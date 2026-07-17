@@ -47,6 +47,12 @@ private lemma topCatFunctorH_map_comp_eq {G K L : TopCat.Sheaf AddCommGrpCat.{u}
   subst h
   exact (CategoryTheory.Sheaf.H.map_comp_apply f g c).symm
 
+private lemma H_equiv₀_naturality {G K : TopCat.Sheaf AddCommGrpCat.{u} X}
+    (f : G ⟶ K) (x : H G 0) :
+    f.hom.app (op ⊤) (H.equiv₀ G x) = H.equiv₀ K (H.map f 0 x) := by
+  exact CategoryTheory.Sheaf.H.equiv₀_naturality
+    (T := (⊤ : Opens X)) isTerminalTop f x
+
 section RestrictionAdjunction
 
 variable {U : Scheme.{u}} (f : U ⟶ X) [hf : IsOpenImmersion f]
@@ -86,7 +92,7 @@ lemma toCoverSheaf_comp_pi (i : I) :
     F.toCoverSheaf U ≫
       Pi.π (fun i ↦ (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i =
         (restrictAdjunction (U i).ι).unit.app F := by
-  simp [toCoverSheaf, Pi.lift_π]
+  simp [toCoverSheaf]
 
 private lemma toCoverSheaf_sheafHom_comp_pi (i : I) :
     (F.toCoverSheaf U).sheafHom ≫
@@ -99,7 +105,6 @@ private lemma toCoverSheaf_sheafHom_comp_pi (i : I) :
           (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i) =
     (toSheaf X).map ((restrictAdjunction (U i).ι).unit.app F)
   rw [← Functor.map_comp, toCoverSheaf_comp_pi]
-  rfl
 
 private lemma toCoverSheaf_sheafHom_comp_pi_toRestrict (i : I) :
     (F.toCoverSheaf U).sheafHom ≫
@@ -132,8 +137,7 @@ private lemma toCoverSheaf_sheafHom_injective (hU : IsOpenCover U)
     rw [map_zero] at h
     exact (toCoverSheaf_comp_pi_apply F U s i).symm.trans h
   rw [restrictAdjunction_sheafHom] at hzero
-  simp only [Functor.id_obj,
-    Adjunction.sheafPushforwardContinuous_unit_app_hom_app] at hzero
+  simp only [Functor.id_obj] at hzero
   have hle : (unop W) ⊓ U i ≤
       (U i).isOpenEmbedding.functor.obj ((Opens.map (U i).inclusion').obj (unop W)) := by
     aesop
@@ -145,13 +149,11 @@ private lemma toCoverSheaf_sheafHom_injective (hU : IsOpenCover U)
     F.sheaf.obj.map (homOfLE inf_le_left).op s =
         F.sheaf.obj.map (q.op ≫ (homOfLE hle).op) s := by
       rw [harrow]
-      rfl
     _ = F.sheaf.obj.map (homOfLE hle).op (F.sheaf.obj.map q.op s) := by
       rw [Functor.map_comp]
       rfl
     _ = F.sheaf.obj.map (homOfLE hle).op 0 := by
       rw [hzero]
-      rfl
     _ = 0 := by
       rw [map_zero]
 
@@ -191,14 +193,18 @@ private lemma H_zero_surjective_of_quasicoherent_epi [IsAffine X]
     (f : M ⟶ N) [Epi f] : Function.Surjective (H.map f.sheafHom 0) := by
   intro y
   obtain ⟨x, hx⟩ := isQuasicoherent_surjective_of_epi f
-    (CategoryTheory.Sheaf.H.equiv₀ N.sheaf isTerminalTop y)
-  refine ⟨(CategoryTheory.Sheaf.H.equiv₀ M.sheaf isTerminalTop).symm x, ?_⟩
-  have hnat := CategoryTheory.Sheaf.H.equiv₀_naturality
-    (f := f.sheafHom) isTerminalTop
-      ((CategoryTheory.Sheaf.H.equiv₀ M.sheaf isTerminalTop).symm x)
-  rw [AddEquiv.apply_symm_apply] at hnat
-  apply (CategoryTheory.Sheaf.H.equiv₀ N.sheaf isTerminalTop).injective
-  exact hnat.symm.trans hx
+    (H.equiv₀ N.sheaf y)
+  refine ⟨(H.equiv₀ M.sheaf).symm x, ?_⟩
+  have hnat := H_equiv₀_naturality f.sheafHom ((H.equiv₀ M.sheaf).symm x)
+  have hsource : f.sheafHom.hom.app (op ⊤)
+      (H.equiv₀ M.sheaf ((H.equiv₀ M.sheaf).symm x)) =
+      f.sheafHom.hom.app (op ⊤) x :=
+    congrArg (f.sheafHom.hom.app (op ⊤)) ((H.equiv₀ M.sheaf).apply_symm_apply x)
+  have hnat' : f.sheafHom.hom.app (op ⊤) x =
+      H.equiv₀ N.sheaf (H.map f.sheafHom 0 ((H.equiv₀ M.sheaf).symm x)) :=
+    hsource.symm.trans hnat
+  apply (H.equiv₀ N.sheaf).injective
+  exact hnat'.symm.trans hx
 
 private lemma H_map_injective_of_subsingleton_cokernel
     {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
