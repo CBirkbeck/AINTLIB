@@ -120,7 +120,7 @@ theorem tailExponent_re_pos (hs : 1 < s.re) :
     0 < (-((((1/2 + (s.re - 1)/2 : ℝ)) : ℂ) - (s - 1/2))).re := by
   have : (-((((1/2 + (s.re - 1)/2 : ℝ)) : ℂ) - (s - 1/2))).re
       = -(1/2 + (s.re - 1)/2) + (s.re - 1/2) := by
-    simp [Complex.sub_re]
+    norm_num [Complex.sub_re]
     ring
   rw [this]
   linarith
@@ -160,7 +160,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
   have hmre : 0 < (-m).re := by
     have h1 : (-m).re = -c + (s.re - 1/2) := by
       rw [hm]
-      simp [Complex.sub_re]
+      norm_num [Complex.sub_re]
       ring
     rw [h1]
     linarith
@@ -173,7 +173,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
       else ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
         * (-(-m + 1/x) * (Complex.exp (-(-m) * x) / x)))
     ?_ ?_ ?_
-  · -- plateau derivative
+  ·
     intro x hx
     rw [if_pos hx.2]
     have hev : (fun y : ℝ => auxF s X y * ((Real.exp (c * y) : ℝ) : ℂ))
@@ -192,7 +192,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
       push_cast
       ring
     exact hbase.congr_of_eventuallyEq hev
-  · -- tail derivative
+  ·
     intro x hx
     rw [if_neg (not_lt.mpr (le_of_lt hx))]
     have hev : (fun y : ℝ => auxF s X y * ((Real.exp (c * y) : ℝ) : ℂ))
@@ -204,7 +204,7 @@ theorem auxF_mul_exp_bv_Ici (hX : 1 < X) {c : ℝ} (hc : c < s.re - 1/2) :
     exact (((hasDerivAt_gAux_core (-m) (hT0.trans hx)).const_mul
       (((Real.log X : ℝ) : ℂ)
         * Complex.exp ((s - 1/2) * (Real.log X : ℂ)))).congr_of_eventuallyEq hev)
-  · -- integrability of the derivative
+  ·
     rw [show Set.Ici (0:ℝ) = Set.Icc 0 (Real.log X) ∪ Set.Ioi (Real.log X) from
       (Set.Icc_union_Ioi_eq_Ici hT0.le).symm]
     refine MeasureTheory.IntegrableOn.union ?_ ?_
@@ -273,15 +273,15 @@ theorem boundedVariationOn_auxF_mul_exp (hX : 1 < X) {c : ℝ}
 
 /-- The real-part projection is `1`-Lipschitz. -/
 theorem lipschitzWith_complex_re : LipschitzWith 1 Complex.re := by
-  refine LipschitzWith.of_dist_le_mul (fun z w => ?_)
-  rw [NNReal.coe_one, one_mul, Real.dist_eq, Complex.dist_eq, ← Complex.sub_re]
-  exact Complex.abs_re_le_norm _
+  convert (RCLike.lipschitzWith_re (K := ℂ)) using 1
+  ext z
+  rfl
 
 /-- The imaginary-part projection is `1`-Lipschitz. -/
 theorem lipschitzWith_complex_im : LipschitzWith 1 Complex.im := by
-  refine LipschitzWith.of_dist_le_mul (fun z w => ?_)
-  rw [NNReal.coe_one, one_mul, Real.dist_eq, Complex.dist_eq, ← Complex.sub_im]
-  exact Complex.abs_im_le_norm _
+  convert (RCLike.lipschitzWith_im (K := ℂ)) using 1
+  ext z
+  rfl
 
 /-- **Bounded variation of `F_{s,X}` on the whole line** (for `Re s > 1/2`): the `c = 0`
 case of `boundedVariationOn_auxF_mul_exp`, with the trivial `e^{0·x} = 1` weight removed. -/
@@ -367,13 +367,13 @@ theorem auxF_diffQuot_tail_eq (hX : 1 < X) :
   have hxpos : 0 < x := lt_of_lt_of_le hT0 hx
   have hxc : ((x : ℝ) : ℂ) ≠ 0 := by exact_mod_cast hxpos.ne'
   rcases eq_or_lt_of_le (Set.mem_Ici.mp hx) with heq | hlt
-  · -- at the kink both sides vanish
+  ·
     rw [auxF_of_le s X (by rw [abs_of_pos hxpos]; exact le_of_eq heq.symm)]
     rw [← heq]
     rw [show (s - 1/2) * (Real.log X : ℂ) = -(-(s - 1/2) * (Real.log X : ℂ)) by ring,
       Complex.exp_neg]
     field_simp
-  · -- on the open tail, expand the branch
+  ·
     have hnot : ¬ |x| ≤ Real.log X := by
       rw [abs_of_pos hxpos]
       exact not_le.mpr hlt
@@ -466,7 +466,7 @@ theorem integrableOn_auxF_diffQuot_tail (hX : 1 < X) (hs : 1 < s.re) :
   have hT0 : 0 < Real.log X := Real.log_pos hX
   have hh : 0 < (s - 1/2 : ℂ).re := by
     have hre : (s - 1/2 : ℂ).re = s.re - 1/2 := by
-      simp [Complex.sub_re]
+      norm_num [Complex.sub_re]
     rw [hre]
     linarith
   have hbase := integrableOn_bounded_mul_exp_div (h := s - 1/2) hh hT0
@@ -490,7 +490,7 @@ theorem integrableOn_auxF_diffQuot_tail (hX : 1 < X) (hs : 1 < s.re) :
     rw [norm_div, norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hxpos]
     have hnum : ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖ ≤ ‖(s - 1/2 : ℂ)‖ * x + 2 := by
       have hht : ‖(s - 1/2) * ((x:ℝ):ℂ)‖ = ‖(s - 1/2 : ℂ)‖ * x := by
-        simp [Complex.norm_real, abs_of_pos hxpos]
+        norm_num [Complex.norm_real, abs_of_pos hxpos]
       have h2 : ‖(2 : ℂ)‖ = 2 := by norm_num
       calc ‖(s - 1/2) * ((x:ℝ):ℂ) + 2‖
           ≤ ‖(s - 1/2) * ((x:ℝ):ℂ)‖ + ‖(2:ℂ)‖ := norm_add_le _ _
@@ -553,7 +553,7 @@ theorem auxF_diffQuot_bv (hX : 1 < X) (hs : 1 < s.re) :
         + ((Real.log X : ℝ) : ℂ) * Complex.exp ((s - 1/2) * (Real.log X : ℂ))
           * (((s - 1/2) * x + 2) * Complex.exp (-(s - 1/2) * x)) / (x:ℂ)^3)
     ?_ ?_ (integrableOn_auxF_diffQuot_deriv s hX hs)
-  · -- plateau derivative: locally zero
+  ·
     intro x hx
     rw [if_pos hx.2]
     have hev : (fun y : ℝ => (1 - auxF s X y) / (y : ℂ)) =ᶠ[nhds x]
