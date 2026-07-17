@@ -1,3 +1,4 @@
+import Common.Analysis.DirichletBounds
 import Mathlib.RingTheory.Flat.Basic
 
 /-!
