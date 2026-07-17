@@ -839,7 +839,318 @@ theorem exists_lift_norm_le_of_closed_range
     have hmem : (⟨z, hzmem⟩ : ↥(f.range)) ∈ (G' : Set ↥(f.range)) := hδball hz'
     rw [hG'eq] at hmem
     exact hmem
-  sorry
+  -- scaling helpers
+  set tinv : A := ((htu.unit⁻¹ : Aˣ) : A) with htinv
+  have htinvscale : ∀ x : A, ‖tinv * x‖ = ‖t‖⁻¹ * ‖x‖ := fun x => by
+    have h1 : ‖t * (tinv * x)‖ = ‖t‖ * ‖tinv * x‖ := hscale _
+    rw [← mul_assoc, htinv, IsUnit.mul_val_inv, one_mul] at h1
+    rw [eq_inv_mul_iff_mul_eq₀ (ne_of_gt ht0)]
+    exact h1.symm
+  have hcancel : ∀ x : A, t * (tinv * x) = x := fun x => by
+    rw [← mul_assoc, htinv, IsUnit.mul_val_inv, one_mul]
+  have hcancel' : ∀ x : A, tinv * (t * x) = x := fun x => by
+    rw [← mul_assoc, htinv, IsUnit.val_inv_mul, one_mul]
+  have hequivinv : ∀ u, f (fun i => tinv * u i) = fun k => tinv * f u k := fun u => by
+    have h1 := hequiv (fun i => tinv * u i)
+    have h2 : (fun i => t * (tinv * u i)) = u := funext fun i => hcancel (u i)
+    rw [h2] at h1
+    funext k
+    rw [h1]
+    show f (fun i => tinv * u i) k = tinv * (t * f (fun i => tinv * u i) k)
+    rw [hcancel']
+  have hequiv_pow : ∀ (n : ℕ) (u), f (fun i => t ^ n * u i) = fun k => t ^ n * f u k := by
+    intro n
+    induction n with
+    | zero => intro u; simp
+    | succ n ih =>
+      intro u
+      have hstep : (fun i => t ^ (n + 1) * u i) = fun i => t * (t ^ n * u i) :=
+        funext fun i => by ring
+      rw [hstep, hequiv, ih u]
+      funext k
+      show t * (t ^ n * f u k) = t ^ (n + 1) * f u k
+      ring
+  have hequivinv_pow : ∀ (n : ℕ) (u), f (fun i => tinv ^ n * u i) =
+      fun k => tinv ^ n * f u k := by
+    intro n
+    induction n with
+    | zero => intro u; simp
+    | succ n ih =>
+      intro u
+      have hstep : (fun i => tinv ^ (n + 1) * u i) = fun i => tinv * (tinv ^ n * u i) :=
+        funext fun i => by ring
+      rw [hstep, hequivinv, ih u]
+      funext k
+      show tinv * (tinv ^ n * f u k) = tinv ^ (n + 1) * f u k
+      ring
+  have htinvnorm : ‖tinv‖ = ‖t‖⁻¹ := by
+    have h := htinvscale 1
+    rwa [mul_one, norm_one, mul_one] at h
+  have htinvscale' : ∀ x : A, ‖tinv * x‖ = ‖tinv‖ * ‖x‖ := fun x => by
+    rw [htinvnorm]
+    exact htinvscale x
+  have htinvpow : ∀ (n : ℕ) (x : A), ‖tinv ^ n * x‖ = (‖t‖⁻¹) ^ n * ‖x‖ := fun n x => by
+    have h := norm_pow_mul_of_scale (E := A) htinvscale' n x
+    rwa [htinvnorm] at h
+  have htpow : ∀ (n : ℕ) (x : A), ‖t ^ n * x‖ = ‖t‖ ^ n * ‖x‖ := fun n x =>
+    norm_pow_mul_of_scale (E := A) hscale n x
+  have hpitpow : ∀ (n : ℕ) (u : ι → A), ‖fun i => t ^ n * u i‖ = ‖t‖ ^ n * ‖u‖ := by
+    intro n u
+    have hnpow : ‖t ^ n‖ = ‖t‖ ^ n := by
+      have h := htpow n 1
+      rwa [mul_one, norm_one, mul_one] at h
+    have hc : ∀ x : A, ‖t ^ n * x‖ = ‖t ^ n‖ * ‖x‖ := fun x => by
+      rw [htpow, hnpow]
+    rw [pi_norm_scale hc u, hnpow]
+  have hpitinvpow : ∀ (n : ℕ) (u : κ → A), ‖fun k => tinv ^ n * u k‖ = (‖t‖⁻¹) ^ n * ‖u‖ := by
+    intro n u
+    have hnpow : ‖tinv ^ n‖ = (‖t‖⁻¹) ^ n := by
+      have h := htinvpow n 1
+      rwa [mul_one, norm_one, mul_one] at h
+    have hc : ∀ x : A, ‖tinv ^ n * x‖ = ‖tinv ^ n‖ * ‖x‖ := fun x => by
+      rw [htinvpow, hnpow]
+    rw [pi_norm_scale hc u, hnpow]
+  have hpitpowκ : ∀ (n : ℕ) (u : κ → A), ‖fun k => t ^ n * u k‖ = ‖t‖ ^ n * ‖u‖ := by
+    intro n u
+    have hnpow : ‖t ^ n‖ = ‖t‖ ^ n := by
+      have h := htpow n 1
+      rwa [mul_one, norm_one, mul_one] at h
+    have hc : ∀ x : A, ‖t ^ n * x‖ = ‖t ^ n‖ * ‖x‖ := fun x => by rw [htpow, hnpow]
+    rw [pi_norm_scale hc u, hnpow]
+  have hpitinvpowι : ∀ (n : ℕ) (u : ι → A),
+      ‖fun i => tinv ^ n * u i‖ = (‖t‖⁻¹) ^ n * ‖u‖ := by
+    intro n u
+    have hnpow : ‖tinv ^ n‖ = (‖t‖⁻¹) ^ n := by
+      have h := htinvpow n 1
+      rwa [mul_one, norm_one, mul_one] at h
+    have hc : ∀ x : A, ‖tinv ^ n * x‖ = ‖tinv ^ n‖ * ‖x‖ := fun x => by
+      rw [htinvpow, hnpow]
+    rw [pi_norm_scale hc u, hnpow]
+  -- the approximation step at scale `k`
+  have step : ∀ (k : ℕ) (z : κ → A), z ∈ Set.range f → ‖z‖ < δ * ‖t‖ ^ k →
+      ∃ u : ι → A, ‖u‖ ≤ R * ‖t‖ ^ k ∧ (z - f u) ∈ Set.range f ∧
+        ‖z - f u‖ < δ * ‖t‖ ^ (k + 1) := by
+    intro k z hzr hzn
+    set w : κ → A := fun j => tinv ^ k * z j with hw
+    have hwr : w ∈ Set.range f := by
+      obtain ⟨v, rfl⟩ := hzr
+      exact ⟨fun i => tinv ^ k * v i, hequivinv_pow k v⟩
+    have hwn : ‖w‖ < δ := by
+      rw [hw, hpitinvpow k z, inv_pow, inv_mul_lt_iff₀ (pow_pos ht0 k), mul_comm]
+      exact hzn
+    obtain ⟨fu₀img, hfu₀mem, hdist⟩ := Metric.mem_closure_iff.mp (hδkey w hwr hwn)
+      (δ * ‖t‖) (by positivity)
+    obtain ⟨u₀, hu₀ball, rfl⟩ := hfu₀mem
+    rw [Metric.mem_closedBall, dist_zero_right] at hu₀ball
+    have hz_eq : ∀ j, z j = t ^ k * w j := fun j => by
+      rw [hw]
+      show z j = t ^ k * (tinv ^ k * z j)
+      rw [← mul_assoc, ← mul_pow, htinv, IsUnit.mul_val_inv, one_pow, one_mul]
+    refine ⟨fun i => t ^ k * u₀ i, ?_, ?_, ?_⟩
+    · rw [hpitpow k u₀]
+      calc ‖t‖ ^ k * ‖u₀‖ ≤ ‖t‖ ^ k * R :=
+            mul_le_mul_of_nonneg_left hu₀ball (pow_nonneg (norm_nonneg t) k)
+        _ = R * ‖t‖ ^ k := mul_comm _ _
+    · obtain ⟨v, rfl⟩ := hzr
+      refine ⟨fun i => v i - t ^ k * u₀ i, ?_⟩
+      rw [show (fun i => v i - t ^ k * u₀ i) = v - fun i => t ^ k * u₀ i from rfl, map_sub]
+    · have hdiff : z - f (fun i => t ^ k * u₀ i) = fun j => t ^ k * (w - f u₀) j := by
+        funext j
+        rw [hequiv_pow k u₀]
+        show z j - t ^ k * f u₀ j = t ^ k * (w j - f u₀ j)
+        rw [mul_sub, ← hz_eq j]
+      rw [hdiff, hpitpowκ k (w - f u₀)]
+      have hd : ‖w - f u₀‖ < δ * ‖t‖ := by
+        rw [← dist_eq_norm]
+        exact hdist
+      calc ‖t‖ ^ k * ‖w - f u₀‖ < ‖t‖ ^ k * (δ * ‖t‖) :=
+            mul_lt_mul_of_pos_left hd (pow_pos ht0 k)
+        _ = δ * ‖t‖ ^ (k + 1) := by ring
+  -- geometric correction: δ-small elements of the range lift exactly within `R`
+  have key : ∀ y ∈ Set.range f, ‖y‖ < δ → ∃ u : ι → A, f u = y ∧ ‖u‖ ≤ R := by
+    intro y hyr hyδ
+    let T : ℕ → Type _ := fun k => {z : κ → A // z ∈ Set.range f ∧ ‖z‖ < δ * ‖t‖ ^ k}
+    let step' : ∀ k, T k → (ι → A) × T (k + 1) := fun k zk =>
+      ⟨(step k zk.1 zk.2.1 zk.2.2).choose,
+       ⟨zk.1 - f (step k zk.1 zk.2.1 zk.2.2).choose,
+        (step k zk.1 zk.2.1 zk.2.2).choose_spec.2.1,
+        (step k zk.1 zk.2.1 zk.2.2).choose_spec.2.2⟩⟩
+    let Z : ∀ k, T k := fun k =>
+      Nat.rec (⟨y, hyr, by simpa using hyδ⟩ : T 0) (fun k zk => (step' k zk).2) k
+    let U : ℕ → ι → A := fun k => (step' k (Z k)).1
+    have hUb : ∀ k, ‖U k‖ ≤ R * ‖t‖ ^ k := fun k =>
+      (step k (Z k).1 (Z k).2.1 (Z k).2.2).choose_spec.1
+    have hZsucc : ∀ k, (Z (k + 1)).1 = (Z k).1 - f (U k) := fun k => rfl
+    have hZnorm : ∀ k, ‖(Z k).1‖ < δ * ‖t‖ ^ k := fun k => (Z k).2.2
+    have htele : ∀ n, (Z n).1 = y - ∑ k ∈ Finset.range n, f (U k) := by
+      intro n
+      induction n with
+      | zero => simp [show (Z 0).1 = y from rfl]
+      | succ n ih =>
+        rw [hZsucc n, ih, Finset.sum_range_succ]
+        abel
+    have hUsummable : Summable U :=
+      Summable.of_norm_bounded
+        ((summable_geometric_of_lt_one (norm_nonneg t) ht1).mul_left R) hUb
+    obtain ⟨US, hUS⟩ := hUsummable
+    have hfUS : HasSum (fun k => f (U k)) (f US) := hUS.map f hcont
+    have htends1 : Filter.Tendsto (fun n => ∑ k ∈ Finset.range n, f (U k))
+        Filter.atTop (𝓝 (f US)) := hfUS.tendsto_sum_nat
+    have htends2 : Filter.Tendsto (fun n => ∑ k ∈ Finset.range n, f (U k))
+        Filter.atTop (𝓝 y) := by
+      have hz0 : Filter.Tendsto (fun n => (Z n).1) Filter.atTop (𝓝 0) := by
+        refine squeeze_zero_norm (fun n => (hZnorm n).le) ?_
+        have h := (tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg t) ht1).const_mul δ
+        simpa using h
+      have heq : (fun n => ∑ k ∈ Finset.range n, f (U k)) = fun n => y - (Z n).1 := by
+        funext n
+        rw [htele n]
+        abel
+      rw [heq]
+      simpa using tendsto_const_nhds.sub hz0
+    have hfy : f US = y := tendsto_nhds_unique htends1 htends2
+    have hURb : ∀ k, ‖U k‖ ≤ R := fun k =>
+      (hUb k).trans (by
+        calc R * ‖t‖ ^ k ≤ R * 1 :=
+              mul_le_mul_of_nonneg_left (pow_le_one₀ (norm_nonneg t) ht1.le) hRpos.le
+          _ = R := mul_one _)
+    have hpartial : ∀ F : Finset ℕ, ‖∑ k ∈ F, U k‖ ≤ R := by
+      intro F
+      induction F using Finset.induction_on with
+      | empty => simpa using hRpos.le
+      | insert a s ha ih =>
+        rw [Finset.sum_insert ha]
+        exact (pi_norm_add_le_max _ _).trans (max_le (hURb a) ih)
+    have hUSnorm : ‖US‖ ≤ R := by
+      have hn : Filter.Tendsto (fun F : Finset ℕ => ‖∑ k ∈ F, U k‖)
+          Filter.atTop (𝓝 ‖US‖) := (continuous_norm.tendsto US).comp hUS
+      exact le_of_tendsto hn (Filter.Eventually.of_forall hpartial)
+    exact ⟨US, hfy, hUSnorm⟩
+  -- the constant, via the `[δ‖t‖, δ)` window
+  refine ⟨max 1 (R / (δ * ‖t‖)), le_max_left _ _, fun y hyr => ?_⟩
+  rcases eq_or_ne y 0 with rfl | hy0
+  · refine ⟨0, map_zero f, ?_⟩
+    rw [norm_zero, norm_zero, mul_zero]
+  · have hypos : 0 < ‖y‖ := norm_pos_iff.mpr hy0
+    have hconst : 0 < R / (δ * ‖t‖) := by positivity
+    by_cases hcase : ‖y‖ < δ
+    · -- scale up by `tinv`-powers into the window
+      have hex : ∃ n : ℕ, δ * ‖t‖ ≤ (‖t‖⁻¹) ^ n * ‖y‖ := by
+        obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt ((δ * ‖t‖) / ‖y‖)
+          ((one_lt_inv₀ ht0).mpr ht1)
+        exact ⟨n, by
+          rw [div_lt_iff₀ hypos] at hn
+          exact hn.le⟩
+      set n := Nat.find hex with hn
+      have hnspec : δ * ‖t‖ ≤ (‖t‖⁻¹) ^ n * ‖y‖ := Nat.find_spec hex
+      have hnlt : (‖t‖⁻¹) ^ n * ‖y‖ < δ := by
+        rcases Nat.eq_zero_or_pos n with h0 | hpos
+        · rw [h0, pow_zero, one_mul]
+          exact hcase
+        · have hmin := Nat.find_min hex (m := n - 1) (by omega)
+          push Not at hmin
+          have hstep : ((‖t‖⁻¹) ^ n * ‖y‖) = ‖t‖⁻¹ * ((‖t‖⁻¹) ^ (n - 1) * ‖y‖) := by
+            rw [← mul_assoc, ← pow_succ']
+            congr 2
+            omega
+          rw [hstep]
+          calc ‖t‖⁻¹ * ((‖t‖⁻¹) ^ (n - 1) * ‖y‖) < ‖t‖⁻¹ * (δ * ‖t‖) :=
+                mul_lt_mul_of_pos_left hmin (inv_pos.mpr ht0)
+            _ = δ := by field_simp
+      set y' : κ → A := fun j => tinv ^ n * y j with hy'
+      have hy'r : y' ∈ Set.range f := by
+        obtain ⟨v, rfl⟩ := hyr
+        exact ⟨fun i => tinv ^ n * v i, hequivinv_pow n v⟩
+      have hy'n : ‖y'‖ < δ := by
+        rw [hy', hpitinvpow n y]
+        exact hnlt
+      obtain ⟨u', hu'f, hu'R⟩ := key y' hy'r hy'n
+      refine ⟨fun i => t ^ n * u' i, ?_, ?_⟩
+      · rw [hequiv_pow n u', hu'f]
+        funext j
+        rw [hy']
+        show t ^ n * (tinv ^ n * y j) = y j
+        rw [← mul_assoc, ← mul_pow, htinv, IsUnit.mul_val_inv, one_pow, one_mul]
+      · have hyn : ‖y‖ = ‖t‖ ^ n * ‖y'‖ := by
+          have : y = fun j => t ^ n * y' j := by
+            funext j
+            rw [hy']
+            show y j = t ^ n * (tinv ^ n * y j)
+            rw [← mul_assoc, ← mul_pow, htinv, IsUnit.mul_val_inv, one_pow, one_mul]
+          rw [this, hpitpowκ n y']
+        have hy'ge : δ * ‖t‖ ≤ ‖y'‖ := by
+          rw [hy', hpitinvpow n y]
+          exact hnspec
+        rw [hpitpow n u']
+        refine le_trans ?_ (mul_le_mul_of_nonneg_right (le_max_right 1 (R / (δ * ‖t‖)))
+          (norm_nonneg y))
+        rw [hyn]
+        calc ‖t‖ ^ n * ‖u'‖ ≤ ‖t‖ ^ n * R :=
+              mul_le_mul_of_nonneg_left hu'R (pow_nonneg (norm_nonneg t) n)
+          _ = R / (δ * ‖t‖) * (‖t‖ ^ n * (δ * ‖t‖)) := by
+              field_simp
+          _ ≤ R / (δ * ‖t‖) * (‖t‖ ^ n * ‖y'‖) := by
+              refine mul_le_mul_of_nonneg_left ?_ hconst.le
+              exact mul_le_mul_of_nonneg_left hy'ge (pow_nonneg (norm_nonneg t) n)
+    · -- scale down by `t`-powers into the window
+      push Not at hcase
+      have hex : ∃ m : ℕ, ‖t‖ ^ m * ‖y‖ < δ := by
+        obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one (div_pos hδpos hypos) ht1
+        exact ⟨m, by
+          rw [lt_div_iff₀ hypos] at hm
+          exact hm⟩
+      set m := Nat.find hex with hm
+      have hmspec : ‖t‖ ^ m * ‖y‖ < δ := Nat.find_spec hex
+      have hmge : δ * ‖t‖ ≤ ‖t‖ ^ m * ‖y‖ := by
+        rcases Nat.eq_zero_or_pos m with h0 | hpos
+        · exfalso
+          rw [h0, pow_zero, one_mul] at hmspec
+          exact absurd hmspec (not_lt.mpr hcase)
+        · have hmin := Nat.find_min hex (m := m - 1) (by omega)
+          push Not at hmin
+          have hstep : (‖t‖ ^ m * ‖y‖) = ‖t‖ * (‖t‖ ^ (m - 1) * ‖y‖) := by
+            rw [← mul_assoc, ← pow_succ']
+            congr 2
+            omega
+          rw [hstep]
+          calc δ * ‖t‖ = ‖t‖ * δ := mul_comm _ _
+            _ ≤ ‖t‖ * (‖t‖ ^ (m - 1) * ‖y‖) :=
+                mul_le_mul_of_nonneg_left hmin (norm_nonneg t)
+      set y' : κ → A := fun j => t ^ m * y j with hy'
+      have hy'r : y' ∈ Set.range f := by
+        obtain ⟨v, rfl⟩ := hyr
+        exact ⟨fun i => t ^ m * v i, hequiv_pow m v⟩
+      have hy'n : ‖y'‖ < δ := by
+        rw [hy', hpitpowκ m y]
+        exact hmspec
+      obtain ⟨u', hu'f, hu'R⟩ := key y' hy'r hy'n
+      refine ⟨fun i => tinv ^ m * u' i, ?_, ?_⟩
+      · rw [hequivinv_pow m u', hu'f]
+        funext j
+        rw [hy']
+        show tinv ^ m * (t ^ m * y j) = y j
+        rw [← mul_assoc, ← mul_pow, htinv, IsUnit.val_inv_mul, one_pow, one_mul]
+      · have hyn : ‖y‖ = (‖t‖⁻¹) ^ m * ‖y'‖ := by
+          have hyeq : y = fun j => tinv ^ m * y' j := by
+            funext j
+            rw [hy']
+            show y j = tinv ^ m * (t ^ m * y j)
+            rw [← mul_assoc, ← mul_pow, htinv, IsUnit.val_inv_mul, one_pow, one_mul]
+          rw [hyeq, hpitinvpow m y']
+        have hy'ge : δ * ‖t‖ ≤ ‖y'‖ := by
+          rw [hy', hpitpowκ m y]
+          exact hmge
+        rw [hpitinvpowι m u']
+        refine le_trans ?_ (mul_le_mul_of_nonneg_right (le_max_right 1 (R / (δ * ‖t‖)))
+          (norm_nonneg y))
+        rw [hyn]
+        calc (‖t‖⁻¹) ^ m * ‖u'‖ ≤ (‖t‖⁻¹) ^ m * R :=
+              mul_le_mul_of_nonneg_left hu'R (pow_nonneg (by positivity) m)
+          _ = R / (δ * ‖t‖) * ((‖t‖⁻¹) ^ m * (δ * ‖t‖)) := by
+              field_simp
+          _ ≤ R / (δ * ‖t‖) * ((‖t‖⁻¹) ^ m * ‖y'‖) := by
+              refine mul_le_mul_of_nonneg_left ?_ hconst.le
+              exact mul_le_mul_of_nonneg_left hy'ge (pow_nonneg (by positivity) m)
 
 end UltrametricBanach
 

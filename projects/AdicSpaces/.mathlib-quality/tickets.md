@@ -411,7 +411,17 @@ T704, by a fresh `/develop --continue`.
   `Fin m → P` with the base-changed free module.
 
 ### [T406] closedness and strictness constants
-- **Status**: IN PROGRESS | **Depends**: T405, T302 | **Type**: proofs (L3.7–L3.9)
+- **Status**: **DONE** (plan of record executed: (i) `isClosed_graphIdeal` :=
+  `Wedhorn.isClosed_ideal_of_noetherian` at the tP-`unitBallPod` (t-bundle + `hE₀P`
+  statement completion); (ii) `exists_lift_norm_le_of_closed_range` — the NEW generic
+  ultrametric Banach-with-constants lemma, proven in full: Baire on the closed range,
+  ball-image closures as open subgroups, `hδkey`, t-equivariant approximation `step`,
+  `Nat.rec` dependent-choice sequences, geometric ultrametric series correction
+  (Summable.of_norm_bounded + HasSum.map + partial-sum ultrametric bound), and the
+  `[δ‖t‖, δ)` Nat.find window for the constant `max 1 (R/(δ‖t‖))`;
+  (iii) `exists_d1_lift`/`exists_d2_lift` derived (part 2). All axiom-clean.
+  **`FiniteJetGraphKoszul.lean` is sorry-free — milestone M3 complete.**)
+  | **Type**: proofs (L3.7–L3.9)
 - **Plan of record**:
   (i) `isClosed_graphIdeal` := `Wedhorn.isClosed_ideal_of_noetherian` at the pod
   `unitBallPod tP …` (tP := polyToP (C t); instances IsTateRing (P E m) via
