@@ -194,7 +194,8 @@ private theorem baseCechComplex_d_succ
   change ((FormalCoproduct.cochainComplexFunctor
     (FormalCoproduct.mk _ U).cech).obj (baseModulePresheaf π M)).d
       i (i + 1) = _
-  rw [FormalCoproduct.cochainComplexFunctor_obj_d, CochainComplex.of_d]
+  rw [FormalCoproduct.cochainComplexFunctor_obj_d]
+  exact (CochainComplex.of_d _ _ i).trans rfl
 
 private theorem cechComplex_d_succ
     {X : Scheme.{u}} (M : X.Modules) {ι : Type u}
@@ -205,7 +206,8 @@ private theorem cechComplex_d_succ
           (FormalCoproduct.mk _ U).cech).obj M.sheaf.obj) i := by
   change ((FormalCoproduct.cochainComplexFunctor
     (FormalCoproduct.mk _ U).cech).obj M.sheaf.obj).d i (i + 1) = _
-  rw [FormalCoproduct.cochainComplexFunctor_obj_d, CochainComplex.of_d]
+  rw [FormalCoproduct.cochainComplexFunctor_obj_d]
+  exact (CochainComplex.of_d _ _ i).trans rfl
 
 private theorem baseCechCosimplicialIso_comm_d
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
