@@ -198,14 +198,32 @@ noncomputable def ID : Ideal (PD F m) := Ideal.span (Set.range (rD F m g f))
 the rational datum is open, its defining ideal contains a power of ϖ. After mapping to each
 of the k-algebras B, C, D, the tuple therefore generates the unit ideal"). -/
 theorem span_pushed_B (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
-    Ideal.span ({jB F g} ∪ Set.range (fun i => jB F (f i))) = ⊤ := by sorry
+    Ideal.span ({jB F g} ∪ Set.range (fun i => jB F (f i))) = ⊤ := by
+  have h := congrArg (Ideal.map (jB F)) hspan
+  rw [Ideal.map_span, Ideal.map_top] at h
+  rw [← h]
+  congr 1
+  rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
+  rfl
 
 theorem span_pushed_C (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
-    Ideal.span ({iotaC F g} ∪ Set.range (fun i => iotaC F (f i))) = ⊤ := by sorry
+    Ideal.span ({iotaC F g} ∪ Set.range (fun i => iotaC F (f i))) = ⊤ := by
+  have h := congrArg (Ideal.map (iotaC F)) hspan
+  rw [Ideal.map_span, Ideal.map_top] at h
+  rw [← h]
+  congr 1
+  rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
+  rfl
 
 theorem span_pushed_D (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Ideal.span ({rhoC F (iotaC F g)} ∪
-      Set.range (fun i => rhoC F (iotaC F (f i)))) = ⊤ := by sorry
+      Set.range (fun i => rhoC F (iotaC F (f i)))) = ⊤ := by
+  have h := congrArg (Ideal.map ((rhoC F).comp (iotaC F))) hspan
+  rw [Ideal.map_span, Ideal.map_top] at h
+  rw [← h]
+  congr 1
+  rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
+  rfl
 
 /-! ### Lemma 4.3 — controlled graph-ideal pullback
 
