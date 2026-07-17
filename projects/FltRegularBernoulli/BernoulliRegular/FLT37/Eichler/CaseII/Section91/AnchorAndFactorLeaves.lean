@@ -34,9 +34,11 @@ of non-Washington constructions.  Washington's real-anchor (`B₀ ∈ Cl(K⁺)` 
 ## Composition
 
 The L1 + L2 outputs feed the **proven** `washington_section91_descended_equation`
-(`CaseIISection91ConjNormReassembly.lean`) — L1's `hanchor`/`hη0real`, L2's `hfa_*`/`hηbreal` (reused
+(`CaseIISection91ConjNormReassembly.lean`) — L1's `hanchor`/`hη0real`, L2's `hfa_*`/`hηbreal`
+(reused
 at the second root `ζ²`).  The full composition + descent + endpoint is in
-`CaseIIWashingtonCaseIIClean.lean`.  `37 ∤ h⁺` is `Sinnott.flt37_not_dvd_hPlus` (proven, axiom-clean).
+`CaseIIWashingtonCaseIIClean.lean`.
+`37 ∤ h⁺` is `Sinnott.flt37_not_dvd_hPlus` (proven, axiom-clean).
 
 It imports only; it does **not** modify any existing file.  No `axiom`, no `sorry`.
 
