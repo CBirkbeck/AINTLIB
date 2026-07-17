@@ -12,6 +12,8 @@ import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
+import Mathlib.RingTheory.Flat.EquationalCriterion
+import Mathlib.RingTheory.Finiteness.ModuleFinitePresentation
 
 /-!
 # Rank rigidity for surjections of finite projective modules
@@ -185,6 +187,58 @@ theorem eq_of_le_of_finrank_eq {C S : Scheme.{u}} (π : C ⟶ S)
         ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)) := by
       rw [← morphismRestrict_comp]
       exact hbridge @LocallyOfFinitePresentation _ hcompres.symm inferInstance
+    -- global-sections extractions over the affine pieces
+    haveI hUaff : IsAffine ↑U.1 := U.2
+    haveI hWaffS : IsAffine ↑((J.subschemeι ≫ π) ⁻¹ᵁ U.1) := hWaff
+    haveI hW'affS : IsAffine ↑(Scheme.IdealSheafData.inclusion hle
+        ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) := hW'aff
+    have hsurjTop : Function.Surjective ((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)).appTop) :=
+      ((HasAffineProperty.iff_of_isAffine (P := @IsClosedImmersion)).mp hCIres).2
+    have hfinB : RingHom.Finite ((((J.subschemeι ≫ π) ∣_ U.1)).appTop).hom :=
+      ((HasAffineProperty.iff_of_isAffine (P := @IsFinite)).mp hJfin).2
+    have hflatB : RingHom.Flat ((((J.subschemeι ≫ π) ∣_ U.1)).appTop).hom :=
+      (HasRingHomProperty.iff_of_isAffine (P := @Flat)).mp hJflat
+    have hlfpB : RingHom.FinitePresentation ((((J.subschemeι ≫ π) ∣_ U.1)).appTop).hom :=
+      (HasRingHomProperty.iff_of_isAffine (P := @LocallyOfFinitePresentation)).mp hJlfp
+    have hfinA : RingHom.Finite ((((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))).appTop).hom :=
+      ((HasAffineProperty.iff_of_isAffine (P := @IsFinite)).mp hIfinC).2
+    have hflatA : RingHom.Flat ((((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))).appTop).hom :=
+      (HasRingHomProperty.iff_of_isAffine (P := @Flat)).mp hIflatC
+    have hlfpA : RingHom.FinitePresentation ((((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))).appTop).hom :=
+      (HasRingHomProperty.iff_of_isAffine (P := @LocallyOfFinitePresentation)).mp hIlfpC
+    -- module structures over R := Γ(U)
+    letI algB : Algebra ↑Γ(U.1, ⊤) ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) :=
+      ((((J.subschemeι ≫ π) ∣_ U.1)).appTop).hom.toAlgebra
+    letI algA : Algebra ↑Γ(U.1, ⊤)
+        ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) :=
+      ((((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))).appTop).hom.toAlgebra
+    haveI hMfinB : Module.Finite ↑Γ(U.1, ⊤) ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) := hfinB
+    haveI hMflatB : Module.Flat ↑Γ(U.1, ⊤) ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) := hflatB
+    haveI hAfpB : Algebra.FinitePresentation ↑Γ(U.1, ⊤)
+        ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) := hlfpB
+    haveI hMfpB : Module.FinitePresentation ↑Γ(U.1, ⊤)
+        ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) :=
+      Module.FinitePresentation.of_finite_of_finitePresentation _ _
+    haveI hMprojB : Module.Projective ↑Γ(U.1, ⊤)
+        ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) :=
+      Module.Flat.projective_of_finitePresentation
+    haveI hMfinA : Module.Finite ↑Γ(U.1, ⊤)
+        ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) := hfinA
+    haveI hMflatA : Module.Flat ↑Γ(U.1, ⊤)
+        ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) := hflatA
+    haveI hAfpA : Algebra.FinitePresentation ↑Γ(U.1, ⊤)
+        ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) := hlfpA
+    haveI hMfpA : Module.FinitePresentation ↑Γ(U.1, ⊤)
+        ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) :=
+      Module.FinitePresentation.of_finite_of_finitePresentation _ _
+    haveI hMprojA : Module.Projective ↑Γ(U.1, ⊤)
+        ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) :=
+      Module.Flat.projective_of_finitePresentation
     sorry
   -- glue: open immersion + full range ⟹ iso
   haveI hoi : IsOpenImmersion (Scheme.IdealSheafData.inclusion hle) := by
