@@ -111,6 +111,55 @@ theorem fullLevel_divisor_forward (N : ℕ) [NeZero N] (P Q : E.Section)
     (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
     (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
 
+/-! ## The backward half (T-D8 ⟸): naive generation ⟹ divisor equality
+
+Route (the v10.302 fork ruling, posted to inbox/STREAM-OMEGA): geometric distinctness of
+the `N²` combination sections (generation + the `N²`-count) → comaximal graph ideals
+(`sup_ker_eq_top_of_pull_ne`) → ideal-CRT (`torsionIdeal ≤ ∏ ker = divisor ideal`) →
+rank rigidity (a closed immersion of finite flat `S`-schemes of equal fibre rank is an
+iso). No reducedness hypotheses anywhere. -/
+
+/-- Killed elements absorb `ℤ`-scalars mod `N`. -/
+theorem zsmul_emod_of_killed {G : Type*} [AddCommGroup G] {N : ℕ} {x : G}
+    (hx : (N : ℤ) • x = 0) (a : ℤ) : a • x = (a.emod N) • x := by
+  have hdecomp : a = (N : ℤ) * (a.ediv N) + a.emod N :=
+    (Int.mul_ediv_add_emod a N).symm
+  conv_lhs => rw [hdecomp]
+  rw [add_smul, mul_smul, smul_comm, show ((N : ℤ) • x) = 0 from hx, smul_zero, zero_add]
+
+/-- Any `ℤ`-combination of two `N`-killed points is a value of the `Fin (N²)`-indexed
+combination family. -/
+theorem exists_combo_index {G : Type*} [AddCommGroup G] (N : ℕ) [NeZero N]
+    {P Q : G} (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) (a b : ℤ) :
+    ∃ i : Fin (N ^ 2),
+      (((i : ℕ) % N : ℕ) : ℤ) • P + (((i : ℕ) / N : ℕ) : ℤ) • Q = a • P + b • Q := by
+  have hNpos : (0 : ℤ) < N := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne N)
+  have ha0 : 0 ≤ a.emod N := Int.emod_nonneg a (by exact_mod_cast NeZero.ne N)
+  have hb0 : 0 ≤ b.emod N := Int.emod_nonneg b (by exact_mod_cast NeZero.ne N)
+  have haN : a.emod N < N := Int.emod_lt_of_pos a hNpos
+  have hbN : b.emod N < N := Int.emod_lt_of_pos b hNpos
+  have hr₁ : (a.emod N).toNat < N := by omega
+  have hr₂ : (b.emod N).toNat < N := by omega
+  have hNn : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+  have hlt : (a.emod N).toNat + (b.emod N).toNat * N < N ^ 2 := by
+    rw [pow_two]
+    have h2 : ((b.emod N).toNat + 1) * N ≤ N * N :=
+      Nat.mul_le_mul_right N (Nat.succ_le_of_lt hr₂)
+    have h3 : ((b.emod N).toNat + 1) * N = (b.emod N).toNat * N + N := by ring
+    omega
+  refine ⟨⟨(a.emod N).toNat + (b.emod N).toNat * N, hlt⟩, ?_⟩
+  have hmod : ((a.emod N).toNat + (b.emod N).toNat * N) % N = (a.emod N).toNat := by
+    rw [Nat.add_mul_mod_self_right]
+    exact Nat.mod_eq_of_lt hr₁
+  have hdiv : ((a.emod N).toNat + (b.emod N).toNat * N) / N = (b.emod N).toNat := by
+    rw [Nat.add_mul_div_right _ _ (Nat.pos_of_ne_zero (NeZero.ne N)),
+      Nat.div_eq_of_lt hr₁, Nat.zero_add]
+  show (((((a.emod N).toNat + (b.emod N).toNat * N : ℕ)) % N : ℕ) : ℤ) • P
+      + (((((a.emod N).toNat + (b.emod N).toNat * N : ℕ)) / N : ℕ) : ℤ) • Q
+      = a • P + b • Q
+  rw [hmod, hdiv, Int.toNat_of_nonneg ha0, Int.toNat_of_nonneg hb0,
+    ← zsmul_emod_of_killed hP a, ← zsmul_emod_of_killed hQ b]
+
 end EllipticCurve
 
 end ModularCurves
