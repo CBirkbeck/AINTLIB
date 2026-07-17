@@ -491,6 +491,120 @@ theorem isNoetherianRing_unitBall_JetC : IsNoetherianRing (unitBall (JetC F)) :=
 theorem isNoetherianRing_unitBall_JetD : IsNoetherianRing (unitBall (JetD F)) :=
   isNoetherianRing_unitBall_dualNumber (L F) (isNoetherianRing_unitBall_L F)
 
+/-! ### Arity-`m` unit balls (inputs to the strict-localization layer, [FJP] §4) -/
+
+/-- The unit ball of `L⟨T₁,…,Tₘ⟩` is noetherian (the transfer chain at arity `m`). -/
+theorem isNoetherianRing_unitBall_restricted_L (m : ℕ) :
+    IsNoetherianRing (unitBall
+      (MvPowerSeries.Restricted (L F) (fun _ : Fin m => (1 : ℝ)))) := by
+  obtain ⟨e1, he1⟩ := UnitDiscExample.exists_flatten' K
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ))) (RingEquiv.refl _)
+    (fun _ => rfl) 1
+  obtain ⟨e2, he2⟩ := UnitDiscExample.exists_flatten'
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ)))
+    (MvPowerSeries.Restricted K (fun _ : Fin 2 => (1 : ℝ)))
+    e1.symm
+    (fun x => by
+      have h := he1 (e1.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) m
+  obtain ⟨e3, he3⟩ := UnitDiscExample.exists_flatten' K
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ))) (RingEquiv.refl _)
+    (fun _ => rfl) (m + 1)
+  have h23 := isNoetherianRing_unitBall_of_isometry e3.symm
+    (fun x => by
+      have h := he3 (e3.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) (isNoetherianRing_unitBall_gaussK F (m + 2))
+  have h3 := isNoetherianRing_unitBall_of_isometry e2.symm
+    (fun x => by
+      have h := he2 (e2.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) h23
+  exact isNoetherianRing_unitBall_of_section
+    (mapRestrictedGauss m (evalHom (R := K)) (evalHom_norm_le (R := K)))
+    (norm_mapRestrictedGauss_le m (evalHom (R := K)) (evalHom_norm_le (R := K)))
+    (mapRestrictedGauss_exists_norm_le m (evalHom (R := K)) (evalHom_norm_le (R := K))
+      (evalHom_exists_norm_le (R := K))) h3
+
+/-- Ball version of the dual-number flattening: the unit ball of `(DualNumber S)⟨T⃗⟩` is
+noetherian whenever the ball of `S⟨T⃗⟩` is (the `ε`-polynomial surjection restricts to
+balls). -/
+theorem isNoetherianRing_unitBall_restricted_dualNumber
+    (S : Type*) [NormedCommRing S] [IsUltrametricDist S] [NormOneClass S] (m : ℕ)
+    (h : IsNoetherianRing (unitBall
+      (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ))))) :
+    IsNoetherianRing (unitBall
+      (MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ)))) := by
+  classical
+  haveI := h
+  have hcoeffle : ∀ (y : MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ)))
+      (s : Fin m →₀ ℕ), ‖MvPowerSeries.coeff s y.1‖ ≤ ‖y‖ := fun y s => by
+    have hb := MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ y) s
+    rw [finsupp_prod_one, mul_one] at hb
+    rw [MvRestricted.norm_eq]
+    exact hb
+  have hEball : ‖(epsRestricted (S := S) m)‖ ≤ 1 := by
+    rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+    refine Real.iSup_le (fun s => ?_) zero_le_one
+    rw [finsupp_prod_one, mul_one]
+    show ‖MvPowerSeries.coeff s (MvPowerSeries.C (σ := Fin m) (R := DualNumber S)
+      DualNumber.eps)‖ ≤ 1
+    rw [MvPowerSeries.coeff_C]
+    split
+    · rw [JetNorm.norm_def]
+      refine max_le ?_ ?_
+      · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).fst‖ ≤ 1
+        rw [TrivSqZeroExt.fst_inr, norm_zero]
+        exact zero_le_one
+      · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).snd‖ ≤ 1
+        rw [TrivSqZeroExt.snd_inr, norm_one]
+    · rw [norm_zero]
+      exact zero_le_one
+  refine isNoetherianRing_of_surjective
+    (Polynomial ↥(unitBall (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ))))) _
+    (Polynomial.eval₂RingHom
+      (RingHom.codRestrict ((mapRestrictedGauss m (TrivSqZeroExt.inlHom S S)
+          (fun x => le_of_eq (JetNorm.norm_inl x))).comp
+        (unitBall (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ)))).subtype)
+        (unitBall _)
+        (fun q => (norm_mapRestrictedGauss_le m (TrivSqZeroExt.inlHom S S)
+          (fun x => le_of_eq (JetNorm.norm_inl x)) q.1).trans q.2))
+      ⟨epsRestricted m, hEball⟩) ?_
+  rintro ⟨y, hy⟩
+  have hfstball : ‖fstRestricted m y‖ ≤ 1 := by
+    rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+    refine Real.iSup_le (fun s => ?_) zero_le_one
+    rw [finsupp_prod_one, mul_one]
+    show ‖(MvPowerSeries.coeff s y.1).fst‖ ≤ 1
+    refine le_trans (le_trans ?_ (hcoeffle y s)) hy
+    rw [JetNorm.norm_def]
+    exact le_max_left _ _
+  have hsndball : ‖sndRestricted m y‖ ≤ 1 := by
+    rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+    refine Real.iSup_le (fun s => ?_) zero_le_one
+    rw [finsupp_prod_one, mul_one]
+    show ‖(MvPowerSeries.coeff s y.1).snd‖ ≤ 1
+    refine le_trans (le_trans ?_ (hcoeffle y s)) hy
+    rw [JetNorm.norm_def]
+    exact le_max_right _ _
+  refine ⟨Polynomial.C ⟨fstRestricted m y, hfstball⟩ +
+    Polynomial.C ⟨sndRestricted m y, hsndball⟩ * Polynomial.X, ?_⟩
+  rw [map_add, map_mul]
+  simp only [Polynomial.coe_eval₂RingHom]
+  rw [Polynomial.eval₂_C, Polynomial.eval₂_C, Polynomial.eval₂_X]
+  refine Subtype.ext (Subtype.ext ?_)
+  show MvPowerSeries.map (TrivSqZeroExt.inlHom S S) (fstRestricted m y).1 +
+      MvPowerSeries.map (TrivSqZeroExt.inlHom S S) (sndRestricted m y).1 *
+        MvPowerSeries.C (σ := Fin m) (R := DualNumber S) DualNumber.eps = y.1
+  refine MvPowerSeries.ext fun t => ?_
+  rw [map_add, MvPowerSeries.coeff_mul_C, MvPowerSeries.coeff_map, MvPowerSeries.coeff_map]
+  show TrivSqZeroExt.inl ((MvPowerSeries.coeff t y.1).fst) +
+      TrivSqZeroExt.inl ((MvPowerSeries.coeff t y.1).snd) * DualNumber.eps =
+      MvPowerSeries.coeff t y.1
+  rw [show (DualNumber.eps : DualNumber S) = TrivSqZeroExt.inr 1 from rfl,
+    TrivSqZeroExt.inl_mul_inr, smul_eq_mul, mul_one, TrivSqZeroExt.inl_fst_add_inr_snd_eq]
+
 /-! ### The payoff: the three comparison vertices are sheafy
 
 [FJP] Theorem 5.3 (input): "The three comparison rings are strongly noetherian. Huber's

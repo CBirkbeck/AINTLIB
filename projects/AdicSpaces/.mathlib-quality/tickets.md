@@ -468,7 +468,12 @@ T704, by a fresh `/develop --continue`.
   constants 1 (decay bookkeeping trivial).
 
 ### [T502] pushed spans + ideal-row surjectivity
-- **Status**: open | **Depends**: T501, T406 | **Type**: proofs (L4.2–L4.3 part)
+- **Status**: **DONE** (`span_pushed_B/C/D` via Ideal.map; NEW arity-m ball lemmas in
+  NoetherianVertices: `isNoetherianRing_unitBall_restricted_L` (transfer chain at arity m)
+  and `isNoetherianRing_unitBall_restricted_dualNumber` (ε-polynomial ball surjection) —
+  these discharge `hE₀P` at the vertices; `ideal_row_surjective` := `exists_d1_lift` at the
+  𝓓-vertex (tD-bundle) + coefficientwise `extRhoC_strict_surjective` sections +
+  ultrametric sum bound, constant `h·(1 + ∑‖rC i‖)`.) | **Type**: proofs (L4.2–L4.3 part)
 - **Sorries**: `span_pushed_B/C/D`, `ideal_row_surjective`.
 - **Sketch**: span push through ring homs; surjectivity: `exists_d1_lift` at 𝓓 →
   coefficientwise lift through `extRhoC` (T501) → `d_{1,C}` image ([FJP] (4.11) chase,

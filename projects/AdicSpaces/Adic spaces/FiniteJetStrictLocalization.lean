@@ -235,7 +235,63 @@ sequence `0 → I_R → I_B ⊕ I_C → I_D → 0` is strict exact."  Constants:
 /-- Right strict surjectivity of the ideal row ([FJP] (4.11)). -/
 theorem ideal_row_surjective (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     ∃ Cs : ℝ, 1 ≤ Cs ∧ ∀ y ∈ ID F m g f,
-      ∃ xc ∈ IC F m g f, extRhoC F m xc = y ∧ ‖xc‖ ≤ Cs * ‖y‖ := by sorry
+      ∃ xc ∈ IC F m g f, extRhoC F m xc = y ∧ ‖xc‖ ≤ Cs * ‖y‖ := by
+  classical
+  haveI hPD : IsNoetherianRing (PD F m) := by
+    haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetD F) m
+    exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetD F)) _
+      (UnitDiscExample.restrictedGaussEquiv (JetD F) m).symm.toRingHom
+      (RingEquiv.surjective _)
+  have hE₀P : IsNoetherianRing (unitBall (PD F m)) :=
+    isNoetherianRing_unitBall_restricted_dualNumber (L F) m
+      (isNoetherianRing_unitBall_restricted_L F m)
+  obtain ⟨h, hh1, hlift⟩ := exists_d1_lift (E := JetD F) (tD F) (isUnit_tD F)
+    (by rw [norm_tD]; exact norm_t_lt_one F)
+    (by rw [norm_tD]; exact norm_t_pos F) (norm_tD_mul F) hE₀P (rD F m g f)
+  set Cr : ℝ := 1 + ∑ i, ‖rC F m g f i‖ with hCr
+  have hCr1 : 1 ≤ Cr := le_add_of_nonneg_right (Finset.sum_nonneg fun i _ => norm_nonneg _)
+  refine ⟨h * Cr, ?_, fun y hy => ?_⟩
+  · calc (1 : ℝ) ≤ h := hh1
+      _ = h * 1 := (mul_one h).symm
+      _ ≤ h * Cr := mul_le_mul_of_nonneg_left hCr1 (zero_le_one.trans hh1)
+  · obtain ⟨u, hu, hun⟩ := hlift y hy
+    have hsec : ∀ i, ∃ c : PC F m, extRhoC F m c = u i ∧ ‖c‖ = ‖u i‖ := fun i =>
+      extRhoC_strict_surjective F m (u i)
+    choose cc hcc hccn using hsec
+    refine ⟨d1 (rC F m g f) cc, ?_, ?_, ?_⟩
+    · show d1 (rC F m g f) cc ∈ Ideal.span (Set.range (rC F m g f))
+      unfold d1
+      exact Ideal.sum_mem _ fun i _ => Ideal.mul_mem_left _ _ (Ideal.subset_span ⟨i, rfl⟩)
+    · rw [show extRhoC F m (d1 (rC F m g f) cc) =
+        d1 (fun i => extRhoC F m (rC F m g f i)) (fun i => extRhoC F m (cc i)) from
+          d1_map (extRhoC F m) _ cc,
+        show (fun i => extRhoC F m (rC F m g f i)) = rD F m g f from rfl,
+        show (fun i => extRhoC F m (cc i)) = u from funext hcc]
+      exact hu
+    · have hterm : ∀ i : Fin m, ‖cc i * rC F m g f i‖ ≤ ‖u‖ * Cr := fun i => by
+        calc ‖cc i * rC F m g f i‖ ≤ ‖cc i‖ * ‖rC F m g f i‖ := norm_mul_le _ _
+          _ = ‖u i‖ * ‖rC F m g f i‖ := by rw [hccn i]
+          _ ≤ ‖u‖ * Cr := by
+              refine mul_le_mul (norm_le_pi_norm u i) ?_ (norm_nonneg _) (norm_nonneg u)
+              rw [hCr]
+              refine le_add_of_nonneg_of_le zero_le_one ?_
+              exact Finset.single_le_sum (fun j _ => norm_nonneg _) (Finset.mem_univ i)
+      have hpartial : ∀ s : Finset (Fin m),
+          ‖∑ i ∈ s, cc i * rC F m g f i‖ ≤ ‖u‖ * Cr := by
+        intro s
+        induction s using Finset.induction_on with
+        | empty =>
+          rw [Finset.sum_empty, norm_zero]
+          exact mul_nonneg (norm_nonneg u) (zero_le_one.trans hCr1)
+        | insert a s ha ih =>
+          rw [Finset.sum_insert ha]
+          exact (IsUltrametricDist.norm_add_le_max _ _).trans (max_le (hterm a) ih)
+      show ‖d1 (rC F m g f) cc‖ ≤ h * Cr * ‖y‖
+      unfold d1
+      refine (hpartial Finset.univ).trans ?_
+      calc ‖u‖ * Cr ≤ h * ‖y‖ * Cr :=
+            mul_le_mul_of_nonneg_right hun (zero_le_one.trans hCr1)
+        _ = h * Cr * ‖y‖ := by ring
 
 /-- The controlled pullback ([FJP] (4.12)–(4.16)): a matching pair of graph-ideal elements
 comes from an element of `I_𝓐` with a uniformly bounded representative. This is where the
