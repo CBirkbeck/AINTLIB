@@ -684,6 +684,76 @@ theorem bridgeRev_bridgeX (i : Fin e.m) :
     bridgeRev D e (bridgeX D e i) = bridgeGen D e i :=
   bridgeEval_X D e i
 
+/-- Sums of open-subgroup members stay in the subgroup (local copy of the private
+Wedhorn828 helper). -/
+private theorem tsum_mem_of_isOpen_addSubgroup' {ι G₀ : Type*} [AddCommGroup G₀]
+    [TopologicalSpace G₀] [IsTopologicalAddGroup G₀] {f : ι → G₀}
+    (hf : Summable f) {G : AddSubgroup G₀} (hG : IsOpen (G : Set G₀))
+    (hmem : ∀ i, f i ∈ G) : ∑' i, f i ∈ G := by
+  have hclosed : IsClosed (G : Set G₀) := AddSubgroup.isClosed_of_isOpen G hG
+  refine hclosed.mem_of_tendsto hf.hasSum (Filter.Eventually.of_forall ?_)
+  intro s
+  exact G.sum_mem fun i _ => hmem i
+
+/-- The range of the generator product powers is bounded (local copy of the private
+Wedhorn828 helper, at our tuple). -/
+private theorem bridgeRangeProd_isBounded :
+    TopologicalRing.IsBounded
+      (Set.range (fun v : Fin e.m →₀ ℕ => ∏ i, bridgeGen D e i ^ (v i))) := by
+  classical
+  suffices h : ∀ s : Finset (Fin e.m), TopologicalRing.IsBounded
+      (Set.range (fun v : Fin e.m →₀ ℕ => ∏ i ∈ s, bridgeGen D e i ^ (v i))) from
+    h Finset.univ
+  intro s
+  induction s using Finset.induction with
+  | empty => simpa using TopologicalRing.isBounded_singleton (1 : presheafValue D)
+  | insert a s ha ih =>
+      refine ((bridgeGen_isBounded D e a).mul ih).subset ?_
+      rintro _ ⟨v, rfl⟩
+      change ∏ i ∈ insert a s, bridgeGen D e i ^ (v i) ∈ _
+      rw [Finset.prod_insert ha]
+      exact Set.mul_mem_mul ⟨v a, rfl⟩ ⟨v, rfl⟩
+
+/-- **Continuity of the evaluation** from the norm topology on `P_𝓐` ([FJP] (1.3) bound;
+mirrors `mvEvalHomBounded_continuous` with the Gauss-norm ball basis in place of the
+Tate-algebra basis: coefficients of a small series are small). -/
+theorem bridgeEval_continuous : Continuous (bridgeEval D e) := by
+  classical
+  refine continuous_of_continuousAt_zero (bridgeEval D e).toAddMonoidHom ?_
+  rw [ContinuousAt, map_zero, Filter.tendsto_def]
+  intro U hU
+  obtain ⟨W, hWU⟩ := NonarchimedeanRing.is_nonarchimedean U hU
+  obtain ⟨V, hV, hVR⟩ := bridgeRangeProd_isBounded D e (W : Set (presheafValue D))
+    (W.isOpen.mem_nhds W.zero_mem)
+  have hpre : D.canonicalMap ⁻¹' V ∈ nhds (0 : JetA F) :=
+    (canonicalMap_continuous D).continuousAt.preimage_mem_nhds (by rwa [map_zero])
+  obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hpre
+  refine Filter.mem_of_superset (Metric.ball_mem_nhds (0 : PA F e.m) hδ) ?_
+  intro p hp
+  rw [Metric.mem_ball, dist_zero_right] at hp
+  apply hWU
+  change (∑' v, mvEvalTerm D.canonicalMap (bridgeGen D e)
+    (bridgeToRestricted e.m p) v) ∈ (W : Set (presheafValue D))
+  refine tsum_mem_of_isOpen_addSubgroup'
+    (mvEvalTerm_summable D.canonicalMap (canonicalMap_continuous D)
+      (bridgeGen D e) (bridgeGen_isBounded D e) (bridgeToRestricted e.m p))
+    W.isOpen fun v => ?_
+  have hcoeff : ‖MvPowerSeries.coeff v p.1‖ < δ :=
+    lt_of_le_of_lt (norm_coeff_le_gauss p v) hp
+  have hVmem : D.canonicalMap (MvPowerSeries.coeff v p.1) ∈ V :=
+    hball (by rwa [Metric.mem_ball, dist_zero_right])
+  change mvEvalTerm D.canonicalMap (bridgeGen D e) (bridgeToRestricted e.m p) v ∈ W
+  rw [show mvEvalTerm D.canonicalMap (bridgeGen D e) (bridgeToRestricted e.m p) v =
+      (∏ i, bridgeGen D e i ^ (v i)) *
+        D.canonicalMap (MvPowerSeries.coeff v p.1) from by
+    rw [mvEvalTerm]; exact mul_comm _ _]
+  exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
+
+/-- Continuity of the reverse map (the graph quotient carries the quotient topology). -/
+theorem bridgeRev_continuous : Continuous (bridgeRev D e) := by
+  rw [(QuotientRing.isOpenQuotientMap_mk (IA F e.m D.s e.f)).isQuotientMap.continuous_iff]
+  exact bridgeEval_continuous D e
+
 end GraphBridgeInfra
 
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
