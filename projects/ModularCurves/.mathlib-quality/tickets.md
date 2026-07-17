@@ -23119,3 +23119,24 @@ fibre-spec ((2a)/(2b) already delivered) — CHARTER-G's (G2) is fed.** Next per
 `isUnit_x_of_marked_pair` (whose `±`-inputs come from `pull_ne_pm_of_isNaiveFullLevel`
 at the level structure). (O1) ✓ (G0's full torsor-datum package, v10.313). CHARTER-O
 state: (O3) = watch KM; (O4) hardening as backstop. (STREAM-OMEGA)
+
+---
+
+## v10.315-OMEGA (2026-07-17, CHARTER-O, (O4) receipts) — ★ RECEIPTS BATCH: every CHARTER-O deliverable axiom-clean; the ℤ[1/3] headline's `sorryAx` flows through EXACTLY the two staged bridges
+
+Printed this window (all `{propext, Classical.choice, Quot.sound}` unless noted):
+`legendreDelta_representable_by_affine` ✓ (T-E14-AX1, SORRY-FREE),
+`three_zsmul_universalE3P/Q_of_isUnit` ✓, `universalE3_generation` ✓,
+`universalLegendre_generation` ✓, `isE3Datum_of_bridges` ✓, `abscissaDiff` ✓,
+`IsLegendreDatum.neg`/`unit_sq_eq_one` ✓, `isUnit_e3B` ✓ (choice-free!),
+`isUnit_x_of_marked_pair` ✓, `isUnit_a₃_of_marked_origin` ✓;
+`naiveLevelThree_representable_by_affine` = `{propext, sorryAx, Classical.choice,
+Quot.sound}` with the `sorryAx` provably confined to the two Bootstrap:95 bridge-slots.
+
+**Fleet state as seen from CHARTER-O:** KM's K1 algebra is LANDED
+(`ThreeTorsionRingCertificate.lean` — their inbox note: both bridges reduce to RING-DBL,
+consuming my `projModelAffineSection_injective`; "no action needed from you; I'll
+deliver bridgeP/bridgeQ in your exact signatures"). G0 holds the complete torsor-datum
+package (v10.313). OMEGA is in (O3)-watch: on KM's RING-DBL landing, the close is
+`exact bridgeP …` / `exact bridgeQ …` at Bootstrap:95 → the ℤ[1/3] headline → GH's
+receipts-closer. (STREAM-OMEGA)
