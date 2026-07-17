@@ -261,6 +261,15 @@ private lemma mulModelHom_assoc_specPoints {K : Type u} [Field K]
   exact congrArg Subtype.val
     ((projModelPointsEquiv 𝕌 K).injective (ebigL.trans ((add_assoc _ _ _).trans ebigR.symm)))
 
+/-- **(fibre-compatibility of the lifted product)** The two-law product of a pair of points
+lifted into the fibre square `E ×_U E`, projected back to the base, lands over the base point of
+the *first* factor. This is the `mulModelHom_π` + `pullback.lift_fst` bookkeeping shared verbatim
+by the `hπ₁₂`/`hπ₂₃` steps of `mulOver_assoc_atlas`, isolated as a reusable one-liner. -/
+private lemma mulModelHom_lift_π {R : Type u} [CommRing R] (W : WeierstrassCurve R) [W.IsElliptic]
+    {X : Scheme.{u}} (a b : X ⟶ projModel W) (w : a ≫ projModelπ W = b ≫ projModelπ W) :
+    (pullback.lift a b w ≫ mulModelHom W) ≫ projModelπ W = a ≫ projModelπ W := by
+  rw [Category.assoc, mulModelHom_π W, ← Category.assoc, pullback.lift_fst]
+
 set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-G3-assoc)** Associativity of the two-law multiplication at the universe-`u` atlas,
 at the `Over (Spec 𝕌)` level: evaluate on a field point of the fibre cube, reduce both
@@ -308,16 +317,12 @@ theorem mulOver_assoc_atlas :
         (g := (projModelπ 𝕌))).symm
   have hπ₁₂ : (pullback.lift _ _ ((hπ₁).trans (hπ₂).symm) ≫
       mulModelHom 𝕌) ≫ (projModelπ 𝕌) =
-      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
-    rw [Category.assoc, show mulModelHom 𝕌 ≫ (projModelπ 𝕌) = _ from mulModelHom_π 𝕌,
-      ← Category.assoc, pullback.lift_fst]
-    exact hπ₁
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) :=
+    (mulModelHom_lift_π 𝕌 _ _ ((hπ₁).trans (hπ₂).symm)).trans hπ₁
   have hπ₂₃ : (pullback.lift _ _ ((hπ₂).trans (hπ₃).symm) ≫
       mulModelHom 𝕌) ≫ (projModelπ 𝕌) =
-      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
-    rw [Category.assoc, show mulModelHom 𝕌 ≫ (projModelπ 𝕌) = _ from mulModelHom_π 𝕌,
-      ← Category.assoc, pullback.lift_fst]
-    exact hπ₂
+      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) :=
+    (mulModelHom_lift_π 𝕌 _ _ ((hπ₂).trans (hπ₃).symm)).trans hπ₂
   have keyval := mulModelHom_assoc_specPoints _ _ _ hπ₁ hπ₂ hπ₃ hπ₁₂ hπ₂₃
   -- outer first projection of the cube through the (mo⊗mo)-factor is the (f,g) input lift
   have hp₁₂p :
