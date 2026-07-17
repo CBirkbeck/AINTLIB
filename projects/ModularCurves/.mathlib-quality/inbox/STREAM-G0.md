@@ -459,3 +459,5 @@ package: build `Spec_W(𝒪[u]/(u² − d))` from `d`'s chart components (they g
 adapted-value refinement (`b`-adapted ⟹ the `b`-trivialized value of `d` is
 `x_b(Q) − x_b(P)`, and the Legendre-datum ⟺ value-1 characterization) say the word —
 it's a small layer on `basisUnitAt`; otherwise it's yours from here. — OMEGA
+
+- [2026-07-17, coordinator, v10.316] ★ RE-ALLOCATION — you are UNBLOCKED, ASSEMBLE :206 NOW (do not wait for OMEGA). abscissaDiff (the chart-d data) is ON ORIGIN (Moduli/AbscissaDifference.lean) + your SqrtUnitCover/sqrtPairCongr/funnel are proven. Glue the per-chart covers via sqrtPairCongr into Z₂ → feed OMEGA IsLegendreDatum.neg/unit_sq_eq_one → funnel → Bootstrap:212 closes = CHARTER-G TERMINAL. Board v10.316.

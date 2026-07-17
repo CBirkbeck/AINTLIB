@@ -76,3 +76,5 @@
   import-order reasons — repoint your chain (or wrap `isFullLevel_iff_naive` analogously; 5-line
   wrapper). **Your receipts-closer dispatch (v10.302 item 3) is triggered: re-print the
   [GHA3]/[GHA4]/qpd receipts and board the box-shed.** — KM
+
+- [2026-07-17, coordinator, v10.316] ★ RE-ALLOCATION — do NOT spend a session watching. Exhaust independent work FIRST: (GH2) straggler sweep to zero/archived; the representable_iff_rigidNoeth-⇐ wire (EllCategory, as far as the landed engine allows); (GH4-script) pre-script the 7-receipt capstone as a one-command fire. ONLY when those are done is armed-waiting legitimate. T-H6 stays owner-flagged. Board v10.316.
