@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
 import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.FiniteFreeResolution
@@ -25,14 +26,89 @@ exposing their final statements.
 open Function
 open CategoryTheory
 open TensorProduct
+open scoped ChangeOfRings
 
-universe u v
+universe u v w
 
 namespace ModularCurves
 
 variable {R : Type u} [CommRing R]
 variable {P Q T : Type v} [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
   [Module R P] [Module R Q] [Module R T]
+
+/-- The usual algebra tensor product is the object produced by categorical extension of
+scalars along the algebra map. -/
+noncomputable def moduleCatExtendScalarsObjLinearEquiv
+    (A : Type w) [CommRing A] [Algebra R A] (M : ModuleCat.{v} R) :
+    (A ⊗[R] M) ≃ₗ[A]
+      (ModuleCat.extendScalars.{u, w, v} (algebraMap R A)).obj M := by
+  let Ares :=
+    (ModuleCat.restrictScalars (algebraMap R A)).obj (ModuleCat.of A A)
+  letI : IsScalarTower R A Ares :=
+    IsScalarTower.of_algebraMap_smul fun _ _ ↦ rfl
+  let eA : A ≃ₗ[A] Ares := LinearEquiv.refl A A
+  exact TensorProduct.AlgebraTensorModule.congr eA (LinearEquiv.refl R M)
+
+@[simp]
+theorem moduleCatExtendScalarsObjLinearEquiv_tmul
+    (A : Type w) [CommRing A] [Algebra R A] (M : ModuleCat.{v} R)
+    (a : A) (m : M) :
+    moduleCatExtendScalarsObjLinearEquiv A M (a ⊗ₜ[R] m) =
+      a ⊗ₜ[R, algebraMap R A] m := by
+  rfl
+
+/-- The linear maps underlying a short complex of modules compose to zero. -/
+theorem shortComplexModuleCatCompEqZero
+    (S : ShortComplex (ModuleCat.{v} R)) :
+    S.g.hom ∘ₗ S.f.hom = 0 := by
+  apply LinearMap.ext
+  intro x
+  exact S.moduleCat_zero_apply x
+
+/-- The short complex built from base-changed linear maps is canonically isomorphic to
+categorical extension of scalars of the original short complex. -/
+noncomputable def shortComplexModuleCatMkBaseChangeIso
+    (S : ShortComplex (ModuleCat.{v} R))
+    (A : Type v) [CommRing A] [Algebra R A] :
+    ShortComplex.moduleCatMk
+        (S.f.hom.baseChange A) (S.g.hom.baseChange A)
+        (LinearMap.baseChange_comp_eq_zero S.f.hom S.g.hom
+          (shortComplexModuleCatCompEqZero S) A) ≅
+      S.map (ModuleCat.extendScalars.{u, v, v} (algebraMap R A)) :=
+  ShortComplex.isoMk
+    (moduleCatExtendScalarsObjLinearEquiv A S.X₁).toModuleIso
+    (moduleCatExtendScalarsObjLinearEquiv A S.X₂).toModuleIso
+    (moduleCatExtendScalarsObjLinearEquiv A S.X₃).toModuleIso
+    (by
+      letI : Module R
+          ((S.map
+            (ModuleCat.extendScalars.{u, v, v} (algebraMap R A))).X₂) :=
+        Module.compHom _ (algebraMap R A)
+      letI : IsScalarTower R A
+          ((S.map
+            (ModuleCat.extendScalars.{u, v, v} (algebraMap R A))).X₂) :=
+        IsScalarTower.of_algebraMap_smul fun _ _ ↦ rfl
+      apply ModuleCat.hom_ext
+      apply TensorProduct.AlgebraTensorModule.ext
+      intro a x
+      change a ⊗ₜ[R, algebraMap R A] S.f x =
+        a ⊗ₜ[R, algebraMap R A] S.f x
+      rfl)
+    (by
+      letI : Module R
+          ((S.map
+            (ModuleCat.extendScalars.{u, v, v} (algebraMap R A))).X₃) :=
+        Module.compHom _ (algebraMap R A)
+      letI : IsScalarTower R A
+          ((S.map
+            (ModuleCat.extendScalars.{u, v, v} (algebraMap R A))).X₃) :=
+        IsScalarTower.of_algebraMap_smul fun _ _ ↦ rfl
+      apply ModuleCat.hom_ext
+      apply TensorProduct.AlgebraTensorModule.ext
+      intro a x
+      change a ⊗ₜ[R, algebraMap R A] S.g x =
+        a ⊗ₜ[R, algebraMap R A] S.g x
+      rfl)
 
 /-- If cycles commute with base change, then the base-changed cokernel into the old cycle
 module computes degree-one homology of the base-changed short complex. -/
@@ -594,15 +670,6 @@ variable [Module.Flat R S.X₁]
   [Module.Finite R (LinearMap.ker S.f.hom)]
   [Module.Finite R S.homology]
 
-omit [IsNoetherianRing R] [Module.Flat R S.X₁]
-  [Module.Flat R (LinearMap.ker S.g.hom)]
-  [Module.Finite R (LinearMap.ker S.f.hom)]
-  [Module.Finite R S.homology] in
-private theorem moduleCat_comp_eq_zero : S.g.hom ∘ₗ S.f.hom = 0 := by
-  apply LinearMap.ext
-  intro x
-  exact S.moduleCat_zero_apply x
-
 local instance shortComplexHZeroFinite :
     Module.Finite R (HZero S.moduleCatToCycles) :=
   Module.Finite.ker_moduleCatToCycles S
@@ -620,7 +687,7 @@ noncomputable def shortComplexBaseChangeKernelEquiv
     LinearMap.ker
         ((kZeroToKOne S.moduleCatToCycles).baseChange A) ≃ₗ[A]
       LinearMap.ker (S.f.hom.baseChange A) := by
-  let hfg := moduleCat_comp_eq_zero S
+  let hfg := shortComplexModuleCatCompEqZero S
   let eReplacement := baseChangeKernelEquiv S.moduleCatToCycles A
   have hker :
       LinearMap.ker (S.moduleCatToCycles.baseChange A) =
@@ -642,12 +709,27 @@ noncomputable def shortComplexBaseChangeHomologyOneEquiv
       (ShortComplex.moduleCatMk
         (S.f.hom.baseChange A) (S.g.hom.baseChange A)
         (LinearMap.baseChange_comp_eq_zero S.f.hom S.g.hom
-          (moduleCat_comp_eq_zero S) A)).homology := by
-  let hfg := moduleCat_comp_eq_zero S
+          (shortComplexModuleCatCompEqZero S) A)).homology := by
+  let hfg := shortComplexModuleCatCompEqZero S
   let eReplacement := baseChangeCokerEquiv S.moduleCatToCycles A
   let eCycles := LinearMap.baseChangeHomologyOneEquiv
     S.f.hom S.g.hom hfg A hbij
   exact eReplacement.trans eCycles
+
+/-- The finite-projective replacement of a short complex computes degree-one homology of
+its categorical extension of scalars. -/
+noncomputable def shortComplexExtendScalarsHomologyOneEquiv
+    (A : Type v) [CommRing A] [Algebra R A]
+    (hbij : Function.Bijective
+      (kerBaseChangeComparison A S.g.hom)) :
+    ((A ⊗[R] KOne S.moduleCatToCycles) ⧸
+        LinearMap.range
+          ((kZeroToKOne S.moduleCatToCycles).baseChange A)) ≃ₗ[A]
+      (S.map
+        (ModuleCat.extendScalars.{u, v, v} (algebraMap R A))).homology :=
+  (shortComplexBaseChangeHomologyOneEquiv S A hbij).trans
+    (ShortComplex.homologyMapIso
+      (shortComplexModuleCatMkBaseChangeIso S A)).toLinearEquiv
 
 end ShortComplex
 
