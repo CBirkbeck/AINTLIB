@@ -1,1 +1,1 @@
-FOCUS: OMEGA v10.308 — hArb-2a DONE (zero-avoidance => MarksAt); next hArb-2b (level structure => zero-avoidance via SpecToEquivOfField + count)
+FOCUS: OMEGA v10.308 — hArb-2 COMPLETE (fibrewise-ne-zero => MarksAt end-to-end); next [hArb-2c] level=>fibrewise inputs + translation normalization; bridges KM-gated

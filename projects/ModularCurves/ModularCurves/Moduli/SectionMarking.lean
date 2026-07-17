@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.SectionCoordinates
 import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.LevelStructure.Factorization
 import ModularCurves.Moduli.LegendreDelta
 
 /-!
@@ -145,6 +146,50 @@ theorem marksAt_of_forall_not_mem_range_zero {S : Scheme.{u}}
         show (V.1.ι ≫ G.zero).base (V.2.isoSpec.inv.base y) =
         G.zero.base (V.1.ι.base (V.2.isoSpec.inv.base y)) from rfl] at this
       exact this.symm⟩
+
+
+/-- **([hArb-2b] fibrewise distinctness ⟹ disjoint ranges)** Two sections of a
+separated morphism whose pulls differ at every algebraically closed geometric point
+have disjoint topological images: their graph ideals are comaximal
+(`sup_ker_eq_top_of_pull_ne`), so the supports — the closed ranges — do not meet. -/
+theorem forall_not_mem_range_of_pull_ne {S : Scheme.{u}} {C : Scheme.{u}} {π : C ⟶ S}
+    [IsSeparated π] (Q₁ Q₂ : S ⟶ C) (hQ₁ : Q₁ ≫ π = 𝟙 S) (hQ₂ : Q₂ ≫ π = 𝟙 S)
+    (hne : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      t ≫ Q₁ ≠ t ≫ Q₂)
+    (w : S) : Q₁.base w ∉ Set.range Q₂.base := by
+  intro hw
+  haveI hci₁ : IsClosedImmersion Q₁ := by
+    have hcomp : IsClosedImmersion (Q₁ ≫ π) := by rw [hQ₁]; infer_instance
+    exact IsClosedImmersion.of_comp Q₁ π
+  haveI hci₂ : IsClosedImmersion Q₂ := by
+    have hcomp : IsClosedImmersion (Q₂ ≫ π) := by rw [hQ₂]; infer_instance
+    exact IsClosedImmersion.of_comp Q₂ π
+  have hsup := RelEffCartierDiv.sup_ker_eq_top_of_pull_ne Q₁ Q₂ hQ₁ hQ₂ hne
+  have hc : Q₁.base w ∈ (Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).support := by
+    rw [Scheme.IdealSheafData.support_sup]
+    refine ⟨?_, ?_⟩
+    · rw [Scheme.Hom.support_ker]
+      exact subset_closure ⟨w, rfl⟩
+    · rw [Scheme.Hom.support_ker]
+      exact subset_closure hw
+  rw [hsup, Scheme.IdealSheafData.support_top] at hc
+  exact hc
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([hArb-2] marking existence from fibrewise nonvanishing)** A section of a
+geometric elliptic curve whose pull differs from zero at every algebraically closed
+geometric point of the base is marked at honest coordinates on every affine piece —
+the interface the level structure feeds directly. -/
+theorem LocalPresentation.marksAt_of_forall_pull_ne_zero {S : Scheme.{u}}
+    {G : EllipticCurveGeom S} {V : S.affineOpens} (Pr : LocalPresentation G V)
+    {σ : S ⟶ G.E} (hσ : σ ≫ G.π = 𝟙 S)
+    (hne : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      t ≫ σ ≠ t ≫ G.zero) :
+    ∃ p q : Γ(S, V.1), Pr.MarksAt hσ p q := by
+  haveI : IsProper G.π := G.proper
+  exact Pr.marksAt_of_forall_not_mem_range_zero hσ
+    (fun w _ => forall_not_mem_range_of_pull_ne σ G.zero hσ G.zero_π hne w)
 
 
 end LocalPresentation
