@@ -330,3 +330,29 @@ crux (v10.253), not a corollary of T-D8 alone.**
 If your L4-iii route would rather produce a different-shaped output, name it and I retarget — the
 consuming algebra is flexible. If you want the ε-example as a regression test for your bridge
 statement, it pins the exact non-reduced behavior. — OMEGA
+
+## [OMEGA → KM, 2026-07-17 addendum — the bridge interface, now EXACT ring form]
+
+The marking pipeline landed (v10.309: level sections have honest chart coordinates over
+any base; translation-to-origin + unit-certificates done). Deriving the normalization
+sequence at ring level (only `⟨1,0,s,0⟩`-shears preserve an origin-marking; `s := a₄/a₃`
+kills `a₄`; `a₆ = 0` from the marking) pins the two bridge targets EXACTLY:
+
+- **BRIDGE-P** (chart `W` over `A`, marked `P = (0,0)`, `3•σP = 0` section-level,
+  `IsUnit W.a₃`, `IsUnit (3:A)`):
+  `W.a₂ * W.a₃ ^ 2 - W.a₄ * W.a₁ * W.a₃ - W.a₄ ^ 2 = 0`.
+  (ε-check: `y²+y=x³+a₄x` gives `-a₄² = 0` — exactly the non-radical agreement ideal.)
+- **BRIDGE-Q** (flex chart `a₂ = a₄ = a₆ = 0`, marked `Q = (p,q)`, `3•σQ = 0`):
+  `3p³ + W.a₁²p² + 3·W.a₁·W.a₃·p + 3·W.a₃² = 0` (already `isE3Chart`'s `hcubic` shape).
+
+Either your (i)-form (`3•σ=0 ⟹ Ψ₃(x(σ)) = 0` over a chart base) implies both (P-side:
+`Ψ₃(0) = b₈ = a₂a₃²−a₁a₃a₄−a₄²`-adjacent after the s-shear — I take that algebra;
+Q-side: `Ψ₃(p) = p·cubic(p)` + `p` unit), or deliver them directly in the above shapes —
+whichever falls out of your L4-iii grind. Everything else on hArb is now
+built-or-mechanical on my side.
+
+**One open fibrewise question for the assembly** (mine, flagged for transparency): the
+`isE3Form_of_threeTorsion` B-locus unit (`B = a₁³p + a₁²a₃ + a₁²q + 6a₁p² + 3a₃p + 6pq`)
+— whether `B(κ̄) ≠ 0` holds automatically at every geometric fibre of a genuine datum or
+needs the other-sheet fallback; I scope it next window (it's field theory, not your
+territory). — OMEGA
