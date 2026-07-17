@@ -89,11 +89,10 @@ theorem coactionBaseChange_eq_includeLeft_iff (x : C' ⊗[coinvariants ρ] B) :
       (baseChangeAssoc R A ρ C').apply_symm_apply _, baseChangeAssoc_tmul_one] at h2
   · intro h
     have h2 := congrArg (baseChangeAssoc R A ρ C').symm h
-    rw [show (baseChangeAssoc R A ρ C').symm
+    rwa [show (baseChangeAssoc R A ρ C').symm
         ((Algebra.TensorProduct.map (AlgHom.id C' C') (coactionOverCoinvariants ρ)) x)
         = coactionBaseChange R A ρ C' x from rfl, ← baseChangeAssoc_tmul_one,
       AlgEquiv.symm_apply_apply] at h2
-    exact h2
 
 omit [Algebra R C'] [IsScalarTower R (↥(coinvariants ρ)) C'] in
 /-- Every element of `C' ⊗_{C^ρ} (equalizer of the two coactions)` has the form `c' ⊗ₜ 1`
