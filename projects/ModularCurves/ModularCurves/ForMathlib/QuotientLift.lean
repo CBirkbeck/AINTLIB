@@ -13,11 +13,15 @@ The restricted universal property of `SchemeAction.quotient`: a `G`-invariant mo
 `pullback quotientπ j` (the `G`-stable open of `X` over an open immersion `j : Q' ⟶ X/G`)
 descends uniquely to `Q'`.
 
+## Main results
+
 * `epi_pullback_snd_quotientπ` — the restricted quotient cover is an epimorphism (fppf: flat from
   `etale_quotientπ`, surjective by base change; `Flat.epi_of_flat_of_surjective`). Uniqueness.
 * `exists_quotientπ_lift_of_isOpenImmersion` — existence: glue the affine keystone
   `exists_invariantsπ_lift_of_isOpenImmersion` over the quotient-chart cover; overlap agreement by
   the epi property; `Scheme.Cover.glueMorphisms`.
+
+## Implementation notes
 
 This is what descends the `[a5]` fppf-comparison `E|_{D(a)} ⟶ projModel W₁` through the curve's
 quotient to `(E/G)|` — the last morphism-level descent the KM 4.7 engine needs.
@@ -28,14 +32,13 @@ namespace AlgebraicGeometry.SchemeAction
 variable {G : Type u} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
 
 set_option backward.isDefEq.respectTransparency.types false in
-/-- **(W2, uniqueness half)** For a free action, the pullback of the quotient projection
-`X ⟶ X/G` along an open immersion `j : Q' ⟶ X/G` is an epimorphism: the restricted quotient
-cover is still an fppf cover (surjective + flat), and flat surjections of schemes are epic. -/
+/-- For a free action, the pullback of the quotient projection along an open immersion is epic. -/
 theorem epi_pullback_snd_quotientπ [Finite G]
     [IsAffineHom (pullback.diagonal (terminal.from X))]
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
     (hVmem : ∀ x, x ∈ V x)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
+      t ≫ σ.hom γ = t → IsEmpty T)
     {Q' : Scheme.{u}} (j : Q' ⟶ σ.quotient V hVs hVa) [IsOpenImmersion j] :
     Epi (pullback.snd (σ.quotientπ V hVs hVa hVmem) j) := by
   haveI hsurj : Surjective (σ.quotientπ V hVs hVa hVmem) :=
@@ -45,10 +48,6 @@ theorem epi_pullback_snd_quotientπ [Finite G]
     MorphismProperty.pullback_snd _ _ hsurj
   exact Flat.epi_of_flat_of_surjective _
 
-/-- Two morphisms out of an "overlap" `T` of two chart pieces agree as soon as they are induced
-by the same morphism `f` on the total space of a family of pullback squares over a common
-morphism `s`, tested against an epimorphism `e` covering `T`. Pure diagram chase, used for the
-overlap agreement of the locally descended morphisms. -/
 private theorem overlap_eq {Z Q'' Y W₁ W₂ T P₁ P₂ E : Scheme.{u}} {s : Z ⟶ Q''}
     {ρ₁ : P₁ ⟶ Z} {sd₁ : P₁ ⟶ W₁} {ι₁ : W₁ ⟶ Q''}
     {ρ₂ : P₂ ⟶ Z} {sd₂ : P₂ ⟶ W₂} {ι₂ : W₂ ⟶ Q''}
@@ -60,9 +59,9 @@ private theorem overlap_eq {Z Q'' Y W₁ W₂ T P₁ P₂ E : Scheme.{u}} {s : Z
     t₁ ≫ q₁ = t₂ ≫ q₂ := by
   have w₁ : m ≫ s = (e ≫ t₁) ≫ ι₁ := by rw [hm, Category.assoc]
   have w₂ : m ≫ s = (e ≫ t₂) ≫ ι₂ := by rw [hm, Category.assoc, ht]
-  rw [← cancel_epi e, ← Category.assoc, ← h₁.lift_snd m (e ≫ t₁) w₁, ← Category.assoc,
-    ← h₂.lift_snd m (e ≫ t₂) w₂, Category.assoc, Category.assoc, hq₁, hq₂,
-    ← Category.assoc, ← Category.assoc, h₁.lift_fst m (e ≫ t₁) w₁,
+  rw [← cancel_epi e, ← Category.assoc, ← h₁.lift_snd m (e ≫ t₁) w₁,
+    ← Category.assoc, ← h₂.lift_snd m (e ≫ t₂) w₂, Category.assoc, Category.assoc,
+    hq₁, hq₂, ← Category.assoc, ← Category.assoc, h₁.lift_fst m (e ≫ t₁) w₁,
     h₂.lift_fst m (e ≫ t₂) w₂]
 
 section Lift
@@ -71,8 +70,6 @@ variable [Finite G] [IsAffineHom (pullback.diagonal (terminal.from X))]
   (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
   (hVmem : ∀ x, x ∈ V x) {Q' : Scheme.{u}} (j : Q' ⟶ σ.quotient V hVs hVa)
 
-/-- The chart-restricted open immersion `j ⁻¹(chart x) ⟶ Spec Γ(X, V x)ᴳ` induced by an
-open immersion `j : Q' ⟶ X/G` into the quotient. -/
 private noncomputable def chartHom (x : X) :
     ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u}) ⟶ σ.localQuotient (hVs x) :=
   j.resLE (σ.quotientChart V hVs hVa x) (j ⁻¹ᵁ σ.quotientChart V hVs hVa x) le_rfl ≫
@@ -91,12 +88,8 @@ private theorem chartHom_comp (x : X) :
     chartHom σ V hVs hVa j x ≫ (σ.quotientChartIso V hVs hVa x).hom ≫
         (σ.quotientChart V hVs hVa x).ι =
       (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι ≫ j := by
-  unfold chartHom
-  rw [Category.assoc, Iso.inv_hom_id_assoc, Scheme.Hom.resLE_comp_ι]
+  simp only [chartHom, Category.assoc, Iso.inv_hom_id_assoc, Scheme.Hom.resLE_comp_ι]
 
-/-- Over the chart preimage `j ⁻¹(chart x) ⊆ Q'`, the pullback of the quotient projection
-along `j` is computed by the affine invariants projection `Spec Γ(X, V x) ⟶ Spec Γ(X, V x)ᴳ`:
-the total rectangle is cartesian. -/
 private theorem isPullback_chartHom (x : X) :
     letI := σ.gammaMulSemiringAction (hVs x)
     IsPullback
@@ -106,35 +99,29 @@ private theorem isPullback_chartHom (x : X) :
       (σ.quotientπ V hVs hVa hVmem)
       ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι ≫ j) := by
   letI := σ.gammaMulSemiringAction (hVs x)
-  -- left block: the defining pullback square of `(invariantsπ, chartHom)`, with its base corner
-  -- transported along the chart iso `Spec Γ(X, V x)ᴳ ≅ chart x`
-  have h₁ : IsPullback (chartHom σ V hVs hVa j x) (𝟙 _)
+  have hbase : IsPullback (chartHom σ V hVs hVa j x) (𝟙 _)
       (σ.quotientChartIso V hVs hVa x).hom
       (chartHom σ V hVs hVa j x ≫ (σ.quotientChartIso V hVs hVa x).hom) :=
     IsPullback.of_vert_isIso ⟨by rw [Category.id_comp]⟩
-  have h₂ := (IsPullback.of_hasPullback (invariantsπ G ↑Γ(X, V x) ℤ)
-      (chartHom σ V hVs hVa j x)).paste_vert h₁
-  rw [Category.comp_id] at h₂
-  -- right block: the chart square of the quotient, with its source corner transported along
-  -- `isoSpec : V x ≅ Spec Γ(X, V x)`
-  have h₃ : IsPullback ((hVa x).isoSpec.inv)
+  have hleft := (IsPullback.of_hasPullback (invariantsπ G ↑Γ(X, V x) ℤ)
+      (chartHom σ V hVs hVa j x)).paste_vert hbase
+  rw [Category.comp_id] at hleft
+  have hchart : IsPullback ((hVa x).isoSpec.inv)
       (invariantsπ G ↑Γ(X, V x) ℤ ≫ (σ.quotientChartIso V hVs hVa x).hom)
       (σ.localQuotientπ (hVs x) (hVa x) ≫ (σ.quotientChartIso V hVs hVa x).hom)
       (𝟙 ((σ.quotientChart V hVs hVa x : Scheme.{u}))) := by
     refine IsPullback.of_horiz_isIso ⟨?_⟩
     rw [Category.comp_id, localQuotientπ_eq σ (hVs x) (hVa x), ← Category.assoc,
       ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
-  have h₄ := h₃.paste_horiz (σ.isPullback_quotientπ_quotientChart V hVs hVa hVmem x)
-  rw [Category.id_comp] at h₄
-  have h₅ := h₂.paste_horiz h₄
+  have hright := hchart.paste_horiz
+    (σ.isPullback_quotientπ_quotientChart V hVs hVa hVmem x)
+  rw [Category.id_comp] at hright
+  have hresult := hleft.paste_horiz hright
   rw [show (chartHom σ V hVs hVa j x ≫ (σ.quotientChartIso V hVs hVa x).hom) ≫
       (σ.quotientChart V hVs hVa x).ι = (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι ≫ j from by
-    rw [Category.assoc]; exact chartHom_comp σ V hVs hVa j x] at h₅
-  exact h₅
+    rw [Category.assoc]; exact chartHom_comp σ V hVs hVa j x] at hresult
+  exact hresult
 
-/-- The per-chart descent package: over `j ⁻¹(chart x)` the pullback of the quotient projection
-along `j` is (isomorphic to) an affine invariants pullback `P`, and the restriction of an
-invariant morphism `f` to `P` descends. -/
 private theorem exists_chart_isPullback_lift {Y : Scheme.{u}} [IsOpenImmersion j]
     (f : pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
     (hf : ∀ g : G, pullback.map (σ.quotientπ V hVs hVa hVmem) j
@@ -154,8 +141,6 @@ private theorem exists_chart_isPullback_lift {Y : Scheme.{u}} [IsOpenImmersion j
       (pullback.snd (invariantsπ G ↑Γ(X, V x) ℤ) (chartHom σ V hVs hVa j x) ≫
         (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι) ≫ j := by
     rw [hrect.w, Category.assoc]
-  -- the restriction of `f` to the affine invariants pullback is invariant for the
-  -- `Spec`-side action
   have hinv : ∀ g : G, pullbackSpecSMul G ↑Γ(X, V x) ℤ (chartHom σ V hVs hVa j x) g ≫
       (pullback.lift _ _ hw ≫ f) = pullback.lift _ _ hw ≫ f := by
     intro g
@@ -181,9 +166,6 @@ private theorem exists_chart_isPullback_lift {Y : Scheme.{u}} [IsOpenImmersion j
 
 end Lift
 
-/-- The pulled-back quotient charts `j ⁻¹ᵁ (quotientChart x)` cover `Q'`: every point of `Q'`
-lies in some chart preimage, since the quotient charts cover `X/G` and `j` maps into it.
-Extracted from `exists_quotientπ_lift_of_isOpenImmersion`. -/
 private lemma exists_mem_quotientChart_preimage [Finite G]
     [IsAffineHom (pullback.diagonal (terminal.from X))]
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
@@ -199,29 +181,28 @@ private lemma exists_mem_quotientChart_preimage [Finite G]
   obtain ⟨y, hy⟩ := h
   exact ⟨x, y, hy⟩
 
-/-- **(W2, existence half)** A `G`-invariant morphism out of the restriction of the total space
-over an open `j : Q' ⟶ X/G` of the quotient descends to `Q'`: the restricted quotient map
-`pullback.snd : X ×_{X/G} Q' ⟶ Q'` has the universal property of the quotient of the open
-`G`-stable subscheme `X ×_{X/G} Q'` of `X`. -/
-theorem exists_quotientπ_lift_of_isOpenImmersion [Finite G]
+private theorem exists_quotientπ_lift_of_chartwise [Finite G]
     [IsAffineHom (pullback.diagonal (terminal.from X))]
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
     (hVmem : ∀ x, x ∈ V x)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
+      t ≫ σ.hom γ = t → IsEmpty T)
     {Q' Y : Scheme.{u}} (j : Q' ⟶ σ.quotient V hVs hVa) [IsOpenImmersion j]
     (f : pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
-    (hf : ∀ g : G, pullback.map (σ.quotientπ V hVs hVa hVmem) j
-        (σ.quotientπ V hVs hVa hVmem) j (σ.hom g) (𝟙 Q') (𝟙 _)
-        (by rw [Category.comp_id, hom_quotientπ]) (by simp) ≫ f = f) :
+    (hlift : ∀ x : X,
+      ∃ (P : Scheme.{u}) (ρ : P ⟶ pullback (σ.quotientπ V hVs hVa hVmem) j)
+        (sd : P ⟶ ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u}))
+        (qx : ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u}) ⟶ Y),
+        IsPullback ρ sd (pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+            (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι ∧
+          sd ≫ qx = ρ ≫ f) :
     ∃ q : Q' ⟶ Y, pullback.snd (σ.quotientπ V hVs hVa hVmem) j ≫ q = f := by
   classical
-  -- per-chart descent data
-  choose P ρ sd qx hPB hq using σ.exists_chart_isPullback_lift V hVs hVa hVmem j f hf
-  -- the chart preimages cover `Q'`
-  have hcov : ∀ p : Q', ∃ (x : X) (y : ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u})),
-      (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι y = p :=
+  choose P ρ sd qx hPB hq using hlift
+  have hcov : ∀ p : Q',
+      ∃ (x : X) (y : ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u})),
+        (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι y = p :=
     fun p => σ.exists_mem_quotientChart_preimage V hVs hVa j p
-  -- the local descents agree on overlaps, by the epi property of the restricted cover
   have hover : ∀ x y : X,
       pullback.fst ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι)
           ((j ⁻¹ᵁ σ.quotientChart V hVs hVa y).ι) ≫ qx x =
@@ -249,7 +230,6 @@ theorem exists_quotientπ_lift_of_isOpenImmersion [Finite G]
           (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι) (𝟙 _)
         (by simp) (by simp))
       (pullback.lift_snd _ _ _)
-  -- glue
   obtain ⟨q, hq'⟩ : ∃ q : Q' ⟶ Y,
       ∀ x : X, (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι ≫ q = qx x :=
     ⟨(Scheme.Cover.mkOfCovers (↥X)
@@ -259,7 +239,6 @@ theorem exists_quotientπ_lift_of_isOpenImmersion [Finite G]
         (fun x => ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u}))
         (fun x => (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι) hcov).ι_glueMorphisms qx hover x⟩
   refine ⟨q, ?_⟩
-  -- verify on the pullback of the cover to the total space
   refine Scheme.Cover.hom_ext ((Scheme.Cover.mkOfCovers (↥X)
       (fun x => ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u}))
       (fun x => (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι) hcov).pullback₁
@@ -275,5 +254,21 @@ theorem exists_quotientπ_lift_of_isOpenImmersion [Finite G]
     Category.assoc, Category.assoc, cancel_epi, ← Category.assoc, (hPB x).w,
     Category.assoc, hq' x]
   exact hq x
+
+/-- A `G`-invariant morphism on the pullback of the quotient projection descends over an open. -/
+theorem exists_quotientπ_lift_of_isOpenImmersion [Finite G]
+    [IsAffineHom (pullback.diagonal (terminal.from X))]
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
+      t ≫ σ.hom γ = t → IsEmpty T)
+    {Q' Y : Scheme.{u}} (j : Q' ⟶ σ.quotient V hVs hVa) [IsOpenImmersion j]
+    (f : pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
+    (hf : ∀ g : G, pullback.map (σ.quotientπ V hVs hVa hVmem) j
+        (σ.quotientπ V hVs hVa hVmem) j (σ.hom g) (𝟙 Q') (𝟙 _)
+        (by rw [Category.comp_id, hom_quotientπ]) (by simp) ≫ f = f) :
+    ∃ q : Q' ⟶ Y, pullback.snd (σ.quotientπ V hVs hVa hVmem) j ≫ q = f := by
+  apply σ.exists_quotientπ_lift_of_chartwise V hVs hVa hVmem hfree j f
+  exact σ.exists_chart_isPullback_lift V hVs hVa hVmem j f hf
 
 end AlgebraicGeometry.SchemeAction
