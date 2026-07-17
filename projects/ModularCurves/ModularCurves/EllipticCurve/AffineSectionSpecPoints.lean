@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import ModularCurves.EllipticCurve.AffinePointSection
 import ModularCurves.EllipticCurve.MulByHomDegree
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.EllipticCurve.RecordGroupUnique
+import ModularCurves.EllipticCurve.MulByHomFibres
 import ModularCurves.LevelStructure.ExactOrder
 
 /-!
@@ -233,5 +235,168 @@ theorem nsmul_section_eq_zero_of_forall_specPoint
   exact hom_ext_of_forall_specPoint (fun K _ pt => hfib K pt)
 
 end Collision
+
+
+/-! ## Stage-D: killing transport along coefficient base change
+
+The general-ring pointed group-object iso between the base-changed model and the model
+of the mapped curve (the field restriction of `modelBaseChangeIsoAsOver` was incidental —
+its pullback and zero-leg inputs are general; the monoid-compat comes from the
+records-level canonicity `isMonHom_of_pointedIso_records`, which needs no noetherian
+hypothesis), and through it: a marked affine-point section killed by `N` stays killed
+after arbitrary coefficient base change. -/
+
+section StageDTransport
+
+open Limits MonoidalCategory CartesianMonoidalCategory MonObj
+
+variable {A A' : Type u} [CommRing A] [CommRing A'] [Algebra A A']
+  (W : WeierstrassCurve A) [W.IsElliptic]
+
+/-- `asSection` sends the zero point to the zero section (local copy of
+`Moduli/DrinfeldRepresentability.asSection_zero`, to keep this file light). -/
+theorem asSection_zero' {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) : EllipticCurve.Point.asSection E g 0 = 0 := by
+  have h := EllipticCurve.Point.asSection_zsmul E g 0 0
+  simpa using h
+
+open EllipticCurve in
+/-- **(Stage D-3)** The base-changed model, as an `Over`-object, is isomorphic to the
+model of the mapped curve via the pullback comparison. -/
+noncomputable def modelBaseChangeIso :
+    (((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))).asOver) ≅
+      ((modelEllipticCurve (W.map (algebraMap A A'))).asOver) := by
+  haveI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+  refine Over.isoMk ((isPullback_projModelBaseChange (R' := A') W).isoPullback.symm) ?_
+  show (isPullback_projModelBaseChange (R' := A') W).isoPullback.inv ≫
+    projModelπ (W.map (algebraMap A A')) = _
+  rw [Iso.inv_comp_eq]
+  exact (isPullback_projModelBaseChange (R' := A') W).isoPullback_hom_snd.symm
+
+theorem modelBaseChangeIso_hom_left :
+    (modelBaseChangeIso (A' := A') W).hom.left =
+      (isPullback_projModelBaseChange (R' := A') W).isoPullback.inv := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(Stage D-3)** The comparison is pointed: the base-changed zero section maps to the
+mapped model's zero section. -/
+theorem modelBaseChangeIso_zero :
+    ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))).zero ≫
+      (modelBaseChangeIso (A' := A') W).hom.left =
+    (modelEllipticCurve (W.map (algebraMap A A'))).zero := by
+  haveI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+  set b := isPullback_projModelBaseChange (R' := A') W
+  have hfst : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))).zero ≫
+        pullback.fst (modelEllipticCurve W).π
+          (Spec.map (CommRingCat.ofHom (algebraMap A A')))
+      = Spec.map (CommRingCat.ofHom (algebraMap A A')) ≫ (modelEllipticCurve W).zero :=
+    pullback.lift_fst _ _ _
+  have hsnd : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))).zero ≫
+        pullback.snd (modelEllipticCurve W).π
+          (Spec.map (CommRingCat.ofHom (algebraMap A A')))
+      = 𝟙 _ :=
+    pullback.lift_snd _ _ _
+  have hz2 : projModelZero (W.map (algebraMap A A')) ≫ b.isoPullback.hom
+      = ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))).zero := by
+    refine pullback.hom_ext ?_ ?_
+    · refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (CategoryStruct.comp _) b.isoPullback_hom_fst).trans ?_
+      exact (projModelZero_baseChange (R' := A') W).trans hfst.symm
+    · refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (CategoryStruct.comp _) b.isoPullback_hom_snd).trans ?_
+      exact (projModelZero_projModelπ (W.map (algebraMap A A'))).trans hsnd.symm
+  rw [modelBaseChangeIso_hom_left]
+  show _ ≫ b.isoPullback.inv = projModelZero (W.map (algebraMap A A'))
+  rw [Iso.comp_inv_eq]
+  exact hz2.symm
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(Stage D-3)** The comparison is a pointed monoid-object hom — via the records-level
+canonicity (`isMonHom_of_pointedIso_records`), with no noetherian hypothesis. -/
+theorem isMonHom_modelBaseChangeIso :
+    IsMonHom (modelBaseChangeIso (A' := A') W).hom := by
+  haveI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+  have hη : (η[(((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))).asOver)]) ≫
+        (modelBaseChangeIso (A' := A') W).hom =
+      η[((modelEllipticCurve (W.map (algebraMap A A'))).asOver)] := by
+    ext1
+    rw [Over.comp_left,
+      (((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap A A'))))).one_eq_zero,
+      ((modelEllipticCurve (W.map (algebraMap A A')))).one_eq_zero]
+    exact (Category.assoc _ _ _).trans
+      (congrArg _ (modelBaseChangeIso_zero (A' := A') W))
+  exact { one_hom := hη
+          mul_hom := isMonHom_of_pointedIso_records _ _
+            (modelBaseChangeIso (A' := A') W) hη }
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(Stage D ★★, the killing transport)** A marked affine-point section killed by `N`
+stays killed after arbitrary coefficient base change: pull + `asSection` transport the
+killing to the base-changed model, and the pointed monoid iso carries it to the mapped
+model, matching the mapped marked section by the pullback comparison against
+`projModelAffineSection_baseChange`. -/
+theorem nsmul_section_map_eq_zero_of_nsmul_eq_zero (N : ℕ)
+    (p q : A) (h : W.toAffine.Equation p q)
+    (h' : (W.map (algebraMap A A')).toAffine.Equation
+      (algebraMap A A' p) (algebraMap A A' q))
+    (hkill : (N : ℤ) • (⟨projModelAffineSection W p q h,
+        projModelAffineSection_projModelπ W p q h⟩ :
+      EllipticCurve.Section (modelEllipticCurve W)) = 0) :
+    (N : ℤ) • (⟨projModelAffineSection (W.map (algebraMap A A'))
+        (algebraMap A A' p) (algebraMap A A' q) h',
+        projModelAffineSection_projModelπ _ _ _ h'⟩ :
+      EllipticCurve.Section (modelEllipticCurve (W.map (algebraMap A A')))) = 0 := by
+  haveI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+  set P₀ : EllipticCurve.Section (modelEllipticCurve W) :=
+    ⟨projModelAffineSection W p q h, projModelAffineSection_projModelπ W p q h⟩ with hP₀
+  -- the base-changed section is killed
+  have hpull : (N : ℤ) • EllipticCurve.Point.pull (modelEllipticCurve W) (Spec.map (CommRingCat.ofHom (algebraMap A A'))) P₀ = 0 := by
+    rw [← EllipticCurve.Point.pull_zsmul, hkill, EllipticCurve.Point.pull_zero]
+  have hbc : (N : ℤ) • EllipticCurve.Point.asSection (modelEllipticCurve W) (Spec.map (CommRingCat.ofHom (algebraMap A A')))
+      (EllipticCurve.Point.pull (modelEllipticCurve W) (Spec.map (CommRingCat.ofHom (algebraMap A A'))) P₀) = 0 := by
+    rw [← EllipticCurve.Point.asSection_zsmul, hpull, asSection_zero']
+  -- morphism-level killing on the base-changed model
+  have hσbc := (EllipticCurve.smul_eq_zero_iff_comp_mulByHom
+    ((modelEllipticCurve W).baseChange (Spec.map (CommRingCat.ofHom (algebraMap A A')))) (𝟙 _) N _).mp hbc
+  rw [Category.id_comp] at hσbc
+  -- the matched section on the mapped model
+  haveI := isMonHom_modelBaseChangeIso (A' := A') W
+  have hmatch : (EllipticCurve.Point.asSection (modelEllipticCurve W) (Spec.map (CommRingCat.ofHom (algebraMap A A')))
+        (EllipticCurve.Point.pull (modelEllipticCurve W) (Spec.map (CommRingCat.ofHom (algebraMap A A'))) P₀)).1 ≫
+        (modelBaseChangeIso (A' := A') W).hom.left =
+      projModelAffineSection (W.map (algebraMap A A'))
+        (algebraMap A A' p) (algebraMap A A' q) h' := by
+    rw [modelBaseChangeIso_hom_left, Iso.comp_inv_eq]
+    refine pullback.hom_ext ?_ ?_
+    · refine ((EllipticCurve.Point.asSection_val_fst _ _ _).trans
+        (projModelAffineSection_baseChange W p q h h').symm).trans ?_
+      exact congrArg (fun m => projModelAffineSection (W.map (algebraMap A A'))
+          (algebraMap A A' p) (algebraMap A A' q) h' ≫ m)
+        (isPullback_projModelBaseChange (R' := A') W).isoPullback_hom_fst.symm
+    · refine ((EllipticCurve.Point.asSection_val_snd _ _ _).trans
+        (projModelAffineSection_projModelπ _ _ _ h').symm).trans ?_
+      exact congrArg (fun m => projModelAffineSection (W.map (algebraMap A A'))
+          (algebraMap A A' p) (algebraMap A A' q) h' ≫ m)
+        (isPullback_projModelBaseChange (R' := A') W).isoPullback_hom_snd.symm
+  -- transport the killing across the iso
+  rw [EllipticCurve.smul_eq_zero_iff_comp_mulByHom
+    (modelEllipticCurve (W.map (algebraMap A A'))) (𝟙 _) N _, Category.id_comp]
+  show projModelAffineSection (W.map (algebraMap A A')) _ _ h' ≫ _ = _
+  rw [← hmatch, Category.assoc,
+    ← EllipticCurve.mulByHom_comp_left_of_isMonHom _ _
+      (modelBaseChangeIso (A' := A') W).hom (N : ℤ),
+    ← Category.assoc, hσbc]
+  exact modelBaseChangeIso_zero (A' := A') W
+
+end StageDTransport
 
 end ModularCurves
