@@ -455,7 +455,13 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-10] /cleanup `FiniteJetGraphKoszul.lean` (final) — **Depends**: T406.
 
 ### [T501] `FiniteJetStrictLocalization.lean` — Lemma 4.1 layer
-- **Status**: open | **Depends**: T107, T403 | **Type**: proofs (L4.1)
+- **Status**: **DONE** (coefficientwise as planned: `ext_square_commutes` (4×coeff_map +
+  square_commutes), `extRhoC_strict_surjective` (sectionD coefficientwise, norm_sectionD
+  restrictedness + gauss sup), `ext_milnorRow_exact` (the JetA-valued coefficient series
+  ⟨coeff c, mem⟩ with milnorRow_exact per coefficient; uniqueness via iotaC-injectivity),
+  `ext_max_norm_eq` (‖extIotaC‖ = ‖p‖ isometric + norm_mapRestricted_le → max_eq_right),
+  `ext_pair_injective` (MvPowerSeries.map_injective on iotaC). Constants 1 throughout.)
+  | **Type**: proofs (L4.1)
 - **Sorries**: `ext_square_commutes`, `extRhoC_strict_surjective`, `ext_milnorRow_exact`,
   `ext_max_norm_eq`, `ext_pair_injective`.
 - **Sketch**: coefficientwise application of T106/T107's row via `MvPowerSeries.map_coeff`;

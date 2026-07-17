@@ -70,26 +70,110 @@ and ρ above continue to work." (For the finite-jet square both may be taken equ
 [FJP] §4 after (4.2).) -/
 
 theorem ext_square_commutes (p : PA F m) :
-    extRhoB F m (extJB F m p) = extRhoC F m (extIotaC F m p) := by sorry
+    extRhoB F m (extJB F m p) = extRhoC F m (extIotaC F m p) := by
+  refine Subtype.ext ?_
+  show MvPowerSeries.map (rhoB F) (MvPowerSeries.map (jB F) p.1) =
+    MvPowerSeries.map (rhoC F) (MvPowerSeries.map (iotaC F) p.1)
+  refine MvPowerSeries.ext fun s => ?_
+  rw [MvPowerSeries.coeff_map, MvPowerSeries.coeff_map, MvPowerSeries.coeff_map,
+    MvPowerSeries.coeff_map]
+  exact square_commutes F _
 
 /-- Coefficientwise sectioning: the extended `ρC` is strictly surjective with constant 1. -/
 theorem extRhoC_strict_surjective (d : PD F m) :
-    ∃ c : PC F m, extRhoC F m c = d ∧ ‖c‖ = ‖d‖ := by sorry
+    ∃ c : PC F m, extRhoC F m c = d ∧ ‖c‖ = ‖d‖ := by
+  classical
+  have hmem : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ))
+      (fun s => sectionD F (MvPowerSeries.coeff s d.1)) := by
+    have hd : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) d.1 := d.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hd ⊢
+    refine hd.congr fun s => ?_
+    show ‖MvPowerSeries.coeff s d.1‖ * _ =
+      ‖MvPowerSeries.coeff s (fun s => sectionD F (MvPowerSeries.coeff s d.1))‖ * _
+    rw [show MvPowerSeries.coeff s (fun s => sectionD F (MvPowerSeries.coeff s d.1)) =
+      sectionD F (MvPowerSeries.coeff s d.1) from rfl, norm_sectionD]
+  refine ⟨⟨fun s => sectionD F (MvPowerSeries.coeff s d.1), hmem⟩, ?_, ?_⟩
+  · refine Subtype.ext ?_
+    show MvPowerSeries.map (rhoC F) (fun s => sectionD F (MvPowerSeries.coeff s d.1)) = d.1
+    refine MvPowerSeries.ext fun s => ?_
+    rw [MvPowerSeries.coeff_map]
+    show rhoC F (sectionD F (MvPowerSeries.coeff s d.1)) = MvPowerSeries.coeff s d.1
+    rw [rhoC_sectionD]
+  · rw [MvRestricted.norm_eq, MvRestricted.norm_eq, MvPowerSeries.gaussNorm,
+      MvPowerSeries.gaussNorm]
+    refine iSup_congr fun s => ?_
+    show ‖MvPowerSeries.coeff s (fun s => sectionD F (MvPowerSeries.coeff s d.1))‖ * _ = _
+    rw [show MvPowerSeries.coeff s (fun s => sectionD F (MvPowerSeries.coeff s d.1)) =
+      sectionD F (MvPowerSeries.coeff s d.1) from rfl, norm_sectionD]
 
 /-- The extended square is cartesian: a compatible pair comes from a unique element of
 `P_𝓐` ([FJP] Lemma 4.1: "If `b = ∑ b_ν T^ν` and `c = ∑ c_ν T^ν` have the same image, each
 coefficient pair comes from a unique `a_ν ∈ R`"). -/
 theorem ext_milnorRow_exact (b : PB F m) (c : PC F m)
     (h : extRhoB F m b = extRhoC F m c) :
-    ∃! p : PA F m, extJB F m p = b ∧ extIotaC F m p = c := by sorry
+    ∃! p : PA F m, extJB F m p = b ∧ extIotaC F m p = c := by
+  classical
+  have hcoeff : ∀ s : Fin m →₀ ℕ, rhoB F (MvPowerSeries.coeff s b.1) =
+      rhoC F (MvPowerSeries.coeff s c.1) := fun s => by
+    have h0 := congrArg (fun x : PD F m => MvPowerSeries.coeff s x.1) h
+    show rhoB F (MvPowerSeries.coeff s b.1) = rhoC F (MvPowerSeries.coeff s c.1)
+    have h1 : MvPowerSeries.coeff s (MvPowerSeries.map (rhoB F) b.1) =
+        MvPowerSeries.coeff s (MvPowerSeries.map (rhoC F) c.1) := h0
+    rwa [MvPowerSeries.coeff_map, MvPowerSeries.coeff_map] at h1
+  have hmem : ∀ s, MvPowerSeries.coeff s c.1 ∈ jetSupport F := fun s =>
+    (mem_jetSupport_iff_jet_in_range F _).mpr ⟨MvPowerSeries.coeff s b.1, hcoeff s⟩
+  have hres : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ))
+      (fun s => (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F)) := by
+    have hc : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) c.1 := c.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hc ⊢
+    exact hc.congr fun s => rfl
+  refine ⟨⟨fun s => (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F), hres⟩, ⟨?_, ?_⟩, ?_⟩
+  · refine Subtype.ext ?_
+    show MvPowerSeries.map (jB F)
+      (fun s => (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F)) = b.1
+    refine MvPowerSeries.ext fun s => ?_
+    rw [MvPowerSeries.coeff_map]
+    obtain ⟨a, ⟨hab, hac⟩, -⟩ := milnorRow_exact F (MvPowerSeries.coeff s b.1)
+      (MvPowerSeries.coeff s c.1) (hcoeff s)
+    have hpa : (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F) = a :=
+      Subtype.ext (show MvPowerSeries.coeff s c.1 = (a : JetC F) from hac.symm)
+    show jB F (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F) = _
+    rw [hpa, hab]
+  · refine Subtype.ext ?_
+    show MvPowerSeries.map (iotaC F)
+      (fun s => (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F)) = c.1
+    refine MvPowerSeries.ext fun s => ?_
+    rw [MvPowerSeries.coeff_map]
+    rfl
+  · rintro q ⟨-, hqc⟩
+    refine Subtype.ext (MvPowerSeries.ext fun s => ?_)
+    have h1 := congrArg (fun x : PC F m => MvPowerSeries.coeff s x.1) hqc
+    have h2 : MvPowerSeries.coeff s (MvPowerSeries.map (iotaC F) q.1) =
+        MvPowerSeries.coeff s c.1 := h1
+    rw [MvPowerSeries.coeff_map] at h2
+    show MvPowerSeries.coeff s q.1 = _
+    exact Subtype.ext h2
 
 /-- Pullback-norm identity for the extended square (constants 1). -/
 theorem ext_max_norm_eq (p : PA F m) :
-    max ‖extJB F m p‖ ‖extIotaC F m p‖ = ‖p‖ := by sorry
+    max ‖extJB F m p‖ ‖extIotaC F m p‖ = ‖p‖ := by
+  have h1 : ‖extIotaC F m p‖ = ‖p‖ := by
+    rw [MvRestricted.norm_eq, MvRestricted.norm_eq]
+    show MvPowerSeries.gaussNorm _ _ (MvPowerSeries.map (iotaC F) p.1) = _
+    rw [MvPowerSeries.gaussNorm, MvPowerSeries.gaussNorm]
+    refine iSup_congr fun s => ?_
+    rw [MvPowerSeries.coeff_map, norm_iotaC]
+  have h2 : ‖extJB F m p‖ ≤ ‖p‖ := norm_mapRestricted_le _ _ _ p
+  rw [h1]
+  exact max_eq_right h2
 
 /-- `P_𝓐 → P_𝓑 ⊕ P_𝓒` is injective (left exactness of the extended row). -/
 theorem ext_pair_injective :
-    Function.Injective (fun p : PA F m => (extJB F m p, extIotaC F m p)) := by sorry
+    Function.Injective (fun p : PA F m => (extJB F m p, extIotaC F m p)) := by
+  intro p q h
+  have h2 : extIotaC F m p = extIotaC F m q := congrArg Prod.snd h
+  have hinj : Function.Injective (iotaC F) := fun a b hab => Subtype.ext hab
+  exact Subtype.ext (MvPowerSeries.map_injective hinj (congrArg Subtype.val h2))
 
 /-! ### The graph data -/
 
