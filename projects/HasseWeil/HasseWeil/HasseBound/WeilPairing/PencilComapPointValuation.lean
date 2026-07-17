@@ -26,9 +26,9 @@ The `infinity` and `affineToInfty` fields go through the **field-general** lemma
 fed:
 
 * the two `K̄` infinity orders of the base-changed pencil pullback on the generators
-  (`ordAtInfty_pencil_pullback_x_gen` = `-2`, `ordAtInfty_pencil_pullback_y_gen` = `-3`), obtained by
-  transporting the **K-level** orders `ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg` (`= -2`)
-  and `ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg` (`= -3`, built in
+  (`ordAtInfty_pencil_pullback_x_gen` = `-2`, `ordAtInfty_pencil_pullback_y_gen` = `-3`), obtained
+  by transporting the **K-level** orders `ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg`
+  (`= -2`) and `ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg` (`= -3`, built in
   `AdditionPullback/Frobenius.lean`) through `ordAtInftyBaseChange_holds`; and
 * the kernel-translation invariance `pencil_hcov_kernel`, the kernel specialisation of the proved
   Wall A generic-point covariance `mapTranslateGenericPoint_pencil_canonical`
@@ -39,8 +39,8 @@ fed:
 **Discharged (axiom-clean):**
 * the `infinity` / `affineToInfty` fields (above);
 * **`finiteKer`** (`pencilIsogBaseChange_finiteKer`) — via the **trace-free** finite-dimensionality
-  route `HasseWeil.finite_kernel_of_hcov`: `K(E_{K̄}) / (rπ−s)^* K(E_{K̄})` is finite-dimensional, so
-  `Aut` is a `Fintype`, and the injective kernel-translation forward map (needing only
+  route `HasseWeil.finite_kernel_of_hcov`: `K(E_{K̄}) / (rπ−s)^* K(E_{K̄})` is finite-dimensional,
+  so `Aut` is a `Fintype`, and the injective kernel-translation forward map (needing only
   `pencil_hcov_kernel`) embeds the kernel into it.  This **sidesteps** the Frobenius-dual route
   `ker ⊆ E[(rπ̂−s)∘(rπ−s)]`, which is a genuine wall over `K̄` (no geometric Verschiebung `V̄`, no
   characteristic-polynomial `π̄ + V̄ = [a]`);
@@ -49,22 +49,21 @@ fed:
 * the reusable **comap → residue bridges** (`resid_x_gen_of_comap`, `resid_y_gen_of_comap`) and the
   **`[−s']` per-summand residue** (`mulByInt_neg_resid_xy`).
 
-**Built (axiom-clean) — the `r·π̄`-summand residue** (the substantive geometric content, by the leaf-2
-`negFrobBaseChange` template with `[r']` in place of `neg`): the **mulByInt base-change pullback
-naturality** `mulByInt_baseChange_pullback_x/y_gen` (the linchpin, over the division-polynomial
-base-change `WeierstrassCurve.map_Φ`/`map_ΨSq`/`map_ψ`/`map_ω`), the bespoke transparent summand
-isogeny `rFrobBaseChange r'` with its generator pullbacks and point image, the addition-formula
-naturalities (`addPullback_x/y_pair_rFrob_mulByInt`), the pullback/point decompositions, the
-`r·π̄`-summand residue `rFrobBaseChange_resid_xy`, and the affine comap
+**Built (axiom-clean) — the `r·π̄`-summand residue** (the substantive geometric content, by the
+leaf-2 `negFrobBaseChange` template with `[r']` in place of `neg`): the **mulByInt base-change
+pullback naturality** `mulByInt_baseChange_pullback_x/y_gen` (the linchpin, over the
+division-polynomial base-change `WeierstrassCurve.map_Φ`/`map_ΨSq`/`map_ψ`/`map_ω`), the bespoke
+transparent summand isogeny `rFrobBaseChange r'` with its generator pullbacks and point image, the
+addition-formula naturalities (`addPullback_x/y_pair_rFrob_mulByInt`), the pullback/point
+decompositions, the `r·π̄`-summand residue `rFrobBaseChange_resid_xy`, and the affine comap
 `comap_pointValuation_pencil_eq_affine` itself (via the uniform `pencil_two_residues`).
 
-**Closed since:** the doubling/tangent and `O`-summand branches (the per-summand
-addition-formula case split has been removed outright in favour of the uniform
-transport-to-`O` route below), the `r' = 0` member
-(`pencilScalingComapDataCard_rZero`, identified with `[−s'] = mulByInt (−s')` and discharged by the
-proved `comapPointValuationWitness_mulByInt`), and the inseparable `p ∣ s'` pairs (now excluded
-**vacuously** in `pencilScaling_holds` by the `¬(ringChar K) ∣ s'` hypothesis — no false `#ker`-exponent
-scaling is claimed for an inseparable member).
+**Closed since:** the doubling/tangent and `O`-summand branches (the per-summand addition-formula
+case split has been removed outright in favour of the uniform transport-to-`O` route below), the
+`r' = 0` member (`pencilScalingComapDataCard_rZero`, identified with `[−s'] = mulByInt (−s')` and
+discharged by the proved `comapPointValuationWitness_mulByInt`), and the inseparable `p ∣ s'` pairs
+(now excluded **vacuously** in `pencilScaling_holds` by the `¬(ringChar K) ∣ s'` hypothesis — no
+false `#ker`-exponent scaling is claimed for an inseparable member).
 
 **The `O`-summand degeneracy is now DISCHARGED** by the *transport-to-`O`* lemma
 `isog_resid_at_affine_of_hgcomm_hinfty`: for *any* isogeny over `K̄` carrying the canonical
@@ -79,16 +78,17 @@ addition-formula decomposition, so the `O`-summand never arises.  The mechanism 
 **Remaining (exactly ONE isolated `sorry`, a genuine geometric residual):**
 * `pencilScalingComapDataCard_pDvdR` — the **`p ∣ r'` separable** bundle (`(r' : K) = 0` but
   `p ∤ s'`, so `rπ − s` is separable, `a = −s' ≠ 0`).  The irreducible obstruction is the **infinity
-  order-transport** `InftyOrdTransport (rπ − s)_{K̄}` / the exact `∞`-orders `-2`, `-3`: for `p ∤ r'`
-  these transport from the K-level `ord_addPullback_x_pair = -2`, whose proof rests essentially on
-  `(r' : K) ≠ 0` (the inner Frobenius factor `ord_∞((r'π)^* x) = q·(-2)` needs separable `[r']`); for
-  `p ∣ r'` the summand decomposition gives only `ord_∞ < 0` (`ordAtInfty_mulByInt_x_neg`), not the
-  exact `-2` the separable whole pencil has.  Closing this needs the **inseparable** division-polynomial
-  pole computation (the inseparable `natDegree (ΨSq r')`) or a general "separable isogeny ⟹ unramified
-  at `O`" theorem — a substantial separate development.  See its docstring.
+  order-transport** `InftyOrdTransport (rπ − s)_{K̄}` / the exact `∞`-orders `-2`, `-3`: for
+  `p ∤ r'` these transport from the K-level `ord_addPullback_x_pair = -2`, whose proof rests
+  essentially on `(r' : K) ≠ 0` (the inner Frobenius factor `ord_∞((r'π)^* x) = q·(-2)` needs
+  separable `[r']`); for `p ∣ r'` the summand decomposition gives only `ord_∞ < 0`
+  (`ordAtInfty_mulByInt_x_neg`), not the exact `-2` the separable whole pencil has.  Closing this
+  needs the **inseparable** division-polynomial pole computation (the inseparable
+  `natDegree (ΨSq r')`) or a general "separable isogeny ⟹ unramified at `O`" theorem — a substantial
+  separate development.  See its docstring.
 
-`comap_pointValuation_pencil_eq_affine` is now **axiom-clean**; `pencilScaling_holds` carries `sorryAx`
-only through the single `p ∣ r'` leaf; leaves 1 (`frobeniusScaling_holds`) and 2
+`comap_pointValuation_pencil_eq_affine` is now **axiom-clean**; `pencilScaling_holds` carries
+`sorryAx` only through the single `p ∣ r'` leaf; leaves 1 (`frobeniusScaling_holds`) and 2
 (`oneSubFrobeniusScaling_holds`) are axiom-clean.
 
 ## References
@@ -244,7 +244,8 @@ theorem omegaPullbackCoeff_pencil (r' s' : ℤ) (hr : r' ≠ 0) (hs : s' ≠ 0)
     (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField]
   rfl
 
-/-- **`omegaPullbackCoeff (rπ − s)_{K̄} ∈ range (algebraMap K̄ K(E_{K̄}))`** — the constancy datum. -/
+/-- **`omegaPullbackCoeff (rπ − s)_{K̄} ∈ range (algebraMap K̄ K(E_{K̄}))`** — the constancy datum.
+-/
 theorem omegaPullbackCoeff_pencil_mem_range (r' s' : ℤ) (hr : r' ≠ 0) (hs : s' ≠ 0)
     (hrK : (r' : K) ≠ 0) (hsK : (s' : K) ≠ 0) :
     omegaPullbackCoeff (W.baseChange (AlgebraicClosure K))
@@ -321,9 +322,9 @@ theorem comap_pointValuation_pencil_eq_infty (r' s' : ℤ) (hr : r' ≠ 0) (hs :
 
 /-! ### Comap → generator-residue bridge (reusable), and the `[−s']` per-summand residue
 
-The two helpers below extract the **generator residues** `α^* x_gen ≡ x`, `α^* y_gen ≡ y` from a full
-affine-image comap identity `(pointValuation P).comap α^* = pointValuation ⟨x, y⟩` for *any* isogeny
-`α` over `K̄`.  Specialised to `α = [−s'] = mulByInt (−s')` via the proved
+The two helpers below extract the **generator residues** `α^* x_gen ≡ x`, `α^* y_gen ≡ y` from a
+full affine-image comap identity `(pointValuation P).comap α^* = pointValuation ⟨x, y⟩` for *any*
+isogeny `α` over `K̄`.  Specialised to `α = [−s'] = mulByInt (−s')` via the proved
 `comap_pointValuation_mulByInt_eq_affine`, they give the `[−s']`-summand residues for the pencil's
 addition decomposition. -/
 
@@ -421,23 +422,25 @@ theorem mulByInt_neg_resid_xy (s' : ℤ) (hsK : (s' : K) ≠ 0)
     resid_y_gen_of_comap W (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s'))
       P h₂ hcomap⟩
 
-/-! ### NEW: the `r·π̄` summand machinery (mulByInt base-change naturality + bespoke `rFrobBaseChange`)
+/-! ### NEW: the `r·π̄` summand machinery (mulByInt base-change naturality + bespoke
+`rFrobBaseChange`)
 
 The `r·π̄`-summand residue — the sole remaining geometric residual flagged below — is now built by
 mirroring leaf 2's `negFrobBaseChange` technique with `[r']` in place of `neg`.  The linchpin is the
-**mulByInt base-change pullback naturality** `(mulByInt^{K̄} m)^* x_gen = functionFieldMap((mulByInt^K m)^* x_gen)`
-(via the division-polynomial base-change `WeierstrassCurve.map_Φ`/`map_ΨSq`/`map_ψ`/`map_ω`); from it the
-bespoke transparent summand isogeny `rFrobBaseChange r'` (pullback `baseChangePullback ((frobeniusIsog).zsmul r')`,
+**mulByInt base-change pullback naturality**
+`(mulByInt^{K̄} m)^* x_gen = functionFieldMap((mulByInt^K m)^* x_gen)` (via the division-polynomial
+base-change `WeierstrassCurve.map_Φ`/`map_ΨSq`/`map_ψ`/`map_ω`); from it the bespoke transparent
+summand isogeny `rFrobBaseChange r'` (pullback `baseChangePullback ((frobeniusIsog).zsmul r')`,
 point map `r'•π̄`) has computable generator residues, and the addition-formula naturality
-(`addPullback_x/y_pair_rFrob_mulByInt`) assembles the pencil pullback decomposition.  Feeding the two
-per-summand residues (`rFrobBaseChange_resid_xy`, `mulByInt_neg_resid_xy`) through
-`isog_coords_at_affine_of_decomp` yielded the two generator residues in the former **secant**
-branch (since removed — the affine comap now goes through the transport-to-`O`
-`pencil_two_residues`). -/
+(`addPullback_x/y_pair_rFrob_mulByInt`) assembles the pencil pullback decomposition.  Feeding the
+two per-summand residues (`rFrobBaseChange_resid_xy`, `mulByInt_neg_resid_xy`) through
+`isog_coords_at_affine_of_decomp` yielded the two generator residues in the former **secant** branch
+(since removed — the affine comap now goes through the transport-to-`O` `pencil_two_residues`). -/
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
   [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] in
-/-- `coordRingMap` sends `algebraMap K[X] R (W.Φ m)` to `algebraMap K̄[X] R̄ ((W.baseChange).Φ m)`. -/
+/-- `coordRingMap` sends `algebraMap K[X] R (W.Φ m)` to `algebraMap K̄[X] R̄ ((W.baseChange).Φ m)`.
+-/
 theorem coordRingMap_algebraMap_Φ (m : ℤ) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
         (algebraMap (Polynomial K) W.toAffine.CoordinateRing (W.Φ m)) =
@@ -613,8 +616,9 @@ theorem mulByInt_baseChange_pullback_y_gen (m : ℤ) (hm : m ≠ 0) :
 
 /-! ### Bespoke `r·π̄` summand isogeny over K̄ (transparent pullback) -/
 
-/-- **The base-changed `r·π̄` summand isogeny** `α₁ = rFrobBaseChange r'`.  Pullback is the transparent
-base change `baseChangePullback ((frobeniusIsog W).zsmul r').pullback`; point map is `r'•π̄`. -/
+/-- **The base-changed `r·π̄` summand isogeny** `α₁ = rFrobBaseChange r'`.  Pullback is the
+transparent base change `baseChangePullback ((frobeniusIsog W).zsmul r').pullback`; point map is
+`r'•π̄`. -/
 noncomputable def rFrobBaseChange (r' : ℤ) :
     HasseWeil.Isogeny (W.baseChange (AlgebraicClosure K)).toAffine
       (W.baseChange (AlgebraicClosure K)).toAffine :=
@@ -650,7 +654,9 @@ theorem rFrobBaseChange_pullback_functionFieldMap (r' : ℤ) (z : W.toAffine.Fun
 /-! ### The pencil addPullback naturality (base change of `addPullback_x/y_pair`) -/
 
 omit [Fintype W.toAffine.Point] in
-/-- **`addSlopePair (rFrob) (mulByInt -s') = functionFieldMap(addSlopePair^K ((zsmul r')) (mulByInt -s'))`**. -/
+/-- **
+`addSlopePair (rFrob) (mulByInt -s') = functionFieldMap(addSlopePair^K ((zsmul r')) (mulByInt -s'))`
+**. -/
 theorem addSlopePair_rFrob_mulByInt (r' s' : ℤ) (hs' : s' ≠ 0) :
     addSlopePair (rFrobBaseChange W p r r') (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')) =
       (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
@@ -769,7 +775,8 @@ theorem card_eq_zero_in_functionField (p r : ℕ) [Fact p.Prime] [CharP K p]
   exact dvd_pow_self p hr
 
 omit [Fintype W.toAffine.Point] in
-/-- **`Dω((rFrobBaseChange r')^* x_gen) = 0`** — the Frobenius `q`-power kills the `ω`-derivative. -/
+/-- **`Dω((rFrobBaseChange r')^* x_gen) = 0`** — the Frobenius `q`-power kills the `ω`-derivative.
+-/
 theorem Dω_rFrobBaseChange_pullback_x_gen (r' : ℤ) (hr' : r' ≠ 0) :
     Dω (W.baseChange (AlgebraicClosure K))
       ((rFrobBaseChange W p r r').pullback
@@ -960,9 +967,10 @@ unconditional affine-image comap identity at every smooth point `P` with affine 
 (+ `_y` for the 2-torsion-image branch), `AdditionPullback/SamePlace.lean`, fed:
 
 * the omega-coefficient `∈ range`/`≠ 0` — **DISCHARGED** (`omegaPullbackCoeff_pencil_mem_range` /
-  `omegaPullbackCoeff_pencil_ne_zero` above): `omegaPullbackCoeff (rπ − s)_{K̄} =
-  functionFieldMap (algebraMap (−s')) = algebraMap (−s')` (via `omegaPullbackCoeff_baseChangePullback`
-  + the K-level `genuineIsogSmulSub_omegaPullbackCoeff`), `algebraMap` of `−s' ≠ 0` (since `p ∤ s'`);
+  `omegaPullbackCoeff_pencil_ne_zero` above):
+  `omegaPullbackCoeff (rπ − s)_{K̄} = functionFieldMap (algebraMap (−s')) = algebraMap (−s')` (via
+  `omegaPullbackCoeff_baseChangePullback` + the K-level `genuineIsogSmulSub_omegaPullbackCoeff`),
+  `algebraMap` of `−s' ≠ 0` (since `p ∤ s'`);
 * the **two generator residues** `(rπ − s)^* x_gen ≡ x`, `(rπ − s)^* y_gen ≡ y`, from
   `isog_coords_at_affine_of_decomp` (secant) / `_slope` (doubling) with the summand pair
   `(r·π̄, [−s'])`; and
@@ -976,11 +984,13 @@ summand whose pullback `x_gen^q` residues directly by `residPV_pow` — the penc
 * The `[−s']`-summand residues are **built** (`mulByInt_neg_resid_xy`, axiom-clean): they go through
   the proved `comap_pointValuation_mulByInt_eq_affine` and the reusable comap→residue bridges
   `resid_x_gen_of_comap` / `resid_y_gen_of_comap`.
-* The **`r·π̄`-summand residue is now BUILT** (`rFrobBaseChange_resid_xy`, axiom-clean), exactly by the
-  leaf-2 `negFrobBaseChange` template with `[r']` in place of `neg`.  The pieces (all axiom-clean):
-  - **(b) the linchpin** `mulByInt_baseChange_pullback_x_gen`/`_y_gen`: the base-change naturality of
-    the `mulByInt` pullback `(mulByInt^{K̄} m)^* x_gen = functionFieldMap((mulByInt^K m)^* x_gen)`, via
-    the division-polynomial base-change `Φ_ff`/`ΨSq_ff`/`ψ_ff`/`ω_ff` transports
+* The **`r·π̄`-summand residue is now BUILT** (`rFrobBaseChange_resid_xy`, axiom-clean), exactly by
+  the leaf-2 `negFrobBaseChange` template with `[r']` in place of `neg`.  The pieces (all
+  axiom-clean):
+  - **(b) the linchpin** `mulByInt_baseChange_pullback_x_gen`/`_y_gen`: the base-change naturality
+    of the `mulByInt` pullback
+    `(mulByInt^{K̄} m)^* x_gen = functionFieldMap((mulByInt^K m)^* x_gen)`, via the
+    division-polynomial base-change `Φ_ff`/`ΨSq_ff`/`ψ_ff`/`ω_ff` transports
     (`functionFieldMap_Φ_ff` etc.) over `WeierstrassCurve.map_Φ`/`map_ΨSq`/`map_ψ`/`map_ω`;
   - **(a) the bespoke transparent summand isogeny** `rFrobBaseChange r'` (`mkBaseChange`, pullback
     `baseChangePullback ((frobeniusIsog).zsmul r')`, point map `r'•π̄`), with computable generators
@@ -997,15 +1007,16 @@ summand whose pullback `x_gen^q` residues directly by `residPV_pow` — the penc
   order-transport, **no** addition-formula case split): `pencil_two_residues` calls it directly; the
   former secant / doubling / `O`-summand branches — and the `sorryAx` the doubling branch carried —
   are gone.  `comap_pointValuation_pencil_eq_affine` is axiom-clean.
-* **Sole remaining residual (for the off-domain `p ∣ r'` member only)** = the infinity order-transport
-  `InftyOrdTransport (rπ − s)_{K̄}` / the exact `∞`-orders `-2`, `-3`, isolated in
+* **Sole remaining residual (for the off-domain `p ∣ r'` member only)** = the infinity
+  order-transport `InftyOrdTransport (rπ − s)_{K̄}` / the exact `∞`-orders `-2`, `-3`, isolated in
   `pencilScalingComapDataCard_pDvdR`.  Everything for the canonical `p ∤ r'` member (the `r·π̄` and
   `[−s']` residues, the transport-to-`O` affine comap, the omega datum, the infinity fields, the
   scaling assembly) is complete and axiom-clean. -/
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- **General `e=1` (non-2-torsion image) from residues**: for ANY isogeny `α` over K̄ whose
 generator pullbacks residue to `x`, `y` at `P` with `2y+a₁x+a₃ ≠ 0`, the differential denominator
-`α^*u` is a unit at `P`.  The `α`-agnostic form of leaf 2's `oneSub_alpha_star_u_ord_eq_zero_of_residues`. -/
+`α^*u` is a unit at `P`.  The `α`-agnostic form of leaf 2's
+`oneSub_alpha_star_u_ord_eq_zero_of_residues`. -/
 theorem alpha_star_u_ord_eq_zero_of_residues
     (α : Isogeny (W.baseChange (AlgebraicClosure K)).toAffine
       (W.baseChange (AlgebraicClosure K)).toAffine)
@@ -1138,9 +1149,9 @@ order-transport + `x_gen − x ∈ m_R`).  Here `R = φ P = some x y`. -/
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 set_option backward.isDefEq.respectTransparency false in
-/-- **The ∞-source order transport** `ord_∞(τ_R f) = ord_R f` for `R = some xR yR` finite and `f ≠ 0`.
-The `infinity`-place case of `ordProj_translate_infinity` (`τ_R` carries the order at `∞` to the order
-at `O + R = R`). -/
+/-- **The ∞-source order transport** `ord_∞(τ_R f) = ord_R f` for `R = some xR yR` finite and
+`f ≠ 0`. The `infinity`-place case of `ordProj_translate_infinity` (`τ_R` carries the order at `∞`
+to the order at `O + R = R`). -/
 theorem ordAtInfty_translate_eq_ord_P_some
     (xR yR : AlgebraicClosure K)
     (hR : (W.baseChange (AlgebraicClosure K)).toAffine.Nonsingular xR yR)
@@ -1195,9 +1206,10 @@ theorem ord_P_isog_pullback_eq_ordAtInfty_translate
   rwa [hcomm] at htar
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
-/-- Generic single-generator residue step for `isog_resid_at_affine_of_hgcomm_hinfty`: for a generator
-`gen` with `gen − c ≠ 0` and `ord_R (gen − c) ≥ 1`, the residue `φ^* gen ≡ c` holds at `P`.  Transport
-chain `ord_P P (φ^* w) = ord_∞(φ^*(τ_R w)) = ord_∞(τ_R w) = ord_R w ≥ 1` for `w := gen − c`. -/
+/-- Generic single-generator residue step for `isog_resid_at_affine_of_hgcomm_hinfty`: for a
+generator `gen` with `gen − c ≠ 0` and `ord_R (gen − c) ≥ 1`, the residue `φ^* gen ≡ c` holds at
+`P`.  Transport chain `ord_P P (φ^* w) = ord_∞(φ^*(τ_R w)) = ord_∞(τ_R w) = ord_R w ≥ 1` for
+`w := gen − c`. -/
 private theorem isog_resid_single_gen_of_hgcomm_hinfty
     (φ : Isogeny (W.baseChange (AlgebraicClosure K)).toAffine
       (W.baseChange (AlgebraicClosure K)).toAffine)
@@ -1294,11 +1306,11 @@ private theorem y_gen_sub_const_ne_zero (y : AlgebraicClosure K) :
       (W' := (W.baseChange (AlgebraicClosure K)).toAffine) (Polynomial.C y))
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
-/-- **The transport-to-`O` affine residue** for a genuine separable isogeny `φ` over `K̄`.  For *any*
-isogeny `φ` carrying the canonical generic-point covariance `hgcomm` and the infinity transport
-`hinfty`, at a smooth point `P` with affine image `φ P = some x y`, the two generator pullbacks
-`φ^* x_gen`, `φ^* y_gen` residue to `x`, `y` modulo `m_P`.  **No addition-formula decomposition** — so
-this covers the `O`-summand degeneracy uniformly. -/
+/-- **The transport-to-`O` affine residue** for a genuine separable isogeny `φ` over `K̄`.  For
+*any* isogeny `φ` carrying the canonical generic-point covariance `hgcomm` and the infinity
+transport `hinfty`, at a smooth point `P` with affine image `φ P = some x y`, the two generator
+pullbacks `φ^* x_gen`, `φ^* y_gen` residue to `x`, `y` modulo `m_P`.  **No addition-formula
+decomposition** — so this covers the `O`-summand degeneracy uniformly. -/
 theorem isog_resid_at_affine_of_hgcomm_hinfty
     (φ : Isogeny (W.baseChange (AlgebraicClosure K)).toAffine
       (W.baseChange (AlgebraicClosure K)).toAffine)
@@ -1341,11 +1353,12 @@ theorem isog_resid_at_affine_of_hgcomm_hinfty
 
 /-! ### The two `∞`-orders from the affine comap at a single finite-image point (Route C)
 
-The **keystone for the `p ∣ r'` member**: for a separable isogeny `φ` over `K̄` carrying the canonical
-generic-point covariance `hgcomm`, and a *single* smooth point `P` with finite image `φ(P) = some xR yR`
-at which the comap valuation equals `pointValuation ⟨xR,yR⟩` (the value-precise `e = 1` content), the
-two `∞`-orders `ord_∞(φ^* x_gen) = -2`, `ord_∞(φ^* y_gen) = -3` follow — **without** any per-summand
-addition-formula control, hence valid even when a summand (`r'·π̄` for `p ∣ r'`) is inseparable.
+The **keystone for the `p ∣ r'` member**: for a separable isogeny `φ` over `K̄` carrying the
+canonical generic-point covariance `hgcomm`, and a *single* smooth point `P` with finite image
+`φ(P) = some xR yR` at which the comap valuation equals `pointValuation ⟨xR,yR⟩` (the value-precise
+`e = 1` content), the two `∞`-orders `ord_∞(φ^* x_gen) = -2`, `ord_∞(φ^* y_gen) = -3` follow —
+**without** any per-summand addition-formula control, hence valid even when a summand (`r'·π̄` for
+`p ∣ r'`) is inseparable.
 
 Mechanism (`Route C`): for each generator `gen` (with `ord_∞ gen = -2` resp. `-3`),
 `ord_∞(φ^* gen) = ord_P(φ^*(τ_{-R} gen))` (transport-to-`O`, `τ_R ∘ τ_{-R} = id`)
@@ -1353,8 +1366,9 @@ Mechanism (`Route C`): for each generator `gen` (with `ord_∞ gen = -2` resp. `
 `= ord_∞ gen` (the translation transport `ordProj_translate`, `R + (-R) = O`). -/
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
-/-- `ord_P P (φ^* v) = ord_R v` from the comap identity `(pointValuation P).comap φ^* = pointValuation R`
-(both `ord_P`s are the same `if`-formula applied to equal `pointValuation` values). -/
+/-- `ord_P P (φ^* v) = ord_R v` from the comap identity
+`(pointValuation P).comap φ^* = pointValuation R` (both `ord_P`s are the same `if`-formula applied
+to equal `pointValuation` values). -/
 theorem ord_P_isog_pullback_eq_of_comap
     (φ : Isogeny (W.baseChange (AlgebraicClosure K)).toAffine
       (W.baseChange (AlgebraicClosure K)).toAffine)
@@ -1376,8 +1390,9 @@ theorem ord_P_isog_pullback_eq_of_comap
   rw [hpv]
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
-/-- `ord_R (τ_{-R} gen) = ord_∞ gen` for `R = some xR yR` finite, `gen ≠ 0` — the translation transport
-`ordProj_translate` at `v = affine R`, `S = -R` (so `placeTranslate (-R) (affine R) = ∞`). -/
+/-- `ord_R (τ_{-R} gen) = ord_∞ gen` for `R = some xR yR` finite, `gen ≠ 0` — the translation
+transport `ordProj_translate` at `v = affine R`, `S = -R` (so `placeTranslate (-R) (affine R) = ∞`).
+-/
 theorem ord_P_translate_neg_eq_ordAtInfty
     (xR yR : AlgebraicClosure K)
     (hR : (W.baseChange (AlgebraicClosure K)).toAffine.Nonsingular xR yR)
@@ -1525,9 +1540,10 @@ injective kernel-translation forward map (needing only the kernel-translation co
 
 This **sidesteps the Frobenius-dual route** `ker(rπ − s) ⊆ E[(rπ̂ − s)∘(rπ − s)]`: that route needs
 the integer trace relation `π̄ + V̄ = [a]` over `K̄` (the characteristic polynomial of geometric
-Frobenius) together with a geometric Verschiebung `V̄`, **neither of which is available over `K̄`** (no
-`FrobeniusCharPolyBaseChange`, no geometric dual of `frobeniusHomBaseChange`).  The finite-dimensional
-route avoids both, requiring neither the separable degree match `#ker = deg` nor any dual. -/
+Frobenius) together with a geometric Verschiebung `V̄`, **neither of which is available over `K̄`**
+(no `FrobeniusCharPolyBaseChange`, no geometric dual of `frobeniusHomBaseChange`).  The
+finite-dimensional route avoids both, requiring neither the separable degree match `#ker = deg` nor
+any dual. -/
 theorem pencilIsogBaseChange_finiteKer (r' s' : ℤ) (hr : r' ≠ 0) (hs : s' ≠ 0)
     (hrK : (r' : K) ≠ 0) (hsK : (s' : K) ≠ 0) :
     Finite (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
@@ -1553,14 +1569,14 @@ noncomputable def pencilScalingComapDataCard_canonical (r' s' : ℤ) (hr : r' �
 /-! ### Handling all `(r', s')` including the edge cases `r' = 0`, `p ∣ r'`, `p ∣ s'`
 
 `PencilScaling` quantifies over **every** `(r', s') : ℤ` with `p ∤ s'`, and the δ-free reduction
-`pencilScaling_of_comapData_card` needs a `PencilScalingComapDataCard` bundle for **every** `(r', s')`
-(to even *state* the `pencilKerCard` exponent function totally).  The bundles split:
+`pencilScaling_of_comapData_card` needs a `PencilScalingComapDataCard` bundle for **every**
+`(r', s')` (to even *state* the `pencilKerCard` exponent function totally).  The bundles split:
 
 * **canonical domain** `r' ≠ 0 ∧ (r' : K) ≠ 0 ∧ (s' : K) ≠ 0` (i.e. `p ∤ r', s'`): the genuine
   `genuineIsogSmulSub` is constructed and `pencilScalingComapDataCard_canonical` applies;
 * **edge / off-domain pairs** (`r' = 0`, or `p ∣ r'`, or `p ∣ s'`): the genuine pencil construction
-  `pencilBaseChangePullback` needs `(r' : K), (s' : K) ≠ 0`, so it is not available; a bundle for these
-  is isolated as the named `pencilScalingComapDataCard_edge` (the `r' = 0` case is a pure
+  `pencilBaseChangePullback` needs `(r' : K), (s' : K) ≠ 0`, so it is not available; a bundle for
+  these is isolated as the named `pencilScalingComapDataCard_edge` (the `r' = 0` case is a pure
   `mulByInt [−s']` whose comap witness *is* the proved `comapPointValuationWitness_mulByInt`; the
   `p ∣ r'` / `p ∣ s'` cases are the inseparable/vacuous off-domain pairs).
 
@@ -1568,9 +1584,9 @@ This isolates the off-domain bundle alongside the two genuine geometric residual
 `finiteKer`); all other content of this file is complete and axiom-clean. -/
 
 omit [Fintype W.toAffine.Point] in
-/-- **`pencilIsogBaseChange 0 s' ((mulByInt (−s'))^*) = mulByInt (−s')`** as isogenies.  For `r' = 0`
-the pencil point map is `0·π̄ − s'·id = (−s')·id = [−s'].toAddMonoidHom`, and the pullback is chosen to
-be `(mulByInt (−s'))^*`, so both structure fields agree. -/
+/-- **`pencilIsogBaseChange 0 s' ((mulByInt (−s'))^*) = mulByInt (−s')`** as isogenies.  For
+`r' = 0` the pencil point map is `0·π̄ − s'·id = (−s')·id = [−s'].toAddMonoidHom`, and the pullback
+is chosen to be `(mulByInt (−s'))^*`, so both structure fields agree. -/
 theorem pencilIsogBaseChange_rZero_eq_mulByInt (s' : ℤ) :
     pencilIsogBaseChange W p r (AlgebraicClosure K) 0 s'
         (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')).pullback =
@@ -1612,12 +1628,12 @@ theorem mapTranslateGenericPoint_mulByInt_canonical (m : ℤ) (hm : m ≠ 0) :
     (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine m) hgenuine
     (mapTranslateGenericPoint_mulByInt (W.baseChange (AlgebraicClosure K)) m)
 
-/-- **The `r' = 0` comap bundle** (the pure `[−s']` member, `p ∤ s'`).  The pencil hom for `r' = 0` is
-`0·π̄ − s'·id = [−s']`, and choosing the pullback to be `(mulByInt (−s'))^*` identifies the whole
+/-- **The `r' = 0` comap bundle** (the pure `[−s']` member, `p ∤ s'`).  The pencil hom for `r' = 0`
+is `0·π̄ − s'·id = [−s']`, and choosing the pullback to be `(mulByInt (−s'))^*` identifies the whole
 isogeny with `mulByInt (−s')` (`pencilIsogBaseChange_rZero_eq_mulByInt`) — whose comap witnesses are
 the **proved** `comapPointValuationWitness_mulByInt`, generic-point covariance the canonical-action
-`mapTranslateGenericPoint_mulByInt_canonical`, and `finiteKer` the trace-free `finite_kernel_of_hcov`
-fed the `hcov` derived from that covariance.
+`mapTranslateGenericPoint_mulByInt_canonical`, and `finiteKer` the trace-free
+`finite_kernel_of_hcov` fed the `hcov` derived from that covariance.
 
 `hsbar : ((-s' : ℤ) : K̄) ≠ 0` is the separability datum (`p ∤ s'` ⟹ `−s' ≠ 0` in `K̄`). -/
 noncomputable def pencilScalingComapDataCard_rZero (s' : ℤ)
@@ -1640,20 +1656,20 @@ noncomputable def pencilScalingComapDataCard_rZero (s' : ℤ)
           (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s'))
           (mapTranslateGenericPoint_mulByInt_canonical W (-s') hmne) k z) }
 
-/-- **The `p ∣ r'` separable comap bundle** (with `p ∤ s'`, so `(s' : K) = 0` is *false* and the member
-`rπ − s` is separable, `a_{rπ−s} = −s' ≠ 0`), the **off-domain** case `(r' : K) = 0` for which the
-canonical construction `pencilBaseChangePullback` (needing `(r' : K) ≠ 0`) is unavailable.
+/-- **The `p ∣ r'` separable comap bundle** (with `p ∤ s'`, so `(s' : K) = 0` is *false* and the
+member `rπ − s` is separable, `a_{rπ−s} = −s' ≠ 0`), the **off-domain** case `(r' : K) = 0` for
+which the canonical construction `pencilBaseChangePullback` (needing `(r' : K) ≠ 0`) is unavailable.
 
 **The SOLE remaining residual of the unconditional Hasse bound**, and a genuine geometric gap (not
 assembly).  The pencil pullback can be rebuilt over `K̄` through the `rFrobBaseChange r'` summand
-(`addIsog (rFrobBaseChange r') (mulByInt (-s'))`, valid for any `r'`), and most of the bundle is then
-reachable:
+(`addIsog (rFrobBaseChange r') (mulByInt (-s'))`, valid for any `r'`), and most of the bundle is
+then reachable:
 
 * the **affine comap** field is now `O`-summand-free via the transport-to-`O` lemma
-  `isog_resid_at_affine_of_hgcomm_hinfty` (no addition-formula decomposition, so the inseparable-summand
-  secant/doubling breakdown is avoided);
-* the **generic-point covariance** `hgcomm` is reachable from `addIsog_isGenuineWith` (genuineness of
-  the two summands over `K̄`) + the pullback-parametric `mapTranslateGenericPoint_gKbarPencil`;
+  `isog_resid_at_affine_of_hgcomm_hinfty` (no addition-formula decomposition, so the
+  inseparable-summand secant/doubling breakdown is avoided);
+* the **generic-point covariance** `hgcomm` is reachable from `addIsog_isGenuineWith` (genuineness
+  of the two summands over `K̄`) + the pullback-parametric `mapTranslateGenericPoint_gKbarPencil`;
 * `finiteKer` follows from the covariance via `finite_kernel_of_hcov`.
 
 The remaining obstruction is the two `∞`-orders `ord_∞((rπ − s)_{K̄}^* x_gen) = -2`,
@@ -1661,38 +1677,42 @@ The remaining obstruction is the two `∞`-orders `ord_∞((rπ − s)_{K̄}^* x
 `InftyOrdTransport` follows (`inftyOrdTransport_of_ordAtInfty_x_y`) and the whole bundle assembles.
 
 **The `∞`-differential route (Route B) is now ELIMINATED** by the Route C keystone
-`ordAtInfty_isog_pullback_x_y_of_comap_at_point` (above, axiom-clean): for any `φ` with the canonical
-`hgcomm` and the affine comap identity `(pointValuation P).comap φ^* = pointValuation ⟨xR, yR⟩` at a
-*single* smooth point `P` with finite image `φ(P) = some xR yR`, the two `∞`-orders are `-2`, `-3`.  The
-mechanism is transport-to-`O` (`ord_P_isog_pullback_eq_ordAtInfty_translate`, needs only `hgcomm`) +
-the comap identity (`ord_P_isog_pullback_eq_of_comap`) + the translation transport
+`ordAtInfty_isog_pullback_x_y_of_comap_at_point` (above, axiom-clean): for any `φ` with the
+canonical `hgcomm` and the affine comap identity
+`(pointValuation P).comap φ^* = pointValuation ⟨xR, yR⟩` at a *single* smooth point `P` with finite
+image `φ(P) = some xR yR`, the two `∞`-orders are `-2`, `-3`.  The mechanism is transport-to-`O`
+(`ord_P_isog_pullback_eq_ordAtInfty_translate`, needs only `hgcomm`) + the comap identity
+(`ord_P_isog_pullback_eq_of_comap`) + the translation transport
 (`ord_P_translate_neg_eq_ordAtInfty`).  So **NO `ω`-derivative machinery at `∞` is needed**; the gap
 reduces to the comap at *one* finite-image point.
 
-That comap, in turn, needs the two generator residues at `P` (secant branch via the **separability-free**
-`rFrobBaseChange_resid_xy_of_ne_zero` + `mulByInt_neg_resid_xy`, both `(r' : K) = 0`-compatible) plus the
-`e = 1` datum — all reachable — once the `addIsog (rFrobBaseChange r') (mulByInt (-s'))` is constructed,
-which requires the **transcendence/injectivity** of `addPullback_x_pair (rFrobBaseChange r') (mulByInt (-s'))`,
-i.e. its pole `ord_∞(addPullback_x_pair (rFrobBaseChange r') (mulByInt (-s'))) < 0`.
+That comap, in turn, needs the two generator residues at `P` (secant branch via the
+**separability-free** `rFrobBaseChange_resid_xy_of_ne_zero` + `mulByInt_neg_resid_xy`, both
+`(r' : K) = 0`-compatible) plus the `e = 1` datum — all reachable — once the
+`addIsog (rFrobBaseChange r') (mulByInt (-s'))` is constructed, which requires the
+**transcendence/injectivity** of `addPullback_x_pair (rFrobBaseChange r') (mulByInt (-s'))`, i.e.
+its pole `ord_∞(addPullback_x_pair (rFrobBaseChange r') (mulByInt (-s'))) < 0`.
 
 **Key fact (verified):** for `p ∣ r'` the two summand `x`-pole orders are *asymmetric*
 (`ord_∞((rFrobBaseChange r')^* x) = q·M ≤ -4` with `M = ord_∞(mulByInt_x r') ≤ -2`, vs
-`ord_∞((mulByInt (-s'))^* x) = -2`), so the Weierstrass-reduced addition numerator has the **unique**
-strictly-dominant term `X₁²·X₂` at order `2qM - 2` (all other reduced terms are strictly less negative,
-using `ord_∞(mulByInt_y r') = (3/2)·M`); hence `ord_∞(addPullback_x_pair …) = (2qM - 2) - 2qM = -2`
-**exactly**.  This is *not* blocked by the BRIDGE-003 "3-way tie" of `addPullback_x_pair_x_ord_neg`
-(`Verschiebung/Genuine.lean`), which is the *symmetric*-pole case.  Closing this requires the inseparable
-generalisation of `ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg` (the general `ord_∞(mulByInt_y n)`
-+ the reduced-numerator unique-dominant analysis with `M ≤ -2` in place of `-2`) — a substantial but
+`ord_∞((mulByInt (-s'))^* x) = -2`), so the Weierstrass-reduced addition numerator has the
+**unique** strictly-dominant term `X₁²·X₂` at order `2qM - 2` (all other reduced terms are strictly
+less negative, using `ord_∞(mulByInt_y r') = (3/2)·M`); hence
+`ord_∞(addPullback_x_pair …) = (2qM - 2) - 2qM = -2` **exactly**.  This is *not* blocked by the
+BRIDGE-003 "3-way tie" of `addPullback_x_pair_x_ord_neg` (`Verschiebung/Genuine.lean`), which is the
+*symmetric*-pole case.  Closing this requires the inseparable generalisation of
+`ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg` (the general `ord_∞(mulByInt_y n)` + the
+reduced-numerator unique-dominant analysis with `M ≤ -2` in place of `-2`) — a substantial but
 mechanical mirror.  Isolated here as the single remaining `sorry`. -/
 noncomputable def pencilScalingComapDataCard_pDvdR (r' s' : ℤ) (hr : r' ≠ 0)
     (hrK0 : (r' : K) = 0) (hsK : (s' : K) ≠ 0) :
     PencilScalingComapDataCard W p r r' s' := by
   sorry
 
-/-- A `PencilScalingComapDataCard` bundle for a **separable** `(r', s')` (`(s' : K) ≠ 0`, i.e. `p ∤ s'`)
-— the canonical bundle when also `r' ≠ 0`, `(r' : K) ≠ 0` (`p ∤ r'`); the `r' = 0` mulByInt bundle when
-`r' = 0`; and the `p ∣ r'` separable bundle otherwise.  No `p ∣ s'` (inseparable) case arises. -/
+/-- A `PencilScalingComapDataCard` bundle for a **separable** `(r', s')` (`(s' : K) ≠ 0`, i.e.
+`p ∤ s'`) — the canonical bundle when also `r' ≠ 0`, `(r' : K) ≠ 0` (`p ∤ r'`); the `r' = 0`
+mulByInt bundle when `r' = 0`; and the `p ∣ r'` separable bundle otherwise.  No `p ∣ s'`
+(inseparable) case arises. -/
 noncomputable def pencilScalingComapDataCard_sep (r' s' : ℤ) (hsK : (s' : K) ≠ 0) :
     PencilScalingComapDataCard W p r r' s' := by
   by_cases hr0 : r' = 0
@@ -1709,15 +1729,16 @@ noncomputable def pencilScalingComapDataCard_sep (r' s' : ℤ) (hsK : (s' : K) �
         (by rintro rfl; exact hsK (by push_cast; ring)) hrK hsK
 
 /-- A total junk pullback function (used only to *state* the kernel-cardinality exponent
-`pencilKerCard`, whose value is pullback-independent since `(pencilIsogBaseChange …).toAddMonoidHom` is). -/
+`pencilKerCard`, whose value is pullback-independent since `(pencilIsogBaseChange …).toAddMonoidHom`
+is). -/
 noncomputable def pencilJunkPullback :
     ℤ → ℤ → ((W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[AlgebraicClosure K]
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) :=
   fun _ _ ↦ AlgHom.id (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
 
 omit [Fintype W.toAffine.Point] in
-/-- `#ker(rπ − s)_{K̄}` is independent of the chosen base-changed pullback, since the kernel is read off
-`toAddMonoidHom = r'·π̄ − s'·id`, which is pullback-independent. -/
+/-- `#ker(rπ − s)_{K̄}` is independent of the chosen base-changed pullback, since the kernel is read
+off `toAddMonoidHom = r'·π̄ − s'·id`, which is pullback-independent. -/
 theorem pencilKerCard_pullback_indep (r' s' : ℤ)
     (pb₁ pb₂ : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[AlgebraicClosure K]
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) :
@@ -1726,13 +1747,14 @@ theorem pencilKerCard_pullback_indep (r' s' : ℤ)
   simp only [pencilIsogBaseChange_toAddMonoidHom]
 
 /-- **`pencilScaling_holds` — leaf 3 of `FrobBaseChangeScalings`** (Silverman III.8.6.1): the
-symplectic Weil-pairing scaling `e_ℓ((r·π̄ − s·id) S, (r·π̄ − s·id) T) = e_ℓ(S, T)^{#ker(rπ − s)_{K̄}}`
-on `E_{K̄}[ℓ]`, for every separable `(r', s')` (`p ∤ s'`) and prime `ℓ ≠ p`, with the **kernel
-cardinality** exponent `pencilKerCard` (against a junk pullback — the value is pullback-independent).
+symplectic Weil-pairing scaling
+`e_ℓ((r·π̄ − s·id) S, (r·π̄ − s·id) T) = e_ℓ(S, T)^{#ker(rπ − s)_{K̄}}` on `E_{K̄}[ℓ]`, for every
+separable `(r', s')` (`p ∤ s'`) and prime `ℓ ≠ p`, with the **kernel cardinality** exponent
+`pencilKerCard` (against a junk pullback — the value is pullback-independent).
 
 Assembled per separable pair from the bundle `pencilScalingComapDataCard_sep` via
-`pencilScaling_one_of_comapData_card`; the **inseparable `p ∣ s'` pairs are excluded vacuously** by the
-`PencilScaling` hypothesis `¬(ringChar K) ∣ s'` (with `ringChar K = p`), so no bundle for an
+`pencilScaling_one_of_comapData_card`; the **inseparable `p ∣ s'` pairs are excluded vacuously** by
+the `PencilScaling` hypothesis `¬(ringChar K) ∣ s'` (with `ringChar K = p`), so no bundle for an
 inseparable member — which could not satisfy the `#ker`-exponent scaling — is ever demanded. -/
 theorem pencilScaling_holds :
     PencilScaling W p r (AlgebraicClosure K)
@@ -1754,13 +1776,14 @@ theorem pencilScaling_holds :
     exact pencilKerCard_pullback_indep W p r r' s' _ _]
   exact hscale
 
-/-- **`pencilScaling_holds_coprime` — leaf 3 of `FrobBaseChangeScalingsCoprime`** (reviewer round-23,
-Route B): the symplectic Weil-pairing scaling
-`e_ℓ((r·π̄ − s·id) S, (r·π̄ − s·id) T) = e_ℓ(S, T)^{#ker(rπ − s)_{K̄}}` on `E_{K̄}[ℓ]`, requested only
-on the genuine locus `p ∤ r' ∧ p ∤ s'`, with the **kernel cardinality** exponent `pencilKerCard`.
+/-- **`pencilScaling_holds_coprime` — leaf 3 of `FrobBaseChangeScalingsCoprime`** (reviewer
+round-23, Route B): the symplectic Weil-pairing scaling
+`e_ℓ((r·π̄ − s·id) S, (r·π̄ − s·id) T) = e_ℓ(S, T)^{#ker(rπ − s)_{K̄}}` on `E_{K̄}[ℓ]`, requested
+only on the genuine locus `p ∤ r' ∧ p ∤ s'`, with the **kernel cardinality** exponent
+`pencilKerCard`.
 
-This is the **axiom-clean** pencil leaf.  On `p ∤ r' ∧ p ∤ s'` we have `(r' : K) ≠ 0`, `(s' : K) ≠ 0`
-(char `p`), so the member `rπ − s` is genuine and its bundle is the canonical
+This is the **axiom-clean** pencil leaf.  On `p ∤ r' ∧ p ∤ s'` we have `(r' : K) ≠ 0`,
+`(s' : K) ≠ 0` (char `p`), so the member `rπ − s` is genuine and its bundle is the canonical
 `pencilScalingComapDataCard_canonical` — which carries **no** `p ∣ r'` `sorry` (cf.
 `pencilScalingComapDataCard_pDvdR`, never invoked here).  Hence the inseparable `p ∣ r'` geometric
 gap is **dropped** from the bound path. -/
@@ -1779,7 +1802,8 @@ theorem pencilScaling_holds_coprime :
     exact hps (by rw [hpchar]; exact (CharP.intCast_eq_zero_iff K p s').mp h)
   have hr0 : r' ≠ 0 := by rintro rfl; exact hrK (by simp)
   have hs0 : s' ≠ 0 := by rintro rfl; exact hsK (by simp)
-  -- The canonical genuine bundle for `(r', s')` (NO `p ∣ r'` input), and its `#ker`-exponent scaling.
+  -- The canonical genuine bundle for `(r', s')` (NO `p ∣ r'` input), and its `#ker`-exponent
+  -- scaling.
   have hscale := pencilScaling_one_of_comapData_card W p r r' s' ℓ hℓF
     (pencilScalingComapDataCard_canonical W p r r' s' hr0 hs0 hrK hsK)
   rw [show (pencilKerCard W p r (pencilJunkPullback W) r' s').toNat =
