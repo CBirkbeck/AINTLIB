@@ -104,6 +104,29 @@ noncomputable def rescaleRestricted {R : Type*} [NormedCommRing R] [IsUltrametri
   map_zero' := Subtype.ext (map_zero (PowerSeries.rescale a))
   map_add' f g := Subtype.ext (map_add (PowerSeries.rescale a) f.1 g.1)
 
+/-- The componentwise `ϖ`-twist of 𝓑 (`X ↦ ϖX` on both jet components). -/
+noncomputable def twistB : JetB F →+* JetB F :=
+  JetNorm.mapHom (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le)
+
+/-- The twisted base map `θ = twist ∘ jB` implementing Prop 3.1's `W ↦ ϖX`. -/
+noncomputable def thetaChart : JetA F →+* JetB F :=
+  (twistB F).comp (jB F)
+
+/-- Rescaling fixes constant power series (`rescale a (C r) = C r`). -/
+theorem rescaleRestricted_const (a : K) (ha : ‖a‖ ≤ 1) (r : K) :
+    rescaleRestricted a ha (constHomPS F r) = constHomPS F r := by
+  refine Subtype.ext ?_
+  show PowerSeries.rescale a (PowerSeries.C r : PowerSeries K) = PowerSeries.C r
+  refine PowerSeries.ext fun n => ?_
+  rw [PowerSeries.coeff_rescale]
+  cases n with
+  | zero => simp
+  | succ k => simp [PowerSeries.coeff_C]
+
+/-- The twist fixes the pseudouniformizer: `θ(ϖ_𝓐) = ϖ_𝓑`. -/
+theorem thetaChart_tA : thetaChart F (tA F) = tB F := by
+  sorry
+
 /-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
 `𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
 def chartEquiv : presheafValue (chartDatum F) ≃+* JetB F := by sorry
