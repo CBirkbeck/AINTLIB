@@ -741,7 +741,30 @@ T704, by a fresh `/develop --continue`.
   likewise (needs a `show`-unfold of the structure `.T` before `Finset.coe_insert`).
 
 ### [T802] Prop 3.1: the chart is 𝓑
-- **Status**: open — **PLAN VERIFIED (2026-07-17, key normalization resolved)**: in the
+- **Status**: IN PROGRESS — DONE: twist (`rescaleRestricted` + `twistB` + `thetaChart`),
+  `jB_tA/thetaChart_tA/thetaChart_Wa` jet computations, FULL forward (`chartLocHom` with
+  generator identities + continuity + `chartFwd` extension), `Qa`, collapse data
+  (`Wa_val_eq`, `yQ`, `Wa_pow_mul_yQ`, `norm_yQ_le`), **the (3.3) limit
+  `canonicalMap_Qa_sq : ρ(Q)² = 0`**, `kwToTate` reindexing bridge, `gChart_isBounded`,
+  `chartConst(+cont)`, `chartEval` (via `TateAlgebraWedhorn.evalHomBounded`), and
+  **`chartRev` ring hom** (mul-field by `linear_combination (-(ev x₂ ev y₂)) * Q̄²-collapse`).
+- **REMAINING (roundtrips fully de-risked, follow this)**: (1) GENERALIZE
+  `canonicalMap_Qa_sq` to `ρ(y) = 0` for ANY `y ∈ 𝓐` with `qCoeff 0/1 = 0` (same proof,
+  `yQ`-family at `y`; norms via `‖y‖`). (2) 2-jet decomposition: `sectionD(b₀,b₁) =
+  constHomC b₀ + Qa·constHomC b₁` (coeff-check ∀n) ⇒ every `a ∈ 𝓐` is
+  `constNN b₀ + Qa·constNN b₁ + (Q²-part)` where `constNN b := ⟨constHomC b, mem⟩`.
+  (3) key identity `chartEval (rescaleRestricted t _ f) = ρ (constNN (ofRestricted f))`-ish:
+  two continuous K-homs KW → 𝒪(chart) agreeing on `C r` (both `ρ(constA r)`) and on `X`
+  (LHS `ev(tX) = ρ(tA)·gChart = ρ(Wa)` by the `hWsplit`-identity from the collapse proof;
+  RHS `ρ(Wa)`) + K[X]-density in KW (1-var `polyToP_denseRange`-mirror) + T2. (4)
+  `chartRev (thetaChart a) = ρ a` from (1)+(2)+(3) + `θ(Qa) = ε`, `rev(ε) = Q̄`. (5)
+  rev∘fwd = id via `ringHom_ext` (powers tA) + density; fwd∘rev = id via KW-poly+ε
+  density on `JetB` (fwd(rev(inl f)) = fwd(ev f)-agreement on C/X + fwd(Q̄) = θ(Qa) = ε).
+  (6) assemble `chartEquiv`; continuities (fwd ✓; rev: `evalHomBounded`-continuity
+  [`TateAlgebraWedhorn`, grep exact name] + component-sums). (7) pinning stub :=
+  `chartEquiv ((chartDatum F).canonicalMap (Wa F)) = tB F * jB F (Wa F)` proven by
+  `chartFwd_coe` + `chartLocHom_algebraMap` + `thetaChart_Wa`. Then T803 closes, T804
+  sweeps. **Prior plan follows.** — in the
   project model `‖W_B‖ = 1` (radius-1 `PowerSeries.Restricted`), so the naive evaluation
   does NOT kill the graph relation — Prop 3.1's `W ↦ ϖX` is implemented by the TWISTED
   base map `θ := (rescale-by-ϖ on both TrivSqZeroExt components) ∘ jB : JetA →+* JetB`
