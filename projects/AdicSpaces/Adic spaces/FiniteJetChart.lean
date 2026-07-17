@@ -263,6 +263,19 @@ theorem thetaChart_Wa : thetaChart F (Wa F) = tB F * jB F (Wa F) := by
         MulOpposite.op ((jB F (Wa F)).fst) • (tB F).snd
     rw [smul_zero, show (tB F).snd = 0 from rfl, smul_zero, add_zero]
 
+/-- The element `Q ∈ 𝓐` (support `(0,1)`; [FJP] §1.4). -/
+def Qa : JetA F :=
+  ⟨sectionD F (TrivSqZeroExt.inr (1 : L F)), by
+    rw [mem_jetSupport_iff_jet_in_range, rhoC_sectionD]
+    refine ⟨TrivSqZeroExt.inr ((nonnegEquiv (R := K)).symm
+      ⟨(1 : RestrictedLaurent K), (nonnegSubring K).one_mem⟩), ?_⟩
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show ofRestricted (R := K) 0 = 0
+      exact map_zero _
+    · show ofRestricted ((nonnegEquiv (R := K)).symm
+        ⟨(1 : RestrictedLaurent K), (nonnegSubring K).one_mem⟩) = 1
+      rw [ofRestricted_nonnegEquiv_symm]⟩
+
 /-! ### The forward map `𝒪_𝓐(chart) → 𝓑` (Prop 3.1's `ψ`-direction) -/
 
 theorem isUnit_thetaChart_s : IsUnit (thetaChart F (chartDatum F).s) := by
