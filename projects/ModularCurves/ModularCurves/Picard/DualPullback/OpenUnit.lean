@@ -220,22 +220,27 @@ theorem openPushforwardSquareIsoQ_dual_app_apply
           (f ⁻¹ᵁ U).toScheme.ringCatSheaf N
           (eqToHom hpre).op x := by
   dsimp only
+  have hpre : (f ⁻¹ᵁ U).ι ⁻¹ᵁ (f ⁻¹ᵁ W) =
+      (f ∣_ U) ⁻¹ᵁ (U.ι ⁻¹ᵁ W) := by
+    rw [← Scheme.Hom.comp_preimage, ← Scheme.Hom.comp_preimage]
+    exact congrArg (fun q : (f ⁻¹ᵁ U).toScheme ⟶ X ↦ q ⁻¹ᵁ W)
+      (morphismRestrict_ι f U).symm
   have hopen := ConcreteCategory.congr_hom
     (openPushforwardSquareIsoQ_hom_app_app f U (dualObj N) W) x
-  calc
-    _ = (((pushforwardCongr (morphismRestrict_ι f U)).hom.app
-          (dualObj N)).val.app (.op W)) x := hopen
-    _ = (dualObj N).presheaf.map
-          (eqToHom (show (f ⁻¹ᵁ U).ι ⁻¹ᵁ (f ⁻¹ᵁ W) =
-            (f ∣_ U) ⁻¹ᵁ (U.ι ⁻¹ᵁ W) by
-              rw [← Scheme.Hom.comp_preimage, ← Scheme.Hom.comp_preimage]
-              exact congrArg
-                (fun q : (f ⁻¹ᵁ U).toScheme ⟶ X ↦ q ⁻¹ᵁ W)
-                (morphismRestrict_ι f U).symm)).op x := by
-      rw [pushforwardCongr_hom_app_applyQ]
-      congr 2
-    _ = _ := by
-      rw [dualObj_presheaf_map_applyQ]
+  have hcongr :
+      (((pushforwardCongr (morphismRestrict_ι f U)).hom.app
+        (dualObj N)).val.app (.op W)) x =
+        (dualObj N).presheaf.map (eqToHom hpre).op x :=
+    pushforwardCongr_hom_app_applyQ
+      (morphismRestrict_ι f U) (dualObj N) W x
+  have hdual :
+      (dualObj N).presheaf.map (eqToHom hpre).op x =
+        ModularCurves.SheafOfModules.dualRestrict
+          (f ⁻¹ᵁ U).toScheme.ringCatSheaf N
+          (eqToHom hpre).op x :=
+    dualObj_presheaf_map_applyQ
+      (X := (f ⁻¹ᵁ U).toScheme) N (eqToHom hpre).op x
+  exact Eq.trans hopen (Eq.trans hcongr hdual)
 
 end AlgebraicGeometry.Scheme.Modules
 
@@ -289,16 +294,25 @@ theorem openUnitSquare_app_applyT (f : Y ⟶ X) (M : X.Modules)
       ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M).presheaf.map
         (eqToHom hpre).op x := by
   dsimp only
+  have hpre : (f ⁻¹ᵁ U).ι ⁻¹ᵁ (f ⁻¹ᵁ U) =
+      (f ∣_ U) ⁻¹ᵁ (U.ι ⁻¹ᵁ U) := by
+    rw [← Scheme.Hom.comp_preimage, ← Scheme.Hom.comp_preimage]
+    exact congrArg
+      (fun q : (f ⁻¹ᵁ U).toScheme ⟶ X ↦ q ⁻¹ᵁ U)
+      (morphismRestrict_ι f U).symm
   have hopen := ConcreteCategory.congr_hom
     (openPushforwardSquareIsoQ_hom_app_app f U
       ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M) U) x
-  calc
-    _ = (((pushforwardCongr (morphismRestrict_ι f U)).hom.app
-          ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M)).val.app
-            (.op U)) x := hopen
-    _ = _ := by
-      rw [pushforwardCongr_hom_app_applyQ]
-      congr 2
+  have hcongr :
+      (((pushforwardCongr (morphismRestrict_ι f U)).hom.app
+        ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M)).val.app
+          (.op U)) x =
+        ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M).presheaf.map
+          (eqToHom hpre).op x :=
+    pushforwardCongr_hom_app_applyQ
+      (morphismRestrict_ι f U)
+      ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M) U x
+  exact Eq.trans hopen hcongr
 
 theorem localPullbackRestrictIso_unit_appT (f : Y ⟶ X)
     (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
@@ -322,12 +336,49 @@ theorem localPullbackRestrictIso_unit_appT (f : Y ⟶ X)
           (((pullbackPushforwardAdjunction f).unit.app M).val.app
             (.op U) x) := by
   dsimp only
-  have h := openUnitStages_app_applyT f M U x
-  rw [openUnitLocal_app_applyT] at h
-  rw [openUnitSquare_app_applyT] at h
-  rw [openUnitComparison_app_applyT] at h
-  rw [openUnitGlobal_app_applyT] at h
-  exact h
+  have hpre : (f ⁻¹ᵁ U).ι ⁻¹ᵁ (f ⁻¹ᵁ U) =
+      (f ∣_ U) ⁻¹ᵁ (U.ι ⁻¹ᵁ U) := by
+    rw [← Scheme.Hom.comp_preimage, ← Scheme.Hom.comp_preimage]
+    exact congrArg
+      (fun q : (f ⁻¹ᵁ U).toScheme ⟶ X ↦ q ⁻¹ᵁ U)
+      (morphismRestrict_ι f U).symm
+  let localValue :
+      ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M).val.obj
+        (.op ((f ∣_ U) ⁻¹ᵁ (U.ι ⁻¹ᵁ U))) :=
+    ((pullbackPushforwardAdjunction (f ∣_ U)).unit.app
+      ((restrictFunctor U.ι).obj M)).val.app
+        (.op (U.ι ⁻¹ᵁ U))
+          (((restrictAdjunction U.ι).unit.app M).val.app (.op U) x)
+  let squareValue :
+      ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M).val.obj
+        (.op ((f ⁻¹ᵁ U).ι ⁻¹ᵁ (f ⁻¹ᵁ U))) :=
+    ((restrictFunctor U.ι ⋙ pullback (f ∣_ U)).obj M).presheaf.map
+      (eqToHom hpre).op localValue
+  have hlocal :
+      (openUnitLocalT f M U).val.app (.op U) x = localValue :=
+    openUnitLocal_app_applyT f M U x
+  have hstages := openUnitStages_app_applyT f M U x
+  have hlocalNested := congrArg
+    (fun y ↦ (openUnitComparisonT f M U).val.app (.op U)
+      ((openUnitSquareT f M U).val.app (.op U) y)) hlocal
+  have hstagesLocal :
+      (openUnitComparisonT f M U).val.app (.op U)
+          ((openUnitSquareT f M U).val.app (.op U) localValue) =
+        (openUnitGlobalT f M U).val.app (.op U) x :=
+    Eq.trans hlocalNested.symm hstages
+  have hsquare :
+      (openUnitSquareT f M U).val.app (.op U) localValue = squareValue :=
+    openUnitSquare_app_applyT f M U localValue
+  have hsquareNested := congrArg
+    (fun y ↦ (openUnitComparisonT f M U).val.app (.op U) y) hsquare
+  have hcomparison :
+      (openUnitComparisonT f M U).val.app (.op U) squareValue =
+        (localPullbackRestrictIso f M U).hom.val.app
+          (.op ((f ⁻¹ᵁ U).ι ⁻¹ᵁ (f ⁻¹ᵁ U))) squareValue :=
+    openUnitComparison_app_applyT f M U squareValue
+  have hglobal := openUnitGlobal_app_applyT f M U x
+  exact Eq.trans hcomparison.symm
+    (Eq.trans hsquareNested.symm (Eq.trans hstagesLocal hglobal))
 
 end AlgebraicGeometry.Scheme.Modules
 
@@ -418,16 +469,6 @@ theorem localPullbackUnit_overFunctorT (f : Y ⟶ X)
         ((pullbackPushforwardAdjunction g).unit.app B).val.app
           (.op (U.ι ⁻¹ᵁ U))
             (((restrictAdjunction U.ι).unit.app M).val.app (.op U) x) := hk
-  calc
-    ((pullback g).map q).val.app
-        (.op (g ⁻¹ᵁ (U.ι ⁻¹ᵁ U)))
-          (((pullbackPushforwardAdjunction g).unit.app A).val.app
-            (.op (U.ι ⁻¹ᵁ U))
-              (localModuleSection M U (U.ι ⁻¹ᵁ U) x)) =
-      ((pullbackPushforwardAdjunction g).unit.app B).val.app
-        (.op (U.ι ⁻¹ᵁ U))
-          (q.val.app (.op (U.ι ⁻¹ᵁ U))
-            (localModuleSection M U (U.ι ⁻¹ᵁ U) x)) := happ.symm
-    _ = _ := hleft
+  exact Eq.trans happ.symm hleft
 
 end AlgebraicGeometry.Scheme.Modules
