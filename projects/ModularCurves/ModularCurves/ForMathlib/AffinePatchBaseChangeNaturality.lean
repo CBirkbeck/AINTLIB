@@ -333,7 +333,7 @@ theorem pullbackPreimageΓIsoTensor_naturality
     conv_rhs =>
       rw [← Category.assoc,
         includeLeft_affinePatchRestrictionTensorHom f t hVU]
-    rw [Category.assoc]
+    rfl
   · rw [pullbackPreimageΓIsoTensor_inv_restrict_includeRight f t hVU hU hV]
     conv_rhs =>
       rw [← Category.assoc,
