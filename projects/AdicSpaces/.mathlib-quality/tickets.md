@@ -333,7 +333,18 @@ T704, by a fresh `/develop --continue`.
 - **Mathlib**: `MvPolynomial.finSuccEquiv` (poly version), `Polynomial` mul-X-injective.
 
 ### [T402] graph syzygies over the polynomial ring
-- **Status**: open | **Depends**: T401 | **Type**: proofs (L3.3)
+- **Status**: **DONE** — but by a REFINEMENT of the planned route: instead of localized
+  Koszul-homology modules at every prime, the proof is fully elementary/global via the
+  ideal of reachable multipliers `A := {a | ∃ v, d2 r v = a • u}` (an ideal by
+  d2_zero/add/smul): (i) each `rᵢ ∈ A` explicitly (`d2_koszul_single`, the contractibility
+  wedge, verified componentwise with the [FJP] formula); (ii) `(C g)^P ∈ A` via base change
+  to `MvPoly(D_g)` — `syzygy_graph_of_isUnit` (translation automorphism `translationEquiv` +
+  unit rescale + T401 coordinate case), then `exists_pow_C_mul_eq_map` (denominator
+  clearing by MvPolynomial.induction_on) and `exists_pow_C_mul_eq_zero_of_map_eq_zero`
+  (g-power torsion kernel) pull the wedge back; (iii) `1 ∈ span((Cg)^P, r⃗) ≤ A` by the
+  (4.3) combination + quotient-nilpotence (mk(Cg·G) = 1, mk(Cg)^P = 0 ⟹ quotient trivial).
+  Same two-case dichotomy as [FJP], no localized-module API. Axiom-clean.
+  | **Type**: proofs (L3.3)
 - **Sorries**: `syzygy_graph_polynomial`.
 - **Sketch**: localize at maximal ideals (`Submodule.eq_top_of_localization_maximal` on the
   quotient submodule Syz/⟨Koszul⟩, or eq_bot form); case split on `r_i ∉ 𝔭` (explicit
