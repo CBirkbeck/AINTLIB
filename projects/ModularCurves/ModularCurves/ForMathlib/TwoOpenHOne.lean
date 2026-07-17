@@ -175,17 +175,51 @@ theorem subsingleton_H_one_of_two_open_cover
         F.obj.map (homOfLE inf_le_left).op aU -
           F.obj.map (homOfLE inf_le_right).op aV = a) :
     Subsingleton (CategoryTheory.Sheaf.H F 1) := by
+  letI : AddCommGroup (CategoryTheory.Sheaf.H F 1) :=
+    CategoryTheory.Abelian.Ext.instAddCommGroup
   refine subsingleton_of_forall_eq 0 fun c ↦ ?_
   let S := (EnoughInjectives.presentation F).some.shortComplex
   have hS : S.ShortExact :=
     (EnoughInjectives.presentation F).some.shortExact_shortComplex
+  letI : AddCommGroup (CategoryTheory.Sheaf.H S.X₂ 0) :=
+    CategoryTheory.Abelian.Ext.instAddCommGroup
+  letI : AddCommGroup (CategoryTheory.Sheaf.H S.X₃ 0) :=
+    CategoryTheory.Abelian.Ext.instAddCommGroup
   obtain ⟨b, hb⟩ := CategoryTheory.Sheaf.H.longSequence_equiv₀_exact₁
     hS isTerminalTop c (Subsingleton.elim _ _)
   have hU := section_surjective_of_restrict_H_one_subsingleton hS U hHU
   have hV := section_surjective_of_restrict_H_one_subsingleton hS V hHV
   obtain ⟨t, ht⟩ := exists_global_lift_of_two_open_cover hS U V hUV hsections hU hV b
-  rw [← hb, ← ht, ← CategoryTheory.Sheaf.H.equiv₀_symm_naturality,
-    CategoryTheory.Sheaf.H.longSequence_comp_zero₃]
+  have hReplace :
+      CategoryTheory.Sheaf.H.δ hS 0 1 rfl
+          ((CategoryTheory.Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm b) =
+        CategoryTheory.Sheaf.H.δ hS 0 1 rfl
+          ((CategoryTheory.Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm
+            (S.g.hom.app (op (⊤ : Opens X)) t)) :=
+    congrArg (CategoryTheory.Sheaf.H.δ hS 0 1 rfl)
+      (congrArg (CategoryTheory.Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm ht).symm
+  have hNaturality :
+      CategoryTheory.Sheaf.H.map S.g 0
+          ((CategoryTheory.Sheaf.H.equiv₀ S.X₂ isTerminalTop).symm t) =
+        (CategoryTheory.Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm
+          (S.g.hom.app (op (⊤ : Opens X)) t) :=
+    CategoryTheory.Sheaf.H.equiv₀_symm_naturality
+      (T := (⊤ : Opens X)) isTerminalTop S.g t
+  have hNaturalityDelta :
+      CategoryTheory.Sheaf.H.δ hS 0 1 rfl
+          ((CategoryTheory.Sheaf.H.equiv₀ S.X₃ isTerminalTop).symm
+            (S.g.hom.app (op (⊤ : Opens X)) t)) =
+        CategoryTheory.Sheaf.H.δ hS 0 1 rfl
+          (CategoryTheory.Sheaf.H.map S.g 0
+            ((CategoryTheory.Sheaf.H.equiv₀ S.X₂ isTerminalTop).symm t)) :=
+    congrArg (CategoryTheory.Sheaf.H.δ hS 0 1 rfl) hNaturality.symm
+  have hZero :
+      CategoryTheory.Sheaf.H.δ hS 0 1 rfl
+          (CategoryTheory.Sheaf.H.map S.g 0
+            ((CategoryTheory.Sheaf.H.equiv₀ S.X₂ isTerminalTop).symm t)) = 0 :=
+    CategoryTheory.Sheaf.H.longSequence_comp_zero₃ hS 0 1 rfl
+      ((CategoryTheory.Sheaf.H.equiv₀ S.X₂ isTerminalTop).symm t)
+  exact hb.symm.trans <| hReplace.trans <| hNaturalityDelta.trans hZero
 
 private lemma exists_HPrimeZero_difference_of_subsingleton_H_one
     (F : Sheaf AddCommGrpCat.{u} X) (U V : Opens X) (hUV : U ⊔ V = ⊤)
@@ -218,13 +252,20 @@ private lemma exists_HPrimeZero_difference_of_subsingleton_H_one
   have hcoh :
       (F'.cohomologyPresheaf 0).map S.f₁₂.op xU -
           (F'.cohomologyPresheaf 0).map S.f₁₃.op xV = x := by
-    calc
-      _ = S.fromBiprod F' 0
-          ((AddCommGrpCat.biprodIsoProd (F'.H' 0 U) (F'.H' 0 V)).inv
-            ⟨xU, xV⟩) :=
-        (S.fromBiprod_biprodIsoProd_inv_apply F' xU xV).symm
-      _ = S.fromBiprod F' 0 y := congrArg (S.fromBiprod F' 0) hyrepr
-      _ = x := hy
+    have hBiprod :
+        (F'.cohomologyPresheaf 0).map S.f₁₂.op xU -
+            (F'.cohomologyPresheaf 0).map S.f₁₃.op xV =
+          S.fromBiprod F' 0
+            ((AddCommGrpCat.biprodIsoProd (F'.H' 0 U) (F'.H' 0 V)).inv
+              ⟨xU, xV⟩) :=
+      (S.fromBiprod_biprodIsoProd_inv_apply F' xU xV).symm
+    have hReplace :
+        S.fromBiprod F' 0
+            ((AddCommGrpCat.biprodIsoProd (F'.H' 0 U) (F'.H' 0 V)).inv
+              ⟨xU, xV⟩) =
+          S.fromBiprod F' 0 y :=
+      congrArg (S.fromBiprod F' 0) hyrepr
+    exact hBiprod.trans <| hReplace.trans hy
   have hcoh' :
       (F'.cohomologyPresheaf 0).map (homOfLE inf_le_left).op xU -
           (F'.cohomologyPresheaf 0).map (homOfLE inf_le_right).op xV = x := by
