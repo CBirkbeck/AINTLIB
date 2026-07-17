@@ -606,3 +606,31 @@ Use-site: the ∐-translate decomposition of `G = Σ_b T_b(D_M)` (orderDivisor_m
 translate engine) with pairwise comaximality from `sup_ker_eq_top_of_pull_ne` + the
 difference-section nonvanishing (`geometric_input` roles-swapped) — this closes the
 integral `smul_hasExactOrder` and then the F3 converse. NEXT WINDOW'S SPINE.
+
+## [RANK-RIGIDITY scheme glue] — VERIFIED design (KM, v10.302 window; module core PROVEN)
+
+Module core DONE (`ForMathlib/FiniteFlatRigidity.lean`, `bijective_of_surjective_of_rankAtStalk_eq`,
+0-sorry, ab3b6e7c8). Remaining: the scheme layer, all names verified in-tree:
+**Target**: `I J : IdealSheafData C`, `hle : J ≤ I`, both `(subschemeι ≫ π)` finite+flat+lfp over S,
+equal `Scheme.Hom.finrank` at every `s` ⟹ `I = J`. Route:
+1. `incl := IdealSheafData.inclusion hle : I.sub ⟶ J.sub`; closed immersion via
+   `IsClosedImmersion.of_comp` (inclusion_subschemeι + both subschemeι closed).
+2. Per-S-affine-piece iso: restrict along `(π_J)⁻¹(U)` (affine — IsAffineHom of finite);
+   G1-criterion: between affines `IsIso f ⟸ IsIso f.appTop` via `arrowIsoSpecΓOfIsAffine` +
+   `(MorphismProperty.isomorphisms _).arrow_mk_iso_iff` + Spec-functor-preserves-iso.
+3. Γ-side bijectivity = the module core. Transfers: HasAffineProperty extractions
+   (IsFinite→RingHom.Finite→Module.Finite; Flat→RingHom.Flat; lfp→RingHom.FinitePresentation→
+   Algebra.FinitePresentation) + `Module.FinitePresentation.of_finite_of_finitePresentation`
+   (Finiteness/ModuleFinitePresentation.lean:80) + `Module.projective_of_finitePresentation`
+   (Flat/EquationalCriterion:288). Surjectivity of the app: closed-immersion HasAffineProperty.
+   Rank-transport: the affineFinrank layer (ForMathlib/FinrankPullbackComp, own rebuild).
+4. Glue: `IsOpenImmersion` is IsZariskiLocalAtTarget (Morphisms/OpenImmersion:110); per-piece
+   iso ⟹ open immersion + pointwise range-cover ⟹ `opensRange = ⊤` ⟹
+   `isIso_of_isOpenImmersion_of_opensRange_eq_top` (OpenImmersion:804).
+5. `I = ker (I.subschemeι) = ker (incl ≫ J.subschemeι) = ker (J.subschemeι) = J` via
+   `ker_subschemeι` + `ker_comp_of_isIso`.
+Then T-D8-⟸'s `hge`: instantiate at I := divisor.ideal, J := torsionIdeal (hle = the PROVEN
+CRT-half); divisor-side rank N² = `sectionsDivisor_degree`; torsion-side = `torsion_rank`
+(transport along `torsionIdeal_subscheme`'s iso e; instances via the
+`fullLevelLocusAux_torsionDivisor`-pattern, Incidence:2540 — private, rebuild the 8-line wrapper,
+flag [DEDUP] for the cleanup fleet).
