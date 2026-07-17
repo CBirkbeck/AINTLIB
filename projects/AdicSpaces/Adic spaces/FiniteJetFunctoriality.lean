@@ -439,6 +439,148 @@ theorem isUnit_bridgeBase_s (hD : D.IsRational) : IsUnit (bridgeBase D e D.s) :=
       _ = 1 := happ
   exact IsUnit.of_mul_eq_one _ hmul
 
+/-- A seminormed ultrametric comm ring is a nonarchimedean topological ring
+(generalizes the normed version in `ExampleUnitDisc`). -/
+instance instNonarchimedeanRingOfSeminormedUltra {R : Type*} [SeminormedCommRing R]
+    [IsUltrametricDist R] : NonarchimedeanRing R :=
+  ⟨NonarchimedeanAddGroup.is_nonarchimedean⟩
+
+/-- Norm-≤-1 elements of a seminormed comm ring are power-bounded. -/
+theorem isPowerBounded_of_norm_le_one {R : Type*} [SeminormedCommRing R] {x : R}
+    (hx : ‖x‖ ≤ 1) : TopologicalRing.IsPowerBounded x := by
+  have hM : ∀ n : ℕ, ‖x ^ n‖ ≤ max ‖(1 : R)‖ 1 := by
+    intro n
+    cases n with
+    | zero => simp only [pow_zero]; exact le_max_left _ _
+    | succ k =>
+      refine le_trans (norm_pow_le' x k.succ_pos) (le_max_of_le_right ?_)
+      exact pow_le_one₀ (norm_nonneg _) hx
+  have hMpos : (0 : ℝ) < max ‖(1 : R)‖ 1 := lt_of_lt_of_le one_pos (le_max_right _ _)
+  intro U hU
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  refine ⟨Metric.ball 0 (ε / max ‖(1 : R)‖ 1),
+    Metric.ball_mem_nhds 0 (by positivity), ?_⟩
+  rintro z ⟨s, ⟨n, rfl⟩, y, hy, rfl⟩
+  rw [Metric.mem_ball, dist_zero_right] at hy
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right]
+  calc ‖x ^ n * y‖ ≤ ‖x ^ n‖ * ‖y‖ := norm_mul_le _ _
+    _ ≤ max ‖(1 : R)‖ 1 * ‖y‖ := by
+        exact mul_le_mul_of_nonneg_right (hM n) (norm_nonneg y)
+    _ < max ‖(1 : R)‖ 1 * (ε / max ‖(1 : R)‖ 1) :=
+        mul_lt_mul_of_pos_left hy hMpos
+    _ = ε := mul_div_cancel₀ _ (ne_of_gt hMpos)
+
+/-- The Gauss norm (radius 1) of a variable is at most one. -/
+theorem gaussNorm_X_le_one {S : Type*} [NormedCommRing S] [NormOneClass S] {m : ℕ} (i : Fin m) :
+    MvPowerSeries.gaussNorm (norm : S → ℝ) (fun _ : Fin m => (1 : ℝ))
+      ((MvPolynomial.X i : MvPolynomial (Fin m) S) : MvPowerSeries (Fin m) S) ≤ 1 := by
+  classical
+  refine Real.iSup_le (fun t => ?_) zero_le_one
+  have hprod : (t.prod fun _ k => (1 : ℝ) ^ k) = 1 := by
+    simp
+  rw [hprod, mul_one, MvPolynomial.coeff_coe, MvPolynomial.coeff_X]
+  split
+  · simp
+  · simp
+
+/-- `‖X̄ᵢ‖ ≤ 1` in the graph quotient. -/
+theorem norm_bridgeX_le_one (i : Fin e.m) : ‖bridgeX D e i‖ ≤ 1 := by
+  refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
+  rw [MvRestricted.norm_eq]
+  exact gaussNorm_X_le_one (S := JetA F) i
+
+/-- `bridgeBase` is norm-nonincreasing (constants keep their norm, quotients contract). -/
+theorem norm_bridgeBase_le (a : JetA F) : ‖bridgeBase D e a‖ ≤ ‖a‖ := by
+  refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
+  show ‖(polyToP (E := JetA F) (m := e.m) (MvPolynomial.C a) : PA F e.m)‖ ≤ ‖a‖
+  rw [MvRestricted.norm_eq,
+    show (polyToP (E := JetA F) (m := e.m) (MvPolynomial.C a)).1 =
+      MvPowerSeries.C (σ := Fin e.m) (R := JetA F) a from MvPolynomial.coe_C a]
+  exact le_of_eq (UnitDiscExample.gaussNorm_C_norm _ a)
+
+/-- The loc-level forward map `A_s → 𝓐_α` (`IsLocalization.Away.lift` at the unit `s̄`). -/
+noncomputable def bridgeLocHom (hD : D.IsRational) :
+    Localization.Away D.s →+* locA F e.m D.s e.f :=
+  IsLocalization.Away.lift D.s (isUnit_bridgeBase_s D e hD)
+
+theorem bridgeLocHom_algebraMap (hD : D.IsRational) (a : JetA F) :
+    bridgeLocHom D e hD (algebraMap (JetA F) (Localization.Away D.s) a) =
+      bridgeBase D e a :=
+  IsLocalization.Away.lift_eq _ _ a
+
+/-- The forward map sends the rational generator `fᵢ/s` to the variable `X̄ᵢ`. -/
+theorem bridgeLocHom_divByS (hD : D.IsRational) (i : Fin e.m) :
+    bridgeLocHom D e hD (divByS (e.f i) D.s) = bridgeX D e i := by
+  have hu := isUnit_bridgeBase_s D e hD
+  have hspec : divByS (e.f i) D.s * algebraMap (JetA F) (Localization.Away D.s) D.s =
+      algebraMap (JetA F) (Localization.Away D.s) (e.f i) := by
+    rw [divByS, IsLocalization.mk'_spec]
+  have happ := congrArg (bridgeLocHom D e hD) hspec
+  rw [RingHom.map_mul (bridgeLocHom D e hD), bridgeLocHom_algebraMap,
+    bridgeLocHom_algebraMap, ← bridgeBase_s_mul_X] at happ
+  refine hu.mul_left_cancel ?_
+  rw [mul_comm (bridgeBase D e D.s) (bridgeLocHom D e hD (divByS (e.f i) D.s))]
+  exact happ
+
+set_option maxHeartbeats 800000 in
+/-- Continuity of the loc-level forward map (universal property; the generators map to
+the norm-≤-1 variables `X̄ᵢ`, which are power-bounded). -/
+theorem bridgeLocHom_continuous (hD : D.IsRational) :
+    @Continuous _ _ D.topology _ (bridgeLocHom D e hD) := by
+  refine locTopology_continuous_lift D.P D.T D.s D.hopen _ ?_ ?_
+  · have h_eq : (bridgeLocHom D e hD).comp
+        (algebraMap (JetA F) (Localization.Away D.s)) = bridgeBase D e := by
+      ext a; exact bridgeLocHom_algebraMap D e hD a
+    rw [show ⇑((bridgeLocHom D e hD).comp
+        (algebraMap (JetA F) (Localization.Away D.s)))
+        = ⇑(bridgeBase D e) from congrArg _ h_eq]
+    exact AddMonoidHomClass.continuous_of_bound (bridgeBase D e) 1 fun a => by
+      rw [one_mul]; exact norm_bridgeBase_le D e a
+  · intro t ht
+    obtain ⟨i, rfl⟩ := e.hf t ht
+    rw [bridgeLocHom_divByS]
+    exact isPowerBounded_of_norm_le_one (norm_bridgeX_le_one D e i)
+
+/-- Forward: `𝒪_𝓐(D) → 𝓐_α` (completion extension of the localization lift;
+the target is complete Hausdorff since `I_𝓐` is closed, [FJP] (4.21)). -/
+noncomputable def bridgeFwd (hD : D.IsRational) :
+    presheafValue D →+* locA F e.m D.s e.f := by
+  haveI hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
+    isClosed_IA F e.m D.s e.f (e.span_eq_top D hD)
+  haveI : NormedAddCommGroup (locA F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  haveI : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom (bridgeLocHom D e hD)
+    (bridgeLocHom_continuous D e hD)
+
+theorem bridgeFwd_coe (hD : D.IsRational) (a : Localization.Away D.s) :
+    bridgeFwd D e hD (D.coeRingHom a) = bridgeLocHom D e hD a := by
+  haveI hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
+    isClosed_IA F e.m D.s e.f (e.span_eq_top D hD)
+  haveI : NormedAddCommGroup (locA F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  haveI : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe (bridgeLocHom D e hD)
+    (bridgeLocHom_continuous D e hD) a
+
+theorem bridgeFwd_canonicalMap (hD : D.IsRational) (a : JetA F) :
+    bridgeFwd D e hD (D.canonicalMap a) = bridgeBase D e a := by
+  rw [show D.canonicalMap a =
+      D.coeRingHom (algebraMap (JetA F) (Localization.Away D.s) a) from rfl,
+    bridgeFwd_coe, bridgeLocHom_algebraMap]
+
+theorem bridgeFwd_continuous (hD : D.IsRational) :
+    Continuous (bridgeFwd D e hD) := by
+  letI := D.uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
 end GraphBridgeInfra
 
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
