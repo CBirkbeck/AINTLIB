@@ -586,5 +586,70 @@ noncomputable def baseChangeCokerEquiv
     ((baseChangeCokerComparison f A).quotKerEquivOfSurjective
       (baseChangeCokerComparison_surjective f A))
 
+section ShortComplex
+
+variable (S : ShortComplex (ModuleCat.{v} R))
+variable [Module.Flat R S.X₁]
+  [Module.Flat R (LinearMap.ker S.g.hom)]
+  [Module.Finite R (LinearMap.ker S.f.hom)]
+  [Module.Finite R S.homology]
+
+omit [IsNoetherianRing R] [Module.Flat R S.X₁]
+  [Module.Flat R (LinearMap.ker S.g.hom)]
+  [Module.Finite R (LinearMap.ker S.f.hom)]
+  [Module.Finite R S.homology] in
+private theorem moduleCat_comp_eq_zero : S.g.hom ∘ₗ S.f.hom = 0 := by
+  apply LinearMap.ext
+  intro x
+  exact S.moduleCat_zero_apply x
+
+local instance shortComplexHZeroFinite :
+    Module.Finite R (HZero S.moduleCatToCycles) :=
+  Module.Finite.ker_moduleCatToCycles S
+
+local instance shortComplexHOneFinite :
+    Module.Finite R (HOne S.moduleCatToCycles) :=
+  Module.Finite.quotient_range_moduleCatToCycles S
+
+/-- The finite-projective replacement of a short complex computes degree-zero homology after
+arbitrary algebra base change, provided cycles commute with that base change. -/
+noncomputable def shortComplexBaseChangeKernelEquiv
+    (A : Type*) [CommRing A] [Algebra R A]
+    (hbij : Function.Bijective
+      (kerBaseChangeComparison A S.g.hom)) :
+    LinearMap.ker
+        ((kZeroToKOne S.moduleCatToCycles).baseChange A) ≃ₗ[A]
+      LinearMap.ker (S.f.hom.baseChange A) := by
+  let hfg := moduleCat_comp_eq_zero S
+  let eReplacement := baseChangeKernelEquiv S.moduleCatToCycles A
+  have hker :
+      LinearMap.ker (S.moduleCatToCycles.baseChange A) =
+        LinearMap.ker (S.f.hom.baseChange A) := by
+    exact LinearMap.ker_baseChange_codRestrictToKer_eq
+      S.f.hom S.g.hom hfg A hbij
+  let eCycles := LinearEquiv.ofEq _ _ hker
+  exact eReplacement.trans eCycles
+
+/-- The finite-projective replacement of a short complex computes degree-one homology after
+arbitrary algebra base change, provided cycles commute with that base change. -/
+noncomputable def shortComplexBaseChangeHomologyOneEquiv
+    (A : Type*) [CommRing A] [Algebra R A]
+    (hbij : Function.Bijective
+      (kerBaseChangeComparison A S.g.hom)) :
+    ((A ⊗[R] KOne S.moduleCatToCycles) ⧸
+        LinearMap.range
+          ((kZeroToKOne S.moduleCatToCycles).baseChange A)) ≃ₗ[A]
+      (ShortComplex.moduleCatMk
+        (S.f.hom.baseChange A) (S.g.hom.baseChange A)
+        (LinearMap.baseChange_comp_eq_zero S.f.hom S.g.hom
+          (moduleCat_comp_eq_zero S) A)).homology := by
+  let hfg := moduleCat_comp_eq_zero S
+  let eReplacement := baseChangeCokerEquiv S.moduleCatToCycles A
+  let eCycles := LinearMap.baseChangeHomologyOneEquiv
+    S.f.hom S.g.hom hfg A hbij
+  exact eReplacement.trans eCycles
+
+end ShortComplex
+
 end LowDegreeFiniteReplacement
 end ModularCurves
