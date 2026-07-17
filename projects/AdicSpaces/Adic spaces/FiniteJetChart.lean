@@ -276,6 +276,59 @@ def Qa : JetA F :=
         ⟨(1 : RestrictedLaurent K), (nonnegSubring K).one_mem⟩) = 1
       rw [ofRestricted_nonnegEquiv_symm]⟩
 
+/-! ### Reindexing `K⟨X⟩ = PowerSeries.Restricted` into the project `TateAlgebra` -/
+
+/-- The index equivalence `Unit ≃ Fin 1`. -/
+def unitFinOne : Unit ≃ Fin 1 where
+  toFun _ := 0
+  invFun _ := ()
+  left_inv _ := rfl
+  right_inv x := by omega
+
+/-- Norm-restricted univariate power series are topologically restricted in the
+`Fin 1`-indexed model (`renameEquiv` + decay transfer). -/
+noncomputable def kwToTate :
+    PowerSeries.Restricted K (1 : ℝ) →+* ↥(TateAlgebra K) where
+  toFun f := ⟨MvPowerSeries.renameEquiv (R := K) unitFinOne f.1, by
+    show MvPowerSeries.IsRestricted _
+    have hf : PowerSeries.IsRestricted (1 : ℝ) f.1 := f.2
+    rw [PowerSeries.IsRestricted] at hf
+    simp only [one_pow, mul_one] at hf
+    rw [← Nat.cofinite_eq_atTop] at hf
+    have hf' : Filter.Tendsto (fun i : ℕ => PowerSeries.coeff i f.1)
+        Filter.cofinite (nhds 0) := by
+      rwa [tendsto_zero_iff_norm_tendsto_zero]
+    show Filter.Tendsto (fun v : Fin 1 →₀ ℕ =>
+      MvPowerSeries.coeff v (MvPowerSeries.renameEquiv (R := K) unitFinOne f.1))
+      Filter.cofinite (nhds 0)
+    have hpt : ∀ v : Fin 1 →₀ ℕ,
+        MvPowerSeries.coeff v (MvPowerSeries.renameEquiv (R := K) unitFinOne f.1) =
+        PowerSeries.coeff (v 0) f.1 := by
+      intro v
+      have hv : v = Finsupp.embDomain unitFinOne.toEmbedding
+          (Finsupp.single () (v 0)) := by
+        rw [Finsupp.embDomain_single]
+        refine Finsupp.ext fun i => ?_
+        rw [show i = (0 : Fin 1) from by omega, Finsupp.single_apply,
+          if_pos (Subsingleton.elim _ _)]
+      have hemb := MvPowerSeries.coeff_embDomain_rename (R := K)
+        unitFinOne.toEmbedding f.1 (Finsupp.single () (v 0))
+      rw [← hv] at hemb
+      exact hemb
+    rw [funext hpt]
+    have hinj : Function.Injective (fun v : Fin 1 →₀ ℕ => v 0) := by
+      intro v w h
+      refine Finsupp.ext fun i => ?_
+      rw [show i = (0 : Fin 1) from by omega]
+      exact h
+    exact hf'.comp hinj.tendsto_cofinite⟩
+  map_one' := Subtype.ext (map_one (MvPowerSeries.renameEquiv (R := K) unitFinOne))
+  map_mul' f g := Subtype.ext
+    (map_mul (MvPowerSeries.renameEquiv (R := K) unitFinOne) f.1 g.1)
+  map_zero' := Subtype.ext (map_zero (MvPowerSeries.renameEquiv (R := K) unitFinOne))
+  map_add' f g := Subtype.ext
+    (map_add (MvPowerSeries.renameEquiv (R := K) unitFinOne) f.1 g.1)
+
 /-! ### The (3.3) collapse data: `Q² = Wⁿ · (W⁻ⁿQ²)` with unit `W`-multiples -/
 
 /-- `W`'s underlying jet is the `Q⁰`-constant at the Laurent unit `W`. -/
