@@ -75,6 +75,35 @@ theorem chartDatum_isRational : (chartDatum F).IsRational :=
         exact Set.mem_insert_of_mem _ rfl))
       (isUnit_tA F))
 
+/-! ### The `ϖ`-rescaling twist (Prop 3.1's normalisation `W ↦ ϖX`) -/
+
+/-- Rescaling a restricted power series by a norm-`≤ 1` scalar stays restricted
+(the substitution `X ↦ aX`; coefficientwise `aⁿ`-scaling). -/
+noncomputable def rescaleRestricted {R : Type*} [NormedCommRing R] [IsUltrametricDist R]
+    [NormOneClass R] (a : R) (ha : ‖a‖ ≤ 1) :
+    PowerSeries.Restricted R (1 : ℝ) →+* PowerSeries.Restricted R (1 : ℝ) where
+  toFun f := ⟨PowerSeries.rescale a f.1, by
+    show PowerSeries.IsRestricted (1 : ℝ) (PowerSeries.rescale a f.1)
+    have hf : PowerSeries.IsRestricted (1 : ℝ) f.1 := f.2
+    rw [PowerSeries.IsRestricted] at hf ⊢
+    refine squeeze_zero (fun n => by positivity) (fun n => ?_) hf
+    rw [PowerSeries.coeff_rescale]
+    refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+    calc ‖a ^ n * PowerSeries.coeff n f.1‖
+        ≤ ‖a ^ n‖ * ‖PowerSeries.coeff n f.1‖ := norm_mul_le _ _
+      _ ≤ 1 * ‖PowerSeries.coeff n f.1‖ := by
+          refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
+          cases n with
+          | zero => rw [pow_zero, norm_one]
+          | succ k =>
+              exact (norm_pow_le' a k.succ_pos).trans
+                (pow_le_one₀ (norm_nonneg a) ha)
+      _ = ‖PowerSeries.coeff n f.1‖ := one_mul _⟩
+  map_one' := Subtype.ext (map_one (PowerSeries.rescale a))
+  map_mul' f g := Subtype.ext (map_mul (PowerSeries.rescale a) f.1 g.1)
+  map_zero' := Subtype.ext (map_zero (PowerSeries.rescale a))
+  map_add' f g := Subtype.ext (map_add (PowerSeries.rescale a) f.1 g.1)
+
 /-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
 `𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
 def chartEquiv : presheafValue (chartDatum F) ≃+* JetB F := by sorry
