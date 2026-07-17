@@ -234,6 +234,24 @@ private lemma six_ext {W : WeierstrassCurve R} [Nontrivial R]
      (rw [← sub_eq_zero]; exact hp2); (rw [← sub_eq_zero]; exact hp3);
      (rw [← sub_eq_zero]; exact hq0); (rw [← sub_eq_zero]; exact hq1)]
 
+/-- The scaling unit of a Weierstrass variable change: if `α` and `γ` are units of a commutative
+ring with `γ ^ 2 = α ^ 3`, then there is a unit `u` with `u ^ 2 = α` and `u ^ 3 = γ` (morally
+`u = γ / α`). Packages the `u`-construction of `exists_variableChange_of_filtration`, where the
+relation `γ ^ 2 = α ^ 3` comes from equating the `coordX ^ 3` coefficients of the two Weierstrass
+relations. -/
+private lemma exists_unit_sq_cube {α γ : R} (hα : IsUnit α) (hγ : IsUnit γ)
+    (h : γ ^ 2 = α ^ 3) : ∃ u : Rˣ, (↑u : R) ^ 2 = α ∧ (↑u : R) ^ 3 = γ := by
+  obtain ⟨uα, hαs⟩ := hα
+  obtain ⟨uγ, hγs⟩ := hγ
+  have hu_val : (↑(uγ * uα⁻¹) : R) = γ * (↑uα⁻¹ : R) := by rw [Units.val_mul, hγs]
+  have hvα : α * (↑uα⁻¹ : R) = 1 := by rw [← hαs]; exact uα.mul_inv
+  refine ⟨uγ * uα⁻¹, ?_, ?_⟩
+  · rw [hu_val]
+    linear_combination (↑uα⁻¹ : R) ^ 2 * h + α * (α * (↑uα⁻¹ : R) + 1) * hvα
+  · rw [hu_val]
+    linear_combination γ * (↑uα⁻¹ : R) ^ 3 * h
+      + γ * ((α * (↑uα⁻¹ : R)) ^ 2 + α * (↑uα⁻¹ : R) + 1) * hvα
+
 lemma exists_variableChange_of_filtration {W W' : WeierstrassCurve R}
     (Φ : W'.toAffine.CoordinateRing ≃ₐ[R] W.toAffine.CoordinateRing)
     (hfil : ∀ n, Submodule.map Φ.toLinearEquiv.toLinearMap (poleOrderFiltration W' n)
@@ -272,18 +290,7 @@ lemma exists_variableChange_of_filtration {W W' : WeierstrassCurve R}
       linear_combination hM
         - (algebraMap R W.toAffine.CoordinateRing γ) ^ 2 * coordY_mul_coordY W
     obtain ⟨e_x0, e_x1, e_x2, e_x3, e_y, e_xy⟩ := six_ext hinput
-    obtain ⟨uα, hαs⟩ := hα
-    obtain ⟨uγ, hγs⟩ := hγ
-    set u : Rˣ := uγ * uα⁻¹ with hu_def
-    have hu_val : (↑u : R) = γ * (↑uα⁻¹ : R) := by rw [hu_def, Units.val_mul, hγs]
-    have hvα : α * (↑uα⁻¹ : R) = 1 := by rw [← hαs]; exact uα.mul_inv
-    have hu2 : (↑u : R) ^ 2 = α := by
-      rw [hu_val]
-      linear_combination (↑uα⁻¹ : R) ^ 2 * e_x3 + α * (α * (↑uα⁻¹ : R) + 1) * hvα
-    have hu3 : (↑u : R) ^ 3 = γ := by
-      rw [hu_val]
-      linear_combination γ * (↑uα⁻¹ : R) ^ 3 * e_x3
-        + γ * ((α * (↑uα⁻¹ : R)) ^ 2 + α * (↑uα⁻¹ : R) + 1) * hvα
+    obtain ⟨u, hu2, hu3⟩ := exists_unit_sq_cube hα hγ e_x3
     simp only [← hu2, ← hu3] at e_x0 e_x1 e_x2 e_y e_xy
     have h6 : IsUnit ((↑u : R) ^ 6) := by
       rw [← Units.val_pow_eq_pow_val]; exact (u ^ 6).isUnit
