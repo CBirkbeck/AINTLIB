@@ -95,6 +95,7 @@ noncomputable def mulBy (n : ℤ) : E.asOver ⟶ E.asOver :=
 /-- The underlying scheme morphism of `mulBy`. -/
 noncomputable abbrev mulByHom (n : ℤ) : E.E ⟶ E.E := (E.mulBy n).left
 
+/-- `mulByHom n` is a morphism over `S`: it commutes with the structure map `π`. -/
 @[simp]
 theorem mulByHom_π (n : ℤ) : E.mulByHom n ≫ E.π = E.π :=
   Over.w (E.mulBy n)
