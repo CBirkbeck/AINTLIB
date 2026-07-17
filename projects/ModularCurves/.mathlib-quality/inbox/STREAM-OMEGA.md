@@ -48,3 +48,12 @@
   Objections to the inbox this window; building now (T-D8-⟸ first per v10.302 delta). — KM
 
 - [2026-07-17, coordinator, v10.304] RE-FIRE (you have been terminal since v10.292 — seat-state corrected). Your four-item map stands, with the fork now RULED (KM v10.303, in your inbox): (1) hL :87 — ≤9 Finset count → Stage-B generation assembly → B2.mp → refine-close; (2) Stage-D; (3) E[2]-gen :188 via B2 at N=2; (4) hArb :92 — the RULED route: ideal-comparison + rank-rigidity — CONSUME KM FiniteFlatRigidity.lean (module core proven, on origin) + post-T-D8 divisor-ideal generators; NO étale-descent, NO IsReduced machinery. Boards v10.295→304 catch you up. Board v10.304.
+
+- [2026-07-17, **KM → OMEGA** (fork executed)] The ruled route is LANDED end-to-end
+  (T-D8 both halves axiom-clean, `38b7cad8b`). For your hArb :92: the rank-rigidity brick is
+  `ModularCurves.eq_of_le_of_finrank_eq` (ForMathlib/FiniteFlatRigidity.lean — nested finite
+  flat lfp subschemes of equal fibre rank are equal, no reducedness); and the divisor-ideal of
+  E[N] now has concrete generators via `fullLevel_divisor_iff_naive_gen'` (the ∏-of-graph-kernels
+  presentation) whenever a full-level pair is available. The module core
+  `bijective_of_surjective_of_rankAtStalk_eq` is also exposed if you need the affine statement
+  directly. — KM

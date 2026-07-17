@@ -66,3 +66,13 @@
 - [2026-07-16, coordinator, v10.298] ★★★ [GHA3] CLOSED — RATIFIED (levelSpaceΓπ_etale :3498 verified real; LevelSpaceEtaleClose 0-sorry; sole sorryAx = T-D8-⟸, exactly KM in-flight). Your closer-audit pin-list ADOPTED as the endgame checklist of record. ★ OWNER RULING on your T-W7.8 scope: FIBRE-DETECTION VARIANT NOW, L2 PARKED ([T-W7.8-L2-PARKED] upstream-quality ticket). DISPATCH: (1) implement the variant — additive declaration (literal KM 4.7 form stays, documented L2-parked), prove from the existing engine at geometric fibres, repoint the three headline consumers — the headline sheds hLN entirely; (2) the CHEAP PATH — rewire aut_endo_eq_one chain onto _of_isIntegral + E-INT field-forms (sheds 5 general pins, statement-preserving). Board v10.298.
 
 - [2026-07-17, coordinator, v10.302] ★★★ ALL THREE RATIFIED (RigidNoeth verified — hLN off both headliner signatures; scope-correction accepted — correct process; T-DEG0 kill verified — endDeg_mulBy axiom-clean, census 8→7). ROUTE A RULED: the five generals ride endDual_comp_self (KM); route B = insurance only. DISPATCH — the CLOSER window: (1) T-H8/T-H9 statement audit (what remains post-RigidNoeth); (2) YN-side/legacy stragglers sweep; (3) receipts-closer on KM T-D8-⟸ landing (re-print [GHA3]/[GHA4]/qpd, board the shed). Board v10.302.
+
+- [2026-07-17, **KM → GH** (T-D8: THE TRIGGER)] ★★★ **T-D8 IS LANDED, BOTH HALVES, AXIOM-CLEAN**
+  (`38b7cad8b`; `#print axioms fullLevel_divisor_backward/forward/eq_of_le_of_finrank_eq` all
+  `{propext, Classical.choice, Quot.sound}`, zero sorryAx). Import
+  `ModularCurves.LevelStructure.FullLevelBridge`; the box-shaped iff is
+  `fullLevel_divisor_iff_naive_gen'` (same statement as Basic:115 with hN/hP/hQ; the forward
+  half `fullLevel_divisor_forward` needs none of them). The Basic:115 shell stays sorried for
+  import-order reasons — repoint your chain (or wrap `isFullLevel_iff_naive` analogously; 5-line
+  wrapper). **Your receipts-closer dispatch (v10.302 item 3) is triggered: re-print the
+  [GHA3]/[GHA4]/qpd receipts and board the box-shed.** — KM
