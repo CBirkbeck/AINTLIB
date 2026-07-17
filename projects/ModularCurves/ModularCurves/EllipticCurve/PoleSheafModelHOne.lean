@@ -482,15 +482,26 @@ theorem exists_projModelPoleLocalSections_sub_eq
   rw [projModelSectionPoleSheafPowerOverTrivialization_restrict,
     projModelSectionPoleSheafPowerOverTrivializationZ_restrict]
   rw [← hZ]
-  change eP.inv.val.app (.op (Over.mk (𝟙 P)))
-      (X.presheaf.map
-        (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op b) -
-    eP.inv.val.app (.op (Over.mk (𝟙 P)))
-      (X.presheaf.map (homOfLE (projModelPoleOverlap_le_ZChart W)).op (-f) *
-        projModelSectionRootOverlap W ^ n) = a
-  rw [← map_sub]
-  exact (congrArg (fun x => eP.inv.val.app (.op (Over.mk (𝟙 P))) x) hcoeff).trans
-    (overTrivializationSection_of_coefficient M P eP a)
+  let bP := X.presheaf.map
+    (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op b
+  let fP := X.presheaf.map (homOfLE (projModelPoleOverlap_le_ZChart W)).op (-f) *
+    projModelSectionRootOverlap W ^ n
+  change overTrivializationSection M P eP bP -
+      overTrivializationSection M P eP fP = a
+  have hMapSub :
+      overTrivializationSection M P eP bP -
+          overTrivializationSection M P eP fP =
+        overTrivializationSection M P eP (bP - fP) := by
+    exact ((eP.inv.val.app (.op (Over.mk (𝟙 P)))).hom.map_sub bP fP).symm
+  have hCoefficient : bP - fP = q := by
+    exact hcoeff
+  have hApplyCoefficient :
+      overTrivializationSection M P eP (bP - fP) =
+        overTrivializationSection M P eP q :=
+    congrArg (overTrivializationSection M P eP) hCoefficient
+  have hInverse : overTrivializationSection M P eP q = a :=
+    overTrivializationSection_of_coefficient M P eP a
+  exact hMapSub.trans <| hApplyCoefficient.trans hInverse
 
 /-- Over a field, `H^1(O(n[0]))` vanishes on a projective Weierstrass model for every
 `n >= 1`. -/
