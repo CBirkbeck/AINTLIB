@@ -22680,3 +22680,29 @@ rank-rigidity engine. ZERO sorryAx.** The v10.302 priority-delta item (1) is DON
   duplicates the torsion-side transport rebuilt inline here; unify when convenient.
 
 Commits: ..38b7cad8b. Next per v10.302: item (2) `endDual_comp_self` (consume GH FinrankDegenerate).
+
+### v10.305-G0 — [T-E14-AX2] :206 REDUCED TO THE SCALE-TORSOR: the funnel is built; OMEGA-coordination filed (STREAM-G0)
+Commits 0eb053276 / (inbox), pushed. The v10.304 :206-campaign, session 1:
+
+**BUILT (compiles clean):** `legendreDelta_relRep_finiteEtale_of_scaleTorsor`
+(Moduli/LegendreDeltaRelRep.lean) — Bootstrap:206 follows from ANY finite étale
+`Z₂ → fullLevelLocus 2` whose sections over a locus point classify the ω-bases completing
+that level-2 structure to a Legendre datum. Plumbing: `sectionsCompSigmaEquiv` (fibring a
+composite's sections over the middle layer — Sigma.ext + Subtype.heq_iff_coe_eq beats
+subst-through-coes) ∘ sigmaCongrRight(spec) ∘ **sigmaCongrLeft(fullLevelLocusPointsEquiv
+at N=2 — the E3 template is N-GENERIC: the whole Γ(2) layer costs ZERO new lines)** ∘
+sigma-subtype-pair collapse, landing definitionally on legendreDeltaProblem.obj.
++ `nIsInvertible_base_of_isUnit` (the R-unit → base-scheme transfer, reusable).
+
+**THE REMAINING INPUT (the campaign's genuinely new geometry):** the ±ω scale-torsor —
+μ₂-torsor of square-roots of the canonical ω^{⊗-2}-valued abscissa-difference d = x(Q)−x(P),
+glued through the omegaCocycle layer. This is T-E14'-territory (adapted models = OMEGA's);
+coordination filed to STREAM-OMEGA with three graded asks: (1) universal-d/trivialization
+data if their layer has it; (2) the two fibre-pinning datum-lemmas (IsLegendreDatum.neg via
+u=−1-VC [Legendre curve is u=−1-invariant; basisUnitAt_ofVC + projModelVCIso_affineSection
+are the visible entry points] + uniqueness-up-to-±); (3) a cold-start pointer set. With
+(2) + local existence, G0 can attempt the gluing next firing; with (1), the torsor drops in
+and :206 dies through the funnel immediately.
+
+**Deliberately NOT done:** excavating the adapted/ω layer solo (explicit dispatch
+de-confliction; the neg-lemma races OMEGA's live Bootstrap-three window).
