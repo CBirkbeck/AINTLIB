@@ -29,10 +29,10 @@ is the **proven** value `14467 = 37·391` (`decide` from the reduced fraction `N
   `formalSum68ResidueCube ≡ 37·21 + 37²·10 (mod 37³)`.
 
 So the **second** `37`-adic digit of `formalSum68` is `r₆₈ = 21` (the first is `0`, the proven
-first-order vanishing `formalSum68_rIntegralToZMod_eq_zero`), and the **third** is `10`.  This is the
-mod-`37³` lift of the proven mod-`37²` value `formalSum68ResidueModSq37_proven` (`≡ 777 = 37·21`),
-and — crucially — it is **proven outright** here, not carried as a residual, because the exact
-rational `N/120` is proven.
+first-order vanishing `formalSum68_rIntegralToZMod_eq_zero`), and the **third** is `10`.  This
+is the mod-`37³` lift of the proven mod-`37²` value `formalSum68ResidueModSq37_proven`
+(`≡ 777 = 37·21`), and — crucially — it is **proven outright** here, not carried as a residual,
+because the exact rational `N/120` is proven.
 
 ## The cancellation `c₆₈ = 4`, GROUNDED
 
@@ -50,7 +50,8 @@ sides carry **two** `37`'s:
 so dividing by `37` (exact in `ℤ_[37]`) and using `castHom X₆₈ = 0` (proven first digit `0`,
 `X₆₈ = 37·c₆₈`):
 
-  `37²·u₆₈'·c₆₈ ≡ −37²·391 (mod 37³)`  ⟹  `u₆₈'·c₆₈ ≡ −391 ≡ −21 (mod 37)`  ⟹  `c₆₈ = −u₆₈'⁻¹·21 = 4`.
+  `37²·u₆₈'·c₆₈ ≡ −37²·391 (mod 37³)`  ⟹
+    `u₆₈'·c₆₈ ≡ −391 ≡ −21 (mod 37)`  ⟹  `c₆₈ = −u₆₈'⁻¹·21 = 4`.
 
 The third digit `10` of `formalSum68` drops out — only `391 mod 37 = 21` survives the second `37`.
 So `c₆₈ = −u₆₈'⁻¹·r₆₈ = −4⁻¹·21 = 4`, **the proven `deg68SecondDigit37Corrected`**, now grounded in
@@ -59,8 +60,8 @@ digit is `4`, computed from the actual degree-`68` Artin-Hasse coefficient `form
 
 ## Honest scope
 
-This file proves the **source side** completely: the mod-`37³` residue value `14467` (PROVEN from the
-exact rational), the second-digit `r₆₈ = 21` and third-digit, and the cancellation arithmetic
+This file proves the **source side** completely: the mod-`37³` residue value `14467` (PROVEN from
+the exact rational), the second-digit `r₆₈ = 21` and third-digit, and the cancellation arithmetic
 `c₆₈ = 4`.  It does **not** prove the mod-`37³` *relation* `68!·X₆₈ = formalSum68Residue·(−37)`
 itself — that is the one piece needing the mod-`37³` Dwork-coordinate evaluator (a parallel
 development to the existing mod-`37²` `valuedLambdaQuotientDworkCoeffModSq` chain, at precision
@@ -78,7 +79,6 @@ development to the existing mod-`37²` `valuedLambdaQuotientDworkCoeffModSq` cha
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 open NumberField
 open scoped BigOperators
@@ -99,11 +99,11 @@ def formalSum68ResidueCube : ZMod (37 ^ 3) :=
     ((((formalSum68 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) : ℚ).den : ℕ) :
         ZMod (37 ^ 3))⁻¹
 
-/-- **The mod-`37³` residue of `formalSum68` is `14467`** (proven, axiom-clean): from the proven exact
-rational `formalSum68RatValue_proven` (`formalSum68 = N/120`), the reduced numerator is `N` and
-denominator `120`, so `formalSum68ResidueCube = (N : ZMod 37³)·(120 : ZMod 37³)⁻¹ = 14467` by
-`decide`.  Note `14467 = 37·391 = 37·21 + 37²·10`: second digit `r₆₈ = 21`, third digit `10`. This is
-the mod-`37³` lift of the proven `formalSum68ResidueModSq37_proven` (`≡ 777 = 37·21 mod 37²`),
+/-- **The mod-`37³` residue of `formalSum68` is `14467`** (proven, axiom-clean): from the proven
+exact rational `formalSum68RatValue_proven` (`formalSum68 = N/120`), the reduced numerator is `N`
+and denominator `120`, so `formalSum68ResidueCube = (N : ZMod 37³)·(120 : ZMod 37³)⁻¹ = 14467` by
+`decide`.  Note `14467 = 37·391 = 37·21 + 37²·10`: second digit `r₆₈ = 21`, third digit `10`. This
+is the mod-`37³` lift of the proven `formalSum68ResidueModSq37_proven` (`≡ 777 = 37·21 mod 37²`),
 **proven outright** (not a residual) because the exact rational `N/120` is proven. -/
 theorem formalSum68ResidueCube_eq : formalSum68ResidueCube = 14467 := by
   have hRat := formalSum68RatValue_proven
@@ -144,10 +144,11 @@ theorem deg68SecondDigit37Corrected_grounded_value :
     -uSixtyeight37⁻¹ * ((391 : ℕ) : ZMod 37) = deg68SecondDigit37Corrected := by
   rw [threeNineOne_mod_thirtyseven, deg68SecondDigit37Corrected, formalSum68SecondDigit37Corrected]
 
-/-- **The mod-`37³` cancellation yields `c₆₈ = 4`** (proven by `decide`): `−u₆₈'⁻¹·(391 mod 37) = 4`.
-Combines `deg68SecondDigit37Corrected_grounded_value` with the proven `deg68SecondDigit37Corrected_eq`
-(`= 4`).  This is the genuine deg-`68` slice second digit, sourced from the **proven** mod-`37³`
-residue of the actual degree-`68` Artin-Hasse coefficient `formalSum68 = N/120`. -/
+/-- **The mod-`37³` cancellation yields `c₆₈ = 4`** (proven by `decide`):
+`−u₆₈'⁻¹·(391 mod 37) = 4`. Combines `deg68SecondDigit37Corrected_grounded_value` with the proven
+`deg68SecondDigit37Corrected_eq` (`= 4`).  This is the genuine deg-`68` slice second digit, sourced
+from the **proven** mod-`37³` residue of the actual degree-`68` Artin-Hasse coefficient
+`formalSum68 = N/120`. -/
 theorem deg68SecondDigit37_from_modCube_eq_four :
     -uSixtyeight37⁻¹ * ((391 : ℕ) : ZMod 37) = (4 : ZMod 37) := by
   rw [deg68SecondDigit37Corrected_grounded_value, deg68SecondDigit37Corrected_eq]
