@@ -191,6 +191,16 @@ theorem syzygy_coordinate (u : Fin m → MvPolynomial (Fin m) D)
         heXs]
       ring
 
+open MvPolynomial in
+/-- Graph-sequence syzygies over the polynomial ring are Koszul-generated, given that
+`(g, f₁, …, f_m)` generate the unit ideal (the two-case localization argument). For `m = 1`
+this says `gT − f` is a nonzerodivisor (the pairs type is empty). -/
+theorem syzygy_graph_polynomial (g : D) (f : Fin m → D)
+    (hunit : Ideal.span ({g} ∪ Set.range f) = ⊤)
+    (u : Fin m → MvPolynomial (Fin m) D)
+    (h : d1 (fun i => C g * X i - C (f i)) u = 0) :
+    ∃ v, d2 (fun i => (C g * X i - C (f i) : MvPolynomial (Fin m) D)) v = u := by sorry
+
 end Polynomial
 
 /-! ### Coefficientwise maps of restricted rings (used here and in the localization layer) -/
