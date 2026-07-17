@@ -68,6 +68,14 @@ end AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
 
+private theorem isSeparated_fiberToSpecResidueField
+    {E S : Scheme.{u}} (π : E ⟶ S) [IsSeparated π] (s : S) :
+    IsSeparated (π.fiberToSpecResidueField s) := by
+  change IsSeparated (pullback.snd π (S.fromSpecResidueField s))
+  exact AlgebraicGeometry.IsSeparated.isStableUnderBaseChange.of_isPullback
+    (IsPullback.of_hasPullback π (S.fromSpecResidueField s))
+    (show IsSeparated π from inferInstance)
+
 /-- A pointed isomorphism over `Spec R` induces an `R`-linear equivalence on global
 sections of every tensor power of the pole sheaf. -/
 noncomputable def sectionPoleSheafPowerPointedSectionsEquiv
@@ -94,7 +102,7 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_finrank
     (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (h : FibrewiseElliptic π z hz)
     (s : S) {n : ℕ} (hn : 1 ≤ n) :
     letI : IsSeparated (π.fiberToSpecResidueField s) :=
-      MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+      isSeparated_fiberToSpecResidueField π s
     letI : Module ↑(S.residueField s)
         Γ(sectionPoleSheafPower (π.fiberToSpecResidueField s)
           (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n,
@@ -106,7 +114,7 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_finrank
         (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n,
         (⊤ : (π.fiber s).Opens)) = n := by
   letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
-    MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+    isSeparated_fiberToSpecResidueField π s
   letI : Module ↑(S.residueField s)
       Γ(sectionPoleSheafPower (π.fiberToSpecResidueField s)
         (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n,
