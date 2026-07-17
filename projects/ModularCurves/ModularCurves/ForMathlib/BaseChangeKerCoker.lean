@@ -261,6 +261,20 @@ theorem Module.Flat.ker_of_bounded_exact [∀ n, Module.Flat R (M n)]
     Module.Flat R (LinearMap.ker (d 0)) :=
   Module.Flat.ker_of_bounded_exact_at M d N hexact 0 (Nat.zero_le N)
 
+/-- A finite degree-zero cycle module in a bounded exact sequence of flat modules over a
+Noetherian ring is projective. This is the finite-flat step in Mumford, *Abelian Varieties*,
+§5, Lemma 1. -/
+theorem Module.Projective.ker_of_bounded_exact_of_finite [IsNoetherianRing R]
+    [∀ n, Module.Flat R (M n)] [Module.Finite R (LinearMap.ker (d 0))]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1))) :
+    Module.Projective R (LinearMap.ker (d 0)) := by
+  letI : Module.Flat R (LinearMap.ker (d 0)) :=
+    Module.Flat.ker_of_bounded_exact M d N hexact
+  letI : Module.FinitePresentation R (LinearMap.ker (d 0)) :=
+    Module.finitePresentation_of_finite R _
+  exact Module.Flat.projective_of_finitePresentation
+
 /-- Kernels in degree zero commute with arbitrary tensor products for a bounded exact
 sequence of flat modules. -/
 theorem kerLTensorComparison_bijective_of_bounded_exact
