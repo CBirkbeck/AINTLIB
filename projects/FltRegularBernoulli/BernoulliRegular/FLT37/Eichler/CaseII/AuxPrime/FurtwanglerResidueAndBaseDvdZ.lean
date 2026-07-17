@@ -165,7 +165,8 @@ From an integer Case-II solution `x³⁷ + y³⁷ = z³⁷` with `37 ∣ z` (the
 hence `(z : 𝓞 K) ∈ lv149`; peeling the `(ζ−1)`-multiplicity (`lv149` unramified) gives `D.z ∈ lv149`
 for the base datum `D` built by the producer. -/
 
--- The `RealCaseIIData37` structure construction (the `equation` field, with the `(ζ-1)`-multiplicity
+-- The `RealCaseIIData37` structure construction (the `equation` field, with the
+-- `(ζ-1)`-multiplicity
 -- extraction) is whnf-heavy and exceeds the default heartbeat budget, as in the parent producer
 -- `exists_realCaseIIData37_of_Int_solution`.
 set_option backward.isDefEq.respectTransparency false in
