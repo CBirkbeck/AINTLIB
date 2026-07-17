@@ -481,4 +481,140 @@ theorem two_zsmul_affineSection_universal :
     | exact hq'
 
 
+/-! ### [F] `RING-DBL`: the general identity -/
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- Variable-curve-and-coordinates congruence for the doubling identity
+(`subst`-trivial; `Equation`-witnesses proof-irrelevant). -/
+theorem section_dbl_congr {A : Type u} [CommRing A] {W₁ W₂ : WeierstrassCurve A}
+    (hW : W₁ = W₂) [W₁.IsElliptic] [W₂.IsElliptic]
+    {a₁ b₁ c₁ d₁ a₂ b₂ c₂ d₂ : A}
+    (ha : a₁ = a₂) (hb : b₁ = b₂) (hc : c₁ = c₂) (hd : d₁ = d₂)
+    {h₁ : W₁.toAffine.Equation a₁ b₁} (h₂ : W₂.toAffine.Equation a₂ b₂)
+    {h₁' : W₁.toAffine.Equation c₁ d₁} (h₂' : W₂.toAffine.Equation c₂ d₂)
+    (hid : (2 : ℤ) • (⟨projModelAffineSection W₁ a₁ b₁ h₁,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      (modelEllipticCurve W₁).Section)
+      = ⟨projModelAffineSection W₁ c₁ d₁ h₁',
+        projModelAffineSection_projModelπ _ _ _ _⟩) :
+    (2 : ℤ) • (⟨projModelAffineSection W₂ a₂ b₂ h₂,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      (modelEllipticCurve W₂).Section)
+      = ⟨projModelAffineSection W₂ c₂ d₂ h₂',
+        projModelAffineSection_projModelπ _ _ _ _⟩ := by
+  subst hW
+  subst ha
+  subst hb
+  subst hc
+  subst hd
+  exact hid
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(`RING-DBL` ★★★★)** Ring-level doubling of a marked affine-point section on the
+unit-tangent-denominator locus: `2 • affineSection (p, q) = affineSection (dblX, dblY)`
+over ANY commutative ring — the identity transports from the universal domain along the
+classifying map. -/
+theorem two_zsmul_affineSection {A' : Type u} [CommRing A'] (W : WeierstrassCurve A')
+    [W.IsElliptic] (p q e : A') (h : W.toAffine.Equation p q)
+    (he : W.tangentDen p q * e = 1)
+    (h' : W.toAffine.Equation (W.dblX p q e) (W.dblY p q e)) :
+    (2 : ℤ) • (⟨projModelAffineSection W p q h,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      (modelEllipticCurve W).Section)
+      = ⟨projModelAffineSection W (W.dblX p q e) (W.dblY p q e) h',
+        projModelAffineSection_projModelπ _ _ _ _⟩ := by
+  classical
+  -- the classifying ring map from the polynomial base
+  set ψ₀ : DblBase₀ →+* A' := MvPolynomial.eval₂Hom (Int.castRingHom A')
+    (fun i : Fin 6 => ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] i) with hψ₀def
+  have hψX : ∀ i : Fin 6, ψ₀ (X i) = ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] i :=
+    fun i => MvPolynomial.eval₂Hom_X' _ _ _
+  have hWmap : dblW.map ψ₀ = W := by
+    ext
+    · exact (hψX 0)
+    · exact (hψX 1)
+    · exact (hψX 2)
+    · exact (hψX 3)
+    · show ψ₀ dblA₆ = W.a₆
+      rw [dblA₆]
+      simp only [map_add, map_sub, map_mul, map_pow, hψX]
+      show ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 5 ^ 2
+          + ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 0 * ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 4
+            * ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 5
+          + ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 2 * ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 5
+          - ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 4 ^ 3
+          - ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 1 * ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 4 ^ 2
+          - ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 3 * ![W.a₁, W.a₂, W.a₃, W.a₄, p, q] 4
+          = W.a₆
+      show q ^ 2 + W.a₁ * p * q + W.a₃ * q - p ^ 3 - W.a₂ * p ^ 2 - W.a₄ * p = W.a₆
+      have hEq := (WeierstrassCurve.Affine.equation_iff _ _).mp h
+      linear_combination hEq
+  have hdenIm : ψ₀ (dblW.tangentDen (X 4) (X 5)) = W.tangentDen p q := by
+    simp only [WeierstrassCurve.tangentDen, dblW, map_add, map_mul, map_ofNat, hψX]
+    rfl
+  have hloc : IsUnit (ψ₀ dblLoc) := by
+    rw [show (dblLoc : DblBase₀) = dblW.tangentDen (X 4) (X 5) * dblW.Δ from rfl,
+      map_mul, hdenIm]
+    refine IsUnit.mul (isUnit_iff_exists_inv.mpr ⟨e, he⟩) ?_
+    rw [show ψ₀ dblW.Δ = (dblW.map ψ₀).Δ from (WeierstrassCurve.map_Δ _ _).symm,
+      hWmap]
+    exact (WeierstrassCurve.isElliptic_iff W).mp inferInstance
+  set φ₀ : DblRing₀ →+* A' := IsLocalization.Away.lift dblLoc hloc with hφ₀def
+  set φ : DblRing.{u} →+* A' :=
+    φ₀.comp ((ULift.ringEquiv : DblRing.{u} ≃+* DblRing₀) : DblRing.{u} →+* DblRing₀)
+    with hφdef
+  letI : Algebra DblRing.{u} A' := φ.toAlgebra
+  have halg : ∀ z : DblRing.{u}, algebraMap DblRing.{u} A' z = φ z := fun _ => rfl
+  have hcomp : ∀ z : DblBase₀, φ (dblι z) = ψ₀ z := by
+    intro z
+    show φ₀ ((ULift.ringEquiv : DblRing.{u} ≃+* DblRing₀)
+      ((ULift.ringEquiv : DblRing.{u} ≃+* DblRing₀).symm
+        (algebraMap DblBase₀ DblRing₀ z))) = ψ₀ z
+    rw [RingEquiv.apply_symm_apply]
+    exact IsLocalization.Away.lift_eq dblLoc hloc z
+  have hWeq : dblWu.{u}.map (algebraMap DblRing.{u} A') = W := by
+    rw [show (algebraMap DblRing.{u} A') = φ from rfl, dblWu,
+      WeierstrassCurve.map_map,
+      show φ.comp dblι = ψ₀ from RingHom.ext hcomp]
+    exact hWmap
+  have hPim : algebraMap DblRing.{u} A' dblPu = p := by
+    rw [halg, dblPu, hcomp, hψX]
+    rfl
+  have hQim : algebraMap DblRing.{u} A' dblQu = q := by
+    rw [halg, dblQu, hcomp, hψX]
+    rfl
+  have hdIm : algebraMap DblRing.{u} A' (dblWu.{u}.tangentDen dblPu dblQu)
+      = W.tangentDen p q := by
+    rw [halg, show dblWu.{u}.tangentDen dblPu dblQu
+      = dblι (dblW.tangentDen (X 4) (X 5)) from dblWu_tangentDen_eq, hcomp, hdenIm]
+  have hEim : algebraMap DblRing.{u} A' dblEu = e := by
+    have hd2 : W.tangentDen p q * algebraMap DblRing.{u} A' dblEu = 1 := by
+      have hh := congrArg (algebraMap DblRing.{u} A') dblEu_spec
+      rw [map_mul, map_one, hdIm] at hh
+      exact hh
+    have hu : IsUnit (W.tangentDen p q) := isUnit_iff_exists_inv.mpr ⟨e, he⟩
+    exact (hu.mul_left_cancel (hd2.trans he.symm))
+  -- transport the universal identity
+  have himg := congrArg (sectionMapHom (A' := A') dblWu.{u})
+    two_zsmul_affineSection_universal
+  rw [map_zsmul] at himg
+  rw [sectionMapHom_affineSection dblWu.{u} dblPu dblQu dblWu_equation
+      (WeierstrassCurve.Affine.Equation.map _ dblWu_equation),
+    sectionMapHom_affineSection dblWu.{u} _ _ dblWu_equation_dbl
+      (WeierstrassCurve.Affine.Equation.map _ dblWu_equation_dbl)] at himg
+  -- normalize the mapped coordinates
+  have hXim : algebraMap DblRing.{u} A' (dblWu.{u}.dblX dblPu dblQu dblEu)
+      = W.dblX p q e := by
+    rw [← WeierstrassCurve.map_dblX dblWu.{u} (algebraMap DblRing.{u} A')
+      dblPu dblQu dblEu, hPim, hQim, hEim, hWeq]
+  have hYim : algebraMap DblRing.{u} A' (dblWu.{u}.dblY dblPu dblQu dblEu)
+      = W.dblY p q e := by
+    rw [← WeierstrassCurve.map_dblY dblWu.{u} (algebraMap DblRing.{u} A')
+      dblPu dblQu dblEu, hPim, hQim, hEim, hWeq]
+  exact section_dbl_congr hWeq hPim hQim hXim hYim h h' himg
+
+
 end ModularCurves
