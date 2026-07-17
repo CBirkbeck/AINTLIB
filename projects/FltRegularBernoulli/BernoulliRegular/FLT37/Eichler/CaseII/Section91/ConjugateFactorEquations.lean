@@ -351,7 +351,8 @@ theorem caseII_section91_factorEquations
 
 /-! ## 5. Non-vacuity of the product half (it is a genuine implication, not degenerate) -/
 
-/-- **The conjugate norm `X·X̄` is real** (`σ(X·X̄) = X·X̄`), certifying the `σ η' = η'` constraint of
+/-- **The conjugate norm `X·X̄` is real** (`σ(X·X̄) = X·X̄`), certifying the `σ η' = η'`
+constraint of
 `CaseIISection91ProductHalf37` is the *natural* shape — not an artificial restriction.
 
 Since `σX = X̄` (`caseII_section91_factor_complexConj`), `σ(X·X̄) = X̄·X = X·X̄`.  So the product is
