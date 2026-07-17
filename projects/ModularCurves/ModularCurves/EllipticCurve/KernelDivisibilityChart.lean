@@ -760,6 +760,33 @@ private theorem pointSharp_sub_mem_ker
     exact congrArg (fun (m : _ ⟶ S') => m.hom ((F.zero.appLE U ⊤ (fun x _ => heU x)) c)) h5
   rw [RingHom.mem_ker, map_sub, h1, h4', sub_self]
 
+/-- In a commutative ring, an ideal that squares to zero annihilates products of its
+members: if `I ^ 2 = ⊥` then `a * b = 0` for all `a b ∈ I`. -/
+private theorem mul_eq_zero_of_mem_of_sq_eq_bot {A : Type*} [CommRing A] {I : Ideal A}
+    (hI : I ^ 2 = ⊥) {a b : A} (ha : a ∈ I) (hb : b ∈ I) : a * b = 0 := by
+  have h1 : a * b ∈ I ^ 2 := by rw [sq]; exact Ideal.mul_mem_mul ha hb
+  simpa [hI] using h1
+
+/-- If a ring map `g : D ⟶ Γ(E, U)` factors the tautological chart cover through a morphism
+`w₀`, i.e. `hU.fromSpec = Spec.map g ≫ w₀`, then `g` recovers every section from the chart
+comorphism of `w₀`: `g (pointSharp w₀ f) = f`. This is the localized axis-law step, shared
+between the two axes of `pointSharp_add_of_kernel`. -/
+private theorem hom_pointSharp_eq_of_fromSpec_factor {D : CommRingCat.{u}}
+    (hU : IsAffineOpen U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    {w₀ : Spec D ⟶ F.E} (hw₀ : ∀ x : ↑(Spec D), w₀.base x ∈ U)
+    (g : D ⟶ Γ(F.E, U)) (hfromSpec : hU.fromSpec = Spec.map g ≫ w₀) (f : Γ(F.E, U)) :
+    g.hom ((pointSharp w₀ hw₀).hom f) = f := by
+  have hcomp : ∀ x : ↑(Spec Γ(F.E, U)), (Spec.map g ≫ w₀).base x ∈ U := by
+    intro x
+    rw [← hfromSpec]
+    exact htaut x
+  have h3 := (pointSharp_congr hfromSpec htaut hcomp).trans
+    (pointSharp_specMap_comp g hw₀ hcomp)
+  have h4 := congrArg (fun (m : Γ(F.E, U) ⟶ Γ(F.E, U)) => m.hom f)
+    ((pointSharp_fromSpec hU htaut).symm.trans h3)
+  exact h4.symm
+
 /-- **(ADD — the co-multiplication additivity on kernel points, arbitrary base)** For two
 points restricting to zero modulo a square-zero kernel, the chart comorphism of the sum is
 additive on augmentation-ideal elements. The `y₀`-localized evaluation replaces the
@@ -792,19 +819,14 @@ private theorem pointSharp_add_of_kernel (hU : IsAffineOpen U)
     fun c => pointSharp_sub_mem_ker heU hφ hφ2 P hP hp c
   have hclose₂ : ∀ c, p₂ c - algebraMap ↑Γ(Spec B, ⊤) ↑R (ε c) ∈ RingHom.ker φ.hom :=
     fun c => pointSharp_sub_mem_ker heU hφ hφ2 Q hQ hq c
-  have hII : ∀ a ∈ RingHom.ker φ.hom, ∀ b ∈ RingHom.ker φ.hom, a * b = 0 := by
-    intro a ha b hb
-    have h1 : a * b ∈ RingHom.ker φ.hom ^ 2 := by
-      rw [sq]
-      exact Ideal.mul_mem_mul ha hb
-    simpa [hφ2] using h1
   -- the separating tensor and the pair lift
   obtain ⟨y₀, hyL, hyR, hyU⟩ := exists_sep hU heU htaut hz
   set pT : ↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U) →ₐ[↑Γ(Spec B, ⊤)] ↑R :=
     Algebra.TensorProduct.lift p₁ p₂ (fun _ _ => Commute.all _ _) with hpT
   have hkey : ∀ x, pT x = p₂ (axisL ε x) + p₁ (axisR ε x) -
       algebraMap ↑Γ(Spec B, ⊤) ↑R (foldε ε x) :=
-    fun x => pairLift_key ε p₁ p₂ hclose₁ hclose₂ hII x
+    fun x => pairLift_key ε p₁ p₂ hclose₁ hclose₂
+      (fun _ ha _ hb => mul_eq_zero_of_mem_of_sq_eq_bot hφ2 ha hb) x
   have hpTy₀ : pT y₀ = 1 := by
     rw [hkey, hyL, hyR, foldε_eq_axisL, hyL, map_one, map_one, map_one, map_one]
     ring
@@ -912,45 +934,15 @@ private theorem pointSharp_add_of_kernel (hU : IsAffineOpen U)
     exact congrArg (fun (m : Γ(F.E, U) ⟶ R) => m.hom f) h3
   -- the axis laws evaluate through the localization
   have haxLf : aLL ((pointSharp _ hqLland).hom f) = f := by
-    have h2 : hU.fromSpec = Spec.map (CommRingCat.ofHom aLL) ≫
-        (Spec.map (CommRingCat.ofHom
-          (algebraMap (↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U)) (BoxLoc y₀))) ≫
-          boxMul hU) := by
-      rw [← Category.assoc, ← hfacL]
-      exact (show Spec.map (CommRingCat.ofHom (axisL ε).toRingHom) ≫ boxMul hU =
-        hU.fromSpec from axisL_spec_law hU heU htaut hz).symm
-    have hcompL : ∀ x : ↑(Spec Γ(F.E, U)), (Spec.map (CommRingCat.ofHom aLL) ≫
-        (Spec.map (CommRingCat.ofHom
-          (algebraMap (↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U)) (BoxLoc y₀))) ≫
-          boxMul hU)).base x ∈ U := by
-      intro x
-      rw [← h2]
-      exact htaut x
-    have h3 := (pointSharp_congr h2 htaut hcompL).trans
-      (pointSharp_specMap_comp (CommRingCat.ofHom aLL) hqLland hcompL)
-    have h4 := congrArg (fun (m : Γ(F.E, U) ⟶ Γ(F.E, U)) => m.hom f)
-      ((pointSharp_fromSpec hU htaut).symm.trans h3)
-    exact h4.symm
+    refine hom_pointSharp_eq_of_fromSpec_factor hU htaut hqLland (CommRingCat.ofHom aLL) ?_ f
+    rw [← Category.assoc, ← hfacL]
+    exact (show Spec.map (CommRingCat.ofHom (axisL ε).toRingHom) ≫ boxMul hU =
+      hU.fromSpec from axisL_spec_law hU heU htaut hz).symm
   have haxRf : aRL ((pointSharp _ hqLland).hom f) = f := by
-    have h2 : hU.fromSpec = Spec.map (CommRingCat.ofHom aRL) ≫
-        (Spec.map (CommRingCat.ofHom
-          (algebraMap (↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U)) (BoxLoc y₀))) ≫
-          boxMul hU) := by
-      rw [← Category.assoc, ← hfacR]
-      exact (show Spec.map (CommRingCat.ofHom (axisR ε).toRingHom) ≫ boxMul hU =
-        hU.fromSpec from axisR_spec_law hU heU htaut hz).symm
-    have hcompR : ∀ x : ↑(Spec Γ(F.E, U)), (Spec.map (CommRingCat.ofHom aRL) ≫
-        (Spec.map (CommRingCat.ofHom
-          (algebraMap (↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U)) (BoxLoc y₀))) ≫
-          boxMul hU)).base x ∈ U := by
-      intro x
-      rw [← h2]
-      exact htaut x
-    have h3 := (pointSharp_congr h2 htaut hcompR).trans
-      (pointSharp_specMap_comp (CommRingCat.ofHom aRL) hqLland hcompR)
-    have h4 := congrArg (fun (m : Γ(F.E, U) ⟶ Γ(F.E, U)) => m.hom f)
-      ((pointSharp_fromSpec hU htaut).symm.trans h3)
-    exact h4.symm
+    refine hom_pointSharp_eq_of_fromSpec_factor hU htaut hqLland (CommRingCat.ofHom aRL) ?_ f
+    rw [← Category.assoc, ← hfacR]
+    exact (show Spec.map (CommRingCat.ofHom (axisR ε).toRingHom) ≫ boxMul hU =
+      hU.fromSpec from axisR_spec_law hU heU htaut hz).symm
   -- clear the denominator
   obtain ⟨⟨num, den⟩, hnd⟩ := IsLocalization.surj (M := Submonoid.powers y₀)
     ((pointSharp _ hqLland).hom f)
