@@ -1385,8 +1385,22 @@ differential has closed image … In particular `I_D = im(d₁) ⊂ P_D` is clos
 noetherian finite-module theory of `NoetherianTateModules.lean`). Requires `P_E`
 noetherian (strong noetherianity of the vertex). -/
 theorem isClosed_graphIdeal [IsNoetherianRing (P E m)]
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
+    (hE₀P : IsNoetherianRing (unitBall (P E m)))
     (r : Fin m → P E m) :
-    IsClosed ((Ideal.span (Set.range r) : Set (P E m))) := by sorry
+    IsClosed ((Ideal.span (Set.range r) : Set (P E m))) := by
+  haveI : IsTateRing (P E m) := isTateRing_of_scale (polyToP (MvPolynomial.C t))
+    (isUnit_tP t htu)
+    (by rw [norm_tP t hscale]; exact ht1)
+    (by rw [norm_tP t hscale]; exact ht0)
+    (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G)
+  set pod := unitBallPod (E := P E m) (polyToP (MvPolynomial.C t)) (isUnit_tP t htu)
+    (by rw [norm_tP t hscale]; exact ht1) (by rw [norm_tP t hscale]; exact ht0)
+    (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G) with hpod
+  haveI : IsNoetherianRing ↥pod.A₀ := hE₀P
+  haveI : IsUniformAddGroup (P E m) := SeminormedAddCommGroup.to_isUniformAddGroup
+  exact Wedhorn.isClosed_ideal_of_noetherian pod _
 
 /-- Strictness of `d₁` with an explicit constant ([FJP] (4.7): "an element `x ∈ I_E` has a
 representative `u ∈ P_E^m` with `d_{1,E}(u) = x`, `‖u‖ ≤ h_E ‖x‖`"; from closedness + the
