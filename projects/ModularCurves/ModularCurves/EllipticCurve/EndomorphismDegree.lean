@@ -2,6 +2,8 @@ import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.Rigidity
 import ModularCurves.ForMathlib.FinrankComp
+import ModularCurves.ForMathlib.FinrankDegenerate
+import ModularCurves.LevelStructure.CartierDivisor
 
 /-!
 # The endomorphism ring, degree, and Hasse bound of `E/S` (KM Ch. 2, §§2.5–2.7)
@@ -160,13 +162,34 @@ instance isIso_mulBy_neg_one : IsIso (E.mulBy (-1)) :=
 instance isIso_mulByHom_neg_one : IsIso (E.mulByHom (-1)) :=
   inferInstanceAs (IsIso ((Over.forget S).map (E.mulBy (-1))))
 
-/-- **(T-DEG0 leaf)** The `[0]` endomorphism has fibre rank `0` at every point. `[0]` factors
-through the base (`(mulBy 0).left = π ≫ zero.left`-shaped), so its pullback module along an affine
-chart at `x` is cut by the fibre ideal of the zero section — a torsion module over the chart's
-local ring (smoothness of `E.π` of relative dimension `1` supplies a nonzerodivisor fibre
-parameter in the kernel), hence of `rankAtStalk` zero. Consumed only by the `n = 0` case of
-`endDeg_mulBy`. -/
-theorem mulByHom_zero_finrank (x : E.E) : (E.mulByHom 0).finrank x = 0 := by sorry
+/-- The `[0]` endomorphism is the constant-to-zero-section map `π ≫ zero`. -/
+theorem mulByHom_zero_eq : E.mulByHom 0 = E.π ≫ E.zero := by
+  show (E.mulBy 0).left = E.π ≫ E.zero
+  rw [show E.mulBy (0 : ℤ) = (1 : E.asOver ⟶ E.asOver) from by
+    simp only [EllipticCurve.mulBy, zpow_zero]]
+  show ((1 : E.asOver ⟶ E.asOver)).left = E.π ≫ E.zero
+  rw [Hom.one_def, Over.comp_left, E.one_eq_zero]
+  have hw : (toUnit E.asOver).left ≫ (𝟙_ (Over S)).hom = E.π :=
+    Over.w (toUnit E.asOver)
+  exact (Category.assoc _ _ _).symm.trans (congrArg (fun m ↦ m ≫ E.zero) hw)
+
+/-- **(T-DEG0 leaf, PROVEN)** The `[0]` endomorphism has fibre rank `0` at every point. `[0]`
+factors through the zero section, a relative effective Cartier divisor (KM 1.2.2: smoothness of
+`E.π` of relative dimension `1` makes the section ideal affine-locally principal on a
+nonzerodivisor, `exists_affineOpen_ker_principal_nonZeroDivisor`), so its pushforward module is
+ideal-torsion with the ideal germ nonzero — `rankAtStalk` zero with no flatness/finiteness
+(`Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem`,
+`ForMathlib/FinrankDegenerate.lean`). Realises KM 2.6.1's `deg 0 = 0` degenerate case with no
+zero-or-isogeny dichotomy. Consumed by the `n = 0` case of `endDeg_mulBy`. -/
+theorem mulByHom_zero_finrank (x : E.E) : (E.mulByHom 0).finrank x = 0 := by
+  haveI : IsSeparated E.π := inferInstance
+  obtain ⟨V, hxV, f₀, hgen, hnzd⟩ :=
+    RelEffCartierDiv.exists_affineOpen_ker_principal_nonZeroDivisor E.π E.smooth E.zero E.zero_π x
+  refine Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem _ (Scheme.Hom.ker E.zero)
+    (E.π ≫ E.zero.toImage) ?_ x V hxV f₀ ?_ hnzd
+  · rw [mulByHom_zero_eq, Category.assoc, Scheme.Hom.toImage_imageι]
+  · rw [hgen]
+    exact Ideal.mem_span_singleton_self f₀
 
 /-- `Spec R` is nonempty for a nontrivial ring — the scheme-carrier form of
 `PrimeSpectrum.instNonempty`, provided as an instance so the `[Nonempty S]` hypotheses of the
