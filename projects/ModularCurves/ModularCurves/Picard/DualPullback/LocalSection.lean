@@ -224,15 +224,20 @@ theorem terminal_apply_eq_of_overEquivT (M : X.Modules)
   dsimp only [T] at hrestricted ⊢
   have hback := congrArg
     (fun z ↦ (X.ringCatSheaf.over U).obj.map e.inv.op z) hrestricted
-  rw [← (X.ringCatSheaf.over U).obj.map_comp_apply,
-    ← op_comp, e.inv_hom_id, op_id,
-    (X.ringCatSheaf.over U).obj.map_id_apply] at hback
+  have hx : (X.ringCatSheaf.over U).obj.map e.inv.op
+      ((X.ringCatSheaf.over U).obj.map e.hom.op
+        (p.val.app (.op (Over.mk (𝟙 U))) x)) =
+      p.val.app (.op (Over.mk (𝟙 U))) x := by
+    simpa only [Functor.mapIso_hom, Functor.mapIso_inv, Iso.op_hom,
+      Iso.op_inv] using Iso.hom_inv_id_apply
+        ((X.ringCatSheaf.over U).obj.mapIso e.op)
+        (p.val.app (.op (Over.mk (𝟙 U))) x)
   have hy : (X.ringCatSheaf.over U).obj.map e.inv.op
       ((X.ringCatSheaf.over U).obj.map e.hom.op y) = y := by
-    rw [← (X.ringCatSheaf.over U).obj.map_comp_apply,
-      ← op_comp, e.inv_hom_id, op_id,
-      (X.ringCatSheaf.over U).obj.map_id_apply]
-  exact hback.trans hy
+    simpa only [Functor.mapIso_hom, Functor.mapIso_inv, Iso.op_hom,
+      Iso.op_inv] using Iso.hom_inv_id_apply
+        ((X.ringCatSheaf.over U).obj.mapIso e.op) y
+  exact Eq.trans hx.symm (Eq.trans hback hy)
 
 end AlgebraicGeometry.Scheme.Modules
 
@@ -297,8 +302,18 @@ theorem pullbackUnitIso_hom_unit_oneT (f : Y ⟶ X) :
   have hunit := pullback_unit_unit_app_top_apply_oneT f
   have h := congrArg (fun z ↦
     (pullbackUnitIso f).hom.val.app (.op (f ⁻¹ᵁ (⊤ : X.Opens))) z) hunit
-  rw [iso_inv_hom_app_applyT] at h
-  simpa only [map_one] using h
+  have hcancel :
+      (pullbackUnitIso f).hom.val.app (.op (f ⁻¹ᵁ (⊤ : X.Opens)))
+          ((pullbackUnitIso f).inv.val.app
+            (.op (f ⁻¹ᵁ (⊤ : X.Opens)))
+              ((f.app (⊤ : X.Opens)).hom
+                (show X.presheaf.obj (.op (⊤ : X.Opens)) from 1))) =
+        (f.app (⊤ : X.Opens)).hom
+          (show X.presheaf.obj (.op (⊤ : X.Opens)) from 1) :=
+    iso_inv_hom_app_applyT (pullbackUnitIso f)
+      (.op (f ⁻¹ᵁ (⊤ : X.Opens))) _
+  have hfinal := Eq.trans h hcancel
+  simpa only [map_one] using hfinal
 
 theorem pullbackUnit_one_transport_topT (f : Y ⟶ X)
     (U : X.Opens) (V : Y.Opens) (hU : U = ⊤)
