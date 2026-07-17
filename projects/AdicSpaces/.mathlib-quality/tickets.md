@@ -741,7 +741,29 @@ T704, by a fresh `/develop --continue`.
   likewise (needs a `show`-unfold of the structure `.T` before `Finset.coe_insert`).
 
 ### [T802] Prop 3.1: the chart is 𝓑
-- **Status**: open | **Depends**: T801, T603 | **Type**: def-completion + proofs (R4)
+- **Status**: open — **PLAN VERIFIED (2026-07-17, key normalization resolved)**: in the
+  project model `‖W_B‖ = 1` (radius-1 `PowerSeries.Restricted`), so the naive evaluation
+  does NOT kill the graph relation — Prop 3.1's `W ↦ ϖX` is implemented by the TWISTED
+  base map `θ := (rescale-by-ϖ on both TrivSqZeroExt components) ∘ jB : JetA →+* JetB`
+  (the substitution X ↦ ϖX = mathlib `PowerSeries.rescale`; Restricted-version needed —
+  decay preserved since `‖ϖ‖ ≤ 1`; θ is norm-≤ hence continuous). **Forward**: `tB` IS a
+  unit of `JetB` (constant Laurent scalar — `isUnit_tB` exists!), so
+  `IsLocalization.Away.lift (tA) (hu : IsUnit (θ tA) = IsUnit tB)`;
+  `locTopology_continuous_lift`: generators `Wa/t ↦ θ(Wa)/tB = (tB·W_B)/tB = W_B` (norm 1,
+  pb ✓) and `t/t ↦ 1`; `extensionHom` (JetB complete T2 ✓). θ(Wa) = tB·W_B is the key jet
+  computation: `jB (Wa) = W_B` (the norm-1 generator) then rescale. **Reverse**: for
+  `(f, g) : JetB = DualNumber K⟨X⟩`: `rev (f,g) := ev f + ev g · Q̄` with `ev : K⟨X⟩ →
+  𝒪(chart)` := single-variable `evalHomBounded` (Wedhorn828 predecessor of mvEval) at the
+  base `canonicalMap ∘ constA : K → 𝒪(chart)` and `X ↦ coeRingHom (divByS (Wa) (tA))`
+  (pb ✓ locSubring), `Q̄ := canonicalMap Qa` (Qa : JetA the (0,1)-support element, build
+  like Wa); ring-hom fields need `Q̄² = 0` in 𝒪(chart) — the (3.3)-collapse:
+  `Q̄² = canonicalMap (Qa²)` … `Qa² ∈ Q²𝓒`-part; use the referee factorisation
+  `y − ϖⁿXⁿ(W⁻ⁿy) = (Wⁿ − (ϖX)ⁿ)(W⁻ⁿy)` at the localization level: in
+  `Localization.Away tA`, `Qa·Qa = (Wa/tA)ⁿ·tAⁿ·(W⁻ⁿ·Qa²)`-chain gives
+  `‖coe(Qa²-image)‖ → 0`, i.e. `canonicalMap (Qa²) = 0` by T0-separation (limit of a
+  null sequence in the completion). Round trips by density (localization dense; K⟨X⟩[Q]
+  polynomials dense) exactly as T603. | **Depends**: T801, T603 | **Type**:
+  def-completion + proofs (R4)
 - **Sorries**: `chartEquiv` (data), continuity ×2; replace stub
   `chartEquiv_canonicalMap_W : True` with the real pinning statement
   (`chartEquiv (canonicalMap (Wa)) = tK • X`-form — fix statement per R4).

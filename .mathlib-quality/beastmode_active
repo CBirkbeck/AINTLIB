@@ -1,1 +1,1 @@
-FOCUS: T802 chartEquiv — route: graphBridgeA at (chartDatum, datumEnum) gives presheafValue ≃ locA F 2 tA f; then locA-chart ≅ JetB via (3.3)-collapse (fallback: direct ψ/φ per R4). T803 after: transport not_isUniform_JetB.
+FOCUS: T802 chartEquiv is the LAST math sorry-cluster: presheafValue(chartDatum) ≃+* JetB. Route A: graphBridgeA at (chartDatum, datumEnum) then locA-chart ≅ JetB via (3.3) Q²-collapse. Fallback R4: direct ψ/φ. Then not_stablyUniform completes automatically; finish with T804 axiom sweep.
