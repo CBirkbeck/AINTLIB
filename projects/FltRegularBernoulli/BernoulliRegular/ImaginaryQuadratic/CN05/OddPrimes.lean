@@ -39,10 +39,10 @@ lemma eq_top_of_coprime_absNorm_dvd_prime_pow (q : ℕ) [Fact q.Prime]
   have hRfac := (Ideal.mem_normalizedFactors_iff hQ_ne).1 hRmem
   have hRprime : R.IsPrime := hRfac.1
   have hQ_le_R : Q ≤ R := hRfac.2
-  haveI : R.IsPrime := hRprime
+  have : R.IsPrime := hRprime
   have hR_ne : R ≠ ⊥ :=
     fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
-  haveI : NeZero R := ⟨hR_ne⟩
+  have : NeZero R := ⟨hR_ne⟩
   have hR_dvd : Ideal.absNorm R ∣ q ^ k :=
     (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R).trans hQ_norm
   have hunder_dvd : Ideal.absNorm (Ideal.under ℤ R) ∣ q ^ k :=
@@ -78,7 +78,7 @@ theorem idealNormMultiplicity_at_q_inert_odd (hp3 : p % 4 = 3) (q : ℕ)
   have hne : (Ideal.span {(q : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : q.Prime).ne_zero
-  haveI : (Ideal.span {(q : ℤ)} : Ideal ℤ).IsMaximal :=
+  have : (Ideal.span {(q : ℤ)} : Ideal ℤ).IsMaximal :=
     Int.ideal_span_isMaximal_of_prime q
   -- Extract the unique prime above q.
   have h_set_card := ncard_primesOver_at_q_inert p hp3 q hq_odd hqp h_not_sq
@@ -93,9 +93,9 @@ theorem idealNormMultiplicity_at_q_inert_odd (hp3 : p % 4 = 3) (q : ℕ)
       Ideal.comap_bot_of_injective (algebraMap ℤ (𝓞 (Kminus p)))
       (FaithfulSMul.algebraMap_injective ℤ (𝓞 (Kminus p)))] at hunder
     exact hne hunder
-  haveI : P.IsPrime := hP_mem.1
-  haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
-  haveI : P.LiesOver (Ideal.span {(q : ℤ)}) := hP_mem.2
+  have : P.IsPrime := hP_mem.1
+  have : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
+  have : P.LiesOver (Ideal.span {(q : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = q ^ 2 :=
     absNorm_primeOver_at_q_inert p hp3 q hq_odd hqp h_not_sq P hP_mem
   -- Show the set {I : NonzeroIdeal (Kminus p) // absNorm I = q^k} is empty.
@@ -172,8 +172,8 @@ theorem absNorm_primeOver_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
     (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p))) :
     Ideal.absNorm P = q := by
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(q : ℤ)}) := hP.2
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(q : ℤ)}) := hP.2
   have h_ine : (Ideal.span {(q : ℤ)}).inertiaDeg' P = 1 :=
     inertiaDeg_at_q_split p hp3 q hq_odd hqp hr P hP
   calc Ideal.absNorm P
@@ -193,7 +193,7 @@ theorem idealNormMultiplicity_at_q_inert_even (hp3 : p % 4 = 3) (q : ℕ)
   have hne : (Ideal.span {(q : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : q.Prime).ne_zero
-  haveI : (Ideal.span {(q : ℤ)} : Ideal ℤ).IsMaximal :=
+  have : (Ideal.span {(q : ℤ)} : Ideal ℤ).IsMaximal :=
     Int.ideal_span_isMaximal_of_prime q
   have h_set_card := ncard_primesOver_at_q_inert p hp3 q hq_odd hqp h_not_sq
   rw [Set.ncard_eq_one] at h_set_card
@@ -207,14 +207,14 @@ theorem idealNormMultiplicity_at_q_inert_even (hp3 : p % 4 = 3) (q : ℕ)
       Ideal.comap_bot_of_injective (algebraMap ℤ (𝓞 (Kminus p)))
       (FaithfulSMul.algebraMap_injective ℤ (𝓞 (Kminus p)))] at hunder
     exact hne hunder
-  haveI : P.IsPrime := hP_mem.1
-  haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
-  haveI : P.LiesOver (Ideal.span {(q : ℤ)}) := hP_mem.2
+  have : P.IsPrime := hP_mem.1
+  have : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
+  have : P.LiesOver (Ideal.span {(q : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = q ^ 2 :=
     absNorm_primeOver_at_q_inert p hp3 q hq_odd hqp h_not_sq P hP_mem
   have hq_gt_one : 1 < q := (Fact.out : q.Prime).one_lt
   simp only [idealNormMultiplicity]
-  haveI : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = q ^ (2 * m)} :=
+  have : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = q ^ (2 * m)} :=
     { default := ⟨⟨P ^ m, pow_ne_zero m hP_ne⟩, by
           rw [map_pow, habsNormP, ← pow_mul]⟩
       uniq := by
@@ -244,7 +244,7 @@ theorem idealNormMultiplicity_at_q_inert_even (hp3 : p % 4 = 3) (q : ℕ)
 iff `q` is a QR mod p. -/
 lemma legendreDirichletNat_eq_one_iff_isSquare (q : ℕ) [hq : Fact q.Prime] (hqp : q ≠ p) :
     legendreDirichletNat p q = 1 ↔ IsSquare ((q : ℕ) : ZMod p) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hq_ne : ((q : ℕ) : ZMod p) ≠ 0 := by
     intro h_zero
     have hp_dvd : (p : ℕ) ∣ q := (ZMod.natCast_eq_zero_iff q p).mp h_zero
@@ -265,7 +265,7 @@ iff `q` is NOT a QR mod p. -/
 lemma legendreDirichletNat_eq_neg_one_iff_not_isSquare (q : ℕ) [hq : Fact q.Prime]
     (hqp : q ≠ p) :
     legendreDirichletNat p q = -1 ↔ ¬ IsSquare ((q : ℕ) : ZMod p) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hq_ne : ((q : ℕ) : ZMod p) ≠ 0 := by
     intro h_zero
     have hp_dvd : (p : ℕ) ∣ q := (ZMod.natCast_eq_zero_iff q p).mp h_zero
@@ -286,8 +286,8 @@ lemma legendreDirichletNat_eq_neg_one_iff_not_isSquare (q : ℕ) [hq : Fact q.Pr
 lemma isSquare_neg_p_iff_isSquare_q (hp3 : p % 4 = 3) (q : ℕ) [hq : Fact q.Prime]
     (hq_odd : q ≠ 2) (hqp : q ≠ p) :
     IsSquare (-(p : ZMod q)) ↔ IsSquare ((q : ℕ) : ZMod p) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
-  haveI : NeZero q := ⟨hq.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero q := ⟨hq.out.ne_zero⟩
   have hp_odd : p ≠ 2 := by omega
   -- Use legendreSym values.
   -- legendreSym q (-p) = quadraticChar (ZMod q) (-p : ZMod q)
@@ -400,7 +400,7 @@ lemma prime_factor_of_q_pow_is_above_q (_hp3 : p % 4 = 3) (q : ℕ)
     (R : Ideal (𝓞 (Kminus p))) [hR_prime : R.IsPrime] (hR_ne : R ≠ ⊥)
     (hR_dvd : Ideal.absNorm R ∣ q ^ k) :
     R ∈ Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)) := by
-  haveI : NeZero R := ⟨hR_ne⟩
+  have : NeZero R := ⟨hR_ne⟩
   have hunder_dvd : Ideal.absNorm (Ideal.under ℤ R) ∣ q ^ k :=
     dvd_trans (Int.absNorm_under_dvd_absNorm R) hR_dvd
   have hunder_prime : (Ideal.absNorm (Ideal.under ℤ R)).Prime :=
@@ -545,8 +545,8 @@ theorem inertiaDeg_at_p (hp3 : p % 4 = 3) (P : Ideal (𝓞 (Kminus p)))
 theorem absNorm_primeOver_at_p (hp3 : p % 4 = 3) (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {(p : ℤ)}) (𝓞 (Kminus p))) :
     Ideal.absNorm P = p := by
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := hP.2
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(p : ℤ)}) := hP.2
   have h_ine : (Ideal.span {(p : ℤ)}).inertiaDeg' P = 1 := inertiaDeg_at_p p hp3 P hP
   calc Ideal.absNorm P
       = p ^ ((Ideal.span {(p : ℤ)}).inertiaDeg' P) := Ideal.absNorm_eq_pow_inertiaDeg' P hp.out
@@ -562,7 +562,7 @@ theorem idealNormMultiplicity_at_p_eq_one (hp3 : p % 4 = 3) (k : ℕ) :
   have hne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast hp.out.ne_zero
-  haveI : (Ideal.span {(p : ℤ)} : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
+  have : (Ideal.span {(p : ℤ)} : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
   -- Extract the unique prime above p.
   have h_set_card := ncard_primesOver_at_p p hp3
   rw [Set.ncard_eq_one] at h_set_card
@@ -576,12 +576,12 @@ theorem idealNormMultiplicity_at_p_eq_one (hp3 : p % 4 = 3) (k : ℕ) :
       Ideal.comap_bot_of_injective (algebraMap ℤ (𝓞 (Kminus p)))
       (FaithfulSMul.algebraMap_injective ℤ (𝓞 (Kminus p)))] at hunder
     exact hne hunder
-  haveI : P.IsPrime := hP_mem.1
-  haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
-  haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := hP_mem.2
+  have : P.IsPrime := hP_mem.1
+  have : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
+  have : P.LiesOver (Ideal.span {(p : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = p := absNorm_primeOver_at_p p hp3 P hP_mem
   simp only [idealNormMultiplicity]
-  haveI : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = p ^ k} :=
+  have : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = p ^ k} :=
     { default := ⟨⟨P ^ k, pow_ne_zero k hP_ne⟩, by rw [map_pow, habsNormP]⟩
       uniq := by
         rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -602,10 +602,10 @@ theorem idealNormMultiplicity_at_p_eq_one (hp3 : p % 4 = 3) (k : ℕ) :
           have hRfac := (Ideal.mem_normalizedFactors_iff hQ_ne).1 hRmem
           have hRprime : R.IsPrime := hRfac.1
           have hQ_le_R : Q ≤ R := hRfac.2
-          haveI : R.IsPrime := hRprime
+          have : R.IsPrime := hRprime
           have hR_ne : R ≠ ⊥ := fun hR_bot ↦
             hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
-          haveI : NeZero R := ⟨hR_ne⟩
+          have : NeZero R := ⟨hR_ne⟩
           have hI_le_Q : I ≤ Q := by
             rw [hIeq]; exact Ideal.mul_le_left
           have hR_dvd_I : Ideal.absNorm R ∣ p ^ k := by
@@ -665,10 +665,10 @@ lemma ideal_decomp_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
   classical
   have hP₁_ne : P₁ ≠ ⊥ := primeOver_ne_bot p q P₁ hP₁_mem
   have hP₂_ne : P₂ ≠ ⊥ := primeOver_ne_bot p q P₂ hP₂_mem
-  haveI : P₁.IsPrime := hP₁_mem.1
-  haveI : P₂.IsPrime := hP₂_mem.1
-  haveI : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
-  haveI : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
+  have : P₁.IsPrime := hP₁_mem.1
+  have : P₂.IsPrime := hP₂_mem.1
+  have : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
+  have : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
   have habsNormP₁ : Ideal.absNorm P₁ = q :=
     absNorm_primeOver_at_q_split p hp3 q hq_odd hqp hr P₁ hP₁_mem
   have habsNormP₂ : Ideal.absNorm P₂ = q :=
@@ -705,7 +705,7 @@ lemma ideal_decomp_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
     have hRprime : R.IsPrime := hRfac.1
     have hQ₂_le_R : Q₂ ≤ R := hRfac.2
     have hR_ne : R ≠ ⊥ := fun h ↦ hQ₂_ne (le_bot_iff.mp (hQ₂_le_R.trans_eq h))
-    haveI : NeZero R := ⟨hR_ne⟩
+    have : NeZero R := ⟨hR_ne⟩
     -- absNorm R divides absNorm Q₂ divides absNorm I = q^k.
     have hQ₂_dvd_I : Ideal.absNorm Q₂ ∣ Ideal.absNorm I := by
       rw [hI_decomp, map_mul]; exact dvd_mul_left _ _
@@ -757,10 +757,10 @@ theorem idealNormMultiplicity_at_q_split_eq (hp3 : p % 4 = 3) (q : ℕ)
     rw [hP_eq]; exact Set.mem_insert_of_mem _ rfl
   have hP₁_ne : P₁ ≠ ⊥ := primeOver_ne_bot p q P₁ hP₁_mem
   have hP₂_ne : P₂ ≠ ⊥ := primeOver_ne_bot p q P₂ hP₂_mem
-  haveI : P₁.IsPrime := hP₁_mem.1
-  haveI : P₂.IsPrime := hP₂_mem.1
-  haveI : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
-  haveI : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
+  have : P₁.IsPrime := hP₁_mem.1
+  have : P₂.IsPrime := hP₂_mem.1
+  have : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
+  have : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
   have habsNormP₁ : Ideal.absNorm P₁ = q :=
     absNorm_primeOver_at_q_split p hp3 q hq_odd hqp hr P₁ hP₁_mem
   have habsNormP₂ : Ideal.absNorm P₂ = q :=
