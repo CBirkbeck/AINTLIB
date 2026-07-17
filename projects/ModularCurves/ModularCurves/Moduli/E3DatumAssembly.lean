@@ -172,6 +172,52 @@ noncomputable def chartPointsEquiv {T : Scheme.{u}} (tV : T ⟶ Spec Γ(S, V.1))
         (chartRecordIso_unit Pr)) tV)
 
 
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([hArb-3c-δ] the marked value)** Under the chart points equivalence, the pull of a
+marked section evaluates to the (pulled) affine-point section of its chart
+coordinates. -/
+theorem chartPointsEquiv_pull_marked {T : Scheme.{u}} (tV : T ⟶ Spec Γ(S, V.1))
+    {σ : S ⟶ E.toEllipticCurveGeom.E} {hσ : σ ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    {p q : Γ(S, V.1)} (heq : Pr.W.toAffine.Equation p q)
+    (hMeq : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσ V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W p q heq) :
+    letI := Pr.elliptic
+    ((chartPointsEquiv Pr tV
+        (EllipticCurve.Point.pull E (tV ≫ chartρ V) ⟨σ, hσ⟩))).1
+      = tV ≫ projModelAffineSection Pr.W p q heq := by
+  letI := Pr.elliptic
+  show (pullback.lift ((tV ≫ chartρ V) ≫ σ) tV
+      (by rw [Category.assoc, hσ, Category.comp_id]) ≫
+    ((chartPullbackIso (E := E) (V := V)).hom ≫ Pr.e.hom)) = _
+  rw [← hMeq]
+  rw [show tV ≫ (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσ V) ≫ Pr.e.hom
+      = (tV ≫ V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσ V) ≫ Pr.e.hom from
+    by simp only [Category.assoc]]
+  rw [← Category.assoc]
+  congr 1
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc,
+      show (chartPullbackIso (E := E) (V := V)).hom ≫
+          pullback.fst E.toEllipticCurveGeom.π V.1.ι = pullback.fst E.π (chartρ V) from
+        pullback.lift_fst _ _ _,
+      pullback.lift_fst]
+    simp only [Category.assoc]
+    rw [show sectionLift E.toEllipticCurveGeom hσ V ≫
+          pullback.fst E.toEllipticCurveGeom.π V.1.ι = V.1.ι ≫ σ from
+        pullback.lift_fst _ _ _]
+  · rw [Category.assoc,
+      show (chartPullbackIso (E := E) (V := V)).hom ≫
+          pullback.snd E.toEllipticCurveGeom.π V.1.ι =
+        pullback.snd E.π (chartρ V) ≫ V.2.isoSpec.inv from pullback.lift_snd _ _ _,
+      ← Category.assoc, pullback.lift_snd]
+    simp only [Category.assoc]
+    rw [show sectionLift E.toEllipticCurveGeom hσ V ≫
+          pullback.snd E.toEllipticCurveGeom.π V.1.ι = 𝟙 _ from
+        pullback.lift_snd _ _ _]
+    simp
+
+
 end ChartRecord
 
 
