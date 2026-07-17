@@ -75,13 +75,29 @@ private def homComplexIsoSections
     ext α
     obtain ⟨f, rfl⟩ :=
       CochainComplex.HomComplex.Cochain.fromSingleMk_surjective α i (zero_add i)
-    rw [AddCommGrpCat.comp_apply, AddCommGrpCat.comp_apply,
-      cochainToSectionsIso_hom_apply, Functor.mapHomologicalComplex_obj_d,
-      homComplex_d_apply, cochainToSectionsIso_hom_apply]
-    rw [CochainComplex.HomComplex.Cochain.δ_fromSingleMk f (zero_add i) j j
-      (zero_add j), cochainToSectionsEquiv_fromSingleMk,
-      cochainToSectionsEquiv_fromSingleMk]
-    exact (he f (K.d i j)).symm
+    let α := CochainComplex.HomComplex.Cochain.fromSingleMk f (zero_add i)
+    have hleft :
+        (((cochainToSectionsIso e K i).hom ≫
+            ((G.mapHomologicalComplex (.up ℤ)).obj K).d i j).hom α) =
+          (G.map (K.d i j)).hom (e (K.X i) f) := by
+      change (((G.mapHomologicalComplex (.up ℤ)).obj K).d i j).hom
+        ((cochainToSectionsIso e K i).hom.hom α) = _
+      rw [Functor.mapHomologicalComplex_obj_d]
+      rw [cochainToSectionsIso_hom_apply]
+      exact congrArg (G.map (K.d i j)).hom
+        (cochainToSectionsEquiv_fromSingleMk e K i f)
+    have hright :
+        (((((CochainComplex.singleFunctor C 0).obj Z).HomComplex K).d i j ≫
+            (cochainToSectionsIso e K j).hom).hom α) =
+          e (K.X j) (f ≫ K.d i j) := by
+      change (cochainToSectionsIso e K j).hom.hom
+        (((((CochainComplex.singleFunctor C 0).obj Z).HomComplex K).d i j).hom α) = _
+      change cochainToSectionsEquiv e K j
+        (CochainComplex.HomComplex.δ i j α) = _
+      rw [CochainComplex.HomComplex.Cochain.δ_fromSingleMk f (zero_add i) j j
+        (zero_add j)]
+      exact cochainToSectionsEquiv_fromSingleMk e K j (f ≫ K.d i j)
+    exact hleft.trans ((he f (K.d i j)).symm.trans hright.symm)
 
 private lemma homComplexIsoSections_hom_f_apply
     (e : ∀ X : C, (Z ⟶ X) ≃+ ↑(G.obj X))
@@ -124,13 +140,30 @@ private lemma homComplexIsoSections_naturality
   ext n z
   obtain ⟨a, rfl⟩ :=
     CochainComplex.HomComplex.Cochain.fromSingleMk_surjective z n (zero_add n)
-  rw [HomologicalComplex.comp_f, HomologicalComplex.comp_f,
-    AddCommGrpCat.comp_apply, AddCommGrpCat.comp_apply, homComplexPostcomp_f_apply,
-    homComplexIsoSections_hom_f_apply, homComplexIsoSections_hom_f_apply,
-    Functor.mapHomologicalComplex_map_f]
-  rw [← CochainComplex.HomComplex.Cochain.fromSingleMk_postcomp]
-  rw [cochainToSectionsEquiv_fromSingleMk, cochainToSectionsEquiv_fromSingleMk]
-  exact he a (f.f n)
+  let α := CochainComplex.HomComplex.Cochain.fromSingleMk a (zero_add n)
+  have hleft :
+      ((((homComplexPostcomp f ≫
+          (homComplexIsoSections e he L).hom).f n).hom α) =
+        e (L.X n) (a ≫ f.f n)) := by
+    rw [HomologicalComplex.comp_f]
+    change ((homComplexIsoSections e he L).hom.f n).hom
+      (((homComplexPostcomp f).f n).hom α) = _
+    change cochainToSectionsEquiv e L n
+      (α.comp (.ofHom f) (add_zero n)) = _
+    rw [← CochainComplex.HomComplex.Cochain.fromSingleMk_postcomp]
+    exact cochainToSectionsEquiv_fromSingleMk e L n (a ≫ f.f n)
+  have hright :
+      (((((homComplexIsoSections e he K).hom ≫
+          (G.mapHomologicalComplex (.up ℤ)).map f).f n).hom α) =
+        (G.map (f.f n)).hom (e (K.X n) a)) := by
+    rw [HomologicalComplex.comp_f]
+    change (((G.mapHomologicalComplex (.up ℤ)).map f).f n).hom
+      (((homComplexIsoSections e he K).hom.f n).hom α) = _
+    rw [Functor.mapHomologicalComplex_map_f]
+    change (G.map (f.f n)).hom (cochainToSectionsEquiv e K n α) = _
+    exact congrArg (G.map (f.f n)).hom
+      (cochainToSectionsEquiv_fromSingleMk e K n a)
+  exact hleft.trans ((he a (f.f n)).trans hright.symm)
 
 private def cocyclePostcomp {K L : CochainComplex C ℤ} (f : K ⟶ L) (n : ℤ) :
     CochainComplex.HomComplex.Cocycle ((CochainComplex.singleFunctor C 0).obj Z) K n →+
@@ -299,7 +332,7 @@ private def mapExtendIso (K : CochainComplex C ℕ) :
           _ = G.map eᵢ.hom ≫
               (mᵢ.hom ≫ ((G.mapHomologicalComplex (.up ℕ)).obj K).d
                 a b) ≫ fⱼ.inv := by
-            simp [Category.assoc]
+            simp only [Category.assoc, Iso.inv_hom_id_assoc]
           _ = G.map eᵢ.hom ≫
               (G.map (K.d a b) ≫ mⱼ.hom) ≫ fⱼ.inv := by
             rw [show mᵢ.hom ≫ ((G.mapHomologicalComplex (.up ℕ)).obj K).d
@@ -340,7 +373,7 @@ private lemma mapExtendIso_naturality {K L : CochainComplex C ℕ} (f : K ⟶ L)
         ComplexShape.embeddingUpNat (ComplexShape.embeddingUpNat_f k)]
     rw [mapExtendXIso_natCast (G := G) K k, mapExtendXIso_natCast (G := G) L k]
     rw [Functor.mapHomologicalComplex_map_f]
-    simp only [G.map_comp, Iso.trans_hom, Iso.symm_hom, mapXIso, Iso.refl_hom]
+    simp only [G.map_comp, Iso.trans_hom, mapXIso]
     let eK := HomologicalComplex.extendXIso K ComplexShape.embeddingUpNat
       (ComplexShape.embeddingUpNat_f k)
     let eL := HomologicalComplex.extendXIso L ComplexShape.embeddingUpNat
@@ -355,16 +388,32 @@ private lemma mapExtendIso_naturality {K L : CochainComplex C ℕ} (f : K ⟶ L)
         (gK.hom ≫ G.map (f.f k) ≫ gL.inv)
     have heL : G.map eL.inv ≫ G.map eL.hom = 𝟙 _ :=
       (G.mapIso eL).inv_hom_id
-    have heLgL : G.map eL.inv ≫ G.map eL.hom ≫ gL.inv = gL.inv := by
-      rw [← Category.assoc, heL, Category.id_comp]
+    have heLgL : G.map eL.inv ≫ G.map eL.hom ≫ gL.inv = gL.inv :=
+      (G.mapIso eL).inv_hom_id_assoc gL.inv
     have hgK : gK.inv ≫ gK.hom ≫ G.map (f.f k) ≫ gL.inv =
         G.map (f.f k) ≫ gL.inv := by
       exact gK.inv_hom_id_assoc (G.map (f.f k) ≫ gL.inv)
     calc
       _ = G.map eK.hom ≫ G.map (f.f k) ≫ gL.inv := by
-        simp only [Category.id_comp, Category.assoc, heLgL]
+        have hunit : (𝟙 (G.obj (L.X k))) ≫ gL.inv = gL.inv :=
+          Category.id_comp gL.inv
+        have htail₀ : G.map eL.hom ≫ 𝟙 _ ≫ gL.inv =
+            G.map eL.hom ≫ gL.inv :=
+          congrArg (fun q ↦ G.map eL.hom ≫ q) hunit
+        have htail : G.map eL.inv ≫
+            (G.map eL.hom ≫ 𝟙 _ ≫ gL.inv) = gL.inv :=
+          (congrArg (fun q ↦ G.map eL.inv ≫ q) htail₀).trans heLgL
+        have houter := Category.assoc
+          (G.map eK.hom) (G.map (f.f k) ≫ G.map eL.inv)
+          (G.map eL.hom ≫ 𝟙 _ ≫ gL.inv)
+        have hinner := Category.assoc (G.map (f.f k)) (G.map eL.inv)
+          (G.map eL.hom ≫ 𝟙 _ ≫ gL.inv)
+        have hinnerWhisker := congrArg (fun q ↦ G.map eK.hom ≫ q) hinner
+        have hcancelWhisker := congrArg
+          (fun q ↦ G.map eK.hom ≫ G.map (f.f k) ≫ q) htail
+        exact houter.trans (hinnerWhisker.trans hcancelWhisker)
       _ = _ := by
-        simp only [Category.id_comp, Category.assoc]
+        simp only [Category.assoc]
         apply (cancel_epi (G.mapIso eK).hom).2
         exact hgK.symm
   · exact (((G.mapHomologicalComplex (.up ℕ)).obj L).isZero_extend_X
@@ -402,8 +451,7 @@ private lemma extAddEquivHomComplexHomology_naturality
         rw [R.cochainComplex_d (n : ℤ) ((n + 1 : ℕ) : ℤ) n (n + 1) rfl rfl]
         simp only [Category.assoc, Iso.inv_hom_id_assoc]
         rw [← Category.assoc, ha]
-        simp
-        rfl) φ.hom']
+        simp) φ.hom']
   ext : 1
   simp only [CochainComplex.HomComplex.Cocycle.fromSingleMk_coe]
   exact congrArg
@@ -476,8 +524,8 @@ private lemma sectionsCochainHomologyAddEquivCocomplex_naturality
       HZ.map ((G.mapHomologicalComplex (.up ℤ)).map φ.hom') ≫
           HZ.map (mapExtendIso R'.cocomplex).hom =
         HZ.map (mapExtendIso R.cocomplex).hom ≫ HZ.map fE := by
-    rw [← Functor.map_comp, ← Functor.map_comp, hmap]
-    rfl
+    exact (HZ.map_comp _ _).symm.trans
+      ((congrArg HZ.map hmap).trans (HZ.map_comp _ _))
   have hext : HZ.map fE ≫
         (((G.mapHomologicalComplex (.up ℕ)).obj R'.cocomplex).extendHomologyIso
           ComplexShape.embeddingUpNat rfl).hom =
@@ -498,22 +546,25 @@ private lemma sectionsCochainHomologyAddEquivCocomplex_naturality
         (HZ.map (mapExtendIso R.cocomplex).hom ≫
           (((G.mapHomologicalComplex (.up ℕ)).obj R.cocomplex).extendHomologyIso
             ComplexShape.embeddingUpNat rfl).hom) ≫ HN.map fN := by
-    calc
-      _ = (HZ.map (mapExtendIso R.cocomplex).hom ≫ HZ.map fE) ≫
-          (((G.mapHomologicalComplex (.up ℕ)).obj R'.cocomplex).extendHomologyIso
-            ComplexShape.embeddingUpNat rfl).hom :=
-        congrArg (fun q ↦ q ≫
-          (((G.mapHomologicalComplex (.up ℕ)).obj R'.cocomplex).extendHomologyIso
-            ComplexShape.embeddingUpNat rfl).hom) hmapH
-      _ = HZ.map (mapExtendIso R.cocomplex).hom ≫
-          (HZ.map fE ≫
-            (((G.mapHomologicalComplex (.up ℕ)).obj R'.cocomplex).extendHomologyIso
-              ComplexShape.embeddingUpNat rfl).hom) := Category.assoc _ _ _
-      _ = HZ.map (mapExtendIso R.cocomplex).hom ≫
-          ((((G.mapHomologicalComplex (.up ℕ)).obj R.cocomplex).extendHomologyIso
-            ComplexShape.embeddingUpNat rfl).hom ≫ HN.map fN) :=
-        congrArg (fun q ↦ HZ.map (mapExtendIso R.cocomplex).hom ≫ q) hext
-      _ = _ := (Category.assoc _ _ _).symm
+    let A := HZ.map ((G.mapHomologicalComplex (.up ℤ)).map φ.hom')
+    let B := HZ.map (mapExtendIso (G := G) R'.cocomplex).hom
+    let C₀ := HZ.map (mapExtendIso (G := G) R.cocomplex).hom
+    let D := HZ.map fE
+    let E' := (((G.mapHomologicalComplex (.up ℕ)).obj
+      R'.cocomplex).extendHomologyIso ComplexShape.embeddingUpNat
+        (show ComplexShape.embeddingUpNat.f n = (n : ℤ) from rfl)).hom
+    let E := (((G.mapHomologicalComplex (.up ℕ)).obj
+      R.cocomplex).extendHomologyIso ComplexShape.embeddingUpNat
+        (show ComplexShape.embeddingUpNat.f n = (n : ℤ) from rfl)).hom
+    let F₀ := HN.map fN
+    have hmapH' : A ≫ B = C₀ ≫ D := hmapH
+    have hext' : D ≫ E' = E ≫ F₀ := hext
+    change (A ≫ B) ≫ E' = (C₀ ≫ E) ≫ F₀
+    have h₀ := congrArg (fun q ↦ q ≫ E') hmapH'
+    have h₁ := Category.assoc C₀ D E'
+    have h₂ := congrArg (fun q ↦ C₀ ≫ q) hext'
+    have h₃ := (Category.assoc C₀ E F₀).symm
+    exact h₀.trans (h₁.trans (h₂.trans h₃))
   have hx := ConcreteCategory.congr_hom htotal x
   change (((G.mapHomologicalComplex (.up ℕ)).obj R'.cocomplex).extendHomologyIso
       ComplexShape.embeddingUpNat rfl).hom.hom
