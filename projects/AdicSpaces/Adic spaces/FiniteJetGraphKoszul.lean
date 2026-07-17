@@ -717,6 +717,56 @@ theorem exists_norm_le_one_eq_pow_mul {t : A} (htu : IsUnit t) (ht0 : 0 < ‖t�
 
 end BallDivision
 
+section UltrametricBanach
+
+variable {A : Type*} [NormedCommRing A] [IsUltrametricDist A] [NormOneClass A]
+  [CompleteSpace A]
+variable {ι κ : Type*} [Fintype ι] [Fintype κ]
+
+/-- Sup norms of tuples scale exactly under a scaling element. -/
+theorem pi_norm_scale {c : A} (hc : ∀ x : A, ‖c * x‖ = ‖c‖ * ‖x‖) (u : ι → A) :
+    ‖fun i => c * u i‖ = ‖c‖ * ‖u‖ := by
+  refine le_antisymm ?_ ?_
+  · refine pi_norm_le_iff_of_nonneg (mul_nonneg (norm_nonneg c) (norm_nonneg u)) |>.mpr
+      fun i => ?_
+    rw [hc]
+    exact mul_le_mul_of_nonneg_left (norm_le_pi_norm u i) (norm_nonneg c)
+  · rcases eq_or_ne ‖c‖ 0 with hc0 | hc0
+    · rw [hc0, zero_mul]
+      exact norm_nonneg _
+    · have hcpos : 0 < ‖c‖ := lt_of_le_of_ne (norm_nonneg c) (Ne.symm hc0)
+      have hui : ∀ i, ‖u i‖ ≤ ‖c‖⁻¹ * ‖fun j => c * u j‖ := fun i => by
+        rw [le_inv_mul_iff₀ hcpos, ← hc]
+        exact norm_le_pi_norm (fun j => c * u j) i
+      have hle : ‖u‖ ≤ ‖c‖⁻¹ * ‖fun j => c * u j‖ :=
+        pi_norm_le_iff_of_nonneg (mul_nonneg (inv_nonneg.mpr (norm_nonneg c))
+          (norm_nonneg _)) |>.mpr hui
+      calc ‖c‖ * ‖u‖ ≤ ‖c‖ * (‖c‖⁻¹ * ‖fun j => c * u j‖) :=
+            mul_le_mul_of_nonneg_left hle (norm_nonneg c)
+        _ = ‖fun j => c * u j‖ := by
+            rw [← mul_assoc, mul_inv_cancel₀ hc0, one_mul]
+
+/-- Ultrametric triangle inequality for sup norms of tuples. -/
+theorem pi_norm_add_le_max (u v : ι → A) : ‖u + v‖ ≤ max ‖u‖ ‖v‖ := by
+  refine pi_norm_le_iff_of_nonneg (le_max_of_le_left (norm_nonneg u)) |>.mpr fun i => ?_
+  refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
+  exact max_le_max (norm_le_pi_norm u i) (norm_le_pi_norm v i)
+
+/-- **Ultrametric Banach open mapping with constants** ([FJP] Lemma 4.2's strictness;
+Huber [4, Lemma 2.4(ii)]): a continuous `t`-equivariant additive map between finite tuple
+spaces over a complete ultrametric normed ring lifts elements of its closed range with a
+uniform norm constant. -/
+theorem exists_lift_norm_le_of_closed_range
+    {t : A} (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : A, ‖t * x‖ = ‖t‖ * ‖x‖)
+    (f : (ι → A) →+ (κ → A)) (hcont : Continuous f)
+    (hequiv : ∀ u, f (fun i => t * u i) = fun k => t * f u k)
+    (hclosed : IsClosed (Set.range f)) :
+    ∃ h : ℝ, 1 ≤ h ∧ ∀ y ∈ Set.range f, ∃ u, f u = y ∧ ‖u‖ ≤ h * ‖y‖ := by
+  sorry
+
+end UltrametricBanach
+
 /-- `P_E = E⟨T₁,…,T_m⟩`. -/
 abbrev P (E : Type*) [NormedCommRing E] [IsUltrametricDist E] (m : ℕ) : Type _ :=
   MvPowerSeries.Restricted E (fun _ : Fin m => (1 : ℝ))
@@ -1405,9 +1455,70 @@ theorem isClosed_graphIdeal [IsNoetherianRing (P E m)]
 /-- Strictness of `d₁` with an explicit constant ([FJP] (4.7): "an element `x ∈ I_E` has a
 representative `u ∈ P_E^m` with `d_{1,E}(u) = x`, `‖u‖ ≤ h_E ‖x‖`"; from closedness + the
 Banach open mapping theorem with constants). -/
-theorem exists_d1_lift [IsNoetherianRing (P E m)] (r : Fin m → P E m) :
+theorem exists_d1_lift [IsNoetherianRing (P E m)]
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
+    (hE₀P : IsNoetherianRing (unitBall (P E m)))
+    (r : Fin m → P E m) :
     ∃ h : ℝ, 1 ≤ h ∧ ∀ x ∈ Ideal.span (Set.range r),
-      ∃ u : Fin m → P E m, d1 r u = x ∧ ‖u‖ ≤ h * ‖x‖ := by sorry
+      ∃ u : Fin m → P E m, d1 r u = x ∧ ‖u‖ ≤ h * ‖x‖ := by
+  classical
+  set tP : P E m := polyToP (MvPolynomial.C t) with htP
+  have htPu : IsUnit tP := isUnit_tP t htu
+  have htP1 : ‖tP‖ < 1 := by rw [htP, norm_tP t hscale]; exact ht1
+  have htP0 : 0 < ‖tP‖ := by rw [htP, norm_tP t hscale]; exact ht0
+  have htPs : ∀ G : P E m, ‖tP * G‖ = ‖tP‖ * ‖G‖ := fun G => by
+    rw [htP, norm_tP t hscale]
+    exact norm_tP_mul t hscale G
+  set F : (Fin m → P E m) →+ (Fin 1 → P E m) :=
+    { toFun := fun u => fun _ => d1 r u
+      map_zero' := funext fun _ => by
+        show d1 r 0 = 0
+        unfold d1
+        exact Finset.sum_eq_zero fun i _ => zero_mul _
+      map_add' := fun u v => funext fun _ => by
+        show d1 r (u + v) = d1 r u + d1 r v
+        unfold d1
+        rw [← Finset.sum_add_distrib]
+        exact Finset.sum_congr rfl fun i _ => by
+          show (u i + v i) * r i = _
+          ring } with hF
+  have hrange : Set.range F = {y : Fin 1 → P E m | y 0 ∈ Ideal.span (Set.range r)} := by
+    ext y
+    constructor
+    · rintro ⟨u, rfl⟩
+      show d1 r u ∈ Ideal.span (Set.range r)
+      unfold d1
+      exact Ideal.sum_mem _ fun i _ => Ideal.mul_mem_left _ _
+        (Ideal.subset_span ⟨i, rfl⟩)
+    · intro hy
+      obtain ⟨c, hc⟩ := Ideal.mem_span_range_iff_exists_fun.mp hy
+      refine ⟨c, funext fun j => ?_⟩
+      rw [Subsingleton.elim j 0]
+      show d1 r c = y 0
+      unfold d1
+      exact hc
+  have hclosed : IsClosed (Set.range F) := by
+    rw [hrange]
+    exact (isClosed_graphIdeal t htu ht1 ht0 hscale hE₀P r).preimage (continuous_apply 0)
+  have hcont : Continuous F := by
+    refine continuous_pi fun _ => ?_
+    show Continuous fun u : Fin m → P E m => d1 r u
+    unfold d1
+    exact continuous_finsetSum _ fun i _ => ((continuous_apply i).mul continuous_const)
+  have hequiv : ∀ u, F (fun i => tP * u i) = fun k => tP * F u k := fun u =>
+    funext fun k => by
+      show d1 r (fun i => tP * u i) = tP * d1 r u
+      unfold d1
+      rw [show (tP * ∑ i, u i * r i) = ∑ i, tP * (u i * r i) from Finset.mul_sum _ _ _]
+      exact Finset.sum_congr rfl fun i _ => by ring
+  obtain ⟨h, hh1, hlift⟩ := exists_lift_norm_le_of_closed_range htPu htP1 htP0 htPs
+    F hcont hequiv hclosed
+  refine ⟨h, hh1, fun x hx => ?_⟩
+  obtain ⟨u, hu, hun⟩ := hlift (fun _ => x) (by rw [hrange]; exact hx)
+  refine ⟨u, congrFun hu 0, ?_⟩
+  refine hun.trans ?_
+  rw [pi_norm_const x]
 
 /-- Strictness of `d₂` onto `ker d₁` with an explicit constant ([FJP] (4.8): "every
 `s ∈ ker(d_{1,D})` has `v ∈ ⋀² P_D^m` satisfying `d_{2,D}(v) = s`, `‖v‖ ≤ z_D ‖s‖`").
@@ -1421,7 +1532,55 @@ theorem exists_d2_lift [IsNoetherianRing (P E m)]
     (r : Fin m → P E m)
     (hr : ∀ i, r i = polyToP (MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i))) :
     ∃ z : ℝ, 1 ≤ z ∧ ∀ u : Fin m → P E m, d1 r u = 0 →
-      ∃ v : Pairs m → P E m, d2 r v = u ∧ ‖v‖ ≤ z * ‖u‖ := by sorry
+      ∃ v : Pairs m → P E m, d2 r v = u ∧ ‖v‖ ≤ z * ‖u‖ := by
+  classical
+  set tP : P E m := polyToP (MvPolynomial.C t) with htP
+  have htPu : IsUnit tP := isUnit_tP t htu
+  have htP1 : ‖tP‖ < 1 := by rw [htP, norm_tP t hscale]; exact ht1
+  have htP0 : 0 < ‖tP‖ := by rw [htP, norm_tP t hscale]; exact ht0
+  have htPs : ∀ G : P E m, ‖tP * G‖ = ‖tP‖ * ‖G‖ := fun G => by
+    rw [htP, norm_tP t hscale]
+    exact norm_tP_mul t hscale G
+  set F : (Pairs m → P E m) →+ (Fin m → P E m) :=
+    { toFun := fun v => d2 r v
+      map_zero' := funext fun j => d2_zero r j
+      map_add' := fun v w => funext fun j => d2_add r v w j } with hF
+  have hrange : Set.range F = {u : Fin m → P E m | d1 r u = 0} := by
+    ext u
+    constructor
+    · rintro ⟨v, rfl⟩
+      exact d1_d2 r v
+    · intro hu
+      exact syzygy_graph_restricted hE₀ t htu ht1 ht0 hscale g f hunit r hr u hu
+  have hd1cont : Continuous fun u : Fin m → P E m => d1 r u := by
+    unfold d1
+    exact continuous_finsetSum _ fun i _ => ((continuous_apply i).mul continuous_const)
+  have hclosed : IsClosed (Set.range F) := by
+    rw [hrange]
+    exact isClosed_singleton.preimage hd1cont
+  have hcont : Continuous F := by
+    refine continuous_pi fun j => ?_
+    show Continuous fun v : Pairs m → P E m => d2 r v j
+    unfold d2
+    refine Continuous.sub ?_ ?_
+    · refine continuous_finsetSum _ fun i _ => ?_
+      by_cases hij : i < j
+      · simp only [dif_pos hij]
+        exact (continuous_apply _).mul continuous_const
+      · simp only [dif_neg hij]
+        exact continuous_const
+    · refine continuous_finsetSum _ fun i _ => ?_
+      by_cases hij : j < i
+      · simp only [dif_pos hij]
+        exact (continuous_apply _).mul continuous_const
+      · simp only [dif_neg hij]
+        exact continuous_const
+  have hequiv : ∀ v, F (fun p => tP * v p) = fun j => tP * F v j := fun v =>
+    funext fun j => d2_smul r tP v j
+  obtain ⟨z, hz1, hlift⟩ := exists_lift_norm_le_of_closed_range htPu htP1 htP0 htPs
+    F hcont hequiv hclosed
+  refine ⟨z, hz1, fun u hu => ?_⟩
+  exact hlift u (by rw [hrange]; exact hu)
 
 end Restricted
 
