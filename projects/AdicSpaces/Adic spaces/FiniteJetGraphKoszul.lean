@@ -678,6 +678,30 @@ noetherian restricted extension; instantiated at `E ∈ {𝓑, 𝓒, 𝓓}` via
 `FiniteJetNoetherianVertices.lean`. `P := E⟨T₁,…,T_m⟩` is the vendored radius-one restricted
 ring. -/
 
+section BallDivision
+
+variable {A : Type*} [NormedCommRing A] [IsUltrametricDist A] [NormOneClass A]
+
+/-- Ball division along a scaling unit: `‖x‖ ≤ ‖t‖ⁿ` forces `x ∈ tⁿ·(unit ball)`. -/
+theorem exists_norm_le_one_eq_pow_mul {t : A} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : A, ‖t * x‖ = ‖t‖ * ‖x‖) (n : ℕ) (x : A) (hx : ‖x‖ ≤ ‖t‖ ^ n) :
+    ∃ y : A, ‖y‖ ≤ 1 ∧ x = t ^ n * y := by
+  refine ⟨((htu.unit⁻¹ : Aˣ) : A) ^ n * x, ?_, ?_⟩
+  · have hxy : t ^ n * (((htu.unit⁻¹ : Aˣ) : A) ^ n * x) = x := by
+      rw [← mul_assoc, ← mul_pow, IsUnit.mul_val_inv, one_pow, one_mul]
+    have hnorm := norm_pow_mul_of_scale (E := A) hscale n (((htu.unit⁻¹ : Aˣ) : A) ^ n * x)
+    rw [hxy] at hnorm
+    by_contra hgt
+    push Not at hgt
+    have hlt : ‖t‖ ^ n < ‖t‖ ^ n * ‖((htu.unit⁻¹ : Aˣ) : A) ^ n * x‖ := by
+      calc ‖t‖ ^ n = ‖t‖ ^ n * 1 := (mul_one _).symm
+        _ < _ := mul_lt_mul_of_pos_left hgt (pow_pos ht0 n)
+    rw [← hnorm] at hlt
+    exact absurd hx (not_le.mpr hlt)
+  · rw [← mul_assoc, ← mul_pow, IsUnit.mul_val_inv, one_pow, one_mul]
+
+end BallDivision
+
 /-- `P_E = E⟨T₁,…,T_m⟩`. -/
 abbrev P (E : Type*) [NormedCommRing E] [IsUltrametricDist E] (m : ℕ) : Type _ :=
   MvPowerSeries.Restricted E (fun _ : Fin m => (1 : ℝ))
@@ -699,10 +723,236 @@ noncomputable def polyToP : MvPolynomial (Fin m) E →+* P E m where
   map_add' q r := Subtype.ext (map_add (MvPolynomial.coeToMvPowerSeries.ringHom
     (σ := Fin m) (R := E)) q r)
 
+theorem coeff_polyToP (q : MvPolynomial (Fin m) E) (s : Fin m →₀ ℕ) :
+    MvPowerSeries.coeff s ((polyToP (E := E) (m := m) q).1) = MvPolynomial.coeff s q :=
+  MvPolynomial.coeff_coe q s
+
+/-- Scaling by the constant `C t` on `P_E` scales the Gauss norm. -/
+theorem norm_tP_mul (t : E) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (F : P E m) :
+    ‖polyToP (MvPolynomial.C t) * F‖ = ‖t‖ * ‖F‖ := by
+  rw [MvRestricted.norm_eq, MvRestricted.norm_eq, MvPowerSeries.gaussNorm,
+    MvPowerSeries.gaussNorm, Real.mul_iSup_of_nonneg (norm_nonneg t)]
+  refine iSup_congr fun s => ?_
+  show ‖MvPowerSeries.coeff s ((polyToP (MvPolynomial.C t) * F : P E m).1)‖ * _ = _
+  rw [show (polyToP (MvPolynomial.C t) * F : P E m).1 =
+      (polyToP (E := E) (m := m) (MvPolynomial.C t)).1 * F.1 from rfl,
+    show (polyToP (E := E) (m := m) (MvPolynomial.C t)).1 =
+      MvPowerSeries.C (σ := Fin m) (R := E) t from MvPolynomial.coe_C t,
+    MvPowerSeries.coeff_C_mul, hscale, mul_assoc]
+
+theorem norm_tP (t : E) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
+    ‖(polyToP (MvPolynomial.C t) : P E m)‖ = ‖t‖ := by
+  have h := norm_tP_mul (E := E) (m := m) t hscale 1
+  rwa [mul_one, norm_one, mul_one] at h
+
+theorem isUnit_tP (t : E) (htu : IsUnit t) :
+    IsUnit (polyToP (MvPolynomial.C t) : P E m) :=
+  (htu.map MvPolynomial.C).map (polyToP (E := E) (m := m))
+
+/-- Ball division on `P_E` (instance of the generic lemma at `(P_E, C t)`). -/
+theorem exists_ball_eq_tP_pow_mul {t : E} (htu : IsUnit t) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (n : ℕ) (F : P E m) (hF : ‖F‖ ≤ ‖t‖ ^ n) :
+    ∃ G : P E m, ‖G‖ ≤ 1 ∧ F = polyToP (MvPolynomial.C t) ^ n * G :=
+  exists_norm_le_one_eq_pow_mul (isUnit_tP t htu)
+    (by rw [norm_tP t hscale]; exact ht0)
+    (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G) n F
+    (by rw [norm_tP t hscale]; exact hF)
+
+/-- Polynomial division over the unit ball: a polynomial all of whose coefficients have
+norm `≤ ‖t‖ⁿ` lies in the `n`-th power of the constant ideal `(C t₀) ⊂ E₀[T]`. -/
+theorem mem_span_C_pow_of_coeff_norm_le {t : E} (htu : IsUnit t) (ht1 : ‖t‖ ≤ 1)
+    (ht0 : 0 < ‖t‖) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (n : ℕ)
+    (q : MvPolynomial (Fin m) ↥(unitBall E))
+    (hq : ∀ s, ‖MvPolynomial.coeff s q‖ ≤ ‖t‖ ^ n) :
+    q ∈ Ideal.span {MvPolynomial.C (⟨t, ht1⟩ : ↥(unitBall E))} ^ n := by
+  classical
+  have hdiv : ∀ s, ∃ y : E, ‖y‖ ≤ 1 ∧ ((MvPolynomial.coeff s q : ↥(unitBall E)) : E) =
+      t ^ n * y := fun s => exists_norm_le_one_eq_pow_mul htu ht0 hscale n _ (hq s)
+  choose y hy1 hy2 using hdiv
+  rw [Ideal.span_singleton_pow, Ideal.mem_span_singleton']
+  refine ⟨∑ s ∈ q.support, MvPolynomial.monomial s (⟨y s, hy1 s⟩ : ↥(unitBall E)), ?_⟩
+  rw [Finset.sum_mul]
+  refine MvPolynomial.ext _ _ fun s => ?_
+  rw [MvPolynomial.coeff_sum]
+  by_cases hs : s ∈ q.support
+  · rw [Finset.sum_eq_single s (fun b _ hb => ?_) (fun hns => absurd hs hns)]
+    · rw [← map_pow, show (MvPolynomial.C ((⟨t, ht1⟩ : ↥(unitBall E)) ^ n)) =
+        MvPolynomial.monomial 0 ((⟨t, ht1⟩ : ↥(unitBall E)) ^ n) from rfl,
+        MvPolynomial.monomial_mul, add_zero, MvPolynomial.coeff_monomial, if_pos rfl]
+      refine Subtype.ext ?_
+      show (⟨y s, hy1 s⟩ : ↥(unitBall E)).1 * ((⟨t, ht1⟩ : ↥(unitBall E)) ^ n).1 = _
+      rw [hy2 s]
+      show y s * t ^ n = t ^ n * y s
+      ring
+    · rw [← map_pow, show (MvPolynomial.C ((⟨t, ht1⟩ : ↥(unitBall E)) ^ n)) =
+        MvPolynomial.monomial 0 ((⟨t, ht1⟩ : ↥(unitBall E)) ^ n) from rfl,
+        MvPolynomial.monomial_mul, add_zero, MvPolynomial.coeff_monomial, if_neg hb]
+  · rw [MvPolynomial.notMem_support_iff.mp hs, Finset.sum_eq_zero fun b hb => ?_]
+    rw [← map_pow, show (MvPolynomial.C ((⟨t, ht1⟩ : ↥(unitBall E)) ^ n)) =
+      MvPolynomial.monomial 0 ((⟨t, ht1⟩ : ↥(unitBall E)) ^ n) from rfl,
+      MvPolynomial.monomial_mul, add_zero, MvPolynomial.coeff_monomial,
+      if_neg (show ¬ b = s from fun hbs => hs (hbs ▸ hb))]
+
+section AdicBridge
+
+variable (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+  (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
+
+theorem norm_coeff_le_gauss (F : P E m) (s : Fin m →₀ ℕ) :
+    ‖MvPowerSeries.coeff s F.1‖ ≤ ‖F‖ := by
+  have h := MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ F) s
+  rw [finsupp_prod_one, mul_one] at h
+  rw [MvRestricted.norm_eq]
+  exact h
+
+/-- Superlevel sets of a restricted series are finite. -/
+theorem finite_setOf_le_norm_coeff (F : P E m) {ε : ℝ} (hε : 0 < ε) :
+    {s : Fin m →₀ ℕ | ε ≤ ‖MvPowerSeries.coeff s F.1‖}.Finite := by
+  have hF : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) F.1 := F.2
+  rw [MvPowerSeries.IsRestrictedGauss] at hF
+  have hev := hF.eventually (eventually_lt_nhds hε (a := (0 : ℝ)))
+  rw [Filter.eventually_cofinite] at hev
+  refine hev.subset fun s hs => ?_
+  rw [Set.mem_setOf_eq] at hs
+  show ¬ _
+  rw [finsupp_prod_one, mul_one]
+  exact not_lt.mpr hs
+
+/-- The polynomial subring with unit-ball coefficients, mapped into `P_E`. -/
+noncomputable def polyBall : MvPolynomial (Fin m) ↥(unitBall E) →+* P E m :=
+  (polyToP (E := E) (m := m)).comp (MvPolynomial.map (unitBall E).subtype)
+
+theorem coeff_polyBall (q : MvPolynomial (Fin m) ↥(unitBall E)) (s : Fin m →₀ ℕ) :
+    MvPowerSeries.coeff s ((polyBall (E := E) (m := m) q).1) =
+      ((MvPolynomial.coeff s q : ↥(unitBall E)) : E) := by
+  show MvPowerSeries.coeff s ((polyToP (MvPolynomial.map (unitBall E).subtype q)).1) = _
+  rw [coeff_polyToP, MvPolynomial.coeff_map]
+  rfl
+
+theorem norm_polyBall_le_one (q : MvPolynomial (Fin m) ↥(unitBall E)) :
+    ‖polyBall (E := E) (m := m) q‖ ≤ 1 := by
+  rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine Real.iSup_le (fun s => ?_) zero_le_one
+  rw [finsupp_prod_one, mul_one, coeff_polyBall]
+  exact (MvPolynomial.coeff s q).2
+
+include hscale
+
+/-- Membership of `I₀ⁿ`-elements is norm-detected after mapping to `P_E`. -/
+theorem norm_polyBall_le_of_mem_span_pow (n : ℕ)
+    (q : MvPolynomial (Fin m) ↥(unitBall E))
+    (hq : q ∈ Ideal.span {MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E))} ^ n) :
+    ‖polyBall (E := E) (m := m) q‖ ≤ ‖t‖ ^ n := by
+  rw [Ideal.span_singleton_pow, Ideal.mem_span_singleton'] at hq
+  obtain ⟨q', hq'⟩ := hq
+  rw [← hq', map_mul, map_pow]
+  have hC : polyBall (E := E) (m := m)
+      (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E))) = polyToP (MvPolynomial.C t) := by
+    show polyToP (MvPolynomial.map (unitBall E).subtype
+      (MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)))) = _
+    rw [MvPolynomial.map_C]
+    rfl
+  rw [hC, mul_comm, norm_pow_mul_of_scale (E := P E m)
+    (fun G => by rw [norm_tP t hscale]; exact norm_tP_mul t hscale G) n, norm_tP t hscale]
+  calc ‖t‖ ^ n * ‖polyBall (E := E) (m := m) q'‖
+      ≤ ‖t‖ ^ n * 1 :=
+        mul_le_mul_of_nonneg_left (norm_polyBall_le_one q') (pow_nonneg (norm_nonneg t) n)
+    _ = ‖t‖ ^ n := mul_one _
+
+omit hscale
+
+/-- The level-`n` truncation of a unit-ball restricted series, as a polynomial with
+unit-ball coefficients. -/
+noncomputable def trnc (n : ℕ) (F : ↥(unitBall (P E m))) :
+    MvPolynomial (Fin m) ↥(unitBall E) :=
+  ∑ s ∈ (finite_setOf_le_norm_coeff F.1 (pow_pos ht0 n)).toFinset,
+    MvPolynomial.monomial s (⟨MvPowerSeries.coeff s F.1.1,
+      (norm_coeff_le_gauss F.1 s).trans F.2⟩ : ↥(unitBall E))
+
+theorem coeff_polyBall_trnc (n : ℕ) (F : ↥(unitBall (P E m))) (s : Fin m →₀ ℕ) :
+    MvPowerSeries.coeff s ((polyBall (trnc t ht0 n F) : P E m).1) =
+      if ‖t‖ ^ n ≤ ‖MvPowerSeries.coeff s F.1.1‖ then MvPowerSeries.coeff s F.1.1 else 0 := by
+  classical
+  rw [coeff_polyBall]
+  unfold trnc
+  rw [MvPolynomial.coeff_sum]
+  by_cases hs : ‖t‖ ^ n ≤ ‖MvPowerSeries.coeff s F.1.1‖
+  · rw [if_pos hs, Finset.sum_eq_single s (fun b _ hb => by
+      rw [MvPolynomial.coeff_monomial, if_neg hb]) (fun hns => absurd
+        ((finite_setOf_le_norm_coeff F.1 (pow_pos ht0 n)).mem_toFinset.mpr hs) hns),
+      MvPolynomial.coeff_monomial, if_pos rfl]
+  · rw [if_neg hs, Finset.sum_eq_zero fun b hb => ?_]
+    · rfl
+    · rw [MvPolynomial.coeff_monomial, if_neg]
+      intro hbs
+      rw [hbs] at hb
+      exact hs ((finite_setOf_le_norm_coeff F.1 (pow_pos ht0 n)).mem_toFinset.mp hb)
+
+/-- The truncation tail is `‖t‖ⁿ`-small. -/
+theorem norm_sub_polyBall_trnc_le (n : ℕ) (F : ↥(unitBall (P E m))) :
+    ‖F.1 - polyBall (trnc t ht0 n F)‖ ≤ ‖t‖ ^ n := by
+  rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine Real.iSup_le (fun s => ?_) (pow_nonneg (norm_nonneg t) n)
+  rw [finsupp_prod_one, mul_one]
+  show ‖MvPowerSeries.coeff s ((F.1 - polyBall (trnc t ht0 n F) : P E m).1)‖ ≤ _
+  rw [show ((F.1 - polyBall (trnc t ht0 n F) : P E m)).1 =
+    F.1.1 - (polyBall (trnc t ht0 n F) : P E m).1 from rfl, map_sub, coeff_polyBall_trnc]
+  by_cases hs : ‖t‖ ^ n ≤ ‖MvPowerSeries.coeff s F.1.1‖
+  · rw [if_pos hs, sub_self, norm_zero]
+    exact pow_nonneg (norm_nonneg t) n
+  · rw [if_neg hs, sub_zero]
+    exact (not_le.mp hs).le
+
+include htu hscale
+
+/-- The workhorse: any `‖t‖ⁿ`-close polynomial has the same level-`n` class as the
+truncation. -/
+theorem mk_trnc_eq (n : ℕ) (F : ↥(unitBall (P E m)))
+    (q : MvPolynomial (Fin m) ↥(unitBall E)) (hq : ‖F.1 - polyBall q‖ ≤ ‖t‖ ^ n) :
+    Ideal.Quotient.mk ((Ideal.span {(MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) :
+          MvPolynomial (Fin m) ↥(unitBall E))}) ^ n • ⊤ :
+        Ideal (MvPolynomial (Fin m) ↥(unitBall E))) (trnc t ht0 n F) =
+      Ideal.Quotient.mk ((Ideal.span {(MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) :
+          MvPolynomial (Fin m) ↥(unitBall E))}) ^ n • ⊤ :
+        Ideal (MvPolynomial (Fin m) ↥(unitBall E))) q := by
+  rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem]
+  have hsmul : ((Ideal.span {(MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) :
+          MvPolynomial (Fin m) ↥(unitBall E))}) ^ n • ⊤ :
+      Ideal (MvPolynomial (Fin m) ↥(unitBall E))) =
+      (Ideal.span {(MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) :
+          MvPolynomial (Fin m) ↥(unitBall E))}) ^ n := by
+    ext x
+    simp
+  rw [hsmul]
+  refine mem_span_C_pow_of_coeff_norm_le htu ht1.le ht0 hscale n _ (fun s => ?_)
+  have hval : ((MvPolynomial.coeff s (trnc t ht0 n F - q) : ↥(unitBall E)) : E) =
+      MvPowerSeries.coeff s ((polyBall (trnc t ht0 n F) - polyBall q : P E m).1) := by
+    rw [show ((polyBall (trnc t ht0 n F) - polyBall q : P E m)).1 =
+      (polyBall (trnc t ht0 n F) : P E m).1 - (polyBall q : P E m).1 from rfl, map_sub,
+      coeff_polyBall, coeff_polyBall, MvPolynomial.coeff_sub]
+    rfl
+  show ‖((MvPolynomial.coeff s (trnc t ht0 n F - q) : ↥(unitBall E)) : E)‖ ≤ _
+  rw [hval]
+  refine (norm_coeff_le_gauss _ s).trans ?_
+  have htri : ‖(polyBall (trnc t ht0 n F) - polyBall q : P E m)‖ ≤
+      max ‖polyBall (trnc t ht0 n F) - F.1‖ ‖F.1 - polyBall q‖ := by
+    have h := IsUltrametricDist.norm_add_le_max
+      (polyBall (trnc t ht0 n F) - F.1) (F.1 - polyBall q)
+    rwa [sub_add_sub_cancel] at h
+  refine htri.trans (max_le ?_ hq)
+  rw [norm_sub_rev]
+  exact norm_sub_polyBall_trnc_le t ht0 n F
+
+end AdicBridge
+
 /-- The base change `E[T] → E⟨T⟩` is **flat** ([FJP] Lemma 4.2, proof: "Noetherian adic
 completion is flat [8, Lemma 10.97.2, Tag 00MB], and localization preserves flatness";
-via the (4.4) identification `P_E ≅ (E₀[T])^∧_ϖ[1/ϖ]` for the noetherian unit ball `E₀`). -/
-theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E)) :
+via the (4.4) identification `P_E ≅ (E₀[T])^∧_ϖ[1/ϖ]` for the noetherian unit ball `E₀`).
+Signature completion (recorded on the board): the scaling pseudouniformizer bundle
+`(t, htu, ht1, ht0, hscale)` of the Tate vertex, exactly as in `unitBallPod`. -/
+theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) :
     letI : Algebra (MvPolynomial (Fin m) E) (P E m) := (polyToP (E := E) (m := m)).toAlgebra
     Module.Flat (MvPolynomial (Fin m) E) (P E m) := by sorry
 
@@ -710,6 +960,8 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E)) :
 ([FJP] Lemma 4.2: positive-degree exactness transfers along the flat base change; degree-1
 form). -/
 theorem syzygy_graph_restricted (hE₀ : IsNoetherianRing (unitBall E))
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
     (g : E) (f : Fin m → E) (hunit : Ideal.span ({g} ∪ Set.range f) = ⊤)
     (r : Fin m → P E m)
     (hr : ∀ i, r i = polyToP (MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i)))
@@ -737,6 +989,8 @@ For `m = 1` the conclusion forces `ker d₁ = 0` (`Pairs 1` is empty), which hol
 `gT − f` is a nonzerodivisor. -/
 theorem exists_d2_lift [IsNoetherianRing (P E m)]
     (hE₀ : IsNoetherianRing (unitBall E))
+    (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
     (g : E) (f : Fin m → E) (hunit : Ideal.span ({g} ∪ Set.range f) = ⊤)
     (r : Fin m → P E m)
     (hr : ∀ i, r i = polyToP (MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i))) :
