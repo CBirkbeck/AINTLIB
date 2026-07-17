@@ -691,6 +691,59 @@ private theorem nowhereGeomOrderLEThree_asSection_pull_tatePoint {T : Scheme.{u}
   rw [pullAsSection_dict R s τ] at h1
   exact h1
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(Y1-E5, order transports across a nilpotent thickening)** Being nowhere of geometric
+order `≤ 3` transports along the closed thickening `Spec (A ⧸ I) ↪ Spec A` (`I` nilpotent):
+if a point `P : E.Point t` restricts (mod `I`) to `P₀ : E.Point t₀` whose associated section
+`asSection E t₀ P₀` is nowhere of order `≤ 3`, then so is `asSection E t P`. Every geometric
+point of `Spec A` over a field factors through the reduced quotient
+(`exists_specMap_factor_of_nilpotent`), so the fibrewise order condition is unchanged. -/
+private theorem nowhereGeomOrderLEThree_asSection_of_nilpotent {S : Scheme.{u}}
+    (E : EllipticCurve S) {A : Type u} [CommRing A] (I : Ideal A) (hI : IsNilpotent I)
+    (t : Spec (CommRingCat.of A) ⟶ S) {t₀ : Spec (CommRingCat.of (A ⧸ I)) ⟶ S}
+    (ht₀ : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t = t₀)
+    (P : E.Point t) (P₀ : E.Point t₀)
+    (hrest : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫
+      (P : Spec (CommRingCat.of A) ⟶ E.E) = (P₀ : Spec (CommRingCat.of (A ⧸ I)) ⟶ E.E))
+    (hord₀ : (E.baseChange t₀).NowhereGeomOrderLEThree
+      (EllipticCurve.Point.asSection E t₀ P₀)) :
+    (E.baseChange t).NowhereGeomOrderLEThree (EllipticCurve.Point.asSection E t P) := by
+  intro k _ _ τ a ha0 ha3 h0
+  obtain ⟨τ₀, hτfac⟩ := exists_specMap_factor_of_nilpotent I hI τ
+  refine hord₀ k τ₀ a ha0 ha3 ?_
+  have hbase : τ ≫ t = τ₀ ≫ t₀ := by rw [hτfac, Category.assoc, ht₀]
+  have hvaleq : τ ≫ (P : Spec (CommRingCat.of A) ⟶ E.E) =
+      τ₀ ≫ (P₀ : Spec (CommRingCat.of (A ⧸ I)) ⟶ E.E) := by
+    rw [hτfac, Category.assoc, hrest]
+  have hL : (a : ℤ) • (EllipticCurve.Point.baseChangeEquiv E t τ)
+      (EllipticCurve.Point.pull (E.baseChange t) τ
+        (EllipticCurve.Point.asSection E t P)) = 0 := by
+    rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
+  have hLval : ((EllipticCurve.Point.baseChangeEquiv E t τ)
+      (EllipticCurve.Point.pull (E.baseChange t) τ
+        (EllipticCurve.Point.asSection E t P)) : Spec (CommRingCat.of k) ⟶ E.E) =
+      τ ≫ (P : Spec (CommRingCat.of A) ⟶ E.E) := by
+    rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
+    show (τ ≫ (EllipticCurve.Point.asSection E t P : _ ⟶ (E.baseChange t).E)) ≫
+      Limits.pullback.fst E.π t = _
+    rw [Category.assoc]
+    exact congrArg (τ ≫ ·) (EllipticCurve.Point.asSection_val_fst E t P)
+  have hRval : ((EllipticCurve.Point.baseChangeEquiv E t₀ τ₀)
+      (EllipticCurve.Point.pull (E.baseChange t₀) τ₀
+        (EllipticCurve.Point.asSection E t₀ P₀)) : Spec (CommRingCat.of k) ⟶ E.E) =
+      τ₀ ≫ (P₀ : Spec (CommRingCat.of (A ⧸ I)) ⟶ E.E) := by
+    rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
+    show (τ₀ ≫ (EllipticCurve.Point.asSection E t₀ P₀ : _ ⟶ (E.baseChange t₀).E)) ≫
+      Limits.pullback.fst E.π t₀ = _
+    rw [Category.assoc]
+    exact congrArg (τ₀ ≫ ·) (EllipticCurve.Point.asSection_val_fst E t₀ P₀)
+  rw [bcEquiv_zsmul_eq_zero_iff]
+  refine Subtype.ext ?_
+  have h2 := congrArg Subtype.val hL
+  rw [E.point_smul_eq_comp_mulBy, E.point_zero_val, hLval] at h2
+  rw [E.point_smul_eq_comp_mulBy, E.point_zero_val, hRval, ← hvaleq, ← hbase]
+  exact h2
+
 open EllipticCurve in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-E5 pure core)** The étale torsion-point lift against a nilpotent ideal, packaged
@@ -827,39 +880,10 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
     exact hzeroPA
   -- the order condition transports along the thickening (fibres are unchanged)
   have hordPA : ((tateUniversal R).baseChange t).NowhereGeomOrderLEThree PA := by
-    intro k _ _ τ a ha0 ha3 h0
-    obtain ⟨τ₀, hτfac⟩ := exists_specMap_factor_of_nilpotent I hI τ
-    have h1 : (a : ℤ) • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t τ)
-        (EllipticCurve.Point.pull ((tateUniversal R).baseChange t) τ PA) = 0 := by
-      rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
-    have hQval : ((EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t τ)
-        (EllipticCurve.Point.pull ((tateUniversal R).baseChange t) τ PA) :
-          Spec (CommRingCat.of k) ⟶ (tateUniversal R).E) =
-        τ ≫ (PT : Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) := by
-      rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
-      show (τ ≫ (PA : _ ⟶ ((tateUniversal R).baseChange t).E)) ≫
-        Limits.pullback.fst (tateUniversal R).π t = _
-      rw [Category.assoc, hPA]
-      exact congrArg (τ ≫ ·) (EllipticCurve.Point.asSection_val_fst _ _ _)
-    have hbase : τ ≫ t = τ₀ ≫ t₀ := by
-      rw [hτfac, Category.assoc, hrestRaw]
-    have hptval : (τ₀ ≫ t₀) ≫ ((tatePoint R) : tateBase R ⟶ (tateUniversal R).E) =
-        τ ≫ (PT : Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) := by
-      rw [Category.assoc]
-      rw [show t₀ ≫ ((tatePoint R) : tateBase R ⟶ (tateUniversal R).E) =
-        Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫
-          (PT : Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) from hPTrest.symm]
-      rw [← Category.assoc, ← hτfac]
-    refine tatePoint_nowhereGeomOrderLEThree R k (τ₀ ≫ t₀) a ha0 ha3 ?_
-    refine Subtype.ext ?_
-    have h2 := congrArg Subtype.val h1
-    rw [(tateUniversal R).point_smul_eq_comp_mulBy,
-      (tateUniversal R).point_zero_val, hQval] at h2
-    rw [(tateUniversal R).point_smul_eq_comp_mulBy, (tateUniversal R).point_zero_val]
-    show ((τ₀ ≫ t₀) ≫ ((tatePoint R) : tateBase R ⟶ (tateUniversal R).E)) ≫
-      (tateUniversal R).mulByHom (a : ℤ) = (τ₀ ≫ t₀) ≫ (tateUniversal R).zero
-    rw [hptval, ← hbase]
-    exact h2
+    rw [hPA]
+    exact nowhereGeomOrderLEThree_asSection_of_nilpotent (tateUniversal R) I hI t hrestRaw
+      PT (EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)) hPTrest
+      (nowhereGeomOrderLEThree_asSection_pull_tatePoint R t₀)
   -- the classifying `Ell/R` morphism of the lifted pair
   obtain ⟨fc, hfc, -⟩ := tatePoint_classifies R ((tateEllObj R).pullbackAlong t)
     PA hordPA
