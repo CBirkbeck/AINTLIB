@@ -101,9 +101,9 @@ private theorem cechFaceSection_zero_transport {V : Opens X} (i₀ : ι)
   rw [← cechTermSectionsAddEquiv_transport U F (n + 1) V s
     (cechPrependDeleteZero i₀ i)]
   change (F.obj.map _ ≫ F.obj.map _) _ = F.obj.map _ _
-  rw [← F.obj.map_comp]
   exact ConcreteCategory.congr_hom
-    (congrArg F.obj.map (Subsingleton.elim _ _)) _
+    ((F.obj.map_comp _ _).symm.trans
+      (congrArg F.obj.map (Subsingleton.elim _ _))) _
 
 private theorem cechFaceSection_succ_transport {V : Opens X} (i₀ : ι)
     (hV : V ≤ U i₀) (n : ℕ)
@@ -118,9 +118,11 @@ private theorem cechFaceSection_succ_transport {V : Opens X} (i₀ : ι)
     (cechPrependDeleteSucc i₀ i k)]
   change (F.obj.map _ ≫ F.obj.map _) _ =
     (F.obj.map _ ≫ F.obj.map _ ≫ F.obj.map _) _
-  rw [← F.obj.map_comp, ← F.obj.map_comp, ← F.obj.map_comp]
   exact ConcreteCategory.congr_hom
-    (congrArg F.obj.map (Subsingleton.elim _ _)) _
+    ((F.obj.map_comp _ _).symm.trans
+      ((congrArg F.obj.map (Subsingleton.elim _ _)).trans
+        ((F.obj.map_comp _ _).trans
+          (congrArg (fun f ↦ F.obj.map _ ≫ f) (F.obj.map_comp _ _))))) _
 
 private theorem cechLocalContraction_differential_component {V : Opens X} (i₀ : ι)
     (hV : V ≤ U i₀) (n : ℕ)
