@@ -79,8 +79,9 @@ private theorem cechTopRestriction_apply (n : ℕ) (k : Fin (n + 2))
               (SimplexCategory.δ k).toOrderHom.toFun).φ i)))).op ≫
           F.obj.map (eqToIso (congrArg op
             (top_inf_eq (∏ᶜ fun a : Fin (n + 2) => U (i a))))).hom := by
-    rw [← F.obj.map_comp, ← F.obj.map_comp]
-    exact congrArg F.obj.map (Subsingleton.elim _ _)
+    exact (F.obj.map_comp _ _).symm.trans
+      ((congrArg F.obj.map (Subsingleton.elim _ _)).trans
+        (F.obj.map_comp _ _))
   exact ConcreteCategory.congr_hom h x
 
 private theorem cechTopCofaceSummand_apply (n : ℕ) (k : Fin (n + 2))
@@ -98,33 +99,31 @@ private theorem cechTopCofaceSummand_apply (n : ℕ) (k : Fin (n + 2))
               (SimplexCategory.δ k).toOrderHom.toFun).φ i)))).op
             (cechTermSectionsAddEquiv F U n (⊤ : Opens X) x
               (i ∘ (SimplexCategory.δ k).toOrderHom.toFun))) := by
-  calc
-    _ = (-1 : ℤ) ^ (k : ℕ) •
-        F.obj.map (((FormalCoproduct.mk _ U).mapPower
-          (SimplexCategory.δ k).toOrderHom.toFun).φ i).op
-          ((F.obj.mapIso (eqToIso (congrArg op
-            (top_inf_eq (∏ᶜ fun r : Fin (n + 1) =>
-              U ((i ∘ (SimplexCategory.δ k).toOrderHom.toFun) r)))))).hom
-            (cechTermSectionsAddEquiv F U n (⊤ : Opens X) x
-              (i ∘ (SimplexCategory.δ k).toOrderHom.toFun))) :=
-      congrArg (fun y => (-1 : ℤ) ^ (k : ℕ) •
-        F.obj.map (((FormalCoproduct.mk _ U).mapPower
-          (SimplexCategory.δ k).toOrderHom.toFun).φ i).op y)
-            (cechTopSectionsAddEquiv_apply (F := F) (U := U) n x _)
-    _ = (-1 : ℤ) ^ (k : ℕ) •
+  have hSections := cechTopSectionsAddEquiv_apply (F := F) (U := U) n x
+    (i ∘ (SimplexCategory.δ k).toOrderHom.toFun)
+  have hIdentify := congrArg (fun y => (-1 : ℤ) ^ (k : ℕ) •
+    F.obj.map (((FormalCoproduct.mk _ U).mapPower
+      (SimplexCategory.δ k).toOrderHom.toFun).φ i).op y) hSections
+  have hRestrict := congrArg (fun y => (-1 : ℤ) ^ (k : ℕ) • y)
+    (cechTopRestriction_apply (F := F) (U := U) n k i
+      (cechTermSectionsAddEquiv F U n (⊤ : Opens X) x
+        (i ∘ (SimplexCategory.δ k).toOrderHom.toFun)))
+  let restricted := F.obj.map (homOfLE (inf_le_inf_left (⊤ : Opens X)
+    (leOfHom (((FormalCoproduct.mk _ U).mapPower
+      (SimplexCategory.δ k).toOrderHom.toFun).φ i)))).op
+    (cechTermSectionsAddEquiv F U n (⊤ : Opens X) x
+      (i ∘ (SimplexCategory.δ k).toOrderHom.toFun))
+  have hScalar :
+      (-1 : ℤ) ^ (k : ℕ) •
+          (F.obj.mapIso (eqToIso (congrArg op
+            (top_inf_eq (∏ᶜ fun r : Fin (n + 2) => U (i r)))))).hom restricted =
         (F.obj.mapIso (eqToIso (congrArg op
           (top_inf_eq (∏ᶜ fun r : Fin (n + 2) => U (i r)))))).hom
-          (F.obj.map (homOfLE (inf_le_inf_left (⊤ : Opens X)
-            (leOfHom (((FormalCoproduct.mk _ U).mapPower
-              (SimplexCategory.δ k).toOrderHom.toFun).φ i)))).op
-            (cechTermSectionsAddEquiv F U n (⊤ : Opens X) x
-              (i ∘ (SimplexCategory.δ k).toOrderHom.toFun))) :=
-      congrArg (fun y => (-1 : ℤ) ^ (k : ℕ) • y)
-        (cechTopRestriction_apply (F := F) (U := U) n k i _)
-    _ = _ := (map_zsmul
-      (F.obj.mapIso (eqToIso (congrArg op
-        (top_inf_eq (∏ᶜ fun r : Fin (n + 2) => U (i r)))))).hom.hom
-      ((-1 : ℤ) ^ (k : ℕ)) _).symm
+          ((-1 : ℤ) ^ (k : ℕ) • restricted) :=
+    (map_zsmul (F.obj.mapIso (eqToIso (congrArg op
+      (top_inf_eq (∏ᶜ fun r : Fin (n + 2) => U (i r)))))).hom.hom
+      ((-1 : ℤ) ^ (k : ℕ)) restricted).symm
+  exact hIdentify.trans (hRestrict.trans hScalar)
 
 private theorem cechTopAlternatingSum_apply (n : ℕ) (i : Fin (n + 2) → ι)
     (x : (cechTerm F U n).obj.obj (op ⊤)) :
@@ -170,30 +169,16 @@ private theorem cechTopSectionsAddEquiv_d (n : ℕ) :
     cechCochainAddEquiv F.obj U (n + 1)
       (cechTopSectionsAddEquiv F U (n + 1)
         ((cechDifferential F U n).hom.app (op ⊤) x)) i
-  calc
-    _ = ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
-        F.obj.map (((FormalCoproduct.mk _ U).mapPower
-          (SimplexCategory.δ k).toOrderHom.toFun).φ i).op
-          (cechCochainAddEquiv F.obj U n (cechTopSectionsAddEquiv F U n x)
-            (i ∘ (SimplexCategory.δ k).toOrderHom.toFun)) :=
-      TopologicalSpace.cechDifferential_apply F.obj U n
-        (cechTopSectionsAddEquiv F U n x) i
-    _ = (F.obj.mapIso (eqToIso (congrArg op
-        (top_inf_eq (∏ᶜ fun r : Fin (n + 2) => U (i r)))))).hom
-        (∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
-          F.obj.map (homOfLE (inf_le_inf_left (⊤ : Opens X)
-            (leOfHom (((FormalCoproduct.mk _ U).mapPower
-              (SimplexCategory.δ k).toOrderHom.toFun).φ i)))).op
-            (cechTermSectionsAddEquiv F U n (⊤ : Opens X) x
-              (i ∘ (SimplexCategory.δ k).toOrderHom.toFun))) :=
-      cechTopAlternatingSum_apply (F := F) (U := U) n i x
-    _ = (F.obj.mapIso (eqToIso (congrArg op
-        (top_inf_eq (∏ᶜ fun r : Fin (n + 2) => U (i r)))))).hom
-        (cechTermSectionsAddEquiv F U (n + 1) (⊤ : Opens X)
-          ((cechDifferential F U n).hom.app (op ⊤) x) i) :=
-      congrArg _ (cechDifferential_apply F U n (⊤ : Opens X) x i).symm
-    _ = _ := (cechTopSectionsAddEquiv_apply (F := F) (U := U) (n + 1)
-      ((cechDifferential F U n).hom.app (op ⊤) x) i).symm
+  have hNative := TopologicalSpace.cechDifferential_apply F.obj U n
+    (cechTopSectionsAddEquiv F U n x) i
+  have hSum := cechTopAlternatingSum_apply (F := F) (U := U) n i x
+  have hDifferential := congrArg
+    (F.obj.mapIso (eqToIso (congrArg op
+      (top_inf_eq (∏ᶜ fun r : Fin (n + 2) => U (i r)))))).hom
+    (cechDifferential_apply F U n (⊤ : Opens X) x i).symm
+  have hTarget := (cechTopSectionsAddEquiv_apply (F := F) (U := U) (n + 1)
+    ((cechDifferential F U n).hom.app (op ⊤) x) i).symm
+  exact hNative.trans (hSum.trans (hDifferential.trans hTarget))
 
 /-- Global sections of a sheaf-level Cech term agree with the corresponding term of
 the native Cech complex of the underlying presheaf. -/
@@ -242,11 +227,13 @@ theorem cechGlobalSectionsAugmentation_apply
   change cechCochainAddEquiv F.obj U 0
     (cechTopSectionsAddEquiv F U 0
       ((cechAugmentation F U).hom.app (op ⊤) (eΓ.hom.app F x))) i = _
-  rw [cechTopSectionsAddEquiv_apply, cechAugmentation_apply]
+  rw [cechTopSectionsAddEquiv_apply (F := F) (U := U) 0
+    ((cechAugmentation F U).hom.app (op ⊤) (eΓ.hom.app F x)) i]
+  rw [cechAugmentation_apply F U (⊤ : Opens X) (eΓ.hom.app F x) i]
   change (F.obj.map _ ≫ F.obj.map _) _ = F.obj.map _ _
-  rw [← F.obj.map_comp]
   exact ConcreteCategory.congr_hom
-    (congrArg F.obj.map (Subsingleton.elim _ _)) _
+    ((F.obj.map_comp _ _).symm.trans
+      (congrArg F.obj.map (Subsingleton.elim _ _))) _
 
 /-- The global-sections Cech augmentation is natural in the sheaf. -/
 theorem cechGlobalSectionsAugmentation_naturality
@@ -328,7 +315,11 @@ noncomputable def cechGlobalSectionsComplexIso :
     intro i j hij
     simp only [ComplexShape.up_Rel] at hij
     subst j
-    rw [Functor.mapHomologicalComplex_obj_d, cechComplex_d]
+    change (cechGlobalSectionsXIso F U i).hom ≫
+        ((cechComplexFunctor U).obj F.obj).d i (i + 1) =
+      (globalSectionsFunctor X).map ((cechComplex F U).d i (i + 1)) ≫
+        (cechGlobalSectionsXIso F U (i + 1)).hom
+    rw [cechComplex_d F U i]
     change
       ((CategoryTheory.Sheaf.ΓNatIsoSheafSections
           (Opens.grothendieckTopology X) AddCommGrpCat.{u} isTerminalTop).hom.app
