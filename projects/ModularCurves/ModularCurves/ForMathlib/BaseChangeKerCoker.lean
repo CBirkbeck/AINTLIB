@@ -353,6 +353,39 @@ theorem LinearMap.codRestrictToKer_surjective_iff_exact
     obtain ⟨p, hp⟩ := hq
     exact ⟨p, Subtype.ext hp⟩
 
+/-- If `A → B → C` is exact, `B` and `C` are flat, and the second map is
+surjective, then the quotient of `A` by the kernel of the first map is flat. -/
+theorem Module.Flat.quotient_ker_of_exact_surjective
+    {A B C : Type*} [AddCommGroup A] [AddCommGroup B] [AddCommGroup C]
+    [Module R A] [Module R B] [Module R C]
+    [Module.Flat R B] [Module.Flat R C]
+    (f : A →ₗ[R] B) (g : B →ₗ[R] C)
+    (hexact : Function.Exact f g) (hg : Function.Surjective g) :
+    Module.Flat R (A ⧸ LinearMap.ker f) := by
+  letI : Module.Flat R (B ⧸ LinearMap.ker g) :=
+    Module.Flat.of_linearEquiv (g.quotKerEquivOfSurjective hg)
+  letI : Module.Flat R (LinearMap.ker g) :=
+    Module.Flat.of_flat_quotient (LinearMap.ker g)
+  exact Module.Flat.of_linearEquiv
+    ((LinearMap.quotKerEquivRange f).trans
+      (LinearEquiv.ofEq _ _ (LinearMap.exact_iff.mp hexact).symm))
+
+/-- Over a noetherian ring, the finite quotient supplied by an exact sequence ending in
+a surjection of flat modules is projective. -/
+theorem Module.Projective.quotient_ker_of_exact_surjective
+    {A B C : Type*} [AddCommGroup A] [AddCommGroup B] [AddCommGroup C]
+    [Module R A] [Module R B] [Module R C]
+    [IsNoetherianRing R] [Module.Finite R A]
+    [Module.Flat R B] [Module.Flat R C]
+    (f : A →ₗ[R] B) (g : B →ₗ[R] C)
+    (hexact : Function.Exact f g) (hg : Function.Surjective g) :
+    Module.Projective R (A ⧸ LinearMap.ker f) := by
+  letI : Module.Flat R (A ⧸ LinearMap.ker f) :=
+    Module.Flat.quotient_ker_of_exact_surjective f g hexact hg
+  letI : Module.FinitePresentation R (A ⧸ LinearMap.ker f) :=
+    Module.finitePresentation_of_finite R _
+  exact Module.Flat.projective_of_finitePresentation
+
 end Exactness
 
 section BaseChangeAlgebra
