@@ -5,6 +5,10 @@
 # (root imports `FJP.FiniteJetMain`; FJP files live in `Adic spaces/FJP/`).
 # 𝓐 sheafy + uniform + domain + non-noetherian all verified; 𝓑 non-uniform verified.
 # Remaining: NONE dispatchable — M7 stretch (needs /develop --continue), CLEANUP-* (cleanup fleet).
+# ★ M8 COMPLETE (2026-07-17): HasLocLiftPowerBounded at FULL HUBER generality —
+# hasLocLiftPowerBounded_huber + priority-1150 instance (no Tate, no noetherian),
+# axiom-clean. IsSheafy's class parameter is now a THEOREM for every complete Huber
+# ring with A⁺ a ring of integral elements — matching Wedhorn Prop 8.2/7.52's generality.
 
 # Ticket Board — Campaign 4: Finite-jet pinching (uniform sheafy non-noetherian domain, not stably uniform)
 
@@ -922,8 +926,13 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
 
 ### [CLEANUP-M8-1] /cleanup SpvAI.lean + SpvAITopology.lean — **Depends**: T905.
 
-### [T906] General witness: `mem_plus_of_forall_spa_vle_one_huber` (+ PB wrapper)
-- **Status**: open — **File**: FaithfulLocLift.lean (skeleton at tail) — **Depends**: T901, T903, T905, CLEANUP-M8-1 — **Type**: theorem ×2
+### [T906] General witness: `mem_plus_of_forall_spa_vle_one_huber` (+ PB wrapper) — **DONE 2026-07-17**
+- **Progress**: Tate body transformed exactly per plan — HU-a…d verbatim; witness
+  `rs := (t.comap algB).restrictIdealSingle 1 hW1` (characteristic restriction); continuity
+  via the T905 AOO-engine at `presheafValue_concretePair D'` with `h_in` from T903's
+  I-independent microbiality; B⁺-bound and `w(x) > 1` via the Single transfer trio at `1`.
+  PB wrapper one-liner. Compiled first try; axiom-clean.
+- **Status**: done (2026-07-17) — **File**: FaithfulLocLift.lean (skeleton at tail) — **Depends**: T901, T903, T905, CLEANUP-M8-1 — **Type**: theorem ×2
 - De-Tate the [Hu2] 3.3(i) witness (decomposition L4): keep HU-a…d blocks verbatim (all
   Tate-free); replace lines-454-530's Tate-pair machinery with:
   `rs := (t.comap algB).restrictIdeal ⊥`; Spa-membership: continuity via T905 at
@@ -936,8 +945,11 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
   `IsRingOfIntegralElements.subset_powerBounded ∘ mem_plus…`.
 - **Sources**: [Hu2] 3.3(i) (huber2.txt:633-658) — "Put u = t|A ∈ Spv A and v = u|cΓ_u".
 
-### [T907] General LL fields: `isUnit_canonicalMap_s_huber` + `locLift_divByS_isPowerBounded_huber`
-- **Status**: open — **File**: FaithfulLocLift.lean (skeleton at tail) — **Depends**: T901, T906 — **Type**: theorem ×2
+### [T907] General LL fields: `isUnit_canonicalMap_s_huber` + `locLift_divByS_isPowerBounded_huber` — **DONE 2026-07-17**
+- **Progress**: faithful bodies reused verbatim with the two swaps — Huber-ring supply
+  `presheafValue_isHuberRing_huber D'` (T901) in place of the Tate route, and `_huber`
+  criteria names. Both axiom-clean.
+- **Status**: done (2026-07-17) — **File**: FaithfulLocLift.lean (skeleton at tail) — **Depends**: T901, T906 — **Type**: theorem ×2
 - Unit side: same body as `isUnit_canonicalMap_s_faithful` with
   `haveI := presheafValue_isHuberRing_huber D'` in place of the Tate route; criterion
   `isUnit_iff_forall_not_vle_zero_of_completePair` already Tate-free + axiom-clean
@@ -948,8 +960,14 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
 
 ### [CLEANUP-M8-ALL] /cleanup-all M8 files — **Depends**: T907. Before the milestone.
 
-### [T908] MILESTONE: `hasLocLiftPowerBounded_huber` + instance + axiom sweep
-- **Status**: open — **File**: FaithfulLocLift.lean — **Depends**: CLEANUP-M8-ALL — **Type**: assembly
+### [T908] MILESTONE: `hasLocLiftPowerBounded_huber` + instance + axiom sweep — **DONE 2026-07-17**
+- **Progress**: class assembled (two fields := T907); `instance (priority := 1150)
+  hasLocLiftPowerBounded_huber_instance` — NO `[IsTateRing]`, NO `[IsNoetherianRing]`.
+  `#print axioms` on hasLocLiftPowerBounded_huber + all three chain theorems =
+  `[propext, Classical.choice, Quot.sound]`. Smoke test: `IsSheafy A` elaborates for a
+  general complete Huber ring through the new instance alone. Full `lake build
+  «Adic spaces»` green; all five `FiniteJetMain` theorems re-verified axiom-clean.
+- **Status**: done (2026-07-17) — **File**: FaithfulLocLift.lean — **Depends**: CLEANUP-M8-ALL — **Type**: assembly
 - Fill `hasLocLiftPowerBounded_huber where isUnit… := T907a; locLift… := T907b`; add
   `instance (priority := 1150) hasLocLiftPowerBounded_huber_instance` with NO
   `[IsNoetherianRing]`, NO `[IsTateRing]` (subsumes the faithful instance's vestigial
