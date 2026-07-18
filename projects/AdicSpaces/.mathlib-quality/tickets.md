@@ -999,6 +999,23 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
 stale docstrings recorded 2026-07-17: `hasLocLiftPowerBounded_JetA`'s "does not apply"
 note (FiniteJetFunctoriality.lean:2147) and FaithfulLocLift's "Status: sorry" relics.
 
+## MERGE-TO-MAIN (owner directive 2026-07-18, in progress)
+
+Goal: land dev/adic-spaces on main with nothing breaking. Steps done: backup branch
+`backup/pre-main-sync-20260718` pushed; merged origin/main (toolchain v4.31→v4.33-rc1,
+mathlib pin fd1d54bcac5c; 7 conflicts resolved keeping branch-newer versions); mathlib
+cache fetched. v4.33 fallout repaired so far (all committed):
+- JetDualNumberNorm: TrivSqZeroExt Prod-literal elaboration (inl/inr limit witness), RightActions snd_mul.
+- Vendored/XiaMvPowerSeriesEquiv: Finsupp.add_apply qualification, coeff_mk transparency
+  (congrArg route), toAdicCompletion_coe via of_apply + Submodule.Quotient.eq.
+- HuberRings: codRestrict defeq-show + exponent ring.
+- Vendored/CoramMvGaussNorm: TRIMMED — 8 decls upstreamed into mathlib GaussNorm.
+- SpvAI: mul_le_mul_left'/right' → renamed unprimed (sides swapped in v4.33).
+- Vendored/CoramMvRestrictedNorm: three subtype-iff convert tails.
+- Presheaf: subtype-algebra instance for completedPlusSubringBase; coe_map local-eq rewrites.
+Remaining: wave-4 root build running (Wedhorn stack + FJP + Milnor downstream of
+Presheaf). Then: gh pr create dev/adic-spaces → main. M9a T1001 resumes after the PR.
+
 ## M9 — [FJP] Cor 5.5 + Cor 6.1 (OPENED 2026-07-18, owner-approved FULL scope)
 
 Plan: `plan-m9.md` (+ audit `plan-m9-preplan.md`). M9a ticketed below; M9b/M9c open
