@@ -139,6 +139,26 @@ noncomputable def orderedBaseCechCoface
     (ModuleCat.{u} Γ(S, (⊤ : S.Opens)))).obj
       (baseModulePresheaf π M)).map (orderedCechFace U n k).op
 
+theorem orderedBaseCechCoface_comp_π
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (k : Fin (n + 2)) (i : OrderedCechIndex ι (n + 1)) :
+    orderedBaseCechCoface π M U n k ≫
+        Pi.π (fun j : OrderedCechIndex ι (n + 1) =>
+          baseCechFactor π M U (n + 1) j.1) i =
+      Pi.π (fun j : OrderedCechIndex ι n =>
+        baseCechFactor π M U n j.1) (i.delete k) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower
+            (SimplexCategory.δ k).toOrderHom.toFun).φ i.1).op := by
+  change (Pi.lift fun j : OrderedCechIndex ι (n + 1) =>
+      Pi.π (fun l : OrderedCechIndex ι n =>
+        baseCechFactor π M U n l.1) (j.delete k) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower
+            (SimplexCategory.δ k).toOrderHom.toFun).φ j.1).op) ≫ _ = _
+  exact Pi.lift_π _ i
+
 theorem orderedBaseCechCoface_comp
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
@@ -181,6 +201,30 @@ noncomputable def orderedBaseCechDifferential
       orderedBaseCechObject π M U (n + 1) :=
   ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
     orderedBaseCechCoface π M U n k
+
+theorem orderedBaseCechDifferential_comp_π
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : OrderedCechIndex ι (n + 1)) :
+    orderedBaseCechDifferential π M U n ≫
+        Pi.π (fun j : OrderedCechIndex ι (n + 1) =>
+          baseCechFactor π M U (n + 1) j.1) i =
+      ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+        (Pi.π (fun j : OrderedCechIndex ι n =>
+          baseCechFactor π M U n j.1) (i.delete k) ≫
+          (baseModulePresheaf π M).map
+            (((FormalCoproduct.mk _ U).mapPower
+              (SimplexCategory.δ k).toOrderHom.toFun).φ i.1).op) := by
+  let p : orderedBaseCechObject π M U (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i.1 :=
+    Pi.π (fun j : OrderedCechIndex ι (n + 1) =>
+      baseCechFactor π M U (n + 1) j.1) i
+  change orderedBaseCechDifferential π M U n ≫ p = _
+  rw [orderedBaseCechDifferential, sum_comp]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [zsmul_comp, orderedBaseCechCoface_comp_π]
+  rfl
 
 theorem orderedBaseCechDifferential_comp
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)

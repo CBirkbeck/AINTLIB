@@ -49,6 +49,28 @@ noncomputable def baseCechCoface {X S : Scheme.{u}} (π : X ⟶ S)
   ((FormalCoproduct.cosimplicialObjectFunctor
     (FormalCoproduct.mk _ U).cech).obj (baseModulePresheaf π M)).δ k
 
+theorem baseCechCoface_comp_π
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n : ℕ)
+    (k : Fin (n + 2)) (i : Fin (n + 2) → ι) :
+    baseCechCoface π M U n k ≫
+        Pi.π (fun j : Fin (n + 2) → ι =>
+          baseCechFactor π M U (n + 1) j) i =
+      Pi.π (fun j : Fin (n + 1) → ι =>
+        baseCechFactor π M U n j)
+          (i ∘ (SimplexCategory.δ k).toOrderHom.toFun) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower
+            (SimplexCategory.δ k).toOrderHom.toFun).φ i).op := by
+  change (Pi.lift fun j : Fin (n + 2) → ι =>
+      Pi.π (fun l : Fin (n + 1) → ι =>
+        baseCechFactor π M U n l)
+          (j ∘ (SimplexCategory.δ k).toOrderHom.toFun) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower
+            (SimplexCategory.δ k).toOrderHom.toFun).φ j).op) ≫ _ = _
+  exact Pi.lift_π _ i
+
 /-- Projection from all tuple components to strictly increasing components. -/
 noncomputable def baseCechToOrderedF
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
@@ -88,6 +110,31 @@ theorem baseCechComplex_d_eq_sum_cofaces
       (baseModulePresheaf π M)).d n (n + 1) = _
   rw [FormalCoproduct.cochainComplexFunctor_obj_d]
   exact (CochainComplex.of_d _ _ n).trans rfl
+
+theorem baseCechComplex_d_comp_π
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 2) → ι) :
+    (baseCechComplex π M U).d n (n + 1) ≫
+        Pi.π (fun j : Fin (n + 2) → ι =>
+          baseCechFactor π M U (n + 1) j) i =
+      ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+        (Pi.π (fun j : Fin (n + 1) → ι =>
+          baseCechFactor π M U n j)
+            (i ∘ (SimplexCategory.δ k).toOrderHom.toFun) ≫
+          (baseModulePresheaf π M).map
+            (((FormalCoproduct.mk _ U).mapPower
+              (SimplexCategory.δ k).toOrderHom.toFun).φ i).op) := by
+  let p : (baseCechComplex π M U).X (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    Pi.π (fun j : Fin (n + 2) → ι =>
+      baseCechFactor π M U (n + 1) j) i
+  change (baseCechComplex π M U).d n (n + 1) ≫ p = _
+  rw [baseCechComplex_d_eq_sum_cofaces, sum_comp]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [zsmul_comp, baseCechCoface_comp_π]
+  rfl
 
 theorem baseCechComplex_d_comp_baseCechToOrderedF
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)

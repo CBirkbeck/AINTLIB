@@ -267,6 +267,88 @@ theorem orderedToBaseCechAlternatingF_comp_baseCechToOrderedF
       π M U n σ hne]
   · simp
 
+theorem orderedToBaseCechAlternatingF_comp_π_of_strictMono
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 1) → ι) (hi : StrictMono i) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor π M U n j) i =
+      Pi.π (fun j : OrderedCechIndex ι n =>
+        baseCechFactor π M U n j.1) ⟨i, hi⟩ := by
+  let p : (baseCechComplex π M U).X n ⟶ baseCechFactor π M U n i :=
+    Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor π M U n j) i
+  let q : orderedBaseCechObject π M U n ⟶ baseCechFactor π M U n i :=
+    Pi.π (fun j : OrderedCechIndex ι n =>
+      baseCechFactor π M U n j.1) ⟨i, hi⟩
+  have hp : baseCechToOrderedF π M U n ≫ q = p := by
+    dsimp only [p, q]
+    exact baseCechToOrderedF_comp_π π M U n ⟨i, hi⟩
+  change orderedToBaseCechAlternatingF π M U n ≫ p = q
+  calc
+    orderedToBaseCechAlternatingF π M U n ≫ p =
+        orderedToBaseCechAlternatingF π M U n ≫
+          (baseCechToOrderedF π M U n ≫ q) :=
+      congrArg (orderedToBaseCechAlternatingF π M U n ≫ ·) hp.symm
+    _ = (orderedToBaseCechAlternatingF π M U n ≫
+          baseCechToOrderedF π M U n) ≫ q :=
+      (Category.assoc _ _ _).symm
+    _ = q := by
+      rw [orderedToBaseCechAlternatingF_comp_baseCechToOrderedF,
+        Category.id_comp]
+
+theorem orderedToBaseCechAlternatingF_comp_d_comp_π_of_strictMono
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 2) → ι) (hi : StrictMono i) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        (baseCechComplex π M U).d n (n + 1) ≫
+          Pi.π (fun j : Fin (n + 2) → ι =>
+            baseCechFactor π M U (n + 1) j) i =
+      orderedBaseCechDifferential π M U n ≫
+        orderedToBaseCechAlternatingF π M U (n + 1) ≫
+          Pi.π (fun j : Fin (n + 2) → ι =>
+            baseCechFactor π M U (n + 1) j) i := by
+  let p : (baseCechComplex π M U).X (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    Pi.π (fun j : Fin (n + 2) → ι =>
+      baseCechFactor π M U (n + 1) j) i
+  let q : orderedBaseCechObject π M U (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    Pi.π (fun j : OrderedCechIndex ι (n + 1) =>
+      baseCechFactor π M U (n + 1) j.1) ⟨i, hi⟩
+  have hp : baseCechToOrderedF π M U (n + 1) ≫ q = p := by
+    dsimp only [p, q]
+    exact baseCechToOrderedF_comp_π π M U (n + 1) ⟨i, hi⟩
+  have ha : orderedToBaseCechAlternatingF π M U (n + 1) ≫ p = q := by
+    dsimp only [p, q]
+    exact orderedToBaseCechAlternatingF_comp_π_of_strictMono
+      π M U (n + 1) i hi
+  change orderedToBaseCechAlternatingF π M U n ≫
+      (baseCechComplex π M U).d n (n + 1) ≫ p =
+    orderedBaseCechDifferential π M U n ≫
+      orderedToBaseCechAlternatingF π M U (n + 1) ≫ p
+  calc
+    orderedToBaseCechAlternatingF π M U n ≫
+        (baseCechComplex π M U).d n (n + 1) ≫ p =
+      orderedToBaseCechAlternatingF π M U n ≫
+        ((baseCechComplex π M U).d n (n + 1) ≫
+          baseCechToOrderedF π M U (n + 1)) ≫ q := by
+        rw [Category.assoc, hp]
+    _ = orderedToBaseCechAlternatingF π M U n ≫
+        (baseCechToOrderedF π M U n ≫
+          orderedBaseCechDifferential π M U n) ≫ q := by
+      rw [baseCechComplex_d_comp_baseCechToOrderedF]
+    _ = (orderedToBaseCechAlternatingF π M U n ≫
+          baseCechToOrderedF π M U n) ≫
+        orderedBaseCechDifferential π M U n ≫ q := by
+      simp only [Category.assoc]
+    _ = orderedBaseCechDifferential π M U n ≫ q := by
+      rw [orderedToBaseCechAlternatingF_comp_baseCechToOrderedF,
+        Category.id_comp]
+    _ = orderedBaseCechDifferential π M U n ≫
+        orderedToBaseCechAlternatingF π M U (n + 1) ≫ p := by
+      rw [ha]
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
