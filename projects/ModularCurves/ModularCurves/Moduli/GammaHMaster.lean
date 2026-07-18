@@ -1122,10 +1122,13 @@ open EllipticCurve in
 nontrivial base-identical self-iso fixes a Drinfeld `Γ₁(N)`-structure (`N ≥ 4`
 invertible), modulo the two register-box pins: the T-D6b geometric-order box
 (`HasExactOrder.pull_nsmul_ne_zero`, consumed through the statement) and the KM
-kernel-degree keystone `hbound` (the [RIG-2] core's frozen contract, quantified over
-the pointed automorphism). Route: the fixed section is `c`-fixed (`pullSection`
-`lift_fst`), its small multiples are nonzero (T-D6b at `t = 𝟙`), and
-`aut_endo_eq_one_of_fixes_point` forces the automorphism to be the identity. -/
+kernel-degree keystone `hbound` (the **[RIG-2′] NARROWED contract**, v10.320
+SUSPECT-RIG2: an ISO `ε` fixing a point of exact geometric order `N` is the identity —
+the former all-pointed-`ε`/∀-`pts` shape was refutable by `ε = [N+1]`, and
+iso-restricted at `N = 4` by `ε = [-1]` on `E[2]`; the single-exact-order-point form is
+exactly what this consumer holds and survives both). Route: the fixed section is
+`c`-fixed (`pullSection` `lift_fst`), its small multiples are nonzero (T-D6b at
+`t = 𝟙`), `εO` is invertible from `e`, and the narrowed keystone kills. -/
 theorem gammaOneDrinfeld_fix_absurd (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (hinv : IsUnit (N : R))
     (k : Type u) [Field k] [IsAlgClosed k]
@@ -1136,13 +1139,12 @@ theorem gammaOneDrinfeld_fix_absurd (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
     (b : (gammaOneDrinfeldProblem R N).obj
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
-    (hbound : ∀ ε : E.asOver ⟶ E.asOver, η[E.asOver] ≫ ε = η[E.asOver] →
-      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
-      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
-      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
-        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
-          (ε * (𝟙 E.asOver)⁻¹) = 1) → False)
+    (hbound : ∀ ε : E.asOver ⟶ E.asOver, IsIso ε → η[E.asOver] ≫ ε = η[E.asOver] →
+      ∀ P : E.Point (𝟙 (Spec (CommRingCat.of k))),
+        (∀ a : ℕ, 0 < a → a < N → (a : ℤ) • P ≠ 0) →
+        (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P ≫ ε
+          = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P →
+        ε = 𝟙 E.asOver)
     (hfix : (gammaOneDrinfeldProblem R N).map e.hom.op b = b) : False := by
   classical
   haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := by
@@ -1192,17 +1194,22 @@ theorem gammaOneDrinfeld_fix_absurd (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     have h := b.2.pull_nsmul_ne_zero E hinvSpec hkill k
       (𝟙 (Spec (CommRingCat.of k))) ha0 haN
     rwa [hpull_id] at h
-  -- the equiv-form fix and the [RIG-2] core
+  -- the equiv-form fix and the [RIG-2′] core (the NARROWED keystone contract:
+  -- `εO` is an automorphism — invertible from `e` — fixing the exact-order-`N` point)
   have hfix' : (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) b.1 ≫ εO
       = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) b.1 := by
     refine Over.OverMorphism.ext ?_
     show b.1.1 ≫ c = b.1.1
     exact hPc
-  have hN3 : 3 ≤ (N : ℤ) := by exact_mod_cast Nat.le_of_succ_le hN
-  have hεid : εO = 𝟙 E.asOver := by
-    refine E.aut_endo_eq_one_of_fixes_point N εO hη b.1 hord hfix' ?_
-    intro hδ pts hinj hkillpts
-    exact hbound εO hη hδ pts hinj hkillpts
+  haveI hIsoε : IsIso εO := by
+    have hcπ' : e.inv.top ≫ E.π = E.π := by
+      have h := e.inv.isPullback.w
+      rw [EllObj.isoInv_baseHom e he, Category.comp_id] at h
+      exact h
+    exact ⟨Over.homMk e.inv.top hcπ',
+      Over.OverMorphism.ext (congrArg EllHom.top e.hom_inv_id),
+      Over.OverMorphism.ext (congrArg EllHom.top e.inv_hom_id)⟩
+  have hεid : εO = 𝟙 E.asOver := hbound εO hIsoε hη b.1 hord hfix'
   have hcid : c = 𝟙 E.E := congrArg CommaMorphism.left hεid
   exact hne (Iso.ext (EllHom.ext he hcid))
 
@@ -1220,13 +1227,12 @@ theorem gammaOneDrinfeld_rigidNoeth (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : 
     (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
       (sm : Spec (CommRingCat.of k) ⟶ Spec R)
       (E : EllipticCurve (Spec (CommRingCat.of k)))
-      (ε : E.asOver ⟶ E.asOver), η[E.asOver] ≫ ε = η[E.asOver] →
-      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
-      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
-      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
-        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
-          (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
+      (ε : E.asOver ⟶ E.asOver), IsIso ε → η[E.asOver] ≫ ε = η[E.asOver] →
+      ∀ P : E.Point (𝟙 (Spec (CommRingCat.of k))),
+        (∀ a : ℕ, 0 < a → a < N → (a : ℤ) • P ≠ 0) →
+        (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P ≫ ε
+          = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P →
+        ε = 𝟙 E.asOver) :
     (gammaOneDrinfeldProblem R N).RigidNoeth := by
   intro X hX e he hne a hfix
   haveI := hX
@@ -1259,13 +1265,12 @@ theorem gammaOneDrinfeld_rigid (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUni
     (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
       (sm : Spec (CommRingCat.of k) ⟶ Spec R)
       (E : EllipticCurve (Spec (CommRingCat.of k)))
-      (ε : E.asOver ⟶ E.asOver), η[E.asOver] ≫ ε = η[E.asOver] →
-      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
-      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
-      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
-        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
-          (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
+      (ε : E.asOver ⟶ E.asOver), IsIso ε → η[E.asOver] ≫ ε = η[E.asOver] →
+      ∀ P : E.Point (𝟙 (Spec (CommRingCat.of k))),
+        (∀ a : ℕ, 0 < a → a < N → (a : ℤ) • P ≠ 0) →
+        (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P ≫ ε
+          = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P →
+        ε = 𝟙 E.asOver) :
     (gammaOneDrinfeldProblem R N).Rigid :=
   fun X => gammaOneDrinfeld_rigidNoeth R N hN hinv hbound X (hLN X)
 
@@ -1279,13 +1284,12 @@ theorem gammaOneDrinfeld_representable_prep (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
       (sm : Spec (CommRingCat.of k) ⟶ Spec R)
       (E : EllipticCurve (Spec (CommRingCat.of k)))
-      (ε : E.asOver ⟶ E.asOver), η[E.asOver] ≫ ε = η[E.asOver] →
-      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
-      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
-      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
-        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
-          (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
+      (ε : E.asOver ⟶ E.asOver), IsIso ε → η[E.asOver] ≫ ε = η[E.asOver] →
+      ∀ P : E.Point (𝟙 (Spec (CommRingCat.of k))),
+        (∀ a : ℕ, 0 < a → a < N → (a : ℤ) • P ≠ 0) →
+        (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P ≫ ε
+          = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P →
+        ε = 𝟙 E.asOver) :
     (gammaOneDrinfeldProblem R N).Representable :=
   (ModuliProblem.representable_iff_rigidNoeth _ (gammaOneDrinfeld_affineOverEll N)).mpr
     ⟨(gammaOneDrinfeld_affineOverEll N).relativelyRepresentable,

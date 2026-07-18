@@ -152,13 +152,12 @@ theorem gammaOneDrinfeld_rigid_and_representable_of_hbound (N : ℕ) [NeZero N]
     (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
       (sm : Spec (CommRingCat.of k) ⟶ Spec R)
       (E : EllipticCurve (Spec (CommRingCat.of k)))
-      (ε : E.asOver ⟶ E.asOver), η[E.asOver] ≫ ε = η[E.asOver] →
-      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
-      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
-      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
-        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
-          (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
+      (ε : E.asOver ⟶ E.asOver), IsIso ε → η[E.asOver] ≫ ε = η[E.asOver] →
+      ∀ P : E.Point (𝟙 (Spec (CommRingCat.of k))),
+        (∀ a : ℕ, 0 < a → a < N → (a : ℤ) • P ≠ 0) →
+        (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P ≫ ε
+          = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P →
+        ε = 𝟙 E.asOver) :
     (gammaOneDrinfeldProblem R N).Rigid ∧
       (gammaOneDrinfeldProblem R N).Representable := by
   have hrep : (gammaOneDrinfeldProblem R N).Representable :=
