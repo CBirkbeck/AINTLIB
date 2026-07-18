@@ -91,7 +91,7 @@ lemma finSuccEquiv_restricted_image :
       finSuccEquiv_restricted_image_restricted n c ⟨f, hf⟩ i⟩
     refine ⟨h, ?_, ?_⟩
     · show PowerSeries.IsRestricted (c 0) _
-      rw [Restricted.isRestricted_iff_cofinite]
+      refine (Restricted.isRestricted_iff_cofinite (c 0)).mpr ?_
       choose a ha using fun i : ℕ ↦ MvRestricted.gaussNorm_achieved (Fin.tail c)
         (fun _ ↦ (StrongPos_pos c _).le)
         (PowerSeries.coeff i h)
@@ -173,6 +173,7 @@ lemma finSuccEquiv_restricted_image :
             (PowerSeries.coeff p.1 h')) p.2) (pow_nonneg (StrongPos_pos c 0).le _)
     · simp [AlgEquiv.apply_symm_apply]
 
+set_option maxSynthPendingDepth 8 in
 variable (R) in
 noncomputable
 def MvRestricted.finSuccEquiv : MvPowerSeries.Restricted R c ≃+*
@@ -180,7 +181,10 @@ def MvRestricted.finSuccEquiv : MvPowerSeries.Restricted R c ≃+*
   ((RingEquiv.subringMap (s := (MvPowerSeries.isSubring (R := R) c))
   (MvPowerSeries.finSuccEquiv R n).toRingEquiv).trans
   (RingEquiv.subringCongr (finSuccEquiv_restricted_image n c))).trans
-  (Subring.equivMapOfInjective _ _ (PowerSeries.map_injective _ Subtype.val_injective)).symm
+  (Subring.equivMapOfInjective
+    (PowerSeries.isSubring (R := MvPowerSeries.Restricted R (Fin.tail c)) (c 0))
+    (PowerSeries.map (MvPowerSeries.isSubring (R := R) (Fin.tail c)).subtype)
+    (PowerSeries.map_injective _ Subtype.val_injective)).symm
 
 instance : StrongPos (fun _ : Unit ↦ c 0) where
   pos := by simpa using StrongPos.pos 0
@@ -194,16 +198,25 @@ lemma MvRestricted.map_finSuccEquiv (f : MvPowerSeries.Restricted R c) :
     (PowerSeries.map_injective _ Subtype.val_injective)
   show (e2 (e2.symm ((RingEquiv.subringCongr (finSuccEquiv_restricted_image n c))
     (RingEquiv.subringMap (MvPowerSeries.finSuccEquiv R n).toRingEquiv f)))).1 = _
-  aesop -- proof done by Claude magic?
+  rw [e2.apply_symm_apply ((RingEquiv.subringCongr (finSuccEquiv_restricted_image n c))
+    (RingEquiv.subringMap (MvPowerSeries.finSuccEquiv R n).toRingEquiv f))]
+  rfl
 
 -- this is an important lemma to have... perhaps I can do it without the above statement though?
 lemma MvRestricted.coeff_finSuccEquiv (f : MvPowerSeries.Restricted R c) (i : ℕ) :
     (PowerSeries.coeff i (MvRestricted.finSuccEquiv R n c f).1).1 =
     PowerSeries.coeff i (MvPowerSeries.finSuccEquiv R n f.1) := by
-  have := MvRestricted.map_finSuccEquiv n c f
-  apply_fun PowerSeries.coeff i at this
-  rw [PowerSeries.coeff_map] at this
-  exact this
+  have h2 : (PowerSeries.map (MvPowerSeries.isSubring (R := R) (Fin.tail c)).subtype)
+      ((MvRestricted.finSuccEquiv R n c f).1) = MvPowerSeries.finSuccEquiv R n f.1 :=
+    MvRestricted.map_finSuccEquiv n c f
+  have h3 := congrArg (PowerSeries.coeff i) h2
+  rw [show (PowerSeries.coeff i) ((PowerSeries.map
+        (MvPowerSeries.isSubring (R := R) (Fin.tail c)).subtype)
+        ((MvRestricted.finSuccEquiv R n c f).1)) =
+      (MvPowerSeries.isSubring (R := R) (Fin.tail c)).subtype
+        ((PowerSeries.coeff i) ((MvRestricted.finSuccEquiv R n c f).1)) from
+    PowerSeries.coeff_map ..] at h3
+  exact h3
 
 -- Claude proof after initial simps to prompt in right direction
 variable (R) in

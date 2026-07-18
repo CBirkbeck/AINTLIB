@@ -553,7 +553,8 @@ theorem spa_completion_of_spa_localization
           ((isClosed_le hVcont continuous_const).preimage
             UniformSpace.Completion.continuous_extension)
         rintro _ ⟨c, hc, rfl⟩
-        rw [Subring.mem_comap, Valuation.mem_integer_iff]
+        show φhat (D.coeRingHom c) ∈ (Valued.v).integer
+        rw [Valuation.mem_integer_iff]
         have hφc : φhat (D.coeRingHom c) = φ c := by
           rw [hφhat_def]; exact UniformSpace.Completion.extensionHom_coe φ hφ c
         erw [hφc]
