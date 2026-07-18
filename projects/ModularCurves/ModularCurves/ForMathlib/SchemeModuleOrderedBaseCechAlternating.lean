@@ -987,6 +987,97 @@ theorem orderedToBaseCechAlternatingF_comp_d_comp_π_of_strictMono
         orderedToBaseCechAlternatingF π M U (n + 1) ≫ p := by
       rw [ha]
 
+theorem orderedToBaseCechAlternatingF_comp_d_comp_π_of_injective
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 2) → ι) (hi : Function.Injective i) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        (baseCechComplex π M U).d n (n + 1) ≫
+          Pi.π (fun j : Fin (n + 2) → ι =>
+            baseCechFactor π M U (n + 1) j) i =
+      orderedBaseCechDifferential π M U n ≫
+        orderedToBaseCechAlternatingF π M U (n + 1) ≫
+          Pi.π (fun j : Fin (n + 2) → ι =>
+            baseCechFactor π M U (n + 1) j) i := by
+  let σ := Tuple.sort i
+  let j := i ∘ σ
+  have hj : StrictMono j :=
+    (Tuple.monotone_sort i).strictMono_of_injective
+      (hi.comp σ.injective)
+  let A : orderedBaseCechObject π M U n ⟶
+      (baseCechComplex π M U).X (n + 1) :=
+    orderedToBaseCechAlternatingF π M U n ≫
+      (baseCechComplex π M U).d n (n + 1)
+  let B := orderedToBaseCechAlternatingF π M U (n + 1)
+  let D := orderedBaseCechDifferential π M U n
+  let P := baseCechPermutationF π M U (n + 1) σ
+  let p : (baseCechComplex π M U).X (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    Pi.π (fun q : Fin (n + 2) → ι =>
+      baseCechFactor π M U (n + 1) q) i
+  let pj : (baseCechComplex π M U).X (n + 1) ⟶
+      baseCechFactor π M U (n + 1) j :=
+    Pi.π (fun q : Fin (n + 2) → ι =>
+      baseCechFactor π M U (n + 1) q) j
+  let q : orderedBaseCechObject π M U (n + 1) ⟶
+      baseCechFactor π M U (n + 1) j :=
+    Pi.π (fun t : OrderedCechIndex ι (n + 1) =>
+      baseCechFactor π M U (n + 1) t.1) ⟨j, hj⟩
+  let r : baseCechFactor π M U (n + 1) j ⟶
+      baseCechFactor π M U (n + 1) i :=
+    (baseModulePresheaf π M).map
+      (((FormalCoproduct.mk _ U).mapPower σ).φ i).op
+  let s : ℤ := Equiv.Perm.sign σ
+  have hPp : P ≫ p = pj ≫ r := by
+    dsimp only [P, p, pj, r, j]
+    exact baseCechPermutationF_comp_π π M U (n + 1) σ i
+  have hAperm := orderedToBaseCechAlternatingF_comp_d_comp_permutation
+    π M U n σ
+  change A ≫ P = s • A at hAperm
+  have hrel : A ≫ pj ≫ r = s • (A ≫ p) := by
+    calc
+      A ≫ pj ≫ r = A ≫ (P ≫ p) := by rw [hPp]
+      _ = (A ≫ P) ≫ p := by simp only [Category.assoc]
+      _ = (s • A) ≫ p := by rw [hAperm]
+      _ = s • (A ≫ p) := by rw [zsmul_comp]
+  have hs : s * s = 1 := by
+    dsimp only [s]
+    exact Int.units_coe_mul_self (Equiv.Perm.sign σ)
+  have hrel' : A ≫ p = s • (A ≫ pj ≫ r) := by
+    calc
+      A ≫ p = s • (s • (A ≫ p)) := by
+        rw [smul_smul, hs, one_smul]
+      _ = s • (A ≫ pj ≫ r) := congrArg (s • ·) hrel.symm
+  have hstrict :=
+    orderedToBaseCechAlternatingF_comp_d_comp_π_of_strictMono
+      π M U n j hj
+  change A ≫ pj = D ≫ B ≫ pj at hstrict
+  have hBj := orderedToBaseCechAlternatingF_comp_π_of_strictMono
+    π M U (n + 1) j hj
+  change B ≫ pj = q at hBj
+  have hBi := orderedToBaseCechAlternatingF_comp_π_of_injective
+    π M U (n + 1) i hi
+  change B ≫ p = s • (q ≫ r) at hBi
+  have hstrict_r : (A ≫ pj) ≫ r = (D ≫ B ≫ pj) ≫ r :=
+    congrArg (fun f => f ≫ r) hstrict
+  have hDj : D ≫ B ≫ pj = D ≫ q :=
+    congrArg (D ≫ ·) hBj
+  have hDj_r : (D ≫ B ≫ pj) ≫ r = (D ≫ q) ≫ r :=
+    congrArg (fun f => f ≫ r) hDj
+  change A ≫ p = D ≫ B ≫ p
+  calc
+    A ≫ p = s • (A ≫ pj ≫ r) := hrel'
+    _ = s • ((D ≫ B ≫ pj) ≫ r) := congrArg (s • ·) hstrict_r
+    _ = s • ((D ≫ q) ≫ r) := congrArg (s • ·) hDj_r
+    _ = D ≫ (s • (q ≫ r)) := by
+      calc
+        s • ((D ≫ q) ≫ r) = s • (D ≫ (q ≫ r)) :=
+          congrArg (s • ·) (Category.assoc D q r)
+        _ = D ≫ (s • (q ≫ r)) :=
+          (comp_zsmul D (q ≫ r) s).symm
+    _ = D ≫ (B ≫ p) := by rw [hBi]
+    _ = D ≫ B ≫ p := by rfl
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
