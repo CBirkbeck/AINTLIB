@@ -284,6 +284,127 @@ theorem orderedToBaseCechAlternatingF_comp_permutation
   rw [show σ.trans τ = τ * σ by rfl]
   rw [Units.val_mul, ← mul_assoc, Int.units_coe_mul_self, one_mul]
 
+theorem baseCechProjection_comp_map_eq_of_eq
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n : ℕ)
+    (j k : Fin (n + 1) → ι) (hjk : j = k) {V : X.Opens}
+    (a : V ⟶ ∏ᶜ fun x : Fin (n + 1) => U (j x))
+    (b : V ⟶ ∏ᶜ fun x : Fin (n + 1) => U (k x)) :
+    Pi.π (fun q : Fin (n + 1) → ι =>
+        baseCechFactor π M U n q) j ≫
+        (baseModulePresheaf π M).map a.op =
+      Pi.π (fun q : Fin (n + 1) → ι =>
+        baseCechFactor π M U n q) k ≫
+        (baseModulePresheaf π M).map b.op := by
+  subst k
+  rw [Subsingleton.elim a b]
+
+theorem orderedToBaseCechAlternatingF_comp_coface_π_pair
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 2) → ι) (k l : Fin (n + 2))
+    (hki : i k = i l) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        Pi.π (fun j : Fin (n + 1) → ι =>
+          baseCechFactor π M U n j) (i ∘ k.succAbove) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op =
+      (Equiv.Perm.sign (cechDeleteSwapPerm k l) : ℤ) •
+        (orderedToBaseCechAlternatingF π M U n ≫
+          Pi.π (fun j : Fin (n + 1) → ι =>
+            baseCechFactor π M U n j) (i ∘ l.succAbove) ≫
+          (baseModulePresheaf π M).map
+            (((FormalCoproduct.mk _ U).mapPower l.succAbove).φ i).op) := by
+  let ρ := cechDeleteSwapPerm k l
+  let p : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U n (i ∘ l.succAbove) :=
+    Pi.π (fun j : Fin (n + 1) → ι =>
+      baseCechFactor π M U n j) (i ∘ l.succAbove)
+  let r : baseCechFactor π M U n (i ∘ l.succAbove) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    (baseModulePresheaf π M).map
+      (((FormalCoproduct.mk _ U).mapPower l.succAbove).φ i).op
+  let pk : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U n (i ∘ k.succAbove) :=
+    Pi.π (fun j : Fin (n + 1) → ι =>
+      baseCechFactor π M U n j) (i ∘ k.succAbove)
+  let rk : baseCechFactor π M U n (i ∘ k.succAbove) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    (baseModulePresheaf π M).map
+      (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op
+  have htuple : (i ∘ l.succAbove) ∘ ρ = i ∘ k.succAbove :=
+    comp_succAbove_cechDeleteSwapPerm_of_eq i k l hki
+  let pρ : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U n ((i ∘ l.succAbove) ∘ ρ) :=
+    Pi.π (fun j : Fin (n + 1) → ι =>
+      baseCechFactor π M U n j) ((i ∘ l.succAbove) ∘ ρ)
+  let rρ : baseCechFactor π M U n ((i ∘ l.succAbove) ∘ ρ) ⟶
+      baseCechFactor π M U n (i ∘ l.succAbove) :=
+    (baseModulePresheaf π M).map
+      (((FormalCoproduct.mk _ U).mapPower ρ).φ (i ∘ l.succAbove)).op
+  have hρp : baseCechPermutationF π M U n ρ ≫ p = pρ ≫ rρ := by
+    dsimp only [p, pρ, rρ]
+    exact baseCechPermutationF_comp_π
+      π M U n ρ (i ∘ l.succAbove)
+  let a : (∏ᶜ fun x : Fin (n + 2) => U (i x)) ⟶
+      ∏ᶜ fun x : Fin (n + 1) => U (((i ∘ l.succAbove) ∘ ρ) x) :=
+    ((FormalCoproduct.mk _ U).mapPower l.succAbove).φ i ≫
+      ((FormalCoproduct.mk _ U).mapPower ρ).φ (i ∘ l.succAbove)
+  let b : (∏ᶜ fun x : Fin (n + 2) => U (i x)) ⟶
+      ∏ᶜ fun x : Fin (n + 1) => U ((i ∘ k.succAbove) x) :=
+    ((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i
+  have hrmaps : rρ ≫ r = (baseModulePresheaf π M).map a.op := by
+    let f := ((FormalCoproduct.mk _ U).mapPower ρ).φ (i ∘ l.succAbove)
+    let g := ((FormalCoproduct.mk _ U).mapPower l.succAbove).φ i
+    change (baseModulePresheaf π M).map f.op ≫
+      (baseModulePresheaf π M).map g.op =
+        (baseModulePresheaf π M).map (g ≫ f).op
+    calc
+      (baseModulePresheaf π M).map f.op ≫
+          (baseModulePresheaf π M).map g.op =
+        (baseModulePresheaf π M).map (f.op ≫ g.op) :=
+          ((baseModulePresheaf π M).map_comp f.op g.op).symm
+      _ = (baseModulePresheaf π M).map (g ≫ f).op := by
+        exact congrArg (baseModulePresheaf π M).map
+          (Subsingleton.elim _ _)
+  have hproj : pρ ≫ (baseModulePresheaf π M).map a.op =
+      pk ≫ (baseModulePresheaf π M).map b.op := by
+    dsimp only [pρ, pk]
+    exact baseCechProjection_comp_map_eq_of_eq
+      π M U n ((i ∘ l.succAbove) ∘ ρ) (i ∘ k.succAbove)
+        htuple a b
+  have hrest : (pρ ≫ rρ) ≫ r = pk ≫ rk := by
+    calc
+      (pρ ≫ rρ) ≫ r = pρ ≫ (rρ ≫ r) := Category.assoc _ _ _
+      _ = pρ ≫ (baseModulePresheaf π M).map a.op := by rw [hrmaps]
+      _ = pk ≫ (baseModulePresheaf π M).map b.op := hproj
+      _ = pk ≫ rk := by rfl
+  have hface : baseCechPermutationF π M U n ρ ≫ p ≫ r = pk ≫ rk := by
+    calc
+      baseCechPermutationF π M U n ρ ≫ p ≫ r = (pρ ≫ rρ) ≫ r := by
+        exact congrArg (fun f => f ≫ r) hρp
+      _ = pk ≫ rk := hrest
+  have hperm := orderedToBaseCechAlternatingF_comp_permutation
+    π M U n ρ
+  change orderedToBaseCechAlternatingF π M U n ≫ pk ≫ rk =
+    (Equiv.Perm.sign ρ : ℤ) •
+      (orderedToBaseCechAlternatingF π M U n ≫ p ≫ r)
+  calc
+    orderedToBaseCechAlternatingF π M U n ≫ pk ≫ rk =
+        orderedToBaseCechAlternatingF π M U n ≫
+          ((baseCechPermutationF π M U n ρ ≫ p) ≫ r) := by
+      simp only [Category.assoc]
+      rw [hface]
+    _ = (orderedToBaseCechAlternatingF π M U n ≫
+        baseCechPermutationF π M U n ρ) ≫ (p ≫ r) := by
+      simp only [Category.assoc]
+    _ = ((Equiv.Perm.sign ρ : ℤ) •
+        orderedToBaseCechAlternatingF π M U n) ≫ (p ≫ r) := by
+      rw [hperm]
+    _ = (Equiv.Perm.sign ρ : ℤ) •
+        (orderedToBaseCechAlternatingF π M U n ≫ p ≫ r) := by
+      rw [zsmul_comp]
+
 theorem orderedToBaseCechAlternatingF_comp_π_of_not_injective
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
