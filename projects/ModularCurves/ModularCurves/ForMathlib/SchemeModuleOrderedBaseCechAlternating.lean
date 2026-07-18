@@ -1078,6 +1078,36 @@ theorem orderedToBaseCechAlternatingF_comp_d_comp_π_of_injective
     _ = D ≫ (B ≫ p) := by rw [hBi]
     _ = D ≫ B ≫ p := by rfl
 
+theorem orderedToBaseCechAlternatingF_comp_d
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        (baseCechComplex π M U).d n (n + 1) =
+      orderedBaseCechDifferential π M U n ≫
+        orderedToBaseCechAlternatingF π M U (n + 1) := by
+  apply Pi.hom_ext
+  intro i
+  let p : (baseCechComplex π M U).X (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    Pi.π (fun j : Fin (n + 2) → ι =>
+      baseCechFactor π M U (n + 1) j) i
+  change (orderedToBaseCechAlternatingF π M U n ≫
+      (baseCechComplex π M U).d n (n + 1)) ≫ p =
+    (orderedBaseCechDifferential π M U n ≫
+      orderedToBaseCechAlternatingF π M U (n + 1)) ≫ p
+  by_cases hi : Function.Injective i
+  · exact orderedToBaseCechAlternatingF_comp_d_comp_π_of_injective
+      π M U n i hi
+  · have hleft :=
+      orderedToBaseCechAlternatingF_comp_d_comp_π_of_not_injective
+        π M U n i hi
+    change (orderedToBaseCechAlternatingF π M U n ≫
+      (baseCechComplex π M U).d n (n + 1)) ≫ p = 0 at hleft
+    have hright := orderedToBaseCechAlternatingF_comp_π_of_not_injective
+      π M U (n + 1) i hi
+    change orderedToBaseCechAlternatingF π M U (n + 1) ≫ p = 0 at hright
+    rw [hleft, Category.assoc, hright, comp_zero]
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
