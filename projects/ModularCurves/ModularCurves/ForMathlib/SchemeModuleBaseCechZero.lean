@@ -23,6 +23,48 @@ functions on the base. -/
 abbrev baseSections {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules) :=
   (baseModulePresheaf π M).obj (op (⊤ : X.Opens))
 
+/-- An isomorphism of scheme modules induces an isomorphism on global sections,
+retaining the action of global functions on the base. -/
+noncomputable def baseSectionsMapIso
+    {X S : Scheme.{u}} (π : X ⟶ S) {M N : X.Modules} (e : M ≅ N) :
+    baseSections π M ≅ baseSections π N := by
+  let eVal : M.1 ≅ N.1 :=
+    { hom := e.hom.val
+      inv := e.inv.val
+      hom_inv_id := congrArg (fun q : M ⟶ M ↦ q.val) e.hom_inv_id
+      inv_hom_id := congrArg (fun q : N ⟶ N ↦ q.val) e.inv_hom_id }
+  exact (ModuleCat.restrictScalars π.appTop.hom).mapIso
+    (((PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop)).mapIso eVal).app
+        (op (⊤ : X.Opens)))
+
+/-- The base-ring action on global sections agrees with the total-space action
+through the structure morphism. -/
+theorem baseSections_smul
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    (a : Γ(S, (⊤ : S.Opens))) (x : Γ(M, (⊤ : X.Opens))) :
+    (show Γ(M, (⊤ : X.Opens)) from
+      a • (show baseSections π M from x)) = π.appTop.hom a • x := by
+  let B :=
+    (PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop)).obj M.1
+  letI : Module ↑Γ(X, (⊤ : X.Opens))
+      (B.obj (op (⊤ : X.Opens))) :=
+    ModuleCat.isModule (B.obj (op (⊤ : X.Opens)))
+  have hinner :
+      (show B.obj (op (⊤ : X.Opens)) from
+          a • (show baseSections π M from x)) =
+        (X.presheaf.map
+            ((initialOpOfTerminal isTerminalTop).to
+              (op (⊤ : X.Opens)))).hom (π.appTop.hom a) • x := by
+    rfl
+  have htop :
+      (initialOpOfTerminal isTerminalTop).to
+          (op (⊤ : X.Opens)) = 𝟙 (op (⊤ : X.Opens)) :=
+    Subsingleton.elim _ _
+  rw [hinner, htop]
+  simp
+
 /-- Restriction of global sections to the degree-zero term of the base-linear
 Cech complex. -/
 noncomputable def baseCechAugmentation
