@@ -213,7 +213,9 @@ private theorem injectiveResolution_d_app_comp_d
   change ((I.cocomplex.d 0 1).hom ≫ (I.cocomplex.d 1 2).hom).app _ = 0
   exact (congr_app h _).trans rfl
 
-private theorem injectiveResolution_cokernel_app_surjective_of_subsingleton_H
+/-- If degree-one cohomology vanishes after restriction to an open, sections of
+the cokernel of the injective-resolution augmentation lift on that open. -/
+theorem injectiveResolution_cokernel_app_surjective_of_subsingleton_H
     (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X)
     [Subsingleton (CategoryTheory.Sheaf.H
       ((restrict AddCommGrpCat V.isOpenEmbedding).obj F) 1)] :
