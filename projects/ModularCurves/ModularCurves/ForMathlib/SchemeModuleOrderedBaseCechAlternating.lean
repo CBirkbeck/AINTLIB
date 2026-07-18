@@ -1108,6 +1108,33 @@ theorem orderedToBaseCechAlternatingF_comp_d
     change orderedToBaseCechAlternatingF π M U (n + 1) ≫ p = 0 at hright
     rw [hleft, Category.assoc, hright, comp_zero]
 
+/-- The alternating extension from ordered Cech cochains to native Cech cochains. -/
+noncomputable def orderedToBaseCechAlternating
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) :
+    orderedBaseCechComplex π M U ⟶ baseCechComplex π M U :=
+  CochainComplex.ofHom (orderedToBaseCechAlternatingF π M U) fun n => by
+    rw [orderedBaseCechComplex_d]
+    exact orderedToBaseCechAlternatingF_comp_d π M U n
+
+@[simp]
+theorem orderedToBaseCechAlternating_f
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ) :
+    (orderedToBaseCechAlternating π M U).f n =
+      orderedToBaseCechAlternatingF π M U n :=
+  rfl
+
+theorem orderedToBaseCechAlternating_comp_baseCechToOrdered
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) :
+    orderedToBaseCechAlternating π M U ≫ baseCechToOrdered π M U =
+      𝟙 (orderedBaseCechComplex π M U) := by
+  apply HomologicalComplex.hom_ext
+  intro n
+  exact orderedToBaseCechAlternatingF_comp_baseCechToOrderedF
+    π M U n
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
