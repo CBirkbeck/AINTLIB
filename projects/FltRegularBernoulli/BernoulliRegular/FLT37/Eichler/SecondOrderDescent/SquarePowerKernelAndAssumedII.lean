@@ -140,7 +140,7 @@ theorem caseII_cor823_valuation_input_proven :
 
 /-- **The Corollary-8.23 valuation input is non-vacuously sharp**: the irregular `B₃₂/32` ratio also
 has `37`-adic valuation exactly `1` (norm `> 37⁻²`), the classical (un-Teichmüller-twisted) form of
-the same `M = 1` non-degeneracy.  Proven `norm_bernoulli_thirtytwo_ratio_gt`, banking
+the same `M = 1` non-degeneracy. Proven `zpow_lt_norm_bernoulli_thirtytwo_ratio`, banking
 `kellner_at_zero_not_dvd` (`37² ∤ B₃₂.num`, i.e. `α₀ = 1`).
 
 This is the second-order non-degeneracy *at the Bernoulli-number level* `v₃₇(B₃₂/32) = 1`, the input
@@ -148,7 +148,7 @@ Washington's proof of Corollary 8.23 reads off `L_p(1,ω³²) ≡ -B_{1184}/1184
 theorem caseII_cor823_bernoulli_ratio_nondegenerate :
     haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
     (37 : ℝ) ^ (-2 : ℤ) < ‖(((bernoulli 32 : ℚ) / 32 : ℚ) : ℚ_[37])‖ :=
-  norm_bernoulli_thirtytwo_ratio_gt
+  zpow_lt_norm_bernoulli_thirtytwo_ratio
 
 /-! ## 3. Washington Theorem 8.22 / Corollary 8.23 for `37` — the genuine isolated residual
 
