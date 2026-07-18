@@ -920,9 +920,13 @@ noncomputable def relativePiece_equiv
   have h_eq : rationalOpen E.T E.s =
       rationalOpen (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).T
         (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).s := by
-    rw [RationalLocData.interSamePair_rationalOpen, genPieceDatum_T,
-      genPieceDatum_s]
-    exact (Set.inter_eq_right.mpr hE_sub).symm
+    -- v4.33: `rw [interSamePair_rationalOpen]` fails to match through the goal's embedded
+    -- `rfl : (genPieceDatum …).P = D₀.P` (re-checked at reducible transparency). Apply the
+    -- lemma with an explicit `genPieceDatum_P` proof instead and compose by `Eq.trans`.
+    have h := RationalLocData.interSamePair_rationalOpen D₀
+      (genPieceDatum D₀.P E.T E.s hspanE) (genPieceDatum_P D₀.P E.T E.s hspanE)
+    rw [genPieceDatum_T, genPieceDatum_s] at h
+    exact (h.trans (Set.inter_eq_right.mpr hE_sub)).symm
   (RingEquiv.ofBijective
     (restrictionMapHom E
       (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl) h_eq.symm.le)
@@ -949,9 +953,13 @@ theorem relativePiece_equiv_restrictionMap
   have h_eq : rationalOpen E.T E.s =
       rationalOpen (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).T
         (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl).s := by
-    rw [RationalLocData.interSamePair_rationalOpen, genPieceDatum_T,
-      genPieceDatum_s]
-    exact (Set.inter_eq_right.mpr hE_sub).symm
+    -- v4.33: `rw [interSamePair_rationalOpen]` fails to match through the goal's embedded
+    -- `rfl : (genPieceDatum …).P = D₀.P` (re-checked at reducible transparency). Apply the
+    -- lemma with an explicit `genPieceDatum_P` proof instead and compose by `Eq.trans`.
+    have h := RationalLocData.interSamePair_rationalOpen D₀
+      (genPieceDatum D₀.P E.T E.s hspanE) (genPieceDatum_P D₀.P E.T E.s hspanE)
+    rw [genPieceDatum_T, genPieceDatum_s] at h
+    exact (h.trans (Set.inter_eq_right.mpr hE_sub)).symm
   show genPiece_relative_equiv D₀ E.T E.s hspanE
       (restrictionMapHom E
         (D₀.interSamePair (genPieceDatum D₀.P E.T E.s hspanE) rfl) h_eq.symm.le
@@ -1378,8 +1386,7 @@ instance hypotheses (incl. completeness) come from the `Wedhorn828Tail` section 
 theorem presheafValue_flat_of_unitDatum_faithful (P : PairOfDefinition A) (f : A) :
     @Module.Flat A (presheafValue (unitDatum P f)) _ _
       (RingHom.toModule (unitDatum P f).canonicalMap) := by
-  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸
-      Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}) :=
+  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ unitDatumSpanIdeal (A := A) f) :=
     lemma_8_31_fSubX_flat (A := A) f
   let e := unitDatum_quotEquiv P f
   change @Module.Flat A (presheafValue (unitDatum P f)) _ _
@@ -1389,12 +1396,12 @@ theorem presheafValue_flat_of_unitDatum_faithful (P : PairOfDefinition A) (f : A
   have he_smul : ∀ (a : A) (x : presheafValue (unitDatum P f)), e (a • x) = a • e x := by
     intro a x
     change e ((unitDatum P f).canonicalMap a * x) =
-      (Ideal.Quotient.mk (Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}))
+      (Ideal.Quotient.mk (unitDatumSpanIdeal (A := A) f))
         (algebraMap A ↥(TateAlgebra A) a) * e x
     rw [e.map_mul]; congr 1
     exact unitDatum_quotEquiv_canonicalMap P f a
   exact @Module.Flat.of_linearEquiv A
-    (↥(TateAlgebra A) ⧸ Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X})
+    (↥(TateAlgebra A) ⧸ unitDatumSpanIdeal (A := A) f)
     (presheafValue (unitDatum P f)) _ _ _ _ _ hflat_quot
     { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
       invFun := e.symm
@@ -1410,8 +1417,7 @@ dominating-unit base step `X₀ = {1 ≤ x(s/u)} = coUnitDatum(s·u⁻¹)` of th
 theorem presheafValue_flat_of_coUnitDatum_faithful (P : PairOfDefinition A) (f : A) :
     @Module.Flat A (presheafValue (coUnitDatum P f)) _ _
       (RingHom.toModule (coUnitDatum P f).canonicalMap) := by
-  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸
-      Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}) :=
+  haveI hflat_quot : Module.Flat A (↥(TateAlgebra A) ⧸ coUnitDatumSpanIdeal (A := A) f) :=
     lemma_8_31_oneSubfX_flat (A := A) f
   let e := coUnitDatum_quotEquiv P f
   change @Module.Flat A (presheafValue (coUnitDatum P f)) _ _
@@ -1421,12 +1427,12 @@ theorem presheafValue_flat_of_coUnitDatum_faithful (P : PairOfDefinition A) (f :
   have he_smul : ∀ (a : A) (x : presheafValue (coUnitDatum P f)), e (a • x) = a • e x := by
     intro a x
     change e ((coUnitDatum P f).canonicalMap a * x) =
-      (Ideal.Quotient.mk (Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}))
+      (Ideal.Quotient.mk (coUnitDatumSpanIdeal (A := A) f))
         (algebraMap A ↥(TateAlgebra A) a) * e x
     rw [e.map_mul]; congr 1
     exact coUnitDatum_quotEquiv_canonicalMap P f a
   exact @Module.Flat.of_linearEquiv A
-    (↥(TateAlgebra A) ⧸ Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X})
+    (↥(TateAlgebra A) ⧸ coUnitDatumSpanIdeal (A := A) f)
     (presheafValue (coUnitDatum P f)) _ _ _ _ _ hflat_quot
     { toLinearMap := { toFun := e, map_add' := e.map_add, map_smul' := he_smul }
       invFun := e.symm
@@ -2032,7 +2038,14 @@ theorem chainStep_rationalOpen (u : Aˣ) (sB : A) (D' : RationalLocData A) (g : 
     rationalOpen (chainStep u sB D' g).T (chainStep u sB D' g).s =
       rationalOpen D'.T D'.s ∩ rationalOpen ({g, (↑u : A)} : Finset A) sB := by
   simp only [chainStep]
-  rw [RationalLocData.interSamePair_rationalOpen, genPieceDatum_T, genPieceDatum_s]
+  -- v4.33: `rw [interSamePair_rationalOpen]` fails to match through `chainStep`'s embedded
+  -- `_hP` proof (re-checked at reducible transparency); apply the lemma with an explicit
+  -- `genPieceDatum_P` proof and close by proof-irrelevance defeq (`exact`).
+  have h := RationalLocData.interSamePair_rationalOpen D'
+    (genPieceDatum D'.P {g, (↑u : A)} sB (span_pair_unit_eq_top g u))
+    (genPieceDatum_P D'.P {g, (↑u : A)} sB (span_pair_unit_eq_top g u))
+  rw [genPieceDatum_T, genPieceDatum_s] at h
+  exact h
 
 /-- **The fold's `rationalOpen` membership.** `v ∈ R(foldl gens X₀)` iff `v ∈ R(X₀)` and `v` lies
 in each step piece `R({g,↑u}/sB)`. By induction on `gens` (each step is the intersection
