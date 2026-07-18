@@ -23383,3 +23383,43 @@ Opener: inbox/WORK-ORDERS.md (REWRITTEN this version). Route book: inbox/STREAM-
 resolves into THE RULING; GH's armed-receipts duty transfers to FIN(F4); if the owner ALSO re-fires
 G0 on :222, FIN yields that front (sentinel-mtime + origin-log guard, inbox coordination).
 **Milestones (report-only-at): KEYSTONE-k̄-LANDED, :222-CLOSED, MOUTH-CLOSED, THE-HEADLINE.**
+
+## v10.321-FIN (2026-07-18, STREAM-FIN) — ★ SUSPECT-RIG2 EXECUTED: hbound NARROWED to [RIG-2′] at all 5 sites (receipts 3/6 statements MOVED); the TRUE cone census corrects the route book
+
+**F1.0 done, pushed (`45adcbf3c`), full build green (4242).** Adversarial re-derivation CONFIRMED the
+coordinator's refutation of the frozen [RIG-2] contract: (i) `ε = [N+1]` — pointed, `δ = ε−1 = [N]`
+(`𝟙^(N+1) * 𝟙⁻¹ = 𝟙^N`), `δ ≠ 1` over any k̄, kills all of `E[N](k̄)` (`N² ≥ N` points, `N`
+invertible via `sm`) — refutes every `N ≥ 4`; (ii) iso-restricted at `N = 4`: `ε = [−1]` (pointed
+iso), `δ = [−2]`, `ker ⊇ E[2]` = 4 injective killed points (char ≠ 2). **The narrowing** (exactly
+the consumer's data): `hbound : ∀ ε, IsIso ε → pointed ε → ∀ P, (exact geometric order N) →
+(P ≫ ε = P) → ε = 𝟙` — survives (i) ([N+1] not iso) and (ii) ((−1)P = P ⟹ 2P = 0 contra order 4).
+Sites: GammaHMaster `fix_absurd` (per-E form + rethread: `IsIso εO` constructed from `e.inv.top`,
+`hbound` consumed DIRECTLY; the CommGroup-letI/δ-spelling GONE from the statement) +
+`gammaOneDrinfeld_rigidNoeth`/`_rigid`/`_representable_prep` + GammaHClosure
+`gammaOneDrinfeld_rigid_and_representable_of_hbound` (∀-k̄ forms). `aut_endo_eq_one_of_fixes_point`
+(proven, CLEAN) unchanged — it becomes the generic-branch engine of the k̄ discharge.
+
+**hH REVIEW (F1.0 second half, conclusion — NO statement change):** `hH`'s ∀γ:H shape (`e ≠ refl`,
+`e^(orderOf γ) = refl → False`) is a legitimate PIN — refutable only as a *discharged-for-all-H*
+claim (`e` = the `[−1]`-iso has `e² = refl`, so any `γ` of even order refutes; order-3/4/6 CM autos
+likewise) — the headliner `gammaH_representable_of_orderOf` carries it as an explicit hypothesis, so
+receipt 5's statement is honest as-is. **The F4 unpinned corollary must carry the side condition**
+`∀ γ : H, Nat.Coprime (orderOf (γ : GL₂(ℤ/N))) 6` (auto element orders over k̄ are {1,2,3,4,6} in
+every characteristic — incl. supersingular char 2/3 whose auto groups have exponent dividing 24 with
+element orders in the same set), under which the discharge is the char-poly/finite-order arithmetic
+(`ε² = [tr ε]ε − [deg ε]`, `|tr| ≤ 2` ⟹ auto orders ∈ {1,2,3,4,6} ⟹ coprime-to-6 power = 𝟙 forces
+`ε = 𝟙`).
+
+**TRUE CONE (meta-census, `getUsedConstants`-walk from the seven receipts — CORRECTS the route-book
+table):** the sorried leaves actually in the receipts' transitive closure are EXACTLY
+{`endDeg_comp_mulBy` :429, `endTrace_comp_mulBy` :435, `endTrace_sq_le` :453,
+`eq_zero_of_endDeg_eq_zero` :459, `exists_eq_one_add_mulBy_comp_of_fixesTorsion` :469 — via the k̄
+core `gammaFullNaive_eq_refl_of_fix_sections` → `aut_endo_eq_one`} ∪ {`representable_iff_rigidNoeth`
+= the engine} ∪ (Γ₁ receipts 3/6 only) {`RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors`,
+`Section.HasExactOrder.pull_nsmul_ne_zero` (T-D6b)} — the LAST TWO are LevelStructure register boxes
+NOT in the route-book cone table (flagged; they must close for receipts 3/6). NOT in any receipt
+cone: `endDual_comp_self` :202, `endDeg_comp` :359 (consumed by nobody — [KEY-GEN-PARKED] applies to
+them immediately), and Bootstrap:222 reaches the receipts only through the FUTURE engine discharge
+(T-E14 TorsorData), as designed. k̄-rewire plan therefore: k̄-instances of the FIVE, rewire
+`gammaFullNaive_eq_refl_of_fix_sections` (+ the narrowed-hbound discharge), close T-D6b + the
+Cartier factor box, then the engine.
