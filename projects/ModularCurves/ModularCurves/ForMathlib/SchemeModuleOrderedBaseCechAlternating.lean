@@ -798,6 +798,26 @@ theorem orderedToBaseCechAlternatingF_comp_π_of_injective
     rw [hpost, smul_zero]
   · simp
 
+theorem orderedToBaseCechAlternatingF_comp_d_comp_permutation
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (σ : Equiv.Perm (Fin (n + 2))) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        (baseCechComplex π M U).d n (n + 1) ≫
+          baseCechPermutationF π M U (n + 1) σ =
+      (Equiv.Perm.sign σ : ℤ) •
+        (orderedToBaseCechAlternatingF π M U n ≫
+          (baseCechComplex π M U).d n (n + 1)) := by
+  rw [baseCechComplex_d_eq_sum_cofaces]
+  simp only [comp_sum, sum_comp, comp_zsmul, zsmul_comp,
+    Finset.smul_sum, smul_smul]
+  refine Fintype.sum_equiv σ _ _ fun r => ?_
+  rw [baseCechCoface_comp_permutation]
+  rw [← Category.assoc,
+    orderedToBaseCechAlternatingF_comp_permutation]
+  simp only [zsmul_comp, smul_smul]
+  rw [cechPermDelete_signed_coefficient]
+
 theorem orderedToBaseCechAlternatingF_comp_d_comp_π_of_not_injective
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
