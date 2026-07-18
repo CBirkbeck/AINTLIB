@@ -1,0 +1,1 @@
+FOCUS: T1001 — Pod row over abstract square (Milnor/PodRow.lean): coefficientwise extension of S.jB/iC/ρB/ρC to GraphKoszul.P pods with same κ, ρ. PHASE 2: baseline build + read the concrete ext-layer to port.

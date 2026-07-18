@@ -1006,7 +1006,7 @@ with their own /develop pass when M9a lands. Interface skeleton compiled:
 `FJP/Milnor/StrictMilnorSquare.lean` (structure + glue_unique).
 
 ### [T1001] Pod row over an abstract square (Lemma 4.1, m-variables form)
-- **Status**: open — **File**: FJP/Milnor/PodRow.lean (NEW) — **Depends**: none — **Type**: defs + lemmas
+- **Status**: in_progress (2026-07-18) — **File**: FJP/Milnor/PodRow.lean (NEW) — **Depends**: none — **Type**: defs + lemmas
 - Port FiniteJetStrictLocalization's top layer (extJB/extIotaC/extRhoB/extRhoC,
   ext_square_commutes, extRhoC_strict_surjective, ext_milnorRow_exact, ext_max_norm_eq,
   ext_pair_injective — its first ~180 lines) from the four concrete Jet rings to
