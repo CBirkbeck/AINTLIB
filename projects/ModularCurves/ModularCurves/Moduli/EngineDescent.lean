@@ -617,6 +617,106 @@ theorem smoothOfRelativeDimension_of_locallyWeierstrass {S E' : Scheme.{u}} {p :
       MorphismProperty.cancel_right_of_respectsIso (P := @SmoothOfRelativeDimension 1)]
     exact projModel_smooth (W s)
 
+/-! #### The `[a5]` reduction: splitting off the section-pair gap
+
+`locallyWeierstrass_quotientπ` below quantifies over an *arbitrary* pair `(π', zero')` with
+`zero' ≫ π' = 𝟙`; it does not carry the compatibilities `hπ'c`/`hzero'c` tying the pair to the
+descended structure maps. The board (v10.94, *Interface decisions*) records the owed statement
+fix: for a wild pair the statement fails (see the counterexample on
+`locallyWeierstrass_quotientπ_transfer`). The two private lemmas below split the leaf along
+exactly that line: `locallyWeierstrass_quotientπ_of_compat` is the true, board-owned `[a5]`
+content — the Phase-A theorem `locallyWeierstrass_quotientπ_of_globalModel` at the bottom of
+this file proves it whenever the model is global — while `_transfer` quarantines the falsity of
+the unconstrained statement in one place. The empty-base case and the assembly are proven. -/
+
+/-- **([a5-compat], the true half — OPEN leaf, board-owned)** `locallyWeierstrass_quotientπ`
+for a section pair carrying the descent compatibilities `hπ'c`/`hzero'c` of
+`exists_quotient_π_zero` — the shape the board's owed `[a5]` statement fix arrives at.
+
+Closure routes, in order of availability:
+* **global model**: with a compatible global model (`W₀`, `φ : C.E ≅ projModel W₀`, `hW₀`,
+  `hπφ`, `hzeroφ`) this is *exactly* `locallyWeierstrass_quotientπ_of_globalModel` (PROVEN,
+  Phase A). That block is declared *below* this point, so closing this leaf in place means
+  hoisting the Phase-A block above the `[a5]` section (or moving this section below it).
+* **general (`C.localModel` only)** — the parked a5-P-loc arc: at a prime `s` of
+  `Aᴳ = Γ(X,⊤)ᴳ` the fibre of `X → X/G` is a single finite `G`-orbit; over the orbit's
+  semilocalisation the finitely many `C.localModel` charts glue to one model (the
+  chart-difference `VariableChange` Čech `1`-cocycle splits: the unit part by the semilocal
+  unit argument of `exists_unit_smul_eq_of_isLocalRing`, the additive part by
+  `exists_sub_smul_eq_of_isCocycle`); the glued model and the `G`-cocycle spread to a
+  `G`-stable basic open `D(a)`, `a ∉ s`, and the Phase-A engine (`lw_chart_at` is abstract in
+  the base ring) runs over `A_a` verbatim, landing the `LocallyWeierstrass` chart at `s`.
+
+Note that `hVtop` trivialises the **base** atlas `V` only; it does not make `C.localModel`'s
+charts global — a global model is genuinely obstructed (the class of `ω` in `Pic Γ(X,⊤)`),
+which is why the general route must localise before globalising the model. -/
+private theorem locallyWeierstrass_quotientπ_of_compat [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (hX : Nonempty ↥X)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
+    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa))
+    (hπ'c : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem)
+    (hzero'c : σ.quotientπ V hVs hVa hVmem ≫ zero'
+      = C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem) :
+    LocallyWeierstrass π' zero' hz := by
+  sorry
+
+/-- **([a5-pair], the quarantined half — FALSE as stated; do not attempt a proof)** Transfer
+of the local Weierstrass model from the descended section pair to an arbitrary one. This lemma
+isolates, without weakening it, exactly the content of `locallyWeierstrass_quotientπ` that goes
+beyond the true `[a5]` statement `locallyWeierstrass_quotientπ_of_compat`.
+
+**Counterexample** (all hypotheses hold): take `G := 1` — so `hfree` is vacuous and the two
+quotients are canonically isomorphic to `C.E` and `X` — with `X := Spec B`,
+`B := ℚ[x₁, x₂, …]`, `C` any elliptic curve with a global model, and `(π'₀, zero'₀)` the
+canonical descended pair (locally Weierstrass, so `hlw₀` holds). Twist by the shift
+`φ : B →+* B`, `xᵢ ↦ xᵢ₊₁`, split by `ρ` (`xᵢ₊₁ ↦ xᵢ`, `x₁ ↦ 0`): the pair
+`π' := π'₀ ≫ Spec φ`, `zero' := Spec ρ ≫ zero'₀` satisfies `zero' ≫ π' = 𝟙`, but `π'` is not
+locally Weierstrass at any point — a chart `pullback π' U.ι ≅ projModel W` would make the
+restriction of the total space over `(Spec φ)⁻¹ U` proper over `U` (`projModelπ_isProper`);
+cancelling its proper surjective projection to `(Spec φ)⁻¹ U` (which is separated and of
+finite type over `U`, since `B = φ(B)[x₁]`), `Spec φ` itself would be proper over `U`, yet its
+fibres are affine lines. Contradiction.
+
+Consequently `locallyWeierstrass_quotientπ` is itself false as stated — precisely the board's
+v10.94 interface note ("false as stated for an arbitrary section-pair"; the owed fix adds the
+`hπ'c`/`hzero'c` compatibilities to the leaf and to its call-site in
+`exists_ellipticCurveGeom_quotient`, cf. `locallyWeierstrass_quotientπ_of_globalModel`, which
+already carries them). Once that statement fix lands, the call-site collapses to
+`locallyWeierstrass_quotientπ_of_compat` and this lemma is deleted. No true strengthening of
+its hypotheses is available at the call-site (`π'`, `zero'` are the parent's own arbitrary
+binders), so the parent's falsity is confined to this single leaf. -/
+private theorem locallyWeierstrass_quotientπ_transfer [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (hX : Nonempty ↥X)
+    (π'₀ : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (zero'₀ : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
+    (hz₀ : zero'₀ ≫ π'₀ = 𝟙 (σ.quotient V hVs hVa))
+    (hπ'₀c : σE.quotientπ VE hVEs hVEa hVEmem ≫ π'₀ = C.π ≫ σ.quotientπ V hVs hVa hVmem)
+    (hzero'₀c : σ.quotientπ V hVs hVa hVmem ≫ zero'₀
+      = C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem)
+    (hlw₀ : LocallyWeierstrass π'₀ zero'₀ hz₀)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
+    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa)) :
+    LocallyWeierstrass π' zero' hz := by
+  sorry
+
 /-- **([a5], the descended Weierstrass model — LEAF)** The quotient curve `E/G ⟶ X/G` admits a
 Zariski-local Weierstrass model.
 
@@ -643,7 +743,17 @@ theorem locallyWeierstrass_quotientπ [Finite G] [IsAffine X]
     (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
     (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa)) :
     LocallyWeierstrass π' zero' hz := by
-  sorry
+  rcases isEmpty_or_nonempty (↥X) with hX | hX
+  · intro s
+    obtain ⟨x, -⟩ := σ.quotientπ_surjective V hVs hVa hVmem s
+    exact (hX.false x).elim
+  · obtain ⟨π'₀, zero'₀, hπ'₀c, hzero'₀c, hz₀⟩ :=
+      exists_quotient_π_zero hact V hVs hVa hVmem VE hVEs hVEa hVEmem
+    exact locallyWeierstrass_quotientπ_transfer hact V hVs hVa hVmem hVtop
+      VE hVEs hVEa hVEmem hfree hX π'₀ zero'₀ hz₀ hπ'₀c hzero'₀c
+      (locallyWeierstrass_quotientπ_of_compat hact V hVs hVa hVmem hVtop
+        VE hVEs hVEa hVEmem hfree hX π'₀ zero'₀ hz₀ hπ'₀c hzero'₀c)
+      π' zero' hz
 
 /-- **([a3]–[a5], the route-(a) descent theorem — ASSEMBLED)** Let `G` act freely on an affine
 scheme `X`, and let the action lift to a geometric elliptic curve `C/X` (an `IsCurveAction`) with
