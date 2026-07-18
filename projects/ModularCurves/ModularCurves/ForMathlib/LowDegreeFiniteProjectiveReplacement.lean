@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
 import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.CategoryTheory.Adjunction.Unique
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.FiniteFreeResolution
 
@@ -49,6 +50,15 @@ noncomputable def moduleCatExtendScalarsObjLinearEquiv
     IsScalarTower.of_algebraMap_smul fun _ _ ↦ rfl
   let eA : A ≃ₗ[A] Ares := LinearEquiv.refl A A
   exact TensorProduct.AlgebraTensorModule.congr eA (LinearEquiv.refl R M)
+
+/-- Extension of scalars along a ring equivalence is the inverse restriction-of-scalars
+functor. -/
+noncomputable def moduleCatExtendScalarsIsoRestrictScalarsOfRingEquiv
+    {A B : Type u} [CommRing A] [CommRing B] (e : A ≃+* B) :
+    ModuleCat.extendScalars.{u, u, u} e.toRingHom ≅
+      ModuleCat.restrictScalars.{u, u, u} e.symm.toRingHom :=
+  (ModuleCat.extendRestrictScalarsAdj e.toRingHom).leftAdjointUniq
+    (ModuleCat.restrictScalarsEquivalenceOfRingEquiv e).symm.toAdjunction
 
 @[simp]
 theorem moduleCatExtendScalarsObjLinearEquiv_tmul

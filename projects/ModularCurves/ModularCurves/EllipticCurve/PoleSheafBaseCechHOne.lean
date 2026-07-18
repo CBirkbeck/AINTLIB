@@ -3,6 +3,7 @@ import ModularCurves.EllipticCurve.PoleSheafFibreHOne
 import ModularCurves.EllipticCurve.PoleSheafFibreSections
 import ModularCurves.ForMathlib.AffineModuleCechBaseChange
 import ModularCurves.ForMathlib.CochainComplexKernel
+import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
@@ -378,6 +379,50 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_baseCech_kernel_fin
   exact e.finrank_eq.trans
     (h.sectionPoleSheafPower_pullback_fiber_baseCech_kernel_finrank
       hsm z hz s hn Uf hUf)
+
+/-- The kernel of the algebraically residue-field-base-changed first Cech differential of
+`O(n[0])` has dimension `n` for `n ≥ 1`. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_baseCech_baseChange_kernel_finrank
+    {E S : Scheme.{u}} {f : E ⟶ S} [IsProper f] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 f)
+    (z : S ⟶ E) (hz : z ≫ f = 𝟙 S) (h : FibrewiseElliptic f z hz)
+    {ι : Type u} [Fintype ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (s : S) {n : ℕ} (hn : 1 ≤ n) :
+    let k := ↑(S.residueField s)
+    letI : Algebra Γ(S, (⊤ : S.Opens)) k :=
+      ((S.fromSpecResidueField s).appTop ≫
+        (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+    let C := Scheme.Modules.baseCechComplex f
+      (sectionPoleSheafPower f z hz n) U
+    Module.finrank k
+      (LinearMap.ker ((C.d 0 1).hom.baseChange k)) = n := by
+  dsimp only
+  let k := ↑(S.residueField s)
+  let t := S.fromSpecResidueField s
+  let eΓ := Scheme.ΓSpecIso (S.residueField s)
+  letI : Algebra Γ(S, (⊤ : S.Opens)) k :=
+    (t.appTop ≫ eΓ.hom).hom.toAlgebra
+  let C := Scheme.Modules.baseCechComplex f
+    (sectionPoleSheafPower f z hz n) U
+  let K := ((ModuleCat.extendScalars t.appTop.hom).mapHomologicalComplex
+    (.up ℕ)).obj C
+  let eFun : ModuleCat.extendScalars
+      (algebraMap Γ(S, (⊤ : S.Opens)) k) ≅
+        ModuleCat.extendScalars t.appTop.hom ⋙
+          ModuleCat.restrictScalars eΓ.inv.hom :=
+    ModuleCat.extendScalarsComp t.appTop.hom eΓ.hom.hom ≪≫
+      Functor.isoWhiskerLeft (ModuleCat.extendScalars t.appTop.hom)
+        (moduleCatExtendScalarsIsoRestrictScalarsOfRingEquiv
+          eΓ.commRingCatIsoToRingEquiv)
+  let eComplex := (NatIso.mapHomologicalComplex eFun (.up ℕ)).app C
+  let eKernel := (HomologicalComplex.baseChangeKernelZeroLinearEquiv C k).trans
+    (HomologicalComplex.kernelZeroIsoOfIso eComplex).toLinearEquiv
+  letI : Module k (LinearMap.ker (K.d 0 1).hom) :=
+    Module.compHom _ eΓ.inv.hom
+  exact eKernel.finrank_eq.trans
+    (h.sectionPoleSheafPower_residueField_baseCech_kernel_finrank
+      hsm z hz U hU hUaff s hn)
 
 /-- After extension to a residue field, the base-linear Cech complex of
 `O(n[0])` is exact in degree one for `n ≥ 1` on a fibrewise elliptic family. -/
