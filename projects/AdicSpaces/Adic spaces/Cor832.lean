@@ -136,8 +136,7 @@ theorem faithfullyFlat_pi_of_prime_surjection
   rw [Ideal.comap_comap]
   have hcomp : (π.comp (algebraMap R (∀ j, B j))) = algebraMap R (B i) := by
     ext r
-    change π (algebraMap R (∀ j, B j) r) = algebraMap R (B i) r
-    simp [π, Pi.evalRingHom, Pi.algebraMap_apply]
+    rfl
   rw [hcomp]; exact hq_comap
 
 /-- **Abstract Corollary 8.32 (faithful flatness), maximals criterion**: given a finite family
@@ -1562,9 +1561,7 @@ private theorem completedLocSubring_eq_presheafValue_ringOfDef (D : RationalLocD
     ((D.coeRingHom.comp (locSubring D.P D.T D.s).subtype).range :
       Set (presheafValue D)) := by
     ext y
-    simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image,
-      RingHom.comp_apply, Set.mem_range]
-    refine ⟨?_, ?_⟩
+    constructor
     · rintro ⟨x, hx, rfl⟩; exact ⟨⟨x, hx⟩, rfl⟩
     · rintro ⟨⟨x, hx⟩, rfl⟩; exact ⟨x, hx, rfl⟩
   -- topologicalClosure of two subrings with the same underlying set is the same.
