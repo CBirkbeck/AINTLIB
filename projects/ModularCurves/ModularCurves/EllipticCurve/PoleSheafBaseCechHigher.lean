@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleSheafBaseCechHOne
 import ModularCurves.ForMathlib.AcyclicAffineCechComparison
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
 # Higher base-linear Cech exactness for pole sheaves
@@ -114,5 +115,40 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_baseCech_exactAt_su
   exact hFiberExact.of_iso
     (Scheme.Modules.baseCechComplexBaseChangeIso
       π t M U hUaff).symm
+
+/-- After extension to a residue field, the bounded ordered Cech complex of
+`O(n[0])` is exact in every positive degree for `n ≥ 1` on a fibrewise
+elliptic family. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_exactAt_succ
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (s : S) {n : ℕ} (hn : 1 ≤ n) (q : ℕ) :
+    (((ModuleCat.extendScalars
+        (S.fromSpecResidueField s).appTop.hom).mapHomologicalComplex
+          (.up ℕ)).obj
+      (Scheme.Modules.orderedBaseCechComplex π
+        (sectionPoleSheafPower π z hz n) U)).ExactAt (q + 1) := by
+  let F := (ModuleCat.extendScalars
+    (S.fromSpecResidueField s).appTop.hom).mapHomologicalComplex (.up ℕ)
+  have hbase :=
+    FibrewiseElliptic.sectionPoleSheafPower_residueField_baseCech_exactAt_succ
+      hsm z hz h U hU hUaff s hn q
+  change (F.obj (Scheme.Modules.orderedBaseCechComplex π
+    (sectionPoleSheafPower π z hz n) U)).ExactAt (q + 1)
+  change (F.obj (Scheme.Modules.baseCechComplex π
+    (sectionPoleSheafPower π z hz n) U)).ExactAt (q + 1) at hbase
+  exact hbase.of_retract
+    (F.map (Scheme.Modules.orderedToBaseCechAlternating π
+      (sectionPoleSheafPower π z hz n) U))
+    (F.map (Scheme.Modules.baseCechToOrdered π
+      (sectionPoleSheafPower π z hz n) U))
+    (by
+      rw [← F.map_comp,
+        Scheme.Modules.orderedToBaseCechAlternating_comp_baseCechToOrdered,
+        F.map_id])
 
 end ModularCurves
