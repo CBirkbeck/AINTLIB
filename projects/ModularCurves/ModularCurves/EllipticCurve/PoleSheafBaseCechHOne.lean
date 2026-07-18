@@ -424,6 +424,36 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_baseCech_baseChange
     (h.sectionPoleSheafPower_residueField_baseCech_kernel_finrank
       hsm z hz U hU hUaff s hn)
 
+/-- The algebraically residue-field-base-changed first differential of the ordered Cech
+complex of `O(n[0])` has an `n`-dimensional kernel for `n ≥ 1`. -/
+theorem
+    FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_baseChange_kernel_finrank
+    {E S : Scheme.{u}} {f : E ⟶ S} [IsProper f] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 f)
+    (z : S ⟶ E) (hz : z ≫ f = 𝟙 S) (h : FibrewiseElliptic f z hz)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (s : S) {n : ℕ} (hn : 1 ≤ n) :
+    let k := ↑(S.residueField s)
+    letI : Algebra Γ(S, (⊤ : S.Opens)) k :=
+      ((S.fromSpecResidueField s).appTop ≫
+        (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+    let C := Scheme.Modules.orderedBaseCechComplex f
+      (sectionPoleSheafPower f z hz n) U
+    Module.finrank k
+      (LinearMap.ker ((C.d 0 1).hom.baseChange k)) = n := by
+  dsimp only
+  let k := ↑(S.residueField s)
+  letI : Algebra Γ(S, (⊤ : S.Opens)) k :=
+    ((S.fromSpecResidueField s).appTop ≫
+      (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+  let M := sectionPoleSheafPower f z hz n
+  let e := Scheme.Modules.baseCechKernelOrderedBaseChangeLinearEquiv
+    f M U k
+  exact e.finrank_eq.symm.trans
+    (h.sectionPoleSheafPower_residueField_baseCech_baseChange_kernel_finrank
+      hsm z hz U hU hUaff s hn)
+
 /-- After extension to a residue field, the base-linear Cech complex of
 `O(n[0])` is exact in degree one for `n ≥ 1` on a fibrewise elliptic family. -/
 theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_baseCech_exactAt_one

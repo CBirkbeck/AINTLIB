@@ -1,3 +1,5 @@
+import ModularCurves.ForMathlib.CochainComplexKernel
+import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
@@ -133,6 +135,42 @@ noncomputable def baseCechKernelOrderedLinearEquiv
     (orderedBaseCechKernelToBaseLinearMap π M U)
     (baseCechKernelToOrdered_comp_orderedBaseCechKernelToBase π M U)
     (orderedBaseCechKernelToBase_comp_baseCechKernelToOrdered π M U)
+
+/-- Algebraic base change preserves the degree-zero kernel equivalence between the native
+and ordered base-linear Cech complexes. -/
+noncomputable def baseCechKernelOrderedBaseChangeLinearEquiv
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
+    (A : Type u) [CommRing A] [Algebra Γ(S, (⊤ : S.Opens)) A] :
+    LinearMap.ker
+        (((baseCechComplex π M U).d 0 1).hom.baseChange A) ≃ₗ[A]
+      LinearMap.ker
+        (((orderedBaseCechComplex π M U).d 0 1).hom.baseChange A) := by
+  let F := ModuleCat.extendScalars (algebraMap Γ(S, (⊤ : S.Opens)) A)
+  let C := baseCechComplex π M U
+  let D := orderedBaseCechComplex π M U
+  let p := (F.mapHomologicalComplex (.up ℕ)).map
+    (baseCechToOrdered π M U)
+  let i := (F.mapHomologicalComplex (.up ℕ)).map
+    (orderedToBaseCechAlternating π M U)
+  have hpi : p.f 0 ≫ i.f 0 = 𝟙 _ := by
+    change F.map (baseCechToOrderedF π M U 0) ≫
+      F.map (orderedToBaseCechAlternatingF π M U 0) =
+        𝟙 (F.obj ((baseCechComplex π M U).X 0))
+    rw [← F.map_comp,
+      baseCechToOrderedF_comp_orderedToBaseCechAlternatingF_zero,
+      F.map_id]
+  have hip : i.f 0 ≫ p.f 0 = 𝟙 _ := by
+    change F.map (orderedToBaseCechAlternatingF π M U 0) ≫
+      F.map (baseCechToOrderedF π M U 0) =
+        𝟙 (F.obj ((orderedBaseCechComplex π M U).X 0))
+    rw [← F.map_comp,
+      orderedToBaseCechAlternatingF_comp_baseCechToOrderedF,
+      F.map_id]
+    rfl
+  exact (ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv C A).trans
+    ((HomologicalComplex.kernelZeroLinearEquivOfHom p i hpi hip).trans
+      (ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv D A).symm)
 
 /-- For an ordered open cover, global sections are the kernel of the first differential in the
 ordered base-linear Cech complex. -/

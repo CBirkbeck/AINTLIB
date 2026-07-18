@@ -19,6 +19,45 @@ universe u v
 
 namespace HomologicalComplex
 
+private noncomputable def kernelZeroMap
+    {R : Type u} [CommRing R]
+    {K L : CochainComplex (ModuleCat.{v} R) ℕ} (f : K ⟶ L) :
+    LinearMap.ker (K.d 0 1).hom →ₗ[R]
+      LinearMap.ker (L.d 0 1).hom where
+  toFun x := ⟨(f.f 0).hom x.1, by
+    change ((f.f 0 ≫ L.d 0 1).hom) x.1 = 0
+    rw [f.comm]
+    change (f.f 1).hom ((K.d 0 1).hom x.1) = 0
+    rw [x.2, map_zero]⟩
+  map_add' x y := by
+    apply Subtype.ext
+    exact map_add _ _ _
+  map_smul' r x := by
+    apply Subtype.ext
+    exact (f.f 0).hom.map_smul r x.1
+
+/-- Two cochain maps which are inverse in degree zero induce an equivalence between
+the kernels of the first differentials. -/
+noncomputable def kernelZeroLinearEquivOfHom
+    {R : Type u} [CommRing R]
+    {K L : CochainComplex (ModuleCat.{v} R) ℕ}
+    (f : K ⟶ L) (g : L ⟶ K)
+    (hfg : f.f 0 ≫ g.f 0 = 𝟙 _)
+    (hgf : g.f 0 ≫ f.f 0 = 𝟙 _) :
+    LinearMap.ker (K.d 0 1).hom ≃ₗ[R]
+      LinearMap.ker (L.d 0 1).hom :=
+  LinearEquiv.ofLinear (kernelZeroMap f) (kernelZeroMap g)
+    (by
+      apply LinearMap.ext
+      intro x
+      apply Subtype.ext
+      exact ConcreteCategory.congr_hom hgf x.1)
+    (by
+      apply LinearMap.ext
+      intro x
+      apply Subtype.ext
+      exact ConcreteCategory.congr_hom hfg x.1)
+
 /-- An isomorphism of cochain complexes of modules identifies the kernels of
 their first differentials. -/
 noncomputable def kernelZeroIsoOfIso
