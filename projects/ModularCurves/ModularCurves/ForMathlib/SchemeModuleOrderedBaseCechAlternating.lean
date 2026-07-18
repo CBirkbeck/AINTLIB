@@ -702,6 +702,122 @@ theorem orderedToBaseCechAlternatingF_comp_π_of_injective
     rw [hpost, smul_zero]
   · simp
 
+theorem orderedToBaseCechAlternatingF_comp_d_comp_π_of_not_injective
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 2) → ι) (hi : ¬ Function.Injective i) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        (baseCechComplex π M U).d n (n + 1) ≫
+          Pi.π (fun j : Fin (n + 2) → ι =>
+            baseCechFactor π M U (n + 1) j) i = 0 := by
+  let p : (baseCechComplex π M U).X (n + 1) ⟶
+      baseCechFactor π M U (n + 1) i :=
+    Pi.π (fun j : Fin (n + 2) → ι =>
+      baseCechFactor π M U (n + 1) j) i
+  change orderedToBaseCechAlternatingF π M U n ≫
+    ((baseCechComplex π M U).d n (n + 1) ≫ p) = 0
+  let G : Fin (n + 2) →
+      ((baseCechComplex π M U).X n ⟶ baseCechFactor π M U (n + 1) i) :=
+    fun k => (-1 : ℤ) ^ (k : ℕ) •
+      (Pi.π (fun j : Fin (n + 1) → ι =>
+          baseCechFactor π M U n j) (i ∘ k.succAbove) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op)
+  let F : Fin (n + 2) →
+      (orderedBaseCechObject π M U n ⟶ baseCechFactor π M U (n + 1) i) :=
+    fun k => (-1 : ℤ) ^ (k : ℕ) •
+      (orderedToBaseCechAlternatingF π M U n ≫
+        Pi.π (fun j : Fin (n + 1) → ι =>
+          baseCechFactor π M U n j) (i ∘ k.succAbove) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op)
+  have hd : (baseCechComplex π M U).d n (n + 1) ≫ p = ∑ k, G k := by
+    dsimp only [p, G]
+    exact baseCechComplex_d_comp_π π M U n i
+  have hcomp : orderedToBaseCechAlternatingF π M U n ≫ (∑ k, G k) =
+      ∑ k, orderedToBaseCechAlternatingF π M U n ≫ G k := by
+    simpa using comp_sum (Finset.univ : Finset (Fin (n + 2)))
+      (orderedToBaseCechAlternatingF π M U n) G
+  have hterms : (∑ k, orderedToBaseCechAlternatingF π M U n ≫ G k) =
+      ∑ k, F k := by
+    apply Finset.sum_congr rfl
+    intro k _
+    let q : (baseCechComplex π M U).X n ⟶
+        baseCechFactor π M U (n + 1) i :=
+      Pi.π (fun j : Fin (n + 1) → ι =>
+          baseCechFactor π M U n j) (i ∘ k.succAbove) ≫
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op
+    change orderedToBaseCechAlternatingF π M U n ≫
+      ((-1 : ℤ) ^ (k : ℕ) • q) =
+        (-1 : ℤ) ^ (k : ℕ) •
+          (orderedToBaseCechAlternatingF π M U n ≫ q)
+    exact comp_zsmul _ _ ((-1 : ℤ) ^ (k : ℕ))
+  rw [hd, hcomp, hterms]
+  by_cases hall : ∀ k : Fin (n + 2),
+      ¬ Function.Injective (i ∘ k.succAbove)
+  · apply Finset.sum_eq_zero
+    intro k _
+    let q : orderedBaseCechObject π M U n ⟶
+        baseCechFactor π M U n (i ∘ k.succAbove) :=
+      orderedToBaseCechAlternatingF π M U n ≫
+        Pi.π (fun j : Fin (n + 1) → ι =>
+          baseCechFactor π M U n j) (i ∘ k.succAbove)
+    let r : baseCechFactor π M U n (i ∘ k.succAbove) ⟶
+        baseCechFactor π M U (n + 1) i :=
+      (baseModulePresheaf π M).map
+        (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op
+    have hk := orderedToBaseCechAlternatingF_comp_π_of_not_injective
+      π M U n (i ∘ k.succAbove) (hall k)
+    change (-1 : ℤ) ^ (k : ℕ) • (q ≫ r) = 0
+    change q = 0 at hk
+    rw [hk, zero_comp, smul_zero]
+  · have hex : ∃ k : Fin (n + 2),
+        Function.Injective (i ∘ k.succAbove) := by
+      by_contra h
+      apply hall
+      intro k hk
+      exact h ⟨k, hk⟩
+    obtain ⟨k, hk⟩ := hex
+    obtain ⟨l, hlk, hil⟩ := exists_partner_of_delete_injective i hi k hk
+    have hkl : k ≠ l := hlk.symm
+    have hother (m : Fin (n + 2)) (hmk : m ≠ k) (hml : m ≠ l) :
+        F m = 0 := by
+      let q : orderedBaseCechObject π M U n ⟶
+          baseCechFactor π M U n (i ∘ m.succAbove) :=
+        orderedToBaseCechAlternatingF π M U n ≫
+          Pi.π (fun j : Fin (n + 1) → ι =>
+            baseCechFactor π M U n j) (i ∘ m.succAbove)
+      let r : baseCechFactor π M U n (i ∘ m.succAbove) ⟶
+          baseCechFactor π M U (n + 1) i :=
+        (baseModulePresheaf π M).map
+          (((FormalCoproduct.mk _ U).mapPower m.succAbove).φ i).op
+      have hm := delete_not_injective_of_ne i k l m hkl hmk.symm hml.symm hil
+      have hz := orderedToBaseCechAlternatingF_comp_π_of_not_injective
+        π M U n (i ∘ m.succAbove) hm
+      change (-1 : ℤ) ^ (m : ℕ) • (q ≫ r) = 0
+      change q = 0 at hz
+      rw [hz, zero_comp, smul_zero]
+    have hrem : ((Finset.univ.erase l).erase k).sum F = 0 := by
+      apply Finset.sum_eq_zero
+      intro m hm
+      have hmk : m ≠ k := (Finset.mem_erase.mp hm).1
+      have hml : m ≠ l :=
+        (Finset.mem_erase.mp (Finset.mem_erase.mp hm).2).1
+      exact hother m hmk hml
+    have hk_mem : k ∈ Finset.univ.erase l :=
+      Finset.mem_erase.mpr ⟨hkl, Finset.mem_univ k⟩
+    calc
+      ∑ m, F m = (Finset.univ.erase l).sum F + F l :=
+        (Finset.sum_erase_add Finset.univ F (Finset.mem_univ l)).symm
+      _ = (((Finset.univ.erase l).erase k).sum F + F k) + F l := by
+        rw [Finset.sum_erase_add (Finset.univ.erase l) F hk_mem]
+      _ = F k + F l := by rw [hrem, zero_add]
+      _ = 0 := by
+        dsimp only [F]
+        exact orderedToBaseCechAlternatingF_comp_coface_π_pair_cancel
+          π M U n i k l hil.symm hkl
+
 theorem orderedToBaseCechAlternatingF_comp_d_comp_π_of_strictMono
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
