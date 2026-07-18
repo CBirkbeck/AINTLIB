@@ -7,6 +7,7 @@ import Mathlib.CategoryTheory.Galois.Equivalence
 import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
 import Mathlib.FieldTheory.Galois.Profinite
 import Mathlib.FieldTheory.KrullTopology
+
 import ModularCurves.ForMathlib.FiniteEtaleFiberFunctor
 
 /-!
@@ -38,10 +39,8 @@ namespace FiniteEtaleGalois
 
 variable (k : Type u) [Field k]
 
-/-! Instance bridges: mathlib's instances for `separableClosure` are keyed on the
-`↥(separableClosure F E)` spelling and do not fire against the `SeparableClosure F`
-abbreviation (the `CoeSort` paths differ), so we re-register the ones downstream
-consumers need, keyed on the abbreviation. -/
+/- Named compatibility instances for downstream code that refers directly to the
+`SeparableClosure` abbreviation. -/
 
 section InstanceBridges
 
@@ -65,8 +64,6 @@ instance (priority := high) compactSpace_galSepClosure :
 
 end InstanceBridges
 
-/-! The natural action of the Galois group on the fibers (leaf AG-GG-3a). -/
-
 section Action
 
 variable {k}
@@ -82,6 +79,7 @@ noncomputable instance fiberMulAction (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
   one_smul _x := AlgHom.ext fun _a => rfl
   mul_smul _σ _τ _x := AlgHom.ext fun _a => rfl
 
+/-- The action on a fiber is post-composition by a field automorphism. -/
 lemma fiber_smul_def (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ) (σ : Ω ≃ₐ[k] Ω)
     (x : (CommAlgCat.FiniteEtale.fiber k Ω).obj X) :
     σ • x = σ.toAlgHom.comp x :=
@@ -92,8 +90,6 @@ instance : PreGaloisCategory.IsNaturalSMul
   naturality _σ {_X _Y} _f _x := AlgHom.ext fun _a => rfl
 
 end Action
-
-/-! Connected finite étale algebras are fields (leaf AG-GG-3d). -/
 
 section Connected
 
@@ -137,12 +133,8 @@ private lemma not_isInitial_op_of_nontrivial (Y : CommAlgCat.FiniteEtale.{u} k)
   haveI : Algebra.Etale k (Fin 0 → k) := ⟨inferInstance, inferInstance⟩
   have hiso2 := hterm.uniqueUpToIso
     (isTerminalOfSubsingleton (CommAlgCat.FiniteEtale.of k (Fin 0 → k)))
-  have hcarrier : (Y : Type u) ≃ (Fin 0 → k) :=
-    ⟨hiso2.hom.hom.hom, hiso2.inv.hom.hom,
-      fun a => congrArg (fun (t : Y ⟶ Y) => t.hom.hom a) hiso2.hom_inv_id,
-      fun a => congrArg (fun (t : CommAlgCat.FiniteEtale.of k (Fin 0 → k) ⟶
-        CommAlgCat.FiniteEtale.of k (Fin 0 → k)) => t.hom.hom a) hiso2.inv_hom_id⟩
-  haveI : Subsingleton (Y : Type u) := hcarrier.subsingleton
+  haveI : Subsingleton (Y : Type u) :=
+    (CategoryTheory.ConcreteCategory.bijective_of_isIso hiso2.hom).1.subsingleton
   exact false_of_nontrivial_of_subsingleton (Y : Type u)
 
 /-- Connected finite étale algebras over a field are fields. -/
@@ -174,21 +166,10 @@ theorem isField_of_isConnected (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
   have hbij : Function.Bijective (Ideal.Quotient.mkₐ k m₀) :=
     CategoryTheory.ConcreteCategory.bijective_of_isIso
       ((ObjectProperty.ι (CommAlgCat.finiteEtale k)).map q)
-  refine ⟨exists_pair_ne _, mul_comm, ?_⟩
-  intro a ha
-  have hea : Ideal.Quotient.mkₐ k m₀ a ≠ 0 := by
-    intro h0
-    exact ha (hbij.1 (h0.trans (map_zero _).symm))
-  obtain ⟨b', hb'⟩ := IsUnit.exists_right_inv (Ne.isUnit hea)
-  obtain ⟨b, rfl⟩ := hbij.2 b'
-  refine ⟨b, hbij.1 ?_⟩
-  rw [map_mul, map_one]
-  exact hb'
+  exact (AlgEquiv.ofBijective (Ideal.Quotient.mkₐ k m₀) hbij).toMulEquiv.isField
+    (Field.toIsField ((X.unop : Type u) ⧸ m₀))
 
 end Connected
-
-/-! Transitivity on connected objects (leaf AG-GG-3e), open stabilisers (leaf
-AG-GG-3c), non-triviality (leaf AG-GG-3f), and the `IsFundamentalGroup` instance. -/
 
 section FundamentalGroup
 
@@ -197,10 +178,8 @@ variable {k}
 /-- The range of a point of a finite étale algebra is a finite field extension inside
 the separable closure. -/
 private lemma isField_range {A : CommAlgCat.FiniteEtale.{u} k}
-    (x : (A : Type u) →ₐ[k] SeparableClosure k) : IsField x.range := by
-  haveI : Module.Finite k x.range :=
-    Module.Finite.of_surjective x.rangeRestrict.toLinearMap x.rangeRestrict_surjective
-  exact isField_of_isIntegral_of_isField' (R := k) (Field.toIsField k)
+    (x : (A : Type u) →ₐ[k] SeparableClosure k) : IsField x.range :=
+  x.range.isField_of_algebraic
 
 /-- The Galois group acts transitively on the points of a connected finite étale
 algebra: any two embeddings into the separable closure are conjugate. -/
@@ -215,23 +194,12 @@ theorem exists_smul_eq_of_isConnected (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
   letI : Field y'.range := (isField_range y').toField
   set χ : (x'.range : Subalgebra k (SeparableClosure k)) ≃ₐ[k] y'.range :=
     (AlgEquiv.ofInjectiveField x').symm.trans (AlgEquiv.ofInjectiveField y') with hχ
-  refine ⟨χ.liftNormal (SeparableClosure k), ?_⟩
-  show (χ.liftNormal (SeparableClosure k)).toAlgHom.comp x' = y'
-  refine AlgHom.ext fun a => ?_
-  have h1 : (χ.liftNormal (SeparableClosure k))
-      (algebraMap x'.range (SeparableClosure k) (AlgEquiv.ofInjectiveField x' a)) =
-      algebraMap y'.range (SeparableClosure k) (χ (AlgEquiv.ofInjectiveField x' a)) :=
-    χ.liftNormal_commutes (SeparableClosure k) _
-  have h2 : χ (AlgEquiv.ofInjectiveField x' a) = AlgEquiv.ofInjectiveField y' a := by
-    show (AlgEquiv.ofInjectiveField y') ((AlgEquiv.ofInjectiveField x').symm
-      (AlgEquiv.ofInjectiveField x' a)) = _
-    rw [AlgEquiv.symm_apply_apply]
-  show (χ.liftNormal (SeparableClosure k)) (x' a) = y' a
-  calc (χ.liftNormal (SeparableClosure k)) (x' a)
-      = (χ.liftNormal (SeparableClosure k))
-        (algebraMap x'.range (SeparableClosure k) (AlgEquiv.ofInjectiveField x' a)) := rfl
-    _ = algebraMap y'.range (SeparableClosure k) (χ (AlgEquiv.ofInjectiveField x' a)) := h1
-    _ = y' a := by rw [h2]; rfl
+  refine ⟨χ.liftNormal (SeparableClosure k), AlgHom.ext fun a => ?_⟩
+  change (χ.liftNormal (SeparableClosure k)) (x' a) = y' a
+  convert χ.liftNormal_commutes (SeparableClosure k) (AlgEquiv.ofInjectiveField x' a) using 1
+  · rfl
+  · simp only [hχ, AlgEquiv.trans_apply, AlgEquiv.symm_apply_apply]
+    rfl
 
 /-- The stabiliser of a point is the fixing subgroup of a finite-dimensional
 intermediate field, hence open. -/
@@ -249,11 +217,9 @@ theorem stabilizer_isOpen (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
     rw [inv_eq_of_mul_eq_one_right this]
     exact hb
   set E : IntermediateField k (SeparableClosure k) := x'.range.toIntermediateField hinv
-    with hE
   haveI : Module.Finite k x'.range :=
     Module.Finite.of_surjective x'.rangeRestrict.toLinearMap x'.rangeRestrict_surjective
   haveI : FiniteDimensional k E := inferInstanceAs (Module.Finite k x'.range)
-  have hopen := E.fixingSubgroup_isOpen
   have hset : {σ : SeparableClosure k ≃ₐ[k] SeparableClosure k | σ • x = x} =
       (E.fixingSubgroup : Set (SeparableClosure k ≃ₐ[k] SeparableClosure k)) := by
     ext σ
@@ -262,15 +228,13 @@ theorem stabilizer_isOpen (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
       rw [SetLike.mem_coe, IntermediateField.mem_fixingSubgroup_iff]
       intro ω hω
       obtain ⟨a, rfl⟩ := hω
-      have hσ' : σ.toAlgHom.comp x' = x' := hσ
-      exact AlgHom.congr_fun hσ' a
+      exact AlgHom.congr_fun (show σ.toAlgHom.comp x' = x' from hσ) a
     · intro hσ
       rw [SetLike.mem_coe, IntermediateField.mem_fixingSubgroup_iff] at hσ
       show σ.toAlgHom.comp x' = x'
-      refine AlgHom.ext fun a => ?_
-      exact hσ (x' a) ⟨a, rfl⟩
+      exact AlgHom.ext fun a => hσ (x' a) ⟨a, rfl⟩
   rw [hset]
-  exact hopen
+  exact E.fixingSubgroup_isOpen
 
 /-- An automorphism of the separable closure acting trivially on all fibers is the
 identity. -/
@@ -279,19 +243,18 @@ theorem eq_one_of_smul_eq (σ : SeparableClosure k ≃ₐ[k] SeparableClosure k)
       (x : (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).obj X), σ • x = x) :
     σ = 1 := by
   refine AlgEquiv.ext fun ω => ?_
-  have hint : IsIntegral k ω := Algebra.IsIntegral.isIntegral ω
   set L : IntermediateField k (SeparableClosure k) :=
-    IntermediateField.adjoin k ({ω} : Set (SeparableClosure k)) with hL
-  haveI : FiniteDimensional k L := IntermediateField.adjoin.finiteDimensional hint
+    IntermediateField.adjoin k ({ω} : Set (SeparableClosure k))
+  haveI : FiniteDimensional k L :=
+    IntermediateField.adjoin.finiteDimensional (Algebra.IsIntegral.isIntegral ω)
   haveI : Algebra.IsSeparable k L :=
     Algebra.isSeparable_tower_bot_of_isSeparable k L (SeparableClosure k)
   haveI : Algebra.FormallyEtale k L := Algebra.FormallyEtale.of_isSeparable k L
   haveI : Algebra.FinitePresentation k L :=
     Algebra.FinitePresentation.of_finiteType.mp inferInstance
   haveI : Algebra.Etale k L := ⟨inferInstance, inferInstance⟩
-  have hx := h (Opposite.op (CommAlgCat.FiniteEtale.of k L)) L.val
-  have hω : ω ∈ L := IntermediateField.mem_adjoin_simple_self k ω
-  exact AlgHom.congr_fun hx ⟨ω, hω⟩
+  exact AlgHom.congr_fun (h (Opposite.op (CommAlgCat.FiniteEtale.of k L)) L.val)
+    ⟨ω, IntermediateField.mem_adjoin_simple_self k ω⟩
 
 instance : GaloisCategory (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ where
   hasFiberFunctor :=
@@ -317,33 +280,23 @@ noncomputable instance isFundamentalGroup_galSepClosure :
         ⋃ x₀ : ((CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).obj X),
           {σ | σ • x₀ = y} ×ˢ ({x₀} : Set _) := by
       ext ⟨σ, x₀⟩
-      simp
+      simp only [Set.mem_preimage, Set.mem_singleton_iff, Set.mem_iUnion, Set.mem_prod,
+        Set.mem_setOf_eq, exists_eq_right']
     rw [hdecomp]
     refine isOpen_iUnion fun x₀ => IsOpen.prod ?_ trivial
     rcases Set.eq_empty_or_nonempty {σ : SeparableClosure k ≃ₐ[k] SeparableClosure k |
       σ • x₀ = y} with hemp | ⟨σ₀, hσ₀⟩
     · rw [hemp]; exact isOpen_empty
-    · have hcoset : {σ : SeparableClosure k ≃ₐ[k] SeparableClosure k | σ • x₀ = y} =
+    · change σ₀ • x₀ = y at hσ₀
+      have hcoset : {σ : SeparableClosure k ≃ₐ[k] SeparableClosure k | σ • x₀ = y} =
           (fun σ => σ₀⁻¹ * σ) ⁻¹' {σ | σ • x₀ = x₀} := by
         ext σ
-        constructor
-        · intro hσ
-          show (σ₀⁻¹ * σ) • x₀ = x₀
-          rw [mul_smul, hσ, ← hσ₀, inv_smul_smul]
-        · intro hσ
-          have : (σ₀⁻¹ * σ) • x₀ = x₀ := hσ
-          rw [mul_smul] at this
-          calc σ • x₀ = σ₀ • σ₀⁻¹ • σ • x₀ := (smul_inv_smul σ₀ _).symm
-            _ = σ₀ • x₀ := by rw [this]
-            _ = y := hσ₀
+        simp only [Set.mem_setOf_eq, Set.mem_preimage, mul_smul, inv_smul_eq_iff, hσ₀]
       rw [hcoset]
       exact (stabilizer_isOpen X x₀).preimage (continuous_const.mul continuous_id)
   non_trivial' σ h := eq_one_of_smul_eq σ h
 
 end FundamentalGroup
-
-/-! The Galois correspondence (leaf AG-GG-4a): `(FiniteEtale k)ᵒᵖ` is equivalent to
-the category of finite discrete sets with continuous `Gal(k^sep/k)`-action. -/
 
 section Correspondence
 
@@ -356,19 +309,8 @@ noncomputable def toAutContinuousMulEquiv {C : Type*} [Category C] [GaloisCatego
     (F : C ⥤ FintypeCat.{u}) [FiberFunctor F] (G : Type*) [Group G]
     [∀ X, MulAction G (F.obj X)] [TopologicalSpace G] [IsTopologicalGroup G]
     [CompactSpace G] [IsFundamentalGroup F G] : G ≃ₜ* Aut F :=
-  { toAutMulEquiv F G with
-    continuous_toFun := (toAut_isHomeomorph F G).continuous
-    continuous_invFun := by
-      have h := (toAut_isHomeomorph F G).homeomorph.symm.continuous
-      have heq : ⇑(toAutMulEquiv F G).symm =
-          ⇑(toAut_isHomeomorph F G).homeomorph.symm := by
-        funext a
-        apply (toAutMulEquiv F G).injective
-        rw [MulEquiv.apply_symm_apply]
-        exact ((toAut_isHomeomorph F G).homeomorph.apply_symm_apply a).symm
-      show Continuous ⇑(toAutMulEquiv F G).symm
-      rw [heq]
-      exact h }
+  (toAutMulEquiv F G).toContinuousMulEquiv fun _ =>
+    (toAutMulEquiv_isHomeomorph F G).isQuotientMap.isOpen_preimage
 
 variable (k)
 
