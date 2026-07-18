@@ -23314,3 +23314,72 @@ that parked T-W7.8 for the headline — verify + rule) + the cheaper-hH/hbound s
 doctrines + immediate-next-actions all captured. The new coordinator starts by reading it, then
 Amendments since its mark. Batch also ratified: RING-DBL landed + hArb closed (CHARTER-O terminal), GH
 independent-work exhausted + capstone scripted, G0 mid-:206-glue, KM at the endDual decision point.
+
+## v10.320 (2026-07-18, coordinator) — ★★ TAKE-OVER + THE §5 RULING (k̄ SUFFICES — T-W7.8 STAYS PARKED; general-S endDual OFF the headline) + ★ SUSPECT-RIG2 (the frozen hbound contract is REFUTABLE — narrow before discharging) + OWNER CONSOLIDATION: CHARTER-FIN (one strong seat takes the whole cone)
+
+**Take-over, verified at source** (origin @ bd4b2b2e9; grep census, never reports): Bootstrap = 1
+(`:222` = `legendreDelta_relativelyRepresentable_finiteEtale`, T-E14-AX2); EndomorphismDegree = 7
+(`:202` endDual_comp_self / `:359` endDeg_comp / `:429` endDeg_comp_mulBy / `:435` endTrace_comp_mulBy /
+`:453` endTrace_sq_le / `:459` eq_zero_of_endDeg_eq_zero / `:469` fixesTorsion); EllCategory = 2
+(`:298`/`:324` the two ⇐s); QuotientProblem = 2 (`:1022`/`:1040` — the mouth). Gate census:
+InvariantTorsor 2 sorry-lines; EngineDescent `:646` (its assembly note says sorry-free around it);
+Recollement `:445` (T-E5f) rides the ⇐-consumption map. PROVEN as boarded (spot-verified):
+KernelBound.le_endDeg_of_killed_injective; TorsionDivisibility.exists_eq_one_add_mulBy_comp_of_fixesTorsion_of_isIso
+(sorry-free, mod the [T-G3d-Niso] box); the T-G3a arithmetic heart; endDeg_mulBy; endDeg_comp_of_isIntegral;
+simulSchemeAction_free_of_rigidNoeth + SchemeAction.quotient (T-Q5); G0's funnel+1a/1b/2a; OMEGA's
+abscissaDiff + the complete ℤ[1/3] engine. The cone = v10.317-GH's, exactly. Sentinels G0/KM/GH fresh
+(17 Jul evening): G0 mid-build (2b→5 mapped), KM stopped at the §5 decision, GH armed.
+
+**★★ THE RULING (§5, resolves v10.317-KM's decision point):**
+1. **k̄ suffices — T-W7.8 STAYS PARKED.** Source evidence, not prior: every headline consumption of
+   the degree keystone goes through ∀-geometric-point pins with verified quantifier prefix
+   `∀ (k : Type u) [Field k] [IsAlgClosed k]` — `hbound` @ GammaHMaster:1220/:1259/:1279 +
+   GammaHClosure:152; `hH` @ GammaHMaster:822/:1064/:1085/:1107. NO consumer touches the keystone
+   over any non-field base, let alone non-reduced. A field is reduced ⟹ KM's L5-general
+   (arbitrary-base rigidity = the T-W7.8 wall) is headline-DEAD; at S = Spec k̄ the lift is the
+   reduced-tractable case (`hom_ext_of_forall_specPoint`) or vanishes outright.
+2. **The §5-Q2 cheaper route is REAL and is now the route of record: discharge hH/hbound DIRECTLY
+   at k̄.** General-S endDual_comp_self + the 5 general-S generals are NOT headline-necessary.
+   The k̄ toolbox: the L1 fibre dictionary (repo endDeg/endTrace ↔ HasseWeil degree over k̄ — KM's
+   banked L1 anchors survive into this route, nothing wasted); the k̄ zero-or-isogeny dichotomy
+   (feeds the PROVEN endDeg_comp_of_isIntegral for the :359/:429/:435 k̄-instances);
+   endTrace_sq_le@k̄ = HasseWeil hasse_bound/degree_quadratic_closed IMPORT (its own documented
+   route); fixesTorsion@k̄ = the PROVEN TorsionDivisibility._of_isIso + Niso@k̄; assembly on the
+   PROVEN T-G3a + le_endDeg_of_killed_injective.
+3. On the k̄-rewire landing, the 7 general-S EndomorphismDegree sorries LEAVE the cone → re-tag
+   **[KEY-GEN-PARKED]** (T-W7.8-family spreading-out debt, non-blocking, do-not-grind). KM's
+   general 5-leaf K2 build is SUPERSEDED by this ruling.
+
+**★ SUSPECT-RIG2 (coordinator adversarial check — verify, then NARROW before discharging):** the
+frozen [RIG-2] `hbound` contract is REFUTABLE AS STATED — it quantifies over ALL pointed ε with
+only `Function.Injective pts`: (i) ε = [N+1] (δ = ε−1 = [N] kills any N of the N² points of
+E[N](k̄)) refutes it for EVERY N ≥ 4; (ii) even automorphism-restricted, N = 4 is refuted by
+ε = [−1] (δ = [−2], ker ⊇ E[2] = 4 injective killed points; char k ≠ 2 since 4 is invertible).
+The TRUE minimal shape — which is exactly what the consumer holds: ε an ISO (deg 1) + a point P of
+exact geometric order N with (ε−1)P = 0 (δ is a homomorphism ⟹ ⟨P⟩ ⊆ ker δ ⟹ N ≤ deg δ ≤ 4 by
+kernel-bound + Cauchy–Schwarz; N = 4 equality forces ε = [−1] ⟹ P = −P ⟹ order ≤ 2, absurd).
+Consumer-compatible: `gammaOneDrinfeld_fix_absurd` holds the iso `e` AND the T-D6b exact-order
+data ("its small multiples are nonzero"). FIN: re-derive the counterexample FIRST, then narrow the
+contract at its sites (GammaHMaster:1139-region/:1220/:1259/:1279 + GammaHClosure:152) + re-thread
+fix_absurd — statement-layer producer work; BOARD the shape change loudly (receipts 3/6 statements
+move). Run the SAME review on `hH` against `gammaH_representable_of_orderOf`'s side condition
+before discharging (hH's ∀γ:H shape is true only under the headliner's orderOf constraint —
+CM-unit orders 2/4/6).
+
+**★ OWNER CONSOLIDATION — CHARTER-FIN** (owner, 2026-07-18: "I want to finish this project off …
+fresh strong worker … the bulk of the remaining work"). ONE seat (FIN) now holds the ENTIRE
+remaining cone as a marathon charter (v10.313 terminal-charter doctrine + v10.316
+force-concentration taken to the limit): **(F1)** keystone-at-k̄ = SUSPECT-RIG2 narrowing + hH +
+hbound discharged + consumers rewired [THE RULING above]; **(F2)** Bootstrap:222 — COLLISION-GUARDED
+takeover of CHARTER-G's banked build (funnel + SqrtUnitCover + glue-1a/1b/2a PROVEN; steps
+2b→3→4→5 verbatim in beastmode_active.G0 + STREAM-G0.md); **(F3)** the engine gate — the mouth
+:1040 (banked KM pp.112–116 route in-source; freeness PROVEN; gates = InvariantTorsor T-Q2 +
+EngineDescent:646) + the two TorsorData packages (T-E15b GL₂(𝔽₃) equivariance; T-E14-ACT' COUPLED
+Legendre action — sequenced after F2) + the :324 ⇐-consumption map (in-source verbatim) +
+recollement :445; :1022/:298 = weakening corollaries, never separate builds; **(F4)** final wiring
+(hH/hbound instantiated, unpinned corollaries added) + `capstone-receipts.sh` fire = THE HEADLINE.
+Opener: inbox/WORK-ORDERS.md (REWRITTEN this version). Route book: inbox/STREAM-FIN.md (NEW).
+**Charters G/K/O/GH are SUPERSEDED-INTO-FIN**: OMEGA terminal-with-honor; KM's decision-point idle
+resolves into THE RULING; GH's armed-receipts duty transfers to FIN(F4); if the owner ALSO re-fires
+G0 on :222, FIN yields that front (sentinel-mtime + origin-log guard, inbox coordination).
+**Milestones (report-only-at): KEYSTONE-k̄-LANDED, :222-CLOSED, MOUTH-CLOSED, THE-HEADLINE.**
