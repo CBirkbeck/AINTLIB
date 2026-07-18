@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleSheafBaseCechHOne
 import ModularCurves.ForMathlib.AcyclicAffineCechComparison
+import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
 
 /-!
@@ -150,5 +151,36 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_exa
       rw [← F.map_comp,
         Scheme.Modules.orderedToBaseCechAlternating_comp_baseCechToOrdered,
         F.map_id])
+
+/-- The consecutive differentials of the bounded ordered Cech complex of
+`O(n[0])` are exact after algebraic base change to the global sections of a
+residue-field spectrum. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_differential_exact
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (s : S) {n : ℕ} (hn : 1 ≤ n) (q : ℕ) :
+    let A := Γ(Spec (S.residueField s),
+      (⊤ : (Spec (S.residueField s)).Opens))
+    letI : Algebra Γ(S, (⊤ : S.Opens)) A :=
+      (S.fromSpecResidueField s).appTop.hom.toAlgebra
+    let C := Scheme.Modules.orderedBaseCechComplex π
+      (sectionPoleSheafPower π z hz n) U
+    Function.Exact
+      ((C.d q (q + 1)).hom.baseChange A)
+      ((C.d (q + 1) (q + 2)).hom.baseChange A) := by
+  dsimp only
+  let A := Γ(Spec (S.residueField s),
+    (⊤ : (Spec (S.residueField s)).Opens))
+  letI : Algebra Γ(S, (⊤ : S.Opens)) A :=
+    (S.fromSpecResidueField s).appTop.hom.toAlgebra
+  exact cochainComplex_baseChange_functionExact_of_map_exactAt A
+    (Scheme.Modules.orderedBaseCechComplex π
+      (sectionPoleSheafPower π z hz n) U) q
+    (h.sectionPoleSheafPower_residueField_orderedBaseCech_exactAt_succ
+      hsm z hz U hU hUaff s hn q)
 
 end ModularCurves

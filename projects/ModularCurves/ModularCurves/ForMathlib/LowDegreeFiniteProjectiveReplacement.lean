@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Category.ModuleCat.ChangeOfRings
+import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.FiniteFreeResolution
@@ -109,6 +110,48 @@ noncomputable def shortComplexModuleCatMkBaseChangeIso
       change a ⊗ₜ[R, algebraMap R A] S.g x =
         a ⊗ₜ[R, algebraMap R A] S.g x
       rfl)
+
+/-- Exactness at a positive degree after categorical extension of scalars is
+exactness of the corresponding algebraically base-changed linear differentials. -/
+theorem cochainComplex_baseChange_functionExact_of_map_exactAt
+    (A : Type v) [CommRing A] [Algebra R A]
+    (K : CochainComplex (ModuleCat.{v} R) ℕ) (q : ℕ)
+    (h : (((ModuleCat.extendScalars (algebraMap R A)).mapHomologicalComplex
+      (.up ℕ)).obj K).ExactAt (q + 1)) :
+    Function.Exact
+      ((K.d q (q + 1)).hom.baseChange A)
+      ((K.d (q + 1) (q + 2)).hom.baseChange A) := by
+  let F := ModuleCat.extendScalars (algebraMap R A)
+  have hprev : (ComplexShape.up ℕ).prev (q + 1) = q :=
+    CochainComplex.prev_nat_succ q
+  have hnext : (ComplexShape.up ℕ).next (q + 1) = q + 2 := by
+    rw [CochainComplex.next]
+    omega
+  have hmap :
+      ((K.sc' q (q + 1) (q + 2)).map F).Exact := by
+    have h' := (HomologicalComplex.exactAt_iff'
+      (K := (F.mapHomologicalComplex (.up ℕ)).obj K)
+      (i := q) (j := q + 1) (k := q + 2) hprev hnext).mp h
+    change ((K.sc' q (q + 1) (q + 2)).map F).Exact at h'
+    exact h'
+  have hbase :
+      (ShortComplex.moduleCatMk
+        ((K.sc' q (q + 1) (q + 2)).f.hom.baseChange A)
+        ((K.sc' q (q + 1) (q + 2)).g.hom.baseChange A)
+        (LinearMap.baseChange_comp_eq_zero
+          (K.sc' q (q + 1) (q + 2)).f.hom
+          (K.sc' q (q + 1) (q + 2)).g.hom
+          (shortComplexModuleCatCompEqZero
+            (K.sc' q (q + 1) (q + 2))) A)).Exact :=
+    (ShortComplex.exact_iff_of_iso
+      (shortComplexModuleCatMkBaseChangeIso
+        (K.sc' q (q + 1) (q + 2)) A)).mpr hmap
+  have hexact : Function.Exact
+      ((K.sc' q (q + 1) (q + 2)).f.hom.baseChange A)
+      ((K.sc' q (q + 1) (q + 2)).g.hom.baseChange A) :=
+    (ShortComplex.ShortExact.moduleCat_exact_iff_function_exact _).mp hbase
+  intro y
+  exact hexact y
 
 /-- If cycles commute with base change, then the base-changed cokernel into the old cycle
 module computes degree-one homology of the base-changed short complex. -/
