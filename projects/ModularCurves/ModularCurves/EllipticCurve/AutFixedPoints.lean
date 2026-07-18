@@ -32,7 +32,9 @@ by `e` gives `ψ ∘ Φ = ψ`), the torsion-point supply [KVC-pts], the faithful
 k̄-core (`aut_endo_eq_one_of_field`) and the narrowed `hbound` ([RIG-2′]).
 -/
 
-open WeierstrassCurve
+open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 universe u
 
@@ -116,5 +118,100 @@ theorem coordEquiv_fixes_generators_of_fixed_points (W : WeierstrassCurve k)
   constructor
   · rw [hΦx, hα1, hβ0, map_one, one_mul, map_zero, add_zero]
   · rw [hΦy, hγ1, hδ0, hε0, map_one, one_mul, map_zero, zero_mul, add_zero, add_zero]
+
+/-! ### [KVC-faith] — a pointed automorphism whose coordinate equivalence fixes the
+generators is the identity (the T-W7.1b faithfulness chain, replayed for `e` vs `refl`). -/
+
+/-- **(coordinate-ring extensionality on the generators)** Two `R`-algebra homomorphisms
+out of the affine coordinate ring agreeing on `coordX` and `coordY` are equal (public
+replay of the local `coordEquiv_ext` inside `pointedIso_exists_variableChange`). -/
+theorem coordRingAlgHom_ext {R : Type u} [CommRing R] {W' : WeierstrassCurve R}
+    {A : Type u} [CommRing A] [Algebra R A]
+    (φ ψ : W'.toAffine.CoordinateRing →ₐ[R] A)
+    (hX : φ (coordX W') = ψ (coordX W')) (hY : φ (coordY W') = ψ (coordY W')) : φ = ψ := by
+  have htest : (AdjoinRoot.of W'.toAffine.polynomial) Polynomial.X = coordX W' := by
+    rw [coordX]; rfl
+  have hofC : ∀ a : R, AdjoinRoot.of W'.toAffine.polynomial (Polynomial.C a)
+      = algebraMap R W'.toAffine.CoordinateRing a := by
+    intro a
+    rw [← AdjoinRoot.algebraMap_eq, ← Polynomial.algebraMap_eq,
+      ← IsScalarTower.algebraMap_apply]
+  have key : ∀ r : Polynomial R, AdjoinRoot.of W'.toAffine.polynomial r
+      = Polynomial.aeval (coordX W') r := by
+    intro r
+    induction r using Polynomial.induction_on with
+    | C a => rw [Polynomial.aeval_C, hofC]
+    | add p q hp hq => rw [map_add, map_add, hp, hq]
+    | monomial n a ih =>
+        rw [map_mul, map_pow, map_mul, map_pow, htest, hofC, Polynomial.aeval_X,
+          Polynomial.aeval_C]
+  have hof : ∀ r : Polynomial R, φ (AdjoinRoot.of W'.toAffine.polynomial r)
+      = ψ (AdjoinRoot.of W'.toAffine.polynomial r) := by
+    intro r
+    rw [key, ← Polynomial.aeval_algHom_apply, ← Polynomial.aeval_algHom_apply, hX]
+  apply AlgHom.ext
+  intro a
+  obtain ⟨p, q, rfl⟩ := WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq a
+  rw [WeierstrassCurve.Affine.CoordinateRing.smul,
+    WeierstrassCurve.Affine.CoordinateRing.smul, mul_one, map_add, map_add, map_mul,
+    map_mul,
+    show Affine.CoordinateRing.mk W'.toAffine (Polynomial.C p)
+      = AdjoinRoot.of W'.toAffine.polynomial p from rfl,
+    show Affine.CoordinateRing.mk W'.toAffine (Polynomial.C q)
+      = AdjoinRoot.of W'.toAffine.polynomial q from rfl,
+    show Affine.CoordinateRing.mk W'.toAffine Polynomial.X = coordY W' from rfl,
+    hof p, hof q, hY]
+
+variable {R : Type u} [CommRing R]
+
+/-- The `Γ`-map of the identity automorphism is the identity. -/
+lemma pointedIsoΓ_refl_apply {W : WeierstrassCurve R}
+    (hez' : projModelZero W ≫ (Iso.refl (projModel W)).hom = projModelZero W)
+    (w : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))) :
+    pointedIsoΓ (Iso.refl (projModel W)) hez' w = w := rfl
+
+/-- The coordinate equivalence of the identity automorphism is the identity. -/
+lemma pointedIsoCoordEquiv_refl_apply {W : WeierstrassCurve R}
+    (heπ' : (Iso.refl (projModel W)).hom ≫ projModelπ W = projModelπ W)
+    (hez' : projModelZero W ≫ (Iso.refl (projModel W)).hom = projModelZero W)
+    (x : W.toAffine.CoordinateRing) :
+    pointedIsoCoordEquiv (Iso.refl (projModel W)) heπ' hez' x = x := by
+  rw [pointedIsoCoordEquiv_apply, pointedIsoΓ_refl_apply, RingEquiv.symm_apply_apply]
+
+/-- **([KVC-faith])** A pointed automorphism of the projective model whose induced
+coordinate equivalence fixes the generators is the identity morphism — assembled from
+the PROVEN T-W7.1b faithfulness chain (`pointedIsoΓ_eq_of_coordEquiv` +
+`pointedIso_hom_eq_of_pointedIsoΓ`) applied against `Iso.refl`. -/
+theorem pointedAuto_hom_eq_id_of_coordEquiv_fixes {W : WeierstrassCurve R}
+    (e : projModel W ≅ projModel W)
+    (heπ : e.hom ≫ projModelπ W = projModelπ W)
+    (hez : projModelZero W ≫ e.hom = projModelZero W)
+    (hX : pointedIsoCoordEquiv e heπ hez (coordX W) = coordX W)
+    (hY : pointedIsoCoordEquiv e heπ hez (coordY W) = coordY W) :
+    e.hom = 𝟙 (projModel W) := by
+  have heπ' : (Iso.refl (projModel W)).hom ≫ projModelπ W = projModelπ W := by
+    rw [Iso.refl_hom, Category.id_comp]
+  have hez' : projModelZero W ≫ (Iso.refl (projModel W)).hom = projModelZero W := by
+    rw [Iso.refl_hom, Category.comp_id]
+  -- the refl coordinate equivalence fixes the generators
+  have hXr : pointedIsoCoordEquiv (Iso.refl (projModel W)) heπ' hez' (coordX W)
+      = coordX W := by
+    rw [pointedIsoCoordEquiv_refl_apply]
+  have hYr : pointedIsoCoordEquiv (Iso.refl (projModel W)) heπ' hez' (coordY W)
+      = coordY W := by
+    rw [pointedIsoCoordEquiv_refl_apply]
+  -- the faithfulness chain
+  have hcoord : pointedIsoCoordEquiv e heπ hez
+      = pointedIsoCoordEquiv (Iso.refl (projModel W)) heπ' hez' := by
+    refine AlgEquiv.ext fun x => ?_
+    exact DFunLike.congr_fun (coordRingAlgHom_ext
+      (pointedIsoCoordEquiv e heπ hez).toAlgHom
+      (pointedIsoCoordEquiv (Iso.refl (projModel W)) heπ' hez').toAlgHom
+      (hX.trans hXr.symm) (hY.trans hYr.symm)) x
+  have hΓ : pointedIsoΓ e hez = pointedIsoΓ (Iso.refl (projModel W)) hez' :=
+    pointedIsoΓ_eq_of_coordEquiv e (Iso.refl (projModel W)) heπ hez heπ' hez' hcoord
+  have h := pointedIso_hom_eq_of_pointedIsoΓ e (Iso.refl (projModel W)) hez hez' hΓ
+  rwa [Iso.refl_hom] at h
 
 end ModularCurves
