@@ -4,6 +4,7 @@ import ModularCurves.EllipticCurve.PoleSheafFibreSections
 import ModularCurves.ForMathlib.AffineModuleCechBaseChange
 import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechZero
 
 /-!
 # Base-linear Cech comparison for pole sheaves
@@ -64,6 +65,19 @@ theorem exists_sectionPoleSheafPower_finiteAffineBaseCechComparison
   exact ⟨ι, hι, U, hU, hUaff,
     ⟨sectionPoleSheafPower_baseCechHomologyOneIso
       hsm z hz n U hU hUaff⟩⟩
+
+/-- Global sections of `O(n[0])` are the degree-zero kernel of its ordered base-linear Cech
+complex. -/
+noncomputable def sectionPoleSheafPower_baseSectionsIsoKernelOrderedBaseCechDifferential
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (n : ℕ)
+    {ι : Type u} [LinearOrder ι] (U : ι → E.Opens) (hU : IsOpenCover U) :
+    Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n) ≅
+      ModuleCat.of Γ(S, (⊤ : S.Opens))
+        (LinearMap.ker ((Scheme.Modules.orderedBaseCechComplex π
+          (sectionPoleSheafPower π z hz n) U).d 0 1).hom) :=
+  Scheme.Modules.baseSectionsIsoKernelOrderedBaseCechDifferential
+    π (sectionPoleSheafPower π z hz n) U hU
 
 /-- Global sections of a residue-fibre pole sheaf are linearly equivalent to
 the degree-zero kernel of any base-linear Cech complex computing them. -/
@@ -191,6 +205,52 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_baseCech_kernel_finrank
     (π := π) z hz s (n := n) U hU
   exact e.finrank_eq.symm.trans
     (h.sectionPoleSheafPower_fiber_finrank z hz s hn)
+
+/-- The degree-zero kernel of an ordered residue-fibre pole Cech complex has dimension `n` for
+`n ≥ 1`. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_orderedBaseCech_kernel_finrank
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (h : FibrewiseElliptic π z hz)
+    (s : S) {n : ℕ} (hn : 1 ≤ n) {ι : Type u} [LinearOrder ι]
+    (U : ι → (π.fiber s).Opens) (hU : IsOpenCover U) :
+    letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
+      isSeparated_fiberToSpecResidueField π s
+    let M := @sectionPoleSheafPower _ _ (π.fiberToSpecResidueField s) hsepFiber
+      (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n
+    let C := Scheme.Modules.orderedBaseCechComplex
+      (π.fiberToSpecResidueField s) M U
+    letI : Module ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) :=
+      Module.compHom _
+        (Scheme.ΓSpecIso (S.residueField s)).inv.hom
+    Module.finrank ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) = n := by
+  letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
+    isSeparated_fiberToSpecResidueField π s
+  let M := @sectionPoleSheafPower _ _ (π.fiberToSpecResidueField s) hsepFiber
+    (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n
+  let C := Scheme.Modules.baseCechComplex
+    (π.fiberToSpecResidueField s) M U
+  let D := Scheme.Modules.orderedBaseCechComplex
+    (π.fiberToSpecResidueField s) M U
+  letI : Module ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) :=
+    Module.compHom _
+      (Scheme.ΓSpecIso (S.residueField s)).inv.hom
+  letI : Module ↑(S.residueField s) (LinearMap.ker (D.d 0 1).hom) :=
+    Module.compHom _
+      (Scheme.ΓSpecIso (S.residueField s)).inv.hom
+  let eA := Scheme.Modules.baseCechKernelOrderedLinearEquiv
+    (π.fiberToSpecResidueField s) M U
+  let e : LinearMap.ker (C.d 0 1).hom ≃ₗ[↑(S.residueField s)]
+      LinearMap.ker (D.d 0 1).hom :=
+    { toFun := eA
+      invFun := eA.symm
+      left_inv := eA.left_inv
+      right_inv := eA.right_inv
+      map_add' := eA.map_add
+      map_smul' := fun r x =>
+        eA.map_smul ((Scheme.ΓSpecIso (S.residueField s)).inv.hom r) x }
+  exact e.finrank_eq.symm.trans
+    (h.sectionPoleSheafPower_fiber_baseCech_kernel_finrank
+      z hz s hn U hU)
 
 /-- After extension to a residue field, the base-linear Cech complex of
 `O(n[0])` is exact in degree one for `n ≥ 1` on a fibrewise elliptic family. -/
