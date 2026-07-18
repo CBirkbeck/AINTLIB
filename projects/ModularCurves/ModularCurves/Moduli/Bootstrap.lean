@@ -12,6 +12,7 @@ import ModularCurves.Moduli.UniversalLegendre
 import ModularCurves.Moduli.UniversalLevelThree
 import ModularCurves.Moduli.E3DatumAssembly
 import ModularCurves.Moduli.BridgeAssembly
+import ModularCurves.Moduli.SqrtCoverGlue
 import ModularCurves.LevelStructure.CombinationLevel
 
 /-!
@@ -218,8 +219,8 @@ theorem legendreDelta_relativelyRepresentable_finiteEtale (hR : IsUnit (2 : R))
     ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsFinite f ∧ Etale f ∧
       ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
         ({ h : T ⟶ Z // h ≫ f = g } ≃
-          (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g))) := by
-  sorry
+          (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g))) :=
+  legendreDelta_relRep_finiteEtale R hR X
 
 /-! #### T-E14 statement-layer correction (2026-07-14, OMEGA — adversarial source check)
 
