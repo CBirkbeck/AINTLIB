@@ -23582,3 +23582,50 @@ gluing half: sections of the relative scheme glue). Glue builder RE-FIRED on the
 α-twist of the tautological class; `((d.eqv d.f).symm (α.hom.app _ (d.eqv d.f ⟨𝟙,_⟩))).1`);
 scaleTorsor + TD6b + KVC + a5compat live. Cone: mouth-leaf ← [a5]+surgery; then :324 map;
 receipts 1/2/4/5 ← KVC chain; 3/5/6 ← hH/hbound instantiation.
+
+---
+
+## v10.327-FIN — [KVC-MASTER] LANDED + IMPORT SURGERY + LEAF CENSUS v2 (STREAM-FIN, 2026-07-18)
+
+**(1) [KVC-eval]+[KVC-master] LANDED** (commit `8c306253d`, AutFixedPoints.lean 217→685, **0
+sorries**, axioms `{propext, Classical.choice, Quot.sound}`): `pointedAuto_hom_eq_id_of_fixes_points`
+— a pointed auto of `projModel W` fixing 3 separated k-points (two distinct x's + one ±pair) IS 𝟙.
+No `[W.IsElliptic]` needed. Full eval bridge: `zChartCoordEval` (ψC : CoordinateRing →+*k),
+`_AlgEval` (→ₐ[k]), `_pointedIsoCoordEquiv` (Φ-invariance), `_algebraMap`, `_coordX/_coordY`
+(readouts in `projModelPointsEquiv_some` normal form via `chartSolutionsEquiv`), membership glue
+(`inZChart_of_range_subset`/converse, `section_comp_projModelπ_specMap`), `chartHomEquiv_zChartEval`,
+`coordRingToZSection_eq_awayToSection` (rfl). KEY TRICK (leg-6 k-linearity): chart route
+`hgπ + zChart_fromSpec + awayι_projModelπ + Spec.map_injective` ⟹ structure-map section = 𝟙;
+`coordRingToZSection`'s algebraMap-image DEFINITIONALLY `awayToSection (algebraMap …)` via
+`chartZRingEquiv_fromZero`. CONSUMER BUILDER FIRED: KeystoneGeometricPoint.lean ([KVC-pts] torsion
+supply via Y_eq_of_X_eq/Y_eq_of_Y_ne + rank-2; [KVC-conj] record↔projModel conjugation at Spec k̄;
+[:524-rewire] `*_kvc` drop-ins with the exact statement shapes + edit-site list).
+
+**(2) IMPORT SURGERY (mouth)** (commit `22cab9a0c`): `section EngineMouth` (:1528–2055) moved
+VERBATIM out of QuotientProblem.lean into NEW `Moduli/EngineMouth.lean` (imports EngineDescent —
+downstream, so the Phase-A engine is consumable). **QuotientProblem.lean is now SORRY-FREE.**
+private `map_eqv` replicated (sole cross-section private). Downstream rebuilt green
+(QuotientRepresentability, GammaHRepresentability). `exists_engineQuotient` (EngineMouth:132) now
+dischargeable IN-FILE — DISCHARGE BUILDER FIRED (mirror `exists_coreData`; [a5] transitive sorryAx
+expected until a5compat lands).
+
+**(3) Recollement B2 + glue re-fire** (commits `b51573334`/board `f5d5dfcd1`): see v10.326.
+
+**(4) LEAF CENSUS v2** (post-surgery run_meta, ground truth): receipts 1/2/4/5
+(`gammaFullNaive/gammaFullDrinfeld/gammaBot/gammaH`) ⟵ {endTrace_comp_mulBy,
+eq_zero_of_endDeg_eq_zero, endTrace_sq_le, endDeg_comp_mulBy,
+exists_eq_one_add_mulBy_comp_of_fixesTorsion} + `representable_iff_rigidNoeth`; receipts 3/6
+(`gammaOneDrinfeld×2`) ⟵ {IsSubgroup.smul_eq_zero_of_factors, HasExactOrder.pull_nsmul_ne_zero}
++ `representable_iff_rigidNoeth`. ⟹ **`representable_iff_rigidNoeth` (EllCategory:324) is a leaf
+of ALL SIX** — the F3 chain is receipt-gating. F4 RE-POINT PLAN (import-direction-safe): prove the
+⇐ DOWNSTREAM (file importing EngineMouth+Recollement+packages, e.g. the capstone), then re-point
+the FOUR `.mpr` code sites: GammaHClosure.lean:119, :137; GammaHMaster.lean:1180, :1358 (GammaH
+files gain one import; no cycle — nothing in GammaH-land is imported by the engine chain).
+EllCategory:324/:298 then become one-line corollaries (boarded, non-gating).
+
+**Fleet (7 live)**: scaleTorsor (SqrtCoverGlue:142) / TD6b+BB-DELIGNE (ExactOrder — receipts 3/6
+leaves) / a5compat (EngineDescent:646) / recollement-glue (:455 on the amended hrel statement) /
+T-E15b (LevelThreeTorsor.lean) / mouth-discharge (EngineMouth:132) / KVC-consumer
+(KeystoneGeometricPoint.lean). Cone to THE HEADLINE: receipts 1/2/4/5 ⟵ KVC-consumer re-point;
+3/6 ⟵ TD6b + hH/hbound instantiation; ALL ⟵ F3 chain (mouth-discharge→a5compat, T-E15b, T-E14
+package after scaleTorsor, recollement-glue) + the 4-site re-point.
