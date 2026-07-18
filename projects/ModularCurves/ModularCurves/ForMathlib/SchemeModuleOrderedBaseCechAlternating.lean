@@ -35,6 +35,24 @@ noncomputable def baseCechPermutationF
       (baseModulePresheaf π M)).map
         ((FormalCoproduct.mk _ U).mapPower σ).op
 
+theorem baseCechPermutationF_comp
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n : ℕ)
+    (σ τ : Equiv.Perm (Fin (n + 1))) :
+    baseCechPermutationF π M U n σ ≫
+        baseCechPermutationF π M U n τ =
+      baseCechPermutationF π M U n (σ.trans τ) := by
+  let F : (FormalCoproduct.{u} X.Opens)ᵒᵖ ⥤
+      ModuleCat.{u} Γ(S, (⊤ : S.Opens)) :=
+    ((FormalCoproduct.evalOp X.Opens
+      (ModuleCat.{u} Γ(S, (⊤ : S.Opens)))).obj
+        (baseModulePresheaf π M))
+  change F.map ((FormalCoproduct.mk _ U).mapPower σ).op ≫
+      F.map ((FormalCoproduct.mk _ U).mapPower τ).op =
+    F.map ((FormalCoproduct.mk _ U).mapPower (σ.trans τ)).op
+  rw [← F.map_comp, ← op_comp]
+  congr 1
+
 theorem baseCechPermutationF_comp_π
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} (U : ι → X.Opens) (n : ℕ)
@@ -131,6 +149,28 @@ theorem orderedToBaseCechZeroExtensionF_comp_permutation_comp_ordered_of_ne
   have hx := ConcreteCategory.congr_hom hcomp x
   exact hx
 
+theorem orderedToBaseCechZeroExtensionF_comp_π_of_not_strictMono
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 1) → ι) (hi : ¬ StrictMono i) :
+    orderedToBaseCechZeroExtensionF π M U n ≫
+        Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor π M U n j) i = 0 := by
+  let p : (baseCechComplex π M U).X n ⟶ baseCechFactor π M U n i :=
+    Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor π M U n j) i
+  change orderedToBaseCechZeroExtensionF π M U n ≫ p = 0
+  have hlinear :
+      ModuleCat.ofHom (orderedBaseCechZeroExtendLinearMap π M U n) ≫
+          (baseCechXIsoPi π M U n).inv ≫ p = 0 := by
+    dsimp only [p]
+    rw [baseCechXIsoPi_inv_comp_proj]
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro x
+    change orderedBaseCechZeroExtendLinearMap π M U n x i = 0
+    rw [orderedBaseCechZeroExtendLinearMap_apply, dif_neg hi]
+  rw [orderedToBaseCechZeroExtensionF]
+  simp only [Category.assoc, hlinear, comp_zero]
+
 /-- Alternating extension from increasing tuples to all tuples. -/
 noncomputable def orderedToBaseCechAlternatingF
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
@@ -139,6 +179,64 @@ noncomputable def orderedToBaseCechAlternatingF
   ∑ σ : Equiv.Perm (Fin (n + 1)), (Equiv.Perm.sign σ : ℤ) •
     (orderedToBaseCechZeroExtensionF π M U n ≫
       baseCechPermutationF π M U n σ)
+
+theorem orderedToBaseCechAlternatingF_comp_permutation
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (τ : Equiv.Perm (Fin (n + 1))) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        baseCechPermutationF π M U n τ =
+      (Equiv.Perm.sign τ : ℤ) •
+        orderedToBaseCechAlternatingF π M U n := by
+  rw [orderedToBaseCechAlternatingF, sum_comp, Finset.smul_sum]
+  refine Fintype.sum_equiv (Equiv.mulLeft τ) _ _ fun σ => ?_
+  simp only [zsmul_comp, Category.assoc, baseCechPermutationF_comp,
+    Equiv.coe_mulLeft, Equiv.Perm.sign_mul, smul_smul]
+  rw [show σ.trans τ = τ * σ by rfl]
+  rw [Units.val_mul, ← mul_assoc, Int.units_coe_mul_self, one_mul]
+
+theorem orderedToBaseCechAlternatingF_comp_π_of_not_injective
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 1) → ι) (hi : ¬ Function.Injective i) :
+    orderedToBaseCechAlternatingF π M U n ≫
+        Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor π M U n j) i = 0 := by
+  let e : (baseCechComplex π M U).X n ⟶ baseCechFactor π M U n i :=
+    Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor π M U n j) i
+  change orderedToBaseCechAlternatingF π M U n ≫ e = 0
+  rw [orderedToBaseCechAlternatingF, sum_comp]
+  apply Finset.sum_eq_zero
+  intro σ _
+  rw [zsmul_comp, Category.assoc, baseCechPermutationF_comp_π]
+  let p : (baseCechComplex π M U).X n ⟶
+      baseCechFactor π M U n (i ∘ σ) :=
+    Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor π M U n j) (i ∘ σ)
+  let r : baseCechFactor π M U n (i ∘ σ) ⟶
+      baseCechFactor π M U n i :=
+    (baseModulePresheaf π M).map
+      (((FormalCoproduct.mk _ U).mapPower σ).φ i).op
+  change (Equiv.Perm.sign σ : ℤ) •
+    (orderedToBaseCechZeroExtensionF π M U n ≫ p ≫ r) = 0
+  have hmono : ¬ StrictMono (i ∘ σ) := by
+    intro h
+    apply hi
+    intro a b hab
+    apply σ.symm.injective
+    apply h.injective
+    simpa using hab
+  have hz :
+      orderedToBaseCechZeroExtensionF π M U n ≫ p = 0 := by
+    dsimp only [p]
+    exact orderedToBaseCechZeroExtensionF_comp_π_of_not_strictMono
+      π M U n (i ∘ σ) hmono
+  have hpost :
+      orderedToBaseCechZeroExtensionF π M U n ≫ (p ≫ r) = 0 := by
+    calc
+      orderedToBaseCechZeroExtensionF π M U n ≫ (p ≫ r) =
+          (orderedToBaseCechZeroExtensionF π M U n ≫ p) ≫ r :=
+        (Category.assoc _ _ _).symm
+      _ = 0 := by rw [hz, zero_comp]
+  rw [hpost, smul_zero]
 
 theorem baseCechPermutationF_one
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
