@@ -7,10 +7,9 @@ public import Mathlib.NumberTheory.NumberField.Ideal.Basic
 /-!
 # The cyclotomic Frobenius as a norm residue, and Frobenii generate
 
-Two arithmetic inputs of the Frobenius-fibre equidistribution (Gap B / L2), placed *below*
-`ZetaProduct.lean` in the import order (the lemma `cyclotomic_frobenius_acts_as_norm_power`
-currently lives in `Cyclotomic.lean`, which imports `ZetaProduct.lean` — the relevant content
-is (re)stated here so that `ZetaProduct.lean` can consume it without an import cycle).
+Two arithmetic inputs of the Frobenius-fibre equidistribution (Gap B / L2). This file is placed
+*below* `ZetaProduct.lean` in the import order so that `ZetaProduct.lean` can consume
+`cyclotomic_frobenius_acts_as_norm_power` (defined here) without an import cycle.
 
 * `autToPow_frobeniusClass_out`: for `L = K(μ_m)` and a prime `𝔭` of `K` unramified in `L`
   with `N𝔭` coprime to `m`, the image of the Frobenius under the (faithful) cyclotomic
@@ -67,7 +66,7 @@ theorem cyclotomic_frobenius_acts_as_norm_power
   set q := Ideal.absNorm 𝔭
   have h𝔭ne : 𝔭 ≠ ⊥ := UnramifiedIn.ne_bot K L hunr
   have hcopP : (Ideal.absNorm 𝔓).Coprime m := by
-    rw [Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver 𝔓 𝔭 ‹𝔭.IsPrime› h𝔭ne]
+    rw [Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver 𝔓 𝔭 ‹𝔭.IsPrime› h𝔭ne]
     exact Nat.Coprime.pow_left _ hcop
   have hN1 : Ideal.absNorm 𝔓 ≠ 1 := fun h ↦ ‹𝔓.IsPrime›.ne_top (Ideal.absNorm_eq_one_iff.mp h)
   have hmnotmem : (m : 𝓞 L) ∉ 𝔓 := by
@@ -93,6 +92,7 @@ private theorem pow_natModEq_of_pow_eq {S : Type*} [CommRing S] [IsDomain S] {μ
     [NeZero n] (hμ : IsPrimitiveRoot μ n) {a b : ℕ} (h : μ ^ a = μ ^ b) : a ≡ b [MOD n] :=
   hμ.eq_orderOf ▸ (hμ.isOfFinOrder (NeZero.ne n)).pow_eq_pow_iff_modEq.mp h
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The cyclotomic Frobenius is the norm residue** (multiplicative form). For `L = K(μ_m)`,
 a primitive `m`-th root `ζ` of unity in `L`, and a prime `𝔭` of `K` unramified in `L` with
 `N𝔭` coprime to `m`, the cyclotomic character `IsPrimitiveRoot.autToPow` sends the Frobenius
@@ -202,6 +202,7 @@ private theorem unramifiedIn_intermediateField
     hunr.2 𝔓 (h𝔓prime.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hunr.1 𝔓)) inferInstance
   exact Algebra.IsUnramifiedAt.of_liesOver (𝓞 K) 𝔮 𝔓
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Step (A): a Frobenius-trivial prime splits completely.** For `F = fixedField H` with `H`
 abelian (hence normal) and a nonzero prime `𝔭` of `𝓞 K` unramified in `L` whose Frobenius
 representative lies in `H`, the `F`-Frobenius class of `𝔭` is trivial: `frobeniusClass K F 𝔭 = [1]`.
@@ -304,7 +305,7 @@ private theorem card_primesOver_fixedField_eq_finrank
 /-- **Step (A), norm form.** For `F = fixedField H` with the hypotheses of
 `frobeniusClass_fixedField_eq_one`, every prime `𝔮` of `𝓞 F` above `𝔭` has `N𝔮 = N𝔭`. Follows from
 the inertia degree `f(𝔮 ∣ 𝔭) = 1` (`finrank_residue_fixedField_eq_one`) via
-`Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver`. -/
+`Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver`. -/
 private theorem absNorm_eq_of_liesOver_fixedField
     (K L : Type*) [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] [IsGalois K L]
     [IsMulCommutative Gal(L/K)] (H : Subgroup Gal(L/K))
@@ -323,11 +324,11 @@ private theorem absNorm_eq_of_liesOver_fixedField
   intro 𝔮 h𝔮p h𝔮lo
   haveI := h𝔮p
   haveI := h𝔮lo
-  have hinert : (𝔮.under (𝓞 K)).inertiaDeg 𝔮 = 1 := by
-    rw [Ideal.inertiaDeg_algebraMap]
+  have hinert : (𝔮.under (𝓞 K)).inertiaDeg' 𝔮 = 1 := by
+    rw [Ideal.inertiaDeg'_algebraMap]
     exact hresdeg 𝔮 h𝔮p h𝔮lo
   have hunder : 𝔮.under (𝓞 K) = 𝔭 := h𝔮lo.over.symm
-  rw [Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver 𝔮 (𝔮.under (𝓞 K)) inferInstance
+  rw [Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver 𝔮 (𝔮.under (𝓞 K)) inferInstance
     (hunder ▸ UnramifiedIn.ne_bot K L hunr), hinert, pow_one, hunder]
 
 /-! ### Coprime-restricted Frobenii generation

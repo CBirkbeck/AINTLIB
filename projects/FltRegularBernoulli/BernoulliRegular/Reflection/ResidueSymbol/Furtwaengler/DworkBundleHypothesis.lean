@@ -41,9 +41,17 @@ to obtain the bundle. The predicate is satisfied as soon as a
 * `DworkBundleHypothesis ℓ p k K R'` — `Nonempty (FullTeichDworkSetup ...)`,
   the named hypothesis at the bundle level.
 * `DworkBundleHypothesis.someBundle` — extract the underlying bundle.
+* `DworkBundleHypothesisWithCoverage ℓ p k K R'` — the hypothesis-level form
+  asserting the existence of a bundle whose `StickelbergerOrbitCoverage` holds.
 * `FullTeichDworkSetup.mk_of_components` — ergonomic explicit-named
   constructor for `FullTeichDworkSetup` taking each of the four Dwork-
   specific fields by name.
+
+## Main results
+
+* `stickelbergerIdealEquality_of_dworkBundleHypothesisWithCoverage` — from a
+  `DworkBundleHypothesisWithCoverage`, produce a `StickelbergerIdealEquality`
+  at the bundle's descent-prime ideal under `𝓞 K`.
 -/
 
 @[expose] public section

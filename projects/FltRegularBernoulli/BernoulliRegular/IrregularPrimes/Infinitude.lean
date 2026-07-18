@@ -36,7 +36,7 @@ theorem positiveResidue_properties
     rcases hpodd with ⟨k, hk⟩
     rw [hk]
     exact ⟨k, by omega⟩
-  have hne_zero : m % (p - 1) ≠ 0 := fun hzero =>
+  have hne_zero : m % (p - 1) ≠ 0 := fun hzero ↦
     hnot (Nat.dvd_iff_mod_eq_zero.mpr hzero)
   refine ⟨Nat.pos_of_ne_zero hne_zero, Nat.mod_lt _ hp_sub_pos,
     Even.mod_even hm_even hp_sub_even, ?_⟩
@@ -128,7 +128,7 @@ theorem dvd_bernoulli_div_self_num_of_dvd_bernoulli_num
     simp
   have hmInv_mul_Qp :
       ((m : ℕ) : ℚ_[p]) * ((mInv : ℤ_[p]) : ℚ_[p]) = 1 := by
-    simpa using congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) hmInv_mul
+    simpa using congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) hmInv_mul
   apply prime_dvd_num_of_padic_eq_p_mul (p := p)
     (q := ((bernoulli m : ℚ) / (m : ℕ) : ℚ))
   refine ⟨b * mInv, ?_⟩
@@ -220,7 +220,7 @@ theorem exists_numerator_prime_for_constructed_m (S : Finset ℕ) :
     (even_irregularBase S).mul_right _
   have hsub_not : ¬ (p - 1) ∣ irregularBase S * 2 ^ t :=
     sub_one_not_dvd_of_dvd_num_bernoulli_div_self hp hm_pos hm_even hnum
-  have hp_odd : p ≠ 2 := fun hp2 =>
+  have hp_odd : p ≠ 2 := fun hp2 ↦
     hsub_not (by simp [hp2])
   exact ⟨t, p, hp, hnum, hp_not_mem, hp_not_dvd_m, hsub_not, hp_odd⟩
 

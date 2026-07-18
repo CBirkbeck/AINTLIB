@@ -42,8 +42,9 @@ theorem natCast_mem_Q_pow_factorization_mul_pred (c : ℕ) :
   · have hp : Nat.Prime ℓ := Fact.out
     have hdvd : ℓ ^ c.factorization ℓ ∣ c :=
       (hp.pow_dvd_iff_le_factorization hc).2 le_rfl
-    let T := F.toConductorFlexibleTraceFormStickelbergerSetup
-    exact T.natCast_mem_Q_pow_mul_pred_of_ell_pow_dvd hdvd
+    exact
+      F.toConductorFlexibleTraceFormStickelbergerSetup.natCast_mem_Q_pow_mul_pred_of_ell_pow_dvd
+        hdvd
 
 theorem natCast_mul_mem_Q_pow_factorization_mul_pred_add {c e : ℕ} {z : 𝓞 R'}
     (hz : z ∈ F.Q ^ e) :
@@ -99,7 +100,7 @@ theorem finiteLogNatDivNumerator_spec {n s : ℕ} {z : 𝓞 R'}
         F.finiteLogNatDivNumerator n s z hz =
       (F.finiteLogNatDivDenom n s z hz : 𝓞 R') * z ∧
     F.finiteLogNatDivNumerator n s z hz ∈ F.Q ^ s := by
-  unfold finiteLogNatDivNumerator finiteLogNatDivDenom
+  simp only [finiteLogNatDivNumerator, finiteLogNatDivDenom]
   exact Classical.choose_spec
     (Classical.choose_spec
       (F.exists_primeCompl_natCast_ell_pow_denom_of_mem_Q_pow
@@ -839,7 +840,7 @@ theorem finiteLog_eq_finiteLogLocalizedPolynomial (N : ℕ)
     {x : 𝓞 R'} (hx : x ∈ F.Q) :
     F.finiteLog N x hx = F.finiteLogLocalizedPolynomial N x hx := by
   classical
-  unfold finiteLog finiteLogLocalizedPolynomial
+  simp only [finiteLog, finiteLogLocalizedPolynomial]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   by_cases hn0 : n = 0

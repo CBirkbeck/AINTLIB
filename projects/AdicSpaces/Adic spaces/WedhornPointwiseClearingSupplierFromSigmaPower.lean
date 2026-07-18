@@ -106,9 +106,7 @@ intermediate at every call site.
 namespace ValuationSpectrum
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
-  [IsTopologicalRing A]
 
-omit [IsTopologicalRing A] in
 /-- **Pointwise clearing supplier via uniform σ-power data**
 (T079 main adapter; T077 input shape).
 
@@ -155,7 +153,6 @@ theorem pointwise_clearing_supplier_via_sigma_power_source_restricted
     pointwise_clearing_supplier_via_pow_cancellation s D_s f t'
       (h_pow_chain t' ht')
 
-omit [IsTopologicalRing A] in
 /-- **Direct upper bound supplier via σ-power-cleared inequality
 supplier** (T079 + T077 composition).
 
@@ -187,7 +184,6 @@ theorem direct_upper_bound_supplier_via_sigma_power_source_restricted
     (pointwise_clearing_supplier_via_sigma_power_source_restricted
       D_T s D_s f h_pow_chain)
 
-omit [IsTopologicalRing A] in
 /-- **`SigmaProductClearedInequalitySupplier` via σ-power-cleared
 inequality supplier** (T079 + T077 + T073 end-to-end direct lane).
 

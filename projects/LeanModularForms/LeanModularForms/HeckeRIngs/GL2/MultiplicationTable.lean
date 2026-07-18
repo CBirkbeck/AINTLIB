@@ -455,11 +455,11 @@ private lemma heckeMultiplicity_values (k : ℕ) (hk : 0 < k) :
       exact D_out1_pp_in_mulSupport p hp k hk
     exact Int.lt_iff_add_one_le.mp (lt_of_le_of_ne
       (HeckeRing.heckeMultiplicity_nonneg ..) (Ne.symm hne))
-  rw [show HeckeCoset_deg (GL_pair 2) D1 = ↑(p + 1) from by
+  rw [show HeckeCoset_deg (GL_pair 2) D1 = ↑(p + 1) by
         simpa using HeckeCoset_deg_T_diag_one_ppow p hp 1 one_pos,
     show HeckeCoset_deg (GL_pair 2) D2 = ↑(p ^ (k - 1) * (p + 1)) from
       HeckeCoset_deg_T_diag_one_ppow p hp k hk,
-    show HeckeCoset_deg (GL_pair 2) D_out1 = ↑(p ^ k * (p + 1)) from by
+    show HeckeCoset_deg (GL_pair 2) D_out1 = ↑(p ^ k * (p + 1)) by
       simpa using HeckeCoset_deg_T_diag_one_ppow p hp (k + 1) (by omega)] at h_deg
   have hp2 : (2 : ℤ) ≤ p := mod_cast hp.two_le
   by_cases hk1 : k = 1
@@ -577,14 +577,14 @@ private lemma T_sum_ppow_recurrence_step (k : ℕ) (hk_pos : 0 < k)
   rw [smul_sub,
     ← mul_assoc (T_sum ⟨p, hp.pos⟩) (T_pp p)
       (T_sum ⟨p ^ k, pow_pos hp.pos k⟩),
-    show T_sum ⟨p, hp.pos⟩ * T_pp p = T_pp p * T_sum ⟨p, hp.pos⟩ from by
+    show T_sum ⟨p, hp.pos⟩ * T_pp p = T_pp p * T_sum ⟨p, hp.pos⟩ by
     rw [T_sum_prime p hp]; exact (T_pp_comm_T_ad_one_p p hp).symm,
     mul_assoc (T_pp p) (T_sum ⟨p, hp.pos⟩)
       (T_sum ⟨p ^ k, pow_pos hp.pos k⟩),
     show T_sum ⟨p, hp.pos⟩ * T_sum ⟨p ^ k, pow_pos hp.pos k⟩ =
       T_sum ⟨p ^ (k + 1), pow_pos hp.pos (k + 1)⟩ +
       (↑p : ℤ) • (T_pp p *
-        T_sum ⟨p ^ (k - 1), pow_pos hp.pos (k - 1)⟩) from by
+        T_sum ⟨p ^ (k - 1), pow_pos hp.pos (k - 1)⟩) by
     rw [ih k (by omega) hk_pos]; abel,
     mul_add (T_pp p), mul_smul_comm (↑p : ℤ),
     ← mul_assoc (T_pp p) (T_pp p), sub_eq_iff_eq_add] at h5
@@ -613,7 +613,7 @@ theorem T_sum_ppow_recurrence : ∀ k : ℕ, 0 < k →
       by congr 1; exact Subtype.ext (pow_one p)]
     rw [T_ad_one_ppow_one, T_sum_prime p hp] at h5
     rw [T_sum_prime p hp]
-    rw [show (↑(p + 1) : ℤ) • T_pp p = (↑p : ℤ) • T_pp p + T_pp p from by
+    rw [show (↑(p + 1) : ℤ) • T_pp p = (↑p : ℤ) • T_pp p + T_pp p by
       rw [show (↑(p + 1) : ℤ) = (↑p : ℤ) + 1 by push_cast; ring,
         add_smul, one_smul]] at h5
     linear_combination (norm := module) -h5
@@ -994,15 +994,14 @@ private lemma T_sum_mul_peel_prime_summand_rhs (q : ℕ) (hq : q.Prime) (a b : �
     T_sum_nat (q ^ a * ↑m' * (q ^ b * ↑n') / (q ^ i * d' * (q ^ i * d')))
   rw [show (⟨q ^ (r + s - 2 * i), pow_pos hq.pos _⟩ : ℕ+).val = q ^ (r + s - 2 * i) by rfl,
     show T_sum_nat (q ^ (r + s - 2 * i)) * T_sum_nat (↑m' * ↑n' / (d' * d')) =
-    T_sum_nat (q ^ (r + s - 2 * i) * (↑m' * ↑n' / (d' * d'))) from by
-      change T_sum ⟨_, pow_pos hq.pos _⟩ * T_sum ⟨_, h_quot_pos⟩ = _
-      rw [T_sum_mul_coprime _ _ ((Nat.Prime.coprime_pow_of_not_dvd hq hq_ndvd_quot).symm)]
-      rfl]
+    T_sum_nat (q ^ (r + s - 2 * i) * (↑m' * ↑n' / (d' * d'))) by
+      exact (T_sum_mul_coprime ⟨_, pow_pos hq.pos _⟩ ⟨_, h_quot_pos⟩
+        ((Nat.Prime.coprime_pow_of_not_dvd hq hq_ndvd_quot).symm)).trans rfl]
   congr 1
   have hrs_eq : r + s = a + b := by omega
   rw [hrs_eq, show q ^ i * d' * (q ^ i * d') = q ^ (2 * i) * (d' * d') by ring,
     show q ^ a * ↑m' * (q ^ b * ↑n') = q ^ (a + b) * (↑m' * ↑n') by ring,
-    show q ^ (a + b) = q ^ (a + b - 2 * i) * q ^ (2 * i) from by
+    show q ^ (a + b) = q ^ (a + b - 2 * i) * q ^ (2 * i) by
       rw [← pow_add]; congr 1; omega,
     show q ^ (a + b - 2 * i) * q ^ (2 * i) * (↑m' * ↑n') =
       q ^ (2 * i) * (q ^ (a + b - 2 * i) * (↑m' * ↑n')) by ring,
@@ -1127,7 +1126,7 @@ theorem T_sum_mul (m n : ℕ+) : T_sum m * T_sum n =
         Subtype.ext hm_eq,
       show n = ⟨q ^ b_ord * n', Nat.mul_pos (pow_pos hq.pos b_ord) n'.pos⟩ from
         Subtype.ext hn_eq,
-      show g = Nat.gcd (q ^ a_ord * ↑m') (q ^ b_ord * ↑n') from by
+      show g = Nat.gcd (q ^ a_ord * ↑m') (q ^ b_ord * ↑n') by
         rw [← h_gcd, ← hm_eq, ← hn_eq]]
     convert T_sum_mul_peel_prime_aux q hq a_ord b_ord ha hb m' n' hqm' hqn'
       (ih _ h_smaller m' n' rfl) using 2 with d _

@@ -44,6 +44,12 @@ namespace HeckeRing.GL2
 noncomputable def glMap : GL (Fin 2) ℚ →* GL (Fin 2) ℝ :=
   GeneralLinearGroup.map (algebraMap ℚ ℝ)
 
+/-- Entrywise description of `glMap`: it applies `algebraMap ℚ ℝ` to each matrix entry. -/
+lemma glMap_apply (g : GL (Fin 2) ℚ) (i j : Fin 2) :
+    (glMap g : Matrix (Fin 2) (Fin 2) ℝ) i j =
+      algebraMap ℚ ℝ ((g : Matrix (Fin 2) (Fin 2) ℚ) i j) :=
+  rfl
+
 /-- Slash action on `GL₂(ℚ)` induced from `GL₂(ℝ)` via the embedding `ℚ ↪ ℝ`.
     Satisfies `f ∣[k] g = f ∣[k] glMap g` definitionally. -/
 noncomputable scoped instance : SlashAction ℤ (GL (Fin 2) ℚ) (ℍ → ℂ) :=

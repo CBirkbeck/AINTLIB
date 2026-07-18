@@ -87,17 +87,13 @@ theorem locTopology_algebraMap_continuous
   intro n _
   refine ⟨n, trivial, ?_⟩
   rintro a ⟨b, hb, rfl⟩
-  -- Goal: algebraMap (P.A₀.subtype b) ∈ locNhd P T s n.
-  -- Identify algebraMap (b : A) with (algebraMapD P T s b : Localization.Away s).
   have heq : algebraMap A (Localization.Away s) ((P.A₀.subtype) b) =
       ((algebraMapD P T s b : locSubring P T s) : Localization.Away s) := by
     rfl
   change algebraMap A (Localization.Away s) ((P.A₀.subtype) b) ∈
     (locNhd P T s n : Set (Localization.Away s))
   rw [heq]
-  -- Use locNhd = image of (locIdeal)^n via subtype embedding.
   refine ⟨algebraMapD P T s b, ?_, rfl⟩
-  -- Goal: algebraMapD P T s b ∈ (locIdeal P T s)^n
   rw [locIdeal, ← Ideal.map_pow]
   exact Ideal.mem_map_of_mem _ hb
 

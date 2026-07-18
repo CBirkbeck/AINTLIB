@@ -90,7 +90,7 @@ omit [IsLinearTopology A A] in
 theorem exists_mem_I_not_mem_of_not_isOpen (P : PairOfDefinition A) {𝔭 : Ideal A} [𝔭.IsPrime]
     (h : ¬IsOpen (𝔭 : Set A)) : ∃ a ∈ P.I, (P.A₀.subtype a : A) ∉ 𝔭 := by
   by_contra h_all
-  push_neg at h_all
+  push Not at h_all
   exact P.idealOfDefinition_not_le_of_not_isOpen h
     (Ideal.map_le_iff_le_comap.mpr fun a ha ↦ h_all a ha)
 

@@ -21,9 +21,6 @@ non-trivial even characters.
 * `cyclotomicUnitFreePartPadicCharacterEigenspace_finrank_omega32_FLT37`:
   V_37^(ω³²) is a free ℤ_37-module of rank 1.
 
-## References
-
-* Reviewer guidance, 2026-05-07 (Q1 atomic rank-one specialisation).
 -/
 
 noncomputable section
@@ -99,12 +96,12 @@ theorem cyclotomicUnitFreePartPadicCharacterEigenspace_finrank_omega32_FLT37 :
     Module.finrank ℤ_[37]
         (cyclotomicUnitFreePartPadicCharacterEigenspace (p := 37)
           (CyclotomicField 37 ℚ) (cyclotomicOmegaPadicChar (p := 37) 32)) = 1 := by
-  letI : Fintype {w : NumberField.InfinitePlace (CyclotomicField 37 ℚ) //
+  let : Fintype {w : NumberField.InfinitePlace (CyclotomicField 37 ℚ) //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := Fintype.ofFinite _
-  letI : DiscreteTopology
+  let : DiscreteTopology
       (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) :=
     NumberField.Units.instDiscrete_unitLattice (CyclotomicField 37 ℚ)
-  letI : IsZLattice ℝ
+  let : IsZLattice ℝ
       (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) := by
     refine ⟨?_⟩
     convert NumberField.Units.dirichletUnitTheorem.unitLattice_span_eq_top
@@ -156,7 +153,7 @@ theorem flt37_atomic_rankOne_omega32
         (CyclotomicField 37 ℚ) (cyclotomicOmegaPadicChar (p := 37) 32)) ⧸
         Submodule.span ℤ_[37] ({c} : Set _),
       ((37 : ℕ) : ℤ_[37]) • x = 0 → x = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hp_prime : Prime ((37 : ℕ) : ℤ_[37]) := by
     rw [show ((37 : ℕ) : ℤ_[37]) = (37 : ℤ_[37]) from by push_cast; rfl]
     exact PadicInt.prime_p (p := 37)
@@ -203,7 +200,7 @@ theorem flt37_pollaczekUnit_padic_eigenspace_class_red
         (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
           (pollaczekUnit 37 (CyclotomicField 37 ℚ) 32))) := by
   classical
-  letI : Invertible ((Fintype.card (CyclotomicUnitDelta 37) : ZMod 37)) :=
+  let : Invertible ((Fintype.card (CyclotomicUnitDelta 37) : ZMod 37)) :=
     cyclotomicUnitDeltaCardInvertibleZMod (p := 37) (by norm_num : 2 < 37)
   change cyclotomicUnitFreePartPadicReduceModP (p := 37) (CyclotomicField 37 ℚ)
     (cyclotomicUnitFreePartPadicCharacterProjector (p := 37) (CyclotomicField 37 ℚ)
@@ -217,7 +214,7 @@ theorem flt37_pollaczekUnit_padic_eigenspace_class_red
   rw [cyclotomicUnitFreePartPadicReduceModP_one_tmul]
   -- Goal: cyclotomicUnitFreePartModPDeltaCharacterProjector (padicToZMod ω³²)
   --   (cyclotomicUnitFreePartModPClass [PU]) = cyclotomicUnitFreePartModPClass [PU]
-  unfold cyclotomicUnitFreePartModPDeltaCharacterProjector
+  simp only [cyclotomicUnitFreePartModPDeltaCharacterProjector]
   rw [padicToZMod_cyclotomicOmegaPadicChar]
   exact characterProjector_apply_of_mem_eigenspace
     (cyclotomicUnitFreePartModPDeltaRepresentation (p := 37) (CyclotomicField 37 ℚ))

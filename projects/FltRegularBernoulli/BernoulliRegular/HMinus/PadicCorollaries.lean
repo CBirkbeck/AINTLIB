@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.Bernoulli
@@ -49,7 +54,7 @@ lemma neg_one_half_mem_padicInt (hp_odd' : p ≠ 2) :
   have hunit_mul : ((((h2_unit.unit⁻¹ : (ℤ_[p])ˣ).val : ℤ_[p]) : ℚ_[p])) * (2 : ℚ_[p]) = 1 := by
     have h2_spec : ((h2_unit.unit : (ℤ_[p])ˣ) : ℤ_[p]) = 2 := h2_unit.unit_spec
     have h2_specQ : ((((h2_unit.unit : (ℤ_[p])ˣ).val : ℤ_[p]) : ℚ_[p])) = (2 : ℚ_[p]) :=
-      congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) h2_spec
+      congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) h2_spec
     rw [← h2_specQ]
     change (((((h2_unit.unit⁻¹ : (ℤ_[p])ˣ) * h2_unit.unit).val : ℤ_[p]) : ℚ_[p])) = 1
     simp
@@ -72,7 +77,7 @@ lemma prod_eq_prod_add_p_mul
       obtain ⟨za, hza⟩ := hfg a (by simp)
       have hs : ∀ b ∈ s, ∃ z : ℤ_[p],
           f b = (g b : ℚ_[p]) + (p : ℚ_[p]) * (z : ℚ_[p]) :=
-        fun b hb => hfg b (by simp [hb])
+        fun b hb ↦ hfg b (by simp [hb])
       obtain ⟨zs, hzs⟩ := ih hs
       let w : ℤ_[p] := g a * zs + za * (∏ b ∈ s, g b) + (p : ℤ_[p]) * za * zs
       refine ⟨w, ?_⟩
@@ -89,6 +94,52 @@ lemma prod_eq_prod_add_p_mul
               (p : ℚ_[p]) * (w : ℚ_[p]) := by
                 simp [ha]
 
+/-- Splitting off the top odd index: for an odd `n`, the odd elements of
+`range (n + 1)` are `n` together with the odd elements of `range n`. This is the
+Finset identity used to separate the boundary factor `j = p - 2` from the
+remaining odd Teichmüller characters. -/
+theorem filter_odd_range_add_one {n : ℕ} (hn : Odd n) :
+    ((Finset.range (n + 1)).filter fun j ↦ Odd j) =
+      insert n ((Finset.range n).filter fun j ↦ Odd j) := by
+  rw [Finset.range_add_one, Finset.filter_insert, if_pos hn]
+
+/-- The per-index factorisation underlying Diekmann's page 51: for an odd index
+`j` in the range `j < p - 2`, the `p`-adic term `(-1/2) · B_{1,ω^j}` is the image
+of a `p`-adic integer. This packages the boundedness of a single Teichmüller
+factor, obtained by combining `exists_padicInt_bernoulli_factor` with the
+Bernoulli-quotient congruence `bernoulliGen_teichmuller_pow_sModEq_div`. -/
+theorem exists_padicInt_neg_half_mul_bernoulliGen (hp_odd' : p ≠ 2)
+    {j : ℕ} (hj_odd : Odd j) (hj_lt : j < p - 2) :
+    ∃ a : ℤ_[p],
+      (a : ℚ_[p]) = (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1 := by
+  have hp_gt : 2 < p := lt_of_le_of_ne hp.out.two_le (Ne.symm hp_odd')
+  obtain ⟨c, hc⟩ := neg_one_half_mem_padicInt (p := p) hp_odd'
+  have hj_pos : 0 < j := by
+    obtain ⟨k, hk⟩ := hj_odd
+    omega
+  have hj_not_dvd : ¬ (p - 1) ∣ (j + 1) := by
+    refine Nat.not_dvd_of_pos_of_lt (by omega) ?_
+    omega
+  have hj_p_plus : ¬ (p : ℕ) ∣ (j + 1) :=
+    Nat.not_dvd_of_pos_of_lt (by omega) (by omega)
+  have hj_p_plus_two : ¬ (p : ℕ) ∣ (j + 2) :=
+    Nat.not_dvd_of_pos_of_lt (by omega) (by omega)
+  obtain ⟨a₀, ha₀, _⟩ := exists_padicInt_bernoulli_factor
+    (p := p) (hp := hp) (n := j + 1) hp_odd' (by omega) (by omega)
+    (BernoulliRegular.prime_not_dvd_bernoulli_den_of_lt_sub_one
+      (p := p) (n := j + 1) (hp := hp) hp_odd' (by omega))
+  obtain ⟨z, hz⟩ := bernoulliGen_teichmuller_pow_sModEq_div
+    (p := p) hp_odd' hj_odd hj_pos hj_not_dvd hj_p_plus hj_p_plus_two
+    (by omega : j + 1 < p - 1)
+  have hz' : BernoulliGen ((teichmullerCharQp p) ^ j) 1 =
+      ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p])) +
+        (p : ℚ_[p]) * (z : ℚ_[p]) := by
+    rw [sub_eq_iff_eq_add] at hz
+    simpa [add_comm] using hz
+  refine ⟨a₀ + (p : ℤ_[p]) * (c * z), ?_⟩
+  rw [PadicInt.coe_add, PadicInt.coe_mul, PadicInt.coe_mul, ha₀, hc, hz']
+  simp [mul_add, mul_comm, mul_left_comm, mul_assoc, add_comm]
+
 /-- Diekmann page 51, first displayed congruence after equation (32): after
 separating off the boundary factor `j = p - 2`, the relative class number is
 congruent modulo `p` to the product over the remaining odd Teichmüller
@@ -103,89 +154,48 @@ boundary-factor congruence from Diekmann's page 51. -/
 theorem hMinus_formula_teichmuller_mod_p (hp_odd' : p ≠ 2) :
     ∃ z : ℤ_[p],
       ((hMinus K : ℕ) : ℚ_[p]) =
-        Finset.prod ((Finset.range (p - 2)).filter fun j => Odd j) (fun j =>
+        Finset.prod ((Finset.range (p - 2)).filter fun j ↦ Odd j) (fun j ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) +
         (p : ℚ_[p]) * (z : ℚ_[p]) := by
   have hp_gt : 2 < p := lt_of_le_of_ne hp.out.two_le (Ne.symm hp_odd')
-  obtain ⟨c, hc⟩ := neg_one_half_mem_padicInt (p := p) hp_odd'
-  let S := (Finset.range (p - 2)).filter fun j => Odd j
+  let S := (Finset.range (p - 2)).filter fun j ↦ Odd j
   have hfactor :
       ∀ j ∈ S,
         ∃ a : ℤ_[p],
-          (a : ℚ_[p]) = (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1 := by
-    intro j hj
-    have hj_lt : j < p - 2 := Finset.mem_range.mp (Finset.mem_filter.mp hj).1
-    have hj_odd : Odd j := (Finset.mem_filter.mp hj).2
-    have hj_pos : 0 < j := by
-      obtain ⟨k, hk⟩ := hj_odd
-      omega
-    have hj_not_dvd : ¬ (p - 1) ∣ (j + 1) := by
-      refine Nat.not_dvd_of_pos_of_lt (by omega) ?_
-      omega
-    have hj_p_plus : ¬ (p : ℕ) ∣ (j + 1) :=
-      Nat.not_dvd_of_pos_of_lt (by omega) (by omega)
-    have hj_p_plus_two : ¬ (p : ℕ) ∣ (j + 2) :=
-      Nat.not_dvd_of_pos_of_lt (by omega) (by omega)
-    obtain ⟨a₀, ha₀, _⟩ := exists_padicInt_bernoulli_factor
-      (p := p) (hp := hp) (n := j + 1) hp_odd' (by omega) (by omega)
-      (BernoulliRegular.prime_not_dvd_bernoulli_den_of_lt_sub_one
-        (p := p) (n := j + 1) (hp := hp) hp_odd' (by omega))
-    obtain ⟨z, hz⟩ := bernoulliGen_teichmuller_pow_sModEq_div
-      (p := p) hp_odd' hj_odd hj_pos hj_not_dvd hj_p_plus hj_p_plus_two
-      (by omega : j + 1 < p - 1)
-    have hz' : BernoulliGen ((teichmullerCharQp p) ^ j) 1 =
-        ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p])) +
-          (p : ℚ_[p]) * (z : ℚ_[p]) := by
-      rw [sub_eq_iff_eq_add] at hz
-      simpa [add_comm] using hz
-    refine ⟨a₀ + (p : ℤ_[p]) * (c * z), ?_⟩
-    rw [PadicInt.coe_add, PadicInt.coe_mul, PadicInt.coe_mul, ha₀, hc, hz']
-    simp [mul_add, mul_comm, mul_left_comm, mul_assoc, add_comm]
+          (a : ℚ_[p]) = (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1 :=
+    fun j hj ↦ exists_padicInt_neg_half_mul_bernoulliGen (p := p) hp_odd'
+      (Finset.mem_filter.mp hj).2 (Finset.mem_range.mp (Finset.mem_filter.mp hj).1)
   classical
-  let a : ℕ → ℤ_[p] := fun j => if hj : j ∈ S then Classical.choose (hfactor j hj) else 1
+  let a : ℕ → ℤ_[p] := fun j ↦ if hj : j ∈ S then Classical.choose (hfactor j hj) else 1
   let A : ℤ_[p] := ∏ j ∈ S, a j
   have hA_cast :
       (A : ℚ_[p]) =
-        Finset.prod S (fun j =>
+        Finset.prod S (fun j ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) := by
     calc
       (A : ℚ_[p]) = ∏ j ∈ S, ((a j : ℤ_[p]) : ℚ_[p]) := by
         dsimp [A]
         change (algebraMap ℤ_[p] ℚ_[p]) (∏ j ∈ S, a j) = ∏ j ∈ S, (algebraMap ℤ_[p] ℚ_[p]) (a j)
         rw [map_prod]
-      _ = Finset.prod S (fun j =>
+      _ = Finset.prod S (fun j ↦
             (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) := by
-          refine Finset.prod_congr rfl fun j hj => ?_
+          refine Finset.prod_congr rfl fun j hj ↦ ?_
           simpa [a, hj] using (Classical.choose_spec (hfactor j hj))
-  have hp_sub_two_odd : Odd (p - 2) := by
-    obtain ⟨k, hk⟩ := hp.out.odd_of_ne_two hp_odd'
-    refine ⟨k - 1, ?_⟩
-    rw [hk]
-    omega
-  have hsplit : ((Finset.range (p - 1)).filter fun j => Odd j) = insert (p - 2) S := by
-    ext j
-    rw [Finset.mem_filter, Finset.mem_range, Finset.mem_insert,
-      show j ∈ S ↔ j < p - 2 ∧ Odd j by
-        dsimp [S]
-        rw [Finset.mem_filter, Finset.mem_range]]
-    constructor
-    · intro h
-      by_cases hj : j = p - 2
-      · exact Or.inl hj
-      · exact Or.inr ⟨by omega, h.2⟩
-    · intro h
-      rcases h with rfl | h
-      · exact ⟨by omega, hp_sub_two_odd⟩
-      · exact ⟨by omega, h.2⟩
+  have hp_sub_two_odd : Odd (p - 2) :=
+    Nat.Odd.sub_even (by omega) (hp.out.odd_of_ne_two hp_odd') (by decide)
+  have hsplit : ((Finset.range (p - 1)).filter fun j ↦ Odd j) = insert (p - 2) S := by
+    have hpe : p - 1 = (p - 2) + 1 := by omega
+    rw [hpe]
+    exact filter_odd_range_add_one hp_sub_two_odd
   obtain ⟨z₀, hz₀⟩ := boundary_teichmuller_factor_eq_one_add_p_mul (p := p) hp_odd'
   refine ⟨A * z₀, ?_⟩
   calc
     ((hMinus K : ℕ) : ℚ_[p])
         = (2 * p : ℚ_[p]) *
-            Finset.prod ((Finset.range (p - 1)).filter fun j => Odd j)
-              (fun j => (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) :=
+            Finset.prod ((Finset.range (p - 1)).filter fun j ↦ Odd j)
+              (fun j ↦ (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) :=
           hMinus_formula_teichmuller (p := p) (K := K) hp_odd'
-    _ = (Finset.prod S (fun j =>
+    _ = (Finset.prod S (fun j ↦
             (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1)) *
           ((2 * p : ℚ_[p]) * (-(1 / 2 : ℚ_[p])) *
             BernoulliGen ((teichmullerCharQp p) ^ (p - 2)) 1) := by
@@ -196,7 +206,7 @@ theorem hMinus_formula_teichmuller_mod_p (hp_odd' : p ≠ 2) :
     _ = (A : ℚ_[p]) + (p : ℚ_[p]) * ((A * z₀ : ℤ_[p]) : ℚ_[p]) := by
           push_cast
           ring
-    _ = Finset.prod S (fun j =>
+    _ = Finset.prod S (fun j ↦
           (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) +
           (p : ℚ_[p]) * ((A * z₀ : ℤ_[p]) : ℚ_[p]) := by rw [hA_cast]
 
@@ -213,13 +223,13 @@ Theorem 42. -/
 theorem hMinus_formula_bernoulli_mod_p (hp_odd' : p ≠ 2) :
     ∃ z : ℤ_[p],
       ((hMinus K : ℕ) : ℚ_[p]) =
-        Finset.prod ((Finset.range (p - 2)).filter fun j => Odd j) (fun j =>
+        Finset.prod ((Finset.range (p - 2)).filter fun j ↦ Odd j) (fun j ↦
           (-(1 / 2 : ℚ_[p])) *
             ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p]))) +
         (p : ℚ_[p]) * (z : ℚ_[p]) := by
   obtain ⟨z₀, hz₀⟩ := hMinus_formula_teichmuller_mod_p (p := p) (K := K) hp_odd'
   obtain ⟨c, hc⟩ := neg_one_half_mem_padicInt (p := p) hp_odd'
-  let S := (Finset.range (p - 2)).filter fun j => Odd j
+  let S := (Finset.range (p - 2)).filter fun j ↦ Odd j
   have hfactor :
       ∀ j ∈ S,
         ∃ a : ℤ_[p],
@@ -233,7 +243,7 @@ theorem hMinus_formula_bernoulli_mod_p (hp_odd' : p ≠ 2) :
         (p := p) (n := j + 1) (hp := hp) hp_odd' (by omega))
     exact ⟨a, by simpa [Nat.cast_add, Nat.cast_one] using ha⟩
   classical
-  let a : ℕ → ℤ_[p] := fun j =>
+  let a : ℕ → ℤ_[p] := fun j ↦
     if hj : j ∈ S then Classical.choose (hfactor j hj) else 1
   have ha_cast :
       ∀ j ∈ S,
@@ -279,10 +289,10 @@ theorem hMinus_formula_bernoulli_mod_p (hp_odd' : p ≠ 2) :
             rw [ha_cast j hj, PadicInt.coe_mul, hc]
             ring
   obtain ⟨z₁, hz₁⟩ := prod_eq_prod_add_p_mul (p := p) S
-    (fun j => (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) a hbridge
+    (fun j ↦ (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) a hbridge
   have hA_cast :
       (((∏ j ∈ S, a j : ℤ_[p]) : ℤ_[p]) : ℚ_[p]) =
-        Finset.prod S (fun j =>
+        Finset.prod S (fun j ↦
           (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p]))) := by
     change (algebraMap ℤ_[p] ℚ_[p]) (∏ j ∈ S, a j) = _
     rw [map_prod]
@@ -290,12 +300,12 @@ theorem hMinus_formula_bernoulli_mod_p (hp_odd' : p ≠ 2) :
   refine ⟨z₁ + z₀, ?_⟩
   calc
     ((hMinus K : ℕ) : ℚ_[p]) =
-        Finset.prod S (fun j => (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) +
+        Finset.prod S (fun j ↦ (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) +
           (p : ℚ_[p]) * (z₀ : ℚ_[p]) := hz₀
     _ = (((∏ j ∈ S, a j : ℤ_[p]) : ℤ_[p]) : ℚ_[p]) +
           (p : ℚ_[p]) * (z₁ : ℚ_[p]) + (p : ℚ_[p]) * (z₀ : ℚ_[p]) := by
             rw [hz₁]
-    _ = Finset.prod S (fun j =>
+    _ = Finset.prod S (fun j ↦
           (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p]))) +
           (p : ℚ_[p]) * ((z₁ + z₀ : ℤ_[p]) : ℚ_[p]) := by
             rw [hA_cast]

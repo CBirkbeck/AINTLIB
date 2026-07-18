@@ -59,7 +59,7 @@ theorem canonicalResidueZetaP_units_galois_compat
         (canonicalResidueZetaP (p := p) (K := K) q) =
       (canonicalResidueZetaP (p := p) (K := K)
           (cyclotomicGaloisConjugate (p := p) (K := K) a q)) ^ (a : ZMod p).val := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   apply Units.ext
   -- Reduce to underlying ring elements.
   change (cyclotomicGaloisQuotientEquiv (p := p) (K := K) a q
@@ -216,8 +216,8 @@ theorem pthSymbolAtPrime_canonical_eq_primeExponent
       Reflection.ResidueSymbol.PowerResidue.primeExponent q
         (canonicalResidueZetaP (p := p) (K := K) q)
         (canonicalResidueZetaP_isPrimitiveRoot hbot hp_in) hdiv α hα := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero q := ⟨hbot⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero q := ⟨hbot⟩
   unfold pthSymbolAtPrime_canonical
   rw [dif_neg hbot, dif_pos hmax, dif_neg hα, dif_pos hdiv, dif_neg hp_in]
 
@@ -240,13 +240,13 @@ theorem pthSymbolAtPrime_canonical_eq_zero_of_residue_isPow
     (h_pow : ∃ y : (𝓞 K ⧸ q)ˣ,
       Reflection.ResidueSymbol.PowerResidue.quotientUnitOfNotMem q α hα = y ^ p) :
     pthSymbolAtPrime_canonical (p := p) (K := K) α q = 0 := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero q := ⟨hbot⟩
-  haveI hmax' : q.IsMaximal := hmax
-  haveI : q.IsPrime := hmax.isPrime
-  letI : Field (𝓞 K ⧸ q) := Ideal.Quotient.field q
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero q := ⟨hbot⟩
+  have hmax' : q.IsMaximal := hmax
+  have : q.IsPrime := hmax.isPrime
+  let : Field (𝓞 K ⧸ q) := Ideal.Quotient.field q
   rw [pthSymbolAtPrime_canonical_eq_primeExponent hbot hmax hα hdiv hp_in]
-  unfold Reflection.ResidueSymbol.PowerResidue.primeExponent
+  simp only [Reflection.ResidueSymbol.PowerResidue.primeExponent]
   exact Reflection.ResidueSymbol.PowerResidue.finiteFieldExponent_eq_zero_of_isPow
     _ (canonicalResidueZetaP_isPrimitiveRoot hbot hp_in) hdiv h_pow
 
@@ -260,16 +260,16 @@ theorem pthSymbolAtPrime_canonical_mul
     pthSymbolAtPrime_canonical (p := p) (K := K) (α * β) q =
       pthSymbolAtPrime_canonical (p := p) (K := K) α q +
         pthSymbolAtPrime_canonical (p := p) (K := K) β q := by
-  haveI : NeZero q := ⟨hbot⟩
-  haveI hqK_prime : q.IsPrime := hmax.isPrime
-  have hαβ : α * β ∉ q := fun h => (hqK_prime.mem_or_mem h).elim hα hβ
+  have : NeZero q := ⟨hbot⟩
+  have hqK_prime : q.IsPrime := hmax.isPrime
+  have hαβ : α * β ∉ q := fun h ↦ (hqK_prime.mem_or_mem h).elim hα hβ
   simp only [pthSymbolAtPrime_canonical, dif_neg hbot, dif_pos hmax, dif_neg hαβ,
     dif_neg hα, dif_neg hβ]
   split_ifs with hdiv hp_in
   · simp
   · -- Good case: apply primeExponent_mul.
-    haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-    haveI : q.IsMaximal := hmax
+    have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+    have : q.IsMaximal := hmax
     exact Reflection.ResidueSymbol.PowerResidue.primeExponent_mul q
       (canonicalResidueZetaP (p := p) (K := K) q)
       (canonicalResidueZetaP_isPrimitiveRoot hbot hp_in)
@@ -281,7 +281,7 @@ theorem pthSymbolAtPrime_canonical_mul
 theorem pthSymbolAtPrime_canonical_one
     {q : Ideal (𝓞 K)} (hbot : q ≠ ⊥) (hmax : q.IsMaximal) :
     pthSymbolAtPrime_canonical (p := p) (K := K) (1 : 𝓞 K) q = 0 := by
-  haveI hqp : q.IsPrime := hmax.isPrime
+  have hqp : q.IsPrime := hmax.isPrime
   have h1 : (1 : 𝓞 K) ∉ q := hqp.one_notMem
   have h := pthSymbolAtPrime_canonical_mul (p := p) (K := K)
     (α := (1 : 𝓞 K)) (β := 1) hbot hmax h1 h1
@@ -295,13 +295,13 @@ theorem pthSymbolAtPrime_canonical_pow
     (hbot : q ≠ ⊥) (hmax : q.IsMaximal) (hα : α ∉ q) (n : ℕ) :
     pthSymbolAtPrime_canonical (p := p) (K := K) (α ^ n) q =
       (n : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α q := by
-  haveI hqp : q.IsPrime := hmax.isPrime
+  have hqp : q.IsPrime := hmax.isPrime
   induction n with
   | zero =>
     rw [pow_zero, Nat.cast_zero, zero_mul]
     exact pthSymbolAtPrime_canonical_one (p := p) (K := K) hbot hmax
   | succ k ih =>
-    have hpow : α ^ k ∉ q := fun h => hα (hqp.mem_of_pow_mem k h)
+    have hpow : α ^ k ∉ q := fun h ↦ hα (hqp.mem_of_pow_mem k h)
     rw [pow_succ, pthSymbolAtPrime_canonical_mul (p := p) (K := K) hbot hmax hpow hα,
       ih]
     push_cast; ring
@@ -359,8 +359,8 @@ theorem pthSymbolAtPrime_canonical_eq_zero_iff
       Reflection.ResidueSymbol.PowerResidue.primeExponent q
         (canonicalResidueZetaP (p := p) (K := K) q)
         (canonicalResidueZetaP_isPrimitiveRoot hbot hp_in) hdiv α hα = 0 := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero q := ⟨hbot⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero q := ⟨hbot⟩
   rw [pthSymbolAtPrime_canonical_eq_primeExponent hbot hmax hα hdiv hp_in]
 
 /-- In the good case, canonical symbol-vanishing is equivalent to the residue
@@ -372,11 +372,11 @@ theorem pthSymbolAtPrime_canonical_eq_zero_iff_residue_isPow
     pthSymbolAtPrime_canonical (p := p) (K := K) α q = 0 ↔
       ∃ y : (𝓞 K ⧸ q)ˣ,
         Reflection.ResidueSymbol.PowerResidue.quotientUnitOfNotMem q α hα = y ^ p := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero q := ⟨hbot⟩
-  haveI hmax' : q.IsMaximal := hmax
-  haveI : q.IsPrime := hmax.isPrime
-  letI : Field (𝓞 K ⧸ q) := Ideal.Quotient.field q
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero q := ⟨hbot⟩
+  have hmax' : q.IsMaximal := hmax
+  have : q.IsPrime := hmax.isPrime
+  let : Field (𝓞 K ⧸ q) := Ideal.Quotient.field q
   rw [pthSymbolAtPrime_canonical_eq_zero_iff hbot hmax hα hdiv hp_in]
   change
     Reflection.ResidueSymbol.PowerResidue.finiteFieldExponent
@@ -453,16 +453,16 @@ theorem pthSymbolAtPrime_canonical_galoisAction
         (cyclotomicGaloisConjugate (p := p) (K := K) a q) =
       (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α q := by
   classical
-  haveI hp_ne : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero q := ⟨hbot⟩
-  haveI hbot_q' : NeZero (cyclotomicGaloisConjugate (p := p) (K := K) a q) :=
+  have hp_ne : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero q := ⟨hbot⟩
+  have hbot_q' : NeZero (cyclotomicGaloisConjugate (p := p) (K := K) a q) :=
     ⟨cyclotomicGaloisConjugate_ne_bot a hbot⟩
-  haveI hmax_q' :
+  have hmax_q' :
       (cyclotomicGaloisConjugate (p := p) (K := K) a q).IsMaximal :=
     cyclotomicGaloisConjugate_isMaximal a q
-  haveI hprime_q' : (cyclotomicGaloisConjugate (p := p) (K := K) a q).IsPrime :=
+  have hprime_q' : (cyclotomicGaloisConjugate (p := p) (K := K) a q).IsPrime :=
     hmax_q'.isPrime
-  haveI hprime_q : q.IsPrime := hmax.isPrime
+  have hprime_q : q.IsPrime := hmax.isPrime
   -- σ_a α ∉ σ_a • q.
   have hα' : cyclotomicRingOfIntegersEquiv (p := p) K a α ∉
       cyclotomicGaloisConjugate (p := p) (K := K) a q :=
@@ -610,7 +610,7 @@ theorem pthSymbolAtPrime_canonical_galoisAction_iff
         (cyclotomicRingOfIntegersEquiv (p := p) K a α)
         (cyclotomicGaloisConjugate (p := p) (K := K) a q) -
       (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α q = 0 :=
-  ⟨fun h => by rw [h, sub_self], fun h => by linear_combination h⟩
+  ⟨fun h ↦ by rw [h, sub_self], fun h ↦ by linear_combination h⟩
 
 /-- **The identity Galois element acts trivially.**
 
@@ -656,7 +656,7 @@ theorem pthSymbolAtPrime_canonical_compose_galois
       (a : ZMod p) * (b : ZMod p) *
         pthSymbolAtPrime_canonical (p := p) (K := K) α q := by
   -- Compatibility witnesses for the inner application of (b, q).
-  haveI hp_ne : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have hp_ne : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   have hbot_b : cyclotomicGaloisConjugate (p := p) (K := K) b q ≠ ⊥ :=
     cyclotomicGaloisConjugate_ne_bot b hbot
   have hmax_b : (cyclotomicGaloisConjugate (p := p) (K := K) b q).IsMaximal :=
@@ -714,10 +714,10 @@ theorem pthSymbolAtPrime_eq_canonical_up_to_unit
       pthSymbolAtPrime (p := p) α q =
         c.val * pthSymbolAtPrime_canonical (p := p) (K := K) α q := by
   classical
-  haveI hp_ne : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero q := ⟨hbot⟩
-  haveI : q.IsMaximal := hmax
-  haveI : q.IsPrime := hmax.isPrime
+  have hp_ne : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero q := ⟨hbot⟩
+  have : q.IsMaximal := hmax
+  have : q.IsPrime := hmax.isPrime
   -- The good-case unfolding of `pthSymbolAtPrime` requires a primitive root.
   have hroot : ∃ ζ : (𝓞 K ⧸ q)ˣ, IsPrimitiveRoot ζ p :=
     exists_isPrimitiveRoot_of_not_mem_p hbot hp_in

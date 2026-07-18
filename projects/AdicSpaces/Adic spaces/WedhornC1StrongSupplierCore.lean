@@ -153,7 +153,7 @@ theorem exists_single_f_refinement_at_t_strong_of_singleton_unit_rescaled
     obtain ⟨hv_spa, hvD, _hvDs⟩ := hv
     obtain ⟨_, hvT, hvCs⟩ := hvCbase
     have hvt : v.vle t D.s := hvD t (hT ▸ Finset.mem_singleton_self t)
-    refine ⟨hv_spa, fun b hb => ?_, hvCs⟩
+    refine ⟨hv_spa, fun b hb ↦ ?_, hvCs⟩
     rcases Finset.mem_insert.mp hb with rfl | hb_base
     · have h1 : v.vle (t * (σ : A)) (D.s * (σ : A)) :=
         v.mul_vle_mul_left hvt (σ : A)
@@ -176,7 +176,7 @@ theorem exists_single_f_refinement_at_t_strong_of_singleton_unit_rescaled
       have h := w.mul_vle_mul_left hwDs0 (σ : A)
       rw [zero_mul, mul_comm D.s (σ : A), hσ] at h
       exact hwCs h
-    refine ⟨hw_spa, fun t' ht' => ?_, hwDs⟩
+    refine ⟨hw_spa, fun t' ht' ↦ ?_, hwDs⟩
     rw [hT, Finset.mem_singleton] at ht'
     subst ht'
     exact hw_t
@@ -225,7 +225,8 @@ theorem exists_single_f_refinement_at_t_strong_via_dominating_unit
    from `σ_A` being a unit times a unit power and `¬ v.vle D.s 0`.
 5. Verify `v ∈ R(insert f C.base.T, C.base.s)` and
    `R(insert f C.base.T, C.base.s) ⊆ R(D.T, D.s)` via
-   `rationalOpen_transfer_via_localization` (`Adic spaces/WedhornLocalizationTransferConsumer.lean`).
+   `rationalOpen_transfer_via_localization`
+   (`Adic spaces/WedhornLocalizationTransferConsumer.lean`).
 
 ### Smallest single missing Lean lemma toward this
 

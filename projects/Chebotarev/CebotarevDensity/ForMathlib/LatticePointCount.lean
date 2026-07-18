@@ -44,7 +44,7 @@ the frontier `∂s` (`abs_card_inter_sub_volume_mul_pow_le`); that count is `O(n
   K. Debaene.
 -/
 
-open Submodule Pointwise MeasureTheory Set BoxIntegral BoxIntegral.unitPartition
+open Submodule Pointwise MeasureTheory Set BoxIntegral.unitPartition
 
 open scoped NNReal
 
@@ -74,7 +74,6 @@ private lemma abs_sub_le_one_div_of_ceil_natCast_mul_eq {n : ℕ} (hn : 0 < (n :
 
 -- The `Fintype ι` instance is needed for the `sup`-metric on `ι → ℝ`, so the
 -- `unusedFintypeInType` linter (which only inspects the conclusion) is a false positive here.
-set_option linter.unusedFintypeInType false in
 /-- The `index n`-image of a bounded set is finite: only finitely many cells of the `n⁻¹ℤ^ι`
 grid meet a bounded set. -/
 theorem setFinite_index_image_of_isBounded (n : ℕ) {T : Set (ι → ℝ)}
@@ -104,7 +103,7 @@ theorem ncard_index_image_le_of_diam_le (n : ℕ) [NeZero n] {T : Set (ι → �
     (index n '' T).ncard ≤ (2 * ⌈(n : ℝ) * r⌉₊ + 1) ^ Fintype.card ι := by
   classical
   rcases T.eq_empty_or_nonempty with rfl | ⟨x₀, hx₀⟩
-  · simp
+  · simp only [image_empty, ncard_empty, zero_le]
   set K : ℕ := ⌈(n : ℝ) * r⌉₊ with hK
   set c : ι → ℤ := index n x₀ with hc
   set F : Finset (ι → ℤ) := Fintype.piFinset fun i ↦ Finset.Icc (c i - K) (c i + K) with hF
@@ -135,18 +134,18 @@ theorem ncard_index_image_le_of_diam_le (n : ℕ) [NeZero n] {T : Set (ι → �
 /-- **Single-chart cell count.** For one `M`-Lipschitz map `φ : (Fin (d-1) → ℝ) → (ι → ℝ)`,
 the number of grid cells of the `n⁻¹ℤ^ι` grid meeting the image `φ '' [0,1]ᵈ⁻¹` is at most
 `(2⌈M⌉₊ + 1)ᵈ · (n+1)ᵈ⁻¹ = O(nᵈ⁻¹)`. -/
-theorem ncard_index_image_chart_le {M : ℝ≥0} {φ : (Fin (Fintype.card ι - 1) → ℝ) → (ι → ℝ)}
+theorem ncard_index_image_chart_le {κ : Type*} [Fintype κ] {M : ℝ≥0} {φ : (κ → ℝ) → (ι → ℝ)}
     (hφ : LipschitzWith M φ) {n : ℕ} (hn : 1 ≤ n) :
     (index n '' (φ '' Set.Icc 0 1)).ncard
-      ≤ (2 * ⌈(M : ℝ)⌉₊ + 1) ^ Fintype.card ι * (n + 1) ^ (Fintype.card ι - 1) := by
+      ≤ (2 * ⌈(M : ℝ)⌉₊ + 1) ^ Fintype.card ι * (n + 1) ^ (Fintype.card κ) := by
   classical
   have hne : NeZero n := ⟨Nat.one_le_iff_ne_zero.mp hn⟩
   have hn0 : (0 : ℝ) < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hne.out
-  set q : (Fin (Fintype.card ι - 1) → ℝ) → (Fin (Fintype.card ι - 1) → ℤ) :=
+  set q : (κ → ℝ) → (κ → ℤ) :=
     fun y k ↦ ⌈(n : ℝ) * y k⌉ with hq
-  set T : Finset (Fin (Fintype.card ι - 1) → ℤ) :=
-    Finset.Icc (0 : Fin (Fintype.card ι - 1) → ℤ) (fun _ ↦ (n : ℤ)) with hT
-  have hdiam : ∀ v : Fin (Fintype.card ι - 1) → ℤ,
+  set T : Finset (κ → ℤ) :=
+    Finset.Icc (0 : κ → ℤ) (fun _ ↦ (n : ℤ)) with hT
+  have hdiam : ∀ v : κ → ℤ,
       Metric.diam (Set.Icc 0 1 ∩ q ⁻¹' {v}) ≤ 1 / n := by
     intro v
     refine Metric.diam_le_of_forall_dist_le (by positivity) fun y hy y' hy' ↦ ?_
@@ -172,19 +171,18 @@ theorem ncard_index_image_chart_le {M : ℝ≥0} {φ : (Fin (Fintype.card ι - 1
         push_cast
         nlinarith [hn0]
     exact Set.mem_biUnion hyT ⟨φ y, ⟨y, ⟨hy, rfl⟩, rfl⟩, rfl⟩
-  have hpiece : ∀ v : Fin (Fintype.card ι - 1) → ℤ,
+  have hpiece : ∀ v : κ → ℤ,
       (index n '' (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v}))).ncard
         ≤ (2 * ⌈(M : ℝ)⌉₊ + 1) ^ Fintype.card ι := by
     intro v
     have hbddφ : Bornology.IsBounded (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v})) :=
       hφ.isBounded_image ((Metric.isBounded_Icc 0 1).subset Set.inter_subset_left)
-    have hdimg : Metric.diam (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v})) ≤ (M : ℝ) * (1 / n) := by
-      refine (hφ.diam_image_le _ ((Metric.isBounded_Icc 0 1).subset
-        Set.inter_subset_left)).trans ?_
-      exact mul_le_mul_of_nonneg_left (hdiam v) (by positivity)
+    have hdimg : Metric.diam (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v})) ≤ (M : ℝ) * (1 / n) :=
+      (hφ.diam_image_le _ ((Metric.isBounded_Icc 0 1).subset Set.inter_subset_left)).trans
+        (mul_le_mul_of_nonneg_left (hdiam v) (by positivity))
     refine (ncard_index_image_le_of_diam_le n (by positivity) hdimg hbddφ).trans ?_
     rw [show (n : ℝ) * ((M : ℝ) * (1 / n)) = (M : ℝ) by field_simp]
-  have hfin : ∀ v : Fin (Fintype.card ι - 1) → ℤ,
+  have hfin : ∀ v : κ → ℤ,
       (index n '' (φ '' (Set.Icc 0 1 ∩ q ⁻¹' {v}))).Finite :=
     fun v ↦ setFinite_index_image_of_isBounded n
       (hφ.isBounded_image ((Metric.isBounded_Icc 0 1).subset Set.inter_subset_left))
@@ -192,19 +190,20 @@ theorem ncard_index_image_chart_le {M : ℝ≥0} {φ : (Fin (Fintype.card ι - 1
   refine (Finset.set_ncard_biUnion_le T _).trans ?_
   refine (Finset.sum_le_sum fun v _ ↦ hpiece v).trans ?_
   rw [Finset.sum_const, nsmul_eq_mul, mul_comm]
-  have hcardT : T.card = (n + 1) ^ (Fintype.card ι - 1) := by
+  have hcardT : T.card = (n + 1) ^ (Fintype.card κ) := by
     rw [hT, Pi.card_Icc]
-    simp [Int.card_Icc]
+    simp only [Pi.zero_apply, Int.card_Icc, sub_zero, Int.toNat_natCast_add_one, Finset.prod_const,
+      Finset.card_univ]
   rw [hcardT, Nat.cast_id]
 
-/-- **Boundary-cell count.** If `∂s` is covered by `m` images `φⱼ '' [0,1]ᵈ⁻¹` of
-`M`-Lipschitz maps, the number of grid cells meeting `∂s` is `O(nᵈ⁻¹)`, with constant
-`m · (2⌈M⌉₊+1)ᵈ · 2ᵈ⁻¹`. -/
-theorem ncard_index_image_frontier_le {s : Set (ι → ℝ)} {m : ℕ} {M : ℝ≥0}
+/-- **Boundary-cell count.** If a set `t` is covered by `m` images `φⱼ '' [0,1]ᵈ⁻¹` of
+`M`-Lipschitz maps, the number of grid cells meeting `t` is `O(nᵈ⁻¹)`, with constant
+`m · (2⌈M⌉₊+1)ᵈ · 2ᵈ⁻¹`. (The boundary-cell estimate is the case `t = ∂s`.) -/
+theorem ncard_index_image_frontier_le {t : Set (ι → ℝ)} {m : ℕ} {M : ℝ≥0}
     {φ : Fin m → (Fin (Fintype.card ι - 1) → ℝ) → (ι → ℝ)}
-    (hφ : ∀ j, LipschitzWith M (φ j)) (hcov : frontier s ⊆ ⋃ j, φ j '' Set.Icc 0 1)
+    (hφ : ∀ j, LipschitzWith M (φ j)) (hcov : t ⊆ ⋃ j, φ j '' Set.Icc 0 1)
     {n : ℕ} (hn : 1 ≤ n) :
-    (index n '' frontier s).ncard
+    (index n '' t).ncard
       ≤ (m * (2 * ⌈(M : ℝ)⌉₊ + 1) ^ Fintype.card ι * 2 ^ (Fintype.card ι - 1))
           * n ^ (Fintype.card ι - 1) := by
   classical
@@ -213,13 +212,13 @@ theorem ncard_index_image_frontier_le {s : Set (ι → ℝ)} {m : ℕ} {M : ℝ�
     (hφ j).isBounded_image (Metric.isBounded_Icc 0 1)
   have hfin : ∀ j : Fin m, (index n '' (φ j '' Set.Icc 0 1)).Finite := fun j ↦
     setFinite_index_image_of_isBounded n (hbddφ j)
-  have hsub : index n '' frontier s ⊆ ⋃ j, index n '' (φ j '' Set.Icc 0 1) := by
+  have hsub : index n '' t ⊆ ⋃ j, index n '' (φ j '' Set.Icc 0 1) := by
     rw [← Set.image_iUnion]
     exact Set.image_mono hcov
   refine (Set.ncard_le_ncard hsub (Set.finite_iUnion hfin)).trans ?_
   refine (Set.ncard_iUnion_le_of_fintype _).trans ?_
   refine (Finset.sum_le_sum fun j _ ↦ ncard_index_image_chart_le (hφ j) hn).trans ?_
-  rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   have hpow : (n + 1) ^ (Fintype.card ι - 1) ≤
       2 ^ (Fintype.card ι - 1) * n ^ (Fintype.card ι - 1) := by
     rw [← mul_pow]
@@ -264,7 +263,7 @@ private lemma measureReal_biUnion_box (n : ℕ) [NeZero n] (t : Finset (ι → �
       volume.real (box n ν : Set (ι → ℝ)) = 1 / (n : ℝ) ^ Fintype.card ι := by
     intro ν
     rw [measureReal_def, volume_box]
-    simp
+    simp only [one_div, ENNReal.toReal_inv, ENNReal.toReal_pow, ENNReal.toReal_natCast]
   rw [measureReal_biUnion_finset (fun ν _ ν' _ h ↦ disjoint.mp h)
     (fun ν _ ↦ (box n ν).measurableSet_coe) (fun ν _ ↦ (box n ν).isBounded.measure_lt_top.ne)]
   simp_rw [hvol_box]
@@ -283,9 +282,9 @@ theorem abs_card_inter_sub_volume_mul_pow_le {s : Set (ι → ℝ)}
   have hne : NeZero n := ⟨Nat.one_le_iff_ne_zero.mp hn⟩
   have hn0 : (0 : ℝ) < (n : ℝ) := by exact_mod_cast Nat.pos_of_ne_zero hne.out
   have hvs : volume s ≠ ⊤ := hbdd.measure_lt_top.ne
-  set Inside : Set (ι → ℤ) := {ν | (box n ν : Set (ι → ℝ)) ⊆ s} with hInside
-  set Meet : Set (ι → ℤ) := {ν | ((box n ν : Set (ι → ℝ)) ∩ s).Nonempty} with hMeet
-  set Bd : Set (ι → ℤ) := index n '' frontier s with hBd
+  set Inside : Set (ι → ℤ) := {ν | (box n ν : Set (ι → ℝ)) ⊆ s}
+  set Meet : Set (ι → ℤ) := {ν | ((box n ν : Set (ι → ℝ)) ∩ s).Nonempty}
+  set Bd : Set (ι → ℤ) := index n '' frontier s
   have hInsideFin : Inside.Finite := setFinite_index n hmeas.nullMeasurableSet hvs
   have hBdFin : Bd.Finite :=
     setFinite_index_image_of_isBounded n (hbdd.closure.subset frontier_subset_closure)

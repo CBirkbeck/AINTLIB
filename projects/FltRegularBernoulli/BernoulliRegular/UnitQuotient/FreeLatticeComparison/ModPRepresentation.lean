@@ -1,7 +1,13 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
-public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.FreeTrace
 public import Mathlib.RepresentationTheory.Basic
+
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.FreeTrace
 
 /-!
 # Unit quotients: mod-p free quotient representation
@@ -19,9 +25,12 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
-open Finset
-
+-- Hides 2 warnings: two theorems below do not use all of the section instances. Removing it
+-- needs `omit`, which drops those binders and so changes the statements — generalisation
+-- work (see the linter-suppression census), not cleanup.
 set_option linter.unusedSectionVars false
+
+open Finset
 
 attribute [local instance] Fintype.ofFinite
 attribute [local instance] NumberField.Units.instZLattice_unitLattice
@@ -109,13 +118,11 @@ theorem cyclotomicUnitFreePartModP_finrank_eq
     (hp_gt_two : 2 < p) :
     Module.finrank (ZMod p) (CyclotomicUnitFreePartModP (p := p) K) =
       (p - 3) / 2 := by
-  rw [cyclotomicUnitFreePartModP_finrank]
-  rw [NumberField.Units.rank]
-  rw [NumberField.InfinitePlace.card_eq_nrRealPlaces_add_nrComplexPlaces]
-  rw [IsCyclotomicExtension.Rat.nrRealPlaces_eq_zero (n := p) K hp_gt_two]
-  rw [zero_add]
-  rw [IsCyclotomicExtension.Rat.nrComplexPlaces_eq_totient_div_two (n := p) K]
-  rw [Nat.totient_prime (Fact.out : p.Prime)]
+  rw [cyclotomicUnitFreePartModP_finrank, NumberField.Units.rank,
+    NumberField.InfinitePlace.card_eq_nrRealPlaces_add_nrComplexPlaces,
+    IsCyclotomicExtension.Rat.nrRealPlaces_eq_zero (n := p) K hp_gt_two, zero_add,
+    IsCyclotomicExtension.Rat.nrComplexPlaces_eq_totient_div_two (n := p) K,
+    Nat.totient_prime (Fact.out : p.Prime)]
   omega
 
 theorem cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card
@@ -130,10 +137,8 @@ theorem cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card_zmod
     (hp_gt_two : 2 < p) :
     (NumberField.Units.rank K : ZMod p) + 1 =
       (Fintype.card (CyclotomicEvenDelta p) : ZMod p) := by
-  have h := congrArg (fun n : ℕ => (n : ZMod p))
-    (cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card
-      (p := p) (K := K) hp_gt_two)
-  simpa [Nat.cast_add, Nat.cast_one] using h
+  simpa [Nat.cast_add, Nat.cast_one] using congrArg (fun n : ℕ ↦ (n : ZMod p))
+    (cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card (p := p) (K := K) hp_gt_two)
 
 open Classical in
 /-- The reduced free quotient has dimension equal to the number of nontrivial
@@ -142,7 +147,7 @@ theorem cyclotomicUnitFreePartModP_finrank_eq_evenDeltaNontrivialCharacter_card
     (hp_gt_two : 2 < p) :
     Module.finrank (ZMod p) (CyclotomicUnitFreePartModP (p := p) K) =
       ((Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) (ZMod p))).filter
-        (fun χ => χ ≠ 1)).card := by
+        (fun χ ↦ χ ≠ 1)).card := by
   rw [cyclotomicUnitFreePartModP_finrank_eq (p := p) (K := K) hp_gt_two,
     evenDeltaNontrivialCharacter_card_eq (p := p) hp_gt_two]
 
@@ -215,11 +220,7 @@ theorem cyclotomicUnitFreePartModPLinearEquiv_trace_formula
         (NumberField.Units.rank K : ZMod p) else -1 := by
   rw [cyclotomicUnitFreePartModPLinearEquiv_trace,
     cyclotomicUnitFreePartLinearEquiv_trace_formula (p := p) (K := K) hp_gt_two a]
-  by_cases hq : cyclotomicEvenDeltaQuotient p a = 1
-  · rw [if_pos hq, if_pos hq]
-    norm_num
-  · rw [if_neg hq, if_neg hq]
-    norm_num
+  split_ifs <;> norm_num
 
 /-- The actual `Delta` action on the reduced free quotient, as a genuine
 `ZMod p`-linear representation. -/
@@ -254,10 +255,9 @@ noncomputable def cyclotomicUnitFreePartModPDeltaActionZMod :
       cyclotomicUnitFreePartModPClass (p := p) K
         (cyclotomicUnitFreePartLinearEquiv (p := p) K a
           (cyclotomicUnitFreePartLinearEquiv (p := p) K b y))
-    have hlin := congrFun
+    exact congrArg (cyclotomicUnitFreePartModPClass (p := p) K) <| congrFun
       (congrArg DFunLike.coe
         (map_mul (cyclotomicUnitFreePartDeltaAction (p := p) K) a b)) y
-    exact congrArg (cyclotomicUnitFreePartModPClass (p := p) K) hlin
 
 @[simp]
 theorem cyclotomicUnitFreePartModPDeltaActionZMod_apply
@@ -358,6 +358,47 @@ noncomputable def cyclotomicUnitFreePartModPEvenCharacterProjector
   exact (cyclotomicUnitFreePartModPEvenRepresentation (p := p) K hp_gt_two).asAlgebraHom
     (charIdempotent (G := CyclotomicEvenDelta p) (R := ZMod p) χ)
 
+private lemma sum_mulChar_mul_ite_rank_add_one
+    {χ : MulChar (CyclotomicEvenDelta p) (ZMod p)} (hχ : χ ≠ 1) :
+    ∑ x : CyclotomicEvenDelta p,
+        χ x * (if x = 1 then (NumberField.Units.rank K : ZMod p) else -1) =
+      (NumberField.Units.rank K : ZMod p) + 1 := by
+  have hsumχ : ∑ x : CyclotomicEvenDelta p, χ x = 0 :=
+    MulChar.sum_eq_zero_of_ne_one (χ := χ) hχ
+  let r : ZMod p := NumberField.Units.rank K
+  calc
+    ∑ x : CyclotomicEvenDelta p, χ x * (if x = 1 then r else -1)
+        = ∑ x : CyclotomicEvenDelta p,
+            (χ x * (-1) + if x = 1 then χ x * (r + 1) else 0) := by
+            apply Finset.sum_congr rfl
+            intro x _
+            by_cases hx : x = 1
+            · simp [hx, r]
+            · simp [hx]
+    _ = (∑ x : CyclotomicEvenDelta p, χ x * (-1)) +
+          ∑ x : CyclotomicEvenDelta p,
+            (if x = 1 then χ x * (r + 1) else 0) := by
+            rw [Finset.sum_add_distrib]
+    _ = 0 + (r + 1) := by
+            rw [← Finset.sum_mul, hsumχ, zero_mul, Finset.sum_ite_eq']
+            simp [r]
+    _ = (NumberField.Units.rank K : ZMod p) + 1 := by
+            simp [r]
+
+private lemma cyclotomicUnitFreePartModPEvenRepresentation_trace_inv
+    [IsZLattice ℝ (NumberField.Units.unitLattice K)]
+    (hp_gt_two : 2 < p) (x : CyclotomicEvenDelta p) :
+    LinearMap.trace (ZMod p) (CyclotomicUnitFreePartModP (p := p) K)
+        ((cyclotomicUnitFreePartModPEvenRepresentation (p := p) K hp_gt_two) x⁻¹) =
+      if x = 1 then (NumberField.Units.rank K : ZMod p) else -1 := by
+  change LinearMap.trace (ZMod p) (CyclotomicUnitFreePartModP (p := p) K)
+      ((cyclotomicUnitFreePartModPEvenDeltaActionZMod
+        (p := p) K hp_gt_two x⁻¹).toLinearMap) =
+    if x = 1 then (NumberField.Units.rank K : ZMod p) else -1
+  simpa only [inv_eq_one] using
+    cyclotomicUnitFreePartModPEvenDeltaActionZMod_trace
+      (p := p) (K := K) hp_gt_two x⁻¹
+
 theorem cyclotomicUnitFreePartModPEvenCharacterProjector_trace_of_ne_one
   [IsZLattice ℝ (NumberField.Units.unitLattice K)]
     (hp_gt_two : 2 < p)
@@ -368,7 +409,6 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_trace_of_ne_one
   classical
   letI : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
     cyclotomicEvenDeltaCardInvertibleZMod (p := p) hp_gt_two
-  let ρ := cyclotomicUnitFreePartModPEvenRepresentation (p := p) K hp_gt_two
   suffices
       (Fintype.card (CyclotomicEvenDelta p) : ZMod p)⁻¹ *
           ∑ x : CyclotomicEvenDelta p,
@@ -377,53 +417,11 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_trace_of_ne_one
                 ((cyclotomicUnitFreePartModPEvenRepresentation
                   (p := p) K hp_gt_two) x⁻¹) = 1 by
     simpa [cyclotomicUnitFreePartModPEvenCharacterProjector, charIdempotent_def] using this
-  have htrace : ∀ x : CyclotomicEvenDelta p,
-      LinearMap.trace (ZMod p) (CyclotomicUnitFreePartModP (p := p) K)
-          ((cyclotomicUnitFreePartModPEvenRepresentation (p := p) K hp_gt_two) x⁻¹) =
-        if x = 1 then (NumberField.Units.rank K : ZMod p) else -1 := by
-    intro x
-    change LinearMap.trace (ZMod p) (CyclotomicUnitFreePartModP (p := p) K)
-        ((cyclotomicUnitFreePartModPEvenDeltaActionZMod
-          (p := p) K hp_gt_two x⁻¹).toLinearMap) =
-      if x = 1 then (NumberField.Units.rank K : ZMod p) else -1
-    rw [cyclotomicUnitFreePartModPEvenDeltaActionZMod_trace
-      (p := p) (K := K) hp_gt_two x⁻¹]
-    by_cases hx : x = 1
-    · simp [hx]
-    · have hxinv : x⁻¹ ≠ 1 := fun h =>
-        hx (inv_eq_one.mp h)
-      rw [if_neg hxinv, if_neg hx]
-  simp_rw [htrace]
-  have hsumχ : ∑ x : CyclotomicEvenDelta p, χ x = 0 :=
-    MulChar.sum_eq_zero_of_ne_one (χ := χ) hχ
-  have hsum :
-      ∑ x : CyclotomicEvenDelta p,
-          χ x * (if x = 1 then (NumberField.Units.rank K : ZMod p) else -1) =
-        (NumberField.Units.rank K : ZMod p) + 1 := by
-    let r : ZMod p := NumberField.Units.rank K
-    calc
-      ∑ x : CyclotomicEvenDelta p, χ x * (if x = 1 then r else -1)
-          = ∑ x : CyclotomicEvenDelta p,
-              (χ x * (-1) + if x = 1 then χ x * (r + 1) else 0) := by
-              apply Finset.sum_congr rfl
-              intro x _
-              by_cases hx : x = 1
-              · simp [hx, r]
-              · simp [hx]
-      _ = (∑ x : CyclotomicEvenDelta p, χ x * (-1)) +
-            ∑ x : CyclotomicEvenDelta p,
-              (if x = 1 then χ x * (r + 1) else 0) := by
-              rw [Finset.sum_add_distrib]
-      _ = 0 + (r + 1) := by
-              rw [← Finset.sum_mul, hsumχ, zero_mul]
-              rw [Finset.sum_ite_eq']
-              simp [r]
-      _ = (NumberField.Units.rank K : ZMod p) + 1 := by
-              simp [r]
-  rw [hsum, cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card_zmod
+  simp_rw [cyclotomicUnitFreePartModPEvenRepresentation_trace_inv (p := p) (K := K) hp_gt_two]
+  rw [sum_mulChar_mul_ite_rank_add_one (p := p) (K := K) hχ,
+    cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card_zmod
     (p := p) (K := K) hp_gt_two]
   simp
-
 
 end BernoulliRegular
 

@@ -66,17 +66,20 @@ private lemma singular_symmDiff_sup_bound {t₀ c : ℝ} (hc_pos : 0 < c) {t : �
   rw [norm_inv, Complex.norm_real, Real.norm_eq_abs, one_div]
   exact inv_anti₀ hc_pos ht_lower
 
-private lemma singular_annulus_f_lin_measurable {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ} :
-    Measurable (fun t : ℝ =>
-      if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
-      then (↑(t - t₀) : ℂ)⁻¹ else 0) := by
-  refine Measurable.ite (.inter ?_ ?_) ?_ measurable_const
-  · exact (isOpen_lt continuous_const (continuous_const.mul
+private lemma measurableSet_Lmul_annulus {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ} :
+    MeasurableSet {t : ℝ | ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁} :=
+  .inter (isOpen_lt continuous_const (continuous_const.mul
       (continuous_abs.comp (continuous_id.sub continuous_const)))).measurableSet
-  · exact (isClosed_le (continuous_const.mul
+    (isClosed_le (continuous_const.mul
       (continuous_abs.comp (continuous_id.sub continuous_const)))
       continuous_const).measurableSet
-  · exact (Complex.measurable_ofReal.comp (measurable_id.sub_const t₀)).inv
+
+private lemma singular_annulus_f_lin_measurable {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ} :
+    Measurable (fun t : ℝ ↦
+      if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
+      then (↑(t - t₀) : ℂ)⁻¹ else 0) := by
+  refine Measurable.ite measurableSet_Lmul_annulus ?_ measurable_const
+  exact (Complex.measurable_ofReal.comp (measurable_id.sub_const t₀)).inv
 
 private lemma singular_annulus_f_lin_bound {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ}
     (hL_pos : 0 < ‖L‖) (hε₂_pos : 0 < ε₂) (t : ℝ) :
@@ -94,7 +97,7 @@ private lemma singular_annulus_f_lin_bound {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ :
 
 private lemma singular_annulus_f_lin_intervalIntegrable {t₀ : ℝ} {L : ℂ} {ε₁ ε₂ : ℝ}
     (hL_pos : 0 < ‖L‖) (hε₂_pos : 0 < ε₂) (u v : ℝ) :
-    IntervalIntegrable (fun t =>
+    IntervalIntegrable (fun t ↦
       if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
       then (↑(t - t₀) : ℂ)⁻¹ else 0) volume u v := by
   rw [intervalIntegrable_iff]
@@ -110,7 +113,7 @@ private lemma lin_indicator_zero_left {a t₀ c₁ c₂ : ℝ} (hc₂_nonneg : 0
     filter_upwards [MeasureTheory.compl_mem_ae_iff.mpr
       (MeasureTheory.measure_singleton (t₀ - c₂))] with t ht_ne ht_mem
     rw [Set.uIoc_of_le ha_lt_mc₂.le] at ht_mem
-    exact hφ_zero t (fun ⟨_, hle⟩ => absurd hle
+    exact hφ_zero t (fun ⟨_, hle⟩ ↦ absurd hle
       (not_le.mpr (by
         rw [abs_of_nonpos (by linarith [ht_mem.2] : t - t₀ ≤ 0)]
         linarith [lt_of_le_of_ne ht_mem.2 ht_ne]))))
@@ -122,7 +125,7 @@ private lemma lin_indicator_zero_right {t₀ c₁ c₂ b : ℝ} (hc₂_nonneg : 
   intervalIntegral_eq_zero_of_ae_eq_zero (by
     filter_upwards with t ht_mem
     rw [Set.uIoc_of_le hpc₂_lt_b.le] at ht_mem
-    exact hφ_zero t (fun ⟨_, hle⟩ => absurd hle
+    exact hφ_zero t (fun ⟨_, hle⟩ ↦ absurd hle
       (not_le.mpr (by
         rw [abs_of_nonneg (by linarith [ht_mem.1] : 0 ≤ t - t₀)]
         linarith [ht_mem.1]))))
@@ -131,9 +134,9 @@ private lemma lin_indicator_zero_middle {t₀ c₁ c₂ : ℝ}
     (hmc₁_le_pc₁ : t₀ - c₁ ≤ t₀ + c₁) {φ : ℝ → ℂ}
     (hφ_zero : ∀ t, ¬(c₁ < |t - t₀| ∧ |t - t₀| ≤ c₂) → φ t = 0) :
     ∫ t in (t₀ - c₁)..(t₀ + c₁), φ t = 0 :=
-  (intervalIntegral.integral_congr (fun t ht => by
+  (intervalIntegral.integral_congr (fun t ht ↦ by
     rw [Set.uIcc_of_le hmc₁_le_pc₁] at ht
-    exact hφ_zero t (fun ⟨hgt, _⟩ => absurd
+    exact hφ_zero t (fun ⟨hgt, _⟩ ↦ absurd
       (abs_le.mpr ⟨by linarith [ht.1], by linarith [ht.2]⟩)
       (not_le.mpr hgt)))).trans intervalIntegral.integral_zero
 
@@ -177,7 +180,7 @@ private lemma singular_annulus_lin_integral_zero {a b t₀ : ℝ} {L : ℂ} {ε�
   have hc₁_le_c₂ : c₁ ≤ c₂ := div_le_div_of_nonneg_right hε₂_le hL_pos.le
   have hc₂_lt_dist : c₂ < min (t₀ - a) (b - t₀) := by
     rw [div_lt_iff₀ hL_pos]; linarith [mul_comm ‖L‖ (min (t₀ - a) (b - t₀))]
-  set φ : ℝ → ℂ := fun t =>
+  set φ : ℝ → ℂ := fun t ↦
     if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
     then (↑(t - t₀) : ℂ)⁻¹ else 0
   have hφ_int := singular_annulus_f_lin_intervalIntegrable hL_pos hε₂_pos
@@ -185,9 +188,9 @@ private lemma singular_annulus_lin_integral_zero {a b t₀ : ℝ} {L : ℂ} {ε�
   have h_cond_iff := norm_annulus_condition_iff hL_pos
     (ε₁ := ε₁) (ε₂ := ε₂) (t₀ := t₀)
   have hφ_zero : ∀ t, ¬(c₁ < |t - t₀| ∧ |t - t₀| ≤ c₂) → φ t = 0 :=
-    fun t hnt => if_neg (mt (h_cond_iff t).mp hnt)
+    fun t hnt ↦ if_neg (mt (h_cond_iff t).mp hnt)
   have hφ_val : ∀ t, c₁ < |t - t₀| ∧ |t - t₀| ≤ c₂ → φ t = (↑(t - t₀) : ℂ)⁻¹ :=
-    fun t ht => if_pos ((h_cond_iff t).mpr ht)
+    fun t ht ↦ if_pos ((h_cond_iff t).mpr ht)
   have ha_lt_mc₂ : a < t₀ - c₂ := by linarith [hc₂_lt_dist.trans_le (min_le_left _ _)]
   have hpc₂_lt_b : t₀ + c₂ < b := by linarith [hc₂_lt_dist.trans_le (min_le_right _ _)]
   rw [integral_split_five (hφ_int a (t₀ - c₂)) (hφ_int (t₀ - c₂) (t₀ - c₁))
@@ -211,13 +214,13 @@ private lemma singular_annulus_diff_pointwise_bound {γ : ℝ → ℂ} {a b t₀
     2 * ‖L‖ / ε₂ := by
   have hbound_pos : 0 < 2 * ‖L‖ / ε₂ := by positivity
   have h_sup : ∀ h_lo : ε₂ / (2 * ‖L‖) ≤ |t - t₀|,
-      ‖(↑(t - t₀) : ℂ)⁻¹‖ ≤ 2 * ‖L‖ / ε₂ := fun h_lo =>
+      ‖(↑(t - t₀) : ℂ)⁻¹‖ ≤ 2 * ‖L‖ / ε₂ := fun h_lo ↦
     (singular_symmDiff_sup_bound (by positivity) h_lo).trans (by rw [one_div, inv_div])
   by_cases hγ : ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ <;>
     by_cases hlin : ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
   · simpa [hγ, hlin] using hbound_pos.le
   · simp only [hγ, hlin, ↓reduceIte, sub_zero]
-    have ht_ne : t ≠ t₀ := fun heq => by simp [heq] at hγ; linarith
+    have ht_ne : t ≠ t₀ := fun heq ↦ by simp [heq] at hγ; linarith
     have ht_pos : 0 < |t - t₀| := abs_pos.mpr (sub_ne_zero.mpr ht_ne)
     refine h_sup (le_of_lt ?_)
     rw [div_lt_iff₀ (by positivity : (0:ℝ) < 2 * ‖L‖)]
@@ -242,8 +245,8 @@ private lemma symmDiff_ae_version_null {γ : ℝ → ℂ} {a b t₀ : ℝ}
     intro t ht
     simp only [Set.mem_symmDiff, Set.mem_setOf_eq] at ht ⊢
     rcases ht with ⟨h_in, h_not⟩ | ⟨h_in, h_not⟩
-    · exact ⟨h_in.1, fun heq => h_not ⟨h_in.1, h_in.2.1, heq ▸ h_in.2.2.1, heq ▸ h_in.2.2.2⟩⟩
-    · exact ⟨h_in.1, fun heq => h_not ⟨h_in.1, h_in.2.1,
+    · exact ⟨h_in.1, fun heq ↦ h_not ⟨h_in.1, h_in.2.1, heq ▸ h_in.2.2.1, heq ▸ h_in.2.2.2⟩⟩
+    · exact ⟨h_in.1, fun heq ↦ h_not ⟨h_in.1, h_in.2.1,
         heq.symm ▸ h_in.2.2.1, heq.symm ▸ h_in.2.2.2⟩⟩
   have h_null : volume {t | t ∈ Set.Icc a b ∧ h' t ≠ ‖γ t - γ t₀‖} = 0 := by
     rw [show {t | t ∈ Set.Icc a b ∧ h' t ≠ ‖γ t - γ t₀‖} =
@@ -272,6 +275,72 @@ private lemma singular_annulus_symmDiff_vol_via_ae
     {t | t ∈ Set.Icc a b ∧ |t - t₀| < δ₀' ∧ ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁} _).trans ?_
   rw [symmDiff_ae_version_null hh'_ae, zero_add]
   exact h_meas ε₁ ε₂ hε₂_pos hε₂_le hε₁_lt_δ_meas
+
+/-- Off the symmetric difference of the two localized annuli, the `γ`-indicator integrand and the
+linearized-model indicator integrand agree pointwise. This is the key cancellation step: at a point
+`t` that lies in `Set.Icc a b`, is outside the symmetric difference `S'`, and where the ae-modified
+integrand `f_γ'` agrees with `f_γ` (hypothesis `hfγ_eq`), the two indicator conditions define the
+same value. -/
+private lemma singular_annulus_f_γ_eq_f_lin_outside_symmDiff
+    {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ} {ε₁ ε₂ δ₀' δ₁ : ℝ} {h' : ℝ → ℝ}
+    (hL_pos : 0 < ‖L‖) (hε₁_lt_Lδ₀' : ε₁ < ‖L‖ * δ₀')
+    (h_localize : ∀ t ∈ Set.Icc a b, ‖γ t - γ t₀‖ ≤ ε₁ → |t - t₀| < δ₁)
+    (hδ₁_le_δ₀' : δ₁ ≤ δ₀') {t : ℝ} (ht_Icc : t ∈ Set.Icc a b)
+    (hfγ_eq :
+      (if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0) =
+      (if ε₂ < h' t ∧ h' t ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0))
+    (ht_S : t ∉ symmDiff
+      {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < δ₀' ∧ ε₂ < h' t ∧ h' t ≤ ε₁}
+      {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < δ₀' ∧
+        ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁}) :
+    (if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0) =
+    (if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0) := by
+  by_cases hδ : |t - t₀| < δ₀'
+  · rw [Set.mem_symmDiff] at ht_S
+    push Not at ht_S
+    have h'_iff_lin :
+        (ε₂ < h' t ∧ h' t ≤ ε₁) ↔ (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) :=
+      ⟨fun ⟨h1, h2⟩ ↦ (ht_S.1 ⟨ht_Icc, hδ, h1, h2⟩).2.2,
+       fun ⟨h1, h2⟩ ↦ (ht_S.2 ⟨ht_Icc, hδ, h1, h2⟩).2.2⟩
+    have h_agree :
+        (ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) ↔
+        (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := by
+      by_cases ht_eq : t = t₀
+      · subst ht_eq; simp
+      have hinv_ne : (↑(t - t₀) : ℂ)⁻¹ ≠ 0 :=
+        inv_ne_zero (Complex.ofReal_ne_zero.mpr (sub_ne_zero.mpr ht_eq))
+      refine ⟨fun hγ_cond ↦ ?_, fun hlin_cond ↦ ?_⟩
+      · by_contra h_neg
+        rw [if_pos hγ_cond, if_neg (mt h'_iff_lin.mp h_neg)] at hfγ_eq
+        exact hinv_ne hfγ_eq
+      · by_contra h_neg
+        rw [if_neg h_neg, if_pos (h'_iff_lin.mpr hlin_cond)] at hfγ_eq
+        exact hinv_ne hfγ_eq.symm
+    by_cases hcond : ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁
+    · rw [if_pos hcond, if_pos (h_agree.mp hcond)]
+    · rw [if_neg hcond, if_neg (mt h_agree.mpr hcond)]
+  · have hγ_fail : ¬(ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) :=
+      fun ⟨_, h_up⟩ ↦ hδ ((h_localize t ht_Icc h_up).trans_le hδ₁_le_δ₀')
+    have hlin_fail : ¬(ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := fun ⟨_, h_le⟩ ↦ by
+      linarith [mul_le_mul_of_nonneg_left (not_lt.mp hδ) hL_pos.le]
+    rw [if_neg hγ_fail, if_neg hlin_fail]
+
+/-- The closing arithmetic step of `singular_annulus_bound_explicit`: the product of the measure
+bound `Kmeas · ε₁² / ‖L‖³` and the pointwise bound `2‖L‖ / ε₂` is at most `Csing · ε₁` with
+`Csing = 4 Kmeas / ‖L‖²`, using `ε₁ ≤ 2 ε₂`. -/
+private lemma singular_annulus_bound_arith {Kmeas ε₁ ε₂ : ℝ} {L : ℂ}
+    (hKmeas_pos : 0 < Kmeas) (hL_pos : 0 < ‖L‖) (hε₂_pos : 0 < ε₂)
+    (hε₁_pos : 0 < ε₁) (h_ratio : ε₁ ≤ 2 * ε₂) :
+    Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3 * (2 * ‖L‖ / ε₂) ≤ 4 * Kmeas / ‖L‖ ^ 2 * ε₁ := by
+  rw [show 4 * Kmeas / ‖L‖ ^ 2 * ε₁ = 4 * Kmeas * ε₁ / ‖L‖ ^ 2 by ring,
+    show Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3 * (2 * ‖L‖ / ε₂) =
+        2 * Kmeas * ε₁ ^ 2 * ‖L‖ / (‖L‖ ^ 3 * ε₂) by ring,
+    div_le_div_iff₀ (by positivity : (0:ℝ) < ‖L‖ ^ 3 * ε₂)
+      (by positivity : (0:ℝ) < ‖L‖ ^ 2)]
+  have key : ε₁ ^ 2 ≤ ε₁ * (2 * ε₂) := by
+    rw [sq]; exact mul_le_mul_of_nonneg_left h_ratio hε₁_pos.le
+  nlinarith [mul_pos hKmeas_pos (pow_pos hL_pos 3),
+    show ‖L‖ ^ 3 = ‖L‖ * ‖L‖ ^ 2 from by ring]
 
 /-- Explicit `ε`-independent bound on the singular annular integral for `C²` curves with
 nonzero derivative: the integral `∫ a..b (1[ε₂ < ‖γ t − γ t₀‖ ≤ ε₁]) · (t − t₀)⁻¹` is at most
@@ -303,7 +372,7 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     lt_min (lt_min hδ_meas_pos hρ_pos)
       (lt_min (mul_pos hL_pos h_dist_pos) (mul_pos hL_pos hδ₀'_pos))
   let Csing := 4 * Kmeas / ‖L‖^2
-  refine ⟨Csing, by positivity, δ, hδ_pos, fun ε₁ ε₂ hε₂_pos hε₂_le h_ratio hε₁_lt => ?_⟩
+  refine ⟨Csing, by positivity, δ, hδ_pos, fun ε₁ ε₂ hε₂_pos hε₂_le h_ratio hε₁_lt ↦ ?_⟩
   have hε₁_pos : 0 < ε₁ := hε₂_pos.trans_le hε₂_le
   have hε₁_lt_δ_meas : ε₁ < δ_meas :=
     (hε₁_lt.trans_le (min_le_left _ _)).trans_le (min_le_left _ _)
@@ -313,7 +382,7 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     (hε₁_lt.trans_le (min_le_right _ _)).trans_le (min_le_left _ _)
   have hε₁_lt_Lδ₀' : ε₁ < ‖L‖ * δ₀' :=
     (hε₁_lt.trans_le (min_le_right _ _)).trans_le (min_le_right _ _)
-  have h_localize : ∀ t ∈ Set.Icc a b, ‖γ t - γ t₀‖ ≤ ε₁ → |t - t₀| < δ₁ := fun t ht hγt => by
+  have h_localize : ∀ t ∈ Set.Icc a b, ‖γ t - γ t₀‖ ≤ ε₁ → |t - t₀| < δ₁ := fun t ht hγt ↦ by
     by_contra h_not_lt
     push Not at h_not_lt
     linarith [h_far_bound t ht h_not_lt]
@@ -322,34 +391,30 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
         if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
         then (↑(t - t₀) : ℂ)⁻¹ else 0) = 0 :=
     singular_annulus_lin_integral_zero hL_pos hε₂_pos hε₂_le hε₁_lt_Ldist
-  set f_γ : ℝ → ℂ := fun t =>
+  set f_γ : ℝ → ℂ := fun t ↦
     if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁
     then (↑(t - t₀) : ℂ)⁻¹ else 0 with hf_γ_def
-  set f_lin : ℝ → ℂ := fun t =>
+  set f_lin : ℝ → ℂ := fun t ↦
     if ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁
     then (↑(t - t₀) : ℂ)⁻¹ else 0 with hf_lin_def
-  set d : ℝ → ℂ := fun t => f_γ t - f_lin t with hd_def
+  set d : ℝ → ℂ := fun t ↦ f_γ t - f_lin t with hd_def
   set bound := 2 * ‖L‖ / ε₂ with hbound_def
   have hbound_pos : 0 < bound := by positivity
-  have hd_bound_on_Icc : ∀ t ∈ Set.Icc a b, ‖d t‖ ≤ bound := fun t ht =>
+  have hd_bound_on_Icc : ∀ t ∈ Set.Icc a b, ‖d t‖ ≤ bound := fun t ht ↦
     singular_annulus_diff_pointwise_bound hL_pos hε₂_pos h_localize
       ((min_le_right _ _).trans (min_le_right _ _)) h_upper t ht
   have hf_lin_meas : Measurable f_lin := singular_annulus_f_lin_measurable
-  have hf_lin_bound : ∀ t : ℝ, ‖f_lin t‖ ≤ bound :=
-    fun t => singular_annulus_f_lin_bound hL_pos hε₂_pos t
-  have hf_lin_int : IntervalIntegrable f_lin volume a b := by
-    rw [intervalIntegrable_iff]
-    exact .of_bound measure_Ioc_lt_top
-      hf_lin_meas.aestronglyMeasurable.restrict bound (.of_forall hf_lin_bound)
-  have hf_γ_eq : ∀ t, f_γ t = d t + f_lin t := fun _ => by simp [d]
-  have h_norm_aesm : AEStronglyMeasurable (fun t => ‖γ t - γ t₀‖)
+  have hf_lin_int : IntervalIntegrable f_lin volume a b :=
+    singular_annulus_f_lin_intervalIntegrable (t₀ := t₀) (ε₁ := ε₁) hL_pos hε₂_pos a b
+  have hf_γ_eq : ∀ t, f_γ t = d t + f_lin t := fun _ ↦ by simp [d]
+  have h_norm_aesm : AEStronglyMeasurable (fun t ↦ ‖γ t - γ t₀‖)
       (volume.restrict (Set.Icc a b)) :=
     ((hγ_cont.sub continuousOn_const).norm).aestronglyMeasurable measurableSet_Icc
-  set h' := h_norm_aesm.mk (fun t => ‖γ t - γ t₀‖) with hh'_def
+  set h' := h_norm_aesm.mk (fun t ↦ ‖γ t - γ t₀‖) with hh'_def
   have hh'_sm : StronglyMeasurable h' := h_norm_aesm.stronglyMeasurable_mk
   have hh'_ae : ∀ᵐ t ∂(volume.restrict (Set.Icc a b)), ‖γ t - γ t₀‖ = h' t :=
     h_norm_aesm.ae_eq_mk
-  set f_γ' : ℝ → ℂ := fun t =>
+  set f_γ' : ℝ → ℂ := fun t ↦
     if ε₂ < h' t ∧ h' t ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0 with hf_γ'_def
   have hf_γ'_meas : Measurable f_γ' := by
     refine Measurable.ite (.inter ?_ ?_) ?_ measurable_const
@@ -367,10 +432,10 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     exact .of_bound measure_Ioc_lt_top
       (hf_γ_aesm.sub hf_lin_meas.aestronglyMeasurable.restrict) bound
       ((MeasureTheory.ae_restrict_iff' measurableSet_Ioc).mpr
-        (.of_forall fun t ht => hd_bound_on_Icc t (Set.Ioc_subset_Icc_self ht)))
+        (.of_forall fun t ht ↦ hd_bound_on_Icc t (Set.Ioc_subset_Icc_self ht)))
   rw [show (∫ t in a..b, f_γ t) = (∫ t in a..b, d t) + (∫ t in a..b, f_lin t) by
       rw [← intervalIntegral.integral_add hd_int hf_lin_int]
-      exact intervalIntegral.integral_congr fun t _ => hf_γ_eq t,
+      exact intervalIntegral.integral_congr fun t _ ↦ hf_γ_eq t,
     hJ_lin_zero, add_zero, intervalIntegral.integral_of_le hab.le]
   set γAnn' := {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < δ₀' ∧ ε₂ < h' t ∧ h' t ≤ ε₁}
   set tAnnLin_loc := {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < δ₀' ∧
@@ -381,18 +446,14 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
       continuous_const).measurableSet
   have hLmul_meas : MeasurableSet
       {t : ℝ | ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁} :=
-    .inter (isOpen_lt continuous_const (continuous_const.mul
-        (continuous_abs.comp (continuous_id.sub continuous_const)))).measurableSet
-      (isClosed_le (continuous_const.mul
-        (continuous_abs.comp (continuous_id.sub continuous_const)))
-        continuous_const).measurableSet
+    measurableSet_Lmul_annulus
   have hγAnn'_meas : MeasurableSet γAnn' :=
     measurableSet_Icc.inter (habs_meas.inter ((hh'_sm.measurable measurableSet_Ioi).inter
       (hh'_sm.measurable measurableSet_Iic)))
   have htAnnLin_meas : MeasurableSet tAnnLin_loc :=
     measurableSet_Icc.inter (habs_meas.inter hLmul_meas)
   have hS'_meas : MeasurableSet S' := hγAnn'_meas.symmDiff htAnnLin_meas
-  set d' : ℝ → ℂ := fun t => f_γ' t - f_lin t with hd'_def
+  set d' : ℝ → ℂ := fun t ↦ f_γ' t - f_lin t with hd'_def
   have hd_ae_eq : ∀ᵐ t ∂(volume.restrict (Set.Icc a b)), d t = d' t := by
     filter_upwards [hf_γ_ae_eq] with t ht_eq; simp [d, d', ht_eq]
   rw [show (∫ t in Set.Ioc a b, d t ∂volume) = ∫ t in Set.Ioc a b, d' t ∂volume by
@@ -400,9 +461,9 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     filter_upwards [(MeasureTheory.ae_restrict_iff' measurableSet_Icc).mp hd_ae_eq]
       with t h_eq ht_Ioc
     exact h_eq (Set.Ioc_subset_Icc_self ht_Ioc)]
-  set g_comp : ℝ → ℝ := S'.indicator (fun _ => bound) with hg_comp_def
+  set g_comp : ℝ → ℝ := S'.indicator (fun _ ↦ bound) with hg_comp_def
   have hS'_finite : volume S' < ⊤ :=
-    (MeasureTheory.measure_mono (fun t ht => by
+    (MeasureTheory.measure_mono (fun t ht ↦ by
       rcases ht with ⟨h, _⟩ | ⟨h, _⟩ <;> exact h.1 :
       S' ⊆ Set.Icc a b)).trans_lt measure_Icc_lt_top
   have hS'_vol_bound : volume S' ≤ ENNReal.ofReal (Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3) :=
@@ -422,42 +483,13 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     suffices h_dt_zero : d t = 0 by rw [(ht ht_Icc).symm, h_dt_zero, norm_zero]
     show f_γ t - f_lin t = 0
     have hfγ_eq : f_γ t = f_γ' t := sub_left_inj.mp (ht ht_Icc)
-    by_cases hδ : |t - t₀| < δ₀'
-    · have h_not_sd := ht_S
-      rw [Set.mem_symmDiff] at h_not_sd
-      push Not at h_not_sd
-      have h'_iff_lin :
-          (ε₂ < h' t ∧ h' t ≤ ε₁) ↔ (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) :=
-        ⟨fun ⟨h1, h2⟩ => (h_not_sd.1 ⟨ht_Icc, hδ, h1, h2⟩).2.2,
-         fun ⟨h1, h2⟩ => (h_not_sd.2 ⟨ht_Icc, hδ, h1, h2⟩).2.2⟩
-      have h_agree :
-          (ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) ↔
-          (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := by
-        by_cases ht_eq : t = t₀
-        · subst ht_eq; simp
-        have hinv_ne : (↑(t - t₀) : ℂ)⁻¹ ≠ 0 :=
-          inv_ne_zero (Complex.ofReal_ne_zero.mpr (sub_ne_zero.mpr ht_eq))
-        refine ⟨fun hγ_cond => ?_, fun hlin_cond => ?_⟩
-        · by_contra h_neg
-          rw [show f_γ t = (↑(t - t₀) : ℂ)⁻¹ from if_pos hγ_cond,
-            show f_γ' t = 0 from if_neg (mt h'_iff_lin.mp h_neg)] at hfγ_eq
-          exact hinv_ne hfγ_eq
-        · by_contra h_neg
-          rw [show f_γ' t = (↑(t - t₀) : ℂ)⁻¹ from if_pos (h'_iff_lin.mpr hlin_cond),
-            show f_γ t = 0 from if_neg h_neg] at hfγ_eq
-          exact hinv_ne hfγ_eq.symm
-      by_cases hcond : ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁
-      · simp [f_γ, f_lin, hcond, h_agree.mp hcond]
-      · simp [f_γ, f_lin, hcond, mt h_agree.mpr hcond]
-    · have hγ_fail : ¬(ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁) :=
-        fun ⟨_, h_up⟩ => hδ ((h_localize t ht_Icc h_up).trans_le (min_le_left _ _))
-      have hlin_fail : ¬(ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := fun ⟨_, h_le⟩ => by
-        linarith [mul_le_mul_of_nonneg_left (not_lt.mp hδ) hL_pos.le]
-      simp [f_γ, f_lin, hγ_fail, hlin_fail]
+    rw [sub_eq_zero]
+    exact singular_annulus_f_γ_eq_f_lin_outside_symmDiff hL_pos hε₁_lt_Lδ₀' h_localize
+      (min_le_left _ _) ht_Icc hfγ_eq ht_S
   calc ‖∫ t in Set.Ioc a b, d' t‖
       ≤ ∫ t in Set.Ioc a b, g_comp t :=
         MeasureTheory.norm_integral_le_of_norm_le hg_int_Ioc h_pw_le_restrict
-    _ = ∫ t in (Set.Ioc a b) ∩ S', (fun _ => bound) t := by
+    _ = ∫ t in (Set.Ioc a b) ∩ S', (fun _ ↦ bound) t := by
         rw [MeasureTheory.setIntegral_indicator hS'_meas]
     _ = volume.real ((Set.Ioc a b) ∩ S') * bound := by
         rw [MeasureTheory.setIntegral_const, smul_eq_mul]
@@ -467,16 +499,8 @@ lemma singular_annulus_bound_explicit {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
     _ ≤ (Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3) * bound :=
         mul_le_mul_of_nonneg_right
           (ENNReal.toReal_le_of_le_ofReal (by positivity) hS'_vol_bound) hbound_pos.le
-    _ ≤ Csing * ε₁ := by
-        rw [show Csing * ε₁ = 4 * Kmeas * ε₁ / ‖L‖ ^ 2 by simp [Csing]; ring,
-          show Kmeas * ε₁ ^ 2 / ‖L‖ ^ 3 * bound = 2 * Kmeas * ε₁ ^ 2 * ‖L‖ / (‖L‖ ^ 3 * ε₂) by
-            simp [bound]; ring,
-          div_le_div_iff₀ (by positivity : (0:ℝ) < ‖L‖ ^ 3 * ε₂)
-            (by positivity : (0:ℝ) < ‖L‖ ^ 2)]
-        have key : ε₁ ^ 2 ≤ ε₁ * (2 * ε₂) := by
-          rw [sq]; exact mul_le_mul_of_nonneg_left h_ratio hε₁_pos.le
-        nlinarith [mul_pos hKmeas_pos (pow_pos hL_pos 3),
-          show ‖L‖ ^ 3 = ‖L‖ * ‖L‖ ^ 2 from by ring]
+    _ ≤ Csing * ε₁ :=
+        singular_annulus_bound_arith hKmeas_pos hL_pos hε₂_pos hε₁_pos h_ratio
 
 
 end

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.Theorem518
 import BernoulliRegular.FLT37.PadicL.GaussSumValuation
 
@@ -164,16 +169,11 @@ noncomputable def ofPadicLFunction (L : PadicLFunction 37) : Prop812Data 37 ℚ_
   LpE_ne_zero i _ _ _ := zpow_ne_zero _ (by norm_num)
   congr i _ _ _ := rfl
   gaussVal i _ _ _ := by
-    show (Padic.valuation ((37 : ℚ_[37]) ^ i) : ℚ) / 36 = gaussSumNormalizedValuation 37 i
-    rw [Padic.valuation_pow, padic37_valuation_p_eq_one, gaussSumNormalizedValuation_def]
+    simp only [Padic.valuation_pow, padic37_valuation_p_eq_one, gaussSumNormalizedValuation_def]
     push_cast; norm_num
-  unitVal i _ _ _ := by
-    show (Padic.valuation (1 : ℚ_[37]) : ℚ) / 36 = 0
-    simp
+  unitVal _ _ _ _ := by simp
   LpE_val i := by
-    show (Padic.valuation ((37 : ℚ_[37]) ^ (36 * (L.Lp i).valuation)) : ℚ) / 36 =
-      ((L.Lp i).valuation : ℚ)
-    rw [Padic.valuation_zpow, padic37_valuation_p_eq_one]; push_cast; ring
+    simp only [Padic.valuation_zpow, padic37_valuation_p_eq_one]; push_cast; ring
 
 /-- **Proposition 8.12 for `p = 37, i = 32`** (the `M = 1` value):
 

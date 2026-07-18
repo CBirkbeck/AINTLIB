@@ -84,7 +84,6 @@ theorem exists_dominating_unit_in_localization_via_global_pi
   letI : PlusSubring (Localization.Away s) :=
     localizationLocSubringPlusSubring P T s
   intro hArch_loc T_loc hT_loc
-  -- Set π_loc := algebraMapD P T s π and discharge the local data.
   set π_loc := algebraMapD P T s π with hπ_loc_def
   have hI_loc :
       (locPairOfDefinition P T s hopen).I = Ideal.span {π_loc} :=
@@ -96,7 +95,6 @@ theorem exists_dominating_unit_in_localization_via_global_pi
   have hπ_loc_unit :
       IsUnit ((locPairOfDefinition P T s hopen).A₀.subtype π_loc) :=
     isUnit_algebraMapD_of_isUnit P T s hopen π hπ_unit
-  -- Apply the localized Cor 7.32 application.
   exact exists_dominating_unit_in_localization P T s hopen
     π_loc hI_loc hπ_loc_tn hπ_loc_unit hArch_loc T_loc hT_loc
 

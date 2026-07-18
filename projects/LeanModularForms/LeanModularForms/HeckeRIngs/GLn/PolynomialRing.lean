@@ -229,7 +229,7 @@ lemma T_elem_ppow_in_range (p : ℕ) (hp : p.Prime) (e : Fin 2 → ℕ) (hmono :
       ← T_diag_scalar_mul 2 (p ^ (e 0)) (pow_pos hp.pos _) (ppowDiag 2 p ![0, e 1 - e 0])
         (ppowDiag_pos 2 p hp _)
         (divChain_ppow 2 p _ (by
-          intro i j hij; fin_cases i <;> fin_cases j <;> simp_all [Fin.le_def]))]
+          intro i j hij; fin_cases i <;> fin_cases j <;> simp_all))]
     apply (evalHom 2 p).range.mul_mem
     · rw [← T_pp_pow p hp (e 0), ← T_gen_one_eq_T_pp p hp]
       exact (evalHom 2 p).range.pow_mem (X_one_mem_range p) _
@@ -468,9 +468,10 @@ private lemma det_rep_T_gen_zero_pow_mul (q : {p : ℕ // p.Prime}) (a₀ b₀ :
             (HeckeCoset.rep (T_diag (![1, q.1]))) (HeckeCoset.rep D₂)) D' from by
           show (Finsupp.sum (Finsupp.single _ 1) (fun D₁' b₁ ↦ g'.sum (fun D₂ b₂ ↦
               b₁ • b₂ • HeckeRing.m (GL_pair 2) (HeckeCoset.rep D₁') (HeckeCoset.rep D₂)))) D' = _
-          rw [Finsupp.sum_single_index (by simp [Finsupp.sum]), Finsupp.sum]
-          simp only [one_smul, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul]
-          rfl] at hD'
+          rw [Finsupp.sum_single_index (by simp [Finsupp.sum])]
+          change (∑ D₂ ∈ g'.support, (1 : ℤ) • g' D₂ • HeckeRing.m (GL_pair 2)
+            (HeckeCoset.rep (T_diag (![1, q.1]))) (HeckeCoset.rep D₂)) D' = _
+          simp only [one_smul, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul]] at hD'
       exact hD')
     have hm_ne : (HeckeRing.m (GL_pair 2) (HeckeCoset.rep (T_diag (![1, q.1])))
         (HeckeCoset.rep D₂)) D' ≠ 0 := fun h ↦ hD₂_ne (by rw [h, mul_zero])
@@ -531,7 +532,7 @@ lemma support_mul_exists (f g : HeckeAlgebra 2) (D : HeckeCoset (GL_pair 2))
   have h : (Finsupp.sum f (fun D₁ b₁ ↦ Finsupp.sum g (fun D₂ b₂ ↦
       b₁ • b₂ • HeckeRing.m (GL_pair 2) (HeckeCoset.rep D₁)
         (HeckeCoset.rep D₂)))) D ≠ 0 := hD
-  simp only [Finsupp.sum, Finsupp.finset_sum_apply, Finsupp.smul_apply, smul_eq_mul] at h
+  simp only [Finsupp.sum, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul] at h
   obtain ⟨D₁, hD₁_mem, h₁⟩ := Finset.exists_ne_zero_of_sum_ne_zero h
   obtain ⟨D₂, hD₂_mem, h₂⟩ := Finset.exists_ne_zero_of_sum_ne_zero h₁
   have hfD₁ := Finsupp.mem_support_iff.mp hD₁_mem
@@ -782,7 +783,9 @@ lemma T_ad_one_p_pow_eval_leading (p : ℕ) (hp : p.Prime) (a : ℕ) :
           (T_diag (![1, p] : Fin 2 → ℕ)).rep D2.rep) D_target =
         g.sum (fun D2 b₂ ↦ (b₂ • HeckeRing.m (GL_pair 2)
           (T_diag (![1, p] : Fin 2 → ℕ)).rep D2.rep) D_target) from
-      Finsupp.sum_apply, Finsupp.sum]
+      Finsupp.sum_apply]
+    change ∑ D2 ∈ g.support, (g D2 • HeckeRing.m (GL_pair 2)
+      (T_diag (![1, p] : Fin 2 → ℕ)).rep D2.rep) D_target = 1
     have h_leading_in_supp : D_leading ∈ g.support :=
       Finsupp.mem_support_iff.mpr (ih ▸ one_ne_zero)
     rw [← Finset.sum_erase_add _ _ h_leading_in_supp]
@@ -801,7 +804,8 @@ lemma T_ad_one_p_pow_eval_leading (p : ℕ) (hp : p.Prime) (a : ℕ) :
     -- Goal: ∑ + (g D_leading • m ...) D_target = 1
     -- Strategy: prove the leading term equals 1, then linarith with h_sum_zero
     have h_leading_eq : (g D_leading • HeckeRing.m (GL_pair 2)
-          (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target = 1 := by
+          (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading))
+          D_target = 1 := by
       rw [Finsupp.smul_apply, ih, ← HeckeRing.T_single_one_mul_T_single_one]
       show (1 : ℤ) • (T_elem (![1, p] : Fin 2 → ℕ) * T_elem (![1, p ^ n] : Fin 2 → ℕ)) D_target = 1
       rw [one_smul,
@@ -815,7 +819,8 @@ lemma T_ad_one_p_pow_eval_leading (p : ℕ) (hp : p.Prime) (a : ℕ) :
           (g D_leading • HeckeRing.m (GL_pair 2)
             (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target
         = 0 + (g D_leading • HeckeRing.m (GL_pair 2)
-              (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target :=
+              (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading))
+              D_target :=
           by rw [h_sum_zero]
       _ = (g D_leading • HeckeRing.m (GL_pair 2)
             (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target :=
@@ -887,8 +892,8 @@ lemma monomial_eval_kronecker (p : ℕ) (hp : p.Prime)
 private lemma prod_T_gen_pow_eq_two (p : ℕ) (d : Fin 2 →₀ ℕ) :
     (∏ k ∈ d.support, T_gen 2 p k ^ d k) = T_gen 2 p 0 ^ (d 0) * T_gen 2 p 1 ^ (d 1) := by
   rw [Finset.prod_subset (Finset.subset_univ d.support) (fun k _ hk ↦ by
-    rw [Finsupp.notMem_support_iff.mp hk, pow_zero]; rfl)]
-  rw [Fin.prod_univ_two]; rfl
+    rw [Finsupp.notMem_support_iff.mp hk, pow_zero])]
+  rw [Fin.prod_univ_two]
 
 /-- Evaluating `evalHom 2 p R` at the coset `D` expands as
 `∑_{d ∈ supp R} (R.coeff d) · (T_gen(p,0)^{d 0} · T_gen(p,1)^{d 1}) D`. -/
@@ -917,7 +922,7 @@ private lemma evalHom_apply_eq_sum_monomial (p : ℕ) (R : MvPolynomial (Fin 2) 
 theorem evalHom_injective_two (p : ℕ) (hp : p.Prime) :
     Function.Injective (evalHom 2 p) := by
   intro P Q hPQ
-  rw [← sub_eq_zero]; set R := P - Q with hR_def
+  rw [← sub_eq_zero]; set R := P - Q
   have hR : evalHom 2 p R = 0 := by simp [R, map_sub, hPQ]
   by_contra hR_ne
   obtain ⟨s, hs_mem, hs_min⟩ := Finset.exists_min_image R.support
@@ -987,6 +992,5 @@ noncomputable def R_p_isPolynomialRing :
   RingEquiv.ofBijective (Inj.evalHomR n p hp)
     ⟨Inj.evalHomR_injective n p hp (evalHom_injective n p hp),
      Inj.evalHomR_surjective n p hp (T_gen_generates_R_p n p hp)⟩
-
 
 end HeckeRing.GLn

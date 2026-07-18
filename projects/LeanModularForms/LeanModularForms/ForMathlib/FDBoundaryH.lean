@@ -32,16 +32,16 @@ noncomputable section
 def heightCutoff : ℝ := Real.sqrt 3 / 2 + 1
 
 /-- Segment 2: arc from ρ+1 to i (angle π/3 → π/2). -/
-def fdBoundary_seg2 : ℝ → ℂ := fun t =>
+def fdBoundary_seg2 : ℝ → ℂ := fun t ↦
   Complex.exp ((Real.pi / 3 + (t - 1) * (Real.pi / 2 - Real.pi / 3)) * I)
 
 /-- Segment 3: arc from i to ρ (angle π/2 → 2π/3). -/
-def fdBoundary_seg3 : ℝ → ℂ := fun t =>
+def fdBoundary_seg3 : ℝ → ℂ := fun t ↦
   Complex.exp ((Real.pi / 2 + (t - 2) * (2 * Real.pi / 3 - Real.pi / 2)) * I)
 
 /-- Boundary of the standard fundamental domain at fixed
 height `heightCutoff`, parameterized over [0, 5]. -/
-def fdBoundary : ℝ → ℂ := fun t =>
+def fdBoundary : ℝ → ℂ := fun t ↦
   if t ≤ 1 then
     1 / 2 +
       (heightCutoff - t * (heightCutoff - Real.sqrt 3 / 2)) * I
@@ -63,11 +63,11 @@ def fdBoundary : ℝ → ℂ := fun t =>
 /-- Full partition including endpoints. -/
 def fdBoundaryFullPartition : Finset ℝ := {0, 1, 2, 3, 4, 5}
 
-lemma fdBoundary_at_three :
-    fdBoundary 3 = ellipticPointRho := by
-  simp only [fdBoundary, show ¬(3 : ℝ) ≤ 1 by norm_num,
-    show ¬(3 : ℝ) ≤ 2 by norm_num, le_refl (3 : ℝ),
-    ite_true, ite_false]
+/-- The arc point of segment 3 at parameter `t = 3` is the elliptic point `ρ`. Shared by
+`fdBoundary_at_three` and `fdBoundary_H_at_three`, since segment 3 is height-independent. -/
+private lemma exp_seg3_at_three :
+    Complex.exp ((↑Real.pi / 2 + (↑(3 : ℝ) - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I) =
+      ellipticPointRho := by
   rw [show (↑Real.pi / 2 + (↑(3 : ℝ) - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I =
       ↑(2 * Real.pi / 3) * I by push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin,
     show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
@@ -75,9 +75,16 @@ lemma fdBoundary_at_three :
   simp [ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk]
   ring
 
+lemma fdBoundary_at_three :
+    fdBoundary 3 = ellipticPointRho := by
+  simp only [fdBoundary, show ¬(3 : ℝ) ≤ 1 by norm_num,
+    show ¬(3 : ℝ) ≤ 2 by norm_num, le_refl (3 : ℝ),
+    ite_true, ite_false]
+  exact exp_seg3_at_three
+
 /-- Segment 1 at height H: right vertical from (1/2 + H·i) down
 to ρ+1. -/
-def fdBoundary_seg1_H (H : ℝ) : ℝ → ℂ := fun t =>
+def fdBoundary_seg1_H (H : ℝ) : ℝ → ℂ := fun t ↦
   1 / 2 + (H - t * (H - Real.sqrt 3 / 2)) * I
 
 /-- Segment 2 at height H (H-independent): arc from ρ+1 to i. -/
@@ -87,15 +94,15 @@ def fdBoundary_seg2_H : ℝ → ℂ := fdBoundary_seg2
 def fdBoundary_seg3_H : ℝ → ℂ := fdBoundary_seg3
 
 /-- Segment 4 at height H: left vertical from ρ up to (-1/2 + H·i). -/
-def fdBoundary_seg4_H (H : ℝ) : ℝ → ℂ := fun t =>
+def fdBoundary_seg4_H (H : ℝ) : ℝ → ℂ := fun t ↦
   -1 / 2 + (Real.sqrt 3 / 2 + (t - 3) * (H - Real.sqrt 3 / 2)) * I
 
 /-- Segment 5 at height H: horizontal from (-1/2 + H·i) to (1/2 + H·i). -/
-def fdBoundary_seg5_H (H : ℝ) : ℝ → ℂ := fun t => (t - 9 / 2) + H * I
+def fdBoundary_seg5_H (H : ℝ) : ℝ → ℂ := fun t ↦ (t - 9 / 2) + H * I
 
 /-- Boundary of the standard fundamental domain at variable height H,
 parameterized over [0, 5]. -/
-def fdBoundary_H (H : ℝ) : ℝ → ℂ := fun t =>
+def fdBoundary_H (H : ℝ) : ℝ → ℂ := fun t ↦
   if t ≤ 1 then
     1 / 2 + (H - t * (H - Real.sqrt 3 / 2)) * I
   else if t ≤ 2 then
@@ -133,12 +140,7 @@ lemma fdBoundary_H_at_three (H : ℝ) :
   simp only [fdBoundary_H, show ¬(3 : ℝ) ≤ 1 by norm_num,
     show ¬(3 : ℝ) ≤ 2 by norm_num, le_refl (3 : ℝ),
     ite_true, ite_false]
-  rw [show (↑Real.pi / 2 + (↑(3 : ℝ) - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I =
-      ↑(2 * Real.pi / 3) * I by push_cast; ring, exp_mul_I, ← ofReal_cos, ← ofReal_sin,
-    show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
-    Real.cos_pi_sub, Real.cos_pi_div_three, Real.sin_pi_sub, Real.sin_pi_div_three]
-  simp [ellipticPointRho, ellipticPointRho', UpperHalfPlane.coe_mk]
-  ring
+  exact exp_seg3_at_three
 
 lemma fdBoundary_H_at_four (H : ℝ) :
     fdBoundary_H H 4 = -1 / 2 + H * I := by
@@ -161,29 +163,29 @@ lemma fdBoundary_H_closed (H : ℝ) :
   rw [fdBoundary_H_at_zero, fdBoundary_H_at_five]
 
 private lemma fdBoundary_H_seg1_cont (H : ℝ) :
-    Continuous (fun t : ℝ => (1 : ℂ) / 2 + (↑H - ↑t * (↑H - ↑(Real.sqrt 3) / 2)) * I) := by
+    Continuous (fun t : ℝ ↦ (1 : ℂ) / 2 + (↑H - ↑t * (↑H - ↑(Real.sqrt 3) / 2)) * I) := by
   fun_prop
 
 private lemma fdBoundary_H_seg23_cont :
-    Continuous (fun t : ℝ => exp
+    Continuous (fun t : ℝ ↦ exp
       ((↑Real.pi / 3 + (↑t - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) * I)) := by
   fun_prop
 
 private lemma fdBoundary_H_seg23b_cont :
-    Continuous (fun t : ℝ => exp
+    Continuous (fun t : ℝ ↦ exp
       ((↑Real.pi / 2 + (↑t - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I)) := by
   fun_prop
 
 private lemma fdBoundary_H_seg4_cont (H : ℝ) :
-    Continuous (fun t : ℝ =>
+    Continuous (fun t : ℝ ↦
       (-1 : ℂ) / 2 + (↑(Real.sqrt 3) / 2 + (↑t - 3) * (↑H - ↑(Real.sqrt 3) / 2)) * I) := by
   fun_prop
 
 private lemma fdBoundary_H_seg5_cont (H : ℝ) :
-    Continuous (fun t : ℝ => (↑t - 9 / 2 : ℂ) + ↑H * I) := by
+    Continuous (fun t : ℝ ↦ (↑t - 9 / 2 : ℂ) + ↑H * I) := by
   fun_prop
 
-private def fdBoundary_H_inner34 (H : ℝ) : ℝ → ℂ := fun t =>
+private def fdBoundary_H_inner34 (H : ℝ) : ℝ → ℂ := fun t ↦
   if t ≤ 4 then
     -1 / 2 + (↑(Real.sqrt 3) / 2 + (↑t - 3) * (↑H - ↑(Real.sqrt 3) / 2)) * I
   else (↑t - 9 / 2 : ℂ) + ↑H * I
@@ -195,7 +197,7 @@ private lemma fdBoundary_H_inner34_cont (H : ℝ) : Continuous (fdBoundary_H_inn
       push_cast
       ring)
 
-private def fdBoundary_H_inner234 (H : ℝ) : ℝ → ℂ := fun t =>
+private def fdBoundary_H_inner234 (H : ℝ) : ℝ → ℂ := fun t ↦
   if t ≤ 3 then
     exp ((↑Real.pi / 2 + (↑t - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I)
   else fdBoundary_H_inner34 H t
@@ -215,7 +217,7 @@ private lemma fdBoundary_H_inner234_cont (H : ℝ) : Continuous (fdBoundary_H_in
   push_cast
   ring
 
-private def fdBoundary_H_inner1234 (H : ℝ) : ℝ → ℂ := fun t =>
+private def fdBoundary_H_inner1234 (H : ℝ) : ℝ → ℂ := fun t ↦
   if t ≤ 2 then
     exp ((↑Real.pi / 3 + (↑t - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) * I)
   else fdBoundary_H_inner234 H t
@@ -243,7 +245,7 @@ private lemma fdBoundary_H_eq_layered (H : ℝ) (t : ℝ) :
 @[fun_prop]
 theorem fdBoundary_H_continuous (H : ℝ) :
     Continuous (fdBoundary_H H) := by
-  rw [show fdBoundary_H H = (fun t => if t ≤ 1 then
+  rw [show fdBoundary_H H = (fun t ↦ if t ≤ 1 then
       1 / 2 + (↑H - ↑t * (↑H - ↑(Real.sqrt 3) / 2)) * I
       else fdBoundary_H_inner1234 H t) from funext (fdBoundary_H_eq_layered H)]
   apply Continuous.if_le (fdBoundary_H_seg1_cont H) (fdBoundary_H_inner1234_cont H)

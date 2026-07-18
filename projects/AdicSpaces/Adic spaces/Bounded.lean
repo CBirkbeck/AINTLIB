@@ -235,10 +235,8 @@ theorem IsTopologicallyNilpotent.add_of_nonarch [IsTopologicalRing A] [Nonarchim
     {a b : A} (ha : IsTopologicallyNilpotent a) (hb : IsTopologicallyNilpotent b) :
     IsTopologicallyNilpotent (a + b) := by
   -- `IsTopologicallyNilpotent x = Tendsto (x ^ ·) atTop (𝓝 0)`.
-  have toPB : ∀ {x : A}, IsTopologicallyNilpotent x → IsPowerBounded x :=
-    IsTopologicallyNilpotent.isPowerBounded
-  have ha_pb : IsPowerBounded a := toPB ha
-  have hb_pb : IsPowerBounded b := toPB hb
+  have ha_pb : IsPowerBounded a := IsTopologicallyNilpotent.isPowerBounded ha
+  have hb_pb : IsPowerBounded b := IsTopologicallyNilpotent.isPowerBounded hb
   rw [IsTopologicallyNilpotent, Filter.tendsto_def]
   intro U hU
   -- Shrink `U` to an open additive subgroup `G ⊆ U`.
@@ -365,7 +363,7 @@ private theorem pow_eq_lincomb_of_monic_rel {B : Subring A} {a : A} {N : ℕ}
   by_cases hn : n < N
   · classical exact ⟨fun j ↦ if j = n then 1 else 0, by
       simp [apply_ite (Subtype.val), Finset.sum_ite_eq', Finset.mem_range.mpr hn]⟩
-  · push_neg at hn
+  · rw [not_lt] at hn
     choose d hd using fun i (hi : i ∈ Finset.range N) ↦
       ih (i + (n - N)) (by rw [Finset.mem_range] at hi; omega)
     refine ⟨fun j ↦ -(∑ i ∈ (Finset.range N).attach, p.coeff ↑i * d ↑i i.2 j), ?_⟩
@@ -393,12 +391,12 @@ theorem IsBounded.isPowerBounded_of_isIntegral [IsTopologicalRing A] {B : Subrin
     fun i _ ↦ hB.mul (isBounded_singleton _)).subset ?_
   rintro _ ⟨n, rfl⟩
   have hp_rel : a ^ N = -(∑ i ∈ Finset.range N, (p.coeff i : A) * a ^ i) := by
-    have h := hp_eval; rw [eval₂_eq_sum_range, Finset.sum_range_succ] at h
-    rw [hp_monic.coeff_natDegree, map_one, one_mul, add_comm] at h
-    exact eq_neg_of_add_eq_zero_left h
+    rw [eval₂_eq_sum_range, Finset.sum_range_succ, hp_monic.coeff_natDegree, map_one, one_mul,
+      add_comm] at hp_eval
+    exact eq_neg_of_add_eq_zero_left hp_eval
   suffices key : ∀ n, ∃ c : ℕ → ↥B, a ^ n = ∑ j ∈ Finset.range N, (c j : A) * a ^ j by
     change a ^ n ∈ S; obtain ⟨c, hc⟩ := key n; rw [hc, hS_def]
-    exact Set.finset_sum_mem_finset_sum _ _ _ fun j _ ↦ Set.mul_mem_mul (Subtype.coe_prop _) rfl
+    exact Set.finsetSum_mem_finsetSum _ _ _ fun j _ ↦ Set.mul_mem_mul (Subtype.coe_prop _) rfl
   by_cases hN : N = 0
   · intro n; refine ⟨0, ?_⟩; simp only [hN, Finset.range_zero, Finset.sum_empty]
     have h1 : (1 : A) = 0 := by simpa [hN] using hp_rel
@@ -613,9 +611,8 @@ theorem IsTopologicallyNilpotent.isUnit_one_sub_mul_of_isPowerBounded
     {a y : A} (ha : IsTopologicallyNilpotent a)
     (hy : TopologicalRing.IsPowerBounded y) :
     IsUnit (1 - a * y) := by
-  have h_mul : IsTopologicallyNilpotent (y * a) := hy.isTopologicallyNilpotent_mul ha
-  rw [show a * y = y * a from mul_comm _ _]
-  exact h_mul.isUnit_one_sub
+  rw [mul_comm a y]
+  exact (hy.isTopologicallyNilpotent_mul ha).isUnit_one_sub
 
 /-- Symmetric version: `1 - y*a` is a unit when `a` is topologically nilpotent
 and `y` is power-bounded. -/
@@ -640,9 +637,7 @@ open TopologicalRing in
 /-- The topologically nilpotent elements form an ideal of the power-bounded subring `A°`. -/
 def topNilpIdeal : Ideal (powerBoundedSubring.toSubring A) where
   carrier := {x | IsTopologicallyNilpotent (x : A)}
-  zero_mem' := by
-    show IsTopologicallyNilpotent ((0 : powerBoundedSubring.toSubring A) : A)
-    exact IsTopologicallyNilpotent.zero
+  zero_mem' := IsTopologicallyNilpotent.zero
   add_mem' := by
     intro x y hx hy
     show IsTopologicallyNilpotent ((x + y : powerBoundedSubring.toSubring A) : A)
@@ -657,8 +652,11 @@ def topNilpIdeal : Ideal (powerBoundedSubring.toSubring A) where
     exact (c.2 : IsPowerBounded (c : A)).isTopologicallyNilpotent_mul hx
 
 open TopologicalRing in
+set_option backward.isDefEq.respectTransparency false in
+omit [T2Space A] [CompleteSpace A] [IsUniformAddGroup A] in
 /-- `1 - det (1 - B)` is topologically nilpotent when every entry of `B` is. -/
-theorem IsTopologicallyNilpotent.one_sub_det_one_sub_matrix    {n : Type*} [Fintype n] [DecidableEq n] (B : Matrix n n A)
+theorem IsTopologicallyNilpotent.one_sub_det_one_sub_matrix {n : Type*} [Fintype n]
+    [DecidableEq n] (B : Matrix n n A)
     (hB : ∀ i j, IsTopologicallyNilpotent (B i j)) :
     IsTopologicallyNilpotent (1 - (1 - B).det) := by
   let B' : Matrix n n (powerBoundedSubring.toSubring A) :=
@@ -695,7 +693,8 @@ theorem IsTopologicallyNilpotent.one_sub_det_one_sub_matrix    {n : Type*} [Fint
 /-- **Matrix Nakayama** (BGR Lemma 1.2.4/6, the form used in §3.7.2/1): if every entry of an
 `n × n` matrix `B` over a complete Hausdorff nonarchimedean commutative ring `A` is topologically
 nilpotent then `1 - B` is invertible. -/
-theorem IsTopologicallyNilpotent.isUnit_one_sub_matrix    {n : Type*} [Fintype n] [DecidableEq n] (B : Matrix n n A)
+theorem IsTopologicallyNilpotent.isUnit_one_sub_matrix {n : Type*} [Fintype n]
+    [DecidableEq n] (B : Matrix n n A)
     (hB : ∀ i j, IsTopologicallyNilpotent (B i j)) :
     IsUnit (1 - B) := by
   rw [Matrix.isUnit_iff_isUnit_det]
@@ -718,10 +717,7 @@ theorem eq_zero_of_isUnit_matrix_of_forall_sum_smul_eq_zero
       C * (↑u : Matrix n n A) = 1 ∧ (↑u : Matrix n n A) * C = 1 :=
     ⟨((u⁻¹ : (Matrix n n A)ˣ) : Matrix n n A), u.inv_mul, u.mul_inv⟩
   calc y k
-      = ∑ j, (1 : Matrix n n A) k j • y j := by
-        rw [Finset.sum_eq_single k
-          (fun j _ hjk => by rw [Matrix.one_apply_ne hjk.symm, zero_smul])
-          (fun h => absurd (Finset.mem_univ k) h), Matrix.one_apply_eq, one_smul]
+      = ∑ j, (1 : Matrix n n A) k j • y j := by simp [Matrix.one_apply]
     _ = ∑ j, (C * (↑u : Matrix n n A)) k j • y j := by rw [hC1]
     _ = ∑ j, (∑ i, C k i * (↑u : Matrix n n A) i j) • y j := by simp_rw [Matrix.mul_apply]
     _ = ∑ j, ∑ i, (C k i * (↑u : Matrix n n A) i j) • y j := by simp_rw [Finset.sum_smul]
@@ -743,8 +739,5 @@ theorem eq_zero_of_forall_eq_sum_topNilp_smul    {n : Type*} [Fintype n] [Decida
   have h1 : ∑ j, (1 - B : Matrix n n A) i j • y j
       = (∑ j, (1 : Matrix n n A) i j • y j) - ∑ j, B i j • y j := by
     simp_rw [Matrix.sub_apply, sub_smul, Finset.sum_sub_distrib]
-  rw [h1, show (∑ j, (1 : Matrix n n A) i j • y j) = y i from by
-    rw [Finset.sum_eq_single i
-      (fun j _ hji => by rw [Matrix.one_apply_ne hji.symm, zero_smul])
-      (fun h => absurd (Finset.mem_univ i) h), Matrix.one_apply_eq, one_smul],
+  rw [h1, show (∑ j, (1 : Matrix n n A) i j • y j) = y i by simp [Matrix.one_apply],
     ← hy i, sub_self]

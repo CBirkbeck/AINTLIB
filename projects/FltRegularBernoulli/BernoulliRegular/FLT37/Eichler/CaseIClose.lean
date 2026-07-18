@@ -269,7 +269,7 @@ private theorem factorRoot_mem (i : ℕ) :
       ((zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger) 37 :=
     (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot
   rw [Polynomial.mem_nthRootsFinset (by norm_num)]
-  unfold factorRoot
+  simp only [factorRoot]
   rw [← pow_mul, mul_comm, pow_mul, hμ.pow_eq_one, one_pow]
 
 private def factorIdealData
@@ -491,7 +491,7 @@ private theorem mk0_factorProdNZ
     (hcaseI : ¬ (37 : ℤ) ∣ a * b * c) (n : Fin 5 → ℕ) :
     ClassGroup.mk0 (factorProdNZ heq hgcd hcaseI n) =
       ∏ i : Fin 5, factorClass heq hgcd hcaseI (i.1 + 1) ^ (n i) := by
-  unfold factorProdNZ
+  simp only [factorProdNZ]
   rw [map_prod]
   exact Finset.prod_congr rfl (fun i _ ↦ by rw [map_pow, factorClass_eq_mk0])
 
@@ -526,7 +526,7 @@ private theorem factorProdNZ_pow_val
     (hcaseI : ¬ (37 : ℤ) ∣ a * b * c) (n : Fin 5 → ℕ) :
     ((factorProdNZ heq hgcd hcaseI n : Ideal (𝓞 (CyclotomicField 37 ℚ))) ^ 37) =
       ∏ i : Fin 5, Ideal.span ({factorElt a b (i.1 + 1)} : Set _) ^ (n i) := by
-  unfold factorProdNZ factorElt
+  simp only [factorProdNZ, factorElt]
   rw [Submonoid.coe_finsetProd, ← Finset.prod_pow]
   refine Finset.prod_congr rfl (fun i _ ↦ ?_)
   rw [SubmonoidClass.coe_pow, ← pow_mul, mul_comm, pow_mul, ← factorNZ_span]
@@ -586,7 +586,7 @@ private theorem conj_factorRoot (k : ℕ) :
     ringOfIntegersComplexConj (CyclotomicField 37 ℚ) (factorRoot k) =
       (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ (36 * k) := by
   haveI := eichlerCM
-  unfold factorRoot
+  simp only [factorRoot]
   rw [map_pow, conj_zeta_eq, ← pow_mul, mul_comm]
 
 private theorem conj_factorElt (a b : ℤ) (k : ℕ) :
@@ -596,7 +596,7 @@ private theorem conj_factorElt (a b : ℤ) (k : ℕ) :
         (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger ^ (36 * k) *
           (b : 𝓞 (CyclotomicField 37 ℚ)) := by
   haveI := eichlerCM
-  unfold factorElt
+  simp only [factorElt]
   rw [map_add, map_mul, conj_factorRoot]
   congr 1 <;> [exact map_intCast _ a; rw [map_intCast]]
 
@@ -965,8 +965,7 @@ private theorem caseI_bounded_deriv (c : ℕ → ℤ)
         ∑ k ∈ Finset.range 36, ((c k - c 36 : ℤ) : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ k :=
       Fin.sum_univ_eq_sum_range
         (fun k ↦ ((c k - c 36 : ℤ) : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ k) 36
-    rw [heq, ← hsum37]
-    exact hmem
+    rwa [heq, ← hsum37]
   have hdvd : ∀ k : Fin 36, (37 : ℤ) ∣ (c k.1 - c 36) :=
     caseI_dvd_of_sum_zeta_pow_mem (fun k ↦ c k.1 - c 36) hmem'
   have hsplit2 : ∑ k ∈ Finset.range 37, ((k : ℤ) * c k : 𝓞 (CyclotomicField 37 ℚ)) *
@@ -1084,7 +1083,7 @@ private theorem caseI_deriv_step (P : ℤ[X])
       rw [show evZ S = Polynomial.aeval ζ S from rfl,
         Polynomial.aeval_eq_sum_range' (by omega : S.natDegree < 37)]
       refine Finset.sum_congr rfl (fun k _ ↦ by rw [Algebra.smul_def]; rfl)
-    rw [← hevSsum]; exact hP
+    rwa [← hevSsum]
   · rw [Ideal.mem_span_singleton]
     exact ⟨(1 - ζ) * ζ ^ 36 * evZ Q, by ring⟩
 
@@ -1093,7 +1092,6 @@ private theorem prod_mul_derivative_prod_pow {ι : Type*} [DecidableEq ι] (s : 
     (∏ j ∈ s, f j) * derivative (∏ j ∈ s, f j ^ e j) =
       (∏ j ∈ s, f j ^ e j) *
         ∑ k ∈ s, (Polynomial.C (e k : ℤ)) * derivative (f k) * ∏ j ∈ s.erase k, f j := by
-  classical
   rw [Polynomial.derivative_prod_finset, Finset.mul_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl (fun k hk ↦ ?_)
   rw [Polynomial.derivative_pow]
@@ -1421,15 +1419,16 @@ private theorem caseI_evZ_Ltil_mem
   have hevP : evZ P = FT - ζ ^ v * GT := by
     rw [hP, map_sub, map_mul, map_pow, evZ_X]
   have hPmem : evZ P ∈ Ideal.span ({(37 : 𝓞 (CyclotomicField 37 ℚ))} : Set _) := by
-    rw [hevP]; exact hKEY
+    rwa [hevP]
   have hDERIV := caseI_deriv_step P hPmem
   have hclF : DT * evZ (derivative (FpolyTot a b nPos nNeg)) = FT * NF := by
     rw [hDT, hFT, hNF, ← map_mul, ← map_mul, Dpoly_mul_derivative_FpolyTot]
   have hclG : DT * evZ (derivative (GpolyTot a b nPos nNeg)) = GT * NG := by
-    rw [hDT, hGT, hNG, ← map_mul, ← map_mul]
-    congr 1
-    rw [show GpolyTot a b nPos nNeg = FpolyTot a b nNeg nPos from rfl,
-      Dpoly_mul_derivative_FpolyTot]
+    have hpoly : Dpoly a b * derivative (GpolyTot a b nPos nNeg) =
+        GpolyTot a b nPos nNeg * NPoly a b nNeg nPos := by
+      rw [show GpolyTot a b nPos nNeg = FpolyTot a b nNeg nPos from rfl,
+        Dpoly_mul_derivative_FpolyTot]
+    rw [hDT, hGT, hNG, ← map_mul, ← map_mul, hpoly]
   have hderivP : evZ (derivative P) =
       evZ (derivative (FpolyTot a b nPos nNeg)) -
         (v : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ (v - 1) * GT -
@@ -1624,10 +1623,9 @@ private theorem caseI_dvd_Ltil_coeff
   have hmem' : (∑ k : Fin 36,
       ((Ltilpoly a b nPos nNeg v).coeff k.1 : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ (k : ℕ)) ∈
       Ideal.span ({(37 : 𝓞 (CyclotomicField 37 ℚ))} : Set _) := by
-    rw [Fin.sum_univ_eq_sum_range
+    rwa [Fin.sum_univ_eq_sum_range
       (fun k ↦ ((Ltilpoly a b nPos nNeg v).coeff k : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ k) 36,
       ← hsum]
-    exact hmem
   have hdvd36 : ∀ k : Fin 36, (37 : ℤ) ∣ (Ltilpoly a b nPos nNeg v).coeff k.1 :=
     caseI_dvd_of_sum_zeta_pow_mem (fun k ↦ (Ltilpoly a b nPos nNeg v).coeff k.1) hmem'
   intro k
@@ -1785,7 +1783,6 @@ private theorem caseI_a_sq_eq_b_sq
   have hexi : ∃ i : Fin 5, (nPos i : ℤ) - (nNeg i : ℤ) ≠ 0 := by
     by_contra! h
     exact hne (funext fun i ↦ by have := h i; omega)
-  classical
   set i₀ := (Finset.univ.filter
     (fun i : Fin 5 ↦ (nPos i : ℤ) - (nNeg i : ℤ) ≠ 0)).min' (by
       rw [Finset.filter_nonempty_iff]; obtain ⟨i, hi⟩ := hexi; exact ⟨i, Finset.mem_univ i, hi⟩)

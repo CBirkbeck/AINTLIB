@@ -1,6 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
-import BernoulliRegular.FLT37.Hilbert90
+module
 
+public import BernoulliRegular.FLT37.Hilbert90
 
 /-!
 # LV010-A: caseI ideal-principalization under `¬ p ∣ h⁺`
@@ -26,7 +26,7 @@ LV010-C (`is_principal` reassembly), this completes the case-I proof.
 ## References
 
 * Diekmann (2023), §4 (Vandiver descent).
-* Project file `BernoulliRegular/FLT37/Hilbert90.lean` line 375
+* Project file `BernoulliRegular/FLT37/Hilbert90.lean`
   (`isPrincipal_of_pow_principal_of_class_eq_complexConj_of_VC`).
 -/
 
@@ -34,7 +34,7 @@ LV010-C (`is_principal` reassembly), this completes the case-I proof.
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension Ideal
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular
 
@@ -48,7 +48,6 @@ variable {p : ℕ} [hp : Fact p.Prime]
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
   [IsCMField K]
 
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **`¬ p ∣ h⁺` is the same as `p.Coprime |Cl(K⁺)|`.** Direct via
 `Nat.Prime.coprime_iff_not_dvd`. The cardinality unfolds to `hPlus K`. -/
@@ -56,7 +55,6 @@ theorem coprime_card_classGroup_Kplus_of_not_dvd_hPlus (h_not_dvd : ¬ (p : ℕ)
     p.Coprime (Fintype.card (ClassGroup (𝓞 (NumberField.maximalRealSubfield K)))) :=
   (Nat.Prime.coprime_iff_not_dvd hp.out).mpr h_not_dvd
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **LV010-A: case-I ideal principalization under `¬ p ∣ h⁺`.**
 Drop-in replacement for `isPrincipal_of_isPrincipal_pow_of_coprime`
 (flt-regular's regularity-based principalization).

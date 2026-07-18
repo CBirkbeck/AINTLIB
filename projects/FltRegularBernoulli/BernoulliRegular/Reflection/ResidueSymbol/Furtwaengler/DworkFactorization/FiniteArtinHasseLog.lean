@@ -173,7 +173,7 @@ theorem finiteArtinHasseLog_mem_map_Q (N : ℕ)
       Ideal.map (Ideal.Quotient.mk (F.Q ^ (N + 1))) F.Q := by
   classical
   rw [finiteArtinHasseLog]
-  exact Ideal.sum_mem _ fun r _hr => F.finiteArtinHasseLogTerm_mem_map_Q N r hx
+  exact Ideal.sum_mem _ fun r _hr ↦ F.finiteArtinHasseLogTerm_mem_map_Q N r hx
 
 /-- Extending the Artin-Hasse log sum past `N` does not change its value
 modulo `Q^(N+1)`. -/

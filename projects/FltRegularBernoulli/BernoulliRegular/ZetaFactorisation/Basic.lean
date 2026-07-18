@@ -29,7 +29,7 @@ noncomputable section
 
 open NumberField
 open Polynomial
-open scoped Topology nonZeroDivisors
+open scoped Topology
 
 namespace BernoulliRegular
 
@@ -48,12 +48,12 @@ lemma neZero_p : NeZero p :=
 /-- A chosen multiplicative equivalence between complex-valued Dirichlet
 characters mod `p` and the unit group `(ZMod p)ˣ`. -/
 noncomputable def dirichletCharacterMulEquivUnits : DirichletCharacter ℂ p ≃* (ZMod p)ˣ := by
-  letI : NeZero p := ⟨hp.1.ne_zero⟩
+  let : NeZero p := ⟨hp.1.ne_zero⟩
   exact (DirichletCharacter.mulEquiv_units ℂ p).some
 
 /-- There are exactly `p - 1` complex-valued Dirichlet characters modulo `p`. -/
 lemma card_dirichletCharacter_complex : Nat.card (DirichletCharacter ℂ p) = p - 1 := by
-  letI := neZero_p (p := p)
+  let := neZero_p (p := p)
   rw [DirichletCharacter.card_eq_totient_of_hasEnoughRootsOfUnity, Nat.totient_prime hp.1]
 
 /-- For prime modulus `p`, the `L`-function of the trivial character is
@@ -61,18 +61,19 @@ lemma card_dirichletCharacter_complex : Nat.card (DirichletCharacter ℂ p) = p 
 lemma LFunction_trivial_eq_mul_riemannZeta {s : ℂ} (hs : s ≠ 1) :
     DirichletCharacter.LFunctionTrivChar p s =
       (1 - (p : ℂ) ^ (-s)) * riemannZeta s := by
-  letI := neZero_p (p := p)
+  let := neZero_p (p := p)
   have hpf : Nat.primeFactors p = {p} := by
     simpa using (Nat.primeFactors_prime_pow (p := p) (k := 1) (by decide : (1 : ℕ) ≠ 0) hp.1)
   rw [DirichletCharacter.LFunctionTrivChar_eq_mul_riemannZeta (N := p) hs]
   rw [hpf, Finset.prod_singleton]
 
 /-- The cyclotomic field `K` has degree `p - 1` over `ℚ`. -/
-lemma finrank_rat_eq_card_characters : Module.finrank ℚ K = Nat.card (DirichletCharacter ℂ p) := by
+lemma finrank_rat_eq_card_characters :
+    Module.finrank ℚ K = Nat.card (DirichletCharacter ℂ p) := by
   rw [IsCyclotomicExtension.finrank K (Polynomial.cyclotomic.irreducible_rat hp.1.pos),
     Nat.totient_prime hp.1, card_dirichletCharacter_complex (p := p)]
 
-/-! ### Step A — local factor definitions -/
+/-! ### Local factor definitions -/
 
 /-- The rational prime ideal `(ℓ)` inside `ℤ`. -/
 noncomputable def rationalPrimeIdeal (ℓ : ℕ) : Ideal ℤ :=
@@ -90,12 +91,12 @@ noncomputable def nontrivialCharacters : Finset (DirichletCharacter ℂ p) := by
 /-- The even nontrivial Dirichlet characters mod `p`, as a finite set. -/
 noncomputable def evenNontrivialCharacters : Finset (DirichletCharacter ℂ p) := by
   classical
-  exact Finset.univ.filter fun χ => χ.Even ∧ χ ≠ 1
+  exact Finset.univ.filter fun χ ↦ χ.Even ∧ χ ≠ 1
 
 /-- The odd Dirichlet characters mod `p`, as a finite set. -/
 noncomputable def oddCharacters : Finset (DirichletCharacter ℂ p) := by
   classical
-  exact Finset.univ.filter fun χ => χ.Odd
+  exact Finset.univ.filter fun χ ↦ χ.Odd
 
 /-- The inverse of an odd Dirichlet character stays in `oddCharacters`. -/
 theorem inv_mem_oddCharacters (p : ℕ) {χ : DirichletCharacter ℂ p}
@@ -113,23 +114,23 @@ noncomputable def charLocalFactor (ℓ : ℕ) (s : ℂ) : ℂ :=
 
 /-- The nontrivial part of the character-side local Euler factor. -/
 noncomputable def nontrivialCharLocalFactor (ℓ : ℕ) (s : ℂ) : ℂ :=
-  Finset.prod (nontrivialCharacters (p := p)) fun χ =>
+  Finset.prod (nontrivialCharacters (p := p)) fun χ ↦
     (1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s))
 
 /-- The even nontrivial part of the character-side local Euler factor. -/
 noncomputable def evenCharLocalFactor (ℓ : ℕ) (s : ℂ) : ℂ :=
-  Finset.prod (evenNontrivialCharacters (p := p)) fun χ =>
+  Finset.prod (evenNontrivialCharacters (p := p)) fun χ ↦
     (1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s))
 
 /-- The odd part of the character-side local Euler factor. -/
 noncomputable def oddCharLocalFactor (ℓ : ℕ) (s : ℂ) : ℂ :=
-  Finset.prod (oddCharacters (p := p)) fun χ =>
+  Finset.prod (oddCharacters (p := p)) fun χ ↦
     (1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s))
 
 /-- The Dedekind-side local Euler factor at a rational prime `ℓ`, written as a
 finite product over the primes of `𝓞 K` lying above `(ℓ)`. -/
 noncomputable def dedekindLocalFactor (ℓ : ℕ) (s : ℂ) : ℂ :=
-  Finset.prod (primesOverFinset K ℓ) fun P =>
+  Finset.prod (primesOverFinset K ℓ) fun P ↦
     (1 - (Ideal.absNorm P : ℂ) ^ (-s))
 
 /-- The global product of Dirichlet `L`-functions over all characters mod `p`. -/
@@ -138,24 +139,22 @@ noncomputable def LProduct (s : ℂ) : ℂ :=
 
 /-- The nontrivial part of the global `L`-product. -/
 noncomputable def nontrivialLProduct (s : ℂ) : ℂ :=
-  Finset.prod (nontrivialCharacters (p := p)) fun χ => DirichletCharacter.LFunction χ s
+  Finset.prod (nontrivialCharacters (p := p)) fun χ ↦ DirichletCharacter.LFunction χ s
 
 /-- The even nontrivial part of the global `L`-product. -/
 noncomputable def evenLProduct (s : ℂ) : ℂ :=
-  Finset.prod (evenNontrivialCharacters (p := p)) fun χ =>
+  Finset.prod (evenNontrivialCharacters (p := p)) fun χ ↦
     DirichletCharacter.LFunction χ s
 
 /-- The odd part of the global `L`-product. -/
 noncomputable def oddLProduct (s : ℂ) : ℂ :=
-  Finset.prod (oddCharacters (p := p)) fun χ => DirichletCharacter.LFunction χ s
+  Finset.prod (oddCharacters (p := p)) fun χ ↦ DirichletCharacter.LFunction χ s
 
 /-- The distinguished primitive `p`-th root of unity viewed in `𝓞 K`. -/
 noncomputable def zetaInteger : 𝓞 K :=
   (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger
 
-/-! ### Step B — easy analytic rewrites -/
-
-/-! ### Step C — character-side local factor skeleton -/
+/-! ### Character-side local factors -/
 
 /-- If `ℓ` is a prime different from `p`, then `p` and `ℓ` are coprime. -/
 lemma coprime_of_prime_ne {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) : p.Coprime ℓ :=
@@ -191,10 +190,10 @@ lemma charLocalFactor_eq_trivial_mul_nontrivial {ℓ : ℕ} [Fact ℓ.Prime]
     charLocalFactor (p := p) ℓ s =
       (1 - (ℓ : ℂ) ^ (-s)) * nontrivialCharLocalFactor p ℓ s := by
   classical
-  unfold charLocalFactor nontrivialCharLocalFactor
+  simp only [charLocalFactor, nontrivialCharLocalFactor]
   rw [show nontrivialCharacters (p := p) = Finset.univ.erase 1 from rfl,
     ← Finset.mul_prod_erase Finset.univ
-      (fun χ : DirichletCharacter ℂ p => 1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s))
+      (fun χ : DirichletCharacter ℂ p ↦ 1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s))
       (Finset.mem_univ 1)]
   have hℓ_unit : IsUnit ((ℓ : ZMod p)) := by
     rw [ZMod.isUnit_iff_coprime]
@@ -208,19 +207,19 @@ lemma nontrivialCharLocalFactor_eq_even_mul_odd {ℓ : ℕ} {s : ℂ} :
   unfold nontrivialCharLocalFactor evenCharLocalFactor oddCharLocalFactor
     nontrivialCharacters evenNontrivialCharacters oddCharacters
   have hdisj : Disjoint
-      (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even ∧ χ ≠ 1)
-      (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Odd) := by
+      (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Even ∧ χ ≠ 1)
+      (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Odd) := by
     refine Finset.disjoint_left.mpr ?_
     intro χ hχe hχo
     rw [Finset.mem_filter] at hχe hχo
     exact DirichletCharacter.Odd.not_even χ hχo.2 hχe.2.1
   have hunion : Finset.univ.erase (1 : DirichletCharacter ℂ p) =
-      Finset.univ.filter (fun χ : DirichletCharacter ℂ p => χ.Even ∧ χ ≠ 1) ∪
-        Finset.univ.filter (fun χ : DirichletCharacter ℂ p => χ.Odd) := by
+      Finset.univ.filter (fun χ : DirichletCharacter ℂ p ↦ χ.Even ∧ χ ≠ 1) ∪
+        Finset.univ.filter (fun χ : DirichletCharacter ℂ p ↦ χ.Odd) := by
     ext χ
     simp only [Finset.mem_erase, Finset.mem_union, Finset.mem_filter, Finset.mem_univ,
       and_true, true_and]
-    refine ⟨fun hne => ?_, ?_⟩
+    refine ⟨fun hne ↦ ?_, ?_⟩
     · rcases DirichletCharacter.even_or_odd χ with he | ho
       · exact Or.inl ⟨he, hne⟩
       · exact Or.inr ho
@@ -237,7 +236,7 @@ lemma char_values_factor_through_unit_order {ℓ : ℕ} [Fact ℓ.Prime] (hℓp 
     χ (ℓ : ZMod p) ^ localResidueDegree (p := p) ℓ hℓp = 1 := by
   have hval : ((unitOfPrimeNe p ℓ hℓp : (ZMod p)ˣ) : ZMod p) = (ℓ : ZMod p) := by
     simp [unitOfPrimeNe]
-  unfold localResidueDegree
+  simp only [localResidueDegree]
   rw [← hval, ← map_pow, ← Units.val_pow_eq_pow_val, pow_orderOf_eq_one,
     Units.val_one, map_one]
 
@@ -255,8 +254,8 @@ lemma prod_nthRootsFinset_one_sub_mul (d : ℕ) (hd : 0 < d) (T : ℂ) :
     have heval := congrArg (Polynomial.eval T⁻¹) hpoly
     simp only [Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_sub,
       Polynomial.eval_one, Polynomial.eval_prod, Polynomial.eval_C] at heval
-    have key : ∀ ζ : ℂ, (1 - ζ * T) = T * (T⁻¹ - ζ) := fun ζ => by field_simp
-    rw [Finset.prod_congr rfl (fun ζ _ => key ζ), Finset.prod_mul_distrib,
+    have key : ∀ ζ : ℂ, (1 - ζ * T) = T * (T⁻¹ - ζ) := fun ζ ↦ by field_simp
+    rw [Finset.prod_congr rfl (fun ζ _ ↦ key ζ), Finset.prod_mul_distrib,
       Finset.prod_const, hcard, ← heval]
     have hTT : T ^ d * T⁻¹ ^ d = 1 := by rw [← mul_pow, mul_inv_cancel₀ hT, one_pow]
     linear_combination hTT
@@ -317,16 +316,16 @@ lemma prod_pow_primRoot_eq_pow {n : ℕ} (hn : 0 < n) (a : ℕ)
       h_da, mul_one]
   rw [show (∏ k ∈ Finset.range n, (1 - ω ^ (k * a) * T)) =
       ∏ k ∈ Finset.range n, (1 - ω ^ ((k % d) * a) * T) from
-    Finset.prod_congr rfl (fun k _ => by rw [← h_period k])]
+    Finset.prod_congr rfl (fun k _ ↦ by rw [← h_period k])]
   rw [← Finset.prod_fiberwise_of_maps_to
-    (g := fun k : ℕ => k % d) (t := Finset.range d)
-    (fun k _ => Finset.mem_range.mpr (Nat.mod_lt _ hd_pos))]
+    (g := fun k : ℕ ↦ k % d) (t := Finset.range d)
+    (fun k _ ↦ Finset.mem_range.mpr (Nat.mod_lt _ hd_pos))]
   have h_inner : ∀ j ∈ Finset.range d,
-      (∏ k ∈ (Finset.range n).filter (fun k => k % d = j), (1 - ω ^ ((k % d) * a) * T)) =
+      (∏ k ∈ (Finset.range n).filter (fun k ↦ k % d = j), (1 - ω ^ ((k % d) * a) * T)) =
       (1 - ω ^ (j * a) * T) ^ c := by
     intro j hj
-    have h_rewrite : ∀ k ∈ (Finset.range n).filter (fun k => k % d = j),
-        (1 - ω ^ ((k % d) * a) * T) = (1 - ω ^ (j * a) * T) := fun k hk => by
+    have h_rewrite : ∀ k ∈ (Finset.range n).filter (fun k ↦ k % d = j),
+        (1 - ω ^ ((k % d) * a) * T) = (1 - ω ^ (j * a) * T) := fun k hk ↦ by
       rw [Finset.mem_filter] at hk; rw [hk.2]
     rw [Finset.prod_congr rfl h_rewrite, Finset.prod_const]
     congr 1
@@ -336,11 +335,11 @@ lemma prod_pow_primRoot_eq_pow {n : ℕ} (hn : 0 < n) (a : ℕ)
       have hd_mul : d * c = n := by rw [mul_comm, hc_mul_d]
       exact Nat.eq_of_mul_eq_mul_left hd_pos (by rw [hd_mul, hcd'])
     rw [hc_eq]
-    have hset : (Finset.range n).filter (fun k => k % d = j) =
-        (Finset.range c').image (fun m => j + m * d) := by
+    have hset : (Finset.range n).filter (fun k ↦ k % d = j) =
+        (Finset.range c').image (fun m ↦ j + m * d) := by
       ext k
       simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image]
-      refine ⟨fun ⟨hk_lt, hk_mod⟩ => ?_, ?_⟩
+      refine ⟨fun ⟨hk_lt, hk_mod⟩ ↦ ?_, ?_⟩
       · have hk_dec : k = j + (k / d) * d := by
           have h1 : k = d * (k / d) + k % d := (Nat.div_add_mod k d).symm
           rw [hk_mod, mul_comm d (k / d)] at h1
@@ -354,15 +353,15 @@ lemma prod_pow_primRoot_eq_pow {n : ℕ} (hn : 0 < n) (a : ℕ)
         refine ⟨?_, ?_⟩
         · rw [hcd', mul_comm]; nlinarith
         · rw [Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hj]
-    rw [hset, Finset.card_image_of_injective _ (fun x y hxy => by simp at hxy; omega),
+    rw [hset, Finset.card_image_of_injective _ (fun x y hxy ↦ by simp at hxy; omega),
       Finset.card_range]
   rw [Finset.prod_congr rfl h_inner, Finset.prod_pow]
   congr 1
-  have h_inj : Set.InjOn (fun j : ℕ => (ω ^ a) ^ j) ↑(Finset.range d) := by
+  have h_inj : Set.InjOn (fun j : ℕ ↦ (ω ^ a) ^ j) ↑(Finset.range d) := by
     intro x hx y hy hxy
     simp only [Finset.coe_range, Set.mem_Iio] at hx hy
     exact hω_a_prim.pow_inj hx hy hxy
-  have h_image : Finset.image (fun j : ℕ => (ω ^ a) ^ j) (Finset.range d) =
+  have h_image : Finset.image (fun j : ℕ ↦ (ω ^ a) ^ j) (Finset.range d) =
       Polynomial.nthRootsFinset d (1 : ℂ) := by
     apply Finset.eq_of_subset_of_card_le
     · intro ζ hζ
@@ -373,9 +372,9 @@ lemma prod_pow_primRoot_eq_pow {n : ℕ} (hn : 0 < n) (a : ℕ)
     · rw [hω_a_prim.card_nthRootsFinset, Finset.card_image_of_injOn h_inj, Finset.card_range]
   calc ∏ j ∈ Finset.range d, (1 - ω ^ (j * a) * T)
       = ∏ j ∈ Finset.range d, (1 - (ω ^ a) ^ j * T) := by
-        refine Finset.prod_congr rfl (fun j _ => ?_)
+        refine Finset.prod_congr rfl (fun j _ ↦ ?_)
         rw [← pow_mul, mul_comm a j]
-    _ = ∏ ζ ∈ Finset.image (fun j : ℕ => (ω ^ a) ^ j) (Finset.range d), (1 - ζ * T) := by
+    _ = ∏ ζ ∈ Finset.image (fun j : ℕ ↦ (ω ^ a) ^ j) (Finset.range d), (1 - ζ * T) := by
         rw [Finset.prod_image h_inj]
     _ = ∏ ζ ∈ Polynomial.nthRootsFinset d (1 : ℂ), (1 - ζ * T) := by rw [h_image]
     _ = 1 - T ^ d := prod_nthRootsFinset_one_sub_mul d hd_pos T
@@ -398,9 +397,9 @@ lemma prod_characters_eval_eq_pow (u : (ZMod p)ˣ) (T : ℂ) :
   have hn_pos : 0 < n := by rw [← hn_units]; exact Fintype.card_pos
   obtain ⟨g, hg_mon⟩ : ∃ g : (ZMod p)ˣ, ∀ x : (ZMod p)ˣ, x ∈ Submonoid.powers g :=
     IsCyclic.exists_monoid_generator
-  have hg_mon' : ∀ x : (ZMod p)ˣ, ∃ m : ℕ, g ^ m = x := fun x => hg_mon x
+  have hg_mon' : ∀ x : (ZMod p)ˣ, ∃ m : ℕ, g ^ m = x := fun x ↦ hg_mon x
   obtain ⟨a, ha⟩ := hg_mon' u
-  have hg_zpow : ∀ x : (ZMod p)ˣ, x ∈ Subgroup.zpowers g := fun x => by
+  have hg_zpow : ∀ x : (ZMod p)ˣ, x ∈ Subgroup.zpowers g := fun x ↦ by
     obtain ⟨m, hm⟩ := hg_mon' x
     refine ⟨(m : ℤ), ?_⟩
     change g ^ (m : ℤ) = x
@@ -430,14 +429,14 @@ lemma prod_characters_eval_eq_pow (u : (ZMod p)ˣ) (T : ℂ) :
       simp only [Units.val_pow_eq_pow_val, Units.val_one, hωu_val]
       exact hω.pow_eq_one
     rw [pow_mul, h1, one_pow]
-  let χAt : ℕ → DirichletCharacter ℂ p := fun k =>
+  let χAt : ℕ → DirichletCharacter ℂ p := fun k ↦
     MulChar.ofRootOfUnity (M := ZMod p) (R := ℂ) (ζ := ωu ^ k)
       (by rw [hn_units]; exact hωu_roots k) hg_zpow
-  have hχAt_g : ∀ k : ℕ, χAt k ((g : (ZMod p)ˣ) : ZMod p) = ω ^ k := fun k => by
+  have hχAt_g : ∀ k : ℕ, χAt k ((g : (ZMod p)ˣ) : ZMod p) = ω ^ k := fun k ↦ by
     simp only [χAt]
     rw [MulChar.ofRootOfUnity_spec]
     simp [Units.val_pow_eq_pow_val, hωu_val]
-  have hχAt_u : ∀ k : ℕ, χAt k (u : ZMod p) = ω ^ (k * a) := fun k => by
+  have hχAt_u : ∀ k : ℕ, χAt k (u : ZMod p) = ω ^ (k * a) := fun k ↦ by
     have hu_eq : (u : ZMod p) = ((g : (ZMod p)ˣ) : ZMod p) ^ a := by
       rw [← Units.val_pow_eq_pow_val, ha]
     rw [hu_eq, map_pow, hχAt_g, ← pow_mul]
@@ -451,43 +450,44 @@ lemma prod_characters_eval_eq_pow (u : (ZMod p)ˣ) (T : ℂ) :
   have hχAt_surj_onto_univ :
       Finset.image χAt (Finset.range n) = (Finset.univ : Finset (DirichletCharacter ℂ p)) := by
     apply Finset.eq_of_subset_of_card_le
-    · exact fun _ _ => Finset.mem_univ _
+    · exact fun _ _ ↦ Finset.mem_univ _
     · rw [Finset.card_image_of_injOn hχAt_inj, Finset.card_range, Finset.card_univ,
         ← Nat.card_eq_fintype_card]
   have h_transfer :
       ∏ χ : DirichletCharacter ℂ p, (1 - χ (u : ZMod p) * T) =
       ∏ k ∈ Finset.range n, (1 - ω ^ (k * a) * T) := by
     calc ∏ χ : DirichletCharacter ℂ p, (1 - χ (u : ZMod p) * T)
-        = ∏ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ p)), (1 - χ (u : ZMod p) * T) := rfl
+        = ∏ χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ p)),
+            (1 - χ (u : ZMod p) * T) := rfl
       _ = ∏ χ ∈ Finset.image χAt (Finset.range n), (1 - χ (u : ZMod p) * T) := by
           rw [hχAt_surj_onto_univ]
       _ = ∏ k ∈ Finset.range n, (1 - (χAt k) (u : ZMod p) * T) := by
           rw [Finset.prod_image hχAt_inj]
       _ = ∏ k ∈ Finset.range n, (1 - ω ^ (k * a) * T) := by
-          refine Finset.prod_congr rfl (fun k _ => ?_)
+          refine Finset.prod_congr rfl (fun k _ ↦ ?_)
           rw [hχAt_u k]
   rw [h_transfer, prod_pow_primRoot_eq_pow hn_pos a hω T, ← hd_eq, hn_div_d]
 
 lemma prod_nontrivial_characters_eval_eq_even_mul_odd (u : (ZMod p)ˣ) (T : ℂ) :
-    Finset.prod (nontrivialCharacters (p := p)) (fun χ => (1 - χ (u : ZMod p) * T)) =
-      Finset.prod (evenNontrivialCharacters (p := p)) (fun χ => (1 - χ (u : ZMod p) * T)) *
-        Finset.prod (oddCharacters (p := p)) (fun χ => (1 - χ (u : ZMod p) * T)) := by
+    Finset.prod (nontrivialCharacters (p := p)) (fun χ ↦ (1 - χ (u : ZMod p) * T)) =
+      Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ (1 - χ (u : ZMod p) * T)) *
+        Finset.prod (oddCharacters (p := p)) (fun χ ↦ (1 - χ (u : ZMod p) * T)) := by
   classical
-  unfold nontrivialCharacters evenNontrivialCharacters oddCharacters
+  simp only [nontrivialCharacters, evenNontrivialCharacters, oddCharacters]
   have hdisj : Disjoint
-      (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even ∧ χ ≠ 1)
-      (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Odd) := by
+      (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Even ∧ χ ≠ 1)
+      (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Odd) := by
     refine Finset.disjoint_left.mpr ?_
     intro χ hχe hχo
     rw [Finset.mem_filter] at hχe hχo
     exact DirichletCharacter.Odd.not_even χ hχo.2 hχe.2.1
   have hunion : Finset.univ.erase (1 : DirichletCharacter ℂ p) =
-      Finset.univ.filter (fun χ : DirichletCharacter ℂ p => χ.Even ∧ χ ≠ 1) ∪
-        Finset.univ.filter (fun χ : DirichletCharacter ℂ p => χ.Odd) := by
+      Finset.univ.filter (fun χ : DirichletCharacter ℂ p ↦ χ.Even ∧ χ ≠ 1) ∪
+        Finset.univ.filter (fun χ : DirichletCharacter ℂ p ↦ χ.Odd) := by
     ext χ
     simp only [Finset.mem_erase, Finset.mem_union, Finset.mem_filter, Finset.mem_univ,
       and_true, true_and]
-    refine ⟨fun hne => ?_, ?_⟩
+    refine ⟨fun hne ↦ ?_, ?_⟩
     · rcases DirichletCharacter.even_or_odd χ with he | ho
       · exact Or.inl ⟨he, hne⟩
       · exact Or.inr ho
@@ -506,9 +506,9 @@ lemma charLocalFactor_prime_ne_p_via_unit_order {ℓ : ℕ} [Fact ℓ.Prime]
         (Nat.card (DirichletCharacter ℂ p) / localResidueDegree (p := p) ℓ hℓp) := by
   have hval : ((unitOfPrimeNe p ℓ hℓp : (ZMod p)ˣ) : ZMod p) = (ℓ : ZMod p) := by
     simp [unitOfPrimeNe]
-  unfold charLocalFactor
+  simp only [charLocalFactor]
   rw [← hval]
-  unfold localResidueDegree
+  simp only [localResidueDegree]
   exact prod_characters_eval_eq_pow p (unitOfPrimeNe p ℓ hℓp) ((ℓ : ℂ) ^ (-s))
 
 /-- The fiber-size is constant for `χ ↦ χ(ℓ)` over its image (the
@@ -534,9 +534,9 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
     rw [hd_def]; exact localResidueDegree_dvd_card_characters (p := p) hℓp
   obtain ⟨g, hg_mon⟩ : ∃ g : (ZMod p)ˣ, ∀ x : (ZMod p)ˣ, x ∈ Submonoid.powers g :=
     IsCyclic.exists_monoid_generator
-  have hg_mon' : ∀ x : (ZMod p)ˣ, ∃ m : ℕ, g ^ m = x := fun x => hg_mon x
+  have hg_mon' : ∀ x : (ZMod p)ˣ, ∃ m : ℕ, g ^ m = x := fun x ↦ hg_mon x
   obtain ⟨a, ha⟩ := hg_mon' (unitOfPrimeNe p ℓ hℓp)
-  have hg_zpow : ∀ x : (ZMod p)ˣ, x ∈ Subgroup.zpowers g := fun x => by
+  have hg_zpow : ∀ x : (ZMod p)ˣ, x ∈ Subgroup.zpowers g := fun x ↦ by
     obtain ⟨m, hm⟩ := hg_mon' x
     refine ⟨(m : ℤ), ?_⟩
     change g ^ (m : ℤ) = x
@@ -557,10 +557,10 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
       simp only [Units.val_pow_eq_pow_val, Units.val_one, hωu_val]
       exact hω.pow_eq_one
     rw [pow_mul, h1, one_pow]
-  let χAt : ℕ → DirichletCharacter ℂ p := fun k =>
+  let χAt : ℕ → DirichletCharacter ℂ p := fun k ↦
     MulChar.ofRootOfUnity (M := ZMod p) (R := ℂ) (ζ := ωu ^ k)
       (by rw [hn_units]; exact hωu_roots k) hg_zpow
-  have hχAt_g : ∀ k : ℕ, χAt k ((g : (ZMod p)ˣ) : ZMod p) = ω ^ k := fun k => by
+  have hχAt_g : ∀ k : ℕ, χAt k ((g : (ZMod p)ˣ) : ZMod p) = ω ^ k := fun k ↦ by
     simp only [χAt]
     rw [MulChar.ofRootOfUnity_spec]
     simp [Units.val_pow_eq_pow_val, hωu_val]
@@ -574,7 +574,7 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
     have h1 : ((unitOfPrimeNe p ℓ hℓp : (ZMod p)ˣ) : ZMod p) = (ℓ : ZMod p) := by
       simp [unitOfPrimeNe]
     rw [← h1, ← ha, Units.val_pow_eq_pow_val]
-  have hχAt_ℓ : ∀ k : ℕ, χAt k (ℓ : ZMod p) = ω ^ (k * a) := fun k => by
+  have hχAt_ℓ : ∀ k : ℕ, χAt k (ℓ : ZMod p) = ω ^ (k * a) := fun k ↦ by
     rw [hℓ_eq, map_pow, hχAt_g, ← pow_mul]
   have hχAt_inj : Set.InjOn χAt ↑(Finset.range n) := by
     intro j hj k hk hjk
@@ -586,15 +586,15 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
   have hχAt_surj_onto_univ :
       Finset.image χAt (Finset.range n) = (Finset.univ : Finset (DirichletCharacter ℂ p)) := by
     apply Finset.eq_of_subset_of_card_le
-    · exact fun _ _ => Finset.mem_univ _
+    · exact fun _ _ ↦ Finset.mem_univ _
     · rw [Finset.card_image_of_injOn hχAt_inj, Finset.card_range, Finset.card_univ,
         ← Nat.card_eq_fintype_card]
   have h_card_eq :
       Nat.card {χ : DirichletCharacter ℂ p // χ (ℓ : ZMod p) = z} =
-      ((Finset.range n).filter (fun k => ω ^ (k * a) = z)).card := by
+      ((Finset.range n).filter (fun k ↦ ω ^ (k * a) = z)).card := by
     rw [Nat.card_eq_fintype_card, Fintype.card_subtype]
     symm
-    apply Finset.card_bij (fun k _ => χAt k)
+    apply Finset.card_bij (fun k _ ↦ χAt k)
     · intro k hk
       rw [Finset.mem_filter] at hk
       refine Finset.mem_filter.mpr ⟨Finset.mem_univ _, ?_⟩
@@ -606,7 +606,8 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
       · exact Finset.mem_coe.mpr hk.1
     · intro χ hχ
       rw [Finset.mem_filter] at hχ
-      have hχ_in_univ : χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ p)) := Finset.mem_univ _
+      have hχ_in_univ : χ ∈ (Finset.univ : Finset (DirichletCharacter ℂ p)) :=
+        Finset.mem_univ _
       rw [← hχAt_surj_onto_univ, Finset.mem_image] at hχ_in_univ
       obtain ⟨k, hk_range, rfl⟩ := hχ_in_univ
       refine ⟨k, ?_, rfl⟩
@@ -617,7 +618,7 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
     rw [hd_eq]; exact IsPrimitiveRoot.pow_isPrimitiveRoot_div_gcd hn_pos a hω
   have hz' : z ∈ Polynomial.nthRootsFinset d (1 : ℂ) := by
     rw [Polynomial.mem_nthRootsFinset hd_pos]; exact hz
-  have h_image : Finset.image (fun j : ℕ => (ω ^ a) ^ j) (Finset.range d) =
+  have h_image : Finset.image (fun j : ℕ ↦ (ω ^ a) ^ j) (Finset.range d) =
       Polynomial.nthRootsFinset d (1 : ℂ) := by
     apply Finset.eq_of_subset_of_card_le
     · intro ζ hζ
@@ -632,11 +633,11 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
   rw [← h_image] at hz'
   simp only [Finset.mem_image, Finset.mem_range] at hz'
   obtain ⟨j, hj_lt, hj_eq⟩ := hz'
-  have h_filter : (Finset.range n).filter (fun k => ω ^ (k * a) = z) =
-      (Finset.range n).filter (fun k => k % d = j) := by
+  have h_filter : (Finset.range n).filter (fun k ↦ ω ^ (k * a) = z) =
+      (Finset.range n).filter (fun k ↦ k % d = j) := by
     ext k
     simp only [Finset.mem_filter, Finset.mem_range]
-    refine and_congr_right (fun hk_lt => ?_)
+    refine and_congr_right (fun hk_lt ↦ ?_)
     have h_pow_mod : ω ^ (k * a) = (ω ^ a) ^ (k % d) := by
       have h1 : ω ^ (k * a) = ω ^ ((k % d) * a) := by
         have hk_split : k * a = (k % d) * a + (k / d) * (d * a) := by
@@ -657,17 +658,17 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
         rw [h_da, mul_one]
       rw [h1, ← pow_mul, mul_comm]
     rw [h_pow_mod, ← hj_eq]
-    refine ⟨fun h => hω_a_prim.pow_inj (Nat.mod_lt _ hd_pos) hj_lt h, fun h => by rw [h]⟩
+    refine ⟨fun h ↦ hω_a_prim.pow_inj (Nat.mod_lt _ hd_pos) hj_lt h, fun h ↦ by rw [h]⟩
   rw [h_filter]
-  have hfs : ((Finset.range n).filter (fun k => k % d = j)).card = n / d := by
+  have hfs : ((Finset.range n).filter (fun k ↦ k % d = j)).card = n / d := by
     obtain ⟨c', hcd'⟩ := hd_dvd_n
     have h_n_div : n / d = c' := by rw [hcd', Nat.mul_div_cancel_left _ hd_pos]
     rw [h_n_div]
-    have hset : (Finset.range n).filter (fun k => k % d = j) =
-        (Finset.range c').image (fun m => j + m * d) := by
+    have hset : (Finset.range n).filter (fun k ↦ k % d = j) =
+        (Finset.range c').image (fun m ↦ j + m * d) := by
       ext k
       simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_image]
-      refine ⟨fun ⟨hk_lt, hk_mod⟩ => ?_, ?_⟩
+      refine ⟨fun ⟨hk_lt, hk_mod⟩ ↦ ?_, ?_⟩
       · have hk_dec : k = j + (k / d) * d := by
           have h1 : k = d * (k / d) + k % d := (Nat.div_add_mod k d).symm
           rw [hk_mod, mul_comm d (k / d)] at h1
@@ -681,7 +682,7 @@ lemma character_eval_fiber_card_constant {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : �
         refine ⟨?_, ?_⟩
         · rw [hcd', mul_comm]; nlinarith
         · rw [Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hj_lt]
-    rw [hset, Finset.card_image_of_injective _ (fun x y hxy => by simp at hxy; omega),
+    rw [hset, Finset.card_image_of_injective _ (fun x y hxy ↦ by simp at hxy; omega),
       Finset.card_range]
   rw [hfs, localPrimeCount, ← hd_def]
 
@@ -705,25 +706,25 @@ local factor `1 - p^{-s}` by exactly the `(1 - p^{-s})` factor distinguishing
 `LFunctionTrivChar p s` from the primitive `ζ(s)`. -/
 lemma charLocalFactor_at_p {s : ℂ} :
     charLocalFactor (p := p) p s = 1 :=
-  Finset.prod_eq_one fun χ _ => by
+  Finset.prod_eq_one fun χ _ ↦ by
     rw [ZMod.natCast_self, MulChar.map_nonunit _ not_isUnit_zero, zero_mul, sub_zero]
 
-/-! ### Step D — Dedekind-side local factor skeleton -/
+/-! ### Dedekind-side local factors -/
 
 lemma primesOverFinset_card_eq_ncard (ℓ : ℕ) [Fact ℓ.Prime] :
     (primesOverFinset K ℓ).card =
       (Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)).ncard := by
   classical
-  haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
+  have : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
   have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
     rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
-  unfold primesOverFinset
+  simp only [primesOverFinset]
   rw [← Set.ncard_coe_finset, IsDedekindDomain.coe_primesOverFinset hne]
 
 lemma mem_primesOverFinset_iff {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 K)} :
     P ∈ primesOverFinset K ℓ ↔ P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K) := by
-  haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
+  have : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
   have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
     rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
@@ -732,12 +733,12 @@ lemma mem_primesOverFinset_iff {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 K)}
 noncomputable def primesOverSubtypeEquivFinset (ℓ : ℕ) [Fact ℓ.Prime] :
     {P : Ideal (𝓞 K) // P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)} ≃
       {P : Ideal (𝓞 K) // P ∈ primesOverFinset K ℓ} :=
-  Equiv.subtypeEquivProp (funext fun _ => propext
+  Equiv.subtypeEquivProp (funext fun _ ↦ propext
     (mem_primesOverFinset_iff (K := K) (ℓ := ℓ)).symm)
 
 lemma zetaInteger_isIntegralGenerator :
     Algebra.adjoin ℤ ({zetaInteger (p := p) (K := K)} : Set (𝓞 K)) = ⊤ := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   exact IsCyclotomicExtension.Rat.adjoin_singleton_eq_top (IsCyclotomicExtension.zeta_spec p ℚ K)
 
 lemma zetaInteger_exponent_eq_one :
@@ -761,7 +762,7 @@ lemma monicFactorsMod_natDegree_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prim
     (hQ : Q ∈ RingOfIntegers.monicFactorsMod (θ := zetaInteger (p := p) (K := K)) (p := ℓ)) :
     Q.natDegree = localResidueDegree (p := p) ℓ hℓp := by
   classical
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hmin : minpoly ℤ (zetaInteger (p := p) (K := K)) = cyclotomic p ℤ := by
     rw [zetaInteger, ← NumberField.RingOfIntegers.minpoly_coe]
     exact (Polynomial.cyclotomic_eq_minpoly (IsCyclotomicExtension.zeta_spec p ℚ K)
@@ -772,19 +773,21 @@ lemma monicFactorsMod_natDegree_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prim
   have hQmem : Q ∈ UniqueFactorizationMonoid.normalizedFactors
       (cyclotomic p (ZMod ℓ)) := by
     have hQ' : Q ∈ (UniqueFactorizationMonoid.normalizedFactors
-        (map (Int.castRingHom (ZMod ℓ)) (minpoly ℤ (zetaInteger (p := p) (K := K))))).toFinset := hQ
+        (map (Int.castRingHom (ZMod ℓ))
+          (minpoly ℤ (zetaInteger (p := p) (K := K))))).toFinset := hQ
     rw [hmin, Polynomial.map_cyclotomic_int] at hQ'
     exact Multiset.mem_toFinset.mp hQ'
   rw [Polynomial.natDegree_of_mem_normalizedFactors_cyclotomic hFcard hcop hQmem]
-  unfold localResidueDegree unitOfPrimeNe
-  rw [← orderOf_units (y := ZMod.unitOfCoprime _ _), ← orderOf_units (y := ZMod.unitOfCoprime ℓ _),
+  simp only [localResidueDegree, unitOfPrimeNe]
+  rw [← orderOf_units (y := ZMod.unitOfCoprime _ _),
+    ← orderOf_units (y := ZMod.unitOfCoprime ℓ _),
     ZMod.coe_unitOfCoprime, ZMod.coe_unitOfCoprime, pow_one]
 
 lemma monicFactorsMod_card_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :
     (RingOfIntegers.monicFactorsMod (θ := zetaInteger (p := p) (K := K)) (p := ℓ)).card =
       localPrimeCount (p := p) ℓ hℓp := by
   classical
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hmin : minpoly ℤ (zetaInteger (p := p) (K := K)) = cyclotomic p ℤ := by
     rw [zetaInteger, ← NumberField.RingOfIntegers.minpoly_coe]
     exact (Polynomial.cyclotomic_eq_minpoly (IsCyclotomicExtension.zeta_spec p ℚ K)
@@ -792,19 +795,20 @@ lemma monicFactorsMod_card_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓ
   have hcop : ℓ.Coprime p := (coprime_of_prime_ne (p := p) hℓp).symm
   have hFcard : Fintype.card (ZMod ℓ) = ℓ ^ 1 := by
     rw [pow_one]; exact ZMod.card ℓ
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [hmin, Polynomial.map_cyclotomic_int,
     Polynomial.normalizedFactors_cyclotomic_card hFcard hcop]
-  unfold localPrimeCount localResidueDegree unitOfPrimeNe
+  simp only [localPrimeCount, localResidueDegree, unitOfPrimeNe]
   rw [card_dirichletCharacter_complex (p := p), Nat.totient_prime hp.out,
-    ← orderOf_units (y := ZMod.unitOfCoprime _ _), ← orderOf_units (y := ZMod.unitOfCoprime ℓ _),
+    ← orderOf_units (y := ZMod.unitOfCoprime _ _),
+    ← orderOf_units (y := ZMod.unitOfCoprime ℓ _),
     ZMod.coe_unitOfCoprime, ZMod.coe_unitOfCoprime, pow_one]
 
 lemma cyclotomic_mod_p_eq_X_sub_one_pow :
     map (Int.castRingHom (ZMod p))
         (minpoly ℤ (zetaInteger (p := p) (K := K))) =
       (X - 1) ^ (p - 1) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   have hmin : minpoly ℤ (zetaInteger (p := p) (K := K)) = cyclotomic p ℤ := by
     rw [zetaInteger, ← NumberField.RingOfIntegers.minpoly_coe]
     exact (Polynomial.cyclotomic_eq_minpoly (IsCyclotomicExtension.zeta_spec p ℚ K)
@@ -824,7 +828,7 @@ lemma cyclotomic_mod_p_eq_X_sub_one_pow :
 lemma monicFactorsMod_at_p_singleton :
     (RingOfIntegers.monicFactorsMod (θ := zetaInteger (p := p) (K := K)) (p := p)).card = 1 := by
   classical
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [cyclotomic_mod_p_eq_X_sub_one_pow (p := p) (K := K)]
   have hirr : Irreducible (X - 1 : (ZMod p)[X]) :=
     irreducible_X_sub_C 1
@@ -841,25 +845,34 @@ lemma ncard_primesOver_at_p_eq_one :
 
 lemma primesOver_inertiaDeg_eq_one_at_p (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)) :
-    (rationalPrimeIdeal p).inertiaDeg P = 1 := by
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
+    (rationalPrimeIdeal p).inertiaDeg' P = 1 := by
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
-  simpa [rationalPrimeIdeal] using IsCyclotomicExtension.Rat.inertiaDeg_eq_of_prime p K P
+  have hbase : (Ideal.span {(p : ℤ)} : Ideal ℤ).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime p
+  have hPmax : P.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(p : ℤ)}) (P := P)
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg'_eq_inertiaDeg]
+  exact IsCyclotomicExtension.Rat.inertiaDeg_eq_of_prime p K P
 
 lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)) :
-    (rationalPrimeIdeal p).ramificationIdx P = p - 1 := by
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
+    (rationalPrimeIdeal p).ramificationIdx' P = p - 1 := by
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
-  simpa [rationalPrimeIdeal] using IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p K P
+  have hp_ne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    simp [hp.out.ne_zero]
+  simp only [rationalPrimeIdeal]
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx (Ideal.span {(p : ℤ)}) P hp_ne]
+  exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p K P
 
 lemma primesOver_at_p_package :
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K),
-      (rationalPrimeIdeal p).inertiaDeg P = 1) ∧
+      (rationalPrimeIdeal p).inertiaDeg' P = 1) ∧
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K),
-      (rationalPrimeIdeal p).ramificationIdx P = p - 1) ∧
+      (rationalPrimeIdeal p).ramificationIdx' P = p - 1) ∧
     (Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)).ncard = 1 :=
   ⟨primesOver_inertiaDeg_eq_one_at_p (p := p) (K := K),
    primesOver_ramificationIdx_eq_prime_sub_one_at_p (p := p) (K := K),
@@ -868,25 +881,33 @@ lemma primesOver_at_p_package :
 lemma primesOver_inertiaDeg_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
     (hℓp : ℓ ≠ p) (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)) :
-    (rationalPrimeIdeal ℓ).inertiaDeg P = localResidueDegree (p := p) ℓ hℓp := by
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
-  have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
+    (rationalPrimeIdeal ℓ).inertiaDeg' P = localResidueDegree (p := p) ℓ hℓp := by
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
+  have hcop : ¬ ℓ ∣ p := fun h ↦ hℓp ((Nat.prime_dvd_prime_iff_eq
     (Fact.out : ℓ.Prime) hp.out).mp h)
-  unfold rationalPrimeIdeal
-  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
-  unfold localResidueDegree unitOfPrimeNe
+  have hbase : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime ℓ
+  have hPmax : P.IsMaximal :=
+    Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(ℓ : ℤ)}) (P := P)
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg'_eq_inertiaDeg,
+    IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
+  simp only [localResidueDegree, unitOfPrimeNe]
   rw [← orderOf_units]
   rfl
 
 lemma primesOver_ramificationIdx_eq_one {ℓ : ℕ} [Fact ℓ.Prime]
     (hℓp : ℓ ≠ p) (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)) :
-    (rationalPrimeIdeal ℓ).ramificationIdx P = 1 := by
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
-  have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
+    (rationalPrimeIdeal ℓ).ramificationIdx' P = 1 := by
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
+  have hcop : ¬ ℓ ∣ p := fun h ↦ hℓp ((Nat.prime_dvd_prime_iff_eq
     (Fact.out : ℓ.Prime) hp.out).mp h)
+  have hℓ_ne : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by
+    simp [(Fact.out : ℓ.Prime).ne_zero]
+  simp only [rationalPrimeIdeal]
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx (Ideal.span {(ℓ : ℤ)}) P hℓ_ne]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd ℓ K P hcop
 
 lemma ncard_primesOver_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :
@@ -899,9 +920,9 @@ lemma ncard_primesOver_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : 
 
 lemma primesOver_prime_ne_p_package {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K),
-      (rationalPrimeIdeal ℓ).inertiaDeg P = localResidueDegree (p := p) ℓ hℓp) ∧
+      (rationalPrimeIdeal ℓ).inertiaDeg' P = localResidueDegree (p := p) ℓ hℓp) ∧
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K),
-      (rationalPrimeIdeal ℓ).ramificationIdx P = 1) ∧
+      (rationalPrimeIdeal ℓ).ramificationIdx' P = 1) ∧
     (Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)).ncard =
       localPrimeCount (p := p) ℓ hℓp :=
   ⟨primesOver_inertiaDeg_eq_localResidueDegree p K hℓp,
@@ -914,7 +935,7 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
       (1 - (ℓ : ℂ) ^ (-(localResidueDegree (p := p) ℓ hℓp : ℂ) * s)) ^
         localPrimeCount (p := p) ℓ hℓp := by
   classical
-  haveI : (rationalPrimeIdeal ℓ).IsMaximal :=
+  have : (rationalPrimeIdeal ℓ).IsMaximal :=
     Int.ideal_span_isMaximal_of_prime ℓ
   have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
     rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
@@ -924,7 +945,7 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
     have h1 := ncard_primesOver_eq_localPrimeCount p K hℓp
     rw [← hcoe, Set.ncard_coe_finset] at h1
     exact h1
-  unfold dedekindLocalFactor
+  simp only [dedekindLocalFactor]
   have hprod_eq : ∀ P ∈ primesOverFinset K ℓ,
       (1 - (Ideal.absNorm P : ℂ) ^ (-s)) =
         1 - (ℓ : ℂ) ^ (-(localResidueDegree (p := p) ℓ hℓp : ℂ) * s) := by
@@ -934,8 +955,8 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
           (↑(IsDedekindDomain.primesOverFinset (rationalPrimeIdeal ℓ) (𝓞 K)) : Set _) :=
         hP
       rwa [hcoe] at this
-    haveI : P.IsPrime := hPmem.1
-    haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hPmem.2
+    have : P.IsPrime := hPmem.1
+    have : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hPmem.2
     have habsNorm : Ideal.absNorm P = ℓ ^ (localResidueDegree (p := p) ℓ hℓp) := by
       rw [← primesOver_inertiaDeg_eq_localResidueDegree p K hℓp P hPmem]
       exact Ideal.absNorm_eq_pow_inertiaDeg' P (Fact.out : ℓ.Prime)
@@ -950,14 +971,15 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
 lemma dedekindLocalFactor_at_p {s : ℂ} :
     dedekindLocalFactor K p s = 1 - (p : ℂ) ^ (-s) := by
   classical
-  unfold dedekindLocalFactor primesOverFinset rationalPrimeIdeal
+  simp only [dedekindLocalFactor, primesOverFinset, rationalPrimeIdeal]
   have hne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast hp.out.ne_zero
   have hcoe :=
     IsDedekindDomain.coe_primesOverFinset (p := (Ideal.span {(p : ℤ)} : Ideal ℤ)) hne (𝓞 K)
   have hcard :
-      (IsDedekindDomain.primesOverFinset (Ideal.span {(p : ℤ)} : Ideal ℤ) (𝓞 K)).card = 1 := by
+      (IsDedekindDomain.primesOverFinset
+        (Ideal.span {(p : ℤ)} : Ideal ℤ) (𝓞 K)).card = 1 := by
     have hncard : ((Ideal.span {(p : ℤ)}).primesOver (𝓞 K)).ncard = 1 := by
       simpa [rationalPrimeIdeal] using ncard_primesOver_at_p_eq_one (p := p) (K := K)
     rw [← hcoe] at hncard
@@ -966,8 +988,8 @@ lemma dedekindLocalFactor_at_p {s : ℂ} :
   rw [hP, Finset.prod_singleton]
   have hPmem : P ∈ (Ideal.span {(p : ℤ)}).primesOver (𝓞 K) := by
     rw [← hcoe]; rw [hP]; exact Finset.mem_singleton_self P
-  haveI : P.IsPrime := hPmem.1
-  haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := hPmem.2
+  have : P.IsPrime := hPmem.1
+  have : P.LiesOver (Ideal.span {(p : ℤ)}) := hPmem.2
   have habsNorm : Ideal.absNorm P = p ^ (1 : ℕ) := by
     rw [← primesOver_inertiaDeg_eq_one_at_p (p := p) (K := K) P]
     · exact Ideal.absNorm_eq_pow_inertiaDeg' P hp.out
@@ -979,3 +1001,38 @@ lemma dedekindLocalFactor_at_p {s : ℂ} :
 end ZetaFactorisation
 
 end BernoulliRegular
+
+namespace IsPrimitiveRoot
+
+/-- Compatibility shim restoring the removed mathlib `IsPrimitiveRoot.unit'`.
+
+For a primitive `n`-th root of unity `ζ` in a number field `K`, this packages the
+corresponding algebraic integer `ζ ∈ 𝓞 K` as a unit of `(𝓞 K)ˣ`.  It is definitionally
+`((h.toInteger_isPrimitiveRoot).isUnit (NeZero.ne n)).unit`, so `↑h.unit' = h.toInteger`
+holds by `IsUnit.unit_spec`, exactly reproducing the old behaviour at every call site. -/
+noncomputable def unit' {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) : (NumberField.RingOfIntegers K)ˣ :=
+  (h.toInteger_isPrimitiveRoot.isUnit (NeZero.ne n)).unit
+
+/-- Compatibility shim restoring the removed mathlib `IsPrimitiveRoot.unit'_pow`:
+the `unit'` of a primitive `n`-th root of unity is itself an `n`-th root of unity. -/
+theorem unit'_pow {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) : h.unit' ^ n = 1 := by
+  apply Units.ext
+  rw [Units.val_pow_eq_pow_val, Units.val_one, unit', IsUnit.unit_spec]
+  exact h.toInteger_isPrimitiveRoot.pow_eq_one
+
+/-- Compatibility shim restoring the removed `IsPrimitiveRoot.unit'_coe`: the coercion of
+`h.unit'` back to `𝓞 K` is itself a primitive `n`-th root of unity (it is definitionally
+`h.toInteger`). -/
+theorem unit'_coe {K : Type*} [Field K] {ζ : K} {n : ℕ} [NeZero n]
+    (h : IsPrimitiveRoot ζ n) :
+    IsPrimitiveRoot ((h.unit' : (NumberField.RingOfIntegers K)ˣ) :
+      NumberField.RingOfIntegers K) n := by
+  have hc : ((h.unit' : (NumberField.RingOfIntegers K)ˣ) :
+      NumberField.RingOfIntegers K) = h.toInteger :=
+    IsUnit.unit_spec (h.toInteger_isPrimitiveRoot.isUnit (NeZero.ne n))
+  rw [hc]
+  exact h.toInteger_isPrimitiveRoot
+
+end IsPrimitiveRoot

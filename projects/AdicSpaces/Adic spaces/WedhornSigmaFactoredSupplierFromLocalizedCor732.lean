@@ -165,9 +165,8 @@ theorem sigma_factored_supplier_via_uniform_sigma
           ¬ v.vle D_s 0) :
     SigmaFactoredSupplier D_T s D_s f := by
   intro t' ht' v hv_spa hv_f hv_one_t hv_t_ne
-  obtain ⟨N, h_factored, h_D_s_ne⟩ :=
-    h_factored_inequality t' ht' v hv_spa hv_f hv_one_t hv_t_ne
-  exact ⟨σ, N, h_factored, h_D_s_ne⟩
+  obtain ⟨N, hN⟩ := h_factored_inequality t' ht' v hv_spa hv_f hv_one_t hv_t_ne
+  exact ⟨σ, N, hN⟩
 
 omit [IsTopologicalRing A] in
 /-- **σ-factored supplier from direct upper-bound supplier**
@@ -199,8 +198,7 @@ theorem sigma_factored_supplier_via_direct_upper_bound_supplier
   obtain ⟨h_clear, h_D_s_ne⟩ :=
     h_direct_supplier t' ht' v hv_spa hv_f hv_one_t hv_t_ne
   refine ⟨1, 0, ?_, h_D_s_ne⟩
-  simp only [pow_zero, mul_one, zero_add, pow_one, Units.val_one]
-  exact h_clear
+  simpa only [pow_zero, mul_one, zero_add, pow_one, Units.val_one] using h_clear
 
 omit [IsTopologicalRing A] in
 /-- **`SigmaProductClearedInequalitySupplier` via the named σ-factored

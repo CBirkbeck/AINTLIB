@@ -32,22 +32,22 @@ private lemma fdBoundaryPath_extend_eq (H : ℝ) (t : ℝ) (ht : t ∈ Icc (0 : 
 
 private lemma fdBoundaryPath_extend_eventuallyEq (H : ℝ) (t : ℝ) (ht : t ∈ Ioo (0 : ℝ) 1) :
     (fdBoundaryPath H).extend =ᶠ[𝓝 t] fdBoundaryFun H :=
-  Filter.eventually_of_mem (Ioo_mem_nhds ht.1 ht.2) fun s hs =>
+  Filter.eventually_of_mem (Ioo_mem_nhds ht.1 ht.2) fun s hs ↦
     fdBoundaryPath_extend_eq H s (Ioo_subset_Icc_self hs)
 
-private def seg1Fun (H : ℝ) : ℝ → ℂ := fun t =>
+private def seg1Fun (H : ℝ) : ℝ → ℂ := fun t ↦
   1/2 + (↑H - 5 * ↑t * (↑H - ↑(Real.sqrt 3) / 2)) * I
 
-private def seg2Fun : ℝ → ℂ := fun t =>
+private def seg2Fun : ℝ → ℂ := fun t ↦
   exp ((↑Real.pi / 3 + (5 * ↑t - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) * I)
 
-private def seg3Fun : ℝ → ℂ := fun t =>
+private def seg3Fun : ℝ → ℂ := fun t ↦
   exp ((↑Real.pi / 2 + (5 * ↑t - 2) * (2 * ↑Real.pi / 3 - ↑Real.pi / 2)) * I)
 
-private def seg4Fun (H : ℝ) : ℝ → ℂ := fun t =>
+private def seg4Fun (H : ℝ) : ℝ → ℂ := fun t ↦
   -1/2 + (↑(Real.sqrt 3) / 2 + (5 * ↑t - 3) * (↑H - ↑(Real.sqrt 3) / 2)) * I
 
-private def seg5Fun (H : ℝ) : ℝ → ℂ := fun t =>
+private def seg5Fun (H : ℝ) : ℝ → ℂ := fun t ↦
   (5 * ↑t - 9/2) + ↑H * I
 
 private lemma seg1Fun_contDiff (H : ℝ) : ContDiff ℝ ⊤ (seg1Fun H) :=
@@ -80,7 +80,7 @@ private lemma seg5Fun_contDiff (H : ℝ) : ContDiff ℝ ⊤ (seg5Fun H) :=
 private lemma fdBoundaryFun_eventuallyEq_seg1 (H : ℝ) (t : ℝ)
     (ht1 : t < 1/5) :
     fdBoundaryFun H =ᶠ[𝓝 t] seg1Fun H :=
-  Filter.eventually_of_mem (Iio_mem_nhds ht1) fun s (hs : s < 1/5) => by
+  Filter.eventually_of_mem (Iio_mem_nhds ht1) fun s (hs : s < 1/5) ↦ by
     simp only [fdBoundaryFun, seg1Fun, if_pos hs.le]
 
 private lemma fdBoundaryFun_eventuallyEq_seg2 (H : ℝ) (t : ℝ)
@@ -88,7 +88,7 @@ private lemma fdBoundaryFun_eventuallyEq_seg2 (H : ℝ) (t : ℝ)
     fdBoundaryFun H =ᶠ[𝓝 t] seg2Fun :=
   Filter.eventually_of_mem
     (Filter.inter_mem (Ioi_mem_nhds ht1) (Iio_mem_nhds ht2))
-    fun s ⟨hs1, hs2⟩ => by
+    fun s ⟨hs1, hs2⟩ ↦ by
       simp only [fdBoundaryFun, seg2Fun,
         show ¬s ≤ 1/5 from not_le.mpr hs1,
         show s ≤ 2/5 from le_of_lt hs2, ite_true, ite_false]
@@ -98,7 +98,7 @@ private lemma fdBoundaryFun_eventuallyEq_seg3 (H : ℝ) (t : ℝ)
     fdBoundaryFun H =ᶠ[𝓝 t] seg3Fun :=
   Filter.eventually_of_mem
     (Filter.inter_mem (Ioi_mem_nhds ht2) (Iio_mem_nhds ht3))
-    fun s ⟨hs2, hs3⟩ => by
+    fun s ⟨hs2, hs3⟩ ↦ by
       simp only [fdBoundaryFun, seg3Fun,
         show ¬s ≤ 1/5 from not_le.mpr (lt_trans (by norm_num : (1:ℝ)/5 < 2/5) hs2),
         show ¬s ≤ 2/5 from not_le.mpr hs2,
@@ -109,7 +109,7 @@ private lemma fdBoundaryFun_eventuallyEq_seg4 (H : ℝ) (t : ℝ)
     fdBoundaryFun H =ᶠ[𝓝 t] seg4Fun H :=
   Filter.eventually_of_mem
     (Filter.inter_mem (Ioi_mem_nhds ht3) (Iio_mem_nhds ht4))
-    fun s ⟨hs3, hs4⟩ => by
+    fun s ⟨hs3, hs4⟩ ↦ by
       simp only [fdBoundaryFun, seg4Fun,
         show ¬s ≤ 1/5 from not_le.mpr (lt_trans (by norm_num : (1:ℝ)/5 < 3/5) hs3),
         show ¬s ≤ 2/5 from not_le.mpr (lt_trans (by norm_num : (2:ℝ)/5 < 3/5) hs3),
@@ -119,7 +119,7 @@ private lemma fdBoundaryFun_eventuallyEq_seg4 (H : ℝ) (t : ℝ)
 private lemma fdBoundaryFun_eventuallyEq_seg5 (H : ℝ) (t : ℝ)
     (ht4 : 4/5 < t) :
     fdBoundaryFun H =ᶠ[𝓝 t] seg5Fun H :=
-  Filter.eventually_of_mem (Ioi_mem_nhds ht4) fun s (hs4 : 4/5 < s) => by
+  Filter.eventually_of_mem (Ioi_mem_nhds ht4) fun s (hs4 : 4/5 < s) ↦ by
     simp only [fdBoundaryFun, seg5Fun,
       show ¬s ≤ 1/5 from not_le.mpr (lt_trans (by norm_num : (1:ℝ)/5 < 4/5) hs4),
       show ¬s ≤ 2/5 from not_le.mpr (lt_trans (by norm_num : (2:ℝ)/5 < 4/5) hs4),
@@ -189,7 +189,7 @@ def fdBoundaryPC1Path (H : ℝ) (_hH : H > Real.sqrt 3 / 2) :
   target := (fdBoundaryPath H).extend_one
   continuous_toFun := (fdBoundaryPath H).continuous_extend.continuousOn
   toPath := fdBoundaryPath H
-  toPath_extend_eq_toFun := fun _ _ => rfl
+  toPath_extend_eq_toFun := fun _ _ ↦ rfl
   partition := fdBoundaryPartition
   partition_subset := fdBoundaryPartition_subset_Ioo
   differentiable_off := fdBoundaryPath_differentiableAt_off H

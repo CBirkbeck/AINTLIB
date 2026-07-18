@@ -1,7 +1,9 @@
-import BernoulliRegular.Reflection.ClassGroupModP.Module
-import BernoulliRegular.TotallyRealSubfield.ClassGroup
-import BernoulliRegular.TotallyRealSubfield.Basic
-import Mathlib.RingTheory.Ideal.Norm.RelNorm
+module
+
+public import BernoulliRegular.Reflection.ClassGroupModP.Module
+public import BernoulliRegular.TotallyRealSubfield.ClassGroup
+public import BernoulliRegular.TotallyRealSubfield.Basic
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
 
 /-!
 # Plus-side descent of ClassGroupModP
@@ -90,8 +92,7 @@ theorem classGroupMap_modP_injective_of_not_dvd_hPlus
     (h_not_dvd : ¬ (p : ℕ) ∣ hPlus K) :
     Function.Injective (classGroupMap_modP p K) := by
   haveI := classGroupModP_Kplus_subsingleton_of_not_dvd_hPlus p K h_not_dvd
-  intro a b _
-  exact Subsingleton.elim a b
+  exact Function.injective_of_subsingleton _
 
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **SP-2b (under p ∤ h⁺): the range of `classGroupMap_modP` is trivial.**
@@ -105,8 +106,7 @@ theorem classGroupMap_modP_range_eq_bot_of_not_dvd_hPlus
   haveI := classGroupModP_Kplus_subsingleton_of_not_dvd_hPlus p K h_not_dvd
   rw [Subgroup.eq_bot_iff_forall]
   rintro a ⟨b, rfl⟩
-  rw [show b = 1 from Subsingleton.elim _ _]
-  rw [map_one]
+  rw [show b = 1 from Subsingleton.elim _ _, map_one]
 
 /-! ## Unconditional SP-2a via the norm trick
 
@@ -149,11 +149,8 @@ private theorem relNorm_mem_nonZeroDivisors
     (J : (Ideal (𝓞 K))⁰) :
     Ideal.relNorm (𝓞 (NumberField.maximalRealSubfield K)) J.1 ∈
       nonZeroDivisors (Ideal (𝓞 (NumberField.maximalRealSubfield K))) := by
-  rw [mem_nonZeroDivisors_iff_ne_zero]
-  have hJ_nz : J.1 ≠ ⊥ := mem_nonZeroDivisors_iff_ne_zero.mp J.2
-  intro h
-  apply hJ_nz
-  exact Ideal.relNorm_eq_bot_iff.mp h
+  rw [mem_nonZeroDivisors_iff_ne_zero, ← bot_eq_zero, ne_eq, Ideal.relNorm_eq_bot_iff]
+  exact mem_nonZeroDivisors_iff_ne_zero.mp J.2
 
 omit [IsCMField K] in
 attribute [local instance] FractionRing.liftAlgebra in
@@ -170,7 +167,7 @@ private theorem relNorm_algebraMap_eq_sq
   exact finrank_fractionRing_ringOfIntegers_K_over_Kplus K
 
 omit [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
-/-- **SP-2a UNCONDITIONAL via the norm trick** (Reviewer guidance 2026-05-22).
+/-- **SP-2a UNCONDITIONAL via the norm trick.**
 
 For any odd prime `p`, the natural map
 `Cl(K⁺)/p → Cl(K)/p` is injective.
@@ -189,8 +186,7 @@ theorem classGroupMap_modP_injective_unconditional [NumberField.IsCMField K]
   -- Unfold classGroupMap_modP through QuotientGroup.map_mk.
   have h_in : classGroupMap K cI ∈
       (powMonoidHom p : ClassGroup (𝓞 K) →* _).range := by
-    rw [classGroupMap_modP, QuotientGroup.map_mk] at hc
-    rwa [QuotientGroup.eq_one_iff] at hc
+    rwa [classGroupMap_modP, QuotientGroup.map_mk, QuotientGroup.eq_one_iff] at hc
   -- Extract a p-th-power witness for classGroupMap cI.
   obtain ⟨d, hd⟩ : ∃ d : ClassGroup (𝓞 K), d ^ p = classGroupMap K cI := h_in
   -- Goal: mk cI = 1, equivalent to cI ∈ (powMonoidHom p).range.
@@ -268,10 +264,8 @@ theorem classGroupMap_modP_injective_unconditional [NumberField.IsCMField K]
   set w : ClassGroup (𝓞 (NumberField.maximalRealSubfield K)) :=
     ClassGroup.mk0 ⟨Ideal.relNorm _ J.1, relNorm_mem_nonZeroDivisors K J⟩
   -- gcd(2, p) = 1 since p is odd prime.
-  have hp_coprime : Nat.Coprime 2 p := by
-    rcases (Fact.out : Nat.Prime p).eq_two_or_odd with h2 | h_odd
-    · exact absurd h2 hp_odd
-    · exact (Nat.coprime_primes Nat.prime_two (Fact.out)).mpr fun h => by omega
+  have hp_coprime : Nat.Coprime 2 p :=
+    Nat.coprime_two_left.mpr ((Fact.out : Nat.Prime p).odd_of_ne_two hp_odd)
   -- Bezout in ℤ: ∃ u v, 2*u + p*v = 1.
   have h_bezout : (2 : ℤ) * (2 : ℕ).gcdA p + (p : ℤ) * (2 : ℕ).gcdB p = 1 := by
     have := Nat.gcd_eq_gcd_ab 2 p
@@ -316,9 +310,7 @@ omit [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
 Top-level wrapper for the unconditional form. The Vandiver-conditional
 form `classGroupMap_modP_injective_of_not_dvd_hPlus` is now subsumed by
 this (the Vandiver case is just the special instance where the source
-is trivial).
-
-Reviewer guidance 2026-05-22 (Q5 / norm trick). -/
+is trivial). -/
 theorem classGroupMap_modP_injective [NumberField.IsCMField K]
     (hp_odd : p ≠ 2) :
     Function.Injective (classGroupMap_modP p K) :=

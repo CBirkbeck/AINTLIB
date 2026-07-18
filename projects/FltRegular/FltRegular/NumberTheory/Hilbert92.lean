@@ -59,32 +59,6 @@ lemma systemOfUnits.IsFundamental.maximal' [Module A G] (S : systemOfUnits p G r
   letI := hs.choose
   convert hs.choose_spec a ‹_› <;> symm <;> exact Nat.card_eq_fintype_card.symm
 
-lemma LinearIndependent.update {ι} [DecidableEq ι] {R} [CommRing R] [Module R G]
-    (f : ι → G) (l : ι →₀ R) (i : ι) (g : G) (σ : R)
-    (hσ : σ ∈ nonZeroDivisors R) (hg : σ • g = Finsupp.linearCombination R f l)
-    (hl : l i ∈ nonZeroDivisors R) (hf : LinearIndependent R f) :
-    LinearIndependent R (Function.update f i g) := by
-  classical
-  rw [linearIndependent_iff] at hf ⊢
-  intros l' hl'
-  apply_fun (σ • ·) at hl'
-  rw [Pi.update_eq_sub_add_single, ← Finsupp.bilinearCombination_apply R (S := R), map_add,
-    map_sub] at hl'
-  simp only [Finsupp.bilinearCombination_apply, LinearMap.add_apply, LinearMap.sub_apply,
-    Finsupp.linearCombination_single_index, smul_add, smul_sub, smul_zero] at hl'
-  rw [smul_comm σ (l' i) g, hg, ← LinearMap.map_smul, ← LinearMap.map_smul, smul_smul,
-    ← Finsupp.linearCombination_single,
-    ← (Finsupp.linearCombination R f).map_sub, ← map_add] at hl'
-  replace hl' : ∀ j, (σ * l' j - (Finsupp.single i (σ * l' i)) j) + l' i * l j = 0 := by
-    intro j
-    exact DFunLike.congr_fun (hf _ hl') j
-  simp only [Finsupp.single_apply] at hl'
-  simp only [mem_nonZeroDivisors_iff] at hl hσ
-  have : l' i = 0 := hl.2 _ (by simpa using hl' i)
-  simp only [this, zero_mul, add_zero, mul_zero, ite_self, sub_zero] at hl'
-  ext j
-  exact hσ.2 _ ((mul_comm _ _).trans (hl' j))
-
 namespace systemOfUnits.IsFundamental
 
 variable {H : Type*} [CommGroup H] [Fintype H] (hCard : Fintype.card H = p)
@@ -117,8 +91,9 @@ lemma lemma2 [Module A G] (S : systemOfUnits p G s) (hs : S.IsFundamental)
     intro g hg
     have := Fact.mk hp
     let S' : systemOfUnits p G (s + 1) := ⟨Function.update S.units i g,
-      LinearIndependent.update _ _ _ _ _ _ (CyclotomicIntegers.one_sub_zeta_mem_nonZeroDivisors p)
-      hg (ha ▸ one_mem A⁰) S.linearIndependent⟩
+      LinearIndependent.update S.linearIndependent i g
+        ⟨1 - zeta p, CyclotomicIntegers.one_sub_zeta_mem_nonZeroDivisors p, a,
+          ha ▸ one_mem A⁰, hg⟩⟩
     let a' := a.comapDomain (Fin.succAbove i) Fin.succAbove_right_injective.injOn
     have hS' : S'.units ∘ Fin.succAbove i = S.units ∘ Fin.succAbove i := by
       ext; simp only [Function.comp_apply, ne_eq, Fin.succAbove_ne, not_false_eq_true,
@@ -320,7 +295,7 @@ lemma isTors' [IsGalois k K] : Module.IsTorsionBySet ℤ[X]
     ← orderOf_eq_card_of_forall_mem_zpowers hσ, ← Fin.prod_univ_eq_prod_range,
     ← (finEquivZPowers <| isOfFinOrder_of_finite _).symm.prod_comp]
   simp only [RingOfIntegers.coe_eq_algebraMap, pow_finEquivZPowers_symm_apply, map_prod,
-    algebraMap_galRestrictHom_apply, AlgEquiv.coe_algHom]
+    algebraMap_galRestrictHom_apply, AlgEquiv.coe_toAlgHom]
   rw [prod_subtype]
   simp [mem_univ, hσ]
 
@@ -579,6 +554,7 @@ def unitlifts (S : systemOfUnits p G (NumberField.Units.rank k + 1)) :
     Fin (NumberField.Units.rank k + 1) → Additive (𝓞 K)ˣ :=
   fun i ↦ Additive.ofMul (Additive.toMul (S.units i).out).out
 
+set_option backward.isDefEq.respectTransparency false in
 lemma unitlifts_spec (S : systemOfUnits p G (NumberField.Units.rank k + 1)) (i) :
     mkG (Additive.toMul <| unitlifts p hp hKL σ hσ S i) = S.units i := by
   delta unitToU unitlifts
@@ -656,12 +632,6 @@ theorem Hilbert91 :
   systemOfUnits.IsFundamental.existence p hp G (NumberField.Units.rank k + 1)
     (finrank_G p hp hKL σ hσ)
 
-lemma IsPrimitiveRoot.coe_coe_iff {ν : (𝓞 k)ˣ} {n} :
-    IsPrimitiveRoot (ν : k) n ↔ IsPrimitiveRoot ν n :=
-  IsPrimitiveRoot.map_iff_of_injective
-    (f := (algebraMap (𝓞 k) k).toMonoidHom.comp (Units.coeHom (𝓞 k)))
-    ((IsFractionRing.injective (𝓞 k) k).comp Units.coeHom_injective)
-
 include hp in
 lemma h_exists' : ∃ (h : ℕ) (ν : (𝓞 k)ˣ),
     IsPrimitiveRoot (ν : k) (p ^ h) ∧
@@ -678,7 +648,7 @@ lemma h_exists' : ∃ (h : ℕ) (ν : (𝓞 k)ˣ),
   obtain ⟨j, _, hj'⟩ := (Nat.dvd_prime_pow hp).mp (orderOf_dvd_of_pow_eq_one hiν)
   refine ⟨j, ν, IsPrimitiveRoot.coe_coe_iff.mpr (hj' ▸ IsPrimitiveRoot.orderOf ν.1),
     fun ε n hn ↦ ?_⟩
-  let _ : Fintype (Units.torsion k) := inferInstance
+  let _ : Fintype (Units.torsion k) := Fintype.ofFinite _
   have : Fintype H := Set.fintypeSubset (NumberField.Units.torsion k) this
   obtain ⟨i, hi⟩ := mem_powers_iff_mem_zpowers.mpr (hν ⟨ε, ⟨_, n, rfl⟩, hn⟩)
   exact ⟨i, congr_arg Subtype.val hi⟩
@@ -686,11 +656,6 @@ lemma h_exists' : ∃ (h : ℕ) (ν : (𝓞 k)ˣ),
 local notation "r" => NumberField.Units.rank k
 
 instance instCommGroupUnitsRingOfIntegersFltRegular : CommGroup ((𝓞 k))ˣ := inferInstance
-
-lemma IsPrimitiveRoot.one_left_iff {M} [CommMonoid M] {n : ℕ} :
-    IsPrimitiveRoot (1 : M) n ↔ n = 1 :=
-  ⟨fun H ↦ Nat.dvd_one.mp (H.dvd_of_pow_eq_one 1 (one_pow _)),
-    fun e ↦ e ▸ IsPrimitiveRoot.one⟩
 
 include hp hKL hσ in
 -- TODO : remove `p ≠ 2`. The offending case is when `K = k[i]`.

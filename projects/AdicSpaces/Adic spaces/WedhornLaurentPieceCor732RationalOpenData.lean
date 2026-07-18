@@ -114,35 +114,11 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
   [IsTopologicalRing A]
 
 omit [IsTopologicalRing A] in
-/-- **T051 rationalOpen data via per-`w` local bounds package**
-(T052 main substantive reduction).
-
-From a per-`w` local-bounds package — at each `w ∈ Spa A A⁺` with
-`w.vle f s`, supply
-
-* `w.vle (T_D.prod id) D_s ∧ ¬ w.vle D_s 0` — product upper bound at
-  `D_s` and non-vanishing of `D_s`;
-* `∀ t' ∈ T_D, w.vle 1 t' ∧ ¬ w.vle t' 0` — per-element lower bound
-  at each `t'` and non-vanishing of each `t'`,
-
-derive T051's per-`w` rationalOpen data:
-
-```
-w ∈ rationalOpen ({T_D.prod id} : Finset A) D_s ∧
-  ∀ t' ∈ T_D, w ∈ rationalOpen ({(1 : A)} : Finset A) t'
-```
-
-**Proof**: at each `w`, extract the local-bounds package and assemble
-each rationalOpen membership. For the product piece, assemble
-`⟨w ∈ Spa, ∀ c ∈ {T_D.prod id}, w.vle c D_s, ¬ w.vle D_s 0⟩` from the
-Spa-membership, the product upper bound (applied at the singleton
-element `T_D.prod id`), and the non-vanishing of `D_s`. Similarly for
-each per-`t'` piece.
-
-This **substantively consumes** the local-bounds package: both
-rationalOpen memberships are assembled by extracting the
-corresponding local bounds AND non-vanishing data via
-`Finset.mem_singleton.mpr rfl` to apply at each singleton element. -/
+/-- **T051 rationalOpen data via per-`w` local bounds package** (T052 main substantive
+reduction). From a per-`w` local-bounds package — at each `w ∈ Spa A A⁺` with `w.vle f s`, the
+product upper bound `w.vle (T_D.prod id) D_s ∧ ¬ w.vle D_s 0` and the per-element lower bound
+`∀ t' ∈ T_D, w.vle 1 t' ∧ ¬ w.vle t' 0` — derive T051's per-`w` rationalOpen data
+`w ∈ rationalOpen {T_D.prod id} D_s ∧ ∀ t' ∈ T_D, w ∈ rationalOpen {1} t'`. -/
 theorem laurent_piece_rationalOpen_data_via_local_bounds
     (T_D : Finset A) (D_s f s : A)
     (h_local :
@@ -157,33 +133,13 @@ theorem laurent_piece_rationalOpen_data_via_local_bounds
   intro w hw_spa hw_f
   obtain ⟨⟨h_prod, h_D_s_ne⟩, h_per_t⟩ := h_local w hw_spa hw_f
   refine ⟨?_, ?_⟩
-  · -- Assemble w ∈ rationalOpen ({T_D.prod id} : Finset A) D_s.
-    refine ⟨hw_spa, ?_, h_D_s_ne⟩
-    intro c hc
-    rw [Finset.mem_singleton] at hc
-    subst hc
-    exact h_prod
-  · -- Assemble w ∈ rationalOpen ({(1 : A)} : Finset A) t' for each t'.
-    intro t' ht'
-    obtain ⟨h_lower, h_t'_ne⟩ := h_per_t t' ht'
-    refine ⟨hw_spa, ?_, h_t'_ne⟩
-    intro c hc
-    rw [Finset.mem_singleton] at hc
-    subst hc
-    exact h_lower
+  · exact ⟨hw_spa, fun c hc ↦ Finset.mem_singleton.mp hc ▸ h_prod, h_D_s_ne⟩
+  · exact fun t' ht' ↦ ⟨hw_spa,
+      fun c hc ↦ Finset.mem_singleton.mp hc ▸ (h_per_t t' ht').1, (h_per_t t' ht').2⟩
 
 omit [IsTopologicalRing A] in
-/-- **Base rationalOpen subset via local-bounds package** (T052
-composed deliverable).
-
-Composes T052's `laurent_piece_rationalOpen_data_via_local_bounds`
-with T051's `rationalOpen_subset_via_laurent_piece_membership` to
-give the base subset clause `R(insert f T_base, s) ⊆ R(T_D, D_s)`
-directly from the per-`w` local-bounds package.
-
-This is the **two-step reduction** from raw Laurent-piece local
-bounds to the cover-piece subset, bypassing the intermediate
-rationalOpen-membership packaging. -/
+/-- **Base rationalOpen subset via local-bounds package.** From the per-`w` local-bounds
+package, the base subset clause `R(insert f T_base, s) ⊆ R(T_D, D_s)`. -/
 theorem rationalOpen_subset_via_local_bounds
     [DecidableEq A]
     (T_base T_D : Finset A) (s D_s f : A)
@@ -239,8 +195,7 @@ theorem C1SupplierStrong_local_via_local_bounds
   intro D hD v hv t ht hvt hvD_s
   obtain ⟨f, h_local, hv_in_plus, hvf_ne⟩ :=
     h_per_call_components D hD v hv t ht hvt hvD_s
-  refine ⟨f, ?_, hv_in_plus, hvf_ne⟩
-  exact laurent_piece_rationalOpen_data_via_local_bounds D.T D.s f
-    C.base.s h_local
+  exact ⟨f, laurent_piece_rationalOpen_data_via_local_bounds D.T D.s f C.base.s h_local,
+    hv_in_plus, hvf_ne⟩
 
 end ValuationSpectrum

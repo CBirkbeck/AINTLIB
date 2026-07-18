@@ -10,10 +10,11 @@ import LeanModularForms.HeckeRIngs.GL2.Unified.RingTransport
 # Hecke adjoint theory: Petersson development and eigenform diagonalization
 
 This file is the downstream continuation of
-`LeanModularForms.HeckeRIngs.GL2.AdjointTheory`. It contains the bulk of the
-adjoint theory of Hecke operators with respect to the Petersson inner product —
-the long T090/T024/T128/T205 double-coset tile development — culminating in the
-adjoint identity `heckeT_p_adjoint`, normality `heckeT_n_normal`, and the
+`LeanModularForms.HeckeRIngs.GL2.AdjointTheory`. The long T090/T024/T128/T205
+double-coset tile development and the `T_p` adjoint identity `heckeT_p_adjoint`
+live in the imported `AdjointTheory/*` modules; building on them, this file develops
+the adjoint theory of Hecke operators with respect to the Petersson inner product —
+the general `T_n` adjoint and normality (`heckeT_n_adjoint`, `heckeT_n_normal`) and the
 existence of a simultaneous eigenform basis for cusp form spaces.
 
 The core cusp/Hecke infrastructure (`heckeT_n_cusp`, `PreservesCusps`,
@@ -22,8 +23,6 @@ the imported `AdjointTheory.lean`; this file builds on top of it.
 
 ## Main results
 
-* `heckeT_p_adjoint` — T_p* = ⟨p⟩⁻¹ T_p (Diamond–Shurman Thm 5.5.3)
-* `diamondOp_petersson_unitary` — `⟨d⟩` is unitary for pet
 * `heckeT_n_adjoint` — adjoint of the general `T_n`
 * `heckeT_n_normal` — T_n is normal
 * `exists_simultaneous_eigenform_basis` — spectral theorem for Hecke operators
@@ -312,12 +311,6 @@ private theorem heckeT_n_adjoint_composite_step (m : ℕ) (hcop : Nat.Coprime m 
       (hpp.factorization_pos_of_dvd (by omega) (Nat.minFac_dvd m)) hpv_cop
       (fun j hj hj_pos hj_cop f₀ g₀ ↦ ih j (hpv_eq ▸ hj) hj_pos hj_cop f₀ g₀) f' g'
 
-private theorem heckeT_n_cusp_one_eq (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
-    heckeT_n_cusp (N := N) k 1 f = f :=
-  CuspForm.ext fun τ ↦ by
-    change (heckeT_n k 1 f.toModularForm').toFun τ = f τ
-    rw [heckeT_n_one]; rfl
-
 /-- The Hecke adjoint for general T_n: `T_n* = ⟨n⟩⁻¹ T_n` on `S_k(Γ₁(N))`,
 w.r.t. the level-N Petersson inner product `petN`. -/
 theorem heckeT_n_adjoint (n : ℕ) [NeZero n] (hn : Nat.Coprime n N)
@@ -339,7 +332,7 @@ theorem heckeT_n_adjoint (n : ℕ) [NeZero n] (hn : Nat.Coprime n N)
     by_cases hle : m ≤ 1
     · obtain rfl : m = 1 := by omega
       have hunit : ZMod.unitOfCoprime 1 hcop = 1 := by ext; simp [ZMod.coe_unitOfCoprime]
-      rw [heckeT_n_cusp_one_eq f', heckeT_n_cusp_one_eq g', hunit, inv_one, diamondOp_cusp_one]
+      rw [heckeT_n_cusp_one f', heckeT_n_cusp_one g', hunit, inv_one, diamondOp_cusp_one]
     · exact heckeT_n_adjoint_composite_step m hcop (by omega) ih f' g'
 
 /-- T_n is normal: `T_n T_n* = T_n* T_n` for `(n,N) = 1`.
@@ -424,7 +417,7 @@ lemma petN_self_re_nonneg (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
 
 This provides the algebraic inner product structure needed for the spectral theorem.
 The inner product is `⟪f, g⟫ := petN f g` (conjugate-linear in first, linear in second). -/
-noncomputable def petN_innerProductCore :
+@[reducible] noncomputable def petN_innerProductCore :
     @InnerProductSpace.Core ℂ (CuspForm ((Gamma1 N).map (mapGL ℝ)) k) _ _ _ where
   inner f g := petN f g
   conj_inner_symm f g := petN_conj_symm f g
@@ -651,9 +644,8 @@ private lemma joint_eigenspace_subset_isCommonEigenfunction (χ : (ZMod N)ˣ →
         a • (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) := by
   intro n hn_cop
   haveI : NeZero n.val := ⟨n.pos.ne'⟩
-  refine ⟨ev ⟨n, hn_cop⟩, ?_⟩
-  exact congr_arg Subtype.val
-    (Module.End.mem_eigenspace_iff.mp ((Submodule.mem_iInf _).mp hf ⟨n, hn_cop⟩))
+  exact ⟨ev ⟨n, hn_cop⟩, congr_arg Subtype.val
+    (Module.End.mem_eigenspace_iff.mp ((Submodule.mem_iInf _).mp hf ⟨n, hn_cop⟩))⟩
 
 private lemma jointEigenspace_petN_orthogonal (χ : (ZMod N)ˣ →* ℂˣ)
     [FiniteDimensional ℂ (cuspFormCharSpace k χ)] {ev₁ ev₂ : CoprimeIndex N → ℂ}
@@ -753,8 +745,7 @@ private lemma heckeFamily_restrict_pairwise_commute
   have hcfun := DFunLike.congr_fun (heckeFamily_commute_all (k := k) χ i j)
     (x : cuspFormCharSpace k χ)
   simp only [Module.End.mul_apply] at hcfun ⊢
-  simp only [LinearMap.restrict_coe_apply]
-  exact hcfun
+  simpa only [LinearMap.coe_restrict_apply] using hcfun
 
 /-- The joint eigenspace decomposition for the restriction of `heckeFamily` to a stable
 submodule fills the whole submodule (proof helper for
@@ -795,8 +786,7 @@ private lemma isCommonEigenfunction_of_mem_iInf_eigenspace_restrict (χ : (ZMod 
   refine ⟨ev ⟨n, hn_cop⟩, ?_⟩
   have heq := Module.End.mem_eigenspace_iff.mp ((Submodule.mem_iInf _).mp hv ⟨n, hn_cop⟩)
   have heq_V : (heckeFamily k χ ⟨n, hn_cop⟩) (v : p).1 = ev ⟨n, hn_cop⟩ • (v : p).1 := by
-    have := congr_arg (Subtype.val) heq
-    simpa only [LinearMap.restrict_coe_apply, SetLike.val_smul] using this
+    simpa only [LinearMap.coe_restrict_apply, SetLike.val_smul] using congr_arg Subtype.val heq
   have h := congr_arg (Subtype.val) heq_V
   simp only [SetLike.val_smul] at h
   exact h
@@ -846,7 +836,7 @@ theorem exists_eigenform_decomposition_of_invariant
     have hval : (gp : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) =
         ∑ ev ∈ fc.support, hForm ev := by
       rw [← hsum_p, hForm_def]
-      simp only [AddSubmonoidClass.coe_finset_sum]
+      simp only [AddSubmonoidClass.coe_finsetSum]
     exact hval
   rw [hsum_form, ← Finset.sum_coe_sort fc.support (fun ev ↦ hForm ev)]
 

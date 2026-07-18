@@ -86,12 +86,8 @@ theorem sigma_loc_upper_bound_of_lower_branch_at
     letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
     letI : DecidableEq (Localization.Away s) := Classical.decEq _
     ∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
-      w.vle t' (σ_loc : Localization.Away s) := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
-  exact h_lower_branch.2.1
+      w.vle t' (σ_loc : Localization.Away s) :=
+  h_lower_branch.2.1
 
 omit [PlusSubring A] in
 /-- **α_s_D per-`t'` σ-factored chain from two rational-open
@@ -143,17 +139,9 @@ theorem alpha_s_D_per_t_factored_chain_via_lower_branch
     ∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
       w.vle (t' * (σ_loc : Localization.Away s))
         ((algebraMap A (Localization.Away s) s_D) *
-          (σ_loc : Localization.Away s)) := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
-  have h_t_le_σ_loc :
-      ∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
-        w.vle t' (σ_loc : Localization.Away s) :=
-    sigma_loc_upper_bound_of_lower_branch_at P T s hopen T_D σ_loc w
-      h_lower_branch
-  exact laurent_piece_α_s_D_per_t_factored_chain P T s hopen T_D s_D σ_loc w
-    h_laurent_α_s_D h_t_le_σ_loc
+          (σ_loc : Localization.Away s)) :=
+  laurent_piece_α_s_D_per_t_factored_chain P T s hopen T_D s_D σ_loc w
+    h_laurent_α_s_D
+    (sigma_loc_upper_bound_of_lower_branch_at P T s hopen T_D σ_loc w h_lower_branch)
 
 end ValuationSpectrum

@@ -1,7 +1,14 @@
-import BernoulliRegular.HilbertClassField
-import BernoulliRegular.TotallyRealSubfield.Basic
-import Mathlib.NumberTheory.NumberField.CMField
-import Mathlib.NumberTheory.Bernoulli
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import BernoulliRegular.HilbertClassField
+public import BernoulliRegular.TotallyRealSubfield.Basic
+public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.NumberTheory.Bernoulli
 
 /-!
 # LV009 + LV010: Case II bridges

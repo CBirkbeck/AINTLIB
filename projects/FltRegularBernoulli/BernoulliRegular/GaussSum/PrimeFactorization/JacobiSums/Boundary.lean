@@ -40,7 +40,7 @@ lemma gaussSumIntegers_eq_rootSum
             gaussSumLiftAdditiveRoot (p := p) L ^
               ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p).val))
   rw [gaussSumLift_eq_gaussSumLiftRootSum (p := p) (L := L)]
-  unfold gaussSumLiftRootSum
+  simp only [gaussSumLiftRootSum]
   rw [map_sum]
   apply Finset.sum_congr rfl
   intro m hm
@@ -100,25 +100,12 @@ lemma inverseGeneratorCoefficient_mul_val_sub_one_mem_normalizedBoundaryPrime
             ((a : ZMod p).val),
           ZMod.natCast_zmod_val]
       _ = 0 := by
-            calc
-              (((a⁻¹ : (ZMod p)ˣ) : ZMod p) * (a : ZMod p) - 1) =
-                  (1 : ZMod p) - 1 := by
-                    congr 1
-                    exact congrArg (fun u : (ZMod p)ˣ => ((u : ZMod p))) (inv_mul_cancel a)
-              _ = 0 := by simp
+            rw [← Units.val_mul, inv_mul_cancel a, Units.val_one, sub_self]
   have hxchar_mem :
-      xchar ∈ normalizedCharacterPrime (p := p) (L := L) := by
-    apply Ideal.Quotient.eq_zero_iff_mem.mp
-    have hquot' :
-        characterSubfieldPrimeQuotientEquivZMod (p := p) (L := L)
-            (Pchar := normalizedCharacterPrime (p := p) (L := L))
-            (Ideal.Quotient.mk (normalizedCharacterPrime (p := p) (L := L)) xchar) =
-          characterSubfieldPrimeQuotientEquivZMod (p := p) (L := L)
-            (Pchar := normalizedCharacterPrime (p := p) (L := L)) 0 := by
-      simpa using hquot
-    exact (characterSubfieldPrimeQuotientEquivZMod
-      (p := p) (L := L)
-      (Pchar := normalizedCharacterPrime (p := p) (L := L))).injective hquot'
+      xchar ∈ normalizedCharacterPrime (p := p) (L := L) :=
+    Ideal.Quotient.eq_zero_iff_mem.mp <|
+      (characterSubfieldPrimeQuotientEquivZMod (p := p) (L := L)
+        (Pchar := normalizedCharacterPrime (p := p) (L := L))).injective (by simpa using hquot)
   have hxchar_mem' :
       xchar ∈ (normalizedBoundaryPrime (p := p) (L := L)).under
         (𝓞 (characterSubfield (L := L) (p := p))) := by
@@ -131,6 +118,19 @@ lemma inverseGeneratorCoefficient_mul_val_sub_one_mem_normalizedBoundaryPrime
       normalizedBoundaryPrime (p := p) (L := L) at hxchar_mem'
   simpa [ZMod.natCast_val] using hxchar_mem'
 
+lemma stickelbergerComplexCharacterGenerator_pow_pred_ne_one (hp_odd : p ≠ 2) :
+    stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2) ≠ 1 := by
+  have hp_two : 2 ≤ p := hp.out.two_le
+  let j : Fin (p - 1) := ⟨p - 2, by omega⟩
+  have hj : j ≠ 0 := by
+    intro hj0
+    have hval : p - 2 = 0 := by
+      simpa [j] using congrArg Fin.val hj0
+    omega
+  simpa [j] using
+    stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
+      (p := p) (j := j) hj
+
 lemma inverseGeneratorCoefficientSum_eq_zero (hp_odd : p ≠ 2) :
     ∑ m : Fin (p - 1),
       gaussSumLiftCharacterValue (p := p) (L := L)
@@ -138,17 +138,8 @@ lemma inverseGeneratorCoefficientSum_eq_zero (hp_odd : p ≠ 2) :
         (((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ)) = 0 := by
   let χ : DirichletCharacter ℂ p :=
     stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2)
-  have hp2 : 2 ≤ p := hp.out.two_le
-  let j : Fin (p - 1) := ⟨p - 2, by omega⟩
-  have hj : j ≠ 0 := by
-    intro hj0
-    have hval : p - 2 = 0 := by
-      simpa [j] using congrArg Fin.val hj0
-    omega
-  have hχ : χ ≠ 1 := by
-    simpa [χ, j] using
-      stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
-        (p := p) (j := j) hj
+  have hχ : χ ≠ 1 :=
+    stickelbergerComplexCharacterGenerator_pow_pred_ne_one (p := p) hp_odd
   apply Subtype.ext
   have hsumC :
       ∑ m : Fin (p - 1),
@@ -167,9 +158,8 @@ lemma inverseGeneratorCoefficientSum_eq_zero (hp_odd : p ≠ 2) :
             apply Finset.sum_congr rfl
             intro m hm
             rw [stickelbergerEmbedding_gaussSumLiftCharacterValue]
-      _ = ∑ a : ZMod p, χ a := by
-            symm
-            exact sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p) (F := fun a => χ a) hF0
+      _ = ∑ a : ZMod p, χ a :=
+            (sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p) (F := fun a => χ a) hF0).symm
       _ = 0 := MulChar.sum_eq_zero_of_ne_one hχ
   have hsumL :
       (((∑ m : Fin (p - 1),
@@ -238,6 +228,35 @@ lemma inverseGeneratorRootSum_term_sub_coeff_sub_uniformizer_mem_normalizedBound
   rw [hrewrite]
   exact Ideal.add_mem _ hadd hcoeff
 
+/-- The rational prime `p`, viewed in `𝓞 L`, lies in the normalized boundary prime: the latter
+lies over the ideal `𝔭 = span {p}` of `ℤ`, and `p ∈ 𝔭`. -/
+lemma natCast_mem_normalizedBoundaryPrime :
+    (p : 𝓞 L) ∈ normalizedBoundaryPrime (p := p) (L := L) := by
+  have hnorm : normalizedBoundaryPrime (p := p) (L := L) ∈ primesAboveP p L := by
+    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
+    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
+  have hP_over :
+      normalizedBoundaryPrime (p := p) (L := L) ∈ Ideal.primesOver 𝔭 (𝓞 L) :=
+    (mem_primesAboveP_iff (p := p) (L := L)).1 hnorm
+  have hunder :
+      𝔭 = (normalizedBoundaryPrime (p := p) (L := L)).under ℤ :=
+    (Ideal.liesOver_iff _ _).mp hP_over.2
+  have hp_mem_under :
+      (p : ℤ) ∈ (normalizedBoundaryPrime (p := p) (L := L)).under ℤ := by
+    rw [← hunder]
+    exact Ideal.subset_span (by simp : (p : ℤ) ∈ ({(p : ℤ)} : Set ℤ))
+  rw [Ideal.mem_comap] at hp_mem_under
+  simpa using hp_mem_under
+
+/-- The product `p * (ζ - 1)`, where `ζ = gaussSumLiftAdditiveRoot`, lies in the square of the
+normalized boundary prime, since `p` and `ζ - 1` each lie in it. -/
+lemma natCast_mul_gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime_sq :
+    (p : 𝓞 L) * (gaussSumLiftAdditiveRoot (p := p) L - 1) ∈
+      normalizedBoundaryPrime (p := p) (L := L) ^ 2 := by
+  simpa [pow_two] using Ideal.mul_mem_mul
+    (natCast_mem_normalizedBoundaryPrime (p := p) (L := L))
+    (gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime (p := p) (L := L))
+
 lemma gaussSumIntegers_inverseGenerator_add_sub_one_mem_normalizedBoundaryPrime_sq
     (hp_odd : p ≠ 2) :
     gaussSumIntegers p L
@@ -284,39 +303,18 @@ lemma gaussSumIntegers_inverseGenerator_add_sub_one_mem_normalizedBoundaryPrime_
         normalizedBoundaryPrime (p := p) (L := L) ^ 2 := by
     rw [← hrewrite]
     exact hsum_mem
-  have hnorm : normalizedBoundaryPrime (p := p) (L := L) ∈ primesAboveP p L := by
-    rw [← characterSidePrimeOrbit_eq_primesAboveP (p := p) (L := L)]
-    exact normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L)
-  have hp_mem :
-      (p : 𝓞 L) ∈ normalizedBoundaryPrime (p := p) (L := L) := by
-    have hP_over :
-        normalizedBoundaryPrime (p := p) (L := L) ∈ Ideal.primesOver 𝔭 (𝓞 L) :=
-      (mem_primesAboveP_iff (p := p) (L := L)).1 hnorm
-    have hunder :
-        𝔭 = (normalizedBoundaryPrime (p := p) (L := L)).under ℤ :=
-      (Ideal.liesOver_iff _ _).mp hP_over.2
-    have hp_mem_under :
-        (p : ℤ) ∈ (normalizedBoundaryPrime (p := p) (L := L)).under ℤ := by
-      rw [← hunder]
-      exact Ideal.subset_span (by simp : (p : ℤ) ∈ ({(p : ℤ)} : Set ℤ))
-    rw [Ideal.mem_comap] at hp_mem_under
-    simpa using hp_mem_under
   have hpζ_mem :
       (p : 𝓞 L) * (ζ - 1) ∈ normalizedBoundaryPrime (p := p) (L := L) ^ 2 := by
-    simpa [pow_two] using Ideal.mul_mem_mul hp_mem
-      (gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime (p := p) (L := L))
+    simpa [ζ] using
+      natCast_mul_gaussSumLiftAdditiveRoot_sub_one_mem_normalizedBoundaryPrime_sq
+        (p := p) (L := L)
   have hp_cast : ((p - 1 : ℕ) : 𝓞 L) + 1 = (p : 𝓞 L) := by
     exact_mod_cast Nat.sub_add_cancel hp.out.one_le
   have hrewrite' :
       gaussSumIntegers p L χ + (ζ - 1) =
         (gaussSumIntegers p L χ - ((p - 1 : ℕ) : 𝓞 L) * (ζ - 1)) +
           (p : 𝓞 L) * (ζ - 1) := by
-    calc
-      gaussSumIntegers p L χ + (ζ - 1) =
-          (gaussSumIntegers p L χ - ((p - 1 : ℕ) : 𝓞 L) * (ζ - 1)) +
-            ((((p - 1 : ℕ) : 𝓞 L) + 1) * (ζ - 1)) := by ring
-      _ = (gaussSumIntegers p L χ - ((p - 1 : ℕ) : 𝓞 L) * (ζ - 1)) +
-            (p : 𝓞 L) * (ζ - 1) := by rw [hp_cast]
+    rw [← hp_cast]; ring
   rw [hrewrite']
   exact Ideal.add_mem _ hbase hpζ_mem
 
@@ -334,15 +332,10 @@ lemma gaussSumIntegers_inverseGenerator_mem_normalizedBoundaryPrime
     simpa [χ, ζ] using
       gaussSumIntegers_inverseGenerator_add_sub_one_mem_normalizedBoundaryPrime_sq
         (p := p) (L := L) hp_odd
-  have hsq_le :
-      normalizedBoundaryPrime (p := p) (L := L) ^ 2 ≤
-        normalizedBoundaryPrime (p := p) (L := L) := by
-    rw [pow_two]
-    exact Ideal.mul_le_left
   have hcong :
       gaussSumIntegers p L χ + (ζ - 1) ∈
         normalizedBoundaryPrime (p := p) (L := L) :=
-    hsq_le hcong_sq
+    Ideal.pow_le_self two_ne_zero hcong_sq
   have hζ :
       ζ - 1 ∈ normalizedBoundaryPrime (p := p) (L := L) := by
     simpa [ζ] using
@@ -384,7 +377,7 @@ lemma primeAbovePExponent_normalizedBoundaryPrime_inverseGenerator_eq_one
     primeAbovePExponent (p := p) (L := L)
         (normalizedBoundaryPrime (p := p) (L := L))
         (stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2)) = 1 := by
-  unfold primeAbovePExponent gaussSumIdeal
+  simp only [primeAbovePExponent, gaussSumIdeal]
   apply Ideal.count_normalizedFactors_eq
   · rw [pow_one, Ideal.span_singleton_le_iff_mem]
     exact gaussSumIntegers_inverseGenerator_mem_normalizedBoundaryPrime
@@ -394,19 +387,6 @@ lemma primeAbovePExponent_normalizedBoundaryPrime_inverseGenerator_eq_one
       (p := p) (L := L) hp_odd
       ((Ideal.span_singleton_le_iff_mem
         (I := normalizedBoundaryPrime (p := p) (L := L) ^ 2)).mp (by simpa using hle))
-
-lemma stickelbergerComplexCharacterGenerator_pow_pred_ne_one (hp_odd : p ≠ 2) :
-    stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2) ≠ 1 := by
-  have hp_two : 2 ≤ p := hp.out.two_le
-  let j : Fin (p - 1) := ⟨p - 2, by omega⟩
-  have hj : j ≠ 0 := by
-    intro hj0
-    have hval : p - 2 = 0 := by
-      simpa [j] using congrArg Fin.val hj0
-    omega
-  simpa [j] using
-    stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero
-      (p := p) (j := j) hj
 
 lemma distinguishedPrimeExponent_inverseGenerator_normalizedTransport_eq_one
     (hp_odd : p ≠ 2) :

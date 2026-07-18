@@ -222,7 +222,6 @@ private theorem locToQuotientOneSubfX_gen_divByS (s t : A) :
     locToQuotientOneSubfX_gen_algebraMap,
     locToQuotientOneSubfX_gen_invSelf, ← map_mul]
 
-set_option linter.unusedSectionVars false in
 -- Helper: scaled coefficient of `algebraMap(a) * g`.
 private theorem scaledCoeff_algebraMap_mul (f a : A)
     (g : ↥(TateAlgebra A)) (n : ℕ) :
@@ -230,7 +229,6 @@ private theorem scaledCoeff_algebraMap_mul (f a : A)
       a * (f ^ n * TateAlgebra.coeff n g) := by
   rw [TateAlgebra.coeff_algebraMap_mul, ← mul_assoc, mul_comm (f ^ n) a, mul_assoc]
 
-set_option linter.unusedSectionVars false in
 -- Helper: scaled coefficient of `algebraMap(t) * X * g` at n+1.
 private theorem scaledCoeff_succ_tX_mul (f t : A)
     (g : ↥(TateAlgebra A)) (n : ℕ) :
@@ -241,7 +239,6 @@ private theorem scaledCoeff_succ_tX_mul (f t : A)
     TateAlgebra.coeff_algebraMap_mul, TateAlgebra.coeff_succ_X_mul, pow_succ]
   ring
 
-set_option linter.unusedSectionVars false in
 -- Helper: scaled coefficient of `algebraMap(t) * X * g` at 0.
 private theorem scaledCoeff_zero_tX_mul (f t : A) (g : ↥(TateAlgebra A)) :
     f ^ 0 * TateAlgebra.coeff 0 (algebraMap A _ t * TateAlgebra.X * g) = 0 := by
@@ -249,7 +246,102 @@ private theorem scaledCoeff_zero_tX_mul (f t : A) (g : ↥(TateAlgebra A)) :
     algebraMap A _ t * (TateAlgebra.X * g) from by ring,
     TateAlgebra.coeff_algebraMap_mul, TateAlgebra.coeff_zero_X_mul, mul_zero, mul_zero]
 
-set_option linter.unusedSectionVars false in
+/-- The self-preserving T-topology neighborhood `G` used in the continuity proof:
+the set of `g ∈ A⟨X⟩` whose scaled coefficients `s ^ n · coeff n g` lie in the
+image of `I ^ (M + (N - n) * C)` for every `n ≤ N`. The `(N - n) * C` shift budget
+is what lets `G` absorb a multiplication by `algebraMap t * X` (Artin-Rees). -/
+private def artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
+    Set ↥(TateAlgebra A) := fun g ↦
+  ∀ n : ℕ, n ≤ N →
+    s ^ n * TateAlgebra.coeff n g ∈
+      Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
+
+/-- `0 ∈ artinReesNhd`. -/
+private theorem zero_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
+    (0 : ↥(TateAlgebra A)) ∈ artinReesNhd P s C M N := by
+  intro n _
+  have : TateAlgebra.coeff n (0 : ↥(TateAlgebra A)) = 0 := map_zero _
+  rw [this, mul_zero]
+  exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
+
+/-- `artinReesNhd` is closed under addition. -/
+private theorem add_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
+    {a b : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N)
+    (hb : b ∈ artinReesNhd P s C M N) : a + b ∈ artinReesNhd P s C M N := by
+  intro n hn
+  have hcoeff_add : TateAlgebra.coeff n (a + b) =
+      TateAlgebra.coeff n a + TateAlgebra.coeff n b := map_add _ _ _
+  rw [hcoeff_add, mul_add]
+  obtain ⟨x, hx, hx_eq⟩ := ha n hn
+  obtain ⟨y, hy, hy_eq⟩ := hb n hn
+  exact ⟨x + y, (P.I ^ _).add_mem hx hy, by rw [Subring.coe_add, ← hx_eq, ← hy_eq]⟩
+
+/-- `artinReesNhd` is closed under negation. -/
+private theorem neg_mem_artinReesNhd (P : PairOfDefinition A) (s : A) (C M N : ℕ)
+    {a : ↥(TateAlgebra A)} (ha : a ∈ artinReesNhd P s C M N) :
+    -a ∈ artinReesNhd P s C M N := by
+  intro n hn
+  have hcoeff_neg : TateAlgebra.coeff n (-a) = -TateAlgebra.coeff n a := map_neg _ _
+  rw [hcoeff_neg, mul_neg]
+  obtain ⟨x, hx, hx_eq⟩ := ha n hn
+  exact ⟨-x, (P.I ^ _).neg_mem hx, by rw [NegMemClass.coe_neg, ← hx_eq]⟩
+
+/-- `artinReesNhd` is a neighborhood of `0` in the T-topology: it is the finite
+intersection (over `n ≤ N`) of preimages of the open sets `val '' I^…` under the
+continuous scaled-coefficient maps. -/
+private theorem artinReesNhd_mem_nhds (P : PairOfDefinition A) (s : A) (C M N : ℕ) :
+    artinReesNhd P s C M N ∈
+      @nhds _ (TateAlgebraWedhorn.tateTopologyT s) 0 := by
+  letI τT : TopologicalSpace ↥(TateAlgebra A) := TateAlgebraWedhorn.tateTopologyT s
+  have hG_eq : artinReesNhd P s C M N =
+      ⋂ (i : Fin (N + 1)), {g | s ^ (i : ℕ) * TateAlgebra.coeff (i : ℕ) g ∈
+        Subtype.val '' ((P.I ^ (M + (N - (i : ℕ)) * C) : Ideal P.A₀) : Set P.A₀)} := by
+    ext g; simp only [artinReesNhd, Set.mem_iInter, Set.mem_setOf_eq]
+    constructor
+    · intro hg ⟨i, hi⟩; exact hg i (by omega)
+    · intro hg n hn; exact hg ⟨n, by omega⟩
+  rw [mem_nhds_iff]
+  refine ⟨_, le_refl _, ?_, zero_mem_artinReesNhd P s C M N⟩
+  rw [hG_eq]
+  exact isOpen_iInter_of_finite fun ⟨n, _⟩ ↦
+    (P.pow_image_isOpen _).preimage
+      (TateAlgebraWedhorn.tateTopologyT_continuous_scaledCoeff s n)
+
+/-- `artinReesNhd` is stable under multiplication by `algebraMap a₀` for `a₀ ∈ A₀`:
+multiplying scales each coefficient by `a₀`, and `a₀ · I^k ⊆ I^k`. -/
+private theorem mul_algebraMap_mem_artinReesNhd (P : PairOfDefinition A) (s : A)
+    (C M N : ℕ) (a₀ : P.A₀) {g : ↥(TateAlgebra A)}
+    (hg : g ∈ artinReesNhd P s C M N) :
+    algebraMap A _ (a₀ : A) * g ∈ artinReesNhd P s C M N := by
+  intro n hn
+  rw [scaledCoeff_algebraMap_mul]
+  obtain ⟨b, hb, hb_eq⟩ := hg n hn
+  exact ⟨a₀ * b, Ideal.mul_mem_left _ _ hb, by rw [MulMemClass.coe_mul, ← hb_eq]⟩
+
+/-- `artinReesNhd` is stable under multiplication by `algebraMap t * X` for any `t`
+with the Artin-Rees shift property `hC_shift`: the `X` shifts the coefficient index
+up by one (consuming one unit of the `(N - n) * C` budget), and `s * t` carries
+`I^(j+C)` back into `I^j`. -/
+private theorem mul_algebraMap_X_mem_artinReesNhd (P : PairOfDefinition A) (s t : A)
+    (C M N : ℕ)
+    (hC_shift : ∀ (k : ℕ) (b : P.A₀), (b : P.A₀) ∈ P.I ^ (k + C) →
+      s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀))
+    {g : ↥(TateAlgebra A)} (hg : g ∈ artinReesNhd P s C M N) :
+    algebraMap A _ t * TateAlgebra.X * g ∈ artinReesNhd P s C M N := by
+  intro n hn
+  by_cases hn0 : n = 0
+  · subst hn0
+    rw [scaledCoeff_zero_tX_mul]; exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
+  · obtain ⟨n', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn0
+    rw [scaledCoeff_succ_tX_mul]
+    have hn' : n' ≤ N := by omega
+    obtain ⟨b, hb, hb_eq⟩ := hg n' hn'
+    rw [← hb_eq]
+    have hkey : M + (N - n') * C = (M + (N - (n' + 1)) * C) + C := by
+      have : N - n' = N - (n' + 1) + 1 := by omega
+      rw [this, add_mul, one_mul]; omega
+    exact hC_shift (M + (N - (n' + 1)) * C) b (hkey ▸ hb)
+
 /-- For any neighborhood W of 0 in the quotient T-topology, there exists m such that
 for all r in locSubring and b in I^m, the product phi(r) * mk(algebraMap(b)) lands in W.
 
@@ -284,10 +376,10 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
   have hC_exists : ∀ t : T, ∃ C : ℕ, ∀ (k : ℕ) (b : P.A₀),
       (b : P.A₀) ∈ P.I ^ (k + C) →
         s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) :=
-    fun t => mul_st_ideal_shift P s t
+    fun t ↦ mul_st_ideal_shift P s t
   choose C_fn hC_fn using hC_exists
   let C := (T.attach.image C_fn).sup id
-  have hC_bound : ∀ (t : T), C_fn t ≤ C := fun t =>
+  have hC_bound : ∀ (t : T), C_fn t ≤ C := fun t ↦
     Finset.le_sup (f := id) (Finset.mem_image_of_mem _ (Finset.mem_attach _ _))
   have hC_shift : ∀ (t : T) (k : ℕ) (b : P.A₀), (b : P.A₀) ∈ P.I ^ (k + C) →
       s * t * (b : A) ∈ Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀) := by
@@ -304,25 +396,22 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
   obtain ⟨W_prod, hW_prod, hW_incl⟩ := hmk_pre_W
   rw [map_zero] at hW_prod
   change W_prod ∈ @nhds _ (@Pi.topologicalSpace (Fin 1 →₀ ℕ)
-    (fun _ => A) (fun _ => ‹_›)) 0 at hW_prod
+    (fun _ ↦ A) (fun _ ↦ ‹_›)) 0 at hW_prod
   rw [nhds_pi] at hW_prod
   simp only [show ∀ i : Fin 1 →₀ ℕ,
-    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ => rfl] at hW_prod
+    (0 : (Fin 1 →₀ ℕ) → A) i = (0 : A) from fun _ ↦ rfl] at hW_prod
   obtain ⟨Idx, t_set, ht_set, hIt⟩ := Filter.mem_pi'.mp hW_prod
   -- Step 4: For each index in Idx, find m_i with Im(I^{m_i}) ⊆ t_set(i).
   have hm_exists : ∀ i : Fin 1 →₀ ℕ,
       ∃ m : ℕ, Subtype.val '' ((P.I ^ m : Ideal P.A₀) : Set P.A₀) ⊆ t_set i :=
-    fun i => by
+    fun i ↦ by
       obtain ⟨m, _, hm⟩ := P.hasBasis_nhds_zero.mem_iff.mp (ht_set i)
       exact ⟨m, hm⟩
   choose m_fn hm_fn using hm_exists
-  let N := (Idx.image (fun i : Fin 1 →₀ ℕ => i 0)).sup id
+  let N := (Idx.image (fun i : Fin 1 →₀ ℕ ↦ i 0)).sup id
   let M := (Idx.image m_fn).sup id
-  -- Step 5: Construct G — the self-preserving neighborhood.
-  let G : Set ↥(TateAlgebra A) := fun g =>
-    ∀ n : ℕ, n ≤ N →
-      s ^ n * TateAlgebra.coeff n g ∈
-        Subtype.val '' ((P.I ^ (M + (N - n) * C) : Ideal P.A₀) : Set P.A₀)
+  -- Step 5: Construct G — the self-preserving neighborhood (see `artinReesNhd`).
+  let G : Set ↥(TateAlgebra A) := artinReesNhd P s C M N
   -- Step 5a: G is contained in mk⁻¹(W).
   have hG_sub_W : G ⊆ mk ⁻¹' W := by
     intro g hg
@@ -330,7 +419,7 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
     apply hIt
     intro i hi
     have : i 0 ≤ N :=
-      Finset.le_sup (f := id) (Finset.mem_image_of_mem (fun i : Fin 1 →₀ ℕ => i 0) hi)
+      Finset.le_sup (f := id) (Finset.mem_image_of_mem (fun i : Fin 1 →₀ ℕ ↦ i 0) hi)
     have hg_i := hg (i 0) this
     have hM_bound : m_fn i ≤ M :=
       Finset.le_sup (f := id) (Finset.mem_image_of_mem m_fn hi)
@@ -349,82 +438,25 @@ private theorem locToQuotient_mul_small_constant_mem (D : RationalLocData A)
     -- TateAlgebra.coeff (i 0) g = MvPowerSeries.coeff A (Finsupp.single 0 (i 0)) g
     --                            = g.val (Finsupp.single 0 (i 0)) = g.val i
     -- So the result follows from hg_i + hsub + hm_fn.
-    -- We use hi_eq to convert: g.val i = g.val (Finsupp.single 0 (i 0))
-    -- which equals TateAlgebra.coeff (i 0) g.
-    -- g.val i = TateAlgebra.coeff (i 0) g since i = Finsupp.single 0 (i 0).
-    -- So scaleIncl = s^(i 0) * TateAlgebra.coeff (i 0) g.
     have hscale : s ^ i 0 * g.val i =
         s ^ i 0 * TateAlgebra.coeff (i 0) g := by
       congr 1; change g.val i = g.val (Finsupp.single 0 (i 0)); rw [← hi_eq]
     rw [hscale]
     exact hm_fn i (hsub hg_i)
-  -- Step 5b: G is an additive subgroup.
-  have hG_zero : (0 : ↥(TateAlgebra A)) ∈ G := by
-    intro n _
-    have : TateAlgebra.coeff n (0 : ↥(TateAlgebra A)) = 0 := map_zero _
-    rw [this, mul_zero]
-    exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
-  have hG_add : ∀ {a b}, a ∈ G → b ∈ G → a + b ∈ G := by
-    intro a b ha hb n hn
-    have hcoeff_add : TateAlgebra.coeff n (a + b) =
-        TateAlgebra.coeff n a + TateAlgebra.coeff n b := map_add _ _ _
-    rw [hcoeff_add, mul_add]
-    obtain ⟨x, hx, hx_eq⟩ := ha n hn
-    obtain ⟨y, hy, hy_eq⟩ := hb n hn
-    exact ⟨x + y, (P.I ^ _).add_mem hx hy,
-      by rw [Subring.coe_add, ← hx_eq, ← hy_eq]⟩
-  have hG_neg : ∀ {a}, a ∈ G → -a ∈ G := by
-    intro a ha n hn
-    have hcoeff_neg : TateAlgebra.coeff n (-a) = -TateAlgebra.coeff n a := map_neg _ _
-    rw [hcoeff_neg, mul_neg]
-    obtain ⟨x, hx, hx_eq⟩ := ha n hn
-    exact ⟨-x, (P.I ^ _).neg_mem hx, by rw [NegMemClass.coe_neg, ← hx_eq]⟩
-  -- Step 5c: G ∈ nhds 0 in the T-topology.
-  have hG_eq : G = ⋂ (i : Fin (N + 1)), {g | s ^ (i : ℕ) * TateAlgebra.coeff (i : ℕ) g ∈
-      Subtype.val '' ((P.I ^ (M + (N - (i : ℕ)) * C) : Ideal P.A₀) : Set P.A₀)} := by
-    ext g; simp only [Set.mem_iInter, Set.mem_setOf_eq]
-    constructor
-    · intro hg ⟨i, hi⟩; exact hg i (by omega)
-    · intro hg n hn; exact hg ⟨n, by omega⟩
-  have hG_nhds : G ∈ @nhds _ τT 0 := by
-    rw [mem_nhds_iff]
-    refine ⟨G, le_refl _, ?_, hG_zero⟩
-    rw [hG_eq]
-    exact isOpen_iInter_of_finite fun ⟨n, _⟩ =>
-      (P.pow_image_isOpen _).preimage
-        (TateAlgebraWedhorn.tateTopologyT_continuous_scaledCoeff s n)
+  -- Step 5b/5c: G is an additive subgroup and a T-topology neighborhood of 0.
+  have hG_zero : (0 : ↥(TateAlgebra A)) ∈ G := zero_mem_artinReesNhd P s C M N
+  have hG_add : ∀ {a b}, a ∈ G → b ∈ G → a + b ∈ G :=
+    fun ha hb ↦ add_mem_artinReesNhd P s C M N ha hb
+  have hG_neg : ∀ {a}, a ∈ G → -a ∈ G := fun ha ↦ neg_mem_artinReesNhd P s C M N ha
+  have hG_nhds : G ∈ @nhds _ τT 0 := artinReesNhd_mem_nhds P s C M N
   -- Step 6: G is stable under algebraMap(a₀) * · for a₀ ∈ A₀.
   have hG_stable_alg : ∀ (a₀ : P.A₀) (g : ↥(TateAlgebra A)),
-      g ∈ G → algebraMap A _ (a₀ : A) * g ∈ G := by
-    intro a₀ g hg n hn
-    have hrw : s ^ n * TateAlgebra.coeff n (algebraMap A _ (a₀ : A) * g) =
-        (a₀ : A) * (s ^ n * TateAlgebra.coeff n g) := scaledCoeff_algebraMap_mul _ _ _ _
-    rw [hrw]
-    obtain ⟨b, hb, hb_eq⟩ := hg n hn
-    exact ⟨a₀ * b, Ideal.mul_mem_left _ _ hb, by rw [MulMemClass.coe_mul, ← hb_eq]⟩
+      g ∈ G → algebraMap A _ (a₀ : A) * g ∈ G :=
+    fun a₀ g hg ↦ mul_algebraMap_mem_artinReesNhd P s C M N a₀ hg
   -- Step 7: G is stable under algebraMap(t)*X * · for t ∈ T.
   have hG_stable_tX : ∀ (t : T) (g : ↥(TateAlgebra A)),
-      g ∈ G → algebraMap A _ (t : A) * TateAlgebra.X * g ∈ G := by
-    intro t g hg n hn
-    by_cases hn0 : n = 0
-    · subst hn0
-      have hrw0 : s ^ 0 * TateAlgebra.coeff 0
-          (algebraMap A _ (t : A) * TateAlgebra.X * g) = 0 :=
-        scaledCoeff_zero_tX_mul _ _ _
-      rw [hrw0]; exact ⟨0, (P.I ^ _).zero_mem, rfl⟩
-    · obtain ⟨n', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn0
-      have hrw_succ : s ^ (n' + 1) * TateAlgebra.coeff (n' + 1)
-          (algebraMap A _ (t : A) * TateAlgebra.X * g) =
-          s * t * (s ^ n' * TateAlgebra.coeff n' g) :=
-        scaledCoeff_succ_tX_mul _ _ _ _
-      rw [hrw_succ]
-      have hn' : n' ≤ N := by omega
-      obtain ⟨b, hb, hb_eq⟩ := hg n' hn'
-      rw [← hb_eq]
-      have hkey : M + (N - n') * C = (M + (N - (n' + 1)) * C) + C := by
-        have : N - n' = N - (n' + 1) + 1 := by omega
-        rw [this, add_mul, one_mul]; omega
-      exact hC_shift t (M + (N - (n' + 1)) * C) b (hkey ▸ hb)
+      g ∈ G → algebraMap A _ (t : A) * TateAlgebra.X * g ∈ G :=
+    fun t g hg ↦ mul_algebraMap_X_mem_artinReesNhd P s t C M N (hC_shift t) hg
   -- Step 8: Find m such that algebraMap(I^m) maps into G.
   -- Use continuity of mk ∘ algebraMap: preimage of G (which is a nhd of 0 in
   -- the T-topology) under algebraMap gives a nhd of 0 in A.
@@ -938,7 +970,6 @@ T-topology. The image contains `mk(a)` for all `a ∈ A` and `mk(X)` (since
 Polynomials are dense in `A⟨X⟩` for the T-topology because truncations
 converge in the induced product topology. -/
 
-set_option linter.unusedSectionVars false in
 /-- A power series whose coefficients are zero above degree `N` is restricted,
 because only finitely many coefficients are nonzero. -/
 private theorem isRestricted_of_eventually_zero
@@ -947,7 +978,7 @@ private theorem isRestricted_of_eventually_zero
     MvPowerSeries.IsRestricted h := by
   -- IsRestricted = coefficients tend to 0 along cofinite filter.
   -- Suffices to show: the set of nonzero coefficients is finite.
-  change Filter.Tendsto (fun s => h s) Filter.cofinite (nhds 0)
+  change Filter.Tendsto (fun s ↦ h s) Filter.cofinite (nhds 0)
   rw [tendsto_nhds]
   intro U hU h0U
   rw [Filter.mem_cofinite]
@@ -959,26 +990,23 @@ private theorem isRestricted_of_eventually_zero
   simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio]
   refine ⟨s 0, ?_, (TateAlgebra.eq_toIndex s).symm⟩
   by_contra hge
-  push_neg at hge
+  push Not at hge
   exact hs (by rw [hh s hge]; exact h0U)
 
 /-- The truncation of `g ∈ A⟨X⟩` at degree `N`: keep coefficients at multi-indices
 with `s 0 < N` and set the rest to zero. The result is restricted (polynomial). -/
 private noncomputable def truncTate (g : ↥(TateAlgebra A)) (N : ℕ) :
     ↥(TateAlgebra A) :=
-  ⟨fun s => if s 0 < N then g.val s else 0,
-   isRestricted_of_eventually_zero _ N (fun s hs => by simp [show ¬(s 0 < N) from by omega])⟩
+  ⟨fun s ↦ if s 0 < N then g.val s else 0,
+   isRestricted_of_eventually_zero _ N (fun s hs ↦ by simp [show ¬(s 0 < N) from by omega])⟩
 
-set_option linter.unusedSectionVars false in
 private theorem truncTate_val (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ) :
     (truncTate g N).val s = if s 0 < N then g.val s else 0 := rfl
 
-set_option linter.unusedSectionVars false in
 private theorem truncTate_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : N ≤ s 0) : (truncTate g N).val s = 0 := by
   simp [truncTate_val, show ¬(s 0 < N) from by omega]
 
-set_option linter.unusedSectionVars false in
 private theorem truncTate_coeff_low (g : ↥(TateAlgebra A)) (N : ℕ) (s : Fin 1 →₀ ℕ)
     (hs : s 0 < N) : (truncTate g N).val s = g.val s := by
   simp [truncTate_val, hs]
@@ -990,6 +1018,7 @@ private theorem scaleIncl_truncTate_eq (g : ↥(TateAlgebra A)) (N : ℕ) (s : A
     TateAlgebraWedhorn.scaleIncl s g idx := by
   simp only [TateAlgebraWedhorn.scaleIncl_apply, truncTate_coeff_low g N idx h]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the T-topology. The T-topology is induced from the
 product `∏ A` via `scaleIncl`, and in the product topology a sequence of
@@ -1053,9 +1082,8 @@ theorem tateAlgebra_polynomials_dense (s : A) :
     rw [scaleIncl_truncTate_eq g N s idx hlt]
     exact mem_of_mem_nhds (ht_nhds idx)
   · -- truncTate g N has finitely many nonzero coefficients
-    exact ⟨N, fun n hn => truncTate_coeff_high g N n hn⟩
+    exact ⟨N, fun n hn ↦ truncTate_coeff_high g N n hn⟩
 
-set_option linter.unusedSectionVars false in
 /-- Every polynomial element in `A⟨X⟩` (coefficients zero above degree N) has its
 quotient class in the range of `locToQuotientOneSubfX_gen`. By induction on N:
 the image contains `mk(algebraMap a)` and `mk(X)`, hence all finite sums of
@@ -1400,6 +1428,7 @@ which is topologically nilpotent. The caller discharges `hJ_eval` from this stru
 Then `IsQuotientMap.continuous_iff` descends continuity to the quotient. -/
 
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The reverse map `A⟨X⟩/(1-sX) → presheafValue D` is continuous.
 
 **Proof (Wedhorn Example 6.38):** `tateQuotientToPresheafHom = Quotient.lift tateEvalPresheafHom`.
@@ -1450,11 +1479,11 @@ theorem tateQuotientToPresheafHom_continuous (D : RationalLocData A)
   intro V hV
   -- Use hadic to get the J-adic nhds basis, then apply hJ_eval.
   have hbasis : ((@nhds _ τT (0 : ↥(TateAlgebra A))).HasBasis
-      (fun _ : ℕ => True) fun n => ((J ^ n : Ideal _) : Set _)) :=
+      (fun _ : ℕ ↦ True) fun n ↦ ((J ^ n : Ideal _) : Set _)) :=
     hadic.hasBasis_nhds_zero
   rw [hbasis.mem_iff]
   obtain ⟨k, hk⟩ := hJ_eval V hV
-  exact ⟨k, trivial, fun h hh => hk h hh⟩
+  exact ⟨k, trivial, fun h hh ↦ hk h hh⟩
 
 end HypothesesDischarge
 
@@ -1481,9 +1510,9 @@ keep coefficients at multi-indices with `s 0 < N`, set the rest to zero.
 The result is restricted (polynomial). -/
 private noncomputable def truncTateC (g : ↥(TateAlgebra A)) (N : ℕ) :
     ↥(TateAlgebra A) :=
-  ⟨fun s => if s 0 < N then g.val s else 0,
+  ⟨fun s ↦ if s 0 < N then g.val s else 0,
    isRestricted_of_eventually_zero _ N
-    (fun s hs => by simp [show ¬(s 0 < N) from by omega])⟩
+    (fun s hs ↦ by simp [show ¬(s 0 < N) from by omega])⟩
 
 private theorem truncTateC_val (g : ↥(TateAlgebra A)) (N : ℕ)
     (s : Fin 1 →₀ ℕ) :
@@ -1494,7 +1523,6 @@ private theorem truncTateC_coeff_high (g : ↥(TateAlgebra A)) (N : ℕ)
     (truncTateC g N).val s = 0 := by
   simp [truncTateC_val, show ¬(s 0 < N) from by omega]
 
-set_option linter.unusedSectionVars false in
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the canonical (natural Tate) topology.
 
@@ -1521,7 +1549,7 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
       (Subtype.val '' ((P.I ^ n : Ideal P.A₀) : Set P.A₀) : Set A)} with hS_def
   have hS_fin : S.Finite := hfin
   let N := (hS_fin.toFinset.image (· 0)).sup id + 1
-  refine ⟨truncTateC g N, hn ?_, ⟨N, fun m hm => truncTateC_coeff_high g N m hm⟩⟩
+  refine ⟨truncTateC g N, hn ?_, ⟨N, fun m hm ↦ truncTateC_coeff_high g N m hm⟩⟩
   -- Need: truncTateC g N - g ∈ tateAlgNhd P n (basis uses b - a ∈ ...).
   -- This equals -(g - truncTateC g N), so use neg_mem.
   have hdiff_pair : g - truncTateC g N ∈ pairSubring P := by
@@ -1571,7 +1599,6 @@ theorem tateAlgebra_polynomials_dense_canonical [IsTateRing A] :
   rw [show truncTateC g N - g = -(g - truncTateC g N) from by ring]
   exact neg_mem hg_diff_mem
 
-set_option linter.unusedSectionVars false in
 /-- The localization `A[1/s]` maps densely into `A⟨X⟩/(1-sX)` for the canonical
 quotient topology (Wedhorn Example 6.38, canonical topology version).
 
@@ -1609,6 +1636,150 @@ theorem locToQuotientOneSubfX_gen_denseRange_canonical [IsTateRing A] [T2Space A
 -- (counterexample: A = ℚ_p, s = 1 — T-quotient non-Hausdorff, canonical
 -- quotient Hausdorff, so the ordering ≤ fails). It had no external callers.
 -- The acyclicity theorem uses `presheafValueTateQuotientEquiv` directly.
+
+/-- The "fixed-ideal coefficient neighborhood": Tate series whose **every**
+`MvPowerSeries` coefficient lies in the image of `P.I ^ M` in `A`.
+
+This is the self-preserving set used by the *canonical*-topology continuity proof
+(`locToQuotientOneSubfX_gen_continuous_canonical`). Unlike `artinReesNhd` (a finite
+Artin-Rees intersection tied to the T-topology), it pins a single ideal `P.I ^ M`
+across all coefficients — which is exactly what is stable under the generators of
+`locSubring` once `P` is the enlarged pair `D.P.adjoin D.T`. -/
+private def coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) : Set ↥(TateAlgebra A) :=
+  fun g ↦ ∀ l : Fin 1 →₀ ℕ,
+    MvPowerSeries.coeff l g.val ∈
+      Subtype.val '' ((P.I ^ M : Ideal P.A₀) : Set P.A₀)
+
+omit [PlusSubring A] [IsHuberRing A] in
+omit [PlusSubring A] [IsHuberRing A] in
+/-- `0 ∈ coeffIdealNhd`. -/
+private theorem zero_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ) :
+    (0 : ↥(TateAlgebra A)) ∈ coeffIdealNhd P M := by
+  intro l
+  rw [ZeroMemClass.coe_zero, map_zero]
+  exact ⟨0, (P.I ^ M).zero_mem, rfl⟩
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- `coeffIdealNhd` is closed under addition. -/
+private theorem add_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
+    {a b : ↥(TateAlgebra A)} (ha : a ∈ coeffIdealNhd P M)
+    (hb : b ∈ coeffIdealNhd P M) : a + b ∈ coeffIdealNhd P M := by
+  intro l
+  rw [AddMemClass.coe_add, map_add]
+  obtain ⟨x, hx, hx_eq⟩ := ha l
+  obtain ⟨y, hy, hy_eq⟩ := hb l
+  exact ⟨x + y, (P.I ^ M).add_mem hx hy,
+    by rw [Subring.coe_add]; exact congrArg₂ (· + ·) hx_eq hy_eq⟩
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- `coeffIdealNhd` is closed under negation. -/
+private theorem neg_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
+    {a : ↥(TateAlgebra A)} (ha : a ∈ coeffIdealNhd P M) :
+    -a ∈ coeffIdealNhd P M := by
+  intro l
+  rw [NegMemClass.coe_neg, map_neg]
+  obtain ⟨x, hx, hx_eq⟩ := ha l
+  exact ⟨-x, (P.I ^ M).neg_mem hx,
+    by rw [NegMemClass.coe_neg]; exact congrArg (- ·) hx_eq⟩
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- `coeffIdealNhd` is stable under multiplication by `algebraMap a₀` for
+`a₀ ∈ P.A₀`: it scales every coefficient by `a₀`, and `a₀ · I^M ⊆ I^M`. -/
+private theorem mul_algebraMap_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
+    {a₀ : A} (ha₀ : a₀ ∈ P.A₀) {g : ↥(TateAlgebra A)}
+    (hg : g ∈ coeffIdealNhd P M) :
+    algebraMap A ↥(TateAlgebra A) a₀ * g ∈ coeffIdealNhd P M := by
+  intro l
+  change MvPowerSeries.coeff l
+    ((MvPowerSeries.C a₀ : MvPowerSeries (Fin 1) A) * g.val) ∈ _
+  rw [MvPowerSeries.coeff_C_mul]
+  obtain ⟨c, hc, hc_eq⟩ := hg l
+  exact ⟨⟨a₀, ha₀⟩ * c, Ideal.mul_mem_left _ _ hc,
+    by rw [MulMemClass.coe_mul]; exact congrArg (a₀ * ·) hc_eq⟩
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- `coeffIdealNhd` is stable under multiplication by `X`: multiplying by `X`
+shifts coefficients up by one (and inserts `0` at index `0`), which preserves the
+property that every coefficient lies in `image (P.I ^ M)`. -/
+private theorem mul_X_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
+    {g : ↥(TateAlgebra A)} (hg : g ∈ coeffIdealNhd P M) :
+    TateAlgebra.X * g ∈ coeffIdealNhd P M := by
+  intro l
+  have hl_eq : l = Finsupp.single 0 (l 0) := by
+    apply Finsupp.ext; intro k; fin_cases k; simp
+  rw [hl_eq]; change TateAlgebra.coeff (l 0) (TateAlgebra.X * g) ∈ _
+  cases hn : l 0 with
+  | zero =>
+    rw [TateAlgebra.coeff_zero_X_mul]
+    exact ⟨0, (P.I ^ M).zero_mem, rfl⟩
+  | succ n =>
+    rw [TateAlgebra.coeff_succ_X_mul]
+    exact hg (Finsupp.single 0 n)
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- The constant series `algebraMap b` lies in `coeffIdealNhd P M` whenever
+`b ∈ P.I ^ M`: its only nonzero coefficient is `b` at index `0`. -/
+private theorem algebraMap_mem_coeffIdealNhd (P : PairOfDefinition A) (M : ℕ)
+    {b : P.A₀} (hb : b ∈ P.I ^ M) :
+    algebraMap A ↥(TateAlgebra A) (b : A) ∈ coeffIdealNhd P M := by
+  intro l
+  have hval : (algebraMap A ↥(TateAlgebra A) (b : A)).val =
+      MvPowerSeries.C (b : A) := rfl
+  rw [hval, MvPowerSeries.coeff_C]
+  split
+  · exact ⟨b, hb, rfl⟩
+  · exact ⟨0, (P.I ^ M).zero_mem, rfl⟩
+
+omit [PlusSubring A] [IsHuberRing A] in
+/-- Every element `x` of `locSubring P T s` has a lift `r' : A⟨X⟩` with
+`mk r' = locToQuotientOneSubfX_gen s x` that **stabilizes** `coeffIdealNhd P_M M`,
+provided the enlarged pair `P_M` absorbs both `P.A₀` (for the `algebraMap a₀`
+generators) and every `t ∈ T` (for the `divByS t s` generators).
+
+Proved by `Subring.closure_induction` over the two families of generators of
+`locSubring`, using the `coeffIdealNhd` stability lemmas; this is the canonical
+analogue of the `Subring.closure_induction` step in `locToQuotient_mul_small_constant_mem`. -/
+private theorem exists_lift_stabilizing_coeffIdealNhd
+    (P : PairOfDefinition A) (T : Finset A) (s : A)
+    (P_M : PairOfDefinition A) (M : ℕ)
+    (hPA₀ : P.A₀ ≤ P_M.A₀) (hT_mem : ∀ t ∈ T, t ∈ P_M.A₀)
+    {x : Localization.Away s} (hx : x ∈ locSubring P T s) :
+    ∃ r' : ↥(TateAlgebra A),
+      Ideal.Quotient.mk (oneSubfXIdeal s) r' = locToQuotientOneSubfX_gen s x ∧
+        ∀ g ∈ coeffIdealNhd P_M M, r' * g ∈ coeffIdealNhd P_M M := by
+  induction hx using Subring.closure_induction with
+  | mem x hx =>
+    rcases hx with ⟨a₀, ha₀, rfl⟩ | ⟨⟨t, ht⟩, rfl⟩
+    · -- Case: x = algebraMap(a₀) with a₀ ∈ P.A₀.
+      refine ⟨algebraMap A _ a₀, ?_, ?_⟩
+      · rw [← locToQuotientOneSubfX_gen_algebraMap]
+      · exact fun g hg ↦ mul_algebraMap_mem_coeffIdealNhd P_M M (hPA₀ ha₀) hg
+    · -- Case: x = divByS(t, s) with t ∈ T.
+      refine ⟨algebraMap A _ t * TateAlgebra.X, ?_, ?_⟩
+      · rw [← locToQuotientOneSubfX_gen_divByS]
+      · refine fun g hg ↦ ?_
+        rw [mul_assoc]
+        exact mul_algebraMap_mem_coeffIdealNhd P_M M (hT_mem t ht)
+          (mul_X_mem_coeffIdealNhd P_M M hg)
+  | zero =>
+    exact ⟨0, by simp [map_zero], fun g _ ↦ by simp [zero_mul, zero_mem_coeffIdealNhd]⟩
+  | one =>
+    exact ⟨1, by simp [map_one], fun g hg ↦ by simp [one_mul, hg]⟩
+  | add x y _ _ ihx ihy =>
+    obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
+    obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
+    exact ⟨rx + ry, by rw [map_add, hrx_eq, hry_eq, map_add],
+      fun g hg ↦ by
+        rw [add_mul]; exact add_mem_coeffIdealNhd P_M M (hrx_stab g hg) (hry_stab g hg)⟩
+  | neg x _ ihx =>
+    obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
+    exact ⟨-rx, by rw [map_neg, hrx_eq, map_neg],
+      fun g hg ↦ by rw [neg_mul]; exact neg_mem_coeffIdealNhd P_M M (hrx_stab g hg)⟩
+  | mul x y _ _ ihx ihy =>
+    obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
+    obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
+    exact ⟨rx * ry, by rw [map_mul, hrx_eq, hry_eq, map_mul],
+      fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
 
 omit [PlusSubring A] [IsHuberRing A] in
 /-- The map `locToQuotientOneSubfX_gen D.s` is continuous from the localization
@@ -1666,7 +1837,7 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
         (Ideal.Quotient.mk (oneSubfXIdeal D.s)).toAddMonoidHom
       isOpen' := @QuotientRing.isOpenMap_coe _ instTopologicalSpaceTateAlgebra _
         (oneSubfXIdeal D.s) instIsTopologicalRingTateAlgebra _ V.isOpen
-    }, fun x hx => by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
+    }, fun x hx ↦ by obtain ⟨y, hy, rfl⟩ := hx; exact hVU hy⟩
   obtain ⟨W, hWS⟩ := NonarchimedeanRing.is_nonarchimedean S hS
   suffices ∃ n, ∀ x ∈ locNhd D.P D.T D.s n,
       locToQuotientOneSubfX_gen D.s x ∈ (W : Set _) by
@@ -1704,12 +1875,12 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
       rw [(IsTateRing.principalPair A).I_eq_span]; exact Ideal.mem_span_singleton_self _)
   -- mk(algebraMap(π^n)) → 0 in canonical quotient.
   have hmk_pi_tendsto : Filter.Tendsto
-      (fun n => mk (algebraMap A ↥(TateAlgebra A) ((IsTateRing.principalPair A).π ^ n : A)))
+      (fun n ↦ mk (algebraMap A ↥(TateAlgebra A) ((IsTateRing.principalPair A).π ^ n : A)))
       Filter.atTop (@nhds _ τC 0) := by
     have h0 : mk (algebraMap A ↥(TateAlgebra A) 0) = 0 := by simp
     rw [← h0]
     exact (hmk_alg_cont.tendsto 0).comp (by
-      change Filter.Tendsto (fun n => ((IsTateRing.principalPair A).π : A) ^ n) _ _
+      change Filter.Tendsto (fun n ↦ ((IsTateRing.principalPair A).π : A) ^ n) _ _
       exact hπ)
   -- Step 2: Construct P_common = D.P.adjoin D.T (Wedhorn 6.3).
   -- P_common.A₀ = Subring.closure(D.P.A₀ ∪ D.T), which contains both D.P.A₀ and D.T.
@@ -1733,151 +1904,38 @@ theorem locToQuotientOneSubfX_gen_continuous_canonical [IsTateRing A] [T2Space A
     (P'.pow_image_isOpen k₀).mem_nhds ⟨0, (P'.I ^ k₀).zero_mem, rfl⟩
   obtain ⟨M, -, hM⟩ := P_common.hasBasis_nhds_zero.mem_iff.mp hPcI_nhds
   -- hM : image(P_common.I^M) ⊆ image(P'.I^k₀)
-  -- Step 5: Define G = {g | all coefficients in image(P_common.I^M)}.
-  let G : Set ↥(TateAlgebra A) := fun g =>
-    ∀ l : Fin 1 →₀ ℕ, MvPowerSeries.coeff l g.val ∈
-      Subtype.val '' ((P_common.I ^ M : Ideal P_common.A₀) : Set P_common.A₀)
-  -- Step 5a: G ⊆ mk⁻¹(W).
-  -- Elements of G have all coefficients in image(P_common.I^M) ⊆ image(P'.I^k₀).
-  -- So they're in pairSubring P' (coefficients in P'.A₀) and tateAlgNhd P' k₀.
+  -- Step 5: G = fixed-ideal coefficient neighborhood for the enlarged pair
+  -- (all coefficients in image(P_common.I^M)); see `coeffIdealNhd`.
+  let G : Set ↥(TateAlgebra A) := coeffIdealNhd P_common M
+  -- Step 5a: G ⊆ mk⁻¹(W) via cofinality image(P_common.I^M) ⊆ image(P'.I^k₀)
+  -- (`hM`) and `tateAlgNhd_of_coeff_mem_principal`.
   have hG_sub_W : G ⊆ mk ⁻¹' (W : Set _) := by
     intro g hg
     apply hk₀
-    -- g has all coefficients in image(P_common.I^M) ⊆ image(P'.I^k₀) ⊆ P'.A₀.
     have hg_pair : g ∈ pairSubring P' := by
       intro l; obtain ⟨c, _, hc_eq⟩ := hM (hg l); rw [← hc_eq]; exact c.property
     have hg_coeff : ∀ l, ∃ b : P'.A₀, b ∈ P'.I ^ k₀ ∧
-        (b : A) = MvPowerSeries.coeff l g.val := by
-      intro l; exact hM (hg l)
+        (b : A) = MvPowerSeries.coeff l g.val := fun l ↦ hM (hg l)
     exact tateAlgNhd_of_coeff_mem_principal P' k₀
       (IsTateRing.principalPair A).π
       (IsTateRing.principalPair A).I_eq_span
       (IsTateRing.principalPair A).π_isUnit
       hg_pair hg_coeff
-  -- Step 5b: G is an additive subgroup.
-  have hG_zero : (0 : ↥(TateAlgebra A)) ∈ G := by
-    intro l; change MvPowerSeries.coeff l (0 : TateAlgebra A).val ∈ _
-    rw [ZeroMemClass.coe_zero, map_zero]
-    exact ⟨0, (P_common.I ^ M).zero_mem, rfl⟩
-  have hG_add : ∀ {a b}, a ∈ G → b ∈ G → a + b ∈ G := by
-    intro a b ha hb l
-    change MvPowerSeries.coeff l (a + b : TateAlgebra A).val ∈ _
-    rw [AddMemClass.coe_add, map_add]
-    obtain ⟨x, hx, hx_eq⟩ := ha l; obtain ⟨y, hy, hy_eq⟩ := hb l
-    exact ⟨x + y, (P_common.I ^ M).add_mem hx hy,
-      by rw [Subring.coe_add]; exact congrArg₂ (· + ·) hx_eq hy_eq⟩
-  have hG_neg : ∀ {a}, a ∈ G → -a ∈ G := by
-    intro a ha l
-    change MvPowerSeries.coeff l (-a : TateAlgebra A).val ∈ _
-    rw [NegMemClass.coe_neg, map_neg]
-    obtain ⟨x, hx, hx_eq⟩ := ha l
-    exact ⟨-x, (P_common.I ^ M).neg_mem hx,
-      by rw [NegMemClass.coe_neg]; exact congrArg (- ·) hx_eq⟩
-  -- Step 6: G is stable under algebraMap(a₀) * · for a₀ ∈ P_common.A₀.
-  -- Since P_common.I is an ideal of P_common.A₀, a₀ * image(P_common.I^M) ⊆ image(P_common.I^M).
-  have hG_stable_Pc : ∀ (a₀ : A), a₀ ∈ P_common.A₀ →
-      ∀ (g : ↥(TateAlgebra A)), g ∈ G →
-        algebraMap A ↥(TateAlgebra A) a₀ * g ∈ G := by
-    intro a₀ ha₀ g hg l
-    change MvPowerSeries.coeff l (algebraMap A ↥(TateAlgebra A) a₀ * g).val ∈ _
-    change MvPowerSeries.coeff l
-      ((MvPowerSeries.C a₀ : MvPowerSeries (Fin 1) A) * g.val) ∈ _
-    rw [MvPowerSeries.coeff_C_mul]
-    obtain ⟨c, hc, hc_eq⟩ := hg l
-    exact ⟨⟨a₀, ha₀⟩ * c, Ideal.mul_mem_left _ _ hc,
-      by rw [MulMemClass.coe_mul]; exact congrArg (a₀ * ·) hc_eq⟩
-  -- Step 6a: G stable under algebraMap(a₀) for a₀ ∈ D.P.A₀.
-  have hG_stable_alg : ∀ (a₀ : P.A₀), ∀ (g : ↥(TateAlgebra A)), g ∈ G →
-      algebraMap A ↥(TateAlgebra A) (a₀ : A) * g ∈ G :=
-    fun a₀ => hG_stable_Pc a₀ (P.adjoin_A₀_le D.T hT_pb a₀.property)
-  -- Step 6b: G stable under X * · (shifting coefficients preserves G).
-  have hG_stable_X : ∀ (g : ↥(TateAlgebra A)), g ∈ G →
-      TateAlgebra.X * g ∈ G := by
-    intro g hg l
-    -- Bridge MvPowerSeries.coeff l to TateAlgebra.coeff (l 0).
-    have hl_eq : l = Finsupp.single 0 (l 0) := by
-      apply Finsupp.ext; intro k; fin_cases k; simp
-    change MvPowerSeries.coeff l (TateAlgebra.X * g).val ∈ _
-    rw [hl_eq]; change TateAlgebra.coeff (l 0) (TateAlgebra.X * g) ∈ _
-    -- coeff 0 (X * g) = 0, coeff (n+1) (X * g) = coeff n g.
-    cases hn : l 0 with
-    | zero =>
-      rw [TateAlgebra.coeff_zero_X_mul]
-      exact ⟨0, (P_common.I ^ M).zero_mem, rfl⟩
-    | succ n =>
-      rw [TateAlgebra.coeff_succ_X_mul]
-      exact hg (Finsupp.single 0 n)
-  -- Step 6c: G stable under algebraMap(t) * X * · for t ∈ T.
-  -- Factor: algebraMap(t) * X * g = algebraMap(t) * (X * g).
-  -- X * g ∈ G (step 6b), then algebraMap(t) * (X * g) ∈ G (step 6, since t ∈ P_common.A₀).
-  have hG_stable_tX : ∀ (t : A), t ∈ T → ∀ (g : ↥(TateAlgebra A)), g ∈ G →
-      algebraMap A ↥(TateAlgebra A) t * TateAlgebra.X * g ∈ G := by
-    intro t ht g hg
-    rw [show algebraMap A ↥(TateAlgebra A) t * TateAlgebra.X * g =
-      algebraMap A ↥(TateAlgebra A) t * (TateAlgebra.X * g) from by ring]
-    exact hG_stable_Pc t (P.mem_adjoin_of_mem_T D.T hT_pb ht) _ (hG_stable_X g hg)
-  -- Step 7: Find m with algebraMap(D.P.I^m) mapping into G.
-  -- For b ∈ D.P.I^m: algebraMap(b : A) has coefficient (b : A) at index 0 and 0 elsewhere.
-  -- Since D.P.I ↪ P_common.I via inclusion, D.P.I^m ↪ P_common.I^m.
-  -- For m ≥ M: image(D.P.I^m) ⊆ image(P_common.I^M) (by Ideal.pow_le_pow_right).
+  -- Step 6: algebraMap(b) ∈ G for b ∈ D.P.I^M (D.P.I ↪ P_common.I via inclusion).
   have halg_in_G : ∀ (b : P.A₀), b ∈ P.I ^ M →
-      algebraMap A ↥(TateAlgebra A) (b : A) ∈ G := by
-    intro b hb l
-    -- algebraMap(b) is the constant power series C(b). Its coefficient at l:
-    -- if l = 0 then (b : A), else 0.
-    change MvPowerSeries.coeff l (algebraMap A ↥(TateAlgebra A) (b : A)).val ∈ _
-    -- The algebraMap into TateAlgebra has .val = MvPowerSeries.C (b : A).
-    have hval : (algebraMap A ↥(TateAlgebra A) (b : A)).val =
-        MvPowerSeries.C (b : A) := by rfl
-    rw [hval, MvPowerSeries.coeff_C]
-    split
-    · -- Coefficient at 0: equals (b : A).
-      -- b ∈ P.I^M. incl b ∈ P_common.I^M (by Ideal.mem_map_of_mem).
-      -- incl b ∈ P_common.I^M = (Ideal.map incl P.I)^M = Ideal.map incl (P.I^M).
-      refine ⟨Subring.inclusion (P.le_adjoin_A₀ T) b, ?_, rfl⟩
-      change Subring.inclusion (P.le_adjoin_A₀ T) b ∈ P_common.I ^ M
-      have : P_common.I ^ M = (Ideal.map (Subring.inclusion (P.le_adjoin_A₀ T)) P.I) ^ M :=
-        rfl
-      rw [this, ← Ideal.map_pow]
-      exact Ideal.mem_map_of_mem _ hb
-    · -- Other coefficients: 0.
-      exact ⟨0, (P_common.I ^ M).zero_mem, rfl⟩
-  -- Step 8: Use Subring.closure_induction to lift all locSubring elements.
-  -- The predicate: for each x ∈ locSubring, there exists r' ∈ TateAlgebra with
-  -- mk(r') = φ(x) and r' * G ⊆ G.
+      algebraMap A ↥(TateAlgebra A) (b : A) ∈ G := fun b hb ↦
+    algebraMap_mem_coeffIdealNhd P_common M
+      (show Subring.inclusion (P.le_adjoin_A₀ T) b ∈ P_common.I ^ M by
+        rw [show P_common.I ^ M =
+          (Ideal.map (Subring.inclusion (P.le_adjoin_A₀ T)) P.I) ^ M from rfl,
+          ← Ideal.map_pow]
+        exact Ideal.mem_map_of_mem _ hb)
+  -- Step 7: every locSubring element lifts to an A⟨X⟩ element stabilizing G.
   have hlift : ∀ (x : Localization.Away s),
       x ∈ locSubring P T s → ∃ r' : ↥(TateAlgebra A),
-        mk r' = locToQuotientOneSubfX_gen s x ∧ ∀ g ∈ G, r' * g ∈ G := by
-    intro x hx
-    induction hx using Subring.closure_induction with
-    | mem x hx =>
-      rcases hx with ⟨a₀, ha₀, rfl⟩ | ⟨⟨t, ht⟩, rfl⟩
-      · -- Case: x = algebraMap(a₀) with a₀ ∈ D.P.A₀.
-        refine ⟨algebraMap A _ a₀, ?_, ?_⟩
-        · rw [← locToQuotientOneSubfX_gen_algebraMap]
-        · exact hG_stable_alg ⟨a₀, ha₀⟩
-      · -- Case: x = divByS(t, s) with t ∈ T.
-        refine ⟨algebraMap A _ t * TateAlgebra.X, ?_, ?_⟩
-        · rw [← locToQuotientOneSubfX_gen_divByS]
-        · exact hG_stable_tX t ht
-    | zero =>
-      exact ⟨0, by simp [map_zero], fun g _ ↦ by simp [zero_mul, hG_zero]⟩
-    | one =>
-      exact ⟨1, by simp [map_one], fun g hg ↦ by simp [one_mul, hg]⟩
-    | add x y _ _ ihx ihy =>
-      obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
-      obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
-      exact ⟨rx + ry, by rw [map_add, hrx_eq, hry_eq, map_add],
-        fun g hg ↦ by rw [add_mul]; exact hG_add (hrx_stab g hg) (hry_stab g hg)⟩
-    | neg x _ ihx =>
-      obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
-      exact ⟨-rx, by rw [map_neg, hrx_eq, map_neg],
-        fun g hg ↦ by rw [neg_mul]; exact hG_neg (hrx_stab g hg)⟩
-    | mul x y _ _ ihx ihy =>
-      obtain ⟨rx, hrx_eq, hrx_stab⟩ := ihx
-      obtain ⟨ry, hry_eq, hry_stab⟩ := ihy
-      exact ⟨rx * ry, by rw [map_mul, hrx_eq, hry_eq, map_mul],
-        fun g hg ↦ by rw [mul_assoc]; exact hrx_stab _ (hry_stab g hg)⟩
+        mk r' = locToQuotientOneSubfX_gen s x ∧ ∀ g ∈ G, r' * g ∈ G := fun x hx ↦
+    exists_lift_stabilizing_coeffIdealNhd P T s P_common M
+      (P.adjoin_A₀_le D.T hT_pb) (fun t ht ↦ P.mem_adjoin_of_mem_T D.T hT_pb ht) hx
   -- Step 9: Assemble via Submodule.span_induction (same as T-topology proof).
   refine ⟨M, ?_⟩
   rintro x ⟨d, hd, rfl⟩
@@ -2021,7 +2079,7 @@ theorem presheafValueToCanonicalQuotient_continuous (D : RationalLocData A)
   -- presheafValueToCanonicalQuotient is defined as
   -- `UniformSpace.Completion.extensionHom (locToQuotientOneSubfX_gen D.s) ...`.
   -- Its function coercion is `Completion.extension (...)` which is continuous.
-  change Continuous (fun x : presheafValue D =>
+  change Continuous (fun x : presheafValue D ↦
     presheafValueToCanonicalQuotient D hA_complete hnoeth hT_pb x)
   unfold presheafValueToCanonicalQuotient
   -- The underlying function is `Completion.extension (locToQuotientOneSubfX_gen D.s)`.
@@ -2540,11 +2598,11 @@ theorem tateEvalPresheafHom_continuous_canonical
   -- Since W ⊆ V, it suffices to show tateAlgNhd P N ⊆ (eval) ⁻¹' W.
   -- Use the canonical basis to describe nhds of 0 in A⟨X⟩.
   have hbasis : ((@nhds _ τ (0 : ↥(TateAlgebra A))).HasBasis
-      (fun _ : ℕ => True) fun n =>
+      (fun _ : ℕ ↦ True) fun n ↦
         (TateAlgebra.tateAlgNhd P n : Set ↥(TateAlgebra A))) :=
     TateAlgebra.tateAlgBasis'.hasBasis_nhds_zero
   apply hbasis.mem_iff.mpr
-  refine ⟨N, trivial, fun h hh => ?_⟩
+  refine ⟨N, trivial, fun h hh ↦ ?_⟩
   -- Goal: (tateEvalPresheafHom D hb).toAddMonoidHom h ∈ V.
   change tateEvalPresheafHom D hb h ∈ V
   refine hWV ?_
@@ -2587,10 +2645,11 @@ theorem tateEvalPresheafHom_continuous_canonical
   -- Apply IsClosed.mem_of_tendsto with the HasSum and eventually-in-W.
   refine hW_closed.mem_of_tendsto hhs.tendsto_sum_nat ?_
   -- Eventually: partial sums are in W (they are, in fact, always in W by subgroup).
-  refine Filter.Eventually.of_forall fun n => ?_
-  exact W.toAddSubgroup.sum_mem (fun k _ => hterm_mem k)
+  refine Filter.Eventually.of_forall fun n ↦ ?_
+  exact W.toAddSubgroup.sum_mem (fun k _ ↦ hterm_mem k)
 
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Canonical-topology continuity of `tateQuotientToPresheafHom`
 (Wedhorn Prop 6.18 + Example 6.38).**
 

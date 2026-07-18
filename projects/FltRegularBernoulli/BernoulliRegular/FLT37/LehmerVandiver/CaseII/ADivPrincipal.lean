@@ -1,7 +1,5 @@
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.PrincipalDischarge
 import BernoulliRegular.FLT37.LehmerVandiver.CaseII.SpecificDischarge
-import FltRegular.CaseII.InductionStep
-
 
 /-!
 # LV-CaseII parametric `a_div_principal`
@@ -31,7 +29,7 @@ parametrises flt-regular's case-II inductive descent.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension Polynomial
+open NumberField Polynomial
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular
@@ -72,8 +70,6 @@ theorem a_div_principal_of_discharge
     root_div_zeta_sub_one_dvd_gcd_spec, root_div_zeta_sub_one_dvd_gcd_spec]
   exact c_div_principal hp hζ e hy η₁ η₂
 
-include hz in
-omit hz in
 /-- **`isPrincipal_a_div_a_zero` adapted to `CaseIIPrincipalDischarge`.**
 Mirror of flt-regular's `isPrincipal_a_div_a_zero` using the parametric
 `a_div_principal_of_discharge` instead of the regularity-based version.
@@ -319,13 +315,13 @@ theorem exists_solution_of_discharge
       mul_ne_zero (ne_zero_of_mem_nthRootsFinset one_ne_zero (η₀ : _).prop)
       (hζ.toInteger_isPrimitiveRoot.ne_zero hpri.out.ne_zero)⟩
   obtain ⟨u₁, hu₁⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       hpri.out η₂.prop (η₀ : _).prop (Subtype.coe_injective.ne_iff.mpr hη₂)
   obtain ⟨u₂, hu₂⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       hpri.out (η₀ : _).prop η₁.prop (Subtype.coe_injective.ne_iff.mpr hη₁.symm)
   obtain ⟨u₃, hu₃⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       hpri.out η₂.prop (η₁ : _).prop (Subtype.coe_injective.ne_iff.mpr hη)
   have := formula_of_discharge hp hζ e hy hz h_discharge η₁ η₂ hη₁ hη₂
   rw [← hu₁, ← hu₂, ← hu₃,
@@ -475,7 +471,7 @@ theorem not_exists_Int_solution_of_discharges
   haveI := CyclotomicField.isCyclotomicExtension p ℚ
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField p ℚ)) (Set.mem_singleton p) hpri.1.ne_zero
-  have h_dvd_iff := fun n ↦
+  have h_dvd_iff := fun n =>
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField p ℚ) hζ (n := n)
   simp_rw [← h_dvd_iff]
   rintro ⟨x, y, z, hy, hz, hz', e⟩
@@ -502,13 +498,12 @@ theorem not_exists_Int_solution'_of_discharges
   refine not_exists_Int_solution_of_discharges h_discharge h_kummer hodd
     ⟨x, y, z, ?_, hz, hz', e⟩
   intro hy
+  have hp_int := Nat.prime_iff_prime_int.mp hpri.out
   have h_dvd : (p : ℤ) ∣ x ^ p := by
     have := dvd_sub (dvd_pow hz hpri.out.ne_zero) (dvd_pow hy hpri.out.ne_zero)
-    rw [← e, add_sub_cancel_right] at this
-    exact this
-  have hp_x : (p : ℤ) ∣ x :=
-    (Nat.prime_iff_prime_int.mp hpri.out).dvd_of_dvd_pow h_dvd
-  apply (Nat.prime_iff_prime_int.mp hpri.out).not_unit
+    rwa [← e, add_sub_cancel_right] at this
+  have hp_x : (p : ℤ) ∣ x := hp_int.dvd_of_dvd_pow h_dvd
+  apply hp_int.not_unit
   rw [isUnit_iff_dvd_one, ← hgcd]
   simp [dvd_gcd_iff, hz, hy, hp_x]
 
@@ -526,8 +521,9 @@ theorem caseII_of_discharges
   simp only [ne_eq, mul_eq_zero, not_or] at hprod
   obtain ⟨⟨a0, b0⟩, c0⟩ := hprod
   have hodd' := Nat.Prime.odd_of_ne_two hpri.out hodd
-  obtain hab | hc := (Nat.prime_iff_prime_int.mp hpri.out).dvd_or_dvd hcase
-  · obtain ha | hb := (Nat.prime_iff_prime_int.mp hpri.out).dvd_or_dvd hab
+  have hp_int := Nat.prime_iff_prime_int.mp hpri.out
+  obtain hab | hc := hp_int.dvd_or_dvd hcase
+  · obtain ha | hb := hp_int.dvd_or_dvd hab
     · refine not_exists_Int_solution'_of_discharges h_discharge h_kummer hodd
         ⟨b, -c, -a, ?_, ?_, ?_, ?_⟩
       · simp only [← hgcd, Finset.gcd_insert, id_eq, ← Int.coe_gcd, Int.neg_gcd,
@@ -553,7 +549,7 @@ The hypothesis arguments `¬ p ∣ hPlus K` and `NoSecondOrderIrregularPair p i`
 in the underlying `CaseIIBridge` structure are accepted but not used:
 the discharges already encapsulate the deep CFT content under
 `¬ p ∣ h⁺` + Kellner condition. -/
-def caseIIBridge_of_discharges
+theorem caseIIBridge_of_discharges
     {p : ℕ} [hpri : Fact p.Prime] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     (h_discharge : CaseIIPrincipalDischarge p (CyclotomicField p ℚ))
@@ -570,7 +566,7 @@ regular-prime fills), so the bridge is fully constructible.
 
 Sanity check: the LV-route's parametric structure recovers
 flt-regular's case-II bridge for regular primes. -/
-def caseIIBridge_of_regular
+theorem caseIIBridge_of_regular
     {p : ℕ} [hpri : Fact p.Prime] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     [Fintype (ClassGroup (𝓞 (CyclotomicField p ℚ)))]

@@ -3,7 +3,9 @@ Copyright (c) 2026 Bernoulli-Regular project contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bernoulli-Regular project contributors
 -/
-import Mathlib.NumberTheory.Bernoulli
+module
+
+public import Mathlib.NumberTheory.Bernoulli
 
 /-!
 # Fast computable Bernoulli numbers
@@ -35,8 +37,8 @@ This module defines a fully computable version of the Bernoulli sequence
 * `BernoulliRegular.BernoulliFast.bernoulliCompute` — `Bₙ` extracted
   from the list.
 -/
+@[expose] public section
 
-set_option linter.unusedVariables false
 
 namespace BernoulliRegular.BernoulliFast
 

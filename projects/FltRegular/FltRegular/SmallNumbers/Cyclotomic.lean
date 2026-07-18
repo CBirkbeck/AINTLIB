@@ -26,6 +26,7 @@ namespace IsCyclotomicExtension.Rat
 local notation3 "θ" => (zeta_spec n ℚ K).toInteger
 
 variable (n K) in
+set_option backward.isDefEq.respectTransparency false in
 lemma minpoly : minpoly ℤ θ = cyclotomic n ℤ := by
   have := cyclotomic_eq_minpoly (zeta_spec n ℚ K) (NeZero.pos n)
   rw [← (zeta_spec n ℚ K).coe_toInteger] at this

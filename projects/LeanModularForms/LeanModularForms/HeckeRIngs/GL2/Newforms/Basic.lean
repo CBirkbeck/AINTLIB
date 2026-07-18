@@ -61,6 +61,13 @@ structure Eigenform (N : ℕ) [NeZero N] (k : ℤ)
     heckeRingHomCharSpace (k := k) (χ := χ) (heckeRingDn n.val)
         ⟨toCuspForm.toModularForm', mem_charSpace⟩ =
       ringEigenvalue n • (⟨toCuspForm.toModularForm', mem_charSpace⟩ : modFormCharSpace k χ)
+  /-- At indices **not** coprime to `N` the ring action `heckeRingDn` is not packaged here
+  (the bad-prime element lies in a disjoint double-coset class), so the ring eigenvalue is
+  pinned to the canonical constant `0`.  This removes a latent over-specification: without it,
+  the bad-prime values of `ringEigenvalue` would be free, giving infinitely many `Eigenform`
+  terms over a single underlying `toCuspForm`.  With it, an `Eigenform` is determined by its
+  underlying form together with `χ` (see `Eigenform.ext_of_toCuspForm`). -/
+  ringEigen_bad : ∀ n : ℕ+, ¬ Nat.Coprime n.val N → ringEigenvalue n = 0
 
 /-- The classical Hecke eigenvalue of an eigenform: the ring eigenvalue rescaled by the
 diamond factor `χ(n)`, so that `T_n f = (eigenvalue n) • f` (`Eigenform.isEigen`).  For
@@ -324,7 +331,7 @@ noncomputable def cuspFormsOldProjection (N : ℕ) [NeZero N] (k : ℤ) :
     CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ]
       CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
   (cuspFormsOld N k).subtype ∘ₗ
-    Submodule.linearProjOfIsCompl (cuspFormsOld N k) (cuspFormsNew N k)
+    Submodule.projectionOnto (cuspFormsOld N k) (cuspFormsNew N k)
       cuspFormsOld_isCompl_cuspFormsNew
 
 /-- **Newform linear projection.**  The `ℂ`-linear endomorphism of
@@ -334,7 +341,7 @@ noncomputable def cuspFormsNewProjection (N : ℕ) [NeZero N] (k : ℤ) :
     CuspForm ((Gamma1 N).map (mapGL ℝ)) k →ₗ[ℂ]
       CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
   (cuspFormsNew N k).subtype ∘ₗ
-    Submodule.linearProjOfIsCompl (cuspFormsNew N k) (cuspFormsOld N k)
+    Submodule.projectionOnto (cuspFormsNew N k) (cuspFormsOld N k)
       cuspFormsOld_isCompl_cuspFormsNew.symm
 
 /-- **Oldform part.**  The image of `f` under the oldform projection.
@@ -369,7 +376,7 @@ theorem oldPart_add_newPart (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
 @[simp] theorem oldPart_of_mem_cuspFormsOld
     {f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hf : f ∈ cuspFormsOld N k) :
     oldPart f = f := by
-  have h := Submodule.linearProjOfIsCompl_apply_left
+  have h := Submodule.projectionOnto_apply_left
     cuspFormsOld_isCompl_cuspFormsNew ⟨f, hf⟩
   unfold oldPart cuspFormsOldProjection
   exact congr_arg ((cuspFormsOld N k).subtype) h
@@ -386,7 +393,7 @@ theorem oldPart_add_newPart (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
 @[simp] theorem newPart_of_mem_cuspFormsNew
     {f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k} (hf : f ∈ cuspFormsNew N k) :
     newPart f = f := by
-  have h := Submodule.linearProjOfIsCompl_apply_left
+  have h := Submodule.projectionOnto_apply_left
     cuspFormsOld_isCompl_cuspFormsNew.symm ⟨f, hf⟩
   unfold newPart cuspFormsNewProjection
   exact congr_arg ((cuspFormsNew N k).subtype) h

@@ -10,7 +10,7 @@ public import Mathlib.RingTheory.UniqueFactorizationDomain.NormalizedFactors
 # Local-factor identity under uniform residue degree
 
 For a general number field `L` and a rational prime `q`, suppose every
-prime `Q` of `𝓞 L` above `q` has the same `inertiaDeg q Q = d`. Then the
+prime `Q` of `𝓞 L` above `q` has the same `inertiaDeg' q Q = d`. Then the
 rational-prime local factor of `ζ_L(s)` at `q` equals the inverse of the
 finite product of local Euler factors.
 
@@ -48,7 +48,7 @@ has the same inertia degree `d` (over `ℤ`).
 -/
 def UniformResidueDegree (q d : ℕ) : Prop :=
   ∀ Q ∈ IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L),
-    inertiaDeg (Ideal.span ({(q : ℤ)} : Set ℤ)) Q = d
+    inertiaDeg' (Ideal.span ({(q : ℤ)} : Set ℤ)) Q = d
 
 /--
 Under the uniform-residue-degree assumption, every prime `Q ∈ T` above the
@@ -60,14 +60,14 @@ theorem absNorm_eq_q_pow_d_of_uniform {q d : ℕ} (hq : q.Prime)
     (hQ : Q ∈
       IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)) :
     Ideal.absNorm Q = q ^ d := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hq_ne : (Ideal.span ({(q : ℤ)} : Set ℤ)) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast hq.ne_zero
   have hQ_mem : Q ∈ (Ideal.span ({(q : ℤ)} : Set ℤ)).primesOver (𝓞 L) :=
     (IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mp hQ
-  haveI : Q.IsPrime := hQ_mem.1
-  haveI : Q.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hQ_mem.2
+  have : Q.IsPrime := hQ_mem.1
+  have : Q.LiesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) := hQ_mem.2
   rw [Ideal.absNorm_eq_pow_inertiaDeg' Q hq, huni Q hQ]
 
 /--
@@ -95,13 +95,13 @@ theorem normalizedFactors_subset_primesOverFinset_of_qpow
     (UniqueFactorizationMonoid.normalizedFactors I).toFinset ⊆
       IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L) := by
   classical
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   intro P hP
   obtain ⟨hP_prime, hI_le_P⟩ :=
     (Ideal.mem_normalizedFactors_iff hI_ne).1 (Multiset.mem_toFinset.1 hP)
-  haveI : P.IsPrime := hP_prime
-  have hP_ne : P ≠ ⊥ := fun hP_bot => hI_ne (le_bot_iff.mp (hP_bot ▸ hI_le_P))
-  haveI : NeZero P := ⟨hP_ne⟩
+  have : P.IsPrime := hP_prime
+  have hP_ne : P ≠ ⊥ := fun hP_bot ↦ hI_ne (le_bot_iff.mp (hP_bot ▸ hI_le_P))
+  have : NeZero P := ⟨hP_ne⟩
   have hunder_eq_q : Ideal.absNorm (Ideal.under ℤ P) = q :=
     (Nat.prime_dvd_prime_iff_eq (Nat.absNorm_under_prime P) hq).1 <|
       (Nat.absNorm_under_prime P).dvd_of_dvd_pow <|
@@ -125,21 +125,21 @@ theorem normalizedFactors_card_mul_d_eq_n_of_uniform
     {I : Ideal (𝓞 L)} (hI_ne : I ≠ ⊥) {k : ℕ} (hI_norm : Ideal.absNorm I = q ^ k) :
     d * (UniqueFactorizationMonoid.normalizedFactors I).card = k := by
   classical
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   set T : Finset (Ideal (𝓞 L)) :=
     IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)
   set m := UniqueFactorizationMonoid.normalizedFactors I with hm
   have hsubset : m.toFinset ⊆ T :=
     normalizedFactors_subset_primesOverFinset_of_qpow L hq hI_ne hI_norm
   have hsum_count : ∑ P ∈ T, m.count P = m.card :=
-    Multiset.sum_count_eq_card fun P hP => hsubset (Multiset.mem_toFinset.2 hP)
+    Multiset.sum_count_eq_card fun P hP ↦ hsubset (Multiset.mem_toFinset.2 hP)
   refine Nat.pow_right_injective hq.one_lt ?_
   calc
     q ^ (d * m.card) = q ^ (d * ∑ P ∈ T, m.count P) := by rw [hsum_count]
     _ = ∏ P ∈ T, (q ^ d) ^ m.count P := by
           rw [Finset.prod_pow_eq_pow_sum]; simp [Nat.pow_mul]
     _ = ∏ P ∈ T, Ideal.absNorm (P ^ m.count P) :=
-          Finset.prod_congr rfl fun P hP => by
+          Finset.prod_congr rfl fun P hP ↦ by
             rw [map_pow, absNorm_eq_q_pow_d_of_uniform L hq huni hP]
     _ = Ideal.absNorm m.prod := by
           rw [Finset.prod_multiset_count_of_subset m T hsubset, map_prod]
@@ -155,7 +155,7 @@ theorem idealNormMultiplicity_prime_pow_eq_zero_of_uniform_of_not_dvd
     {k : ℕ} (hk : ¬ d ∣ k) :
     idealNormMultiplicity L (q ^ k) = 0 := by
   classical
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -168,9 +168,9 @@ private lemma prime_of_mem_primesOverFinset_of_uniform
     (hQ : Q ∈
       IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)) :
     Prime Q := by
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   have hQ_norm := absNorm_eq_q_pow_d_of_uniform L hq huni hQ
-  have hQ_ne : Q ≠ ⊥ := fun hQ_bot => by
+  have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ by
     rw [Ideal.absNorm_eq_zero_iff.mpr hQ_bot] at hQ_norm
     exact pow_ne_zero d hq.ne_zero hQ_norm.symm
   have hq_ne : (Ideal.span ({(q : ℤ)} : Set ℤ)) ≠ ⊥ := by
@@ -185,14 +185,15 @@ private lemma absNorm_prod_eq_q_pow_of_uniform
     {q d : ℕ} (hq : q.Prime) (huni : UniformResidueDegree L q d)
     {T : Finset (Ideal (𝓞 L))}
     (hT : T = IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L))
-    {m : Multiset (Ideal (𝓞 L))} (hm_subset : m.toFinset ⊆ T) {N : ℕ} (hm_card : m.card = N) :
+    {m : Multiset (Ideal (𝓞 L))} (hm_subset : m.toFinset ⊆ T)
+    {N : ℕ} (hm_card : m.card = N) :
     Ideal.absNorm m.prod = q ^ (d * N) := by
   have hsum_count : ∑ P ∈ T, m.count P = m.card :=
-    Multiset.sum_count_eq_card fun P hP => hm_subset (Multiset.mem_toFinset.2 hP)
+    Multiset.sum_count_eq_card fun P hP ↦ hm_subset (Multiset.mem_toFinset.2 hP)
   rw [Finset.prod_multiset_count_of_subset m T hm_subset, map_prod]
   calc
     ∏ P ∈ T, Ideal.absNorm (P ^ m.count P) = ∏ P ∈ T, (q ^ d) ^ m.count P :=
-          Finset.prod_congr rfl fun P hP => by
+          Finset.prod_congr rfl fun P hP ↦ by
             rw [map_pow, absNorm_eq_q_pow_d_of_uniform L hq huni (hT ▸ hP)]
     _ = q ^ (d * ∑ P ∈ T, m.count P) := by
           rw [Finset.prod_pow_eq_pow_sum]; simp [Nat.pow_mul]
@@ -212,35 +213,36 @@ theorem idealNormMultiplicity_prime_pow_mul_d_eq_card_sym_of_uniform
     {q d : ℕ} (hq : q.Prime) (hd : 1 ≤ d) (huni : UniformResidueDegree L q d) (n : ℕ) :
     idealNormMultiplicity L (q ^ (d * n)) =
       Fintype.card (Sym {P : Ideal (𝓞 L) //
-        P ∈ IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)} n) := by
+        P ∈ IsDedekindDomain.primesOverFinset
+          (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)} n) := by
   classical
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   let T : Finset (Ideal (𝓞 L)) :=
     IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)
   let α : Type _ := {P : Ideal (𝓞 L) // P ∈ T}
-  letI : Fintype α := Fintype.ofFinset T fun P => by simp
+  let : Fintype α := Fintype.ofFinset T fun P ↦ by simp
   let β : Type _ := {I : NonzeroIdeal L // Ideal.absNorm I.1 = q ^ (d * n)}
   have hd_pos : 0 < d := hd
   have hpmap_val :
       ∀ {m : Multiset (Ideal (𝓞 L))} (H : ∀ P, P ∈ m → P ∈ T),
-        (Multiset.pmap (fun P hP => (⟨P, hP⟩ : α)) m H).map Subtype.val = m := fun H => by
+        (Multiset.pmap (fun P hP ↦ (⟨P, hP⟩ : α)) m H).map Subtype.val = m := fun H ↦ by
     rw [Multiset.map_pmap, Multiset.pmap_eq_map, Multiset.map_id']
-  let toSym : β → Sym α n := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ =>
+  let toSym : β → Sym α n := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ ↦
     let m := UniqueFactorizationMonoid.normalizedFactors I
-    let H : ∀ P, P ∈ m → P ∈ T := fun P hP =>
+    let H : ∀ P, P ∈ m → P ∈ T := fun P hP ↦
       normalizedFactors_subset_primesOverFinset_of_qpow L hq hI_ne hI_norm
         (Multiset.mem_toFinset.2 hP)
     have hm_card : m.card = n :=
       Nat.eq_of_mul_eq_mul_left hd_pos
         (normalizedFactors_card_mul_d_eq_n_of_uniform L hq huni hI_ne hI_norm)
-    ⟨Multiset.pmap (fun P hP => (⟨P, hP⟩ : α)) m H, by simp [hm_card]⟩
-  let ofSym : Sym α n → β := fun s =>
+    ⟨Multiset.pmap (fun P hP ↦ (⟨P, hP⟩ : α)) m H, by simp [hm_card]⟩
+  let ofSym : Sym α n → β := fun s ↦
     let m : Multiset (Ideal (𝓞 L)) := s.1.map Subtype.val
     have hm_card : m.card = n := by simp [m]
-    have hm_subset : m.toFinset ⊆ T := fun P hP => by
+    have hm_subset : m.toFinset ⊆ T := fun P hP ↦ by
       obtain ⟨Q, _, rfl⟩ := Multiset.mem_map.1 (Multiset.mem_toFinset.1 hP)
       exact Q.2
-    have hm_prime : ∀ P ∈ m, Prime P := fun P hP => by
+    have hm_prime : ∀ P ∈ m, Prime P := fun P hP ↦ by
       obtain ⟨Q, _, rfl⟩ := Multiset.mem_map.1 hP
       exact prime_of_mem_primesOverFinset_of_uniform L hq huni Q.2
     have hm_prod_ne : m.prod ≠ ⊥ := Multiset.prod_ne_zero_of_prime m hm_prime
@@ -258,20 +260,21 @@ theorem idealNormMultiplicity_prime_pow_mul_d_eq_card_sym_of_uniform
         UniqueFactorizationMonoid.normalizedFactors (ofSym s).1.1 = s.1.map Subtype.val := by
     intro s
     dsimp [ofSym]
-    refine UniqueFactorizationMonoid.normalizedFactors_prod_of_prime fun P hP => ?_
+    refine UniqueFactorizationMonoid.normalizedFactors_prod_of_prime fun P hP ↦ ?_
     obtain ⟨Q, _, rfl⟩ := Multiset.mem_map.1 hP
     exact prime_of_mem_primesOverFinset_of_uniform L hq huni Q.2
-  have hleft : Function.LeftInverse ofSym toSym := fun b => by
+  have hleft : Function.LeftInverse ofSym toSym := fun b ↦ by
     apply Subtype.ext
     apply Subtype.ext
     change ((toSym b).1.map Subtype.val).prod = b.1.1
     rw [htoSym_map_val, Ideal.prod_normalizedFactors_eq_self b.1.2]
-  have hright : Function.RightInverse ofSym toSym := fun s => by
+  have hright : Function.RightInverse ofSym toSym := fun s ↦ by
     apply Subtype.ext
     apply Multiset.map_injective Subtype.val_injective
     simpa [hofSym_nfactors s] using htoSym_map_val (ofSym s)
-  unfold idealNormMultiplicity
-  rw [Nat.card_congr (⟨toSym, ofSym, hleft, hright⟩ : β ≃ Sym α n), Nat.card_eq_fintype_card]
+  simp only [idealNormMultiplicity]
+  rw [Nat.card_congr (⟨toSym, ofSym, hleft, hright⟩ : β ≃ Sym α n),
+    Nat.card_eq_fintype_card]
 
 /--
 The rational-prime local-factor identity for any number field `L` under
@@ -292,14 +295,14 @@ theorem dedekindLocalFactorRat_identity_of_uniform
     (∑' k : ℕ, (idealNormMultiplicity L (q ^ k) : ℂ) * (((q ^ k : ℕ) : ℂ) ^ (-s))) =
       (dedekindLocalFactorRat L q s)⁻¹ := by
   classical
-  haveI : Fact q.Prime := ⟨hq⟩
+  have : Fact q.Prime := ⟨hq⟩
   set T : Finset (Ideal (𝓞 L)) :=
     IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)
   let α : Type _ := {P : Ideal (𝓞 L) // P ∈ T}
-  letI : Fintype α := Fintype.ofFinset T fun P => by simp
-  let f : ℕ → ℂ := fun k =>
+  let : Fintype α := Fintype.ofFinset T fun P ↦ by simp
+  let f : ℕ → ℂ := fun k ↦
     (idealNormMultiplicity L (q ^ k) : ℂ) * (((q ^ k : ℕ) : ℂ) ^ (-s))
-  let g : ℕ → ℂ := fun n =>
+  let g : ℕ → ℂ := fun n ↦
     (idealNormMultiplicity L (q ^ (d * n)) : ℂ) * (((q ^ (d * n) : ℕ) : ℂ) ^ (-s))
   let z : ℂ := (q : ℂ) ^ (-((d : ℂ) * s))
   have hd_pos : 0 < d := hd
@@ -310,7 +313,7 @@ theorem dedekindLocalFactorRat_identity_of_uniform
     nlinarith [hs, hd_ge]
   have hz : ‖z‖ < 1 :=
     (Complex.norm_prime_cpow_le_one_half ⟨q, hq⟩ hs_d).trans_lt (by norm_num)
-  have hg_eq : g = fun n : ℕ => (Fintype.card (Sym α n) : ℂ) * z ^ n := by
+  have hg_eq : g = fun n : ℕ ↦ (Fintype.card (Sym α n) : ℂ) * z ^ n := by
     funext n
     dsimp [g, z]
     rw [idealNormMultiplicity_prime_pow_mul_d_eq_card_sym_of_uniform L hq hd huni n,
@@ -322,11 +325,11 @@ theorem dedekindLocalFactorRat_identity_of_uniform
     exact (summable_tsum_symGeometric α hz).1.hasSum
   have hf_hasSum : HasSum f (((1 - z)⁻¹) ^ Fintype.card α) := by
     refine (hasSum_iff_hasSum_of_ne_zero_bij
-      (f := f) (g := g) (i := fun x : Function.support g => d * x.1) ?_ ?_ ?_).2 hg_hasSum
-    · exact fun x y hxy => Subtype.ext (Nat.eq_of_mul_eq_mul_left hd_pos hxy)
+      (f := f) (g := g) (i := fun x : Function.support g ↦ d * x.1) ?_ ?_ ?_).2 hg_hasSum
+    · exact fun x y hxy ↦ Subtype.ext (Nat.eq_of_mul_eq_mul_left hd_pos hxy)
     · intro k hk
       have hk_mult : idealNormMultiplicity L (q ^ k) ≠ 0 :=
-        fun hk_zero => hk (by simp [f, hk_zero])
+        fun hk_zero ↦ hk (by simp [f, hk_zero])
       obtain ⟨n, rfl⟩ : d ∣ k := by
         by_contra hk_ndvd
         exact hk_mult <|
@@ -334,7 +337,7 @@ theorem dedekindLocalFactorRat_identity_of_uniform
       exact ⟨⟨n, by simpa [f, g] using hk⟩, rfl⟩
     · intro x
       simp [f, g]
-  have h_factor : ∀ Q ∈ T, (1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s) = 1 - z := fun Q hQ => by
+  have h_factor : ∀ Q ∈ T, (1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s) = 1 - z := fun Q hQ ↦ by
     have hN : (Ideal.absNorm Q : ℂ) = (q : ℂ) ^ d := by
       rw [absNorm_eq_q_pow_d_of_uniform L hq huni hQ]; push_cast; rfl
     rw [hN, ← Complex.natCast_cpow_natCast_mul q d (-s)]

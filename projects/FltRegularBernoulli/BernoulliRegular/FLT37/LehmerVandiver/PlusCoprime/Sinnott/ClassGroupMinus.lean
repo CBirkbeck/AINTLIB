@@ -1,6 +1,7 @@
-import BernoulliRegular.Reflection.ClassGroupModP.GalAction
-import Mathlib.NumberTheory.NumberField.CMField
+module
 
+public import BernoulliRegular.Reflection.ClassGroupModP.GalAction
+public import Mathlib.NumberTheory.NumberField.CMField
 
 /-!
 # K-side ClassGroup minus eigenspace `Cl(K)⁻`
@@ -55,22 +56,22 @@ def classGroupMinus : Subgroup (ClassGroup (𝓞 K)) where
     change complexConjOnClassGroup p K 1 = 1⁻¹
     rw [inv_one]
     -- σ(1) = 1 since σ is a group hom.
-    unfold complexConjOnClassGroup
+    simp only [complexConjOnClassGroup]
     -- cyclotomicGalActionOnClassGroup is a group hom
     exact map_one (cyclotomicGalActionMonoidHom (p := p) (K := K)
       (-1 : CyclotomicUnitDelta p))
   mul_mem' := by
     intro c₁ c₂ h₁ h₂
     change complexConjOnClassGroup p K (c₁ * c₂) = (c₁ * c₂)⁻¹
-    unfold complexConjOnClassGroup at *
-    rw [cyclotomicGalActionOnClassGroup_mul]
-    rw [show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c₁ = c₁⁻¹ from h₁]
-    rw [show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c₂ = c₂⁻¹ from h₂]
+    simp only [complexConjOnClassGroup] at *
+    rw [cyclotomicGalActionOnClassGroup_mul,
+      show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c₁ = c₁⁻¹ from h₁,
+      show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c₂ = c₂⁻¹ from h₂]
     exact (mul_inv c₁ c₂).symm
   inv_mem' := by
     intro c h
     change complexConjOnClassGroup p K c⁻¹ = (c⁻¹)⁻¹
-    unfold complexConjOnClassGroup at *
+    simp only [complexConjOnClassGroup] at *
     -- σ(c⁻¹) = σ(c)⁻¹ = (c⁻¹)⁻¹ = c, and (c⁻¹)⁻¹ = c.
     rw [show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c⁻¹ =
       (cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c)⁻¹ from
@@ -78,20 +79,17 @@ def classGroupMinus : Subgroup (ClassGroup (𝓞 K)) where
         (-1 : CyclotomicUnitDelta p)) _]
     rw [h, inv_inv]
 
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
 /-- **Membership** in `classGroupMinus`: `c ∈ classGroupMinus K ↔ σ(c) = c⁻¹`. -/
 theorem mem_classGroupMinus {c : ClassGroup (𝓞 K)} :
     c ∈ classGroupMinus p K ↔ complexConjOnClassGroup p K c = c⁻¹ :=
   Iff.rfl
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **MonoidHom version** of `complexConjOnClassGroup`. -/
 noncomputable def complexConjOnClassGroupHom :
     ClassGroup (𝓞 K) →* ClassGroup (𝓞 K) :=
   cyclotomicGalActionMonoidHom (p := p) (K := K) (-1 : CyclotomicUnitDelta p)
 
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
 /-- The function and MonoidHom forms agree. -/
 @[simp]
@@ -105,7 +103,7 @@ omit [IsCMField K] in
 @[simp]
 theorem complexConjOnClassGroup_involutive (c : ClassGroup (𝓞 K)) :
     complexConjOnClassGroup p K (complexConjOnClassGroup p K c) = c := by
-  unfold complexConjOnClassGroup
+  simp only [complexConjOnClassGroup]
   -- σ_{(-1)} ∘ σ_{(-1)} = σ_{(-1)·(-1)} = σ_{1} = id.
   have h_compose :
       cyclotomicGalActionMonoidHom (p := p) (K := K) ((-1) * (-1)) c =
@@ -115,8 +113,7 @@ theorem complexConjOnClassGroup_involutive (c : ClassGroup (𝓞 K)) :
   have h_neg_one_sq : ((-1 : CyclotomicUnitDelta p)) * ((-1 : CyclotomicUnitDelta p)) =
       1 := by
     rw [neg_one_mul, neg_neg]
-  rw [h_neg_one_sq] at h_compose
-  rw [cyclotomicGalActionMonoidHom_one_apply] at h_compose
+  rw [h_neg_one_sq, cyclotomicGalActionMonoidHom_one_apply] at h_compose
   exact h_compose.symm
 
 omit [IsCMField K] in
@@ -135,7 +132,7 @@ omit [IsCMField K] in
 @[simp]
 theorem complexConjOnClassGroup_inv (c : ClassGroup (𝓞 K)) :
     complexConjOnClassGroup p K c⁻¹ = (complexConjOnClassGroup p K c)⁻¹ := by
-  unfold complexConjOnClassGroup
+  simp only [complexConjOnClassGroup]
   exact map_inv (cyclotomicGalActionMonoidHom (p := p) (K := K)
     (-1 : CyclotomicUnitDelta p)) c
 
@@ -144,7 +141,7 @@ omit [IsCMField K] in
 @[simp]
 theorem complexConjOnClassGroup_pow (c : ClassGroup (𝓞 K)) (n : ℕ) :
     complexConjOnClassGroup p K (c ^ n) = (complexConjOnClassGroup p K c) ^ n := by
-  unfold complexConjOnClassGroup
+  simp only [complexConjOnClassGroup]
   exact map_pow (cyclotomicGalActionMonoidHom (p := p) (K := K)
     (-1 : CyclotomicUnitDelta p)) c n
 

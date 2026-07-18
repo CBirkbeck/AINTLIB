@@ -131,15 +131,11 @@ theorem rationalOpen_image_union_base_eq_of_unit_rescaled
   constructor
   · rintro ⟨hv_spa, hvFT, hvCs⟩
     refine ⟨hv_spa, fun t ht => ?_, ?_⟩
-    · -- For t ∈ D.T, lift v.vle ((σ : A) * t) C.base.s back to v.vle t D.s.
-      have hv_σt : v.vle ((σ : A) * t) C.base.s :=
+    · have h : v.vle ((σ : A) * t) C.base.s :=
         hvFT _ (Finset.mem_union_left _ (Finset.mem_image.mpr ⟨t, ht, rfl⟩))
-      have hvσ_ne : ¬ v.vle (σ : A) 0 := not_vle_zero_of_isUnit σ.isUnit v
-      have h := hv_σt
       rw [← hσ, mul_comm (σ : A) t, mul_comm (σ : A) D.s] at h
-      exact v.vle_mul_cancel hvσ_ne h
-    · -- ¬ v.vle D.s 0 from ¬ v.vle C.base.s 0 by cancelling σ.
-      intro hvDs0
+      exact v.vle_mul_cancel (not_vle_zero_of_isUnit σ.isUnit v) h
+    · intro hvDs0
       have h := v.mul_vle_mul_left hvDs0 (σ : A)
       rw [zero_mul, mul_comm D.s (σ : A), hσ] at h
       exact hvCs h
@@ -149,14 +145,11 @@ theorem rationalOpen_image_union_base_eq_of_unit_rescaled
     obtain ⟨_, hvT, hvCs⟩ := hvCbase
     refine ⟨hv_spa, fun b hb => ?_, hvCs⟩
     rcases Finset.mem_union.mp hb with hF | hT_mem
-    · -- b ∈ σ • D.T: b = (σ : A) * t for some t ∈ D.T.
-      obtain ⟨t, htD, rfl⟩ := Finset.mem_image.mp hF
-      have hvt : v.vle t D.s := hvD t htD
-      have h1 : v.vle (t * (σ : A)) (D.s * (σ : A)) :=
-        v.mul_vle_mul_left hvt (σ : A)
+    · obtain ⟨t, htD, rfl⟩ := Finset.mem_image.mp hF
       have h2 : v.vle ((σ : A) * t) ((σ : A) * D.s) := by
-        rw [mul_comm (σ : A) t, mul_comm (σ : A) D.s]; exact h1
-      rw [hσ] at h2; exact h2
+        rw [mul_comm (σ : A) t, mul_comm (σ : A) D.s]
+        exact v.mul_vle_mul_left (hvD t htD) (σ : A)
+      rwa [hσ] at h2
     · exact hvT b hT_mem
 
 /-- **Single-`t` C1 helper for singleton cover piece with unit-rescaled
@@ -202,30 +195,22 @@ theorem exists_single_f_refinement_at_t_of_singleton_unit_rescaled
       v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s := by
   refine ⟨(σ : A) * t, ?_, ?_⟩
-  · -- Membership: v ∈ R(insert ((σ : A) * t) C.base.T, C.base.s).
-    have hvCbase := hD_sub hv
+  · have hvCbase := hD_sub hv
     obtain ⟨hv_spa, hvD, _hvDs⟩ := hv
     obtain ⟨_, hvT, hvCs⟩ := hvCbase
-    have hvt : v.vle t D.s := hvD t (hT ▸ Finset.mem_singleton_self t)
     refine ⟨hv_spa, fun b hb => ?_, hvCs⟩
     rcases Finset.mem_insert.mp hb with rfl | hb_base
-    · -- b = (σ : A) * t: lift v.vle t D.s to v.vle ((σ : A) * t) C.base.s.
-      have h1 : v.vle (t * (σ : A)) (D.s * (σ : A)) :=
-        v.mul_vle_mul_left hvt (σ : A)
-      have h2 : v.vle ((σ : A) * t) ((σ : A) * D.s) := by
-        rw [mul_comm (σ : A) t, mul_comm (σ : A) D.s]; exact h1
-      rw [hσ] at h2; exact h2
+    · have h2 : v.vle ((σ : A) * t) ((σ : A) * D.s) := by
+        rw [mul_comm (σ : A) t, mul_comm (σ : A) D.s]
+        exact v.mul_vle_mul_left (hvD t (hT ▸ Finset.mem_singleton_self t)) (σ : A)
+      rwa [hσ] at h2
     · exact hvT b hb_base
-  · -- Subset: R(insert ((σ : A) * t) C.base.T, C.base.s) ⊆ R(D.T, D.s).
-    intro w hw
+  · intro w hw
     obtain ⟨hw_spa, hwIns, hwCs⟩ := hw
-    have hw_σt : w.vle ((σ : A) * t) C.base.s :=
-      hwIns ((σ : A) * t) (Finset.mem_insert_self _ _)
-    have hwσ_ne : ¬ w.vle (σ : A) 0 := not_vle_zero_of_isUnit σ.isUnit w
     have hw_t : w.vle t D.s := by
-      have h := hw_σt
+      have h := hwIns ((σ : A) * t) (Finset.mem_insert_self _ _)
       rw [← hσ, mul_comm (σ : A) t, mul_comm (σ : A) D.s] at h
-      exact w.vle_mul_cancel hwσ_ne h
+      exact w.vle_mul_cancel (not_vle_zero_of_isUnit σ.isUnit w) h
     have hwDs : ¬ w.vle D.s 0 := by
       intro hwDs0
       have h := w.mul_vle_mul_left hwDs0 (σ : A)
@@ -277,11 +262,8 @@ theorem one_vle_inv_unit_mul_of_strict_dom_at
     (w : Spv A) {σ : Aˣ} {τ : A} (hστ : w.vle (σ : A) τ) :
     w.vle (1 : A) (((σ⁻¹ : Aˣ) : A) * τ) := by
   letI : ValuativeRel A := w.toValuativeRel
-  have h_mul :
-      w.vle (((σ⁻¹ : Aˣ) : A) * (σ : A)) (((σ⁻¹ : Aˣ) : A) * τ) :=
-    ValuativeRel.mul_vle_mul_right hστ ((σ⁻¹ : Aˣ) : A)
-  rwa [show ((σ⁻¹ : Aˣ) : A) * (σ : A) = (1 : A) from Units.inv_mul σ]
-    at h_mul
+  have h_mul := ValuativeRel.mul_vle_mul_right hστ ((σ⁻¹ : Aˣ) : A)
+  rwa [Units.inv_mul] at h_mul
 
 omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] in
 /-- **Per-`w` Laurent-piece membership from Cor 7.32 σ-strict-domination
@@ -372,17 +354,11 @@ theorem cor732_laurent_piece_membership_at
   refine ⟨τ, hτ, hw, ?_, ?_⟩
   · intro t ht
     rw [Finset.mem_singleton] at ht
-    subst ht
-    exact h_one_le
+    exact ht ▸ h_one_le
   · intro h_inv_τ_zero
     apply h_τ_ne
-    have h_mul :
-        w.vle ((σ : A) * (((σ⁻¹ : Aˣ) : A) * τ)) ((σ : A) * 0) :=
-      ValuativeRel.mul_vle_mul_right h_inv_τ_zero (σ : A)
-    have h_lhs : (σ : A) * (((σ⁻¹ : Aˣ) : A) * τ) = τ := by
-      rw [← mul_assoc, Units.mul_inv, one_mul]
-    rw [h_lhs, mul_zero] at h_mul
-    exact h_mul
+    have h_mul := ValuativeRel.mul_vle_mul_right h_inv_τ_zero (σ : A)
+    rwa [← mul_assoc, Units.mul_inv, one_mul, mul_zero] at h_mul
 
 omit [IsTopologicalRing A] in
 /-- **Spa is covered by the Cor 7.32 σ-rescaled Laurent pieces**
@@ -970,21 +946,9 @@ theorem WedhornStep2RefinementCarryingFactor_of_strengthened_single_f
     (C : RationalCovering A) (D : RationalLocData A) (t : A)
     (h_target : exists_single_f_factor_carrying_refinement_at_t_target C D t) :
     Nonempty (WedhornStep2RefinementCarryingFactor A C D t) := by
-  obtain ⟨σ, N, f, hf_eq, h_factor, _h_subset, h_T_D_in_plus, h_v_bound⟩ :=
+  obtain ⟨σ, N, f, rfl, h_factor, _h_subset, h_T_D_in_plus, h_v_bound⟩ :=
     h_target
-  refine ⟨{
-    σ := σ
-    N := N
-    h_factor := ?_
-    h_T_D_in_plus := h_T_D_in_plus
-    h_v_bound := ?_
-  }⟩
-  · -- C.base.s = D.s * (σ * t * D.s ^ N) ⇐ C.base.s = D.s * f ∧ f = σ * t * D.s ^ N.
-    rw [h_factor, hf_eq]
-  · -- v.vle (σ * t * D.s ^ N) C.base.s ⇐ v.vle f C.base.s ∧ σ * t * D.s ^ N = f.
-    intro v hv hvt hvD_s
-    rw [show σ * t * D.s ^ N = f from hf_eq.symm]
-    exact h_v_bound v hv hvt hvD_s
+  exact ⟨σ, N, h_factor, h_T_D_in_plus, h_v_bound⟩
 
 /-- **T201 per-cover bridge: strengthened single-f → T199 provider**.
 
@@ -1109,21 +1073,14 @@ theorem exists_single_f_factor_carrying_refinement_at_t_via_localisation_transfe
     exists_single_f_factor_carrying_refinement_at_t_target C D t := by
   refine ⟨σ, N, f, hf_eq, h_factor, h_subset, h_T_D_in_plus, ?_⟩
   intro v hv _hvt _hvD_s
-  -- Lift v ∈ rationalOpen D.T D.s to w ∈ Spa(Loc D.s, ⁺) via T203.
   letI : TopologicalSpace (Localization.Away D.s) :=
     locTopology D.P D.T D.s D.hopen
   letI : PlusSubring (Localization.Away D.s) :=
     localizationAwayPlusSubring D.s
   obtain ⟨w, hw_spa, hw_comap⟩ :=
     exists_localization_lift_of_rationalOpen D.P D.T D.s D.hopen hA₀_le hv
-  -- Apply localised f-bound at w.
-  have h_loc : w.vle (algebraMap A (Localization.Away D.s) f)
-                     (algebraMap A (Localization.Away D.s) C.base.s) :=
-    h_loc_bound w hw_spa
-  -- Transfer the bound back via comap: v = comap w, so
-  -- v.vle f C.base.s = (comap w).vle f C.base.s = w.vle (algMap f) (algMap C.base.s).
   rw [← hw_comap, comap_vle]
-  exact h_loc
+  exact h_loc_bound w hw_spa
 
 /-! ### T207: specialise T205 localised σ-clearing reducer to T204 f-bound
 
@@ -1207,19 +1164,14 @@ theorem localised_sigma_reducer_to_single_f_bound_for_step2
     ∀ w ∈ Spa (Localization.Away D.s) (Localization.Away D.s)⁺,
       w.vle (algebraMap A (Localization.Away D.s) f)
             (algebraMap A (Localization.Away D.s) C.base.s) := by
-  -- Suppress unused-section-variable warnings from `_hf_eq` and `(σ, N)`
-  -- which are kept for callsite compatibility with T204's signature.
   letI : TopologicalSpace (Localization.Away D.s) :=
     locTopology D.P D.T D.s D.hopen
   letI : PlusSubring (Localization.Away D.s) :=
     localizationAwayPlusSubring D.s
   intro w hw
-  -- Apply T205 with T' := {f}, s' := C.base.s.
-  have h := localised_sigma_clearing_bounds_for_localisation_transfer
+  exact (localised_sigma_clearing_bounds_for_localisation_transfer
     D.P D.T D.s D.hopen ({f} : Finset A) C.base.s T_test_loc σ_loc
-    h_sigma_loc h_per_τ_bound w hw
-  -- Extract the singleton bound from the conjunction's first half.
-  exact h.1 f (Finset.mem_singleton_self f)
+    h_sigma_loc h_per_τ_bound w hw).1 f (Finset.mem_singleton_self f)
 
 /-- **T207 composed bridge: localised σ-data → strengthened target**.
 
@@ -1454,41 +1406,26 @@ theorem per_tau_algebraic_sigma_clearing_bridge_for_single_f_bound
   letI : PlusSubring (Localization.Away D.s) :=
     localizationAwayPlusSubring D.s
   intro τ hτ w hw hστ
-  -- Algebraic identity in `Localization.Away D.s`:
-  -- `algMap C.base.s = algMap D.s * algMap f` (from `h_factor` + `map_mul`).
   have h_alg : algebraMap A (Localization.Away D.s) C.base.s =
       algebraMap A (Localization.Away D.s) D.s *
         algebraMap A (Localization.Away D.s) f := by
     rw [h_factor, map_mul]
-  -- `algMap D.s` is a unit in `Localization.Away D.s` (it is the inverted
-  -- element of the localization).
   have h_D_s_unit : IsUnit (algebraMap A (Localization.Away D.s) D.s) :=
     IsLocalization.map_units (Localization.Away D.s)
       ⟨D.s, Submonoid.mem_powers D.s⟩
   refine ⟨?_, ?_⟩
-  · -- Singleton bound: for `t' = f`, derive
-    -- `w.vle (algMap f) (algMap C.base.s)` via `mul_vle_mul_left`
-    -- applied to `w.vle 1 (algMap D.s)`.
-    intro t' ht'
+  · intro t' ht'
     rw [Finset.mem_singleton] at ht'
     rw [ht', h_alg]
-    have h_dom := h_v_le_one_D_s τ hτ w hw hστ
-    have hmul := w.mul_vle_mul_left h_dom
+    have hmul := w.mul_vle_mul_left (h_v_le_one_D_s τ hτ w hw hστ)
       (algebraMap A (Localization.Away D.s) f)
     rwa [one_mul] at hmul
-  · -- Non-vanishing: `¬ w.vle (algMap C.base.s) 0` via prime-support
-    -- argument on `algMap D.s * algMap f` (using `algMap D.s` unit free
-    -- and `algMap f` non-vanishing via `h_f_ne_zero`).
-    rw [h_alg]
+  · rw [h_alg]
     intro hC0
-    have h_supp : algebraMap A (Localization.Away D.s) D.s *
-        algebraMap A (Localization.Away D.s) f ∈ w.supp :=
-      (w.mem_supp_iff _).mpr hC0
-    rcases (inferInstance : w.supp.IsPrime).mem_or_mem h_supp with hD | hf
-    · exact (not_vle_zero_of_isUnit h_D_s_unit w)
-        ((w.mem_supp_iff _).mp hD)
-    · exact (h_f_ne_zero τ hτ w hw hστ)
-        ((w.mem_supp_iff _).mp hf)
+    rcases (inferInstance : w.supp.IsPrime).mem_or_mem
+      ((w.mem_supp_iff _).mpr hC0) with hD | hf
+    · exact not_vle_zero_of_isUnit h_D_s_unit w ((w.mem_supp_iff _).mp hD)
+    · exact h_f_ne_zero τ hτ w hw hστ ((w.mem_supp_iff _).mp hf)
 
 /-- **T209 composed bridge: per-`τ` algebraic suppliers → strengthened
 single-`f` Step-2 target**.
@@ -1678,19 +1615,11 @@ theorem post_T209_supplier_f_ne_zero_via_factors
   intro w _hw hσ_ne ht_ne
   letI : ValuativeRel (Localization.Away D.s) := w.toValuativeRel
   rw [hf_eq, map_mul, map_mul, map_pow]
-  -- `algebraMap D.s` is a unit in `Loc D.s`; its `N`-th power is too.
   have h_D_s_unit : IsUnit (algebraMap A (Localization.Away D.s) D.s) :=
     IsLocalization.map_units (Localization.Away D.s)
       ⟨D.s, Submonoid.mem_powers D.s⟩
-  have h_pow_pos : (0 : Localization.Away D.s) <ᵥ
-      (algebraMap A (Localization.Away D.s) D.s) ^ N :=
-    not_vle_zero_of_isUnit (h_D_s_unit.pow N) w
-  have hσ_pos : (0 : Localization.Away D.s) <ᵥ
-      algebraMap A (Localization.Away D.s) σ := hσ_ne
-  have ht_pos : (0 : Localization.Away D.s) <ᵥ
-      algebraMap A (Localization.Away D.s) t := ht_ne
-  exact ValuativeRel.zero_vlt_mul (ValuativeRel.zero_vlt_mul hσ_pos ht_pos)
-    h_pow_pos
+  exact ValuativeRel.zero_vlt_mul (ValuativeRel.zero_vlt_mul hσ_ne ht_ne)
+    (not_vle_zero_of_isUnit (h_D_s_unit.pow N) w)
 
 /-- **T212 per-`τ` wrapper of the `h_f_ne_zero` factor reducer**.
 
@@ -1803,11 +1732,9 @@ theorem post_T209_supplier_v_le_one_D_s_via_inverse_in_plus
     localizationAwayPlusSubring D.s
   intro w hw
   obtain ⟨y, hy_plus, hy_inv⟩ := h_inv_mem
-  have hy_le_one : w.vle y 1 := vle_one_of_mem_spa hw hy_plus
-  have h := w.mul_vle_mul_left hy_le_one
+  have h := w.mul_vle_mul_left (vle_one_of_mem_spa hw hy_plus)
     (algebraMap A (Localization.Away D.s) D.s)
-  rw [hy_inv, one_mul] at h
-  exact h
+  rwa [hy_inv, one_mul] at h
 
 /-- **T212 per-`τ` wrapper of the `h_v_le_one_D_s` interface lemma**.
 

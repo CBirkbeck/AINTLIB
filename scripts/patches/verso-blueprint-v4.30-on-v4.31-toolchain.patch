@@ -1,0 +1,15 @@
+diff --git a/src/VersoBlueprint/Lib/HoverRender.lean b/src/VersoBlueprint/Lib/HoverRender.lean
+index f92e9fe..6f3b9af 100644
+--- a/src/VersoBlueprint/Lib/HoverRender.lean
++++ b/src/VersoBlueprint/Lib/HoverRender.lean
+@@ -61,8 +61,9 @@ private def toHex (n : Nat) : String := Id.run do
+       break
+     else
+       digits := digits.push <| hexDigits[n % 16]'(by
++        have h16 : hexDigits.size = 16 := rfl
+         have : n % 16 < 16 := Nat.mod_lt _ (by decide)
+-        simpa using this)
++        omega)
+       n := n >>> 4
+   let padding := (4 - digits.size).fold (init := "") (fun _ _ p => p.push '0')
+   digits.foldr (init := padding) fun c s => s.push c

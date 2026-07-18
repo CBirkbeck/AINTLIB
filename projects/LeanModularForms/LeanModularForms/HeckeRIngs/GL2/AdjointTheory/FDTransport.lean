@@ -50,14 +50,14 @@ theorem Gamma_p_α_finiteIndex (α : GL (Fin 2) ℚ) :
   show (conjGL (Gamma1 N) (α.map (Rat.castHom ℝ)) ⊓ Gamma1 N).FiniteIndex
   exact inferInstance
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- `Γ_p(α) ≤ Γ₁(N)`. -/
 lemma Gamma_p_α_le_Gamma1 (α : GL (Fin 2) ℚ) :
     Gamma_p_α (N := N) α ≤ Gamma1 N :=
   inf_le_right
 
-open CongruenceSubgroup Pointwise ConjAct in
-
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- `Γ_p(α)` conjugation embedding. -/
 lemma Gamma_p_α_conj_mem_Gamma1 (α : GL (Fin 2) ℚ)
@@ -76,6 +76,7 @@ noncomputable def Gamma_p_α_conjBy (α : GL (Fin 2) ℚ)
   ⟨Classical.choose (Gamma_p_α_conj_mem_Gamma1 α γ.property),
     (Classical.choose_spec (Gamma_p_α_conj_mem_Gamma1 α γ.property)).1⟩
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- Defining equality of `Gamma_p_α_conjBy`:
 `mapGL ℝ (Gamma_p_α_conjBy α γ) = α · mapGL ℝ γ · α⁻¹` in `GL (Fin 2) ℝ`. -/
@@ -87,8 +88,7 @@ lemma Gamma_p_α_conjBy_spec (α : GL (Fin 2) ℚ)
         ((α.map (Rat.castHom ℝ) : GL (Fin 2) ℝ))⁻¹ :=
   (Classical.choose_spec (Gamma_p_α_conj_mem_Gamma1 α γ.property)).2
 
-open CongruenceSubgroup Pointwise ConjAct in
-
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
 /-- Slash by α is `Γ_p(α)`-invariant on Γ₁(N)-cusp forms. -/
 lemma slash_α_Gamma_p_α_invariant (α : GL (Fin 2) ℚ)
@@ -107,6 +107,7 @@ lemma slash_α_Gamma_p_α_invariant (α : GL (Fin 2) ℚ)
     group
   rw [← SlashAction.slash_mul, hαγ, SlashAction.slash_mul, hf δ hδ_mem]
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
 /-- Cusp-form specialization of `slash_α_Gamma_p_α_invariant`. -/
 lemma slash_α_Gamma_p_α_invariant_cuspForm
@@ -121,12 +122,7 @@ lemma slash_α_Gamma_p_α_invariant_cuspForm
         (((δ : SL(2, ℤ)) : GL (Fin 2) ℝ)) from rfl, ← ModularForm.SL_slash]
   exact slash_Gamma1_eq f δ hδ
 
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
-
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
-
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
-
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise UpperHalfPlane MeasureTheory in
 /-- Finite-index FD decomposition for `Γ_p(α) ≤ Γ₁(N)` (generic ambient). -/
 theorem Gamma_p_α_FD_finite_index_decomp
@@ -144,8 +140,6 @@ theorem Gamma_p_α_FD_finite_index_decomp
         ((q.out : ((Gamma1 N).map φ)) : G_outer)⁻¹ • D)
       μ_hyp :=
   hD.subgroup_iUnion_out_smul _
-
-open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
 
 open CongruenceSubgroup in
 /-- Finite-index instance for the projective image of `Γ_p(α)` inside the
@@ -296,6 +290,7 @@ noncomputable def slToPslQuot_Gamma_p_α (α : GL (Fin 2) ℚ) :
       rw [h_psl]
       exact ⟨a⁻¹ * b, hab, rfl⟩)
 
+omit [NeZero N] in
 @[simp]
 theorem slToPslQuot_Gamma_p_α_mk (α : GL (Fin 2) ℚ) (g : SL(2, ℤ)) :
     slToPslQuot_Gamma_p_α (N := N) α
@@ -303,6 +298,7 @@ theorem slToPslQuot_Gamma_p_α_mk (α : GL (Fin 2) ℚ) (g : SL(2, ℤ)) :
       QuotientGroup.mk (QuotientGroup.mk g : PSL(2, ℤ)) :=
   rfl
 
+omit [NeZero N] in
 theorem slToPslQuot_Gamma_p_α_surjective (α : GL (Fin 2) ℚ) :
     Function.Surjective (slToPslQuot_Gamma_p_α (N := N) α) := fun q' ↦ by
   obtain ⟨g_psl, hg_psl⟩ := QuotientGroup.mk_surjective q'
@@ -322,6 +318,7 @@ noncomputable def slLeftMul_Gamma_p_α (α : GL (Fin 2) ℚ) (h : SL(2, ℤ)) :
       have : (h * a)⁻¹ * (h * b) = a⁻¹ * b := by group
       rwa [this])
 
+omit [NeZero N] in
 @[simp]
 theorem slLeftMul_Gamma_p_α_mk (α : GL (Fin 2) ℚ) (h g : SL(2, ℤ)) :
     slLeftMul_Gamma_p_α (N := N) α h
@@ -329,17 +326,20 @@ theorem slLeftMul_Gamma_p_α_mk (α : GL (Fin 2) ℚ) (h g : SL(2, ℤ)) :
       QuotientGroup.mk (h * g) :=
   rfl
 
+omit [NeZero N] in
 theorem slLeftMul_Gamma_p_α_one (α : GL (Fin 2) ℚ)
     (q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α) :
     slLeftMul_Gamma_p_α (N := N) α 1 q = q := by
   induction q using QuotientGroup.induction_on with | _ g => simp
 
+omit [NeZero N] in
 theorem slLeftMul_Gamma_p_α_comp (α : GL (Fin 2) ℚ) (h₁ h₂ : SL(2, ℤ))
     (q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α) :
     slLeftMul_Gamma_p_α (N := N) α h₁ (slLeftMul_Gamma_p_α (N := N) α h₂ q) =
       slLeftMul_Gamma_p_α (N := N) α (h₁ * h₂) q := by
   induction q using QuotientGroup.induction_on with | _ g => simp [mul_assoc]
 
+omit [NeZero N] in
 private lemma slToPslQuot_mk_left_transport (α : GL (Fin 2) ℚ) (a b g : SL(2, ℤ))
     (hg : slToPslQuot_Gamma_p_α (N := N) α (QuotientGroup.mk g) =
         slToPslQuot_Gamma_p_α (N := N) α (QuotientGroup.mk b)) :
@@ -410,6 +410,7 @@ theorem slToPslQuot_fiberCard_Gamma_p_α_eq (α : GL (Fin 2) ℚ)
     slToPslQuot_fiberCard_Gamma_p_α (N := N) α :=
   slToPslQuot_Gamma_p_α_fiber_card_uniform (N := N) α q' _
 
+omit [NeZero N] in
 open CongruenceSubgroup UpperHalfPlane MeasureTheory in
 /-- Fiber-invariance of the SL-tile integral at `H = Γ_p(α)`. -/
 theorem setIntegral_SL_tile_eq_PSL_tile_Gamma_p_α (α : GL (Fin 2) ℚ)
@@ -481,7 +482,8 @@ theorem sum_SL_tile_eq_fiberwise_PSL_tile_Gamma_p_α (α : GL (Fin 2) ℚ)
       = ∑ q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α,
           ∫ τ in ((slToPslQuot_Gamma_p_α (N := N) α q).out : PSL(2, ℤ))⁻¹ •
             (fdo : Set ℍ), h τ ∂μ_hyp :=
-        Finset.sum_congr rfl fun q _ ↦ setIntegral_SL_tile_eq_PSL_tile_Gamma_p_α (N := N) α h h_inv q
+        Finset.sum_congr rfl fun q _ ↦
+          setIntegral_SL_tile_eq_PSL_tile_Gamma_p_α (N := N) α h h_inv q
     _ = ∑ q' : PSL(2, ℤ) ⧸ image_Gamma_p_α_PSL (N := N) α,
           ∑ q ∈ Finset.univ.filter (fun q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α ↦
             slToPslQuot_Gamma_p_α (N := N) α q = q'),
@@ -496,6 +498,7 @@ theorem sum_SL_tile_eq_fiberwise_PSL_tile_Gamma_p_α (α : GL (Fin 2) ℚ)
         refine Finset.sum_congr rfl fun q' _ ↦ ?_
         exact Finset.sum_const _
 
+omit [NeZero N] in
 open UpperHalfPlane ModularGroup MeasureTheory in
 /-- `fd` ↔ `fdo` SL-tile integral equality at `H = Γ_p(α)`. -/
 theorem setIntegral_SL_tile_fd_eq_fdo_Gamma_p_α
@@ -513,6 +516,7 @@ theorem setIntegral_SL_tile_fd_eq_fdo_Gamma_p_α
       (measurableEmbedding_const_smul _),
     setIntegral_fd_eq_fdo]
 
+omit [NeZero N] in
 open CongruenceSubgroup UpperHalfPlane ModularGroup MeasureTheory in
 /-- Pairwise AE-disjointness of the canonical PSL coset tiles for `Γ_p(α)`. -/
 theorem aedisjoint_PSL_coset_tiles_Gamma_p_α (α : GL (Fin 2) ℚ) :
@@ -527,6 +531,7 @@ theorem aedisjoint_PSL_coset_tiles_Gamma_p_α (α : GL (Fin 2) ℚ) :
     rw [← q₁.out_eq, ← q₂.out_eq, inv_injective hg]
   exact isFundamentalDomain_fdo_PSL.aedisjoint h_inv_ne
 
+omit [NeZero N] in
 open CongruenceSubgroup UpperHalfPlane ModularGroup MeasureTheory in
 /-- Null-measurability of the canonical PSL coset tiles for `Γ_p(α)`. -/
 theorem nullMeasurableSet_PSL_coset_tile_Gamma_p_α
@@ -586,6 +591,7 @@ theorem setIntegral_Gamma_p_α_fundDomain_PSL_canonical_eq_SL_outer_q_sum
         rw [← setIntegral_Gamma_p_α_fundDomain_PSL_canonical_eq_sum
           (N := N) α h h_int]
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise in
 /-- `(Γ_p(α)).map SL2Z_to_PSL2R = (image_Gamma_p_α_PSL α).map PSL2Z_to_PSL2R`. -/
 theorem map_SL2Z_to_PSL2R_eq_image_Gamma_p_α_PSL_R
@@ -646,6 +652,7 @@ theorem isFundamentalDomain_Gamma_p_α_fundDomain_PSL_at_PSL_R
   rw [Gamma_p_α_fundDomain_PSL]
   simpa using h_image
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise UpperHalfPlane MeasureTheory in
 /-- `Γ_p(α)`-invariance lifts to `(Γ_p(α)).map SL2Z_to_PSL2R`-invariance. -/
 theorem inv_under_Gamma_p_α_PSL_R_of_inv_under_Gamma_p_α
@@ -725,12 +732,14 @@ noncomputable def slGamma_p_αToGamma1 (α : GL (Fin 2) ℚ) :
       rw [QuotientGroup.leftRel_apply] at hab
       exact QuotientGroup.eq.mpr (Gamma_p_α_le_Gamma1 α hab))
 
+omit [NeZero N] in
 @[simp]
 theorem slGamma_p_αToGamma1_mk (α : GL (Fin 2) ℚ) (g : SL(2, ℤ)) :
     slGamma_p_αToGamma1 (N := N) α
         (QuotientGroup.mk g : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α) =
       QuotientGroup.mk g := rfl
 
+omit [NeZero N] in
 theorem slGamma_p_αToGamma1_surjective (α : GL (Fin 2) ℚ) :
     Function.Surjective (slGamma_p_αToGamma1 (N := N) α) := fun q' ↦ by
   obtain ⟨g, hg⟩ := QuotientGroup.mk_surjective q'
@@ -806,16 +815,7 @@ theorem slGamma_p_αToGamma1_fiberCard_eq (α : GL (Fin 2) ℚ)
     slGamma_p_αToGamma1_fiberCard (N := N) α :=
   slGamma_p_αToGamma1_fiber_card_uniform (N := N) α q' _
 
-open CongruenceSubgroup UpperHalfPlane MeasureTheory in
-
-open CongruenceSubgroup UpperHalfPlane MeasureTheory Classical in
-
-open CongruenceSubgroup UpperHalfPlane ModularGroup MeasureTheory in
-
-open UpperHalfPlane ModularGroup MeasureTheory in
-
-open CongruenceSubgroup UpperHalfPlane ModularGroup MeasureTheory in
-
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory in
 /-- **Per-tile slash-reindex (DS 5.4.4 leaf).** A single `SL/Γ_p(α)`-coset tile
 integral `∫_{q.out⁻¹•fd} petersson k F G` is reindexed onto its image
@@ -936,10 +936,10 @@ theorem sum_SL_tile_petersson_Gamma_p_α_eq_sum_SL_tile_traceSlash_Gamma1
             fun τ ↦ ∑ q ∈ Finset.univ.filter
               (fun q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α ↦
                 slGamma_p_αToGamma1 (N := N) α q = q'),
-                petersson k F (G ∣[k] ((q.out : SL(2, ℤ))⁻¹ * q'.out)) τ from by
+                petersson k F (G ∣[k] ((q.out : SL(2, ℤ))⁻¹ * q'.out)) τ by
           funext τ
           simp only [petersson, Finset.sum_apply, Finset.mul_sum, Finset.sum_mul]]
-        rw [integral_finset_sum _ (h_int q')]
+        rw [integral_finsetSum _ (h_int q')]
 
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory Classical in
 /-- **DS Exercise 5.4.4 (fundamental-domain transfer form).** The `Γ_p(α)`-fundamental
@@ -981,6 +981,7 @@ theorem setIntegral_Gamma_p_α_fundDomain_PSL_petersson_eq_traceSlash_SL_outer_q
   exact sum_SL_tile_petersson_Gamma_p_α_eq_sum_SL_tile_traceSlash_Gamma1
     (N := N) α F G hF_slash h_int_trace
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory Classical in
 /-- Fiber-transport for `slLeftMul_Gamma_p_α`: left-multiplication by
 `q₂'.out · q₁'.out⁻¹` carries the `slGamma_p_αToGamma1`-fiber over `q₁'` into the
@@ -1007,6 +1008,7 @@ private lemma slGamma_p_αToGamma1_slLeftMul_fiber
         g⁻¹ * q₁'.out := by group
   rwa [hrw]
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory Classical in
 /-- Summand equality used by `traceSlash_Gamma_p_α_indep`: shifting `q` by
 `h = q₂'.out · q₁'.out⁻¹` differs from the connector by a left `Γ_p(α)`-factor that
@@ -1071,6 +1073,7 @@ theorem traceSlash_Gamma_p_α_indep
       rw [hh_def, mul_inv_rev, inv_inv]]
     exact slGamma_p_αToGamma1_slLeftMul_fiber α q₂' q₁' hq
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory Classical in
 /-- Self-fiber stability under `slLeftMul_Gamma_p_α` by a `q'`-conjugate of a `Γ₁(N)`
 element: the fiber of `slGamma_p_αToGamma1 α` over `q'` is closed under left
@@ -1100,6 +1103,7 @@ private lemma slGamma_p_αToGamma1_slLeftMul_conj_self
   rw [hrw]
   exact mul_mem h_gm (inv_mem hδ)
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise UpperHalfPlane ModularGroup MeasureTheory Classical in
 /-- Summand equality used by `traceSlash_Gamma_p_α_slash_Gamma1`: after reindexing the
 fiber by left-multiplication by `hr⁻¹` where `hr = q'.out · γ⁻¹ · q'.out⁻¹`, the connector
@@ -1257,7 +1261,7 @@ lemma conj_T_p_lower_real_val (p : ℕ) (hp : 0 < p) (γ : SL(2, ℤ)) :
     rw [Matrix.coe_units_inv, map_T_p_lower_real_val p hp, Matrix.inv_def,
       Matrix.adjugate_fin_two_of, Ring.inverse_eq_inv']
     ext i j
-    fin_cases i <;> fin_cases j <;> simp [Matrix.det_fin_two_of] <;> field_simp
+    fin_cases i <;> fin_cases j <;> simp [Matrix.det_fin_two_of]; field_simp
   have hγr : ((toGL ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) γ)) :
       Matrix (Fin 2) (Fin 2) ℝ) =
       !![((γ.val 0 0 : ℤ) : ℝ), ((γ.val 0 1 : ℤ) : ℝ);
@@ -1269,6 +1273,7 @@ lemma conj_T_p_lower_real_val (p : ℕ) (hp : 0 < p) (γ : SL(2, ℤ)) :
   ext i j
   fin_cases i <;> fin_cases j <;> simp <;> field_simp
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- Forward direction of `mem_Gamma_p_α_T_p_lower`: if `γ` lies in the conjugate
 intersection `conjGL Γ₁(N) (mapGL A)` (with `A = diag(p,1)`), the resulting integral
@@ -1313,6 +1318,7 @@ private lemma mem_Gamma_p_α_T_p_lower_mpr_det
     rw [hk]; ring
   linarith [hγdet, this]
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- Helper: the `(1,0)` entry `k` of the witness `y` reduces to `0 mod N`. This is the
 key Γ₁(N) membership ingredient on the reverse side, deduced from
@@ -1329,6 +1335,7 @@ private lemma mem_Gamma_p_α_T_p_lower_mpr_k_mod_N
   have hN_dvd_k : (N : ℤ) ∣ k := hco.dvd_of_dvd_mul_left hN_dvd_pk
   rw [← ZMod.intCast_zmod_eq_zero_iff_dvd] at hN_dvd_k; exact_mod_cast hN_dvd_k
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- Reverse direction of `mem_Gamma_p_α_T_p_lower`: given `γ ∈ Γ₁(N)` with `p ∣ γ₁₀`,
 the integral matrix `y = [[a, p·b], [k, d]]` (with `k = γ₁₀/p`) lies in `Γ₁(N)` and
@@ -1366,12 +1373,13 @@ private lemma mem_Gamma_p_α_T_p_lower_mpr
   apply Units.ext
   rw [Matrix.GeneralLinearGroup.coe_mul, Matrix.GeneralLinearGroup.coe_mul,
     conj_T_p_lower_real_val p hp γ]
+  have hyval : Subtype.val y = !![γ.val 0 0, (p : ℤ) * γ.val 0 1; k, γ.val 1 1] := rfl
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [hy_def, Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
-      Matrix.map_apply, hk] <;>
-    field_simp
+    simp [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+      Matrix.map_apply, hyval, hk]; field_simp
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- **Membership characterization of `Γ_p(T_p_lower)`.** For `A = diag(p,1)`, conjugation
 `A·γ·A⁻¹ = [[a, p·b], [c/p, d]]` is integral (and lands in `Γ₁(N)`) iff `p ∣ c`. Hence
@@ -1384,6 +1392,7 @@ lemma mem_Gamma_p_α_T_p_lower (p : ℕ) (hp : 0 < p) (hpN : Nat.Coprime p N)
   refine ⟨fun ⟨h, hγ₁⟩ ↦ ⟨hγ₁, mem_Gamma_p_α_T_p_lower_mp p hp h⟩, fun ⟨hγ₁, hdvd⟩ ↦ ?_⟩
   exact ⟨mem_Gamma_p_α_T_p_lower_mpr p hp hpN hγ₁ hdvd, hγ₁⟩
 
+omit [NeZero N] in
 open CongruenceSubgroup Pointwise ConjAct in
 /-- `Γ_p(T_p_lower) = Γ₁(N) ⊓ Γ₀(p)`. -/
 lemma Gamma_p_α_T_p_lower_eq_inf (p : ℕ) (hp : 0 < p) (hpN : Nat.Coprime p N) :
@@ -1413,6 +1422,7 @@ private lemma Gamma1_S_corrector_mem (N p : ℕ) [NeZero N] (hpN : Nat.Coprime p
 private def lowerUni (m : ℤ) : SL(2, ℤ) :=
   ⟨!![1, 0; m, 1], by rw [Matrix.det_fin_two_of]; ring⟩
 
+omit [NeZero N] in
 private lemma lowerUni_mem_Gamma1 {m : ℤ} (hm : (m : ZMod N) = 0) :
     lowerUni m ∈ Gamma1 N := by
   rw [Gamma1_mem]
@@ -1437,8 +1447,10 @@ theorem exists_Gamma1_mul_inv_mem_Gamma0 (p : ℕ) (hp : Nat.Prime p) (hpN : Nat
       rw [show ((g * (Gamma1_S_corrector N p hpN)⁻¹).1 1 0 : ℤ) =
           (g.1 1 0) * (((Gamma1_S_corrector N p hpN)⁻¹).1 0 0) +
           (g.1 1 1) * (((Gamma1_S_corrector N p hpN)⁻¹).1 1 0)
-        from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
-      simp only [Gamma1_S_corrector, Matrix.SpecialLinearGroup.coe_inv,
+        by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+      have hval : (Gamma1_S_corrector N p hpN).1 =
+          !![1, mIdxOfCoprime N p hpN; (N : ℤ), (aInvOfCoprime N p hpN : ℤ) * p] := rfl
+      simp only [Matrix.SpecialLinearGroup.coe_inv, hval,
         Matrix.adjugate_fin_two_of,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]
@@ -1459,8 +1471,9 @@ theorem exists_Gamma1_mul_inv_mem_Gamma0 (p : ℕ) (hp : Nat.Prime p) (hpN : Nat
         rw [show ((g * (lowerUni (m : ℤ))⁻¹).1 1 0 : ℤ) =
             (g.1 1 0) * (((lowerUni (m : ℤ))⁻¹).1 0 0) +
             (g.1 1 1) * (((lowerUni (m : ℤ))⁻¹).1 1 0)
-          from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
-        simp only [lowerUni, Matrix.SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two_of,
+          by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+        have hval : (lowerUni (m : ℤ)).1 = !![1, 0; (m : ℤ), 1] := rfl
+        simp only [Matrix.SpecialLinearGroup.coe_inv, hval, Matrix.adjugate_fin_two_of,
           Matrix.cons_val', Matrix.cons_val_zero,
           Matrix.cons_val_one, Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]
         ring
@@ -1637,8 +1650,11 @@ theorem exists_Gamma1_mul_inv_mem_Gamma_up (p : ℕ) (hp : Nat.Prime p) (hpN : N
       rw [show ((g * (Gamma1_S_corrector_up N p hpN)⁻¹).1 0 1 : ℤ) =
           (g.1 0 0) * (((Gamma1_S_corrector_up N p hpN)⁻¹).1 0 1) +
           (g.1 0 1) * (((Gamma1_S_corrector_up N p hpN)⁻¹).1 1 1)
-        from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
-      simp only [Gamma1_S_corrector_up, Matrix.SpecialLinearGroup.coe_inv,
+        by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+      have hval : (Gamma1_S_corrector_up N p hpN).1 =
+          !![(aInvOfCoprime N p hpN : ℤ) * p, -1;
+             -(N : ℤ) * mIdxOfCoprime N p hpN, 1] := rfl
+      simp only [Matrix.SpecialLinearGroup.coe_inv, hval,
         Matrix.adjugate_fin_two_of,
         Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]
@@ -1655,7 +1671,7 @@ theorem exists_Gamma1_mul_inv_mem_Gamma_up (p : ℕ) (hp : Nat.Prime p) (hpN : N
       rw [show ((g * (ModularGroup.T ^ m)⁻¹).1 0 1 : ℤ) =
           (g.1 0 0) * (((ModularGroup.T ^ m)⁻¹).1 0 1) +
           (g.1 0 1) * (((ModularGroup.T ^ m)⁻¹).1 1 1)
-        from by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
+        by rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]]
       rw [← zpow_neg, ModularGroup.coe_T_zpow]
       simp only [Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
         Matrix.empty_val', Matrix.cons_val_fin_one, Matrix.of_apply]

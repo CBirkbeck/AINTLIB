@@ -31,7 +31,7 @@ theorem generalizedWindingNumber_eq_classical_away
   have hδ : 0 < Metric.infDist z₀ (γ.toFun '' Icc γ.a γ.b) :=
     ((isCompact_Icc.image_of_continuousOn γ.continuous_toFun).isClosed.notMem_iff_infDist_pos
       (Set.image_nonempty.mpr (Set.nonempty_Icc.mpr γ.hab.le))).mp
-      (fun ⟨t, ht, htw⟩ => hoff t ht htw)
+      (fun ⟨t, ht, htw⟩ ↦ hoff t ht htw)
   congr 1
   apply limUnder_eventually_eq_const
   filter_upwards [Ioo_mem_nhdsGT hδ] with ε hε

@@ -1,6 +1,8 @@
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.NumberTheory.MulChar.Basic
-import Mathlib.Tactic
+module
+
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.NumberTheory.MulChar.Basic
+public import Mathlib.Tactic
 
 /-!
 # Deleted Fourier matrices on the augmentation subspace
@@ -12,10 +14,9 @@ finite abelian group `G`, a function `q : G → ℂ`, and the deleted matrix
 the nontrivial Fourier coefficients.  The proof uses the deleted character
 matrix and includes the rank-one correction in its inverse.
 -/
+@[expose] public section
 
 noncomputable section
-
-open scoped BigOperators
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -35,8 +36,7 @@ theorem sum_subtype_ne_eq_sum_erase {α : Type*} [Fintype α] [DecidableEq α]
     (a₀ : α) (f : α → ℂ) [Fintype {x : α // x ≠ a₀}] :
     ∑ x : {x : α // x ≠ a₀}, f x.val =
       ∑ x ∈ (Finset.univ : Finset α).erase a₀, f x := by
-  classical
-  refine Finset.sum_bij (fun (x : {x : α // x ≠ a₀}) _ => x.val) ?_ ?_ ?_ ?_
+  refine Finset.sum_bij (fun (x : {x : α // x ≠ a₀}) _ ↦ x.val) ?_ ?_ ?_ ?_
   · intro x _
     rw [Finset.mem_erase]
     exact ⟨x.property, Finset.mem_univ _⟩
@@ -94,10 +94,9 @@ theorem sum_nonidentity_mulChar_eq_neg_one
     [DecidableEq G]
     (χ : MulChar G ℂ) (hχ : χ ≠ 1) :
     ∑ h : Nonidentity G, χ h.val = -1 := by
-  classical
   have hfull : ∑ g : G, χ g = 0 := MulChar.sum_eq_zero_of_ne_one hχ
   rw [← Finset.add_sum_erase _ _ (Finset.mem_univ (1 : G))] at hfull
-  rw [← sum_subtype_ne_eq_sum_erase (α := G) (a₀ := 1) (f := fun g => χ g)] at hfull
+  rw [← sum_subtype_ne_eq_sum_erase (α := G) (a₀ := 1) (f := fun g ↦ χ g)] at hfull
   have hsplit : (1 : ℂ) + ∑ h : Nonidentity G, χ h.val = 0 := by
     simpa using hfull
   linear_combination hsplit
@@ -109,7 +108,6 @@ theorem sum_nonidentity_inv_mulChar_mul
     (χ ψ : MulChar G ℂ) :
     ∑ h : Nonidentity G, (χ h.val)⁻¹ * ψ h.val =
       if χ = ψ then (Fintype.card (Nonidentity G) : ℂ) else -1 := by
-  classical
   by_cases hχψ : χ = ψ
   · subst hχψ
     rw [if_pos rfl]
@@ -143,12 +141,11 @@ def deletedFourierCoeff (q : G → ℂ) (χ : MulChar G ℂ) : ℂ :=
 Fourier coefficient by `χ h₀`. -/
 theorem deletedFourierCoeff_mulLeft
     (q : G → ℂ) (χ : MulChar G ℂ) (h₀ : G) :
-    deletedFourierCoeff (G := G) (fun h => q (h₀ * h)) χ =
+    deletedFourierCoeff (G := G) (fun h ↦ q (h₀ * h)) χ =
       χ h₀ * deletedFourierCoeff (G := G) q χ := by
-  classical
-  unfold deletedFourierCoeff
+  simp only [deletedFourierCoeff]
   have hsum := Equiv.sum_comp (Equiv.mulLeft h₀)
-    (fun h : G => q h * (χ (h₀⁻¹ * h))⁻¹)
+    (fun h : G ↦ q h * (χ (h₀⁻¹ * h))⁻¹)
   have hleft :
       (∑ x : G, q ((Equiv.mulLeft h₀) x) *
           (χ (h₀⁻¹ * (Equiv.mulLeft h₀) x))⁻¹) =
@@ -165,15 +162,14 @@ theorem deletedFourierCoeff_mulLeft
     have hinv : (h₀⁻¹ * h)⁻¹ = h⁻¹ * h₀ := by group
     rw [hinv, map_mul, map_inv]
     ring
-  rw [Finset.sum_congr rfl (fun h _ => hterm h)]
-  rw [← Finset.mul_sum]
+  rw [Finset.sum_congr rfl (fun h _ ↦ hterm h), ← Finset.mul_sum]
 
 /-- The deleted character matrix, with rows reindexed by an equivalence
 between nontrivial characters and non-identity elements. -/
 def deletedCharacterMatrix
     (ρ : NontrivChar G ≃ Nonidentity G) :
     Matrix (NontrivChar G) (NontrivChar G) ℂ :=
-  Matrix.of fun h χ => χ.val (ρ h).val
+  Matrix.of fun h χ ↦ χ.val (ρ h).val
 
 /-- The corrected left inverse of the deleted character matrix.  The `-1`
 term is the rank-one correction that appears after deleting the trivial row
@@ -181,7 +177,7 @@ and the trivial character. -/
 def deletedCharacterMatrixLeftInverse
     (ρ : NontrivChar G ≃ Nonidentity G) :
     Matrix (NontrivChar G) (NontrivChar G) ℂ :=
-  Matrix.of fun χ h =>
+  Matrix.of fun χ h ↦
     ((Fintype.card G : ℕ) : ℂ)⁻¹ * ((χ.val (ρ h).val)⁻¹ - 1)
 
 /-- The corrected deleted character matrix inverse is a left inverse. -/
@@ -194,7 +190,7 @@ theorem deletedCharacterMatrix_leftInverse
   ext χ ψ
   simp only [deletedCharacterMatrixLeftInverse, deletedCharacterMatrix, Matrix.mul_apply,
     Matrix.of_apply, Matrix.one_apply]
-  rw [Equiv.sum_comp ρ (fun h : Nonidentity G =>
+  rw [Equiv.sum_comp ρ (fun h : Nonidentity G ↦
     (((Fintype.card G : ℕ) : ℂ)⁻¹ * ((χ.val h.val)⁻¹ - 1)) * ψ.val h.val)]
   rw [show (∑ h : Nonidentity G,
       ((Fintype.card G : ℕ) : ℂ)⁻¹ * ((χ.val h.val)⁻¹ - 1) * ψ.val h.val) =
@@ -211,9 +207,8 @@ theorem deletedCharacterMatrix_leftInverse
           ∑ h : Nonidentity G, ψ.val h.val := by
     simp_rw [sub_mul, one_mul]
     rw [Finset.sum_sub_distrib]
-  rw [hsplit]
-  rw [sum_nonidentity_inv_mulChar_mul (G := G) χ.val ψ.val]
-  rw [sum_nonidentity_mulChar_eq_neg_one (G := G) ψ.val ψ.property]
+  rw [hsplit, sum_nonidentity_inv_mulChar_mul (G := G) χ.val ψ.val,
+    sum_nonidentity_mulChar_eq_neg_one (G := G) ψ.val ψ.property]
   by_cases hχψ : χ = ψ
   · subst hχψ
     simp only [ite_true]
@@ -224,7 +219,7 @@ theorem deletedCharacterMatrix_leftInverse
       card_group_ne_zero_complex (G := G)
     field_simp [hnz]
     linear_combination hcard
-  · have hval : χ.val ≠ ψ.val := fun h =>
+  · have hval : χ.val ≠ ψ.val := fun h ↦
       hχψ (Subtype.ext h)
     simp only [hval, ite_false]
     rw [if_neg hχψ]
@@ -235,12 +230,11 @@ theorem sum_translate_inv_mulChar
     (q : G → ℂ) (χ : MulChar G ℂ) (h : G) :
     ∑ k : G, q (h * k⁻¹) * χ k =
       χ h * deletedFourierCoeff (G := G) q χ := by
-  classical
   let e : G ≃ G := (Equiv.inv G).trans (Equiv.mulLeft h)
   have he_apply : ∀ k : G, e k = h * k⁻¹ := by
     intro k
     rfl
-  have hsum := Equiv.sum_comp e (fun t : G => q t * χ (t⁻¹ * h))
+  have hsum := Equiv.sum_comp e (fun t : G ↦ q t * χ (t⁻¹ * h))
   have hleft :
       (∑ k : G, q (e k) * χ ((e k)⁻¹ * h)) =
         ∑ k : G, q (h * k⁻¹) * χ k := by
@@ -251,14 +245,13 @@ theorem sum_translate_inv_mulChar
     rw [hk]
   rw [hleft] at hsum
   rw [hsum]
-  unfold deletedFourierCoeff
+  simp only [deletedFourierCoeff]
   have hterm : ∀ t : G, q t * χ (t⁻¹ * h) =
       χ h * (q t * (χ t)⁻¹) := by
     intro t
     rw [map_mul, map_inv]
     ring
-  rw [Finset.sum_congr rfl (fun t _ => hterm t)]
-  rw [← Finset.mul_sum]
+  rw [Finset.sum_congr rfl (fun t _ ↦ hterm t), ← Finset.mul_sum]
 
 /-- The first summand of the deleted convolution-character product. -/
 theorem sum_nonidentity_translate_inv_mulChar
@@ -266,11 +259,10 @@ theorem sum_nonidentity_translate_inv_mulChar
     (q : G → ℂ) (χ : MulChar G ℂ) (h : G) :
     ∑ k : Nonidentity G, q (h * k.val⁻¹) * χ k.val =
       χ h * deletedFourierCoeff (G := G) q χ - q h := by
-  classical
   have hfull := sum_translate_inv_mulChar (G := G) q χ h
   rw [← Finset.add_sum_erase _ _ (Finset.mem_univ (1 : G))] at hfull
   rw [← sum_subtype_ne_eq_sum_erase (α := G) (a₀ := 1)
-    (f := fun k : G => q (h * k⁻¹) * χ k)] at hfull
+    (f := fun k : G ↦ q (h * k⁻¹) * χ k)] at hfull
   have hsplit :
       q h + ∑ k : Nonidentity G, q (h * k.val⁻¹) * χ k.val =
         χ h * deletedFourierCoeff (G := G) q χ := by
@@ -284,7 +276,6 @@ theorem sum_nonidentity_deletedConvolution_mulChar
     (q : G → ℂ) (χ : MulChar G ℂ) (hχ : χ ≠ 1) (h : G) :
     ∑ k : Nonidentity G, (q (h * k.val⁻¹) - q h) * χ k.val =
       χ h * deletedFourierCoeff (G := G) q χ := by
-  classical
   have hfirst := sum_nonidentity_translate_inv_mulChar (G := G) q χ h
   have hchar := sum_nonidentity_mulChar_eq_neg_one (G := G) χ hχ
   have hsplit :
@@ -300,18 +291,18 @@ theorem sum_nonidentity_deletedConvolution_mulChar
 def deletedConvolutionMatrix
     (ρ : NontrivChar G ≃ Nonidentity G) (q : G → ℂ) :
     Matrix (NontrivChar G) (NontrivChar G) ℂ :=
-  Matrix.of fun h k => q ((ρ h).val * (ρ k).val⁻¹) - q (ρ h).val
+  Matrix.of fun h k ↦ q ((ρ h).val * (ρ k).val⁻¹) - q (ρ h).val
 
 /-- The same deleted convolution matrix with the literal `G \ {1}` indices. -/
 def deletedConvolutionMatrixOnNonidentity (q : G → ℂ) :
     Matrix (Nonidentity G) (Nonidentity G) ℂ :=
-  Matrix.of fun h k => q (h.val * k.val⁻¹) - q h.val
+  Matrix.of fun h k ↦ q (h.val * k.val⁻¹) - q h.val
 
 /-- The deleted convolution matrix with an arbitrary omitted row `h₀` and
 columns still indexed by `G \ {1}`. -/
 def deletedConvolutionMatrixAt (h₀ : G) (q : G → ℂ) :
     Matrix (DeletedAt G h₀) (Nonidentity G) ℂ :=
-  Matrix.of fun h k => q (h.val * k.val⁻¹) - q h.val
+  Matrix.of fun h k ↦ q (h.val * k.val⁻¹) - q h.val
 
 /-- The arbitrary-row deleted matrix after ordering rows as `h = h₀ * r`,
 `r ∈ G \ {1}`. -/
@@ -326,7 +317,7 @@ identity-deleted matrix for the translated function `r ↦ q (h₀ * r)`. -/
 theorem deletedConvolutionMatrixAtReindexed_eq_translated
     (h₀ : G) (q : G → ℂ) :
     deletedConvolutionMatrixAtReindexed (G := G) h₀ q =
-      deletedConvolutionMatrixOnNonidentity (G := G) (fun h => q (h₀ * h)) := by
+      deletedConvolutionMatrixOnNonidentity (G := G) (fun h ↦ q (h₀ * h)) := by
   ext h k
   simp [deletedConvolutionMatrixAtReindexed, deletedConvolutionMatrixAt,
     deletedConvolutionMatrixOnNonidentity, nonidentityMulLeftEquivDeletedAt, mul_assoc]
@@ -348,17 +339,16 @@ theorem deletedConvolution_mul_deletedCharacter
     deletedConvolutionMatrix (G := G) ρ q *
         deletedCharacterMatrix (G := G) ρ =
       deletedCharacterMatrix (G := G) ρ *
-        Matrix.diagonal (fun χ : NontrivChar G =>
+        Matrix.diagonal (fun χ : NontrivChar G ↦
           deletedFourierCoeff (G := G) q χ.val) := by
   classical
   ext h χ
   simp only [deletedConvolutionMatrix, deletedCharacterMatrix, Matrix.mul_apply,
     Matrix.of_apply, Matrix.diagonal_apply]
-  rw [Equiv.sum_comp ρ (fun k : Nonidentity G =>
+  rw [Equiv.sum_comp ρ (fun k : Nonidentity G ↦
     (q ((ρ h).val * k.val⁻¹) - q (ρ h).val) * χ.val k.val)]
   rw [sum_nonidentity_deletedConvolution_mulChar
-    (G := G) q χ.val χ.property (ρ h).val]
-  rw [Finset.sum_eq_single χ]
+    (G := G) q χ.val χ.property (ρ h).val, Finset.sum_eq_single χ]
   · simp
   · intro ψ _ hψ
     rw [if_neg hψ, mul_zero]
@@ -371,7 +361,6 @@ theorem det_deletedConvolutionMatrix_eq_prod_deletedFourierCoeff
     (ρ : NontrivChar G ≃ Nonidentity G) (q : G → ℂ) :
     (deletedConvolutionMatrix (G := G) ρ q).det =
       ∏ χ : NontrivChar G, deletedFourierCoeff (G := G) q χ.val := by
-  classical
   have hmul := deletedConvolution_mul_deletedCharacter (G := G) ρ q
   have hdet := congrArg Matrix.det hmul
   rw [Matrix.det_mul, Matrix.det_mul, Matrix.det_diagonal] at hdet
@@ -401,11 +390,10 @@ theorem det_deletedConvolutionMatrixOnNonidentity_eq_prod_erase
       ∏ χ ∈ (Finset.univ : Finset (MulChar G ℂ)).erase 1,
         deletedFourierCoeff (G := G) q χ := by
   rw [det_deletedConvolutionMatrixOnNonidentity_eq_prod_deletedFourierCoeff
-    (G := G) ρ q]
-  rw [Finset.prod_subtype
-    (p := fun χ : MulChar G ℂ => χ ≠ 1)
+    (G := G) ρ q, Finset.prod_subtype
+    (p := fun χ : MulChar G ℂ ↦ χ ≠ 1)
     (s := (Finset.univ : Finset (MulChar G ℂ)).erase 1)
-    (f := fun χ => deletedFourierCoeff (G := G) q χ)]
+    (f := fun χ ↦ deletedFourierCoeff (G := G) q χ)]
   intro χ
   simp [Finset.mem_erase]
 
@@ -417,10 +405,9 @@ theorem det_deletedConvolutionMatrixAtReindexed_eq_charFactor_mul_prod
     (deletedConvolutionMatrixAtReindexed (G := G) h₀ q).det =
       (∏ χ : NontrivChar G, χ.val h₀) *
         ∏ χ : NontrivChar G, deletedFourierCoeff (G := G) q χ.val := by
-  classical
-  rw [deletedConvolutionMatrixAtReindexed_eq_translated]
-  rw [det_deletedConvolutionMatrixOnNonidentity_eq_prod_deletedFourierCoeff
-    (G := G) ρ (fun h => q (h₀ * h))]
+  rw [deletedConvolutionMatrixAtReindexed_eq_translated,
+    det_deletedConvolutionMatrixOnNonidentity_eq_prod_deletedFourierCoeff
+    (G := G) ρ (fun h ↦ q (h₀ * h))]
   simp_rw [deletedFourierCoeff_mulLeft (G := G) q]
   rw [Finset.prod_mul_distrib]
 
@@ -433,20 +420,19 @@ theorem det_deletedConvolutionMatrixAtReindexed_eq_charFactor_mul_prod_erase
       (∏ χ ∈ (Finset.univ : Finset (MulChar G ℂ)).erase 1, χ h₀) *
         ∏ χ ∈ (Finset.univ : Finset (MulChar G ℂ)).erase 1,
           deletedFourierCoeff (G := G) q χ := by
-  classical
   rw [det_deletedConvolutionMatrixAtReindexed_eq_charFactor_mul_prod
     (G := G) ρ h₀ q]
   congr 1
   · rw [Finset.prod_subtype
-      (p := fun χ : MulChar G ℂ => χ ≠ 1)
+      (p := fun χ : MulChar G ℂ ↦ χ ≠ 1)
       (s := (Finset.univ : Finset (MulChar G ℂ)).erase 1)
-      (f := fun χ => χ h₀)]
+      (f := fun χ ↦ χ h₀)]
     intro χ
     simp [Finset.mem_erase]
   · rw [Finset.prod_subtype
-      (p := fun χ : MulChar G ℂ => χ ≠ 1)
+      (p := fun χ : MulChar G ℂ ↦ χ ≠ 1)
       (s := (Finset.univ : Finset (MulChar G ℂ)).erase 1)
-      (f := fun χ => deletedFourierCoeff (G := G) q χ)]
+      (f := fun χ ↦ deletedFourierCoeff (G := G) q χ)]
     intro χ
     simp [Finset.mem_erase]
 
@@ -469,20 +455,20 @@ def nonidentityInvEquiv : Nonidentity G ≃ Nonidentity G where
 cyclotomic-unit logarithm matrix. -/
 def deletedConvolutionMulMatrixOnNonidentity (q : G → ℂ) :
     Matrix (Nonidentity G) (Nonidentity G) ℂ :=
-  Matrix.of fun h k => q (h.val * k.val) - q h.val
+  Matrix.of fun h k ↦ q (h.val * k.val) - q h.val
 
 /-- The arbitrary-row deleted matrix in the `hk` convention, with rows ordered
 as `h = h₀ * r`, `r ∈ G \ {1}`. -/
 def deletedConvolutionMulMatrixAtReindexed (h₀ : G) (q : G → ℂ) :
     Matrix (Nonidentity G) (Nonidentity G) ℂ :=
-  Matrix.of fun h k => q (h₀ * h.val * k.val) - q (h₀ * h.val)
+  Matrix.of fun h k ↦ q (h₀ * h.val * k.val) - q (h₀ * h.val)
 
 omit [Fintype G] in
 /-- Reindexing rows by `h = h₀ * r` in the `hk` convention translates `q`. -/
 theorem deletedConvolutionMulMatrixAtReindexed_eq_translated
     (h₀ : G) (q : G → ℂ) :
     deletedConvolutionMulMatrixAtReindexed (G := G) h₀ q =
-      deletedConvolutionMulMatrixOnNonidentity (G := G) (fun h => q (h₀ * h)) := by
+      deletedConvolutionMulMatrixOnNonidentity (G := G) (fun h ↦ q (h₀ * h)) := by
   ext h k
   simp [deletedConvolutionMulMatrixAtReindexed, deletedConvolutionMulMatrixOnNonidentity,
     mul_assoc]
@@ -492,7 +478,7 @@ omit [Fintype G] in
 `x ↦ q(x⁻¹)`. -/
 theorem deletedConvolutionMulMatrix_eq_invRow_submatrix (q : G → ℂ) :
     deletedConvolutionMulMatrixOnNonidentity (G := G) q =
-      (deletedConvolutionMatrixOnNonidentity (G := G) (fun x => q x⁻¹)).submatrix
+      (deletedConvolutionMatrixOnNonidentity (G := G) (fun x ↦ q x⁻¹)).submatrix
         (nonidentityInvEquiv (G := G)) id := by
   ext h k
   simp [deletedConvolutionMulMatrixOnNonidentity, deletedConvolutionMatrixOnNonidentity,
@@ -508,13 +494,12 @@ one. -/
 theorem prod_mulChar_apply_sq_eq_one
     [Fintype (MulChar G ℂ)] (h₀ : G) :
     (∏ χ : MulChar G ℂ, χ h₀) ^ 2 = 1 := by
-  classical
   set P : ℂ := ∏ χ : MulChar G ℂ, χ h₀
   have hP_inv : P = P⁻¹ := by
     calc
       P = ∏ χ : MulChar G ℂ, χ h₀ := rfl
       _ = ∏ χ : MulChar G ℂ, (χ⁻¹) h₀ := by
-        rw [← Equiv.prod_comp (Equiv.inv (MulChar G ℂ)) (fun χ => χ h₀)]
+        rw [← Equiv.prod_comp (Equiv.inv (MulChar G ℂ)) (fun χ ↦ χ h₀)]
         rfl
       _ = ∏ χ : MulChar G ℂ, (χ h₀)⁻¹ := by
         refine Finset.prod_congr rfl ?_
@@ -528,7 +513,7 @@ theorem prod_mulChar_apply_sq_eq_one
     exact (IsUnit.map χ.toMonoidHom (Group.isUnit h₀)).ne_zero
   calc
     P ^ 2 = P * P := by ring
-    _ = P * P⁻¹ := congrArg (fun z => P * z) hP_inv
+    _ = P * P⁻¹ := congrArg (fun z ↦ P * z) hP_inv
     _ = 1 := mul_inv_cancel₀ hP_ne
 
 omit [Fintype G] in
@@ -537,14 +522,13 @@ has square one. -/
 theorem prod_nontriv_mulChar_apply_sq_eq_one
     [Fintype (MulChar G ℂ)] [DecidableEq (MulChar G ℂ)] (h₀ : G) :
     (∏ χ : NontrivChar G, χ.val h₀) ^ 2 = 1 := by
-  classical
   have herase :
       (∏ χ : NontrivChar G, χ.val h₀) =
         ∏ χ ∈ (Finset.univ : Finset (MulChar G ℂ)).erase 1, χ h₀ := by
     rw [Finset.prod_subtype
-      (p := fun χ : MulChar G ℂ => χ ≠ 1)
+      (p := fun χ : MulChar G ℂ ↦ χ ≠ 1)
       (s := (Finset.univ : Finset (MulChar G ℂ)).erase 1)
-      (f := fun χ => χ h₀)]
+      (f := fun χ ↦ χ h₀)]
     intro χ
     simp [Finset.mem_erase]
   rw [herase]
@@ -555,7 +539,7 @@ theorem prod_nontriv_mulChar_apply_sq_eq_one
       (∏ χ ∈ (Finset.univ : Finset (MulChar G ℂ)).erase 1, χ h₀) =
         ∏ χ : MulChar G ℂ, χ h₀ :=
     Finset.prod_erase (s := (Finset.univ : Finset (MulChar G ℂ)))
-      (f := fun χ => χ h₀) (a := 1) htriv
+      (f := fun χ ↦ χ h₀) (a := 1) htriv
   rw [herase_full]
   exact hfull
 
@@ -565,22 +549,18 @@ element also has square one. -/
 theorem prod_nontriv_mulChar_apply_inv_sq_eq_one
     [Fintype (MulChar G ℂ)] [DecidableEq (MulChar G ℂ)] (h₀ : G) :
     (∏ χ : NontrivChar G, (χ.val h₀)⁻¹) ^ 2 = 1 := by
-  classical
-  rw [show (∏ χ : NontrivChar G, (χ.val h₀)⁻¹) =
-      (∏ χ : NontrivChar G, χ.val h₀)⁻¹ from by
-    rw [Finset.prod_inv_distrib]]
-  rw [inv_pow, prod_nontriv_mulChar_apply_sq_eq_one (G := G) h₀, inv_one]
+  rw [Finset.prod_inv_distrib, inv_pow,
+    prod_nontriv_mulChar_apply_sq_eq_one (G := G) h₀, inv_one]
 
 /-- Translating the input of `q` by `h₀` multiplies the non-inverse-character
 Fourier coefficient by `(χ h₀)⁻¹`. -/
 theorem deletedFourierCoeffMul_mulLeft
     (q : G → ℂ) (χ : MulChar G ℂ) (h₀ : G) :
-    deletedFourierCoeffMul (G := G) (fun h => q (h₀ * h)) χ =
+    deletedFourierCoeffMul (G := G) (fun h ↦ q (h₀ * h)) χ =
       (χ h₀)⁻¹ * deletedFourierCoeffMul (G := G) q χ := by
-  classical
-  unfold deletedFourierCoeffMul
+  simp only [deletedFourierCoeffMul]
   have hsum := Equiv.sum_comp (Equiv.mulLeft h₀)
-    (fun h : G => χ (h₀⁻¹ * h) * q h)
+    (fun h : G ↦ χ (h₀⁻¹ * h) * q h)
   have hleft :
       (∑ x : G, χ (h₀⁻¹ * (Equiv.mulLeft h₀) x) *
           q ((Equiv.mulLeft h₀) x)) =
@@ -595,19 +575,17 @@ theorem deletedFourierCoeffMul_mulLeft
     intro h
     rw [map_mul, map_inv]
     ring
-  rw [Finset.sum_congr rfl (fun h _ => hterm h)]
-  rw [← Finset.mul_sum]
+  rw [Finset.sum_congr rfl (fun h _ ↦ hterm h), ← Finset.mul_sum]
 
 /-- Inverting the argument changes the inverse-character coefficient into the
 non-inverse-character coefficient. -/
 theorem deletedFourierCoeff_invArg_eq_mul
     (q : G → ℂ) (χ : MulChar G ℂ) :
-    deletedFourierCoeff (G := G) (fun x => q x⁻¹) χ =
+    deletedFourierCoeff (G := G) (fun x ↦ q x⁻¹) χ =
       deletedFourierCoeffMul (G := G) q χ := by
-  classical
-  unfold deletedFourierCoeff deletedFourierCoeffMul
+  simp only [deletedFourierCoeff, deletedFourierCoeffMul]
   have hsum := Equiv.sum_comp (Equiv.inv G)
-    (fun h : G => q h * (χ h⁻¹)⁻¹)
+    (fun h : G ↦ q h * (χ h⁻¹)⁻¹)
   have hleft :
       (∑ x : G, q ((Equiv.inv G) x) * (χ ((Equiv.inv G) x)⁻¹)⁻¹) =
         ∑ x : G, q x⁻¹ * (χ x)⁻¹ := by
@@ -618,8 +596,7 @@ theorem deletedFourierCoeff_invArg_eq_mul
   rw [hsum]
   refine Finset.sum_congr rfl ?_
   intro h _
-  rw [map_inv]
-  rw [inv_inv]
+  rw [map_inv, inv_inv]
   ring
 
 /-- Squared determinant identity in the `hk` convention.  The square removes
@@ -629,14 +606,10 @@ theorem det_deletedConvolutionMulMatrixOnNonidentity_sq_eq_prod_deletedFourierCo
     (ρ : NontrivChar G ≃ Nonidentity G) (q : G → ℂ) :
     (deletedConvolutionMulMatrixOnNonidentity (G := G) q).det ^ 2 =
       (∏ χ : NontrivChar G, deletedFourierCoeffMul (G := G) q χ.val) ^ 2 := by
-  classical
-  rw [deletedConvolutionMulMatrix_eq_invRow_submatrix]
-  rw [Matrix.det_permute]
-  rw [mul_pow]
-  rw [show ((↑↑(Equiv.Perm.sign (nonidentityInvEquiv (G := G))) : ℂ)) ^ 2 = 1 from ?_]
-  · rw [one_mul]
-    rw [det_deletedConvolutionMatrixOnNonidentity_eq_prod_deletedFourierCoeff
-      (G := G) ρ (fun x => q x⁻¹)]
+  rw [deletedConvolutionMulMatrix_eq_invRow_submatrix, Matrix.det_permute, mul_pow,
+    show ((↑↑(Equiv.Perm.sign (nonidentityInvEquiv (G := G))) : ℂ)) ^ 2 = 1 from ?_]
+  · rw [one_mul, det_deletedConvolutionMatrixOnNonidentity_eq_prod_deletedFourierCoeff
+      (G := G) ρ (fun x ↦ q x⁻¹)]
     congr 1
     refine Finset.prod_congr rfl ?_
     intro χ _
@@ -657,10 +630,9 @@ theorem det_deletedConvolutionMulMatrixAtReindexed_sq_eq_charFactor_mul_prod_sq
     (deletedConvolutionMulMatrixAtReindexed (G := G) h₀ q).det ^ 2 =
       ((∏ χ : NontrivChar G, (χ.val h₀)⁻¹) *
         ∏ χ : NontrivChar G, deletedFourierCoeffMul (G := G) q χ.val) ^ 2 := by
-  classical
   rw [deletedConvolutionMulMatrixAtReindexed_eq_translated]
   rw [det_deletedConvolutionMulMatrixOnNonidentity_sq_eq_prod_deletedFourierCoeffMul_sq
-    (G := G) ρ (fun h => q (h₀ * h))]
+    (G := G) ρ (fun h ↦ q (h₀ * h))]
   congr 1
   simp_rw [deletedFourierCoeffMul_mulLeft (G := G) q]
   rw [Finset.prod_mul_distrib]
@@ -672,7 +644,6 @@ theorem det_deletedConvolutionMulMatrixAtReindexed_sq_eq_prod_deletedFourierCoef
     (ρ : NontrivChar G ≃ Nonidentity G) (h₀ : G) (q : G → ℂ) :
     (deletedConvolutionMulMatrixAtReindexed (G := G) h₀ q).det ^ 2 =
       (∏ χ : NontrivChar G, deletedFourierCoeffMul (G := G) q χ.val) ^ 2 := by
-  classical
   rw [det_deletedConvolutionMulMatrixAtReindexed_sq_eq_charFactor_mul_prod_sq
     (G := G) ρ h₀ q]
   rw [mul_pow, prod_nontriv_mulChar_apply_inv_sq_eq_one (G := G) h₀, one_mul]

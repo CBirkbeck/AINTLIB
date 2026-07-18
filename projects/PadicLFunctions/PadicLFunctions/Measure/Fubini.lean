@@ -43,16 +43,14 @@ lemma innerInt_apply [CompactSpace Y] (ν : PadicMeasure p Y) (F : C(X × Y, ℤ
 lemma innerInt_add [CompactSpace Y] (ν : PadicMeasure p Y) (F G : C(X × Y, ℤ_[p])) :
     innerInt p ν (F + G) = innerInt p ν F + innerInt p ν G :=
   ContinuousMap.ext fun x => by
-    have hcurry : (F + G).curry x = F.curry x + G.curry x := ContinuousMap.ext fun y => rfl
-    simp [hcurry]
+    simp [show (F + G).curry x = F.curry x + G.curry x from ContinuousMap.ext fun y => rfl]
 
 @[simp]
 lemma innerInt_smul [CompactSpace Y] (c : ℤ_[p]) (ν : PadicMeasure p Y)
     (F : C(X × Y, ℤ_[p])) :
     innerInt p ν (c • F) = c • innerInt p ν F :=
   ContinuousMap.ext fun x => by
-    have hcurry : (c • F).curry x = c • F.curry x := ContinuousMap.ext fun y => rfl
-    simp [hcurry]
+    simp [show (c • F).curry x = c • F.curry x from ContinuousMap.ext fun y => rfl]
 
 @[simp]
 lemma innerInt_measure_add [CompactSpace Y] (ν₁ ν₂ : PadicMeasure p Y)
@@ -78,7 +76,6 @@ theorem exists_locallyConstant_norm_sub_le' [CompactSpace X]
       rw [Set.eq_empty_of_isEmpty (_ ⁻¹' s)]; exact isOpen_empty⟩,
       fun x => (IsEmpty.false x).elim⟩
   classical
-  -- clopen cover by ball preimages
   have hcov : ∀ x : X,
       ∃ U : Set X, IsClopen U ∧ x ∈ U ∧ ∀ y ∈ U, ‖f y - f x‖ ≤ ε := by
     intro x
@@ -90,7 +87,6 @@ theorem exists_locallyConstant_norm_sub_le' [CompactSpace X]
   choose U hUclopen hUmem hUapprox using hcov
   obtain ⟨t, ht⟩ := IsCompact.elim_finite_subcover isCompact_univ U
     (fun x => (hUclopen x).isOpen) (fun x _ => Set.mem_iUnion.2 ⟨x, hUmem x⟩)
-  -- the membership-pattern map into a finite type
   set P : X → (↥t → Bool) := fun x c => decide (x ∈ U ↑c) with hPdef
   have hPlc : IsLocallyConstant P := by
     intro s
@@ -103,27 +99,20 @@ theorem exists_locallyConstant_norm_sub_le' [CompactSpace X]
     rw [hfib]
     refine isOpen_iInter_of_finite fun c => ?_
     cases hb : b c
-    · have heq : {x | decide (x ∈ U ↑c) = false} = (U ↑c)ᶜ := by
-        ext x; simp
-      rw [heq]; exact (hUclopen _).compl.isOpen
-    · have heq : {x | decide (x ∈ U ↑c) = true} = U ↑c := by
-        ext x; simp
-      rw [heq]; exact (hUclopen _).isOpen
-  -- value assignment: the value of `f` at the centre of any covering member
+    · rw [show {x | decide (x ∈ U ↑c) = false} = (U ↑c)ᶜ from by ext x; simp]
+      exact (hUclopen _).compl.isOpen
+    · rw [show {x | decide (x ∈ U ↑c) = true} = U ↑c from by ext x; simp]
+      exact (hUclopen _).isOpen
   set h : (↥t → Bool) → E := fun b =>
     if hb : ∃ c, b c = true then f ↑(hb.choose) else f hX.some with hhdef
   refine ⟨⟨h ∘ P, hPlc.comp h⟩, fun x => ?_⟩
   have hex : ∃ c : ↥t, P x c = true := by
-    obtain ⟨c₀, hmem⟩ := Set.mem_iUnion₂.1 (ht (Set.mem_univ x))
-    obtain ⟨hc₀t, hxc₀⟩ := hmem
+    obtain ⟨c₀, hc₀t, hxc₀⟩ := Set.mem_iUnion₂.1 (ht (Set.mem_univ x))
     exact ⟨⟨c₀, hc₀t⟩, by simp [hPdef, hxc₀]⟩
   change ‖f x - h (P x)‖ ≤ ε
   rw [hhdef]
   simp only [dif_pos hex]
-  have hxU : x ∈ U ↑(hex.choose) := by
-    have := hex.choose_spec
-    simpa [hPdef] using this
-  exact hUapprox _ x hxU
+  exact hUapprox _ x (by simpa [hPdef] using hex.choose_spec)
 
 /-- **Fubini for p-adic measures**: the two iterated integrals of
 `F ∈ C(X × Y, ℤ_[p])` against measures `μ` on `X` and `ν` on `Y` agree:
@@ -139,13 +128,10 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
   obtain ⟨Φ, hΦ⟩ := exists_locallyConstant_norm_sub_le' F.curry hε
   classical
   set R : Finset C(Y, ℤ_[p]) := Φ.range_finite.toFinset with hRdef
-  have hmemR : ∀ x : X, Φ x ∈ R := fun x =>
-    Φ.range_finite.mem_toFinset.2 ⟨x, rfl⟩
-  -- the common middle value
+  have hmemR : ∀ x : X, Φ x ∈ R := fun x => Φ.range_finite.mem_toFinset.2 ⟨x, rfl⟩
   set S : ℤ_[p] := ∑ g ∈ R,
     μ (LocallyConstant.charFn ℤ_[p] (Φ.isLocallyConstant.isClopen_fiber g) :
         C(X, ℤ_[p])) * ν g with hSdef
-  -- pointwise collapse: at `x` only the `g = Φ x` term survives
   have hcollapse : ∀ (x : X) (w : C(Y, ℤ_[p]) → ℤ_[p]),
       (∑ g ∈ R, (LocallyConstant.charFn ℤ_[p] (Φ.isLocallyConstant.isClopen_fiber g) :
           C(X, ℤ_[p])) x * w g) = w (Φ x) := by
@@ -165,7 +151,6 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
         zero_mul]
     · intro hx
       exact absurd (hmemR x) hx
-  -- LHS ≈ S
   have hL : dist (μ (innerInt p ν F)) S ≤ ε := by
     set mid₁ : C(X, ℤ_[p]) := ∑ g ∈ R,
       ν g • (LocallyConstant.charFn ℤ_[p] (Φ.isLocallyConstant.isClopen_fiber g) :
@@ -194,7 +179,6 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
       _ = ‖μ (innerInt p ν F - mid₁)‖ := by rw [map_sub]
       _ ≤ ‖innerInt p ν F - mid₁‖ := norm_apply_le p μ _
       _ ≤ ε := hbound
-  -- RHS ≈ S
   have hR : dist (ν (innerInt p μ (F.comp ⟨Prod.swap, continuous_swap⟩))) S ≤ ε := by
     set mid₂ : C(Y, ℤ_[p]) := ∑ g ∈ R,
       μ (LocallyConstant.charFn ℤ_[p] (Φ.isLocallyConstant.isClopen_fiber g) :
@@ -207,13 +191,8 @@ theorem integral_swap [CompactSpace X] [CompactSpace Y]
         ≤ ε := by
       rw [ContinuousMap.norm_le _ hε.le]
       intro y
-      -- the column `x ↦ Φ x y`, as a continuous map
       set col : C(X, ℤ_[p]) :=
-        ⟨fun x => Φ x y, by
-          have : (fun x => Φ x y)
-              = (fun g : C(Y, ℤ_[p]) => g y) ∘ ⇑Φ := rfl
-          rw [this]
-          exact (continuous_eval_const y).comp Φ.continuous⟩ with hcol
+        ⟨fun x => Φ x y, (continuous_eval_const y).comp Φ.continuous⟩ with hcol
       have hmidy : mid₂ y = μ col := by
         rw [hmid]
         have hcolsum : col = ∑ g ∈ R,

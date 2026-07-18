@@ -35,9 +35,8 @@ universe u
 
 namespace ArtinRees
 
-variable {R : Type u} [CommRing R] [IsNoetherianRing R]
+variable {R : Type u} [CommRing R]
 
-omit [IsNoetherianRing R] in
 /-- Elements of `I^m • ⊤` in a Pi type have all components in `I^m`. -/
 theorem pi_smul_top_component {ι : Type*} {I : Ideal R} {m : ℕ}
     {v : ι → R} (hv : v ∈ (I ^ m • ⊤ : Submodule R (ι → R))) (i : ι) :
@@ -50,7 +49,6 @@ theorem pi_smul_top_component {ι : Type*} {I : Ideal R} {m : ℕ}
   · change x i + y i ∈ I ^ m
     exact (I ^ m).add_mem hx hy
 
-omit [IsNoetherianRing R] in
 /-- The surjection map from `Rᵏ` to a submodule `K` via generators `s`. -/
 noncomputable def surjMap {l k : ℕ} {K : Submodule R (Fin l → R)}
     (s : Fin k → K) : (Fin k → R) →ₗ[R] K where
@@ -58,7 +56,6 @@ noncomputable def surjMap {l k : ℕ} {K : Submodule R (Fin l → R)}
   map_add' a b := by simp [add_smul, sum_add_distrib]
   map_smul' r a := by simp [smul_smul, smul_sum]
 
-omit [IsNoetherianRing R] in
 /-- The surjection map is surjective when the generators span the whole submodule. -/
 theorem surjMap_surjective {l k : ℕ} {K : Submodule R (Fin l → R)}
     {s : Fin k → K} (hs : Submodule.span R (Set.range s) = ⊤) :
@@ -71,7 +68,6 @@ theorem surjMap_surjective {l k : ℕ} {K : Submodule R (Fin l → R)}
   rw [← hcf, Finsupp.sum, ← sum_subset (subset_univ cf.support)]
   intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul]
 
-omit [IsNoetherianRing R] in
 /-- The surjection map sends `I^m • ⊤` onto `I^m • ⊤` in the target. -/
 theorem surjMap_image_smul {l k : ℕ} {K : Submodule R (Fin l → R)}
     {s : Fin k → K} (hs : Submodule.span R (Set.range s) = ⊤)

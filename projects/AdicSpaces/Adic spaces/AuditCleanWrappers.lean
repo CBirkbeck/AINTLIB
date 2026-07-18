@@ -61,18 +61,6 @@ universe u
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
-/-! ## Wedhorn Cor 8.32 — option-(1) form with explicit noeth-A₀
-
-**Source** (Wedhorn Cor 8.32, p. 82):
-> "Let `A` be a strongly noetherian Tate affinoid ring, `X = Spa A`, and
-> `(U_i)_{1 ≤ i ≤ n}` a finite covering of `X` be rational subsets. Then
-> the homomorphism `O_X(X) → ∏_{i=1}^n O_X(U_i)`, `f ↦ (f|_{U_i})_{1 ≤ i ≤ n}`
-> is faithfully flat (and in particular injective)."
-
-Discharge: delegates to `productRestriction_faithfullyFlat_tate_of_hSpa_points`
-+ explicit noeth-A₀ supplied + audit-pass-2 Spa-points.
--/
-
 /-- **Option-(1) hypothesis bundle**: per pass-(iii) decision (2026-05-17), the
 noeth-A₀ requirement is **explicit** rather than derived. Wedhorn never asserts
 "strongly noeth Tate ⇒ noeth A₀" (see `decomposition.md`), so the audit-clean
@@ -82,7 +70,13 @@ parameters. The hypothesis bundle is now:
 [NonarchimedeanRing] + (P) + [IsNoetherianRing P.A₀]`.
 
 This is one step away from Wedhorn-exact but is the lowest-cost recovery from
-the L5.2.2 scope finding. -/
+the L5.2.2 scope finding.
+
+**Source** (Wedhorn Cor 8.32, p. 82):
+> "Let `A` be a strongly noetherian Tate affinoid ring, `X = Spa A`, and
+> `(U_i)_{1 ≤ i ≤ n}` a finite covering of `X` be rational subsets. Then
+> the homomorphism `O_X(X) → ∏_{i=1}^n O_X(U_i)`, `f ↦ (f|_{U_i})_{1 ≤ i ≤ n}`
+> is faithfully flat (and in particular injective)." -/
 theorem cor_8_32_clean_proof
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [CompatiblePlusSubring A]
@@ -94,7 +88,7 @@ theorem cor_8_32_clean_proof
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
     Module.FaithfullyFlat (presheafValue C.base)
       (∀ D : { D // D ∈ C.covers }, presheafValue D.1) := by
-  haveI : Finite { D : RationalLocData A // D ∈ C.covers } := Finite.of_fintype _
+  have : Finite { D : RationalLocData A // D ∈ C.covers } := Finite.of_fintype _
   exact productRestriction_faithfullyFlat_tate_of_hSpa_points P C
     (fun p hp hps =>
       exists_hSpa_points_global_of_stronglyNoetherianTate_proof

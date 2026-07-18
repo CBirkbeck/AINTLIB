@@ -6,7 +6,7 @@ public import BernoulliRegular.Reflection.SingularKummer.LocalizationKernel
 /-!
 # Singular Kummer: integral normalization
 
-This file records the REF-14 normalization step.  Multiplying a singular pair
+This file records the normalization step.  Multiplying a singular pair
 by a principal pair changes its generator by a global `p`-th power and leaves
 its singular-group class unchanged.  Choosing the principal factor to clear
 denominators makes the fractional ideal an integral ideal.
@@ -24,8 +24,6 @@ namespace Reflection
 namespace SingularKummer
 
 namespace SingularPair
-
-set_option linter.unusedSectionVars false
 
 variable {R K : Type*} [CommRing R] [IsDedekindDomain R]
 variable [Field K] [Algebra R K] [IsFractionRing R K]
@@ -94,6 +92,37 @@ theorem exists_integral_normalization
   · simpa [ht_ideal] using
       (principal_eq_ideal_pow (R := R) (K := K) (s := t))
 
+/-- Absorbing an ideal-avoidance representative into a singular pair: if
+`ideal t₀ = mk0 K J₀` and `spanSingleton R⁰ delta · J₀ = J` (the fractional
+identity witnessing `[J₀] = [J]` in the class group), then multiplying `t₀` by
+the principal pair of `delta` moves its ideal exactly onto `mk0 K J`. -/
+private lemma ideal_mul_principalPair_eq_mk0 (t₀ : SingularPair R K p)
+    {J₀ J : (Ideal R)⁰} {delta : K} (hdelta_ne : delta ≠ 0)
+    (ht₀_ideal : ideal t₀ = FractionalIdeal.mk0 K J₀)
+    (hdelta : FractionalIdeal.spanSingleton R⁰ delta * (J₀ : FractionalIdeal R⁰ K) =
+      (J : FractionalIdeal R⁰ K)) :
+    ideal (t₀ * principalPair (R := R) (K := K) p (Units.mk0 delta hdelta_ne)) =
+      FractionalIdeal.mk0 K J := by
+  calc
+    ideal (t₀ * principalPair (R := R) (K := K) p (Units.mk0 delta hdelta_ne)) =
+        ideal t₀ * toPrincipalIdeal R K (Units.mk0 delta hdelta_ne) := by
+      simp [principalPair, ideal]
+    _ = FractionalIdeal.mk0 K J := by
+      apply Units.ext
+      rw [ht₀_ideal]
+      change
+        (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
+            ((toPrincipalIdeal R K (Units.mk0 delta hdelta_ne) : (FractionalIdeal R⁰ K)ˣ) :
+              FractionalIdeal R⁰ K) =
+          (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
+      rw [coe_toPrincipalIdeal]
+      change
+        (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
+            FractionalIdeal.spanSingleton R⁰ delta =
+          (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
+      rw [mul_comm]
+      simpa [FractionalIdeal.coe_mk0] using hdelta
+
 /-- Integral normalization with a prescribed coprime condition.
 
 After first clearing denominators, ideal avoidance replaces the integral ideal
@@ -119,25 +148,8 @@ theorem exists_integral_normalization_coprime
       (R := R) (K := K) (I := J₀) (J := J)).mp hJ_class.symm
   let deltaUnit : Kˣ := Units.mk0 delta hdelta_ne
   let t : SingularPair R K p := t₀ * principalPair (R := R) (K := K) p deltaUnit
-  have ht_ideal : ideal t = FractionalIdeal.mk0 K J := by
-    calc
-      ideal t = ideal t₀ * toPrincipalIdeal R K deltaUnit := by
-        simp [t, principalPair, ideal]
-      _ = FractionalIdeal.mk0 K J := by
-        apply Units.ext
-        rw [ht₀_ideal]
-        change
-          (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
-              ((toPrincipalIdeal R K deltaUnit : (FractionalIdeal R⁰ K)ˣ) :
-                FractionalIdeal R⁰ K) =
-            (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
-        rw [coe_toPrincipalIdeal]
-        change
-          (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
-              FractionalIdeal.spanSingleton R⁰ delta =
-            (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
-        rw [mul_comm]
-        simpa [FractionalIdeal.coe_mk0] using hdelta
+  have ht_ideal : ideal t = FractionalIdeal.mk0 K J :=
+    ideal_mul_principalPair_eq_mk0 t₀ hdelta_ne ht₀_ideal hdelta
   refine ⟨t, gamma₀ * deltaUnit, J, ht_ideal, hJ_coprime, ?_, ?_, ?_⟩
   · calc
       generator t = generator t₀ * deltaUnit ^ p := by
@@ -177,7 +189,7 @@ theorem exists_integral_generator_of_principal_eq_mk0_pow
   have hspan :
       FractionalIdeal.spanSingleton R⁰ (g : K) =
         (((J : Ideal R) ^ p : Ideal R) : FractionalIdeal R⁰ K) := by
-    have hval := congrArg (fun I : (FractionalIdeal R⁰ K)ˣ =>
+    have hval := congrArg (fun I : (FractionalIdeal R⁰ K)ˣ ↦
       (I : FractionalIdeal R⁰ K)) hprincipal
     simpa [FractionalIdeal.coe_mk0, FractionalIdeal.coeIdeal_pow] using hval
   have hJpow_le :
@@ -235,7 +247,7 @@ theorem fractionalIdealUnit_pow_left_injective
     I = J :=
   Units.ext <| fractionalIdeal_pow_left_injective_of_ne_zero (K := K) hn
     (Units.ne_zero I) (Units.ne_zero J)
-    (congrArg (fun U : (FractionalIdeal R⁰ K)ˣ => (U : FractionalIdeal R⁰ K)) hpow)
+    (congrArg (fun U : (FractionalIdeal R⁰ K)ˣ ↦ (U : FractionalIdeal R⁰ K)) hpow)
 
 /-- If the generator of a singular pair is a global `p`-th power, then the
 singular-group class of the pair is trivial. -/
@@ -288,7 +300,7 @@ section Cyclotomic
 variable (K : Type*) [Field K] [NumberField K]
 variable (p : ℕ) [Fact p.Prime] [IsCyclotomicExtension {p} ℚ K]
 
-/-- REF-14: the REF-13 singular pair can be replaced by a representative whose
+/-- The singular pair can be replaced by a representative whose
 ideal is an integral ideal, without changing the singular class, localization
 kernel condition, or `i`-th character eigenspace relation. -/
 theorem exists_integral_normalized_singularPair_in_concrete_completed_localization_kernel
@@ -352,7 +364,7 @@ theorem exists_integral_normalized_singularPair_in_concrete_completed_localizati
   · intro b
     simpa [hclass] using hs_eigen b
 
-/-- REF-14 with ideal avoidance at a chosen maximal ideal.
+/-- Normalization with ideal avoidance at a chosen maximal ideal.
 
 This is the same completed-localization-kernel representative as
 `exists_integral_normalized_singularPair_in_concrete_completed_localization_kernel`,

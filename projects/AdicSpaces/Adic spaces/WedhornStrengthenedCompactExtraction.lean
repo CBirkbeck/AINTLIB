@@ -109,10 +109,8 @@ theorem mk_S_D_of_C1Strong_and_compactness
   have hC1_K : ∀ w : K, ∃ f : A,
       (w.1.1 : Spv A) ∈ rationalOpen (insert f C.base.T) C.base.s ∧
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s ∧
-      ¬ (w.1.1 : Spv A).vle f 0 := by
-    intro w
-    have hmem : (w.1.1 : Spv A) ∈ rationalOpen D.T D.s := w.2
-    exact hC1_strong w.1.1 hmem
+      ¬ (w.1.1 : Spv A).vle f 0 :=
+    fun w => hC1_strong w.1.1 w.2
   -- Choose a witness function g : K → A.
   let g : K → A := fun w => Classical.choose (hC1_K w)
   have hg_self : ∀ w : K, (w.1.1 : Spv A) ∈
@@ -131,31 +129,23 @@ theorem mk_S_D_of_C1Strong_and_compactness
     fun _ => (rationalOpen_isOpen _ _).inter (rationalOpen_isOpen _ _)
   have hK_cover : K ⊆ ⋃ w, V w := by
     intro x hx
-    refine Set.mem_iUnion.mpr ⟨⟨x, hx⟩, ?_, ?_⟩
-    · exact hg_self ⟨x, hx⟩
-    · -- x.1 ∈ rationalOpen ∅ (g ⟨x, hx⟩)
-      refine ⟨x.2, ?_, hg_nonzero ⟨x, hx⟩⟩
-      intro t ht
-      exact absurd ht (Finset.notMem_empty t)
+    refine Set.mem_iUnion.mpr ⟨⟨x, hx⟩, hg_self ⟨x, hx⟩, x.2, ?_, hg_nonzero ⟨x, hx⟩⟩
+    -- x.1 ∈ rationalOpen ∅ (g ⟨x, hx⟩)
+    exact fun t ht => absurd ht (Finset.notMem_empty t)
   -- Finite subcover via mathlib's `IsCompact.elim_finite_subcover`.
   obtain ⟨T₀, hT₀_cover⟩ := hK_compact.elim_finite_subcover V hV_open hK_cover
   refine ⟨T₀.image g, ?_, ?_⟩
   · -- Containment: each `f ∈ T₀.image g` comes from some `w ∈ T₀` via `hg_sub`.
     intro f hf
-    obtain ⟨w, _hw_T₀, hg_eq⟩ := Finset.mem_image.mp hf
-    rw [← hg_eq]
+    obtain ⟨w, -, rfl⟩ := Finset.mem_image.mp hf
     exact hg_sub w
   · -- Strengthened coverage: lift `v` to a point of `K`, find `w₀ ∈ T₀` with
     -- `x ∈ V w₀`, extract `g w₀ ∈ S` together with the plus-piece membership
     -- (first component) and the non-zero clause (third component of the
     -- `rationalOpen ∅ (g w₀)` membership).
     intro v hv
-    have hv_spa : v ∈ Spa A A⁺ := rationalOpen_subset_spa hv
-    let x : ↥(Spa A A⁺) := ⟨v, hv_spa⟩
-    have hx_K : x ∈ K := hv
-    have hmem : x ∈ ⋃ w ∈ T₀, V w := hT₀_cover hx_K
-    rw [Set.mem_iUnion₂] at hmem
-    obtain ⟨w₀, hw₀_T₀, hx_in⟩ := hmem
+    obtain ⟨w₀, hw₀_T₀, hx_in⟩ := Set.mem_iUnion₂.mp
+      (hT₀_cover (a := ⟨v, rationalOpen_subset_spa hv⟩) hv)
     refine ⟨g w₀, Finset.mem_image.mpr ⟨w₀, hw₀_T₀, rfl⟩, hx_in.1, ?_⟩
     -- `hx_in.2 : x ∈ Subtype.val ⁻¹' rationalOpen ∅ (g w₀)`.
     -- Decomposing: x.1 ∈ Spa ∧ (∀ t ∈ ∅, ...) ∧ ¬ x.1.vle (g w₀) 0.

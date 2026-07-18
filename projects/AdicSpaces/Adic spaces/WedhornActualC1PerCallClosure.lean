@@ -131,11 +131,7 @@ noncomputable def WedhornC1Lemma833PerCallAssemblyData_of_t_indexed
         ∃ t ∈ D.T,
           w ∈ rationalOpen ({(1 : A)} : Finset A) t) :
     WedhornC1Lemma833PerCallAssemblyData C D v := by
-  -- σ-cancellation helper: σ⁻¹ * (σ * t) = t for any t : A.
-  have h_cancel : ∀ t : A, ((σ⁻¹ : Aˣ) : A) * ((σ : A) * t) = t := by
-    intro t
-    rw [← mul_assoc]
-    simp
+  -- σ-cancellation `σ⁻¹ * (σ * t) = t` is `Units.inv_mul_cancel_left σ`.
   -- Translate per-piece data from t-indexed to τ-indexed.
   have h_per_piece_τ :
       ∀ τ ∈ D.T.image (fun t => (σ : A) * t),
@@ -145,7 +141,7 @@ noncomputable def WedhornC1Lemma833PerCallAssemblyData_of_t_indexed
             ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D.s := by
     intro τ hτ
     obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp hτ
-    rw [h_cancel]
+    rw [Units.inv_mul_cancel_left]
     exact h_per_piece_t t ht
   -- Translate cover hypothesis from t-indexed to τ-indexed.
   have h_cover_τ :
@@ -156,7 +152,7 @@ noncomputable def WedhornC1Lemma833PerCallAssemblyData_of_t_indexed
     intro w hw
     obtain ⟨t, ht, hw_in⟩ := h_cover_t w hw
     refine ⟨(σ : A) * t, Finset.mem_image_of_mem _ ht, ?_⟩
-    rw [h_cancel]
+    rw [Units.inv_mul_cancel_left]
     exact hw_in
   -- Assemble: σ-shift discharges h_lemma833 unconditionally via T062.
   exact

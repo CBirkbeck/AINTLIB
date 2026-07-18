@@ -169,9 +169,8 @@ private lemma heckeSlashExt_gen_Gamma0_zsmul (k : ℤ) (n : ℤ) (T : 𝕋 (Gamm
     (h := fun D c ↦ c • heckeSlash_gen (Gamma0_pair N) k D f) fun _ ↦ zero_smul ..
   rw [show ((n • T : 𝕋 (Gamma0_pair N) ℤ).sum
       fun D c ↦ c • heckeSlash_gen (Gamma0_pair N) k D f) =
-    T.sum (fun D a ↦ (n * a) • heckeSlash_gen (Gamma0_pair N) k D f) from hsmi,
-    Finsupp.smul_sum]
-  exact Finsupp.sum_congr fun D _ ↦ mul_smul ..
+    T.sum (fun D a ↦ (n * a) • heckeSlash_gen (Gamma0_pair N) k D f) from hsmi]
+  exact (Finsupp.sum_congr fun D _ ↦ mul_smul ..).trans Finsupp.smul_sum.symm
 
 private lemma heckeSum_Gamma0_mul_T_single (k : ℤ) (D₁ D₂ : HeckeCoset (Gamma0_pair N)) (a b : ℤ) :
     heckeSum_Gamma0 N k (T_single (Gamma0_pair N) ℤ D₁ a * T_single (Gamma0_pair N) ℤ D₂ b) =

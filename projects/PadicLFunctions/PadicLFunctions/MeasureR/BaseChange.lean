@@ -47,11 +47,8 @@ variable {p K}
 lemma mahlerTransform_baseChange (μ : PadicMeasure p ℤ_[p]) :
     mahlerTransform p K (baseChange p K μ)
       = PowerSeries.map (algebraMap ℤ_[p] (integerRing K))
-          (PadicMeasure.mahlerTransform p μ) := by
-  have h := (mahlerRingEquiv p K).apply_symm_apply
-    (PowerSeries.map (algebraMap ℤ_[p] (integerRing K))
-      (PadicMeasure.mahlerTransform p μ))
-  exact h
+          (PadicMeasure.mahlerTransform p μ) :=
+  (mahlerRingEquiv p K).apply_symm_apply _
 
 /-- `baseChange` sends Dirac measures to Dirac measures. -/
 @[simp]
@@ -86,21 +83,18 @@ theorem baseChange_algCM (μ : PadicMeasure p ℤ_[p]) (f : C(ℤ_[p], ℤ_[p]))
   rw [apply_eq_tsum (baseChange p K μ) (algCM K f),
     PadicMeasure.apply_eq_tsum p μ f]
   have hΔ : ∀ n, Δ_[1]^[n] (⇑(algCM K f)) 0
-      = algebraMap ℤ_[p] (integerRing K) (Δ_[1]^[n] (⇑f) 0) := by
-    intro n
+      = algebraMap ℤ_[p] (integerRing K) (Δ_[1]^[n] (⇑f) 0) := fun n => by
     rw [fwdDiff_iter_eq_sum_shift, fwdDiff_iter_eq_sum_shift, map_sum]
     refine Finset.sum_congr rfl fun i _ => ?_
-    simp []
+    simp
   have hcoeff : ∀ n, baseChange p K μ (mahlerCM p K n)
-      = algebraMap ℤ_[p] (integerRing K) (μ (mahler n)) := by
-    intro n
+      = algebraMap ℤ_[p] (integerRing K) (μ (mahler n)) := fun n => by
     rw [← coeff_mahlerTransform, mahlerTransform_baseChange, PowerSeries.coeff_map,
       PadicMeasure.coeff_mahlerTransform]
   have hsum : Summable fun n =>
       Δ_[1]^[n] (⇑f) 0 * PadicMeasure.mahlerCoeff p μ n := by
-    have h := (PadicInt.hasSum_mahler f).map μ.toAddMonoidHom (PadicMeasure.continuous p μ)
-    have h2 := h.summable
-    refine h2.congr fun n => ?_
+    refine (((PadicInt.hasSum_mahler f).map μ.toAddMonoidHom
+      (PadicMeasure.continuous p μ)).summable).congr fun n => ?_
     simp only [Function.comp_apply, LinearMap.toAddMonoidHom_coe]
     rw [show (PadicInt.mahlerTerm (Δ_[1]^[n] (⇑f) 0) n : C(ℤ_[p], ℤ_[p]))
         = (Δ_[1]^[n] (⇑f) 0) • mahler n from ContinuousMap.ext fun x => by
@@ -131,10 +125,8 @@ lemma algCM_charFn {U : Set ℤ_[p]} (hU : IsClopen U) :
   refine ContinuousMap.ext fun x => ?_
   rw [algCM_apply, charFnCM_apply]
   change algebraMap ℤ_[p] (integerRing K) (U.indicator 1 x) = U.indicator 1 x
-  by_cases hx : x ∈ U
-  · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx, Pi.one_apply, Pi.one_apply,
-      map_one]
-  · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx, map_zero]
+  by_cases hx : x ∈ U <;>
+    simp [Set.indicator_of_mem, Set.indicator_of_notMem, hx]
 
 omit [NormedAlgebra ℚ_[p] K] [CompleteSpace K] in
 /-- A locally constant `R`-valued function is an `R`-linear combination of

@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
-import BernoulliRegular.LValueAtOne.Defs
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
+public import BernoulliRegular.LValueAtOne.Defs
 
 /-!
 # LV-SIN-D: Composition into `SinnottAnalyticIdentity`
@@ -50,7 +52,6 @@ def KummerDirichletDeterminantSum (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Prop
         (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three) =
       |factor| * ∏ χ ∈ charSet, (DirichletLogSum p χ).re
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Composition step**: combining `KummerDirichletDeterminantSum`
 (LV-SIN-B+C) with the analytic CNF for K⁺ (`hPlus_formula_of_evenLValues`)
 gives `SinnottAnalyticIdentity`. The composition is the substantive
@@ -80,10 +81,9 @@ theorem dirichletCharacter_inv_matrix_eigenvalue_evenLValueLogSum
         ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) (a * (↑k : ZMod p))‖ : ℝ) -
           (Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ) =
       (χ (↑k : ZMod p) - 1) * BernoulliRegular.evenLValueLogSum p χ := by
-  set g : ZMod p → ℂ := fun a =>
+  set g : ZMod p → ℂ := fun a ↦
     ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ)
   have h_abs := dirichletCharacter_sum_matrix_eigenvalue χ⁻¹ k g
-  -- LHS matches via combining the subtraction inside the complex cast.
   have h_lhs_eq : ∀ a : ZMod p,
       χ⁻¹ a *
         ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) (a * (↑k : ZMod p))‖ : ℝ) -
@@ -92,18 +92,11 @@ theorem dirichletCharacter_inv_matrix_eigenvalue_evenLValueLogSum
     intro a
     push_cast [g]
     ring
-  rw [Finset.sum_congr rfl (fun a _ => h_lhs_eq a), h_abs]
-  -- Now goal: (χ⁻¹(↑k⁻¹) - 1) * ∑ a, χ⁻¹ a * g a = (χ(↑k) - 1) * evenLValueLogSum p χ.
-  -- Simplify both factors.
+  rw [Finset.sum_congr rfl (fun a _ ↦ h_lhs_eq a), h_abs]
   have h_inv : χ⁻¹ (↑(k⁻¹ : (ZMod p)ˣ) : ZMod p) = χ ((↑k : ZMod p)) := by
-    rw [MulChar.inv_apply]
-    -- Goal: χ (Ring.inverse (↑(k⁻¹) : ZMod p)) = χ (↑k : ZMod p)
-    congr 1
-    rw [Ring.inverse_unit (k⁻¹)]
-    -- Now `↑(k⁻¹)⁻¹ = ↑k` by `inv_inv k`; congr unifies.
+    rw [MulChar.inv_apply, Ring.inverse_unit (k⁻¹)]
     simp [inv_inv]
   rw [h_inv]
-  -- ∑ a, χ⁻¹ a · g a = evenLValueLogSum p χ by definition.
   rfl
 
 /-- **Second-kind orthogonality** for Dirichlet characters: for χ, ψ
@@ -121,14 +114,8 @@ the sum vanishes; when χ = ψ the sum is the cardinality of `(ZMod p)ˣ`
 theorem dirichletCharacter_orthogonality_ne
     (χ ψ : DirichletCharacter ℂ p) (h : χ ≠ ψ) :
     ∑ a : ZMod p, χ a * ψ⁻¹ a = 0 := by
-  have h_prod_ne : (χ * ψ⁻¹) ≠ 1 := by
-    intro h_eq
-    apply h
-    have : χ * ψ⁻¹ * ψ = 1 * ψ := by rw [h_eq]
-    rw [mul_assoc, inv_mul_cancel, mul_one, one_mul] at this
-    exact this
-  have := MulChar.sum_eq_zero_of_ne_one h_prod_ne
-  simpa [MulChar.coeToFun_mul] using this
+  have h_prod_ne : (χ * ψ⁻¹) ≠ 1 := mul_inv_eq_one.not.mpr h
+  simpa [MulChar.coeToFun_mul] using MulChar.sum_eq_zero_of_ne_one h_prod_ne
 
 /-- **Self-orthogonality** for Dirichlet characters: for any χ,
 
@@ -138,11 +125,7 @@ Direct from `MulChar.sum_one_eq_card_units` applied to `χ · χ⁻¹ = 1`. -/
 theorem dirichletCharacter_orthogonality_self
     (χ : DirichletCharacter ℂ p) :
     ∑ a : ZMod p, χ a * χ⁻¹ a = (Fintype.card (ZMod p)ˣ : ℂ) := by
-  have h_one : ∀ a : ZMod p, χ a * χ⁻¹ a = (1 : DirichletCharacter ℂ p) a := by
-    intro a
-    rw [← MulChar.mul_apply, mul_inv_cancel]
-  classical
-  rw [Finset.sum_congr rfl (fun a _ => h_one a)]
+  simp_rw [← MulChar.mul_apply, mul_inv_cancel]
   exact_mod_cast MulChar.sum_one_eq_card_units (R := ZMod p) (R' := ℂ)
 
 /-- **Matrix χ⁻¹-eigenvalue in `DirichletLogSum` form**: composing

@@ -85,11 +85,12 @@ Five sub-lemmas (mirror Sharifi's structure):
 
 /-- Sharifi 7.2.2 Step 2 sub-lemma (i) — cyclic subgroup trivial meet
 (p. 144). Source quote: "if `|G|` divides the order of `τ`, then
-`⟨(σ,τ)⟩ ∩ (G × {1}) = 1`". This is the only place where the
-`|G| | ord(τ)` hypothesis is used in Step 2. -/
+`⟨(σ,τ)⟩ ∩ (G × {1}) = 1`". Stated in generalised form: no finiteness on
+`G`/`H`, and the hypothesis is the weaker `orderOf σ ∣ orderOf τ` (the project's
+`|G| ∣ ord τ` Step-2 usage recovers it via `orderOf σ ∣ Nat.card G`). -/
 theorem cyclic_subgroup_meets_G_times_one_trivially
-    (G H : Type*) [Group G] [Group H] [Finite G] [Finite H] (σ : G) (τ : H)
-    (_hn : Nat.card G ∣ orderOf τ) :
+    (G H : Type*) [Group G] [Group H] (σ : G) (τ : H)
+    (hn : orderOf σ ∣ orderOf τ) :
     (Subgroup.zpowers (σ, τ)) ⊓
         ((⊤ : Subgroup G).prod (⊥ : Subgroup H)) = ⊥ := by
   rw [eq_bot_iff]
@@ -98,7 +99,7 @@ theorem cyclic_subgroup_meets_G_times_one_trivially
   obtain ⟨⟨k, hk⟩, _, (hh : h = 1)⟩ := hmem
   have h2 : τ ^ k = 1 := by simpa [hh] using congrArg Prod.snd hk
   have hg2 : σ ^ k = 1 := orderOf_dvd_iff_zpow_eq_one.mp
-    (((orderOf_dvd_natCard σ).trans _hn).natCast.trans (orderOf_dvd_iff_zpow_eq_one.mpr h2))
+    (hn.natCast.trans (orderOf_dvd_iff_zpow_eq_one.mpr h2))
   rw [Subgroup.mem_bot, Prod.mk_eq_one]
   exact ⟨by simpa [hg2] using (congrArg Prod.fst hk).symm, hh⟩
 
@@ -242,7 +243,7 @@ private theorem prime_dvd_natAbs_discr_cyclotomic_dvd
   have hspanbot : Ideal.span {(p : ℤ)} ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]; exact hpprime.ne_zero
   have hPbot : P ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hspanbot P
-  rw [Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := ℤ) (S := 𝓞 E) hPbot, hlo.over.symm]
+  rw [← Ideal.ramificationIdx_eq_one_iff]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p E P hpm
 
 /-- **C2a — cyclotomic degree over the base** (the deep ramification/Minkowski leaf). Source
@@ -636,16 +637,17 @@ private theorem unramifiedIn_tower_descend
   have h𝔭under : Ideal.under (𝓞 K) 𝔮 = 𝔭 := h𝔮lo.over.symm
   haveI h𝔓lo𝔭 : 𝔓.LiesOver 𝔭 := ⟨by rw [← h𝔭under, ← h𝔮under, Ideal.under_under]⟩
   have hunderP : Ideal.under (𝓞 K) 𝔓 = 𝔭 := h𝔓lo𝔭.over.symm
-  have hP1 : (Ideal.under (𝓞 K) 𝔓).ramificationIdx 𝔓 = 1 :=
-    (Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := 𝓞 K) (S := 𝓞 M) h𝔓bot).mp
-      (hunr.2 𝔓 h𝔓max h𝔓lo𝔭)
+  have hP1 : (Ideal.under (𝓞 K) 𝔓).ramificationIdx' 𝔓 = 1 := by
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx _ 𝔓 (hunderP ▸ hunr.1)]
+    exact Ideal.ramificationIdx_eq_one_iff.mpr (hunr.2 𝔓 h𝔓max h𝔓lo𝔭)
   rw [hunderP] at hP1
   have htower := Ideal.ramificationIdx_algebra_tower (R := 𝓞 K) (S := 𝓞 L) (T := 𝓞 M)
     (p := 𝔭) (P := 𝔮) (Q := 𝔓) (Ideal.map_ne_bot_of_ne_bot h𝔮bot)
     (Ideal.map_ne_bot_of_ne_bot hunr.1) (by rw [Ideal.map_le_iff_le_comap, h𝔓comap])
   rw [hP1] at htower
-  have he𝔮 : 𝔭.ramificationIdx 𝔮 = 1 := Nat.eq_one_of_mul_eq_one_right htower.symm
-  rw [Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := 𝓞 K) (S := 𝓞 L) h𝔮bot, h𝔭under]
+  have he𝔮 : 𝔭.ramificationIdx' 𝔮 = 1 := Nat.eq_one_of_mul_eq_one_right htower.symm
+  rw [← Ideal.ramificationIdx_eq_one_iff,
+    ← Ideal.ramificationIdx'_eq_ramificationIdx 𝔭 𝔮 hunr.1]
   exact he𝔮
 
 /-- **An automorphism fixing a primitive root has trivial cyclotomic character.** If
@@ -1499,15 +1501,15 @@ order, so without it the statement is false (one `gᵢ` could dip to `-∞` whil
 keeping a spurious `liminf` and the sum still converging). At the only call site
 (`chebotarev_abelian`) each `gᵢ` is a ratio of nonnegative Dirichlet sums, hence
 `0 ≤ gᵢ`, so `hbelow` is immediate. -/
-theorem tendsto_inv_card_of_liminf_ge_of_sum_tendsto_one {ι : Type*} [Fintype ι] (g : ι → ℝ → ℝ)
-    (hlo : ∀ i, (Fintype.card ι : ℝ)⁻¹ ≤ Filter.liminf (g i) (𝓝[>] (1 : ℝ)))
-    (hbelow : ∀ i, Filter.IsBoundedUnder (· ≥ ·) (𝓝[>] (1 : ℝ)) (g i))
-    (hsum : Filter.Tendsto (fun s ↦ ∑ i, g i s) (𝓝[>] (1 : ℝ)) (𝓝 1)) (i₀ : ι) :
-    Filter.Tendsto (g i₀) (𝓝[>] (1 : ℝ)) (𝓝 (Fintype.card ι : ℝ)⁻¹) := by
+theorem tendsto_inv_card_of_liminf_ge_of_sum_tendsto_one {ι : Type*} [Fintype ι]
+    {γ : Type*} {l : Filter γ} [l.NeBot] (g : ι → γ → ℝ)
+    (hlo : ∀ i, (Fintype.card ι : ℝ)⁻¹ ≤ Filter.liminf (g i) l)
+    (hbelow : ∀ i, Filter.IsBoundedUnder (· ≥ ·) l (g i))
+    (hsum : Filter.Tendsto (fun s ↦ ∑ i, g i s) l (𝓝 (1 : ℝ))) (i₀ : ι) :
+    Filter.Tendsto (g i₀) l (𝓝 (Fintype.card ι : ℝ)⁻¹) := by
   classical
-  set l : Filter ℝ := 𝓝[>] (1 : ℝ) with hl
   set N : ℕ := Fintype.card ι with hN
-  set F : ℝ → ℝ := fun s ↦ ∑ i, g i s with hF
+  set F : γ → ℝ := fun s ↦ ∑ i, g i s with hF
   have hFle : l.IsBoundedUnder (· ≤ ·) F := hsum.isBoundedUnder_le
   have hFlimsup : limsup F l = 1 := hsum.limsup_eq
   have hgle : ∀ i, l.IsBoundedUnder (· ≤ ·) (g i) :=

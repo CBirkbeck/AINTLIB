@@ -27,9 +27,9 @@ Via Shimura Prop 3.8 this yields commutativity of `𝕋 (Γ₀(N)) ℤ`.
 * Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §3.3
 -/
 
-open Matrix Subgroup.Commensurable Pointwise Matrix.SpecialLinearGroup
+open Matrix Matrix.SpecialLinearGroup
 
-open scoped Pointwise MatrixGroups
+open scoped Pointwise
 
 namespace HeckeRing.GLn
 
@@ -53,7 +53,6 @@ private noncomputable def Gamma0_AL_hom (N : ℕ) [NeZero N] :
     simp only [MulOpposite.unop_op, MulOpposite.unop_mul]
     have h1 : (GL_transposeEquiv 2 (a * b)).unop =
         (GL_transposeEquiv 2 b).unop * (GL_transposeEquiv 2 a).unop := by
-      change MulOpposite.unop (GL_transposeEquiv 2 (a * b)) = _
       rw [map_mul]; rfl
     rw [h1]; group
 
@@ -64,8 +63,6 @@ private lemma Gamma0_AL_involutive (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ) :
       (GL_transposeEquiv 2 (wN N)⁻¹).unop *
       (GL_transposeEquiv 2 (GL_transposeEquiv 2 g).unop).unop *
       (GL_transposeEquiv 2 (wN N)).unop := by
-    change MulOpposite.unop (GL_transposeEquiv 2
-      (wN N * (GL_transposeEquiv 2 g).unop * (wN N)⁻¹)) = _
     rw [map_mul, map_mul]
     simp only [MulOpposite.unop_mul]; group
   have h_wN : (GL_transposeEquiv 2 (wN N)).unop = wN N :=
@@ -248,7 +245,8 @@ private lemma snf_mutual_dvd_eq (A B : Matrix (Fin 2) (Fin 2) ℤ)
     (hB_det : B.det = A.det)
     (hdA_B : ∀ i j, dA 0 ∣ B i j) (hdB_A : ∀ i j, dB 0 ∣ A i j) :
     ((LB⁻¹ : SpecialLinearGroup (Fin 2) ℤ) : Matrix _ _ ℤ) * (LA : Matrix _ _ ℤ) * A *
-      ((RA : Matrix _ _ ℤ) * ((RB⁻¹ : SpecialLinearGroup (Fin 2) ℤ) : Matrix _ _ ℤ)) = B := by
+      ((RA : Matrix _ _ ℤ) *
+        ((RB⁻¹ : SpecialLinearGroup (Fin 2) ℤ) : Matrix _ _ ℤ)) = B := by
   have h_d0 : dA 0 = dB 0 :=
     le_antisymm
       (Int.le_of_dvd (hdB_pos 0) (dvd_snf_first_of_dvd_entries B (dA 0) dB LB RB hSNF_B hdA_B))
@@ -281,7 +279,8 @@ private lemma snf_mutual_dvd_eq (A B : Matrix (Fin 2) (Fin 2) ℤ)
         rw [Matrix.mul_one, ← Matrix.mul_assoc (LB⁻¹).val, hLL, Matrix.one_mul]
 
 private lemma bar_val_eq_swap (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ)
-    (A : Matrix (Fin 2) (Fin 2) ℤ) (hA : (g : Matrix (Fin 2) (Fin 2) ℚ) = A.map (Int.cast : ℤ → ℚ))
+    (A : Matrix (Fin 2) (Fin 2) ℤ)
+    (hA : (g : Matrix (Fin 2) (Fin 2) ℚ) = A.map (Int.cast : ℤ → ℚ))
     (c₀ : ℤ) (hc₀ : A 1 0 = ↑N * c₀) :
     (↑((Gamma0_antiInvolution N).bar g) : Matrix (Fin 2) (Fin 2) ℚ) =
       (Matrix.of ![![A 0 0, c₀], ![↑N * A 0 1, A 1 1]]).map (Int.cast : ℤ → ℚ) := by
@@ -292,7 +291,8 @@ private lemma bar_val_eq_swap (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ)
     have : A.det = A 0 0 * A 1 1 - A 0 1 * A 1 0 := Matrix.det_fin_two A
     linarith [show c₀ * (↑N * A 0 1) = A 0 1 * A 1 0 by rw [hc₀]; ring]
   have hA_det_ne : A.det ≠ 0 := by
-    have hg_ne : (g : Matrix (Fin 2) (Fin 2) ℚ).det ≠ 0 := Matrix.GeneralLinearGroup.det_ne_zero g
+    have hg_ne : (g : Matrix (Fin 2) (Fin 2) ℚ).det ≠ 0 :=
+      Matrix.GeneralLinearGroup.det_ne_zero g
     rw [hA, det_intMat_cast] at hg_ne; exact_mod_cast hg_ne
   have hB_ne : (B.map (Int.cast : ℤ → ℚ)).det ≠ 0 := by
     rw [det_intMat_cast]; exact_mod_cast hB_det ▸ hA_det_ne
@@ -314,7 +314,8 @@ private lemma bar_val_eq_swap (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ)
 
 private lemma dvd_swap_entries (A : Matrix (Fin 2) (Fin 2) ℤ) (N e c₀ : ℤ)
     (hc₀ : A 1 0 = N * c₀) (he : ∀ i j, e ∣ A i j) (heN : IsCoprime e N) :
-    ∀ i j, e ∣ (Matrix.of ![![A 0 0, c₀], ![N * A 0 1, A 1 1]] : Matrix (Fin 2) (Fin 2) ℤ) i j := by
+    ∀ i j, e ∣ (Matrix.of ![![A 0 0, c₀], ![N * A 0 1, A 1 1]] :
+      Matrix (Fin 2) (Fin 2) ℤ) i j := by
   intro i j; fin_cases i <;> fin_cases j
   · simpa using he 0 0
   · simpa using heN.dvd_of_dvd_mul_left (hc₀ ▸ he 1 0)
@@ -335,12 +336,13 @@ private lemma gl_eq_of_intMat_eq (g h : GL (Fin 2) ℚ)
     (congr_arg (fun M : Matrix _ _ ℤ ↦ M.map (Int.cast : ℤ → ℚ)) hPQ) i j
   simp only [Matrix.mul_apply, Matrix.map_apply, Fin.sum_univ_two, Int.cast_add,
     Int.cast_mul] at hcast
-  simp only [SpecialLinearGroup.map, MonoidHom.coe_mk,
-    OneHom.coe_mk, RingHom.mapMatrix_apply, Int.coe_castRingHom, Matrix.map_apply]
+  simp only [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+    Int.coe_castRingHom, Matrix.map_apply]
   rw [hB] at *; simp only [Matrix.map_apply] at hcast ⊢
   linarith
 
-private lemma bar_eq_SL2_conj (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ) (hg : g ∈ (Gamma0_pair N).Δ)
+private lemma bar_eq_SL2_conj (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ)
+    (hg : g ∈ (Gamma0_pair N).Δ)
     (A : Matrix (Fin 2) (Fin 2) ℤ)
     (hA : (g : Matrix (Fin 2) (Fin 2) ℚ) = A.map (Int.cast : ℤ → ℚ))
     (hAN : (N : ℤ) ∣ A 1 0) (hAco : Int.gcd (A 0 0) N = 1) :
@@ -359,8 +361,10 @@ private lemma bar_eq_SL2_conj (N : ℕ) [NeZero N] (g : GL (Fin 2) ℚ) (hg : g 
     exists_divchain_diagonal_of_posdet 2 A hA_det_pos
   obtain ⟨dB, hdB_pos, hdB_div, LB, RB, hSNF_B⟩ :=
     exists_divchain_diagonal_of_posdet 2 B (hB_det ▸ hA_det_pos)
-  have hdA_A : ∀ i j, dA 0 ∣ A i j := snf_first_dvd_entry₂ A dA (hdA_div 0 (by omega)) LA RA hSNF_A
-  have hdB_B : ∀ i j, dB 0 ∣ B i j := snf_first_dvd_entry₂ B dB (hdB_div 0 (by omega)) LB RB hSNF_B
+  have hdA_A : ∀ i j, dA 0 ∣ A i j :=
+    snf_first_dvd_entry₂ A dA (hdA_div 0 (by omega)) LA RA hSNF_A
+  have hdB_B : ∀ i j, dB 0 ∣ B i j :=
+    snf_first_dvd_entry₂ B dB (hdB_div 0 (by omega)) LB RB hSNF_B
   have hAco_isCop : IsCoprime (A 0 0) (↑N : ℤ) := Int.isCoprime_iff_gcd_eq_one.mpr hAco
   have hB00 : B 0 0 = A 0 0 := by simp [B, Matrix.of_apply, Matrix.cons_val_zero]
   have hdA_B : ∀ i j, dA 0 ∣ B i j := by
@@ -404,7 +408,8 @@ private lemma Gamma0_AL_in_DC_coprime (N : ℕ) [NeZero N]
     rw [hBdet]; exact hdet_coprime
   have h_coset_eq : cosetMap N ⟦a_sub⟧ = cosetMap N ⟦b_sub⟧ := by
     obtain ⟨P, Q, hPQ⟩ := bar_eq_SL2_conj N g hg A hA hAN hAco
-    change (⟦Delta0_inclusion N a_sub⟧ : HeckeCoset (GL_pair 2)) = ⟦Delta0_inclusion N b_sub⟧
+    change (⟦Delta0_inclusion N a_sub⟧ : HeckeCoset (GL_pair 2)) =
+      ⟦Delta0_inclusion N b_sub⟧
     rw [HeckeCoset.eq_iff]
     symm; apply DoubleCoset.doubleCoset_eq_of_mem
     rw [DoubleCoset.mem_doubleCoset]
@@ -417,7 +422,8 @@ private lemma Gamma0_AL_in_DC_coprime (N : ℕ) [NeZero N]
 
 private lemma entry_clear_prime (A : Matrix (Fin 2) (Fin 2) ℤ) (N : ℤ)
     (p : ℕ) (hp : p.Prime) (hpN : ¬((p : ℤ) ∣ N))
-    (hprim : ¬((p : ℤ) ∣ A 0 0 ∧ (p : ℤ) ∣ A 0 1 ∧ (p : ℤ) ∣ A 1 0 ∧ (p : ℤ) ∣ A 1 1)) :
+    (hprim : ¬((p : ℤ) ∣ A 0 0 ∧ (p : ℤ) ∣ A 0 1 ∧
+      (p : ℤ) ∣ A 1 0 ∧ (p : ℤ) ∣ A 1 1)) :
     ∃ l t : ℤ, ¬((p : ℤ) ∣ (A 0 0 + l * A 1 0 + N * t * (A 0 1 + l * A 1 1))) := by
   have hp' : Prime (p : ℤ) := Nat.prime_iff_prime_int.mp hp
   by_cases ha : (p : ℤ) ∣ A 0 0
@@ -544,8 +550,8 @@ private lemma exists_coprime_entry (A : Matrix (Fin 2) (Fin 2) ℤ) (N : ℤ)
   refine ⟨↑l₀, ↑t₀, ?_⟩
   by_contra hne
   obtain ⟨p, hp, hpg⟩ := Nat.exists_prime_and_dvd hne
-  have hpc : (p : ℤ) ∣ ↑c := Int.natCast_dvd_natCast.mpr
-    (Int.natCast_dvd_natCast.mp (dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right _ _)))
+  have hpc : (p : ℤ) ∣ ↑c := Int.natCast_dvd_natCast.mpr (Int.natCast_dvd_natCast.mp
+    (dvd_trans (Int.natCast_dvd_natCast.mpr hpg) (Int.gcd_dvd_right _ _)))
   have hp_mem : p ∈ c.primeFactors := Nat.mem_primeFactors.mpr
     ⟨hp, Int.natCast_dvd_natCast.mp hpc, by omega⟩
   have hwit : wit p = ⟨(havoid p hp hpc).choose, (havoid p hp hpc).choose_spec.choose⟩ :=
@@ -568,10 +574,11 @@ private lemma mapGL_conj_val (g : GL (Fin 2) ℚ) (A : Matrix (Fin 2) (Fin 2) �
     (hA : (g : Matrix (Fin 2) (Fin 2) ℚ) = A.map (Int.cast : ℤ → ℚ))
     (P Q : SpecialLinearGroup (Fin 2) ℤ) :
     ((mapGL ℚ P) * g * (mapGL ℚ Q) : GL (Fin 2) ℚ).val =
-      ((P : Matrix (Fin 2) (Fin 2) ℤ) * A * (Q : Matrix _ _ ℤ)).map (Int.cast : ℤ → ℚ) := by
+      ((P : Matrix (Fin 2) (Fin 2) ℤ) * A * (Q : Matrix _ _ ℤ)).map
+        (Int.cast : ℤ → ℚ) := by
   rw [Units.val_mul, Units.val_mul, mapGL_coe_matrix, mapGL_coe_matrix, hA]
-  simp only [SpecialLinearGroup.map, MonoidHom.coe_mk, OneHom.coe_mk, RingHom.mapMatrix_apply,
-    algebraMap_int_eq, Int.coe_castRingHom, SpecialLinearGroup.coe_mk]
+  simp only [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+    algebraMap_int_eq, Int.coe_castRingHom]
   ext i j
   simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.map_apply, Int.cast_add, Int.cast_mul]
 
@@ -894,6 +901,7 @@ private lemma Gamma0_onHeckeCoset_eq (N : ℕ) [NeZero N]
   exact HeckeCoset.eq_mk_of_mem (Gamma0_AL_in_doubleCoset N _ (HeckeCoset.rep D).2)
 
 /-- `𝕋 (Gamma0_pair N) ℤ` is a commutative ring (Shimura Prop 3.8 for `Γ₀(N)`). -/
+@[reducible]
 noncomputable def instCommRing_Gamma0 (N : ℕ) [NeZero N] :
     CommRing (HeckeRing.𝕋 (Gamma0_pair N) ℤ) :=
   instCommRing_of_antiInvolution (Gamma0_antiInvolution N) (Gamma0_onHeckeCoset_eq N)

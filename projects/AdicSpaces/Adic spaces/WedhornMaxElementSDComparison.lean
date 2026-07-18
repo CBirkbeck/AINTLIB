@@ -162,10 +162,8 @@ theorem max_element_le_s_D_of_laurent_branch
     ∀ τ_max ∈ T_D.image (algebraMap A (Localization.Away s)),
       (∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
           w.vle t' τ_max) →
-      w.vle τ_max (algebraMap A (Localization.Away s) s_D) := by
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
-  intro τ_max hτ_max _h_max
-  exact h_per_t_le_s_D τ_max hτ_max
+      w.vle τ_max (algebraMap A (Localization.Away s) s_D) :=
+  fun τ_max hτ_max _ ↦ h_per_t_le_s_D τ_max hτ_max
 
 omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] in
 /-- **Top-level composed wrapper: α_T_D per-`t'` σ-factored chain via
@@ -202,10 +200,8 @@ theorem alpha_T_D_per_t_factored_chain_via_rational_open
     ∀ t' ∈ T_D.image (algebraMap A (Localization.Away s)),
       w.vle (t' * (σ_loc : Localization.Away s))
         ((algebraMap A (Localization.Away s) s_D) *
-          (σ_loc : Localization.Away s)) := by
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
-  exact alpha_T_D_per_t_factored_chain_via_max_element T_D s_D σ_loc w
-    hT_D_image_ne
+          (σ_loc : Localization.Away s)) :=
+  alpha_T_D_per_t_factored_chain_via_max_element T_D s_D σ_loc w hT_D_image_ne
     (max_element_le_s_D_of_laurent_branch T_D s_D w h_per_t_le_s_D)
 
 end ValuationSpectrum

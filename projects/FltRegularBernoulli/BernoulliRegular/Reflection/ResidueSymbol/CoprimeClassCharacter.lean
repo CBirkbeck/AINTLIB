@@ -34,7 +34,7 @@ namespace Reflection
 namespace ResidueSymbol
 namespace CoprimeClassCharacter
 
-variable {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
+variable {R : Type*} [CommRing R] [IsDedekindDomain R]
 
 /-- A chosen integral representative of a class, coprime to a finite set of
 nonzero prime ideals. -/
@@ -129,7 +129,7 @@ theorem onClassGroup_mk0
     (I : (Ideal R)⁰)
     (hI : ∀ P ∈ S, IsCoprime (I : Ideal R) P) :
     D.onClassGroup (ClassGroup.mk0 I) = D.symbol I hI := by
-  unfold onClassGroup
+  simp only [onClassGroup]
   exact D.symbol_eq_of_mk0_eq (D.rep_coprime (ClassGroup.mk0 I)) hI
     (D.rep_mk0 (ClassGroup.mk0 I))
 
@@ -200,7 +200,7 @@ theorem symbol_eq_zero_of_toClassGroupHom_eq_one
     (I : (Ideal R)⁰)
     (hI : ∀ P ∈ S, IsCoprime (I : Ideal R) P) :
     D.symbol I hI = 0 := by
-  have h := congrArg (fun φ : ClassGroup R →* Multiplicative (ZMod p) =>
+  have h := congrArg (fun φ : ClassGroup R →* Multiplicative (ZMod p) ↦
     φ (ClassGroup.mk0 I)) htriv
   dsimp at h
   rw [D.toClassGroupHom_mk0 I hI] at h
@@ -252,7 +252,7 @@ theorem symbol_eq_zero_of_toClassGroupModPHom_eq_one
     (I : (Ideal (𝓞 K))⁰)
     (hI : ∀ P ∈ S, IsCoprime (I : Ideal (𝓞 K)) P) :
     D.symbol I hI = 0 := by
-  have h := congrArg (fun φ : ClassGroupModP K p →* Multiplicative (ZMod p) =>
+  have h := congrArg (fun φ : ClassGroupModP K p →* Multiplicative (ZMod p) ↦
     φ (QuotientGroup.mk (ClassGroup.mk0 I) : ClassGroupModP K p)) htriv
   dsimp at h
   rw [toClassGroupModPHom_mk0 D I hI] at h

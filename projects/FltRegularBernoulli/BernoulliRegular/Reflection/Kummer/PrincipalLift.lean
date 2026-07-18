@@ -120,6 +120,20 @@ variable {Ext : ComponentUnramifiedCyclicDegreePExtension (p := p) K χ Comp}
 ### Atomic predicates: the class-group obstruction
 -/
 
+/-- A unit fractional ideal whose underlying submodule is principal is of the
+form `toPrincipalIdeal _ _ β` for some unit `β : Kˣ`: its (necessarily nonzero)
+principal generator promotes to a unit. -/
+private theorem exists_eq_toPrincipalIdeal_of_isPrincipal
+    {J : (FractionalIdeal (𝓞 K)⁰ K)ˣ}
+    (hJprinc : ((J : FractionalIdeal (𝓞 K)⁰ K) : Submodule (𝓞 K) K).IsPrincipal) :
+    ∃ β : Kˣ, J = toPrincipalIdeal (𝓞 K) K β := by
+  obtain ⟨x, hx⟩ := (FractionalIdeal.isPrincipal_iff
+    (S := (𝓞 K)⁰) (P := K) (I := (J : FractionalIdeal (𝓞 K)⁰ K))).mp hJprinc
+  have hxne : x ≠ 0 := fun hx0 ↦ J.ne_zero (by rw [hx, hx0, spanSingleton_zero])
+  refine ⟨Units.mk0 x hxne, Units.ext ?_⟩
+  rw [coe_toPrincipalIdeal, hx]
+  rfl
+
 /-- **Per-witness class-triviality predicate.** For a *specific* witness `J`
 of the weak form `(γ) = J^p`, the class `[J] ∈ ClassGroup (𝓞 K)` is trivial.
 
@@ -180,25 +194,10 @@ theorem genIsPowOfPrincipalFractionalIdeal_of_jClassTrivialFor
     (hJ : P.JClassTrivialFor J) :
     P.GenIsPowOfPrincipalFractionalIdeal := by
   obtain ⟨hγ, hJprinc⟩ := hJ
-  -- Extract a principal generator `x : K` such that `J = spanSingleton x`.
-  obtain ⟨x, hx⟩ := (FractionalIdeal.isPrincipal_iff
-    (S := (𝓞 K)⁰) (P := K) (I := (J : FractionalIdeal (𝓞 K)⁰ K))).mp hJprinc
-  -- `J ≠ 0` (unit fractional ideal), hence its generator `x ≠ 0`.
-  have hJne : (J : FractionalIdeal (𝓞 K)⁰ K) ≠ 0 := J.ne_zero
-  have hxne : x ≠ 0 := by
-    intro hx0
-    apply hJne
-    rw [hx, hx0, spanSingleton_zero]
-  -- Promote `x` to a unit `β : Kˣ`.
-  let β : Kˣ := Units.mk0 x hxne
-  refine ⟨β, ?_⟩
-  -- Goal: `toPrincipalIdeal _ _ P.genUnit = (toPrincipalIdeal _ _ β) ^ p`.
-  -- We need `J = toPrincipalIdeal _ _ β` as units, then `hγ` finishes.
-  have hJ_eq_β : J = toPrincipalIdeal (𝓞 K) K β := by
-    apply Units.ext
-    rw [coe_toPrincipalIdeal, hx]
-    rfl
-  rw [hγ, hJ_eq_β]
+  -- Extract the principal generator `β : Kˣ` with `J = toPrincipalIdeal _ _ β`,
+  -- then `hγ` finishes via `(γ) = J^p = (β)^p`.
+  obtain ⟨β, hJ_eq_β⟩ := exists_eq_toPrincipalIdeal_of_isPrincipal hJprinc
+  exact ⟨β, by rw [hγ, hJ_eq_β]⟩
 
 /-- **Existential reduction.** From the trivial-class atom (some weak-form
 witness `J` is principal), derive the strong form `(γ) = (β)^p`. -/
@@ -229,7 +228,7 @@ theorem hasTrivialClassWitness_of_genIsPowOfPrincipalFractionalIdeal
   -- `toPrincipalIdeal _ _ β` is principal: it is `spanSingleton (β : K)`.
   rw [coe_toPrincipalIdeal]
   exact (FractionalIdeal.isPrincipal_iff (S := (𝓞 K)⁰) (P := K)
-    (I := spanSingleton (𝓞 K)⁰ ((β : K)))).mpr ⟨(β : K), rfl⟩
+    (I := spanSingleton (𝓞 K)⁰ (β : K))).mpr ⟨(β : K), rfl⟩
 
 /-- **The central equivalence.** `GenIsPowOfPrincipalFractionalIdeal` is
 exactly `HasTrivialClassWitness`: the strong form holds iff some weak-form
@@ -358,29 +357,18 @@ theorem universalPrincipalLift_iff_principalLift_of_composer
       ∃ β : Kˣ, J = toPrincipalIdeal (𝓞 K) K β := by
   constructor
   · intro hLift J hJ
-    -- From `J` principal, extract a generator `x : K`, promote to a unit `β`,
-    -- and rewrite `J = toPrincipalIdeal _ _ β`.
-    have hJprinc := hLift J hJ
-    obtain ⟨x, hx⟩ := (FractionalIdeal.isPrincipal_iff
-      (S := (𝓞 K)⁰) (P := K) (I := (J : FractionalIdeal (𝓞 K)⁰ K))).mp hJprinc
-    have hJne : (J : FractionalIdeal (𝓞 K)⁰ K) ≠ 0 := J.ne_zero
-    have hxne : x ≠ 0 := by
-      intro hx0; apply hJne; rw [hx, hx0, spanSingleton_zero]
-    refine ⟨Units.mk0 x hxne, ?_⟩
-    apply Units.ext
-    rw [coe_toPrincipalIdeal, hx]
-    rfl
+    -- From `J` principal, extract the unit generator `β` with
+    -- `J = toPrincipalIdeal _ _ β`.
+    exact exists_eq_toPrincipalIdeal_of_isPrincipal (hLift J hJ)
   · intro hLift J hJ
     obtain ⟨β, hβ⟩ := hLift J hJ
     -- `J = toPrincipalIdeal _ _ β` ⇒ `J : Submodule` is principal.
     have hJ_eq : (J : FractionalIdeal (𝓞 K)⁰ K) =
-        spanSingleton (𝓞 K)⁰ ((β : K)) := by
-      have := congrArg
-        (fun I : (FractionalIdeal (𝓞 K)⁰ K)ˣ => (I : FractionalIdeal (𝓞 K)⁰ K)) hβ
-      simpa [coe_toPrincipalIdeal] using this
+        spanSingleton (𝓞 K)⁰ (β : K) := by
+      simpa [coe_toPrincipalIdeal] using Units.ext_iff.mp hβ
     rw [hJ_eq]
     exact (FractionalIdeal.isPrincipal_iff (S := (𝓞 K)⁰) (P := K)
-      (I := spanSingleton (𝓞 K)⁰ ((β : K)))).mpr ⟨_, rfl⟩
+      (I := spanSingleton (𝓞 K)⁰ (β : K))).mpr ⟨_, rfl⟩
 
 /-!
 ### Summary diagram

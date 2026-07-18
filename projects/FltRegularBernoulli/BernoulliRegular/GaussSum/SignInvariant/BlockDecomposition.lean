@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.LinearAlgebra.Basis.Defs
@@ -40,11 +45,13 @@ values in `ℂ`. -/
 def dirichletCharacterUnitMonoidHom (χ : DirichletCharacter ℂ p) : (ZMod p)ˣ →* ℂ :=
   (Units.coeHom ℂ).comp χ.toUnitHom
 
+/-- Evaluating that monoid hom is evaluating the character. -/
 @[simp] theorem dirichletCharacterUnitMonoidHom_apply
     (χ : DirichletCharacter ℂ p) (u : (ZMod p)ˣ) :
     dirichletCharacterUnitMonoidHom (p := p) χ u = χ u := by
   simp [dirichletCharacterUnitMonoidHom]
 
+/-- A Dirichlet character is determined by its restriction to the unit group. -/
 theorem dirichletCharacterUnitMonoidHom_injective :
     Function.Injective (dirichletCharacterUnitMonoidHom (p := p)) := by
   intro χ ψ hχψ
@@ -69,7 +76,7 @@ theorem linearIndependent_dirichletCharacters :
   have h := linearIndependent_dirichletCharactersOnUnits (p := p)
   convert h using 1
   funext χ u
-  simp [restrictUnitsLinear, Function.comp_def, dirichletCharacterUnitMonoidHom_apply]
+  simp [restrictUnitsLinear, dirichletCharacterUnitMonoidHom_apply]
 
 /-- Evaluation at `0`. -/
 def evalAtZeroLinear : (ZMod p → ℂ) →ₗ[ℂ] ℂ where
@@ -77,10 +84,12 @@ def evalAtZeroLinear : (ZMod p → ℂ) →ₗ[ℂ] ℂ where
   map_add' _ _ := rfl
   map_smul' _ _ := rfl
 
+/-- A Dirichlet character vanishes at `0`. -/
 @[simp] theorem dirichletCharacter_apply_zero (χ : DirichletCharacter ℂ p) :
-    χ (0 : ZMod p) = 0 := by
-  simpa using MulChar.map_nonunit χ (a := (0 : ZMod p)) (by simp)
+    χ (0 : ZMod p) = 0 :=
+  χ.map_zero
 
+/-- Hence every function in the span of the characters vanishes at `0`. -/
 theorem span_dirichletCharacters_le_ker_evalAtZero :
     Submodule.span ℂ (Set.range fun χ : DirichletCharacter ℂ p => (χ : ZMod p → ℂ)) ≤
       LinearMap.ker (evalAtZeroLinear (p := p)) := by
@@ -89,23 +98,22 @@ theorem span_dirichletCharacters_le_ker_evalAtZero :
   change evalAtZeroLinear (p := p) ((χ : DirichletCharacter ℂ p) : ZMod p → ℂ) = 0
   simp [evalAtZeroLinear, dirichletCharacter_apply_zero]
 
+/-- …but `δ₀` does not, so `δ₀` is outside that span. -/
 theorem deltaZero_not_mem_span_dirichletCharacters :
     deltaZeroFunction (p := p) ∉
       Submodule.span ℂ (Set.range fun χ : DirichletCharacter ℂ p => (χ : ZMod p → ℂ)) := by
   intro hdelta
   have hker : deltaZeroFunction (p := p) ∈ LinearMap.ker (evalAtZeroLinear (p := p)) :=
     span_dirichletCharacters_le_ker_evalAtZero (p := p) hdelta
-  have hzero : evalAtZeroLinear (p := p) (deltaZeroFunction (p := p)) = 0 := by
-    rw [LinearMap.mem_ker] at hker
-    exact hker
-  have hone := hzero
-  simp [evalAtZeroLinear, deltaZeroFunction] at hone
+  rw [LinearMap.mem_ker] at hker
+  simp [evalAtZeroLinear, deltaZeroFunction] at hker
 
 /-- The ambient family consisting of `δ₀` together with all Dirichlet
 characters. -/
 def deltaZeroDirichletCharacterFamily : Option (DirichletCharacter ℂ p) → (ZMod p → ℂ) :=
   fun o => Option.casesOn' o (deltaZeroFunction (p := p)) fun χ => (χ : ZMod p → ℂ)
 
+/-- So `δ₀` together with the characters is a linearly independent family. -/
 theorem linearIndependent_deltaZeroDirichletCharacterFamily :
     LinearIndependent ℂ (deltaZeroDirichletCharacterFamily (p := p)) :=
   (linearIndependent_dirichletCharacters (p := p)).option
@@ -124,11 +132,13 @@ def deltaZeroDirichletCharacterBasis :
       rw [Module.finrank_fintype_fun_eq_card, ZMod.card]
       exact Nat.sub_add_cancel hp.out.one_le
 
+/-- The basis vector at `none` is `δ₀`. -/
 @[simp] theorem deltaZeroDirichletCharacterBasis_apply_none :
     deltaZeroDirichletCharacterBasis (p := p) none = deltaZeroFunction (p := p) := by
   rw [deltaZeroDirichletCharacterBasis, coe_basisOfLinearIndependentOfCardEqFinrank]
   rfl
 
+/-- The basis vector at `some χ` is `χ`. -/
 @[simp] theorem deltaZeroDirichletCharacterBasis_apply_some
     (χ : DirichletCharacter ℂ p) :
     deltaZeroDirichletCharacterBasis (p := p) (some χ) = (χ : ZMod p → ℂ) := by
@@ -145,18 +155,17 @@ def trivialCharacterBlock : Submodule ℂ (ZMod p → ℂ) :=
   Submodule.span ℂ
     (Set.range ![deltaZeroFunction (p := p), ((1 : DirichletCharacter ℂ p) : ZMod p → ℂ)])
 
+/-- `δ₀` lies in the trivial block. -/
 theorem deltaZero_mem_trivialBlock :
-    deltaZeroFunction (p := p) ∈ trivialBlock (p := p) := by
-  apply Submodule.subset_span
-  refine ⟨0, ?_⟩
-  simp
+    deltaZeroFunction (p := p) ∈ trivialBlock (p := p) :=
+  Submodule.subset_span ⟨0, by simp⟩
 
+/-- The constant-`1` function lies in the trivial block. -/
 theorem constOne_mem_trivialBlock :
-    (fun _ : ZMod p => (1 : ℂ)) ∈ trivialBlock (p := p) := by
-  apply Submodule.subset_span
-  refine ⟨1, ?_⟩
-  simp
+    (fun _ : ZMod p => (1 : ℂ)) ∈ trivialBlock (p := p) :=
+  Submodule.subset_span ⟨1, by simp⟩
 
+/-- The constant-`1` function is `δ₀` plus the trivial character (which vanishes at `0`). -/
 theorem constOne_eq_deltaZero_add_trivialCharacter :
     (fun _ : ZMod p => (1 : ℂ)) =
       deltaZeroFunction (p := p) + ((1 : DirichletCharacter ℂ p) : ZMod p → ℂ) := by
@@ -164,40 +173,27 @@ theorem constOne_eq_deltaZero_add_trivialCharacter :
   by_cases hx : x = 0
   · subst hx
     simp [deltaZeroFunction]
-  · have hx_unit : IsUnit x := isUnit_iff_ne_zero.mpr hx
-    have htriv : (1 : DirichletCharacter ℂ p) x = 1 := by
-      simpa using (MulChar.one_apply hx_unit : (1 : DirichletCharacter ℂ p) x = 1)
+  · have htriv : (1 : DirichletCharacter ℂ p) x = 1 :=
+      MulChar.one_apply (isUnit_iff_ne_zero.mpr hx)
     simp [deltaZeroFunction, hx, htriv]
 
+/-- Equivalently, the trivial character is the constant-`1` function minus `δ₀`. -/
 theorem trivialCharacter_eq_constOne_sub_deltaZero :
     (((1 : DirichletCharacter ℂ p) : ZMod p → ℂ)) =
-      (fun _ : ZMod p => (1 : ℂ)) - deltaZeroFunction (p := p) := by
-  ext x
-  by_cases hx : x = 0
-  · subst hx
-    simp [deltaZeroFunction]
-  · have hx_unit : IsUnit x := isUnit_iff_ne_zero.mpr hx
-    have htriv : (1 : DirichletCharacter ℂ p) x = 1 := by
-      simpa using (MulChar.one_apply hx_unit : (1 : DirichletCharacter ℂ p) x = 1)
-    simp [deltaZeroFunction, hx, htriv]
+      (fun _ : ZMod p => (1 : ℂ)) - deltaZeroFunction (p := p) :=
+  eq_sub_of_add_eq' (constOne_eq_deltaZero_add_trivialCharacter (p := p)).symm
 
+/-- The two generating sets therefore span the same block. -/
 theorem trivialBlock_eq_trivialCharacterBlock :
     trivialBlock (p := p) = trivialCharacterBlock (p := p) := by
   refine le_antisymm ?_ ?_
   · refine Submodule.span_le.mpr ?_
     rintro _ ⟨i, rfl⟩
     fin_cases i
-    · apply Submodule.subset_span
-      refine ⟨0, ?_⟩
-      simp
+    · exact Submodule.subset_span ⟨0, by simp⟩
     · rw [constOne_eq_deltaZero_add_trivialCharacter (p := p)]
       exact (trivialCharacterBlock (p := p)).add_mem
-        (Submodule.subset_span <| by
-          refine ⟨0, ?_⟩
-          simp)
-        (Submodule.subset_span <| by
-          refine ⟨1, ?_⟩
-          simp)
+        (Submodule.subset_span ⟨0, by simp⟩) (Submodule.subset_span ⟨1, by simp⟩)
   · refine Submodule.span_le.mpr ?_
     rintro _ ⟨i, rfl⟩
     fin_cases i
@@ -207,13 +203,13 @@ theorem trivialBlock_eq_trivialCharacterBlock :
         (constOne_mem_trivialBlock (p := p))
         (deltaZero_mem_trivialBlock (p := p))
 
+/-- The trivial character lies in the trivial block. -/
 theorem trivialCharacter_mem_trivialBlock :
     (((1 : DirichletCharacter ℂ p) : ZMod p → ℂ)) ∈ trivialBlock (p := p) := by
   rw [trivialBlock_eq_trivialCharacterBlock (p := p)]
-  apply Submodule.subset_span
-  refine ⟨1, ?_⟩
-  simp
+  exact Submodule.subset_span ⟨1, by simp⟩
 
+/-- The normalized DFT sends `δ₀` to `p^(-1/2)` times the constant-`1` function. -/
 theorem normalizedDft_deltaZero :
     normalizedDft p (deltaZeroFunction (p := p)) =
       (Real.sqrt p : ℂ)⁻¹ • (fun _ : ZMod p => (1 : ℂ)) := by
@@ -221,6 +217,7 @@ theorem normalizedDft_deltaZero :
   rw [normalizedDft_apply, deltaZeroFunction, dft_deltaZero_eq_constOne]
   simp [smul_eq_mul]
 
+/-- …and the constant-`1` function to `p^(1/2)` times `δ₀`. -/
 theorem normalizedDft_constOne :
     normalizedDft p (fun _ : ZMod p => (1 : ℂ)) =
       (((Real.sqrt p : ℂ)⁻¹) * p) • deltaZeroFunction (p := p) := by
@@ -228,6 +225,7 @@ theorem normalizedDft_constOne :
   rw [normalizedDft_apply, congrFun (dft_constOne_eq_prime_smul_deltaZero (p := p)) x]
   simp [deltaZeroFunction, smul_eq_mul, mul_assoc]
 
+/-- Hence the normalized DFT preserves the trivial block. -/
 theorem normalizedDft_maps_trivialBlock {f : ZMod p → ℂ}
     (hf : f ∈ trivialBlock (p := p)) :
     normalizedDft p f ∈ trivialBlock (p := p) := by
@@ -247,6 +245,8 @@ theorem normalizedDft_maps_trivialBlock {f : ZMod p → ℂ}
   · intro a g hg hgm
     simpa using (trivialBlock (p := p)).smul_mem a hgm
 
+/-- It preserves each non-self-dual character-pair block, since it is a scalar
+multiple of the DFT. -/
 theorem normalizedDft_maps_characterPairSubmodule {χ : DirichletCharacter ℂ p}
     (hχ : χ ≠ 1) {f : ZMod p → ℂ} (hf : f ∈ characterPairSubmodule (p := p) χ) :
     normalizedDft p f ∈ characterPairSubmodule (p := p) χ := by
@@ -261,12 +261,14 @@ theorem normalizedDft_maps_characterPairSubmodule {χ : DirichletCharacter ℂ p
 def quadraticCharacterLine : Submodule ℂ (ZMod p → ℂ) :=
   Submodule.span ℂ {((quadraticCharComplex p : DirichletCharacter ℂ p) : ZMod p → ℂ)}
 
+/-- The quadratic character spans the quadratic line. -/
 theorem quadraticCharComplex_mem_quadraticCharacterLine :
     ((quadraticCharComplex p : DirichletCharacter ℂ p) : ZMod p → ℂ) ∈
-      quadraticCharacterLine (p := p) := by
-  apply Submodule.subset_span
-  simp
+      quadraticCharacterLine (p := p) :=
+  Submodule.mem_span_singleton_self _
 
+/-- The quadratic character is an eigenvector of the normalized DFT; the eigenvalue is
+the scalar whose branch is pinned down in `BranchChoice`. -/
 theorem normalizedDft_quadraticCharComplex_eq_scalar_smul (hp₂ : p ≠ 2) :
     normalizedDft p (quadraticCharComplex p) =
       (((Real.sqrt p : ℂ)⁻¹) *
@@ -280,6 +282,7 @@ theorem normalizedDft_quadraticCharComplex_eq_scalar_smul (hp₂ : p ≠ 2) :
         (quadraticCharComplex_ne_one (p := p) hp₂)) x]
   simp [quadraticCharComplex_inv (p := p), smul_eq_mul, mul_left_comm, mul_comm]
 
+/-- Hence the normalized DFT preserves the quadratic line. -/
 theorem normalizedDft_maps_quadraticCharacterLine (hp₂ : p ≠ 2) {f : ZMod p → ℂ}
     (hf : f ∈ quadraticCharacterLine (p := p)) :
     normalizedDft p f ∈ quadraticCharacterLine (p := p) := by

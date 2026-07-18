@@ -24,9 +24,10 @@ the prime operator `T_p` from `GL2/HeckeT_p.lean`.
 * `heckeT_ppow_succ_succ` — the prime-power recurrence (definitional)
 * `heckeT_ppow_eq_pow_of_not_coprime` — `T_{p^r} = T_p^r` when `p ∣ N`
 * `heckeT_n_one` — `T_1 = id`
-* `heckeT_n_mul_coprime` — `T_{mn} = T_m T_n` when `(m,n) = 1`
-* `heckeT_n_comm` — `T_m T_n = T_n T_m`
 * `heckeT_n_preserves_charSpace` — `T_n` preserves `M_k(N, χ)`
+
+Multiplicativity (`T_{mn} = T_m T_n` for `(m,n) = 1`) and commutativity (`T_m T_n = T_n T_m`)
+are established in `Unified/RingTransport.lean` via the abstract Hecke-ring transport.
 
 ## Implementation notes
 
@@ -204,7 +205,8 @@ lemma moebiusFin'_injective (p : ℕ) (hp : Nat.Prime p)
       simp only [hA₁_def, hA₂_def, hB₁_def, hB₂_def]; push_cast; ring
     have h0 : B₁ * A₂ - B₂ * A₁ = 0 := by rw [hcross]; ring
     rw [h0, hdet_p, mul_one] at h_cross_det
-    exact fin_val_eq_of_dvd_sub hp b₁ b₂ ((ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp h_cross_det.symm)
+    exact fin_val_eq_of_dvd_sub hp b₁ b₂
+      ((ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp h_cross_det.symm)
 
 /-- Determinant of the moebius conjugating matrix is `1`, from the integer relations
 `A·M₁₁ - B·M₁₀ = 1` (the row-swapped `det σ`) and `B - A·j = p·q`. -/
@@ -264,13 +266,15 @@ lemma moebius_conj {p : ℕ} [Fact p.Prime] (hp : Nat.Prime p)
     have hAB : A * M 1 1 - B * M 1 0 = 1 := by
       simp only [hA_def, hB_def]; linear_combination hdet
     simpa only [τ_mat] using det_fin_two_moebius hAB hq_eq
-  refine ⟨⟨τ_mat, hτ_det⟩, ?_, ?_, ?_, ?_⟩
+  let τ : SL(2, ℤ) := ⟨τ_mat, hτ_det⟩
+  have hτval : Subtype.val τ = τ_mat := rfl
+  refine ⟨τ, ?_, ?_, ?_, ?_⟩
   · apply Units.ext; ext i j; fin_cases i <;> fin_cases j <;>
       simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_upper_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
-        algebraMap_int_eq, hτ_mat_def, hA_def, hmoeb] <;>
-      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply,
-        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        algebraMap_int_eq, hmoeb] <;>
+      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
+        hA_def, hmoeb, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
         Matrix.head_fin_const] <;>
       simp only [show (↑σ : Matrix (Fin 2) (Fin 2) ℤ) = M from rfl] <;>
       first | rfl | simp |
@@ -759,10 +763,12 @@ private lemma T_p_lower_upper_shift (p q : ℕ) (hp : 0 < p) (hq : 0 < q) (b : �
     mapGL ℚ (shiftSL' (↑(q * b / p : ℕ) : ℤ)) *
       ((T_p_upper p hp (q * b % p) : GL (Fin 2) ℚ) * T_p_lower q hq) := by
   apply Units.ext
+  have hshift : (↑(shiftSL' ((q : ℤ) * (b : ℤ) / (p : ℤ))) : Matrix (Fin 2) (Fin 2) ℤ) =
+      !![1, (q : ℤ) * (b : ℤ) / (p : ℤ); 0, 1] := rfl
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [T_p_lower, T_p_upper, shiftSL', mapGL, GeneralLinearGroup.mkOfDetNeZero,
-      Matrix.mul_apply, Fin.sum_univ_two]
+    simp [T_p_lower, T_p_upper, hshift, Matrix.map_apply,
+      GeneralLinearGroup.mkOfDetNeZero, Matrix.mul_apply, Fin.sum_univ_two]
   have h1 : (↑q : ℚ) * ↑b = ((q * b : Nat) : ℚ) := by push_cast; ring
   have h2 : ((↑q * ↑b / ↑p : ℤ) : ℚ) = ((q * b / p : Nat) : ℚ) := by congr 1
   have h3 : q * b = q * b % p + q * b / p * p := by
@@ -905,7 +911,8 @@ private lemma heckeT_p_comm_distinct_both_coprime [NeZero N] (k : ℤ) {p q : �
     (heckeT_p_ut_slash_lower_comm k hp hq hpq (diamondOp k (ZMod.unitOfCoprime q hqN) f)) w
   simp only [heckeT_p_ut, SlashAction.sum_slash, Finset.sum_apply] at hC1
   have hC2 := congr_fun
-    (heckeT_p_ut_slash_lower_comm k hq hp (Ne.symm hpq) (diamondOp k (ZMod.unitOfCoprime p hpN) f)) w
+    (heckeT_p_ut_slash_lower_comm k hq hp (Ne.symm hpq)
+      (diamondOp k (ZMod.unitOfCoprime p hpN) f)) w
   simp only [heckeT_p_ut, SlashAction.sum_slash, Finset.sum_apply] at hC2
   have hLL : (((⇑(diamondOp k (ZMod.unitOfCoprime q hqN)
         (diamondOp k (ZMod.unitOfCoprime p hpN) f))) ∣[k]
@@ -1065,7 +1072,7 @@ theorem diamondOp_n_preserves_modFormCharSpace [NeZero N] (k : ℤ) (n : ℕ) (�
     rw [heig]
     exact Submodule.smul_mem _ _ hf
   · rw [diamondOp_n_not_coprime k h]
-    simpa using (modFormCharSpace (N := N) k χ).zero_mem
+    simp
 
 /-- `T_{p^r}` preserves each character space, for **every** prime `p` (including
 `p ∣ N`).  Direct induction over the defining recurrence. -/

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.Bernoulli
@@ -53,6 +58,26 @@ lemma exists_odd_index_iff_exists_k (hp_odd : p ≠ 2) (Q : ℕ → Prop) :
     · have hsucc : (2 * k - 1) + 1 = 2 * k := by omega
       simpa [hsucc] using hQ
 
+/-- Per-index Bernoulli-quotient factorisation with unit detection: for an index
+`j < p - 2`, the `p`-adic number `(-1/2) · B_{j+1}/(j+1)` is the image of a
+`p`-adic integer `a`, and `a` is a unit exactly when `p ∤ (B_{j+1}).num`.
+
+This is the classical-Bernoulli-quotient, unit-carrying companion of
+`exists_padicInt_neg_half_mul_bernoulliGen`; the unit criterion is what lets the
+product over the odd Teichmüller characters detect divisibility in
+`p_dvd_hMinus_iff_p_dvd_some_bernoulli`. -/
+theorem exists_padicInt_neg_half_mul_bernoulli_quotient (hp_odd' : p ≠ 2)
+    {j : ℕ} (hj_lt : j < p - 2) :
+    ∃ a : ℤ_[p],
+      (a : ℚ_[p]) =
+          (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p])) ∧
+        (IsUnit a ↔ ¬ (p : ℤ) ∣ (bernoulli (j + 1)).num) := by
+  simpa [Nat.cast_add, Nat.cast_one] using
+    exists_padicInt_bernoulli_factor (p := p) (hp := hp) (n := j + 1) hp_odd'
+      (by omega) (by omega)
+      (BernoulliRegular.prime_not_dvd_bernoulli_den_of_lt_sub_one
+        (p := p) (n := j + 1) (hp := hp) hp_odd' (by omega))
+
 /-- Diekmann Theorem 42: `p` divides the relative class number iff it divides
 the numerator of one of the relevant even Bernoulli numbers. -/
 theorem p_dvd_hMinus_iff_p_dvd_some_bernoulli (hp_odd' : p ≠ 2) :
@@ -66,14 +91,9 @@ theorem p_dvd_hMinus_iff_p_dvd_some_bernoulli (hp_odd' : p ≠ 2) :
         ∃ a : ℤ_[p],
           (a : ℚ_[p]) =
             (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p])) ∧
-          (IsUnit a ↔ ¬ (p : ℤ) ∣ (bernoulli (j + 1)).num) := by
-    intro j hj
-    have hj_lt : j < p - 2 := Finset.mem_range.mp (Finset.mem_filter.mp hj).1
-    simpa [Nat.cast_add, Nat.cast_one] using
-      (exists_padicInt_bernoulli_factor (p := p) (hp := hp) (n := j + 1) hp_odd'
-        (by omega) (by omega)
-        (BernoulliRegular.prime_not_dvd_bernoulli_den_of_lt_sub_one
-          (p := p) (n := j + 1) (hp := hp) hp_odd' (by omega)))
+          (IsUnit a ↔ ¬ (p : ℤ) ∣ (bernoulli (j + 1)).num) :=
+    fun j hj ↦ exists_padicInt_neg_half_mul_bernoulli_quotient (p := p) hp_odd'
+      (Finset.mem_range.mp (Finset.mem_filter.mp hj).1)
   classical
   let a : ℕ → ℤ_[p] := fun j =>
     if hj : j ∈ S then Classical.choose (hfactor j hj) else 1
@@ -94,15 +114,17 @@ theorem p_dvd_hMinus_iff_p_dvd_some_bernoulli (hp_odd' : p ≠ 2) :
         Finset.prod S (fun j =>
           (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p]))) := by
     calc
-      ((A : ℤ_[p]) : ℚ_[p]) = ∏ j ∈ S, (((a j : ℤ_[p]) : ℚ_[p])) := by
+      ((A : ℤ_[p]) : ℚ_[p]) = ∏ j ∈ S, ((a j : ℤ_[p]) : ℚ_[p]) := by
         dsimp [A]
-        change (algebraMap ℤ_[p] ℚ_[p]) (∏ j ∈ S, a j) = ∏ j ∈ S, (algebraMap ℤ_[p] ℚ_[p]) (a j)
+        change (algebraMap ℤ_[p] ℚ_[p]) (∏ j ∈ S, a j) =
+          ∏ j ∈ S, (algebraMap ℤ_[p] ℚ_[p]) (a j)
         rw [map_prod]
       _ = Finset.prod S (fun j =>
             (-(1 / 2 : ℚ_[p])) * ((((bernoulli (j + 1) : ℚ) / (j + 1) : ℚ) : ℚ_[p]))) :=
           Finset.prod_congr rfl ha_cast
   have hzA :
-      (((hMinus K : ℕ) : ℚ_[p])) = ((A : ℤ_[p]) : ℚ_[p]) + (p : ℚ_[p]) * (z : ℚ_[p]) := by
+      (((hMinus K : ℕ) : ℚ_[p])) =
+        ((A : ℤ_[p]) : ℚ_[p]) + (p : ℚ_[p]) * (z : ℚ_[p]) := by
     calc
       (((hMinus K : ℕ) : ℚ_[p])) =
           Finset.prod S (fun j =>
@@ -110,8 +132,7 @@ theorem p_dvd_hMinus_iff_p_dvd_some_bernoulli (hp_odd' : p ≠ 2) :
             (p : ℚ_[p]) * (z : ℚ_[p]) := hz
       _ = ((A : ℤ_[p]) : ℚ_[p]) + (p : ℚ_[p]) * (z : ℚ_[p]) := by rw [hA_cast]
   have hpz_lt : ‖(p : ℚ_[p]) * (z : ℚ_[p])‖ < 1 := by
-    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := by
-      simpa using (Padic.norm_natCast_lt_one_iff (p := p) (n := p)).2 (dvd_rfl)
+    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := Padic.norm_p_lt_one
     calc
       ‖(p : ℚ_[p]) * (z : ℚ_[p])‖ = ‖(z : ℚ_[p])‖ * ‖(p : ℚ_[p])‖ := by
         rw [norm_mul, mul_comm]

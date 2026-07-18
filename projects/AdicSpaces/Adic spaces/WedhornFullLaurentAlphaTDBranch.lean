@@ -53,10 +53,8 @@ so the missing comparison is explicit and reusable.
 
 namespace ValuationSpectrum
 
-variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [PlusSubring A]
+variable {A : Type*} [CommRing A]
 
-omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] in
 /-- **σ-cancellation lift from per-`t'` upper bound by `algebraMap s_D`**
 (α_T_D branch primitive A).
 
@@ -88,7 +86,6 @@ theorem alpha_T_D_per_t_factored_chain_from_per_t_bound
   exact (vle_iff_mul_unit_right w σ_loc t'
     (algebraMap A (Localization.Away s) s_D)).mpr (h_per_t t' ht')
 
-omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] in
 /-- **α_T_D per-`t'` upper bound via intermediate τ-comparison**
 (α_T_D branch primitive B).
 
@@ -118,7 +115,6 @@ theorem alpha_T_D_per_t_bound_via_intermediate
   intro t' ht'
   exact w.vle_trans (h_t_le_τ t' ht') h_τ_le_s_D
 
-omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] in
 /-- **α_T_D per-`t'` σ-factored chain via intermediate τ-comparison
 (T033 main composed deliverable)**.
 

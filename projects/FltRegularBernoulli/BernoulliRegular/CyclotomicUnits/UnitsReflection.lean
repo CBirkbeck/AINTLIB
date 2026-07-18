@@ -1,7 +1,9 @@
-import BernoulliRegular.CyclotomicUnits.ClassNumber
-import BernoulliRegular.CyclotomicUnits.KummerLogDeterminant
-import BernoulliRegular.CyclotomicUnits.LogDomain
-import BernoulliRegular.CyclotomicUnits.SaturationIndex
+module
+
+public import BernoulliRegular.CyclotomicUnits.ClassNumber
+public import BernoulliRegular.CyclotomicUnits.KummerLogDeterminant
+public import BernoulliRegular.CyclotomicUnits.LogDomain
+public import BernoulliRegular.CyclotomicUnits.SaturationIndex
 
 /-!
 # Cyclotomic-unit route to weak reflection
@@ -20,8 +22,6 @@ This file assembles the completed cyclotomic-unit tickets:
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular
 
 variable {p : ℕ} [Fact p.Prime]
@@ -38,7 +38,6 @@ theorem not_dvd_cyclotomicUnitIndex_of_bernoulli_nonzero
       ¬ (p : ℤ) ∣ (_root_.bernoulli (2 * j)).num) :
     ¬ p ∣ (CPlus (p := p) (K := K)
       (by have hp_two := (Fact.out : Nat.Prime p).two_le; omega)).index := by
-  classical
   have hp_three : 3 ≤ p := by
     have hp_two := (Fact.out : Nat.Prime p).two_le
     omega
@@ -77,7 +76,6 @@ theorem not_dvd_cyclotomicUnitIndex_of_bernoulli_nonzero
 theorem not_dvd_hPlus_of_not_dvd_hMinus_units
     (hp_odd : p ≠ 2) (hminus : ¬ (p : ℕ) ∣ hMinus K) :
     ¬ (p : ℕ) ∣ hPlus K := by
-  classical
   have hp_three : 3 ≤ p := by
     have hp_two := (Fact.out : Nat.Prime p).two_le
     omega
@@ -106,7 +104,6 @@ theorem not_dvd_hPlus_of_not_dvd_hMinus_units
 theorem weakReflection_dvd_hMinus_of_dvd_hPlus_units
     (hp_odd : p ≠ 2) (hplus : (p : ℕ) ∣ hPlus K) :
     (p : ℕ) ∣ hMinus K := by
-  classical
   by_contra hminus
   exact not_dvd_hPlus_of_not_dvd_hMinus_units
     (p := p) (K := K) hp_odd hminus hplus

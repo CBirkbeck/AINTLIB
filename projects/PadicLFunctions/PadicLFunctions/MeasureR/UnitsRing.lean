@@ -73,25 +73,19 @@ instance : CommRing (MeasureR K ℤ_[p]ˣ) where
     change c _ = c _
     congr 1
     ext z
-    refine congrArg Subtype.val ?_
-    change f (x * y * z) = f (x * (y * z))
-    rw [mul_assoc]
+    exact congrArg Subtype.val (congrArg f (mul_assoc x y z))
   one_mul a := by
     refine LinearMap.ext fun f => ?_
     change a ((f.comp (PadicMeasure.unitsMulCM₂ p)).curry 1) = a f
     congr 1
     ext y
-    refine congrArg Subtype.val ?_
-    change f (1 * y) = f y
-    rw [one_mul]
+    exact congrArg Subtype.val (congrArg f (one_mul y))
   mul_one a := by
     refine LinearMap.ext fun f => ?_
     change a (innerInt K (dirac K ℤ_[p]ˣ 1) (f.comp (PadicMeasure.unitsMulCM₂ p))) = a f
     congr 1
     ext x
-    refine congrArg Subtype.val ?_
-    change f (x * 1) = f x
-    rw [mul_one]
+    exact congrArg Subtype.val (congrArg f (mul_one x))
   left_distrib a b c := by
     refine LinearMap.ext fun f => ?_
     change a (innerInt K (b + c) (f.comp (PadicMeasure.unitsMulCM₂ p))) = _
@@ -118,9 +112,7 @@ instance : CommRing (MeasureR K ℤ_[p]ˣ) where
     change a _ = a _
     congr 1
     ext x
-    refine congrArg Subtype.val ?_
-    change f (x * y) = f (y * x)
-    rw [mul_comm]
+    exact congrArg Subtype.val (congrArg f (mul_comm x y))
 
 variable {p K}
 
@@ -138,9 +130,7 @@ variable (p K)
 (RJW Def 3.37, TeX 1245–1253). -/
 def deg : MeasureR K ℤ_[p]ˣ →+* integerRing K where
   toFun μ := μ 1
-  map_one' := by
-    change (1 : C(ℤ_[p]ˣ, integerRing K)) 1 = 1
-    rfl
+  map_one' := rfl
   map_mul' μ ν := by
     change μ (innerInt K ν ((1 : C(ℤ_[p]ˣ, integerRing K)).comp
       (PadicMeasure.unitsMulCM₂ p))) = μ 1 * ν 1
@@ -148,10 +138,7 @@ def deg : MeasureR K ℤ_[p]ˣ →+* integerRing K where
         = ν 1 • (1 : C(ℤ_[p]ˣ, integerRing K)) := by
       ext x
       refine congrArg Subtype.val ?_
-      change ν _ = _
-      have hc : ((1 : C(ℤ_[p]ˣ, integerRing K)).comp (PadicMeasure.unitsMulCM₂ p)).curry x
-          = (1 : C(ℤ_[p]ˣ, integerRing K)) := ContinuousMap.ext fun y => rfl
-      rw [hc]
+      change ν (1 : C(ℤ_[p]ˣ, integerRing K)) = _
       simp [smul_eq_mul]
     rw [h1, map_smul, smul_eq_mul, mul_comm]
   map_zero' := rfl

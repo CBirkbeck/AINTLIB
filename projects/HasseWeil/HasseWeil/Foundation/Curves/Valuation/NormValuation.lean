@@ -1,0 +1,2321 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.FieldTheory.IsAlgClosed.Basic
+import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.RingTheory.AdjoinRoot
+import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.Jacobson.Ring
+import Mathlib.RingTheory.Polynomial.Quotient
+
+import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
+
+open scoped Polynomial.Bivariate
+
+/-!
+# Norm-valuation bridge for smooth plane curves
+
+Helper lemmas toward the norm-local-order formula (Silverman II.3.1(b),
+"Helper B"):
+
+> For `u ∈ F[C]` nonzero and `a ∈ F` (with `[IsAlgClosed F]`),
+> `rootMultiplicity a (N(u)) = Σ_{P : P.x = a, smooth} ord_P(u)`.
+
+The foundational bridge is `F[C] ⧸ maximalIdealAt P ≃ₐ[F] F` as an F-algebra,
+hence its F-rank is 1 — the "inertia degree = 1" fact in the Dedekind-extension
+language. Under `[IsAlgClosed F]` the general Dedekind argument runs:
+
+1. Every maximal ideal of `F[C]` lying over `(X − a)` has residue field `F`
+   (finite F-algebra field ⇒ `F` by `IsAlgClosed`).
+2. So `inertiaDeg' (X − a) M = finrank F (F[C]⧸M) = 1`.
+3. Combined with the principal-power form of `Ideal.relNorm`:
+   `relNorm (maximalIdealAt P) = (X − P.x)^1 = (X − P.x)`.
+4. Multiplicativity of `relNorm` + UFD factorization of `(u)` in Dedekind `F[C]`
+   ⇒ the main formula.
+
+## Main definitions
+
+* `SmoothPlaneCurve.quotientMaximalIdealAtEquiv`: the F-algebra isomorphism
+  `F[C] ⧸ maximalIdealAt P ≃ₐ[F] F`.
+* `SmoothPlaneCurve.smoothPointEquivMaxIdeal`: the bijection between smooth
+  F-rational points and maximal ideals of `F[C]`.
+
+## Main results
+
+* `SmoothPlaneCurve.inertiaDeg_maximalIdealAt`: the residue degree at a smooth
+  point is `1`.
+* `SmoothPlaneCurve.relNorm_maximalIdealAt`: `relNorm (maximalIdealAt P) = (X − P.x)`.
+* `count_preservation_localization`: the M-adic count is preserved under the
+  localization map `A → Localization.AtPrime M`.
+* `SmoothPlaneCurve.helperB`: `(divisorOf f).degree = intDegree (normAsRatFunc f)`.
+* `SmoothPlaneCurve.projectiveDivisorOf_degree_eq_zero`: Silverman II.3.1(b),
+  the keystone degree-zero statement for principal projective divisors.
+
+## References
+
+* [Silverman, *The Arithmetic of Elliptic Curves*], II.3.1.
+-/
+
+namespace HasseWeil.Curves
+
+variable {F : Type*} [Field F]
+
+namespace SmoothPlaneCurve
+
+variable (C : SmoothPlaneCurve F)
+
+/-- The F-algebra isomorphism `F[C] ⧸ maximalIdealAt P ≃ₐ[F] F`, obtained
+by evaluation at the smooth point `P`. The quotient of the coordinate
+ring by the maximal ideal at a smooth point is naturally isomorphic to
+the base field `F`. -/
+noncomputable def quotientMaximalIdealAtEquiv (P : C.SmoothPoint) :
+    (C.CoordinateRing ⧸ C.maximalIdealAt P) ≃ₐ[F] F :=
+  WeierstrassCurve.Affine.CoordinateRing.quotientXYIdealEquiv
+    (W' := C.toAffine) (x := P.x) (y := Polynomial.C P.y) P.nonsingular.1
+
+/-- `F[C] ⧸ maximalIdealAt P` is free of rank 1 over `F` — the residue
+field at any smooth point of a smooth plane curve over `F` is isomorphic
+to `F`. -/
+theorem finrank_quotientMaximalIdealAt (P : C.SmoothPoint) :
+    Module.finrank F (C.CoordinateRing ⧸ C.maximalIdealAt P) = 1 := by
+  rw [(C.quotientMaximalIdealAtEquiv P).toLinearEquiv.finrank_eq,
+    Module.finrank_self]
+
+/-- The `XClass` of `P.x` (image of `X − P.x` under `F[X] → F[C]`) belongs
+to the maximal ideal at `P`. This is the structural fact underlying
+`comap_algebraMap_maximalIdealAt`. -/
+theorem xClass_mem_maximalIdealAt (P : C.SmoothPoint) :
+    WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine P.x ∈
+      C.maximalIdealAt P := by
+  rw [maximalIdealAt, WeierstrassCurve.Affine.CoordinateRing.XYIdeal]
+  exact Ideal.subset_span (Set.mem_insert _ _)
+
+/-- The image of `X − P.x` under the algebra map `F[X] → F[C]` lies in the
+maximal ideal at `P`. -/
+theorem algebraMap_X_sub_C_mem_maximalIdealAt (P : C.SmoothPoint) :
+    algebraMap (Polynomial F) C.CoordinateRing (Polynomial.X - Polynomial.C P.x) ∈
+      C.maximalIdealAt P := by
+  have h_eq : algebraMap (Polynomial F) C.CoordinateRing
+      (Polynomial.X - Polynomial.C P.x) =
+    WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine P.x := by
+    simp only [WeierstrassCurve.Affine.CoordinateRing.XClass]
+    change (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine ∘
+        Polynomial.C) (Polynomial.X - Polynomial.C P.x) = _
+    simp [WeierstrassCurve.Affine.CoordinateRing.mk, Polynomial.C_sub,
+      AdjoinRoot.mk]
+  rw [h_eq]
+  exact C.xClass_mem_maximalIdealAt P
+
+/-- **Lies-over bridge**: the maximal ideal `maximalIdealAt P` of `F[C]`
+lies over the principal prime ideal `(X − P.x)` of `F[X]`. Equivalently,
+the preimage of `maximalIdealAt P` under the algebra map
+`F[X] → F[C]` is exactly the ideal generated by `X − P.x`. -/
+theorem maximalIdealAt_liesOver (P : C.SmoothPoint) :
+    (C.maximalIdealAt P).LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}) := by
+  refine ⟨?_⟩
+  have h_sub :
+      Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} ≤
+        Ideal.under (Polynomial F) (C.maximalIdealAt P) := by
+    rw [Ideal.span_le, Set.singleton_subset_iff]
+    change Polynomial.X - Polynomial.C P.x ∈
+      (C.maximalIdealAt P).comap (algebraMap _ _)
+    rw [Ideal.mem_comap]
+    exact C.algebraMap_X_sub_C_mem_maximalIdealAt P
+  have h_max :
+      (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).IsMaximal :=
+    Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv P.x).toRingEquiv.isField
+        (Field.toIsField F))
+  have h_under_ne_top :
+      Ideal.under (Polynomial F) (C.maximalIdealAt P) ≠ ⊤ := by
+    rw [Ne, Ideal.eq_top_iff_one]
+    change (1 : Polynomial F) ∉ (C.maximalIdealAt P).comap (algebraMap _ _)
+    rw [Ideal.mem_comap, map_one]
+    exact (C.maximalIdealAt_isMaximal P).ne_top.imp
+      (fun h ↦ (Ideal.eq_top_iff_one _).mpr h)
+  exact h_max.eq_of_le h_under_ne_top h_sub
+
+/-- Auxiliary: `F[X] ⧸ (X − a)` has F-rank 1 (it is F-algebra-isomorphic to F). -/
+theorem finrank_quotientSpanXSubC (a : F) :
+    Module.finrank F
+      (Polynomial F ⧸ Ideal.span {Polynomial.X - Polynomial.C a}) = 1 := by
+  rw [(Polynomial.quotientSpanXSubCAlgEquiv (R := F) a).toLinearEquiv.finrank_eq,
+    Module.finrank_self]
+
+/-- The algebra map `F[X]⧸(X−P.x) → F[C]⧸maximalIdealAt P` is surjective:
+both are F-algebras isomorphic to `F`, and the composition
+`F → F[X]⧸(X−P.x) → F[C]⧸maximalIdealAt P` equals `algebraMap F
+(F[C]⧸maximalIdealAt P)` which is surjective (since `1` generates the
+1-dim F-vector space `F[C]⧸maximalIdealAt P`). -/
+theorem algebraMap_quotient_maximalIdealAt_surjective (P : C.SmoothPoint) :
+    letI : (C.maximalIdealAt P).LiesOver
+        (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}) :=
+      C.maximalIdealAt_liesOver P
+    Function.Surjective
+      (algebraMap ((Polynomial F) ⧸
+        Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
+        (C.CoordinateRing ⧸ C.maximalIdealAt P)) := by
+  haveI := C.maximalIdealAt_liesOver P
+  intro w
+  set a := C.quotientMaximalIdealAtEquiv P w
+  refine ⟨Ideal.Quotient.mk _ (Polynomial.C a), ?_⟩
+  have h_tower : algebraMap (Polynomial F) C.CoordinateRing (Polynomial.C a) =
+      algebraMap F C.CoordinateRing a := by
+    rw [IsScalarTower.algebraMap_apply F (Polynomial F) C.CoordinateRing,
+      Polynomial.algebraMap_eq]
+  have h_le : Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} ≤
+      Ideal.comap (algebraMap (Polynomial F) C.CoordinateRing) (C.maximalIdealAt P) := by
+    apply Ideal.span_le.mpr
+    intro x hx
+    rcases Set.mem_singleton_iff.mp hx with rfl
+    change algebraMap (Polynomial F) C.CoordinateRing
+      (Polynomial.X - Polynomial.C P.x) ∈ C.maximalIdealAt P
+    exact C.algebraMap_X_sub_C_mem_maximalIdealAt P
+  have h_simp :
+      algebraMap ((Polynomial F) ⧸
+          Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
+          (C.CoordinateRing ⧸ C.maximalIdealAt P)
+          (Ideal.Quotient.mk _ (Polynomial.C a)) =
+      Ideal.Quotient.mk _ (algebraMap F C.CoordinateRing a) := by
+    change Ideal.quotientMap (C.maximalIdealAt P)
+        (algebraMap (Polynomial F) C.CoordinateRing) h_le
+        (Ideal.Quotient.mk _ (Polynomial.C a)) = _
+    rw [Ideal.quotientMap_mk, h_tower]
+  rw [h_simp]
+  change algebraMap F (C.CoordinateRing ⧸ C.maximalIdealAt P) a = w
+  change (C.quotientMaximalIdealAtEquiv P).symm a = w
+  simp [a]
+
+/-- **Inertia degree = 1** at every smooth point: the bridge lemmas
+combine via `Module.finrank_le_one` (using surjectivity) and the
+nontriviality lower bound. -/
+theorem inertiaDeg_maximalIdealAt (P : C.SmoothPoint) :
+    letI : (C.maximalIdealAt P).LiesOver
+        (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}) :=
+      C.maximalIdealAt_liesOver P
+    Ideal.inertiaDeg' (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
+      (C.maximalIdealAt P) = 1 := by
+  haveI := C.maximalIdealAt_liesOver P
+  rw [Ideal.inertiaDeg'_algebraMap]
+  haveI h_max :
+      (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).IsMaximal :=
+    Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv P.x).toRingEquiv.isField
+        (Field.toIsField F))
+  haveI : Field ((Polynomial F) ⧸
+      Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}) :=
+    Ideal.Quotient.field _
+  haveI : Nontrivial (C.CoordinateRing ⧸ C.maximalIdealAt P) :=
+    (Ideal.Quotient.nontrivial_iff).mpr (C.maximalIdealAt_isMaximal P).ne_top
+  have h_le : Module.finrank
+      ((Polynomial F) ⧸
+        Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
+      (C.CoordinateRing ⧸ C.maximalIdealAt P) ≤ 1 :=
+    finrank_le_one (1 : C.CoordinateRing ⧸ C.maximalIdealAt P) fun w ↦ by
+      obtain ⟨c, hc⟩ := C.algebraMap_quotient_maximalIdealAt_surjective P w
+      refine ⟨c, ?_⟩
+      rw [Algebra.smul_def, hc]
+      exact mul_one w
+  haveI : Module.IsTorsionFree
+      ((Polynomial F) ⧸
+        Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
+      (C.CoordinateRing ⧸ C.maximalIdealAt P) :=
+    inferInstance
+  have h_ge : 1 ≤ Module.finrank
+      ((Polynomial F) ⧸
+        Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
+      (C.CoordinateRing ⧸ C.maximalIdealAt P) :=
+    Module.finrank_pos
+  exact le_antisymm h_le h_ge
+
+/-- `C.CoordinateRing` is finite type as an F-algebra (F → F[X] → F[C] is a
+chain of finite-type extensions). -/
+instance coordinateRing_finiteType :
+    Algebra.FiniteType F C.CoordinateRing :=
+  Algebra.FiniteType.trans (S := Polynomial F) inferInstance
+    (AdjoinRoot.finiteType (f := C.toAffine.polynomial))
+
+/-- For a maximal ideal `M` of `F[C]`, the quotient `F[C]⧸M` is a field of
+finite-type over `F`. Combined with `IsJacobsonRing F` (auto for fields),
+this gives `Module.Finite F (F[C]⧸M)` via Zariski's lemma. -/
+theorem module_finite_quotient_of_maximal
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal) :
+    letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+    Module.Finite F (C.CoordinateRing ⧸ M) := by
+  letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+  haveI : Algebra.FiniteType F (C.CoordinateRing ⧸ M) :=
+    Algebra.FiniteType.of_surjective (Ideal.Quotient.mkₐ F M)
+      Ideal.Quotient.mk_surjective
+  exact finite_of_finite_type_of_isJacobsonRing F (C.CoordinateRing ⧸ M)
+
+/-- Under `[IsAlgClosed F]`, for every maximal ideal `M` of `F[C]` the
+algebra map `F → F[C]⧸M` is bijective: `F[C]⧸M` is a finite-type F-algebra
+that's a field, so by Zariski's lemma it's a finite F-algebra, hence
+integral over `F`, hence (under `IsAlgClosed`) equal to `F`. -/
+theorem algebraMap_bijective_quotient_of_maximal [IsAlgClosed F]
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal) :
+    letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+    Function.Bijective (algebraMap F (C.CoordinateRing ⧸ M)) := by
+  letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+  haveI := C.module_finite_quotient_of_maximal hM
+  haveI : Algebra.IsIntegral F (C.CoordinateRing ⧸ M) :=
+    Algebra.IsIntegral.of_finite F (C.CoordinateRing ⧸ M)
+  exact IsAlgClosed.algebraMap_bijective_of_isIntegral
+
+/-- **SmoothPoint extraction (partial)**: under `[IsAlgClosed F]`, for every
+maximal ideal `M` of `F[C]` there exist `a, b ∈ F` such that
+`algebraMap F (F[C]⧸M) a = mk X_F[C]` and `algebraMap F (F[C]⧸M) b = mk Y_F[C]`.
+
+These are the "candidate coordinates" for the smooth point associated to M;
+full extraction (proving `(a, b)` satisfies the Weierstrass equation and is
+nonsingular under `[IsElliptic]`) is the next step. -/
+theorem exists_coordinates_of_isMaximal [IsAlgClosed F]
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal) :
+    letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+    ∃ a b : F,
+      algebraMap F (C.CoordinateRing ⧸ M) a = Ideal.Quotient.mk M
+        (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine (Polynomial.C Polynomial.X)) ∧
+      algebraMap F (C.CoordinateRing ⧸ M) b = Ideal.Quotient.mk M
+        (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y) := by
+  letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+  have h_bij := C.algebraMap_bijective_quotient_of_maximal hM
+  obtain ⟨a, ha⟩ := h_bij.2 (Ideal.Quotient.mk M
+    (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine (Polynomial.C Polynomial.X)))
+  obtain ⟨b, hb⟩ := h_bij.2 (Ideal.Quotient.mk M
+    (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y))
+  exact ⟨a, b, ha, hb⟩
+
+/-- **De-`IsAlgClosed` coordinate extraction**: the `[IsAlgClosed F]`-free
+generalisation of `exists_coordinates_of_isMaximal`, replacing the
+algebraic-closure hypothesis by *surjectivity* of `algebraMap F (F[C]⧸M)`. For a
+maximal ideal `M` whose residue field is `F`, there exist `a, b ∈ F` mapping to
+the `X`- and `Y`-classes. This is the `F`-rationality (inertia-1) form. -/
+theorem exists_coordinates_of_isMaximal_of_surjective
+    {M : Ideal C.CoordinateRing} (_hM : M.IsMaximal)
+    (h_surj : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+      Function.Surjective (algebraMap F (C.CoordinateRing ⧸ M))) :
+    letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+    ∃ a b : F,
+      algebraMap F (C.CoordinateRing ⧸ M) a = Ideal.Quotient.mk M
+        (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine (Polynomial.C Polynomial.X)) ∧
+      algebraMap F (C.CoordinateRing ⧸ M) b = Ideal.Quotient.mk M
+        (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y) := by
+  letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+  obtain ⟨a, ha⟩ := h_surj (Ideal.Quotient.mk M
+    (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine (Polynomial.C Polynomial.X)))
+  obtain ⟨b, hb⟩ := h_surj (Ideal.Quotient.mk M
+    (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y))
+  exact ⟨a, b, ha, hb⟩
+
+/-- The polynomial identity underlying `equation_of_coordinates_of_field`, isolated as
+its own declaration so its `ring1` closing step elaborates cheaply.  In `F[X][Y]` the
+`X`-class polynomial `C X` and the `Y`-class `Y` recombine into `W.polynomial`. -/
+private lemma mk_polynomial_expand_aux (W : WeierstrassCurve.Affine F) :
+    (Y : F[X][Y]) ^ 2 +
+        Polynomial.C (Polynomial.C W.a₁) * Polynomial.C Polynomial.X * Y +
+        Polynomial.C (Polynomial.C W.a₃) * Y -
+        (Polynomial.C Polynomial.X ^ 3 +
+          Polynomial.C (Polynomial.C W.a₂) * Polynomial.C Polynomial.X ^ 2 +
+          Polynomial.C (Polynomial.C W.a₄) * Polynomial.C Polynomial.X +
+          Polynomial.C (Polynomial.C W.a₆)) =
+      W.polynomial := by
+  simp only [WeierstrassCurve.Affine.polynomial]
+  simp only [Polynomial.C_add, Polynomial.C_mul, Polynomial.C_pow]
+  ring1
+
+/-- **De-`IsAlgClosed` Weierstrass equation**: the `[IsAlgClosed F]`-free
+generalisation of `equation_of_coordinates`. The extracted coordinates `(a, b)`
+satisfy the curve equation over any field. -/
+theorem equation_of_coordinates_of_field
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal)
+    {a b : F}
+    (ha : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+          algebraMap F (C.CoordinateRing ⧸ M) a = Ideal.Quotient.mk M
+            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+              (Polynomial.C Polynomial.X)))
+    (hb : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+          algebraMap F (C.CoordinateRing ⧸ M) b = Ideal.Quotient.mk M
+            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y)) :
+    C.toAffine.Equation a b := by
+  letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+  have h_mk_zero :
+      (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        C.toAffine.polynomial : C.CoordinateRing) = 0 :=
+    AdjoinRoot.mk_self
+  have h_quot_zero : Ideal.Quotient.mk M
+      (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        C.toAffine.polynomial) = 0 := by
+    rw [h_mk_zero, map_zero]
+  rw [WeierstrassCurve.Affine.equation_iff']
+  have h_inj : Function.Injective (algebraMap F (C.CoordinateRing ⧸ M)) :=
+    RingHom.injective _
+  apply h_inj
+  rw [map_zero]
+  have h_const : ∀ (c : F),
+      algebraMap F (C.CoordinateRing ⧸ M) c =
+      Ideal.Quotient.mk M
+        (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+          (Polynomial.C (Polynomial.C c))) := fun c ↦ rfl
+  -- Rewrite `mk polynomial` on the RHS as `mk` of the expanded Weierstrass value (via the
+  -- polynomial identity `mk_polynomial_expand_aux`), then distribute the two ring homs
+  -- *forward* through the expansion and fold the `X`/`Y`-classes back via `ha`/`hb`.  Working
+  -- forward avoids the heartbeat-heavy `congr`/`whnf` descent through the coordinate-ring
+  -- quotient that the naive proof performed.
+  have hmk : WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+      ((Y : F[X][Y]) ^ 2 +
+        Polynomial.C (Polynomial.C C.toAffine.a₁) * Polynomial.C Polynomial.X * Y +
+        Polynomial.C (Polynomial.C C.toAffine.a₃) * Y -
+        (Polynomial.C Polynomial.X ^ 3 +
+          Polynomial.C (Polynomial.C C.toAffine.a₂) * Polynomial.C Polynomial.X ^ 2 +
+          Polynomial.C (Polynomial.C C.toAffine.a₄) * Polynomial.C Polynomial.X +
+          Polynomial.C (Polynomial.C C.toAffine.a₆))) =
+      WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine C.toAffine.polynomial :=
+    congrArg _ (mk_polynomial_expand_aux C.toAffine)
+  have h_expand :
+      algebraMap F (C.CoordinateRing ⧸ M)
+          (b ^ 2 + C.toAffine.a₁ * a * b + C.toAffine.a₃ * b -
+            (a ^ 3 + C.toAffine.a₂ * a ^ 2 + C.toAffine.a₄ * a + C.toAffine.a₆)) =
+        Ideal.Quotient.mk M
+          (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+            C.toAffine.polynomial) := by
+    rw [← hmk]
+    simp only [map_add, map_sub, map_mul, map_pow, ← ha, ← hb, ← h_const]
+  rw [h_expand]
+  exact h_quot_zero
+
+/-- The coordinates `(a, b)` extracted from a maximal ideal of `F[C]`
+satisfy the Weierstrass equation.  Special case of `equation_of_coordinates_of_field`
+for `[IsAlgClosed F]`. -/
+theorem equation_of_coordinates [IsAlgClosed F]
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal)
+    {a b : F}
+    (ha : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+          algebraMap F (C.CoordinateRing ⧸ M) a = Ideal.Quotient.mk M
+            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+              (Polynomial.C Polynomial.X)))
+    (hb : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+          algebraMap F (C.CoordinateRing ⧸ M) b = Ideal.Quotient.mk M
+            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y)) :
+    C.toAffine.Equation a b :=
+  C.equation_of_coordinates_of_field hM ha hb
+
+/-- **De-`IsAlgClosed` SmoothPoint extraction**: given a maximal ideal `M` of
+`F[C]` whose residue map `algebraMap F (F[C]⧸M)` is *surjective* (the
+`F`-rationality / inertia-1 hypothesis) and `[C.toAffine.IsElliptic]`,
+`M = maximalIdealAt P` for a smooth `F`-rational point `P`. -/
+theorem exists_smoothPoint_of_isMaximal_of_surjective [C.toAffine.IsElliptic]
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal)
+    (h_surj : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+      Function.Surjective (algebraMap F (C.CoordinateRing ⧸ M))) :
+    ∃ P : C.SmoothPoint, C.maximalIdealAt P = M := by
+  obtain ⟨a, b, ha, hb⟩ := C.exists_coordinates_of_isMaximal_of_surjective hM h_surj
+  have h_eq : C.toAffine.Equation a b := C.equation_of_coordinates_of_field hM ha hb
+  have h_nonsing : C.toAffine.Nonsingular a b :=
+    (WeierstrassCurve.Affine.equation_iff_nonsingular (W := C.toAffine)).mp h_eq
+  refine ⟨⟨a, b, h_nonsing⟩, ?_⟩
+  apply (C.maximalIdealAt_isMaximal ⟨a, b, h_nonsing⟩).eq_of_le hM.ne_top
+  rw [maximalIdealAt, WeierstrassCurve.Affine.CoordinateRing.XYIdeal,
+    Ideal.span_le, Set.insert_subset_iff, Set.singleton_subset_iff]
+  refine ⟨?_, ?_⟩
+  · change WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine a ∈ M
+    rw [← Ideal.Quotient.eq_zero_iff_mem]
+    simp only [WeierstrassCurve.Affine.CoordinateRing.XClass]
+    have h_sub_mk : WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        (Polynomial.C (Polynomial.X - Polynomial.C a)) =
+      WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        (Polynomial.C Polynomial.X) -
+      WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        (Polynomial.C (Polynomial.C a)) := by
+      rw [← map_sub, ← Polynomial.C_sub]
+    rw [h_sub_mk, map_sub, ← ha]
+    exact sub_self _
+  · change WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+      (Polynomial.C b) ∈ M
+    rw [← Ideal.Quotient.eq_zero_iff_mem]
+    simp only [WeierstrassCurve.Affine.CoordinateRing.YClass]
+    have h_sub_mk : WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        (Y - Polynomial.C (Polynomial.C b)) =
+      WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y -
+      WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+        (Polynomial.C (Polynomial.C b)) := by
+      rw [← map_sub]
+    rw [h_sub_mk, map_sub, ← hb]
+    exact sub_self _
+
+/-- **SmoothPoint surjection**: under `[IsAlgClosed F]` and
+`[C.toAffine.IsElliptic]`, every maximal ideal of `F[C]` is of the form
+`maximalIdealAt P` for some smooth F-rational point `P`. The residue surjectivity
+needed by `exists_smoothPoint_of_isMaximal_of_surjective` is supplied here by
+Zariski's lemma. -/
+theorem exists_smoothPoint_of_isMaximal [IsAlgClosed F] [C.toAffine.IsElliptic]
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal) :
+    ∃ P : C.SmoothPoint, C.maximalIdealAt P = M :=
+  C.exists_smoothPoint_of_isMaximal_of_surjective hM
+    (C.algebraMap_bijective_quotient_of_maximal hM).surjective
+
+/-- `maximalIdealAt` is injective on `SmoothPoint`: two smooth points with
+the same maximal ideal have the same coordinates. -/
+theorem maximalIdealAt_injective :
+    Function.Injective (C.maximalIdealAt) := by
+  intro P Q hPQ
+  have h_mem_x : WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine P.x ∈
+      C.maximalIdealAt Q := hPQ ▸ C.xClass_mem_maximalIdealAt P
+  have h_basis_x :
+      WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine P.x =
+      (Polynomial.X - Polynomial.C P.x) • (1 : C.CoordinateRing) +
+      (0 : Polynomial F) •
+        WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y := by
+    simp only [WeierstrassCurve.Affine.CoordinateRing.XClass]
+    rw [zero_smul, add_zero, Algebra.smul_def, mul_one]
+    rfl
+  rw [h_basis_x, C.mem_maximalIdealAt_iff_eval_zero Q
+    (Polynomial.X - Polynomial.C P.x) 0] at h_mem_x
+  simp only [Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, Polynomial.eval_zero,
+    zero_mul, add_zero] at h_mem_x
+  have h_x : P.x = Q.x := by linear_combination -h_mem_x
+  have h_mem_y : WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+      (Polynomial.C P.y) ∈ C.maximalIdealAt Q := by
+    rw [← hPQ, maximalIdealAt, WeierstrassCurve.Affine.CoordinateRing.XYIdeal]
+    exact Ideal.subset_span (by right; rfl)
+  have h_basis_y :
+      WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
+        (Polynomial.C P.y) =
+      (- Polynomial.C P.y) • (1 : C.CoordinateRing) +
+      (1 : Polynomial F) •
+        WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y := by
+    simp only [WeierstrassCurve.Affine.CoordinateRing.YClass]
+    rw [one_smul, Algebra.smul_def, mul_one,
+      show (algebraMap (Polynomial F) C.CoordinateRing (-Polynomial.C P.y)) +
+          WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y =
+        WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+          (- Polynomial.C (Polynomial.C P.y) + Y) by rw [map_add, map_neg]; rfl]
+    congr 1
+    ring
+  rw [h_basis_y, C.mem_maximalIdealAt_iff_eval_zero Q
+    (- Polynomial.C P.y) 1] at h_mem_y
+  simp only [Polynomial.eval_neg, Polynomial.eval_C, Polynomial.eval_one] at h_mem_y
+  have h_y : P.y = Q.y := by linear_combination -h_mem_y
+  exact SmoothPoint.ext h_x h_y
+
+/-- **SmoothPoint ↔ MaxSpec bijection**: under `[IsAlgClosed F]` +
+`[C.toAffine.IsElliptic]`, the map `P ↦ maximalIdealAt P` is a bijection
+between smooth F-rational points of `C` and maximal ideals of `F[C]`.
+
+Combines `maximalIdealAt_injective` (injection, unconditional) and
+`exists_smoothPoint_of_isMaximal` (surjection, under hypotheses). -/
+noncomputable def smoothPointEquivMaxIdeal
+    [IsAlgClosed F] [C.toAffine.IsElliptic] :
+    C.SmoothPoint ≃ {M : Ideal C.CoordinateRing // M.IsMaximal} where
+  toFun P := ⟨C.maximalIdealAt P, C.maximalIdealAt_isMaximal P⟩
+  invFun M := (C.exists_smoothPoint_of_isMaximal M.2).choose
+  left_inv P := by
+    apply C.maximalIdealAt_injective
+    exact (C.exists_smoothPoint_of_isMaximal
+      (C.maximalIdealAt_isMaximal P)).choose_spec
+  right_inv M := by
+    apply Subtype.ext
+    exact (C.exists_smoothPoint_of_isMaximal M.2).choose_spec
+
+@[simp] theorem smoothPointEquivMaxIdeal_apply
+    [IsAlgClosed F] [C.toAffine.IsElliptic] (P : C.SmoothPoint) :
+    (C.smoothPointEquivMaxIdeal P : Ideal C.CoordinateRing) =
+      C.maximalIdealAt P := rfl
+
+/-- Under `[IsAlgClosed F]` + `[C.toAffine.IsElliptic]`, the maximal-ideal
+map `P ↦ maximalIdealAt P` is an `Embedding` with image the full MaxSpec
+of `F[C]`. -/
+theorem maximalIdealAt_range [IsAlgClosed F] [C.toAffine.IsElliptic] :
+    Set.range C.maximalIdealAt = {M : Ideal C.CoordinateRing | M.IsMaximal} := by
+  ext M
+  constructor
+  · rintro ⟨P, rfl⟩
+    exact C.maximalIdealAt_isMaximal P
+  · intro hM
+    exact C.exists_smoothPoint_of_isMaximal hM
+
+/-- For a smooth point `P` with `P.x = a`, the maximal ideal
+`maximalIdealAt P` lies over `(X − a)` in `F[X]`. -/
+theorem maximalIdealAt_liesOver_of_eq_x (P : C.SmoothPoint) {a : F} (h : P.x = a) :
+    (C.maximalIdealAt P).LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) := by
+  subst h
+  exact C.maximalIdealAt_liesOver P
+
+/-- **Sum of ramification indices** over the fiber of smooth F-rational
+points with x-coordinate `a` equals the function-field degree 2. Uses
+`sum_ramification_inertia` (mathlib) + our `inertiaDeg_maximalIdealAt = 1`. -/
+theorem sum_ramificationIdx_over_fiber [IsAlgClosed F] [C.toAffine.IsElliptic]
+    [IsIntegrallyClosed C.CoordinateRing] (a : F) :
+    let p : Ideal (Polynomial F) :=
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}
+    haveI : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+        (Field.toIsField F))
+    ∑ M ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      Ideal.ramificationIdx' p M *
+      Ideal.inertiaDeg' p M =
+      Module.finrank (FractionRing (Polynomial F)) C.FunctionField := by
+  set p : Ideal (Polynomial F) :=
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
+  haveI h_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+      (Field.toIsField F))
+  apply Ideal.sum_ramification_inertia C.CoordinateRing
+    (FractionRing (Polynomial F)) C.FunctionField
+  intro h
+  have hx_mem : (Polynomial.X - Polynomial.C a : Polynomial F) ∈ p :=
+    Ideal.subset_span rfl
+  rw [h, Ideal.mem_bot] at hx_mem
+  exact Polynomial.X_sub_C_ne_zero a hx_mem
+
+/-- The principal ideal `(X − a)` of `F[X]` is nonzero, since `X − a` is. -/
+private theorem span_X_sub_C_ne_bot (a : F) :
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} ≠ ⊥ := by
+  rw [Ne, Ideal.span_singleton_eq_bot]
+  exact Polynomial.X_sub_C_ne_zero a
+
+/-- A prime ideal `M` of `F[C]` lying over the nonzero principal prime `(X − a)`
+of `F[X]` is maximal: it is nonzero (its contraction is `(X − a) ≠ ⊥`, using that
+the algebra map `F[X] → F[C]` is injective), and a nonzero prime of a Dedekind
+domain is maximal. -/
+private theorem isMaximal_of_isPrime_of_liesOver_span_X_sub_C {a : F}
+    {M : Ideal C.CoordinateRing} (hMprime : M.IsPrime)
+    (hMlies : M.LiesOver (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})) :
+    M.IsMaximal := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  have hM_ne_bot : M ≠ ⊥ := by
+    intro h
+    apply hp_ne
+    have h_over : Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} =
+        M.under (Polynomial F) := hMlies.over
+    rw [h, Ideal.under, Ideal.comap_bot_of_injective _
+      (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)]
+      at h_over
+    exact h_over
+  exact Ideal.IsPrime.isMaximal hMprime hM_ne_bot
+
+/-- If the maximal ideal `maximalIdealAt P` of a smooth point `P` lies over the
+principal prime `(X − a)`, then `P.x = a`. The contraction of `maximalIdealAt P`
+is `(X − P.x)`, so `(X − P.x)` and `(X − a)` generate the same ideal, hence are
+associated; being monic of the same degree they are equal, so `P.x = a`. -/
+private theorem smoothPoint_x_eq_of_liesOver_span_X_sub_C {a : F} (P : C.SmoothPoint)
+    (hP_over : (C.maximalIdealAt P).LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})) : P.x = a := by
+  haveI h_over_P := C.maximalIdealAt_liesOver P
+  have h_both : Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} =
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} := by
+    rw [h_over_P.over, hP_over.over]
+  have h_assoc : Associated (Polynomial.X - Polynomial.C P.x)
+      (Polynomial.X - Polynomial.C a) :=
+    Ideal.span_singleton_eq_span_singleton.mp h_both
+  have h_eq : Polynomial.X - Polynomial.C P.x = Polynomial.X - Polynomial.C a :=
+    Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
+      (Polynomial.monic_X_sub_C _) h_assoc
+  have hCeq : Polynomial.C P.x = Polynomial.C a := by
+    linear_combination -h_eq
+  exact Polynomial.C_injective hCeq
+
+/-- The inertia degree of any prime `M` of `F[C]` lying over `(X − a)` is `1`.
+Such an `M` is maximal, hence equals `maximalIdealAt P` for a smooth point `P`
+with `P.x = a`, where the residue degree is `1` by `inertiaDeg_maximalIdealAt`. -/
+private theorem inertiaDeg_eq_one_of_isPrime_of_liesOver_span_X_sub_C
+    [IsAlgClosed F] [C.toAffine.IsElliptic] [IsIntegrallyClosed C.CoordinateRing]
+    {a : F} {M : Ideal C.CoordinateRing} (hMprime : M.IsPrime)
+    (hMlies : M.LiesOver (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})) :
+    Ideal.inertiaDeg' (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) M = 1 := by
+  haveI hMmax : M.IsMaximal :=
+    C.isMaximal_of_isPrime_of_liesOver_span_X_sub_C hMprime hMlies
+  obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hMmax
+  have hP_over : (C.maximalIdealAt P).LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) := hP ▸ hMlies
+  have h_Px : P.x = a := C.smoothPoint_x_eq_of_liesOver_span_X_sub_C P hP_over
+  have h_id := C.inertiaDeg_maximalIdealAt P
+  rw [hP, h_Px] at h_id
+  exact h_id
+
+/-- **Σ e_M = 2**: sum of ramification indices over primes of `F[C]` lying
+over `(X − a)` equals `[F(C) : F(X)] = 2`. Derived from
+`sum_ramificationIdx_over_fiber` (Σ e·f) by simplifying f = 1 via
+`inertiaDeg_maximalIdealAt = 1` (using the surjection to identify each
+M with `maximalIdealAt P`). -/
+theorem sum_ramificationIdx_eq_finrank [IsAlgClosed F] [C.toAffine.IsElliptic]
+    [IsIntegrallyClosed C.CoordinateRing] (a : F) :
+    let p : Ideal (Polynomial F) :=
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}
+    haveI : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+        (Field.toIsField F))
+    ∑ M ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      Ideal.ramificationIdx' p M =
+      Module.finrank (FractionRing (Polynomial F)) C.FunctionField := by
+  set p : Ideal (Polynomial F) :=
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
+  haveI h_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+      (Field.toIsField F))
+  have h_sum := C.sum_ramificationIdx_over_fiber a
+  simp only at h_sum
+  rw [← h_sum]
+  have hp_ne : p ≠ ⊥ := span_X_sub_C_ne_bot (F := F) a
+  apply Finset.sum_congr rfl
+  intro M hM
+  rw [IsDedekindDomain.mem_primesOverFinset_iff hp_ne] at hM
+  rw [C.inertiaDeg_eq_one_of_isPrime_of_liesOver_span_X_sub_C hM.1 hM.2, mul_one]
+
+/-- **Fibers agree**: under `[IsAlgClosed F]` + `[C.toAffine.IsElliptic]`,
+the smooth F-rational points with x-coordinate `a` are in bijection with
+the maximal ideals of `F[C]` lying over `(X − a)`. -/
+theorem smoothPoint_fiber_eq_primesOver [IsAlgClosed F] [C.toAffine.IsElliptic]
+    (a : F) :
+    (C.maximalIdealAt '' {P : C.SmoothPoint | P.x = a}) =
+      {M : Ideal C.CoordinateRing | M.IsMaximal ∧
+        M.LiesOver (Ideal.span {Polynomial.X - Polynomial.C a})} := by
+  ext M
+  constructor
+  · rintro ⟨P, hP, rfl⟩
+    exact ⟨C.maximalIdealAt_isMaximal P,
+      C.maximalIdealAt_liesOver_of_eq_x P hP⟩
+  · rintro ⟨hMmax, hMover⟩
+    obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hMmax
+    refine ⟨P, ?_, hP⟩
+    haveI := C.maximalIdealAt_liesOver P
+    have h1 : Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} =
+        (C.maximalIdealAt P).under (Polynomial F) :=
+      Ideal.LiesOver.over
+    have h2 : Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} =
+        M.under (Polynomial F) := by
+      haveI := hMover; exact Ideal.LiesOver.over
+    rw [hP] at h1
+    have : Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} =
+        Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} :=
+      h1.trans h2.symm
+    have h_assoc : Associated (Polynomial.X - Polynomial.C P.x)
+        (Polynomial.X - Polynomial.C a) :=
+      Ideal.span_singleton_eq_span_singleton.mp this
+    have : Polynomial.X - Polynomial.C P.x = Polynomial.X - Polynomial.C a :=
+      Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
+        (Polynomial.monic_X_sub_C _) h_assoc
+    have hCeq : Polynomial.C P.x = Polynomial.C a := by
+      linear_combination -this
+    exact Polynomial.C_injective hCeq
+
+/-- **`relNorm M_P` is a power of `(X - P.x)`** — the principal-power form for
+the relative norm, from `Ideal.exists_relNorm_eq_pow_of_isPrime`. -/
+theorem exists_relNorm_maximalIdealAt_eq_pow [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (P : C.SmoothPoint) :
+    ∃ s : ℕ, Ideal.relNorm (Polynomial F) (C.maximalIdealAt P) =
+      (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})^s := by
+  haveI hLies := C.maximalIdealAt_liesOver P
+  haveI hPrime : (Ideal.span
+      {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).IsPrime := by
+    rw [Ideal.span_singleton_prime (Polynomial.X_sub_C_ne_zero P.x)]
+    exact Polynomial.prime_X_sub_C P.x
+  exact Ideal.exists_relNorm_eq_pow_of_isPrime
+    (C.maximalIdealAt P) _
+
+/-- **Helper B keystone bound (algebraMap)**: the relative norm of the
+    pulled-back ideal `(X - a)·F[C]` equals `(X - a)^2`, since
+    `[F(C) : F(X)] = 2`. Direct application of mathlib's
+    `Ideal.relNorm_algebraMap` with `finrank_functionField_over_fracPolynomialX = 2`. -/
+theorem relNorm_algebraMap_X_sub_C_eq_pow_two [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (a : F) :
+    Ideal.relNorm (Polynomial F)
+        ((Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).map
+          (algebraMap (Polynomial F) C.CoordinateRing)) =
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ 2 := by
+  rw [Ideal.relNorm_algebraMap, C.finrank_functionField_over_fracPolynomialX]
+
+/-- **Helper B keystone upper bound on s**: combining the existence form
+    `relNorm M_P = (X-P.x)^s` with monotonicity of relNorm and the keystone
+    bound, the exponent `s` satisfies `(X-P.x)^2 ≤ relNorm M_P`, i.e.,
+    `s ≤ 2`. This is the structural divisibility bound; combined with `s ≥ 1`
+    and `∑ s_Q · e_Q = 2`, `∑ e_Q = 2` from the fibre, forces `s = 1`. -/
+theorem X_sub_C_pow_two_le_relNorm_maximalIdealAt [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (P : C.SmoothPoint) :
+    (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}) ^ 2 ≤
+      Ideal.relNorm (Polynomial F) (C.maximalIdealAt P) := by
+  have h_le : (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).map
+        (algebraMap (Polynomial F) C.CoordinateRing) ≤
+      C.maximalIdealAt P := by
+    rw [Ideal.map_le_iff_le_comap, Ideal.span_le, Set.singleton_subset_iff]
+    exact C.algebraMap_X_sub_C_mem_maximalIdealAt P
+  have hmono := Ideal.relNorm_mono (R := Polynomial F) h_le
+  rw [C.relNorm_algebraMap_X_sub_C_eq_pow_two P.x] at hmono
+  exact hmono
+
+/-- **Helper B Dedekind factorization**: for `(X - a) : Polynomial F` (a maximal
+    ideal in `F[X]`), the pulled-back ideal `(X - a)·F[C]` factors as a product
+    over primes lying over `(X - a)`. Direct from mathlib's
+    `Ideal.map_algebraMap_eq_finset_prod_pow`. -/
+theorem map_algebraMap_X_sub_C_eq_prod_primesOver_pow [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (a : F) :
+    let p : Ideal (Polynomial F) :=
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}
+    haveI : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+        (Field.toIsField F))
+    p.map (algebraMap (Polynomial F) C.CoordinateRing) =
+      ∏ P ∈ p.primesOver C.CoordinateRing,
+        P ^ p.ramificationIdx' P := by
+  intro p
+  haveI h_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+      (Field.toIsField F))
+  have hp_ne : p ≠ 0 := by
+    intro h
+    have hx_mem : (Polynomial.X - Polynomial.C a : Polynomial F) ∈ p :=
+      Ideal.subset_span rfl
+    rw [h, Ideal.zero_eq_bot, Ideal.mem_bot] at hx_mem
+    exact Polynomial.X_sub_C_ne_zero a hx_mem
+  have hp_bot : p ≠ (⊥ : Ideal (Polynomial F)) := by
+    rwa [← Ideal.zero_eq_bot]
+  rw [Ideal.map_algebraMap_eq_finsetProd_pow (R := C.CoordinateRing) hp_ne]
+  refine Finset.prod_congr rfl fun P hP ↦ ?_
+  have hP' : P ∈ p.primesOver C.CoordinateRing := Set.mem_toFinset.mp hP
+  obtain ⟨hP_prime, hP_over⟩ := hP'
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx p P hp_bot]
+
+/-- **Helper B fibre product equation**: applying `relNorm` to both sides of
+    the Dedekind factorization gives
+
+      `(X - a)^2 = ∏ P ∈ p.primesOver, (relNorm P)^{ramificationIdx' P}`
+
+    Combines `relNorm_algebraMap_X_sub_C_eq_pow_two` (LHS) with `map_prod`
+    on the relNorm `→*₀` (RHS). -/
+theorem prod_relNorm_pow_primesOver_eq_X_sub_C_pow_two [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (a : F) :
+    let p : Ideal (Polynomial F) :=
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}
+    haveI : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+        (Field.toIsField F))
+    ∏ P ∈ p.primesOver C.CoordinateRing,
+        (Ideal.relNorm (Polynomial F) P) ^
+          p.ramificationIdx' P =
+      p ^ 2 := by
+  intro p
+  haveI h_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
+      (Field.toIsField F))
+  have h_factor := C.map_algebraMap_X_sub_C_eq_prod_primesOver_pow a
+  have h_relNorm := congr_arg (Ideal.relNorm (Polynomial F)) h_factor
+  rw [C.relNorm_algebraMap_X_sub_C_eq_pow_two a] at h_relNorm
+  rw [map_prod] at h_relNorm
+  simp_rw [map_pow] at h_relNorm
+  exact h_relNorm.symm
+
+/-- **Helper B keystone lower bound on s**: combining the existence form
+    `relNorm M_P = (X-P.x)^s` with `relNorm_le_comap` and the fact that
+    `M_P` lies over `(X - P.x)`, the exponent `s` satisfies
+    `relNorm M_P ≤ (X-P.x)`, i.e., `s ≥ 1`. Combined with the upper bound
+    `s ≤ 2`, this gives `1 ≤ s ≤ 2`. -/
+theorem relNorm_maximalIdealAt_le_X_sub_C [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (P : C.SmoothPoint) :
+    Ideal.relNorm (Polynomial F) (C.maximalIdealAt P) ≤
+      Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} := by
+  haveI := C.maximalIdealAt_liesOver P
+  have hcomap_eq : (C.maximalIdealAt P).comap (algebraMap (Polynomial F)
+      C.CoordinateRing) =
+      Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} :=
+    Ideal.LiesOver.over.symm
+  have hbound := Ideal.relNorm_le_comap (R := Polynomial F) (C.maximalIdealAt P)
+  rw [hcomap_eq] at hbound
+  exact hbound
+
+/-- **Helper B prime existence + lower bound**: for any prime ideal `Q` of
+    `C.CoordinateRing` lying over `(X - a)·F[X]`, the relative norm satisfies
+    `relNorm Q = (X - a)^{s_Q}` for some `s_Q ≥ 1`. -/
+theorem exists_relNorm_pow_of_primesOver [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (a : F) {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).primesOver
+            C.CoordinateRing) :
+    ∃ s_Q : ℕ, 1 ≤ s_Q ∧ Ideal.relNorm (Polynomial F) Q =
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ s_Q := by
+  obtain ⟨hQ_prime, hQ_lies⟩ := hQ
+  haveI : Q.IsPrime := hQ_prime
+  haveI : Q.LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) := hQ_lies
+  haveI hp_prime : (Ideal.span
+      {(Polynomial.X - Polynomial.C a : Polynomial F)}).IsPrime := by
+    rw [Ideal.span_singleton_prime (Polynomial.X_sub_C_ne_zero a)]
+    exact Polynomial.prime_X_sub_C a
+  obtain ⟨s, hs⟩ := Ideal.exists_relNorm_eq_pow_of_isPrime Q
+    (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})
+  refine ⟨s, ?_, hs⟩
+  have h_under : Q.under (Polynomial F) =
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} :=
+    Ideal.LiesOver.over.symm
+  have h_le := Ideal.relNorm_le_comap (R := Polynomial F) Q
+  rw [show Q.comap (algebraMap (Polynomial F) C.CoordinateRing) = Q.under (Polynomial F)
+    from rfl, h_under, hs] at h_le
+  nth_rewrite 2 [← pow_one (Ideal.span {Polynomial.X - Polynomial.C a} :
+    Ideal (Polynomial F))] at h_le
+  rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow,
+    Ideal.span_singleton_le_span_singleton,
+    pow_dvd_pow_iff (Polynomial.X_sub_C_ne_zero a)
+      ((Polynomial.prime_X_sub_C a).not_unit)] at h_le
+  exact h_le
+
+/-- **Helper B prime exponent (numeric form)**: define the exponent `s_Q` such
+    that `relNorm Q = (X - a)^{s_Q}` for any prime `Q` in the fibre over `(X - a)`.
+    Uses `Classical.choose` on `exists_relNorm_pow_of_primesOver`. -/
+noncomputable def primesOverExp [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (a : F) (Q : Ideal C.CoordinateRing)
+    (hQ : Q ∈ (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).primesOver
+            C.CoordinateRing) : ℕ :=
+  (C.exists_relNorm_pow_of_primesOver a hQ).choose
+
+/-- The exponent `primesOverExp` is at least `1`. -/
+theorem one_le_primesOverExp [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (a : F) (Q : Ideal C.CoordinateRing)
+    (hQ : Q ∈ (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).primesOver
+            C.CoordinateRing) : 1 ≤ C.primesOverExp a Q hQ :=
+  (C.exists_relNorm_pow_of_primesOver a hQ).choose_spec.1
+
+/-- `relNorm Q = (X − a) ^ primesOverExp a Q`, the defining property of the
+exponent. -/
+theorem relNorm_eq_pow_primesOverExp [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (a : F) (Q : Ideal C.CoordinateRing)
+    (hQ : Q ∈ (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).primesOver
+            C.CoordinateRing) :
+    Ideal.relNorm (Polynomial F) Q =
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^
+        (C.primesOverExp a Q hQ) :=
+  (C.exists_relNorm_pow_of_primesOver a hQ).choose_spec.2
+
+/-- **Helper B s ∈ {1, 2} bracketing**: combining existence + upper + lower
+    bounds, the exponent `s` in `relNorm M_P = (X-P.x)^s` is exactly 1 or 2.
+    Direct via `pow_dvd_pow_iff` for the `(X-P.x)`-adic powers. -/
+theorem exists_relNorm_maximalIdealAt_eq_pow_bracketed [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (P : C.SmoothPoint) :
+    ∃ s : ℕ, 1 ≤ s ∧ s ≤ 2 ∧
+      Ideal.relNorm (Polynomial F) (C.maximalIdealAt P) =
+        (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}) ^ s := by
+  obtain ⟨s, hs⟩ := C.exists_relNorm_maximalIdealAt_eq_pow P
+  refine ⟨s, ?_, ?_, hs⟩
+  · have hbound := C.relNorm_maximalIdealAt_le_X_sub_C P
+    rw [hs] at hbound
+    nth_rewrite 2 [← pow_one (Ideal.span {Polynomial.X - Polynomial.C P.x} :
+      Ideal (Polynomial F))] at hbound
+    rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow,
+      Ideal.span_singleton_le_span_singleton,
+      pow_dvd_pow_iff (Polynomial.X_sub_C_ne_zero P.x)
+        ((Polynomial.prime_X_sub_C P.x).not_unit)] at hbound
+    exact hbound
+  · have hbound := C.X_sub_C_pow_two_le_relNorm_maximalIdealAt P
+    rw [hs] at hbound
+    rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow,
+      Ideal.span_singleton_le_span_singleton,
+      pow_dvd_pow_iff (Polynomial.X_sub_C_ne_zero P.x)
+        ((Polynomial.prime_X_sub_C P.x).not_unit)] at hbound
+    exact hbound
+
+/-- **Helper B M_P membership**: `maximalIdealAt P` lies in
+    `(X - P.x).primesOver C.CoordinateRing`. Direct from `IsPrime` (since maximal)
+    and `maximalIdealAt_liesOver`. -/
+theorem maximalIdealAt_mem_primesOver [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (P : C.SmoothPoint) :
+    C.maximalIdealAt P ∈
+      (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).primesOver
+        C.CoordinateRing :=
+  ⟨inferInstance, C.maximalIdealAt_liesOver P⟩
+
+/-- **Helper B M_P ramification ≥ 1**: the ramification index of `maximalIdealAt P`
+    over `(X - P.x)` is nonzero. Direct from
+    `Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver`. -/
+theorem ramificationIdx_maximalIdealAt_ne_zero [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (P : C.SmoothPoint) :
+    (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).ramificationIdx'
+        (C.maximalIdealAt P) ≠ 0 := by
+  haveI := C.maximalIdealAt_liesOver P
+  refine Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
+    (C.maximalIdealAt P) ?_
+  intro h_eq
+  rw [Ideal.span_singleton_eq_bot] at h_eq
+  exact Polynomial.X_sub_C_ne_zero P.x h_eq
+
+/-- **Degree count for `(X − a)`-powers**: if two powers of the principal ideal
+`(X − a)` of `F[X]` coincide, the exponents agree. The ideals are associated as
+elements of the UFD `F[X]`, so comparing degrees of `(X − a)^m` and `(X − a)^n`
+(each `m` resp. `n`, since `X − a` has degree `1`) forces `m = n`. -/
+private theorem eq_of_span_X_sub_C_pow_eq {a : F} {m n : ℕ}
+    (h : (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ m =
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ n) :
+    m = n := by
+  rw [Ideal.span_singleton_pow, Ideal.span_singleton_pow,
+    Ideal.span_singleton_eq_span_singleton] at h
+  have h_deg := Polynomial.degree_eq_degree_of_associated h
+  rw [Polynomial.degree_pow, Polynomial.degree_pow,
+    Polynomial.degree_X_sub_C, nsmul_one, nsmul_one] at h_deg
+  exact_mod_cast h_deg
+
+/-- **`Σ e_Q = 2` over the fibre**: the ramification indices of the primes of
+`F[C]` lying over `(X − a)` sum to `[F(C) : F(X)] = 2`. This is
+`sum_ramificationIdx_eq_finrank` with the finrank simplified to `2` via
+`finrank_functionField_over_fracPolynomialX`. -/
+private theorem sum_ramificationIdx_primesOver_eq_two [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] (a : F) :
+    ∑ Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx' Q =
+      2 := by
+  have h_sum_e := C.sum_ramificationIdx_eq_finrank a
+  simp only [C.finrank_functionField_over_fracPolynomialX] at h_sum_e
+  exact h_sum_e
+
+/-- **`Σ s_Q · e_Q = 2` over the fibre**: given any exponent function `f` such
+that `relNorm Q = (X − a)^{f Q}` for every prime `Q` of `F[C]` lying over
+`(X − a)`, the weighted sum `Σ f Q · e_Q` equals `2`. Substituting
+`relNorm Q ^ e_Q = (X − a)^{f Q · e_Q}` into the fibre factorization
+`∏ relNorm Q ^ e_Q = (X − a)^2` collapses the product to a single
+`(X − a)`-power, and the degree count `eq_of_span_X_sub_C_pow_eq` reads off the
+exponent. -/
+private theorem sum_mul_ramificationIdx_primesOver_eq_two [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] (a : F)
+    {f : Ideal C.CoordinateRing → ℕ}
+    (hf : ∀ Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
+      Ideal.relNorm (Polynomial F) Q =
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ (f Q)) :
+    ∑ Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
+      f Q * (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx' Q =
+      2 := by
+  set p : Ideal (Polynomial F) :=
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
+  haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  -- the finset `primesOverFinset p` coincides with `(p.primesOver).toFinset`
+  have h_idx : IsDedekindDomain.primesOverFinset p C.CoordinateRing =
+      (p.primesOver C.CoordinateRing : Set _).toFinset := by
+    apply Finset.coe_injective
+    rw [Set.coe_toFinset, IsDedekindDomain.coe_primesOverFinset (span_X_sub_C_ne_bot (F := F) a)]
+  -- `(X - a)·F[C] = ∏ relNorm Q ^ e_Q`; substitute `relNorm Q = (X - a)^{f Q}`
+  have h_fibre := C.prod_relNorm_pow_primesOver_eq_X_sub_C_pow_two a
+  simp only at h_fibre
+  have h_fibre_subst : ∏ Q ∈ (p.primesOver C.CoordinateRing : Set _).toFinset,
+      p ^ (f Q * p.ramificationIdx' Q) = p ^ 2 := by
+    rw [← h_fibre]
+    refine Finset.prod_congr rfl fun Q hQ_fs ↦ ?_
+    rw [hf Q (h_idx ▸ hQ_fs), pow_mul]
+  rw [Finset.prod_pow_eq_pow_sum] at h_fibre_subst
+  rw [h_idx]
+  exact eq_of_span_X_sub_C_pow_eq h_fibre_subst
+
+/-- **The fibre exponent is `1`**: for every prime `Q` of `F[C]` lying over
+`(X − a)`, the exponent `primesOverExp a Q` in `relNorm Q = (X − a)^{·}` is `1`.
+
+Two sums over the fibre agree: `Σ e_Q = 2` (`sum_ramificationIdx_primesOver_eq_two`,
+the degree of the extension) and `Σ s_Q · e_Q = 2`
+(`sum_mul_ramificationIdx_primesOver_eq_two`, from the norm of `(X − a)·F[C]`),
+where `s_Q := primesOverExp a Q ≥ 1`. Since `e_Q ≤ s_Q · e_Q` term-by-term,
+`Finset.sum_eq_sum_iff_of_le` forces equality in every term, so `e_Q = s_Q · e_Q`;
+as `e_Q ≠ 0` (`ramificationIdx_ne_zero_of_liesOver`), this gives `s_Q = 1`. -/
+private theorem primesOverExp_eq_one_of_mem_primesOver [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] (a : F)
+    (Q : Ideal C.CoordinateRing)
+    (hQ : Q ∈ (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).primesOver
+            C.CoordinateRing) :
+    C.primesOverExp a Q hQ = 1 := by
+  classical
+  set p : Ideal (Polynomial F) :=
+    Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
+  haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  -- the exponent function on the whole ring (`0` off the fibre)
+  set s_fn : Ideal C.CoordinateRing → ℕ := fun R ↦
+    if hR : R ∈ p.primesOver C.CoordinateRing then C.primesOverExp a R hR else 0 with hs_fn
+  have h_s_fn_eq : ∀ R (hR : R ∈ p.primesOver C.CoordinateRing),
+      s_fn R = C.primesOverExp a R hR := fun R hR ↦ dif_pos hR
+  -- `Σ e_R = 2` and `Σ s_R · e_R = 2`, both over `primesOverFinset`
+  have h_sum_e := C.sum_ramificationIdx_primesOver_eq_two a
+  have h_sum_se : ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      s_fn R * p.ramificationIdx' R = 2 := by
+    refine C.sum_mul_ramificationIdx_primesOver_eq_two a fun R hR_fs ↦ ?_
+    have hR : R ∈ p.primesOver C.CoordinateRing :=
+      (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hR_fs
+    rw [h_s_fn_eq R hR]
+    exact C.relNorm_eq_pow_primesOverExp a R hR
+  -- termwise `e_R ≤ s_R · e_R`, so all terms coincide
+  have h_pointwise : ∀ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      p.ramificationIdx' R ≤ s_fn R * p.ramificationIdx' R := by
+    intro R hR_fs
+    have hR : R ∈ p.primesOver C.CoordinateRing :=
+      (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hR_fs
+    have : 1 ≤ s_fn R := by rw [h_s_fn_eq R hR]; exact C.one_le_primesOverExp a R hR
+    nlinarith
+  have h_sum_eq : ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      p.ramificationIdx' R = ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+        s_fn R * p.ramificationIdx' R := by rw [h_sum_e, h_sum_se]
+  have h_each := (Finset.sum_eq_sum_iff_of_le h_pointwise).mp h_sum_eq
+  -- evaluate at `Q`: `e_Q = s_Q · e_Q` with `e_Q ≠ 0`
+  have hQ_fs : Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing :=
+    (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mpr hQ
+  have h_Q := h_each Q hQ_fs
+  rw [h_s_fn_eq Q hQ] at h_Q
+  haveI : Q.IsPrime := hQ.1
+  haveI : Q.LiesOver p := hQ.2
+  have h_e_ne_zero : p.ramificationIdx' Q ≠ 0 :=
+    Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver Q hp_ne
+  -- `e_Q = s_Q · e_Q` with `0 < e_Q` cancels to `s_Q = 1`
+  refine Nat.eq_of_mul_eq_mul_right (Nat.pos_of_ne_zero h_e_ne_zero) ?_
+  rw [one_mul, ← h_Q]
+
+/-- **Helper B s = 1 closure**: `relNorm M_P = (X - P.x)`. -/
+theorem relNorm_maximalIdealAt [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (P : C.SmoothPoint) :
+    Ideal.relNorm (Polynomial F) (C.maximalIdealAt P) =
+      Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)} := by
+  have hM_mem := C.maximalIdealAt_mem_primesOver P
+  rw [C.relNorm_eq_pow_primesOverExp P.x (C.maximalIdealAt P) hM_mem,
+    C.primesOverExp_eq_one_of_mem_primesOver P.x (C.maximalIdealAt P) hM_mem, pow_one]
+
+/-- **Helper B keystone (full primesOver version)**: for any prime `Q` in
+    `(X - a).primesOver C.CoordinateRing`, `relNorm Q = span {X - a}`.
+
+    Extends `relNorm_maximalIdealAt` from M_P to all primes in the fibre using
+    the bijection `smoothPoint_fiber_eq_primesOver`. -/
+theorem relNorm_eq_X_sub_C_of_primesOver [IsAlgClosed F]
+    [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).primesOver
+            C.CoordinateRing) :
+    Ideal.relNorm (Polynomial F) Q =
+      Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} := by
+  obtain ⟨hQ_prime, hQ_lies⟩ := hQ
+  haveI : Q.IsPrime := hQ_prime
+  have hQ_max : Q.IsMaximal := by
+    refine Ideal.IsPrime.isMaximal hQ_prime ?_
+    intro h_eq
+    have hp_ne : (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ≠ ⊥ := by
+      intro h_eq2
+      rw [Ideal.span_singleton_eq_bot] at h_eq2
+      exact Polynomial.X_sub_C_ne_zero a h_eq2
+    apply hp_ne
+    rw [show (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) =
+      Q.under (Polynomial F) from hQ_lies.over]
+    rw [h_eq]
+    exact Ideal.under_bot _ _
+  obtain ⟨P', hP'⟩ := C.exists_smoothPoint_of_isMaximal hQ_max
+  have hP'_lies : (C.maximalIdealAt P').LiesOver
+      (Ideal.span {(Polynomial.X - Polynomial.C P'.x : Polynomial F)}) :=
+    C.maximalIdealAt_liesOver P'
+  have hP'_x : P'.x = a := by
+    have h_under_Q : Q.under (Polynomial F) =
+        Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} :=
+      hQ_lies.over.symm
+    have h_under_Q' : (C.maximalIdealAt P').under (Polynomial F) =
+        Ideal.span {(Polynomial.X - Polynomial.C P'.x : Polynomial F)} :=
+      hP'_lies.over.symm
+    rw [hP', h_under_Q] at h_under_Q'
+    have h_assoc : Associated (Polynomial.X - Polynomial.C a)
+        (Polynomial.X - Polynomial.C P'.x : Polynomial F) :=
+      Ideal.span_singleton_eq_span_singleton.mp h_under_Q'
+    have h_eq : (Polynomial.X - Polynomial.C a : Polynomial F) =
+        (Polynomial.X - Polynomial.C P'.x) :=
+      Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
+        (Polynomial.monic_X_sub_C _) h_assoc
+    have hCeq : Polynomial.C a = Polynomial.C P'.x := by linear_combination -h_eq
+    exact (Polynomial.C_injective hCeq).symm
+  rw [← hP', C.relNorm_maximalIdealAt P', hP'_x]
+
+end SmoothPlaneCurve
+
+/-- **Unit-collapse for non-M primes**: in a Dedekind domain `A` with maximal
+    ideal `M`, any height-one prime `v ≠ M` has `Ideal.map alg v.asIdeal = ⊤`
+    in `Localization.AtPrime M`. The image becomes the unit ideal because
+    `v.asIdeal` contains some element `x ∉ M`, and `algMap x` is a unit in
+    the localization. -/
+theorem map_eq_top_of_ne_localization {A : Type*} [CommRing A]
+    [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal]
+    (v : IsDedekindDomain.HeightOneSpectrum A) (hv_ne_M : v.asIdeal ≠ M) :
+    Ideal.map (algebraMap A (Localization.AtPrime M)) v.asIdeal = ⊤ := by
+  classical
+  haveI hv_max : v.asIdeal.IsMaximal :=
+    Ideal.IsPrime.isMaximal v.isPrime v.ne_bot
+  have h_not_le : ¬ v.asIdeal ≤ M := by
+    intro h_le
+    exact hv_ne_M (hv_max.eq_of_le hM.ne_top h_le)
+  obtain ⟨x, hx_mem, hx_not⟩ : ∃ x ∈ v.asIdeal, x ∉ M := by
+    by_contra! h
+    exact h_not_le h
+  have h_unit : IsUnit (algebraMap A (Localization.AtPrime M) x) := by
+    rw [IsLocalization.AtPrime.isUnit_to_map_iff (Localization.AtPrime M) M x]
+    exact hx_not
+  have h_mem : algebraMap A (Localization.AtPrime M) x ∈
+      Ideal.map (algebraMap A (Localization.AtPrime M)) v.asIdeal :=
+    Ideal.mem_map_of_mem _ hx_mem
+  exact Ideal.eq_top_of_isUnit_mem _ h_mem h_unit
+
+/-- **Unit-collapse for non-M-as-HeightOneSpectrum**: special case packaging
+    when M is wrapped as a HeightOneSpectrum element via `vM = ⟨M, _, _⟩`. -/
+theorem map_eq_top_of_ne_heightOneSpectrum {A : Type*} [CommRing A]
+    [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥)
+    (v : IsDedekindDomain.HeightOneSpectrum A)
+    (hv_ne : v ≠ ⟨M, hM.isPrime, hM_ne⟩) :
+    Ideal.map (algebraMap A (Localization.AtPrime M)) v.asIdeal = ⊤ := by
+  apply map_eq_top_of_ne_localization M v
+  intro h_eq
+  apply hv_ne
+  exact IsDedekindDomain.HeightOneSpectrum.ext h_eq
+
+/-- **Power identity at M**: for `n : ℕ`, `Ideal.map alg (M^n) =
+    (IsLocalRing.maximalIdeal localization)^n`. Direct from `Ideal.map_pow`
+    and `Localization.AtPrime.map_eq_maximalIdeal`. -/
+theorem map_M_pow_eq_localRing_max_pow {A : Type*} [CommRing A]
+    [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (n : ℕ) :
+    Ideal.map (algebraMap A (Localization.AtPrime M)) (M ^ n) =
+      (IsLocalRing.maximalIdeal (Localization.AtPrime M)) ^ n := by
+  rw [Ideal.map_pow, Localization.AtPrime.map_eq_maximalIdeal]
+
+/-- **`Ideal.map` packaged as MonoidHom for ideals**. Used for finprod
+    distribution. -/
+def Ideal.mapMonoidHom {A B : Type*} [CommRing A] [CommRing B] (f : A →+* B) :
+    Ideal A →* Ideal B where
+  toFun := Ideal.map f
+  map_one' := by rw [Ideal.one_eq_top, Ideal.map_top, Ideal.one_eq_top]
+  map_mul' := Ideal.map_mul f
+
+@[simp] theorem Ideal.mapMonoidHom_apply {A B : Type*} [CommRing A] [CommRing B]
+    (f : A →+* B) (I : Ideal A) :
+    Ideal.mapMonoidHom f I = Ideal.map f I := rfl
+
+/-- **Ideal.map distributes over `Finset.prod`** via the MonoidHom packaging. -/
+theorem Ideal.map_finset_prod {A B : Type*} [CommRing A] [CommRing B]
+    (f : A →+* B) {ι : Type*} (s : Finset ι) (g : ι → Ideal A) :
+    Ideal.map f (∏ i ∈ s, g i) = ∏ i ∈ s, Ideal.map f (g i) := by
+  change Ideal.mapMonoidHom f (∏ i ∈ s, g i) = ∏ i ∈ s, Ideal.mapMonoidHom f (g i)
+  exact map_prod (Ideal.mapMonoidHom f) g s
+
+/-- **Count of a height-one prime in its own power**: for any height-one prime
+    `v` of a Dedekind domain, the count of `v.asIdeal` in `(v.asIdeal)^n.factors`
+    is `n`. Direct from `Associates.count_pow` + `Associates.count_self`. -/
+theorem count_self_pow_heightOneSpectrum {R : Type*} [CommRing R]
+    [IsDedekindDomain R]
+    (v : IsDedekindDomain.HeightOneSpectrum R) (n : ℕ) :
+    (Associates.mk v.asIdeal).count (Associates.mk (v.asIdeal ^ n)).factors = n := by
+  classical
+  have hirr : Irreducible (Associates.mk v.asIdeal) := v.associates_irreducible
+  have hne : Associates.mk v.asIdeal ≠ 0 := by
+    rw [Ne, Associates.mk_eq_zero, Ideal.zero_eq_bot]
+    exact v.ne_bot
+  rw [Associates.mk_pow, Associates.count_pow hne hirr,
+    Associates.count_self hirr, mul_one]
+
+/-- **Count of `(IsLocalRing.maximalIdeal localization)^n`**: the M-adic count
+    of `local_max^n` at the unique nonzero prime of the localization. Useful
+    intermediate for the count-preservation closure. -/
+theorem count_localRing_max_pow {A : Type*} [CommRing A]
+    [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (n : ℕ) :
+    (Associates.mk (IsLocalRing.maximalIdeal (Localization.AtPrime M))).count
+        (Associates.mk
+          ((IsLocalRing.maximalIdeal (Localization.AtPrime M)) ^ n)).factors = n := by
+  haveI := Localization.AtPrime.isLocalRing M
+  haveI : IsDedekindDomain (Localization.AtPrime M) :=
+    IsLocalization.AtPrime.isDedekindDomain A M _
+  haveI : IsDiscreteValuationRing (Localization.AtPrime M) :=
+    IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain A hM_ne _
+  let hv : IsDedekindDomain.HeightOneSpectrum (Localization.AtPrime M) :=
+    IsDiscreteValuationRing.maximalIdeal (Localization.AtPrime M)
+  change (Associates.mk hv.asIdeal).count (Associates.mk (hv.asIdeal ^ n)).factors = n
+  exact count_self_pow_heightOneSpectrum hv n
+
+namespace Conditional
+
+/-- **count_preservation closure (witness on structural decomposition)**: under
+    the witness `Ideal.map alg I = local_max^(count_M I)`, the count-preservation
+    follows mechanically. -/
+theorem count_preservation_of_structural_witness
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (I : Ideal A)
+    (h_witness : Ideal.map (algebraMap A (Localization.AtPrime M)) I =
+      (IsLocalRing.maximalIdeal (Localization.AtPrime M)) ^
+        ((Associates.mk M).count (Associates.mk I).factors)) :
+    (Associates.mk (Ideal.map (algebraMap A (Localization.AtPrime M)) M)).count
+        (Associates.mk
+          (Ideal.map (algebraMap A (Localization.AtPrime M)) I)).factors =
+      (Associates.mk M).count (Associates.mk I).factors := by
+  rw [h_witness, Localization.AtPrime.map_eq_maximalIdeal,
+    HasseWeil.Curves.count_localRing_max_pow M hM_ne]
+
+end Conditional
+
+/-- **Specialized at M-power**: for `I = M^n`, the count-preservation holds
+    unconditionally. Direct from `map_M_pow_eq_localRing_max_pow` +
+    `count_localRing_max_pow` + the count of M in `M^n` formula. -/
+theorem count_preservation_M_pow {A : Type*} [CommRing A]
+    [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (n : ℕ) :
+    (Associates.mk (Ideal.map (algebraMap A (Localization.AtPrime M)) M)).count
+        (Associates.mk
+          (Ideal.map (algebraMap A (Localization.AtPrime M)) (M ^ n))).factors =
+      (Associates.mk M).count (Associates.mk (M ^ n)).factors := by
+  rw [HasseWeil.Curves.map_M_pow_eq_localRing_max_pow M n,
+    Localization.AtPrime.map_eq_maximalIdeal,
+    HasseWeil.Curves.count_localRing_max_pow M hM_ne n]
+  let vM : IsDedekindDomain.HeightOneSpectrum A := ⟨M, hM.isPrime, hM_ne⟩
+  change n = (Associates.mk vM.asIdeal).count (Associates.mk (vM.asIdeal ^ n)).factors
+  rw [count_self_pow_heightOneSpectrum vM n]
+
+/-- **Step 1 + 2 combined**: rewrite the local-ring count of `span {algebraMap u}`
+    at the local maximal ideal as the count of the *mapped* ideals at the *mapped*
+    ideal. Direct application of `Localization.AtPrime.map_eq_maximalIdeal` and
+    `Ideal.map_span` (mathlib).
+
+    This is the unconditional foundational step — composes mathlib lemmas without
+    requiring the substantive count-preservation. -/
+theorem localization_max_count_eq_map_count
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (u : A) :
+    (Associates.mk (IsLocalRing.maximalIdeal
+          (Localization.AtPrime M))).count
+        (Associates.mk
+          (Ideal.span {algebraMap A (Localization.AtPrime M) u})).factors =
+      (Associates.mk (Ideal.map
+          (algebraMap A (Localization.AtPrime M)) M)).count
+        (Associates.mk
+          (Ideal.map (algebraMap A (Localization.AtPrime M))
+            (Ideal.span {u}))).factors := by
+  rw [Localization.AtPrime.map_eq_maximalIdeal,
+    show (Ideal.map (algebraMap A (Localization.AtPrime M)) (Ideal.span {u}) :
+        Ideal (Localization.AtPrime M)) =
+        Ideal.span {algebraMap A (Localization.AtPrime M) u} by
+      rw [Ideal.map_span, Set.image_singleton]]
+
+namespace Conditional
+
+/-- **Step 3 (witness-parametric)**: assuming the count-preservation under the
+    localization map, the local-ring count of `span {algebraMap u}` at the local
+    maximal ideal equals the M-adic count of `u` in `A`. -/
+theorem count_preservation_localization_of_witness
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (u : A)
+    (h_count_pres : (Associates.mk (Ideal.map
+          (algebraMap A (Localization.AtPrime M)) M)).count
+        (Associates.mk
+          (Ideal.map (algebraMap A (Localization.AtPrime M))
+            (Ideal.span {u}))).factors =
+      (Associates.mk M).count (Associates.mk (Ideal.span {u})).factors) :
+    (Associates.mk (IsLocalRing.maximalIdeal
+          (Localization.AtPrime M))).count
+        (Associates.mk
+          (Ideal.span {algebraMap A (Localization.AtPrime M) u})).factors =
+      (Associates.mk M).count (Associates.mk (Ideal.span {u})).factors := by
+  rw [HasseWeil.Curves.localization_max_count_eq_map_count M u]
+  exact h_count_pres
+
+end Conditional
+
+/-- **Structural witness (unconditional)**: for any nonzero ideal `I` in a Dedekind
+    domain `A` with maximal ideal `M ≠ ⊥`, `Ideal.map alg I` in the localization
+    `Localization.AtPrime M` equals `local_max ^ count_M I`. This is the
+    substantive Dedekind/localization structural content, discharging the
+    `_witness` hypothesis used in `count_preservation_of_structural_witness`.
+
+    Proof: factor `I` as a finprod over height-one primes
+    `∏ᶠ v, v.asIdeal^count_v I` (via `Ideal.finprod_heightOneSpectrum_factorization`);
+    map to the localization; for `v ≠ M`, the term collapses to `⊤` (since `v ⊄ M`);
+    the surviving `v = M` term gives `local_max^count_M I`. -/
+theorem map_eq_localRing_max_pow_count
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) {I : Ideal A} (hI : I ≠ ⊥) :
+    Ideal.map (algebraMap A (Localization.AtPrime M)) I =
+      (IsLocalRing.maximalIdeal (Localization.AtPrime M)) ^
+        ((Associates.mk M).count (Associates.mk I).factors) := by
+  classical
+  let vM : IsDedekindDomain.HeightOneSpectrum A := ⟨M, hM.isPrime, hM_ne⟩
+  have hI' : I ≠ 0 := hI
+  have h_supp := Ideal.hasFiniteMulSupport (R := A) hI'
+  set s : Finset (IsDedekindDomain.HeightOneSpectrum A) :=
+    h_supp.toFinset ∪ {vM} with hs_def
+  have hvM_in_s : vM ∈ s := by simp [hs_def]
+  have h_finprod_to_prod :
+      (∏ᶠ v : IsDedekindDomain.HeightOneSpectrum A, v.maxPowDividing I) =
+      ∏ v ∈ s, v.maxPowDividing I := by
+    apply finprod_eq_prod_of_mulSupport_subset
+    intro v hv
+    simp only [hs_def, Finset.coe_union, Finset.coe_singleton, Set.mem_union,
+      Set.mem_singleton_iff]
+    left
+    exact h_supp.mem_toFinset.mpr hv
+  conv_lhs => rw [← Ideal.finprod_heightOneSpectrum_factorization hI', h_finprod_to_prod]
+  rw [Ideal.map_finset_prod]
+  rw [← Finset.prod_erase_mul s _ hvM_in_s]
+  rw [Finset.prod_eq_one (fun v hv ↦ ?_), one_mul]
+  · change Ideal.map (algebraMap A (Localization.AtPrime M))
+        (vM.asIdeal ^ (Associates.mk vM.asIdeal).count (Associates.mk I).factors) = _
+    rw [Ideal.map_pow, Localization.AtPrime.map_eq_maximalIdeal]
+  · have hv_ne : v ≠ vM := (Finset.mem_erase.mp hv).1
+    change Ideal.map (algebraMap A (Localization.AtPrime M))
+        (v.asIdeal ^ (Associates.mk v.asIdeal).count (Associates.mk I).factors) = 1
+    rw [Ideal.map_pow, map_eq_top_of_ne_heightOneSpectrum M hM_ne v hv_ne,
+      ← Ideal.one_eq_top, one_pow]
+
+/-- **Count-preservation under localization map (unconditional)**: for any nonzero
+    ideal `I` in a Dedekind domain `A` with maximal ideal `M ≠ ⊥`, the M-adic
+    count of `Ideal.map alg I` in the localization equals the M-adic count of `I`
+    in `A`. Discharges the substantive witness of
+    `Conditional.count_preservation_of_structural_witness`. -/
+theorem count_preservation_map_localization
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) {I : Ideal A} (hI : I ≠ ⊥) :
+    (Associates.mk (Ideal.map (algebraMap A (Localization.AtPrime M)) M)).count
+        (Associates.mk (Ideal.map (algebraMap A (Localization.AtPrime M)) I)).factors =
+      (Associates.mk M).count (Associates.mk I).factors :=
+  HasseWeil.Curves.Conditional.count_preservation_of_structural_witness M hM_ne I
+    (HasseWeil.Curves.map_eq_localRing_max_pow_count M hM_ne hI)
+
+/-- **count_preservation_localization (unconditional)**: for any element `u ∈ A`
+    in a Dedekind domain with maximal ideal `M ≠ ⊥`, the local-ring count of
+    `Ideal.span {algebraMap u}` at the local maximal ideal equals the M-adic count
+    of `Ideal.span {u}` in `A`.
+
+    This is the unconditional form of `Conditional.count_preservation_localization_of_witness`,
+    obtained by discharging the witness via `count_preservation_map_localization`.
+    The `u = 0` case is handled separately (both sides reduce to `count _ ⊤ = 0`). -/
+theorem count_preservation_localization
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
+    (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (u : A) :
+    (Associates.mk (IsLocalRing.maximalIdeal
+          (Localization.AtPrime M))).count
+        (Associates.mk
+          (Ideal.span {algebraMap A (Localization.AtPrime M) u})).factors =
+      (Associates.mk M).count (Associates.mk (Ideal.span {u})).factors := by
+  by_cases hu : u = 0
+  · subst hu
+    rw [(algebraMap A (Localization.AtPrime M)).map_zero, Ideal.span_singleton_zero,
+      Ideal.span_singleton_zero]
+    have h_top_loc :
+        (Associates.mk (⊥ : Ideal (Localization.AtPrime M))).factors = ⊤ :=
+      Associates.factors_zero
+    have h_top_A : (Associates.mk (⊥ : Ideal A)).factors = ⊤ :=
+      Associates.factors_zero
+    rw [h_top_loc, h_top_A]
+    -- both sides are now `count _ ⊤`, which is `0` by the `Associates.count` definition
+    simp only [Associates.count]
+    split_ifs <;> rfl
+  · have hI : Ideal.span {u} ≠ ⊥ :=
+      mt Ideal.span_singleton_eq_bot.mp hu
+    rw [HasseWeil.Curves.localization_max_count_eq_map_count M u]
+    exact HasseWeil.Curves.count_preservation_map_localization M hM_ne hI
+
+namespace SmoothPlaneCurve
+
+variable (C : SmoothPlaneCurve F)
+
+/-- **`pointValuation P (algebraMap u)` formula**: for a smooth point `P` of `C`
+    and nonzero `u ∈ F[C]`, the multiplicative valuation `pointValuation P` of
+    `algebraMap u ∈ F(C)` equals `exp(-count_M (Ideal.span {u}))`, where
+    `M = maximalIdealAt P` is the maximal ideal at `P` and the count is the
+    M-adic multiplicity in the ideal factorization of `Ideal.span {u}`.
+
+    Proof: route `algebraMap u` through the localization at `M` via
+    `IsScalarTower`, apply mathlib's `HeightOneSpectrum.valuation_of_algebraMap`
+    to convert valuation-on-fraction-field to intValuation-on-localization,
+    expand `intValuation` by `intValuation_if_neg`, then transport the count
+    back to `F[C]` via `count_preservation_localization`. -/
+theorem pointValuation_algebraMap_eq_exp_count
+    [IsIntegrallyClosed C.CoordinateRing]
+    (P : C.SmoothPoint) {u : C.CoordinateRing} (hu : u ≠ 0) :
+    C.pointValuation P (algebraMap C.CoordinateRing C.FunctionField u) =
+      WithZero.exp (-((Associates.mk (C.maximalIdealAt P)).count
+        (Associates.mk (Ideal.span {u})).factors : ℤ)) := by
+  have hM_max : (C.maximalIdealAt P).IsMaximal := C.maximalIdealAt_isMaximal P
+  have hM_ne : C.maximalIdealAt P ≠ ⊥ := C.maximalIdealAt_ne_bot P
+  have hu_loc : algebraMap C.CoordinateRing (C.localRingAt P) u ≠ 0 := by
+    intro h
+    apply hu
+    apply IsLocalization.injective (C.localRingAt P)
+      (C.maximalIdealAt P).primeCompl_le_nonZeroDivisors
+    rw [h, map_zero]
+  have h_algMap :
+      algebraMap C.CoordinateRing C.FunctionField u =
+      algebraMap (C.localRingAt P) C.FunctionField
+        (algebraMap C.CoordinateRing (C.localRingAt P) u) :=
+    IsScalarTower.algebraMap_apply _ _ _ u
+  have h_pv_to_int :
+      C.pointValuation P (algebraMap C.CoordinateRing C.FunctionField u) =
+        (IsDiscreteValuationRing.maximalIdeal (C.localRingAt P)).intValuation
+          (algebraMap C.CoordinateRing (C.localRingAt P) u) := by
+    change (IsDiscreteValuationRing.maximalIdeal (C.localRingAt P)).valuation
+        C.FunctionField _ = _
+    rw [h_algMap, IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
+  rw [h_pv_to_int,
+    IsDedekindDomain.HeightOneSpectrum.intValuation_if_neg _ hu_loc]
+  congr 1
+  have h_count_pres :
+      (Associates.mk
+            (IsLocalRing.maximalIdeal (Localization.AtPrime (C.maximalIdealAt P)))).count
+          (Associates.mk
+            (Ideal.span
+              {algebraMap C.CoordinateRing
+                  (Localization.AtPrime (C.maximalIdealAt P)) u})).factors =
+      (Associates.mk (C.maximalIdealAt P)).count
+        (Associates.mk (Ideal.span {u})).factors :=
+    HasseWeil.Curves.count_preservation_localization (C.maximalIdealAt P) hM_ne u
+  exact_mod_cast congr_arg (Neg.neg : ℤ → ℤ) (congr_arg (Nat.cast : ℕ → ℤ) h_count_pres)
+
+/-- **`ord_P P (algebraMap u) = count_M (Ideal.span {u})` bridge**: for a smooth
+    point `P` of `C` and nonzero `u ∈ F[C]`, the order of `algebraMap u` at `P`
+    equals the M-adic count of `Ideal.span {u}` in `F[C]`, where
+    `M = maximalIdealAt P`.
+
+    This is the per-prime form of Helper B's `ord_P u ↔ multiplicity` bridge. It
+    rewrites `ord_P` (project's `WithTop ℤ`-valued additive order) into the
+    pure-integer count from mathlib's Dedekind factorization machinery, enabling
+    the Helper B per-fiber sum identity downstream. -/
+theorem ord_P_algebraMap_eq_count
+    [IsIntegrallyClosed C.CoordinateRing]
+    (P : C.SmoothPoint) {u : C.CoordinateRing} (hu : u ≠ 0) :
+    C.ord_P P (algebraMap C.CoordinateRing C.FunctionField u) =
+      (((Associates.mk (C.maximalIdealAt P)).count
+        (Associates.mk (Ideal.span {u})).factors : ℤ) : WithTop ℤ) := by
+  have hu_FC : algebraMap C.CoordinateRing C.FunctionField u ≠ 0 := by
+    intro h
+    apply hu
+    exact (IsFractionRing.injective C.CoordinateRing C.FunctionField)
+      (h.trans (map_zero _).symm)
+  have h_pv_ne :
+      C.pointValuation P (algebraMap C.CoordinateRing C.FunctionField u) ≠ 0 :=
+    (C.pointValuation P).ne_zero_iff.mpr hu_FC
+  simp only [SmoothPlaneCurve.ord_P]
+  rw [dif_neg h_pv_ne]
+  have h_pv_eq := C.pointValuation_algebraMap_eq_exp_count P hu
+  have h_unz :
+      WithZero.unzero h_pv_ne =
+        Multiplicative.ofAdd (-((Associates.mk (C.maximalIdealAt P)).count
+          (Associates.mk (Ideal.span {u})).factors : ℤ)) := by
+    rw [← WithZero.coe_inj, WithZero.coe_unzero]
+    exact h_pv_eq
+  rw [h_unz, toAdd_ofAdd, neg_neg]
+
+/-- **`divisorOf` of `algebraMap u` is the count, as `ℤ`**: for nonzero `u ∈ F[C]`,
+    the affine divisor `C.divisorOf (algebraMap u) P` (an integer) equals the
+    M-adic count of `Ideal.span {u}` where `M = maximalIdealAt P`. Immediate
+    corollary of `ord_P_algebraMap_eq_count` + `WithTop.untopD_coe`. -/
+theorem divisorOf_algebraMap_apply_eq_count
+    [IsIntegrallyClosed C.CoordinateRing]
+    (P : C.SmoothPoint) {u : C.CoordinateRing} (hu : u ≠ 0) :
+    C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P =
+      ((Associates.mk (C.maximalIdealAt P)).count
+        (Associates.mk (Ideal.span {u})).factors : ℤ) := by
+  rw [SmoothPlaneCurve.divisorOf_apply, C.ord_P_algebraMap_eq_count P hu,
+    WithTop.untopD_coe]
+
+/-- **`relNorm` of the principal singleton ideal**: for `u ∈ F[C]`,
+    `relNorm F[X] (Ideal.span {u}) = Ideal.span {Algebra.norm F[X] u}`. Direct
+    composition of mathlib's `Ideal.relNorm_singleton` (giving `Algebra.intNorm`)
+    with `Algebra.intNorm_eq_norm` (matching `intNorm` to `norm` under the
+    Module.Free + Module.Finite setting which holds for `F[X] → F[C]`). -/
+theorem relNorm_span_singleton_eq_norm_span
+    [IsIntegrallyClosed C.CoordinateRing] (u : C.CoordinateRing) :
+    Ideal.relNorm (Polynomial F) (Ideal.span ({u} : Set C.CoordinateRing)) =
+      Ideal.span ({Algebra.norm (Polynomial F) u} : Set (Polynomial F)) := by
+  rw [Ideal.relNorm_singleton, Algebra.intNorm_eq_norm]
+
+end SmoothPlaneCurve
+
+/-- **Count distributes over `Finset.prod`**: for nonzero `f i` in `s`, the
+    `p`-count of `∏ i ∈ s, f i` equals `∑ i ∈ s, count p (f i)`. -/
+theorem count_finset_prod_factors {α : Type*} [CommMonoidWithZero α] [Nontrivial α]
+    [UniqueFactorizationMonoid α] [DecidableEq (Associates α)]
+    [(p : Associates α) → Decidable (Irreducible p)]
+    {ι : Type*} {s : Finset ι} {f : ι → Associates α}
+    (hf : ∀ i ∈ s, f i ≠ 0) {p : Associates α} (hp : Irreducible p) :
+    p.count (∏ i ∈ s, f i).factors = ∑ i ∈ s, p.count (f i).factors := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    simp [Associates.factors_one, Associates.count_zero hp]
+  | @insert j s' hi ih =>
+    have h_jne : f j ≠ 0 := hf _ (Finset.mem_insert_self _ _)
+    have h_sne : ∀ k ∈ s', f k ≠ 0 := fun k hk ↦ hf _ (Finset.mem_insert_of_mem hk)
+    have h_prod_ne : ∏ k ∈ s', f k ≠ 0 := Finset.prod_ne_zero_iff.mpr h_sne
+    rw [Finset.prod_insert hi, Associates.count_mul h_jne h_prod_ne hp,
+      Finset.sum_insert hi, ih h_sne]
+
+namespace SmoothPlaneCurve
+
+variable {F : Type*} [Field F] (C : SmoothPlaneCurve F)
+
+/-- **`relNorm` of a power of a fiber prime**: for `Q ∈ primesOverFinset (X-a)`,
+    `relNorm (Q^n) = (Ideal.span {X-a})^n`. Combines mathlib's `map_pow` for
+    `relNorm` (a monoid-with-zero hom) with the project's
+    `relNorm_eq_X_sub_C_of_primesOver`. -/
+theorem relNorm_pow_of_mem_primesOverFinset
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+        C.CoordinateRing) (n : ℕ) :
+    Ideal.relNorm (Polynomial F) (Q ^ n) =
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ^ n := by
+  haveI hp_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
+      Set (Polynomial F))).IsMaximal :=
+    Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  have hp_ne : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  rw [IsDedekindDomain.mem_primesOverFinset_iff hp_ne] at hQ
+  rw [map_pow, C.relNorm_eq_X_sub_C_of_primesOver hQ]
+
+/-- **Count of `(relNorm Q)^n` at `(X-a)` for Q over (X-a)**: combines the
+    per-prime power formula `relNorm_pow_of_mem_primesOverFinset` with
+    `Associates.count_pow` and `Associates.count_self`. The prime `Q ∈ primesOver`
+    contributes exactly `n` to the (X-a)-count. -/
+theorem count_relNorm_pow_of_mem_primesOverFinset
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+        C.CoordinateRing) (n : ℕ) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+      (Associates.mk (Ideal.relNorm (Polynomial F) (Q ^ n))).factors = n := by
+  classical
+  haveI hp_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
+      Set (Polynomial F))).IsMaximal :=
+    Ideal.Quotient.maximal_of_isField _
+      ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  have hp_ne : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  let vp : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
+    ⟨_, hp_max.isPrime, hp_ne⟩
+  rw [C.relNorm_pow_of_mem_primesOverFinset hQ n]
+  exact count_self_pow_heightOneSpectrum vp n
+
+/-- **Primes over `(X-a)` are nonzero**: any `Q ∈ primesOverFinset (X-a) F[C]`
+    is a nonzero ideal of `F[C]`. If `Q = ⊥` then it lies over
+    `⊥.under F[X] = ⊥` (the algebra map is injective), contradicting that it lies
+    over the nonzero `(X-a)`. Setup helper for
+    `count_relNorm_singleton_eq_sum_count_fiber`. -/
+private theorem ne_bot_of_mem_primesOverFinset_span_X_sub_C
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] {a : F}
+    {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing) :
+    Q ≠ ⊥ := by
+  have hp_ne : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  haveI hp_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
+      Set (Polynomial F))).IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  rw [IsDedekindDomain.mem_primesOverFinset_iff hp_ne] at hQ
+  intro h_eq
+  apply hp_ne
+  have h_over : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) =
+      Q.under (Polynomial F) := hQ.2.over
+  rw [h_eq, Ideal.under, Ideal.comap_bot_of_injective _
+    (FaithfulSMul.algebraMap_injective (Polynomial F) C.CoordinateRing)] at h_over
+  exact h_over
+
+/-- **Distinct linear primes of `F[X]`**: for `a ≠ b` in `F`, the principal ideals
+    `(X - a)` and `(X - b)` of `F[X]` are distinct. From an equality of spans the two
+    monic linear polynomials would be associated, hence equal, forcing `a = b` via
+    `Polynomial.C_inj`. The non-association input to the count-collapse in
+    `count_X_sub_C_span_X_sub_C_pow_eq_zero_of_ne`. -/
+private theorem span_X_sub_C_ne_span_X_sub_C_of_ne {a b : F} (hab : a ≠ b) :
+    (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠
+      Ideal.span ({Polynomial.X - Polynomial.C b} : Set (Polynomial F)) := by
+  intro h_id_eq
+  apply hab
+  have h_assoc : Associated (Polynomial.X - Polynomial.C a)
+      (Polynomial.X - Polynomial.C b : Polynomial F) :=
+    Ideal.span_singleton_eq_span_singleton.mp h_id_eq
+  have h_eq2 : (Polynomial.X - Polynomial.C a : Polynomial F) =
+      Polynomial.X - Polynomial.C b :=
+    Polynomial.eq_of_monic_of_associated (Polynomial.monic_X_sub_C _)
+      (Polynomial.monic_X_sub_C _) h_assoc
+  have hCeq : Polynomial.C a = Polynomial.C b := by linear_combination -h_eq2
+  exact Polynomial.C_inj.mp hCeq
+
+/-- **Cross-count of distinct linear primes vanishes**: for `a ≠ b` in `F` and any
+    `k`, the `(X-a)`-adic count of `(X - b)^k` in `F[X]` is `0`. The two linear primes
+    are non-associated (`span_X_sub_C_ne_span_X_sub_C_of_ne`), so `Associates.count_pow`
+    and `Associates.count_eq_zero_of_ne` collapse the count. The pure `F[X]` core of the
+    off-fiber vanishing in `count_relNorm_pow_eq_zero_of_not_mem_primesOverFinset`. -/
+private theorem count_X_sub_C_span_X_sub_C_pow_eq_zero_of_ne {a b : F} (hab : a ≠ b)
+    (k : ℕ) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+      (Associates.mk
+        ((Ideal.span ({Polynomial.X - Polynomial.C b} : Set (Polynomial F))) ^ k)).factors
+        = 0 := by
+  classical
+  have hpa_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
+      Set (Polynomial F))).IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  have hpa_ne : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  have hpb_max : (Ideal.span ({Polynomial.X - Polynomial.C b} :
+      Set (Polynomial F))).IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv b).toRingEquiv.isField (Field.toIsField F))
+  have hpb_ne : (Ideal.span ({Polynomial.X - Polynomial.C b} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero b
+  let vpa : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
+    ⟨_, hpa_max.isPrime, hpa_ne⟩
+  let vpb : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
+    ⟨_, hpb_max.isPrime, hpb_ne⟩
+  have h_vpa_irr : Irreducible (Associates.mk vpa.asIdeal) := vpa.associates_irreducible
+  have h_vpb_irr : Irreducible (Associates.mk vpb.asIdeal) := vpb.associates_irreducible
+  have hpb_count_factor : (Associates.mk
+      (Ideal.span ({Polynomial.X - Polynomial.C b} : Set _) :
+        Ideal (Polynomial F))) ≠ 0 := by
+    rw [Associates.mk_ne_zero, Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
+    exact Polynomial.X_sub_C_ne_zero b
+  have h_vpa_ne_vpb : (Associates.mk vpa.asIdeal) ≠ (Associates.mk vpb.asIdeal) := by
+    intro h_eq
+    exact span_X_sub_C_ne_span_X_sub_C_of_ne (F := F) hab
+      (associated_iff_eq.mp (Associates.mk_eq_mk_iff_associated.mp h_eq))
+  rw [Associates.mk_pow]
+  change (Associates.mk vpa.asIdeal).count
+    (Associates.mk vpb.asIdeal ^ _).factors = 0
+  rw [Associates.count_pow hpb_count_factor h_vpa_irr,
+    Associates.count_eq_zero_of_ne h_vpa_irr h_vpb_irr h_vpa_ne_vpb, Nat.mul_zero]
+
+/-- **Off-fiber smooth points avoid `a`**: if a smooth point `P` carries the maximal
+    ideal `Q = maximalIdealAt P` and `Q ∉ primesOverFinset (X-a) F[C]`, then `P.x ≠ a`.
+    If `P.x = a`, then `maximalIdealAt P` would lie over `(X-a)` (so be in the finset),
+    a contradiction. The non-membership step of
+    `count_relNorm_pow_eq_zero_of_not_mem_primesOverFinset`. -/
+private theorem smoothPoint_x_ne_of_not_mem_primesOverFinset
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (h_over : Q ∉ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing)
+    (hQ_prime : Q.IsPrime) {P : C.SmoothPoint} (hP : C.maximalIdealAt P = Q) :
+    P.x ≠ a := by
+  have hp_ne : (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  haveI hp_max : (Ideal.span ({Polynomial.X - Polynomial.C a} :
+      Set (Polynomial F))).IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  intro h_eq
+  apply h_over
+  rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne]
+  refine ⟨hQ_prime, ?_⟩
+  rw [← hP]
+  exact C.maximalIdealAt_liesOver_of_eq_x P h_eq
+
+/-- **Off-fiber count vanishes**: for a height-one prime `Q` of `F[C]` that does
+    NOT lie over `(X-a)`, the `(X-a)`-adic count of `relNorm Q ^ k` is `0`.
+    Choosing a smooth point `P` for the maximal ideal `Q` gives `relNorm Q = (X-P.x)`
+    with `P.x ≠ a` (else `Q` would lie over `(X-a)`); the two distinct linear primes
+    `(X-a)`, `(X-P.x)` of `F[X]` are non-associated, so `Associates.count_eq_zero_of_ne`
+    and `Associates.count_pow` collapse the count. The vanishing branch of
+    `count_relNorm_singleton_eq_sum_count_fiber`. -/
+private theorem count_relNorm_pow_eq_zero_of_not_mem_primesOverFinset
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing}
+    (h_over : Q.asIdeal ∉ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing) (k : ℕ) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+      (Associates.mk ((Ideal.relNorm (Polynomial F) Q.asIdeal) ^ k)).factors = 0 := by
+  -- Choose a smooth point `P` for the maximal ideal `Q`; off-fiber forces `P.x ≠ a`.
+  haveI hQ_max : Q.asIdeal.IsMaximal := Ideal.IsPrime.isMaximal Q.isPrime Q.ne_bot
+  obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hQ_max
+  have hPx_ne : P.x ≠ a :=
+    smoothPoint_x_ne_of_not_mem_primesOverFinset (C := C) h_over Q.isPrime hP
+  -- `relNorm Q = (X - P.x)`, so the count reduces to the cross-count of two distinct
+  -- linear primes, which vanishes.
+  have h_relNorm_Q :
+      Ideal.relNorm (Polynomial F) Q.asIdeal =
+        Ideal.span ({Polynomial.X - Polynomial.C P.x} : Set (Polynomial F)) := by
+    rw [← hP]; exact C.relNorm_maximalIdealAt P
+  rw [h_relNorm_Q]
+  exact count_X_sub_C_span_X_sub_C_pow_eq_zero_of_ne (F := F) (Ne.symm hPx_ne) k
+
+/-- **Per-fiber count identity** (Helper B's per-fiber piece, count form): for
+    nonzero `u ∈ F[C]` and `a ∈ F`, the `(X-a)`-adic count of
+    `Ideal.span {Algebra.norm F[X] u}` in `F[X]` equals the sum of `Q`-adic
+    counts of `Ideal.span {u}` over primes `Q ∈ primesOverFinset (X-a) F[C]`. -/
+theorem count_relNorm_singleton_eq_sum_count_fiber
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {u : C.CoordinateRing} (hu : u ≠ 0) (a : F) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+      (Associates.mk (Ideal.span {Algebra.norm (Polynomial F) u})).factors =
+    ∑ Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+        C.CoordinateRing,
+      (Associates.mk Q).count (Associates.mk (Ideal.span ({u} : Set _))).factors := by
+  classical
+  set p : Ideal (Polynomial F) :=
+    Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)) with hp_def
+  have hp_ne : p ≠ ⊥ := by
+    rw [hp_def, Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+  haveI hp_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+  let vp : IsDedekindDomain.HeightOneSpectrum (Polynomial F) :=
+    ⟨p, hp_max.isPrime, hp_ne⟩
+  have h_vp_irr : Irreducible (Associates.mk vp.asIdeal) := vp.associates_irreducible
+  rw [show Ideal.span ({Algebra.norm (Polynomial F) u} : Set _) =
+      Ideal.relNorm (Polynomial F) (Ideal.span ({u} : Set _)) from
+    (C.relNorm_span_singleton_eq_norm_span u).symm]
+  have hI_ne : Ideal.span ({u} : Set C.CoordinateRing) ≠ 0 := by
+    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hu
+  have h_supp := Ideal.hasFiniteMulSupport (R := C.CoordinateRing) hI_ne
+  have h_prime_ne_bot : ∀ Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing, Q ≠ ⊥ :=
+    fun Q hQ ↦ C.ne_bot_of_mem_primesOverFinset_span_X_sub_C hQ
+  let toHOS : ∀ Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+      IsDedekindDomain.HeightOneSpectrum C.CoordinateRing := fun Q hQ ↦
+    ⟨Q, ((IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hQ).1,
+      h_prime_ne_bot Q hQ⟩
+  let sH : Finset (IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) :=
+    (IsDedekindDomain.primesOverFinset p C.CoordinateRing).attach.image
+      (fun ⟨Q, hQ⟩ ↦ toHOS Q hQ)
+  set S : Finset (IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) :=
+    h_supp.toFinset ∪ sH with hS_def
+  have hS_supp : Function.mulSupport (fun Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing ↦
+      Q.maxPowDividing (Ideal.span ({u} : Set _))) ⊆ ↑S := by
+    intro Q hQ
+    simp only [hS_def, Finset.coe_union, Set.mem_union]
+    left
+    exact h_supp.mem_toFinset.mpr hQ
+  have h_finprod_eq_prod :
+      (∏ᶠ Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing,
+         Q.maxPowDividing (Ideal.span ({u} : Set _))) =
+      ∏ Q ∈ S, Q.maxPowDividing (Ideal.span ({u} : Set _)) :=
+    finprod_eq_prod_of_mulSupport_subset _ hS_supp
+  conv_lhs =>
+    rw [← Ideal.finprod_heightOneSpectrum_factorization hI_ne, h_finprod_eq_prod,
+      map_prod (Ideal.relNorm (Polynomial F))]
+  simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing, map_pow]
+  have h_term_ne : ∀ Q ∈ S,
+      Associates.mk
+          ((Ideal.relNorm (Polynomial F) Q.asIdeal) ^
+            ((Associates.mk Q.asIdeal).count
+              (Associates.mk (Ideal.span ({u} : Set _))).factors)) ≠ 0 := by
+    intro Q _
+    rw [Associates.mk_ne_zero]
+    apply pow_ne_zero
+    rw [Ne, Ideal.zero_eq_bot, Ideal.relNorm_eq_bot_iff]
+    exact Q.ne_bot
+  rw [show Associates.mk (∏ Q ∈ S, (Ideal.relNorm (Polynomial F)) Q.asIdeal ^
+        (Associates.mk Q.asIdeal).count
+          (Associates.mk (Ideal.span ({u} : Set _))).factors) =
+      ∏ Q ∈ S, Associates.mk ((Ideal.relNorm (Polynomial F)) Q.asIdeal ^
+        (Associates.mk Q.asIdeal).count
+          (Associates.mk (Ideal.span ({u} : Set _))).factors) from
+      map_prod (Associates.mkMonoidHom (M := Ideal (Polynomial F))) _ _]
+  rw [count_finset_prod_factors h_term_ne h_vp_irr]
+  have h_S_split : ∀ Q ∈ S,
+      (Associates.mk vp.asIdeal).count
+        (Associates.mk
+          ((Ideal.relNorm (Polynomial F) Q.asIdeal) ^
+            ((Associates.mk Q.asIdeal).count
+              (Associates.mk (Ideal.span ({u} : Set _))).factors))).factors =
+      if Q.asIdeal ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing then
+        (Associates.mk Q.asIdeal).count (Associates.mk (Ideal.span ({u} : Set _))).factors
+      else 0 := by
+    intro Q _
+    by_cases h_over : Q.asIdeal ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing
+    · rw [if_pos h_over, ← map_pow]
+      exact C.count_relNorm_pow_of_mem_primesOverFinset h_over _
+    · rw [if_neg h_over]
+      exact C.count_relNorm_pow_eq_zero_of_not_mem_primesOverFinset h_over _
+  rw [Finset.sum_congr rfl h_S_split]
+  rw [Finset.sum_ite, Finset.sum_const_zero, add_zero]
+  refine Finset.sum_bij'
+    (i := fun (Q : IsDedekindDomain.HeightOneSpectrum C.CoordinateRing) _ ↦ Q.asIdeal)
+    (j := fun (Q' : Ideal C.CoordinateRing) hQ' ↦ toHOS Q' hQ')
+    ?_ ?_ ?_ ?_ ?_
+  · intro Q hQ
+    exact (Finset.mem_filter.mp hQ).2
+  · intro Q' hQ'
+    refine Finset.mem_filter.mpr ⟨?_, ?_⟩
+    · simp only [hS_def, Finset.mem_union]
+      right
+      simp only [sH, Finset.mem_image, Finset.mem_attach, true_and, Subtype.exists]
+      exact ⟨Q', hQ', rfl⟩
+    · change Q' ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing
+      exact hQ'
+  · intro Q hQ
+    apply IsDedekindDomain.HeightOneSpectrum.ext
+    rfl
+  · intro Q' hQ'
+    rfl
+  · intro Q hQ
+    rfl
+
+/-- **`Ideal.span {X - C a}` is maximal in `F[X]`**: the residue ring
+    `F[X] ⧸ (X - a)` is a field (via `quotientSpanXSubCAlgEquiv`), so the ideal
+    is maximal. Setup helper for `count_X_sub_C_eq_rootMultiplicity`. -/
+private theorem isMaximal_span_X_sub_C (a : F) :
+    (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))).IsMaximal :=
+  Ideal.Quotient.maximal_of_isField _
+    ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField (Field.toIsField F))
+
+/-- **Height-one prime `(X - a)` of `F[X]`**: bundles the maximality
+    (`isMaximal_span_X_sub_C`) and nonzero-ness of `Ideal.span {X - C a}` into the
+    `HeightOneSpectrum` object used by `count_X_sub_C_eq_rootMultiplicity`. -/
+private noncomputable def heightOneSpectrumSpanXSubC (a : F) :
+    IsDedekindDomain.HeightOneSpectrum (Polynomial F) where
+  asIdeal := Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F))
+  isPrime := (isMaximal_span_X_sub_C a).isPrime
+  ne_bot := by rw [Ne, Ideal.span_singleton_eq_bot]; exact Polynomial.X_sub_C_ne_zero a
+
+/-- **`(X-a)`-count of a factor coprime to `(X - a)` vanishes**: if `q ≠ 0` and
+    `(X - C a) ∤ q`, then the `(X-a)`-adic count of `Ideal.span {q}` is `0`.
+    The vanishing half of `count_X_sub_C_eq_rootMultiplicity`. -/
+private theorem count_X_sub_C_span_singleton_eq_zero_of_not_dvd
+    {q : Polynomial F} {a : F} (hq_ne : q ≠ 0)
+    (h_not_dvd : ¬ (Polynomial.X - Polynomial.C a) ∣ q) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+        (Associates.mk (Ideal.span ({q} : Set (Polynomial F)))).factors = 0 := by
+  have h_right_ne : Ideal.span ({q} : Set (Polynomial F)) ≠ 0 := by
+    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hq_ne
+  by_contra h_ne
+  have h_dvd : (heightOneSpectrumSpanXSubC a).asIdeal ∣
+      Ideal.span ({q} : Set (Polynomial F)) :=
+    (Associates.count_ne_zero_iff_dvd h_right_ne
+      (heightOneSpectrumSpanXSubC a).irreducible).mp h_ne
+  apply h_not_dvd
+  rwa [show (heightOneSpectrumSpanXSubC a).asIdeal =
+      Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)) from rfl,
+    Ideal.dvd_iff_le, Ideal.span_singleton_le_iff_mem, Ideal.mem_span_singleton] at h_dvd
+
+/-- **`(X-a)`-adic count equals root multiplicity**: for a nonzero polynomial
+    `p ∈ F[X]` and `a : F`, the count of `(X-a)` in the principal-ideal
+    factorization of `Ideal.span {p}` equals the root multiplicity of `a` in `p`. -/
+theorem count_X_sub_C_eq_rootMultiplicity
+    {p : Polynomial F} (hp : p ≠ 0) (a : F) :
+    (Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+      (Associates.mk (Ideal.span ({p} : Set (Polynomial F)))).factors =
+      p.rootMultiplicity a := by
+  classical
+  -- The prime `(X - a)` of `F[X]` (`.asIdeal` defeq `span {X - C a}`) is irreducible.
+  have h_vXa_irr : Irreducible (Associates.mk
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))) :=
+    (heightOneSpectrumSpanXSubC a).associates_irreducible
+  -- Factor `p = (X - a)^(mult) * q` with `(X - a) ∤ q`.
+  obtain ⟨q, h_eq, h_not_dvd⟩ :=
+    Polynomial.exists_eq_pow_rootMultiplicity_mul_and_not_dvd p hp a
+  have hq_ne : q ≠ 0 := by
+    intro hq0; apply hp; rw [h_eq, hq0, mul_zero]
+  have h_ideal_eq : Ideal.span ({p} : Set (Polynomial F)) =
+      Ideal.span ({(Polynomial.X - Polynomial.C a)^p.rootMultiplicity a} :
+        Set (Polynomial F)) *
+      Ideal.span ({q} : Set (Polynomial F)) := by
+    rw [Ideal.span_singleton_mul_span_singleton, ← h_eq]
+  have h_left_ne : Ideal.span ({(Polynomial.X - Polynomial.C a) ^ p.rootMultiplicity a} :
+      Set (Polynomial F)) ≠ 0 := by
+    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
+    exact pow_ne_zero _ (Polynomial.X_sub_C_ne_zero a)
+  have h_right_ne : Ideal.span ({q} : Set (Polynomial F)) ≠ 0 := by
+    rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]; exact hq_ne
+  -- The `(X-a)^mult` factor contributes `mult`; the `q` factor contributes `0`.
+  rw [h_ideal_eq, ← Associates.mk_mul_mk,
+    Associates.count_mul (Associates.mk_ne_zero.mpr h_left_ne)
+      (Associates.mk_ne_zero.mpr h_right_ne) h_vXa_irr,
+    show Ideal.span ({(Polynomial.X - Polynomial.C a) ^ p.rootMultiplicity a} :
+        Set (Polynomial F)) =
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set _))^p.rootMultiplicity a from
+      (Ideal.span_singleton_pow _ _).symm,
+    Associates.mk_pow,
+    Associates.count_pow (Associates.mk_ne_zero.mpr (by
+      rw [Ne, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
+      exact Polynomial.X_sub_C_ne_zero a)) h_vXa_irr,
+    Associates.count_self h_vXa_irr, Nat.mul_one,
+    count_X_sub_C_span_singleton_eq_zero_of_not_dvd hq_ne h_not_dvd, Nat.add_zero]
+
+/-- **Sum of `(X-a)`-counts of `Ideal.span {p}` equals `natDegree p`**: under
+    `[IsAlgClosed F]`, summing `count_{(X-a)} (Ideal.span {p})` over the (finite)
+    set of roots of a nonzero polynomial `p ∈ F[X]` recovers `natDegree p`. -/
+theorem sum_count_X_sub_C_eq_natDegree [IsAlgClosed F] [DecidableEq F]
+    {p : Polynomial F} (hp : p ≠ 0) :
+    ∑ a ∈ p.roots.toFinset,
+      (Associates.mk
+          (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+        (Associates.mk (Ideal.span ({p} : Set (Polynomial F)))).factors =
+      p.natDegree := by
+  rw [Finset.sum_congr rfl (fun a _ ↦
+    SmoothPlaneCurve.count_X_sub_C_eq_rootMultiplicity (F := F) hp a)]
+  exact Polynomial.sum_rootMultiplicity_eq_natDegree F p
+
+/-- **Primes over `(X-a)` are maximal**: every prime `Q` of `F[C]` in
+    `primesOverFinset (X-a) F[C]` is maximal. Unpacks the `primesOverFinset`
+    membership into `IsPrime` + `LiesOver (X-a)` and feeds it to
+    `isMaximal_of_isPrime_of_liesOver_span_X_sub_C`. The maximality input to the
+    fibre bijection in `fiber_sum_divisorOf_algMap_eq_count_norm`. -/
+private theorem isMaximal_of_mem_primesOverFinset_span_X_sub_C
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing) :
+    Q.IsMaximal := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  haveI hp_max := isMaximal_span_X_sub_C (F := F) a
+  have hQ' := (IsDedekindDomain.mem_primesOverFinset_iff
+    (B := C.CoordinateRing) hp_ne).mp hQ
+  exact C.isMaximal_of_isPrime_of_liesOver_span_X_sub_C hQ'.1 hQ'.2
+
+/-- **Smooth points map into `primesOverFinset (X-a)`**: for a smooth point `P`
+    with `P.x = a`, the maximal ideal `maximalIdealAt P` is a prime of `F[C]`
+    lying over `(X-a)`, hence belongs to `primesOverFinset (X-a) F[C]`. The
+    forward map of the fibre bijection in
+    `fiber_sum_divisorOf_algMap_eq_count_norm`. -/
+private theorem maximalIdealAt_mem_primesOverFinset_of_eq_x
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} (P : C.SmoothPoint) (hPx : P.x = a) :
+    C.maximalIdealAt P ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  haveI hp_max := isMaximal_span_X_sub_C (F := F) a
+  rw [IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne]
+  exact ⟨(C.maximalIdealAt_isMaximal P).isPrime,
+    C.maximalIdealAt_liesOver_of_eq_x P hPx⟩
+
+/-- **Pre-images of `primesOverFinset (X-a)` have `x = a`**: if a prime `Q` of
+    `F[C]` lies in `primesOverFinset (X-a) F[C]` and `Q = maximalIdealAt P` for a
+    smooth point `P`, then `P.x = a`. Transports the `LiesOver (X-a)` witness from
+    `Q` to `maximalIdealAt P` and applies
+    `smoothPoint_x_eq_of_liesOver_span_X_sub_C`. The backward map of the fibre
+    bijection in `fiber_sum_divisorOf_algMap_eq_count_norm`. -/
+private theorem smoothPoint_x_eq_of_maximalIdealAt_mem_primesOverFinset
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {a : F} {Q : Ideal C.CoordinateRing}
+    (hQ : Q ∈ IsDedekindDomain.primesOverFinset
+      (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))
+      C.CoordinateRing)
+    {P : C.SmoothPoint} (hP : C.maximalIdealAt P = Q) :
+    P.x = a := by
+  have hp_ne := span_X_sub_C_ne_bot (F := F) a
+  haveI hp_max := isMaximal_span_X_sub_C (F := F) a
+  have hQ' := (IsDedekindDomain.mem_primesOverFinset_iff
+    (B := C.CoordinateRing) hp_ne).mp hQ
+  refine C.smoothPoint_x_eq_of_liesOver_span_X_sub_C P ?_
+  rw [hP]
+  exact hQ'.2
+
+/-- **Per-fiber sum identity in smooth-point form** (Helper B's per-fiber,
+    smooth-point-indexed form): for nonzero `u ∈ F[C]` and `a ∈ F`, the sum
+    of the affine divisor's value at smooth points with `x`-coordinate `a`
+    equals the `(X-a)`-adic count of `Ideal.span {N(u)}`. -/
+theorem fiber_sum_divisorOf_algMap_eq_count_norm
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {u : C.CoordinateRing} (hu : u ≠ 0) (a : F) :
+    ∑ P ∈ (C.smoothPoint_x_preimage_finite a).toFinset,
+      C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P =
+    ((Associates.mk
+        (Ideal.span ({Polynomial.X - Polynomial.C a} : Set (Polynomial F)))).count
+      (Associates.mk
+        (Ideal.span ({Algebra.norm (Polynomial F) u} : Set (Polynomial F)))).factors :
+        ℤ) := by
+  classical
+  -- Rewrite each fibre term as a count at `maximalIdealAt P`, then expand the
+  -- right-hand count as a sum of `Q`-adic counts over `primesOverFinset (X-a)`.
+  rw [show ∑ P ∈ (C.smoothPoint_x_preimage_finite a).toFinset,
+      C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P =
+      ∑ P ∈ (C.smoothPoint_x_preimage_finite a).toFinset,
+        ((Associates.mk (C.maximalIdealAt P)).count
+          (Associates.mk (Ideal.span ({u} : Set _))).factors : ℤ) from
+    Finset.sum_congr rfl (fun P _ ↦ C.divisorOf_algebraMap_apply_eq_count P hu)]
+  rw [C.count_relNorm_singleton_eq_sum_count_fiber hu a]
+  push_cast
+  -- Both sides now sum the same count; reindex along the fibre bijection
+  -- `P ↦ maximalIdealAt P`, with inverse `Q ↦ (a chosen smooth point of `Q`)`.
+  refine Finset.sum_bij'
+    (i := fun (P : C.SmoothPoint) _ ↦ C.maximalIdealAt P)
+    (j := fun (Q : Ideal C.CoordinateRing) hQ ↦
+      (C.exists_smoothPoint_of_isMaximal
+        (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C hQ)).choose)
+    ?_ ?_ ?_ ?_ ?_
+  · -- `i` lands in `primesOverFinset (X-a)`.
+    intro P hP
+    exact C.maximalIdealAt_mem_primesOverFinset_of_eq_x P
+      ((C.smoothPoint_x_preimage_finite a).mem_toFinset.mp hP)
+  · -- `j` lands in the fibre `{P | P.x = a}`.
+    intro Q hQ
+    rw [(C.smoothPoint_x_preimage_finite a).mem_toFinset, Set.mem_setOf_eq]
+    exact C.smoothPoint_x_eq_of_maximalIdealAt_mem_primesOverFinset hQ
+      (C.exists_smoothPoint_of_isMaximal
+        (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C hQ)).choose_spec
+  · -- `j ∘ i = id`.
+    intro P hP
+    apply C.maximalIdealAt_injective
+    exact (C.exists_smoothPoint_of_isMaximal
+      (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C
+        (C.maximalIdealAt_mem_primesOverFinset_of_eq_x P
+          ((C.smoothPoint_x_preimage_finite a).mem_toFinset.mp hP)))).choose_spec
+  · -- `i ∘ j = id`.
+    intro Q hQ
+    exact (C.exists_smoothPoint_of_isMaximal
+      (C.isMaximal_of_mem_primesOverFinset_span_X_sub_C hQ)).choose_spec
+  · -- Summand equality is definitional.
+    intros
+    rfl
+
+/-- **`normAsRatFunc (algMap u)` factors through the polynomial-form norm**: for
+    `u ∈ F[C]`, the rational function `normAsRatFunc (algMap u) ∈ F(X)` is the
+    image of the polynomial `Algebra.norm F[X] u` under the algebra map
+    `F[X] → F(X)`. Combines `Algebra.algebraMap_intNorm_fractionRing`,
+    `Algebra.intNorm_eq_norm`, and `RatFunc.ofFractionRing_algebraMap`. -/
+theorem normAsRatFunc_algebraMap_eq
+    [IsIntegrallyClosed C.CoordinateRing] (u : C.CoordinateRing) :
+    C.normAsRatFunc (algebraMap C.CoordinateRing C.FunctionField u) =
+      algebraMap (Polynomial F) (RatFunc F) (Algebra.norm (Polynomial F) u) := by
+  simp only [SmoothPlaneCurve.normAsRatFunc, SmoothPlaneCurve.fieldNorm]
+  rw [show Algebra.norm (FractionRing (Polynomial F))
+      (algebraMap C.CoordinateRing C.FunctionField u) =
+      algebraMap (Polynomial F) (FractionRing (Polynomial F))
+        (Algebra.norm (Polynomial F) u) by
+    rw [← Algebra.intNorm_eq_norm (A := Polynomial F) (B := C.CoordinateRing),
+      ← Algebra.algebraMap_intNorm_fractionRing]]
+  exact RatFunc.ofFractionRing_algebraMap _
+
+/-- **`intDegree of normAsRatFunc (algMap u) = natDegree (Algebra.norm F[X] u)`**:
+    direct corollary of `normAsRatFunc_algebraMap_eq` + `intDegree_polynomial`. -/
+theorem intDegree_normAsRatFunc_algebraMap
+    [IsIntegrallyClosed C.CoordinateRing] (u : C.CoordinateRing) :
+    ((C.normAsRatFunc (algebraMap C.CoordinateRing C.FunctionField u)).intDegree : ℤ) =
+      ((Algebra.norm (Polynomial F) u).natDegree : ℤ) := by
+  rw [C.normAsRatFunc_algebraMap_eq u, RatFunc.intDegree_polynomial]
+
+/-- **Fibers of the `x`-projection are pairwise disjoint**: the smooth-point
+    `x`-preimage finsets `a ↦ (C.smoothPoint_x_preimage_finite a).toFinset` are
+    pairwise disjoint over any set of `x`-values — distinct `x`-coordinates have
+    disjoint fibers. Extracted from
+    `divisorOf_algMap_degree_eq_natDegree_norm` (the `h_disjoint` step), the
+    side condition for splitting the degree sum over a `biUnion` of fibers. -/
+private theorem pairwiseDisjoint_smoothPoint_x_preimage (s : Set F) :
+    s.PairwiseDisjoint
+      (fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset) := by
+  intro a₁ _ a₂ _ h_ne
+  rw [Function.onFun, Finset.disjoint_left]
+  intro P hP₁ hP₂
+  have hP₁_x : P.x = a₁ := (C.smoothPoint_x_preimage_finite a₁).mem_toFinset.mp hP₁
+  have hP₂_x : P.x = a₂ := (C.smoothPoint_x_preimage_finite a₂).mem_toFinset.mp hP₂
+  exact h_ne (hP₁_x.symm.trans hP₂_x)
+
+open scoped Classical in
+/-- **Support of `divisorOf (algMap u)` lies over the roots of `N(u)`**: every
+    smooth point in the support of the affine divisor of `algMap u` has its
+    `x`-coordinate a root of the algebra norm `Algebra.norm F[X] u`, hence sits
+    in the `biUnion` of the `x`-fibers over those roots. Extracted from
+    `divisorOf_algMap_degree_eq_natDegree_norm` (the `h_supp_sub` step): this is
+    the geometric core — a zero/pole of `u` forces `u ∈ maximalIdealAt P`, so
+    `P.x` is a root of `N(u)` via `norm_eval_at_x_of_zero_at_smoothPoint`. -/
+private theorem divisorOf_algMap_support_subset_biUnion_smoothPoint_x_preimage
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {u : C.CoordinateRing} (hu : u ≠ 0)
+    (hNu : Algebra.norm (Polynomial F) u ≠ 0) :
+    (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).support ⊆
+      (Algebra.norm (Polynomial F) u).roots.toFinset.biUnion
+        (fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset) := by
+  classical
+  intro P hP
+  have h_ne_zero :
+      C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P ≠ 0 :=
+    Finsupp.mem_support_iff.mp hP
+  have h_ord_ne :
+      C.ord_P P (algebraMap C.CoordinateRing C.FunctionField u) ≠ 0 := by
+    intro h_eq
+    apply h_ne_zero
+    rw [SmoothPlaneCurve.divisorOf_apply, h_eq]; rfl
+  have h_u_mem : u ∈ C.maximalIdealAt P :=
+    (C.ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hu P).mp h_ord_ne
+  obtain ⟨p, q, hpq⟩ :=
+    WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq u
+  have hPu : Polynomial.eval P.x p + Polynomial.eval P.x q * P.y = 0 := by
+    rw [← C.mem_maximalIdealAt_iff_eval_zero P p q, hpq]
+    exact h_u_mem
+  have h_isRoot : (Algebra.norm (Polynomial F) u).IsRoot P.x := by
+    rw [Polynomial.IsRoot, ← hpq]
+    exact C.norm_eval_at_x_of_zero_at_smoothPoint P p q hPu
+  have hPx_root : P.x ∈ (Algebra.norm (Polynomial F) u).roots :=
+    (Polynomial.mem_roots hNu).mpr h_isRoot
+  rw [Finset.mem_biUnion]
+  refine ⟨P.x, Multiset.mem_toFinset.mpr hPx_root, ?_⟩
+  exact (C.smoothPoint_x_preimage_finite P.x).mem_toFinset.mpr rfl
+
+/-- **Helper B for `u ∈ F[C]`** (composition step): the affine divisor degree of
+    `algMap u` equals the polynomial `natDegree` of the algebra norm
+    `Algebra.norm F[X] u`. -/
+theorem divisorOf_algMap_degree_eq_natDegree_norm
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {u : C.CoordinateRing} (hu : u ≠ 0) :
+    (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).degree =
+      ((Algebra.norm (Polynomial F) u).natDegree : ℤ) := by
+  classical
+  have hNu : Algebra.norm (Polynomial F) u ≠ 0 := fun h ↦
+    hu ((Algebra.norm_eq_zero_iff (R := Polynomial F)).mp h)
+  rw [show (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).degree =
+      ∑ P ∈ (Algebra.norm (Polynomial F) u).roots.toFinset.biUnion
+          (fun a ↦ (C.smoothPoint_x_preimage_finite a).toFinset),
+        C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u) P from
+    Finsupp.sum_of_support_subset _
+      (C.divisorOf_algMap_support_subset_biUnion_smoothPoint_x_preimage hu hNu)
+      _ (fun _ _ ↦ rfl)]
+  rw [Finset.sum_biUnion (C.pairwiseDisjoint_smoothPoint_x_preimage _)]
+  rw [Finset.sum_congr rfl (fun a _ ↦
+    C.fiber_sum_divisorOf_algMap_eq_count_norm hu a)]
+  exact_mod_cast SmoothPlaneCurve.sum_count_X_sub_C_eq_natDegree (F := F) hNu
+
+/-- **Helper B, zero case**: the affine divisor degree of `0` equals the
+    `intDegree` of `normAsRatFunc 0` (both sides vanish). The `f = 0` branch of
+    `helperB`, isolated as an unconditional fact. -/
+private theorem divisorOf_degree_eq_intDegree_normAsRatFunc_zero :
+    (C.divisorOf (0 : C.FunctionField)).degree =
+      ((C.normAsRatFunc (0 : C.FunctionField)).intDegree : ℤ) := by
+  rw [C.divisorOf_zero, Divisor.degree_zero, C.normAsRatFunc_zero,
+    RatFunc.intDegree_zero]
+
+/-- **Helper B, algebra-map atom in `degree = intDegree` shape**: for nonzero
+    `u : C.CoordinateRing`, the affine divisor degree of `algMap u` equals the
+    `intDegree` of `normAsRatFunc (algMap u)`. Rephrases
+    `divisorOf_algMap_degree_eq_natDegree_norm` through
+    `intDegree_normAsRatFunc_algebraMap` so it matches the `helperB` conclusion
+    shape; this is the building block applied to both numerator and denominator
+    in the general case. -/
+private theorem divisorOf_algMap_degree_eq_intDegree_normAsRatFunc
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {u : C.CoordinateRing} (hu : u ≠ 0) :
+    (C.divisorOf (algebraMap C.CoordinateRing C.FunctionField u)).degree =
+      ((C.normAsRatFunc
+        (algebraMap C.CoordinateRing C.FunctionField u)).intDegree : ℤ) := by
+  rw [C.divisorOf_algMap_degree_eq_natDegree_norm hu,
+    C.intDegree_normAsRatFunc_algebraMap u]
+
+/-- **Helper B, nonzero case**: for `f ≠ 0`, the affine divisor degree of `f`
+    equals the `intDegree` of `normAsRatFunc f`. Writes `f = u / v` with
+    `u, v : C.CoordinateRing`, splits both sides multiplicatively
+    (`divisorOf_mul`/`divisorOf_inv` and `normAsRatFunc_mul`/`normAsRatFunc_inv`
+    against `intDegree_mul`/`intDegree_inv`), and reduces to the algebra-map atom
+    `divisorOf_algMap_degree_eq_intDegree_normAsRatFunc` on `u` and `v`. -/
+private theorem divisorOf_degree_eq_intDegree_normAsRatFunc_of_ne_zero
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {f : C.FunctionField} (hf : f ≠ 0) :
+    (C.divisorOf f).degree = ((C.normAsRatFunc f).intDegree : ℤ) := by
+  obtain ⟨u, v, hv_mem, h_eq⟩ :=
+    IsFractionRing.div_surjective (A := C.CoordinateRing) f
+  have hv_ne : v ≠ 0 := nonZeroDivisors.ne_zero hv_mem
+  have h_alg_v_ne :
+      algebraMap C.CoordinateRing C.FunctionField v ≠ 0 :=
+    (IsLocalization.map_units C.FunctionField ⟨v, hv_mem⟩).ne_zero
+  have hu_ne : u ≠ 0 := by
+    intro hu
+    apply hf
+    rw [← h_eq, hu, map_zero, zero_div]
+  have h_alg_u_ne :
+      algebraMap C.CoordinateRing C.FunctionField u ≠ 0 := by
+    intro h
+    apply hu_ne
+    exact (IsFractionRing.injective C.CoordinateRing C.FunctionField)
+      (h.trans (map_zero _).symm)
+  rw [← h_eq, div_eq_mul_inv]
+  rw [C.divisorOf_mul h_alg_u_ne (inv_ne_zero h_alg_v_ne),
+    C.divisorOf_inv h_alg_v_ne, Divisor.degree_add, Divisor.degree_neg]
+  rw [C.normAsRatFunc_mul, C.normAsRatFunc_inv h_alg_v_ne]
+  have hN_alg_u_ne : C.normAsRatFunc (algebraMap _ _ u) ≠ 0 :=
+    (C.normAsRatFunc_eq_zero_iff _).not.mpr h_alg_u_ne
+  have hN_alg_v_ne : C.normAsRatFunc (algebraMap _ _ v) ≠ 0 :=
+    (C.normAsRatFunc_eq_zero_iff _).not.mpr h_alg_v_ne
+  rw [RatFunc.intDegree_mul hN_alg_u_ne (inv_ne_zero hN_alg_v_ne),
+    RatFunc.intDegree_inv]
+  rw [C.divisorOf_algMap_degree_eq_intDegree_normAsRatFunc hu_ne,
+    C.divisorOf_algMap_degree_eq_intDegree_normAsRatFunc hv_ne]
+
+/-- **Helper B (full unconditional form)**: under `[IsAlgClosed F]` +
+    `[C.toAffine.IsElliptic]` + `[IsIntegrallyClosed C.CoordinateRing]`, for any
+    `f ∈ F(C)`, `(C.divisorOf f).degree = intDegree (C.normAsRatFunc f)`. -/
+theorem helperB
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (f : C.FunctionField) :
+    (C.divisorOf f).degree = ((C.normAsRatFunc f).intDegree : ℤ) := by
+  by_cases hf : f = 0
+  · subst hf
+    exact C.divisorOf_degree_eq_intDegree_normAsRatFunc_zero
+  · exact C.divisorOf_degree_eq_intDegree_normAsRatFunc_of_ne_zero hf
+
+/-- **Silverman II.3.1(b) unconditional**: for any `f : C.FunctionField` under
+    `[IsAlgClosed F]` + `[C.toAffine.IsElliptic]` +
+    `[IsIntegrallyClosed C.CoordinateRing]`,
+    `(C.projectiveDivisorOf f).degree = 0`.
+
+    Combines the unconditional `helperB`
+    (`(C.divisorOf f).degree = intDegree (C.normAsRatFunc f)`) with the
+    project's `projectiveDivisorOf_degree_eq_zero_of_helperB` (which absorbs
+    `ordAtInfty f = -intDegree (normAsRatFunc f)`) for nonzero `f`, and the
+    trivial `f = 0` case via `projectiveDivisorOf_zero`.
+
+    This is the keystone Silverman II.3.1(b) closure for smooth plane elliptic
+    curves over algebraically closed fields. -/
+theorem projectiveDivisorOf_degree_eq_zero
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    (f : C.FunctionField) :
+    (C.projectiveDivisorOf f).degree = 0 := by
+  by_cases hf : f = 0
+  · subst hf
+    rw [C.projectiveDivisorOf_zero, ProjectiveDivisor.degree_zero]
+  · exact C.projectiveDivisorOf_degree_eq_zero_of_helperB hf (C.helperB f)
+
+/-- **A5 chained principal preservation (unconditional)**: combining
+    `helperB` with affine degree-zero gives `toProjective(divisorOf f) =
+    projectiveDivisorOf f`. Drops the `hHelperB` witness from the existing
+    `toProjective_eq_projectiveDivisorOf_of_helperB`. -/
+theorem toProjective_eq_projectiveDivisorOf
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {f : C.FunctionField} (hf : f ≠ 0) (hdivZero : (C.divisorOf f).degree = 0) :
+    (C.divisorOf f).toProjective = C.projectiveDivisorOf f :=
+  C.toProjective_eq_projectiveDivisorOf_of_helperB hf (C.helperB f) hdivZero
+
+/-- **A5 Pic-level principal preservation (unconditional)**: drops the
+    universally-quantified `hHelperB` premise from
+    `toProjective_eq_projectiveDivisorOf_witness_of_helperB`. An affine principal
+    divisor of degree zero is `projectiveDivisorOf g` for some nonzero `g`.
+    This is the form needed for the Pic⁰_aff ≃+ PicProj⁰ construction. -/
+theorem toProjective_eq_projectiveDivisorOf_witness
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {D : Divisor C} (hD_aff_principal : C.IsPrincipal D) (hD_degZero : D.degree = 0) :
+    ∃ g : C.FunctionField, g ≠ 0 ∧ C.projectiveDivisorOf g = D.toProjective :=
+  C.toProjective_eq_projectiveDivisorOf_witness_of_helperB hD_aff_principal hD_degZero
+    (fun f _ ↦ C.helperB f)
+
+/-- **Principal projective divisors lie in `degZero`** (witness drop): the
+    `PrincipalImpliesDegZero W` predicate of `AFConditional.lean` follows
+    immediately from the just-shipped `projectiveDivisorOf_degree_eq_zero`.
+    Ships the unconditional witness for the `h_pdz₁` / `h_pdz₂` arguments to
+    `AddHomProperty_of_AFInputs`. -/
+theorem principal_mem_degZero
+    [IsAlgClosed F] [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
+    {D : ProjectiveDivisor C} (hD : D ∈ C.projPrincipalSubgroup) :
+    D ∈ ProjectiveDivisor.degZero C := by
+  obtain ⟨f, _, hfD⟩ := hD
+  rw [← hfD, ProjectiveDivisor.mem_degZero]
+  exact C.projectiveDivisorOf_degree_eq_zero f
+
+end SmoothPlaneCurve
+
+end HasseWeil.Curves

@@ -14,3 +14,4 @@ blueprint/print/
 # Reference PDFs — local-only (copyright; large). Text extractions + maps are tracked.
 references/*.pdf
 references/*.txt
+*.log

@@ -81,7 +81,6 @@ private theorem finiteLog_mem_Q_pow_succ_of_order {N s : ℕ}
     {y : 𝓞 R'} (hy : y ∈ F.Q) (hs2 : 2 ≤ s) (hsN : s ≤ N)
     (hys : y ∈ F.Q ^ s) (hlog : F.finiteLog N y hy = 0) :
     y ∈ F.Q ^ (s + 1) := by
-  classical
   let terms : ℕ → 𝓞 R' ⧸ F.Q ^ (N + 1) :=
     fun n => F.finiteLogTerm N n y hy
   let tailSet : Finset ℕ := (Finset.range (finiteLogCutoff (ℓ := ℓ) N)).erase 1

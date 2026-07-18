@@ -89,9 +89,8 @@ theorem localizationLocSubring_aplus_le_comap
       localizationLocSubringPlusSubring P T s
     (A⁺ : Subring A) ≤
       (PlusSubring.toSubring (A := Localization.Away s)).comap
-        (algebraMap A (Localization.Away s)) := by
-  intro f hf
-  exact algebraMap_mem_locSubring P T s (hAplus_le_A₀ hf)
+        (algebraMap A (Localization.Away s)) :=
+  fun _ hf => algebraMap_mem_locSubring P T s (hAplus_le_A₀ hf)
 
 /-- **Rational-open transfer via localization (locSubring form)**.
 
@@ -157,8 +156,8 @@ theorem rationalOpen_subset_via_localization_locSubring
   intro v hv
   obtain ⟨hv_spa, hv_T1, hv_s_ne⟩ := hv
   -- Pre-condition for lift: v ∈ rationalOpen T s (via T ⊆ T1).
-  have hv_T_s : v ∈ rationalOpen T s := by
-    refine ⟨hv_spa, fun t ht => hv_T1 t (h_T_le_T1 ht), hv_s_ne⟩
+  have hv_T_s : v ∈ rationalOpen T s :=
+    ⟨hv_spa, fun t ht => hv_T1 t (h_T_le_T1 ht), hv_s_ne⟩
   -- Lift to local Spa.
   obtain ⟨w, hw_spa, hcomap⟩ :=
     valuationLocalizationLift_of_spa_rationalOpen_locSubring
@@ -167,25 +166,22 @@ theorem rationalOpen_subset_via_localization_locSubring
   have hw_T1 : ∀ t ∈ T1, w.vle (algebraMap A (Localization.Away s) t)
       (algebraMap A (Localization.Away s) s) := by
     intro t ht
-    have : (comap (algebraMap A (Localization.Away s)) w).vle t s :=
-      hcomap ▸ hv_T1 t ht
-    rwa [comap_vle] at this
+    rw [← comap_vle]
+    exact hcomap ▸ hv_T1 t ht
   have hw_s_ne : ¬ w.vle (algebraMap A (Localization.Away s) s) 0 := by
     intro hw_s
     apply hv_s_ne
-    have : (comap (algebraMap A (Localization.Away s)) w).vle s 0 := by
-      rw [comap_vle, map_zero]; exact hw_s
-    rwa [hcomap] at this
+    rw [← hcomap, comap_vle, map_zero]
+    exact hw_s
   -- Apply local inclusion.
   obtain ⟨hw_T2, hw_s2_ne⟩ := h_local w hw_spa hw_T1 hw_s_ne
   -- Translate back to base side.
   refine ⟨hv_spa, fun t ht => ?_, ?_⟩
-  · have hcomap_t : (comap (algebraMap A (Localization.Away s)) w).vle t s2 := by
-      rw [comap_vle]; exact hw_T2 t ht
-    rwa [hcomap] at hcomap_t
+  · rw [← hcomap, comap_vle]
+    exact hw_T2 t ht
   · intro hv_s2
     apply hw_s2_ne
     have : (comap (algebraMap A (Localization.Away s)) w).vle s2 0 := hcomap ▸ hv_s2
-    rw [comap_vle, map_zero] at this; exact this
+    rwa [comap_vle, map_zero] at this
 
 end ValuationSpectrum

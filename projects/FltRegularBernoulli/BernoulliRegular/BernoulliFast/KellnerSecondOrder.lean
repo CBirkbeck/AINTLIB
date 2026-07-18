@@ -244,21 +244,21 @@ theorem kellner_at_small_s
     change (if (37 : ℤ) ∣ ((32 : ℕ) + (0 : ℕ) * 36 : ℤ)
       then ¬ (37 : ℤ) ^ 3 ∣ (bernoulli ((32 : ℕ) + (0 : ℕ) * 36)).num
       else ¬ (37 : ℤ) ^ 2 ∣ (bernoulli ((32 : ℕ) + (0 : ℕ) * 36)).num)
-    rw [show ((32 : ℕ) + (0 : ℕ) * 36 : ℕ) = 32 from by decide]
+    rw [show ((32 : ℕ) + (0 : ℕ) * 36 : ℕ) = 32 by decide]
     rw [if_neg (by decide : ¬ ((37 : ℤ) ∣ ((32 : ℕ) + (0 : ℕ) * 36 : ℤ)))]
     exact kellner_at_zero_not_dvd
   · -- s = 1, n = 68, 37 ∤ 68, conclusion: ¬ 37² ∣ B_68.num
     change (if (37 : ℤ) ∣ ((32 : ℕ) + (1 : ℕ) * 36 : ℤ)
       then ¬ (37 : ℤ) ^ 3 ∣ (bernoulli ((32 : ℕ) + (1 : ℕ) * 36)).num
       else ¬ (37 : ℤ) ^ 2 ∣ (bernoulli ((32 : ℕ) + (1 : ℕ) * 36)).num)
-    rw [show ((32 : ℕ) + (1 : ℕ) * 36 : ℕ) = 68 from by decide]
+    rw [show ((32 : ℕ) + (1 : ℕ) * 36 : ℕ) = 68 by decide]
     rw [if_neg (by decide : ¬ ((37 : ℤ) ∣ ((32 : ℕ) + (1 : ℕ) * 36 : ℤ)))]
     exact kellner_at_one_not_dvd
 
 /-! ## The FLT37 second-order target -/
 
-/-- **`¬ 37³ ∣ B_{1184}.num` from Kellner Prop 2.7** (Reviewer guidance
-2026-05-22). The bare statement of the FLT37 target case is the
+/-- **`¬ 37³ ∣ B_{1184}.num` from Kellner Prop 2.7.**
+The bare statement of the FLT37 target case is the
 specialisation of `KellnerProp27_thirtyseven_thirtytwo` at `s = 32`:
 since the unique second-order index is `s = 7 ≠ 32`, and `37 ∣ 1184`,
 the Kellner Prop 2.7 conclusion at `s = 32` is `¬ 37³ ∣ B_{1184}.num`.

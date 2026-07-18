@@ -40,6 +40,7 @@ variable (G : Type*) [Group G] [Finite G]
 variable (A : Type*) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 variable [MulSemiringAction G A] [ContinuousConstSMul G A]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The induced `MulAction` of `G` on `Spv(A)` via precomposition: `g • v = Spv(g⁻¹)(v)`.
 Concretely, `(g • v)(a, b) = v(g⁻¹ • a, g⁻¹ • b)`. -/
 noncomputable instance instMulActionSpv : MulAction G (Spv A) where

@@ -1,6 +1,8 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator
-import BernoulliRegular.CyclotomicUnits.KummerLogLinearAlgebra
-import BernoulliRegular.CyclotomicUnits.Vandermonde
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator
+public import BernoulliRegular.CyclotomicUnits.KummerLogLinearAlgebra
+public import BernoulliRegular.CyclotomicUnits.Vandermonde
 
 /-!
 # Kummer logarithm determinant
@@ -14,10 +16,6 @@ range are nonzero modulo `p`.
 @[expose] public section
 
 noncomputable section
-
-open NumberField
-open NumberField.IsCMField
-open scoped BigOperators NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -84,7 +82,7 @@ theorem kummerLogDetRowFactor_ne_zero_iff_bernoulliFactor_ne_zero
     (hp_five : 5 ≤ p) (j : Fin (kummerLogRank p)) :
     kummerLogDetRowFactor (p := p) j ≠ 0 ↔
       bernoulliFactor p (kummerLogRowIndex (p := p) j) ≠ 0 := by
-  unfold kummerLogDetRowFactor
+  simp only [kummerLogDetRowFactor]
   constructor
   · intro h hB
     exact h (mul_eq_zero.mpr (Or.inr hB))
@@ -149,15 +147,15 @@ theorem bernoulliFactor_ne_zero_iff_not_dvd_bernoulli_num
     simpa [D, B, n, Nat.cast_mul] using mul_ne_zero hBden hn
   have hcden_zmod :
       ((D : ℕ) : ZMod p) = (c : ZMod p) * (q.den : ZMod p) := by
-    have hcast := congrArg (fun z : ℤ => (z : ZMod p)) hcden
+    have hcast := congrArg (fun z : ℤ ↦ (z : ZMod p)) hcden
     simpa [Int.cast_mul] using hcast
-  have hc_zmod_ne : (c : ZMod p) ≠ 0 := fun hc_zero =>
+  have hc_zmod_ne : (c : ZMod p) ≠ 0 := fun hc_zero ↦
     hD_zmod_ne (by rw [hcden_zmod, hc_zero, zero_mul])
-  have hqden_zmod_ne : ((q.den : ℕ) : ZMod p) ≠ 0 := fun hqden_zero =>
+  have hqden_zmod_ne : ((q.den : ℕ) : ZMod p) ≠ 0 := fun hqden_zero ↦
     hD_zmod_ne (by rw [hcden_zmod, hqden_zero, mul_zero])
   have hcnum_zmod :
       ((B.num : ℤ) : ZMod p) = (c : ZMod p) * (q.num : ZMod p) := by
-    have hcast := congrArg (fun z : ℤ => (z : ZMod p)) hcnum
+    have hcast := congrArg (fun z : ℤ ↦ (z : ZMod p)) hcnum
     simpa [Int.cast_mul] using hcast
   have hqnum_ne_iff_Bnum_ne :
       (q.num : ZMod p) ≠ 0 ↔ ((B.num : ℤ) : ZMod p) ≠ 0 := by
@@ -169,7 +167,7 @@ theorem bernoulliFactor_ne_zero_iff_not_dvd_bernoulli_num
     · intro hB hq
       exact hB (by rw [hcnum_zmod, hq, mul_zero])
   have hred_ne_iff : ratReductionZMod p q ≠ 0 ↔ (q.num : ZMod p) ≠ 0 := by
-    unfold ratReductionZMod
+    simp only [ratReductionZMod]
     rw [div_eq_mul_inv]
     constructor
     · intro h hq

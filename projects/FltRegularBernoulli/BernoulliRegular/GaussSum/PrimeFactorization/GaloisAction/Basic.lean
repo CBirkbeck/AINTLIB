@@ -32,7 +32,7 @@ roots that underlie the Gauss-sum lift.
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
+open NumberField
 open scoped Pointwise
 
 namespace BernoulliRegular
@@ -46,10 +46,8 @@ local notation "N" => p * (p - 1)
 local notation "𝔭" => (Ideal.span ({(p : ℤ)} : Set ℤ))
 local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
 
-lemma stickelbergerN_pos : 0 < N := by
-  refine Nat.mul_pos hp.out.pos ?_
-  have hp_one_lt : 1 < p := hp.out.one_lt
-  omega
+lemma stickelbergerN_pos : 0 < N :=
+  Nat.mul_pos hp.out.pos (Nat.sub_pos_of_lt hp.out.one_lt)
 
 instance : NeZero N :=
   ⟨(stickelbergerN_pos (p := p)).ne'⟩
@@ -92,9 +90,8 @@ lemma sigmaOfExponent_apply_zeta (u : (ZMod N)ˣ) :
       (n := N) (K := L) (σ := σ)
       (x := IsCyclotomicExtension.zeta N ℚ L)
       ((IsCyclotomicExtension.zeta_spec N ℚ L).pow_eq_one)
-  rw [show IsCyclotomicExtension.Rat.galEquivZMod N L σ = u by
-      exact stickelbergerGalEquivZMod_sigmaOfExponent (p := p) (L := L) u] at h
-  exact h
+  rwa [show IsCyclotomicExtension.Rat.galEquivZMod N L σ = u from
+      stickelbergerGalEquivZMod_sigmaOfExponent (p := p) (L := L) u] at h
 
 @[simp]
 lemma sigmaOfExponent_smul_stickelbergerZetaInteger (u : (ZMod N)ˣ) :
@@ -106,9 +103,8 @@ lemma sigmaOfExponent_smul_stickelbergerZetaInteger (u : (ZMod N)ˣ) :
       (n := N) (K := L) (σ := σ)
       (x := stickelbergerZetaInteger (p := p) L)
       ((stickelbergerZetaInteger_isPrimitiveRoot (p := p) (L := L)).pow_eq_one)
-  rw [show IsCyclotomicExtension.Rat.galEquivZMod N L σ = u by
-      exact stickelbergerGalEquivZMod_sigmaOfExponent (p := p) (L := L) u] at h
-  exact h
+  rwa [show IsCyclotomicExtension.Rat.galEquivZMod N L σ = u from
+      stickelbergerGalEquivZMod_sigmaOfExponent (p := p) (L := L) u] at h
 
 /-- The primitive `p`-th root extracted from the distinguished `N`-th root.
 This is the additive root occurring in the Gauss-sum lift. -/
@@ -131,8 +127,8 @@ lemma sigmaOfExponent_smul_gaussSumLiftAdditiveRoot (u : (ZMod N)ˣ) :
             simp [gaussSumLiftAdditiveRoot]
     _ = (stickelbergerZetaInteger (p := p) L ^ u.val.val) ^ (p - 1) := by
           rw [sigmaOfExponent_smul_stickelbergerZetaInteger (p := p) (L := L) u]
-    _ = (stickelbergerZetaInteger (p := p) L ^ (p - 1)) ^ u.val.val := by
-          rw [← pow_mul, ← pow_mul, Nat.mul_comm]
+    _ = (stickelbergerZetaInteger (p := p) L ^ (p - 1)) ^ u.val.val :=
+          pow_right_comm _ _ _
     _ = gaussSumLiftAdditiveRoot (p := p) L ^ u.val.val := by
           simp [gaussSumLiftAdditiveRoot]
 
@@ -157,8 +153,8 @@ lemma sigmaOfExponent_smul_gaussSumLiftCharacterRoot (u : (ZMod N)ˣ) :
             simp [gaussSumLiftCharacterRoot]
     _ = (stickelbergerZetaInteger (p := p) L ^ u.val.val) ^ p := by
           rw [sigmaOfExponent_smul_stickelbergerZetaInteger (p := p) (L := L) u]
-    _ = (stickelbergerZetaInteger (p := p) L ^ p) ^ u.val.val := by
-          rw [← pow_mul, ← pow_mul, Nat.mul_comm]
+    _ = (stickelbergerZetaInteger (p := p) L ^ p) ^ u.val.val :=
+          pow_right_comm _ _ _
     _ = gaussSumLiftCharacterRoot (p := p) L ^ u.val.val := by
           simp [gaussSumLiftCharacterRoot]
 
@@ -179,35 +175,28 @@ lemma stickelbergerUnitsEquivProd_unitExponentOfUnit (a : (ZMod p)ˣ) :
       (a, 1) :=
   (stickelbergerUnitsEquivProd (p := p)).apply_symm_apply (a, 1)
 
+/-- The CRT image of the exponent `(Units.mapEquiv …).symm (prodUnits.symm q)` is the
+componentwise coercion of the pair `q`. Shared core of the `cast`/`modEq` lemmas below. -/
+private lemma chineseRemainder_coe_mapEquiv_symm_prodUnits_symm
+    (q : (ZMod p)ˣ × (ZMod (p - 1))ˣ) :
+    ZMod.chineseRemainder (prime_coprime_pred (p := p))
+        (((Units.mapEquiv (ZMod.chineseRemainder (prime_coprime_pred (p := p))).toMulEquiv).symm
+            (MulEquiv.prodUnits.symm q) : (ZMod N)ˣ) : ZMod N) =
+      ((q.1 : ZMod p), (q.2 : ZMod (p - 1))) := by
+  rw [Units.mapEquiv_symm, Units.coe_mapEquiv,
+    show ((MulEquiv.prodUnits.symm q : (ZMod p × ZMod (p - 1))ˣ) : ZMod p × ZMod (p - 1)) =
+        ((q.1 : ZMod p), (q.2 : ZMod (p - 1))) from rfl]
+  exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
+
 lemma unitExponentOfUnit_cast_p (a : (ZMod p)ˣ) :
     (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N).cast : ZMod p) = a := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (a, 1) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N))) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rw [unitExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.fst h
+  simpa [ZMod.chineseRemainder, unitExponentOfUnit] using
+    congrArg Prod.fst (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (a, 1))
 
 lemma unitExponentOfUnit_cast_pred (a : (ZMod p)ˣ) :
     (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N).cast : ZMod (p - 1)) = 1 := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (a, 1) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((unitExponentOfUnit (p := p) a : (ZMod N)ˣ) : ZMod N))) =
-        ((a : ZMod p), (1 : ZMod (p - 1))) := by
-    rw [unitExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.snd h
+  simpa [ZMod.chineseRemainder, unitExponentOfUnit] using
+    congrArg Prod.snd (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (a, 1))
 
 lemma unitExponentOfUnit_modEq_val (a : (ZMod p)ˣ) :
     (unitExponentOfUnit (p := p) a).val.val ≡ (a : ZMod p).val [MOD p] := by
@@ -266,33 +255,13 @@ lemma stickelbergerUnitsEquivProd_characterExponentOfUnit (b : (ZMod (p - 1))ˣ)
 
 lemma characterExponentOfUnit_cast_p (b : (ZMod (p - 1))ˣ) :
     (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N).cast : ZMod p) = 1 := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (1, b) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N))) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rw [characterExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.fst h
+  simpa [ZMod.chineseRemainder, characterExponentOfUnit] using
+    congrArg Prod.fst (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (1, b))
 
 lemma characterExponentOfUnit_cast_pred (b : (ZMod (p - 1))ˣ) :
     (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N).cast : ZMod (p - 1)) = b := by
-  have hpair :
-      ((MulEquiv.prodUnits.symm (1, b) : (ZMod p × ZMod (p - 1))ˣ) :
-          ZMod p × ZMod (p - 1)) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rfl
-  have h :
-      (ZMod.chineseRemainder (prime_coprime_pred (p := p))
-          (((characterExponentOfUnit (p := p) b : (ZMod N)ˣ) : ZMod N))) =
-        ((1 : ZMod p), (b : ZMod (p - 1))) := by
-    rw [characterExponentOfUnit, Units.mapEquiv_symm, Units.coe_mapEquiv, hpair]
-    exact (ZMod.chineseRemainder (prime_coprime_pred (p := p))).apply_symm_apply _
-  simpa [ZMod.chineseRemainder] using congrArg Prod.snd h
+  simpa [ZMod.chineseRemainder, characterExponentOfUnit] using
+    congrArg Prod.snd (chineseRemainder_coe_mapEquiv_symm_prodUnits_symm (p := p) (1, b))
 
 lemma characterExponentOfUnit_modEq_one (b : (ZMod (p - 1))ˣ) :
     (characterExponentOfUnit (p := p) b).val.val ≡ 1 [MOD p] := by
@@ -301,7 +270,6 @@ lemma characterExponentOfUnit_modEq_one (b : (ZMod (p - 1))ˣ) :
 
 lemma characterExponentOfUnit_modEq_val (b : (ZMod (p - 1))ˣ) :
     (characterExponentOfUnit (p := p) b).val.val ≡ (b : ZMod (p - 1)).val [MOD p - 1] := by
-  haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
   rw [← ZMod.natCast_eq_natCast_iff, ZMod.natCast_val, ZMod.natCast_val]
   simpa using characterExponentOfUnit_cast_pred (p := p) b
 
@@ -454,19 +422,15 @@ lemma exists_stickelbergerCharacterExponent (χ : DirichletCharacter ℂ p) :
     ∃ j < p - 1,
       stickelbergerComplexCharacterRoot (p := p) ^ j =
         χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p) := by
-  haveI : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
   have hpow : χ ^ (p - 1) = 1 := by
     have h := MulChar.pow_card_eq_one χ (M := ZMod p)
     rwa [ZMod.card_units_eq_totient, Nat.totient_prime hp.out] at h
   have hval_pow :
       χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p) ^ (p - 1) = 1 := by
-    have h := congrArg
+    simpa [MulChar.pow_apply_coe] using congrArg
       (fun ψ : DirichletCharacter ℂ p =>
         ψ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p)) hpow
-    simpa [MulChar.pow_apply_coe] using h
-  obtain ⟨j, hj_lt, hj_eq⟩ :=
-    (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).eq_pow_of_pow_eq_one hval_pow
-  exact ⟨j, hj_lt, hj_eq⟩
+  exact (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).eq_pow_of_pow_eq_one hval_pow
 
 noncomputable def stickelbergerCharacterExponent (χ : DirichletCharacter ℂ p) : Fin (p - 1) :=
   ⟨Classical.choose (exists_stickelbergerCharacterExponent (p := p) χ),
@@ -571,8 +535,7 @@ theorem characterUnitGenerator_pow_eq_iff_of_lt {m n : ℕ}
 theorem characterUnitGenerator_pow_bijective :
     Function.Bijective fun m : Fin (p - 1) => characterUnitGenerator (p := p) ^ (m : ℕ) := by
   let f : Fin (p - 1) → (ZMod p)ˣ := fun m => characterUnitGenerator (p := p) ^ (m : ℕ)
-  refine (Fintype.bijective_iff_injective_and_card f).mpr ?_
-  refine ⟨?_, ?_⟩
+  refine (Fintype.bijective_iff_injective_and_card f).mpr ⟨?_, ?_⟩
   · intro m n hmn
     exact Fin.ext <| (characterUnitGenerator_pow_eq_iff_of_lt (p := p) m.is_lt n.is_lt).mp hmn
   · rw [Fintype.card_fin, ZMod.card_units]
@@ -632,8 +595,7 @@ lemma stdAddChar_one_eq_stickelbergerAdditiveRoot :
   have hpm1_ne : ((p - 1 : ℕ) : ℂ) ≠ 0 :=
     Nat.cast_ne_zero.mpr (Nat.sub_ne_zero_of_lt hp.out.one_lt)
   have h1 : ((1 : ZMod p)) = ((1 : ℤ) : ZMod p) := by norm_cast
-  set ζ : ℂ := stickelbergerComplexRoot p with hζ_def
-  rw [h1, ZMod.stdAddChar_coe, hζ_def, stickelbergerComplexRoot, ← Complex.exp_nat_mul]
+  rw [h1, ZMod.stdAddChar_coe, stickelbergerComplexRoot, ← Complex.exp_nat_mul]
   congr 1
   push_cast
   field_simp [hp_ne, hpm1_ne]
@@ -662,8 +624,7 @@ lemma stdAddChar_mulShift_eq_stickelbergerAdditiveRootPow_mul
       (stickelbergerComplexRoot p ^ (p - 1)) ^ p
           = stickelbergerComplexRoot p ^ ((p - 1) * p) := by rw [pow_mul]
       _ = stickelbergerComplexRoot p ^ (p * (p - 1)) := by
-            congr 1
-            exact Nat.mul_comm (p - 1) p
+            rw [Nat.mul_comm]
       _ = 1 := by
             simpa using (stickelbergerComplexRoot_isPrimitiveRoot (p := p)).pow_eq_one
 
@@ -708,12 +669,14 @@ lemma stickelbergerComplexCharacter_apply_unit
     (stickelbergerComplexCharacter_apply_characterUnitGeneratorPow (p := p) χ
       (characterUnitGeneratorExponent (p := p) a : ℕ))
 
+set_option backward.isDefEq.respectTransparency false in
 lemma stickelbergerEmbedding_gaussSumLiftAdditiveRoot :
     stickelbergerEmbedding p L (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L)) =
       stickelbergerComplexRoot p ^ (p - 1) := by
   simp [gaussSumLiftAdditiveRoot, stickelbergerZetaInteger, map_pow,
     stickelbergerEmbedding_apply_zeta]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma stickelbergerEmbedding_gaussSumLiftCharacterRoot :
     stickelbergerEmbedding p L (((gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L)) =
       stickelbergerComplexCharacterRoot (p := p) := by
@@ -741,15 +704,14 @@ lemma gaussSumComplexRootSum_eq_gaussSum (χ : DirichletCharacter ℂ p) :
             χ (((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p) *
               (ZMod.stdAddChar : AddChar (ZMod p) ℂ)
                 ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p)) := by
-              unfold gaussSumComplexRootSum
+              simp only [gaussSumComplexRootSum]
               apply Finset.sum_congr rfl
               intro m _
               rw [stickelbergerComplexCharacter_apply_characterUnitGeneratorPow (p := p),
                 stdAddChar_eq_stickelbergerAdditiveRootPow (p := p)]
-    _ = ∑ a : ZMod p, χ a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a := by
-          symm
-          exact sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p)
-            (F := fun a : ZMod p => χ a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a) hF0
+    _ = ∑ a : ZMod p, χ a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a :=
+          (sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p)
+            (F := fun a : ZMod p => χ a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a) hF0).symm
     _ = gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) := by
           rfl
 
@@ -772,7 +734,7 @@ noncomputable def gaussSumLiftCharacterValue
 lemma gaussSumLiftCharacterValue_isUnit
     (χ : DirichletCharacter ℂ p) (a : (ZMod p)ˣ) :
     IsUnit (gaussSumLiftCharacterValue (p := p) (L := L) χ a) := by
-  unfold gaussSumLiftCharacterValue
+  simp only [gaussSumLiftCharacterValue]
   exact ((gaussSumLiftCharacterRoot_isPrimitiveRoot (p := p) (L := L)).isUnit
     (Nat.sub_ne_zero_of_lt hp.out.one_lt)).pow _
 
@@ -781,7 +743,7 @@ lemma stickelbergerEmbedding_gaussSumLiftCharacterValue
     stickelbergerEmbedding p L
         (((gaussSumLiftCharacterValue (p := p) (L := L) χ a : 𝓞 L) : L)) =
       χ (a : ZMod p) := by
-  unfold gaussSumLiftCharacterValue
+  simp only [gaussSumLiftCharacterValue]
   calc
     stickelbergerEmbedding p L
         (((gaussSumLiftCharacterRoot (p := p) L ^
@@ -805,7 +767,7 @@ lemma stickelbergerEmbedding_gaussSumLiftCharacterValue
 lemma stickelbergerEmbedding_gaussSumLiftRootSum (χ : DirichletCharacter ℂ p) :
     stickelbergerEmbedding p L (gaussSumLiftRootSum (p := p) (L := L) χ) =
       gaussSumComplexRootSum (p := p) χ := by
-  unfold gaussSumLiftRootSum gaussSumComplexRootSum
+  simp only [gaussSumLiftRootSum, gaussSumComplexRootSum]
   rw [map_sum]
   apply Finset.sum_congr rfl
   intro m hm
@@ -877,7 +839,7 @@ lemma characterSideEmbedding_gaussSumLiftRootSum
                 (((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p) *
               (ZMod.stdAddChar : AddChar (ZMod p) ℂ)
                 ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p)) := by
-              unfold gaussSumLiftRootSum
+              simp only [gaussSumLiftRootSum]
               rw [map_sum]
               apply Finset.sum_congr rfl
               intro m _
@@ -896,29 +858,19 @@ lemma characterSideEmbedding_gaussSumLiftRootSum
                       (stickelbergerComplexCharacterRoot (p := p) ^
                         ((stickelbergerCharacterExponent (p := p) χ : ℕ) * (m : ℕ))) ^
                         (b : ZMod (p - 1)).val := by
-                          rw [MulChar.pow_apply_coe]
-                          rw [stickelbergerComplexCharacter_apply_characterUnitGeneratorPow
+                          rw [MulChar.pow_apply_coe,
+                            stickelbergerComplexCharacter_apply_characterUnitGeneratorPow
                             (p := p) χ m]
-                  _ = stickelbergerComplexCharacterRoot (p := p) ^
-                        (((stickelbergerCharacterExponent (p := p) χ : ℕ) * (m : ℕ)) *
-                          (b : ZMod (p - 1)).val) := by
-                            rw [← pow_mul, pow_mul]
-                  _ = stickelbergerComplexCharacterRoot (p := p) ^
-                        ((b : ZMod (p - 1)).val *
-                          ((stickelbergerCharacterExponent (p := p) χ : ℕ) * (m : ℕ))) := by
-                            congr 1
-                            simp [Nat.mul_assoc, Nat.mul_comm]
                   _ = (stickelbergerComplexCharacterRoot (p := p) ^ (b : ZMod (p - 1)).val) ^
-                        ((stickelbergerCharacterExponent (p := p) χ : ℕ) * (m : ℕ)) := by
-                            rw [pow_mul]
+                        ((stickelbergerCharacterExponent (p := p) χ : ℕ) * (m : ℕ)) :=
+                          pow_right_comm _ _ _
               rw [← hchar, ← stdAddChar_eq_stickelbergerAdditiveRootPow (p := p)
                 ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p))]
     _ = ∑ a : ZMod p,
-          (χ ^ (b : ZMod (p - 1)).val) a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a := by
-          symm
-          exact sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p)
+          (χ ^ (b : ZMod (p - 1)).val) a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a :=
+          (sum_zmod_eq_sum_characterUnitGeneratorPowers (p := p)
             (F := fun a : ZMod p =>
-              (χ ^ (b : ZMod (p - 1)).val) a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a) hF0
+              (χ ^ (b : ZMod (p - 1)).val) a * (ZMod.stdAddChar : AddChar (ZMod p) ℂ) a) hF0).symm
     _ = gaussSum (χ ^ (b : ZMod (p - 1)).val) (ZMod.stdAddChar : AddChar (ZMod p) ℂ) := by
           rfl
 

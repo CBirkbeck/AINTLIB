@@ -42,12 +42,11 @@ theorem IsAdicComplete.series_convergent {M : Type*} [AddCommGroup M] [Module R 
   -- The difference of partial sums: Σ_{range m} a - Σ_{range n} a = -Σ_{Ico m n} a
   -- Each term aᵢ ∈ I^i • ⊤ ⊆ I^m • ⊤ for i ≥ m.
   suffices h : ∑ i ∈ Finset.Ico m n, a i ∈ (I ^ m • ⊤ : Submodule R M) by
-    have heq := Finset.sum_range_add_sum_Ico a hmn
     -- range m + Ico m n = range n, so range m - range n = -(Ico m n)
-    have : ∑ i ∈ Finset.range m, a i - ∑ i ∈ Finset.range n, a i =
-        -(∑ i ∈ Finset.Ico m n, a i) := by
-      rw [← heq]; abel
-    rw [this]; exact neg_mem h
+    rw [show ∑ i ∈ Finset.range m, a i - ∑ i ∈ Finset.range n, a i
+        = -(∑ i ∈ Finset.Ico m n, a i) by
+      rw [← Finset.sum_range_add_sum_Ico a hmn]; abel]
+    exact neg_mem h
   exact Submodule.sum_mem _ fun i hi =>
     Submodule.smul_mono_left (Ideal.pow_le_pow_right (Finset.mem_Ico.mp hi).1) (ha i)
 

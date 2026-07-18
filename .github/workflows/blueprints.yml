@@ -1,0 +1,53 @@
+name: blueprints
+
+# Build every project's Verso blueprint and publish them as subdirectories of ONE Pages site
+# in the dedicated blueprints repo (CBirkbeck/AINTLIB-blueprints). Kept off the code repo's
+# build / daily-bump / cache critical path. Manual for now; flip on the schedule once wired.
+
+on:
+  workflow_dispatch: {}
+  # schedule:
+  #   - cron: "0 5 * * *"        # optional: rebuild daily, after the mathlib bump
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blueprints
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # need all dev/* branches for the per-blueprint worktrees
+
+      - name: Install elan / Lean
+        run: |
+          curl -sSfL https://github.com/leanprover/elan/releases/latest/download/elan-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          ./elan-init -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Build + assemble blueprints
+        run: ./scripts/build-blueprints.sh
+        env:
+          PAGES_BASE: /AINTLIB-blueprints     # = the Pages repo's project-site base path
+
+      - name: Publish to the blueprints Pages repo
+        env:
+          DEPLOY_TOKEN: ${{ secrets.BLUEPRINTS_DEPLOY_TOKEN }}   # PAT with write to AINTLIB-blueprints
+        run: |
+          cd _site
+          touch .nojekyll
+          git init -q
+          git add -A
+          git -c user.email=ci@aintlib -c user.name="aintlib ci" commit -qm "blueprints ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${DEPLOY_TOKEN}@github.com/CBirkbeck/AINTLIB-blueprints.git" HEAD:gh-pages
+
+# Prerequisites to turn this on:
+#   1. Create repo CBirkbeck/AINTLIB-blueprints; enable Pages from branch gh-pages (root).
+#   2. Add repo secret BLUEPRINTS_DEPLOY_TOKEN (a PAT with write access to AINTLIB-blueprints).
+#   3. Wire each project's real Verso render in scripts/build-blueprints.sh (replace the placeholder).
+# Result: cbirkbeck.github.io/AINTLIB-blueprints/<project>/ for each, with an index at the root.

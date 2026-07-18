@@ -28,8 +28,8 @@ identity, and the GL₂⁺ change-of-variables lemma `peterssonInner_slash_adjoi
 
 * `heckeT_n_cusp` — the Hecke operator `T_n` on cusp forms
 * `heckeT_p_cusp` / `diamondOp_cusp` — `T_p` and `⟨d⟩` restricted to cusp forms
-* `adjointGamma0Rep` / `peterssonAdj` — adjoint representatives for the change of
-  variables
+* `adjointGamma0Rep` / `adjointGamma1Rep` / `peterssonAdj` — adjoint representatives for
+  the change of variables
 * `peterssonInner_slash_adjoint` — DS Proposition 5.5.2, GL₂⁺ change of variables
 
 ## References
@@ -154,13 +154,9 @@ private theorem preservesCusps_sub {T₁ T₂ : Module.End ℂ (ModularForm ((Ga
     (h₁ : PreservesCusps T₁) (h₂ : PreservesCusps T₂) : PreservesCusps (T₁ - T₂) := by
   intro f c hc
   let g₁ : CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
-    { toSlashInvariantForm := (T₁ f.toModularForm').toSlashInvariantForm
-      holo' := (T₁ f.toModularForm').holo'
-      zero_at_cusps' := h₁ f }
+    { T₁ f.toModularForm' with zero_at_cusps' := h₁ f }
   let g₂ : CuspForm ((Gamma1 N).map (mapGL ℝ)) k :=
-    { toSlashInvariantForm := (T₂ f.toModularForm').toSlashInvariantForm
-      holo' := (T₂ f.toModularForm').holo'
-      zero_at_cusps' := h₂ f }
+    { T₂ f.toModularForm' with zero_at_cusps' := h₂ f }
   exact (g₁ - g₂).zero_at_cusps' hc
 
 omit [NeZero N] in
@@ -226,6 +222,23 @@ theorem heckeT_n_cusp_unfold (m : ℕ) [NeZero m] (hm : 1 < m)
     (heckeT_n_prime_pow k hp' _
       (hp'.factorization_pos_of_dvd (by lia) (Nat.minFac_dvd m))).symm]
 
+/-- `T_1` is the identity on cusp forms. -/
+theorem heckeT_n_cusp_one (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    heckeT_n_cusp k 1 f = f :=
+  CuspForm.ext fun z ↦ by
+    change (heckeT_n k 1 f.toModularForm').toFun z = f z
+    rw [heckeT_n_one]; rfl
+
+/-- Transport an operator factorisation `T_m = T_a · T_b` to the cusp-form level. -/
+theorem heckeT_n_cusp_decomp_of_mul (a b m : ℕ) [NeZero a] [NeZero b] [NeZero m]
+    (h_mul : heckeT_n (N := N) k m = heckeT_n k a * heckeT_n k b)
+    (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
+    heckeT_n_cusp k m f = heckeT_n_cusp k a (heckeT_n_cusp k b f) :=
+  CuspForm.ext fun z ↦ by
+    change ((heckeT_n (N := N) k m) f.toModularForm').toFun z =
+      ((heckeT_n k a) ((heckeT_n k b) f.toModularForm')).toFun z
+    rw [h_mul]; rfl
+
 @[simp]
 theorem heckeT_n_cusp_toModularForm' (n : ℕ) [NeZero n]
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
@@ -263,9 +276,9 @@ noncomputable def adjointGamma0Rep (p N : ℕ) (hpN : Nat.Coprime p N) : ↥(Gam
   ⟨⟨!![(p : ℤ), n; (N : ℤ), m], by
       have hbez := coprime_bezout_aux hpN
       simp only [Matrix.det_fin_two_of]
-      linarith⟩, by
-      rw [Gamma0_mem]
-      simp⟩
+      linarith⟩, Gamma0_mem.mpr (by
+      show (((N : ℤ) : ℤ) : ZMod N) = 0
+      simp)⟩
 
 /-- The mod-`N` unit attached to `adjointGamma0Rep` is `(unitOfCoprime p)⁻¹`. -/
 lemma adjointGamma0Rep_units (p N : ℕ) (hpN : Nat.Coprime p N) [NeZero N] :
@@ -408,8 +421,7 @@ theorem peterssonInner_slash_adjoint (D : Set ℍ) (α : GL (Fin 2) ℝ) (hα : 
       ↑|α.det.val| ^ (k - 2) * petersson k f g' (α • τ) := by
     intro τ
     rw [hg_decomp, petersson_slash,
-      show σ α = ContinuousAlgEquiv.refl ℝ ℂ by
-        simp [σ]; intro hcontra; exact absurd hα (not_lt.mpr hcontra),
+      show σ α = ContinuousAlgEquiv.refl ℝ ℂ by simp only [σ, hα, ↓reduceIte],
       ContinuousAlgEquiv.refl_apply]
   simp_rw [h_eq]
   symm

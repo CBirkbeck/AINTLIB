@@ -1,0 +1,271 @@
+    27 * P x ^ 3 * Q x ^ 6 + 9 * W'.a₁ ^ 2 * P x ^ 3 * Q x ^ 5 * Q z + 54 * W'.a₂ * P x ^ 3 *
+      Q x ^ 5 * Q z - 27 * W'.a₁ * P x ^ 3 * Q x ^ 4 * Q y * Q z + W'.a₁ ^ 4 * P x ^ 3 * Q x ^
+      4 * Q z ^ 2 + 15 * W'.a₁ ^ 2 * W'.a₂ * P x ^ 3 * Q x ^ 4 * Q z ^ 2 + 36 * W'.a₂ ^ 2 * P
+      x ^ 3 * Q x ^ 4 * Q z ^ 2 + 27 * W'.a₄ * P x ^ 3 * Q x ^ 4 * Q z ^ 2 - 10 * W'.a₁ ^ 3 *
+      P x ^ 3 * Q x ^ 3 * Q y * Q z ^ 2 - 36 * W'.a₁ * W'.a₂ * P x ^ 3 * Q x ^ 3 * Q y * Q z ^
+      2 + W'.a₁ ^ 4 * W'.a₂ * P x ^ 3 * Q x ^ 3 * Q z ^ 3 + W'.a₁ ^ 3 * W'.a₃ * P x ^ 3 * Q x
+      ^ 3 * Q z ^ 3 + 6 * W'.a₁ ^ 2 * W'.a₂ ^ 2 * P x ^ 3 * Q x ^ 3 * Q z ^ 3 + 12 * W'.a₁ ^ 2
+      * W'.a₄ * P x ^ 3 * Q x ^ 3 * Q z ^ 3 + 8 * W'.a₂ ^ 3 * P x ^ 3 * Q x ^ 3 * Q z ^ 3 + 36
+      * W'.a₂ * W'.a₄ * P x ^ 3 * Q x ^ 3 * Q z ^ 3 - W'.a₁ ^ 5 * P x ^ 3 * Q x ^ 2 * Q y * Q
+      z ^ 3 - 7 * W'.a₁ ^ 3 * W'.a₂ * P x ^ 3 * Q x ^ 2 * Q y * Q z ^ 3 - 9 * W'.a₁ ^ 2 *
+      W'.a₃ * P x ^ 3 * Q x ^ 2 * Q y * Q z ^ 3 - 12 * W'.a₁ * W'.a₂ ^ 2 * P x ^ 3 * Q x ^ 2 *
+      Q y * Q z ^ 3 - 18 * W'.a₁ * W'.a₄ * P x ^ 3 * Q x ^ 2 * Q y * Q z ^ 3 + W'.a₁ ^ 4 *
+      W'.a₄ * P x ^ 3 * Q x ^ 2 * Q z ^ 4 + W'.a₁ ^ 3 * W'.a₂ * W'.a₃ * P x ^ 3 * Q x ^ 2 * Q
+      z ^ 4 + 9 * W'.a₁ ^ 2 * W'.a₂ * W'.a₄ * P x ^ 3 * Q x ^ 2 * Q z ^ 4 + 9 * W'.a₁ ^ 2 *
+      W'.a₆ * P x ^ 3 * Q x ^ 2 * Q z ^ 4 + 12 * W'.a₂ ^ 2 * W'.a₄ * P x ^ 3 * Q x ^ 2 * Q z ^
+      4 + 9 * W'.a₄ ^ 2 * P x ^ 3 * Q x ^ 2 * Q z ^ 4 - 2 * W'.a₁ ^ 4 * W'.a₃ * P x ^ 3 * Q x
+      * Q y * Q z ^ 4 - 4 * W'.a₁ ^ 3 * W'.a₄ * P x ^ 3 * Q x * Q y * Q z ^ 4 - 6 * W'.a₁ ^ 2
+      * W'.a₂ * W'.a₃ * P x ^ 3 * Q x * Q y * Q z ^ 4 - 12 * W'.a₁ * W'.a₂ * W'.a₄ * P x ^ 3 *
+      Q x * Q y * Q z ^ 4 + W'.a₁ ^ 4 * W'.a₆ * P x ^ 3 * Q x * Q z ^ 5 + W'.a₁ ^ 3 * W'.a₃ *
+      W'.a₄ * P x ^ 3 * Q x * Q z ^ 5 + 6 * W'.a₁ ^ 2 * W'.a₂ * W'.a₆ * P x ^ 3 * Q x * Q z ^
+      5 + 3 * W'.a₁ ^ 2 * W'.a₄ ^ 2 * P x ^ 3 * Q x * Q z ^ 5 + 6 * W'.a₂ * W'.a₄ ^ 2 * P x ^
+      3 * Q x * Q z ^ 5 - W'.a₁ ^ 3 * W'.a₃ ^ 2 * P x ^ 3 * Q y * Q z ^ 5 - W'.a₁ ^ 3 * W'.a₆
+      * P x ^ 3 * Q y * Q z ^ 5 - 3 * W'.a₁ ^ 2 * W'.a₃ * W'.a₄ * P x ^ 3 * Q y * Q z ^ 5 - 3
+      * W'.a₁ * W'.a₄ ^ 2 * P x ^ 3 * Q y * Q z ^ 5 + W'.a₁ ^ 3 * W'.a₃ * W'.a₆ * P x ^ 3 * Q
+      z ^ 6 + 3 * W'.a₁ ^ 2 * W'.a₄ * W'.a₆ * P x ^ 3 * Q z ^ 6 + W'.a₄ ^ 3 * P x ^ 3 * Q z ^
+      6 + 9 * W'.a₁ * P x ^ 2 * P y * Q x ^ 5 * Q z - 54 * P x ^ 2 * P y * Q x ^ 4 * Q y * Q z
+      + 3 * W'.a₁ ^ 3 * P x ^ 2 * P y * Q x ^ 4 * Q z ^ 2 + 24 * W'.a₁ * W'.a₂ * P x ^ 2 * P y
+      * Q x ^ 4 * Q z ^ 2 - 27 * W'.a₃ * P x ^ 2 * P y * Q x ^ 4 * Q z ^ 2 - 24 * W'.a₁ ^ 2 *
+      P x ^ 2 * P y * Q x ^ 3 * Q y * Q z ^ 2 - 72 * W'.a₂ * P x ^ 2 * P y * Q x ^ 3 * Q y * Q
+      z ^ 2 + 3 * W'.a₁ ^ 3 * W'.a₂ * P x ^ 2 * P y * Q x ^ 3 * Q z ^ 3 + 3 * W'.a₁ ^ 2 *
+      W'.a₃ * P x ^ 2 * P y * Q x ^ 3 * Q z ^ 3 + 12 * W'.a₁ * W'.a₂ ^ 2 * P x ^ 2 * P y * Q x
+      ^ 3 * Q z ^ 3 + 30 * W'.a₁ * W'.a₄ * P x ^ 2 * P y * Q x ^ 3 * Q z ^ 3 - 36 * W'.a₂ *
+      W'.a₃ * P x ^ 2 * P y * Q x ^ 3 * Q z ^ 3 - 3 * W'.a₁ ^ 4 * P x ^ 2 * P y * Q x ^ 2 * Q
+      y * Q z ^ 3 - 18 * W'.a₁ ^ 2 * W'.a₂ * P x ^ 2 * P y * Q x ^ 2 * Q y * Q z ^ 3 - 18 *
+      W'.a₁ * W'.a₃ * P x ^ 2 * P y * Q x ^ 2 * Q y * Q z ^ 3 - 24 * W'.a₂ ^ 2 * P x ^ 2 * P y
+      * Q x ^ 2 * Q y * Q z ^ 3 - 36 * W'.a₄ * P x ^ 2 * P y * Q x ^ 2 * Q y * Q z ^ 3 + 3 *
+      W'.a₁ ^ 3 * W'.a₄ * P x ^ 2 * P y * Q x ^ 2 * Q z ^ 4 + 3 * W'.a₁ ^ 2 * W'.a₂ * W'.a₃ *
+      P x ^ 2 * P y * Q x ^ 2 * Q z ^ 4 + 24 * W'.a₁ * W'.a₂ * W'.a₄ * P x ^ 2 * P y * Q x ^ 2
+      * Q z ^ 4 + 36 * W'.a₁ * W'.a₆ * P x ^ 2 * P y * Q x ^ 2 * Q z ^ 4 - 12 * W'.a₂ ^ 2 *
+      W'.a₃ * P x ^ 2 * P y * Q x ^ 2 * Q z ^ 4 - 18 * W'.a₃ * W'.a₄ * P x ^ 2 * P y * Q x ^ 2
+      * Q z ^ 4 - 6 * W'.a₁ ^ 3 * W'.a₃ * P x ^ 2 * P y * Q x * Q y * Q z ^ 4 - 12 * W'.a₁ ^ 2
+      * W'.a₄ * P x ^ 2 * P y * Q x * Q y * Q z ^ 4 - 12 * W'.a₁ * W'.a₂ * W'.a₃ * P x ^ 2 * P
+      y * Q x * Q y * Q z ^ 4 - 24 * W'.a₂ * W'.a₄ * P x ^ 2 * P y * Q x * Q y * Q z ^ 4 + 3 *
+      W'.a₁ ^ 3 * W'.a₆ * P x ^ 2 * P y * Q x * Q z ^ 5 + 3 * W'.a₁ ^ 2 * W'.a₃ * W'.a₄ * P x
+      ^ 2 * P y * Q x * Q z ^ 5 + 24 * W'.a₁ * W'.a₂ * W'.a₆ * P x ^ 2 * P y * Q x * Q z ^ 5 +
+      9 * W'.a₁ * W'.a₄ ^ 2 * P x ^ 2 * P y * Q x * Q z ^ 5 - 12 * W'.a₂ * W'.a₃ * W'.a₄ * P x
+      ^ 2 * P y * Q x * Q z ^ 5 - 3 * W'.a₁ ^ 2 * W'.a₃ ^ 2 * P x ^ 2 * P y * Q y * Q z ^ 5 -
+      6 * W'.a₁ ^ 2 * W'.a₆ * P x ^ 2 * P y * Q y * Q z ^ 5 - 6 * W'.a₁ * W'.a₃ * W'.a₄ * P x
+      ^ 2 * P y * Q y * Q z ^ 5 - 6 * W'.a₄ ^ 2 * P x ^ 2 * P y * Q y * Q z ^ 5 + 3 * W'.a₁ ^
+      2 * W'.a₃ * W'.a₆ * P x ^ 2 * P y * Q z ^ 6 + 12 * W'.a₁ * W'.a₄ * W'.a₆ * P x ^ 2 * P y
+      * Q z ^ 6 - 3 * W'.a₃ * W'.a₄ ^ 2 * P x ^ 2 * P y * Q z ^ 6 - 3 * W'.a₁ ^ 2 * P x ^ 2 *
+      P z * Q x ^ 6 - 9 * W'.a₂ * P x ^ 2 * P z * Q x ^ 6 - 9 * W'.a₁ * P x ^ 2 * P z * Q x ^
+      5 * Q y - 3 * W'.a₁ ^ 2 * W'.a₂ * P x ^ 2 * P z * Q x ^ 5 * Q z + 18 * W'.a₁ * W'.a₃ * P
+      x ^ 2 * P z * Q x ^ 5 * Q z - 12 * W'.a₂ ^ 2 * P x ^ 2 * P z * Q x ^ 5 * Q z + 36 *
+      W'.a₄ * P x ^ 2 * P z * Q x ^ 5 * Q z - 27 * P x ^ 2 * P z * Q x ^ 4 * Q y ^ 2 + 3 *
+      W'.a₁ ^ 3 * P x ^ 2 * P z * Q x ^ 4 * Q y * Q z + 12 * W'.a₁ * W'.a₂ * P x ^ 2 * P z * Q
+      x ^ 4 * Q y * Q z - 54 * W'.a₃ * P x ^ 2 * P z * Q x ^ 4 * Q y * Q z + 3 * W'.a₁ ^ 3 *
+      W'.a₃ * P x ^ 2 * P z * Q x ^ 4 * Q z ^ 2 + 30 * W'.a₁ * W'.a₂ * W'.a₃ * P x ^ 2 * P z *
+      Q x ^ 4 * Q z ^ 2 + 24 * W'.a₂ * W'.a₄ * P x ^ 2 * P z * Q x ^ 4 * Q z ^ 2 + 81 * W'.a₆
+      * P x ^ 2 * P z * Q x ^ 4 * Q z ^ 2 - 18 * W'.a₁ ^ 2 * W'.a₃ * P x ^ 2 * P z * Q x ^ 3 *
+      Q y * Q z ^ 2 - 12 * W'.a₁ * W'.a₄ * P x ^ 2 * P z * Q x ^ 3 * Q y * Q z ^ 2 - 36 *
+      W'.a₂ * W'.a₃ * P x ^ 2 * P z * Q x ^ 3 * Q y * Q z ^ 2 + 3 * W'.a₁ ^ 3 * W'.a₂ * W'.a₃
+      * P x ^ 2 * P z * Q x ^ 3 * Q z ^ 3 + 3 * W'.a₁ ^ 2 * W'.a₂ * W'.a₄ * P x ^ 2 * P z * Q
+      x ^ 3 * Q z ^ 3 + 3 * W'.a₁ ^ 2 * W'.a₃ ^ 2 * P x ^ 2 * P z * Q x ^ 3 * Q z ^ 3 + 3 *
+      W'.a₁ ^ 2 * W'.a₆ * P x ^ 2 * P z * Q x ^ 3 * Q z ^ 3 + 12 * W'.a₁ * W'.a₂ ^ 2 * W'.a₃ *
+      P x ^ 2 * P z * Q x ^ 3 * Q z ^ 3 + 24 * W'.a₁ * W'.a₃ * W'.a₄ * P x ^ 2 * P z * Q x ^ 3
+      * Q z ^ 3 + 12 * W'.a₂ ^ 2 * W'.a₄ * P x ^ 2 * P z * Q x ^ 3 * Q z ^ 3 + 72 * W'.a₂ *
+      W'.a₆ * P x ^ 2 * P z * Q x ^ 3 * Q z ^ 3 + 15 * W'.a₄ ^ 2 * P x ^ 2 * P z * Q x ^ 3 * Q
+      z ^ 3 - 3 * W'.a₁ ^ 4 * W'.a₃ * P x ^ 2 * P z * Q x ^ 2 * Q y * Q z ^ 3 - 3 * W'.a₁ ^ 3
+      * W'.a₄ * P x ^ 2 * P z * Q x ^ 2 * Q y * Q z ^ 3 - 15 * W'.a₁ ^ 2 * W'.a₂ * W'.a₃ * P x
+      ^ 2 * P z * Q x ^ 2 * Q y * Q z ^ 3 - 12 * W'.a₁ * W'.a₂ * W'.a₄ * P x ^ 2 * P z * Q x ^
+      2 * Q y * Q z ^ 3 - 18 * W'.a₁ * W'.a₃ ^ 2 * P x ^ 2 * P z * Q x ^ 2 * Q y * Q z ^ 3 -
+      36 * W'.a₁ * W'.a₆ * P x ^ 2 * P z * Q x ^ 2 * Q y * Q z ^ 3 - 12 * W'.a₂ ^ 2 * W'.a₃ *
+      P x ^ 2 * P z * Q x ^ 2 * Q y * Q z ^ 3 - 18 * W'.a₃ * W'.a₄ * P x ^ 2 * P z * Q x ^ 2 *
+      Q y * Q z ^ 3 + 3 * W'.a₁ ^ 3 * W'.a₃ * W'.a₄ * P x ^ 2 * P z * Q x ^ 2 * Q z ^ 4 + 3 *
+      W'.a₁ ^ 2 * W'.a₂ * W'.a₃ ^ 2 * P x ^ 2 * P z * Q x ^ 2 * Q z ^ 4 + 6 * W'.a₁ ^ 2 *
+      W'.a₂ * W'.a₆ * P x ^ 2 * P z * Q x ^ 2 * Q z ^ 4 + 3 * W'.a₁ ^ 2 * W'.a₄ ^ 2 * P x ^ 2
+      * P z * Q x ^ 2 * Q z ^ 4 + 18 * W'.a₁ * W'.a₂ * W'.a₃ * W'.a₄ * P x ^ 2 * P z * Q x ^ 2
+      * Q z ^ 4 + 18 * W'.a₁ * W'.a₃ * W'.a₆ * P x ^ 2 * P z * Q x ^ 2 * Q z ^ 4 + 24 * W'.a₂
+      ^ 2 * W'.a₆ * P x ^ 2 * P z * Q x ^ 2 * Q z ^ 4 + 12 * W'.a₂ * W'.a₄ ^ 2 * P x ^ 2 * P z
+      * Q x ^ 2 * Q z ^ 4 + 36 * W'.a₄ * W'.a₆ * P x ^ 2 * P z * Q x ^ 2 * Q z ^ 4 - 6 * W'.a₁
+      ^ 3 * W'.a₃ ^ 2 * P x ^ 2 * P z * Q x * Q y * Q z ^ 4 - 6 * W'.a₁ ^ 3 * W'.a₆ * P x ^ 2
+      * P z * Q x * Q y * Q z ^ 4 - 12 * W'.a₁ ^ 2 * W'.a₃ * W'.a₄ * P x ^ 2 * P z * Q x * Q y
+      * Q z ^ 4 - 12 * W'.a₁ * W'.a₂ * W'.a₃ ^ 2 * P x ^ 2 * P z * Q x * Q y * Q z ^ 4 - 24 *
+      W'.a₁ * W'.a₂ * W'.a₆ * P x ^ 2 * P z * Q x * Q y * Q z ^ 4 - 6 * W'.a₁ * W'.a₄ ^ 2 * P
+      x ^ 2 * P z * Q x * Q y * Q z ^ 4 - 12 * W'.a₂ * W'.a₃ * W'.a₄ * P x ^ 2 * P z * Q x * Q
+      y * Q z ^ 4 + 3 * W'.a₁ ^ 3 * W'.a₃ * W'.a₆ * P x ^ 2 * P z * Q x * Q z ^ 5 + 3 * W'.a₁
+      ^ 2 * W'.a₃ ^ 2 * W'.a₄ * P x ^ 2 * P z * Q x * Q z ^ 5 + 9 * W'.a₁ ^ 2 * W'.a₄ * W'.a₆
+      * P x ^ 2 * P z * Q x * Q z ^ 5 + 12 * W'.a₁ * W'.a₂ * W'.a₃ * W'.a₆ * P x ^ 2 * P z * Q
+      x * Q z ^ 5 + 6 * W'.a₁ * W'.a₃ * W'.a₄ ^ 2 * P x ^ 2 * P z * Q x * Q z ^ 5 + 24 * W'.a₂
+      * W'.a₄ * W'.a₆ * P x ^ 2 * P z * Q x * Q z ^ 5 + 3 * W'.a₄ ^ 3 * P x ^ 2 * P z * Q x *
+      Q z ^ 5 - 3 * W'.a₁ ^ 2 * W'.a₃ ^ 3 * P x ^ 2 * P z * Q y * Q z ^ 5 - 9 * W'.a₁ ^ 2 *
+      W'.a₃ * W'.a₆ * P x ^ 2 * P z * Q y * Q z ^ 5 - 6 * W'.a₁ * W'.a₃ ^ 2 * W'.a₄ * P x ^ 2
+      * P z * Q y * Q z ^ 5 - 12 * W'.a₁ * W'.a₄ * W'.a₆ * P x ^ 2 * P z * Q y * Q z ^ 5 - 3 *
+      W'.a₃ * W'.a₄ ^ 2 * P x ^ 2 * P z * Q y * Q z ^ 5 + 3 * W'.a₁ ^ 2 * W'.a₃ ^ 2 * W'.a₆ *
+      P x ^ 2 * P z * Q z ^ 6 + 6 * W'.a₁ ^ 2 * W'.a₆ ^ 2 * P x ^ 2 * P z * Q z ^ 6 + 6 *
+      W'.a₁ * W'.a₃ * W'.a₄ * W'.a₆ * P x ^ 2 * P z * Q z ^ 6 + 6 * W'.a₄ ^ 2 * W'.a₆ * P x ^
+      2 * P z * Q z ^ 6 + 36 * P x * P y ^ 2 * Q x ^ 5 * Q z + 9 * W'.a₁ ^ 2 * P x * P y ^ 2 *
+      Q x ^ 4 * Q z ^ 2 + 60 * W'.a₂ * P x * P y ^ 2 * Q x ^ 4 * Q z ^ 2 - 12 * W'.a₁ * P x *
+      P y ^ 2 * Q x ^ 3 * Q y * Q z ^ 2 + 6 * W'.a₁ ^ 2 * W'.a₂ * P x * P y ^ 2 * Q x ^ 3 * Q
+      z ^ 3 + 18 * W'.a₁ * W'.a₃ * P x * P y ^ 2 * Q x ^ 3 * Q z ^ 3 + 24 * W'.a₂ ^ 2 * P x *
+      P y ^ 2 * Q x ^ 3 * Q z ^ 3 + 48 * W'.a₄ * P x * P y ^ 2 * Q x ^ 3 * Q z ^ 3 - 3 * W'.a₁
+      ^ 3 * P x * P y ^ 2 * Q x ^ 2 * Q y * Q z ^ 3 - 12 * W'.a₁ * W'.a₂ * P x * P y ^ 2 * Q x
+      ^ 2 * Q y * Q z ^ 3 + 3 * W'.a₁ ^ 2 * W'.a₄ * P x * P y ^ 2 * Q x ^ 2 * Q z ^ 4 + 12 *
+      W'.a₁ * W'.a₂ * W'.a₃ * P x * P y ^ 2 * Q x ^ 2 * Q z ^ 4 + 36 * W'.a₂ * W'.a₄ * P x * P
+      y ^ 2 * Q x ^ 2 * Q z ^ 4 + 9 * W'.a₃ ^ 2 * P x * P y ^ 2 * Q x ^ 2 * Q z ^ 4 + 36 *
+      W'.a₆ * P x * P y ^ 2 * Q x ^ 2 * Q z ^ 4 - 6 * W'.a₁ ^ 2 * W'.a₃ * P x * P y ^ 2 * Q x
+      * Q y * Q z ^ 4 - 12 * W'.a₁ * W'.a₄ * P x * P y ^ 2 * Q x * Q y * Q z ^ 4 + 6 * W'.a₁ *
+      W'.a₃ * W'.a₄ * P x * P y ^ 2 * Q x * Q z ^ 5 + 6 * W'.a₂ * W'.a₃ ^ 2 * P x * P y ^ 2 *
+      Q x * Q z ^ 5 + 24 * W'.a₂ * W'.a₆ * P x * P y ^ 2 * Q x * Q z ^ 5 + 12 * W'.a₄ ^ 2 * P
+      x * P y ^ 2 * Q x * Q z ^ 5 - 3 * W'.a₁ * W'.a₃ ^ 2 * P x * P y ^ 2 * Q y * Q z ^ 5 - 12
+      * W'.a₁ * W'.a₆ * P x * P y ^ 2 * Q y * Q z ^ 5 + 3 * W'.a₃ ^ 2 * W'.a₄ * P x * P y ^ 2
+      * Q z ^ 6 + 12 * W'.a₄ * W'.a₆ * P x * P y ^ 2 * Q z ^ 6 + 6 * W'.a₁ * P x * P y * P z *
+      Q x ^ 6 + 36 * P x * P y * P z * Q x ^ 5 * Q y + 54 * W'.a₃ * P x * P y * P z * Q x ^ 5
+      * Q z + 6 * W'.a₁ ^ 2 * P x * P y * P z * Q x ^ 4 * Q y * Q z + 24 * W'.a₂ * P x * P y *
+      P z * Q x ^ 4 * Q y * Q z + 6 * W'.a₁ ^ 2 * W'.a₃ * P x * P y * P z * Q x ^ 4 * Q z ^ 2
+      - 12 * W'.a₁ * W'.a₄ * P x * P y * P z * Q x ^ 4 * Q z ^ 2 + 72 * W'.a₂ * W'.a₃ * P x *
+      P y * P z * Q x ^ 4 * Q z ^ 2 - 24 * W'.a₁ * W'.a₃ * P x * P y * P z * Q x ^ 3 * Q y * Q
+      z ^ 2 - 24 * W'.a₄ * P x * P y * P z * Q x ^ 3 * Q y * Q z ^ 2 + 6 * W'.a₁ ^ 2 * W'.a₂ *
+      W'.a₃ * P x * P y * P z * Q x ^ 3 * Q z ^ 3 + 6 * W'.a₁ * W'.a₃ ^ 2 * P x * P y * P z *
+      Q x ^ 3 * Q z ^ 3 - 24 * W'.a₁ * W'.a₆ * P x * P y * P z * Q x ^ 3 * Q z ^ 3 + 24 *
+      W'.a₂ ^ 2 * W'.a₃ * P x * P y * P z * Q x ^ 3 * Q z ^ 3 + 36 * W'.a₃ * W'.a₄ * P x * P y
+      * P z * Q x ^ 3 * Q z ^ 3 - 6 * W'.a₁ ^ 3 * W'.a₃ * P x * P y * P z * Q x ^ 2 * Q y * Q
+      z ^ 3 - 6 * W'.a₁ ^ 2 * W'.a₄ * P x * P y * P z * Q x ^ 2 * Q y * Q z ^ 3 - 24 * W'.a₁ *
+      W'.a₂ * W'.a₃ * P x * P y * P z * Q x ^ 2 * Q y * Q z ^ 3 - 24 * W'.a₂ * W'.a₄ * P x * P
+      y * P z * Q x ^ 2 * Q y * Q z ^ 3 - 18 * W'.a₃ ^ 2 * P x * P y * P z * Q x ^ 2 * Q y * Q
+      z ^ 3 - 72 * W'.a₆ * P x * P y * P z * Q x ^ 2 * Q y * Q z ^ 3 + 6 * W'.a₁ ^ 2 * W'.a₃ *
+      W'.a₄ * P x * P y * P z * Q x ^ 2 * Q z ^ 4 + 6 * W'.a₁ * W'.a₂ * W'.a₃ ^ 2 * P x * P y
+      * P z * Q x ^ 2 * Q z ^ 4 + 6 * W'.a₁ * W'.a₄ ^ 2 * P x * P y * P z * Q x ^ 2 * Q z ^ 4
+      + 24 * W'.a₂ * W'.a₃ * W'.a₄ * P x * P y * P z * Q x ^ 2 * Q z ^ 4 - 12 * W'.a₁ ^ 2 *
+      W'.a₃ ^ 2 * P x * P y * P z * Q x * Q y * Q z ^ 4 - 12 * W'.a₁ ^ 2 * W'.a₆ * P x * P y *
+      P z * Q x * Q y * Q z ^ 4 - 24 * W'.a₁ * W'.a₃ * W'.a₄ * P x * P y * P z * Q x * Q y * Q
+      z ^ 4 - 12 * W'.a₂ * W'.a₃ ^ 2 * P x * P y * P z * Q x * Q y * Q z ^ 4 - 48 * W'.a₂ *
+      W'.a₆ * P x * P y * P z * Q x * Q y * Q z ^ 4 - 12 * W'.a₄ ^ 2 * P x * P y * P z * Q x *
+      Q y * Q z ^ 4 + 6 * W'.a₁ ^ 2 * W'.a₃ * W'.a₆ * P x * P y * P z * Q x * Q z ^ 5 + 6 *
+      W'.a₁ * W'.a₃ ^ 2 * W'.a₄ * P x * P y * P z * Q x * Q z ^ 5 + 24 * W'.a₁ * W'.a₄ * W'.a₆
+      * P x * P y * P z * Q x * Q z ^ 5 + 6 * W'.a₃ * W'.a₄ ^ 2 * P x * P y * P z * Q x * Q z
+      ^ 5 - 6 * W'.a₁ * W'.a₃ ^ 3 * P x * P y * P z * Q y * Q z ^ 5 - 24 * W'.a₁ * W'.a₃ *
+      W'.a₆ * P x * P y * P z * Q y * Q z ^ 5 - 6 * W'.a₃ ^ 2 * W'.a₄ * P x * P y * P z * Q y
+      * Q z ^ 5 - 24 * W'.a₄ * W'.a₆ * P x * P y * P z * Q y * Q z ^ 5 + 6 * W'.a₁ * W'.a₃ ^ 2
+      * W'.a₆ * P x * P y * P z * Q z ^ 6 + 24 * W'.a₁ * W'.a₆ ^ 2 * P x * P y * P z * Q z ^ 6
+      - 9 * W'.a₁ * W'.a₃ * P x * P z ^ 2 * Q x ^ 6 + 3 * W'.a₂ ^ 2 * P x * P z ^ 2 * Q x ^ 6
+      - 33 * W'.a₄ * P x * P z ^ 2 * Q x ^ 6 - 9 * W'.a₁ * W'.a₂ * P x * P z ^ 2 * Q x ^ 5 * Q
+      y + 36 * W'.a₃ * P x * P z ^ 2 * Q x ^ 5 * Q y - 9 * W'.a₁ * W'.a₂ * W'.a₃ * P x * P z ^
+      2 * Q x ^ 5 * Q z - 18 * W'.a₂ * W'.a₄ * P x * P z ^ 2 * Q x ^ 5 * Q z - 54 * W'.a₆ * P
+      x * P z ^ 2 * Q x ^ 5 * Q z + 6 * W'.a₁ ^ 2 * P x * P z ^ 2 * Q x ^ 4 * Q y ^ 2 - 12 *
+      W'.a₂ * P x * P z ^ 2 * Q x ^ 4 * Q y ^ 2 + 9 * W'.a₁ ^ 2 * W'.a₃ * P x * P z ^ 2 * Q x
+      ^ 4 * Q y * Q z + 9 * W'.a₁ * W'.a₄ * P x * P z ^ 2 * Q x ^ 4 * Q y * Q z + 18 * W'.a₂ *
+      W'.a₃ * P x * P z ^ 2 * Q x ^ 4 * Q y * Q z + 3 * W'.a₁ ^ 2 * W'.a₃ ^ 2 * P x * P z ^ 2
+      * Q x ^ 4 * Q z ^ 2 - 3 * W'.a₁ * W'.a₃ * W'.a₄ * P x * P z ^ 2 * Q x ^ 4 * Q z ^ 2 + 6
+      * W'.a₂ * W'.a₃ ^ 2 * P x * P z ^ 2 * Q x ^ 4 * Q z ^ 2 - 30 * W'.a₂ * W'.a₆ * P x * P z
+      ^ 2 * Q x ^ 4 * Q z ^ 2 - 6 * W'.a₄ ^ 2 * P x * P z ^ 2 * Q x ^ 4 * Q z ^ 2 + 15 * W'.a₁
+      * P x * P z ^ 2 * Q x ^ 3 * Q y ^ 3 + 6 * W'.a₁ * W'.a₃ ^ 2 * P x * P z ^ 2 * Q x ^ 3 *
+      Q y * Q z ^ 2 + 15 * W'.a₁ * W'.a₆ * P x * P z ^ 2 * Q x ^ 3 * Q y * Q z ^ 2 + 6 * W'.a₃
+      * W'.a₄ * P x * P z ^ 2 * Q x ^ 3 * Q y * Q z ^ 2 + 3 * W'.a₁ ^ 2 * W'.a₂ * W'.a₃ ^ 2 *
+      P x * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 6 * W'.a₁ * W'.a₂ * W'.a₃ * W'.a₄ * P x * P z ^ 2 *
+      Q x ^ 3 * Q z ^ 3 + 3 * W'.a₁ * W'.a₃ ^ 3 * P x * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 3 *
+      W'.a₁ * W'.a₃ * W'.a₆ * P x * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 6 * W'.a₂ ^ 2 * W'.a₃ ^ 2 *
+      P x * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 6 * W'.a₂ * W'.a₄ ^ 2 * P x * P z ^ 2 * Q x ^ 3 * Q
+      z ^ 3 + 3 * W'.a₃ ^ 2 * W'.a₄ * P x * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 6 * W'.a₄ * W'.a₆ *
+      P x * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 9 * P x * P z ^ 2 * Q x ^ 2 * Q y ^ 4 - 3 * W'.a₁ ^
+      3 * W'.a₃ ^ 2 * P x * P z ^ 2 * Q x ^ 2 * Q y * Q z ^ 3 - 6 * W'.a₁ ^ 2 * W'.a₃ * W'.a₄
+      * P x * P z ^ 2 * Q x ^ 2 * Q y * Q z ^ 3 - 9 * W'.a₁ * W'.a₂ * W'.a₃ ^ 2 * P x * P z ^
+      2 * Q x ^ 2 * Q y * Q z ^ 3 - 3 * W'.a₁ * W'.a₄ ^ 2 * P x * P z ^ 2 * Q x ^ 2 * Q y * Q
+      z ^ 3 - 12 * W'.a₂ * W'.a₃ * W'.a₄ * P x * P z ^ 2 * Q x ^ 2 * Q y * Q z ^ 3 - 18 *
+      W'.a₃ * W'.a₆ * P x * P z ^ 2 * Q x ^ 2 * Q y * Q z ^ 3 + 3 * W'.a₁ ^ 2 * W'.a₃ ^ 2 *
+      W'.a₄ * P x * P z ^ 2 * Q x ^ 2 * Q z ^ 4 + 3 * W'.a₁ * W'.a₂ * W'.a₃ ^ 3 * P x * P z ^
+      2 * Q x ^ 2 * Q z ^ 4 + 12 * W'.a₁ * W'.a₂ * W'.a₃ * W'.a₆ * P x * P z ^ 2 * Q x ^ 2 * Q
+      z ^ 4 + 6 * W'.a₁ * W'.a₃ * W'.a₄ ^ 2 * P x * P z ^ 2 * Q x ^ 2 * Q z ^ 4 + 9 * W'.a₂ *
+      W'.a₃ ^ 2 * W'.a₄ * P x * P z ^ 2 * Q x ^ 2 * Q z ^ 4 + 24 * W'.a₂ * W'.a₄ * W'.a₆ * P x
+      * P z ^ 2 * Q x ^ 2 * Q z ^ 4 + 3 * W'.a₄ ^ 3 * P x * P z ^ 2 * Q x ^ 2 * Q z ^ 4 + 27 *
+      W'.a₆ ^ 2 * P x * P z ^ 2 * Q x ^ 2 * Q z ^ 4 - 6 * W'.a₁ ^ 2 * W'.a₃ ^ 3 * P x * P z ^
+      2 * Q x * Q y * Q z ^ 4 - 12 * W'.a₁ ^ 2 * W'.a₃ * W'.a₆ * P x * P z ^ 2 * Q x * Q y * Q
+      z ^ 4 - 12 * W'.a₁ * W'.a₃ ^ 2 * W'.a₄ * P x * P z ^ 2 * Q x * Q y * Q z ^ 4 - 12 *
+      W'.a₁ * W'.a₄ * W'.a₆ * P x * P z ^ 2 * Q x * Q y * Q z ^ 4 - 6 * W'.a₂ * W'.a₃ ^ 3 * P
+      x * P z ^ 2 * Q x * Q y * Q z ^ 4 - 24 * W'.a₂ * W'.a₃ * W'.a₆ * P x * P z ^ 2 * Q x * Q
+      y * Q z ^ 4 - 6 * W'.a₃ * W'.a₄ ^ 2 * P x * P z ^ 2 * Q x * Q y * Q z ^ 4 + 3 * W'.a₁ ^
+      2 * W'.a₃ ^ 2 * W'.a₆ * P x * P z ^ 2 * Q x * Q z ^ 5 + 3 * W'.a₁ * W'.a₃ ^ 3 * W'.a₄ *
+      P x * P z ^ 2 * Q x * Q z ^ 5 + 18 * W'.a₁ * W'.a₃ * W'.a₄ * W'.a₆ * P x * P z ^ 2 * Q x
+      * Q z ^ 5 + 6 * W'.a₂ * W'.a₃ ^ 2 * W'.a₆ * P x * P z ^ 2 * Q x * Q z ^ 5 + 24 * W'.a₂ *
+      W'.a₆ ^ 2 * P x * P z ^ 2 * Q x * Q z ^ 5 + 3 * W'.a₃ ^ 2 * W'.a₄ ^ 2 * P x * P z ^ 2 *
+      Q x * Q z ^ 5 + 12 * W'.a₄ ^ 2 * W'.a₆ * P x * P z ^ 2 * Q x * Q z ^ 5 - 3 * W'.a₁ *
+      W'.a₃ ^ 4 * P x * P z ^ 2 * Q y * Q z ^ 5 - 15 * W'.a₁ * W'.a₃ ^ 2 * W'.a₆ * P x * P z ^
+      2 * Q y * Q z ^ 5 - 12 * W'.a₁ * W'.a₆ ^ 2 * P x * P z ^ 2 * Q y * Q z ^ 5 - 3 * W'.a₃ ^
+      3 * W'.a₄ * P x * P z ^ 2 * Q y * Q z ^ 5 - 12 * W'.a₃ * W'.a₄ * W'.a₆ * P x * P z ^ 2 *
+      Q y * Q z ^ 5 + 3 * W'.a₁ * W'.a₃ ^ 3 * W'.a₆ * P x * P z ^ 2 * Q z ^ 6 + 12 * W'.a₁ *
+      W'.a₃ * W'.a₆ ^ 2 * P x * P z ^ 2 * Q z ^ 6 + 3 * W'.a₃ ^ 2 * W'.a₄ * W'.a₆ * P x * P z
+      ^ 2 * Q z ^ 6 + 12 * W'.a₄ * W'.a₆ ^ 2 * P x * P z ^ 2 * Q z ^ 6 - 4 * W'.a₁ * P y ^ 3 *
+      Q x ^ 4 * Q z ^ 2 - 8 * P y ^ 3 * Q x ^ 3 * Q y * Q z ^ 2 - W'.a₁ ^ 3 * P y ^ 3 * Q x ^
+      3 * Q z ^ 3 - 4 * W'.a₁ * W'.a₂ * P y ^ 3 * Q x ^ 3 * Q z ^ 3 - 4 * W'.a₃ * P y ^ 3 * Q
+      x ^ 3 * Q z ^ 3 - 2 * W'.a₁ ^ 2 * P y ^ 3 * Q x ^ 2 * Q y * Q z ^ 3 - 8 * W'.a₂ * P y ^
+      3 * Q x ^ 2 * Q y * Q z ^ 3 - 3 * W'.a₁ ^ 2 * W'.a₃ * P y ^ 3 * Q x ^ 2 * Q z ^ 4 - 4 *
+      W'.a₁ * W'.a₄ * P y ^ 3 * Q x ^ 2 * Q z ^ 4 - 4 * W'.a₂ * W'.a₃ * P y ^ 3 * Q x ^ 2 * Q
+      z ^ 4 - 4 * W'.a₁ * W'.a₃ * P y ^ 3 * Q x * Q y * Q z ^ 4 - 8 * W'.a₄ * P y ^ 3 * Q x *
+      Q y * Q z ^ 4 - 3 * W'.a₁ * W'.a₃ ^ 2 * P y ^ 3 * Q x * Q z ^ 5 - 4 * W'.a₁ * W'.a₆ * P
+      y ^ 3 * Q x * Q z ^ 5 - 4 * W'.a₃ * W'.a₄ * P y ^ 3 * Q x * Q z ^ 5 - 2 * W'.a₃ ^ 2 * P
+      y ^ 3 * Q y * Q z ^ 5 - 8 * W'.a₆ * P y ^ 3 * Q y * Q z ^ 5 - W'.a₃ ^ 3 * P y ^ 3 * Q z
+      ^ 6 - 4 * W'.a₃ * W'.a₆ * P y ^ 3 * Q z ^ 6 - 12 * P y ^ 2 * P z * Q x ^ 6 - 3 * W'.a₁ ^
+      2 * P y ^ 2 * P z * Q x ^ 5 * Q z - 12 * W'.a₂ * P y ^ 2 * P z * Q x ^ 5 * Q z - 6 *
+      W'.a₁ * W'.a₃ * P y ^ 2 * P z * Q x ^ 4 * Q z ^ 2 - 12 * W'.a₃ * P y ^ 2 * P z * Q x ^ 3
+      * Q y * Q z ^ 2 + 3 * W'.a₁ ^ 2 * W'.a₄ * P y ^ 2 * P z * Q x ^ 3 * Q z ^ 3 + 12 * W'.a₂
+      * W'.a₄ * P y ^ 2 * P z * Q x ^ 3 * Q z ^ 3 - 3 * W'.a₃ ^ 2 * P y ^ 2 * P z * Q x ^ 3 *
+      Q z ^ 3 + 12 * W'.a₆ * P y ^ 2 * P z * Q x ^ 3 * Q z ^ 3 - 3 * W'.a₁ ^ 2 * W'.a₃ * P y ^
+      2 * P z * Q x ^ 2 * Q y * Q z ^ 3 - 12 * W'.a₂ * W'.a₃ * P y ^ 2 * P z * Q x ^ 2 * Q y *
+      Q z ^ 3 + 6 * W'.a₁ ^ 2 * W'.a₆ * P y ^ 2 * P z * Q x ^ 2 * Q z ^ 4 + 6 * W'.a₁ * W'.a₃
+      * W'.a₄ * P y ^ 2 * P z * Q x ^ 2 * Q z ^ 4 + 24 * W'.a₂ * W'.a₆ * P y ^ 2 * P z * Q x ^
+      2 * Q z ^ 4 + 12 * W'.a₄ ^ 2 * P y ^ 2 * P z * Q x ^ 2 * Q z ^ 4 - 6 * W'.a₁ * W'.a₃ ^ 2
+      * P y ^ 2 * P z * Q x * Q y * Q z ^ 4 - 12 * W'.a₃ * W'.a₄ * P y ^ 2 * P z * Q x * Q y *
+      Q z ^ 4 + 12 * W'.a₁ * W'.a₃ * W'.a₆ * P y ^ 2 * P z * Q x * Q z ^ 5 + 3 * W'.a₃ ^ 2 *
+      W'.a₄ * P y ^ 2 * P z * Q x * Q z ^ 5 + 36 * W'.a₄ * W'.a₆ * P y ^ 2 * P z * Q x * Q z ^
+      5 - 3 * W'.a₃ ^ 3 * P y ^ 2 * P z * Q y * Q z ^ 5 - 12 * W'.a₃ * W'.a₆ * P y ^ 2 * P z *
+      Q y * Q z ^ 5 + 6 * W'.a₃ ^ 2 * W'.a₆ * P y ^ 2 * P z * Q z ^ 6 + 24 * W'.a₆ ^ 2 * P y ^
+      2 * P z * Q z ^ 6 + 3 * W'.a₁ * W'.a₂ * P y * P z ^ 2 * Q x ^ 6 - 21 * W'.a₃ * P y * P z
+      ^ 2 * Q x ^ 6 - 3 * W'.a₁ ^ 2 * P y * P z ^ 2 * Q x ^ 5 * Q y + 6 * W'.a₂ * P y * P z ^
+      2 * Q x ^ 5 * Q y + 9 * W'.a₁ * W'.a₄ * P y * P z ^ 2 * Q x ^ 5 * Q z - 18 * W'.a₂ *
+      W'.a₃ * P y * P z ^ 2 * Q x ^ 5 * Q z - 9 * W'.a₁ * P y * P z ^ 2 * Q x ^ 4 * Q y ^ 2 +
+      9 * W'.a₁ * W'.a₃ * P y * P z ^ 2 * Q x ^ 4 * Q y * Q z + 18 * W'.a₄ * P y * P z ^ 2 * Q
+      x ^ 4 * Q y * Q z + 3 * W'.a₁ * W'.a₃ ^ 2 * P y * P z ^ 2 * Q x ^ 4 * Q z ^ 2 + 15 *
+      W'.a₁ * W'.a₆ * P y * P z ^ 2 * Q x ^ 4 * Q z ^ 2 - 6 * P y * P z ^ 2 * Q x ^ 3 * Q y ^
+      3 + 6 * W'.a₃ ^ 2 * P y * P z ^ 2 * Q x ^ 3 * Q y * Q z ^ 2 + 30 * W'.a₆ * P y * P z ^ 2
+      * Q x ^ 3 * Q y * Q z ^ 2 + 3 * W'.a₁ * W'.a₂ * W'.a₃ ^ 2 * P y * P z ^ 2 * Q x ^ 3 * Q
+      z ^ 3 - 3 * W'.a₁ * W'.a₄ ^ 2 * P y * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 12 * W'.a₂ * W'.a₃ *
+      W'.a₄ * P y * P z ^ 2 * Q x ^ 3 * Q z ^ 3 + 3 * W'.a₃ ^ 3 * P y * P z ^ 2 * Q x ^ 3 * Q
+      z ^ 3 + 18 * W'.a₃ * W'.a₆ * P y * P z ^ 2 * Q x ^ 3 * Q z ^ 3 - 3 * W'.a₁ ^ 2 * W'.a₃ ^
+      2 * P y * P z ^ 2 * Q x ^ 2 * Q y * Q z ^ 3 - 6 * W'.a₁ * W'.a₃ * W'.a₄ * P y * P z ^ 2
+      * Q x ^ 2 * Q y * Q z ^ 3 - 6 * W'.a₂ * W'.a₃ ^ 2 * P y * P z ^ 2 * Q x ^ 2 * Q y * Q z
+      ^ 3 - 6 * W'.a₄ ^ 2 * P y * P z ^ 2 * Q x ^ 2 * Q y * Q z ^ 3 + 3 * W'.a₁ * W'.a₃ ^ 2 *
+      W'.a₄ * P y * P z ^ 2 * Q x ^ 2 * Q z ^ 4 - 12 * W'.a₁ * W'.a₄ * W'.a₆ * P y * P z ^ 2 *
+      Q x ^ 2 * Q z ^ 4 + 3 * W'.a₂ * W'.a₃ ^ 3 * P y * P z ^ 2 * Q x ^ 2 * Q z ^ 4 + 24 *
+      W'.a₂ * W'.a₃ * W'.a₆ * P y * P z ^ 2 * Q x ^ 2 * Q z ^ 4 + 9 * W'.a₃ * W'.a₄ ^ 2 * P y
+      * P z ^ 2 * Q x ^ 2 * Q z ^ 4 - 6 * W'.a₁ * W'.a₃ ^ 3 * P y * P z ^ 2 * Q x * Q y * Q z
+      ^ 4 - 12 * W'.a₁ * W'.a₃ * W'.a₆ * P y * P z ^ 2 * Q x * Q y * Q z ^ 4 - 12 * W'.a₃ ^ 2
+      * W'.a₄ * P y * P z ^ 2 * Q x * Q y * Q z ^ 4 - 24 * W'.a₄ * W'.a₆ * P y * P z ^ 2 * Q x
+      * Q y * Q z ^ 4 + 3 * W'.a₁ * W'.a₃ ^ 2 * W'.a₆ * P y * P z ^ 2 * Q x * Q z ^ 5 - 12 *
+      W'.a₁ * W'.a₆ ^ 2 * P y * P z ^ 2 * Q x * Q z ^ 5 + 3 * W'.a₃ ^ 3 * W'.a₄ * P y * P z ^
+      2 * Q x * Q z ^ 5 + 24 * W'.a₃ * W'.a₄ * W'.a₆ * P y * P z ^ 2 * Q x * Q z ^ 5 - 3 *
+      W'.a₃ ^ 4 * P y * P z ^ 2 * Q y * Q z ^ 5 - 18 * W'.a₃ ^ 2 * W'.a₆ * P y * P z ^ 2 * Q y
+      * Q z ^ 5 - 24 * W'.a₆ ^ 2 * P y * P z ^ 2 * Q y * Q z ^ 5 + 3 * W'.a₃ ^ 3 * W'.a₆ * P y
+      * P z ^ 2 * Q z ^ 6 + 12 * W'.a₃ * W'.a₆ ^ 2 * P y * P z ^ 2 * Q z ^ 6 + W'.a₂ ^ 3 * P z
+      ^ 3 * Q x ^ 6 - 6 * W'.a₂ * W'.a₄ * P z ^ 3 * Q x ^ 6 - 6 * W'.a₃ ^ 2 * P z ^ 3 * Q x ^
+      6 + 9 * W'.a₆ * P z ^ 3 * Q x ^ 6 - 3 * W'.a₁ * W'.a₂ ^ 2 * P z ^ 3 * Q x ^ 5 * Q y + 6
+      * W'.a₁ * W'.a₄ * P z ^ 3 * Q x ^ 5 * Q y + 6 * W'.a₂ * W'.a₃ * P z ^ 3 * Q x ^ 5 * Q y
+      - 6 * W'.a₂ * W'.a₃ ^ 2 * P z ^ 3 * Q x ^ 5 * Q z - 6 * W'.a₄ ^ 2 * P z ^ 3 * Q x ^ 5 *
+      Q z + 3 * W'.a₁ ^ 2 * W'.a₂ * P z ^ 3 * Q x ^ 4 * Q y ^ 2 - 6 * W'.a₁ * W'.a₃ * P z ^ 3
+      * Q x ^ 4 * Q y ^ 2 - 3 * W'.a₂ ^ 2 * P z ^ 3 * Q x ^ 4 * Q y ^ 2 + 6 * W'.a₄ * P z ^ 3
+      * Q x ^ 4 * Q y ^ 2 + 6 * W'.a₁ * W'.a₃ ^ 2 * P z ^ 3 * Q x ^ 4 * Q y * Q z + 12 * W'.a₃
+      * W'.a₄ * P z ^ 3 * Q x ^ 4 * Q y * Q z + 2 * W'.a₁ * W'.a₃ ^ 3 * P z ^ 3 * Q x ^ 4 * Q
+      z ^ 2 - 12 * W'.a₄ * W'.a₆ * P z ^ 3 * Q x ^ 4 * Q z ^ 2 - W'.a₁ ^ 3 * P z ^ 3 * Q x ^ 3
+      * Q y ^ 3 + 6 * W'.a₁ * W'.a₂ * P z ^ 3 * Q x ^ 3 * Q y ^ 3 - 6 * W'.a₃ * P z ^ 3 * Q x
+      ^ 3 * Q y ^ 3 + 4 * W'.a₃ ^ 3 * P z ^ 3 * Q x ^ 3 * Q y * Q z ^ 2 + 12 * W'.a₃ * W'.a₆ *
+      P z ^ 3 * Q x ^ 3 * Q y * Q z ^ 2 + 2 * W'.a₁ * W'.a₂ * W'.a₃ ^ 3 * P z ^ 3 * Q x ^ 3 *
+      Q z ^ 3 + 6 * W'.a₂ * W'.a₃ ^ 2 * W'.a₄ * P z ^ 3 * Q x ^ 3 * Q z ^ 3 + 2 * W'.a₃ ^ 4 *
+      P z ^ 3 * Q x ^ 3 * Q z ^ 3 + 3 * W'.a₃ ^ 2 * W'.a₆ * P z ^ 3 * Q x ^ 3 * Q z ^ 3 + 2 *
+      W'.a₄ ^ 3 * P z ^ 3 * Q x ^ 3 * Q z ^ 3 - 9 * W'.a₆ ^ 2 * P z ^ 3 * Q x ^ 3 * Q z ^ 3 -
+      3 * W'.a₁ ^ 2 * P z ^ 3 * Q x ^ 2 * Q y ^ 4 + 3 * W'.a₂ * P z ^ 3 * Q x ^ 2 * Q y ^ 4 -
+      2 * W'.a₁ ^ 2 * W'.a₃ ^ 3 * P z ^ 3 * Q x ^ 2 * Q y * Q z ^ 3 - 6 * W'.a₁ * W'.a₃ ^ 2 *
+      W'.a₄ * P z ^ 3 * Q x ^ 2 * Q y * Q z ^ 3 - 2 * W'.a₂ * W'.a₃ ^ 3 * P z ^ 3 * Q x ^ 2 *
+      Q y * Q z ^ 3 - 6 * W'.a₃ * W'.a₄ ^ 2 * P z ^ 3 * Q x ^ 2 * Q y * Q z ^ 3 + 2 * W'.a₁ *
+      W'.a₃ ^ 3 * W'.a₄ * P z ^ 3 * Q x ^ 2 * Q z ^ 4 + 2 * W'.a₂ * W'.a₃ ^ 4 * P z ^ 3 * Q x
+      ^ 2 * Q z ^ 4 + 9 * W'.a₂ * W'.a₃ ^ 2 * W'.a₆ * P z ^ 3 * Q x ^ 2 * Q z ^ 4 + 6 * W'.a₃
+      ^ 2 * W'.a₄ ^ 2 * P z ^ 3 * Q x ^ 2 * Q z ^ 4 + 9 * W'.a₄ ^ 2 * W'.a₆ * P z ^ 3 * Q x ^
+      2 * Q z ^ 4 - 3 * W'.a₁ * P z ^ 3 * Q x * Q y ^ 5 - 4 * W'.a₁ * W'.a₃ ^ 4 * P z ^ 3 * Q
+      x * Q y * Q z ^ 4 - 9 * W'.a₁ * W'.a₃ ^ 2 * W'.a₆ * P z ^ 3 * Q x * Q y * Q z ^ 4 - 8 *
+      W'.a₃ ^ 3 * W'.a₄ * P z ^ 3 * Q x * Q y * Q z ^ 4 - 18 * W'.a₃ * W'.a₄ * W'.a₆ * P z ^ 3
+      * Q x * Q y * Q z ^ 4 + 2 * W'.a₁ * W'.a₃ ^ 3 * W'.a₆ * P z ^ 3 * Q x * Q z ^ 5 + 2 *
+      W'.a₃ ^ 4 * W'.a₄ * P z ^ 3 * Q x * Q z ^ 5 + 15 * W'.a₃ ^ 2 * W'.a₄ * W'.a₆ * P z ^ 3 *
+      Q x * Q z ^ 5 + 15 * W'.a₄ * W'.a₆ ^ 2 * P z ^ 3 * Q x * Q z ^ 5 - P z ^ 3 * Q y ^ 6 - 2
+      * W'.a₃ ^ 5 * P z ^ 3 * Q y * Q z ^ 5 - 11 * W'.a₃ ^ 3 * W'.a₆ * P z ^ 3 * Q y * Q z ^ 5
+      - 15 * W'.a₃ * W'.a₆ ^ 2 * P z ^ 3 * Q y * Q z ^ 5 + 2 * W'.a₃ ^ 4 * W'.a₆ * P z ^ 3 * Q
+      z ^ 6 + 9 * W'.a₃ ^ 2 * W'.a₆ ^ 2 * P z ^ 3 * Q z ^ 6 + 9 * W'.a₆ ^ 3 * P z ^ 3 * Q z ^
+      6

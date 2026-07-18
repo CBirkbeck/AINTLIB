@@ -179,8 +179,7 @@ noncomputable def mvCoeffInIdealIdeal (n : ℕ) (P : PairOfDefinition A) (I : Id
       change (∑ p ∈ Finset.antidiagonal l,
           MvPowerSeries.coeff p.1 r.val.val * ((hz p.2).choose : A)) =
         MvPowerSeries.coeff l (r • z).val.val
-      rw [show (r • z).val.val = r.val.val * z.val.val from rfl]
-      rw [MvPowerSeries.coeff_mul]
+      rw [show (r • z).val.val = r.val.val * z.val.val from rfl, MvPowerSeries.coeff_mul]
       refine Finset.sum_congr rfl fun p _ => ?_
       rw [(hz p.2).choose_spec.2]
 
@@ -195,12 +194,10 @@ private theorem mvPairConstantHom_mem_coeffInIdeal (n : ℕ) (P : PairOfDefiniti
   classical
   by_cases hl : l = 0
   · refine ⟨c, hc, ?_⟩
-    show (c : A) = MvPowerSeries.coeff l (mvPairConstantHom n P c).val.val
     subst hl
     change (c : A) = MvPowerSeries.coeff 0 (MvPowerSeries.C (c : A))
     rw [MvPowerSeries.coeff_zero_C]
   · refine ⟨0, (P.I ^ k).zero_mem, ?_⟩
-    show ((0 : P.A₀) : A) = MvPowerSeries.coeff l (mvPairConstantHom n P c).val.val
     change (0 : A) = MvPowerSeries.coeff l (MvPowerSeries.C (c : A))
     rw [MvPowerSeries.coeff_C, if_neg hl]
 
@@ -242,8 +239,7 @@ theorem mvCoeffInIdealIdeal_mul_mono (n : ℕ) (P : PairOfDefinition A) {I₁ I�
       change (∑ p ∈ Finset.antidiagonal l,
           ((ha' p.1).choose : A) * ((hb' p.2).choose : A)) =
         MvPowerSeries.coeff l (a * b).val.val
-      rw [show (a * b).val.val = a.val.val * b.val.val from rfl]
-      rw [MvPowerSeries.coeff_mul]
+      rw [show (a * b).val.val = a.val.val * b.val.val from rfl, MvPowerSeries.coeff_mul]
       refine Finset.sum_congr rfl fun p _ => ?_
       rw [(ha' p.1).choose_spec.2, (hb' p.2).choose_spec.2]
   · intro z₁ z₂ h₁' h₂' l
@@ -276,10 +272,7 @@ theorem mvTateAlgNhd_coeff_mem (n : ℕ) (P : PairOfDefinition A) (k : ℕ)
     {y : ↥(restrictedMvPowerSeriesSubring n A)} (hy : y ∈ mvTateAlgNhd n P k) (l : Fin n →₀ ℕ) :
     ∃ b : P.A₀, b ∈ P.I ^ k ∧ (b : A) = MvPowerSeries.coeff l y.val := by
   obtain ⟨z, hz, rfl⟩ := hy
-  have := mvPairIdeal_pow_le_coeffInIdeal n P k hz l
-  change ∃ b, b ∈ P.I ^ k ∧ (b : A) =
-    MvPowerSeries.coeff l ((mvPairSubring n P).subtype.toAddMonoidHom z).val
-  exact this
+  exact mvPairIdeal_pow_le_coeffInIdeal n P k hz l
 
 omit [IsTopologicalRing A] in
 /-- The product `mvTateAlgNhd n P k · mvTateAlgNhd n P k ⊆ mvTateAlgNhd n P i`. Generalizes
@@ -305,12 +298,8 @@ theorem mvExists_mul_pow_subset_pow (P : PairOfDefinition A) (a : A) (k : ℕ) :
     P.hasBasis_nhds_zero.mem_of_mem trivial
   have hcont : Continuous fun b : A => a * b := continuous_const.mul continuous_id
   have hV : (fun b : A => a * b) ⁻¹' (Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀)) ∈
-      nhds (0 : A) := by
-    have h0 : (0 : A) ∈
-        (fun b : A => a * b) ⁻¹' (Subtype.val '' ((P.I ^ k : Ideal P.A₀) : Set P.A₀)) := by
-      simp only [Set.mem_preimage, mul_zero]
-      exact ⟨0, (P.I ^ k).zero_mem, rfl⟩
-    exact hcont.continuousAt.preimage_mem_nhds (by
+      nhds (0 : A) :=
+    hcont.continuousAt.preimage_mem_nhds (by
       rw [show (a * (0 : A)) = (0 : A) from mul_zero a]
       exact hU)
   obtain ⟨m, -, hm⟩ := P.hasBasis_nhds_zero.mem_iff.mp hV
@@ -319,8 +308,7 @@ theorem mvExists_mul_pow_subset_pow (P : PairOfDefinition A) (a : A) (k : ℕ) :
     ⟨b, hb, rfl⟩
   have := hm hbA
   simp only [Set.mem_preimage, Set.mem_image] at this
-  obtain ⟨c, hc, heq⟩ := this
-  exact ⟨c, hc, heq⟩
+  exact this
 
 /-- For `x ∈ A⟨X⟩` and `k`, eventually every coefficient of `x` lies in `image P.I^k`.
 Generalizes `TateAlgebra.tateAlgebra_coeff_eventually_in_pow` from `Fin 1` to `Fin n`;
@@ -363,8 +351,6 @@ theorem mvTateAlgNhd_of_coeff_mem_principal (n : ℕ) (P : PairOfDefinition A) (
     have hcoeff_g : MvPowerSeries.coeff l g_val.val =
         πinv ^ k * MvPowerSeries.coeff l y.val := by
       change MvPowerSeries.coeff l
-        (((algebraMap A ↥(restrictedMvPowerSeriesSubring n A)) (πinv ^ k) * y).val) = _
-      change MvPowerSeries.coeff l
         ((MvPowerSeries.C (πinv ^ k) : MvPowerSeries (Fin n) A) * y.val) = _
       rw [MvPowerSeries.coeff_C_mul]
     change MvPowerSeries.coeff l g_val.val ∈ P.A₀
@@ -384,16 +370,8 @@ theorem mvTateAlgNhd_of_coeff_mem_principal (n : ℕ) (P : PairOfDefinition A) (
   let g_in_subring : ↥(mvPairSubring n P) := ⟨g_val, hg_in⟩
   have hy_eq : (⟨y, hy_pair⟩ : ↥(mvPairSubring n P)) =
       mvPairConstantHom n P (π ^ k) * g_in_subring := by
-    apply Subtype.ext
-    apply Subtype.ext
+    refine Subtype.ext (Subtype.ext ?_)
     ext l
-    change MvPowerSeries.coeff l y.val =
-      MvPowerSeries.coeff l
-        ((mvPairConstantHom n P (π ^ k) * g_in_subring :
-          ↥(mvPairSubring n P)) : ↥(restrictedMvPowerSeriesSubring n A)).val
-    change MvPowerSeries.coeff l y.val =
-      MvPowerSeries.coeff l
-        ((MvPowerSeries.C ((π : A) ^ k)) * g_val.val)
     change MvPowerSeries.coeff l y.val =
       MvPowerSeries.coeff l ((MvPowerSeries.C ((π : A) ^ k)) *
         ((MvPowerSeries.C (πinv ^ k)) * y.val))
@@ -659,9 +637,7 @@ theorem mvTate_t2Space [IsTateRing A] [T2Space A] (n : ℕ) :
   intro y hy_ne
   obtain ⟨l, hl⟩ : ∃ l, MvPowerSeries.coeff l y.val ≠ 0 := by
     contrapose! hy_ne
-    apply Subtype.ext
-    apply MvPowerSeries.ext
-    intro l
+    refine Subtype.ext (MvPowerSeries.ext fun l => ?_)
     simpa using hy_ne l
   suffices h : ∃ k, MvPowerSeries.coeff l y.val ∉
       (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) by
@@ -672,7 +648,7 @@ theorem mvTate_t2Space [IsTateRing A] [T2Space A] (n : ℕ) :
     obtain ⟨b, hb_mem, hb_eq⟩ := mvTateAlgNhd_coeff_mem n P k hy_mem l
     exact hk ⟨b, hb_mem, hb_eq⟩
   by_contra hall
-  push_neg at hall
+  push Not at hall
   obtain ⟨b, _, hb_eq⟩ := hall 0
   have hb_all : ∀ k : ℕ, b ∈ P.I ^ k := by
     intro k
@@ -717,14 +693,11 @@ omit [NonarchimedeanRing A] in
 Generalizes `TateAlgebra.pow_image_isClosed` (no index dependence); Wedhorn Prop 6.21(2). -/
 private theorem mvPow_image_isClosed (P : PairOfDefinition A) (k : ℕ) :
     IsClosed (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
-  have hopen := P.pow_image_isOpen k
   rw [show Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) =
     (AddSubgroup.map P.A₀.subtype.toAddMonoidHom (P.I ^ k).toAddSubgroup : Set A) from rfl]
-  exact AddSubgroup.isClosed_of_isOpen _ (by
-    rw [show (AddSubgroup.map P.A₀.subtype.toAddMonoidHom (P.I ^ k).toAddSubgroup : Set A) =
-      Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) from rfl]
-    exact hopen)
+  exact AddSubgroup.isClosed_of_isOpen _ (P.pow_image_isOpen k)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **T-MVT-3:** `A⟨X₁,…,Xₙ⟩` is complete with the canonical natural Tate topology, provided
 the ground ring `A` is complete and Hausdorff. Generalizes
 `TateAlgebra.tateAlgebraTopology'_completeSpace` from `Fin 1` to `Fin n`; Wedhorn Prop 6.21(2).
@@ -847,8 +820,8 @@ theorem mvTate_completeSpace [IsTateRing A] [T2Space A] (n : ℕ)
       simp only [MvPowerSeries.coeff_apply, f]
     have htend : Tendsto (fun i => MvPowerSeries.coeff l (u m).val -
         MvPowerSeries.coeff l (u i).val)
-        atTop (nhds (MvPowerSeries.coeff l (u m).val - c l)) := by
-      exact tendsto_const_nhds.sub (hc l)
+        atTop (nhds (MvPowerSeries.coeff l (u m).val - c l)) :=
+      tendsto_const_nhds.sub (hc l)
     have hev : ∀ᶠ i in atTop,
         MvPowerSeries.coeff l (u m).val - MvPowerSeries.coeff l (u i).val ∈
           (Subtype.val '' ((P.I ^ k : Ideal ↥P.A₀) : Set ↥P.A₀) : Set A) := by
@@ -858,8 +831,7 @@ theorem mvTate_completeSpace [IsTateRing A] [T2Space A] (n : ℕ)
       exact ⟨b, hb_mem, by rw [hb_eq]; simp [map_sub]⟩
     have hlim_mem := (mvPow_image_isClosed P k).mem_of_tendsto htend hev
     rw [← hcoeff_val] at hlim_mem
-    obtain ⟨b, hb_mem, hb_eq⟩ := hlim_mem
-    exact ⟨b, hb_mem, hb_eq⟩
+    exact hlim_mem
   have hpair : (u m - f) ∈ mvPairSubring n P := by
     intro s
     obtain ⟨b, _, hb_eq⟩ := hcoeff_diff s
@@ -882,10 +854,8 @@ theorem mvTateAlgNhd_preimage_eq (n : ℕ) (P : PairOfDefinition A) (k : ℕ) :
   simp only [Set.mem_preimage, SetLike.mem_coe]
   constructor
   · rintro ⟨y, hy, heq⟩
-    have : x = y := by
-      apply_fun (mvPairSubring n P).subtype using Subtype.val_injective
-      exact heq.symm
-    rw [this]; exact hy
+    obtain rfl : x = y := Subtype.val_injective heq.symm
+    exact hy
   · exact fun hx => ⟨x, hx, rfl⟩
 
 omit [IsTopologicalRing A] in
@@ -962,7 +932,7 @@ theorem mvTateAlgebra_algebraMap_continuous [IsTateRing A] (n : ℕ) :
     change algebraMap A ↥(restrictedMvPowerSeriesSubring n A) ((b : A) + a) -
       algebraMap A ↥(restrictedMvPowerSeriesSubring n A) a ∈ mvTateAlgNhd n P k
     rw [map_add, add_sub_cancel_right]
-    refine ⟨mvPairConstantHom n P ⟨b, b.property⟩, ?_, ?_⟩
+    refine ⟨mvPairConstantHom n P b, ?_, ?_⟩
     · rw [show (mvPairIdeal n P) ^ k = Ideal.map (mvPairConstantHom n P) (P.I ^ k) from by
         simp only [mvPairIdeal, ← Ideal.map_pow]]
       exact Ideal.mem_map_of_mem _ hb
@@ -988,10 +958,6 @@ theorem mvTate_isTateRing [IsTateRing A] (n : ℕ) :
       refine ⟨Units.map
         (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
           A →* ↥(restrictedMvPowerSeriesSubring n A)) u, ?_⟩
-      change @IsTopologicallyNilpotent _ _ τ
-        ((Units.map (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
-          A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
-            ↥(restrictedMvPowerSeriesSubring n A)))
       change Tendsto (fun m => ((Units.map
         (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
           A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
@@ -1002,9 +968,6 @@ theorem mvTate_isTateRing [IsTateRing A] (n : ℕ) :
               ↥(restrictedMvPowerSeriesSubring n A)) ^ m =
           algebraMap A ↥(restrictedMvPowerSeriesSubring n A) ((u : A) ^ m) := by
         intro m
-        show ((Units.map (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
-          A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
-            ↥(restrictedMvPowerSeriesSubring n A)) ^ m) = _
         rw [show (Units.map (algebraMap A ↥(restrictedMvPowerSeriesSubring n A) :
           A →* ↥(restrictedMvPowerSeriesSubring n A)) u :
             ↥(restrictedMvPowerSeriesSubring n A)) =
@@ -1044,10 +1007,8 @@ theorem mvTate_isClosed_ideal [IsTateRing A] [T2Space A] [IsStronglyNoetherian A
       ↥(restrictedMvPowerSeriesSubring n A) := ⟨continuous_mul⟩
   haveI hnoeth : IsNoetherianRing ↥(restrictedMvPowerSeriesSubring n A) :=
     IsStronglyNoetherian.isNoetherianRing_restricted n
-  have hfin : Module.Finite ↥(restrictedMvPowerSeriesSubring n A)
-      (Submodule.topologicalClosure J) :=
-    Module.Finite.iff_fg.mpr (isNoetherian_def.mp hnoeth _)
-  exact ValuationSpectrum.fg_topologicalClosure_isClosed J hfin
+  exact ValuationSpectrum.fg_topologicalClosure_isClosed J
+    (Module.Finite.iff_fg.mpr (isNoetherian_def.mp hnoeth _))
 
 omit [IsTopologicalRing A] in
 /-- A multivariate power series whose support is contained in the box `[0, N)^m` (all coefficients
@@ -1070,7 +1031,7 @@ private theorem mvIsRestricted_of_eventually_zero (m : ℕ)
   have hbox : ∀ i, s i < N := by
     intro i
     by_contra h_ge
-    push_neg at h_ge
+    push Not at h_ge
     exact hs (by rw [hh s ⟨i, h_ge⟩]; exact h0U)
   refine ⟨fun i => ⟨s i, hbox i⟩, ?_⟩
   ext i
@@ -1197,7 +1158,8 @@ theorem mvPowerSeries_X_isBounded [IsTateRing A] {m : ℕ} (j : Fin m) :
   exact hbd.subset (by rintro _ ⟨n, rfl⟩; exact hpow n)
 
 /-- **`algebraMap` (the constant-series map) preserves boundedness** into `A⟨X₁,…,Xₘ⟩`: a bounded
-set `S ⊆ A` has bounded image under `a ↦` (constant series `a`). Since `coeffₗ(C(s)·v) = s·coeffₗ(v)`
+set `S ⊆ A` has bounded image under `a ↦` (constant series `a`).
+Since `coeffₗ(C(s)·v) = s·coeffₗ(v)`
 and `S` is bounded, the small coefficients of `v` (in `Iᵏ`) are absorbed: `s·coeffₗ(v) ∈ S·Iᵏ ⊆ Iʲ`.
 Needed for the relative Example-6.38 evaluation tuple (the `tᵢ/s` constant entries). -/
 theorem mvTateAlgebra_algebraMap_isBounded [IsTateRing A] {m : ℕ} {S : Set A}
@@ -1316,7 +1278,7 @@ theorem mvPolynomialToTate_denseRange [IsTateRing A] (m : ℕ) :
     have hbox : ∀ i, l i < N := by
       intro i
       by_contra hge
-      push_neg at hge
+      push Not at hge
       exact hne ((hN l ⟨i, hge⟩).symm)
     refine Finset.mem_image.mpr ⟨fun i => ⟨l i, hbox i⟩, Finset.mem_univ _, ?_⟩
     have : (fun i => ((⟨l i, hbox i⟩ : Fin N) : ℕ)) = ⇑l := by funext i; rfl

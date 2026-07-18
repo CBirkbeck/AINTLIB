@@ -70,38 +70,26 @@ structure FLT37BridgeBundle where
 
 /-- **FLT37 from bridge bundle**: clean one-shot interface. Once the
 bundle is constructed, this delivers `FermatLastTheoremFor 37`. -/
-theorem fermatLastTheoremFor_thirtyseven_of_bundle
-    (bundle : FLT37BridgeBundle) : FermatLastTheoremFor 37 := by
-  -- Step 1: realLocalCert + cor8_19 → ¬ 37 ∣ hPlus K (via LV006).
-  have hVan37 : FLT37.Vandiver37PlusCoprime :=
-    FLT37.vandiver37PlusCoprime_of_bridge bundle.cor8_19 bundle.realLocalCert
-  have h_not_dvd_hPlus :
-      ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ) :=
-    FLT37.not_dvd_hPlus_thirtyseven_of_vandiver37PlusCoprime hVan37
-  -- Step 2: caseI bridge → no case I.
-  have h_caseI : ∀ ⦃a b c : ℤ⦄,
-      ¬ (37 : ℤ) ∣ a * b * c → a ^ 37 + b ^ 37 ≠ c ^ 37 :=
-    bundle.caseI.no_caseI_solution h_not_dvd_hPlus
-  -- Step 3: caseII bridge + noSecondOrderIrregular → no case II.
-  have h_caseII : ∀ ⦃a b c : ℤ⦄, a * b * c ≠ 0 →
-      ({a, b, c} : Finset ℤ).gcd id = 1 →
-      ((37 : ℤ) ∣ a * b * c) → a ^ 37 + b ^ 37 ≠ c ^ 37 :=
-    bundle.caseII.no_caseII_solution h_not_dvd_hPlus bundle.noSecondOrderIrregular
-  -- Step 4: combine via case-decomposition (FltRegular.MayAssume.coprime).
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+theorem fermatLastTheoremFor_thirtyseven_of_bundle (bundle : FLT37BridgeBundle) :
+    FermatLastTheoremFor 37 := by
+  have h_not_dvd_hPlus : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ) :=
+    FLT37.not_dvd_hPlus_thirtyseven_of_vandiver37PlusCoprime
+      (FLT37.vandiver37PlusCoprime_of_bridge bundle.cor8_19 bundle.realLocalCert)
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   apply fermatLastTheoremFor_iff_int.mpr
   intro a b c ha hb hc heq
-  have hprod := mul_ne_zero (mul_ne_zero ha hb) hc
-  obtain ⟨e', hgcd, hprod'⟩ := FltRegular.MayAssume.coprime heq hprod
+  obtain ⟨e', hgcd, hprod'⟩ :=
+    FltRegular.MayAssume.coprime heq (mul_ne_zero (mul_ne_zero ha hb) hc)
   let d : ℤ := ({a, b, c} : Finset ℤ).gcd id
   by_cases case : (37 : ℤ) ∣ (a / d) * (b / d) * (c / d)
-  · exact h_caseII hprod' hgcd case e'
-  · exact h_caseI case e'
+  · exact bundle.caseII.no_caseII_solution h_not_dvd_hPlus bundle.noSecondOrderIrregular
+      hprod' hgcd case e'
+  · exact bundle.caseI.no_caseI_solution h_not_dvd_hPlus case e'
 
 /-- **FLT37 from nonempty bundle**: clean reduction of FLT37 to the
 existence of `FLT37BridgeBundle`. -/
-theorem fermatLastTheoremFor_thirtyseven_of_nonempty_bundle
-    (h : Nonempty FLT37BridgeBundle) : FermatLastTheoremFor 37 :=
+theorem fermatLastTheoremFor_thirtyseven_of_nonempty_bundle (h : Nonempty FLT37BridgeBundle) :
+    FermatLastTheoremFor 37 :=
   h.elim fermatLastTheoremFor_thirtyseven_of_bundle
 
 end BernoulliRegular

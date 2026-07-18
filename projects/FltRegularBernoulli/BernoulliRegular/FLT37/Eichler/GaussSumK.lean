@@ -83,10 +83,12 @@ cyclotomic level `m = p` and residue prime `ℓ`, using `ℓ ∤ p` (both prime,
 `ℓ ≠ p`). -/
 theorem ramificationIdx_eq_one_of_ne
     (hne : ℓ ≠ p) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
-    Ideal.ramificationIdx 𝓵 𝔮 = 1 := by
-  have hndvd : ¬ ℓ ∣ p := fun h =>
+    Ideal.ramificationIdx' 𝓵 𝔮 = 1 := by
+  have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have h𝓵ne : 𝓵 ≠ ⊥ := by simpa using hℓ.out.ne_zero
+  rw [ramificationIdx_eq_ramificationIdx' 𝓵 𝔮 h𝓵ne]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd
     (p := ℓ) (K := K) (P := 𝔮) (m := p) hndvd
 
@@ -98,10 +100,14 @@ Specialises `IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd` with cyclotomic
 level `m = p` and residue prime `ℓ`. -/
 theorem inertiaDeg_eq_orderOf
     (hne : ℓ ≠ p) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
-    Ideal.inertiaDeg 𝓵 𝔮 = orderOf (ℓ : ZMod p) := by
-  have hndvd : ¬ ℓ ∣ p := fun h =>
+    Ideal.inertiaDeg' 𝓵 𝔮 = orderOf (ℓ : ZMod p) := by
+  have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have h𝓵ne' : 𝓵 ≠ ⊥ := by simpa using hℓ.out.ne_zero
+  haveI h𝔮ne : 𝔮 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot h𝓵ne' 𝔮
+  haveI : 𝔮.IsMaximal := (inferInstance : 𝔮.IsPrime).isMaximal h𝔮ne
+  rw [inertiaDeg_eq_inertiaDeg' 𝓵 𝔮]
   exact IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
     (p := ℓ) (K := K) (P := 𝔮) (m := p) hndvd
 
@@ -124,7 +130,7 @@ theorem ne_of_natCast_eq_one_mod (hℓ1 : (ℓ : ZMod p) = 1) : ℓ ≠ p := by
 analyses. -/
 theorem inertiaDeg_eq_one_of_natCast_eq_one
     (hℓ1 : (ℓ : ZMod p) = 1) (𝔮 : Ideal (𝓞 K)) [𝔮.IsPrime] [𝔮.LiesOver 𝓵] :
-    Ideal.inertiaDeg 𝓵 𝔮 = 1 := by
+    Ideal.inertiaDeg' 𝓵 𝔮 = 1 := by
   have hne : ℓ ≠ p := ne_of_natCast_eq_one_mod hℓ1
   rw [inertiaDeg_eq_orderOf (K := K) hne 𝔮, hℓ1, orderOf_one]
 
@@ -147,14 +153,14 @@ theorem ncard_primesOver_eq_sub_one_of_natCast_eq_one
     (hℓ1 : (ℓ : ZMod p) = 1) :
     (Ideal.primesOver 𝓵 (𝓞 K)).ncard = p - 1 := by
   have hne : ℓ ≠ p := ne_of_natCast_eq_one_mod hℓ1
-  have hndvd : ¬ ℓ ∣ p := fun h =>
+  have hndvd : ¬ ℓ ∣ p := fun h ↦
     hne ((Nat.prime_dvd_prime_iff_eq hℓ.out hp.out).mp h)
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   haveI : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p} ℚ K
   -- The Galois fundamental identity: `g · (e · f) = #Gal(K/ℚ)`.
   have hfund :=
     Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
-      (p := 𝓵) (span_ell_ne_bot (ℓ := ℓ)) (𝓞 K) (Gal(K / ℚ))
+      (p := 𝓵) (B := 𝓞 K) (G := Gal(K / ℚ))
   -- `e = 1`: ramification index of `ℓ` in `K` is `1`.
   have he : (𝓵 : Ideal ℤ).ramificationIdxIn (𝓞 K) = 1 :=
     IsCyclotomicExtension.Rat.ramificationIdxIn_eq_of_not_dvd
@@ -205,6 +211,7 @@ local instance : NeZero (p * ℓ) := ⟨Nat.mul_ne_zero hp.out.ne_zero hℓ.out.
 noncomputable def zetaPL : 𝓞 L :=
   (IsCyclotomicExtension.zeta_spec (p * ℓ) ℚ L).toInteger
 
+/-- `zetaPL` is a primitive `(p ℓ)`-th root of unity in `𝓞 L`. -/
 lemma zetaPL_isPrimitiveRoot :
     IsPrimitiveRoot (zetaPL (p := p) (ℓ := ℓ) (L := L)) (p * ℓ) := by
   simpa [zetaPL] using
@@ -259,6 +266,7 @@ lemma addCharL_isPrimitive :
   AddChar.zmodChar_primitive_of_primitive_root ℓ
     (zetaL_isPrimitiveRoot (p := p) (ℓ := ℓ) (L := L))
 
+/-- The additive character `ψ = addCharL` is nontrivial. -/
 lemma addCharL_ne_one :
     addCharL (p := p) (ℓ := ℓ) (L := L) ≠ 1 := by
   have hprim := addCharL_isPrimitive (p := p) (ℓ := ℓ) (L := L)
@@ -280,7 +288,8 @@ lemma p_dvd_card_sub_one (hℓ1 : (ℓ : ZMod p) = 1) :
   have hle : 1 ≤ ℓ := hℓ.out.one_le
   have : ((ℓ - 1 : ℕ) : ZMod p) = 0 := by
     push_cast [hle]
-    rw [hℓ1]; ring
+    rw [hℓ1]
+    ring
   exact (ZMod.natCast_eq_zero_iff _ _).mp this
 
 /-- **(ii) existence of the order-`p` character.** When `ℓ ≡ 1 (mod p)` there is
@@ -397,11 +406,11 @@ lemma charP_quotient_of_liesOver_ell (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
     CharP (𝓞 L ⧸ 𝔓) ℓ := by
   have hℓ0 : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     simpa using hℓ.out.ne_zero
-  haveI : NeZero (Ideal.ramificationIdx (Ideal.span {(ℓ : ℤ)}) 𝔓) :=
-    ⟨Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
+  haveI : NeZero (Ideal.ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓) :=
+    ⟨Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
       (R := ℤ) (S := 𝓞 L) (p := Ideal.span {(ℓ : ℤ)}) 𝔓 hℓ0⟩
   letI : Algebra (ℤ ⧸ (Ideal.span {(ℓ : ℤ)})) (𝓞 L ⧸ 𝔓) :=
-    Ideal.Quotient.algebraQuotientOfRamificationIdxNeZero (Ideal.span {(ℓ : ℤ)}) 𝔓
+    Ideal.Quotient.algebraQuotientOfLEComap (le_of_eq (𝔓.over_def (Ideal.span {(ℓ : ℤ)})))
   haveI : CharP (ℤ ⧸ (Ideal.span {(ℓ : ℤ)})) ℓ :=
     charP_of_injective_ringHom
       (f := (Int.quotientSpanNatEquivZMod ℓ).symm.toRingHom)
@@ -458,7 +467,7 @@ lemma gaussSumL_mem_prime_of_liesOver_ell (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
         Ideal.Quotient.mk 𝔓 (χ a) := by
     intro a
     rw [addCharL_apply, map_mul, map_pow, hζ1, one_pow, mul_one]
-  rw [Finset.sum_congr rfl (fun a _ => hterm a), ← map_sum,
+  rw [Finset.sum_congr rfl (fun a _ ↦ hterm a), ← map_sum,
     MulChar.sum_eq_zero_of_ne_one hχ1, map_zero]
 
 include hχord in
@@ -476,8 +485,8 @@ lemma gaussSumL_ne_zero_and_inv :
           gaussSum χ⁻¹ (addCharL (p := p) (ℓ := ℓ) (L := L)) ≠ 0 := by
     rw [hmul]
     exact mul_ne_zero u.ne_zero (show (ℓ : 𝓞 L) ≠ 0 by exact_mod_cast hℓ.out.ne_zero)
-  exact ⟨fun h => hprod_ne (by rw [h, zero_mul]),
-    fun h => hprod_ne (by rw [h, mul_zero])⟩
+  exact ⟨fun h ↦ hprod_ne (by rw [h, zero_mul]),
+    fun h ↦ hprod_ne (by rw [h, mul_zero])⟩
 
 include hχord in
 /-- The principal ideal of `g(χ)` is nonzero. -/
@@ -538,15 +547,17 @@ lemma gaussSumL_count_add_inv_eq_sub_one
     have hℓ0 : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by simpa using hℓ.out.ne_zero
     exact ne_bot_of_liesOver_of_ne_bot hℓ0 𝔓
   -- `e(𝔓|ℓ) = ℓ - 1` for `L = ℚ(ζ_{pℓ})`: write `pℓ = ℓ^1 · p`, `ℓ ∤ p`.
-  have hram : Ideal.ramificationIdx (Ideal.span {(ℓ : ℤ)}) 𝔓 = ℓ - 1 := by
+  have hram : Ideal.ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓 = ℓ - 1 := by
+    rw [ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓
+      (by simpa using hℓ.out.ne_zero)]
     have := IsCyclotomicExtension.Rat.ramificationIdx_eq
       (n := p * ℓ) (m := p) (p := ℓ) (k := 0) (K := L) (P := 𝔓) (by ring) hℓp
     simpa using this
   have hcount_ell :
       (UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({(ℓ : 𝓞 L)} : Set (𝓞 L)))).count 𝔓 = ℓ - 1 := by
-    rw [Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count
-        (R := ℤ) (S := 𝓞 L) (p := Ideal.span {(ℓ : ℤ)}) (P := 𝔓)
+    rw [Ideal.IsDedekindDomain.ramificationIdx'_eq_normalizedFactors_count
+        (p := Ideal.span {(ℓ : ℤ)}) (P := 𝔓)
         hℓmap_ne_bot inferInstance h𝔓_ne_bot, hℓmap] at hram
     exact hram
   have hmuleq : Iχ * Iχinv = Ideal.span ({(ℓ : 𝓞 L)} : Set (𝓞 L)) :=
@@ -810,11 +821,11 @@ lemma gaussSumL_count_pow_telescope {n : ℕ} (hn1 : 1 ≤ n) (hnp : n < p)
         (Ideal.span ({gaussSum χ (addCharL (p := p) (ℓ := ℓ) (L := L))} :
           Set (𝓞 L)))).count 𝔓₀ := by
   -- `gcount m := v_{𝔓₀}(g(χ^m))`, `Jcount i := v_{𝔓₀}(J(χ,χ^i))`.
-  let gcount : ℕ → ℕ := fun m =>
+  let gcount : ℕ → ℕ := fun m ↦
     (UniqueFactorizationMonoid.normalizedFactors
       (Ideal.span ({gaussSum (χ ^ m) (addCharL (p := p) (ℓ := ℓ) (L := L))} :
         Set (𝓞 L)))).count 𝔓₀
-  let Jcount : ℕ → ℕ := fun i =>
+  let Jcount : ℕ → ℕ := fun i ↦
     (UniqueFactorizationMonoid.normalizedFactors
       (Ideal.span ({jacobiSum χ (χ ^ i)} : Set (𝓞 L)))).count 𝔓₀
   -- `gcount 1 = v_{𝔓₀}(g(χ))` (rewriting `χ^1 = χ`).

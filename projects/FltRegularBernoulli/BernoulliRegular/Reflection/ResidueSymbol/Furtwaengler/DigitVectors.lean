@@ -108,7 +108,7 @@ def multiIndexLE (f N : ℕ) : Finset (Fin f → ℕ) := by
 theorem mem_multiIndexLE {f N : ℕ} (m : Fin f → ℕ) :
     m ∈ multiIndexLE f N ↔ (∀ i, m i ≤ N) ∧ multiIndexWeight m ≤ N := by
   classical
-  unfold multiIndexLE
+  simp only [multiIndexLE]
   simp only [Finset.mem_filter, Fintype.mem_piFinset, Finset.mem_range]
   constructor
   · rintro ⟨h1, h2⟩
@@ -132,7 +132,7 @@ def digitVecsLE (ℓ f N : ℕ) : Finset (digitVec ℓ f) := by
 theorem mem_digitVecsLE {ℓ f N : ℕ} (m : digitVec ℓ f) :
     m ∈ digitVecsLE ℓ f N ↔ digitWeight m ≤ N := by
   classical
-  unfold digitVecsLE
+  simp only [digitVecsLE]
   simp
 
 /-- Common denominator for the digit-vector multinomial coefficients:
@@ -156,7 +156,7 @@ theorem factorial_dvd_block {ℓ r : ℕ} (hr : r < ℓ) :
 /-- For each `i`, the factorial `m_i!` divides `digitDen ℓ f`. -/
 theorem factorial_entry_dvd_digitDen {ℓ f : ℕ} (m : digitVec ℓ f) (i : Fin f) :
     Nat.factorial (m.1 i) ∣ digitDen ℓ f := by
-  unfold digitDen
+  simp only [digitDen]
   refine (factorial_dvd_block (m.entry_lt i)).trans ?_
   exact Finset.dvd_prod_of_mem
     (fun _ : Fin f => ∏ r ∈ Finset.range ℓ, Nat.factorial r) (Finset.mem_univ i)
@@ -165,7 +165,7 @@ theorem factorial_entry_dvd_digitDen {ℓ f : ℕ} (m : digitVec ℓ f) (i : Fin
 This is the integrality witness for `digitCoeff`. -/
 theorem factorial_prod_dvd_digitDen {ℓ f : ℕ} (m : digitVec ℓ f) :
     (∏ i : Fin f, Nat.factorial (m.1 i)) ∣ digitDen ℓ f := by
-  unfold digitDen
+  simp only [digitDen]
   refine Finset.prod_dvd_prod_of_dvd _ _ ?_
   intro i _
   exact factorial_dvd_block (m.entry_lt i)
@@ -174,7 +174,7 @@ theorem factorial_prod_dvd_digitDen {ℓ f : ℕ} (m : digitVec ℓ f) :
 `digitCoeff m * ∏ m_i! = digitDen ℓ f`. -/
 theorem digitCoeff_mul_prod_factorial_eq {ℓ f : ℕ} (m : digitVec ℓ f) :
     digitCoeff m * (∏ i : Fin f, Nat.factorial (m.1 i)) = digitDen ℓ f := by
-  unfold digitCoeff
+  simp only [digitCoeff]
   exact Nat.div_mul_cancel (factorial_prod_dvd_digitDen m)
 
 /-- Extension of a digit vector to `ℕ → ℕ` by zero outside `[0, f)`. -/
@@ -184,19 +184,19 @@ def digitVec.extend {ℓ f : ℕ} (m : digitVec ℓ f) : ℕ → ℕ :=
 @[simp]
 theorem digitVec.extend_of_lt {ℓ f : ℕ} (m : digitVec ℓ f) {i : ℕ} (hi : i < f) :
     m.extend i = m.1 ⟨i, hi⟩ := by
-  unfold digitVec.extend
+  simp only [digitVec.extend]
   rw [dif_pos hi]
 
 theorem digitVec.extend_of_not_lt {ℓ f : ℕ} (m : digitVec ℓ f) {i : ℕ} (hi : ¬ i < f) :
     m.extend i = 0 := by
-  unfold digitVec.extend
+  simp only [digitVec.extend]
   rw [dif_neg hi]
 
 /-- The digit weight equals the `Finset.range`-form sum of the extended
 sequence. -/
 theorem digitWeight_eq_sum_range {ℓ f : ℕ} (m : digitVec ℓ f) :
     digitWeight m = ∑ i ∈ Finset.range f, m.extend i := by
-  unfold digitWeight
+  simp only [digitWeight]
   rw [← Fin.sum_univ_eq_sum_range (fun i => m.extend i) f]
   refine Finset.sum_congr rfl fun i _ => ?_
   exact (digitVec.extend_of_lt m i.is_lt).symm
@@ -205,7 +205,7 @@ theorem digitWeight_eq_sum_range {ℓ f : ℕ} (m : digitVec ℓ f) :
 sequence weighted by powers of `ℓ`. -/
 theorem digitValue_eq_sum_range {ℓ f : ℕ} (m : digitVec ℓ f) :
     digitValue m = ∑ i ∈ Finset.range f, m.extend i * ℓ ^ i := by
-  unfold digitValue
+  simp only [digitValue]
   rw [← Fin.sum_univ_eq_sum_range (fun i => m.extend i * ℓ ^ i) f]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [digitVec.extend_of_lt m i.is_lt]
@@ -253,7 +253,7 @@ theorem dworkCarryDigitVec_apply {ℓ p : ℕ} (hℓ : 0 < ℓ) (hp : 0 < p)
 /-- Multiplying a residue by `ℓ` advances the residue orbit. -/
 theorem residueOrbit_mul_ell_mod_eq_next {ℓ p A i : ℕ} :
     (ℓ * residueOrbit ℓ p A i) % p = residueOrbit ℓ p A (i + 1) := by
-  unfold residueOrbit
+  simp only [residueOrbit]
   change ℓ * ((A * ℓ ^ i) % p) ≡ A * ℓ ^ (i + 1) [MOD p]
   have h1 : (A * ℓ ^ i) % p ≡ A * ℓ ^ i [MOD p] := Nat.mod_modEq _ _
   have h2 : ℓ * ((A * ℓ ^ i) % p) ≡ ℓ * (A * ℓ ^ i) [MOD p] :=
@@ -277,7 +277,7 @@ theorem carryDigit_mul_p_add_next {ℓ p A i : ℕ} :
 theorem residueOrbit_period_of_pow_modEq_one {ℓ p A f : ℕ}
     (hpow : ℓ ^ f ≡ 1 [MOD p]) :
     residueOrbit ℓ p A f = residueOrbit ℓ p A 0 := by
-  unfold residueOrbit
+  simp only [residueOrbit]
   change A * ℓ ^ f ≡ A * ℓ ^ 0 [MOD p]
   simpa using Nat.ModEq.mul_left A hpow
 
@@ -369,7 +369,7 @@ theorem digitValue_dworkCarryDigitVec_succ {ℓ p A f : ℕ}
     digitValue (dworkCarryDigitVec hℓ hp A (f + 1)) =
       (ℓ * residueOrbit ℓ p A f) / p +
         ℓ * digitValue (dworkCarryDigitVec hℓ hp A f) := by
-  unfold digitValue
+  simp only [digitValue]
   rw [Fin.sum_univ_succ]
   simp only [dworkCarryDigitVec_apply, Fin.val_zero, tsub_zero, Fin.val_succ]
   rw [show f + 1 - 1 = f by omega, pow_zero, mul_one]
@@ -409,7 +409,7 @@ theorem digitValue_dworkCarryDigitVec_eq_mul_div
     p_mul_digitValue_dworkCarryDigitVec_add_last_eq
       (ℓ := ℓ) (p := p) (A := A) (f := f) hℓ hp
   have hr0 : residueOrbit ℓ p A 0 = A := by
-    unfold residueOrbit
+    simp only [residueOrbit]
     rw [pow_zero, mul_one, Nat.mod_eq_of_lt hA_lt]
   have hrf : residueOrbit ℓ p A f = A := by
     rw [residueOrbit_period_of_pow_modEq_one (A := A) hpow, hr0]
@@ -457,7 +457,7 @@ theorem p_mul_digitSum_mul_div_eq_ell_sub_one_mul_residueOrbitSum
 inequality. -/
 theorem digitValue_lt {ℓ : ℕ} (hℓ : 2 ≤ ℓ) {f : ℕ} (m : digitVec ℓ f) :
     digitValue m < ℓ ^ f := by
-  unfold digitValue
+  simp only [digitValue]
   induction f with
   | zero => simp
   | succ n ih =>
@@ -525,7 +525,7 @@ theorem digitValue_standardDigitVec_of_lt
     simp [digitValue, standardDigitVec, this]
   | succ n ih =>
     intro a h
-    unfold digitValue
+    simp only [digitValue]
     rw [Fin.sum_univ_succ]
     simp only [standardDigitVec_apply, Fin.val_succ, Fin.val_zero, pow_zero, Nat.div_one,
       pow_succ]
@@ -533,7 +533,7 @@ theorem digitValue_standardDigitVec_of_lt
       rw [pow_succ] at h
       exact Nat.div_lt_iff_lt_mul (by omega) |>.mpr h
     have hih := ih hdiv_lt
-    unfold digitValue at hih
+    simp only [digitValue] at hih
     have hkey :
         (∑ i : Fin n,
             (a / (ℓ ^ (i : ℕ) * ℓ) % ℓ) * (ℓ ^ (i : ℕ) * ℓ)) =
@@ -609,14 +609,14 @@ theorem digitWeight_standardDigitVec_of_lt
     simp [digitWeight, standardDigitVec, this, digitSum]
   | succ n ih =>
     intro a h
-    unfold digitWeight
+    simp only [digitWeight]
     rw [Fin.sum_univ_succ]
     simp only [standardDigitVec_apply, Fin.val_succ, Fin.val_zero, pow_zero, Nat.div_one]
     have hdiv_lt : a / ℓ < ℓ ^ n := by
       rw [pow_succ] at h
       exact Nat.div_lt_iff_lt_mul (by omega) |>.mpr h
     have hih := ih hdiv_lt
-    unfold digitWeight at hih
+    simp only [digitWeight] at hih
     -- After simp the goal has `∑ x, a / ℓ ^ (↑x + 1) % ℓ`. Rewrite it.
     have hkey :
         (∑ i : Fin n, a / ℓ ^ ((i : ℕ) + 1) % ℓ) =
@@ -631,7 +631,7 @@ theorem digitWeight_standardDigitVec_of_lt
     · simp [ha, digitSum]
     · -- digitSum ℓ a = (a%ℓ) + digitSum ℓ (a/ℓ).
       have hdigit : digitSum ℓ a = a % ℓ + digitSum ℓ (a / ℓ) := by
-        unfold digitSum
+        simp only [digitSum]
         rw [Nat.digits_def' hℓ ha]
         simp
       omega
@@ -665,7 +665,7 @@ theorem digitDen_not_mem_Q :
     (digitDen ℓ S.f : 𝓞 R') ∉ S.Q := by
   classical
   intro hmem
-  unfold digitDen at hmem
+  simp only [digitDen] at hmem
   rw [Nat.cast_prod] at hmem
   obtain ⟨i, _, hi_in_Q⟩ := (Ideal.IsPrime.prod_mem_iff (p := S.Q)).mp hmem
   exact S.block_factorial_prod_not_mem_Q hi_in_Q
@@ -792,7 +792,6 @@ theorem no_survivor_of_weight_lt
     obtain ⟨c, hc⟩ := hdiv
     -- (p-a)*d + M = (q-1) * c.
     have : (q - 1) * c = (p - a) * d + M := by
-      change (q - 1) * c = _
       rw [show (Fintype.card k - 1) * c = (q - 1) * c from rfl] at hc
       exact hc.symm
     -- c = 1 because 0 < (q-1)*c < 2(q-1) and q-1 ≥ 1.

@@ -1,4 +1,10 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import PadicLFunctions.Measure.Convolution
+import PadicLFunctions.Common.DelOperator
 import Mathlib.RingTheory.PowerSeries.Derivative
 import Mathlib.RingTheory.PowerSeries.Substitution
 
@@ -42,13 +48,15 @@ def cmul (g : C(ℤ_[p], ℤ_[p])) (μ : PadicMeasure p ℤ_[p]) : PadicMeasure 
 lemma cmul_apply (g f : C(ℤ_[p], ℤ_[p])) (μ : PadicMeasure p ℤ_[p]) :
     cmul p g μ f = μ (g * f) := rfl
 
-/-- The operator `∂ = (1+T) d/dT` on power series. Source: RJW Lem. 3.24. -/
+/-- The operator `∂ = (1+T) d/dT` on power series, over `ℤ_p`. Source: RJW Lem. 3.24.
+This is the `ℤ_p`-specialisation of the generic `PadicLFunctions.del`. -/
 noncomputable def del (F : PowerSeries ℤ_[p]) : PowerSeries ℤ_[p] :=
-  (1 + PowerSeries.X) * F.derivativeFun
+  PadicLFunctions.del F
+
+lemma del_def (F : PowerSeries ℤ_[p]) : del p F = (1 + PowerSeries.X) * F.derivativeFun := rfl
 
 /-- The binomial recurrence `x·binom(x,n) = (n+1)·binom(x,n+1) + n·binom(x,n)` over
-`ℤ_p`: the source's one-line computation (RJW TeX line 1074), proved on `ℕ` and
-extended by density. -/
+`ℤ_p` (RJW TeX line 1074). -/
 lemma mul_choose_eq (x : ℤ_[p]) (n : ℕ) :
     x * Ring.choose x n
       = (n + 1 : ℤ_[p]) * Ring.choose x (n + 1) + (n : ℤ_[p]) * Ring.choose x n := by
@@ -75,35 +83,25 @@ lemma mul_choose_eq (x : ℤ_[p]) (n : ℕ) :
           (n + 1 : ℤ_[p]) * Ring.choose x (n + 1) + (n : ℤ_[p]) * Ring.choose x n)
       (funext hc)) x
 
-/-- The coefficients of `∂F = (1+T)F′`: `(∂F)_n = (n+1)F_{n+1} + n·F_n`. -/
 private lemma coeff_del (F : PowerSeries ℤ_[p]) (n : ℕ) :
     PowerSeries.coeff n (del p F)
       = (n + 1 : ℤ_[p]) * PowerSeries.coeff (n + 1) F
-        + (n : ℤ_[p]) * PowerSeries.coeff n F := by
-  rw [del, one_add_mul, map_add, coeff_derivativeFun]
-  rcases n with - | m
-  · rw [coeff_zero_X_mul]
-    push_cast
-    ring
-  · rw [coeff_succ_X_mul, coeff_derivativeFun]
-    push_cast
-    ring
+        + (n : ℤ_[p]) * PowerSeries.coeff n F :=
+  PadicLFunctions.coeff_del F n
 
 /-- Multiplication by `x` on measures corresponds to `∂` on Mahler transforms:
-`𝓐_{xμ} = ∂ 𝓐_μ`. Proof: `x·binom(x,n) = (n+1)·binom(x,n+1) + n·binom(x,n)`.
+`𝓐_{xμ} = ∂ 𝓐_μ`.
 
 Source: RJW Lem. 3.24 (`LemmaMultiplicationbyx`, TeX lines 1066–1075). -/
 theorem mahlerTransform_cmul_X (μ : PadicMeasure p ℤ_[p]) :
     mahlerTransform p (cmul p (ContinuousMap.id ℤ_[p]) μ) = del p (mahlerTransform p μ) := by
   ext n
   rw [coeff_mahlerTransform]
-  -- LHS: μ(x·binom(x,n)) via the recurrence
   have hpt : (ContinuousMap.id ℤ_[p] * mahler n : C(ℤ_[p], ℤ_[p]))
       = (n + 1 : ℤ_[p]) • mahler (n + 1) + (n : ℤ_[p]) • mahler n := by
     ext x
-    simp only [ContinuousMap.mul_apply, ContinuousMap.id_apply, mahler_apply,
-      ContinuousMap.add_apply, ContinuousMap.smul_apply, smul_eq_mul]
-    exact mul_choose_eq p x n
+    simpa only [ContinuousMap.mul_apply, ContinuousMap.id_apply, mahler_apply,
+      ContinuousMap.add_apply, ContinuousMap.smul_apply, smul_eq_mul] using mul_choose_eq p x n
   change μ (ContinuousMap.id ℤ_[p] * mahler n) = _
   rw [hpt, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul, coeff_del,
     coeff_mahlerTransform, coeff_mahlerTransform]
@@ -212,7 +210,7 @@ theorem mahlerTransform_pushforward_mulCM (c : ℤ_[p]) (μ : PadicMeasure p ℤ
       simp only [Function.mem_support] at hd
       by_contra hmem
       simp only [Finset.coe_range, Set.mem_Iio, not_lt] at hmem
-      exact hd (by rw [hvanish (by omega)]; simp))]
+      exact hd (by rw [hvanish (by lia)]; simp))]
   have key : ∀ k : ℕ, mahler n (c * (k : ℤ_[p]))
       = ∑ d ∈ Finset.range (n + 1),
           PowerSeries.coeff n (B' ^ d) * ((k.choose d : ℕ) : ℤ_[p]) := by
@@ -231,15 +229,15 @@ theorem mahlerTransform_pushforward_mulCM (c : ℤ_[p]) (μ : PadicMeasure p ℤ
         PowerSeries.coeff_mul_C]
     rw [lhs_eq, expand]
     rcases le_total k n with hkn | hnk
-    · refine Finset.sum_subset (by intro d hd; simp only [Finset.mem_range] at *; omega)
+    · refine Finset.sum_subset (by intro d hd; simp only [Finset.mem_range] at *; lia)
         (fun d hd hnd => ?_)
       simp only [Finset.mem_range, not_lt] at hnd
       simp only [Finset.mem_range] at hd
-      rw [Nat.choose_eq_zero_of_lt (by omega), Nat.cast_zero, mul_zero]
-    · refine (Finset.sum_subset (by intro d hd; simp only [Finset.mem_range] at *; omega)
+      rw [Nat.choose_eq_zero_of_lt (by lia), Nat.cast_zero, mul_zero]
+    · refine (Finset.sum_subset (by intro d hd; simp only [Finset.mem_range] at *; lia)
         (fun d hd hnd => ?_)).symm
       simp only [Finset.mem_range, not_lt] at hnd
-      rw [hvanish (by omega), zero_mul]
+      rw [hvanish (by lia), zero_mul]
   have hfun : (mahler n).comp (mulCM p c)
       = ∑ d ∈ Finset.range (n + 1),
           (PowerSeries.coeff n (B' ^ d)) • (mahler d : C(ℤ_[p], ℤ_[p])) := by
@@ -310,10 +308,8 @@ noncomputable def shiftDiv : C(ℤ_[p], ℤ_[p]) where
 lemma shiftDiv_mul (x : ℤ_[p]) : shiftDiv p ((p : ℤ_[p]) * x) = x := by
   have hdig : digit p ((p : ℤ_[p]) * x) = 0 := by
     have hpz : PadicInt.toZModPow 1 (((p : ℕ) : ℤ_[p])) = 0 := by
-      rw [map_natCast]
-      have hcast : ((p : ℕ) : ZMod (p ^ 1)) = ((p ^ 1 : ℕ) : ZMod (p ^ 1)) := by
-        norm_num
-      rw [hcast, ZMod.natCast_self]
+      rw [map_natCast, show ((p : ℕ) : ZMod (p ^ 1)) = ((p ^ 1 : ℕ) : ZMod (p ^ 1)) by norm_num,
+        ZMod.natCast_self]
     have hp0 : PadicInt.toZModPow 1 ((p : ℤ_[p]) * x) = 0 := by
       rw [map_mul, hpz, zero_mul]
     rw [digit, hp0, ZMod.val_zero, Nat.cast_zero]
@@ -413,14 +409,6 @@ lemma isClopen_units : IsClopen {x : ℤ_[p] | IsUnit x} := by
   rw [heq]
   exact (isClopen_pZp p).compl
 
-/-- `Res_{ℤ_p^×} = 1 − φ∘ψ` — Eq. (3.10) (`res to Zp`).
-
-Source: RJW TeX lines 1152–1154. -/
-lemma setOf_isUnit_eq : {x : ℤ_[p] | IsUnit x} = {x : ℤ_[p] | ‖x‖ < 1}ᶜ := by
-  ext x
-  simp only [Set.mem_compl_iff, Set.mem_setOf_eq, PadicInt.isUnit_iff, not_lt]
-  exact ⟨fun h => h.ge, fun h => le_antisymm (PadicInt.norm_le_one x) h⟩
-
 theorem res_units_eq (μ : PadicMeasure p ℤ_[p]) :
     res p (isClopen_units p) μ = μ - phi p (psi p μ) := by
   rw [phi_psi]
@@ -444,13 +432,12 @@ theorem res_units_eq (μ : PadicMeasure p ℤ_[p]) :
     rw [Set.indicator_of_mem hu, Set.indicator_of_notMem hnm, Pi.one_apply, add_zero,
       one_mul]
 
-/-- **RJW Cor. 3.32 (`CorollarySupportedZpet`)**: a measure is supported on `ℤ_p^×` if
-and only if `ψ(μ) = 0`. (Source proof uses injectivity of `φ`, which here follows from
-`ψ ∘ φ = id`; TeX lines 1161–1167.) -/
 lemma psi_sub (μ ν : PadicMeasure p ℤ_[p]) :
     psi p (μ - ν) = psi p μ - psi p ν :=
   LinearMap.ext fun _f => LinearMap.sub_apply μ ν _
 
+/-- **RJW Cor. 3.32 (`CorollarySupportedZpet`)**: a measure is supported on `ℤ_p^×` if
+and only if `ψ(μ) = 0` (TeX lines 1161–1167). -/
 theorem isSupportedOn_units_iff_psi_eq_zero (μ : PadicMeasure p ℤ_[p]) :
     IsSupportedOn p (isClopen_units p) μ ↔ psi p μ = 0 := by
   rw [IsSupportedOn]

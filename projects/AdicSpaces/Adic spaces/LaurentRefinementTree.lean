@@ -291,7 +291,7 @@ each leaf base L of `t` at D₀. -/
 theorem LaurentTree.leaves_graftAt (t : LaurentTree A)
     (D₀ : RationalLocData A) (h : RationalLocData A → LaurentTree A) :
     (t.graftAt D₀ h).leaves D₀ =
-      (t.leaves D₀).flatMap (fun L => (h L).leaves L) := by
+      (t.leaves D₀).flatMap (fun L ↦ (h L).leaves L) := by
   induction t generalizing D₀ with
   | leaf => simp [graftAt, leaves]
   | node f L R ihL ihR =>
@@ -508,7 +508,7 @@ noncomputable def LaurentTree.toCovering (t : LaurentTree A)
   base := D₀
   covers := t.toCoveringCovers D₀
   hsubset := t.toCoveringCovers_subset_base D₀
-  hcover := fun _ hv => t.toCoveringCovers_cover_base D₀ hv
+  hcover := fun _ hv ↦ t.toCoveringCovers_cover_base D₀ hv
 
 @[simp] theorem LaurentTree.toCovering_base (t : LaurentTree A)
     (D₀ : RationalLocData A) : (t.toCovering D₀).base = D₀ := rfl
@@ -543,7 +543,6 @@ theorem LaurentTree.leaves_disjoint_of_leaf_leaf
       ((LaurentTree.leaf : LaurentTree A).leaves (laurentPlusDatum D₀ f)).toFinset
       ((LaurentTree.leaf : LaurentTree A).leaves
         (laurentMinusDatum D₀ f)).toFinset := by
-  -- Both leaves are singletons; the disjoint reduces to plus ≠ minus.
   have h_plus : ((LaurentTree.leaf : LaurentTree A).leaves
       (laurentPlusDatum D₀ f)).toFinset = {laurentPlusDatum D₀ f} := by
     simp [LaurentTree.leaves_leaf]
@@ -603,10 +602,10 @@ noncomputable def LaurentTree.balancedLeafBase :
   | D₀, f :: rest, σ =>
       if σ ⟨0, Nat.succ_pos _⟩ then
         balancedLeafBase (laurentPlusDatum D₀ f) rest
-          (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
+          (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
       else
         balancedLeafBase (laurentMinusDatum D₀ f) rest
-          (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
+          (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
 
 @[simp] theorem LaurentTree.balancedLeafBase_nil
     (D₀ : RationalLocData A) (σ : Fin 0 → Bool) :
@@ -617,10 +616,10 @@ theorem LaurentTree.balancedLeafBase_cons (D₀ : RationalLocData A)
     LaurentTree.balancedLeafBase D₀ (f :: rest) σ =
       (if σ ⟨0, Nat.succ_pos _⟩ then
         LaurentTree.balancedLeafBase (laurentPlusDatum D₀ f) rest
-          (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
+          (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
       else
         LaurentTree.balancedLeafBase (laurentMinusDatum D₀ f) rest
-          (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)) := rfl
+          (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)) := rfl
 
 /-- The leaves of `ofBalancedList L` at root `D₀` are exactly the
 running bases at all sign-choices `σ : Fin L.length → Bool`. -/
@@ -674,7 +673,7 @@ theorem LaurentTree.leaves_ofBalancedList_eq_image (D₀ : RationalLocData A)
     intro D hD
     simp only [LaurentTree.ofBalancedList, LaurentTree.leaves_leaf,
       List.mem_singleton] at hD
-    refine ⟨fun k => k.elim0, ?_⟩
+    refine ⟨fun k ↦ k.elim0, ?_⟩
     simp [LaurentTree.balancedLeafBase, hD]
   | cons f rest ih =>
     intro D hD
@@ -726,23 +725,19 @@ theorem LaurentTree.balancedLeafBase_isUnit_get_of_false
       -- and L.get k = f.
       have h_get : (f :: rest).get ⟨0, hn⟩ = f := rfl
       rw [h_get]
-      -- Unfold balancedLeafBase at cons with σ 0 = false:
       have h_unfold : LaurentTree.balancedLeafBase D₀ (f :: rest) σ =
           LaurentTree.balancedLeafBase (laurentMinusDatum D₀ f) rest
-            (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) := by
+            (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) := by
         rw [LaurentTree.balancedLeafBase_cons]
         exact if_neg (by simpa using hσk)
       rw [h_unfold]
-      -- f is a unit in (laurentMinusDatum D₀ f).canonicalMap.
       have h_unit_at_lm : IsUnit ((laurentMinusDatum D₀ f).canonicalMap f) :=
         canonicalMap_f_isUnit_in_laurentMinus D₀ f
-      -- The leaf base is a sub-base of laurentMinusDatum D₀ f.
       set leafB := LaurentTree.balancedLeafBase (laurentMinusDatum D₀ f) rest
-        (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) with hleafB_def
+        (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) with hleafB_def
       have h_subset : rationalOpen leafB.T leafB.s ⊆
           rationalOpen (laurentMinusDatum D₀ f).T (laurentMinusDatum D₀ f).s :=
         LaurentTree.balancedLeafBase_subset_base (laurentMinusDatum D₀ f) rest _
-      -- restrictionMapHom (laurentMinus) leafB sends canonicalMap f to leafB.canonicalMap f.
       have h_comp : restrictionMapHom (laurentMinusDatum D₀ f) leafB h_subset
           ((laurentMinusDatum D₀ f).canonicalMap f) = leafB.canonicalMap f :=
         restrictionMapHom_canonicalMap (laurentMinusDatum D₀ f) leafB h_subset f
@@ -751,16 +746,15 @@ theorem LaurentTree.balancedLeafBase_isUnit_get_of_false
     · -- k = n'.succ: recurse on rest with the shifted sign-function.
       have h_get : (f :: rest).get ⟨n'.succ, hn⟩ = rest.get ⟨n', Nat.lt_of_succ_lt_succ hn⟩ := rfl
       rw [h_get]
-      -- Split on σ 0.
       rcases h0 : σ ⟨0, Nat.succ_pos _⟩ with _ | _
       · -- σ 0 = false (so the cons unfold gives laurentMinus)
         have h_unfold : LaurentTree.balancedLeafBase D₀ (f :: rest) σ =
             LaurentTree.balancedLeafBase (laurentMinusDatum D₀ f) rest
-              (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) := by
+              (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) := by
           rw [LaurentTree.balancedLeafBase_cons]
           exact if_neg (by simpa using h0)
         rw [h_unfold]
-        have hσk' : (fun (k : Fin rest.length) => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
+        have hσk' : (fun (k : Fin rest.length) ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
             ⟨n', Nat.lt_of_succ_lt_succ hn⟩ = false := by
           simpa using hσk
         exact ih (laurentMinusDatum D₀ f) _
@@ -768,11 +762,11 @@ theorem LaurentTree.balancedLeafBase_isUnit_get_of_false
       · -- σ 0 = true (cons unfold gives laurentPlus)
         have h_unfold : LaurentTree.balancedLeafBase D₀ (f :: rest) σ =
             LaurentTree.balancedLeafBase (laurentPlusDatum D₀ f) rest
-              (fun k => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) := by
+              (fun k ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩) := by
           rw [LaurentTree.balancedLeafBase_cons]
           exact if_pos (by simpa using h0)
         rw [h_unfold]
-        have hσk' : (fun (k : Fin rest.length) => σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
+        have hσk' : (fun (k : Fin rest.length) ↦ σ ⟨k.1 + 1, Nat.succ_lt_succ k.2⟩)
             ⟨n', Nat.lt_of_succ_lt_succ hn⟩ = false := by
           simpa using hσk
         exact ih (laurentPlusDatum D₀ f) _

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.BernoulliFast.Tactic
 import BernoulliRegular.Main
 import Mathlib.Data.Set.Finite.Basic
@@ -23,7 +28,7 @@ theorem not_isRegularPrime_of_bernoulli_num_dvd
   letI : Fact p.Prime := ⟨hp⟩
   intro hreg
   rcases h with ⟨k, hk_pos, hk_range, hdiv⟩
-  exact ((KummerCriterion (p := p) hp_odd).mp hreg k hk_pos hk_range) hdiv
+  exact ((kummer_criterion (p := p) hp_odd).mp hreg k hk_pos hk_range) hdiv
 
 /-- Conversely, non-regularity gives a Bernoulli numerator witness in Kummer's
 range. -/
@@ -34,7 +39,7 @@ theorem exists_bernoulli_num_dvd_of_not_isRegularPrime
       (p : ℤ) ∣ (bernoulli (2 * k)).num := by
   letI : Fact p.Prime := ⟨hp⟩
   by_contra h
-  exact hirr <| (KummerCriterion (p := p) hp_odd).mpr <| by
+  exact hirr <| (kummer_criterion (p := p) hp_odd).mpr <| by
     intro k hk_pos hk_range hdiv
     exact h ⟨k, hk_pos, hk_range, hdiv⟩
 

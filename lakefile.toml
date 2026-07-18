@@ -12,7 +12,7 @@ pp.unicode.fun = true   # universal across all origin projects
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"
-rev = "d90090f647ca"     # the rc2 commit already shared by HasseWeil, LeanModularForms, AdicSpaces
+rev = "fd1d54bcac5c"     # daily steady-state bump 2026-07-17, toolchain v4.33.0-rc1
 
 # ───────────────────────── shared, refactored-out lemmas ─────────────────────────
 [[lean_lib]]
@@ -82,6 +82,28 @@ maxSynthPendingDepth = 3
 name = "CebotarevDensity"
 srcDir = "projects/Chebotarev"
 globs = ["CebotarevDensity"]
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+# ───────── Belabas–Friedman: effective residue of the Dedekind zeta function ─────────
+# Imports mathlib (and CebotarevDensity for the ζ_K Euler product); built on demand.
+[[lean_lib]]
+name = "DedekindResidue"
+srcDir = "projects/DedekindResidue"
+globs = ["DedekindResidue"]
+[lean_lib.leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+maxSynthPendingDepth = 3
+
+# ───────── Modular curves: X(Γ) = Γ\ℍ for congruence Γ — new project (dev/modular-curves) ─────────
+# Analytic Riemann-surface theory first, later the algebraic/moduli models. Imports mathlib (and, as
+# it grows, LeanModularForms / HasseWeil). Built on demand while it is a stub — not yet a default target.
+[[lean_lib]]
+name = "ModularCurves"
+srcDir = "projects/ModularCurves"
 [lean_lib.leanOptions]
 autoImplicit = false
 relaxedAutoImplicit = false

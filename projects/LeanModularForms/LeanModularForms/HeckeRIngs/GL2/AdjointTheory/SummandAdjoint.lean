@@ -31,20 +31,19 @@ instance : ContinuousConstSMul SL(2, ℤ) UpperHalfPlane where
     show Continuous fun τ ↦ (map (Int.castRingHom ℝ) c) • τ
     exact continuous_const_smul _
 
-
 theorem glMap_T_p_upper_det_pos (p : ℕ) (hp : 0 < p) (b : ℕ) :
     0 < (glMap (T_p_upper p hp b) : GL (Fin 2) ℝ).det.val := by
   show 0 < ((glMap (T_p_upper p hp b) : GL (Fin 2) ℝ) :
     Matrix (Fin 2) (Fin 2) ℝ).det
   rw [show ((glMap (T_p_upper p hp b) : GL (Fin 2) ℝ) :
-      Matrix (Fin 2) (Fin 2) ℝ) =
-      ((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ) from rfl]
-  rw [show (((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ)).det =
-      (algebraMap ℚ ℝ) (((T_p_upper p hp b : GL (Fin 2) ℚ).val).det) from
-        (RingHom.map_det _ _).symm]
-  rw [show ((T_p_upper p hp b : GL (Fin 2) ℚ).val).det = (p : ℚ) by
-    simp [T_p_upper, Matrix.GeneralLinearGroup.mkOfDetNeZero,
-      Matrix.det_fin_two, Matrix.of_apply]]
+        Matrix (Fin 2) (Fin 2) ℝ) =
+        ((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ) from rfl,
+    show (((T_p_upper p hp b : GL (Fin 2) ℚ).val).map (algebraMap ℚ ℝ)).det =
+        (algebraMap ℚ ℝ) (((T_p_upper p hp b : GL (Fin 2) ℚ).val).det) from
+        (RingHom.map_det _ _).symm,
+    show ((T_p_upper p hp b : GL (Fin 2) ℚ).val).det = (p : ℚ) by
+      simp [T_p_upper, Matrix.GeneralLinearGroup.mkOfDetNeZero,
+        Matrix.det_fin_two, Matrix.of_apply]]
   change 0 < ((p : ℚ) : ℝ)
   exact_mod_cast hp
 
@@ -61,9 +60,8 @@ theorem diamondOp_petersson_unitary
     petN (diamondOp_cusp k d f) (diamondOp_cusp k d g) = petN f g := by
   set γ_sub := (Gamma0MapUnits_surjective d).choose
   exact petN_slash_invariant f g (γ_sub : SL(2, ℤ)) γ_sub.property
-    (fun η hη ↦ slash_Gamma1_eq f η hη) (fun η hη ↦ slash_Gamma1_eq g η hη)
+    (slash_Gamma1_eq f) (slash_Gamma1_eq g)
     (diamondOp_cusp k d f) (diamondOp_cusp k d g) rfl rfl
-
 
 private lemma peterssonAdj_glMap_T_p_upper (p : ℕ) (hp : 0 < p) (b : ℕ) :
     (peterssonAdj (glMap (T_p_upper p hp b)) : Matrix (Fin 2) (Fin 2) ℝ) =
@@ -77,7 +75,6 @@ private lemma peterssonAdj_glMap_T_p_upper (p : ℕ) (hp : 0 < p) (b : ℕ) :
   ext i j
   fin_cases i <;> fin_cases j <;> simp [Matrix.of_apply]
 
-
 /-- `glMap (mapGL ℚ γ) = mapGL ℝ γ` for `γ : SL(2, ℤ)`: the composite
 `SL(2, ℤ) → GL(2, ℚ) → GL(2, ℝ)` equals the direct map `mapGL ℝ`. -/
 theorem glMap_mapGL_Q_eq_mapGL_R (γ : SL(2, ℤ)) :
@@ -89,12 +86,15 @@ theorem glMap_mapGL_Q_eq_mapGL_R (γ : SL(2, ℤ)) :
       Matrix (Fin 2) (Fin 2) ℝ) i j =
     (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) γ) : Matrix (Fin 2) (Fin 2) ℝ) i j
   simp [glMap, Matrix.GeneralLinearGroup.map, mapGL_coe_matrix,
-    Matrix.SpecialLinearGroup.map, algebraMap_int_eq, Matrix.map_apply]
+    Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+    algebraMap_int_eq, Int.coe_castRingHom, Matrix.map_apply]
 
 def shiftSL_loc (m : ℤ) : SL(2, ℤ) :=
   ⟨!![1, m; 0, 1], by simp [Matrix.det_fin_two]⟩
 
-private lemma shiftSL_loc_mem_Gamma1 (m : ℤ) : shiftSL_loc m ∈ Gamma1 N := by
+omit [NeZero N] in
+/-- `[1, m; 0, 1] ∈ Γ₁(N)`. -/
+lemma shiftSL_loc_mem_Gamma1 (m : ℤ) : shiftSL_loc m ∈ Gamma1 N := by
   rw [Gamma1_mem]
   refine ⟨?_, ?_, ?_⟩ <;> simp [shiftSL_loc]
 
@@ -124,9 +124,12 @@ lemma peterssonAdj_T_p_upper_eq_shift_mul_lower
   have h_rhs : ((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (shiftSL_loc (-(b : ℤ))) *
       glMap (T_p_lower p hp) : GL (Fin 2) ℝ).val =
       (!![(p : ℝ), -(b : ℝ); 0, 1] : Matrix (Fin 2) (Fin 2) ℝ) := by
+    have hsh : (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (shiftSL_loc (-(b : ℤ)))) :
+        Matrix (Fin 2) (Fin 2) ℝ) = (!![1, -(b : ℤ); 0, 1]).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
     ext i' j'
     fin_cases i' <;> fin_cases j' <;>
-      simp [shiftSL_loc, glMap, T_p_lower, mapGL, Matrix.SpecialLinearGroup.map,
+      simp [hsh, Matrix.map_apply, glMap, T_p_lower,
         Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, Units.val_mul]
   show (peterssonAdj (glMap (T_p_upper p hp b)) : Matrix _ _ ℝ) i j =
     ((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (shiftSL_loc (-(b : ℤ))) *
@@ -160,10 +163,25 @@ private lemma T_p_lower_triple_product_matrix (p N : ℕ) [NeZero N] (hp : 0 < p
         ((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ))) :
       GL (Fin 2) ℝ).val =
       (!![(p : ℝ), 0; 0, 1] : Matrix (Fin 2) (Fin 2) ℝ) := by
+    have h1 : (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (adjointGamma1Rep p N hpN)) :
+        Matrix (Fin 2) (Fin 2) ℝ) =
+        (↑(adjointGamma1Rep p N hpN) : Matrix (Fin 2) (Fin 2) ℤ).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+    have h2 : (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ)
+        ((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ))) :
+        Matrix (Fin 2) (Fin 2) ℝ) =
+        (↑((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ)) :
+          Matrix (Fin 2) (Fin 2) ℤ).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+    have hval1 : (↑(adjointGamma1Rep p N hpN) : Matrix (Fin 2) (Fin 2) ℤ) =
+        !![(p : ℤ) * Int.gcdA p N, Int.gcdB p N; -(N : ℤ), 1] := rfl
+    have hval2 : (↑((adjointGamma0Rep p N hpN : Gamma0 N) : SL(2, ℤ)) :
+        Matrix (Fin 2) (Fin 2) ℤ) =
+        !![(p : ℤ), -Int.gcdB p N; (N : ℤ), Int.gcdA p N] := rfl
     ext i' j'
     fin_cases i' <;> fin_cases j' <;>
-      simp [adjointGamma1Rep, adjointGamma0Rep, glMap, T_p_upper,
-        mapGL, Matrix.SpecialLinearGroup.map,
+      simp [h1, h2, hval1, hval2, glMap, T_p_upper,
+        Matrix.map_apply,
         Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, Units.val_mul] <;>
       nlinarith [hbezℝ]
   show (glMap (T_p_lower p hp) : Matrix _ _ ℝ) i j =
@@ -232,7 +250,7 @@ theorem peterssonInner_sum_left
     have h_sum_int :
         IntegrableOn (fun τ ↦ petersson k g (∑ j ∈ t, F j) τ) D μ_hyp := by
       rw [funext (petersson_sum_right t g F)]
-      exact MeasureTheory.integrable_finset_sum _ h_t
+      exact MeasureTheory.integrable_finsetSum _ h_t
     rw [peterssonInner_add_left D (F i) (∑ j ∈ t, F j) g
         (h_int i (Finset.mem_insert_self i t)) h_sum_int,
       ih h_t, Finset.sum_insert hi]
@@ -248,8 +266,7 @@ theorem peterssonInner_sum_slash_adjoint
     peterssonInner k D (∑ i ∈ s, f ∣[k] α i) g =
       ∑ i ∈ s, peterssonInner k ((α i) • D) f (g ∣[k] peterssonAdj (α i)) := by
   rw [peterssonInner_sum_left s (fun i ↦ f ∣[k] α i) g D h_int]
-  refine Finset.sum_congr rfl fun i hi ↦ ?_
-  exact peterssonInner_slash_adjoint D (α i) (hα i hi) f g
+  exact Finset.sum_congr rfl fun i hi ↦ peterssonInner_slash_adjoint D (α i) (hα i hi) f g
 
 open UpperHalfPlane ModularGroup MeasureTheory in
 /-- Finite-union bridge (pure measure-theoretic form). -/
@@ -267,13 +284,10 @@ theorem setIntegral_biUnion_finset_ae
     simp [Set.mem_iUnion]
   have hm' : ∀ i : s, NullMeasurableSet (S i.val) μ :=
     fun i ↦ hm i.val i.property
-  have hd' : Pairwise (fun i j : s ↦ AEDisjoint μ (S i.val) (S j.val)) := by
-    intro i j hij
-    exact hd (Finset.mem_coe.mpr i.property) (Finset.mem_coe.mpr j.property)
+  have hd' : Pairwise (fun i j : s ↦ AEDisjoint μ (S i.val) (S j.val)) :=
+    fun i j hij ↦ hd (Finset.mem_coe.mpr i.property) (Finset.mem_coe.mpr j.property)
       (fun h ↦ hij (Subtype.ext h))
-  have hfi' : IntegrableOn f (⋃ i : s, S i.val) μ := by
-    rw [← h_biU]
-    exact hfi
+  have hfi' : IntegrableOn f (⋃ i : s, S i.val) μ := h_biU ▸ hfi
   rw [h_biU, integral_iUnion_ae hm' hd' hfi', tsum_fintype,
     Finset.sum_coe_sort s (fun i ↦ ∫ x in S i, f x ∂μ)]
 
@@ -385,9 +399,11 @@ theorem glMap_T_p_upper_inv_mul_eq_mapGL_shift
           Matrix.GeneralLinearGroup.map, Matrix.of_apply]
     have h_R2 : (((mapGL ℝ : SL(2, ℤ) →* _) (shiftSL_loc ((b₂ : ℤ) - (b₁ : ℤ)))) :
         Matrix (Fin 2) (Fin 2) ℝ) = !![(1 : ℝ), (b₂ : ℝ) - (b₁ : ℝ); 0, 1] := by
+      rw [show (((mapGL ℝ : SL(2, ℤ) →* _) (shiftSL_loc ((b₂ : ℤ) - (b₁ : ℤ)))) :
+          Matrix (Fin 2) (Fin 2) ℝ) = (!![1, (b₂ : ℤ) - (b₁ : ℤ); 0, 1]).map Int.cast from
+        (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)]
       ext i' j'
-      fin_cases i' <;> fin_cases j' <;>
-        simp [mapGL_coe_matrix, shiftSL_loc, algebraMap_int_eq, Matrix.of_apply]
+      fin_cases i' <;> fin_cases j' <;> simp [Matrix.map_apply, Matrix.of_apply]
     show ((glMap (T_p_upper p hp b₂) : GL (Fin 2) ℝ) : Matrix _ _ ℝ) i j =
       ((glMap (T_p_upper p hp b₁) : GL (Fin 2) ℝ) *
        ((mapGL ℝ : SL(2, ℤ) →* _) (shiftSL_loc ((b₂ : ℤ) - (b₁ : ℤ)))) :
@@ -421,7 +437,7 @@ theorem measure_glPos_smul_eq (α : GL (Fin 2) ℝ) (hα : 0 < α.det.val)
     μ_hyp (α • S) = μ_hyp S := by
   have h_eq : ((α⁻¹ • ·) : ℍ → ℍ) ⁻¹' S = α • S := by
     ext τ
-    simp [Set.mem_preimage, Set.mem_smul_set_iff_inv_smul_mem]
+    simp only [Set.mem_preimage, Set.mem_smul_set_iff_inv_smul_mem]
   rw [← h_eq]
   exact (measurePreserving_glPos_smul α⁻¹ (det_val_inv_pos hα)).measure_preimage hS
 
@@ -538,17 +554,22 @@ theorem glMap_T_p_upper_inv_mul_M_infty_eq_mapGL_Gamma1
              (b : ℝ) * (((N : ℤ) * mIdxOfCoprime N p hpN : ℤ) : ℝ),
            (1 : ℝ) - (b : ℝ);
            (((N : ℤ) * mIdxOfCoprime N p hpN : ℤ) : ℝ), 1] := by
+      rw [show (((mapGL ℝ : SL(2, ℤ) →* _) (M_infty_Gamma1_factor N p hpN b)) :
+          Matrix (Fin 2) (Fin 2) ℝ) =
+          (!![(aInvOfCoprime N p hpN : ℤ) * p - (b : ℤ) * ((N : ℤ) * mIdxOfCoprime N p hpN),
+              1 - (b : ℤ);
+              (N : ℤ) * mIdxOfCoprime N p hpN, 1]).map Int.cast from
+        (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)]
       ext i' j'
       fin_cases i' <;> fin_cases j' <;>
-        simp [mapGL_coe_matrix, M_infty_Gamma1_factor, algebraMap_int_eq,
-          Matrix.of_apply]
+        simp [Matrix.map_apply, Matrix.of_apply]
     show ((glMap (M_infty N p hp hpN) : GL (Fin 2) ℝ) : Matrix _ _ ℝ) i j =
       ((glMap (T_p_upper p hp b) : GL (Fin 2) ℝ) *
        ((mapGL ℝ : SL(2, ℤ) →* _) (M_infty_Gamma1_factor N p hpN b)) :
        GL (Fin 2) ℝ).val i j
     rw [h_L, Units.val_mul, h_R1, h_R2]
     fin_cases i <;> fin_cases j <;>
-      simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply] <;> ring
+      simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, mul_comm]
   rw [h_mul, ← mul_assoc, inv_mul_cancel, one_mul]
 
 open UpperHalfPlane ModularGroup MeasureTheory in
@@ -590,13 +611,8 @@ theorem aedisjoint_pairwise_T_p_family
     exact (aedisjoint_glMap_M_infty_T_p_upper hp hpN b.val).symm
   | some b, none, _ => exact aedisjoint_glMap_M_infty_T_p_upper hp hpN b.val
   | some b₁, some b₂, hij =>
-    refine aedisjoint_glMap_T_p_upper_pair hp.pos ?_
-    intro h_eq
-    apply hij
-    have h_val : b₁.val = b₂.val := by
-      have : (b₁.val : ℤ) = (b₂.val : ℤ) := by linarith
-      exact_mod_cast this
-    exact congr_arg some (Fin.ext h_val)
+    refine aedisjoint_glMap_T_p_upper_pair hp.pos fun h_eq ↦ hij ?_
+    exact congr_arg some (Fin.ext (by omega))
 
 open UpperHalfPlane ModularGroup MeasureTheory in
 /-- Petersson sum-of-slashes equals the aggregate Hecke-FD biUnion, with an
@@ -696,6 +712,7 @@ lemma slash_peterssonAdj_glMap_M_infty_eq_slash_T_p_lower
     p hp hpN g]
   exact (slash_T_p_lower_eq_T_p_upper_zero_slash_gamma0 p hp hpN g).symm
 
+omit [NeZero N] in
 lemma slash_peterssonAdj_glMap_T_p_upper_eq_slash_T_p_lower
     (p : ℕ) (hp : 0 < p) (b : ℕ)
     (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :

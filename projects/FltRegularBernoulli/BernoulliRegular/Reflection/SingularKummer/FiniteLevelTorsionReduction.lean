@@ -41,18 +41,11 @@ theorem zmod_smul_ptorsion_eq_of_castHom_eq
     (hc : ZMod.castHom hm (ZMod p) c = a) :
     c • (x : A) = ((a • x : TorsionComponent.PTorsion A p) : A) := by
   have hcval : (c.val : ZMod p) = a := by
-    have hcast :
-        ZMod.castHom hm (ZMod p) (c.val : ZMod m) =
-          ZMod.castHom hm (ZMod p) c := by
-      rw [ZMod.natCast_zmod_val c]
-    simpa [ZMod.castHom_apply] using hcast.trans hc
+    simpa [ZMod.castHom_apply, ZMod.natCast_zmod_val c] using hc
   calc
     c • (x : A) = c.val • (x : A) := by
-      calc
-        c • (x : A) = (c.val : ZMod m) • (x : A) := by
-          rw [ZMod.natCast_zmod_val c]
-        _ = c.val • (x : A) :=
-          Nat.cast_smul_eq_nsmul (ZMod m) c.val (x : A)
+      conv_lhs => rw [← ZMod.natCast_zmod_val c]
+      exact Nat.cast_smul_eq_nsmul (ZMod m) c.val (x : A)
     _ = (((c.val : ZMod p) • x : TorsionComponent.PTorsion A p) : A) :=
       nsmul_ptorsion_eq_zmod_smul (p := p) c.val x
     _ = ((a • x : TorsionComponent.PTorsion A p) : A) := by

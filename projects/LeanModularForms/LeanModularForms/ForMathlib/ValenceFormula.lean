@@ -21,10 +21,15 @@ $$\operatorname{ord}_\infty(f) + \tfrac{1}{2}\operatorname{ord}_i(f)
 
 ## Main results
 
+* `fd_orbit_i_eq_i` — a point of `𝒟` in the `i`-orbit equals `i`
+* `fd_orbit_rho_eq` — a point of `𝒟` in the `ρ`-orbit equals `ρ` or `ρ + 1`
+* `orb_repCanon_nonEll` — `repCanon` representatives have non-elliptic orbits
 * `finsum_nonell_eq_repCanon_sum` — the `∑ᶠ` over non-elliptic orbits equals the
   `repCanon` Finset sum
+* `repCanon_sum_split` — the `repCanon` sum splits into strict interior, left vertical
+  edge, and left arc
 * `valence_formula_textbook_orbit_finsum` — the valence formula in literal orbit-sum form,
-  conditional on the core identity `valence_formula_orbit_sum`
+  conditional on the core identity (supplied as the hypothesis `h_core`)
 -/
 
 open Complex MeasureTheory Set Filter Topology CongruenceSubgroup
@@ -68,7 +73,8 @@ private lemma denom_at_I (g : SL(2, ℤ)) :
       ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) g)) (Complex.I) =
     ↑((g : Matrix (Fin 2) (Fin 2) ℤ) 1 0 : ℤ) * Complex.I +
     ↑((g : Matrix (Fin 2) (Fin 2) ℤ) 1 1 : ℤ) := by
-  simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.toGL, Matrix.SpecialLinearGroup.map]
+  simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.toGL,
+    Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply, Matrix.map_apply]
 
 omit f hf in
 private lemma normSq_denom_at_I (g : SL(2, ℤ)) :
@@ -145,7 +151,8 @@ private lemma denom_at_rho (g : SL(2, ℤ)) :
       (-1/2 + (Real.sqrt 3 / 2) * I) +
     ↑((g : Matrix (Fin 2) (Fin 2) ℤ) 1 1 : ℤ) := by
   simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.toGL,
-    Matrix.SpecialLinearGroup.map, ellipticPointRho']
+    Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply, Matrix.map_apply,
+    ellipticPointRho']
 
 omit f hf in
 private lemma normSq_denom_at_rho (g : SL(2, ℤ)) :
@@ -231,34 +238,34 @@ theorem orb_repCanon_nonEll (p : ℍ) (hp : p ∈ repCanon f hf) :
     orbFM p ≠ oiFM ∧ orbFM p ≠ orhoFM := by
   have ⟨hne_i, hne_rho, hne_rho1⟩ := repCanon_ne_elliptic f hf p hp
   have hp_fd := repCanon_mem_fd f hf hp
-  exact ⟨fun h => hne_i (fd_orbit_i_eq_i p hp_fd h),
-    fun h => (fd_orbit_rho_eq p hp_fd h).elim hne_rho hne_rho1⟩
+  exact ⟨fun h ↦ hne_i (fd_orbit_i_eq_i p hp_fd h),
+    fun h ↦ (fd_orbit_rho_eq p hp_fd h).elim hne_rho hne_rho1⟩
 
 /-- The `∑ᶠ` over non-elliptic orbits equals the `repCanon` Finset sum. -/
 theorem finsum_nonell_eq_repCanon_sum :
     ∑ᶠ (q : NonEllOrbitFM), ordOrbitQ f q =
     ∑ s ∈ repCanon f hf, (orderOfVanishingAt' (⇑f) s : ℂ) := by
   set S := (finite_support_ordOrbit_nonEllFM f hf).toFinset
-  rw [finsum_eq_sum_of_support_subset _ (fun q hq => by
+  rw [finsum_eq_sum_of_support_subset _ (fun q hq ↦ by
     rw [Finset.mem_coe, Set.Finite.mem_toFinset]
     exact Int.cast_ne_zero.mp (Function.mem_support.mp hq))]
   set R := repCanon f hf
   set φ : (p : ℍ) → p ∈ R → NonEllOrbitFM :=
-    fun p hp => ⟨orbFM p, orb_repCanon_nonEll f hf p hp⟩ with hφ_def
-  have h_im : ∀ p (hp : p ∈ R), φ p hp ∈ S := fun p hp => by
+    fun p hp ↦ ⟨orbFM p, orb_repCanon_nonEll f hf p hp⟩ with hφ_def
+  have h_im : ∀ p (hp : p ∈ R), φ p hp ∈ S := fun p hp ↦ by
     rw [Set.Finite.mem_toFinset]
     change ordOrbitFM f (orbFM p) ≠ 0
     rw [ordOrbit_mkFM]
     have hp_s₀ := repCanon_mem_s₀ f hf hp
     rw [s₀FM, Set.Finite.mem_toFinset] at hp_s₀
     exact hp_s₀.2
-  have h_surj : ∀ q ∈ S, ∃ p, ∃ hp : p ∈ R, φ p hp = q := fun q hq => by
+  have h_surj : ∀ q ∈ S, ∃ p, ∃ hp : p ∈ R, φ p hp = q := fun q hq ↦ by
     obtain ⟨p, hp_mem, hp_orb⟩ := exists_repCanon_of_nonEllOrbit f hf q
       ((Set.Finite.mem_toFinset _).mp hq)
     exact ⟨p, hp_mem, Subtype.ext hp_orb⟩
   exact (Finset.sum_bij φ h_im
-    (fun _ h₁ _ h₂ heq => orb_injOn_repCanon f hf h₁ h₂ (congr_arg Subtype.val heq))
-    h_surj (fun p hp => by
+    (fun _ h₁ _ h₂ heq ↦ orb_injOn_repCanon f hf h₁ h₂ (congr_arg Subtype.val heq))
+    h_surj (fun p hp ↦ by
       simp only [ordOrbitQ, hφ_def]
       exact_mod_cast (ordOrbit_mkFM f p).symm)).symm
 
@@ -273,7 +280,7 @@ theorem repCanon_sum_split :
 
 include hf in
 /-- **The Valence Formula** for weight-`k` modular forms on `SL₂(ℤ)`, in textbook orbit-sum
-form, conditional on the core identity `valence_formula_orbit_sum`.
+form, conditional on the core identity (supplied as the hypothesis `h_core`).
 
 The core identity states that for any finite set `S ⊆ 𝒟` capturing all zeros,
 the explicit coefficient expansion holds. This is proved separately via contour
@@ -285,12 +292,12 @@ theorem valence_formula_textbook_orbit_finsum
       (orderAtCusp' f : ℂ) +
       (1/2 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointI') +
       (1/3 : ℂ) * ↑(orderOfVanishingAt' (⇑f) ellipticPointRho') +
-      ∑ s ∈ S.filter (fun p =>
+      ∑ s ∈ S.filter (fun p ↦
           p ≠ ellipticPointI' ∧ p ≠ ellipticPointRho' ∧ p ≠ ellipticPointRhoPlusOne' ∧
           ‖(p : ℂ)‖ > 1 ∧ |(p : ℂ).re| < 1/2),
         ↑(orderOfVanishingAt' (⇑f) s) +
       ∑ s ∈ sLeftVertFM S, ↑(orderOfVanishingAt' (⇑f) s) +
-      ∑ s ∈ S.filter (fun p =>
+      ∑ s ∈ S.filter (fun p ↦
           p ≠ ellipticPointRho' ∧ ‖(p : ℂ)‖ = 1 ∧ (p : ℂ).re < 0),
         ↑(orderOfVanishingAt' (⇑f) s) =
       (k : ℂ) / 12) :

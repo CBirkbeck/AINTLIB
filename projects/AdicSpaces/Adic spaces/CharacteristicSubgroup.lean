@@ -76,12 +76,8 @@ i.e., the generating set of `cΓ_v` is trivial. -/
 theorem imageGeOne_subset_singleton_of_le_one (v : Valuation A Γ₀)
     (h : ∀ a : A, v a ≤ 1) :
     Valuation.imageGeOne v ⊆ {1} := by
-  intro γ hγ
-  obtain ⟨hγ_ge, a, ha⟩ := hγ
-  rw [← ha] at hγ_ge
-  have hva_le : v a ≤ 1 := h a
-  rw [← ha]
-  exact Set.mem_singleton_iff.mpr (le_antisymm hva_le hγ_ge)
+  rintro _ ⟨hγ_ge, a, rfl⟩
+  exact Set.mem_singleton_iff.mpr (le_antisymm (h a) hγ_ge)
 
 /-- **Microbial valuation** (Wedhorn implicit, p. 27): a valuation `v` is
 *microbial* if its characteristic subgroup is the whole value group, i.e.,
@@ -102,10 +98,7 @@ theorem IsMicrobial.exists_inv_le {v : Valuation A Γ₀}
     ∃ t : A, v t ≠ 0 ∧ (v t)⁻¹ ≤ γ := by
   obtain ⟨a, ha_ge_one, ha_inv_le, _⟩ := h γ hγ
   -- v a ≥ 1, so v a ≠ 0.
-  refine ⟨a, ?_, ha_inv_le⟩
-  intro h_eq
-  rw [h_eq] at ha_ge_one
-  exact absurd ha_ge_one (by simp)
+  exact ⟨a, (zero_lt_one.trans_le ha_ge_one).ne', ha_inv_le⟩
 
 /-- **Wedhorn 7.3: `cΓ_v(I)` characteristic subgroup attached to an ideal.**
 As a set of `Γ_v` values, this is `{0} ∪ {γ : ∃ a ∈ I, v(a) > 0 ∧ v(a) ≤ γ}`
@@ -134,11 +127,8 @@ theorem cGammaPos_subset_cGammaIdealPos (v : Valuation A Γ₀) (I : Ideal A) :
 
 /-- `1 ∈ cGammaIdealPos v I`. Witnessed by `a = 1` and `v(1) = 1`. -/
 theorem one_mem_cGammaIdealPos (v : Valuation A Γ₀) (I : Ideal A) :
-    (1 : Γ₀) ∈ cGammaIdealPos v I := by
-  refine Or.inr ⟨zero_lt_one, Or.inl ⟨1, ?_, ?_, ?_⟩⟩
-  · rw [map_one]
-  · rw [map_one, inv_one]
-  · rw [map_one]
+    (1 : Γ₀) ∈ cGammaIdealPos v I :=
+  Or.inr ⟨zero_lt_one, Or.inl ⟨1, by rw [map_one], by rw [map_one, inv_one], by rw [map_one]⟩⟩
 
 /-- Zero is in `cGammaIdealPos`. -/
 theorem zero_mem_cGammaIdealPos (v : Valuation A Γ₀) (I : Ideal A) :
@@ -220,7 +210,7 @@ theorem vUnit_mem_cGammaIdeal_of_mem_ideal {v : Valuation A Γ₀}
   · -- Case 1: v(a) ≥ 1. Use the cΓ_v generator clause.
     exact vUnit_mem_cGammaIdeal h_ge hva
   · -- Case 2: v(a) < 1, hence v(a) ≤ 1. Use the ideal generator clause.
-    push_neg at h_ge
+    push Not at h_ge
     have h_le : Units.mk0 (v a) hva ≤ 1 := by
       rw [← Units.val_le_val]
       exact h_ge.le
@@ -250,6 +240,7 @@ noncomputable def coarsenIdeal (v : Valuation A Γ₀) (I : Ideal A) :
     Valuation A (WithZero (Γ₀ˣ ⧸ (cGammaIdeal v I).toSubgroup)) :=
   (asWithZeroUnits v).coarsen (cGammaIdeal v I)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `coarsenIdeal v I a = 0` when `v(a) = 0` — coarsening preserves zero. -/
 theorem coarsenIdeal_eq_zero_of_eq_zero (v : Valuation A Γ₀) (I : Ideal A)
     {a : A} (hva : v a = 0) :
@@ -263,6 +254,7 @@ theorem coarsenIdeal_eq_zero_of_eq_zero (v : Valuation A Γ₀) (I : Ideal A)
   rw [h_asWZ]
   simp
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Key trivialisation property: `coarsenIdeal v I a = 1` for `a ∈ I`
 with `v(a) ≠ 0`.** This is the substance of Wedhorn 7.4(iii) — the
 coarsening kills every value `v(a)` for `a ∈ I` (sends it to the

@@ -56,7 +56,7 @@ structure WittVector.IsPrimitive (ξ : 𝕎 k) (ϖ : k) : Prop where
 omit [PerfectRing k p] in
 /-- The 0-th Witt coefficient of `p ∈ W(k)` is 0 when `k` has characteristic `p`. -/
 theorem WittVector.coeff_zero_p : ((p : 𝕎 k)).coeff 0 = 0 := by
-  rw [WittVector.coeff_p]; simp
+  simp [WittVector.coeff_p]
 
 omit [PerfectRing k p] in
 /-- A primitive element `ξ = p + [ϖ]α` has `ξ.coeff 0 = ϖ · (α.coeff 0)`. -/
@@ -71,9 +71,8 @@ omit [PerfectRing k p] in
 `α.coeff 0` are both nonzero in a domain. -/
 theorem WittVector.IsPrimitive.coeff_zero_ne_zero_of {ξ : 𝕎 k} {ϖ : k} {α : 𝕎 k}
     (hξ : ξ = (p : 𝕎 k) + teichmuller p ϖ * α)
-    (hϖ : ϖ ≠ 0) (hα : α.coeff 0 ≠ 0) [NoZeroDivisors k] : ξ.coeff 0 ≠ 0 := by
-  rw [IsPrimitive.coeff_zero_eq hξ]
-  exact mul_ne_zero hϖ hα
+    (hϖ : ϖ ≠ 0) (hα : α.coeff 0 ≠ 0) [NoZeroDivisors k] : ξ.coeff 0 ≠ 0 :=
+  IsPrimitive.coeff_zero_eq hξ ▸ mul_ne_zero hϖ hα
 
 omit [PerfectRing k p] in
 /-- A primitive element `ξ = p + [ϖ]α` is nonzero when ϖ ≠ 0 and α.coeff 0 ≠ 0. -/
@@ -81,17 +80,16 @@ theorem WittVector.IsPrimitive.ne_zero_of {ξ : 𝕎 k} {ϖ : k} {α : 𝕎 k}
     (hξ : ξ = (p : 𝕎 k) + teichmuller p ϖ * α)
     (hϖ : ϖ ≠ 0) (hα : α.coeff 0 ≠ 0) [NoZeroDivisors k] : ξ ≠ 0 := by
   intro h; rw [h] at hξ
-  have := IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα
-  simp at this
+  simpa using IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα
 
 /-- A primitive element is not in `(p)` when ϖ ≠ 0 and α.coeff 0 ≠ 0, since
 every element of `(p)` has 0-th coefficient equal to 0. -/
 theorem WittVector.IsPrimitive.not_mem_span_p_of {ξ : 𝕎 k} {ϖ : k} {α : 𝕎 k}
     (hξ : ξ = (p : 𝕎 k) + teichmuller p ϖ * α)
     (hϖ : ϖ ≠ 0) (hα : α.coeff 0 ≠ 0) [NoZeroDivisors k] :
-    ξ ∉ Ideal.span {(p : 𝕎 k)} := by
-  rw [WittVector.mem_span_p_iff_coeff_zero_eq_zero]
-  exact IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα
+    ξ ∉ Ideal.span {(p : 𝕎 k)} :=
+  mt (WittVector.mem_span_p_iff_coeff_zero_eq_zero ξ).mp
+    (IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα)
 
 /-! ### Coefficient-level operations for p-adic division -/
 
@@ -102,10 +100,9 @@ theorem WittVector.eq_teichmuller_add_p_mul (x : 𝕎 k) :
     ∃ x' : 𝕎 k, x = teichmuller p (x.coeff 0) + (p : 𝕎 k) * x' := by
   -- x - [x.coeff 0] has coeff 0 = x.coeff 0 - x.coeff 0 = 0
   -- So x - [x.coeff 0] ∈ ker(constantCoeff) = (p) by ker_constantCoeff
-  have h0 : constantCoeff (x - teichmuller p (x.coeff 0)) = 0 := by
-    rw [map_sub, constantCoeff_apply, constantCoeff_apply,
+  have hmem : x - teichmuller p (x.coeff 0) ∈ RingHom.ker constantCoeff := by
+    rw [RingHom.mem_ker, map_sub, constantCoeff_apply, constantCoeff_apply,
       WittVector.teichmuller_coeff_zero, sub_self]
-  have hmem : x - teichmuller p (x.coeff 0) ∈ RingHom.ker constantCoeff := h0
   rw [WittVector.ker_constantCoeff, Ideal.mem_span_singleton] at hmem
   obtain ⟨x', hx'⟩ := hmem
   exact ⟨x', by linear_combination hx'⟩
@@ -142,7 +139,7 @@ theorem WittVector.IsPrimitive.mul_left_cancel {ξ : 𝕎 k} {ϖ : k} {α : 𝕎
     -- x ∈ (p^n) for all n → all coefficients are 0 → x = 0
     have : ∀ i, x.coeff i = 0 := fun i =>
       WittVector.coeff_eq_zero_of_mem_pow_p (this (i + 1)) (Nat.lt_succ_of_le le_rfl)
-    exact WittVector.ext fun i => by rw [this i]; simp [WittVector.zero_coeff]
+    exact WittVector.ext fun i => by simp [this i]
   intro n; induction n with
   | zero => simp
   | succ n ih =>
@@ -173,20 +170,16 @@ theorem WittVector.IsPrimitive.mul_left_cancel {ξ : 𝕎 k} {ϖ : k} {α : 𝕎
         | zero => simp [pow_zero, mul_one]
         | succ m ihm =>
           intro h
-          apply ihm
-          have : a * (p : 𝕎 k) ^ (m + 1) = (a * (p : 𝕎 k) ^ m) * p := by ring
-          rw [this] at h
-          exact WittVector.eq_zero_of_p_mul_eq_zero _ h
-      have hξy : ξ * y = 0 := by
-        apply cancel_p_pow _ i
-        have : ξ * y * (p : 𝕎 k) ^ i = ξ * ((p : 𝕎 k) ^ i * y) := by ring
-        rw [this]; exact hxy ▸ h
+          rw [pow_succ, ← mul_assoc] at h
+          exact ihm (WittVector.eq_zero_of_p_mul_eq_zero _ h)
+      have hξy : ξ * y = 0 :=
+        cancel_p_pow _ i <| by rw [hxy] at h; linear_combination h
       -- Step B: y.coeff 0 = 0
       have hy0 : y.coeff 0 = 0 := by
         have h0 := WittVector.mul_coeff_zero ξ y
         rw [hξy, WittVector.zero_coeff] at h0
-        have hξ0 : ξ.coeff 0 ≠ 0 := IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα
-        exact (mul_eq_zero.mp h0.symm).resolve_left hξ0
+        exact (mul_eq_zero.mp h0.symm).resolve_left
+          (IsPrimitive.coeff_zero_ne_zero_of hξ hϖ hα)
       -- Step C: x.coeff i = y.coeff 0 ^ (p^i) = 0
       have hcoeff := WittVector.mul_pow_charP_coeff_succ y (m := 0) (n := i)
       simp only [zero_add] at hcoeff
@@ -233,16 +226,14 @@ theorem WittVector.ker_of_primitive_and_division
       (∀ n, r n ∈ RingHom.ker θ) ∧
       (∀ n, r n = ξ * q n + (p : 𝕎 k) * r (n + 1)) := by
     -- Use dependent choice: given r_n ∈ ker θ, produce q_n, r_{n+1}
-    have step : ∀ y : 𝕎 k, y ∈ RingHom.ker θ →
-        ∃ (q r' : 𝕎 k), y = ξ * q + (p : 𝕎 k) * r' ∧ r' ∈ RingHom.ker θ := hdiv
     -- Build by Nat.rec on a bundled type
     let T := { w : 𝕎 k // w ∈ RingHom.ker θ }
     -- For each element of T, choose q and r' from the division step
-    let chooseQ : T → 𝕎 k := fun ⟨y, hy⟩ => (step y hy).choose
+    let chooseQ : T → 𝕎 k := fun ⟨y, hy⟩ => (hdiv y hy).choose
     let chooseR : T → T := fun ⟨y, hy⟩ =>
-      ⟨(step y hy).choose_spec.choose, (step y hy).choose_spec.choose_spec.2⟩
+      ⟨(hdiv y hy).choose_spec.choose, (hdiv y hy).choose_spec.choose_spec.2⟩
     have div_prop : ∀ t : T, (t : 𝕎 k) = ξ * chooseQ t + (p : 𝕎 k) * (chooseR t : 𝕎 k) :=
-      fun ⟨y, hy⟩ => (step y hy).choose_spec.choose_spec.1
+      fun ⟨y, hy⟩ => (hdiv y hy).choose_spec.choose_spec.1
     -- Build the sequence r_n by iterating chooseR
     let rT : ℕ → T := fun n => Nat.rec ⟨x, hx⟩ (fun _ t => chooseR t) n
     refine ⟨fun n => (rT n).1, fun n => chooseQ (rT n), rfl, fun n => (rT n).2,
@@ -254,8 +245,7 @@ theorem WittVector.ker_of_primitive_and_division
     intro N; induction N with
     | zero => simp [hr0]
     | succ N ih =>
-      rw [ih, hdiv_eq N]
-      rw [Finset.sum_range_succ]
+      rw [ih, hdiv_eq N, Finset.sum_range_succ]
       ring
   -- Step 3: The series Σ q_n * p^n converges by p-adic completeness.
   -- We need: q n * p^n ∈ Ideal.span {(p : 𝕎 k)} ^ n • ⊤
@@ -274,13 +264,10 @@ theorem WittVector.ker_of_primitive_and_division
   intro n
   rw [SModEq.zero, smul_eq_mul, Ideal.mul_top, Ideal.span_singleton_pow]
   set partN := ∑ i ∈ Finset.range n, q i * (p : 𝕎 k) ^ i
-  have htel := telescope n
   have hconv := hS n
   rw [SModEq.sub_mem, smul_eq_mul, Ideal.mul_top, Ideal.span_singleton_pow] at hconv
-  have decomp : x - ξ * S = (x - ξ * partN) + ξ * (partN - S) := by ring
-  rw [decomp]
+  rw [show x - ξ * S = (x - ξ * partN) + ξ * (partN - S) by ring]
   apply Ideal.add_mem
-  · have : x - ξ * partN = (p : 𝕎 k) ^ n * r n := by rw [htel]; ring
-    rw [this]
+  · rw [show x - ξ * partN = (p : 𝕎 k) ^ n * r n by rw [telescope n]; ring]
     exact Ideal.mem_span_singleton.mpr (dvd_mul_right _ _)
   · exact Ideal.mul_mem_left _ _ hconv

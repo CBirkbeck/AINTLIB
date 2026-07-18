@@ -47,8 +47,8 @@ This is the bound used in Phase 3.3 chord analysis. -/
 theorem orthogonal_deviation_at_radius_right
     {γ : ℝ → ℂ} {t₀ : ℝ} {s L : ℂ} {n : ℕ} (h_flat : IsFlatOfOrder γ t₀ n)
     (hL : L ≠ 0) (hL_right : Tendsto (deriv γ) (𝓝[>] t₀) (𝓝 L)) (h_s : γ t₀ = s) :
-    (fun t : ℝ => ‖tangentDeviation (γ t - s) L‖) =o[𝓝[>] t₀]
-      (fun t => ‖γ t - s‖ ^ n) := by
+    (fun t : ℝ ↦ ‖tangentDeviation (γ t - s) L‖) =o[𝓝[>] t₀]
+      (fun t ↦ ‖γ t - s‖ ^ n) := by
   subst h_s
   exact h_flat.right_flat L hL hL_right
 
@@ -56,8 +56,8 @@ theorem orthogonal_deviation_at_radius_right
 theorem orthogonal_deviation_at_radius_left
     {γ : ℝ → ℂ} {t₀ : ℝ} {s L : ℂ} {n : ℕ} (h_flat : IsFlatOfOrder γ t₀ n)
     (hL : L ≠ 0) (hL_left : Tendsto (deriv γ) (𝓝[<] t₀) (𝓝 L)) (h_s : γ t₀ = s) :
-    (fun t : ℝ => ‖tangentDeviation (γ t - s) L‖) =o[𝓝[<] t₀]
-      (fun t => ‖γ t - s‖ ^ n) := by
+    (fun t : ℝ ↦ ‖tangentDeviation (γ t - s) L‖) =o[𝓝[<] t₀]
+      (fun t ↦ ‖γ t - s‖ ^ n) := by
   subst h_s
   exact h_flat.left_flat L hL hL_left
 
@@ -112,7 +112,8 @@ bounded by `‖tangentDev‖² / ‖w‖`:
 Proof: From Pythagoras, `‖proj‖² = ‖w‖² − ‖tangentDev‖²`, so
 `‖proj‖ = √(‖w‖² − ‖tangentDev‖²)`. Apply `real_sqrt_shortfall_le`. -/
 theorem norm_orthogonalProjection_shortfall_le {w : ℂ} (L : ℂ) (hw : 0 < ‖w‖) :
-    ‖w‖ - ‖orthogonalProjectionComplex w L‖ ≤ ‖tangentDeviation w L‖ ^ 2 / ‖w‖ := by
+    ‖w‖ - ‖orthogonalProjectionComplex w L‖ ≤
+      ‖tangentDeviation w L‖ ^ 2 / ‖w‖ := by
   have h_proj_sq : ‖orthogonalProjectionComplex w L‖ ^ 2 =
       ‖w‖ ^ 2 - ‖tangentDeviation w L‖ ^ 2 := by linarith [orthogonal_pythagoras w L]
   have h_dev_le : ‖tangentDeviation w L‖ ≤ ‖w‖ := by
@@ -145,8 +146,10 @@ theorem norm_orthogonalProjection_minus_target_eq {w L : ℂ} (hL : L ≠ 0)
     exact (abs_le_of_sq_le_sq' h_sq (norm_nonneg w)).2
   have h_c_le_div : c ≤ ‖w‖ / ‖L‖ := by
     rw [le_div_iff₀ hL_norm_pos, ← h_proj_norm]; exact h_proj_le_w
-  change ‖(c : ℝ) • L - (‖w‖ / ‖L‖ : ℝ) • L‖ = ‖w‖ - ‖orthogonalProjectionComplex w L‖
-  rw [show (c : ℝ) • L - (‖w‖ / ‖L‖ : ℝ) • L = (c - ‖w‖ / ‖L‖ : ℝ) • L by module,
+  change ‖(c : ℝ) • L - (‖w‖ / ‖L‖ : ℝ) • L‖ =
+    ‖w‖ - ‖orthogonalProjectionComplex w L‖
+  rw [show (c : ℝ) • L - (‖w‖ / ‖L‖ : ℝ) • L =
+      (c - ‖w‖ / ‖L‖ : ℝ) • L by module,
     norm_smul, Real.norm_eq_abs, abs_of_nonpos (sub_nonpos.mpr h_c_le_div), h_proj_norm]
   field_simp
   ring

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IntegralBridge
@@ -103,7 +108,7 @@ are equal. -/
 theorem binomialPointwiseApprox_eq_coeffApprox (a s : ℕ) :
     S.binomialPointwiseApprox a s = S.binomialCoeffApprox a s := by
   classical
-  unfold binomialPointwiseApprox binomialCoeffApprox binomialCoeffSum
+  simp only [binomialPointwiseApprox, binomialCoeffApprox, binomialCoeffSum]
   simp_rw [Finset.mul_sum]
   rw [Finset.sum_comm]
   refine Finset.sum_congr rfl fun n _ => ?_
@@ -116,7 +121,7 @@ approximation through degree `s`. -/
 theorem gaussSumInt_sub_binomialPointwiseApprox_mem_Q_pow (a s : ℕ) :
     S.gaussSumInt a - S.binomialPointwiseApprox a s ∈ S.Q ^ (s + 1) := by
   classical
-  unfold gaussSumInt binomialPointwiseApprox
+  simp only [gaussSumInt, binomialPointwiseApprox]
   change
     (∑ x : k, (S.residueCharInt ^ a) x * S.psiInt x) -
         ∑ x : k, (S.residueCharInt ^ a) x *

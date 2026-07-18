@@ -1,0 +1,37 @@
+module
+
+public import DedekindResidue.Basic
+public import DedekindResidue.AuxiliaryFunction
+public import DedekindResidue.Lemma2
+public import DedekindResidue.ExplicitFormula.TestFunction
+public import DedekindResidue.ExplicitFormula.AuxAdmissible
+public import DedekindResidue.CompletedZeta.ClassTheta
+public import DedekindResidue.CompletedZeta.DualLattice
+public import DedekindResidue.CompletedZeta.MellinAgreement
+public import DedekindResidue.CompletedZeta.Normalisation
+public import DedekindResidue.CompletedZeta.PoissonLattice
+public import DedekindResidue.CompletedZeta.PoissonSummation
+public import DedekindResidue.CompletedZeta.HeckeTheta
+public import DedekindResidue.CompletedZeta.IdealLattice
+public import DedekindResidue.CompletedZeta.ThetaEstimates
+public import DedekindResidue.CompletedZeta.ThetaLattice
+public import DedekindResidue.CompletedZeta.Existence
+public import DedekindResidue.CompletedZeta.FEPair
+public import DedekindResidue.CompletedZeta.FunctionalEquation
+public import DedekindResidue.CompletedZeta.GammaStrip
+public import DedekindResidue.CompletedZeta.AnalyticControl
+public import DedekindResidue.CompletedZeta.GRH
+public import DedekindResidue.ExplicitFormula.PhiTransform
+public import DedekindResidue.ExplicitFormula.RectangleContour
+public import DedekindResidue.ExplicitFormula.ZeroCapture
+public import DedekindResidue.ExplicitFormula.PrimeSide
+public import DedekindResidue.ExplicitFormula.FourierJordan
+public import DedekindResidue.ExplicitFormula.GammaSide
+public import DedekindResidue.ExplicitFormula.WeilAssembly
+public import DedekindResidue.ExplicitFormula.GRHZeros
+public import DedekindResidue.Lemma3
+public import DedekindResidue.Lemma4
+public import DedekindResidue.QSide
+public import DedekindResidue.Lemma5
+public import DedekindResidue.Theorem1
+public import DedekindResidue.MainTheorem

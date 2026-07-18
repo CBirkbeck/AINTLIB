@@ -53,8 +53,8 @@ theorem flt37_not_dvd_hPlus_of_washington816_class
   · intro hzero
     exact h_table i hi_even hi2 hi34 hi32 (h_816 i hi_even hi2 hi34 hzero)
 
-/-- **`¬ 37 ∣ h⁺` for `ℚ(ζ₃₇)`, with both §8.3 boundaries discharged.** The forward step
-(Thm 8.14) is the proven eigenspace/index bridge; Theorem 8.16 (class form) is now the proven
+/-- **`¬ 37 ∣ h⁺` for `ℚ(ζ₃₇)`, with both §8.3 boundaries discharged.** The forward
+step (Thm 8.14) is the proven eigenspace/index bridge; Theorem 8.16 (class form) is now the proven
 `flt37_dvd_bernoulli_of_pollaczek_class_eq_zero`. Only the finite Bernoulli table
 (`37 ∤ B_i` for even `i ≠ 32` in range — the irregularity data) remains as a hypothesis. -/
 theorem flt37_not_dvd_hPlus_of_bernoulli_table
@@ -62,15 +62,14 @@ theorem flt37_not_dvd_hPlus_of_bernoulli_table
       ¬ (37 : ℤ) ∣ (bernoulli i).num) :
     ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ) :=
   flt37_not_dvd_hPlus_of_washington816_class
-    (fun i hi_even hi2 hi34 hzero =>
-      FLT37.flt37_dvd_bernoulli_of_pollaczek_class_eq_zero i hi_even hi2 hi34 hzero)
-    h_table
+    FLT37.flt37_dvd_bernoulli_of_pollaczek_class_eq_zero h_table
 
 omit [Fact (Nat.Prime 37)] [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
-/-- **The finite Bernoulli table for `37`**: `37 ∤ B_i` for every even `2 ≤ i ≤ 34` with `i ≠ 32`
-(the only irregular even index of `37` in this range is `32`). Proved by direct computation of
-each Bernoulli numerator modulo `37` (`bernoulli_decide`). This is the *first-order* irregularity
-data, distinct from the second-order `NoSecondOrderIrregularPair 37 32`. -/
+/-- **The finite Bernoulli table for `37`**: `37 ∤ B_i` for every even `2 ≤ i ≤ 34` with
+`i ≠ 32` (the only irregular even index of `37` in this range is `32`). Proved by direct
+computation of
+each Bernoulli numerator modulo `37` (`bernoulli_decide`). This is the *first-order*
+irregularity data, distinct from the second-order `NoSecondOrderIrregularPair 37 32`. -/
 theorem flt37_bernoulli_table : ∀ i : ℕ, Even i → 2 ≤ i → i ≤ 34 → i ≠ 32 →
     ¬ (37 : ℤ) ∣ (bernoulli i).num := by
   intro i hi_even hi2 hi34 hi32
@@ -80,9 +79,10 @@ theorem flt37_bernoulli_table : ∀ i : ℕ, Even i → 2 ≤ i → i ≤ 34 →
       | exact absurd rfl hi32
       | bernoulli_decide
 
-/-- **`¬ 37 ∣ h⁺(ℚ(ζ₃₇))`, unconditionally.** Both §8.3 boundaries are proven (Thm 8.14 forward
-via the eigenspace/index bridge, Thm 8.16 via the class-form computation) and the Bernoulli
-table is discharged by computation, so Vandiver's conjecture holds for the prime `37`. -/
+/-- **`¬ 37 ∣ h⁺(ℚ(ζ₃₇))`, unconditionally.** Both §8.3 boundaries are proven (Thm 8.14
+forward via the eigenspace/index bridge, Thm 8.16 via the class-form computation) and the
+Bernoulli table is discharged by computation, so Vandiver's conjecture holds for the prime
+`37`. -/
 theorem flt37_not_dvd_hPlus : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ) :=
   flt37_not_dvd_hPlus_of_bernoulli_table flt37_bernoulli_table
 

@@ -115,7 +115,7 @@ theorem exists_per_D_finset_via_C1Strong_supplier_and_compactness
     exact mk_S_D_of_C1Strong_and_compactness P hA₀_le π hI hπ_tn hπ_unit hArch C D
       (hC1_pointwise_strong D hD)
   -- Step 3: aggregate per-D Finsets into a total function via Classical.dec.
-  let mk_S_D : RationalLocData A → Finset A := fun D =>
+  let mk_S_D : RationalLocData A → Finset A := fun D ↦
     if hD : D ∈ C.covers then Classical.choose (hPerD D hD) else ∅
   refine ⟨mk_S_D, ?_, ?_⟩
   · -- containment per D, per f.

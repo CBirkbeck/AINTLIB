@@ -121,11 +121,9 @@ lemma π_surjective : Function.Surjective π_hom := by
   exact π_hom.range.sum_mem fun s _ ↦
     π_hom.range.zsmul_mem (T_elem_mem_π_range s.1.1 s.1.2.1 s.1.2.2) _
 
-variable (N : ℕ) [NeZero N]
-
 /-- The target ring hom `ψ : ℤ[X_{(p,k)}] →+* 𝕋 (Gamma0_pair N) ℤ`:
     `X_{(p,0)} ↦ T'(1,p)`, `X_{(p,1)} ↦ T'(p,p)` if `p ∤ N` else `0`. -/
-noncomputable def ψ_hom :
+noncomputable def ψ_hom (N : ℕ) [NeZero N] :
     FreeHecke →+* HeckeRing.𝕋 (Gamma0_pair N) ℤ :=
   @MvPolynomial.eval₂Hom _ _ _ _ (instCommRing_Gamma0 N).toCommSemiring
     (Int.castRingHom _) (fun ⟨⟨p, hp⟩, k⟩ ↦

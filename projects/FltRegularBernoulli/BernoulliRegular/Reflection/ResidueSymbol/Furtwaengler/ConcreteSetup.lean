@@ -205,7 +205,7 @@ theorem residueMap_surjective' : Function.Surjective S.residueMap :=
 
 /-- The residue map identifies the quotient `𝓞 R' / Q` with the chosen
 finite-field model `k`. -/
-noncomputable def residueQuotientEquiv : 𝓞 R' ⧸ S.Q ≃+* k :=
+def residueQuotientEquiv : 𝓞 R' ⧸ S.Q ≃+* k :=
   (Ideal.quotientEquiv S.Q (RingHom.ker S.residueMap) (RingEquiv.refl (𝓞 R')) (by
     simpa using S.residueMap_ker)).trans
     (RingHom.quotientKerEquivOfSurjective S.residueMap_surjective)
@@ -226,7 +226,7 @@ theorem quotient_mk_isUnit_of_not_mem_Q (N : ℕ) {s : 𝓞 R'} (hs : s ∉ S.Q)
 
 /-- The canonical unit in `𝓞 R' / Q^(N+1)` attached to an element outside
 `Q`. -/
-noncomputable def quotientUnitOfNotMemQ
+def quotientUnitOfNotMemQ
     (N : ℕ) (s : 𝓞 R') (hs : s ∉ S.Q) : (𝓞 R' ⧸ S.Q ^ (N + 1))ˣ :=
   (S.quotient_mk_isUnit_of_not_mem_Q N hs).unit
 
@@ -238,7 +238,7 @@ theorem quotientUnitOfNotMemQ_coe (N : ℕ) (s : 𝓞 R') (hs : s ∉ S.Q) :
 
 /-- The chosen inverse of an element outside `Q` in the quotient by
 `Q^(N+1)`. -/
-noncomputable def quotientInvOfNotMemQ
+def quotientInvOfNotMemQ
     (N : ℕ) (s : 𝓞 R') (hs : s ∉ S.Q) : 𝓞 R' ⧸ S.Q ^ (N + 1) :=
   ((S.quotientUnitOfNotMemQ N s hs)⁻¹ : (𝓞 R' ⧸ S.Q ^ (N + 1))ˣ)
 
@@ -282,14 +282,14 @@ theorem quotient_mk_isUnit_primeCompl
 /-- The canonical map from the localization of `𝓞 R'` away from `Q` to the
 finite quotient `𝓞 R' / Q^(N+1)`. This keeps local finite-log fractions inside
 the same global quotient used by the Dwork endpoint. -/
-noncomputable def quotientLocalizationAwayQMap (N : ℕ) :
+def quotientLocalizationAwayQMap (N : ℕ) :
     Localization S.Q.primeCompl →+* (𝓞 R' ⧸ S.Q ^ (N + 1)) :=
   IsLocalization.lift
     (M := S.Q.primeCompl)
     (S := Localization S.Q.primeCompl)
     (P := 𝓞 R' ⧸ S.Q ^ (N + 1))
     (g := Ideal.Quotient.mk (S.Q ^ (N + 1)))
-    (fun s => S.quotient_mk_isUnit_primeCompl N s)
+    (S.quotient_mk_isUnit_primeCompl N)
 
 @[simp]
 theorem quotientLocalizationAwayQMap_algebraMap
@@ -303,13 +303,13 @@ theorem quotientLocalizationAwayQMap_algebraMap
       (S := Localization S.Q.primeCompl)
       (P := 𝓞 R' ⧸ S.Q ^ (N + 1))
       (g := Ideal.Quotient.mk (S.Q ^ (N + 1)))
-      (fun s => S.quotient_mk_isUnit_primeCompl N s)
+      (S.quotient_mk_isUnit_primeCompl N)
       x)]
 
 /-- Evaluate a local fraction with denominator away from `Q` in the finite
 quotient.  The denominator is given as an element of the prime complement so
 that algebraic identities have canonical denominator proofs. -/
-noncomputable def quotientFractionEvalPrimeCompl
+def quotientFractionEvalPrimeCompl
     (N : ℕ) (x : 𝓞 R') (s : S.Q.primeCompl) :
     𝓞 R' ⧸ S.Q ^ (N + 1) :=
   S.quotientLocalizationAwayQMap N
@@ -317,7 +317,7 @@ noncomputable def quotientFractionEvalPrimeCompl
 
 /-- Evaluate a local fraction with an explicit proof that the denominator is
 outside `Q`. -/
-noncomputable def quotientFractionEval
+def quotientFractionEval
     (N : ℕ) (x s : 𝓞 R') (hs : s ∉ S.Q) :
     𝓞 R' ⧸ S.Q ^ (N + 1) :=
   S.quotientFractionEvalPrimeCompl N x ⟨s, hs⟩
@@ -347,7 +347,7 @@ theorem quotientFractionEvalPrimeCompl_den_mul
         (S := Localization S.Q.primeCompl)
         (P := 𝓞 R' ⧸ S.Q ^ (N + 1))
         (g := Ideal.Quotient.mk (S.Q ^ (N + 1)))
-        (hg := fun t => S.quotient_mk_isUnit_primeCompl N t)
+        (hg := S.quotient_mk_isUnit_primeCompl N)
         x
         (S.quotientFractionEvalPrimeCompl N x s)
         s).1 (by
@@ -369,8 +369,8 @@ theorem quotientFractionEval_eq_mk_mul_inv
         S.quotientInvOfNotMemQ N s hs := by
   apply (S.quotient_mk_isUnit_of_not_mem_Q N hs).mul_left_inj.mp
   rw [mul_comm (S.quotientFractionEval N x s hs),
-    S.quotientFractionEval_den_mul N x s hs]
-  rw [mul_assoc, S.quotientInvOfNotMemQ_mul_quotient_mk N s hs, mul_one]
+    S.quotientFractionEval_den_mul N x s hs, mul_assoc,
+    S.quotientInvOfNotMemQ_mul_quotient_mk N s hs, mul_one]
 
 theorem quotientFractionEvalPrimeCompl_add
     (N : ℕ) (x₁ x₂ : 𝓞 R') (s₁ s₂ : S.Q.primeCompl) :
@@ -464,7 +464,7 @@ theorem quotientFractionEval_eq_of_sub_mem
     S.quotientFractionEvalPrimeCompl_eq_of_sub_mem N ⟨s, hs⟩ hxy
 
 /-- Unit-group form of the residue-field identification. -/
-noncomputable def residueUnitEquiv : (𝓞 R' ⧸ S.Q)ˣ ≃* kˣ :=
+def residueUnitEquiv : (𝓞 R' ⧸ S.Q)ˣ ≃* kˣ :=
   Units.mapEquiv S.residueQuotientEquiv.toMulEquiv
 
 @[simp]
@@ -531,7 +531,7 @@ def residueChar : MulChar k R' :=
 
 /-- The order-`p` Teichmüller representative on the residue ring
 `𝓞 R' / Q`, transported through the concrete residue-field model `k`. -/
-noncomputable def teichmuller : (𝓞 R' ⧸ S.Q)ˣ →* R'ˣ :=
+def teichmuller : (𝓞 R' ⧸ S.Q)ˣ →* R'ˣ :=
   S.residueChar.toUnitHom.comp S.residueUnitEquiv.toMonoidHom
 
 @[simp]
@@ -700,7 +700,7 @@ theorem mem_Q_iff_residueMap_eq_zero (x : 𝓞 R') :
 
 /-- The residue map identifies the quotient `𝓞 R' / Q` with the chosen
 finite-field model `k`. -/
-noncomputable def residueQuotientEquiv : 𝓞 R' ⧸ S.Q ≃+* k :=
+def residueQuotientEquiv : 𝓞 R' ⧸ S.Q ≃+* k :=
   (Ideal.quotientEquiv S.Q (RingHom.ker S.residueMap) (RingEquiv.refl (𝓞 R')) (by
     simpa using S.residueMap_ker)).trans
     (RingHom.quotientKerEquivOfSurjective S.residueMap_surjective)
@@ -711,7 +711,7 @@ theorem residueQuotientEquiv_mk (x : 𝓞 R') :
   simp [residueQuotientEquiv]
 
 /-- Unit-group form of the residue-field identification. -/
-noncomputable def residueUnitEquiv : (𝓞 R' ⧸ S.Q)ˣ ≃* kˣ :=
+def residueUnitEquiv : (𝓞 R' ⧸ S.Q)ˣ ≃* kˣ :=
   Units.mapEquiv S.residueQuotientEquiv.toMulEquiv
 
 /-- Forget the concrete arithmetic data and recover the abstract
@@ -735,7 +735,7 @@ theorem zeta_p_int_isPrimitiveRoot : IsPrimitiveRoot S.zeta_p_int p := by
   simpa [S.zeta_p_int_spec] using (IsPrimitiveRoot.coe_units_iff.mpr S.hzeta_p)
 
 /-- Unit form of the integral `p`-th root. -/
-noncomputable def zeta_p_int_unit : (𝓞 R')ˣ :=
+def zeta_p_int_unit : (𝓞 R')ˣ :=
   (S.zeta_p_int_isPrimitiveRoot.isUnit (Fact.out : Nat.Prime p).ne_zero).unit
 
 @[simp]
@@ -755,7 +755,7 @@ theorem zeta_p_int_unit_isPrimitiveRoot : IsPrimitiveRoot S.zeta_p_int_unit p :=
     S.zeta_p_int_isPrimitiveRoot.isUnit_unit (Fact.out : Nat.Prime p).ne_zero
 
 /-- The residue character with values in the ring of integers. -/
-noncomputable def residueCharInt : MulChar k (𝓞 R') :=
+def residueCharInt : MulChar k (𝓞 R') :=
   letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   residueMulChar S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot
@@ -772,22 +772,19 @@ theorem π_def : S.π = S.zeta_ell_int - 1 :=
 theorem algebraMap_π : algebraMap (𝓞 R') R' S.π = S.zeta_ell - 1 := by
   simp [S.hπ, S.zeta_ell_int_spec]
 
-/-- The selected prime above `ℓ` contains `π = ζ_ℓ - 1`. -/
-theorem π_mem_Q : S.π ∈ S.Q := by
-  rw [S.π_def]
-  have hprim : IsPrimitiveRoot S.zeta_ell_int ℓ := by
-    refine IsPrimitiveRoot.of_map_of_injective ?_ NumberField.RingOfIntegers.coe_injective
-    simpa [S.zeta_ell_int_spec] using S.hzeta_ell
-  exact zeta_sub_one_mem_of_natCast_mem hprim S.hQ
-
-/-- Ideal form of `π_mem_Q`: the principal ideal `(π)` lies below `Q`. -/
-theorem span_pi_le_Q : Ideal.span ({S.π} : Set (𝓞 R')) ≤ S.Q :=
-  (Ideal.span_singleton_le_iff_mem _).mpr S.π_mem_Q
-
 /-- The integral lift of `ζ_ℓ` is primitive in `𝓞 R'`. -/
 theorem zeta_ell_int_isPrimitiveRoot : IsPrimitiveRoot S.zeta_ell_int ℓ := by
   refine IsPrimitiveRoot.of_map_of_injective ?_ NumberField.RingOfIntegers.coe_injective
   simpa [S.zeta_ell_int_spec] using S.hzeta_ell
+
+/-- The selected prime above `ℓ` contains `π = ζ_ℓ - 1`. -/
+theorem π_mem_Q : S.π ∈ S.Q := by
+  rw [S.π_def]
+  exact zeta_sub_one_mem_of_natCast_mem S.zeta_ell_int_isPrimitiveRoot S.hQ
+
+/-- Ideal form of `π_mem_Q`: the principal ideal `(π)` lies below `Q`. -/
+theorem span_pi_le_Q : Ideal.span ({S.π} : Set (𝓞 R')) ≤ S.Q :=
+  (Ideal.span_singleton_le_iff_mem _).mpr S.π_mem_Q
 
 /-- The additive character is expressed in powers of the chosen primitive
 `ℓ`-th root. -/
@@ -796,7 +793,7 @@ theorem psi_pow_form (x : k) : S.psi x = S.zeta_ell ^ S.psiExponent x :=
 
 /-- The integral additive character defined by the exponent form
 `ψ(x) = ζ_ℓ ^ psiExponent x`. -/
-noncomputable def psiInt : AddChar k (𝓞 R') where
+def psiInt : AddChar k (𝓞 R') where
   toFun x := S.zeta_ell_int ^ S.psiExponent x
   map_zero_eq_one' := by
     apply NumberField.RingOfIntegers.ext
@@ -817,7 +814,7 @@ noncomputable def psiInt : AddChar k (𝓞 R') where
         rw [S.psi_pow_form x, S.psi_pow_form y]
 
 /-- The concrete Gauss sum as an algebraic integer. -/
-noncomputable def gaussSumInt (a : ℕ) : 𝓞 R' :=
+def gaussSumInt (a : ℕ) : 𝓞 R' :=
   _root_.gaussSum (S.residueCharInt ^ a) S.psiInt
 
 end ConductorFlexibleConcreteStickelbergerSetup
@@ -832,7 +829,7 @@ variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower
 
 /-- The old exact pair-cyclotomic concrete setup is a special case of the
 conductor-flexible concrete API. -/
-noncomputable def toConductorFlexible (S : ConcreteStickelbergerSetup ℓ p k K R') :
+def toConductorFlexible (S : ConcreteStickelbergerSetup ℓ p k K R') :
     ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R' where
   hℓ_ne_p := S.hℓ_ne_p
   f := S.f

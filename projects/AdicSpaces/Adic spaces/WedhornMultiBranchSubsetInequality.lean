@@ -106,14 +106,10 @@ theorem vle_t_D_s_of_sigma_decay_chain_at
     (h_C_decay : w.vle C_base_s ((σ : A) * D_s ^ (N + 1))) :
     w.vle t' D_s := by
   letI : ValuativeRel A := w.toValuativeRel
-  have h_combined : w.vle ((σ : A) * t' * D_s ^ N) ((σ : A) * D_s ^ (N + 1)) :=
-    w.vle_trans h_w_f h_C_decay
-  rw [mul_assoc] at h_combined
-  have hσ_ne : ¬ ((σ : A) ≤ᵥ 0) := not_vle_zero_of_isUnit σ.isUnit w
-  rw [ValuativeRel.mul_vle_mul_iff_right hσ_ne] at h_combined
-  rw [pow_succ, mul_comm (D_s ^ N) D_s] at h_combined
-  have h_pow_ne : ¬ (D_s ^ N ≤ᵥ 0) := not_vle_zero_pow h_D_s_ne N
-  rwa [ValuativeRel.mul_vle_mul_iff_left h_pow_ne] at h_combined
+  have h_combined := w.vle_trans h_w_f h_C_decay
+  rwa [mul_assoc, ValuativeRel.mul_vle_mul_iff_right (not_vle_zero_of_isUnit σ.isUnit w),
+    pow_succ, mul_comm (D_s ^ N) D_s,
+    ValuativeRel.mul_vle_mul_iff_left (not_vle_zero_pow h_D_s_ne N)] at h_combined
 
 /-- **Multi-`t'` subset-inequality wrapper** (Wedhorn 8.34(ii) target
 shape).
@@ -129,7 +125,7 @@ theorem subset_inequality_via_per_t_sigma_decay
     (h_per_t : ∀ t' ∈ T_D, w.vle ((σ : A) * t' * D_s ^ N) C_base_s)
     (h_C_decay : w.vle C_base_s ((σ : A) * D_s ^ (N + 1))) :
     (∀ t' ∈ T_D, w.vle t' D_s) ∧ ¬ w.vle D_s 0 :=
-  ⟨fun t' ht' =>
+  ⟨fun t' ht' ↦
       vle_t_D_s_of_sigma_decay_chain_at w N h_D_s_ne (h_per_t t' ht') h_C_decay,
     h_D_s_ne⟩
 

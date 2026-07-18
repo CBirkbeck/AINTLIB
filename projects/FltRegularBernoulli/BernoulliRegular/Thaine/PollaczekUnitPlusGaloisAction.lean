@@ -1,1 +1,1 @@
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.Part2
+import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.EigenspaceGeneratorAndCertEquivalence

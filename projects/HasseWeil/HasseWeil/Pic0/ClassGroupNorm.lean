@@ -1,4 +1,14 @@
-import Mathlib
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.LinearAlgebra.FreeModule.Norm
+import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.RingTheory.ClassGroup.Basic
+import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.Localization.AtPrime.Extension
+import Mathlib.RingTheory.OrderOfVanishing.Basic
 
 /-!
 # The class-group relative norm
@@ -70,7 +80,7 @@ theorem mk0CompRelNorm0_eq_of_mk0_eq {I J : (Ideal S)⁰}
     FractionRing.isScalarTower_liftAlgebra R (FractionRing S)
   haveI : IsLocalization (Algebra.algebraMapSubmonoid S R⁰) (FractionRing S) :=
     IsIntegralClosure.isLocalization R (FractionRing R) (FractionRing S) S
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   haveI : FiniteDimensional (FractionRing R) (FractionRing S) :=
     Module.Finite.of_isLocalization R S R⁰
   rw [ClassGroup.mk0_eq_mk0_iff] at h
@@ -129,10 +139,10 @@ by the **inertia/residue degree** `f`: by `Ideal.relNorm_eq_pow_of_isMaximal` (o
 residue base),
 
 ```
-relNorm R 𝔭 = (𝔭.under R) ^ inertiaDeg (𝔭.under R) 𝔭 .
+relNorm R 𝔭 = (𝔭.under R) ^ inertiaDeg' (𝔭.under R) 𝔭 .
 ```
 
-When `f = inertiaDeg (𝔭.under R) 𝔭 = 1` — which holds at an `F`-rational point of an elliptic
+When `f = inertiaDeg' (𝔭.under R) 𝔭 = 1` — which holds at an `F`-rational point of an elliptic
 curve, where the residue field is `F` itself, so the entire inseparability of an isogeny (e.g.
 Frobenius) lives in the *ramification* `e`, **not** in `f` (Silverman III.4.10(a)) — the power
 collapses and `relNorm R 𝔭 = 𝔭.under R = comap (algebraMap R S) 𝔭`.  This is the exact
@@ -144,7 +154,7 @@ and its function fields are perfect), so the hypothesis is dischargeable in the 
 /-! #### Unconditional `relNorm 𝔪 = 𝔪.under^f` over a **local** base extension (no `PerfectField`)
 
 Mathlib's `Ideal.relNorm_eq_pow_of_isMaximal`
-(`relNorm R P = (P.under R) ^ inertiaDeg (P.under R) P`)
+(`relNorm R P = (P.under R) ^ inertiaDeg' (P.under R) P`)
 is gated on `PerfectField (FractionRing R)`: its proof reduces to the **Galois** case via the normal
 closure, which needs separability.  This is *unnecessary* for the identity itself, but the
 obstruction is real for our intended use — a function field over a *finite* field is **imperfect**,
@@ -166,12 +176,11 @@ the prime; mathlib's `Localization.AtPrime` extension API
 transports `e`, `f` across the localisation, leaving only the relative-norm/localisation
 compatibility — see the residual note after `Ideal.relNorm_eq_under_of_inertiaDeg_one`.) -/
 
-set_option maxHeartbeats 800000 in
 -- The `S/R` fraction-field tower + residue-degree `finrank` bookkeeping need elaboration room.
-/-- **`relNorm 𝔪 = p ^ inertiaDeg p 𝔪` over a local base extension, unconditionally** (no
+/-- **`relNorm 𝔪 = p ^ inertiaDeg' p 𝔪` over a local base extension, unconditionally** (no
 `PerfectField`).  For a **local** Dedekind domain `S` (a DVR) module-finite over a Dedekind domain
 `R`, with `𝔪 = IsLocalRing.maximalIdeal S` lying over a maximal `p ≠ ⊥` of `R`, the relative norm
-of `𝔪` is `p ^ inertiaDeg p 𝔪`.
+of `𝔪` is `p ^ inertiaDeg' p 𝔪`.
 
 Proof (see the section note): `p · S = 𝔪^e` (unique prime, via
 `Ideal.map_algebraMap_eq_finset_prod_pow` + `IsLocalRing.primesOver_eq`); applying `relNorm` and
@@ -187,16 +196,21 @@ theorem Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing
     {p : Ideal R} [p.IsMaximal] (hp0 : p ≠ ⊥)
     [(IsLocalRing.maximalIdeal S).LiesOver p] :
     Ideal.relNorm R (IsLocalRing.maximalIdeal S) =
-      p ^ p.inertiaDeg (IsLocalRing.maximalIdeal S) := by
+      p ^ p.inertiaDeg' (IsLocalRing.maximalIdeal S) := by
   set m := IsLocalRing.maximalIdeal S with hm
-  set e := Ideal.ramificationIdx p m with he_def
-  set f := p.inertiaDeg m with hf_def
+  set e := Ideal.ramificationIdx' p m with he_def
+  set f := p.inertiaDeg' m with hf_def
   haveI : m.IsMaximal := IsLocalRing.maximalIdeal.isMaximal S
-  have he0 : e ≠ 0 := Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver m hp0
+  have he0 : e ≠ 0 := Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver m hp0
   -- `p · S = 𝔪^e` (the *unique* prime over `p`, so the factorisation is a single term).
   have hmap : Ideal.map (algebraMap R S) p = m ^ e := by
     have hp0' : p ≠ 0 := hp0
-    rw [Ideal.map_algebraMap_eq_finset_prod_pow hp0']
+    rw [Ideal.map_algebraMap_eq_finsetProd_pow hp0']
+    rw [show (∏ P ∈ (p.primesOver S).toFinset, P ^ P.ramificationIdx R)
+          = ∏ P ∈ (p.primesOver S).toFinset, P ^ Ideal.ramificationIdx' p P from
+      Finset.prod_congr rfl fun P hP => by
+        obtain ⟨hP_prime, hP_over⟩ := Set.mem_toFinset.mp hP
+        rw [Ideal.ramificationIdx'_eq_ramificationIdx p P hp0]]
     rw [Finset.prod_eq_single m]
     · intro b hb hne
       exact absurd ((Set.mem_singleton_iff).mp
@@ -207,7 +221,7 @@ theorem Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing
   letI : Algebra (FractionRing R) (FractionRing S) := FractionRing.liftAlgebra R _
   haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
     FractionRing.isScalarTower_liftAlgebra R _
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   have hef : e * f = Module.finrank (FractionRing R) (FractionRing S) :=
     Ideal.ramificationIdx_mul_inertiaDeg_of_isLocalRing S (FractionRing R) (FractionRing S) hp0
   -- `(relNorm 𝔪)^e = relNorm(𝔪^e) = relNorm(p · S) = p^{[Frac S:Frac R]} = p^{e·f}`.
@@ -224,7 +238,7 @@ theorem Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing
 
 /-- **`relNorm 𝔪 = 𝔪.under` over a local base extension at residue degree one, unconditionally**
 (Silverman III.4.10(a), `f = 1`; no `PerfectField`).  Specialisation of
-`Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing` to `inertiaDeg = 1`: the prime power
+`Ideal.relNorm_maximalIdeal_eq_pow_inertiaDeg_of_isLocalRing` to `inertiaDeg' = 1`: the prime power
 collapses (`pow_one`) and `p = 𝔪.under R`, giving `relNorm R 𝔪 = 𝔪.under R` (`= comap (algebraMap R
 S) 𝔪`) with **no** separability hypothesis. -/
 theorem Ideal.relNorm_maximalIdeal_eq_under_of_inertiaDeg_one_of_isLocalRing
@@ -233,7 +247,7 @@ theorem Ideal.relNorm_maximalIdeal_eq_under_of_inertiaDeg_one_of_isLocalRing
     [CommRing S] [IsDomain S] [IsIntegrallyClosed S] [IsDedekindDomain S] [IsLocalRing S]
     [Algebra R S] [Module.Finite R S] [Module.IsTorsionFree R S]
     (hp0 : (IsLocalRing.maximalIdeal S).under R ≠ ⊥)
-    (hf : Ideal.inertiaDeg ((IsLocalRing.maximalIdeal S).under R)
+    (hf : Ideal.inertiaDeg' ((IsLocalRing.maximalIdeal S).under R)
       (IsLocalRing.maximalIdeal S) = 1) :
     Ideal.relNorm R (IsLocalRing.maximalIdeal S) = (IsLocalRing.maximalIdeal S).under R := by
   haveI : ((IsLocalRing.maximalIdeal S).under R).IsMaximal :=
@@ -321,14 +335,17 @@ theorem relNorm_eq_relNorm_localization
 
 This block discharges, **without `PerfectField`**, the global-to-semilocal half of the general-base
 identity `relNorm R 𝔭 = 𝔭.under` at residue degree one.  The localisation bridge
-`relNorm_map_localization` (an instance of mathlib's `Ideal.spanIntNorm_localization`, the same engine
+`relNorm_map_localization` (an instance of mathlib's `Ideal.spanIntNorm_localization`, the same
+engine
 behind `relNorm_eq_relNorm_localization`) transports `relNorm R 𝔭` to the **semilocal**
 `Sₚ = Localization (algebraMapSubmonoid S p.primeCompl)` over the DVR `Rₚ = Localization.AtPrime p`,
-and `relNorm_eq_under_of_localized` then assembles the whole identity by `eq_of_localization_maximal`:
+and `relNorm_eq_under_of_localized` then assembles the whole identity by
+`eq_of_localization_maximal`:
 at primes `q ≠ p` both sides localise to `⊤`, and at `q = p` the claim is exactly the **semilocal
 per-prime formula** `relNorm Rₚ (𝔭·Sₚ) = maximalIdeal Rₚ`.
 
-This reduces the `PerfectField` gate to the **single** residual stated in `relNorm_eq_under_of_localized`'s
+This reduces the `PerfectField` gate to the **single** residual stated in
+`relNorm_eq_under_of_localized`'s
 hypothesis `hlocal` — the per-prime relative norm over a DVR base (see the residual note after
 `Ideal.relNorm_eq_under_of_inertiaDeg_one`). -/
 
@@ -344,7 +361,7 @@ theorem map_eq_top_of_under_ne (P : Ideal S) (q : Ideal R) [hq : q.IsMaximal] [P
     P.map (algebraMap S (Localization (Algebra.algebraMapSubmonoid S q.primeCompl))) = ⊤ := by
   haveI : (P.under R).IsMaximal := Ideal.IsMaximal.under R P
   obtain ⟨a, hap, haq⟩ : ∃ a, a ∈ P.under R ∧ a ∉ q := by
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     exact hne (((Ideal.IsMaximal.under R P).eq_of_le hq.ne_top h))
   have haP : algebraMap R S a ∈ P := by rwa [← Ideal.mem_comap, ← Ideal.under_def]
   have hunit : IsUnit (algebraMap S (Localization (Algebra.algebraMapSubmonoid S q.primeCompl))
@@ -356,13 +373,13 @@ theorem map_eq_top_of_under_ne (P : Ideal S) (q : Ideal R) [hq : q.IsMaximal] [P
 
 -- The semilocal `Sₚ` Dedekind/finite/torsion-free instance bundle over the DVR `Rₚ` pushes instance
 -- synthesis (e.g. `IsDomain Sₚ`) past the default budget at statement elaboration.
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **The relative norm localises (top + bottom) at a maximal prime `q` of `R`.**  Pushing
 `relNorm R P` along `R → Rₚ := Localization.AtPrime q` equals the relative norm over `Rₚ` of the
 extension of `P` to the semilocal `Sₚ = Localization (algebraMapSubmonoid S q.primeCompl)`.
 
 This is a direct instance of mathlib's `Ideal.spanIntNorm_localization` (with `M = q.primeCompl`,
-`Sₘ = Sₚ`), the same lemma powering `Ideal.relNorm_algebraMap` and `relNorm_eq_relNorm_localization`.
+`Sₘ = Sₚ`), the same lemma powering `Ideal.relNorm_algebraMap` and
+`relNorm_eq_relNorm_localization`.
 It is the genuine `relNorm`-vs-localisation compatibility needed to compute `relNorm R P` valuation
 by valuation. -/
 theorem relNorm_map_localization (P : Ideal S) (q : Ideal R) [q.IsMaximal] [NeZero q] :
@@ -375,7 +392,6 @@ theorem relNorm_map_localization (P : Ideal S) (q : Ideal R) [q.IsMaximal] [NeZe
       P q.primeCompl q.primeCompl_le_nonZeroDivisors]
 
 -- The semilocal `Sₚ` instance bundle (in `hlocal`'s type) needs synthesis room at elaboration.
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **General-base `relNorm 𝔭 = 𝔭.under`, reduced to the semilocal per-prime formula** (no
 `PerfectField`).  For a maximal prime `P` of `S` (with `p := P.under R`), the identity
 `relNorm R P = p` holds **once** the per-prime relative norm over the DVR base is known:
@@ -403,21 +419,23 @@ theorem relNorm_eq_under_of_localized (P : Ideal S) [P.IsMaximal] (hP : P ≠ �
   haveI hpne : NeZero (P.under R) := ⟨Ideal.under_ne_bot R hP⟩
   have hnotfield : ¬ IsField R :=
     Ring.not_isField_of_ne_of_ne (Ideal.under_ne_bot R hP) (Ideal.IsMaximal.ne_top inferInstance)
-  refine Ideal.eq_of_localization_maximal (fun q hq => ?_)
+  refine Ideal.eq_of_localization_maximal (fun q hq ↦ ?_)
   by_cases hqp : P.under R = q
   · subst hqp
     rw [relNorm_map_localization P (P.under R), hlocal,
       Localization.AtPrime.map_eq_maximalIdeal]
   · haveI : NeZero q := ⟨Ring.ne_bot_of_isMaximal_of_not_isField hq hnotfield⟩
     rw [relNorm_map_localization P q, map_eq_top_of_under_ne P q hqp, Ideal.relNorm_top,
-      IsLocalization.AtPrime.map_eq_top_of_not_le _ (fun hle => hqp
+      IsLocalization.AtPrime.map_eq_top_of_not_le _ (fun hle ↦ hqp
         ((Ideal.IsMaximal.under R P).eq_of_le hq.ne_top hle))]
 
 /-! #### The per-prime relative norm over a DVR base — the `PerfectField`-free residual, **CLOSED**
 
 The single remaining input of `relNorm_eq_under_of_localized` — the per-prime relative norm
-`relNorm Rₚ 𝔮 = maximalIdeal Rₚ` over a **DVR** base `Rₚ` at residue degree one — is discharged here,
-**without `PerfectField`**, via the **module-length** route (no residue *field* structure on the base,
+`relNorm Rₚ 𝔮 = maximalIdeal Rₚ` over a **DVR** base `Rₚ` at residue degree one — is discharged
+here,
+**without `PerfectField`**, via the **module-length** route (no residue *field* structure on the
+base,
 so no `Field (Rₚ ⧸ m)` instance diamond).
 
 The engine is the `Rₚ`-module-length identity over a **PID** base (`Rₚ` is a DVR, hence a PID):
@@ -425,11 +443,13 @@ for a nonzero principal `Q = (π)` of a free-finite `Rₚ`-algebra `Sₚ`,
 
   `length_{Rₚ}(Sₚ ⧸ Q) = length_{Rₚ}(Rₚ ⧸ relNorm Rₚ Q)`        (`relNorm_length_eq_span`),
 
-proved by Smith normal form (`Ideal.quotientEquivPiSpan` is `Rₚ`-linear) + additivity of the order of
+proved by Smith normal form (`Ideal.quotientEquivPiSpan` is `Rₚ`-linear) + additivity of the order
+of
 vanishing (`Ring.ord_mul`, `Ideal.relNorm_singleton`, `Algebra.intNorm_eq_norm`,
-`associated_norm_prod_smith`).  When `f = inertiaDeg = 1`, `Sₚ ⧸ Q` is a **simple** `Rₚ`-module
+`associated_norm_prod_smith`).  When `f = inertiaDeg' = 1`, `Sₚ ⧸ Q` is a **simple** `Rₚ`-module
 (`isSimpleModule_quot_of_inertiaDeg_one`: the residue algebra map `Rₚ → Sₚ ⧸ Q` is onto, so
-`Sₚ ⧸ Q ≃ₗ[Rₚ] Rₚ ⧸ m`), hence `length = 1`; the identity then forces `Rₚ ⧸ relNorm Rₚ Q` to be simple,
+`Sₚ ⧸ Q ≃ₗ[Rₚ] Rₚ ⧸ m`), hence `length = 1`; the identity then forces `Rₚ ⧸ relNorm Rₚ Q` to be
+simple,
 i.e. `relNorm Rₚ Q` maximal, i.e. `= m` (`IsLocalRing.eq_maximalIdeal`).  **No Galois, no
 `PerfectField`.** -/
 
@@ -440,12 +460,12 @@ theorem Ring.ord_finset_prod {A : Type*} [CommRing A] [IsDomain A]
     Ring.ord A (∏ i ∈ s, c i) = ∑ i ∈ s, Ring.ord A (c i) := by
   classical
   induction s using Finset.induction with
-  | empty => simp [Ring.ord_one]
+  | empty => simp
   | insert a t ha ih =>
     rw [Finset.prod_insert ha, Finset.sum_insert ha, Ring.ord_mul,
-      ih (fun i hi => hc i (Finset.mem_insert_of_mem hi))]
+      ih (fun i hi ↦ hc i (Finset.mem_insert_of_mem hi))]
     rw [mem_nonZeroDivisors_iff_ne_zero]
-    exact Finset.prod_ne_zero_iff.mpr (fun i hi => hc i (Finset.mem_insert_of_mem hi))
+    exact Finset.prod_ne_zero_iff.mpr (fun i hi ↦ hc i (Finset.mem_insert_of_mem hi))
 
 /-- **Norm–length identity over a PID base.** For a free-finite algebra `Sₚ` over a PID `Rₚ`
 (integrally closed domains), and a nonzero element `π`, the `Rₚ`-module length of `Sₚ ⧸ (π)` equals
@@ -467,8 +487,8 @@ theorem relNorm_length_eq_span
   have hQ : (Ideal.span {π} : Ideal Sp) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]; exact hπ0
   set b := Module.Free.chooseBasis Rp Sp with hb
-  set c := fun i => (Ideal.span {π} : Ideal Sp).smithCoeffs b hQ i with hc
-  have hc0 : ∀ i, c i ≠ 0 := fun i => (Ideal.span {π}).smithCoeffs_ne_zero b hQ i
+  set c := fun i ↦ (Ideal.span {π} : Ideal Sp).smithCoeffs b hQ i with hc
+  have hc0 : ∀ i, c i ≠ 0 := fun i ↦ (Ideal.span {π}).smithCoeffs_ne_zero b hQ i
   have hrelNorm : Ideal.relNorm Rp (Ideal.span {π}) = Ideal.span {Algebra.norm Rp π} := by
     rw [Ideal.relNorm_singleton, Algebra.intNorm_eq_norm]
   have hassoc : Associated (Algebra.norm Rp π) (∏ i, c i) := by
@@ -479,36 +499,37 @@ theorem relNorm_length_eq_span
   have hord_eq : Ring.ord Rp (Algebra.norm Rp π) = Ring.ord Rp (∏ i, c i) := by
     rw [Ring.ord, Ring.ord, Ideal.span_singleton_eq_span_singleton.mpr hassoc]
   have hord_prod : Ring.ord Rp (∏ i, c i) = ∑ i, Module.length Rp (Rp ⧸ Ideal.span {c i}) := by
-    rw [Ring.ord_finset_prod Finset.univ c (fun i _ => hc0 i)]; rfl
+    rw [Ring.ord_finset_prod Finset.univ c (fun i _ ↦ hc0 i)]; rfl
   have hlen_smith : Module.length Rp (Sp ⧸ (Ideal.span {π} : Ideal Sp)) =
       ∑ i, Module.length Rp (Rp ⧸ Ideal.span {c i}) := by
     rw [(Ideal.quotientEquivPiSpan (Ideal.span {π}) b hQ).length_eq, Module.length_pi_of_fintype]
   rw [← hord_relNorm, hord_eq, hord_prod, hlen_smith]
 
-set_option maxHeartbeats 800000 in
--- The explicit residue-field algebra structure (built on the `Ideal.Quotient.field`-derived semiring
--- via `algebraQuotientOfLEComap`) keeps the surjectivity/`finrank` bookkeeping in elaboration budget
+-- The explicit residue-field algebra structure (built on the `Ideal.Quotient.field`-derived
+-- semiring
+-- via `algebraQuotientOfLEComap`) keeps the surjectivity/`finrank` bookkeeping in elaboration
+-- budget
 -- *without* the `algebraOfLiesOver` instance-diamond (which carries free metavariables).
 /-- **`Sₚ ⧸ Q` is a simple `Rₚ`-module at residue degree one** (the diamond-free `f = 1` input). For
-a maximal ideal `Q` of `Sₚ` lying over a maximal `m` of `Rₚ` with `inertiaDeg m Q = 1`, the residue
+a maximal ideal `Q` of `Sₚ` lying over a maximal `m` of `Rₚ` with `inertiaDeg' m Q = 1`, the residue
 algebra map `Rₚ → Sₚ ⧸ Q` is **surjective** with kernel `m` (the residue extension is trivial), so
 `Sₚ ⧸ Q ≃ₗ[Rₚ] Rₚ ⧸ m`, a simple `Rₚ`-module.
 
 Diamond-free: the residue `Field (Rₚ ⧸ m)` and the residue algebra `Algebra (Rₚ ⧸ m) (Sₚ ⧸ Q)` are
 introduced together by `algebraQuotientOfLEComap` on the **same** field-derived semiring, so the
-`FiniteDimensional`/`finrank` synthesis never disagrees with `inertiaDeg`'s
+`FiniteDimensional`/`finrank` synthesis never disagrees with `inertiaDeg'`'s
 `Module (Rₚ ⧸ m) (Sₚ ⧸ Q)`. -/
 theorem isSimpleModule_quot_of_inertiaDeg_one
     {Rp Sp : Type*} [CommRing Rp] [CommRing Sp] [Algebra Rp Sp]
     (Q : Ideal Sp) [hQ : Q.IsMaximal] (m : Ideal Rp) [hm : m.IsMaximal]
-    [hlo : Q.LiesOver m] (hf : Ideal.inertiaDeg m Q = 1) :
+    [hlo : Q.LiesOver m] (hf : Ideal.inertiaDeg' m Q = 1) :
     IsSimpleModule Rp (Sp ⧸ Q) := by
   letI : Field (Rp ⧸ m) := Ideal.Quotient.field m
   letI alg : Algebra (Rp ⧸ m) (Sp ⧸ Q) :=
     Ideal.Quotient.algebraQuotientOfLEComap (le_of_eq (Q.over_def m))
   haveI hst : IsScalarTower Rp (Rp ⧸ m) (Sp ⧸ Q) := IsScalarTower.of_algebraMap_eq' rfl
   have hfr : Module.finrank (Rp ⧸ m) (Sp ⧸ Q) = 1 := by
-    rw [← Ideal.inertiaDeg_algebraMap m Q]; exact hf
+    rw [← Ideal.inertiaDeg'_algebraMap m Q]; exact hf
   haveI : Nontrivial (Sp ⧸ Q) := Ideal.Quotient.nontrivial_iff.mpr hQ.ne_top
   haveI : FiniteDimensional (Rp ⧸ m) (Sp ⧸ Q) := Module.finite_of_finrank_eq_succ hfr
   have hsurj' : Function.Surjective (algebraMap (Rp ⧸ m) (Sp ⧸ Q)) := by
@@ -533,12 +554,12 @@ theorem isSimpleModule_quot_of_inertiaDeg_one
   exact ⟨m, hm, ⟨(LinearMap.quotKerEquivOfSurjective _ hsurjRp).symm.trans
     (Submodule.quotEquivOfEq _ _ hker)⟩⟩
 
-set_option maxHeartbeats 800000 in
--- The module-length chain over the DVR base (Smith + `Ring.ord` additivity + simplicity) needs room.
+-- The module-length chain over the DVR base (Smith + `Ring.ord` additivity + simplicity) needs
+-- room.
 /-- **The per-prime relative norm over a DVR base at residue degree one** (the `PerfectField`-free
 residual, **CLOSED**).  For a DVR `Rₚ` (a local PID), a Dedekind PID `Sₚ` free-finite torsion-free
 over `Rₚ`, and a nonzero maximal ideal `Q` of `Sₚ` lying over `m = maximalIdeal Rₚ` with
-`inertiaDeg m Q = 1`, the relative norm `relNorm Rₚ Q = m`.
+`inertiaDeg' m Q = 1`, the relative norm `relNorm Rₚ Q = m`.
 
 Proof (module-length, **no** residue-field instance, **no** Galois/`PerfectField`):
 `Sₚ ⧸ Q` is `Rₚ`-simple (`isSimpleModule_quot_of_inertiaDeg_one`), so `length_{Rₚ}(Sₚ ⧸ Q) = 1`; the
@@ -554,7 +575,7 @@ theorem relNorm_eq_maximalIdeal_of_inertiaDeg_one
     [Algebra Rp Sp] [Module.Finite Rp Sp] [Module.IsTorsionFree Rp Sp]
     (Q : Ideal Sp) [hQ : Q.IsMaximal] (hQ0 : Q ≠ ⊥)
     [hlo : Q.LiesOver (IsLocalRing.maximalIdeal Rp)]
-    (hf : Ideal.inertiaDeg (IsLocalRing.maximalIdeal Rp) Q = 1) :
+    (hf : Ideal.inertiaDeg' (IsLocalRing.maximalIdeal Rp) Q = 1) :
     Ideal.relNorm Rp Q = IsLocalRing.maximalIdeal Rp := by
   set m := IsLocalRing.maximalIdeal Rp with hm
   haveI : m.IsMaximal := IsLocalRing.maximalIdeal.isMaximal Rp
@@ -571,16 +592,15 @@ theorem relNorm_eq_maximalIdeal_of_inertiaDeg_one
     rw [Ideal.isMaximal_def, ← isSimpleModule_iff_isCoatom]; exact hsimp2
   exact IsLocalRing.eq_maximalIdeal hmax
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- The abstract `Rₚ`/`Sₚ` localisation instance bundle (in the binders) needs synthesis room.
 omit [IsIntegrallyClosed R] [IsDedekindDomain R] [IsDomain S] [IsIntegrallyClosed S]
   [IsDedekindDomain S] [Module.Finite R S] [Module.IsTorsionFree R S] in
 /-- **The per-prime relative norm at residue degree one, general semilocal `Rₚ`/`Sₚ`.**  The
 hypothesis `hlocal` of `relNorm_eq_under_of_localized`, stated over abstract localisation data
 `Rₚ`/`Sₚ` (so the expensive concrete-`Localization` instances are deferred): for a maximal `P` of
-`S` over a maximal `p` of `R` with `inertiaDeg p P = 1`, `relNorm Rₚ (P·Sₚ) = maximalIdeal Rₚ`.
+`S` over a maximal `p` of `R` with `inertiaDeg' p P = 1`, `relNorm Rₚ (P·Sₚ) = maximalIdeal Rₚ`.
 
-The prime/maximal/`LiesOver`/`inertiaDeg`-transport facts for `P·Sₚ` come from the
+The prime/maximal/`LiesOver`/`inertiaDeg'`-transport facts for `P·Sₚ` come from the
 `IsLocalization.AtPrime` extension API (`isPrime_map_of_liesOver`, `liesOver_map_of_liesOver`,
 `inertiaDeg_map_eq_inertiaDeg`); the per-prime norm itself is
 `relNorm_eq_maximalIdeal_of_inertiaDeg_one`. -/
@@ -595,7 +615,7 @@ theorem relNorm_map_eq_maximalIdeal_general
       [Algebra Rp Sp] [Module.Finite Rp Sp] [Module.IsTorsionFree Rp Sp]
       [Algebra R Sp] [IsScalarTower R S Sp] [IsScalarTower R Rp Sp]
     (P : Ideal S) [hPmax : P.IsMaximal] [hPp : P.LiesOver p]
-    (hf : Ideal.inertiaDeg p P = 1) :
+    (hf : Ideal.inertiaDeg' p P = 1) :
     Ideal.relNorm Rp (P.map (algebraMap S Sp)) = IsLocalRing.maximalIdeal Rp := by
   haveI hQprime : (P.map (algebraMap S Sp)).IsPrime :=
     IsLocalization.AtPrime.isPrime_map_of_liesOver S p Sp P
@@ -607,15 +627,13 @@ theorem relNorm_map_eq_maximalIdeal_general
   have hQ0 : (P.map (algebraMap S Sp)) ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hm0 _
   haveI hQmax : (P.map (algebraMap S Sp)).IsMaximal :=
     Ring.DimensionLEOne.maximalOfPrime hQ0 hQprime
-  have hfQ : Ideal.inertiaDeg (IsLocalRing.maximalIdeal Rp) (P.map (algebraMap S Sp)) = 1 := by
+  have hfQ : Ideal.inertiaDeg' (IsLocalRing.maximalIdeal Rp) (P.map (algebraMap S Sp)) = 1 := by
     rw [IsLocalization.AtPrime.inertiaDeg_map_eq_inertiaDeg p Rp Sp P]; exact hf
   exact relNorm_eq_maximalIdeal_of_inertiaDeg_one (P.map (algebraMap S Sp)) hQ0 hfQ
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- The concrete semilocal `Sₚ` / DVR `Rₚ` localisation instance bundle is expensive to synthesise.
-set_option maxHeartbeats 1600000 in
 /-- **`relNorm 𝔭 = comap 𝔭` for a maximal prime of residue degree one** (Silverman III.4.10(a),
-`f = 1`; ideal form). For a maximal ideal `P` of `S` with `inertiaDeg (P.under R) P = 1`, the
+`f = 1`; ideal form). For a maximal ideal `P` of `S` with `inertiaDeg' (P.under R) P = 1`, the
 relative norm `Ideal.relNorm R P` equals the contraction `P.under R = comap (algebraMap R S) P`.
 
 This is reduced (no `PerfectField`) to the per-prime DVR-base norm via the global→semilocal
@@ -641,7 +659,7 @@ degree transports across the localisation via `IsLocalization.AtPrime.inertiaDeg
 general base; it is retained as a lighter-weight `IsLocalRing` form.) -/
 theorem Ideal.relNorm_eq_under_of_inertiaDeg_one
     {P : Ideal S} [hPmax : P.IsMaximal] (hP : P ≠ ⊥)
-    (hf : Ideal.inertiaDeg (P.under R) P = 1) :
+    (hf : Ideal.inertiaDeg' (P.under R) P = 1) :
     Ideal.relNorm R P = P.under R := by
   letI hnz := NeZero.mk (Ideal.under_ne_bot R hP)
   haveI hpmax : (P.under R).IsMaximal := Ideal.IsMaximal.under R P
@@ -673,7 +691,7 @@ contraction `comap (algebraMap R S) P` (which is nonzero by `Ideal.under_ne_bot`
 `(Ideal R)⁰`. -/
 theorem relNorm0_eq_comap_of_inertiaDeg_one
     (P : (Ideal S)⁰) [hPmax : (P : Ideal S).IsMaximal]
-    (hf : Ideal.inertiaDeg ((P : Ideal S).under R) (P : Ideal S) = 1) :
+    (hf : Ideal.inertiaDeg' ((P : Ideal S).under R) (P : Ideal S) = 1) :
     (relNorm0 (R := R) (S := S) P : Ideal R) =
       Ideal.comap (algebraMap R S) (P : Ideal S) :=
   Ideal.relNorm_eq_under_of_inertiaDeg_one (R := R) (S := S)
@@ -689,15 +707,15 @@ the `Pic⁰` naturality `hnat` at a rational point.  The `comap`-nonzero members
 via `Ideal.under_ne_bot`. -/
 theorem ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one
     (P : (Ideal S)⁰) [hPmax : (P : Ideal S).IsMaximal]
-    (hf : Ideal.inertiaDeg ((P : Ideal S).under R) (P : Ideal S) = 1)
+    (hf : Ideal.inertiaDeg' ((P : Ideal S).under R) (P : Ideal S) = 1)
     (hcomap : Ideal.comap (algebraMap R S) (P : Ideal S) ∈ (Ideal R)⁰) :
     ClassGroup.mk0 (relNorm0 (R := R) (S := S) P) =
       ClassGroup.mk0 (⟨Ideal.comap (algebraMap R S) (P : Ideal S), hcomap⟩ : (Ideal R)⁰) :=
   congrArg ClassGroup.mk0 (Subtype.ext (relNorm0_eq_comap_of_inertiaDeg_one (R := R) (S := S) P hf))
 
-/-! ### `inertiaDeg = 1` at a residue-degree-one prime, for an `F`-algebra self-map `R →ₐ[F] R`
+/-! ### `inertiaDeg' = 1` at a residue-degree-one prime, for an `F`-algebra self-map `R →ₐ[F] R`
 
-The residue/inertia degree `f = inertiaDeg (M.under R) M = finrank (R ⧸ M.under R) (R ⧸ M)` is `1`
+The residue/inertia degree `f = inertiaDeg' (M.under R) M = finrank (R ⧸ M.under R) (R ⧸ M)` is `1`
 whenever the residue field `R ⧸ M` is *one-dimensional over the ground field `F`* (an `F`-rational
 point: `R ⧸ M ≅ F`).  This is Silverman III.4.10(a) `f = 1`: at a rational point the inseparability
 of an `F`-algebra self-map `g : R →ₐ[F] R` (e.g. Frobenius) lives entirely in the **ramification**
@@ -716,10 +734,8 @@ is hit by a *constant* `algebraMap F (R ⧸ M.under R) c`.  Positivity (`finrank
 `Isogeny.CoordHom` already carries. -/
 
 -- The twisted self-algebra `R →[g] R` pushes instance synthesis past the default budget.
-set_option synthInstance.maxHeartbeats 400000 in
 -- The residue-field `finrank` bookkeeping (surjectivity bound + tower) needs more elaboration room.
-set_option maxHeartbeats 1600000 in
-/-- **`inertiaDeg = 1` at a rational point, for an `F`-algebra self-map** (Silverman III.4.10(a),
+/-- **`inertiaDeg' = 1` at a rational point, for an `F`-algebra self-map** (Silverman III.4.10(a),
 `f = 1`). For an `F`-algebra `R`, an `F`-algebra hom `g : R →ₐ[F] R` that is module-finite over
 itself through `g`, and a maximal ideal `M` whose residue field is one-dimensional over `F`
 (`finrank F (R ⧸ M) = 1`, the `F`-rational condition), the inertia degree of `M.under R` (the
@@ -734,20 +750,20 @@ theorem Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one
     (M : Ideal R) [hM : M.IsMaximal]
     (hres : Module.finrank F (R ⧸ M) = 1) :
     letI : Algebra R R := g.toRingHom.toAlgebra
-    Ideal.inertiaDeg (M.under R) M = 1 := by
+    Ideal.inertiaDeg' (M.under R) M = 1 := by
   letI inst : Algebra R R := g.toRingHom.toAlgebra
   haveI instFin : @Module.Finite R R _ _ inst.toModule := hfin
   haveI : @Algebra.IsIntegral R R _ _ inst :=
     @Algebra.IsIntegral.of_finite R R _ _ inst instFin
   -- The twisted self-algebra is a scalar tower over `F`: `g` fixes the image of `F`.
   haveI hst : @IsScalarTower F R R _ inst.toSMul _ :=
-    @IsScalarTower.of_algebraMap_eq F R R _ _ _ _ inst _ fun c => by
+    @IsScalarTower.of_algebraMap_eq F R R _ _ _ _ inst _ fun c ↦ by
     change algebraMap F R c = g.toRingHom (algebraMap F R c)
     rw [show g.toRingHom (algebraMap F R c) = g (algebraMap F R c) from rfl, AlgHom.commutes]
   haveI : M.LiesOver (M.under R) := Ideal.over_under M
   haveI hmax : (M.under R).IsMaximal := Ideal.IsMaximal.under R M
   haveI : Field (R ⧸ M.under R) := Ideal.Quotient.field _
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   haveI : Nontrivial (R ⧸ M) := Ideal.Quotient.nontrivial_iff.mpr hM.ne_top
   haveI : FiniteDimensional F (R ⧸ M) := Module.finite_of_finrank_eq_succ hres
   -- `algebraMap F (R ⧸ M)` is surjective: injective `F`-linear map between equal (= 1) finrank.
@@ -768,7 +784,7 @@ theorem Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one
     Module.Finite.of_surjective (Algebra.linearMap (R ⧸ M.under R) (R ⧸ M))
       (by intro w; obtain ⟨c, hc⟩ := hsurj w; exact ⟨c, hc⟩)
   have h_le : Module.finrank (R ⧸ M.under R) (R ⧸ M) ≤ 1 :=
-    finrank_le_one 1 fun w => by
+    finrank_le_one 1 fun w ↦ by
       obtain ⟨c, hc⟩ := hsurj w
       exact ⟨c, by rw [Algebra.smul_def, hc]; exact mul_one w⟩
   have h_ge : 1 ≤ Module.finrank (R ⧸ M.under R) (R ⧸ M) := Module.finrank_pos
@@ -849,7 +865,7 @@ theorem mk0CompMap0_eq_of_mk0_eq {I J : (Ideal R)⁰}
   change Ideal.span {algebraMap R S x} * Ideal.map (algebraMap R S) (I : Ideal R) =
     Ideal.span {algebraMap R S y} * Ideal.map (algebraMap R S) (J : Ideal R)
   have key : ∀ a : R,
-      Ideal.span {algebraMap R S a} = Ideal.map (algebraMap R S) (Ideal.span {a}) := fun a => by
+      Ideal.span {algebraMap R S a} = Ideal.map (algebraMap R S) (Ideal.span {a}) := fun a ↦ by
     rw [Ideal.map_span, Set.image_singleton]
   rw [key x, key y, ← Ideal.map_mul, ← Ideal.map_mul, hxy]
 
@@ -907,7 +923,7 @@ theorem Ideal.relNorm_map_algebraMap (I : Ideal R) :
     FractionRing.liftAlgebra R (FractionRing S)
   haveI : IsScalarTower R (FractionRing R) (FractionRing S) :=
     FractionRing.isScalarTower_liftAlgebra R (FractionRing S)
-  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower R S (FractionRing S) := IsScalarTower.of_algebraMap_eq fun _ ↦ rfl
   have hrank : Module.finrank (FractionRing R) (FractionRing S) = Module.finrank R S :=
     Algebra.IsAlgebraic.finrank_of_isFractionRing R (FractionRing R) S (FractionRing S)
   rw [Ideal.relNorm_algebraMap S I, hrank]
@@ -936,7 +952,7 @@ theorem ClassGroup.relNorm_comp_map (c : ClassGroup R) :
 theorem ClassGroup.relNorm_comp_map_eq :
     (ClassGroup.relNorm (R := R)).comp (ClassGroup.map (S := S)) =
       powMonoidHom (Module.finrank R S) := by
-  refine MonoidHom.ext fun c => ?_
+  refine MonoidHom.ext fun c ↦ ?_
   rw [MonoidHom.comp_apply, powMonoidHom_apply, ClassGroup.relNorm_comp_map]
 
 end HasseWeil

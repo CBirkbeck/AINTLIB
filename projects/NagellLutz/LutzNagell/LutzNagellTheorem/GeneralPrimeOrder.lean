@@ -3,6 +3,7 @@ import LutzNagell.ZSMul
 import LutzNagell.LutzNagellTheorem.GeneralDenominators
 import LutzNagell.LutzNagellTheorem.EvalBridge
 import LutzNagell.LutzNagellTheorem.GeneralCurve
+import LutzNagell.LutzNagellTheorem.PIDPrimeOrder
 import Mathlib.RingTheory.Polynomial.RationalRoot
 import Mathlib.RingTheory.Localization.Rat
 
@@ -13,6 +14,12 @@ If `P ≠ 0` has odd prime order or order 4 on a general Weierstrass curve with 
 coefficients, then `P` has integral affine coordinates.
 
 For order 2, we prove the weaker bound `4x, 8y ∈ ℤ`.
+
+## Main results
+
+* `prime_order_integrality_general`: a point of odd prime order has integral coordinates.
+* `integrality_of_order_four_general`: a point of order 4 has integral coordinates.
+* `bounded_den_of_order_two_general`: a point of order 2 satisfies `4x, 8y ∈ ℤ`.
 -/
 
 namespace LutzNagell
@@ -56,12 +63,8 @@ theorem evalEval_ψ_eq_zero_of_zsmul_eq_zero_general
     {x y : ℚ} (hns : (curveQ W).toAffine.Nonsingular x y) (n : ℤ)
     (htors : n • (Jacobian.Point.fromAffine
       (Affine.Point.some _ _ hns)) = 0) :
-    ((curveQ W).ψ n).evalEval x y = 0 := by
-  have heval := zsmul_eq_smulEval (curveQ W) hns n
-  have hzero := Jacobian.Point.zero_point (W' := (curveQ W).toJacobian)
-  rw [Jacobian.Point.ext_iff] at htors
-  rw [heval, hzero] at htors
-  exact (Jacobian.Z_eq_zero_of_equiv (Quotient.exact htors)).mpr rfl
+    ((curveQ W).ψ n).evalEval x y = 0 :=
+  PID.evalEval_ψ_eq_zero_of_zsmul_eq_zero (curveQ W) hns n htors
 
 /-! ### ψ₂ = 0 implies 2•P = 0 (converse direction) -/
 
@@ -107,7 +110,7 @@ theorem x_integral_of_odd_prime_torsion_general
   have hden_one : x.den = 1 := by
     rcases hp.eq_one_or_self_of_dvd x.den hdvd_nat with h | h
     · exact h
-    · exact absurd h (fun h => den_ne_prime_of_on_general_curve W
+    · exact absurd h (fun h ↦ den_ne_prime_of_on_general_curve W
         ((curveQ_equation_iff W x y).mp hns.left) hp h)
   exact ⟨x.num, by rwa [← Rat.den_eq_one_iff]⟩
 
@@ -138,7 +141,7 @@ theorem integrality_of_order_four_general
     have hden_one : x.den = 1 := by
       rcases (by decide : Nat.Prime 2).eq_one_or_self_of_dvd x.den hdvd_nat with h | h
       · exact h
-      · exact absurd h (fun h => den_ne_prime_of_on_general_curve W
+      · exact absurd h (fun h ↦ den_ne_prime_of_on_general_curve W
           ((curveQ_equation_iff W x y).mp hns.left) (by decide) h)
     have hx₀ : (x.num : ℚ) = x := by rwa [← Rat.den_eq_one_iff]
     exact ⟨⟨x.num, hx₀⟩, y_integral_of_x_integral_on_general_curve W
@@ -203,7 +206,7 @@ theorem bounded_den_of_order_two_general
     field_simp
   obtain ⟨n₀, hn₀⟩ := hfour_x
   exact ⟨⟨n₀, hn₀⟩, -(W.a₁ * n₀) - 4 * W.a₃, by
-    push_cast; linarith [show (↑W.a₁ : ℚ) * ↑n₀ = 4 * ↑W.a₁ * x from by rw [hn₀]; ring]⟩
+    push_cast; linarith [show (↑W.a₁ : ℚ) * ↑n₀ = 4 * ↑W.a₁ * x by rw [hn₀]; ring]⟩
 
 end LutzNagellTheorem
 end LutzNagell

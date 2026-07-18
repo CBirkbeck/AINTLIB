@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.TotallyRealSubfield
@@ -48,7 +53,7 @@ fractional ideals; we package its `Ideal` analogue here. -/
 /-- If `n` is coprime to `|Cl(A)|`, then a non-zero ideal `I` of a Dedekind
 domain `A` whose `n`-th power is principal is itself principal. -/
 theorem isPrincipal_of_isPrincipal_pow_of_coprime
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
     [Fintype (ClassGroup A)] {n : ℕ}
     (hcop : n.Coprime (Fintype.card (ClassGroup A)))
     {I : Ideal A} (hI_nz : I ≠ ⊥) (hpow : (I ^ n).IsPrincipal) :

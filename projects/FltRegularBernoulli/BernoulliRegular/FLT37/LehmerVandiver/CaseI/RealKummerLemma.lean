@@ -1,8 +1,5 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Helpers
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
 import BernoulliRegular.FLT37.KummerUnits
 import FltRegular.NumberTheory.KummersLemma.KummersLemma
-
 
 /-!
 # Real Kummer's lemma (the concrete Stage 2 target)
@@ -100,16 +97,13 @@ The first ingredient is the Stage 2 substantive content. The second is
 elementary algebra (ζ-power adjustment). -/
 def RealKummerViaLiftExtract : Prop :=
   ¬ (p : ℕ) ∣ hPlus K →
-    -- For every real unit u with congruence
     ∀ (u : (𝓞 (NumberField.maximalRealSubfield K))ˣ),
     (∃ n : ℤ,
       ((p : ℕ) : 𝓞 (NumberField.maximalRealSubfield K)) ∣
         ((u : 𝓞 (NumberField.maximalRealSubfield K)) - (n : ℤ))) →
-    -- The lifted u in 𝓞 K is a p-th power (in 𝓞 K-units)
     (∃ v : (𝓞 K)ˣ, (v : 𝓞 K) ^ p =
       algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K) u)
 
-set_option backward.isDefEq.respectTransparency false in
 omit [Fact p.Prime] [IsCyclotomicExtension {p} ℚ K] in
 /-- **`RealKummerLemma` from lift-and-extract.** Composes the lift
 step (which produces a `p`-th-root unit in `(𝓞 K)ˣ`) with the
@@ -121,7 +115,6 @@ theorem realKummerLemma_of_lift_extract (h_lift : RealKummerViaLiftExtract p K)
   obtain ⟨v, hv⟩ := h_lift h_not_dvd u hcong
   exact h_extract u v hv
 
-set_option backward.isDefEq.respectTransparency false in
 omit [NumberField.IsCMField K] in
 /-- **`RealKummerExtract` is unconditional** (when `2 < p`). The
 elementary K-to-K⁺ extraction step using
@@ -136,14 +129,11 @@ theorem realKummerExtract_unconditional (hp_two : 2 < p) : RealKummerExtract p K
   obtain ⟨m, w, hw⟩ :=
     FLT37.exists_zeta_pow_mul_real_eq_unit (p := p) (K := K) hp_two v
   refine ⟨w, ?_⟩
-  -- Work at the unit level: u = w^p in (𝓞 K⁺)ˣ.
   apply Units.ext
   apply (FaithfulSMul.algebraMap_injective
     (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))
-  -- LHS: algebraMap u = v^p (from hv).
-  -- RHS: algebraMap (w^p).
-  -- v = ζ^m · algebraMap w (from hw).
-  -- v^p = (ζ^m · algebraMap w)^p = (ζ^m)^p · (algebraMap w)^p = (algebraMap w)^p.
+  -- The key computation: `v = ζ^m · algebraMap w` (from `hw`), so since `p` is odd
+  -- `v^p = (ζ^m · algebraMap w)^p = (ζ^m)^p · (algebraMap w)^p = (algebraMap w)^p`.
   have hζ_p_one :
       (((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit (NeZero.ne p)).unit :
         (𝓞 K)ˣ) ^ p = 1 :=
@@ -152,22 +142,18 @@ theorem realKummerExtract_unconditional (hp_two : 2 < p) : RealKummerExtract p K
       (((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit (NeZero.ne p)).unit :
         (𝓞 K)ˣ) ^ (m * p) = 1 := by
     rw [mul_comm, pow_mul, hζ_p_one, one_pow]
-  -- Compute v^p as a unit.
   have hv_pow_unit : v ^ p = (Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K))
       (𝓞 K)).toMonoidHom w) ^ p := by
     rw [hw, mul_pow, ← pow_mul, hζmp_one, one_mul]
-  -- Apply ↑ to both sides of hv_pow_unit.
   have hv_pow_val : (v : 𝓞 K) ^ p = ((Units.map
       (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)).toMonoidHom w
       : (𝓞 K)ˣ) : 𝓞 K) ^ p := by
     rw [← Units.val_pow_eq_pow_val, hv_pow_unit, Units.val_pow_eq_pow_val]
   rw [← hv, hv_pow_val]
-  -- Now: algebraMap (u : 𝓞 K⁺) = (Units.map (algebraMap _ _) w : 𝓞 K)^p.
-  -- Note: algebraMap (w^p) = (algebraMap w)^p as elements.
+  -- `algebraMap (w^p) = (algebraMap w)^p` holds definitionally after `push_cast`.
   push_cast
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`RealKummerLemma` reduces to `RealKummerViaLiftExtract`** (when
 `2 < p`). With `realKummerExtract_unconditional` shipped, the only
 remaining substantive Stage 2 work is the "lift to K and find p-th
@@ -182,7 +168,6 @@ theorem realKummerLemma_of_lift_under_hp_two
   realKummerLemma_of_lift_extract p K h_lift
     (realKummerExtract_unconditional p K hp_two)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`RealKummerViaLiftExtract` from regularity.** Under regularity
 (`p.Coprime |Cl(K)|`), the lift step holds: every real unit congruent
 to a rational mod `p` lifts to a `p`-th power in `(𝓞 K)ˣ` via
@@ -196,16 +181,14 @@ theorem realKummerViaLiftExtract_of_regular
     (hreg : p.Coprime <| Fintype.card <| ClassGroup (𝓞 K)) :
     RealKummerViaLiftExtract p K := by
   intro _h_not_dvd u hcong
-  -- Lift u to (𝓞 K)ˣ.
   set u_K : (𝓞 K)ˣ :=
     Units.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K))
       (𝓞 K)).toMonoidHom u with hu_K
-  -- Transfer congruence via algebraMap.
+  -- Transfer the congruence along `algebraMap`: `p ∣ (u - n)` in `𝓞 K⁺` gives
+  -- `p ∣ algebraMap (u - n) = u_K - n` in `𝓞 K`.
   have hcong_K : ∃ n : ℤ, ((p : ℕ) : 𝓞 K) ∣ ((u_K : 𝓞 K) - (n : ℤ)) := by
     obtain ⟨n, k, hk⟩ := hcong
     refine ⟨n, ?_⟩
-    -- (u_K : 𝓞 K) = algebraMap (u : 𝓞 K⁺).
-    -- p ∣ (u - n) in 𝓞 K⁺ ⟹ p ∣ algebraMap(u - n) = algebraMap u - n in 𝓞 K.
     have h_map : algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
         ((u : 𝓞 (NumberField.maximalRealSubfield K)) -
           ((n : ℤ) : 𝓞 (NumberField.maximalRealSubfield K))) =
@@ -214,20 +197,13 @@ theorem realKummerViaLiftExtract_of_regular
       simp [hu_K]
     rw [← h_map, hk, map_mul]
     exact dvd_mul_of_dvd_left (by simp) _
-  -- Apply flt-regular's Kummer's lemma to u_K.
   obtain ⟨v_K, hv_K⟩ := eq_pow_prime_of_unit_of_congruent
     (K := K) (Nat.ne_of_gt hp_two) hreg u_K hcong_K
-  -- v_K^p = u_K = algebraMap u.
+  -- `hv_K : u_K = v_K^p` at the unit level; `(u_K : 𝓞 K) = algebraMap u` definitionally.
   refine ⟨v_K, ?_⟩
-  -- hv_K : u_K = v_K^p (unit level).
-  -- Want: (v_K : 𝓞 K)^p = algebraMap u (element level).
-  have h_val : ((v_K ^ p : (𝓞 K)ˣ) : 𝓞 K) = (u_K : 𝓞 K) := by
-    rw [← hv_K]
-  rw [Units.val_pow_eq_pow_val] at h_val
-  rw [h_val]
+  rw [← Units.val_pow_eq_pow_val, ← hv_K]
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`RealKummerLemma` from regularity (combined).** Under regularity
 (`p.Coprime |Cl(K)|`) and `2 < p`, the full real Kummer's lemma
 holds. This combines:
@@ -246,7 +222,6 @@ theorem realKummerLemma_of_regular
   realKummerLemma_of_lift_under_hp_two p K hp_two
     (realKummerViaLiftExtract_of_regular p K hp_two hreg)
 
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **Hilbert 94 contrapositive for K⁺.** Under `¬ p ∣ h⁺(K)`, no
 unramified cyclic prime-degree (p) extension `L⁺/K⁺` exists.
@@ -278,7 +253,7 @@ theorem no_h94_extension_of_Kplus_under_VC (hp_odd : p ≠ 2)
       Fintype.card (ClassGroup (𝓞 (NumberField.maximalRealSubfield K))) :=
     dvd_card_classGroup_of_unramified_isCyclic hp_finrank hp_ne_two
   rw [hKL] at hdvd
-  -- hdvd : p ∣ |Cl(𝓞 K⁺)|. But |Cl(𝓞 K⁺)| = hPlus K, contradicting h_not_dvd.
+  -- `hdvd : p ∣ |Cl(𝓞 K⁺)|`, and `|Cl(𝓞 K⁺)| = hPlus K`, contradicting `h_not_dvd`.
   exact h_not_dvd hdvd
 
 end CaseI

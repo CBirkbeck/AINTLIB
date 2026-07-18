@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.FormalGroup.Definition
 import HasseWeil.FormalGroup.Logarithm
 
@@ -29,12 +34,10 @@ previously-computed coefficients.
 * `FormalGroup.inverse_constantCoeff` — `constantCoeff i = 0`.
 * `FormalGroup.inverse_coeff_zero` — `coeff 0 i = 0`.
 * `FormalGroup.inverse_coeff_one` — `coeff 1 i = -1`.
-
-The functional equation `F(T, i(T)) = 0` (to be theorem
-`FormalGroup.fAdd_X_inverse_eq_zero`) is deferred to a follow-up ticket
-(T-IV-2-011 remainder); its proof closely mirrors
-`subst_compInverse_eq_X` in `HasseWeil/FormalGroup/Logarithm.lean` but for
-the two-variable implicit equation.
+* `FormalGroup.fAdd_X_inverse_eq_zero` — the functional equation
+  `F(T, i(T)) = 0`. Its proof mirrors `subst_compInverse_eq_X` in
+  `HasseWeil/FormalGroup/Logarithm.lean`, but for the two-variable implicit
+  equation.
 
 ## References
 
@@ -152,8 +155,8 @@ theorem FormalGroup.coeff_inverseTrunc_of_le (F : FormalGroup R)
 /-- `inverseTrunc F n` has zero constant coefficient. -/
 theorem FormalGroup.inverseTrunc_constantCoeff (F : FormalGroup R) (n : ℕ) :
     @PowerSeries.constantCoeff R _ (F.inverseTrunc n) = 0 := by
-  rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply]
-  rw [F.coeff_inverseTrunc_of_le n 0 (Nat.zero_le _)]
+  rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
+    F.coeff_inverseTrunc_of_le n 0 (Nat.zero_le _)]
   exact F.inverseCoeff_zero
 
 /-- `inverseTrunc F n` admits substitution (zero constant coefficient). -/
@@ -189,8 +192,7 @@ theorem FormalGroup.inverse_coeff_one (F : FormalGroup R) :
         PowerSeries.X ^ (0 + 1)) = -1
   rw [map_add, FormalGroup.inverseTrunc_zero, map_zero, zero_add]
   -- Simplify the coefficient expression.
-  rw [PowerSeries.coeff_C_mul_X_pow]
-  rw [if_pos (by norm_num : (1 : ℕ) = 0 + 1)]
+  rw [PowerSeries.coeff_C_mul_X_pow, if_pos (by norm_num : (1 : ℕ) = 0 + 1)]
   -- Goal: `-coeff 1 (fAdd F X 0) = -1`, i.e., `coeff 1 (fAdd F X 0) = 1`.
   have hX : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
   have hzero : @PowerSeries.constantCoeff R _ (0 : PowerSeries R) = 0 := by simp
@@ -199,7 +201,7 @@ theorem FormalGroup.inverse_coeff_one (F : FormalGroup R) :
 
 /-! ### Functional equation `F(T, i(T)) = 0`
 
-Closing T-IV-2-011: we show `fAdd F X (inverse F) = 0` by the pattern
+We show `fAdd F X (inverse F) = 0` by the pattern
 "polynomial tail / substitution stabilisation / induction on truncations"
 mirroring `subst_compInverse_eq_X` in `Logarithm.lean`. The new ingredient
 is the MvPowerSeries analogue of the stabilisation step: because
@@ -241,12 +243,35 @@ private theorem coeff_X_pow_mul_pow_eq_of_coeff_eq
     by_cases hjb : j ≥ b
     · congr 1
       exact coeff_pow_eq_of_coeff_eq g₁ g₂ n hg b j hj_le
-    · push_neg at hjb
+    · push Not at hjb
       have e1 : PowerSeries.coeff j (g₁ ^ b) = 0 := coeff_pow_eq_zero_of_gt g₁ h1 j b hjb
       have e2 : PowerSeries.coeff j (g₂ ^ b) = 0 := coeff_pow_eq_zero_of_gt g₂ h2 j b hjb
       rw [e1, e2]
-  · rw [PowerSeries.coeff_X_pow, if_neg (fun h => hia h)]
-    rw [zero_mul, zero_mul]
+  · rw [PowerSeries.coeff_X_pow, if_neg hia, zero_mul, zero_mul]
+
+/-- **Coefficient of `fAdd F X g` as a finsum.** For `g` with zero constant
+coefficient, the `k`-th coefficient of `fAdd F X g` expands as the finsum over
+multi-indices `d` of `coeff d F • coeff k (X^(d 0) * g^(d 1))`. This is the
+common unfolding of the `![X, g]`-substitution via `MvPowerSeries.coeff_subst`. -/
+private theorem coeff_fAdd_X_eq_finsum
+    (F : FormalGroup R) (g : PowerSeries R)
+    (hg : @PowerSeries.constantCoeff R _ g = 0) (k : ℕ) :
+    PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X g) =
+      ∑ᶠ (d : Fin 2 →₀ ℕ), MvPowerSeries.coeff d F.toSeries •
+        PowerSeries.coeff k
+          ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) := by
+  have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
+  have ha := HasseWeil.FG.hasSubst_pair (PowerSeries.X : PowerSeries R) g hXcc hg
+  show MvPowerSeries.coeff (Finsupp.single () k)
+      (MvPowerSeries.subst _ F.toSeries) = _
+  rw [MvPowerSeries.coeff_subst ha]
+  apply finsum_congr
+  intro d
+  congr 1
+  -- Expand `d.prod (s e => ![X, g] s ^ e)` to `X^(d 0) * g^(d 1)`.
+  rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> exact pow_zero _),
+      Fin.prod_univ_two]
+  rfl
 
 /-- **MvPowerSeries stabilisation for the `![X, g]` substitution**: if `g₁` and
 `g₂` have zero constant coefficient and agree up to degree `n`, then
@@ -259,27 +284,7 @@ theorem FormalGroup.coeff_fAdd_X_eq_of_coeff_eq
     (k : ℕ) (hk : k ≤ n) :
     PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X g₁) =
       PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X g₂) := by
-  have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
-  -- General helper: we prove the main coefficient formula for any particular
-  -- g with zero constant coefficient.
-  have main : ∀ (g : PowerSeries R), @PowerSeries.constantCoeff R _ g = 0 →
-      PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X g) =
-      ∑ᶠ (d : Fin 2 →₀ ℕ), MvPowerSeries.coeff d F.toSeries •
-        PowerSeries.coeff k
-          ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) := by
-    intro g hg0
-    have ha := HasseWeil.FG.hasSubst_pair (PowerSeries.X : PowerSeries R) g hXcc hg0
-    show MvPowerSeries.coeff (Finsupp.single () k)
-        (MvPowerSeries.subst _ F.toSeries) = _
-    rw [MvPowerSeries.coeff_subst ha]
-    apply finsum_congr
-    intro d
-    congr 1
-    -- Expand `d.prod (s e => ![X, g] s ^ e)` to `X^(d 0) * g^(d 1)`.
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
-        Fin.prod_univ_two]
-    rfl
-  rw [main g₁ h1, main g₂ h2]
+  rw [coeff_fAdd_X_eq_finsum F g₁ h1 k, coeff_fAdd_X_eq_finsum F g₂ h2 k]
   apply finsum_congr
   intro d
   congr 1
@@ -292,6 +297,49 @@ The key insight: for `h = C c * X^(n+1)` (monomial of order `n+1`), coefficients
 `h` has order `n+1`. This lets us reduce the `a ≥ 1` case by factoring out
 `X^a` and shifting indices.
 -/
+
+/-- A high power of `X` annihilates low-degree coefficients of any product:
+`coeff k (X^N * f) = 0` whenever `k < N`. (Every term of the convolution forces
+the `X^N`-factor to land at degree `< N`, where it vanishes.) -/
+private theorem coeff_X_pow_mul_eq_zero_of_lt
+    (f : PowerSeries R) (N k : ℕ) (hk : k < N) :
+    PowerSeries.coeff k ((PowerSeries.X : PowerSeries R) ^ N * f) = 0 := by
+  rw [PowerSeries.coeff_mul]
+  apply Finset.sum_eq_zero
+  intro ⟨p, q⟩ hpq
+  have hpq' : p + q = k := Finset.mem_antidiagonal.mp hpq
+  rw [PowerSeries.coeff_X_pow, if_neg (by omega : p ≠ N), zero_mul]
+
+/-- The `m`-th binomial term `(C c * X^(n+1))^m * g^(d-m) * (d.choose m)` vanishes
+at every degree `k < n+1` once `0 < m`: the monomial power becomes `C (c^m)`
+times `X^(m*(n+1))`, and `m*(n+1) ≥ n+1 > k`, so the `X`-power kills the
+coefficient (`coeff_X_pow_mul_eq_zero_of_lt`). -/
+private theorem coeff_monomial_pow_mul_pow_eq_zero
+    (g : PowerSeries R) (n : ℕ) (c : R) (d m k : ℕ)
+    (hm : 0 < m) (hk : k < n + 1) :
+    PowerSeries.coeff k
+        ((PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ m * g ^ (d - m) *
+          (d.choose m : PowerSeries R)) = 0 := by
+  rw [monomial_pow_eq]
+  -- `(C c * X^(n+1))^m = C (c^m) * X^(m*(n+1))`; cast the binomial coefficient.
+  have hnatCast : ((d.choose m : ℕ) : PowerSeries R) = PowerSeries.C ((d.choose m : ℕ) : R) :=
+    (map_natCast PowerSeries.C (d.choose m)).symm
+  rw [hnatCast]
+  -- Goal: coeff k (C (c^m) * X^(m*(n+1)) * g^(d-m) * C ↑choose) = 0.
+  -- Rearrange the product so both `C`-factors are on the outside.
+  have reorg : PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) *
+          g ^ (d - m) *
+          PowerSeries.C ((d.choose m : ℕ) : R) =
+        PowerSeries.C ((d.choose m : ℕ) : R) *
+          (PowerSeries.C (c ^ m) *
+            (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) := by ring
+  rw [reorg, PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul]
+  -- coeff k (X^(m*(n+1)) * g^(d-m)) = 0 since m*(n+1) ≥ n+1 > k.
+  have horder_X : k < m * (n + 1) := by
+    calc k < n + 1 := hk
+      _ ≤ m * (n + 1) := Nat.le_mul_of_pos_left _ hm
+  rw [coeff_X_pow_mul_eq_zero_of_lt (g ^ (d - m)) (m * (n + 1)) k horder_X,
+    mul_zero, mul_zero]
 
 /-- For `h = C c * X^(n+1)` and any `d`, the coefficient `coeff k ((g + h)^d)` at
 `k < n+1` equals `coeff k (g^d)`. (Adding a high-order monomial doesn't affect
@@ -311,68 +359,13 @@ private theorem coeff_add_monomial_pow_stable
   rw [map_sum]
   -- Split sum: m = 0 term = h^0 * g^d * 1 = g^d; m ≥ 1 terms vanish at coeff k.
   rw [Finset.sum_eq_single 0]
-  · -- Goal: coeff k (h^0 * g^(d-0) * (choose(d,0) : PS)) = coeff k (g^d).
+  · -- The `m = 0` term is `h^0 * g^d * (choose d 0) = g^d`.
     rw [pow_zero, Nat.sub_zero, Nat.choose_zero_right]
-    -- Goal: coeff k (1 * g^d * ↑1) = coeff k (g^d).
-    congr 1
-    -- Goal: 1 * g ^ d * ↑1 = g ^ d.
-    -- Try `simp` first since rewriting is finicky.
-    push_cast
-    -- After push_cast: 1 * g^d * 1 = g^d.
-    exact (mul_one _).trans (one_mul _)
-  · intro m _ hm0
-    have hm_pos : 0 < m := Nat.pos_of_ne_zero hm0
-    -- Goal: coeff k (h^m * g^(d-m) * choose(d,m)) = 0.
-    rw [hdef, monomial_pow_eq]
-    -- h^m = C (c^m) * X^(m*(n+1)).
-    have hnatCast : ((d.choose m : ℕ) : PowerSeries R) = PowerSeries.C ((d.choose m : ℕ) : R) := by
-      induction (d.choose m) with
-      | zero => push_cast; exact (map_zero _).symm
-      | succ k ih =>
-        rw [show ((k + 1 : ℕ) : PowerSeries R) = ((k : ℕ) : PowerSeries R) + 1 from by
-              push_cast; rfl]
-        rw [ih]
-        rw [show ((k + 1 : ℕ) : R) = ((k : ℕ) : R) + 1 from by push_cast; rfl]
-        rw [map_add, map_one]
-    rw [hnatCast]
-    -- Goal: coeff k (C (c^m) * X^(m*(n+1)) * g^(d-m) * C ↑choose) = 0
-    -- Rearrange using explicit term-level rewriting via congruence.
-    have reorg : PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) *
-            g ^ (d - m) *
-            PowerSeries.C ((d.choose m : ℕ) : R) =
-          PowerSeries.C ((d.choose m : ℕ) : R) *
-            (PowerSeries.C (c ^ m) *
-              (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) := by
-      -- First: (C (c^m) * X^N) * g^(d-m) = C (c^m) * (X^N * g^(d-m)).
-      have step1 : PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m) =
-          PowerSeries.C (c ^ m) * (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m)) :=
-        mul_assoc _ _ _
-      -- Substitute in LHS and commute.
-      calc PowerSeries.C (c ^ m) * PowerSeries.X ^ (m * (n + 1)) *
-            g ^ (d - m) *
-            PowerSeries.C ((d.choose m : ℕ) : R)
-          = (PowerSeries.C (c ^ m) *
-              (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) *
-              PowerSeries.C ((d.choose m : ℕ) : R) := by
-            exact congr_arg (· * PowerSeries.C ((d.choose m : ℕ) : R)) step1
-        _ = PowerSeries.C ((d.choose m : ℕ) : R) *
-            (PowerSeries.C (c ^ m) *
-              (PowerSeries.X ^ (m * (n + 1)) * g ^ (d - m))) := mul_comm _ _
-    rw [reorg]
-    rw [PowerSeries.coeff_C_mul, PowerSeries.coeff_C_mul]
-    -- coeff k (X^(m*(n+1)) * g^(d-m)) = 0 since m*(n+1) ≥ n+1 > k.
-    have horder_X : k < m * (n + 1) := by
-      calc k < n + 1 := hk
-        _ ≤ m * (n + 1) := Nat.le_mul_of_pos_left _ hm_pos
-    have hxprod : PowerSeries.coeff k
-        ((PowerSeries.X : PowerSeries R) ^ (m * (n + 1)) * g ^ (d - m)) = 0 := by
-      rw [PowerSeries.coeff_mul]
-      apply Finset.sum_eq_zero
-      intro ⟨p, q⟩ hpq
-      have hpq' : p + q = k := Finset.mem_antidiagonal.mp hpq
-      rw [PowerSeries.coeff_X_pow]
-      rw [if_neg (by omega : p ≠ m * (n + 1)), zero_mul]
-    rw [hxprod, mul_zero, mul_zero]
+    simp
+  · -- Each `m ≥ 1` term vanishes at `coeff k` (high `X`-power).
+    intro m _ hm0
+    rw [hdef]
+    exact coeff_monomial_pow_mul_pow_eq_zero g n c d m k (Nat.pos_of_ne_zero hm0) hk
   · intro h0
     simp at h0
 
@@ -392,9 +385,7 @@ private theorem coeff_X_pow_mul_add_monomial_pow
   · subst ha0
     -- X^0 = 1, so the goal simplifies.
     have hshift : (if (0 : ℕ) = 0 ∧ j = 1 then c else 0) = (if j = 1 then c else 0) := by
-      by_cases hj : j = 1
-      · simp [hj]
-      · simp [hj]
+      simp
     rw [show ((PowerSeries.X : PowerSeries R) ^ (0 : ℕ) *
           (g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ j :
             PowerSeries R) =
@@ -406,9 +397,8 @@ private theorem coeff_X_pow_mul_add_monomial_pow
     exact coeff_add_monomial_pow_eq g hg n c j
   · -- a ≥ 1: the "if" vanishes, and we need to show
     -- coeff (n+1) (X^a * (g+h)^j) = coeff (n+1) (X^a * g^j).
-    have hand_fail : ¬ (a = 0 ∧ j = 1) := fun hand => ha0 hand.1
-    rw [if_neg hand_fail]
-    rw [add_zero]
+    have hand_fail : ¬ (a = 0 ∧ j = 1) := fun hand ↦ ha0 hand.1
+    rw [if_neg hand_fail, add_zero]
     -- By coeff_mul, coeff (n+1) (X^a * f) = coeff (n+1 - a) f (when a ≤ n+1).
     rw [PowerSeries.coeff_mul, PowerSeries.coeff_mul]
     apply Finset.sum_congr rfl
@@ -428,6 +418,91 @@ private theorem coeff_X_pow_mul_add_monomial_pow
       exact coeff_add_monomial_pow_stable g hg n c j q hq
     · rw [PowerSeries.coeff_X_pow, if_neg hpa, zero_mul, zero_mul]
 
+/-- The finsum of `coeff d F • (if d 0 = 0 ∧ d 1 = 1 then c else 0)` over all
+multi-indices is `c`. Only the index `Finsupp.single 1 1` contributes, where the
+multi-index records the monomial `Y`, and its coefficient in `F` is `1` by the
+second unit axiom (`FormalGroup.coeff_01`). This is precisely the source of the
+`+ c` in `coeff_fAdd_X_add_monomial`. -/
+private theorem finsum_coeff_smul_indicator_eq
+    (F : FormalGroup R) (c : R) :
+    ∑ᶠ (d : Fin 2 →₀ ℕ), MvPowerSeries.coeff d F.toSeries •
+        (if d 0 = 0 ∧ d 1 = 1 then c else 0) = c := by
+  rw [finsum_eq_single _ (Finsupp.single (1 : Fin 2) 1) (by
+    intro d hd
+    have : ¬ (d 0 = 0 ∧ d 1 = 1) := by
+      intro ⟨h0, h1⟩
+      apply hd
+      ext i
+      fin_cases i <;> simp [h0, h1]
+    rw [if_neg this, smul_zero])]
+  -- Eval at d = Finsupp.single 1 1: d 0 = 0, d 1 = 1.
+  have hd01 : (Finsupp.single (1 : Fin 2) 1) 0 = 0 := by simp
+  have hd11 : (Finsupp.single (1 : Fin 2) 1) 1 = 1 := by simp
+  rw [hd01, hd11, if_pos ⟨rfl, rfl⟩]
+  -- coeff (Finsupp.single 1 1) F.toSeries = 1 by the right-unit axiom.
+  rw [HasseWeil.FG.FormalGroup.coeff_01, one_smul]
+
+/-- The map `d ↦ coeff d F • (if d 0 = 0 ∧ d 1 = 1 then c else 0)` has finite
+support, since only `d = Finsupp.single 1 1` can contribute. -/
+private theorem support_finite_coeff_smul_indicator
+    (F : FormalGroup R) (c : R) :
+    (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
+        (if d 0 = 0 ∧ d 1 = 1 then c else 0)).support.Finite := by
+  -- Support ⊆ {Finsupp.single 1 1}.
+  apply Set.Finite.subset (Set.finite_singleton (Finsupp.single (1 : Fin 2) 1))
+  intro d hd
+  simp only [Function.mem_support] at hd
+  -- Need: d = Finsupp.single 1 1.
+  by_contra hne
+  apply hd
+  have : ¬ (d 0 = 0 ∧ d 1 = 1) := by
+    intro ⟨h0, h1⟩
+    apply hne
+    ext i
+    fin_cases i <;> simp [h0, h1]
+  rw [if_neg this, smul_zero]
+
+/-- The map `d ↦ coeff d F • coeff k (X^(d 0) * g^(d 1))` has finite support;
+this is the support of the `![X, g]`-substitution coefficient finsum, finite by
+`MvPowerSeries.coeff_subst_finite`. -/
+private theorem support_finite_coeff_smul_coeff_X_pow_mul_pow
+    (F : FormalGroup R) (g : PowerSeries R)
+    (hg : @PowerSeries.constantCoeff R _ g = 0) (k : ℕ) :
+    (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
+        PowerSeries.coeff k
+          ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1))).support.Finite := by
+  have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
+  have ha := HasseWeil.FG.hasSubst_pair (PowerSeries.X : PowerSeries R) g hXcc hg
+  -- The support is finite because of MvPowerSeries.coeff_subst_finite.
+  have hfinite := MvPowerSeries.coeff_subst_finite ha F.toSeries (Finsupp.single () k)
+  -- `hfinite` is `HasFiniteSupport` which unfolds to `.support.Finite`.
+  -- We show our support equals the original support.
+  have hfinite' : (fun d : Fin 2 →₀ ℕ ↦
+      MvPowerSeries.coeff d F.toSeries •
+      MvPowerSeries.coeff (Finsupp.single () k)
+        (d.prod fun s e ↦
+          (show Fin 2 → MvPowerSeries Unit R from ![PowerSeries.X, g]) s ^ e)).support.Finite :=
+    hfinite
+  refine hfinite'.subset ?_
+  intro d hd
+  simp only [Function.mem_support] at hd ⊢
+  -- hd : coeff d F • coeff k (X^(d 0) * g^(d 1)) ≠ 0.
+  -- goal: coeff d F • coeff (Finsupp.single () k) (d.prod ...) ≠ 0.
+  -- We show `d.prod ... = X^(d 0) * g^(d 1)` as MvPowerSeries Unit R elements,
+  -- then the coeffs are equal.
+  have prod_eq :
+      (MvPowerSeries.coeff (Finsupp.single () k)
+          (d.prod fun s e ↦
+            (show Fin 2 → MvPowerSeries Unit R from ![PowerSeries.X, g]) s ^ e)) =
+        PowerSeries.coeff k
+          ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) := by
+    congr 1
+    rw [Finsupp.prod_fintype _ _ (fun i ↦ by fin_cases i <;> exact pow_zero _),
+        Fin.prod_univ_two]
+    rfl
+  rw [prod_eq]
+  exact hd
+
 /-- **Monomial-addition step**: for `g : PowerSeries R` with zero constant
 coefficient and any `c ∈ R`,
 `coeff (n+1) (fAdd F X (g + C c * X^(n+1))) = coeff (n+1) (fAdd F X g) + c`.
@@ -442,50 +517,13 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
         (HasseWeil.FG.fAdd F PowerSeries.X
           (g + PowerSeries.C c * PowerSeries.X ^ (n + 1))) =
       PowerSeries.coeff (n + 1) (HasseWeil.FG.fAdd F PowerSeries.X g) + c := by
-  have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
   have hh_cc : @PowerSeries.constantCoeff R _
       (PowerSeries.C c * PowerSeries.X ^ (n + 1)) = 0 := monomial_constantCoeff_zero n c
   have hgh_cc : @PowerSeries.constantCoeff R _
       (g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) = 0 := by simp [hg, hh_cc]
-  -- Use the same `main` identity, then compare term-by-term.
-  have ha_gh := HasseWeil.FG.hasSubst_pair (PowerSeries.X : PowerSeries R)
-      (g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) hXcc hgh_cc
-  have ha_g := HasseWeil.FG.hasSubst_pair (PowerSeries.X : PowerSeries R) g hXcc hg
-  -- Unfold both substitutions.
-  have lhs_eq :
-      PowerSeries.coeff (n + 1)
-          (HasseWeil.FG.fAdd F PowerSeries.X
-            (g + PowerSeries.C c * PowerSeries.X ^ (n + 1))) =
-      ∑ᶠ (d : Fin 2 →₀ ℕ), MvPowerSeries.coeff d F.toSeries •
-        PowerSeries.coeff (n + 1)
-          ((PowerSeries.X : PowerSeries R) ^ (d 0) *
-            (g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ (d 1)) := by
-    show MvPowerSeries.coeff (Finsupp.single () (n + 1))
-      (MvPowerSeries.subst _ F.toSeries) = _
-    rw [MvPowerSeries.coeff_subst ha_gh]
-    apply finsum_congr
-    intro d
-    congr 1
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
-        Fin.prod_univ_two]
-    rfl
-  have rhs_eq :
-      PowerSeries.coeff (n + 1)
-          (HasseWeil.FG.fAdd F PowerSeries.X g) =
-      ∑ᶠ (d : Fin 2 →₀ ℕ), MvPowerSeries.coeff d F.toSeries •
-        PowerSeries.coeff (n + 1)
-          ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) := by
-    show MvPowerSeries.coeff (Finsupp.single () (n + 1))
-      (MvPowerSeries.subst _ F.toSeries) = _
-    rw [MvPowerSeries.coeff_subst ha_g]
-    apply finsum_congr
-    intro d
-    congr 1
-    rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
-        Fin.prod_univ_two]
-    rfl
-  rw [lhs_eq, rhs_eq]
-  -- Now use the coeff_X_pow_mul_add_monomial_pow lemma to rewrite each LHS term.
+  -- Expand both sides as `![X, ·]`-substitution coefficient finsums.
+  rw [coeff_fAdd_X_eq_finsum F _ hgh_cc, coeff_fAdd_X_eq_finsum F g hg]
+  -- Term-by-term: adding the monomial changes the `(0, 1)`-term by `c`.
   have key : ∀ d : Fin 2 →₀ ℕ,
       MvPowerSeries.coeff d F.toSeries •
         PowerSeries.coeff (n + 1)
@@ -498,86 +536,74 @@ theorem FormalGroup.coeff_fAdd_X_add_monomial (F : FormalGroup R)
         (if d 0 = 0 ∧ d 1 = 1 then c else 0) := by
     intro d
     rw [coeff_X_pow_mul_add_monomial_pow g hg n c (d 0) (d 1), smul_add]
-  rw [show (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
+  rw [show (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
           PowerSeries.coeff (n + 1)
             ((PowerSeries.X : PowerSeries R) ^ (d 0) *
               (g + PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ (d 1))) =
-        (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
+        (fun d : Fin 2 →₀ ℕ ↦ MvPowerSeries.coeff d F.toSeries •
           PowerSeries.coeff (n + 1)
             ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) +
             MvPowerSeries.coeff d F.toSeries •
               (if d 0 = 0 ∧ d 1 = 1 then c else 0)) from funext key]
-  -- Split the finsum into two.
-  have hfin1 : (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
-        PowerSeries.coeff (n + 1)
-          ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1))).support.Finite := by
-    -- The support is finite because of MvPowerSeries.coeff_subst_finite.
-    have hfinite := MvPowerSeries.coeff_subst_finite ha_g F.toSeries (Finsupp.single () (n + 1))
-    -- `hfinite` is `HasFiniteSupport` which unfolds to `.support.Finite`.
-    -- We show our support equals the original support.
-    have hfinite' : (fun d : Fin 2 →₀ ℕ =>
-        MvPowerSeries.coeff d F.toSeries •
-        MvPowerSeries.coeff (Finsupp.single () (n + 1))
-          (d.prod fun s e =>
-            (show Fin 2 → MvPowerSeries Unit R from ![PowerSeries.X, g]) s ^ e)).support.Finite :=
-      hfinite
-    refine hfinite'.subset ?_
-    intro d hd
-    simp only [Function.mem_support] at hd ⊢
-    -- hd : coeff d F • coeff (n+1) (X^(d 0) * g^(d 1)) ≠ 0.
-    -- goal: coeff d F • coeff (Finsupp.single () (n+1)) (d.prod ...) ≠ 0.
-    -- We show `d.prod ... = X^(d 0) * g^(d 1)` as MvPowerSeries Unit R elements,
-    -- then the coeffs are equal.
-    have prod_eq :
-        (MvPowerSeries.coeff (Finsupp.single () (n + 1))
-            (d.prod fun s e =>
-              (show Fin 2 → MvPowerSeries Unit R from ![PowerSeries.X, g]) s ^ e)) =
-          PowerSeries.coeff (n + 1)
-            ((PowerSeries.X : PowerSeries R) ^ (d 0) * g ^ (d 1)) := by
-      congr 1
-      rw [Finsupp.prod_fintype _ _ (fun i => by fin_cases i <;> exact pow_zero _),
-          Fin.prod_univ_two]
-      rfl
-    rw [prod_eq]
-    exact hd
-  have hfin2 : (fun d : Fin 2 →₀ ℕ => MvPowerSeries.coeff d F.toSeries •
-        (if d 0 = 0 ∧ d 1 = 1 then c else 0)).support.Finite := by
-    -- Support ⊆ {Finsupp.single 1 1}.
-    apply Set.Finite.subset (Set.finite_singleton (Finsupp.single (1 : Fin 2) 1))
-    intro d hd
-    simp only [Function.mem_support] at hd
-    -- Need: d = Finsupp.single 1 1.
-    by_contra hne
-    apply hd
-    have : ¬ (d 0 = 0 ∧ d 1 = 1) := by
-      intro ⟨h0, h1⟩
-      apply hne
-      ext i
-      fin_cases i <;> simp [Finsupp.single_apply, h0, h1]
-    rw [if_neg this, smul_zero]
-  rw [finsum_add_distrib hfin1 hfin2]
-  -- The second finsum equals `coeff_01 F * c = 1 * c = c`.
-  congr 1
-  -- Show: ∑ᶠ d, coeff d F • (if d 0 = 0 ∧ d 1 = 1 then c else 0) = c.
-  rw [finsum_eq_single _ (Finsupp.single (1 : Fin 2) 1) (by
-    intro d hd
-    have : ¬ (d 0 = 0 ∧ d 1 = 1) := by
-      intro ⟨h0, h1⟩
-      apply hd
-      ext i
-      fin_cases i <;> simp [Finsupp.single_apply, h0, h1]
-    rw [if_neg this, smul_zero])]
-  -- Eval at d = Finsupp.single 1 1: d 0 = 0, d 1 = 1.
-  have hd01 : (Finsupp.single (1 : Fin 2) 1) 0 = 0 := by
-    simp [Finsupp.single_apply]
-  have hd11 : (Finsupp.single (1 : Fin 2) 1) 1 = 1 := by
-    simp [Finsupp.single_apply]
-  rw [hd01, hd11]
-  rw [if_pos ⟨rfl, rfl⟩]
-  -- coeff (Finsupp.single 1 1) F.toSeries = 1 by the right-unit axiom.
-  rw [HasseWeil.FG.FormalGroup.coeff_01, one_smul]
+  -- Split the finsum into the unchanged part and the correction.
+  rw [finsum_add_distrib
+        (support_finite_coeff_smul_coeff_X_pow_mul_pow F g hg (n + 1))
+        (support_finite_coeff_smul_indicator F c)]
+  -- The correction finsum equals `c` (via the second unit axiom `coeff_01`).
+  rw [finsum_coeff_smul_indicator_eq F c]
 
 /-! ### Core invariant and functional equation -/
+
+/-- Base case of the core invariant: `coeff 0 (fAdd F X (inverseTrunc F 0)) = 0`.
+
+Since `inverseTrunc F 0 = 0` and `fAdd F X 0 = X` (by `fAdd_zero_right`), this
+reduces to `coeff 0 X = 0`. -/
+private theorem coeff_zero_fAdd_X_inverseTrunc_zero (F : FormalGroup R) :
+    PowerSeries.coeff 0 (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc 0)) = 0 := by
+  have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
+  rw [FormalGroup.inverseTrunc_zero]
+  rw [HasseWeil.FG.fAdd_zero_right F PowerSeries.X hXcc]
+  rw [PowerSeries.coeff_zero_X]
+
+/-- Stabilization step of the core invariant: for `k ≤ n`, replacing
+`inverseTrunc F (n + 1)` by `inverseTrunc F n` inside `fAdd F X ·` leaves the
+`k`-th coefficient unchanged.
+
+The two truncations agree on coefficients up to degree `n`
+(`coeff_inverseTrunc_succ_of_le`), so `coeff_fAdd_X_eq_of_coeff_eq` applies. -/
+private theorem coeff_fAdd_X_inverseTrunc_succ_eq_of_le (F : FormalGroup R)
+    (n k : ℕ) (hk : k ≤ n) :
+    PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc (n + 1))) =
+      PowerSeries.coeff k (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc n)) := by
+  have hstab : ∀ j ≤ n,
+      PowerSeries.coeff j (F.inverseTrunc (n + 1)) =
+        PowerSeries.coeff j (F.inverseTrunc n) := by
+    intro j hj
+    exact F.coeff_inverseTrunc_succ_of_le n j hj
+  exact FormalGroup.coeff_fAdd_X_eq_of_coeff_eq F _ _
+    (F.inverseTrunc_constantCoeff (n + 1))
+    (F.inverseTrunc_constantCoeff n)
+    n hstab k hk
+
+/-- Top-degree step of the core invariant:
+`coeff (n + 1) (fAdd F X (inverseTrunc F (n + 1))) = 0`.
+
+By definition `inverseTrunc F (n + 1) = inverseTrunc F n + C c * X^(n+1)` with
+the correction `c = -coeff (n+1) (fAdd F X (inverseTrunc F n))`. Monomial
+addition (`coeff_fAdd_X_add_monomial`) shows the degree-`(n+1)` coefficient is
+the previous one plus `c`, which cancels by construction. -/
+private theorem coeff_succ_fAdd_X_inverseTrunc_succ (F : FormalGroup R) (n : ℕ) :
+    PowerSeries.coeff (n + 1)
+        (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc (n + 1))) = 0 := by
+  set prev := F.inverseTrunc n with hprev
+  set curr := HasseWeil.FG.fAdd F PowerSeries.X prev with hcurr
+  have hunfold : F.inverseTrunc (n + 1) = prev +
+      PowerSeries.C (-PowerSeries.coeff (n + 1) curr) * PowerSeries.X ^ (n + 1) := rfl
+  rw [hunfold]
+  rw [FormalGroup.coeff_fAdd_X_add_monomial F prev n
+        (-PowerSeries.coeff (n + 1) curr) (F.inverseTrunc_constantCoeff n)]
+  show PowerSeries.coeff (n + 1) curr + -PowerSeries.coeff (n + 1) curr = 0
+  exact add_neg_cancel _
 
 /-- **Core invariant**: for `k ≤ n`,
 `coeff k (fAdd F X (inverseTrunc F n)) = 0`.
@@ -595,50 +621,21 @@ theorem FormalGroup.inverseTrunc_fAdd_coeff_eq_zero
         (HasseWeil.FG.fAdd F PowerSeries.X (F.inverseTrunc n)) = 0 := by
   induction n with
   | zero =>
-    -- k = 0.
-    have hk0 : k = 0 := Nat.le_zero.mp hk
-    subst hk0
-    -- fAdd F X 0 = X (by fAdd_zero_right).
-    have hXcc : @PowerSeries.constantCoeff R _ PowerSeries.X = 0 := by simp
-    rw [FormalGroup.inverseTrunc_zero]
-    rw [HasseWeil.FG.fAdd_zero_right F PowerSeries.X hXcc]
-    -- coeff 0 X = 0.
-    rw [PowerSeries.coeff_zero_X]
+    -- `k = 0`; base case (`coeff_zero_fAdd_X_inverseTrunc_zero`).
+    obtain rfl : k = 0 := Nat.le_zero.mp hk
+    exact coeff_zero_fAdd_X_inverseTrunc_zero F
   | succ n ih =>
     rcases Nat.lt_or_ge k (n + 1) with hk' | hk'
-    · -- k ≤ n: use stabilization + ih.
+    · -- `k ≤ n`: stabilize down to `inverseTrunc F n`, then `ih`.
       have hk'' : k ≤ n := Nat.lt_succ_iff.mp hk'
-      -- fAdd F X (inverseTrunc F (n+1)) and fAdd F X (inverseTrunc F n) agree on
-      -- coefficients up to degree n, so coeff k of both is equal (and ih gives 0).
-      have hstab : ∀ j ≤ n,
-          PowerSeries.coeff j (F.inverseTrunc (n + 1)) =
-            PowerSeries.coeff j (F.inverseTrunc n) := by
-        intro j hj
-        exact F.coeff_inverseTrunc_succ_of_le n j hj
-      rw [FormalGroup.coeff_fAdd_X_eq_of_coeff_eq F _ _
-            (F.inverseTrunc_constantCoeff (n + 1))
-            (F.inverseTrunc_constantCoeff n)
-            n hstab k hk'']
+      rw [coeff_fAdd_X_inverseTrunc_succ_eq_of_le F n k hk'']
       exact ih hk''
-    · -- k = n + 1.
-      have hk_eq : k = n + 1 := le_antisymm hk hk'
-      subst hk_eq
-      -- inverseTrunc F (n+1) = inverseTrunc F n + C c * X^(n+1) where
-      -- c = -coeff (n+1) (fAdd F X (inverseTrunc F n)).
-      set prev := F.inverseTrunc n with hprev
-      set curr := HasseWeil.FG.fAdd F PowerSeries.X prev with hcurr
-      have hunfold : F.inverseTrunc (n + 1) = prev +
-          PowerSeries.C (-PowerSeries.coeff (n + 1) curr) * PowerSeries.X ^ (n + 1) := rfl
-      rw [hunfold]
-      -- Apply monomial-addition.
-      rw [FormalGroup.coeff_fAdd_X_add_monomial F prev n
-            (-PowerSeries.coeff (n + 1) curr) (F.inverseTrunc_constantCoeff n)]
-      -- Goal: coeff (n+1) curr + (-coeff (n+1) curr) = 0.
-      show PowerSeries.coeff (n + 1) curr + -PowerSeries.coeff (n + 1) curr = 0
-      exact add_neg_cancel _
+    · -- `k = n + 1`: the top-degree correction cancels.
+      obtain rfl : k = n + 1 := le_antisymm hk hk'
+      exact coeff_succ_fAdd_X_inverseTrunc_succ F n
 
-/-- **Functional equation of the formal inverse** (Silverman IV.2, closing
-T-IV-2-011): `F(T, i(T)) = 0`, i.e., `fAdd F X (inverse F) = 0`.
+/-- **Functional equation of the formal inverse** (Silverman IV.2):
+`F(T, i(T)) = 0`, i.e., `fAdd F X (inverse F) = 0`.
 
 This is the defining identity of the formal inverse. The proof uses the
 polynomial-tail / substitution-stabilization / induction pattern: at each

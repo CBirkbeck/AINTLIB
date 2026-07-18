@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator.Folded
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator.Folded
 
 /-!
 # Homogeneous finite-log coordinates
@@ -51,7 +53,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normaliz
   rw [map_sum]
   exact valuedLambdaQuotientDworkCoeffModP_sum (p := p) (K := K) i
     (Finset.range (samePrimeFiniteLogCutoff (p := p) (p - 2)))
-    (fun d =>
+    (fun d ↦
       Ideal.Quotient.factorPow (lambdaIdeal p K) (by omega :
           p - 1 ≤ (p - 2) + 1)
         (samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
@@ -160,7 +162,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_linear_eq_zero
   have hvec :=
     concreteKummerLogVector_evalₐ_pow_pred_eq_two_nsmul_dworkArtinHasseSpecializedFiniteLog
       (p := p) (K := K) hp_three a
-  let hle : p - 1 ≤ (p - 2) + 1 := by omega
+  have hle : p - 1 ≤ (p - 2) + 1 := by omega
   have hvec_factor := congrArg (Ideal.Quotient.factorPow (lambdaIdeal p K) hle) hvec
   have hvec' :
       AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
@@ -200,7 +202,6 @@ theorem valuedLambdaQuotientDworkCoeffModP_specializedFoldedFiniteLog_linear_eq_
   exact valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_linear_eq_zero
     (p := p) (K := K) hp_three hp_five a
 
-set_option maxHeartbeats 1200000 in
 -- The proof unfolds a quotient coordinate through the Dwork power basis and
 -- a ramification congruence; elaborating the completion coercions is slow.
 omit [NumberField.IsCMField K] in
@@ -255,7 +256,7 @@ theorem dworkRamificationCorrection_evenCoeff_eq_zero_of_sub_residue
     have hne : (i : ℕ) ≠ 1 := by
       dsimp [i]
       omega
-    have hne_fin : i ≠ (⟨1, by omega⟩ : Fin (p - 1)) := fun h =>
+    have hne_fin : i ≠ (⟨1, by omega⟩ : Fin (p - 1)) := fun h ↦
       hne (congrArg Fin.val h)
     rw [show y =
         algebraMap R₀ S (-(c ^ p)) * dworkParameter p K ^ 1 by
@@ -266,7 +267,6 @@ theorem dworkRamificationCorrection_evenCoeff_eq_zero_of_sub_residue
     simp
   exact hy
 
-set_option maxHeartbeats 800000 in
 -- The `n = p` finite-log term is compared with the ramification correction
 -- by identifying their `p`-multiples in the complete Dwork ring and then
 -- cancelling `p` there, not in the finite quotient.
@@ -381,7 +381,6 @@ theorem valuedLambdaQuotientDworkCoeffModP_samePrimeFiniteLogTerm_p_eq_ramificat
     dworkParameterQuotientCoeffModP_mk]
   rw [hmap_y]
 
-set_option maxHeartbeats 1000000 in
 -- The statement contains a same-prime term at precision `p - 2` coerced to
 -- the Kummer quotient; elaborating those quotient powers is expensive.
 omit [NumberField.IsCMField K] in
@@ -440,10 +439,10 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_ordinaryTerms
                 (p := p) (K := K) (p - 2)))) := by
   let x : ValuedIntegerRing p K :=
     dworkParameterNormalizedCoordApprox (p := p) (K := K) (p - 2)
-  let hx : x ∈ lambdaIdeal p K :=
+  have hx : x ∈ lambdaIdeal p K :=
     dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
       (p := p) (K := K) (p - 2)
-  let hle : p - 1 ≤ (p - 2) + 1 := by omega
+  have hle : p - 1 ≤ (p - 2) + 1 := by omega
   let i : Fin (p - 1) := (kummerLogEvenPowerIndex (p := p) hp_five j).1
   have hlog :
       samePrimeFiniteLog (p := p) (K := K) (p - 2) x hx =
@@ -458,7 +457,7 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_ordinaryTerms
             (samePrimeFiniteLogTerm (p := p) (K := K) (p - 2) p x hx)) = 0 :=
     valuedLambdaQuotientDworkCoeffModP_samePrimeFiniteLogTerm_p_even_eq_zero
       (p := p) (K := K) hp_five j hx
-  unfold dworkParameterNormalizedFiniteLogApprox
+  simp only [dworkParameterNormalizedFiniteLogApprox]
   change
     valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
         (Ideal.Quotient.factorPow (lambdaIdeal p K) hle
@@ -473,12 +472,12 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_ordinaryTerms
   rw [hpterm]
   simp
 
-set_option linter.style.longLine false in
 omit [NumberField.IsCMField K] in
 /-- For ordinary same-prime logarithm terms `n < p`, no same-prime
 denominator folding occurs.  Hence a homogeneous piece of lambda-degree
 `>= N + 1` is already zero in the `lambda^(N + 1)` quotient. -/
-theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_quotient_le_of_lt_prime
+theorem
+    samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_quotient_le_of_lt_prime
     {N n d : ℕ} {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hnlt : n < p) (hd : N + 1 ≤ d) :
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
@@ -506,7 +505,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_qu
   · simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm,
       samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore, hn, hnd]
 
-set_option linter.style.longLine false in
 omit [NumberField.IsCMField K] in
 /-- An ordinary logarithm term `n < p` for the normalized Artin-Hasse
 coordinate only needs homogeneous degrees below the quotient precision. -/
@@ -524,13 +522,10 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_quotient
   rw [samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_cutoff_sum
     (p := p) (K := K) N n hx]
   let C : ℕ := samePrimeFiniteLogCutoff (p := p) N
-  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d =>
-    samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
-      (p := p) (K := K) N n d x hx
   have hprec_le_cut : N + 1 ≤ C := by
     dsimp [C, samePrimeFiniteLogCutoff]
     exact Nat.le_mul_of_pos_left (N + 1) (Fact.out : Nat.Prime p).pos
-  have hsubset : Finset.range (N + 1) ⊆ Finset.range C := fun d hd =>
+  have hsubset : Finset.range (N + 1) ⊆ Finset.range C := fun d hd ↦
     Finset.mem_range.mpr ((Finset.mem_range.mp hd).trans_le hprec_le_cut)
   exact (Finset.sum_subset hsubset (by
     intro d _hdC hdSmall
@@ -538,11 +533,10 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_quotient
       Nat.le_of_not_gt (by
         intro hlt
         exact hdSmall (Finset.mem_range.mpr hlt))
-    exact samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_quotient_le_of_lt_prime
+    exact
+      samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_quotient_le_of_lt_prime
       (p := p) (K := K) hx hnlt hd)).symm
 
-set_option linter.style.longLine false in
-set_option maxHeartbeats 800000 in
 -- The proof pushes the factorial-cleared homogeneous identity through
 -- quotient maps and Dwork-coordinate extraction; elaboration is above the
 -- default heartbeat budget.
@@ -570,10 +564,10 @@ theorem valuedLambdaQuotientDworkCoeffModP_factorPow_normalizedHomogeneousDegree
             (1 : RationalPadicIntegerRing p) :
               Fin (p - 1) → RationalPadicIntegerRing p) i)) := by
   classical
-  let hle : p - 1 ≤ (p - 2) + 1 := by omega
+  have hle : p - 1 ≤ (p - 2) + 1 := by omega
   let x : ValuedIntegerRing p K :=
     dworkParameterApprox p K ((p - 2) + 1)
-  let hx : x ∈ lambdaIdeal p K :=
+  have hx : x ∈ lambdaIdeal p K :=
     dworkParameterApprox_mem_lambdaIdeal (p := p) (K := K) ((p - 2) + 1)
   let S : Furtwaengler.DieudonneDwork.rIntegralRatSubring p :=
     ∑ n ∈ Finset.Icc 1 d,
@@ -658,29 +652,8 @@ theorem valuedLambdaQuotientDworkCoeffModP_factorPow_normalizedHomogeneousDegree
     rw [hleft] at hsource_coord
     rw [hright] at hsource_coord
     simpa [S] using hsource_coord
-  apply (isUnit_iff_ne_zero.mpr hfac_ne).mul_left_cancel
-  calc
-    ((d.factorial : ℕ) : ZMod p) *
-        valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
-          (Ideal.Quotient.factorPow (lambdaIdeal p K) hle
-            (samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
-              (p := p) (K := K) (p - 2) d x hx))
-        = Furtwaengler.DieudonneDwork.rIntegralToZMod p S * b := hmul
-    _ =
-        ((d.factorial : ℕ) : ZMod p) *
-          ((((d.factorial : ℕ) : ZMod p)⁻¹ *
-            Furtwaengler.DieudonneDwork.rIntegralToZMod p S) * b) := by
-        calc
-          Furtwaengler.DieudonneDwork.rIntegralToZMod p S * b =
-              (((d.factorial : ℕ) : ZMod p) *
-                ((d.factorial : ℕ) : ZMod p)⁻¹) *
-                  (Furtwaengler.DieudonneDwork.rIntegralToZMod p S * b) := by
-                rw [mul_inv_cancel₀ hfac_ne, one_mul]
-          _ =
-              ((d.factorial : ℕ) : ZMod p) *
-                ((((d.factorial : ℕ) : ZMod p)⁻¹ *
-                  Furtwaengler.DieudonneDwork.rIntegralToZMod p S) * b) := by
-                ring
+  rw [mul_assoc, eq_inv_mul_iff_mul_eq₀ hfac_ne]
+  exact hmul
 
 end CyclotomicUnits
 end BernoulliRegular

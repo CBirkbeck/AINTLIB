@@ -14,6 +14,8 @@ we reach a contradiction.
 
 * `LutzNagell.PID.den_no_simple_prime_factor_of_on_curve`: if `(x, y)` is on the
   curve, `q` is prime, `q ∣ den(x)`, and `q² ∤ den(x)`, then `False`.
+* `LutzNagell.PID.den_not_prime_of_on_curve`: the corollary that `den(x)` cannot be a
+  prime element (the special case `q = den(x)`).
 -/
 
 namespace LutzNagell
@@ -101,7 +103,7 @@ theorem den_no_simple_prime_factor_of_on_curve (W : WeierstrassCurve R)
   have hcop_y : IsRelPrime γ e := IsFractionRing.num_den_reduced R y
   have hd_ne : d ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp d_sub.2
   have he_ne : e ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp e_sub.2
-  have hq_not_dvd_α : ¬ q ∣ α := fun h => hq.not_unit (hcop_x h hqd)
+  have hq_not_dvd_α : ¬ q ∣ α := fun h ↦ hq.not_unit (hcop_x h hqd)
   -- Factor d = q * u with q ∤ u
   obtain ⟨u, hu⟩ := hqd
   have hq_not_dvd_u : ¬ q ∣ u := by
@@ -164,7 +166,7 @@ theorem den_no_simple_prime_factor_of_on_curve (W : WeierstrassCurve R)
     have hq_dvd_γu : q ∣ γ ^ 2 * u ^ 3 :=
       ⟨k₁ - k₂, by linear_combination hZ3 - hk₂ + hk₁⟩
     exact (hq.dvd_or_dvd hq_dvd_γu).resolve_right
-      (fun h => hq_not_dvd_u (hq.dvd_of_dvd_pow h))
+      (fun h ↦ hq_not_dvd_u (hq.dvd_of_dvd_pow h))
   have hq_dvd_γ : q ∣ γ := hq.dvd_of_dvd_pow hq_dvd_γsq
   -- Contradiction: q ∣ γ and q ∣ e violates IsRelPrime γ e
   exact hq.not_unit (hcop_y hq_dvd_γ ⟨e₁, he₁⟩)
@@ -178,7 +180,7 @@ theorem den_not_prime_of_on_curve (W : WeierstrassCurve R)
     (heq : y ^ 2 + algebraMap R K W.a₁ * x * y + algebraMap R K W.a₃ * y =
       x ^ 3 + algebraMap R K W.a₂ * x ^ 2 + algebraMap R K W.a₄ * x + algebraMap R K W.a₆)
     (hp : Prime (IsFractionRing.den R x : R)) : False :=
-  den_no_simple_prime_factor_of_on_curve W heq hp dvd_rfl (fun h => by
+  den_no_simple_prime_factor_of_on_curve W heq hp dvd_rfl (fun h ↦ by
     obtain ⟨c, hc⟩ := h
     rw [sq, mul_assoc] at hc
     have h1 : (1 : R) = (IsFractionRing.den R x : R) * c :=

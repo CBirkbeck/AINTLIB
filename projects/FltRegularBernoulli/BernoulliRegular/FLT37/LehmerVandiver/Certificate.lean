@@ -35,7 +35,7 @@ This file provides:
   `lehmerVandiverPrefactor ≠ lehmerVandiverProduct`, equivalent to
   `Q_i^k ≢ 1 (mod ℓ)`.
 * `lehmerVandiverNonTrivial_thirtyseven` — the central numerical fact for
-  `(p, i, ℓ, t, k) = (37, 32, 149, 2, 4)`, proved by `native_decide`.
+  `(p, i, ℓ, t, k) = (37, 32, 149, 2, 4)`, proved by `decide`.
 * `two_pow_four_ne_one_mod_one_hundred_forty_nine` — admissibility of
   `t = 2`: `2^4 ≢ 1 (mod 149)`.
 
@@ -104,8 +104,6 @@ theorem two_pow_four_ne_one_mod_one_hundred_forty_nine :
 section CertificateProof
 
 set_option maxRecDepth 4000000
-set_option linter.style.setOption false in
-set_option maxHeartbeats 4000000
 
 /-- **Numerical Lehmer-Vandiver certificate at `(37, 32, 149, 2, 4)`:**
 the prefactor `2^{16·d_{32}/2} mod 149` differs from the product
@@ -119,13 +117,13 @@ This is the single numerical input feeding Washington Corollary 8.19
 (via Proposition 8.18 / Pollaczek's log identity in `LV004` / `LV005`)
 and ultimately discharging `Vandiver37PlusCoprime` (`LV006`).
 
-Proved by kernel `decide` with bumped `maxRecDepth` and `maxHeartbeats`
-(matching the convention used by `bernoulli_decide` in this project).
-This avoids any `native_decide` axiom and keeps the axiom set at the
-standard `[propext, Classical.choice, Quot.sound]`. -/
+Proved by kernel `decide` with bumped `maxRecDepth` (matching the
+convention used by `bernoulli_decide` in this project). This avoids any
+`native_decide` axiom and keeps the axiom set at the standard
+`[propext, Classical.choice, Quot.sound]`. -/
 theorem lehmerVandiverNonTrivial_thirtyseven :
     lehmerVandiverNonTrivial 37 32 149 2 4 := by
-  unfold lehmerVandiverNonTrivial
+  simp only [lehmerVandiverNonTrivial]
   decide
 
 end CertificateProof

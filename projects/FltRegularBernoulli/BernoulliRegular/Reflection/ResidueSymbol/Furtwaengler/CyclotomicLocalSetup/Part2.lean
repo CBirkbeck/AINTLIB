@@ -1,3 +1,0 @@
-module
-
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicLocalSetup.Part2.Flexible

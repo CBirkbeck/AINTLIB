@@ -1,10 +1,12 @@
-import BernoulliRegular.Main
-import Mathlib.Algebra.Order.Ring.Unbundled.Rat
-import Mathlib.Data.Nat.Prime.Basic
-import Mathlib.Data.Rat.Lemmas
-import Mathlib.NumberTheory.Padics.RingHoms
-import Mathlib.NumberTheory.Padics.WithVal
-import Mathlib.Tactic
+module
+
+public import BernoulliRegular.Main
+public import Mathlib.Algebra.Order.Ring.Unbundled.Rat
+public import Mathlib.Data.Nat.Prime.Basic
+public import Mathlib.Data.Rat.Lemmas
+public import Mathlib.NumberTheory.Padics.RingHoms
+public import Mathlib.NumberTheory.Padics.WithVal
+public import Mathlib.Tactic
 
 /-!
 # Rational numerator bookkeeping
@@ -13,6 +15,7 @@ This file records rational-number lemmas needed by the Diekmann/Jensen route.
 The results here only talk about reduced rational numerators and avoid any
 extra p-adic package assumptions.
 -/
+@[expose] public section
 
 namespace BernoulliRegular
 
@@ -24,7 +27,7 @@ theorem exists_prime_dvd_num_of_one_lt_abs
   have hq_rat : (1 : ℚ) < |q| := by
     exact_mod_cast hq
   have hnum_gt_den_int : ((|q|).den : ℤ) < (|q|).num := by
-    have hnot : ¬ (|q|).num ≤ ((|q|).den : ℤ) := fun hle =>
+    have hnot : ¬ (|q|).num ≤ ((|q|).den : ℤ) := fun hle ↦
       (not_le_of_gt hq_rat) ((Rat.num_le_denom_iff).mp hle)
     exact lt_of_not_ge hnot
   have hden_lt_num : q.den < q.num.natAbs := by

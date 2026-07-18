@@ -1,13 +1,12 @@
 module
 
-public import Mathlib.RingTheory.Ideal.Over
-public import Mathlib.RingTheory.Ideal.NatInt
-public import Mathlib.NumberTheory.Cyclotomic.Basic
-public import Mathlib.NumberTheory.Cyclotomic.Gal
-public import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
-
 public import CebotarevDensity.Abelian
 public import CebotarevDensity.FixedFieldDensity
+public import Mathlib.NumberTheory.Cyclotomic.Basic
+public import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
+public import Mathlib.NumberTheory.Cyclotomic.Gal
+public import Mathlib.RingTheory.Ideal.NatInt
+public import Mathlib.RingTheory.Ideal.Over
 
 /-!
 # Chebotarev's density theorem
@@ -184,11 +183,11 @@ private theorem primeIdealZetaSum_eq_add_sub_sdiff {S T : Set (Ideal (𝓞 K))} 
     fun A B ↦ disjoint_of_subset_left inter_subset_right disjoint_sdiff_right
   have hT : primeIdealZetaSum T s
       = primeIdealZetaSum (T ∩ S) s + primeIdealZetaSum (T \ S) s := by
-    conv_lhs => rw [← inter_union_diff T S]
+    conv_lhs => rw [← inter_union_sdiff T S]
     rw [primeIdealZetaSum_union_of_disjoint (hdisj T S) hs]
   have hS : primeIdealZetaSum S s
       = primeIdealZetaSum (T ∩ S) s + primeIdealZetaSum (S \ T) s := by
-    conv_lhs => rw [← inter_union_diff S T]
+    conv_lhs => rw [← inter_union_sdiff S T]
     rw [primeIdealZetaSum_union_of_disjoint (hdisj S T) hs, inter_comm]
   rw [hT, hS]
   ring
@@ -253,7 +252,7 @@ private theorem ratPrime_eq_span (𝔭 : Ideal (𝓞 ℚ)) (hp : 𝔭.IsPrime) (
   have hcomap : Ideal.comap e (Ideal.map e 𝔭) = 𝔭 := Ideal.comap_map_of_bijective e hbij
   have hJne : Ideal.map e 𝔭 ≠ ⊥ := by
     intro h; apply hne; rw [← hcomap, h, Ideal.comap_bot_of_injective e hbij.injective]
-  rcases (Ideal.isPrime_int_iff.mp hJp) with h | ⟨p, hpp, hpJ⟩
+  rcases Ideal.isPrime_int_iff.mp hJp with h | ⟨p, hpp, hpJ⟩
   · exact absurd h hJne
   · exact ⟨p, hpp, by rw [← hcomap, hpJ, ratSpan_eq_comap_intSpan]⟩
 
@@ -346,7 +345,7 @@ private theorem frobeniusClass_eq_iff_residue
   · intro h
     have he : hζ.autToPow ℚ (frobeniusClass ℚ L 𝔭).out = hζ.autToPow ℚ σ := by rw [h]
     rw [hdict, hσ] at he
-    have hc := congrArg (Units.val) he
+    have hc := congrArg Units.val he
     rwa [ZMod.coe_unitOfCoprime, IsUnit.unit_spec] at hc
   · intro h
     apply hζ.autToPow_injective ℚ
@@ -421,7 +420,7 @@ private theorem dirichlet_AP_image_diff_fibre_subset_bad
   · exact ⟨p, ⟨hpp, hdvd⟩, rfl⟩
   · exfalso; apply hnotF
     have hcop : (Ideal.absNorm (Ideal.span {(p : 𝓞 ℚ)})).Coprime n := by
-      rw [absNorm_span_nat]; exact (hpp.coprime_iff_not_dvd).mpr hdvd
+      rw [absNorm_span_nat]; exact hpp.coprime_iff_not_dvd.mpr hdvd
     have hne : Ideal.span {(p : 𝓞 ℚ)} ≠ ⊥ :=
       Ideal.span_singleton_eq_bot.not.mpr hp0
     have hunr := unramifiedIn_cyclotomic_of_coprime L n _ hne hcop

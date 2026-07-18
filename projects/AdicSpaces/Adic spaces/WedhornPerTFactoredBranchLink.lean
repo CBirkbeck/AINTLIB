@@ -79,9 +79,7 @@ theorem not_vle_zero_prod_of_pointwise
   classical
   letI : ValuativeRel A := v.toValuativeRel
   induction S using Finset.induction_on with
-  | empty =>
-      simp only [Finset.prod_empty]
-      exact v.not_vle_one_zero
+  | empty => simp [v.not_vle_one_zero]
   | insert a S' ha ih =>
       rw [Finset.prod_insert ha]
       exact ValuativeRel.zero_vlt_mul (h a (Finset.mem_insert_self a S'))
@@ -141,13 +139,10 @@ theorem per_t_factored_chain_α_s_D_branch
         (σ_loc : Localization.Away s)) := by
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
   letI : ValuativeRel (Localization.Away s) := w.toValuativeRel
-  -- Step 1: product split via `Finset.mul_prod_erase`.
-  have h_prod_split :
-      (∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t) =
-      t' * (∏ t ∈ (T_D.image (algebraMap A (Localization.Away s))).erase t', t) :=
-    (Finset.mul_prod_erase _ id ht').symm
-  -- Step 2: rewrite hw_f.
-  rw [h_prod_split] at hw_f
+  -- Step 1: product split via `Finset.mul_prod_erase`, then rewrite hw_f.
+  rw [show (∏ t ∈ T_D.image (algebraMap A (Localization.Away s)), t) =
+      t' * (∏ t ∈ (T_D.image (algebraMap A (Localization.Away s))).erase t', t)
+      from (Finset.mul_prod_erase _ id ht').symm] at hw_f
   -- hw_f : w.vle (σ_loc * (t' * ∏ erase)) (algebraMap s)
   -- Reassociate: σ_loc * (t' * ∏ erase) = (σ_loc * t') * ∏ erase.
   rw [show ((σ_loc : Localization.Away s) *
@@ -156,14 +151,12 @@ theorem per_t_factored_chain_α_s_D_branch
         (∏ t ∈ (T_D.image (algebraMap A (Localization.Away s))).erase t', t)
       from by ring] at hw_f
   -- Step 3: chain via h_Wedhorn_α_s_D.
-  have h_Wedhorn := h_Wedhorn_α_s_D t' ht'
-  -- h_Wedhorn : w.vle (algebraMap s) (algebraMap s_D * σ_loc * ∏ erase)
   have h_chain : w.vle ((σ_loc : Localization.Away s) * t' *
         (∏ t ∈ (T_D.image (algebraMap A (Localization.Away s))).erase t', t))
       (algebraMap A (Localization.Away s) s_D *
         (σ_loc : Localization.Away s) *
         (∏ t ∈ (T_D.image (algebraMap A (Localization.Away s))).erase t', t)) :=
-    w.vle_trans hw_f h_Wedhorn
+    w.vle_trans hw_f (h_Wedhorn_α_s_D t' ht')
   -- Step 4: cancel ∏ erase on the right.
   have h_prod_ne : ¬ w.vle
       (∏ t ∈ (T_D.image (algebraMap A (Localization.Away s))).erase t', t) 0 := by
@@ -173,9 +166,8 @@ theorem per_t_factored_chain_α_s_D_branch
   rw [ValuativeRel.mul_vle_mul_iff_left h_prod_ne] at h_chain
   -- h_chain : w.vle (σ_loc * t') (algebraMap s_D * σ_loc)
   -- Step 5: commute on LHS.
-  rw [show (σ_loc : Localization.Away s) * t' =
+  rwa [show (σ_loc : Localization.Away s) * t' =
         t' * (σ_loc : Localization.Away s) from mul_comm _ _] at h_chain
-  exact h_chain
 
 omit [PlusSubring A] in
 /-- **Assembled `α_s_D`-branch hypothesis** matching the input shape of

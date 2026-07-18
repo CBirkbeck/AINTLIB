@@ -3,7 +3,7 @@ module
 public import BernoulliRegular.Stickelberger
 
 /-!
-# Integrality of the corrected Stickelberger element (T032a)
+# Integrality of the corrected Stickelberger element
 
 For any unit `c ∈ (ZMod p)ˣ`, the element
   `(c.val • 1 - σ_c) · θ_p ∈ ℚ[(ZMod p)ˣ]`
@@ -59,7 +59,7 @@ def stickelbergerCorrectedInt (c : (ZMod p)ˣ) : MonoidAlgebra ℤ (ZMod p)ˣ :=
 lemma val_mul_sub_val_mul_dvd (c b : (ZMod p)ˣ) :
     (p : ℤ) ∣ ((c : ZMod p).val * (b : ZMod p).val -
         ((c * b : (ZMod p)ˣ) : ZMod p).val : ℤ) := by
-  haveI : NeZero p := ⟨hp.out.ne_zero⟩
+  have : NeZero p := ⟨hp.out.ne_zero⟩
   rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
   push_cast
   rw [ZMod.natCast_zmod_val, ZMod.natCast_zmod_val, ZMod.natCast_zmod_val]
@@ -70,7 +70,7 @@ lemma stickelbergerCorrectedCoeff_mul_p (c b : (ZMod p)ˣ) :
     (p : ℤ) * stickelbergerCorrectedCoeff p c b =
       ((c : ZMod p).val * (b : ZMod p).val -
         ((c * b : (ZMod p)ˣ) : ZMod p).val : ℤ) := by
-  unfold stickelbergerCorrectedCoeff
+  simp only [stickelbergerCorrectedCoeff]
   exact Int.mul_ediv_cancel' (val_mul_sub_val_mul_dvd p c b)
 
 /-- Rational form: the coefficient difference equals `p * (corrected coeff : ℚ)`. -/
@@ -93,7 +93,7 @@ lemma single_mul_stickelbergerScaled (c : (ZMod p)ˣ) :
   -- Re-index a ↦ a * c⁻¹ (bijection on G). Then:
   -- single c 1 * (a.val • single a⁻¹ 1) = a.val • single (c * a⁻¹) 1
   -- With substitution a = b * c: c * a⁻¹ = b⁻¹, a.val = (b * c).val.
-  apply Finset.sum_bij (fun (a : (ZMod p)ˣ) _ => a * c⁻¹)
+  apply Finset.sum_bij (fun (a : (ZMod p)ˣ) _ ↦ a * c⁻¹)
   · intros; exact Finset.mem_univ _
   · intro a _ a' _ h
     have : a * c⁻¹ * c = a' * c⁻¹ * c := by rw [h]
@@ -128,7 +128,7 @@ theorem p_smul_stickelbergerCorrectedInt (c : (ZMod p)ˣ) :
     (p : ℤ) • stickelbergerCorrectedInt p c =
       (((c : ZMod p).val : ℤ) • (1 : MonoidAlgebra ℤ (ZMod p)ˣ) -
         MonoidAlgebra.single c (1 : ℤ)) * stickelbergerScaled p := by
-  unfold stickelbergerCorrectedInt
+  simp only [stickelbergerCorrectedInt]
   rw [sub_mul, smul_one_mul_stickelbergerScaled, single_mul_stickelbergerScaled]
   rw [show ((p : ℤ) • ∑ b : (ZMod p)ˣ,
       stickelbergerCorrectedCoeff p c b • MonoidAlgebra.single b⁻¹ (1 : ℤ)) =
@@ -145,7 +145,8 @@ theorem p_smul_stickelbergerCorrectedInt (c : (ZMod p)ˣ) :
   push_cast at hmul ⊢
   linarith
 
-/-- The image of `stickelbergerScaled p` under `ℤ → ℚ` equals `p • stickelbergerElement p`. -/
+/-- The image of `stickelbergerScaled p` under `ℤ → ℚ` equals
+`p • stickelbergerElement p`. -/
 lemma mapRangeRingHom_stickelbergerScaled :
     MonoidAlgebra.mapRingHom (ZMod p)ˣ (Int.castRingHom ℚ) (stickelbergerScaled p) =
       (p : ℚ) • stickelbergerElement p := by
@@ -157,7 +158,7 @@ lemma mapRangeRingHom_stickelbergerScaled :
   push_cast
   rfl
 
-/-- **T032a**: The corrected Stickelberger element `(c.val • 1 - σ_c) · θ_p` has integer
+/-- The corrected Stickelberger element `(c.val • 1 - σ_c) · θ_p` has integer
 coefficients: it equals the image of `stickelbergerCorrectedInt p c ∈ ℤ[(ZMod p)ˣ]`
 under the coefficient cast `ℤ → ℚ`. -/
 theorem mapRangeRingHom_stickelbergerCorrectedInt (c : (ZMod p)ˣ) :

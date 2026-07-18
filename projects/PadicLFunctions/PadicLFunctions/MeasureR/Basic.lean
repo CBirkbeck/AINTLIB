@@ -140,12 +140,8 @@ theorem norm_apply_le (μ : MeasureR K X) (f : C(X, integerRing K)) :
     conv_lhs => rw [hfg]
     rw [map_smul, smul_eq_mul]
   have hgle : ‖μ g‖ ≤ 1 := (μ g).2
-  calc ‖μ f‖ = ‖f x₀ * μ g‖ := by rw [hμf]
-    _ = ‖(f x₀ : K) * (μ g : K)‖ := rfl
-    _ = ‖f x₀‖ * ‖μ g‖ := by
-        rw [norm_mul, AddSubgroupClass.coe_norm, AddSubgroupClass.coe_norm]
-    _ ≤ ‖f x₀‖ * 1 := mul_le_mul_of_nonneg_left hgle (norm_nonneg _)
-    _ = ‖f‖ := by rw [mul_one, hnorm]
+  rw [hμf, hnorm, norm_mul]
+  simpa using mul_le_mul_of_nonneg_left hgle (norm_nonneg (f x₀))
 
 /-- Measures are automatically continuous (TeX 765). -/
 theorem continuous (μ : MeasureR K X) : Continuous μ :=
@@ -163,17 +159,13 @@ theorem ext_locallyConstant {μ ν : MeasureR K X}
   obtain ⟨Φ, hΦ⟩ := PadicMeasure.exists_locallyConstant_norm_sub_le' f hε
   have hΦn : ‖f - Φ.toContinuousMap‖ ≤ ε :=
     (ContinuousMap.norm_le _ hε.le).2 fun x => by simpa using hΦ x
-  have key : μ f - ν f = μ (f - Φ.toContinuousMap) - ν (f - Φ.toContinuousMap) := by
+  have key : μ f - ν f = μ (f - Φ.toContinuousMap) + -(ν (f - Φ.toContinuousMap)) := by
     simp only [map_sub, h Φ]
     ring
-  rw [dist_eq_norm, key, sub_eq_add_neg]
-  calc ‖μ (f - Φ.toContinuousMap) + -(ν (f - Φ.toContinuousMap))‖
-      ≤ max ‖μ (f - Φ.toContinuousMap)‖ ‖-(ν (f - Φ.toContinuousMap))‖ :=
-        IsUltrametricDist.norm_add_le_max _ _
-    _ ≤ ‖f - Φ.toContinuousMap‖ := by
-        rw [norm_neg]
-        exact max_le (norm_apply_le μ _) (norm_apply_le ν _)
-    _ ≤ ε := hΦn
+  rw [dist_eq_norm, key]
+  refine (IsUltrametricDist.norm_add_le_max _ _).trans ?_
+  rw [norm_neg]
+  exact (max_le (norm_apply_le μ _) (norm_apply_le ν _)).trans hΦn
 
 end compact
 

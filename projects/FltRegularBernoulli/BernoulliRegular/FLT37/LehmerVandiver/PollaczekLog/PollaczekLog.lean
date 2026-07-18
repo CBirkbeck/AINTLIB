@@ -1,3 +1,13 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.PollaczekIdentity
@@ -109,7 +119,7 @@ variable {R : Type*} [CommRing R] {p : ℕ} {𝔩 : Ideal R}
 then `x` is a `p`-th power mod `𝔩` iff `y` is. -/
 theorem IsPthPowerModPrime.congr {x y : R} (h : x - y ∈ 𝔩) :
     IsPthPowerModPrime p 𝔩 x ↔ IsPthPowerModPrime p 𝔩 y := by
-  unfold IsPthPowerModPrime
+  simp only [IsPthPowerModPrime]
   refine ⟨?_, ?_⟩ <;>
     rintro ⟨z, hz⟩ <;>
     refine ⟨z, ?_⟩ <;>
@@ -131,18 +141,17 @@ theorem IsPthPowerModPrime.mul_pow_iff [𝔩.IsMaximal]
     IsPthPowerModPrime p 𝔩 (x * α ^ p) ↔ IsPthPowerModPrime p 𝔩 x := by
   letI : Field (R ⧸ 𝔩) := Ideal.Quotient.field 𝔩
   refine ⟨?_, ?_⟩
-  · -- `x · α^p` is a `p`-th power: divide by `α^p` in the residue field.
-    rintro ⟨z, hz⟩
+  · rintro ⟨z, hz⟩
     have hα' : (Ideal.Quotient.mk 𝔩 α) ≠ 0 :=
       fun h => hα ((Ideal.Quotient.eq_zero_iff_mem).mp h)
     refine ⟨z * (Ideal.Quotient.mk 𝔩 α)⁻¹, ?_⟩
     rw [map_mul, map_pow] at hz
     rw [mul_pow]
-    rw [show ((Ideal.Quotient.mk 𝔩 α)⁻¹) ^ p = ((Ideal.Quotient.mk 𝔩 α) ^ p)⁻¹ from inv_pow _ _]
+    rw [show ((Ideal.Quotient.mk 𝔩 α)⁻¹) ^ p =
+        ((Ideal.Quotient.mk 𝔩 α) ^ p)⁻¹ from inv_pow _ _]
     field_simp
     linear_combination hz
-  · -- `x` is a `p`-th power, so `x · α^p` is a product of `p`-th powers.
-    intro hx
+  · intro hx
     exact hx.mul (IsPthPowerModPrime.pow_self α)
 
 /-- **Transfer through a balanced equation.** Given an equation
@@ -206,7 +215,9 @@ theorem IsPthPowerModPrime.pow_eq_of_modEq [𝔩.IsMaximal]
   rcases le_or_gt n m with hle | hlt
   · obtain ⟨k, hk⟩ : p ∣ m - n := by
       have h_int_eq : ((m - n : ℕ) : ℤ) = (m : ℤ) - n := by omega
-      exact_mod_cast (show ((p : ℕ) : ℤ) ∣ ((m - n : ℕ) : ℤ) from by rw [h_int_eq]; exact h)
+      exact_mod_cast (show ((p : ℕ) : ℤ) ∣ ((m - n : ℕ) : ℤ) by
+        rw [h_int_eq]
+        exact h)
     rw [show x ^ m = x ^ n * (x ^ k) ^ p from by
       rw [show m = n + p * k from by omega, pow_add, pow_mul, pow_right_comm]]
     exact IsPthPowerModPrime.mul_pow_iff (pow_notMem_of_notMem hx k)
@@ -214,7 +225,9 @@ theorem IsPthPowerModPrime.pow_eq_of_modEq [𝔩.IsMaximal]
       have h_neg : (p : ℤ) ∣ (n : ℤ) - m := by
         have := dvd_neg.mpr h; rw [neg_sub] at this; exact this
       have h_int_eq : ((n - m : ℕ) : ℤ) = (n : ℤ) - m := by omega
-      exact_mod_cast (show ((p : ℕ) : ℤ) ∣ ((n - m : ℕ) : ℤ) from by rw [h_int_eq]; exact h_neg)
+      exact_mod_cast (show ((p : ℕ) : ℤ) ∣ ((n - m : ℕ) : ℤ) by
+        rw [h_int_eq]
+        exact h_neg)
     rw [show x ^ n = x ^ m * (x ^ k) ^ p from by
       rw [show n = m + p * k from by omega, pow_add, pow_mul, pow_right_comm]]
     exact (IsPthPowerModPrime.mul_pow_iff (pow_notMem_of_notMem hx k)).symm
@@ -325,8 +338,6 @@ theorem zeta_sub_one_notMem_lehmerVandiverPrime
     (zeta_spec p ℚ (CyclotomicField p ℚ)).toInteger - 1 ∉
       lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne := by
   intro hmem
-  -- Subtract from `lehmerVandiverPrime_zeta_sub_tk_mem` to get
-  -- `((t^k).val : 𝓞 K) - 1 ∈ 𝔩`.
   have h_zeta_eq := lehmerVandiverPrime_zeta_sub_tk_mem p ℓ k hℓ ht_coprime ht_ne
   have h_diff : (((((t : ZMod ℓ) ^ k).val : ℕ) : 𝓞 (CyclotomicField p ℚ))) - 1 ∈
       lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne := by
@@ -336,9 +347,7 @@ theorem zeta_sub_one_notMem_lehmerVandiverPrime
             ((((t : ZMod ℓ) ^ k).val : ℕ) : 𝓞 (CyclotomicField p ℚ))) =
         ((((t : ZMod ℓ) ^ k).val : ℕ) : 𝓞 (CyclotomicField p ℚ)) - 1 := by ring
     rw [hrw] at h_sub; exact h_sub
-  -- Apply `cyclotomicReduction` (ring hom to `ZMod ℓ`) via the
-  -- `Ideal.mem_comap` characterisation of `lehmerVandiverPrime`.
-  unfold lehmerVandiverPrime at h_diff
+  simp only [lehmerVandiverPrime] at h_diff
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe,
     RingHom.mem_ker, map_sub, map_natCast, map_one, map_sub, map_natCast,
     map_one] at h_diff
@@ -408,7 +417,7 @@ theorem zeta_pow_sub_one_notMem_lehmerVandiverPrime
         ((((t : ZMod ℓ) ^ k).val : ℕ) ^ a : 𝓞 (CyclotomicField p ℚ)) - 1 := by
       ring
     rw [hrw] at h_sub; exact h_sub
-  unfold lehmerVandiverPrime at h_diff
+  simp only [lehmerVandiverPrime] at h_diff
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe,
     RingHom.mem_ker, map_sub, map_pow, map_natCast, map_one,
     map_sub, map_pow, map_natCast, map_one] at h_diff
@@ -478,7 +487,6 @@ theorem isPthPowerModPrime_pollaczekR_iff_main
   rw [mul_comm _ _]
   exact IsPthPowerModPrime.mul_iff hsign_ne hsign_pth
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Quotient iso `𝓞 K / lehmerVandiverPrime ≃+* ZMod ℓ`.** Identifies
 the residue field at `lehmerVandiverPrime` with `ZMod ℓ`, via the
 composition
@@ -502,12 +510,11 @@ noncomputable def lehmerVandiverPrime_quotientEquiv
     rw [map_natCast, ZMod.natCast_val, ZMod.cast_id]
   refine RingEquiv.trans ?_ (RingHom.quotientKerEquivOfSurjective hsurj)
   apply Ideal.quotientEquiv _ _ (CyclotomicIntegers.equiv p).symm
-  unfold lehmerVandiverPrime
+  simp only [lehmerVandiverPrime]
   exact (Ideal.map_comap_of_surjective
       ((CyclotomicIntegers.equiv p).symm.toRingHom)
       (CyclotomicIntegers.equiv p).symm.surjective _).symm
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`Fintype` instance for `𝓞 K / lehmerVandiverPrime`.** Transferred
 from `Fintype (ZMod ℓ)` via `lehmerVandiverPrime_quotientEquiv`. -/
 @[reducible]
@@ -519,7 +526,6 @@ noncomputable def lehmerVandiverPrime_quotientFintype
   Fintype.ofEquiv (ZMod ℓ)
     (lehmerVandiverPrime_quotientEquiv ℓ k hℓ ht_coprime ht_ne).symm.toEquiv
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Cardinality of the residue field at `lehmerVandiverPrime` is `ℓ`.**
 Direct consequence of the iso to `ZMod ℓ` (`Fintype.ofEquiv_card` +
 `ZMod.card`). -/
@@ -533,7 +539,6 @@ theorem lehmerVandiverPrime_quotient_card
   rw [Fintype.ofEquiv_card]
   exact ZMod.card ℓ
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Cyclic-group `p`-th-power criterion at `lehmerVandiverPrime`.**
 For `x ∉ 𝔩`,
 
@@ -559,7 +564,10 @@ theorem isPthPowerModPrime_lehmerVandiverPrime_iff
     have hprime := lehmerVandiverPrime_isPrime p ℓ k hℓ ht_coprime ht_ne
     exact Ideal.IsPrime.isMaximal hprime (by
       have h := lehmerVandiverPrime_natCast_ℓ_mem p ℓ k hℓ ht_coprime ht_ne
-      intro h_zero; rw [h_zero] at h; simp at h
+      intro h_zero
+      rw [h_zero] at h
+      have hℓ_zero := by
+        simpa using h
       have hℓ_pos : 0 < ℓ := (Fact.out (p := ℓ.Prime)).pos
       omega)
   letI : Fintype (𝓞 (CyclotomicField p ℚ) ⧸
@@ -607,7 +615,8 @@ theorem lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq
   exact h_pow
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **Product-level residue substitution: `Q(∏ (ζ^a - 1)^{...}) = Q(∏ (((t^k).val)^a - 1)^{...})`.**
+/-- **Product-level residue substitution:
+`Q(∏ (ζ^a - 1)^{...}) = Q(∏ (((t^k).val)^a - 1)^{...})`.**
 The half-range cyclotomic-unit product, when evaluated in
 `𝓞 K / lehmerVandiverPrime`, equals the corresponding certificate-side
 product after substituting `ζ ≡ (t^k).val (mod 𝔩)` term-wise. Proof:
@@ -632,7 +641,6 @@ theorem lehmerVandiverPrime_quotient_half_range_eq
   exact lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq
     (p := p) ℓ k hℓ ht_coprime ht_ne a
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Squaring lemma at `lehmerVandiverPrime` (LV004g-2).** For `p` an
 odd prime and `x ∉ lehmerVandiverPrime`,
 
@@ -663,7 +671,9 @@ theorem isPthPowerModPrime_lehmerVandiverPrime_sq_iff
     exact Ideal.IsPrime.isMaximal hprime (by
       have h := lehmerVandiverPrime_natCast_ℓ_mem p ℓ k hℓ ht_coprime ht_ne
       intro h_zero
-      rw [h_zero] at h; simp at h
+      rw [h_zero] at h
+      have hℓ_zero := by
+        simpa using h
       have hℓ_pos : 0 < ℓ := (Fact.out (p := ℓ.Prime)).pos
       omega)
   have hx2 : x ^ 2 ∉ lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne :=
@@ -703,16 +713,13 @@ theorem isPthPowerModPrime_lehmerVandiverPrime_sq_iff
     apply Units.ext
     change (Ideal.Quotient.mk _ (x ^ k)) ^ 2 = 1
     exact hsq
-  have h_ord_p : orderOf yu ∣ p := orderOf_dvd_of_pow_eq_one hyu_p
-  have h_ord_2 : orderOf yu ∣ 2 := orderOf_dvd_of_pow_eq_one hyu_2
-  have h_ord_gcd : orderOf yu ∣ Nat.gcd p 2 := Nat.dvd_gcd h_ord_p h_ord_2
-  have h_gcd : Nat.gcd p 2 = 1 := by
+  have h_coprime : Nat.Coprime p 2 := by
     rcases Nat.coprime_or_dvd_of_prime hp.out 2 with h | h
     · exact h
-    · exfalso
-      exact hp_odd ((Nat.prime_dvd_prime_iff_eq hp.out Nat.prime_two).mp h)
-  rw [h_gcd] at h_ord_gcd
-  have hyu_eq : yu = 1 := orderOf_eq_one_iff.mp (Nat.dvd_one.mp h_ord_gcd)
+    · exact absurd ((Nat.prime_dvd_prime_iff_eq hp.out Nat.prime_two).mp h) hp_odd
+  -- `yu ^ p = 1` and `yu ^ 2 = 1` with `p, 2` coprime force `yu = 1`
+  -- (mathlib's `pow_eq_one_iff_of_coprime`).
+  have hyu_eq : yu = 1 := (pow_eq_one_iff_of_coprime h_coprime).mp ⟨hyu_p, hyu_2⟩
   exact congr_arg Units.val hyu_eq
 
 /-- **`x² = y² ↔ x = ±y` in `ZMod ℓ` for `ℓ` prime.** Standard field
@@ -779,7 +786,9 @@ theorem isPthPowerModPrime_zeta_form_iff_pollaczekUnit
     exact Ideal.IsPrime.isMaximal hprime (by
       have h := lehmerVandiverPrime_natCast_ℓ_mem p ℓ k hℓ ht_coprime ht_ne
       intro h_zero
-      rw [h_zero] at h; simp at h
+      rw [h_zero] at h
+      have hℓ_zero := by
+        simpa using h
       have hℓ_pos : 0 < ℓ := (Fact.out (p := ℓ.Prime)).pos
       omega)
   rw [zeta_pow_sub_one_prod_eq_pollaczekUnit_sq_mul_zeta_sub_one_pow
@@ -853,7 +862,9 @@ theorem isPthPowerModPrime_pollaczekR_iff_pollaczekUnit
     exact Ideal.IsPrime.isMaximal hprime (by
       have h := lehmerVandiverPrime_natCast_ℓ_mem p ℓ k hℓ ht_coprime ht_ne
       intro h_zero
-      rw [h_zero] at h; simp at h
+      rw [h_zero] at h
+      have hℓ_zero := by
+        simpa using h
       have hℓ_pos : 0 < ℓ := (Fact.out (p := ℓ.Prime)).pos
       omega)
   rw [isPthPowerModPrime_pollaczekR_iff_main (p := p) (K := CyclotomicField p ℚ)
@@ -895,7 +906,9 @@ theorem isPthPowerModPrime_pollaczekUnit_iff_quotient_pow_eq_one
     exact Ideal.IsPrime.isMaximal hprime (by
       have h := lehmerVandiverPrime_natCast_ℓ_mem p ℓ k hℓ ht_coprime ht_ne
       intro h_zero
-      rw [h_zero] at h; simp at h
+      rw [h_zero] at h
+      have hℓ_zero := by
+        simpa using h
       have hℓ_pos : 0 < ℓ := (Fact.out (p := ℓ.Prime)).pos
       omega)
   exact isPthPowerModPrime_lehmerVandiverPrime_iff

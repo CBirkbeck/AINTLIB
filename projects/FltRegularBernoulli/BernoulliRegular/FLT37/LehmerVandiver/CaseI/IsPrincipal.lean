@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
-import BernoulliRegular.FLT37.CaseI
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
+public import BernoulliRegular.FLT37.CaseI
 
 /-!
 # LV010-C: caseI `is_principal` analogue under `¬ p ∣ h⁺`
@@ -107,16 +109,8 @@ theorem caseI_is_principal_of_not_dvd_hPlus
   rw [Ideal.span_singleton_eq_span_singleton] at hαp_span
   obtain ⟨u, hu⟩ := hαp_span
   refine ⟨u⁻¹, α, ?_⟩
-  -- hu : α^p * u = a + ζ * b (or similar — extract precisely)
-  -- u⁻¹ * (a + ζ * b) = u⁻¹ * (α^p * u) = α^p, hence u⁻¹ * (a + ζ * b) = α^p,
-  -- so ↑u⁻¹ * α^p = α^p · u⁻¹ ⁻¹ = ... we want ↑u⁻¹ * α^p = a + ζ * b.
-  -- Actually we have α^p * u = a + ζ b, so a + ζ b = α^p * u, so ↑u⁻¹ * (a + ζ b) = α^p.
-  -- We want ↑u⁻¹ * α^p = a + ζ b. Hmm rearrange:
-  -- ↑u⁻¹ * α^p needs to equal a + ζ b. From hu : α^p * u = a + ζ b (Associated.symm form).
   rw [show (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val * α ^ p =
-      α ^ p * (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val by ring]
-  rw [← hu]
-  rw [mul_assoc]
+      α ^ p * (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val by ring, ← hu, mul_assoc]
   simp [Units.mul_inv]
 
 end CaseI

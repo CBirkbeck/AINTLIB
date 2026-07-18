@@ -1,0 +1,3 @@
+module
+
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.K2PathSymbol.K2PathSymbolViaCrossRing

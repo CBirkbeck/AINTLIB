@@ -4,12 +4,6 @@ public import Mathlib.NumberTheory.NumberField.CMField
 public import Mathlib.NumberTheory.NumberField.ClassNumber
 public import Mathlib.NumberTheory.Cyclotomic.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
-public import Mathlib.NumberTheory.NumberField.Cyclotomic.Embeddings
-public import Mathlib.NumberTheory.RamificationInertia.Ramification
-public import Mathlib.LinearAlgebra.Dimension.StrongRankCondition
-public import Mathlib.RingTheory.Flat.TorsionFree
-public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
-public import Mathlib.RingTheory.Ideal.GoingUp
 public import BernoulliRegular.ClassGroupExtension
 public import FltRegular.NumberTheory.RegularPrimes
 public import FltRegular.NumberTheory.Cyclotomic.UnitLemmas
@@ -95,7 +89,6 @@ theorem indexRealUnits_eq_one [IsCMField K] :
       exact ⟨u, by simp [pow_two]⟩
   have hrange_idx : (IsCMField.unitsMulComplexConjInv K).range.index = 2 := by
     rw [hrange, IsCyclic.index_powMonoidHom_range, Nat.gcd_eq_right]
-    rw [Nat.card_eq_fintype_card]
     exact even_iff_two_dvd.mp (NumberField.Units.even_torsionOrder K)
   have hmul : IsCMField.indexRealUnits K * 2 = 2 := by
     simpa [hrange_idx] using IsCMField.indexRealUnits_mul_eq K

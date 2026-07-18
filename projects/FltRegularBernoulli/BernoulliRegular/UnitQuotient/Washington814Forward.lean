@@ -1,4 +1,4 @@
-import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.Part2
+import BernoulliRegular.Thaine.PollaczekUnitPlusGaloisAction.EigenspaceGeneratorAndCertEquivalence
 
 /-!
 # Washington Theorem 8.14 forward step — general-index component lemmas
@@ -43,7 +43,7 @@ theorem pollaczekUnitPlus_class_eq_two_smul_pollaczekUnit_class_in_modp_freepart
         (Additive.ofMul (pollaczekUnitPlus 37 K i)) =
       (2 : ℕ) • cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (pollaczekUnit 37 K i)) := by
-  unfold pollaczekUnitPlus
+  simp only [pollaczekUnitPlus]
   rw [ofMul_mul, map_add]
   rw [show cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (NumberField.IsCMField.unitsComplexConj K
@@ -85,7 +85,7 @@ theorem pollaczekUnit_class_in_modp_freepart_eq_zero_of_pthPower
   set y : CyclotomicUnitFreePartModP (p := 37) K :=
     cyclotomicUnitToFreePartModPAdd (p := 37) K
       (Additive.ofMul (pollaczekUnit 37 K i)) with hy
-  letI : Invertible ((2 : ZMod 37)) :=
+  let : Invertible ((2 : ZMod 37)) :=
     twoInvertibleZModOfPrimeGtTwo (p := 37) (by omega)
   have h_two_smul_zmod : ((2 : ZMod 37)) • y = 0 := by
     have h_cast : (((2 : ℕ) : ZMod 37)) • y = ((2 : ℕ) : ℕ) • y :=
@@ -123,9 +123,9 @@ theorem pollaczekUnitPlus_powerClass_mem_torsion_of_pollaczekUnit_class_eq_zero
   rw [← cyclotomicUnitPowerQuotientToFreePartModP_ker, MonoidHom.mem_ker]
   exact hmul
 
-/-- **Reverse (general `i`): `[pollaczekUnit i]_modp = 0 ⟹ pollaczekUnitPlus i` is a 37-th power.**
-This is the structural direction WF-814c needs (the converse of
-`pollaczekUnit_class_in_modp_freepart_eq_zero_of_pthPower`), valid for *every* index, with no
+/-- **Reverse (general `i`): `[pollaczekUnit i]_modp = 0 ⟹ pollaczekUnitPlus i` is a 37-th
+power.** This is the converse of
+`pollaczekUnit_class_in_modp_freepart_eq_zero_of_pthPower`, valid for *every* index, with no
 certificate. Proof: by the previous lemma the power class of the σ-fixed `pollaczekUnitPlus i`
 lies in the torsion subgroup; complex conjugation (the `-1 ∈ Δ` action) fixes it
 (`pollaczekUnitPlus_complexConj`), so the odd-prime argument
@@ -161,17 +161,17 @@ theorem pollaczekUnitPlus_isPthPower_of_pollaczekUnit_class_eq_zero
   simpa [powMonoidHom] using hv.symm
 
 omit [NumberField K] [IsCyclotomicExtension {37} ℚ K] [IsCMField K] in
-/-- **General-`i` power-sum vanishing in the mod-37 free part** (WF-814b leaf a, link 1).
+/-- **General-`i` power-sum vanishing in the mod-37 free part.**
 Generalises `cyclotomicUnitFreePartModP_powerSum_smul_eq_zero_FLT37` (exponent `36-32`) to every
 even `i ∈ [2,34]`: the coefficient `∑_{b=1}^{18} b^{36-i}` is divisible by 37 (the `b ↔ 37-b`
-pairing makes it twice a half-sum of even powers, and `37 ∤ 36-i` so the full sum vanishes mod 37),
-hence its `ℕ`-scalar action is zero. Divisibility is decided over the finite range. -/
+pairing makes it twice a half-sum of even powers, and `37 ∤ 36-i` so the full sum vanishes mod
+37), hence its `ℕ`-scalar action is zero. Divisibility is decided over the finite range. -/
 theorem cyclotomicUnitFreePartModP_powerSum_smul_eq_zero_general
     (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : i ≤ 34)
     (x : CyclotomicUnitFreePartModP (p := 37) K) :
     (∑ b ∈ Finset.Ico (1 : ℕ) (((37 : ℕ) - 1) / 2 + 1),
         b ^ ((37 : ℕ) - 1 - i)) • x = 0 := by
-  haveI : NeZero (37 : ℕ) := ⟨by decide⟩
+  have : NeZero (37 : ℕ) := ⟨by decide⟩
   have h_S_dvd : (37 : ℕ) ∣ ∑ b ∈ Finset.Ico (1 : ℕ) (((37 : ℕ) - 1) / 2 + 1),
       b ^ ((37 : ℕ) - 1 - i) := by
     interval_cases i <;> revert hi_even <;> decide
@@ -186,7 +186,7 @@ theorem cyclotomicUnitFreePartModP_powerSum_smul_eq_zero_general
   rw [h_S_zmod, zero_smul]
 
 omit [IsCMField K] in
-/-- **General-`i` Pollaczek eigenvalue in the mod-37 free part** (WF-814b leaf a, link 2).
+/-- **General-`i` Pollaczek eigenvalue in the mod-37 free part.**
 Generalises `pollaczekUnit_image_eigenvalue_FLT37` to even `i ∈ [2,34]`: the Galois image of
 `pollaczekUnit 37 K i` has additive mod-37 free-part class `(a^i).val • [pollaczekUnit i]`. The
 37-th-power, power-sum, and sign+ζ correction factors of the unit-level eigenvalue identity all
@@ -201,13 +201,13 @@ theorem pollaczekUnit_image_eigenvalue_general
           (Additive.ofMul (pollaczekUnit 37 K i)) := by
   have heven_sub : Even (37 - 1 - i) := by
     rw [show (37 : ℕ) - 1 - i = 36 - i by norm_num]
-    exact (Nat.even_sub (by omega : i ≤ 36)).mpr ⟨fun _ => hi_even, fun _ => by decide⟩
+    exact (Nat.even_sub (by omega : i ≤ 36)).mpr ⟨fun _ ↦ hi_even, fun _ ↦ by decide⟩
   obtain ⟨γ, hγ⟩ :=
     cyclotomicSigmaOfUnit_smul_pollaczekUnit_almost_eigenvalue_units
       (p := 37) (K := K) a i (by decide : (37 : ℕ) ≠ 2) (by decide : 2 ≤ 37)
       (by omega : (i : ℕ) ≤ 37 - 1) heven_sub ha_coprime
   have h_class := congrArg
-    (fun u => cyclotomicUnitToFreePartModPAdd (p := 37) K (Additive.ofMul u)) hγ
+    (fun u ↦ cyclotomicUnitToFreePartModPAdd (p := 37) K (Additive.ofMul u)) hγ
   simp only [ofMul_mul, map_add, ofMul_pow, map_nsmul] at h_class
   rw [show ((∑ b ∈ Finset.Ico 1 ((37 - 1) / 2 + 1), b ^ (37 - 1 - i)) •
         cyclotomicUnitToFreePartModPAdd (p := 37) K
@@ -227,7 +227,7 @@ theorem pollaczekUnit_image_eigenvalue_general
   exact h_class
 
 omit [IsCMField K] in
-/-- WF-814b leaf a, link 3: the additive Δ-action form of the general-`i` eigenvalue. -/
+/-- The additive Δ-action form of the general-`i` eigenvalue. -/
 theorem pollaczekUnit_image_action_eq_general
     (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : i ≤ 34)
     (a : (ZMod 37)ˣ) (ha_coprime : ((a : ZMod 37).val).Coprime 37) :
@@ -241,7 +241,7 @@ theorem pollaczekUnit_image_action_eq_general
   exact pollaczekUnit_image_eigenvalue_general i hi_even hi2 hi34 a ha_coprime
 
 omit [IsCMField K] in
-/-- WF-814b leaf a, link 4: the `ZMod`-action form of the general-`i` eigenvalue. -/
+/-- The `ZMod`-action form of the general-`i` eigenvalue. -/
 theorem pollaczekUnit_image_DeltaActionZMod_eq_general
     (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : i ≤ 34)
     (a : (ZMod 37)ˣ) (ha_coprime : ((a : ZMod 37).val).Coprime 37) :
@@ -256,7 +256,7 @@ theorem pollaczekUnit_image_DeltaActionZMod_eq_general
   exact pollaczekUnit_image_action_eq_general i hi_even hi2 hi34 a ha_coprime
 
 omit [IsCMField K] in
-/-- WF-814b leaf a, link 5: eigenvalue in `ZMod 37`-scalar form (general `i`). -/
+/-- The eigenvalue in `ZMod 37`-scalar form (general `i`). -/
 theorem pollaczekUnit_image_eigenvalue_zmod_general
     (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : i ≤ 34)
     (a : (ZMod 37)ˣ) (ha_coprime : ((a : ZMod 37).val).Coprime 37) :
@@ -270,7 +270,7 @@ theorem pollaczekUnit_image_eigenvalue_zmod_general
   set y : CyclotomicUnitFreePartModP (p := 37) K :=
     cyclotomicUnitFreePartModPClass (p := 37) K
       (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K i)))
-  haveI : NeZero (37 : ℕ) := ⟨by decide⟩
+  have : NeZero (37 : ℕ) := ⟨by decide⟩
   rw [show (((a ^ i : (ZMod 37)ˣ) : ZMod 37)) • y =
       ((((a ^ i : (ZMod 37)ˣ) : ZMod 37).val : ℕ) : ZMod 37) • y from by
     rw [ZMod.natCast_val, ZMod.cast_id]]
@@ -278,7 +278,7 @@ theorem pollaczekUnit_image_eigenvalue_zmod_general
     (((a ^ i : (ZMod 37)ˣ) : ZMod 37).val) y).symm
 
 omit [IsCMField K] in
-/-- WF-814b leaf a, link 6: ZMod-scalar eigenvalue for all `a` (general `i`). -/
+/-- The `ZMod`-scalar eigenvalue for all `a` (general `i`). -/
 theorem pollaczekUnit_image_eigenvalue_zmod_general_forall
     (i : ℕ) (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : i ≤ 34)
     (a : (ZMod 37)ˣ) :
@@ -292,7 +292,7 @@ theorem pollaczekUnit_image_eigenvalue_zmod_general_forall
     (ZMod.val_coe_unit_coprime a)
 
 omit [IsCMField K] in
-/-- **WF-814b leaf a (goal): `[pollaczekUnit i]` lies in the ω^i-eigenspace** of the mod-37
+/-- **`[pollaczekUnit i]` lies in the ω^i-eigenspace** of the mod-37
 free part, for every even `i ∈ [2,34]`. Generalises
 `pollaczekUnit_image_in_omegaChar32_eigenspace_FLT37`. -/
 theorem pollaczekUnit_image_in_omegaChar_eigenspace_general
@@ -307,7 +307,7 @@ theorem pollaczekUnit_image_in_omegaChar_eigenspace_general
   exact pollaczekUnit_image_eigenvalue_zmod_general_forall i hi_even hi2 hi34 a
 
 omit [IsCMField K] in
-/-- **WF-814b leaf c: a nonzero `[E_i]` spans its (rank-1) ω^i-eigenspace** (general even `i`).
+/-- **A nonzero `[E_i]` spans its (rank-1) ω^i-eigenspace** (general even `i`).
 Generalises `flt37_pollaczekUnit_image_spans_omegaChar32_eigenspace`: the ω^i-eigenspace is
 1-dimensional, and `[E_i]` lies in it (leaf a), so if `[E_i] ≠ 0` it generates the eigenspace.
 (`ω^i ≠ 1` is taken as a hypothesis, discharged at the call site over the even range.) -/
@@ -326,11 +326,11 @@ theorem pollaczekUnit_image_spans_omegaChar_eigenspace_general
             pollaczekUnit_image_in_omegaChar_eigenspace_general i hi_even hi2 hi34⟩} :
           Set (cyclotomicUnitFreePartModPDeltaCharacterEigenspace (p := 37) K
             (cyclotomicOmegaChar (p := 37) i))) = ⊤ := by
-  letI : Fintype {w : NumberField.InfinitePlace K //
+  let : Fintype {w : NumberField.InfinitePlace K //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := Fintype.ofFinite _
-  letI : DiscreteTopology (NumberField.Units.unitLattice K) :=
+  let : DiscreteTopology (NumberField.Units.unitLattice K) :=
     NumberField.Units.instDiscrete_unitLattice K
-  letI : IsZLattice ℝ (NumberField.Units.unitLattice K) := by
+  let : IsZLattice ℝ (NumberField.Units.unitLattice K) := by
     refine ⟨?_⟩
     convert NumberField.Units.dirichletUnitTheorem.unitLattice_span_eq_top K
   have h_finrank :
@@ -404,7 +404,7 @@ theorem pow_two_zmod_injOn_range {i j : ℕ}
   interval_cases i <;> interval_cases j <;> decide
 
 omit [IsCMField K] in
-/-- **WF-814b (b): `[E_i]` is an eigenvector of the action by the generator `2`** with eigenvalue
+/-- **`[E_i]` is an eigenvector of the action by the generator `2`** with eigenvalue
 `(2 : ZMod 37)^i`. From sub-leaf (a) (the eigenvalue identity) and `[E_i] ≠ 0`. -/
 theorem pollaczekUnit_image_hasEigenvector (i : ℕ)
     (hi_even : Even i) (hi2 : 2 ≤ i) (hi34 : i ≤ 34)
@@ -428,20 +428,20 @@ theorem pollaczekUnit_image_hasEigenvector (i : ℕ)
   congr 1
 
 omit [IsCMField K] in
-/-- **WF-814b (b): the 17 Pollaczek classes are linearly independent** (when all nonzero) — they
+/-- **The 17 Pollaczek classes are linearly independent** (when all nonzero) — they
 are eigenvectors of the action by `2` with the distinct eigenvalues `(2)^{2k+2}`. -/
 theorem pollaczekUnit_image_linearIndependent
     (h_all : ∀ i : ℕ, Even i → 2 ≤ i → i ≤ 34 →
       cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K i))) ≠ 0) :
-    LinearIndependent (ZMod 37) (fun k : Fin 17 =>
+    LinearIndependent (ZMod 37) (fun k : Fin 17 ↦
       cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K
           (pollaczekUnit 37 K (2 * (k : ℕ) + 2))))) := by
   refine Module.End.eigenvectors_linearIndependent'
     (cyclotomicUnitFreePartModPDeltaActionZMod (p := 37) K
       (ZMod.unitOfCoprime 2 (by decide : Nat.Coprime 2 37))).toLinearMap
-    (fun k : Fin 17 => (2 : ZMod 37) ^ (2 * (k : ℕ) + 2)) ?_ _ ?_
+    (fun k : Fin 17 ↦ (2 : ZMod 37) ^ (2 * (k : ℕ) + 2)) ?_ _ ?_
   · intro k k' hkk'
     have hk : (k : ℕ) < 17 := k.isLt
     have hk' : (k' : ℕ) < 17 := k'.isLt
@@ -455,21 +455,21 @@ theorem pollaczekUnit_image_linearIndependent
       (h_all _ ⟨(k : ℕ) + 1, by ring⟩ (by omega) (by omega))
 
 omit [IsCMField K] in
-/-- **WF-814b (b)-assembly: the Pollaczek classes span the mod-37 free part** (when all nonzero).
+/-- **The Pollaczek classes span the mod-37 free part** (when all nonzero).
 17 linearly independent vectors in the 17-dimensional space form a basis, hence span `⊤`. -/
 theorem pollaczekUnit_image_span_eq_top
     (h_all : ∀ i : ℕ, Even i → 2 ≤ i → i ≤ 34 →
       cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K i))) ≠ 0) :
-    Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 =>
+    Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 ↦
       cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K
           (pollaczekUnit 37 K (2 * (k : ℕ) + 2)))))) = ⊤ := by
-  letI : Fintype {w : NumberField.InfinitePlace K //
+  let : Fintype {w : NumberField.InfinitePlace K //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := Fintype.ofFinite _
-  letI : DiscreteTopology (NumberField.Units.unitLattice K) :=
+  let : DiscreteTopology (NumberField.Units.unitLattice K) :=
     NumberField.Units.instDiscrete_unitLattice K
-  letI : IsZLattice ℝ (NumberField.Units.unitLattice K) := by
+  let : IsZLattice ℝ (NumberField.Units.unitLattice K) := by
     refine ⟨?_⟩
     convert NumberField.Units.dirichletUnitTheorem.unitLattice_span_eq_top K
   have hcard : Fintype.card (Fin 17) =
@@ -485,33 +485,35 @@ omit hp37 in
 power is surjective has order coprime to `p`. (If `p ∣ |G|`, Cauchy gives an order-`p` element,
 but `(·)^p` injective—from surjective + finite—forces it to be trivial.) -/
 theorem not_dvd_card_of_pow_surjective {G : Type*} [CommGroup G] [Finite G] (p : ℕ)
-    [Fact p.Prime] (h : Function.Surjective (fun y : G => y ^ p)) : ¬ p ∣ Nat.card G := by
+    [Fact p.Prime] (h : Function.Surjective (fun y : G ↦ y ^ p)) : ¬ p ∣ Nat.card G := by
   intro hdvd
-  have hinj : Function.Injective (fun y : G => y ^ p) :=
+  have hinj : Function.Injective (fun y : G ↦ y ^ p) :=
     Finite.injective_iff_surjective.mpr h
   obtain ⟨x, hx⟩ := exists_prime_orderOf_dvd_card' (G := G) p hdvd
   have hx1 : x = 1 := hinj (by simpa using pow_orderOf_eq_one x ▸ hx ▸ rfl)
   rw [hx1, orderOf_one] at hx
   exact (Fact.out : p.Prime).ne_one hx.symm
 
-/-- **WF-814b (d) step: the symmetrised Pollaczek classes span the mod-37 free part** (when all
+/-- **The symmetrised Pollaczek classes span the mod-37 free part** (when all
 bare classes are nonzero). Since `[PUP_i] = 2·[PU_i]` and `2` is a unit in `ZMod 37`, the
 symmetrised family spans the same subspace as the bare family, which is `⊤` by (b). -/
 theorem pollaczekUnitPlus_image_span_eq_top
     (h_all : ∀ i : ℕ, Even i → 2 ≤ i → i ≤ 34 →
       cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K i))) ≠ 0) :
-    Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 =>
+    Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 ↦
       cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (pollaczekUnitPlus 37 K (2 * (k : ℕ) + 2))))) = ⊤ := by
   have hb := pollaczekUnit_image_span_eq_top (K := K) h_all
-  -- Each `[PUP_{2k+2}] = (2 : ℕ) • [PU_{2k+2}]`, so the symmetrised range is `2 •` the bare range.
-  have hrw : (fun k : Fin 17 =>
+  -- Each `[PUP_{2k+2}] = (2 : ℕ) • [PU_{2k+2}]`, so the symmetrised range is `2 •` the bare
+  -- range.
+  have hrw : (fun k : Fin 17 ↦
       cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (pollaczekUnitPlus 37 K (2 * (k : ℕ) + 2)))) =
-      fun k : Fin 17 => ((2 : ZMod 37)) •
+      fun k : Fin 17 ↦ ((2 : ZMod 37)) •
         cyclotomicUnitFreePartModPClass (p := 37) K
-          (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K (2 * (k : ℕ) + 2)))) := by
+          (Additive.ofMul
+            (cyclotomicUnitFreeClass K (pollaczekUnit 37 K (2 * (k : ℕ) + 2)))) := by
     funext k
     rw [pollaczekUnitPlus_class_eq_two_smul_pollaczekUnit_class_in_modp_freepart_general,
       cyclotomicUnitToFreePartModPAdd_apply, ← Nat.cast_smul_eq_nsmul (ZMod 37)]
@@ -524,7 +526,7 @@ theorem pollaczekUnitPlus_image_span_eq_top
   simp only []
   have h2k : (2 : ZMod 37) • cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K (2 * (k : ℕ) + 2)))) ∈
-      Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 => (2 : ZMod 37) •
+      Submodule.span (ZMod 37) (Set.range (fun k : Fin 17 ↦ (2 : ZMod 37) •
         cyclotomicUnitFreePartModPClass (p := 37) K
           (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K (2 * (k : ℕ) + 2)))))) :=
     Submodule.subset_span (Set.mem_range_self k)

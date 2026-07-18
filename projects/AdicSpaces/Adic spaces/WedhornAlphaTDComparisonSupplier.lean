@@ -125,18 +125,18 @@ theorem Spv.exists_max_vle_of_nonempty
     ∃ x_max ∈ S, ∀ y ∈ S, w.vle y x_max := by
   induction hS using Finset.Nonempty.cons_induction with
   | singleton x =>
-      refine ⟨x, Finset.mem_singleton.mpr rfl, fun y hy => ?_⟩
+      refine ⟨x, Finset.mem_singleton.mpr rfl, fun y hy ↦ ?_⟩
       rw [Finset.mem_singleton] at hy
       subst hy
       exact (w.vle_total y y).elim id id
   | cons a S _ha _hSne ih =>
       obtain ⟨x_max, hx_max_mem, h_max⟩ := ih
       rcases w.vle_total x_max a with h_x_le_a | h_a_le_x
-      · refine ⟨a, Finset.mem_cons.mpr (Or.inl rfl), fun y hy => ?_⟩
+      · refine ⟨a, Finset.mem_cons.mpr (Or.inl rfl), fun y hy ↦ ?_⟩
         rcases Finset.mem_cons.mp hy with rfl | hy'
         · exact (w.vle_total y y).elim id id
         · exact w.vle_trans (h_max y hy') h_x_le_a
-      · refine ⟨x_max, Finset.mem_cons.mpr (Or.inr hx_max_mem), fun y hy => ?_⟩
+      · refine ⟨x_max, Finset.mem_cons.mpr (Or.inr hx_max_mem), fun y hy ↦ ?_⟩
         rcases Finset.mem_cons.mp hy with rfl | hy'
         · exact h_a_le_x
         · exact h_max y hy'

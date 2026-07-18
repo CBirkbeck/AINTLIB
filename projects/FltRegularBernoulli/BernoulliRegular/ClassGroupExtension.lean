@@ -1,7 +1,7 @@
 module
 
 public import Mathlib.RingTheory.FractionalIdeal.Extended
-public import Mathlib.RingTheory.ClassGroup
+public import Mathlib.RingTheory.ClassGroup.Basic
 
 /-!
 # Class group map induced by an extension of domains
@@ -67,24 +67,14 @@ principal fractional ideals — the key compatibility for the class-group
 descent. -/
 lemma extensionMap_spanSingleton (x : FractionRing A) :
     extensionMap A B (spanSingleton _ x) =
-      spanSingleton _ (fractionRingMap A B x) := by
-  refine FractionalIdeal.ext fun y => ?_
-  rw [show extensionMap A B = FractionalIdeal.extendedHom' _
-        (algebraMap_nonZeroDivisors_le A B) from rfl,
-      FractionalIdeal.extendedHom'_apply, FractionalIdeal.mem_extended_iff,
-      FractionalIdeal.mem_spanSingleton, ← Submodule.mem_span_singleton]
-  refine ⟨fun hy => Submodule.span_le.2 ?_ hy, fun hy => Submodule.span_le.2 ?_ hy⟩
-  · rintro _ ⟨w, hw, rfl⟩
-    rw [SetLike.mem_coe, FractionalIdeal.mem_spanSingleton] at hw
-    obtain ⟨a, rfl⟩ := hw
-    rw [SetLike.mem_coe, Algebra.smul_def, map_mul, IsLocalization.map_eq, ← Algebra.smul_def]
-    exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _)
-  · rintro _ rfl
-    exact Submodule.subset_span ⟨x, SetLike.mem_coe.mpr (mem_spanSingleton_self _ x), rfl⟩
+      spanSingleton _ (fractionRingMap A B x) :=
+  extendedHom_spanSingleton (FractionRing B) B x
 
 end FractionalIdeal
 
 namespace ClassGroup
+
+section
 
 variable (A : Type*) [CommRing A] [IsDomain A]
 variable (B : Type*) [CommRing B] [IsDomain B]
@@ -116,7 +106,11 @@ lemma extensionMap_quotientMk (α : (FractionalIdeal A⁰ (FractionRing A))ˣ) :
         (Units.map (FractionalIdeal.extensionMap A B).toMonoidHom α) :=
   rfl
 
-variable [IsDedekindDomain A] [IsDedekindDomain B]
+end
+
+variable (A : Type*) [CommRing A] [IsDedekindDomain A]
+variable (B : Type*) [CommRing B] [IsDedekindDomain B]
+variable [Algebra A B] [Module.IsTorsionFree A B]
 
 /-- Compatibility: the class-group map sends the class of a non-zero ideal
 `I ∈ (Ideal A)⁰` to the class of its image `I · B = I.map (algebraMap A B)`
@@ -169,7 +163,7 @@ theorem extensionMap_injective_iff :
     exact h _ (by rwa [extensionMap_mk])
   · intro h x
     exact ClassGroup.induction (K := FractionRing A)
-      (fun I hI => by rw [extensionMap_mk] at hI; exact h I hI) x
+      (fun I hI ↦ by rw [extensionMap_mk] at hI; exact h I hI) x
 
 end ClassGroup
 

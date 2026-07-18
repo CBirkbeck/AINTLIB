@@ -42,6 +42,7 @@ automatically interval-integrable on each piece, and so on `[0, 1]` by gluing.
   (both lie in `S`, `a < b`, no element of `S` strictly between them).
 * `ClosedPwC1Curve x` — a closed path at `x` that is paper-`C¹`-piecewise.
 * `ClosedPwC1Immersion x` — extends with non-vanishing derivative on each piece.
+* `ClosedPwC1Immersion.toPwC1Immersion` — forgets to the legacy `PwC1Immersion x x`.
 
 ## Main results
 
@@ -120,7 +121,7 @@ theorem continuous (γ : ClosedPwC1Curve x) : Continuous γ.toPath.extend :=
 `closedPartition` while not being an endpoint. -/
 theorem mem_partition_iff (γ : ClosedPwC1Curve x) {t : ℝ} :
     t ∈ γ.partition ↔ t ∈ γ.closedPartition ∧ t ≠ 0 ∧ t ≠ 1 := by
-  refine ⟨fun ht => ?_, fun ⟨h_in, h_ne0, h_ne1⟩ => ?_⟩
+  refine ⟨fun ht ↦ ?_, fun ⟨h_in, h_ne0, h_ne1⟩ ↦ ?_⟩
   · have h_in_Ioo : t ∈ Ioo (0 : ℝ) 1 := γ.partition_subset ht
     exact ⟨γ.closedPartition_eq ▸ by simp [Finset.mem_insert, ht],
       ne_of_gt h_in_Ioo.1, ne_of_lt h_in_Ioo.2⟩
@@ -153,7 +154,8 @@ theorem deriv_intervalIntegrable_piece (γ : ClosedPwC1Curve x) {a b : ℝ}
   have h_dw_cont : ContinuousOn (derivWithin γ.toPath.extend (Icc a b)) (Icc a b) :=
     hcd.continuousOn_derivWithin (uniqueDiffOn_Icc h.2.2.1) le_rfl
   refine (h_dw_cont.intervalIntegrable_of_Icc hab).congr_ae ?_
-  refine Filter.eventuallyEq_iff_exists_mem.mpr ⟨Ioo a b, ?_, fun _ ht => derivWithin_eq_deriv_on_Ioo _ ht⟩
+  refine Filter.eventuallyEq_iff_exists_mem.mpr
+    ⟨Ioo a b, ?_, fun _ ht ↦ derivWithin_eq_deriv_on_Ioo _ ht⟩
   rw [MeasureTheory.mem_ae_iff, MeasureTheory.Measure.restrict_apply' measurableSet_uIoc]
   refine MeasureTheory.measure_mono_null (t := ({b} : Set ℝ)) ?_ Real.volume_singleton
   intro t ⟨ht_compl, ht_in⟩
@@ -188,18 +190,18 @@ private lemma consecutive_piece_induction {P : ℝ → ℝ → Prop}
     have ha'_in_s : a' ∈ s := (Finset.mem_filter.mp ha'_in_t).1
     have ha_lt_a' : a < a' := (Finset.mem_filter.mp ha'_in_t).2
     have hcons : s.IsConsecutive a a' :=
-      ⟨ha, ha'_in_s, ha_lt_a', fun c hc hc_Ioo =>
+      ⟨ha, ha'_in_s, ha_lt_a', fun c hc hc_Ioo ↦
         absurd (t.min'_le c (Finset.mem_filter.mpr ⟨hc, hc_Ioo.1⟩)) (by linarith [hc_Ioo.2])⟩
     set s' : Finset ℝ := s.erase a
     have ha'_in_s' : a' ∈ s' := Finset.mem_erase.mpr ⟨ne_of_gt ha_lt_a', ha'_in_s⟩
     have hb_in_s' : b ∈ s' := Finset.mem_erase.mpr ⟨ne_of_gt hab_lt, hb⟩
-    have hbds' : ∀ c ∈ s', a' ≤ c ∧ c ≤ b := fun c hc => by
+    have hbds' : ∀ c ∈ s', a' ≤ c ∧ c ≤ b := fun c hc ↦ by
       have hc_in : c ∈ s := (Finset.mem_erase.mp hc).2
       refine ⟨t.min'_le _ (Finset.mem_filter.mpr ⟨hc_in, ?_⟩), (hbds c hc_in).2⟩
       exact lt_of_le_of_ne (hbds c hc_in).1 (Ne.symm (Finset.mem_erase.mp hc).1)
-    have hpc' : ∀ p q, s'.IsConsecutive p q → P p q := fun p q hcons' =>
+    have hpc' : ∀ p q, s'.IsConsecutive p q → P p q := fun p q hcons' ↦
       hpc p q ⟨(Finset.mem_erase.mp hcons'.1).2, (Finset.mem_erase.mp hcons'.2.1).2,
-        hcons'.2.2.1, fun c hc hc_Ioo => by
+        hcons'.2.2.1, fun c hc hc_Ioo ↦ by
           have hp_gt_a : a < p := lt_of_lt_of_le ha_lt_a' (hbds' p hcons'.1).1
           exact hcons'.2.2.2 c (Finset.mem_erase.mpr
             ⟨ne_of_gt (lt_of_lt_of_le hp_gt_a hc_Ioo.1.le), hc⟩) hc_Ioo⟩
@@ -217,7 +219,7 @@ private theorem intervalIntegrable_of_consecutive_pieces
     (hpc : ∀ p q, s.IsConsecutive p q → IntervalIntegrable f μ p q) :
     IntervalIntegrable f μ a b :=
   consecutive_piece_induction (P := IntervalIntegrable f μ)
-    (fun _ => IntervalIntegrable.refl) (fun h1 h2 => h1.trans h2) s a b ha hb hab hbds hpc
+    (fun _ ↦ IntervalIntegrable.refl) (fun h1 h2 ↦ h1.trans h2) s a b ha hb hab hbds hpc
 
 /-! ## Global interval-integrability of the derivative -/
 
@@ -231,8 +233,8 @@ theorem deriv_extend_intervalIntegrable (γ : ClosedPwC1Curve x) :
     IntervalIntegrable (deriv γ.toPath.extend) volume 0 1 :=
   intervalIntegrable_of_consecutive_pieces γ.closedPartition 0 1
     γ.zero_mem_closedPartition γ.one_mem_closedPartition zero_le_one
-    (fun _ hc => ⟨(γ.closedPartition_subset hc).1, (γ.closedPartition_subset hc).2⟩)
-    (fun _ _ h => γ.deriv_intervalIntegrable_piece h)
+    (fun _ hc ↦ ⟨(γ.closedPartition_subset hc).1, (γ.closedPartition_subset hc).2⟩)
+    (fun _ _ h ↦ γ.deriv_intervalIntegrable_piece h)
 
 /-! ## Bridge to legacy `PiecewiseC1Path`
 
@@ -257,7 +259,7 @@ private lemma exists_consecutive_pair_aux {closedPartition : Finset ℝ}
   have ha_lt : a < t := (Finset.mem_filter.mp ha_mem).2
   have ht_lt_b : t < b := (Finset.mem_filter.mp hb_mem).2
   refine ⟨a, b, ⟨(Finset.mem_filter.mp ha_mem).1, (Finset.mem_filter.mp hb_mem).1,
-    ha_lt.trans ht_lt_b, fun c hc hc_Ioo => ?_⟩, ha_lt, ht_lt_b⟩
+    ha_lt.trans ht_lt_b, fun c hc hc_Ioo ↦ ?_⟩, ha_lt, ht_lt_b⟩
   rcases lt_trichotomy c t with hct | hct | hct
   · exact absurd (pred.le_max' c (Finset.mem_filter.mpr ⟨hc, hct⟩))
       (by linarith [hc_Ioo.1])
@@ -289,7 +291,7 @@ private lemma exists_predecessor (γ : ClosedPwC1Immersion x) {p : ℝ}
     Finset.mem_filter.mpr ⟨γ.zero_mem_closedPartition, hp_pos⟩
   have ha_mem : pred.max' ⟨0, h0_pred⟩ ∈ pred := pred.max'_mem _
   exact ⟨_, (Finset.mem_filter.mp ha_mem).1, hp_in, (Finset.mem_filter.mp ha_mem).2,
-    fun c hc hc_Ioo => absurd (pred.le_max' c (Finset.mem_filter.mpr ⟨hc, hc_Ioo.2⟩))
+    fun c hc hc_Ioo ↦ absurd (pred.le_max' c (Finset.mem_filter.mpr ⟨hc, hc_Ioo.2⟩))
       (by linarith [hc_Ioo.1])⟩
 
 /-- Helper for the immersion bridge: at an interior closed-partition point `p`, the
@@ -303,7 +305,7 @@ private lemma exists_successor (γ : ClosedPwC1Immersion x) {p : ℝ}
     Finset.mem_filter.mpr ⟨γ.one_mem_closedPartition, hp_lt_one⟩
   have hb_mem : succ.min' ⟨1, h1_succ⟩ ∈ succ := succ.min'_mem _
   exact ⟨_, hp_in, (Finset.mem_filter.mp hb_mem).1, (Finset.mem_filter.mp hb_mem).2,
-    fun c hc hc_Ioo => absurd (succ.min'_le c (Finset.mem_filter.mpr ⟨hc, hc_Ioo.1⟩))
+    fun c hc hc_Ioo ↦ absurd (succ.min'_le c (Finset.mem_filter.mpr ⟨hc, hc_Ioo.1⟩))
       (by linarith [hc_Ioo.2])⟩
 
 /-- Shared inner computation for `left_deriv_limit` / `right_deriv_limit` in
@@ -323,14 +325,14 @@ private lemma toPwC1Immersion_deriv_limit_aux (γ : ClosedPwC1Immersion x) {a b 
     (nhdsWithin_mono _ Ioo_subset_Icc_self)).congr' ?_
   rw [hSeq]
   exact Filter.eventuallyEq_of_mem (s := Ioo a b) self_mem_nhdsWithin
-    fun _ hu => ClosedPwC1Curve.derivWithin_eq_deriv_on_Ioo _ hu
+    fun _ hu ↦ ClosedPwC1Curve.derivWithin_eq_deriv_on_Ioo _ hu
 
 /-- A `ClosedPwC1Immersion` produces a legacy `PwC1Immersion`. -/
 def toPwC1Immersion (γ : ClosedPwC1Immersion x) : PwC1Immersion x x where
   toPiecewiseC1Path := γ.toPiecewiseC1Path
   deriv_ne_zero := by
     intro t ht htn
-    have htn_closed : t ∉ γ.closedPartition := fun h_in => htn
+    have htn_closed : t ∉ γ.closedPartition := fun h_in ↦ htn
       (γ.toClosedPwC1Curve.mem_partition_iff.mpr ⟨h_in, ne_of_gt ht.1, ne_of_lt ht.2⟩)
     obtain ⟨a, b, hcons, ht_Ioo⟩ :=
       γ.toClosedPwC1Curve.exists_consecutive_pair_containing ht htn_closed
@@ -406,10 +408,10 @@ private lemma lipschitzOnWith_of_consecutive_pieces {E : Type*}
     (hbds : ∀ c ∈ s, a ≤ c ∧ c ≤ b)
     (hpc : ∀ p q, s.IsConsecutive p q → LipschitzOnWith C f (Icc p q)) :
     LipschitzOnWith C f (Icc a b) := by
-  refine consecutive_piece_induction (P := fun p q => p ≤ q ∧ LipschitzOnWith C f (Icc p q))
-    (fun x => ⟨le_refl x, ?_⟩) (fun {p q r} h1 h2 => ⟨h1.1.trans h2.1,
+  refine consecutive_piece_induction (P := fun p q ↦ p ≤ q ∧ LipschitzOnWith C f (Icc p q))
+    (fun x ↦ ⟨le_refl x, ?_⟩) (fun {p q r} h1 h2 ↦ ⟨h1.1.trans h2.1,
       lipschitzOnWith_Icc_trans h1.1 h2.1 h1.2 h2.2⟩) s a b ha hb hab hbds
-    (fun p q hcons => ⟨hcons.2.2.1.le, hpc p q hcons⟩) |>.2
+    (fun p q hcons ↦ ⟨hcons.2.2.1.le, hpc p q hcons⟩) |>.2
   rw [lipschitzOnWith_iff_norm_sub_le]
   intro y hy z hz
   simp [le_antisymm hy.2 hy.1, le_antisymm hz.2 hz.1]
@@ -432,7 +434,7 @@ theorem lipschitzOnWith_piece (γ : ClosedPwC1Curve x) {a b : ℝ}
     isCompact_Icc.exists_isMaxOn ⟨a, left_mem_Icc.mpr hab⟩ h_dw_cont.norm
   refine ⟨⟨_, norm_nonneg (derivWithin γ.toPath.extend (Icc a b) t₀)⟩, ?_⟩
   exact Convex.lipschitzOnWith_of_nnnorm_derivWithin_le (convex_Icc _ _)
-    hcd.differentiableOn_one fun u hu => ht₀_max hu
+    hcd.differentiableOn_one fun u hu ↦ ht₀_max hu
 
 /-- Existence of a global Lipschitz constant on `Icc 0 1`, by gluing the
 piece-wise constants. -/
@@ -440,20 +442,20 @@ theorem lipschitzOnWith_Icc01 (γ : ClosedPwC1Curve x) :
     ∃ K : NNReal, LipschitzOnWith K γ.toPath.extend (Icc (0 : ℝ) 1) := by
   classical
   set pairs : Finset (ℝ × ℝ) := (γ.closedPartition.product γ.closedPartition).filter
-    (fun p => γ.closedPartition.IsConsecutive p.1 p.2)
+    (fun p ↦ γ.closedPartition.IsConsecutive p.1 p.2)
   have h_each : ∀ p ∈ pairs, ∃ K : NNReal,
-      LipschitzOnWith K γ.toPath.extend (Icc p.1 p.2) := fun p hp =>
+      LipschitzOnWith K γ.toPath.extend (Icc p.1 p.2) := fun p hp ↦
     γ.lipschitzOnWith_piece (Finset.mem_filter.mp hp).2
   choose K hK using h_each
-  set Kmax : NNReal := pairs.attach.sup (fun p => K p.1 p.2)
+  set Kmax : NNReal := pairs.attach.sup (fun p ↦ K p.1 p.2)
   refine ⟨Kmax, lipschitzOnWith_of_consecutive_pieces γ.closedPartition 0 1
     γ.zero_mem_closedPartition γ.one_mem_closedPartition zero_le_one
-    (fun _ hc => ⟨(γ.closedPartition_subset hc).1, (γ.closedPartition_subset hc).2⟩) ?_⟩
+    (fun _ hc ↦ ⟨(γ.closedPartition_subset hc).1, (γ.closedPartition_subset hc).2⟩) ?_⟩
   intro p q hcons
   have hpq_in : (p, q) ∈ pairs := Finset.mem_filter.mpr
     ⟨Finset.mem_product.mpr ⟨hcons.1, hcons.2.1⟩, hcons⟩
   exact (hK (p, q) hpq_in).weaken <| Finset.le_sup (s := pairs.attach)
-    (f := fun p => K p.1 p.2) (Finset.mem_attach pairs ⟨(p, q), hpq_in⟩)
+    (f := fun p ↦ K p.1 p.2) (Finset.mem_attach pairs ⟨(p, q), hpq_in⟩)
 
 /-- A `ClosedPwC1Curve` extends to a globally Lipschitz function `ℝ → E`.
 Outside `[0, 1]`, the extended path is constant. -/
@@ -466,19 +468,19 @@ theorem lipschitzWith_extend (γ : ClosedPwC1Curve x) :
   intro s t
   set s' : ℝ := max 0 (min s 1)
   set t' : ℝ := max 0 (min t 1)
-  have clamp_mem : ∀ u : ℝ, max 0 (min u 1) ∈ Icc (0 : ℝ) 1 := fun _ =>
+  have clamp_mem : ∀ u : ℝ, max 0 (min u 1) ∈ Icc (0 : ℝ) 1 := fun _ ↦
     ⟨le_max_left _ _, max_le zero_le_one (min_le_right _ _)⟩
   have hclamp : ∀ u : ℝ, γ.toPath.extend u = γ.toPath.extend (max 0 (min u 1)) := by
     intro u
     rcases le_total u 0 with hu0 | hu0
     · rw [γ.toPath.extend_of_le_zero hu0,
-        show max 0 (min u 1) = 0 from by
+        show max 0 (min u 1) = 0 by
           simp [min_eq_left (hu0.trans zero_le_one), max_eq_left hu0],
         γ.toPath.extend_zero]
     · rcases le_total u 1 with hu1 | hu1
       · simp [min_eq_left hu1, max_eq_right hu0]
       · rw [γ.toPath.extend_of_one_le hu1,
-          show max 0 (min u 1) = 1 from by simp [min_eq_right hu1], γ.toPath.extend_one]
+          show max 0 (min u 1) = 1 by simp [min_eq_right hu1], γ.toPath.extend_one]
   have h_proj_lip : ‖s' - t'‖ ≤ ‖s - t‖ := by
     rw [Real.norm_eq_abs, Real.norm_eq_abs]
     calc |s' - t'|

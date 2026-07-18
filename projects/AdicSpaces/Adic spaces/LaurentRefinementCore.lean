@@ -90,9 +90,8 @@ theorem divByS_factor' (a b s f : A) :
 
 /-- `divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f)`. -/
 theorem divByS_factor2' (b s f : A) :
-    divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f) := by
-  unfold divByS; rw [← IsLocalization.mk'_mul]
-  exact IsLocalization.mk'_eq_of_eq (by simp only [Submonoid.coe_mul]; ring)
+    divByS (b * s) (s * f) = divByS (b * f) (s * f) * divByS (s * s) (s * f) :=
+  divByS_factor' b s s f
 
 /-- `divByS` is additive in the numerator. -/
 theorem divByS_add' (a b s : A) :
@@ -296,15 +295,9 @@ theorem prodImage_mul_comm (T₁ T₂ : Finset A) :
     (T₂.product T₁).image (fun p => p.1 * p.2) := by
   ext x
   simp only [Finset.mem_image, Prod.exists]
-  constructor
-  · rintro ⟨a, b, hp, rfl⟩
-    obtain ⟨ha, hb⟩ := Finset.mem_product.mp hp
-    exact ⟨b, a, Finset.mem_product.mpr ⟨hb, ha⟩, mul_comm b a⟩
-  · rintro ⟨a, b, hp, rfl⟩
-    obtain ⟨ha, hb⟩ := Finset.mem_product.mp hp
-    exact ⟨b, a, Finset.mem_product.mpr ⟨hb, ha⟩, mul_comm b a⟩
+  constructor <;> rintro ⟨a, b, hp, rfl⟩ <;>
+    exact ⟨b, a, Finset.mem_product.mpr (Finset.mem_product.mp hp).symm, mul_comm b a⟩
 
-set_option maxHeartbeats 400000 in
 -- heavy `Subring.closure_induction` over `locSubring` (6 cases × ring ops)
 /-- For `b ∈ I^N₁` (first datum), `divByS (b·s₂) (s₁·s₂)` lands in the product
 `locSubring` (lift of `D₁`'s `locSubring` along `Away s₁ → Away (s₁·s₂)`). -/
@@ -521,6 +514,7 @@ theorem RationalLocData.interSamePair_coUnitDatum_span_eq_top [IsTateRing A]
     (span_insert_eq_top_of_span_eq_top D₁.s h₁.span_eq_top)
     (span_insert_eq_top_of_span_eq_top f (span_eq_top_of_one_mem (Finset.mem_singleton_self 1)))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The base-independent **2-cover `𝒰_f`** of `D₀` (Wedhorn 4230): the two
 halves `R(f/1) ∩ D₀` and `R(1/f) ∩ D₀` (via `interSamePair`, base-independent
 conditions `v(f) ≤ 1` / `v(f) ≥ 1`). Covers by the valuation trichotomy. -/
@@ -531,9 +525,8 @@ noncomputable def unitCover (D₀ : RationalLocData A) (f : A) : RationalCoverin
   hsubset := by
     intro D hD
     simp only [Finset.mem_insert, Finset.mem_singleton] at hD
-    rcases hD with rfl | rfl
-    · exact RationalLocData.interSamePair_subset_left _ _ _
-    · exact RationalLocData.interSamePair_subset_left _ _ _
+    rcases hD with rfl | rfl <;>
+      exact RationalLocData.interSamePair_subset_left _ _ _
   hcover := by
     intro v hv
     rcases v.vle_total f 1 with h | h
@@ -549,6 +542,7 @@ noncomputable def unitCover (D₀ : RationalLocData A) (f : A) : RationalCoverin
         rw [Finset.mem_singleton.mp ht]; exact h, fun hf0 => ?_⟩
       exact v.not_vle_one_zero (v.vle_trans h hf0)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The two base-independent halves `R(f/1) ∩ D₀` and `R(1/f) ∩ D₀` cover `D₀`
 (valuation trichotomy `v(f) ≤ 1 ∨ v(f) ≥ 1`). Base-INDEPENDENT analogue of
 `laurentCover_covers` (whose split references `D₀.s`). -/
@@ -662,8 +656,7 @@ theorem ratioMinus_rationalOpen (D₀ : RationalLocData A) (f g f_inv : A)
                  (ratioMinusDatum D₀ f g f_inv hf hf_inv).s =
       rationalOpen D₀.T D₀.s ∩
         rationalOpen ({g, f} : Finset A) f := by
-  unfold ratioMinusDatum
-  exact ratioPlus_rationalOpen D₀ g f f_inv hf hf_inv
+  unfold ratioMinusDatum; exact ratioPlus_rationalOpen D₀ g f f_inv hf hf_inv
 
 /-- The ratio plus piece is contained in the base. -/
 theorem ratioPlus_subset (D₀ : RationalLocData A) (f g g_inv : A)
@@ -671,8 +664,7 @@ theorem ratioPlus_subset (D₀ : RationalLocData A) (f g g_inv : A)
     rationalOpen (ratioPlusDatum D₀ f g g_inv hg hg_inv).T
                  (ratioPlusDatum D₀ f g g_inv hg hg_inv).s ⊆
       rationalOpen D₀.T D₀.s := by
-  rw [ratioPlus_rationalOpen]
-  exact Set.inter_subset_left
+  rw [ratioPlus_rationalOpen]; exact Set.inter_subset_left
 
 /-- The ratio minus piece is contained in the base. -/
 theorem ratioMinus_subset (D₀ : RationalLocData A) (f g f_inv : A)
@@ -680,8 +672,7 @@ theorem ratioMinus_subset (D₀ : RationalLocData A) (f g f_inv : A)
     rationalOpen (ratioMinusDatum D₀ f g f_inv hf hf_inv).T
                  (ratioMinusDatum D₀ f g f_inv hf hf_inv).s ⊆
       rationalOpen D₀.T D₀.s := by
-  unfold ratioMinusDatum
-  exact ratioPlus_subset D₀ g f f_inv hf hf_inv
+  unfold ratioMinusDatum; exact ratioPlus_subset D₀ g f f_inv hf hf_inv
 
 /-- The ratio plus and minus pieces cover the base. -/
 theorem ratioCover_covers (D₀ : RationalLocData A) (f g f_inv g_inv : A)
@@ -972,11 +963,9 @@ theorem algebraMap_f_isUnit_in_laurentMinus
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (D₀ : RationalLocData A) (f : A) :
     IsUnit (algebraMap A (Localization.Away (D₀.s * f)) f) := by
-  have hmul : algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f) =
-      algebraMap A _ D₀.s * algebraMap A _ f := map_mul _ _ _
   have hu : IsUnit (algebraMap A (Localization.Away (D₀.s * f)) (D₀.s * f)) :=
     IsLocalization.Away.algebraMap_isUnit _
-  rw [hmul] at hu
+  rw [map_mul] at hu
   exact isUnit_of_mul_isUnit_right hu
 
 /-- In `presheafValue (laurentMinusDatum D₀ f)`, the canonical image of `f` is a unit. -/
@@ -1119,6 +1108,7 @@ theorem iteratedPlus_forwardLocHom_generators_powerBounded
       Subring.le_topologicalClosure _ ⟨⟨divByS t D₀.s, hdiv_mem⟩, rfl⟩
     exact algebraMap_mem_locSubring _ _ _ hcoe_mem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the forward uncompleted hom to the completion (plus branch). -/
 theorem iteratedPlus_forwardToCompletion_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1248,6 +1238,7 @@ theorem iteratedPlus_backwardLocHom_generator_powerBounded
   exact ⟨(algebraMap A _ f) ^ n,
     (locSubring _ _ _).pow_mem hmem n, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the backward uncompleted hom (plus branch). -/
 theorem iteratedPlus_backwardLocHom_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1384,6 +1375,7 @@ theorem iteratedPlus_backwardHom_coeRingHom
     (iteratedPlusDatum_B P D₀ f).isTopologicalRing
   exact UniformSpace.Completion.extensionHom_coe _ _ b
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Round-trip 1 (plus branch): `backwardHom ∘ forwardHom = id`. -/
 theorem iteratedPlus_backwardHom_comp_forwardHom
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1853,6 +1845,7 @@ theorem iteratedMinus_forwardLocHom_generators_powerBounded
       exact ⟨⟨divByS a D₀.s, hdiv_mem_loc⟩, rfl⟩
     exact algebraMap_mem_locSubring _ _ _ hcoe_mem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the forward uncompleted hom to the completion
 (Wedhorn Prop 8.2 analogue, minus branch).
 
@@ -1972,6 +1965,7 @@ We package this as `iteratedMinus_backwardLocHom_generator_powerBounded`
 (parallels `iteratedMinus_forwardLocHom_generators_powerBounded` in the
 forward direction). -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Power-boundedness of the minus backward generator image** (Wedhorn
 Prop 8.2 analogue, minus branch backward generator). The image of
 `divByS 1 (canonicalMap f)` (= the unique generator of `T = {1}` in
@@ -2082,6 +2076,7 @@ theorem iteratedMinus_backwardLocHom_generator_powerBounded
   exact ⟨(divByS D₀.s (D₀.s * f)) ^ n,
     (locSubring _ _ _).pow_mem hdiv_mem n, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Continuity of the backward uncompleted hom (minus branch).
 
 **Proof**: Apply `locTopology_continuous_lift` to `iteratedMinus_backwardLocHom D₀ f hsub`
@@ -2241,6 +2236,7 @@ theorem iteratedMinus_backwardHom_coeRingHom
     (iteratedMinusDatum_B P D₀ f).isTopologicalRing
   exact UniformSpace.Completion.extensionHom_coe _ _ b
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Round-trip 1 (minus branch): `backwardHom ∘ forwardHom = id`. This is
 the `Completion.ext'` chase using the uncompleted-level identity
 `iteratedMinus_backward_forward_locHom`. -/

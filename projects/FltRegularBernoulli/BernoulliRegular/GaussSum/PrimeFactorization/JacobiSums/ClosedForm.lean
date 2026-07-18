@@ -10,8 +10,7 @@ public import BernoulliRegular.GaussSum.PrimeFactorization.JacobiSums.Boundary
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
-open scoped Pointwise
+open NumberField
 
 namespace BernoulliRegular
 
@@ -22,6 +21,25 @@ variable (p : ℕ) [hp : Fact p.Prime]
 
 local notation "𝔭" => (Ideal.span ({(p : ℤ)} : Set ℤ))
 local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
+
+/-- If `0 < m < 2 * (p - 1)` and `m ≠ p - 1`, then the `m`-th power of the Stickelberger
+complex character generator is nontrivial. The generator has order `p - 1`, so within the open
+interval `(0, 2 * (p - 1))` its only power equal to `1` occurs at `m = p - 1`; excluding that
+value forces the power to differ from `1`. -/
+private lemma stickelbergerComplexCharacterGenerator_pow_ne_one_of_pos_of_lt_two_mul_of_ne
+    {m : ℕ} (hm_pos : 0 < m) (hm_lt : m < 2 * (p - 1)) (hm_ne : m ≠ p - 1) :
+    stickelbergerComplexCharacterGenerator (p := p) ^ m ≠ 1 := by
+  intro htriv
+  have hroot :
+      stickelbergerComplexCharacterRoot (p := p) ^ m = 1 := by
+    have hEval := congrArg
+      (fun χ : DirichletCharacter ℂ p =>
+        χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p)) htriv
+    simpa [MulChar.pow_apply_coe,
+      stickelbergerComplexCharacterGenerator_apply_characterUnitGenerator] using hEval
+  have hdvd : p - 1 ∣ m :=
+    (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).dvd_of_pow_eq_one _ hroot
+  exact hm_ne (Nat.eq_of_dvd_of_lt_two_mul hm_pos.ne' hdvd hm_lt)
 
 private lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_pow_add_eq
     (j k : Fin (p - 1)) :
@@ -66,44 +84,12 @@ private lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_
         have hgk : g ^ (k : ℕ) ≠ 1 :=
           stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero (p := p) (j := k) hk
         have hgsum : g ^ ((j : ℕ) + (k : ℕ)) ≠ 1 := by
-          intro htriv
-          have hroot :
-              stickelbergerComplexCharacterRoot (p := p) ^ ((j : ℕ) + (k : ℕ)) = 1 := by
-            have hEval := congrArg
-              (fun χ : DirichletCharacter ℂ p =>
-                χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p)) htriv
-            simpa [g, MulChar.pow_apply_coe,
-              stickelbergerComplexCharacterGenerator_apply_characterUnitGenerator] using hEval
-          have hdvd :
-              p - 1 ∣ (j : ℕ) + (k : ℕ) :=
-            (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).dvd_of_pow_eq_one _ hroot
-          obtain ⟨m, hm⟩ := hdvd
           have hj_pos : 0 < (j : ℕ) := Fin.pos_iff_ne_zero.mpr hj
           have hk_pos : 0 < (k : ℕ) := Fin.pos_iff_ne_zero.mpr hk
-          have hpred_pos : 0 < p - 1 := Nat.sub_pos_of_lt hp.out.one_lt
-          have hsum_pos : 0 < (j : ℕ) + (k : ℕ) := by
-            omega
-          have hsum_lt : (j : ℕ) + (k : ℕ) < 2 * (p - 1) := by
-            have hj_lt : (j : ℕ) < p - 1 := j.2
-            have hk_lt : (k : ℕ) < p - 1 := k.2
-            omega
-          have hmpos : 0 < m := by
-            by_contra hm0
-            have hm_eq_zero : m = 0 := Nat.eq_zero_of_not_pos hm0
-            have hzero : (j : ℕ) + (k : ℕ) = 0 := by
-              simpa [hm_eq_zero] using hm
-            exact (Nat.ne_of_gt hsum_pos) hzero
-          have hm_lt_two : m < 2 := by
-            by_contra hm2
-            have hm_ge_two : 2 ≤ m := Nat.not_lt.mp hm2
-            have hge : 2 * (p - 1) ≤ (j : ℕ) + (k : ℕ) := by
-              calc
-                2 * (p - 1) = (p - 1) * 2 := by rw [Nat.mul_comm]
-                _ ≤ (p - 1) * m := Nat.mul_le_mul_left (p - 1) hm_ge_two
-                _ = (j : ℕ) + (k : ℕ) := hm.symm
-            exact (Nat.not_le_of_lt hsum_lt) hge
-          have hm_eq : m = 1 := by omega
-          exact hsum (hm.trans (by simp [hm_eq]))
+          have hj_lt : (j : ℕ) < p - 1 := j.2
+          have hk_lt : (k : ℕ) < p - 1 := k.2
+          exact stickelbergerComplexCharacterGenerator_pow_ne_one_of_pos_of_lt_two_mul_of_ne
+            (p := p) (m := (j : ℕ) + (k : ℕ)) (by omega) (by omega) hsum
         have hprod : (g ^ (j : ℕ)) * (g ^ (k : ℕ)) ≠ 1 := by
           simpa [g, pow_add] using hgsum
         let JI : Ideal (𝓞 L) :=
@@ -127,8 +113,7 @@ private lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_
               (distinguishedPrimeAboveP p L))
           (gaussSumIdeal_mul_eq_jacobiSumLift_mul_gaussSumIdeal
             (p := p) (L := L) (χ := g ^ (j : ℕ)) (ψ := g ^ (k : ℕ)) hprod)
-        rw [show g ^ (j : ℕ) * g ^ (k : ℕ) = g ^ ((j : ℕ) + (k : ℕ)) by
-            simp [pow_add]] at hcount0
+        rw [← pow_add] at hcount0
         have hcount :
             distinguishedPrimeExponent (p := p) (L := L) (g ^ (j : ℕ)) +
                 distinguishedPrimeExponent (p := p) (L := L) (g ^ (k : ℕ)) =
@@ -177,25 +162,8 @@ lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_pow_add_
   obtain ⟨n, hn⟩ :=
     distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_pow_add_eq
       (p := p) (L := L) j k
-  have hmod :
-      distinguishedPrimeExponent (p := p) (L := L)
-          (stickelbergerComplexCharacterGenerator (p := p) ^
-            ((j : ℕ) + (k : ℕ))) ≡
-        distinguishedPrimeExponent (p := p) (L := L)
-            (stickelbergerComplexCharacterGenerator (p := p) ^
-              ((j : ℕ) + (k : ℕ))) +
-          (p - 1) * n [MOD p - 1] := by
-    rw [Nat.add_comm
-      (distinguishedPrimeExponent (p := p) (L := L)
-        (stickelbergerComplexCharacterGenerator (p := p) ^ ((j : ℕ) + (k : ℕ))))
-      ((p - 1) * n)]
-    exact (Nat.ModEq.modulus_mul_add
-      (m := p - 1)
-      (a := n)
-      (b := distinguishedPrimeExponent (p := p) (L := L)
-        (stickelbergerComplexCharacterGenerator (p := p) ^
-          ((j : ℕ) + (k : ℕ))))).symm
-  exact hn ▸ hmod
+  rw [← hn]
+  simp [Nat.ModEq, Nat.add_mul_mod_self_left]
 
 /-- Distinguished-prime exponent of a generator-power character, indexed by
 `ZMod (p - 1)` rather than by a chosen natural representative. -/
@@ -218,8 +186,7 @@ private lemma stickelbergerComplexCharacterGenerator_pow_eq_of_zmod_eq
       (stickelbergerComplexCharacterGenerator_pow_sub_one_eq_one (p := p))
   rw [pow_eq_pow_iff_modEq]
   apply Nat.ModEq.of_dvd horder
-  rw [← ZMod.natCast_eq_natCast_iff]
-  exact h
+  rwa [← ZMod.natCast_eq_natCast_iff]
 
 lemma distinguishedPrimeExponentGeneratorPowerIndex_add_le
     (j k : ZMod (p - 1)) :
@@ -268,18 +235,13 @@ lemma distinguishedPrimeExponentGeneratorPowerIndex_normalizedInverseGeneratorIn
         (((normalizedInverseGeneratorIndex (p := p) (L := L) :
           (ZMod (p - 1))ˣ) : ZMod (p - 1))) = 1 := by
   let u : (ZMod (p - 1))ˣ := normalizedCharacterPrimeIndex (p := p) (L := L)
-  have hp1 : 1 < p - 1 := by
-    have hp2 : 2 ≤ p := hp.out.two_le
-    omega
+  have hp1 : 1 < p - 1 := by have := hp.out.two_le; omega
   letI : Fact (1 < p - 1) := ⟨hp1⟩
   have hpred_add :
       ((p - 2 : ℕ) : ZMod (p - 1)) + 1 = 0 := by
     have hsub : p - 2 + 1 = p - 1 := by omega
-    have hcast :
-        ((p - 2 : ℕ) : ZMod (p - 1)) + ((1 : ℕ) : ZMod (p - 1)) = 0 := by
-      rw [← Nat.cast_add, hsub]
-      simp
-    simpa using hcast
+    rw [← Nat.cast_one (R := ZMod (p - 1)), ← Nat.cast_add, hsub]
+    simp
   have hpred :
       ((p - 2 : ℕ) : ZMod (p - 1)) = -1 :=
     eq_neg_of_add_eq_zero_left hpred_add
@@ -349,8 +311,7 @@ lemma distinguishedPrimeExponentGeneratorPowerIndex_nsmul_normalizedInverseGener
               ((Nat.succ n : ZMod (p - 1)) * a) < p - 1 :=
         lt_of_le_of_lt hupper hsucc_lt
       rw [Nat.ModEq] at hmod_succ
-      rw [Nat.mod_eq_of_lt hleft_lt, Nat.mod_eq_of_lt hsucc_lt] at hmod_succ
-      exact hmod_succ
+      rwa [Nat.mod_eq_of_lt hleft_lt, Nat.mod_eq_of_lt hsucc_lt] at hmod_succ
 
 lemma distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget_of_normalizedBoundary
     (hp_odd : p ≠ 2) :
@@ -382,16 +343,13 @@ lemma distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget_of_
   have hindex :
       ((n : ZMod (p - 1)) * a) = (j : ZMod (p - 1)) := by
     rw [hn_zmod]
-    dsimp [a, u]
-    simp [normalizedInverseGeneratorIndex, mul_assoc]
+    simp [a, u, normalizedInverseGeneratorIndex, mul_assoc]
   have hpow :
       stickelbergerComplexCharacterGenerator (p := p) ^ j.val =
         stickelbergerComplexCharacterGenerator (p := p) ^
           (((n : ZMod (p - 1)) * a).val) := by
     apply stickelbergerComplexCharacterGenerator_pow_eq_of_zmod_eq (p := p)
     simp [hindex]
-  change distinguishedPrimeExponent (p := p) (L := L)
-      (stickelbergerComplexCharacterGenerator (p := p) ^ j.val) = n
   rw [hpow]
   simpa [distinguishedPrimeExponentGeneratorPowerIndex] using hcycle
 

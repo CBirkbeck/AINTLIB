@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.KummerCongruence.Bridge
@@ -24,7 +29,6 @@ open scoped NumberField Pointwise nonZeroDivisors
 
 namespace BernoulliRegular
 
-set_option linter.unusedSectionVars false
 
 section Herbrand
 
@@ -113,7 +117,7 @@ structure GeneralizedBernoulliToTeichmullerBridge
 lemma negHalf_mem_padicInt (hp_odd : p ≠ 2) :
     ∃ c : ℤ_[p], (c : ℚ_[p]) = -(1 / 2 : ℚ_[p]) := by
   have hp_prime : Nat.Prime p := hp.out
-  have h2_not_dvd : ¬ p ∣ 2 := fun h =>
+  have h2_not_dvd : ¬ p ∣ 2 := fun h ↦
     hp_odd (le_antisymm (Nat.le_of_dvd (by positivity) h) hp_prime.two_le)
   have h2_unit : IsUnit ((2 : ℕ) : ℤ_[p]) := by
     rw [PadicInt.isUnit_iff, PadicInt.norm_natCast_eq_one_iff]
@@ -126,7 +130,7 @@ lemma negHalf_mem_padicInt (hp_odd : p ≠ 2) :
     have h2_specQ :
         ((((h2_unit.unit : (ℤ_[p])ˣ).val : ℤ_[p]) : ℚ_[p])) =
           (2 : ℚ_[p]) :=
-      congrArg (fun x : ℤ_[p] => (x : ℚ_[p])) h2_spec
+      congrArg (fun x : ℤ_[p] ↦ (x : ℚ_[p])) h2_spec
     rw [← h2_specQ]
     change (((((h2_unit.unit⁻¹ : (ℤ_[p])ˣ) * h2_unit.unit).val : ℤ_[p]) :
       ℚ_[p])) = 1
@@ -152,8 +156,7 @@ lemma ordinaryBernoulliPDivisible_of_ratio_pDivisible
     ring
   have ha_lt_Qp : ‖((a : ℤ_[p]) : ℚ_[p])‖ < 1 := by
     rw [ha_pdiv]
-    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := by
-      simpa using (Padic.norm_natCast_lt_one_iff (p := p) (n := p)).2 dvd_rfl
+    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := Padic.norm_p_lt_one
     calc
       ‖(p : ℚ_[p]) * ((c * z : ℤ_[p]) : ℚ_[p])‖ =
           ‖((c * z : ℤ_[p]) : ℚ_[p])‖ * ‖(p : ℚ_[p])‖ := by

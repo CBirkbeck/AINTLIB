@@ -70,10 +70,8 @@ theorem norm_le_one_of_isIntegral_int {x : ℂ_[p]} (hx : IsIntegral ℤ x) :
     rw [Finset.sum_range_succ] at hsum
     have hlead : (algebraMap ℤ ℂ_[p]) (P.coeff N) * x ^ N = x ^ N := by
       rw [hNdef, hPmonic.coeff_natDegree, map_one, one_mul]
-    rw [hlead, add_comm, ← eq_neg_iff_add_eq_zero] at hsum
-    exact hsum
+    rwa [hlead, add_comm, ← eq_neg_iff_add_eq_zero] at hsum
   -- each lower term has norm `≤ ‖x‖^(N−1) < ‖x‖^N` (integer coefficients, smaller power)
-  have hxpos : (0 : ℝ) < ‖x‖ := lt_trans one_pos h1
   rcases Nat.eq_zero_or_pos N with hN0 | hNpos
   · -- `N = 0`: the relation reads `1 = 0`
     rw [hN0, Finset.range_zero, Finset.sum_empty, neg_zero, pow_zero] at htop
@@ -90,8 +88,7 @@ theorem norm_le_one_of_isIntegral_int {x : ℂ_[p]} (hx : IsIntegral ℤ x) :
   have hterm : ‖(algebraMap ℤ ℂ_[p]) (P.coeff i) * x ^ i‖ ≤ ‖x‖ ^ (N - 1) := by
     rw [norm_mul, norm_pow]
     calc ‖(algebraMap ℤ ℂ_[p]) (P.coeff i)‖ * ‖x‖ ^ i
-        ≤ 1 * ‖x‖ ^ i := by
-          exact mul_le_mul_of_nonneg_right hcoeff (by positivity)
+        ≤ 1 * ‖x‖ ^ i := mul_le_mul_of_nonneg_right hcoeff (by positivity)
       _ = ‖x‖ ^ i := one_mul _
       _ ≤ ‖x‖ ^ (N - 1) := pow_le_pow_right₀ h1.le (by omega)
   have hxNbound : ‖x‖ ^ N ≤ ‖x‖ ^ (N - 1) := by
@@ -250,7 +247,9 @@ lemma cycloTower1_le_unitsTower1 : cycloTower1 p ≤ unitsTower1 p :=
 /-- `ξ_{p^n}` is integral over `ℤ` (a primitive `p^n`-th root of unity, hence a root
 of unity, hence integral). -/
 private theorem zetaSys_isIntegral (n : ℕ) : IsIntegral ℤ (zetaSys p n) :=
-  (zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)
+  ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+    Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+    by simp [(zetaSys_primitiveRoot p n).pow_eq_one]⟩
 
 /-- `c_n(a) = (ξ^a−1)/(ξ−1) = Σ_{i<a} ξ^i`: the cyclotomic unit is the geometric sum.
 Clear the denominator (`ξ−1 ≠ 0` for `n ≥ 1`) and apply `geom_sum_mul`. -/
@@ -261,11 +260,16 @@ private theorem cycloUnit_eq_geomSum {a : ℕ} {n : ℕ} (hn : 1 ≤ n) :
   rw [cycloUnit, div_eq_iff hne, geom_sum_mul]
 
 /-- `c_n(a) = 1 + ξ + ⋯ + ξ^{a−1}` is integral over `ℤ` (a `ℤ`-polynomial in the
-`ℤ`-integral `ξ`). -/
-theorem isIntegral_cycloUnit {a : ℕ} (_ha : ¬ (p : ℕ) ∣ a) {n : ℕ} (hn : 1 ≤ n) :
-    IsIntegral ℤ (cycloUnit p a n) := by
-  rw [cycloUnit_eq_geomSum p hn]
-  exact IsIntegral.sum _ fun i _ => (zetaSys_isIntegral p n).pow i
+`ℤ`-integral `ξ`). For `n ≥ 1` this is the geometric sum; at `n = 0` the cyclotomic
+unit is the junk value `0` (since `ξ_{p^0} = 1`), which is integral, so no hypothesis
+on `a` or `n` is needed. -/
+theorem isIntegral_cycloUnit (a n : ℕ) : IsIntegral ℤ (cycloUnit p a n) := by
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · have h0 : zetaSys p 0 = 1 :=
+      IsPrimitiveRoot.one_right_iff.mp (by simpa using zetaSys_primitiveRoot p 0)
+    rw [cycloUnit, h0]; simp [isIntegral_zero]
+  · rw [cycloUnit_eq_geomSum p hn]
+    exact IsIntegral.sum _ fun i _ => (zetaSys_isIntegral p n).pow i
 
 /-- `orderOf ξ_{p^n} = p^n` (the primitive-root order). -/
 private theorem orderOf_zetaSys (n : ℕ) : orderOf (zetaSys p n) = p ^ n :=
@@ -411,12 +415,10 @@ private theorem cyclo_elems_mem_globalUnits {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) 
     change ((if hn : 1 ≤ n then Units.mk0 (cycloUnit p a n)
       (cycloUnit_ne_zero p ha hn) else 1 : ℂ_[p]ˣ) : ℂ_[p]) = _
     rw [dif_pos hn, Units.val_mk0]
-  have hinv : ((((cyclo p ha hp2).elems n)⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) = (cycloUnit p a n)⁻¹ := by
-    rw [Units.val_inv_eq_inv_val, hval]
   refine ⟨?_, ?_, ?_⟩
   · rw [hval]; exact cycloUnit_mem_Fglobal p hn
-  · rw [hval]; exact isIntegral_cycloUnit p ha hn
-  · rw [hinv]; exact isIntegral_inv_cycloUnit p ha hn
+  · rw [hval]; exact isIntegral_cycloUnit p a n
+  · rw [Units.val_inv_eq_inv_val, hval]; exact isIntegral_inv_cycloUnit p ha hn
 
 /-- **RJW TeX 3084**: `c_n(a) ∈ 𝒟_n` — membership in the generated subgroup (the
 word `(ξ^a−1)·(ξ−1)⁻¹`, with `a` reduced mod `p^n`) together with global
@@ -432,10 +434,8 @@ theorem cyclo_elems_mem_cycloUnits {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (hp2 : p 
     sub_ne_zero_of_ne ((zetaSys_primitiveRoot p n).ne_one hpn1)
   -- `p^n ∤ a`, so `a % p^n ≠ 0`
   have hpndvd : ¬ p ^ n ∣ a := fun h => ha (dvd_trans (dvd_pow_self p (by omega)) h)
-  have hmod_pos : 1 ≤ a % p ^ n := by
-    rcases Nat.eq_zero_or_pos (a % p ^ n) with h0 | h0
-    · exact absurd (Nat.dvd_of_mod_eq_zero h0) hpndvd
-    · exact h0
+  have hmod_pos : 1 ≤ a % p ^ n :=
+    Nat.pos_of_ne_zero fun h => hpndvd (Nat.dvd_of_mod_eq_zero h)
   have hmodlt0 : a % p ^ n < p ^ n := Nat.mod_lt _ (by positivity)
   have hmod_lt : a % p ^ n ≤ p ^ n - 1 := by omega
   have hne2 : zetaSys p n ^ (a % p ^ n) - 1 ≠ 0 := by
@@ -542,14 +542,14 @@ private theorem zetaSysU_pow_mem_cycloUnits {n : ℕ} (hn : 1 ≤ n) (k : ℕ) :
     exact pow_mem (IntermediateField.mem_adjoin_simple_self ℚ _) k
   · -- `ξ_n^k` integral over `ℤ`
     rw [Units.val_pow_eq_pow_val, zetaSysU_val]
-    exact ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).pow k
+    exact (zetaSys_isIntegral p n).pow k
   · -- `(ξ_n^k)⁻¹ = (ξ_n⁻¹)^k` integral over `ℤ` (`ξ_n⁻¹ = ξ_n^{p^n−1}` is a root of unity)
     rw [show (((zetaSysU p hn ^ k)⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) = ((zetaSys p n)⁻¹) ^ k from by
       rw [Units.val_inv_eq_inv_val, Units.val_pow_eq_pow_val, zetaSysU_val, inv_pow]]
     refine IsIntegral.pow ?_ k
     -- `ξ_n⁻¹ = ξ_n^{p^n − 1}`, an integral power
     rw [show (zetaSys p n)⁻¹ = (zetaSys p n) ^ (p ^ n - 1) from ?_]
-    · exact ((zetaSys_primitiveRoot p n).isIntegral (pow_pos hp.out.pos n)).pow _
+    · exact (zetaSys_isIntegral p n).pow _
     · refine inv_eq_of_mul_eq_one_left ?_
       rw [← pow_succ, Nat.sub_add_cancel (Nat.one_le_pow _ _ hp.out.pos),
         (zetaSys_primitiveRoot p n).pow_eq_one]
@@ -560,11 +560,9 @@ private theorem zetaSysU_mem_localUnitsOne {n : ℕ} (hn : 1 ≤ n) :
   have hξ1 : ‖zetaSys p n‖ = 1 := norm_primitiveRoot_eq_one' p (zetaSys_primitiveRoot p n)
   have hmemO : (zetaSysU p hn : ℂ_[p]) ∈ O p n := by
     rw [zetaSysU_val, O, Subring.mem_inf]; exact ⟨zetaSys_mem_K p n, le_of_eq hξ1⟩
-  have hinvval : (((zetaSysU p hn)⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) = (zetaSys p n)⁻¹ := by
-    rw [Units.val_inv_eq_inv_val, zetaSysU_val]
   have hinvnorm : ‖(zetaSys p n)⁻¹‖ ≤ 1 := le_of_eq (by rw [norm_inv, hξ1, inv_one])
   have hmemOinv : (((zetaSysU p hn)⁻¹ : ℂ_[p]ˣ) : ℂ_[p]) ∈ O p n := by
-    rw [hinvval, O, Subring.mem_inf]
+    rw [Units.val_inv_eq_inv_val, zetaSysU_val, O, Subring.mem_inf]
     exact ⟨(K p n).inv_mem (zetaSys_mem_K p n), hinvnorm⟩
   rw [mem_localUnitsOne_iff]
   exact ⟨⟨hmemO, hmemOinv⟩, by rw [zetaSysU_val]; exact norm_zetaSys_sub_one_lt_one' p hn⟩
@@ -593,10 +591,8 @@ theorem zpPow_zetaSys_mem_cycloClosureOne {n : ℕ} (hn : 1 ≤ n) (a : ℤ_[p])
   have hFcont : Continuous F :=
     Units.continuous_iff.2 ⟨hcont, hcont.comp continuous_neg⟩
   -- `F (k : ℕ) = ξu^k` (matches the integral powers)
-  have hFnat : ∀ k : ℕ, F (k : ℤ_[p]) = zetaSysU p hn ^ k := by
-    intro k
-    refine Units.ext ?_
-    rw [hFval, zpPow_natCast p hz1, Units.val_pow_eq_pow_val, zetaSysU_val]
+  have hFnat : ∀ k : ℕ, F (k : ℤ_[p]) = zetaSysU p hn ^ k := fun k =>
+    Units.ext (by rw [hFval, zpPow_natCast p hz1, Units.val_pow_eq_pow_val, zetaSysU_val])
   -- `x = F a` and `range F ⊆ closure(↑𝒟_n)`, so `x ∈ (𝒟_n)⁻`
   have hxF : x = F a := Units.ext (by rw [hFval]; exact hx)
   have hclos : x ∈ (cycloUnits p n).topologicalClosure := by
@@ -655,9 +651,8 @@ theorem zpPow_mem_cycloUnits_topologicalClosure {n : ℕ} {y : ℂ_[p]ˣ}
       zpPow_natCast p hyc, pow_zero]⟩ with hF
   have hFval : ∀ c, (F c : ℂ_[p]) = zpPow p (y : ℂ_[p]) c := fun _ => rfl
   have hFcont : Continuous F := Units.continuous_iff.2 ⟨hcont, hcont.comp continuous_neg⟩
-  have hFnat : ∀ k : ℕ, F (k : ℤ_[p]) = y ^ k := by
-    intro k; refine Units.ext ?_
-    rw [hFval, zpPow_natCast p hyc, Units.val_pow_eq_pow_val]
+  have hFnat : ∀ k : ℕ, F (k : ℤ_[p]) = y ^ k := fun k =>
+    Units.ext (by rw [hFval, zpPow_natCast p hyc, Units.val_pow_eq_pow_val])
   have hxF : x = F a := Units.ext (by rw [hFval]; exact hx)
   -- `range F ⊆ closure ↑(𝒟_n)⁻`: density of `ℕ ↪ ℤ_[p]` and `F(ℕ) ⊆ (𝒟_n)⁻`
   have hrange : Set.range F ⊆ closure ((cycloUnits p n).topologicalClosure : Set ℂ_[p]ˣ) := by
@@ -694,11 +689,8 @@ theorem mem_cycloClosureOne_of_pow_mem {n : ℕ} {g : ℂ_[p]ˣ}
   obtain ⟨c, hc⟩ := hunit.exists_left_inv
   -- `g = zpPow (g^{p−1}) c` (the unique `(p−1)`-th root via the binomial action)
   have hgeq : (g : ℂ_[p]) = zpPow p ((g ^ (p - 1) : ℂ_[p]ˣ) : ℂ_[p]) c := by
-    rw [Units.val_pow_eq_pow_val]
-    have hpow : (g : ℂ_[p]) ^ (p - 1) = zpPow p (g : ℂ_[p]) ((p - 1 : ℕ) : ℤ_[p]) :=
-      (zpPow_natCast p hgc (p - 1)).symm
-    rw [hpow, ← zpPow_mul p hgc, mul_comm, hc,
-      show (1 : ℤ_[p]) = ((1 : ℕ) : ℤ_[p]) by norm_cast, zpPow_natCast p hgc, pow_one]
+    rw [Units.val_pow_eq_pow_val, (zpPow_natCast p hgc (p - 1)).symm, ← zpPow_mul p hgc, mul_comm,
+      hc, show (1 : ℤ_[p]) = ((1 : ℕ) : ℤ_[p]) by norm_cast, zpPow_natCast p hgc, pow_one]
   have hypowc : ‖((g ^ (p - 1) : ℂ_[p]ˣ) : ℂ_[p]) - 1‖ < 1 := by
     rw [Units.val_pow_eq_pow_val, ← zpPow_natCast p hgc]
     exact norm_zpPow_sub_one_lt_one p hgc _

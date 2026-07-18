@@ -51,7 +51,7 @@ Galois conjugate of that class.
 
 noncomputable section
 
-open NumberField MonoidAlgebra
+open NumberField
 open scoped nonZeroDivisors
 
 namespace BernoulliRegular
@@ -184,7 +184,7 @@ theorem classGroupModPGroupRingAction_instance_apply_mk0
     classGroupModPGroupRingAction (p := p) (K := K)
         (cyclotomicGalActionInstance (p := p) (K := K)) x
         (Additive.ofMul (QuotientGroup.mk (ClassGroup.mk0 I) : ClassGroupModP K p)) =
-      x.sum fun a e =>
+      x.coeff.sum fun a e ↦
         e • Additive.ofMul
           (QuotientGroup.mk
             (ClassGroup.mk0
@@ -195,7 +195,7 @@ theorem classGroupModPGroupRingAction_instance_apply_mk0
   -- by the canonical-action dictionary.
   rw [classGroupModPGroupRingAction, MonoidAlgebra.lift_apply,
     LinearMap.finsupp_sum_apply]
-  refine Finsupp.sum_congr fun a _ => ?_
+  refine Finsupp.sum_congr fun a _ ↦ ?_
   rw [LinearMap.smul_apply]
   -- `cyclotomicGalActionInstance a [mk0 I] = [mk0 (σ_a I)]` is the dictionary,
   -- since `classGroupModPGroupRingAction ρ (single a 1) = ρ a`.
@@ -249,7 +249,9 @@ theorem mem_span_primeClassSet (I : (Ideal (𝓞 K))⁰) :
     intro hJ
     have hone : ClassGroup.mk0 (⟨J, hJ⟩ : (Ideal (𝓞 K))⁰) = (1 : ClassGroup (𝓞 K)) :=
       (ClassGroup.mk0_eq_one_iff hJ).mpr (by
-        show J.IsPrincipal; rw [Ideal.isUnit_iff.mp hJunit]; infer_instance)
+        show J.IsPrincipal
+        rw [Ideal.isUnit_iff.mp hJunit]
+        infer_instance)
     have hzero : Additive.ofMul
         (QuotientGroup.mk (ClassGroup.mk0 (⟨J, hJ⟩ : (Ideal (𝓞 K))⁰)) :
           ClassGroupModP K p) = 0 := by

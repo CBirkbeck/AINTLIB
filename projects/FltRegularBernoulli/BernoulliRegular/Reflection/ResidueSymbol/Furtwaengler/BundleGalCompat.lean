@@ -56,7 +56,6 @@ theorem psi_shift_of_zetaEll_action_traceForm
     σ.toMonoidHom.compAddChar S.psi =
       AddChar.mulShift S.psi
         (TraceFormStickelbergerSetup.kUnitOfZModUnit (k := k) c) := by
-  haveI : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
   ext x
   change σ (S.psi x) = S.psi
     ((TraceFormStickelbergerSetup.kUnitOfZModUnit (k := k) c : kˣ) * x)

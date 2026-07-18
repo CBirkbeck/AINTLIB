@@ -43,8 +43,8 @@ private theorem dlog_mul {g h : PowerSeries ℤ_[p]} (hg : IsUnit g) (hh : IsUni
   have hg' : g * Ring.inverse g = 1 := Ring.mul_inverse_cancel _ hg
   have hh' : h * Ring.inverse h = 1 := Ring.mul_inverse_cancel _ hh
   rw [dlog, dlog, dlog, PowerSeries.derivativeFun_mul, smul_eq_mul, smul_eq_mul,
-    Ring.mul_inverse_rev]
-  rw [show (1 + PowerSeries.X) * (g * h.derivativeFun + h * g.derivativeFun)
+    Ring.mul_inverse_rev,
+    show (1 + PowerSeries.X) * (g * h.derivativeFun + h * g.derivativeFun)
         * (Ring.inverse h * Ring.inverse g)
       = (1 + PowerSeries.X) * g.derivativeFun * Ring.inverse g * (h * Ring.inverse h)
         + (1 + PowerSeries.X) * h.derivativeFun * Ring.inverse h * (g * Ring.inverse g) from by
@@ -92,7 +92,7 @@ private theorem zsmul_powerSeries_eq_zero {g : PowerSeries ℤ_[p]} {k : ℕ} (h
   have hcoef : (k : ℤ) • PowerSeries.coeff n g = 0 := by
     rw [← map_zsmul (PowerSeries.coeff n) (k : ℤ) g, h, map_zero]
   rw [map_zero]
-  exact (smul_eq_zero.mp hcoef).resolve_left (by exact_mod_cast hk)
+  exact (smul_eq_zero.mp hcoef).resolve_left (mod_cast hk)
 
 /-- **RJW §12.1 Lemma (TeX 3170–3178)**: `μ_{p−1} ⊂ 𝒰_∞` is killed by `Col` (constant
 Coleman series are killed by `∂log`). Stated for a `(p−1)`-torsion tower.
@@ -108,15 +108,13 @@ theorem Col_eq_zero_of_torsion (u : NormCompatUnits p) (htor : ∀ n, (u.elems n
   have hp1 : p - 1 ≠ 0 := by have := hp.out.two_le; omega
   -- elementwise torsion ⟹ `u^{p−1} = 1` in `𝒰_∞`
   have hupow : u ^ (p - 1) = (1 : NormCompatUnits p) := by
-    apply NormCompatUnits.ext; funext n; rw [elems_pow p, htor n]; rfl
+    ext n; rw [elems_pow p, htor n]; rfl
   -- so the Coleman series is a `(p−1)`-th root of unity: `(f_u)^{p−1} = 1`
   have hfpow : (colemanSeries p u) ^ (p - 1) = 1 := by
     rw [← colemanSeries_pow p, hupow, colemanSeries_one p]
-  -- `(p−1)·∂log f_u = ∂log 1 = 0`
-  have hsmul : ((p - 1 : ℕ) : ℤ) • dlog p (colemanSeries p u) = 0 := by
+  -- `(p−1)·∂log f_u = ∂log 1 = 0`, and torsion-freeness of `ℤ_p⟦T⟧` ⟹ `∂log f_u = 0`
+  have hd : dlog p (colemanSeries p u) = 0 := zsmul_powerSeries_eq_zero p hp1 <| by
     rw [← dlog_pow p (colemanSeries_isUnit p u), hfpow, dlog_one p]
-  -- torsion-freeness of `ℤ_p⟦T⟧` ⟹ `∂log f_u = 0`
-  have hd : dlog p (colemanSeries p u) = 0 := zsmul_powerSeries_eq_zero p hp1 hsmul
   -- push `∂log f_u = 0` through the (linear) tail of `Col`
   rw [Col, hd, map_zero, LinearMap.zero_comp, PadicMeasure.unitsCmul]
   exact LinearMap.zero_comp _

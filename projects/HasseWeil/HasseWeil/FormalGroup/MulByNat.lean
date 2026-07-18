@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.FormalGroup.Definition
 
 /-!
@@ -65,12 +70,109 @@ private lemma constantCoeff_fAdd₂ (F : FormalGroup.FormalGroup R)
     MvPowerSeries.constantCoeff (fAdd₂ F a b) = 0 := by
   unfold fAdd₂
   rw [constantCoeff_subst_vanishing (hasSubst_pair₂ a b ha hb)
-    (fun s => by fin_cases s <;> simpa)]
+    (fun s ↦ by fin_cases s <;> simpa)]
   exact constantCoeff_FG_toSeries F
 
 /-! ### Bivariate assoc and comm -/
 
-set_option maxHeartbeats 800000 in
+/-- The substitution vector `![X 0, X 1] : Fin 2 → MvPowerSeries (Fin 3) R`
+admits substitution (both coordinates have vanishing constant coefficient). -/
+private lemma hasSubst_XY_fin3 :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+        Fin 2 → MvPowerSeries (Fin 3) R) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
+
+/-- The substitution vector `![X 1, X 2] : Fin 2 → MvPowerSeries (Fin 3) R`
+admits substitution (both coordinates have vanishing constant coefficient). -/
+private lemma hasSubst_YZ_fin3 :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+        Fin 2 → MvPowerSeries (Fin 3) R) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
+
+/-- The substitution vector `![F(X 0, X 1), X 2]` (used to build `F(F(X, Y), Z)`)
+admits substitution: the first coordinate is `F` of vanishing-constant-coefficient
+inputs, the second is a variable. -/
+private lemma hasSubst_FXY_Z_fin3 (F : FormalGroup.FormalGroup R) :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.subst
+            (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
+          MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
+  · exact (constantCoeff_subst_vanishing hasSubst_XY_fin3
+      (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans (constantCoeff_FG_toSeries F)
+  · simp
+
+/-- The substitution vector `![X 0, F(X 1, X 2)]` (used to build `F(X, F(Y, Z))`)
+admits substitution: the first coordinate is a variable, the second is `F` of
+vanishing-constant-coefficient inputs. -/
+private lemma hasSubst_X_FYZ_fin3 (F : FormalGroup.FormalGroup R) :
+    MvPowerSeries.HasSubst
+      (![MvPowerSeries.X (0 : Fin 3),
+          MvPowerSeries.subst
+            (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
+        Fin 2 → MvPowerSeries (Fin 3) R) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
+  · simp
+  · exact (constantCoeff_subst_vanishing hasSubst_YZ_fin3
+      (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans (constantCoeff_FG_toSeries F)
+
+-- Deeply nested `MvPowerSeries.subst` expressions; the default limit is exceeded
+-- while unifying the `Fin 3 → MvPowerSeries (Fin 2) R` specialization of `F.assoc`.
+/-- The left side `F(F(X, Y), Z)` of the associativity law, substituted along
+`![a, b, c]`, evaluates to `F(F(a, b), c)`: a substitution-composition
+reassociation. -/
+private lemma subst_abc_FXY_Z (F : FormalGroup.FormalGroup R)
+    (a b c : MvPowerSeries (Fin 2) R)
+    (h_abc : MvPowerSeries.HasSubst (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R)) :
+    MvPowerSeries.subst (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R)
+      (MvPowerSeries.subst
+        (![MvPowerSeries.subst
+              (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
+                Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
+            MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) =
+      fAdd₂ F (fAdd₂ F a b) c := by
+  rw [MvPowerSeries.subst_comp_subst_apply (hasSubst_FXY_Z_fin3 F) h_abc]
+  unfold fAdd₂
+  congr 1; funext s; fin_cases s
+  · change MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
+    rw [MvPowerSeries.subst_comp_subst_apply hasSubst_XY_fin3 h_abc]
+    congr 1; funext s; fin_cases s
+    · exact subst_fin3_X _ h_abc 0
+    · exact subst_fin3_X _ h_abc 1
+  · change MvPowerSeries.subst _ (MvPowerSeries.X 2) = _
+    exact subst_fin3_X _ h_abc 2
+
+-- Deeply nested `MvPowerSeries.subst` expressions; the default limit is exceeded
+-- while unifying the `Fin 3 → MvPowerSeries (Fin 2) R` specialization of `F.assoc`.
+/-- The right side `F(X, F(Y, Z))` of the associativity law, substituted along
+`![a, b, c]`, evaluates to `F(a, F(b, c))`: a substitution-composition
+reassociation. -/
+private lemma subst_abc_X_FYZ (F : FormalGroup.FormalGroup R)
+    (a b c : MvPowerSeries (Fin 2) R)
+    (h_abc : MvPowerSeries.HasSubst (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R)) :
+    MvPowerSeries.subst (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R)
+      (MvPowerSeries.subst
+        (![MvPowerSeries.X (0 : Fin 3),
+            MvPowerSeries.subst
+              (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
+                Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
+          Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) =
+      fAdd₂ F a (fAdd₂ F b c) := by
+  rw [MvPowerSeries.subst_comp_subst_apply (hasSubst_X_FYZ_fin3 F) h_abc]
+  unfold fAdd₂
+  congr 1; funext s; fin_cases s
+  · change MvPowerSeries.subst _ (MvPowerSeries.X 0) = _
+    exact subst_fin3_X _ h_abc 0
+  · change MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
+    rw [MvPowerSeries.subst_comp_subst_apply hasSubst_YZ_fin3 h_abc]
+    congr 1; funext s; fin_cases s
+    · exact subst_fin3_X _ h_abc 1
+    · exact subst_fin3_X _ h_abc 2
+
 -- Deeply nested `MvPowerSeries.subst` expressions; the default limit is exceeded
 -- while unifying the `Fin 3 → MvPowerSeries (Fin 2) R` specialization of `F.assoc`.
 /-- Associativity of the bivariate `F`-addition: for `a, b, c` with vanishing
@@ -81,74 +183,12 @@ private theorem fAdd₂_assoc (F : FormalGroup.FormalGroup R)
     (hb : MvPowerSeries.constantCoeff b = 0)
     (hc : MvPowerSeries.constantCoeff c = 0) :
     fAdd₂ F (fAdd₂ F a b) c = fAdd₂ F a (fAdd₂ F b c) := by
-  have h_XY : MvPowerSeries.HasSubst
-      (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
-        Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
-  have h_YZ : MvPowerSeries.HasSubst
-      (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
-        Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s <;> simp
-  have h_FXY_Z : MvPowerSeries.HasSubst
-      (![MvPowerSeries.subst
-            (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
-              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
-          MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
-    · exact (constantCoeff_subst_vanishing h_XY (fun s => by fin_cases s <;> simp)
-        F.toSeries).trans (constantCoeff_FG_toSeries F)
-    · simp
-  have h_X_FYZ : MvPowerSeries.HasSubst
-      (![MvPowerSeries.X (0 : Fin 3),
-          MvPowerSeries.subst
-            (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
-              Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
-        Fin 2 → MvPowerSeries (Fin 3) R) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro s; fin_cases s
-    · simp
-    · exact (constantCoeff_subst_vanishing h_YZ (fun s => by fin_cases s <;> simp)
-        F.toSeries).trans (constantCoeff_FG_toSeries F)
   have h_abc : MvPowerSeries.HasSubst
       (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R) :=
     hasSubst_triple₂ a b c ha hb hc
-  have comp_L : MvPowerSeries.subst (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R)
-      (MvPowerSeries.subst
-        (![MvPowerSeries.subst
-              (![MvPowerSeries.X (0 : Fin 3), MvPowerSeries.X 1] :
-                Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries,
-            MvPowerSeries.X 2] : Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) =
-      fAdd₂ F (fAdd₂ F a b) c := by
-    rw [MvPowerSeries.subst_comp_subst_apply h_FXY_Z h_abc]
-    unfold fAdd₂
-    congr 1; funext s; fin_cases s
-    · change MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
-      rw [MvPowerSeries.subst_comp_subst_apply h_XY h_abc]
-      congr 1; funext s; fin_cases s
-      · exact subst_fin3_X _ h_abc 0
-      · exact subst_fin3_X _ h_abc 1
-    · change MvPowerSeries.subst _ (MvPowerSeries.X 2) = _
-      exact subst_fin3_X _ h_abc 2
-  have comp_R : MvPowerSeries.subst (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R)
-      (MvPowerSeries.subst
-        (![MvPowerSeries.X (0 : Fin 3),
-            MvPowerSeries.subst
-              (![MvPowerSeries.X (1 : Fin 3), MvPowerSeries.X 2] :
-                Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries] :
-          Fin 2 → MvPowerSeries (Fin 3) R) F.toSeries) =
-      fAdd₂ F a (fAdd₂ F b c) := by
-    rw [MvPowerSeries.subst_comp_subst_apply h_X_FYZ h_abc]
-    unfold fAdd₂
-    congr 1; funext s; fin_cases s
-    · change MvPowerSeries.subst _ (MvPowerSeries.X 0) = _
-      exact subst_fin3_X _ h_abc 0
-    · change MvPowerSeries.subst _ (MvPowerSeries.subst _ F.toSeries) = _
-      rw [MvPowerSeries.subst_comp_subst_apply h_YZ h_abc]
-      congr 1; funext s; fin_cases s
-      · exact subst_fin3_X _ h_abc 1
-      · exact subst_fin3_X _ h_abc 2
   have step := congr_arg
     (MvPowerSeries.subst (![a, b, c] : Fin 3 → MvPowerSeries (Fin 2) R)) F.assoc
-  rw [comp_L, comp_R] at step
+  rw [subst_abc_FXY_Z F a b c h_abc, subst_abc_X_FYZ F a b c h_abc] at step
   exact step
 
 /-- Commutativity of the bivariate `F`-addition. -/
@@ -166,7 +206,7 @@ private theorem fAdd₂_comm (F : FormalGroup.FormalGroup R)
   have step := congr_arg
     (MvPowerSeries.subst (![a, b] : Fin 2 → MvPowerSeries (Fin 2) R)) F.comm
   rw [MvPowerSeries.subst_comp_subst_apply h_swap h_ab] at step
-  have heq : (fun s => MvPowerSeries.subst
+  have heq : (fun s ↦ MvPowerSeries.subst
       (![a, b] : Fin 2 → MvPowerSeries (Fin 2) R)
       ((![MvPowerSeries.X 1, MvPowerSeries.X 0] : Fin 2 → MvPowerSeries (Fin 2) R) s)) =
       (![b, a] : Fin 2 → MvPowerSeries (Fin 2) R) := by
@@ -223,25 +263,29 @@ private lemma mv_subst_X_of_unit {τ : Type*}
   change MvPowerSeries.subst a (MvPowerSeries.X () : MvPowerSeries Unit R) = a ()
   exact MvPowerSeries.subst_X ha ()
 
+/-- The constant `Unit`-indexed family `fun _ ↦ g` admits substitution whenever
+`g` has vanishing constant coefficient. -/
+private lemma hasSubst_const_unit (g : MvPowerSeries (Fin 2) R)
+    (hg : MvPowerSeries.constantCoeff g = 0) :
+    MvPowerSeries.HasSubst (fun _ : Unit ↦ g) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
+
 private lemma hasSubst_const_F (F : FormalGroup.FormalGroup R) :
     MvPowerSeries.HasSubst
-      (fun _ : Unit => F.toSeries : Unit → MvPowerSeries (Fin 2) R) := by
-  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-  intro; exact constantCoeff_FG_toSeries F
+      (fun _ : Unit ↦ F.toSeries : Unit → MvPowerSeries (Fin 2) R) :=
+  hasSubst_const_unit F.toSeries (constantCoeff_FG_toSeries F)
 
 private lemma hasSubst_const_Xi (i : Fin 2) :
     MvPowerSeries.HasSubst
-      (fun _ : Unit => MvPowerSeries.X i : Unit → MvPowerSeries (Fin 2) R) := by
-  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; simp
+      (fun _ : Unit ↦ MvPowerSeries.X i : Unit → MvPowerSeries (Fin 2) R) :=
+  hasSubst_const_unit (MvPowerSeries.X i) (by simp)
 
 lemma constantCoeff_univariate_subst
     (g : MvPowerSeries (Fin 2) R) (hg : MvPowerSeries.constantCoeff g = 0)
     (f : PowerSeries R) (hf : PowerSeries.constantCoeff f = 0) :
     MvPowerSeries.constantCoeff (PowerSeries.subst g f) = 0 := by
   rw [PowerSeries.subst_def]
-  have h : MvPowerSeries.HasSubst (fun _ : Unit => g) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
-  exact MvPowerSeries.constantCoeff_subst_eq_zero h (fun _ => hg) hf
+  exact MvPowerSeries.constantCoeff_subst_eq_zero (hasSubst_const_unit g hg) (fun _ ↦ hg) hf
 
 private lemma subst_F_applied_to_X (F : FormalGroup.FormalGroup R) :
     PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) (PowerSeries.X : PowerSeries R) =
@@ -259,9 +303,7 @@ private lemma subst_univariate_zero (g : MvPowerSeries (Fin 2) R)
     (hg : MvPowerSeries.constantCoeff g = 0) :
     PowerSeries.subst g (0 : PowerSeries R) = 0 := by
   rw [PowerSeries.subst_def]
-  have h : MvPowerSeries.HasSubst (fun _ : Unit => g) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
-  exact subst_zero_eq h
+  exact subst_zero_eq (hasSubst_const_unit g hg)
 
 /-- `MvPowerSeries.subst ![0, 0] F.toSeries = 0` when `constantCoeff F.toSeries = 0`. -/
 private lemma subst_pair_zero_fin2 (F : FormalGroup.FormalGroup R) :
@@ -270,10 +312,10 @@ private lemma subst_pair_zero_fin2 (F : FormalGroup.FormalGroup R) :
       F.toSeries = 0 := by
   have heq : (![(0 : MvPowerSeries (Fin 2) R), 0] :
       Fin 2 → MvPowerSeries (Fin 2) R) =
-      (fun _ : Fin 2 => (0 : MvPowerSeries (Fin 2) R)) := by
+      (fun _ : Fin 2 ↦ (0 : MvPowerSeries (Fin 2) R)) := by
     funext s; fin_cases s <;> rfl
   rw [heq]
-  have h : MvPowerSeries.HasSubst (fun _ : Fin 2 => (0 : MvPowerSeries (Fin 2) R)) := by
+  have h : MvPowerSeries.HasSubst (fun _ : Fin 2 ↦ (0 : MvPowerSeries (Fin 2) R)) := by
     apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; simp
   ext e
   rw [MvPowerSeries.coeff_subst h, MvPowerSeries.coeff_zero]
@@ -284,7 +326,7 @@ private lemma subst_pair_zero_fin2 (F : FormalGroup.FormalGroup R) :
     rw [Finsupp.prod_zero_index]
     rw [MvPowerSeries.coeff_zero_eq_constantCoeff_apply, constantCoeff_FG_toSeries]
     exact zero_smul _ _
-  · have hprod : (d.prod fun _ exp => (0 : MvPowerSeries (Fin 2) R) ^ exp) = 0 := by
+  · have hprod : (d.prod fun _ exp ↦ (0 : MvPowerSeries (Fin 2) R) ^ exp) = 0 := by
       rw [Finsupp.prod]
       obtain ⟨i, hi⟩ := Finsupp.support_nonempty_iff.mpr hd
       exact Finset.prod_eq_zero hi
@@ -295,10 +337,45 @@ private lemma subst_pair_zero_fin2 (F : FormalGroup.FormalGroup R) :
 private lemma preservesAddCondition_zero (F : FormalGroup.FormalGroup R) :
     PreservesAddCondition F 0 := by
   unfold PreservesAddCondition
-  rw [subst_univariate_zero F.toSeries (constantCoeff_FG_toSeries F)]
-  rw [subst_univariate_zero (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) (by simp)]
-  rw [subst_univariate_zero (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) (by simp)]
+  rw [subst_univariate_zero F.toSeries (constantCoeff_FG_toSeries F),
+    subst_univariate_zero (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) (by simp),
+    subst_univariate_zero (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) (by simp)]
   exact (subst_pair_zero_fin2 F).symm
+
+/-- Substituting a bivariate series `g` (with `HasSubst (fun _ ↦ g)`) into the
+univariate `F`-sum `fAdd F f X` distributes over `fAdd₂`:
+`g(fAdd F f X) = F(g(f), g)`. This is the substitution-composition step shared by
+the LHS (`g = F.toSeries`) and both RHS lifts (`g = X 0`, `g = X 1`) of the
+inductive step. -/
+private lemma subst_fAdd_fX_eq_fAdd₂ (F : FormalGroup.FormalGroup R)
+    (f : PowerSeries R) (hf : PowerSeries.constantCoeff f = 0)
+    (g : MvPowerSeries (Fin 2) R)
+    (hg : MvPowerSeries.HasSubst (fun _ : Unit ↦ g)) :
+    PowerSeries.subst g (fAdd F f PowerSeries.X) =
+      fAdd₂ F (PowerSeries.subst g f) g := by
+  have hpair_univ : MvPowerSeries.HasSubst
+      (![f, PowerSeries.X] : Fin 2 → MvPowerSeries Unit R) :=
+    hasSubst_pair f PowerSeries.X hf (by simp)
+  unfold fAdd fAdd₂
+  rw [PowerSeries.subst_def, MvPowerSeries.subst_comp_subst_apply hpair_univ hg]
+  congr 1
+  funext s; fin_cases s
+  · rfl
+  · exact mv_subst_X_of_unit _ hg
+
+/-- The formal group law is the bivariate `F`-sum of its two variables:
+`F.toSeries = F(X 0, X 1)`. -/
+private lemma toSeries_eq_fAdd₂_X (F : FormalGroup.FormalGroup R) :
+    F.toSeries =
+      fAdd₂ F (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R)
+              (MvPowerSeries.X (1 : Fin 2)) := by
+  unfold fAdd₂
+  have heq : (![MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X 1] :
+      Fin 2 → MvPowerSeries (Fin 2) R) =
+      (fun s : Fin 2 ↦ MvPowerSeries.X s) := by
+    funext s; fin_cases s <;> rfl
+  rw [heq]
+  exact (congr_fun MvPowerSeries.subst_self F.toSeries).symm
 
 /-- The key inductive step: if `f` satisfies `PreservesAddCondition` and has
 vanishing constant coefficient, then so does `fAdd F f X`. -/
@@ -308,9 +385,9 @@ private lemma preservesAddCondition_step (F : FormalGroup.FormalGroup R)
     PreservesAddCondition F (fAdd F f PowerSeries.X) := by
   unfold PreservesAddCondition at ih ⊢
   set fX : MvPowerSeries (Fin 2) R :=
-    PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f with hfX_def
+    PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f
   set fY : MvPowerSeries (Fin 2) R :=
-    PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f with hfY_def
+    PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f
   have hfX0 : MvPowerSeries.constantCoeff fX = 0 :=
     constantCoeff_univariate_subst _ (by simp) f hf
   have hfY0 : MvPowerSeries.constantCoeff fY = 0 :=
@@ -319,56 +396,13 @@ private lemma preservesAddCondition_step (F : FormalGroup.FormalGroup R)
     MvPowerSeries (Fin 2) R) = 0 := by simp
   have hX1 : MvPowerSeries.constantCoeff (MvPowerSeries.X (1 : Fin 2) :
     MvPowerSeries (Fin 2) R) = 0 := by simp
-  have hF := hasSubst_const_F F
-  have hpair_univ : MvPowerSeries.HasSubst
-      (![f, PowerSeries.X] : Fin 2 → MvPowerSeries Unit R) :=
-    hasSubst_pair f PowerSeries.X hf (by simp)
-  have hX0_const := hasSubst_const_Xi (R := R) 0
-  have hX1_const := hasSubst_const_Xi (R := R) 1
-  -- LHS: subst F.toSeries (fAdd F f X) = fAdd₂ F (subst F f) F.toSeries
-  have lhs_eq : PowerSeries.subst F.toSeries (fAdd F f PowerSeries.X) =
-      fAdd₂ F (PowerSeries.subst F.toSeries f) F.toSeries := by
-    unfold fAdd fAdd₂
-    rw [PowerSeries.subst_def]
-    rw [MvPowerSeries.subst_comp_subst_apply hpair_univ hF]
-    congr 1
-    funext s; fin_cases s
-    · rfl
-    · exact mv_subst_X_of_unit _ hF
-  have rhs_lift_X0 : PowerSeries.subst
-      (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R)
-      (fAdd F f PowerSeries.X) = fAdd₂ F fX (MvPowerSeries.X 0) := by
-    unfold fAdd fAdd₂
-    rw [PowerSeries.subst_def]
-    rw [MvPowerSeries.subst_comp_subst_apply hpair_univ hX0_const]
-    congr 1
-    funext s; fin_cases s
-    · rfl
-    · exact mv_subst_X_of_unit _ hX0_const
-  have rhs_lift_X1 : PowerSeries.subst
-      (MvPowerSeries.X (1 : Fin 2) : MvPowerSeries (Fin 2) R)
-      (fAdd F f PowerSeries.X) = fAdd₂ F fY (MvPowerSeries.X 1) := by
-    unfold fAdd fAdd₂
-    rw [PowerSeries.subst_def]
-    rw [MvPowerSeries.subst_comp_subst_apply hpair_univ hX1_const]
-    congr 1
-    funext s; fin_cases s
-    · rfl
-    · exact mv_subst_X_of_unit _ hX1_const
-  rw [lhs_eq, rhs_lift_X0, rhs_lift_X1]
+  -- LHS and the two RHS lifts are the same substitution-composition step.
+  rw [subst_fAdd_fX_eq_fAdd₂ F f hf F.toSeries (hasSubst_const_F F),
+    subst_fAdd_fX_eq_fAdd₂ F f hf _ (hasSubst_const_Xi 0),
+    subst_fAdd_fX_eq_fAdd₂ F f hf _ (hasSubst_const_Xi 1)]
   rw [show PowerSeries.subst F.toSeries f = fAdd₂ F fX fY from ih]
-  -- Rewrite F.toSeries as fAdd₂ F (X 0) (X 1).
-  have hFact : F.toSeries =
-      fAdd₂ F (MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R)
-              (MvPowerSeries.X (1 : Fin 2)) := by
-    unfold fAdd₂
-    have heq : (![MvPowerSeries.X (0 : Fin 2), MvPowerSeries.X 1] :
-        Fin 2 → MvPowerSeries (Fin 2) R) =
-        (fun s : Fin 2 => MvPowerSeries.X s) := by
-      funext s; fin_cases s <;> rfl
-    rw [heq]
-    exact (congr_fun MvPowerSeries.subst_self F.toSeries).symm
-  conv_lhs => rw [hFact]
+  -- Rewrite F.toSeries as fAdd₂ F (X 0) (X 1) and apply the interchange law.
+  conv_lhs => rw [toSeries_eq_fAdd₂_X F]
   exact fAdd₂_interchange F fX fY (MvPowerSeries.X 0) (MvPowerSeries.X 1) hfX0 hfY0 hX0 hX1
 
 /-- **The preserves_add identity** for multiplication-by-n on a formal group:

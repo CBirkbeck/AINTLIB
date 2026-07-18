@@ -36,8 +36,7 @@ theorem characterProjectionCoefficient_inv_mul
     (i : ℕ) (b a : Delta p) :
     characterProjectionCoefficient (p := p) i (b⁻¹ * a) =
       ((b : ZMod p) ^ i) * characterProjectionCoefficient (p := p) i a := by
-  have hinv : (b⁻¹ * a)⁻¹ = a⁻¹ * b := by
-    group
+  have hinv : (b⁻¹ * a)⁻¹ = a⁻¹ * b := by group
   rw [characterProjectionCoefficient, characterProjectionCoefficient, hinv]
   simp only [Units.val_mul]
   rw [mul_pow]

@@ -1,8 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
-import BernoulliRegular.FLT37.Hilbert90
-import BernoulliRegular.FLT37.PrimaryConj
+module
 
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
+public import BernoulliRegular.FLT37.Hilbert90
+public import BernoulliRegular.FLT37.PrimaryConj
 
 /-!
 # LV008-CTOR-b: Vandiver descent step 1 — `I · σ(I)` is principal under `p ∤ h⁺`
@@ -57,7 +58,6 @@ variable {p : ℕ} [Fact p.Prime]
 
 local notation3 "K⁺" => NumberField.maximalRealSubfield (CyclotomicField p ℚ)
 
-set_option backward.isDefEq.respectTransparency false in
 omit [Fact p.Prime] in
 /-- **σ-fixedness of the factor product.** The element
 `(a + ζ b)·σ(a + ζ b)` is fixed by `σ = ringOfIntegersComplexConj K`,
@@ -81,7 +81,6 @@ theorem caseI_factor_mul_complexConj_isFixed
   rw [h_inv]
   ring
 
-set_option backward.isDefEq.respectTransparency false in
 omit [Fact p.Prime] in
 /-- **Span of σ-fixed element descends to K⁺.** If `x ∈ 𝓞 K` is
 σ-fixed, then `Ideal.span ({x} : Set (𝓞 K))` is the pushforward under
@@ -100,13 +99,12 @@ theorem caseI_factor_mul_complexConj_idealSpan_descends [IsCMField (CyclotomicFi
   refine ⟨Ideal.span ({x₀} : Set (𝓞 K⁺)), ?_⟩
   rw [Ideal.map_span, Set.image_singleton]
   congr 1
-  exact congrArg (fun y => ({y} : Set _)) hx₀.symm
+  exact congrArg (fun y ↦ ({y} : Set _)) hx₀.symm
 
 section VandiverDescent
 
-variable (p) [Fact p.Prime] [IsCMField (CyclotomicField p ℚ)]
+variable (p) [IsCMField (CyclotomicField p ℚ)]
 
-set_option backward.isDefEq.respectTransparency false in
 omit [Fact p.Prime] in
 /-- **σ-conjugate factor identity.** From the LV008-CTOR-a fact
 `Ideal.span {a + ζ b} = I^p`, applying `Ideal.map σ` (where σ =
@@ -141,7 +139,6 @@ theorem caseI_factor_conj_idealSpan_eq_pow
     simp [map_add, map_mul, map_intCast]] at h_map
   exact h_map
 
-set_option backward.isDefEq.respectTransparency false in
 omit [Fact p.Prime] in
 /-- **`(I · σ I)^p` is principal in `𝓞 K`.** Vandiver descent step 1
 (without the final K⁺-descent).
@@ -213,9 +210,8 @@ end VandiverDescent
 
 section ClassGroupForm
 
-variable (p) [Fact p.Prime] [IsCMField (CyclotomicField p ℚ)]
+variable (p) [IsCMField (CyclotomicField p ℚ)]
 
-set_option backward.isDefEq.respectTransparency false in
 omit [Fact p.Prime] in
 /-- **Class-group reformulation of LV008-CTOR-b.** In
 `ClassGroup (𝓞 K)`, the class of `I · Ideal.map σ I` has `p`-th power
@@ -290,8 +286,6 @@ theorem caseI_factor_ideal_mul_conj_class_pow_eq_one
     rw [← hx₀]
   rw [h_target]
 
-set_option linter.unusedSectionVars false in
-set_option backward.isDefEq.respectTransparency false in
 /-- **`I * σI` is principal under plus-class-number nondivisibility.**
 
 This is the no-extra-descent form of the product step.  It reuses the
@@ -329,8 +323,6 @@ theorem caseI_factor_ideal_mul_conj_isPrincipal_of_not_dvd_hPlus
       (p := p) (K := CyclotomicField p ℚ) h_VC hα_ne hI_ne hI
   simpa using h_principal
 
-set_option linter.unusedSectionVars false in
-set_option backward.isDefEq.respectTransparency false in
 /-- The proved product-principality step gives the class-group relation
 `[I] * [σI] = 1`.
 
@@ -414,7 +406,7 @@ theorem class_eq_one_of_p_torsion_mul_and_square
   have h_ord_4 : orderOf x ∣ 4 := orderOf_dvd_of_pow_eq_one hx4
   have h_cop2 : Nat.Coprime p 2 := by
     rw [Nat.coprime_comm, Nat.coprime_primes Nat.prime_two hp_prime]
-    exact fun h => hp_odd h.symm
+    exact fun h ↦ hp_odd h.symm
   have h_cop4 : Nat.Coprime p 4 := by
     simpa [show 4 = 2 ^ 2 by norm_num] using h_cop2.pow_right 2
   have h_ord_one : orderOf x = 1 := by
@@ -423,8 +415,6 @@ theorem class_eq_one_of_p_torsion_mul_and_square
     exact Nat.dvd_one.mp h_gcd
   exact orderOf_eq_one_iff.mp h_ord_one
 
-set_option linter.unusedSectionVars false in
-set_option backward.isDefEq.respectTransparency false in
 /-- Under plus-coprime and the concrete square-class target, the actual
 case-I factor ideal has trivial class.
 
@@ -492,8 +482,6 @@ theorem caseI_factor_class_eq_one_of_square_and_not_dvd_hPlus
   exact class_eq_one_of_p_torsion_mul_and_square
     (Fact.out : Nat.Prime p) hp_odd hx_p hxy hyx_sq
 
-set_option linter.unusedSectionVars false in
-set_option backward.isDefEq.respectTransparency false in
 /-- **Class-group descent with an explicit σ-fixed ideal descent input.**
 The previous lemma proves `(I * σI)^p` principal. If the σ-fixed ideal
 `I * σI` is known to be the pushforward of a real-subfield ideal, then

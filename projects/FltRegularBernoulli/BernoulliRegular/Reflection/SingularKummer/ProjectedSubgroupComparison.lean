@@ -34,7 +34,7 @@ def subgroupTorsionToTorsion (B : AddSubgroup A) (p : ℕ) :
     torsionBySubgroup B p →+ torsionBySubgroup A p where
   toFun x :=
     ⟨(x.1 : A), by
-      have hx := congrArg (fun y : B => (y : A)) x.2
+      have hx := congrArg (fun y : B ↦ (y : A)) x.2
       simpa using hx⟩
   map_zero' := by
     apply Subtype.ext
@@ -70,7 +70,7 @@ theorem torsionComponentNontrivial_of_projectedSubgroup
   apply hx_ne
   have hxA : (x.1 : A) = 0 := by
     simpa [subgroupTorsionToTorsion] using
-      congrArg (fun y : torsionBySubgroup A p => (y.1 : A)) hx_zero
+      congrArg (fun y : torsionBySubgroup A p ↦ (y.1 : A)) hx_zero
   exact Subtype.ext (Subtype.ext hxA)
 
 end ProjectedSubgroupComparison

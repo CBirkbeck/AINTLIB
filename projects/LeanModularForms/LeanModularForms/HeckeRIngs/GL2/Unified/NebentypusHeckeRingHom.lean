@@ -371,8 +371,6 @@ noncomputable def heckeRingHomCharSpace :
 
 section Bridge
 
-variable {k : ℤ} {χ : (ZMod N)ˣ →* ℂˣ}
-
 private lemma adj_rep_mem (p : ℕ) (hp : Nat.Prime p) (hpN : Nat.Coprime p N) :
     GL_adjugate (HeckeCoset.rep (D_p_Gamma0 N p hp.pos) : GL _ ℚ) ∈
       HeckeCoset.toSet (D_p_Gamma0 N p hp.pos) := by
@@ -1030,8 +1028,6 @@ end Bridge
 
 section OperatorCommutativityFromRing
 
-variable {k : ℤ} {χ : (ZMod N)ˣ →* ℂˣ}
-
 /-- Endomorphism form of the normalization bridge: on the χ-space, the canonical χ-twisted
 operator at the prime double coset `D_p` equals the scalar `χ(p)⁻¹` times the restricted
 concrete operator `heckeT_p_all_charRestrict`. -/
@@ -1051,8 +1047,6 @@ theorem heckeRingHomCharSpace_D_p_eq_scalar_charRestrict (p : ℕ) (hp : Nat.Pri
 end OperatorCommutativityFromRing
 
 section CompositeBridge
-
-variable {k : ℤ} {χ : (ZMod N)ˣ →* ℂˣ}
 
 /-- The diamond operator `⟨d⟩` preserves `modFormCharSpace k χ` (it acts by the
 scalar `χ(d)`). -/

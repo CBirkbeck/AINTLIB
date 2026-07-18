@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1Stickelberger
 import BernoulliRegular.FLT37.PadicL.LpValueFormula
 import Mathlib.Algebra.Group.ForwardDiff
@@ -90,7 +95,7 @@ theorem alternating_sum_choose_mul_pow_eq_zero {i m : ℕ} (hmi : m < i) :
     rw [← hsum]; ring
   rw [Finset.mul_sum] at hmul
   rw [← hmul]
-  refine Finset.sum_congr rfl fun k hk => ?_
+  refine Finset.sum_congr rfl fun k hk ↦ ?_
   rw [Finset.mem_range, Nat.lt_succ_iff] at hk
   -- `(-1)^i · (-1)^{i-k} = (-1)^{2i - k} = (-1)^{-k} = (-1)^k`.
   have hpow : (-1 : R) ^ i * (-1 : R) ^ (i - k) = (-1 : R) ^ k := by
@@ -138,9 +143,11 @@ term is `0`). -/
 noncomputable def geomLogSummand (T : ℚ_[p]) (n : ℕ) : ℚ_[p] :=
   if n = 0 then 0 else T ^ n / (n : ℚ_[p])
 
+/-- The `0`-th term of the geometric log series vanishes. -/
 @[simp] theorem geomLogSummand_zero (T : ℚ_[p]) : geomLogSummand T 0 = 0 := by
   simp [geomLogSummand]
 
+/-- Away from `n = 0`, the summand is `T ^ n / n`. -/
 theorem geomLogSummand_of_ne_zero (T : ℚ_[p]) {n : ℕ} (hn : n ≠ 0) :
     geomLogSummand T n = T ^ n / (n : ℚ_[p]) := by simp [geomLogSummand, hn]
 
@@ -207,19 +214,22 @@ theorem gaussSumTwist_eq_mathlib (i : ℕ) (j : (ZMod p)ˣ) :
   have hmathlib : _root_.gaussSum (S.teichCharPow i) (AddChar.mulShift S.addCharPi (j : ZMod p)) =
       ∑ a ∈ Finset.univ \ {(0 : ZMod p)},
         S.teichCharPow i a * AddChar.mulShift S.addCharPi (j : ZMod p) a := by
-    have hsplit := Finset.sum_eq_sum_diff_singleton_add (Finset.mem_univ (0 : ZMod p))
-      (fun a : ZMod p => S.teichCharPow i a * AddChar.mulShift S.addCharPi (j : ZMod p) a)
+    have hsplit := (Finset.sum_erase_add Finset.univ
+      (fun a : ZMod p ↦ S.teichCharPow i a * AddChar.mulShift S.addCharPi (j : ZMod p) a)
+      (Finset.mem_univ (0 : ZMod p))).symm
+    rw [Finset.erase_eq] at hsplit
     rw [MulChar.map_zero, zero_mul, add_zero] at hsplit
     exact hsplit
   rw [hmathlib]
   let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
   have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
     ext x
-    simpa only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
-      Finset.mem_sdiff, Finset.mem_singleton, φ] using isUnit_iff_ne_zero
+    simp only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
+      Finset.mem_sdiff, Finset.mem_singleton, φ]
+    exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
-  unfold StickelbergerF1Setup.gaussSumTwist
-  refine Finset.sum_congr rfl fun a _ => ?_
+  simp only [StickelbergerF1Setup.gaussSumTwist]
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Function.Embedding.coeFn_mk, teichCharPow_apply_unit]
   -- `mulShift ψ j (a) = ψ (j·a) = (1+π)^{(j·a).rep}` (and `(j·a).rep = ((j*a : ℤ/p)).val`).
   rw [AddChar.mulShift_apply,
@@ -271,9 +281,9 @@ theorem gaussSumTwist_trivial_eq_zero {i : ℕ} (hi0 : 0 < i) (hip : i < p - 1) 
   simp only [mul_one]
   -- This is exactly `gaussSumCoeff i 0` (the `C(·, 0) = 1` slice), which vanishes.
   have hc0 := S.gaussSumCoeff_zero_eq_zero hi0 hip
-  unfold StickelbergerF1Setup.gaussSumCoeff at hc0
+  simp only [StickelbergerF1Setup.gaussSumCoeff] at hc0
   rw [← hc0]
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Nat.choose_zero_right, Nat.cast_one, mul_one]
 
 /-! ### The resummation factoring `logSum i = τ(ω^{-i}) · Λ(i)`
@@ -323,9 +333,9 @@ Each inner sum collapses by `gaussSumTwist_collapse`, then `gaussSum i` factors 
 of the `j`-sum. -/
 theorem logSumViaSeries_eq (c : (ZMod p)ˣ → S.O) (i : ℕ) :
     S.logSumViaSeries c i = S.logCoeffSum c i * S.gaussSum i := by
-  unfold logSumViaSeries logCoeffSum
+  simp only [logSumViaSeries, logCoeffSum]
   rw [Finset.sum_mul]
-  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [S.gaussSumTwist_collapse i j, mul_assoc]
 
 /-- **The precise remaining analytic residual**, isolated to the twisted

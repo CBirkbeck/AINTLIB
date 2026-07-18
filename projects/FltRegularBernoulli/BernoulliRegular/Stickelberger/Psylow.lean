@@ -1,5 +1,6 @@
 module
 
+public import BernoulliRegular.Characters
 public import BernoulliRegular.Stickelberger.Annihilation
 public import BernoulliRegular.Stickelberger.Eigenspaces
 public import Mathlib.GroupTheory.Sylow
@@ -29,6 +30,9 @@ open scoped NumberField Pointwise nonZeroDivisors
 
 namespace BernoulliRegular
 
+-- Hides 6 warnings: several theorems below (the `_coe` / `_ext` / `_eq_bot` accessors) do not
+-- use all of the section instances. Removing it needs `omit`, which drops those binders and so
+-- changes the statements — generalisation work, not cleanup.
 set_option linter.unusedSectionVars false
 
 section PSylow
@@ -122,17 +126,17 @@ def stickelbergerPSylowClassAction
   ⟨characterSideStickelbergerClassAction (p := p) (L := L)
       (stickelbergerCharacterCoefficientGroupRingTarget (p := p) (L := L) χ),
     by
-      rw [stickelbergerCharacterCoefficientGroupRingTarget_annihilates_minusInput
+      rw [stickelbergerCharacterCoefficientGroupRingTarget_annihilates_primeClass
         (p := p) (L := L) hp_odd hχ]
       exact Subgroup.one_mem _⟩
 
-/-- `T034a`: the `T032c` annihilation statement, restricted to the chosen
+/-- The annihilation statement, restricted to the chosen
 Sylow `p`-subgroup of the class group. -/
 theorem stickelbergerPSylowClassAction_eq_one
     (hp_odd : p ≠ 2) {χ : DirichletCharacter ℂ p} (hχ : χ ≠ 1) :
     stickelbergerPSylowClassAction (p := p) (L := L) hp_odd χ hχ = 1 := by
   rw [cyclotomicClassGroupPSylow_eq_one_iff]
-  exact stickelbergerCharacterCoefficientGroupRingTarget_annihilates_minusInput
+  exact stickelbergerCharacterCoefficientGroupRingTarget_annihilates_primeClass
     (p := p) (L := L) hp_odd hχ
 
 /-- A component-level transfer lemma: if a class represented inside a declared
@@ -169,12 +173,12 @@ abbrev A1 (B : CyclotomicClassGroupBoundaryComponents (p := p) (L := L)) :
     Subgroup (CyclotomicClassGroupPSylow (p := p) (L := L)) :=
   B.componentOne
 
-/-- `T034b`: the `A₀` component is trivial. -/
+/-- The `A₀` component is trivial. -/
 theorem A0_eq_bot (B : CyclotomicClassGroupBoundaryComponents (p := p) (L := L)) :
     B.A0 = ⊥ :=
   B.componentZero_eq_bot
 
-/-- `T034b`: the `A₁` component is trivial. -/
+/-- The `A₁` component is trivial. -/
 theorem A1_eq_bot (B : CyclotomicClassGroupBoundaryComponents (p := p) (L := L)) :
     B.A1 = ⊥ :=
   B.componentOne_eq_bot
@@ -218,21 +222,6 @@ lemma complexUnitMulCharDirichlet_ne_one {χ : MulChar (ZMod p)ˣ ℚ} (hχ : χ
 def pSylowBernoulliScalar (χ : MulChar (ZMod p)ˣ ℚ) : ℚ :=
   BernoulliGen (unitMulCharDirichlet p χ⁻¹) 1
 
-/-- Odd rational unit characters are the rational stand-in for odd
-Teichmüller-indexed eigenspaces in the current `ℚ`-valued idempotent API. -/
-def IsOddUnitCharacter (χ : MulChar (ZMod p)ˣ ℚ) : Prop :=
-  χ (-1 : (ZMod p)ˣ) = -1
-
-lemma IsOddUnitCharacter.ne_one {χ : MulChar (ZMod p)ˣ ℚ}
-    (hχ_odd : IsOddUnitCharacter (p := p) χ) :
-    χ ≠ 1 := by
-  intro hχ
-  have hval : χ (-1 : (ZMod p)ˣ) = 1 := by
-    rw [hχ]
-    exact MulChar.one_apply (R' := ℚ) (Group.isUnit (-1 : (ZMod p)ˣ))
-  rw [hχ_odd] at hval
-  norm_num at hval
-
 /-- The `T034c` package: for an odd component tagged by a rational character
 `χ`, the Stickelberger projection has Bernoulli scalar `B_{1,χ⁻¹}`, and the
 matching complexified character-side class action is trivial on the chosen
@@ -253,7 +242,7 @@ structure OddComponentBernoulliAnnihilation
           (IsOddUnitCharacter.ne_one (p := p) odd)) =
       1
 
-/-- `T034c`: an odd declared component carries the Bernoulli annihilation
+/-- An odd declared component carries the Bernoulli annihilation
 certificate obtained by combining the eigenspace calculation `T033b` with the
 class-group annihilation statement `T032c`, restricted to the `p`-Sylow subgroup
 by `T034a`. -/

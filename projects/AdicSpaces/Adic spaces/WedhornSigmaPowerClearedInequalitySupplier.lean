@@ -164,10 +164,8 @@ theorem sigma_product_cleared_inequality_via_direct_clearing
     {v : Spv A} {t' D_s : A}
     (h_clear : v.vle t' D_s)
     (h_D_s_ne : ¬ v.vle D_s 0) :
-    ∃ N : ℕ, v.vle (t' * D_s ^ N) (D_s ^ (N + 1)) ∧ ¬ v.vle D_s 0 := by
-  refine ⟨0, ?_, h_D_s_ne⟩
-  simp only [pow_zero, mul_one, zero_add, pow_one]
-  exact h_clear
+    ∃ N : ℕ, v.vle (t' * D_s ^ N) (D_s ^ (N + 1)) ∧ ¬ v.vle D_s 0 :=
+  ⟨0, by simpa only [pow_zero, mul_one, zero_add, pow_one] using h_clear, h_D_s_ne⟩
 
 omit [IsTopologicalRing A] in
 /-- **`SigmaProductClearedInequalitySupplier` from σ-factored
@@ -206,9 +204,8 @@ theorem SigmaProductClearedInequalitySupplier_via_sigma_factored_supplier
   intro t' ht' v hv_spa hv_f hv_one_t hv_t_ne
   obtain ⟨σ, N, h_factored, h_D_s_ne⟩ :=
     h_factored_supplier t' ht' v hv_spa hv_f hv_one_t hv_t_ne
-  refine ⟨N, ?_⟩
-  exact sigma_product_cleared_inequality_via_sigma_factored σ h_factored
-    h_D_s_ne
+  exact ⟨N, sigma_product_cleared_inequality_via_sigma_factored σ h_factored
+    h_D_s_ne⟩
 
 omit [IsTopologicalRing A] in
 /-- **`SigmaProductClearedInequalitySupplier` from direct upper-bound

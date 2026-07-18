@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Coordinates
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Coordinates
 
 /-!
 # Specialized finite-log coefficient evaluators
@@ -11,10 +13,8 @@ Artin-Hasse finite logarithms.
 
 noncomputable section
 
-open NumberField
-open NumberField.IsCMField
 open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField
+open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -23,28 +23,25 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-variable [NumberField.IsCMField K]
 
-omit [NumberField.IsCMField K] in
 theorem dworkParameterPowerLinearMap_of_polynomial_eval₂
     (P : Polynomial (RationalPadicIntegerRing p)) (hdeg : P.natDegree < p - 1) :
     Polynomial.eval₂
         (algebraMap (RationalPadicIntegerRing p) (DworkCompleteIntegerRing p K))
         (dworkParameter p K) P =
       dworkParameterPowerLinearMap p K
-        (fun i : Fin (p - 1) => P.coeff (i : ℕ)) := by
+        (fun i : Fin (p - 1) ↦ P.coeff (i : ℕ)) := by
   rw [Polynomial.eval₂_eq_sum_range'
     (f := algebraMap (RationalPadicIntegerRing p)
       (DworkCompleteIntegerRing p K))
-    (p := P) hdeg (x := dworkParameter p K)]
-  rw [dworkParameterPowerLinearMap_apply]
+    (p := P) hdeg (x := dworkParameter p K),
+    dworkParameterPowerLinearMap_apply]
   exact (Fin.sum_univ_eq_sum_range
-    (fun i : ℕ =>
+    (fun i : ℕ ↦
       algebraMap (RationalPadicIntegerRing p) (DworkCompleteIntegerRing p K)
           (P.coeff i) *
         dworkParameter p K ^ i) (p - 1)).symm
 
-omit [NumberField.IsCMField K] in
 theorem dworkParameterQuotientCoeffModP_mk_polynomial_eval₂_of_natDegree_lt
     (i : Fin (p - 1)) (P : Polynomial (RationalPadicIntegerRing p))
     (hdeg : P.natDegree < p - 1) :
@@ -55,10 +52,9 @@ theorem dworkParameterQuotientCoeffModP_mk_polynomial_eval₂_of_natDegree_lt
             (dworkParameter p K) P)) =
       rationalPadicIntegerToZMod p (P.coeff (i : ℕ)) := by
   rw [dworkParameterPowerLinearMap_of_polynomial_eval₂
-    (p := p) (K := K) P hdeg]
-  rw [dworkParameterQuotientCoeffModP_mk_powerLinearMap]
+    (p := p) (K := K) P hdeg,
+    dworkParameterQuotientCoeffModP_mk_powerLinearMap]
 
-omit [NumberField.IsCMField K] in
 theorem valuedLambdaQuotientDworkCoeffModP_evalₐ_polynomial_eval₂_of_natDegree_lt
     (i : Fin (p - 1)) (P : Polynomial (RationalPadicIntegerRing p))
     (hdeg : P.natDegree < p - 1) :
@@ -69,10 +65,9 @@ theorem valuedLambdaQuotientDworkCoeffModP_evalₐ_polynomial_eval₂_of_natDegr
             (dworkParameter p K) P)) =
       rationalPadicIntegerToZMod p (P.coeff (i : ℕ)) := by
   rw [dworkParameterPowerLinearMap_of_polynomial_eval₂
-    (p := p) (K := K) P hdeg]
-  rw [valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
+    (p := p) (K := K) P hdeg,
+    valuedLambdaQuotientDworkCoeffModP_evalₐ_powerLinearMap]
 
-omit [NumberField.IsCMField K] in
 /-- The cyclotomic action multiplies the `i`-th Dwork power-basis coordinate
 by the corresponding residue power. -/
 theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod
@@ -84,7 +79,6 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod
       (a : ZMod p) ^ (i : ℕ) *
         rationalPadicIntegerToZMod p
           ((dworkParameterPowerBasis p K).repr x i) := by
-  classical
   let c : Fin (p - 1) → RationalPadicIntegerRing p :=
     (dworkParameterPowerBasis p K).repr x
   have hx : dworkParameterPowerLinearMap p K c = x := by
@@ -94,7 +88,7 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod
   have haction :
       Conjugation.dworkCompleteCyclotomicEquiv (p := p) K a x =
         dworkParameterPowerLinearMap p K
-          (fun i : Fin (p - 1) =>
+          (fun i : Fin (p - 1) ↦
             rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i) := by
     rw [← hx]
     exact Conjugation.dworkCompleteCyclotomicEquiv_powerLinearMap
@@ -107,13 +101,12 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod
       congrFun
         (dworkParameterPowerBasis_repr_powerLinearMap
           (p := p) (K := K)
-          (fun i : Fin (p - 1) =>
+          (fun i : Fin (p - 1) ↦
             rationalPadicTeichmuller p (a : ZMod p) ^ (i : ℕ) * c i)) i
     rw [haction]
     simpa using hrepr
   rw [hcoeff, map_mul, map_pow, rationalPadicIntegerToZMod_teichmuller]
 
-omit [NumberField.IsCMField K] in
 /-- The completed cyclotomic action is compatible with the valued-integer
 algebra map into the Dwork completion. -/
 theorem dworkCompleteCyclotomicEquiv_algebraMap_valuedInteger
@@ -128,7 +121,6 @@ theorem dworkCompleteCyclotomicEquiv_algebraMap_valuedInteger
   rw [Conjugation.evalₐ_dworkCompleteCyclotomicEquiv]
   simp [AdicCompletion.algebraMap_apply, AdicCompletion.evalₐ_of]
 
-omit [NumberField.IsCMField K] in
 /-- Coordinate action on the valued `lambda^(p - 1)` quotient. -/
 theorem valuedLambdaQuotientDworkCoeffModP_quotientMap_cyclotomic
     (a : CyclotomicUnitDelta p) (i : Fin (p - 1))
@@ -158,7 +150,6 @@ theorem valuedLambdaQuotientDworkCoeffModP_quotientMap_cyclotomic
     valuedLambdaQuotientDworkCoeffModP_mk]
   exact hcoord
 
-omit [NumberField.IsCMField K] in
 /-- The finite Dwork Artin-Hasse specialization coefficient selected by a
 Kummer matrix row. -/
 noncomputable def kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP
@@ -171,7 +162,6 @@ noncomputable def kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP
       (kummerLogDworkArtinHasseSpecializedFiniteLog
         (p := p) (K := K) hp_three a))
 
-omit [NumberField.IsCMField K] in
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :
@@ -185,7 +175,6 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq
             (p := p) (K := K) hp_three a)) :=
   rfl
 
-omit [NumberField.IsCMField K] in
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_of_evalₐ_eq
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) (x : DworkCompleteIntegerRing p K)
@@ -203,7 +192,6 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_of_evalₐ_eq
   rw [kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq, hx,
     valuedLambdaQuotientDworkCoeffModP_evalₐ]
 
-omit [NumberField.IsCMField K] in
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_of_evalₐ_powerLinearMap
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p))
@@ -231,7 +219,6 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_of_evalₐ_powe
     (dworkParameterPowerLinearMap p K c) hc_eval,
     dworkParameterPowerBasis_repr_powerLinearMap, hc_coeff]
 
-omit [NumberField.IsCMField K] in
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_of_evalₐ_polynomial_eval₂
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p))
@@ -264,7 +251,6 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_of_evalₐ_poly
       (kummerLogEvenPowerIndex (p := p) hp_five j).1 P hdeg,
     h_coeff]
 
-omit [NumberField.IsCMField K] in
 /-- Once the finite Artin-Hasse specialization coefficient has been identified
 with the formal `ZMod p[X]` coefficient, it rewrites to the assembled Kummer
 right-hand side from CU-11e. -/
@@ -282,7 +268,6 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_congrRhs_of_eq_
       kummerLogCoeffCongrRhs (p := p) hp_three j a := by
   rw [hformal, formalKummerLogCoeff_congr (p := p) hp_three hp_five j a]
 
-omit [NumberField.IsCMField K] in
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogCoeffModP_eq_formal_iff_eq_congrRhs
     (hp_three : 3 ≤ p) (hp_five : 5 ≤ p)
     (j a : Fin (kummerLogRank p)) :

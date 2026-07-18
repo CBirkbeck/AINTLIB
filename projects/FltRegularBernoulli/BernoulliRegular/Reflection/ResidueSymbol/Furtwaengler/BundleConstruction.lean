@@ -63,7 +63,7 @@ theorem zmodCharOfPrimitiveRoot_apply
     (hzeta : IsPrimitiveRoot zeta_ell ℓ) (a : ZMod ℓ) :
     zmodCharOfPrimitiveRoot ℓ R' hzeta a = zeta_ell ^ a.val := by
   haveI : NeZero ℓ := ⟨hℓ.out.ne_zero⟩
-  unfold zmodCharOfPrimitiveRoot
+  simp only [zmodCharOfPrimitiveRoot]
   rw [AddChar.zmodChar_apply]
 
 /-- The trace-form additive character on the residue field `k`:
@@ -78,13 +78,13 @@ theorem psiTraceForm_apply (hzeta : IsPrimitiveRoot zeta_ell ℓ) (x : k) :
     psiTraceForm ℓ k R' hzeta x =
       zeta_ell ^ (Algebra.trace (ZMod ℓ) k x).val := by
   haveI : NeZero ℓ := ⟨hℓ.out.ne_zero⟩
-  unfold psiTraceForm
+  simp only [psiTraceForm]
   rw [AddChar.compAddMonoidHom_apply, zmodCharOfPrimitiveRoot_apply]
   rfl
 
 /-- Exponent function paired with `psiTraceForm`: `psiExponent x = (Tr x).val`. -/
 noncomputable def psiTraceFormExponent : k → ℕ :=
-  fun x => (Algebra.trace (ZMod ℓ) k x).val
+  fun x ↦ (Algebra.trace (ZMod ℓ) k x).val
 
 @[simp]
 theorem psiTraceFormExponent_apply (x : k) :

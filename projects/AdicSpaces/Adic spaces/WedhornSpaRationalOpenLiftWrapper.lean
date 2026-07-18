@@ -76,11 +76,9 @@ theorem valuationLocalizationLift_of_spa_rationalOpen
       w ∈ @Spa (Localization.Away s) _ (locTopology P T s hopen)
         (localizationAwayPlusSubring s).toSubring ∧
       comap (algebraMap A (Localization.Away s)) w = v := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
   -- Unpack rationalOpen membership.
-  obtain ⟨hv, hv_T, hvs⟩ := hv_rat
   -- The lift's continuity needs only `v(tᵢ) ≤ v(s)` (Wedhorn 8.2:3738); the A₀-coefficients
   -- are absorbed into the ideal of definition. No `A₀ ⊆ A⁺` needed (Wedhorn §8.1 absorption).
-  exact valuationLocalizationLift_of_bounded P T s hopen hv hv_T hvs
+  exact valuationLocalizationLift_of_bounded P T s hopen hv_rat.1 hv_rat.2.1 hv_rat.2.2
 
 end ValuationSpectrum

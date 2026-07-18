@@ -61,7 +61,7 @@ def orbFM (p : ℍ) : OrbitFM := Quotient.mk'' p
 
 /-- The order of vanishing lifted to orbits. Well-defined by `ord_smul_eqFM`. -/
 def ordOrbitFM (q : OrbitFM) : ℤ :=
-  Quotient.liftOn' q (orderOfVanishingAt' (⇑f)) fun _ b ⟨g, hg⟩ => by
+  Quotient.liftOn' q (orderOfVanishingAt' (⇑f)) fun _ b ⟨g, hg⟩ ↦ by
     rw [← hg]; exact ord_smul_eqFM f g b
 
 @[simp]
@@ -83,13 +83,17 @@ theorem orbit_has_fd_repFM (q : OrbitFM) : ∃ p : ℍ, orbFM p = q ∧ p ∈ �
     obtain ⟨g, hg⟩ := ModularGroup.exists_smul_mem_fd z
     exact ⟨g • z, Quotient.sound' ⟨g, rfl⟩, hg⟩
 
-private theorem G_analyticAtFM (p : ℍ) :
-    AnalyticAt ℂ (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) := by
+/-- The extension-by-zero of a `Γ(1)` modular form to `ℂ` is analytic at every point of `ℍ`.
+
+Public because the same fact is the input to every "order of vanishing is `≥ 0`" argument
+downstream (e.g. `JFunction.lean`), which would otherwise have to restate it. -/
+theorem G_analyticAtFM (p : ℍ) :
+    AnalyticAt ℂ (fun w : ℂ ↦ if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) := by
   have h_diffOn : DifferentiableOn ℂ (f ∘ UpperHalfPlane.ofComplex) {w | 0 < w.im} :=
     UpperHalfPlane.mdifferentiable_iff.mp f.holo'
   apply analyticAt_iff_eventually_differentiableAt.mpr
   filter_upwards [UpperHalfPlane.isOpen_upperHalfPlaneSet.mem_nhds p.im_pos] with w hw
-  have h_eq : ∀ᶠ u in 𝓝 w, (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0) u =
+  have h_eq : ∀ᶠ u in 𝓝 w, (fun w : ℂ ↦ if h : 0 < w.im then f ⟨w, h⟩ else 0) u =
         (f ∘ UpperHalfPlane.ofComplex) u := by
     filter_upwards [UpperHalfPlane.isOpen_upperHalfPlaneSet.mem_nhds hw] with u hu
     simp only [Function.comp_apply, dif_pos hu, UpperHalfPlane.ofComplex_apply_of_im_pos hu]
@@ -97,7 +101,7 @@ private theorem G_analyticAtFM (p : ℍ) :
     (UpperHalfPlane.isOpen_upperHalfPlaneSet.mem_nhds hw)).congr_of_eventuallyEq h_eq
 
 private theorem G_eval_eq_fFM (p : ℍ) :
-    (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) = f p :=
+    (fun w : ℂ ↦ if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) = f p :=
   dif_pos p.im_pos
 
 /-- If `f p ≠ 0`, then `orderOfVanishingAt' f p = 0`. -/
@@ -105,7 +109,7 @@ theorem orderOfVanishingAt'_eq_zero_of_ne_zero' (p : ℍ) (hp : f p ≠ 0) :
     orderOfVanishingAt' f p = 0 := by
   unfold orderOfVanishingAt'
   have h_nf : MeromorphicNFAt _ (p : ℂ) := (G_analyticAtFM f p).meromorphicNFAt
-  have hGp : (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) ≠ 0 := by
+  have hGp : (fun w : ℂ ↦ if h : 0 < w.im then f ⟨w, h⟩ else 0) (p : ℂ) ≠ 0 := by
     rwa [G_eval_eq_fFM]
   rw [h_nf.meromorphicOrderAt_eq_zero_iff.mpr hGp]; rfl
 
@@ -121,7 +125,7 @@ theorem orderOfVanishingAt'_ne_zero_of_eq_zeroFM (hf : f ≠ 0) (p : ℍ) (hp : 
   intro h_untop_eq
   have h_nf : MeromorphicNFAt _ (p : ℂ) := (G_analyticAtFM f p).meromorphicNFAt
   have h_ord_ne : meromorphicOrderAt
-      (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0) (↑p) ≠ (0 : WithTop ℤ) := by
+      (fun w : ℂ ↦ if h : 0 < w.im then f ⟨w, h⟩ else 0) (↑p) ≠ (0 : WithTop ℤ) := by
     intro h0
     apply h_nf.meromorphicOrderAt_eq_zero_iff.mp h0
     split_ifs with h
@@ -129,8 +133,8 @@ theorem orderOfVanishingAt'_ne_zero_of_eq_zeroFM (hf : f ≠ 0) (p : ℍ) (hp : 
     · exact absurd p.im_pos h
   have h_top := (WithTop.untop₀_eq_zero.mp h_untop_eq).resolve_left h_ord_ne
   rw [meromorphicOrderAt_eq_top_iff] at h_top
-  have h_analOn : AnalyticOnNhd ℂ (fun w : ℂ => if h : 0 < w.im then f ⟨w, h⟩ else 0)
-      {w | 0 < w.im} := fun w hw => G_analyticAtFM f ⟨w, hw⟩
+  have h_analOn : AnalyticOnNhd ℂ (fun w : ℂ ↦ if h : 0 < w.im then f ⟨w, h⟩ else 0)
+      {w | 0 < w.im} := fun w hw ↦ G_analyticAtFM f ⟨w, hw⟩
   have h_preconn : IsPreconnected {w : ℂ | 0 < w.im} :=
     ((convex_halfSpace_im_gt 0).isConnected ⟨I, by simp [I_im]⟩).isPreconnected
   apply hf
@@ -155,7 +159,7 @@ private theorem no_zeros_above_height' (hf : f ≠ 0) :
     ∃ H₀ : ℝ, Real.sqrt 3 / 2 < H₀ ∧
       ∀ (p : ℍ), H₀ ≤ (p : ℂ).im → f p ≠ 0 := by
   obtain ⟨H₀, hH₀_gt, hH₀_nonvan⟩ := exists_height_cusp_nonvanishing f hf
-  refine ⟨H₀, hH₀_gt, fun p hp hfp => ?_⟩
+  refine ⟨H₀, hH₀_gt, fun p hp hfp ↦ ?_⟩
   have h_one_mem : (1 : ℝ) ∈ (↑(Gamma 1) : Subgroup (GL (Fin 2) ℝ)).strictPeriods :=
     Gamma_one_coe_eq_SL.symm ▸ one_mem_strictPeriods_SL
   have h_eq := SlashInvariantFormClass.eq_cuspFunction f p h_one_mem one_ne_zero
@@ -195,7 +199,7 @@ theorem finite_support_ordOrbitFM (hf : f ≠ 0) :
       {p : ℍ | p ∈ 𝒟 ∧ orderOfVanishingAt' (⇑f) p ≠ 0} := by
     rintro _ ⟨q, hq, rfl⟩
     exact ⟨(hrep q).2, by rwa [← ordOrbit_mkFM f (rep q), (hrep q).1]⟩
-  have h_inj : Set.InjOn rep S := fun q₁ _ q₂ _ h => by
+  have h_inj : Set.InjOn rep S := fun q₁ _ q₂ _ h ↦ by
     have := congrArg orbFM h
     rwa [(hrep q₁).1, (hrep q₂).1] at this
   exact (finite_zeros_in_fdFM f hf).subset h_image |>.of_finite_image h_inj
@@ -203,19 +207,19 @@ theorem finite_support_ordOrbitFM (hf : f ≠ 0) :
 /-- The set of non-elliptic orbits with nonzero `ordOrbitFM` is finite. -/
 theorem finite_support_ordOrbit_nonEllFM (hf : f ≠ 0) :
     Set.Finite {q : NonEllOrbitFM | ordOrbitFM f q.val ≠ 0} :=
-  ((finite_support_ordOrbitFM f hf).preimage Subtype.val_injective.injOn).subset fun _ h => h
+  ((finite_support_ordOrbitFM f hf).preimage Subtype.val_injective.injOn).subset fun _ h ↦ h
 
 /-- The canonical finite set of zeros (with nonzero order) in `𝒟`. -/
 noncomputable def s₀FM (hf : f ≠ 0) : Finset ℍ := (finite_zeros_in_fdFM f hf).toFinset
 
 /-- Every point in `s₀` lies in the fundamental domain `𝒟`. -/
 theorem s₀FM_mem_fd (hf : f ≠ 0) : ∀ p ∈ s₀FM f hf, p ∈ 𝒟 :=
-  fun _ hp => ((finite_zeros_in_fdFM f hf).mem_toFinset.mp hp).1
+  fun _ hp ↦ ((finite_zeros_in_fdFM f hf).mem_toFinset.mp hp).1
 
 /-- `s₀` captures all points in `𝒟` with nonzero order of vanishing. -/
 theorem s₀FM_complete (hf : f ≠ 0) :
     ∀ p, p ∈ 𝒟 → orderOfVanishingAt' (⇑f) p ≠ 0 → p ∈ s₀FM f hf :=
-  fun _ hp hord => (finite_zeros_in_fdFM f hf).mem_toFinset.mpr ⟨hp, hord⟩
+  fun _ hp hord ↦ (finite_zeros_in_fdFM f hf).mem_toFinset.mpr ⟨hp, hord⟩
 
 /-- The orbit of `ρ+1` equals the orbit of `ρ`. -/
 theorem orb_rho_plus_one_eq_orb_rhoFM :

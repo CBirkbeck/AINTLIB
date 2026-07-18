@@ -1,5 +1,5 @@
-import BernoulliRegular.FLT37.Eichler.CaseIIRealRootClassConjFixed
-import BernoulliRegular.FLT37.Eichler.CaseIILeadingExponent
+import BernoulliRegular.FLT37.Eichler.CaseII.RootClass.RootClassConjugateFixed
+import BernoulliRegular.FLT37.Eichler.CaseII.LeadingExponent.LambdaExponentCollapseToOmega32
 
 /-!
 # Fermat's Last Theorem for `p = 37`, reduced to the four genuine (non-vacuous) Case-II residuals
@@ -49,7 +49,8 @@ plus `noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32` — the carried
 Bernoulli input (Kellner Prop 2.7, `37³ ∤ B_{32·37}`), **not** a leaf to discharge.
 
 Residuals 3+4 produce **Assumption II** (`WashingtonCaseIIExactQuotientUnitPower37Source`) via
-`caseIIOmega32_assumptionII_of_membership_localPower ∘ descentUnit_omega32Membership_of_leadingExponent`;
+`caseIIOmega32_assumptionII_of_membership_localPower ∘
+descentUnit_omega32Membership_of_leadingExponent`;
 residuals 1+2 then drive the `c = 1` real-data descent to the Case-II contradiction.
 
 ## References
@@ -61,11 +62,7 @@ residuals 1+2 then drive the `c = 1` real-data descent to the Case-II contradict
 
 noncomputable section
 
-open NumberField
-
 namespace BernoulliRegular.FLT37.Eichler
-
-open FLT37.LehmerVandiver.CaseII
 
 /-- **Fermat's Last Theorem for `37`, reduced to the four genuine non-vacuous Case-II residuals**
 (proven, axiom-clean given the four named inputs + the carried second-order Bernoulli Prop).

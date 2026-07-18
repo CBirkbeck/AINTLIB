@@ -1,5 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealConjugate
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
 
 /-!
 # LV010-B: caseI `𝔞 · σ𝔞` is principal under `¬ p ∣ h⁺`
@@ -35,7 +36,7 @@ descends to a principal ideal of `𝓞 K`. The remaining gap to
 
 noncomputable section
 
-open NumberField NumberField.IsCMField IsCyclotomicExtension Ideal
+open NumberField NumberField.IsCMField
 
 namespace BernoulliRegular
 
@@ -49,7 +50,6 @@ variable {p : ℕ} [Fact p.Prime]
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
   [IsCMField K]
 
-set_option backward.isDefEq.respectTransparency false in
 omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **LV010-B: `𝔞 · σ𝔞` is principal under `¬ p ∣ h⁺`.** Direct wrapper
 of `isPrincipal_mul_complexConj_of_pow_of_VC` (`Hilbert90.lean` line

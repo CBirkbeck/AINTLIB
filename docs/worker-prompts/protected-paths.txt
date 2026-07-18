@@ -1,0 +1,19 @@
+# Protected paths — fleet workers must NOT touch these, and ticket-generators must NOT file on them.
+#
+# WHY: an active dev-extraction is in progress (epic #2546 — extract E[N] ≅ (ℤ/Nℤ)² + the Tate module /
+# Weil-pairing chain → mathlib, on dev/hasse-weil). Any cleanup/generalise/decompose edit on these files
+# on `main` would churn or conflict with the dev branch's extraction work.
+#
+# RULE for workers (cleanup / generalise / decompose): before claiming a ticket, if its TARGET FILE path
+# contains any line below, do NOT claim it — comment "protected: dev-extraction in progress (#2546)",
+# leave it in state:todo, and move to the next ticket.
+#
+# RULE for ticket-generators (find_decompose_targets.py, refill-cleanup-tickets.py, file_deprecation_tickets.py):
+# skip any file whose path contains a line below; never file a ticket on it.
+#
+# Format: one path substring per line (matched as a substring of the file path). '#' lines are comments.
+# REMOVE the relevant lines once the extraction lands (epic #2546 closed).
+
+projects/HasseWeil/HasseWeil/TateModule/
+projects/HasseWeil/HasseWeil/WeilPairing/Torsion
+projects/HasseWeil/HasseWeil/WeilPairing/Pairing

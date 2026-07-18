@@ -123,7 +123,7 @@ theorem exists_lipschitzWith_comp_clampUnit {ι κ : Type*} [Fintype ι] [Fintyp
 
 variable (K : Type*) [Field K] [NumberField K]
 
-theorem contDiff_expMapBasis : ContDiff ℝ 1 (⇑(expMapBasis (K := K))) := by
+theorem contDiff_expMapBasis {n : WithTop ℕ∞} : ContDiff ℝ n (⇑(expMapBasis (K := K))) := by
   classical
   rw [show ⇑(expMapBasis (K := K)) = fun x : realSpace K ↦
       Real.exp (x w₀) • fun w : InfinitePlace K ↦
@@ -166,24 +166,38 @@ theorem contDiff_faceMapSide (i : {w : InfinitePlace K // w ≠ w₀}) (a : ℝ)
     · simpa only [if_pos hi] using contDiff_const
     · simpa only [if_neg hi] using contDiff_apply ℝ ℝ _
 
+/-- **Abstract topological core.** For an open injective map `f` and a set `s`, if the closure of
+`f '' s` is contained in `f '' closure s` together with one extra point `p`, then the frontier of
+`f '' s` is contained in the image of the boundary `closure s \ interior s` together with `p`:
+`frontier (f '' s) = closure (f '' s) \ interior (f '' s)` shrinks under `closure (f '' s) ⊆
+f '' closure s ∪ {p}` (numerator) and `f '' interior s ⊆ interior (f '' s)`
+(`IsOpenMap.image_interior_subset`, denominator), then `f '' closure s \ f '' interior s =
+f '' (closure s \ interior s)` by injectivity (`Set.image_sdiff`).
+
+The number-field instance `frontier_image_paramSet_subset` is the special case
+`f = expMapBasis`, `s = paramSet K`, `p = 0`, the `{0}` accounting for the closure points
+escaping to norm `0` as the `w₀`-coordinate `→ -∞`. -/
+theorem frontier_image_subset_of_closure_subset {X Y : Type*} [TopologicalSpace X]
+    [TopologicalSpace Y] {f : X → Y} (hf : IsOpenMap f) (hfi : Function.Injective f) {s : Set X}
+    {p : Y} (hcl : closure (f '' s) ⊆ f '' closure s ∪ {p}) :
+    frontier (f '' s) ⊆ f '' (closure s \ interior s) ∪ {p} := by
+  refine (Set.sdiff_subset_sdiff hcl (hf.image_interior_subset s)).trans ?_
+  rw [Set.union_sdiff_distrib, ← Set.image_sdiff hfi]
+  exact Set.union_subset_union_right _ Set.sdiff_subset
+
 /-- **Topological reduction.** Since `expMapBasis` is open and injective with source `univ`,
 the frontier of `expMapBasis '' paramSet K` is contained in the image of the box boundary
 `closure (paramSet K) \ interior (paramSet K)`, together with `{0}` (the escape to norm `0`):
-`closure (expMapBasis '' paramSet K) ⊆ compactSet K = expMapBasis '' closure (paramSet K) ∪ {0}`
-while `expMapBasis '' interior (paramSet K)` is open, hence inside the interior. -/
+`closure (expMapBasis '' paramSet K) ⊆ compactSet K = expMapBasis '' closure (paramSet K) ∪ {0}`.
+The abstract content is `frontier_image_subset_of_closure_subset`. -/
 theorem frontier_image_paramSet_subset :
     frontier (expMapBasis '' paramSet K) ⊆
-      expMapBasis '' (closure (paramSet K) \ interior (paramSet K)) ∪ {0} := by
-  have hcl : closure (expMapBasis '' paramSet K) ⊆ compactSet K :=
-    (isCompact_compactSet K).isClosed.closure_subset_iff.mpr
-      ((Set.image_mono subset_closure).trans (expMapBasis_closure_subset_compactSet K))
-  have hint : expMapBasis '' interior (paramSet K) ⊆ interior (expMapBasis '' paramSet K) :=
-    (expMapBasis.isOpen_image_of_subset_source isOpen_interior
-      (by simp [expMapBasis_source])).subset_interior_iff.mpr (Set.image_mono interior_subset)
-  refine (Set.diff_subset_diff hcl hint).trans ?_
-  rw [compactSet_eq_union, Set.union_diff_distrib,
-    ← Set.image_diff (injective_expMapBasis K)]
-  exact Set.union_subset_union_right _ Set.diff_subset
+      expMapBasis '' (closure (paramSet K) \ interior (paramSet K)) ∪ {0} :=
+  frontier_image_subset_of_closure_subset
+    (fun _ hU ↦ expMapBasis.isOpen_image_of_subset_source hU (by simp [expMapBasis_source]))
+    (injective_expMapBasis K)
+    (compactSet_eq_union K ▸ (isCompact_compactSet K).isClosed.closure_subset_iff.mpr
+      ((Set.image_mono subset_closure).trans (expMapBasis_closure_subset_compactSet K)))
 
 open scoped Classical in
 private theorem expMapBasis_mem_iUnion_faceMapSide
@@ -574,21 +588,21 @@ theorem mem_iUnion_image_liftToMixed_of_eq
     · exact ⟨hc'.1 i, hc'.2 i⟩
     · exact hθmem w
   refine Set.mem_iUnion.mpr ⟨ε, c, ⟨fun k ↦ (hck k).1, fun k ↦ (hck k).2⟩, ?_⟩
-  · rw [liftToMixed, hproj]
-    have hcph : ∀ w : {w : InfinitePlace K // IsComplex w},
-        c ((mixedCubeEquiv K).symm (Sum.inr w)) = θ w := fun w ↦ by rw [hc]; simp
-    have hmodreal : ∀ w : {w : InfinitePlace K // IsReal w}, ψ c' w.1 = |x.1 w| := fun w ↦ by
-      rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isReal w.2, ← Real.norm_eq_abs]
-    have hmodcplx : ∀ w : {w : InfinitePlace K // IsComplex w}, ψ c' w.1 = ‖x.2 w‖ :=
-      fun w ↦ by rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isComplex w.2]
-    refine Prod.ext (funext fun w ↦ ?_) (funext fun w ↦ ?_)
-    · simp only [hε, hmodreal w]
-      by_cases hpos : 0 ≤ x.1 w
-      · rw [decide_eq_true hpos, if_pos rfl, one_mul, abs_of_nonneg hpos]
-      · rw [decide_eq_false hpos, if_neg (by simp), abs_of_neg (not_le.mp hpos)]
-        ring
-    · simp only [hcph w, hmodcplx w]
-      exact hθeq w
+  rw [liftToMixed, hproj]
+  have hcph : ∀ w : {w : InfinitePlace K // IsComplex w},
+      c ((mixedCubeEquiv K).symm (Sum.inr w)) = θ w := fun w ↦ by rw [hc]; simp
+  have hmodreal : ∀ w : {w : InfinitePlace K // IsReal w}, ψ c' w.1 = |x.1 w| := fun w ↦ by
+    rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isReal w.2, ← Real.norm_eq_abs]
+  have hmodcplx : ∀ w : {w : InfinitePlace K // IsComplex w}, ψ c' w.1 = ‖x.2 w‖ :=
+    fun w ↦ by rw [← hx, normAtAllPlaces_apply, normAtPlace_apply_of_isComplex w.2]
+  refine Prod.ext (funext fun w ↦ ?_) (funext fun w ↦ ?_)
+  · simp only [hε, hmodreal w]
+    by_cases hpos : 0 ≤ x.1 w
+    · rw [decide_eq_true hpos, if_pos rfl, one_mul, abs_of_nonneg hpos]
+    · rw [decide_eq_false hpos, if_neg (by simp), abs_of_neg (not_le.mp hpos)]
+      ring
+  · simp only [hcph w, hmodcplx w]
+    exact hθeq w
 
 /-- The frontier of `normLeOne K` in `mixedSpace K` is contained in the `normAtAllPlaces`-preimage
 of the frontier of its `realSpace` image: `normLeOne K` is the preimage of its image

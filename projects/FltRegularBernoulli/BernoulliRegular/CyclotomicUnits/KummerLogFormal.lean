@@ -40,7 +40,7 @@ abbrev kummerLogScalarX : KummerLogCoeffRing :=
 shifting the coefficients of `E_p(T)-1`. -/
 def formalArtinHasseNormalizedExpMinusOne (p : ℕ) [Fact p.Prime] :
     PowerSeries KummerLogCoeffRing :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     Polynomial.C
       ((PowerSeries.coeff (R := ℚ) (n + 1))
         (PadicLogSetup.FormalDwork.expMinusOneSeries p))
@@ -127,7 +127,7 @@ theorem formalKummerQuotientUnit_mul_scaled_eq_normalized (p : ℕ)
 /-- The ordinary formal exponential numerator `(exp(T)-1)/T`.  This is used
 as the low-degree model for the Artin-Hasse normalized numerator. -/
 def formalExpNormalizedMinusOne : PowerSeries ℚ :=
-  PowerSeries.mk fun n =>
+  PowerSeries.mk fun n ↦
     (PowerSeries.coeff (R := ℚ) (n + 1)) (PowerSeries.exp ℚ)
 
 @[simp]
@@ -175,7 +175,7 @@ theorem derivative_logOf_formalExpNormalizedMinusOne_mul_self :
     have h :=
       Furtwaengler.FiniteLogFormal.subst_deriv_log_mul_one_add (A := ℚ) hsubst
     simpa [N, sub_eq_add_neg, add_assoc] using h
-  rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ℚ hsubst]
+  rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst hsubst]
   have hderiv_sub : d⁄dX ℚ (N - 1) = d⁄dX ℚ N := by simp
   calc
     (PowerSeries.subst (N - 1) (d⁄dX ℚ (PowerSeries.log ℚ)) *
@@ -214,11 +214,8 @@ theorem X_mul_derivative_logOf_formalExpNormalizedMinusOne :
             change N + PowerSeries.X * PowerSeries.derivativeFun N =
               PowerSeries.derivativeFun (PowerSeries.X * N)
             rw [PowerSeries.derivativeFun_mul]
-            have hdx : PowerSeries.derivativeFun (PowerSeries.X : PowerSeries ℚ) = 1 := by
-              ext n
-              by_cases hn : n = 0
-              · simp [PowerSeries.coeff_derivativeFun, PowerSeries.coeff_X, hn]
-              · simp [PowerSeries.coeff_derivativeFun, PowerSeries.coeff_X, hn]
+            have hdx : PowerSeries.derivativeFun (PowerSeries.X : PowerSeries ℚ) = 1 :=
+              PowerSeries.derivative_X
             rw [hdx]
             ring
       _ = d⁄dX ℚ (PowerSeries.exp ℚ - 1) := by
@@ -316,7 +313,7 @@ theorem coeff_pow_eq_of_coeff_eq_le
       change PowerSeries.coeff i (F ^ m) * PowerSeries.coeff k F =
         PowerSeries.coeff i (G ^ m) * PowerSeries.coeff k G
       rw [coeff_pow_eq_of_coeff_eq_le (m := m) (d := i)
-          (fun t ht => h t (ht.trans hi)),
+          (fun t ht ↦ h t (ht.trans hi)),
         h k hk]
 
 theorem coeff_logOf_eq_of_coeff_eq_le
@@ -328,15 +325,15 @@ theorem coeff_logOf_eq_of_coeff_eq_le
       PowerSeries.coeff d (PowerSeries.logOf G) := by
   have hFsub0 : PowerSeries.constantCoeff (F - 1) = 0 := by simp [hF0]
   have hGsub0 : PowerSeries.constantCoeff (G - 1) = 0 := by simp [hG0]
-  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq]
-  rw [Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
+  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq,
+    Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (F - 1) hFsub0 d,
     Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (G - 1) hGsub0 d]
   refine Finset.sum_congr rfl ?_
   intro m hm
   congr 1
-  exact coeff_pow_eq_of_coeff_eq_le (m := m) (d := d) fun k hk => by
+  exact coeff_pow_eq_of_coeff_eq_le (m := m) (d := d) fun k hk ↦ by
     simp [hcoeff k hk]
 
 theorem map_logOf_of_constantCoeff_eq_one
@@ -392,8 +389,8 @@ theorem coeff_logOf_rescale_eq_pow_mul_coeff_logOf
   have hsub :
       PowerSeries.rescale a F - 1 = PowerSeries.rescale a (F - 1) := by
     rw [map_sub, map_one]
-  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq]
-  rw [Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
+  rw [PowerSeries.logOf_eq, PowerSeries.logOf_eq,
+    Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (PowerSeries.rescale a F - 1) hRsub0 d,
     Furtwaengler.FiniteArtinHasseFormal.coeff_subst_log_eq_sum_Icc
       (F - 1) hFsub0 d]
@@ -530,8 +527,8 @@ theorem coeff_logOf_formalArtinHasseScaledNormalizedExpMinusOne_eq_bernoulli
         Polynomial.C
           ((_root_.bernoulli (2 * j) : ℚ) /
             (((2 * j : ℕ) : ℚ) * (Nat.factorial (2 * j) : ℚ))) := by
-  rw [coeff_logOf_formalArtinHasseScaledNormalizedExpMinusOne_eq_pow_mul]
-  rw [coeff_logOf_formalArtinHasseNormalizedExpMinusOne_eq_bernoulli hj hjp]
+  rw [coeff_logOf_formalArtinHasseScaledNormalizedExpMinusOne_eq_pow_mul,
+    coeff_logOf_formalArtinHasseNormalizedExpMinusOne_eq_bernoulli hj hjp]
 
 theorem coeff_formalKummerLogSeries_eq_neg_bernoulli_mul_X_pow_sub_one
     {p j : ℕ} [Fact p.Prime] (hj : 1 ≤ j) (hjp : 2 * j ≤ p - 3) :
@@ -566,7 +563,7 @@ theorem coeff_formalKummerLogSeries_eq_neg_bernoulli_mul_X_pow_sub_one
           simp [formalKummerLogSeries, hnorm, hscaled]
     _ =
           -Polynomial.C q * (Polynomial.X ^ (2 * j) - 1) := by
-          simp [kummerLogScalarX]
+          simp only [kummerLogScalarX]
           ring
 
 /-- Reduction of a rational number modulo `p`, written using numerator and
@@ -644,7 +641,7 @@ theorem prime_not_dvd_bernoulli_den_two_mul {p j : ℕ} [Fact p.Prime]
 modulo `p`. -/
 theorem bernoulli_den_zmod_ne_zero {p j : ℕ} [Fact p.Prime]
     (hj : 1 ≤ j) (hjp : 2 * j ≤ p - 3) :
-    (((_root_.bernoulli (2 * j)).den : ℕ) : ZMod p) ≠ 0 := fun hzero =>
+    (((_root_.bernoulli (2 * j)).den : ℕ) : ZMod p) ≠ 0 := fun hzero ↦
   prime_not_dvd_bernoulli_den_two_mul hj hjp
     ((ZMod.natCast_eq_zero_iff ((_root_.bernoulli (2 * j)).den) p).mp hzero)
 

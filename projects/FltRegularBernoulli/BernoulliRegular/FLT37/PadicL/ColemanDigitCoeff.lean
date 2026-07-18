@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.LogCoeffPiDigit
 
 /-!
@@ -290,7 +295,7 @@ theorem colemanRung_zero_of_const_residue {c : (ZMod p)ˣ → S.O} {r : ZMod p}
   refine ⟨S.logCoeffSum c i, by rw [pow_zero, one_mul], ?_, ?_⟩
   · rw [Polynomial.natDegree_C]
   · rw [S.residue_logCoeffSum c i]
-    refine Finset.sum_congr rfl fun j _ => ?_
+    refine Finset.sum_congr rfl fun j _ ↦ ?_
     rw [Polynomial.eval_C, hr j, mul_comm]
 
 /-- **The leading-rung weight is the constant harmonic residue** (the `d = 0` Coleman
@@ -301,7 +306,7 @@ collapse `residue_logCoeffSum`.  (The vanishing of this rung — `π ∣ Λ i` �
 proven character orthogonality `residue_logCoeffSum_eq_zero_of_const_residue`.) -/
 theorem colemanRungWeight_one_of_const_residue {c : (ZMod p)ˣ → S.O} {r : ZMod p}
     (hr : ∀ j, S.residue (c j) = r) (i : ℕ) :
-    S.ColemanRungWeight c (fun _ => Polynomial.C r) i 1 := by
+    S.ColemanRungWeight c (fun _ ↦ Polynomial.C r) i 1 := by
   intro d hd
   interval_cases d
   exact S.colemanRung_zero_of_const_residue hr i
@@ -391,7 +396,7 @@ theorem colemanRungWeight_thirtytwo_of_residuals
       intro _
       refine ⟨S.logCoeffSum c 32, by rw [pow_zero, one_mul], ?_⟩
       rw [S.residue_logCoeffSum c 32, hw0]
-      refine Finset.sum_congr rfl fun j _ => ?_
+      refine Finset.sum_congr rfl fun j _ ↦ ?_
       rw [Polynomial.eval_C, hr j, mul_comm]
     | succ n ih =>
       intro hn8
@@ -441,7 +446,7 @@ compression, and every per-rung residual — with the zero weight family. -/
 `π⁸·(…)` is divisible by `π`). -/
 theorem residue_piOrderWitnessCoeff (S : StickelbergerF1Setup p) (j : (ZMod p)ˣ) :
     S.residue (S.piOrderWitnessCoeff j) = 0 := by
-  unfold piOrderWitnessCoeff
+  simp only [piOrderWitnessCoeff]
   by_cases hj : j = 1
   · rw [if_pos hj]
     refine (S.residue_eq_zero_iff _).mpr ⟨S.π ^ 7 * (((S.ω 1) ^ 32 : S.Oˣ)⁻¹ : S.Oˣ), ?_⟩
@@ -477,7 +482,7 @@ residual chain) is consistent. -/
 theorem colemanRungWeight_thirtytwo_inhabited (S : StickelbergerF1Setup 37) :
     ∃ (c : (ZMod 37)ˣ → S.O) (cw : ℕ → Polynomial (ZMod 37)),
       S.ColemanRungWeight c cw 32 8 := by
-  refine ⟨S.piOrderWitnessCoeff, fun _ => 0, ?_⟩
+  refine ⟨S.piOrderWitnessCoeff, fun _ ↦ 0, ?_⟩
   refine S.colemanRungWeight_thirtytwo_of_residuals
     (r := 0) (S.residue_piOrderWitnessCoeff) ?_ ?_ ?_
   · rw [Polynomial.C_0]
@@ -555,7 +560,7 @@ single-unit witness `piOrderWitnessCoeff` realises `ColemanDigitLadder37` (with
 `r = 0`, zero weights).  So the core introduces no hidden contradiction. -/
 theorem colemanDigitLadder37_inhabited (S : StickelbergerF1Setup 37) :
     ∃ c : (ZMod 37)ˣ → S.O, S.ColemanDigitLadder37 c := by
-  refine ⟨S.piOrderWitnessCoeff, 0, fun _ => 0, S.residue_piOrderWitnessCoeff, ?_, ?_, ?_⟩
+  refine ⟨S.piOrderWitnessCoeff, 0, fun _ ↦ 0, S.residue_piOrderWitnessCoeff, ?_, ?_, ?_⟩
   · rw [Polynomial.C_0]
   · intro d _; rw [Polynomial.natDegree_zero]; omega
   · intro d hd; exact S.colemanNextRungResidue_thirtytwo_inhabited hd

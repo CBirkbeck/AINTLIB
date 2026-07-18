@@ -26,8 +26,6 @@ open UniformSpace
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
 
-/-! ### Helpers -/
-
 section Helpers
 
 variable [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -37,8 +35,7 @@ becomes a unit under `algebraMap A (Localization.Away D₀.s)` (definition of
 localization) and `D₀.coeRingHom` preserves units. -/
 theorem canonicalMap_s_isUnit (D₀ : RationalLocData A) :
     IsUnit (D₀.canonicalMap D₀.s) := by
-  unfold RationalLocData.canonicalMap
-  simp only [RingHom.coe_comp, Function.comp_apply]
+  simp only [RationalLocData.canonicalMap, RingHom.coe_comp, Function.comp_apply]
   exact RingHom.isUnit_map D₀.coeRingHom
     (IsLocalization.Away.algebraMap_isUnit D₀.s)
 
@@ -57,10 +54,6 @@ theorem restrictionMapHom_canonicalMap (D₀ D' : RationalLocData A)
   change restrictionMapHom D₀ D' h
       (D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) a)) =
       D'.coeRingHom (algebraMap A (Localization.Away D'.s) a)
-  -- `D₀.coeRingHom = UniformSpace.Completion.coeRingHom` and `restrictionMapHom = extensionHom`.
-  -- Apply `extensionHom_coe` to collapse `extensionHom f (coeRingHom x)` to `f x`.
-  -- Then `restrictionMapAlg = IsLocalization.Away.lift D₀.s witness` with witness
-  -- for the ring hom `D'.canonicalMap`; `IsLocalization.Away.lift_eq` finishes.
   have h_ext :
       restrictionMapHom D₀ D' h
         (D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) a)) =

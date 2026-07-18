@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1
 import Mathlib.NumberTheory.GaussSum
 import Mathlib.NumberTheory.JacobiSum.Basic
@@ -67,6 +72,7 @@ noncomputable def omegaHom : (ZMod p)ˣ →* S.Oˣ where
     exact (mul_left_cancel h).symm
   map_mul' := S.ω_mul
 
+/-- The Teichmüller unit hom evaluates to `ω`. -/
 @[simp] theorem omegaHom_apply (a : (ZMod p)ˣ) : S.omegaHom a = S.ω a := rfl
 
 /-- The base Teichmüller multiplicative character `χ : MulChar (ZMod p) O`,
@@ -76,14 +82,17 @@ noncomputable def teichChar : MulChar (ZMod p) S.O := MulChar.ofUnitHom S.omegaH
 /-- The character `χ_i := χ⁻¹^i = ω^{-i}`. -/
 noncomputable def teichCharPow (i : ℕ) : MulChar (ZMod p) S.O := (S.teichChar)⁻¹ ^ i
 
+/-- …and so does the multiplicative character it induces, on units. -/
 theorem teichChar_apply_unit (a : (ZMod p)ˣ) : S.teichChar (a : ZMod p) = (S.ω a : S.O) := by
   rw [teichChar, MulChar.ofUnitHom_coe, omegaHom_apply]
 
 /-- The additive character `ψ(x) = (1+π)^{x.val}` on `ZMod p`. -/
 noncomputable def addCharPi : AddChar (ZMod p) S.O := AddChar.zmodChar p S.one_add_pi_pow_p
 
+/-- The additive character is `x ↦ (1 + π) ^ x.val`. -/
 theorem addCharPi_apply (x : ZMod p) : S.addCharPi x = (1 + S.π) ^ x.val := rfl
 
+/-- …stated on units. -/
 theorem addCharPi_apply_unit (a : (ZMod p)ˣ) :
     S.addCharPi (a : ZMod p) = (1 + S.π) ^ teichRep a := rfl
 
@@ -97,6 +106,7 @@ theorem teichChar_inv_apply_unit (a : (ZMod p)ˣ) :
   -- S.ω (a⁻¹) = (S.ω a)⁻¹ via the monoid hom `omegaHom`.
   rw [← omegaHom_apply, map_inv, omegaHom_apply]
 
+/-- The value of `χ_i = ω^{-i}` on a unit. -/
 theorem teichCharPow_apply_unit (i : ℕ) (a : (ZMod p)ˣ) :
     S.teichCharPow i (a : ZMod p) = (((S.ω a)⁻¹ ^ i : S.Oˣ) : S.O) := by
   rw [teichCharPow, MulChar.pow_apply_coe, teichChar_inv_apply_unit, ← Units.val_pow_eq_pow_val]
@@ -110,8 +120,9 @@ theorem gaussSum_eq_mathlib (i : ℕ) :
   -- Mathlib's Gauss sum, split off the `a = 0` term (which vanishes since `χ 0 = 0`).
   have hmathlib : _root_.gaussSum (S.teichCharPow i) S.addCharPi =
       ∑ a ∈ Finset.univ \ {(0 : ZMod p)}, S.teichCharPow i a * S.addCharPi a := by
-    have hsplit := Finset.sum_eq_sum_diff_singleton_add (Finset.mem_univ (0 : ZMod p))
-      (fun a : ZMod p => S.teichCharPow i a * S.addCharPi a)
+    have hsplit := (Finset.sum_erase_add Finset.univ
+      (fun a : ZMod p ↦ S.teichCharPow i a * S.addCharPi a) (Finset.mem_univ (0 : ZMod p))).symm
+    rw [Finset.erase_eq] at hsplit
     rw [MulChar.map_zero, zero_mul, add_zero] at hsplit
     exact hsplit
   rw [hmathlib]
@@ -119,13 +130,15 @@ theorem gaussSum_eq_mathlib (i : ℕ) :
   let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
   have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
     ext x
-    simpa only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
-      Finset.mem_sdiff, Finset.mem_singleton, φ] using isUnit_iff_ne_zero
+    simp only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
+      Finset.mem_sdiff, Finset.mem_singleton, φ]
+    exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
-  unfold StickelbergerF1Setup.gaussSum
-  refine Finset.sum_congr rfl fun a _ => ?_
+  simp only [StickelbergerF1Setup.gaussSum]
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Function.Embedding.coeFn_mk, teichCharPow_apply_unit, addCharPi_apply_unit]
 
+/-- `χ_0` is the trivial character. -/
 @[simp] theorem teichCharPow_zero : S.teichCharPow 0 = 1 := by
   rw [teichCharPow, pow_zero]
 
@@ -199,6 +212,8 @@ theorem gaussSum_ne_zero {α : ℕ} (h1 : 1 ≤ α) (h2 : α ≤ p - 2) : S.gaus
   rw [ZMod.card]
   exact S.cast_p_ne_zero
 
+/-- The Gauss-sum valuation is finite in the range `1 ≤ α ≤ p - 2`, since the Gauss sum is
+nonzero there. -/
 theorem gaussSumVal_lt_top {α : ℕ} (h1 : 1 ≤ α) (h2 : α ≤ p - 2) : S.gaussSumVal α < ⊤ := by
   rw [gaussSumVal, lt_top_iff_ne_top, Ne, addVal_eq_top_iff]
   exact S.gaussSum_ne_zero h1 h2

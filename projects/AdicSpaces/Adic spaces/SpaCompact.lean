@@ -134,7 +134,7 @@ theorem isCompact_spa [DiscreteTopology A] :
   -- hence compact; continuous image of compact is compact.
   have hfactor :
       (ιSpv : Spv A → (A × A → Prop)) '' (Spa A A⁺) =
-        (fun r : A × A → Bool => fun p => boolToProp (r p)) ''
+        (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
           ((ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺)) := by
     ext s
     simp only [Set.mem_image]
@@ -185,7 +185,7 @@ theorem isCompact_spa_of_isClosed_image
   refine (ιSpv_isEmbedding.isCompact_iff (s := Spa A A⁺)).mpr ?_
   have hfactor :
       (ιSpv : Spv A → (A × A → Prop)) '' (Spa A A⁺) =
-        (fun r : A × A → Bool => fun p => boolToProp (r p)) ''
+        (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
           ((ιSpv_bool : Spv A → (A × A → Bool)) '' (Spa A A⁺)) := by
     ext s
     simp only [Set.mem_image]
@@ -275,7 +275,7 @@ theorem isCompact_rationalOpen_of_isClosed_image
   refine (ιSpv_isEmbedding.isCompact_iff (s := rationalOpen T s)).mpr ?_
   have hfactor :
       (ιSpv : Spv A → (A × A → Prop)) '' (rationalOpen T s) =
-        (fun r : A × A → Bool => fun p => boolToProp (r p)) ''
+        (fun r : A × A → Bool ↦ fun p ↦ boolToProp (r p)) ''
           ((ιSpv_bool : Spv A → (A × A → Bool)) '' (rationalOpen T s)) := by
     ext p
     simp only [Set.mem_image]
@@ -380,7 +380,7 @@ lemma not_vle_one_of_mem_spa_of_topologicallyNilpotent
   simp only [map_pow, map_one] at hn
   have hπ_lt : (ValuativeRel.valuation A) π < 1 := by
     by_contra h
-    push_neg at h
+    push Not at h
     exact not_lt_of_ge (one_le_pow_of_one_le' h n) hn
   -- Translate to `vle` via `Compatible.vle_iff_le`.
   haveI : (ValuativeRel.valuation A).Compatible := inferInstance
@@ -498,7 +498,7 @@ lemma image_spa_ιSpv_bool_of_tate
       set w := ValuativeRel.valuation A
       have hw_lt_one : w (P.A₀.subtype π) < 1 := by
         by_contra hge
-        push_neg at hge
+        push Not at hge
         rw [show (1 : ValuativeRel.ValueGroupWithZero A) = w 1
           from (map_one w).symm] at hge
         exact hv_lt ((Valuation.Compatible.vle_iff_le (v := w) _ _).mpr hge)

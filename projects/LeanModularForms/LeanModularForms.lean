@@ -47,3 +47,12 @@ import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.Rho
 import LeanModularForms.ForMathlib.ValenceFormula.WindingWeights.RhoPlusOne
 import LeanModularForms.ForMathlib.ValenceFormulaFinal
 import LeanModularForms.ForMathlib.HW33Clean
+import LeanModularForms.HeckeRIngs.GL2.Newforms.MainLemmaProof
+import LeanModularForms.HeckeRIngs.GL2.Newforms.Molteni
+import LeanModularForms.Labels.Encoding
+import LeanModularForms.Labels.CharacterOrbit
+import LeanModularForms.Labels.NewformOrbit
+import LeanModularForms.Labels.Label
+import LeanModularForms.Modularforms.LFunctionEuler
+import LeanModularForms.Modularforms.LFunctionFEqN
+import LeanModularForms.Modularforms.JFunction

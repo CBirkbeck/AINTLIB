@@ -100,7 +100,7 @@ theorem finiteLogNatDivNumerator_spec {n s : ℕ} {z : 𝓞 R'}
         F.finiteLogNatDivNumerator n s z hz =
       (F.finiteLogNatDivDenom n s z hz : 𝓞 R') * z ∧
     F.finiteLogNatDivNumerator n s z hz ∈ F.Q ^ s := by
-  unfold finiteLogNatDivNumerator finiteLogNatDivDenom
+  simp only [finiteLogNatDivNumerator, finiteLogNatDivDenom]
   exact Classical.choose_spec
     (Classical.choose_spec
       (F.exists_primeCompl_natCast_ell_pow_denom_of_mem_Q_pow
@@ -150,7 +150,6 @@ theorem finiteLogNatDivEval_natCast_mul_eq_mk {N n s : ℕ} (hn : n ≠ 0)
     Ideal.Quotient.mk (F.Q ^ (N + 1)) ((n : ℕ) : 𝓞 R') *
         F.finiteLogNatDivEval N n s hn z hz =
       Ideal.Quotient.mk (F.Q ^ (N + 1)) z := by
-  classical
   let m : ℕ := n.factorization ℓ
   let d : F.Q.primeCompl := F.finiteLogNatDivDenom n s z hz
   let c : F.Q.primeCompl := F.ordComplPrimeCompl hn
@@ -305,7 +304,6 @@ theorem finiteLogNatDivEval_add {N n s : ℕ} (hn : n ≠ 0)
     F.finiteLogNatDivEval N n s hn (z₁ + z₂) hz₁₂ =
       F.finiteLogNatDivEval N n s hn z₁ hz₁ +
         F.finiteLogNatDivEval N n s hn z₂ hz₂ := by
-  classical
   let m : ℕ := n.factorization ℓ
   let c : F.Q.primeCompl := F.ordComplPrimeCompl hn
   let y₁ : 𝓞 R' := F.finiteLogNatDivNumerator n s z₁ hz₁
@@ -404,7 +402,6 @@ theorem finiteLogNatDivEval_mul_denominator_right {N n m s : ℕ} (hn : n ≠ 0)
     (hmz : (m : 𝓞 R') * z ∈ F.Q ^ ((n * m).factorization ℓ * (ℓ - 1) + s)) :
     F.finiteLogNatDivEval N (n * m) s (Nat.mul_ne_zero hn hm) ((m : 𝓞 R') * z) hmz =
       F.finiteLogNatDivEval N n s hn z hz := by
-  classical
   let hnm : n * m ≠ 0 := Nat.mul_ne_zero hn hm
   let vn : ℕ := n.factorization ℓ
   let vm : ℕ := m.factorization ℓ
@@ -549,6 +546,55 @@ theorem finiteLogNatDivEval_eq_factorial_denominator {N d n s : ℕ} (hn : n ≠
   have h := F.finiteLogNatDivEval_mul_denominator_right (N := N) hn hm hz hmz_nm
   simpa [hmul] using h.symm
 
+/-- Common core for the two fixed-degree transport lemmas below: the
+attach-indexed sum of localized values `z_n / n` over `1 ≤ n ≤ d` equals the
+single localized value of the factorial-cleared numerator over the common
+denominator `d!`. -/
+private theorem finiteLogNatDivEval_Icc_attach_sum_eq {N d s : ℕ} (z : ℕ → 𝓞 R')
+    (hz : ∀ n ∈ Finset.Icc 1 d, z n ∈ F.Q ^ (n.factorization ℓ * (ℓ - 1) + s))
+    (hsum : (∑ a ∈ (Finset.Icc 1 d).attach, ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1) ∈
+      F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s)) :
+    (∑ a ∈ (Finset.Icc 1 d).attach,
+      F.finiteLogNatDivEval N a.1 s
+        (by
+          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+          exact Nat.ne_zero_of_lt ha1)
+        (z a.1) (hz a.1 a.2)) =
+      F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d)
+        (∑ a ∈ (Finset.Icc 1 d).attach, ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1)
+        hsum := by
+  let w : {n // n ∈ Finset.Icc 1 d} → 𝓞 R' :=
+    fun a => ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1
+  have hw : ∀ a, w a ∈ F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s) := by
+    intro a
+    have ha := Finset.mem_Icc.mp a.2
+    exact F.finiteLogNatDivEval_factorial_weighted_mem
+      (Nat.ne_zero_of_lt ha.1) ha.2 (hz a.1 a.2)
+  calc
+    (∑ a ∈ (Finset.Icc 1 d).attach,
+      F.finiteLogNatDivEval N a.1 s
+        (by
+          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
+          exact Nat.ne_zero_of_lt ha1)
+        (z a.1) (hz a.1 a.2))
+        =
+      ∑ a ∈ (Finset.Icc 1 d).attach,
+        F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d)
+          (w a) (hw a) := by
+        refine Finset.sum_congr rfl ?_
+        intro a ha
+        dsimp [w]
+        have haI : a.1 ∈ Finset.Icc 1 d := a.2
+        have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp haI).1
+        have had : a.1 ≤ d := (Finset.mem_Icc.mp haI).2
+        exact F.finiteLogNatDivEval_eq_factorial_denominator (N := N)
+          (Nat.ne_zero_of_lt ha1) had (hz a.1 a.2) (hw a)
+    _ =
+      F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d)
+        (∑ a ∈ (Finset.Icc 1 d).attach, w a) hsum :=
+        (F.finiteLogNatDivEval_sum (N := N) (n := d.factorial) (s := s)
+          (Nat.factorial_ne_zero d) (Finset.Icc 1 d).attach w hw hsum).symm
+
 /-- Fixed-degree transport for a denominator-cleared rational coefficient
 identity.  If the factorial-cleared numerator of `∑ z_n / n` vanishes for
 `1 ≤ n ≤ d`, then the corresponding localized quotient sum is zero. -/
@@ -562,56 +608,17 @@ theorem finiteLogNatDivEval_Icc_sum_eq_zero_of_factorial_weighted_sum_eq_zero
           have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
           exact Nat.ne_zero_of_lt ha1)
         (z a.1) (hz a.1 a.2)) = 0 := by
-  classical
-  let t : Finset {n // n ∈ Finset.Icc 1 d} := (Finset.Icc 1 d).attach
-  let w : {n // n ∈ Finset.Icc 1 d} → 𝓞 R' :=
-    fun a => ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1
-  have hw : ∀ a, w a ∈ F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s) := by
-    intro a
-    have ha := Finset.mem_Icc.mp a.2
-    exact F.finiteLogNatDivEval_factorial_weighted_mem
-      (Nat.ne_zero_of_lt ha.1) ha.2 (hz a.1 a.2)
-  have hsum_zero : (∑ a ∈ t, w a) = 0 := by
-    rw [show (∑ a ∈ t, w a) =
-        ∑ n ∈ Finset.Icc 1 d, ((d.factorial / n : ℕ) : 𝓞 R') * z n by
-      simpa [t, w] using
-        (Finset.sum_attach (Finset.Icc 1 d)
-          (fun n => ((d.factorial / n : ℕ) : 𝓞 R') * z n))]
+  have hsum_eq :
+      (∑ a ∈ (Finset.Icc 1 d).attach, ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1) = 0 := by
+    rw [Finset.sum_attach (Finset.Icc 1 d)
+      (fun n => ((d.factorial / n : ℕ) : 𝓞 R') * z n)]
     exact hclear
-  have hsum_mem : (∑ a ∈ t, w a) ∈ F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s) := by
-    rw [hsum_zero]
-    exact zero_mem _
-  calc
-    (∑ a ∈ (Finset.Icc 1 d).attach,
-      F.finiteLogNatDivEval N a.1 s
-        (by
-          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
-          exact Nat.ne_zero_of_lt ha1)
-        (z a.1) (hz a.1 a.2))
-        =
-      ∑ a ∈ t, F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d)
-        (w a) (hw a) := by
-        refine Finset.sum_congr ?_ ?_
-        · simp [t]
-        · intro a ha
-          dsimp [w]
-          have haI : a.1 ∈ Finset.Icc 1 d := a.2
-          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp haI).1
-          have had : a.1 ≤ d := (Finset.mem_Icc.mp haI).2
-          exact F.finiteLogNatDivEval_eq_factorial_denominator (N := N)
-            (Nat.ne_zero_of_lt ha1) had (hz a.1 a.2) (hw a)
-    _ =
-      F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d)
-        (∑ a ∈ t, w a) hsum_mem := by
-        rw [← F.finiteLogNatDivEval_sum (N := N) (n := d.factorial) (s := s)
-          (Nat.factorial_ne_zero d) t w hw hsum_mem]
-    _ =
-      F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d) 0
-        (zero_mem _) := by
-        congr 1
-    _ = 0 :=
-        F.finiteLogNatDivEval_zero (N := N) (n := d.factorial) (s := s)
-          (Nat.factorial_ne_zero d) (zero_mem _)
+  have hsum_mem :
+      (∑ a ∈ (Finset.Icc 1 d).attach, ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1) ∈
+        F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s) := hsum_eq ▸ zero_mem _
+  rw [F.finiteLogNatDivEval_Icc_attach_sum_eq z hz hsum_mem,
+    F.finiteLogNatDivEval_eq_of_eq (Nat.factorial_ne_zero d) hsum_eq hsum_mem (zero_mem _)]
+  exact F.finiteLogNatDivEval_zero (Nat.factorial_ne_zero d) (zero_mem _)
 
 /-- Fixed-degree transport for a denominator-cleared coefficient error.
 If the factorial-cleared numerator of `∑ z_n / n` has sufficiently high
@@ -628,59 +635,27 @@ theorem finiteLogNatDivEval_Icc_sum_eq_zero_of_factorial_weighted_sum_mem_Q_pow
           have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
           exact Nat.ne_zero_of_lt ha1)
         (z a.1) (hz a.1 a.2)) = 0 := by
-  classical
-  let T : Finset {n // n ∈ Finset.Icc 1 d} := (Finset.Icc 1 d).attach
-  let w : {n // n ∈ Finset.Icc 1 d} → 𝓞 R' :=
-    fun a => ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1
-  have hw : ∀ a, w a ∈ F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s) := by
-    intro a
-    have ha := Finset.mem_Icc.mp a.2
-    exact F.finiteLogNatDivEval_factorial_weighted_mem
-      (Nat.ne_zero_of_lt ha.1) ha.2 (hz a.1 a.2)
-  have hsum_s : (∑ a ∈ T, w a) ∈
-      F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s) :=
-    Ideal.sum_mem _ fun a _ha => hw a
-  have hsum_t : (∑ a ∈ T, w a) ∈
-      F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + t) := by
-    rw [show (∑ a ∈ T, w a) =
-        ∑ n ∈ Finset.Icc 1 d, ((d.factorial / n : ℕ) : 𝓞 R') * z n by
-      simpa [T, w] using
-        (Finset.sum_attach (Finset.Icc 1 d)
-          (fun n => ((d.factorial / n : ℕ) : 𝓞 R') * z n))]
-    exact hclear
-  calc
-    (∑ a ∈ (Finset.Icc 1 d).attach,
-      F.finiteLogNatDivEval N a.1 s
-        (by
-          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
-          exact Nat.ne_zero_of_lt ha1)
-        (z a.1) (hz a.1 a.2))
-        =
-      ∑ a ∈ T, F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d)
-        (w a) (hw a) := by
-        refine Finset.sum_congr ?_ ?_
-        · simp [T]
-        · intro a ha
-          dsimp [w]
-          have haI : a.1 ∈ Finset.Icc 1 d := a.2
-          have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp haI).1
-          have had : a.1 ≤ d := (Finset.mem_Icc.mp haI).2
-          exact F.finiteLogNatDivEval_eq_factorial_denominator (N := N)
-            (Nat.ne_zero_of_lt ha1) had (hz a.1 a.2) (hw a)
-    _ =
-      F.finiteLogNatDivEval N d.factorial s (Nat.factorial_ne_zero d)
-        (∑ a ∈ T, w a) hsum_s := by
-        rw [← F.finiteLogNatDivEval_sum (N := N) (n := d.factorial) (s := s)
-          (Nat.factorial_ne_zero d) T w hw hsum_s]
-    _ =
-      F.finiteLogNatDivEval N d.factorial t (Nat.factorial_ne_zero d)
-        (∑ a ∈ T, w a) hsum_t :=
-        F.finiteLogNatDivEval_eq_of_mem (N := N) (n := d.factorial)
-          (s := s) (t := t) (Nat.factorial_ne_zero d) hsum_s hsum_t
-    _ = 0 :=
-        F.finiteLogNatDivEval_eq_zero_of_succ_le
-          (N := N) (n := d.factorial) (s := t)
-          (Nat.factorial_ne_zero d) hsum_t ht
+  have hsum_eq :
+      (∑ a ∈ (Finset.Icc 1 d).attach, ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1) =
+        ∑ n ∈ Finset.Icc 1 d, ((d.factorial / n : ℕ) : 𝓞 R') * z n :=
+    Finset.sum_attach (Finset.Icc 1 d)
+      (fun n => ((d.factorial / n : ℕ) : 𝓞 R') * z n)
+  have hsum_s :
+      (∑ a ∈ (Finset.Icc 1 d).attach, ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1) ∈
+        F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + s) :=
+    Ideal.sum_mem _ fun a _ha =>
+      F.finiteLogNatDivEval_factorial_weighted_mem
+        (Nat.ne_zero_of_lt (Finset.mem_Icc.mp a.2).1)
+        (Finset.mem_Icc.mp a.2).2 (hz a.1 a.2)
+  have hsum_t :
+      (∑ a ∈ (Finset.Icc 1 d).attach, ((d.factorial / a.1 : ℕ) : 𝓞 R') * z a.1) ∈
+        F.Q ^ (d.factorial.factorization ℓ * (ℓ - 1) + t) := hsum_eq ▸ hclear
+  rw [F.finiteLogNatDivEval_Icc_attach_sum_eq z hz hsum_s,
+    F.finiteLogNatDivEval_eq_of_mem (N := N) (n := d.factorial)
+      (s := s) (t := t) (Nat.factorial_ne_zero d) hsum_s hsum_t]
+  exact F.finiteLogNatDivEval_eq_zero_of_succ_le
+    (N := N) (n := d.factorial) (s := t)
+    (Nat.factorial_ne_zero d) hsum_t ht
 
 /-- The localized evaluator commutes with negating the numerator. -/
 theorem finiteLogNatDivEval_neg {N n s : ℕ} (hn : n ≠ 0) {z : 𝓞 R'}
@@ -839,8 +814,7 @@ noncomputable def finiteLogLocalizedPolynomial (N : ℕ) (x : 𝓞 R') (hx : x �
 theorem finiteLog_eq_finiteLogLocalizedPolynomial (N : ℕ)
     {x : 𝓞 R'} (hx : x ∈ F.Q) :
     F.finiteLog N x hx = F.finiteLogLocalizedPolynomial N x hx := by
-  classical
-  unfold finiteLog finiteLogLocalizedPolynomial
+  simp only [finiteLog, finiteLogLocalizedPolynomial]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   by_cases hn0 : n = 0

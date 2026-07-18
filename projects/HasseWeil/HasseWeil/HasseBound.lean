@@ -1,74 +1,93 @@
-import HasseWeil.DegreeQuadraticForm
-import HasseWeil.Frobenius
-import Mathlib.Analysis.SpecialFunctions.Pow.Real
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import HasseWeil.HasseBound.WeilPairing.FrobMatrixData
+import HasseWeil.HasseBound.WeilPairing.PencilComapPointValuation
+import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
+import HasseWeil.HasseBound.WeilPairing.Scaling.OneSubTransport
 
 /-!
-# The Hasse Bound for Elliptic Curves
+# The unconditional Hasse bound `|#E(𝔽_q) − q − 1| ≤ 2√q`
 
-We prove Hasse's theorem: for an elliptic curve `E` over a finite field `𝔽_q`,
+This is the capstone: it discharges the single geometric leaf `FrobBaseChangeScalingsCoprime` of
+`hasse_bound_unconditional_of_baseChange_scalings_coprime` (`FrobMatrixData.lean`) by the three
+per-isogeny base-change Weil-pairing scalings now built over `K̄ = AlgebraicClosure K`:
 
-  `|#E(𝔽_q) - q - 1| ≤ 2√q`.
+* `frobeniusScaling_holds` (leaf 1, Frobenius `π`) — axiom-clean;
+* `oneSubFrobeniusScaling_holds` (leaf 2, `1 − π`) — axiom-clean;
+* `pencilScaling_holds_coprime` (leaf 3, `rπ − s` on `p ∤ r' ∧ p ∤ s'`) — axiom-clean, with the
+  kernel-cardinality exponent `pencilKerCard`.
 
-The proof decomposes into:
-1. **Algebraic input**: The degree map on End(E) is a positive semidefinite (nonnegative) quadratic
-   form (Silverman III.6.3), the Frobenius has degree `q` (III.4.6), and
-   `#E(𝔽_q) = q + 1 - t` where `t = tr(π)` (V.1.1).
-2. **Pure algebra** (fully proved): From the non-negativity of the quadratic form,
-   we deduce `t² ≤ 4q`, hence `|t| ≤ 2√q`.
+The **coprime-BOTH** route requests the pencil scaling only on the
+genuine locus `p ∤ r' ∧ p ∤ s'` — exactly where `rπ − s` is genuine — so the inseparable `p ∣ r'`
+geometric input is never demanded.  The resulting Hasse bound is **axiom-clean** (no `sorryAx`).
+
+The exponent `deg` of `hasse_bound_unconditional_of_baseChange_scalings` is fixed **before** the
+`∀ p r` quantifier; we pick the canonical `(p₀, n₀)` of `FiniteField.card' K` for it, and inside the
+per-`(p, r)` `hscale` discharge we force `p = p₀` (`CharP` uniqueness) and `r = n₀`
+(`Nat.pow_right_injective` on `#K = p₀^r = p₀^n₀`) so that the carried exponent
+`pencilKerCard W p r (pencilJunkPullback W)` matches.
 
 ## References
 
-* Silverman, *The Arithmetic of Elliptic Curves*, Theorem V.1.1
-* Sutherland, *18.783 Elliptic Curves*, Lecture 7, Theorem 7.17
+* Silverman, *The Arithmetic of Elliptic Curves*, V.1.1 (the Hasse bound), III.8.6 (the Weil-pairing
+  symplectic scaling).
 -/
 
-open WeierstrassCurve Real
+open WeierstrassCurve HasseWeil.Curves
 
-namespace HasseWeil
+namespace HasseWeil.WeilPairing
 
-/-! ### Pure algebra: the discriminant bound -/
 
-/-- If a binary quadratic form `q · r² - t · r · s + s²` is non-negative for all
-    integers `r, s`, then `t² ≤ 4q`. -/
-theorem trace_sq_le_four_mul_deg (q : ℕ) (t : ℤ) (hq : 0 < q)
-    (h : ∀ r s : ℤ, 0 ≤ (q : ℤ) * r ^ 2 - t * r * s + s ^ 2) :
-    t ^ 2 ≤ 4 * (q : ℤ) := by
-  by_contra habs
-  push_neg at habs
-  have h₁ := h t (2 * (q : ℤ))
-  have hq' : (0 : ℤ) < q := Int.natCast_pos.mpr hq
-  nlinarith [sq_nonneg t, sq_nonneg (q : ℤ), mul_self_nonneg (q : ℤ)]
+variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
+variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
 
-/-- The integer absolute value bound: if `t² ≤ 4q`, then `|t| ≤ 2√q`. -/
-theorem abs_le_two_sqrt_of_sq_le (q : ℕ) (t : ℤ)
-    (ht : t ^ 2 ≤ 4 * (q : ℤ)) :
-    |(t : ℝ)| ≤ 2 * sqrt (q : ℝ) := by
-  have hq_nn : (0 : ℝ) ≤ q := Nat.cast_nonneg' q
-  have hsq_nn : (0 : ℝ) ≤ 2 * sqrt q := by positivity
-  have ht_real : (t : ℝ) ^ 2 ≤ 4 * (q : ℝ) := by exact_mod_cast ht
-  have key : (t : ℝ) ^ 2 ≤ (2 * sqrt (q : ℝ)) ^ 2 := by
-    rw [mul_pow, sq_sqrt hq_nn]; linarith
-  rw [abs_le]
-  exact abs_le_of_sq_le_sq' key hsq_nn
+noncomputable local instance : DecidableEq (AlgebraicClosure K) := Classical.decEq _
 
-/-! ### The Hasse bound
+/-- **The unconditional Hasse bound** (Silverman V.1.1): for an elliptic curve `E` over a
+finite field
+`𝔽_q`, `|#E(𝔽_q) − q − 1| ≤ 2√q`, with **no hypotheses** beyond `2 ≤ #K`.
 
-**[2026-05-28 — placeholder removal, Strategy B].** The theorems
-`traceOfFrobenius_sq_le`, `hasse_bound`, and `hasse_bound_sq` previously lived
-here. They were built on the placeholder `oneSubFrobeniusIsog` (whose
-`pullback := AlgHom.id` forces `degree = 1`, hence `traceOfFrobenius = q` and
-the false `q² ≤ 4q`), so they asserted universally-false statements
-(`#E(F_q) = 1`, `q² ≤ 4q` for `q ≥ 5`). They have been **deleted**.
+Assembled from `hasse_bound_unconditional_of_baseChange_scalings_coprime`
+(`FrobMatrixData.lean`) with
+the kernel-cardinality degree function `pencilKerCard` and the three base-change scalings
+`frobeniusScaling_holds`, `oneSubFrobeniusScaling_holds`, `pencilScaling_holds_coprime`.
 
-The live, honest Hasse-bound API is
-`HasseWeil.WeilPairing.hasse_bound_unconditional`
-(`HasseWeil/WeilPairing/HasseBound.lean`), PROVEN axiom-clean; it routes through
-the genuine `isogOneSub_negFrobenius` and the Weil-pairing assembly
-(`WeilPairing/HasseAssembly.lean`, with `hasse_bound_of_full_qf_nonneg_witnesses`
-/ `traceOfFrobenius_sq_le_of_qf_nonneg` in `Hasse/QuadraticForm.lean`).
-(The intermediate `hasse_bound_skeleton` milestone and its sorried skeleton chain
-were retired 2026-06-11.) The pure-algebra discriminant lemmas above
-(`trace_sq_le_four_mul_deg`, `abs_le_two_sqrt_of_sq_le`) are correct and are
-consumed by that live chain. -/
+Instance bookkeeping: `deg` is fixed before `∀ p r`, so it is taken at the canonical `(p₀, n₀)` of
+`FiniteField.card' K`; inside the `hscale` discharge `p = p₀` (`CharP.eq`) and `r = n₀`
+(`Nat.pow_right_injective`) are forced. -/
+theorem hasse_bound_unconditional (hq : 2 ≤ Fintype.card K) :
+    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
+      2 * Real.sqrt (Fintype.card K : ℝ) := by
+  -- The canonical characteristic / exponent of `K`, used to fix the degree function `deg`.
+  obtain ⟨p₀, hCharP₀, n₀, hp₀_prime, hcard₀⟩ := FiniteField.card' K
+  have : Fact p₀.Prime := ⟨hp₀_prime⟩
+  have : CharP K p₀ := hCharP₀
+  have : Fact (Fintype.card K = p₀ ^ (n₀ : ℕ)) := ⟨hcard₀⟩
+  -- The degree function, at the canonical `(p₀, n₀)`.  Kept as a local definition so the heavy
+  -- `Nat.card (… .ker)` underneath `pencilKerCard` is never whnf-reduced during unification.
+  set deg₀ : ℤ → ℤ → ℤ := pencilKerCard W p₀ (n₀ : ℕ) (pencilJunkPullback W) with hdeg₀
+  refine hasse_bound_unconditional_of_baseChange_scalings_coprime W hq deg₀
+    (fun r' s' ↦ hdeg₀ ▸ pencilKerCard_nonneg W p₀ (n₀ : ℕ) (pencilJunkPullback W) r' s')
+    (fun p r hp hcp hcard ↦ ?_)
+  -- Discharge `FrobBaseChangeScalingsCoprime` for an arbitrary `(p, r)`, forcing `p = p₀`, `r = n₀`
+  -- (`obtain rfl` eliminates the RHS canonical vars, keeping the quantified `p`, `r`).
+  obtain rfl : p = p₀ := CharP.eq K hcp hCharP₀
+  obtain rfl : r = (n₀ : ℕ) := by
+    have hpow : p ^ r = p ^ (n₀ : ℕ) := by rw [← hcard.out, hcard₀]
+    exact Nat.pow_right_injective hp₀_prime.two_le hpow
+  refine ⟨frobeniusScaling_holds W p (n₀ : ℕ), oneSubFrobeniusScaling_holds W p (n₀ : ℕ) hq, ?_⟩
+  rw [hdeg₀]
+  exact pencilScaling_holds_coprime W p (n₀ : ℕ)
 
-end HasseWeil
+/-- **The Hasse bound, hypothesis-free capstone** (Silverman V.1.1):
+`|#E(𝔽_q) − q − 1| ≤ 2√q` with no explicit cardinality hypothesis — `2 ≤ #K` is
+automatic for a finite field (`Fintype.one_lt_card`). -/
+theorem hasse_bound :
+    |(↑(pointCount W.toAffine) - ↑(Fintype.card K) - 1 : ℝ)| ≤
+      2 * Real.sqrt (Fintype.card K : ℝ) :=
+  hasse_bound_unconditional W (Nat.succ_le_of_lt Fintype.one_lt_card)
+
+end HasseWeil.WeilPairing

@@ -10,8 +10,7 @@ public import BernoulliRegular.GaussSum.PrimeFactorization.Assembly.Factorizatio
 
 noncomputable section
 
-open NumberField IsCyclotomicExtension
-open scoped Pointwise
+open NumberField
 
 namespace BernoulliRegular
 
@@ -33,16 +32,15 @@ noncomputable def characterSideCoefficientGroupRing
 `b`. -/
 @[simp] lemma characterSideCoefficientGroupRing_apply_inv
     (v : (ZMod (p - 1))ˣ → ℕ) (b : (ZMod (p - 1))ˣ) :
-    characterSideCoefficientGroupRing (p := p) v b⁻¹ = (v b : ℤ) := by
-  classical
-  rw [characterSideCoefficientGroupRing]
+    (characterSideCoefficientGroupRing (p := p) v).coeff b⁻¹ = (v b : ℤ) := by
+  rw [characterSideCoefficientGroupRing, MonoidAlgebra.coeff_sum]
   calc
-    (∑ c : (ZMod (p - 1))ˣ, MonoidAlgebra.single c⁻¹ (v c : ℤ)) b⁻¹ =
-        ∑ c : (ZMod (p - 1))ˣ, MonoidAlgebra.single c⁻¹ (v c : ℤ) b⁻¹ :=
+    (∑ c : (ZMod (p - 1))ˣ, (MonoidAlgebra.single c⁻¹ (v c : ℤ)).coeff) b⁻¹ =
+        ∑ c : (ZMod (p - 1))ˣ, (MonoidAlgebra.single c⁻¹ (v c : ℤ)).coeff b⁻¹ :=
           (Finsupp.finsetSum_apply
             (S := (Finset.univ : Finset (ZMod (p - 1))ˣ))
             (f := fun c : (ZMod (p - 1))ˣ =>
-              MonoidAlgebra.single c⁻¹ (v c : ℤ))
+              (MonoidAlgebra.single c⁻¹ (v c : ℤ)).coeff)
             (a := b⁻¹))
     _ = (v b : ℤ) := by
         rw [Fintype.sum_eq_single b]
@@ -61,7 +59,7 @@ of prime powers. Coefficients are read in the inverse-basis convention. -/
 noncomputable def characterSideIdealFactorizationFromGroupRing
     (E : MonoidAlgebra ℤ (ZMod (p - 1))ˣ) : Ideal (𝓞 L) :=
   ∏ b : (ZMod (p - 1))ˣ,
-    characterSidePrimeMap (p := p) (L := L) b ^ (E b⁻¹).toNat
+    characterSidePrimeMap (p := p) (L := L) b ^ (E.coeff b⁻¹).toNat
 
 @[simp] lemma characterSideIdealFactorizationFromGroupRing_coefficientGroupRing
     (v : (ZMod (p - 1))ˣ → ℕ) :
@@ -185,8 +183,8 @@ lemma distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget_iff
         distinguishedPrimeExponent (p := p) (L := L)
             (stickelbergerComplexCharacterGenerator (p := p) ^ (j : ℕ)) =
           stickelbergerGeneratorPowerNormalizedParameter (p := p) (L := L)
-            (j : ZMod (p - 1)) := by
-  rfl
+            (j : ZMod (p - 1)) :=
+  Iff.rfl
 
 /-- The exact closed-form target for the normalized coefficient vector on
 generator-power characters. -/
@@ -245,35 +243,27 @@ lemma distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget_of_
   intro j
   by_cases hj : j = 0
   · subst hj
-    have h1 := congrFun (h 0) (1 : (ZMod (p - 1))ˣ)
-    unfold characterSideExponentVector at h1
-    simpa [stickelbergerGeneratorPowerCoefficientTarget,
+    simpa [characterSideExponentVector, stickelbergerGeneratorPowerCoefficientTarget,
       stickelbergerGeneratorPowerNormalizedParameter,
-      stickelbergerGeneratorPowerParameter] using h1
+      stickelbergerGeneratorPowerParameter] using congrFun (h 0) (1 : (ZMod (p - 1))ˣ)
   · have hjpos : 0 < j := Fin.pos_iff_ne_zero.mpr hj
-    have hp1 : 1 < p - 1 := by
-      omega
+    have hp1 : 1 < p - 1 := by omega
     letI : Fact (1 < p - 1) := ⟨hp1⟩
-    have h1 := congrFun (h j) (1 : (ZMod (p - 1))ˣ)
-    unfold characterSideExponentVector at h1
     have hval1 : (1 : ZMod (p - 1)).val = 1 := ZMod.val_one (p - 1)
-    simpa [stickelbergerGeneratorPowerCoefficientTarget,
+    simpa [characterSideExponentVector, stickelbergerGeneratorPowerCoefficientTarget,
       stickelbergerGeneratorPowerNormalizedParameter,
-      stickelbergerGeneratorPowerParameter, hval1] using h1
+      stickelbergerGeneratorPowerParameter, hval1] using congrFun (h j) (1 : (ZMod (p - 1))ˣ)
 
 theorem distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget_iff_characterSide
     :
     distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget
         (p := p) (L := L) ↔
       characterSideExponentVector_stickelbergerGeneratorPowerClosedFormTarget
-        (p := p) (L := L) := by
-  constructor
-  · exact
-      characterSideExponentVector_stickelbergerGeneratorPowerClosedFormTarget_of_distinguished
-        (p := p) (L := L)
-  · exact
-      distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget_of_characterSide
-        (p := p) (L := L)
+        (p := p) (L := L) :=
+  ⟨characterSideExponentVector_stickelbergerGeneratorPowerClosedFormTarget_of_distinguished
+      (p := p) (L := L),
+    distinguishedPrimeExponent_stickelbergerGeneratorPowerClosedFormTarget_of_characterSide
+      (p := p) (L := L)⟩
 
 /-- The closed-form coefficient target for an arbitrary character, expressed by
 first writing it as a power of `stickelbergerComplexCharacterGenerator`. -/
@@ -292,7 +282,7 @@ noncomputable def stickelbergerCharacterCoefficientGroupRingTarget
 /-- Coefficients of the character-side group-ring target. -/
 @[simp] lemma stickelbergerCharacterCoefficientGroupRingTarget_apply_inv
     (χ : DirichletCharacter ℂ p) (b : (ZMod (p - 1))ˣ) :
-    stickelbergerCharacterCoefficientGroupRingTarget (p := p) (L := L) χ b⁻¹ =
+    (stickelbergerCharacterCoefficientGroupRingTarget (p := p) (L := L) χ).coeff b⁻¹ =
       (stickelbergerCharacterCoefficientTarget (p := p) (L := L) χ b : ℤ) := by
   simp [stickelbergerCharacterCoefficientGroupRingTarget]
 
@@ -309,7 +299,7 @@ noncomputable def stickelbergerCharacterAdditiveGroupRingTarget
 /-- Coefficients of the arbitrary-character additive group-ring target. -/
 @[simp] lemma stickelbergerCharacterAdditiveGroupRingTarget_apply_inv
     (χ : DirichletCharacter ℂ p) (a : (ZMod p)ˣ) :
-    stickelbergerCharacterAdditiveGroupRingTarget (p := p) (L := L) χ a⁻¹ =
+    (stickelbergerCharacterAdditiveGroupRingTarget (p := p) (L := L) χ).coeff a⁻¹ =
       (stickelbergerGeneratorPowerNormalizedParameter (p := p) (L := L)
         (stickelbergerCharacterExponent (p := p) χ : ZMod (p - 1)) : ℤ) := by
   simp [stickelbergerCharacterAdditiveGroupRingTarget]

@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.BernoulliFast.KellnerSecondOrder
 import BernoulliRegular.FLT37.Final
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiRadicalNotPthPower
@@ -11,7 +16,7 @@ import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Thaine.ReflectionOther
 import BernoulliRegular.HMinus.HMinusCriterion
 import BernoulliRegular.Reflection.ClassGroupModP.AtomC
 import BernoulliRegular.Reflection.ClassGroupModP.SP2
-import BernoulliRegular.Reflection.FinalReflection.Part2
+import BernoulliRegular.Reflection.FinalReflection.WeakReflection
 import BernoulliRegular.UnitQuotient.PadicEigenspaceRankOne
 
 /-!
@@ -350,7 +355,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_padicThaineHerbrandAll_AK5a_caseIIDe
       componentId thaine h_herbrand caseI_AK5a caseII_step
       noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from the concrete Padic Thaine input, named Case-I AK
 unramifiedness, and adjacent Case-II generator/unit-power data.**
 
@@ -443,7 +447,6 @@ theorem
           (fun {_m'} D' ↦ h_unit hV hSO D') D)
       noSecondOrderIrregular
 
-set_option maxRecDepth 40000 in
 /-- **FLT37 from Cor 8.19, the concrete Case-I factor-class target, and
 Washington 9.4 Case-II descent.**
 
@@ -482,8 +485,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_cor8_19_factorIdealClass_caseIIDesce
     fermatLastTheoremFor_thirtyseven_of_cor8_19_stage2_caseIIDescent_noSecondOrder
       cor8_19 stage2 caseII_step noSecondOrderIrregular
 
-set_option linter.style.longLine false in
-set_option maxRecDepth 40000 in
 /-- **FLT37 from the exact Pollaczek root source, principality of the actual
 Case-I factor ideals, and Washington 9.4 Case-II descent.**
 
@@ -529,7 +530,6 @@ theorem
     fermatLastTheoremFor_thirtyseven_of_cor8_19_stage2_caseIIDescent_noSecondOrder
       cor8_19 stage2 caseII_step noSecondOrderIrregular
 
-set_option maxRecDepth 40000 in
 /-- **FLT37 from Cor 8.19, the concrete Case-I square-class target, and
 Washington 9.4 Case-II descent.**
 
@@ -577,7 +577,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_cor8_19_caseISquare_caseIIDescent_no
     fermatLastTheoremFor_thirtyseven_of_cor8_19_stage2_caseIIDescent_noSecondOrder
       cor8_19 stage2 caseII_step noSecondOrderIrregular
 
-set_option maxRecDepth 40000 in
 /-- **FLT37 from Cor 8.19, the direct AK-5 unit-form/congruence target, and
 Washington 9.4 Case-II descent.**
 
@@ -623,7 +622,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_cor8_19_caseIAK5UnitCongr_caseIIDesc
     fermatLastTheoremFor_thirtyseven_of_cor8_19_stage2_caseIIDescent_noSecondOrder
       cor8_19 stage2 caseII_step noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from the exact Pollaczek root source, the direct AK-5
 unit-form/congruence target, and Washington 9.4 Case-II descent.** -/
 theorem
@@ -667,7 +665,6 @@ theorem
       h_pollaczek)
     caseI_AK5 caseII_step noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from the exact Pollaczek root source, direct AK-5
 unit-form/congruence, adjacent Washington generators, and the exact Case-II
 quotient-unit p-th-power source.**
@@ -797,7 +794,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_exact_pollaczek_AK5a_caseIIDescent_n
       h_pollaczek)
     caseI_AK5a caseII_step noSecondOrderIrregular
 
-set_option maxRecDepth 40000 in
 /-- **FLT37 from the exact Pollaczek root source, concrete Case-I
 Hilbert-90 cross-multiplication data, and Washington 9.4 Case-II descent.**
 
@@ -868,8 +864,6 @@ theorem
     fermatLastTheoremFor_thirtyseven_of_cor8_19_AK5a_caseIIDescent_noSecondOrder
       cor8_19 caseI_AK5a caseII_step noSecondOrderIrregular
 
-set_option linter.style.longLine false in
-set_option maxRecDepth 40000 in
 /-- **FLT37 from the exact Pollaczek root source, concrete Case-I
 Hilbert-90 cross-multiplication witnesses, and Washington 9.4 Case-II descent.**
 
@@ -1636,7 +1630,6 @@ theorem
     fermatLastTheoremFor_thirtyseven_of_adjacentWashingtonCaseII_and_noSecondOrder
       cor8_19 caseI_AK5a hgens h_kummer noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from refined Thaine, named AK unramifiedness, and Washington
 Case-II expressions with one conjugacy orientation.**
 
@@ -1712,7 +1705,6 @@ theorem
             (K := CyclotomicField 37 ℚ) hρ₂)
     h_kummer noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from refined Thaine, named AK unramifiedness, and the narrowed
 Washington Case-II expression source.**
 
@@ -1783,7 +1775,6 @@ theorem
       · exact FLT37.LehmerVandiver.CaseII.ne_zero_of_not_dvd hnot₂)
     h_kummer noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from exact Pollaczek, universal AK-5 data, and the narrowed
 Washington Case-II expression source.**
 
@@ -1876,7 +1867,6 @@ theorem
           (fun {_m'} D' ↦ hgens hV hSO D') (h_kummer hV hSO) D)
       noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from exact Pollaczek, universal AK-5 data, and the exact
 Case-II quotient-unit p-th-power source.**
 
@@ -1982,7 +1972,6 @@ theorem
           (fun {_m'} D' ↦ h_unit hV hSO D') D)
       noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from refined Thaine, universal AK-5 data, and the narrowed
 Washington Case-II expression source.**
 
@@ -2055,7 +2044,6 @@ theorem
     (CaseI.flt37_pollaczekUnitPlusKplus_isPthPower_of_refinedThaineBridge thaine)
     h_AK5 hgens h_kummer noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from refined Thaine, universal AK-5 data, and the exact Case-II
 quotient-unit p-th-power source.**
 
@@ -2140,7 +2128,6 @@ theorem
     (CaseI.flt37_pollaczekUnitPlusKplus_isPthPower_of_refinedThaineBridge thaine)
     h_AK5 hgens h_unit noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from explicit Thaine/reflection fields, universal AK-5 data, and
 the narrowed Washington Case-II expression source.**
 
@@ -2231,7 +2218,6 @@ theorem
           (fun {_m'} D' ↦ hgens hV hSO D') (h_kummer hV hSO) D)
       noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from explicit Thaine/reflection fields, universal AK-5 data, and
 the exact Case-II quotient-unit p-th-power source.**
 
@@ -2322,7 +2308,6 @@ theorem
     fermatLastTheoremFor_thirtyseven_of_refinedThaine_AK5Universal_adjacentWashingtonUnitPower_noSecondOrder
       refined h_AK5 hgens h_unit noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from Thaine, Herbrand-Ribet reflection data, universal AK-5 data,
 and the exact Case-II quotient-unit p-th-power source.**
 
@@ -2416,7 +2401,6 @@ theorem
     fermatLastTheoremFor_thirtyseven_of_thaineAndReflection_AK5Universal_adjacentWashingtonUnitPower_noSecondOrder
       componentId thaine reflection h_AK5 hgens h_unit noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from explicit Thaine/reflection fields, direct AK-5
 unit-form/congruence data, and the narrowed Washington Case-II source.**
 
@@ -2505,7 +2489,6 @@ theorem
           (fun {_m'} D' ↦ hgens hV hSO D') (h_kummer hV hSO) D)
       noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from Thaine, Herbrand-Ribet reflection data, direct AK-5
 unit congruence, and the narrowed Washington Case-II source.**
 
@@ -2596,7 +2579,6 @@ theorem
       componentId thaine reflection caseI_AK5 hgens h_kummer
       noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from Thaine, Herbrand-Ribet reflection data, direct AK-5
 unit congruence, Washington adjacent generators, and the exact Case-II
 quotient-unit p-th-power source.**
@@ -2705,7 +2687,6 @@ theorem
           (fun {_m'} D' ↦ h_unit hV hSO D') D)
       noSecondOrderIrregular
 
-set_option linter.style.longLine false in
 /-- **FLT37 from Thaine, Herbrand-Ribet reflection data, direct AK-5
 unit congruence, adjacent Case-II quotient generators, and the exact Case-II
 quotient-unit p-th-power source.**
@@ -3079,7 +3060,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_exact_pollaczek_classEq_base_specifi
       h_pollaczek)
     caseI_class h_model_base h_kummer kellner
 
-set_option maxRecDepth 40000 in
 /-- **FLT37 from the factor-ideal class surface plus anchored case-II
 sources.**
 
@@ -3137,7 +3117,6 @@ theorem fermatLastTheoremFor_thirtyseven_of_factorIdealClass_base_caseII_sources
   exact fermatLastTheoremFor_thirtyseven_of_cor8_19_stage2_caseII
     cor8_19 stage2 kellner caseII
 
-set_option maxRecDepth 40000 in
 /-- **FLT37 from the factor-ideal class surface, plus the current case-II
 surfaces, using the shipped second-order Bernoulli target.**
 

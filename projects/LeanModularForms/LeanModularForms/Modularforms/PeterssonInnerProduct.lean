@@ -39,10 +39,10 @@ where `D` is a fundamental domain.
 * `peterssonInner_conj_symm`: Hermitian symmetry `conj ⟨g, f⟩ = ⟨f, g⟩`.
 * `peterssonInner_zero_left`, `peterssonInner_zero_right`: the pairing with the zero function
   vanishes.
-* `peterssonInner_petersson_self_re_nonneg`: `0 ≤ re ⟨f, f⟩` (non-negativity of the diagonal
-  pairing).
 * `peterssonInner_integrableOn`: integrability of the Petersson integrand for cusp forms
   over the standard fundamental domain (uses mathlib's exponential decay estimates).
+* `eq_zero_on_fd_of_peterssonInner_self_eq_zero`: definiteness — if the diagonal pairing
+  `⟨f, f⟩` of a cusp form vanishes, then `f` is zero on the fundamental domain.
 
 ## Implementation notes
 
@@ -373,7 +373,7 @@ theorem hyperbolicMeasure_fd_boundary : μ_hyp (fd \ fdo) = 0 := by
 /-- `fd` and `fdo` are a.e. equal w.r.t. the hyperbolic measure. -/
 theorem fd_ae_eq_fdo : (fd : Set ℍ) =ᶠ[ae μ_hyp] fdo :=
   ae_eq_set.mpr ⟨hyperbolicMeasure_fd_boundary, by
-    rw [show (fdo : Set ℍ) \ fd = ∅ from diff_eq_empty.mpr fdo_subset_fd]
+    rw [show (fdo : Set ℍ) \ fd = ∅ from sdiff_eq_empty.mpr fdo_subset_fd]
     exact measure_empty⟩
 
 /-- Integrals over `fd` and `fdo` agree against `μ_hyp`. -/
@@ -432,7 +432,7 @@ fundamental domain `𝒟` for `SL₂(ℤ)`.
 For cusp forms of level `Γ` with `[SL₂(ℤ) : Γ] = n`, a fundamental domain
 for `Γ` consists of `n` translates of `𝒟`, and the Petersson inner product
 scales accordingly. -/
-noncomputable def pet (f g : CuspForm Γ k) : ℂ :=
+def pet (f g : CuspForm Γ k) : ℂ :=
   peterssonInner k ModularGroup.fd f g
 
 end CuspForm

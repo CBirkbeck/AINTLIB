@@ -1,21 +1,15 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
-import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
+module
 
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.PollaczekFamilyDescent
+public import Mathlib.NumberTheory.NumberField.Units.DirichletTheorem
 
 /-!
 # Logarithmic embedding of cyclotomic-unit family elements
 
-For the K⁺-side cyclotomic-unit family, we compute the logarithmic
-embedding `logEmbedding K⁺ : (𝓞 K⁺)ˣ → logSpace K⁺` explicitly.
-
-For totally real K⁺, all infinite places are real (`mult w = 1`), so
-
-  `logEmbedding K⁺ (family j) w = Real.log (w (family j))`
-
-for `w : InfinitePlace K⁺` with `w ≠ w₀` (the distinguished place).
-
-This file is **LV-SIN-A** of the Cor 8.19 / Sinnott bridge construction.
+This file computes the logarithmic embedding of the `K⁺`-side cyclotomic-unit
+family and rewrites its regulator determinant in terms of the corresponding
+real cyclotomic units over `K`.
 -/
 
 @[expose] public section
@@ -40,13 +34,12 @@ omit [IsCMField K] in
 theorem mult_eq_one_of_maximalRealSubfield (w : InfinitePlace (NumberField.maximalRealSubfield K)) :
     mult w = 1 := by
   rw [mult]
-  simp [IsTotallyReal.isReal w]
+  simp only [IsTotallyReal.isReal w, ↓reduceIte]
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- The logarithmic embedding of a unit `u : (𝓞 K⁺)ˣ` at a non-distinguished
-infinite place `w` is just `Real.log (w u)`, since `mult w = 1` for
-totally real K⁺. -/
+/-- The logarithmic embedding of a unit over `K⁺` at a non-distinguished
+infinite place is `Real.log` of its value there. -/
 theorem logEmbedding_apply_maximalRealSubfield
     (u : (𝓞 (NumberField.maximalRealSubfield K))ˣ)
     (w : {w : InfinitePlace (NumberField.maximalRealSubfield K) //
@@ -59,9 +52,8 @@ theorem logEmbedding_apply_maximalRealSubfield
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-/-- For the cyclotomic-unit family element `cyclotomicUnitFamilyKplusFinRank j`,
-the value of an infinite place `w` of K⁺ on this element factors through
-algebraMap to K. -/
+/-- The value of a `K⁺` infinite place on a cyclotomic-family unit factors
+through the corresponding infinite place of `K`. -/
 theorem infinitePlace_cyclotomicUnitFamilyKplus_eq
     (j : Fin (NumberField.Units.rank
         (NumberField.maximalRealSubfield K)))
@@ -78,7 +70,7 @@ theorem infinitePlace_cyclotomicUnitFamilyKplus_eq
   rw [NumberField.IsCMField.equivInfinitePlace_symm_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The value of an infinite place of K⁺ on `cyclotomicUnitFamilyKplus j`
+/-- The value of an infinite place of `K⁺` on `cyclotomicUnitFamilyKplus j`
 equals the value of the corresponding place of K on `realCyclotomicUnit (j+2)`. -/
 theorem infinitePlace_cyclotomicUnitFamilyKplus_eq_realCyclotomicUnit
     (j : Fin (NumberField.Units.rank
@@ -96,10 +88,7 @@ theorem infinitePlace_cyclotomicUnitFamilyKplus_eq_realCyclotomicUnit
               (p := p) (K := K)))) + 2) : 𝓞 K) : K) := by
   rw [infinitePlace_cyclotomicUnitFamilyKplus_eq]
   congr 1
-  -- Goal: algebraMap K⁺ K (algebraMap 𝓞 K⁺ K⁺ x) = (realCyclotomicUnit (...) : K).
-  -- Use scalar tower: (𝓞 K⁺) → K⁺ → K = (𝓞 K⁺) → (𝓞 K) → K.
   have h := algebraMap_cyclotomicUnitFamilyKplus p K j hp_odd hp_three
-  -- Rewrite via IsScalarTower.
   rw [← IsScalarTower.algebraMap_apply
     (𝓞 (NumberField.maximalRealSubfield K)) (NumberField.maximalRealSubfield K) K]
   rw [IsScalarTower.algebraMap_apply
@@ -107,7 +96,7 @@ theorem infinitePlace_cyclotomicUnitFamilyKplus_eq_realCyclotomicUnit
   rw [h]
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The log embedding of `cyclotomicUnitFamilyKplus j` at place `w` of K⁺
+/-- The log embedding of `cyclotomicUnitFamilyKplus j` at a place `w` of `K⁺`
 equals `Real.log (w'(realCyclotomicUnit (j+2)))` where `w'` is the
 corresponding place of K. -/
 theorem logEmbedding_cyclotomicUnitFamilyKplus_apply
@@ -129,24 +118,11 @@ theorem logEmbedding_cyclotomicUnitFamilyKplus_apply
   congr 1
   exact infinitePlace_cyclotomicUnitFamilyKplus_eq_realCyclotomicUnit p K j w.val hp_odd hp_three
 
-/-! ## Determinant matrix structure
-
-The matrix `M` whose determinant equals `regOfFamily(family)`:
-
-  `M[w, j] = logEmbedding K⁺ (family j) w`
-          = `Real.log (w'_w (realCyclotomicUnit (j+2)))`
-
-where `w'_w = (equivInfinitePlace K).symm w` is the K-side place
-corresponding to `w`. The determinant of this matrix is exactly
-`±regOfFamily(family)` by `regOfFamily_eq_det'` from mathlib. -/
-
 set_option backward.isDefEq.respectTransparency false in
 open Classical in
 /-- The log-embedding matrix of `cyclotomicUnitFamilyKplusFinRank` has
 entries given by `Real.log (w' (realCyclotomicUnit (j+2)))` where `w'`
-is the K-side place. The matrix is square: rows and columns both
-indexed by `{w : InfinitePlace K⁺ // w ≠ w₀}` (places of K⁺ excluding w₀).
-The "row place" determines which family element via `equivFinRank.symm`. -/
+is the corresponding infinite place of `K`. -/
 theorem regOfFamily_cyclotomicUnitFamilyKplus_eq_det
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     NumberField.Units.regOfFamily
@@ -176,20 +152,9 @@ theorem regOfFamily_cyclotomicUnitFamilyKplus_eq_det
     ((NumberField.Units.equivFinRank (NumberField.maximalRealSubfield K)).symm i)
     w hp_odd hp_three
 
-/-! ## PF-1-helper: `cyclotomicUnit` norm at infinite places
-
-From the geometric-series identity
-`cyclotomicUnit k · (ζ - 1) = ζ^k - 1`
-(shipped in `FLT37/PrimaryUnits.lean`) and the multiplicativity of
-infinite places, we get
-`w(cyclotomicUnit k) · w(ζ - 1) = w(ζ^k - 1)`
-for any infinite place `w` of K. This is the key step for the matrix
-decomposition `M = 2·A - 2·B` in PF-1-MatrixDecomp:
-`log w(cyclotomicUnit k) = log w(ζ^k - 1) - log w(ζ - 1)`. -/
-
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper.** Multiplicativity of `w` applied to
+/-- Multiplicativity of an infinite place applied to
 `zeta_sub_one_mul_cyclotomicUnit`. -/
 theorem norm_cyclotomicUnit_mul_zeta_sub_one (k : ℕ) (w : InfinitePlace K) :
     w ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K) *
@@ -201,8 +166,7 @@ theorem norm_cyclotomicUnit_mul_zeta_sub_one (k : ℕ) (w : InfinitePlace K) :
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper (zeta - 1 nonzero).** For p ≥ 2 (i.e., any prime p),
-the K-element `ζ - 1` is non-zero. -/
+/-- For `2 ≤ p`, the `K`-element `ζ - 1` is non-zero. -/
 theorem zeta_sub_one_ne_zero_K (hp_two : 2 ≤ p) :
     ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K) - 1) ≠ 0 := by
   intro h
@@ -217,11 +181,8 @@ theorem zeta_sub_one_ne_zero_K (hp_two : 2 ≤ p) :
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper (cyclotomicUnit nonzero in K).** For `k` coprime to
-`p` and `p ≥ 2`, `cyclotomicUnit p K k` is non-zero in K.
-
-Direct from `isUnit_cyclotomicUnit` (unit is non-zero) +
-algebraMap-of-nonzero is non-zero. -/
+/-- For `k` coprime to `p` and `2 ≤ p`, `cyclotomicUnit p K k` is non-zero in
+`K`. -/
 theorem cyclotomicUnit_ne_zero_K
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p) :
     ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K) ≠ 0 := by
@@ -236,11 +197,8 @@ theorem cyclotomicUnit_ne_zero_K
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper (ζ^k - 1 nonzero in K).** For `k` coprime to `p` and
-`p ≥ 2`, `ζ^k - 1` is non-zero in K (since ζ is a primitive p-th root
-of unity in K, ζ^k = 1 iff p ∣ k, contradicting coprimality).
-
-Follows from `IsPrimitiveRoot.pow_eq_one_iff_dvd` + algebraMap. -/
+/-- For `k` coprime to `p` and `2 ≤ p`, the `K`-element `ζ^k - 1` is
+non-zero. -/
 theorem pow_zeta_sub_one_ne_zero_K
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p) :
     ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K) ^ k - 1) ≠
@@ -248,18 +206,15 @@ theorem pow_zeta_sub_one_ne_zero_K
   intro h
   have hζ_pow_K : (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K) ^ k = 1 :=
     sub_eq_zero.mp h
-  -- Lift to 𝓞 K via algebraMap injective.
   have h_inj : Function.Injective (algebraMap (𝓞 K) K) :=
     FaithfulSMul.algebraMap_injective (𝓞 K) K
   have hζ_pow_OK : ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ k = 1 := by
     apply h_inj
     rw [map_pow, map_one]
     exact hζ_pow_K
-  -- Now apply pow_eq_one_iff_dvd
   have hdvd : p ∣ k :=
     ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger_isPrimitiveRoot.pow_eq_one_iff_dvd
       k).mp hζ_pow_OK
-  -- Contradicts coprimality: p ∣ k + gcd(k, p) = 1 → p ∣ 1 → p = 1, contradiction.
   have hp_prime : Nat.Prime p := hp.out
   have hp_one_lt : 1 < p := hp_prime.one_lt
   have h_gcd_ge_p : p ≤ Nat.gcd k p := Nat.le_of_dvd
@@ -270,13 +225,8 @@ theorem pow_zeta_sub_one_ne_zero_K
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper (log form).** From the product identity
-`w(cyclotomicUnit k) · w(ζ - 1) = w(ζ^k - 1)`:
-`log w(cyclotomicUnit k) = log w(ζ^k - 1) - log w(ζ - 1)`.
-
-Requires `k.Coprime p` and `p ≥ 2` so that `cyclotomicUnit k` is a
-unit (hence non-zero in K). The non-zero condition for `ζ - 1`
-is shipped as `zeta_sub_one_ne_zero_K`. -/
+/-- The logarithm of `w (cyclotomicUnit p K k)` is the difference of the
+logarithms of `w (ζ^k - 1)` and `w (ζ - 1)`. -/
 theorem log_norm_cyclotomicUnit_eq_sub
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p) (w : InfinitePlace K) :
     Real.log (w ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K)) =
@@ -300,23 +250,9 @@ theorem log_norm_cyclotomicUnit_eq_sub
     rw [← Real.log_mul h_w_cycU h_w_zsub, h_prod]
   linarith
 
-
-/-! ## PF-1-Real: `realCyclotomicUnit` log via `cyclotomicUnit` log
-
-`realCyclotomicUnit p K k = cyclotomicUnit p K k · σ(cyclotomicUnit p K k)`
-where `σ` is complex conjugation on K (CM). For any infinite place w
-of K (necessarily complex since K is CM cyclotomic of conductor p),
-complex conjugation preserves the place's absolute value
-(mathlib's `infinitePlace_complexConj`). Hence
-`w(realCyclotomicUnit k) = w(cyclotomicUnit k)^2`, and taking log
-gives the factor of 2 below. This is ticket PF-1-Real from the
-`KummerDirichletDeterminant` sub-decomposition. -/
-
 set_option backward.isDefEq.respectTransparency false in
-/-- **PF-1-Real.** `Real.log (w (realCyclotomicUnit k)) =
-2 · Real.log (w (cyclotomicUnit k))` for any infinite place `w` of K.
-
-Proof: σ-symmetrization + `infinitePlace_complexConj` + `Real.log_pow`. -/
+/-- The logarithm of `w (realCyclotomicUnit p K k)` is twice the logarithm of
+`w (cyclotomicUnit p K k)`. -/
 theorem log_infinitePlace_realCyclotomicUnit
     (k : ℕ) (w : InfinitePlace K) :
     Real.log (w ((FLT37.realCyclotomicUnit p K k : 𝓞 K) : K)) =
@@ -324,20 +260,15 @@ theorem log_infinitePlace_realCyclotomicUnit
   have h_eq : ((FLT37.realCyclotomicUnit p K k : 𝓞 K) : K) =
       ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K) *
         complexConj K ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K) := by
-    unfold FLT37.realCyclotomicUnit
+    simp only [FLT37.realCyclotomicUnit]
     push_cast
     rw [← coe_ringOfIntegersComplexConj]
   rw [h_eq, map_mul, infinitePlace_complexConj, ← sq, Real.log_pow]
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **PF-1-MatrixDecomp (per-entry form).** Combining PF-1-Real
-(`log_infinitePlace_realCyclotomicUnit`) with PF-1-helper-log
-(`log_norm_cyclotomicUnit_eq_sub`):
-`log w(realCyclotomicUnit k) = 2 · log w(ζ^k - 1) - 2 · log w(ζ - 1)`.
-
-This is the per-entry form of the matrix decomposition `M = 2·A - 2·B`
-for the log-embedding matrix of `cyclotomicUnitFamilyKplus`. -/
+/-- Per-entry decomposition of the logarithm of `realCyclotomicUnit p K k` in
+terms of `ζ^k - 1` and `ζ - 1`. -/
 theorem log_realCyclotomicUnit_eq_sub_decomp
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p) (w : InfinitePlace K) :
     Real.log (w ((FLT37.realCyclotomicUnit p K k : 𝓞 K) : K)) =
@@ -349,7 +280,8 @@ theorem log_realCyclotomicUnit_eq_sub_decomp
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **PF-1-helper K⁺-place.** w'(cycU k) ≠ 0 for w' = equivInfinitePlace.symm w. -/
+/-- Non-vanishing of `cyclotomicUnit p K k` at the `K`-place corresponding to a
+`K⁺` infinite place. -/
 theorem cyclotomicUnit_at_Kplus_place_ne_zero
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p)
     (w : InfinitePlace (NumberField.maximalRealSubfield K)) :
@@ -358,7 +290,8 @@ theorem cyclotomicUnit_at_Kplus_place_ne_zero
   (InfinitePlace.pos_iff.mpr (cyclotomicUnit_ne_zero_K p K k hk hp_two)).ne'
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **PF-1-helper K⁺-place.** w'(ζ - 1) ≠ 0. -/
+/-- Non-vanishing of `ζ - 1` at the `K`-place corresponding to a `K⁺` infinite
+place. -/
 theorem zeta_sub_one_at_Kplus_place_ne_zero (hp_two : 2 ≤ p)
     (w : InfinitePlace (NumberField.maximalRealSubfield K)) :
     ((NumberField.IsCMField.equivInfinitePlace K).symm w)
@@ -366,7 +299,8 @@ theorem zeta_sub_one_at_Kplus_place_ne_zero (hp_two : 2 ≤ p)
   (InfinitePlace.pos_iff.mpr (zeta_sub_one_ne_zero_K p K hp_two)).ne'
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **PF-1-helper K⁺-place.** w'(ζ^k - 1) ≠ 0 for k coprime to p. -/
+/-- Non-vanishing of `ζ^k - 1` at the `K`-place corresponding to a `K⁺`
+infinite place. -/
 theorem pow_zeta_sub_one_at_Kplus_place_ne_zero
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p)
     (w : InfinitePlace (NumberField.maximalRealSubfield K)) :
@@ -376,7 +310,8 @@ theorem pow_zeta_sub_one_at_Kplus_place_ne_zero
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper.** w(cycU k) > 0 at a K-place (positivity from ne_zero). -/
+/-- Positivity of the absolute value of `cyclotomicUnit p K k` at a `K`
+infinite place. -/
 theorem cyclotomicUnit_at_place_pos (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p)
     (w : InfinitePlace K) :
     0 < w ((FLT37.cyclotomicUnit p K k : 𝓞 K) : K) :=
@@ -384,22 +319,21 @@ theorem cyclotomicUnit_at_place_pos (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper.** w(ζ - 1) > 0 at a K-place. -/
+/-- Positivity of the absolute value of `ζ - 1` at a `K` infinite place. -/
 theorem zeta_sub_one_at_place_pos (hp_two : 2 ≤ p) (w : InfinitePlace K) :
     0 < w ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K) - 1) :=
   InfinitePlace.pos_iff.mpr (zeta_sub_one_ne_zero_K p K hp_two)
 
 set_option backward.isDefEq.respectTransparency false in
 omit [IsCMField K] in
-/-- **PF-1-helper.** w(ζ^k - 1) > 0 at a K-place for k coprime to p. -/
+/-- Positivity of the absolute value of `ζ^k - 1` at a `K` infinite place. -/
 theorem pow_zeta_sub_one_at_place_pos (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p)
     (w : InfinitePlace K) :
     0 < w ((((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) : K) ^ k - 1) :=
   InfinitePlace.pos_iff.mpr (pow_zeta_sub_one_ne_zero_K p K k hk hp_two)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **PF-1-helper K⁺-place version.** The cyclotomicUnit log
-decomposition at a K⁺-place. -/
+/-- The cyclotomic-unit logarithm decomposition at a `K⁺` infinite place. -/
 theorem log_cyclotomicUnit_at_Kplus_place_eq_sub
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p)
     (w : InfinitePlace (NumberField.maximalRealSubfield K)) :
@@ -413,9 +347,8 @@ theorem log_cyclotomicUnit_at_Kplus_place_eq_sub
     ((NumberField.IsCMField.equivInfinitePlace K).symm w)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **PF-1-MatrixDecomp at K⁺-places.** The per-entry decomposition
-specialised to K⁺-places (the column index of the
-`cyclotomicUnitFamilyKplusFinRank` log-embedding matrix). -/
+/-- The real-cyclotomic-unit logarithm decomposition at a `K⁺` infinite
+place. -/
 theorem log_realCyclotomicUnit_at_Kplus_place_eq_sub_decomp
     (k : ℕ) (hk : k.Coprime p) (hp_two : 2 ≤ p)
     (w : InfinitePlace (NumberField.maximalRealSubfield K)) :
@@ -428,39 +361,9 @@ theorem log_realCyclotomicUnit_at_Kplus_place_eq_sub_decomp
   log_realCyclotomicUnit_eq_sub_decomp p K k hk hp_two
     ((NumberField.IsCMField.equivInfinitePlace K).symm w)
 
-/-! ## PF-1-MatrixDecomp (matrix-level, future work)
-
-The full matrix-level decomposition `M = 2·A - 2·B` (with A k-dependent
-and B column-constant of rank 1) would build on
-`log_realCyclotomicUnit_at_Kplus_place_eq_sub_decomp` above, applied via
-`Matrix.ext` to the matrix expression in
-`regOfFamily_cyclotomicUnitFamilyKplus_eq_det`. The typeclass + nested
-coercion infrastructure for the full matrix expression is involved and
-left for future work; the per-entry decomposition above suffices for
-the conceptual structure. -/
-
-/-! ## Kummer-Dirichlet determinant identity (deferred analytic content)
-
-The substantive analytic content of Sinnott's theorem reduces to a single
-determinant identity. Combined with the explicit form of `regOfFamily`
-above + the analytic CNF, this closes `SinnottRegulatorIdentity`. -/
-
 set_option backward.isDefEq.respectTransparency false in
-/-- **`KummerDirichletDeterminant`**: the explicit determinant evaluation.
-
-For the matrix `M` from `regOfFamily_cyclotomicUnitFamilyKplus_eq_det`,
-`|det M| = 2^((p-3)/2) · (hPlus K : ℝ) · regulator K⁺`.
-
-The factor `2^((p-3)/2)` is the index `[C⁺ : ⟨squared cyclotomic family⟩]`:
-the project's family `realCyclotomicUnit_k = c_k · σ(c_k)` is the
-square of a "smaller" cyclotomic unit (under K-embedding,
-`σ(realCyclotomicUnit_k) = |σ(c_k)|²`), so `⟨family⟩` has index
-`2^((p-3)/2)` in the standard cyclotomic unit subgroup `C⁺`.
-Combined with the Sinnott index identity `[U⁺ : C⁺] = h⁺`, the total
-index is `2^((p-3)/2) · h⁺`, hence
-`regOfFamily(family) = 2^((p-3)/2) · h⁺ · regulator(K⁺)`.
-
-This is the cyclotomic case of Sinnott's class number formula. -/
+/-- The explicit Kummer-Dirichlet determinant evaluation for the
+cyclotomic-unit family over `K⁺`. -/
 def KummerDirichletDeterminant (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Prop :=
   NumberField.Units.regOfFamily
       (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three) =
@@ -468,8 +371,8 @@ def KummerDirichletDeterminant (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) : Prop :=
       (NumberField.maximalRealSubfield K)
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **`KummerDirichletDeterminant` = `SinnottRegulatorIdentity`**: as
-formulated, both Props are literally the same equation. -/
+/-- `KummerDirichletDeterminant` and `SinnottRegulatorIdentity` are the same
+equation in the present formulation. -/
 theorem sinnottRegulatorIdentity_iff_kummerDirichletDeterminant
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     KummerDirichletDeterminant p K hp_odd hp_three ↔

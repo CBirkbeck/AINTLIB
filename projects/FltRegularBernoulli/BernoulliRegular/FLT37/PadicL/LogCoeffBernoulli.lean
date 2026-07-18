@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.Theorem518Resummation
 import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
 
@@ -102,9 +107,9 @@ this is the *purely algebraic* residue compatibility, the bridge from the abstra
 Gauss-sum functional to the `𝔽_p`-arithmetic of Faulhaber/Bernoulli. -/
 theorem residue_logCoeffSum (c : (ZMod p)ˣ → S.O) (i : ℕ) :
     S.residue (S.logCoeffSum c i) = ∑ j : (ZMod p)ˣ, S.residue (c j) * (j : ZMod p) ^ i := by
-  unfold logCoeffSum
+  simp only [logCoeffSum]
   rw [map_sum]
-  refine Finset.sum_congr rfl fun j _ => ?_
+  refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [map_mul, S.residue_omega_pow i j]
 
 end StickelbergerF1Setup
@@ -176,7 +181,7 @@ theorem sum_units_val_pow_eq_sum_range {i : ℕ} (hi0 : 0 < i) :
   -- First: `Σ_{k<p} k^i = Σ_{x:ZMod p} (x.val)^i` via the full bijection `range p ≃ ZMod p`.
   have hfull : ∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ i =
       ∑ x : ZMod p, ((x : ZMod p).val : ℚ_[p]) ^ i := by
-    refine (Finset.sum_nbij' (fun x => (x : ZMod p).val) (fun k => (k : ZMod p))
+    refine (Finset.sum_nbij' (fun x ↦ (x : ZMod p).val) (fun k ↦ (k : ZMod p))
       ?_ ?_ ?_ ?_ ?_).symm
     · intro a _
       simp only [Finset.mem_range]
@@ -201,8 +206,9 @@ theorem sum_units_val_pow_eq_sum_range {i : ℕ} (hi0 : 0 < i) :
   let φ : (ZMod p)ˣ ↪ ZMod p := ⟨fun x ↦ x, Units.val_injective⟩
   have hmap : (Finset.univ : Finset (ZMod p)ˣ).map φ = Finset.univ \ {0} := by
     ext x
-    simpa only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
-      Finset.mem_sdiff, Finset.mem_singleton, φ] using isUnit_iff_ne_zero
+    simp only [Finset.mem_map, Finset.mem_univ, Function.Embedding.coeFn_mk, true_and,
+      Finset.mem_sdiff, Finset.mem_singleton, φ]
+    exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
   rfl
 
@@ -224,6 +230,41 @@ theorem sum_units_val_pow_sub_p_mul_bernoulli {i : ℕ} (hp_ge_five : 5 ≤ p)
   obtain ⟨z, hz⟩ := sum_range_pow_sub_p_mul_bernoulli_strong (p := p) (h := i)
     hp_ge_five hi0 hi_even hnot
   exact ⟨z, by rw [sum_units_val_pow_eq_sum_range hi0]; exact hz⟩
+
+/-- **The Faulhaber perturbation has `p`-adic valuation `≥ 2`.**  For an index
+`0 < i < p` (so `p ∤ i`, hence `v_p(i) = 0`) and any nonzero `p`-adic integer
+`w : ℤ_[p]` (so `v_p(w) ≥ 0`), the product `i · p² · w` in `ℚ_[p]` has
+
+  `v_p(i · p² · w) = v_p(i) + v_p(p²) + v_p(w) ≥ 0 + 2 + 0 = 2`.
+
+This is the "second-order term" bound behind the sharp valuation read-off in
+`valuation_sum_units_val_pow`: it makes the Faulhaber perturbation `i·p²·z`
+strictly subdominant to the valuation-`1` main term `p·B_i`. -/
+theorem two_le_valuation_natCast_mul_p_sq_mul {i : ℕ} (hi0 : 0 < i) (hip : i < p)
+    {w : ℤ_[p]} (hw : (w : ℚ_[p]) ≠ 0) :
+    (2 : ℤ) ≤ ((i : ℚ_[p]) * (p : ℚ_[p]) ^ 2 * (w : ℚ_[p])).valuation := by
+  have hp : Nat.Prime p := hp.out
+  haveI : Fact (1 < p) := ⟨hp.one_lt⟩
+  have hpQ_ne : (p : ℚ_[p]) ≠ 0 := by exact_mod_cast hp.ne_zero
+  have hvp : Padic.valuation (p : ℚ_[p]) = 1 := by
+    rw [show (p : ℚ_[p]) = ((p : ℕ) : ℚ_[p]) from rfl, Padic.valuation_natCast,
+      padicValNat_self]
+    rfl
+  have hi_ne : (i : ℚ_[p]) ≠ 0 := by
+    rw [show (i : ℚ_[p]) = ((i : ℕ) : ℚ_[p]) from rfl, Ne, Nat.cast_eq_zero]; omega
+  have hp2_ne : ((p : ℚ_[p]) ^ 2) ≠ 0 := pow_ne_zero _ hpQ_ne
+  rw [Padic.valuation_mul (mul_ne_zero hi_ne hp2_ne) hw,
+    Padic.valuation_mul hi_ne hp2_ne]
+  have hvi : Padic.valuation (i : ℚ_[p]) = 0 := by
+    rw [show (i : ℚ_[p]) = ((i : ℕ) : ℚ_[p]) from rfl, Padic.valuation_natCast]
+    have hpvi0 : padicValNat p i = 0 := by
+      rw [padicValNat.eq_zero_iff]; right; right
+      exact Nat.not_dvd_of_pos_of_lt hi0 hip
+    rw [hpvi0]; rfl
+  have hvp2 : Padic.valuation ((p : ℚ_[p]) ^ 2) = 2 := by
+    rw [Padic.valuation_pow, hvp]; ring
+  have hvz : (0 : ℤ) ≤ (w : ℚ_[p]).valuation := PadicInt.valuation_coe_nonneg
+  rw [hvi, hvp2]; omega
 
 /-- **The SHARP `p`-adic valuation of the units power-sum** (the genuine
 Kubota–Leopoldt valuation read-off in the `v_p ≤ 1` regime), fully proved.  For
@@ -271,22 +312,7 @@ theorem valuation_sum_units_val_pow {i : ℕ} (hp_ge_five : 5 ≤ p)
   · -- `v_p(x - y) ≥ 2`: `v(i)=0` (i<p), `v(p²)=2`, `v(z)≥0`.
     have hcong : (2 : ℤ) ≤ (x - y).valuation := by
       rw [hxy_eq]
-      have hi_ne : (i : ℚ_[p]) ≠ 0 := by
-        rw [show (i : ℚ_[p]) = ((i : ℕ) : ℚ_[p]) from rfl, Ne,
-          Nat.cast_eq_zero]; omega
-      have hp2_ne : ((p : ℚ_[p]) ^ 2) ≠ 0 := pow_ne_zero _ hpQ_ne
-      rw [Padic.valuation_mul (mul_ne_zero hi_ne hp2_ne) hzz,
-        Padic.valuation_mul hi_ne hp2_ne]
-      have hvi : Padic.valuation (i : ℚ_[p]) = 0 := by
-        rw [show (i : ℚ_[p]) = ((i : ℕ) : ℚ_[p]) from rfl, Padic.valuation_natCast]
-        have hpvi0 : padicValNat p i = 0 := by
-          rw [padicValNat.eq_zero_iff]; right; right
-          exact Nat.not_dvd_of_pos_of_lt hi0 (by omega)
-        rw [hpvi0]; rfl
-      have hvp2 : Padic.valuation ((p : ℚ_[p]) ^ 2) = 2 := by
-        rw [Padic.valuation_pow, hvp]; ring
-      have hvz : (0 : ℤ) ≤ (z : ℚ_[p]).valuation := PadicInt.valuation_coe_nonneg
-      rw [hvi, hvp2]; omega
+      exact two_le_valuation_natCast_mul_p_sq_mul hi0 (by omega) hzz
     -- Exactness: v(x) = v(y) = 1.
     rw [hx] at *
     rw [Padic.valuation_sub_eq_of_lt hy0 hcong (by rw [hvy]; norm_num), hvy]
@@ -342,7 +368,7 @@ theorem residue_logCoeffSum_eq_zero_of_const_residue {c : (ZMod p)ˣ → S.O}
   rw [S.residue_logCoeffSum c i]
   rw [show (∑ j : (ZMod p)ˣ, S.residue (c j) * (j : ZMod p) ^ i)
         = r * ∑ j : (ZMod p)ˣ, (j : ZMod p) ^ i from by
-    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ => by rw [hr j]]
+    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun j _ ↦ by rw [hr j]]
   rw [sum_units_pow_eq_zero_of_lt hi0 hip, mul_zero]
 
 /-- **The `𝔓`-adic order lower bound from Steps 1+2**: when the coefficients have
@@ -358,6 +384,7 @@ theorem pi_dvd_logCoeffSum_of_const_residue {c : (ZMod p)ˣ → S.O}
     S.π ∣ S.logCoeffSum c i :=
   (S.residue_eq_zero_iff _).mp (S.residue_logCoeffSum_eq_zero_of_const_residue hr hi0 hip)
 
+/-- The same divisibility, phrased as a bound on the additive valuation. -/
 theorem one_le_addVal_logCoeffSum_of_const_residue {c : (ZMod p)ˣ → S.O}
     {r : ZMod p} (hr : ∀ j, S.residue (c j) = r) {i : ℕ}
     (hi0 : 0 < i) (hip : i < p - 1) :
@@ -428,7 +455,7 @@ theorem normVal_logCoeffSum_of_integralAt {c : (ZMod p)ˣ → S.O} {i : ℕ}
   -- The integral identity, cast to ℚ.
   have hIQ : ((addVal S.O (S.logCoeffSum c i)).toNat : ℚ) + 2 * (i : ℚ)
       = ((p : ℚ) - 1) * (((bernoulliFactorQp p i).valuation : ℚ) + 1) := by
-    have hcast := congrArg (fun n : ℕ => (n : ℚ)) hint
+    have hcast := congrArg (fun n : ℕ ↦ (n : ℚ)) hint
     push_cast at hcast
     rw [hpsub, hvcast] at hcast
     linarith [hcast]

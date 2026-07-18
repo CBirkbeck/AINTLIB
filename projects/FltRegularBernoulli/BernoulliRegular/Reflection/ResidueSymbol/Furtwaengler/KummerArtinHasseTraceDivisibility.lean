@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHasseValuationTrace
@@ -37,6 +42,7 @@ def PadicDivisibleByPrime (q : Nat.Primes) (x : PadicOfPrime q) : Prop :=
   ∃ z : PadicIntOfPrime q,
     x = (q.1 : PadicOfPrime q) * (z : PadicOfPrime q)
 
+/-- Divisibility by `q` in `ℚ_q` is the norm bound `‖x‖ ≤ q⁻¹`. -/
 theorem padicDivisibleByPrime_iff_norm_le
     (q : Nat.Primes) (x : PadicOfPrime q) :
     PadicDivisibleByPrime q x ↔ ‖x‖ ≤ ((q.1 : ℝ)⁻¹) := by
@@ -77,6 +83,7 @@ def lambdaValuedATraceDivisibleByP
     (u : LambdaValuedPrincipalUnitSubgroup p K 1) : Prop :=
   PadicDivisibleByPrime (lambdaPadicPrime p) (lambdaValuedATrace p K u)
 
+/-- The legacy `A`-trace divisibility target, as a norm bound. -/
 theorem lambdaValuedATraceDivisibleByP_iff_norm_le
     (u : LambdaValuedPrincipalUnitSubgroup p K 1) :
     lambdaValuedATraceDivisibleByP p K u ↔
@@ -92,6 +99,7 @@ def lambdaValuedCorrectedATraceDivisibleByP
   PadicDivisibleByPrime (lambdaPadicPrime p)
     (lambdaValuedCorrectedATrace p K u)
 
+/-- The corrected `A`-trace divisibility target, as a norm bound. -/
 theorem lambdaValuedCorrectedATraceDivisibleByP_iff_norm_le
     (u : LambdaValuedPrincipalUnitSubgroup p K 1) :
     lambdaValuedCorrectedATraceDivisibleByP p K u ↔

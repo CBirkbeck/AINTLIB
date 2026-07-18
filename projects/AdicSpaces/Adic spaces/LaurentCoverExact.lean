@@ -117,6 +117,7 @@ noncomputable def deltaMap (f : A) : B₁ f × B₂ f →+ Localization.Away f w
     ring
 
 omit [IsNoetherianRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The composition `delta circ epsilon = 0`: the image of `epsilon` lands in the
 kernel of `delta`. -/
 theorem deltaMap_comp_epsilonHom (f : A) :
@@ -126,9 +127,8 @@ theorem deltaMap_comp_epsilonHom (f : A) :
     RingHom.prod_apply, RingHom.comp_apply]
   have h1 : TateAlgebra.quotientFSubXToA f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) = a := by
-    have := RingHom.congr_fun (TateAlgebra.quotientFSubXToA_comp_AToQuotientFSubX f) a
-    simp only [RingHom.comp_apply, RingHom.id_apply, TateAlgebra.AToQuotientFSubX] at this
-    exact this
+    simpa only [RingHom.comp_apply, RingHom.id_apply, TateAlgebra.AToQuotientFSubX]
+      using RingHom.congr_fun (TateAlgebra.quotientFSubXToA_comp_AToQuotientFSubX f) a
   have h2 : TateAlgebra.quotientOneSubfXToLoc f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) =
       algebraMap A (Localization.Away f) a := by
@@ -156,6 +156,7 @@ theorem quotientOneSubfXToLoc_injective (f : A) :
   (TateAlgebra.quotientOneSubfXEquiv f).injective
 
 omit [IsNoetherianRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- Reverse inclusion: if `delta(b_1, b_2) = 0` then `(b_1, b_2)` is in the range
 of `epsilon`. This uses that both equivalences allow us to recover the element
 `a` in `A`. -/
@@ -168,9 +169,8 @@ theorem ker_deltaMap_le_range_epsilonHom (f : A) :
       TateAlgebra.quotientOneSubfXToLoc f b₂ := sub_eq_zero.mp h
   set a := TateAlgebra.quotientFSubXToA f b₁
   -- b₁ = AToQuotientFSubX(a) since the equiv round-trips
-  have hb₁ : TateAlgebra.AToQuotientFSubX f a = b₁ := by
-    change (TateAlgebra.quotientFSubXEquiv f).symm (TateAlgebra.quotientFSubXEquiv f b₁) = b₁
-    exact (TateAlgebra.quotientFSubXEquiv f).symm_apply_apply b₁
+  have hb₁ : TateAlgebra.AToQuotientFSubX f a = b₁ :=
+    (TateAlgebra.quotientFSubXEquiv f).symm_apply_apply b₁
   -- quotientOneSubfXToLoc(mk(algebraMap a)) = algebraMap(a)
   have himg : TateAlgebra.quotientOneSubfXToLoc f
       ((Ideal.Quotient.mk _) (algebraMap A ↥(TateAlgebra A) a)) =
@@ -275,13 +275,11 @@ theorem algebraMap_mem_span_fSubX_eq_zero_of_iInf_pow_eq_bot (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
+    rwa [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
   -- Constant coefficient: f * coeff 0 c = a.
   have h0 : f * TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
-    exact this
+    rwa [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
   -- Recurrence: coeff n c = f * coeff (n + 1) c.
   have hstep : ∀ n,
       TateAlgebra.coeff n c = f * TateAlgebra.coeff (n + 1) c := by
@@ -335,12 +333,10 @@ theorem exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
+    rwa [sub_mul, TateAlgebra.coeff_sub, TateAlgebra.coeff_algebraMap_mul] at this
   have h0 : f * TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
-    exact this
+    rwa [TateAlgebra.coeff_zero_X_mul, sub_zero, coeff_zero_algebraMap] at this
   have hstep : ∀ n,
       TateAlgebra.coeff n c = f * TateAlgebra.coeff (n + 1) c := by
     intro n
@@ -413,14 +409,12 @@ theorem tendsto_pow_mul_of_algebraMap_mem_oneSubfX (f a : A)
       TateAlgebra.coeff n (algebraMap A ↥(TateAlgebra A) a) := by
     intro n
     have := congr_arg (TateAlgebra.coeff n) hc'
-    rw [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
+    rwa [sub_mul, one_mul, mul_assoc, TateAlgebra.coeff_sub,
       TateAlgebra.coeff_algebraMap_mul] at this
-    exact this
   have h0 : TateAlgebra.coeff 0 c = a := by
     have := hcoeff_eq 0
-    rw [TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero,
+    rwa [TateAlgebra.coeff_zero_X_mul, mul_zero, sub_zero,
       coeff_zero_algebraMap] at this
-    exact this
   have hstep : ∀ n, TateAlgebra.coeff (n + 1) c =
       f * TateAlgebra.coeff n c := by
     intro n
@@ -430,8 +424,7 @@ theorem tendsto_pow_mul_of_algebraMap_mem_oneSubfX (f a : A)
   have hpow : ∀ n, TateAlgebra.coeff n c = f ^ n * a := by
     intro n
     induction n with
-    | zero =>
-        simpa using h0
+    | zero => simpa using h0
     | succ n ih =>
         rw [hstep n, ih, pow_succ, mul_assoc]
         ring
@@ -444,9 +437,8 @@ This packages the second projection of the simple Laurent row in a form that
 the separation proof can use directly. -/
 theorem tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero (f a : A)
     (h2 : (epsilonHom_gen f a).2 = 0) :
-    Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
-  apply tendsto_pow_mul_of_algebraMap_mem_oneSubfX
-  exact Ideal.Quotient.eq_zero_iff_mem.mp h2
+    Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) :=
+  tendsto_pow_mul_of_algebraMap_mem_oneSubfX f a (Ideal.Quotient.eq_zero_iff_mem.mp h2)
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- Kernel data for `ε` in the simple Laurent row.
@@ -464,10 +456,9 @@ theorem epsilonHom_gen_eq_zero_coeff_data (f a : A)
     Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
   have h1 : (epsilonHom_gen f a).1 = 0 := congr_arg Prod.fst h
   have h2 : (epsilonHom_gen f a).2 = 0 := congr_arg Prod.snd h
-  constructor
-  · apply exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX
-    exact Ideal.Quotient.eq_zero_iff_mem.mp h1
-  · exact tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero f a h2
+  refine ⟨exists_coeff_tendsto_and_pow_mul_of_algebraMap_mem_fSubX f a
+      (Ideal.Quotient.eq_zero_iff_mem.mp h1),
+    tendsto_pow_mul_of_epsilonHom_gen_second_eq_zero f a h2⟩
 
 omit [IsNoetherianRing A] [IsDomain A] in
 /-- Plus-side Krull-intersection membership for a constant in `(f - X)`.
@@ -484,8 +475,7 @@ theorem mem_iInf_pow_of_algebraMap_mem_fSubX (f a : A)
   rw [Ideal.mem_iInf]
   intro n
   cases n with
-  | zero =>
-      simp [Ideal.one_eq_top]
+  | zero => simp [Ideal.one_eq_top]
   | succ n =>
       rw [hc_pow n]
       exact Ideal.mul_mem_right _ _
@@ -538,14 +528,11 @@ theorem epsilonHom_gen_eq_zero_krull_multiplier_data (f a : A)
       Filter.Tendsto (fun n : ℕ => f ^ n * a) Filter.cofinite (nhds (0 : A)) := by
   obtain ⟨r, hr⟩ := exists_span_singleton_mul_eq_self_of_epsilonHom_gen_eq_zero f a h
   obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp r.property
-  have hcf : (c * f) * a = a := by
-    rw [hc]
-    exact hr
+  have hcf : (c * f) * a = a := by rw [hc]; exact hr
   have hcf_pow : ∀ n : ℕ, (c * f) ^ n * a = a := by
     intro n
     induction n with
-    | zero =>
-        simp
+    | zero => simp
     | succ n ih =>
         calc
           (c * f) ^ (n + 1) * a = (c * f) ^ n * ((c * f) * a) := by
@@ -611,9 +598,8 @@ theorem span_singleton_iInf_pow_eq_bot_of_le_jacobson (f : A)
     intro n
     have hxn : x ∈ Ideal.span ({f} : Set A) ^ n := (Ideal.mem_iInf.mp hx) n
     rwa [smul_eq_mul, ← Ideal.one_eq_top, mul_one]
-  have hx_bot : x ∈ (⊥ : Submodule A A) := by
-    rwa [hsub] at hx_sub
-  simpa using hx_bot
+  rw [hsub] at hx_sub
+  simpa using hx_sub
 
 omit [IsDomain A] in
 /-- **`ε` is injective when `(f)` lies in the Jacobson radical.**
@@ -689,9 +675,7 @@ private theorem idx_eq_single_zero_iff (i j : ℕ) :
   rw [idx_apply_zero]
   constructor
   · intro h
-    have := Finsupp.ext_iff.mp h 1
-    simp [idx] at this
-    exact this
+    simpa [idx] using Finsupp.ext_iff.mp h 1
   · intro hj
     subst hj; ext k; fin_cases k <;> simp [idx]
 
@@ -700,9 +684,7 @@ private theorem idx_eq_single_one_iff (i j : ℕ) :
   rw [idx_apply_one]
   constructor
   · intro h
-    have := Finsupp.ext_iff.mp h 0
-    simp [idx] at this
-    exact this
+    simpa [idx] using Finsupp.ext_iff.mp h 0
   · intro hi
     subst hi; ext k; fin_cases k <;> simp [idx]
 
@@ -724,9 +706,7 @@ private theorem coeff_posIncl (g : ↥(TateAlgebra A)) (i j : ℕ) :
   have h2 : (idx i j = Finsupp.single 0 i) ↔ j = 0 := by
     rw [show Finsupp.single (0 : Fin 2) i = Finsupp.single 0 (idx i j 0) from by rw [h1]]
     exact idx_eq_single_zero_iff i j
-  by_cases hj : j = 0
-  · rw [if_pos (h2.mpr hj), if_pos hj]
-  · rw [if_neg (mt h2.mp hj), if_neg hj]
+  simp only [h2]
 
 /-- The RHS coefficient: `negIncl h` at index `idx i j`. -/
 private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
@@ -739,9 +719,7 @@ private theorem coeff_negIncl (h : ↥(TateAlgebra A)) (i j : ℕ) :
   have h2 : (idx i j = Finsupp.single 1 j) ↔ i = 0 := by
     rw [show Finsupp.single (1 : Fin 2) j = Finsupp.single 1 (idx i j 1) from by rw [h1]]
     exact idx_eq_single_one_iff i j
-  by_cases hi : i = 0
-  · rw [if_pos (h2.mpr hi), if_pos hi]
-  · rw [if_neg (mt h2.mp hi), if_neg hi]
+  simp only [h2]
 
 private theorem idx_11 :
     Finsupp.single (0 : Fin 2) 1 + Finsupp.single (1 : Fin 2) 1 = idx 1 1 := by
@@ -944,10 +922,7 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     -- h1 : 0 - c(n,0) = coeff_n g - 0
     simp only [zero_sub, sub_zero] at h1
     -- h1 : -c(n,0) = coeff_n g, so c(n,0) = -coeff_n g
-    have : MvPowerSeries.coeff (idx n 0) c.val =
-        -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) g.val) := by
-      rw [← h1, neg_neg]
-    exact this
+    rw [← h1, neg_neg]
   -- Boundary equation at (0, m) for m ≥ 1: -c(0,m) = -coeff_m h, i.e. c(0,m) = coeff_m h
   have hboundary_y : ∀ m, 0 < m →
       MvPowerSeries.coeff (idx 0 m) c.val =
@@ -970,13 +945,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     rw [coeff_posIncl, if_pos rfl, coeff_negIncl, if_pos rfl] at h1
     -- h1 : 0 - c(0,0) = coeff_0 g - coeff_0 h
     simp only [zero_sub] at h1
-    -- h1 : -c(0,0) = coeff_0 g - coeff_0 h
-    -- Want: c(0,0) = coeff_0 h - coeff_0 g
-    have : MvPowerSeries.coeff (idx 0 0) c.val =
-      -(MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val -
-       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val) := by
-      rw [← h1, neg_neg]
-    rw [this]; ring
+    -- h1 : -c(0,0) = coeff_0 g - coeff_0 h; want c(0,0) = coeff_0 h - coeff_0 g
+    linear_combination -h1
   -- Step 5: For n ≥ 1, the diagonal c(n+k, k) = c(n, 0) for all k.
   -- This is constant, and by restricted condition in T1 space, must be 0.
   -- Therefore coeff_n g = 0 for all n ≥ 1.
@@ -985,10 +955,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
     intro n hn
     -- c(n, 0) = -coeff_n g, and c(n+k, k) = c(n, 0) for all k
     have hconst : ∀ k, MvPowerSeries.coeff (idx (n + k) k) c.val =
-        MvPowerSeries.coeff (idx n 0) c.val := by
-      intro k
-      have := hdiag_iter n 0 k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx n 0) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter n 0 k
     -- The injection ℕ → Fin 2 →₀ ℕ sending k ↦ idx (n + k) k
     have hinj : Function.Injective (fun k => idx (n + k) k) := by
       intro a b hab
@@ -1005,10 +973,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) m) h.val = 0 := by
     intro m hm
     have hconst : ∀ k, MvPowerSeries.coeff (idx k (m + k)) c.val =
-        MvPowerSeries.coeff (idx 0 m) c.val := by
-      intro k
-      have := hdiag_iter 0 m k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx 0 m) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter 0 m k
     have hinj : Function.Injective (fun k => idx k (m + k)) := by
       intro a b hab
       have := Finsupp.ext_iff.mp hab 0
@@ -1020,10 +986,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   -- Step 7: c(0,0) = 0, which gives coeff_0 g = coeff_0 h.
   have hc00_zero : MvPowerSeries.coeff (idx 0 0) c.val = 0 := by
     have hconst : ∀ k, MvPowerSeries.coeff (idx k k) c.val =
-        MvPowerSeries.coeff (idx 0 0) c.val := by
-      intro k
-      have := hdiag_iter 0 0 k
-      simp only [Nat.zero_add] at this; exact this
+        MvPowerSeries.coeff (idx 0 0) c.val := fun k => by
+      simpa only [Nat.zero_add] using hdiag_iter 0 0 k
     have hinj : Function.Injective (fun k => idx k k) := by
       intro a b hab
       have := Finsupp.ext_iff.mp hab 0
@@ -1033,11 +997,8 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   have hg0_eq_h0 :
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) g.val =
       MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) 0) h.val := by
-    have := hboundary_00
-    rw [hc00_zero] at this
-    -- this : 0 = coeff_0 h - coeff_0 g
-    -- So coeff_0 h - coeff_0 g = 0, hence coeff_0 h = coeff_0 g
-    exact (eq_of_sub_eq_zero this.symm).symm
+    -- hboundary_00 : c(0,0) = coeff_0 h - coeff_0 g; hc00_zero : c(0,0) = 0
+    linear_combination hboundary_00 - hc00_zero
   -- Step 8: Assemble. Set a = coeff_0 g (as TateAlgebra.coeff).
   -- coeff_zero_algebraMap and coeff_succ_algebraMap use TateAlgebra.coeff.
   set a := TateAlgebra.coeff 0 g with ha_def
@@ -1063,7 +1024,7 @@ theorem ker_lambdaMap_le_range_iotaHom [T1Space A]
   have hh_eq : algebraMap A ↥(TateAlgebra A) a = h := by
     apply TateAlgebra.ext; intro n
     cases n with
-    | zero => rw [coeff_zero_algebraMap]; rw [ha_def]; exact hg0_eq_h0'
+    | zero => rw [coeff_zero_algebraMap, ha_def]; exact hg0_eq_h0'
     | succ n =>
       rw [coeff_succ_algebraMap]
       exact (hh_higher' (n + 1) (Nat.succ_pos n)).symm
@@ -1207,13 +1168,9 @@ This is needed for `deltaMap_gen` to be well-defined. -/
 theorem posEmbHom_ideal_compat (x : ↥(TateAlgebra A))
     (hx : x ∈ Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X}) :
     posEmbHom x ∈ laurentFSubZetaIdeal f := by
-  have hsub : Ideal.span {algebraMap A ↥(TateAlgebra A) f - TateAlgebra.X} ≤
-      (laurentFSubZetaIdeal f).comap posEmbHom := by
-    rw [Ideal.span_le]
-    intro y hy
-    rw [Set.mem_singleton_iff] at hy; subst hy
-    exact posEmbHom_generator_mem f
-  exact Ideal.mem_comap.mp (hsub hx)
+  refine Ideal.mem_comap.mp (Ideal.span_le.mpr ?_ hx)
+  rintro y rfl
+  exact posEmbHom_generator_mem f
 
 /-- `negEmbHom` sends the generator `1 - fX` to an element of `(f - ζ)`.
 Key identity: `1 - f·ζ⁻¹ = -ζ⁻¹·(f - ζ)`. -/
@@ -1246,8 +1203,8 @@ theorem negEmbHom_generator_mem :
       algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
       -(LaurentTateAlgebra.zetaInv *
         (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
-    rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f)]
-    rw [LaurentTateAlgebra.zetaInv_mul_zeta]; ring
+    rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
+      LaurentTateAlgebra.zetaInv_mul_zeta]; ring
   rw [hkey]
   exact neg_mem (Ideal.mul_mem_left _ _ (Ideal.subset_span rfl))
 
@@ -1256,13 +1213,9 @@ theorem negEmbHom_ideal_compat (x : ↥(TateAlgebra A))
     (hx : x ∈ Ideal.span
       {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X}) :
     negEmbHom x ∈ laurentFSubZetaIdeal f := by
-  have hsub : Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * TateAlgebra.X} ≤
-      (laurentFSubZetaIdeal f).comap negEmbHom := by
-    rw [Ideal.span_le]
-    intro y hy
-    rw [Set.mem_singleton_iff] at hy; subst hy
-    exact negEmbHom_generator_mem f
-  exact Ideal.mem_comap.mp (hsub hx)
+  refine Ideal.mem_comap.mp (Ideal.span_le.mpr ?_ hx)
+  rintro y rfl
+  exact negEmbHom_generator_mem f
 
 /-- The positive lift: `B₁ → B₁₂`, induced by `quotLaurent ∘ posEmbHom`. -/
 noncomputable def posLift : B₁_gen f →+* B₁₂_gen f :=
@@ -1299,6 +1252,174 @@ theorem deltaMap_gen_comp_epsilonHom_gen (a : A) :
       congrArg LaurentTateAlgebra.mkHom
         (Subtype.ext (by rw [posIncl_algebraMap, negIncl_algebraMap])))
 
+/-- The injection `k ↦ idx (i + k) (j + k)` running down a diagonal is injective. -/
+private theorem idx_diag_injective (i j : ℕ) :
+    Function.Injective (fun k => idx (i + k) (j + k)) := by
+  intro a b hab
+  have := Finsupp.ext_iff.mp hab 0; simp [idx] at this; omega
+
+section LambdaSurjectiveHelpers
+
+variable [UniformSpace A] [IsUniformAddGroup A] [T2Space A] [CompleteSpace A]
+  (htop : ‹TopologicalSpace A› = UniformSpace.toTopologicalSpace)
+  (p : ↥(TateAlgebra₂ A))
+include htop
+
+/-- Coefficients of a restricted bivariate series, sampled along any injective
+index path `ν : ℕ → (Fin 2 →₀ ℕ)`, are summable (completeness + nonarchimedean). -/
+private theorem summable_coeff_comp_injective
+    {ν : ℕ → (Fin 2 →₀ ℕ)} (hν : Function.Injective ν) :
+    Summable (fun k => MvPowerSeries.coeff (ν k) p.val) := by
+  subst htop
+  exact NonarchimedeanAddGroup.summable_of_tendsto_cofinite_zero
+    (p.prop.comp hν.tendsto_cofinite)
+
+/-- Summability of `p` along the diagonal through `(i, j)`: `k ↦ p_{i+k, j+k}`. -/
+private theorem summable_coeff_diag (i j : ℕ) :
+    Summable (fun k => MvPowerSeries.coeff (idx (i + k) (j + k)) p.val) :=
+  summable_coeff_comp_injective htop p (idx_diag_injective i j)
+
+/-- Splitting a diagonal `tsum` into its head term and the once-shifted tail:
+`∑ₖ p_{i+k, j+k} = p_{i, j} + ∑ₖ p_{i+1+k, j+1+k}`. -/
+private theorem tsum_diag_head (i j : ℕ) :
+    ∑' k, MvPowerSeries.coeff (idx (i + k) (j + k)) p.val =
+      MvPowerSeries.coeff (idx i j) p.val +
+      ∑' k, MvPowerSeries.coeff (idx (i + 1 + k) (j + 1 + k)) p.val := by
+  have h1 := (summable_coeff_diag htop p i j).tsum_eq_zero_add
+  simp only [Nat.add_zero] at h1
+  rw [h1]; congr 1; apply tsum_congr; intro k
+  have : idx (i + (k + 1)) (j + (k + 1)) = idx (i + 1 + k) (j + 1 + k) := by
+    apply Finsupp.ext; intro x; fin_cases x <;> simp [idx] <;> omega
+  rw [this]
+
+/-- The positive diagonal sums `g_n = ∑ₖ p_{n+k, k}` define a restricted univariate
+series: as `n → ∞` the coefficients tend to `0`. -/
+private theorem gRestr_of_restricted :
+    MvPowerSeries.IsRestricted
+      (fun s : Fin 1 →₀ ℕ =>
+        (∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val : A) :
+        MvPowerSeries (Fin 1) A) := by
+  subst htop
+  intro U hU
+  obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
+  have hSfin : {e : Fin 2 →₀ ℕ | MvPowerSeries.coeff e p.val ∉ (V : Set A)}.Finite := by
+    have := p.prop (V.isOpen.mem_nhds V.zero_mem)
+    rwa [Filter.mem_map, Filter.mem_cofinite] at this
+  classical
+  set N : ℕ := hSfin.toFinset.sup (fun e => e 0) + 1
+  have hsmall : {s : Fin 1 →₀ ℕ | s 0 < N}.Finite := by
+    apply Set.Finite.subset (Set.finite_Iio N |>.image (Finsupp.single 0))
+    intro s hs; simp only [Set.mem_setOf_eq] at hs
+    refine ⟨s 0, hs, Finsupp.ext (fun i => ?_)⟩
+    simp [Fin.eq_zero i]
+  refine hsmall.subset (fun s (hs : _ ∉ U) => show s 0 < N from ?_)
+  by_contra hlt
+  apply hs; apply hVU
+  have hsN : N ≤ s 0 := Nat.not_lt.mp hlt
+  have hterm : ∀ k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val ∈ (V : Set A) := by
+    intro k; by_contra hk
+    have h1 := Finset.le_sup (f := fun e : Fin 2 →₀ ℕ => e 0) (hSfin.mem_toFinset.mpr hk)
+    simp only [idx_apply_zero] at h1; omega
+  refine V.isClosed.mem_of_tendsto
+    (summable_coeff_comp_injective rfl p (ν := fun k => idx (s 0 + k) k) ?_).hasSum
+    (Filter.Eventually.of_forall fun t =>
+      V.toAddSubgroup.sum_mem (fun k _ => hterm k))
+  intro a b hab
+  have := Finsupp.ext_iff.mp hab 1; simp [idx] at this; omega
+
+/-- The negative diagonal sums `h_m = ∑ₖ p_{k, m+k}` (with `h_0 = 0`) define a
+restricted univariate series. -/
+private theorem hRestr_of_restricted :
+    MvPowerSeries.IsRestricted
+      (fun s : Fin 1 →₀ ℕ =>
+        (if s 0 = 0 then 0
+         else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val : A) :
+        MvPowerSeries (Fin 1) A) := by
+  subst htop
+  intro U hU
+  obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
+  have hSfin : {e : Fin 2 →₀ ℕ | MvPowerSeries.coeff e p.val ∉ (V : Set A)}.Finite := by
+    have := p.prop (V.isOpen.mem_nhds V.zero_mem)
+    rwa [Filter.mem_map, Filter.mem_cofinite] at this
+  classical
+  set N : ℕ := hSfin.toFinset.sup (fun e => e 1) + 1
+  have hsmall : {s : Fin 1 →₀ ℕ | s 0 < N}.Finite := by
+    apply Set.Finite.subset (Set.finite_Iio N |>.image (Finsupp.single 0))
+    intro s hs; simp only [Set.mem_setOf_eq] at hs
+    refine ⟨s 0, hs, Finsupp.ext (fun i => ?_)⟩; simp [Fin.eq_zero i]
+  refine (hsmall.union (Set.finite_singleton (0 : Fin 1 →₀ ℕ))).subset
+    (fun s (hs : _ ∉ U) => ?_)
+  by_cases hs0 : s 0 = 0
+  · exfalso; apply hs
+    change (if s 0 = 0 then 0 else _) ∈ U
+    rw [if_pos hs0]; exact mem_of_mem_nhds hU
+  · left; change s 0 < N
+    by_contra hlt
+    apply hs
+    change (if s 0 = 0 then 0 else _) ∈ U
+    rw [if_neg hs0]; apply hVU
+    have hsN : N ≤ s 0 := Nat.not_lt.mp hlt
+    have hterm : ∀ k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val ∈ (V : Set A) := by
+      intro k; by_contra hk
+      have h1 := Finset.le_sup (f := fun e : Fin 2 →₀ ℕ => e 1) (hSfin.mem_toFinset.mpr hk)
+      simp only [idx_apply_one] at h1; omega
+    refine V.isClosed.mem_of_tendsto
+      (summable_coeff_comp_injective rfl p (ν := fun k => idx k (s 0 + k)) ?_).hasSum
+      (Filter.Eventually.of_forall fun t =>
+        V.toAddSubgroup.sum_mem (fun k _ => hterm k))
+    intro a b hab
+    have := Finsupp.ext_iff.mp hab 0; simp [idx] at this; omega
+
+/-- The witness `c_{i,j} = -∑ₖ p_{i+1+k, j+1+k}` (diagonal tail sums, negated)
+defines a restricted bivariate series. -/
+private theorem cRestr_of_restricted :
+    MvPowerSeries.IsRestricted
+      (fun e : Fin 2 →₀ ℕ =>
+        -(∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val) :
+        MvPowerSeries (Fin 2) A) := by
+  subst htop
+  change Filter.Tendsto _ Filter.cofinite (nhds 0)
+  rw [show (0 : A) = -0 from neg_zero.symm]
+  apply Filter.Tendsto.neg
+  change Filter.Tendsto
+    (fun e : Fin 2 →₀ ℕ => ∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val)
+    Filter.cofinite (nhds 0)
+  intro U hU
+  rw [Filter.mem_map, Filter.mem_cofinite]
+  obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
+  have hSfin : {e : Fin 2 →₀ ℕ | MvPowerSeries.coeff e p.val ∉ (V : Set A)}.Finite := by
+    have := p.prop (V.isOpen.mem_nhds V.zero_mem)
+    rwa [Filter.mem_map, Filter.mem_cofinite] at this
+  classical
+  set M := hSfin.toFinset.sup (fun e => max (e 0) (e 1)) + 1
+  have hbad_bound : ∀ e : Fin 2 →₀ ℕ, M ≤ e 0 + 1 ∨ M ≤ e 1 + 1 →
+      ∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val ∈ (V : Set A) := by
+    intro e hor
+    apply V.isClosed.mem_of_tendsto (summable_coeff_diag rfl p (e 0 + 1) (e 1 + 1)).hasSum
+    apply Filter.Eventually.of_forall; intro t
+    apply V.toAddSubgroup.sum_mem; intro k _
+    by_contra hk
+    have hmem := Finset.le_sup (f := fun e => max (e 0) (e 1)) (hSfin.mem_toFinset.mpr hk)
+    simp only [idx_apply_zero, idx_apply_one] at hmem
+    omega
+  apply Set.Finite.subset
+    (s := {e : Fin 2 →₀ ℕ | e 0 < M ∧ e 1 < M})
+  · apply Set.Finite.subset
+      ((Finset.range M ×ˢ Finset.range M).image (fun p => idx p.1 p.2)).finite_toSet
+    intro e ⟨h0, h1⟩
+    simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe, Finset.mem_product,
+      Finset.mem_range]
+    exact ⟨(e 0, e 1), ⟨h0, h1⟩, (eq_idx e).symm⟩
+  · intro e he
+    simp only [Set.mem_setOf_eq, Set.mem_compl_iff, Set.mem_preimage] at he ⊢
+    constructor
+    · by_contra h0
+      exact he (hVU (hbad_bound e (Or.inl (by omega))))
+    · by_contra h1
+      exact he (hVU (hbad_bound e (Or.inr (by omega))))
+
+end LambdaSurjectiveHelpers
+
 /-- **`lambdaMap` surjectivity** for complete nonarchimedean rings: every element
 of the Laurent Tate algebra decomposes as `posEmbHom(g) - negEmbHom(h)`.
 
@@ -1326,231 +1447,36 @@ fully specified in the proof structure and comments. -/
 theorem lambdaMap_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space A] [CompleteSpace A]
     (htop : ‹TopologicalSpace A› = UniformSpace.toTopologicalSpace) :
     Function.Surjective (lambdaMap (A := A)) := by
-  subst htop
   intro ℓ
-  -- Step 1: Lift from the quotient.
+  -- Step 1: Lift `ℓ` to a bivariate restricted series `p`.
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective ℓ
-  -- Step 2: Summability of diagonal subsequences.
-  -- The terms p_{n+k, k} tend to 0 as k → ∞ (subsequence of restricted series).
-  -- Summability follows from completeness + nonarchimedean (requires topology compat).
-  -- Diagonal subsequences tend to 0 (subsequences of a restricted series)
-  -- The injection ℕ → (Fin 2 →₀ ℕ) sending k ↦ idx (n+k) k is injective
-  have hinj_pos : ∀ n, Function.Injective (fun k => idx (n + k) k) := by
-    intro n a b hab
-    have := Finsupp.ext_iff.mp hab 1; simp [idx] at this; omega
-  have hinj_neg : ∀ m, Function.Injective (fun k => idx k (m + k)) := by
-    intro m a b hab
-    have := Finsupp.ext_iff.mp hab 0; simp [idx] at this; omega
-  have hpos_tendsto : ∀ n, Filter.Tendsto
-      (fun k => MvPowerSeries.coeff (idx (n + k) k) p.val) Filter.cofinite (nhds 0) := by
-    intro n
-    exact p.prop.comp (hinj_pos n).tendsto_cofinite
-  have hneg_tendsto : ∀ m, Filter.Tendsto
-      (fun k => MvPowerSeries.coeff (idx k (m + k)) p.val) Filter.cofinite (nhds 0) := by
-    intro m
-    exact p.prop.comp (hinj_neg m).tendsto_cofinite
-  -- After subst htop, both topologies are unified. Summability from completeness.
-  have hsum_pos : ∀ n, Summable (fun k => MvPowerSeries.coeff (idx (n + k) k) p.val) := by
-    intro n
-    exact NonarchimedeanAddGroup.summable_of_tendsto_cofinite_zero
-      (p.prop.comp (hinj_pos n).tendsto_cofinite)
-  have hsum_neg : ∀ m, Summable (fun k => MvPowerSeries.coeff (idx k (m + k)) p.val) := by
-    intro m
-    exact NonarchimedeanAddGroup.summable_of_tendsto_cofinite_zero
-      (p.prop.comp (hinj_neg m).tendsto_cofinite)
-  -- Step 3: Define g via positive diagonal sums: g_n = ∑_{k≥0} p_{n+k, k}.
-  have gRestr : MvPowerSeries.IsRestricted
-      (fun s : Fin 1 →₀ ℕ =>
-        (∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val : A) :
-        MvPowerSeries (Fin 1) A) := by
-    intro U hU
-    obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
-    have hSfin : {e : Fin 2 →₀ ℕ | MvPowerSeries.coeff e p.val ∉ (V : Set A)}.Finite := by
-      have := p.prop (V.isOpen.mem_nhds V.zero_mem)
-      rwa [Filter.mem_map, Filter.mem_cofinite] at this
-    classical
-    set N : ℕ := hSfin.toFinset.sup (fun e => e 0) + 1
-    have hsmall : {s : Fin 1 →₀ ℕ | s 0 < N}.Finite := by
-      apply Set.Finite.subset (Set.finite_Iio N |>.image (Finsupp.single 0))
-      intro s hs; simp only [Set.mem_setOf_eq] at hs
-      refine ⟨s 0, hs, Finsupp.ext (fun i => ?_)⟩
-      simp [Fin.eq_zero i]
-    refine hsmall.subset (fun s (hs : _ ∉ U) => show s 0 < N from ?_)
-    by_contra hlt
-    apply hs; apply hVU
-    have hsN : N ≤ s 0 := Nat.not_lt.mp hlt
-    have hterm : ∀ k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val ∈ (V : Set A) := by
-      intro k; by_contra hk
-      have h1 := Finset.le_sup (f := fun e : Fin 2 →₀ ℕ => e 0) (hSfin.mem_toFinset.mpr hk)
-      simp only [idx_apply_zero] at h1; omega
-    exact V.isClosed.mem_of_tendsto (hsum_pos (s 0)).hasSum
-      (Filter.Eventually.of_forall fun t =>
-        V.toAddSubgroup.sum_mem (fun k _ => hterm k))
+  -- Step 2: Assemble `g`, `h` from diagonal sums of `p` (restrictedness via helpers).
+  --   g_n = ∑_{k≥0} p_{n+k, k}    (positive diagonals);
+  --   h_0 = 0, h_m = ∑_{k≥0} p_{k, m+k}  (negative diagonals).
   set g : ↥(TateAlgebra A) :=
-    ⟨fun s => ∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val, gRestr⟩
-  -- Step 4: Define h via negative diagonal sums.
-  -- h_0 = 0, h_m = ∑_{k≥0} p_{k, m+k} for m ≥ 1.
-  have hRestr : MvPowerSeries.IsRestricted
-      (fun s : Fin 1 →₀ ℕ =>
-        (if s 0 = 0 then 0
-         else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val : A) :
-        MvPowerSeries (Fin 1) A) := by
-    -- Same argument as gRestr but along negative diagonals, with h_0 = 0.
-    intro U hU
-    obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
-    have hSfin : {e : Fin 2 →₀ ℕ | MvPowerSeries.coeff e p.val ∉ (V : Set A)}.Finite := by
-      have := p.prop (V.isOpen.mem_nhds V.zero_mem)
-      rwa [Filter.mem_map, Filter.mem_cofinite] at this
-    classical
-    set N : ℕ := hSfin.toFinset.sup (fun e => e 1) + 1
-    have hsmall : {s : Fin 1 →₀ ℕ | s 0 < N}.Finite := by
-      apply Set.Finite.subset (Set.finite_Iio N |>.image (Finsupp.single 0))
-      intro s hs; simp only [Set.mem_setOf_eq] at hs
-      refine ⟨s 0, hs, Finsupp.ext (fun i => ?_)⟩; simp [Fin.eq_zero i]
-    -- h_0 = 0 ∈ U (since 0 ∈ V ⊆ U), so only s with s 0 ≥ 1 matter
-    refine (hsmall.union (Set.finite_singleton (0 : Fin 1 →₀ ℕ))).subset
-      (fun s (hs : _ ∉ U) => ?_)
-    by_cases hs0 : s 0 = 0
-    · -- h_{s 0} = 0 ∈ U since 0 ∈ U (U ∈ nhds 0). Contradiction.
-      exfalso; apply hs
-      change (if s 0 = 0 then 0 else _) ∈ U
-      rw [if_pos hs0]; exact mem_of_mem_nhds hU
-    · left; change s 0 < N
-      by_contra hlt
-      apply hs
-      change (if s 0 = 0 then 0 else _) ∈ U
-      rw [if_neg hs0]; apply hVU
-      have hsN : N ≤ s 0 := Nat.not_lt.mp hlt
-      have hterm : ∀ k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val ∈ (V : Set A) := by
-        intro k; by_contra hk
-        have h1 := Finset.le_sup (f := fun e : Fin 2 →₀ ℕ => e 1) (hSfin.mem_toFinset.mpr hk)
-        simp only [idx_apply_one] at h1; omega
-      exact V.isClosed.mem_of_tendsto (hsum_neg (s 0)).hasSum
-        (Filter.Eventually.of_forall fun t =>
-          V.toAddSubgroup.sum_mem (fun k _ => hterm k))
+    ⟨fun s => ∑' k, MvPowerSeries.coeff (idx (s 0 + k) k) p.val,
+      gRestr_of_restricted htop p⟩
   set h : ↥(TateAlgebra A) :=
     ⟨fun s => if s 0 = 0 then 0
-              else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val, hRestr⟩
-  -- Step 5: Produce the preimage (g, -h) and show lambdaMap(g, -h) = mkHom(p).
+              else ∑' k, MvPowerSeries.coeff (idx k (s 0 + k)) p.val,
+      hRestr_of_restricted htop p⟩
+  -- Step 3: Produce the preimage `(g, -h)` and reduce to an ideal membership.
   refine ⟨(g, -h), ?_⟩
   change posEmbHom g - negEmbHom (-h) = mkHom p
   rw [map_neg, sub_neg_eq_add]
-  -- Step 6: Show posEmbHom g + negEmbHom h = mkHom p in the Laurent algebra.
-  -- posEmbHom = mkHom ∘ posIncl and negEmbHom = mkHom ∘ negIncl, so
-  -- LHS = mkHom(posIncl g) + mkHom(negIncl h) = mkHom(posIncl g + negIncl h).
-  -- We need: mkHom(posIncl g + negIncl h) = mkHom p, i.e.,
+  -- Reduce `posEmbHom g + negEmbHom h = mkHom p` to an ideal membership:
+  -- posEmbHom = mkHom ∘ posIncl and negEmbHom = mkHom ∘ negIncl, so it suffices that
   -- posIncl g + negIncl h - p ∈ laurentIdeal A = (XY - 1).
   change mkHom (posIncl g) + mkHom (negIncl h) = mkHom p
   rw [← map_add]
   apply Ideal.Quotient.eq.mpr
   -- Goal: posIncl g + negIncl h - p ∈ laurentIdeal A = Ideal.span {XY_sub_one}
   rw [laurentIdeal, Ideal.mem_span_singleton']
-  -- Need witness c with c * XY_sub_one = posIncl g + negIncl h - p.
-  -- Define c(i,j) = -(∑' k, p(i+1+k, j+1+k)) (tail sum along the diagonal through (i,j)).
-  -- Summability of diagonal tails: fun k => p(i+1+k, j+1+k) is summable for all i, j.
-  have hinj_diag : ∀ i j, Function.Injective (fun k => idx (i + k) (j + k)) := by
-    intro i j a b hab
-    have := Finsupp.ext_iff.mp hab 0; simp [idx] at this; omega
-  have hsum_diag : ∀ i j, Summable (fun k => MvPowerSeries.coeff (idx (i + k) (j + k)) p.val) := by
-    intro i j
-    exact NonarchimedeanAddGroup.summable_of_tendsto_cofinite_zero
-      (p.prop.comp (hinj_diag i j).tendsto_cofinite)
-  -- Shifted version for convenience
-  have hsum_shift : ∀ i j,
-      Summable (fun k => MvPowerSeries.coeff (idx (i + 1 + k) (j + 1 + k)) p.val) := by
-    intro i j; exact (hsum_diag (i + 1) (j + 1))
-  -- The tail tsum relation: tsum from 0 = head + tsum from 1
-  have htsum_head : ∀ i j, ∑' k, MvPowerSeries.coeff (idx (i + k) (j + k)) p.val =
-      MvPowerSeries.coeff (idx i j) p.val +
-      ∑' k, MvPowerSeries.coeff (idx (i + 1 + k) (j + 1 + k)) p.val := by
-    intro i j
-    have h1 := (hsum_diag i j).tsum_eq_zero_add
-    -- h1 : ∑' k, f k = f 0 + ∑' k, f (k + 1) where f k = coeff (idx (i+k) (j+k)) p.val
-    simp only [Nat.add_zero] at h1
-    rw [h1]; congr 1; apply tsum_congr; intro k
-    -- Goal: coeff (idx (i + (k + 1)) (j + (k + 1))) p.val = coeff (idx (i+1+k) (j+1+k)) p.val
-    -- These are equal because i + (k + 1) = i + 1 + k and j + (k + 1) = j + 1 + k.
-    have : idx (i + (k + 1)) (j + (k + 1)) = idx (i + 1 + k) (j + 1 + k) := by
-      apply Finsupp.ext; intro x; fin_cases x <;> simp [idx] <;> omega
-    rw [this]
-  -- Restrictedness of c: c(i,j) = -(∑' k, p(i+1+k, j+1+k)) tends to 0 as (i,j) → cofinite.
-  -- Strategy: bad p-coefficients form a finite set S. If both i+1 and j+1 exceed all
-  -- coordinates in S, then every term p(i+1+k, j+1+k) is in V, so the tsum is in V.
-  -- For i < M₀ or j < M₁ (where M₀, M₁ bound coordinates of S), the set is finite.
-  have cRestr : MvPowerSeries.IsRestricted
-      (fun e : Fin 2 →₀ ℕ =>
-        -(∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val) :
-        MvPowerSeries (Fin 2) A) := by
-    change Filter.Tendsto _ Filter.cofinite (nhds 0)
-    rw [show (0 : A) = -0 from neg_zero.symm]
-    apply Filter.Tendsto.neg
-    change Filter.Tendsto
-      (fun e : Fin 2 →₀ ℕ => ∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val)
-      Filter.cofinite (nhds 0)
-    intro U hU
-    rw [Filter.mem_map, Filter.mem_cofinite]
-    obtain ⟨V, hVU⟩ := NonarchimedeanAddGroup.is_nonarchimedean U hU
-    have hSfin : {e : Fin 2 →₀ ℕ | MvPowerSeries.coeff e p.val ∉ (V : Set A)}.Finite := by
-      have := p.prop (V.isOpen.mem_nhds V.zero_mem)
-      rwa [Filter.mem_map, Filter.mem_cofinite] at this
-    classical
-    -- M bounds all coordinates of bad p-indices: if e 0 ≥ M or e 1 ≥ M, then p(e) ∈ V.
-    set M := hSfin.toFinset.sup (fun e => max (e 0) (e 1)) + 1
-    -- If e 0 + 1 ≥ M and e 1 + 1 ≥ M, then for all k:
-    -- max(e 0+1+k, e 1+1+k) ≥ M, so idx(e 0+1+k, e 1+1+k) is not a bad index.
-    -- Actually we need both coordinates of idx(e 0+1+k, e 1+1+k) to exceed bad coords.
-    -- Simpler: if max(e 0+1+k, e 1+1+k) ≥ M (which always holds when max(e 0+1, e 1+1) ≥ M),
-    -- and the index has some coordinate ≥ M, then it's not a bad index.
-    -- In fact, bad indices have BOTH coordinates < M (since max < M implies both < M).
-    -- So if e 0+1+k ≥ M OR e 1+1+k ≥ M, the index is not bad.
-    -- If max(e 0, e 1) ≥ M - 1, then max(e 0+1, e 1+1) ≥ M, so max(e 0+1+k, e 1+1+k) ≥ M.
-    -- The bad set for c is thus ⊆ {e | max(e 0, e 1) < M - 1} which IS finite.
-    -- Wait, max(e 0, e 1) < M - 1 means e 0 < M-1 AND e 1 < M-1. That's finite.
-    -- But is this the right bound? If max(e 0, e 1) < M - 1, then max(e 0+1, e 1+1) < M,
-    -- and so max(e 0+1+k, e 1+1+k) could still be ≥ M for k ≥ 1. The key is that
-    -- for k ≥ 1, we ALWAYS have max(e 0+1+k, e 1+1+k) ≥ e 0+2 ≥ 2 > 0 (not useful).
-    -- Actually the bound should use: p(a,b) ∈ V whenever a ≥ M or b ≥ M.
-    -- So p(e 0+1+k, e 1+1+k) ∈ V when e 0+1+k ≥ M or e 1+1+k ≥ M.
-    -- If e 0 ≥ M - 1 (i.e., e 0+1 ≥ M), then for ALL k ≥ 0, e 0+1+k ≥ M, so term ∈ V.
-    -- Similarly if e 1 ≥ M - 1.
-    -- So: if e 0 ≥ M - 1 or e 1 ≥ M - 1, all terms in V, tsum in V ⊆ U.
-    -- Bad set ⊆ {e | e 0 < M - 1 ∧ e 1 < M - 1} = finite.
-    -- Hmm wait: we need BOTH e 0 < M-1 AND e 1 < M-1 for the element to potentially be bad.
-    -- If e 0 ≥ M-1, all terms have first coord ≥ M, hence in V. Tsum in V ⊆ U.
-    -- If e 1 ≥ M-1, all terms have second coord ≥ M, hence in V. Tsum in V ⊆ U.
-    -- So only e 0 < M-1 AND e 1 < M-1 can have tsum ∉ U.
-    -- {e | e 0 < M-1 ∧ e 1 < M-1} is finite (both coordinates bounded).
-    have hbad_bound : ∀ e : Fin 2 →₀ ℕ, M ≤ e 0 + 1 ∨ M ≤ e 1 + 1 →
-        ∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val ∈ (V : Set A) := by
-      intro e hor
-      apply V.isClosed.mem_of_tendsto (hsum_shift (e 0) (e 1)).hasSum
-      apply Filter.Eventually.of_forall; intro t
-      apply V.toAddSubgroup.sum_mem; intro k _
-      -- Show each term is in V by showing it's not a bad index
-      by_contra hk
-      have hmem := Finset.le_sup (f := fun e => max (e 0) (e 1)) (hSfin.mem_toFinset.mpr hk)
-      simp only [idx_apply_zero, idx_apply_one] at hmem
-      omega
-    apply Set.Finite.subset
-    · -- The bound: {e | e 0 < M ∧ e 1 < M}
-      change {e : Fin 2 →₀ ℕ | e 0 < M ∧ e 1 < M}.Finite
-      apply Set.Finite.subset
-        ((Finset.range M ×ˢ Finset.range M).image (fun p => idx p.1 p.2)).finite_toSet
-      intro e ⟨h0, h1⟩
-      simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe, Finset.mem_product,
-        Finset.mem_range]
-      exact ⟨(e 0, e 1), ⟨h0, h1⟩, (eq_idx e).symm⟩
-    · intro e he
-      simp only [Set.mem_setOf_eq, Set.mem_compl_iff, Set.mem_preimage] at he ⊢
-      constructor
-      · by_contra h0
-        exact he (hVU (hbad_bound e (Or.inl (by omega))))
-      · by_contra h1
-        exact he (hVU (hbad_bound e (Or.inr (by omega))))
-  -- Construct c as a restricted bivariate power series.
-  -- c(i,j) = -(∑' k, p(i+1+k, j+1+k))
+  -- Step 4: The witness c(i,j) = -(∑_k p_{i+1+k, j+1+k}) (negated diagonal tail sums);
+  -- its restrictedness and the head/tail tsum split `tsum_diag_head` come from the helpers.
   let c : ↥(TateAlgebra₂ A) :=
-    ⟨fun e => -(∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val), cRestr⟩
+    ⟨fun e => -(∑' k, MvPowerSeries.coeff (idx (e 0 + 1 + k) (e 1 + 1 + k)) p.val),
+      cRestr_of_restricted htop p⟩
   -- The witness: c * XY_sub_one = posIncl g + negIncl h - p
   -- Helper: c.val at idx a b = -(∑' k, p(a+1+k, b+1+k)).
   have hc_val : ∀ a b, MvPowerSeries.coeff (idx a b) c.val =
@@ -1595,7 +1521,7 @@ theorem lambdaMap_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space A] 
     have he0 : ∀ k, idx ((e 0 - 1) + 1 + k) ((e 1 - 1) + 1 + k) = idx (e 0 + k) (e 1 + k) := by
       intro k; apply Finsupp.ext; intro x; fin_cases x <;> simp [idx] <;> omega
     simp_rw [he0]
-    rw [htsum_head]; ring
+    rw [tsum_diag_head htop p]; ring
   · -- e 0 = 0 or e 1 = 0
     -- After if_neg hij: LHS = 0 - coeff c.val = 0 - (-(∑' k, p(e 0+1+k, e 1+1+k)))
     rw [if_neg hij, hc_val]
@@ -1607,15 +1533,15 @@ theorem lambdaMap_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space A] 
       · -- e 0 = 0, e 1 = 0
         rw [h1, if_pos rfl]
         -- Goal: 0 - (-(∑' k, p(0+1+k, 0+1+k))) = (∑' k, p(0+k, k)) + 0 - p(0, 0)
-        -- htsum_head 0 0 uses idx(0+k)(0+k), but hg_val uses idx(0+k)(k).
+        -- tsum_diag_head 0 0 uses idx(0+k)(0+k), but hg_val uses idx(0+k)(k).
         -- These differ syntactically, so normalize both.
-        have hts := htsum_head 0 0
+        have hts := tsum_diag_head htop p 0 0
         simp only [Nat.zero_add] at hts ⊢
         rw [hts]; ring
       · -- e 0 ≥ 1, e 1 = 0
         rw [if_neg h1]
         -- Goal: 0 - (-(∑' k, p(e 0+1+k, 0+1+k))) = (∑' k, p(e 0+k, k)) + 0 - p(e 0, 0)
-        have hts := htsum_head (e 0) 0
+        have hts := tsum_diag_head htop p (e 0) 0
         simp only [Nat.zero_add] at hts ⊢
         rw [hts]; ring
     · -- e 1 ≥ 1, so e 0 = 0
@@ -1623,7 +1549,7 @@ theorem lambdaMap_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space A] 
         by_contra hne; exact hij ⟨Nat.pos_of_ne_zero hne, Nat.pos_of_ne_zero h0⟩
       rw [if_neg h0, if_pos h1, h1, hh_val, if_neg h0]
       -- Goal: 0 - (-(∑' k, p(0+1+k, e 1+1+k))) = 0 + (∑' k, p(k, e 1+k)) - p(0, e 1)
-      have hts := htsum_head 0 (e 1)
+      have hts := tsum_diag_head htop p 0 (e 1)
       simp only [Nat.zero_add] at hts ⊢
       rw [hts]; ring
 
@@ -1661,6 +1587,7 @@ theorem deltaMap_gen_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space 
   simp only [posLift, negLift, Ideal.Quotient.lift_mk, RingHom.comp_apply, ← map_sub]
   exact congrArg (quotLaurent f) hgh
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Row 3 exactness: `ker(δ) ⊆ im(ε)` (general case, 3×3 diagram chase).**
 
 If `δ(b₁, b₂) = 0`, lift `(b₁, b₂)` to `(g, h) ∈ A⟨X⟩ × A⟨X⟩`.
@@ -1827,8 +1754,8 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
         algebraMap A (LaurentTateAlgebra A) f * LaurentTateAlgebra.zetaInv =
         -(LaurentTateAlgebra.zetaInv *
           (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta)) := by
-      rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f)]
-      rw [LaurentTateAlgebra.zetaInv_mul_zeta]; ring
+      rw [mul_sub, mul_comm LaurentTateAlgebra.zetaInv (algebraMap A _ f),
+        LaurentTateAlgebra.zetaInv_mul_zeta]; ring
     rw [hkey]
     -- Factor out (alg f - zeta) and use hneg_b, hab, hc
     have : (algebraMap A (LaurentTateAlgebra A) f - LaurentTateAlgebra.zeta) *
@@ -1844,16 +1771,7 @@ theorem ker_deltaMap_gen_le_range_epsilonHom_gen
     change posEmbHom (g - g') - negEmbHom (h - h') = 0
     have heq : posEmbHom g' - negEmbHom h' = posEmbHom g - negEmbHom h := hrow1
     rw [map_sub, map_sub]
-    -- a - b - (c - d) = 0 ↔ a - b = c - d ↔ a - c = b - d
-    rw [sub_eq_zero]
-    -- Need: posEmbHom g - posEmbHom g' = negEmbHom h - negEmbHom h'
-    have : posEmbHom g - negEmbHom h = posEmbHom g' - negEmbHom h' := heq.symm
-    -- a - c = b - d ↔ a - b = c - d (just rearranging)
-    calc posEmbHom g - posEmbHom g'
-        = (posEmbHom g - negEmbHom h) - (posEmbHom g' - negEmbHom h') +
-          (negEmbHom h - negEmbHom h') := by ring
-      _ = 0 + (negEmbHom h - negEmbHom h') := by rw [this, sub_self]
-      _ = negEmbHom h - negEmbHom h' := by rw [zero_add]
+    linear_combination -heq
   -- Step 6: By Row 2 exactness, (g - g', h - h') ∈ im(ι)
   obtain ⟨a, ha⟩ := ker_lambdaMap_le_range_iotaHom (g - g', h - h') hker
   -- Step 7: ha says ι(a) = (g - g', h - h'), i.e.,

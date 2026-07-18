@@ -105,9 +105,8 @@ theorem gen_ne_zero (P : KummerPresentation Ext) : P.gen ≠ 0 := by
   have h1 : P.root ^ p = 0 := by
     rw [P.root_pow_eq, hγ, map_zero]
   have hp_pos : 0 < p := (Fact.out : p.Prime).pos
-  have hα : P.root = 0 := by
-    have h2 : P.root ^ p = (0 : Ext.E) := h1
-    exact (pow_eq_zero_iff (M₀ := Ext.E) (a := P.root) hp_pos.ne').mp h2
+  have hα : P.root = 0 :=
+    (pow_eq_zero_iff (M₀ := Ext.E) (a := P.root) hp_pos.ne').mp h1
   -- K⟮0⟯ = ⊥
   have hbot : (IntermediateField.adjoin K {P.root} : IntermediateField K Ext.E) = ⊥ := by
     rw [hα]
@@ -118,8 +117,7 @@ theorem gen_ne_zero (P : KummerPresentation Ext) : P.gen ≠ 0 := by
     rw [← hbot, P.adjoin_root_eq_top]
   -- finrank K E = 1 from ⊥ = ⊤
   have hfr : Module.finrank K Ext.E = 1 := by
-    rw [IntermediateField.bot_eq_top_iff_finrank_eq_one] at htb
-    exact htb
+    rwa [IntermediateField.bot_eq_top_iff_finrank_eq_one] at htb
   rw [Ext.degree_eq_p] at hfr
   exact (Fact.out : p.Prime).one_lt.ne' hfr
 
@@ -145,8 +143,7 @@ theorem irreducible_X_pow_sub_C (P : KummerPresentation Ext) :
   have h := irreducible_X_pow_sub_C_of_root_adjoin_eq_top
     (K := K) (L := Ext.E) (a := P.gen) (α := P.root) ha hα
   -- Rewrite `finrank K E = p` to match the polynomial.
-  rw [hfr] at h
-  exact h
+  rwa [hfr] at h
 
 /-- **`E/K` is a splitting field of `X^p - C γ`.** -/
 theorem isSplittingField_X_pow_sub_C (P : KummerPresentation Ext) :
@@ -167,8 +164,7 @@ theorem isSplittingField_X_pow_sub_C (P : KummerPresentation Ext) :
     P.adjoin_root_eq_top
   have h := isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top
     (K := K) (L := Ext.E) hK (a := P.gen) (α := P.root) ha hα
-  rw [hfr] at h
-  exact h
+  rwa [hfr] at h
 
 /-- **The algebra equivalence `E ≃ₐ[K] SplittingField (X^p - C γ)`.**
 

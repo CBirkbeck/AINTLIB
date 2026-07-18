@@ -85,10 +85,8 @@ theorem restrictToCont_smul_eq (g : G) (v : ↥(Cont A)) :
   funext a₁ a₂
   change (comap (fixedSubringInclusion G A) (g • v.1)).vle a₁ a₂ =
     (comap (fixedSubringInclusion G A) v.1).vle a₁ a₂
-  simp only [comap_vle, fixedSubringInclusion, Subring.coe_subtype]
-  show (comap (MulSemiringAction.toRingHom G A g⁻¹) v.1).vle (↑a₁) (↑a₂) =
-    v.1.vle (↑a₁) (↑a₂)
-  simp only [comap_vle, MulSemiringAction.toRingHom_apply, a₁.2 g⁻¹, a₂.2 g⁻¹]
+  simp only [comap_vle, fixedSubringInclusion, Subring.coe_subtype,
+    MulSemiringAction.toRingHom_apply, a₁.2 g⁻¹, a₂.2 g⁻¹]
 
 /-- The descended map `Cont(A)/G → Cont(A^G)`, well-defined since the restriction map is
 constant on `G`-orbits. -/
@@ -98,10 +96,9 @@ noncomputable def quotientToCont :
     (fun a b ⟨g, hg⟩ => by rw [← hg, restrictToCont_smul_eq])
 
 /-- `quotientToCont` is continuous. -/
-theorem continuous_quotientToCont : Continuous (quotientToCont G A) := by
-  apply Continuous.quotient_lift
-  exact Continuous.subtype_mk
-    ((comap_continuous (fixedSubringInclusion G A)).comp continuous_subtype_val) _
+theorem continuous_quotientToCont : Continuous (quotientToCont G A) :=
+  Continuous.quotient_lift (Continuous.subtype_mk
+    ((comap_continuous (fixedSubringInclusion G A)).comp continuous_subtype_val) _) _
 
 end QuotientMap
 

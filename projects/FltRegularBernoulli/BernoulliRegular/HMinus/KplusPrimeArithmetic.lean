@@ -1,10 +1,16 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
-import Mathlib.NumberTheory.RamificationInertia.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.NumberTheory.RamificationInertia.Galois
 import Mathlib.RingTheory.Ideal.GoingUp
-public import BernoulliRegular.HMinus.KplusLocalCharacters
 
+public import BernoulliRegular.HMinus.KplusLocalCharacters
 
 /-!
 # `K⁺` prime arithmetic above `ℓ ≠ p` (T023b2a2)
@@ -46,6 +52,11 @@ variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
 local notation3 "K⁺" => NumberField.maximalRealSubfield K
 
+private lemma rationalPrimeIdeal_ne_bot_aux (ℓ : ℕ) [Fact ℓ.Prime] :
+    rationalPrimeIdeal ℓ ≠ ⊥ := by
+  rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
+  exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
+
 /-- The finite set of prime ideals of `𝓞 K⁺` lying above the rational prime
 ideal `(ℓ)`. -/
 noncomputable def primesOverFinsetPlus (ℓ : ℕ) : Finset (Ideal (𝓞 (K⁺))) :=
@@ -56,25 +67,22 @@ lemma primesOverFinsetPlus_card_eq_ncard (ℓ : ℕ) [Fact ℓ.Prime] :
       (Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))).ncard := by
   classical
   haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
-  have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
-    rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
-    exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
-  unfold primesOverFinsetPlus
-  rw [← Set.ncard_coe_finset, IsDedekindDomain.coe_primesOverFinset hne]
+  simp only [primesOverFinsetPlus]
+  rw [← Set.ncard_coe_finset,
+    IsDedekindDomain.coe_primesOverFinset (rationalPrimeIdeal_ne_bot_aux ℓ)]
 
 lemma mem_primesOverFinsetPlus_iff {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 (K⁺))} :
     P ∈ primesOverFinsetPlus (K := K) ℓ ↔
       P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺)) := by
   haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
-  have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
-    rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
-    exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
-  exact IsDedekindDomain.mem_primesOverFinset_iff hne (𝓞 (K⁺))
+  exact IsDedekindDomain.mem_primesOverFinset_iff
+    (rationalPrimeIdeal_ne_bot_aux ℓ) (𝓞 (K⁺))
 
+/-- The subtype of primes above `(ℓ)` is equivalent to the corresponding finite set. -/
 noncomputable def primesOverSubtypeEquivFinsetPlus (ℓ : ℕ) [Fact ℓ.Prime] :
     {P : Ideal (𝓞 (K⁺)) // P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))} ≃
       {P : Ideal (𝓞 (K⁺)) // P ∈ primesOverFinsetPlus (K := K) ℓ} :=
-  Equiv.subtypeEquivProp (funext fun _ => propext
+  Equiv.subtypeEquivProp (funext fun _ ↦ propext
     (mem_primesOverFinsetPlus_iff (K := K) (ℓ := ℓ)).symm)
 
 lemma under_mem_primesOverFinsetPlus {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 K)}
@@ -145,7 +153,7 @@ lemma map_ringOfIntegersComplexConj_mem_primesOverFinset {ℓ : ℕ} [Fact ℓ.P
     (mem_primesOverFinsetPlus_iff (K := K) (ℓ := ℓ)).1 hPPlus_mem
   letI : P.IsPrime := hP_over.1
   letI : PPlus.IsPrime := hPPlus_over.1
-  letI : P.LiesOver PPlus := by simp [Ideal.liesOver_iff, PPlus]
+  letI : P.LiesOver PPlus := by simp only [Ideal.liesOver_iff, PPlus]
   have hmap_liesOver_PPlus :
       (P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom).LiesOver PPlus :=
     Ideal.LiesOver.of_eq_map_equiv PPlus (ringOfIntegersComplexConj K) rfl
@@ -165,7 +173,7 @@ lemma under_map_ringOfIntegersComplexConj_eq_under (P : Ideal (𝓞 K)) :
     (P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom).under (𝓞 (K⁺)) =
       P.under (𝓞 (K⁺)) := by
   let PPlus : Ideal (𝓞 (K⁺)) := P.under (𝓞 (K⁺))
-  letI : P.LiesOver PPlus := by simp [Ideal.liesOver_iff, PPlus]
+  letI : P.LiesOver PPlus := by simp only [Ideal.liesOver_iff, PPlus]
   have hmap_liesOver_PPlus :
       (P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom).LiesOver PPlus :=
     Ideal.LiesOver.of_eq_map_equiv PPlus (ringOfIntegersComplexConj K) rfl
@@ -181,7 +189,7 @@ lemma eq_or_eq_map_ringOfIntegersComplexConj_of_under_eq {ℓ : ℕ} [Fact ℓ.P
   let PPlus : Ideal (𝓞 (K⁺)) := P.under (𝓞 (K⁺))
   have hP_over : P ∈ Ideal.primesOver PPlus (𝓞 K) := by
     refine ⟨((mem_primesOverFinset_iff (K := K) (ℓ := ℓ)).1 hP).1,
-      by simp [Ideal.liesOver_iff, PPlus]⟩
+      by simp only [Ideal.liesOver_iff, PPlus]⟩
   have hQ_over : Q ∈ Ideal.primesOver PPlus (𝓞 K) := by
     refine ⟨((mem_primesOverFinset_iff (K := K) (ℓ := ℓ)).1 hQ).1,
       by simpa [Ideal.liesOver_iff, PPlus] using hunder⟩
@@ -205,21 +213,19 @@ lemma primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair {ℓ : ℕ} [
     {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ) :
     let Pconj := P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
     let fiber := (primesOverFinset K ℓ).filter
-      (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
     (Pconj = P ∧ fiber = ({P} : Finset (Ideal (𝓞 K)))) ∨
       (Pconj ≠ P ∧ fiber = {P, Pconj}) := by
   classical
   let Pconj : Ideal (𝓞 K) := P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
   let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+    (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
   have hPconj : Pconj ∈ primesOverFinset K ℓ := by
     simpa [Pconj] using map_ringOfIntegersComplexConj_mem_primesOverFinset (K := K) hP
   have hunder_conj : Pconj.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)) := by
     simpa [Pconj] using under_map_ringOfIntegersComplexConj_eq_under (K := K) P
-  have hP_fiber : P ∈ fiber := by
-    simp [fiber, hP]
-  have hPconj_fiber : Pconj ∈ fiber := by
-    simp [fiber, hPconj, hunder_conj]
+  have hP_fiber : P ∈ fiber := Finset.mem_filter.mpr ⟨hP, rfl⟩
+  have hPconj_fiber : Pconj ∈ fiber := Finset.mem_filter.mpr ⟨hPconj, hunder_conj⟩
   have hfiber_subset {Q : Ideal (𝓞 K)} (hQ : Q ∈ fiber) : Q = P ∨ Q = Pconj := by
     have hQ_mem : Q ∈ primesOverFinset K ℓ := (Finset.mem_filter.1 hQ).1
     have hQ_under : Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)) := (Finset.mem_filter.1 hQ).2
@@ -228,62 +234,65 @@ lemma primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair {ℓ : ℕ} [
     · exact Or.inl hQP
     · exact Or.inr (by simpa [Pconj] using hQconj)
   by_cases hfix : Pconj = P
-  · left
-    refine ⟨hfix, Finset.ext fun Q => ?_⟩
+  · refine Or.inl ⟨hfix, Finset.ext fun Q ↦ ?_⟩
+    simp only [Finset.mem_singleton]
     constructor
     · intro hQ
       rcases hfiber_subset hQ with hQP | hQconj
-      · rw [hQP]
-        simp
-      · rw [hQconj, hfix]
-        simp
-    · intro hQ
-      have hQP : Q = P := by simpa using hQ
-      subst hQP
+      · exact hQP
+      · exact hQconj.trans hfix
+    · rintro rfl
       exact hP_fiber
-  · right
-    refine ⟨hfix, Finset.ext fun Q => ?_⟩
+  · refine Or.inr ⟨hfix, Finset.ext fun Q ↦ ?_⟩
+    simp only [Finset.mem_insert, Finset.mem_singleton]
     constructor
-    · intro hQ
-      rcases hfiber_subset hQ with hQP | hQconj
-      · rw [hQP]
-        simp
-      · rw [hQconj]
-        simp [Pconj]
-    · intro hQ
-      have hQ' : Q = P ∨ Q = Pconj := by
-        rwa [Finset.mem_insert, Finset.mem_singleton] at hQ
-      rcases hQ' with hQP | hQconj
-      · rw [hQP]
-        exact hP_fiber
-      · rw [hQconj]
-        exact hPconj_fiber
+    · exact hfiber_subset
+    · rintro (rfl | rfl)
+      · exact hP_fiber
+      · exact hPconj_fiber
+
+private lemma primesOverFinsetContractionToPlus_fiber_card_eq_one_aux
+    {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ)
+    (hfix : P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom = P) :
+    let fiber := (primesOverFinset K ℓ).filter
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+    fiber.card = 1 := by
+  rcases primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair (K := K) hP with
+    hsingle | hpair
+  · rw [hsingle.2]
+    exact Finset.card_singleton P
+  · exact (hpair.1 hfix).elim
+
+private lemma primesOverFinsetContractionToPlus_fiber_card_eq_two_aux
+    {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ)
+    (hfix : P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom ≠ P) :
+    let fiber := (primesOverFinset K ℓ).filter
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+    fiber.card = 2 := by
+  rcases primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair (K := K) hP with
+    hsingle | hpair
+  · exact (hfix hsingle.1).elim
+  · rw [hpair.2, Finset.card_eq_two]
+    exact ⟨P, P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
+      hfix.symm, rfl⟩
 
 lemma primesOverFinsetContractionToPlus_fiber_card_eq_one_or_two {ℓ : ℕ} [Fact ℓ.Prime]
     {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ) :
     let fiber := (primesOverFinset K ℓ).filter
-      (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
     fiber.card = 1 ∨ fiber.card = 2 := by
-  classical
-  let Pconj : Ideal (𝓞 K) := P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom
-  let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = P.under (𝓞 (K⁺)))
-  rcases primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair (K := K) hP with
-    ⟨hfix, hfiber⟩ | ⟨hfix, hfiber⟩
-  · left
-    have hcard : ({P} : Finset (Ideal (𝓞 K))).card = 1 := by simp
-    rw [hfiber, hcard]
-  · right
-    have hcard : ({P, Pconj} : Finset (Ideal (𝓞 K))).card = 2 := by
-      rw [Finset.card_eq_two]
-      exact ⟨P, Pconj, hfix.symm, rfl⟩
-    rw [hfiber, hcard]
+  by_cases hfix : P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom = P
+  · exact Or.inl <|
+      primesOverFinsetContractionToPlus_fiber_card_eq_one_aux (K := K) hP hfix
+  · exact Or.inr <|
+      primesOverFinsetContractionToPlus_fiber_card_eq_two_aux (K := K) hP hfix
 
+/-- Complex conjugation on `K`, regarded as a Galois automorphism over `ℚ`. -/
 noncomputable def complexConjRat (hp_odd : p ≠ 2) : Gal(K/ℚ) := by
   letI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
   exact
     { (complexConj K).toRingEquiv with
-      commutes' := fun q => by
+      commutes' := fun q ↦ by
         exact map_ratCast ((complexConj K).toRingEquiv.toRingHom) q }
 
 @[simp] private lemma complexConjRat_apply (hp_odd : p ≠ 2) (x : K) :
@@ -298,7 +307,7 @@ lemma toRingHom_complexConjRat_eq_ringOfIntegersComplexConj (hp_odd : p ≠ 2) :
   ext x
   change complexConjRat (p := p) (K := K) hp_odd x =
       ((ringOfIntegersComplexConj K x : 𝓞 K) : K)
-  simp [complexConjRat_apply, coe_ringOfIntegersComplexConj]
+  simp only [complexConjRat_apply, coe_ringOfIntegersComplexConj]
 
 lemma pointwise_smul_complexConjRat_eq_map (hp_odd : p ≠ 2) (P : Ideal (𝓞 K)) :
     (complexConjRat (p := p) (K := K) hp_odd • P) =
@@ -308,6 +317,7 @@ lemma pointwise_smul_complexConjRat_eq_map (hp_odd : p ≠ 2) (P : Ideal (𝓞 K
     (p := p) (K := K) hp_odd]
 
 omit [IsCMField K] in
+set_option backward.isDefEq.respectTransparency false in
 lemma galEquivZMod_complexConj_eq_neg_one (hp_odd : p ≠ 2) :
     IsCyclotomicExtension.Rat.galEquivZMod p K
         (complexConjRat (p := p) (K := K) hp_odd) = -1 := by
@@ -317,10 +327,11 @@ lemma galEquivZMod_complexConj_eq_neg_one (hp_odd : p ≠ 2) :
   have hc :
       c (IsCyclotomicExtension.zeta p ℚ K) =
         (IsCyclotomicExtension.zeta p ℚ K) ^ (p - 1) := by
-    have hc' := congrArg (fun x : 𝓞 K => (x : K)) (complexConj_apply_zeta (p := p) (K := K))
+    have hc' := congrArg (fun x : 𝓞 K ↦ (x : K)) (complexConj_apply_zeta (p := p) (K := K))
     simpa [c, complexConjRat_apply, coe_ringOfIntegersComplexConj] using hc'
   have hpow :
-      (IsCyclotomicExtension.zeta p ℚ K) ^ (IsCyclotomicExtension.Rat.galEquivZMod p K c).val.val =
+      (IsCyclotomicExtension.zeta p ℚ K) ^
+          (IsCyclotomicExtension.Rat.galEquivZMod p K c).val.val =
         (IsCyclotomicExtension.zeta p ℚ K) ^ (p - 1) := by
     calc
       (IsCyclotomicExtension.zeta p ℚ K) ^ (IsCyclotomicExtension.Rat.galEquivZMod p K c).val.val
@@ -356,12 +367,12 @@ lemma unitOfPrimeNe_pow_localResidueDegreePlus_eq_neg_one_of_even
       simpa [d] using localResidueDegreePlus_eq_half (p := p) hℓp hd_even
     have hhalf_pos : 0 < d / 2 := by
       rcases hd_even with ⟨k, hk⟩
-      rw [show d = 2 * k by omega]
-      omega
+      rw [show d = 2 * k by lia]
+      lia
     have hle : d ≤ d / 2 := by
       rw [hhalf] at hdvd
       exact Nat.le_of_dvd hhalf_pos hdvd
-    omega
+    lia
   · apply Units.ext
     simpa [u, Units.val_pow_eq_pow_val] using hpow
 
@@ -395,8 +406,7 @@ lemma complexConjRat_mem_stabilizer_iff_even_localResidueDegree
   letI : P.IsPrime := hP_over.1
   letI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP_over.2
-  haveI : (rationalPrimeIdeal ℓ).IsMaximal := by
-    simpa [rationalPrimeIdeal] using Int.ideal_span_isMaximal_of_prime ℓ
+  haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
   letI : P.IsMaximal := Ideal.isMaximal_of_mem_primesOver hP_over
   constructor
   · intro hc
@@ -407,7 +417,8 @@ lemma complexConjRat_mem_stabilizer_iff_even_localResidueDegree
       ((coprime_of_prime_ne (p := p) hℓp).symm), galEquivZMod_complexConj_eq_neg_one
       (p := p) (K := K) hp_odd] at hmem_map
     simpa [unitOfPrimeNe] using
-      (neg_one_mem_zpowers_unitOfPrimeNe_iff_even_localResidueDegree (p := p) hp_odd hℓp).1 hmem_map
+      (neg_one_mem_zpowers_unitOfPrimeNe_iff_even_localResidueDegree
+        (p := p) hp_odd hℓp).1 hmem_map
   · intro h_even
     have hneg_mem : (-1 : (ZMod p)ˣ) ∈ Subgroup.zpowers (unitOfPrimeNe (p := p) ℓ hℓp) :=
       (neg_one_mem_zpowers_unitOfPrimeNe_iff_even_localResidueDegree (p := p) hp_odd hℓp).2 h_even
@@ -429,22 +440,10 @@ lemma map_ringOfIntegersComplexConj_eq_self_iff_even_localResidueDegree
     P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom = P ↔
       Even (localResidueDegree (p := p) ℓ hℓp) := by
   haveI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
-  let c : Gal(K/ℚ) := complexConjRat (p := p) (K := K) hp_odd
-  constructor
-  · intro hmap
-    have hsmul : c • P = P := by
-      rw [pointwise_smul_complexConjRat_eq_map (p := p) (K := K) hp_odd]
-      exact hmap
-    have hc : c ∈ MulAction.stabilizer Gal(K/ℚ) P := by simpa [c] using hsmul
-    exact (complexConjRat_mem_stabilizer_iff_even_localResidueDegree
-      (p := p) (K := K) hp_odd hℓp hP).1 hc
-  · intro h_even
-    have hc : c ∈ MulAction.stabilizer Gal(K/ℚ) P :=
-      (complexConjRat_mem_stabilizer_iff_even_localResidueDegree
-        (p := p) (K := K) hp_odd hℓp hP).2 h_even
-    have hsmul : c • P = P := by simpa [c] using hc
-    rw [pointwise_smul_complexConjRat_eq_map (p := p) (K := K) hp_odd] at hsmul
-    exact hsmul
+  rw [← pointwise_smul_complexConjRat_eq_map (p := p) (K := K) hp_odd,
+    ← MulAction.mem_stabilizer_iff]
+  exact complexConjRat_mem_stabilizer_iff_even_localResidueDegree
+    (p := p) (K := K) hp_odd hℓp hP
 
 lemma map_ringOfIntegersComplexConj_eq_self_iff_localResidueDegreePlus_eq_half
     (hp_odd : p ≠ 2) {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p)
@@ -459,21 +458,21 @@ lemma map_ringOfIntegersComplexConj_eq_self_iff_localResidueDegreePlus_eq_half
     by_contra hodd
     have hself := localResidueDegreePlus_eq_self (p := p) hℓp hodd
     have hpos : 0 < localResidueDegree (p := p) ℓ hℓp := by
-      unfold localResidueDegree unitOfPrimeNe
+      simp only [localResidueDegree, unitOfPrimeNe]
       exact orderOf_pos _
     rw [hself] at hhalf
-    omega
+    lia
 
 omit [IsCMField K] in
 lemma primesOverFinsetContractionToPlus_fiber_card_eq_ncard_primesOver {ℓ : ℕ} [Fact ℓ.Prime]
     {P : Ideal (𝓞 K)} (hP : P ∈ primesOverFinset K ℓ)
     {PPlus : Ideal (𝓞 (K⁺))} (hPPlus : P.under (𝓞 (K⁺)) = PPlus) :
     let fiber := (primesOverFinset K ℓ).filter
-      (fun Q => Q.under (𝓞 (K⁺)) = PPlus)
+      (fun Q ↦ Q.under (𝓞 (K⁺)) = PPlus)
     fiber.card = (Ideal.primesOver PPlus (𝓞 K)).ncard := by
   classical
   let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = PPlus)
+    (fun Q ↦ Q.under (𝓞 (K⁺)) = PPlus)
   have hPPlus_mem : PPlus ∈ primesOverFinsetPlus (K := K) ℓ := by
     simpa [hPPlus] using under_mem_primesOverFinsetPlus (K := K) hP
   have hPPlus_over : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺)) :=
@@ -506,16 +505,41 @@ lemma primesOverFinsetContractionToPlus_fiber_card_eq_ncard_primesOver {ℓ : �
   simpa [fiber] using (show fiber.card = (Ideal.primesOver PPlus (𝓞 K)).ncard from by
     rw [← Set.ncard_coe_finset, hfiber])
 
+/-- **Galois fundamental identity for the CM extension `K / K⁺`.**
+For a prime `PPlus` of `𝓞 K⁺` and a prime `P` of `𝓞 K` lying over it whose relative
+ramification index is `1`, the number of primes of `𝓞 K` above `PPlus` times the relative
+inertia degree `f(P ∣ PPlus)` equals `2 = [K : K⁺]`. This is the degree-`2` Galois count
+`#{primes over PPlus} · e · f = [K : K⁺]` specialised to the unramified (`e = 1`) case. -/
+lemma ncard_primesOver_mul_inertiaDeg'_eq_two
+    (PPlus : Ideal (𝓞 (K⁺))) (P : Ideal (𝓞 K))
+    [PPlus.IsPrime] [PPlus.IsMaximal] [P.IsPrime] [P.IsMaximal] [P.LiesOver PPlus]
+    (hPPlus_ne_bot : PPlus ≠ ⊥) (hram_rel : PPlus.ramificationIdx' P = 1) :
+    (Ideal.primesOver PPlus (𝓞 K)).ncard * PPlus.inertiaDeg' P = 2 := by
+  have _ : IsGaloisGroup Gal(K/K⁺) (𝓞 (K⁺)) (𝓞 K) :=
+    IsGaloisGroup.of_isFractionRing (Gal(K/K⁺)) (𝓞 (K⁺)) (𝓞 K) (K⁺) K
+  have hfund := Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
+    (p := PPlus) (B := 𝓞 K) (G := Gal(K/K⁺))
+  have hcard_gal : Nat.card Gal(K/K⁺) = 2 :=
+    (IsGalois.card_aut_eq_finrank K⁺ K).trans (finrank_K_over_Kplus (K := K))
+  have hram_in : PPlus.ramificationIdxIn (𝓞 K) = 1 := by
+    rw [Ideal.ramificationIdxIn_eq_ramificationIdx (p := PPlus) (P := P) (G := Gal(K/K⁺))]
+    rw [← Ideal.ramificationIdx'_eq_ramificationIdx (q := P) (p := PPlus) (hp := hPPlus_ne_bot)]
+    exact hram_rel
+  have hinertia_in : PPlus.inertiaDegIn (𝓞 K) = PPlus.inertiaDeg' P := by
+    rw [Ideal.inertiaDegIn_eq_inertiaDeg (p := PPlus) (P := P) (G := Gal(K/K⁺))]
+    rw [← Ideal.inertiaDeg'_eq_inertiaDeg (p := PPlus) (q := P)]
+  rw [hcard_gal, hram_in, hinertia_in, one_mul] at hfund
+  exact hfund
+
 omit [IsCMField K] in
 lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
     (hp_odd : p ≠ 2) {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p)
     (PPlus : Ideal (𝓞 (K⁺)))
     (hPPlus : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))) :
-    (rationalPrimeIdeal ℓ).inertiaDeg PPlus = localResidueDegreePlus (p := p) ℓ hℓp := by
+    (rationalPrimeIdeal ℓ).inertiaDeg' PPlus = localResidueDegreePlus (p := p) ℓ hℓp := by
   classical
   haveI : IsCMField K := isCMField_of_cyclotomic (p := p) (K := K) hp_odd
-  haveI : (rationalPrimeIdeal ℓ).IsMaximal := by
-    simpa [rationalPrimeIdeal] using Int.ideal_span_isMaximal_of_prime ℓ
+  haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
   letI : PPlus.IsPrime := hPPlus.1
   letI : PPlus.LiesOver (rationalPrimeIdeal ℓ) := hPPlus.2
   letI : PPlus.IsMaximal := Ideal.isMaximal_of_mem_primesOver hPPlus
@@ -532,65 +556,40 @@ lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
   have hPPlus_eq : P.under (𝓞 (K⁺)) = PPlus :=
     ((Ideal.liesOver_iff _ _).1 (show P.LiesOver PPlus from inferInstance)).symm
   let fiber : Finset (Ideal (𝓞 K)) := (primesOverFinset K ℓ).filter
-    (fun Q => Q.under (𝓞 (K⁺)) = PPlus)
+    (fun Q ↦ Q.under (𝓞 (K⁺)) = PPlus)
   have hfiber_ncard : fiber.card = (Ideal.primesOver PPlus (𝓞 K)).ncard := by
     simpa [fiber] using primesOverFinsetContractionToPlus_fiber_card_eq_ncard_primesOver
       (K := K) hP_fin hPPlus_eq
   have hram_tower :
-      (rationalPrimeIdeal ℓ).ramificationIdx P =
-        (rationalPrimeIdeal ℓ).ramificationIdx PPlus * PPlus.ramificationIdx P := by
-    simpa using Ideal.ramificationIdx_algebra_tower'
+      (rationalPrimeIdeal ℓ).ramificationIdx' P =
+        (rationalPrimeIdeal ℓ).ramificationIdx' PPlus * PPlus.ramificationIdx' P := by
+    simpa using Ideal.ramificationIdx'_algebra_tower'
       (p := rationalPrimeIdeal ℓ) (P := PPlus) (Q := P)
-  have hram_rel : PPlus.ramificationIdx P = 1 := by
+  have hram_rel : PPlus.ramificationIdx' P = 1 := by
     apply Nat.eq_one_of_dvd_one
-    refine ⟨(rationalPrimeIdeal ℓ).ramificationIdx PPlus, ?_⟩
+    refine ⟨(rationalPrimeIdeal ℓ).ramificationIdx' PPlus, ?_⟩
     rw [mul_comm, ← hram_tower,
       primesOver_ramificationIdx_eq_one (p := p) (K := K) hℓp P hP_over]
-  have hPPlus_ne_bot : PPlus ≠ ⊥ := by
-    intro hbot
-    have hlie : PPlus.LiesOver (rationalPrimeIdeal ℓ) := inferInstance
-    have hover := (Ideal.liesOver_iff _ _).1 hlie
-    have hcomap_bot : Ideal.comap (algebraMap ℤ (𝓞 (K⁺))) (⊥ : Ideal (𝓞 (K⁺))) = ⊥ := by
-      ext x
-      simp
-    have hneq : rationalPrimeIdeal ℓ ≠ ⊥ := by
-      rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
-      exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
-    exact hneq (by simpa [Ideal.under_def, hbot, hcomap_bot] using hover)
-  have _ : IsGaloisGroup Gal(K/K⁺) (𝓞 (K⁺)) (𝓞 K) :=
-    IsGaloisGroup.of_isFractionRing (Gal(K/K⁺)) (𝓞 (K⁺)) (𝓞 K) (K⁺) K
-  have hquad : (Ideal.primesOver PPlus (𝓞 K)).ncard * PPlus.inertiaDeg P = 2 := by
-    have hfund := Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
-      (p := PPlus) (hpb := hPPlus_ne_bot)
-      (B := 𝓞 K) (G := Gal(K/K⁺))
-    have hcard_gal : Nat.card Gal(K/K⁺) = 2 :=
-      (IsGalois.card_aut_eq_finrank K⁺ K).trans (finrank_K_over_Kplus (K := K))
-    rw [hcard_gal,
-      Ideal.ramificationIdxIn_eq_ramificationIdx (p := PPlus) (P := P) (G := Gal(K/K⁺)),
-      Ideal.inertiaDegIn_eq_inertiaDeg (p := PPlus) (P := P) (G := Gal(K/K⁺)),
-      hram_rel] at hfund
-    simpa using hfund
+  have hPPlus_ne_bot : PPlus ≠ ⊥ :=
+    Ideal.ne_bot_of_liesOver_of_ne_bot (rationalPrimeIdeal_ne_bot_aux ℓ) PPlus
+  have hquad : (Ideal.primesOver PPlus (𝓞 K)).ncard * PPlus.inertiaDeg' P = 2 :=
+    ncard_primesOver_mul_inertiaDeg'_eq_two (K := K) PPlus P hPPlus_ne_bot hram_rel
   have hinertia_tower :
-      (rationalPrimeIdeal ℓ).inertiaDeg P =
-        (rationalPrimeIdeal ℓ).inertiaDeg PPlus * PPlus.inertiaDeg P := by
-    simpa using Ideal.inertiaDeg_algebra_tower
+      (rationalPrimeIdeal ℓ).inertiaDeg' P =
+        (rationalPrimeIdeal ℓ).inertiaDeg' PPlus * PPlus.inertiaDeg' P := by
+    simpa using Ideal.inertiaDeg'_algebra_tower
       (p := rationalPrimeIdeal ℓ) (P := PPlus) (I := P)
   have hP_inertia :
-      (rationalPrimeIdeal ℓ).inertiaDeg P = localResidueDegree (p := p) ℓ hℓp :=
+      (rationalPrimeIdeal ℓ).inertiaDeg' P = localResidueDegree (p := p) ℓ hℓp :=
     primesOver_inertiaDeg_eq_localResidueDegree (p := p) (K := K) hℓp P hP_over
   by_cases hfix : P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom = P
   · have hfiber_card : fiber.card = 1 := by
-      rcases primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair (K := K) hP_fin with
-        hsingle | hpair
-      · have hsingle_fiber : fiber = ({P} : Finset (Ideal (𝓞 K))) := by
-          simpa [fiber, hPPlus_eq] using hsingle.2
-        rw [hsingle_fiber]
-        simp
-      · exact (hpair.1 hfix).elim
+      simpa [fiber, hPPlus_eq] using
+        primesOverFinsetContractionToPlus_fiber_card_eq_one_aux (K := K) hP_fin hfix
     have hcard_primes : (Ideal.primesOver PPlus (𝓞 K)).ncard = 1 := by
       rw [← hfiber_ncard]
       exact hfiber_card
-    have hrel_inertia : PPlus.inertiaDeg P = 2 := by
+    have hrel_inertia : PPlus.inertiaDeg' P = 2 := by
       rw [hcard_primes] at hquad
       simpa using hquad
     have hhalf : localResidueDegreePlus (p := p) ℓ hℓp =
@@ -599,27 +598,17 @@ lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
         (p := p) (K := K) hp_odd hℓp hP_fin).1 hfix
     rw [hhalf]
     rw [hP_inertia, hrel_inertia] at hinertia_tower
-    omega
+    lia
   · have hfiber_card : fiber.card = 2 := by
-      rcases primesOverFinsetContractionToPlus_fiber_eq_singleton_or_pair (K := K) hP_fin with
-        hsingle | hpair
-      · exact (hfix hsingle.1).elim
-      · have hpair_fiber :
-            fiber =
-              ({P, P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom} :
-                Finset (Ideal (𝓞 K))) := by
-          simpa [fiber, hPPlus_eq] using hpair.2
-        rw [hpair_fiber]
-        rw [Finset.card_eq_two]
-        exact ⟨P, P.map (ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
-          by simpa [eq_comm] using hpair.1, rfl⟩
+      simpa [fiber, hPPlus_eq] using
+        primesOverFinsetContractionToPlus_fiber_card_eq_two_aux (K := K) hP_fin hfix
     have hcard_primes : (Ideal.primesOver PPlus (𝓞 K)).ncard = 2 := by
       rw [← hfiber_ncard]
       exact hfiber_card
-    have hrel_inertia : PPlus.inertiaDeg P = 1 := by
+    have hrel_inertia : PPlus.inertiaDeg' P = 1 := by
       rw [hcard_primes] at hquad
-      omega
-    have hnot_even : ¬ Even (localResidueDegree (p := p) ℓ hℓp) := fun h_even =>
+      lia
+    have hnot_even : ¬ Even (localResidueDegree (p := p) ℓ hℓp) := fun h_even ↦
       hfix
         ((map_ringOfIntegersComplexConj_eq_self_iff_even_localResidueDegree
           (p := p) (K := K) hp_odd hℓp hP_fin).2 h_even)
@@ -628,15 +617,14 @@ lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
       localResidueDegreePlus_eq_self (p := p) hℓp hnot_even
     rw [hself]
     rw [hP_inertia, hrel_inertia] at hinertia_tower
-    omega
+    lia
 
 omit [IsCMField K] in
 lemma primesOverPlus_ramificationIdx_eq_one {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p)
     (PPlus : Ideal (𝓞 (K⁺)))
     (hPPlus : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))) :
-    (rationalPrimeIdeal ℓ).ramificationIdx PPlus = 1 := by
-  haveI : (rationalPrimeIdeal ℓ).IsMaximal := by
-    simpa [rationalPrimeIdeal] using Int.ideal_span_isMaximal_of_prime ℓ
+    (rationalPrimeIdeal ℓ).ramificationIdx' PPlus = 1 := by
+  haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
   letI : PPlus.IsPrime := hPPlus.1
   letI : PPlus.LiesOver (rationalPrimeIdeal ℓ) := hPPlus.2
   letI : PPlus.IsMaximal := Ideal.isMaximal_of_mem_primesOver hPPlus
@@ -648,32 +636,28 @@ lemma primesOverPlus_ramificationIdx_eq_one {ℓ : ℕ} [Fact ℓ.Prime] (hℓp 
     exact Ideal.LiesOver.trans (A := ℤ) (B := 𝓞 (K⁺)) (C := 𝓞 K)
       (𝔓 := P) (P := PPlus) (p := rationalPrimeIdeal ℓ)
   have hram_tower :
-      (rationalPrimeIdeal ℓ).ramificationIdx P =
-        (rationalPrimeIdeal ℓ).ramificationIdx PPlus * PPlus.ramificationIdx P := by
-    simpa using Ideal.ramificationIdx_algebra_tower'
+      (rationalPrimeIdeal ℓ).ramificationIdx' P =
+        (rationalPrimeIdeal ℓ).ramificationIdx' PPlus * PPlus.ramificationIdx' P := by
+    simpa using Ideal.ramificationIdx'_algebra_tower'
       (p := rationalPrimeIdeal ℓ) (P := PPlus) (Q := P)
-  have hram_abs : (rationalPrimeIdeal ℓ).ramificationIdx P = 1 :=
+  have hram_abs : (rationalPrimeIdeal ℓ).ramificationIdx' P = 1 :=
     BernoulliRegular.primesOver_ramificationIdx_eq_one (p := p) (K := K) hℓp P hP_over
   apply Nat.eq_one_of_dvd_one
-  refine ⟨PPlus.ramificationIdx P, ?_⟩
+  refine ⟨PPlus.ramificationIdx' P, ?_⟩
   rw [← hram_tower, hram_abs]
 
 lemma ncard_primesOverPlus_eq_localPrimeCountPlus (hp_odd : p ≠ 2)
     {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :
     (Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))).ncard =
       localPrimeCountPlus (p := p) ℓ hℓp := by
-  haveI : (rationalPrimeIdeal ℓ).IsMaximal := by
-    simpa [rationalPrimeIdeal] using Int.ideal_span_isMaximal_of_prime ℓ
-  have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
-    rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
-    exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
+  haveI : (rationalPrimeIdeal ℓ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
   have hsum :
       ∑ PPlus ∈ primesOverFinsetPlus (K := K) ℓ,
-          (rationalPrimeIdeal ℓ).ramificationIdx PPlus *
-            (rationalPrimeIdeal ℓ).inertiaDeg PPlus = Module.finrank ℚ (K⁺) := by
+          (rationalPrimeIdeal ℓ).ramificationIdx' PPlus *
+            (rationalPrimeIdeal ℓ).inertiaDeg' PPlus = Module.finrank ℚ (K⁺) := by
     simpa [primesOverFinsetPlus] using
       (Ideal.sum_ramification_inertia (S := 𝓞 (K⁺)) (K := ℚ) (L := K⁺)
-        (p := rationalPrimeIdeal ℓ) hne)
+        (p := rationalPrimeIdeal ℓ) (rationalPrimeIdeal_ne_bot_aux ℓ))
   have hsum_const :
       (primesOverFinsetPlus (K := K) ℓ).card * localResidueDegreePlus (p := p) ℓ hℓp =
         Module.finrank ℚ (K⁺) := by
@@ -681,17 +665,18 @@ lemma ncard_primesOverPlus_eq_localPrimeCountPlus (hp_odd : p ≠ 2)
       (primesOverFinsetPlus (K := K) ℓ).card * localResidueDegreePlus (p := p) ℓ hℓp
           = ∑ PPlus ∈ primesOverFinsetPlus (K := K) ℓ,
               localResidueDegreePlus (p := p) ℓ hℓp := by
-              simp
+              simp only [Finset.sum_const, Nat.nsmul_eq_mul]
       _ = ∑ PPlus ∈ primesOverFinsetPlus (K := K) ℓ,
-              (rationalPrimeIdeal ℓ).ramificationIdx PPlus *
-                (rationalPrimeIdeal ℓ).inertiaDeg PPlus := by
+              (rationalPrimeIdeal ℓ).ramificationIdx' PPlus *
+                (rationalPrimeIdeal ℓ).inertiaDeg' PPlus := by
               refine Finset.sum_congr rfl ?_
               intro PPlus hPPlus_fin
               have hPPlus : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺)) :=
                 (mem_primesOverFinsetPlus_iff (K := K) (ℓ := ℓ)).1 hPPlus_fin
-              simp [primesOverPlus_ramificationIdx_eq_one (p := p) (K := K) hℓp PPlus hPPlus,
+              simp only [primesOverPlus_ramificationIdx_eq_one
+                  (p := p) (K := K) hℓp PPlus hPPlus,
                 primesOver_inertiaDeg_eq_localResidueDegreePlus (p := p) (K := K)
-                  hp_odd hℓp PPlus hPPlus]
+                  hp_odd hℓp PPlus hPPlus, one_mul]
       _ = Module.finrank ℚ (K⁺) := hsum
   rw [primesOverFinsetPlus_card_eq_ncard (K := K) (ℓ := ℓ),
     finrank_Kplus_over_rat (p := p) (K := K)] at hsum_const
@@ -704,22 +689,22 @@ lemma ncard_primesOverPlus_eq_localPrimeCountPlus (hp_odd : p ≠ 2)
     by_cases hde : Even (localResidueDegree (p := p) ℓ hℓp)
     · rcases hde with ⟨k, hk⟩
       rw [localResidueDegreePlus_eq_half (p := p) hℓp ⟨k, hk⟩]
-      omega
+      lia
     · rw [localResidueDegreePlus_eq_self (p := p) hℓp hde]
       exact hd_pos
   have hmul :
       (Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))).ncard *
         localResidueDegreePlus (p := p) ℓ hℓp =
           localPrimeCountPlus (p := p) ℓ hℓp * localResidueDegreePlus (p := p) ℓ hℓp := by
-    omega
+    lia
   exact Nat.eq_of_mul_eq_mul_right hfd_pos (by simpa [Nat.mul_comm] using hmul)
 
 lemma primesOverPlus_prime_ne_p_package (hp_odd : p ≠ 2)
     {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :
     (∀ PPlus ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺)),
-      (rationalPrimeIdeal ℓ).inertiaDeg PPlus = localResidueDegreePlus (p := p) ℓ hℓp) ∧
+      (rationalPrimeIdeal ℓ).inertiaDeg' PPlus = localResidueDegreePlus (p := p) ℓ hℓp) ∧
     (∀ PPlus ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺)),
-      (rationalPrimeIdeal ℓ).ramificationIdx PPlus = 1) ∧
+      (rationalPrimeIdeal ℓ).ramificationIdx' PPlus = 1) ∧
     (Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 (K⁺))).ncard =
       localPrimeCountPlus (p := p) ℓ hℓp :=
   ⟨primesOver_inertiaDeg_eq_localResidueDegreePlus (p := p) (K := K) hp_odd hℓp,
@@ -732,11 +717,12 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegreePlus (hp_odd : p ≠ 2)
       (1 - (ℓ : ℂ) ^ (-(localResidueDegreePlus (p := p) ℓ hℓp : ℂ) * s)) ^
         localPrimeCountPlus (p := p) ℓ hℓp := by
   classical
-  have hcard_eq : (primesOverFinsetPlus (K := K) ℓ).card = localPrimeCountPlus (p := p) ℓ hℓp := by
+  have hcard_eq :
+      (primesOverFinsetPlus (K := K) ℓ).card = localPrimeCountPlus (p := p) ℓ hℓp := by
     rw [primesOverFinsetPlus_card_eq_ncard (K := K) (ℓ := ℓ)]
     exact ncard_primesOverPlus_eq_localPrimeCountPlus (p := p) (K := K) hp_odd hℓp
-  unfold dedekindLocalFactor
-  change Finset.prod (primesOverFinsetPlus (K := K) ℓ) (fun PPlus =>
+  simp only [dedekindLocalFactor]
+  change Finset.prod (primesOverFinsetPlus (K := K) ℓ) (fun PPlus ↦
       (1 - (Ideal.absNorm PPlus : ℂ) ^ (-s))) =
         (1 - (ℓ : ℂ) ^ (-(localResidueDegreePlus (p := p) ℓ hℓp : ℂ) * s)) ^
           localPrimeCountPlus (p := p) ℓ hℓp
@@ -801,8 +787,7 @@ lemma primesOverPlus_at_p_eq_singleton_zetaPrimePlus :
   ext PPlus
   constructor
   · intro hPPlus
-    haveI : (rationalPrimeIdeal p).IsMaximal := by
-      simpa [rationalPrimeIdeal] using Int.ideal_span_isMaximal_of_prime p
+    haveI : (rationalPrimeIdeal p).IsMaximal := Int.ideal_span_isMaximal_of_prime p
     letI : PPlus.IsPrime := hPPlus.1
     letI : PPlus.LiesOver (rationalPrimeIdeal p) := hPPlus.2
     letI : PPlus.IsMaximal := Ideal.isMaximal_of_mem_primesOver hPPlus
@@ -819,7 +804,7 @@ lemma primesOverPlus_at_p_eq_singleton_zetaPrimePlus :
     have hPPlus_eq : PPlus = zetaPrimePlus p K := by
       simpa [zetaPrimePlus, hP_eq] using
         (Ideal.liesOver_iff _ _).1 (show P.LiesOver PPlus from inferInstance)
-    simp [hPPlus_eq]
+    exact Set.mem_singleton_iff.mpr hPPlus_eq
   · intro hPPlus
     rw [Set.mem_singleton_iff] at hPPlus
     simpa [hPPlus] using zetaPrimePlus_mem_primesOver_at_p (p := p) (K := K)
@@ -827,55 +812,55 @@ lemma primesOverPlus_at_p_eq_singleton_zetaPrimePlus :
 lemma ncard_primesOverPlus_at_p_eq_one :
     (Ideal.primesOver (rationalPrimeIdeal p) (𝓞 (K⁺))).ncard = 1 := by
   rw [primesOverPlus_at_p_eq_singleton_zetaPrimePlus (p := p) (K := K)]
-  simp
+  exact Set.ncard_singleton _
 
 lemma zetaPrimePlus_inertiaDeg_eq_one_at_p :
-    (rationalPrimeIdeal p).inertiaDeg (zetaPrimePlus p K) = 1 := by
-  haveI : (rationalPrimeIdeal p).IsMaximal := by
-    simpa [rationalPrimeIdeal] using Int.ideal_span_isMaximal_of_prime p
+    (rationalPrimeIdeal p).inertiaDeg' (zetaPrimePlus p K) = 1 := by
+  haveI : (rationalPrimeIdeal p).IsMaximal := Int.ideal_span_isMaximal_of_prime p
   haveI : (zetaPrimePlus p K).LiesOver (rationalPrimeIdeal p) :=
     (zetaPrimePlus_mem_primesOver_at_p (p := p) (K := K)).2
   haveI : (zetaPrimePlus p K).IsMaximal :=
     Ideal.isMaximal_of_mem_primesOver
       (zetaPrimePlus_mem_primesOver_at_p (p := p) (K := K))
   have hinertia_tower :
-      (rationalPrimeIdeal p).inertiaDeg (zetaPrime p K) =
-        (rationalPrimeIdeal p).inertiaDeg (zetaPrimePlus p K) *
-          (zetaPrimePlus p K).inertiaDeg (zetaPrime p K) := by
-    simpa using Ideal.inertiaDeg_algebra_tower
+      (rationalPrimeIdeal p).inertiaDeg' (zetaPrime p K) =
+        (rationalPrimeIdeal p).inertiaDeg' (zetaPrimePlus p K) *
+          (zetaPrimePlus p K).inertiaDeg' (zetaPrime p K) := by
+    simpa using Ideal.inertiaDeg'_algebra_tower
       (p := rationalPrimeIdeal p) (P := zetaPrimePlus p K) (I := zetaPrime p K)
   have hzeta_inertia :
-      (rationalPrimeIdeal p).inertiaDeg (zetaPrime p K) = 1 :=
+      (rationalPrimeIdeal p).inertiaDeg' (zetaPrime p K) = 1 :=
     primesOver_inertiaDeg_eq_one_at_p (p := p) (K := K) (zetaPrime p K)
       (zetaPrime_mem_primesOver_at_p (p := p) (K := K))
   rw [hzeta_inertia] at hinertia_tower
-  exact Nat.eq_one_of_dvd_one <| ⟨(zetaPrimePlus p K).inertiaDeg (zetaPrime p K), hinertia_tower⟩
+  exact Nat.eq_one_of_dvd_one
+    ⟨(zetaPrimePlus p K).inertiaDeg' (zetaPrime p K), hinertia_tower⟩
 
 lemma primesOverPlus_inertiaDeg_eq_one_at_p (PPlus : Ideal (𝓞 (K⁺)))
     (hPPlus : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 (K⁺))) :
-    (rationalPrimeIdeal p).inertiaDeg PPlus = 1 := by
+    (rationalPrimeIdeal p).inertiaDeg' PPlus = 1 := by
   have hPPlus_eq : PPlus = zetaPrimePlus p K := by
     rw [primesOverPlus_at_p_eq_singleton_zetaPrimePlus (p := p) (K := K)] at hPPlus
     simpa using hPPlus
   simpa [hPPlus_eq] using zetaPrimePlus_inertiaDeg_eq_one_at_p (p := p) (K := K)
 
 lemma zetaPrimePlus_ramificationIdx_eq_prime_sub_one_div_two_at_p (hp_odd : p ≠ 2) :
-    (rationalPrimeIdeal p).ramificationIdx (zetaPrimePlus p K) = (p - 1) / 2 := by
+    (rationalPrimeIdeal p).ramificationIdx' (zetaPrimePlus p K) = (p - 1) / 2 := by
   haveI : (zetaPrimePlus p K).LiesOver (rationalPrimeIdeal p) :=
     (zetaPrimePlus_mem_primesOver_at_p (p := p) (K := K)).2
   have hram_tower :
-      (rationalPrimeIdeal p).ramificationIdx (zetaPrime p K) =
-        (rationalPrimeIdeal p).ramificationIdx (zetaPrimePlus p K) *
-          (zetaPrimePlus p K).ramificationIdx (zetaPrime p K) := by
-    simpa using Ideal.ramificationIdx_algebra_tower'
+      (rationalPrimeIdeal p).ramificationIdx' (zetaPrime p K) =
+        (rationalPrimeIdeal p).ramificationIdx' (zetaPrimePlus p K) *
+          (zetaPrimePlus p K).ramificationIdx' (zetaPrime p K) := by
+    simpa using Ideal.ramificationIdx'_algebra_tower'
       (p := rationalPrimeIdeal p) (P := zetaPrimePlus p K) (Q := zetaPrime p K)
   have hzeta_ram :
-      (rationalPrimeIdeal p).ramificationIdx (zetaPrime p K) = p - 1 :=
+      (rationalPrimeIdeal p).ramificationIdx' (zetaPrime p K) = p - 1 :=
     primesOver_ramificationIdx_eq_prime_sub_one_at_p (p := p) (K := K) (zetaPrime p K)
       (zetaPrime_mem_primesOver_at_p (p := p) (K := K))
   rw [hzeta_ram,
     ramificationIdx_zetaPrimePlus_eq_two (p := p) (hp_odd := hp_odd) (K := K)] at hram_tower
-  have hram_tower' : p - 1 = 2 * (rationalPrimeIdeal p).ramificationIdx (zetaPrimePlus p K) := by
+  have hram_tower' : p - 1 = 2 * (rationalPrimeIdeal p).ramificationIdx' (zetaPrimePlus p K) := by
     simpa [Nat.mul_comm] using hram_tower
   exact (Nat.div_eq_of_eq_mul_right (by decide : 0 < 2) hram_tower').symm
 
@@ -883,7 +868,7 @@ lemma primesOverPlus_ramificationIdx_eq_prime_sub_one_div_two_at_p
   (hp_odd : p ≠ 2)
     (PPlus : Ideal (𝓞 (K⁺)))
     (hPPlus : PPlus ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 (K⁺))) :
-    (rationalPrimeIdeal p).ramificationIdx PPlus = (p - 1) / 2 := by
+    (rationalPrimeIdeal p).ramificationIdx' PPlus = (p - 1) / 2 := by
   have hPPlus_eq : PPlus = zetaPrimePlus p K := by
     rw [primesOverPlus_at_p_eq_singleton_zetaPrimePlus (p := p) (K := K)] at hPPlus
     simpa using hPPlus
@@ -893,9 +878,9 @@ lemma primesOverPlus_ramificationIdx_eq_prime_sub_one_div_two_at_p
 
 lemma primesOverPlus_at_p_package (hp_odd : p ≠ 2) :
     (∀ PPlus ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 (K⁺)),
-      (rationalPrimeIdeal p).inertiaDeg PPlus = 1) ∧
+      (rationalPrimeIdeal p).inertiaDeg' PPlus = 1) ∧
     (∀ PPlus ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 (K⁺)),
-      (rationalPrimeIdeal p).ramificationIdx PPlus = (p - 1) / 2) ∧
+      (rationalPrimeIdeal p).ramificationIdx' PPlus = (p - 1) / 2) ∧
     (Ideal.primesOver (rationalPrimeIdeal p) (𝓞 (K⁺))).ncard = 1 :=
   ⟨primesOverPlus_inertiaDeg_eq_one_at_p (p := p) (K := K),
     primesOverPlus_ramificationIdx_eq_prime_sub_one_div_two_at_p
@@ -905,32 +890,22 @@ lemma primesOverPlus_at_p_package (hp_odd : p ≠ 2) :
 lemma dedekindLocalFactorPlus_at_p {s : ℂ} :
     dedekindLocalFactor K⁺ p s = 1 - (p : ℂ) ^ (-s) := by
   classical
-  unfold dedekindLocalFactor primesOverFinset rationalPrimeIdeal
-  have hne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
-    rw [Ne, Ideal.span_singleton_eq_bot]
-    exact_mod_cast hp.out.ne_zero
-  have hcoe :=
-    IsDedekindDomain.coe_primesOverFinset (p := (Ideal.span {(p : ℤ)} : Ideal ℤ)) hne
-      (𝓞 (K⁺))
-  have hcard : (IsDedekindDomain.primesOverFinset (Ideal.span {(p : ℤ)} : Ideal ℤ)
-      (𝓞 (K⁺))).card = 1 := by
-    have hncard : ((Ideal.span {(p : ℤ)}).primesOver (𝓞 (K⁺))).ncard = 1 := by
-      simpa [rationalPrimeIdeal] using ncard_primesOverPlus_at_p_eq_one (p := p) (K := K)
-    rw [← hcoe] at hncard
-    simpa using hncard
-  obtain ⟨PPlus, hPPlus⟩ := Finset.card_eq_one.mp hcard
-  rw [hPPlus, Finset.prod_singleton]
-  have hPPlus_mem : PPlus ∈ (Ideal.span {(p : ℤ)}).primesOver (𝓞 (K⁺)) := by
-    rw [← hcoe]
-    rw [hPPlus]
-    exact Finset.mem_singleton_self PPlus
-  haveI : PPlus.IsPrime := hPPlus_mem.1
-  haveI : PPlus.LiesOver (Ideal.span {(p : ℤ)}) := by
-    simpa [rationalPrimeIdeal] using hPPlus_mem.2
-  have habsNorm : Ideal.absNorm PPlus = p ^ (1 : ℕ) := by
-    rw [← primesOverPlus_inertiaDeg_eq_one_at_p (p := p) (K := K) PPlus]
-    · exact Ideal.absNorm_eq_pow_inertiaDeg' PPlus hp.out
-    · simpa [rationalPrimeIdeal] using hPPlus_mem
+  simp only [dedekindLocalFactor]
+  change Finset.prod (primesOverFinsetPlus (K := K) p)
+      (fun PPlus ↦ 1 - (Ideal.absNorm PPlus : ℂ) ^ (-s)) = 1 - (p : ℂ) ^ (-s)
+  have hfinset : primesOverFinsetPlus (K := K) p = {zetaPrimePlus p K} := by
+    ext PPlus
+    rw [mem_primesOverFinsetPlus_iff,
+      primesOverPlus_at_p_eq_singleton_zetaPrimePlus (p := p) (K := K)]
+    simp only [Set.mem_singleton_iff, Finset.mem_singleton]
+  rw [hfinset, Finset.prod_singleton]
+  have hzeta_mem := zetaPrimePlus_mem_primesOver_at_p (p := p) (K := K)
+  haveI : (zetaPrimePlus p K).IsPrime := hzeta_mem.1
+  haveI : (zetaPrimePlus p K).LiesOver (Ideal.span {(p : ℤ)}) := by
+    simpa [rationalPrimeIdeal] using hzeta_mem.2
+  have habsNorm : Ideal.absNorm (zetaPrimePlus p K) = p ^ (1 : ℕ) := by
+    rw [← zetaPrimePlus_inertiaDeg_eq_one_at_p (p := p) (K := K)]
+    exact Ideal.absNorm_eq_pow_inertiaDeg' (zetaPrimePlus p K) hp.out
   rw [habsNorm]
   push_cast
   rw [pow_one]

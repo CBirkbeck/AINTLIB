@@ -85,13 +85,13 @@ theorem logOf_artinHasseExpSeries (ell : ℕ) [Fact (Nat.Prime ell)] :
   have hE_deriv : d⁄dX ℚ E = E * d⁄dX ℚ L := by
     change d⁄dX ℚ (PowerSeries.subst L (PowerSeries.exp ℚ)) =
       PowerSeries.subst L (PowerSeries.exp ℚ) * d⁄dX ℚ L
-    rw [PowerSeries.derivative_subst ℚ hLsubst, PowerSeries.derivative_exp]
+    rw [PowerSeries.derivative_subst hLsubst, PowerSeries.derivative_exp]
   have hgeom :
       PowerSeries.subst a (d⁄dX ℚ (PowerSeries.log ℚ)) * E = 1 := by
     have h := FiniteLogFormal.subst_deriv_log_mul_one_add (A := ℚ) ha
     simpa [a] using h
   refine PowerSeries.derivative.ext ?_ ?_
-  · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ℚ ha]
+  · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ha]
     have hda : d⁄dX ℚ a = d⁄dX ℚ E := by
       simp [a]
     rw [hda, hE_deriv]

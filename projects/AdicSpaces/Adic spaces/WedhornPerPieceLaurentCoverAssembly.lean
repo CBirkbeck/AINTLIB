@@ -181,9 +181,7 @@ theorem source_subset_finset_iUnion_via_per_piece_cover
     S ⊆ ⋃ i ∈ T_test, R i := by
   intro s hs
   obtain ⟨i, hi_mem, hsV⟩ := h_cover s hs
-  refine Set.mem_iUnion.mpr ⟨i, ?_⟩
-  refine Set.mem_iUnion.mpr ⟨hi_mem, ?_⟩
-  exact h_per_piece i hi_mem ⟨hs, hsV⟩
+  exact Set.mem_iUnion₂.mpr ⟨i, hi_mem, h_per_piece i hi_mem ⟨hs, hsV⟩⟩
 
 omit [IsTopologicalRing A] in
 /-- **Wedhorn-specific Laurent-piece per-piece cover assembly** (T057
@@ -256,8 +254,7 @@ theorem MultiPieceLaurentCover_source_iUnion_assembly
   refine rationalOpen_subset_iUnion_laurentPiece_via_per_piece
     Source T_test R h_per_piece ?_
   intro w hw_source
-  have hw_spa : w ∈ Spa A A⁺ := h_source_subset_spa hw_source
-  obtain ⟨τ, hτ_mem, hw_in_piece, _⟩ := h_refinement w hw_spa
+  obtain ⟨τ, hτ_mem, hw_in_piece, _⟩ := h_refinement w (h_source_subset_spa hw_source)
   exact ⟨τ, hτ_mem, hw_in_piece⟩
 
 /-- **Lemma 8.33 multi-piece cover-acyclicity collapse — structured
@@ -382,9 +379,7 @@ theorem laurentCoverPresheafLemma833Assembly_via_iUnion_subset
     LaurentCoverPresheafLemma833Assembly (σ := σ) T_test R R_target := by
   refine laurentCoverPresheafLemma833Assembly_via_per_piece_target_subset ?_
   intro τ hτ_mem w hw
-  apply h_subset
-  refine Set.mem_iUnion.mpr ⟨τ, ?_⟩
-  exact Set.mem_iUnion.mpr ⟨hτ_mem, hw⟩
+  exact h_subset (Set.mem_iUnion₂.mpr ⟨τ, hτ_mem, hw⟩)
 
 omit [IsTopologicalRing A] in
 /-- **Empty-cover discharge** (T058 Layer 1 vacuous case).
@@ -411,8 +406,7 @@ theorem laurentCoverPresheafLemma833Assembly_singleton
       (σ := σ) ({τ_0} : Finset A) R R_target := by
   refine laurentCoverPresheafLemma833Assembly_via_per_piece_target_subset ?_
   intro τ hτ_mem
-  rw [Finset.mem_singleton] at hτ_mem
-  subst hτ_mem
+  obtain rfl := Finset.mem_singleton.mp hτ_mem
   exact h_subset
 
 omit [IsTopologicalRing A] in
@@ -462,11 +456,10 @@ theorem laurentCoverPresheafLemma833Assembly_via_sigma_rescaled_image
   intro w hw_spa hw_cover hw_per_piece
   obtain ⟨τ_0, hτ_0_mem, hw_V_τ_0⟩ := hw_cover
   -- Per-piece data at τ_0 (the cover-winning piece).
-  have hw_R_τ_0 := hw_per_piece τ_0 hτ_0_mem hw_V_τ_0
+  obtain ⟨_, h_per_τ_0_D_s, h_D_s_ne⟩ := hw_per_piece τ_0 hτ_0_mem hw_V_τ_0
   obtain ⟨_, h_per_one_τ_0, _⟩ := hw_V_τ_0
   have h_one_le_τ_0 : w.vle (1 : A) (((σ⁻¹ : Aˣ) : A) * τ_0) :=
     h_per_one_τ_0 (1 : A) (Finset.mem_singleton.mpr rfl)
-  obtain ⟨_, h_per_τ_0_D_s, h_D_s_ne⟩ := hw_R_τ_0
   have h_τ_0_le_D_s : w.vle (((σ⁻¹ : Aˣ) : A) * τ_0) D_s :=
     h_per_τ_0_D_s _ (Finset.mem_singleton.mpr rfl)
   refine ⟨hw_spa, ?_, h_D_s_ne⟩
@@ -477,8 +470,7 @@ theorem laurentCoverPresheafLemma833Assembly_via_sigma_rescaled_image
       w ∈ rationalOpen ({(1 : A)} : Finset A)
         (((σ⁻¹ : Aˣ) : A) * τ')
   · -- w ∈ V_τ': per-piece data at τ' gives the bound directly.
-    have hw_R_τ' := hw_per_piece τ' hτ'_mem hτ'_in_V
-    exact hw_R_τ'.2.1 _ (Finset.mem_singleton.mpr rfl)
+    exact (hw_per_piece τ' hτ'_mem hτ'_in_V).2.1 _ (Finset.mem_singleton.mpr rfl)
   · -- w ∉ V_τ': split on `w.vle (σ⁻¹ * τ') 0`.
     by_cases h_τ'_zero : w.vle (((σ⁻¹ : Aˣ) : A) * τ') 0
     · -- Chain σ⁻¹ * τ' ≤ 0 ≤ D_s.
@@ -491,15 +483,13 @@ theorem laurentCoverPresheafLemma833Assembly_via_sigma_rescaled_image
         apply hτ'_in_V
         refine ⟨hw_spa, ?_, h_τ'_zero⟩
         intro t ht
-        rw [Finset.mem_singleton] at ht
-        subst ht
+        obtain rfl := Finset.mem_singleton.mp ht
         exact h
       -- By Spv totality, w.vle (σ⁻¹ * τ') 1; chain through τ_0.
       have h_τ'_le_one : w.vle (((σ⁻¹ : Aˣ) : A) * τ') (1 : A) :=
         (w.vle_total (1 : A)
           (((σ⁻¹ : Aˣ) : A) * τ')).resolve_left h_not_one_le
-      exact w.vle_trans (w.vle_trans h_τ'_le_one h_one_le_τ_0)
-        h_τ_0_le_D_s
+      exact w.vle_trans (w.vle_trans h_τ'_le_one h_one_le_τ_0) h_τ_0_le_D_s
 
 omit [IsTopologicalRing A] in
 /-- **`⋃`-form covering implies single-target covering under
@@ -546,10 +536,9 @@ theorem source_subset_target_via_lemma833_collapse
           w ∈ R τ) :
     Source ⊆ R_target := by
   intro w hw_source
-  have hw_spa : w ∈ Spa A A⁺ := h_source_subset_spa hw_source
-  exact h_lemma833 w hw_spa
+  exact h_lemma833 w (h_source_subset_spa hw_source)
     (h_source_in_pieces w hw_source)
-    (fun τ hτ_mem hw_in => h_per_piece_at_w w hw_source τ hτ_mem hw_in)
+    (h_per_piece_at_w w hw_source)
 
 omit [IsTopologicalRing A] in
 /-- **Per-piece subsets + Laurent cover + Lemma 8.33 collapse ⊢ single
@@ -605,25 +594,15 @@ theorem rationalOpen_global_subset_via_lemma833_assembly
         w ∈ rationalOpen ({(1 : A)} : Finset A) (((σ⁻¹ : Aˣ) : A) * τ)) :
     rationalOpen (insert f T_base) s ⊆ rationalOpen D_T D_s := by
   -- The source `R(insert f T_base, s)` is contained in `Spa A A⁺` via
-  -- `rationalOpen_subset_spa`.
-  have h_source_subset_spa :
-      rationalOpen (insert f T_base) s ⊆ Spa A A⁺ :=
-    rationalOpen_subset_spa
-  -- At each `w ∈ Source` and each `τ ∈ T_test` with `w` in the Laurent
-  -- piece, the per-piece subset gives `w ∈ R τ`.
-  have h_per_piece_at_w :
-      ∀ w ∈ rationalOpen (insert f T_base) s,
-        ∀ τ ∈ T_test,
-          w ∈ rationalOpen ({(1 : A)} : Finset A) (((σ⁻¹ : Aˣ) : A) * τ) →
-          w ∈ rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s := by
-    intro w hw_source τ hτ_mem hw_in_piece
-    exact h_per_piece_subset τ hτ_mem ⟨hw_source, hw_in_piece⟩
-  -- Apply the Lemma 8.33 collapse.
+  -- `rationalOpen_subset_spa`; at each `w` in the Laurent piece, the
+  -- per-piece subset gives `w ∈ R τ`. Apply the Lemma 8.33 collapse.
   exact source_subset_target_via_lemma833_collapse
     (rationalOpen (insert f T_base) s)
     (fun τ => rationalOpen ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) D_s)
-    (rationalOpen D_T D_s) h_lemma833 h_source_subset_spa
-    h_cover h_per_piece_at_w
+    (rationalOpen D_T D_s) h_lemma833 rationalOpen_subset_spa
+    h_cover
+    (fun _ hw_source τ hτ_mem hw_in_piece =>
+      h_per_piece_subset τ hτ_mem ⟨hw_source, hw_in_piece⟩)
 
 omit [IsTopologicalRing A] in
 /-- **Unconditional global subset for the σ-rescaled image target**
@@ -703,8 +682,7 @@ theorem rationalOpen_global_subset_via_t054_refinement
   refine rationalOpen_global_subset_via_sigma_rescaled_image T_test T_base
     s D_s f h_per_piece_subset ?_
   intro w hw_source
-  have hw_spa : w ∈ Spa A A⁺ := rationalOpen_subset_spa hw_source
-  obtain ⟨τ, hτ_mem, hw_piece, _⟩ := h_refinement w hw_spa
+  obtain ⟨τ, hτ_mem, hw_piece, _⟩ := h_refinement w (rationalOpen_subset_spa hw_source)
   exact ⟨τ, hτ_mem, hw_piece⟩
 
 end ValuationSpectrum

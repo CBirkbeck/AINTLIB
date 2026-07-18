@@ -51,8 +51,6 @@ open NumberField
 
 namespace BernoulliRegular
 
-set_option linter.unusedSectionVars false
-
 section RankInequality
 
 variable (p : ℕ) [Fact p.Prime] (K : Type u) [Field K] [NumberField K]
@@ -87,8 +85,7 @@ theorem reflection_gal_card_le
     (χ : MulChar (ZMod p)ˣ ℚ) {n : ℕ}
     (hle : Nat.card (R.kummerComponent (characterTwistDual p χ) : Type _) ≤ n) :
     Nat.card (R.galComponent χ : Type _) ≤ n := by
-  rw [R.card_gal_eq_card_kummer_dual_apply χ]
-  exact hle
+  rwa [R.card_gal_eq_card_kummer_dual_apply χ]
 
 /-- **T042b**: the reflection rank inequality with vanishing inserted.
 
@@ -106,7 +103,7 @@ theorem reflection_gal_card_le_one_of_oddVanishing
     (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     (Br : KummerToUnitQuotientInclusion (p := p) (K := K) R S)
     {χ : MulChar (ZMod p)ˣ ℚ}
-    (hχ_odd_dual : IsOddDeltaCharacter (p := p) (characterTwistDual p χ))
+    (hχ_odd_dual : IsOddUnitCharacter (p := p) (characterTwistDual p χ))
     (hχ_ne_dual : characterTwistDual p χ ≠ V.distinguishedCharacter) :
     Nat.card (R.galComponent χ : Type _) ≤ 1 := by
   have hunit_one :
@@ -115,8 +112,7 @@ theorem reflection_gal_card_le_one_of_oddVanishing
   have hkummer_le :
       Nat.card (R.kummerComponent (characterTwistDual p χ) : Type _) ≤ 1 := by
     have := Br.kummer_card_le_unit_card (characterTwistDual p χ)
-    rw [hunit_one] at this
-    exact this
+    rwa [hunit_one] at this
   exact reflection_gal_card_le (p := p) (K := K) R χ hkummer_le
 
 end RankInequality

@@ -44,11 +44,11 @@ theorem ne_zero_of_unit_completion
       (UniformSpace.Completion.coe' : R → _) F (nhds xinv) :=
     Filter.tendsto_comap
   have h1 : Filter.Tendsto
-      (fun y : R => (UniformSpace.Completion.coe' (α * y) :
+      (fun y : R ↦ (UniformSpace.Completion.coe' (α * y) :
         UniformSpace.Completion R))
       F (nhds (1 : UniformSpace.Completion R)) := by
     have h_mul : Filter.Tendsto
-        (fun y : R => (UniformSpace.Completion.coeRingHom α :
+        (fun y : R ↦ (UniformSpace.Completion.coeRingHom α :
           UniformSpace.Completion R) *
           UniformSpace.Completion.coe' y)
         F (nhds ((UniformSpace.Completion.coeRingHom α :
@@ -62,7 +62,7 @@ theorem ne_zero_of_unit_completion
     change UniformSpace.Completion.coe' (α * y) =
       UniformSpace.Completion.coe' α * UniformSpace.Completion.coe' y
     exact UniformSpace.Completion.coe_mul α y
-  have hα_mul : Filter.Tendsto (fun y : R => α * y) F (nhds (1 : R)) := by
+  have hα_mul : Filter.Tendsto (fun y : R ↦ α * y) F (nhds (1 : R)) := by
     have h_nhds : (nhds (1 : R)) = Filter.comap
         (UniformSpace.Completion.coe' : R → _) (nhds (1 : UniformSpace.Completion R)) := by
       have hcoe1 : (UniformSpace.Completion.coe' (1 : R) :
@@ -73,11 +73,11 @@ theorem ne_zero_of_unit_completion
       exact UniformSpace.Completion.isDenseInducing_coe.nhds_eq_comap 1
     rw [h_nhds]
     exact Filter.tendsto_comap_iff.mpr h1
-  have hv_tendsto : Filter.Tendsto (fun y : R => v (α * y)) F (nhds (1 : Γ₀)) := by
+  have hv_tendsto : Filter.Tendsto (fun y : R ↦ v (α * y)) F (nhds (1 : Γ₀)) := by
     have ht : Filter.Tendsto v (nhds (1 : R)) (nhds (v 1)) := hv_cont
     rw [v.map_one] at ht
     exact ht.comp hα_mul
-  have hv_const : (fun y : R => v (α * y)) = fun _ => (0 : Γ₀) := by
+  have hv_const : (fun y : R ↦ v (α * y)) = fun _ ↦ (0 : Γ₀) := by
     funext y
     rw [v.map_mul, hvα, zero_mul]
   rw [hv_const] at hv_tendsto

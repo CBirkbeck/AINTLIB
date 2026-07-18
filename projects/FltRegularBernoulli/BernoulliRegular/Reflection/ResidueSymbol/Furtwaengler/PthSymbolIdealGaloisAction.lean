@@ -55,8 +55,8 @@ theorem normalizedFactors_cyclotomicGaloisConjugate
     obtain ⟨Q, hQ_mem, hQ_eq⟩ := hP
     have hQ_prime : Prime Q := prime_of_normalized_factor Q hQ_mem
     have hQ_ne : Q ≠ ⊥ := hQ_prime.ne_zero
-    haveI hQ_isPrime : Q.IsPrime := (Ideal.prime_iff_isPrime hQ_ne).mp hQ_prime
-    haveI : (cyclotomicGaloisConjugate (p := p) (K := K) a Q).IsPrime :=
+    have hQ_isPrime : Q.IsPrime := (Ideal.prime_iff_isPrime hQ_ne).mp hQ_prime
+    have : (cyclotomicGaloisConjugate (p := p) (K := K) a Q).IsPrime :=
       cyclotomicGaloisConjugate_isPrime a Q
     have hP_ne_bot : P ≠ ⊥ := by
       rw [← hQ_eq]
@@ -68,7 +68,7 @@ theorem normalizedFactors_cyclotomicGaloisConjugate
     exact this.irreducible
   -- Step 2: each P in normalizedFactors σI is irreducible.
   have h_nf_irreducible : ∀ P ∈ normalizedFactors σI, Irreducible P :=
-    fun P hP => irreducible_of_normalized_factor P hP
+    fun P hP ↦ irreducible_of_normalized_factor P hP
   -- Step 3: m.prod ~ᵤ σI (in fact equal since ideals).
   have h_m_prod : m.prod = σI := by
     rw [hm_def, hσI_def]
@@ -129,38 +129,33 @@ theorem pthSymbolAtIdeal_canonical_galoisAction
       (a : ZMod p) *
         pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
   classical
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   -- Use the multiset bijection.
   rw [← normalizedFactors_cyclotomicGaloisConjugate a hI, Multiset.map_map]
   -- Show pointwise equality of the mapped functions.
-  rw [show ((normalizedFactors I).map
-        ((fun P => pthSymbolAtPrime_canonical (p := p) (K := K)
+  -- Pointwise: the symbol of `σ_a α` at `σ_a Q` is `a` times the symbol of `α` at `Q`.
+  have hmap : (normalizedFactors I).map
+        ((fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)
             (cyclotomicRingOfIntegersEquiv (p := p) K a α) P) ∘
-          (cyclotomicGaloisConjugate (p := p) (K := K) a))).sum =
-      ((normalizedFactors I).map
-        (fun P => (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α P)).sum
-    from ?_]
-  · rw [← Multiset.sum_map_mul_left]
-  · -- Pointwise equality.
-    apply congrArg Multiset.sum
-    apply Multiset.map_congr rfl
-    intro Q hQ
+          (cyclotomicGaloisConjugate (p := p) (K := K) a)) =
+      (normalizedFactors I).map
+        (fun P ↦ (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α P) := by
+    refine Multiset.map_congr rfl fun Q hQ ↦ ?_
     change pthSymbolAtPrime_canonical (p := p) (K := K)
         (cyclotomicRingOfIntegersEquiv (p := p) K a α)
         (cyclotomicGaloisConjugate (p := p) (K := K) a Q) =
       (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α Q
     have hQ_prime_orig : Prime Q := prime_of_normalized_factor Q hQ
     have hQ_ne : Q ≠ ⊥ := hQ_prime_orig.ne_zero
-    haveI : Q.IsPrime := (Ideal.prime_iff_isPrime hQ_ne).mp hQ_prime_orig
-    haveI : Q.IsMaximal := hmax Q hQ
-    haveI : NeZero Q := ⟨hQ_ne⟩
-    have h_card_eq : Nat.card (𝓞 K ⧸ Q) = Fintype.card (𝓞 K ⧸ Q) :=
-      Nat.card_eq_fintype_card
+    have : Q.IsPrime := (Ideal.prime_iff_isPrime hQ_ne).mp hQ_prime_orig
+    have : Q.IsMaximal := hmax Q hQ
+    have : NeZero Q := ⟨hQ_ne⟩
     have hdiv_Q : p ∣ Fintype.card (𝓞 K ⧸ Q) - 1 := by
-      rw [← h_card_eq]; exact hdiv Q hQ
+      rw [← Nat.card_eq_fintype_card]; exact hdiv Q hQ
     exact pthSymbolAtPrime_canonical_galoisAction
       (p := p) (K := K) a α hQ_ne ‹Q.IsMaximal›
       (hα Q hQ) (hp_in Q hQ) hdiv_Q
+  rw [hmap, ← Multiset.sum_map_mul_left]
 
 /-! ### Principal-ideal version -/
 
@@ -169,7 +164,7 @@ theorem cyclotomicGaloisConjugate_span_singleton
     (a : CyclotomicUnitDelta p) (β : 𝓞 K) :
     cyclotomicGaloisConjugate (p := p) (K := K) a (Ideal.span ({β} : Set (𝓞 K))) =
       Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a β} : Set (𝓞 K)) := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   rw [Ideal.map_span]
   congr 1
   ext x
@@ -196,7 +191,7 @@ theorem pthSymbolAtPrincipal_canonical_galoisAction
         (cyclotomicRingOfIntegersEquiv (p := p) K a β) =
       (a : ZMod p) *
         pthSymbolAtPrincipal_canonical (p := p) (K := K) α β := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   rw [← cyclotomicGaloisConjugate_span_singleton]
   apply pthSymbolAtIdeal_canonical_galoisAction a α
   · -- I ≠ ⊥.
@@ -227,8 +222,8 @@ theorem pthSymbolAtPrime_canonical_galoisAction_unconditional
       pthSymbolAtPrime_canonical_eq_zero_of_eq_bot, mul_zero]
   by_cases hmax : q.IsMaximal
   · -- q is maximal.
-    haveI : q.IsMaximal := hmax
-    haveI : (cyclotomicGaloisConjugate (p := p) (K := K) a q).IsMaximal :=
+    have : q.IsMaximal := hmax
+    have : (cyclotomicGaloisConjugate (p := p) (K := K) a q).IsMaximal :=
       cyclotomicGaloisConjugate_isMaximal a q
     have hbot_σ : cyclotomicGaloisConjugate (p := p) (K := K) a q ≠ ⊥ :=
       cyclotomicGaloisConjugate_ne_bot a hbot
@@ -245,8 +240,8 @@ theorem pthSymbolAtPrime_canonical_galoisAction_unconditional
           cyclotomicGaloisConjugate (p := p) (K := K) a q :=
         (notMem_cyclotomicGaloisConjugate_iff a).mpr hα
       -- Need Fintype to talk about cardinality.
-      haveI : NeZero q := ⟨hbot⟩
-      haveI : NeZero (cyclotomicGaloisConjugate (p := p) (K := K) a q) :=
+      have : NeZero q := ⟨hbot⟩
+      have : NeZero (cyclotomicGaloisConjugate (p := p) (K := K) a q) :=
         ⟨hbot_σ⟩
       -- Cardinality preserved.
       have h_card_eq :
@@ -319,25 +314,17 @@ theorem pthSymbolAtIdeal_canonical_galoisAction_unconditional
       (a : ZMod p) *
         pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
   classical
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [← normalizedFactors_cyclotomicGaloisConjugate a hI, Multiset.map_map]
-  rw [show ((normalizedFactors I).map
-        ((fun P => pthSymbolAtPrime_canonical (p := p) (K := K)
+  have hmap : (normalizedFactors I).map
+        ((fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)
             (cyclotomicRingOfIntegersEquiv (p := p) K a α) P) ∘
-          (cyclotomicGaloisConjugate (p := p) (K := K) a))).sum =
-      ((normalizedFactors I).map
-        (fun P => (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α P)).sum
-    from ?_]
-  · rw [← Multiset.sum_map_mul_left]
-  · apply congrArg Multiset.sum
-    apply Multiset.map_congr rfl
-    intro Q _
-    change pthSymbolAtPrime_canonical (p := p) (K := K)
-        (cyclotomicRingOfIntegersEquiv (p := p) K a α)
-        (cyclotomicGaloisConjugate (p := p) (K := K) a Q) =
-      (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α Q
-    exact pthSymbolAtPrime_canonical_galoisAction_unconditional
-      (p := p) (K := K) a α Q
+          (cyclotomicGaloisConjugate (p := p) (K := K) a)) =
+      (normalizedFactors I).map
+        (fun P ↦ (a : ZMod p) * pthSymbolAtPrime_canonical (p := p) (K := K) α P) :=
+    Multiset.map_congr rfl fun Q _ ↦
+      pthSymbolAtPrime_canonical_galoisAction_unconditional (p := p) (K := K) a α Q
+  rw [hmap, ← Multiset.sum_map_mul_left]
 
 /-- **Unconditional Galois weight 1**: when `σ_a α = α`, the residue-symbol's
 ideal slot transforms by the cyclotomic character `(a : ZMod p)`,

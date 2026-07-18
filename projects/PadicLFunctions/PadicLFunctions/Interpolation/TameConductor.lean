@@ -61,9 +61,8 @@ lemma charTwist_muA_mahler_identity {ζ : integerRing K} {N : ℕ}
     (substAffine (ζ ^ c - 1) (tendsto_pow_pow_sub_one hζ c)) h4
   simp only [map_mul, map_sub, map_pow, map_one, map_natCast,
     substAffine_one_add_X] at h5
-  rw [show (1 + (ζ ^ c - 1) : integerRing K) = ζ ^ c by ring, mul_pow, ← map_pow,
+  rwa [show (1 + (ζ ^ c - 1) : integerRing K) = ζ ^ c by ring, mul_pow, ← map_pow,
     ← pow_mul] at h5
-  exact h5
 
 omit [CharZero K] in
 /-- The `substAffine (ζ^c−1)`-image of the base-changed geometric sum:
@@ -101,10 +100,7 @@ lemma charTwist_muA_exp_identity {ζ : integerRing K} {N : ℕ}
     PowerSeries.HasSubst.of_constantCoeff_zero' (by simp)
   have hX : (PowerSeries.substAlgHom hg) (PowerSeries.X : PowerSeries K)
       = PowerSeries.exp K - 1 := by
-    rw [show ⇑(PowerSeries.substAlgHom hg)
-        = PowerSeries.subst (PowerSeries.exp K - 1) from
-      PowerSeries.coe_substAlgHom hg]
-    exact PowerSeries.subst_X hg
+    rw [PowerSeries.coe_substAlgHom hg]; exact PowerSeries.subst_X hg
   have hK := congrArg (PowerSeries.map (integerRing K).subtype)
     (charTwist_muA_mahler_identity hζ c hpa)
   rw [substAffine_map_geomSum hζ c a] at hK
@@ -282,8 +278,7 @@ lemma charTwist_muA_exp_identity_cleared {ζ : integerRing K} {N : ℕ}
   have h := congrArg
     (· * ∑ j ∈ Finset.range (p ^ N), B ^ j) (charTwist_muA_exp_identity hζ c hpa)
   rw [← hB, mul_right_comm, htel] at h
-  simp only [hBj] at h
-  exact h
+  simpa only [hBj] using h
 
 /-- T509 (v-e) step 2: the `χ̄⁻¹`-weighted sum of the telescoped identities,
 with the inner character sums collapsed by the Gauss identity:
@@ -542,24 +537,22 @@ section fieldBridge
 
 open PowerSeries
 
-/-- `∂ = (1+t)·d/dt` over the coefficient field `K` (the `delQ`-analogue;
-to be merged with `MeasureR.del`/`PadicMeasure.delQ` at cleanup). -/
+/-- `∂ = (1+t)·d/dt` over the coefficient field `K`: the `K`-specialisation of the
+generic `PadicLFunctions.del`. -/
 noncomputable def delField (G : PowerSeries K) : PowerSeries K :=
-  (1 + X) * PowerSeries.derivativeFun G
+  PadicLFunctions.del G
 
 omit [CompleteSpace K] [CharZero K] in
 lemma map_subtype_derivativeFun (F : PowerSeries (integerRing K)) :
     PowerSeries.map (integerRing K).subtype (PowerSeries.derivativeFun F)
-      = PowerSeries.derivativeFun (PowerSeries.map (integerRing K).subtype F) := by
-  ext n
-  simp [coeff_derivativeFun]
+      = PowerSeries.derivativeFun (PowerSeries.map (integerRing K).subtype F) :=
+  PadicLFunctions.map_derivativeFun (integerRing K).subtype F
 
 omit [CompleteSpace K] [CharZero K] in
 lemma map_subtype_del (F : PowerSeries (integerRing K)) :
     PowerSeries.map (integerRing K).subtype (del K F)
-      = delField (PowerSeries.map (integerRing K).subtype F) := by
-  rw [del, delField, map_mul, map_add, map_one, PowerSeries.map_X,
-    map_subtype_derivativeFun]
+      = delField (PowerSeries.map (integerRing K).subtype F) :=
+  PadicLFunctions.map_del (integerRing K).subtype F
 
 omit [CompleteSpace K] [CharZero K] in
 lemma map_subtype_del_iterate (j : ℕ) (F : PowerSeries (integerRing K)) :
@@ -588,9 +581,9 @@ lemma derivativeFun_subst_exp_K (F : PowerSeries K) :
   calc PowerSeries.derivativeFun (F.subst (exp K - 1))
       = d⁄dX K (F.subst (exp K - 1)) := rfl
     _ = (d⁄dX K F).subst (exp K - 1) * d⁄dX K (exp K - 1) :=
-        derivative_subst K hg
+        derivative_subst hg
     _ = (delField F).subst (exp K - 1) := by
-        rw [hder, delField, subst_mul hg, subst_add hg, subst_X hg, hone]
+        rw [hder, delField, PadicLFunctions.del_def, subst_mul hg, subst_add hg, subst_X hg, hone]
         ring_nf
         rfl
 
@@ -614,7 +607,8 @@ lemma constantCoeff_iterate_derivativeFun_K (k : ℕ) (G : PowerSeries K) :
   induction k generalizing G with
   | zero => simp [PowerSeries.coeff_zero_eq_constantCoeff]
   | succ k ih =>
-    rw [Function.iterate_succ_apply, ih, coeff_derivativeFun, Nat.factorial_succ]
+    rw [Function.iterate_succ_apply, ih,
+      show G.derivativeFun = d⁄dX K G from rfl, coeff_derivative, Nat.factorial_succ]
     push_cast
     ring
 
@@ -627,7 +621,9 @@ lemma constantCoeff_iterate_delField (k : ℕ) (F : PowerSeries K) :
   | zero => simp [constantCoeff_subst_exp_K, PowerSeries.coeff_zero_eq_constantCoeff]
   | succ k ih =>
     rw [Function.iterate_succ_apply, ih (delField F), ← derivativeFun_subst_exp_K,
-      coeff_derivativeFun, Nat.factorial_succ]
+      show PowerSeries.derivativeFun (F.subst (exp K - 1))
+        = d⁄dX K (F.subst (exp K - 1)) from rfl,
+      coeff_derivative, Nat.factorial_succ]
     push_cast
     ring
 
@@ -789,8 +785,8 @@ theorem twist_muA_moments {n : ℕ} (hn : 1 ≤ n)
             (twist p K χ.toContinuousMapZp
               (baseChange p K (PadicMeasure.muA p a))))).subst
             (PowerSeries.exp K - 1)) := by
-    rw [apply_powCM]
-    rw [show ((PowerSeries.constantCoeff ((del K)^[k] (mahlerTransform p K
+    rw [apply_powCM,
+      show ((PowerSeries.constantCoeff ((del K)^[k] (mahlerTransform p K
           (twist p K χ.toContinuousMapZp (baseChange p K
             (PadicMeasure.muA p a))))) : integerRing K) : K)
         = PowerSeries.constantCoeff (PowerSeries.map (integerRing K).subtype
@@ -798,8 +794,8 @@ theorem twist_muA_moments {n : ℕ} (hn : 1 ≤ n)
               (baseChange p K (PadicMeasure.muA p a)))))) from by
       rw [← PowerSeries.coeff_zero_eq_constantCoeff_apply,
         ← PowerSeries.coeff_zero_eq_constantCoeff_apply, PowerSeries.coeff_map]
-      rfl]
-    rw [map_subtype_del_iterate, constantCoeff_iterate_delField]
+      rfl,
+      map_subtype_del_iterate, constantCoeff_iterate_delField]
   -- the `(k+1)`-st coefficient of FINAL-10b
   have h10b := congrArg (PowerSeries.coeff (k + 1))
     (X_mul_sum_char_inv_subst hn hχ hζ hζK hpa)

@@ -43,6 +43,9 @@ namespace BernoulliRegular
 
 namespace FLT37
 
+/-- `2` is invertible mod `37`; used to divide the doubled symmetrised classes. -/
+private theorem two_ne_zero_zmod37 : (2 : ZMod 37) ≠ 0 := by decide
+
 variable {K : Type} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
   [hp37 : Fact (Nat.Prime 37)] [NumberField.IsCMField K]
 
@@ -86,19 +89,15 @@ omit [NumberField K] [IsCyclotomicExtension {37} ℚ K] [IsCMField K] in
 its mod-37 free-part class vanishes. -/
 theorem realUnitToFreePartModP_neg_one :
     realUnitToFreePartModP (K := K) (Additive.ofMul (-1 : (𝓞 K⁺)ˣ)) = 0 := by
-  have h2ne : (2 : ZMod 37) ≠ 0 := by
-    rw [show (2 : ZMod 37) = ((2 : ℕ) : ZMod 37) from by push_cast; ring,
-      show (0 : ZMod 37) = ((0 : ℕ) : ZMod 37) from by push_cast; ring, Ne,
-      ZMod.natCast_eq_natCast_iff]
-    decide
-  have h2 : (2 : ℕ) • realUnitToFreePartModP (K := K) (Additive.ofMul (-1 : (𝓞 K⁺)ˣ)) = 0 := by
+  have h2 : (2 : ℕ) •
+      realUnitToFreePartModP (K := K) (Additive.ofMul (-1 : (𝓞 K⁺)ˣ)) = 0 := by
     rw [← map_nsmul, ← ofMul_pow, neg_one_sq, ofMul_one, map_zero]
   have h2' : (2 : ZMod 37) •
       realUnitToFreePartModP (K := K) (Additive.ofMul (-1 : (𝓞 K⁺)ˣ)) = 0 := by
     rw [show (2 : ZMod 37) = ((2 : ℕ) : ZMod 37) from by push_cast; ring,
       Nat.cast_smul_eq_nsmul]
     exact h2
-  exact (smul_eq_zero.mp h2').resolve_left h2ne
+  exact (smul_eq_zero.mp h2').resolve_left two_ne_zero_zmod37
 
 /-- **φ of a `CPlusExponentProduct` is the integer combination of the generator images.**
 The sign factor `(-1)^s` dies (φ kills `-1`); each `CPlusGenerator_a ^ (e a)` contributes
@@ -109,10 +108,10 @@ theorem realUnitToFreePartModP_CPlusExponentProduct (s : ℤ)
         (Additive.ofMul (CPlusExponentProduct (p := 37) (K := K) (by norm_num) s e)) =
       ∑ a : Fin ((37 - 3) / 2), e a • realUnitToFreePartModP (K := K)
         (Additive.ofMul (CPlusGenerator (p := 37) (K := K) (by norm_num) a)) := by
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   rw [ofMul_mul, map_add, ofMul_zpow, map_zsmul, realUnitToFreePartModP_neg_one,
     zsmul_zero, zero_add, ofMul_prod, map_sum]
-  refine Finset.sum_congr rfl (fun a _ => ?_)
+  refine Finset.sum_congr rfl (fun a _ ↦ ?_)
   rw [ofMul_zpow, map_zsmul]
 
 /-- **φ maps `C⁺` into the span of the generator images.** Every `C⁺` element is a
@@ -120,14 +119,14 @@ theorem realUnitToFreePartModP_CPlusExponentProduct (s : ℤ)
 theorem realUnitToFreePartModP_mem_span_of_mem_CPlus (u : (𝓞 K⁺)ˣ)
     (hu : u ∈ CPlus (p := 37) (K := K) (by norm_num)) :
     realUnitToFreePartModP (K := K) (Additive.ofMul u) ∈
-      Submodule.span (ZMod 37) (Set.range (fun a : Fin ((37 - 3) / 2) =>
+      Submodule.span (ZMod 37) (Set.range (fun a : Fin ((37 - 3) / 2) ↦
         realUnitToFreePartModP (K := K)
           (Additive.ofMul (CPlusGenerator (p := 37) (K := K) (by norm_num) a)))) := by
   obtain ⟨s, e, hse⟩ :=
     exists_CPlusExponentProduct_of_mem_CPlus (p := 37) (K := K) (by norm_num) hu
   rw [← hse, realUnitToFreePartModP_CPlusExponentProduct]
   exact Submodule.sum_mem _
-    (fun a _ => zsmul_mem (Submodule.subset_span (Set.mem_range_self a)) (e a))
+    (fun a _ ↦ zsmul_mem (Submodule.subset_span (Set.mem_range_self a)) (e a))
 
 /-- **WF-814b (d) span transfer: the generator images span the mod-37 free part** (under the
 all-components-nonzero hypothesis). Each bare class `[pollaczekUnit_{2k+2}]` equals
@@ -137,22 +136,18 @@ theorem CPlusGenerator_image_span_eq_top
     (h_all : ∀ i : ℕ, Even i → 2 ≤ i → i ≤ 34 →
       cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K i))) ≠ 0) :
-    Submodule.span (ZMod 37) (Set.range (fun a : Fin ((37 - 3) / 2) =>
+    Submodule.span (ZMod 37) (Set.range (fun a : Fin ((37 - 3) / 2) ↦
       realUnitToFreePartModP (K := K)
         (Additive.ofMul (CPlusGenerator (p := 37) (K := K) (by norm_num) a)))) = ⊤ := by
-  have h2ne : (2 : ZMod 37) ≠ 0 := by
-    rw [show (2 : ZMod 37) = ((2 : ℕ) : ZMod 37) from by push_cast; ring,
-      show (0 : ZMod 37) = ((0 : ℕ) : ZMod 37) from by push_cast; ring, Ne,
-      ZMod.natCast_eq_natCast_iff]
-    decide
   apply le_antisymm le_top
   rw [← pollaczekUnit_image_span_eq_top (K := K) h_all]
   refine Submodule.span_le.mpr ?_
   rintro _ ⟨k, rfl⟩
-  simp only []
+  beta_reduce
   rw [← cyclotomicUnitToFreePartModPAdd_apply]
-  have hmem : Sinnott.pollaczekUnitPlusKplus 37 K (2 * (k : ℕ) + 2) (by norm_num) (by norm_num) ∈
-      CPlus (p := 37) (K := K) (by norm_num) := by
+  have hmem :
+      Sinnott.pollaczekUnitPlusKplus 37 K (2 * (k : ℕ) + 2) (by norm_num) (by norm_num) ∈
+        CPlus (p := 37) (K := K) (by norm_num) := by
     rw [← cyclotomicUnitIndexSubgroup_eq_CPlus (p := 37) (K := K) (by norm_num) (by norm_num)]
     exact Sinnott.pollaczekUnitPlusKplus_mem 37 K (2 * (k : ℕ) + 2) (by norm_num) (by norm_num)
   have hspan := realUnitToFreePartModP_mem_span_of_mem_CPlus
@@ -165,7 +160,7 @@ theorem CPlusGenerator_image_span_eq_top
   · exact Submodule.smul_mem _ _ hspan
   · rw [← Nat.cast_smul_eq_nsmul (ZMod 37), smul_smul,
       show ((2 : ℕ) : ZMod 37) = (2 : ZMod 37) from by push_cast; ring,
-      inv_mul_cancel₀ h2ne, one_smul]
+      inv_mul_cancel₀ two_ne_zero_zmod37, one_smul]
 
 /-- **WF-814b (d): the generator images are linearly independent** (under the
 all-components-nonzero hypothesis). They span a 17-dimensional space and there are exactly
@@ -174,7 +169,7 @@ theorem CPlusGenerator_image_linearIndependent
     (h_all : ∀ i : ℕ, Even i → 2 ≤ i → i ≤ 34 →
       cyclotomicUnitFreePartModPClass (p := 37) K
         (Additive.ofMul (cyclotomicUnitFreeClass K (pollaczekUnit 37 K i))) ≠ 0) :
-    LinearIndependent (ZMod 37) (fun a : Fin ((37 - 3) / 2) =>
+    LinearIndependent (ZMod 37) (fun a : Fin ((37 - 3) / 2) ↦
       realUnitToFreePartModP (K := K)
         (Additive.ofMul (CPlusGenerator (p := 37) (K := K) (by norm_num) a))) := by
   apply linearIndependent_of_top_le_span_of_card_eq_finrank
@@ -203,7 +198,7 @@ theorem flt37_CPlusGenerator_exponents_modP_zero
   rw [realUnitToFreePartModP_CPlusExponentProduct] at hφ0
   simp_rw [← Int.cast_smul_eq_zsmul (ZMod 37)] at hφ0
   exact Fintype.linearIndependent_iff.mp (CPlusGenerator_image_linearIndependent h_all)
-    (fun a => (e a : ZMod 37)) hφ0
+    (fun a ↦ (e a : ZMod 37)) hφ0
 
 /-- **WF-814b (d): `¬ 37 ∣ h⁺` from all even Pollaczek classes nonzero.** The generator
 exponent-vanishing condition gives `p`-saturation of `C⁺` in `E⁺`, hence `37 ∤ [E⁺ : C⁺]`,
@@ -219,7 +214,7 @@ theorem flt37_not_dvd_hPlus_of_pollaczekUnit_classes_ne_zero
       (by norm_num) (by norm_num) (by norm_num) (by norm_num)
   have hsat : pSaturated (CPlus (p := 37) (K := K) (by norm_num)) (EPlus (K := K)) 37 :=
     CPlus_pSaturated_of_generator_exponents_modP_zero (p := 37) (K := K) (by norm_num)
-      (by norm_num) (fun s e hpow => flt37_CPlusGenerator_exponents_modP_zero h_all s e hpow)
+      (by norm_num) (flt37_CPlusGenerator_exponents_modP_zero h_all)
   have hidx : ¬ (37 : ℕ) ∣
       (cyclotomicUnitIndexSubgroup (p := 37) (K := K) (by norm_num) (by norm_num)).index := by
     rw [cyclotomicUnitIndexSubgroup_eq_CPlus (p := 37) (K := K) (by norm_num) (by norm_num)]

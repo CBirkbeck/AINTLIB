@@ -363,7 +363,7 @@ theorem locNhd_eq_subtype_image
         (((locIdeal P T s) ^ n : Ideal (locSubring P T s)) :
           Set (locSubring P T s)) := by
   ext y
-  exact ⟨fun ⟨d, hd, heq⟩ => ⟨d, hd, heq⟩, fun ⟨d, hd, heq⟩ => ⟨d, hd, heq⟩⟩
+  exact ⟨fun ⟨d, hd, heq⟩ ↦ ⟨d, hd, heq⟩, fun ⟨d, hd, heq⟩ ↦ ⟨d, hd, heq⟩⟩
 
 /-! ## Artin-Rees / kernel-filtration support (T091)
 
@@ -474,7 +474,7 @@ theorem locIdeal_artinRees_ideal
       (locIdeal P T s) ^ n ⊓ K =
         (locIdeal P T s) ^ (n - k₀) * ((locIdeal P T s) ^ k₀ ⊓ K) := by
   obtain ⟨k₀, hk⟩ := locIdeal_artinRees P T s K
-  refine ⟨k₀, fun n hn => ?_⟩
+  refine ⟨k₀, fun n hn ↦ ?_⟩
   have h := hk n hn
   rwa [show (locIdeal P T s) ^ n • (⊤ : Submodule _ _) =
         ((locIdeal P T s) ^ n : Ideal _) from by
@@ -514,7 +514,7 @@ theorem locIdeal_pow_inter_le_pow_mul
     ∃ k₀ : ℕ, ∀ n : ℕ, k₀ ≤ n →
       (locIdeal P T s) ^ n ⊓ K ≤ (locIdeal P T s) ^ (n - k₀) * K := by
   obtain ⟨k₀, hk⟩ := locIdeal_artinRees_ideal P T s K
-  refine ⟨k₀, fun n hn => ?_⟩
+  refine ⟨k₀, fun n hn ↦ ?_⟩
   rw [hk n hn]
   exact Ideal.mul_mono_right inf_le_right
 
@@ -541,7 +541,7 @@ theorem locIdeal_pow_shift_inter_le_pow_mul
       (locIdeal P T s) ^ (n + k₀) ⊓ K ≤
         (locIdeal P T s) ^ n * K := by
   obtain ⟨k₀, hk⟩ := locIdeal_pow_inter_le_pow_mul P T s K
-  refine ⟨k₀, fun n => ?_⟩
+  refine ⟨k₀, fun n ↦ ?_⟩
   have hge : k₀ ≤ n + k₀ := Nat.le_add_left k₀ n
   have h := hk (n + k₀) hge
   rwa [show n + k₀ - k₀ = n by omega] at h
@@ -579,7 +579,7 @@ theorem locNhd_inter_subtype_image_kernel_le_pow_mul
           (((locIdeal P T s) ^ (n - k₀) * K : Ideal _) :
             Set (locSubring P T s)) := by
   obtain ⟨k₀, hk⟩ := locIdeal_pow_inter_le_pow_mul P T s K
-  refine ⟨k₀, fun n hn => ?_⟩
+  refine ⟨k₀, fun n hn ↦ ?_⟩
   exact Set.image_mono (hk n hn)
 
 /-! ## Radical-relation / denominator-lifting support (T092)
@@ -926,7 +926,7 @@ noncomputable def locSubringHom
     (h_divByS : ∀ t ∈ T, f (divByS t s_0) ∈ R) :
     locSubring P T s_0 →+* R :=
   (f.comp (locSubring P T s_0).subtype).codRestrict R
-    (fun x => locSubring_image_subset_of_generators P T f h_alg h_divByS x.property)
+    (fun x ↦ locSubring_image_subset_of_generators P T f h_alg h_divByS x.property)
 
 omit [IsTopologicalRing A] in
 /-- **`locSubringHom` value compatibility** (T093 reusable lemma).
@@ -1172,7 +1172,7 @@ theorem Jfull_artinRees [IsNoetherianRing A]
   haveI : IsNoetherianRing (Localization.Away s) :=
     IsLocalization.isNoetherianRing (Submonoid.powers s) _ inferInstance
   obtain ⟨k₀, hk⟩ := Ideal.exists_pow_inf_eq_pow_smul (Jfull P T s) K
-  refine ⟨k₀, fun n hn => ?_⟩
+  refine ⟨k₀, fun n hn ↦ ?_⟩
   have h := hk n hn
   rwa [show (Jfull P T s) ^ n • (⊤ : Submodule _ _) =
         ((Jfull P T s) ^ n : Ideal _) from by
@@ -1201,7 +1201,7 @@ theorem Jfull_pow_inter_le_pow_mul [IsNoetherianRing A]
     ∃ k₀ : ℕ, ∀ n : ℕ, k₀ ≤ n →
       (Jfull P T s) ^ n ⊓ K ≤ (Jfull P T s) ^ (n - k₀) * K := by
   obtain ⟨k₀, hk⟩ := Jfull_artinRees P T s K
-  refine ⟨k₀, fun n hn => ?_⟩
+  refine ⟨k₀, fun n hn ↦ ?_⟩
   rw [hk n hn]
   exact Ideal.mul_mono_right inf_le_right
 
@@ -1227,7 +1227,7 @@ theorem Jfull_pow_shift_inter_le_pow_mul [IsNoetherianRing A]
     ∃ k₀ : ℕ, ∀ n : ℕ,
       (Jfull P T s) ^ (n + k₀) ⊓ K ≤ (Jfull P T s) ^ n * K := by
   obtain ⟨k₀, hk⟩ := Jfull_pow_inter_le_pow_mul P T s K
-  refine ⟨k₀, fun n => ?_⟩
+  refine ⟨k₀, fun n ↦ ?_⟩
   have hge : k₀ ≤ n + k₀ := Nat.le_add_left k₀ n
   have h := hk (n + k₀) hge
   rwa [show n + k₀ - k₀ = n by omega] at h
@@ -1458,7 +1458,7 @@ theorem locNhd_algMap_mul_step_of_hopen
   obtain ⟨j, hj⟩ :=
     locNhd_leftMul P T s hopen
       (algebraMap A (Localization.Away s) a) i
-  exact ⟨j, fun y hy => hj hy⟩
+  exact ⟨j, fun y hy ↦ hj hy⟩
 
 /-- **Iterated multiplication-and-divByS-power shift** (T096 strong
 combined theorem).
@@ -1505,7 +1505,7 @@ theorem locNhd_algMap_mul_invS_pow_step_of_hopen
         locNhd P T s i := by
   obtain ⟨j, hj⟩ :=
     locNhd_algMap_mul_step_of_hopen P T s ⟨N, hN⟩ i a
-  refine ⟨j, fun y hy => ?_⟩
+  refine ⟨j, fun y hy ↦ ?_⟩
   have h_step : (divByS 1 s) ^ k * y ∈ locNhd P T s j :=
     locNhd_invS_pow_step_of_hopen P T s N hN j k hy
   have h_algMap :
@@ -1755,7 +1755,7 @@ theorem locNhd_radSourceFactor_mul_step_of_hopen
   -- composed with T095 one-step divByS shift.
   obtain ⟨j, hj⟩ :=
     locNhd_algMap_mul_step_of_hopen P T s_0 ⟨Nopen, hN⟩ i (s ^ N)
-  refine ⟨j, fun y hy => ?_⟩
+  refine ⟨j, fun y hy ↦ ?_⟩
   have h_step : divByS 1 s_0 * y ∈ locNhd P T s_0 j :=
     locNhd_invS_step_of_hopen P T s_0 Nopen hN j y hy
   have h_algMap :
@@ -2248,8 +2248,8 @@ theorem AddSubgroup.preimage_subset_sup_ker_iff_small_repr
     (f : G →+ H) (U : AddSubgroup G) (W : Set H) :
     (∀ a : G, f a ∈ W → a ∈ U ⊔ f.ker) ↔
       (∀ a : G, f a ∈ W → ∃ b ∈ U, f b = f a) := by
-  refine forall_congr' (fun a => ?_)
-  refine imp_congr_right (fun _ => ?_)
+  refine forall_congr' (fun a ↦ ?_)
+  refine imp_congr_right (fun _ ↦ ?_)
   exact AddSubgroup.mem_sup_ker_iff_exists_small_repr f U a
 
 omit [IsTopologicalRing A] in
@@ -2352,7 +2352,7 @@ theorem locNhd_pow_shift_inter_le_Jfull_pow_mul [IsNoetherianRing A]
         (K : Set (Localization.Away s))) ⊆
         ((Jfull P T s) ^ n * K : Ideal (Localization.Away s)) := by
   obtain ⟨k₀, hk⟩ := Jfull_pow_shift_inter_le_pow_mul P T s K
-  refine ⟨k₀, fun n y ⟨hy_locNhd, hy_K⟩ => ?_⟩
+  refine ⟨k₀, fun n y ⟨hy_locNhd, hy_K⟩ ↦ ?_⟩
   apply hk n
   refine ⟨?_, hy_K⟩
   exact locNhd_subset_Jfull_pow P T s (n + k₀) hy_locNhd

@@ -1,6 +1,13 @@
-import Mathlib.Data.Finset.Lattice.Fold
-import Mathlib.Data.Nat.Prime.Factorial
-import Mathlib.Tactic
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+module
+
+public import Mathlib.Data.Finset.Lattice.Fold
+public import Mathlib.Data.Nat.Prime.Factorial
+public import Mathlib.Tactic
 
 /-!
 # Divisor-closed finite multipliers
@@ -13,6 +20,7 @@ The ticket board suggests an lcm over `q - 1`.  This file uses the stronger
 factorial base `2 * M!`; it is larger but has the same formal role and gives
 simpler closure proofs.
 -/
+@[expose] public section
 
 open scoped Nat
 
@@ -27,11 +35,11 @@ def irregularBase (S : Finset ℕ) : ℕ :=
   2 * (irregularBaseBound S)!
 
 theorem even_irregularBase (S : Finset ℕ) : Even (irregularBase S) := by
-  unfold irregularBase
+  simp only [irregularBase]
   exact even_two.mul_right _
 
 theorem pos_irregularBase (S : Finset ℕ) : 0 < irregularBase S := by
-  unfold irregularBase
+  simp only [irregularBase]
   exact mul_pos (by norm_num) (Nat.factorial_pos _)
 
 theorem sub_one_dvd_irregularBase_of_mem
@@ -52,7 +60,7 @@ theorem sub_one_dvd_irregularBase_of_prime_dvd_irregularBase
     {S : Finset ℕ} {q : ℕ}
     (hq : q.Prime) (hqdvd : q ∣ irregularBase S) :
     q - 1 ∣ irregularBase S := by
-  unfold irregularBase at hqdvd ⊢
+  simp only [irregularBase] at hqdvd ⊢
   rcases hq.dvd_mul.mp hqdvd with hq_two | hq_fact
   · have hq_eq_two : q = 2 :=
       (Nat.prime_dvd_prime_iff_eq hq Nat.prime_two).mp hq_two

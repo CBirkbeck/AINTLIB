@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import LeanModularForms.ForMathlib.FDBoundary
-import LeanModularForms.ForMathlib.SingleCrossing
 import LeanModularForms.ForMathlib.SegmentFTC
+import LeanModularForms.ForMathlib.SingleCrossing
 
 /-!
 # Winding Weight Proofs for the Valence Formula
@@ -59,14 +59,17 @@ angle `pi/3` (at `t = 1/5`) through `pi/2` (at `t = 2/5`) to `2pi/3` (at `t = 3/
 def fdArcAngle (t : ℝ) : ℝ := Real.pi / 3 + (5 * t - 1) * (Real.pi / 6)
 
 theorem fdArcAngle_at_one_fifth : fdArcAngle (1/5) = Real.pi / 3 := by
-  unfold fdArcAngle; ring
+  unfold fdArcAngle
+  ring
 
 theorem fdArcAngle_at_three_fifths : fdArcAngle (3/5) = 2 * Real.pi / 3 := by
-  unfold fdArcAngle; ring
+  unfold fdArcAngle
+  ring
 
 @[fun_prop]
 theorem fdArcAngle_continuous : Continuous fdArcAngle := by
-  unfold fdArcAngle; fun_prop
+  unfold fdArcAngle
+  fun_prop
 
 private theorem cos_sin_sub_sq_eq_half_angle_sq (θ φ : ℝ) :
     (Real.cos θ - Real.cos φ) ^ 2 + (Real.sin θ - Real.sin φ) ^ 2 =
@@ -94,10 +97,14 @@ theorem fdBoundaryFun_arc_eq_exp (H : ℝ) (t : ℝ) (ht1 : 1/5 < t) (ht2 : t �
   have hh : ¬ t ≤ 1/5 := by linarith
   rcases le_or_gt t (2/5) with ht | ht
   · simp only [fdBoundaryFun, fdArcAngle, hh, ht, ite_false, ite_true]
-    congr 1; push_cast; ring
+    congr 1
+    push_cast
+    ring
   · simp only [fdBoundaryFun, fdArcAngle, hh, ht2, show ¬t ≤ 2/5 by linarith,
       ite_false, ite_true]
-    congr 1; push_cast; ring
+    congr 1
+    push_cast
+    ring
 
 /-- The arc distance to `I`:
 `norm(fdBoundaryFun H t - I) = 2|sin((fdArcAngle t - pi/2)/2)|` for `t` in `(1/5, 3/5]`. -/
@@ -177,8 +184,7 @@ theorem fdBoundaryFun_seg5_dist_I_lower (hH : 1 < H) (t : ℝ) (ht : 4/5 < t) :
 theorem fdBoundaryFun_seg1_dist_rho_lower (t : ℝ) (ht : t ≤ 1/5) :
     (1 : ℝ) ≤ ‖fdBoundaryFun H t - ellipticPointRho‖ := by
   have h1 : (fdBoundaryFun H t - ellipticPointRho).re = 1 := by
-    simp [ellipticPointRho, ellipticPointRho', fdBoundaryFun_seg1_re H t ht, sub_re]
-    norm_num
+    norm_num [ellipticPointRho, ellipticPointRho', fdBoundaryFun_seg1_re H t ht, sub_re]
   simpa [h1] using Complex.abs_re_le_norm (fdBoundaryFun H t - ellipticPointRho)
 
 /-- On segment 5, distance to `rho` is at least `H - sqrt(3)/2`. -/
@@ -194,9 +200,8 @@ theorem fdBoundaryFun_seg5_dist_rho_lower (hH : fdHeightValid H) (t : ℝ) (ht :
 theorem fdBoundaryFun_seg4_dist_rhoPlusOne_lower (t : ℝ) (ht3 : 3/5 < t) (ht4 : t ≤ 4/5) :
     (1 : ℝ) ≤ ‖fdBoundaryFun H t - ellipticPointRhoPlusOne‖ := by
   have h1 : (fdBoundaryFun H t - ellipticPointRhoPlusOne).re = -1 := by
-    simp [ellipticPointRhoPlusOne, ellipticPointRhoPlusOne',
+    norm_num [ellipticPointRhoPlusOne, ellipticPointRhoPlusOne',
       fdBoundaryFun_seg4_re H t ht3 ht4, sub_re]
-    norm_num
   simpa [h1, show |(-1 : ℝ)| = 1 by norm_num] using
     Complex.abs_re_le_norm (fdBoundaryFun H t - ellipticPointRhoPlusOne)
 
@@ -231,12 +236,12 @@ structure ArcFTCHyp {x y : ℂ} (γ : PiecewiseC1Path x y) (z₀ : ℂ)
   /-- Integrability on the left segment. -/
   hint_left : ∀ ε, 0 < ε → ε < threshold →
     IntervalIntegrable
-      (fun t => (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
+      (fun t ↦ (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
       volume 0 (t₀ - δ ε)
   /-- Integrability on the right segment. -/
   hint_right : ∀ ε, 0 < ε → ε < threshold →
     IntervalIntegrable
-      (fun t => (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
+      (fun t ↦ (γ.toPath.extend t - z₀)⁻¹ * deriv γ.toPath.extend t)
       volume (t₀ + δ ε) 1
   /-- `E(epsilon) -> L` as `epsilon -> 0+`. -/
   h_limit : Tendsto E (𝓝[>] 0) (𝓝 L)
@@ -264,11 +269,11 @@ def mkSingleCrossingData_atI {H : ℝ} (hH : 1 < H)
   threshold := threshold
   hthresh := hthresh
   hδ_pos := hδ_pos
-  hδ_small := fun ε hε hεt => by
+  hδ_small := fun ε hε hεt ↦ by
     have hδ := hδ_small ε hε hεt
     simp only [show (1 : ℝ) - 2/5 = 3/5 by norm_num]
     exact lt_min (by linarith) (by linarith)
-  h_far := fun ε hε hεt t ht hδt => by
+  h_far := fun ε hε hεt t ht hδt ↦ by
     have hε_half : ε < 1/2 := hεt.trans_le (hthresh_le.trans (min_le_left _ _))
     have hε_Hm1 : ε < H - 1 := hεt.trans_le (hthresh_le.trans (min_le_right _ _))
     change ε < ‖γ.toPath.extend t - I‖
@@ -283,7 +288,7 @@ def mkSingleCrossingData_atI {H : ℝ} (hH : 1 < H)
         · linarith [fdBoundaryFun_seg4_dist_I_lower H t ht2 ht3]
         · push Not at ht3
           linarith [fdBoundaryFun_seg5_dist_I_lower H hH t ht3]
-  h_near := fun ε hε hεt t hδt => by
+  h_near := fun ε hε hεt t hδt ↦ by
     have ht01 : t ∈ Icc (0 : ℝ) 1 := by
       have hδ := hδ_small ε hε hεt
       rw [abs_le] at hδt

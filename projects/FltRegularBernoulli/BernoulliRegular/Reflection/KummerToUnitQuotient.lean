@@ -209,7 +209,7 @@ per-character group injections.  In particular, any future construction
 of `KummerToUnitQuotientEmbeddingData` from component-extension data / unramifiedness
 automatically discharges `KummerToUnitQuotientInclusion` and hence
 `T042b`. -/
-def toInclusion
+theorem toInclusion
     (D : KummerToUnitQuotientEmbeddingData (p := p) (K := K) R S) :
     KummerToUnitQuotientInclusion (p := p) (K := K) R S where
   kummer_card_le_unit_card χ := D.kummer_card_le_unit_card χ
@@ -221,7 +221,7 @@ produce the `KummerToUnitQuotientInclusion` bridge.
 
 This is the named entry point that downstream files can use to build
 the bridge from the substantive mathematical content. -/
-def kummerToUnitQuotientInclusion_of_embeddingData
+theorem kummerToUnitQuotientInclusion_of_embeddingData
     {N : NondegenerateKummerPairing (p := p) (K := K) P}
     {T : KummerPairingTwistData (p := p) (K := K) N}
     {R : KummerPairingRawComparison (p := p) (K := K) N T}

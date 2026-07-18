@@ -116,16 +116,12 @@ theorem mul_apply (μ ν : PadicMeasure p ℤ_[p]) (f : C(ℤ_[p], ℤ_[p])) :
   set ρ : PadicMeasure p ℤ_[p] :=
     { toFun := fun f => μ (convInner p ν f)
       map_add' := fun f g => by
-        have h : convInner p ν (f + g) = convInner p ν f + convInner p ν g :=
-          ContinuousMap.ext fun x => by
-            simp [ContinuousMap.add_comp]
-        rw [h, map_add]
+        rw [← map_add]
+        exact congrArg μ (ContinuousMap.ext fun x => by simp [ContinuousMap.add_comp])
       map_smul' := fun c f => by
-        have h : convInner p ν (c • f) = c • convInner p ν f :=
-          ContinuousMap.ext fun x => by
-            simp [ContinuousMap.smul_comp]
-        rw [h, map_smul, RingHom.id_apply] } with hρ
-  suffices h : μ * ν = ρ by rw [h]; rfl
+        rw [RingHom.id_apply, ← map_smul]
+        exact congrArg μ (ContinuousMap.ext fun x => by simp [ContinuousMap.smul_comp]) }
+  suffices h : μ * ν = ρ from h ▸ rfl
   apply mahlerTransform_injective p
   ext n
   rw [mahlerTransform_mul, PowerSeries.coeff_mul, coeff_mahlerTransform]

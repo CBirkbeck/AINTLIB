@@ -164,7 +164,7 @@ private lemma heckeMultiplicity_right_scalar_le_one (b : Fin 2 → ℕ) (c : ℕ
   refine Fintype.card_le_one_iff_subsingleton.mpr ⟨fun ⟨⟨i₁, j₁⟩, h₁⟩ ⟨⟨i₂, j₂⟩, h₂⟩ ↦ ?_⟩
   obtain rfl : j₁ = j₂ := Subsingleton.elim j₁ j₂
   simp only [Set.mem_setOf_eq] at h₁ h₂
-  suffices hi : i₁ = i₂ by exact hi ▸ rfl
+  suffices hi : i₁ = i₂ from hi ▸ rfl
   by_contra hne
   apply HeckeRing.decompQuot_coset_diff (GL_pair 2) (HeckeCoset.rep (T_diag b)) i₁ i₂ hne
   let δ_c := (HeckeCoset.rep (T_diag (fun _ : Fin 2 ↦ c)) : GL (Fin 2) ℚ)

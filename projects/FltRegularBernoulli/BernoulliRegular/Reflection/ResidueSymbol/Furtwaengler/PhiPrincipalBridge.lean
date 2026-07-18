@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KellyPrime
@@ -302,7 +307,7 @@ theorem StickelbergerNormRelationNeg_of_phi_unit_factor
     (h_coprime : ∀ a : CyclotomicUnitDelta p,
       cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ∉ P') :
     StickelbergerNormRelationNeg (p := p) (K := K) α P' := by
-  unfold StickelbergerNormRelationNeg
+  simp only [StickelbergerNormRelationNeg]
   exact k2_6_weighted_galois_sum_at_prime_eq_neg_norm_principal_of_eq_unit_mul
     (p := p) (K := K) Φα hP'_ne hcop h_prime hu hu_zero hΦ h_coprime
 
@@ -520,7 +525,7 @@ theorem StickelbergerNormRelation_of_phi_unit_factor
     (h_coprime : ∀ a : CyclotomicUnitDelta p,
       cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ∉ P') :
     StickelbergerNormRelation (p := p) (K := K) α P' := by
-  unfold StickelbergerNormRelation
+  simp only [StickelbergerNormRelation]
   exact k2_6_weighted_galois_sum_at_prime_eq_norm_principal_of_eq_unit_mul
     (p := p) (K := K) Φα hP'_ne hcop h_prime hu hu_zero hΦ h_coprime
 

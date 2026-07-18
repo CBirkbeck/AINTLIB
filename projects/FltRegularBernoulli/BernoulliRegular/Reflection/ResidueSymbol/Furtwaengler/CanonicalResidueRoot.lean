@@ -81,12 +81,12 @@ theorem coprime_absNorm_p_of_not_mem
     Nat.absNorm_under_prime q
   have h_under_ne_p : Ideal.absNorm (q.under ℤ) ≠ p :=
     absNorm_under_ne_of_not_mem hp_not_in_q
-  -- absNorm q is a power of absNorm (q.under ℤ) (via inertiaDeg).
+  -- absNorm q is a power of absNorm (q.under ℤ) (via inertiaDeg').
   have h_under_dvd : Ideal.absNorm (q.under ℤ) ∣ Ideal.absNorm q :=
     Int.absNorm_under_dvd_absNorm q
   have h_norm_pow : Ideal.absNorm q =
       Ideal.absNorm (q.under ℤ) ^
-        ((Ideal.span ({(Ideal.absNorm (q.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg q) := by
+        ((Ideal.span ({(Ideal.absNorm (q.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg' q) := by
     have := Ideal.absNorm_eq_pow_inertiaDeg
       (R := 𝓞 K) (P := q) (p := (Ideal.absNorm (q.under ℤ) : ℤ))
       (Nat.prime_iff_prime_int.mp h_under_prime)
@@ -113,7 +113,7 @@ as the residue of the canonical primitive `p`-th root of unity
 
 /-- Canonical residue primitive `p`-th root in `𝓞 K ⧸ q`. This is the
 "underlying" element; the unit version is `canonicalResidueZetaP`. -/
-noncomputable def canonicalResidueZetaPRing
+def canonicalResidueZetaPRing
     (q : Ideal (𝓞 K)) : 𝓞 K ⧸ q :=
   Ideal.Quotient.mk q (cyclotomicZetaInteger (p := p) K)
 
@@ -121,7 +121,7 @@ noncomputable def canonicalResidueZetaPRing
 as the residue of `cyclotomicZetaInteger K`, which is a primitive
 `p`-th root of unity in `𝓞 K`, hence a unit. The image inherits the
 unit structure from the surjective ring hom. -/
-noncomputable def canonicalResidueZetaP
+def canonicalResidueZetaP
     (q : Ideal (𝓞 K)) : (𝓞 K ⧸ q)ˣ :=
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- ζ_p ∈ 𝓞 K is a unit. Its image under the ring hom is also a unit.
@@ -146,7 +146,6 @@ theorem canonicalResidueZetaPRing_isPrimitiveRoot
     haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
     IsPrimitiveRoot (canonicalResidueZetaPRing (p := p) (K := K) q) p := by
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  haveI : NeZero q := ⟨hq_ne_bot⟩
   -- Use IsPrimitiveRoot.idealQuotient_mk.
   -- Need: absNorm q ≠ 1 (q ≠ ⊤, automatic from prime) and Coprime.
   have habs_ne_one : Ideal.absNorm q ≠ 1 := by
@@ -168,8 +167,7 @@ theorem canonicalResidueZetaP_isPrimitiveRoot
     IsPrimitiveRoot (canonicalResidueZetaP (p := p) (K := K) q) p := by
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- Use coe_units_iff to reduce to the underlying ring element.
-  rw [← IsPrimitiveRoot.coe_units_iff]
-  rw [canonicalResidueZetaP_val]
+  rw [← IsPrimitiveRoot.coe_units_iff, canonicalResidueZetaP_val]
   exact canonicalResidueZetaPRing_isPrimitiveRoot hq_ne_bot hp_not_in_q
 
 /-- **Existence corollary.** For maximal `q` with `(p : 𝓞 K) ∉ q`, there
@@ -313,13 +311,12 @@ theorem canonicalResidueZetaP_val_galois_compat
       𝓞 K ⧸ cyclotomicGaloisConjugate (p := p) (K := K) a q) ^ (a : ZMod p).val := by
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- Both sides unfold to the same residue: σ_a (ζ_p) = ζ_p^a.val.
-  rw [canonicalResidueZetaP_val, canonicalResidueZetaP_val]
-  rw [cyclotomicGaloisQuotientEquiv_mk]
+  rw [canonicalResidueZetaP_val, canonicalResidueZetaP_val,
+    cyclotomicGaloisQuotientEquiv_mk]
   -- Now LHS: Ideal.Quotient.mk (σ_a • q) (σ_a (ζ_p)).
   -- RHS: (Ideal.Quotient.mk (σ_a • q) ζ_p)^a.val.
   -- Use that σ_a (ζ_p) = ζ_p^a.val and map_pow.
-  rw [cyclotomicRingOfIntegersEquiv_apply_zetaInteger]
-  rw [map_pow]
+  rw [cyclotomicRingOfIntegersEquiv_apply_zetaInteger, map_pow]
 
 /-- Existence of primitive `p`-th root at the conjugate prime, derived from
 the canonical residue zeta. -/
@@ -353,8 +350,8 @@ theorem canonicalResidueZetaP_sq
     (q : Ideal (𝓞 K)) :
     (canonicalResidueZetaP (p := p) (K := K) q) ^ 2 =
       (canonicalResidueZetaP (p := p) (K := K) q) *
-        (canonicalResidueZetaP (p := p) (K := K) q) := by
-  rw [sq]
+        (canonicalResidueZetaP (p := p) (K := K) q) :=
+  sq _
 
 end Furtwaengler
 

@@ -1,0 +1,48 @@
+# Side-build for the DedekindResidue (Belabas–Friedman) Verso blueprint.
+#
+# Self-contained Lake package, DECOUPLED from AINTLIB's root lakefile: it lives
+# entirely under projects/DedekindResidue/_blueprint/ and is never referenced by
+# the root workspace. It exists only to compile + render the Verso blueprint.
+#
+# It reuses the already-built DedekindResidue oleans by path-requiring the
+# AINTLIB workspace (../../..), then adds VersoBlueprint (v4.32.0 branch,
+# source-compiled under the workspace toolchain v4.32.0-rc1). mathlib is pinned
+# to the workspace's rev and required LAST so its transitive deps win over
+# VersoBlueprint's manifest.
+#
+# The blueprint .lean sources live one directory up, in projects/DedekindResidue/
+# (root module `DedekindResidueBlueprint`, renderer `DedekindResidueBlueprintMain`);
+# these are SIBLING modules of the `DedekindResidue` lib, so the root workspace's
+# lib glob never picks them up.
+name = "DedekindResidueBlueprintBuild"
+defaultTargets = ["DedekindResidueBlueprint"]
+
+[leanOptions]
+pp.unicode.fun = true
+
+# Reuse the workspace's built DedekindResidue oleans.
+[[require]]
+name = "AINTLIB"
+path = "../../.."
+
+[[require]]
+name = "VersoBlueprint"
+git = "https://github.com/leanprover/verso-blueprint"
+rev = "v4.32.0"
+
+# mathlib LAST so its transitive pins win the reconciliation.
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4.git"
+rev = "11b908e5cdd9"
+
+# The blueprint library + its renderer entry point both live one dir up.
+[[lean_lib]]
+name = "DedekindResidueBlueprint"
+srcDir = ".."
+globs = ["DedekindResidueBlueprint"]
+
+[[lean_lib]]
+name = "DedekindResidueBlueprintMain"
+srcDir = ".."
+globs = ["DedekindResidueBlueprintMain"]

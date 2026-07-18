@@ -527,10 +527,9 @@ theorem AlphaS_DMPowerDecayTarget_via_uniform_decay_and_lower_bound
   intro w hw_spa _hw_f _hστ t' ht'
   letI : ValuativeRel (Localization.Away s) := w.toValuativeRel
   -- Local notation for the carriers in `Localization.Away s`.
-  set imgT := T_D.image (algebraMap A (Localization.Away s)) with himgT_def
+  set imgT := T_D.image (algebraMap A (Localization.Away s))
   set sD : Localization.Away s := algebraMap A (Localization.Away s) s_D
-    with hsD_def
-  set σL : Localization.Away s := (σ_loc : Localization.Away s) with hσL_def
+  set σL : Localization.Away s := (σ_loc : Localization.Away s)
   -- Step 1: Lift `h_lower` to a product lower bound on `imgT.erase t'`.
   have h_lower_at : ∀ t'' ∈ imgT.erase t', w.vle sD t'' :=
     h_lower w hw_spa t' ht'
@@ -539,8 +538,8 @@ theorem AlphaS_DMPowerDecayTarget_via_uniform_decay_and_lower_bound
     Spv.vle_prod_of_pointwise w (imgT.erase t') h_lower_at
   -- Replace the constant product by a power and the cardinality by `c - 1`.
   have h_const_prod :
-      (∏ _t ∈ imgT.erase t', sD) = sD ^ (imgT.erase t').card := by
-    simp [Finset.prod_const]
+      (∏ _t ∈ imgT.erase t', sD) = sD ^ (imgT.erase t').card :=
+    Finset.prod_const sD
   have h_card_erase : (imgT.erase t').card = imgT.card - 1 :=
     Finset.card_erase_of_mem ht'
   rw [h_const_prod, h_card_erase] at h_prod_lift
@@ -1149,7 +1148,7 @@ theorem AlphaT_DBranchPerTSigmaPowerDecay_via_joint
     localizationLocSubringPlusSubring P T s
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro _τ _hτ w hw_spa
-  exact ⟨h_joint.1 w hw_spa, fun t' ht' => h_joint.2 w hw_spa t' ht'⟩
+  exact ⟨h_joint.1 w hw_spa, fun t' ht' ↦ h_joint.2 w hw_spa t' ht'⟩
 
 omit [PlusSubring A] in
 /-- **Top-level honest supplier from joint residual** — uniform-N
@@ -1279,7 +1278,7 @@ theorem AlphaJointBranchPerTSigmaPowerDecay_via_chain_decay_and_unit_s_D
     AlphaJointBranchPerTSigmaPowerDecay P T s hopen T_D s_D σ_loc N :=
   AlphaJointBranchPerTSigmaPowerDecay_via_three_pieces
     P T s hopen T_D s_D σ_loc N
-    (fun w _ => not_vle_zero_of_isUnit h_unit_s_D w)
+    (fun w _ ↦ not_vle_zero_of_isUnit h_unit_s_D w)
     h_chain h_decay
 
 /-! ### Remaining single mathematical statement (T154 fallback target)
@@ -1480,7 +1479,7 @@ theorem AlphaJointAlphaSDNonVanishingPiece_via_isUnit
     (s_D : A)
     (h_unit : IsUnit (algebraMap A (Localization.Away s) s_D)) :
     AlphaJointAlphaSDNonVanishingPiece P T s hopen s_D :=
-  fun w _ => not_vle_zero_of_isUnit h_unit w
+  fun w _ ↦ not_vle_zero_of_isUnit h_unit w
 
 omit [PlusSubring A] in
 /-- **Top-level honest supplier from named pieces 2, 3 + `IsUnit α s_D`**.
@@ -1630,11 +1629,8 @@ theorem AlphaJointSigmaPowerDecayPiece_via_factorization
   letI : PlusSubring (Localization.Away s) :=
     localizationLocSubringPlusSubring P T s
   intro w hw_spa
-  have hξ_mem : (ξ : Localization.Away s) ∈
-      ((Localization.Away s)⁺ : Subring (Localization.Away s)) :=
-    ξ.property
   have hξ_le_one : w.vle (ξ : Localization.Away s) 1 :=
-    vle_one_of_mem_spa hw_spa hξ_mem
+    vle_one_of_mem_spa hw_spa ξ.property
   have h_mul := w.mul_vle_mul_left hξ_le_one
     ((σ_loc : Localization.Away s) *
       (algebraMap A (Localization.Away s) s_D) ^ (N + 1))
@@ -1679,11 +1675,8 @@ theorem AlphaJointPerTChainPiece_via_factorization
   letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro w hw_spa t' ht'
   obtain ⟨ξ_t', hfact_t'⟩ := h_factor t' ht'
-  have hξ_t'_mem : (ξ_t' : Localization.Away s) ∈
-      ((Localization.Away s)⁺ : Subring (Localization.Away s)) :=
-    ξ_t'.property
   have hξ_t'_le_one : w.vle (ξ_t' : Localization.Away s) 1 :=
-    vle_one_of_mem_spa hw_spa hξ_t'_mem
+    vle_one_of_mem_spa hw_spa ξ_t'.property
   have h_mul := w.mul_vle_mul_left hξ_t'_le_one
     (algebraMap A (Localization.Away s) s)
   rw [one_mul] at h_mul
@@ -2667,8 +2660,7 @@ theorem locSigmaUnit_isTopologicallyNilpotent
     IsTopologicallyNilpotent
       (locSigmaUnit P T s hopen π_loc hπ_loc_unit M : Localization.Away s) := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  have hval := locSigmaUnit_val P T s hopen π_loc hπ_loc_unit M
-  rw [hval]
+  rw [locSigmaUnit_val P T s hopen π_loc hπ_loc_unit M]
   exact isTopologicallyNilpotent_pow hπ_loc_tn (Nat.succ_pos M)
 
 set_option linter.unusedSectionVars false in
@@ -3159,10 +3151,10 @@ private theorem vle_one_of_isIntegral_of_subring_le_one
     {b : R}
     (hb_int : IsIntegral S b) : _v.vle b 1 := by
   letI : ValuativeRel R := _v
-  set ν := ValuativeRel.valuation R with hν_def
+  set ν := ValuativeRel.valuation R
   -- Translate vle x y ↔ ν x ≤ ν y via the Compatible instance for ν.
   haveI : Valuation.Compatible (R := R) ν := inferInstance
-  have h_iff : ∀ x : R, x ≤ᵥ 1 ↔ ν x ≤ 1 := fun x => by
+  have h_iff : ∀ x : R, x ≤ᵥ 1 ↔ ν x ≤ 1 := fun x ↦ by
     rw [Valuation.Compatible.vle_iff_le (v := ν) x 1, ν.map_one]
   -- S ≤ ν.integer (as subrings of R).
   have h_le : S ≤ Valuation.integer ν := by
@@ -3297,8 +3289,7 @@ theorem mem_locPlusSubring_of_vle_on_spa
       ⟨hv_cont, hv_locPlus⟩
     exact ha_spa _ hw_spa
   -- Step 2: a ∈ locPlusSubring (by definition of integral closure).
-  rw [mem_locPlusSubring_iff_isIntegral]
-  exact hint
+  rwa [mem_locPlusSubring_iff_isIntegral]
 
 omit [PlusSubring A] in
 /-- **T163 honest M/N-choice membership** with witnesses in
@@ -3489,7 +3480,7 @@ theorem AlphaJointCor732MultiplicativeBound_residual_via_uniformDecayAndChain_an
     with hα_s_inv_def
   refine ⟨N,
     algebraMap A (Localization.Away s) s * denom_inv,
-    fun t _ht =>
+    fun t _ht ↦
       (σ_loc : Localization.Away s) *
         algebraMap A (Localization.Away s) t *
         (algebraMap A (Localization.Away s) s_D) ^ N *
@@ -3931,12 +3922,12 @@ theorem Finset.exists_uniform_N_of_per_mem_monotone
   classical
   induction T using Finset.induction_on with
   | empty =>
-    exact ⟨0, fun a ha => absurd ha (Finset.notMem_empty a)⟩
+    exact ⟨0, fun a ha ↦ absurd ha (Finset.notMem_empty a)⟩
   | insert b T' hb_notin ih =>
     obtain ⟨N_T, h_N_T⟩ :=
-      ih (fun a ha => h_per_mem a (Finset.mem_insert_of_mem ha))
+      ih (fun a ha ↦ h_per_mem a (Finset.mem_insert_of_mem ha))
     obtain ⟨N_b, h_N_b⟩ := h_per_mem b (Finset.mem_insert_self b T')
-    refine ⟨max N_T N_b, fun a ha => ?_⟩
+    refine ⟨max N_T N_b, fun a ha ↦ ?_⟩
     rcases Finset.mem_insert.mp ha with rfl | ha_T'
     · exact h_mono (le_max_right _ _) _ h_N_b
     · exact h_mono (le_max_left _ _) _ (h_N_T a ha_T')
@@ -4003,7 +3994,7 @@ theorem AlphaJointCor732_chain_uniform_N_of_per_t_chain_monotone
   letI : PlusSubring (Localization.Away s) :=
     localizationLocSubringPlusSubring P T s
   exact Finset.exists_uniform_N_of_per_mem_monotone
-    (P := fun N t =>
+    (P := fun N t ↦
       ∀ w ∈ Spa (Localization.Away s) (Localization.Away s)⁺,
         w.vle ((σ_loc : Localization.Away s) *
             algebraMap A (Localization.Away s) t *
@@ -4108,13 +4099,12 @@ theorem AlphaJointCor732_chain_half_via_sigma_dominated_by_alpha_s
       w.vle ((algebraMap A (Localization.Away s) s_D) ^ N) 1 := by
     have := ValuativeRel.pow_vle_pow h_α_s_D_le_one N
     rwa [one_pow] at this
-  have h_σ_dom_at := h_σ_dom w hw
   -- (σ_loc) * (α t) ≤ᵥ (α s) * 1
   have h_step1 :
       w.vle ((σ_loc : Localization.Away s) *
           algebraMap A (Localization.Away s) t)
         (algebraMap A (Localization.Away s) s * 1) :=
-    ValuativeRel.mul_vle_mul h_σ_dom_at h_α_t_le_one
+    ValuativeRel.mul_vle_mul (h_σ_dom w hw) h_α_t_le_one
   -- (σ_loc * α t) * (α s_D)^N ≤ᵥ (α s * 1) * 1
   have h_step2 :
       w.vle ((σ_loc : Localization.Away s) *

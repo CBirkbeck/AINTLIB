@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.FormalGroup.Differential
 
 /-!
@@ -61,16 +66,15 @@ variable {F : FormalGroup R}
 /-- The scalar `η.scalar ∈ R` of an invariant differential, defined as the
 constant coefficient of `η.toSeries`. -/
 noncomputable def scalar (η : InvariantDifferential F) : R :=
-  @PowerSeries.constantCoeff R _ η.toSeries
+  PowerSeries.constantCoeff η.toSeries
 
 /-- The defining equation: `η.toSeries · F_X(0, T) = C η.scalar`. -/
 theorem toSeries_mul_dX_at_zero (η : InvariantDifferential F) :
     η.toSeries * F.dX_at_zero = PowerSeries.C η.scalar := by
   obtain ⟨c, hc⟩ := η.mul_dX_isConstant
   have heq : η.scalar = c := by
-    have h := congr_arg (@PowerSeries.constantCoeff R _) hc
-    rw [map_mul, F.dX_at_zero_constantCoeff, mul_one, PowerSeries.constantCoeff_C] at h
-    exact h
+    have h := congr_arg (PowerSeries.constantCoeff (R := R)) hc
+    rwa [map_mul, F.dX_at_zero_constantCoeff, mul_one, PowerSeries.constantCoeff_C] at h
   rw [heq]; exact hc
 
 /-- Every invariant differential is a scalar multiple of `F.invariantDiff`.
@@ -98,7 +102,7 @@ theorem isNormalized_iff (η : InvariantDifferential F) :
     η.IsNormalized ↔ η.toSeries = F.invariantDiff := by
   constructor
   · intro h
-    rw [η.toSeries_eq_scalar_smul, h]; exact one_smul R _
+    rw [η.toSeries_eq_scalar_smul, h, one_smul]
   · intro h
     change η.scalar = 1
     rw [scalar, h, F.invariantDiff_constantCoeff]
@@ -133,14 +137,14 @@ for a unique `a ∈ R`. -/
 theorem InvariantDifferential.eq_smul_normalized {F : FormalGroup R}
     (η : InvariantDifferential F) :
     ∃! a : R, η.toSeries = a • F.normalizedDifferential.toSeries := by
-  refine ⟨η.scalar, η.toSeries_eq_scalar_smul, fun b hb => ?_⟩
+  refine ⟨η.scalar, η.toSeries_eq_scalar_smul, fun b hb ↦ ?_⟩
   -- From `η.toSeries = b • invariantDiff`, take constant coefficient of both sides.
   -- Since `constantCoeff` is defeq-compatible with `•`, the goal reduces to
   -- `b • (1 : R) = b`, i.e., `b * 1 = b`.
   have h : η.scalar = b := by
-    change @PowerSeries.constantCoeff R _ η.toSeries = b
+    change PowerSeries.constantCoeff η.toSeries = b
     rw [hb]
-    change b • @PowerSeries.constantCoeff R _ F.invariantDiff = b
+    change b • PowerSeries.constantCoeff F.invariantDiff = b
     rw [F.invariantDiff_constantCoeff]
     exact mul_one b
   exact h.symm

@@ -120,16 +120,11 @@ theorem _sub_lemma_symmetric_absorbs
     (K : Set H) (_hK_closed : IsClosed K) (_hK_sym : K = (fun x => -x) '' K)
     (h_int : (interior K).Nonempty) :
     (Set.image2 (· - ·) K K) ∈ nhds (0 : H) := by
-  -- Let V = interior K: open, ⊆ K, nonempty.
-  -- Then V - V is open and contains 0; V - V ⊆ K - K.
-  have hV_open : IsOpen (interior K) := isOpen_interior
-  have hV_subset : interior K ⊆ K := interior_subset
+  -- V - V (with V = interior K) is open, contains 0, and lies inside K - K.
   obtain ⟨x, hx⟩ := h_int
-  have hVV_open : IsOpen (interior K - interior K) := hV_open.sub_left
-  have h0 : (0 : H) ∈ interior K - interior K := ⟨x, hx, x, hx, sub_self x⟩
-  have hVV_KK : (interior K - interior K) ⊆ Set.image2 (· - ·) K K :=
-    Set.image2_subset hV_subset hV_subset
-  exact mem_nhds_iff.mpr ⟨interior K - interior K, hVV_KK, hVV_open, h0⟩
+  exact mem_nhds_iff.mpr ⟨interior K - interior K,
+    Set.image2_subset interior_subset interior_subset, isOpen_interior.sub_left,
+    ⟨x, hx, x, hx, sub_self x⟩⟩
 
 /-! ## Obsolete BGR-route sub-lemmas removed (2026-05-18)
 
@@ -181,16 +176,11 @@ theorem _sub_lemma_translation
     rintro w ⟨z, hzV, rfl⟩
     have : z + x ∈ U := by simpa [hV_def] using hzV
     exact ⟨z + x, this, by rw [f.map_add]⟩
-  -- Step 4: ((· + f x) ⁻¹' (f '' U)) ∈ nhds 0, so f '' U ∈ nhds (f x).
+  -- Step 4: `(· + f x) ⁻¹' (f '' U) ∈ nhds 0`; translate along `(· + f x)`
+  -- (`map_add_right_nhds_zero`) to get `f '' U ∈ nhds (f x)`.
   have hpre_nhds : (fun w => w + f x) ⁻¹' (f '' U) ∈ nhds (0 : H) :=
     Filter.mem_of_superset hfV_nhds hsub
-  -- Translate via the additive homeomorphism `(· + f x)`.
-  have heq : Filter.map (fun w => w + f x) (nhds (0 : H)) = nhds (f x) := by
-    rw [show (fun w : H => w + f x) = ((Homeomorph.addRight (f x)) : H → H) from rfl,
-        Homeomorph.map_nhds_eq]
-    simp
-  rw [← heq, Filter.mem_map]
-  exact hpre_nhds
+  exact map_add_right_nhds_zero (f x) ▸ hpre_nhds
 
 /-! ## Sub-sub-lemma decomposition for Sub-lemmas A, C, D (pass-(ii) refinement)
 
@@ -227,15 +217,9 @@ exist via `Topology.Algebra.Group.Pointwise`. Compose for `interior + interior �
 theorem _sub_sub_lemma_A_2_interior_add
     {H : Type v} [AddCommGroup H] [TopologicalSpace H] [IsTopologicalAddGroup H]
     (S T : Set H) :
-    interior S + interior T ⊆ interior (S + T) := by
-  -- interior S + interior T is open (sum of opens via IsOpen.add_left).
-  have h_open : IsOpen (interior S + interior T) :=
-    isOpen_interior.add_left
-  -- And interior S + interior T ⊆ S + T (since interior S ⊆ S, interior T ⊆ T).
-  have h_sub : interior S + interior T ⊆ S + T :=
-    Set.add_subset_add interior_subset interior_subset
-  -- An open subset of S + T lies in interior (S + T).
-  exact interior_maximal h_sub h_open
+    interior S + interior T ⊆ interior (S + T) :=
+  -- the open set `interior S + interior T` is contained in `S + T`.
+  interior_maximal (Set.add_subset_add interior_subset interior_subset) isOpen_interior.add_left
 
 /-- **Sub-sub-lemma C.2 — Baire ⇒ nonempty interior in some closure**.
 
@@ -279,9 +263,6 @@ theorem _sub_sub_lemma_D_1_cauchy_builder
     (step : (n : ℕ) → G) (hstep : ∀ n, step (n + 1) - step n ∈ basis n) :
     CauchySeq step := by
   have h0_basis : ∀ n, (0 : G) ∈ basis n := fun n => mem_of_mem_nhds (hbasis n)
-  have hbasis_dec : ∀ n, basis (n + 1) ⊆ basis n := fun n x hx => by
-    have hsum : x + 0 ∈ basis (n + 1) + basis (n + 1) := Set.add_mem_add hx (h0_basis _)
-    rw [add_zero] at hsum; exact hshrink _ hsum
   -- Sum lemma: for any indexed family with xs i ∈ basis (n + 1 + i), Σ xs ∈ basis n.
   -- Proved by induction on k via iterated doubling.
   have hsum_lemma : ∀ k : ℕ, ∀ n : ℕ, ∀ xs : Fin k → G,
@@ -294,7 +275,7 @@ theorem _sub_sub_lemma_D_1_cauchy_builder
     | succ k ih =>
       intro n xs hxs
       rw [Fin.sum_univ_succ]
-      have h0 : xs 0 ∈ basis (n + 1) := by have := hxs 0; simpa using this
+      have h0 : xs 0 ∈ basis (n + 1) := by simpa using hxs 0
       have hrest : ∑ i, xs (Fin.succ i) ∈ basis (n + 1) := by
         apply ih (n + 1)
         intro i
@@ -345,12 +326,10 @@ theorem _sub_sub_lemma_D_2_limit_in_nbhd
     ∃ x : G, Filter.Tendsto step Filter.atTop (nhds x) ∧ x - step 0 ∈ closure V := by
   -- Cauchy + complete ⇒ converges.
   obtain ⟨x, hx⟩ := cauchySeq_tendsto_of_complete hcauchy
-  refine ⟨x, hx, ?_⟩
-  -- (step n - step 0) → x - step 0 by continuity of subtraction.
-  have h_lim : Filter.Tendsto (fun n => step n - step 0) Filter.atTop (nhds (x - step 0)) :=
-    hx.sub_const (step 0)
-  -- Each step n - step 0 ∈ V, so the limit lies in closure V.
-  exact mem_closure_of_tendsto h_lim (Filter.Eventually.of_forall hstep_in_V)
+  -- `step n - step 0 → x - step 0` (continuity of subtraction) and each term lies in `V`,
+  -- so the limit lies in `closure V`.
+  exact ⟨x, hx, mem_closure_of_tendsto (hx.sub_const (step 0))
+    (Filter.Eventually.of_forall hstep_in_V)⟩
 
 /-! ## Main theorem (composes sub-lemmas A-E from sub-sub-lemmas A.1, A.2, C.1, C.2, D.1, D.2)
 -/

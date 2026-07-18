@@ -358,13 +358,13 @@ theorem exists_solution_of_etaZeroSpanSingletons
         (ε₃ : 𝓞 K) * ((hζ.toInteger - 1) ^ m * z') ^ p := by
   set η₀ := zetaSubOneDvdRoot hp hζ e hy
   obtain ⟨u₁, hu₁⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
     η₂.prop (η₀ : _).prop (Subtype.coe_injective.ne_iff.mpr hη₂)
   obtain ⟨u₂, hu₂⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
     (η₀ : _).prop η₁.prop (Subtype.coe_injective.ne_iff.mpr hη₁.symm)
   obtain ⟨u₃, hu₃⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime hpri.out
     η₂.prop (η₁ : _).prop (Subtype.coe_injective.ne_iff.mpr hη)
   have := formula_of_etaZeroSpanSingletons
     hp hζ e hy hz η₁ η₂ hb₁ hb₂ hspan₁ hspan₂
@@ -1143,7 +1143,7 @@ theorem not_exists_Int_solution_of_specific_discharges
   haveI := CyclotomicField.isCyclotomicExtension p ℚ
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField p ℚ)) (Set.mem_singleton p) hpri.1.ne_zero
-  have h_dvd_iff := fun n ↦
+  have h_dvd_iff := fun n =>
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField p ℚ) hζ (n := n)
   simp_rw [← h_dvd_iff]
   rintro ⟨x, y, z, hy, hz, hz', e⟩
@@ -1184,7 +1184,7 @@ theorem not_exists_Int_solution_of_etaZeroPrincipalizationOnSpecific
   haveI := CyclotomicField.isCyclotomicExtension p ℚ
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField p ℚ)) (Set.mem_singleton p) hpri.1.ne_zero
-  have h_dvd_iff := fun n ↦
+  have h_dvd_iff := fun n =>
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField p ℚ) hζ (n := n)
   simp_rw [← h_dvd_iff]
   rintro ⟨x, y, z, hy, hz, hz', e⟩
@@ -1247,7 +1247,7 @@ set_option backward.isDefEq.respectTransparency false in
 term parametric on the OnSpecific predicates
 `CaseIIPrincipalDischargeOnSpecific` and `AdaptedKummersLemmaOnSpecific`
 (the tightened forms suitable for irregular primes). -/
-def caseIIBridge_of_specificDischarges
+theorem caseIIBridge_of_specificDischarges
     {p : ℕ} [hpri : Fact p.Prime] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     (h_specific : CaseIIPrincipalDischargeOnSpecific p (CyclotomicField p ℚ))
@@ -1260,7 +1260,7 @@ def caseIIBridge_of_specificDischarges
 set_option backward.isDefEq.respectTransparency false in
 /-- **`caseIIBridge_of_etaZeroPrincipalizationOnSpecific`**: case-II bridge
 from anchored principalization and the tightened Kummer predicate. -/
-def caseIIBridge_of_etaZeroPrincipalizationOnSpecific
+theorem caseIIBridge_of_etaZeroPrincipalizationOnSpecific
     {p : ℕ} [hpri : Fact p.Prime] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     (h_principal : CaseIIPrincipalizationAgainstEtaZeroOnSpecific
@@ -1278,7 +1278,7 @@ set_option backward.isDefEq.respectTransparency false in
 This is the currently narrowest formal case-II principalization route: the
 source theorem only has to identify each quotient `𝔞 η / 𝔞 η₀` with the
 extension of a nonzero ideal from the maximal real subfield. -/
-def caseIIBridge_of_realIdealModel_base_and_specificKummer
+theorem caseIIBridge_of_realIdealModel_base_and_specificKummer
     {p : ℕ} [hpri : Fact p.Prime] [NeZero p] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     (h_not_dvd : ¬ (p : ℕ) ∣ hPlus (CyclotomicField p ℚ))
@@ -1321,7 +1321,7 @@ actual case-II quotient `𝔞 η₁ / 𝔞 η₂` descends from an ideal of `K�
 lemma does not hide that source theorem inside a new final hypothesis; it just
 connects the proved plus-class-number principalization step to the existing
 `CaseIIBridge` consumer. -/
-def caseIIBridge_of_realIdealModel_and_specificKummer
+theorem caseIIBridge_of_realIdealModel_and_specificKummer
     {p : ℕ} [hpri : Fact p.Prime] [NeZero p] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     (h_not_dvd : ¬ (p : ℕ) ∣ hPlus (CyclotomicField p ℚ))
@@ -1357,7 +1357,7 @@ set_option backward.isDefEq.respectTransparency false in
 The equal-root quotient `𝔞 η / 𝔞 η` is principal without any descent theorem, so
 the remaining principalization source only has to provide the real-ideal model
 for distinct roots. -/
-def caseIIBridge_of_realIdealModel_ne_and_specificKummer
+theorem caseIIBridge_of_realIdealModel_ne_and_specificKummer
     {p : ℕ} [hpri : Fact p.Prime] [NeZero p] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     (h_not_dvd : ¬ (p : ℕ) ∣ hPlus (CyclotomicField p ℚ))
@@ -1397,7 +1397,7 @@ The remaining source inputs stay explicit:
 * `h_model`: the Washington 9.4 real-descent witness for the actual quotient
   `𝔞 η₁ / 𝔞 η₂`;
 * `h_kummer`: the case-II-specific adapted Kummer lemma. -/
-def caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_and_specificKummer
+theorem caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_and_specificKummer
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
     (h_model : ∀ {ζ : CyclotomicField 37 ℚ} (hζ : IsPrimitiveRoot ζ 37)
@@ -1437,7 +1437,7 @@ def caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_and_specificKummer
 This is the narrowest current case-II principalization surface: the real-descent
 witness is required only when `η₁ ≠ η₂`; the diagonal quotient is discharged by
 `fractionalIdeal_div_self_isPrincipal`. -/
-def caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_ne_and_specificKummer
+theorem caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_ne_and_specificKummer
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
     (h_model_ne : ∀ {ζ : CyclotomicField 37 ℚ} (hζ : IsPrimitiveRoot ζ 37)
@@ -1478,7 +1478,7 @@ def caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_ne_and_specificKummer
 This version only asks for the real-ideal model of the anchored quotients
 `𝔞 η / 𝔞 η₀`, which are the quotients used to build the next descent equation.
 -/
-def caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_base_and_specificKummer
+theorem caseIIBridge_thirtyseven_of_cor8_19_realIdealModel_base_and_specificKummer
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (cor8_19 : Cor8_19Bridge 37 (CyclotomicField 37 ℚ) 32)
     (h_model_base : ∀ {ζ : CyclotomicField 37 ℚ} (hζ : IsPrimitiveRoot ζ 37)
@@ -1565,6 +1565,7 @@ theorem washington_real_expression_fixed_of_conj_pair
   field_simp [hden, hden_zeta, hden_inv, hζ_ne_zero]
   ring
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Primitive-root wrapper for
 `washington_real_expression_fixed_of_conj_pair`.
 
@@ -1615,8 +1616,7 @@ theorem washington_integral_expression_fixed_of_primitive_integer_conj_pair
     rw [← NumberField.IsCMField.coe_ringOfIntegersComplexConj (K := K) rho_neg_a]
     exact congrArg (algebraMap (𝓞 K) K) hrho_neg_a
   apply RingOfIntegers.ext
-  rw [NumberField.IsCMField.coe_ringOfIntegersComplexConj]
-  rw [ha]
+  rw [NumberField.IsCMField.coe_ringOfIntegersComplexConj, ha]
   exact
     washington_real_expression_fixed_of_primitive_conj_pair
       (K := K) (ζ := ζ) (rho_a := (rho_a : K))
@@ -2151,20 +2151,8 @@ theorem CaseIIData37.descent_step_of_adjacent_integral_real_generators_and_adapt
       ?_ h_one_not_dvd ?_ h_one_not_dvd ?_ ?_ h_kummer
   · simpa [c₁] using hb₁_ndvd
   · simpa [c₂] using hb₂_ndvd
-  · change FractionalIdeal.spanSingleton (𝓞 K)⁰
-        ((c₁ : K) / ((1 : 𝓞 K) : K)) =
-      (D.rootIdeal D.etaOne /
-        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2)
-          D.hζ D.equation D.hy :
-        FractionalIdeal (𝓞 K)⁰ K)
-    simpa [c₁] using hspan₁
-  · change FractionalIdeal.spanSingleton (𝓞 K)⁰
-        ((c₂ : K) / ((1 : 𝓞 K) : K)) =
-      (D.rootIdeal D.etaTwo /
-        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2)
-          D.hζ D.equation D.hy :
-        FractionalIdeal (𝓞 K)⁰ K)
-    simpa [c₂] using hspan₂
+  · simpa [c₁] using hspan₁
+  · simpa [c₂] using hspan₂
 
 /-- Adjacent integral real generators with the exact unit-power discharge. -/
 theorem CaseIIData37.descent_step_of_adjacent_integral_real_generators_and_unitPower
@@ -2214,20 +2202,8 @@ theorem CaseIIData37.descent_step_of_adjacent_integral_real_generators_and_unitP
       ?_ h_one_not_dvd ?_ h_one_not_dvd ?_ ?_ h_unit
   · simpa [c₁] using hb₁_ndvd
   · simpa [c₂] using hb₂_ndvd
-  · change FractionalIdeal.spanSingleton (𝓞 K)⁰
-        ((c₁ : K) / ((1 : 𝓞 K) : K)) =
-      (D.rootIdeal D.etaOne /
-        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2)
-          D.hζ D.equation D.hy :
-        FractionalIdeal (𝓞 K)⁰ K)
-    simpa [c₁] using hspan₁
-  · change FractionalIdeal.spanSingleton (𝓞 K)⁰
-        ((c₂ : K) / ((1 : 𝓞 K) : K)) =
-      (D.rootIdeal D.etaTwo /
-        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2)
-          D.hζ D.equation D.hy :
-        FractionalIdeal (𝓞 K)⁰ K)
-    simpa [c₂] using hspan₂
+  · simpa [c₁] using hspan₁
+  · simpa [c₂] using hspan₂
 
 /-- Adjacent fixed integral generators descend to the real subfield and give
 the datum-local Case-II descent step.
@@ -2457,7 +2433,7 @@ theorem exists_caseIIData37_of_Int_solution
   obtain ⟨ζ, hζ⟩ := IsCyclotomicExtension.exists_isPrimitiveRoot
     ℚ (B := (CyclotomicField 37 ℚ)) (Set.mem_singleton 37)
     (by decide : (37 : ℕ) ≠ 0)
-  have h_dvd_iff := fun n ↦
+  have h_dvd_iff := fun n =>
     zeta_sub_one_dvd_Int_iff (K := CyclotomicField 37 ℚ) hζ (n := n)
   rcases h with ⟨x, y, z, hy_int, hz_int, hz_ne, e⟩
   have hy : ¬ (hζ.toInteger - 1) ∣ (y : 𝓞 (CyclotomicField 37 ℚ)) := by
@@ -3012,20 +2988,8 @@ theorem caseII_descent_step_of_adjacent_washington_oneConj_noNonzero_and_unitPow
     D.descent_step_of_adjacent_etaZeroSpanSingletons_and_unitPower
       (a₁ := a₁) (b₁ := 1) (a₂ := a₂) (b₂ := 1)
       hnot₁ h_one_not_dvd hnot₂ h_one_not_dvd ?_ ?_ (h_unit D)
-  · change FractionalIdeal.spanSingleton (𝓞 K)⁰
-        ((a₁ : K) / ((1 : 𝓞 K) : K)) =
-      (D.rootIdeal D.etaOne /
-        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2)
-          D.hζ D.equation D.hy :
-        FractionalIdeal (𝓞 K)⁰ K)
-    simpa using hspan₁
-  · change FractionalIdeal.spanSingleton (𝓞 K)⁰
-        ((a₂ : K) / ((1 : 𝓞 K) : K)) =
-      (D.rootIdeal D.etaTwo /
-        aEtaZeroDvdPPow (by decide : (37 : ℕ) ≠ 2)
-          D.hζ D.equation D.hy :
-        FractionalIdeal (𝓞 K)⁰ K)
-    simpa using hspan₂
+  · simpa using hspan₁
+  · simpa using hspan₂
 
 /-- A single Washington real-expression generator for one anchored Case-II
 quotient.
@@ -3945,7 +3909,7 @@ fills of both OnSpecific predicates. Mirrors `caseIIBridge_of_regular`
 but routes through the OnSpecific predicates instead of the general
 ones, confirming the OnSpecific chain is a valid alternative for
 regular primes. -/
-def caseIIBridge_of_specificDischarges_of_regular
+theorem caseIIBridge_of_specificDischarges_of_regular
     {p : ℕ} [hpri : Fact p.Prime] (hodd : p ≠ 2) (i : ℕ)
     [NumberField.IsCMField (CyclotomicField p ℚ)]
     [Fintype (ClassGroup (𝓞 (CyclotomicField p ℚ)))]

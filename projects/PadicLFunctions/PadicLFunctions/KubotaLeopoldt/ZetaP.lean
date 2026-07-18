@@ -28,8 +28,6 @@ namespace PadicMeasure
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
-/-! ## `μ_a` as a measure on `ℤ_p^×` -/
-
 /-- The restriction of `μ_a` to `ℤ_p^×`, as a measure on `ℤ_p^×`: precomposition
 with extension-by-zero. Satisfies `ι (muAUnits a) = Res_{ℤ_p^×}(μ_a)`
 (`iota_muAUnits`). Source: RJW §4.2/§4.3 transition. -/
@@ -53,15 +51,9 @@ lemma muAUnits_apply_unitsPowCM (a k : ℕ) :
       ContinuousMap.ext fun u => rfl,
     extendByZero_comp_unitsVal]
 
-/-! ## Multiplication by `x⁻¹` (RJW eq. 4.11) -/
-
 lemma continuous_units_inv_val :
-    Continuous fun u : ℤ_[p]ˣ => ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) := by
-  have h : (fun u : ℤ_[p]ˣ => ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]))
-      = MulOpposite.unop ∘ Prod.snd ∘ Units.embedProduct ℤ_[p] := rfl
-  rw [h]
-  exact MulOpposite.continuous_unop.comp
-    (continuous_snd.comp Units.continuous_embedProduct)
+    Continuous fun u : ℤ_[p]ˣ => ((u⁻¹ : ℤ_[p]ˣ) : ℤ_[p]) :=
+  MulOpposite.continuous_unop.comp (continuous_snd.comp Units.continuous_embedProduct)
 
 /-- The continuous function `x ↦ x⁻¹` on `ℤ_p^×` (valued in `ℤ_p`). -/
 def invCM : C(ℤ_[p]ˣ, ℤ_[p]) :=
@@ -102,11 +94,8 @@ theorem zetaNum_moments {a : ℕ} (hpa : ¬ p ∣ a) {k : ℕ} (hk : 0 < k) :
           * ((zetaNeg (k - 1) : ℚ) : ℚ_[p]) := by
   obtain ⟨k', rfl⟩ : ∃ k', k = k' + 1 := ⟨k - 1, by omega⟩
   rw [zetaNum_apply_unitsPowCM p a hk, Nat.succ_sub_one, muAUnits_apply_unitsPowCM,
-    res_units_muA_apply_powCM p hpa k']
-  rw [pow_succ (-1 : ℚ_[p]) k', pow_succ (a : ℚ_[p]) k']
+    res_units_muA_apply_powCM p hpa k', pow_succ (-1 : ℚ_[p]) k', pow_succ (a : ℚ_[p]) k']
   ring
-
-/-! ## Integer topological generators -/
 
 /-- A topological generator of `ℤ_p^×` is torsion-free: `a^k ≠ 1` for `k > 0`
 (the order of its image in `(ℤ/p^n)^×` grows without bound). -/
@@ -115,7 +104,6 @@ theorem topGen_pow_ne_one {a : ℤ_[p]ˣ}
     ∀ k, 0 < k → (a : ℤ_[p]) ^ k ≠ 1 := by
   intro k hk hak
   have hu : a ^ k = 1 := Units.ext (by rw [Units.val_pow_eq_pow_val, hak, Units.val_one])
-  -- at level k+1 the image generates a group of order p^k (p−1) > k
   have horder : orderOf (unitsToZModPow p (k + 1) a) = Nat.card (ZMod (p ^ (k + 1)))ˣ :=
     orderOf_eq_card_of_forall_mem_zpowers fun x => (ha (k + 1)) ▸ Subgroup.mem_top x
   have hdvd : orderOf (unitsToZModPow p (k + 1) a) ∣ k :=
@@ -138,12 +126,10 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
       ∀ n : ℕ, Subgroup.zpowers (unitsToZModPow p n u) = ⊤ := by
   classical
   obtain ⟨u₀, hu₀⟩ := exists_topological_generator p hp2
-  -- the integer lift of u₀ mod p²
   set m : ℕ := ((unitsToZModPow p 2 u₀ : (ZMod (p ^ 2))ˣ) : ZMod (p ^ 2)).val with hm
   have hm2 : ((m : ℕ) : ZMod (p ^ 2))
       = ((unitsToZModPow p 2 u₀ : (ZMod (p ^ 2))ˣ) : ZMod (p ^ 2)) :=
     ZMod.natCast_rightInverse _
-  -- p ∤ m (else p²|p in ZMod p²)
   have hpm : ¬ p ∣ m := by
     rintro ⟨t, ht⟩
     have hunit : IsUnit ((m : ℕ) : ZMod (p ^ 2)) := by
@@ -162,16 +148,13 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
     nlinarith [hp.out.two_le]
   have hum := PadicInt.isUnit_natCast_of_not_dvd (p := p) hpm
   refine ⟨m, hum.unit, hpm, hum.unit_spec, ?_⟩
-  -- the value of the constructed unit at every level
   have hval : ∀ n : ℕ, ((unitsToZModPow p n hum.unit : (ZMod (p ^ n))ˣ) : ZMod (p ^ n))
       = ((m : ℕ) : ZMod (p ^ n)) := fun n => by
     rw [unitsToZModPow_coe, hum.unit_spec, map_natCast]
-  -- level 2 matches u₀, hence generates
   have hgen2 : Subgroup.zpowers (unitsToZModPow p 2 hum.unit) = ⊤ := by
     have hq2 : unitsToZModPow p 2 hum.unit = unitsToZModPow p 2 u₀ :=
       Units.ext (by rw [hval 2, hm2])
     rw [hq2]; exact hu₀ 2
-  -- generation descends along the (surjective) transition maps
   have hdown : ∀ {n₁ n₂ : ℕ}, n₁ ≤ n₂ →
       Subgroup.zpowers (unitsToZModPow p n₂ hum.unit) = ⊤ →
       Subgroup.zpowers (unitsToZModPow p n₁ hum.unit) = ⊤ := by
@@ -184,7 +167,6 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
       (ZMod.unitsMap_surjective (pow_dvd_pow p h))
   have hgen1 : Subgroup.zpowers (unitsToZModPow p 1 hum.unit) = ⊤ :=
     hdown one_le_two hgen2
-  -- Fermat decomposition m^{p−1} = 1 + p·c with p ∤ c
   have hm1 : 1 ≤ m := Nat.one_le_iff_ne_zero.2 fun h => hpm (h ▸ dvd_zero p)
   have hmp1 : 1 ≤ m ^ (p - 1) := Nat.one_le_pow _ _ hm1
   have hfermat : (p : ℕ) ∣ m ^ (p - 1) - 1 := by
@@ -198,7 +180,6 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
     exact (Nat.modEq_iff_dvd' hmp1).1 h3.symm
   obtain ⟨c, hc⟩ := hfermat
   have hc' : m ^ (p - 1) = 1 + p * c := by omega
-  -- p ∤ c: else m^{p−1} ≡ 1 mod p², contradicting order p(p−1) at level 2
   have hpc : ¬ p ∣ c := by
     rintro ⟨d, rfl⟩
     have hsq : (p ^ 2 : ℕ) ∣ m ^ (p - 1) - 1 := ⟨d, by rw [hc]; ring⟩
@@ -220,7 +201,6 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
     have h8 := hp.out.two_le
     omega
   have hcz : ¬ ((p : ℤ)) ∣ ((c : ℕ) : ℤ) := by exact_mod_cast hpc
-  -- main: every level generates
   intro n
   rcases Nat.lt_or_ge n 3 with hn | hn
   · exact hdown (by omega) hgen2
@@ -229,7 +209,6 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
     have hcard : Nat.card (ZMod (p ^ (n' + 1)))ˣ = p ^ n' * (p - 1) := by
       rw [Nat.card_eq_fintype_card, ZMod.card_units_eq_totient,
         Nat.totient_prime_pow hp.out (Nat.succ_pos n'), Nat.succ_sub_one]
-    -- (p − 1) ∣ orderOf g, via the level-1 image
     have ho1 : orderOf (unitsToZModPow p 1 hum.unit) = p - 1 := by
       rw [orderOf_eq_card_of_forall_mem_zpowers fun x => hgen1 ▸ Subgroup.mem_top x,
         Nat.card_eq_fintype_card, ZMod.card_units_eq_totient, pow_one,
@@ -240,7 +219,6 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
           = ZMod.unitsMap (pow_dvd_pow p (by omega : 1 ≤ n' + 1)) g from
           unitsToZModPow_le p (by omega) _]
       exact orderOf_map_dvd _ _
-    -- p^{n'} ∣ orderOf g, via 1 + pc
     have hd2 : p ^ n' ∣ orderOf g := by
       have hval_pow : ((g ^ (p - 1) : (ZMod (p ^ (n' + 1)))ˣ) : ZMod (p ^ (n' + 1)))
           = (1 : ZMod (p ^ (n' + 1))) + (p : ZMod (p ^ (n' + 1))) * (c : ZMod (p ^ (n' + 1))) := by
@@ -267,8 +245,6 @@ theorem exists_nat_topological_generator (hp2 : p ≠ 2) :
     have hog : orderOf g = Nat.card (ZMod (p ^ (n' + 1)))ˣ :=
       Nat.dvd_antisymm (orderOf_dvd_natCard g) (hcard ▸ hmul)
     exact Subgroup.eq_top_of_card_eq _ (by rw [Nat.card_zpowers, hog])
-
-/-! ## The p-adic zeta function (RJW Def. 4.10, Prop. 4.11, Thm. 4.1) -/
 
 /-- **RJW Def. 4.10 (`DefZetap`)**: the p-adic zeta function
 `ζ_p = (x⁻¹ Res_{ℤ_p^×} μ_a) / ([a] − [1]) ∈ Q(ℤ_p^×)`, for (a choice of) an integer
@@ -311,17 +287,14 @@ theorem padicZeta_moments (hp2 : p ≠ 2) (b : ℤ_[p]ˣ) {k : ℕ} (hk : 0 < k)
   obtain ⟨hpm, huv, hgen⟩ := (exists_nat_topological_generator p hp2).choose_spec.choose_spec
   set m := (exists_nat_topological_generator p hp2).choose with hm
   set u := (exists_nat_topological_generator p hp2).choose_spec.choose with hu
-  -- the defining relation ([u]−1)·ζ_p = zetaNum m
   have hspec : algebraMap _ (QuotientField p) (dirac p u - 1) * padicZeta p hp2
       = algebraMap _ _ (zetaNum p m) := by
     rw [padicZeta]
     exact IsLocalization.mk'_spec' (QuotientField p) _ _
-  -- pull the witness identity back to Λ(ℤ_p^×)
   have hkey : (dirac p u - 1) * ν = (dirac p b - 1) * zetaNum p m := by
     apply IsFractionRing.injective (PadicMeasure p ℤ_[p]ˣ) (QuotientField p)
     rw [map_mul, map_mul, ← hν, ← hspec]
     ring
-  -- moments of both sides
   have hmom := congrArg (fun μ : PadicMeasure p ℤ_[p]ˣ =>
     ((μ (unitsPowCM p k) : ℤ_[p]) : ℚ_[p])) hkey
   simp only [units_mul_apply_unitsPowCM, LinearMap.sub_apply] at hmom
@@ -330,26 +303,17 @@ theorem padicZeta_moments (hp2 : p ≠ 2) (b : ℤ_[p]ˣ) {k : ℕ} (hk : 0 < k)
     rw [units_one_def, hdir, Units.val_one, one_pow]
   rw [hdir, hdir, hone] at hmom
   push_cast at hmom
-  -- divide by (u^k − 1) ≠ 0
   have hne : ((u : ℤ_[p]) : ℚ_[p]) ^ k - 1 ≠ 0 := by
     refine sub_ne_zero.2 fun h => topGen_pow_ne_one p hgen k hk ?_
-    have h2 : (((u : ℤ_[p]) ^ k : ℤ_[p]) : ℚ_[p]) = ((1 : ℤ_[p]) : ℚ_[p]) := by
-      push_cast
-      exact h
-    exact Subtype.coe_injective h2
-  -- value of the numerator moments
-  have hzm := zetaNum_moments p hpm hk
-  -- (m : ℚ_p) = (u : ℚ_p)
+    exact Subtype.coe_injective (by push_cast; exact h)
   have hmu : ((m : ℕ) : ℚ_[p]) = ((u : ℤ_[p]) : ℚ_[p]) := by
     rw [huv]
     push_cast
     rfl
-  rw [hzm, hmu] at hmom
-  -- sign removal, cast to ℚ_p
+  rw [zetaNum_moments p hpm hk, hmu] at hmom
   have hsign := congrArg (fun q : ℚ => (q : ℚ_[p]))
     (neg_one_pow_mul_one_sub_pow_mul_zetaNeg (p : ℚ) hk)
   push_cast at hsign
-  -- solve the linear relation
   refine mul_left_cancel₀ hne ?_
   rw [hmom]
   linear_combination ((((b : ℤ_[p]) : ℚ_[p])) ^ k - 1)
@@ -386,15 +350,10 @@ theorem kubotaLeopoldt (hp2 : p ≠ 2) :
     have h1 := hmom u k hk ν₁ hν₁
     have h2 := padicZeta_moments p hp2 u hk ν₂ hν₂
     rw [hsplit]
-    have hcast : (((ν₁ - ν₂) (unitsPowCM p k) : ℤ_[p]) : ℚ_[p]) = 0 := by
-      rw [LinearMap.sub_apply]
-      push_cast
-      rw [h1, h2]
-      ring
     refine Subtype.coe_injective ?_
-    change (((ν₁ - ν₂) (unitsPowCM p k) : ℤ_[p]) : ℚ_[p]) = ((0 : ℤ_[p]) : ℚ_[p])
-    rw [hcast]
-    norm_num
+    push_cast [LinearMap.sub_apply]
+    rw [h1, h2]
+    ring
   exact sub_eq_zero.1 hzero
 
 end PadicMeasure

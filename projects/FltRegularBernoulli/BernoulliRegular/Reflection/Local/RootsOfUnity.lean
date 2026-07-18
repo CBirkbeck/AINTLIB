@@ -78,8 +78,7 @@ theorem localCyclotomicMuP_pow_eq_one {u : localCyclotomicUnitGroup p K}
 /-- The localized distinguished root is a principal unit. -/
 theorem localCyclotomicZetaUnit_mem_principalUnitSubgroup_one :
     localCyclotomicZetaUnit p K ∈ principalUnitSubgroup p K 1 := by
-  rw [mem_principalUnitSubgroup_iff]
-  rw [pow_one]
+  rw [mem_principalUnitSubgroup_iff, pow_one]
   let hζ := IsCyclotomicExtension.zeta_spec p ℚ K
   change algebraMap (𝓞 K) (localCyclotomicRing p K) hζ.toInteger - 1 ∈
     localCyclotomicMaximalIdeal p K
@@ -112,9 +111,8 @@ theorem localCyclotomicZetaUnit_not_mem_principalUnitSubgroup_two :
   have hmap : algebraMap (𝓞 K) (localCyclotomicRing p K)
       ((hζ.toInteger : 𝓞 K) - 1) ∈ localCyclotomicMaximalIdeal p K ^ 2 := by
     simpa using hmem
-  rw [← localCyclotomicMaximalIdeal_eq_map p K] at hmap
-  rw [← Ideal.map_pow] at hmap
-  rw [IsLocalization.algebraMap_mem_map_algebraMap_iff
+  rw [← localCyclotomicMaximalIdeal_eq_map p K, ← Ideal.map_pow,
+    IsLocalization.algebraMap_mem_map_algebraMap_iff
     (M := (cyclotomicLambda p K).primeCompl) (S := localCyclotomicRing p K)] at hmap
   rcases hmap with ⟨s, hs, hsπ⟩
   have hπ_sq_dvd : ((hζ.toInteger : 𝓞 K) - 1) ^ 2 ∣
@@ -130,7 +128,7 @@ theorem localCyclotomicZetaUnit_not_mem_principalUnitSubgroup_two :
 
 /-- The root-of-unity subgroup contributes nontrivially modulo `U_2`. -/
 theorem not_localCyclotomicMuP_le_principalUnitSubgroup_two :
-    ¬ localCyclotomicMuP p K ≤ principalUnitSubgroup p K 2 := fun hle =>
+    ¬ localCyclotomicMuP p K ≤ principalUnitSubgroup p K 2 := fun hle ↦
   localCyclotomicZetaUnit_not_mem_principalUnitSubgroup_two (p := p) (K := K)
     (hle (localCyclotomicZetaUnit_mem_muP (p := p) (K := K)))
 

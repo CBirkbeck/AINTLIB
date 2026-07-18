@@ -133,10 +133,9 @@ D_T_loc relations).
 
 namespace ValuationSpectrum
 
-variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
+variable {A : Type*} [CommRing A] [TopologicalSpace A]
   [IsTopologicalRing A]
 
-omit [PlusSubring A] in
 /-- **Strictly sharper named source-restricted denominator-clearing chain
 identity at the T065-produced σ_loc** (T084 sharper named identity).
 
@@ -200,7 +199,6 @@ def Cor732SigmaDenominatorClearingChainIdentity
           v.vle τ (D_s_loc * (σ_loc : Localization.Away s)) ∧
           ¬ v.vle D_s_loc 0
 
-omit [PlusSubring A] in
 /-- **`Cor732SigmaDirectUpperBoundResidual` from the denominator-clearing
 chain identity** (T084 main ticket-named theorem).
 
@@ -250,7 +248,6 @@ theorem cor732_sigma_direct_upper_bound_residual_from_denominator_identity
   -- Step 2: T050 σ-cancellation gives v.vle t' D_s_loc.
   exact (per_t_inequality_via_sigma_factor v σ_loc t' D_s_loc).mp h_factored
 
-omit [PlusSubring A] in
 /-- **End-to-end: σ-factored supplier from the denominator-clearing chain
 identity** (T084 final consumer).
 

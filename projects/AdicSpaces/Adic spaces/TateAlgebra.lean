@@ -101,7 +101,7 @@ noncomputable def coeff (n : ℕ) (f : ↥(TateAlgebra A)) : A :=
 /-- The coefficients of a restricted power series tend to zero along the
 cofinite filter on `ℕ`. This is the univariate form of restrictedness. -/
 theorem coeff_tendsto_zero (f : ↥(TateAlgebra A)) :
-    Filter.Tendsto (fun n => coeff n f) Filter.cofinite (nhds (0 : A)) :=
+    Filter.Tendsto (fun n ↦ coeff n f) Filter.cofinite (nhds (0 : A)) :=
   f.prop.comp (Finsupp.single_injective (0 : Fin 1)).tendsto_cofinite
 
 /-- The variable `X` as an element of `A⟨X⟩`. -/
@@ -112,7 +112,7 @@ noncomputable def X : ↥(TateAlgebra A) :=
 @[ext]
 theorem ext {f g : ↥(TateAlgebra A)} (h : ∀ n : ℕ, coeff n f = coeff n g) : f = g := by
   ext1
-  exact MvPowerSeries.ext fun s => by rw [eq_toIndex s]; exact h (s 0)
+  exact MvPowerSeries.ext fun s ↦ by rw [eq_toIndex s]; exact h (s 0)
 
 /-- The constant term (evaluation at zero) is a ring homomorphism `A⟨X⟩ →+* A`. -/
 noncomputable def evalZeroHom : ↥(TateAlgebra A) →+* A where
@@ -225,7 +225,7 @@ noncomputable instance : Algebra A (LaurentTateAlgebra A) :=
 a `k`-variate one by mapping the single variable to variable `j`. -/
 noncomputable def varInclFun {k : ℕ} (j : Fin k) (f : MvPowerSeries (Fin 1) A) :
     MvPowerSeries (Fin k) A :=
-  fun e => if e = Finsupp.single j (e j)
+  fun e ↦ if e = Finsupp.single j (e j)
     then (MvPowerSeries.coeff (Finsupp.single 0 (e j))) f else 0
 
 omit [TopologicalSpace A] [NonarchimedeanRing A] in
@@ -317,7 +317,7 @@ theorem varInclHom_isRestricted {k : ℕ} (j : Fin k) (f : MvPowerSeries (Fin 1)
   have hfU : {s | (MvPowerSeries.coeff s) f ∉ U}.Finite := by
     have := tendsto_nhds.mp hf U hU h0U
     rwa [Filter.mem_cofinite] at this
-  apply (hfU.image (fun d => Finsupp.mapDomain (fun _ => j) d)).subset
+  apply (hfU.image (fun d ↦ Finsupp.mapDomain (fun _ ↦ j) d)).subset
   intro e he
   simp only [Set.mem_compl_iff, Set.mem_preimage] at he
   have he2 : varInclFun j f e ∉ U := by
@@ -326,7 +326,7 @@ theorem varInclHom_isRestricted {k : ℕ} (j : Fin k) (f : MvPowerSeries (Fin 1)
   rw [varInclFun_apply] at he2
   split_ifs at he2 with h
   · refine ⟨Finsupp.single 0 (e j), he2, ?_⟩
-    change Finsupp.mapDomain (fun _ => j) (Finsupp.single 0 (e j)) = e
+    change Finsupp.mapDomain (fun _ ↦ j) (Finsupp.single 0 (e j)) = e
     rw [Finsupp.mapDomain_single]; exact h.symm
   · exact absurd h0U he2
 
@@ -393,7 +393,7 @@ theorem evalZeroHom_comp_algebraMap :
 /-- The "shift" of a univariate power series: `(shiftFun f)(s) = f(s + single 0 1)`.
 This extracts the quotient `f / X` when `f(0) = 0`. -/
 noncomputable def shiftFun (f : MvPowerSeries (Fin 1) A) : MvPowerSeries (Fin 1) A :=
-  fun s => f (s + Finsupp.single 0 1)
+  fun s ↦ f (s + Finsupp.single 0 1)
 
 omit [NonarchimedeanRing A] in
 /-- The shift of a restricted power series is restricted. The map `s ↦ s + single 0 1`
@@ -402,10 +402,10 @@ theorem shiftFun_isRestricted {f : MvPowerSeries (Fin 1) A}
     (hf : MvPowerSeries.IsRestricted f) : MvPowerSeries.IsRestricted (shiftFun f) := by
   change Tendsto _ cofinite (nhds 0)
   change Tendsto _ cofinite (nhds 0) at hf
-  have inj : Function.Injective fun s : Fin 1 →₀ ℕ => s + Finsupp.single 0 1 :=
-    fun s t h => by
+  have inj : Function.Injective fun s : Fin 1 →₀ ℕ ↦ s + Finsupp.single 0 1 :=
+    fun s t h ↦ by
       simp only [Finsupp.ext_iff, Finsupp.add_apply, Finsupp.single_apply] at h
-      exact Finsupp.ext (fun i => by have := h i; omega)
+      exact Finsupp.ext (fun i ↦ by have := h i; omega)
   exact hf.comp inj.tendsto_cofinite
 
 /-- The shift as an element of `A⟨X⟩`: given `f ∈ A⟨X⟩`, `shift f` is the shifted
@@ -552,7 +552,7 @@ private theorem noeth_zero_of_mul_shift [IsNoetherianRing A] (a : A) (x : ℕ �
     intro k
     have : a ^ (k + 1) * x k = a * (a ^ k * x k) := by ring
     rw [this, ← hpow k, h0]
-  have chain_monotone : Monotone (fun n => (⟨⟨⟨{b | a ^ n * b = 0},
+  have chain_monotone : Monotone (fun n ↦ (⟨⟨⟨{b | a ^ n * b = 0},
     fun {x y} (hx : a ^ n * x = 0) (hy : a ^ n * y = 0) => by
       change a ^ n * (x + y) = 0; rw [mul_add, hx, hy, add_zero]⟩,
     by change a ^ n * 0 = 0; simp⟩,
@@ -604,16 +604,17 @@ theorem isRestricted_iff_finite_support [DiscreteTopology A]
   rw [nhds_discrete, tendsto_pure, Filter.Eventually, Filter.mem_cofinite]
   constructor
   · intro h
-    exact h.subset (fun s hs => by simp only [Set.mem_compl_iff] at hs ⊢; exact hs)
+    exact h.subset (fun s hs ↦ by simp only [Set.mem_compl_iff] at hs ⊢; exact hs)
   · intro h
-    exact h.subset (fun s hs => by simp only [Set.mem_compl_iff] at hs ⊢; exact hs)
+    exact h.subset (fun s hs ↦ by simp only [Set.mem_compl_iff] at hs ⊢; exact hs)
 
 omit [NonarchimedeanRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- A finitely supported function gives a restricted power series (discrete case). -/
 theorem finsupp_isRestricted [DiscreteTopology A]
     (g : (Fin 1 →₀ ℕ) →₀ A) :
     MvPowerSeries.IsRestricted
-      (fun s => g s : MvPowerSeries (Fin 1) A) := by
+      (fun s ↦ g s : MvPowerSeries (Fin 1) A) := by
   rw [isRestricted_iff_finite_support]
   apply g.support.finite_toSet.subset
   intro s hs
@@ -626,15 +627,15 @@ noncomputable def toFinsupp [DiscreteTopology A]
     (f : ↥(TateAlgebra A)) : (Fin 1 →₀ ℕ) →₀ A :=
   Finsupp.onFinset
     ((isRestricted_iff_finite_support f.val).mp f.prop).toFinset
-    (fun s => MvPowerSeries.coeff s f.val)
-    (fun s hs => by
+    (fun s ↦ MvPowerSeries.coeff s f.val)
+    (fun s hs ↦ by
       simp only [Set.Finite.mem_toFinset, Set.mem_setOf_eq]
       exact hs)
 
 /-- The backward map: `(Fin 1 →₀ ℕ) →₀ A → TateAlgebra A` (discrete case). -/
 noncomputable def ofFinsupp [DiscreteTopology A]
     (g : (Fin 1 →₀ ℕ) →₀ A) : ↥(TateAlgebra A) :=
-  ⟨fun s => g s, finsupp_isRestricted g⟩
+  ⟨fun s ↦ g s, finsupp_isRestricted g⟩
 
 /-- The `A`-linear equivalence `TateAlgebra A ≃ₗ[A] (Fin 1 →₀ ℕ) →₀ A`
 (discrete case). This exhibits `TateAlgebra A` as a free `A`-module. -/
@@ -672,21 +673,24 @@ We build a ring isomorphism `TateAlgebra A ≃+* MvPolynomial (Fin 1) A`. -/
 This is `toFinsupp` with the correct type annotation for `MvPolynomial`. -/
 noncomputable def toMvPolynomial [DiscreteTopology A]
     (f : ↥(TateAlgebra A)) : MvPolynomial (Fin 1) A :=
-  toFinsupp f
+  .ofCoeff (toFinsupp f)
 
 /-- Convert an `MvPolynomial (Fin 1) A` to `TateAlgebra A` (discrete case).
 This is `ofFinsupp` with the correct type annotation for `MvPolynomial`. -/
 noncomputable def fromMvPolynomial [DiscreteTopology A]
     (p : MvPolynomial (Fin 1) A) : ↥(TateAlgebra A) :=
-  ofFinsupp p
+  ofFinsupp (AddMonoidAlgebra.coeff p)
 
 theorem fromMvPolynomial_toMvPolynomial [DiscreteTopology A] (f : ↥(TateAlgebra A)) :
-    fromMvPolynomial (toMvPolynomial f) = f :=
-  (linearEquivFinsupp (A := A)).left_inv f
+    fromMvPolynomial (toMvPolynomial f) = f := by
+  rw [fromMvPolynomial, toMvPolynomial, AddMonoidAlgebra.coeff_ofCoeff]
+  exact (linearEquivFinsupp (A := A)).left_inv f
 
 theorem toMvPolynomial_fromMvPolynomial [DiscreteTopology A] (p : MvPolynomial (Fin 1) A) :
-    toMvPolynomial (fromMvPolynomial p) = p :=
-  (linearEquivFinsupp (A := A)).right_inv p
+    toMvPolynomial (fromMvPolynomial p) = p := by
+  rw [toMvPolynomial, fromMvPolynomial,
+    show toFinsupp (ofFinsupp (AddMonoidAlgebra.coeff p)) = AddMonoidAlgebra.coeff p from
+      (linearEquivFinsupp (A := A)).right_inv (AddMonoidAlgebra.coeff p)]
 
 /-- `fromMvPolynomial` preserves multiplication: it is the restriction of the
 coercion `MvPolynomial → MvPowerSeries`, which is a ring homomorphism. -/
@@ -705,15 +709,18 @@ theorem fromMvPolynomial_one [DiscreteTopology A] :
 
 theorem toMvPolynomial_mul [DiscreteTopology A] (f g : ↥(TateAlgebra A)) :
     toMvPolynomial (f * g) = toMvPolynomial f * toMvPolynomial g := by
-  apply_fun fromMvPolynomial using fun a b h => by
+  apply_fun fromMvPolynomial using fun a b h ↦ by
     have := congr_arg toMvPolynomial h
     rwa [toMvPolynomial_fromMvPolynomial, toMvPolynomial_fromMvPolynomial] at this
   rw [fromMvPolynomial_mul, fromMvPolynomial_toMvPolynomial,
       fromMvPolynomial_toMvPolynomial, fromMvPolynomial_toMvPolynomial]
 
 theorem toMvPolynomial_add [DiscreteTopology A] (f g : ↥(TateAlgebra A)) :
-    toMvPolynomial (f + g) = toMvPolynomial f + toMvPolynomial g :=
-  (linearEquivFinsupp (A := A)).map_add' f g
+    toMvPolynomial (f + g) = toMvPolynomial f + toMvPolynomial g := by
+  rw [toMvPolynomial, toMvPolynomial, toMvPolynomial,
+    show toFinsupp (f + g) = toFinsupp f + toFinsupp g from
+      (linearEquivFinsupp (A := A)).map_add' f g]
+  rfl
 
 /-- The ring equivalence `TateAlgebra A ≃+* MvPolynomial (Fin 1) A` (discrete case).
 Under `[DiscreteTopology A]`, the restricted power series ring coincides with the
@@ -736,7 +743,7 @@ is a well-defined ring homomorphism, since elements have finite support. -/
 /-- Evaluation of `TateAlgebra A` at `f : A`, defined as the composition
 `TateAlgebra A ≃+* MvPolynomial (Fin 1) A →[eval] A` (discrete case). -/
 noncomputable def evalFHom [DiscreteTopology A] (f : A) : ↥(TateAlgebra A) →+* A :=
-  (MvPolynomial.eval (fun _ => f)).comp ringEquivMvPolynomial.toRingHom
+  (MvPolynomial.eval (fun _ ↦ f)).comp ringEquivMvPolynomial.toRingHom
 
 theorem ringEquivMvPolynomial_algebraMap [DiscreteTopology A] (a : A) :
     ringEquivMvPolynomial (algebraMap A (↥(TateAlgebra A)) a) = MvPolynomial.C a := by
@@ -752,11 +759,12 @@ theorem ringEquivMvPolynomial_X [DiscreteTopology A] :
       MvPolynomial.coeff s (MvPolynomial.X (0 : Fin 1)) by
     ext s; exact h s
   intro s
-  change @DFunLike.coe _ _ _ Finsupp.instFunLike (toMvPolynomial (X : ↥(TateAlgebra A))) s = _
-  simp only [toMvPolynomial, toFinsupp, Finsupp.onFinset_apply]
+  show MvPolynomial.coeff s (toMvPolynomial (X : ↥(TateAlgebra A))) = _
+  rw [toMvPolynomial, MvPolynomial.coeff, AddMonoidAlgebra.coeff_ofCoeff]
+  simp only [toFinsupp, Finsupp.onFinset_apply]
   change MvPowerSeries.coeff s (MvPowerSeries.X (0 : Fin 1)) = _
   rw [MvPowerSeries.coeff_X]
-  rw [MvPolynomial.coeff_X']
+  rw [MvPolynomial.coeff_X]
   simp only [eq_comm]
 
 theorem evalFHom_algebraMap [DiscreteTopology A] (f a : A) :
@@ -838,7 +846,7 @@ theorem sub_algebraMap_evalFHom_mem_ideal_fSubX [DiscreteTopology A] (f : A)
           evalFHom f X * evalFHom f (shift q) := by rw [map_add, map_mul]
       _ = coeff 0 q + f * evalFHom f (shift q) := by
           rw [evalFHom_algebraMap, evalFHom_X]; rfl
-  have eval_zero_eq : ∀ (q : ↥(TateAlgebra A)), evalZeroHom q = coeff 0 q := fun _ => rfl
+  have eval_zero_eq : ∀ (q : ↥(TateAlgebra A)), evalZeroHom q = coeff 0 q := fun _ ↦ rfl
   have key_identity : ∀ (q : ↥(TateAlgebra A)),
       q - algebraMap A _ (evalFHom f q) =
       X * (shift q - algebraMap A _ (evalFHom f (shift q))) +
@@ -873,7 +881,7 @@ theorem sub_algebraMap_evalFHom_mem_ideal_fSubX [DiscreteTopology A] (f : A)
       rw [key_identity]
       apply Ideal.add_mem
       · apply Ideal.mul_mem_left
-        exact ih (shift q) (fun k hk => by rw [coeff_shift]; exact hq _ (by omega))
+        exact ih (shift q) (fun k hk ↦ by rw [coeff_shift]; exact hq _ (by omega))
       · apply Ideal.mul_mem_right
         have hmem : (X : ↥(TateAlgebra A)) - algebraMap A ↥(TateAlgebra A) f =
             -(algebraMap A ↥(TateAlgebra A) f - X) := by ring
@@ -883,27 +891,27 @@ theorem sub_algebraMap_evalFHom_mem_ideal_fSubX [DiscreteTopology A] (f : A)
     (isRestricted_iff_finite_support p.val).mp p.prop
   by_cases hp : ∀ k, coeff k p = 0
   · rw [(ext hp : p = 0), map_zero, map_zero, sub_self]; exact Ideal.zero_mem _
-  · push_neg at hp
+  · push Not at hp
     have hne : hfin.toFinset.Nonempty := by
       obtain ⟨k, hk⟩ := hp
       refine ⟨toIndex k, ?_⟩
       rw [Set.Finite.mem_toFinset]
       simp only [Set.mem_setOf_eq, coeff, toIndex] at hk ⊢
       exact hk
-    refine hmain (hfin.toFinset.sup' hne (fun s => s 0)) p (fun k hk => ?_)
+    refine hmain (hfin.toFinset.sup' hne (fun s ↦ s 0)) p (fun k hk ↦ ?_)
     by_contra hne2
     have hmem : toIndex k ∈ hfin.toFinset := by
       rw [Set.Finite.mem_toFinset]
       simp only [Set.mem_setOf_eq, coeff, toIndex] at hne2 ⊢
       exact hne2
-    have hle := Finset.le_sup' (fun s : Fin 1 →₀ ℕ => s 0) hmem
+    have hle := Finset.le_sup' (fun s : Fin 1 →₀ ℕ ↦ s 0) hmem
     simp only [toIndex, Finsupp.single_apply, ite_true] at hle
     omega
 
 /-- The quotient ring hom from `TateAlgebra A ⧸ (f-X)` to `A`. -/
 noncomputable def quotientFSubXToA [DiscreteTopology A] (f : A) :
     (↥(TateAlgebra A) ⧸ Ideal.span {algebraMap A ↥(TateAlgebra A) f - X}) →+* A :=
-  Ideal.Quotient.lift _ (evalFHom f) (fun x hx => by
+  Ideal.Quotient.lift _ (evalFHom f) (fun x hx ↦ by
     exact ideal_fSubX_le_ker_evalFHom f hx)
 
 /-- The ring hom from `A` to `TateAlgebra A ⧸ (f-X)`. -/
@@ -911,6 +919,7 @@ noncomputable def AToQuotientFSubX [DiscreteTopology A] (f : A) :
     A →+* (↥(TateAlgebra A) ⧸ Ideal.span {algebraMap A ↥(TateAlgebra A) f - X}) :=
   (Ideal.Quotient.mk _).comp (algebraMap A _)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem quotientFSubXToA_comp_AToQuotientFSubX [DiscreteTopology A] (f : A) :
     (quotientFSubXToA f).comp (AToQuotientFSubX f) = RingHom.id A := by
   ext a
@@ -966,7 +975,7 @@ theorem mul_fSubX_regular [IsNoetherianRing A] (f : A) :
   have hall : ∀ n, coeff n u = 0 := by
     intro n; induction n using Nat.strongRecOn with
     | ind n ih =>
-      refine noeth_zero_of_mul_shift f (fun k => coeff (n + k) u) ?_ (fun k => hstep (n + k))
+      refine noeth_zero_of_mul_shift f (fun k ↦ coeff (n + k) u) ?_ (fun k ↦ hstep (n + k))
       simp only [Nat.add_zero]
       cases n with
       | zero => exact h0
@@ -1029,7 +1038,7 @@ This factors through the quotient by `(1 - fX)` and yields an isomorphism
 Defined as `MvPolynomial.eval (fun _ => invSelf f)` composed with `ringEquivMvPolynomial`. -/
 noncomputable def evalInvFHom [DiscreteTopology A] (f : A) :
     ↥(TateAlgebra A) →+* Localization.Away f :=
-  ((MvPolynomial.aeval (R := A) (fun (_ : Fin 1) =>
+  ((MvPolynomial.aeval (R := A) (fun (_ : Fin 1) ↦
     IsLocalization.Away.invSelf (S := Localization.Away f) f)).toRingHom).comp
     ringEquivMvPolynomial.toRingHom
 
@@ -1065,7 +1074,7 @@ theorem ideal_oneSubfX_le_ker_evalInvFHom [DiscreteTopology A] (f : A) :
 noncomputable def quotientOneSubfXToLoc [DiscreteTopology A] (f : A) :
     (↥(TateAlgebra A) ⧸ Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * X}) →+*
       Localization.Away f :=
-  Ideal.Quotient.lift _ (evalInvFHom f) (fun _ hx =>
+  Ideal.Quotient.lift _ (evalInvFHom f) (fun _ hx ↦
     ideal_oneSubfX_le_ker_evalInvFHom f hx)
 
 /-- The image of `algebraMap f` is a unit in `TateAlgebra A ⧸ (1-fX)`, with inverse
@@ -1104,6 +1113,7 @@ theorem locToQuotientOneSubfX_algebraMap [DiscreteTopology A] (f a : A) :
   rw [IsLocalization.Away.lift_eq]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 theorem quotientOneSubfXToLoc_comp_locToQuotientOneSubfX [DiscreteTopology A] (f : A) :
     (quotientOneSubfXToLoc f).comp (locToQuotientOneSubfX f) =
       RingHom.id (Localization.Away f) := by
@@ -1164,7 +1174,7 @@ theorem locToQuotientOneSubfX_comp_quotientOneSubfXToLoc [DiscreteTopology A] (f
     change MvPowerSeries.coeff (Finsupp.single 0 k) (shiftFun q.val) =
       MvPowerSeries.coeff (Finsupp.single 0 (k + 1)) q.val
     simp only [shiftFun, MvPowerSeries.coeff_apply, Finsupp.single_add]
-  have eval_zero_eq : ∀ (q : ↥(TateAlgebra A)), evalZeroHom q = coeff 0 q := fun _ => rfl
+  have eval_zero_eq : ∀ (q : ↥(TateAlgebra A)), evalZeroHom q = coeff 0 q := fun _ ↦ rfl
   have hmain : ∀ (n : ℕ) (q : ↥(TateAlgebra A)),
       (∀ k, n < k → coeff k q = 0) →
       locToQuotientOneSubfX f (evalInvFHom f q) =
@@ -1195,25 +1205,25 @@ theorem locToQuotientOneSubfX_comp_quotientOneSubfXToLoc [DiscreteTopology A] (f
         evalInvFHom_X, loc_inv]
       congr 1
       congr 1
-      exact ih (shift q) (fun k hk => by rw [coeff_shift]; exact hq _ (by omega))
+      exact ih (shift q) (fun k hk ↦ by rw [coeff_shift]; exact hq _ (by omega))
   have hfin : Set.Finite {s : Fin 1 →₀ ℕ | p.val s ≠ 0} :=
     (isRestricted_iff_finite_support p.val).mp p.prop
   by_cases hp : ∀ k, coeff k p = 0
   · rw [(ext hp : p = 0), map_zero, map_zero, map_zero]
-  · push_neg at hp
+  · push Not at hp
     have hne : hfin.toFinset.Nonempty := by
       obtain ⟨k, hk⟩ := hp
       refine ⟨toIndex k, ?_⟩
       rw [Set.Finite.mem_toFinset]
       simp only [Set.mem_setOf_eq, coeff, toIndex] at hk ⊢
       exact hk
-    exact hmain (hfin.toFinset.sup' hne (fun s => s 0)) p (fun k hk => by
+    exact hmain (hfin.toFinset.sup' hne (fun s ↦ s 0)) p (fun k hk ↦ by
       by_contra hne2
       have hmem : toIndex k ∈ hfin.toFinset := by
         rw [Set.Finite.mem_toFinset]
         simp only [Set.mem_setOf_eq, coeff, toIndex] at hne2 ⊢
         exact hne2
-      have hle := Finset.le_sup' (fun s : Fin 1 →₀ ℕ => s 0) hmem
+      have hle := Finset.le_sup' (fun s : Fin 1 →₀ ℕ ↦ s 0) hmem
       simp only [toIndex, Finsupp.single_apply, ite_true] at hle
       omega)
 
@@ -1236,6 +1246,7 @@ noncomputable def quotientOneSubfXEquiv [DiscreteTopology A] (f : A) :
   map_mul' := map_mul _
   map_add' := map_add _
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `A⟨X⟩/(1 - f·X)` is flat over a noetherian `A` (Lemma 8.31(2), second case).
 Under discrete topology, `A⟨X⟩/(1-fX) ≅ Localization.Away f` via the universal
 property of localization, and localization is flat.
@@ -1285,7 +1296,7 @@ private lemma mem_span_range_iff_exists_fin {R : Type u} [CommRing R] {M : Type 
     intro j _ hj; rw [Finsupp.notMem_support_iff] at hj; simp [hj]
   · intro ⟨c, hc⟩; rw [hc]
     exact Submodule.sum_mem _
-      (fun j _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩))
+      (fun j _ ↦ Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩))
 
 /-- The relation map for syzygies: sends `r` to `∑ f(i) * r(i)`. -/
 private noncomputable def relMapFlat {R : Type u} [CommRing R] {l : ℕ}
@@ -1319,15 +1330,15 @@ theorem Module.Flat.pi_self {R : Type u} [CommRing R] [IsNoetherianRing R]
   have hdecomp : ∀ n : ι, ∃ c : Fin k → R,
       ∀ i, x i n = ∑ j, c j * (s j : Fin l → R) i := by
     intro n
-    have hmem : (⟨fun i => x i n, by
+    have hmem : (⟨fun i ↦ x i n, by
         simp only [LinearMap.mem_ker, relMapFlat]; exact hcoord n⟩ :
         ↥(LinearMap.ker (relMapFlat f))) ∈
         Submodule.span R (Set.range s) := by
       rw [hs]; trivial
     obtain ⟨c, hc⟩ := mem_span_range_iff_exists_fin.mp hmem
-    exact ⟨c, fun i => by
+    exact ⟨c, fun i ↦ by
       have := congr_arg
-        (fun (v : ↥(LinearMap.ker (relMapFlat f))) =>
+        (fun (v : ↥(LinearMap.ker (relMapFlat f))) ↦
           (v : Fin l → R) i) hc
       simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
         Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
@@ -1336,8 +1347,8 @@ theorem Module.Flat.pi_self {R : Type u} [CommRing R] [IsNoetherianRing R]
   -- Build IsTrivialRelation witnesses:
   -- a(i,j) = s(j)(i) (syzygy generator components)
   -- y(j)(n) = c(n)(j) (coefficient at coordinate n)
-  refine ⟨k, fun i j => (s j : Fin l → R) i,
-    fun j n => c n j, ?_, ?_⟩
+  refine ⟨k, fun i j ↦ (s j : Fin l → R) i,
+    fun j n ↦ c n j, ?_, ?_⟩
   · -- x(i) = ∑_j a(i,j) • y(j)
     intro i; ext n
     simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
@@ -1396,11 +1407,11 @@ Remark 8.29 of Wedhorn. -/
 noncomputable def restrictedModule_fin_equiv (n : ℕ) :
     restrictedModule A (Fin n → A) ≃ₗ[A]
       Fin n → ↥(TateAlgebra A) where
-  toFun f i := ⟨fun s => f.val s i,
-    (tendsto_pi_nhds.mp f.prop i).congr fun _ => rfl⟩
-  invFun g := ⟨fun s i => (g i).val s,
-    tendsto_pi_nhds.mpr fun i =>
-      ((g i).prop).congr fun s =>
+  toFun f i := ⟨fun s ↦ f.val s i,
+    (tendsto_pi_nhds.mp f.prop i).congr fun _ ↦ rfl⟩
+  invFun g := ⟨fun s i ↦ (g i).val s,
+    tendsto_pi_nhds.mpr fun i ↦
+      ((g i).prop).congr fun s ↦
         (MvPowerSeries.coeff_apply _ _).symm⟩
   left_inv f := by apply Subtype.ext; rfl
   right_inv g := by funext i; apply Subtype.ext; rfl
@@ -1409,7 +1420,7 @@ noncomputable def restrictedModule_fin_equiv (n : ℕ) :
     funext i; apply Subtype.ext; funext s
     simp only [RingHom.id_apply, Pi.smul_apply]
     change (a • f.val) s i =
-      (a • (⟨fun s => f.val s i, _⟩ :
+      (a • (⟨fun s ↦ f.val s i, _⟩ :
         ↥(TateAlgebra A))).val s
     rw [TateAlgebra.smul_val_eq]; rfl
 
@@ -1426,21 +1437,21 @@ noncomputable def muMap
     TensorProduct A M ↥(TateAlgebra A) →ₗ[A]
       ↥(restrictedModule A M) :=
   TensorProduct.lift (LinearMap.mk₂ A
-    (fun m f => ⟨fun s => f.val s • m, by
+    (fun m f ↦ ⟨fun s ↦ f.val s • m, by
       change Tendsto _ cofinite (nhds 0)
       rw [show (0 : M) = (0 : A) • m from
         (zero_smul A m).symm]
-      exact (f.prop.congr fun s =>
+      exact (f.prop.congr fun s ↦
         (MvPowerSeries.coeff_apply _ _).symm).smul_const
           m⟩)
-    (fun m₁ m₂ f =>
-      Subtype.ext (funext fun s => smul_add _ _ _))
-    (fun a m f => Subtype.ext (funext fun s => by
+    (fun m₁ m₂ f ↦
+      Subtype.ext (funext fun s ↦ smul_add _ _ _))
+    (fun a m f ↦ Subtype.ext (funext fun s ↦ by
       change f.val s • (a • m) = a • (f.val s • m)
       rw [smul_comm]))
-    (fun m f₁ f₂ =>
-      Subtype.ext (funext fun s => add_smul _ _ _))
-    (fun a m f => Subtype.ext (funext fun s => by
+    (fun m f₁ f₂ ↦
+      Subtype.ext (funext fun s ↦ add_smul _ _ _))
+    (fun a m f ↦ Subtype.ext (funext fun s ↦ by
       change (a • f).val s • m = a • (f.val s • m)
       rw [TateAlgebra.smul_val_eq, mul_smul])))
 
@@ -1466,6 +1477,7 @@ theorem restrictedModule_map_injective
 
 /-! #### Equivalence restrictedModule A A ≃ TateAlgebra A -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The restricted module `A⟨X⟩` (as an `A`-submodule of
 `MvPowerSeries`) is linearly equivalent to the Tate algebra `A⟨X⟩`
 (as a subring). The two have the same carrier (restricted power
@@ -1473,10 +1485,10 @@ series) viewed through different type-class lenses. -/
 noncomputable def restrictedModuleA_equiv :
     ↥(restrictedModule A A) ≃ₗ[A] ↥(TateAlgebra A) where
   toFun f := ⟨f.val,
-    f.prop.congr fun s =>
+    f.prop.congr fun s ↦
       MvPowerSeries.coeff_apply f.val s⟩
   invFun g := ⟨g.val,
-    g.prop.congr fun s =>
+    g.prop.congr fun s ↦
       (MvPowerSeries.coeff_apply g.val s).symm⟩
   left_inv f := by apply Subtype.ext; rfl
   right_inv g := by apply Subtype.ext; rfl
@@ -1514,11 +1526,11 @@ omit [NonarchimedeanRing A] [IsTopologicalRing A] in
 private def piOpenAddSubgroup {n : ℕ} (W : Fin n → OpenAddSubgroup A) :
     OpenAddSubgroup (Fin n → A) where
   toAddSubgroup := {
-    carrier := Set.pi Set.univ (fun i => (W i : Set A))
-    add_mem' := fun ha hb => fun i _ => (W i).add_mem (ha i trivial) (hb i trivial)
-    zero_mem' := fun i _ => (W i).zero_mem
-    neg_mem' := fun ha => fun i _ => (W i).neg_mem (ha i trivial) }
-  isOpen' := isOpen_set_pi (Set.toFinite _) (fun i _ => (W i).isOpen)
+    carrier := Set.pi Set.univ (fun i ↦ (W i : Set A))
+    add_mem' := fun ha hb ↦ fun i _ ↦ (W i).add_mem (ha i trivial) (hb i trivial)
+    zero_mem' := fun i _ ↦ (W i).zero_mem
+    neg_mem' := fun ha ↦ fun i _ ↦ (W i).neg_mem (ha i trivial) }
+  isOpen' := isOpen_set_pi (Set.toFinite _) (fun i _ ↦ (W i).isOpen)
 
 /-- Finite pi types over a nonarchimedean ring are nonarchimedean.
 Every open neighborhood of 0 contains a product of open subgroups. -/
@@ -1533,12 +1545,12 @@ instance nonarchimedeanPiFin (n : ℕ) :
       intro i
       by_cases hi : i ∈ I
       · obtain ⟨W, hW⟩ := NonarchimedeanAddGroup.is_nonarchimedean (S i) (hS i)
-        exact ⟨W, fun _ => hW⟩
+        exact ⟨W, fun _ ↦ hW⟩
       · obtain ⟨V, _⟩ := NonarchimedeanAddGroup.is_nonarchimedean
             (Set.univ : Set A) Filter.univ_mem
-        exact ⟨V, fun h => absurd h hi⟩
+        exact ⟨V, fun h ↦ absurd h hi⟩
     choose W hW using hW
-    exact ⟨piOpenAddSubgroup W, fun f hf => hSU (fun i hi => hW i hi (hf i trivial))⟩
+    exact ⟨piOpenAddSubgroup W, fun f hf ↦ hSU (fun i hi ↦ hW i hi (hf i trivial))⟩
 
 end PiNonarchimedean
 
@@ -1588,18 +1600,18 @@ theorem muMap_surjective
       (restrictedModule_fin_equiv n h i))).val s =
       ∑ i : Fin n, h.val s i • p (Pi.single i 1) := by
     simp only [map_sum, muMap, TensorProduct.lift.tmul, LinearMap.mk₂_apply]
-    rw [show (∑ x : Fin n, (⟨fun s =>
+    rw [show (∑ x : Fin n, (⟨fun s ↦
         (restrictedModule_fin_equiv n h x : ↥(TateAlgebra A)).val s •
           p (Pi.single x 1), _⟩ : ↥(restrictedModule A M))).val s =
         ∑ x : Fin n, (restrictedModule_fin_equiv n h x : ↥(TateAlgebra A)).val s •
           p (Pi.single x 1) from by
-      simp only [AddSubmonoidClass.coe_finset_sum]
+      simp only [AddSubmonoidClass.coe_finsetSum]
       exact Fintype.sum_apply s _]
     rfl
   rw [lhs]
   change _ = p (h.val s)
   rw [show h.val s = ∑ i : Fin n, h.val s i • Pi.single i (1 : A) from
-    funext fun j => by simp [Finset.sum_apply, Pi.single_apply]]
+    funext fun j ↦ by simp [Finset.sum_apply, Pi.single_apply]]
   rw [map_sum]; congr 1; funext i; rw [map_smul]
   congr 1
   simp [Finset.sum_apply, Pi.single_apply]
@@ -1661,13 +1673,13 @@ private theorem muMap_free_injective (m : ℕ) :
     rw [show (∑ i : Fin m, (Pi.single i (1 : A) : Fin m → A) ⊗ₜ[A] (x i • f)) =
         (∑ i : Fin m, (x i • Pi.single i (1 : A) : Fin m → A)) ⊗ₜ[A] f from by
       rw [TensorProduct.sum_tmul]
-      exact Finset.sum_congr rfl fun i _ => by
+      exact Finset.sum_congr rfl fun i _ ↦ by
         rw [TensorProduct.smul_tmul, TensorProduct.tmul_smul]]
     congr 1
     funext j
     simp [Finset.sum_apply, Pi.single_apply, Pi.smul_apply]
   exact Function.LeftInverse.injective (g := muMapFreeInv m)
-    (fun z => by rw [← LinearMap.comp_apply, hli, LinearMap.id_apply])
+    (fun z ↦ by rw [← LinearMap.comp_apply, hli, LinearMap.id_apply])
 
 /-- **Step 3 of Remark 8.29 (middle exactness).** For a presentation `Aⁿ →u Aᵐ →p M → 0`
 with `p` surjective and `range u = ker p`, the restricted-power-series row
@@ -1700,8 +1712,8 @@ private theorem muMap_middle_exact
   -- are required of the target, all inherited from the subspace structure).
   haveI : ContinuousSMul A ↥(LinearMap.range u) := by
     refine ⟨?_⟩
-    rw [show (fun pr : A × ↥(LinearMap.range u) => pr.1 • pr.2) =
-        fun pr => (⟨pr.1 • (pr.2 : Fin m → A), Submodule.smul_mem _ pr.1 pr.2.2⟩ :
+    rw [show (fun pr : A × ↥(LinearMap.range u) ↦ pr.1 • pr.2) =
+        fun pr ↦ (⟨pr.1 • (pr.2 : Fin m → A), Submodule.smul_mem _ pr.1 pr.2.2⟩ :
           ↥(LinearMap.range u)) from rfl]
     refine Topology.IsInducing.subtypeVal.continuous_iff.mpr ?_
     exact continuous_smul.comp ((continuous_fst).prodMk
@@ -1731,17 +1743,17 @@ private theorem muMap_middle_exact
     exact congr_fun (congr_arg Subtype.val hc) s
   -- Realize `c` as an `↥(range u)`-valued restricted series `c'`.
   have hc'_restricted :
-      MvPowerSeries.IsRestrictedModule (fun s => (⟨c.val s, hcoef s⟩ : ↥(LinearMap.range u))) := by
-    change Tendsto (fun s => (⟨c.val s, hcoef s⟩ : ↥(LinearMap.range u))) cofinite (nhds 0)
+      MvPowerSeries.IsRestrictedModule (fun s ↦ (⟨c.val s, hcoef s⟩ : ↥(LinearMap.range u))) := by
+    change Tendsto (fun s ↦ (⟨c.val s, hcoef s⟩ : ↥(LinearMap.range u))) cofinite (nhds 0)
     rw [Topology.IsInducing.subtypeVal.tendsto_nhds_iff]
     exact c.2
   set c' : ↥(restrictedModule A ↥(LinearMap.range u)) :=
-    ⟨fun s => ⟨c.val s, hcoef s⟩, hc'_restricted⟩ with hc'_def
+    ⟨fun s ↦ ⟨c.val s, hcoef s⟩, hc'_restricted⟩ with hc'_def
   -- Surjection lifting: lift `c'` to `b ∈ Aⁿ⟨X⟩` along `u'⟨X⟩`.
   obtain ⟨b, hb⟩ := restrictedModule_map_surjective u.rangeRestrict hu'_cont hu'_surj hu'_open c'
   refine ⟨b, ?_⟩
   -- `u = (range u).subtype ∘ u.rangeRestrict`, so `u⟨X⟩ = subtype⟨X⟩ ∘ u'⟨X⟩`.
-  have hcomp : (LinearMap.range u).subtype.comp u.rangeRestrict = u := LinearMap.ext fun _ => rfl
+  have hcomp : (LinearMap.range u).subtype.comp u.rangeRestrict = u := LinearMap.ext fun _ ↦ rfl
   have hsub_cont : Continuous (LinearMap.range u).subtype := continuous_subtype_val
   have key : restrictedModule.map u hu_cont b =
       restrictedModule.map (LinearMap.range u).subtype hsub_cont
@@ -1898,12 +1910,12 @@ private theorem tate_coord_relation {l : ℕ} {f : Fin l → A}
   -- Use that Subtype.val commutes with sums, and smul_val_eq.
   suffices h : ∀ i, (f i • x i : ↥(TateAlgebra A)).val s = f i * (x i).val s by
     trans ∑ i, (f i • x i : ↥(TateAlgebra A)).val s
-    · exact Finset.sum_congr rfl (fun i _ => (h i).symm)
+    · exact Finset.sum_congr rfl (fun i _ ↦ (h i).symm)
     · -- The goal after trans: ∑ i, (f i • x i).val s = 0
       -- Use h' which says (∑ i, (f i • x i).val) s = 0
       exact Fintype.sum_apply (α := Fin 1 →₀ ℕ) s
-        (fun i => (f i • x i : ↥(TateAlgebra A)).val) ▸ h'
-  exact fun i => TateAlgebra.smul_val_eq (f i) (x i) s
+        (fun i ↦ (f i • x i : ↥(TateAlgebra A)).val) ▸ h'
+  exact fun i ↦ TateAlgebra.smul_val_eq (f i) (x i) s
 
 /-- The relation map for syzygies in the Tate algebra flatness proof. -/
 private noncomputable def tateRelMap {l : ℕ}
@@ -1930,8 +1942,9 @@ private lemma tate_mem_span_range {l : ℕ} {g : Fin l → A} {k : ℕ}
     intro j _ hj; rw [Finsupp.notMem_support_iff] at hj; simp [hj]
   · intro ⟨c, hc⟩; rw [hc]
     exact Submodule.sum_mem _
-      (fun j _ => Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩))
+      (fun j _ ↦ Submodule.smul_mem _ _ (Submodule.subset_span ⟨j, rfl⟩))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Flatness of the Tate algebra** (`A⟨X⟩` is flat over noetherian `A`).
 
 For a strongly noetherian Tate ring `A` (with noetherian ring of definition `A₀`),
@@ -1961,22 +1974,22 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
   -- {b | b * a ∈ A₀} is open (A₀ open, mult by a continuous) and contains 0,
   -- so it's a nhd of 0. Since w^n → 0, eventually w^n is in this set.
   have hw_event : ∀ a : A, ∀ᶠ n in Filter.atTop, (w : A) ^ n * a ∈ P.A₀ :=
-    fun a => hw_nil.eventually ((P.isOpen.preimage (continuous_mul_const a)).mem_nhds
+    fun a ↦ hw_nil.eventually ((P.isOpen.preimage (continuous_mul_const a)).mem_nhds
       (by simp [P.A₀.zero_mem]))
   -- Intersect finitely many (one for each f_i) to get a common N.
   have hg_ex : ∃ N : ℕ, ∀ i : Fin l, (w : A) ^ N * f i ∈ P.A₀ := by
     have h_all : ∀ᶠ n in Filter.atTop, ∀ i : Fin l, (w : A) ^ n * f i ∈ P.A₀ := by
-      rw [Filter.eventually_all]; exact fun i => hw_event (f i)
+      rw [Filter.eventually_all]; exact fun i ↦ hw_event (f i)
     exact h_all.exists
   obtain ⟨N, hg_mem⟩ := hg_ex
-  set g : Fin l → P.A₀ := fun i => ⟨(w : A) ^ N * f i, hg_mem i⟩
+  set g : Fin l → P.A₀ := fun i ↦ ⟨(w : A) ^ N * f i, hg_mem i⟩
   -- The scaled relation: w^N is a unit in A.
   have hw_unit : IsUnit ((w : A) ^ N) := w.isUnit.pow N
   -- Step 3: A₀-kernel and its generators.
   set relMap₀ : (Fin l → P.A₀) →ₗ[P.A₀] P.A₀ :=
-    { toFun := fun r => ∑ i, g i * r i
-      map_add' := fun r s => by simp [mul_add, Finset.sum_add_distrib]
-      map_smul' := fun a r => by simp [smul_eq_mul, mul_left_comm, Finset.mul_sum] }
+    { toFun := fun r ↦ ∑ i, g i * r i
+      map_add' := fun r s ↦ by simp [mul_add, Finset.sum_add_distrib]
+      map_smul' := fun a r ↦ by simp [smul_eq_mul, mul_left_comm, Finset.mul_sum] }
   set K₀ := LinearMap.ker relMap₀
   obtain ⟨k, s₀, hs₀⟩ := Submodule.fg_iff_exists_fin_generating_family.mp
     (IsNoetherian.noetherian (⊤ : Submodule P.A₀ ↥K₀))
@@ -1991,7 +2004,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         ∑ i, f i * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) = 0 := by
       trans ∑ i, ((↑w : A) ^ N * f i) *
         P.A₀.subtype ((s₀ j : Fin l → ↥P.A₀) i)
-      · rw [Finset.mul_sum]; exact Finset.sum_congr rfl (fun i _ => by ring)
+      · rw [Finset.mul_sum]; exact Finset.sum_congr rfl (fun i _ ↦ by ring)
       · exact h_A
     exact (hw_unit.mul_left_cancel (by rw [h_scaled, mul_zero])).symm
   -- Step 5: Artin-Rees over A₀.
@@ -2007,7 +2020,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
     have hcomp : ∀ i, ∃ a : P.A₀, a ∈ P.I ^ (m + k₀) ∧ P.A₀.subtype a = (x i).val n := by
       intro i; obtain ⟨a, ha, heq⟩ := hn i; exact ⟨a, ha, heq⟩
     choose lift₀ hlift₀_mem hlift₀_eq using hcomp
-    have h_ker : (fun i => lift₀ i) ∈ K₀ := by
+    have h_ker : (fun i ↦ lift₀ i) ∈ K₀ := by
       -- K₀ = ker relMap₀, so need relMap₀ (fun i => lift₀ i) = 0
       -- i.e., ∑ g(i) * lift₀(i) = 0 in A₀
       -- Proof by injectivity of A₀ → A.
@@ -2017,21 +2030,21 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         -- ↑(g i) = ↑w ^ N * f i, ↑(lift₀ i) = (x i).val n
         trans (↑w : A) ^ N * ∑ i, f i * (x i).val n
         · rw [Finset.mul_sum]
-          exact Finset.sum_congr rfl (fun i _ => by
+          exact Finset.sum_congr rfl (fun i _ ↦ by
             rw [show (↑(lift₀ i) : A) = (x i).val n from hlift₀_eq i]; ring)
         · rw [hcoord, mul_zero]
       have h_eq_zero : ∑ i : Fin l, g i * lift₀ i = 0 := by
         ext; simpa [Subring.coe_subtype] using h_sum_zero
-      change (fun i => lift₀ i) ∈ LinearMap.ker relMap₀
+      change (fun i ↦ lift₀ i) ∈ LinearMap.ker relMap₀
       rw [LinearMap.mem_ker]
       exact h_eq_zero
-    have h_smul_top : (fun i => lift₀ i) ∈
+    have h_smul_top : (fun i ↦ lift₀ i) ∈
         (P.I ^ (m + k₀) • ⊤ : Submodule P.A₀ (Fin l → P.A₀)) := by
-      rw [show (fun i => lift₀ i) = ∑ i, lift₀ i • Pi.single i 1 from by
+      rw [show (fun i ↦ lift₀ i) = ∑ i, lift₀ i • Pi.single i 1 from by
         ext j; simp [Finset.sum_apply, Pi.single_apply]]
-      exact Submodule.sum_mem _ (fun i _ =>
+      exact Submodule.sum_mem _ (fun i _ ↦
         Submodule.smul_mem_smul (hlift₀_mem i) Submodule.mem_top)
-    have h_in_inf : (fun i => lift₀ i) ∈
+    have h_in_inf : (fun i ↦ lift₀ i) ∈
         (P.I ^ (m + k₀) • ⊤ ⊓ K₀ : Submodule P.A₀ (Fin l → P.A₀)) :=
       Submodule.mem_inf.mpr ⟨h_smul_top, h_ker⟩
     rw [hAR (m + k₀) (by omega : k₀ ≤ m + k₀),
@@ -2042,7 +2055,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
     -- Then decompose over the generators s₀ to get coefficients in I^m.
     -- We use Submodule.smul_mono_right to pass to I^m • K₀,
     -- then the generating family to extract Fin k coefficients.
-    have h_in_smul_K₀ : (fun i => lift₀ i) ∈
+    have h_in_smul_K₀ : (fun i ↦ lift₀ i) ∈
         (P.I ^ m • K₀ : Submodule P.A₀ (Fin l → P.A₀)) :=
       Submodule.smul_mono le_rfl inf_le_right h_in_inf
     -- Now extract coefficients. An element of I^m • K₀ is a finite sum ∑ aⱼ • vⱼ
@@ -2054,16 +2067,16 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
     suffices ∃ c₀ : Fin k → P.A₀, (∀ j, c₀ j ∈ P.I ^ m) ∧
         ∀ i, lift₀ i = ∑ j, c₀ j * (s₀ j : Fin l → P.A₀) i by
       obtain ⟨c₀, hc₀_mem, hc₀_eq⟩ := this
-      refine ⟨fun j => P.A₀.subtype (c₀ j), fun j => ⟨c₀ j, hc₀_mem j, rfl⟩, fun i => ?_⟩
+      refine ⟨fun j ↦ P.A₀.subtype (c₀ j), fun j ↦ ⟨c₀ j, hc₀_mem j, rfl⟩, fun i ↦ ?_⟩
       have h := congr_arg P.A₀.subtype (hc₀_eq i)
       simp only [map_sum, map_mul] at h
       rw [← hlift₀_eq i]; exact h
     -- Step B: Use smul_induction_on on h_in_smul_K₀ with the predicate
     -- "can be decomposed over s₀ with I^m coefficients".
-    refine Submodule.smul_induction_on (p := fun v =>
+    refine Submodule.smul_induction_on (p := fun v ↦
         ∃ c₀ : Fin k → ↥P.A₀, (∀ j, c₀ j ∈ P.I ^ m) ∧
           ∀ i, v i = ∑ j, c₀ j * (s₀ j : Fin l → ↥P.A₀) i) h_in_smul_K₀
-      (fun a ha v hv => ?_) (fun u v ⟨cu, hcu, heu⟩ ⟨cv, hcv, hev⟩ => ?_)
+      (fun a ha v hv ↦ ?_) (fun u v ⟨cu, hcu, heu⟩ ⟨cv, hcv, hev⟩ ↦ ?_)
     · -- Base case: a • v with a ∈ I^m and v ∈ K₀.
       -- Decompose v ∈ K₀ over s₀ using the spanning hypothesis.
       have hv_span : (⟨v, hv⟩ : K₀) ∈ Submodule.span P.A₀ (Set.range s₀) :=
@@ -2077,20 +2090,20 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       -- Extract component-wise equality
       have hv_eq : ∀ i, v i = ∑ j, (cf j : P.A₀) * (s₀ j : Fin l → P.A₀) i := by
         intro i
-        have := congr_arg (fun (w : K₀) => (w : Fin l → P.A₀) i) hcf_sum
+        have := congr_arg (fun (w : K₀) ↦ (w : Fin l → P.A₀) i) hcf_sum
         simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
           Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
         exact this
       -- Set c₀(j) = a * cf(j), which are in I^m since a ∈ I^m.
-      refine ⟨fun j => a * cf j, fun j => Ideal.mul_mem_right _ _ ha, fun i => ?_⟩
+      refine ⟨fun j ↦ a * cf j, fun j ↦ Ideal.mul_mem_right _ _ ha, fun i ↦ ?_⟩
       have : (a • v) i = a * v i := by simp [Pi.smul_apply, smul_eq_mul]
       rw [this, hv_eq i, Finset.mul_sum]
-      exact Finset.sum_congr rfl (fun j _ => by ring)
+      exact Finset.sum_congr rfl (fun j _ ↦ by ring)
     · -- Addition case: combine coefficients.
-      exact ⟨fun j => cu j + cv j, fun j => (P.I ^ m).add_mem (hcu j) (hcv j), fun i => by
+      exact ⟨fun j ↦ cu j + cv j, fun j ↦ (P.I ^ m).add_mem (hcu j) (hcv j), fun i ↦ by
         have : (u + v) i = u i + v i := Pi.add_apply u v i
         rw [this, heu i, hev i, ← Finset.sum_add_distrib]
-        exact Finset.sum_congr rfl (fun j _ => by ring)⟩
+        exact Finset.sum_congr rfl (fun j _ ↦ by ring)⟩
   -- Step 7: Assemble the IsTrivialRelation witness.
   -- For each n, hdecomp_A gives a decomposition over the A₀-generators.
   -- For convergence, hAR_ctrl gives controlled coefficients.
@@ -2150,10 +2163,10 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
           (show (↑(P.I ^ (p + k₀)) : Set ↥P.A₀) ⊆ ↑(P.I ^ p) from
             Ideal.pow_le_pow_right (by omega))
           (h_all_levels p i))) hxV
-      refine ⟨0, fun i => by simp [h_zero i],
-        fun m _ j => ⟨0, (P.I ^ m).zero_mem, by simp⟩⟩
+      refine ⟨0, fun i ↦ by simp [h_zero i],
+        fun m _ j ↦ ⟨0, (P.I ^ m).zero_mem, by simp⟩⟩
     · -- Some level fails. Find the smallest failing level q.
-      push_neg at h_all_levels
+      push Not at h_all_levels
       obtain ⟨m_fail, hm_fail⟩ := h_all_levels
       -- The set of failing levels is upward closed: if hyp(m) fails,
       -- then hyp(m') fails for m' ≥ m (contrapositively, hyp(m'+1) → hyp(m')).
@@ -2169,7 +2182,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
       have hq_valid : ∀ m < q, ∀ i, (x i).val n ∈
           Subtype.val '' ((P.I ^ (m + k₀) : Ideal P.A₀) : Set P.A₀) := by
         intro m hm
-        by_contra h; push_neg at h
+        by_contra h; push Not at h
         exact Nat.find_min h_fail_exists hm h
       -- For m ≥ q, the hypothesis fails (upward closure).
       have hq_fail_above : ∀ m, q ≤ m → ¬(∀ i, (x i).val n ∈
@@ -2183,28 +2196,28 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         -- Need unconditional decomposition via denominator-clearing.
         -- Clear denominators: find M with w^M * (x i).val n ∈ A₀ for all i.
         have h_clear : ∃ M : ℕ, ∀ i, (w : A) ^ M * (x i).val n ∈ P.A₀ :=
-          (Filter.eventually_all.mpr (fun i => hw_event ((x i).val n))).exists
+          (Filter.eventually_all.mpr (fun i ↦ hw_event ((x i).val n))).exists
         obtain ⟨M, hM⟩ := h_clear
         -- The scaled vector is in K₀.
-        have h_scaled_ker : (fun i => (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ K₀ := by
+        have h_scaled_ker : (fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ K₀ := by
           have h_zero : P.A₀.subtype
             (∑ i : Fin l, g i * (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) = 0 := by
             simp only [map_sum, map_mul, Subring.coe_subtype]
             trans (↑w : A) ^ (N + M) * ∑ i, f i * (x i).val n
             · rw [Finset.mul_sum]
-              exact Finset.sum_congr rfl (fun i _ => by rw [pow_add]; ring)
+              exact Finset.sum_congr rfl (fun i _ ↦ by rw [pow_add]; ring)
             · rw [hcoord n, mul_zero]
           have h_eq : ∑ i : Fin l, g i * (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀) = 0 := by
             ext; simpa [Subring.coe_subtype] using h_zero
-          change (fun i => (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ LinearMap.ker relMap₀
+          change (fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀)) ∈ LinearMap.ker relMap₀
           rw [LinearMap.mem_ker]
           exact h_eq
         -- Decompose over s₀.
-        have h_in_span : (⟨fun i => (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
+        have h_in_span : (⟨fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
             h_scaled_ker⟩ : K₀) ∈ Submodule.span P.A₀ (Set.range s₀) :=
           hs₀ ▸ Submodule.mem_top
         obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp h_in_span
-        have hcf_sum : (⟨fun i => (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
+        have hcf_sum : (⟨fun i ↦ (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀),
             h_scaled_ker⟩ : K₀) = ∑ j : Fin k, cf j • s₀ j := by
           rw [← hcf, Finsupp.sum,
             Finset.sum_subset (Finset.subset_univ _)]
@@ -2213,14 +2226,14 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
         have hcf_eq : ∀ i, (⟨(w : A) ^ M * (x i).val n, hM i⟩ : ↥P.A₀) =
             ∑ j, cf j * (s₀ j : Fin l → P.A₀) i := by
           intro i
-          have := congr_arg (fun (v : K₀) => (v : Fin l → P.A₀) i) hcf_sum
+          have := congr_arg (fun (v : K₀) ↦ (v : Fin l → P.A₀) i) hcf_sum
           simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
             Finset.sum_apply, Pi.smul_apply, smul_eq_mul] at this
           exact this
         -- Unscale: divide by w^M (which is a unit).
         have hw_M_unit : IsUnit ((w : A) ^ M) := w.isUnit.pow M
-        set c₀ := fun j => ↑(hw_M_unit.unit⁻¹ : Aˣ) * P.A₀.subtype (cf j)
-        refine ⟨c₀, fun i => ?_, fun m hm => ?_⟩
+        set c₀ := fun j ↦ ↑(hw_M_unit.unit⁻¹ : Aˣ) * P.A₀.subtype (cf j)
+        refine ⟨c₀, fun i ↦ ?_, fun m hm ↦ ?_⟩
         · -- Decomposition: (x i).val n = ∑ c₀ j * s₀(j)(i)
           have h_scaled := congr_arg P.A₀.subtype (hcf_eq i)
           simp only [map_sum, map_mul, Subring.coe_subtype] at h_scaled
@@ -2229,7 +2242,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
               ((w : A) ^ M * (x i).val n) := by
             rw [← mul_assoc, hw_M_unit.val_inv_mul, one_mul]
           rw [this, h_scaled, Finset.mul_sum]
-          exact Finset.sum_congr rfl (fun j _ => by
+          exact Finset.sum_congr rfl (fun j _ ↦ by
             simp only [c₀, Subring.coe_subtype]; ring)
         · -- Filtration: vacuously true since q = 0 means hypothesis fails for all m.
           exfalso
@@ -2240,7 +2253,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
             Subtype.val '' ((P.I ^ ((q - 1) + k₀) : Ideal P.A₀) : Set P.A₀) :=
           hq_valid (q - 1) (by omega)
         obtain ⟨c₀, hc₀_mem, hc₀_decomp⟩ := hAR_ctrl n (q - 1) hq_hyp
-        refine ⟨c₀, hc₀_decomp, fun m hm j => ?_⟩
+        refine ⟨c₀, hc₀_decomp, fun m hm j ↦ ?_⟩
         -- Need: c₀ j ∈ image(I^m).
         -- We have: c₀ j ∈ image(I^{q-1}).
         -- If m ≤ q-1: I^{q-1} ⊆ I^m, so image(I^{q-1}) ⊆ image(I^m). Done.
@@ -2254,43 +2267,43 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
   suffices ∃ c' : (Fin 1 →₀ ℕ) → Fin k → A,
       (∀ n i, (x i).val n =
         ∑ j, c' n j * P.A₀.subtype ((s₀ j : Fin l → P.A₀) i)) ∧
-      (∀ j, (fun n => c' n j) ∈ TateAlgebra A) by
+      (∀ j, (fun n ↦ c' n j) ∈ TateAlgebra A) by
     obtain ⟨c'', hc'', hrestr''⟩ := this
-    refine ⟨k, fun i j => P.A₀.subtype ((s₀ j : Fin l → P.A₀) i),
-      fun j => ⟨fun n => c'' n j, hrestr'' j⟩, ?_, ?_⟩
+    refine ⟨k, fun i j ↦ P.A₀.subtype ((s₀ j : Fin l → P.A₀) i),
+      fun j ↦ ⟨fun n ↦ c'' n j, hrestr'' j⟩, ?_, ?_⟩
     · intro i; apply Subtype.ext; funext n
       have hrhs : (∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-          (⟨fun n => c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A)) :
+          (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A)) :
           ↥(TateAlgebra A)).val n =
         ∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) * c'' n j := by
         rw [show (∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-            (⟨fun n => c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val =
+            (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val =
           (TateAlgebra A).subtype (∑ j, P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-            (⟨fun n => c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))) from rfl,
+            (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))) from rfl,
           map_sum]
         simp only [Subring.coe_subtype]
         trans ∑ j, (P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-            (⟨fun n => c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val n
+            (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val n
         · exact Fintype.sum_apply n
-            (fun j => (P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
-              (⟨fun n => c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val)
-        · exact Finset.sum_congr rfl (fun j _ =>
+            (fun j ↦ (P.A₀.subtype ((s₀ j : Fin l → P.A₀) i) •
+              (⟨fun n ↦ c'' n j, hrestr'' j⟩ : ↥(TateAlgebra A))).val)
+        · exact Finset.sum_congr rfl (fun j _ ↦
             TateAlgebra.smul_val_eq _ _ n)
       rw [hrhs, hc'' n i]
-      exact Finset.sum_congr rfl (fun j _ => by ring)
-    · exact fun j => hsyz j
+      exact Finset.sum_congr rfl (fun j _ ↦ by ring)
+    · exact fun j ↦ hsyz j
   -- Prove the suffices using c' from the diagonal construction.
-  refine ⟨c', hc'_decomp, fun j => ?_⟩
+  refine ⟨c', hc'_decomp, fun j ↦ ?_⟩
   -- Goal: (fun n => c' n j) ∈ TateAlgebra A
   -- Show Tendsto (c'(·)(j)) cofinite (nhds 0) using the filtration property hc'_filt.
-  change MvPowerSeries.IsRestricted (fun n => c' n j)
+  change MvPowerSeries.IsRestricted (fun n ↦ c' n j)
   rw [MvPowerSeries.IsRestricted, P.hasBasis_nhds_zero.tendsto_right_iff]
   intro m _
   rw [Filter.eventually_cofinite]
   -- Goal: {n | c' n j ∉ image(P.I^m)}.Finite
   -- By hc'_filt: if all (x i).val n ∈ image(I^{m+k₀}), then c' n j ∈ image(I^m).
   -- So {n | c' n j ∉ image(I^m)} ⊆ {n | ∃ i, (x i).val n ∉ image(I^{m+k₀})}.
-  apply Set.Finite.subset (Set.finite_iUnion (fun i : Fin l => by
+  apply Set.Finite.subset (Set.finite_iUnion (fun i : Fin l ↦ by
       have hxi := (x i).prop
       change MvPowerSeries.IsRestricted (x i).val at hxi
       rw [MvPowerSeries.IsRestricted] at hxi
@@ -2299,7 +2312,7 @@ theorem tateAlgebra_flat (P : PairOfDefinition A) [IsNoetherianRing P.A₀] :
   intro n hn
   simp only [Set.mem_setOf_eq] at hn
   simp only [Set.mem_iUnion, Set.mem_setOf_eq]
-  by_contra h_all; push_neg at h_all
+  by_contra h_all; push Not at h_all
   exact hn (hc'_filt n m h_all j)
 
 end TateAlgebraFlat
@@ -2354,7 +2367,7 @@ theorem Module.Flat.quotient_of_flat_of_saturated
   apply Module.Flat.of_forall_isTrivialRelation
   intro l f x hfx
   -- Step 1: Lift x̄ᵢ from Q to S.
-  choose x' hx' using fun i => Ideal.Quotient.mk_surjective (x i)
+  choose x' hx' using fun i ↦ Ideal.Quotient.mk_surjective (x i)
   -- Step 2: ∑ fᵢ • x'ᵢ maps to 0 in Q, so it lies in Ideal.span {g}.
   have hπ_sum : π (∑ i, f i • x' i) = 0 := by
     rw [map_sum]
@@ -2387,7 +2400,7 @@ theorem Module.Flat.quotient_of_flat_of_saturated
   obtain ⟨c, hc⟩ := hw_mem
   -- So w = ∑ cᵢ * algebraMap(fᵢ).
   -- Step 5: Set x''ᵢ = x'ᵢ - g * cᵢ. Then ∑ fᵢ • x''ᵢ = 0 in S.
-  set x'' : Fin l → S := fun i => x' i - g * c i
+  set x'' : Fin l → S := fun i ↦ x' i - g * c i
   have hrel : ∑ i, f i • x'' i = 0 := by
     simp only [x'', smul_sub, Finset.sum_sub_distrib]
     suffices h : ∑ i, f i • (g * c i) = ∑ i, f i • x' i by
@@ -2406,7 +2419,7 @@ theorem Module.Flat.quotient_of_flat_of_saturated
   -- x''ᵢ = ∑ⱼ aᵢⱼ • yⱼ, so π(x''ᵢ) = ∑ⱼ aᵢⱼ • π(yⱼ).
   have hπg : π g = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr
     (Ideal.subset_span (Set.mem_singleton g))
-  refine ⟨k, a, fun j => π (y j), fun i => ?_, hsyz⟩
+  refine ⟨k, a, fun j ↦ π (y j), fun i ↦ ?_, hsyz⟩
   -- x i = π(x'' i)
   have hxi_eq : x i = π (x'' i) := by
     -- x'' i = x' i - g * c i. Since g * c i ∈ Ideal.span {g},
@@ -2431,7 +2444,7 @@ theorem Module.Flat.quotient_of_flat_of_saturated
     _ = π (∑ j, a i j • y j) := congr_arg π (ha i)
     _ = ∑ j, π (a i j • y j) := map_sum π _ _
     _ = ∑ j, a i j • π (y j) := by
-        exact Finset.sum_congr rfl (fun j _ =>
+        exact Finset.sum_congr rfl (fun j _ ↦
           map_smul (Ideal.Quotient.mkₐ R _).toLinearMap (a i j) (y j))
 
 /-! #### Step 2: Modular ascending chain lemma -/
@@ -2475,7 +2488,7 @@ theorem noeth_mem_ideal_of_mul_shift {R : Type u} [CommRing R] [IsNoetherianRing
   -- Use LinearMap.ker of left-multiplication by a'^n
   let mulPow (n : ℕ) : (R ⧸ I) →ₗ[R ⧸ I] (R ⧸ I) :=
     LinearMap.lsmul (R ⧸ I) (R ⧸ I) (a' ^ n)
-  have chain_monotone : Monotone (fun n => LinearMap.ker (mulPow n)) := by
+  have chain_monotone : Monotone (fun n ↦ LinearMap.ker (mulPow n)) := by
     intro m n hmn b hb
     simp only [mulPow, LinearMap.mem_ker, LinearMap.lsmul_apply, smul_eq_mul] at hb ⊢
     have key : a' ^ n * b = a' ^ (n - m) * (a' ^ m * b) := by
@@ -2515,7 +2528,7 @@ theorem forall_coeff_mem_of_mem_ideal_map (I : Ideal A) (g : ↥(TateAlgebra A))
   -- Use span_induction with predicate "all coefficients in I".
   -- The dependent predicate ignores the membership proof.
   refine Submodule.span_induction
-    (p := fun (g' : ↥(TateAlgebra A)) _ => ∀ n, coeff n g' ∈ I)
+    (p := fun (g' : ↥(TateAlgebra A)) _ ↦ ∀ n, coeff n g' ∈ I)
     ?_ ?_ ?_ ?_ hg
   · -- Generators: algebraMap a for a ∈ I.
     rintro _ ⟨a, ha, rfl⟩ n
@@ -2556,6 +2569,7 @@ theorem forall_coeff_mem_of_mem_ideal_map (I : Ideal A) (g : ↥(TateAlgebra A))
 
 variable [IsTopologicalRing A] [T2Space A] [IsTateRing A]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A restricted power series with all coefficients in `I` belongs to `Ideal.map I`
 in the Tate algebra. This is the reverse direction of `forall_coeff_mem_of_mem_ideal_map`.
 
@@ -2581,11 +2595,11 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
   -- Step 3: Get pseudo-uniformizer.
   obtain ⟨w, hw_nil⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
   have hw_event : ∀ a : A, ∀ᶠ n in Filter.atTop, (w : A) ^ n * a ∈ P.A₀ :=
-    fun a => hw_nil.eventually ((P.isOpen.preimage (continuous_mul_const a)).mem_nhds
+    fun a ↦ hw_nil.eventually ((P.isOpen.preimage (continuous_mul_const a)).mem_nhds
       (by simp [P.A₀.zero_mem]))
   -- Step 4: Each generator maps to I.
   have hg₀_in_I : ∀ q : Fin numG, P.A₀.subtype (g₀ q : I₀).val ∈ I :=
-    fun q => (g₀ q : I₀).prop
+    fun q ↦ (g₀ q : I₀).prop
   -- Step 5: The diagonal decomposition.
   have hdecomp_ctrl : ∀ n : Fin 1 →₀ ℕ,
       ∃ c : Fin numG → A,
@@ -2604,8 +2618,8 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
           (Ideal.pow_le_pow_right (by omega) :
             (↑(P.I ^ (p + k₁)) : Set ↥P.A₀) ⊆ ↑(P.I ^ p))
           (h_all p))) hxV
-      exact ⟨0, by simp [h_zero], fun l _ q => ⟨0, (P.I ^ l).zero_mem, by simp⟩⟩
-    · push_neg at h_all
+      exact ⟨0, by simp [h_zero], fun l _ q ↦ ⟨0, (P.I ^ l).zero_mem, by simp⟩⟩
+    · push Not at h_all
       obtain ⟨l_fail, hl_fail⟩ := h_all
       have h_fail_ex : ∃ l, h.val n ∉
           Subtype.val '' ((P.I ^ (l + k₁) : Ideal P.A₀) : Set P.A₀) :=
@@ -2614,10 +2628,10 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
       have hqn_fail := Nat.find_spec h_fail_ex
       have hqn_valid : ∀ l < qn, h.val n ∈
           Subtype.val '' ((P.I ^ (l + k₁) : Ideal P.A₀) : Set P.A₀) :=
-        fun l hl => Decidable.not_not.mp (Nat.find_min h_fail_ex hl)
+        fun l hl ↦ Decidable.not_not.mp (Nat.find_min h_fail_ex hl)
       have hqn_fail_above : ∀ l, qn ≤ l →
           h.val n ∉ Subtype.val '' ((P.I ^ (l + k₁) : Ideal P.A₀) : Set P.A₀) :=
-        fun l hl hmem => hqn_fail (Set.image_mono (Ideal.pow_le_pow_right (by omega)) hmem)
+        fun l hl hmem ↦ hqn_fail (Set.image_mono (Ideal.pow_le_pow_right (by omega)) hmem)
       by_cases hq0 : qn = 0
       · -- qn = 0: hypothesis fails at all levels. Use arbitrary decomposition.
         obtain ⟨M, hM⟩ := (hw_event (h.val n)).exists
@@ -2632,14 +2646,14 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
           intro q _ hq; rw [Finsupp.notMem_support_iff.mp hq, zero_smul]
         have hcf_A : (w : A) ^ M * h.val n =
             ∑ q, P.A₀.subtype ((g₀ q : I₀).val) * P.A₀.subtype (cf q) := by
-          have h' := congr_arg (fun (x : I₀) => P.A₀.subtype x.val) hcf_sum
+          have h' := congr_arg (fun (x : I₀) ↦ P.A₀.subtype x.val) hcf_sum
           simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower,
             map_sum, smul_eq_mul, map_mul, Subring.coe_subtype] at h'
           rw [h']; congr 1; ext q
           simp only [Subring.coe_subtype]; ring
         have hw_unit : IsUnit ((w : A) ^ M) := w.isUnit.pow M
-        refine ⟨fun q => ↑(hw_unit.unit⁻¹ : Aˣ) * P.A₀.subtype (cf q),
-          ?_, fun l hl => absurd hl (hqn_fail_above l (by omega))⟩
+        refine ⟨fun q ↦ ↑(hw_unit.unit⁻¹ : Aˣ) * P.A₀.subtype (cf q),
+          ?_, fun l hl ↦ absurd hl (hqn_fail_above l (by omega))⟩
         have hinv : h.val n = ↑(hw_unit.unit⁻¹ : Aˣ) * ((w : A) ^ M * h.val n) := by
           rw [← mul_assoc, hw_unit.val_inv_mul, one_mul]
         rw [hinv, hcf_A, Finset.mul_sum]
@@ -2663,31 +2677,31 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
         have hy_decomp : ∃ c₀ : Fin numG → P.A₀,
             (∀ j, c₀ j ∈ P.I ^ (qn - 1)) ∧
             y = ∑ j, c₀ j * (g₀ j : I₀).val := by
-          refine Submodule.smul_induction_on (p := fun v =>
+          refine Submodule.smul_induction_on (p := fun v ↦
               ∃ c₀ : Fin numG → P.A₀,
                 (∀ j, c₀ j ∈ P.I ^ (qn - 1)) ∧
                 v = ∑ j, c₀ j * (g₀ j : I₀).val)
-            hy_smul (fun a ha v hv => ?_) (fun u v ⟨cu, hcu, heu⟩ ⟨cv, hcv, hev⟩ => ?_)
+            hy_smul (fun a ha v hv ↦ ?_) (fun u v ⟨cu, hcu, heu⟩ ⟨cv, hcv, hev⟩ ↦ ?_)
           · -- Base: a ∈ P.I^{qn-1}, v ∈ I₀.
             have hv_sp : (⟨v, hv⟩ : I₀) ∈ Submodule.span P.A₀ (Set.range g₀) :=
               hg₀ ▸ Submodule.mem_top
             obtain ⟨cf, hcf⟩ := Finsupp.mem_span_range_iff_exists_finsupp.mp hv_sp
             have hv_eq : v = ∑ j : Fin numG, (cf j : P.A₀) * (g₀ j : I₀).val := by
-              have h' := congr_arg (fun (x : I₀) => x.val) (show (⟨v, hv⟩ : I₀) =
+              have h' := congr_arg (fun (x : I₀) ↦ x.val) (show (⟨v, hv⟩ : I₀) =
                 ∑ j, cf j • g₀ j from by
                   rw [← hcf, Finsupp.sum, Finset.sum_subset (Finset.subset_univ _)]
                   intro j _ hj; rw [Finsupp.notMem_support_iff.mp hj, zero_smul])
               simp only [Submodule.coe_sum, Submodule.coe_smul_of_tower, smul_eq_mul] at h'
               exact h'
-            refine ⟨fun j => a * cf j, fun j => Ideal.mul_mem_right _ _ ha, ?_⟩
+            refine ⟨fun j ↦ a * cf j, fun j ↦ Ideal.mul_mem_right _ _ ha, ?_⟩
             rw [show a • v = a * v from smul_eq_mul _ _, hv_eq, Finset.mul_sum]
-            exact Finset.sum_congr rfl (fun j _ => by ring)
-          · exact ⟨fun j => cu j + cv j,
-              fun j => (P.I ^ (qn - 1)).add_mem (hcu j) (hcv j), by
+            exact Finset.sum_congr rfl (fun j _ ↦ by ring)
+          · exact ⟨fun j ↦ cu j + cv j,
+              fun j ↦ (P.I ^ (qn - 1)).add_mem (hcu j) (hcv j), by
               rw [heu, hev, ← Finset.sum_add_distrib]
-              exact Finset.sum_congr rfl (fun j _ => by ring)⟩
+              exact Finset.sum_congr rfl (fun j _ ↦ by ring)⟩
         obtain ⟨c₀, hc₀_mem, hc₀_eq⟩ := hy_decomp
-        refine ⟨fun j => P.A₀.subtype (c₀ j), ?_, fun l hl j => ?_⟩
+        refine ⟨fun j ↦ P.A₀.subtype (c₀ j), ?_, fun l hl j ↦ ?_⟩
         · rw [← hy_eq]
           have := congr_arg P.A₀.subtype hc₀_eq
           simp only [map_sum, map_mul, Subring.coe_subtype] at this
@@ -2698,7 +2712,7 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
   -- Step 6: Choose the decomposition for all n.
   choose c' hc'_decomp hc'_filt using hdecomp_ctrl
   -- Step 7: Restrictedness.
-  have hrestr : ∀ q : Fin numG, MvPowerSeries.IsRestricted (fun n => c' n q) := by
+  have hrestr : ∀ q : Fin numG, MvPowerSeries.IsRestricted (fun n ↦ c' n q) := by
     intro q
     rw [MvPowerSeries.IsRestricted, P.hasBasis_nhds_zero.tendsto_right_iff]
     intro l _; rw [Filter.eventually_cofinite]
@@ -2709,7 +2723,7 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
     intro n hn; simp only [Set.mem_setOf_eq] at hn ⊢
     intro hmem; exact hn (hc'_filt n l hmem q)
   -- Step 8: Assemble.
-  set g : Fin numG → ↥(TateAlgebra A) := fun q => ⟨fun n => c' n q, hrestr q⟩
+  set g : Fin numG → ↥(TateAlgebra A) := fun q ↦ ⟨fun n ↦ c' n q, hrestr q⟩
   have hmem : h = ∑ q : Fin numG,
       algebraMap A ↥(TateAlgebra A) (P.A₀.subtype (g₀ q : I₀).val) * g q := by
     apply Subtype.ext; funext n
@@ -2735,7 +2749,7 @@ theorem mem_ideal_map_of_forall_coeff_mem (I : Ideal A)
         rfl
     rw [lhs, rhs]
   rw [hmem]
-  exact Ideal.sum_mem _ (fun q _ =>
+  exact Ideal.sum_mem _ (fun q _ ↦
     Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ (hg₀_in_I q)))
 
 theorem fSubX_saturated
@@ -2767,7 +2781,7 @@ theorem fSubX_saturated
     have : -(f * coeff (n + 1) h - coeff n h) ∈ I := I.neg_mem h1
     rwa [neg_sub] at this
   -- Step 3: Apply the ascending chain lemma to get coeff 0 h ∈ I.
-  have hcoeff0 : coeff 0 h ∈ I := noeth_mem_ideal_of_mul_shift f I (fun n => coeff n h) h0 hstep
+  have hcoeff0 : coeff 0 h ∈ I := noeth_mem_ideal_of_mul_shift f I (fun n ↦ coeff n h) h0 hstep
   -- Step 4: By induction, ALL coefficients of h are in I.
   -- Once coeff 0 h ∈ I, from coeff 0 h - f * coeff 1 h ∈ I we get f * coeff 1 h ∈ I.
   -- Apply the ascending chain starting from coeff 1 h to get coeff 1 h ∈ I. Etc.
@@ -2781,9 +2795,9 @@ theorem fSubX_saturated
         have := I.sub_mem ih (hstep n)
         rwa [sub_sub_cancel] at this
       -- Apply ascending chain starting from coeff (n+1) h.
-      exact noeth_mem_ideal_of_mul_shift f I (fun k => coeff (n + 1 + k) h)
+      exact noeth_mem_ideal_of_mul_shift f I (fun k ↦ coeff (n + 1 + k) h)
         (by simp only [Nat.add_zero]; exact hf_succ)
-        (fun k => by
+        (fun k ↦ by
           change coeff (n + 1 + k) h - f * coeff (n + 1 + (k + 1)) h ∈ I
           rw [show n + 1 + (k + 1) = (n + 1 + k) + 1 from by omega]
           exact hstep (n + 1 + k))
@@ -2844,7 +2858,7 @@ theorem flat_quotient_fSubX_general
       Ideal.span {algebraMap A ↥(TateAlgebra A) f - X}) := by
   haveI := tateAlgebra_flat P
   exact Module.Flat.quotient_of_flat_of_saturated
-    (mul_fSubX_regular f) (fun I s hmem => fSubX_saturated P f I s hmem)
+    (mul_fSubX_regular f) (fun I s hmem ↦ fSubX_saturated P f I s hmem)
 
 /-- `A⟨X⟩/(1-fX)` is flat over noetherian `A` (Lemma 8.31(2), general case). -/
 theorem flat_quotient_oneSubfX_general
@@ -2854,7 +2868,7 @@ theorem flat_quotient_oneSubfX_general
       Ideal.span {1 - algebraMap A ↥(TateAlgebra A) f * X}) := by
   haveI := tateAlgebra_flat P
   exact Module.Flat.quotient_of_flat_of_saturated
-    (mul_oneSubfX_regular f) (fun I s hmem => oneSubfX_saturated P f I s hmem)
+    (mul_oneSubfX_regular f) (fun I s hmem ↦ oneSubfX_saturated P f I s hmem)
 
 /-- **Lemma 8.31(1), general case**: `A⟨X⟩` is **faithfully flat** over a
 noetherian Tate ring `A`.

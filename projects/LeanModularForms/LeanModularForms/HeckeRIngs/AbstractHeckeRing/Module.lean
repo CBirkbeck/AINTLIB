@@ -12,7 +12,7 @@ The module action of `𝕋 P ℤ` on `HeckeModule P ℤ` (formal sums of left co
 theorem `eq_of_smul_eq_smul_𝕋`.
 -/
 
-open Classical MulOpposite Set DoubleCoset Subgroup
+open Classical
 
 open scoped Pointwise
 
@@ -22,23 +22,33 @@ variable {G : Type*} [Group G]
 
 variable (P : HeckePair G) (Z : Type*) [CommRing Z]
 
-open Finsupp
-
 /-- The scalar multiplication on `𝕋` by itself, defined as reverse multiplication. -/
 noncomputable instance (priority := 1200) instSMul𝕋 : SMul (𝕋 P ℤ) (𝕋 P ℤ) where
   smul x y := y * x
+
+/-- The left coset `β · σᵢ · g`: the image of the decomposition index `i` in the smul orbit
+of `β` under `g`. (Named so the quotient-of-subtype element elaborates at the folded type
+`HeckeLeftCoset P`.) -/
+noncomputable def smulOrbitElt (g β : P.Δ) (i : decompQuot P g) : HeckeLeftCoset P :=
+  ⟦⟨(β : G) * (i.out : G) * (g : G), delta_mul_mem P.H P.Δ i.out β g P.h₀⟩⟧
 
 /-- The orbit of a left coset representative `β` under double coset representative `g`:
 the set of left cosets `{β · σ_i · g | σ_i ∈ H/(H ∩ gHg⁻¹)}`. -/
 noncomputable def smulOrbit (g : P.Δ) (β : P.Δ) :
     Finset (HeckeLeftCoset P) :=
-  Finset.image (fun i : decompQuot P g ↦
-    (⟦⟨(β : G) * (i.out : G) * (g : G),
-      delta_mul_mem P.H P.Δ i.out β g P.h₀⟩⟧ : HeckeLeftCoset P)) ⊤
+  Finset.image (smulOrbitElt P g β) ⊤
+
+/-- Membership in the smul orbit, phrased via `smulOrbitElt`. -/
+lemma mem_smulOrbit {g β : P.Δ} {x : HeckeLeftCoset P} :
+    x ∈ smulOrbit P g β ↔ ∃ i, smulOrbitElt P g β i = x := by
+  rw [smulOrbit]
+  simp
 
 /-- The smul orbit of any left coset under any double coset is nonempty. -/
 lemma smulOrbit_nonempty (g : P.Δ) (β : P.Δ) :
-    (smulOrbit P g β).Nonempty := by simp [smulOrbit]
+    (smulOrbit P g β).Nonempty := by
+  rw [smulOrbit]
+  exact ⟨_, Finset.mem_image_of_mem _ (Finset.mem_univ ((1 : P.H) : decompQuot P g))⟩
 
 /-- The orbit is invariant under left coset equivalence: if `β₁H = β₂H`, then
     `smulOrbit g β₁ = smulOrbit g β₂`. This is the key API lemma that lets us
@@ -46,13 +56,9 @@ lemma smulOrbit_nonempty (g : P.Δ) (β : P.Δ) :
 lemma smulOrbit_lcRel (g : P.Δ) {β₁ β₂ : P.Δ} (h : lcRel P β₁ β₂) :
     smulOrbit P g β₁ = smulOrbit P g β₂ := by
   ext x
-  simp only [smulOrbit, Finset.top_eq_univ, Finset.mem_image, Finset.mem_univ, true_and]
+  rw [mem_smulOrbit, mem_smulOrbit]
   suffices hsuff : ∀ (β β' : P.Δ), lcRel P β β' → ∀ i : decompQuot P g,
-      ∃ j : decompQuot P g,
-        (⟦⟨(β : G) * (i.out : G) * (g : G),
-          delta_mul_mem P.H P.Δ i.out β g P.h₀⟩⟧ : HeckeLeftCoset P) =
-        ⟦⟨(β' : G) * (j.out : G) * (g : G),
-          delta_mul_mem P.H P.Δ j.out β' g P.h₀⟩⟧ by
+      ∃ j : decompQuot P g, smulOrbitElt P g β i = smulOrbitElt P g β' j by
     refine ⟨fun ⟨i, hi⟩ ↦ ?_, fun ⟨i, hi⟩ ↦ ?_⟩
     · obtain ⟨j, hj⟩ := hsuff β₁ β₂ h i; exact ⟨j, hi ▸ hj.symm⟩
     · obtain ⟨j, hj⟩ := hsuff β₂ β₁ h.symm i; exact ⟨j, hi ▸ hj.symm⟩
@@ -79,7 +85,7 @@ lemma smulOrbit_lcRel (g : P.Δ) {β₁ β₂ : P.Δ} (h : lcRel P β₁ β₂) 
   rw [hj_coe, ← hβ'_eq]
   conv_rhs =>
     rw [show (β : G) * k * (k⁻¹ * (i.out : G) * ↑n) * (g : G) =
-      (β : G) * (i.out : G) * (g : G) * ((g : G)⁻¹ * ↑n * (g : G)) from by group,
+      (β : G) * (i.out : G) * (g : G) * ((g : G)⁻¹ * ↑n * (g : G)) by group,
       ← Set.singleton_mul_singleton, mul_assoc]
   rw [Subgroup.singleton_mul_subgroup hn_conj]
 
@@ -105,8 +111,9 @@ lemma single_smul_single (t : HeckeCoset P) (m : HeckeLeftCoset P) (a b : Z) :
       ((Finsupp.single m b) : HeckeModule P Z) =
     (∑ i ∈ smulOrbit P (HeckeCoset.rep t) (HeckeLeftCoset.rep m),
       Finsupp.single i (a * b : Z) : (HeckeLeftCoset P) →₀ Z) := by
-  rw [smul_eq_sum]
+  refine (smul_eq_sum P Z _ _).trans ?_
   simp
+  rfl
 
 /-- The one element of `HeckeModule`: the basis element for the identity left coset. -/
 noncomputable instance instOneHeckeModule : One (HeckeModule P Z) :=
@@ -123,8 +130,8 @@ lemma smul_add_left (T₁ T₂ : 𝕋 P Z) (m : HeckeModule P Z) :
   simp only [smul_eq_sum]
   refine Eq.trans (Finsupp.sum_add_index (f := T₁) (g := T₂) ?_ ?_) ?_
   · intro D1 _
-    simp only [zero_mul, Finsupp.single_zero, Finset.sum_const_zero, Finsupp.sum_fun_zero]
-    rfl
+    simp only [zero_mul, Finsupp.single_zero, Finset.sum_const_zero]
+    exact Finsupp.sum_fun_zero _
   · intro D1 _ y b₂
     simp only [Finsupp.sum]
     show (∑ x ∈ m.support, ∑ i ∈ smulOrbit P D1.rep x.rep,
@@ -150,10 +157,7 @@ lemma smul_zero_HeckeModule (T : 𝕋 P Z) : T • (0 : HeckeModule P Z) = 0 := 
   show Finsupp.sum T (fun D1 b₁ ↦ Finsupp.sum 0 fun m b₂ ↦
     ∑ i ∈ smulOrbit P (HeckeCoset.rep D1) (HeckeLeftCoset.rep m),
       Finsupp.single i (b₁ * b₂)) = 0
-  rw [show (fun D1 b₁ ↦ Finsupp.sum (0 : HeckeLeftCoset P →₀ Z) fun m b₂ ↦
-    ∑ i ∈ smulOrbit P (HeckeCoset.rep D1) (HeckeLeftCoset.rep m),
-      Finsupp.single i (b₁ * b₂)) = (fun _ _ ↦ (0 : HeckeLeftCoset P →₀ Z)) from by
-        ext; rw [Finsupp.sum_zero_index]]
+  simp_rw [Finsupp.sum_zero_index]
   exact Finsupp.sum_fun_zero _
 
 /-- The module action is additive in the module argument. -/
@@ -192,9 +196,9 @@ lemma smulOrbit_disjoint_of_ne (g₁ g₂ : P.Δ) (β : P.Δ) (hne : (⟦g₁⟧
   rw [Finset.disjoint_left]
   intro x hx₁ hx₂
   refine hne <| Quotient.sound (show dcRel P _ _ from ?_)
-  simp only [smulOrbit, Finset.mem_image] at hx₁ hx₂
-  obtain ⟨i₁, _, hi₁⟩ := hx₁
-  obtain ⟨i₂, _, hi₂⟩ := hx₂
+  rw [mem_smulOrbit] at hx₁ hx₂
+  obtain ⟨i₁, hi₁⟩ := hx₁
+  obtain ⟨i₂, hi₂⟩ := hx₂
   rw [← hi₂] at hi₁
   have hset : ({(β : G) * (i₁.out : G) * (g₁ : G)} : Set G) * (P.H : Set G) =
       {(β : G) * (i₂.out : G) * (g₂ : G)} * P.H := Quotient.exact hi₁
@@ -215,7 +219,7 @@ lemma smulOrbit_disjoint_of_ne (g₁ g₂ : P.Δ) (β : P.Δ) (hne : (⟦g₁⟧
       simp only [Subgroup.coe_mul, Subgroup.coe_inv]; group
     rw [this]; exact hstep.symm
   show DoubleCoset.doubleCoset (g₁ : G) P.H P.H = DoubleCoset.doubleCoset (g₂ : G) P.H P.H
-  conv_lhs => rw [show (g₁ : G) = _ from hg]
+  rw [hg]
   exact (DoubleCoset.doubleCoset_mul_right_eq_self P ⟨k, hk⟩ _).trans
     (doset_mul_left_eq_self P (i₁.out⁻¹ * i₂.out) _)
 
@@ -236,8 +240,7 @@ private lemma smul_one_eval (T : 𝕋 P Z) (D : HeckeCoset P) (m : HeckeLeftCose
   show (∑ x ∈ T.support,
     ∑ i ∈ smulOrbit P (HeckeCoset.rep x) (HeckeLeftCoset.rep (HeckeLeftCoset.one P)),
       Finsupp.single i (T.toFun x)) m = T.toFun D
-  rw [Finsupp.finset_sum_apply]
-  simp_rw [Finsupp.finset_sum_apply, Finsupp.single_apply]
+  simp_rw [Finsupp.finsetSum_apply, Finsupp.single_apply]
   rw [Finset.sum_eq_single D]
   · rw [Finset.sum_eq_single_of_mem m hm (fun b _ hb ↦ if_neg hb), if_pos rfl]
   · intro D' _ hne
@@ -246,7 +249,7 @@ private lemma smul_one_eval (T : 𝕋 P Z) (D : HeckeCoset P) (m : HeckeLeftCose
         (Finset.disjoint_left.mp
           (smulOrbit_disjoint_of_ne P (HeckeCoset.rep D) (HeckeCoset.rep D')
             (HeckeLeftCoset.rep (HeckeLeftCoset.one P))
-            (by simp only [HeckeCoset.rep, Quotient.out_eq]; exact hne.symm)) hm)
+            (by rw [HeckeCoset.mk_rep, HeckeCoset.mk_rep]; exact hne.symm)) hm)
   · intro hns
     have h0 : T.toFun D = 0 := Finsupp.notMem_support_iff.mp hns
     exact Finset.sum_eq_zero fun x _ ↦ by simp [h0]

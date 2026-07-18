@@ -57,8 +57,7 @@ lemma constantCoeff_geomSum (a : ℕ) : constantCoeff (geomSum p a) = (a : ℤ_[
 
 lemma geomSum_mul_X (a : ℕ) : geomSum p a * X = (1 + X) ^ a - 1 := by
   have h := geom_sum_mul (1 + X : PowerSeries ℤ_[p]) a
-  rw [add_sub_cancel_left] at h
-  exact h
+  rwa [add_sub_cancel_left] at h
 
 lemma isUnit_geomSum {a : ℕ} (hpa : ¬ p ∣ a) : IsUnit (geomSum p a) := by
   rw [PowerSeries.isUnit_iff_constantCoeff, constantCoeff_geomSum]
@@ -157,9 +156,8 @@ lemma dirac_natCast_sub_one_ne_zero {a : ℕ} (ha : a ≠ 0) :
     binomialSeries_nat, sub_eq_zero] at h2
   have h3 := congrArg (PowerSeries.coeff 1) h2
   rw [show ((1 : PowerSeries ℤ_[p]) + X) ^ a = ((1 + Polynomial.X : Polynomial ℤ_[p]) ^ a :
-      Polynomial ℤ_[p]).toPowerSeries by push_cast [Polynomial.coe_one, Polynomial.coe_X]; ring]
-    at h3
-  rw [Polynomial.coeff_coe, Polynomial.coeff_one_add_X_pow] at h3
+      Polynomial ℤ_[p]).toPowerSeries by push_cast [Polynomial.coe_one, Polynomial.coe_X]; ring,
+    Polynomial.coeff_coe, Polynomial.coeff_one_add_X_pow] at h3
   simp at h3
   omega
 
@@ -170,21 +168,20 @@ realised by `PowerSeries.subst (exp ℚ_p − 1)`; the value `f_a^{(k)}(0)` is t
 off from the Bernoulli generating function `B(t)·(e^t−1) = t` via
 `t·f_a(t) = B(t) − B(at)`. -/
 
-/-- `∂ = (1+T) d/dT` over `ℚ_p`. (To be merged with `PadicMeasure.del` when the
-latter is generalised to arbitrary commutative rings — cleanup note in tickets.) -/
+/-- `∂ = (1+T) d/dT` over `ℚ_p`: the `ℚ_p`-specialisation of the generic
+`PadicLFunctions.del`. -/
 def delQ (G : PowerSeries ℚ_[p]) : PowerSeries ℚ_[p] :=
-  (1 + X) * PowerSeries.derivativeFun G
+  PadicLFunctions.del G
 
 lemma map_derivativeFun (F : PowerSeries ℤ_[p]) :
     PowerSeries.map PadicInt.Coe.ringHom (PowerSeries.derivativeFun F)
-      = PowerSeries.derivativeFun (PowerSeries.map PadicInt.Coe.ringHom F) := by
-  ext n
-  simp [coeff_derivativeFun]
+      = PowerSeries.derivativeFun (PowerSeries.map PadicInt.Coe.ringHom F) :=
+  PadicLFunctions.map_derivativeFun PadicInt.Coe.ringHom F
 
 lemma map_del (F : PowerSeries ℤ_[p]) :
     PowerSeries.map PadicInt.Coe.ringHom (del p F)
-      = delQ p (PowerSeries.map PadicInt.Coe.ringHom F) := by
-  rw [del, delQ, map_mul, map_add, map_one, PowerSeries.map_X, map_derivativeFun]
+      = delQ p (PowerSeries.map PadicInt.Coe.ringHom F) :=
+  PadicLFunctions.map_del PadicInt.Coe.ringHom F
 
 lemma hasSubst_exp_sub_one : HasSubst (exp ℚ_[p] - 1) :=
   HasSubst.of_constantCoeff_zero' (by simp)
@@ -202,9 +199,9 @@ lemma derivativeFun_subst_exp (F : PowerSeries ℚ_[p]) :
   calc PowerSeries.derivativeFun (F.subst (exp ℚ_[p] - 1))
       = d⁄dX ℚ_[p] (F.subst (exp ℚ_[p] - 1)) := rfl
     _ = (d⁄dX ℚ_[p] F).subst (exp ℚ_[p] - 1) * d⁄dX ℚ_[p] (exp ℚ_[p] - 1) :=
-        derivative_subst ℚ_[p] hg
+        derivative_subst hg
     _ = (delQ p F).subst (exp ℚ_[p] - 1) := by
-        rw [hder, delQ, subst_mul hg, subst_add hg, subst_X hg, hone]
+        rw [hder, delQ, PadicLFunctions.del_def, subst_mul hg, subst_add hg, subst_X hg, hone]
         ring_nf
         rfl
 
@@ -214,9 +211,8 @@ lemma constantCoeff_subst_exp (F : PowerSeries ℚ_[p]) :
       = MvPowerSeries.constantCoeff (F.subst (exp ℚ_[p] - 1)) from rfl,
     constantCoeff_subst (hasSubst_exp_sub_one p),
     finsum_eq_single _ 0 fun d hd => by
-      have h0 : MvPowerSeries.constantCoeff (exp ℚ_[p] - 1) = (0 : ℚ_[p]) := by
-        have h1 : PowerSeries.constantCoeff (exp ℚ_[p] - 1) = (0 : ℚ_[p]) := by simp
-        exact h1
+      have h0 : MvPowerSeries.constantCoeff (exp ℚ_[p] - 1) = (0 : ℚ_[p]) :=
+        show PowerSeries.constantCoeff (exp ℚ_[p] - 1) = 0 by simp
       rw [map_pow, h0, zero_pow hd, smul_zero]]
   simp
 
@@ -226,7 +222,8 @@ lemma constantCoeff_iterate_derivativeFun (k : ℕ) (G : PowerSeries ℚ_[p]) :
   induction k generalizing G with
   | zero => simp [PowerSeries.coeff_zero_eq_constantCoeff]
   | succ k ih =>
-    rw [Function.iterate_succ_apply, ih, coeff_derivativeFun, Nat.factorial_succ]
+    rw [Function.iterate_succ_apply, ih,
+      show G.derivativeFun = d⁄dX ℚ_[p] G from rfl, coeff_derivative, Nat.factorial_succ]
     push_cast
     ring
 
@@ -240,7 +237,9 @@ lemma constantCoeff_iterate_delQ (k : ℕ) (F : PowerSeries ℚ_[p]) :
   | zero => simp [constantCoeff_subst_exp, PowerSeries.coeff_zero_eq_constantCoeff]
   | succ k ih =>
     rw [Function.iterate_succ_apply, ih (delQ p F), ← derivativeFun_subst_exp,
-      coeff_derivativeFun, Nat.factorial_succ]
+      show PowerSeries.derivativeFun (F.subst (exp ℚ_[p] - 1))
+        = d⁄dX ℚ_[p] (F.subst (exp ℚ_[p] - 1)) from rfl,
+      coeff_derivative, Nat.factorial_succ]
     push_cast
     ring
 
@@ -258,8 +257,7 @@ lemma X_mul_subst_exp_Fa {a : ℕ} (hpa : ¬ p ∣ a) :
     intro h
     have h1 := congrArg (PowerSeries.coeff 1) h
     rw [map_sub, coeff_rescale, PowerSeries.coeff_exp, PowerSeries.coeff_one] at h1
-    have h2 : ((a : ℕ) : ℚ_[p]) = 0 := by simpa [Nat.factorial] using h1
-    exact haN (Nat.cast_eq_zero.mp h2)
+    exact ha0 (by simpa [Nat.factorial] using h1)
   have hX : (substAlgHom hg) (X : PowerSeries ℚ_[p]) = exp ℚ_[p] - 1 := by
     rw [show ⇑(substAlgHom hg) = PowerSeries.subst (exp ℚ_[p] - 1) from coe_substAlgHom hg]
     exact subst_X hg
@@ -349,9 +347,7 @@ theorem muA_apply_powCM {a : ℕ} (hpa : ¬ p ∣ a) (k : ℕ) :
   simp only [map_div₀, map_mul, map_pow, map_neg, map_add, map_one, map_natCast]
   have hfact : (((k + 1).factorial : ℕ) : ℚ_[p])
       = ((k + 1 : ℕ) : ℚ_[p]) * (k.factorial : ℚ_[p]) := by
-    rw [Nat.factorial_succ]
-    push_cast
-    ring
+    push_cast [Nat.factorial_succ]; ring
   have hk1 : (((k + 1 : ℕ)) : ℚ_[p]) ≠ 0 := Nat.cast_ne_zero.2 (Nat.succ_ne_zero k)
   have hkf : ((k.factorial : ℕ) : ℚ_[p]) ≠ 0 := Nat.cast_ne_zero.2 k.factorial_ne_zero
   rw [hfact]
@@ -555,10 +551,9 @@ theorem psi_muA {a : ℕ} (hpa : ¬ p ∣ a) : psi p (muA p a) = muA p a := by
 lemma phi_apply_powCM (μ : PadicMeasure p ℤ_[p]) (k : ℕ) :
     phi p μ (powCM p k) = (p : ℤ_[p]) ^ k * μ (powCM p k) := by
   change μ ((powCM p k).comp (mulCM p (p : ℤ_[p]))) = (p : ℤ_[p]) ^ k * μ (powCM p k)
-  have hfun : (powCM p k).comp (mulCM p (p : ℤ_[p])) = (p : ℤ_[p]) ^ k • powCM p k := by
-    ext x
-    simp [powCM, mulCM, mul_pow]
-  rw [hfun, map_smul, smul_eq_mul]
+  rw [show (powCM p k).comp (mulCM p (p : ℤ_[p])) = (p : ℤ_[p]) ^ k • powCM p k by
+        ext x; simp [powCM, mulCM, mul_pow],
+    map_smul, smul_eq_mul]
 
 /-- **RJW Prop. 4.8 (`PropInterpolation1`)**: restricting to `ℤ_p^×` removes the
 Euler factor at `p`:

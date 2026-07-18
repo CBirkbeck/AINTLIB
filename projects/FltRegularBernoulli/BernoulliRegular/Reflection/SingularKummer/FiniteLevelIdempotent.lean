@@ -36,7 +36,7 @@ namespace SingularKummer
 
 namespace FiniteLevelIdempotent
 
-variable {m : ℕ} [NeZero m]
+variable {m : ℕ}
 variable {D M : Type*} [Group D] [Fintype D]
 variable [AddCommGroup M] [Module (ZMod m) M]
 
@@ -51,7 +51,6 @@ def projection
     M →ₗ[ZMod m] M :=
   ∑ d : D, coefficient (m := m) chi d • (rho d : M →ₗ[ZMod m] M)
 
-omit [NeZero m] in
 @[simp]
 theorem projection_apply
     (rho : D →* M ≃ₗ[ZMod m] M) (chi : D →* (ZMod m)ˣ) (x : M) :
@@ -59,19 +58,13 @@ theorem projection_apply
       ∑ d : D, coefficient (m := m) chi d • rho d x := by
   simp [projection]
 
-omit [NeZero m] in
 theorem coefficient_inv_mul
     (chi : D →* (ZMod m)ˣ) (b a : D) :
     coefficient (m := m) chi (b⁻¹ * a) =
       (chi b : ZMod m) * coefficient (m := m) chi a := by
-  rw [coefficient, coefficient]
-  have hinv : (b⁻¹ * a)⁻¹ = a⁻¹ * b := by
-    group
-  rw [hinv, map_mul]
-  simp only [Units.val_mul]
+  rw [coefficient, coefficient, mul_inv_rev, inv_inv, map_mul, Units.val_mul]
   ring
 
-omit [NeZero m] in
 /-- The projection range is contained in the eigenspace for `chi`. -/
 theorem apply_projection
     (rho : D →* M ≃ₗ[ZMod m] M) (chi : D →* (ZMod m)ˣ)
@@ -89,7 +82,6 @@ theorem apply_projection
     _ = (chi b : ZMod m) • projection (m := m) rho chi x := by
           simp [projection, coefficient_inv_mul, smul_smul, Finset.smul_sum]
 
-omit [NeZero m] in
 /-- Elementwise eigenspace statement for the range of the exact finite-level
 projection. -/
 theorem mem_range_apply
@@ -100,19 +92,13 @@ theorem mem_range_apply
   obtain ⟨y, rfl⟩ := hx
   exact apply_projection (m := m) rho chi b y
 
-omit [NeZero m] in
 theorem coefficient_mul_character
     (chi : D →* (ZMod m)ˣ) (d : D) :
     coefficient (m := m) chi d * (chi d : ZMod m) =
       (Fintype.card D : ZMod m)⁻¹ := by
-  rw [coefficient]
-  have hmul : (chi d⁻¹ : ZMod m) * (chi d : ZMod m) = 1 := by
-    have hunit : chi d⁻¹ * chi d = 1 := by
-      rw [← map_mul, inv_mul_cancel, map_one]
-    exact congrArg (fun u : (ZMod m)ˣ => (u : ZMod m)) hunit
-  rw [mul_assoc, hmul, mul_one]
+  rw [coefficient, mul_assoc, ← Units.val_mul, ← map_mul, inv_mul_cancel, map_one,
+    Units.val_one, mul_one]
 
-omit [NeZero m] in
 /-- A finite-level character projection acts as the identity on its own range. -/
 theorem projection_apply_eq_self_of_mem_range
     (hcard : IsUnit (Fintype.card D : ZMod m))
@@ -131,23 +117,10 @@ theorem projection_apply_eq_self_of_mem_range
           rw [mem_range_apply (m := m) rho chi d hx]
     _ = ∑ _d : D, (Fintype.card D : ZMod m)⁻¹ • x := by
           simp [smul_smul, coefficient_mul_character]
-    _ = ((Fintype.card D : ZMod m) *
-            (Fintype.card D : ZMod m)⁻¹) • x := by
-          rw [Finset.sum_const]
-          change Fintype.card D • ((Fintype.card D : ZMod m)⁻¹ • x) =
-            ((Fintype.card D : ZMod m) *
-              (Fintype.card D : ZMod m)⁻¹) • x
-          rw [← Nat.cast_smul_eq_nsmul (ZMod m) (Fintype.card D)
-            ((Fintype.card D : ZMod m)⁻¹ • x)]
-          rw [smul_smul]
     _ = x := by
-          have hmul :
-              (Fintype.card D : ZMod m) *
-                (Fintype.card D : ZMod m)⁻¹ = 1 :=
-            ZMod.mul_inv_of_unit _ hcard
-          rw [hmul, one_smul]
+          rw [Finset.sum_const, Finset.card_univ, ← Nat.cast_smul_eq_nsmul (ZMod m), smul_smul,
+            ZMod.mul_inv_of_unit _ hcard, one_smul]
 
-omit [NeZero m] in
 /-- Idempotence of the finite-level character projection. -/
 theorem projection_apply_projection
     (hcard : IsUnit (Fintype.card D : ZMod m))

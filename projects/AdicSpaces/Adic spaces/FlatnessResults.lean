@@ -6,6 +6,7 @@ import Mathlib.RingTheory.Flat.Basic
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Mathlib.RingTheory.Flat.Localization
 import Mathlib.RingTheory.Spectrum.Prime.RingHom
+import Common
 import «Adic spaces».Presheaf
 import «Adic spaces».TateAlgebra
 
@@ -17,7 +18,6 @@ and that the product restriction for a finite rational cover is faithfully flat.
 
 ## Main results
 
-* `Module.Flat.pi` : Finite products of flat modules are flat.
 * `canonicalMap_flat_discrete` : The canonical map `A → presheafValue D` is flat
   for discrete `A` (Prop 8.30, discrete case).
 * `productRestriction_flat_discrete` : The product restriction for a rational cover
@@ -29,18 +29,6 @@ and that the product restriction for a finite rational cover is faithfully flat.
 -/
 
 open ValuationSpectrum
-
-/-! ### Finite products of flat modules -/
-
-/-- Finite products of flat modules are flat.
-This follows from the equivalence `(ι → M) ≃ (ι →₀ M)` for finite `ι`
-and `Module.Flat.dfinsupp`. -/
-instance Module.Flat.pi {R : Type*} [CommSemiring R] {ι : Type*} [Finite ι]
-    {M : ι → Type*} [∀ i, AddCommMonoid (M i)] [∀ i, Module R (M i)]
-    [∀ i, Module.Flat R (M i)] : Module.Flat R (∀ i, M i) := by
-  cases nonempty_fintype ι
-  exact Module.Flat.of_linearEquiv
-    (DirectSum.linearEquivFunOnFintype R ι M).symm
 
 /-! ### Presheaf value flatness (discrete case) -/
 
@@ -78,15 +66,7 @@ theorem canonicalMap_flat_discrete [DiscreteTopology A] (D : RationalLocData A) 
   have halg : ∀ a : A, e (algebraMap A _ a) = algebraMap A (presheafValue D) a := fun a => by
     change D.coeRingHom (algebraMap A _ a) = algebraMap A (presheafValue D) a
     rfl
-  exact Module.Flat.of_linearEquiv
-    { e.symm.toEquiv with
-      map_add' := e.symm.map_add
-      map_smul' := fun a x => by
-        simp only [Algebra.smul_def, RingHom.id_apply]
-        change e.symm (e (algebraMap A _ a) * x) = algebraMap A _ a * e.symm x
-        rw [show e.symm (e (algebraMap A _ a) * x) =
-          e.symm (e (algebraMap A _ a)) * e.symm x from e.symm.map_mul _ _,
-          e.symm_apply_apply] }
+  exact Module.Flat.of_linearEquiv (AlgEquiv.ofRingEquiv halg).symm.toLinearEquiv
 
 /-! ### Cor 8.32: each cover piece is flat over A (discrete case) -/
 
@@ -121,15 +101,8 @@ theorem flat_of_ringEquiv_respecting_algebra {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [Module.Flat R S]
     {T : Type*} [CommRing T] [Algebra R T]
     (e : S ≃+* T) (halg : ∀ r : R, e (algebraMap R S r) = algebraMap R T r) :
-    Module.Flat R T := by
-  exact Module.Flat.of_linearEquiv
-    { e.symm.toEquiv with
-      map_add' := e.symm.map_add
-      map_smul' := fun r x => by
-        simp only [Algebra.smul_def, RingHom.id_apply]
-        change e.symm (algebraMap R T r * x) = algebraMap R S r * e.symm x
-        rw [show algebraMap R T r = e (algebraMap R S r) from (halg r).symm]
-        rw [e.symm.map_mul, e.symm_apply_apply] }
+    Module.Flat R T :=
+  Module.Flat.of_linearEquiv (AlgEquiv.ofRingEquiv halg).symm.toLinearEquiv
 
 /-! ### Tate algebra quotient flatness (discrete, Lemma 8.31(2))
 

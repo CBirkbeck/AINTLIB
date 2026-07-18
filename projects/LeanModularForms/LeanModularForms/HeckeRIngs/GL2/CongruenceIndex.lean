@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.Algebra.Field.ZMod
-import Mathlib.Data.ZMod.Units
 import Mathlib.GroupTheory.Index
 import Mathlib.NumberTheory.ModularForms.CongruenceSubgroups
 
@@ -32,14 +31,14 @@ namespace HeckeRing.GL2
 
 private lemma dvd_sub_val_mul (p : ℕ) (hp : Nat.Prime p) (a b : ℤ) (hb : (b : ZMod p) ≠ 0) :
     (p : ℤ) ∣ a - (((a : ZMod p) * (b : ZMod p)⁻¹).val : ℤ) * b := by
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact (Nat.Prime p) := ⟨hp⟩
   rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
   push_cast
   rw [ZMod.natCast_zmod_val, mul_assoc, inv_mul_cancel₀ hb, mul_one, sub_self]
 
 private lemma SL2_entry_mul (A B : SL(2, ℤ)) (i j : Fin 2) :
     (A * B).1 i j = A.1 i 0 * B.1 0 j + A.1 i 1 * B.1 1 j := by
-  simp [Matrix.mul_apply, Fin.sum_univ_two]
+  simp only [Matrix.SpecialLinearGroup.coe_mul, Matrix.mul_apply, Fin.sum_univ_two]
 
 private lemma TjS_inv_10 (j : ℤ) : ((T ^ j * S)⁻¹).1 1 0 = -1 := by
   simp [coe_T_zpow, coe_S, Matrix.SpecialLinearGroup.coe_inv, adjugate_fin_two_of]
@@ -98,7 +97,8 @@ private lemma Gamma0_prime_index_surj :
   · refine ⟨⟨p, p.lt_succ_self⟩, ?_⟩
     rw [QuotientGroup.eq, Gamma0_mem]
     simpa [Gamma0Rep] using h
-  · obtain ⟨j₀, hj₀⟩ : ∃ j₀ : ZMod p, (p : ℤ) ∣ σ.1 0 0 - (j₀.val : ℤ) * σ.1 1 0 :=
+  · obtain ⟨j₀, hj₀⟩ :
+        ∃ j₀ : ZMod p, (p : ℤ) ∣ σ.1 0 0 - (j₀.val : ℤ) * σ.1 1 0 :=
       ⟨_, dvd_sub_val_mul p hp _ _ h⟩
     refine ⟨⟨j₀.val, Nat.lt_succ_of_lt (ZMod.val_lt j₀)⟩, ?_⟩
     rw [QuotientGroup.eq, Gamma0_mem]
@@ -127,13 +127,18 @@ private lemma lowerTriRep_mem_Gamma0 (k : ℕ) (c : Fin p) :
 private lemma lowerTriRep_diff_entry (k : ℕ) (c₁ c₂ : Fin p) :
     ((lowerTriRep p k c₁)⁻¹ * lowerTriRep p k c₂).1 1 0 =
     ((c₂ : ℤ) - (c₁ : ℤ)) * (p : ℤ) ^ k := by
-  simp [lowerTriRep, Matrix.SpecialLinearGroup.coe_inv, adjugate_fin_two_of, sub_mul,
+  rw [show (((lowerTriRep p k c₁)⁻¹ * lowerTriRep p k c₂).1 : Matrix (Fin 2) (Fin 2) ℤ)
+      = adjugate (lowerTriRep p k c₁) * (lowerTriRep p k c₂).1 from by
+    rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.SpecialLinearGroup.coe_inv]]
+  simp [lowerTriRep, adjugate_fin_two_of, Matrix.mul_apply, Fin.sum_univ_two, sub_mul,
     neg_add_eq_sub]
 
 private lemma lowerTriRep_inv_mul_10 (k : ℕ) (c : Fin p) (σ : SL(2, ℤ)) :
     ((lowerTriRep p k c)⁻¹ * σ).1 1 0 = σ.1 1 0 - (c : ℤ) * (p : ℤ) ^ k * σ.1 0 0 := by
-  simp [SL2_entry_mul, lowerTriRep, Matrix.SpecialLinearGroup.coe_inv, adjugate_fin_two_of,
-    neg_add_eq_sub]
+  rw [SL2_entry_mul,
+    show (((lowerTriRep p k c)⁻¹).1 : Matrix (Fin 2) (Fin 2) ℤ)
+      = adjugate (lowerTriRep p k c) from Matrix.SpecialLinearGroup.coe_inv _]
+  simp [lowerTriRep, adjugate_fin_two_of, neg_add_eq_sub]
 
 private def relindexRep (k : ℕ) (c : Fin p) : ↥(Gamma0 (p ^ k)) :=
   ⟨lowerTriRep p k c, lowerTriRep_mem_Gamma0 p k c⟩
@@ -178,7 +183,8 @@ private lemma Gamma0_relindex_step_surj (k : ℕ) (hk : 0 < k) :
     have h1_dvd : (p : ℤ) ∣ 1 :=
       hdet ▸ dvd_sub (dvd_mul_of_dvd_left h00_dvd _) (dvd_mul_of_dvd_right h10_dvd _)
     exact absurd (Int.le_of_dvd one_pos h1_dvd) (not_le.mpr (mod_cast hp.one_lt))
-  obtain ⟨c₀, hc₀⟩ : ∃ c₀ : ZMod p, (p : ℤ) ∣ q - (c₀.val : ℤ) * σ.1 0 0 :=
+  obtain ⟨c₀, hc₀⟩ :
+      ∃ c₀ : ZMod p, (p : ℤ) ∣ q - (c₀.val : ℤ) * σ.1 0 0 :=
     ⟨_, dvd_sub_val_mul p hp q _ h00_ne⟩
   refine ⟨⟨c₀.val, ZMod.val_lt c₀⟩, ?_⟩
   rw [QuotientGroup.eq, Subgroup.mem_subgroupOf]

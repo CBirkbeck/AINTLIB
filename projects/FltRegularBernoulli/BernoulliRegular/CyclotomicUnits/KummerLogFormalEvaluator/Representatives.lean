@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient
 
 /-!
 # Formal-to-finite evaluator bridge for Kummer logarithm coefficients
@@ -13,11 +15,6 @@ the coefficient file stays focused and below the route line limit.
 @[expose] public section
 
 noncomputable section
-
-open NumberField
-open NumberField.IsCMField
-open BernoulliRegular.Reflection.Local
-open scoped BigOperators NumberField PowerSeries
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -97,7 +94,7 @@ theorem kummerLogFormalEvenRowRepresentative_natDegree_lt
   dsimp [kummerLogFormalEvenRowRepresentative]
   refine Polynomial.natDegree_sum_le_of_forall_le
     (s := Finset.univ) (n := p - 3)
-    (f := fun j : Fin (kummerLogRank p) =>
+    (f := fun j : Fin (kummerLogRank p) ↦
       Polynomial.monomial (2 * kummerLogRowIndex (p := p) j)
         (kummerLogFormalEvenRowCoeffLift (p := p) hp_three a j)) ?_
   intro j _hj

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
 
 /-!
 # T-Q1-CSINNOTT: Sinnott `C_S(K⁺)` vs Washington `C_cl(K⁺)` for prime conductor
@@ -87,17 +89,9 @@ reviewer reply.
 
 Since both `C_S` and `C_cl` are not separately formalised in this
 project (we use the unified `circularSubgroupKplus`), the equivalence
-is captured at the documentation level here. -/
-
-/-- **Marker theorem: for prime conductor, `circularSubgroupKplus` serves
-as both Sinnott's `C_S(K⁺)` and Washington's `C_cl(K⁺)`**.
-
-The two are definitionally the same group when the conductor is prime
-([Wash97 §8.2] / [Sinnott 1980]). The naming `circularSubgroupKplus`
-avoids the distinction. -/
-theorem circularSubgroupKplus_eq_sinnott_eq_washington (hp_three : 3 ≤ p) :
-    circularSubgroupKplus p K hp_three = circularSubgroupKplus p K hp_three :=
-  rfl
+is captured at the documentation level here — there is deliberately no
+theorem asserting it, since with only one group formalised any such
+statement could only be the tautology `C = C`. -/
 
 end Thaine
 

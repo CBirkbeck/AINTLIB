@@ -44,7 +44,7 @@ theorem dworkThetaTrunc_artinHasseAtTo_eq_finiteArtinHasseExp_mul
         (dworkCoeffArtinHasseAtTo F.toConcreteStickelbergerSetup γ N) N u =
       F.finiteArtinHasseExp N (γ * u) := by
   classical
-  unfold finiteArtinHasseExp dworkThetaTrunc
+  simp only [finiteArtinHasseExp, dworkThetaTrunc]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   cases n with
@@ -71,12 +71,12 @@ finset-product coordinate of its Artin-Hasse factor coordinates. -/
 theorem artinHasseThetaTruncProductAtTo_sub_one_eq_finsetProductCoord
     (γ : 𝓞 R') (N : ℕ) (y : kˣ) :
     artinHasseThetaTruncProductAtTo F γ N y - 1 =
-      finiteLogFinsetProductCoord Finset.univ (fun i : Fin F.toConcreteStickelbergerSetup.f =>
+      finiteLogFinsetProductCoord Finset.univ (fun i : Fin F.toConcreteStickelbergerSetup.f ↦
         F.finiteArtinHasseExpCoord N
           (γ * (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ)))) := by
   classical
   rw [F.artinHasseThetaTruncProductAtTo_eq_prod_finiteArtinHasseExp]
-  unfold finiteLogFinsetProductCoord
+  simp only [finiteLogFinsetProductCoord]
   congr 1
   refine Finset.prod_congr rfl ?_
   intro i _hi
@@ -89,10 +89,10 @@ theorem artinHasseThetaTruncProductAtTo_sub_one_mem_Q
     {γ : 𝓞 R'} (hγ : γ ∈ F.Q) (N : ℕ) (y : kˣ) :
     artinHasseThetaTruncProductAtTo F γ N y - 1 ∈ F.Q := by
   classical
-  let x : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i =>
+  let x : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i ↦
     F.finiteArtinHasseExpCoord N
       (γ * (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ)))
-  have hx : ∀ i ∈ Finset.univ, x i ∈ F.Q := fun i _hi =>
+  have hx : ∀ i ∈ Finset.univ, x i ∈ F.Q := fun i _hi ↦
     F.finiteArtinHasseExpCoord_mem_Q N
       (Ideal.mul_mem_right _ _ hγ)
   have hcoord : finiteLogFinsetProductCoord Finset.univ x ∈ F.Q :=
@@ -209,10 +209,10 @@ theorem finiteLog_artinHasseThetaTruncProductAtTo_sub_one_eq_sum_finiteArtinHass
           (γ * (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ)))
           (Ideal.mul_mem_right _ _ hγ) := by
   classical
-  let x : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i =>
+  let x : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i ↦
     F.finiteArtinHasseExpCoord N
       (γ * (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ)))
-  have hx : ∀ i ∈ Finset.univ, x i ∈ F.Q := fun i _hi =>
+  have hx : ∀ i ∈ Finset.univ, x i ∈ F.Q := fun i _hi ↦
     F.finiteArtinHasseExpCoord_mem_Q N
       (Ideal.mul_mem_right _ _ hγ)
   have hprod :
@@ -240,10 +240,10 @@ theorem finiteLog_artinHasseThetaTruncProductAtTo_sub_one_eq_sum_finiteArtinHass
             F.finiteLog N (x i) (hx i (Finset.mem_univ i)) :=
       (Finset.sum_subtype
           (s := (Finset.univ : Finset (Fin F.toConcreteStickelbergerSetup.f)))
-          (p := fun i : Fin F.toConcreteStickelbergerSetup.f =>
+          (p := fun i : Fin F.toConcreteStickelbergerSetup.f ↦
             i ∈ (Finset.univ : Finset (Fin F.toConcreteStickelbergerSetup.f)))
-          (fun _ => Iff.rfl)
-          (fun i => F.finiteLog N (x i) (hx i (Finset.mem_univ i)))).symm
+          (fun _ ↦ Iff.rfl)
+          (fun i ↦ F.finiteLog N (x i) (hx i (Finset.mem_univ i)))).symm
     rw [hsum] at hlog
     simpa only [x, Finset.mem_univ, true_implies] using hlog
   calc
@@ -581,7 +581,7 @@ theorem one_add_pi_pow_traceNatCast_mul_one_add_traceRootInverseCoord_eq_one
   have hcoord_eq :
       finiteLogProductCoord ((1 + F.π) ^ t - 1) (F.traceRootInverseCoord y) =
         (1 + F.π) ^ t * (1 + F.traceRootInverseCoord y) - 1 := by
-    unfold finiteLogProductCoord
+    simp only [finiteLogProductCoord]
     ring
   rw [hcoord_eq] at hcoord
   simpa [t] using sub_eq_zero.mp hcoord
@@ -706,7 +706,7 @@ theorem dworkProductApprox_mul_traceRootInverse_sub_one_mem_Q
       (by
         simpa [invCoord] using F.traceRootInverseCoord_mem_Q y)
   have heq : P * (1 + invCoord) - 1 = finiteLogProductCoord (P - 1) invCoord := by
-    unfold finiteLogProductCoord
+    simp only [finiteLogProductCoord]
     ring
   simpa [P, invCoord, heq] using hcoord
 
@@ -726,7 +726,7 @@ theorem finiteLog_dworkProductApprox_mul_traceRootInverse_sub_one_eq_zero
       (artinHasseDworkParameterApproxTo F.toConcreteStickelbergerSetup N) N y
   let invCoord : 𝓞 R' := F.traceRootInverseCoord y
   have heq : P * (1 + invCoord) - 1 = finiteLogProductCoord (P - 1) invCoord := by
-    unfold finiteLogProductCoord
+    simp only [finiteLogProductCoord]
     ring
   calc
     F.finiteLog N (P * (1 + invCoord) - 1)
@@ -884,7 +884,7 @@ theorem artinHasseApproxDworkOneAddPiProductIdentity_of_finiteLog
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -939,7 +939,7 @@ parameter, with no remaining Dwork splitting premise. -/
 noncomputable def toFullTeichDworkSetupArtinHasseApproxToOfFiniteLog :
     FullTeichDworkSetup ℓ p k K R' :=
   F.toFullTeichDworkSetupArtinHasseApproxToOfTheta
-    (fun N y => F.psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ N y)
+    (fun N y ↦ F.psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ N y)
 
 end FullTeichStickelbergerSetup
 

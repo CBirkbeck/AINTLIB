@@ -1,7 +1,7 @@
 module
 
-public import BernoulliRegular.Reflection.Local.ComponentDimension.Part1
-public import BernoulliRegular.Reflection.Local.ComponentDimension.Part2
+public import BernoulliRegular.Reflection.Local.ComponentDimension.CharacterProjectionEigenspaceSetup
+public import BernoulliRegular.Reflection.Local.ComponentDimension.CharacterProjectionFinrankOne
 
 /-!
 This module has been split into smaller implementation files.

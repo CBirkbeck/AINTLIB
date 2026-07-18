@@ -48,20 +48,16 @@ private theorem primitiveRoot_pow_succ :
       ∃ w : ℂ_[p], IsPrimitiveRoot w (p ^ (n + 1)) ∧ w ^ p = z := by
   haveI : NeZero (p : ℂ_[p]) := ⟨(Nat.cast_ne_zero (R := ℂ_[p])).mpr hp.out.ne_zero⟩
   rintro (_ | n) z hz
-  · -- `n = 0`: `z = 1`, take a genuine primitive `p`-th root
-    obtain ⟨w, hw⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot ℂ_[p] p
+  · obtain ⟨w, hw⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot ℂ_[p] p
     have hz1 : z = 1 := by simpa using hz.pow_eq_one
     exact ⟨w, by simpa using hw, by rw [hz1, hw.pow_eq_one]⟩
-  · -- `n + 1`: any `p`-th root `w` of `z` has order exactly `p^{n+2}`
-    obtain ⟨w, hwz⟩ := IsAlgClosed.exists_pow_nat_eq (k := ℂ_[p]) z (n := p) hp.out.pos
+  · obtain ⟨w, hwz⟩ := IsAlgClosed.exists_pow_nat_eq (k := ℂ_[p]) z (n := p) hp.out.pos
     refine ⟨w, ?_, hwz⟩
     rw [IsPrimitiveRoot.iff_orderOf]
-    -- `w^{p^{n+2}} = z^{p^{n+1}} = 1`, so `orderOf w ∣ p^{n+2}`
     have hpow : w ^ p ^ (n + 1 + 1) = 1 := by
       rw [pow_succ', pow_mul, hwz, hz.pow_eq_one]
     have hdvd : orderOf w ∣ p ^ (n + 1 + 1) := orderOf_dvd_of_pow_eq_one hpow
     obtain ⟨k, hkle, hk⟩ := (Nat.dvd_prime_pow hp.out).1 hdvd
-    -- if `k ≤ n+1` then `z^{p^n} = w^{p^{n+1}} = 1`, contradicting `hz`
     rcases eq_or_lt_of_le hkle with hkeq | hklt
     · rw [hk, hkeq]
     · exfalso
@@ -80,7 +76,6 @@ once and for all a compatible system of roots of unity `(ξ_{p^n})_n`". -/
 theorem exists_compatible_primitiveRoot :
     ∃ ξ : ℕ → ℂ_[p],
       (∀ n, IsPrimitiveRoot (ξ n) (p ^ n)) ∧ ∀ n, ξ (n + 1) ^ p = ξ n := by
-  -- build the system as a chain of subtypes `{z // IsPrimitiveRoot z (p^n)}`
   let chain : ∀ n, {z : ℂ_[p] // IsPrimitiveRoot z (p ^ n)} := fun n =>
     Nat.rec ⟨1, by simp⟩ (fun _ zn => ⟨(primitiveRoot_pow_succ p zn.2).choose,
       (primitiveRoot_pow_succ p zn.2).choose_spec.1⟩) n
@@ -204,7 +199,9 @@ instance isCyclotomicExtension_K {n : ℕ} [NeZero (p ^ n)] :
     IsCyclotomicExtension {p ^ n} ℚ_[p] (K p n) := by
   have hζ := zetaSys_primitiveRoot p n
   have hint : IsIntegral ℚ_[p] (zetaSys p n) :=
-    (hζ.isIntegral (pow_pos hp.out.pos n)).tower_top
+    ⟨Polynomial.X ^ p ^ n - Polynomial.C 1,
+      Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+      by simp [hζ.pow_eq_one]⟩
   change IsCyclotomicExtension {p ^ n} ℚ_[p] (K p n).toSubalgebra
   rw [K, IntermediateField.adjoin_simple_toSubalgebra_of_isAlgebraic hint.isAlgebraic]
   exact hζ.adjoin_isCyclotomicExtension ℚ_[p]
@@ -230,8 +227,8 @@ private theorem norm_primitiveRoot_eq_one {n : ℕ} {ξ : ℂ_[p]}
   have h1 : ‖ξ‖ ^ (p ^ n) = 1 := by rw [← norm_pow, hξ.pow_eq_one, norm_one]
   have hne : p ^ n ≠ 0 := (pow_pos hp.out.pos n).ne'
   refine le_antisymm ?_ ?_
-  · by_contra h; rw [not_le] at h; exact absurd h1 (one_lt_pow₀ h hne).ne'
-  · by_contra h; rw [not_le] at h; exact absurd h1 (pow_lt_one₀ (norm_nonneg ξ) h hne).ne
+  · by_contra! h; exact absurd h1 (one_lt_pow₀ h hne).ne'
+  · by_contra! h; exact absurd h1 (pow_lt_one₀ (norm_nonneg ξ) h hne).ne
 
 /-- For a norm-one element `ξ` of `ℂ_p`, `‖ξ^c − 1‖ ≤ ‖ξ − 1‖`: factor
 `ξ^c − 1 = (∑_{i<c} ξ^i)(ξ − 1)` and bound the geometric factor by `1`
@@ -322,7 +319,7 @@ theorem norm_pi_pow_totient {n : ℕ} (hn : 1 ≤ n) :
   rw [← hprodnorm, hpnorm]
 
 theorem norm_pi_lt_one {n : ℕ} (hn : 1 ≤ n) : ‖pi p n‖ < 1 :=
-  (zetaSys_primitiveRoot p n).norm_sub_one_lt hn
+  (zetaSys_primitiveRoot p n).norm_sub_one_lt
 
 theorem pi_ne_zero {n : ℕ} (hn : 1 ≤ n) : pi p n ≠ 0 := by
   rw [pi, sub_ne_zero]
@@ -367,13 +364,6 @@ theorem finrank_K_succ {n : ℕ} (hn : 1 ≤ n) :
   rw [hratio] at htower
   exact (Nat.eq_of_mul_eq_mul_left (Nat.totient_pos.2 (pow_pos hp.out.pos n))
     (by linarith [htower])).symm
-
-/-! ## The level norm `N_{n+1,n}` and the norm-compatible unit group `𝒰_∞`
-
-RJW §9 (TeX 2503, 2525, 2581–2585). The relative field norm
-`N_{K_{n+1}/K_n}` is the engine for the norm-inverse-limit `𝒰_∞` and (via its
-collapse `N_{n+1,n}(ξ^b_{p^{n+1}} − 1) = ξ^b_{p^n} − 1`, TeX 2581) for the
-cyclotomic units and the Coleman commuting square. -/
 
 /-- The relative field norm `N_{K_{n+1}/K_n} : K_{n+1} → K_n`, viewed as a map
 `ℂ_p → ℂ_p` (junk-extended by `0` off `K_{n+1}`). For `x ∈ K_{n+1}` it is the
@@ -423,7 +413,6 @@ theorem levelNorm_one (n : ℕ) : levelNorm p n 1 = 1 := by
 set_option synthInstance.maxHeartbeats 1000000 in
 -- the `Algebra.norm_algebraMap`/`finrank` computation runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; instance synthesis exceeds defaults
-set_option maxHeartbeats 1000000 in
 /-- **The level norm of a base constant is its `p`-th power** (RJW §12.1 norm-compatibility
 helper, the `N(ζ) = ζ^p` step): for `c ∈ K_n` with `n ≥ 1`, viewing `c ∈ K_{n+1}` through
 the inclusion, `N_{n+1,n}(c) = c^p`. The step `K_{n+1}/K_n` has degree `p`
@@ -450,15 +439,6 @@ theorem levelNorm_const_eq_pow {n : ℕ} (hn : 1 ≤ n) {c : ℂ_[p]} (hc : c �
   push_cast
   rfl
 
-/-! ### The norm collapse `N_{n+1,n}(ξ^b_{p^{n+1}} − 1) = ξ^b_{p^n} − 1`
-
-RJW TeX 2581–2585. The proof identifies `w := ξ^b_{p^{n+1}}` as a primitive
-`p^{n+1}`-th root of unity (`b` coprime to `p`) generating `K_{n+1}` over
-`K_n`, whose minimal polynomial over `K_n` is `X^p − ξ^b_{p^n}` (degree
-`p = [K_{n+1}:K_n]`); translating to `w − 1` gives minpoly `(X+1)^p − ξ^b_{p^n}`,
-and the norm of a generator is `(−1)^p` times its constant term, i.e.
-`ξ^b_{p^n} − 1` (using `p` odd). -/
-
 /-- The degree of `ℚ_p(w)` for any primitive `p^{n+1}`-th root of unity `w` is
 `φ(p^{n+1})` — `ℚ_p(w)` is a cyclotomic extension (`w` generates the `p^{n+1}`-th
 roots) and `Φ_{p^{n+1}}` is irreducible over `ℚ_p`. -/
@@ -466,7 +446,10 @@ private theorem finrank_adjoin_primitiveRoot {n : ℕ} {w : ℂ_[p]}
     (hw : IsPrimitiveRoot w (p ^ (n + 1))) :
     Module.finrank ℚ_[p] (IntermediateField.adjoin ℚ_[p] {w}) = Nat.totient (p ^ (n + 1)) := by
   haveI : NeZero (p ^ (n + 1)) := ⟨(pow_pos hp.out.pos (n + 1)).ne'⟩
-  have hint : IsIntegral ℚ_[p] w := (hw.isIntegral (pow_pos hp.out.pos (n + 1))).tower_top
+  have hint : IsIntegral ℚ_[p] w :=
+    ⟨Polynomial.X ^ p ^ (n + 1) - Polynomial.C 1,
+      Polynomial.monic_X_pow_sub_C 1 (pow_ne_zero _ hp.out.ne_zero),
+      by simp [hw.pow_eq_one]⟩
   haveI : IsCyclotomicExtension {p ^ (n + 1)} ℚ_[p]
       (IntermediateField.adjoin ℚ_[p] {w}) := by
     change IsCyclotomicExtension {p ^ (n + 1)} ℚ_[p]
@@ -518,7 +501,6 @@ theorem extendScalars_adjoin_eq_top {n : ℕ} (hn : 1 ≤ n)
     FiniteDimensional.right ℚ_[p] (K p n) _
   refine IntermediateField.eq_of_le_of_finrank_eq le_top ?_
   rw [IntermediateField.finrank_top', finrank_K_succ p hn]
-  -- `finrank K_n K_n⟮V⟯ ∣ p` and `≠ 1`, so `= p`
   have hdvd : Module.finrank (K p n) (K p n)⟮V⟯ ∣
       Module.finrank (K p n) (IntermediateField.extendScalars (K_le_succ p n)) :=
     (IntermediateField.finrank_dvd_of_le_right le_top).trans
@@ -533,11 +515,8 @@ theorem extendScalars_adjoin_eq_top {n : ℕ} (hn : 1 ≤ n)
   · exact hp'
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
-set_option maxHeartbeats 1000000 in
--- the `adjoin.powerBasis`/`norm_eq_norm_adjoin` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer; both instance synthesis and the
--- elaboration of the power-basis term exceed the defaults
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis through the
+-- second `IntermediateField` over `K p n` exceeds the default budget
 /-- The norm of a generator `V` of `K_{n+1}/K_n` with minimal polynomial
 `(X+1)^p − C c` is `c − 1` (using `p` odd: `(−1)^p · (1 − c) = c − 1`). -/
 private theorem norm_extendScalars_translated {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
@@ -546,27 +525,23 @@ private theorem norm_extendScalars_translated {n : ℕ} (hn : 1 ≤ n) (hp2 : p 
     (hmp : minpoly (K p n) V = (Polynomial.X + 1) ^ p - Polynomial.C c) :
     Algebra.norm (K p n) V = c - 1 := by
   have hp0 : p ≠ 0 := hp.out.ne_zero
+  have hm : ((Polynomial.X : (K p n)[X]) + 1).Monic := by
+    rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp]
+    exact Polynomial.monic_X_add_C 1
+  have hm1 : ((Polynomial.X : (K p n)[X]) + 1).natDegree = 1 := by
+    rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp,
+      Polynomial.natDegree_X_add_C]
   have hmonic : ((Polynomial.X + 1) ^ p - Polynomial.C c : (K p n)[X]).Monic := by
-    have hm : ((Polynomial.X : (K p n)[X]) + 1).Monic := by
-      rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp]
-      exact Polynomial.monic_X_add_C 1
     have hmp' : ((Polynomial.X + 1 : (K p n)[X]) ^ p).Monic := hm.pow p
     have hdn : ((Polynomial.X + 1 : (K p n)[X]) ^ p).natDegree = p := by
-      rw [hm.natDegree_pow, show ((Polynomial.X : (K p n)[X]) + 1).natDegree = 1 by
-        rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp,
-          Polynomial.natDegree_X_add_C], mul_one]
+      rw [hm.natDegree_pow, hm1, mul_one]
     rw [sub_eq_add_neg, ← Polynomial.C_neg]
     refine hmp'.add_of_left ?_
     rw [Polynomial.degree_eq_natDegree hmp'.ne_zero, hdn]
     exact lt_of_le_of_lt Polynomial.degree_C_le (by exact_mod_cast Nat.pos_of_ne_zero hp0)
   have hdeg : (minpoly (K p n) V).natDegree = p := by
-    rw [hmp, sub_eq_add_neg, ← Polynomial.C_neg, Polynomial.natDegree_add_C]
-    have hm : ((Polynomial.X : (K p n)[X]) + 1).Monic := by
-      rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp]
-      exact Polynomial.monic_X_add_C 1
-    rw [hm.natDegree_pow, show ((Polynomial.X : (K p n)[X]) + 1).natDegree = 1 by
-      rw [show ((Polynomial.X : (K p n)[X]) + 1) = Polynomial.X + Polynomial.C 1 by simp,
-        Polynomial.natDegree_X_add_C], mul_one]
+    rw [hmp, sub_eq_add_neg, ← Polynomial.C_neg, Polynomial.natDegree_add_C,
+      hm.natDegree_pow, hm1, mul_one]
   have hint : IsIntegral (K p n) V := by
     rw [← minpoly.ne_zero_iff, hmp]; exact hmonic.ne_zero
   have htop : (K p n)⟮V⟯ = ⊤ := extendScalars_adjoin_eq_top p hn hbot
@@ -588,10 +563,7 @@ private theorem norm_extendScalars_translated {n : ℕ} (hn : 1 ≤ n) (hp2 : p 
   ring
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
-set_option maxHeartbeats 1000000 in
--- `adjoin.finrank` and the divisibility argument run through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer, exceeding the default budgets
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis exceeds the default
 /-- The minimal polynomial over `K_n` of the extendScalars element `W` whose
 value is a primitive `p^{n+1}`-th root `w` (with `w^p = (c : ℂ_p)`, `c ∈ K_n`)
 is `X^p − C c` (RJW TeX 2685). Degree `p = [K_{n+1}:K_n]` from `W` generating. -/
@@ -627,14 +599,12 @@ and `p = 2` would give `+(1 − ξ^b_n)` not `ξ^b_n − 1`. -/
 theorem levelNorm_zetaSys_pow_sub_one {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
     {b : ℕ} (hb : ¬ p ∣ b) :
     levelNorm p n (zetaSys p (n + 1) ^ b - 1) = zetaSys p n ^ b - 1 := by
-  -- `w := ξ^b_{p^{n+1}}` is a primitive `p^{n+1}`-th root not in `K_n`
   have hw : IsPrimitiveRoot (zetaSys p (n + 1) ^ b) (p ^ (n + 1)) :=
     (zetaSys_primitiveRoot p (n + 1)).pow_of_coprime b
       (Nat.Coprime.pow_right _ (hp.out.coprime_iff_not_dvd.2 hb).symm)
   have hwK : zetaSys p (n + 1) ^ b ∈ K p (n + 1) := pow_mem (zetaSys_mem_K p (n + 1)) b
   have hcK : zetaSys p n ^ b ∈ K p n := pow_mem (zetaSys_mem_K p n) b
   have hvK : zetaSys p (n + 1) ^ b - 1 ∈ K p (n + 1) := sub_mem hwK (one_mem _)
-  -- package the extendScalars elements and the base element `c = ξ^b_n`
   set W : IntermediateField.extendScalars (K_le_succ p n) :=
     ⟨zetaSys p (n + 1) ^ b, (IntermediateField.mem_extendScalars (K_le_succ p n)).2 hwK⟩ with hW
   set c : K p n := ⟨zetaSys p n ^ b, hcK⟩ with hc
@@ -644,7 +614,6 @@ theorem levelNorm_zetaSys_pow_sub_one {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
     rw [← pow_mul, mul_comm, pow_mul, zetaSys_pow_p]
   have hWbot : (W : ℂ_[p]) ∉ K p n := primitiveRoot_notMem_K p hn hw
   have hWtop : (K p n)⟮W⟯ = ⊤ := extendScalars_adjoin_eq_top p hn hWbot
-  -- `V := W − 1` has value `w − 1` and minpoly `(X+1)^p − C c`
   set V : IntermediateField.extendScalars (K_le_succ p n) := W - 1 with hV
   have hVval : (V : ℂ_[p]) = zetaSys p (n + 1) ^ b - 1 := rfl
   have hWval : (W : ℂ_[p]) = zetaSys p (n + 1) ^ b := rfl
@@ -659,7 +628,6 @@ theorem levelNorm_zetaSys_pow_sub_one {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2)
   have hmpV : minpoly (K p n) V = (Polynomial.X + 1) ^ p - Polynomial.C c := by
     rw [hV, hone, minpoly.sub_algebraMap, minpoly_extendScalars_of_pow p hn hWc hWtop]
     rw [sub_comp, pow_comp, X_comp, C_comp, map_one]
-  -- the norm value, then unfold `levelNorm` and coerce
   have hnorm : Algebra.norm (K p n) V = c - 1 :=
     norm_extendScalars_translated p hn hp2 hVbot hmpV
   rw [levelNorm_apply p n hvK]
@@ -674,14 +642,6 @@ theorem levelNorm_pi {n : ℕ} (hn : 1 ≤ n) (hp2 : p ≠ 2) :
     levelNorm p n (pi p (n + 1)) = pi p n := by
   have h := levelNorm_zetaSys_pow_sub_one p hn hp2 (b := 1) (by simp [hp.out.one_lt.ne'])
   simpa only [pi, pow_one] using h
-
-/-! ### The norm-compatible unit group `𝒰_∞`
-
-RJW TeX 2503/2525: `𝒰_∞ = lim_n 𝒰_n` along the level norms. A member is a
-system `(u_n)_n` of units `u_n ∈ 𝒪_n^×` with `N_{n+1,n}(u_{n+1}) = u_n`. The
-compatibility equation carries membership of the norm in `𝒪_n` (its value *is*
-`u_n ∈ 𝒪_n`), so no separate norm-preservation lemma is needed (T903 authoring
-note: the general `‖N(x)‖ ≤ 1` lemma is omitted as unused — see ticket item 6). -/
 
 /-- `𝒰_∞`, the norm-inverse-limit of the local unit groups (RJW TeX 2503): a
 compatible system of units, each in its integer ring together with its inverse,
@@ -729,22 +689,6 @@ noncomputable instance : Mul (NormCompatUnits p) := ⟨mul⟩
 
 end NormCompatUnits
 
-/-! ## Integral `O_n`-basis of the tower step `O_{n+1} = ⊕_{i<p} O_n·ξ_{n+1}^i`
-
-RJW TeX 2685 (the minimal polynomial of `ξ_{p^{n+1}}` over `K_n` is `X^p − ξ_{p^n}`)
-and TeX 2474 (`O_n` is the ring of integers). The `O_n`-module structure of `O_{n+1}`
-on the powers `ξ_{n+1}^i` (equivalently the uniformiser powers `π_{n+1}^i`) is the
-input T907's commuting-square determinant transport consumes (Washington, *Cyclotomic
-Fields*, §3, on the integral basis of a totally ramified tower step).
-
-The crux is that `K_{n+1}/K_n` is *totally ramified* of degree `p`: the uniformiser
-powers `{π_{n+1}^j : j < p}` are an *orthogonal* `K_n`-basis (their `ℂ_p`-norms lie in
-distinct cosets of the value group of `K_n`), so `‖∑_j d_j π_{n+1}^j‖ = max_j ‖d_j‖·q^j`
-where `q = ‖π_{n+1}‖`; an integral element then has every `d_j ∈ O_n`. The value-group
-fact `‖c‖^{φ(p^n)} ∈ p^ℤ` for `c ∈ K_n` comes from the spectral-norm formula
-`‖c‖ = ‖Φ_c(0)‖^{1/deg}` (Galois-invariance of the `ℂ_p`-norm on the algebraic
-elements). -/
-
 /-- The ambient `ℂ_p`-norm, restricted to a finite extension `F` of `ℚ_p` inside `ℂ_p`,
 as an `AbsoluteValue F ℝ`. Used to identify it with the spectral norm. -/
 private noncomputable def restrictAbs (F : IntermediateField ℚ_[p] ℂ_[p]) :
@@ -785,7 +729,6 @@ private theorem norm_pow_totient_mem_zpow {n : ℕ} {c : ℂ_[p]} (hc : c ∈ K 
   have halg : IsAlgebraic ℚ_[p] x := Algebra.IsAlgebraic.isAlgebraic x
   have hdeg : 0 < (minpoly ℚ_[p] x).natDegree := minpoly.natDegree_pos halg.isIntegral
   have hcpos : 0 < ‖c‖ := norm_pos_iff.mpr hc0
-  -- `‖c‖^deg = ‖Φ_c(0)‖`
   have hpow : ‖c‖ ^ (minpoly ℚ_[p] x).natDegree = ‖(minpoly ℚ_[p] x).coeff 0‖ := by
     have : (‖c‖ : ℝ)
         = ‖(minpoly ℚ_[p] x).coeff 0‖ ^ (1 / (minpoly ℚ_[p] x).natDegree : ℝ) := by
@@ -793,12 +736,10 @@ private theorem norm_pow_totient_mem_zpow {n : ℕ} {c : ℂ_[p]} (hc : c ∈ K 
     rw [this, ← Real.rpow_natCast (‖(minpoly ℚ_[p] x).coeff 0‖ ^ _),
       ← Real.rpow_mul (norm_nonneg _), one_div, inv_mul_cancel₀ (by exact_mod_cast hdeg.ne'),
       Real.rpow_one]
-  -- `deg ∣ φ(p^n)`
   have hdvd : (minpoly ℚ_[p] x).natDegree ∣ Nat.totient (p ^ n) := by
     rw [← finrank_K p n]
     exact minpoly.degree_dvd halg.isIntegral
   obtain ⟨e, he⟩ := hdvd
-  -- `Φ_c(0) ≠ 0` (else `‖c‖ = 0`), so `‖Φ_c(0)‖ = p^j`
   have hcoeff0 : (minpoly ℚ_[p] x).coeff 0 ≠ 0 := by
     intro h; rw [h, norm_zero] at hpow; exact (pow_ne_zero _ hcpos.ne') hpow
   obtain ⟨j, hj⟩ : ∃ j : ℤ, ‖(minpoly ℚ_[p] x).coeff 0‖ = (p : ℝ) ^ j :=
@@ -834,7 +775,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
   set f : Fin p → ℂ_[p] := fun j => d j * pi p (n + 1) ^ (j : ℕ) with hf
   have hnormf : ∀ j : Fin p, ‖f j‖ = ‖d j‖ * ‖pi p (n + 1)‖ ^ (j : ℕ) := by
     intro j; rw [hf]; simp [norm_mul, norm_pow]
-  -- nonzero terms have pairwise distinct norms
   have hdist : ∀ a b : Fin p, a ≠ b → f a ≠ 0 → f b ≠ 0 →
       ‖f a‖ ≠ ‖f b‖ := by
     intro a b hab hfa hfb heqn
@@ -875,7 +815,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
       omega
     rw [hkij, zero_mul] at hfactor
     exact hab (Fin.ext (by omega))
-  -- each term ≤ the sum norm (orthogonality on the nonzero support)
   intro j
   have hterm_le : ‖f j‖ ≤ ‖∑ jj : Fin p, f jj‖ := by
     set S : Finset (Fin p) := Finset.univ.filter (fun jj => f jj ≠ 0) with hS
@@ -893,7 +832,6 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
       exact Finset.le_sup' (fun jj => ‖f jj‖) hjS
   have hle1 : ‖d j‖ * ‖pi p (n + 1)‖ ^ (j : ℕ) ≤ 1 := by
     rw [← hnormf]; exact le_trans hterm_le hsum
-  -- collapse: `d j = 0` trivial; else `‖d j‖ = q^{-pk}` with the exponent forcing `k ≥ 0`
   rcases eq_or_ne (d j) 0 with hdj0 | hdj0
   · rw [hdj0, norm_zero]; exact zero_le_one
   obtain ⟨k, hk⟩ := norm_pow_totient_mem_zpow p (hdK j) hdj0
@@ -911,7 +849,7 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
       ← zpow_natCast ((p : ℝ)⁻¹) (j : ℕ), inv_zpow, ← zpow_neg]
   rw [hdM, hqj, ← zpow_add₀ hp0.ne'] at hraise
   have hexp : k * p + (-(j : ℕ) : ℤ) ≤ 0 := by
-    by_contra h; push Not at h
+    by_contra! h
     exact absurd hraise (not_le.mpr (one_lt_zpow₀ hpgt1 (by omega)))
   have hjlt := j.2
   have hkle : k ≤ 0 := by nlinarith [hexp, hjlt, hp.out.pos]
@@ -922,11 +860,8 @@ private theorem forall_norm_le_one_of_norm_sum_pi_pow_le_one {n : ℕ} (hn : 1 �
   exact le_of_pow_le_pow_left₀ hMpos.ne' (by norm_num) (by rwa [one_pow])
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
-set_option maxHeartbeats 1000000 in
--- the `adjoin.powerBasis`/`Basis.sum_repr` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer; both instance synthesis and the
--- power-basis term elaboration exceed the defaults
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis and the
+-- `adjoin.powerBasis`/`Basis.sum_repr` term elaboration both exceed the default budgets
 /-- `K_n`-coordinate expansion in the tower step: for an integral generator `W` of
 `K_{n+1}/K_n` (`(K_n)⟮W⟯ = ⊤`, the step has degree `p`), every element is uniquely
 `∑_{i<p} c_i W^i` with `c_i ∈ K_n` — `W` carries a power basis of dimension `p`
@@ -984,7 +919,6 @@ private theorem exists_pi_repr {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x �
     ∃ d : Fin p → ℂ_[p], (∀ k, d k ∈ K p n) ∧
       x = ∑ k : Fin p, d k * pi p (n + 1) ^ (k : ℕ) := by
   obtain ⟨W, hWval, hWint, hWtop⟩ := zetaSys_extendScalars_generator p hn
-  -- V = W − 1 generates `K_{n+1}/K_n` and is integral; its value is `π_{n+1}`
   set V : IntermediateField.extendScalars (K_le_succ p n) := W - 1 with hV
   have hVval : (V : ℂ_[p]) = pi p (n + 1) := by
     rw [hV]; push_cast; rw [hWval, pi]
@@ -1046,12 +980,10 @@ theorem O_succ_exists_digits {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ 
     ∃ c : Fin p → ℂ_[p], (∀ i, c i ∈ O p n) ∧
       x = ∑ i : Fin p, c i * zetaSys p (n + 1) ^ (i : ℕ) := by
   obtain ⟨hxK, hxnorm⟩ := Subring.mem_inf.1 hx
-  -- uniformiser-power expansion, with all coefficients in `O_n` (orthogonality collapse)
   obtain ⟨d, hdK, hxd⟩ := exists_pi_repr p hn hxK
   have hdO : ∀ k, ‖d k‖ ≤ 1 := by
     refine forall_norm_le_one_of_norm_sum_pi_pow_le_one p hn d hdK ?_
     rw [← hxd]; exact hxnorm
-  -- `x ∈ O_n`-span of the `ξ`-powers
   have hxspan : x ∈ Submodule.span (O p n)
       (Set.range (fun i : Fin p => zetaSys p (n + 1) ^ (i : ℕ))) := by
     rw [hxd]
@@ -1061,7 +993,6 @@ theorem O_succ_exists_digits {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ 
     rw [show d k * pi p (n + 1) ^ (k : ℕ)
       = (⟨d k, hdkO⟩ : O p n) • pi p (n + 1) ^ (k : ℕ) from rfl]
     exact Submodule.smul_mem _ _ (pi_pow_mem_span p k.2)
-  -- extract the `ξ`-coordinates
   rw [Submodule.mem_span_range_iff_exists_fun] at hxspan
   obtain ⟨c, hc⟩ := hxspan
   refine ⟨fun i => ((c i : O p n) : ℂ_[p]), fun i => (c i).2, ?_⟩
@@ -1070,10 +1001,7 @@ theorem O_succ_exists_digits {n : ℕ} (hn : 1 ≤ n) {x : ℂ_[p]} (hx : x ∈ 
   rfl
 
 set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (see below)
-set_option maxHeartbeats 1000000 in
--- the `linearIndependent_pow`/`adjoin.finrank` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer, exceeding the defaults
+-- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis exceeds the default
 /-- The `ξ_{n+1}`-powers `{ξ_{n+1}^i : i < p}` are `K_n`-linearly independent in `ℂ_p`:
 a `K_n`-combination `∑_{i<p} e_i ξ_{n+1}^i = 0` with `e_i ∈ K_n` has all `e_i = 0`. (They
 form a power basis of `K_{n+1}/K_n`, `linearIndependent_pow`.) -/
@@ -1081,12 +1009,10 @@ private theorem zetaSys_pow_sum_eq_zero_imp {n : ℕ} (hn : 1 ≤ n) {e : Fin p 
     (heK : ∀ i, e i ∈ K p n) (he0 : ∑ i : Fin p, e i * zetaSys p (n + 1) ^ (i : ℕ) = 0) :
     ∀ i, e i = 0 := by
   obtain ⟨W, hWval, hWint, hWtop⟩ := zetaSys_extendScalars_generator p hn
-  -- `natDegree (minpoly K_n W) = p`
   have hdeg : (minpoly (K p n) W).natDegree = p := by
     have h1 := IntermediateField.adjoin.finrank hWint
     rw [hWtop, IntermediateField.finrank_top', finrank_K_succ p hn] at h1
     exact h1.symm
-  -- lift the `ℂ_p`-relation to `extendScalars`
   set ees : Fin p → K p n := fun i => ⟨e i, heK i⟩ with hees
   have hlift : ∑ i : Fin p, ees i • W ^ (i : ℕ) = 0 := by
     apply Subtype.ext
@@ -1095,10 +1021,8 @@ private theorem zetaSys_pow_sum_eq_zero_imp {n : ℕ} (hn : 1 ≤ n) {e : Fin p 
     rw [IntermediateField.coe_smul, hees]
     change (e i) * (W : ℂ_[p]) ^ (i : ℕ) = e i * zetaSys p (n + 1) ^ (i : ℕ)
     rw [hWval]
-  -- linear independence of `W`-powers, reindexed `Fin p ≃ Fin (natDegree)`
   have hli := linearIndependent_pow (K := K p n) W
   rw [Fintype.linearIndependent_iff] at hli
-  -- transport `ees` along `Fin p = Fin (natDegree)`
   have hsum' : ∑ i : Fin (minpoly (K p n) W).natDegree,
       (fun i => ees (Fin.cast hdeg i)) i • W ^ (i : ℕ) = 0 := by
     rw [← hlift]

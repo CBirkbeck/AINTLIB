@@ -40,7 +40,9 @@ private lemma slTransvecG_mul_entry {m : ℕ} [NeZero m] (i j : Fin m) (hij : i 
     (σ : Matrix.SpecialLinearGroup (Fin m) ℤ) (a b : Fin m) :
     (slTransvecG i j hij c * σ).1 a b =
     if a = i then σ.1 i b + c * σ.1 j b else σ.1 a b := by
-  simp only [Matrix.SpecialLinearGroup.coe_mul, slTransvecG]
+  rw [show ((slTransvecG i j hij c * σ).1 : Matrix (Fin m) (Fin m) ℤ)
+      = Matrix.transvection i j c * σ.1 from by
+    rw [Matrix.SpecialLinearGroup.coe_mul]; rfl]
   split_ifs with hai
   · subst hai; simp [Matrix.transvection, Matrix.add_mul]
   · simp [Matrix.transvection, Matrix.add_mul, hai]
@@ -49,7 +51,9 @@ private lemma slTransvecG_mul_right_entry {m : ℕ} [NeZero m] (i j : Fin m) (hi
     (σ : Matrix.SpecialLinearGroup (Fin m) ℤ) (a b : Fin m) :
     (σ * slTransvecG i j hij c).1 a b =
     if b = j then σ.1 a j + c * σ.1 a i else σ.1 a b := by
-  simp only [Matrix.SpecialLinearGroup.coe_mul, slTransvecG]
+  rw [show ((σ * slTransvecG i j hij c).1 : Matrix (Fin m) (Fin m) ℤ)
+      = σ.1 * Matrix.transvection i j c from by
+    rw [Matrix.SpecialLinearGroup.coe_mul]; rfl]
   split_ifs with hbj
   · subst hbj; simp [Matrix.transvection, Matrix.mul_add, mul_comm]
   · simp [Matrix.transvection, Matrix.mul_add, hbj]
@@ -93,8 +97,7 @@ private lemma col0_euclidean_step_aux {m : ℕ} (σ : Matrix.SpecialLinearGroup 
     have h1 := Int.emod_nonneg (σ.1 i 0) hj
     have h2 : σ.1 i 0 % σ.1 j 0 < |σ.1 j 0| := by
       rw [← Int.emod_abs]; exact Int.emod_lt_of_pos _ (abs_pos.mpr hj)
-    exact_mod_cast show ((σ.1 i 0 % σ.1 j 0).natAbs : ℤ) < (σ.1 j 0).natAbs from by
-      rw [Int.natAbs_of_nonneg h1, Int.natCast_natAbs]; exact h2
+    simpa only [Int.natAbs_abs] using Int.natAbs_lt_natAbs_of_nonneg_of_lt h1 h2
   simp only [col0Sum]
   rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i),
       ← Finset.add_sum_erase _ _ (Finset.mem_univ i)]
@@ -126,7 +129,7 @@ private lemma col0_reduce {m : ℕ} (σ : Matrix.SpecialLinearGroup (Fin (m+1)) 
   | _ k ihk =>
   intro τ hk
   by_cases hn : nzCount τ ≤ 1
-  · exact ⟨[], fun _ h ↦ absurd h (by simp), by simp; exact hn⟩
+  · exact ⟨[], fun _ h ↦ absurd h (by simp), by simpa using hn⟩
   · push Not at hn
     obtain ⟨i, j, hij, c, hlt⟩ := col0_euclidean_step τ hn
     set τ' := slTransvecG i j hij c * τ
@@ -233,7 +236,6 @@ private lemma row0_clear_step {m : ℕ} (σ : Matrix.SpecialLinearGroup (Fin (m+
     (hσ00 : σ.1 0 0 = 1) (hσi0 : ∀ i, i ≠ 0 → σ.1 i 0 = 0) (hzero : row0Sum σ ≠ 0) :
     ∃ E, IsTransvec E ∧ (σ * E).1 0 0 = 1 ∧ (∀ i, i ≠ 0 → (σ * E).1 i 0 = 0) ∧
       row0Sum (σ * E) < row0Sum σ := by
-  haveI : NeZero (m + 1) := ⟨Nat.succ_ne_zero m⟩
   have ⟨j₀, hj₀_nz⟩ : ∃ j : Fin (m + 1),
       (if (j : ℕ) = 0 then 0 else (σ.1 0 j).natAbs) ≠ 0 := by
     by_contra h; push Not at h
@@ -443,7 +445,6 @@ private lemma to_block_form {m : ℕ} (τ : Matrix.SpecialLinearGroup (Fin (m+1)
       (L_left.prod * τ * L_right.prod).1 0 0 = 1 ∧
       (∀ j : Fin (m+1), j ≠ 0 → (L_left.prod * τ * L_right.prod).1 0 j = 0) ∧
       (∀ i : Fin (m+1), i ≠ 0 → (L_left.prod * τ * L_right.prod).1 i 0 = 0) := by
-  haveI : NeZero (m + 1) := ⟨Nat.succ_ne_zero m⟩
   suffices h_col : ∃ (L₁ : List (Matrix.SpecialLinearGroup (Fin (m+1)) ℤ)),
       (∀ E ∈ L₁, IsTransvec E) ∧
       (L₁.prod * τ).1 0 0 = 1 ∧

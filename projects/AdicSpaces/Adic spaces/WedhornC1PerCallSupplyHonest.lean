@@ -130,8 +130,8 @@ theorem C1SupplierStrong_local_via_honest_residuals
         WedhornC1PerCallSupplyHonest P C hopen_base D v) :
     C1SupplierStrong_local C := by
   intro D hD v hv t ht hvt hvD_s
-  have h_supply := h_per_call_supply D hD v hv t ht hvt hvD_s
-  obtain ⟨σ_loc, f, h_alg, h_dom, h_honest, hv_in_plus, hvf_nz⟩ := h_supply
+  obtain ⟨σ_loc, f, h_alg, h_dom, h_honest, hv_in_plus, hvf_nz⟩ :=
+    h_per_call_supply D hD v hv t ht hvt hvD_s
   refine ⟨f, hv_in_plus, ?_, hvf_nz⟩
   exact rationalOpen_subset_base_via_honest_structural_data
     P C.base.T C.base.s hopen_base hA₀_le C.base.T D.T D.s

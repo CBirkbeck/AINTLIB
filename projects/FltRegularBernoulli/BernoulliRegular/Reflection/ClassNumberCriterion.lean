@@ -10,7 +10,7 @@ public import BernoulliRegular.Reflection.FinalReflection
 
 This file contains the class-number consequence of the reflection route. It
 deliberately stops before restating Kummer's criterion: the public endpoint is
-`BernoulliRegular.KummerCriterion`, proved through cyclotomic units.
+`BernoulliRegular.kummer_criterion`, proved through cyclotomic units.
 -/
 
 @[expose] public section

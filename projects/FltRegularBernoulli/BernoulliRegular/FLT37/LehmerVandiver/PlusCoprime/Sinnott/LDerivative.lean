@@ -1,1 +1,3 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.Part7
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.SinnottConvolutionSubmatrixDet

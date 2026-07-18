@@ -1,3 +1,3 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.Theorem1.Part2
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.Theorem1.EisensteinReciprocity

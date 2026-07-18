@@ -3,9 +3,9 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.Analysis.SpecialFunctions.Complex.Circle
 import Mathlib.Analysis.SpecialFunctions.Complex.Log
 import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-import Mathlib.Analysis.SpecialFunctions.Complex.Circle
 import Mathlib.MeasureTheory.Integral.DivergenceTheorem
 import Mathlib.Topology.MetricSpace.Lipschitz
 
@@ -21,8 +21,8 @@ an integer multiple of `2π`, giving the integer-valuedness of the winding numbe
 
 ## Main results
 
-* `Complex.exists_continuous_arg_lift_of_avoids` — existence of continuous arg lift
-  for `γ : ℝ → ℂ` continuous on `[0,1]` avoiding `w`.
+* `Complex.exists_continuous_arg_lift_with_partition` — existence of a continuous arg lift
+  (together with its partition witness) for `γ : ℝ → ℂ` continuous on `[0,1]` avoiding `w`.
 
 ## Strategy
 
@@ -32,7 +32,7 @@ disjoint from `{0}`). On each segment, use `Complex.log` to extract the argument
 adjusted by the running sum of previous segments' angles.
 -/
 
-open Set Filter Topology
+open Set
 
 noncomputable section
 
@@ -56,7 +56,7 @@ theorem exists_uniform_modulus_avoiding {γ : ℝ → ℂ} {w : ℂ}
   have h_image_nonempty : (γ '' Icc (0 : ℝ) 1).Nonempty :=
     ⟨γ 0, mem_image_of_mem _ (left_mem_Icc.mpr zero_le_one)⟩
   have h_w_not_mem : w ∉ γ '' Icc (0 : ℝ) 1 :=
-    fun ⟨t, ht, heq⟩ => h_avoid t ht heq
+    fun ⟨t, ht, heq⟩ ↦ h_avoid t ht heq
   have hρ_pos : 0 < Metric.infDist w (γ '' Icc (0 : ℝ) 1) :=
     (h_image_compact.isClosed.notMem_iff_infDist_pos h_image_nonempty).mp h_w_not_mem
   set ρ := Metric.infDist w (γ '' Icc (0 : ℝ) 1)
@@ -82,13 +82,13 @@ theorem mem_slitPlane_of_ball_one (z : ℂ) (hz : ‖z - 1‖ < 1 / 2) :
     z ∈ Complex.slitPlane := by
   rw [Complex.mem_slitPlane_iff]
   left
-  have h_re : |z.re - 1| ≤ ‖z - 1‖ := by simpa using Complex.abs_re_le_norm (z - 1)
-  have : |z.re - 1| < 1 / 2 := h_re.trans_lt hz
-  rw [abs_sub_lt_iff] at this; linarith
+  have h_re : |z.re - 1| < 1 / 2 :=
+    (by simpa using Complex.abs_re_le_norm (z - 1) : |z.re - 1| ≤ ‖z - 1‖).trans_lt hz
+  rw [abs_sub_lt_iff] at h_re; linarith
 
 /-! ### W-1 helpers (deferred main theorem)
 
-The main `exists_continuous_arg_lift_of_avoids` theorem is deferred — it uses
+The main `exists_continuous_arg_lift_with_partition` theorem is deferred — it uses
 the telescoping-sum approach with `Finset.sum` over `N` partition segments,
 each contributing `Im(log(segRatio j t))` where `segRatio j t` lies in
 `ball(1, 1/2) ⊆ slitPlane` by W-0 + `mem_slitPlane_of_ball_one`.
@@ -109,7 +109,7 @@ theorem segClamp_mem_Icc (s_j s_jp1 t : ℝ) (h : s_j ≤ s_jp1) :
   unfold segClamp
   rcases le_total t s_jp1 with ht | ht
   · simpa [min_eq_left ht] using max_le h ht
-  · rw [min_eq_right ht, max_le_iff]; exact ⟨h, le_refl _⟩
+  · rw [min_eq_right ht, max_le_iff]; exact ⟨h, le_rfl⟩
 
 theorem segClamp_eq_left {s_j s_jp1 t : ℝ} (h : s_j ≤ s_jp1) (ht : t ≤ s_j) :
     segClamp s_j s_jp1 t = s_j := by
@@ -176,7 +176,7 @@ theorem segRatio_mem_ball_one
 theorem continuousOn_segRatio {γ : ℝ → ℂ} (hγ : ContinuousOn γ (Icc (0 : ℝ) 1))
     {w : ℂ} {s_j s_jp1 : ℝ} (hsj : s_j ∈ Icc (0 : ℝ) 1)
     (hsjp1 : s_jp1 ∈ Icc (0 : ℝ) 1) (h_le : s_j ≤ s_jp1) :
-    ContinuousOn (fun t => segRatio γ w s_j s_jp1 t) (Icc (0 : ℝ) 1) := by
+    ContinuousOn (fun t ↦ segRatio γ w s_j s_jp1 t) (Icc (0 : ℝ) 1) := by
   unfold segRatio
   refine ContinuousOn.div_const ?_ _
   refine ContinuousOn.sub ?_ continuousOn_const
@@ -197,6 +197,19 @@ theorem segRatio_mem_slitPlane
   mem_slitPlane_of_ball_one _
     (segRatio_mem_ball_one hρ_pos h_dist_lb h_unif hsj hsjp1 h_le h_mesh t)
 
+/-- For a partition with mesh `< δ'`, the segment ratio `segRatio γ w s_j s_jp1 t` is
+nonzero: it lies in the slit plane, which avoids `0`. -/
+theorem segRatio_ne_zero
+    {γ : ℝ → ℂ} {w : ℂ} {δ' ρ : ℝ} (hρ_pos : 0 < ρ)
+    (h_dist_lb : ∀ t ∈ Icc (0 : ℝ) 1, ρ ≤ ‖γ t - w‖)
+    (h_unif : ∀ t s : ℝ, t ∈ Icc (0 : ℝ) 1 → s ∈ Icc (0 : ℝ) 1 →
+      |t - s| < δ' → ‖γ t - γ s‖ < ρ / 2)
+    {s_j s_jp1 : ℝ} (hsj : s_j ∈ Icc (0 : ℝ) 1) (hsjp1 : s_jp1 ∈ Icc (0 : ℝ) 1)
+    (h_le : s_j ≤ s_jp1) (h_mesh : s_jp1 - s_j < δ') (t : ℝ) :
+    segRatio γ w s_j s_jp1 t ≠ 0 :=
+  Complex.slitPlane_ne_zero
+    (segRatio_mem_slitPlane hρ_pos h_dist_lb h_unif hsj hsjp1 h_le h_mesh t)
+
 /-! ### Telescoping product over a partition -/
 
 /-- Telescoping product in `ℂ` over `Finset.range`. For `a : ℕ → ℂ` nonzero on
@@ -207,7 +220,7 @@ private lemma prod_range_div_complex (a : ℕ → ℂ) (k : ℕ)
   induction k with
   | zero => simp [div_self (ha 0 le_rfl)]
   | succ n ih =>
-    rw [Finset.prod_range_succ, ih (fun j hj => ha j (by lia)),
+    rw [Finset.prod_range_succ, ih (fun j hj ↦ ha j (by lia)),
         div_mul_div_comm, mul_comm (a n) (a (n + 1)),
         mul_div_mul_right _ _ (ha n (by lia))]
 
@@ -248,8 +261,8 @@ theorem prod_segRatio_telescope
   -- Middle term: segRatio at index k = (γ t - w) / (γ s_k - w)
   rw [segRatio_eq_self_div hk_lo hk_hi]
   -- Apply telescoping lemma to range k product
-  rw [prod_range_div_complex (fun j => γ (s j) - w) k
-        (fun j hj => h_avoid j (hj.trans hk.le))]
+  rw [prod_range_div_complex (fun j ↦ γ (s j) - w) k
+        (fun j hj ↦ h_avoid j (hj.trans hk.le))]
   -- Use s 0 = 0 and cancel γ s_k - w
   rw [hs_zero, div_mul_div_comm, mul_comm (γ (s k) - w) (γ t - w),
       mul_div_mul_right _ _ (h_avoid k hk.le)]
@@ -264,11 +277,11 @@ theorem continuousOn_im_log_segRatio {γ : ℝ → ℂ}
       |t - s| < δ' → ‖γ t - γ s‖ < ρ / 2)
     {s_j s_jp1 : ℝ} (hsj : s_j ∈ Icc (0 : ℝ) 1) (hsjp1 : s_jp1 ∈ Icc (0 : ℝ) 1)
     (h_le : s_j ≤ s_jp1) (h_mesh : s_jp1 - s_j < δ') :
-    ContinuousOn (fun t => (Complex.log (segRatio γ w s_j s_jp1 t)).im)
+    ContinuousOn (fun t ↦ (Complex.log (segRatio γ w s_j s_jp1 t)).im)
       (Icc (0 : ℝ) 1) := by
   refine Complex.continuous_im.comp_continuousOn ?_
   exact (continuousOn_segRatio hγ hsj hsjp1 h_le).clog
-    fun t _ => segRatio_mem_slitPlane hρ_pos h_dist_lb h_unif hsj hsjp1 h_le h_mesh t
+    fun t _ ↦ segRatio_mem_slitPlane hρ_pos h_dist_lb h_unif hsj hsjp1 h_le h_mesh t
 
 /-! ### Helper: `exp(I · Im(log z)) = z / ‖z‖` -/
 
@@ -313,6 +326,50 @@ private lemma partition_segment_exists {N : ℕ} (hN : 0 < N) {t : ℝ}
       rw [h_eq, div_self hN_real.ne']
       exact ht.2
 
+/-! ### Polar decomposition of a product -/
+
+/-- **Polar decomposition of a product.** If a nonzero `b` factors as `b = a * ∏ zⱼ`
+with `a` and every `zⱼ` nonzero, then
+`b = ‖b‖ · exp(i · (arg a + ∑ Im(log zⱼ)))`; that is, `arg a + ∑ Im(log zⱼ)` is an
+argument of `b`. This is the algebraic core of the telescoping argument lift: each
+factor `zⱼ` contributes its `Im(log zⱼ)` to the running angle. -/
+theorem eq_norm_mul_exp_arg_add_sum_log_im
+    {a b : ℂ} {N : ℕ} {z : ℕ → ℂ} (ha : a ≠ 0) (hb : b ≠ 0)
+    (hz : ∀ j ∈ Finset.range N, z j ≠ 0)
+    (h_prod : a * ∏ j ∈ Finset.range N, z j = b) :
+    b = (‖b‖ : ℂ) * Complex.exp (Complex.I *
+      ((Complex.arg a +
+        ∑ j ∈ Finset.range N, (Complex.log (z j)).im : ℝ) : ℂ)) := by
+  have h_theta_cast :
+      ((Complex.arg a + ∑ j ∈ Finset.range N, (Complex.log (z j)).im : ℝ) : ℂ) =
+      (Complex.arg a : ℂ) +
+      ∑ j ∈ Finset.range N, ((Complex.log (z j)).im : ℂ) := by
+    push_cast
+    rfl
+  have h_exp_split :
+      Complex.exp (Complex.I *
+        ((Complex.arg a + ∑ j ∈ Finset.range N, (Complex.log (z j)).im : ℝ) : ℂ)) =
+      Complex.exp (Complex.I * (Complex.arg a : ℂ)) *
+        ∏ j ∈ Finset.range N,
+          Complex.exp (Complex.I * ((Complex.log (z j)).im : ℂ)) := by
+    rw [h_theta_cast, mul_add, Complex.exp_add, Finset.mul_sum, Complex.exp_sum]
+  have h_arg : Complex.exp (Complex.I * (Complex.arg a : ℂ)) =
+      a / ((‖a‖ : ℝ) : ℂ) := by
+    rw [show (Complex.arg a : ℂ) = ((Complex.log a).im : ℂ) by rw [Complex.log_im]]
+    exact exp_I_log_im_eq_div_norm ha
+  have h_z_eq : ∀ j ∈ Finset.range N,
+      Complex.exp (Complex.I * ((Complex.log (z j)).im : ℂ)) =
+        z j / ((‖z j‖ : ℝ) : ℂ) :=
+    fun j hj ↦ exp_I_log_im_eq_div_norm (hz j hj)
+  have h_norm_prod_real : (‖a‖ : ℝ) *
+      (∏ j ∈ Finset.range N, ‖z j‖) = ‖b‖ := by
+    rw [← Complex.norm_prod, ← norm_mul, h_prod]
+  have h_norm_b_ne : ((‖b‖ : ℝ) : ℂ) ≠ 0 :=
+    Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr hb)
+  rw [h_exp_split, h_arg, Finset.prod_congr rfl h_z_eq, Finset.prod_div_distrib,
+      div_mul_div_comm, ← Complex.ofReal_prod, ← Complex.ofReal_mul,
+      h_norm_prod_real, h_prod, mul_div_cancel₀ _ h_norm_b_ne]
+
 /-! ### Main theorem: continuous argument lift -/
 
 theorem exists_continuous_arg_lift_with_partition
@@ -326,7 +383,7 @@ theorem exists_continuous_arg_lift_with_partition
       (∀ j, j < N → ∀ t ∈ Icc (s j) (s (j + 1)),
         (γ t - w) / (γ (s j) - w) ∈ Complex.slitPlane) ∧
       ContinuousOn
-        (fun t => Complex.arg (γ 0 - w) +
+        (fun t ↦ Complex.arg (γ 0 - w) +
           ∑ j ∈ Finset.range N, (Complex.log (segRatio γ w (s j) (s (j + 1)) t)).im)
         (Icc (0 : ℝ) 1) ∧
       (∀ t ∈ Icc (0 : ℝ) 1, γ t - w = (‖γ t - w‖ : ℂ) * Complex.exp (Complex.I *
@@ -343,23 +400,23 @@ theorem exists_continuous_arg_lift_with_partition
     rw [div_lt_iff₀ hN_real]
     rw [div_lt_iff₀ hδ'_pos] at hN
     linarith
-  set s : ℕ → ℝ := fun j => (j : ℝ) / N with hs_def
+  set s : ℕ → ℝ := fun j ↦ (j : ℝ) / N with hs_def
   have hs_zero : s 0 = 0 := by simp [hs_def]
   have hs_N : s N = 1 := by
     simp only [hs_def]
     exact div_self hN_real.ne'
-  have hs_mono : Monotone s := fun a b hab =>
+  have hs_mono : Monotone s := fun a b hab ↦
     div_le_div_of_nonneg_right (by exact_mod_cast hab) hN_real.le
   have hs_in : ∀ j, j ≤ N → s j ∈ Icc (0 : ℝ) 1 := by
     intro j hj
     refine ⟨div_nonneg (by exact_mod_cast Nat.zero_le j) hN_real.le, ?_⟩
     rw [div_le_one hN_real]
     exact_mod_cast hj
-  have hs_avoid : ∀ j ≤ N, γ (s j) - w ≠ 0 := fun j hj =>
+  have hs_avoid : ∀ j ≤ N, γ (s j) - w ≠ 0 := fun j hj ↦
     sub_ne_zero.mpr (h_avoid (s j) (hs_in j hj))
   have hs_mesh : ∀ j, s (j + 1) - s j = 1 / N := by
     intro j; simp only [hs_def]; push_cast; ring
-  have hs_le : ∀ j, s j ≤ s (j + 1) := fun j => hs_mono (Nat.le_succ _)
+  have hs_le : ∀ j, s j ≤ s (j + 1) := fun j ↦ hs_mono (Nat.le_succ _)
   have h_slit : ∀ j, j < N → ∀ t ∈ Icc (s j) (s (j + 1)),
       (γ t - w) / (γ (s j) - w) ∈ Complex.slitPlane := by
     intro j hj t ht
@@ -381,58 +438,19 @@ theorem exists_continuous_arg_lift_with_partition
   · intro t ht
     have h_avoid_t : γ t - w ≠ 0 := sub_ne_zero.mpr (h_avoid t ht)
     have h_avoid_0 : γ 0 - w ≠ 0 :=
-      sub_ne_zero.mpr (h_avoid 0 ⟨le_refl _, zero_le_one⟩)
+      sub_ne_zero.mpr (h_avoid 0 ⟨le_rfl, zero_le_one⟩)
     obtain ⟨k, hk_lt, hk_lo, hk_hi⟩ := partition_segment_exists hN_pos ht
     have h_telescope := prod_segRatio_telescope hs_zero hs_mono hs_avoid hk_lt hk_lo hk_hi
     have h_ratio_ne : ∀ j ∈ Finset.range N,
-        segRatio γ w (s j) (s (j + 1)) t ≠ 0 := fun j hj =>
-      have h_mesh_j : s (j + 1) - s j < δ' := by rw [hs_mesh j]; exact hN_mesh
-      Complex.slitPlane_ne_zero
-        (segRatio_mem_slitPlane hρ_pos h_dist_lb h_unif
-          (hs_in j (Finset.mem_range.mp hj).le)
-          (hs_in (j + 1) (Finset.mem_range.mp hj))
-          (hs_le j) h_mesh_j t)
-    have h_prod_eq : (γ 0 - w) *
-        ∏ j ∈ Finset.range N, segRatio γ w (s j) (s (j + 1)) t = γ t - w := by
-      rw [h_telescope, mul_div_cancel₀ _ h_avoid_0]
-    have h_theta_cast :
-        ((Complex.arg (γ 0 - w) +
-          ∑ j ∈ Finset.range N,
-            (Complex.log (segRatio γ w (s j) (s (j + 1)) t)).im : ℝ) : ℂ) =
-        (Complex.arg (γ 0 - w) : ℂ) +
-        ∑ j ∈ Finset.range N,
-          ((Complex.log (segRatio γ w (s j) (s (j + 1)) t)).im : ℂ) := by
-      push_cast
-      rfl
-    have h_exp_split :
-        Complex.exp (Complex.I *
-          ((Complex.arg (γ 0 - w) +
-            ∑ j ∈ Finset.range N,
-              (Complex.log (segRatio γ w (s j) (s (j + 1)) t)).im : ℝ) : ℂ)) =
-        Complex.exp (Complex.I * (Complex.arg (γ 0 - w) : ℂ)) *
-          ∏ j ∈ Finset.range N,
-            Complex.exp (Complex.I *
-              ((Complex.log (segRatio γ w (s j) (s (j + 1)) t)).im : ℂ)) := by
-      rw [h_theta_cast, mul_add, Complex.exp_add, Finset.mul_sum, Complex.exp_sum]
-    have h_arg : Complex.exp (Complex.I * (Complex.arg (γ 0 - w) : ℂ)) =
-        (γ 0 - w) / ((‖γ 0 - w‖ : ℝ) : ℂ) := by
-      rw [show (Complex.arg (γ 0 - w) : ℂ) = ((Complex.log (γ 0 - w)).im : ℂ) by
-            rw [Complex.log_im]]
-      exact exp_I_log_im_eq_div_norm h_avoid_0
-    have h_z_eq : ∀ j ∈ Finset.range N,
-        Complex.exp (Complex.I *
-          ((Complex.log (segRatio γ w (s j) (s (j + 1)) t)).im : ℂ)) =
-          segRatio γ w (s j) (s (j + 1)) t /
-            ((‖segRatio γ w (s j) (s (j + 1)) t‖ : ℝ) : ℂ) :=
-      fun j hj => exp_I_log_im_eq_div_norm (h_ratio_ne j hj)
-    have h_norm_prod_real : (‖γ 0 - w‖ : ℝ) *
-        (∏ j ∈ Finset.range N, ‖segRatio γ w (s j) (s (j + 1)) t‖) = ‖γ t - w‖ := by
-      rw [← Complex.norm_prod, ← norm_mul, h_prod_eq]
-    have h_norm_t_ne : ((‖γ t - w‖ : ℝ) : ℂ) ≠ 0 :=
-      Complex.ofReal_ne_zero.mpr (norm_ne_zero_iff.mpr h_avoid_t)
-    rw [h_exp_split, h_arg, Finset.prod_congr rfl h_z_eq, Finset.prod_div_distrib,
-        div_mul_div_comm, ← Complex.ofReal_prod, ← Complex.ofReal_mul,
-        h_norm_prod_real, h_prod_eq, mul_div_cancel₀ _ h_norm_t_ne]
+        segRatio γ w (s j) (s (j + 1)) t ≠ 0 := fun j hj ↦
+      segRatio_ne_zero hρ_pos h_dist_lb h_unif
+        (hs_in j (Finset.mem_range.mp hj).le) (hs_in (j + 1) (Finset.mem_range.mp hj))
+        (hs_le j) (by rw [hs_mesh j]; exact hN_mesh) t
+    -- The telescoping product `(γ 0 - w) * ∏ segRatio = γ t - w` is a polar
+    -- decomposition; the running angle `arg (γ 0 - w) + ∑ Im(log segRatio)` is an
+    -- argument of `γ t - w`.
+    exact eq_norm_mul_exp_arg_add_sum_log_im h_avoid_0 h_avoid_t h_ratio_ne
+      (by rw [h_telescope, mul_div_cancel₀ _ h_avoid_0])
 
 /-! ### Per-segment FTC for `1/(γ(t) − w)` (W-2 building block)
 
@@ -447,25 +465,22 @@ theorem segment_log_FTC
     (h_a_ne : γ a - w ≠ 0)
     (h_slit : ∀ t ∈ Icc a b, (γ t - w) / (γ a - w) ∈ Complex.slitPlane)
     (h_int : IntervalIntegrable
-      (fun t => deriv γ t / (γ t - w)) MeasureTheory.volume a b) :
+      (fun t ↦ deriv γ t / (γ t - w)) MeasureTheory.volume a b) :
     ∫ t in a..b, deriv γ t / (γ t - w) = Complex.log ((γ b - w) / (γ a - w)) := by
-  set F : ℝ → ℂ := fun t => Complex.log ((γ t - w) / (γ a - w)) with hF_def
+  set F : ℝ → ℂ := fun t ↦ Complex.log ((γ t - w) / (γ a - w))
   have hF_cont : ContinuousOn F (Icc a b) :=
-    ContinuousOn.clog ((hγ_cont.sub continuousOn_const).div_const _)
-      fun t ht => h_slit t ht
+    ContinuousOn.clog ((hγ_cont.sub continuousOn_const).div_const _) h_slit
   have hF_deriv : ∀ t ∈ Ioo a b \ P,
       HasDerivAt F (deriv γ t / (γ t - w)) t := by
     intro t ht
     have ht_Icc : t ∈ Icc a b := Ioo_subset_Icc_self ht.1
-    have h_inner : HasDerivAt (fun t => (γ t - w) / (γ a - w))
+    have h_inner : HasDerivAt (fun t ↦ (γ t - w) / (γ a - w))
         (deriv γ t / (γ a - w)) t :=
       ((hγ_diff t ht).sub_const w).div_const _
     have h_slit_t : (γ t - w) / (γ a - w) ∈ Complex.slitPlane := h_slit t ht_Icc
     have h_log := h_inner.clog_real h_slit_t
-    have h_t_minus_ne : γ t - w ≠ 0 := by
-      intro h
-      apply Complex.slitPlane_ne_zero h_slit_t
-      rw [h, zero_div]
+    have h_t_minus_ne : γ t - w ≠ 0 :=
+      fun h ↦ Complex.slitPlane_ne_zero h_slit_t (by rw [h, zero_div])
     convert h_log using 1
     field_simp
   have h_FTC := MeasureTheory.integral_eq_of_hasDerivAt_off_countable_of_le _ _ hab hP_count

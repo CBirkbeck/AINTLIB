@@ -35,6 +35,7 @@ universe u
 
 namespace ScottishBook
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Scottish Book Problem 35** (Kedlaya, 29 Oct 2020):
 *Every Tate Huber pair admits a stably uniform approximation.*
 

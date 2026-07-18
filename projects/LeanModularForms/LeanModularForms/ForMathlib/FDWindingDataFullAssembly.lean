@@ -31,12 +31,12 @@ the argument `arg z` lies in `(π/3, 2π/3)`. -/
 theorem arg_mem_arc_range {z : ℂ} (hz_norm : ‖z‖ = 1) (hz_im : 0 < z.im)
     (hz_re : |z.re| < 1/2) :
     Real.pi / 3 < z.arg ∧ z.arg < 2 * Real.pi / 3 := by
-  have hz_ne : z ≠ 0 := fun h => by simp [h] at hz_im
+  have hz_ne : z ≠ 0 := fun h ↦ by simp [h] at hz_im
   have h_cos : Real.cos z.arg = z.re := by rw [Complex.cos_arg hz_ne, hz_norm, div_one]
   have h_sin : Real.sin z.arg = z.im := by rw [Complex.sin_arg, hz_norm, div_one]
-  have h_arg_pos : 0 < z.arg := (Complex.arg_nonneg_iff.mpr hz_im.le).lt_of_ne fun h => by
+  have h_arg_pos : 0 < z.arg := (Complex.arg_nonneg_iff.mpr hz_im.le).lt_of_ne fun h ↦ by
     rw [← h, Real.sin_zero] at h_sin; linarith
-  have h_arg_lt_pi : z.arg < Real.pi := (Complex.arg_le_pi z).lt_of_ne fun h => by
+  have h_arg_lt_pi : z.arg < Real.pi := (Complex.arg_le_pi z).lt_of_ne fun h ↦ by
     rw [h, Real.sin_pi] at h_sin; linarith
   have h_cos_2pi3 : Real.cos (2 * Real.pi / 3) = -(1/2) := by
     rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,

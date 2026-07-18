@@ -806,7 +806,7 @@ theorem h_T_D_in_locSubring_of_subset_A₀
     (hT_D_le_A₀ : ∀ t ∈ T_D, t ∈ P.A₀) :
     ∀ t ∈ T_D,
       algebraMap A (Localization.Away s) t ∈ locSubring P T s :=
-  fun t ht => algebraMap_mem_locSubring P T s (hT_D_le_A₀ t ht)
+  fun t ht ↦ algebraMap_mem_locSubring P T s (hT_D_le_A₀ t ht)
 
 omit [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] in
 /-- **T173: `h_factorization` supplier from `h_alg` + `s = s_D · f`**.
@@ -1031,9 +1031,9 @@ theorem h_T_test_compat_loc_canonical_via_h_alg_subset_A₀_and_alpha_s_D
   exact h_T_test_compat_loc_canonical
     P T s hopen T_D s_D σ_loc
     h_α_s_D_per_t
-    (fun τ hτ w hw_spa hw_f hστ =>
+    (fun τ hτ w hw_spa hw_f hστ ↦
       (h_α_T_D_branch τ hτ w hw_spa hw_f hστ).1)
-    (fun τ hτ w hw_spa hw_f hστ =>
+    (fun τ hτ w hw_spa hw_f hστ ↦
       (h_α_T_D_branch τ hτ w hw_spa hw_f hστ).2)
 
 /-- **T174: caller-facing base inclusion from T173's α_T_D-branch

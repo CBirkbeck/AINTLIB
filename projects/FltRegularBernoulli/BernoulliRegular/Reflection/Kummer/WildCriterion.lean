@@ -160,11 +160,8 @@ def IsCoprimeToP (v : HeightOneSpectrum (𝓞 K)) : Prop :=
 
 /-- Trivial dichotomy: every prime is either above `p` or coprime to `p`. -/
 theorem isAboveP_or_isCoprimeToP (v : HeightOneSpectrum (𝓞 K)) :
-    IsAboveP (p := p) v ∨ IsCoprimeToP (p := p) v := by
-  classical
-  by_cases hv : IsAboveP (p := p) v
-  · exact Or.inl hv
-  · exact Or.inr hv
+    IsAboveP (p := p) v ∨ IsCoprimeToP (p := p) v :=
+  em _
 
 /-!
 ### Wild atomic predicates
@@ -193,7 +190,7 @@ the Hensel-lift argument rather than the discriminant argument.* -/
 def KummerWildLocalLift
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K)) : Prop :=
   IsAboveP (p := p) v →
-    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
     GenValuationDivisibleByPAt v P
 
 /-- **Valuation reduction (wild case).** *If `γ` is locally a `p`-th power
@@ -217,7 +214,7 @@ prime `v ∣ p`; structurally it is the composition
 def KummerWildCriterion
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K)) : Prop :=
   IsAboveP (p := p) v →
-    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+    (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
     GenValuationDivisibleByPAt v P
 
 /-!
@@ -243,7 +240,7 @@ divisibility statement. -/
 theorem kummerWildCriterion_of_lift
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K))
     (hLift : KummerWildLocalLift P v) :
-    KummerWildCriterion P v := fun hAbove hUnr =>
+    KummerWildCriterion P v := fun hAbove hUnr ↦
   kummerWildValuationStep_trivial P v (hLift hAbove hUnr)
 
 /-!
@@ -270,8 +267,7 @@ theorem kummerWildCriterion_of_globally_pth_power
   -- Rewrite `toPrincipalIdeal genUnit` as `(toPrincipalIdeal β)^p`.
   have hcoe : (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) =
       (toPrincipalIdeal (𝓞 K) K β : FractionalIdeal (𝓞 K)⁰ K) ^ p := by
-    rw [coe_toPrincipalIdeal, coe_toPrincipalIdeal, P.genUnit_val, hβ]
-    rw [← spanSingleton_pow]
+    rw [coe_toPrincipalIdeal, coe_toPrincipalIdeal, P.genUnit_val, hβ, ← spanSingleton_pow]
   -- Goal: `(p : ℤ) ∣ count v (toPrincipalIdeal genUnit)`.
   -- The witness is `count v (toPrincipalIdeal β)`, since `count_pow` gives the factor `p`.
   refine ⟨FractionalIdeal.count K v
@@ -289,7 +285,7 @@ discharge of the per-prime hypothesis specialises to the wild atom. -/
 theorem kummerWildCriterion_of_kummerDedekindAt
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K))
     (h : KummerDedekindUnramifiedAt P v) :
-    KummerWildCriterion P v := fun _ hUnr =>
+    KummerWildCriterion P v := fun _ hUnr ↦
   h hUnr
 
 /-- **Reverse direction.** The wild criterion *and* the (analogous) tame
@@ -302,7 +298,7 @@ theorem kummerDedekindUnramifiedAt_of_wild_and_tame
     (P : KummerPresentation Ext) (v : HeightOneSpectrum (𝓞 K))
     (hWild : KummerWildCriterion P v)
     (hTame : IsCoprimeToP (p := p) v →
-      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
         GenValuationDivisibleByPAt v P) :
     KummerDedekindUnramifiedAt P v := by
   intro hUnr
@@ -331,7 +327,7 @@ ramification analysis; for `v ∣ p` it is vacuously satisfied. -/
 def KummerTame (P : KummerPresentation Ext) : Prop :=
   ∀ v : HeightOneSpectrum (𝓞 K),
     IsCoprimeToP (p := p) v →
-      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx v.asIdeal Q = 1) →
+      (∀ Q ∈ v.asIdeal.primesOver (𝓞 Ext.E), Ideal.ramificationIdx' v.asIdeal Q = 1) →
       GenValuationDivisibleByPAt v P
 
 /-- **Global assembly.** From the global wild and tame criteria, derive the
@@ -340,7 +336,7 @@ that lets the two cases be discharged independently in downstream files. -/
 theorem kummerDedekindUnramified_of_wild_and_tame
     (P : KummerPresentation Ext)
     (hWild : P.KummerWild) (hTame : P.KummerTame) :
-    P.KummerDedekindUnramified := fun v =>
+    P.KummerDedekindUnramified := fun v ↦
   kummerDedekindUnramifiedAt_of_wild_and_tame P v (hWild v) (hTame v)
 
 /-- **Global trivial discharge from a global `p`-th power.** If `γ` is itself
@@ -350,7 +346,7 @@ theorem kummerWild_of_globally_pth_power
     (P : KummerPresentation Ext)
     (h : ∃ β : Kˣ, P.gen = (β : K) ^ p) :
     P.KummerWild :=
-  fun v => kummerWildCriterion_of_globally_pth_power P v h
+  fun v ↦ kummerWildCriterion_of_globally_pth_power P v h
 
 end KummerPresentation
 

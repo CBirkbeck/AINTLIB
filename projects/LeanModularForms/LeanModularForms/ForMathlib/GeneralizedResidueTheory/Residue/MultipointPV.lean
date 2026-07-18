@@ -44,8 +44,8 @@ private lemma measurableSet_norm_gt_of_continuousOn {f : ℝ → ℂ} {s : Set �
     (isOpen_Ioi.preimage hf.norm.restrict)
   have h_eq : {t | ε < ‖f t‖} ∩ s = U ∩ s := by
     ext x
-    refine ⟨fun ⟨hx_far, hx_s⟩ => ⟨?_, hx_s⟩, fun ⟨hx_U, hx_s⟩ => ⟨?_, hx_s⟩⟩
-    · have h1 : (⟨x, hx_s⟩ : ↑s) ∈ (s.restrict (fun t => ‖f t‖)) ⁻¹' Set.Ioi ε := hx_far
+    refine ⟨fun ⟨hx_far, hx_s⟩ ↦ ⟨?_, hx_s⟩, fun ⟨hx_U, hx_s⟩ ↦ ⟨?_, hx_s⟩⟩
+    · have h1 : (⟨x, hx_s⟩ : ↑s) ∈ (s.restrict (fun t ↦ ‖f t‖)) ⁻¹' Set.Ioi ε := hx_far
       rw [← hU_eq] at h1; exact h1
     · have h1 : (⟨x, hx_s⟩ : ↑s) ∈ Subtype.val ⁻¹' U := hx_U
       rw [hU_eq] at h1; exact h1
@@ -64,12 +64,12 @@ theorem aEStronglyMeasurable_of_continuousOn_off_finite {f : ℝ → ℂ} {a b :
   have hP_meas_zero : volume (↑P ∩ Icc a b) = 0 :=
     (P.finite_toSet.inter_of_left (Icc a b)).measure_zero volume
   have h_disj : Disjoint (Icc a b \ P) (↑P ∩ Icc a b) :=
-    Set.disjoint_left.mpr fun _ ⟨_, hx_nP⟩ ⟨hx_P, _⟩ => hx_nP hx_P
+    Set.disjoint_left.mpr fun _ ⟨_, hx_nP⟩ ⟨hx_P, _⟩ ↦ hx_nP hx_P
   have h_eq : volume.restrict (Icc a b) =
       volume.restrict (Icc a b \ P) + volume.restrict (↑P ∩ Icc a b) := by
     rw [← Measure.restrict_union h_disj
       (P.finite_toSet.measurableSet.inter isClosed_Icc.measurableSet)]
-    congr 1; ext x; simp only [Set.mem_union, Set.mem_diff, Set.mem_inter_iff]; tauto
+    congr 1; ext x; simp only [Set.mem_union, Set.mem_sdiff, Set.mem_inter_iff]; tauto
   rw [h_eq]
   apply AEStronglyMeasurable.add_measure
     (hf_cont.aestronglyMeasurable
@@ -86,13 +86,13 @@ private lemma measurableSet_multipoint_condition {γ : ℝ → ℂ} {a b ε : �
     simp only [Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_iUnion, exists_prop]
     tauto
   rw [h_eq]
-  refine Finset.measurableSet_biUnion _ fun s _ => ?_
+  refine Finset.measurableSet_biUnion _ fun s _ ↦ ?_
   have h_eq' : {t | ‖γ t - s‖ ≤ ε} ∩ Icc a b =
       Icc a b \ ({t | ε < ‖γ t - s‖} ∩ Icc a b) := by
     ext t
-    simp only [Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_diff, not_and]
-    refine ⟨fun ⟨h_le, h_Icc⟩ => ⟨h_Icc, fun h_gt _ => absurd h_gt (not_lt.mpr h_le)⟩,
-      fun ⟨h_Icc, h⟩ => ⟨not_lt.mp fun h_gt => h h_gt h_Icc, h_Icc⟩⟩
+    simp only [Set.mem_inter_iff, Set.mem_setOf_eq, Set.mem_sdiff, not_and]
+    refine ⟨fun ⟨h_le, h_Icc⟩ ↦ ⟨h_Icc, fun h_gt _ ↦ absurd h_gt (not_lt.mpr h_le)⟩,
+      fun ⟨h_Icc, h⟩ ↦ ⟨not_lt.mp fun h_gt ↦ h h_gt h_Icc, h_Icc⟩⟩
   rw [h_eq']
   exact isClosed_Icc.measurableSet.diff
     (measurableSet_norm_gt_Icc ε (hγ.sub continuousOn_const))
@@ -103,9 +103,9 @@ private lemma measurableSet_multipoint_goodset {γ : ℝ → ℂ} {a b ε : ℝ}
   have h_eq : {t | ∀ s ∈ S, ε < ‖γ t - s‖} ∩ Icc a b =
       Icc a b \ ({t | ∃ s ∈ S, ‖γ t - s‖ ≤ ε} ∩ Icc a b) := by
     ext t
-    refine ⟨fun ⟨h_good, ht_Icc⟩ =>
-      ⟨ht_Icc, fun ⟨⟨s, hs, h_le⟩, _⟩ => by linarith [h_good s hs]⟩,
-      fun ⟨ht_Icc, h_not⟩ => ⟨fun s hs => ?_, ht_Icc⟩⟩
+    refine ⟨fun ⟨h_good, ht_Icc⟩ ↦
+      ⟨ht_Icc, fun ⟨⟨s, hs, h_le⟩, _⟩ ↦ by linarith [h_good s hs]⟩,
+      fun ⟨ht_Icc, h_not⟩ ↦ ⟨fun s hs ↦ ?_, ht_Icc⟩⟩
     by_contra h_le
     push Not at h_le
     exact h_not ⟨⟨s, hs, h_le⟩, ht_Icc⟩
@@ -115,12 +115,12 @@ private lemma measurableSet_multipoint_goodset {γ : ℝ → ℂ} {a b ε : ℝ}
 private lemma aEStronglyMeasurable_residueProd_on_goodset {γ : ℝ → ℂ} {a b ε : ℝ}
     {P : Finset ℝ} {s c : ℂ} (hε : 0 < ε) (hγ : ContinuousOn γ (Icc a b))
     (hγ'_off_P : ContinuousOn (deriv γ) (Icc a b \ P)) :
-    AEStronglyMeasurable (fun t => (c / (γ t - s)) * deriv γ t)
+    AEStronglyMeasurable (fun t ↦ (c / (γ t - s)) * deriv γ t)
       (volume.restrict ({t : ℝ | ε < ‖γ t - s‖} ∩ Icc a b)) := by
-  have h_ratio : AEStronglyMeasurable (fun t => c / (γ t - s))
+  have h_ratio : AEStronglyMeasurable (fun t ↦ c / (γ t - s))
       (volume.restrict ({t : ℝ | ε < ‖γ t - s‖} ∩ Icc a b)) :=
     ((continuousOn_const.div ((hγ.mono Set.inter_subset_right).sub continuousOn_const)
-      fun t ⟨ht_good, _⟩ => norm_ne_zero_iff.mp
+      fun t ⟨ht_good, _⟩ ↦ norm_ne_zero_iff.mp
         (ne_of_gt (lt_trans hε ht_good)))).aestronglyMeasurable
       (measurableSet_norm_gt_Icc ε (hγ.sub continuousOn_const))
   exact h_ratio.mul ((aEStronglyMeasurable_of_continuousOn_off_finite
@@ -129,13 +129,13 @@ private lemma aEStronglyMeasurable_residueProd_on_goodset {γ : ℝ → ℂ} {a 
 private theorem aEStronglyMeasurable_pv_integrand_residue {γ : ℝ → ℂ} {a b ε : ℝ}
     {P : Finset ℝ} {s c : ℂ} (hε : 0 < ε) (hγ : ContinuousOn γ (Icc a b))
     (hγ'_off_P : ContinuousOn (deriv γ) (Icc a b \ P)) :
-    AEStronglyMeasurable (fun t => if ‖γ t - s‖ > ε then (c / (γ t - s)) * deriv γ t
+    AEStronglyMeasurable (fun t ↦ if ‖γ t - s‖ > ε then (c / (γ t - s)) * deriv γ t
       else 0) (volume.restrict (Icc a b)) := by
   have hGoodSet_meas : MeasurableSet ({t | ε < ‖γ t - s‖} ∩ Icc a b) :=
     measurableSet_norm_gt_Icc ε (hγ.sub continuousOn_const)
-  have h_zero_meas : AEStronglyMeasurable (fun _ : ℝ => (0 : ℂ))
+  have h_zero_meas : AEStronglyMeasurable (fun _ : ℝ ↦ (0 : ℂ))
       (volume.restrict ({t : ℝ | ε < ‖γ t - s‖} ∩ Icc a b)ᶜ) := aestronglyMeasurable_const
-  have h_prod_meas : AEStronglyMeasurable (fun t => (c / (γ t - s)) * deriv γ t)
+  have h_prod_meas : AEStronglyMeasurable (fun t ↦ (c / (γ t - s)) * deriv γ t)
       (volume.restrict ({t | ε < ‖γ t - s‖} ∩ Icc a b)) :=
     aEStronglyMeasurable_residueProd_on_goodset hε hγ hγ'_off_P
   refine ((AEStronglyMeasurable.piecewise hGoodSet_meas h_prod_meas
@@ -148,11 +148,11 @@ private theorem aEStronglyMeasurable_pv_integrand_residue {γ : ℝ → ℂ} {a 
 
 private lemma aEStronglyMeasurable_singularSum_on_goodset {γ : ℝ → ℂ} {a b ε : ℝ}
     (S : Finset ℂ) (coeffs : ℂ → ℂ) (hε : 0 < ε) (hγ : ContinuousOn γ (Icc a b)) :
-    AEStronglyMeasurable (fun t => ∑ s ∈ S, coeffs s / (γ t - s))
+    AEStronglyMeasurable (fun t ↦ ∑ s ∈ S, coeffs s / (γ t - s))
       (volume.restrict ({t : ℝ | ∀ s ∈ S, ε < ‖γ t - s‖} ∩ Icc a b)) :=
-  Finset.aestronglyMeasurable_fun_sum S fun s hs =>
+  Finset.aestronglyMeasurable_fun_sum S fun s hs ↦
     (continuousOn_const.div ((hγ.mono Set.inter_subset_right).sub continuousOn_const)
-      fun _ ⟨ht_good, _⟩ => norm_ne_zero_iff.mp
+      fun _ ⟨ht_good, _⟩ ↦ norm_ne_zero_iff.mp
         (ne_of_gt (lt_trans hε (ht_good s hs)))).aestronglyMeasurable
       (measurableSet_multipoint_goodset S hγ)
 
@@ -160,10 +160,10 @@ private lemma aEStronglyMeasurable_decomposed_on_goodset {g_reg : ℂ → ℂ} {
     {a b ε : ℝ} {P : Finset ℝ} (S : Finset ℂ) (coeffs : ℂ → ℂ) (hε : 0 < ε)
     (hg : ContinuousOn g_reg (γ '' Icc a b)) (hγ : ContinuousOn γ (Icc a b))
     (hγ'_off_P : ContinuousOn (deriv γ) (Icc a b \ P)) :
-    AEStronglyMeasurable (fun t => (g_reg (γ t) + ∑ s ∈ S, coeffs s / (γ t - s)) * deriv γ t)
+    AEStronglyMeasurable (fun t ↦ (g_reg (γ t) + ∑ s ∈ S, coeffs s / (γ t - s)) * deriv γ t)
       (volume.restrict ({t : ℝ | ∀ s ∈ S, ε < ‖γ t - s‖} ∩ Icc a b)) := by
-  have hgγ_meas : AEStronglyMeasurable (fun t => g_reg (γ t)) (volume.restrict (Icc a b)) :=
-    (hg.comp hγ fun _ => Set.mem_image_of_mem _).aestronglyMeasurable
+  have hgγ_meas : AEStronglyMeasurable (fun t ↦ g_reg (γ t)) (volume.restrict (Icc a b)) :=
+    (hg.comp hγ fun _ ↦ Set.mem_image_of_mem _).aestronglyMeasurable
       isClosed_Icc.measurableSet
   have h_f_meas := (hgγ_meas.mono_measure
     (Measure.restrict_mono Set.inter_subset_right le_rfl)).add
@@ -173,12 +173,12 @@ private lemma aEStronglyMeasurable_decomposed_on_goodset {g_reg : ℂ → ℂ} {
 
 private lemma goodset_piecewise_ae_eq_decomposed {g_reg : ℂ → ℂ} {γ : ℝ → ℂ} {a b ε : ℝ}
     (S : Finset ℂ) (coeffs : ℂ → ℂ) :
-    (fun t => if ∃ s ∈ S, ‖γ t - s‖ ≤ ε then 0
+    (fun t ↦ if ∃ s ∈ S, ‖γ t - s‖ ≤ ε then 0
       else (g_reg (γ t) + ∑ s ∈ S, coeffs s / (γ t - s)) * deriv γ t)
       =ᵐ[volume.restrict (Icc a b)]
     ({t : ℝ | ∀ s ∈ S, ε < ‖γ t - s‖} ∩ Icc a b).piecewise
-      (fun t => (g_reg (γ t) + ∑ s ∈ S, coeffs s / (γ t - s)) * deriv γ t)
-      (fun _ => 0) := by
+      (fun t ↦ (g_reg (γ t) + ∑ s ∈ S, coeffs s / (γ t - s)) * deriv γ t)
+      (fun _ ↦ 0) := by
   filter_upwards [ae_restrict_mem isClosed_Icc.measurableSet] with t ht
   simp only [Set.piecewise, Set.mem_inter_iff, Set.mem_setOf_eq]
   by_cases ht_good : (∀ s ∈ S, ε < ‖γ t - s‖) ∧ t ∈ Icc a b
@@ -192,7 +192,7 @@ theorem aEStronglyMeasurable_pv_integrand_decomposed {g_reg : ℂ → ℂ} {γ :
     {a b ε : ℝ} {P : Finset ℝ} (S : Finset ℂ) (coeffs : ℂ → ℂ) (hε : 0 < ε)
     (hg : ContinuousOn g_reg (γ '' Icc a b)) (hγ : ContinuousOn γ (Icc a b))
     (hγ'_off_P : ContinuousOn (deriv γ) (Icc a b \ P)) :
-    AEStronglyMeasurable (fun t => if ∃ s ∈ S, ‖γ t - s‖ ≤ ε then 0
+    AEStronglyMeasurable (fun t ↦ if ∃ s ∈ S, ‖γ t - s‖ ≤ ε then 0
       else (g_reg (γ t) + ∑ s ∈ S, coeffs s / (γ t - s)) * deriv γ t)
       (volume.restrict (Icc a b)) :=
   ((AEStronglyMeasurable.piecewise (measurableSet_multipoint_goodset S hγ)
@@ -214,8 +214,8 @@ theorem tendsto_integral_of_dominated' {a b : ℝ} {F : ℝ → ℝ → ℂ} {f 
     (hF_le : ∀ ε > 0, ∀ᵐ t ∂volume, t ∈ Ι a b → ‖F ε t‖ ≤ g t)
     (hg_int : IntervalIntegrable g volume a b)
     (hF_lim : ∀ᵐ t ∂volume, t ∈ Ι a b →
-      Tendsto (fun ε => F ε t) (𝓝[>] 0) (𝓝 (f t))) :
-    Tendsto (fun ε => ∫ t in a..b, F ε t) (𝓝[>] 0) (𝓝 (∫ t in a..b, f t)) :=
+      Tendsto (fun ε ↦ F ε t) (𝓝[>] 0) (𝓝 (f t))) :
+    Tendsto (fun ε ↦ ∫ t in a..b, F ε t) (𝓝[>] 0) (𝓝 (∫ t in a..b, f t)) :=
   intervalIntegral.tendsto_integral_filter_of_dominated_convergence g
     (by filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε); exact hF_meas ε hε)
     (by filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε); exact hF_le ε hε)
@@ -243,7 +243,7 @@ private lemma piecewiseC1Immersion_deriv_continuousOn_off_partition (γ : Piecew
 lemma intervalIntegrable_residueTerm {γ : PiecewiseC1Immersion} {s c : ℂ} {ε : ℝ}
     (hε : 0 < ε) :
     IntervalIntegrable
-      (fun t => if ‖γ.toFun t - s‖ > ε then (c / (γ.toFun t - s)) * deriv γ.toFun t else 0)
+      (fun t ↦ if ‖γ.toFun t - s‖ > ε then (c / (γ.toFun t - s)) * deriv γ.toFun t else 0)
       volume γ.a γ.b := by
   obtain ⟨Mγ', hMγ'⟩ := piecewiseC1Immersion_deriv_bounded γ
   let M := ‖c‖ / ε * |Mγ'| + 1
@@ -260,7 +260,7 @@ lemma intervalIntegrable_residueTerm {γ : PiecewiseC1Immersion} {s c : ℂ} {ε
         _ ≤ M := by simp only [M]; linarith
     · simp only [norm_zero, M]; positivity
   have h_meas : AEStronglyMeasurable
-      (fun t => if ‖γ.toFun t - s‖ > ε then (c / (γ.toFun t - s)) * deriv γ.toFun t else 0)
+      (fun t ↦ if ‖γ.toFun t - s‖ > ε then (c / (γ.toFun t - s)) * deriv γ.toFun t else 0)
       (volume.restrict (Icc γ.a γ.b)) :=
     aEStronglyMeasurable_pv_integrand_residue hε γ.toPiecewiseC1Curve.continuous_toFun
       (piecewiseC1Immersion_deriv_continuousOn_off_partition γ)
@@ -271,7 +271,7 @@ lemma aEStronglyMeasurable_pv_sum_residue (S : Finset ℂ) (f : ℂ → ℂ) (γ
     (ε : ℝ) (hε : 0 < ε) (a b : ℝ) {P : Finset ℝ} (hγ_cont : ContinuousOn γ (Icc a b))
     (hγ'_off_P : ContinuousOn (deriv γ) (Icc a b \ P)) :
     AEStronglyMeasurable
-      (fun t => ∑ s ∈ S, if ‖γ t - s‖ > ε
+      (fun t ↦ ∑ s ∈ S, if ‖γ t - s‖ > ε
         then residueSimplePole f s / (γ t - s) * deriv γ t else 0)
       (volume.restrict (Icc a b)) := by
   induction S using Finset.induction_on with
@@ -279,7 +279,7 @@ lemma aEStronglyMeasurable_pv_sum_residue (S : Finset ℂ) (f : ℂ → ℂ) (γ
   | @insert x S' hx ih =>
     refine (AEStronglyMeasurable.add (aEStronglyMeasurable_pv_integrand_residue
       (s := x) (c := residueSimplePole f x) hε hγ_cont hγ'_off_P) ih).congr ?_
-    refine ae_of_all _ (fun t => ?_)
+    refine ae_of_all _ (fun t ↦ ?_)
     simp only [Pi.add_apply, Finset.sum_insert hx]
 
 end

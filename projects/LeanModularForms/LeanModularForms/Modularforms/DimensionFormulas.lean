@@ -146,7 +146,7 @@ private lemma dim_gen_cong_levels_eq_of_coeff_eq_zero {k : ℤ} {Γ : Subgroup S
     (hcoeff : ∀ m < N, (qExpansion (cuspWidth (Γ := Γ)) (⇑(f - g))).coeff m = 0) : f = g := by
   have hcoeff_norm : ∀ m < N,
       (qExpansion (cuspWidth (Γ := Γ)) (ModularForm.norm 𝒮ℒ (f - g))).coeff m = 0 := fun m hm ↦
-    SpherePacking.ModularForms.NormReduction.qExpansion_coeff_eq_zero_norm_of_qExpansion_coeff_eq_zero
+    qExpansion_coeff_eq_zero_norm_of_qExpansion_coeff_eq_zero
       (Γ := Γ) (k := k) (f := (f - g)) (N := N) (n := m) hm hcoeff
   have hfun :
       (fun n : Fin N ↦ (qExpansion (cuspWidth (Γ := Γ)) (ModularForm.norm 𝒮ℒ (f - g))).coeff n) =
@@ -197,5 +197,5 @@ lemma dim_gen_cong_levels (k : ℤ) (Γ : Subgroup SL(2, ℤ)) (hΓ : Subgroup.i
       rw [trunc.map_sub, hfg, sub_self]
     have := congrArg (fun t : Fin N → ℂ ↦ t ⟨m, hm⟩) hsub
     simpa [trunc] using this
-  haveI : FiniteDimensional ℂ (Fin N → ℂ) := by infer_instance
+  haveI : FiniteDimensional ℂ (Fin N → ℂ) := inferInstance
   simpa using (FiniteDimensional.of_injective trunc htrunc_inj)

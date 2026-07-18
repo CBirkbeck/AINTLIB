@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.Analysis.Complex.AbelLimit
@@ -17,8 +22,6 @@ functional-equation reduction for the odd formula.
 @[expose] public section
 
 noncomputable section
-
-open scoped BigOperators Topology
 
 namespace BernoulliRegular
 
@@ -48,13 +51,8 @@ theorem odd_LFunction_one_eq_oddLValueRhs_of_LFunction_inv_zero
     {χ : DirichletCharacter ℂ p} (hχ_prim : χ.IsPrimitive) (hχ_odd : χ.Odd)
     (hχ0 : DirichletCharacter.LFunction χ⁻¹ 0 = -BernoulliGen χ⁻¹ 1) :
     DirichletCharacter.LFunction χ 1 = oddLValueRhs p χ := by
-  have hp_ne_one : p ≠ 1 := hp.out.ne_one
-  have hp_ne_zero : (p : ℂ) ≠ 0 := by
-    exact_mod_cast hp.out.ne_zero
   have hχinv_odd : (χ⁻¹).Odd := by
-    rw [DirichletCharacter.Odd] at hχ_odd ⊢
-    rw [MulChar.inv_apply_eq_inv', hχ_odd]
-    norm_num
+    rw [DirichletCharacter.Odd, MulChar.inv_apply_eq_inv', hχ_odd]; norm_num
   have hL1 : DirichletCharacter.LFunction χ 1 =
       ((Real.pi : ℝ) : ℂ) * DirichletCharacter.completedLFunction χ 1 := by
     rw [DirichletCharacter.LFunction_eq_completed_div_gammaFactor (χ := χ) (s := 1)
@@ -63,26 +61,18 @@ theorem odd_LFunction_one_eq_oddLValueRhs_of_LFunction_inv_zero
   have hL0 : DirichletCharacter.completedLFunction χ⁻¹ 0 =
       DirichletCharacter.LFunction χ⁻¹ 0 := by
     rw [DirichletCharacter.LFunction_eq_completed_div_gammaFactor (χ := χ⁻¹) (s := 0)
-        (Or.inr hp_ne_one), hχinv_odd.gammaFactor_def]
+        (Or.inr hp.out.ne_one), hχinv_odd.gammaFactor_def]
     simp
   have hfe := DirichletCharacter.IsPrimitive.completedLFunction_one_sub (χ := χ) hχ_prim (0 : ℂ)
   rw [DirichletCharacter.rootNumber, if_neg hχ_odd.not_even, pow_one,
-    ← mul_comm_div, ← mul_comm_div, ← Complex.cpow_sub _ _ hp_ne_zero, sub_sub, add_halves,
-    hL0, hχ0] at hfe
+    ← mul_comm_div, ← mul_comm_div, ← Complex.cpow_sub _ _ (by exact_mod_cast hp.out.ne_zero),
+    sub_sub, add_halves, hL0, hχ0] at hfe
   have hfe' : DirichletCharacter.completedLFunction χ 1 =
       (p : ℂ) ^ (-1 : ℂ) * Complex.I * gaussSum χ (ZMod.stdAddChar (N := p)) *
         BernoulliGen χ⁻¹ 1 := by
     simpa using hfe
-  calc
-    DirichletCharacter.LFunction χ 1
-        = ((Real.pi : ℝ) : ℂ) * DirichletCharacter.completedLFunction χ 1 := hL1
-    _ = ((Real.pi : ℝ) : ℂ) *
-          (((p : ℂ) ^ (-1 : ℂ)) * Complex.I * gaussSum χ (ZMod.stdAddChar (N := p)) *
-            BernoulliGen χ⁻¹ 1) := by rw [hfe']
-    _ = ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ)) *
-          BernoulliGen χ⁻¹ 1 := by
-      simp [Complex.cpow_neg_one, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm]
-    _ = oddLValueRhs p χ := rfl
+  rw [hL1, hfe', oddLValueRhs, Complex.cpow_neg_one]
+  ring
 
 end LValueAtOne
 

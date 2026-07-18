@@ -140,11 +140,9 @@ theorem T050_supplier_via_laurent_piece_membership
   obtain ⟨h_prod_open, h_per_t_open⟩ :=
     h_per_w_laurent_piece w hw_spa hw_f
   refine ⟨?_, ?_⟩
-  · -- Extract `w.vle (T_D.prod id) D_s` from singleton-product rationalOpen.
-    obtain ⟨_hw_spa', h_bound, _h_D_s_ne⟩ := h_prod_open
+  · obtain ⟨_hw_spa', h_bound, _h_D_s_ne⟩ := h_prod_open
     exact h_bound (T_D.prod id) (Finset.mem_singleton.mpr rfl)
-  · -- Extract `w.vle 1 t'` from each per-element rationalOpen.
-    intro t' ht'
+  · intro t' ht'
     obtain ⟨_hw_spa', h_bound, _h_t'_ne⟩ := h_per_t_open t' ht'
     exact h_bound (1 : A) (Finset.mem_singleton.mpr rfl)
 

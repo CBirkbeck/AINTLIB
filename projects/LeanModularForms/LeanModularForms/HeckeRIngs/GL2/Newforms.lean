@@ -28,7 +28,7 @@ import LeanModularForms.Modularforms.SlashActionAuxil
 This file collects the newform-theory development following Diamond–Shurman
 §§5.6–5.8 and Atkin–Lehner [AL70]. It re-exports the eigenform/newform
 structures, predicates and old/new submodules of `Newforms.Basic` (through
-`Newforms.CoeffSeq` and `Newforms.MainLemma`, which also provide the
+`Newforms.CoeffSeq` and `Newforms.Newform`, which also provide the
 Atkin–Lehner main lemma), together with the supporting level-raising,
 character-decomposition, Petersson, dimension-formula and L-function theory.
 

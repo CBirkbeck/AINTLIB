@@ -215,25 +215,15 @@ theorem WedhornCoverPieceVKNonemptyRationalBound_via_alpha_TD_max_bound
     (h_max_bound :
       WedhornCoverPieceVKAlphaTDMaxBound P T s hopen T_D s_D σ_loc) :
     WedhornCoverPieceVKNonemptyRationalBound P T s hopen T_D s_D σ_loc := by
-  letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
-  letI : PlusSubring (Localization.Away s) :=
-    localizationLocSubringPlusSubring P T s
-  letI : DecidableEq (Localization.Away s) := Classical.decEq _
   intro w hw_spa hw_f h_VK t ht
   -- V_K-nonempty witness gives nonempty image (without consuming h_VK).
-  have hT_D_image_ne :
-      (T_D.image (algebraMap A (Localization.Away s))).Nonempty := by
-    obtain ⟨t_K, ht_K, _⟩ := h_VK
-    exact ⟨t_K, ht_K⟩
   -- Extract max element via T034's existence lemma.
   obtain ⟨τ_max, hτ_max_mem, hτ_max_max⟩ :=
-    Spv.exists_max_vle_of_nonempty w hT_D_image_ne
-  -- Apply max-element residual.
-  have h_τ_le_s_D :
-      w.vle τ_max (algebraMap A (Localization.Away s) s_D) :=
-    h_max_bound w hw_spa hw_f h_VK τ_max hτ_max_mem hτ_max_max
-  -- Maxness gives w.vle t τ_max; transitivity closes.
-  exact w.vle_trans (hτ_max_max t ht) h_τ_le_s_D
+    Spv.exists_max_vle_of_nonempty w (h_VK.imp fun _ h => h.1)
+  -- Maxness gives `w.vle t τ_max`; the max-element residual gives
+  -- `w.vle τ_max (algebraMap s_D)`; transitivity closes.
+  exact w.vle_trans (hτ_max_max t ht)
+    (h_max_bound w hw_spa hw_f h_VK τ_max hτ_max_mem hτ_max_max)
 
 /-- **Per-call assembly: `WedhornC1PerCallSupplyPerWCoverPiece` via
 the max-element residual** (T042 composed deliverable).
@@ -275,11 +265,6 @@ theorem WedhornC1PerCallSupplyPerWCoverPiece_via_alpha_TD_max_bound
       (_hv_in_plus : v ∈ rationalOpen (insert f C.base.T) C.base.s)
       (_hvf_nz : ¬ v.vle f 0),
       WedhornC1PerCallSupplyPerWCoverPiece P C hopen_base D v := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   intro σ_loc f h_alg h_dom h_max_bound hv_in_plus hvf_nz
   exact WedhornC1PerCallSupplyPerWCoverPiece_via_VK_residual
     P C hopen_base D v σ_loc f h_alg h_dom
@@ -338,11 +323,6 @@ theorem C1SupplierStrong_local_via_alpha_TD_max_bound
         v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
         ¬ v.vle f 0) :
     C1SupplierStrong_local C := by
-  letI : TopologicalSpace (Localization.Away C.base.s) :=
-    locTopology P C.base.T C.base.s hopen_base
-  letI : PlusSubring (Localization.Away C.base.s) :=
-    localizationLocSubringPlusSubring P C.base.T C.base.s
-  letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
   refine C1SupplierStrong_local_via_VK_residual P hA₀_le C hopen_base ?_
   intro D hD v hv t ht hvt hvD_s
   obtain ⟨σ_loc, f, h_alg, h_dom, h_max_bound, hv_in_plus, hvf_nz⟩ :=

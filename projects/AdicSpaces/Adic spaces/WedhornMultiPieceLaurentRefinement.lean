@@ -138,11 +138,8 @@ theorem multi_element_lower_bound_on_piece_singleton_via_laurent_membership
       (rationalOpen ({(1 : A)} : Finset A) (((σ⁻¹ : Aˣ) : A) * τ))
       ({((σ⁻¹ : Aˣ) : A) * τ} : Finset A) := by
   intro w hw_in t' ht'
-  rw [Finset.mem_singleton] at ht'
-  subst ht'
-  obtain ⟨_, h_per_one, h_t_ne⟩ := hw_in
-  refine ⟨?_, h_t_ne⟩
-  exact h_per_one (1 : A) (Finset.mem_singleton.mpr rfl)
+  obtain rfl := Finset.mem_singleton.mp ht'
+  exact ⟨hw_in.2.1 (1 : A) (Finset.mem_singleton.mpr rfl), hw_in.2.2⟩
 
 omit [IsTopologicalRing A] in
 /-- **Multi-piece Laurent cover refinement from Cor 7.32**
@@ -179,8 +176,8 @@ theorem cor732_multi_piece_laurent_refinement
   intro w hw_spa
   obtain ⟨τ, hτ_mem, hw_in_piece⟩ :=
     cor732_laurent_piece_membership_at hσ_dom hw_spa
-  refine ⟨τ, hτ_mem, hw_in_piece, ?_⟩
-  exact multi_element_lower_bound_on_piece_singleton_via_laurent_membership τ
+  exact ⟨τ, hτ_mem, hw_in_piece,
+    multi_element_lower_bound_on_piece_singleton_via_laurent_membership τ⟩
 
 omit [IsTopologicalRing A] in
 /-- **Per-`w` existential singleton residual from Cor 7.32**
@@ -212,9 +209,8 @@ theorem cor732_existential_singleton_residual_at_each_w
   intro w hw_spa
   obtain ⟨τ, hτ_mem, hw_in_piece, h_residual⟩ :=
     cor732_multi_piece_laurent_refinement hσ_dom w hw_spa
-  refine ⟨τ, hτ_mem, ?_⟩
-  exact h_residual w hw_in_piece (((σ⁻¹ : Aˣ) : A) * τ)
-    (Finset.mem_singleton.mpr rfl)
+  exact ⟨τ, hτ_mem, h_residual w hw_in_piece (((σ⁻¹ : Aˣ) : A) * τ)
+    (Finset.mem_singleton.mpr rfl)⟩
 
 /-- **Structured blocker: global multi-element residual from
 multi-piece refinement** (T054 documented gap).

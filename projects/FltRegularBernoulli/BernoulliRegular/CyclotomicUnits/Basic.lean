@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.PrimaryUnits
@@ -53,7 +58,7 @@ theorem realCyclotomicUnit_val (a : ℕ)
     (ha_two : 2 ≤ a) (ha_le : a ≤ (p - 1) / 2) :
     (realCyclotomicUnit (p := p) (K := K) a ha_two ha_le : 𝓞 K⁺) =
       FLT37.realCyclotomicUnitPlus p K a := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [FLT37.realCyclotomicUnitPlusUnit_val]
 
 /-- The route-level real cyclotomic unit is a unit. -/

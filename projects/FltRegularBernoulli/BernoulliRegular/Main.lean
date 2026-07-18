@@ -1,5 +1,7 @@
-import BernoulliRegular.CyclotomicUnits.UnitsReflection
-import FltRegular.NumberTheory.RegularPrimes
+module
+
+public import BernoulliRegular.CyclotomicUnits.UnitsReflection
+public import FltRegular.NumberTheory.RegularPrimes
 
 /-!
 # Kummer's criterion
@@ -17,8 +19,7 @@ namespace BernoulliRegular
 
 An odd prime `p` is regular iff `p` does not divide the numerator of any
 Bernoulli number `B_2, B_4, ..., B_{p-3}`. -/
-theorem KummerCriterion
-    {p : ℕ} [hp : Fact p.Prime] (hp_odd : p ≠ 2) :
+theorem kummer_criterion {p : ℕ} [hp : Fact p.Prime] (hp_odd : p ≠ 2) :
     IsRegularPrime p ↔
       ∀ k, 1 ≤ k → 2 * k ≤ p - 3 → ¬ (p : ℤ) ∣ (bernoulli (2 * k)).num := by
   letI : IsCyclotomicExtension {p} ℚ (CyclotomicField p ℚ) :=

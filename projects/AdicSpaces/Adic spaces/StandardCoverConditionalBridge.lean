@@ -124,7 +124,7 @@ theorem exists_single_f_refining_point_in_D_via_C1Supplier
     ∃ f : A,
       v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s :=
-  h_C1 D hD v hv D.s hD_s_mem (v.vle_total D.s D.s |>.elim id id) hv.2.2
+  h_C1 D hD v hv D.s hD_s_mem (v.vle_refl D.s) hv.2.2
 
 /-- **Bridge: per-D pointwise C1 → per-D-and-`v` candidate-element
 selector**.
@@ -161,8 +161,7 @@ noncomputable def c1_pointwise_selector
     {f : A //
       v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s} :=
-  ⟨(h_C1_pointwise D hD v hv).choose,
-    (h_C1_pointwise D hD v hv).choose_spec⟩
+  Classical.indefiniteDescription _ (h_C1_pointwise D hD v hv)
 
 /-- **Composed bridge: C1 supplier → per-D-and-`v` selector**.
 

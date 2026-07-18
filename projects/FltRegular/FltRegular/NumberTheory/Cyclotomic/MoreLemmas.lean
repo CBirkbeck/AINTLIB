@@ -28,7 +28,7 @@ lemma associated_zeta_sub_one_pow_prime :
     ← Finset.prod_const]
   apply Associated.prod
   intro η hη
-  refine hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  refine hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     hpri.out (one_mem_nthRootsFinset hpri.out.pos) ?_ ?_
   · exact ((isPrimitiveRoot_of_mem_primitiveRoots hη).mem_nthRootsFinset hpri.out.pos)
   · exact ((isPrimitiveRoot_of_mem_primitiveRoots hη).ne_one hpri.out.one_lt).symm
@@ -67,14 +67,6 @@ lemma exists_dvd_pow_sub_Int_pow (a : 𝓞 K) : ∃ b : ℤ, ↑p ∣ a ^ p - (b
     Nat.sub_add_cancel (n := p) (m := 1) hpri.out.one_lt.le]
   ring
 
-section
-
-variable {α} [CommMonoidWithZero α]
-
-theorem prime_units_mul (a : αˣ) (b : α) : Prime (↑a * b) ↔ Prime b := by simp [Prime]
-
-end
-
 lemma zeta_sub_one_dvd_Int_iff {n : ℤ} : (hζ.toInteger : 𝓞 K) - 1 ∣ n ↔ ↑p ∣ n := by
   letI := IsCyclotomicExtension.numberField {p} ℚ K
   by_cases hp : p = 2
@@ -93,14 +85,6 @@ lemma zeta_sub_one_dvd_Int_iff {n : ℤ} : (hζ.toInteger : 𝓞 K) - 1 ∣ n �
     rw [hζ.norm_toInteger_sub_one_of_prime_ne_two' hp, ← Nat.prime_iff_prime_int]
     exact hpri.1
   rw [← hζ.norm_toInteger_sub_one_of_prime_ne_two' hp, Ideal.norm_dvd_iff hprime]
-
-lemma IsPrimitiveRoot.sub_one_dvd_sub {A : Type*} [CommRing A] [IsDomain A]
-    {p : ℕ} (hp : p.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ p) {η₁ : A}
-    (hη₁ : η₁ ∈ nthRootsFinset p 1) {η₂ : A} (hη₂ : η₂ ∈ nthRootsFinset p 1) :
-    ζ - 1 ∣ η₁ - η₂ := by
-  by_cases h : η₁ = η₂
-  · rw [h, sub_self]; exact dvd_zero _
-  · exact (hζ.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hp hη₁ hη₂ h).dvd
 
 lemma quotient_zero_sub_one_comp_aut (σ : 𝓞 K →+* 𝓞 K) :
     (Ideal.Quotient.mk (Ideal.span {(hζ.toInteger : 𝓞 K) - 1})).comp σ = Ideal.Quotient.mk _ := by

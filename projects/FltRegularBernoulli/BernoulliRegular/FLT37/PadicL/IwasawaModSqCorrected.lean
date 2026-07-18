@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.IwasawaCongruenceModPSq
 import BernoulliRegular.FLT37.PadicL.PowerSumModPCubed
 
@@ -115,7 +120,7 @@ theorem thirtyseven_mul_bernoulliGenOmega_thirtytwo_eq :
     (R := ℚ_[37]) (N := 37) (χ := (teichmullerCharQp 37) ^ 31) hχ_ne_one
   rw [bernoulliGenOmega_def, show (32 - 1 : ℕ) = 31 from rfl,
     show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, hT006, PadicInt.coe_sum]
-  refine Finset.sum_congr rfl fun a _ => ?_
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [PadicInt.coe_mul, PadicInt.coe_pow, PadicInt.coe_natCast]
   congr 1
   rw [teichmullerCharQp_pow_eq_ringHomComp (p := 37) (n := 31),
@@ -143,7 +148,7 @@ dividing off the single `37` gives `v₃₇(B_{1,ω³¹}) = 1`.  **No Kellner in
 theorem valuation_bernoulliGenOmega_thirtytwo_of_valTwo
     (h : bernoulliGenOmegaValuationTwo37) :
     (bernoulliGenOmega 37 32).valuation = 1 := by
-  unfold bernoulliGenOmegaValuationTwo37 at h
+  simp only [bernoulliGenOmegaValuationTwo37] at h
   have h37_ne : (37 : ℚ_[37]) ≠ 0 := by norm_num
   have hv37 : Padic.valuation (37 : ℚ_[37]) = 1 := by
     rw [show (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) from by norm_num, Padic.valuation_natCast,
@@ -165,7 +170,7 @@ theorem valuation_bernoulliGenOmega_thirtytwo_of_teichmullerSumValTwo
         ℤ_[37]) : ℚ_[37]) = 2) :
     (bernoulliGenOmega 37 32).valuation = 1 := by
   refine valuation_bernoulliGenOmega_thirtytwo_of_valTwo ?_
-  unfold bernoulliGenOmegaValuationTwo37
+  simp only [bernoulliGenOmegaValuationTwo37]
   rwa [thirtyseven_mul_bernoulliGenOmega_thirtytwo_eq]
 
 /-- **The corrected mod-`p²` Iwasawa-congruence data bundle.**

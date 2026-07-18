@@ -121,15 +121,6 @@ private lemma heckeT_p_holomorphic [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prim
   (MDifferentiable.sum fun _ _ ↦ (ModularFormClass.holo f).slash k _).add
     ((ModularFormClass.holo (diamondOp k (ZMod.unitOfCoprime p hpN) f)).slash k _)
 
-private lemma zmod_mul_inv {p : ℕ} [hp : Fact p.Prime] [NeZero p]
-    {a : ZMod p} (ha : a ≠ 0) : a * a⁻¹ = 1 := by
-  have vcz : ∀ x : ZMod p, (x.val : ZMod p) = x := fun x ↦ by rw [ZMod.natCast_val, ZMod.cast_id]
-  conv_lhs => rw [show a = (a.val : ZMod p) from (vcz a).symm,
-    show ((a.val : ZMod p))⁻¹ = (((a.val : ZMod p)⁻¹).val : ZMod p) from (vcz _).symm]
-  exact ZMod.mul_val_inv (hp.out.coprime_iff_not_dvd.2 fun h ↦ ha (by
-    rw [show a = (a.val : ZMod p) by rw [ZMod.natCast_val, ZMod.cast_id]]
-    simp [Nat.eq_zero_of_dvd_of_lt h (ZMod.val_lt a)])).symm
-
 private noncomputable def moebiusFin (p : ℕ) (hp : Nat.Prime p)
     (M : Matrix (Fin 2) (Fin 2) ℤ) (b : Fin p) : Fin p :=
   haveI : NeZero p := ⟨hp.ne_zero⟩
@@ -160,14 +151,11 @@ private lemma fin_val_eq_of_intCast_sub_dvd {p : ℕ} (hp : Nat.Prime p) (x y : 
 private lemma zmod_mul_eq_of_mul_inv_eq {p : ℕ} [Fact p.Prime] [NeZero p]
     {a b c d : ZMod p} (hb : b ≠ 0) (hd : d ≠ 0)
     (h : a * b⁻¹ = c * d⁻¹) : a * d = c * b := by
-  have inv_mul {x : ZMod p} (hx : x ≠ 0) : x⁻¹ * x = 1 := by
-    rw [mul_comm]
-    exact zmod_mul_inv hx
   have := congr_arg (· * (b * d)) h
   simp only [mul_assoc] at this
-  rwa [show b⁻¹ * (b * d) = d by rw [← mul_assoc, inv_mul hb, one_mul],
+  rwa [show b⁻¹ * (b * d) = d by rw [← mul_assoc, inv_mul_cancel₀ hb, one_mul],
        show d⁻¹ * (b * d) = b by
-          rw [mul_comm b d, ← mul_assoc, inv_mul hd, one_mul]] at this
+          rw [mul_comm b d, ← mul_assoc, inv_mul_cancel₀ hd, one_mul]] at this
 
 private lemma botLeft_ne_zero_of_topLeft_add_eq_zero {p : ℕ} [Fact p.Prime]
     (M : Matrix (Fin 2) (Fin 2) ℤ) (hdet : M 0 0 * M 1 1 - M 0 1 * M 1 0 = 1)
@@ -283,7 +271,7 @@ private lemma dvd_topLeft_add_canonicalIndex (p : ℕ) (hp : Nat.Prime p)
   rw [ZMod.natCast_val, ZMod.cast_id]
   have : (-(M 0 0 : ZMod p) * ((M 1 0 : ℤ) : ZMod p)⁻¹) * ((M 1 0 : ℤ) : ZMod p) =
       -(M 0 0 : ZMod p) := by
-    rw [mul_assoc, mul_comm ((M 1 0 : ℤ) : ZMod p)⁻¹ _, zmod_mul_inv h10_ne, mul_one]
+    rw [mul_assoc, mul_comm ((M 1 0 : ℤ) : ZMod p)⁻¹ _, mul_inv_cancel₀ h10_ne, mul_one]
   rw [this, add_neg_cancel]
 
 private lemma sum_ite_swap_eq {p : ℕ} {V : Type*} [AddCommGroup V]
@@ -327,7 +315,7 @@ private lemma dvd_sub_mul_inv_val {p : ℕ} [Fact p.Prime] [NeZero p]
   rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
   push_cast
   rw [ZMod.natCast_val, ZMod.cast_id, sub_eq_zero, mul_comm (num : ZMod p) _, ← mul_assoc,
-    zmod_mul_inv hden, one_mul]
+    mul_inv_cancel₀ hden, one_mul]
 
 private lemma upper_tau_det_eq_one {M : Matrix (Fin 2) (Fin 2) ℤ}
     (hdet : M 0 0 * M 1 1 - M 0 1 * M 1 0 = 1) (p : ℕ) (b j' q : ℤ)
@@ -438,13 +426,13 @@ private theorem orbit_upper_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prim
     rw [hσ, zero_mul, sub_zero]
   have hmatrix : T_p_upper p hp.pos b.val * mapGL ℚ σ = mapGL ℚ τ * T_p_upper p hp.pos j' := by
     apply Units.ext
+    have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_upper_coe, Fin.isValue,
-        Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two, algebraMap_int_eq,
-        hτ_def, hτ_mat_def] <;>
-      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, Matrix.cons_val_zero,
-        Matrix.cons_val_one, Matrix.head_cons, Matrix.head_fin_const] <;>
+        Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two, algebraMap_int_eq] <;>
+      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
+        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, Matrix.head_fin_const] <;>
       simp only [show (↑σ : Matrix (Fin 2) (Fin 2) ℤ) = M from rfl] <;>
       first | rfl | simp |
         exact_mod_cast (show M 0 1 + ↑b.val * M 1 1 = (M 0 0 + ↑b.val * M 1 0) * ↑j' + q * ↑p by
@@ -490,14 +478,14 @@ private theorem orbit_upper_div_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.
   have hmatrix : T_p_upper p hp.pos b.val * mapGL ℚ σ =
       mapGL ℚ τ * T_p_lower p hp.pos := by
     apply Units.ext
+    have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_upper_coe, T_p_lower_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
-        algebraMap_int_eq, hτ_def, hτ_mat_def,
-        hB_def] <;>
-      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply,
-        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        algebraMap_int_eq] <;>
+      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
+        hB_def, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
         Matrix.head_fin_const] <;>
       simp only [show (↑σ : Matrix (Fin 2) (Fin 2) ℤ) = M from rfl] <;>
       first | rfl | simp |
@@ -553,12 +541,13 @@ private theorem orbit_lower_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.Prim
   have hmatrix : T_p_lower p hp.pos * mapGL ℚ σ =
       mapGL ℚ τ * T_p_upper p hp.pos j' := by
     apply Units.ext
+    have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_lower_coe, T_p_upper_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
-        algebraMap_int_eq, hτ_def, hτ_mat_def] <;>
-      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply,
+        algebraMap_int_eq] <;>
+      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
         Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
         Matrix.head_fin_const] <;>
       simp only [show (↑σ : Matrix (Fin 2) (Fin 2) ℤ) = M from rfl] <;>
@@ -601,12 +590,13 @@ private theorem orbit_lower_div_gamma0 [NeZero N] (k : ℤ) (p : ℕ) (hp : Nat.
   have hmatrix : T_p_lower p hp.pos * mapGL ℚ σ =
       mapGL ℚ τ * T_p_lower p hp.pos := by
     apply Units.ext
+    have hτval : Subtype.val τ = τ_mat := rfl
     ext i j
     fin_cases i <;> fin_cases j <;>
       simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_lower_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
-        algebraMap_int_eq, hτ_def, hτ_mat_def] <;>
-      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply,
+        algebraMap_int_eq] <;>
+      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
         Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
         Matrix.head_fin_const] <;>
       simp only [show (↑σ : Matrix (Fin 2) (Fin 2) ℤ) = M from rfl] <;>

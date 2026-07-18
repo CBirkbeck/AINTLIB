@@ -1,0 +1,21 @@
+FOCUS: [T-SG3-LFP] — 1,2,3,4a GREEN+pushed; [4c] comap_ideal_of_isClosedImmersion STAKED (sorry, Incidence.lean ~before VanishingLocus section). NEXT: prove 4c via tensorQuotientEquiv/quotientTensorEquiv (mathlib RingTheory/TensorProduct/Quotient) + ker_fst_of_isClosedImmersion per-affine; then 4b ideal-fg-locality, 4d threading (LE/EQ/generatorLocus ∃-strengthening), 5 capstone. Full arc-plan in this file's git-history + prior sentinel-versions.
+[4c'] PROOF DESIGN (banked 2026-07-10):
+Route A (GC + candidate sheaf): define K := image-ideal-sheaf (per-affine (I.ideal U).map (f.app U)); show IdealSheafData-axioms (map_ideal_basicOpen: Ideal.map commutes with localization maps — map_comp-chains); then comap I f = K by antisymm:
+ - K ≤ comap: per-affine elementwise: x ∈ I.ideal U: f.app x ∈ ker (fst.app _) since fst≫f = snd≫Iι [pullback.condition] and Iι.app kills I (ker_subschemeι); i.e. (pullback.fst f Iι).app-image of f.app x = snd-side-image of (Iι.app x) = 0. Then span/map_le_iff_le_comap-style closure.
+ - comap ≤ K: GC (map_gc).l_le?? : comap I f ≤ K ⟺ I ≤ K.map f: per-affine: x ∈ I.ideal U → x ∈ (K.map f).ideal U: map-def (K.subschemeι ≫ f).ker: ker_apply: need (K.subschemeι ≫ f).app U x = 0: app-comp: f.app then K.subschemeι.app: f.app x ∈ K.ideal-per-affine := map (f.app) (I.ideal U) ∋ f.app x ✓ then subschemeι.app kills its own ideal (ker_subschemeι) ✓ 0.
+Then the target-lemma = evaluate K-formula at ⟨f⁻¹ᵁU, _⟩ (definitional).
+Route B (heavier): pullback-affine tensor-presentation (tensorQuotientEquiv) — only if A stalls.
+Note: QuasiCompact (pullback.fst f Iι) instance via IsClosedImmersion-base-change for ker_apply.
+[4c'-REVISION 2026-07-10]: image-formula stake REMOVED (unconsumed). Simpler route found:
+- [4b] D-ideal-fg-per-affine: sectionsDivisor.ideal = ∏ ker(section-values) (fullLevelLocusAux_sectionsDivisor_ideal); per-affine ∏-pointwise; each ker(P.1-app)-fg via Algebra.FinitePresentation.ker_fG_of_surjective (R := Γ(S,U); A := Γ(curve-total,⁻¹U) fp-algebra from lfp-composite; B fp; section-app surjective since section = closed immersion).
+- [4c] comap-fg: comap-of-∏ = ∏-of-comaps (project IdealSheafComapMul.comap_prod); comap-of-ker = ker-of-pullback-fst (mathlib ker_fst_of_isClosedImmersion, reversed); ker(fst.app)-fg via the SAME ker_fG_of_surjective with A := Γ(pullback-affine) = tensor-fp, B := Γ(D'-total)-fp.
+- [4b'-LOCALITY] still needed: IdealSheafData with fg on the preimage-cofinal affines ⟹ fg on ALL affines (for lfp_subschemeι_of_fg's ∀-binder): via map_ideal_basicOpen + Module.Finite.of_localizationSpan-style gluing; OR weaken lfp_subschemeι_of_fg to take fg on a cover (better: re-derive iff_appLE per (U,V,e) directly from cover-fg — the appLE-target factors through basic-opens).
+[4b'-KILLED 2026-07-10]: no locality lemma needed. Weaken lfp_subschemeι_of_fg to a COVER-version:
+  lfp Z.subschemeι ⟸ IsZariskiLocalAtTarget.of_iSup_eq_top (fun U : ι-family => U.1) htop
+    (per-piece: Z.subschemeι ∣_ U between affines [preimage-affine via closed-imm affine-hom];
+     HasRingHomProperty.iff_of_isAffine: FinitePresentation ((∣_U).appTop).hom;
+     appTop-of-restrict ≅-conjugate of app-U via resLE_eq_morphismRestrict + resLE_app_top
+     (the e0-hsq pattern) + finitePresentation_respectsIso;
+     core: of_surjective + ker_apply + ker_subschemeι + fg-AT-COVER-U-ONLY).
+So the consumer chain needs fg only at S-affine-cover members (e.g. the preimage-cofinal family) — matching exactly what [4b]/[4c]'s ker_fG_of_surjective route provides per chosen affine.
+EXECUTION ORDER on resume: (1) lfp_subschemeι_of_fg_cover (rework proof as above, keep the ∀-version as corollary or drop); (2) [4b] sectionsDivisor-ideal-fg per-affine (ker_fG route); (3) [4c] comap-fg (comap_prod + ker_fst + ker_fG); (4) [4d] ∃-strengthening LE→EQ→generatorLocus (+lfp conjunct); (5) capstone exists_cyclicityLocus assembly per banked plan.

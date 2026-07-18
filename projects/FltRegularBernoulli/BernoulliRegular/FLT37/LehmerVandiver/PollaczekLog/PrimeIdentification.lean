@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import FltRegular.NumberTheory.CyclotomicRing
@@ -88,7 +93,6 @@ theorem cyclotomic_p_eval_eq_zero_of_ne_one
     (ht_ne : (t : ZMod ℓ) ^ k ≠ 1) :
     Polynomial.eval₂ (Int.castRingHom (ZMod ℓ)) ((t : ZMod ℓ) ^ k)
         (Polynomial.cyclotomic p ℤ) = 0 := by
-  classical
   -- Let `x = (t : ZMod ℓ)^k` for brevity.
   set x : ZMod ℓ := (t : ZMod ℓ) ^ k with hx_def
   -- Convert `eval₂` into `eval` after mapping coefficients to `ZMod ℓ`.
@@ -104,21 +108,14 @@ theorem cyclotomic_p_eval_eq_zero_of_ne_one
       Polynomial.eval_X, Polynomial.eval_one] using this
   -- Compute `x ^ p = 1` via Fermat: `x^p = t^{k·p} = t^{ℓ-1}`.
   have hxp : x ^ p = 1 := by
-    rw [hx_def, ← pow_mul]
-    have hmul : k * p = ℓ - 1 := by omega
-    rw [hmul]
+    rw [hx_def, ← pow_mul, show k * p = ℓ - 1 by omega]
     -- `(t : ZMod ℓ) ^ (ℓ - 1) = 1` by Fermat (gcd(t, ℓ) = 1).
-    have ht0 : (t : ZMod ℓ) ≠ 0 := by
-      intro h
-      rw [ZMod.natCast_eq_zero_iff] at h
-      exact (Nat.Prime.coprime_iff_not_dvd (Fact.out (p := ℓ.Prime))).mp
-        (Nat.Coprime.symm ht_coprime) h
-    exact ZMod.pow_card_sub_one_eq_one ht0
+    exact ZMod.pow_card_sub_one_eq_one
+      ((ZMod.isUnit_iff_coprime t ℓ).mpr ht_coprime).ne_zero
   -- Hence `(x - 1) * Φ_p(x) = 0`. Since `x - 1 ≠ 0`, `Φ_p(x) = 0`.
-  have hzero : (Polynomial.cyclotomic p (ZMod ℓ)).eval x * (x - 1) = 0 := by
-    rw [heval, hxp, sub_self]
   have hx_ne : x - 1 ≠ 0 := sub_ne_zero.mpr ht_ne
-  exact (mul_eq_zero.mp hzero).resolve_right hx_ne
+  refine (mul_eq_zero.mp ?_).resolve_right hx_ne
+  rw [heval, hxp, sub_self]
 
 end CyclotomicEval
 
@@ -148,7 +145,7 @@ theorem cyclotomicReduction_zeta
     (ht_ne : (t : ZMod ℓ) ^ k ≠ 1) :
     cyclotomicReduction p ℓ k hℓ ht_coprime ht_ne (CyclotomicIntegers.zeta p) =
       (t : ZMod ℓ) ^ k := by
-  unfold cyclotomicReduction CyclotomicIntegers.zeta
+  simp only [cyclotomicReduction, CyclotomicIntegers.zeta]
   exact AdjoinRoot.lift_root _
 
 end CyclotomicReduction
@@ -179,14 +176,11 @@ theorem lehmerVandiverPrime_isPrime
     (hℓ : ℓ = k * p + 1) {t : ℕ} (ht_coprime : t.Coprime ℓ)
     (ht_ne : (t : ZMod ℓ) ^ k ≠ 1) :
     (lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne).IsPrime := by
-  unfold lehmerVandiverPrime
-  -- The kernel of the cyclotomic reduction (target is the field
-  -- `ZMod ℓ`, hence an integral domain) is a prime ideal.
-  haveI hker : (RingHom.ker
-      (cyclotomicReduction p ℓ k hℓ ht_coprime ht_ne)).IsPrime :=
-    RingHom.ker_isPrime _
-  -- Primality is preserved under `Ideal.comap`.
-  exact Ideal.IsPrime.comap _
+  simp only [lehmerVandiverPrime]
+  -- The kernel of the cyclotomic reduction (target is the field `ZMod ℓ`,
+  -- hence an integral domain) is prime, and primality is preserved under
+  -- `Ideal.comap`.
+  exact (RingHom.ker_isPrime _).comap _
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Witness equation modulo `lehmerVandiverPrime`.** Inside
@@ -203,7 +197,7 @@ theorem lehmerVandiverPrime_zeta_sub_tk_mem
   -- The element is in `lehmerVandiverPrime` iff its image under
   -- `equiv⁻¹` is in `RingHom.ker cyclotomicReduction`, i.e. the
   -- cyclotomic reduction of that image is `0` in `ZMod ℓ`.
-  unfold lehmerVandiverPrime
+  simp only [lehmerVandiverPrime]
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe,
     RingHom.mem_ker, map_sub]
   -- Compute each summand.
@@ -228,7 +222,7 @@ theorem lehmerVandiverPrime_natCast_ℓ_mem
     (ht_ne : (t : ZMod ℓ) ^ k ≠ 1) :
     ((ℓ : ℕ) : 𝓞 (CyclotomicField p ℚ)) ∈
       lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne := by
-  unfold lehmerVandiverPrime
+  simp only [lehmerVandiverPrime]
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe,
     RingHom.mem_ker, map_natCast, map_natCast, ZMod.natCast_self]
 

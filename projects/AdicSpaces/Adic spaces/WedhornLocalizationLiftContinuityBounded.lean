@@ -100,10 +100,8 @@ theorem localizationLift_isContinuous_locTopology_of_bounded
     (localizationLift (Submonoid.powers s) (Localization.Away s) v hS).IsContinuous := by
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
   letI : ValuativeRel A := v.toValuativeRel
-  -- Apply the Spv-level reduction lemma.
   apply localizationLift_isContinuous_iff_extension (Submonoid.powers s)
     (Localization.Away s) hS
-  -- Now need the Mathlib-Valuation-level continuity of the extension.
   -- ν := canonical valuation; convert v-level hypotheses to ν-level via Compatible.
   set ν := ValuativeRel.valuation A with hν_def
   -- Compatible instance for translating v.vle ↔ ν _ ≤ ν _.
@@ -157,11 +155,9 @@ theorem valuationLocalizationLift_of_bounded
   letI : TopologicalSpace (Localization.Away s) := locTopology P T s hopen
   -- Derive Submonoid.powers s ≤ v.supp.primeCompl from hvs.
   have hS := valuationLocalizationLift_powers_subset_primeCompl hvs
-  -- Apply the bounded continuity bridge.
   have h_cont : (localizationLift (Submonoid.powers s) (Localization.Away s) v hS).IsContinuous :=
     localizationLift_isContinuous_locTopology_of_bounded P T s hopen
       hv.1 hv_T hS
-  -- Apply valuationLocalizationLift_via_continuity.
   exact valuationLocalizationLift_via_continuity P T s hopen hv hvs h_cont
 
 end ValuationSpectrum

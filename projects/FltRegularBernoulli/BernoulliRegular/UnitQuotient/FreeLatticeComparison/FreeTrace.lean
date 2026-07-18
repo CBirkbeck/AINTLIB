@@ -19,8 +19,9 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
-open Finset
-
+-- Hides one warning: `cyclotomicUnitFreeClass_unitsComplexConj_eq` does not use all of the
+-- section instances. Removing the suppression needs `omit`, which drops the binder and so
+-- changes the statement — generalisation work, not cleanup.
 set_option linter.unusedSectionVars false
 
 attribute [local instance] Fintype.ofFinite
@@ -85,8 +86,8 @@ theorem cyclotomicDeletedLogLinearEquiv_map_unitLattice
       (NumberField.Units.logEmbeddingQuot K x) ∈
     (NumberField.Units.unitLattice K :
       Set (NumberField.Units.dirichletUnitTheorem.logSpace K))
-  rw [cyclotomicDeletedLogLinearEquiv_apply_logEmbeddingQuot]
-  rw [unitLattice_eq_range_logEmbeddingQuot]
+  rw [cyclotomicDeletedLogLinearEquiv_apply_logEmbeddingQuot,
+    unitLattice_eq_range_logEmbeddingQuot]
   exact ⟨cyclotomicUnitFreePartDeltaAction (p := p) K a x, rfl⟩
 
 /-- The actual free-part action, transported to the integral Dirichlet unit
@@ -149,7 +150,7 @@ theorem cyclotomicUnitLatticeLinearEquiv_toMatrix_apply
 
 @[simp]
 theorem cyclotomicDeletedLogLinearEquiv_toUnitLatticeMatrix_apply
-  [IsZLattice ℝ (NumberField.Units.unitLattice K)]
+    [IsZLattice ℝ (NumberField.Units.unitLattice K)]
     (a : CyclotomicUnitDelta p)
     (i j : Fin (NumberField.Units.rank K)) :
     LinearMap.toMatrixAlgEquiv
@@ -175,7 +176,7 @@ theorem cyclotomicDeletedLogLinearEquiv_toUnitLatticeMatrix_apply
 
 @[simp]
 theorem cyclotomicDeletedLogLinearEquiv_toMatrix_apply
-  [IsZLattice ℝ (NumberField.Units.unitLattice K)]
+    [IsZLattice ℝ (NumberField.Units.unitLattice K)]
     (a : CyclotomicUnitDelta p)
     (i j : Fin (NumberField.Units.rank K)) :
     LinearMap.toMatrixAlgEquiv
@@ -188,7 +189,7 @@ theorem cyclotomicDeletedLogLinearEquiv_toMatrix_apply
     cyclotomicUnitLatticeLinearEquiv_toMatrix_apply]
 
 theorem cyclotomicDeletedLogLinearEquiv_trace
-  [IsZLattice ℝ (NumberField.Units.unitLattice K)]
+    [IsZLattice ℝ (NumberField.Units.unitLattice K)]
     (a : CyclotomicUnitDelta p) :
     LinearMap.trace ℝ (NumberField.Units.dirichletUnitTheorem.logSpace K)
         ((cyclotomicDeletedLogLinearEquiv (p := p) K a).toLinearMap) =
@@ -200,12 +201,11 @@ theorem cyclotomicDeletedLogLinearEquiv_trace
     LinearMap.trace_eq_matrix_trace (b := cyclotomicUnitFreeBasis K)]
   simp only [Matrix.trace, Matrix.diag]
   rw [Int.cast_sum]
-  apply Finset.sum_congr rfl
-  intro i _
-  exact cyclotomicDeletedLogLinearEquiv_toMatrix_apply (p := p) (K := K) a i i
+  exact Finset.sum_congr rfl fun i _ ↦
+    cyclotomicDeletedLogLinearEquiv_toMatrix_apply (p := p) (K := K) a i i
 
 theorem cyclotomicFullLogAugmentationLinearEquiv_trace
-  [IsZLattice ℝ (NumberField.Units.unitLattice K)]
+    [IsZLattice ℝ (NumberField.Units.unitLattice K)]
     (a : CyclotomicUnitDelta p) :
     LinearMap.trace ℝ (cyclotomicFullLogAugmentationSubmodule K)
         ((cyclotomicFullLogAugmentationLinearEquiv (p := p) K a).toLinearMap) =
@@ -229,7 +229,7 @@ theorem cyclotomicFullLogAugmentationLinearEquiv_trace
         cyclotomicDeletedLogLinearEquiv_trace (p := p) (K := K) a
 
 theorem cyclotomicUnitFreePartLinearEquiv_trace_formula
-  [IsZLattice ℝ (NumberField.Units.unitLattice K)]
+    [IsZLattice ℝ (NumberField.Units.unitLattice K)]
     (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p) :
     LinearMap.trace ℤ (CyclotomicUnitFreePart K)
         ((cyclotomicUnitFreePartLinearEquiv (p := p) K a).toLinearMap) =
@@ -275,7 +275,7 @@ theorem cyclotomicUnitFreeClass_unitsComplexConj_eq
     cyclotomicUnitFreeClass K
         (cyclotomicUnitsComplexConj (p := p) K hp_gt_two u) =
       cyclotomicUnitFreeClass K u := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   have htorsion :
       u * (cyclotomicUnitsComplexConj (p := p) K hp_gt_two u)⁻¹ ∈
@@ -364,7 +364,6 @@ theorem cyclotomicUnitFreePartEvenDeltaAction_apply_quotient
         (cyclotomicEvenDeltaQuotient p a) =
       cyclotomicUnitFreePartDeltaAction (p := p) K a :=
   rfl
-
 
 end BernoulliRegular
 

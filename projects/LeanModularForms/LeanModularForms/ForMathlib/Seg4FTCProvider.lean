@@ -47,9 +47,9 @@ private lemma seg4_h_arc_slitPlane {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     right
     rw [h_eq]
     have hpi := Real.pi_pos
-    rw [show (fdArcAngle (3/5) : ℝ) = 2 * Real.pi / 3 from by unfold fdArcAngle; ring]
+    rw [show (fdArcAngle (3/5) : ℝ) = 2 * Real.pi / 3 by unfold fdArcAngle; ring]
     rw [exp_mul_I, ← ofReal_cos, ← ofReal_sin]
-    rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 from by ring,
+    rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
       Real.cos_pi_sub, Real.sin_pi_sub, Real.cos_pi_div_three, Real.sin_pi_div_three]
     simp only [Complex.sub_im, Complex.add_im, Complex.mul_im,
       Complex.ofReal_re, Complex.ofReal_im, Complex.I_re, Complex.I_im,
@@ -70,7 +70,7 @@ private lemma seg4_h_arc_slitPlane {z₀ : ℂ} (hz_re : z₀.re = -1/2)
       have hθ_Icc : fdArcAngle t ∈ Icc (0 : ℝ) Real.pi := ⟨by linarith, by linarith⟩
       have := Real.strictAntiOn_cos hθ_Icc h_2pi3 hθ_hi
       have h_cos_2pi3 : Real.cos (2 * Real.pi / 3) = -1/2 := by
-        rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 from by ring,
+        rw [show (2 * Real.pi / 3 : ℝ) = Real.pi - Real.pi / 3 by ring,
             Real.cos_pi_sub, Real.cos_pi_div_three]
         norm_num
       linarith
@@ -96,7 +96,7 @@ private lemma seg4_h₃_eq_pure_im {H : ℝ} {z₀ : ℂ} (hz_re : z₀.re = -1/
     seg4_h₃ H z₀ t =
       ((Real.sqrt 3 / 2 + (5 * t - 3) * (H - Real.sqrt 3 / 2) - z₀.im : ℝ) : ℂ) * I := by
   unfold seg4_h₃ vertSeg_h₃
-  rw [show (-1/2 - z₀.re : ℝ) = 0 from by rw [hz_re]; ring]
+  rw [show (-1/2 - z₀.re : ℝ) = 0 by rw [hz_re]; ring]
   simp
 
 private lemma seg4_h₃_slitPlane_of_ne {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
@@ -137,13 +137,13 @@ private abbrev seg4_h₅ := vertSeg_h₅
 
 private lemma seg4_seg1_ftc (H : ℝ) {z₀ : ℂ} (hz_re : z₀.re = -1/2) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h₀ H z₀) t / seg4_h₀ H z₀ t) volume 0 (1/5) ∧
+      (fun t ↦ deriv (seg4_h₀ H z₀) t / seg4_h₀ H z₀ t) volume 0 (1/5) ∧
     ∫ t in (0:ℝ)..(1/5),
         deriv (seg4_h₀ H z₀) t / seg4_h₀ H z₀ t =
       Complex.log (seg4_h₀ H z₀ (1/5)) - Complex.log (seg4_h₀ H z₀ 0) := by
   apply LogDerivFTC.ftc_log_on_segment (by norm_num : (0 : ℝ) ≤ 1/5)
     (vertSeg_h₀_continuous H z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h₀ H z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h₀ H z₀ t).differentiableAt)
     (funext (deriv_vertSeg_h₀ H z₀) ▸ continuousOn_const)
   intro t _
   exact seg4_h₀_slitPlane hz_re t
@@ -151,13 +151,13 @@ private lemma seg4_seg1_ftc (H : ℝ) {z₀ : ℂ} (hz_re : z₀.re = -1/2) :
 private lemma seg4_arc_ftc {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     (hc_lo : Real.sqrt 3 / 2 < z₀.im) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h_arc z₀) t / seg4_h_arc z₀ t) volume (1/5) (3/5) ∧
+      (fun t ↦ deriv (seg4_h_arc z₀) t / seg4_h_arc z₀ t) volume (1/5) (3/5) ∧
     ∫ t in (1/5 : ℝ)..(3/5),
         deriv (seg4_h_arc z₀) t / seg4_h_arc z₀ t =
       Complex.log (seg4_h_arc z₀ (3/5)) - Complex.log (seg4_h_arc z₀ (1/5)) := by
   apply LogDerivFTC.ftc_log_on_segment (by norm_num : (1/5 : ℝ) ≤ 3/5)
     (vertSeg_h_arc_continuous z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h_arc z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h_arc z₀ t).differentiableAt)
     (vertSeg_h_arc_deriv_continuousOn z₀ _)
   intro t ⟨ht1, ht3⟩
   exact seg4_h_arc_slitPlane hz_re hc_lo ht1 ht3
@@ -166,14 +166,14 @@ private lemma seg4_left_ftc {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
     {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     {δ : ℝ} (hδ_pos : 0 < δ) (hδ_lt : δ < seg4T₀ H z₀.im - 3/5) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (3/5) (seg4T₀ H z₀.im - δ) ∧
+      (fun t ↦ deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (3/5) (seg4T₀ H z₀.im - δ) ∧
     ∫ t in (3/5 : ℝ)..(seg4T₀ H z₀.im - δ),
         deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t =
       Complex.log (seg4_h₃ H z₀ (seg4T₀ H z₀.im - δ)) -
       Complex.log (seg4_h₃ H z₀ (3/5)) := by
   apply LogDerivFTC.ftc_log_on_segment (by linarith : (3/5 : ℝ) ≤ seg4T₀ H z₀.im - δ)
     (vertSeg_h₃_continuous H z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
     (funext (deriv_vertSeg_h₃ H z₀) ▸ continuousOn_const)
   intro t ⟨_, htd⟩
   exact seg4_h₃_left_slitPlane hH hz_re hδ_pos htd
@@ -182,14 +182,14 @@ private lemma seg4_right_ftc {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
     {z₀ : ℂ} (hz_re : z₀.re = -1/2)
     {δ : ℝ} (hδ_pos : 0 < δ) (hδ_lt : δ < 4/5 - seg4T₀ H z₀.im) :
     IntervalIntegrable
-      (fun t => deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (seg4T₀ H z₀.im + δ) (4/5) ∧
+      (fun t ↦ deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t) volume (seg4T₀ H z₀.im + δ) (4/5) ∧
     ∫ t in (seg4T₀ H z₀.im + δ)..(4/5 : ℝ),
         deriv (seg4_h₃ H z₀) t / seg4_h₃ H z₀ t =
       Complex.log (seg4_h₃ H z₀ (4/5)) -
       Complex.log (seg4_h₃ H z₀ (seg4T₀ H z₀.im + δ)) := by
   apply LogDerivFTC.ftc_log_on_segment (by linarith : seg4T₀ H z₀.im + δ ≤ 4/5)
     (vertSeg_h₃_continuous H z₀).continuousOn
-    (fun t _ => (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
+    (fun t _ ↦ (hasDerivAt_vertSeg_h₃ H z₀ t).differentiableAt)
     (funext (deriv_vertSeg_h₃ H z₀) ▸ continuousOn_const)
   intro t ⟨htd, _⟩
   exact seg4_h₃_right_slitPlane hH hz_re hδ_pos htd
@@ -239,7 +239,7 @@ private lemma seg4_log_diff_eq_neg_pi_I {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
       linarith [this, hK_eq_seg4]
     exact_mod_cast this
   rw [h_minus, h_plus,
-    show (((-(seg1Speed H * δ) : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * (-I) from by
+    show (((-(seg1Speed H * δ) : ℝ) : ℂ) * I) = ((seg1Speed H * δ : ℝ) : ℂ) * (-I) by
       push_cast; ring]
   exact vertSeg_log_diff_neg_I_pi hKδ
 
@@ -251,6 +251,17 @@ private lemma seg4_ae_eq_h₀ (H : ℝ) (z₀ : ℂ) :
 
 /-- Local alias for the shared ae-equality. -/
 private alias seg4_ae_eq_h₃ := ae_eq_vertSeg_h₃
+
+/-- Split an interval integral over three adjacent subintervals `[a,b]`, `[b,c]`, `[c,d]`
+into the sum of the three pieces. The 2-way case is `integral_add_adjacent_intervals`. -/
+private lemma integral_split_three {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {f : ℝ → E} {a b c d : ℝ}
+    (hab : IntervalIntegrable f volume a b) (hbc : IntervalIntegrable f volume b c)
+    (hcd : IntervalIntegrable f volume c d) :
+    ∫ t in a..d, f t =
+      (∫ t in a..b, f t) + (∫ t in b..c, f t) + (∫ t in c..d, f t) := by
+  rw [intervalIntegral.integral_add_adjacent_intervals hab hbc,
+      intervalIntegral.integral_add_adjacent_intervals (hab.trans hbc) hcd]
 
 /-- The full FTC telescope for the seg4 crossing. -/
 theorem fdBoundary_ftc_telescope_seg4 {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
@@ -285,19 +296,15 @@ theorem fdBoundary_ftc_telescope_seg4 {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
       (∫ t in (1/5:ℝ)..(3/5),
           (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) +
       (∫ t in (3/5:ℝ)..(t₀ - δ),
-          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) := by
-    have h1 := intervalIntegral.integral_add_adjacent_intervals hint_seg1 hint_arc
-    have h2 := intervalIntegral.integral_add_adjacent_intervals
-      (hint_seg1.trans hint_arc) hint_left
-    linear_combination -h1 - h2
+          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) :=
+    integral_split_three hint_seg1 hint_arc hint_left
   have h_split_right :
       ∫ t in (t₀ + δ)..(1 : ℝ), (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t =
       (∫ t in (t₀ + δ)..(4/5 : ℝ),
           (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) +
       (∫ t in (4/5 : ℝ)..(1 : ℝ),
-          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) := by
-    have h := intervalIntegral.integral_add_adjacent_intervals hint_right hint_seg5
-    linear_combination -h
+          (fdBoundaryFun H t - z₀)⁻¹ * deriv (fdBoundaryFun H) t) :=
+    (intervalIntegral.integral_add_adjacent_intervals hint_right hint_seg5).symm
   rw [h_split_left, h_split_right, h_int_seg1, h_int_arc, h_int_left, h_int_right, h_int_seg5,
       seg4_junction_15 H z₀,
       show seg4_h_arc z₀ (3/5) = seg4_h₃ H z₀ (3/5) from vertSeg_junction_35 H z₀,
@@ -347,7 +354,7 @@ def arcFTCHyp_seg4 {H : ℝ} (hH : Real.sqrt 3 / 2 < H)
     (hc_lo : Real.sqrt 3 / 2 < z₀.im) (hc_hi : z₀.im < H) :
     ArcFTCHyp γ z₀ (seg4T₀ H z₀.im) (linDelta (seg1Speed H))
       (seg4Threshold H z₀) (-(↑Real.pi * I)) where
-  E := fun _ => -(↑Real.pi * I)
+  E := fun _ ↦ -(↑Real.pi * I)
   h_ftc := by
     intro ε hε hε_thr
     obtain ⟨h_lin_pos, h_lin_lt_lo, h_lin_lt_hi, h_t₀_lo, h_t₀_hi⟩ :=

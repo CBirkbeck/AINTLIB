@@ -49,12 +49,15 @@ noncomputable def chiAllU (χ : (ZMod N)ˣ →* ℂˣ) (n : ℕ) : ℂˣ :=
   peelProd (R := ℂˣ)
     (fun p v ↦ if h : Nat.Coprime p N then (χ (ZMod.unitOfCoprime p h)) ^ v else 1) n
 
+omit [NeZero N] in
 @[simp] theorem chiAllU_one (χ : (ZMod N)ˣ →* ℂˣ) : chiAllU χ 1 = 1 := peelProd_one _
 
+omit [NeZero N] in
 theorem chiAllU_mul_coprime (χ : (ZMod N)ˣ →* ℂˣ) (m n : ℕ) (hmn : Nat.Coprime m n) :
     chiAllU χ (m * n) = chiAllU χ m * chiAllU χ n :=
   peelProd_mul_coprime _ m n hmn
 
+omit [NeZero N] in
 theorem chiAllU_ppow_good (χ : (ZMod N)ˣ →* ℂˣ) {p : ℕ} (hp : Nat.Prime p)
     (hpN : Nat.Coprime p N) (v : ℕ) (hv : 0 < v) :
     chiAllU χ (p ^ v) = (χ (ZMod.unitOfCoprime p hpN)) ^ v := by
