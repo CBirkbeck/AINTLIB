@@ -986,7 +986,10 @@ theorem IsTateRing.isAdicHom_of_continuous_with_pairs [IsTateRing A] [IsHuberRin
         SubmonoidClass.coe_pow, RingHom.codRestrict_apply,
         RingHom.coe_comp, Function.comp_apply,
         Subring.coe_subtype, map_pow, ← pow_mul]
-      congr 1; ring)
+      show (φ (↑u ^ K)) ^ (N * (L * M)) = (φ ↑u) ^ (L * (M * (K * N)))
+      rw [map_pow, ← pow_mul]
+      congr 1
+      ring)
   exact radical_span_eq_of_pow_eq
     (Nat.mul_pos hL_pos hM_pos)
     (Nat.mul_pos hK_pos hN_pos)

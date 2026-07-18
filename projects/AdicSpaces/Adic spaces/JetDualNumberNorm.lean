@@ -124,12 +124,21 @@ instance [CompleteSpace R] : CompleteSpace (DualNumber R) := by
     exact le_max_right _ _
   obtain ⟨a, ha⟩ := cauchySeq_tendsto_of_complete hfst
   obtain ⟨b, hb⟩ := cauchySeq_tendsto_of_complete hsnd
-  refine ⟨⟨a, b⟩, Metric.tendsto_atTop.mpr fun ε hε => ?_⟩
+  refine ⟨TrivSqZeroExt.inl a + TrivSqZeroExt.inr b,
+    Metric.tendsto_atTop.mpr fun ε hε => ?_⟩
   obtain ⟨N₁, hN₁⟩ := (Metric.tendsto_atTop.mp ha) ε hε
   obtain ⟨N₂, hN₂⟩ := (Metric.tendsto_atTop.mp hb) ε hε
   refine ⟨max N₁ N₂, fun n hn => ?_⟩
-  rw [dist_eq_norm, show u n - ⟨a, b⟩ = (⟨(u n).fst - a, (u n).snd - b⟩ : DualNumber R) from
-    rfl, norm_def]
+  rw [dist_eq_norm, norm_def]
+  have hf : (u n - (TrivSqZeroExt.inl a + TrivSqZeroExt.inr b) : DualNumber R).fst =
+      (u n).fst - a := by
+    rw [TrivSqZeroExt.fst_sub, TrivSqZeroExt.fst_add, TrivSqZeroExt.fst_inl,
+      TrivSqZeroExt.fst_inr, add_zero]
+  have hs : (u n - (TrivSqZeroExt.inl a + TrivSqZeroExt.inr b) : DualNumber R).snd =
+      (u n).snd - b := by
+    rw [TrivSqZeroExt.snd_sub, TrivSqZeroExt.snd_add, TrivSqZeroExt.snd_inl,
+      TrivSqZeroExt.snd_inr, zero_add]
+  rw [hf, hs]
   refine max_lt ?_ ?_
   · have := hN₁ n (le_of_max_le_left hn)
     rwa [dist_eq_norm] at this
@@ -171,10 +180,9 @@ def mapHom (φ : R →+* S) : DualNumber R →+* DualNumber S where
       rw [TrivSqZeroExt.fst_mul, map_mul]
       rfl
     · show φ (x * y).snd = _
-      rw [TrivSqZeroExt.snd_mul, smul_eq_mul, op_smul_eq_mul, map_add, map_mul,
-        map_mul]
-      show _ = (⟨φ x.fst, φ x.snd⟩ * ⟨φ y.fst, φ y.snd⟩ : DualNumber S).snd
-      rw [TrivSqZeroExt.snd_mul, smul_eq_mul, op_smul_eq_mul]
+      rw [TrivSqZeroExt.snd_mul]
+      show φ (x.fst • y.snd + MulOpposite.op y.fst • x.snd) = _
+      rw [smul_eq_mul, op_smul_eq_mul, map_add, map_mul, map_mul]
       rfl
   map_zero' := by
     refine TrivSqZeroExt.ext ?_ ?_
