@@ -178,11 +178,13 @@ private abbrev globalSections (X : TopCat.{u}) :
       AddCommGrpCat.{u} :=
   CategoryTheory.Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}
 
-noncomputable local instance : (globalSections X).Additive :=
+noncomputable local instance acyclicComparison_globalSections_additive :
+    (globalSections X).Additive :=
   (CategoryTheory.constantSheafΓAdj
     (Opens.grothendieckTopology X) AddCommGrpCat.{u}).right_adjoint_additive
 
-noncomputable local instance : (globalSections X).PreservesZeroMorphisms :=
+noncomputable local instance acyclicComparison_globalSections_preservesZeroMorphisms :
+    (globalSections X).PreservesZeroMorphisms :=
   Functor.preservesZeroMorphisms_of_additive (F := globalSections X)
 
 private abbrev cechSiteDifferential (n : ℕ) :
