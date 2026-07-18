@@ -405,6 +405,40 @@ theorem orderedToBaseCechAlternatingF_comp_coface_π_pair
         (orderedToBaseCechAlternatingF π M U n ≫ p ≫ r) := by
       rw [zsmul_comp]
 
+theorem orderedToBaseCechAlternatingF_comp_coface_π_pair_cancel
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (i : Fin (n + 2) → ι) (k l : Fin (n + 2))
+    (hki : i k = i l) (hkl : k ≠ l) :
+    (-1 : ℤ) ^ (k : ℕ) •
+        (orderedToBaseCechAlternatingF π M U n ≫
+          Pi.π (fun j : Fin (n + 1) → ι =>
+            baseCechFactor π M U n j) (i ∘ k.succAbove) ≫
+          (baseModulePresheaf π M).map
+            (((FormalCoproduct.mk _ U).mapPower k.succAbove).φ i).op) +
+      (-1 : ℤ) ^ (l : ℕ) •
+        (orderedToBaseCechAlternatingF π M U n ≫
+          Pi.π (fun j : Fin (n + 1) → ι =>
+            baseCechFactor π M U n j) (i ∘ l.succAbove) ≫
+          (baseModulePresheaf π M).map
+            (((FormalCoproduct.mk _ U).mapPower l.succAbove).φ i).op) = 0 := by
+  let t := orderedToBaseCechAlternatingF π M U n ≫
+    Pi.π (fun j : Fin (n + 1) → ι =>
+      baseCechFactor π M U n j) (i ∘ l.succAbove) ≫
+    (baseModulePresheaf π M).map
+      (((FormalCoproduct.mk _ U).mapPower l.succAbove).φ i).op
+  have hpair := orderedToBaseCechAlternatingF_comp_coface_π_pair
+    π M U n i k l hki
+  change (-1 : ℤ) ^ (k : ℕ) • _ + (-1 : ℤ) ^ (l : ℕ) • t = 0
+  rw [hpair, smul_smul, cechDeleteSwapPerm_sign k l hkl]
+  have hcoef :
+      (-1 : ℤ) ^ (k : ℕ) *
+          -((-1 : ℤ) ^ (k : ℕ) * (-1 : ℤ) ^ (l : ℕ)) =
+        -((-1 : ℤ) ^ (l : ℕ)) := by
+    rw [mul_neg, ← mul_assoc, ← pow_add,
+      (Even.add_self (k : ℕ)).neg_one_pow, one_mul]
+  rw [hcoef, neg_smul, neg_add_cancel]
+
 theorem orderedToBaseCechAlternatingF_comp_π_of_not_injective
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
