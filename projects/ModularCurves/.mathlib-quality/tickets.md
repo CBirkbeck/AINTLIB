@@ -23519,3 +23519,29 @@ k̄-étale route, `torsionπ_etale` CLEAN); [KVC-eval]+master (AutFixedPoints �
 [K-VC] consequence sharpened: with the VC fixed-point route, receipts 1/2/4/5's k̄-cores AND the
 narrowed-hbound discharge need NO dichotomy/kernel-bound/Hasse at all — the whole numeric funnel
 is bypassed; K-DICH/Niso demote to [KEY-GEN-PARKED]-adjacent cleanup.
+
+## v10.325-FIN (2026-07-18, STREAM-FIN) — ★ F2 REDUCED to one crisp residual + the T-E15b design banked; six-builder fleet integrating
+
+**F2 (Bootstrap:222) — CLOSED BY DELEGATION, pushed:** `legendreDelta_relativelyRepresentable_finiteEtale`
+now := the proven funnel assembly (`legendreDelta_relRep_finiteEtale`, Classical-extraction into
+`legendreDelta_relRep_finiteEtale_of_scaleTorsor`); **`univAbscissaDiff`** (the universal
+`ω^{⊗-2}`-valued `d = x(Q) − x(P)` over the level-2 locus, fibrewise nonzero) AXIOM-CLEAN. The
+sole `sorryAx` source is **`exists_scaleTorsorData`** (SqrtCoverGlue.lean:142 — the ±ω μ₂-cover:
+steps (2b)/(3)/(4), a ~750-line RelativeGluingData build; mathlib-location correction:
+`Scheme.Cover.RelativeGluingData` is `Mathlib/AlgebraicGeometry/RelativeGluing.lean` +
+`Cover/Directed.lean`, not project ForMathlib). Dedicated builder live on it.
+
+**T-E15b TorsorData design (banked, turnkey):** `htors₃ : ∀ X, Nonempty (TorsorData
+(gammaFullNaiveGlAction R 3) X)` over `IsUnit (3 : R)`. Substrate ALL verified: `RelRepData +
+IsFinite + Etale` = **`gammaFullNaive_relRepData` (AXIOM-CLEAN — fullLevelSpace + receipt-7's
+`levelSpaceΓπ_etale`)**; the problem-action = `gammaFullNaiveGlAction` (Bootstrap:351, proven).
+Remaining fields: `σZ` (transport the Aut-action onto `fullLevelSpace` through `d.eqv`-naturality —
+the `simulSchemeAction`/`RelRepData.compare` pattern), `over_base`, `equivariant`, `surjective` +
+`torsor` (KM axiom 2 at level 3: fibrewise simple transitivity of GL₂(𝔽₃) on full-level structures,
+#GL₂(𝔽₃) = 48 = #bases of E[3](k̄); both sides finite étale ⟹ detect the torsor iso fibrewise).
+Sequenced after the mouth lands (its `htors`-shape is the consumer).
+
+**Fleet:** mouth (:1040 restructuring, statements re-inserted), `exists_scaleTorsorData`,
+T-D6b+BB-DELIGNE, [KVC-eval]+master, [a5] `_of_compat`, Recollement:445. Substrate pre-verified
+for consumers: `EllipticCurveGeom.toEllipticCurve` CLEAN (recollement anchor); mathlib
+`Y_eq_of_X_eq`/`Y_eq_of_Y_ne` ([KVC-pts] x-collision facts).
