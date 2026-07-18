@@ -23629,3 +23629,38 @@ T-E15b (LevelThreeTorsor.lean) / mouth-discharge (EngineMouth:132) / KVC-consume
 (KeystoneGeometricPoint.lean). Cone to THE HEADLINE: receipts 1/2/4/5 ⟵ KVC-consumer re-point;
 3/6 ⟵ TD6b + hH/hbound instantiation; ALL ⟵ F3 chain (mouth-discharge→a5compat, T-E15b, T-E14
 package after scaleTorsor, recollement-glue) + the 4-site re-point.
+
+---
+
+## v10.328-FIN — [KEY-GEN-PARKED] re-tag + F4 PIN-DISCHARGE DESIGNS BANKED (STREAM-FIN, 2026-07-18)
+
+**(1) Re-tag executed** (commit `77de3e016`): EndomorphismDegree.lean module doc now carries the
+[KEY-GEN-PARKED] block — all 7 general-S sorries (endDual_comp_self, endDeg_comp, endDeg_comp_mulBy,
+endTrace_comp_mulBy, endTrace_sq_le, eq_zero_of_endDeg_eq_zero,
+exists_eq_one_add_mulBy_comp_of_fixesTorsion) marked headline-dead under THE RULING; the KVC route
+replaces them at k̄. Compile-checked green.
+
+**(2) F4 hbound-DISCHARGE DESIGN (receipts 3/6) — BANKED TURNKEY.** The narrowed pin (GammaHClosure
+:152 shape: ISO pointed ε fixing ONE exact-geometric-order-N point P, N ≥ 4 ⟹ ε = 𝟙) discharges
+from KeystoneGeometricPoint + `endMonHom` (PROVEN, EndomorphismDegree.lean — over Spec k̄
+IsLocallyNoetherian ✓): ε pointed ⟹ MonHom ⟹ ε fixes the whole cyclic ⟨P⟩; supply the master's 3
+points from ⟨P⟩ alone: {P, 2P} distinct x (2P = ±P ⟹ P = 0 or 3P = 0, refuted by exact order
+N ≥ 4) + {P, −P} the ±pair (P ≠ −P since 2P ≠ 0; y(P) ≠ negY(P) via Y_eq_of_Y_ne), all ε-fixed
+(hom + fixes P ⟹ fixes aP and −P). Then [KVC-conj] + master ⟹ ε = 𝟙. NO Hasse, NO degree theory.
+
+**(3) F4 hH-DISCHARGE DESIGN (receipt 5) — BANKED TURNKEY, no auto-order classification needed.**
+Pin shape (GammaHMaster:1171): pointed-base auto e ≠ refl with `isoPow e (orderOf γ) = refl` for
+some γ : H ⟹ False. Unpinned corollary carries side condition `∀ γ : H, Nat.Coprime (orderOf γ) 6`
+(as ruled v10.318-review). Discharge: ord(e) | ord(γ) coprime to 6 ⟹ WLOG e' := e^(ord/p) has
+prime order p ≥ 5. TORSION-ACTION TRICK: char k ≠ 3 → e' acts on E[3](k̄) ≅ (ℤ/3)² through
+GL₂(𝔽₃), |GL₂(𝔽₃)| = 48 = 2⁴·3, gcd(p,48) = 1 ⟹ action trivial ⟹ e' fixes all nine 3-torsion
+points ⟹ [KVC-pts] rank-2 supply (independent P,Q give the 3 separated points) + master ⟹
+e' = 𝟙, contradiction. char k = 3 → same with E[4], |GL₂(ℤ/4)| = 96 = 2⁵·3 ✓. Consumer of
+KeystoneGeometricPoint ([KVC-pts] rank-2 + [KVC-conj] + master) + small group arithmetic.
+
+**FIRING RULE**: ONE F4 pin-discharge builder fires the moment KVC-consumer
+(KeystoneGeometricPoint.lean) lands, covering (2)+(3) + the receipt-3/5/6 unpinned corollaries.
+
+**(4) Fleet poll**: EngineDescent 3→1 sorry-lines (a5compat landing imminent); ExactOrder 5,
+SqrtCoverGlue 1, Recollement 1, EngineMouth 4 (discharge mid-edit); LevelThreeTorsor.lean +
+KeystoneGeometricPoint.lean not yet written (builders exploring).
