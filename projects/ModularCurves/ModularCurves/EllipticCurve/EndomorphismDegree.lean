@@ -40,6 +40,15 @@ Sources (KM, verbatim in the decl docstrings): 2.5.1 (pointed ⟹ hom; dual via 
 (`f^t f = [deg f]`), 2.6.1.1 (`deg[N] = N²`, `f^{tt} = f`), 2.6.2 (dual additive), 2.6.2.2 (trace),
 2.6.3 (char.-poly + `(tr f)² ≤ 4 deg f`), 2.7.2 (rigidity of level `N`). Fibre anchor for T-G3c:
 HasseWeil `Foundation/DegreeQuadraticForm.lean` + `HasseBound.lean` (IMPORT at execution).
+
+**[KEY-GEN-PARKED] (THE RULING, v10.320; re-tagged v10.328).** All seven remaining sorries in
+this file (`endDual_comp_self`, `endDeg_comp`, `endDeg_comp_mulBy`, `endTrace_comp_mulBy`,
+`endTrace_sq_le`, `eq_zero_of_endDeg_eq_zero`, `exists_eq_one_add_mulBy_comp_of_fixesTorsion`)
+are **general-`S` degree theory, headline-dead**: every headline keystone consumer is a
+∀-geometric-point pin, discharged over `S = Spec k̄` by the Hasse-free VariableChange route
+(`EllipticCurve/AutFixedPoints.lean` master + `Moduli/KeystoneGeometricPoint.lean` `*_kvc`
+drop-ins), which consumes **none** of these. They stay as honest WIP markers for the eventual
+general-`S` endomorphism theory (T-W7.8-gated, PARKED — do not grind for the headline).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
