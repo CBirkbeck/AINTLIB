@@ -616,6 +616,65 @@ theorem LinearMap.baseChange_exact_of_exact_of_flat_coker
     (LinearMap.baseChange_surjective A
       ((LinearMap.codRestrictToKer_surjective_iff_exact f g h).mpr hexact))
 
+/-- Exactness after base change to every prime residue field implies exactness after base
+change to every field algebra. The algebra map to a field factors through the residue field
+of its kernel prime, and the remaining field extension is flat. -/
+theorem LinearMap.baseChange_exact_of_forall_residueField_baseChange_exact
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T)
+    (hres : ∀ p : PrimeSpectrum R,
+      Function.Exact (f.baseChange p.asIdeal.ResidueField)
+        (g.baseChange p.asIdeal.ResidueField))
+    (K : Type u) [Field K] [Algebra R K] :
+    Function.Exact (f.baseChange K) (g.baseChange K) := by
+  let p : Ideal R := RingHom.ker (algebraMap R K)
+  letI hp : p.IsPrime := RingHom.ker_isPrime (algebraMap R K)
+  have hp_le : p ≤ RingHom.ker (algebraMap R K) := le_rfl
+  have hp_unit : p.primeCompl ≤
+      (IsUnit.submonoid K).comap (algebraMap R K) := by
+    intro r hr
+    apply isUnit_iff_ne_zero.mpr
+    intro hr_zero
+    exact hr hr_zero
+  let φ : p.ResidueField →+* K :=
+    Ideal.ResidueField.lift p (algebraMap R K) hp_le hp_unit
+  letI : Algebra p.ResidueField K := φ.toAlgebra
+  letI : IsScalarTower R p.ResidueField K :=
+    IsScalarTower.of_algebraMap_eq fun r ↦ by
+      exact (Ideal.ResidueField.lift_algebraMap
+        p (algebraMap R K) hp_le hp_unit r).symm
+  have hκ : Function.Exact
+      (f.baseChange p.ResidueField) (g.baseChange p.ResidueField) :=
+    hres ⟨p, hp⟩
+  have hiter : Function.Exact
+      ((f.baseChange p.ResidueField).baseChange K)
+      ((g.baseChange p.ResidueField).baseChange K) :=
+    LinearMap.baseChange_exact_of_exact_of_flat_coker
+      (R := p.ResidueField) K
+      (f.baseChange p.ResidueField) (g.baseChange p.ResidueField)
+      hκ.linearMap_comp_eq_zero hκ
+  let eP := AlgebraTensorModule.cancelBaseChange R p.ResidueField K K P
+  let eQ := AlgebraTensorModule.cancelBaseChange R p.ResidueField K K Q
+  let eT := AlgebraTensorModule.cancelBaseChange R p.ResidueField K K T
+  exact (Function.Exact.iff_of_ladder_linearEquiv
+    (e₁ := eP) (e₂ := eQ) (e₃ := eT)
+    (f₁₂ := (f.baseChange p.ResidueField).baseChange K)
+    (f₂₃ := (g.baseChange p.ResidueField).baseChange K)
+    (g₁₂ := f.baseChange K) (g₂₃ := g.baseChange K)
+    (by
+      ext
+      simp only [AlgebraTensorModule.curry_apply, LinearMap.restrictScalars_comp,
+        curry_apply, LinearMap.coe_restrictScalars, LinearMap.coe_comp,
+        LinearEquiv.coe_coe, Function.comp_apply,
+        AlgebraTensorModule.cancelBaseChange_tmul, one_smul,
+        LinearMap.baseChange_tmul, eP, eQ])
+    (by
+      ext
+      simp only [AlgebraTensorModule.curry_apply, LinearMap.restrictScalars_comp,
+        curry_apply, LinearMap.coe_restrictScalars, LinearMap.coe_comp,
+        LinearEquiv.coe_coe, Function.comp_apply,
+        AlgebraTensorModule.cancelBaseChange_tmul, one_smul,
+        LinearMap.baseChange_tmul, eQ, eT])).mpr hiter
+
 /-- Exactness of a complex can be checked on every field fibre when its homology is finite
 and formation of the second kernel commutes with base change. The flatness hypotheses are the
 module-theoretic criterion ensuring that kernel comparison. -/

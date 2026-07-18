@@ -10,11 +10,143 @@ Prove exactness in every positive degree after extending the base-linear Cech
 complex of a pole sheaf to a residue field.
 -/
 
-open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
+open AlgebraicGeometry CategoryTheory Limits TensorProduct TopologicalSpace
 
 universe u
 
 namespace ModularCurves
+
+private theorem affineFieldFactor_isScalarTower
+    {S : Scheme.{u}} [IsAffine S]
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
+    let t : Spec (.of K) ⟶ S :=
+      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, (⊤ : S.Opens)) K)) ≫
+        S.isoSpec.inv
+    let x := Scheme.SpecToEquivOfField K S t
+    let s := x.1
+    let ψ := x.2
+    let A := Γ(Spec (S.residueField s),
+      (⊤ : (Spec (S.residueField s)).Opens))
+    letI : Algebra Γ(S, (⊤ : S.Opens)) A :=
+      (S.fromSpecResidueField s).appTop.hom.toAlgebra
+    let χ : A →+* K :=
+      ((Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
+    letI : Algebra A K := χ.toAlgebra
+    IsScalarTower Γ(S, (⊤ : S.Opens)) A K := by
+  dsimp only
+  let R := Γ(S, (⊤ : S.Opens))
+  let t : Spec (.of K) ⟶ S :=
+    Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ S.isoSpec.inv
+  let x := Scheme.SpecToEquivOfField K S t
+  let s := x.1
+  let ψ := x.2
+  let A := Γ(Spec (S.residueField s),
+    (⊤ : (Spec (S.residueField s)).Opens))
+  letI : Algebra R A :=
+    (S.fromSpecResidueField s).appTop.hom.toAlgebra
+  let χ : A →+* K :=
+    ((Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
+  letI : Algebra A K := χ.toAlgebra
+  have hfac : Spec.map ψ ≫ S.fromSpecResidueField s = t := by
+    simpa only [x, s, ψ, Scheme.SpecToEquivOfField_symm_apply] using
+      (Scheme.SpecToEquivOfField K S).symm_apply_apply t
+  have hcomp₀ :
+      (S.fromSpecResidueField s).appTop ≫
+          (Spec.map ψ).appTop ≫ (Scheme.ΓSpecIso (.of K)).hom =
+        CommRingCat.ofHom (algebraMap R K) := by
+    rw [← Category.assoc]
+    rw [← Scheme.Hom.comp_appTop (Spec.map ψ)
+      (S.fromSpecResidueField s), hfac]
+    dsimp only [t]
+    rw [Scheme.Hom.comp_appTop, Category.assoc,
+      Scheme.ΓSpecIso_naturality]
+    have hΓ : (Scheme.ΓSpecIso (.of R)).hom =
+        S.isoSpec.hom.appTop := by
+      dsimp only [R]
+      exact (Scheme.toSpecΓ_appTop S).symm
+    rw [hΓ]
+    rw [← Category.assoc]
+    rw [← Scheme.Hom.comp_appTop S.isoSpec.hom S.isoSpec.inv,
+      S.isoSpec.hom_inv_id]
+    simp only [Scheme.Hom.id_app, Category.id_comp]
+  have hcomp : CommRingCat.ofHom (algebraMap R K) =
+      (S.fromSpecResidueField s).appTop ≫
+        (Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ := by
+    rw [← Scheme.ΓSpecIso_naturality ψ]
+    exact hcomp₀.symm
+  apply IsScalarTower.of_algebraMap_eq'
+  change (CommRingCat.ofHom (algebraMap R K)).hom =
+    ((S.fromSpecResidueField s).appTop ≫
+      (Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
+  exact congrArg CommRingCat.Hom.hom hcomp
+
+private theorem baseChange_exact_of_forall_schemeResidueField_baseChange_exact
+    {S : Scheme.{u}} [IsAffine S]
+    {P Q T : Type u} [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
+    [Module Γ(S, (⊤ : S.Opens)) P] [Module Γ(S, (⊤ : S.Opens)) Q]
+    [Module Γ(S, (⊤ : S.Opens)) T]
+    (f : P →ₗ[Γ(S, (⊤ : S.Opens))] Q)
+    (g : Q →ₗ[Γ(S, (⊤ : S.Opens))] T)
+    (hres : ∀ s : S,
+      let A := Γ(Spec (S.residueField s),
+        (⊤ : (Spec (S.residueField s)).Opens))
+      letI : Algebra Γ(S, (⊤ : S.Opens)) A :=
+        (S.fromSpecResidueField s).appTop.hom.toAlgebra
+      Function.Exact (f.baseChange A) (g.baseChange A))
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
+    Function.Exact (f.baseChange K) (g.baseChange K) := by
+  let t : Spec (.of K) ⟶ S :=
+    Spec.map (CommRingCat.ofHom
+      (algebraMap Γ(S, (⊤ : S.Opens)) K)) ≫ S.isoSpec.inv
+  let x := Scheme.SpecToEquivOfField K S t
+  let s := x.1
+  let ψ := x.2
+  let A := Γ(Spec (S.residueField s),
+    (⊤ : (Spec (S.residueField s)).Opens))
+  letI : Algebra Γ(S, (⊤ : S.Opens)) A :=
+    (S.fromSpecResidueField s).appTop.hom.toAlgebra
+  let χ : A →+* K :=
+    ((Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
+  letI : Algebra A K := χ.toAlgebra
+  letI : IsScalarTower Γ(S, (⊤ : S.Opens)) A K :=
+    affineFieldFactor_isScalarTower K
+  have hAfield : IsField A :=
+    (Scheme.ΓSpecIso (S.residueField s)).commRingCatIsoToRingEquiv.toMulEquiv.isField
+      (Field.toIsField (S.residueField s))
+  letI : Module.Flat A K := by
+    letI : Field A := hAfield.toField
+    letI : Module.Free A K := Module.Free.of_divisionRing A K
+    exact Module.Flat.of_free
+  have hiter : Function.Exact
+      ((f.baseChange A).baseChange K)
+      ((g.baseChange A).baseChange K) := by
+    simpa only [LinearMap.baseChange_eq_ltensor] using
+      Module.Flat.lTensor_exact K (hres s)
+  let eP := AlgebraTensorModule.cancelBaseChange
+    Γ(S, (⊤ : S.Opens)) A K K P
+  let eQ := AlgebraTensorModule.cancelBaseChange
+    Γ(S, (⊤ : S.Opens)) A K K Q
+  let eT := AlgebraTensorModule.cancelBaseChange
+    Γ(S, (⊤ : S.Opens)) A K K T
+  exact (Function.Exact.iff_of_ladder_linearEquiv
+    (e₁ := eP) (e₂ := eQ) (e₃ := eT)
+    (f₁₂ := (f.baseChange A).baseChange K)
+    (f₂₃ := (g.baseChange A).baseChange K)
+    (g₁₂ := f.baseChange K) (g₂₃ := g.baseChange K)
+    (by
+      ext
+      simp only [AlgebraTensorModule.curry_apply, LinearMap.restrictScalars_comp,
+        curry_apply, LinearMap.coe_restrictScalars, LinearMap.coe_comp,
+        LinearEquiv.coe_coe, Function.comp_apply,
+        AlgebraTensorModule.cancelBaseChange_tmul, one_smul,
+        LinearMap.baseChange_tmul, eP, eQ])
+    (by
+      ext
+      simp only [AlgebraTensorModule.curry_apply, LinearMap.restrictScalars_comp,
+        curry_apply, LinearMap.coe_restrictScalars, LinearMap.coe_comp,
+        LinearEquiv.coe_coe, Function.comp_apply,
+        AlgebraTensorModule.cancelBaseChange_tmul, one_smul,
+        LinearMap.baseChange_tmul, eQ, eT])).mpr hiter
 
 /-- After extension to a residue field, the base-linear Cech complex of
 `O(n[0])` is exact in every positive degree for `n ≥ 1` on a fibrewise
@@ -182,5 +314,28 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_dif
       (sectionPoleSheafPower π z hz n) U) q
     (h.sectionPoleSheafPower_residueField_orderedBaseCech_exactAt_succ
       hsm z hz U hU hUaff s hn q)
+
+/-- The consecutive positive-degree differentials of the bounded ordered Cech complex of
+`O(n[0])` are exact after base change to every field over the affine base. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_field_orderedBaseCech_differential_exact
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K]
+    {n : ℕ} (hn : 1 ≤ n) (q : ℕ) :
+    let C := Scheme.Modules.orderedBaseCechComplex π
+      (sectionPoleSheafPower π z hz n) U
+    Function.Exact
+      ((C.d q (q + 1)).hom.baseChange K)
+      ((C.d (q + 1) (q + 2)).hom.baseChange K) := by
+  dsimp only
+  apply baseChange_exact_of_forall_schemeResidueField_baseChange_exact
+    (S := S) _ _ _ K
+  intro s
+  exact h.sectionPoleSheafPower_residueField_orderedBaseCech_differential_exact
+    hsm z hz U hU hUaff s hn q
 
 end ModularCurves
