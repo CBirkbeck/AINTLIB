@@ -417,9 +417,24 @@ assembly"), the **engine** below is delivered in this file; the **assembly** ([R
 compat), `overlapIso`, `isOpenImmersion_SpecMap_awayProdHomLeft/Right`. The remaining
 [R-glue-obj]/[R-glue-repr] scheme-and-curve assembly is NEW-Y1's charter (`YFULL` curve
 assembly, in progress: `[YF-SUBDIV-EQ]`/`[YF-COMAX]`/`[YF-⊆⊇]` scheme plumbing) — consumed here
-as the single remaining gap, to avoid duplicating that lane's active work. -/
+as the single remaining gap, to avoid duplicating that lane's active work.
+
+**B2 STATEMENT AMENDMENT (v10.326, logged in `b2_log.jsonl`).** The bare-presheaf form (no
+hypothesis on `P` beyond the two localized representabilities) is REFUTABLE: over `R = ℤ`,
+`a = 2`, `b = 3`, take `X₀` the mixed curve over `Spec (𝔽₄ × 𝔽₉)` and
+`P := yoneda.obj X₀ × C` where `C(Y)` collapses to `PUnit` exactly when `2` or `3` is a unit
+on `Γ(Y.base, ⊤)` and is `ULift Bool` otherwise — both localized base-changes are then
+representable (by `representableBy_baseChangeRing` on the tautological representation), but
+`P(X₀)` has two elements agreeing on the clopen cover `Spec 𝔽₄ ⊔ Spec 𝔽₉`, so `P` is not
+representable: the inverse direction of [R-glue-repr] needs the gluing half of a Zariski-sheaf
+condition, unavailable for a bare presheaf. KM Cor. 4.7.1's verbatim standing hypothesis is
+"any *relatively representable* moduli problem 𝒫 …" — we restore exactly that clause as
+`hrel`. Both intended consumers (`representable_iff`, `representable_iff_rigidNoeth`) carry
+`AffineOverEll`, which supplies `hrel` via `AffineOverEll.relativelyRepresentable`;
+localized instantiations transfer by `RelativelyRepresentable.baseChange`. -/
 theorem representable_of_baseChange_cover (P : ModuliProblem R) (a b : R)
     (hab : ∃ x y : R, x * a + y * b = 1)
+    (hrel : P.RelativelyRepresentable)
     (h_a : (P.baseChange (awayHom a)).Representable)
     (h_b : (P.baseChange (awayHom b)).Representable) :
     P.Representable := by
