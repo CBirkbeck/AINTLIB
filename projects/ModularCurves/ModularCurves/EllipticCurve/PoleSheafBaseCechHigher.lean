@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.PoleSheafBaseCechHOne
+import ModularCurves.EllipticCurve.PoleSheafBaseCechFlat
 import ModularCurves.ForMathlib.AcyclicAffineCechComparison
 import ModularCurves.ForMathlib.LowDegreeFiniteProjectiveReplacement
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechAlternating
@@ -337,5 +338,43 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_field_orderedBaseCech_differenti
   intro s
   exact h.sectionPoleSheafPower_residueField_orderedBaseCech_differential_exact
     hsm z hz U hU hUaff s hn q
+
+/-- For `n ≥ 1`, a fibrewise elliptic family has a finite ordered affine Cech
+model for `O(n[0])` which is termwise flat, bounded, and exact in positive
+degrees after every field base change. -/
+theorem FibrewiseElliptic.exists_sectionPoleSheafPower_orderedBaseCech_flat_bounded_field_exact
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz) {n : ℕ} (hn : 1 ≤ n) :
+    ∃ (ι : Type u) (_ : Fintype ι) (_ : LinearOrder ι)
+      (U : ι → E.Opens),
+      IsOpenCover U ∧ (∀ i, IsAffineOpen (U i)) ∧
+        (∀ i, Nonempty
+          ((sectionPoleSheafPower π z hz n).restrict (U i).ι ≅
+            Scheme.Modules.unitObj (U i).toScheme)) ∧
+          let C := Scheme.Modules.orderedBaseCechComplex π
+            (sectionPoleSheafPower π z hz n) U
+          (∀ q, Module.Flat Γ(S, (⊤ : S.Opens)) (C.X q)) ∧
+            (∀ q, Fintype.card ι ≤ q → Subsingleton (C.X q)) ∧
+              ∀ (K : Type u) [Field K]
+                [Algebra Γ(S, (⊤ : S.Opens)) K] (q : ℕ),
+                Function.Exact
+                  ((C.d q (q + 1)).hom.baseChange K)
+                  ((C.d (q + 1) (q + 2)).hom.baseChange K) := by
+  obtain ⟨ι, hι, hιord, U, hU, hUaff, htriv, hflat⟩ :=
+    exists_sectionPoleSheafPower_finiteAffineOrderedBaseCech_flat
+      hsm z hz n
+  letI : Fintype ι := hι
+  letI : LinearOrder ι := hιord
+  refine ⟨ι, inferInstance, inferInstance, U, hU, hUaff, htriv, ?_⟩
+  dsimp only
+  refine ⟨hflat, ?_, ?_⟩
+  · intro q hq
+    exact Scheme.Modules.orderedBaseCechObject_subsingleton_of_card_le
+      π (sectionPoleSheafPower π z hz n) U q hq
+  · intro K _ _ q
+    exact h.sectionPoleSheafPower_field_orderedBaseCech_differential_exact
+      hsm z hz U hU hUaff K hn q
 
 end ModularCurves
