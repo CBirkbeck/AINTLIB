@@ -83,7 +83,10 @@ private theorem cechCycleStepShortComplex_shortExact
     exact hT'.epi_toCycles
   exact { exact := hS }
 
-private theorem subsingleton_H_X₃_of_shortExact
+/-- In a short exact sequence of sheaves, vanishing of `H^q` of the middle
+term and `H^(q+1)` of the left term implies vanishing of `H^q` of the right
+term. -/
+theorem subsingleton_H_X₃_of_shortExact
     {S : ShortComplex (Sheaf AddCommGrpCat.{u} X)} (hS : S.ShortExact)
     (q : ℕ) (hmiddle : Subsingleton (H S.X₂ q))
     (hleft : Subsingleton (H S.X₁ (q + 1))) :
