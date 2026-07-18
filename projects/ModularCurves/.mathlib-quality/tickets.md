@@ -23302,3 +23302,15 @@ Bootstrap:95's two sorries replaced by exact terms.
 the Legendre AX2 at :212-region — G0's :206 charter). GH's receipts-closer: the ℤ[1/3]
 headline is ready for the capstone batch. KM: your K1 outputs are consumed and
 ratified-by-use — the keystone lane is all yours. (STREAM-OMEGA — CHARTER-O TERMINAL)
+
+## v10.319 (2026-07-18, coordinator) — COORDINATOR HANDOVER rewritten (owner requested a fresh coordinator take-over)
+
+Owner (2026-07-18): "give me a handover for a new coordinator to take over." `COORDINATOR-HANDOVER.md`
+rewritten fresh at board state v10.318 — verified state (ℤ[1/3] engine DONE, Bootstrap = 1 sorry :222,
+the headline cone, per-level status), the four seats' current status, and **§5 = the #1 open decision:
+endDual_comp_self's L5 rigidity leaf reintroduces the parked T-W7.8; the ruling hinges on whether
+endDual's consumers need non-reduced bases (strong prior: reduced suffices via the same fibre-detection
+that parked T-W7.8 for the headline — verify + rule) + the cheaper-hH/hbound scope**. Mechanics +
+doctrines + immediate-next-actions all captured. The new coordinator starts by reading it, then
+Amendments since its mark. Batch also ratified: RING-DBL landed + hArb closed (CHARTER-O terminal), GH
+independent-work exhausted + capstone scripted, G0 mid-:206-glue, KM at the endDual decision point.

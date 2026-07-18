@@ -1,130 +1,145 @@
 # COORDINATOR HANDOVER — ModularCurves producer fleet
-*Written 2026-07-10 (board v10.115) by the outgoing coordinator. Supersedes the 2026-07-09
-edition. Read this fully, then `tickets.md` Amendments **v10.94 → end** (v10.94 is the
-owner's full-capacity directive; everything before it is context, not orders). You are the
-fleet's coordinator, with owner-delegated authority over dispatches, adjudications, and B2
-approvals.*
+**Rewritten 2026-07-18 (board state v10.318). Read this top-to-bottom before dispatching anything.**
 
-## THE GOAL (owner, binding)
-**Modular curves ASAP**: construct Y₁(N), Y(N), Γ_H as representing objects of the
-elliptic-curve moduli problems. Modular forms are SHELVED (ω/T-E-OMEGA demoted to
-on-demand). Priority ranking: **Y1 > YFULL > GH > NISOG** (v10.37, restored in full at
-v10.94).
+You are the new coordinator of the **ModularCurves producer fleet** on branch `dev/modular-curves`
+(worktree `/Users/mcu22seu/Documents/GitHub/aintlib-modular-curves`). Owner = Chris Birkbeck
+(c.birkbeck@uea.ac.uk). The owner fires all worker sessions and relays their reports to you; you
+verify-at-source, ratify, adjudicate blockers, maintain the append-only board, and dispatch via the
+inbox. You do NOT write Lean — you coordinate.
 
-## HOW THE SYSTEM WORKS
-- **The board is the record**: `tickets.md`, append-only Amendments sections at EOF.
-  Workers self-number too — collisions get letter suffixes. You are at **~v10.115**; check
-  the tail before numbering (workers had reached v10.114 independently).
-- **Append discipline** (races with live workers): write your section to a scratch file,
-  `git pull --rebase --autostash`, `cat scratch >> tickets.md`, pathspec-commit ONLY the
-  files you own (board + inboxes), push with a pull-rebase fallback. **NEVER `git add`
-  broadly** — sibling worktree edits are live WIP. (Run the append from the repo ROOT; a
-  `cd` into `.mathlib-quality/` plus a repo-relative path is a silent foot-gun.)
-- **THE INBOX PROTOCOL (v10.69)**: dispatches/redirects/adjudications go to
-  `.mathlib-quality/inbox/<worker>.md`, committed+pushed. Workers pull + read inbox + new
-  Amendments at session start and every commit boundary. Reports flow board-ward; you POLL
-  the board each activation. Off-branch workers (ATLAS) read the canonical copy via
-  `git show origin/dev/modular-curves:…/inbox/<worker>.md` — their branch copies lag (v10.86).
-- **Charter mode (v10.32)**: each worker holds a multi-session charter and reports ONLY at
-  named milestones, post-decomposition walls, B2 events, or completion. Respond with
-  charters/queues, not micro-tasks.
-- **Sentinels**: `beastmode_active.<worker>` = live claim/focus, and they are *current* —
-  read them every activation; several times now a worker's relayed report was already
-  superseded by their own pushed work. The BARE `beastmode_active` file is
-  last-writer-wins garbage — ignore it.
-- **THE OWNER IS THE SESSION-FIRING MECHANISM.** Workers only read inboxes once running.
-  **Every dispatch to a parked/ended worker MUST come with a paste-ready opener** in your
-  reply to the owner (identity + worktree/branch + "pull, read inbox + board tail +
-  sentinel" + first act with policy citation + stop-lines + discipline one-liner).
-- **The owner wants a small digest after each batch of relayed reports**: what moved, what
-  it means for Y₁(N)/Y(N)/Γ_H, what (if anything) needs them. Lead with the headline.
+---
 
-## BINDING POLICIES (cite by number)
-- **v10.8 RR-only**: BB-RR is the ONLY standing assumable. Every sorry needs a
-  proof-terminating plan or a registered gate. `/develop --decompose` is the first act of
-  any new stream (verbatim source quotes; PDF page = print + 11 for KM).
-- **v10.24 slowdown⟹decompose** (a–e): split slow proofs; heavy defs ship opaque
-  interfaces same-commit; variable-first transport lemmas; term-built isos (never
-  rw-then-exact); "never let unification meet a concrete ring/scheme — hand it a named
-  handle". Four-route wall = long past the stop signal.
-- **v10.115-a term-mode-as-probe** (NEW): when a tactic goal drowns in clothing
-  (`.toFun`-composites, `AddMonoidHom.mk'`-internals), run the term-mode proof *as a probe
-  to learn the evaluated goal shapes*, then return to tactics with a `show` of that form.
-  Companion to v10.24, not a replacement. (This is how PIC0 closed [G1-NAT′].)
-- **Stop-lines work — keep issuing them.** When you dispatch a wall-attack, name the route
-  AND the iteration budget (3–4 measured iterations), then hard-stop + delta-ledger. Two
-  for two so far: PIC0's 10-iteration wall shrank a level in 4, then closed in the next.
-- **Fresh-session doctrine (v10.19/23/66)**: intricate walls/assemblies go to a FRESH
-  full-budget session on an explicit boarded plan — never tail-of-session grinding.
-- **v10.35b EXTERNAL-QUIET**: no Zulip, no mathlib PRs, no upstream filings. Ledger/PR
-  drafts/repros stay internal. Mathlib-PR watching is read-only.
-- **v10.52 commit-early cadence**: green increments pathspec-committed + pushed immediately.
-- **B2 protocol**: statement wrong ⟹ hard-stop, `b2_log.jsonl`, owner(-delegate) approves,
-  FILE HOLDER executes with verbatim quotes same-commit. (Both prior B2s are executed; the
-  T-H4/T-H6 repoint to KM 7.1.2 is DONE — no B2 debt outstanding.)
-- **DS-register rule**: any def-level sorry gets a plan.md register row + pins, same commit.
-  Consumers use pins only.
-- **Rule 5**: claim on the board BEFORE touching files; first claim wins; adjudications land
-  in inboxes. **Shared-worktree collisions** (v10.108, the fleet standard): if another
-  worker's edit window is open on a file you need, *wait it out with a background watch and
-  draft ahead* — never touch foreign WIP.
-- **Owner-reserved: [OWNER-FLW]** (fibrewise ⟷ locally-Weierstrass equivalence, an
-  owner-run codex worker). Consume as a pin at integration; no lane duplicates it.
+## 1. THE GOAL (unchanged since project start)
+Three modular-curve levels representable as schemes: **Y(N)=Γ(N)**, **Γ_H**, **Γ₁(N)-Drinfeld** (plus
+the integral full-level **T-H8** and **Γ₀** as a direct construction). All engine-routed levels bottom
+out at ONE shared engine `representable_iff` / `representable_iff_rigidNoeth` (EllCategory.lean), which
+consumes two concrete instantiations in `Moduli/Bootstrap.lean` (the ℤ[1/3] ℰ₃ problem + the Legendre
+problem).
 
-## FLEET ROSTER + STATE (as of v10.115)
-| Worker | Charter / current | State |
-|---|---|---|
-| **c5β** | CHARTER-C5B, THE ENDGAME solo. ★★ [C6] COMPLETE (`mulModelHom_specPoints` for every elliptic curve). Now [0c-i] = T-G1..T-G5: T-G1 + T-G3-comm landed, **T-G3-assoc drafted, iterating** → 0c-ii (board-signal fires A's 0h) → 0h → T-W7.12 → **T-W7a** | active |
-| **fable-P4** | CHARTER-FP4 Phase B (moduli-functor layer on the axiom-clean KM 4.7 engine). B0+B1+B2a/b landed axiom-clean; **B3 central assembly in flight** (agent; flagged sub-question: torsor-quotient morphism-descent). Then **B4 = T-E5c**, **B5 = Y(N) + Γ_H** | active |
-| **NEW-HOPF** | CHARTER-HOPF (the Γ_H/Γ₀ enabler). Hopf–Galois theorem PROVEN (03BM). Wave C: C2 ✓ C1a ✓ C1b ✓ **C1c-ii ✓** (`chartCoaction : B →ₐ[R] B ⊗[R] A`); [HG-C1c-0] structure maps ✓. Next: Over-S lifts + GrpObj instance → C1c diagrams (counit/coassoc) → C1d → C3 → C4 → pins → **BOARD-SIGNAL** (arms NISOG L6 + p0 pickup) | active |
-| **PIC0** | Route G to **Pic(f)**. B1 ✓ B2 ✓ **G1 ✓ (axiom-clean)**. G3 re-anchored on mathlib presentation machinery (five-lemma superseded). Next: **[G3-pre]** → [G3] → A → Pic(f) (GME 2.16) | at boundary; needs an opener |
-| **NEW-ATLAS-3** | [Y1-ATLAS] — chartered, **not yet fired**. Own worktree `~/Documents/GitHub/aintlib-mc-atlas`, branch `dev/modular-curves-y1-atlas` (clean, pushed 319170881). Executes v10.111-ATLAS steps 2–5 → `exists_tatePoint` ∀-part → ONE PR → axioms board | dark; opener ready |
-| **D2** | STREAM-NISOG. [L1]/T-SG3 ✓, **[L5] ✓** (`generatorSpace_baseChange`, KM 6.1). Now [T-SG3-LFP] arc (LFP-1..5, executing LFP-1). L6 waits on NEW-HOPF's signal | active |
-| **fable-FP** | [02KL-CORE] `/develop --decompose` in progress (substrate survey, source tags 10.168.1 / 35.3.6). Also holds [KM-FMT-FLAT], [NISOG-GRASS] | active |
-| **NEW-GH** | Parked clean at [02KL] (5466cda51). Inbox self-fires: **[02KM]** (closes [YF-QSM]) → MellWeierstrass tail → home GH stream ([A711-BC] check first, then corrected T-H4/T-H6 wiring + gate-flipped leaves) | parked; no new text needed |
-| **beastmode-A** | T-A3 done (proven — the wiring was missing). Holds the **pre-merge holder-look on the codex branch** (v10.110): Comparison.lean +202 duplication verdict; WeierstrassAtlas +73 drop for-cause?; PoleSheaf vs PoleFiltration glance | active |
-| **NEW-Y1** | STREAM-Y1 assembly; also carries the HG-C1c commits. On the atlas PR: integrate + one-`exact` into `exists_tatePoint` + MASTER prep | active |
-| **p2** | CHARTER-P2: BB-DELIGNE affine core (L6c crux proven in scratch; dualPt_unit/injective → Ψ → finrank=N → Deligne assembly) | active |
-| **p0, P3b3, NEW-ATLAS, NEW-ATLAS-2** | rate-limited / superseded. Reclaim only by rule-5 boundary handshake; inboxes carry their orders | dark |
+## 2. HEADLINE STATE — verified at source 2026-07-18 (do NOT trust this table without re-verifying via `git show origin:<file>`)
+- **ℤ[1/3] engine: DONE.** `naiveLevelThree_representable_by_affine` (Bootstrap) is **sorry-free,
+  axiom-clean** {propext, Classical.choice, Quot.sound} — OMEGA closed it this batch (RING-DBL
+  `two_zsmul_affineSection` → the bridges → `isE3Datum_of_bridges`). CHARTER-O is TERMINAL.
+- **Bootstrap = 1 sorry** (`:222`, the Legendre AX2 = G0's :206 lane). That is the ONLY engine-side sorry left.
+- **T-D8 dead both halves** (zero boxes on the rel-rep side); **hLN off the headline** (RigidNoeth
+  fibre-detection variant, literal KM 4.7 forms parked as `[T-W7.8-L2-PARKED]`).
+- **The headline CONE** (GH's receipts-verified minimal blocking set, board v10.317-GH): exactly
+  **(a)** KM's keystone set — `endDual_comp_self` + the 5 EndomorphismDegree generals + `fixesTorsion`;
+  **(b)** G0's one Bootstrap sorry (:222); **(c)** the shared engine gate — the two `⇐` wires
+  (`representable_of_rigidNoeth_of_torsor` mouth is BUILT, QuotientProblem:1032; the instantiation
+  wire stops honestly at the TorsorData-equivariance boundary = O/G work) + the engine theorems.
+  ~125 other project sorries are archived as non-blocking (NIsogeny, WeilPairing, ForMathlib parks, shells).
+- **Capstone is one command:** `bash projects/ModularCurves/.mathlib-quality/scripts/capstone-receipts.sh`
+  (GH built it) — fires the 7 headline receipts + the cone-residual census. Run it the moment the cone empties.
 
-## THE DEPENDENCY PICTURE (what gates what)
-- **Y₁(N) (T-E7)**: representability half **COMPLETE** (v10.89). Remaining = the ATLAS
-  classifying clause (`exists_tatePoint`'s ∀-part — NEW-ATLAS-3, pure plumbing, one
-  session) + retiring two *designed* sorry trails: **[T-A6b]** (`abelEnrichment_exists`,
-  becomes `rfl` at **T-W7a**) and **[T-B6′]** (via P3b3's étale cascade + PIC0's pins).
-  MASTER bridge then closes it by one `exact`.
-- **T-W7a (the group law over every base)** = c5β's chain, nothing else. Un-gates: T-A6b;
-  T-B6/T-B6′ → étale cascade (BB-DIFF MASTER → torsionπ_etale → rigidity closes modulo
-  PIC0 pins) → T-D8-bridge → Y1's ii/vi; FP4's [B3] EllObj wiring; [U/G] full-faithfulness.
-- **Y(N) + Γ_H** = FP4's Phase B: B3 → B4 (T-E5c) → B5. Γ_H additionally consumes
-  NEW-HOPF's Wave C pins (quotient by H).
-- **The pins (DS-END0, rigidity's tail)** = PIC0's route G to Pic(f), OR p2's
-  Cartier-duality route — two-route edge, never build duality twice (v10.36).
+## 3. PER-LEVEL REPRESENTABILITY (verify signatures before quoting)
+- **Y(N)=Γ(N)** `gammaBot_representable` — real proof via `representable_iff_rigidNoeth.mpr`, **no hLN**.
+  Inherits sorryAx only through the engine (Bootstrap :222) + the qpd chain.
+- **Γ_H** `gammaH_representable_of_orderOf` — same, plus the explicit `hH` pin (= KM `endDual` keystone).
+- **Γ₁-Drinfeld** `gammaOneDrinfeld_representable` (GammaH:1087) — still `:= by sorry`; ingredients banked
+  (rigid ✓ mod `hbound` = keystone; rel-rep ✓); final wiring + hbound + engine.
+- **T-H8 integral full-level** `gammaFullDrinfeld_representable` (GammaH:1074) — the long pole; rides KM's
+  [KM-W0] wave (F3.mp proven over ℤ[1/N]; integral glue is KM's deep background). Rigid conjuncts are
+  FREE-RIDERS (`rigid_of_representable`) — the L2 wall never touches T-H8/T-H9.
+- **Γ₀** `exists_gammaZeroSpace` (NIsogeny:3290) — the space is CONSTRUCTED (Hopf-Galois route); its
+  geometry refinements are boxed by design (BB-ELLQUOT, DR IV.1). Not engine-routed.
 
-## IMMEDIATELY OPEN ITEMS FOR YOU
-1. **Three owner-relays outstanding** (the owner fires sessions; give them the openers):
-   **NEW-ATLAS-3** (chartered, never fired — the single highest-value session available:
-   it finishes Y₁'s last big subtree); **PIC0** (opener must now say **[G3-pre]**, not the
-   stale [G1-NAT′]); **the codex/[OWNER-FLW] worker** (push the rebased branch —
-   origin still has the old tip 43660b2bd — then ONE PR → `dev/modular-curves`, plus the
-   standing cadence rules: rebase+read-board each session, push every increment, small PRs,
-   claim before building).
-2. **The codex merge is yours to call** once beastmode-A boards its holder-look verdict
-   (v10.110). Rules already set: PoleSheaf's 9 `maxHeartbeats` raises = registered debt, not
-   a blocker; **do NOT delete `codex/fibrewise-weierstrass-comparison-pre-rebase`** (ca22ffd12)
-   — the pullback-tensor map-layer PIC0 adapts at integration lives only there; at
-   integration, retarget G3/A onto their `pullbackTensorObjHom` and dedup the B-chain doubles
-   (recommend: keep their data-level oplax def, graft PIC0's rfl-coherence proofs).
-3. **Watch for the NEW-HOPF BOARD-SIGNAL** on pin-discharge — it releases D2's L6 and p0's
-   pickup. Both are armed; you just have to notice and dispatch.
-4. **No B2 debt, no owner-pending items** except deferred external-quiet ones (mathlib PRs,
-   Riou Zulip ping, Lean-core repro) — do NOT resurface unless the owner lifts v10.35b.
+## 4. THE FOUR SEATS — charters + current status (charters live in `inbox/WORK-ORDERS.md`)
+- **OMEGA (CHARTER-O): TERMINAL** — ℤ[1/3] engine done. Free for re-charter. Strongest at
+  affineSection/coordinate/scheme-dictionary + adapted-model/ω work. Natural next: help G0's :206 spec
+  layer (the b↔u adapted-value refinement G0 filed), or take a piece of the T-W7.8/endDual question.
+- **G0 (CHARTER-G): MID-BUILD on :206** — the μ₂-torsor scheme glue. Done: funnel (proven),
+  SqrtUnitCover, sqrtPair_map (1a), selfPresentation+baseChangeEquiv (1b), sqrtPairMapRingHom (2a).
+  Remaining (in its sentinel, verbatim): 2b (Spec-pullback square) → 3 (RelativeGluingData → Z₂ finite
+  étale) → 4 (sections-spec, consumes OMEGA's b↔u refinement) → 5 (feed funnel → :222 closes = TERMINAL).
+  This is the closest-to-done deep item; keep it firing.
+- **GH (CHARTER-GH): ARMED** — independent work exhausted (sweep done, ⇐-mouth built, capstone scripted).
+  Legitimately waiting; re-fire it on any of {endDual-landed, :206-closed, cone-empty} to run the receipts.
+- **KM (CHARTER-K): AT A DECISION POINT** — see §5. K1 done (bridges, consumed by OMEGA). K2
+  (`endDual_comp_self`) decomposed into 5 leaves; blocked on a T-W7.8 ruling. L1 (fibre-bridge) is the
+  next build regardless of the ruling.
 
-## YOUR CYCLE (each activation)
-`git pull` → read new Amendments + **sentinels** (they're current; relayed reports may be
-stale) → absorb reports → decide (GO/redirect/adjudicate; board wins over sentinels;
-evidence over assumption) → write a vN section + inbox replies → pathspec-commit
-board+inbox → push → tell the owner: the digest, the milestones, any genuinely-owner call,
-**and a paste-ready opener for every parked worker you dispatched**. Praise honest walls;
-issue stop-lines with routes; enforce fresh-session for intricate assemblies; never let a
-worker grind past the stop signal.
+## 5. ★ THE #1 OPEN DECISION — endDual vs T-W7.8 (the new coordinator's first job)
+KM found (source-verified, board v10.317-KM): `endDual_comp_self`'s leaf **L5 (rigidity lift)** needs
+arbitrary-base rigidity = the same spreading-out as `RigiditySpreadingOut.isMonHom_of_one_comp_eq'_of_finitePresentation`,
+which **is the owner-parked T-W7.8** (sorry). Over REDUCED bases L5 is tractable now
+(`hom_ext_of_forall_specPoint`); the non-reduced case needs T-W7.8 unparked.
+
+**The ruling hinges on: do endDual's consumers (hH/hbound → the T-H9 capstone) need endDual over
+NON-REDUCED bases, or does reduced/geometric-fibre suffice?**
+- **Strong prior it's REDUCED-sufficient (verify first):** the headliners were already moved onto
+  `RigidNoeth` (fibre-detection — every consumer detects at geometric fibres, where bases are reduced).
+  The same logic that let us park T-W7.8 for the headline rigidity should apply to endDual's rigidity
+  lift. IF so → KM builds L1–L4 + L5-reduced, K2 closes, **T-W7.8 stays parked.** Very likely the answer;
+  have KM or GH (owns the rigidity chain) verify the consumer hypotheses and rule.
+- **Second strategic question worth a scope:** is `endDual_comp_self` even necessary? The Weil-pairing
+  gate was avoided TWICE (ζ₃-void, combination-clopen). hH/hbound is a kernel-bound at geometric points;
+  `le_endDeg_of_killed_injective` (KernelBound) + the now-complete degree theory (`endDeg_mulBy=N²`
+  axiom-clean) may deliver it WITHOUT the full Cayley-Hamilton endDual. If a cheaper route exists, the
+  five generals + hH/hbound close far faster. **Scope this before committing KM to the 5-leaf endDual build.**
+
+Other pending owner item: **T-H6 SUSPECT-B2** (`gammaH_representable_of_rigid`, GammaHRep:4128 — Rigid⟹
+Representable for the orbit presheaf at H≠⊥ is plausibly false; GH boarded the counterexample shape +
+b2_log, v10.314). Owner's call; non-blocking for the headline.
+
+## 6. THE HONEST DYNAMICS (why sessions look short — a coordinator cannot fully fix this)
+The owner's frustration (2026-07-18: "nobody worked more than 5 mins") is real to look at, but the
+mechanics are: **(1)** the milestone-only reporting protocol makes a seat STOP at each named milestone
+even mid-charter; **(2)** the endgame has genuinely serialized — the remaining work is 2 deep builds
+(endDual, the :206 glue) + real decision points, and hard math doesn't parallelize past its natural
+grain; **(3)** this batch OMEGA actually FINISHED the whole ℤ[1/3] engine and KM correctly STOPPED at a
+real decision rather than build on parked sorries — both good outcomes that *present* as short sessions.
+What a coordinator CAN do: resolve the T-W7.8/endDual decision so KM isn't idle; keep G0's :206 glue
+firing (closest to done); hunt cheaper routes (the Weil-avoidance pattern); set owner expectations that
+endDual + the integral T-H8 are genuinely multi-session. What a coordinator CANNOT do: make
+`endDual_comp_self` a 30-minute job. Consider relaxing milestone-reporting to "report only at
+charter-terminal or a real blocker" if the owner wants fewer, longer-looking sessions.
+
+## 7. MECHANICS (how to run the fleet — load-bearing)
+- **Board** = `.mathlib-quality/tickets.md` (append-only, ~600KB — read via grep/sed, NEVER whole).
+  Coordinator amendments are `## v10.NNN (date, coordinator) — …`. **Append via `cat scratchfile >>
+  tickets.md`, NEVER Edit** (a live worker's concurrent commit races an Edit'd append and clobbers it).
+  Commit board `.md` ONLY, via atomic pathspec `git add <exact files>`.
+- **Dispatch home** = `inbox/WORK-ORDERS.md` (paste-ready openers/charters — the owner fires these).
+  Per-seat banked state = `inbox/STREAM-<SEAT>.md` (append pointers via `printf >>`, same anti-race rule).
+- **Sentinels** = `beastmode_active.<SEAT>` (a worker's live claim/FOCUS; they go STALE — verify blockers
+  against the board + source, never trust a sentinel's "next" line as current truth).
+- **VERIFY-AT-SOURCE (the cardinal discipline):** never ratify a worker's claim from its report. `git
+  fetch` then `git show origin/dev/modular-curves:<file>` + grep the actual sorry census / theorem bodies.
+- **VERIFY PUSHES via `git ls-remote origin dev/modular-curves`**, NOT the worker's "pushed" claim — a
+  worker once reported "all pushed" with 10 commits unpushed in the shared local HEAD (protective-push if
+  a terminal worker left them: confirm remote-tip is an ancestor of HEAD = clean FF, then push).
+- **NEVER `2>/dev/null` next to a lake/lean command** (guardrail-blocked).
+- **SHARED worktree** across worker accounts; a background sync fast-forwards it. `git fetch` + check
+  `rev-list --left-right --count` before committing; `git merge --ff-only origin/...` to sync (workers'
+  dirty .lean files are theirs — don't commit them).
+
+## 8. STANDING DOCTRINES & RULINGS (do not re-litigate)
+- **Charter mode + build-ahead (v10.32, re-asserted v10.313):** each seat gets its ENTIRE remaining
+  headline contribution as one charter; a cross-seat block ⟹ switch sub-goals, not terminate; build
+  consuming sides turnkey. **Force-concentration corollary (v10.316):** when the project serializes onto
+  a few deep builds, put the strongest idle seat ON the critical build (transfer works with a banked
+  route + collision guard) rather than leaving it to watch.
+- **Register-box / DEDUP:** downstream consumers CONSUME a hard lemma sorried and proceed. When ≥2 seats
+  converge on shared substrate, RULE one canonical owner + one file (G0's `TorsionCombination` = scheme
+  carrier of record; GH's B2 `pair_generates_iff_combos_ne_zero` = generation criterion of record; GH's
+  `FinrankDegenerate` = the fibre-rank engine).
+- **RigidNoeth (v10.298):** headliners detect rigidity at geometric fibres → hLN off the headline;
+  literal forms parked `[T-W7.8-L2-PARKED]` (EGA IV §8, a real mathlib gap).
+- **Weil-avoidance pattern:** any "consumes stream C / Weil pairing" gate is SUSPECT — avoided twice
+  (NORM ζ₃-void; AX2 combination-clopen). Scope the avoidance before grinding a Weil route.
+- **External-quiet (v10.35b):** no mathlib PRs / Zulip / upstream filings; ForMathlib-worthy results
+  (`FiniteFlatRigidity`, `FinrankDegenerate`, `finrank_pullback_comp_fst`, RING-DBL) are flag-only.
+
+## 9. IMMEDIATE NEXT ACTIONS for the new coordinator
+1. **Rule the endDual/T-W7.8 question (§5)** — almost certainly "reduced suffices, T-W7.8 stays parked";
+   verify the consumer hypotheses and unblock KM. Also scope the cheaper-hH/hbound route.
+2. **Keep G0 firing on the :206 glue** (2b→3→4→5) — the last engine-side sorry; when it closes, Bootstrap
+   is EMPTY and the engine gate is one wire from open.
+3. **Re-charter OMEGA** (terminal) — onto G0's :206 spec-layer support (the b↔u refinement) and/or the
+   endDual cheaper-route scope.
+4. **Hold GH armed** — fire the capstone script on the first cone-empty signal.
+5. When the cone (§2) empties: run `capstone-receipts.sh` → the three-level headline.
+
+The finish is close in COUNT (1 Bootstrap sorry + 7 keystone sorries + the wires) but the keystone
+sorries are genuinely deep. The single highest-leverage coordinator move right now is resolving §5.
