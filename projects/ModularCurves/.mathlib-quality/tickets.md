@@ -23456,3 +23456,36 @@ exist in-tree) + explicit small-degree computation, or (A) dictionary + auto-wit
 `h_sum_trace` proven per CM-order case. Both bounded-but-heavy; SEQUENCED AFTER the engine (F3) +
 Bootstrap (F2), which gate ALL seven receipts and are mapped-banked builds. Dichotomy (K-DICH) +
 Niso@k̄ + T-D6b + Cartier box ride along in F1-B/F4.
+
+## v10.323-FIN (2026-07-18, STREAM-FIN) — ★★ [K-VC]: THE HASSE WALL IS BYPASSED (design banked) + four parallel builders launched on the mapped fronts
+
+**THE FINDING (kills the last research-grade crux):** the remaining keystone consumptions (:524
+full-level k̄-core; the narrowed hbound discharge; hH) do NOT need the Hasse/Cauchy–Schwarz bound at
+all. **Route [K-VC]:** a pointed automorphism of `projModel W` over a field is a `VariableChange`
+(T-W7.1b `pointedIso_exists_variableChange` — PROVEN, AXIOM-CLEAN, Comparison.lean:162), and the
+coefficient extraction b3x/b3y (`pointedIsoCoordEquiv_coordX/_coordY`, PROVEN) makes its coordinate
+action AFFINE: `Φ(x) = αx + β`, `Φ(y) = γy + δx + ε` (α, γ units). An affine map fixing (i) two
+points with DISTINCT x-coordinates and (ii) one `±`-pair (same x, distinct y) satisfies α=1, β=0
+(two fixed x-values), γ=1 (the pair), δ=ε=0 (two x's) ⟹ Φ fixes the generators ⟹ Φ = id (the
+brick-6 AdjoinRoot/Polynomial ext-chain) ⟹ `e = refl` (faithfulness infra: `pointedIsoΓ_eq_of_coordEquiv`
++ `projModelVCIso_injective'`, ComparisonInjective — PROVEN). Point supply over k̄: `E[N](k̄)` rank 2
+(N ≥ 3 invertible): `Q` of order ≥ 3 gives the pair `(Q, −Q)` (`y ≠ y'` else `2Q = 0`); any
+`Q' ∉ {±Q}` gives the second x (`x(A) = x(B) ⟹ B = ±A`, the quadratic-in-y structure). For the
+narrowed hbound (Γ₁, single P of exact order N ≥ 4): the multiples supply the same configuration
+({P, 2P} distinct x's for ord ≥ 4; (P, −P) the pair for ord ≥ 3) — ε a HOM fixes every aP. NO
+Hasse, NO duals, NO degree bounds — elementary field algebra on proven substrate. Sub-pieces:
+[KVC-eval] the fixed-point ⟹ ψ_Q ∘ Φ = ψ_Q evaluation bridge (`pointedIsoΓ = e.hom.app (zChart)`-
+conjugate + chartHomEquiv naturality — brick-6-style plumbing); [KVC-alg] the affine arithmetic;
+[KVC-pts] the torsion supply (`torsion_geometricFibre_rank_two` + mathlib y-quadratic); [KVC-faith];
+[KVC-conj] the record↔model endo conjugation over `Spec k̄` (LocallyWeierstrass global chart at the
+single point, the [E-INT] pattern); then rewire :524 (`aut_endo_eq_one_of_field`) + discharge the
+narrowed hbound + (with the VC-stabilizer u-equations) hH-with-coprime-to-6. Receipts 1/2/4/5 then
+drop the five degree leaves; the 7 EndomorphismDegree sorries re-tag [KEY-GEN-PARKED].
+
+**Parallel builders live (4):** [a5] `locallyWeierstrass_quotientπ` (EngineDescent:646, the VC-
+cocycle descent); THE MOUTH `representable_of_rigidNoeth_of_torsor` (QuotientProblem:1040, KM
+pp.112–116 assembly on the banked [B1] substrate; :1022 as weakening corollary); F2 Bootstrap:222
+(CHARTER-G takeover, steps 2b→5); T-D6b + BB-DELIGNE (ExactOrder.lean — the banked k̄-étale route;
+`torsionπ_etale` verified AXIOM-CLEAN so the substrate is green). Engine-gate finding: InvariantTorsor
+is ALREADY sorry-free (route book's "2 sorry-lines" were docstring text); EngineDescent's residual is
+exactly [a5]; `isPullback_chart` + `smoothOfRelativeDimension_of_locallyWeierstrass` PROVEN.
