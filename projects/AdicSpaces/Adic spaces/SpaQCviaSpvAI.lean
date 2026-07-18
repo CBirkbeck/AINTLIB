@@ -330,8 +330,7 @@ theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hIg : I = Ideal.span {
     ιSpvR I (restrictIdealSingleSpv v g) p = ιSpvR I v p := by
   by_cases hg0 : v.vle g 0
   · rw [restrictIdealSingleSpv_of_zero hg0]
-  · obtain ⟨⟨T, s⟩, hTI⟩ := p
-    rw [restrictIdealSingleSpv_of_ne hg0]
+  · rw [restrictIdealSingleSpv_of_ne hg0]
     letI : ValuativeRel A := v.toValuativeRel
     set w := ValuativeRel.valuation A with hw_def
     have hg : w g ≠ 0 := fun h0 => hg0 ((vle_zero_iff_canonical v g).mpr h0)
@@ -348,6 +347,8 @@ theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hIg : I = Ideal.span {
         Valuation.restrictToConvexBounded_apply_mem w _ _ hg hg_mem]
       exact WithZero.coe_ne_zero
     rw [Bool.eq_iff_iff, ιSpvR_eq_true_iff, ιSpvR_eq_true_iff]
+    -- destructure the coordinate only AFTER the profile rewrites (v4.33 literal-leak)
+    obtain ⟨⟨T, s⟩, hTI⟩ := p
     constructor
     · rintro ⟨hT, hs⟩
       have hs_ne : w' s ≠ 0 := by

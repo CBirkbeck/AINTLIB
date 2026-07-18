@@ -330,22 +330,24 @@ instance isCompleteSpace [CompleteSpace R] : CompleteSpace (PowerSeries.Restrict
     rcases le_max_iff.mp h_max_bd with h | h
     · linarith
     · linarith
-  -- Step 6: `u i` converges to `⟨f, hf⟩` in the Gauss norm.
-  refine ⟨⟨f, hf⟩, ?_⟩
+  -- Step 6: `u i` converges to `⟨f, hf⟩` in the Gauss norm. (v4.33: name the limit
+  -- point so the subtype literal does not leak into rewrite patterns.)
+  set z : PowerSeries.Restricted R c := ⟨f, hf⟩ with hz
+  refine ⟨z, ?_⟩
   rw [Metric.tendsto_atTop]
   intro ε hε
   obtain ⟨N, hN⟩ := unif_conv (ε / 2) (by linarith)
   refine ⟨N, fun i hi => ?_⟩
   rw [dist_eq_norm]
-  show MvPowerSeries.gaussNorm norm (fun _ ↦ c) (u i - ⟨f, hf⟩).1 < ε
-  have hdiff : ∀ n, PowerSeries.coeff n (u i - ⟨f, hf⟩).1 =
+  show MvPowerSeries.gaussNorm norm (fun _ ↦ c) (u i - z).1 < ε
+  have hdiff : ∀ n, PowerSeries.coeff n (u i - z).1 =
       PowerSeries.coeff n (u i).1 - a n := fun n => by
     show PowerSeries.coeff n ((u i).1 - f) = _
     rw [map_sub, coeff_f]
-  have hbd : ∀ n, ‖PowerSeries.coeff n (u i - ⟨f, hf⟩).1‖ * c ^ n ≤ ε / 2 := fun n => by
+  have hbd : ∀ n, ‖PowerSeries.coeff n (u i - z).1‖ * c ^ n ≤ ε / 2 := fun n => by
     rw [hdiff]; exact hN i hi n
-  have h_gauss_le : MvPowerSeries.gaussNorm norm (fun _ : Unit ↦ c) (u i - ⟨f, hf⟩).1 ≤ ε / 2 := by
-    show PowerSeries.gaussNorm norm c (u i - ⟨f, hf⟩).1 ≤ ε / 2
+  have h_gauss_le : MvPowerSeries.gaussNorm norm (fun _ : Unit ↦ c) (u i - z).1 ≤ ε / 2 := by
+    show PowerSeries.gaussNorm norm c (u i - z).1 ≤ ε / 2
     rw [PowerSeries.gaussNorm_eq]
     exact ciSup_le hbd
   linarith

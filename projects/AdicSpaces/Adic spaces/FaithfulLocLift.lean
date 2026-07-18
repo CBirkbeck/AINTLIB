@@ -121,11 +121,12 @@ theorem mem_plus_of_forall_spa_vle_one
         w ∈ Spa (presheafValue D') (presheafValue D')⁺ ∧ ¬ w.vle x 1 := by
     -- HU-a (huber2.txt:635-637): `x ∉ B⁺` ⟹ `x` is NOT integral over `B⁺` (contrapositive of
     -- `B⁺` integrally closed). This is what makes `x⁻¹` a non-unit of `B⁺[x⁻¹]`, opening Huber's
-    -- localization argument.
+    -- localization argument. (v4.33: the subtype algebra is no longer instance-automatic —
+    -- registered before first use.)
+    letI : Algebra ↥(presheafValue D')⁺ (presheafValue D') := (presheafValue D')⁺.subtype.toAlgebra
     have hx_not_integral : ¬ IsIntegral ((presheafValue D')⁺) x := fun hint =>
       hxnot (IsRingOfIntegralElements.isIntegrallyClosed (B := (presheafValue D')⁺) x hint)
     -- HU-b: `x⁻¹` is a non-unit of `B⁺[x⁻¹] := adjoin B⁺ {x⁻¹} ⊆ B_x := Localization.Away x`.
-    letI : Algebra ↥(presheafValue D')⁺ (presheafValue D') := (presheafValue D')⁺.subtype.toAlgebra
     have hnonunit := not_isUnit_invSelf_of_not_isIntegral (Bx := Localization.Away x) x hx_not_integral
     -- HU-b': a maximal ideal `𝔪` of `B⁺[x⁻¹]` containing `x⁻¹` (proper since `x⁻¹` is a non-unit).
     obtain ⟨𝔪, h𝔪max, h𝔪ge⟩ := Ideal.exists_le_maximal _ (Ideal.span_singleton_ne_top hnonunit)
