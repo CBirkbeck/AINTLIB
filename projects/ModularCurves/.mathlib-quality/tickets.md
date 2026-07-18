@@ -23423,3 +23423,36 @@ them immediately), and Bootstrap:222 reaches the receipts only through the FUTUR
 (T-E14 TorsorData), as designed. k̄-rewire plan therefore: k̄-instances of the FIVE, rewire
 `gammaFullNaive_eq_refl_of_fix_sections` (+ the narrowed-hbound discharge), close T-D6b + the
 Cartier factor box, then the engine.
+
+## v10.322-FIN (2026-07-18, STREAM-FIN) — ★★ F1-A: THE DETECTION IS KEYSTONE-FREE (GIT-6.1 rewire) — Γ₁ receipts drop ALL FIVE degree leaves (8 → 3)
+
+**Landed + pushed (`5f2aee813`), GammaHMaster+Closure green (4006).** The route-critical find: the
+[RIG-1] detection (`EllObj.eq_refl_of_forall_isoFibre_eq_refl`) consumed `aut_endo_eq_one` over the
+AMBIENT locally-noetherian base — but its `htriv` (ALL fibres trivial) is far stronger than the
+`E[M]`-fix it funneled through: **`δ = ε − 1` is fibrewise zero = exactly the GIT 6.1 collapse
+hypothesis of the PROVEN rigidity factor engine** (`exists_factor_of_forall_component` +
+`fibre_subset_eqLocus_of_collapsed`, Rigidity.lean, axiom-clean). New proof: geometric-point lift of
+each fibre point + the isoFibre-square plumbing (`xbar ≫ c = xbar`) + group-object algebra
+(`comp_mul`/`comp_inv`: fixed ⟹ δ-killed) ⟹ `δ.left` collapses every π-fibre to the zero point ⟹
+factor through the base ⟹ pointedness pins to the zero section ⟹ `δ = 0`, `ε = 𝟙`, `e = refl`.
+The `E[M]`/UnramifiedEqualizer detour and the keystone consumption are GONE from the detection
+(M/hM/hinv hypotheses retained for signature stability). LEAN-OP: the `asOver.left`-vs-`E.E`
+elaboration friction killed by an `obtain`-retype `d : E.E ⟶ E.E, d = δ.left`; assoc-walls by
+congrArg-postcompose term chains.
+
+**Post-F1-A receipt census (meta-walk):** receipts 3/6 (Γ₁) = {engine `representable_iff_rigidNoeth`,
+T-D6b `pull_nsmul_ne_zero`, Cartier `smul_eq_zero_of_factors`} — NO degree leaves. Receipts 1/2/4/5
+= {the FIVE degree leaves via the full-level k̄-core `gammaFullNaive_eq_refl_of_fix_sections` →
+`aut_endo_eq_one` (:524, THE remaining keystone site), engine}. Receipt 7 CLEAN.
+
+**The remaining keystone analysis (F1-B scope, sharpened):** at :524 (k̄, ε ISO fixing E[N], N ≥ 3)
+the numeric funnel is: N² ≤ deg δ (PROVEN `le_endDeg_of_killed_injective` + N² torsion points) vs
+**[K-CM4]: `deg(ε−1) ≤ 4` for pointed isos over k̄** — THE single research-grade crux left (its
+N=4-equality analysis additionally discharges the narrowed hbound for F4). HasseWeil survey verdict:
+NO free import (their quadratic form is witness-parametric; `h_sum_trace` for automorphisms = the
+char-poly content; only Frobenius witnesses instantiated). Honest routes: (B) pointed-auto
+classification via the pole-filtration/VariableChange machinery (PoleFiltration/ModelVariableChange
+exist in-tree) + explicit small-degree computation, or (A) dictionary + auto-witnesses with
+`h_sum_trace` proven per CM-order case. Both bounded-but-heavy; SEQUENCED AFTER the engine (F3) +
+Bootstrap (F2), which gate ALL seven receipts and are mapped-banked builds. Dichotomy (K-DICH) +
+Niso@k̄ + T-D6b + Cartier box ride along in F1-B/F4.
