@@ -999,6 +999,84 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
 stale docstrings recorded 2026-07-17: `hasLocLiftPowerBounded_JetA`'s "does not apply"
 note (FiniteJetFunctoriality.lean:2147) and FaithfulLocLift's "Status: sorry" relics.
 
+## M9 — [FJP] Cor 5.5 + Cor 6.1 (OPENED 2026-07-18, owner-approved FULL scope)
+
+Plan: `plan-m9.md` (+ audit `plan-m9-preplan.md`). M9a ticketed below; M9b/M9c open
+with their own /develop pass when M9a lands. Interface skeleton compiled:
+`FJP/Milnor/StrictMilnorSquare.lean` (structure + glue_unique).
+
+### [T1001] Pod row over an abstract square (Lemma 4.1, m-variables form)
+- **Status**: open — **File**: FJP/Milnor/PodRow.lean (NEW) — **Depends**: none — **Type**: defs + lemmas
+- Port FiniteJetStrictLocalization's top layer (extJB/extIotaC/extRhoB/extRhoC,
+  ext_square_commutes, extRhoC_strict_surjective, ext_milnorRow_exact, ext_max_norm_eq,
+  ext_pair_injective — its first ~180 lines) from the four concrete Jet rings to
+  `(S : StrictMilnorSquare k)`: coefficientwise maps `GraphKoszul.P S.R m → GraphKoszul.P S.B m`
+  etc. via the existing generic `mapRestricted` machinery, with the SAME constants κ, ρ.
+- **Sources**: [FJP] Lemma 4.1 (fjp.txt:610-635): "Choose lifts cν ∈ C with ‖cν‖ ≤ κ‖dν‖.
+  Since ‖dν‖ → 0, the series Σ cν T^ν is restricted and is a lift of norm at most κ‖d‖."
+  Source proof: 1 paragraph + wedge remark; concrete d=2 port anchor ≈ 180 lines.
+
+### [T1002] Prop 4.5 heart: ideal row + controlled pullback + closedness (abstract)
+- **Status**: open — **File**: FJP/Milnor/Localization.lean (NEW) — **Depends**: T1001 — **Type**: lemmas
+- Port ideal_row_surjective / ideal_pullback_controlled / isClosed_IA (+ the rA/rB/rC/rD
+  generator bookkeeping and span_pushed_*) from FiniteJetStrictLocalization (its middle
+  ~600 lines) to S: the (4.12)-(4.16) d₂-correction chase verbatim with S's constants
+  (defect constant becomes 1 + Bs·CrA-analogue in κ, ρ). Vertex inputs from S's
+  pods_noetherian_* / unitBall_pods_noetherian_* fields + the generic Lemma-4.2 layer
+  (FiniteJetGraphKoszul, already generic — 0 Jet-mentions).
+- **Sources**: [FJP] (4.12)-(4.16) (fjp.txt:760-905); Prop 4.5 proof (fjp.txt:925-960).
+
+### [T1003] Prop 4.5 assembly: localized square `S.localize`
+- **Status**: open — **File**: FJP/Milnor/Localization.lean — **Depends**: T1002 — **Type**: def + lemmas
+- Port the loc_* chain (locJB..locRhoC, loc_square_commutes, loc_pair_injective,
+  loc_row_exact, loc_pair_isEmbedding, locRhoC_surjective, loc_norm_le — the file's last
+  ~400 lines) and assemble `S.localize (datum) : StrictMilnorSquare k` with tracked
+  constants ((4.19)/(4.20)). DESIGN NOTE (recorded): degenerate data (s = 0 ⟹ zero
+  localized rings) violate NormOneClass — follow the d=2 resolution
+  (presheafValue_subsingleton_of_s_eq_zero handled separately in the transfer), i.e.
+  `S.localize` takes the nondegeneracy hypothesis; the transfer ticket handles s = 0
+  directly as in T70x.
+- **Sources**: Prop 4.5 statement+proof (fjp.txt:910-960).
+
+### [CLEANUP-M9-1] /cleanup Milnor/PodRow + Localization — **Depends**: T1003. (fleet)
+
+### [T1004] Naturality/(4.21) identifications (Lemma 4.6/5.1 abstract)
+- **Status**: open — **File**: FJP/Milnor/Naturality.lean (NEW) — **Depends**: T1003 — **Type**: defs + lemmas
+- Port the graph-bridge layer of FiniteJetFunctoriality (bridgeConst..bridgeRev,
+  graphBridgeA + continuity, graphBridge_natural_B/C, pushDatum/pushCovering + interDatum,
+  presheafValueMapOfHom consumers) to S: the Banach-quotient identification
+  `Eα ≅ P_E/I_E` (4.21) at each vertex + naturality under refinement. The
+  presheafValueMapOfHom/CovariantPush section is ALREADY generic — reuse directly.
+- **Sources**: [FJP] (4.21) (fjp.txt:930-940); Lemma 4.6 (fjp.txt:981+); Lemma 5.1
+  (fjp.txt:1133-1170). d=2 anchor ≈ 1400 concrete lines of the 2580-line file.
+
+### [T1005] Transfer (Lemma 5.2 abstract): `S.isSheafy_R`
+- **Status**: open — **File**: FJP/Milnor/Transfer.lean (NEW) — **Depends**: T1004 — **Type**: theorems
+- Port FiniteJetSheafTransfer (productRestrictionSub_injective, gluing, embedding,
+  isSheafy — 705 lines) to S with hypotheses `IsSheafy S.B`, `IsSheafy S.C`,
+  `IsSheafy S.D` + the pair-package bundle on the four carriers. Conclusion
+  `IsSheafy S.R`. s = 0 degenerate case per T1003's design note.
+- **Sources**: [FJP] Lemma 5.2 statement (fjp.txt:1190-1200): "If the Huber pairs
+  (B,B⁺), (C,C⁺), (D,D⁺) are sheafy as complete topological rings, then (R,R⁺) is
+  sheafy as a complete topological ring." Proof fjp.txt:1203-1310.
+
+### [CLEANUP-M9-2] /cleanup Milnor/Naturality + Transfer — **Depends**: T1005. (fleet)
+
+### [T1006] Regression instance: `FiniteJetSquare F : StrictMilnorSquare K`
+- **Status**: open — **File**: FJP/Milnor/FiniteJetInstance.lean (NEW) — **Depends**: T1005 — **Type**: def + theorem
+- Package the d=2 square as an instance (κ = ρ = 1, all fields from the existing
+  FiniteJetRings/UniformDomain/NoetherianVertices theorems — (2.1b) gives K = P = 0)
+  and RE-DERIVE `isSheafy_JetA'` through the abstract machine; check it against the
+  original (`example : isSheafy_JetA' F = isSheafy_JetA F`-level regression not
+  required — axiom-sweep + statement identity suffice). Old concrete chain stays.
+- **Sources**: [FJP] "For the finite-jet square both may be taken equal to one"
+  (fjp.txt:584), (2.1b).
+
+### [T1007] MILESTONE M9a: axiom sweep + banner + M9b//M9c /develop opening
+- **Status**: open — **Depends**: T1006, CLEANUP-M9-2 — **Type**: verification
+- `#print axioms` on S.isSheafy_R + isSheafy_JetA'; root build; banner; then run the
+  M9b + M9c /develop passes (detailed ticketing per plan-m9.md architecture).
+
 ## M7 (stretch, NOT opened): strong sheafiness ([FJP] Cor 5.5)
 Blocked on T704. Requires: `𝓐⟨Z₁..Zₙ⟩ ≅ 𝓑⟨Z⟩ ×_{𝓓⟨Z⟩} 𝓒⟨Z⟩` (Lemma 4.1 with `Z`-variables),
 instance stacks for `𝓐⟨Z⟩`, and re-running M5/M6 over the extended square. Open via
