@@ -3045,15 +3045,20 @@ theorem coUnitDatum_span_le_ker
       (coUnitDatum P b).coeRingHom (divByS 1 b) = 1 := by
     show (coUnitDatum P b).coeRingHom (algebraMap A (Localization.Away b) b) *
         (coUnitDatum P b).coeRingHom (divByS 1 b) = 1
-    rw [← map_mul, ← map_one (coUnitDatum P b).coeRingHom]
-    congr 1
-    unfold divByS
-    exact (IsLocalization.mk'_spec' (Localization.Away b) 1
-      ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
+    have hloc : (algebraMap A (Localization.Away b) b) * divByS 1 b = 1 := by
+      unfold divByS
+      exact (IsLocalization.mk'_spec' (Localization.Away b) 1
+        ⟨b, Submonoid.mem_powers b⟩).trans (map_one _)
+    calc (coUnitDatum P b).coeRingHom (algebraMap A (Localization.Away b) b) *
+          (coUnitDatum P b).coeRingHom (divByS 1 b)
+        = (coUnitDatum P b).coeRingHom
+            ((algebraMap A (Localization.Away b) b) * divByS 1 b) := (map_mul _ _ _).symm
+      _ = 1 := by rw [hloc]; exact map_one _
   rw [hmul, sub_self]
 
 omit [CompatiblePlusSubring A] in
 set_option maxHeartbeats 1000000 in
+set_option maxSynthPendingDepth 8 in
 set_option linter.unusedSectionVars false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
 `A⟨ζ⟩ ⧸ (b − ζ)` is complete Hausdorff (the principal ideal is closed by Prop 6.17
@@ -3197,7 +3202,7 @@ theorem unitDatum_ker_le_span
   intro h hh
   have hh' : Φ h = 0 := hh
   have hfun := congrFun hext h
-  simp only [Function.comp_apply, hh', map_zero] at hfun
+  rw [show (⇑β ∘ ⇑Φ) h = β (Φ h) from rfl, hh', map_zero] at hfun
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
 
 omit [CompatiblePlusSubring A] in
@@ -3354,8 +3359,36 @@ theorem coUnitDatum_ker_le_span
   intro h hh
   have hh2 : Φ h = 0 := hh
   have hfun := congrFun hext h
-  simp only [Function.comp_apply, hh2, map_zero] at hfun
+  rw [show (⇑β ∘ ⇑Φ) h = β (Φ h) from rfl, hh2, map_zero] at hfun
   exact Ideal.Quotient.eq_zero_iff_mem.mp hfun.symm
+
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+  [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+  [CompatiblePlusSubring A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
+/-- v4.33: `Ideal.Quotient` needs `[I.IsTwoSided]`; commutativity supplies it, but the
+section's letI-`CompleteSpace` binder makes any instance carrying the section context
+unsynthesizable — so this instance is declared with the minimal `TateAlgebra` context. -/
+instance instIsTwoSided_tateAlgebraIdeal (I : Ideal ↥(TateAlgebra A)) : I.IsTwoSided :=
+  ⟨fun c h => Ideal.mul_mem_right c _ h⟩
+
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+  [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+  [CompatiblePlusSubring A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
+/-- Rigid name for the Example-6.38 graph ideal `(b − ζ)` (v4.33: keeping the ideal
+behind a constant lets `IsTwoSided`-synthesis see a rigid head instead of a
+half-elaborated `span`). -/
+noncomputable def unitDatumSpanIdeal (b : A) : Ideal ↥(TateAlgebra A) :=
+  Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X}
+
+omit [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+  [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+  [CompatiblePlusSubring A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
+/-- Rigid name for the Example-6.39 graph ideal `(1 − bη)`. -/
+noncomputable def coUnitDatumSpanIdeal (b : A) : Ideal ↥(TateAlgebra A) :=
+  Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X}
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
@@ -3367,8 +3400,7 @@ theorem unitDatum_ker_eq_span
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (P : PairOfDefinition A) (b : A) :
-    RingHom.ker (example638_evalHom (unitDatum P b)) =
-      Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X} :=
+    RingHom.ker (example638_evalHom (unitDatum P b)) = unitDatumSpanIdeal (A := A) b :=
   le_antisymm (unitDatum_ker_le_span P b) (unitDatum_span_le_ker P b)
 
 omit [CompatiblePlusSubring A] in
@@ -3381,9 +3413,10 @@ theorem coUnitDatum_ker_eq_span
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (P : PairOfDefinition A) (b : A) :
-    RingHom.ker (example638_evalHom (coUnitDatum P b)) =
-      Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X} :=
+    RingHom.ker (example638_evalHom (coUnitDatum P b)) = coUnitDatumSpanIdeal (A := A) b :=
   le_antisymm (coUnitDatum_ker_le_span P b) (coUnitDatum_span_le_ker P b)
+
+
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
@@ -3391,32 +3424,31 @@ set_option linter.unusedSectionVars false in
 `O_X(R(b/1)) ≃+* A⟨ζ⟩/(b − ζ)` — surjectivity (`example638_evalHom_surjective`)
 plus the explicit kernel (`unitDatum_ker_eq_span`). -/
 noncomputable def unitDatum_quotEquiv
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
     (P : PairOfDefinition A) (b : A) :
+    letI : (unitDatumSpanIdeal (A := A) b).IsTwoSided := instIsTwoSided_tateAlgebraIdeal _
     presheafValue (unitDatum P b) ≃+*
-      (↥(TateAlgebra A) ⧸ Ideal.span {algebraMap A ↥(TateAlgebra A) b - TateAlgebra.X}) :=
+      (↥(TateAlgebra A) ⧸ unitDatumSpanIdeal (A := A) b) :=
   ((RingHom.quotientKerEquivOfSurjective
       (example638_evalHom_surjective (unitDatum P b))).symm).trans
-    (Ideal.quotEquivOfEq (unitDatum_ker_eq_span P b))
+    (@Ideal.quotEquivOfEq _ _ _ _
+      (instIsTwoSided_tateAlgebraIdeal _) (instIsTwoSided_tateAlgebraIdeal _)
+      (unitDatum_ker_eq_span P b))
 
 omit [CompatiblePlusSubring A] in
+set_option maxSynthPendingDepth 8 in
 set_option linter.unusedSectionVars false in
 /-- **Wedhorn Example 6.39, minus form (any strongly noetherian Tate base)**:
 `O_X(R(1/b)) ≃+* A⟨η⟩/(1 − bη)`. -/
 noncomputable def coUnitDatum_quotEquiv
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
-    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
-      CompleteSpace A]
     (P : PairOfDefinition A) (b : A) :
+    letI : (coUnitDatumSpanIdeal (A := A) b).IsTwoSided := instIsTwoSided_tateAlgebraIdeal _
     presheafValue (coUnitDatum P b) ≃+*
-      (↥(TateAlgebra A) ⧸ Ideal.span {1 - algebraMap A ↥(TateAlgebra A) b * TateAlgebra.X}) :=
+      (↥(TateAlgebra A) ⧸ coUnitDatumSpanIdeal (A := A) b) :=
   ((RingHom.quotientKerEquivOfSurjective
       (example638_evalHom_surjective (coUnitDatum P b))).symm).trans
-    (Ideal.quotEquivOfEq (coUnitDatum_ker_eq_span P b))
+    (@Ideal.quotEquivOfEq _ _ _ _
+      (instIsTwoSided_tateAlgebraIdeal _) (instIsTwoSided_tateAlgebraIdeal _)
+      (coUnitDatum_ker_eq_span P b))
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
@@ -3428,8 +3460,11 @@ theorem unitDatum_quotEquiv_canonicalMap
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (P : PairOfDefinition A) (b : A) (x : A) :
+    letI : (unitDatumSpanIdeal (A := A) b).IsTwoSided := instIsTwoSided_tateAlgebraIdeal _
     unitDatum_quotEquiv P b ((unitDatum P b).canonicalMap x) =
-      Ideal.Quotient.mk _ (algebraMap A ↥(TateAlgebra A) x) := by
+      Ideal.Quotient.mk (unitDatumSpanIdeal (A := A) b)
+        (algebraMap A ↥(TateAlgebra A) x) := by
+  letI : (unitDatumSpanIdeal (A := A) b).IsTwoSided := instIsTwoSided_tateAlgebraIdeal _
   have h1 : (unitDatum P b).canonicalMap x =
       example638_evalHom (unitDatum P b)
         (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) :=
@@ -3442,12 +3477,10 @@ theorem unitDatum_quotEquiv_canonicalMap
         (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) := by
     rw [RingEquiv.symm_apply_eq]
     rfl
-  show (Ideal.quotEquivOfEq (unitDatum_ker_eq_span P b))
-      ((RingHom.quotientKerEquivOfSurjective
-        (example638_evalHom_surjective (unitDatum P b))).symm
-          ((unitDatum P b).canonicalMap x)) = _
-  rw [h1, h2]
-  erw [Ideal.quotEquivOfEq_mk]
+  rw [unitDatum_quotEquiv, h1]
+  exact congrArg (@Ideal.quotEquivOfEq _ _ _ _
+    (instIsTwoSided_tateAlgebraIdeal _) (instIsTwoSided_tateAlgebraIdeal _)
+    (unitDatum_ker_eq_span P b)) h2
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
@@ -3459,8 +3492,11 @@ theorem coUnitDatum_quotEquiv_canonicalMap
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (P : PairOfDefinition A) (b : A) (x : A) :
+    letI : (coUnitDatumSpanIdeal (A := A) b).IsTwoSided := instIsTwoSided_tateAlgebraIdeal _
     coUnitDatum_quotEquiv P b ((coUnitDatum P b).canonicalMap x) =
-      Ideal.Quotient.mk _ (algebraMap A ↥(TateAlgebra A) x) := by
+      Ideal.Quotient.mk (coUnitDatumSpanIdeal (A := A) b)
+        (algebraMap A ↥(TateAlgebra A) x) := by
+  letI : (coUnitDatumSpanIdeal (A := A) b).IsTwoSided := instIsTwoSided_tateAlgebraIdeal _
   have h1 : (coUnitDatum P b).canonicalMap x =
       example638_evalHom (coUnitDatum P b)
         (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) :=
@@ -3473,12 +3509,10 @@ theorem coUnitDatum_quotEquiv_canonicalMap
         (algebraMap A ↥(restrictedMvPowerSeriesSubring 1 A) x) := by
     rw [RingEquiv.symm_apply_eq]
     rfl
-  show (Ideal.quotEquivOfEq (coUnitDatum_ker_eq_span P b))
-      ((RingHom.quotientKerEquivOfSurjective
-        (example638_evalHom_surjective (coUnitDatum P b))).symm
-          ((coUnitDatum P b).canonicalMap x)) = _
-  rw [h1, h2]
-  erw [Ideal.quotEquivOfEq_mk]
+  rw [coUnitDatum_quotEquiv, h1]
+  exact congrArg (@Ideal.quotEquivOfEq _ _ _ _
+    (instIsTwoSided_tateAlgebraIdeal _) (instIsTwoSided_tateAlgebraIdeal _)
+    (coUnitDatum_ker_eq_span P b)) h2
 
 end Wedhorn828
 
