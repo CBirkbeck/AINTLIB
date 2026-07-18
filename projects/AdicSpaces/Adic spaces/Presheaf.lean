@@ -623,7 +623,11 @@ theorem RationalLocData.isClosed_powerBoundedSubring (D : RationalLocData A) :
     intro x hx
     have hx' : x ∈ closure ((((locSubring D.P D.T D.s).map D.coeRingHom) :
         Subring (presheafValue D)) : Set (presheafValue D)) := hx
-    rwa [Subring.coe_map] at hx'
+    have hset : ((((locSubring D.P D.T D.s).map D.coeRingHom) :
+        Subring (presheafValue D)) : Set (presheafValue D)) =
+        ⇑D.coeRingHom '' ↑(locSubring D.P D.T D.s) :=
+      Subring.coe_map _ _
+    rwa [hset] at hx'
   -- (iii) `(𝒪_X(D))° ⊇ completedLocSubring` elementwise, so `A°` is an open subgroup.
   have hsub : (D.completedLocSubring : Set (presheafValue D)) ⊆
       ((TopologicalRing.powerBoundedSubring.toSubring (presheafValue D)).toAddSubgroup :
@@ -661,7 +665,14 @@ theorem RationalLocData.completedPlusSubringBase_le_powerBounded (D : RationalLo
     have hmem : x ∈ closure ((((integralClosure ↥(D.locPlusSubring)
         (Localization.Away D.s)).toSubring.map D.coeRingHom) :
         Subring (presheafValue D)) : Set (presheafValue D)) := hx
-    rwa [Subring.coe_map] at hmem
+    have hset : ((((integralClosure ↥(D.locPlusSubring)
+        (Localization.Away D.s)).toSubring.map D.coeRingHom) :
+        Subring (presheafValue D)) : Set (presheafValue D)) =
+        ⇑D.coeRingHom '' ↑(integralClosure ↥(D.locPlusSubring)
+          (Localization.Away D.s)).toSubring :=
+      Subring.coe_map _ _
+    rw [hset, Subalgebra.coe_toSubring] at hmem
+    exact hmem
   exact closure_minimal himg D.isClosed_powerBoundedSubring hx'
 
 -- The former `completedPlusSubringBase_isBounded` (UNIFORM von-Neumann boundedness of `Ĉ₀`,
