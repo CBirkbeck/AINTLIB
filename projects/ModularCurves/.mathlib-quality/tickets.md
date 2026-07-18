@@ -23545,3 +23545,40 @@ Sequenced after the mouth lands (its `htors`-shape is the consumer).
 T-D6b+BB-DELIGNE, [KVC-eval]+master, [a5] `_of_compat`, Recollement:445. Substrate pre-verified
 for consumers: `EllipticCurveGeom.toEllipticCurve` CLEAN (recollement anchor); mathlib
 `Y_eq_of_X_eq`/`Y_eq_of_Y_ne` ([KVC-pts] x-collision facts).
+
+---
+
+## v10.326-FIN — MOUTH ASSEMBLED + Recollement B2 (STREAM-FIN, 2026-07-18)
+
+**(1) THE ENGINE MOUTH IS ASSEMBLED** (commit `ab550f83a`, QuotientProblem.lean 1575→2061):
+`representable_of_rigidNoeth_of_torsor` (:1981) is a REAL PROOF — simulRepresentableBy + affine
+base → `simulSchemeAction_free_of_rigidNoeth` (the SINGLE rigidity call) → geometric interface →
+[B1] `existsUnique_alpha_descent` → KM pp.114–116 bijection (`Equiv.ofBijective`; surjectivity
+via exists_descended/map_descended, injectivity via a NEW rigidity-free retraction —
+`rM.homEquiv.injective` + componentwise `Flat.epi_of_flat_of_surjective` chart-cancellation).
+`representable_of_rigid_of_torsor` (:2045) = one-line corollary via `Rigid.rigidNoeth`.
+**Statements verbatim** (diff-checked). Axioms: both `{propext, sorryAx, Classical.choice,
+Quot.sound}` with sorryAx ONLY through the ONE private interface:
+- `exists_engineQuotient` (:1603): free KM action on affine (XM, rM) ⟹ quotient (X₀, q) with
+  Ell-invariance + Epi + lifting + Surjective + Etale on baseHom. = route-(a) Phase A verbatim.
+  **Gated on**: [a5] `_of_compat` (in flight) AND an import-surgery (EngineDescent imports
+  QuotientProblem, so Phase A cannot be consumed in-file — discharge = move Phase-A machinery
+  upstream, or split QuotientProblem; recipe + `exists_coreData` mirror noted in the docstring).
+- KEY FINDS: RigidNoeth mouth needs NO RigidNoeth→Rigid bridge (the two [B3] full-Rigid uses are
+  avoidable: q-invariance by construction, uniqueness via retraction); T-W7.8-L2 STAYS PARKED.
+  "Engine consumes rigidity exactly once" is now real code. Trap: `set`-local XM poisons
+  instance-index discrimination (fix: two-step `have haffZ : IsAffine dP.Z` retyping).
+
+**(2) Recollement :445 B2 AMENDMENT** (commit `b51573334`, logged `b2_log.jsonl`):
+`representable_of_baseChange_cover` bare-presheaf form REFUTED (R=ℤ, a=2,b=3, X₀ over
+Spec(𝔽₄×𝔽₉), P = yoneda X₀ × unit-collapse-presheaf: localized base-changes representable,
+P(X₀) two points agreeing on the clopen cover). Restored KM 4.7.1's verbatim standing clause as
+`hrel : P.RelativelyRepresentable` — consumers (`representable_iff`/`_rigidNoeth`) carry
+AffineOverEll ⟹ hrel free via `AffineOverEll.relativelyRepresentable` +
+`RelativelyRepresentable.baseChange`. hrel = the missing Zariski-descent input ([R-glue-repr]
+gluing half: sections of the relative scheme glue). Glue builder RE-FIRED on the true statement.
+
+**Fleet**: T-E15b package builder LIVE (σZ `relRepAut` prototype compiled green — classify the
+α-twist of the tautological class; `((d.eqv d.f).symm (α.hom.app _ (d.eqv d.f ⟨𝟙,_⟩))).1`);
+scaleTorsor + TD6b + KVC + a5compat live. Cone: mouth-leaf ← [a5]+surgery; then :324 map;
+receipts 1/2/4/5 ← KVC chain; 3/5/6 ← hH/hbound instantiation.
