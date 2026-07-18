@@ -1,4 +1,4 @@
-import ModularCurves.EllipticCurve.PoleSheafModelHOne
+import ModularCurves.EllipticCurve.PoleSheafModelHigherCohomology
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.ForMathlib.SheafCohomologyIso
 import ModularCurves.ForMathlib.SchemeModuleSheaf
@@ -87,5 +87,38 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_subsingleton_H_one
     e hez n
   exact TopCat.Sheaf.subsingleton_H_of_iso
     (Scheme.forgetToTop.mapIso e.symm) hSheaf 1
+
+/-- Every residue fibre of a fibrewise elliptic family has vanishing pole-sheaf
+cohomology in degrees at least two. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_subsingleton_H_add_two
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (h : FibrewiseElliptic π z hz)
+    (s : S) (n q : ℕ) :
+    letI : IsSeparated (π.fiberToSpecResidueField s) :=
+      by
+        change IsSeparated (pullback.snd π (S.fromSpecResidueField s))
+        infer_instance
+    Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower (π.fiberToSpecResidueField s)
+        (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n).sheaf (q + 2)) := by
+  letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
+    by
+      change IsSeparated (pullback.snd π (S.fromSpecResidueField s))
+      infer_instance
+  obtain ⟨W, hW, e, _, hez⟩ := h s
+  letI : W.IsElliptic := hW
+  letI : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+        (projModelZero_projModelπ W) n).sheaf (q + 2)) :=
+    sectionPoleSheafPower_projModel_subsingleton_H_add_two W n q
+  let hSheaf := @sectionPoleSheafPowerPointedSheafIso
+    (π.fiber s) (projModel W) (Spec (CommRingCat.of (S.residueField s)))
+    (π.fiberToSpecResidueField s) (projModelπ W)
+    hsepFiber (by infer_instance)
+    (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _)
+    (projModelZero W) (projModelZero_projModelπ W) (projModel_smooth W)
+    e hez n
+  exact TopCat.Sheaf.subsingleton_H_of_iso
+    (Scheme.forgetToTop.mapIso e.symm) hSheaf (q + 2)
 
 end ModularCurves
