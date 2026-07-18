@@ -23489,3 +23489,33 @@ pp.112–116 assembly on the banked [B1] substrate; :1022 as weakening corollary
 `torsionπ_etale` verified AXIOM-CLEAN so the substrate is green). Engine-gate finding: InvariantTorsor
 is ALREADY sorry-free (route book's "2 sorry-lines" were docstring text); EngineDescent's residual is
 exactly [a5]; `isPullback_chart` + `smoothOfRelativeDimension_of_locallyWeierstrass` PROVEN.
+
+## v10.324-FIN (2026-07-18, STREAM-FIN) — ★ [a5] FALSITY QUARANTINED + THE v10.94 OWED STATEMENT FIX EXECUTED; five parallel builders on the cone
+
+**[a5] (`locallyWeierstrass_quotientπ`, EngineDescent):** builder + verification found the :646
+statement FALSE AS BOARDED — confirming the project's OWN v10.94 interface note ("false as stated
+for an arbitrary section-pair"; explicit counterexample: twist the canonical descended pair by a
+split endomorphism of `Spec ℚ[x₁,x₂,…]` — `zero' ≫ π' = 𝟙` survives but no LocallyWeierstrass
+chart exists, by properness cancellation against `projModelπ_isProper`). EXECUTED the owed fix
+(statement-layer, boarded here per charter): `locallyWeierstrass_quotientπ` now carries the
+`hπ'c`/`hzero'c` quotient-chart compatibilities; the false transfer leaf DELETED; the sole
+call-site (`exists_ellipticCurveGeom_quotient`) supplies the compats from
+`exists_quotient_π_zero`'s outputs. Remaining: ONE true leaf `_of_compat` (private), both closure
+routes boarded in-docstring — (a) Phase-A `locallyWeierstrass_quotientπ_of_globalModel` (PROVEN,
+needs a global model upstairs) or (b) the a5-P-loc orbit-semilocalisation (Čech VC-cocycle splits
+semilocally: `exists_unit_smul_eq_of_isLocalRing` + additive H90 both PROVEN; `lw_chart_at`
+abstract-in-base-ring PROVEN). Builder live on (b). EngineDescent + QuotientProblem green (3861).
+
+**Also discovered en route:** the banked [a5] plan's step (2) was wrong as boarded — `hVtop`
+trivialises the BASE atlas only; the upstairs model is NOT global over `Γ(X,⊤)` (Pic-obstructed);
+the global-model form is exactly the proven Phase-A theorem. The genuine remaining math of the
+engine's descent side = the semilocal model globalization.
+
+**Builder fleet (5):** mouth :1040 (QuotientProblem, KM pp.112–116 on the [B1] substrate);
+F2 Bootstrap:222 (steps 2b→5, SqrtCoverGlue.lean in progress); T-D6b + BB-DELIGNE (ExactOrder,
+k̄-étale route, `torsionπ_etale` CLEAN); [KVC-eval]+master (AutFixedPoints — increments 1/2 of
+[K-VC] LANDED+pushed: `coordEquiv_fixes_generators_of_fixed_points` + the faithfulness wire
+`pointedAuto_hom_eq_id_of_coordEquiv_fixes`, both sorry-free); [a5]-`_of_compat` (route (b)).
+[K-VC] consequence sharpened: with the VC fixed-point route, receipts 1/2/4/5's k̄-cores AND the
+narrowed-hbound discharge need NO dichotomy/kernel-bound/Hasse at all — the whole numeric funnel
+is bypassed; K-DICH/Niso demote to [KEY-GEN-PARKED]-adjacent cleanup.
