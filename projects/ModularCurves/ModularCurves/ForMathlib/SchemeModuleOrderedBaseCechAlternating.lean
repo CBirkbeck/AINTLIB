@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.Data.Fin.Tuple.Sort
 import Mathlib.GroupTheory.Perm.Fin
+import ModularCurves.ForMathlib.HomologicalComplexExactRetract
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
 
 /-!
@@ -1134,6 +1135,16 @@ theorem orderedToBaseCechAlternating_comp_baseCechToOrdered
   intro n
   exact orderedToBaseCechAlternatingF_comp_baseCechToOrderedF
     π M U n
+
+theorem orderedBaseCechComplex_exactAt_of_baseCechComplex_exactAt
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens) (n : ℕ)
+    (h : (baseCechComplex π M U).ExactAt n) :
+    (orderedBaseCechComplex π M U).ExactAt n :=
+  h.of_retract
+    (orderedToBaseCechAlternating π M U)
+    (baseCechToOrdered π M U)
+    (orderedToBaseCechAlternating_comp_baseCechToOrdered π M U)
 
 end
 
