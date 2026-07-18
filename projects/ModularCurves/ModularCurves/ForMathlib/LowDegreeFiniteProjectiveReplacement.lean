@@ -111,6 +111,34 @@ noncomputable def shortComplexModuleCatMkBaseChangeIso
         a ⊗ₜ[R, algebraMap R A] S.g x
       rfl)
 
+/-- The concrete cycle module of a short complex after algebraic base change is
+canonically equivalent to the cycle module after categorical extension of scalars. -/
+noncomputable def ShortComplex.baseChangeCyclesLinearEquiv
+    (S : ShortComplex (ModuleCat.{v} R))
+    (A : Type v) [CommRing A] [Algebra R A] :
+    LinearMap.ker (S.g.hom.baseChange A) ≃ₗ[A]
+      LinearMap.ker
+        ((S.map (ModuleCat.extendScalars (algebraMap R A))).g.hom) := by
+  let T := ShortComplex.moduleCatMk
+    (S.f.hom.baseChange A) (S.g.hom.baseChange A)
+    (LinearMap.baseChange_comp_eq_zero S.f.hom S.g.hom
+      (shortComplexModuleCatCompEqZero S) A)
+  exact (T.moduleCatCyclesIso.symm ≪≫
+    ShortComplex.cyclesMapIso
+      (shortComplexModuleCatMkBaseChangeIso S A) ≪≫
+    (S.map (ModuleCat.extendScalars (algebraMap R A))).moduleCatCyclesIso).toLinearEquiv
+
+/-- The kernel of the first differential after algebraic base change is canonically
+equivalent to the first kernel after categorical extension of scalars. -/
+noncomputable def HomologicalComplex.baseChangeKernelZeroLinearEquiv
+    (K : CochainComplex (ModuleCat.{v} R) ℕ)
+    (A : Type v) [CommRing A] [Algebra R A] :
+    LinearMap.ker ((K.d 0 1).hom.baseChange A) ≃ₗ[A]
+      LinearMap.ker
+        ((((ModuleCat.extendScalars (algebraMap R A)).mapHomologicalComplex
+          (.up ℕ)).obj K).d 0 1).hom := by
+  exact ShortComplex.baseChangeCyclesLinearEquiv (K.sc' 0 0 1) A
+
 /-- Exactness at a positive degree after categorical extension of scalars is
 exactness of the corresponding algebraically base-changed linear differentials. -/
 theorem cochainComplex_baseChange_functionExact_of_map_exactAt
