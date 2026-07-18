@@ -255,6 +255,35 @@ theorem baseCechPermutationF_comp
   rw [← F.map_comp, ← op_comp]
   congr 1
 
+theorem baseCechCoface_comp_permutation
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n : ℕ)
+    (σ : Equiv.Perm (Fin (n + 2))) (r : Fin (n + 2)) :
+    baseCechCoface π M U n r ≫
+        baseCechPermutationF π M U (n + 1) σ =
+      baseCechPermutationF π M U n (cechPermDelete σ r) ≫
+        baseCechCoface π M U n (σ r) := by
+  let V := FormalCoproduct.mk _ U
+  let F : (FormalCoproduct.{u} X.Opens)ᵒᵖ ⥤
+      ModuleCat.{u} Γ(S, (⊤ : S.Opens)) :=
+    ((FormalCoproduct.evalOp X.Opens
+      (ModuleCat.{u} Γ(S, (⊤ : S.Opens)))).obj
+        (baseModulePresheaf π M))
+  change F.map (V.mapPower r.succAbove).op ≫
+      F.map (V.mapPower σ).op =
+    F.map (V.mapPower (cechPermDelete σ r)).op ≫
+      F.map (V.mapPower (σ r).succAbove).op
+  rw [← F.map_comp, ← F.map_comp, ← op_comp, ← op_comp]
+  congr 1
+  rw [← FormalCoproduct.mapPower_comp,
+    ← FormalCoproduct.mapPower_comp]
+  have hfun : σ ∘ r.succAbove =
+      (σ r).succAbove ∘ cechPermDelete σ r := by
+    funext x
+    exact (succAbove_cechPermDelete σ r x).symm
+  exact congrArg (fun q => q.op) (congrArg
+    (fun f : Fin (n + 1) → Fin (n + 2) => V.mapPower f) hfun)
+
 theorem baseCechPermutationF_comp_π
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
     {ι : Type u} (U : ι → X.Opens) (n : ℕ)
