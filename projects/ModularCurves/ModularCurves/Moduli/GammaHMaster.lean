@@ -253,92 +253,156 @@ theorem EllObj.eq_refl_of_forall_isoFibre_eq_refl {X : EllObj R}
     refine ⟨Over.homMk e.inv.top hcπ', ?_, ?_⟩
     · exact Over.OverMorphism.ext htop_hom_inv
     · exact Over.OverMorphism.ext htop_inv_hom
-  -- the torsion restriction, compared with the identity through the equalizer engine
-  set cM := E.torsionRestrict εO hη M with hcM
-  haveI : Etale ((Over.mk (E.torsionπ M)).hom) := E.torsionπ_etale M hinv
-  set fO : Over.mk (E.torsionπ M) ⟶ Over.mk (E.torsionπ M) :=
-    Over.homMk cM (E.torsionRestrict_π εO hη M) with hfO
-  have hcMid : cM = 𝟙 (E.torsion M) := by
-    have hfeq : fO = 𝟙 (Over.mk (E.torsionπ M)) := by
-      refine AlgebraicGeometry.Over.hom_ext_of_unramified_of_surjective fO
-        (𝟙 (Over.mk (E.torsionπ M))) ?_
-      -- every point of `E[M]` lies in the equalizer's range
-      intro q
-      -- the geometric point through `q`
-      set κ := (E.torsion M).residueField q with hκ
-      set k := AlgebraicClosure κ with hk
-      set xbar : Spec (CommRingCat.of k) ⟶ E.torsion M :=
-        Spec.map (CommRingCat.ofHom (algebraMap κ k)) ≫
-          (E.torsion M).fromSpecResidueField q with hxbar
-      set t : Spec (CommRingCat.of k) ⟶ X.base := xbar ≫ E.torsionπ M with ht
-      -- fibre triviality at `t`, projected to the top map of the fibre
-      have htt := htriv k t
-      have htop : (EllObj.isoFibre e he t).hom.top = (Iso.refl (X.pullbackAlong t)).hom.top :=
-        congrArg EllHom.top (congrArg Iso.hom htt)
-      -- the `E`-point under `q̄` is fixed by `c`
-      set p : Spec (CommRingCat.of k) ⟶ E.E := xbar ≫ E.torsionι M with hp
-      have hpπ : p ≫ E.π = t := by
-        rw [hp, ht, Category.assoc, E.torsionι_π]
-      have hpc : p ≫ c = p := by
-        set ℓ : Spec (CommRingCat.of k) ⟶ Limits.pullback E.π t :=
-          Limits.pullback.lift p (𝟙 _) (by rw [hpπ, Category.id_comp]) with hℓ
-        have hfix' : ℓ ≫ (EllObj.isoFibre e he t).hom.top = ℓ := by
-          refine (congrArg (fun m => ℓ ≫ m) htop).trans ?_
-          show ℓ ≫ 𝟙 _ = ℓ
-          rw [Category.comp_id]
-        calc p ≫ c = (ℓ ≫ Limits.pullback.fst E.π t) ≫ c := by
-              rw [hℓ, Limits.pullback.lift_fst]
-          _ = ℓ ≫ Limits.pullback.fst E.π t ≫ c := Category.assoc _ _ _
-          _ = ℓ ≫ (EllObj.isoFibre e he t).hom.top ≫ Limits.pullback.fst E.π t := by
-              refine congrArg (fun m => ℓ ≫ m) ?_
-              exact (Limits.pullback.lift_fst _ _ _).symm
-          _ = (ℓ ≫ (EllObj.isoFibre e he t).hom.top) ≫ Limits.pullback.fst E.π t :=
-              (Category.assoc _ _ _).symm
-          _ = ℓ ≫ Limits.pullback.fst E.π t := congrArg
-              (fun m => m ≫ Limits.pullback.fst E.π t) hfix'
-          _ = p := by rw [hℓ, Limits.pullback.lift_fst]
-      -- hence `q̄` is fixed by the torsion restriction
-      haveI := E.torsionι_isClosedImmersion M
-      have hpc' : (xbar ≫ E.torsionι M) ≫ εO.left = xbar ≫ E.torsionι M := hpc
-      have hxcι : (xbar ≫ cM) ≫ E.torsionι M = xbar ≫ E.torsionι M := by
-        have s1 : (xbar ≫ cM) ≫ E.torsionι M = xbar ≫ cM ≫ E.torsionι M :=
-          Category.assoc _ _ _
-        have s2 : xbar ≫ cM ≫ E.torsionι M = xbar ≫ E.torsionι M ≫ εO.left :=
-          congrArg (fun m => xbar ≫ m) (E.torsionRestrict_ι εO hη M)
-        have s3 : xbar ≫ E.torsionι M ≫ εO.left = (xbar ≫ E.torsionι M) ≫ εO.left :=
-          (Category.assoc _ _ _).symm
-        exact s1.trans (s2.trans (s3.trans hpc'))
-      have hxc : xbar ≫ cM = xbar := (cancel_mono (E.torsionι M)).mp hxcι
-      -- package as an `Over`-morphism and factor through the equalizer
-      set xbarO : Over.mk t ⟶ Over.mk (E.torsionπ M) := Over.homMk xbar rfl with hxbarO
-      have hw : xbarO ≫ fO = xbarO ≫ 𝟙 (Over.mk (E.torsionπ M)) := by
-        refine Over.OverMorphism.ext ?_
-        show xbar ≫ cM = xbar ≫ 𝟙 _
-        rw [hxc, Category.comp_id]
-      set ℓq := Limits.equalizer.lift xbarO hw with hℓq
-      have hℓι : ℓq ≫ Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ M))) = xbarO :=
-        Limits.equalizer.lift_ι _ _
-      have hleft : ℓq.left ≫ (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ M)))).left
-          = xbar := congrArg CommaMorphism.left hℓι
-      -- the closed point of the geometric point witnesses range membership
-      obtain ⟨s⟩ : Nonempty (Spec (CommRingCat.of k)) :=
-        inferInstanceAs (Nonempty (PrimeSpectrum k))
-      refine ⟨ℓq.left.base s, ?_⟩
-      have happ : (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ M)))).left
-          (ℓq.left s) = xbar s := by
-        rw [← Scheme.Hom.comp_apply, hleft]
-        rfl
-      have hxq : xbar s = q := by
-        rw [hxbar, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
-      exact happ.trans hxq
-    have h := congrArg CommaMorphism.left hfeq
-    exact h
-  -- conclude: `c` fixes `E[M]`, so `εO = 𝟙` by KM 2.7.2, so `e = refl`
-  have hfixM : E.torsionι M ≫ c = E.torsionι M :=
-    E.torsionι_comp_left_eq_of_torsionRestrict_eq_id εO hη M hcMid
+  -- **[v10.322-FIN keystone-free rewire]** `htriv` is far stronger than an `E[M]`-fix:
+  -- the difference endomorphism `δ = ε − 1` is FIBREWISE ZERO, which is exactly the
+  -- GIT 6.1 collapse hypothesis of the PROVEN rigidity factor engine
+  -- (`exists_factor_of_forall_component` + `fibre_subset_eqLocus_of_collapsed`).
+  -- `δ.left` collapses every `π`-fibre to the zero point, hence factors through the
+  -- base; pointedness pins the factor to the zero section, so `δ = 0` and `ε = 𝟙` —
+  -- with NO endomorphism-degree input (the former `aut_endo_eq_one` consumption and
+  -- its five sorried degree leaves are gone from this route).
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  set δ : E.asOver ⟶ E.asOver := εO * (𝟙 E.asOver)⁻¹ with hδdef
+  have hδη : η[E.asOver] ≫ δ = η[E.asOver] := E.sub_one_pointed εO hη
+  have hδπ : δ.left ≫ E.π = E.π := Over.w δ
+  -- re-type the underlying morphism at `E.E` (kills the `asOver.left`-vs-`E.E`
+  -- elaboration friction in the factor-engine plumbing below)
+  have hd : ∃ d : E.E ⟶ E.E, d = δ.left := ⟨δ.left, rfl⟩
+  obtain ⟨d, hd⟩ := hd
+  have hdπ : d ≫ E.π = E.π := by rw [hd]; exact hδπ
+  -- the unit of any point-hom-group has underlying morphism `t ≫ zero`
+  have hunit_left : ∀ {T : Scheme.{u}} (t : T ⟶ X.base),
+      letI : CommGroup (Over.mk t ⟶ E.asOver) := Hom.commGroup
+      (1 : Over.mk t ⟶ E.asOver).left = t ≫ E.zero := by
+    intro T t
+    letI : CommGroup (Over.mk t ⟶ E.asOver) := Hom.commGroup
+    rw [Hom.one_def]
+    show (toUnit (Over.mk t)).left ≫ (η[E.asOver]).left = t ≫ E.zero
+    rw [E.one_eq_zero]
+    exact ((Category.assoc _ _ _).symm).trans
+      (congrArg (· ≫ E.zero) (Over.w (toUnit (Over.mk t))))
+  -- a `c`-fixed point is `δ`-killed (pure group-object algebra)
+  have hkill_of_fix : ∀ {T : Scheme.{u}} (t : T ⟶ X.base) (P : Over.mk t ⟶ E.asOver),
+      P ≫ εO = P →
+      letI : CommGroup (Over.mk t ⟶ E.asOver) := Hom.commGroup
+      P ≫ δ = 1 := by
+    intro T t P hPfix
+    letI : CommGroup (Over.mk t ⟶ E.asOver) := Hom.commGroup
+    rw [hδdef, MonObj.comp_mul, GrpObj.comp_inv, Category.comp_id, hPfix, mul_inv_cancel]
+  -- `δ.left` collapses every set-theoretic fibre of `π` to the zero point
+  have hcollapse : ∀ s : X.base,
+      Set.Subsingleton (d.base '' (E.π.base ⁻¹' {s})) := by
+    intro s
+    suffices h : ∀ x ∈ E.π.base ⁻¹' {s}, d.base x = E.zero.base s by
+      rintro y ⟨x, hx, rfl⟩ y' ⟨x', hx', rfl⟩
+      rw [h x hx, h x' hx']
+    intro x hx
+    -- the geometric point through `x`
+    set κx := E.E.residueField x with hκx
+    set kx := AlgebraicClosure κx with hkx
+    set xbar : Spec (CommRingCat.of kx) ⟶ E.E :=
+      Spec.map (CommRingCat.ofHom (algebraMap κx kx)) ≫
+        E.E.fromSpecResidueField x with hxbar
+    set t : Spec (CommRingCat.of kx) ⟶ X.base := xbar ≫ E.π with ht
+    -- fibre triviality at `t`, projected to the top map of the fibre
+    have htt := htriv kx t
+    have htop : (EllObj.isoFibre e he t).hom.top = (Iso.refl (X.pullbackAlong t)).hom.top :=
+      congrArg EllHom.top (congrArg Iso.hom htt)
+    -- `xbar` is fixed by `c` (the isoFibre-square plumbing)
+    have hxc : xbar ≫ c = xbar := by
+      set ℓ : Spec (CommRingCat.of kx) ⟶ Limits.pullback E.π t :=
+        Limits.pullback.lift xbar (𝟙 _) (by rw [Category.id_comp]) with hℓ
+      have hfix' : ℓ ≫ (EllObj.isoFibre e he t).hom.top = ℓ := by
+        refine (congrArg (fun m => ℓ ≫ m) htop).trans ?_
+        show ℓ ≫ 𝟙 _ = ℓ
+        rw [Category.comp_id]
+      calc xbar ≫ c = (ℓ ≫ Limits.pullback.fst E.π t) ≫ c := by
+            rw [hℓ, Limits.pullback.lift_fst]
+        _ = ℓ ≫ Limits.pullback.fst E.π t ≫ c := Category.assoc _ _ _
+        _ = ℓ ≫ (EllObj.isoFibre e he t).hom.top ≫ Limits.pullback.fst E.π t := by
+            refine congrArg (fun m => ℓ ≫ m) ?_
+            exact (Limits.pullback.lift_fst _ _ _).symm
+        _ = (ℓ ≫ (EllObj.isoFibre e he t).hom.top) ≫ Limits.pullback.fst E.π t :=
+            (Category.assoc _ _ _).symm
+        _ = ℓ ≫ Limits.pullback.fst E.π t := congrArg
+            (fun m => m ≫ Limits.pullback.fst E.π t) hfix'
+        _ = xbar := by rw [hℓ, Limits.pullback.lift_fst]
+    -- hence `xbar` is `δ`-killed, and the value of `δ.left` at `x` is the zero point
+    letI : CommGroup (Over.mk t ⟶ E.asOver) := Hom.commGroup
+    set P : Over.mk t ⟶ E.asOver := Over.homMk xbar rfl with hP
+    have hPε : P ≫ εO = P := by
+      refine Over.OverMorphism.ext ?_
+      show xbar ≫ c = xbar
+      exact hxc
+    have hPδ : P ≫ δ = 1 := hkill_of_fix t P hPε
+    have hPδl : xbar ≫ d = t ≫ E.zero := by
+      rw [hd]
+      have h1 := congrArg CommaMorphism.left hPδ
+      exact h1.trans (hunit_left t)
+    obtain ⟨pt⟩ : Nonempty (Spec (CommRingCat.of kx)) :=
+      inferInstanceAs (Nonempty (PrimeSpectrum kx))
+    have hxbase : xbar.base pt = x := by
+      rw [hxbar, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+    have htbase : t.base pt = s := by
+      rw [ht, Scheme.Hom.comp_apply, hxbase]
+      exact hx
+    calc d.base x = d.base (xbar.base pt) := by rw [hxbase]
+      _ = (xbar ≫ d).base pt := rfl
+      _ = (t ≫ E.zero).base pt :=
+          congrArg (fun m : Spec (CommRingCat.of kx) ⟶ E.E => m.base pt) hPδl
+      _ = E.zero.base (t.base pt) := rfl
+      _ = E.zero.base s := congrArg E.zero.base htbase
+  -- the GIT 6.1 factor engine: `δ.left` factors through the equalizer with the constant
+  haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) (f := E.π)
+  haveI : IsProper E.π := E.proper
+  haveI : IsSeparated E.π := inferInstance
+  haveI : Flat E.π := inferInstance
+  have hg : (E.π ≫ (E.zero ≫ d)) ≫ E.π = E.π := by
+    calc (E.π ≫ (E.zero ≫ d)) ≫ E.π
+        = E.π ≫ (E.zero ≫ (d ≫ E.π)) := by
+          rw [Category.assoc, Category.assoc]
+      _ = E.π ≫ (E.zero ≫ E.π) := congrArg (fun m => E.π ≫ (E.zero ≫ m)) hdπ
+      _ = E.π ≫ 𝟙 _ := congrArg (fun m => E.π ≫ m) E.zero_π
+      _ = E.π := Category.comp_id _
+  obtain ⟨w, hw⟩ := exists_factor_of_forall_component (p := E.π) (q := E.π)
+    E.toEllipticCurveGeom.universallyOConnected E.zero E.zero_π
+    d (E.π ≫ (E.zero ≫ d)) hdπ hg rfl
+    (fun s => ⟨s, mem_connectedComponent,
+      fibre_subset_eqLocus_of_collapsed E.toEllipticCurveGeom.universallyOConnected
+        E.zero E.zero_π d hdπ s (hcollapse s)⟩)
+  -- read the factorization: `d` equals the constant morphism
+  have hfg : d = E.π ≫ (E.zero ≫ d) := by
+    have hcond := eqLocusι_comp_eq d (E.π ≫ (E.zero ≫ d)) hdπ hg
+    have h2 : w ≫ (eqLocusι d (E.π ≫ (E.zero ≫ d)) hdπ hg ≫ d)
+        = w ≫ (eqLocusι d (E.π ≫ (E.zero ≫ d)) hdπ hg ≫ (E.π ≫ (E.zero ≫ d))) :=
+      congrArg (fun m => w ≫ m) hcond
+    have h3 : (w ≫ eqLocusι d (E.π ≫ (E.zero ≫ d)) hdπ hg) ≫ d
+        = (w ≫ eqLocusι d (E.π ≫ (E.zero ≫ d)) hdπ hg) ≫ (E.π ≫ (E.zero ≫ d)) :=
+      (Category.assoc _ _ _).trans (h2.trans (Category.assoc _ _ _).symm)
+    rw [hw] at h3
+    rw [Category.id_comp, Category.id_comp] at h3
+    exact h3
+  -- pointedness pins the constant: `zero ≫ d = zero`
+  have hδz : E.zero ≫ d = E.zero := by
+    rw [hd]
+    letI : CommGroup (Over.mk (𝟙 X.base) ⟶ E.asOver) := Hom.commGroup
+    set P0 : Over.mk (𝟙 X.base) ⟶ E.asOver := Over.homMk E.zero E.zero_π with hP0
+    have hP0ε : P0 ≫ εO = P0 := by
+      refine Over.OverMorphism.ext ?_
+      show E.zero ≫ c = E.zero
+      exact hzc
+    have hP0δ : P0 ≫ δ = 1 := hkill_of_fix (𝟙 X.base) P0 hP0ε
+    have h1 := congrArg CommaMorphism.left hP0δ
+    exact h1.trans ((hunit_left (𝟙 X.base)).trans (Category.id_comp E.zero))
+  -- conclude: `δ = 1`, so `ε = 𝟙`, so `e = refl`
+  have hδone : δ = (1 : E.asOver ⟶ E.asOver) := by
+    refine Over.OverMorphism.ext ?_
+    show δ.left = (1 : E.asOver ⟶ E.asOver).left
+    rw [← hd]
+    exact hfg.trans ((congrArg (fun m => E.π ≫ m) hδz).trans (hunit_left E.π).symm)
   have hεid : εO = 𝟙 E.asOver := by
-    refine E.aut_endo_eq_one M hM εO (E.endDeg_eq_one_of_isIso εO) ?_
-    exact hfixM
+    have h := hδdef.symm.trans hδone
+    exact _root_.mul_inv_eq_one.mp h
   have hcid : c = 𝟙 E.E := congrArg CommaMorphism.left hεid
   refine Iso.ext (EllHom.ext ?_ ?_)
   · exact he
