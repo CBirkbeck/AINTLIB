@@ -275,7 +275,7 @@ def isAbsoluteValue [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] [Stron
     intro g
     convert MvPowerSeries.gaussNorm_eq_zero_iff norm c g.1 norm_zero norm_nonneg (by aesop)
       (StrongPos_pos c) (hasGaussNorm c g)
-    aesop
+    exact ⟨fun h => by rw [h]; rfl, fun h => Subtype.ext h⟩
   abv_add' f g := (MvPowerSeries.gaussNorm_add_le_max norm c f.1 g.1 (StrongLT.le (StrongPos_pos c))
     norm_nonneg IsUltrametricDist.norm_add_le_max (hasGaussNorm c f) (hasGaussNorm c g)).trans
     (max_le_add_of_nonneg (MvPowerSeries.gaussNorm_nonneg norm c _ norm_nonneg)
@@ -292,7 +292,7 @@ def isAbsoluteValue [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] [Stron
         rw [this, zero_mul]
       convert (MvPowerSeries.gaussNorm_eq_zero_iff norm c f.1 norm_zero norm_nonneg (by aesop)
         (StrongPos_pos c) (hasGaussNorm c f)).mp h1
-      aesop
+      exact ⟨fun h => by rw [h]; rfl, fun h => Subtype.ext h⟩
     by_cases h2 : gaussNorm R c g = 0
     · simp [h2]
       suffices f * g = 0 by
@@ -304,7 +304,7 @@ def isAbsoluteValue [NormedRing R] [IsUltrametricDist R] [LinearOrder σ] [Stron
         rw [this, mul_zero]
       convert (MvPowerSeries.gaussNorm_eq_zero_iff norm c g.1 norm_zero norm_nonneg (by aesop)
         (StrongPos_pos c) (hasGaussNorm c g)).mp h2
-      aesop
+      exact ⟨fun h => by rw [h]; rfl, fun h => Subtype.ext h⟩
     exact MvPowerSeries.gaussNorm_mul_eq_mul norm c f.1 g.1 (hasGaussNorm c f) (hasGaussNorm c g)
       (hasGaussNorm c (f * g)) norm_nonneg norm_zero IsUltrametricDist.isNonarchimedean_norm hnorm
       norm_neg (by aesop) (StrongPos_pos c) (bar c (StrongPos_pos c) f g h1 h2)

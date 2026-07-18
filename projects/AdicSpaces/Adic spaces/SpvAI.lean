@@ -290,7 +290,7 @@ theorem cofinalValue_principal_pow_lt {A : Type*} [CommRing A] [TopologicalSpace
   rw [ha_eq, map_mul, map_pow]
   calc v (P.A₀.subtype π) ^ m * v (P.A₀.subtype (π * b))
       ≤ v (P.A₀.subtype π) ^ m * 1 := by
-        exact mul_le_mul_left' hπb_le _
+        exact mul_le_mul_right hπb_le _
     _ = v (P.A₀.subtype π) ^ m := mul_one _
     _ < γ := hm
 
@@ -556,7 +556,7 @@ private theorem pow_gen_prod_lt {R Γ₀ : Type*} [CommRing R]
             obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le h_count_ge
             rw [hk, pow_add]
             conv_rhs => rw [← mul_one (v (↑c_star : R) ^ N_c (↑c_star : R) c_star.2)]
-            exact mul_le_mul_left' (Left.pow_le_one_of_le (h_v_le_one c_star) k) _
+            exact mul_le_mul_right (Left.pow_le_one_of_le (h_v_le_one c_star) k) _
         _ < γ := hN_c (↑c_star : R) c_star.2
     calc (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star, v (↑c : R) ^
             (Finset.univ.filter
@@ -565,7 +565,7 @@ private theorem pow_gen_prod_lt {R Γ₀ : Type*} [CommRing R]
             (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card
         ≤ 1 * v (↑c_star : R) ^ (Finset.univ.filter
             (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card :=
-          mul_le_mul_right' h_others _
+          mul_le_mul_left h_others _
       _ = _ := one_mul _
       _ < γ := h_star_lt
   · rw [Finset.not_nonempty_iff_eq_empty] at hS
@@ -612,7 +612,7 @@ theorem exists_pow_lt_of_forall_le_one_cofinal {R Γ₀ : Type*} [CommRing R]
   rw [habs, map_mul]
   calc v (cf p * (↑(g 0) : R)) * v (∏ i : Fin m, (↑(g i.succ) : R))
       ≤ 1 * v (∏ i : Fin m, (↑(g i.succ) : R)) :=
-        mul_le_mul_right' (h_le_one _ (I.mul_mem_left (cf p) hg0I)) _
+        mul_le_mul_left (h_le_one _ (I.mul_mem_left (cf p) hg0I)) _
     _ = v (∏ i : Fin m, (↑(g i.succ) : R)) := one_mul _
     _ < γ := hm fun i => g i.succ
 

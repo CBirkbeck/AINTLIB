@@ -1,1 +1,1 @@
-FOCUS: MERGE-TO-MAIN v4.33 repair loop: JetDualNumberNorm + XiaMvPowerSeriesEquiv GREEN. Rebuild wave N+1 running; fix next errors as they surface; loop until root green, then gh pr create to main.
+FOCUS: MERGE-TO-MAIN v4.33 repair loop, wave 3 building in background (task b3u5uf0qo, monitor bmb6krr0r). On errors: fix file-by-file (patterns so far: TrivSqZeroExt Prod-literals -> inl/inr or defeq-shows; RightActions snd_mul; upstreamed-vendor dups -> trim; simp-set drift -> extend/replace tails). When green: gh pr create dev/adic-spaces -> main.

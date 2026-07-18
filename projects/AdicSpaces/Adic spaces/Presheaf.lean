@@ -436,6 +436,14 @@ noncomputable def RationalLocData.completedPlusSubringBase (D : RationalLocData 
   ((integralClosure ↥(D.locPlusSubring) (Localization.Away D.s)).toSubring.map
     D.coeRingHom).topologicalClosure
 
+/-- v4.33 bump: the `Subring ↥S → Algebra ↥S R` route is no longer instance-automatic;
+register the subtype algebra for the base subring here (it is what the old instance
+unfolded to). -/
+noncomputable instance RationalLocData.algebraCompletedPlusSubringBase
+    (D : RationalLocData A) [PlusSubring A] :
+    Algebra (↥D.completedPlusSubringBase) (presheafValue D) :=
+  D.completedPlusSubringBase.subtype.toAlgebra
+
 noncomputable def RationalLocData.completedPlusSubring (D : RationalLocData A) [PlusSubring A] :
     Subring (presheafValue D) :=
   (integralClosure ↥(D.completedPlusSubringBase) (presheafValue D)).toSubring
