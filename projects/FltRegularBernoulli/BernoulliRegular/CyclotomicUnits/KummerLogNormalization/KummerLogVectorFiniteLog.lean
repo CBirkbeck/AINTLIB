@@ -1,6 +1,31 @@
 module
 
-public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasseFiniteLogDecomposition
+public import
+  BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasseFiniteLogDecomposition
+
+/-!
+# Finite logarithms for Dwork Artin--Hasse Kummer vectors
+
+This file decomposes the same-prime finite logarithm of a normalized Artin--Hasse coordinate
+into homogeneous pieces. It then compares the normalized Dwork Artin--Hasse quotient with the
+finite-log argument used for the Kummer-log vector.
+
+## Main definitions
+
+* `kummerLogDworkArtinHasseNormalizedQuotientArg`: the normalized Dwork Artin--Hasse quotient
+  argument in the completed integer ring.
+* `kummerLogDworkArtinHasseSpecializedFiniteLog`: its finite logarithm in the quotient of
+  precision `p - 1`.
+
+## Main results
+
+* `samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_range` rewrites the
+  finite logarithm as a sum of homogeneous degree terms.
+* `kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs` identifies the
+  specialized finite logarithm with a difference of normalized approximation logarithms.
+* `concreteKummerLogVector_evalₐ_pow_pred_eq_two_nsmul_dworkArtinHasseSpecializedFiniteLog`
+  evaluates the concrete Kummer-log vector in terms of that specialized finite logarithm.
+-/
 
 @[expose] public section
 
@@ -22,6 +47,7 @@ variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 variable [NumberField.IsCMField K]
 
 omit [NumberField.IsCMField K] in
+/-- Homogeneous terms at or beyond the finite-log cutoff vanish. -/
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_cutoff_le_degree
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hcut : samePrimeFiniteLogCutoff (p := p) N ≤ d) :
@@ -50,6 +76,7 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_cu
       samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore, hn, hnd]
 
 omit [NumberField.IsCMField K] in
+/-- The homogeneous degree sum is the sum over logarithmic indices from `1` through the degree. -/
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_sum_Icc
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
@@ -60,11 +87,12 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_sum_I
   classical
   simpa [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum] using
     (Finset.sum_attach (s := Finset.Icc 1 d)
-      (f := fun n : ℕ =>
+      (f := fun n : ℕ ↦
         samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
           (p := p) (K := K) N n d x hx))
 
 omit [NumberField.IsCMField K] in
+/-- The homogeneous degree sum vanishes at or beyond the finite-log cutoff. -/
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_cutoff_le
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hcut : samePrimeFiniteLogCutoff (p := p) N ≤ d) :
@@ -79,6 +107,7 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_
     (p := p) (K := K) N n d hx hcut
 
 omit [NumberField.IsCMField K] in
+/-- The finite-log core at a normalized Artin--Hasse coordinate is its coefficient-support sum. -/
 theorem samePrimeFiniteLogTermCore_normalizedArtinHasseCoord_eq_homogeneous_support_sum
     (N n : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) (hn : n ≠ 0) :
     samePrimeFiniteLogTermCore (p := p) (K := K) N n
@@ -157,10 +186,8 @@ theorem samePrimeFiniteLogTermCore_normalizedArtinHasseCoord_eq_homogeneous_supp
           (p := p) (K := K) hn hz]
         rw [samePrimeNatDivEvalAtDegree_eq_samePrimeNatDivEval
           (p := p) (K := K) hn (Ideal.pow_mem_pow hz n)
-          (by
-            have h := Nat.factorization_mul_pred_le_pred
-              (ell := p) (n := n) (Fact.out : Nat.Prime p) hn
-            omega)
+          ((Nat.factorization_mul_pred_le_pred
+              (ell := p) (n := n) (Fact.out : Nat.Prime p) hn).trans (Nat.pred_le n))
           hpow_order]
     _ =
       samePrimeNatDivEval (p := p) (K := K) N n s hn
@@ -172,7 +199,7 @@ theorem samePrimeFiniteLogTermCore_normalizedArtinHasseCoord_eq_homogeneous_supp
         samePrimeNatDivEval (p := p) (K := K) N n s hn ((P ^ n).coeff d)
           (hcoeff_order d) := by
         rw [samePrimeNatDivEval_sum (p := p) (K := K) hn (P ^ n).support
-          (fun d => (P ^ n).coeff d) hcoeff_order hsum_order]
+          (fun d ↦ (P ^ n).coeff d) hcoeff_order hsum_order]
     _ =
       ∑ d ∈ (P ^ n).support,
         samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore
@@ -194,6 +221,7 @@ theorem samePrimeFiniteLogTermCore_normalizedArtinHasseCoord_eq_homogeneous_supp
           (p := p) (K := K) hn hcoeff hden (hcoeff_order d)).symm
 
 omit [NumberField.IsCMField K] in
+/-- The signed finite-log term at a normalized Artin--Hasse coordinate is its support sum. -/
 theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_support_sum
     (N n : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) (hn : n ≠ 0) :
     samePrimeFiniteLogTerm (p := p) (K := K) N n
@@ -211,6 +239,7 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_support_
   simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm]
 
 omit [NumberField.IsCMField K] in
+/-- The support sum for a normalized Artin--Hasse coordinate truncates at the finite-log cutoff. -/
 theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_cutoff_sum
     (N n : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLogTerm (p := p) (K := K) N n
@@ -228,7 +257,7 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_cutoff_s
   let P : Polynomial (ValuedIntegerRing p K) :=
     samePrimeFiniteArtinHasseNormalizedCoordPoly (p := p) (K := K) N x
   let C : ℕ := samePrimeFiniteLogCutoff (p := p) N
-  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d =>
+  let f : ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun d ↦
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
       (p := p) (K := K) N n d x hx
   have hsupport :
@@ -268,6 +297,7 @@ theorem samePrimeFiniteLogTerm_normalizedArtinHasseCoord_eq_homogeneous_cutoff_s
     _ = ∑ d ∈ Finset.range C, f d := hrange_union.symm
 
 omit [NumberField.IsCMField K] in
+/-- The finite log of a normalized Artin--Hasse coordinate is its homogeneous degree sum. -/
 theorem samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_range
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLog (p := p) (K := K) N
@@ -279,7 +309,7 @@ theorem samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_r
           (p := p) (K := K) N d x hx := by
   classical
   let C : ℕ := samePrimeFiniteLogCutoff (p := p) N
-  let f : ℕ → ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun n d =>
+  let f : ℕ → ℕ → ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) := fun n d ↦
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
       (p := p) (K := K) N n d x hx
   have hterm : ∀ n ∈ Finset.range C,
@@ -349,6 +379,7 @@ theorem samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_r
         exact hdegree d hd
 
 omit [NumberField.IsCMField K] in
+/-- Subtracting one from the scaled Artin--Hasse exponential extracts its normalized factor. -/
 theorem artinHasseExp_scaledDworkParameter_sub_one_eq_mul_normalized
     (a : ZMod p) :
     artinHasseExp_eval_scaledDworkParameter p K a - 1 =
@@ -361,6 +392,7 @@ theorem artinHasseExp_scaledDworkParameter_sub_one_eq_mul_normalized
     (scaledDworkParameter_evalₐ_one (p := p) (K := K) a)
 
 omit [NumberField.IsCMField K] in
+/-- The normalized Artin--Hasse factor evaluates to one modulo the completed maximal ideal. -/
 theorem artinHasseNormalizedExpMinusOneEval_evalₐ_one
     {x : DworkCompleteIntegerRing p K}
     (hx : AdicCompletion.evalₐ (lambdaIdeal p K) 1 x = 0) :
@@ -567,15 +599,11 @@ theorem kummerLogDworkArtinHasseNormalizedQuotientArg_evalₐ_add_one_mul_normal
       (artinHasseNormalizedExpMinusOneEval p K
         (dworkParameter p K)
         (dworkParameter_evalₐ_one (p := p) (K := K))) := by
-  have h :=
+  simpa [map_mul] using
     congrArg (AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1))
       (kummerLogDworkArtinHasseNormalizedQuotientArg_add_one_mul_normalized_eq_normalized
         (p := p) (K := K) hp_three a)
-  simpa [map_mul] using h
 
--- The proof compares the Teichmuller scalar with the integral scalar through
--- the completed Dwork ramification identity; the larger heartbeat budget keeps
--- the coercion reductions deterministic.
 omit [NumberField.IsCMField K] in
 /-- The Dwork Artin-Hasse specialization represents the same normalized
 quotient as CU-11b modulo the Dwork `p`-level `(lambda)^(p-1)`. -/
@@ -601,7 +629,7 @@ theorem kummerLogDworkArtinHasseNormalizedQuotientArg_sub_algebraMap_mem_pow_pre
   let denInv : S := (dU⁻¹ : Sˣ)
   have hk_lt : k < p := by
     have hk_le := kummerLogColumnIndex_le_half (p := p) hp_three a
-    omega
+    lia
   have hk_val : z.val = k := by
     simpa [z] using ZMod.val_natCast_of_lt hk_lt
   have hprime :
@@ -659,9 +687,6 @@ theorem kummerLogDworkArtinHasseNormalizedQuotientArg_evalₐ_pow_pred
           (p := p) (K := K) hp_three a) := by
   let R : Type _ := ValuedIntegerRing p K
   let S : Type _ := DworkCompleteIntegerRing p K
-  have hmem :=
-    kummerLogDworkArtinHasseNormalizedQuotientArg_sub_algebraMap_mem_pow_pred
-      (p := p) (K := K) hp_three a
   have hzero :
       AdicCompletion.evalₐ (lambdaIdeal p K) (p - 1)
         (kummerLogDworkArtinHasseNormalizedQuotientArg
@@ -669,11 +694,14 @@ theorem kummerLogDworkArtinHasseNormalizedQuotientArg_evalₐ_pow_pred
           algebraMap R S (kummerLogNormalizedQuotientFiniteLogArg
             (p := p) (K := K) hp_three a)) = 0 :=
     dworkComplete_evalₐ_eq_zero_of_mem_lambdaIdeal_pow
-      (p := p) (K := K) hmem
+      (p := p) (K := K)
+      (kummerLogDworkArtinHasseNormalizedQuotientArg_sub_algebraMap_mem_pow_pred
+        (p := p) (K := K) hp_three a)
   rw [map_sub] at hzero
   simpa [S, R, AdicCompletion.algebraMap_apply] using sub_eq_zero.mp hzero
 
 omit [NumberField.IsCMField K] in
+/-- A product-coordinate congruence turns the finite log of the first factor into a difference. -/
 theorem samePrimeFiniteLog_eq_sub_of_productCoord_sub_mem {N : ℕ}
     {x y z : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hy : y ∈ lambdaIdeal p K) (hz : z ∈ lambdaIdeal p K)
@@ -767,10 +795,8 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs
           (kummerLogDworkArtinHasseNormalizedQuotientArg
             (p := p) (K := K) hp_three a + 1) =
         Ideal.Quotient.mk (I ^ (p - 1)) (q + 1) := by
-    have hqeval :=
-      kummerLogDworkArtinHasseNormalizedQuotientArg_evalₐ_pow_pred
-        (p := p) (K := K) hp_three a
-    rw [map_add, hqeval]
+    rw [map_add, kummerLogDworkArtinHasseNormalizedQuotientArg_evalₐ_pow_pred
+      (p := p) (K := K) hp_three a]
     rfl
   have hY :
       AdicCompletion.evalₐ I (p - 1)
@@ -778,7 +804,7 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs
             (scaledDworkParameter p K z)
             (scaledDworkParameter_evalₐ_one (p := p) (K := K) z)) =
         Ideal.Quotient.mk (I ^ (p - 1)) Y := by
-    have hpow : (p - 2) + 1 = p - 1 := by omega
+    have hpow : (p - 2) + 1 = p - 1 := by lia
     rw [← hpow]
     simpa [I, Y, z] using
       evalₐ_artinHasseNormalized_scaledDworkParameter_eq_mk_normalizedApprox
@@ -789,7 +815,7 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs
             (dworkParameter p K)
             (dworkParameter_evalₐ_one (p := p) (K := K))) =
         Ideal.Quotient.mk (I ^ (p - 1)) X := by
-    have hpow : (p - 2) + 1 = p - 1 := by omega
+    have hpow : (p - 2) + 1 = p - 1 := by lia
     rw [← hpow]
     simpa [I, X] using
       evalₐ_artinHasseNormalized_dworkParameter_eq_mk_normalizedApprox
@@ -819,7 +845,7 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs
   have hsub :
       samePrimeFiniteLogProductCoord (p := p) (K := K) q y - x ∈
         (lambdaIdeal p K) ^ ((p - 2) + 1) := by
-    simpa [show (p - 2) + 1 = p - 1 by omega] using hsub_pred
+    simpa [show (p - 2) + 1 = p - 1 by lia] using hsub_pred
   rw [kummerLogDworkArtinHasseSpecializedFiniteLog,
     kummerLogNormalizedQuotientFiniteLog]
   simpa [q, x, y, z] using
@@ -831,17 +857,17 @@ omit [NumberField.IsCMField K] in
 the Dwork-coordinate coefficient API. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_normalizedApprox_logs
     (hp_three : 3 ≤ p) (a : Fin (kummerLogRank p)) :
-    Ideal.Quotient.factorPow (lambdaIdeal p K) (by omega :
+    Ideal.Quotient.factorPow (lambdaIdeal p K) (by lia :
         p - 1 ≤ (p - 2) + 1)
       (kummerLogDworkArtinHasseSpecializedFiniteLog
         (p := p) (K := K) hp_three a) =
-      Ideal.Quotient.factorPow (lambdaIdeal p K) (by omega :
+      Ideal.Quotient.factorPow (lambdaIdeal p K) (by lia :
           p - 1 ≤ (p - 2) + 1)
         (samePrimeFiniteLog (p := p) (K := K) (p - 2)
           (dworkParameterNormalizedCoordApprox (p := p) (K := K) (p - 2))
           (dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
             (p := p) (K := K) (p - 2))) -
-      Ideal.Quotient.factorPow (lambdaIdeal p K) (by omega :
+      Ideal.Quotient.factorPow (lambdaIdeal p K) (by lia :
           p - 1 ≤ (p - 2) + 1)
         (samePrimeFiniteLog (p := p) (K := K) (p - 2)
           (scaledDworkParameterNormalizedCoordApprox
@@ -853,6 +879,7 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_normalizedAppr
   rw [kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs
     (p := p) (K := K) hp_three a, map_sub]
 
+/-- The concrete Kummer-log vector evaluates to twice the specialized Artin--Hasse finite log. -/
 theorem concreteKummerLogVector_evalₐ_pow_pred_eq_two_nsmul_dworkArtinHasseSpecializedFiniteLog
     (hp_three : 3 ≤ p) (a : Fin (kummerLogRank p)) :
     AdicCompletion.evalₐ (lambdaIdeal p K) ((p - 2) + 1)
