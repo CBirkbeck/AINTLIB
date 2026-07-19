@@ -98,6 +98,18 @@ noncomputable def optionChartRingEquiv :
   exact (chartRingEquiv R (none : Option σ)).trans
     (renameEquiv R (optionNeNoneEquiv σ)).toRingEquiv
 
+/-- On a homogeneous fraction, the option chart is dehomogenization of its numerator. -/
+lemma optionChartRingEquiv_apply_mk (n : ℕ) (p : MvPolynomial (Option σ) R)
+    (hp : p ∈ homogeneousSubmodule (Option σ) R (n • (1 : ℕ))) :
+    optionChartRingEquiv
+      (Away.mk _ (X_mem_homogeneousSubmodule_one R (none : Option σ)) n p hp) =
+      dehomogenizeOption R p := by
+  classical
+  change rename (optionNeNoneEquiv σ)
+      (dehomogenizeAt R none
+        (Away.mk _ (X_mem_homogeneousSubmodule_one R (none : Option σ)) n p hp)) = _
+  rw [dehomogenizeAt_mk, rename_dehomogenizeAux_none]
+
 /-- Under the standard chart equivalence, a homogeneous lift divided by the homogenizing
 variable to its chosen degree is the original polynomial. -/
 lemma optionChartRingEquiv_apply_mk_homogenizeOption
@@ -108,13 +120,76 @@ lemma optionChartRingEquiv_apply_mk_homogenizeOption
         (by
           simpa using (mem_homogeneousSubmodule _ _).mpr
             (homogenizeOption_isHomogeneous p n))) = p := by
-  classical
-  change rename (optionNeNoneEquiv σ)
-      (dehomogenizeAt R none
-        (Away.mk _ (X_mem_homogeneousSubmodule_one R (none : Option σ)) n
-          (homogenizeOption p n) _)) = p
-  rw [dehomogenizeAt_mk, rename_dehomogenizeAux_none,
+  rw [optionChartRingEquiv_apply_mk,
     dehomogenizeOption_homogenizeOption p n h]
+
+/-- The kernel cutting out the homogenized quotient chart becomes the original affine relation
+ideal under the option chart equivalence. -/
+lemma map_optionChartRingEquiv_ker_awayMap_homogenizedIdeal
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    Ideal.map (optionChartRingEquiv (R := R) (σ := σ)).toRingHom
+        (RingHom.ker (Away.map
+          (quotientGradingHom (homogenizedIdeal (R := R) (σ := σ) g d))
+          (X none : MvPolynomial (Option σ) R))) =
+      Ideal.span (Set.range g) := by
+  classical
+  let I := homogenizedIdeal g d
+  let s : MvPolynomial (Option σ) R := X none
+  let hs : s ∈ homogeneousSubmodule (Option σ) R 1 :=
+    X_mem_homogeneousSubmodule_one R none
+  let φ := Away.map (quotientGradingHom I) s
+  apply le_antisymm
+  · intro x hx
+    obtain ⟨z, hz, rfl⟩ :=
+      (Ideal.mem_map_of_equiv (optionChartRingEquiv (R := R) (σ := σ)) _).mp hx
+    obtain ⟨n, p, hp, rfl⟩ := Away.mk_surjective _ hs z
+    rw [RingHom.mem_ker, Away.map_mk] at hz
+    have hval := congrArg
+      (valRingHom (Submonoid.powers ((quotientGradingHom I) s))) hz
+    rw [valRingHom_apply, valRingHom_apply, Away.val_mk, val_zero] at hval
+    have hzero : algebraMap (MvPolynomial (Option σ) R ⧸ I.toIdeal)
+        (Localization (Submonoid.powers ((quotientGradingHom I) s)))
+        ((quotientGradingHom I) p) = 0 := by
+      rw [← Localization.mk_one_eq_algebraMap, Localization.mk_eq_mk',
+        IsLocalization.mk'_eq_zero_iff]
+      rwa [Localization.mk_eq_mk', IsLocalization.mk'_eq_zero_iff] at hval
+    obtain ⟨⟨c, k, rfl⟩, hc⟩ := (IsLocalization.map_eq_zero_iff
+      (Submonoid.powers ((quotientGradingHom I) s)) _ _).mp hzero
+    have hmem : s ^ k * p ∈ I.toIdeal := by
+      have : (quotientGradingHom I) (s ^ k * p) = 0 := by
+        rw [map_mul, map_pow]
+        exact hc
+      rwa [quotientGradingHom_apply, ← RingHom.mem_ker, Ideal.mk_ker] at this
+    have hdehom : dehomogenizeOption R (s ^ k * p) ∈ Ideal.span (Set.range g) := by
+      rw [← map_dehomogenizeOption_homogenizedIdeal g d hdeg]
+      exact Ideal.mem_map_of_mem (dehomogenizeOption R) hmem
+    rw [map_mul, map_pow, dehomogenizeOption_X_none, one_pow, one_mul] at hdehom
+    rw [optionChartRingEquiv_apply_mk (R := R) (σ := σ)]
+    exact hdehom
+  · rw [Ideal.span_le]
+    intro p hp
+    obtain ⟨j, rfl⟩ := hp
+    let q := homogenizeOption (g j) (d j)
+    have hq : q ∈ homogeneousSubmodule (Option σ) R (d j) :=
+      (mem_homogeneousSubmodule _ _).mpr (homogenizeOption_isHomogeneous (g j) (d j))
+    have hq' : q ∈ homogeneousSubmodule (Option σ) R ((d j) • (1 : ℕ)) := by
+      simpa using hq
+    let w := Away.mk _ hs (d j) q hq'
+    have hw : w ∈ RingHom.ker φ := by
+      rw [RingHom.mem_ker, Away.map_mk]
+      have hqzero : (quotientGradingHom I) q = 0 := by
+        rw [quotientGradingHom_apply, ← RingHom.mem_ker, Ideal.mk_ker]
+        exact Ideal.subset_span ⟨j, rfl⟩
+      apply val_injective
+      rw [Away.val_mk, val_zero, hqzero]
+      exact Localization.mk_zero _
+    have he : (optionChartRingEquiv (R := R) (σ := σ)) w = g j := by
+      rw [optionChartRingEquiv_apply_mk (R := R) (σ := σ),
+        dehomogenizeOption_homogenizeOption _ _ (hdeg j)]
+    rw [← he]
+    exact Ideal.mem_map_of_mem
+      (optionChartRingEquiv (R := R) (σ := σ)).toRingHom hw
 
 end OptionChart
 
