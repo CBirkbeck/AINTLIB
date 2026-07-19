@@ -31,7 +31,9 @@ We define the structure sheaf `𝒪_X` on `X = Spa(A, A⁺)` following §8.1 of 
 ## Main definitions
 
 * `SpaTop A` : The adic spectrum as an object of `TopCat`.
-* `structureSheaf A` : The structure sheaf valued in `CompleteTopCommRingCat`.
+* `locallyFractionPresheaf A` : the quarantined discrete locally-fraction comparison
+  presheaf (NOT the structure presheaf — see `StructurePresheafBundled.lean` for the
+  public `structurePresheaf`/`structureSheaf`).
 * `VPreObj` / `VObj` : Categories 𝒱^pre and 𝒱 (Definitions 8.5, 8.7, Remark 8.20).
 * `IsSheafy` : Sheaf condition for topological ring presheaves (Definition 8.26).
 
@@ -184,7 +186,9 @@ noncomputable def presheafSectionsMor {U V : Opens (SpaTop A)} (h : V ≤ U) :
     exact DiscreteUniformity.instDiscreteTopology ↥(sectionsSubring U)
   exact continuous_of_discreteTopology
 
-/-- **QUARANTINED LEGACY PLACEHOLDER — this is *not* Wedhorn's structure presheaf.**
+/-- **QUARANTINED LEGACY PLACEHOLDER — this is *not* Wedhorn's structure presheaf,
+and it is *not* the public `structurePresheaf`** (which is the projective-limit
+presheaf, `StructurePresheafBundled.lean`).
 
 For each open `U`, this presheaf takes the subring of locally-fraction sections in
 `∏ₓ Localization.AtPrime x.supp` with the **discrete** uniformity. Its values on
@@ -192,16 +196,11 @@ rational opens are *not* canonically the completed rational localizations
 `presheafValue`, and its topology is *not* the projective-limit topology of §8.1 —
 were its type-level sheaf property (which holds for every `LocalPredicate`) the
 sheaf condition of Definition 8.26, every Tate ring would be sheafy, contradicting
-Wedhorn Remark 8.17.
-
-**The genuine structure presheaf on all opens is `limitSections`**
-(`StructurePresheafLimit.lean`): compatible families over the valid rational data,
-with the initial/projective-limit topology; `SheafyPair.lean` proves it is a sheaf
-of topological rings exactly under the finite rational criterion
-(`isSheafy_iff_isLimitSheaf`), and `SheafyRing.lean` states pair- and ring-level
-sheafiness through it. Do not extend this placeholder; do not fill
-`structurePresheaf_isSheaf` below (handover prohibition). -/
-noncomputable def structurePresheaf [IsHuberRing A] [PlusSubring A] :
+Wedhorn Remark 8.17. No sheaf assertion is made or to be made about this object
+(the formerly-sorried `structurePresheaf_isSheaf` was **removed** 2026-07-20 with
+the WO1 rewiring); it is retained only as the locally-fraction *comparison* object
+feeding the stalk/valuation (`𝒱^pre`) machinery below. -/
+noncomputable def locallyFractionPresheaf [IsHuberRing A] [PlusSubring A] :
     Presheaf CompleteTopCommRingCat (SpaTop A) where
   obj U := presheafSectionsObj A U.unop
   map {U V} i := presheafSectionsMor A (leOfHom i.unop)
@@ -214,62 +213,16 @@ noncomputable def structurePresheaf [IsHuberRing A] [PlusSubring A] :
     apply Subtype.ext; ext ⟨f, hf⟩
     exact Subtype.ext (funext fun ⟨x, hx⟩ ↦ rfl)
 
-/-- **Sub-lemma — type-level sheaf condition for the locally-fraction subpresheaf.**
-
-This is the *type-level* sheaf condition on `subpresheafToTypes
-isLocallyFraction.toPrelocalPredicate`, which is precisely the underlying
-type-presheaf of `structurePresheaf A` (modulo bundling into
-`CompleteTopCommRingCat`). The proof is a direct application of Mathlib's
-`subpresheafToTypes.isSheaf` for any `LocalPredicate`. Used by
-`structurePresheaf_isSheaf` below as the type-level input to the (still-pending)
-`CompleteTopCommRingCat`-to-types infrastructure transfer.
-
-Per CLAUDE.md sub-lemma policy: this fully discharges the type-level half
-of `structurePresheaf_isSheaf`, isolating the remaining obligation to the
-forgetful-functor / concrete-category infrastructure for
-`CompleteTopCommRingCat`. -/
-theorem structurePresheaf_typeLevel_isSheaf [IsHuberRing A] :
+/-- Type-level sheaf condition for the locally-fraction subpresheaf: the underlying
+type-presheaf of `locallyFractionPresheaf A` is a sheaf of *types* — an instance of
+Mathlib's `subpresheafToTypes.isSheaf`, which holds for **every** `LocalPredicate`
+and therefore carries no adic content whatsoever (Wedhorn Remark 8.17: the
+topological sheaf condition of Definition 8.26 is *not* type-level). -/
+theorem locallyFractionPresheaf_typeLevel_isSheaf [IsHuberRing A] :
     (subpresheafToTypes
       (T := fun x : SpaTop A ↦ StructureSheaf.Localizations x)
       StructureSheaf.isLocallyFraction.toPrelocalPredicate).IsSheaf :=
   subpresheafToTypes.isSheaf StructureSheaf.isLocallyFraction
-
-/-- **Sub-lemma — sheaf condition for `structurePresheaf` in
-`CompleteTopCommRingCat`.**
-
-Named sub-lemma extracted from the (formerly anonymous) `sorry` body in the
-`structureSheaf` definition. Keeps the project's sorry obligation honest at a
-named declaration with a tracked docstring, per project policy.
-
-**Route to fill:** The type-level sheaf condition is now established at
-`structurePresheaf_typeLevel_isSheaf` (directly above, sorry-free), which
-proves that the underlying `subpresheafToTypes` of `isLocallyFraction` is a
-sheaf. What remains is the transfer to `CompleteTopCommRingCat`, which
-requires:
-1. A forgetful functor `CompleteTopCommRingCat ⥤ Type` that preserves
-   limits and reflects isomorphisms.
-2. A natural isomorphism `structurePresheaf ⋙ forget ≅ subpresheafToTypes`.
-3. Application of `isSheaf_iff_isSheaf_comp` to transfer the sheaf condition.
-
-Note: the forgetful functor `CompleteTopCommRingCat ⥤ Type` does NOT reflect
-isomorphisms in general (a bijective continuous ring hom into a complete
-topological ring need not have a continuous inverse), so the standard
-`isSheaf_iff_isSheaf_comp` lemma cannot be applied as stated. The Wedhorn-style
-proof goes via the **Hom-by-Hom** route: for each `E : CompleteTopCommRingCat`,
-the presheaf `U ↦ Hom(E, structurePresheaf U)` is a sheaf of types, verified
-by gluing continuous ring homs piecewise. Continuity of the global lift uses
-the fact that rational covers are *finite* (hence finite intersections of
-preimages of points in the discrete target remain open). -/
-theorem structurePresheaf_isSheaf [IsHuberRing A] [PlusSubring A] :
-    (structurePresheaf A).IsSheaf := by
-  sorry
-
-/-- The structure sheaf of `Spa(A, A⁺)`, valued in `CompleteTopCommRingCat`
-(Remark 8.20 of Wedhorn). Sheaf condition delegated to the named sub-lemma
-`structurePresheaf_isSheaf` (its `sorry` body carries the obligation). -/
-noncomputable def structureSheaf [IsHuberRing A] [PlusSubring A] :
-    Sheaf CompleteTopCommRingCat (SpaTop A) :=
-  ⟨structurePresheaf A, structurePresheaf_isSheaf A⟩
 
 /-! ### Sheafy affinoid rings (Definition 8.26 of Wedhorn) -/
 
@@ -432,60 +385,11 @@ theorem IsSheafy.separation_injective [IsTopologicalRing A] [PlusSubring A]
   funext ⟨D, hD⟩
   exact congr_fun (congr_fun hxy D) hD
 
-/-! ### Affinoid adic spaces (Definition 8.21 of Wedhorn) -/
-
-/-- An *affinoid adic space* is `Spa(A, A⁺)` where `(A, A⁺)` is a sheafy
-complete affinoid ring (Definition 8.21 of Wedhorn). Restriction maps are
-constructed from the ring data (Proposition 8.2), not assumed separately. -/
-structure AffinoidAdicSpace where
-  /-- The underlying affinoid ring. -/
-  Ring : Type u
-  [instCommRing : CommRing Ring]
-  [instTopologicalSpace : TopologicalSpace Ring]
-  [instIsTopologicalRing : IsTopologicalRing Ring]
-  [instPlusSubring : PlusSubring Ring]
-  [instIsHuberRing : IsHuberRing Ring]
-  [instT2Space : T2Space Ring]
-  [instNonarchimedeanRing : NonarchimedeanRing Ring]
-  [instCompleteSpace :
-    letI : UniformSpace Ring := IsTopologicalAddGroup.rightUniformSpace Ring
-    CompleteSpace Ring]
-  [instIsRingOfIntegralElements : IsRingOfIntegralElements (Ring⁺)]
-  [instIsSheafy : IsSheafy Ring]
-
-attribute [instance] AffinoidAdicSpace.instCommRing
-  AffinoidAdicSpace.instTopologicalSpace AffinoidAdicSpace.instIsTopologicalRing
-  AffinoidAdicSpace.instPlusSubring AffinoidAdicSpace.instIsHuberRing
-  AffinoidAdicSpace.instT2Space AffinoidAdicSpace.instNonarchimedeanRing
-  AffinoidAdicSpace.instCompleteSpace AffinoidAdicSpace.instIsRingOfIntegralElements
-  AffinoidAdicSpace.instIsSheafy
-
-namespace AffinoidAdicSpace
-
-variable (X : AffinoidAdicSpace.{u})
-
-/-- The underlying topological space of an affinoid adic space. -/
-def toTopCat : TopCat.{u} := SpaTop X.Ring
-
-/-- The structure sheaf of an affinoid adic space, valued in `CompleteTopCommRingCat`
-(Definition 8.21 / Remark 8.20 of Wedhorn). -/
-noncomputable def sheaf : Sheaf CompleteTopCommRingCat.{u} X.toTopCat :=
-  structureSheaf X.Ring
-
-end AffinoidAdicSpace
-
-/-! ### Adic spaces (Definition 8.22 of Wedhorn) -/
-
-/-- An *adic space* (Definition 8.22 of Wedhorn). -/
-structure AdicSpace where
-  /-- The underlying topological space. -/
-  carrier : Type u
-  [instTopologicalSpace : TopologicalSpace carrier]
-  /-- Every point has an open neighborhood homeomorphic to an affinoid adic space. -/
-  isLocallyAffinoid : ∀ x : carrier, ∃ (U : Opens carrier) (_ : x ∈ U)
-    (X : AffinoidAdicSpace.{u}), Nonempty (↥U ≃ₜ X.toTopCat)
-
-attribute [instance] AdicSpace.instTopologicalSpace
+-- `AffinoidAdicSpace` (Wedhorn Definition 8.21) and `AdicSpace` (Definition 8.22)
+-- live in `StructurePresheafBundled.lean` (WO1 rewiring 2026-07-20): the sheafiness
+-- field of an affinoid adic space is Wedhorn's actual condition — the genuine
+-- all-open structure presheaf is a sheaf of topological rings (`IsLimitSheaf`) —
+-- which is only available downstream of `SheafyPair`.
 
 /-! ### The categories 𝒱^pre and 𝒱 (Definitions 8.5, 8.7, Remark 8.20 of Wedhorn) -/
 

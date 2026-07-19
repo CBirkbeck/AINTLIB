@@ -18,22 +18,34 @@ the target category for presheaf values on adic spectra (§8.1 of Wedhorn).
 * `forgetToTopCommRingCat` : Forgetful functor to `TopCommRingCat`.
 * `forgetToCommRingCat` : Forgetful functor to `CommRingCat`.
 * `forgetToTopCat` : Forgetful functor to `TopCat`.
+
+## Coherence
+
+An object stores a `UniformSpace` (with completeness and separation about *it*); its
+topology is **derived** — `instUniformSpace.toTopologicalSpace` — never stored
+separately. Earlier revisions carried independent `TopologicalSpace` and
+`UniformSpace` fields, so an object could be built whose `Hom`-continuity referred to
+one topology while `CompleteSpace` referred to an unrelated uniformity; that
+incoherence is structurally impossible now (audit 2026-07-20, WO1 task 2).
+`IsTopologicalRing` is stated about the derived topology, and `IsUniformAddGroup`
+ties the additive structure to the uniformity itself.
 -/
 
 universe u
 
 open CategoryTheory
 
-/-- A bundled complete separated topological commutative ring (§8.1 of Wedhorn). -/
+/-- A bundled complete separated topological commutative ring (§8.1 of Wedhorn). The
+topology of the carrier is the topology of the stored uniformity (see the module
+docstring: no independent, possibly incoherent `TopologicalSpace` field exists). -/
 structure CompleteTopCommRingCat where
   of ::
   /-- The carrier type. -/
   α : Type u
   [instCommRing : CommRing α]
-  [instTopologicalSpace : TopologicalSpace α]
-  [instIsTopologicalRing : IsTopologicalRing α]
   [instUniformSpace : UniformSpace α]
   [instIsUniformAddGroup : IsUniformAddGroup α]
+  [instIsTopologicalRing : IsTopologicalRing α]
   [instCompleteSpace : CompleteSpace α]
   [instT0Space : T0Space α]
 
@@ -43,8 +55,8 @@ namespace CompleteTopCommRingCat
 instance : CoeSort CompleteTopCommRingCat.{u} (Type u) :=
   ⟨CompleteTopCommRingCat.α⟩
 
-attribute [instance] instCommRing instTopologicalSpace instIsTopologicalRing
-  instUniformSpace instIsUniformAddGroup instCompleteSpace instT0Space
+attribute [instance] instCommRing instUniformSpace instIsUniformAddGroup
+  instIsTopologicalRing instCompleteSpace instT0Space
 
 /-- Category structure on `CompleteTopCommRingCat`. -/
 instance : Category CompleteTopCommRingCat.{u} where
