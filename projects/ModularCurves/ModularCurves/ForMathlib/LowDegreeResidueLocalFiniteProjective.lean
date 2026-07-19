@@ -15,12 +15,35 @@ finite-projective kernel.
 
 open CategoryTheory
 
-universe u
+universe u v w
 
 namespace ModularCurves
+
+variable {R : Type u} [CommRing R]
+variable {P Q : Type v} [AddCommGroup P] [Module R P]
+  [AddCommGroup Q] [Module R Q]
+
+/-- Finiteness of a kernel descends across a bijective kernel base-change comparison. -/
+theorem Module.Finite.ker_baseChange_of_bijective
+    (A : Type w) [CommRing A] [Algebra R A]
+    (f : P →ₗ[R] Q) [Module.Finite R (LinearMap.ker f)]
+    (h : Function.Bijective (kerBaseChangeComparison A f)) :
+    Module.Finite A (LinearMap.ker (f.baseChange A)) := by
+  let e := LinearEquiv.ofBijective (kerBaseChangeComparison A f) h
+  exact Module.Finite.equiv e
+
+/-- Projectivity of a kernel descends across a bijective kernel base-change comparison. -/
+theorem Module.Projective.ker_baseChange_of_bijective
+    (A : Type w) [CommRing A] [Algebra R A]
+    (f : P →ₗ[R] Q) [Module.Projective R (LinearMap.ker f)]
+    (h : Function.Bijective (kerBaseChangeComparison A f)) :
+    Module.Projective A (LinearMap.ker (f.baseChange A)) := by
+  let e := LinearEquiv.ofBijective (kerBaseChangeComparison A f) h
+  exact Module.Projective.of_equiv' e
+
 namespace LowDegreeFiniteReplacement
 
-variable {R : Type u} [CommRing R] [IsNoetherianRing R]
+variable {R : Type u} [CommRing R]
 
 /-- A linear map is surjective near `p`, with a finite-projective kernel that commutes
 with every further algebra base change. -/
@@ -38,6 +61,10 @@ def HasAwayFiniteProjectiveKernelAt
       Function.Bijective
         (kerBaseChangeComparison A
           (f.baseChange (Localization.Away r)))
+
+section Noetherian
+
+variable [IsNoetherianRing R]
 
 local instance residueLocalFiniteProjectiveHZeroFinite
     (S : ShortComplex (ModuleCat.{u} R))
@@ -73,6 +100,40 @@ theorem exists_away_finiteProjective_kernel_of_residueField_exact
     (kZeroToKOne S.moduleCatToCycles) p
     (shortComplexBaseChange_kZeroToKOne_surjective_of_exact
       S p.ResidueField hbij hexact)
+
+end Noetherian
+
+/-- The principal neighborhood in `HasAwayFiniteProjectiveKernelAt` remains
+surjective with finite-projective kernel after every further algebra base change. -/
+theorem HasAwayFiniteProjectiveKernelAt.exists_away_forall_baseChange
+    {P Q : Type u} [AddCommGroup P] [Module R P]
+    [AddCommGroup Q] [Module R Q]
+    (f : P →ₗ[R] Q) (p : Ideal R)
+    (h : HasAwayFiniteProjectiveKernelAt.{u, w} f p) :
+    ∃ r : R, r ∉ p ∧
+      ∀ (A : Type w) [CommRing A] [Algebra (Localization.Away r) A],
+        Function.Surjective
+            ((f.baseChange (Localization.Away r)).baseChange A) ∧
+          Module.Finite A
+            (LinearMap.ker
+              ((f.baseChange (Localization.Away r)).baseChange A)) ∧
+          Module.Projective A
+            (LinearMap.ker
+              ((f.baseChange (Localization.Away r)).baseChange A)) ∧
+          Function.Bijective
+            (kerBaseChangeComparison A
+              (f.baseChange (Localization.Away r))) := by
+  obtain ⟨r, hr, hsurj, hfinite, hprojective, hcomparison⟩ := h
+  refine ⟨r, hr, ?_⟩
+  intro A _ _
+  letI : Module.Finite (Localization.Away r)
+      (LinearMap.ker (f.baseChange (Localization.Away r))) := hfinite
+  letI : Module.Projective (Localization.Away r)
+      (LinearMap.ker (f.baseChange (Localization.Away r))) := hprojective
+  exact ⟨LinearMap.baseChange_surjective A hsurj,
+    Module.Finite.ker_baseChange_of_bijective A _ (hcomparison A),
+    Module.Projective.ker_baseChange_of_bijective A _ (hcomparison A),
+    hcomparison A⟩
 
 end LowDegreeFiniteReplacement
 end ModularCurves
