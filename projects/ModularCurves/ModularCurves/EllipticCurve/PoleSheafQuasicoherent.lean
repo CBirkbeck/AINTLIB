@@ -9,7 +9,7 @@ quasicoherent. This is the sheaf-theoretic input required by affine vanishing an
 cohomology-and-base-change arguments.
 -/
 
-open AlgebraicGeometry CategoryTheory
+open AlgebraicGeometry CategoryTheory Limits
 
 universe u
 
@@ -44,5 +44,20 @@ theorem sectionPoleSheafPower_isFinitePresentation
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
     (sectionPoleSheafPower π z hz n).IsFinitePresentation :=
   (sectionPoleSheafPower_isInvertible hsm z hz n).isFinitePresentation
+
+/-- The quotient between two consecutive pole sheaves. -/
+noncomputable def sectionPoleSheafSuccCoker
+    {C S : Scheme.{u}} (π : C ⟶ S) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) : C.Modules :=
+  cokernel (sectionPoleSheafSuccHom π z hz n)
+
+/-- A successive pole-filtration quotient is a finitely presented scheme module. -/
+theorem sectionPoleSheafSuccCoker_isFinitePresentation
+    {C S : Scheme.{u}} {π : C ⟶ S} (hsm : SmoothOfRelativeDimension 1 π)
+    [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    (sectionPoleSheafSuccCoker π z hz n).IsFinitePresentation :=
+  (sectionPoleSheafPower_isInvertible hsm z hz n).cokernel_isFinitePresentation
+    (sectionPoleSheafPower_isInvertible hsm z hz (n + 1))
+    (sectionPoleSheafSuccHom π z hz n)
 
 end ModularCurves
