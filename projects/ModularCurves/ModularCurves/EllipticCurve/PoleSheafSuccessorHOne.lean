@@ -70,4 +70,35 @@ theorem sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_open_cover
       hoverlapSheaf.elim 0 a
     exact ⟨0, 0, by simpa using ha⟩
 
+/-- A successive pole quotient has vanishing first cohomology when an affine open
+contains the section. -/
+theorem sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_neighborhood
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤) :
+    Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafSuccCoker π z hz n).sheaf 1) := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  let V : C.Opens :=
+    ⟨(Set.range ⇑z)ᶜ, z.isClosedEmbedding.isClosed_range.isOpen_compl⟩
+  have hV : z ⁻¹ᵁ V = ⊥ := by
+    ext s
+    change z s ∈ (Set.range ⇑z)ᶜ ↔ s ∈ (⊥ : S.Opens)
+    simp
+  have hUV : U.1 ⊔ V = ⊤ := by
+    ext c
+    change c ∈ (U.1 : Set C) ∪ (Set.range ⇑z)ᶜ ↔ c ∈ Set.univ
+    simp only [Set.mem_union, Set.mem_compl_iff, Set.mem_univ, iff_true]
+    by_cases hc : c ∈ Set.range ⇑z
+    · left
+      obtain ⟨s, rfl⟩ := hc
+      have hs : s ∈ z ⁻¹ᵁ U.1 := by
+        rw [hU]
+        trivial
+      exact hs
+    · exact Or.inr hc
+  exact sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_open_cover
+    hsm z hz n U V hUV hV
+
 end ModularCurves
