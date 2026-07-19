@@ -234,6 +234,59 @@ structure ScaleTorsorData (X : EllObj R) (h2 : NIsInvertible X.base 2) where
         IsLegendreDatum (X.pullbackAlong g)
           (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b })
 
+/-! ## Step-(iv) assembly infrastructure (banked)
+
+The sections classification `scaleTorsor_spec` is a bijection between two `μ₂`-pseudotorsors
+— on the left the `T`-sections of the glued square-root cover (the two sheets of the double
+cover, `IsLegendreDatum.neg` on the datum side), on the right the `ω`-bases completing the
+level structure to a Legendre datum (pinned to a `μ₂`-torsor by
+`IsLegendreDatum.unit_sq_eq_one` + `OmegaBasis.existsUnique_unit_smul`). The two helpers
+below are the generic and the right-hand-side halves of that final assembly, both
+sorry-free; see the note on `scaleTorsor_spec` for the residual left-hand-side gap. -/
+
+/-- A type carrying a free, transitive `M`-action (a torsor, once a basepoint is fixed) is
+equivalent to `M`: `a ↦ the unique m with m • a₀ = a`. Only freeness and transitivity
+*at the basepoint* `a₀` are used. -/
+noncomputable def Equiv.ofBasepointTorsor {M A : Type*} (act : M → A → A) (a₀ : A)
+    (free : ∀ m m' : M, act m a₀ = act m' a₀ → m = m')
+    (trans : ∀ a : A, ∃ m, act m a₀ = a) : A ≃ M where
+  toFun a := (trans a).choose
+  invFun m := act m a₀
+  left_inv a := (trans a).choose_spec
+  right_inv m := free _ _ (trans (act m a₀)).choose_spec
+
+/-- **(Step (iv) — the generic torsor-matching combinator.)** Two `M`-torsors that are
+simultaneously (non)empty are equinumerous. This reduces the sections classification to:
+each side is a free transitive `μ₂`-set, and one side is nonempty iff the other is. -/
+theorem nonempty_equiv_of_pseudotorsor {M A B : Type*}
+    (actA : M → A → A) (actB : M → B → B)
+    (freeA : ∀ (a₀ : A) (m m' : M), actA m a₀ = actA m' a₀ → m = m')
+    (transA : ∀ a a' : A, ∃ m, actA m a = a')
+    (freeB : ∀ (b₀ : B) (m m' : M), actB m b₀ = actB m' b₀ → m = m')
+    (transB : ∀ b b' : B, ∃ m, actB m b = b')
+    (hAB : Nonempty A ↔ Nonempty B) : Nonempty (A ≃ B) := by
+  by_cases hA : Nonempty A
+  · obtain ⟨a₀⟩ := hA
+    obtain ⟨b₀⟩ := hAB.mp ⟨a₀⟩
+    exact ⟨(Equiv.ofBasepointTorsor actA a₀ (freeA a₀) (fun a => transA a₀ a)).trans
+      (Equiv.ofBasepointTorsor actB b₀ (freeB b₀) (fun b => transB b₀ b)).symm⟩
+  · have hB : ¬ Nonempty B := fun h => hA (hAB.mpr h)
+    rw [not_nonempty_iff] at hA hB
+    exact ⟨Equiv.equivOfIsEmpty A B⟩
+
+/-- **(Step (iv) — the right-hand-side `μ₂`-torsor pinning.)** Any two `ω`-bases completing
+the same level structure to a Legendre datum are connected by a unique global unit `g`
+(`OmegaBasis.existsUnique_unit_smul`), and that unit is a square root of one
+(`IsLegendreDatum.unit_sq_eq_one`): the transitivity input of `nonempty_equiv_of_pseudotorsor`
+for the basis side. -/
+theorem isLegendreDatum_exists_connecting_sqrtOne {X : EllObj R}
+    (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    {L : X.curve.FullLevelPt 2} {b b' : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (hD' : IsLegendreDatum X L b') :
+    ∃ g : Γ(X.base, ⊤)ˣ, g • b = b' ∧ g ^ 2 = 1 := by
+  obtain ⟨g, hg, -⟩ := OmegaBasis.existsUnique_unit_smul b b'
+  exact ⟨g, hg, IsLegendreDatum.unit_sq_eq_one h2 hD hD' g hg⟩
+
 /-! ## The build: the glued square-root cover
 
 The carrier of the scale-torsor is built as a mathlib `RelativeGluingData` over the
