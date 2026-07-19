@@ -95,6 +95,45 @@ theorem baseSections_smul
   rw [hinner, htop]
   simp
 
+/-- Base-linear global sections agree with top sections equipped with the
+directly restricted scalar action. -/
+noncomputable def baseSectionsIsoRestrictScalarsTop
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules) :
+    baseSections π M ≅
+      (ModuleCat.restrictScalars π.appTop.hom).obj
+        (ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(M, (⊤ : X.Opens))) := by
+  let D := (ModuleCat.restrictScalars π.appTop.hom).obj
+    (ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(M, (⊤ : X.Opens)))
+  let eAdd : (baseSections π M : Type u) ≃+ (D : Type u) := AddEquiv.refl _
+  let eLin : (baseSections π M : Type u) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      (D : Type u) :=
+    { eAdd with
+      map_smul' := by
+        intro r x
+        change (show Γ(M, (⊤ : X.Opens)) from r • x) =
+          π.appTop.hom r • (show Γ(M, (⊤ : X.Opens)) from x)
+        exact baseSections_smul π M r x }
+  exact eLin.toModuleIso
+
+/-- A bijective restriction map identifies base-linear global sections with
+top sections of the module restricted to that open. -/
+noncomputable def baseSectionsRestrictIsoOfBijective
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules) (U : X.Opens)
+    (hbij : Function.Bijective fun s : Γ(M, (⊤ : X.Opens)) ↦
+      M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op s) :
+    baseSections π M ≅
+      baseSections (U.ι ≫ π) (M.restrict U.ι) := by
+  let res := (baseModulePresheaf π M).map
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op
+  have hres : Function.Bijective res.hom := by
+    change Function.Bijective fun s : Γ(M, (⊤ : X.Opens)) ↦
+      M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op s
+    exact hbij
+  exact (LinearEquiv.ofBijective res.hom hres).toModuleIso ≪≫
+    baseModulePresheafRestrictIso π M U ≪≫
+      (baseSectionsIsoRestrictScalarsTop
+        (U.ι ≫ π) (M.restrict U.ι)).symm
+
 /-- The base-linear global sections of the pushed-forward structure module
 along a section form the regular module of global functions on the base. -/
 noncomputable def baseSectionsPushforwardUnitIsoOfSection
