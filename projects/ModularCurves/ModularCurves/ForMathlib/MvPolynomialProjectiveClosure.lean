@@ -220,6 +220,29 @@ lemma homogenizedChartRingEquiv_mk
         (X none : MvPolynomial (Option σ) R) (optionChartRingEquiv.symm p) := by
   rfl
 
+/-- The original affine presentation as the homogenizing-coordinate chart of its projective
+closure. -/
+noncomputable def homogenizedChartOpen
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    Spec (.of (MvPolynomial σ R ⧸ Ideal.span (Set.range g))) ⟶
+      homogenizedProj g d :=
+  Spec.map (homogenizedChartRingEquiv g d hdeg).toCommRingCatIso.inv ≫
+    Proj.awayι (quotientGrading (homogenizedIdeal g d))
+      ((quotientGradingHom (homogenizedIdeal g d))
+        (X none : MvPolynomial (Option σ) R))
+      (mk_mem_quotientGrading (homogenizedIdeal g d)
+        (X_mem_homogeneousSubmodule_one R (none : Option σ))) one_pos
+
+/-- The affine chart map into the homogenized projective closure is an open immersion. -/
+lemma homogenizedChartOpen_isOpenImmersion
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    IsOpenImmersion (homogenizedChartOpen g d hdeg) := by
+  unfold homogenizedChartOpen
+  exact @IsOpenImmersion.comp _ _ _ _ _ (by infer_instance)
+    (Proj.instIsOpenImmersionAwayι _ _ _ _)
+
 end OptionChart
 
 end
