@@ -130,6 +130,127 @@ noncomputable def baseSectionsPushforwardUnitIsoOfSection
         exact hbase.trans (by rw [hr]) }
   exact eLin.toModuleIso
 
+private theorem restrictPushforwardUnit_baseScalar
+    {C S : Scheme.{u}} (π : C ⟶ S) (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.Opens) (hU : z ⁻¹ᵁ U = ⊤)
+    (htop : (⊤ : S.Opens) =
+      z ⁻¹ᵁ (U.ι ''ᵁ (⊤ : U.toScheme.Opens)))
+    (r : Γ(S, (⊤ : S.Opens))) :
+    S.presheaf.map (eqToHom htop).op
+      (z.app (U.ι ''ᵁ (⊤ : U.toScheme.Opens))
+        ((U.ι.appIso (⊤ : U.toScheme.Opens)).inv
+          ((U.ι ≫ π).appTop.hom r))) = r := by
+  have hzrange : Set.range ⇑z ⊆ Set.range ⇑U.ι := by
+    rintro _ ⟨s, rfl⟩
+    have hs : s ∈ z ⁻¹ᵁ U := by
+      rw [hU]
+      trivial
+    exact ⟨⟨z s, hs⟩, rfl⟩
+  let zU : S ⟶ U.toScheme := IsOpenImmersion.lift U.ι z hzrange
+  have hzU : zU ≫ (U.ι ≫ π) = 𝟙 S := by
+    rw [← Category.assoc, show zU ≫ U.ι = z by
+      exact IsOpenImmersion.lift_fac U.ι z hzrange, hz]
+  have hlift : S.presheaf.map (eqToHom htop).op
+      (z.app (U.ι ''ᵁ (⊤ : U.toScheme.Opens))
+        ((U.ι.appIso (⊤ : U.toScheme.Opens)).inv
+          ((U.ι ≫ π).appTop.hom r))) =
+        zU.appTop ((U.ι ≫ π).appTop.hom r) := by
+    convert ConcreteCategory.congr_hom
+      (IsOpenImmersion.lift_app U.ι z hzrange
+        (⊤ : U.toScheme.Opens)).symm
+      ((U.ι ≫ π).appTop.hom r) using 1
+    · simp
+    · rfl
+    · rfl
+  rw [hlift]
+  have happ : (zU ≫ (U.ι ≫ π)).appTop =
+      Scheme.Hom.appTop (𝟙 S) :=
+    congrArg Scheme.Hom.appTop hzU
+  rw [Scheme.Hom.comp_appTop] at happ
+  have hr := ConcreteCategory.congr_hom happ r
+  simpa using hr
+
+/-- If a section lies in an open neighborhood, the base-linear top sections
+of its restricted pushed-forward structure module form the regular base
+module. -/
+noncomputable def baseSectionsRestrictPushforwardUnitIsoOfSection
+    {C S : Scheme.{u}} (π : C ⟶ S) (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.Opens) (hU : z ⁻¹ᵁ U = ⊤) :
+    baseSections (U.ι ≫ π)
+        ((restrictFunctor U.ι).obj ((pushforward z).obj
+          (_root_.SheafOfModules.unit S.ringCatSheaf))) ≅
+      ModuleCat.of Γ(S, (⊤ : S.Opens)) Γ(S, (⊤ : S.Opens)) := by
+  let OS : S.Modules := _root_.SheafOfModules.unit S.ringCatSheaf
+  let N := (pushforward z).obj OS
+  have htop : (⊤ : S.Opens) =
+      z ⁻¹ᵁ (U.ι ''ᵁ (⊤ : U.toScheme.Opens)) := by
+    rw [U.ι_image_top, hU]
+  let eAdd : Γ(N.restrict U.ι, (⊤ : U.toScheme.Opens)) ≅
+      Γ(OS, (⊤ : S.Opens)) :=
+    N.restrictAppIso U.ι (⊤ : U.toScheme.Opens) ≪≫
+      OS.presheaf.mapIso (eqToIso htop).op
+  let eMap (q : Γ(N.restrict U.ι, (⊤ : U.toScheme.Opens))) :
+      Γ(OS, (⊤ : S.Opens)) :=
+    OS.presheaf.map (eqToHom htop).op
+      ((N.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).hom q)
+  have heAdd (q : Γ(N.restrict U.ι, (⊤ : U.toScheme.Opens))) :
+      eAdd.hom q = eMap q := rfl
+  let eLin :
+      (baseSections (U.ι ≫ π)
+        ((restrictFunctor U.ι).obj ((pushforward z).obj OS)) :
+          Type u) ≃ₗ[Γ(S, (⊤ : S.Opens))] Γ(S, (⊤ : S.Opens)) :=
+    { AddEquiv.ofBijective eAdd.hom.hom
+        (ConcreteCategory.bijective_of_isIso eAdd.hom) with
+      map_smul' := by
+        intro r x
+        let x' : Γ(N.restrict U.ι, (⊤ : U.toScheme.Opens)) := x
+        have hbase := baseSections_smul (U.ι ≫ π) (N.restrict U.ι) r x'
+        change (show Γ(N.restrict U.ι, (⊤ : U.toScheme.Opens)) from r • x) =
+          (U.ι ≫ π).appTop.hom r • x' at hbase
+        change (show Γ(S, (⊤ : S.Opens)) from eAdd.hom (r • x)) =
+          r * (show Γ(S, (⊤ : S.Opens)) from eAdd.hom x')
+        calc
+          (show Γ(S, (⊤ : S.Opens)) from eAdd.hom (r • x)) =
+              (show Γ(S, (⊤ : S.Opens)) from
+                eAdd.hom ((U.ι ≫ π).appTop.hom r • x')) := by
+            exact congrArg
+              (fun q : Γ(N.restrict U.ι, (⊤ : U.toScheme.Opens)) ↦
+                (show Γ(S, (⊤ : S.Opens)) from eAdd.hom q)) hbase
+          _ = r * (show Γ(S, (⊤ : S.Opens)) from eAdd.hom x') := by
+            calc
+              (show Γ(S, (⊤ : S.Opens)) from
+                  eAdd.hom ((U.ι ≫ π).appTop.hom r • x')) =
+                  (show Γ(S, (⊤ : S.Opens)) from
+                    eMap ((U.ι ≫ π).appTop.hom r • x')) := by
+                exact congrArg
+                  (fun q : Γ(OS, (⊤ : S.Opens)) ↦
+                    (show Γ(S, (⊤ : S.Opens)) from q))
+                  (heAdd _)
+              _ = r * (show Γ(S, (⊤ : S.Opens)) from eMap x') := by
+                dsimp only [eMap]
+                rw [smul_restrictAppIso_hom_apply]
+                change S.presheaf.map (eqToHom htop).op
+                    (z.app (U.ι ''ᵁ (⊤ : U.toScheme.Opens))
+                        ((U.ι.appIso (⊤ : U.toScheme.Opens)).inv
+                          ((U.ι ≫ π).appTop.hom r)) *
+                      (show Γ(S, z ⁻¹ᵁ
+                        (U.ι ''ᵁ (⊤ : U.toScheme.Opens))) from
+                          (N.restrictAppIso U.ι
+                            (⊤ : U.toScheme.Opens)).hom x')) =
+                  r * S.presheaf.map (eqToHom htop).op
+                    (show Γ(S, z ⁻¹ᵁ
+                      (U.ι ''ᵁ (⊤ : U.toScheme.Opens))) from
+                        (N.restrictAppIso U.ι
+                          (⊤ : U.toScheme.Opens)).hom x')
+                rw [map_mul]
+                rw [restrictPushforwardUnit_baseScalar π z hz U hU htop]
+              _ = r * (show Γ(S, (⊤ : S.Opens)) from eAdd.hom x') := by
+                exact congrArg
+                  (fun q : Γ(OS, (⊤ : S.Opens)) ↦
+                    r * (show Γ(S, (⊤ : S.Opens)) from q))
+                  (heAdd x').symm }
+  exact eLin.toModuleIso
+
 /-- Restriction of global sections to the degree-zero term of the base-linear
 Cech complex. -/
 noncomputable def baseCechAugmentation
