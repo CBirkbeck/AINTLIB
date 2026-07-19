@@ -15,7 +15,8 @@ namespace ModularCurves
 
 noncomputable section
 
-local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+local instance poleSheafMulFiltrationMonoidalCategory (X : Scheme.{u}) :
+    MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 private theorem tensor_succ_mul
