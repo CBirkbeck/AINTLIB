@@ -43,6 +43,24 @@ lemma chartToFactor_comp (i : ι) :
       (chart p j q g hf i).ι ≫ proj p q (coordinates j g) hf i :=
   IsOpenImmersion.lift_fac _ _ _
 
+/-- An inverse-image chart is the base change of its closure projection along the original
+open immersion. -/
+lemma chartToFactor_isPullback (i : ι) :
+    IsPullback (chartToFactor p j q g hf i)
+      (chart p j q g hf i).ι (j i)
+      (proj p q (coordinates j g) hf i) := by
+  apply IsOpenImmersion.isPullback
+  · exact (chartToFactor_comp p j q g hf i).symm
+  · rw [Scheme.Opens.opensRange_ι]
+
+/-- Each inverse-image chart is proper over the corresponding original chart. -/
+lemma chartToFactor_isProper (hp : ∀ i, IsProper (p i)) (i : ι) :
+    IsProper (chartToFactor p j q g hf i) := by
+  letI : IsProper (proj p q (coordinates j g) hf i) :=
+    proj_isProper p q (coordinates j g) hf hp i
+  exact MorphismProperty.of_isPullback
+    (chartToFactor_isPullback p j q g hf i).flip inferInstance
+
 variable (a : ∀ i, U i ⟶ X)
 
 /-- The map from an inverse-image chart to the original scheme. -/
