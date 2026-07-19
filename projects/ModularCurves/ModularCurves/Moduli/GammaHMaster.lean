@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.Moduli.KeystoneGeometricPoint
+import ModularCurves.Moduli.EngineWiring
 import ModularCurves.EllipticCurve.TorsionRestrict
 import ModularCurves.EllipticCurve.ExactOrderRigidity
 import ModularCurves.ForMathlib.UnramifiedEqualizer
@@ -1124,9 +1125,9 @@ theorem gammaH_representable_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : �
         isoPow e (orderOf ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) =
           Iso.refl _ → False) :
     qpd.prob.Representable :=
-  (ModuliProblem.representable_iff_rigidNoeth qpd.prob qpd.affineOverEll).mpr
-    ⟨qpd.affineOverEll.relativelyRepresentable,
-     gammaH_rigidNoeth_of_orderOf R N hN H hinv qpd hH⟩
+  ModuliProblem.representable_of_affineOverEll_of_rigidNoeth qpd.prob qpd.affineOverEll
+    qpd.affineOverEll.relativelyRepresentable
+    (gammaH_rigidNoeth_of_orderOf R N hN H hinv qpd hH)
 
 open EllipticCurve in
 /-- **[Γ₁ k̄-core] (T-H9's rigidity content at a geometric point)** — over k̄, no
@@ -1302,9 +1303,9 @@ theorem gammaOneDrinfeld_representable_prep (N : ℕ) [NeZero N] (hN : 4 ≤ N)
           = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P →
         ε = 𝟙 E.asOver) :
     (gammaOneDrinfeldProblem R N).Representable :=
-  (ModuliProblem.representable_iff_rigidNoeth _ (gammaOneDrinfeld_affineOverEll N)).mpr
-    ⟨(gammaOneDrinfeld_affineOverEll N).relativelyRepresentable,
-     gammaOneDrinfeld_rigidNoeth R N hN hinv hbound⟩
+  ModuliProblem.representable_of_affineOverEll_of_rigidNoeth _ (gammaOneDrinfeld_affineOverEll N)
+    (gammaOneDrinfeld_affineOverEll N).relativelyRepresentable
+    (gammaOneDrinfeld_rigidNoeth R N hN hinv hbound)
 
 /-- **[Γ(N) rigidity] (KM 2.7.2 upgraded to the quotient problem at `H = ⊥`)** — the
 quotient problem `P_⊥ = [Γ(N)]` is rigid for `N ≥ 3` invertible, with the k̄
@@ -1339,9 +1340,9 @@ theorem gammaBot_representable (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (qpd : ModuliProblem.QuotientProblemData
       (gammaHAut R N (⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))))) :
     qpd.prob.Representable :=
-  (ModuliProblem.representable_iff_rigidNoeth qpd.prob qpd.affineOverEll).mpr
-    ⟨qpd.affineOverEll.relativelyRepresentable,
-     gammaBot_rigidNoeth R N hN hinv qpd⟩
+  ModuliProblem.representable_of_affineOverEll_of_rigidNoeth qpd.prob qpd.affineOverEll
+    qpd.affineOverEll.relativelyRepresentable
+    (gammaBot_rigidNoeth R N hN hinv qpd)
 
 
 /-- **[Γ_H MASTER, interface] (KM 4.7.0 for `P_H`; Loeffler 3.8.2 upgraded to a fine

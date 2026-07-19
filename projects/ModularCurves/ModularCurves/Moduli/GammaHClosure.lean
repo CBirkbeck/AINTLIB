@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.GammaHMaster
 import ModularCurves.Moduli.KeystoneGeometricPoint
+import ModularCurves.Moduli.EngineWiring
 
 /-!
 # The T-H8/T-H9 closure layer: Drinfeld representability from the boxed keystones
@@ -117,10 +118,10 @@ theorem gammaFullNaive_rigid_and_representable (N : ℕ) [NeZero N] (hN : 3 ≤ 
     (hinv : IsUnit (N : R)) :
     (gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable := by
   have hrep : (gammaFullNaiveProblem R N).Representable :=
-    (ModuliProblem.representable_iff_rigidNoeth _
-      (gammaFullNaive_affineOverEll R N hinv)).mpr
-      ⟨(gammaFullNaive_affineOverEll R N hinv).relativelyRepresentable,
-       gammaFullNaive_rigidNoeth R N hN hinv⟩
+    ModuliProblem.representable_of_affineOverEll_of_rigidNoeth _
+      (gammaFullNaive_affineOverEll R N hinv)
+      (gammaFullNaive_affineOverEll R N hinv).relativelyRepresentable
+      (gammaFullNaive_rigidNoeth R N hN hinv)
   exact ⟨ModuliProblem.rigid_of_representable hrep, hrep⟩
 
 /-- **[T-H8 CONTENT] (GME Thm 2.6.8 scope; KM 4.7.2/5.1)** — the closure form of
@@ -135,10 +136,10 @@ theorem gammaFullDrinfeld_rigid_and_representable (N : ℕ) [NeZero N] (hN : 3 �
     (gammaFullDrinfeldProblem R N).Rigid ∧
       (gammaFullDrinfeldProblem R N).Representable := by
   have hnaive : (gammaFullNaiveProblem R N).Representable :=
-    (ModuliProblem.representable_iff_rigidNoeth _
-      (gammaFullNaive_affineOverEll R N hinv)).mpr
-      ⟨(gammaFullNaive_affineOverEll R N hinv).relativelyRepresentable,
-       gammaFullNaive_rigidNoeth R N hN hinv⟩
+    ModuliProblem.representable_of_affineOverEll_of_rigidNoeth _
+      (gammaFullNaive_affineOverEll R N hinv)
+      (gammaFullNaive_affineOverEll R N hinv).relativelyRepresentable
+      (gammaFullNaive_rigidNoeth R N hN hinv)
   have hrep : (gammaFullDrinfeldProblem R N).Representable :=
     ModuliProblem.representable_of_iso (gammaFullDrinfeldNaiveIso R N hinv) hnaive
   exact ⟨ModuliProblem.rigid_of_representable hrep, hrep⟩
