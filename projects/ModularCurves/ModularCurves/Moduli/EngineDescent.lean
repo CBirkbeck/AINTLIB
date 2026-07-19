@@ -1138,6 +1138,55 @@ private theorem isElliptic_of_map_fixedAwayMap {A : Type u} [CommRing A]
     exact u.mul_inv
   exact IsUnit.of_mul_eq_one _ hone
 
+/-- **`G`-invariant descent along `fixedAwayMap`** (the localized companion of `descendFixed`).
+A Weierstrass curve `W` over `A_a = Localization.Away (a : A)` whose coefficients are all
+`G`-fixed for the localized action `MulSemiringAction.away` descends to a Weierstrass curve `W₁`
+over `(Aᴳ)_a = Localization.Away a` with `W₁.map (fixedAwayMap a) = W`. Each coefficient, being
+`G`-fixed, is a fraction with fixed numerator (`exists_fixed_smul_mk'_eq`), hence in the image of
+`fixedAwayMap a`; the preimages assemble the descended curve, and the defining property of each
+preimage gives the base-change identity coefficientwise. -/
+private theorem descendFixedAway {A : Type u} [CommRing A]
+    [MulSemiringAction G A] [Finite G] (a : FixedPoints.subring A G)
+    (W : WeierstrassCurve (Localization.Away ((a : A))))
+    (hinv : ∀ g : G,
+      W.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g) = W) :
+    ∃ W₁ : WeierstrassCurve (Localization.Away a), W₁.map (fixedAwayMap a) = W := by
+  classical
+  have hfixA : ∀ g : G, g • ((a : A)) = (a : A) := fun g => a.2 g
+  letI := MulSemiringAction.away hfixA
+  have hcomp : ∀ (g : G) (r : A),
+      g • (algebraMap A (Localization.Away ((a : A))) r)
+        = algebraMap A (Localization.Away ((a : A))) (g • r) := fun g r =>
+    MulSemiringAction.awayHom_algebraMap hfixA g r
+  have hS : ∀ (g : G), ∀ x ∈ Submonoid.powers ((a : A)), g • x = x := by
+    rintro g x ⟨n, rfl⟩
+    rw [smul_pow', hfixA]
+  -- every `G`-fixed element of `A_a` is in the image of `fixedAwayMap a`
+  have himg : ∀ x : Localization.Away ((a : A)), (∀ g : G, g • x = x) →
+      ∃ c : Localization.Away a, fixedAwayMap a c = x := by
+    intro x hx
+    obtain ⟨b, s, hb, hmk⟩ := exists_fixed_smul_mk'_eq hcomp hS x hx
+    obtain ⟨n, hn⟩ : ∃ n : ℕ, ((a : A)) ^ n = (s : A) := s.2
+    have hmkc : ∀ (b₁ b₂ : A) (s₁ s₂ : Submonoid.powers ((a : A))), b₁ = b₂ →
+        (s₁ : A) = (s₂ : A) → IsLocalization.mk' (Localization.Away ((a : A))) b₁ s₁
+          = IsLocalization.mk' _ b₂ s₂ := by
+      rintro b₁ b₂ s₁ s₂ rfl hs
+      exact congrArg _ (Subtype.ext hs)
+    refine ⟨IsLocalization.mk' (Localization.Away a)
+      (⟨b, hb⟩ : FixedPoints.subring A G) (⟨a ^ n, n, rfl⟩ : Submonoid.powers a), ?_⟩
+    rw [fixedAwayMap, IsLocalization.map_mk']
+    refine (hmkc _ _ _ _ rfl ?_).trans hmk
+    show ((algebraMap (FixedPoints.subring A G) A) (a ^ n) : A) = (s : A)
+    rw [map_pow, ← hn]
+    rfl
+  -- each coefficient of `W` is `G`-fixed (the localized action is `map (awayHom …)`)
+  obtain ⟨c₁, hc₁⟩ := himg W.a₁ (fun g => congrArg WeierstrassCurve.a₁ (hinv g))
+  obtain ⟨c₂, hc₂⟩ := himg W.a₂ (fun g => congrArg WeierstrassCurve.a₂ (hinv g))
+  obtain ⟨c₃, hc₃⟩ := himg W.a₃ (fun g => congrArg WeierstrassCurve.a₃ (hinv g))
+  obtain ⟨c₄, hc₄⟩ := himg W.a₄ (fun g => congrArg WeierstrassCurve.a₄ (hinv g))
+  obtain ⟨c₆, hc₆⟩ := himg W.a₆ (fun g => congrArg WeierstrassCurve.a₆ (hinv g))
+  exact ⟨⟨c₁, c₂, c₃, c₄, c₆⟩, WeierstrassCurve.ext hc₁ hc₂ hc₃ hc₄ hc₆⟩
+
 /-- **([a5-W6], the per-point chart — ABSTRACT)** The `LocallyWeierstrass` chart package at a
 point `s` of `Spec Aᴳ`, over an abstract ring `A` (all instances opaque — no `whnf` grind).
 The geometry (the quotient cover `qE`, the model `φA`, the action family, the restricted
@@ -2249,46 +2298,101 @@ compatibilities `hπ'c`/`hzero'c` tying it to the descended structure maps (the 
 owed statement fix — for a wild pair the statement is FALSE, see the deleted `[a5-pair]`
 counterexample in the git history). `locallyWeierstrass_quotientπ_of_compat` is the true,
 board-owned `[a5]` content. Its engine consumption is now PROVEN in full generality
-(`lw_chart_at_of_localModel`, no global model needed); the ONE residual leaf is the localized
-model package `exists_localModel_package_at` — the a5-P-loc semilocal gluing. The empty-base
+(`lw_chart_at_of_localModel`, no global model needed); the ONE residual leaf is the geometric
+core `exists_localModel_core_at` — the a5-P-loc semilocal gluing — from which the full localized
+model package `exists_localModel_package_at` is assembled (`descendFixedAway`). The empty-base
 case and the assembly are proven. -/
 
 open WeierstrassCurve in
-/-- **([a5-P-loc], the localized model package — THE residual leaf, board-owned)** At every
-prime `s` of `Aᴳ = Γ(X,⊤)ᴳ` there is an invariant `a ∉ s` over whose basic open the curve
-acquires a global Weierstrass model compatible with the `G`-action: the model `W₀R / A_a`,
-with `projModel W₀R` presented as the restriction of `E` along `Spec A_a ⟶ Spec A ≅ X`
-(`ρR`/the pullback square/the zero-leg), the `VariableChange` cocycle `CvcR / A_a` presenting
-the geometric action through `ρR` (T-W7.1b at the `A_a`-level), and the Hilbert-90 descent
-data `W₁ / (Aᴳ)_a`, `E` with the coboundary identity.
+/-- **([a5-P-loc], the geometric core — THE residual leaf, board-owned)** At every prime `s` of
+`Aᴳ = Γ(X,⊤)ᴳ` there is an invariant `a ∉ s` over whose basic open the curve acquires a global
+Weierstrass model compatible with the `G`-action: the model `W₀R / A_a`, with `projModel W₀R`
+presented as the restriction of `E` along `Spec A_a ⟶ Spec A ≅ X` (`ρR`/the pullback
+square/the zero-leg), the `VariableChange` cocycle `CvcR / A_a` presenting the geometric action
+through `ρR` (T-W7.1b at the `A_a`-level), and the coboundary `E` splitting `CvcR` over `A_a`
+(`CvcR g = E * (g • E)⁻¹`).
 
-Everything downstream is PROVEN: `lw_chart_at_of_localModel` consumes exactly this package
-and lands the `LocallyWeierstrass` chart at `s` (see
-`locallyWeierstrass_quotientπ_of_compat` below). With a *global* model the package is
-immediate (`W₀R := W₀.map (algebraMap _ _)`, `ρR := projModelBaseChange ≫ φ.inv`,
-`CvcR g := (Cvc g).map _` — this is how `locallyWeierstrass_quotientπ_of_globalModel`
-specializes), but in general a global model is obstructed by the class of `ω` in
-`Pic Γ(X,⊤)`, and the package must be produced semilocally:
+This is the whole geometric content. `exists_localModel_package_at` peels off the Hilbert-90
+descended model `W₁ / (Aᴳ)_a` for free (`E⁻¹ • W₀R` is `G`-invariant, so `descendFixedAway`
+descends it), and `lw_chart_at_of_localModel` then consumes the full package and lands the
+`LocallyWeierstrass` chart at `s` (see `locallyWeierstrass_quotientπ_of_compat` below).
 
-Proof plan (KM 2.2.5–2.2.6 + the a5-P-loc board): the fibre of `Spec A → Spec Aᴳ` over `s` is
-one finite `G`-orbit (`Aᴳ ⊆ A` is an invariant-integral extension; mathlib's
-`Algebra.IsInvariant` transitivity). Each orbit point has a `C.localModel` chart; shrink the
-charts to basic opens `D(f_i)`. Over the orbit's semilocalization `L := Localization S`,
-`S = s.primeCompl.map (algebraMap Aᴳ A)` (the ring of `exists_away_invariant_descent`,
-Part 1 — its fixed subring is LOCAL by `isLocalRing_fixedPoints_of_isLocalization`), the
-`D(f_i)` cover `Spec L` (every prime of the semilocal `L` lies under an orbit maximal, and
-`f_i ∉ q_i`), and the chart-difference `VariableChange` Čech 1-cocycle on this finite cover
-splits: the unit part because a unit-valued Čech cocycle on a semilocal ring is a coboundary
-(the maximal ideals are the finitely many orbit primes — the avoidance argument of
-`exists_unit_smul_eq_of_isLocalRing`), the additive part by the affine Čech vanishing
-(partition of unity in the `f_i`; cf. `exists_sub_smul_eq_of_isCocycle`). The corrected charts
-glue to a model over `L` (sheaf condition for the basic cover); T-W7.1b over `L`
-(`pointedIso_exists_variableChange`) gives the `G`-cocycle; `exists_coboundary` over `L`
-splits it and `descendFixed` produces `W₁`. Finally SPREAD: the finitely many coefficients,
-variable changes and identities have finitely many denominators in `S` — clear them into a
-single invariant `a ∉ s` exactly as in Part 2 of `exists_away_invariant_descent` — and glue
-the finitely many corrected chart isos over the basic cover of `D((a : A))` (e.g. by
-`Scheme.OpenCover.glueMorphisms`) to produce `ρR` and its two legs. -/
+With a *global* model the core is immediate (`W₀R := W₀.map (algebraMap _ _)`,
+`ρR := projModelBaseChange ≫ φ.inv`, `CvcR g := (Cvc g).map _`, `E` from `exists_coboundary` —
+this is how `locallyWeierstrass_quotientπ_of_globalModel` specializes), but in general a global
+model is obstructed by the class of `ω` in `Pic Γ(X,⊤)`, and the core must be produced
+semilocally:
+
+Proof plan (KM 2.2.5–2.2.6 + the a5-P-loc board):
+* **Charts.** The fibre of `Spec A → Spec Aᴳ` over `s` is one finite `G`-orbit (`Aᴳ ⊆ A` is an
+  invariant-integral extension; mathlib's `Algebra.IsInvariant` transitivity). Extract per-point
+  charts from `C.localModel` via `EllipticCurveGeom.atlas` / `WeierstrassAtlasData` (fields
+  `W`, `e`, `compat_π`, `compat_zero`; `LocalPresentation` for a single pointed chart) and shrink
+  to basic opens `D(f_i)`. The `G`-translates of one chart already cover the orbit (equivariance).
+* **Semilocalize.** Over `L := Localization S`, `S = s.primeCompl.map (algebraMap Aᴳ A)` (the ring
+  of `exists_away_invariant_descent` Part 1; `Localization S` action by `localizationInvariant`,
+  freeness by `isFreeAlgebraAction_of_isLocalization`), the fixed subring `Lᴳ` is LOCAL by
+  `isLocalRing_fixedPoints_of_isLocalization`, and the `D(f_i)` cover `Spec L`.
+* **Split the chart cocycle + glue the model over `L`.** The chart-difference `VariableChange`
+  Čech 1-cocycle (`InvariantDifferential.transVC` across overlapping charts) splits over the
+  semilocal `L`: unit part (avoidance of the finitely many orbit maximals; the `twistedInvariants`
+  module is projective hence free over `Lᴳ` — the mechanism inside
+  `exists_unit_smul_eq_of_isLocalRing`), additive part by affine Čech vanishing (partition of unity
+  in the `f_i`; cf. `exists_sub_smul_eq_of_isCocycle`). Correct the charts (cf. `AdaptedModel`,
+  `pointedIso_hom_of_transVC_eq_one`) and glue the coefficients (structure-sheaf sheaf condition on
+  the basic cover) to a model `W₀L / L`; the presentation `ρL` glues via
+  `Scheme.OpenCover.glueMorphisms` with overlaps discharged by `glueMorphisms_hf_of_agree`
+  (`SpecBasicOpenAway`); the two legs use `isPullback_projModelBaseChange` and
+  `projModelZero_baseChange`.
+* **`G`-cocycle + coboundary over `L`.** `pointedIso_exists_variableChange` (T-W7.1b) over `L`
+  gives `CvcL` (`isVCocycle_of_curveActionFamily'`); since `Lᴳ` is LOCAL, `exists_coboundary`
+  splits it to `E_L` directly (no spread needed at the `L` level).
+* **SPREAD to `A_a`.** The finitely many coefficients of `W₀L`, the entries of `CvcL`/`E_L`, and
+  the presentation `ρL` have finitely many denominators in `S`; clear them into a single invariant
+  `a ∉ s` exactly as in Part 2 of `exists_away_invariant_descent` (`fixedAwayMap`,
+  `mem_range_fixedPoints_awayMap_iff`, `existsUnique_factor_fixedPoints_away`), re-gluing the
+  finitely many corrected chart isos over the basic cover of `D((a : A))` to produce `ρR` and its
+  two legs; `hρact` follows from `projModelVCIso_*`. -/
+private theorem exists_localModel_core_at [Finite G] [IsAffine X]
+    (hact : IsCurveAction σ C σE)
+    (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∀ _s : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(X, ⊤) G))),
+    ∃ (a : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a ∉ _s.asIdeal)
+      (W₀R : WeierstrassCurve (Localization.Away ((a : ↑Γ(X, ⊤))))),
+      W₀R.IsElliptic ∧
+      ∃ ρR : projModel W₀R ⟶ C.E,
+        IsPullback (projModelπ W₀R) ρR
+          (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a : ↑Γ(X, ⊤))))))) (C.π ≫ X.isoSpec.hom) ∧
+        projModelZero W₀R ≫ ρR
+          = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+              (Localization.Away ((a : ↑Γ(X, ⊤)))))) ≫ X.isoSpec.inv ≫ C.zero ∧
+        ∃ (CvcR : G → VariableChange (Localization.Away ((a : ↑Γ(X, ⊤)))))
+          (hCvcR : ∀ g, CvcR g
+            • (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)) = W₀R),
+          (∀ g, (eqToHom (congrArg projModel (hCvcR g).symm)
+              ≫ (projModelVCIso (CvcR g)
+                  (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))).hom
+              ≫ projModelBaseChange (MulSemiringAction.awayHom
+                  (fun g' : G => a.2 g') g) W₀R) ≫ ρR = ρR ≫ σE.hom g) ∧
+          ∃ (E : VariableChange (Localization.Away ((a : ↑Γ(X, ⊤))))),
+            ∀ g : G, CvcR g
+              = E * (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹ := by
+  sorry
+
+open WeierstrassCurve in
+/-- **([a5-P-loc], the localized model package — assembled from the geometric core)** The full
+localized model package consumed by `lw_chart_at_of_localModel`. It is obtained from the
+geometric core `exists_localModel_core_at` — which supplies the localized model `W₀R / A_a`, its
+presentation `ρR` (pullback square + zero-leg), the geometric `VariableChange` cocycle `CvcR` with
+its action-compatibility `hρact`, and the coboundary `E` splitting `CvcR` over `A_a` — by peeling
+off the descended model `W₁ / (Aᴳ)_a`:
+
+`E⁻¹ • W₀R` is `G`-invariant (from `hCvcR` and the coboundary `CvcR g = E * (g • E)⁻¹`), so it
+descends along `fixedAwayMap a : (Aᴳ)_a ⟶ A_a` to `W₁` by `descendFixedAway`, and the coboundary
+identity is the required `hcob` verbatim. This isolates the whole geometric content into the single
+residual sub-leaf `exists_localModel_core_at`. -/
 private theorem exists_localModel_package_at [Finite G] [IsAffine X]
     (hact : IsCurveAction σ C σE)
     (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
@@ -2317,7 +2421,24 @@ private theorem exists_localModel_package_at [Finite G] [IsAffine X]
             W₁.map (fixedAwayMap a) = E⁻¹ • W₀R ∧
             ∀ g : G, CvcR g
               = E * (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹ := by
-  sorry
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  intro s
+  obtain ⟨a, hap, W₀R, hW₀R, ρR, hρsq, hρzero, CvcR, hCvcR, hρact, E, hEcob⟩ :=
+    exists_localModel_core_at hact hfreeX s
+  -- `E⁻¹ • W₀R` is `G`-invariant, using the coboundary identity and the model's invariance
+  have hInv : ∀ g : G,
+      (E⁻¹ • W₀R).map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g) = E⁻¹ • W₀R := by
+    intro g
+    rw [← map_variableChange,
+      show E⁻¹.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)
+          = (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹ from
+            map_inv (VariableChange.mapHom _) E,
+      show (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹ = E⁻¹ * CvcR g from by
+          rw [hEcob g, inv_mul_cancel_left],
+      mul_smul, hCvcR g]
+  -- descend the invariant model along `fixedAwayMap` to `(Aᴳ)_a`
+  obtain ⟨W₁, hW₁⟩ := descendFixedAway a (E⁻¹ • W₀R) hInv
+  exact ⟨a, hap, W₀R, hW₀R, ρR, hρsq, hρzero, CvcR, hCvcR, hρact, W₁, E, hW₁, hEcob⟩
 
 /-- **([a5-compat], the true half — ENGINE PROVEN; residual = the localized model package)**
 `locallyWeierstrass_quotientπ` for a section pair carrying the descent compatibilities
@@ -2326,8 +2447,9 @@ arrives at.
 
 PROVEN via the localized Phase-A engine: per point `s` of `X/G ≅ Spec Aᴳ`
 (`exists_quotientIsoSpec_top`), the localized model package `exists_localModel_package_at`
-(the ONE residual sorry — the a5-P-loc semilocal gluing, see its docstring for the boarded
-proof) feeds `lw_chart_at_of_localModel`, which lands the chart at `s`; `lw_of_baseIso`
+(now assembled from the geometric core `exists_localModel_core_at` — the ONE residual sorry, the
+a5-P-loc semilocal gluing, see its docstring for the boarded proof) feeds
+`lw_chart_at_of_localModel`, which lands the chart at `s`; `lw_of_baseIso`
 transports back along `qiso`. This is the general (`C.localModel`-only) route: `hVtop`
 trivialises the **base** atlas `V` only — a global model upstairs is genuinely obstructed
 (the class of `ω` in `Pic Γ(X,⊤)`), which is why the model data enters localized at an
