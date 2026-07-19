@@ -287,6 +287,71 @@ theorem isLegendreDatum_exists_connecting_sqrtOne {X : EllObj R}
   obtain ⟨g, hg, -⟩ := OmegaBasis.existsUnique_unit_smul b b'
   exact ⟨g, hg, IsLegendreDatum.unit_sq_eq_one h2 hD hD' g hg⟩
 
+/-- **(Step (iv) — the right-hand-side `μ₂`-action.)** The subgroup `μ₂ = {g : Γ(S,⊤)ˣ // g² = 1}`
+acts on the `ω`-bases completing a level structure `L` to a Legendre datum: `g • b`, which stays
+a Legendre datum by sublemma B1 (`IsLegendreDatum.smul_of_sq_eq_one`). This is the `actB` input of
+`nonempty_equiv_of_pseudotorsor` for the basis side. -/
+noncomputable def rhsMuTwoAct {X : EllObj R} (L : X.curve.FullLevelPt 2) :
+    {g : Γ(X.base, ⊤)ˣ // g ^ 2 = 1} →
+      {b : OmegaBasis X.curve.toEllipticCurveGeom // IsLegendreDatum X L b} →
+      {b : OmegaBasis X.curve.toEllipticCurveGeom // IsLegendreDatum X L b} :=
+  fun g b => ⟨g.1 • b.1, b.2.smul_of_sq_eq_one g.1 g.2⟩
+
+/-- **(Step (iv) — RHS freeness.)** The `μ₂`-action on Legendre-completing bases is free: if
+`g • b₀ = g' • b₀` then `g = g'`, since the `ω`-bases form a pseudotorsor under the global units
+(`OmegaBasis.existsUnique_unit_smul`). -/
+theorem rhsMuTwoAct_free {X : EllObj R} (L : X.curve.FullLevelPt 2)
+    (b₀ : {b : OmegaBasis X.curve.toEllipticCurveGeom // IsLegendreDatum X L b})
+    (g g' : {g : Γ(X.base, ⊤)ˣ // g ^ 2 = 1})
+    (h : rhsMuTwoAct R L g b₀ = rhsMuTwoAct R L g' b₀) : g = g' := by
+  apply Subtype.ext
+  have h1 : g.1 • b₀.1 = g'.1 • b₀.1 := congrArg Subtype.val h
+  exact (OmegaBasis.existsUnique_unit_smul b₀.1 (g.1 • b₀.1)).unique rfl h1.symm
+
+/-- **(Step (iv) — RHS transitivity.)** The `μ₂`-action on Legendre-completing bases is
+transitive: any two are connected by a square root of one
+(`isLegendreDatum_exists_connecting_sqrtOne`). Together with `rhsMuTwoAct_free` this exhibits the
+basis side as a free transitive `μ₂`-set. -/
+theorem rhsMuTwoAct_trans {X : EllObj R} (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (L : X.curve.FullLevelPt 2)
+    (b b' : {b : OmegaBasis X.curve.toEllipticCurveGeom // IsLegendreDatum X L b}) :
+    ∃ g, rhsMuTwoAct R L g b = b' := by
+  obtain ⟨g, hg, hg2⟩ := isLegendreDatum_exists_connecting_sqrtOne R h2 b.2 b'.2
+  exact ⟨⟨g, hg2⟩, Subtype.ext hg⟩
+
+/-- **(Piece 1 — the per-piece deck involution.)** The `A`-algebra automorphism `u ↦ -u`
+of a single square-root piece `(sqrtPair d).Ring`: the `μ₂`-deck generator of the sqrt
+double cover (`(-u)² = u² = d`, so `-u` is again a square root). This is the local
+`sqrtPairCongr`-style sign flip that glues to the deck involution of the scale-torsor. -/
+noncomputable def sqrtNegAut {A : Type u} [CommRing A] (d : Aˣ) (h2 : IsUnit (2 : A)) :
+    (sqrtPair d).Ring ≃ₐ[A] (sqrtPair d).Ring := by
+  have h2R : IsUnit (2 : (sqrtPair d).Ring) := by
+    have := h2.map (algebraMap A (sqrtPair d).Ring); rwa [map_ofNat] at this
+  have hmap : (sqrtPair d).HasMap (-(sqrtPair d).X) := by
+    rw [sqrtPair_hasMap_iff _ h2R, show (-(sqrtPair d).X) ^ 2 = (sqrtPair d).X ^ 2 from by ring,
+      sqrtPair_X_sq]
+  refine AlgEquiv.ofAlgHom ((sqrtPair d).lift (-(sqrtPair d).X) hmap)
+    ((sqrtPair d).lift (-(sqrtPair d).X) hmap) ?_ ?_ <;>
+    · refine StandardEtalePair.algHom_ext ?_
+      rw [AlgHom.comp_apply, StandardEtalePair.lift_X, map_neg, StandardEtalePair.lift_X,
+        neg_neg, AlgHom.id_apply]
+
+/-- `sqrtNegAut` sends the root to its negative. -/
+theorem sqrtNegAut_X {A : Type u} [CommRing A] (d : Aˣ) (h2 : IsUnit (2 : A)) :
+    sqrtNegAut d h2 (sqrtPair d).X = -(sqrtPair d).X := by
+  have h2R : IsUnit (2 : (sqrtPair d).Ring) := by
+    have := h2.map (algebraMap A (sqrtPair d).Ring); rwa [map_ofNat] at this
+  have hmap : (sqrtPair d).HasMap (-(sqrtPair d).X) := by
+    rw [sqrtPair_hasMap_iff _ h2R, show (-(sqrtPair d).X) ^ 2 = (sqrtPair d).X ^ 2 from by ring,
+      sqrtPair_X_sq]
+  exact (sqrtPair d).lift_X (-(sqrtPair d).X) hmap
+
+/-- `sqrtNegAut` fixes the base ring (it is an `A`-algebra map). -/
+theorem sqrtNegAut_algebraMap {A : Type u} [CommRing A] (d : Aˣ) (h2 : IsUnit (2 : A))
+    (a : A) : sqrtNegAut d h2 (algebraMap A (sqrtPair d).Ring a) =
+      algebraMap A (sqrtPair d).Ring a :=
+  AlgEquiv.commutes _ a
+
 /-! ## The build: the glued square-root cover
 
 The carrier of the scale-torsor is built as a mathlib `RelativeGluingData` over the
@@ -711,6 +776,31 @@ private theorem scaleTorsor_spec {T : Scheme.{u}} (g : T ⟶ X.base)
       { b : OmegaBasis (X.pullbackAlong g).curve.toEllipticCurveGeom //
         IsLegendreDatum (X.pullbackAlong g)
           (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b }) := by
+  -- **Assembly plan (via `nonempty_equiv_of_pseudotorsor`, `M := {ε : Γ(T,⊤)ˣ // ε² = 1}`).**
+  -- Write `L_w := X.curve.fullLevelLocusPointsEquiv 2 h2 g w` and
+  -- `h2T : IsUnit (2 : Γ(T,⊤))` (from `NIsInvertible.of_hom g h2`, `Nat.cast_ofNat`).
+  -- Apply `nonempty_equiv_of_pseudotorsor` with:
+  --   • RHS (basis side) — BANKED: `actB := rhsMuTwoAct R L_w`,
+  --     `freeB := rhsMuTwoAct_free R L_w`, `transB := rhsMuTwoAct_trans R h2T L_w`.
+  --   • LHS (section side) — Piece 1, OUTSTANDING: `actA`, `freeA`, `transA`. The `μ₂`-action
+  --     twists a section by a locally-constant sign; its `ε = -1` generator is the deck
+  --     involution glued from the banked per-piece `sqrtNegAut` (`u ↦ -u`). Building it needs
+  --     the scheme-level descent: base-change `glueCover` along `w.1` (`𝒰.pullback₁ w.1`,
+  --     auto-`LocallyDirected`), read a section on each piece as a map into
+  --     `Xᵢ ≅ Uᵢ ×_W glued` (`(glueData …).isPullback_natTrans_ι_toBase i |>.flip.isoPullback`),
+  --     translate to a square root via `sqrtCoverSectionsEquiv`, and glue with
+  --     `glueMorphismsOverOfLocallyDirected` (`Cover/Directed.lean`). There is NO packaged
+  --     sections `homEquiv` for a `RelativeGluingData.glued` — this is a genuine hand descent.
+  --   • `hAB : Nonempty (sections) ↔ Nonempty (Legendre bases)` — Pieces 2+3, OUTSTANDING.
+  --     Piece 2 (the `b`↔`u` dictionary): `IsLegendreDatum X' L_w b ↔ basisUnitAt b = 1` in
+  --     every chart `↔ uᵢ² = dᵢ⁻¹`. Ingredients all exist (`e3_markChase`,
+  --     `basisUnitAt_transUnit`, `basisUnitAt_smul`, `legendreCurve_vc_marked`; a Legendre
+  --     marking pins the abscissae to `0`,`1` so `d = 1`), but the missing glue is an operator
+  --     "trivialize a `(ω^{⊗-2})`-section by a basis `b`" turning `abscissaDiff` into a scalar
+  --     `d_b`. Piece 3 (`w.1 ^* univAbscissaDiff = abscissaDiff` of the pulled tautological
+  --     pair): needs a pullback/naturality of `abscissaDiff`/`markedCoordsAt` (via
+  --     `MarksAt.transport` + `marksAt_coords_unique`) plus a base-change iso of the
+  --     `omegaCocycle` — neither exists yet.
   sorry
 
 end TorsorBuild
