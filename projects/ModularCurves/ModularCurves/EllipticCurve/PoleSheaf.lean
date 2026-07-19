@@ -806,6 +806,14 @@ theorem affineOpenAmbientSection_add {Y : Scheme.{u}} (U : Y.affineOpens)
   rw [map_add, map_add]
 
 @[simp]
+theorem affineOpenAmbientSection_mul {Y : Scheme.{u}} (U : Y.affineOpens)
+    (r s : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) :
+    affineOpenAmbientSection U (r * s) =
+      affineOpenAmbientSection U r * affineOpenAmbientSection U s := by
+  unfold affineOpenAmbientSection
+  rw [map_mul, map_mul]
+
+@[simp]
 theorem affineOpenAmbientSection_zero {Y : Scheme.{u}} (U : Y.affineOpens) :
     affineOpenAmbientSection U 0 = 0 := by
   unfold affineOpenAmbientSection
@@ -2674,6 +2682,23 @@ theorem localTrivializationRestriction_add {X : Scheme.{u}} (M : X.Modules)
 theorem localTrivializationRestriction_zero {X : Scheme.{u}} (M : X.Modules)
     (U : X.affineOpens) : localTrivializationRestriction M U 0 = 0 := by
   simp [localTrivializationRestriction, map_zero]
+
+/-- Restricting a global section commutes with a morphism of scheme modules. -/
+theorem localTrivializationRestriction_map
+    {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N)
+    (U : X.affineOpens) (m : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationRestriction N U (f.val.app (.op ⊤) m) =
+      ((Scheme.Modules.restrictFunctor U.1.ι).map f).val.app (.op ⊤)
+        (localTrivializationRestriction M U m) := by
+  unfold localTrivializationRestriction
+  have htop := PresheafOfModules.naturality_apply f.val
+    (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op m
+  have himage := PresheafOfModules.naturality_apply f.val
+    (eqToHom U.1.ι_image_top).op
+      (M.presheaf.map
+        (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op m)
+  erw [← htop, ← himage]
+  rfl
 
 /-- A restricted section, expressed in the trivial unit module. -/
 noncomputable def localTrivializationTopSection {X : Scheme.{u}} (M : X.Modules)
