@@ -1849,6 +1849,49 @@ private noncomputable def unitObjTensorIso (X : Scheme.{u}) :
   ((monoidalUnitObjIso X).symm ⊗ᵢ (monoidalUnitObjIso X).symm) ≪≫
     λ_ (𝟙_ X.Modules) ≪≫ monoidalUnitObjIso X
 
+/-- The canonical multiplication on the explicit structure module is associative. -/
+private theorem unitObjTensorIso_hom_assoc (X : Scheme.{u}) :
+    (α_ (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
+          (Scheme.Modules.unitObj X)).inv ≫
+        ((unitObjTensorIso X).hom ⊗ₘ 𝟙 (Scheme.Modules.unitObj X)) ≫
+          (unitObjTensorIso X).hom =
+      (𝟙 (Scheme.Modules.unitObj X) ⊗ₘ (unitObjTensorIso X).hom) ≫
+        (unitObjTensorIso X).hom := by
+  letI : MonObj (Scheme.Modules.unitObj X) :=
+    MonObj.ofIso (monoidalUnitObjIso X)
+  change (α_ (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
+        (Scheme.Modules.unitObj X)).inv ≫
+      (MonObj.mul ⊗ₘ 𝟙 (Scheme.Modules.unitObj X)) ≫ MonObj.mul =
+    (𝟙 (Scheme.Modules.unitObj X) ⊗ₘ MonObj.mul) ≫ MonObj.mul
+  simpa only [tensorHom_id, id_tensorHom] using
+    (MonObj.mul_assoc_flip (Scheme.Modules.unitObj X)).symm
+
+/-- Associativity of a multiplication propagates through three morphisms into
+its underlying object. -/
+private theorem tensorMulHom_assoc
+    {D : Type u} [Category.{v} D] [MonoidalCategory D]
+    {A B C X : D} (a : A ⟶ X) (b : B ⟶ X) (c : C ⟶ X)
+    (mul : X ⊗ X ⟶ X)
+    (hassoc :
+      (α_ X X X).inv ≫ (mul ⊗ₘ 𝟙 X) ≫ mul =
+        (𝟙 X ⊗ₘ mul) ≫ mul) :
+    (α_ A B C).inv ≫ (((a ⊗ₘ b) ≫ mul) ⊗ₘ c) ≫ mul =
+      (a ⊗ₘ ((b ⊗ₘ c) ≫ mul)) ≫ mul := by
+  calc
+    _ = (α_ A B C).inv ≫
+        (((a ⊗ₘ b) ⊗ₘ c) ≫ (mul ⊗ₘ 𝟙 X)) ≫ mul := by
+      simp only [tensorHom_comp_tensorHom, Category.comp_id]
+    _ = ((a ⊗ₘ (b ⊗ₘ c)) ≫ (α_ X X X).inv) ≫
+        (mul ⊗ₘ 𝟙 X) ≫ mul := by
+      rw [associator_inv_naturality]
+      simp only [Category.assoc]
+    _ = (a ⊗ₘ (b ⊗ₘ c)) ≫ (𝟙 X ⊗ₘ mul) ≫ mul := by
+      simp only [Category.assoc, hassoc]
+    _ = _ := by
+      rw [← Category.assoc]
+      rw [tensorHom_comp_tensorHom]
+      rw [Category.comp_id]
+
 /-- Conjugating the tensor of two endomorphisms through an identification with the
 monoidal unit gives their composite. -/
 private theorem tensorUnitIso_hom_naturality
@@ -1966,6 +2009,33 @@ noncomputable def sectionPoleSheafPowerTrivialization
           (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
         (sectionPoleSheafPowerTrivialization z hz U e n ⊗ᵢ e) ≪≫
         unitObjTensorIso U.toScheme
+
+/-- Transporting the index of a pole-sheaf power is compatible with its local
+trivialization. -/
+private theorem sectionPoleSheafPowerTrivialization_eqToHom
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) {a b : ℕ} (h : a = b) :
+    (Scheme.Modules.restrictFunctor U.ι).map
+          (eqToHom (congrArg (sectionPoleSheafPower π z hz) h)) ≫
+        (sectionPoleSheafPowerTrivialization z hz U e b).hom =
+      (sectionPoleSheafPowerTrivialization z hz U e a).hom := by
+  cases h
+  simp
+
+/-- The morphism underlying the successor power trivialization. -/
+private theorem sectionPoleSheafPowerTrivialization_succ_hom
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) (n : ℕ) :
+    (sectionPoleSheafPowerTrivialization z hz U e (n + 1)).hom =
+      (restrictMonoidalTensorIso U.ι
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).hom ≫
+        ((sectionPoleSheafPowerTrivialization z hz U e n).hom ⊗ₘ e.hom) ≫
+          (unitObjTensorIso U.toScheme).hom :=
+  rfl
 
 /-- A scalar transition between simple-pole trivializations raises to its `n`th
 power on the induced trivializations of `𝒪(n[0])`. -/
@@ -4180,6 +4250,234 @@ noncomputable def sectionPoleSheafMulHom {C S : Scheme.{u}} (π : C ⟶ S)
       (sectionPoleSheafMulHom π z hz m n ⊗ₘ 𝟙 _) ≫
       eqToHom ((sectionPoleSheafPower_succ π z hz (m + n)).symm.trans
         (congrArg (sectionPoleSheafPower π z hz) (by omega)))
+
+/-- The source trivialization for multiplication of two pole-sheaf powers. -/
+noncomputable def sectionPoleSheafPowerMulTrivialization
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) (m n : ℕ) :
+    (sectionPoleSheafPower π z hz m ⊗
+        sectionPoleSheafPower π z hz n).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme :=
+  restrictMonoidalTensorIso U.ι
+      (sectionPoleSheafPower π z hz m)
+      (sectionPoleSheafPower π z hz n) ≪≫
+    (sectionPoleSheafPowerTrivialization z hz U e m ⊗ᵢ
+      sectionPoleSheafPowerTrivialization z hz U e n) ≪≫
+    unitObjTensorIso U.toScheme
+
+/-- The morphism underlying the source trivialization for pole multiplication. -/
+private theorem sectionPoleSheafPowerMulTrivialization_hom
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) (m n : ℕ) :
+    (sectionPoleSheafPowerMulTrivialization z hz U e m n).hom =
+      (restrictMonoidalTensorIso U.ι
+          (sectionPoleSheafPower π z hz m)
+          (sectionPoleSheafPower π z hz n)).hom ≫
+        ((sectionPoleSheafPowerTrivialization z hz U e m).hom ⊗ₘ
+          (sectionPoleSheafPowerTrivialization z hz U e n).hom) ≫
+            (unitObjTensorIso U.toScheme).hom :=
+  rfl
+
+/-- Under the compatible tensor-power trivializations, multiplication of pole
+sheaves restricts to multiplication of two copies of the structure sheaf. -/
+theorem sectionPoleSheafMulHom_restrict_comp_powerTrivialization
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) (m n : ℕ) :
+    (Scheme.Modules.restrictFunctor U.ι).map
+          (sectionPoleSheafMulHom π z hz m n) ≫
+        (sectionPoleSheafPowerTrivialization z hz U e (m + n)).hom =
+      (sectionPoleSheafPowerMulTrivialization z hz U e m n).hom := by
+  induction n with
+  | zero =>
+      let F := Scheme.Modules.restrictFunctor U.ι
+      letI : (Scheme.Modules.pullback U.ι).Monoidal :=
+        Scheme.Modules.pullbackMonoidal U.ι
+      letI : F.Monoidal := Functor.Monoidal.transport
+        (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm
+      let P := sectionPoleSheafPower π z hz m
+      let eP := sectionPoleSheafPowerTrivialization z hz U e m
+      let eU := monoidalUnitObjIso U.toScheme
+      have hTensor :
+          (restrictMonoidalTensorIso U.ι P (𝟙_ C.Modules)).hom =
+            Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) := rfl
+      have hUnit :
+          (restrictMonoidalUnitIso U.ι).hom =
+            Functor.OplaxMonoidal.η F := rfl
+      have hUnitTensor :
+          (eP.hom ⊗ₘ eU.hom) ≫ (unitObjTensorIso U.toScheme).hom =
+            (ρ_ (F.obj P)).hom ≫ eP.hom := by
+        simpa only [unitObjTensorIso, Iso.trans_hom,
+          MonoidalCategory.tensorIso_hom, Iso.symm_hom] using
+          tensorUnitIso_hom_naturality_left eU eP.hom
+      change F.map (ρ_ P).hom ≫ eP.hom =
+        (restrictMonoidalTensorIso U.ι P (𝟙_ C.Modules)).hom ≫
+          (eP.hom ⊗ₘ ((restrictMonoidalUnitIso U.ι).hom ≫ eU.hom)) ≫
+            (unitObjTensorIso U.toScheme).hom
+      rw [hTensor, hUnit]
+      rw [Functor.Monoidal.map_rightUnitor]
+      calc
+        _ = Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) ≫
+            (F.obj P ◁ Functor.OplaxMonoidal.η F) ≫
+              ((ρ_ (F.obj P)).hom ≫ eP.hom) := by
+          simp only [Category.assoc]
+        _ = Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) ≫
+            (F.obj P ◁ Functor.OplaxMonoidal.η F) ≫
+              ((eP.hom ⊗ₘ eU.hom) ≫
+                (unitObjTensorIso U.toScheme).hom) := by
+          exact congrArg
+            (fun k => Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) ≫
+              (F.obj P ◁ Functor.OplaxMonoidal.η F) ≫ k)
+            hUnitTensor.symm
+        _ = Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) ≫
+            ((F.obj P ◁ Functor.OplaxMonoidal.η F) ≫
+              (eP.hom ⊗ₘ eU.hom)) ≫
+                (unitObjTensorIso U.toScheme).hom := by
+          simp only [Category.assoc]
+        _ = Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) ≫
+            (eP.hom ⊗ₘ
+              (Functor.OplaxMonoidal.η F ≫ eU.hom)) ≫
+                (unitObjTensorIso U.toScheme).hom := by
+          rw [← id_tensorHom]
+          rw [tensorHom_comp_tensorHom]
+          rw [Category.id_comp]
+  | succ n hn =>
+      let F := Scheme.Modules.restrictFunctor U.ι
+      letI : (Scheme.Modules.pullback U.ι).Monoidal :=
+        Scheme.Modules.pullbackMonoidal U.ι
+      letI : F.Monoidal := Functor.Monoidal.transport
+        (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm
+      have hTensor (A B : C.Modules) :
+          (restrictMonoidalTensorIso U.ι A B).hom =
+            Functor.OplaxMonoidal.δ
+              (Scheme.Modules.restrictFunctor U.ι) A B := rfl
+      have hadd : (m + n) + 1 = m + (n + 1) := by omega
+      have htransport :
+          F.map (eqToHom
+              ((sectionPoleSheafPower_succ π z hz (m + n)).symm.trans
+                (congrArg (sectionPoleSheafPower π z hz) hadd))) ≫
+              (sectionPoleSheafPowerTrivialization z hz U e
+                (m + (n + 1))).hom =
+            (sectionPoleSheafPowerTrivialization z hz U e
+              ((m + n) + 1)).hom := by
+        rw [Subsingleton.elim
+          ((sectionPoleSheafPower_succ π z hz (m + n)).symm.trans
+            (congrArg (sectionPoleSheafPower π z hz) hadd))
+          (congrArg (sectionPoleSheafPower π z hz) hadd)]
+        exact sectionPoleSheafPowerTrivialization_eqToHom z hz U e hadd
+      rw [sectionPoleSheafMulHom]
+      simp only [sectionPoleSheafPower_succ]
+      rw [Functor.map_comp, Functor.map_comp]
+      simp only [Category.assoc]
+      rw [htransport]
+      rw [sectionPoleSheafPowerTrivialization_succ_hom]
+      rw [sectionPoleSheafPowerMulTrivialization_hom]
+      rw [sectionPoleSheafPowerTrivialization_succ_hom]
+      rw [Functor.Monoidal.map_associator_inv]
+      rw [Functor.Monoidal.map_tensor]
+      rw [hTensor, hTensor, hTensor]
+      simp only [sectionPoleSheafPower_succ]
+      simp only [Category.assoc, Functor.Monoidal.μ_δ_assoc]
+      have hmapId :
+          (Scheme.Modules.restrictFunctor U.ι).map
+              (𝟙 (sectionPoleSheaf π z hz)) =
+            𝟙 ((Scheme.Modules.restrictFunctor U.ι).obj
+              (sectionPoleSheaf π z hz)) :=
+        (Scheme.Modules.restrictFunctor U.ι).map_id _
+      have hmulTensor :
+          ((Scheme.Modules.restrictFunctor U.ι).map
+                (sectionPoleSheafMulHom π z hz m n) ⊗ₘ
+              (Scheme.Modules.restrictFunctor U.ι).map
+                (𝟙 (sectionPoleSheaf π z hz))) ≫
+              ((sectionPoleSheafPowerTrivialization z hz U e (m + n)).hom ⊗ₘ
+                e.hom) =
+            ((Functor.OplaxMonoidal.δ
+                  (Scheme.Modules.restrictFunctor U.ι)
+                  (sectionPoleSheafPower π z hz m)
+                  (sectionPoleSheafPower π z hz n) ≫
+                ((sectionPoleSheafPowerTrivialization z hz U e m).hom ⊗ₘ
+                  (sectionPoleSheafPowerTrivialization z hz U e n).hom) ≫
+                    (unitObjTensorIso U.toScheme).hom) ⊗ₘ e.hom) := by
+        rw [hmapId]
+        rw [tensorHom_comp_tensorHom]
+        simp only [Category.id_comp]
+        rw [hn]
+        rw [sectionPoleSheafPowerMulTrivialization_hom]
+        rw [hTensor]
+      rw [← Category.assoc
+        ((Scheme.Modules.restrictFunctor U.ι).map
+            (sectionPoleSheafMulHom π z hz m n) ⊗ₘ
+          (Scheme.Modules.restrictFunctor U.ι).map
+            (𝟙 (sectionPoleSheaf π z hz)))
+        ((sectionPoleSheafPowerTrivialization z hz U e (m + n)).hom ⊗ₘ
+          e.hom)
+        (unitObjTensorIso U.toScheme).hom]
+      rw [hmulTensor]
+      have hcancel :
+          (Functor.LaxMonoidal.μ (Scheme.Modules.restrictFunctor U.ι)
+                (sectionPoleSheafPower π z hz m)
+                (sectionPoleSheafPower π z hz n) ▷
+              (Scheme.Modules.restrictFunctor U.ι).obj
+                (sectionPoleSheaf π z hz)) ≫
+              ((Functor.OplaxMonoidal.δ
+                    (Scheme.Modules.restrictFunctor U.ι)
+                    (sectionPoleSheafPower π z hz m)
+                    (sectionPoleSheafPower π z hz n) ≫
+                  ((sectionPoleSheafPowerTrivialization z hz U e m).hom ⊗ₘ
+                    (sectionPoleSheafPowerTrivialization z hz U e n).hom) ≫
+                      (unitObjTensorIso U.toScheme).hom) ⊗ₘ e.hom) =
+            (((sectionPoleSheafPowerTrivialization z hz U e m).hom ⊗ₘ
+                (sectionPoleSheafPowerTrivialization z hz U e n).hom) ≫
+                  (unitObjTensorIso U.toScheme).hom) ⊗ₘ e.hom := by
+        rw [← Category.id_comp e.hom]
+        rw [← tensorHom_comp_tensorHom]
+        simp only [tensorHom_id,
+          Functor.Monoidal.whiskerRight_μ_δ_assoc]
+        rw [Category.id_comp]
+      rw [← Category.assoc
+        (Functor.LaxMonoidal.μ (Scheme.Modules.restrictFunctor U.ι)
+            (sectionPoleSheafPower π z hz m)
+            (sectionPoleSheafPower π z hz n) ▷
+          (Scheme.Modules.restrictFunctor U.ι).obj
+            (sectionPoleSheaf π z hz))
+        ((Functor.OplaxMonoidal.δ (Scheme.Modules.restrictFunctor U.ι)
+              (sectionPoleSheafPower π z hz m)
+              (sectionPoleSheafPower π z hz n) ≫
+            ((sectionPoleSheafPowerTrivialization z hz U e m).hom ⊗ₘ
+              (sectionPoleSheafPowerTrivialization z hz U e n).hom) ≫
+                (unitObjTensorIso U.toScheme).hom) ⊗ₘ e.hom)
+        (unitObjTensorIso U.toScheme).hom]
+      rw [hcancel]
+      have hright :
+          (sectionPoleSheafPowerTrivialization z hz U e m).hom ⊗ₘ
+              (Functor.OplaxMonoidal.δ (Scheme.Modules.restrictFunctor U.ι)
+                  (sectionPoleSheafPower π z hz n)
+                  (sectionPoleSheaf π z hz) ≫
+                ((sectionPoleSheafPowerTrivialization z hz U e n).hom ⊗ₘ
+                  e.hom) ≫ (unitObjTensorIso U.toScheme).hom) =
+            ((Scheme.Modules.restrictFunctor U.ι).obj
+                (sectionPoleSheafPower π z hz m) ◁
+              Functor.OplaxMonoidal.δ (Scheme.Modules.restrictFunctor U.ι)
+                (sectionPoleSheafPower π z hz n)
+                (sectionPoleSheaf π z hz)) ≫
+              ((sectionPoleSheafPowerTrivialization z hz U e m).hom ⊗ₘ
+                (((sectionPoleSheafPowerTrivialization z hz U e n).hom ⊗ₘ
+                  e.hom) ≫ (unitObjTensorIso U.toScheme).hom)) := by
+        rw [← id_tensorHom]
+        rw [tensorHom_comp_tensorHom]
+        rw [Category.id_comp]
+      rw [hright]
+      rw [tensorMulHom_assoc
+        (sectionPoleSheafPowerTrivialization z hz U e m).hom
+        (sectionPoleSheafPowerTrivialization z hz U e n).hom e.hom
+        (unitObjTensorIso U.toScheme).hom
+        (unitObjTensorIso_hom_assoc U.toScheme)]
+      simp only [Category.assoc]
 
 /-- The simple-pole sheaf along a section of a smooth separated relative curve is
 invertible. -/
