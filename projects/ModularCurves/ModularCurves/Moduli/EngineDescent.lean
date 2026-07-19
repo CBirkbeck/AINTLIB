@@ -2548,6 +2548,48 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
           ∃ (E : VariableChange (Localization.Away ((a : ↑Γ(X, ⊤))))),
             ∀ g : G, CvcR g
               = E * (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹ := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  intro s
+  classical
+  -- ### Stages 1–2 (the `a`-independent semilocalization at `s`) — BANKED, sorry-free.
+  -- Route input: the base `G`-action on `A := Γ(X,⊤)` is free.
+  have hfreeA : IsFreeAlgebraAction G ℤ ↑Γ(X, ⊤) :=
+    σ.isFreeAlgebraAction_of_free (isStableOpen_top σ) (isAffineOpen_top X) hfreeX
+  -- The prime of the fixed subring below `s` (`FixedPoints.subring`/`subalgebra` carriers are
+  -- defeq, cf. mathlib `RingTheory/Invariant/Basic`), transported to `Rᴳ = FixedPoints.subring`.
+  set p : Ideal (FixedPoints.subring ↑Γ(X, ⊤) G) := s.asIdeal with hpdef
+  haveI : p.IsPrime := s.isPrime
+  -- Part 1 of `exists_away_invariant_descent` (WeierstrassInvariantLocal:363–371): semilocalize
+  -- `A` at `s`.  `S = image of (Aᴳ \ p)`; `Localization S` carries the localized `G`-action
+  -- (`localizationInvariant`), is nontrivial, its fixed subring `(Aᴳ)_p` is a LOCAL ring
+  -- (`isLocalRing_fixedPoints_of_isLocalization`), and the action stays free
+  -- (`isFreeAlgebraAction_of_isLocalization`).
+  set S : Submonoid ↑Γ(X, ⊤) :=
+    p.primeCompl.map (algebraMap (FixedPoints.subring ↑Γ(X, ⊤) G) ↑Γ(X, ⊤)) with hSdef
+  have hS : ∀ (g : G), ∀ x ∈ S, g • x = x := primeComplImage_fixed p
+  letI actL : MulSemiringAction G (Localization S) := MulSemiringAction.localizationInvariant hS
+  have hcomp : ∀ (g : G) (r : ↑Γ(X, ⊤)),
+      g • (algebraMap ↑Γ(X, ⊤) (Localization S) r)
+        = algebraMap ↑Γ(X, ⊤) (Localization S) (g • r) :=
+    fun g r => MulSemiringAction.locHom_algebraMap hS g r
+  haveI : Nontrivial (Localization S) := nontrivial_localization_primeComplImage p
+  -- `Lᴳ = (Aᴳ)_p` is LOCAL; the localized action stays free.  (No type ascription: mirrors
+  -- WeierstrassInvariantLocal:370–371 to avoid the `Algebra ℤ (Localization S)` diamond.)
+  haveI := isLocalRing_fixedPoints_of_isLocalization p hcomp
+  have hfreeL := isFreeAlgebraAction_of_isLocalization hcomp hfreeA
+  -- ### Stage 3 (THE CRUX — residual): over the semilocal `L := Localization S` (whose maximal
+  -- spectrum is finite since `L` is module-finite over the LOCAL `Lᴳ = (Aᴳ)_p`, hence `Pic L = 0`
+  -- by `CommRing.Pic.instSubsingleton…`), glue a global Weierstrass model `W₀L / L` presenting the
+  -- base-changed curve, then spread the finitely many ring coefficients + the corrected chart
+  -- isos to a basic open `D(a)`, `a ∉ p`, and glue `ρR` NATIVELY over `A_a`.  This needs two
+  -- results not yet in the library (see the accompanying report):
+  --   (i)  `Nonempty (OmegaBasis G_L)` from `Subsingleton (Pic L)` (the `ω`-line-bundle ↔ ring-Pic
+  --        bridge over the affine `Spec L`);  and
+  --   (ii) additive Čech-H¹ vanishing over the affine `Spec L` for the *nilpotent* `(r,s,t)`
+  --        translation cocycle `transVC` (the flagged research risk; `exists_sub_smul_eq_of_isCocycle`
+  --        is Galois-H¹, not the Čech vanishing needed here).
+  -- Stage 4 (`exists_cocycle_hρact_of_presentation`, DONE) then supplies `CvcR/hCvcR/hρact` at
+  -- `A_a`, and Stage 5 spreads the coboundary `E` (from `exists_coboundary` over the LOCAL `Lᴳ`).
   sorry
 
 open WeierstrassCurve in
