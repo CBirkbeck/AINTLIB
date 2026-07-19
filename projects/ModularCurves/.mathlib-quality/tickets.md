@@ -23985,3 +23985,27 @@ surjective_of/naturalFamily [Legendre, mis-stated + √-cover-gated]}; receipts 
 Each frontier residual is multi-week/research-class (B3-scale published-theorem geometry) — the genuine
 deferred deep inputs. The KM 4.7.0 representability engine is FORMALIZED END-TO-END; the headline holds
 modulo exactly this cited frontier. `bash capstone-receipts.sh` reports the live set.
+
+## v10.337-FIN (2026-07-20) — [ARCH-CONCERN] legendreDeltaGAction global-action formulation may be UNPROVABLE (owner adjudication) + corrected frontier (STREAM-FIN)
+
+**ARCHITECTURAL CONCERN raised (owner to adjudicate — NOT acted on unilaterally).** Examining
+`legendreDeltaProblem` (LegendreDelta.lean:231): δ(X) = {(full-level-2 marking, ω-basis) // IsLegendreDatum}
+where IsLegendreDatum PINS the adapted x by x(P₂)=0, x(Q₂)=1 (so abscissa difference x(Q)−x(P)=1). The coupled
+`GL₂(𝔽₂)`-action re-marks (P,Q) and must rescale ω by √(x(Q')−x(P')) (module docstring discovery-2; KM 4.6.2's
+coupling). BUT `legendreDeltaGAction : GL₂(𝔽₂)×ℤˣ →* Aut(legendreDeltaProblem R)` is a **functor automorphism**,
+which requires the action be defined on **every** δ(X) — and √(x(Q')−x(P')) is NOT globally available on a general X
+(the datum only ships the abscissa differences ∈ Γ(X)ˣ, not their square roots). So re-marking can send a δ(X)-value
+OUT of δ(X) (no valid rescaled ω over X): **the global functor automorphism appears not to exist as stated.**
+This is precisely why δ is a nontrivial torsor over the √-cover — the action lives on the √-cover, NOT on δ globally.
+LIKELY RE-ARCHITECTURE (KM's actual structure): the D(2) leg should use the **torsor formulation directly**
+(exists_scaleTorsorData = the √-cover IS the G-torsor) rather than a global `G →* Aut δ`. [T-E14-ACT'] as a global
+action may be chasing a false statement. **OWNER: please adjudicate — is legendreDeltaGAction genuinely constructible,
+or does the D(2) TorsorData framework need the torsor-first (no global action) reformulation?**
+
+**CORRECTED FRONTIER (supersedes the v10.336 "5-of-7 achievable" estimate — that was too optimistic).**
+Receipts 1/2/4/5 are blocked by legendreDeltaGAction (D(2) leg — above concern) in ADDITION to the assembly-class
+leaves; so the 4-builder wave (glueEllObj_representableBy / exists_localModel_core_at / scaleTorsor_spec) is genuine
+residual-SHRINKING (banks real theorems) but flips NO receipt this session. Receipts 3/6 additionally blocked by
+BB-DELIGNE=Oort-Tate (mathlib has NO group-scheme theory — CONFIRMED via search). Receipt 7 clean. Honest session
+ceiling: engine WIRED + residual set shrunk by the 4-builder wave; the two receipt-blocking crux pieces
+(legendreDeltaGAction global-action concern, Oort-Tate) are owner-adjudication / research-class.
