@@ -9,6 +9,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
 import ModularCurves.ForMathlib.GradedQuotient
 import ModularCurves.ForMathlib.MvPolynomialHomogenize
+import ModularCurves.ForMathlib.ProjClosedImmersion
 import ModularCurves.ForMathlib.ProjectiveSpaceChart
 
 /-!
@@ -190,6 +191,34 @@ lemma map_optionChartRingEquiv_ker_awayMap_homogenizedIdeal
     rw [← he]
     exact Ideal.mem_map_of_mem
       (optionChartRingEquiv (R := R) (σ := σ)).toRingHom hw
+
+/-- The chart of a homogenized projective closure at the homogenizing coordinate is the original
+affine presentation. -/
+noncomputable def homogenizedChartRingEquiv
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    (MvPolynomial σ R ⧸ Ideal.span (Set.range g)) ≃+*
+      Away (quotientGrading (homogenizedIdeal g d))
+        ((quotientGradingHom (homogenizedIdeal g d))
+          (X none : MvPolynomial (Option σ) R)) :=
+  ((Ideal.quotientEquiv
+    (RingHom.ker (Away.map (quotientGradingHom (homogenizedIdeal g d))
+      (X none : MvPolynomial (Option σ) R)))
+    (Ideal.span (Set.range g)) optionChartRingEquiv
+    (map_optionChartRingEquiv_ker_awayMap_homogenizedIdeal g d hdeg).symm).symm).trans
+    (RingHom.quotientKerEquivOfSurjective
+      (away_map_quotientGradingHom_surjective (homogenizedIdeal g d)
+        (X_mem_homogeneousSubmodule_one R (none : Option σ))))
+
+@[simp]
+lemma homogenizedChartRingEquiv_mk
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) (p : MvPolynomial σ R) :
+    homogenizedChartRingEquiv g d hdeg
+        (Ideal.Quotient.mk (Ideal.span (Set.range g)) p) =
+      Away.map (quotientGradingHom (homogenizedIdeal g d))
+        (X none : MvPolynomial (Option σ) R) (optionChartRingEquiv.symm p) := by
+  rfl
 
 end OptionChart
 
