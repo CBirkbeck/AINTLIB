@@ -3423,6 +3423,197 @@ theorem localIdealGeneratorOverTrivialization_inv_comp
     congrArg (fun p ↦ C ≫ p) hbase
   exact h₀.trans (h₁.trans (h₂.trans h₃))
 
+private theorem sheafOfModules_mono_of_mono_over_iSup_eq_top
+    {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N)
+    {ι : Type u} (U : ι → Opens X) (hU : iSup U = ⊤)
+    (hf : ∀ i, Mono (f.over (U i))) : Mono f := by
+  apply (SheafOfModules.forget X.ringCatSheaf).mono_of_mono_map
+  apply PresheafOfModules.mono_of_injective
+  intro V x y hxy
+  apply TopCat.Sheaf.eq_of_locally_eq'
+      ((SheafOfModules.toSheaf X.ringCatSheaf).obj M)
+      (fun i ↦ V.unop ⊓ U i) V.unop
+      (fun _ ↦ homOfLE inf_le_left)
+  · intro p hp
+    have hpU : p ∈ iSup U := by
+      rw [hU]
+      trivial
+    obtain ⟨i, hpi⟩ := Opens.mem_iSup.mp hpU
+    exact Opens.mem_iSup.mpr ⟨i, hp, hpi⟩
+  · intro i
+    let W : Over (U i) := Over.mk
+      (homOfLE (inf_le_right : V.unop ⊓ U i ≤ U i))
+    haveI : Mono (f.over (U i)) := hf i
+    let g := (SheafOfModules.forget (X.ringCatSheaf.over (U i))).map
+      (f.over (U i))
+    haveI : Mono g := Functor.map_mono _ _
+    apply PresheafOfModules.injective_of_mono g (.op W)
+    have hx := PresheafOfModules.naturality_apply f.val
+      (homOfLE (inf_le_left : V.unop ⊓ U i ≤ V.unop)).op x
+    have hy := PresheafOfModules.naturality_apply f.val
+      (homOfLE (inf_le_left : V.unop ⊓ U i ≤ V.unop)).op y
+    exact hx.trans ((congrArg (fun q ↦ N.val.map
+      (homOfLE (inf_le_left : V.unop ⊓ U i ≤ V.unop)).op q) hxy).trans hy.symm)
+
+private theorem sheafOfModules_mono_over
+    {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
+    {R : Sheaf J RingCat} {M N : SheafOfModules R}
+    (f : M ⟶ N) (hf : Mono f) (U : C) : Mono (f.over U) := by
+  letI := hf
+  apply (SheafOfModules.forget (R.over U)).mono_of_mono_map
+  apply PresheafOfModules.mono_of_injective
+  intro V
+  haveI : Mono ((SheafOfModules.forget R).map f) :=
+    Functor.map_mono (SheafOfModules.forget R) f
+  exact PresheafOfModules.injective_of_mono
+    ((SheafOfModules.forget R).map f) (.op V.unop.left)
+
+private theorem localIdealGeneratorScalar_mono
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [QuasiCompact f]
+    (U : Y.affineOpens) (r : Γ(Y, U.1)) (hr : r ∈ f.ker.ideal U)
+    (hspan : f.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(Y, U.1)) :
+    Mono (SheafOfModules.overUnitScalarEnd Y.ringCatSheaf U.1 r) := by
+  let eGen := localIdealGeneratorIso f U r hr hspan hnzd
+  let eOver := Scheme.Modules.overTrivializationOfRestrictIso
+    (idealModule f) U.1 eGen.symm
+  have hmono : Mono ((idealModuleToUnit f).over U.1) :=
+    sheafOfModules_mono_over (idealModuleToUnit f)
+      (idealModuleToUnit_mono f) U.1
+  have hcomp : Mono (eOver.inv ≫ (idealModuleToUnit f).over U.1) :=
+    @mono_comp _ _ _ _ _ eOver.inv inferInstance
+      ((idealModuleToUnit f).over U.1) hmono
+  rw [← localIdealGeneratorOverTrivialization_inv_comp
+    f U r hr hspan hnzd]
+  exact hcomp
+
+private theorem dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
+    {X : Scheme.{u}} {M : X.Modules}
+    (i : M ⟶ Scheme.Modules.unitObj X) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U))
+    (h : e.inv ≫ i.over U =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) :
+    (((Scheme.Modules.dualUnitObjIso (X := X)).inv ≫
+      Scheme.Modules.dualMapObj i).over U) ≫
+        (SheafOfModules.dualOverIsoOfIso
+          X.ringCatSheaf M U e).hom =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+  apply (SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U).injective
+  have hr : (SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U)
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) = r := by
+    change (SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U)
+      ((SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U).symm r) = r
+    exact (SheafOfModules.dualUnitSectionsEquiv
+      X.ringCatSheaf U).apply_symm_apply r
+  rw [hr]
+  change
+    (Hom.over ((Scheme.Modules.dualUnitObjIso (X := X)).inv ≫
+        Scheme.Modules.dualMapObj i) U ≫
+      (SheafOfModules.dualOverIsoOfIso
+        X.ringCatSheaf M U e).hom).val.app (.op (Over.mk (𝟙 U)))
+          (show (X.ringCatSheaf.over U).obj.obj
+            (.op (Over.mk (𝟙 U))) from 1) = r
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M U e
+        (SheafOfModules.dualPrecomp X.ringCatSheaf i U
+          ((SheafOfModules.dualUnitLinearEquiv
+            X.ringCatSheaf U).symm 1)) = r
+  change SheafOfModules.dualUnitLinearEquiv X.ringCatSheaf U
+      (e.inv ≫ (i.over U ≫
+        (SheafOfModules.dualUnitLinearEquiv
+          X.ringCatSheaf U).symm 1)) = r
+  let alpha := (SheafOfModules.dualUnitLinearEquiv
+    X.ringCatSheaf U).symm 1
+  have hcomp : (e.inv ≫ i.over U) ≫ alpha =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r ≫ alpha :=
+    congrArg (fun q ↦ q ≫ alpha) h
+  have halpha : alpha = 𝟙 _ := by
+    change SheafOfModules.overUnitScalarEnd X.ringCatSheaf U 1 = 𝟙 _
+    exact (SheafOfModules.overUnitScalarEndRingHom
+      X.ringCatSheaf U).map_one
+  change SheafOfModules.dualUnitLinearEquiv X.ringCatSheaf U
+      (e.inv ≫ (i.over U ≫ alpha)) = r
+  have h₁ : SheafOfModules.dualUnitLinearEquiv X.ringCatSheaf U
+      (e.inv ≫ (i.over U ≫ alpha)) =
+      SheafOfModules.dualUnitLinearEquiv X.ringCatSheaf U
+        ((e.inv ≫ i.over U) ≫ alpha) :=
+    congrArg _ (Category.assoc _ _ _).symm
+  have h₂ : SheafOfModules.dualUnitLinearEquiv X.ringCatSheaf U
+      ((e.inv ≫ i.over U) ≫ alpha) =
+      SheafOfModules.dualUnitLinearEquiv X.ringCatSheaf U
+        (SheafOfModules.overUnitScalarEnd
+          X.ringCatSheaf U r ≫ alpha) := congrArg _ hcomp
+  have h₃ : SheafOfModules.dualUnitLinearEquiv X.ringCatSheaf U
+      (SheafOfModules.overUnitScalarEnd
+        X.ringCatSheaf U r ≫ alpha) = r := by
+    rw [halpha, Category.comp_id]
+    change (SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf U)
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) = r
+    exact hr
+  exact h₁.trans (h₂.trans h₃)
+
+private theorem sectionPoleUnitHom_over_mono_of_generator
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) :
+    Mono ((sectionPoleUnitHom π z hz).over U.1) := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+  let eOver := Scheme.Modules.overTrivializationOfRestrictIso
+    (idealModule z) U.1 eGen.symm
+  have hscalar : Mono
+      (SheafOfModules.overUnitScalarEnd C.ringCatSheaf U.1 r) :=
+    localIdealGeneratorScalar_mono z U r hr hspan hnzd
+  have hcoord := dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
+    (idealModuleToUnit z) U.1 eOver r
+      (localIdealGeneratorOverTrivialization_inv_comp
+        z U r hr hspan hnzd)
+  change Mono ((((Scheme.Modules.dualUnitObjIso (X := C)).inv ≫
+    Scheme.Modules.dualMapObj (idealModuleToUnit z)).over U.1))
+  let q := (((Scheme.Modules.dualUnitObjIso (X := C)).inv ≫
+    Scheme.Modules.dualMapObj (idealModuleToUnit z)).over U.1)
+  let d := (SheafOfModules.dualOverIsoOfIso
+    C.ringCatSheaf (idealModule z) U.1 eOver).hom
+  have hqd : Mono (q ≫ d) := by
+    rw [hcoord]
+    exact hscalar
+  letI := hqd
+  exact mono_of_mono q d
+
+/-- The canonical inclusion `𝒪_C → 𝒪_C([0])` is a monomorphism. -/
+theorem sectionPoleUnitHom_mono
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
+    Mono (sectionPoleUnitHom π z hz) := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  choose U hxU r hspan hnzd using fun x ↦
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm z hz).locallyPrincipal x
+  have hU : iSup (fun x ↦ (U x).1) = ⊤ := by
+    ext x
+    constructor
+    · intro _
+      trivial
+    · intro _
+      exact Opens.mem_iSup.mpr ⟨x, hxU x⟩
+  apply sheafOfModules_mono_of_mono_over_iSup_eq_top
+    (sectionPoleUnitHom π z hz) (fun x ↦ (U x).1) hU
+  intro x
+  have hspanx := hspan x
+  change z.ker.ideal (U x) = Ideal.span {r x} at hspanx
+  have hr : r x ∈ z.ker.ideal (U x) := by
+    rw [hspanx]
+    exact Ideal.mem_span_singleton_self (r x)
+  exact sectionPoleUnitHom_over_mono_of_generator z hz
+    (U x) (r x) hr hspanx (hnzd x)
+
 end
 
 /-- The restriction of `O([0])` to a residue fibre is the pole sheaf of the induced
