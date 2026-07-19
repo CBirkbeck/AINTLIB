@@ -76,6 +76,20 @@ lemma longSequence_exact₂ (n : ℕ) (x₂ : H S.X₂ n) (hx₂ : map S.g n x�
     ∃ x₁ : H S.X₁ n, map S.f n x₁ = x₂ :=
   Ext.covariant_sequence_exact₂ _ hS _ hx₂
 
+include hS in
+/-- In a short exact sequence, vanishing of the same cohomology degree at the
+two ends implies vanishing at the middle. -/
+lemma subsingleton_H_X₂_of_shortExact (n : ℕ)
+    (hleft : Subsingleton (H S.X₁ n))
+    (hright : Subsingleton (H S.X₃ n)) :
+    Subsingleton (H S.X₂ n) := by
+  letI : Subsingleton (H S.X₁ n) := hleft
+  letI : Subsingleton (H S.X₃ n) := hright
+  refine subsingleton_of_forall_eq 0 fun x => ?_
+  obtain ⟨x₁, hx₁⟩ := longSequence_exact₂ hS n x (Subsingleton.elim _ _)
+  rw [Subsingleton.elim x₁ 0, map_zero] at hx₁
+  exact hx₁.symm
+
 /-- Elementwise exactness before the connecting homomorphism. -/
 lemma longSequence_exact₃ (x₃ : H S.X₃ n₀) (hx₃ : δ hS n₀ n₁ h x₃ = 0) :
     ∃ x₂ : H S.X₂ n₀, map S.g n₀ x₂ = x₃ :=

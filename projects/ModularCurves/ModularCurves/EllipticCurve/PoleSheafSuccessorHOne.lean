@@ -1,6 +1,7 @@
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.ForMathlib.AcyclicAffineOpenCover
 import ModularCurves.ForMathlib.AffinePatchBaseChange
+import ModularCurves.ForMathlib.SheafCohomologyExact
 import ModularCurves.ForMathlib.TwoOpenHOne
 
 /-!
@@ -87,6 +88,66 @@ theorem sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_neighborhood
     · exact Or.inr hc
   exact sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_open_cover
     hsm z hz n U V hUV hV
+
+/-- Vanishing of first cohomology propagates across one pole-filtration step
+when the successive quotient also has vanishing first cohomology. -/
+theorem sectionPoleSheafPower_succ_subsingleton_H_one
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1))
+    (hQ : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafSuccCoker π z hz n).sheaf 1)) :
+    Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz (n + 1)).sheaf 1) := by
+  letI : Mono (sectionPoleSheafSuccHom π z hz n) :=
+    sectionPoleSheafSuccHom_mono hsm z hz n
+  let T := ShortComplex.mk (sectionPoleSheafSuccHom π z hz n)
+    (cokernel.π (sectionPoleSheafSuccHom π z hz n))
+    (cokernel.condition (sectionPoleSheafSuccHom π z hz n))
+  have hT : T.ShortExact :=
+    ShortComplex.ShortExact.mk
+      (ShortComplex.exact_cokernel (sectionPoleSheafSuccHom π z hz n))
+  let Ts := T.map (Scheme.Modules.toSheaf C)
+  have hTs : Ts.ShortExact :=
+    ShortComplex.ShortExact.map_of_exact hT (Scheme.Modules.toSheaf C)
+  apply CategoryTheory.Sheaf.H.subsingleton_H_X₂_of_shortExact (hS := hTs) 1
+  · exact hH
+  · exact hQ
+
+/-- On an affine neighborhood containing the section, vanishing of first
+cohomology propagates from one pole sheaf to its successor. -/
+theorem sectionPoleSheafPower_succ_subsingleton_H_one_of_affine_neighborhood
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1)) :
+    Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz (n + 1)).sheaf 1) :=
+  sectionPoleSheafPower_succ_subsingleton_H_one hsm z hz n hH
+    (sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_neighborhood
+      hsm z hz n U hU)
+
+/-- On an affine neighborhood containing the section, vanishing of
+`H¹(O([0]))` implies vanishing of `H¹(O(n[0]))` for every positive `n`. -/
+theorem sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (hHOne : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    {n : ℕ} (hn : 1 ≤ n) :
+    Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1) := by
+  induction n, hn using Nat.le_induction with
+  | base => exact hHOne
+  | succ n hn ih =>
+      exact sectionPoleSheafPower_succ_subsingleton_H_one_of_affine_neighborhood
+        hsm z hz U hU n ih
 
 /-- Around every point of an affine base, successive pole quotients have vanishing
 first cohomology after restricting the family to a suitable affine neighborhood. -/
