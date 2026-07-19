@@ -78,6 +78,30 @@ theorem Scheme.exists_finite_affine_openCover_dense_iInf_of_isNoetherian
       (finite_irreducibleComponents_of_isNoetherian (X := X))).to_subtype
   exact X.exists_finite_affine_openCover_dense_iInf
 
+/-- A Noetherian scheme admits a nonempty finite affine open cover whose common intersection
+is dense. The singleton empty cover handles the empty scheme. -/
+theorem Scheme.exists_nonempty_finite_affine_openCover_dense_iInf_of_isNoetherian
+    (X : Scheme.{u}) [AlgebraicGeometry.IsNoetherian X] :
+    ∃ (ι : Type u) (_ : Finite ι) (_ : Nonempty ι) (U : ι → X.Opens),
+      IsOpenCover U ∧ (∀ i, IsAffineOpen (U i)) ∧
+        Dense ((⨅ i, U i : X.Opens) : Set X) := by
+  obtain ⟨ι, hι, U, hcover, hU, hDense⟩ :=
+    X.exists_finite_affine_openCover_dense_iInf_of_isNoetherian
+  letI : Finite ι := hι
+  by_cases hnonempty : Nonempty ι
+  · exact ⟨ι, hι, hnonempty, U, hcover, hU, hDense⟩
+  · letI : IsEmpty ι := not_nonempty_iff.mp hnonempty
+    have hbot : (⊥ : X.Opens) = ⊤ := by
+      simpa only [IsOpenCover, iSup_of_empty] using hcover
+    have hcover' : IsOpenCover (fun _ : ULift.{u} Unit ↦ (⊥ : X.Opens)) := by
+      rw [IsOpenCover]
+      simpa using hbot
+    have hDense' : Dense (((⊥ : X.Opens) : Set X)) := by
+      rw [hbot]
+      exact dense_univ
+    exact ⟨ULift.{u} Unit, inferInstance, inferInstance, fun _ ↦ ⊥, hcover',
+      fun _ ↦ isAffineOpen_bot X, by simpa using hDense'⟩
+
 /-- A proper scheme over an affine base has a finite affine open cover whose every
 nonempty finite intersection is affine. -/
 theorem Scheme.Hom.exists_finite_affine_openCover_of_isProper
