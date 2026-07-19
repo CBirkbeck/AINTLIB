@@ -1073,6 +1073,349 @@ private noncomputable def glueJb :
 
 end GlueObj
 
+/-! ## [R-glue-descent] Zariski descent of the moduli functor — chart inclusions
+
+The descent is parametrized over the Zariski-sheaf property of `P`. We first build, for every test
+object `Y : Ell/R`, the two chart inclusions `Y|D(a) ⟶ Y`, `Y|D(b) ⟶ Y` and the overlap
+`Y|D(ab)` with its inclusions into the two charts, all as morphisms of `Ell/R`. These are the
+diagram the sheaf condition (`ZariskiSheaf`) is stated against. -/
+
+section ZariskiDescent
+
+set_option backward.isDefEq.respectTransparency false
+
+variable (a b : R)
+
+/-- The `a`-chart inclusion of a test object `Y : Ell/R`: `Y|D(a) ⟶ Y`, the restriction of `Y` to
+`Y.structMap ⁻¹ D(a)` viewed over `R`. Built from the base-change ⊣ restrict-scalars adjunction
+`baseChangeRingHomEquivFwd` applied to `𝟙`. Its `baseHom` is `pullback.fst Y.structMap (Spec.map
+(awayHom a))`, the open immersion `Y|D(a) ↪ Y`. -/
+noncomputable def yChartInclA (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a)) ⟶ Y :=
+  baseChangeRingHomEquivFwd Y (awayHom a) (Y.baseChangeRing (awayHom a)) (𝟙 _)
+
+/-- The `b`-chart inclusion `Y|D(b) ⟶ Y`. -/
+noncomputable def yChartInclB (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b)) ⟶ Y :=
+  baseChangeRingHomEquivFwd Y (awayHom b) (Y.baseChangeRing (awayHom b)) (𝟙 _)
+
+/-- The overlap-chart inclusion `Y|D(ab) ⟶ Y`. -/
+noncomputable def yChartInclAB (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b))) ⟶ Y :=
+  baseChangeRingHomEquivFwd Y (awayHom (a * b)) (Y.baseChangeRing (awayHom (a * b))) (𝟙 _)
+
+@[simp] theorem yChartInclA_baseHom (Y : EllObj R) :
+    (yChartInclA a Y).baseHom = pullback.fst Y.structMap (Spec.map (awayHom a)) := by
+  rw [yChartInclA, baseChangeRingHomEquivFwd_baseHom]
+  exact Category.id_comp _
+
+@[simp] theorem yChartInclB_baseHom (Y : EllObj R) :
+    (yChartInclB b Y).baseHom = pullback.fst Y.structMap (Spec.map (awayHom b)) := by
+  rw [yChartInclB, baseChangeRingHomEquivFwd_baseHom]
+  exact Category.id_comp _
+
+@[simp] theorem yChartInclAB_baseHom (Y : EllObj R) :
+    (yChartInclAB a b Y).baseHom = pullback.fst Y.structMap (Spec.map (awayHom (a * b))) := by
+  rw [yChartInclAB, baseChangeRingHomEquivFwd_baseHom]
+  exact Category.id_comp _
+
+@[simp] theorem yChartInclA_top (Y : EllObj R) :
+    (yChartInclA a Y).top
+      = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a))) := by
+  rw [yChartInclA, baseChangeRingHomEquivFwd_top]
+  exact Category.id_comp _
+
+@[simp] theorem yChartInclB_top (Y : EllObj R) :
+    (yChartInclB b Y).top
+      = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b))) := by
+  rw [yChartInclB, baseChangeRingHomEquivFwd_top]
+  exact Category.id_comp _
+
+@[simp] theorem yChartInclAB_top (Y : EllObj R) :
+    (yChartInclAB a b Y).top
+      = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b)))) := by
+  rw [yChartInclAB, baseChangeRingHomEquivFwd_top]
+  exact Category.id_comp _
+
+/-! ### Overlap-into-chart inclusions `Y|D(ab) ⟶ Y|D(a)`, `Y|D(ab) ⟶ Y|D(b)` -/
+
+/-- Base leg of the overlap-into-`a`-chart inclusion: `Y|D(ab) ⟶ Y|D(a)` on bases, induced by the
+localization tower `D(ab) ↪ D(a)`. -/
+noncomputable def yOverlapBaseA (Y : EllObj R) :
+    ((EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))).base ⟶
+      ((EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a))).base :=
+  pullback.lift (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+    (pullback.snd Y.structMap (Spec.map (awayHom (a * b))) ≫ Spec.map (awayProdHomLeft a b))
+    (by rw [Category.assoc, ← Spec.map_comp, awayHom_comp_awayProdHomLeft]; exact pullback.condition)
+
+@[simp] theorem yOverlapBaseA_fst (Y : EllObj R) :
+    yOverlapBaseA a b Y ≫ pullback.fst Y.structMap (Spec.map (awayHom a))
+      = pullback.fst Y.structMap (Spec.map (awayHom (a * b))) :=
+  pullback.lift_fst _ _ _
+
+@[simp] theorem yOverlapBaseA_snd (Y : EllObj R) :
+    yOverlapBaseA a b Y ≫ pullback.snd Y.structMap (Spec.map (awayHom a))
+      = pullback.snd Y.structMap (Spec.map (awayHom (a * b))) ≫ Spec.map (awayProdHomLeft a b) :=
+  pullback.lift_snd _ _ _
+
+/-- Curve leg of the overlap-into-`a`-chart inclusion. -/
+noncomputable def yOverlapTopA (Y : EllObj R) :
+    ((EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))).curve.E ⟶
+      ((EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a))).curve.E :=
+  pullback.lift
+    (pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b)))))
+    (pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+      ≫ yOverlapBaseA a b Y)
+    (by rw [Category.assoc, yOverlapBaseA_fst]; exact pullback.condition)
+
+@[simp] theorem yOverlapTopA_fst (Y : EllObj R) :
+    yOverlapTopA a b Y ≫ pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+      = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b)))) :=
+  pullback.lift_fst _ _ _
+
+@[simp] theorem yOverlapTopA_snd (Y : EllObj R) :
+    yOverlapTopA a b Y ≫ pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+      = pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+        ≫ yOverlapBaseA a b Y :=
+  pullback.lift_snd _ _ _
+
+/-- The overlap-into-`a`-chart inclusion `Y|D(ab) ⟶ Y|D(a)` in `Ell/R`. -/
+noncomputable def yOverlapInclA (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b))) ⟶
+      (EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a)) where
+  baseHom := yOverlapBaseA a b Y
+  base_w := by
+    show yOverlapBaseA a b Y
+        ≫ (pullback.snd Y.structMap (Spec.map (awayHom a)) ≫ Spec.map (awayHom a))
+      = pullback.snd Y.structMap (Spec.map (awayHom (a * b))) ≫ Spec.map (awayHom (a * b))
+    rw [← Category.assoc, yOverlapBaseA_snd, Category.assoc, ← Spec.map_comp,
+      awayHom_comp_awayProdHomLeft]
+  top := yOverlapTopA a b Y
+  isPullback := by
+    refine IsPullback.of_right (h₁₂ := (yChartInclA a Y).top) ?_ ?_ (yChartInclA a Y).isPullback
+    · have e := (yChartInclAB a b Y).isPullback
+      rw [yChartInclAB_top, yChartInclAB_baseHom] at e
+      rw [yChartInclA_top, yChartInclA_baseHom, yOverlapTopA_fst, yOverlapBaseA_fst]
+      exact e
+    · show yOverlapTopA a b Y
+          ≫ pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        = pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+          ≫ yOverlapBaseA a b Y
+      exact yOverlapTopA_snd a b Y
+  zero_w := by
+    show (Y.baseChangeRing (awayHom (a * b))).curve.zero ≫ yOverlapTopA a b Y
+      = yOverlapBaseA a b Y ≫ (Y.baseChangeRing (awayHom a)).curve.zero
+    refine pullback.hom_ext (f := Y.curve.π)
+      (g := pullback.fst Y.structMap (Spec.map (awayHom a))) ?_ ?_
+    · rw [Category.assoc, yOverlapTopA_fst, baseChangeRing_curve_zero_comp_fst, Category.assoc,
+        baseChangeRing_curve_zero_comp_fst, ← Category.assoc, yOverlapBaseA_fst]
+    · rw [Category.assoc, yOverlapTopA_snd, ← Category.assoc, baseChangeRing_curve_zero_comp_snd,
+        Category.id_comp, Category.assoc, baseChangeRing_curve_zero_comp_snd]
+      exact (Category.comp_id _).symm
+
+/-- The overlap-into-`a`-chart inclusion composes with the `a`-chart inclusion to the overlap
+inclusion into `Y`. -/
+theorem yOverlapInclA_chartInclA (Y : EllObj R) :
+    yOverlapInclA a b Y ≫ yChartInclA a Y = yChartInclAB a b Y := by
+  refine EllHom.ext ?_ ?_
+  · show yOverlapBaseA a b Y ≫ (yChartInclA a Y).baseHom = (yChartInclAB a b Y).baseHom
+    rw [yChartInclA_baseHom, yChartInclAB_baseHom, yOverlapBaseA_fst]
+  · show yOverlapTopA a b Y ≫ (yChartInclA a Y).top = (yChartInclAB a b Y).top
+    rw [yChartInclA_top, yChartInclAB_top, yOverlapTopA_fst]
+
+/-- Base leg of the overlap-into-`b`-chart inclusion `Y|D(ab) ⟶ Y|D(b)`. -/
+noncomputable def yOverlapBaseB (Y : EllObj R) :
+    ((EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))).base ⟶
+      ((EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b))).base :=
+  pullback.lift (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+    (pullback.snd Y.structMap (Spec.map (awayHom (a * b))) ≫ Spec.map (awayProdHomRight a b))
+    (by rw [Category.assoc, ← Spec.map_comp, awayHom_comp_awayProdHomRight]; exact pullback.condition)
+
+@[simp] theorem yOverlapBaseB_fst (Y : EllObj R) :
+    yOverlapBaseB a b Y ≫ pullback.fst Y.structMap (Spec.map (awayHom b))
+      = pullback.fst Y.structMap (Spec.map (awayHom (a * b))) :=
+  pullback.lift_fst _ _ _
+
+@[simp] theorem yOverlapBaseB_snd (Y : EllObj R) :
+    yOverlapBaseB a b Y ≫ pullback.snd Y.structMap (Spec.map (awayHom b))
+      = pullback.snd Y.structMap (Spec.map (awayHom (a * b))) ≫ Spec.map (awayProdHomRight a b) :=
+  pullback.lift_snd _ _ _
+
+/-- Curve leg of the overlap-into-`b`-chart inclusion. -/
+noncomputable def yOverlapTopB (Y : EllObj R) :
+    ((EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))).curve.E ⟶
+      ((EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b))).curve.E :=
+  pullback.lift
+    (pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b)))))
+    (pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+      ≫ yOverlapBaseB a b Y)
+    (by rw [Category.assoc, yOverlapBaseB_fst]; exact pullback.condition)
+
+@[simp] theorem yOverlapTopB_fst (Y : EllObj R) :
+    yOverlapTopB a b Y ≫ pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+      = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b)))) :=
+  pullback.lift_fst _ _ _
+
+@[simp] theorem yOverlapTopB_snd (Y : EllObj R) :
+    yOverlapTopB a b Y ≫ pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+      = pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+        ≫ yOverlapBaseB a b Y :=
+  pullback.lift_snd _ _ _
+
+/-- The overlap-into-`b`-chart inclusion `Y|D(ab) ⟶ Y|D(b)` in `Ell/R`. -/
+noncomputable def yOverlapInclB (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b))) ⟶
+      (EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b)) where
+  baseHom := yOverlapBaseB a b Y
+  base_w := by
+    show yOverlapBaseB a b Y
+        ≫ (pullback.snd Y.structMap (Spec.map (awayHom b)) ≫ Spec.map (awayHom b))
+      = pullback.snd Y.structMap (Spec.map (awayHom (a * b))) ≫ Spec.map (awayHom (a * b))
+    rw [← Category.assoc, yOverlapBaseB_snd, Category.assoc, ← Spec.map_comp,
+      awayHom_comp_awayProdHomRight]
+  top := yOverlapTopB a b Y
+  isPullback := by
+    refine IsPullback.of_right (h₁₂ := (yChartInclB b Y).top) ?_ ?_ (yChartInclB b Y).isPullback
+    · have e := (yChartInclAB a b Y).isPullback
+      rw [yChartInclAB_top, yChartInclAB_baseHom] at e
+      rw [yChartInclB_top, yChartInclB_baseHom, yOverlapTopB_fst, yOverlapBaseB_fst]
+      exact e
+    · show yOverlapTopB a b Y
+          ≫ pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        = pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+          ≫ yOverlapBaseB a b Y
+      exact yOverlapTopB_snd a b Y
+  zero_w := by
+    show (Y.baseChangeRing (awayHom (a * b))).curve.zero ≫ yOverlapTopB a b Y
+      = yOverlapBaseB a b Y ≫ (Y.baseChangeRing (awayHom b)).curve.zero
+    refine pullback.hom_ext (f := Y.curve.π)
+      (g := pullback.fst Y.structMap (Spec.map (awayHom b))) ?_ ?_
+    · rw [Category.assoc, yOverlapTopB_fst, baseChangeRing_curve_zero_comp_fst, Category.assoc,
+        baseChangeRing_curve_zero_comp_fst, ← Category.assoc, yOverlapBaseB_fst]
+    · rw [Category.assoc, yOverlapTopB_snd, ← Category.assoc, baseChangeRing_curve_zero_comp_snd,
+        Category.id_comp, Category.assoc, baseChangeRing_curve_zero_comp_snd]
+      exact (Category.comp_id _).symm
+
+/-- The overlap-into-`b`-chart inclusion composes with the `b`-chart inclusion to the overlap
+inclusion into `Y`. -/
+theorem yOverlapInclB_chartInclB (Y : EllObj R) :
+    yOverlapInclB a b Y ≫ yChartInclB b Y = yChartInclAB a b Y := by
+  refine EllHom.ext ?_ ?_
+  · show yOverlapBaseB a b Y ≫ (yChartInclB b Y).baseHom = (yChartInclAB a b Y).baseHom
+    rw [yChartInclB_baseHom, yChartInclAB_baseHom, yOverlapBaseB_fst]
+  · show yOverlapTopB a b Y ≫ (yChartInclB b Y).top = (yChartInclAB a b Y).top
+    rw [yChartInclB_top, yChartInclAB_top, yOverlapTopB_fst]
+
+/-- **Overlap compatibility (cocycle base condition).** The two overlap inclusions into the `a`-
+and `b`-charts of `Y` agree after including into `Y`: both equal `Y|D(ab) ⟶ Y`. -/
+theorem yOverlap_compat (Y : EllObj R) :
+    yOverlapInclA a b Y ≫ yChartInclA a Y = yOverlapInclB a b Y ≫ yChartInclB b Y := by
+  rw [yOverlapInclA_chartInclA, yOverlapInclB_chartInclB]
+
+end ZariskiDescent
+
+/-! ## [R-sheaf-P] The Zariski-sheaf hypothesis on `P` and the parametrized descent
+
+The recollement's inverse direction needs *exactly one* global input about `P`: that it is a
+Zariski sheaf for the two-chart cover `Spec R = D(a) ∪ D(b)` pulled back to every test object `Y`.
+We package that as `ZariskiSheaf`, taking it as an explicit hypothesis (`zglue`). The half that
+fails for a bare presheaf (the `𝔽₄ × 𝔽₉` counterexample) is exactly the surjectivity of the
+restriction map onto the compatible pairs; the separatedness is its injectivity. -/
+
+/-- **Compatible chart-pairs.** For a test object `Y : Ell/R`, a pair of `P`-sections over the two
+charts `Y|D(a)`, `Y|D(b)` that agree over the overlap `Y|D(ab)` (restriction via the overlap
+inclusions `yOverlapInclA`/`yOverlapInclB`). This is the value-object of the two-chart Zariski
+sheaf condition — the equaliser of `P(Y|D(a)) ⇉ P(Y|D(ab)) ⇇ P(Y|D(b))`. -/
+def CompatPair (P : ModuliProblem R) (a b : R) (Y : EllObj R) : Type u :=
+  { p : P.obj (op ((EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a))))
+          × P.obj (op ((EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b)))) //
+      P.map (yOverlapInclA a b Y).op p.1 = P.map (yOverlapInclB a b Y).op p.2 }
+
+/-- **[R-sheaf-P] The two-chart Zariski-sheaf property of `P` (the `zglue` hypothesis).**
+
+For every test object `Y : Ell/R`, restriction to the two charts `Y|D(a)`, `Y|D(b)` is a
+*bijection* `P(Y) ≃ CompatPair P a b Y` onto the pairs agreeing over the overlap `Y|D(ab)`. The
+`fst_eq`/`snd_eq` fields pin the bijection to be genuine chart-restriction (`P.map` along the chart
+inclusions `yChartInclA`/`yChartInclB`), so this is the honest sheaf condition for the cover, not a
+mere abstract iso.
+
+This is precisely what the sorry-free `Stack.lean` lemmas `moduliProblem_fppf_separated`
+(injectivity) and `moduliProblem_fppf_descent` (surjectivity) supply for a
+`RelativelyRepresentable` `P`, applied to the fppf cover `Y|D(a) ⊔ Y|D(b) ⟶ Y` (open immersions
+are flat + locally of finite presentation, and joint surjectivity comes from
+`basicOpen_sup_basicOpen_eq_top`). The coordinator discharges `zglue` from those. -/
+structure ZariskiSheaf (P : ModuliProblem R) (a b : R) where
+  /-- Restriction to the two charts is a bijection onto compatible pairs. -/
+  equiv : ∀ Y : EllObj R, P.obj (op Y) ≃ CompatPair P a b Y
+  /-- The first component of the equivalence is restriction along the `a`-chart inclusion. -/
+  fst_eq : ∀ (Y : EllObj R) (s : P.obj (op Y)),
+    (equiv Y s).val.1 = P.map (yChartInclA a Y).op s
+  /-- The second component of the equivalence is restriction along the `b`-chart inclusion. -/
+  snd_eq : ∀ (Y : EllObj R) (s : P.obj (op Y)),
+    (equiv Y s).val.2 = P.map (yChartInclB b Y).op s
+
+/-- **[R-hom-glue] Zariski descent of `Hom(-, G)` (the geometric leaf).** For the glued object `G`,
+morphisms `Y ⟶ G` biject naturally with compatible chart-pairs of `P` — i.e. `Hom(-, G)` is the
+same two-chart Zariski sheaf as `P`. This bundles the three geometric facts of the descent: the
+per-chart representability `repr_a`/`repr_b` (turning `Y|D(a) ⟶ Xa` into `P(Y|D(a))` via the
+base-change ⊣ restrict-scalars adjunction), the identification of the `a`-chart of `G` with `Xa`,
+and the source-cover gluing of an `Ell/R`-morphism from its two chart legs
+(`Scheme.Cover.glueMorphisms` + `Scheme.isPullback_of_openCover` for the cartesian field). -/
+structure HomGlueDescent {P : ModuliProblem R} (a b : R) (zglue : ZariskiSheaf P a b)
+    (G : EllObj R) where
+  /-- Morphisms into `G` biject with compatible chart-pairs. -/
+  toEquiv : ∀ Y : EllObj R, (Y ⟶ G) ≃ CompatPair P a b Y
+  /-- The bijection is natural in `Y` and compatible with the sheaf structure on `P`. -/
+  natural : ∀ {Y' Y : EllObj R} (f : Y' ⟶ Y) (g : Y ⟶ G),
+    toEquiv Y' (f ≫ g) = zglue.equiv Y' (P.map f.op ((zglue.equiv Y).symm (toEquiv Y g)))
+
+/-- **[R-hom-glue], the geometric descent for the glued object (the single remaining `sorry`).**
+
+`Hom(-, glueEllObj …)` is the two-chart Zariski sheaf `CompatPair P a b`. This is the sole
+irreducible geometric content left in the recollement: assembling an `Ell/R`-morphism `Y ⟶ G` from
+its two chart legs `Y|D(a) ⟶ Xa`, `Y|D(b) ⟶ Xb` (glued via `Scheme.Cover.glueMorphisms` on the
+base and total space over the cover `Y.base = Y|D(a) ∪ Y|D(b)`, the cartesian `isPullback` field
+checked Zariski-locally via `Scheme.isPullback_of_openCover`), together with the per-chart
+representability equivalences from `repr_a`/`repr_b` and the identification of the `a`-chart of `G`
+with `Xa`. Everything it consumes — the chart/overlap inclusions, the glued object and its
+cartesian chart squares `isPullback_glueTotalInl/Inr`, `glueBase_hom_ext`/`glueTotal_hom_ext`, the
+adjunction `baseChangeRingHomEquiv`, and `repr_a`/`repr_b` — is already proven above and in the
+file. -/
+private noncomputable def homGlueDescentData {P : ModuliProblem R} (a b : R)
+    (hab : ∃ x y : R, x * a + y * b = 1) (hrel : P.RelativelyRepresentable)
+    {Xa : EllObj (CommRingCat.of (Localization.Away a))}
+    {Xb : EllObj (CommRingCat.of (Localization.Away b))}
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb)
+    (zglue : ZariskiSheaf P a b) :
+    HomGlueDescent a b zglue (glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) :=
+  sorry
+
+/-- **[R-glue-repr], parametrized over the sheaf property.** `glueEllObj a b Xa Xb (overlapIso …)`
+represents `P`, *given* the two-chart Zariski-sheaf property `zglue` of `P`. This is the full
+functor-of-points descent (KM Cor. 4.7.1 core): the representing bijection `(Y ⟶ G) ≃ P(Y)` is the
+composite of the geometric descent `Hom(-, G) ≃ CompatPair P a b` (`homGlueDescentData`) with the
+inverse of the sheaf bijection `P ≃ CompatPair P a b` (`zglue`). Naturality (`homEquiv_comp`) is
+immediate from `HomGlueDescent.natural`.
+
+The coordinator discharges the `:1141` `glueEllObj_representableBy` sorry as
+`glueEllObj_representableBy_of_zariskiGlue a b hab hrel repr_a repr_b zglue`, where `zglue` is the
+`ZariskiSheaf P a b` produced from the `Stack.lean` fppf-sheaf lemmas. -/
+private noncomputable def glueEllObj_representableBy_of_zariskiGlue {P : ModuliProblem R} (a b : R)
+    (hab : ∃ x y : R, x * a + y * b = 1) (hrel : P.RelativelyRepresentable)
+    {Xa : EllObj (CommRingCat.of (Localization.Away a))}
+    {Xb : EllObj (CommRingCat.of (Localization.Away b))}
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb)
+    (zglue : ZariskiSheaf P a b) :
+    P.RepresentableBy (glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) :=
+  let hgd := homGlueDescentData a b hab hrel repr_a repr_b zglue
+  { homEquiv := fun {Y} => (hgd.toEquiv Y).trans (zglue.equiv Y).symm
+    homEquiv_comp := fun {Y' Y} f g => by
+      show (zglue.equiv Y').symm (hgd.toEquiv Y' (f ≫ g))
+        = P.map f.op ((zglue.equiv Y).symm (hgd.toEquiv Y g))
+      rw [hgd.natural f g, Equiv.symm_apply_apply] }
+
 /-! ## [R-glue-repr] the glued object represents `P` -/
 
 /-- **[R-glue-repr] — the YFULL Zariski-descent leaf (quarantined; `sorry`).**
