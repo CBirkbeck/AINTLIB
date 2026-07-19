@@ -37,6 +37,16 @@ lemma Scheme.Hom.toImage_isSchemeTheoreticallyDominant (f : X ⟶ Y) [QuasiCompa
   rw [Scheme.Hom.ker_apply, Scheme.IdealSheafData.ideal_bot, Pi.bot_apply]
   exact (RingHom.injective_iff_ker_eq_bot _).mp (f.toImage_app_injective U)
 
+/-- If a quasi-compact scheme-theoretically dominant morphism factors through an open
+immersion, its canonical lift to the open subscheme is scheme-theoretically dominant. -/
+lemma IsSchemeTheoreticallyDominant.lift_of_isOpenImmersion
+    (f : X ⟶ Y) (j : W ⟶ Y) [IsOpenImmersion j]
+    (H : Set.range f ⊆ Set.range j) [IsSchemeTheoreticallyDominant f]
+    [QuasiCompact f] :
+    IsSchemeTheoreticallyDominant (IsOpenImmersion.lift j f H) := by
+  exact IsSchemeTheoreticallyDominant.of_isPullback
+    (IsOpenImmersion.isPullback_lift_id f j H).flip
+
 /-- The closed embedding of the scheme-theoretic image of a quasi-compact dominant morphism is
 surjective. -/
 lemma Scheme.Hom.imageι_surjective_of_isDominant (f : X ⟶ Y) [QuasiCompact f]
