@@ -50,9 +50,14 @@ Architecture ("ENDING-1", concrete filtered systems, no category-theory transpor
   clash with the registered gate; the gate flips to this on completion, board-coordinated).
 -/
 
-universe u
+universe u v
 
 open TensorProduct
+
+/-- Noetherianity is invariant under a universe lift. -/
+instance ULift.isNoetherianRing {R : Type v} [CommRing R] [IsNoetherianRing R] :
+    IsNoetherianRing (ULift.{u} R) :=
+  isNoetherianRing_of_ringEquiv R ULift.ringEquiv.symm
 
 namespace Algebra
 
@@ -302,6 +307,12 @@ theorem stage_finitePresentation (P : Index R A) :
     FinitePresentation R (stage R A P) :=
   show FinitePresentation R (MvPolynomial {a // a ∈ P.vars} R ⧸ P.rels) from
     FinitePresentation.quotient P.rels_fg
+
+/-- A stage of the canonical presentation system over a Noetherian base is Noetherian. -/
+instance stage_isNoetherianRing [IsNoetherianRing R] (P : Index R A) :
+    IsNoetherianRing (stage R A P) := by
+  letI : FinitePresentation R (stage R A P) := stage_finitePresentation R A P
+  exact FiniteType.isNoetherianRing R (stage R A P)
 
 /-- **[KL-1b] (Stacks 10.127.2).** The canonical presentation system is a filtered
 colimit presentation of `A`: directed (union of variables, sum of transported relations),

@@ -155,6 +155,7 @@ import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 import ModularCurves.Picard.InvertibleSheafGlueData
 import ModularCurves.Picard.InvertibleSheafLocallyFree
+import ModularCurves.Picard.InvertibleSheafNoetherianStage
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.UnitPullback
