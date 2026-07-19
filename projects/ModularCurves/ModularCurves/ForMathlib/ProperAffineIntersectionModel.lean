@@ -32,6 +32,32 @@ lemma IsProper.of_comp_surjective {Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
   toUniversallyClosed := UniversallyClosed.of_comp_surjective f g
   toLocallyOfFiniteType := inferInstance
 
+/-- A compatible affine map which is a closed immersion over the filtered
+colimit becomes a closed immersion at one later stage. -/
+theorem Algebra.SpreadData.exists_isClosedImmersion_specMapAtLaterStage
+    {R A : Type u} [CommRing R] [CommRing A]
+    {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+    {A₁ A₂ : Type u} [CommRing A₁] [Algebra A A₁]
+    [CommRing A₂] [Algebra A A₂]
+    (D₁ : Algebra.SpreadData 𝒮 uA A₁) (D₂ : Algebra.SpreadData 𝒮 uA A₂)
+    (H : Algebra.IsFilteredAlgColimit R 𝒮 t A uA)
+    {i : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i)
+    (f : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (F : A₁ →ₐ[A] A₂)
+    (hf : ∀ x, D₂.stageToColimit H ⟨i, h₂⟩ (f x) =
+      F (D₁.stageToColimit H ⟨i, h₁⟩ x))
+    (hF : Function.Surjective F) :
+    ∃ (j : ι) (hij : i ≤ j), IsClosedImmersion
+      (Spec.map (CommRingCat.ofHom
+        (D₁.mapAtLaterStage D₂ H h₁ h₂ hij f).toRingHom)) := by
+  obtain ⟨j, hij, hsurj⟩ :=
+    D₁.exists_surjective_mapAtLaterStage D₂ H h₁ h₂ f F hf hF
+  exact ⟨j, hij, IsClosedImmersion.spec_of_surjective _ hsurj⟩
+
 /-- The glued structural morphism attached to a spread affine-intersection functor is
 locally of finite presentation over its stage ring. -/
 theorem Algebra.SpreadData.FunctorModel.locallyOfFinitePresentation_affineIntersectionToSpec
