@@ -325,6 +325,7 @@ end RationalComparison
 
 /-! ### The whole space (Wedhorn Remark 8.3, presheaf level) -/
 
+omit [HasLocLiftPowerBounded A] in
 /-- The whole space is the rational open of the `{1}/1`-datum: `R({1}/1) = Spa (A, A⁺)`.
 Combined with `limitEval`, this identifies `𝒪_X(X)` with
 `presheafValue (globalLocData P)`; the further identification with `Â` (for complete

@@ -93,6 +93,7 @@ import «Adic spaces».SpvCompletionExtension
 import «Adic spaces».StandardCover
 import «Adic spaces».RationalIntersection
 import «Adic spaces».SheafyFoundations
+import «Adic spaces».RationalBasis
 import «Adic spaces».StructurePresheafLimit
 import «Adic spaces».StructureSheaf
 import «Adic spaces».TateAcyclicity
