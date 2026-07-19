@@ -37,6 +37,18 @@ lemma Scheme.Hom.toImage_isSchemeTheoreticallyDominant (f : X ⟶ Y) [QuasiCompa
   rw [Scheme.Hom.ker_apply, Scheme.IdealSheafData.ideal_bot, Pi.bot_apply]
   exact (RingHom.injective_iff_ker_eq_bot _).mp (f.toImage_app_injective U)
 
+/-- The closed embedding of the scheme-theoretic image of a quasi-compact dominant morphism is
+surjective. -/
+lemma Scheme.Hom.imageι_surjective_of_isDominant (f : X ⟶ Y) [QuasiCompact f]
+    [IsDominant f] : Surjective f.imageι := by
+  have hrange : Set.range f ⊆ Set.range f.imageι := by
+    have hcomp : Set.range (f.toImage ≫ f.imageι) ⊆ Set.range f.imageι :=
+      Set.range_comp_subset_range f.toImage f.imageι
+    simpa only [f.toImage_imageι] using hcomp
+  haveI : IsDominant f.imageι := ⟨f.denseRange.mono hrange⟩
+  exact surjective_of_isDominant_of_isClosed_range f.imageι
+    f.imageι.isClosedEmbedding.isClosed_range
+
 /-- Morphisms over a separated target are equal if they agree after precomposition by a
 scheme-theoretically dominant morphism. -/
 lemma ext_of_isSchemeTheoreticallyDominant_of_isSeparated
