@@ -24097,3 +24097,17 @@ isPullback_projModelBaseChange, exists_coboundary, fixedAwayMap/existsUnique_fac
 possibly a Čech-additive-vanishing lemma in the exact VariableChange-cocycle shape (would go in a ForMathlib file, NOT
 EngineDescent). The ONE research-risk = the additive Čech H¹ split over L; unit part is covered (Pic(L)=0). Genuinely
 multi-session by volume + that one possible new ForMathlib lemma. Stage 4 (exists_cocycle_hρact_of_presentation) banked.
+
+### v10.339 addendum — mouth-core Stage-3 Čech-split research-risk RESOLVED (it is elementary)
+Correcting F's route-map: F flagged the Stage-3 additive split as "the one research-risk" citing
+exists_sub_smul_eq_of_isCocycle. But that lemma (ForMathlib/InvariantTorsor:397) is the additive **G-cocycle**
+split (`a : G → A`, hcocycle `a(g*h)=a g + g•a h` — Hilbert-90 for the GROUP action), used for the Stage-4/5
+G-part — NOT the Stage-3 **chart-Čech** cocycle (over the affine chart-cover overlap indices). The two were conflated.
+The genuine Stage-3 additive split (chart-Čech 1-cocycle over the basic opens D(fᵢ) covering Spec L) is ELEMENTARY:
+over the semilocal L the D(fᵢ) cover ⟺ the fᵢ generate the unit ideal ⟹ a partition of unity 1 = Σ gᵢfᵢ, and the
+standard partition-of-unity argument (aᵢ := Σₖ (unit-weight)·aₖᵢ, then aᵢ − aⱼ = aᵢⱼ) splits it — provable INLINE,
+NOT a deep/missing mathlib lemma. (mathlib has group cohomology H¹, not affine-Čech-H¹ in this shape, but the affine
+case is the elementary partition-of-unity split.) So the mouth core has NO deep research-gap — it is a large-VOLUME
+assembly (~1000 lines) with the unit-split via Pic(semilocal)=0 (mathlib) + the additive-split via partition-of-unity
+(elementary). This DE-RISKS exists_localModel_core_at fully: it is multi-session by VOLUME, not by any missing theorem.
+Builder I (a424befe) is attacking it via F's direct-over-A_a route with this understanding.
