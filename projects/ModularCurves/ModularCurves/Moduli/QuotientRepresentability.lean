@@ -16,7 +16,9 @@ import ModularCurves.EllipticCurve.GroupLawDescent
 problem `P` whose universal simultaneous curve carries a global Weierstrass model is
 representable. Assembles Phase A (the engine) + [B0] + [B1] + [B2a/b/c'].
 
-Only remaining non-proven leaf: T-W7 (`EllipticCurveGeom.toEllipticCurve` → `grpObj`).
+The T-W7 leaf (`EllipticCurveGeom.toEllipticCurve` → `grpObj`) is PROVEN — verified
+axiom-clean {propext, Classical.choice, Quot.sound} (v10.330; the group-law enrichment
+chain is complete, and no sorryAx reaches this file from the group-law side).
 -/
 
 universe u
