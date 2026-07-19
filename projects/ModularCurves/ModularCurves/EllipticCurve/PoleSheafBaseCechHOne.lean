@@ -68,6 +68,26 @@ theorem exists_sectionPoleSheafPower_finiteAffineBaseCechComparison
     ⟨sectionPoleSheafPower_baseCechHomologyOneIso
       hsm z hz n U hU hUaff⟩⟩
 
+/-- The pole-filtration map on global sections, retaining the affine-base
+module structure. -/
+noncomputable def sectionPoleSheafPower_baseSectionsLEHom
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) {n m : ℕ} (h : n ≤ m) :
+    Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n) ⟶
+      Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz m) :=
+  Scheme.Modules.baseSectionsMap π (sectionPoleSheafLEHom π z hz h)
+
+/-- Pole-filtration maps are injective on global sections over the affine
+base ring. -/
+theorem sectionPoleSheafPower_baseSectionsLEHom_mono
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) {n m : ℕ} (h : n ≤ m) :
+    Mono (sectionPoleSheafPower_baseSectionsLEHom z hz h) :=
+  Scheme.Modules.baseSectionsMap_mono π
+    (sectionPoleSheafLEHom π z hz h)
+    (sectionPoleSheafLEHom_mono hsm z hz h)
+
 /-- Global sections of `O(n[0])` are the degree-zero kernel of its ordered base-linear Cech
 complex. -/
 noncomputable def sectionPoleSheafPower_baseSectionsIsoKernelOrderedBaseCechDifferential

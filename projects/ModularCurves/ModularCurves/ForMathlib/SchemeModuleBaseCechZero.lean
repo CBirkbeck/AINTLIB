@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Category.ModuleCat.Kernels
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
 import ModularCurves.ForMathlib.SheafCechInjectiveComparison
 
@@ -22,6 +23,35 @@ noncomputable section
 functions on the base. -/
 abbrev baseSections {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules) :=
   (baseModulePresheaf π M).obj (op (⊤ : X.Opens))
+
+/-- A morphism of scheme modules induces a morphism on global sections,
+retaining the action of global functions on the base. -/
+noncomputable def baseSectionsMap
+    {X S : Scheme.{u}} (π : X ⟶ S) {M N : X.Modules} (f : M ⟶ N) :
+    baseSections π M ⟶ baseSections π N :=
+  (ModuleCat.restrictScalars π.appTop.hom).map
+    (((PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop)).map f.val).app
+        (op (⊤ : X.Opens)))
+
+/-- A monomorphism of scheme modules induces a monomorphism on global
+sections over the base ring. -/
+theorem baseSectionsMap_mono
+    {X S : Scheme.{u}} (π : X ⟶ S) {M N : X.Modules} (f : M ⟶ N)
+    (hf : Mono f) : Mono (baseSectionsMap π f) := by
+  letI := hf
+  let F := SheafOfModules.evaluation X.ringCatSheaf (op (⊤ : X.Opens))
+  letI : PreservesFiniteLimits F :=
+    SheafOfModules.Finite.evaluationPreservesFiniteLimits
+      X.ringCatSheaf (op (⊤ : X.Opens))
+  letI : PreservesLimitsOfShape WalkingCospan F :=
+    PreservesFiniteLimits.preservesFiniteLimits WalkingCospan
+  letI : F.PreservesMonomorphisms :=
+    CategoryTheory.preservesMonomorphisms_of_preservesLimitsOfShape F
+  haveI : Mono (F.map f) := @Functor.map_mono _ _ _ _ F
+    inferInstance _ _ f hf
+  apply (ModuleCat.mono_iff_injective (baseSectionsMap π f)).mpr
+  exact (ModuleCat.mono_iff_injective (F.map f)).mp inferInstance
 
 /-- An isomorphism of scheme modules induces an isomorphism on global sections,
 retaining the action of global functions on the base. -/
