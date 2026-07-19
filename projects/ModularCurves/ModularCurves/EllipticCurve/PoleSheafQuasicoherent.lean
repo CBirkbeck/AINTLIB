@@ -62,6 +62,28 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 open ZeroObject
 
+/-- If a scheme module restricts to zero on an open subscheme, then its sections
+on the corresponding ambient open form a subsingleton. -/
+theorem subsingleton_sections_of_isZero_restrict
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (hzero : IsZero ((restrictFunctor U.ι).obj M)) :
+    Subsingleton Γ(M, U) := by
+  let F := SheafOfModules.toSheaf U.toScheme.ringCatSheaf
+  have hzeroSheaf : IsZero (F.obj (M.restrict U.ι)) :=
+    F.map_isZero hzero
+  let E := TopCat.Sheaf.forget AddCommGrpCat U.toScheme.toTopCat ⋙
+    (CategoryTheory.evaluation U.toScheme.Opensᵒᵖ AddCommGrpCat).obj (.op ⊤)
+  letI : E.PreservesZeroMorphisms := by
+    constructor
+    intro A B
+    rfl
+  have htop : Subsingleton ↑Γ(M.restrict U.ι, ⊤) :=
+    AddCommGrpCat.subsingleton_of_isZero (E.map_isZero hzeroSheaf)
+  rw [← Scheme.Opens.opensRange_ι (U := U),
+    ← Scheme.Hom.image_top_eq_opensRange]
+  change Subsingleton ↑Γ(M.restrict U.ι, ⊤)
+  exact htop
+
 /-- Restriction to an open subscheme commutes with cokernels. -/
 noncomputable def restrictCokernelIso
     {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N) (U : X.Opens) :

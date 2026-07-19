@@ -46,23 +46,9 @@ theorem sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_open_cover
     have hzero : IsZero (M.restrict (U.1 ⊓ V).ι) :=
       sectionPoleSheafSuccCoker_restrict_isZero_of_section_preimage_eq_bot
         hsm z hz (U.1 ⊓ V) hpre n
-    let F := SheafOfModules.toSheaf (U.1 ⊓ V).toScheme.ringCatSheaf
-    have hzeroSheaf : IsZero (F.obj (M.restrict (U.1 ⊓ V).ι)) :=
-      F.map_isZero hzero
-    let E := TopCat.Sheaf.forget AddCommGrpCat (U.1 ⊓ V).toScheme.toTopCat ⋙
-      (CategoryTheory.evaluation ((U.1 ⊓ V).toScheme.Opens)ᵒᵖ
-        AddCommGrpCat).obj (.op ⊤)
-    letI : E.PreservesZeroMorphisms := by
-      constructor
-      intro A B
-      rfl
-    have htop : Subsingleton ↑Γ(M.restrict (U.1 ⊓ V).ι, ⊤) :=
-      AddCommGrpCat.subsingleton_of_isZero (E.map_isZero hzeroSheaf)
     haveI hoverlap : Subsingleton ↑Γ(M, U.1 ⊓ V) := by
-      rw [← Scheme.Opens.opensRange_ι (U := U.1 ⊓ V),
-        ← Scheme.Hom.image_top_eq_opensRange]
-      change Subsingleton ↑Γ(M.restrict (U.1 ⊓ V).ι, ⊤)
-      exact htop
+      exact Scheme.Modules.subsingleton_sections_of_isZero_restrict
+        M (U.1 ⊓ V) hzero
     have hoverlapSheaf :
         Subsingleton ↑(M.sheaf.obj.obj (op (U.1 ⊓ V))) := by
       change Subsingleton ↑Γ(M, U.1 ⊓ V)
