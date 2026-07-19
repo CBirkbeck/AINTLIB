@@ -24072,3 +24072,28 @@ but the ℰ₄ representability is the real cost. TRADE for owner: Legendre D(2)
 being attacked) + impossible legendreDeltaGAction (B2); Level-4 D(2) = genuine action (no B2) + ℰ₄-machine. Both are
 major. THIRD option: φ-free TorsorData (mouth interface change). Owner picks. Receipt 7 clean; D(3)/level-3 leg is
 sorry-free (naiveLevelThree_representable_by_affine landed via the ℰ₃-machine).
+
+## v10.339-FIN (2026-07-20) — mouth-core (exists_localModel_core_at) DE-RISKED + route-mapped (Builder F, no code change) (STREAM-FIN)
+
+Builder F assessed exists_localModel_core_at (the ~1000-line Stage 1-3 semilocal-model assembly, multi-session) and made
+NO edit (banking a Stage-1/2/5 helper = duplication or scaffolding-sorry; correctly declined). Two findings:
+1. **Stage-1 orbit fact ALREADY EXISTS** — fibre of Spec A → Spec Aᴳ over s is one G-orbit = `invariantsπ_apply_eq_iff`
+   (ForMathlib/SpecGroupAction.lean:134) + `invariantsπ_surjective` (:125) + the `Algebra.IsInvariant` instance (:98).
+   CITE, do not re-prove.
+2. **KEY DE-RISKING — the EGA IV §8 spreading-out gate is AVOIDABLE.** The docstring's "SPREAD ρL from L to A_a" reads
+   as spreading a MORPHISM (needs EGA IV §8, UNLANDED = T-W7.8). Instead: glue DIRECTLY over A_a, spreading only RING
+   ELEMENTS from L (never a morphism). Route: (a) split the chart Čech cocycle over semilocal L (Lᴳ local) → correction
+   DATA = ring elts of L; (b) spread that data + coefficients to A_a by IsLocalization denominator-clearing (Part 2 of
+   exists_away_invariant_descent, no invariance needed — simpler); (c) glue W₀R (coeffs via Spec sheaf) + ρR (via
+   glueMorphisms_hf_of_agree) NATIVELY over A_a (atlas charts live over A-level opens, restrict to D(a) natively —
+   nothing geometric spread); (d) coboundary E: Stage 4 at A_a → CvcR, base-change along G-equiv A_a→L (j₀,
+   WeierstrassInvariantLocal:485-498), exists_coboundary at L → E_L, spread E_L's 4 entries to A_a. L used ONLY for
+   cocycle-split + coboundary existence (both bare ring data).
+
+REMAINING GAP (Stages 1-3 + Stage-5 coboundary, ~1000 lines, all in EngineDescent): tooling ALL exists (atlas,
+transVC, exists_unit_smul_eq_of_isLocalRing / Pic(semilocal)=0 [mathlib PicardGroup:512] for unit-split,
+exists_sub_smul_eq_of_isCocycle for additive-split, pointedIso_hom_of_transVC_eq_one, glueMorphisms_hf_of_agree,
+isPullback_projModelBaseChange, exists_coboundary, fixedAwayMap/existsUnique_factor_fixedPoints_away for spread) EXCEPT
+possibly a Čech-additive-vanishing lemma in the exact VariableChange-cocycle shape (would go in a ForMathlib file, NOT
+EngineDescent). The ONE research-risk = the additive Čech H¹ split over L; unit part is covered (Pic(L)=0). Genuinely
+multi-session by volume + that one possible new ForMathlib lemma. Stage 4 (exists_cocycle_hρact_of_presentation) banked.
