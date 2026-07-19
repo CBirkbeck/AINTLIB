@@ -4307,6 +4307,957 @@ private theorem sectionPoleSheafPowerMulTrivialization_hom
             (unitObjTensorIso U.toScheme).hom :=
   rfl
 
+private theorem poleTensor_five_comp_of_three_eq
+    {D : Type u} [Category.{v} D]
+    {A₀ A₁ A₂ A₃ A₄ A₅ B₁ B₂ B₃ : D}
+    {a : A₀ ⟶ A₁} {b : A₁ ⟶ A₂}
+    {c : A₀ ⟶ B₁} {d : B₁ ⟶ A₂}
+    {e : A₂ ⟶ A₃} {f : A₃ ⟶ A₄}
+    {g : B₁ ⟶ B₂} {h : B₂ ⟶ A₄}
+    {i : A₄ ⟶ A₅} {j : B₂ ⟶ B₃}
+    {k : B₃ ⟶ A₅}
+    (h₁ : a ≫ b = c ≫ d) (h₂ : d ≫ e ≫ f = g ≫ h)
+    (h₃ : h ≫ i = j ≫ k) :
+    a ≫ b ≫ e ≫ f ≫ i = c ≫ g ≫ j ≫ k := by
+  rw [reassoc_of% h₁, reassoc_of% h₂, h₃]
+
+private theorem poleTensor_nested_four_comp_of_tail_head_last
+    {D : Type u} [Category.{v} D]
+    {A₀ A₁ A₂ A₃ A₄ B₁ C₁ : D}
+    {a : A₀ ⟶ A₁} {b : A₁ ⟶ A₂}
+    {c : A₂ ⟶ A₃} {d : A₃ ⟶ A₄}
+    {e : A₂ ⟶ B₁} {f : B₁ ⟶ A₄}
+    {g : A₀ ⟶ C₁} {h : C₁ ⟶ B₁}
+    {i : C₁ ⟶ A₄}
+    (htail : c ≫ d = e ≫ f)
+    (hhead : a ≫ b ≫ e = g ≫ h) (hlast : h ≫ f = i) :
+    (a ≫ (b ≫ c)) ≫ d = g ≫ i := by
+  calc
+    (a ≫ (b ≫ c)) ≫ d = a ≫ ((b ≫ c) ≫ d) :=
+      Category.assoc _ _ _
+    _ = a ≫ (b ≫ (c ≫ d)) := congrArg
+      (fun q ↦ a ≫ q) (Category.assoc _ _ _)
+    _ = a ≫ (b ≫ (e ≫ f)) := congrArg
+      (fun q ↦ a ≫ (b ≫ q)) htail
+    _ = a ≫ ((b ≫ e) ≫ f) := congrArg
+      (fun q ↦ a ≫ q) (Category.assoc _ _ _).symm
+    _ = (a ≫ (b ≫ e)) ≫ f := (Category.assoc _ _ _).symm
+    _ = (g ≫ h) ≫ f := congrArg (fun q ↦ q ≫ f) hhead
+    _ = g ≫ (h ≫ f) := Category.assoc _ _ _
+    _ = g ≫ i := congrArg (fun q ↦ g ≫ q) hlast
+
+private noncomputable def poleTensorTopSection
+    {X : Scheme.{u}} (M N : X.Modules)
+    (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
+    Γ(M ⊗ N, (⊤ : X.Opens)) :=
+  (monoidalTensorObjIso M N).inv.val.app (.op (⊤ : X.Opens))
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app
+      (.op (⊤ : X.Opens)) (x ⊗ₜ y))
+
+private noncomputable def poleTopSectionHom
+    {X : Scheme.{u}} (M : X.Modules)
+    (x : Γ(M, (⊤ : X.Opens))) : Scheme.Modules.unitObj X ⟶ M :=
+  M.unitHomEquiv.symm (moduleSectionsOfTop M x)
+
+private theorem poleTopSectionHom_app_top_apply_one
+    {X : Scheme.{u}} (M : X.Modules)
+    (x : Γ(M, (⊤ : X.Opens))) :
+    (poleTopSectionHom M x).val.app (.op ⊤)
+      (show X.presheaf.obj (.op ⊤) from 1) = x := by
+  change (M.unitHomEquiv (poleTopSectionHom M x)).val (.op ⊤) = x
+  let s := moduleSectionsOfTop M x
+  have he : M.unitHomEquiv (poleTopSectionHom M x) = s :=
+    Equiv.apply_symm_apply M.unitHomEquiv s
+  have hv := congrArg (fun t ↦ t.val (.op (⊤ : X.Opens))) he
+  rw [hv]
+  change M.val.map (homOfLE (le_top : (⊤ : X.Opens) ≤ ⊤)).op x = x
+  simp
+  rfl
+
+private theorem poleTopSectionHom_app_apply
+    {X : Scheme.{u}} (M : X.Modules)
+    (x : Γ(M, (⊤ : X.Opens))) (W : X.Opens) (a : Γ(X, W)) :
+    (poleTopSectionHom M x).val.app (.op W) a =
+      a • M.presheaf.map
+        (homOfLE (le_top : W ≤ (⊤ : X.Opens))).op x := by
+  rfl
+
+private theorem poleUnitObj_hom_ext_top
+    {X : Scheme.{u}} {M : X.Modules}
+    {f g : Scheme.Modules.unitObj X ⟶ M}
+    (h : f.val.app (.op ⊤) (show X.presheaf.obj (.op ⊤) from 1) =
+      g.val.app (.op ⊤) (show X.presheaf.obj (.op ⊤) from 1)) :
+    f = g := by
+  apply SheafOfModules.hom_ext
+  ext V
+  let i := (homOfLE (le_top : V.unop ≤ (⊤ : X.Opens))).op
+  have hf := PresheafOfModules.naturality_apply f.val i
+    (show X.presheaf.obj (.op ⊤) from 1)
+  have hg := PresheafOfModules.naturality_apply g.val i
+    (show X.presheaf.obj (.op ⊤) from 1)
+  change f.val.app V
+      (X.presheaf.map i (show X.presheaf.obj (.op ⊤) from 1)) =
+      M.presheaf.map i
+        (f.val.app (.op ⊤) (show X.presheaf.obj (.op ⊤) from 1)) at hf
+  change g.val.app V
+      (X.presheaf.map i (show X.presheaf.obj (.op ⊤) from 1)) =
+      M.presheaf.map i
+        (g.val.app (.op ⊤) (show X.presheaf.obj (.op ⊤) from 1)) at hg
+  rw [map_one] at hf hg
+  exact hf.trans ((congrArg (fun q ↦ M.presheaf.map i q) h).trans hg.symm)
+
+private theorem poleTopSectionHom_localTrivializationRestriction
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (x : Γ(M, (⊤ : X.Opens))) :
+    poleTopSectionHom ((Scheme.Modules.restrictFunctor U.1.ι).obj M)
+        (localTrivializationRestriction M U x) =
+      (Scheme.Modules.restrictUnitIso U.1.ι).inv ≫
+        (Scheme.Modules.restrictFunctor U.1.ι).map
+          (poleTopSectionHom M x) := by
+  apply poleUnitObj_hom_ext_top
+  rw [poleTopSectionHom_app_top_apply_one]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  erw [Scheme.Modules.restrictUnitIso_inv_app_applyP]
+  rw [map_one]
+  unfold localTrivializationRestriction
+  let s : Γ(M, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) :=
+    M.presheaf.map (eqToHom U.1.ι_image_top).op
+      (M.presheaf.map
+        (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op x)
+  have hrestrict :
+      (M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)).inv s = s :=
+    rfl
+  have hmapApply :
+      ((Scheme.Modules.restrictFunctor U.1.ι).map
+          (poleTopSectionHom M x)).val.app (.op ⊤)
+            (show X.presheaf.obj
+              (.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))) from 1) =
+        (poleTopSectionHom M x).val.app
+          (.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+            (show X.presheaf.obj
+              (.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))) from 1) :=
+    rfl
+  have hs : s =
+      (poleTopSectionHom M x).val.app
+        (.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+          (show X.presheaf.obj
+            (.op (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))) from 1) := by
+    dsimp only [s]
+    rw [poleTopSectionHom_app_apply, one_smul]
+    change M.presheaf.map (eqToHom U.1.ι_image_top).op
+        (M.presheaf.map
+          (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op x) =
+      M.presheaf.map
+        (homOfLE (le_top : U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens) ≤
+          (⊤ : X.Opens))).op x
+    rw [← M.presheaf.map_comp_apply]
+    rw [Subsingleton.elim
+      ((homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op ≫
+        (eqToHom U.1.ι_image_top).op)
+      (homOfLE (le_top : U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens) ≤
+        (⊤ : X.Opens))).op]
+  exact hrestrict.trans (hs.trans hmapApply.symm)
+
+private theorem monoidalTensorObjIso_inv_natural
+    {X : Scheme.{u}} {M M' N N' : X.Modules}
+    (f : M ⟶ M') (g : N ⟶ N') :
+    (PresheafOfModules.sheafification
+          (𝟙 X.ringCatSheaf.obj)).map (f.val ⊗ₘ g.val) ≫
+        (monoidalTensorObjIso M' N').inv =
+      (monoidalTensorObjIso M N).inv ≫ (f ⊗ₘ g) := by
+  letI : (PresheafOfModules.sheafificationW
+      (𝟙 X.ringCatSheaf.obj)).IsMonoidal :=
+    @PresheafOfModules.instSheafificationW_isMonoidal_commRingSheaf
+      _ _ _ _ _ X.sheaf.obj X.ringCatSheaf.property
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let F : X.PresheafOfModules ⥤ X.Modules :=
+    Localization.Monoidal.toMonoidalCategory
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+      (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+      (Iso.refl _)
+  letI : F.Monoidal := by
+    change (Localization.Monoidal.toMonoidalCategory
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+      (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+      (Iso.refl _)).Monoidal
+    infer_instance
+  let sh (A : X.PresheafOfModules) : X.Modules := L.obj A
+  let δ (A B : X.PresheafOfModules) : sh (A ⊗ B) ⟶ sh A ⊗ sh B :=
+    Functor.OplaxMonoidal.δ F A B
+  let ε (A : X.Modules) : sh A.val ⟶ A :=
+    (Scheme.Modules.sheafifyValIso A).hom
+  have hIso (A B : X.Modules) :
+      (monoidalTensorObjIso A B).inv =
+        δ A.val B.val ≫ (ε A ⊗ₘ ε B) := by
+    rfl
+  have hδ :
+      L.map (f.val ⊗ₘ g.val) ≫ δ M'.val N'.val =
+        δ M.val N.val ≫ (L.map f.val ⊗ₘ L.map g.val) :=
+    (Functor.OplaxMonoidal.δ_natural F f.val g.val).symm
+  have hεf : L.map f.val ≫ ε M' = ε M ≫ f :=
+    (PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).counit.naturality f
+  have hεg : L.map g.val ≫ ε N' = ε N ≫ g :=
+    (PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).counit.naturality g
+  let e' : (sh M'.val ⊗ sh N'.val) ⟶ (M' ⊗ N') :=
+    ε M' ⊗ₘ ε N'
+  let e₀ : (sh M.val ⊗ sh N.val) ⟶ (M ⊗ N) :=
+    ε M ⊗ₘ ε N
+  let lfg : (sh M.val ⊗ sh N.val) ⟶ (sh M'.val ⊗ sh N'.val) :=
+    L.map f.val ⊗ₘ L.map g.val
+  let fg : (M ⊗ N) ⟶ (M' ⊗ N') := f ⊗ₘ g
+  change L.map (f.val ⊗ₘ g.val) ≫ δ M'.val N'.val =
+    δ M.val N.val ≫ lfg at hδ
+  have hTensorComp : lfg ≫ e' = e₀ ≫ fg := by
+    let c₁ : (sh M.val ⊗ sh N.val) ⟶ (M' ⊗ N') :=
+      (L.map f.val ≫ ε M') ⊗ₘ (L.map g.val ≫ ε N')
+    let c₀ : (sh M.val ⊗ sh N.val) ⟶ (M' ⊗ N') :=
+      (ε M ≫ f) ⊗ₘ (ε N ≫ g)
+    have hleft : lfg ≫ e' = c₁ := by
+      dsimp only [lfg, e', c₁]
+      exact MonoidalCategory.tensorHom_comp_tensorHom _ _ _ _
+    have hmiddle : c₁ = c₀ := by
+      dsimp only [c₁, c₀]
+      exact congrArg₂
+        (fun (a : sh M.val ⟶ M') (b : sh N.val ⟶ N') ↦ a ⊗ₘ b)
+        hεf hεg
+    have hright : e₀ ≫ fg = c₀ := by
+      dsimp only [e₀, fg, c₀]
+      exact MonoidalCategory.tensorHom_comp_tensorHom _ _ _ _
+    exact hleft.trans (hmiddle.trans hright.symm)
+  rw [hIso M' N', hIso M N]
+  change L.map (f.val ⊗ₘ g.val) ≫ δ M'.val N'.val ≫ e' =
+    δ M.val N.val ≫ e₀ ≫ fg
+  have h₁ :
+      L.map (f.val ⊗ₘ g.val) ≫ δ M'.val N'.val ≫ e' =
+        (L.map (f.val ⊗ₘ g.val) ≫ δ M'.val N'.val) ≫ e' :=
+    (Category.assoc _ _ _).symm
+  have h₂ :
+      (L.map (f.val ⊗ₘ g.val) ≫ δ M'.val N'.val) ≫ e' =
+        (δ M.val N.val ≫ lfg) ≫ e' :=
+    congrArg (fun k ↦ k ≫ e') hδ
+  have h₃ :
+      (δ M.val N.val ≫ lfg) ≫ e' =
+        δ M.val N.val ≫ (lfg ≫ e') :=
+    Category.assoc _ _ _
+  have h₄ :
+      δ M.val N.val ≫ (lfg ≫ e') =
+        δ M.val N.val ≫ (e₀ ≫ fg) :=
+    congrArg (fun k ↦ δ M.val N.val ≫ k) hTensorComp
+  have h₅ :
+      δ M.val N.val ≫ (e₀ ≫ fg) =
+        δ M.val N.val ≫ e₀ ≫ fg :=
+    (Category.assoc _ _ _).symm
+  exact h₁.trans (h₂.trans (h₃.trans (h₄.trans h₅)))
+
+private theorem poleTensorTopSection_map
+    {X : Scheme.{u}} {M M' N N' : X.Modules}
+    (f : M ⟶ M') (g : N ⟶ N')
+    (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
+    (f ⊗ₘ g).val.app (.op ⊤) (poleTensorTopSection M N x y) =
+      poleTensorTopSection M' N'
+        (f.val.app (.op ⊤) x) (g.val.app (.op ⊤) y) := by
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let t : (M.val ⊗ N.val).obj (.op ⊤) := x ⊗ₜ y
+  let t' : (M'.val ⊗ N'.val).obj (.op ⊤) :=
+    f.val.app (.op ⊤) x ⊗ₜ g.val.app (.op ⊤) y
+  let q := adj.unit.app (M.val ⊗ N.val)
+  let q' := adj.unit.app (M'.val ⊗ N'.val)
+  let a := q.app (.op ⊤) t
+  let a' := q'.app (.op ⊤) t'
+  have ht : (f.val ⊗ₘ g.val).app (.op ⊤) t = t' := by
+    rfl
+  have hunit := adj.unit_naturality (f.val ⊗ₘ g.val)
+  change adj.unit.app (M.val ⊗ N.val) ≫
+      (L.map (f.val ⊗ₘ g.val)).val =
+    (f.val ⊗ₘ g.val) ≫ adj.unit.app (M'.val ⊗ N'.val) at hunit
+  have hunitTop := congrArg (fun k ↦ k.app (.op (⊤ : X.Opens))) hunit
+  have hunitApply := ConcreteCategory.congr_hom hunitTop t
+  conv_lhs at hunitApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  conv_rhs at hunitApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  have hLa : (L.map (f.val ⊗ₘ g.val)).val.app (.op ⊤) a = a' := by
+    dsimp only [a, a', q, q']
+    have hright := congrArg
+      (fun b ↦ (adj.unit.app (M'.val ⊗ N'.val)).app (.op ⊤) b) ht
+    exact hunitApply.trans hright
+  have hk := monoidalTensorObjIso_inv_natural f g
+  have hkTop := congrArg (fun k ↦ k.val.app (.op (⊤ : X.Opens))) hk
+  have hkApply := ConcreteCategory.congr_hom hkTop a
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply, SheafOfModules.comp_val,
+    PresheafOfModules.comp_app, ModuleCat.comp_apply] at hkApply
+  change (f ⊗ₘ g).val.app (.op ⊤)
+      ((monoidalTensorObjIso M N).inv.val.app (.op ⊤) a) =
+    (monoidalTensorObjIso M' N').inv.val.app (.op ⊤) a'
+  exact hkApply.symm.trans
+    (congrArg
+      (fun b ↦ (monoidalTensorObjIso M' N').inv.val.app (.op ⊤) b) hLa)
+
+private theorem monoidalTensorObjIso_unit_comp_unitObjTensorIso
+    (X : Scheme.{u}) :
+    (monoidalTensorObjIso (Scheme.Modules.unitObj X)
+          (Scheme.Modules.unitObj X)).inv ≫
+        (unitObjTensorIso X).hom =
+      (PresheafOfModules.sheafification
+          (𝟙 X.ringCatSheaf.obj)).map
+          (λ_ (Scheme.Modules.unitObj X).val).hom ≫
+        (Scheme.Modules.sheafifyValIso
+          (Scheme.Modules.unitObj X)).hom := by
+  letI : (PresheafOfModules.sheafificationW
+      (𝟙 X.ringCatSheaf.obj)).IsMonoidal :=
+    @PresheafOfModules.instSheafificationW_isMonoidal_commRingSheaf
+      _ _ _ _ _ X.sheaf.obj X.ringCatSheaf.property
+  let F : X.PresheafOfModules ⥤ X.Modules :=
+    Localization.Monoidal.toMonoidalCategory
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+      (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+      (Iso.refl _)
+  letI : F.Monoidal := by
+    change (Localization.Monoidal.toMonoidalCategory
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+      (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+      (Iso.refl _)).Monoidal
+    infer_instance
+  let c := monoidalUnitObjIso X
+  have hcc :
+      (c.hom ⊗ₘ c.hom) ≫ (c.inv ⊗ₘ c.inv) =
+        𝟙 _ := by
+    rw [MonoidalCategory.tensorHom_comp_tensorHom]
+    rw [c.hom_inv_id]
+    rw [MonoidalCategory.tensorHom_id]
+    rw [MonoidalCategory.id_whiskerRight]
+  let t := (λ_ (𝟙_ X.Modules)).hom ≫ c.hom
+  have hcct :
+      (c.hom ⊗ₘ c.hom) ≫ (c.inv ⊗ₘ c.inv) ≫ t = t := by
+    rw [← Category.assoc, hcc, Category.id_comp]
+  have hcancel :
+      (monoidalTensorObjIso (Scheme.Modules.unitObj X)
+            (Scheme.Modules.unitObj X)).inv ≫
+          (unitObjTensorIso X).hom =
+        Functor.OplaxMonoidal.δ F
+            (Scheme.Modules.unitObj X).val
+            (Scheme.Modules.unitObj X).val ≫
+          (λ_ (𝟙_ X.Modules)).hom ≫ c.hom := by
+    change
+      (Localization.Monoidal.μ
+          (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+          (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+          (Iso.refl _) (Scheme.Modules.unitObj X).val
+            (Scheme.Modules.unitObj X).val).inv ≫
+        (c.hom ⊗ₘ c.hom) ≫
+        (c.inv ⊗ₘ c.inv) ≫
+        (λ_ (𝟙_ X.Modules)).hom ≫ c.hom =
+      Functor.OplaxMonoidal.δ F
+          (Scheme.Modules.unitObj X).val
+          (Scheme.Modules.unitObj X).val ≫
+        (λ_ (𝟙_ X.Modules)).hom ≫ c.hom
+    let d :=
+      (Localization.Monoidal.μ
+        (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+        (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+        (Iso.refl _) (Scheme.Modules.unitObj X).val
+          (Scheme.Modules.unitObj X).val).inv
+    change d ≫ (c.hom ⊗ₘ c.hom) ≫ (c.inv ⊗ₘ c.inv) ≫ t = d ≫ t
+    exact congrArg (fun k ↦ d ≫ k) hcct
+  rw [hcancel]
+  change
+    Functor.OplaxMonoidal.δ F (𝟙_ X.PresheafOfModules)
+          (𝟙_ X.PresheafOfModules) ≫
+        (λ_ (F.obj (𝟙_ X.PresheafOfModules))).hom ≫ c.hom =
+      F.map (λ_ (𝟙_ X.PresheafOfModules)).hom ≫ c.hom
+  have heta : Functor.OplaxMonoidal.η F = 𝟙 _ := by
+    rfl
+  have hid :
+      𝟙 (F.obj (𝟙_ X.PresheafOfModules)) ▷
+          F.obj (𝟙_ X.PresheafOfModules) = 𝟙 _ :=
+    MonoidalCategory.id_whiskerRight _ _
+  have hunit := Functor.OplaxMonoidal.left_unitality_hom_assoc F
+    (𝟙_ X.PresheafOfModules) c.hom
+  rw [heta] at hunit
+  let s := (λ_ (F.obj (𝟙_ X.PresheafOfModules))).hom ≫ c.hom
+  have hidt :
+      (𝟙 (F.obj (𝟙_ X.PresheafOfModules)) ▷
+          F.obj (𝟙_ X.PresheafOfModules)) ≫ s = s :=
+    (congrArg (fun k ↦ k ≫ s) hid).trans (Category.id_comp s)
+  have hpre := congrArg
+    (fun k ↦ Functor.OplaxMonoidal.δ F (𝟙_ X.PresheafOfModules)
+      (𝟙_ X.PresheafOfModules) ≫ k) hidt
+  exact hpre.symm.trans hunit
+
+private theorem unitObjTensorIso_hom_poleTensorTopSection (X : Scheme.{u})
+    (a b : Γ(X, (⊤ : X.Opens))) :
+    (unitObjTensorIso X).hom.val.app (.op (⊤ : X.Opens))
+      (poleTensorTopSection _ _
+        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from a)
+        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from b)) =
+      a * b := by
+  let A := Scheme.Modules.unitObj X
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let c := monoidalUnitObjIso X
+  let q₀ : (A.val ⊗ A.val).obj (.op (⊤ : X.Opens)) :=
+    (show Γ(A, (⊤ : X.Opens)) from a) ⊗ₜ
+      (show Γ(A, (⊤ : X.Opens)) from b)
+  let uq := (adj.unit.app (A.val ⊗ A.val)).app
+    (.op (⊤ : X.Opens)) q₀
+  have hmor := monoidalTensorObjIso_unit_comp_unitObjTensorIso X
+  have hmorTop := congrArg
+    (fun k ↦ k.val.app (.op (⊤ : X.Opens))) hmor
+  have hmorApply := ConcreteCategory.congr_hom hmorTop uq
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at hmorApply
+  change (unitObjTensorIso X).hom.val.app (.op (⊤ : X.Opens))
+      ((monoidalTensorObjIso A A).inv.val.app (.op (⊤ : X.Opens)) uq) = _
+  rw [hmorApply]
+  let f := (λ_ A.val).hom
+  have hnat := adj.unit_naturality f
+  have htri := adj.right_triangle_components A
+  change adj.unit.app (A.val ⊗ A.val) ≫ (L.map f).val =
+    f ≫ adj.unit.app A.val at hnat
+  change adj.unit.app A.val ≫ c.hom.val = 𝟙 A.val at htri
+  have hpresheaf :
+      adj.unit.app (A.val ⊗ A.val) ≫ (L.map f).val ≫ c.hom.val = f := by
+    have hnatp :
+        (adj.unit.app (A.val ⊗ A.val) ≫ (L.map f).val) ≫ c.hom.val =
+          (f ≫ adj.unit.app A.val) ≫ c.hom.val :=
+      congrArg (fun k ↦ k ≫ c.hom.val) hnat
+    have htrip : f ≫ (adj.unit.app A.val ≫ c.hom.val) = f ≫ 𝟙 A.val :=
+      congrArg (fun k ↦ f ≫ k) htri
+    exact (Category.assoc _ _ _).symm |>.trans <|
+      hnatp.trans <| (Category.assoc _ _ _).trans <|
+        htrip.trans (Category.comp_id f)
+  have hpresheafTop := congrArg
+    (fun k ↦ k.app (.op (⊤ : X.Opens))) hpresheaf
+  have hpresheafApply := ConcreteCategory.congr_hom hpresheafTop q₀
+  erw [PresheafOfModules.comp_app, ModuleCat.comp_apply,
+    PresheafOfModules.comp_app, ModuleCat.comp_apply] at hpresheafApply
+  have hleft : ((λ_ A.val).hom.app (.op (⊤ : X.Opens))) q₀ = a * b := by
+    have happ := PresheafOfModules.leftUnitor_hom_app A.val
+      (.op (⊤ : X.Opens))
+    have heval := ConcreteCategory.congr_hom happ q₀
+    have hmodule :
+        ((λ_ (ModuleCat.of (X.sheaf.obj.obj (.op (⊤ : X.Opens)))
+          (X.sheaf.obj.obj (.op (⊤ : X.Opens))))).hom)
+            (a ⊗ₜ b) = a • b :=
+      ModuleCat.MonoidalCategory.leftUnitor_hom_apply
+        (R := X.sheaf.obj.obj (.op (⊤ : X.Opens)))
+        (M := ModuleCat.of (X.sheaf.obj.obj (.op (⊤ : X.Opens)))
+          (X.sheaf.obj.obj (.op (⊤ : X.Opens))))
+        (show X.sheaf.obj.obj (.op (⊤ : X.Opens)) from a)
+        (show X.sheaf.obj.obj (.op (⊤ : X.Opens)) from b)
+    have hsmul : a • b = a * b := by
+      rfl
+    exact heval.trans (hmodule.trans hsmul)
+  dsimp only [uq]
+  exact hpresheafApply.trans hleft
+
+private theorem unitObjTensorIso_inv_apply_one (X : Scheme.{u}) :
+    (unitObjTensorIso X).inv.val.app (.op ⊤)
+        (show X.presheaf.obj (.op ⊤) from 1) =
+      poleTensorTopSection
+        (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
+        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from
+          (show X.presheaf.obj (.op ⊤) from 1))
+        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from
+          (show X.presheaf.obj (.op ⊤) from 1)) := by
+  let e := unitObjTensorIso X
+  let q := poleTensorTopSection
+    (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
+    (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from
+      (show X.presheaf.obj (.op ⊤) from 1))
+    (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from
+      (show X.presheaf.obj (.op ⊤) from 1))
+  have hmul : e.hom.val.app (.op ⊤) q =
+      (show X.presheaf.obj (.op ⊤) from 1) := by
+    dsimp only [e, q]
+    simpa only [one_mul] using
+      unitObjTensorIso_hom_poleTensorTopSection X
+        (show Γ(X, (⊤ : X.Opens)) from 1)
+        (show Γ(X, (⊤ : X.Opens)) from 1)
+  have hcomp := congrArg (fun k ↦ k.val.app (.op (⊤ : X.Opens)))
+    e.hom_inv_id
+  have hcompApply := ConcreteCategory.congr_hom hcomp q
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at hcompApply
+  have hcancel := congrArg (fun a ↦ e.inv.val.app (.op ⊤) a) hmul
+  exact hcancel.symm.trans hcompApply
+
+private theorem poleTopSectionHom_tensorTopSection
+    {X : Scheme.{u}} (M N : X.Modules)
+    (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
+    poleTopSectionHom (M ⊗ N) (poleTensorTopSection M N x y) =
+      (unitObjTensorIso X).inv ≫
+        (poleTopSectionHom M x ⊗ₘ poleTopSectionHom N y) := by
+  apply poleUnitObj_hom_ext_top
+  rw [poleTopSectionHom_app_top_apply_one]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  rw [unitObjTensorIso_inv_apply_one]
+  rw [poleTensorTopSection_map]
+  exact congrArg₂ (fun a b ↦ poleTensorTopSection M N a b)
+    (poleTopSectionHom_app_top_apply_one M x).symm
+    (poleTopSectionHom_app_top_apply_one N y).symm
+
+private theorem poleTopSectionHom_comp
+    {X : Scheme.{u}} {M N : X.Modules} (x : Γ(M, (⊤ : X.Opens)))
+    (f : M ⟶ N) :
+    poleTopSectionHom M x ≫ f =
+      poleTopSectionHom N (f.val.app (.op ⊤) x) := by
+  apply poleUnitObj_hom_ext_top
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  calc
+    f.val.app (.op ⊤)
+        ((poleTopSectionHom M x).val.app (.op ⊤)
+          (show X.presheaf.obj (.op ⊤) from 1)) =
+      f.val.app (.op ⊤) x := congrArg
+        (fun q ↦ f.val.app (.op ⊤) q)
+        (poleTopSectionHom_app_top_apply_one M x)
+    _ = (poleTopSectionHom N (f.val.app (.op ⊤) x)).val.app (.op ⊤)
+        (show X.presheaf.obj (.op ⊤) from 1) :=
+      (poleTopSectionHom_app_top_apply_one N
+        (f.val.app (.op ⊤) x)).symm
+
+private theorem poleTensor_restrict_monoidalUnitObjIso
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    let F := Scheme.Modules.restrictFunctor f
+    letI : (Scheme.Modules.pullback f).Monoidal :=
+      Scheme.Modules.pullbackMonoidal f
+    letI : F.Monoidal := Functor.Monoidal.transport
+      (Scheme.Modules.restrictFunctorIsoPullback f).symm
+    F.map (monoidalUnitObjIso Y).hom ≫
+        (Scheme.Modules.restrictUnitIso f).hom =
+      Functor.OplaxMonoidal.η F ≫ (monoidalUnitObjIso X).hom := by
+  let F := Scheme.Modules.restrictFunctor f
+  let G := Scheme.Modules.pullback f
+  letI : G.Monoidal := Scheme.Modules.pullbackMonoidal f
+  letI : F.Monoidal := Functor.Monoidal.transport
+    (Scheme.Modules.restrictFunctorIsoPullback f).symm
+  let R := Scheme.Modules.restrictFunctorIsoPullback f
+  let q : F.obj (Scheme.Modules.unitObj Y) ⟶ Scheme.Modules.unitObj X :=
+    (Scheme.Modules.restrictUnitIso f).hom
+  let p : G.obj (Scheme.Modules.unitObj Y) ⟶ Scheme.Modules.unitObj X :=
+    (Scheme.Modules.pullbackUnitIso f).hom
+  have hpull :
+      (Functor.Monoidal.εIso G).inv ≫ (monoidalUnitObjIso X).hom =
+        G.map (monoidalUnitObjIso Y).hom ≫ p := by
+    have h := congrArg Iso.hom
+      (Scheme.Modules.pullback_monoidalUnitObjIso f)
+    change (Functor.Monoidal.εIso G).inv ≫
+        (monoidalUnitObjIso X).hom =
+      G.map (monoidalUnitObjIso Y).hom ≫ p at h
+    exact h
+  have hrestrict :
+      R.hom.app (Scheme.Modules.unitObj Y) ≫ p = q := by
+    have h := restrictFunctorIsoPullback_inv_comp_restrictUnitIso f
+    let eR := R.app (Scheme.Modules.unitObj Y)
+    have h' : eR.inv ≫ q = p := h
+    calc
+      eR.hom ≫ p = eR.hom ≫ (eR.inv ≫ q) :=
+        congrArg (fun k ↦ eR.hom ≫ k) h'.symm
+      _ = (eR.hom ≫ eR.inv) ≫ q := (Category.assoc _ _ _).symm
+      _ = 𝟙 _ ≫ q := congrArg (fun k ↦ k ≫ q) eR.hom_inv_id
+      _ = q := Category.id_comp q
+  have hnat := R.hom.naturality (monoidalUnitObjIso Y).hom
+  change F.map (monoidalUnitObjIso Y).hom ≫ q =
+    R.hom.app (𝟙_ Y.Modules) ≫
+      (Functor.Monoidal.εIso G).inv ≫ (monoidalUnitObjIso X).hom
+  rw [hpull]
+  rw [← Category.assoc]
+  rw [← hnat]
+  rw [Category.assoc]
+  rw [hrestrict]
+
+private theorem poleTensor_restrict_monoidalUnitObjIso_inv
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    let F := Scheme.Modules.restrictFunctor f
+    letI : (Scheme.Modules.pullback f).Monoidal :=
+      Scheme.Modules.pullbackMonoidal f
+    letI : F.Monoidal := Functor.Monoidal.transport
+      (Scheme.Modules.restrictFunctorIsoPullback f).symm
+    (Scheme.Modules.restrictUnitIso f).inv ≫
+        F.map (monoidalUnitObjIso Y).inv =
+      (monoidalUnitObjIso X).inv ≫ Functor.LaxMonoidal.ε F := by
+  let F := Scheme.Modules.restrictFunctor f
+  letI : (Scheme.Modules.pullback f).Monoidal :=
+    Scheme.Modules.pullbackMonoidal f
+  letI : F.Monoidal := Functor.Monoidal.transport
+    (Scheme.Modules.restrictFunctorIsoPullback f).symm
+  let cY := monoidalUnitObjIso Y
+  let cX := monoidalUnitObjIso X
+  let r := Scheme.Modules.restrictUnitIso f
+  have h := poleTensor_restrict_monoidalUnitObjIso f
+  change F.map cY.hom ≫ r.hom =
+    Functor.OplaxMonoidal.η F ≫ cX.hom at h
+  let eL := F.mapIso cY ≪≫ r
+  let eR := (Functor.Monoidal.εIso F).symm ≪≫ cX
+  have he : eL = eR := Iso.ext h
+  have hinv := congrArg Iso.inv he
+  change r.inv ≫ F.map cY.inv =
+    cX.inv ≫ Functor.LaxMonoidal.ε F at hinv
+  exact hinv
+
+private theorem poleTensor_restrict_unitObjTensorIso_inv
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    let F := Scheme.Modules.restrictFunctor f
+    letI : (Scheme.Modules.pullback f).Monoidal :=
+      Scheme.Modules.pullbackMonoidal f
+    letI : F.Monoidal := Functor.Monoidal.transport
+      (Scheme.Modules.restrictFunctorIsoPullback f).symm
+    (Scheme.Modules.restrictUnitIso f).inv ≫
+        F.map (unitObjTensorIso Y).inv ≫
+          (restrictMonoidalTensorIso f
+            (Scheme.Modules.unitObj Y) (Scheme.Modules.unitObj Y)).hom =
+      (unitObjTensorIso X).inv ≫
+        ((Scheme.Modules.restrictUnitIso f).inv ⊗ₘ
+          (Scheme.Modules.restrictUnitIso f).inv) := by
+  let F := Scheme.Modules.restrictFunctor f
+  letI : (Scheme.Modules.pullback f).Monoidal :=
+    Scheme.Modules.pullbackMonoidal f
+  letI : F.Monoidal := Functor.Monoidal.transport
+    (Scheme.Modules.restrictFunctorIsoPullback f).symm
+  let cY := monoidalUnitObjIso Y
+  let cX := monoidalUnitObjIso X
+  let r := Scheme.Modules.restrictUnitIso f
+  have hunit := poleTensor_restrict_monoidalUnitObjIso_inv f
+  change r.inv ≫ F.map cY.inv =
+    cX.inv ≫ Functor.LaxMonoidal.ε F at hunit
+  have hunitForward := poleTensor_restrict_monoidalUnitObjIso f
+  change F.map cY.hom ≫ r.hom =
+    Functor.OplaxMonoidal.η F ≫ cX.hom at hunitForward
+  have hunitHom :
+      cX.hom ≫ r.inv =
+        Functor.LaxMonoidal.ε F ≫ F.map cY.hom := by
+    refine (r.comp_inv_eq).2 ?_
+    have h₁ :
+        (Functor.LaxMonoidal.ε F ≫ F.map cY.hom) ≫ r.hom =
+          Functor.LaxMonoidal.ε F ≫ (F.map cY.hom ≫ r.hom) :=
+      Category.assoc _ _ _
+    have h₂ :
+        Functor.LaxMonoidal.ε F ≫ (F.map cY.hom ≫ r.hom) =
+          Functor.LaxMonoidal.ε F ≫
+            (Functor.OplaxMonoidal.η F ≫ cX.hom) := congrArg
+      (fun k : F.obj (𝟙_ Y.Modules) ⟶
+          Scheme.Modules.unitObj X ↦
+        Functor.LaxMonoidal.ε F ≫ k)
+      hunitForward
+    have h₃ :
+        Functor.LaxMonoidal.ε F ≫
+            (Functor.OplaxMonoidal.η F ≫ cX.hom) =
+          (Functor.LaxMonoidal.ε F ≫
+            Functor.OplaxMonoidal.η F) ≫ cX.hom :=
+      (Category.assoc _ _ _).symm
+    have h₄ :
+        (Functor.LaxMonoidal.ε F ≫
+            Functor.OplaxMonoidal.η F) ≫ cX.hom = cX.hom :=
+      (congrArg (fun k ↦ k ≫ cX.hom)
+        (Functor.Monoidal.ε_η F)).trans (Category.id_comp cX.hom)
+    exact (h₁.trans (h₂.trans (h₃.trans h₄))).symm
+  have hepsilonTensor :
+      Functor.LaxMonoidal.ε F ≫
+          (λ_ (F.obj (𝟙_ Y.Modules))).inv ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)) =
+        (λ_ (𝟙_ X.Modules)).inv ≫
+          (Functor.LaxMonoidal.ε F ⊗ₘ
+            Functor.LaxMonoidal.ε F) := by
+    calc
+      _ = ((λ_ (𝟙_ X.Modules)).inv ≫
+          (𝟙_ X.Modules ◁ Functor.LaxMonoidal.ε F)) ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)) :=
+        congrArg
+          (fun k ↦ k ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)))
+          (leftUnitor_inv_naturality (Functor.LaxMonoidal.ε F))
+      _ = (λ_ (𝟙_ X.Modules)).inv ≫
+          ((𝟙_ X.Modules ◁ Functor.LaxMonoidal.ε F) ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules))) :=
+        Category.assoc _ _ _
+      _ = _ := congrArg
+        (fun k ↦ (λ_ (𝟙_ X.Modules)).inv ≫ k)
+        (MonoidalCategory.tensorHom_def'
+          (Functor.LaxMonoidal.ε F)
+          (Functor.LaxMonoidal.ε F)).symm
+  have htensorUnit :
+      (Functor.LaxMonoidal.ε F ⊗ₘ Functor.LaxMonoidal.ε F) ≫
+          (F.map cY.hom ⊗ₘ F.map cY.hom) =
+        (cX.hom ⊗ₘ cX.hom) ≫ (r.inv ⊗ₘ r.inv) := by
+    have h₁ := tensorHom_comp_tensorHom
+      (Functor.LaxMonoidal.ε F) (Functor.LaxMonoidal.ε F)
+      (F.map cY.hom) (F.map cY.hom)
+    have h₂ :
+        (Functor.LaxMonoidal.ε F ≫ F.map cY.hom) ⊗ₘ
+            (Functor.LaxMonoidal.ε F ≫ F.map cY.hom) =
+          (cX.hom ≫ r.inv) ⊗ₘ (cX.hom ≫ r.inv) := congrArg
+      (fun k : 𝟙_ X.Modules ⟶
+          F.obj (Scheme.Modules.unitObj Y) ↦ k ⊗ₘ k)
+      hunitHom.symm
+    have h₃ := tensorHom_comp_tensorHom
+      cX.hom cX.hom r.inv r.inv
+    exact h₁.trans (h₂.trans h₃.symm)
+  have hcore := poleTensor_five_comp_of_three_eq
+    hunit hepsilonTensor htensorUnit
+  change r.inv ≫
+      F.map (cY.inv ≫ (λ_ (𝟙_ Y.Modules)).inv ≫
+        (cY.hom ⊗ₘ cY.hom)) ≫
+        Functor.OplaxMonoidal.δ F
+          (Scheme.Modules.unitObj Y) (Scheme.Modules.unitObj Y) =
+    (cX.inv ≫ (λ_ (𝟙_ X.Modules)).inv ≫
+      (cX.hom ⊗ₘ cX.hom)) ≫ (r.inv ⊗ₘ r.inv)
+  have hmap :
+      F.map (cY.inv ≫ (λ_ (𝟙_ Y.Modules)).inv ≫
+          (cY.hom ⊗ₘ cY.hom)) =
+        F.map cY.inv ≫ F.map (λ_ (𝟙_ Y.Modules)).inv ≫
+          F.map (cY.hom ⊗ₘ cY.hom) := by
+    calc
+      _ = F.map cY.inv ≫
+          F.map ((λ_ (𝟙_ Y.Modules)).inv ≫
+            (cY.hom ⊗ₘ cY.hom)) :=
+        F.map_comp cY.inv
+          ((λ_ (𝟙_ Y.Modules)).inv ≫ (cY.hom ⊗ₘ cY.hom))
+      _ = _ := congrArg (fun k ↦ F.map cY.inv ≫ k)
+        (F.map_comp (λ_ (𝟙_ Y.Modules)).inv
+          (cY.hom ⊗ₘ cY.hom))
+  have hmapUnitor :
+      F.map (λ_ (𝟙_ Y.Modules)).inv =
+        (λ_ (F.obj (𝟙_ Y.Modules))).inv ≫
+          (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)) ≫
+            Functor.LaxMonoidal.μ F (𝟙_ Y.Modules) (𝟙_ Y.Modules) :=
+    Functor.Monoidal.map_leftUnitor_inv F (𝟙_ Y.Modules)
+  have hmapTensor :
+      F.map (cY.hom ⊗ₘ cY.hom) =
+        Functor.OplaxMonoidal.δ F (𝟙_ Y.Modules) (𝟙_ Y.Modules) ≫
+          (F.map cY.hom ⊗ₘ F.map cY.hom) ≫
+            Functor.LaxMonoidal.μ F
+              (Scheme.Modules.unitObj Y) (Scheme.Modules.unitObj Y) :=
+    Functor.Monoidal.map_tensor F cY.hom cY.hom
+  have hmapExpanded :
+      F.map (cY.inv ≫ (λ_ (𝟙_ Y.Modules)).inv ≫
+          (cY.hom ⊗ₘ cY.hom)) =
+        F.map cY.inv ≫
+          ((λ_ (F.obj (𝟙_ Y.Modules))).inv ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)) ≫
+              Functor.LaxMonoidal.μ F
+                (𝟙_ Y.Modules) (𝟙_ Y.Modules)) ≫
+          (Functor.OplaxMonoidal.δ F
+              (𝟙_ Y.Modules) (𝟙_ Y.Modules) ≫
+            (F.map cY.hom ⊗ₘ F.map cY.hom) ≫
+              Functor.LaxMonoidal.μ F
+                (Scheme.Modules.unitObj Y)
+                (Scheme.Modules.unitObj Y)) := by
+    calc
+      _ = F.map cY.inv ≫ F.map (λ_ (𝟙_ Y.Modules)).inv ≫
+          F.map (cY.hom ⊗ₘ cY.hom) := hmap
+      _ = F.map cY.inv ≫
+          ((λ_ (F.obj (𝟙_ Y.Modules))).inv ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)) ≫
+              Functor.LaxMonoidal.μ F
+                (𝟙_ Y.Modules) (𝟙_ Y.Modules)) ≫
+          F.map (cY.hom ⊗ₘ cY.hom) := congrArg
+        (fun k ↦ F.map cY.inv ≫ k ≫ F.map (cY.hom ⊗ₘ cY.hom))
+        hmapUnitor
+      _ = _ := congrArg
+        (fun k ↦ F.map cY.inv ≫
+          ((λ_ (F.obj (𝟙_ Y.Modules))).inv ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)) ≫
+              Functor.LaxMonoidal.μ F
+                (𝟙_ Y.Modules) (𝟙_ Y.Modules)) ≫ k)
+        hmapTensor
+  calc
+    _ = r.inv ≫
+        (F.map cY.inv ≫
+          ((λ_ (F.obj (𝟙_ Y.Modules))).inv ≫
+            (Functor.LaxMonoidal.ε F ▷ F.obj (𝟙_ Y.Modules)) ≫
+              Functor.LaxMonoidal.μ F
+                (𝟙_ Y.Modules) (𝟙_ Y.Modules)) ≫
+          (Functor.OplaxMonoidal.δ F
+              (𝟙_ Y.Modules) (𝟙_ Y.Modules) ≫
+            (F.map cY.hom ⊗ₘ F.map cY.hom) ≫
+              Functor.LaxMonoidal.μ F
+                (Scheme.Modules.unitObj Y)
+                (Scheme.Modules.unitObj Y))) ≫
+          Functor.OplaxMonoidal.δ F
+            (Scheme.Modules.unitObj Y)
+            (Scheme.Modules.unitObj Y) := congrArg
+      (fun k ↦ r.inv ≫ k ≫
+        Functor.OplaxMonoidal.δ F
+          (Scheme.Modules.unitObj Y)
+          (Scheme.Modules.unitObj Y)) hmapExpanded
+    _ = _ := by
+      simp only [Category.assoc, Functor.Monoidal.μ_δ_assoc,
+        Functor.Monoidal.μ_δ, Category.comp_id]
+      exact hcore
+
+private theorem poleTensor_restrict_localTrivializationRestriction
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.affineOpens)
+    (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
+    (restrictMonoidalTensorIso U.1.ι M N).hom.val.app (.op ⊤)
+        (localTrivializationRestriction (M ⊗ N) U
+          (poleTensorTopSection M N x y)) =
+      poleTensorTopSection
+        ((Scheme.Modules.restrictFunctor U.1.ι).obj M)
+        ((Scheme.Modules.restrictFunctor U.1.ι).obj N)
+        (localTrivializationRestriction M U x)
+        (localTrivializationRestriction N U y) := by
+  let F := Scheme.Modules.restrictFunctor U.1.ι
+  letI : (Scheme.Modules.pullback U.1.ι).Monoidal :=
+    Scheme.Modules.pullbackMonoidal U.1.ι
+  letI : F.Monoidal := Functor.Monoidal.transport
+    (Scheme.Modules.restrictFunctorIsoPullback U.1.ι).symm
+  let r := Scheme.Modules.restrictUnitIso U.1.ι
+  let uX := unitObjTensorIso X
+  let uU := unitObjTensorIso U.1.toScheme
+  let d := restrictMonoidalTensorIso U.1.ι M N
+  let dUnit := restrictMonoidalTensorIso U.1.ι
+    (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
+  let hx := poleTopSectionHom M x
+  let hy := poleTopSectionHom N y
+  let q := poleTensorTopSection M N x y
+  let xU := localTrivializationRestriction M U x
+  let yU := localTrivializationRestriction N U y
+  let qU := localTrivializationRestriction (M ⊗ N) U q
+  let tU := poleTensorTopSection (F.obj M) (F.obj N) xU yU
+  have hcomp := poleTopSectionHom_comp qU d.hom
+  change poleTopSectionHom (F.obj (M ⊗ N)) qU ≫ d.hom =
+    poleTopSectionHom (F.obj M ⊗ F.obj N)
+      (d.hom.val.app (.op ⊤) qU) at hcomp
+  have hrestrict :=
+    poleTopSectionHom_localTrivializationRestriction (M ⊗ N) U q
+  change poleTopSectionHom (F.obj (M ⊗ N)) qU =
+    r.inv ≫ F.map (poleTopSectionHom (M ⊗ N) q) at hrestrict
+  have hglobal := poleTopSectionHom_tensorTopSection M N x y
+  change poleTopSectionHom (M ⊗ N) q =
+    uX.inv ≫ (hx ⊗ₘ hy) at hglobal
+  have hmapGlobal := congrArg F.map hglobal
+  have hmapComp := F.map_comp uX.inv (hx ⊗ₘ hy)
+  have hmapGlobalExpanded :
+      F.map (poleTopSectionHom (M ⊗ N) q) =
+        F.map uX.inv ≫ F.map (hx ⊗ₘ hy) :=
+    hmapGlobal.trans hmapComp
+  have hnatural := (Functor.OplaxMonoidal.δ_natural F hx hy).symm
+  change F.map (hx ⊗ₘ hy) ≫ d.hom =
+    dUnit.hom ≫ (F.map hx ⊗ₘ F.map hy) at hnatural
+  have hunit := poleTensor_restrict_unitObjTensorIso_inv U.1.ι
+  change r.inv ≫ F.map uX.inv ≫ dUnit.hom =
+    uU.inv ≫ (r.inv ⊗ₘ r.inv) at hunit
+  have htensor := tensorHom_comp_tensorHom
+    r.inv r.inv (F.map hx) (F.map hy)
+  have hrestrictX :=
+    poleTopSectionHom_localTrivializationRestriction M U x
+  change poleTopSectionHom (F.obj M) xU =
+    r.inv ≫ F.map hx at hrestrictX
+  have hrestrictY :=
+    poleTopSectionHom_localTrivializationRestriction N U y
+  change poleTopSectionHom (F.obj N) yU =
+    r.inv ≫ F.map hy at hrestrictY
+  have hlocal := poleTopSectionHom_tensorTopSection
+    (F.obj M) (F.obj N) xU yU
+  change poleTopSectionHom (F.obj M ⊗ F.obj N) tU =
+    uU.inv ≫
+      (poleTopSectionHom (F.obj M) xU ⊗ₘ
+        poleTopSectionHom (F.obj N) yU) at hlocal
+  have hmiddle := poleTensor_nested_four_comp_of_tail_head_last
+    hnatural hunit htensor
+  change (r.inv ≫
+      (F.map uX.inv ≫ F.map (hx ⊗ₘ hy))) ≫ d.hom =
+    uU.inv ≫
+      ((r.inv ≫ F.map hx) ⊗ₘ (r.inv ≫ F.map hy)) at hmiddle
+  have hhom :
+      poleTopSectionHom (F.obj M ⊗ F.obj N) (d.hom.val.app (.op ⊤) qU) =
+        poleTopSectionHom (F.obj M ⊗ F.obj N) tU := by
+    have hchain :
+        poleTopSectionHom (F.obj (M ⊗ N)) qU ≫ d.hom =
+          poleTopSectionHom (F.obj M ⊗ F.obj N) tU := by
+      have hstart :
+          poleTopSectionHom (F.obj (M ⊗ N)) qU ≫ d.hom =
+            (r.inv ≫ F.map (poleTopSectionHom (M ⊗ N) q)) ≫
+              d.hom :=
+        congrArg (fun k ↦ k ≫ d.hom) hrestrict
+      have hglobalStep :
+          (r.inv ≫ F.map (poleTopSectionHom (M ⊗ N) q)) ≫
+              d.hom =
+            (r.inv ≫ (F.map uX.inv ≫ F.map (hx ⊗ₘ hy))) ≫
+              d.hom :=
+        congrArg (fun k ↦ (r.inv ≫ k) ≫ d.hom) hmapGlobalExpanded
+      have hrestricted :
+          uU.inv ≫ ((r.inv ≫ F.map hx) ⊗ₘ
+              (r.inv ≫ F.map hy)) =
+            uU.inv ≫
+              (poleTopSectionHom (F.obj M) xU ⊗ₘ
+                poleTopSectionHom (F.obj N) yU) :=
+        congrArg (fun k ↦ uU.inv ≫ k)
+          (congrArg₂ (fun a b ↦ a ⊗ₘ b)
+            hrestrictX.symm hrestrictY.symm)
+      exact hstart.trans (hglobalStep.trans
+        (hmiddle.trans (hrestricted.trans hlocal.symm)))
+    exact hcomp.symm.trans hchain
+  have happ := congrArg
+    (fun k ↦ k.val.app (.op (⊤ : U.1.toScheme.Opens))
+      (show U.1.toScheme.presheaf.obj (.op ⊤) from 1)) hhom
+  exact (poleTopSectionHom_app_top_apply_one (F.obj M ⊗ F.obj N)
+    (d.hom.val.app (.op ⊤) qU)).symm.trans
+      (happ.trans (poleTopSectionHom_app_top_apply_one
+        (F.obj M ⊗ F.obj N) tU))
+
+/-- The local source coordinate of a canonical pure tensor of pole sections is
+the product of the two local power coordinates. -/
+theorem
+    sectionPoleSheafPowerMulTrivialization_localTrivializationRestriction_tmul
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.affineOpens)
+    (e : (sectionPoleSheaf π z hz).restrict U.1.ι ≅
+      Scheme.Modules.unitObj U.1.toScheme) (m n : ℕ)
+    (x : Γ(sectionPoleSheafPower π z hz m, (⊤ : C.Opens)))
+    (y : Γ(sectionPoleSheafPower π z hz n, (⊤ : C.Opens))) :
+    (sectionPoleSheafPowerMulTrivialization z hz U.1 e m n).hom.val.app
+        (.op ⊤)
+        (localTrivializationRestriction
+          (sectionPoleSheafPower π z hz m ⊗
+            sectionPoleSheafPower π z hz n) U
+          ((monoidalTensorObjIso
+              (sectionPoleSheafPower π z hz m)
+              (sectionPoleSheafPower π z hz n)).inv.val.app (.op ⊤)
+            (((PresheafOfModules.sheafificationAdjunction
+              (𝟙 C.ringCatSheaf.obj)).unit.app
+                ((sectionPoleSheafPower π z hz m).val ⊗
+                  (sectionPoleSheafPower π z hz n).val)).app (.op ⊤)
+              (x ⊗ₜ y)))) =
+      (show Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) from
+        (sectionPoleSheafPowerTrivialization z hz U.1 e m).hom.val.app
+          (.op ⊤)
+          (localTrivializationRestriction
+            (sectionPoleSheafPower π z hz m) U x)) *
+        (show Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) from
+          (sectionPoleSheafPowerTrivialization z hz U.1 e n).hom.val.app
+            (.op ⊤)
+            (localTrivializationRestriction
+              (sectionPoleSheafPower π z hz n) U y)) := by
+  let P := sectionPoleSheafPower π z hz m
+  let Q := sectionPoleSheafPower π z hz n
+  change
+    (unitObjTensorIso U.1.toScheme).hom.val.app (.op ⊤)
+      (((sectionPoleSheafPowerTrivialization z hz U.1 e m).hom ⊗ₘ
+          (sectionPoleSheafPowerTrivialization z hz U.1 e n).hom).val.app
+        (.op ⊤)
+        ((restrictMonoidalTensorIso U.1.ι P Q).hom.val.app (.op ⊤)
+          (localTrivializationRestriction (P ⊗ Q) U
+            (poleTensorTopSection P Q x y)))) = _
+  have hrestrict := poleTensor_restrict_localTrivializationRestriction
+    P Q U x y
+  rw [hrestrict, poleTensorTopSection_map]
+  exact unitObjTensorIso_hom_poleTensorTopSection U.1.toScheme
+    ((sectionPoleSheafPowerTrivialization z hz U.1 e m).hom.val.app
+      (.op ⊤) (localTrivializationRestriction P U x))
+    ((sectionPoleSheafPowerTrivialization z hz U.1 e n).hom.val.app
+      (.op ⊤) (localTrivializationRestriction Q U y))
+
 /-- Under the compatible tensor-power trivializations, multiplication of pole
 sheaves restricts to multiplication of two copies of the structure sheaf. -/
 theorem sectionPoleSheafMulHom_restrict_comp_powerTrivialization

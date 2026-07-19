@@ -396,6 +396,62 @@ theorem sectionPoleSheafPower_baseSectionsMul_tmul
   change sectionPoleSheafPower_baseSectionsMul z hz m n (x ⊗ₜ y) = sectionPoleSheafPower_baseSectionsMulPure z hz m n x y
   exact sectionPoleSheafPower_baseSectionsMul_tmul_aux z hz m n x y
 
+/-- In compatible local tensor-power coordinates, the coefficient of a pure-tensor
+pole product is the product of the two coefficients. -/
+theorem localTrivializationCoefficient_sectionPoleSheafPower_baseSectionsMul_tmul
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.affineOpens)
+    (e : (sectionPoleSheaf π z hz).restrict U.1.ι ≅
+      Scheme.Modules.unitObj U.1.toScheme) (m n : ℕ)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz m))
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz n)) :
+    localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz (m + n)) U
+        (sectionPoleSheafPowerTrivialization z hz U.1 e (m + n))
+        (sectionPoleSheafPower_baseSectionsMul z hz m n (x ⊗ₜ y)) =
+      localTrivializationCoefficient
+          (sectionPoleSheafPower π z hz m) U
+          (sectionPoleSheafPowerTrivialization z hz U.1 e m) x *
+        localTrivializationCoefficient
+          (sectionPoleSheafPower π z hz n) U
+          (sectionPoleSheafPowerTrivialization z hz U.1 e n) y := by
+  unfold localTrivializationCoefficient
+  rw [← affineOpenAmbientSection_mul]
+  congr 1
+  unfold localTrivializationTopSection
+  rw [sectionPoleSheafPower_baseSectionsMul_tmul]
+  erw [localTrivializationRestriction_map]
+  let P := sectionPoleSheafPower π z hz m
+  let Q := sectionPoleSheafPower π z hz n
+  let q : Γ(P ⊗ Q, (⊤ : C.Opens)) :=
+    (monoidalTensorObjIso P Q).inv.val.app (.op (⊤ : C.Opens))
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 C.ringCatSheaf.obj)).unit.app (P.val ⊗ Q.val)).app
+          (.op (⊤ : C.Opens))
+            ((show Γ(P, (⊤ : C.Opens)) from x) ⊗ₜ
+              (show Γ(Q, (⊤ : C.Opens)) from y)))
+  change
+    (sectionPoleSheafPowerTrivialization z hz U.1 e (m + n)).hom.val.app
+      (.op (⊤ : U.1.toScheme.Opens))
+        (((Scheme.Modules.restrictFunctor U.1.ι).map
+          (sectionPoleSheafMulHom π z hz m n)).val.app
+            (.op (⊤ : U.1.toScheme.Opens))
+              (localTrivializationRestriction (P ⊗ Q) U q)) = _
+  have hcoord := sectionPoleSheafMulHom_restrict_comp_powerTrivialization
+    z hz U.1 e m n
+  have hcoordTop := congrArg
+    (fun k ↦ k.val.app (.op (⊤ : U.1.toScheme.Opens))) hcoord
+  have hcoordApply := ConcreteCategory.congr_hom hcoordTop
+    (localTrivializationRestriction (P ⊗ Q) U q)
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at hcoordApply
+  rw [hcoordApply]
+  exact
+    sectionPoleSheafPowerMulTrivialization_localTrivializationRestriction_tmul
+      z hz U e m n x y
+
 
 end
 
