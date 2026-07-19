@@ -9,6 +9,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
 import ModularCurves.ForMathlib.GradedQuotient
 import ModularCurves.ForMathlib.MvPolynomialHomogenize
+import ModularCurves.ForMathlib.ProjectiveSpaceChart
 
 /-!
 # Projective closures from homogenized relations
@@ -19,7 +20,7 @@ variable. With finitely many polynomial variables, its `Proj` is proper over the
 
 namespace MvPolynomial
 
-open AlgebraicGeometry CategoryTheory HomogeneousIdeal MorphismProperty
+open AlgebraicGeometry CategoryTheory HomogeneousIdeal HomogeneousLocalization MorphismProperty
 
 noncomputable section
 
@@ -64,6 +65,58 @@ lemma homogenizedProjπ_isProper [Finite σ] (g : κ → MvPolynomial σ R) (d :
     (Proj.toSpecZero (quotientGrading I) ≫
       Spec.map (CommRingCat.ofHom (algebraMapGradeZero I)))
   exact IsStableUnderComposition.comp_mem _ _ hproj hbase
+
+section OptionChart
+
+local instance : DecidableEq (Option σ) := Classical.decEq _
+
+private def optionNeNoneEquiv (σ : Type*) : {x : Option σ // x ≠ none} ≃ σ where
+  toFun x := x.1.get (Option.ne_none_iff_isSome.mp x.2)
+  invFun x := ⟨some x, by simp⟩
+  left_inv x := Subtype.ext (Option.some_get _)
+  right_inv x := Option.get_some _ _
+
+private lemma rename_dehomogenizeAux_none (p : MvPolynomial (Option σ) R) :
+    rename (optionNeNoneEquiv σ) (dehomogenizeAux R none p) =
+      dehomogenizeOption R p := by
+  classical
+  apply RingHom.congr_fun
+    (f := (rename (optionNeNoneEquiv σ)).toRingHom.comp (dehomogenizeAux R none))
+    (g := dehomogenizeOption R)
+  refine ringHom_ext (fun r ↦ ?_) (fun i ↦ ?_)
+  · simp
+  · cases i with
+    | none => simp
+    | some i => simp [optionNeNoneEquiv]
+
+/-- The standard projective chart at the added homogenizing variable is affine space in the
+original variables. -/
+noncomputable def optionChartRingEquiv :
+    Away (homogeneousSubmodule (Option σ) R) (X none : MvPolynomial (Option σ) R) ≃+*
+      MvPolynomial σ R := by
+  classical
+  exact (chartRingEquiv R (none : Option σ)).trans
+    (renameEquiv R (optionNeNoneEquiv σ)).toRingEquiv
+
+/-- Under the standard chart equivalence, a homogeneous lift divided by the homogenizing
+variable to its chosen degree is the original polynomial. -/
+lemma optionChartRingEquiv_apply_mk_homogenizeOption
+    (p : MvPolynomial σ R) (n : ℕ) (h : p.totalDegree ≤ n) :
+    optionChartRingEquiv
+      (Away.mk _ (X_mem_homogeneousSubmodule_one R (none : Option σ)) n
+        (homogenizeOption p n)
+        (by
+          simpa using (mem_homogeneousSubmodule _ _).mpr
+            (homogenizeOption_isHomogeneous p n))) = p := by
+  classical
+  change rename (optionNeNoneEquiv σ)
+      (dehomogenizeAt R none
+        (Away.mk _ (X_mem_homogeneousSubmodule_one R (none : Option σ)) n
+          (homogenizeOption p n) _)) = p
+  rw [dehomogenizeAt_mk, rename_dehomogenizeAux_none,
+    dehomogenizeOption_homogenizeOption p n h]
+
+end OptionChart
 
 end
 
