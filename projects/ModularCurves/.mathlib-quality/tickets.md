@@ -23801,3 +23801,39 @@ KVC-consumer (KeystoneGeometricPoint, creates) · T-E15b-residuals (LevelThreeTo
 (ExactOrder). ARMED: pin-discharge (3 strands) on KeystoneGeometricPoint; T-E14 on scaleTorsor;
 [a2-M]-discharge follow-on on a5-P-loc (needs the un-privating). Central-integration protocol
 (builders don't commit) holding — zero drift.
+
+---
+
+## v10.331-FIN (2026-07-19) — 2nd credit-wipeout; KVC-consumer HAND-RECOVERED + landed (STREAM-FIN)
+
+**The wipeout.** All six re-fired builders (a5-P-loc, scaleTorsor, recollement-glue, KVC-consumer,
+T-E15b-residuals, TD6b) died mid-edit on "out of usage credits" — the same failure mode as the first
+wave. Session switched to Opus 4.8. As sole worker I ran the salvage protocol; ALL SIX left
+BROKEN-FROM-SOURCE WIP (the monitor's sorry-count deltas + line growth were mid-edit states that never
+compiled — apparent earlier "successes" were stale-olean replays). Backed every WIP to
+`scratchpad/wip_backup/*.wip` and reverted the tree to the clean committed baseline (4242 green).
+
+**LANDED (wave 2/7): `Moduli/KeystoneGeometricPoint.lean` (639 lines, 0 sorries, axiom-clean).**
+The KVC-consumer had 0 sorries but 6 rewrite errors; FIN fixed all six by hand on Opus:
+- [KVC-conj] `exists_projModelIso_of_field` hinvρ: bogus lemma `IsIso.Iso.inv_hom` → `IsIso.inv_eq_of_hom_inv_id` witness.
+- π-compat + zero-compat chains: removed spurious `Category.assoc` calls (terms already right-assoc after `heπ`/`hθz`); π-compat needed exactly ONE reassoc before `Iso.hom_inv_id_assoc` (heπ leaves `(snd ≫ isoSpec.hom)` grouped).
+- 3× `.left` extraction blocks: `rwa [Over.comp_left] at h` failed (head-symbol `CommaMorphism.left` vs lemma's `Over.Hom.left`); fix = `have h := congrArg CommaMorphism.left …; simp only [Over.comp_left, pointEquivOverHom, Equiv.coe_fn_mk, Over.homMk_left] at h; exact h` (simp matches up to reducible; explicit `exact` handles the `(Over.mk (𝟙 _)).left` vs `Spec _` ambient-type defeq that `simpa … using` rejected).
+
+Delivers, ALL axiom-clean {propext, Classical.choice, Quot.sound}: `exists_projModelIso_of_field`
+([KVC-model]); the [KVC-pts] readout dictionary; `conjModelIso` + compat ([KVC-conj]);
+`pointedAuto_eq_id_of_fixes_points_kvc` (3-pt supply, hH design), `pointedAuto_eq_id_of_fixes_point_kvc`
+(single-P cyclic, hbound design), **`hbound_pointwise_of_kvc` + `hbound_of_kvc`** (the LITERAL hbound
+pin of GammaHClosure:152 — dischargeable verbatim). Full tree green 4242 jobs.
+
+**Consequence.** The F4 pin-discharge no longer needs a fresh builder for the hbound pin — `hbound_of_kvc`
+IS the pin, ready to instantiate at GammaHClosure:150's `gammaOneDrinfeld_rigid_and_representable_of_hbound`
+(and the hH pin sites via `pointedAuto_eq_id_of_fixes_points_kvc`). STRAND-3 (degree-leaf kill at
+fix_sections:436) and the hH torsion-action supply remain to wire, but the k̄-master consumer bridge is DONE.
+
+**Backed-up broken WIP (for clean re-fire w/ fresh credits, backups in scratchpad/wip_backup):**
+a5-P-loc (EngineDescent, design-stage only) · scaleTorsor (SqrtCoverGlue, ~300-line glue scaffold + 5
+errors) · recollement-glue (Recollement, ~870-line TwoChartGlue apparatus + 4 errors) · T-E15b-residuals
+(LevelThreeTorsor: levelThree_surjective attempt has a whnf-timeout in exists_isNaiveFullLevel_of_isAlgClosed;
+levelThree_torsor still open) · TD6b (ExactOrder: jet-core port + 4 errors; scratch_alg.lean has the clean
+pure-algebra core). The universe-wall ULift recipe (compiled) + :324 D(3)-leg recipe remain banked in
+scratchpad/armed_prompts.md.
