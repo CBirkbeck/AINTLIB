@@ -274,11 +274,60 @@ cardinality `N²`, hence onto. -/
 private theorem exists_isNaiveFullLevel_of_isAlgClosed (k : Type u) [Field k]
     [IsAlgClosed k] (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
     (hk : (N : k) ≠ 0) : ∃ P Q : E.Section, E.IsNaiveFullLevel N P Q := by
-  -- QUARANTINED (bump-fallout): the change-of-basis proof below elaborated pre-bump but a
-  -- daily mathlib bump made a `whnf` step here blow past the heartbeat limit (see git history
-  -- for the full proof: `torsion_geometricFibre_rank_two` basis + `pull_injective` `N²`-count).
-  -- The mathematics is unchanged and TRUE; this is a performance residual, not a math gap.
-  sorry
+  obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two N k (𝟙 _) hk
+  refine ⟨(e.symm ![1, 0]).1, (e.symm ![0, 1]).1,
+    ⟨⟨(Submodule.mem_torsionBy_iff _ _).mp (e.symm ![1, 0]).2,
+      (Submodule.mem_torsionBy_iff _ _).mp (e.symm ![0, 1]).2⟩, ?_⟩⟩
+  intro k' _ _ t x hx
+  -- `N` stays invertible over `k'`.
+  have hk' : ((N : ℕ) : k') ≠ 0 := by
+    have hu : IsUnit ((N : ℕ) : k) := isUnit_iff_ne_zero.mpr hk
+    have hm := hu.map (Spec.preimage t).hom
+    rw [map_natCast] at hm
+    exact hm.ne_zero
+  obtain ⟨e'⟩ := E.torsion_geometricFibre_rank_two N k' t hk'
+  -- Pulling back is a map between the two `N`-torsion groups …
+  have hpullmem : ∀ y : Submodule.torsionBy ℤ (E.Point (𝟙 (Spec (CommRingCat.of k)))) (N : ℤ),
+      Point.pull E t y.1 ∈ Submodule.torsionBy ℤ (E.Point t) (N : ℤ) := by
+    intro y
+    refine (Submodule.mem_torsionBy_iff _ _).mpr ?_
+    rw [← Point.pull_zsmul, (Submodule.mem_torsionBy_iff _ _).mp y.2, Point.pull_zero]
+  set Φ : Submodule.torsionBy ℤ (E.Point (𝟙 (Spec (CommRingCat.of k)))) (N : ℤ) →
+      Submodule.torsionBy ℤ (E.Point t) (N : ℤ) :=
+    fun y => ⟨Point.pull E t y.1, hpullmem y⟩ with hΦ
+  -- … which is injective, hence surjective by the `N²`-count on both sides.
+  have hΦinj : Function.Injective Φ := fun y z h =>
+    Subtype.ext (E.pull_injective k k' t (congrArg Subtype.val h))
+  haveI : Finite (Submodule.torsionBy ℤ (E.Point (𝟙 (Spec (CommRingCat.of k)))) (N : ℤ)) :=
+    Finite.of_equiv _ e.toEquiv.symm
+  have hΦsurj : Function.Surjective Φ :=
+    (Finite.injective_iff_surjective_of_equiv (e.toEquiv.trans e'.toEquiv.symm)).mp hΦinj
+  obtain ⟨y, hy⟩ := hΦsurj ⟨x, (Submodule.mem_torsionBy_iff _ _).mpr hx⟩
+  -- Expand `y` in the chosen basis and push through `pull`.
+  have hc : e y = ((e y 0).val : ℤ) • ![1, 0] + ((e y 1).val : ℤ) • ![0, 1] := by
+    funext i
+    fin_cases i <;> simp [ZMod.natCast_val, ZMod.cast_id]
+  have hy2 : y = ((e y 0).val : ℤ) • e.symm ![1, 0] + ((e y 1).val : ℤ) • e.symm ![0, 1] := by
+    conv_lhs => rw [← e.symm_apply_apply y, hc]
+    rw [map_add, map_zsmul, map_zsmul]
+  have hy3 : (y : E.Point (𝟙 (Spec (CommRingCat.of k)))) =
+      ((e y 0).val : ℤ) • ((e.symm ![1, 0]).1 : E.Point (𝟙 (Spec (CommRingCat.of k)))) +
+        ((e y 1).val : ℤ) • (e.symm ![0, 1]).1 := by
+    -- PERF: rewrite `y` on the LHS ONLY. A whole-goal `rw [hy2]` substitutes `y` into the
+    -- RHS coefficients `e y`, forcing `whnf` to evaluate `e (e.symm …)` (an `AddEquiv`
+    -- round-trip through the huge `torsionBy` structure) — the post-bump heartbeat blow-up.
+    -- Restricting to `conv_lhs` leaves `e y` untouched; the rest is shallow coercion pushing.
+    conv_lhs => rw [hy2]
+    rw [Submodule.coe_add, Submodule.coe_smul, Submodule.coe_smul]
+  have hx1 : Point.pull E t (y : E.Point (𝟙 (Spec (CommRingCat.of k)))) = x :=
+    congrArg Subtype.val hy
+  rw [← hx1, hy3, Point.pull_add, Point.pull_zsmul, Point.pull_zsmul]
+  -- PERF: close via `mem_closure_pair` (a SYNTACTIC equality `rfl`) rather than a nested
+  -- `add_mem (zsmul_mem (subset_closure (mem_insert …)) …) …` term — the latter forces the
+  -- elaborator to `whnf` the large `Point.pull …`/`E.Point` terms across the unification chain
+  -- (the post-bump heartbeat blow-up). Here the two sides are literally equal.
+  rw [AddSubgroup.mem_closure_pair]
+  exact ⟨((e y 0).val : ℤ), ((e y 1).val : ℤ), rfl⟩
 
 /-- **Simple transitivity of the `GL₂(ℤ/N)`-action on naive full level structures over
 an algebraically closed field** (the change-of-basis half of KM p. 112 axiom 2; the
