@@ -68,6 +68,55 @@ theorem IsLegendreDatum.neg {R : CommRingCat.{u}} {X : EllObj R}
     · convert hMQ using 2 <;> simp [hC]
 
 open WeierstrassCurve in
+/-- **([T-E14-ACT'] sublemma B1 — the genuine `μ₂`-on-`ω` stability)** For any global unit
+`g` with `g² = 1`, rescaling the `ω`-basis by `g` preserves the Legendre-datum condition.
+This generalises `IsLegendreDatum.neg` (the `g = -1` case) to the full `μ₂` factor: the
+variable change `⟨g, 0, 0, 0⟩` scales the Weierstrass coefficients by `g⁻²`, `g⁻⁴`, `g⁻⁶`,
+all `= 1` under `g² = 1`, so the chart curve stays `legendreCurve lam` and the markings
+survive (the `x`-coordinates scale by `g² = 1`). Unlike the `GL₂(𝔽₂)` re-marking (which
+needs a global `√`, see the `legendreDeltaGAction` B2), this `μ₂`-on-`ω` action is genuine
+and global — it is the honest content of the `{±1}` factor. -/
+theorem IsLegendreDatum.smul_of_sq_eq_one {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (g : Γ(X.base, ⊤)ˣ) (hg : g ^ 2 = 1) :
+    IsLegendreDatum X L (g • b) := by
+  intro s
+  obtain ⟨V, hsV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD s
+  set gV : Γ(X.base, V.1)ˣ := Scheme.resUnit (le_top : V.1 ≤ ⊤) g with hgV
+  have hgV2 : gV ^ 2 = 1 := by
+    rw [hgV, ← map_pow, hg, map_one]
+  set C : WeierstrassCurve.VariableChange Γ(X.base, V.1) := ⟨gV, 0, 0, 0⟩ with hC
+  have hgVval2 : (gV : Γ(X.base, V.1)) ^ 2 = 1 := by
+    have := congrArg (Units.val) hgV2
+    simpa using this
+  have hginv2 : (↑gV⁻¹ : Γ(X.base, V.1)) ^ 2 = 1 := by
+    have : (gV⁻¹) ^ 2 = 1 := by rw [inv_pow, hgV2, inv_one]
+    have := congrArg (Units.val) this
+    simpa using this
+  have h4 : (↑gV⁻¹ : Γ(X.base, V.1)) ^ 4 = 1 := by
+    rw [show (4 : ℕ) = 2 * 2 from rfl, pow_mul, hginv2, one_pow]
+  have hWfix : C • Pr.W = legendreCurve lam := by
+    rw [hW]
+    ext <;>
+      simp [hC, legendreCurve, WeierstrassCurve.variableChange_def, hginv2, h4]
+  refine ⟨V, hsV, Pr.ofVC C, lam, ?_, ?_, ?_, ?_⟩
+  · show (((Pr.ofVC C).basisUnitAt _)).1 = 1
+    rw [basisUnitAt_smul, basisUnitAt_ofVC, hAd]
+    rw [mul_one]
+    show gV * gV = 1
+    rw [← sq]; exact hgV2
+  · show C • Pr.W = legendreCurve lam
+    exact hWfix
+  · refine LocalPresentation.MarksAt.ofVC Pr C ?_ ?_
+    · rw [hWfix]
+      exact legendreCurve_equation_zero lam
+    · convert hMP using 2 <;> simp [hC]
+  · refine LocalPresentation.MarksAt.ofVC Pr C ?_ ?_
+    · rw [hWfix]
+      exact legendreCurve_equation_one lam
+    · convert hMQ using 2 <;> simp [hC, hgVval2]
+
+open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 /-- **([T-E14-ACT'] uniqueness up to `±`: the `μ₂`-torsor pinning)** Two Legendre data
