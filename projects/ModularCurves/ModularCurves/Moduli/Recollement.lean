@@ -457,6 +457,124 @@ private theorem pushout_exists_inl_or_inr (x : ↑(pushout f g)) :
 
 end TwoChartGlue
 
+/-- **[RECOLL-LW-transport]** Transport of a `LocallyWeierstrass` chart *down* an open-immersion
+cartesian square. Given an open immersion `j : S' ⟶ S` sitting in a cartesian square
+`IsPullback jE π' π j`, compatible zero sections (`z' ≫ jE = j ≫ z`), and a locally-Weierstrass
+structure upstairs on `π'`, every point of `S` in the image of `j` admits the downstairs chart
+datum for `π`: push the affine chart `U'` forward to `j ''ᵁ U'` (affine, since `j` is an open
+immersion), transport the Weierstrass curve `W` along the section-ring iso `j.appIso U'`, and paste
+the base-change square for `projModel` onto the (cancelled) chart pullback squares. The `isoSpec`
+compatibility is the `SpecMap_appLE_fromSpec`/`appIso` bridge. This is the per-point engine behind
+`glue_locallyWeierstrass`. -/
+private theorem lw_chart_transport
+    {E' S' E S : Scheme.{u}} {π' : E' ⟶ S'} {z' : S' ⟶ E'} {hz' : z' ≫ π' = 𝟙 S'}
+    {π : E ⟶ S} {z : S ⟶ E} {hz : z ≫ π = 𝟙 S}
+    {j : S' ⟶ S} {jE : E' ⟶ E} [IsOpenImmersion j]
+    (hsq : IsPullback jE π' π j) (hzc : z' ≫ jE = j ≫ z)
+    (hlw' : LocallyWeierstrass π' z' hz') (s' : S') :
+    ∃ (U : S.affineOpens) (_ : (j.base s') ∈ U.1) (W : WeierstrassCurve Γ(S, U.1)),
+      W.IsElliptic ∧
+      ∃ e : pullback π U.1.ι ≅ projModel W,
+        e.hom ≫ projModelπ W = pullback.snd π U.1.ι ≫ U.2.isoSpec.hom ∧
+        (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
+            (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e.hom =
+          projModelZero W := by
+  obtain ⟨U', hsU', W, hell, e', heπ', hez'⟩ := hlw' s'
+  haveI := hell
+  -- The image affine open downstairs, and its affineness.
+  have hAff : IsAffineOpen (j ''ᵁ U'.1) := U'.2.image_of_isOpenImmersion j
+  -- Membership of the target point.
+  have hmem : j.base s' ∈ (j ''ᵁ U'.1) := ⟨s', hsU', rfl⟩
+  -- The corestriction iso θ : ↥U' ≅ ↥(j ''ᵁ U').
+  have hrange : Set.range (U'.1.ι ≫ j) = Set.range (j ''ᵁ U'.1).ι := by
+    simp [Scheme.Hom.comp_base, Set.range_comp]
+  set θ : (U'.1 : Scheme) ≅ ((j ''ᵁ U'.1) : Scheme) :=
+    IsOpenImmersion.isoOfRangeEq (U'.1.ι ≫ j) (j ''ᵁ U'.1).ι hrange with hθ
+  have hθfac : θ.hom ≫ (j ''ᵁ U'.1).ι = U'.1.ι ≫ j :=
+    IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+  -- The transported Weierstrass curve.
+  set f : Γ(S', U'.1) ⟶ Γ(S, j ''ᵁ U'.1) := (j.appIso U'.1).inv with hf
+  set W_new : WeierstrassCurve Γ(S, j ''ᵁ U'.1) := W.map f.hom with hWnew
+  haveI : W_new.IsElliptic := by rw [hWnew]; infer_instance
+  -- The base-change square for projModel.
+  have hB : IsPullback (projModelBaseChangeOf f.hom W W_new rfl) (projModelπ W_new)
+      (projModelπ W) (Spec.map (CommRingCat.ofHom f.hom)) :=
+    isPullback_projModelBaseChangeOf f.hom W W_new rfl
+  set bc := projModelBaseChangeOf f.hom W W_new rfl with hbc
+  set Specφ := Spec.map (CommRingCat.ofHom f.hom) with hSpecφ
+  have hSpecφ_eq : Specφ = Spec.map f := by rw [hSpecφ, hf, CommRingCat.ofHom_hom]
+  haveI : IsIso Specφ := by rw [hSpecφ_eq]; infer_instance
+  haveI : IsIso bc := hB.isIso_fst_of_isIso
+  -- Base pullback square with the new base map.
+  have sq_paste : IsPullback (pullback.fst π' U'.1.ι ≫ jE) (pullback.snd π' U'.1.ι) π
+      (U'.1.ι ≫ j) := (IsPullback.of_hasPullback π' U'.1.ι).paste_horiz hsq
+  have hP_new : IsPullback (pullback.fst π' U'.1.ι ≫ jE)
+      (pullback.snd π' U'.1.ι ≫ θ.hom) π (j ''ᵁ U'.1).ι := by
+    refine sq_paste.of_iso (Iso.refl _) (Iso.refl _) θ (Iso.refl _) (by simp) (by simp) (by simp) ?_
+    simp [hθfac]
+  -- The chart iso downstairs.
+  set e_new : pullback π (j ''ᵁ U'.1).ι ≅ projModel W_new :=
+    hP_new.isoPullback.symm ≪≫ e' ≪≫ (asIso bc).symm with he_new
+  -- Bridge: isoSpec compatibility.
+  have hbridge0 : Spec.map (j.appIso U'.1).hom ≫ hAff.isoSpec.inv =
+      U'.2.isoSpec.inv ≫ θ.hom := by
+    have hsp := IsAffineOpen.SpecMap_appLE_fromSpec j hAff U'.2 (j.preimage_image_eq U'.1).ge
+    rw [← Scheme.Hom.appIso_hom', ← IsAffineOpen.isoSpec_inv_ι hAff,
+      ← IsAffineOpen.isoSpec_inv_ι U'.2] at hsp
+    simp only [Category.assoc] at hsp
+    rw [← hθfac] at hsp
+    exact (cancel_mono (j ''ᵁ U'.1).ι).mp (by simp only [Category.assoc]; exact hsp)
+  have hinvSpecφ : inv Specφ = Spec.map (j.appIso U'.1).hom := by
+    have h1 : Specφ ≫ Spec.map (j.appIso U'.1).hom = 𝟙 _ := by
+      rw [hSpecφ_eq, hf, ← Spec.map_comp, Iso.hom_inv_id]; exact Spec.map_id _
+    exact IsIso.inv_eq_of_hom_inv_id h1
+  have hbr1 : θ.inv ≫ U'.2.isoSpec.hom ≫ inv Specφ = hAff.isoSpec.hom := by
+    rw [hinvSpecφ, ← cancel_mono hAff.isoSpec.inv]
+    simp only [Category.assoc, hbridge0]
+    simp
+  have hzbc : projModelZero W_new ≫ bc = Specφ ≫ projModelZero W := by
+    rw [hbc, hSpecφ]; exact projModelZero_baseChangeOf f.hom W W_new rfl
+  refine ⟨⟨j ''ᵁ U'.1, hAff⟩, hmem, W_new, inferInstance, e_new, ?_, ?_⟩
+  · -- condition 1: `e.hom ≫ projModelπ = snd ≫ isoSpec.hom`
+    have hsnd : hP_new.isoPullback.inv ≫ pullback.snd π' U'.1.ι
+        = pullback.snd π (j ''ᵁ U'.1).ι ≫ θ.inv := by
+      rw [Iso.inv_comp_eq, ← Category.assoc, hP_new.isoPullback_hom_snd, Category.assoc,
+        θ.hom_inv_id, Category.comp_id]
+    have hinvbc : inv bc ≫ projModelπ W_new = projModelπ W ≫ inv Specφ := by
+      rw [IsIso.inv_comp_eq, ← Category.assoc, hB.w, Category.assoc, IsIso.hom_inv_id,
+        Category.comp_id]
+    rw [he_new]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_inv, Category.assoc]
+    rw [hinvbc, reassoc_of% heπ', ← Category.assoc, hsnd, Category.assoc, hbr1]
+  · -- condition 2: the zero-section compatibility
+    show (hAff.isoSpec.inv ≫ pullback.lift ((j ''ᵁ U'.1).ι ≫ z) (𝟙 _)
+        (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e_new.hom =
+      projModelZero W_new
+    set sU := pullback.lift ((j ''ᵁ U'.1).ι ≫ z) (𝟙 _)
+      (show ((j ''ᵁ U'.1).ι ≫ z) ≫ π = 𝟙 _ ≫ (j ''ᵁ U'.1).ι by
+        rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) with hsU
+    set sU' := pullback.lift (U'.1.ι ≫ z') (𝟙 _)
+      (show (U'.1.ι ≫ z') ≫ π' = 𝟙 _ ≫ U'.1.ι by
+        rw [Category.assoc, hz', Category.comp_id, Category.id_comp]) with hsU'
+    have hsec0 : sU = θ.inv ≫ sU' ≫ hP_new.isoPullback.hom := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [hsU, pullback.lift_fst, Category.assoc, Category.assoc,
+          hP_new.isoPullback_hom_fst, hsU', pullback.lift_fst_assoc,
+          Category.assoc, hzc, ← reassoc_of% hθfac, θ.inv_hom_id_assoc]
+      · rw [hsU, pullback.lift_snd, Category.assoc, Category.assoc,
+          hP_new.isoPullback_hom_snd, hsU', pullback.lift_snd_assoc,
+          Category.id_comp, θ.inv_hom_id]
+    have hsecinv : sU ≫ hP_new.isoPullback.inv = θ.inv ≫ sU' := by
+      rw [hsec0, Category.assoc, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    have hsU'e : sU' ≫ e'.hom = U'.2.isoSpec.hom ≫ projModelZero W := by
+      rw [← hez', ← Category.assoc, Iso.hom_inv_id_assoc]
+    have hz0invbc : projModelZero W ≫ inv bc = inv Specφ ≫ projModelZero W_new := by
+      rw [IsIso.comp_inv_eq, Category.assoc, hzbc, IsIso.inv_hom_id_assoc]
+    rw [he_new]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_inv, Category.assoc]
+    rw [reassoc_of% hsecinv, reassoc_of% hsU'e, hz0invbc, reassoc_of% hbr1,
+      Iso.inv_hom_id_assoc]
+
 /-! ## [R-glue-obj] the glued `Ell`-object
 
 Glue the two representing objects `Xa/R[1/a]` and `Xb/R[1/b]` along the overlap iso `φ` over
@@ -875,10 +993,11 @@ private theorem glue_zariskiLocalAtTarget (P : MorphismProperty Scheme.{u})
 /-! ### The glued geometric elliptic curve and the glued `Ell/R`-object
 
 The three geometry `Prop`s (`smooth`, `proper`, `localModel`) are Zariski-local on the glued
-base and transfer from the charts; they are quarantined as the leaves [RECOLL-SM],
-[RECOLL-PR], [RECOLL-LW] below. -/
+base and transfer from the charts; all three ([RECOLL-SM], [RECOLL-PR], [RECOLL-LW]) are now
+**proven** below (`smooth`/`proper` via `glue_zariskiLocalAtTarget`, `localModel` via the
+per-point chart transport `lw_chart_transport`). -/
 
-/-- **[RECOLL-SM] (leaf).** Smoothness of relative dimension 1 for the glued projection.
+/-- **[RECOLL-SM] (proven).** Smoothness of relative dimension 1 for the glued projection.
 
 *Recipe.* `SmoothOfRelativeDimension 1` is `IsZariskiLocalAtTarget` (mathlib). Apply
 `IsZariskiLocalAtTarget.of_iSup_eq_top` with the two chart opens
@@ -897,25 +1016,24 @@ with `IsProper` (`IsZariskiLocalAtTarget`) and `Xa.curve.proper`/`Xb.curve.prope
 private theorem glue_proper : IsProper (gluePi a b Xa Xb φ) :=
   glue_zariskiLocalAtTarget a b Xa Xb φ (@IsProper) Xa.curve.proper Xb.curve.proper
 
-/-- **[RECOLL-LW] (leaf).** The glued curve is locally Weierstrass.
+/-- **[RECOLL-LW] (proven).** The glued curve is locally Weierstrass.
 
-*Recipe.* `LocallyWeierstrass` is a pointwise condition on the base. Given
-`s : glueBase …`, by `glueBase_exists` it is `glueBaseInl … sa` (or the mirrored `b`-case).
-Develop the transport lemma `LocallyWeierstrass.of_isPullback_of_isOpenImmersion`: if
-`IsPullback jE π' π j` with `j`, `jE` open immersions, `z' ≫ jE = j ≫ z` and
-`LocallyWeierstrass π' z' hz'`, then every point of `Set.range j` admits the chart data.
-Proof sketch: pick the chart `(U, W, e)` upstairs at `sa`; push `U` forward to the affine
-open `j ''ᵁ U` (`IsAffineOpen.image_of_isOpenImmersion`), transport the section ring along
-the iso `Γ(S, j''U) ≅ Γ(S', U)` (`Scheme.Hom.appIso`), map the Weierstrass curve along it
-(`WeierstrassCurve.map`, `IsElliptic` is preserved), and paste the chart pullback squares
-(the `U`-restriction of `π` is the `U`-restriction of `π'` via `IsPullback jE π' π j`
-restricted to `U`, cf. `LocallyWeierstrass.baseChange`/`of_iso` in
-`EllipticCurve/Basic.lean`). Zero-section compatibility follows from `z' ≫ jE = j ≫ z`
-by `pullback.hom_ext`. -/
+`LocallyWeierstrass` is a pointwise condition on the base: given `s : glueBase …`,
+`glueBase_exists` writes it as `glueBaseInl … sa` (or the mirrored `b`-case), and the
+per-point chart transport `lw_chart_transport` (above) produces the downstairs chart datum
+from the chart of `Xa.curve`/`Xb.curve` through the cartesian chart square
+`isPullback_glueTotalInl/Inr` and the zero-section compatibility `glueBaseInl/Inr_glueZero`. -/
 private theorem glue_locallyWeierstrass :
     LocallyWeierstrass (gluePi a b Xa Xb φ) (glueZero a b Xa Xb φ)
       (glueZero_gluePi a b Xa Xb φ) := by
-  sorry
+  intro s
+  rcases glueBase_exists a b Xa Xb φ s with ⟨sa, rfl⟩ | ⟨sb, rfl⟩
+  · exact lw_chart_transport (hz := glueZero_gluePi a b Xa Xb φ)
+      (isPullback_glueTotalInl a b Xa Xb φ)
+      (glueBaseInl_glueZero a b Xa Xb φ).symm Xa.curve.localModel sa
+  · exact lw_chart_transport (hz := glueZero_gluePi a b Xa Xb φ)
+      (isPullback_glueTotalInr a b Xa Xb φ)
+      (glueBaseInr_glueZero a b Xa Xb φ).symm Xb.curve.localModel sb
 
 /-- **[R-glue-obj], geometry.** The glued geometric elliptic curve over the glued base. -/
 private noncomputable def glueGeom : EllipticCurveGeom (glueBase a b Xa Xb φ) where
@@ -995,8 +1113,31 @@ union is `⊤` since `Y.structMap` lands in `Spec R = D(a) ∪ D(b)`
 
 Sub-leaves for a future worker: `[R-sheaf-P]` (`hrel ⟹ P` is a Zariski sheaf), `[R-hom-glue]`
 (Hom into `glueEllObj` is a sheaf, from the two pushouts), `[R-chart-eqv]` (the per-chart bijection
-via `repr_a`/`glueJa`). Also transitively depends on `glue_locallyWeierstrass` through
-`glueEllObj`. -/
+via `repr_a`/`glueJa`).
+
+**Status (this session).** All *geometry* inputs are now sorry-free: `glueEllObj` is a genuine
+`EllObj R` (the last geometry leaf `glue_locallyWeierstrass` is discharged via `lw_chart_transport`),
+so this `def` no longer depends on any geometry `sorry` — only on the descent bookkeeping below.
+
+**Sharpened on-ramp for `[R-sheaf-P]` (the crux).** The separated + gluing halves of "`P` is an
+fppf sheaf for a relatively representable `P`" are already proven, sorry-free, in
+`Moduli/Stack.lean`: `moduliProblem_fppf_separated` and `moduliProblem_fppf_descent` (they consume
+exactly the `RelativelyRepresentable` naturality clause + "fppf covers are effective epis"). A
+Zariski two-chart open cover `Y.base = Ya ∪ Yb` is the fppf cover `Ya ⊔ Yb ⟶ Y.base` (open
+immersions are flat + LFP; joint surjectivity from `basicOpen_sup_basicOpen_eq_top` gives
+surjectivity of the coproduct map), and `P(X.pullbackAlong (Ya ⊔ Yb → Y.base)) ≃ P(Y|Ya) × P(Y|Yb)`
+(Hom out of a coproduct); the kernel pair `(Ya ⊔ Yb) ×_Y (Ya ⊔ Yb)` restricts the cocycle to
+agreement over `Yab = Ya ∩ Yb`. So `[R-sheaf-P]` is now an *assembly* of the two `Stack.lean`
+lemmas, not a from-scratch sheaf development.
+
+**Remaining genuinely-new work (register-box-class, NEW-Y1's `YFULL` lane — do not duplicate).**
+`[R-hom-glue]` (gluing an `Ell/R`-morphism `Y ⟶ glueEllObj` — its `baseHom`, `top`, cartesian
+`isPullback`, and `zero_w` — from the two chart morphisms via the `glueBase`/`glueTotal` pushout
+universal properties `glueBase_hom_ext`/`pushout.desc`), `[R-chart-eqv]` (per-chart bijection: factor
+`Y|Ya`'s structure through `Spec R[1/a]`, pass `P(Y|Ya) ≃ (P.baseChange (awayHom a))(…)` through the
+`restrictScalars`/`baseChange` adjunction, then `repr_a.homEquiv` + `glueJa`, matched on `Yab` by
+`overlapIso`), and assembling the `Equiv` + `homEquiv_comp` naturality. This remains the single
+`sorry` and is a multi-session development overlapping NEW-Y1's active curve-assembly charter. -/
 private noncomputable def glueEllObj_representableBy {P : ModuliProblem R} (a b : R)
     (hab : ∃ x y : R, x * a + y * b = 1) (hrel : P.RelativelyRepresentable)
     {Xa : EllObj (CommRingCat.of (Localization.Away a))}
@@ -1086,7 +1227,8 @@ theorem representable_of_baseChange_cover (P : ModuliProblem R) (a b : R)
     Functor.representableBy _
   -- [compat]/[R-glue-obj] ✅ engine, delivered: `overlapIso` is the gluing datum over `D(ab)` and
   -- `glueEllObj a b Xa Xb (overlapIso …)` is the glued `Ell/R`-object (base/total pushouts of the
-  -- open-immersion charts; `glue_smooth`/`glue_proper` proven, `glue_locallyWeierstrass` leaf).
+  -- open-immersion charts; `glue_smooth`/`glue_proper`/`glue_locallyWeierstrass` all proven, so
+  -- `glueEllObj` is a genuine `EllObj R`).
   -- [R-glue-repr]/[assemble]: it represents `P` by Zariski descent along the cover (`hrel` supplies
   -- the sheaf condition that kills the bare-presheaf counterexample).
   exact (glueEllObj_representableBy a b hab hrel repr_a repr_b).isRepresentable
