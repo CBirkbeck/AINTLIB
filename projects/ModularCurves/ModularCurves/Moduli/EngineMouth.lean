@@ -107,9 +107,12 @@ private theorem map_fst_autMulHom_inv {P Q : ModuliProblem R} {G : Type u} [Grou
     _ = (η.inv.app (op XM) (rM.homEquiv (𝟙 XM))).1 := congrArg Prod.fst key2
     _ = (rM.homEquiv (𝟙 XM)).1 := rfl
 
-/-- **([a2-M], the orbit-in-an-affine-open input — the quarantined geometric residual.)**
+/-- **([a2-M], the orbit-in-an-affine-open input — DISCHARGED via route 1.)**
 Every `G`-orbit of the KM action on the total space of the universal curve over `𝕸(𝒫,δ)`
-lies in an affine open. This is the `horbit` hypothesis of the model-free Phase-A engine
+lies in an affine open. Now proven from the a5-P-loc package via the general geometric helper
+`RouteA.exists_orbit_isAffineOpen_of_curveAction` (`Moduli/EngineDescent.lean`); its residual
+`sorryAx` collapses to the single a5-P-loc core `exists_localModel_core_at` (nothing [a2-M]-local
+remains). This is the `horbit` hypothesis of the model-free Phase-A engine
 (`RouteA.exists_ellipticCurveGeom_quotient`), i.e. KM's silent appeal to quasi-projectivity
 (Stacks 01ZY: a finite set of points of a scheme quasi-projective over an affine lies in a
 common affine open — absent from mathlib; flagged at `RouteA.orbit_mem_isAffineOpen_of_charts`,
@@ -143,7 +146,9 @@ private theorem exists_orbit_isAffineOpen (P Q : ModuliProblem R) {G : Type u} [
     (e : XM.curve.E) :
     ∃ U : (XM.curve.E).Opens, IsAffineOpen U ∧
       ∀ γ : G, ((P.simulSchemeActionTotal Q φ rM).hom γ).base e ∈ U := by
-  sorry
+  haveI := haff
+  exact RouteA.exists_orbit_isAffineOpen_of_curveAction
+    (isCurveAction_simulSchemeActionTotal P Q φ rM) hfree e
 
 /-- **([a2]–[a5] interface — the geometric core of the KM 4.7.0 engine.)**
 The free quotient of the simultaneous representing object by the KM action, as an
