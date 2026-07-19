@@ -3683,6 +3683,115 @@ noncomputable def sectionPoleSheafSuccHom {C S : Scheme.{u}} (π : C ⟶ S)
   (ρ_ (sectionPoleSheafPower π z hz n)).inv ≫
     (𝟙 _ ⊗ₘ ((monoidalUnitObjIso C).hom ≫ sectionPoleUnitHom π z hz))
 
+private theorem mono_id_tensorHom_of_iso_unit
+    {D : Type u} [Category.{v} D] [MonoidalCategory D]
+    {M X Y : D} (e : M ≅ 𝟙_ D) (f : X ⟶ Y) [Mono f] :
+    Mono (𝟙 M ⊗ₘ f) := by
+  let eX : M ⊗ X ≅ X := whiskerRightIso e X ≪≫ λ_ X
+  let eY : M ⊗ Y ≅ Y := whiskerRightIso e Y ≪≫ λ_ Y
+  have h : (𝟙 M ⊗ₘ f) ≫ eY.hom = eX.hom ≫ f := by
+    dsimp only [eX, eY]
+    simp only [Iso.trans_hom, whiskerRightIso_hom, Category.assoc]
+    rw [id_tensorHom]
+    rw [← Category.assoc, whisker_exchange]
+    rw [Category.assoc, leftUnitor_naturality]
+  haveI : Mono (eX.hom ≫ f) := mono_comp _ _
+  haveI : Mono ((𝟙 M ⊗ₘ f) ≫ eY.hom) := h ▸ inferInstance
+  exact mono_of_mono (𝟙 M ⊗ₘ f) eY.hom
+
+private theorem map_id_tensorHom_mono_of_iso_unit
+    {C D : Type u} [Category.{v} C] [Category.{v} D]
+    [MonoidalCategory C] [MonoidalCategory D]
+    (F : C ⥤ D) [F.Monoidal] {M X Y : C}
+    (e : F.obj M ≅ 𝟙_ D) (f : X ⟶ Y) (hf : Mono (F.map f)) :
+    Mono (F.map (𝟙 M ⊗ₘ f)) := by
+  letI : Mono (F.map f) := hf
+  haveI : Mono (𝟙 (F.obj M) ⊗ₘ F.map f) :=
+    mono_id_tensorHom_of_iso_unit e (F.map f)
+  rw [Functor.Monoidal.map_tensor, F.map_id]
+  infer_instance
+
+private theorem restrictFunctor_map_mono
+    {X : Scheme.{u}} {M N : X.Modules} (U : X.Opens)
+    (f : M ⟶ N) (hf : Mono f) :
+    Mono ((Scheme.Modules.restrictFunctor U.ι).map f) := by
+  let F := (Scheme.Modules.overEquiv U).functor
+  let e := Scheme.Modules.overFunctorEquiv U
+  haveI : Mono (f.over U) := sheafOfModules_mono_over f hf U
+  haveI : Mono (F.map (f.over U)) := Functor.map_mono F (f.over U)
+  have hnat := e.hom.naturality f
+  have hnat' : F.map (f.over U) ≫ (e.app N).hom =
+      (e.app M).hom ≫ (Scheme.Modules.restrictFunctor U.ι).map f := by
+    exact hnat
+  have hmap : (Scheme.Modules.restrictFunctor U.ι).map f =
+      (e.app M).inv ≫ F.map (f.over U) ≫ (e.app N).hom := by
+    calc
+      _ = (e.app M).inv ≫ ((e.app M).hom ≫
+          (Scheme.Modules.restrictFunctor U.ι).map f) := by simp
+      _ = (e.app M).inv ≫ (F.map (f.over U) ≫ (e.app N).hom) := by
+        exact congrArg (fun q ↦ (e.app M).inv ≫ q) hnat'.symm
+      _ = _ := Category.assoc _ _ _
+  rw [hmap]
+  infer_instance
+
+private theorem sheafOfModules_mono_over_of_restrict_mono
+    {X : Scheme.{u}} {M N : X.Modules} (U : X.Opens)
+    (f : M ⟶ N) (hf : Mono ((Scheme.Modules.restrictFunctor U.ι).map f)) :
+    Mono (f.over U) := by
+  let F := (Scheme.Modules.overEquiv U).functor
+  let e := Scheme.Modules.overFunctorEquiv U
+  have hnat := e.hom.naturality f
+  have hnat' : F.map (f.over U) ≫ (e.app N).hom =
+      (e.app M).hom ≫ (Scheme.Modules.restrictFunctor U.ι).map f := by
+    exact hnat
+  letI : Mono ((Scheme.Modules.restrictFunctor U.ι).map f) := hf
+  haveI : Mono ((e.app M).hom ≫
+      (Scheme.Modules.restrictFunctor U.ι).map f) := mono_comp _ _
+  have hleft : Mono (F.map (f.over U) ≫ (e.app N).hom) := by
+    rw [hnat']
+    infer_instance
+  letI := hleft
+  haveI : Mono (F.map (f.over U)) := mono_of_mono _ (e.app N).hom
+  exact F.mono_of_mono_map
+    (show Mono (F.map (f.over U)) from inferInstance)
+
+private theorem sectionPoleSheafSuccHom_over_mono_of_trivialization
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) (U : C.Opens)
+    (e : (Scheme.Modules.pullback U.ι).obj
+      (sectionPoleSheafPower π z hz n) ≅ Scheme.Modules.unitObj U.toScheme) :
+    Mono ((sectionPoleSheafSuccHom π z hz n).over U) := by
+  let F := Scheme.Modules.restrictFunctor U.ι
+  let eR : F.obj (sectionPoleSheafPower π z hz n) ≅
+      Scheme.Modules.unitObj U.toScheme :=
+    (Scheme.Modules.restrictFunctorIsoPullback U.ι).app
+      (sectionPoleSheafPower π z hz n) ≪≫ e
+  let eM : F.obj (sectionPoleSheafPower π z hz n) ≅ 𝟙_ U.toScheme.Modules :=
+    eR ≪≫ (monoidalUnitObjIso U.toScheme).symm
+  let f : 𝟙_ C.Modules ⟶ sectionPoleSheaf π z hz :=
+    (monoidalUnitObjIso C).hom ≫ sectionPoleUnitHom π z hz
+  have hf : Mono f := by
+    dsimp only [f]
+    letI : Mono (sectionPoleUnitHom π z hz) :=
+      sectionPoleUnitHom_mono hsm z hz
+    infer_instance
+  have hfR : Mono (F.map f) := restrictFunctor_map_mono U f hf
+  letI : (Scheme.Modules.pullback U.ι).Monoidal :=
+    Scheme.Modules.pullbackMonoidal U.ι
+  letI : F.Monoidal := Functor.Monoidal.transport
+    (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm
+  have htensor : Mono (F.map (𝟙 (sectionPoleSheafPower π z hz n) ⊗ₘ f)) :=
+    map_id_tensorHom_mono_of_iso_unit F eM f hfR
+  have hsucc : Mono (F.map (sectionPoleSheafSuccHom π z hz n)) := by
+    change Mono (F.map ((ρ_ (sectionPoleSheafPower π z hz n)).inv ≫
+      (𝟙 (sectionPoleSheafPower π z hz n) ⊗ₘ f)))
+    rw [F.map_comp]
+    letI := htensor
+    infer_instance
+  exact sheafOfModules_mono_over_of_restrict_mono U
+    (sectionPoleSheafSuccHom π z hz n) hsucc
+
 /-- The composite filtration map `𝒪_C(n[0]) → 𝒪_C((n+k)[0])`. -/
 noncomputable def sectionPoleSheafAddHom {C S : Scheme.{u}} (π : C ⟶ S)
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
@@ -3737,5 +3846,50 @@ theorem sectionPoleSheafPower_isInvertible {C S : Scheme.{u}} {π : C ⟶ S}
       exact isInvertible_of_iso
         (ih.tensorObj (sectionPoleSheaf_isInvertible hsm z hz))
         (monoidalTensorObjIso _ _)
+
+/-- Each successive inclusion `𝒪_C(n[0]) → 𝒪_C((n+1)[0])` is a monomorphism. -/
+theorem sectionPoleSheafSuccHom_mono
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    Mono (sectionPoleSheafSuccHom π z hz n) := by
+  obtain ⟨ι, U, hU, htriv⟩ :=
+    sectionPoleSheafPower_isInvertible hsm z hz n
+  apply sheafOfModules_mono_of_mono_over_iSup_eq_top
+    (sectionPoleSheafSuccHom π z hz n) U hU
+  intro i
+  obtain ⟨e⟩ := htriv i
+  exact sectionPoleSheafSuccHom_over_mono_of_trivialization
+    hsm z hz n (U i) e
+
+/-- Every finite composite in the pole filtration is a monomorphism. -/
+theorem sectionPoleSheafAddHom_mono
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    ∀ k : ℕ, Mono (sectionPoleSheafAddHom π z hz n k)
+  | 0 => by
+      dsimp only [sectionPoleSheafAddHom]
+      infer_instance
+  | k + 1 => by
+      letI : Mono (sectionPoleSheafAddHom π z hz n k) :=
+        sectionPoleSheafAddHom_mono hsm z hz n k
+      letI : Mono (sectionPoleSheafSuccHom π z hz (n + k)) :=
+        sectionPoleSheafSuccHom_mono hsm z hz (n + k)
+      dsimp only [sectionPoleSheafAddHom]
+      infer_instance
+
+/-- For `n ≤ m`, the canonical pole-filtration map
+`𝒪_C(n[0]) → 𝒪_C(m[0])` is a monomorphism. -/
+theorem sectionPoleSheafLEHom_mono
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    {n m : ℕ} (h : n ≤ m) :
+    Mono (sectionPoleSheafLEHom π z hz h) := by
+  letI : Mono (sectionPoleSheafAddHom π z hz n (m - n)) :=
+    sectionPoleSheafAddHom_mono hsm z hz n (m - n)
+  dsimp only [sectionPoleSheafLEHom]
+  infer_instance
 
 end ModularCurves
