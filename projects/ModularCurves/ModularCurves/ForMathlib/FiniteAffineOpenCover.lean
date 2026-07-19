@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
+import Mathlib.AlgebraicGeometry.Noetherian
 import ModularCurves.ForMathlib.MinimalPrimeBasicOpen
 
 /-!
@@ -65,6 +66,17 @@ theorem Scheme.exists_finite_affine_openCover_dense_iInf
   have hclosure := closure_mono hsub
   rw [genericPoints.closure] at hclosure
   exact hclosure (Set.mem_univ x)
+
+/-- A Noetherian scheme admits a finite affine open cover whose common intersection is dense. -/
+theorem Scheme.exists_finite_affine_openCover_dense_iInf_of_isNoetherian
+    (X : Scheme.{u}) [AlgebraicGeometry.IsNoetherian X] :
+    ∃ (ι : Type u) (_ : Finite ι) (U : ι → X.Opens),
+      IsOpenCover U ∧ (∀ i, IsAffineOpen (U i)) ∧
+        Dense ((⨅ i, U i : X.Opens) : Set X) := by
+  letI : Finite (genericPoints X) :=
+    (genericPoints.finite
+      (finite_irreducibleComponents_of_isNoetherian (X := X))).to_subtype
+  exact X.exists_finite_affine_openCover_dense_iInf
 
 /-- A proper scheme over an affine base has a finite affine open cover whose every
 nonempty finite intersection is affine. -/
