@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
+import Mathlib.AlgebraicGeometry.Noetherian
 import ModularCurves.ForMathlib.FiniteAffineOpenCover
 import ModularCurves.ForMathlib.FiniteIntersectionGlueComparison
 import ModularCurves.ForMathlib.FinitePresentationSchemeBaseChange
@@ -58,6 +59,41 @@ theorem Algebra.SpreadData.FunctorModel.quasiCompact_affineIntersectionToSpec
     QuasiCompact
       (Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopen hpush) :=
   Scheme.GlueData.quasiCompact_affineIntersectionToSpec M.toFunctor hopen hpush
+
+/-- A finite affine-intersection model over a Noetherian stage has Noetherian glued source. -/
+theorem Algebra.SpreadData.FunctorModel.isNoetherian_affineIntersectionGlued
+    {R A : Type u} [CommRing R] [CommRing A]
+    {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+    {H : Algebra.IsFilteredAlgColimit R 𝒮 t A uA}
+    {F : Finset J ⥤ CommAlgCat.{u} A} [Finite J]
+    (M : Algebra.SpreadData.FunctorModel F H)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor)
+    [IsNoetherianRing (𝒮 M.stage)] :
+    IsNoetherian
+      (Scheme.GlueData.ofAffineIntersectionFunctor M.toFunctor hopen hpush).glued := by
+  let p := Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopen hpush
+  letI : LocallyOfFinitePresentation p :=
+    _root_.AlgebraicGeometry.Algebra.SpreadData.FunctorModel.locallyOfFinitePresentation_affineIntersectionToSpec
+      M hopen hpush
+  letI : LocallyOfFiniteType p := inferInstance
+  letI : QuasiCompact p :=
+    _root_.AlgebraicGeometry.Algebra.SpreadData.FunctorModel.quasiCompact_affineIntersectionToSpec
+      M hopen hpush
+  letI : IsLocallyNoetherian (Spec (CommRingCat.of (𝒮 M.stage))) := inferInstance
+  let hlocal : IsLocallyNoetherian
+      (Scheme.GlueData.ofAffineIntersectionFunctor M.toFunctor hopen hpush).glued :=
+    LocallyOfFiniteType.isLocallyNoetherian p
+  letI : CompactSpace (Spec (CommRingCat.of (𝒮 M.stage))) := inferInstance
+  let hcompact : CompactSpace
+      (Scheme.GlueData.ofAffineIntersectionFunctor M.toFunctor hopen hpush).glued :=
+    QuasiCompact.compactSpace_of_compactSpace p
+  letI := hlocal
+  letI := hcompact
+  exact ⟨⟩
 
 /-- Every nonempty finite intersection in an affine open cover of the source of a proper
 morphism to an affine scheme is affine. -/
