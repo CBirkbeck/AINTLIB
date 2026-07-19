@@ -66,6 +66,23 @@ theorem ModuliProblem.Rigid.baseChange {P : ModuliProblem R} (hP : P.Rigid) :
   have h1 := congrArg Iso.hom hrefl
   simpa using h1
 
+/-- **Noetherian-local rigidity transfers forward under base change**: if `P` is
+`RigidNoeth`, so is `P.baseChange ρ`. `restrictScalars` leaves the base scheme unchanged
+(`restrictScalars_obj_base`), so the `IsLocallyNoetherian` hypothesis carries through to
+the `P`-side rigidity call. This is the `:324` recollement's transfer of the engine's
+rigidity input to the `D(2)` / `D(3)` loci. -/
+theorem ModuliProblem.RigidNoeth.baseChange {P : ModuliProblem R} (hP : P.RigidNoeth) :
+    (P.baseChange ρ).RigidNoeth := by
+  intro X hXnoeth e hb hne a hfix
+  refine hP ((EllObj.restrictScalars ρ).obj X) hXnoeth
+    ((EllObj.restrictScalars ρ).mapIso e) hb ?_ a hfix
+  intro hrefl
+  apply hne
+  apply Iso.ext
+  apply (EllObj.restrictScalars ρ).map_injective
+  have h1 := congrArg Iso.hom hrefl
+  simpa using h1
+
 
 /-- **Relative representability transfers under base change**: the same representing datum works
 (the `Ell/R'`-pullbacks agree, over `R`, with the `Ell/R`-pullbacks — `rfl`). -/
