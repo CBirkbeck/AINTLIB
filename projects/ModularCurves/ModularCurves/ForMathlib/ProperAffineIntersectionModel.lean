@@ -23,6 +23,15 @@ noncomputable section
 
 variable {X S : Scheme.{u}} {J : Type u}
 
+/-- A separated, locally finite-type morphism is proper if it has a surjective
+cover whose composite to the target is proper. -/
+lemma IsProper.of_comp_surjective {Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
+    [IsProper (f ≫ g)] [Surjective f] [IsSeparated g] [LocallyOfFiniteType g] :
+    IsProper g where
+  toIsSeparated := inferInstance
+  toUniversallyClosed := UniversallyClosed.of_comp_surjective f g
+  toLocallyOfFiniteType := inferInstance
+
 /-- The glued structural morphism attached to a spread affine-intersection functor is
 locally of finite presentation over its stage ring. -/
 theorem Algebra.SpreadData.FunctorModel.locallyOfFinitePresentation_affineIntersectionToSpec
