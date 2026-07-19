@@ -617,155 +617,6 @@ theorem smoothOfRelativeDimension_of_locallyWeierstrass {S E' : Scheme.{u}} {p :
       MorphismProperty.cancel_right_of_respectsIso (P := @SmoothOfRelativeDimension 1)]
     exact projModel_smooth (W s)
 
-/-! #### The `[a5]` reduction: splitting off the section-pair gap
-
-`locallyWeierstrass_quotientπ` below quantifies over an *arbitrary* pair `(π', zero')` with
-`zero' ≫ π' = 𝟙`; it does not carry the compatibilities `hπ'c`/`hzero'c` tying the pair to the
-descended structure maps. The board (v10.94, *Interface decisions*) records the owed statement
-fix: for a wild pair the statement fails (see the counterexample on
-`locallyWeierstrass_quotientπ_transfer`). The two private lemmas below split the leaf along
-exactly that line: `locallyWeierstrass_quotientπ_of_compat` is the true, board-owned `[a5]`
-content — the Phase-A theorem `locallyWeierstrass_quotientπ_of_globalModel` at the bottom of
-this file proves it whenever the model is global — while `_transfer` quarantines the falsity of
-the unconstrained statement in one place. The empty-base case and the assembly are proven. -/
-
-/-- **([a5-compat], the true half — OPEN leaf, board-owned)** `locallyWeierstrass_quotientπ`
-for a section pair carrying the descent compatibilities `hπ'c`/`hzero'c` of
-`exists_quotient_π_zero` — the shape the board's owed `[a5]` statement fix arrives at.
-
-Closure routes, in order of availability:
-* **global model**: with a compatible global model (`W₀`, `φ : C.E ≅ projModel W₀`, `hW₀`,
-  `hπφ`, `hzeroφ`) this is *exactly* `locallyWeierstrass_quotientπ_of_globalModel` (PROVEN,
-  Phase A). That block is declared *below* this point, so closing this leaf in place means
-  hoisting the Phase-A block above the `[a5]` section (or moving this section below it).
-* **general (`C.localModel` only)** — the parked a5-P-loc arc: at a prime `s` of
-  `Aᴳ = Γ(X,⊤)ᴳ` the fibre of `X → X/G` is a single finite `G`-orbit; over the orbit's
-  semilocalisation the finitely many `C.localModel` charts glue to one model (the
-  chart-difference `VariableChange` Čech `1`-cocycle splits: the unit part by the semilocal
-  unit argument of `exists_unit_smul_eq_of_isLocalRing`, the additive part by
-  `exists_sub_smul_eq_of_isCocycle`); the glued model and the `G`-cocycle spread to a
-  `G`-stable basic open `D(a)`, `a ∉ s`, and the Phase-A engine (`lw_chart_at` is abstract in
-  the base ring) runs over `A_a` verbatim, landing the `LocallyWeierstrass` chart at `s`.
-
-Note that `hVtop` trivialises the **base** atlas `V` only; it does not make `C.localModel`'s
-charts global — a global model is genuinely obstructed (the class of `ω` in `Pic Γ(X,⊤)`),
-which is why the general route must localise before globalising the model. -/
-private theorem locallyWeierstrass_quotientπ_of_compat [Finite G] [IsAffine X]
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
-    (hact : IsCurveAction σ C σE)
-    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
-    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
-    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
-    (hX : Nonempty ↥X)
-    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
-    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
-    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa))
-    (hπ'c : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem)
-    (hzero'c : σ.quotientπ V hVs hVa hVmem ≫ zero'
-      = C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem) :
-    LocallyWeierstrass π' zero' hz := by
-  sorry
-
-/-- **([a5], the descended Weierstrass model — LEAF; STATEMENT FIX EXECUTED v10.324-FIN)** The
-quotient curve `E/G ⟶ X/G` admits a Zariski-local Weierstrass model, for the section pair
-COMPATIBLE with the quotient charts (`hπ'c`/`hzero'c` — the v10.94 owed interface fix; the
-unconstrained form was FALSE, see the deleted `[a5-pair]` counterexample in the git history:
-twist the canonical pair by a split endomorphism of `Spec ℚ[x₁,x₂,…]`).
-
-Plan (terminating in a proof; the one genuinely new-math leaf of route (a)): the universal curve
-upstairs has a global model `E = projModel W` (in the bootstrap `E` is pulled back from T-E15's
-explicit `ℰ₃`), and each `γ ∈ G` acts on it by a `VariableChange` `C_γ = (u_γ, r_γ, s_γ, t_γ)`
-(**T-W7.1b** = `pointedIso_exists_variableChange`, now DONE). Splitting the cocycle:
-* the additive part `(r, s, t) ∈ Z¹(G, A⁺)` is a coboundary by `exists_sub_smul_eq_of_isCocycle`
-  (additive Hilbert 90, PROVEN);
-* the multiplicative part `u ∈ Z¹(G, Aˣ)` is **Zariski-locally** a coboundary by
-  `exists_unit_smul_eq_of_isLocalRing` ([A711-DESC], PROVEN).
-So over a Zariski neighbourhood of each prime of `Aᴳ`, a variable change makes `W` `G`-invariant,
-and the invariant model descends to give the local Weierstrass model of `E/G`. -/
-theorem locallyWeierstrass_quotientπ [Finite G] [IsAffine X]
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
-    (hact : IsCurveAction σ C σE)
-    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
-    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
-    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
-    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
-    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
-    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa))
-    (hπ'c : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem)
-    (hzero'c : σ.quotientπ V hVs hVa hVmem ≫ zero'
-      = C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem) :
-    LocallyWeierstrass π' zero' hz := by
-  rcases isEmpty_or_nonempty (↥X) with hX | hX
-  · intro s
-    obtain ⟨x, -⟩ := σ.quotientπ_surjective V hVs hVa hVmem s
-    exact (hX.false x).elim
-  · exact locallyWeierstrass_quotientπ_of_compat hact V hVs hVa hVmem hVtop
-      VE hVEs hVEa hVEmem hfree hX π' zero' hz hπ'c hzero'c
-
-/-- **([a3]–[a5], the route-(a) descent theorem — ASSEMBLED)** Let `G` act freely on an affine
-scheme `X`, and let the action lift to a geometric elliptic curve `C/X` (an `IsCurveAction`) with
-an orbit-in-affine-open chart datum. Then the quotient `E/G` carries a geometric elliptic curve
-structure over `X/G`, and the square
-
-    E ──────▶ E/G
-    │           │
-    π           π'
-    ▼           ▼
-    X ──────▶ X/G
-
-is **cartesian** and compatible with the zero sections — precisely an `Ell/R`-morphism, which is
-what the KM engine consumes.
-
-**This assembly is sorry-free.** It consumes exactly:
-* `exists_quotient_π_zero` (PROVEN) — the descended `π'`, `zero'` and `zero' ≫ π' = 𝟙`;
-* `locallyWeierstrass_quotientπ` (leaf `[a5]`, gated on nothing — T-W7.1b is DONE) — the local
-  Weierstrass model of the quotient curve;
-* `isProper_of_locallyWeierstrass` (PROVEN) and `smoothOfRelativeDimension_of_locallyWeierstrass`
-  (leaf, waits on T-A3) — `proper` and `smooth` from that model;
-* `isPullback_quotientπ` (PROVEN modulo the affine chart square `isPullback_chart`) — the
-  cartesian square.
-
-So the KM 4.7 ⇐-engine's geometric core is **structurally complete**: the two residual sorries are
-the isolated affine computations `isPullback_chart` (Galois descent of `Γ(W)`) and
-`locallyWeierstrass_quotientπ`/`smoothOfRelativeDimension_of_locallyWeierstrass` ([a5] + T-A3). -/
-theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
-    (hact : IsCurveAction σ C σE)
-    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
-      t ≫ σ.hom γ = t → IsEmpty T)
-    (horbit : ∀ e : C.E, ∃ U : (C.E).Opens, IsAffineOpen U ∧
-      ∀ γ : G, (σE.hom γ).base e ∈ U) :
-    ∃ (C' : EllipticCurveGeom (σ.quotient V hVs hVa)) (q : C.E ⟶ C'.E),
-      IsPullback q C.π C'.π (σ.quotientπ V hVs hVa hVmem) ∧
-        C.zero ≫ q = σ.quotientπ V hVs hVa hVmem ≫ C'.zero := by
-  -- the `G`-stable affine atlas of `E` (from the orbit chart datum)
-  choose VE hVEs hVEa hVEmem using
-    fun e => exists_isStableOpen_isAffineOpen_of_orbit horbit e
-  -- descend `π` and the zero section
-  obtain ⟨π', zero', hπ', hzero', hzπ'⟩ :=
-    exists_quotient_π_zero hact V hVs hVa hVmem VE hVEs hVEa hVEmem
-  -- the descended local Weierstrass model, and proper/smooth from it
-  have hlw := locallyWeierstrass_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree
-    π' zero' hzπ' hπ' hzero'
-  haveI hproper : IsProper π' := isProper_of_locallyWeierstrass hlw
-  haveI hsmooth : SmoothOfRelativeDimension 1 π' :=
-    smoothOfRelativeDimension_of_locallyWeierstrass hlw
-  -- assemble the geometric elliptic curve on `E/G`
-  refine ⟨{ E := σE.quotient VE hVEs hVEa, π := π', zero := zero', zero_π := hzπ'
-            smooth := hsmooth, proper := hproper, localModel := hlw },
-    σE.quotientπ VE hVEs hVEa hVEmem, ?_, ?_⟩
-  · exact isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree π' hπ'
-  · exact hzero'.symm
-
 end RouteA
 
 /-! ### The seam: KM's action *is* a `RouteA.IsCurveAction` -/
@@ -1725,6 +1576,475 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
     rw [reassoc_of% hbmapinv, ← reassoc_of% hζpQ, hcmp, hfdef, reassoc_of% hζθ,
       reassoc_of% hzψ, hzν]
 
+set_option maxHeartbeats 800000 in
+/-- **([a5-W6-loc], the per-point chart from a LOCALIZED model — ABSTRACT)** The `lw_chart_at`
+engine with the global-model inputs (`W₀A`, `φA`, `act`, `Cvc`, `hΨ`) replaced by their
+restrictions to the invariant basic localization `A_a`, `a ∉ s`: a Weierstrass model
+`W₀R / A_a` of the restricted total space (`ρR`/`hρsq`/`hρzero` — `projModel W₀R` presented as
+the pullback of `EE` along `Spec A_a ⟶ Spec A`), the `VariableChange` cocycle `CvcR / A_a`
+presenting the geometric action through `ρR` (`hCvcR`/`hρact`), and the descended curve
+`W₁ / (Aᴳ)_a` with the coboundary identity (`hW₁`/`hcob`). This is the engine of the general
+(`C.localModel`-only) route `[a5-P-loc]`, where a *global* model upstairs is obstructed by the
+class of `ω` in `Pic A`. The geometric action is carried by the abstract family `actE` (no
+`φ`-conjugation — instantiated with `σE.hom` directly). The proof is `lw_chart_at`'s verbatim,
+with Step 3a (the base-change presentation of the restricted total space) replaced by the given
+`hρsq`, and `exists_actLoc` inlined one localization level down (its base-change leg (ii)
+becomes the hypothesis `hρact`). -/
+theorem lw_chart_at_of_localModel {A : Type u} [CommRing A] [MulSemiringAction G A]
+    [Fintype G] [DecidableEq G]
+    -- the descended family over Spec Aᴳ
+    {Qe : Scheme.{u}}
+    (π'' : Qe ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)))
+    (zero'' : Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)) ⟶ Qe)
+    (hz'' : zero'' ≫ π'' = 𝟙 _)
+    -- the total space, its cover of the quotient, and the geometric action
+    {EE : Scheme.{u}} (qE : EE ⟶ Qe) (πE : EE ⟶ Spec (CommRingCat.of A))
+    (zeroE : Spec (CommRingCat.of A) ⟶ EE)
+    (hsq : IsPullback qE πE π'' (invariantsπ G A ℤ))
+    (hzeroSq : invariantsπ G A ℤ ≫ zero'' = zeroE ≫ qE)
+    (actE : G → (EE ⟶ EE)) (hEact : ∀ g, actE g ≫ qE = qE)
+    -- the restricted morphism-descent and epi property of the cover
+    (hlift : ∀ {Q' Y : Scheme.{u}} (j : Q' ⟶ Qe) [IsOpenImmersion j]
+      (f : pullback qE j ⟶ Y),
+      (∀ g, pullback.map qE j qE j (actE g) (𝟙 Q') (𝟙 _)
+          (by rw [Category.comp_id, hEact g]) (by simp) ≫ f = f) →
+      ∃ q : Q' ⟶ Y, pullback.snd qE j ≫ q = f)
+    (hepi : ∀ {Q' : Scheme.{u}} (j : Q' ⟶ Qe) [IsOpenImmersion j],
+      Epi (pullback.snd qE j))
+    -- the fppf data of the invariants cover
+    (hfsur : Surjective (invariantsπ G A ℤ)) (hffl : Flat (invariantsπ G A ℤ))
+    (hfqc : QuasiCompact (invariantsπ G A ℤ))
+    -- the point, and the localized model/cocycle/descent package at an invariant `a ∉ s`
+    (s : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))))
+    (a : FixedPoints.subring A G) (hap : a ∉ s.asIdeal)
+    (W₀R : WeierstrassCurve (Localization.Away ((a : A)))) (hW₀R : W₀R.IsElliptic)
+    (ρR : projModel W₀R ⟶ EE)
+    (hρsq : IsPullback (projModelπ W₀R) ρR
+      (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A)))))) πE)
+    (hρzero : projModelZero W₀R ≫ ρR
+      = Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A))))) ≫ zeroE)
+    (CvcR : G → VariableChange (Localization.Away ((a : A))))
+    (hCvcR : ∀ g, CvcR g
+      • (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)) = W₀R)
+    (hρact : ∀ g, (eqToHom (congrArg projModel (hCvcR g).symm)
+        ≫ (projModelVCIso (CvcR g)
+            (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))).hom
+        ≫ projModelBaseChange (MulSemiringAction.awayHom (fun g' : G => a.2 g') g) W₀R)
+        ≫ ρR = ρR ≫ actE g)
+    (W₁ : WeierstrassCurve (Localization.Away a))
+    (E : VariableChange (Localization.Away ((a : A))))
+    (hW₁ : W₁.map (fixedAwayMap a) = E⁻¹ • W₀R)
+    (hcob : ∀ g : G, CvcR g
+      = E * (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹) :
+    ∃ (U : (Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))).affineOpens)
+      (_ : s ∈ U.1) (W : WeierstrassCurve ↑Γ(Spec (CommRingCat.of
+        (FixedPoints.subalgebra ℤ A G)), U.1)),
+      W.IsElliptic ∧
+      ∃ e : pullback π'' U.1.ι ≅ projModel W,
+        e.hom ≫ projModelπ W = pullback.snd π'' U.1.ι ≫ U.2.isoSpec.hom ∧
+        (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+            (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ e.hom =
+          projModelZero W := by
+  classical
+  -- ## Step 1: the chart `U = D(a)` and its ring of sections
+  let iA0 := CommRingCat.ofHom
+    (algebraMap (FixedPoints.subring A G) (Localization.Away a))
+  set iA : Spec (CommRingCat.of (Localization.Away a))
+      ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)) :=
+    Spec.map iA0 with hiA
+  haveI : IsOpenImmersion iA := by
+    rw [hiA]
+    exact IsOpenImmersion.of_isLocalization a
+  have hrange : iA.opensRange = (PrimeSpectrum.basicOpen a :
+      (Spec (CommRingCat.of (FixedPoints.subring A G))).Opens) := by
+    ext1
+    exact PrimeSpectrum.localization_away_comap_range (Localization.Away a) a
+  set U : (Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))).affineOpens :=
+    ⟨iA.opensRange, isAffineOpen_opensRange iA⟩ with hUdef
+  have hsU : s ∈ U.1 := by
+    show s ∈ iA.opensRange
+    rw [hrange]
+    exact (PrimeSpectrum.mem_basicOpen _ _).mpr hap
+  -- the scheme-level chart iso `Spec (Aᴳ)_a ≅ Spec Γ(Spec Aᴳ, U)` through `fromSpec`
+  have hfsRange : Set.range ⇑iA.base = Set.range ⇑U.2.fromSpec.base := by
+    rw [U.2.range_fromSpec]; rfl
+  let kF : Spec (CommRingCat.of (Localization.Away a))
+      ≅ Spec Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    IsOpenImmersion.isoOfRangeEq iA U.2.fromSpec hfsRange
+  have hkF : kF.inv ≫ iA = U.2.fromSpec :=
+    IsOpenImmersion.isoOfRangeEq_inv_fac iA U.2.fromSpec hfsRange
+  -- the ring identification, through `Spec`-full-faithfulness
+  let qp : CommRingCat.of (Localization.Away a)
+      ≅ Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    { hom := Spec.preimage kF.inv
+      inv := Spec.preimage kF.hom
+      hom_inv_id := by
+        apply Spec.map_injective
+        rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, Spec.map_id, Iso.hom_inv_id]
+      inv_hom_id := by
+        apply Spec.map_injective
+        rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, Spec.map_id, Iso.inv_hom_id] }
+  set req : Localization.Away a ≃+*
+      ↑Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    qp.commRingCatIsoToRingEquiv with hreq
+  have hsR : Spec.map (CommRingCat.ofHom req.toRingHom) = kF.inv := by
+    rw [hreq]
+    show Spec.map (CommRingCat.ofHom qp.hom.hom) = kF.inv
+    rw [CommRingCat.ofHom_hom]
+    exact Spec.map_preimage kF.inv
+  have hBridge : Spec.map (CommRingCat.ofHom req.toRingHom) ≫ iA = U.2.fromSpec := by
+    rw [hsR, hkF]
+  -- the descended model over the chart ring
+  set W : WeierstrassCurve ↑Γ(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G)), U.1) :=
+    W₁.map req.toRingHom with hWdef
+  -- ## Step 2: ellipticity
+  haveI hW₁ell : W₁.IsElliptic := by
+    refine isElliptic_of_map_fixedAwayMap a ?_
+    rw [hW₁]
+    haveI := hW₀R
+    infer_instance
+  haveI hWell : W.IsElliptic := by
+    rw [hWdef]
+    infer_instance
+  refine ⟨U, hsU, W, hWell, ?_⟩
+  -- ## Step 3a: the chart square over `Spec A`
+  set iAA := Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A)))))
+    with hiAA
+  haveI : IsOpenImmersion iAA := by
+    rw [hiAA]
+    exact IsOpenImmersion.of_isLocalization ((a : A))
+  have hrangeAA : iAA.opensRange = (PrimeSpectrum.basicOpen ((a : A)) :
+      (Spec (CommRingCat.of A)).Opens) := by
+    ext1
+    exact PrimeSpectrum.localization_away_comap_range (Localization.Away ((a : A))) ((a : A))
+  -- the preimage of the chart is the basic open `D((a : A))`
+  have hpreU : invariantsπ G A ℤ ⁻¹ᵁ U.1 = iAA.opensRange := by
+    rw [hrangeAA]
+    ext x
+    show invariantsπ G A ℤ x ∈ iA.opensRange ↔ x ∈ PrimeSpectrum.basicOpen ((a : A))
+    rw [hrange]
+    exact Iff.rfl
+  -- the restricted invariants map `κ` and the chart square
+  set specFam := Spec.map (CommRingCat.ofHom (fixedAwayMap a)) with hspecFam
+  have hRingSq : iA0 ≫ CommRingCat.ofHom (fixedAwayMap a)
+      = CommRingCat.ofHom (algebraMap (FixedPoints.subring A G) A)
+        ≫ CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A)))) := by
+    ext v
+    show fixedAwayMap a (algebraMap _ _ v)
+      = algebraMap A (Localization.Away ((a : A))) (algebraMap _ A v)
+    rw [fixedAwayMap_algebraMap]
+    rfl
+  have hSpecSq : specFam ≫ iA = iAA ≫ invariantsπ G A ℤ := by
+    have h1 : specFam ≫ iA = Spec.map (iA0 ≫ CommRingCat.ofHom (fixedAwayMap a)) :=
+      (Spec.map_comp _ _).symm
+    have h2 : iAA ≫ invariantsπ G A ℤ
+        = Spec.map (CommRingCat.ofHom (algebraMap (FixedPoints.subring A G) A)
+          ≫ CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A))))) :=
+      (Spec.map_comp _ _).symm
+    rw [h1, h2, hRingSq]
+  -- `κ` : the restriction of the invariants cover to the chart
+  have hκsub : Set.range ⇑(iAA ≫ invariantsπ G A ℤ).base ⊆ Set.range ⇑U.1.ι.base := by
+    rw [Scheme.Opens.range_ι]
+    rintro y ⟨z, rfl⟩
+    have hz : iAA z ∈ invariantsπ G A ℤ ⁻¹ᵁ U.1 := by
+      rw [hpreU]
+      exact ⟨z, rfl⟩
+    exact hz
+  set κ : Spec (CommRingCat.of (Localization.Away ((a : A)))) ⟶ U.1.toScheme :=
+    IsOpenImmersion.lift U.1.ι (iAA ≫ invariantsπ G A ℤ) hκsub with hκdef
+  have hκι : κ ≫ U.1.ι = iAA ≫ invariantsπ G A ℤ := IsOpenImmersion.lift_fac ..
+  have hAsq : IsPullback iAA κ (invariantsπ G A ℤ) U.1.ι := by
+    refine (IsOpenImmersion.isPullback κ iAA U.1.ι (invariantsπ G A ℤ) ?_ ?_).flip
+    · rw [hκι]
+    · rw [Scheme.Opens.opensRange_ι]
+      exact hpreU
+  haveI hκsur : Surjective κ := MorphismProperty.of_isPullback (P := @Surjective) hAsq hfsur
+  haveI hκfl : Flat κ := MorphismProperty.of_isPullback (P := @Flat) hAsq hffl
+  haveI hκqc : QuasiCompact κ := MorphismProperty.of_isPullback (P := @QuasiCompact) hAsq hfqc
+  -- the chart bridge: `κ` through `isoSpec` is the `Spec`-side composite
+  have hkFhom : kF.hom ≫ U.2.fromSpec = iA :=
+    IsOpenImmersion.isoOfRangeEq_hom_fac iA U.2.fromSpec hfsRange
+  have hκiso : κ ≫ U.2.isoSpec.hom = specFam ≫ kF.hom := by
+    rw [← cancel_mono U.2.fromSpec, Category.assoc, Category.assoc,
+      IsAffineOpen.isoSpec_hom_fromSpec, hκι, hkFhom, hSpecSq]
+  -- ## Step 3b: the model-side squares
+  letI : Algebra (Localization.Away a) (Localization.Away ((a : A))) :=
+    (fixedAwayMap a).toAlgebra
+  have halg : algebraMap (Localization.Away a) (Localization.Away ((a : A)))
+      = fixedAwayMap a := RingHom.algebraMap_toAlgebra _
+  have hW₁' : W₁.map (algebraMap (Localization.Away a) (Localization.Away ((a : A))))
+      = E⁻¹ • W₀R := by
+    rw [halg]
+    exact hW₁
+  set ψ₀ : projModel W₀R ⟶ projModel W₁ := descentComparison W₀R W₁ E hW₁' with hψ₀def
+  have hspecAlg : Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) (Localization.Away ((a : A))))) = specFam := by
+    rw [halg, hspecFam]
+  have transπ : ∀ {V V' : WeierstrassCurve (Localization.Away ((a : A)))} (h : V = V'),
+      eqToHom (congrArg projModel h) ≫ projModelπ V' = projModelπ V := by
+    rintro V V' rfl; simp
+  have hψsq : IsPullback ψ₀ (projModelπ W₀R) (projModelπ W₁) specFam := by
+    have hι₀ : IsPullback ((projModelVCIso E⁻¹ W₀R).inv
+        ≫ eqToHom (congrArg projModel hW₁'.symm)) (projModelπ W₀R)
+        (projModelπ (W₁.map (algebraMap (Localization.Away a)
+          (Localization.Away ((a : A)))))) (𝟙 _) := by
+      refine IsPullback.of_horiz_isIso ⟨?_⟩
+      rw [Category.comp_id, Category.assoc, transπ hW₁'.symm, Iso.inv_comp_eq,
+        projModelVCIso_π]
+    have hpaste := hι₀.paste_horiz (isPullback_projModelBaseChange
+      (R := Localization.Away a) (R' := Localization.Away ((a : A))) W₁)
+    rw [Category.id_comp, hspecAlg] at hpaste
+    rw [hψ₀def, descentComparison, ← Category.assoc]
+    exact hpaste
+  -- the `req`-transport square
+  haveI hsRqIso : IsIso (Spec.map (CommRingCat.ofHom req.toRingHom)) := by
+    rw [hsR]
+    infer_instance
+  have hbcW : IsPullback (projModelBaseChange req.toRingHom W₁)
+      (projModelπ W) (projModelπ W₁) kF.inv := by
+    have h := isPullback_projModelBaseChange₂ req.toRingHom W₁
+    rw [hsR] at h
+    exact h
+  haveI hbcRIso : IsIso (projModelBaseChange req.toRingHom W₁) :=
+    isIso_projModelBaseChange₂ req.toRingHom W₁
+  set ν : projModel W₁ ⟶ projModel W := inv (projModelBaseChange req.toRingHom W₁) with hνdef
+  have hνsq : IsPullback ν (projModelπ W₁) (projModelπ W) kF.hom := by
+    refine IsPullback.of_horiz_isIso ⟨?_⟩
+    rw [hνdef, ← cancel_epi (projModelBaseChange req.toRingHom W₁), IsIso.hom_inv_id_assoc,
+      ← Category.assoc, hbcW.w, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  -- the pasted comparison square over `bmap := specFam ≫ kF.hom`
+  have hψν : IsPullback (ψ₀ ≫ ν) (projModelπ W₀R) (projModelπ W) (specFam ≫ kF.hom) :=
+    hψsq.paste_horiz hνsq
+  -- ## Step 3c: the two pullback presentations of the chart-restricted total space
+  set j : pullback π'' U.1.ι ⟶ Qe := pullback.fst π'' U.1.ι with hjdef
+  haveI : IsOpenImmersion j := by
+    rw [hjdef]
+    infer_instance
+  set pU : pullback π'' U.1.ι ⟶ U.1.toScheme := pullback.snd π'' U.1.ι with hpUdef
+  set pE : pullback qE j ⟶ EE := pullback.fst qE j with hpEdef
+  set pQ : pullback qE j ⟶ pullback π'' U.1.ι := pullback.snd qE j with hpQdef
+  have hQ'sq : IsPullback j pU π'' U.1.ι := IsPullback.of_hasPullback π'' U.1.ι
+  have hPBsq : IsPullback pE pQ qE j := IsPullback.of_hasPullback qE j
+  -- the `U`-cospan presentation of `pullback qE j`
+  have hbig : IsPullback (pQ ≫ pU) pE U.1.ι (πE ≫ invariantsπ G A ℤ) := by
+    have h1 := hPBsq.flip.paste_horiz hQ'sq.flip
+    rw [hsq.w] at h1
+    exact h1
+  -- the `U`-cospan presentation of the localized model, from the given restriction square
+  have hW₀Rsq : IsPullback (projModelπ W₀R ≫ κ) ρR U.1.ι (πE ≫ invariantsπ G A ℤ) :=
+    hρsq.paste_horiz hAsq.flip
+  -- the comparison iso
+  set θ : (pullback qE j : Scheme) ≅ projModel W₀R :=
+    hbig.isoIsPullback _ _ hW₀Rsq with hθdef
+  have hθfst : θ.hom ≫ (projModelπ W₀R ≫ κ) = pQ ≫ pU :=
+    hbig.isoIsPullback_hom_fst _ _ hW₀Rsq
+  have hθsnd : θ.hom ≫ ρR = pE :=
+    hbig.isoIsPullback_hom_snd _ _ hW₀Rsq
+  -- ## Step 4: the localized action family and its invariance properties
+  -- `Spec` of the localized action fixes `κ`
+  have hκfix : ∀ g : G, Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom
+      (fun g' : G => a.2 g') g)) ≫ κ = κ := by
+    intro g
+    have hringL : CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A))))
+        ≫ CommRingCat.ofHom (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)
+        = CommRingCat.ofHom (MulSemiringAction.toRingHom G A g)
+          ≫ CommRingCat.ofHom (algebraMap A (Localization.Away ((a : A)))) := by
+      ext r
+      exact MulSemiringAction.awayHom_algebraMap (fun g' : G => a.2 g') g r
+    have hL : Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom
+        (fun g' : G => a.2 g') g)) ≫ iAA = iAA ≫ specSMul g := by
+      rw [hiAA, ← Spec.map_comp, hringL, Spec.map_comp]
+      rfl
+    rw [← cancel_mono U.1.ι, Category.assoc, hκι, ← Category.assoc, hL, Category.assoc,
+      specSMul_invariantsπ]
+  -- the localized action family (`exists_actLoc` inlined, one localization level down)
+  have hfixA : ∀ g' : G, g' • ((a : A)) = (a : A) := fun g' => a.2 g'
+  letI := MulSemiringAction.away hfixA
+  set actR : G → (projModel W₀R ⟶ projModel W₀R) := fun g =>
+    eqToHom (congrArg projModel (hCvcR g).symm)
+      ≫ (projModelVCIso (CvcR g)
+          (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))).hom
+      ≫ projModelBaseChange (MulSemiringAction.awayHom (fun g' : G => a.2 g') g) W₀R
+    with hactRdef
+  have transπ' : ∀ {V V' : WeierstrassCurve (Localization.Away ((a : A)))} (h : V = V'),
+      eqToHom (congrArg projModel h) ≫ projModelπ V' = projModelπ V := by
+    rintro V V' rfl; simp
+  -- (π-leg) `actR g` is over `Spec (awayHom g)`
+  have hactπ : ∀ g : G, actR g ≫ projModelπ W₀R
+      = projModelπ W₀R ≫ Spec.map (CommRingCat.ofHom
+          (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)) := by
+    intro g
+    show (eqToHom (congrArg projModel (hCvcR g).symm)
+        ≫ (projModelVCIso (CvcR g)
+            (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))).hom
+        ≫ projModelBaseChange (MulSemiringAction.awayHom (fun g' : G => a.2 g') g) W₀R)
+        ≫ projModelπ W₀R = _
+    simp only [Category.assoc]
+    rw [projModelBaseChange_π,
+      reassoc_of% (projModelVCIso_π (CvcR g)
+        (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))),
+      reassoc_of% (transπ' (hCvcR g).symm)]
+  -- (κ-leg) `actR g` fixes the `κ`-composite
+  have hactπκ : ∀ g : G, actR g ≫ (projModelπ W₀R ≫ κ) = projModelπ W₀R ≫ κ := by
+    intro g
+    rw [← Category.assoc, hactπ g, Category.assoc, hκfix g]
+  -- (ρ-leg) `actR g` intertwines `ρR` with the geometric action — the hypothesis
+  have hactρ : ∀ g : G, actR g ≫ ρR = ρR ≫ actE g := fun g => hρact g
+  -- (comparison leg) `actR g` coequalizes into the descent comparison
+  have hR₀ : ∀ (g : G) (r₀ : Localization.Away a),
+      g • (algebraMap (Localization.Away a) (Localization.Away ((a : A))) r₀)
+        = algebraMap (Localization.Away a) (Localization.Away ((a : A))) r₀ := by
+    intro g r₀
+    rw [halg]
+    show MulSemiringAction.awayHom hfixA g (fixedAwayMap a r₀) = fixedAwayMap a r₀
+    exact congrArg
+      (fun f : Localization.Away a →+* Localization.Away ((a : A)) => f r₀)
+      (awayHom_comp_fixedAwayMap a g)
+  have hE : ∀ g : G, CvcR g = E * (g • E)⁻¹ := by
+    intro g
+    have h2 : E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g) = g • E :=
+      variableChange_map_awayHom (fun g' : G => a.2 g') g E
+    rw [hcob g, h2]
+  have hactψ : ∀ g : G, actR g ≫ ψ₀ = ψ₀ := by
+    intro g
+    refine descentComparison_invariant W₀R W₁ E hW₁' CvcR (fun g' => hCvcR g') hE hR₀
+      actR (fun g' => ?_) g
+    show (projModelVCIso (CvcR g')
+        (W₀R.map (MulSemiringAction.awayHom (fun g'' : G => a.2 g'') g'))).hom
+      ≫ projModelBaseChange (MulSemiringAction.awayHom (fun g'' : G => a.2 g'') g') W₀R
+      = eqToHom (congrArg projModel (hCvcR g')) ≫ actR g'
+    rw [hactRdef]
+    simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  -- the comparison morphism on the chart-restricted cover
+  set f : (pullback qE j : Scheme.{u}) ⟶ projModel W := θ.hom ≫ ψ₀ ≫ ν with hfdef
+  -- invariance of `f`, for an abstract endomorphism with the two projection properties
+  have hMkey : ∀ (g : G) (M : (pullback qE j : Scheme.{u}) ⟶ pullback qE j),
+      M ≫ pQ = pQ → M ≫ pE = pE ≫ actE g → M ≫ f = f := by
+    intro g M hMpQ hMpE
+    have hMθ : M ≫ θ.hom = θ.hom ≫ actR g := by
+      refine hW₀Rsq.hom_ext ?_ ?_
+      · simp only [Category.assoc]
+        rw [hactπκ g, hθfst, ← Category.assoc, hMpQ]
+      · simp only [Category.assoc]
+        rw [hactρ g, reassoc_of% hθsnd, hθsnd, hMpE]
+    rw [hfdef, ← Category.assoc, hMθ, Category.assoc, reassoc_of% (hactψ g)]
+  -- ## the descended morphism
+  obtain ⟨cmp, hcmp₀⟩ := hlift j f (fun g => hMkey g _
+    (by rw [hpQdef]; simp only [pullback.lift_snd, Category.comp_id])
+    (by rw [hpEdef]; simp only [pullback.lift_fst]))
+  have hcmp : pQ ≫ cmp = f := hcmp₀
+  haveI hpQepi : Epi pQ := by
+    rw [hpQdef]
+    exact hepi j
+  -- the `π`-leg of the comparison
+  have hcmpπ : cmp ≫ projModelπ W = pU ≫ U.2.isoSpec.hom := by
+    rw [← cancel_epi pQ, ← Category.assoc, hcmp, hfdef, Category.assoc, Category.assoc,
+      hνsq.w, reassoc_of% hψsq.w, ← reassoc_of% hθfst, hκiso]
+  -- ## Step 5: `cmp` is an isomorphism (fppf descent of `θ`)
+  have hPBR : IsPullback (θ.hom ≫ projModelπ W₀R) pQ κ pU := by
+    refine IsPullback.of_right ?_ ?_ hAsq
+    · have h1 := hPBsq.paste_horiz hsq.flip
+      rw [hQ'sq.w] at h1
+      have hfst : (θ.hom ≫ projModelπ W₀R) ≫ iAA = pE ≫ πE := by
+        rw [Category.assoc, hρsq.w, ← Category.assoc, hθsnd]
+      rw [← hfst] at h1
+      exact h1
+    · rw [Category.assoc]
+      exact hθfst
+  have hs₅ : IsPullback (θ.hom ≫ projModelπ W₀R) pQ (specFam ≫ kF.hom)
+      (pU ≫ U.2.isoSpec.hom) := by
+    have h2 : IsPullback pU (𝟙 (pullback π'' U.1.ι : Scheme.{u})) U.2.isoSpec.hom
+        (pU ≫ U.2.isoSpec.hom) := by
+      refine IsPullback.of_vert_isIso ⟨?_⟩
+      rw [Category.id_comp]
+    have h3 := hPBR.paste_vert h2
+    rw [Category.comp_id, hκiso] at h3
+    exact h3
+  have hspecFamFppf : specFam = κ ≫ U.2.isoSpec.hom ≫ kF.inv := by
+    rw [← Category.assoc, hκiso, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  haveI : Surjective specFam := by
+    rw [hspecFamFppf]
+    infer_instance
+  haveI : Flat specFam := by
+    rw [hspecFamFppf]
+    infer_instance
+  haveI : QuasiCompact specFam := by
+    rw [hspecFamFppf]
+    infer_instance
+  haveI : Surjective ψ₀ := MorphismProperty.of_isPullback (P := @Surjective) hψsq.flip ‹_›
+  haveI : Flat ψ₀ := MorphismProperty.of_isPullback (P := @Flat) hψsq.flip ‹_›
+  haveI : QuasiCompact ψ₀ := MorphismProperty.of_isPullback (P := @QuasiCompact) hψsq.flip ‹_›
+  haveI : IsIso cmp := by
+    have hLsq : IsPullback θ.hom pQ (ψ₀ ≫ ν) cmp := by
+      refine IsPullback.of_right ?_ ?_ hψν.flip
+      · rw [← hcmpπ] at hs₅
+        exact hs₅
+      · rw [hcmp, hfdef]
+    exact isIso_of_isPullback_of_fppf hLsq
+  -- ## Step 6: packaging
+  refine ⟨asIso cmp, ?_, ?_⟩
+  · show cmp ≫ projModelπ W = pullback.snd π'' U.1.ι ≫ U.2.isoSpec.hom
+    rw [← hpUdef]
+    exact hcmpπ
+  · -- the zero-section leg, by cancelling the fppf cover
+    show (U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ cmp
+      = projModelZero W
+    haveI hpUepi : Epi pU := by
+      have hsplit : (pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+          (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ pU = 𝟙 _ := by
+        rw [hpUdef]
+        exact pullback.lift_snd _ _ _
+      refine ⟨fun {Z} u v huv => ?_⟩
+      rw [← Category.id_comp u, ← hsplit, Category.assoc, huv, ← Category.assoc, hsplit,
+        Category.id_comp]
+    haveI hκepi : Epi κ := by
+      haveI h2 : Epi ((θ.hom ≫ projModelπ W₀R) ≫ κ) := by
+        rw [Category.assoc, hθfst]
+        exact epi_comp pQ pU
+      exact epi_of_epi (θ.hom ≫ projModelπ W₀R) κ
+    haveI hbmapepi : Epi (specFam ≫ kF.hom) := by
+      rw [← hκiso]
+      exact epi_comp κ U.2.isoSpec.hom
+    -- the ingredients of the zero-section chase
+    have hbmapinv : (specFam ≫ kF.hom) ≫ U.2.isoSpec.inv = κ := by
+      rw [← hκiso, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    have hζw : (iAA ≫ zeroE) ≫ qE = (κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) ≫ j := by
+      rw [Category.assoc, ← hzeroSq, hjdef, Category.assoc, pullback.lift_fst,
+        reassoc_of% hκι]
+    have hζpQ : pullback.lift (iAA ≫ zeroE) (κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) hζw ≫ pQ
+        = κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+          (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp]) := by
+      rw [hpQdef]
+      exact pullback.lift_snd _ _ _
+    have hζθ : pullback.lift (iAA ≫ zeroE) (κ ≫ pullback.lift (U.1.ι ≫ zero'') (𝟙 _)
+        (by rw [Category.assoc, hz'', Category.comp_id, Category.id_comp])) hζw ≫ θ.hom
+        = projModelZero W₀R := by
+      refine hW₀Rsq.hom_ext ?_ ?_
+      · simp only [Category.assoc]
+        rw [hθfst, ← Category.assoc, hζpQ, Category.assoc,
+          reassoc_of% projModelZero_projModelπ]
+        rw [hpUdef, pullback.lift_snd, Category.comp_id]
+      · simp only [Category.assoc]
+        rw [hθsnd, hpEdef, pullback.lift_fst, hρzero]
+    have hz2 : projModelZero W ≫ projModelBaseChange req.toRingHom W₁
+        = kF.inv ≫ projModelZero W₁ := by
+      have h := projModelZero_baseChange₂ req.toRingHom W₁
+      rw [hsR] at h
+      exact h
+    have hzν : projModelZero W₁ ≫ ν = kF.hom ≫ projModelZero W := by
+      rw [hνdef, ← cancel_mono (projModelBaseChange req.toRingHom W₁), Category.assoc,
+        Category.assoc, IsIso.inv_hom_id, Category.comp_id, hz2, Iso.hom_inv_id_assoc]
+    have hzψ : projModelZero W₀R ≫ ψ₀ = specFam ≫ projModelZero W₁ := by
+      rw [hψ₀def, descentComparison_zero, hspecAlg]
+    -- assemble
+    rw [← cancel_epi (specFam ≫ kF.hom)]
+    simp only [Category.assoc]
+    rw [reassoc_of% hbmapinv, ← reassoc_of% hζpQ, hcmp, hfdef, reassoc_of% hζθ,
+      reassoc_of% hzψ, hzν]
+
 /-- Opaque-shape zero-square transport. -/
 private theorem zeroSq_transport {Xs Qs EQ ET Ss Ss' : Scheme.{u}}
     {qX : Xs ⟶ Qs} {z' : Qs ⟶ EQ} {cz : Xs ⟶ ET} {qE : ET ⟶ EQ}
@@ -1831,6 +2151,24 @@ private theorem discharge_hlift [Finite G]
   rw [hmap_eq]
   exact hf g
 
+/-- The restricted morphism-descent, in the plain (unconjugated) action shape consumed by
+`lw_chart_at_of_localModel` (own budget). -/
+private theorem discharge_hlift' [Finite G]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfreeE : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ C.E),
+      t ≫ σE.hom γ = t → IsEmpty T) :
+    ∀ {Q' Y : Scheme.{u}} (j : Q' ⟶ σE.quotient VE hVEs hVEa)
+      [IsOpenImmersion j] (f : pullback (σE.quotientπ VE hVEs hVEa hVEmem) j ⟶ Y),
+      (∀ g, pullback.map (σE.quotientπ VE hVEs hVEa hVEmem) j
+          (σE.quotientπ VE hVEs hVEa hVEmem) j (σE.hom g) (𝟙 Q') (𝟙 _)
+          (by rw [Category.comp_id, σE.hom_quotientπ]) (by simp) ≫ f = f) →
+      ∃ q : Q' ⟶ Y, pullback.snd (σE.quotientπ VE hVEs hVEa hVEmem) j ≫ q = f := by
+  intro Q' Y j hj f hf
+  exact σE.exists_quotientπ_lift_of_isOpenImmersion VE hVEs hVEa hVEmem
+    (fun t g hg h => hfreeE g hg _ t h) j f hf
+
 /-- The restricted-cover epi property, in ∀-shape (own budget). -/
 private theorem discharge_hepi [Finite G]
     [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
@@ -1903,6 +2241,241 @@ theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
       (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.2
       hfreeA s a hap W₁ E hW₁ hcob
   exact lw_of_baseIso π' zero' hz qiso hspec
+
+/-! #### The `[a5]` reduction: splitting off the section-pair gap
+
+`locallyWeierstrass_quotientπ` below quantifies over a pair `(π', zero')` carrying the descent
+compatibilities `hπ'c`/`hzero'c` tying it to the descended structure maps (the board's v10.94
+owed statement fix — for a wild pair the statement is FALSE, see the deleted `[a5-pair]`
+counterexample in the git history). `locallyWeierstrass_quotientπ_of_compat` is the true,
+board-owned `[a5]` content. Its engine consumption is now PROVEN in full generality
+(`lw_chart_at_of_localModel`, no global model needed); the ONE residual leaf is the localized
+model package `exists_localModel_package_at` — the a5-P-loc semilocal gluing. The empty-base
+case and the assembly are proven. -/
+
+open WeierstrassCurve in
+/-- **([a5-P-loc], the localized model package — THE residual leaf, board-owned)** At every
+prime `s` of `Aᴳ = Γ(X,⊤)ᴳ` there is an invariant `a ∉ s` over whose basic open the curve
+acquires a global Weierstrass model compatible with the `G`-action: the model `W₀R / A_a`,
+with `projModel W₀R` presented as the restriction of `E` along `Spec A_a ⟶ Spec A ≅ X`
+(`ρR`/the pullback square/the zero-leg), the `VariableChange` cocycle `CvcR / A_a` presenting
+the geometric action through `ρR` (T-W7.1b at the `A_a`-level), and the Hilbert-90 descent
+data `W₁ / (Aᴳ)_a`, `E` with the coboundary identity.
+
+Everything downstream is PROVEN: `lw_chart_at_of_localModel` consumes exactly this package
+and lands the `LocallyWeierstrass` chart at `s` (see
+`locallyWeierstrass_quotientπ_of_compat` below). With a *global* model the package is
+immediate (`W₀R := W₀.map (algebraMap _ _)`, `ρR := projModelBaseChange ≫ φ.inv`,
+`CvcR g := (Cvc g).map _` — this is how `locallyWeierstrass_quotientπ_of_globalModel`
+specializes), but in general a global model is obstructed by the class of `ω` in
+`Pic Γ(X,⊤)`, and the package must be produced semilocally:
+
+Proof plan (KM 2.2.5–2.2.6 + the a5-P-loc board): the fibre of `Spec A → Spec Aᴳ` over `s` is
+one finite `G`-orbit (`Aᴳ ⊆ A` is an invariant-integral extension; mathlib's
+`Algebra.IsInvariant` transitivity). Each orbit point has a `C.localModel` chart; shrink the
+charts to basic opens `D(f_i)`. Over the orbit's semilocalization `L := Localization S`,
+`S = s.primeCompl.map (algebraMap Aᴳ A)` (the ring of `exists_away_invariant_descent`,
+Part 1 — its fixed subring is LOCAL by `isLocalRing_fixedPoints_of_isLocalization`), the
+`D(f_i)` cover `Spec L` (every prime of the semilocal `L` lies under an orbit maximal, and
+`f_i ∉ q_i`), and the chart-difference `VariableChange` Čech 1-cocycle on this finite cover
+splits: the unit part because a unit-valued Čech cocycle on a semilocal ring is a coboundary
+(the maximal ideals are the finitely many orbit primes — the avoidance argument of
+`exists_unit_smul_eq_of_isLocalRing`), the additive part by the affine Čech vanishing
+(partition of unity in the `f_i`; cf. `exists_sub_smul_eq_of_isCocycle`). The corrected charts
+glue to a model over `L` (sheaf condition for the basic cover); T-W7.1b over `L`
+(`pointedIso_exists_variableChange`) gives the `G`-cocycle; `exists_coboundary` over `L`
+splits it and `descendFixed` produces `W₁`. Finally SPREAD: the finitely many coefficients,
+variable changes and identities have finitely many denominators in `S` — clear them into a
+single invariant `a ∉ s` exactly as in Part 2 of `exists_away_invariant_descent` — and glue
+the finitely many corrected chart isos over the basic cover of `D((a : A))` (e.g. by
+`Scheme.OpenCover.glueMorphisms`) to produce `ρR` and its two legs. -/
+private theorem exists_localModel_package_at [Finite G] [IsAffine X]
+    (hact : IsCurveAction σ C σE)
+    (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∀ _s : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(X, ⊤) G))),
+    ∃ (a : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a ∉ _s.asIdeal)
+      (W₀R : WeierstrassCurve (Localization.Away ((a : ↑Γ(X, ⊤))))),
+      W₀R.IsElliptic ∧
+      ∃ ρR : projModel W₀R ⟶ C.E,
+        IsPullback (projModelπ W₀R) ρR
+          (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a : ↑Γ(X, ⊤))))))) (C.π ≫ X.isoSpec.hom) ∧
+        projModelZero W₀R ≫ ρR
+          = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+              (Localization.Away ((a : ↑Γ(X, ⊤)))))) ≫ X.isoSpec.inv ≫ C.zero ∧
+        ∃ (CvcR : G → VariableChange (Localization.Away ((a : ↑Γ(X, ⊤)))))
+          (hCvcR : ∀ g, CvcR g
+            • (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)) = W₀R),
+          (∀ g, (eqToHom (congrArg projModel (hCvcR g).symm)
+              ≫ (projModelVCIso (CvcR g)
+                  (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))).hom
+              ≫ projModelBaseChange (MulSemiringAction.awayHom
+                  (fun g' : G => a.2 g') g) W₀R) ≫ ρR = ρR ≫ σE.hom g) ∧
+          ∃ (W₁ : WeierstrassCurve (Localization.Away a))
+            (E : VariableChange (Localization.Away ((a : ↑Γ(X, ⊤))))),
+            W₁.map (fixedAwayMap a) = E⁻¹ • W₀R ∧
+            ∀ g : G, CvcR g
+              = E * (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹ := by
+  sorry
+
+/-- **([a5-compat], the true half — ENGINE PROVEN; residual = the localized model package)**
+`locallyWeierstrass_quotientπ` for a section pair carrying the descent compatibilities
+`hπ'c`/`hzero'c` of `exists_quotient_π_zero` — the shape the board's owed `[a5]` statement fix
+arrives at.
+
+PROVEN via the localized Phase-A engine: per point `s` of `X/G ≅ Spec Aᴳ`
+(`exists_quotientIsoSpec_top`), the localized model package `exists_localModel_package_at`
+(the ONE residual sorry — the a5-P-loc semilocal gluing, see its docstring for the boarded
+proof) feeds `lw_chart_at_of_localModel`, which lands the chart at `s`; `lw_of_baseIso`
+transports back along `qiso`. This is the general (`C.localModel`-only) route: `hVtop`
+trivialises the **base** atlas `V` only — a global model upstairs is genuinely obstructed
+(the class of `ω` in `Pic Γ(X,⊤)`), which is why the model data enters localized at an
+invariant basic open `D(a)`, `a ∉ s`. -/
+private theorem locallyWeierstrass_quotientπ_of_compat [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (hX : Nonempty ↥X)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
+    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa))
+    (hπ'c : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem)
+    (hzero'c : σ.quotientπ V hVs hVa hVmem ≫ zero'
+      = C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem) :
+    LocallyWeierstrass π' zero' hz := by
+  classical
+  cases nonempty_fintype G
+  obtain ⟨x₀⟩ := hX
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  obtain ⟨qiso, hqiso⟩ := σ.exists_quotientIsoSpec_top V hVs hVa hVmem hVtop x₀
+  have hz'' : (qiso.inv ≫ zero') ≫ (π' ≫ qiso.hom) = 𝟙 _ := by
+    rw [Category.assoc, ← Category.assoc zero', hz, Category.id_comp, Iso.inv_hom_id]
+  -- the freeness over Γ(X,⊤), upstairs and on the fibre product
+  have hfreeA : IsFreeAlgebraAction G ℤ ↑Γ(X, ⊤) :=
+    σ.isFreeAlgebraAction_of_free (isStableOpen_top σ) (isAffineOpen_top X) hfree
+  have hfreeE := discharge_freeE σ σE hact hfree
+  -- the Spec-side local model, per point from the localized model package
+  have hspec : LocallyWeierstrass (π' ≫ qiso.hom) (qiso.inv ≫ zero') hz'' := by
+    intro s
+    obtain ⟨a, hap, W₀R, hW₀R, ρR, hρsq, hρzero, CvcR, hCvcR, hρact, W₁, E, hW₁, hcob⟩ :=
+      exists_localModel_package_at hact hfree s
+    exact lw_chart_at_of_localModel (π' ≫ qiso.hom) (qiso.inv ≫ zero') hz''
+      (σE.quotientπ VE hVEs hVEa hVEmem) (C.π ≫ X.isoSpec.hom) (X.isoSpec.inv ≫ C.zero)
+      (isPullback_transport_corner
+        (isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree π' hπ'c)
+        X.isoSpec qiso rfl rfl hqiso)
+      (zeroSq_transport hzero'c hqiso)
+      σE.hom (σE.hom_quotientπ VE hVEs hVEa hVEmem)
+      (discharge_hlift' VE hVEs hVEa hVEmem hfreeE)
+      (discharge_hepi VE hVEs hVEa hVEmem hfreeE)
+      (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).1
+      (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.1
+      (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.2
+      s a hap W₀R hW₀R ρR hρsq hρzero CvcR hCvcR hρact W₁ E hW₁ hcob
+  exact lw_of_baseIso π' zero' hz qiso hspec
+
+/-- **([a5], the descended Weierstrass model — LEAF; STATEMENT FIX EXECUTED v10.324-FIN)** The
+quotient curve `E/G ⟶ X/G` admits a Zariski-local Weierstrass model, for the section pair
+COMPATIBLE with the quotient charts (`hπ'c`/`hzero'c` — the v10.94 owed interface fix; the
+unconstrained form was FALSE, see the deleted `[a5-pair]` counterexample in the git history:
+twist the canonical pair by a split endomorphism of `Spec ℚ[x₁,x₂,…]`).
+
+Plan (terminating in a proof; the one genuinely new-math leaf of route (a)): the universal curve
+upstairs has a global model `E = projModel W` (in the bootstrap `E` is pulled back from T-E15's
+explicit `ℰ₃`), and each `γ ∈ G` acts on it by a `VariableChange` `C_γ = (u_γ, r_γ, s_γ, t_γ)`
+(**T-W7.1b** = `pointedIso_exists_variableChange`, now DONE). Splitting the cocycle:
+* the additive part `(r, s, t) ∈ Z¹(G, A⁺)` is a coboundary by `exists_sub_smul_eq_of_isCocycle`
+  (additive Hilbert 90, PROVEN);
+* the multiplicative part `u ∈ Z¹(G, Aˣ)` is **Zariski-locally** a coboundary by
+  `exists_unit_smul_eq_of_isLocalRing` ([A711-DESC], PROVEN).
+So over a Zariski neighbourhood of each prime of `Aᴳ`, a variable change makes `W` `G`-invariant,
+and the invariant model descends to give the local Weierstrass model of `E/G`. -/
+theorem locallyWeierstrass_quotientπ [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
+    (VE : C.E → (C.E).Opens) (hVEs : ∀ e, σE.IsStableOpen (VE e))
+    (hVEa : ∀ e, IsAffineOpen (VE e)) (hVEmem : ∀ e, e ∈ VE e)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (π' : σE.quotient VE hVEs hVEa ⟶ σ.quotient V hVs hVa)
+    (zero' : σ.quotient V hVs hVa ⟶ σE.quotient VE hVEs hVEa)
+    (hz : zero' ≫ π' = 𝟙 (σ.quotient V hVs hVa))
+    (hπ'c : σE.quotientπ VE hVEs hVEa hVEmem ≫ π' = C.π ≫ σ.quotientπ V hVs hVa hVmem)
+    (hzero'c : σ.quotientπ V hVs hVa hVmem ≫ zero'
+      = C.zero ≫ σE.quotientπ VE hVEs hVEa hVEmem) :
+    LocallyWeierstrass π' zero' hz := by
+  rcases isEmpty_or_nonempty (↥X) with hX | hX
+  · intro s
+    obtain ⟨x, -⟩ := σ.quotientπ_surjective V hVs hVa hVmem s
+    exact (hX.false x).elim
+  · exact locallyWeierstrass_quotientπ_of_compat hact V hVs hVa hVmem hVtop
+      VE hVEs hVEa hVEmem hfree hX π' zero' hz hπ'c hzero'c
+
+/-- **([a3]–[a5], the route-(a) descent theorem — ASSEMBLED)** Let `G` act freely on an affine
+scheme `X`, and let the action lift to a geometric elliptic curve `C/X` (an `IsCurveAction`) with
+an orbit-in-affine-open chart datum. Then the quotient `E/G` carries a geometric elliptic curve
+structure over `X/G`, and the square
+
+    E ──────▶ E/G
+    │           │
+    π           π'
+    ▼           ▼
+    X ──────▶ X/G
+
+is **cartesian** and compatible with the zero sections — precisely an `Ell/R`-morphism, which is
+what the KM engine consumes.
+
+**This assembly is sorry-free.** It consumes exactly:
+* `exists_quotient_π_zero` (PROVEN) — the descended `π'`, `zero'` and `zero' ≫ π' = 𝟙`;
+* `locallyWeierstrass_quotientπ` (leaf `[a5]`, gated on nothing — T-W7.1b is DONE) — the local
+  Weierstrass model of the quotient curve;
+* `isProper_of_locallyWeierstrass` (PROVEN) and `smoothOfRelativeDimension_of_locallyWeierstrass`
+  (leaf, waits on T-A3) — `proper` and `smooth` from that model;
+* `isPullback_quotientπ` (PROVEN modulo the affine chart square `isPullback_chart`) — the
+  cartesian square.
+
+So the KM 4.7 ⇐-engine's geometric core is **structurally complete**: the two residual sorries are
+the isolated affine computations `isPullback_chart` (Galois descent of `Γ(W)`) and
+`locallyWeierstrass_quotientπ`/`smoothOfRelativeDimension_of_locallyWeierstrass` ([a5] + T-A3). -/
+theorem exists_ellipticCurveGeom_quotient [Finite G] [IsAffine X]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from C.E))]
+    (hact : IsCurveAction σ C σE)
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    (hVmem : ∀ x, x ∈ V x) (hVtop : ∀ x, V x = ⊤)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
+      t ≫ σ.hom γ = t → IsEmpty T)
+    (horbit : ∀ e : C.E, ∃ U : (C.E).Opens, IsAffineOpen U ∧
+      ∀ γ : G, (σE.hom γ).base e ∈ U) :
+    ∃ (C' : EllipticCurveGeom (σ.quotient V hVs hVa)) (q : C.E ⟶ C'.E),
+      IsPullback q C.π C'.π (σ.quotientπ V hVs hVa hVmem) ∧
+        C.zero ≫ q = σ.quotientπ V hVs hVa hVmem ≫ C'.zero := by
+  -- the `G`-stable affine atlas of `E` (from the orbit chart datum)
+  choose VE hVEs hVEa hVEmem using
+    fun e => exists_isStableOpen_isAffineOpen_of_orbit horbit e
+  -- descend `π` and the zero section
+  obtain ⟨π', zero', hπ', hzero', hzπ'⟩ :=
+    exists_quotient_π_zero hact V hVs hVa hVmem VE hVEs hVEa hVEmem
+  -- the descended local Weierstrass model, and proper/smooth from it
+  have hlw := locallyWeierstrass_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree
+    π' zero' hzπ' hπ' hzero'
+  haveI hproper : IsProper π' := isProper_of_locallyWeierstrass hlw
+  haveI hsmooth : SmoothOfRelativeDimension 1 π' :=
+    smoothOfRelativeDimension_of_locallyWeierstrass hlw
+  -- assemble the geometric elliptic curve on `E/G`
+  refine ⟨{ E := σE.quotient VE hVEs hVEa, π := π', zero := zero', zero_π := hzπ'
+            smooth := hsmooth, proper := hproper, localModel := hlw },
+    σE.quotientπ VE hVEs hVEa hVEmem, ?_, ?_⟩
+  · exact isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem hfree π' hπ'
+  · exact hzero'.symm
 
 
 /-- **([a3]–[a5] ASSEMBLED, global-model form — the KM 4.7 ⇐-engine, Phase A)** Let `G` act
