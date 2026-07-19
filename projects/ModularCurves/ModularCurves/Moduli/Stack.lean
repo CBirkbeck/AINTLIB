@@ -223,4 +223,212 @@ theorem moduliProblem_fppf_descent (R : CommRingCat.{u}) (P : ModuliProblem R)
       { h : T' ⟶ Z // h ≫ fZ = f ≫ g }) = hz := Subtype.ext hζ
   exact (congrArg (eqv (f ≫ g)) harg).trans hzval
 
+/-- **([R-sheaf-P], Zariski 2-chart gluing for relatively representable moduli problems).**
+Assembling the two fppf-sheaf halves (`moduliProblem_fppf_separated` +
+`moduliProblem_fppf_descent`) into a genuine Zariski recollement statement: for a
+relatively representable moduli problem `P`, an `Ell/R`-object `X` and a two-element open
+cover `U ⊔ V = ⊤` of `X.base`, a pair of `P`-sections on the two charts that agree on the
+scheme-theoretic overlap `U ∩ V` (the fibre product `pullback U.ι V.ι`) glues to a *unique*
+`P`-section over `X` (i.e. over `X.pullbackAlong (𝟙 X.base)`, the identity-restriction of
+`X`) restricting to the given ones.
+
+The cover is the coproduct `(U : Scheme) ⨿ (V : Scheme) ⟶ X.base` copairing the two open
+immersions; it is flat + locally of finite presentation + surjective (an fppf cover), so
+the two file lemmas apply: existence is `moduliProblem_fppf_descent` (the cocycle over the
+kernel pair `(U⨿V) ×_{X.base} (U⨿V)` is supplied by `hagree` after the extensive
+decomposition into the four pieces `U×U, U×V, V×U, V×V`), and uniqueness is
+`moduliProblem_fppf_separated`. Source: SGA 1 VIII (fppf covers are effective epis);
+Zariski covers are fppf. -/
+theorem moduliProblem_zariski_glue (R : CommRingCat.{u}) (P : ModuliProblem R)
+    (hP : P.RelativelyRepresentable) (X : EllObj R) (U V : X.base.Opens)
+    (hUV : U ⊔ V = ⊤)
+    (sU : P.obj (Opposite.op (X.pullbackAlong U.ι)))
+    (sV : P.obj (Opposite.op (X.pullbackAlong V.ι)))
+    (hagree : P.map (X.pullbackAlongMap U.ι (Limits.pullback.fst U.ι V.ι)).op sU =
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q)))
+          (Limits.pullback.condition (f := U.ι) (g := V.ι)).symm)
+        (P.map (X.pullbackAlongMap V.ι (Limits.pullback.snd U.ι V.ι)).op sV)) :
+    ∃! s : P.obj (Opposite.op (X.pullbackAlong (𝟙 X.base))),
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q))) (Category.comp_id U.ι))
+          (P.map (X.pullbackAlongMap (𝟙 X.base) U.ι).op s) = sU ∧
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q))) (Category.comp_id V.ι))
+          (P.map (X.pullbackAlongMap (𝟙 X.base) V.ι).op s) = sV := by
+  obtain ⟨Z, fZ, eqv, hnat⟩ := hP X
+  -- transporting an `eqv`-value between two equal base maps only permutes the (irrelevant)
+  -- factorisation proof, so it commutes with the underlying map (cf. `moduliProblem_fppf_descent`)
+  have transport_eqv : ∀ {T : Scheme.{u}} (q₁ q₂ : T ⟶ X.base) (hq : q₂ = q₁)
+      (m : T ⟶ Z) (pf1 : m ≫ fZ = q₁) (pf2 : m ≫ fZ = q₂),
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q))) hq) (eqv q₂ ⟨m, pf2⟩)
+        = eqv q₁ ⟨m, pf1⟩ := by
+    intro T q₁ q₂ hq m pf1 pf2
+    subst hq
+    rfl
+  -- classify the two chart sections as lifts into the representing scheme `Z`
+  set hU := (eqv U.ι).symm sU with hUdef
+  set hV := (eqv V.ι).symm sV with hVdef
+  have hUval : eqv U.ι hU = sU := (eqv U.ι).apply_symm_apply sU
+  have hVval : eqv V.ι hV = sV := (eqv V.ι).apply_symm_apply sV
+  -- the two-element coproduct cover of `X.base` (`true ↦ U`, `false ↦ V`)
+  let chart : Bool → Scheme.{u} := fun b => b.casesOn V.toScheme U.toScheme
+  let fhom : (b : Bool) → chart b ⟶ X.base := fun b => b.casesOn V.ι U.ι
+  let hlift : (b : Bool) → chart b ⟶ Z := fun b => b.casesOn hV.1 hU.1
+  have hfhom_true : fhom true = U.ι := rfl
+  have hfhom_false : fhom false = V.ι := rfl
+  have hlift_true : hlift true = hU.1 := rfl
+  have hlift_false : hlift false = hV.1 := rfl
+  -- the cover is an fppf cover: flat + locally of finite presentation + surjective
+  letI hff_flat : ∀ b, Flat (fhom b) := by
+    intro b; cases b with
+    | false => exact inferInstanceAs (Flat V.ι)
+    | true => exact inferInstanceAs (Flat U.ι)
+  letI hff_lfp : ∀ b, LocallyOfFinitePresentation (fhom b) := by
+    intro b; cases b with
+    | false => exact inferInstanceAs (LocallyOfFinitePresentation V.ι)
+    | true => exact inferInstanceAs (LocallyOfFinitePresentation U.ι)
+  haveI hFflat : Flat (Limits.Sigma.desc fhom) :=
+    IsZariskiLocalAtSource.sigmaDesc hff_flat
+  haveI hFlfp : LocallyOfFinitePresentation (Limits.Sigma.desc fhom) :=
+    IsZariskiLocalAtSource.sigmaDesc hff_lfp
+  haveI hFsurj : Surjective (Limits.Sigma.desc fhom) :=
+    Surjective.sigmaDesc_of_union_range_eq_univ (by
+      apply Set.eq_univ_of_forall
+      intro x
+      rw [Set.mem_iUnion]
+      have hx : x ∈ (⊤ : X.base.Opens) := trivial
+      rw [← hUV] at hx
+      rcases hx with hxU | hxV
+      · exact ⟨true, by rw [hfhom_true, Scheme.Opens.range_ι]; exact hxU⟩
+      · exact ⟨false, by rw [hfhom_false, Scheme.Opens.range_ι]; exact hxV⟩)
+  -- overlap agreement, read off `hagree` on the fibre product `U ∩ V = pullback U.ι V.ι`
+  have AGREE : Limits.pullback.fst U.ι V.ι ≫ hU.1 = Limits.pullback.snd U.ι V.ι ≫ hV.1 := by
+    have E1 := hnat U.ι (Limits.pullback.fst U.ι V.ι) hU
+    have E2 := hnat V.ι (Limits.pullback.snd U.ι V.ι) hV
+    rw [hUval] at E1
+    rw [hVval] at E2
+    have key : eqv (Limits.pullback.fst U.ι V.ι ≫ U.ι)
+          ⟨Limits.pullback.fst U.ι V.ι ≫ hU.1, by rw [Category.assoc, hU.2]⟩ =
+        eqv (Limits.pullback.fst U.ι V.ι ≫ U.ι)
+          ⟨Limits.pullback.snd U.ι V.ι ≫ hV.1, by
+            rw [Category.assoc, hV.2, ← Limits.pullback.condition]⟩ := by
+      rw [E1, hagree, ← E2]
+      exact transport_eqv (Limits.pullback.fst U.ι V.ι ≫ U.ι)
+        (Limits.pullback.snd U.ι V.ι ≫ V.ι)
+        (Limits.pullback.condition (f := U.ι) (g := V.ι)).symm _ _ _
+    exact congrArg Subtype.val ((eqv (Limits.pullback.fst U.ι V.ι ≫ U.ι)).injective key)
+  -- the classifying map `Sigma.desc hlift` coequalizes the kernel pair of the cover: check on
+  -- the four pieces `U×U, U×V, V×U, V×V` via the extensive decomposition of the kernel pair
+  have COEQ : Limits.pullback.fst (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫
+        Limits.Sigma.desc hlift =
+      Limits.pullback.snd (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫
+        Limits.Sigma.desc hlift := by
+    have hpb := FinitaryPreExtensive.isPullback_sigmaDesc fhom fhom
+    refine (cancel_epi hpb.isoPullback.hom).mp ?_
+    rw [← Category.assoc, ← Category.assoc, hpb.isoPullback_hom_fst, hpb.isoPullback_hom_snd]
+    refine Limits.Sigma.hom_ext _ _ fun p => ?_
+    simp only [Limits.Sigma.ι_desc_assoc, Category.assoc, Limits.Sigma.ι_desc]
+    obtain ⟨b1, b2⟩ := p
+    cases b1 <;> cases b2 <;>
+      simp only [hlift_true, hlift_false]
+    · -- V × V (diagonal): `pullback.fst = pullback.snd` since `V.ι` is mono
+      rw [show Limits.pullback.fst V.ι V.ι = Limits.pullback.snd V.ι V.ι from
+        (cancel_mono V.ι).mp Limits.pullback.condition]
+    · -- V × U (cross): from `AGREE` via the pullback symmetry
+      refine (cancel_epi (Limits.pullbackSymmetry U.ι V.ι).hom).mp ?_
+      rw [Limits.pullbackSymmetry_hom_comp_fst_assoc, Limits.pullbackSymmetry_hom_comp_snd_assoc]
+      exact AGREE.symm
+    · -- U × V (cross): exactly `AGREE`
+      exact AGREE
+    · -- U × U (diagonal): `pullback.fst = pullback.snd` since `U.ι` is mono
+      rw [show Limits.pullback.fst U.ι U.ι = Limits.pullback.snd U.ι U.ι from
+        (cancel_mono U.ι).mp Limits.pullback.condition]
+  -- assemble the two chart-lifts into a single classifying lift over the cover
+  have hlift_comp_fZ : ∀ b, hlift b ≫ fZ = fhom b := by
+    intro b; cases b
+    · exact hV.2
+    · exact hU.2
+  have hz2 : Limits.Sigma.desc hlift ≫ fZ = Limits.Sigma.desc fhom ≫ 𝟙 X.base := by
+    rw [Category.comp_id]
+    refine Limits.Sigma.hom_ext _ _ fun b => ?_
+    simp only [Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc, hlift_comp_fZ]
+  have hcocyc : P.map (X.pullbackAlongMap (Limits.Sigma.desc fhom ≫ 𝟙 X.base)
+        (Limits.pullback.fst (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom))).op
+        (eqv (Limits.Sigma.desc fhom ≫ 𝟙 X.base) ⟨Limits.Sigma.desc hlift, hz2⟩) =
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q)))
+          (show Limits.pullback.snd (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫
+              (Limits.Sigma.desc fhom ≫ 𝟙 X.base) =
+            Limits.pullback.fst (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫
+              (Limits.Sigma.desc fhom ≫ 𝟙 X.base) by
+            simp only [← Category.assoc, Limits.pullback.condition]))
+        (P.map (X.pullbackAlongMap (Limits.Sigma.desc fhom ≫ 𝟙 X.base)
+          (Limits.pullback.snd (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom))).op
+          (eqv (Limits.Sigma.desc fhom ≫ 𝟙 X.base) ⟨Limits.Sigma.desc hlift, hz2⟩)) := by
+    set hz : { h // h ≫ fZ = Limits.Sigma.desc fhom ≫ 𝟙 X.base } :=
+      ⟨Limits.Sigma.desc hlift, hz2⟩ with hzdef
+    have COEQ2 : Limits.pullback.fst (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫ hz.1 =
+        Limits.pullback.snd (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫ hz.1 := COEQ
+    rw [← hnat (Limits.Sigma.desc fhom ≫ 𝟙 X.base)
+        (Limits.pullback.fst (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom)) hz,
+      ← hnat (Limits.Sigma.desc fhom ≫ 𝟙 X.base)
+        (Limits.pullback.snd (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom)) hz]
+    exact (congrArg (eqv _) (Subtype.ext COEQ2)).trans
+      (transport_eqv
+        (Limits.pullback.fst (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫
+          Limits.Sigma.desc fhom ≫ 𝟙 X.base)
+        (Limits.pullback.snd (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫
+          Limits.Sigma.desc fhom ≫ 𝟙 X.base)
+        (by simp only [← Category.assoc, Limits.pullback.condition])
+        (Limits.pullback.snd (Limits.Sigma.desc fhom) (Limits.Sigma.desc fhom) ≫ hz.1)
+        (by rw [Category.assoc, hz.2, ← Category.assoc, ← Category.assoc,
+          Limits.pullback.condition])
+        (by rw [Category.assoc, hz.2])).symm
+  obtain ⟨a, descfac⟩ := moduliProblem_fppf_descent R P hP (Limits.Sigma.desc fhom) X (𝟙 X.base)
+    (eqv (Limits.Sigma.desc fhom ≫ 𝟙 X.base) ⟨Limits.Sigma.desc hlift, hz2⟩) hcocyc
+  set α := (eqv (𝟙 X.base)).symm a with hαdef
+  have haα : eqv (𝟙 X.base) α = a := (eqv (𝟙 X.base)).apply_symm_apply a
+  -- restriction of an arbitrary section to a chart, expressed through the representing scheme
+  have chartRestrict : ∀ (s : P.obj (Opposite.op (X.pullbackAlong (𝟙 X.base)))) {W : Scheme.{u}}
+      (j : W ⟶ X.base),
+      cast (congrArg (fun q => P.obj (Opposite.op (X.pullbackAlong q))) (Category.comp_id j))
+        (P.map (X.pullbackAlongMap (𝟙 X.base) j).op s) =
+      eqv j ⟨j ≫ ((eqv (𝟙 X.base)).symm s).1, by
+        rw [Category.assoc, ((eqv (𝟙 X.base)).symm s).2, Category.comp_id]⟩ := by
+    intro s W j
+    conv_lhs => rw [← (eqv (𝟙 X.base)).apply_symm_apply s,
+      ← hnat (𝟙 X.base) j ((eqv (𝟙 X.base)).symm s)]
+    exact transport_eqv j (j ≫ 𝟙 X.base) (Category.comp_id j) _ _ _
+  -- the base lift of `a` restricts to the two chart lifts on each chart
+  have KEY : Limits.Sigma.desc fhom ≫ α.1 = Limits.Sigma.desc hlift := by
+    have hnf := hnat (𝟙 X.base) (Limits.Sigma.desc fhom) α
+    rw [haα, descfac] at hnf
+    exact congrArg Subtype.val ((eqv _).injective hnf)
+  have KEYt : U.ι ≫ α.1 = hU.1 := by
+    have h := congrArg (fun t => Limits.Sigma.ι chart true ≫ t) KEY
+    simpa only [Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc, hfhom_true, hlift_true] using h
+  have KEYf : V.ι ≫ α.1 = hV.1 := by
+    have h := congrArg (fun t => Limits.Sigma.ι chart false ≫ t) KEY
+    simpa only [Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc, hfhom_false, hlift_false] using h
+  refine ⟨a, ⟨?_, ?_⟩, ?_⟩
+  · rw [chartRestrict a U.ι, ← hUval]
+    exact congrArg (eqv U.ι) (Subtype.ext KEYt)
+  · rw [chartRestrict a V.ι, ← hVval]
+    exact congrArg (eqv V.ι) (Subtype.ext KEYf)
+  · rintro y ⟨hyU, hyV⟩
+    refine moduliProblem_fppf_separated R P hP (Limits.Sigma.desc fhom) hFflat hFlfp hFsurj
+      X (𝟙 X.base) y a ?_
+    rw [descfac]
+    conv_lhs => rw [← (eqv (𝟙 X.base)).apply_symm_apply y,
+      ← hnat (𝟙 X.base) (Limits.Sigma.desc fhom) ((eqv (𝟙 X.base)).symm y)]
+    refine congrArg (eqv _) (Subtype.ext ?_)
+    refine Limits.Sigma.hom_ext _ _ fun b => ?_
+    rw [Limits.Sigma.ι_desc_assoc, Limits.Sigma.ι_desc]
+    cases b
+    · have hb := (chartRestrict y V.ι).symm.trans hyV
+      rw [← hVval] at hb
+      have hb' := congrArg Subtype.val ((eqv V.ι).injective hb)
+      simpa only [hfhom_false, hlift_false] using hb'
+    · have hb := (chartRestrict y U.ι).symm.trans hyU
+      rw [← hUval] at hb
+      have hb' := congrArg Subtype.val ((eqv U.ι).injective hb)
+      simpa only [hfhom_true, hlift_true] using hb'
+
 end ModularCurves
