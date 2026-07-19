@@ -278,6 +278,44 @@ theorem exists_sectionPoleSheafPower_succ_baseSection_generator
   refine ⟨x, ?_⟩
   rw [hx, Iso.inv_hom_id_apply]
 
+/-- A lift of the distinguished successor quotient generator has local leading
+coefficient equal to one along the marked section. -/
+theorem exists_sectionPoleSheafPower_succ_localTrivializationCoefficient_eq_one
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1)) :
+    ∃ x : Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz (n + 1)),
+      letI : IsClosedImmersion z := isClosedImmersion_section z hz
+      letI : QuasiCompact z := inferInstance
+      let hr : r ∈ z.ker.ideal U := by
+        rw [hspan]
+        exact Ideal.mem_span_singleton_self r
+      let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+      let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+        (sectionIdealModule π z hz) U.1 eGen.symm
+      let ePoleOver := SheafOfModules.dualOverIsoOfIso
+        C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+      let ePole := restrictTrivializationOfOverIso
+        (sectionPoleSheaf π z hz) U.1 ePoleOver
+      let ePsucc := sectionPoleSheafPowerTrivialization
+        z hz U.1 ePole (n + 1)
+      S.presheaf.map (eqToHom hU.symm).op
+          (z.app U.1
+            (localTrivializationCoefficient
+              (sectionPoleSheafPower π z hz (n + 1)) U ePsucc x)) = 1 := by
+  obtain ⟨x, hx⟩ :=
+    exists_sectionPoleSheafPower_succ_baseSection_generator
+      hsm z hz U hU r hspan hnzd n hH
+  refine ⟨x, ?_⟩
+  exact (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator_hom_baseSectionsMap
+    hsm z hz U hU r hspan hnzd n x).symm.trans hx
+
 private noncomputable def
     sectionPoleSheafPower_succ_baseSectionsSplitDataOfCartierGenerator
     {C S : Scheme.{u}} {π : C ⟶ S}
