@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.EngineDescent
+import ModularCurves.EllipticCurve.GroupLawDescent
 
 /-!
 # [T-Q6d.γ] The KM 4.7 engine mouth
@@ -61,7 +62,9 @@ The Katz–Mazur representability bijection, assembled *in this file* from the [
 core — the free quotient `q : 𝕸(𝒫,δ) ⟶ 𝕸(𝒫,δ)/G` in `Ell/R` — is the route-(a) Phase-A
 engine, which lives *downstream* of this file (`Moduli/EngineDescent.lean` **imports**
 this file), so it enters here as the single precisely-stated private interface
-`exists_engineQuotient` (sorried; see its docstring for the exact downstream discharge).
+`exists_engineQuotient` — now discharged in-file from the assembled Phase-A engine
+(post-surgery, this file sits downstream of `EngineDescent`), modulo the quarantined
+[a2-M] orbit-chart input `exists_orbit_isAffineOpen` and the upstream [a5-P-loc] residual.
 Everything around it is proven.
 
 Design note (why no rigidity appears in the bijection): the two `Rigid` calls of the
@@ -104,7 +107,45 @@ private theorem map_fst_autMulHom_inv {P Q : ModuliProblem R} {G : Type u} [Grou
     _ = (η.inv.app (op XM) (rM.homEquiv (𝟙 XM))).1 := congrArg Prod.fst key2
     _ = (rM.homEquiv (𝟙 XM)).1 := rfl
 
-/-- **([a2]–[a5] interface — the geometric core of the KM 4.7.0 engine; residual sorry.)**
+/-- **([a2-M], the orbit-in-an-affine-open input — the quarantined geometric residual.)**
+Every `G`-orbit of the KM action on the total space of the universal curve over `𝕸(𝒫,δ)`
+lies in an affine open. This is the `horbit` hypothesis of the model-free Phase-A engine
+(`RouteA.exists_ellipticCurveGeom_quotient`), i.e. KM's silent appeal to quasi-projectivity
+(Stacks 01ZY: a finite set of points of a scheme quasi-projective over an affine lies in a
+common affine open — absent from mathlib; flagged at `RouteA.orbit_mem_isAffineOpen_of_charts`,
+whose two-chart dichotomy replaces it when a **global** Weierstrass model exists,
+`RouteA.exists_charts_of_globalModel`). The statement is TRUE unconditionally — `haff`/`hfree`
+are carried only because the boarded discharge route consumes them.
+
+**Discharge recipe (route 1, the a5-P-loc package — boarded, preferred)**: from
+`exists_localModel_package_at` (`Moduli/EngineDescent.lean`, the [a5-P-loc] residual; needs
+un-privating or a public wrapper once it lands), at the invariant prime `s` below
+`x := π(e)` it yields an invariant `a ∉ s`, hence a `G`-stable basic open `D((a : A)) ∋ x`
+(stable since `a` is `G`-invariant, so it contains the whole base orbit of `x` for free),
+a global elliptic model `W₀R` over `Spec A_a`, and a presentation
+`ρR : projModel W₀R ⟶ E` whose `IsPullback` square against the basic-open localization
+`Spec A_a ⟶ Spec A ≅ X` makes `ρR` an open immersion onto `π⁻¹(D(a))`. Push the two charts
+of `projModel W₀R` forward along `ρR` to affine opens of `E` (`Proj.isAffineOpen_basicOpen`
++ image along an open immersion), and run the `orbit_mem_isAffineOpen_of_charts` dichotomy
+inside `π⁻¹(D(a))`: the orbit is either entirely on the zero section (which lands in the
+`Y`-chart, `projModelZero_preimage_yChart`, via the package's zero-leg and
+`IsCurveAction.zero_equivariant`) or entirely off it (contained in the `Z`-chart,
+`mem_range_zero_of_not_mem_zChart` + `mem_range_zero_of_smul_mem`).
+
+**Route 2 (model-free, mathlib-gap)**: relative projectivity of `E/X` — `O(3·zero)` is
+relatively very ample (KM 2.2.x), embedding `E ↪ ℙ²_X` globally over the affine `X`, then
+Stacks 01ZY directly. Both halves absent from mathlib; route 1 is the boarded one. -/
+private theorem exists_orbit_isAffineOpen (P Q : ModuliProblem R) {G : Type u} [Group G]
+    [Finite G] (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM)
+    (haff : IsAffine XM.base)
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ XM.base),
+      t ≫ (P.simulSchemeAction Q φ rM).hom γ = t → IsEmpty T)
+    (e : XM.curve.E) :
+    ∃ U : (XM.curve.E).Opens, IsAffineOpen U ∧
+      ∀ γ : G, ((P.simulSchemeActionTotal Q φ rM).hom γ).base e ∈ U := by
+  sorry
+
+/-- **([a2]–[a5] interface — the geometric core of the KM 4.7.0 engine.)**
 The free quotient of the simultaneous representing object by the KM action, as an
 `Ell/R`-morphism `q : XM ⟶ X₀` exposing exactly what the representability bijection
 consumes:
@@ -116,19 +157,21 @@ consumes:
 * `hqsurj`/`hqetale` — `q.baseHom` is a surjective étale cover (finite étale `G`-torsor
   grade; consumed by the KM pp. 114–116 bijection through `Flat`+`Surjective`).
 
-**Why this is a sorry here**: the construction is the route-(a) Phase-A engine —
-`SchemeAction.quotient` on the `⊤`-atlas of the affine base, `exists_quotient_π_zero` +
-`locallyWeierstrass_quotientπ` ([a5]) + `isPullback_quotientπ` for the descended curve
-(`exists_ellipticCurveGeom_quotient`, `Moduli/EngineDescent.lean`), and
-`etale_quotientπ`/`quotientπ_surjective`/`existsUnique_quotientπ_lift`/`quotientπ_hom_ext`
-(`ForMathlib/SchemeActionFree.lean` + `ForMathlib/SchemeQuotient.lean`) for the exposed
-properties — but `EngineDescent.lean` **imports this file**, so the assembled engine cannot
-be consumed here. Discharge downstream by proving this exact statement from those pieces
-(mirroring `exists_coreData`, `Moduli/QuotientRepresentability.lean`, which does precisely
-this at the `_of_globalModel` variant; note the model-free
-`exists_ellipticCurveGeom_quotient` interface does not expose the curve-level invariance
-`hqinv_eng` — take it from `SchemeAction.hom_quotientπ` on the internals, as
-`exists_coreData` does). Freeness is a *hypothesis* here, so no rigidity enters. -/
+**Discharged from the route-(a) Phase-A engine** (mirroring `exists_coreData`,
+`Moduli/QuotientRepresentability.lean`, which does the same at the `_of_globalModel`
+variant): `SchemeAction.quotient` on the `⊤`-atlas of the affine base;
+`exists_quotient_π_zero` + `locallyWeierstrass_quotientπ` ([a5]) + `isPullback_quotientπ`
+for the descended curve — the internals of `RouteA.exists_ellipticCurveGeom_quotient`,
+replayed here rather than consumed as a black box because the model-free existential does
+not expose the curve-level invariance, which we take from `SchemeAction.hom_quotientπ` on
+the total-space action; and `etale_quotientπ`/`quotientπ_surjective`/
+`existsUnique_quotientπ_lift`/`quotientπ_hom_ext` (`ForMathlib/SchemeActionFree.lean` +
+`ForMathlib/SchemeQuotient.lean`) for the exposed properties. Freeness is a *hypothesis*
+here, so no rigidity enters.
+
+Residuals reaching this proof: the [a2-M] orbit input (`exists_orbit_isAffineOpen` above,
+quarantined) and — transitively through `locallyWeierstrass_quotientπ` — the [a5-P-loc]
+localized model package (`exists_localModel_package_at`, `Moduli/EngineDescent.lean`). -/
 private theorem exists_engineQuotient (P Q : ModuliProblem R) {G : Type u} [Group G]
     [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
     (rM : (P.simul Q).RepresentableBy XM) (haff : IsAffine XM.base)
@@ -141,7 +184,73 @@ private theorem exists_engineQuotient (P Q : ModuliProblem R) {G : Type u} [Grou
         (∀ γ : G, (P.simulSchemeAction Q φ rM).hom γ ≫ F = F) →
           ∃ F₀ : X₀.base ⟶ W, q.baseHom ≫ F₀ = F) ∧
       Surjective q.baseHom ∧ Etale q.baseHom := by
-  sorry
+  classical
+  haveI := haff
+  set σ : SchemeAction G XM.base := P.simulSchemeAction Q φ rM with hσ
+  set σE : SchemeAction G XM.curve.E := P.simulSchemeActionTotal Q φ rM with hσE
+  have hact : RouteA.IsCurveAction σ XM.curve.toEllipticCurveGeom σE :=
+    P.isCurveAction_simulSchemeActionTotal Q φ rM
+  -- the `⊤`-atlas of the affine base
+  set V : XM.base → XM.base.Opens := fun _ => ⊤ with hV
+  have hVs : ∀ x, σ.IsStableOpen (V x) := fun _ => RouteA.isStableOpen_top σ
+  have hVa : ∀ x, IsAffineOpen (V x) := fun _ => isAffineOpen_top XM.base
+  have hVmem : ∀ x, x ∈ V x := fun _ => trivial
+  have hVtop : ∀ x, V x = ⊤ := fun _ => rfl
+  -- the diagonal instance the engine needs on the total space
+  haveI : IsSeparated (terminal.from XM.curve.toEllipticCurveGeom.E) := by
+    have h : terminal.from XM.curve.toEllipticCurveGeom.E =
+        XM.curve.toEllipticCurveGeom.π ≫ terminal.from XM.base := Subsingleton.elim _ _
+    rw [h]; infer_instance
+  -- the `G`-stable affine atlas of the total space, from the [a2-M] orbit input
+  choose VE hVEs hVEa hVEmem using fun e =>
+    RouteA.exists_isStableOpen_isAffineOpen_of_orbit
+      (C := XM.curve.toEllipticCurveGeom) (σE := σE)
+      (exists_orbit_isAffineOpen P Q φ rM haff hfree) e
+  -- descend `π` and the zero section
+  obtain ⟨π', zero', hπ', hzero', hzπ'⟩ :=
+    RouteA.exists_quotient_π_zero hact V hVs hVa hVmem VE hVEs hVEa hVEmem
+  -- the descended local Weierstrass model ([a5]), and proper/smooth from it
+  have hlw := RouteA.locallyWeierstrass_quotientπ hact V hVs hVa hVmem hVtop
+    VE hVEs hVEa hVEmem hfree π' zero' hzπ' hπ' hzero'
+  haveI hproper : IsProper π' := RouteA.isProper_of_locallyWeierstrass hlw
+  haveI hsmooth : SmoothOfRelativeDimension 1 π' :=
+    RouteA.smoothOfRelativeDimension_of_locallyWeierstrass hlw
+  -- the quotient geometric elliptic curve and the cartesian engine square
+  set C' : EllipticCurveGeom (σ.quotient V hVs hVa) :=
+    { E := σE.quotient VE hVEs hVEa, π := π', zero := zero', zero_π := hzπ'
+      smooth := hsmooth, proper := hproper, localModel := hlw } with hC'
+  have hpb := RouteA.isPullback_quotientπ hact V hVs hVa hVmem hVtop VE hVEs hVEa hVEmem
+    hfree π' hπ'
+  -- descend the structure map through the quotient
+  have hstructinv : ∀ γ, σ.hom γ ≫ XM.structMap = XM.structMap :=
+    fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.base_w
+  obtain ⟨structMap₀, hstructMap₀, -⟩ :=
+    σ.existsUnique_quotientπ_lift V hVs hVa hVmem XM.structMap hstructinv
+  -- assemble `X₀` and the quotient `Ell/R`-morphism `q`
+  set X₀ : EllObj R :=
+    { base := σ.quotient V hVs hVa, structMap := structMap₀, curve := C'.toEllipticCurve }
+    with hX₀
+  set q : XM ⟶ X₀ :=
+    { baseHom := σ.quotientπ V hVs hVa hVmem
+      base_w := hstructMap₀
+      top := σE.quotientπ VE hVEs hVEa hVEmem
+      isPullback := hpb
+      zero_w := hzero'.symm } with hq
+  refine ⟨X₀, q, ?_, ?_, ?_, ?_, ?_⟩
+  · -- `Ell/R`-level `G`-invariance: base and curve quotient projections are invariant
+    -- by construction (`hom_quotientπ` downstairs and upstairs)
+    intro γ
+    refine EllHom.ext ?_ ?_
+    · show (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫
+          σ.quotientπ V hVs hVa hVmem = σ.quotientπ V hVs hVa hVmem
+      exact σ.hom_quotientπ V hVs hVa hVmem γ
+    · show (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.top ≫
+          σE.quotientπ VE hVEs hVEa hVEmem = σE.quotientπ VE hVEs hVEa hVEmem
+      exact σE.hom_quotientπ VE hVEs hVEa hVEmem γ
+  · exact ⟨fun {W} g₁ g₂ h => σ.quotientπ_hom_ext V hVs hVa hVmem g₁ g₂ h⟩
+  · exact fun {W} F hF => (σ.existsUnique_quotientπ_lift V hVs hVa hVmem F hF).exists
+  · exact ⟨σ.quotientπ_surjective V hVs hVa hVmem⟩
+  · exact σ.etale_quotientπ V hVs hVa hVmem hfree
 
 /-- The δ-torsor classifying morphism of a `P`-class (KM p. 114): the `Ell/R`-morphism
 `Y ×_{Y.base} δ_{E_Y} ⟶ 𝕸(𝒫,δ)` classifying the pair `(α|_chart, β_univ)` — the pulled-back
@@ -503,7 +612,9 @@ Proof (KM pp. 112–116): `𝕸(𝒫,δ) = Xδ ×_{𝕸(δ)} Z_P` represents `�
 the single rigidity call, already at `RigidNoeth` (`simulSchemeAction_free_of_rigidNoeth`,
 PROVEN: emptiness of the fixed locus is detected on residue-field points); the free
 quotient `q : 𝕸(𝒫,δ) ⟶ 𝕸(𝒫,δ)/G` in `Ell/R` is the route-(a) Phase-A engine
-(`exists_engineQuotient` — the residual interface sorry, geometric and rigidity-free);
+(`exists_engineQuotient` — PROVEN in-file from the assembled Phase-A pieces, geometric and
+rigidity-free; residuals: the quarantined [a2-M] orbit input `exists_orbit_isAffineOpen`
+and the upstream [a5-P-loc] package);
 the universal `P`-class descends along `q` by the [B1] α-descent
 (`existsUnique_alpha_descent`, PROVEN); and `(𝕸(𝒫,δ)/G, α₀)` represents `𝒫` by the
 KM pp. 114–116 torsor bijection — surjectivity via `exists_descended`/`map_descended`,

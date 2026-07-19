@@ -23733,3 +23733,71 @@ mouth-discharge (`EngineMouth:exists_engineQuotient`, mirror `exists_coreData`) 
 T-E15b-residuals (2 sorries + universe wall) · TD6b (`ExactOrder` part 3, `scratch_alg.lean` banked).
 F4 firing rule armed: ONE pin-discharge builder (hbound+hH, designs at v10.328) fires when
 `KeystoneGeometricPoint.lean` lands.
+
+---
+
+## v10.330-FIN (2026-07-19) — ENGINE-MOUTH INTERFACE DISCHARGED (wave landing 1/7) + FIN recon bundle (STREAM-FIN)
+
+### 1. `exists_engineQuotient` DISCHARGED (mouth builder, verified+landed)
+
+The private engine interface (EngineMouth.lean) is now a real ~60-line proof — statement verbatim,
+replaying the **model-free** route-(a) Phase-A engine inline (⊤-atlas + G-stable affine atlas via
+`RouteA.exists_isStableOpen_isAffineOpen_of_orbit` + `exists_quotient_π_zero` +
+`locallyWeierstrass_quotientπ` + proper/smooth/`isPullback_quotientπ` + `existsUnique_quotientπ_lift`
++ `C'.toEllipticCurve`), rather than consuming the black-box existential — only the replay exposes
+`q_eng = σE.quotientπ` so curve-level `Ell/R`-invariance comes from `SchemeAction.hom_quotientπ`.
+No rigidity enters (freeness = the `hfree` input, as designed). New import: GroupLawDescent (cycle-safe).
+
+**NEW quarantined leaf [a2-M] `exists_orbit_isAffineOpen` (EngineMouth:138, TRUE unconditionally)** —
+the model-free engine's `horbit` input = KM's silent quasi-projectivity appeal (Stacks 01ZY, absent
+from mathlib). Two-route recipe in its docstring; route 1 (boarded, preferred) consumes the
+[a5-P-loc] `exists_localModel_package_at` package (sibling in flight) → invariant basic open D(a) +
+global model + `orbit_mem_isAffineOpen_of_charts` dichotomy. ⚠️ COUPLING: that package is `private`
+in EngineDescent — needs un-privating/public wrapper when a5-P-loc lands; then ONE follow-on builder
+discharges [a2-M] and the mouth goes sorry-free (= MOUTH-CLOSED milestone; NOT yet fired).
+
+Mouth axiom profile (verified): sorryAx via EXACTLY two leaves — [a2-M] in-file + [a5-P-loc] upstream
+(path: `locallyWeierstrass_quotientπ`). Build green 3880 jobs; sorry census 1→1 (interface sorry
+replaced by the strictly smaller geometric leaf).
+
+**Discovery (mouth builder):** `EllipticCurveGeom.toEllipticCurve` is AXIOM-CLEAN — the T-W7
+group-law enrichment chain is fully proven; QuotientRepresentability.lean's header note ("only
+remaining non-proven leaf: T-W7") is STALE (cleanup item, low priority).
+
+### 2. FIN recon bundle (wait-window work, all machine-verified)
+
+* **Universe wall FULLY RESOLVED (compiled green in scratch).** The complete ULift torsor-field
+  transfer for `exists_levelThreeTorsorData_ulift` / T-E14 mirror: φu = `(action).comp
+  MulEquiv.ulift.toMonoidHom`; action agreement with the unlifted σZ is **rfl**; torsor field:
+  `hfact : descU = Sigma.map' ⇑Equiv.ulift (fun _ => 𝟙 Z) ≫ descG` by `Sigma.hom_ext` +
+  `rw [Sigma.ι_desc, Sigma.ι_comp_map'_assoc, Sigma.ι_desc]; simp only [Category.id_comp]; rfl`;
+  `IsIso (Sigma.map' …)` by `change … (Sigma.whiskerEquiv Equiv.ulift (fun _ => Iso.refl _)).hom;
+  infer_instance`; then `rw [hfact]; infer_instance`. ⚠️ `Sigma.reindex` is the WRONG bridge (its
+  ι-lemma pattern-matches a syntactic `f ∘ ⇑ε` family — rw/erw never fire); plain
+  `rw [Category.id_comp]` breaks on the pullback.lift proof-term motive (`simp only` + `rfl` closes).
+  ⟹ the :324 ⇐-edit consumes the `_ulift` package forms; the mouth is G-generic and instantiates directly.
+* **4-site `.mpr` re-point: ALREADY EXECUTED** — all five live receipt sites (GammaHClosure:119/:137,
+  GammaHMaster:1180/:1358/:1395) consume `representable_iff_rigidNoeth`; plain `representable_iff`
+  (:293, sorry :298) has ZERO consumers ⟹ :298 discharges as a one-liner from :324
+  (`Rigid.rigidNoeth`). v10.327's banked plan is moot.
+* **STRAND-3 (headline-critical, added to the armed pin-discharge charter):** the 5 parked degree
+  leaves enter receipts 1/2/4/5 through EXACTLY ONE site — `gammaFullNaive_eq_refl_of_fix_sections`
+  (GammaHMaster:436)'s closing step `aut_endo_eq_one … (endDeg_eq_one_of_isIso …)` (~:588). Re-route
+  through the KVC master (fixed full-level basis ⟹ E[N](k̄) fixed pointwise ⟹ rank-2 supply);
+  statement unchanged. ⚠️ Do NOT imitate the :262 [RIG-1] collapse-engine rewire (vacuous over k̄);
+  its εO-pointedness extraction (:226-240) and Hom.commGroup δ-plumbing ARE reusable glue. The :203
+  section docstring naming aut_endo_eq_one is stale.
+* **capstone-receipts.sh v2 (self-judging):** per-receipt PASS/FAIL verdicts (axiom-set membership),
+  12-file cone census, hard exit code — **exit 0 ⟺ THE HEADLINE**. Verified at baseline: 1 PASS
+  (levelSpaceΓπ_etale) + 6 FAIL (sorryAx), exit 1. GammaHMaster/GammaHClosure confirmed ZERO real
+  sorries (prose only) — the receipts' entire sorryAx load is import-cone.
+* Pin-design deps verified: `endMonHom` already in both pin files' import cone (GammaHMaster →
+  TorsionRestrict → EndomorphismDegree); `Matrix.card_GL_field` present (mathlib Card.lean:89).
+
+### 3. Wave status after landing 1/7
+
+LIVE: a5-P-loc (EngineDescent) · scaleTorsor (SqrtCoverGlue) · recollement-glue (Recollement) ·
+KVC-consumer (KeystoneGeometricPoint, creates) · T-E15b-residuals (LevelThreeTorsor) · TD6b
+(ExactOrder). ARMED: pin-discharge (3 strands) on KeystoneGeometricPoint; T-E14 on scaleTorsor;
+[a2-M]-discharge follow-on on a5-P-loc (needs the un-privating). Central-integration protocol
+(builders don't commit) holding — zero drift.
