@@ -533,6 +533,82 @@ theorem pointedAuto_eq_id_of_fixes_point_kvc {k : Type u} [Field k]
           rw [show (3 : ℤ) = 2 + 1 by norm_num, add_zsmul, one_zsmul]
       _ = 0 := h1
 
+/-- **([KVC-drop-in D], the full-torsion supply — the STRAND-3 degree-cone bypass)** Over
+an algebraically closed field with `N ≥ 3` invertible, a pointed automorphism `ε` fixing
+EVERY `N`-torsion point is the identity. This is the Hasse- and degree-free replacement
+for `aut_endo_eq_one` at the sole degree-cone entry `gammaFullNaive_eq_refl_of_fix_sections`:
+`E[N](k̄) ≅ (ℤ/N)²` (`torsion_geometricFibre_rank_two`) supplies a basis `P, Q`; for
+`N ≥ 3` the standard basis has `2 • P ≠ 0` and `Q ∉ {0, P, -P}`, and both are `ε`-fixed by
+hypothesis, so `pointedAuto_eq_id_of_fixes_points_kvc` closes. -/
+theorem pointedAuto_eq_id_of_fixes_torsion_kvc {k : Type u} [Field k]
+    [IsAlgClosed k] (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (ε : E.asOver ⟶ E.asOver) (hIso : IsIso ε)
+    (hη : η[E.asOver] ≫ ε = η[E.asOver])
+    (N : ℕ) [NeZero N] (hN : 3 ≤ N) (hNk : (N : k) ≠ 0)
+    (hfix : ∀ x : E.Point (𝟙 (Spec (CommRingCat.of k))), (N : ℤ) • x = 0 →
+      (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x ≫ ε =
+        (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x) :
+    ε = 𝟙 E.asOver := by
+  classical
+  obtain ⟨φ⟩ := E.torsion_geometricFibre_rank_two N k (𝟙 (Spec (CommRingCat.of k))) hNk
+  set sP := φ.symm (Pi.single (0 : Fin 2) (1 : ZMod N)) with hsP
+  set sQ := φ.symm (Pi.single (1 : Fin 2) (1 : ZMod N)) with hsQ
+  have hφP : φ sP = Pi.single (0 : Fin 2) (1 : ZMod N) := φ.apply_symm_apply _
+  have hφQ : φ sQ = Pi.single (1 : Fin 2) (1 : ZMod N) := φ.apply_symm_apply _
+  have h1 : (1 : ZMod N) ≠ 0 := by
+    rw [show (1 : ZMod N) = ((1 : ℕ) : ZMod N) by push_cast; ring, Ne,
+      CharP.cast_eq_zero_iff (ZMod N) N]
+    intro h; have := Nat.le_of_dvd (by norm_num) h; omega
+  have h2 : (2 : ZMod N) ≠ 0 := by
+    rw [show (2 : ZMod N) = ((2 : ℕ) : ZMod N) by push_cast; ring, Ne,
+      CharP.cast_eq_zero_iff (ZMod N) N]
+    intro h; have := Nat.le_of_dvd (by norm_num) h; omega
+  -- an element of the torsion submodule is zero iff its `φ`-image is zero
+  have hzero : ∀ s : Submodule.torsionBy ℤ (E.Point (𝟙 (Spec (CommRingCat.of k)))) (N : ℤ),
+      s.1 = 0 → φ s = 0 := by
+    intro s hs
+    rw [show s = 0 from Subtype.ext (by rw [hs, ZeroMemClass.coe_zero])]
+    exact φ.map_zero
+  have hPtor : (N : ℤ) • sP.1 = 0 := (Submodule.mem_torsionBy_iff _ _).mp sP.2
+  have hQtor : (N : ℤ) • sQ.1 = 0 := (Submodule.mem_torsionBy_iff _ _).mp sQ.2
+  refine pointedAuto_eq_id_of_fixes_points_kvc E ε hIso hη sP.1 sQ.1 ?_ ?_ ?_ ?_
+    (hfix _ hPtor) (hfix _ hQtor)
+  · -- `2 • P ≠ 0`
+    intro h0
+    apply h2
+    have hsp0 : sP + sP = 0 := by
+      apply Subtype.ext
+      rw [AddMemClass.coe_add, ZeroMemClass.coe_zero, ← two_zsmul]
+      exact h0
+    have hz : (Pi.single (0 : Fin 2) (1 : ZMod N) : Fin 2 → ZMod N)
+        + Pi.single (0 : Fin 2) (1 : ZMod N) = 0 := by
+      rw [← hφP, ← φ.map_add, hsp0, φ.map_zero]
+    have hev := congrFun hz (0 : Fin 2)
+    simp only [Pi.add_apply, Pi.single_eq_same, Pi.zero_apply] at hev
+    rw [show (2 : ZMod N) = 1 + 1 from by ring]
+    exact hev
+  · -- `Q ≠ 0`
+    intro h0
+    apply h1
+    have hz : φ sQ = 0 := hzero _ h0
+    rw [hφQ] at hz
+    have hev := congrFun hz (1 : Fin 2)
+    simpa using hev
+  · -- `Q ≠ P`
+    intro h0
+    apply h1
+    have hz : φ sQ = φ sP := congrArg φ (Subtype.ext h0)
+    rw [hφP, hφQ] at hz
+    have hev := congrFun hz (1 : Fin 2)
+    simpa using hev
+  · -- `Q ≠ -P`
+    intro h0
+    apply h1
+    have hz : φ sQ = φ (-sP) := congrArg φ (Subtype.ext (by rw [h0, NegMemClass.coe_neg]))
+    rw [hφQ, φ.map_neg, hφP] at hz
+    have hev := congrFun hz (1 : Fin 2)
+    simpa using hev
+
 end EllipticCurve
 
 /-! ## [KVC-drop-ins] — the literal `hbound` pin shapes -/
