@@ -46,6 +46,7 @@ import ModularCurves.ForMathlib.AffineVanishing
 import ModularCurves.ForMathlib.ClosedImmersionFinrankIso
 import ModularCurves.ForMathlib.ComoduleCoinvariants
 import ModularCurves.ForMathlib.FiniteAffineOpenCover
+import ModularCurves.ForMathlib.FinitelyGeneratedSubalgebraSystem
 import ModularCurves.ForMathlib.FiniteIntersectionFunctor
 import ModularCurves.ForMathlib.FiniteIntersectionFunctorGeometry
 import ModularCurves.ForMathlib.FiniteIntersectionGlueComparison
