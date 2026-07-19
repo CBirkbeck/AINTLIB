@@ -60,6 +60,54 @@ theorem Algebra.SpreadData.mapAtLaterStage_surjective
   refine ⟨x, ?_⟩
   rw [D₁.mapAtLaterStage_apply D₂ H, hx, hx', hy']
 
+/-- Finitely many compatible colimit surjections become surjective simultaneously at one
+common later stage. -/
+theorem Algebra.SpreadData.exists_common_surjective_mapAtLaterStage
+    {R A : Type u} [CommRing R] [CommRing A]
+    {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+    (H : Algebra.IsFilteredAlgColimit R 𝒮 t A uA)
+    {ω ρ : Type u} [Finite ρ]
+    (B : ω → Type u) [∀ q, CommRing (B q)] [∀ q, Algebra A (B q)]
+    (D : ∀ q, Algebra.SpreadData 𝒮 uA (B q)) (src dst : ρ → ω)
+    {i : ι} (h : ∀ q, (D q).i₀ ≤ i)
+    (f : ∀ r,
+      (D (src r)).spreadStage (t := t) (h (src r)) →ₐ[𝒮 i]
+        (D (dst r)).spreadStage (t := t) (h (dst r)))
+    (F : ∀ r, B (src r) →ₐ[A] B (dst r))
+    (hf : ∀ r x,
+      (D (dst r)).stageToColimit H ⟨i, h (dst r)⟩ (f r x) =
+        F r ((D (src r)).stageToColimit H ⟨i, h (src r)⟩ x))
+    (hF : ∀ r, Function.Surjective (F r)) :
+    ∃ (j : ι) (hij : i ≤ j), ∀ r,
+      letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+      Function.Surjective
+        ((D (src r)).mapAtLaterStage (D (dst r)) H
+          (h (src r)) (h (dst r)) hij (f r)) := by
+  classical
+  choose j hij hsurj using fun r =>
+    (D (src r)).exists_surjective_mapAtLaterStage (D (dst r)) H
+      (h (src r)) (h (dst r)) (f r) (F r) (hf r) (hF r)
+  letI : Fintype ρ := Fintype.ofFinite ρ
+  haveI := H.directed
+  haveI := H.nonempty
+  obtain ⟨k, hk⟩ := (insert i (Finset.univ.image j)).exists_le
+  have hik : i ≤ k := hk i (Finset.mem_insert_self i _)
+  have hjk : ∀ r, j r ≤ k := fun r => hk (j r)
+    (Finset.mem_insert_of_mem (Finset.mem_image_of_mem j (Finset.mem_univ r)))
+  refine ⟨k, hik, fun r => ?_⟩
+  have hr :=
+    _root_.AlgebraicGeometry.Algebra.SpreadData.mapAtLaterStage_surjective
+      (D (src r)) (D (dst r)) H
+      ((h (src r)).trans (hij r)) ((h (dst r)).trans (hij r)) (hjk r)
+      ((D (src r)).mapAtLaterStage (D (dst r)) H
+        (h (src r)) (h (dst r)) (hij r) (f r)) (hsurj r)
+  rw [(D (src r)).mapAtLaterStage_trans (D (dst r)) H
+    (h (src r)) (h (dst r)) (hij r) (hjk r) (f r)] at hr
+  exact hr
+
 /-- A compatible affine map which is a closed immersion over the filtered
 colimit becomes a closed immersion at one later stage. -/
 theorem Algebra.SpreadData.exists_isClosedImmersion_specMapAtLaterStage
@@ -85,6 +133,39 @@ theorem Algebra.SpreadData.exists_isClosedImmersion_specMapAtLaterStage
   obtain ⟨j, hij, hsurj⟩ :=
     D₁.exists_surjective_mapAtLaterStage D₂ H h₁ h₂ f F hf hF
   exact ⟨j, hij, IsClosedImmersion.spec_of_surjective _ hsurj⟩
+
+/-- Finitely many compatible affine maps which are closed immersions over the filtered
+colimit become closed immersions simultaneously at one common later stage. -/
+theorem Algebra.SpreadData.exists_common_isClosedImmersion_specMapAtLaterStage
+    {R A : Type u} [CommRing R] [CommRing A]
+    {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+    (H : Algebra.IsFilteredAlgColimit R 𝒮 t A uA)
+    {ω ρ : Type u} [Finite ρ]
+    (B : ω → Type u) [∀ q, CommRing (B q)] [∀ q, Algebra A (B q)]
+    (D : ∀ q, Algebra.SpreadData 𝒮 uA (B q)) (src dst : ρ → ω)
+    {i : ι} (h : ∀ q, (D q).i₀ ≤ i)
+    (f : ∀ r,
+      (D (src r)).spreadStage (t := t) (h (src r)) →ₐ[𝒮 i]
+        (D (dst r)).spreadStage (t := t) (h (dst r)))
+    (F : ∀ r, B (src r) →ₐ[A] B (dst r))
+    (hf : ∀ r x,
+      (D (dst r)).stageToColimit H ⟨i, h (dst r)⟩ (f r x) =
+        F r ((D (src r)).stageToColimit H ⟨i, h (src r)⟩ x))
+    (hF : ∀ r, Function.Surjective (F r)) :
+    ∃ (j : ι) (hij : i ≤ j), ∀ r,
+      letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+      IsClosedImmersion
+        (Spec.map (CommRingCat.ofHom
+          ((D (src r)).mapAtLaterStage (D (dst r)) H
+            (h (src r)) (h (dst r)) hij (f r)).toRingHom)) := by
+  obtain ⟨j, hij, hsurj⟩ :=
+    Algebra.SpreadData.exists_common_surjective_mapAtLaterStage
+      H B D src dst h f F hf hF
+  refine ⟨j, hij, fun r => ?_⟩
+  exact IsClosedImmersion.spec_of_surjective _ (hsurj r)
 
 /-- The glued structural morphism attached to a spread affine-intersection functor is
 locally of finite presentation over its stage ring. -/
