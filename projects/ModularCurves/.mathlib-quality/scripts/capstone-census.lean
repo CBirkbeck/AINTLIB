@@ -14,7 +14,6 @@ run_meta do
     `ModularCurves.gammaH_representable_of_orderOf,
     `ModularCurves.gammaOneDrinfeld_representable_prep,
     `ModularCurves.levelSpaceΓπ_etale ]
-  IO.println "== RESIDUAL LEAF CENSUS (register boxes each receipt bottoms out at) =="
   for r in receipts do
     match env.find? r with
     | none => IO.println s!"  {r}: MISSING"

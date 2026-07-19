@@ -68,11 +68,10 @@ for name in \
   fi
 done
 
-echo "== RESULT =="
+echo "== RESIDUAL LEAF CENSUS (register box per dirty receipt) =="
 echo ""
-echo "== RESIDUAL LEAF CENSUS (which register box each dirty receipt bottoms out at) =="
 CENSUS="$(cd "$(git rev-parse --show-toplevel)" && lake env lean projects/ModularCurves/.mathlib-quality/scripts/capstone-census.lean 2>&1)" || true
-echo "$CENSUS" | grep -vE "^$" | tail -n +1
+echo "$CENSUS" | grep -E "CENSUS|CLEAN|:|★" | grep -vE "^$"
 
 echo ""
 echo "== RESULT =="
