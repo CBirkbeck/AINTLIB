@@ -1,5 +1,8 @@
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.Picard.InvertibleSheafLocallyFree
+import ModularCurves.ForMathlib.SheafDisjointUnion
+import Mathlib.Algebra.Category.Grp.Zero
+import Mathlib.Topology.Sheaves.AddCommGrpCat
 import Mathlib.Topology.Sheaves.LocallySurjective
 
 /-!
@@ -57,6 +60,8 @@ end SheafOfModules
 
 namespace AlgebraicGeometry.Scheme.Modules
 
+open ZeroObject
+
 /-- Restriction to an open subscheme commutes with cokernels. -/
 noncomputable def restrictCokernelIso
     {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N) (U : X.Opens) :
@@ -67,6 +72,50 @@ noncomputable def restrictCokernelIso
   letI : F.PreservesZeroMorphisms :=
     Functor.preservesZeroMorphisms_of_isLeftAdjoint F
   exact (PreservesCokernel.iso F f).symm
+
+/-- Restricting a pushforward to an open with empty source preimage gives the zero
+module. -/
+theorem restrictPushforward_isZero_of_preimage_opensRange_eq_bot
+    {X Y W : Scheme.{u}} (f : X ⟶ Y) (g : W ⟶ Y) [IsOpenImmersion g]
+    (M : X.Modules) (h : f ⁻¹ᵁ g.opensRange = ⊥) :
+    IsZero ((restrictFunctor g).obj ((pushforward f).obj M)) := by
+  let q : (restrictFunctor g).obj ((pushforward f).obj M) ⟶ 0 := 0
+  haveI : IsIso q := by
+    rw [Hom.isIso_iff_isIso_app]
+    intro U
+    have hpre : f ⁻¹ᵁ (g ''ᵁ U) = ⊥ := by
+      apply le_antisymm
+      · calc
+          f ⁻¹ᵁ (g ''ᵁ U) ≤ f ⁻¹ᵁ g.opensRange :=
+            Scheme.Hom.preimage_mono f (g.image_le_opensRange U)
+          _ = ⊥ := h
+      · exact bot_le
+    haveI : Subsingleton Γ(M, f ⁻¹ᵁ (g ''ᵁ U)) := by
+      rw [hpre]
+      exact TopCat.Sheaf.subsingleton_toType_obj_bot
+        ((SheafOfModules.toSheaf X.ringCatSheaf).obj M)
+    haveI hsource : Subsingleton ↑Γ((restrictFunctor g).obj
+        ((pushforward f).obj M), U) := by
+      change Subsingleton Γ(M, f ⁻¹ᵁ (g ''ᵁ U))
+      infer_instance
+    haveI htarget : Subsingleton ↑Γ((0 : W.Modules), U) := by
+      let F := SheafOfModules.toSheaf W.ringCatSheaf
+      have hz : IsZero (F.obj (0 : W.Modules)) :=
+        F.map_isZero (isZero_zero W.Modules)
+      let E := TopCat.Sheaf.forget AddCommGrpCat W ⋙
+        (CategoryTheory.evaluation (W.Opens)ᵒᵖ AddCommGrpCat).obj (.op U)
+      letI : E.PreservesZeroMorphisms := by
+        constructor
+        intro A B
+        rfl
+      exact AddCommGrpCat.subsingleton_of_isZero (E.map_isZero hz)
+    rw [ConcreteCategory.isIso_iff_bijective]
+    constructor
+    · intro a b _
+      exact Subsingleton.elim a b
+    · intro y
+      exact ⟨0, Subsingleton.elim _ y⟩
+  exact (isZero_zero _).of_iso (asIso q)
 
 end AlgebraicGeometry.Scheme.Modules
 
@@ -250,5 +299,27 @@ noncomputable def sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit
       z hz U r hr hspan hnzd n ≪≫
     (Scheme.Modules.restrictFunctor U.1.ι).mapIso
       (idealModuleCokerIsoPushforwardUnit z)
+
+/-- A consecutive pole quotient vanishes on a Cartier-generator chart disjoint
+from the section. -/
+theorem sectionPoleSheafSuccCoker_restrict_isZero_of_preimage_eq_bot
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (hU : z ⁻¹ᵁ U.1 = ⊥) :
+    IsZero ((Scheme.Modules.restrictFunctor U.1.ι).obj
+      (sectionPoleSheafSuccCoker π z hz n)) := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  have htarget : IsZero
+      ((Scheme.Modules.restrictFunctor U.1.ι).obj
+        ((Scheme.Modules.pushforward z).obj (Scheme.Modules.unitObj S))) := by
+    apply Scheme.Modules.restrictPushforward_isZero_of_preimage_opensRange_eq_bot
+    simpa only [Scheme.Opens.opensRange_ι] using hU
+  exact htarget.of_iso
+    (sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit
+      z hz U r hr hspan hnzd n)
 
 end ModularCurves
