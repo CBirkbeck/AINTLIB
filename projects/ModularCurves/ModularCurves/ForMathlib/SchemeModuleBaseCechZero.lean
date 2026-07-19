@@ -53,6 +53,35 @@ theorem baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
   exact CategoryTheory.Sheaf.H.longSequence_surjective_of_subsingleton_H
     hTs isTerminalTop
 
+/-- Global sections are exact at the target of a monomorphism and the source
+of its cokernel map. -/
+theorem baseSectionsMap_exact_cokernel
+    {X S : Scheme.{u}} (π : X ⟶ S) {M N : X.Modules} (f : M ⟶ N)
+    [Mono f] :
+    Function.Exact (baseSectionsMap π f).hom
+      (baseSectionsMap π (cokernel.π f)).hom := by
+  let T := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
+  have hT : T.ShortExact :=
+    ShortComplex.ShortExact.mk (ShortComplex.exact_cokernel f)
+  let Ts := T.map (toSheaf X)
+  have hTs : Ts.ShortExact :=
+    ShortComplex.ShortExact.map_of_exact hT (toSheaf X)
+  rw [LinearMap.exact_iff]
+  ext y
+  constructor
+  · intro hy
+    have hy' : Ts.g.hom.app (op (⊤ : X.Opens)) y = 0 := by
+      change (baseSectionsMap π (cokernel.π f)).hom y = 0
+      exact LinearMap.mem_ker.mp hy
+    obtain ⟨x, hx⟩ := CategoryTheory.Sheaf.H.longSequence_equiv₀_exact₂
+      (hT := isTerminalTop) (hS := hTs) y hy'
+    exact ⟨x, hx⟩
+  · rintro ⟨x, rfl⟩
+    rw [LinearMap.mem_ker]
+    change ((cokernel.π f).app (⊤ : X.Opens)) (f.app (⊤ : X.Opens) x) = 0
+    have hzero : f ≫ cokernel.π f = 0 := cokernel.condition f
+    exact congrArg (fun q : M ⟶ cokernel f => q.app (⊤ : X.Opens) x) hzero
+
 /-- A monomorphism of scheme modules induces a monomorphism on global
 sections over the base ring. -/
 theorem baseSectionsMap_mono

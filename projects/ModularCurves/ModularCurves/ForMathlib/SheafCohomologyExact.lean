@@ -90,6 +90,21 @@ variable {T : C} (hT : Limits.IsTerminal T)
 
 open Opposite
 
+include hS hT in
+/-- Degree-zero exactness at the middle sheaf, expressed using sections over a
+terminal object. -/
+lemma longSequence_equiv₀_exact₂ (x₂ : S.X₂.obj.obj (op T))
+    (hx₂ : S.g.hom.app (op T) x₂ = 0) :
+    ∃ x₁ : S.X₁.obj.obj (op T), S.f.hom.app (op T) x₁ = x₂ := by
+  let y₂ := (equiv₀ S.X₂ hT).symm x₂
+  have hy₂ : map S.g 0 y₂ = 0 := by
+    rw [equiv₀_symm_naturality, hx₂]
+    exact map_zero _
+  obtain ⟨y₁, hy₁⟩ := longSequence_exact₂ hS 0 y₂ hy₂
+  refine ⟨equiv₀ S.X₁ hT y₁, ?_⟩
+  rw [equiv₀_naturality, hy₁]
+  simp [y₂]
+
 /-- Degree-zero exactness expressed using sections over a terminal object. -/
 lemma longSequence_equiv₀_exact₃ (x₃ : S.X₃.obj.obj (op T))
     (hx₃ : δ hS 0 1 rfl ((equiv₀ S.X₃ hT).symm x₃) = 0) :
