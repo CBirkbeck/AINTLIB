@@ -59,9 +59,31 @@ FJP campaign targets (`FiniteJet.finiteJet_isSheafy/isUniform/isDomain/not_noeth
 not_stablyUniform`, FJP/FiniteJetMain.lean) are sorry-free at file level and
 regression-protected.
 
-## Phase 0b: axiom audit (live)
+## Phase 0b: axiom audit (live, post-wave-9, commit `aa28f1f01`)
 
-(To be filled by `scratchpad/axiom_audit.lean` output — run after each phase.)
+`#print axioms` on the green tree:
+
+**Axiom-clean** (`propext`, `Classical.choice`, `Quot.sound` only — the
+regression-protected set; every new wrapper must consume only these):
+
+- `ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b` ✓ (the headline)
+- `ValuationSpectrum.every_rational_cover_is_OXAcyclic` ✓
+- `ValuationSpectrum.cor_8_32_productRestrictionSub_injective` ✓
+- `ValuationSpectrum.lemma_8_34_gluing` ✓
+- `FiniteJet.finiteJet_isSheafy` / `_isUniform` / `_isDomain` / `_not_noetherian`
+  / `_not_stablyUniform` ✓ (all five FJP targets)
+
+**sorryAx-tainted — all on the superseded old S-B route, OFF the headline path**
+(the headline's embedding field uses `productRestrictionSub_isInducing_via_equalizer`;
+handover rule: leave closed branches closed, do not reopen):
+
+- `productRestrictionSub_isInducing_tate` (StructureSheaf.lean, old OMT route)
+- `cor_8_32_productRestrictionSub_isEmbedding` (combines the tainted inducing)
+- `isSheafy_ofStronglyNoetherianTate_clean` (duplicate wrapper over the old route;
+  candidate for deprecation in Phase 7)
+
+Conclusion: **S-A, S-B, S-C are closed on the live branch.** The remaining program
+is the definitional/API work (R/O/C/P/S-D phases), not the 8.28(b) mathematics.
 
 ## Remaining-program tickets
 
