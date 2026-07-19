@@ -23664,3 +23664,72 @@ KeystoneGeometricPoint ([KVC-pts] rank-2 + [KVC-conj] + master) + small group ar
 **(4) Fleet poll**: EngineDescent 3→1 sorry-lines (a5compat landing imminent); ExactOrder 5,
 SqrtCoverGlue 1, Recollement 1, EngineMouth 4 (discharge mid-edit); LevelThreeTorsor.lean +
 KeystoneGeometricPoint.lean not yet written (builders exploring).
+
+---
+
+## v10.329-FIN (2026-07-19) — SALVAGE WAVE landed + [B2-TD-CONV] TorsorData convention amendment (STREAM-FIN)
+
+**Context.** All 8 integration-wave builders died on the account session limit (v10.328 note); per the
+salvage protocol their on-disk partials were verified (build+axioms+residue) and landed.
+
+### 1. Salvage commit `2e3c77233`
+
+* **T-E15b — `Moduli/LevelThreeTorsor.lean` (NEW, 437 lines).** Generic layer: `RelRepData.relRepAut`
+  classifying transport + `relRepAut_over/eqv_relRepAut/eqv_comp_relRepAut` (master naturality) +
+  `relRepAut_one/_mul` (**anti-homomorphy**, Yoneda contravariance) + `relRepSchemeAction`
+  (covariant via the `ofAut` inversion trick) + `relRepSchemeAction_equivariant` (the TRUE `γ⁻¹`
+  law) — ALL axiom-clean. Level-3 layer: `levelThreeData` (concrete carrier `YFull.fullLevelSpace X 3`,
+  [GHA4] replay) + finite/étale + `gammaFullNaiveGl_freeAction` + **`levelThreeEquivariantData`
+  ([GH0b] package, SORRY-FREE, axiom-clean)**. Salvage repairs by FIN: `obtain z` moved after the
+  `set`s (the `set` re-typed `d`, orphaning `z`'s type at `d✝`) + explicit `hzne` witness.
+* **[a5compat] — `Moduli/EngineDescent.lean` (1406→2527).** `locallyWeierstrass_quotientπ_of_compat`
+  PROVEN modulo **ONE** residual `exists_localModel_package_at` (:2320 — a5-P-loc semilocal gluing;
+  full recipe in its docstring: orbit-semilocalization + unit-Čech coboundary on semilocal rings +
+  additive affine Čech vanishing + T-W7.1b `G`-cocycle + `exists_coboundary` + `descendFixed` +
+  denominator-clearing SPREAD). `locallyWeierstrass_quotientπ_of_globalModel` **AXIOM-CLEAN**;
+  `locallyWeierstrass_quotientπ` / `exists_ellipticCurveGeom_quotient` sorryAx via the one residual only.
+* **TD6b scratch salvage (on-disk, untracked):** `projects/ModularCurves/scratch_alg.lean` (441 lines —
+  the pure-algebra jet/binomial core, `jetAux_coeff_zero` coefficient-peeling induction) +
+  `scratch_probe.lean` (name probe). Input for the TD6b re-fire; NOT committed.
+
+### 2. ⚠️ TWO STATEMENT-LAYER DISCOVERIES (T-E15b adjudication) + the [B2-TD-CONV] ruling
+
+1. **Convention wall — `TorsorData.equivariant` was FALSE-BY-DESIGN for non-abelian effective
+   actions.** The untwisted `(φ γ)`-form + covariant `hom_mul` + Yoneda anti-homomorphy of the
+   classifying transport force `(φ (γδ))(univ) = (φ (δγ))(univ)` over the (surjective ⟹ nonempty)
+   representing scheme; freeness (`glSmul_eq_one_of_eq_self`) refutes this for `GL₂(𝔽₃)`.
+   **Machine-checked refutation** `levelThreeTorsorData_isEmpty_of_nonempty_base` (axiom-clean) at
+   commit `2e3c77233`, removed together with the convention it refuted.
+   **RULING [B2-TD-CONV] (owner, source-faithful):** `TorsorData.equivariant` re-conventioned
+   `(φ γ) ↦ (φ γ⁻¹)`, mirroring `EquivariantRelRepData` [GH0b] verbatim (KM p. 112's "G operates"
+   fixes no direction; the `γ⁻¹`-twist is the unique one satisfiable by a covariant action).
+   Consumers reindexed (γ ↦ γ⁻¹ absorbs into ∀γ-uniform invariance inputs):
+   `QuotientProblem/simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian` (new `hfixval'`
+   via `map_inv` + `hom_inv_id` — the site's `c2'` was already in `.inv` form, so the new
+   convention is NATIVE there), `QuotientRepresentability/homToPullbackAlong_classifying_comm`
+   (+3 consumer blocks, `hqinv/hAq` at `γ⁻¹`), `EngineMouth/deck_classifyTorsor_comm` (+`hAq γ⁻¹`).
+   `levelThree_equivariant_bridge` DELETED — the field is now discharged by
+   `relRepSchemeAction_equivariant` (PROVEN). Logged in `b2_log.jsonl`.
+2. **Universe wall — STANDS (re-fire work order).** `TorsorData` pins `G : Type u`;
+   `GL₂(ℤ/3) : Type 0` ⟹ `exists_levelThreeTorsorData` stated at `CommRingCat.{0}` (unique
+   elaborating universe). Consumers at `u ≠ 0` need ULift-of-group (transported action) or
+   `G : Type*` widening (as [GH0b]). Adjudication to the T-E15b re-fire; the `∐`-coproduct and
+   `SchemeAction` universe constraints decide which.
+
+### 3. T-E15b residual census (post-amendment): **2 quarantined, both TRUE geometric**
+
+* `levelThree_surjective` — KM 3.7.1 covering: geometric-point-over-`y` anchor +
+  `exists_isNaiveFullLevel` at `N = 3` from `torsion_geometricFibre_rank_two` + conversion through
+  `(levelThreeData …).eqv`.
+* `levelThree_torsor` — KM p. 112 axiom 2 heart: freeness half in-repo; transitivity =
+  change-of-basis for `E[3](k̄) ≅ (ℤ/3)²`; scheme route via `Scheme.Hom.isIso_iff_finrank_eq`
+  on the finite étale comparison.
+
+### 4. Re-fire roster (7 builders, session-limit reset long past)
+
+mouth-discharge (`EngineMouth:exists_engineQuotient`, mirror `exists_coreData`) · a5-P-loc
+(`exists_localModel_package_at`) · scaleTorsor (`SqrtCoverGlue:142`) · recollement-glue
+(`Recollement:~455`, amended statement) · KVC-consumer (`KeystoneGeometricPoint.lean` NEW) ·
+T-E15b-residuals (2 sorries + universe wall) · TD6b (`ExactOrder` part 3, `scratch_alg.lean` banked).
+F4 firing rule armed: ONE pin-discharge builder (hbound+hH, designs at v10.328) fires when
+`KeystoneGeometricPoint.lean` lands.

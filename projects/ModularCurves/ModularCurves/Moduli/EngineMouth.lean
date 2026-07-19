@@ -163,20 +163,21 @@ private theorem classifyTorsor_homEquiv {P Q : ModuliProblem R} {G : Type u} [Gr
 
 /-- **G-equivariance of the classifying morphism** (KM p. 115): the deck transformation
 `σZ.hom γ` of the δ-torsor precomposes into `classifyTorsor` as postcomposition by
-`(A γ).hom` on `𝕸(𝒫,δ)`. -/
+`(A γ⁻¹).hom` on `𝕸(𝒫,δ)` (the `γ⁻¹` is the [B2-TD-CONV] convention of
+`TorsorData.equivariant`; consumers absorb it through their `∀ γ`-invariance inputs). -/
 private theorem deck_classifyTorsor_comm {P Q : ModuliProblem R} {G : Type u} [Group G]
     [Finite G] {φ : G →* Aut Q} {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM)
     {Y : EllObj R} (td : TorsorData φ Y) (α : P.obj (op Y)) (γ : G) :
     EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ) ≫
         classifyTorsor rM td α =
-      classifyTorsor rM td α ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom := by
+      classifyTorsor rM td α ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ⁻¹))).hom := by
   set ρ : Y.pullbackAlong td.f ⟶ Y.pullbackAlong td.f :=
     EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ) with hρ
   have hHEc := classifyTorsor_homEquiv rM td α
   apply rM.homEquiv.injective
   rw [rM.homEquiv_comp, hHEc,
-    show (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom
-        = rM.transportHom ((P.simulAutSnd Q) (φ γ)).hom from rfl,
+    show (rM.autMulHom ((P.simulAutSnd Q) (φ γ⁻¹))).hom
+        = rM.transportHom ((P.simulAutSnd Q) (φ γ⁻¹)).hom from rfl,
     rM.homEquiv_comp_transportHom, hHEc]
   refine Prod.ext ?_ ?_
   · show P.map ρ.op (P.map (Y.pullbackAlongπ td.f).op α)
@@ -184,7 +185,7 @@ private theorem deck_classifyTorsor_comm {P Q : ModuliProblem R} {G : Type u} [G
     rw [← Functor.map_comp_apply, ← op_comp, hρ,
       EllObj.homToPullbackAlong_pullbackAlongπ]
   · show Q.map ρ.op (td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩) =
-      (φ γ).hom.app (op (Y.pullbackAlong td.f))
+      (φ γ⁻¹).hom.app (op (Y.pullbackAlong td.f))
         (td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩)
     rw [hρ, map_eqv td.toRelRepData
       (EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ))
@@ -363,7 +364,7 @@ private theorem exists_descended {P Q : ModuliProblem R} {G : Type u} [Group G] 
       EllObj.homToPullbackAlong (Y.pullbackAlongπ td.f) (td.σZ.hom γ) (td.over_base γ) ≫
         (classifyTorsor rM td α ≫ q) = classifyTorsor rM td α ≫ q := by
     intro γ
-    rw [← Category.assoc, deck_classifyTorsor_comm rM td α γ, Category.assoc, hAq γ]
+    rw [← Category.assoc, deck_classifyTorsor_comm rM td α γ, Category.assoc, hAq γ⁻¹]
   exact descend_deckInvariant td (classifyTorsor rM td α ≫ q) hg_inv
 
 /-- **The descended morphism classifies `α`** (KM p. 115, surjectivity): if

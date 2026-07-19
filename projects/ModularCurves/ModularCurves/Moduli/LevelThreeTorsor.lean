@@ -26,8 +26,7 @@ axiom 2 upgrades to a finite étale `G`-torsor.
   its finiteness/étaleness, freeness of the `GL₂`-action
   (`gammaFullNaiveGl_freeAction`), and the fully proven equivariant package
   `levelThreeEquivariantData : EquivariantRelRepData (gammaFullNaiveGlAction R 3) X`.
-* **Quarantined residuals** (see below): `levelThree_surjective`, `levelThree_torsor`,
-  `levelThree_equivariant_bridge`.
+* **Quarantined residuals** (see below): `levelThree_surjective`, `levelThree_torsor`.
 * **The target**: `exists_levelThreeTorsorData`.
 
 ## ⚠️ TWO STATEMENT-LAYER DISCOVERIES (T-E15b adjudication input)
@@ -41,28 +40,23 @@ axiom 2 upgrades to a finite étale `G`-torsor.
    need either a `ULift` of the group (with a transported action) or a widening of
    `TorsorData`'s `G` to `Type*` (as `EquivariantRelRepData` [GH0b] already has).
 
-2. **Convention wall — `TorsorData.equivariant` is UNSATISFIABLE for a non-abelian
-   effective action.** The field demands precomposition with `σZ.hom γ` to intertwine
-   `(φ γ).hom`, while `σZ` is a covariant `SchemeAction` (`hom_mul`). But the
-   classifying transport is ANTI-homomorphic (Yoneda contravariance): together the two
-   fields force `σZ.hom (γδ) = σZ.hom (δγ)` and hence `(φ (γδ)).hom = (φ (δγ)).hom` on
-   all values over the (nonempty, by the `surjective` field) representing scheme — which
-   freeness (`glSmul_eq_one_of_eq_self`, PROVEN) refutes for the non-abelian
-   `GL₂(𝔽₃)`. This is machine-checked below:
-   `levelThreeTorsorData_isEmpty_of_nonempty_base`. The fix is the `γ⁻¹`-twist already
-   adopted (and documented, with the same anti-homomorphy adjudication) by
-   `EquivariantRelRepData.equivariant` (GammaHRepresentability.lean [GH0b]): replace
-   `(φ γ)` by `(φ γ⁻¹)` in `TorsorData.equivariant` (QuotientProblem.lean:766) and
-   reindex engine consumers by `γ ↦ γ⁻¹` where consumed (`FreeAction` is invariant under
-   the reindexing). With the corrected convention the equivariance is PROVEN here
-   (`relRepSchemeAction_equivariant` / `levelThreeEquivariantData`).
+2. **Convention wall — RESOLVED by the [B2-TD-CONV] amendment.** As delivered, this
+   package machine-checked that `TorsorData.equivariant`'s original untwisted
+   `(φ γ)`-form was UNSATISFIABLE for a non-abelian effective action: with a covariant
+   `SchemeAction` (`hom_mul`) and the ANTI-homomorphic classifying transport (Yoneda
+   contravariance), the two fields force `(φ (γδ)).hom = (φ (δγ)).hom` on all values
+   over the (nonempty, by the `surjective` field) representing scheme — refuted by
+   freeness (`glSmul_eq_one_of_eq_self`, PROVEN) for the non-abelian `GL₂(𝔽₃)`.
+   Formal refutation of record: `levelThreeTorsorData_isEmpty_of_nonempty_base` at
+   commit `2e3c77233` (removed together with the convention it refuted). The fix —
+   `(φ γ) ↦ (φ γ⁻¹)` in `TorsorData.equivariant`, mirroring
+   `EquivariantRelRepData.equivariant` [GH0b], with engine consumers reindexed by
+   `γ ↦ γ⁻¹` (`FreeAction` and all `∀ γ`-invariance inputs are reindexing-invariant) —
+   is now APPLIED (QuotientProblem + QuotientRepresentability + EngineMouth), and the
+   field is discharged here by `relRepSchemeAction_equivariant` (PROVEN).
 
-## Quarantined sorries (3)
+## Quarantined sorries (2)
 
-* `levelThree_equivariant_bridge` — the verbatim `TorsorData.equivariant` obligation.
-  **PROVABLY FALSE for `Nonempty X.base`** (see discovery 2 and the refutation theorem);
-  over the empty base it holds trivially. Dischargeable ONLY by the statement-layer
-  convention fix above; kept so the chartered target assembles verbatim.
 * `levelThree_surjective` — TRUE (KM 3.7.1 torsor axiom's surjectivity): fibre
   nonemptiness at every geometric point. Decomposition: (a) the point-anchored
   refinement of `EllObj.exists_geometricPoint` (its proof already routes through
@@ -291,116 +285,17 @@ private theorem levelThree_torsor (hinv : IsUnit ((3 : ℕ) : R)) (X : EllObj R)
         pullback (levelThreeData R hinv X).f (levelThreeData R hinv X).f) := by
   sorry
 
-/-- **QUARANTINED — ⚠️ PROVABLY FALSE for `Nonempty X.base`** (statement-layer issue,
-discovery 2 of the module docstring; machine-checked refutation:
-`levelThreeTorsorData_isEmpty_of_nonempty_base`). This is the verbatim
-`TorsorData.equivariant` obligation for the induced action: precomposition with
-`σZ.hom γ` intertwining `(φ γ).hom`. The TRUE law intertwines `(φ γ⁻¹).hom`
-(`relRepSchemeAction_equivariant`, PROVEN above); the two differ by the
-anti-homomorphy of the classifying transport. Dischargeable ONLY by the one-character
-convention fix `(φ γ) ↦ (φ γ⁻¹)` in `TorsorData.equivariant`
-(QuotientProblem.lean:766), mirroring `EquivariantRelRepData` [GH0b]. Kept sorried so
-the chartered target assembles verbatim. -/
-private theorem levelThree_equivariant_bridge (hinv : IsUnit ((3 : ℕ) : R))
-    (X : EllObj R) {T : Scheme.{u}} (g : T ⟶ X.base)
-    (h : { h : T ⟶ (levelThreeData R hinv X).Z //
-      h ≫ (levelThreeData R hinv X).f = g })
-    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3)) :
-    (levelThreeData R hinv X).eqv g
-        ⟨h.1 ≫ (ModuliProblem.RelRepData.relRepSchemeAction (gammaFullNaiveGlAction R 3)
-            (levelThreeData R hinv X)).hom γ,
-          by rw [Category.assoc, ModuliProblem.RelRepData.relRepSchemeAction_over, h.2]⟩ =
-      (gammaFullNaiveGlAction R 3 γ).hom.app (Opposite.op (X.pullbackAlong g))
-        ((levelThreeData R hinv X).eqv g h) := by
-  sorry
-
 end Quarantine
 
-/-! ### The refutation of record (discovery 2, machine-checked)
+/-! ### The refutation of record (discovery 2) — RESOLVED, theorem removed
 
-`TorsorData`'s field combination — covariant `SchemeAction` + `(φ γ)`-equivariance +
-`surjective` — is EMPTY for the level-3 action over any nonempty base. Formal core:
-`equivariant` at `g := f, h := 𝟙` shows `σZ.hom γ` classifies `(φ γ)(univ)`; applying
-`equivariant` twice against `hom_mul` forces
-`(φ (γδ))(univ) = (φ (δγ))(univ)`; freeness ([GH2-core]) then forces `γδ = δγ` in
-`GL₂(𝔽₃)` — refuted by the unipotent pair `[[1,1],[0,1]]`, `[[1,0],[1,1]]`. -/
-
-/-- **⚠️ THE CONVENTION-WALL REFUTATION** — `TorsorData (gammaFullNaiveGlAction R 3) X`
-is empty whenever `X.base` is nonempty (and hence `exists_levelThreeTorsorData` is
-unprovable as stated: its `equivariant` convention must become `(φ γ⁻¹)`, see the
-module docstring). Uses only the structure's own fields plus freeness. -/
-theorem levelThreeTorsorData_isEmpty_of_nonempty_base (R : CommRingCat.{0})
-    (hinv : IsUnit ((3 : ℕ) : R)) (X : EllObj R) (hne : Nonempty X.base) :
-    IsEmpty (ModuliProblem.TorsorData (gammaFullNaiveGlAction R 3) X) := by
-  constructor
-  intro d
-  obtain ⟨x⟩ := hne
-  set φ : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3) →*
-      Aut (gammaFullNaiveProblem R 3) := gammaFullNaiveGlAction R 3 with hφ
-  set uv : (gammaFullNaiveProblem R 3).obj (Opposite.op (X.pullbackAlong d.f)) :=
-    d.eqv d.f ⟨𝟙 d.Z, Category.id_comp d.f⟩ with huv
-  obtain ⟨z, -⟩ := d.surjective.surj x
-  -- `σZ.hom γ` classifies `(φ γ)(uv)`
-  have key : ∀ γ, d.eqv d.f ⟨d.σZ.hom γ, d.over_base γ⟩ =
-      (φ γ).hom.app (Opposite.op (X.pullbackAlong d.f)) uv := by
-    intro γ
-    have h := d.equivariant d.f ⟨𝟙 d.Z, Category.id_comp d.f⟩ γ
-    exact (congrArg (d.eqv d.f)
-      (Subtype.ext (Category.id_comp (d.σZ.hom γ)))).symm.trans h
-  -- `Aut`-multiplication evaluates as composition of the `app`s
-  have happ : ∀ (γ δ : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3))
-      (v : (gammaFullNaiveProblem R 3).obj (Opposite.op (X.pullbackAlong d.f))),
-      (φ (γ * δ)).hom.app (Opposite.op (X.pullbackAlong d.f)) v =
-        (φ γ).hom.app (Opposite.op (X.pullbackAlong d.f))
-          ((φ δ).hom.app (Opposite.op (X.pullbackAlong d.f)) v) := by
-    intro γ δ v
-    rw [map_mul]
-    rfl
-  -- the forced commutation on the universal value
-  have comm : ∀ γ δ : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3),
-      (φ (γ * δ)).hom.app (Opposite.op (X.pullbackAlong d.f)) uv =
-        (φ (δ * γ)).hom.app (Opposite.op (X.pullbackAlong d.f)) uv := by
-    intro γ δ
-    have h1 := d.equivariant d.f ⟨d.σZ.hom γ, d.over_base γ⟩ δ
-    rw [key γ] at h1
-    have h2 : d.eqv d.f ⟨d.σZ.hom (γ * δ), d.over_base (γ * δ)⟩ =
-        d.eqv d.f ⟨d.σZ.hom γ ≫ d.σZ.hom δ, by
-          rw [Category.assoc, d.over_base, d.over_base]⟩ :=
-      congrArg (d.eqv d.f) (Subtype.ext (d.σZ.hom_mul γ δ))
-    calc (φ (γ * δ)).hom.app (Opposite.op (X.pullbackAlong d.f)) uv
-        = d.eqv d.f ⟨d.σZ.hom (γ * δ), d.over_base (γ * δ)⟩ := (key (γ * δ)).symm
-      _ = d.eqv d.f ⟨d.σZ.hom γ ≫ d.σZ.hom δ, by
-            rw [Category.assoc, d.over_base, d.over_base]⟩ := h2
-      _ = (φ δ).hom.app (Opposite.op (X.pullbackAlong d.f))
-            ((φ γ).hom.app (Opposite.op (X.pullbackAlong d.f)) uv) := h1
-      _ = (φ (δ * γ)).hom.app (Opposite.op (X.pullbackAlong d.f)) uv :=
-            (happ δ γ uv).symm
-  -- freeness of the action
-  have hfree : ModuliProblem.FreeAction φ := gammaFullNaiveGl_freeAction R 3 hinv
-  -- an explicit non-commuting pair in GL₂(𝔽₃)
-  have hA : (!![1, 1; 0, 1] : Matrix (Fin 2) (Fin 2) (ZMod 3)) * !![1, 2; 0, 1] = 1 := by
-    decide
-  have hA' : (!![1, 2; 0, 1] : Matrix (Fin 2) (Fin 2) (ZMod 3)) * !![1, 1; 0, 1] = 1 := by
-    decide
-  have hB : (!![1, 0; 1, 1] : Matrix (Fin 2) (Fin 2) (ZMod 3)) * !![1, 0; 2, 1] = 1 := by
-    decide
-  have hB' : (!![1, 0; 2, 1] : Matrix (Fin 2) (Fin 2) (ZMod 3)) * !![1, 0; 1, 1] = 1 := by
-    decide
-  let A : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3) := ⟨!![1, 1; 0, 1], !![1, 2; 0, 1], hA, hA'⟩
-  let B : Matrix.GeneralLinearGroup (Fin 2) (ZMod 3) := ⟨!![1, 0; 1, 1], !![1, 0; 2, 1], hB, hB'⟩
-  have hAB : A * B ≠ B * A := by
-    intro hcomm
-    have hval : (!![1, 1; 0, 1] : Matrix (Fin 2) (Fin 2) (ZMod 3)) * !![1, 0; 1, 1] =
-        !![1, 0; 1, 1] * !![1, 1; 0, 1] := congrArg Units.val hcomm
-    exact absurd hval (by decide)
-  -- assemble the fixed point and contradict freeness
-  have hzne : Nonempty (X.pullbackAlong d.f).base := ⟨z⟩
-  refine absurd ?_ (hfree (X.pullbackAlong d.f) hzne ((A * B) * (B * A)⁻¹)
-    (by rw [Ne, mul_inv_eq_one]; exact hAB)
-    ((φ (B * A)).hom.app (Opposite.op (X.pullbackAlong d.f)) uv))
-  have h3 := happ ((A * B) * (B * A)⁻¹) (B * A) uv
-  rw [inv_mul_cancel_right] at h3
-  exact h3.symm.trans (comm A B)
+The machine-checked emptiness theorem `levelThreeTorsorData_isEmpty_of_nonempty_base` —
+refuting `TorsorData`'s original field combination (covariant `SchemeAction` +
+untwisted `(φ γ)`-equivariance + `surjective`) via the non-commuting unipotent pair
+`[[1,1],[0,1]]`, `[[1,0],[1,1]]` in `GL₂(𝔽₃)` — lived here through commit
+`2e3c77233` and was removed together with the convention it refuted when the
+[B2-TD-CONV] amendment landed (module docstring, discovery 2;
+`.mathlib-quality/b2_log.jsonl`). -/
 
 /-! ### The chartered target -/
 
@@ -413,10 +308,11 @@ theorem levelThreeTorsorData_isEmpty_of_nonempty_base (R : CommRingCat.{0})
 `GL₂(ℤ/3) : Type 0`).
 
 Assembly: the concrete datum `levelThreeData` ([GHA4] replay) + the induced covariant
-action `relRepSchemeAction` (laws PROVEN) + finiteness/étaleness (PROVEN) + the three
-quarantined residuals (`levelThree_equivariant_bridge` — false as stated, see
-`levelThreeTorsorData_isEmpty_of_nonempty_base`; `levelThree_surjective` and
-`levelThree_torsor` — true, geometric). -/
+action `relRepSchemeAction` with its `equivariant` field discharged by
+`relRepSchemeAction_equivariant` (PROVEN — the [B2-TD-CONV] `γ⁻¹` convention) +
+finiteness/étaleness (PROVEN) + the two quarantined geometric residuals
+(`levelThree_surjective`, `levelThree_torsor` — both TRUE, discharge plans in the
+module docstring). -/
 theorem exists_levelThreeTorsorData (R : CommRingCat.{0}) (hinv : IsUnit (3 : R))
     (X : EllObj R) :
     Nonempty (ModuliProblem.TorsorData (gammaFullNaiveGlAction R 3) X) := by
@@ -429,7 +325,8 @@ theorem exists_levelThreeTorsorData (R : CommRingCat.{0}) (hinv : IsUnit (3 : R)
            over_base := fun γ =>
              ModuliProblem.RelRepData.relRepSchemeAction_over _ _ γ
            equivariant := fun {T} g h γ =>
-             levelThree_equivariant_bridge R hinv' X g h γ
+             ModuliProblem.RelRepData.relRepSchemeAction_equivariant
+               (gammaFullNaiveGlAction R 3) (levelThreeData R hinv' X) g h γ
            finite := levelThreeData_finite R hinv' X
            etale := levelThreeData_etale R hinv' X
            surjective := levelThree_surjective R hinv' X

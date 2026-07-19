@@ -751,19 +751,30 @@ that for every elliptic curve E/S […] the S-scheme `δ_{E/S}` is a finite etal
 G-torsor"): a relative representation datum for the auxiliary problem carrying a
 compatible `G`-action which makes it a finite étale `G`-torsor over the base.
 
-Convention (attack-adjudicated): the `G`-action on classifying maps is by
-precomposition with `σZ.hom γ`, intertwining `(φ γ).hom` on values. -/
+Convention (**[B2-TD-CONV]**, v10.329 owner amendment; machine-checked adjudication):
+the `G`-action on classifying maps is by precomposition with `σZ.hom γ`, intertwining
+`(φ γ⁻¹).hom` on values — the same `γ⁻¹`-twist as `EquivariantRelRepData.equivariant`
+([GH0b]), forced by the anti-homomorphy of the classifying transport (Yoneda is
+contravariant). The originally-chartered untwisted `(φ γ)`-form is UNSATISFIABLE for a
+non-abelian effective action: together with the covariant `hom_mul` it forces
+`(φ (γδ))(univ) = (φ (δγ))(univ)` over the (by `surjective` nonempty) representing
+scheme, which freeness refutes for `GL₂(𝔽₃)` — formal refutation of the old field
+combination: `levelThreeTorsorData_isEmpty_of_nonempty_base` at commit `2e3c77233`
+(removed together with the convention it refuted). Consumers reindex by `γ ↦ γ⁻¹`
+where needed (`FreeAction` and all `∀ γ`-invariance hypotheses are invariant under the
+reindexing). -/
 structure TorsorData {Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
     (φ : G →* Aut Q) (X : EllObj R) extends RelRepData Q X where
   /-- The `G`-action on the relative representing scheme. -/
   σZ : SchemeAction G Z
   /-- The action lies over the base. -/
   over_base : ∀ γ : G, σZ.hom γ ≫ f = f
-  /-- The representing bijections are `G`-equivariant. -/
+  /-- The representing bijections are `G`-equivariant, in the `γ⁻¹`-twisted convention
+  of [GH0b] (see the structure docstring). -/
   equivariant : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
     (h : { h : T ⟶ Z // h ≫ f = g }) (γ : G),
     eqv g ⟨h.1 ≫ σZ.hom γ, by rw [Category.assoc, over_base, h.2]⟩ =
-      (φ γ).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
+      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g)) (eqv g h)
   /-- The structure map is finite. -/
   finite : IsFinite f
   /-- The structure map is étale. -/
@@ -887,15 +898,24 @@ theorem simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian
     exact congrArg
       (fun η : Q ⟶ Q => η.app (Opposite.op (XM.pullbackAlong t))
         (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).inv_hom_id
+  -- the `γ⁻¹`-fixedness, as demanded by the [B2-TD-CONV] `equivariant` convention
+  have hfixval' : (φ γ⁻¹).hom.app (Opposite.op (XM.pullbackAlong t))
+      (rM.homEquiv (XM.pullbackAlongπ t)).2 =
+      (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
+    conv_lhs => rw [← hfixval]
+    rw [_root_.map_inv]
+    exact congrArg
+      (fun η : Q ⟶ Q => η.app (Opposite.op (XM.pullbackAlong t))
+        (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).hom_inv_id
   -- transport into the torsor chart at the identity base map
   obtain ⟨td⟩ := htors (XM.pullbackAlong t)
-  have hβ : (φ γ).hom.app
+  have hβ : (φ γ⁻¹).hom.app
       (Opposite.op ((XM.pullbackAlong t).pullbackAlong (𝟙 _)))
       (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
         (rM.homEquiv (XM.pullbackAlongπ t)).2) =
       Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
         (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
-    rw [NatTrans.naturality_apply, hfixval]
+    rw [NatTrans.naturality_apply, hfixval']
   have hZfix : ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
       (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
         (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫ td.σZ.hom γ =
