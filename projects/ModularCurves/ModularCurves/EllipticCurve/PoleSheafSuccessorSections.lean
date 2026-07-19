@@ -129,6 +129,31 @@ noncomputable def sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
     Scheme.Modules.baseSectionsRestrictPushforwardUnitIsoOfSection
       π z hz U.1 hU
 
+/-- If the lower pole sheaf has vanishing first cohomology, the generator of a
+successive rank-one quotient lifts to a section of the next pole sheaf. -/
+theorem exists_sectionPoleSheafPower_succ_baseSection_generator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1)) :
+    ∃ x : Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz (n + 1)),
+      (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd n).hom
+        (Scheme.Modules.baseSectionsMap π
+          (cokernel.π (sectionPoleSheafSuccHom π z hz n)) x) = 1 := by
+  obtain ⟨x, hx⟩ :=
+    sectionPoleSheafSuccCoker_baseSectionsMap_surjective_of_subsingleton_H_one
+      hsm z hz n hH
+      ((sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd n).inv 1)
+  refine ⟨x, ?_⟩
+  rw [hx, Iso.inv_hom_id_apply]
+
 /-- Around every point of an affine base, the base-changed section has an affine
 neighborhood on which its ideal has an explicit regular generator. -/
 theorem exists_affineBaseChange_sectionCartierGenerator
