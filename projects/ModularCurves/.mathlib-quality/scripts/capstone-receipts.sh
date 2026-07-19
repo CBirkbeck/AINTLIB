@@ -69,10 +69,19 @@ for name in \
 done
 
 echo "== RESULT =="
+echo ""
+echo "== RESIDUAL LEAF CENSUS (which register box each dirty receipt bottoms out at) =="
+CENSUS="$(cd "$(git rev-parse --show-toplevel)" && lake env lean projects/ModularCurves/.mathlib-quality/scripts/capstone-census.lean 2>&1)" || true
+echo "$CENSUS" | grep -vE "^$" | tail -n +1
+
+echo ""
+echo "== RESULT =="
 if [ "$FAILED" -eq 0 ]; then
   echo "★★★ THE HEADLINE: all seven receipts are {propext, Classical.choice, Quot.sound}-clean ★★★"
   exit 0
 else
-  echo "headline not yet: at least one receipt failed (see VERDICTS)"
+  echo "headline not yet: dirty receipts bottom out at the register boxes in the census above."
+  echo "(Deep-geometry register boxes: exists_localModel_core_at [mouth], smul_eq_zero_of_factors"
+  echo " = BB-DELIGNE/Oort–Tate [receipts 3/6], pull_nsmul_jetData [receipts 3/6].)"
   exit 1
 fi
