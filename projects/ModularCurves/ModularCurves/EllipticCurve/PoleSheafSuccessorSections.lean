@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Module.Projective
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.ForMathlib.AffinePatchBaseChange
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
@@ -153,6 +154,49 @@ theorem exists_sectionPoleSheafPower_succ_baseSection_generator
         hsm z hz U hU r hspan hnzd n).inv 1)
   refine ⟨x, ?_⟩
   rw [hx, Iso.inv_hom_id_apply]
+
+/-- If the lower pole sheaf has vanishing first cohomology, the next pole
+module splits as the lower pole module and its rank-one successive quotient. -/
+noncomputable def sectionPoleSheafPower_succ_baseSectionsSplitEquivOfCartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1)) :
+    Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz (n + 1)) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n) ×
+        Γ(S, (⊤ : S.Opens)) := by
+  let f := (Scheme.Modules.baseSectionsMap π
+    (sectionPoleSheafSuccHom π z hz n)).hom
+  let g₀ := (Scheme.Modules.baseSectionsMap π
+    (cokernel.π (sectionPoleSheafSuccHom π z hz n))).hom
+  let e := (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+    hsm z hz U hU r hspan hnzd n).toLinearEquiv
+  let g := e.toLinearMap ∘ₗ g₀
+  have hsurj₀ : Function.Surjective g₀ :=
+    sectionPoleSheafSuccCoker_baseSectionsMap_surjective_of_subsingleton_H_one
+      hsm z hz n hH
+  have hsurj : Function.Surjective g := e.surjective.comp hsurj₀
+  have hexact₀ : Function.Exact f g₀ :=
+    sectionPoleSheafPower_baseSectionsSucc_exact hsm z hz n
+  have hexact : Function.Exact f g :=
+    (LinearEquiv.postcomp_exact_iff_exact (f := f) (g := g₀) (e := e)).mpr hexact₀
+  have hf : Function.Injective f := by
+    apply (ModuleCat.mono_iff_injective
+      (Scheme.Modules.baseSectionsMap π
+        (sectionPoleSheafSuccHom π z hz n))).mp
+    exact Scheme.Modules.baseSectionsMap_mono π
+      (sectionPoleSheafSuccHom π z hz n)
+      (sectionPoleSheafSuccHom_mono hsm z hz n)
+  let hsplitting := g.exists_rightInverse_of_surjective
+    (LinearMap.range_eq_top.mpr hsurj)
+  let l := Classical.choose hsplitting
+  have hl := Classical.choose_spec hsplitting
+  exact (hexact.splitSurjectiveEquiv hf ⟨l, hl⟩).1
 
 /-- Around every point of an affine base, the base-changed section has an affine
 neighborhood on which its ideal has an explicit regular generator. -/
