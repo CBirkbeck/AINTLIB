@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.Picard.InvertibleSheafLocallyFree
+import Mathlib.Topology.Sheaves.LocallySurjective
 
 /-!
 # Quasicoherence of pole sheaves
@@ -9,9 +10,50 @@ quasicoherent. This is the sheaf-theoretic input required by affine vanishing an
 cohomology-and-base-change arguments.
 -/
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
 
 universe u
+
+namespace SheafOfModules
+
+/-- For a closed immersion, the structure-sheaf map to the pushed-forward structure
+sheaf is an epimorphism of sheaves of modules. -/
+theorem unitToPushforwardObjUnit_epi_of_isClosedImmersion
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsClosedImmersion f] :
+    Epi (unitToPushforwardObjUnit f.toRingCatSheafHom) := by
+  let F := toSheaf Y.ringCatSheaf
+  let q := unitToPushforwardObjUnit f.toRingCatSheafHom
+  have hq : Epi (F.map q) := by
+    letI : CategoryTheory.Sheaf.IsLocallySurjective (F.map q) := by
+      change CategoryTheory.Presheaf.IsLocallySurjective
+        (Opens.grothendieckTopology Y) (F.map q).hom
+      constructor
+      intro U t
+      change ∀ y ∈ U, ∃ (V : TopologicalSpace.Opens Y) (i : V ⟶ U),
+        CategoryTheory.Presheaf.imageSieve (F.map q).hom t i ∧ y ∈ V
+      intro y hy
+      obtain ⟨_, ⟨V, hV, rfl⟩, hyV, hVU⟩ :=
+        Y.isBasis_affineOpens.exists_subset_of_mem_open hy U.isOpen
+      let i : V ⟶ U := homOfLE hVU
+      obtain ⟨s, hs⟩ := f.app_surjective V hV
+        (((Scheme.Modules.pushforward f).obj (Scheme.Modules.unitObj X)).val.map
+          i.op t)
+      refine ⟨V, i, ⟨s, ?_⟩, hyV⟩
+      change
+        (unitToPushforwardObjUnit f.toRingCatSheafHom).val.app (op V) s =
+          (((Scheme.Modules.pushforward f).obj (Scheme.Modules.unitObj X)).val.map
+            i.op t)
+      exact
+        (unitToPushforwardObjUnit_val_app_apply f.toRingCatSheafHom s).trans hs
+    infer_instance
+  letI := hq
+  constructor
+  intro Z g h hgh
+  apply F.map_injective
+  apply (cancel_epi (F.map q)).mp
+  rw [← F.map_comp, ← F.map_comp, hgh]
+
+end SheafOfModules
 
 namespace ModularCurves
 
@@ -44,6 +86,21 @@ theorem sectionPoleSheafPower_isFinitePresentation
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
     (sectionPoleSheafPower π z hz n).IsFinitePresentation :=
   (sectionPoleSheafPower_isInvertible hsm z hz n).isFinitePresentation
+
+/-- The quotient of the structure sheaf by the ideal module of a closed immersion is
+canonically the pushed-forward structure sheaf of its source. -/
+noncomputable def idealModuleCokerIsoPushforwardUnit
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsClosedImmersion f] :
+    cokernel (idealModuleToUnit f) ≅
+      (Scheme.Modules.pushforward f).obj (Scheme.Modules.unitObj X) := by
+  let q := SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom
+  letI : Epi q :=
+    SheafOfModules.unitToPushforwardObjUnit_epi_of_isClosedImmersion f
+  change cokernel (kernel.ι q) ≅ _
+  exact IsColimit.coconePointUniqueUpToIso
+    (cokernelIsCokernel (kernel.ι q))
+    (Abelian.epiIsCokernelOfKernel
+      (KernelFork.ofι (kernel.ι q) (kernel.condition q)) (kernelIsKernel q))
 
 /-- The quotient between two consecutive pole sheaves. -/
 noncomputable def sectionPoleSheafSuccCoker
