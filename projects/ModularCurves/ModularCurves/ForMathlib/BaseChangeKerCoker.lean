@@ -496,6 +496,57 @@ theorem kerBaseChangeComparison_coe (x : A ⊗[R] (LinearMap.ker f)) :
     (kerBaseChangeComparison A f x : A ⊗[R] P) = (LinearMap.ker f).subtype.baseChange A x :=
   rfl
 
+/-- The kernel after iterated algebra base change agrees with the kernel after direct base
+change, via the canonical tensor-product cancellation equivalences. -/
+noncomputable def LinearMap.baseChangeBaseChangeKernelEquiv
+    (A B : Type u) [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] [Algebra A B] [IsScalarTower R A B]
+    (f : P →ₗ[R] Q) :
+    LinearMap.ker ((f.baseChange A).baseChange B) ≃ₗ[B]
+      LinearMap.ker (f.baseChange B) := by
+  let eP := AlgebraTensorModule.cancelBaseChange R A B B P
+  let eQ := AlgebraTensorModule.cancelBaseChange R A B B Q
+  refine
+    { toFun := fun x ↦ ⟨eP.toLinearMap x, ?_⟩
+      invFun := fun x ↦ ⟨eP.symm.toLinearMap x, ?_⟩
+      left_inv := fun x ↦ by
+        ext
+        exact eP.symm_apply_apply x
+      right_inv := fun x ↦ by
+        ext
+        exact eP.apply_symm_apply x
+      map_add' := fun x y ↦ by
+        ext
+        exact eP.map_add x y
+      map_smul' := fun r x ↦ by
+        ext
+        exact eP.map_smul r x }
+  · change (f.baseChange B) (eP.toLinearMap x) = 0
+    have hx : eQ.symm.toLinearMap ((f.baseChange B) (eP.toLinearMap x)) = 0 := by
+      calc
+        _ = ((f.baseChange A).baseChange B) x := by
+          simpa only [eP, eQ, LinearMap.comp_apply] using congrArg
+            (fun g ↦ g x.1) (LinearMap.baseChange_baseChange (A := A) (B := B) f).symm
+        _ = 0 := x.2
+    calc
+      _ = eQ.toLinearMap (eQ.symm.toLinearMap
+          ((f.baseChange B) (eP.toLinearMap x))) :=
+        (eQ.apply_symm_apply ((f.baseChange B) (eP.toLinearMap x))).symm
+      _ = eQ.toLinearMap 0 := congrArg eQ.toLinearMap hx
+      _ = 0 := eQ.toLinearMap.map_zero
+  · change ((f.baseChange A).baseChange B) (eP.symm.toLinearMap x) = 0
+    have hx : (f.baseChange B) x = 0 := x.2
+    calc
+      _ = eQ.symm.toLinearMap
+          ((f.baseChange B) (eP.toLinearMap (eP.symm.toLinearMap x))) := by
+        simpa only [eP, eQ, LinearMap.comp_apply] using congrArg
+          (fun g ↦ g (eP.symm.toLinearMap x.1))
+            (LinearMap.baseChange_baseChange (A := A) (B := B) f)
+      _ = eQ.symm.toLinearMap ((f.baseChange B) x) := by
+        exact congrArg eQ.symm.toLinearMap
+          (congrArg (f.baseChange B) (eP.apply_symm_apply x.1))
+      _ = 0 := by rw [hx, map_zero]
+
 /-- **Fibre identification** (GME p. 107: "Again by Lemma 1.10.4, we know `f_*𝓛` is
 locally free and `(f_*𝓛) ⊗ k(s) ≅ f_*(𝓛(s))`"): for an `R`-algebra `A`, if `Q` and
 `Q ⧸ range f` are flat then `A ⊗[R] ker f → ker (f.baseChange A)` is bijective. -/
