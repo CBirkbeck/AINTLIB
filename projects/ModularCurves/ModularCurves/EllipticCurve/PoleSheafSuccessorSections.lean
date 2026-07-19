@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.ForMathlib.AffinePatchBaseChange
+import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 import ModularCurves.ForMathlib.SheafDisjointUnion
 
 /-!
@@ -68,6 +69,33 @@ theorem sectionPoleSheafSuccCoker_bijective_restrict_of_neighborhood
     infer_instance
   exact TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton
     F hUV
+
+/-- On a Cartier-generator neighborhood containing the section, global base
+sections of a consecutive pole quotient form the regular rank-one base
+module. -/
+noncomputable def sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ) :
+    Scheme.Modules.baseSections π (sectionPoleSheafSuccCoker π z hz n) ≅
+      ModuleCat.of Γ(S, (⊤ : S.Opens)) Γ(S, (⊤ : S.Opens)) := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  let M := sectionPoleSheafSuccCoker π z hz n
+  have hr : r ∈ z.ker.ideal U := by
+    rw [hspan]
+    exact Ideal.mem_span_singleton_self r
+  exact Scheme.Modules.baseSectionsRestrictIsoOfBijective π M U.1
+      (sectionPoleSheafSuccCoker_bijective_restrict_of_neighborhood
+        hsm z hz n U.1 hU) ≪≫
+    Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π)
+      (sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit
+        z hz U r hr hspan hnzd n) ≪≫
+    Scheme.Modules.baseSectionsRestrictPushforwardUnitIsoOfSection
+      π z hz U.1 hU
 
 /-- Around every point of an affine base, the base-changed section has an affine
 neighborhood on which its ideal has an explicit regular generator. -/
