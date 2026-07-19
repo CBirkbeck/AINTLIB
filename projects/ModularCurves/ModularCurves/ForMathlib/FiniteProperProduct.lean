@@ -1,3 +1,4 @@
+import Mathlib.AlgebraicGeometry.Morphisms.Immersion
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.CategoryTheory.Limits.Constructions.Over.Products
 import Mathlib.CategoryTheory.Limits.MorphismProperty
@@ -55,6 +56,17 @@ lemma lift_comp {T : Scheme.{u}} (q : T ⟶ S) (f : ∀ i, T ⟶ Z i)
   (Pi.lift (f := fun i ↦ Over.mk (p i)) (P := Over.mk q) fun i ↦
     Over.homMk (U := Over.mk q) (V := Over.mk (p i)) (f i) (hf i)).w
 
+/-- A map to a nonempty finite product is an immersion if all its coordinates are
+immersions. -/
+lemma lift_isImmersion [Nonempty ι] {T : Scheme.{u}} (q : T ⟶ S)
+    (f : ∀ i, T ⟶ Z i) (hf : ∀ i, f i ≫ p i = q)
+    (hfi : ∀ i, IsImmersion (f i)) : IsImmersion (lift p q f hf) := by
+  let i : ι := Classical.choice (inferInstance : Nonempty ι)
+  have hcomp : IsImmersion (lift p q f hf ≫ proj p i) :=
+    (lift_proj p q f hf i).symm ▸ hfi i
+  letI : IsImmersion (lift p q f hf ≫ proj p i) := hcomp
+  exact IsImmersion.of_comp (lift p q f hf) (proj p i)
+
 private lemma properOverObj_isClosedUnderBinaryProducts :
     (MorphismProperty.overObj
       (@IsProper : MorphismProperty Scheme.{u}) (X := S)).IsClosedUnderBinaryProducts := by
@@ -94,6 +106,14 @@ lemma π_isProper (hp : ∀ i, IsProper (p i)) : IsProper (π p) := by
     ObjectProperty.IsClosedUnderFiniteProducts.mk'
   exact ObjectProperty.prop_product
     (MorphismProperty.overObj (@IsProper : MorphismProperty Scheme.{u}) (X := S)) hp
+
+/-- Every projection from a finite product of proper schemes over `S` is proper. -/
+lemma proj_isProper (hp : ∀ i, IsProper (p i)) (i : ι) : IsProper (proj p i) := by
+  letI : IsProper (p i) := hp i
+  have hπ : IsProper (π p) := π_isProper p hp
+  have hcomp : IsProper (proj p i ≫ p i) := (proj_comp p i).symm ▸ hπ
+  letI : IsProper (proj p i ≫ p i) := hcomp
+  exact IsProper.of_comp (proj p i) (p i)
 
 end
 
