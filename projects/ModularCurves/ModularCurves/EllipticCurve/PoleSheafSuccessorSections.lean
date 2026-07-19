@@ -16,6 +16,38 @@ universe u
 
 namespace ModularCurves
 
+/-- Global base sections are exact at two consecutive pole modules. -/
+theorem sectionPoleSheafPower_baseSectionsSucc_exact
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    Function.Exact
+      (Scheme.Modules.baseSectionsMap π
+        (sectionPoleSheafSuccHom π z hz n)).hom
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz n))).hom := by
+  letI : Mono (sectionPoleSheafSuccHom π z hz n) :=
+    sectionPoleSheafSuccHom_mono hsm z hz n
+  exact Scheme.Modules.baseSectionsMap_exact_cokernel π
+    (sectionPoleSheafSuccHom π z hz n)
+
+/-- If the lower pole module has vanishing first cohomology, then its successor
+surjects onto the successive quotient on global base sections. -/
+theorem sectionPoleSheafSuccCoker_baseSectionsMap_surjective_of_subsingleton_H_one
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1)) :
+    Function.Surjective (Scheme.Modules.baseSectionsMap π
+      (cokernel.π (sectionPoleSheafSuccHom π z hz n))) := by
+  letI : Mono (sectionPoleSheafSuccHom π z hz n) :=
+    sectionPoleSheafSuccHom_mono hsm z hz n
+  letI : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1) := hH
+  exact Scheme.Modules.baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
+    π (sectionPoleSheafSuccHom π z hz n)
+
 /-- Global sections of a consecutive pole quotient are determined by any open
 containing the whole marked section. -/
 theorem sectionPoleSheafSuccCoker_bijective_restrict_of_neighborhood
