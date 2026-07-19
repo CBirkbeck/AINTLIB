@@ -116,6 +116,13 @@ noncomputable def baseSectionsMapIso
       (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop)).mapIso eVal).app
         (op (⊤ : X.Opens)))
 
+@[simp]
+theorem baseSectionsMapIso_hom_apply
+    {X S : Scheme.{u}} (f : X ⟶ S) {M N : X.Modules} (e : M ≅ N)
+    (x : baseSections f M) :
+    (baseSectionsMapIso f e).hom x = e.hom.val.app (.op ⊤) x := by
+  rfl
+
 /-- The base-ring action on global sections agrees with the total-space action
 through the structure morphism. -/
 theorem baseSections_smul
@@ -181,6 +188,19 @@ noncomputable def baseSectionsRestrictIsoOfBijective
     baseModulePresheafRestrictIso π M U ≪≫
       (baseSectionsIsoRestrictScalarsTop
         (U.ι ≫ π) (M.restrict U.ι)).symm
+
+@[simp]
+theorem baseSectionsRestrictIsoOfBijective_hom_apply
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules) (U : X.Opens)
+    (hbij : Function.Bijective fun s : Γ(M, (⊤ : X.Opens)) ↦
+      M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op s)
+    (x : baseSections f M) :
+    (baseSectionsRestrictIsoOfBijective f M U hbij).hom x =
+      (M.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).inv
+        (M.presheaf.map (eqToHom U.ι_image_top).op
+          (M.presheaf.map
+            (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op x)) := by
+  rfl
 
 /-- The base-linear global sections of the pushed-forward structure module
 along a section form the regular module of global functions on the base. -/
@@ -337,6 +357,24 @@ noncomputable def baseSectionsRestrictPushforwardUnitIsoOfSection
                     r * (show Γ(S, (⊤ : S.Opens)) from q))
                   (heAdd x').symm }
   exact eLin.toModuleIso
+
+@[simp]
+theorem baseSectionsRestrictPushforwardUnitIsoOfSection_hom_apply
+    {C S : Scheme.{u}} (π : C ⟶ S) (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.Opens) (hU : z ⁻¹ᵁ U = ⊤)
+    (x : baseSections (U.ι ≫ π)
+      ((restrictFunctor U.ι).obj ((pushforward z).obj
+        (_root_.SheafOfModules.unit S.ringCatSheaf)))) :
+    let OS : S.Modules := _root_.SheafOfModules.unit S.ringCatSheaf
+    let N := (pushforward z).obj OS
+    let htop : (⊤ : S.Opens) =
+        z ⁻¹ᵁ (U.ι ''ᵁ (⊤ : U.toScheme.Opens)) := by
+      rw [U.ι_image_top, hU]
+    (baseSectionsRestrictPushforwardUnitIsoOfSection
+      π z hz U hU).hom x =
+      OS.presheaf.map (eqToHom htop).op
+        ((N.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).hom x) := by
+  rfl
 
 /-- Restriction of global sections to the degree-zero term of the base-linear
 Cech complex. -/
