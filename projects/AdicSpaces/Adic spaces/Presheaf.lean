@@ -185,15 +185,23 @@ theorem RationalLocData.isRational_iff_span_eq_top {A : Type*} [CommRing A]
     D.IsRational ↔ Ideal.span (D.T : Set A) = ⊤ :=
   ⟨RationalLocData.IsRational.span_eq_top, RationalLocData.isRational_of_span_eq_top⟩
 
-/-- **Compatible plus subring** (Wedhorn Remark 7.17).
+/-- **Compatible plus subring** — a project-internal normalization condition, **not**
+a consequence of being a ring of integral elements and **not** a statement from
+Wedhorn (source-attribution corrected 2026-07-19; the earlier citation of
+"Wedhorn Remark 7.17" was wrong — 7.17 is an *Example* about a valued field and does
+not assert `A⁺ ⊆ A₀`; see `.mathlib-quality/b2_log.jsonl`,
+`T-WC-CITATION-CORRECTIONS-2026-05-28` (b)). A ring of integral elements can be
+unbounded, and an arbitrary ring of definition need not contain it. This class must
+not appear in the literature-facing sheafiness API — pair-level validity is
+`IsRingOfIntegralElements` (`SheafyFoundations.RingOfIntegralElements`), and none of
+`IsSheafyFor` / `IsSheafyComplete` / `StandardSheafCondition` / the strongly
+noetherian theorems mention it.
 
 An affinoid ring `(A, A⁺)` has a *compatible plus subring* if for every rational
 localization datum, the plus subring `A⁺` is contained in the ring of definition
-`D.P.A₀`.
-
-**Mathematical content.** By Wedhorn Definition 7.14, `A⁺` is an open integrally closed
-subring of the power-bounded subring `A°`. It follows that `A⁺` is bounded
-(Wedhorn Remark 7.17: every open integrally closed subring of `A°` is bounded).
+`D.P.A₀` — a per-datum *choice* that is possible when constructing data (a bounded
+`A⁺` lies in some ring of definition, Wedhorn Prop 6.4(3)) but is extra data, not a
+theorem about arbitrary data.
 By Wedhorn Proposition 6.4(3), every bounded subring is contained in some ring of
 definition. Therefore, *for each rational localization datum*, one can always CHOOSE
 the pair of definition so that `A⁺ ⊆ D.P.A₀`.

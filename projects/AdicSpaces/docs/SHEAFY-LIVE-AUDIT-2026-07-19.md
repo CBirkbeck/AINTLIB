@@ -85,10 +85,37 @@ handover rule: leave closed branches closed, do not reopen):
 Conclusion: **S-A, S-B, S-C are closed on the live branch.** The remaining program
 is the definitional/API work (R/O/C/P/S-D phases), not the 8.28(b) mathematics.
 
-## Remaining-program tickets
+## Program status at end of session (2026-07-19) — all Lean sorry-free
 
-Tracked in the session task board: F1 bundle → R1+R3 → O1–O3 → C1–C5 → P1–P4 → S-D →
-Phase 7/8 migration+verification. New files planned:
-`SheafyFoundations.lean`, `StructurePresheafLimit.lean`, `SheafyPair.lean`,
-`StandardSheafCondition.lean`, `SheafyRing.lean` — all additive; WCA and the 828b
-assembly are regression-protected and not to be re-proved.
+New files (all additive; WCA/828b untouched):
+
+| File | Contents |
+|---|---|
+| `SheafyFoundations.lean` | F1: `RingOfIntegralElements` bundle + `toPlusSubring` local-instance bridge + pair-explicit `spa`. |
+| `StructurePresheafLimit.lean` | O1–O3: `spaOpen`/`spaOpens`/`RationalIndex`/`limitSections` (closed ⇒ complete, T2; initial = projective-limit topology; **no discrete topology anywhere**), continuous functorial `limitRestrict`, the rational comparison `limitEval : limitSections (spaOpens D₀) ≃+* presheafValue D₀` with continuous inverse, `spaOpens_globalLocData : R({1}/1) = ⊤` (Remark 8.3, presheaf level). |
+| `RationalIntersection.lean` | R1: `interDatum`/`interRational` (arbitrary-pair valid intersections, Tate; no shared-`P` hypothesis; different-pairs regression example). R3: `AllDataCompatible ⟺ RationalRefinementCompatible ⟺ ExactIntersectionCompatible` (the legacy `IsSheafy.gluing` input is the literature condition). |
+| `RationalBasis.lean` | R2: `exists_isRational_spaOpen_subset` (Wedhorn 7.35(2), Tate — via the `RCoord`-profile inducing + sierpiński unfolding + `interRational` folds) and `isCompact_spaOpen` (7.35(3)). |
+| `SheafyPair.lean` | C1–C5: finite rational refinements (`exists_finite_rational_refinement`, `refinementCovering`, `interCovering`); `limitRestrict_injective`, `exists_limitSections_glue`, `isEmbedding_limitRestrictProd` (arbitrary covers, arbitrary opens; Remark 8.20's embedding via the nhds/comap computation on the initial topology); `IsLimitSheaf`; **`isSheafy_iff_isLimitSheaf`** — the finite rational criterion *is* pair-level sheafiness for the genuine presheaf. |
+| `SheafyRing.lean` | S-D + P1/P3(→)/P4: `IsSheafyFor` (explicit **bundled valid** choice; `HasLocLiftPowerBounded` existentially bundled, never a public hypothesis), `IsSheafyComplete` (universal valid-`A⁺`, Wedhorn 8.26 complete specialization), `IsSheafyRing` (literal 8.26 over `UniformSpace.Completion A`, completion-package as instance parameters); **`isSheafyFor_of_stronglyNoetherianTate`**, **`isSheafyComplete_of_stronglyNoetherianTate`** (the principal theorems); `isSheafyFor_congr_of_stronglyNoetherianTate` + non-defeq-pairs example (P4 at the 8.28(b) target scope); `StandardCoverData`/`StandardSheafCondition` (Spa-uniform covers; `A⁺`-free signature) + `standardSheafCondition_of_isSheafyComplete`/`_of_stronglyNoetherianTate` (P3, provable direction). |
+
+Phase 7 migration performed: the locally-fraction/discrete `structurePresheaf` is
+docstring-quarantined as a legacy placeholder (its sorry intentionally NOT filled,
+per the handover prohibition — filling it would "prove" all Tate rings sheafy against
+Remark 8.17); the `CompatiblePlusSubring` "Wedhorn Remark 7.17" misattribution is
+corrected (b2-log `T-WC-CITATION-CORRECTIONS-2026-05-28`(b)).
+
+## Honest remaining items (recorded, none on any theorem's dependency path)
+
+1. **P2 general cofinality / P3(←)** (Kedlaya Lemma 1.6.8, Wedhorn 7.54 general
+   branch): `StandardSheafCondition A → IsSheafyFor A Aplus` for *generic* complete
+   Tate `A` needs every rational cover refined by a standard one; the general
+   non-standard-shape branch is the missing API already recorded in
+   `WedhornStandardCoverRefinement.lean`. Not needed by the strongly noetherian
+   theorems (the 828b input quantifies over all valid pairs directly).
+2. **Completion transport** (Wedhorn 7.47 + Tate/strongly-noetherian transfer to
+   `Â`): required to *populate* `IsSheafyRing`'s instance parameters and to state the
+   non-complete 8.28(b) wrapper. No such transport exists in the project yet; the
+   definition is stated with the completion package as visible instance parameters.
+3. Old sorry-tainted S-B route (`productRestrictionSub_isInducing_tate`,
+   `cor_8_32_productRestrictionSub_isEmbedding`, `isSheafy_ofStronglyNoetherianTate_clean`)
+   — superseded, off-path, candidates for deletion by the cleanup fleet.

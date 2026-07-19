@@ -572,7 +572,9 @@ theorem nhds_eq_comap_limitOfValue {D₀ : RationalLocData A} (hD₀ : D₀.IsRa
         congr 1
         exact (limitEval hD₀).apply_symm_apply g
 
-theorem productRestrictionSub_continuous (C : RationalCovering A) :
+-- (`productRestrictionSub_continuous` is provided by `EmbeddingTopo.lean`; the same
+-- statement here is re-proved locally to keep this file's import cone small.)
+theorem productRestrictionSub_continuous' (C : RationalCovering A) :
     Continuous (productRestrictionSub A C) := by
   refine continuous_pi fun E => ?_
   show Continuous fun x : presheafValue C.base =>

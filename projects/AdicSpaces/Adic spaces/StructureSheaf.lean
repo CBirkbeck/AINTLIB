@@ -184,15 +184,23 @@ noncomputable def presheafSectionsMor {U V : Opens (SpaTop A)} (h : V ≤ U) :
     exact DiscreteUniformity.instDiscreteTopology ↥(sectionsSubring U)
   exact continuous_of_discreteTopology
 
-/-- The structure presheaf of `Spa(A, A⁺)`, valued in `CompleteTopCommRingCat`.
+/-- **QUARANTINED LEGACY PLACEHOLDER — this is *not* Wedhorn's structure presheaf.**
 
-For each open `U`, the presheaf value is the subring of locally-fraction sections
-in `∏ₓ Localization.AtPrime x.supp` (Definition 8.5 of Wedhorn), equipped with
-the discrete uniformity. For rational subsets `U = R(T/s)`, this is canonically
-isomorphic to the completion `A⟨T/s⟩` (Proposition 8.2).
+For each open `U`, this presheaf takes the subring of locally-fraction sections in
+`∏ₓ Localization.AtPrime x.supp` with the **discrete** uniformity. Its values on
+rational opens are *not* canonically the completed rational localizations
+`presheafValue`, and its topology is *not* the projective-limit topology of §8.1 —
+were its type-level sheaf property (which holds for every `LocalPredicate`) the
+sheaf condition of Definition 8.26, every Tate ring would be sheafy, contradicting
+Wedhorn Remark 8.17.
 
-The correct topology for general opens is the limit topology over rational
-covers; this requires substantial additional infrastructure (§8.1). -/
+**The genuine structure presheaf on all opens is `limitSections`**
+(`StructurePresheafLimit.lean`): compatible families over the valid rational data,
+with the initial/projective-limit topology; `SheafyPair.lean` proves it is a sheaf
+of topological rings exactly under the finite rational criterion
+(`isSheafy_iff_isLimitSheaf`), and `SheafyRing.lean` states pair- and ring-level
+sheafiness through it. Do not extend this placeholder; do not fill
+`structurePresheaf_isSheaf` below (handover prohibition). -/
 noncomputable def structurePresheaf [IsHuberRing A] [PlusSubring A] :
     Presheaf CompleteTopCommRingCat (SpaTop A) where
   obj U := presheafSectionsObj A U.unop
