@@ -296,6 +296,24 @@ theorem sectionPoleSheafPower_baseSectionsMul_tmul_succ_right
     _ = s (μ₀ (κ₀ (η₀ t))) := hNested
     _ = _ := rfl
 
+/-- After swapping the two pure-tensor factors, base-section multiplication
+commutes with the canonical inclusion in the original left factor. -/
+theorem sectionPoleSheafPower_baseSectionsMul_tmul_succ_left_swapped
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (m n : ℕ)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz m))
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz n)) :
+    sectionPoleSheafPower_baseSectionsMul z hz n (m + 1)
+        (y ⊗ₜ Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz m) x) =
+      Scheme.Modules.baseSectionsMap π
+        (sectionPoleSheafSuccHom π z hz (n + m))
+        (sectionPoleSheafPower_baseSectionsMul z hz n m (y ⊗ₜ x)) := by
+  exact sectionPoleSheafPower_baseSectionsMul_tmul_succ_right
+    z hz n m y x
+
 end
 
 end ModularCurves
