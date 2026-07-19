@@ -3555,6 +3555,32 @@ private theorem dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
     exact hr
   exact h₁.trans (h₂.trans h₃)
 
+/-- On a Cartier-generator chart, the canonical map from the structure sheaf to the
+simple-pole sheaf is multiplication by the generator under the induced dual
+trivialization. -/
+theorem sectionPoleUnitHom_over_comp_dualGeneratorTrivialization
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    letI : QuasiCompact z := inferInstance
+    let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U.1 eGen.symm
+    ((sectionPoleUnitHom π z hz).over U.1) ≫
+        (SheafOfModules.dualOverIsoOfIso
+          C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal).hom =
+      SheafOfModules.overUnitScalarEnd C.ringCatSheaf U.1 r := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  dsimp only
+  exact dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
+    (sectionIdealToUnit π z hz) U.1 _ r
+      (localIdealGeneratorOverTrivialization_inv_comp
+        z U r hr hspan hnzd)
+
 private theorem sectionPoleUnitHom_over_mono_of_generator
     {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
     (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
