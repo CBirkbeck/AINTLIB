@@ -1404,9 +1404,16 @@ theorem mk_trnc_eq (n : ℕ) (F : ↥(unitBall (P E m)))
 
 omit htu hscale
 
-/-- `I₀ = (C t₀) ⊂ E₀[T]`, the constant ideal at the pseudouniformizer. -/
+/-- `I₀ = (C t₀) ⊂ E₀[T]`, the constant ideal at the pseudouniformizer.
+
+v4.33: the membership witness is threaded through `mem_unitBall_iff` (an `Iff.rfl`) so
+the subtype literal carries a proof of the syntactic type `t ∈ unitBall E` — a bare
+`ht1.le : ‖t‖ ≤ 1` types only at default transparency, and since `I0` is a (reducible)
+`abbrev` the ill-typed literal would leak into every consumer goal and choke
+`kabstract` there. -/
 noncomputable abbrev I0 : Ideal (MvPolynomial (Fin m) ↥(unitBall E)) :=
-  Ideal.span {(MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) :
+  Ideal.span {(MvPolynomial.C (⟨t, (mem_unitBall_iff (E := E) t).mpr ht1.le⟩ :
+      ↥(unitBall E)) :
     MvPolynomial (Fin m) ↥(unitBall E))}
 
 theorem I0_pow_smul_top (n : ℕ) :
@@ -1417,6 +1424,10 @@ theorem I0_pow_smul_top (n : ℕ) :
 
 include htu hscale
 
+-- v4.33: the `⟨trnc …, ⋯⟩`-literals and `⟨t, ht1.le⟩`-witnesses throughout this layer
+-- type only at default transparency; restore pre-v4.33 defeq behaviour for the
+-- `kabstract`-heavy proof (established bump-repair pattern).
+set_option backward.isDefEq.respectTransparency false in
 /-- The truncation-classes ring homomorphism into the adic completion. -/
 noncomputable def toAdic : ↥(unitBall (P E m)) →+*
     AdicCompletion (I0 (E := E) (m := m) t ht1) (MvPolynomial (Fin m) ↥(unitBall E)) where
@@ -1770,6 +1781,10 @@ theorem flat_polyToP (hE₀ : IsNoetherianRing (unitBall E))
       (P E m)).toLinearMap)
   exact Module.Flat.of_linearEquiv hBC.equiv.symm
 
+-- v4.33: the `MvPolynomial`-`CommSemiring` diamond (`AddMonoidAlgebra.commSemiring` vs
+-- `CommRing.toCommSemiring`) blocks the flat-lemma's instance unification at reducible
+-- transparency; restore pre-v4.33 defeq behaviour for this declaration.
+set_option backward.isDefEq.respectTransparency false in
 /-- Graph-sequence syzygies over `P_E = E⟨T⟩` are Koszul-generated **algebraically**
 ([FJP] Lemma 4.2: positive-degree exactness transfers along the flat base change; degree-1
 form). -/

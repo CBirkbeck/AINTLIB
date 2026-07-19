@@ -439,6 +439,11 @@ theorem norm_le_one_of_isPowerBounded {a : D F}
       _ ≤ ‖a‖ ^ n * ‖tD F‖ ^ m := by gcongr
   exact absurd hmem (not_lt.mpr hge)
 
+-- v4.33: the subtype algebra for `OD F ≤ D F` is no longer found by instance synthesis
+-- (cf. the wave-4 `letI` hoists in HuberLocLift/FaithfulLocLift); register it locally for
+-- the `IsIntegral` statement below and its `IsRingOfIntegralElements` consumer.
+noncomputable local instance : Algebra ↥(OD F) (D F) := (OD F).subtype.toAlgebra
+
 /-- `𝒪_D` is integrally closed in `D` (via power-boundedness, Wedhorn Prop 5.30(4)). -/
 theorem OD_isIntegrallyClosed (a : D F) (ha : IsIntegral (OD F) a) : a ∈ OD F :=
   norm_le_one_of_isPowerBounded F ((isBounded_OD F).isPowerBounded_of_isIntegral ha)

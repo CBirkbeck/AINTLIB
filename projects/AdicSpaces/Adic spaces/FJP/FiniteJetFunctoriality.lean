@@ -34,6 +34,13 @@ This file supplies what the survey identified as the missing covariant layer:
 
 open Filter Topology
 
+-- v4.33 (file-wide): the closed-ideal quotient-norm chains through the `PA`/`locA`
+-- defs (`Submodule.Quotient.normedAddCommGroup`, `locA_t2`, `locA_completeSpace`, …)
+-- are used in a dozen declarations here and their instance unification needs
+-- semireducible unfolding; restore pre-v4.33 defeq behaviour for this FJP-internal
+-- file (established bump-repair pattern, cf. FiniteJetStrictLocalization).
+set_option backward.isDefEq.respectTransparency false
+
 namespace FiniteJet
 
 open RestrictedLaurent ValuationSpectrum StrictLoc
@@ -2334,6 +2341,9 @@ theorem mem_rationalOpen_pushDatumC_iff (D : RationalLocData (JetA F))
       rw [this]
       exact h0
 
+-- (this declaration elaborated fine at the default; the file-wide `false` above makes
+-- its `whnf`-checks explode — restore the default here)
+set_option backward.isDefEq.respectTransparency true in
 theorem mem_rationalOpen_pushDatumB_iff (D : RationalLocData (JetA F))
     (hD : D.IsRational) (v : Spv (JetB F)) (hv : v ∈ Spa (JetB F) (ringPlus (JetB F))) :
     v ∈ rationalOpen (pushDatumB D hD).T (pushDatumB D hD).s ↔

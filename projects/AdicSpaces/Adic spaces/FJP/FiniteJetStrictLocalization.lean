@@ -79,6 +79,10 @@ theorem ext_square_commutes (p : PA F m) :
     MvPowerSeries.coeff_map]
   exact square_commutes F _
 
+-- v4.33: the goal carries `↑d` at the (defeq-only) `PD`-def type plus raw
+-- `MvPowerSeries`-lambdas; restore pre-v4.33 defeq behaviour for this declaration
+-- (established bump-repair pattern).
+set_option backward.isDefEq.respectTransparency false in
 /-- Coefficientwise sectioning: the extended `ρC` is strictly surjective with constant 1. -/
 theorem extRhoC_strict_surjective (d : PD F m) :
     ∃ c : PC F m, extRhoC F m c = d ∧ ‖c‖ = ‖d‖ := by
@@ -86,7 +90,7 @@ theorem extRhoC_strict_surjective (d : PD F m) :
   have hmem : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ))
       (fun s => sectionD F (MvPowerSeries.coeff s d.1)) := by
     have hd : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) d.1 := d.2
-    rw [MvPowerSeries.IsRestrictedGauss] at hd ⊢
+    unfold MvPowerSeries.IsRestrictedGauss at hd ⊢
     refine hd.congr fun s => ?_
     show ‖MvPowerSeries.coeff s d.1‖ * _ =
       ‖MvPowerSeries.coeff s (fun s => sectionD F (MvPowerSeries.coeff s d.1))‖ * _
@@ -106,6 +110,9 @@ theorem extRhoC_strict_surjective (d : PD F m) :
     rw [show MvPowerSeries.coeff s (fun s => sectionD F (MvPowerSeries.coeff s d.1)) =
       sectionD F (MvPowerSeries.coeff s d.1) from rfl, norm_sectionD]
 
+-- v4.33: goals carry `↑b`/`↑c` at the (defeq-only) `PB`/`PC`-def types plus raw
+-- subtype-valued `MvPowerSeries`-lambdas; restore pre-v4.33 defeq behaviour.
+set_option backward.isDefEq.respectTransparency false in
 /-- The extended square is cartesian: a compatible pair comes from a unique element of
 `P_𝓐` ([FJP] Lemma 4.1: "If `b = ∑ b_ν T^ν` and `c = ∑ c_ν T^ν` have the same image, each
 coefficient pair comes from a unique `a_ν ∈ R`"). -/
@@ -125,7 +132,7 @@ theorem ext_milnorRow_exact (b : PB F m) (c : PC F m)
   have hres : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ))
       (fun s => (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F)) := by
     have hc : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) c.1 := c.2
-    rw [MvPowerSeries.IsRestrictedGauss] at hc ⊢
+    unfold MvPowerSeries.IsRestrictedGauss at hc ⊢
     exact hc.congr fun s => rfl
   refine ⟨⟨fun s => (⟨MvPowerSeries.coeff s c.1, hmem s⟩ : JetA F), hres⟩, ⟨?_, ?_⟩, ?_⟩
   · refine Subtype.ext ?_
@@ -933,6 +940,9 @@ theorem loc_norm_le (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) (x : locA F
             _ ≤ ε := by linarith
         linarith
 
+-- v4.33: instance search no longer sees the quotient-norm chain through the
+-- `PA`/`locA` defs; restore pre-v4.33 defeq behaviour for these declarations.
+set_option backward.isDefEq.respectTransparency false in
 /-- Topological strictness on the left ([FJP] (4.19)/(4.20)): `𝓐_α` carries the subspace
 topology of `𝓑_α × 𝓒_α`. -/
 theorem loc_pair_isEmbedding (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
@@ -1022,6 +1032,7 @@ theorem locRhoC_isOpenMap (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rw [himg]
   exact hmkD_open _ (extRhoC_isOpenMap F m _ (hU.preimage hmkC_cont))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `𝓐_α` is Hausdorff (quotient by a closed ideal; [FJP] (4.21)). -/
 theorem locA_t2 (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     T2Space (locA F m g f) := by
@@ -1030,11 +1041,15 @@ theorem locA_t2 (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Submodule.Quotient.normedAddCommGroup _
   infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `𝓐_α` is complete (Banach quotient; [FJP] (4.21): "the completed graph quotient is
 already the Banach quotient"). -/
 theorem locA_completeSpace (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     @CompleteSpace (locA F m g f)
       (IsTopologicalAddGroup.rightUniformSpace (locA F m g f)) := by
+  haveI hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
+  haveI : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
+    Submodule.Quotient.normedAddCommGroup _
   haveI : IsUniformAddGroup (locA F m g f) := SeminormedAddCommGroup.to_isUniformAddGroup
   rw [IsUniformAddGroup.rightUniformSpace_eq]
   infer_instance

@@ -93,7 +93,7 @@ theorem qCoeff_one_mul (f g : JetC F) :
     qCoeff F 1 (f * g) = qCoeff F 0 f * qCoeff F 1 g + qCoeff F 1 f * qCoeff F 0 g := by
   show PowerSeries.coeff 1 (f * g : JetC F).1 = _
   rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, PowerSeries.coeff_mul,
-    show Finset.antidiagonal (1 : ℕ) = {(0, 1), (1, 0)} from rfl,
+    show Finset.HasAntidiagonal.antidiagonal (1 : ℕ) = {(0, 1), (1, 0)} from rfl,
     Finset.sum_insert (by simp), Finset.sum_singleton]
   rfl
 
@@ -141,20 +141,15 @@ noncomputable def rhoC : JetC F →+* JetD F where
       rw [show (1 : JetC F).1 = 1 from rfl, TrivSqZeroExt.snd_one, PowerSeries.coeff_one,
         if_neg one_ne_zero]
   map_mul' f g := by
+    -- v4.33: rewriting `(f * g).1 = f.1 * g.1` into the goal leaves `Subtype.val`
+    -- projections that type only after unfolding the `JetC` def, and `kabstract`
+    -- rejects the follow-up rewrites; both components are exactly the proven
+    -- `qCoeff`-multiplication lemmas (the `TrivSqZeroExt` structure is defeq).
     refine TrivSqZeroExt.ext ?_ ?_
-    · show PowerSeries.coeff 0 (f * g : JetC F).1 = _
-      rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, TrivSqZeroExt.fst_mul]
-      show _ = qCoeff F 0 f * qCoeff F 0 g
-      rw [PowerSeries.coeff_mul]
-      simp [qCoeff]
-    · show PowerSeries.coeff 1 (f * g : JetC F).1 = _
-      rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, TrivSqZeroExt.snd_mul, smul_eq_mul,
-        op_smul_eq_mul]
-      show _ = qCoeff F 0 f * qCoeff F 1 g + qCoeff F 1 f * qCoeff F 0 g
-      rw [PowerSeries.coeff_mul]
-      rw [show Finset.antidiagonal (1 : ℕ) = {(0, 1), (1, 0)} from rfl]
-      rw [Finset.sum_insert (by simp), Finset.sum_singleton]
-      rfl
+    · show qCoeff F 0 (f * g) = qCoeff F 0 f * qCoeff F 0 g
+      exact qCoeff_zero_mul F f g
+    · show qCoeff F 1 (f * g) = qCoeff F 0 f * qCoeff F 1 g + qCoeff F 1 f * qCoeff F 0 g
+      exact qCoeff_one_mul F f g
   map_zero' := by
     refine TrivSqZeroExt.ext ?_ ?_
     · show PowerSeries.coeff 0 (0 : JetC F).1 = (0 : JetD F).fst
@@ -162,13 +157,13 @@ noncomputable def rhoC : JetC F →+* JetD F where
     · show PowerSeries.coeff 1 (0 : JetC F).1 = (0 : JetD F).snd
       rw [show (0 : JetC F).1 = 0 from rfl, TrivSqZeroExt.snd_zero, map_zero]
   map_add' f g := by
+    -- v4.33: same `kabstract`/`JetC`-projection issue as `map_mul'`; both components
+    -- are the proven `qCoeff_add` (the `TrivSqZeroExt` addition is componentwise-defeq).
     refine TrivSqZeroExt.ext ?_ ?_
-    · show PowerSeries.coeff 0 (f + g : JetC F).1 = ((⟨_, _⟩ + ⟨_, _⟩ : JetD F)).fst
-      rw [show (f + g : JetC F).1 = f.1 + g.1 from rfl, map_add, TrivSqZeroExt.fst_add]
-      rfl
-    · show PowerSeries.coeff 1 (f + g : JetC F).1 = ((⟨_, _⟩ + ⟨_, _⟩ : JetD F)).snd
-      rw [show (f + g : JetC F).1 = f.1 + g.1 from rfl, map_add, TrivSqZeroExt.snd_add]
-      rfl
+    · show qCoeff F 0 (f + g) = qCoeff F 0 f + qCoeff F 0 g
+      exact qCoeff_add F f g 0
+    · show qCoeff F 1 (f + g) = qCoeff F 1 f + qCoeff F 1 g
+      exact qCoeff_add F f g 1
 
 /-- `ρB : 𝓑 → 𝓓`, componentwise restriction from the disc to the annulus ([FJP] (1.5):
 "the first is restriction from the `W`-disc to its radius-one boundary"). -/

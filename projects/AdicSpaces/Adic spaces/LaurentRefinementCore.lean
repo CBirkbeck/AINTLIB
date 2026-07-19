@@ -380,6 +380,17 @@ noncomputable def RationalLocData.interSamePair (D₁ D₂ : RationalLocData A)
 @[simp] theorem RationalLocData.interSamePair_s (D₁ D₂ : RationalLocData A)
     (hP : D₂.P = D₁.P) : (D₁.interSamePair D₂ hP).s = D₁.s * D₂.s := rfl
 
+/-- The pair of definition of `interSamePair` is the shared pair `D₁.P`.
+
+Stated as a named lemma so that pair-equality proofs of the form
+`(D₁.interSamePair D₂ hP).P = _` can be built as *applications* (well-typed at
+**reducible** transparency) rather than as bare `rfl` (whose type only checks after
+unfolding the semireducible `interSamePair` — v4.33's `kabstract` re-checks embedded
+proofs at reducible transparency, so any `rw`/`erw`/`simp` over a goal carrying such a
+`rfl` chokes). Compose with `Eq.trans`/`Eq.symm` to repair embedded proofs. -/
+theorem RationalLocData.interSamePair_P (D₁ D₂ : RationalLocData A)
+    (hP : D₂.P = D₁.P) : (D₁.interSamePair D₂ hP).P = D₁.P := rfl
+
 open scoped Pointwise in
 /-- **`interSamePair` realises the intersection**: `R(interSamePair D₁ D₂) =
 R(D₁) ∩ R(D₂)`. This is the rational-basis intersection-stability used by
@@ -463,8 +474,15 @@ theorem RationalLocData.interSamePair_subset_right (D₁ D₂ : RationalLocData 
 
 /-- The base-independent **`f`-half** `R(f/1) = {v(f) ≤ 1}` as a rational datum
 with pair `P` (Wedhorn's `𝒰_f` numerator piece, `s = 1`). Base-INDEPENDENT
-(condition is `v(f) ≤ v(1)`), unlike `laurentPlusDatum` (whose `s = D₀.s`). -/
-noncomputable def unitDatum (P : PairOfDefinition A) (f : A) : RationalLocData A where
+(condition is `v(f) ≤ v(1)`), unlike `laurentPlusDatum` (whose `s = D₀.s`).
+
+`@[reducible]` (v4.33): downstream goals carry `interSamePair D₀ (unitDatum D₀.P f) rfl`
+subterms whose `rfl : (unitDatum D₀.P f).P = D₀.P` only holds at default transparency;
+v4.33's `kabstract` re-checks embedded proofs at *reducible* transparency, so a
+semireducible `unitDatum` makes any `rw`/`erw`/`simp` over such a goal choke. Reducibility
+lets `.P` reduce at reducible transparency (there are no `unitDatum`-projection rewrites to
+disturb). -/
+@[reducible] noncomputable def unitDatum (P : PairOfDefinition A) (f : A) : RationalLocData A where
   P := P
   T := {f}
   s := 1
@@ -474,8 +492,11 @@ noncomputable def unitDatum (P : PairOfDefinition A) (f : A) : RationalLocData A
 
 /-- The base-independent **`1/f`-half** `R(1/f) = {v(f) ≥ 1}` as a rational datum
 with pair `P` (Wedhorn's `𝒰_f` denominator piece, `T = {1}`, `s = f`).
-Base-INDEPENDENT (condition is `v(1) ≤ v(f)`). -/
-noncomputable def coUnitDatum (P : PairOfDefinition A) (f : A) : RationalLocData A where
+Base-INDEPENDENT (condition is `v(1) ≤ v(f)`).
+
+`@[reducible]` (v4.33): see `unitDatum` — the same `kabstract`-at-reducible choke on
+`interSamePair D₀ (coUnitDatum D₀.P f) rfl` subterms in downstream goals. -/
+@[reducible] noncomputable def coUnitDatum (P : PairOfDefinition A) (f : A) : RationalLocData A where
   P := P
   T := {1}
   s := f

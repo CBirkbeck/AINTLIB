@@ -3002,8 +3002,8 @@ theorem coUnitDatum_genTuple_eq [IsTateRing A] [IsNoetherianRing A]
       ((coUnitDatum P b).T : Finset A)) : A) = 1 :=
     Finset.mem_singleton.mp ((coUnitDatum P b).T.equivFin.symm i).2
   show (coUnitDatum P b).coeRingHom (divByS _ (coUnitDatum P b).s) = _
+  -- v4.33: `coUnitDatum` is now `@[reducible]`, so `rw [hval]` closes the goal by rfl.
   rw [hval]
-  rfl
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
@@ -3317,7 +3317,6 @@ theorem coUnitDatum_ker_le_span
     refine ⟨example638_evalHom D, example638_evalHom_continuous D,
       fun x => example638_evalHom_algebraMap D x, ?_, rfl⟩
     erw [example638_evalHom_X D ((0 : Fin 1) : Fin D.T.card), coUnitDatum_genTuple_eq]
-    rfl
   -- extend to the completion, opaquely
   letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
   letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing

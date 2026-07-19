@@ -117,7 +117,7 @@ theorem norm_restricted_mul (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖
     show ‖PowerSeries.coeff j g.1‖ * (1 : ℝ) ^ j = _
     rw [one_pow, mul_one, hjA, Restricted.norm_eq]
   · intro p hp hpne
-    rw [Finset.mem_antidiagonal] at hp
+    rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
     show ‖PowerSeries.coeff p.1 f.1 * PowerSeries.coeff p.2 g.1‖ <
       ‖PowerSeries.coeff i f.1‖ * ‖PowerSeries.coeff j g.1‖
     rw [hmul, hiA, hjA]
@@ -514,7 +514,7 @@ theorem qCoeff_two_mul (f g : JetC F) :
       (qCoeff F 1 f * qCoeff F 1 g + qCoeff F 2 f * qCoeff F 0 g) := by
   show PowerSeries.coeff 2 (f * g : JetC F).1 = _
   rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, PowerSeries.coeff_mul,
-    show Finset.antidiagonal (2 : ℕ) = {(0, 2), (1, 1), (2, 0)} from rfl,
+    show Finset.HasAntidiagonal.antidiagonal (2 : ℕ) = {(0, 2), (1, 1), (2, 0)} from rfl,
     Finset.sum_insert (by simp), Finset.sum_insert (by simp), Finset.sum_singleton]
   rfl
 

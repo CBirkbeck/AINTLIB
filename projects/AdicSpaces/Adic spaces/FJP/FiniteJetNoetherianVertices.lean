@@ -96,7 +96,7 @@ theorem mapRestrictedGauss_exists_norm_le (m : ℕ) (φ : B →+* C) (hφ : ∀ 
     fun t => rfl
   have hmem : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) x := by
     have hy : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) y.1 := y.2
-    rw [MvPowerSeries.IsRestrictedGauss] at hy ⊢
+    unfold MvPowerSeries.IsRestrictedGauss at hy ⊢
     refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _) ?_) (fun t => ?_) hy
     · rw [finsupp_prod_one]
       exact zero_le_one
@@ -243,7 +243,7 @@ noncomputable def fstRestricted (m : ℕ)
   ⟨fun t => (MvPowerSeries.coeff t y.1).fst, by
     show MvPowerSeries.IsRestrictedGauss _ _
     have hy : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) y.1 := y.2
-    rw [MvPowerSeries.IsRestrictedGauss] at hy ⊢
+    unfold MvPowerSeries.IsRestrictedGauss at hy ⊢
     refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _)
       (by rw [finsupp_prod_one]; exact zero_le_one)) (fun t => ?_) hy
     refine mul_le_mul_of_nonneg_right ?_ (by rw [finsupp_prod_one]; exact zero_le_one)
@@ -258,7 +258,7 @@ noncomputable def sndRestricted (m : ℕ)
   ⟨fun t => (MvPowerSeries.coeff t y.1).snd, by
     show MvPowerSeries.IsRestrictedGauss _ _
     have hy : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) y.1 := y.2
-    rw [MvPowerSeries.IsRestrictedGauss] at hy ⊢
+    unfold MvPowerSeries.IsRestrictedGauss at hy ⊢
     refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _)
       (by rw [finsupp_prod_one]; exact zero_le_one)) (fun t => ?_) hy
     refine mul_le_mul_of_nonneg_right ?_ (by rw [finsupp_prod_one]; exact zero_le_one)

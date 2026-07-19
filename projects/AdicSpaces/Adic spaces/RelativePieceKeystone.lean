@@ -185,6 +185,21 @@ noncomputable def imagePieceDatum
       (T.image D₀.canonicalMap) (D₀.canonicalMap t)
       (by rw [Finset.coe_image]; exact span_image_canonicalMap_eq_top D₀ T hspan) }
 
+/-- The pair of definition of `imagePieceDatum` is `presheafValue_concretePair D₀`.
+
+Named projection lemma (see `RationalLocData.interSamePair_P`): pair-equality proofs
+between two `imagePieceDatum`s must be built from this by `Eq.trans`/`Eq.symm` so they
+stay well-typed at reducible transparency (a bare `rfl` needs the semireducible
+`imagePieceDatum` unfolded and makes v4.33 `kabstract` choke on any enclosing goal). -/
+theorem imagePieceDatum_P
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    (D₀ : RationalLocData A) (T : Finset A) (t : A)
+    (hspan : Ideal.span (T : Set A) = ⊤) :
+    (imagePieceDatum D₀ T t hspan).P = presheafValue_concretePair D₀ := rfl
+
 /-- The image piece is rational (Wedhorn 7.29): its tray is the `canonicalMap`-image of
 a `⊤`-spanning family, which spans `⊤` (`span_image_canonicalMap_eq_top`). -/
 theorem imagePieceDatum_isRational

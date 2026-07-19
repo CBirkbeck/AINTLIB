@@ -822,29 +822,29 @@ theorem ofPowerSeries_mul (f g : PowerSeries.Restricted R (1 : ℝ)) :
     rw [tsum_eq_sum hvanish, coeff_ofPowerSeries, if_pos h0]
     have hcoe : (f * g : PowerSeries.Restricted R (1 : ℝ)).1 = f.1 * g.1 := rfl
     rw [hcoe, PowerSeries.coeff_mul]
-    have hbij : ∑ p ∈ Finset.antidiagonal a.toNat,
+    have hbij : ∑ p ∈ Finset.HasAntidiagonal.antidiagonal a.toNat,
         (PowerSeries.coeff p.1 f.1 * PowerSeries.coeff p.2 g.1 : R) =
         ∑ x ∈ Finset.Icc (0 : ℤ) a,
           (ofPowerSeries f).coeff x * (ofPowerSeries g).coeff (a - x) := by
       refine Finset.sum_nbij' (i := fun p : ℕ × ℕ => ((p.1 : ℕ) : ℤ))
         (j := fun x : ℤ => (x.toNat, a.toNat - x.toNat)) ?_ ?_ ?_ ?_ ?_
       · intro p hp
-        rw [Finset.mem_antidiagonal] at hp
+        rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
         rw [Finset.mem_Icc]
         omega
       · intro x hx
         rw [Finset.mem_Icc] at hx
-        rw [Finset.mem_antidiagonal]
+        rw [Finset.HasAntidiagonal.mem_antidiagonal]
         omega
       · intro p hp
-        rw [Finset.mem_antidiagonal] at hp
+        rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
         simp only [Int.toNat_natCast]
         ext <;> omega
       · intro x hx
         rw [Finset.mem_Icc] at hx
         omega
       · intro p hp
-        rw [Finset.mem_antidiagonal] at hp
+        rw [Finset.HasAntidiagonal.mem_antidiagonal] at hp
         rw [coeff_ofPowerSeries, coeff_ofPowerSeries,
           if_pos (by omega : (0 : ℤ) ≤ ((p.1 : ℕ) : ℤ)),
           if_pos (by omega : (0 : ℤ) ≤ a - ((p.1 : ℕ) : ℤ)), Int.toNat_natCast,
@@ -859,29 +859,54 @@ theorem ofPowerSeries_mul (f g : PowerSeries.Restricted R (1 : ℝ)) :
       · rw [coeff_ofPowerSeries (a := a - x), if_neg (by omega), mul_zero]
     rw [(tsum_congr hz).trans tsum_zero, coeff_ofPowerSeries, if_neg h0]
 
+/-- v4.33 (reducible-well-typed membership form): the `ℕ`-coefficient restriction of a
+nonnegatively-supported restricted Laurent series is a restricted power series, stated as
+membership in `PowerSeries.isSubring 1` — the syntactic field type of the subtype literal
+in `nonnegEquiv.invFun`. (An inline `show IsRestricted …` proof types only at default
+transparency and makes `kabstract` choke on every goal carrying the literal.) -/
+theorem mk_coeff_mem_isSubring (F : ↥(nonnegSubring R)) :
+    (PowerSeries.mk fun n => (F : RestrictedLaurent R).coeff n) ∈
+      PowerSeries.isSubring (R := R) (1 : ℝ) := by
+  show PowerSeries.IsRestricted (1 : ℝ) _
+  rw [Restricted.isRestricted_iff_cofinite]
+  simp only [PowerSeries.coeff_mk, one_pow, mul_one]
+  exact (F : RestrictedLaurent R).tendsto_coeff.comp
+    (Function.Injective.tendsto_cofinite Nat.cast_injective)
+
+/-- v4.33 (named smart constructor): the inverse of `nonnegEquiv` as a `def`, so goals
+carry `ofCoeffs F : PowerSeries.Restricted R 1` at its stated type. (An inline subtype
+literal infers `↥(PowerSeries.isSubring 1)`, which is defeq to `Restricted R 1` only at
+default transparency and makes `kabstract` choke.) -/
+noncomputable def ofCoeffs (F : ↥(nonnegSubring R)) : PowerSeries.Restricted R (1 : ℝ) :=
+  ⟨PowerSeries.mk fun n => (F : RestrictedLaurent R).coeff n, mk_coeff_mem_isSubring F⟩
+
+@[simp] theorem coeff_ofCoeffs (F : ↥(nonnegSubring R)) (n : ℕ) :
+    PowerSeries.coeff n (ofCoeffs F).1 = (F : RestrictedLaurent R).coeff n := by
+  show PowerSeries.coeff n (PowerSeries.mk fun m => (F : RestrictedLaurent R).coeff m) =
+    (F : RestrictedLaurent R).coeff n
+  exact PowerSeries.coeff_mk n _
+
 /-- The norm-preserving identification of `PowerSeries.Restricted R 1` (the vendored `R⟨W⟩`)
 with the nonnegative-support subring of `R⟨W, W⁻¹⟩`. -/
 noncomputable def nonnegEquiv :
     PowerSeries.Restricted R (1 : ℝ) ≃+* nonnegSubring R where
   toFun f := ⟨ofPowerSeries f, ofPowerSeries_mem f⟩
-  invFun F := ⟨PowerSeries.mk fun n => (F : RestrictedLaurent R).coeff n, by
-    show PowerSeries.IsRestricted (1 : ℝ) _
-    rw [Restricted.isRestricted_iff_cofinite]
-    simp only [PowerSeries.coeff_mk, one_pow, mul_one]
-    exact (F : RestrictedLaurent R).tendsto_coeff.comp
-      (Function.Injective.tendsto_cofinite Nat.cast_injective)⟩
+  invFun F := ofCoeffs F
   left_inv f := by
     apply Subtype.ext
     ext n
-    simp only [PowerSeries.coeff_mk, coeff_ofPowerSeries,
+    simp only [coeff_ofCoeffs, coeff_ofPowerSeries,
       if_pos (by omega : (0 : ℤ) ≤ (n : ℤ)), Int.toNat_natCast]
   right_inv F := by
     apply Subtype.ext
     ext a
     show (ofPowerSeries _).coeff a = _
+    -- v4.33: the goal carries a beta-redex `(fun F ↦ ofCoeffs F) F`; normalise it away
+    -- before rewriting so `kabstract` sees the named-constructor spine.
+    beta_reduce
     rw [coeff_ofPowerSeries]
     by_cases h0 : 0 ≤ a
-    · rw [if_pos h0, PowerSeries.coeff_mk, Int.toNat_of_nonneg h0]
+    · rw [if_pos h0, coeff_ofCoeffs, Int.toNat_of_nonneg h0]
     · rw [if_neg h0, F.2 a (by omega)]
   map_mul' f g := Subtype.ext (ofPowerSeries_mul f g)
   map_add' f g := by
@@ -1062,7 +1087,7 @@ noncomputable def evalLE (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) (hs : ‖s‖ ≤
       rw [show (G * G' : PowerSeries.Restricted A (1 : ℝ)).1 = G.1 * G'.1 from rfl,
         PowerSeries.coeff_mul, map_sum, Finset.sum_mul]
       refine Finset.sum_congr rfl fun kl hkl => ?_
-      rw [Finset.mem_antidiagonal] at hkl
+      rw [Finset.HasAntidiagonal.mem_antidiagonal] at hkl
       rw [map_mul, ← hkl, pow_add]
       ring
     exact key.symm
@@ -1139,6 +1164,15 @@ theorem restrictedCongr_norm {A B : Type*} [NormedCommRing A] [IsUltrametricDist
   refine iSup_congr fun i => ?_
   rw [coeff_restrictedCongr, he]
 
+/-- v4.33 (reducible-well-typed coe form): norm-preservation of the `Fin 0`-collapse
+`foo`, stated at the `RingEquiv` coercion — the syntactic shape `restrictedCongr`'s
+`he`-argument expects. (The bare `RingHomIsometric.norm_map (σ := ….toRingHom)` proof
+carries the `RingHom`-coe type, which types only at default transparency and makes
+`kabstract` choke on goals carrying `innerToSeries`.) -/
+theorem foo_norm_map (x : MvPowerSeries.Restricted R (fun _ : Fin 0 => (1 : ℝ))) :
+    ‖foo R (fun _ : Fin 0 => (1 : ℝ)) x‖ = ‖x‖ :=
+  RingHomIsometric.norm_map (σ := (foo R (fun _ : Fin 0 => (1 : ℝ))).toRingHom)
+
 /-- The one-variable restricted ring in `Fin 1`-indexed form, identified with the
 univariate form. -/
 noncomputable def innerToSeries :
@@ -1146,7 +1180,7 @@ noncomputable def innerToSeries :
       PowerSeries.Restricted R (1 : ℝ) :=
   (UnitDiscExample.finSuccOne R 0).trans
     (restrictedCongr (foo R (fun _ : Fin 0 => (1 : ℝ)))
-      (fun x => RingHomIsometric.norm_map (σ := (foo R (fun _ : Fin 0 => (1 : ℝ))).toRingHom)))
+      (fun x => foo_norm_map x))
 
 theorem innerToSeries_norm (f : MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ))) :
     ‖innerToSeries (R := R) f‖ = ‖f‖ := by
@@ -1258,6 +1292,47 @@ theorem norm_truncNonpos_le (h : RestrictedLaurent R) : ‖truncNonpos h‖ ≤ 
   · rw [norm_zero]
     exact norm_nonneg h
 
+/-- v4.33 (named witness): the negated nonpositive truncation is nonnegatively
+supported — extracted so the `nonnegSubring`-subtype literal in
+`evalHom_exists_norm_le` carries a named proof (an inline `by`-proof with
+`if`-rewrites makes `kabstract` motive-checks choke on goals carrying the literal). -/
+theorem negate_truncNonpos_mem (h : RestrictedLaurent R) :
+    negate (truncNonpos h) ∈ nonnegSubring R := fun a ha => by
+  show (truncNonpos h).coeff (-a) = 0
+  show (if -a ≤ 0 then h.coeff (-a) else 0) = 0
+  rw [if_neg (by omega)]
+
+/-- v4.33 (named witness): the `evalHom_exists_norm_le` preimage series is restricted —
+extracted for the same `kabstract` reason as `negate_truncNonpos_mem`. -/
+theorem mk_if_coeff_mem_isSubring (h : RestrictedLaurent R)
+    (c0 : PowerSeries.Restricted R (1 : ℝ)) :
+    (PowerSeries.mk fun i =>
+        if i = 0 then c0 else PowerSeries.Restricted.C (1 : ℝ) (h.coeff i)) ∈
+      PowerSeries.isSubring (R := PowerSeries.Restricted R (1 : ℝ)) (1 : ℝ) := by
+  classical
+  show PowerSeries.IsRestricted (1 : ℝ) _
+  rw [Restricted.isRestricted_iff_cofinite]
+  simp only [PowerSeries.coeff_mk, one_pow, mul_one]
+  refine tendsto_cofinite_zero_of_finite (fun i => norm_nonneg _) fun ε hε => ?_
+  have hfin : {a : ℤ | ε ≤ ‖h.coeff a‖}.Finite := h.finite_setOf_le_norm_coeff hε
+  refine ((hfin.image fun a : ℤ => a.toNat).union (Set.finite_singleton 0)).subset
+    fun i hi => ?_
+  rw [Set.mem_setOf_eq] at hi
+  rcases eq_or_ne i 0 with rfl | hi0
+  · exact Set.mem_union_right _ rfl
+  · rw [if_neg hi0, norm_restrictedC] at hi
+    exact Set.mem_union_left _ ⟨(i : ℤ), hi, Int.toNat_natCast i⟩
+
+/-- v4.33 (named smart constructor): the `evalHom_exists_norm_le` preimage over the
+univariate coefficient ring, at its stated doubly-restricted type (a bare subtype
+literal infers `↥(PowerSeries.isSubring 1)`, defeq only at default transparency, and
+makes `kabstract` choke on every goal carrying it — see `ofCoeffs`). -/
+noncomputable def evalHomSection (h : RestrictedLaurent R)
+    (c0 : PowerSeries.Restricted R (1 : ℝ)) :
+    PowerSeries.Restricted (PowerSeries.Restricted R (1 : ℝ)) (1 : ℝ) :=
+  ⟨PowerSeries.mk fun i => if i = 0 then c0 else PowerSeries.Restricted.C (1 : ℝ) (h.coeff i),
+    mk_if_coeff_mem_isSubring h c0⟩
+
 /-- `evalHom` has a norm-nonincreasing set-theoretic section: the preimage places the
 nonpositive part on the `V`-axis and the positive coefficients on `W`-monomials
 ([FJP] §1.4's "norm-preserving monomial section"). -/
@@ -1267,24 +1342,9 @@ theorem evalHom_exists_norm_le (h : RestrictedLaurent R) :
   classical
   -- the friendly preimage over the univariate coefficient ring
   set c0 : PowerSeries.Restricted R (1 : ℝ) :=
-    (nonnegEquiv (R := R)).symm ⟨negate (truncNonpos h), fun a ha => by
-      show (truncNonpos h).coeff (-a) = 0
-      show (if -a ≤ 0 then h.coeff (-a) else 0) = 0
-      rw [if_neg (by omega)]⟩ with hc0
+    (nonnegEquiv (R := R)).symm ⟨negate (truncNonpos h), negate_truncNonpos_mem h⟩ with hc0
   set G' : PowerSeries.Restricted (PowerSeries.Restricted R (1 : ℝ)) (1 : ℝ) :=
-    ⟨PowerSeries.mk fun i => if i = 0 then c0 else PowerSeries.Restricted.C (1 : ℝ) (h.coeff i), by
-      show PowerSeries.IsRestricted (1 : ℝ) _
-      rw [Restricted.isRestricted_iff_cofinite]
-      simp only [PowerSeries.coeff_mk, one_pow, mul_one]
-      refine tendsto_cofinite_zero_of_finite (fun i => norm_nonneg _) fun ε hε => ?_
-      have hfin : {a : ℤ | ε ≤ ‖h.coeff a‖}.Finite := h.finite_setOf_le_norm_coeff hε
-      refine ((hfin.image fun a : ℤ => a.toNat).union (Set.finite_singleton 0)).subset
-        fun i hi => ?_
-      rw [Set.mem_setOf_eq] at hi
-      rcases eq_or_ne i 0 with rfl | hi0
-      · exact Set.mem_union_right _ rfl
-      · rw [if_neg hi0, norm_restrictedC] at hi
-        exact Set.mem_union_left _ ⟨(i : ℤ), hi, Int.toNat_natCast i⟩⟩ with hG'
+    evalHomSection h c0 with hG'
   -- transport to the `Fin 1`-indexed coefficient ring
   set G'' : PowerSeries.Restricted
       (MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ))) (1 : ℝ) :=

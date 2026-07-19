@@ -242,9 +242,12 @@ def tauFun (g : PowerSeries (MvPolynomial (Fin k) F)) :
 theorem coeff_tauFun (g : PowerSeries (MvPolynomial (Fin k) F)) (s : Fin k →₀ ℕ) (m : ℕ) :
     PowerSeries.coeff m (MvPowerSeries.coeff s (tauFun F k g)) =
       MvPolynomial.coeff s (PowerSeries.coeff m g) := by
-  rw [show tauFun F k g = fun s => PowerSeries.mk fun m =>
-    MvPolynomial.coeff s (PowerSeries.coeff m g) from rfl,
-    MvPowerSeries.coeff_apply, PowerSeries.coeff_mk]
+  -- v4.33: unfolding `tauFun` into the goal by `rw [show … from rfl]` leaves a bare lambda
+  -- at the (defeq-only-at-default) `MvPowerSeries` carrier, which `kabstract` rejects on
+  -- the follow-up rewrites; `change` to the (well-typed) `PowerSeries.mk` form instead.
+  change PowerSeries.coeff m (PowerSeries.mk fun n =>
+    MvPolynomial.coeff s (PowerSeries.coeff n g)) = _
+  exact PowerSeries.coeff_mk m _
 
 /-- The **transpose** ring homomorphism: a power series in `X` whose coefficients are
 `k`-variable polynomials becomes a `k`-variable power series whose coefficients are
