@@ -10,6 +10,7 @@ import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.Pic
 import ModularCurves.Picard.UnitPullback
 import ModularCurves.ForMathlib.PullbackCompMonoidal
+import ModularCurves.ForMathlib.FlatNonZeroDivisor
 import ModularCurves.ForMathlib.PullbackTensorGeneral
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
 import ModularCurves.ForMathlib.PullbackUnitMonoidal
@@ -840,6 +841,11 @@ theorem affineOpenAmbientSection_topSection {Y : Scheme.{u}}
   rw [← Y.presheaf.map_comp]
   simp
 
+private noncomputable def affineOpenSectionsIso
+    {Y : Scheme.{u}} (U : Y.affineOpens) :
+    Γ(Y, U.1) ≅ Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+  Y.presheaf.mapIso (eqToIso U.1.ι_image_top).op ≪≫ U.1.ι.appIso ⊤
+
 /-- The ambient affine section obtained by pulling a chart section through a
 restricted morphism. -/
 noncomputable def affinePullbackSection {X Y : Scheme.{u}} (f : X ⟶ Y)
@@ -856,6 +862,33 @@ theorem affineOpenTopSection_affinePullbackSection
     affineOpenTopSection U (affinePullbackSection f U V hUV r) =
       (f.resLE V.1 U.1 hUV).appTop.hom (affineOpenTopSection V r) := by
   simp [affinePullbackSection]
+
+/-- Pulling a nonzerodivisor through a flat morphism preserves the
+nonzerodivisor condition on affine charts. -/
+theorem affinePullbackSection_mem_nonZeroDivisors
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f]
+    (U : X.affineOpens) (V : Y.affineOpens)
+    (hUV : U.1 ≤ f ⁻¹ᵁ V.1) {r : Γ(Y, V.1)}
+    (hr : r ∈ nonZeroDivisors Γ(Y, V.1)) :
+    affinePullbackSection f U V hUV r ∈
+      nonZeroDivisors Γ(X, U.1) := by
+  haveI : IsAffine U.1.toScheme := U.2
+  haveI : IsAffine V.1.toScheme := V.2
+  have hrTop : affineOpenTopSection V r ∈
+      nonZeroDivisors Γ(V.1.toScheme, (⊤ : V.1.toScheme.Opens)) := by
+    change (affineOpenSectionsIso V).commRingCatIsoToRingEquiv r ∈
+      nonZeroDivisors Γ(V.1.toScheme, (⊤ : V.1.toScheme.Opens))
+    rw [← MulEquivClass.map_nonZeroDivisors
+      (affineOpenSectionsIso V).commRingCatIsoToRingEquiv]
+    exact ⟨r, hr, rfl⟩
+  have hrPullback := RingHom.Flat.map_mem_nonZeroDivisors
+    (f.resLE V.1 U.1 hUV).flat_appTop hrTop
+  change (affineOpenSectionsIso U).symm.commRingCatIsoToRingEquiv
+      ((f.resLE V.1 U.1 hUV).appTop.hom
+        (affineOpenTopSection V r)) ∈ nonZeroDivisors Γ(X, U.1)
+  rw [← MulEquivClass.map_nonZeroDivisors
+    (affineOpenSectionsIso U).symm.commRingCatIsoToRingEquiv]
+  exact ⟨_, hrPullback, rfl⟩
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
