@@ -24021,3 +24021,16 @@ So the coupling is mathematically necessary for the torsor property, confirming 
 and the D(2) leg genuinely needs KM's torsor-first structure (δ = √-cover G-torsor; action lives on the cover, not
 on δ). D(3) leg (level 3) is SOUND (genuine global action, sorry-free). Owner: the D(2) TorsorData interface, not
 just [T-E14-ACT'], is what needs the reformulation.
+
+### v10.337-FIN pinpoint — the EXACT field requiring the impossible φ (TorsorData.equivariant)
+Traced to the root: `TorsorData {Q} (φ : G →* Aut Q) (X)` (QuotientProblem.lean:766) is parametrized by the GLOBAL
+functor action φ, and its `equivariant` field is
+  `eqv g ⟨h.1 ≫ σZ.hom γ, …⟩ = (φ γ⁻¹).hom.app (op (X.pullbackAlong g)) (eqv g h)`
+— i.e. it equates the (existent) Z-scheme action `σZ` with `φ`'s action on δ-VALUES at every g. For the D(2)/Legendre
+δ, `φ = legendreDeltaGAction` cannot exist (global √-rescale), so this field is unsatisfiable. The Z-action σZ DOES
+exist (G acts on the √-cover representing scheme Z); it is only the φ-SIDE that fails. RESOLUTION DIRECTION for owner:
+a φ-FREE TorsorData whose `equivariant` states the twist intrinsically via σZ (the Z-torsor structure) rather than a
+global functor φ — then the D(2) leg supplies only the Z-action (which exists) and no impossible global δ-action.
+This is a mouth/TorsorData interface change (affects representable_of_rigidNoeth_of_torsor + the D(3) leg wiring),
+hence OWNER territory — NOT attempted unilaterally. D(3)/level-3 works because there φ (gammaFullNaiveGlAction) genuinely
+exists globally. NET: receipts 1/2/4/5 gated on this owner interface decision; receipts 3/6 on Oort-Tate (mathlib gap).
