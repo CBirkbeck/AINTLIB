@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.ForMathlib.AcyclicAffineOpenCover
+import ModularCurves.ForMathlib.AffinePatchBaseChange
 import ModularCurves.ForMathlib.TwoOpenHOne
 
 /-!
@@ -100,5 +101,50 @@ theorem sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_neighborhood
     · exact Or.inr hc
   exact sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_open_cover
     hsm z hz n U V hUV hV
+
+/-- Around every point of an affine base, successive pole quotients have vanishing
+first cohomology after restricting the family to a suitable affine neighborhood. -/
+theorem exists_affineBaseChange_sectionPoleSheafSuccCoker_subsingleton_H_one
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (s : S) (n : ℕ) :
+    ∃ V : S.affineOpens, s ∈ V.1 ∧
+      let t : V.1.toScheme ⟶ S := V.1.ι
+      let πV := pullback.snd π t
+      let zV := sectionBaseChange z hz t
+      Subsingleton (CategoryTheory.Sheaf.H
+        (sectionPoleSheafSuccCoker πV zV (sectionBaseChange_snd z hz t) n).sheaf 1) := by
+  obtain ⟨_, ⟨U, hU, rfl⟩, hzsU, -⟩ :=
+    C.isBasis_affineOpens.exists_subset_of_mem_open
+      (Set.mem_univ (z s)) isOpen_univ
+  let Uaff : C.affineOpens := ⟨U, hU⟩
+  obtain ⟨_, ⟨V, hV, rfl⟩, hsV, hVU⟩ :=
+    S.isBasis_affineOpens.exists_subset_of_mem_open
+      hzsU ((z ⁻¹ᵁ Uaff.1).2)
+  let Vaff : S.affineOpens := ⟨V, hV⟩
+  refine ⟨Vaff, hsV, ?_⟩
+  dsimp only
+  let t : Vaff.1.toScheme ⟶ S := Vaff.1.ι
+  let πV := pullback.snd π t
+  let zV := sectionBaseChange z hz t
+  let UV : (pullback π t).Opens := pullback.fst π t ⁻¹ᵁ Uaff.1
+  letI : IsAffine Vaff.1.toScheme := Vaff.2
+  have hUVaff : IsAffineOpen UV := by
+    dsimp only [UV]
+    exact IsAffineOpen.preimage_pullback_fst π t Uaff.2
+  let UVaff : (pullback π t).affineOpens := ⟨UV, hUVaff⟩
+  have hzUV : zV ⁻¹ᵁ UV = ⊤ := by
+    rw [← Scheme.Hom.comp_preimage, sectionBaseChange_fst,
+      Scheme.Hom.comp_preimage]
+    ext x
+    change z x.1 ∈ Uaff.1 ↔ x ∈ (⊤ : Vaff.1.toScheme.Opens)
+    simp only [Opens.mem_top, iff_true]
+    exact hVU x.2
+  have hsmV : SmoothOfRelativeDimension 1 πV := by
+    exact
+      (AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
+        (IsPullback.of_hasPullback π t) hsm
+  exact sectionPoleSheafSuccCoker_subsingleton_H_one_of_affine_neighborhood
+    hsmV zV (sectionBaseChange_snd z hz t) n UVaff hzUV
 
 end ModularCurves
