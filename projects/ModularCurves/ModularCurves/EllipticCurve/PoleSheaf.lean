@@ -1837,7 +1837,7 @@ noncomputable def sectionPoleSheafPowerRestrictIso
           sectionPoleSheafRestrictIso z hz t)
 
 /-- The localized monoidal unit is the structure sheaf. -/
-private noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
+noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
     𝟙_ X.Modules ≅ Scheme.Modules.unitObj X :=
   Scheme.Modules.sheafifyValIso (Scheme.Modules.unitObj X)
 
