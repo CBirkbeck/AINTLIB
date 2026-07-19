@@ -24137,3 +24137,26 @@ constructive, but new — neither exists, and both belong OUTSIDE EngineDescent)
     (The existing adaptedCoeff₄/₆ gluing sidesteps this ONLY by assuming 2,3 invertible — unavailable over general ℤ-base.)
 (iii) native glue over A_a + Stages 4-5 = mechanical (exists_cocycle_hρact_of_presentation DONE + exists_coboundary +
     the Part-2 spread). So the mouth core = 2 new ForMathlib lemmas + ~1000-line assembly (genuine multi-session).
+
+## v10.341-FIN (2026-07-20) — STREAM-FIN marathon concluded at the genuine B2/B3 ceiling (STREAM-FIN)
+
+**BEASTMODE B2/B3 STOP.** The headline (all 7 KM 4.7.0 receipts axiom-clean) is IRREDUCIBLY blocked this session by:
+- **B2 (legendreDeltaGAction, b2_log'd):** the D(2)/Legendre leg's global functor-action `G →* Aut δ` is PROVEN impossible
+  (ω-rescale √(x(Q')−x(P')) not globally available; TorsorData.equivariant requires it). OWNER must pick a resolution:
+  (1) φ-free TorsorData (mouth interface change) + scaleTorsor_spec, (2) level-4 ℰ₄-machine rigidifier, (3) fix Legendre.
+- **B3 (Oort–Tate / BB-DELIGNE):** mathlib has NO group-scheme theory — a multi-week research contribution.
+Neither is unblockable by residual-shrinking. Receipt 7 (levelSpaceΓπ_etale) is CLEAN; the engine is WIRED.
+
+**Delivered this marathon (13 commits, all axiom-clean):** engine wired end-to-end; moduliProblem_zariski_glue [R-sheaf-P];
+parametrized recollement descent glueEllObj_representableBy_of_zariskiGlue + ZariskiSheaf + naturality; mouth-core Stage-4
+(exists_cocycle_hρact_of_presentation) + Stage-1/2 semilocalization preamble; scaleTorsor_spec RHS μ₂-torsor + deck
+involution + 3 torsor helpers; IsLegendreDatum.smul_of_sq_eq_one (genuine μ₂-on-ω); PicSubsingletonFree (mouth-core
+prereq i, via mathlib Pic.instFreeOfSubsingleton). Mouth core DE-RISKED to volume-only (2 ForMathlib prereqs: Pic-triv
+DONE, Čech-H¹ + OmegaBasis in-flight) + ~1000-line assembly — NO deep research gap.
+
+**In-flight at stop (residual-shrinking below the ceiling — integrate on their completions):** E (glueEllObj_representableBy
+full completion), af680e03 (ForMathlib/AffineCechH1), a22226dd (ForMathlib/SemilocalOmegaBasis). These bank infra; they
+do NOT unblock the B2/B3-blocked receipts.
+
+NEXT (owner): adjudicate the D(2) B2 architecture (the 3 resolutions), then the mouth-core assembly + scaleTorsor_spec
+Pieces are turnkey multi-session work. Board v10.336-341 + b2_log.jsonl + memory carry the full route-maps.
