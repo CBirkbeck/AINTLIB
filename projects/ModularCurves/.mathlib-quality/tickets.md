@@ -24034,3 +24034,24 @@ global functor φ — then the D(2) leg supplies only the Z-action (which exists
 This is a mouth/TorsorData interface change (affects representable_of_rigidNoeth_of_torsor + the D(3) leg wiring),
 hence OWNER territory — NOT attempted unilaterally. D(3)/level-3 works because there φ (gammaFullNaiveGlAction) genuinely
 exists globally. NET: receipts 1/2/4/5 gated on this owner interface decision; receipts 3/6 on Oort-Tate (mathlib gap).
+
+## v10.338-FIN (2026-07-20) — residual-shrinking wave: full recollement descent + mouth-core Stage 4 + torsor/μ₂ helpers banked (STREAM-FIN)
+
+6-builder wave (A/B/C/D done+committed; E/F in flight). COMMITTED (all axiom-clean):
+- A (31b3aaaa2): moduliProblem_zariski_glue [R-sheaf-P] — relatively-representable P is a 2-chart Zariski sheaf
+  (∃! gluing), assembling the 2 proven Stack.lean fppf lemmas over a coproduct cover. The recollement descent crux.
+- B (8bb822dfa): parametrized descent glueEllObj_representableBy_of_zariskiGlue + ZariskiSheaf hypothesis +
+  chart/overlap inclusions + homEquiv_comp naturality — all proven; [R-hom-glue] isolated as homGlueDescentData (leaf).
+- C (b523eb7f1): exists_cocycle_hρact_of_presentation — Stage 4 of the mouth core (G-cocycle + hρact from a presentation).
+- D (e01e12912): 3 torsor helpers (Equiv.ofBasepointTorsor, nonempty_equiv_of_pseudotorsor, isLegendreDatum_exists_connecting_sqrtOne).
+- B1 (e0856548e): IsLegendreDatum.smul_of_sq_eq_one — the GENUINE μ₂-on-ω action (g²=1 ⟹ g•b preserves IsLegendreDatum),
+  generalising IsLegendreDatum.neg; the honest {±1}-factor (no √, unlike the legendreDeltaGAction GL₂ B2).
+IN FLIGHT: E (a5db72f1, Recollement) = glueEllObj_representableBy full completion (zariskiSheaf_of_relRep from
+moduliProblem_zariski_glue + discharge homGlueDescentData + wire :1491). F (a5ac0d1e, EngineDescent) = mouth-core
+Stages 1-3+5 (semilocal model over L + spread + coboundary, building on C's Stage 4).
+
+LESSON: "named deps exist" ≠ assembly-class — D found scaleTorsor_spec's connecting bridges ARE the open [T-E14-ACT']
+√-dictionary (not mechanical); the wave banks INFRASTRUCTURE (reduces remaining work) but census leaves clear only when
+E/F land. If E lands: glueEllObj_representableBy CLEARED (1 receipt-cone leaf). If F lands: exists_localModel_core_at CLEARED.
+REMAINING (deep/owner/research): scaleTorsor_spec ← [T-E14-ACT'] √-dictionary (D banked step-iv + RHS pinning + B1);
+legendreDeltaGAction B2 (owner φ-free re-arch); BB-DELIGNE=Oort-Tate (mathlib gap, B3) + pull_nsmul_jetData. Receipt 7 clean.
