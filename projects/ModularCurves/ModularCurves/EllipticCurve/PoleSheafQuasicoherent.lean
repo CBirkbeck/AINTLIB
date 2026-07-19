@@ -223,6 +223,24 @@ noncomputable def idealModuleCokerIsoPushforwardUnit
     (Abelian.epiIsCokernelOfKernel
       (KernelFork.ofι (kernel.ι q) (kernel.condition q)) (kernelIsKernel q))
 
+/-- The ideal-quotient isomorphism carries the cokernel projection to the
+canonical map from the structure sheaf to the section's pushforward. -/
+theorem idealModuleCokerIsoPushforwardUnit_π_hom
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsClosedImmersion f] :
+    cokernel.π (idealModuleToUnit f) ≫
+        (idealModuleCokerIsoPushforwardUnit f).hom =
+      SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom := by
+  let q := SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom
+  letI : Epi q :=
+    SheafOfModules.unitToPushforwardObjUnit_epi_of_isClosedImmersion f
+  let hq := Abelian.epiIsCokernelOfKernel
+    (KernelFork.ofι (kernel.ι q) (kernel.condition q)) (kernelIsKernel q)
+  change cokernel.π (kernel.ι q) ≫
+      (IsColimit.coconePointUniqueUpToIso
+        (cokernelIsCokernel (kernel.ι q)) hq).hom = q
+  exact IsColimit.comp_coconePointUniqueUpToIso_hom
+    (cokernelIsCokernel (kernel.ι q)) hq WalkingParallelPair.one
+
 /-- The quotient between two consecutive pole sheaves. -/
 noncomputable def sectionPoleSheafSuccCoker
     {C S : Scheme.{u}} (π : C ⟶ S) [IsSeparated π]
@@ -285,9 +303,8 @@ private theorem isoSquareOfScalarCoordinates
     (Category.assoc _ _ _).symm
   exact h₁.trans (h₂.trans (h₃.trans (h₄.trans h₅)))
 
-/-- On a Cartier-generator chart, a consecutive pole quotient agrees with the
-restriction of the section-ideal quotient. -/
-noncomputable def sectionPoleSheafSuccCoker_restrictIsoIdealCoker
+private noncomputable def
+    sectionPoleSheafSuccCoker_restrictIsoIdealCokerData
     {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
     (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
     (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
@@ -295,10 +312,22 @@ noncomputable def sectionPoleSheafSuccCoker_restrictIsoIdealCoker
     (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ) :
     letI : IsClosedImmersion z := isClosedImmersion_section z hz
     letI : QuasiCompact z := inferInstance
-    (Scheme.Modules.restrictFunctor U.1.ι).obj
-        (sectionPoleSheafSuccCoker π z hz n) ≅
-      (Scheme.Modules.restrictFunctor U.1.ι).obj
-        (cokernel (idealModuleToUnit z)) := by
+    let F := Scheme.Modules.restrictFunctor U.1.ι
+    let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U.1 eGen.symm
+    let ePoleOver := SheafOfModules.dualOverIsoOfIso
+      C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+    let ePole := restrictTrivializationOfOverIso
+      (sectionPoleSheaf π z hz) U.1 ePoleOver
+    let ePsucc := sectionPoleSheafPowerTrivialization
+      z hz U.1 ePole (n + 1)
+    let eUnit := Scheme.Modules.restrictUnitIso U.1.ι
+    let q := ePsucc ≪≫ eUnit.symm
+    { e : F.obj (sectionPoleSheafSuccCoker π z hz n) ≅
+          F.obj (cokernel (idealModuleToUnit z)) //
+      F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫ e.hom =
+        q.hom ≫ F.map (cokernel.π (idealModuleToUnit z)) } := by
   letI : IsClosedImmersion z := isClosedImmersion_section z hz
   letI : QuasiCompact z := inferInstance
   let F := Scheme.Modules.restrictFunctor U.1.ι
@@ -340,12 +369,102 @@ noncomputable def sectionPoleSheafSuccCoker_restrictIsoIdealCoker
     exact isoSquareOfScalarCoordinates
       (F.map (sectionPoleSheafSuccHom π z hz n))
       (F.map (idealModuleToUnit z)) eP ePsucc eGen eUnit d hsucc hideal'
-  exact
-    (Scheme.Modules.restrictCokernelIso
-      (sectionPoleSheafSuccHom π z hz n) U.1).symm ≪≫
-      cokernel.mapIso (f := F.map (sectionPoleSheafSuccHom π z hz n))
-        (F.map (idealModuleToUnit z)) p q hsquare ≪≫
-      Scheme.Modules.restrictCokernelIso (idealModuleToUnit z) U.1
+  let ePoleCoker := Scheme.Modules.restrictCokernelIso
+    (sectionPoleSheafSuccHom π z hz n) U.1
+  let eMap := cokernel.mapIso
+    (f := F.map (sectionPoleSheafSuccHom π z hz n))
+    (F.map (idealModuleToUnit z)) p q hsquare
+  let eIdealCoker := Scheme.Modules.restrictCokernelIso
+    (idealModuleToUnit z) U.1
+  let e := ePoleCoker.symm ≪≫ eMap ≪≫ eIdealCoker
+  have hfirst :
+      F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+          ePoleCoker.symm.hom =
+        cokernel.π (F.map (sectionPoleSheafSuccHom π z hz n)) := by
+    simpa only [ePoleCoker, Scheme.Modules.restrictCokernelIso,
+      Iso.symm_hom, Iso.symm_inv] using
+        PreservesCokernel.π_iso_hom F
+          (sectionPoleSheafSuccHom π z hz n)
+  have hmiddle :
+      cokernel.π (F.map (sectionPoleSheafSuccHom π z hz n)) ≫
+          eMap.hom =
+        q.hom ≫ cokernel.π (F.map (idealModuleToUnit z)) := by
+    change cokernel.π (F.map (sectionPoleSheafSuccHom π z hz n)) ≫
+        cokernel.map (F.map (sectionPoleSheafSuccHom π z hz n))
+          (F.map (idealModuleToUnit z)) p.hom q.hom hsquare =
+      q.hom ≫ cokernel.π (F.map (idealModuleToUnit z))
+    exact cokernel.π_desc _ _ _
+  have hlast :
+      cokernel.π (F.map (idealModuleToUnit z)) ≫ eIdealCoker.hom =
+        F.map (cokernel.π (idealModuleToUnit z)) := by
+    have h := PreservesCokernel.π_iso_hom F (idealModuleToUnit z)
+    have hcomp := congrArg
+      (fun k ↦ k ≫ (PreservesCokernel.iso F (idealModuleToUnit z)).inv) h
+    simpa only [eIdealCoker, Scheme.Modules.restrictCokernelIso,
+      Iso.symm_hom, Category.assoc, Iso.hom_inv_id, Category.comp_id] using
+        hcomp.symm
+  refine ⟨e, ?_⟩
+  have hmiddleWhisker := congrArg (fun k ↦ k ≫ eIdealCoker.hom) hmiddle
+  have hlastWhisker := congrArg (fun k ↦ q.hom ≫ k) hlast
+  calc
+    F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫ e.hom =
+        (F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+            ePoleCoker.symm.hom) ≫ eMap.hom ≫ eIdealCoker.hom := by
+      simp only [e, Iso.trans_hom, Category.assoc]
+    _ = cokernel.π (F.map (sectionPoleSheafSuccHom π z hz n)) ≫
+          eMap.hom ≫ eIdealCoker.hom := by rw [hfirst]
+    _ = (q.hom ≫ cokernel.π (F.map (idealModuleToUnit z))) ≫
+          eIdealCoker.hom := hmiddleWhisker
+    _ = q.hom ≫
+          (cokernel.π (F.map (idealModuleToUnit z)) ≫
+            eIdealCoker.hom) := Category.assoc _ _ _
+    _ = q.hom ≫ F.map (cokernel.π (idealModuleToUnit z)) := hlastWhisker
+
+/-- On a Cartier-generator chart, a consecutive pole quotient agrees with the
+restriction of the section-ideal quotient. -/
+noncomputable def sectionPoleSheafSuccCoker_restrictIsoIdealCoker
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    letI : QuasiCompact z := inferInstance
+    (Scheme.Modules.restrictFunctor U.1.ι).obj
+        (sectionPoleSheafSuccCoker π z hz n) ≅
+      (Scheme.Modules.restrictFunctor U.1.ι).obj
+        (cokernel (idealModuleToUnit z)) :=
+  (sectionPoleSheafSuccCoker_restrictIsoIdealCokerData
+    z hz U r hr hspan hnzd n).1
+
+/-- The local pole-quotient isomorphism respects the canonical cokernel
+projections. -/
+theorem sectionPoleSheafSuccCoker_restrictIsoIdealCoker_π_hom
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    letI : QuasiCompact z := inferInstance
+    let F := Scheme.Modules.restrictFunctor U.1.ι
+    let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U.1 eGen.symm
+    let ePoleOver := SheafOfModules.dualOverIsoOfIso
+      C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+    let ePole := restrictTrivializationOfOverIso
+      (sectionPoleSheaf π z hz) U.1 ePoleOver
+    let ePsucc := sectionPoleSheafPowerTrivialization
+      z hz U.1 ePole (n + 1)
+    let eUnit := Scheme.Modules.restrictUnitIso U.1.ι
+    F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+        (sectionPoleSheafSuccCoker_restrictIsoIdealCoker
+          z hz U r hr hspan hnzd n).hom =
+      (ePsucc ≪≫ eUnit.symm).hom ≫
+        F.map (cokernel.π (idealModuleToUnit z)) :=
+  (sectionPoleSheafSuccCoker_restrictIsoIdealCokerData
+    z hz U r hr hspan hnzd n).2
 
 /-- On a Cartier-generator chart, a consecutive pole quotient is supported on
 the zero section. -/
@@ -367,6 +486,84 @@ noncomputable def sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit
       z hz U r hr hspan hnzd n ≪≫
     (Scheme.Modules.restrictFunctor U.1.ι).mapIso
       (idealModuleCokerIsoPushforwardUnit z)
+
+/-- The local identification of a consecutive pole quotient with the pushed-forward
+structure sheaf respects the canonical quotient projection. -/
+theorem sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit_π_hom
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    letI : QuasiCompact z := inferInstance
+    let F := Scheme.Modules.restrictFunctor U.1.ι
+    let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U.1 eGen.symm
+    let ePoleOver := SheafOfModules.dualOverIsoOfIso
+      C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+    let ePole := restrictTrivializationOfOverIso
+      (sectionPoleSheaf π z hz) U.1 ePoleOver
+    let ePsucc := sectionPoleSheafPowerTrivialization
+      z hz U.1 ePole (n + 1)
+    let eUnit := Scheme.Modules.restrictUnitIso U.1.ι
+    F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+        (sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit
+          z hz U r hr hspan hnzd n).hom =
+      (ePsucc ≪≫ eUnit.symm).hom ≫
+        F.map (SheafOfModules.unitToPushforwardObjUnit
+          z.toRingCatSheafHom) := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  let F := Scheme.Modules.restrictFunctor U.1.ι
+  let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+  let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+    (sectionIdealModule π z hz) U.1 eGen.symm
+  let ePoleOver := SheafOfModules.dualOverIsoOfIso
+    C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+  let ePole := restrictTrivializationOfOverIso
+    (sectionPoleSheaf π z hz) U.1 ePoleOver
+  let ePsucc := sectionPoleSheafPowerTrivialization
+    z hz U.1 ePole (n + 1)
+  let eUnit := Scheme.Modules.restrictUnitIso U.1.ι
+  let q := ePsucc ≪≫ eUnit.symm
+  let eLocal := sectionPoleSheafSuccCoker_restrictIsoIdealCoker
+    z hz U r hr hspan hnzd n
+  let eCoker := idealModuleCokerIsoPushforwardUnit z
+  have hpole :
+      F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+          eLocal.hom =
+        q.hom ≫ F.map (cokernel.π (idealModuleToUnit z)) := by
+    exact sectionPoleSheafSuccCoker_restrictIsoIdealCoker_π_hom
+      z hz U r hr hspan hnzd n
+  have hcoker := idealModuleCokerIsoPushforwardUnit_π_hom z
+  have hmap :
+      F.map (cokernel.π (idealModuleToUnit z)) ≫ F.map eCoker.hom =
+        F.map (SheafOfModules.unitToPushforwardObjUnit
+          z.toRingCatSheafHom) := by
+    rw [← F.map_comp]
+    exact congrArg F.map hcoker
+  have hpoleWhisker := congrArg (fun k ↦ k ≫ F.map eCoker.hom) hpole
+  have hmapWhisker := congrArg (fun k ↦ q.hom ≫ k) hmap
+  change F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+      (eLocal.hom ≫ F.map eCoker.hom) =
+    q.hom ≫ F.map (SheafOfModules.unitToPushforwardObjUnit
+      z.toRingCatSheafHom)
+  have hassocSource :
+      F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+          (eLocal.hom ≫ F.map eCoker.hom) =
+        (F.map (cokernel.π (sectionPoleSheafSuccHom π z hz n)) ≫
+          eLocal.hom) ≫ F.map eCoker.hom :=
+    (Category.assoc _ _ _).symm
+  have hassocTarget :
+      (q.hom ≫ F.map (cokernel.π (idealModuleToUnit z))) ≫
+          F.map eCoker.hom =
+        q.hom ≫ (F.map (cokernel.π (idealModuleToUnit z)) ≫
+          F.map eCoker.hom) :=
+    Category.assoc _ _ _
+  exact hassocSource.trans
+    (hpoleWhisker.trans (hassocTarget.trans hmapWhisker))
 
 /-- A consecutive pole quotient vanishes on a Cartier-generator chart disjoint
 from the section. -/
