@@ -95,6 +95,7 @@ import «Adic spaces».RationalIntersection
 import «Adic spaces».SheafyFoundations
 import «Adic spaces».RationalBasis
 import «Adic spaces».StructurePresheafLimit
+import «Adic spaces».SheafyPair
 import «Adic spaces».StructureSheaf
 import «Adic spaces».TateAcyclicity
 import «Adic spaces».TateAcyclicityFinalAssembly
