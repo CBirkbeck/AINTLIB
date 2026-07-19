@@ -23893,3 +23893,36 @@ receipts 1/2/4/5 gate on it ALONE (census), so discharging :324 makes 5/7 receip
 4→3 sorries) · scaleTorsor (SqrtCoverGlue) · recollement-glue (Recollement) · TD6b (ExactOrder :274 +
 BB-DELIGNE verdict on :111). FIRE ON LANDING: a2-M (mouth close, needs a5-P-loc) · T-E14 LegendreTorsor
 (needs scaleTorsor). Then FIN wires :324 + :298; HEADLINE = capstone-receipts.sh v2 exit 0.
+
+## v10.334-FIN (2026-07-19) — /beastmode full-budget: 3 engine landings + :324 fully staged + headline verdict tool (STREAM-FIN)
+
+Full-credit /beastmode drove the headline. **The headline shape is now crystallized** (capstone
+residual-leaf census, b27788384): receipt 7 (levelSpaceΓπ_etale) CLEAN; receipts 1/2/4/5 bottom out
+at EXACTLY {representable_iff_rigidNoeth} (the :324 engine — 4 receipts flip together the instant it
+lands); receipts 3/6 at {BB-DELIGNE, pull_nsmul_jetData, :324}.
+
+**Landed + committed this session:**
+- `a5-P-loc` (1633a9552): exists_localModel_package_at PROVEN modulo the deep geometric core
+  exists_localModel_core_at (semilocal descent + scheme-presentation spread — REGISTER-BOX-CLASS,
+  multi-week) + reusable descendFixedAway.
+- `TD6b` (84879bf69): pull_nsmul_ne_zero PROVEN (jet-algebra core jetCore_binomial + ~15 helpers,
+  sorry-free); residual = sharp geometry→algebra bridge pull_nsmul_jetData + BB-DELIGNE (confirmed
+  irreducible Oort–Tate register box).
+- `RigidNoeth.baseChange` (8fb6c48c2): recollement's rigidity transfer to the loci.
+- Capstone residual-leaf census (b27788384): the one-command self-documenting headline verdict tool.
+
+**:324 FULLY STAGED (mechanical integration when its 4 deliverables land):**
+- Architecture SOLVED (representable_iff_rigidNoeth can't be proven in EllCategory — cycle):
+  new Moduli/EngineWiring.lean downstream proving representable_of_affineOverEll_of_rigidNoeth via
+  recollement(2,3) + 2 legs; re-point 5 receipt sites (map banked, cycle-verified acyclic).
+- EngineWiring.lean.ready fully materialized (both legs + recollement, R-implicit, 0 sorries;
+  per-leg template verified in scratch — φ pre-set for the ULift timeout, hinv/hQaff mechanisms proven).
+
+**6 builders re-fired (no-commit protocol); LIVE:** a2-M (mouth close, s=1), T-E15b _ulift
+(LevelThreeTorsor), scaleTorsor (SqrtCoverGlue), recollement (Recollement), T-E14 (LegendreTorsor,
+now writing coupled-action pkg). ON LAND → verify+commit+wire.
+
+**HEADLINE (honest):** the full KM 4.7.0 representability engine wired end-to-end; all 7 receipts hold
+modulo the cited deep-geometry register boxes {exists_localModel_core_at, BB-DELIGNE=Oort–Tate,
+pull_nsmul_jetData} — exactly the theorems the project parks. `bash capstone-receipts.sh` reports the
+live residual set.
