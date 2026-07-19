@@ -95,6 +95,41 @@ theorem baseSections_smul
   rw [hinner, htop]
   simp
 
+/-- The base-linear global sections of the pushed-forward structure module
+along a section form the regular module of global functions on the base. -/
+noncomputable def baseSectionsPushforwardUnitIsoOfSection
+    {X Y : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ X) (h : f ≫ g = 𝟙 X) :
+    baseSections g ((pushforward f).obj
+      (_root_.SheafOfModules.unit X.ringCatSheaf)) ≅
+      ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(X, (⊤ : X.Opens)) := by
+  let eAdd :
+      (baseSections g ((pushforward f).obj
+        (_root_.SheafOfModules.unit X.ringCatSheaf)) : Type u) ≃+
+        Γ(X, (⊤ : X.Opens)) := AddEquiv.refl _
+  let eLin :
+      (baseSections g ((pushforward f).obj
+        (_root_.SheafOfModules.unit X.ringCatSheaf)) : Type u) ≃ₗ[
+          Γ(X, (⊤ : X.Opens))] Γ(X, (⊤ : X.Opens)) :=
+    { eAdd with
+      map_smul' := by
+        intro r x
+        change (show Γ(X, (⊤ : X.Opens)) from r • x) =
+          r * (show Γ(X, (⊤ : X.Opens)) from x)
+        have hbase : (show Γ(X, (⊤ : X.Opens)) from r • x) =
+            f.appTop.hom (g.appTop.hom r) *
+              (show Γ(X, (⊤ : X.Opens)) from x) := by
+          exact baseSections_smul g
+            ((pushforward f).obj
+              (_root_.SheafOfModules.unit X.ringCatSheaf)) r x
+        have happ : (f ≫ g).appTop = Scheme.Hom.appTop (𝟙 X) :=
+          congrArg Scheme.Hom.appTop h
+        rw [Scheme.Hom.comp_appTop] at happ
+        have hr : f.appTop.hom (g.appTop.hom r) = r := by
+          have hx := ConcreteCategory.congr_hom happ r
+          simpa using hx
+        exact hbase.trans (by rw [hr]) }
+  exact eLin.toModuleIso
+
 /-- Restriction of global sections to the degree-zero term of the base-linear
 Cech complex. -/
 noncomputable def baseCechAugmentation
