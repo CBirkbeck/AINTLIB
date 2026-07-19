@@ -216,6 +216,17 @@ theorem sectionPoleSheafSuccCoker_isFinitePresentation
     (sectionPoleSheafPower_isInvertible hsm z hz (n + 1))
     (sectionPoleSheafSuccHom π z hz n)
 
+/-- A successive pole-filtration quotient is quasicoherent. -/
+theorem sectionPoleSheafSuccCoker_isQuasicoherent
+    {C S : Scheme.{u}} {π : C ⟶ S} (hsm : SmoothOfRelativeDimension 1 π)
+    [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    SheafOfModules.IsQuasicoherent.{u}
+      (sectionPoleSheafSuccCoker π z hz n) := by
+  letI : (sectionPoleSheafSuccCoker π z hz n).IsFinitePresentation :=
+    sectionPoleSheafSuccCoker_isFinitePresentation hsm z hz n
+  exact (SheafOfModules.IsFinitePresentation.exists_quasicoherentData
+    (sectionPoleSheafSuccCoker π z hz n)).choose.isQuasicoherent
+
 local instance (X : Scheme.{u}) :
     ∀ V, IsMulCommutative (X.ringCatSheaf.obj.obj V) :=
   fun V ↦ by
