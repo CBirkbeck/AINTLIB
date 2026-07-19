@@ -45,6 +45,58 @@ theorem baseModulePresheaf_map_apply {X S : Scheme.{u}} (π : X ⟶ S)
     ((baseModulePresheaf π M).map f).hom x = M.presheaf.map f x :=
   rfl
 
+/-- Base-linear sections on an ambient open are naturally identified with
+top sections of the module restricted to that open. -/
+noncomputable def baseModulePresheafRestrictIso
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules) (U : X.Opens) :
+    (baseModulePresheaf f M).obj (op U) ≅
+      (ModuleCat.restrictScalars (U.ι ≫ f).appTop.hom).obj
+        (ModuleCat.of Γ(U.toScheme, (⊤ : U.toScheme.Opens))
+          Γ(M.restrict U.ι, (⊤ : U.toScheme.Opens))) := by
+  let eAdd := M.presheaf.mapIso (eqToIso U.ι_image_top).op ≪≫
+    (M.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).symm
+  refine ModuleCat.isoMk eAdd ?_
+  intro r
+  ext (x : Γ(M, U))
+  change
+    (U.ι ≫ f).appTop.hom r •
+        (M.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).inv
+          (M.presheaf.map (eqToHom U.ι_image_top).op x) =
+      (M.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).inv
+        (M.presheaf.map (eqToHom U.ι_image_top).op
+          (((X.presheaf.map
+            ((initialOpOfTerminal isTerminalTop).to (op U))).hom
+              (f.appTop.hom r)) • x))
+  rw [M.map_smul]
+  rw [smul_restrictAppIso_inv_apply]
+  congr 1
+  rw [Scheme.Hom.comp_appTop]
+  have hr : (U.ι.appIso (⊤ : U.toScheme.Opens)).hom
+      (X.presheaf.map (eqToHom U.ι_image_top).op
+        ((X.presheaf.map
+          ((initialOpOfTerminal isTerminalTop).to (op U))).hom
+            (f.appTop.hom r))) =
+      U.topIso.inv
+        ((X.presheaf.map
+          ((initialOpOfTerminal isTerminalTop).to (op U))).hom
+            (f.appTop.hom r)) := by
+    rw [Scheme.Opens.topIso_inv]
+    rw [Scheme.Opens.ι_appIso]
+    rfl
+  rw [hr]
+  rw [Scheme.Opens.topIso_inv]
+  rw [Scheme.Opens.ι_appTop]
+  have hmap :
+      X.presheaf.map
+          (homOfLE (x := U.ι ''ᵁ (⊤ : U.toScheme.Opens)) le_top).op =
+        X.presheaf.map
+            ((initialOpOfTerminal isTerminalTop).to (op U)) ≫
+          X.presheaf.map (eqToHom U.ι_image_top).op := by
+    rw [← Functor.map_comp]
+    congr
+  rw [hmap]
+  rfl
+
 /-- The Cech complex of a scheme module, retaining its module structure over
 the global functions on the base. -/
 noncomputable def baseCechComplex {X S : Scheme.{u}} (π : X ⟶ S)
