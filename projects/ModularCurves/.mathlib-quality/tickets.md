@@ -23958,3 +23958,30 @@ residual, math TRUE); receipts 3/6 also `smul_eq_zero_of_factors [BB-DELIGNE/Oor
 These are exactly the genuine hard geometric inputs — the theorems KM cites / the project parks. `bash
 capstone-receipts.sh` reports the live set. The representability theorem is FORMALIZED; the residual set is
 the frontier.
+
+## v10.336-FIN (2026-07-20) — residual-shrinking wave: level-3 package CLEAN + recollement/scaleTorsor leaves discharged (STREAM-FIN)
+
+Post-:324-WIRED residual-shrinking wave (4 builders) integrated; full tree green 4242. Receipts 1/2/4/5
+residual set shrunk 12→8 leaves:
+- level-3-perf (521628b41): exists_isNaiveFullLevel_of_isAlgClosed whnf-restructure → exists_levelThreeTorsorData
+  FULLY AXIOM-CLEAN. Entire level-3 torsor package clean; all level-3 leaves GONE.
+- recollement-descent (aaa2e7746): glue_locallyWeierstrass DISCHARGED (lw_chart_transport helper, axiom-clean);
+  glueEllObj now genuine sorry-free EllObj. Only glueEllObj_representableBy remains.
+- scaleTorsor-geometry (65d031683): chartUnit_compat + isUnit_univAbscissaDiff_component DISCHARGED
+  (+isUnit_x_diff_of_marked_pair helper). equifibered + scaleTorsor_spec remain.
+- Legendre-geometry (no edits): FINDING — legendreDelta_torsor_of/surjective_of are MIS-STATED
+  over-generalizations (generic ∀G φ, missing IsUnit(2:R)), FALSE as stated ⟹ need OWNER statement-fix
+  (add hR, specialize torsor to legendreDeltaGAction; build exists_isLegendreDatum_of_isAlgClosed).
+
+**IRREDUCIBLE FRONTIER (final, per capstone census — the genuine deep-geometry/research floor):**
+receipts 1/2/4/5 hold modulo {exists_localModel_core_at [mouth semilocal descent],
+glueEllObj_representableBy [recollement Zariski moduli descent, on-ramp = Stack.moduliProblem_fppf_descent],
+scaleTorsor_spec [glued-sections↔OmegaBasis classification] + glueData [its propagation],
+legendreDeltaGAction [T-E14-ACT' √-cover coupled action, naive form FALSE] + legendreDelta_torsor_of/
+surjective_of/naturalFamily [Legendre, mis-stated + √-cover-gated]}; receipts 3/6 also {smul_eq_zero_of_factors
+= BB-DELIGNE/Oort–Tate [mathlib has no group-scheme theory — research contribution], pull_nsmul_jetData
+[DVR jet bridge]}. Receipt 7 (levelSpaceΓπ_etale) axiom-CLEAN.
+
+Each frontier residual is multi-week/research-class (B3-scale published-theorem geometry) — the genuine
+deferred deep inputs. The KM 4.7.0 representability engine is FORMALIZED END-TO-END; the headline holds
+modulo exactly this cited frontier. `bash capstone-receipts.sh` reports the live set.
