@@ -155,9 +155,8 @@ theorem exists_sectionPoleSheafPower_succ_baseSection_generator
   refine ⟨x, ?_⟩
   rw [hx, Iso.inv_hom_id_apply]
 
-/-- If the lower pole sheaf has vanishing first cohomology, the next pole
-module splits as the lower pole module and its rank-one successive quotient. -/
-noncomputable def sectionPoleSheafPower_succ_baseSectionsSplitEquivOfCartierGenerator
+private noncomputable def
+    sectionPoleSheafPower_succ_baseSectionsSplitDataOfCartierGenerator
     {C S : Scheme.{u}} {π : C ⟶ S}
     (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
     (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
@@ -166,10 +165,20 @@ noncomputable def sectionPoleSheafPower_succ_baseSectionsSplitEquivOfCartierGene
     (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
     (hH : Subsingleton (CategoryTheory.Sheaf.H
       (sectionPoleSheafPower π z hz n).sheaf 1)) :
-    Scheme.Modules.baseSections π
-        (sectionPoleSheafPower π z hz (n + 1)) ≃ₗ[Γ(S, (⊤ : S.Opens))]
-      Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n) ×
-        Γ(S, (⊤ : S.Opens)) := by
+    let R := Γ(S, (⊤ : S.Opens))
+    let P := Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n)
+    let Q := Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1))
+    let f := (Scheme.Modules.baseSectionsMap π
+      (sectionPoleSheafSuccHom π z hz n)).hom
+    let e := (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n).toLinearEquiv
+    let g := e.toLinearMap ∘ₗ (Scheme.Modules.baseSectionsMap π
+      (cokernel.π (sectionPoleSheafSuccHom π z hz n))).hom
+    { d : Q ≃ₗ[R] P × R //
+      f = d.symm.toLinearMap ∘ₗ LinearMap.inl R P R ∧
+        g = LinearMap.snd R P R ∘ₗ d.toLinearMap } := by
+  dsimp only
   let f := (Scheme.Modules.baseSectionsMap π
     (sectionPoleSheafSuccHom π z hz n)).hom
   let g₀ := (Scheme.Modules.baseSectionsMap π
@@ -196,7 +205,87 @@ noncomputable def sectionPoleSheafPower_succ_baseSectionsSplitEquivOfCartierGene
     (LinearMap.range_eq_top.mpr hsurj)
   let l := Classical.choose hsplitting
   have hl := Classical.choose_spec hsplitting
-  exact (hexact.splitSurjectiveEquiv hf ⟨l, hl⟩).1
+  exact hexact.splitSurjectiveEquiv hf ⟨l, hl⟩
+
+/-- If the lower pole sheaf has vanishing first cohomology, the next pole
+module splits as the lower pole module and its rank-one successive quotient. -/
+noncomputable def sectionPoleSheafPower_succ_baseSectionsSplitEquivOfCartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1)) :
+    Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz (n + 1)) ≃ₗ[Γ(S, (⊤ : S.Opens))]
+      Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n) ×
+        Γ(S, (⊤ : S.Opens)) :=
+  (sectionPoleSheafPower_succ_baseSectionsSplitDataOfCartierGenerator
+    hsm z hz U hU r hspan hnzd n hH).1
+
+/-- The old pole module is the first summand in the successor splitting. -/
+@[simp]
+theorem sectionPoleSheafPower_succ_baseSectionsSplitEquiv_symm_apply_inl
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1))
+    (x : Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n)) :
+    (sectionPoleSheafPower_succ_baseSectionsSplitEquivOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n hH).symm (x, 0) =
+      Scheme.Modules.baseSectionsMap π
+        (sectionPoleSheafSuccHom π z hz n) x := by
+  let d := sectionPoleSheafPower_succ_baseSectionsSplitDataOfCartierGenerator
+    hsm z hz U hU r hspan hnzd n hH
+  have hd := LinearMap.congr_fun d.2.1 x
+  change d.1.symm (x, 0) =
+    Scheme.Modules.baseSectionsMap π
+      (sectionPoleSheafSuccHom π z hz n) x
+  rw [LinearMap.comp_apply, LinearMap.inl_apply] at hd
+  exact hd.symm
+
+/-- The second coordinate in the successor splitting is the canonical
+successive-quotient coordinate. -/
+@[simp]
+theorem sectionPoleSheafPower_succ_baseSectionsSplitEquiv_apply_snd
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (hH : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1))) :
+    (sectionPoleSheafPower_succ_baseSectionsSplitEquivOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n hH x).2 =
+      (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd n).hom
+        (Scheme.Modules.baseSectionsMap π
+          (cokernel.π (sectionPoleSheafSuccHom π z hz n)) x) := by
+  let d := sectionPoleSheafPower_succ_baseSectionsSplitDataOfCartierGenerator
+    hsm z hz U hU r hspan hnzd n hH
+  have hd := LinearMap.congr_fun d.2.2 x
+  change (d.1 x).2 =
+    (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n).hom
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz n)) x)
+  rw [LinearMap.comp_apply, LinearMap.snd_apply] at hd
+  change
+    (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n).hom
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz n)) x) =
+      (d.1 x).2 at hd
+  exact hd.symm
 
 /-- Around every point of an affine base, the base-changed section has an affine
 neighborhood on which its ideal has an explicit regular generator. -/
