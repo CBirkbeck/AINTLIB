@@ -117,6 +117,41 @@ theorem restrictPushforward_isZero_of_preimage_opensRange_eq_bot
       exact ⟨0, Subsingleton.elim _ y⟩
   exact (isZero_zero _).of_iso (asIso q)
 
+/-- A scheme module with zero stalk at every point is zero. -/
+theorem isZero_of_forall_stalk_isZero
+    {X : Scheme.{u}} (M : X.Modules)
+    (h : ∀ x : X, IsZero
+      ((toPresheaf.{u} X ⋙ TopCat.Presheaf.stalkFunctor.{u, u + 1}
+        AddCommGrpCat.{u} x).obj M)) :
+    IsZero M := by
+  let F := SheafOfModules.toSheaf X.ringCatSheaf
+  have hs : IsZero (F.obj M) := by
+    apply (TopCat.Sheaf.isZero_iff_stalkFunctor_obj_isZero (F.obj M)).2
+    intro x
+    exact h x
+  let q : M ⟶ 0 := 0
+  letI hreflect : F.ReflectsIsomorphisms :=
+    PresheafOfModules.instReflectsIsomorphismsSheafOfModulesSheafAddCommGrpCatToSheaf_1
+  have htarget : IsZero (F.obj (0 : X.Modules)) :=
+    F.map_isZero (isZero_zero X.Modules)
+  haveI hmap : IsIso (F.map q) :=
+    isIso_of_source_target_iso_zero (F.map q) hs.isoZero htarget.isoZero
+  haveI : IsIso q :=
+    @Functor.ReflectsIsomorphisms.reflects _ _ _ _ F hreflect _ _ q hmap
+  exact (isZero_zero _).of_iso (asIso q)
+
+/-- A scheme module restricts to zero when all ambient stalks over the open are
+zero. -/
+theorem restrict_isZero_of_forall_stalk_isZero
+    {X : Scheme.{u}} (M : X.Modules) (W : X.Opens)
+    (h : ∀ x : X, x ∈ W → IsZero
+      ((toPresheaf.{u} X ⋙ TopCat.Presheaf.stalkFunctor.{u, u + 1}
+        AddCommGrpCat.{u} x).obj M)) :
+    IsZero ((restrictFunctor W.ι).obj M) := by
+  apply isZero_of_forall_stalk_isZero
+  intro x
+  exact (h x.1 x.2).of_iso ((restrictStalkNatIso W.ι x).app M)
+
 end AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
@@ -321,5 +356,49 @@ theorem sectionPoleSheafSuccCoker_restrict_isZero_of_preimage_eq_bot
   exact htarget.of_iso
     (sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit
       z hz U r hr hspan hnzd n)
+
+/-- A consecutive pole quotient restricts to zero on every open whose preimage
+under the section is empty. -/
+theorem sectionPoleSheafSuccCoker_restrict_isZero_of_section_preimage_eq_bot
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (W : C.Opens)
+    (hW : z ⁻¹ᵁ W = ⊥) (n : ℕ) :
+    IsZero ((Scheme.Modules.restrictFunctor W.ι).obj
+      (sectionPoleSheafSuccCoker π z hz n)) := by
+  apply Scheme.Modules.restrict_isZero_of_forall_stalk_isZero
+  intro x hxW
+  obtain ⟨V, hxV, r, hspan, hnzd⟩ :=
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm z hz).locallyPrincipal x
+  change z.ker.ideal V = Ideal.span {r} at hspan
+  obtain ⟨a, hxU, hUW⟩ :=
+    exists_chartBasicOpenImage_le_of_mem V W x hxV hxW
+  let U := chartBasicOpenImage V a
+  let rU := C.presheaf.map (homOfLE (chartBasicOpenImage_le V a)).op r
+  have hdata := ideal_chartBasicOpenImage_span_nzd z.ker V r hspan hnzd a
+  have hrU : rU ∈ z.ker.ideal U := by
+    rw [hdata.1]
+    exact Ideal.mem_span_singleton_self rU
+  have hpreU : z ⁻¹ᵁ U.1 = ⊥ := by
+    apply le_antisymm
+    · calc
+        z ⁻¹ᵁ U.1 ≤ z ⁻¹ᵁ W := Scheme.Hom.preimage_mono z hUW
+        _ = ⊥ := hW
+    · exact bot_le
+  have hlocal : IsZero ((Scheme.Modules.restrictFunctor U.1.ι).obj
+      (sectionPoleSheafSuccCoker π z hz n)) :=
+    sectionPoleSheafSuccCoker_restrict_isZero_of_preimage_eq_bot
+      z hz U rU hrU hdata.1 hdata.2 n hpreU
+  let xU : U.1.toScheme := ⟨x, hxU⟩
+  let F := SheafOfModules.toSheaf U.1.toScheme.ringCatSheaf
+  have hlocalSheaf : IsZero (F.obj
+      ((Scheme.Modules.restrictFunctor U.1.ι).obj
+        (sectionPoleSheafSuccCoker π z hz n))) :=
+    F.map_isZero hlocal
+  have hlocalStalk :=
+    (TopCat.Sheaf.isZero_iff_stalkFunctor_obj_isZero _).1 hlocalSheaf xU
+  exact hlocalStalk.of_iso
+    ((Scheme.Modules.restrictStalkNatIso U.1.ι xU).app
+      (sectionPoleSheafSuccCoker π z hz n)).symm
 
 end ModularCurves
