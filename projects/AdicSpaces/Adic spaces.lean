@@ -91,6 +91,8 @@ import «Adic spaces».SpvAI
 import «Adic spaces».SpvAITopology
 import «Adic spaces».SpvCompletionExtension
 import «Adic spaces».StandardCover
+import «Adic spaces».SheafyFoundations
+import «Adic spaces».StructurePresheafLimit
 import «Adic spaces».StructureSheaf
 import «Adic spaces».TateAcyclicity
 import «Adic spaces».TateAcyclicityFinalAssembly
