@@ -2291,6 +2291,175 @@ theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
       hfreeA s a hap W₁ E hW₁ hcob
   exact lw_of_baseIso π' zero' hz qiso hspec
 
+set_option backward.isDefEq.respectTransparency false in
+open WeierstrassCurve in
+/-- **([a5-P-loc], Stage 4 — cocycle + action-compatibility from a localized presentation)**
+The geometric half of the core, isolated and PROVEN.  Given, at an invariant `a`, a global
+Weierstrass model `W₀R` over `A_a := Localization.Away (a : Γ(X,⊤))` presenting the curve
+base-changed to `Spec A_a` — the pullback square `hρsq` (so `projModel W₀R ≅ C.E ×_X Spec A_a`)
+and the zero-leg `hρzero` — the lifted geometric `G`-action `σE` induces:
+* a `VariableChange` cocycle `CvcR` over `A_a` with the model-invariance `hCvcR`
+  (`CvcR g • (g • W₀R) = W₀R`, `IsVCocycle CvcR`), and
+* the action-compatibility `hρact` that `lw_chart_at_of_localModel` / the core consume.
+
+The geometric action family `act g` on `projModel W₀R` is built from `hρsq` by the pullback
+universal property (`IsPullback.lift`; `act g` is cartesian over `Spec (awayHom g)` because both
+`act g` and `Spec (awayHom g)` are isomorphisms, so `IsPullback.of_horiz_isIso`) and fed to
+`isVCocycle_of_curveActionFamily'`.  `hρact` then follows from the resulting `hΨ` and the
+equivariance leg `act g ≫ ρR = ρR ≫ σE g`.
+
+This discharges everything in the core EXCEPT the coboundary `E` and the production of the
+localized presentation itself (the semilocal chart-gluing over `L`, Stages 1–3, plus the
+geometric spread `L → A_a` of Stage 5). -/
+private theorem exists_cocycle_hρact_of_presentation [IsAffine X]
+    (hact : IsCurveAction σ C σE) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∀ (a : FixedPoints.subring ↑Γ(X, ⊤) G)
+      (W₀R : WeierstrassCurve (Localization.Away ((a : ↑Γ(X, ⊤)))))
+      (ρR : projModel W₀R ⟶ C.E)
+      (_ : IsPullback (projModelπ W₀R) ρR
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+          (Localization.Away ((a : ↑Γ(X, ⊤))))))) (C.π ≫ X.isoSpec.hom))
+      (_ : projModelZero W₀R ≫ ρR
+        = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a : ↑Γ(X, ⊤)))))) ≫ X.isoSpec.inv ≫ C.zero),
+    letI := MulSemiringAction.away (fun g' : G => a.2 g')
+    ∃ (CvcR : G → VariableChange (Localization.Away ((a : ↑Γ(X, ⊤)))))
+      (hCvcR : ∀ g, CvcR g
+        • (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)) = W₀R),
+      IsVCocycle CvcR ∧
+      ∀ g, (eqToHom (congrArg projModel (hCvcR g).symm)
+          ≫ (projModelVCIso (CvcR g)
+              (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))).hom
+          ≫ projModelBaseChange (MulSemiringAction.awayHom
+              (fun g' : G => a.2 g') g) W₀R) ≫ ρR = ρR ≫ σE.hom g := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  intro a W₀R ρR hρsq hρzero
+  set hfix : ∀ g' : G, g' • (a : ↑Γ(X, ⊤)) = (a : ↑Γ(X, ⊤)) := fun g' => a.2 g' with hfixdef
+  letI actAa : MulSemiringAction G (Localization.Away ((a : ↑Γ(X, ⊤)))) :=
+    MulSemiringAction.away hfix
+  have htr : ∀ g : G,
+      MulSemiringAction.toRingHom G (Localization.Away ((a : ↑Γ(X, ⊤)))) g
+        = MulSemiringAction.awayHom hfix g := fun _ => rfl
+  -- the intertwining square: `Spec(awayHom g) ≫ Spec(alg) = Spec(alg) ≫ Spec(toRingHom g)`
+  have hsqbc : ∀ g : G,
+      Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g))
+        ≫ Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a : ↑Γ(X, ⊤))))))
+      = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a : ↑Γ(X, ⊤))))))
+        ≫ Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) g)) := by
+    intro g
+    rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+    congr 2
+    ext x
+    exact MulSemiringAction.awayHom_algebraMap hfix g x
+  -- conjugation of the base action by `isoSpec`
+  have hinv_conj : ∀ g : G, X.isoSpec.inv ≫ σ.hom g
+      = Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G ↑Γ(X, ⊤) g))
+        ≫ X.isoSpec.inv := by
+    intro g
+    rw [Iso.inv_comp_eq, ← Category.assoc, ← hom_isoSpec_toRingHom σ g, Category.assoc,
+      Iso.hom_inv_id, Category.comp_id]
+  -- the cone equation for the pullback lift
+  have hcone : ∀ g : G,
+      (projModelπ W₀R ≫ Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g)))
+          ≫ Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+              (Localization.Away ((a : ↑Γ(X, ⊤))))))
+        = (ρR ≫ σE.hom g) ≫ (C.π ≫ X.isoSpec.hom) := by
+    intro g
+    rw [Category.assoc, hsqbc g, ← Category.assoc, hρsq.w]
+    simp only [Category.assoc]
+    congr 1
+    rw [← hom_isoSpec_toRingHom σ g, ← Category.assoc, ← hact.π_equivariant g, Category.assoc]
+  -- the geometric action family on `projModel W₀R`, from the pullback universal property
+  let act : G → (projModel W₀R ⟶ projModel W₀R) := fun g =>
+    hρsq.lift (projModelπ W₀R ≫ Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g)))
+      (ρR ≫ σE.hom g) (hcone g)
+  have hfst : ∀ g, act g ≫ projModelπ W₀R
+      = projModelπ W₀R ≫ Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g)) :=
+    fun g => hρsq.lift_fst _ _ _
+  have hsnd : ∀ g, act g ≫ ρR = ρR ≫ σE.hom g := fun g => hρsq.lift_snd _ _ _
+  -- `act 1 = 𝟙`
+  have hawone : MulSemiringAction.awayHom hfix (1 : G) = RingHom.id _ := by
+    ext x; exact MulSemiringAction.awayHom_one hfix x
+  have hone : act 1 = 𝟙 _ := by
+    refine hρsq.hom_ext ?_ ?_
+    · rw [hfst, hawone, CommRingCat.ofHom_id, Spec.map_id, Category.comp_id, Category.id_comp]
+    · rw [hsnd, σE.hom_one, Category.comp_id, Category.id_comp]
+  -- `act` is multiplicative
+  have hmul : ∀ g h, act (g * h) = act g ≫ act h := by
+    intro g h
+    refine hρsq.hom_ext ?_ ?_
+    · rw [hfst, Category.assoc, hfst, ← Category.assoc, hfst, Category.assoc]
+      congr 1
+      rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
+      congr 2
+      ext x
+      exact MulSemiringAction.awayHom_mul hfix g h x
+    · rw [hsnd, Category.assoc, hsnd, ← Category.assoc, hsnd, Category.assoc, σE.hom_mul]
+  -- `act g` and `Spec (awayHom g)` are isomorphisms
+  have hiso_act : ∀ g, IsIso (act g) := fun g =>
+    ⟨act g⁻¹, by rw [← hmul, mul_inv_cancel, hone], by rw [← hmul, inv_mul_cancel, hone]⟩
+  have hiso_saw : ∀ g,
+      IsIso (Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g))) := by
+    intro g
+    refine ⟨Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g⁻¹)), ?_, ?_⟩
+    · rw [← Spec.map_comp, ← CommRingCat.ofHom_comp,
+        show (MulSemiringAction.awayHom hfix g).comp (MulSemiringAction.awayHom hfix g⁻¹)
+            = RingHom.id _ from by
+          ext x
+          rw [RingHom.comp_apply, ← MulSemiringAction.awayHom_mul, mul_inv_cancel,
+            MulSemiringAction.awayHom_one, RingHom.id_apply],
+        CommRingCat.ofHom_id, Spec.map_id]
+    · rw [← Spec.map_comp, ← CommRingCat.ofHom_comp,
+        show (MulSemiringAction.awayHom hfix g⁻¹).comp (MulSemiringAction.awayHom hfix g)
+            = RingHom.id _ from by
+          ext x
+          rw [RingHom.comp_apply, ← MulSemiringAction.awayHom_mul, inv_mul_cancel,
+            MulSemiringAction.awayHom_one, RingHom.id_apply],
+        CommRingCat.ofHom_id, Spec.map_id]
+  -- cartesian legs and zero-equivariance, for `isVCocycle_of_curveActionFamily'`
+  have hcart : ∀ g, IsPullback (act g) (projModelπ W₀R) (projModelπ W₀R)
+      (Spec.map (CommRingCat.ofHom
+        (MulSemiringAction.toRingHom G (Localization.Away ((a : ↑Γ(X, ⊤)))) g))) := by
+    intro g
+    rw [htr g]
+    haveI := hiso_act g
+    haveI := hiso_saw g
+    exact IsPullback.of_horiz_isIso ⟨hfst g⟩
+  have hzeq : ∀ g, projModelZero W₀R ≫ act g
+      = Spec.map (CommRingCat.ofHom
+          (MulSemiringAction.toRingHom G (Localization.Away ((a : ↑Γ(X, ⊤)))) g))
+        ≫ projModelZero W₀R := by
+    intro g
+    rw [htr g]
+    refine hρsq.hom_ext ?_ ?_
+    · rw [Category.assoc, hfst, ← Category.assoc, projModelZero_projModelπ, Category.id_comp,
+        Category.assoc, projModelZero_projModelπ, Category.comp_id]
+    · rw [Category.assoc, hsnd, ← Category.assoc, hρzero,
+        Category.assoc (Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g)))
+          (projModelZero W₀R) ρR, hρzero]
+      simp only [Category.assoc]
+      rw [hact.zero_equivariant g, ← Category.assoc X.isoSpec.inv (σ.hom g) C.zero, hinv_conj g,
+        ← Category.assoc (Spec.map (CommRingCat.ofHom (MulSemiringAction.awayHom hfix g)))
+          (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a : ↑Γ(X, ⊤))))))),
+        hsqbc g]
+      simp only [Category.assoc]
+  -- assemble the cocycle via the cocycle-from-action-family theorem
+  obtain ⟨CvcR, hCvcR, hcoc, hΨ⟩ :=
+    isVCocycle_of_curveActionFamily' W₀R act hmul hcart hzeq
+  have hΨ' : ∀ g, (projModelVCIso (CvcR g)
+        (W₀R.map (MulSemiringAction.awayHom hfix g))).hom
+      ≫ projModelBaseChange (MulSemiringAction.awayHom hfix g) W₀R
+    = eqToHom (congrArg projModel (hCvcR g)) ≫ act g := by
+    intro g; exact hΨ g
+  refine ⟨CvcR, hCvcR, hcoc, fun g => ?_⟩
+  rw [hΨ' g]
+  simp only [← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp]
+  exact hsnd g
+
 /-! #### The `[a5]` reduction: splitting off the section-pair gap
 
 `locallyWeierstrass_quotientπ` below quantifies over a pair `(π', zero')` carrying the descent
