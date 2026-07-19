@@ -4132,6 +4132,97 @@ theorem sectionPoleSheafSuccHom_restrict_comp_generatorTrivialization
   rw [hunitD]
   simpa only [Category.assoc] using congrArg (fun k ↦ k ≫ d) hsource
 
+/-- On a Cartier-generator chart, passing to the next pole power multiplies
+the local coefficient by the generator. -/
+theorem localTrivializationCoefficient_sectionPoleSheafSuccHom
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (x : Γ(sectionPoleSheafPower π z hz n, (⊤ : C.Opens))) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    letI : QuasiCompact z := inferInstance
+    let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U.1 eGen.symm
+    let ePoleOver := SheafOfModules.dualOverIsoOfIso
+      C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+    let ePole := restrictTrivializationOfOverIso
+      (sectionPoleSheaf π z hz) U.1 ePoleOver
+    localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz (n + 1)) U
+        (sectionPoleSheafPowerTrivialization z hz U.1 ePole (n + 1))
+        ((sectionPoleSheafSuccHom π z hz n).val.app (.op ⊤) x) =
+      localTrivializationCoefficient
+          (sectionPoleSheafPower π z hz n) U
+          (sectionPoleSheafPowerTrivialization z hz U.1 ePole n) x * r := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+  let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+    (sectionIdealModule π z hz) U.1 eGen.symm
+  let ePoleOver := SheafOfModules.dualOverIsoOfIso
+    C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+  let ePole := restrictTrivializationOfOverIso
+    (sectionPoleSheaf π z hz) U.1 ePoleOver
+  let P := sectionPoleSheafPower π z hz n
+  let Q := sectionPoleSheafPower π z hz (n + 1)
+  let eP := sectionPoleSheafPowerTrivialization z hz U.1 ePole n
+  let eQ := sectionPoleSheafPowerTrivialization z hz U.1 ePole (n + 1)
+  have htransition :
+      (Scheme.Modules.restrictFunctor U.1.ι).map
+            (sectionPoleSheafSuccHom π z hz n) ≫ eQ.hom =
+        eP.hom ≫ unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection U.1 r) := by
+    simpa only [eQ, eP, ePole, ePoleOver, eIdeal, eGen] using
+      sectionPoleSheafSuccHom_restrict_comp_generatorTrivialization
+        z hz U r hr hspan hnzd n
+  have htransitionTop := congrArg
+    (fun k ↦ k.val.app (.op (⊤ : U.1.toScheme.Opens))) htransition
+  have htransitionApply := ConcreteCategory.congr_hom htransitionTop
+    (localTrivializationRestriction P U x)
+  conv_lhs at htransitionApply =>
+    erw [Scheme.Modules.sheafOfModules_comp_app_apply]
+  conv_rhs at htransitionApply =>
+    erw [Scheme.Modules.sheafOfModules_comp_app_apply]
+  have htop :
+      localTrivializationTopSection Q U eQ
+          ((sectionPoleSheafSuccHom π z hz n).val.app (.op ⊤) x) =
+        localTrivializationTopSection P U eP x *
+          Scheme.Modules.openTopSection U.1 r := by
+    unfold localTrivializationTopSection
+    erw [localTrivializationRestriction_map]
+    rw [htransitionApply]
+    let a : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+      eP.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+        (localTrivializationRestriction P U x)
+    have hunit := unitEndomorphismOfTopSection_app_apply
+      (X := U.1.toScheme) (Scheme.Modules.openTopSection U.1 r)
+      (⊤ : U.1.toScheme.Opens) a
+    have hrestrict :
+        U.1.toScheme.presheaf.map
+            (homOfLE (le_top : (⊤ : U.1.toScheme.Opens) ≤ ⊤)).op
+              (Scheme.Modules.openTopSection U.1 r) =
+          Scheme.Modules.openTopSection U.1 r := by
+      rw [Subsingleton.elim
+        (homOfLE (le_top : (⊤ : U.1.toScheme.Opens) ≤ ⊤)).op (𝟙 _)]
+      have hmap := U.1.toScheme.presheaf.map_id
+        (.op (⊤ : U.1.toScheme.Opens))
+      have happ := ConcreteCategory.congr_hom hmap
+        (Scheme.Modules.openTopSection U.1 r)
+      exact happ.trans (by rfl)
+    exact hunit.trans (by rw [hrestrict])
+  change
+    localTrivializationCoefficient Q U eQ
+        ((sectionPoleSheafSuccHom π z hz n).val.app (.op ⊤) x) =
+      localTrivializationCoefficient P U eP x * r
+  unfold localTrivializationCoefficient
+  rw [htop, affineOpenAmbientSection_mul]
+  congr 1
+  change affineOpenAmbientSection U (affineOpenTopSection U r) = r
+  exact affineOpenAmbientSection_topSection U r
+
 end
 
 private theorem mono_id_tensorHom_of_iso_unit
