@@ -81,6 +81,45 @@ private theorem affineFieldFactor_isScalarTower
       (Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
   exact congrArg CommRingCat.Hom.hom hcomp
 
+private theorem affineFieldFactor_residue_isScalarTower
+    {S : Scheme.{u}} [IsAffine S]
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K] :
+    let t : Spec (.of K) ⟶ S :=
+      Spec.map (CommRingCat.ofHom (algebraMap Γ(S, (⊤ : S.Opens)) K)) ≫
+        S.isoSpec.inv
+    let x := Scheme.SpecToEquivOfField K S t
+    let s := x.1
+    let ψ := x.2
+    let k := ↑(S.residueField s)
+    letI : Algebra Γ(S, (⊤ : S.Opens)) k :=
+      ((S.fromSpecResidueField s).appTop ≫
+        (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+    letI : Algebra k K := ψ.hom.toAlgebra
+    IsScalarTower Γ(S, (⊤ : S.Opens)) k K := by
+  dsimp only
+  let R := Γ(S, (⊤ : S.Opens))
+  let t : Spec (.of K) ⟶ S :=
+    Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ S.isoSpec.inv
+  let x := Scheme.SpecToEquivOfField K S t
+  let s := x.1
+  let ψ := x.2
+  let k := ↑(S.residueField s)
+  letI : Algebra R k :=
+    ((S.fromSpecResidueField s).appTop ≫
+      (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+  letI : Algebra k K := ψ.hom.toAlgebra
+  let A := Γ(Spec (S.residueField s),
+    (⊤ : (Spec (S.residueField s)).Opens))
+  letI : Algebra R A :=
+    (S.fromSpecResidueField s).appTop.hom.toAlgebra
+  let χ : A →+* K :=
+    ((Scheme.ΓSpecIso (S.residueField s)).hom ≫ ψ).hom
+  letI : Algebra A K := χ.toAlgebra
+  letI : IsScalarTower R A K := affineFieldFactor_isScalarTower K
+  apply IsScalarTower.of_algebraMap_eq
+  intro r
+  exact IsScalarTower.algebraMap_apply R A K r
+
 private theorem baseChange_exact_of_forall_schemeResidueField_baseChange_exact
     {S : Scheme.{u}} [IsAffine S]
     {P Q T : Type u} [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
@@ -315,6 +354,40 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_residueField_orderedBaseCech_dif
       (sectionPoleSheafPower π z hz n) U) q
     (h.sectionPoleSheafPower_residueField_orderedBaseCech_exactAt_succ
       hsm z hz U hU hUaff s hn q)
+
+/-- The first differential of the bounded ordered Cech complex of `O(n[0])` has
+an `n`-dimensional kernel after base change to every field over the affine base. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → E.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    (K : Type u) [Field K] [Algebra Γ(S, (⊤ : S.Opens)) K]
+    {n : ℕ} (hn : 1 ≤ n) :
+    let C := Scheme.Modules.orderedBaseCechComplex π
+      (sectionPoleSheafPower π z hz n) U
+    Module.finrank K
+      (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = n := by
+  dsimp only
+  let R := Γ(S, (⊤ : S.Opens))
+  let t : Spec (.of K) ⟶ S :=
+    Spec.map (CommRingCat.ofHom (algebraMap R K)) ≫ S.isoSpec.inv
+  let x := Scheme.SpecToEquivOfField K S t
+  let s := x.1
+  let ψ := x.2
+  let k := ↑(S.residueField s)
+  letI : Algebra R k :=
+    ((S.fromSpecResidueField s).appTop ≫
+      (Scheme.ΓSpecIso (S.residueField s)).hom).hom.toAlgebra
+  letI : Algebra k K := ψ.hom.toAlgebra
+  letI : IsScalarTower R k K := affineFieldFactor_residue_isScalarTower K
+  let C := Scheme.Modules.orderedBaseCechComplex π
+    (sectionPoleSheafPower π z hz n) U
+  exact (LinearMap.finrank_ker_baseChange_eq k K (C.d 0 1).hom).trans
+    (h.sectionPoleSheafPower_residueField_orderedBaseCech_baseChange_kernel_finrank
+      hsm z hz U hU hUaff s hn)
 
 /-- The consecutive positive-degree differentials of the bounded ordered Cech complex of
 `O(n[0])` are exact after base change to every field over the affine base. -/

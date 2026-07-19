@@ -558,6 +558,23 @@ theorem kerBaseChangeComparison_bijective
   -- `congrArg Subtype.val` / `Subtype.ext` in each direction.
   kerLTensorComparison_bijective A f
 
+/-- Extending scalars between fields preserves the dimension of the kernel of a
+base-changed linear map. -/
+theorem LinearMap.finrank_ker_baseChange_eq
+    (A B : Type u) [Field A] [Field B]
+    [Algebra R A] [Algebra R B] [Algebra A B] [IsScalarTower R A B]
+    (f : P →ₗ[R] Q) :
+    Module.finrank B (LinearMap.ker (f.baseChange B)) =
+      Module.finrank A (LinearMap.ker (f.baseChange A)) := by
+  letI : Module.Free A (LinearMap.ker (f.baseChange A)) :=
+    Module.Free.of_divisionRing A (LinearMap.ker (f.baseChange A))
+  let eIter : B ⊗[A] LinearMap.ker (f.baseChange A) ≃ₗ[B]
+      LinearMap.ker ((f.baseChange A).baseChange B) :=
+    LinearEquiv.ofBijective (kerBaseChangeComparison B (f.baseChange A))
+      (kerBaseChangeComparison_bijective B (f.baseChange A))
+  let e := eIter.trans (LinearMap.baseChangeBaseChangeKernelEquiv A B f)
+  exact e.finrank_eq.symm.trans Module.finrank_baseChange
+
 /-- If the differential is surjective and its target is projective, its kernel commutes with
 every algebra base change. This is the arbitrary-base endpoint used when a length-one
 Grothendieck complex has vanishing degree-one cohomology. -/
