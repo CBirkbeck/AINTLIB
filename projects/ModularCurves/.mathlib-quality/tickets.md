@@ -23868,3 +23868,28 @@ endDeg_comp_mulBy, exists_eq_one_add_mulBy_comp_of_fixesTorsion) are GONE. Recei
 **THE HEADLINE CONE IS NOW TWO FRONTIERS:** (1) representable_iff_rigidNoeth (:324, the KM 4.7.0
 engine) — gates all 6; (2) ExactOrder :111/:274 (TD6b) — gates 3/6 only. The entire
 [KEY-GEN-PARKED] EndomorphismDegree cone is headline-dead, exactly as THE RULING (v10.320) designed.
+
+## v10.333-FIN (2026-07-19) — /beastmode full-budget: :324 engine DE-RISKED + fleet re-fired (STREAM-FIN)
+
+Full credits restored; fleet re-fired against the 2 remaining headline frontiers under the no-commit
+protocol. **:324 (representable_iff_rigidNoeth) is the keystone** — it gates ALL 6 receipts, and
+receipts 1/2/4/5 gate on it ALONE (census), so discharging :324 makes 5/7 receipts axiom-clean.
+
+**:324 fully de-risked this window (FIN, non-builder-gated):**
+- `ModuliProblem.RigidNoeth.baseChange` COMMITTED (8fb6c48c2) — the recollement's rigidity transfer to
+  the D(2)/D(3) loci (mirrors Rigid.baseChange; restrictScalars leaves the base unchanged).
+- Full :324 assembly template VERIFIED in scratch (wire324c/d + hqaff all compile) and banked
+  (scratchpad/armed_prompts.md :324 section). Both legs (D(2) Legendre via legendreDelta_representable_by_affine,
+  D(3) level-3 via naiveLevelThree_representable_by_affine) share one template; only the torsor package
+  (htorsN, builder deliverable) is the open input per leg.
+- Key findings: (a) PRE-SET φ before the mouth `refine` or the ULift-group unification isDefEq-TIMEOUTS;
+  (b) hinvN = `IsLocalization.Away.algebraMap_isUnit (N:R)` + `rw [map_ofNat]`; (c) hQaffN via
+  `uniqueUpToIso` + `IsAffine.of_isIso` (baseHom-of-iso is rfl-defeq: category comp/id baseHom is
+  componentwise); (d) base-change lemmas take ρ EXPLICIT first.
+- :298 (representable_iff, Rigid form) will discharge as a one-liner from :324 via Rigid.rigidNoeth
+  (needs reorder so :324 precedes it, or route through) — folded into the :324 landing.
+
+**Fleet (5 live, no-commit):** a5-P-loc (EngineDescent) · T-E15b torsor+_ulift (LevelThreeTorsor,
+4→3 sorries) · scaleTorsor (SqrtCoverGlue) · recollement-glue (Recollement) · TD6b (ExactOrder :274 +
+BB-DELIGNE verdict on :111). FIRE ON LANDING: a2-M (mouth close, needs a5-P-loc) · T-E14 LegendreTorsor
+(needs scaleTorsor). Then FIN wires :324 + :298; HEADLINE = capstone-receipts.sh v2 exit 0.
