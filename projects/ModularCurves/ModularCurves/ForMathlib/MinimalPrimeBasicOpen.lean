@@ -5,8 +5,9 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib.AlgebraicGeometry.Morphisms.QuasiCompact
+import Mathlib.AlgebraicGeometry.Limits
 import Mathlib.AlgebraicGeometry.Properties
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiSeparated
 import Mathlib.RingTheory.Ideal.MinimalPrime.Localization
 
 /-!
@@ -194,5 +195,58 @@ lemma genericPoints.exists_affineOpen_disjoint_closure
   rw [Set.disjoint_left]
   intro x hxV hxζ
   exact hVC hxV (Set.mem_iUnion_of_mem ζ (Set.mem_iUnion_of_mem hζ hxζ))
+
+/-- A finite set of generic points on a quasi-separated scheme admits pairwise-disjoint affine
+open neighborhoods. -/
+lemma genericPoints.exists_pairwise_disjoint_affineOpens
+    [Finite (genericPoints X)] [QuasiSeparatedSpace X] :
+    ∃ U : genericPoints X → X.Opens,
+      (∀ η, IsAffineOpen (U η)) ∧
+      (∀ η, η.1 ∈ U η) ∧
+      Pairwise (fun η ζ ↦ Disjoint (U η) (U ζ)) := by
+  choose V hV hηV hVdisj using fun η : genericPoints X ↦
+    genericPoints.exists_affineOpen_disjoint_closure η
+  let W : genericPoints X → X.Opens := fun η ↦
+    ⨆ ζ : {ζ : genericPoints X // ζ ≠ η}, V η ⊓ V ζ.1
+  have hWcompact (η : genericPoints X) : IsCompact (W η : Set X) := by
+    simpa only [W, TopologicalSpace.Opens.coe_iSup, TopologicalSpace.Opens.coe_inf] using
+      (isCompact_iUnion fun ζ : {ζ : genericPoints X // ζ ≠ η} ↦
+        (quasiSeparatedSpace_iff_forall_affineOpens.mp inferInstance)
+          ⟨V η, hV η⟩ ⟨V ζ.1, hV ζ.1⟩)
+  have hWle (η : genericPoints X) : W η ≤ V η :=
+    iSup_le fun _ ↦ inf_le_left
+  have hηW (η : genericPoints X) : η.1 ∉ W η := by
+    intro hη
+    obtain ⟨ζ, -, hηVζ⟩ := TopologicalSpace.Opens.mem_iSup.mp hη
+    exact Set.disjoint_left.mp (hVdisj ζ.1 η ζ.2.symm) hηVζ (subset_closure rfl)
+  have hWprecompact (η : genericPoints X) :
+      IsCompact ((hV η).fromSpec ⁻¹ᵁ W η : Set (Spec Γ(X, V η))) := by
+    apply (hV η).fromSpec.isOpenEmbedding.isInducing.isCompact_preimage' (hWcompact η)
+    rw [(hV η).range_fromSpec]
+    exact hWle η
+  choose f hηf hfW using fun η : genericPoints X ↦
+    (hV η).exists_basicOpen_disjoint_of_closure_mem_irreducibleComponents
+      (hηV η) η.2 (hWprecompact η) (hηW η)
+  let U : genericPoints X → X.Opens := fun η ↦ X.basicOpen (f η)
+  refine ⟨U, fun η ↦ (hV η).basicOpen (f η), hηf, ?_⟩
+  intro η ζ hηζ
+  change Disjoint (X.basicOpen (f η)) (X.basicOpen (f ζ))
+  rw [← TopologicalSpace.Opens.coe_disjoint, Set.disjoint_left]
+  intro x hxη hxζ
+  have hfWη := hfW η
+  rw [← TopologicalSpace.Opens.coe_disjoint] at hfWη
+  apply Set.disjoint_left.mp hfWη hxη
+  apply TopologicalSpace.Opens.mem_iSup.mpr
+  exact ⟨⟨ζ, hηζ.symm⟩, X.basicOpen_le (f η) hxη, X.basicOpen_le (f ζ) hxζ⟩
+
+/-- A quasi-separated scheme with finitely many generic points has an affine open containing all
+of them. -/
+lemma genericPoints.exists_affineOpen_containing
+    [Finite (genericPoints X)] [QuasiSeparatedSpace X] :
+    ∃ U : X.Opens, IsAffineOpen U ∧ ∀ η : genericPoints X, η.1 ∈ U := by
+  obtain ⟨U, hU, hηU, hdisj⟩ := genericPoints.exists_pairwise_disjoint_affineOpens (X := X)
+  refine ⟨⨆ η, U η, IsAffineOpen.iSup_of_disjoint hU hdisj, ?_⟩
+  intro η
+  exact TopologicalSpace.Opens.mem_iSup.mpr ⟨η, hηU η⟩
 
 end AlgebraicGeometry
