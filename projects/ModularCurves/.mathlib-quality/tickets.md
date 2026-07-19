@@ -23848,3 +23848,23 @@ and the 5 EndomorphismDegree leaves are GONE from the Γ₁(N) cone; the KVC rou
 replaced them with axiom-clean k̄-point reasoning. GammaHClosure now imports
 KeystoneGeometricPoint (acyclic). Full tree green 4242. Remaining Γ₁(N) gates = TD6b (2
 ExactOrder leaves) + the engine (:324).
+
+## v10.332-FIN (2026-07-19) — STRAND-3 LANDED: degree cone eliminated from ALL receipts (STREAM-FIN)
+
+The sole degree-cone entry `gammaFullNaive_eq_refl_of_fix_sections` (GammaHMaster:436) re-routed
+through the KVC master: its closing `aut_endo_eq_one (endDeg_eq_one_of_isIso ...)` block (~70 lines
+of torsionRestrict + unramified-equalizer machinery) REPLACED by a 5-line call to
+`pointedAuto_eq_id_of_fixes_torsion_kvc` (KVC-drop-in D), fed `hfixAll` (εO fixes every N-torsion
+point) from the existing `hfixed` + the `IsNaiveFullLevel` span `b.2.2` at the geometric point `k`.
+GammaHMaster now imports KeystoneGeometricPoint (acyclic — its cone is EllipticCurve/LevelStructure
+level). Full tree green 4242.
+
+**CENSUS (ground truth, post-STRAND-3):** receipts 1/2/4/5 (gammaFullNaive, gammaFullDrinfeld,
+gammaBot, gammaH_representable_of_orderOf) now gate on EXACTLY {representable_iff_rigidNoeth} — the
+5 EndomorphismDegree leaves (endTrace_comp_mulBy, eq_zero_of_endDeg_eq_zero, endTrace_sq_le,
+endDeg_comp_mulBy, exists_eq_one_add_mulBy_comp_of_fixesTorsion) are GONE. Receipts 3/6 keep
+{ExactOrder :111 smul_eq_zero_of_factors, :274 pull_nsmul_ne_zero, representable_iff_rigidNoeth}.
+
+**THE HEADLINE CONE IS NOW TWO FRONTIERS:** (1) representable_iff_rigidNoeth (:324, the KM 4.7.0
+engine) — gates all 6; (2) ExactOrder :111/:274 (TD6b) — gates 3/6 only. The entire
+[KEY-GEN-PARKED] EndomorphismDegree cone is headline-dead, exactly as THE RULING (v10.320) designed.

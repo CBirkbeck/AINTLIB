@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.Moduli.QuotientRepresentability
+import ModularCurves.Moduli.KeystoneGeometricPoint
 import ModularCurves.EllipticCurve.TorsionRestrict
 import ModularCurves.EllipticCurve.ExactOrderRigidity
 import ModularCurves.ForMathlib.UnramifiedEqualizer
@@ -517,75 +518,21 @@ theorem gammaFullNaive_eq_refl_of_fix_sections (N : ℕ) [NeZero N] (hN : 3 ≤ 
       simp only [IsMonHom.monoidHom_apply] at hmap
       have htr : (E.pointEquivOverHom t') (-y) = ((E.pointEquivOverHom t') y)⁻¹ := rfl
       rw [htr, hmap, hy]
-  -- every point of `E[N]` lies in the equalizer of the torsion restriction and `𝟙`
-  set cM := E.torsionRestrict εO hη N with hcM
+  -- **[STRAND-3, KVC route]** `εO` fixes EVERY `N`-torsion point (`hfixed` on the
+  -- `IsNaiveFullLevel` span `b.2.2`, at the geometric point `k` itself), so the
+  -- Hasse-/degree-free `k̄`-point master closes — replacing the former
+  -- `aut_endo_eq_one` (KM 2.7.2) route and its five EndomorphismDegree leaves.
   have hinvk : IsUnit ((N : ℕ) : k) := by
     have h := hinv.map (Spec.preimage sm).hom
     rwa [map_natCast] at h
-  have hinvSpec : NIsInvertible (Spec (CommRingCat.of k)) N := by
-    show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of k), ⊤))
-    have h2 := hinvk.map (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
-    rwa [map_natCast] at h2
-  haveI : Etale ((Over.mk (E.torsionπ N)).hom) := E.torsionπ_etale N hinvSpec
-  haveI := E.torsionι_isClosedImmersion N
-  set fO : Over.mk (E.torsionπ N) ⟶ Over.mk (E.torsionπ N) :=
-    Over.homMk cM (E.torsionRestrict_π εO hη N) with hfO
-  have hcMid : cM = 𝟙 (E.torsion N) := by
-    have hfeq : fO = 𝟙 (Over.mk (E.torsionπ N)) := by
-      refine AlgebraicGeometry.Over.hom_ext_of_unramified_of_surjective fO
-        (𝟙 (Over.mk (E.torsionπ N))) ?_
-      intro q
-      set κ := (E.torsion N).residueField q with hκ
-      set k' := AlgebraicClosure κ with hk'
-      set xbar : Spec (CommRingCat.of k') ⟶ E.torsion N :=
-        Spec.map (CommRingCat.ofHom (algebraMap κ k')) ≫
-          (E.torsion N).fromSpecResidueField q with hxbar
-      set t' : Spec (CommRingCat.of k') ⟶ Spec (CommRingCat.of k) :=
-        xbar ≫ E.torsionπ N with ht'
-      -- the point of `E` under `q̄` is `N`-torsion, hence in the span, hence fixed
-      set xpt := E.torsionPointsEquiv N t' ⟨xbar, rfl⟩ with hxpt
-      have hxmem : xpt.1 ∈ AddSubgroup.closure
-          {Point.pull E t' b.1.1, Point.pull E t' b.1.2} := by
-        refine b.2.2 k' t' xpt.1 ?_
-        exact (Submodule.mem_torsionBy_iff _ _).mp xpt.2
-      have hxfix := hfixed k' t' xpt.1 hxmem
-      have hpc2 : (xbar ≫ E.torsionι N) ≫ c = xbar ≫ E.torsionι N :=
-        congrArg CommaMorphism.left hxfix
-      have hpc' : (xbar ≫ E.torsionι N) ≫ εO.left = xbar ≫ E.torsionι N := hpc2
-      have hxcι : (xbar ≫ cM) ≫ E.torsionι N = xbar ≫ E.torsionι N := by
-        have s1 : (xbar ≫ cM) ≫ E.torsionι N = xbar ≫ cM ≫ E.torsionι N :=
-          Category.assoc _ _ _
-        have s2 : xbar ≫ cM ≫ E.torsionι N = xbar ≫ E.torsionι N ≫ εO.left :=
-          congrArg (fun m => xbar ≫ m) (E.torsionRestrict_ι εO hη N)
-        have s3 : xbar ≫ E.torsionι N ≫ εO.left = (xbar ≫ E.torsionι N) ≫ εO.left :=
-          (Category.assoc _ _ _).symm
-        exact s1.trans (s2.trans (s3.trans hpc'))
-      have hxc : xbar ≫ cM = xbar := (cancel_mono (E.torsionι N)).mp hxcι
-      set xbarO : Over.mk t' ⟶ Over.mk (E.torsionπ N) := Over.homMk xbar rfl with hxbarO
-      have hw : xbarO ≫ fO = xbarO ≫ 𝟙 (Over.mk (E.torsionπ N)) := by
-        refine Over.OverMorphism.ext ?_
-        show xbar ≫ cM = xbar ≫ 𝟙 _
-        rw [hxc, Category.comp_id]
-      set ℓq := Limits.equalizer.lift xbarO hw with hℓq
-      have hℓι : ℓq ≫ Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ N))) = xbarO :=
-        Limits.equalizer.lift_ι _ _
-      have hleft : ℓq.left ≫ (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ N)))).left
-          = xbar := congrArg CommaMorphism.left hℓι
-      obtain ⟨s⟩ : Nonempty (Spec (CommRingCat.of k')) :=
-        inferInstanceAs (Nonempty (PrimeSpectrum k'))
-      refine ⟨ℓq.left.base s, ?_⟩
-      have happ : (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ N)))).left
-          (ℓq.left s) = xbar s := by
-        rw [← Scheme.Hom.comp_apply, hleft]
-        rfl
-      have hxq : xbar s = q := by
-        rw [hxbar, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
-      exact happ.trans hxq
-    exact congrArg CommaMorphism.left hfeq
-  have hfixM : E.torsionι N ≫ c = E.torsionι N :=
-    E.torsionι_comp_left_eq_of_torsionRestrict_eq_id εO hη N hcMid
+  have hNnat : 3 ≤ N := by exact_mod_cast hN
+  have hfixAll : ∀ x : E.Point (𝟙 (Spec (CommRingCat.of k))), (N : ℤ) • x = 0 →
+      (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x ≫ εO =
+        (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x :=
+    fun x hx => hfixed k (𝟙 _) x (b.2.2 k (𝟙 _) x hx)
   have hεid : εO = 𝟙 E.asOver :=
-    E.aut_endo_eq_one N hN εO (E.endDeg_eq_one_of_isIso εO) hfixM
+    EllipticCurve.pointedAuto_eq_id_of_fixes_torsion_kvc E εO ‹IsIso εO› hη N hNnat
+      hinvk.ne_zero hfixAll
   have hcid : c = 𝟙 E.E := congrArg CommaMorphism.left hεid
   exact Iso.ext (EllHom.ext he hcid)
 
