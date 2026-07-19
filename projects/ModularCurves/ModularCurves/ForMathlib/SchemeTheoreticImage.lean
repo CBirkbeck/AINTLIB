@@ -7,6 +7,7 @@ ForMathlib (OURS, not vendored): upstream candidate.
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
 import Mathlib.AlgebraicGeometry.Morphisms.Separated
+import Mathlib.AlgebraicGeometry.Noetherian
 
 /-!
 # Scheme-theoretic images and separated-target extensionality
@@ -23,6 +24,17 @@ universe u
 namespace AlgebraicGeometry
 
 variable {W X Y Z : Scheme.{u}}
+
+/-- The scheme-theoretic image of a quasi-compact morphism into a Noetherian scheme is
+Noetherian. -/
+lemma Scheme.Hom.image_isNoetherian (f : X ⟶ Y) [QuasiCompact f] [IsNoetherian Y] :
+    IsNoetherian f.image := by
+  haveI : LocallyOfFiniteType f.imageι := by infer_instance
+  haveI : IsLocallyNoetherian f.image :=
+    LocallyOfFiniteType.isLocallyNoetherian f.imageι
+  haveI : CompactSpace f.image :=
+    (quasiCompact_iff_compactSpace f.imageι).mp inferInstance
+  exact IsNoetherian.mk
 
 /-- The canonical map from the source of a quasi-compact morphism to its scheme-theoretic image
 is scheme-theoretically dominant. -/
