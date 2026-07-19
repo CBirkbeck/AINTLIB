@@ -57,6 +57,7 @@ theorem algebraMap_s_mul_divByS (D : RationalLocData A) (t : A) :
   apply IsLocalization.mk'_eq_of_eq
   simp [mul_comm]
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- **Absorption (Wedhorn §8.1-style)**: a high power of the ideal of definition
 multiplies any finitely many fixed ring elements into `A₀` (continuity of
 multiplication + openness of `A₀` + the `I`-adic neighborhood basis). -/
@@ -79,6 +80,7 @@ theorem pod_absorb_finset_mul_pow (P : PairOfDefinition A) (S : Finset A) :
   refine ⟨S.sup Nf, fun a ha b hb => hNf a b ?_⟩
   exact Ideal.pow_le_pow_right (Finset.le_sup ha) hb
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- **General gen-set piece openness**: for `T` spanning the unit ideal and `t ∈ T`,
 the piece `R(T/t)` satisfies the `hopen`-condition — high `I`-powers divide by `t`
 into the ring of definition, via the span-combination `1 = Σ c_{t'}·t'` and
@@ -140,8 +142,10 @@ theorem span_image_canonicalMap_eq_top
   rw [← Ideal.map_span D₀.canonicalMap, hspan]
   exact Ideal.map_top _
 
+omit [PlusSubring A] [IsHuberRing A] in
 /-- **The A-side gen-set piece** `R(T/t)` (Wedhorn p. 83's `U_t := R(T/t)` cover form),
-with the `hopen`-condition supplied by `genPiece_hopen` (span + absorption). -/
+with the `hopen`-condition supplied by `genPiece_hopen` (span + absorption).
+(`A⁺`-free: the datum and its openness use only the pair of definition.) -/
 noncomputable def genPieceDatum (P : PairOfDefinition A) (T : Finset A) (t : A)
     (hspan : Ideal.span (T : Set A) = ⊤) : RationalLocData A :=
   { P := P
@@ -149,12 +153,15 @@ noncomputable def genPieceDatum (P : PairOfDefinition A) (T : Finset A) (t : A)
     s := t
     hopen := genPiece_hopen P T t hspan }
 
+omit [PlusSubring A] [IsHuberRing A] in
 @[simp] theorem genPieceDatum_P (P : PairOfDefinition A) (T : Finset A) (t : A)
     (hspan : Ideal.span (T : Set A) = ⊤) : (genPieceDatum P T t hspan).P = P := rfl
 
+omit [PlusSubring A] [IsHuberRing A] in
 @[simp] theorem genPieceDatum_T (P : PairOfDefinition A) (T : Finset A) (t : A)
     (hspan : Ideal.span (T : Set A) = ⊤) : (genPieceDatum P T t hspan).T = T := rfl
 
+omit [PlusSubring A] [IsHuberRing A] in
 @[simp] theorem genPieceDatum_s (P : PairOfDefinition A) (T : Finset A) (t : A)
     (hspan : Ideal.span (T : Set A) = ⊤) : (genPieceDatum P T t hspan).s = t := rfl
 

@@ -57,7 +57,7 @@ open scoped Pointwise
 namespace ValuationSpectrum
 
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [PlusSubring A] [IsHuberRing A] [DecidableEq A]
+  [DecidableEq A]
 
 /-! ### R1: the intersection datum for arbitrary pairs -/
 
@@ -108,7 +108,7 @@ theorem RationalLocData.interDatum_P (D E : RationalLocData A)
 
 /-- **`interDatum` realises the intersection**: `R(interDatum D E) = R(D) ∩ R(E)`.
 The computation is pair-free (`rationalOpen` never mentions `P`). -/
-theorem RationalLocData.interDatum_rationalOpen (D E : RationalLocData A)
+theorem RationalLocData.interDatum_rationalOpen [PlusSubring A] (D E : RationalLocData A)
     (hD : Ideal.span (D.T : Set A) = ⊤) (hE : Ideal.span (E.T : Set A) = ⊤) :
     rationalOpen (D.interDatum E hD hE).T (D.interDatum E hD hE).s =
       rationalOpen D.T D.s ∩ rationalOpen E.T E.s := by
@@ -124,13 +124,13 @@ theorem RationalLocData.interDatum_isRational (D E : RationalLocData A)
     (D.interDatum E hD hE).IsRational :=
   RationalLocData.isRational_of_span_eq_top (D.interTray_span_eq_top E hD hE)
 
-theorem RationalLocData.interDatum_subset_left (D E : RationalLocData A)
+theorem RationalLocData.interDatum_subset_left [PlusSubring A] (D E : RationalLocData A)
     (hD : Ideal.span (D.T : Set A) = ⊤) (hE : Ideal.span (E.T : Set A) = ⊤) :
     rationalOpen (D.interDatum E hD hE).T (D.interDatum E hD hE).s ⊆
       rationalOpen D.T D.s := by
   rw [RationalLocData.interDatum_rationalOpen]; exact Set.inter_subset_left
 
-theorem RationalLocData.interDatum_subset_right (D E : RationalLocData A)
+theorem RationalLocData.interDatum_subset_right [PlusSubring A] (D E : RationalLocData A)
     (hD : Ideal.span (D.T : Set A) = ⊤) (hE : Ideal.span (E.T : Set A) = ⊤) :
     rationalOpen (D.interDatum E hD hE).T (D.interDatum E hD hE).s ⊆
       rationalOpen E.T E.s := by
@@ -146,7 +146,7 @@ def RationalLocData.interRational (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) : RationalLocData A :=
   D.interDatum E hD.span_eq_top hE.span_eq_top
 
-theorem RationalLocData.interRational_rationalOpen (D E : RationalLocData A)
+theorem RationalLocData.interRational_rationalOpen [PlusSubring A] (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :
     rationalOpen (D.interRational E hD hE).T (D.interRational E hD hE).s =
       rationalOpen D.T D.s ∩ rationalOpen E.T E.s :=
@@ -157,13 +157,13 @@ theorem RationalLocData.interRational_isRational (D E : RationalLocData A)
     (D.interRational E hD hE).IsRational :=
   D.interDatum_isRational E hD.span_eq_top hE.span_eq_top
 
-theorem RationalLocData.interRational_subset_left (D E : RationalLocData A)
+theorem RationalLocData.interRational_subset_left [PlusSubring A] (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :
     rationalOpen (D.interRational E hD hE).T (D.interRational E hD hE).s ⊆
       rationalOpen D.T D.s :=
   D.interDatum_subset_left E hD.span_eq_top hE.span_eq_top
 
-theorem RationalLocData.interRational_subset_right (D E : RationalLocData A)
+theorem RationalLocData.interRational_subset_right [PlusSubring A] (D E : RationalLocData A)
     (hD : D.IsRational) (hE : E.IsRational) :
     rationalOpen (D.interRational E hD hE).T (D.interRational E hD hE).s ⊆
       rationalOpen E.T E.s :=
@@ -182,7 +182,7 @@ end Tate
 
 section Compatibility
 
-variable [HasLocLiftPowerBounded A]
+variable [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
 
 /-- **All-raw-data compatibility** — agreement after restriction to *every* raw datum
 contained in both pieces. This is verbatim the hypothesis shape of the legacy

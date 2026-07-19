@@ -104,18 +104,55 @@ per the handover prohibition — filling it would "prove" all Tate rings sheafy 
 Remark 8.17); the `CompatiblePlusSubring` "Wedhorn Remark 7.17" misattribution is
 corrected (b2-log `T-WC-CITATION-CORRECTIONS-2026-05-28`(b)).
 
+## Second pass (same day): `HasLocLiftPowerBounded` purge + items 1 & 2
+
+- **`IsSheafyFor`/`StandardSheafCondition` refactored**: the restriction-map package
+  is now **derived** inside the definitions from the complete analytic scope
+  (`hasLocLiftPowerBounded_faithful`, a theorem) — `HasLocLiftPowerBounded` appears in
+  no public signature, not even existentially. The pair-level definition is scoped to
+  complete Tate rings, exactly where Wedhorn's restriction maps exist (Prop 8.2 via
+  7.52(2)). Supporting de-leak: `genPieceDatum`/`genPiece_hopen`/
+  `pod_absorb_finset_mul_pow` (RelativePieceKeystone) and the R1 datum layer
+  (RationalIntersection) no longer capture `[PlusSubring A]`/`[IsHuberRing A]` — the
+  intersection/gen-piece *data* are now visibly `A⁺`-free.
+
+- **Item 2 (completion, `SheafyRing.lean`)**: `CompletionModel A P :=
+  presheafValue (globalLocData P)` — the project's own `Â = 𝒪_X(X)` (Remark 8.3) —
+  now carries a **fully populated, completeness-free** instance stack: complete
+  (right uniformity), T2, Huber (`presheafValue_concretePair`), nonarchimedean, and
+  Tate when `A` is (completeness-free restatement via `presheafValue_topNilUnit`).
+  `IsSheafyRing A` is the **literal Wedhorn Definition 8.26** over this completion,
+  with *no* instance parameters. `isSheafyRing_of_stronglyNoetherianTate` proves it
+  for complete strongly noetherian Tate `A` (via
+  `completionModel_isStronglyNoetherian`, the faithful transport at the whole-space
+  datum). **Reduction for the non-complete wrapper**: exactly one transport remains —
+  `IsStronglyNoetherian A → IsStronglyNoetherian (CompletionModel A P)` without
+  `CompleteSpace A` (the faithful proof sits in Wedhorn828's complete section; its
+  `presheafValue_mvRestricted_surjection` chain would need its `CompleteSpace A`
+  section hypothesis discharged).
+
+- **Item 1 (cofinality, generation side — `StandardRefinement.lean`)**: the
+  `Spv`-level multiplicative toolkit (`Spv.vle_mul_of_vle_of_vle`,
+  `Spv.vle_of_vle_mul_right` — the slot-comparison/cancellation engine of Kedlaya
+  Lemma 1.6.8), the **maximum argument** (`exists_not_vle_zero_of_span_eq_top`,
+  `exists_max_vle_of_span_eq_top`: a valuation cannot vanish on a generating family;
+  Kedlaya 1.6.2), and **`StandardCoverData.ofSpanTop`**: for every valid rational
+  base and every finite family generating the unit ideal, the generated cover
+  `{R(D₀) ∩ R(F/f)}` is `Spa`-**uniformly** subordinate and covering — a genuine
+  `StandardCoverData` at every `A⁺` simultaneously. This populates
+  `StandardSheafCondition` with Kedlaya's actual covers. **Remaining for full
+  P3(←)**: the descent branch of Lemma 1.6.8 — subordinating the product-selection
+  pieces of an *arbitrary* rational cover and eliminating the unslotted pieces
+  (Wedhorn 7.54's normalization) — the missing API recorded in
+  `WedhornStandardCoverRefinement.lean`; the toolkit above is its intended engine.
+
 ## Honest remaining items (recorded, none on any theorem's dependency path)
 
-1. **P2 general cofinality / P3(←)** (Kedlaya Lemma 1.6.8, Wedhorn 7.54 general
-   branch): `StandardSheafCondition A → IsSheafyFor A Aplus` for *generic* complete
-   Tate `A` needs every rational cover refined by a standard one; the general
-   non-standard-shape branch is the missing API already recorded in
-   `WedhornStandardCoverRefinement.lean`. Not needed by the strongly noetherian
-   theorems (the 828b input quantifies over all valid pairs directly).
-2. **Completion transport** (Wedhorn 7.47 + Tate/strongly-noetherian transfer to
-   `Â`): required to *populate* `IsSheafyRing`'s instance parameters and to state the
-   non-complete 8.28(b) wrapper. No such transport exists in the project yet; the
-   definition is stated with the completion package as visible instance parameters.
+1. **P3(←) descent** (Kedlaya Lemma 1.6.8's refinement of arbitrary rational covers):
+   see above — generation side done, descent branch remains
+   (`WedhornStandardCoverRefinement.lean`'s recorded missing API).
+2. **Non-complete strong-noetherian transport**: the single missing input for the
+   non-complete ring-level 8.28(b) wrapper (see Item 2 above).
 3. Old sorry-tainted S-B route (`productRestrictionSub_isInducing_tate`,
    `cor_8_32_productRestrictionSub_isEmbedding`, `isSheafy_ofStronglyNoetherianTate_clean`)
    — superseded, off-path, candidates for deletion by the cleanup fleet.
