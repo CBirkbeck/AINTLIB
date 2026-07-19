@@ -1,17 +1,22 @@
-FOCUS: sheafy completion — DELIVERED (2026-07-19, second pass)
-- IsSheafyFor/StandardSheafCondition: HasLocLiftPowerBounded PURGED from all public
-  signatures (derived internally via hasLocLiftPowerBounded_faithful at complete
-  analytic scope). Signature-gated in the axiom audit.
-- Item 2: CompletionModel A P := presheafValue (globalLocData P) with a
-  completeness-free instance stack; IsSheafyRing = literal Wedhorn Def 8.26
-  ([CommRing][TopologicalSpace][IsTopologicalRing][IsHuberRing][IsTateRing] → Prop,
-  NO instance parameters); isSheafyRing_of_stronglyNoetherianTate proven for
-  complete strongly noetherian Tate A. Non-complete wrapper reduced to ONE missing
-  transport: IsStronglyNoetherian A → IsStronglyNoetherian (CompletionModel A P)
-  without [CompleteSpace A].
-- Item 1 (generation side): StandardRefinement.lean — Spv cancellation/max toolkit +
-  StandardCoverData.ofSpanTop (generated covers of unit-ideal-spanning families are
-  Spa-uniform standard covers over any valid base). Descent branch of Kedlaya 1.6.8
-  remains = the missing API recorded in WedhornStandardCoverRefinement.lean.
-- Full tree green (build15, lake exit 0); 37/37 axiom audit clean; zero sorryAx.
-- structurePresheaf_isSheaf sorry stays OPEN by mandate (quarantined legacy def).
+FOCUS: sheafy INTEGRATION campaign WO0-WO6 — DELIVERED (2026-07-20)
+- WO1: structurePresheaf (bundled, coherent CompleteTopCommRingCat, projective
+  topology) is THE public presheaf; IsSheafOfTopologicalRings (Rem 8.20 ∀T-form) ⟺
+  IsLimitSheaf; categorical IsSheaf + structureSheaf; AffinoidAdicSpace faithful
+  Def-8.21 field + SORRY-FREE .sheaf; discrete placeholder quarantined as
+  locallyFractionPresheaf (no public consumer); universe reduction for covers.
+- WO2: standardSheafCondition_of_isSheafyFor (SINGLE pair ⟹ A⁺-free condition,
+  defeq+R3 transfer); isSheafyFor_congr conditional on HasStandardRefinements
+  (= Kedlaya 1.6.8's conclusion; blocked deps recorded: noetherian-free
+  IsAdicComplete bridge + noetherian-free relativePiece_equiv); engine
+  isSheafy_of_standardSheafCondition_at proven.
+- WO3: IsSheafyRing → IsSheafyTateRing (honest Tate naming; f-adic blocked on
+  non-analytic presheaf infra, Kedlaya 1.6.10); completionModelCompare (+cont,
+  +canonicalMap) = the compatible model equivalence; IsSheafy-class deprecation note.
+- WO4: isSheafyTateRing_of_stronglyNoetherian_completion — noncomplete wrapper,
+  Def-6.36-verbatim hypothesis, NO CompleteSpace/PlusSubring/IsNoetherianRing/
+  HasLocLift leaks.
+- WO5: finiteJet_{isSheafyFor, isSheafOfTopologicalRings, structurePresheaf_isSheaf,
+  structureSheaf, standardSheafCondition(unconditional!), isSheafyComplete_of_...}.
+- WO6: docs/SHEAFY-INTEGRATION-2026-07-20.md = audit table + named-theorem chain +
+  exact blocked declarations. Full tree green; ~35-target audit all clean.
+- structurePresheaf_isSheaf's old sorry REMOVED (placeholder makes no sheaf claim).

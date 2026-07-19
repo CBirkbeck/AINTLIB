@@ -24,37 +24,48 @@ The literature-facing sheafiness API (Wedhorn Definition 8.26, Kedlaya Remarks
 * `CompletionModel A P` — the project's completion `Â = 𝒪_X(X) = presheafValue
   (globalLocData P)` (Wedhorn Remark 8.3) with its **fully populated** instance stack
   (complete, T2, Huber, nonarchimedean; Tate when `A` is — all completeness-free in
-  `A`), and `IsSheafyRing A` — the **literal general Definition 8.26**: every ring of
+  `A`), any two models canonically compatibly equivalent (`completionModelCompare`),
+  and `IsSheafyTateRing A` — Wedhorn Definition 8.26 **at Tate scope** (see its
+  docstring for the naming honesty note; the general f-adic notion is blocked on
+  non-analytic presheaf infrastructure, Kedlaya Remark 1.6.10): every ring of
   integral elements of the completion gives a sheafy pair of the completion. No
   instance parameters remain.
 * `isSheafyFor_of_stronglyNoetherianTate` / `isSheafyComplete_of_stronglyNoetherianTate`
   — **the principal theorems** (Wedhorn Theorem 8.28(b) in the genuine all-open
   vocabulary): a complete strongly noetherian Tate ring is sheafy for **every** valid
-  ring of integral elements. `isSheafyRing_of_stronglyNoetherianTate` — the literal
-  completion-based form, through the transport of the Tate/strongly-noetherian
-  structure to `Â`. No `CompatiblePlusSubring`, no `HasLocLiftPowerBounded`, no
-  `IsDomain` anywhere.
-* `isSheafyFor_congr_of_stronglyNoetherianTate` — `A⁺`-independence at the 8.28(b)
-  target scope (Kedlaya Remark 1.6.9's conclusion), with a non-definitionally-equal
-  regression example; no identification of the `Spa` spaces is used, and **no
-  nonanalytic independence is claimed** (Remark 1.6.10).
+  ring of integral elements. `isSheafyTateRing_of_stronglyNoetherian_completion` —
+  the general (noncomplete) wrapper with Definition 6.36's hypothesis verbatim
+  ("the completion is strongly noetherian"), with **no** `CompleteSpace A`, ambient
+  `PlusSubring A`, `IsNoetherianRing A`, or `HasLocLiftPowerBounded A`;
+  `isSheafyTateRing_of_stronglyNoetherianTate` — its complete-case instantiation
+  through the faithful transport. No `CompatiblePlusSubring`, no
+  `HasLocLiftPowerBounded`, no `IsDomain` anywhere.
+* `A⁺`-independence lives in `StandardDescent.lean`: `isSheafyFor_congr` is the
+  genuine transfer through the `A⁺`-free standard middle term (conditional on
+  exactly Kedlaya Lemma 1.6.8's descent input `HasStandardRefinements`; no
+  noetherianness, no `iff_of_true`), with the unconditional single-pair half
+  `standardSheafCondition_of_isSheafyFor`. **No nonanalytic independence is
+  claimed** (Remark 1.6.10).
 * `StandardCoverData` / `StandardSheafCondition` — the `A⁺`-free standard condition
   (`Spa`-uniform covers; populated by the generation construction in
-  `StandardRefinement.lean`), with the provable comparison direction
-  `standardSheafCondition_of_isSheafyComplete`. The converse for *generic* complete
-  Tate rings is the standard-cover cofinality (Kedlaya Lemma 1.6.8) whose general
-  branch is the recorded missing API (`WedhornStandardCoverRefinement.lean`) — not on
-  the dependency path of anything here.
+  `StandardRefinement.lean`). The conditional converse — recovering the pair-level
+  sheaf axioms from the standard condition — is `isSheafy_of_standardSheafCondition_at`
+  (`StandardDescent.lean`); its descent input's blocked dependencies are recorded
+  there and in `WedhornStandardCoverRefinement.lean`.
 
 ## Scope notes (honest boundaries)
 
-The non-complete form of the ring-level 8.28(b) wrapper reduces to a **single**
-missing transport: `IsStronglyNoetherian A → IsStronglyNoetherian (CompletionModel A P)`
-for non-complete `A` (the project's `presheafValue_isStronglyNoetherian_faithful`
-proves it inside the complete section; its `CompleteSpace A` hypothesis would need to
-be discharged from its proof chain). Everything else — completeness, T2,
-nonarchimedean, Huber, Tate — transports completeness-free (this file). See
-`docs/SHEAFY-LIVE-AUDIT-2026-07-19.md`.
+The noncomplete ring-level wrapper (`isSheafyTateRing_of_stronglyNoetherian_completion`)
+takes Wedhorn Definition 6.36's hypothesis **verbatim** — strong noetherianity of the
+**completion** ("`Â⟨X₁, …, Xₙ⟩` noetherian for all `n`") — which is the literature's
+own hypothesis for 8.28(b) and requires nothing of noncomplete `A` itself. The
+`A`-level restatement ("`A`-level restricted series noetherian ⟹ the model's"), i.e.
+the transport `IsStronglyNoetherian A → IsStronglyNoetherian (CompletionModel A P)`
+for noncomplete `A`, remains recorded: `presheafValue_isStronglyNoetherian_faithful`
+proves it inside the complete section only. Model-transport of `IsSheafyFor` along
+`completionModelCompare` (hence the `∃P ↔ ∀P` collapse) is likewise recorded — it
+needs the `IsLimitSheaf` transport along compatible topological-ring equivalences.
+See `docs/SHEAFY-LIVE-AUDIT-2026-07-19.md`.
 -/
 
 noncomputable section
@@ -126,23 +137,12 @@ theorem isSheafyComplete_of_stronglyNoetherianTate [IsStronglyNoetherian A] :
     IsSheafyComplete A :=
   fun Aplus => isSheafyFor_of_stronglyNoetherianTate Aplus
 
-/-- **`A⁺`-independence at the 8.28(b) target scope** (Kedlaya Remark 1.6.9's
-conclusion for complete strongly noetherian Tate rings): any two valid choices —
-related by no hypothesis whatsoever, in particular non-definitionally-equal ones —
-give equivalent pair-level sheafiness. No identification of the underlying
-`Spa (A, Aplus₁)` and `Spa (A, Aplus₂)` is used or asserted. -/
-theorem isSheafyFor_congr_of_stronglyNoetherianTate [IsStronglyNoetherian A]
-    (Aplus Bplus : RingOfIntegralElements A) :
-    IsSheafyFor A Aplus ↔ IsSheafyFor A Bplus :=
-  iff_of_true (isSheafyFor_of_stronglyNoetherianTate Aplus)
-    (isSheafyFor_of_stronglyNoetherianTate Bplus)
-
-/-- Regression (handover P4 gate — non-definitionally-equal choices): the
-independence statement applies to two choices assumed *distinct*. -/
-example [IsStronglyNoetherian A] (Aplus Bplus : RingOfIntegralElements A)
-    (_ : Aplus ≠ Bplus) :
-    IsSheafyFor A Aplus ↔ IsSheafyFor A Bplus :=
-  isSheafyFor_congr_of_stronglyNoetherianTate Aplus Bplus
+-- `A⁺`-independence is NOT stated here via `iff_of_true` from strong noetherianness
+-- (removed 2026-07-20, WO2/WO3 honesty constraint): the genuine transfer — through
+-- the `A⁺`-free standard middle term, conditional on exactly Kedlaya Lemma 1.6.8's
+-- descent input and with no noetherian hypothesis — is `isSheafyFor_congr`
+-- (`StandardDescent.lean`), with `standardSheafCondition_of_isSheafyFor` as its
+-- provable single-pair half.
 
 end ValuationSpectrum
 
@@ -202,17 +202,129 @@ instance [IsTateRing A] (P : PairOfDefinition A) : IsTateRing (CompletionModel A
 
 variable [IsTateRing A]
 
-/-- **Wedhorn Definition 8.26, literal general form** (fully populated — no instance
+/-- **Wedhorn Definition 8.26 for Tate rings** (fully populated — no instance
 parameters): a Tate ring `A` is *sheafy* when, for every pair of definition `P` and
 every ring of integral elements `Bplus` of the completion `Â = CompletionModel A P`,
 the pair `(Â, Bplus)` is sheafy — i.e. the genuine all-open structure presheaf of
 `Spa (Â, Bplus)` is a sheaf of topological rings. Quantifying over `P` keeps the
-definition choice-free; all models are the completion of `A` (Remark 8.3). -/
-def IsSheafyRing : Prop :=
+definition choice-free; all models are the completion of `A` (Remark 8.3), and any
+two models are compatibly equivalent (`completionModelCompare` below).
+
+**Naming (WO3 honesty note, 2026-07-20).** Wedhorn's Definition 8.26 is stated for
+arbitrary **f-adic** rings; this formalization is deliberately named
+`IsSheafyTateRing` because it is defined at Tate (analytic) scope only: the
+project's structure presheaf machinery — the restriction maps of Prop 8.2, whose
+existence package is derived from the complete-analytic 7.52(2) route
+(`hasLocLiftPowerBounded_faithful`) — does not yet exist for non-analytic f-adic
+rings, and Kedlaya Remark 1.6.10 records that the analytic and non-analytic cases
+genuinely differ (rational subsets are cut by *open*, not unit, ideals; the
+standard-cover machinery does not extend). Defining the general notion faithfully
+requires the non-analytic presheaf infrastructure first; the name `IsSheafyRing`
+is intentionally **not** used for this Tate-only notion. -/
+def IsSheafyTateRing : Prop :=
   ∀ (P : PairOfDefinition A) (Bplus : RingOfIntegralElements (CompletionModel A P)),
     IsSheafyFor (CompletionModel A P) Bplus
 
 end CompletionModel
+
+/-! ### Comparison of completion models (Remark 8.3's uniqueness half)
+
+Any two completion models are canonically **compatibly equivalent**: the whole-space
+data `globalLocData P`, `globalLocData P'` have literally the same rational open (the
+conditions mention only `T = {1}`, `s = 1`), so the canonical restriction maps run in
+both directions, compose to the identity, are continuous, and intertwine the
+canonical maps from `A`. This is the "actual compatible topological-ring
+equivalence" of the models (WO3): it does not depend on completeness of `A`, only on
+the analytic scope where the restriction maps exist. -/
+
+section CompletionModelCompare
+
+variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [PlusSubring A] [IsHuberRing A] [IsTateRing A] [HasLocLiftPowerBounded A]
+
+private theorem globalLocData_rationalOpen_subset (P P' : PairOfDefinition A) :
+    rationalOpen (globalLocData P).T (globalLocData P).s ⊆
+      rationalOpen (globalLocData P').T (globalLocData P').s :=
+  fun _ hv => hv
+
+/-- The canonical comparison between two completion models: the restriction map
+along the (reflexive) containment of the two whole-space rational opens, with the
+reverse restriction map as inverse (`restrictionMap_comp` + `restrictionMap_id`). -/
+def completionModelCompare (P P' : PairOfDefinition A) :
+    CompletionModel A P ≃+* CompletionModel A P' where
+  toFun := restrictionMapHom (globalLocData P) (globalLocData P')
+    (globalLocData_rationalOpen_subset P' P)
+  invFun := restrictionMapHom (globalLocData P') (globalLocData P)
+    (globalLocData_rationalOpen_subset P P')
+  left_inv x :=
+    (congr_fun (restrictionMap_comp (globalLocData P) (globalLocData P')
+      (globalLocData P) (globalLocData_rationalOpen_subset P' P)
+      (globalLocData_rationalOpen_subset P P')) x).trans
+    (congr_fun (restrictionMap_id (globalLocData P)) x)
+  right_inv x :=
+    (congr_fun (restrictionMap_comp (globalLocData P') (globalLocData P)
+      (globalLocData P') (globalLocData_rationalOpen_subset P P')
+      (globalLocData_rationalOpen_subset P' P)) x).trans
+    (congr_fun (restrictionMap_id (globalLocData P')) x)
+  map_mul' := map_mul _
+  map_add' := map_add _
+
+theorem completionModelCompare_continuous (P P' : PairOfDefinition A) :
+    Continuous (completionModelCompare P P') :=
+  restrictionMapHom_continuous (globalLocData P) (globalLocData P')
+    (globalLocData_rationalOpen_subset P' P)
+
+theorem completionModelCompare_symm_continuous (P P' : PairOfDefinition A) :
+    Continuous (completionModelCompare P P').symm :=
+  restrictionMapHom_continuous (globalLocData P') (globalLocData P)
+    (globalLocData_rationalOpen_subset P P')
+
+/-- The comparison intertwines the canonical maps from `A` — the compatibility
+required of an equivalence of completions (Wedhorn Remark 8.3). (The
+`IsNoetherianRing` hypothesis is inherited from the current section scope of
+`restrictionMapHom_canonicalMap` and carries no mathematical content here.) -/
+theorem completionModelCompare_canonicalMap [IsNoetherianRing A] [T2Space A]
+    [NonarchimedeanRing A]
+    (P P' : PairOfDefinition A) (a : A) :
+    completionModelCompare P P' ((globalLocData P).canonicalMap a) =
+      (globalLocData P').canonicalMap a :=
+  restrictionMapHom_canonicalMap (globalLocData P) (globalLocData P')
+    (globalLocData_rationalOpen_subset P' P) a
+
+end CompletionModelCompare
+
+section NoncompleteWrapper
+
+variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [IsHuberRing A] [IsTateRing A]
+
+/-- **The strongly noetherian sheafiness theorem, general (noncomplete) Tate form**
+(Wedhorn Theorem 8.28(b) with Definition 6.36's hypothesis taken *verbatim*): let
+`A` be a Tate ring whose **completion** is strongly noetherian — Definition 6.36(i)
+is literally a condition on `Â` ("`Â⟨X₁, …, Xₙ⟩` is noetherian for all `n`"), here
+read at every completion model. Then `A` is sheafy in the ring-level sense
+(`IsSheafyTateRing`): for every pair of definition and every ring of integral
+elements of the completion, the completed pair's genuine all-open structure
+presheaf is a sheaf of topological rings.
+
+Hypotheses are exactly the mathematically necessary ones: `A` Tate (Huber comes
+with it in the formalization), and Definition 6.36 for the completion. **No**
+`CompleteSpace A`, **no** ambient `PlusSubring A`, **no** `IsNoetherianRing A`,
+**no** `HasLocLiftPowerBounded A` appear (WO4 acceptance): the completion model
+carries its full completeness-free instance stack, and the restriction-map package
+is derived at the (complete) model, never assumed.
+
+Obtained by transport into the already-proved complete theorem
+(`isSheafyFor_of_stronglyNoetherianTate` at the model) — the hard proof is not
+duplicated. -/
+theorem isSheafyTateRing_of_stronglyNoetherian_completion
+    (h : ∀ P : PairOfDefinition A, IsStronglyNoetherian (CompletionModel A P)) :
+    IsSheafyTateRing A := by
+  intro P Bplus
+  haveI := h P
+  exact isSheafyFor_of_stronglyNoetherianTate Bplus
+
+end NoncompleteWrapper
 
 section CompletionTheorem
 
@@ -223,24 +335,23 @@ variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
 
 /-- The strongly noetherian structure transports to the completion model (the
-project's faithful transport at the whole-space datum; stated inside the complete
-analytic scope — removing `CompleteSpace A` from this transport is the single
-remaining input for the non-complete ring-level wrapper, see the module docstring). -/
+project's faithful transport at the whole-space datum, Wedhorn Example 6.38's
+"`Â⟨T/s⟩` is again strongly noetherian"; stated inside the complete analytic scope,
+where `A`-level strong noetherianity and Definition 6.36 for `Â` coincide). -/
 theorem completionModel_isStronglyNoetherian (P : PairOfDefinition A) :
     IsStronglyNoetherian (CompletionModel A P) :=
   presheafValue_isStronglyNoetherian_faithful (globalLocData P)
 
 /-- **The literal completion-based Theorem 8.28(b)** (Wedhorn Definition 8.26 over
-`Â`): a complete strongly noetherian Tate ring is sheafy in the ring-level sense —
-for every pair of definition and **every** ring of integral elements of the
-completion, the completed pair is sheafy with the genuine all-open structure presheaf.
-(Note this is a statement about the pairs of `Â`, not of `A`; it complements
-`isSheafyComplete_of_stronglyNoetherianTate`, which handles the pairs of `A` itself.) -/
-theorem isSheafyRing_of_stronglyNoetherianTate : IsSheafyRing A := by
-  intro P Bplus
-  haveI : IsStronglyNoetherian (CompletionModel A P) :=
-    completionModel_isStronglyNoetherian P
-  exact isSheafyFor_of_stronglyNoetherianTate Bplus
+`Â`, Tate scope, complete case): a complete strongly noetherian Tate ring is sheafy
+in the ring-level sense. Instantiates the general noncomplete wrapper
+`isSheafyTateRing_of_stronglyNoetherian_completion` through the faithful transport
+`completionModel_isStronglyNoetherian`. (This statement is about the pairs of `Â`;
+it complements `isSheafyComplete_of_stronglyNoetherianTate`, which handles the
+pairs of `A` itself — for complete `A` the two scopes agree by Remark 8.3.) -/
+theorem isSheafyTateRing_of_stronglyNoetherianTate : IsSheafyTateRing A :=
+  isSheafyTateRing_of_stronglyNoetherian_completion
+    (fun P => completionModel_isStronglyNoetherian P)
 
 end CompletionTheorem
 

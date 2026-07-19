@@ -318,9 +318,20 @@ theorem sectionEqualizer_isCountablyGenerated (C : RationalCovering A) :
     fun D => presheafValue_uniformity_isCountablyGenerated A D.1
   exact Filter.comap.isCountablyGenerated _ _
 
-/-- An affinoid ring `(A, A⁺)` is **sheafy** if the structure presheaf `𝒪_X` on
-`Spa(A, A⁺)` is a sheaf of **topological** rings (Definition 8.26 of Wedhorn).
-By Remark 8.20, this is equivalent to two conditions on every rational cover `C` —
+/-- **Internal finite rational-cover criterion** for a fixed pair `(A, A⁺)` — the
+proof-engine class of the 8.28(b) campaign. **Naming note (WO3, 2026-07-20): this is
+NOT the literature's ring-level "sheafy" (Wedhorn Definition 8.26)** — that is
+`IsSheafyTateRing` (`SheafyRing.lean`), which quantifies over the rings of integral
+elements of the completion; the pair-level public notion is `IsSheafyFor` (bundled
+valid pair, genuine all-open presheaf), equivalent to this class at complete Tate
+scope by `isSheafy_iff_isLimitSheaf`. New code should state results through those;
+this class remains as the internal criterion the existing proof corpus is written
+against.
+
+An affinoid ring `(A, A⁺)` satisfies this criterion if the rational-localization
+presheaf satisfies, on every rational cover, the conditions that Remark 8.20 makes
+equivalent to the sheaf-of-topological-rings property — two conditions on every
+rational cover `C` —
 quantified over coverings of rational subsets by rational subsets in Wedhorn
 Definition 7.29's sense (`RationalCovering.IsRational`: base and pieces have `T·A`
 open in `A`, wedhorn.txt:3100, 4143):
