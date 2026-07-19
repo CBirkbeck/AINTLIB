@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.GammaHMaster
+import ModularCurves.Moduli.KeystoneGeometricPoint
 
 /-!
 # The T-H8/T-H9 closure layer: Drinfeld representability from the boxed keystones
@@ -163,5 +164,18 @@ theorem gammaOneDrinfeld_rigid_and_representable_of_hbound (N : ℕ) [NeZero N]
   have hrep : (gammaOneDrinfeldProblem R N).Representable :=
     gammaOneDrinfeld_representable_prep R N hN hinv hbound
   exact ⟨ModuliProblem.rigid_of_representable hrep, hrep⟩
+
+/-- **[T-H9 CONTENT, pin-free] (KM's Γ₁(N) ledger, unconditional)** — the closure form
+of `gammaOneDrinfeld_representable` with the KM kernel-degree keystone `hbound`
+DISCHARGED via the Hasse-free `k̄`-point master (`hbound_of_kvc`, the KVC-consumer
+route of THE RULING v10.320): for `N ≥ 4` invertible the Drinfeld `Γ₁(N)` problem is
+rigid and representable, gated on EXACTLY the shared engine (`representable_iff_rigidNoeth`'s
+`⇐`, through `gammaOneDrinfeld_representable_prep`) and the T-D6b exact-order box — the
+`hbound` pin is gone. -/
+theorem gammaOneDrinfeld_rigid_and_representable (N : ℕ) [NeZero N]
+    (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
+    (gammaOneDrinfeldProblem R N).Rigid ∧
+      (gammaOneDrinfeldProblem R N).Representable :=
+  gammaOneDrinfeld_rigid_and_representable_of_hbound R N hN hinv (hbound_of_kvc R N hN)
 
 end ModularCurves

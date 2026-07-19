@@ -23837,3 +23837,14 @@ errors) · recollement-glue (Recollement, ~870-line TwoChartGlue apparatus + 4 e
 levelThree_torsor still open) · TD6b (ExactOrder: jet-core port + 4 errors; scratch_alg.lean has the clean
 pure-algebra core). The universe-wall ULift recipe (compiled) + :324 D(3)-leg recipe remain banked in
 scratchpad/armed_prompts.md.
+
+### v10.331-FIN addendum — hbound pin WIRED (receipt 3 pin-free)
+
+`GammaHClosure.gammaOneDrinfeld_rigid_and_representable` (NEW, unconditional): consumes
+`hbound_of_kvc R N hN` to discharge the `hbound` hypothesis of the `_of_hbound` receipt.
+Census-verified leaf set is EXACTLY {ExactOrder :111 smul_eq_zero_of_factors, :274
+pull_nsmul_ne_zero, representable_iff_rigidNoeth} — the KM kernel-degree keystone (hbound)
+and the 5 EndomorphismDegree leaves are GONE from the Γ₁(N) cone; the KVC route (THE RULING)
+replaced them with axiom-clean k̄-point reasoning. GammaHClosure now imports
+KeystoneGeometricPoint (acyclic). Full tree green 4242. Remaining Γ₁(N) gates = TD6b (2
+ExactOrder leaves) + the engine (:324).
