@@ -249,4 +249,79 @@ lemma genericPoints.exists_affineOpen_containing
   intro η
   exact TopologicalSpace.Opens.mem_iSup.mpr ⟨η, hηU η⟩
 
+/-- Given an arbitrary point on a quasi-separated scheme with finitely many generic points, there
+is an affine open containing that point and every generic point. -/
+lemma genericPoints.exists_affineOpen_containing_point
+    [Finite (genericPoints X)] [QuasiSeparatedSpace X] (x : X) :
+    ∃ U : X.Opens, IsAffineOpen U ∧ x ∈ U ∧
+      ∀ η : genericPoints X, η.1 ∈ U := by
+  let B : Set (genericPoints X) := {η | x ∉ closure {η.1}}
+  have hB : B.Finite := Set.toFinite B
+  have hclosed : IsClosed (⋃ η ∈ B, closure {η.1}) :=
+    hB.isClosed_biUnion fun _ _ ↦ isClosed_closure
+  let C : X.Opens := ⟨(⋃ η ∈ B, closure {η.1})ᶜ, hclosed.isOpen_compl⟩
+  have hxC : x ∈ C := by
+    intro hx
+    simp only [Set.mem_iUnion] at hx
+    obtain ⟨η, hηB, hxη⟩ := hx
+    exact hηB hxη
+  obtain ⟨_, ⟨W : X.Opens, hW, rfl⟩, hxW, hWC⟩ :=
+    X.isBasis_affineOpens.exists_subset_of_mem_open hxC C.isOpen
+  have hWdisj (η : genericPoints X) (hηB : η ∈ B) :
+      Disjoint (W : Set X) (closure {η.1}) := by
+    rw [Set.disjoint_left]
+    intro y hyW hyη
+    exact hWC hyW (Set.mem_iUnion_of_mem η (Set.mem_iUnion_of_mem hηB hyη))
+  obtain ⟨V, hV, hηV, hVpair⟩ :=
+    genericPoints.exists_pairwise_disjoint_affineOpens (X := X)
+  have hprecompact (η : B) :
+      IsCompact ((hV η.1).fromSpec ⁻¹ᵁ W : Set (Spec Γ(X, V η.1))) := by
+    change IsCompact ((hV η.1).fromSpec ⁻¹' (W : Set X))
+    rw [← Set.preimage_inter_range]
+    apply (hV η.1).fromSpec.isOpenEmbedding.isInducing.isCompact_preimage'
+    · rw [(hV η.1).range_fromSpec]
+      exact (quasiSeparatedSpace_iff_forall_affineOpens.mp inferInstance)
+        ⟨W, hW⟩ ⟨V η.1, hV η.1⟩
+    · exact Set.inter_subset_right
+  have hηW (η : B) : η.1.1 ∉ W := by
+    intro hη
+    exact Set.disjoint_left.mp (hWdisj η.1 η.2) hη (subset_closure rfl)
+  choose f hηf hfW using fun η : B ↦
+    (hV η.1).exists_basicOpen_disjoint_of_closure_mem_irreducibleComponents
+      (hηV η.1) η.1.2 (hprecompact η) (hηW η)
+  let V' : B → X.Opens := fun η ↦ X.basicOpen (f η)
+  have hV'aff (η : B) : IsAffineOpen (V' η) := (hV η.1).basicOpen (f η)
+  have hV'pair : Pairwise (fun η ζ ↦ Disjoint (V' η) (V' ζ)) := by
+    intro η ζ hηζ
+    change Disjoint (X.basicOpen (f η)) (X.basicOpen (f ζ))
+    rw [← TopologicalSpace.Opens.coe_disjoint, Set.disjoint_left]
+    intro y hyη hyζ
+    have hpair := hVpair (show η.1 ≠ ζ.1 from fun h ↦ hηζ (Subtype.ext h))
+    change Disjoint (V η.1) (V ζ.1) at hpair
+    rw [← TopologicalSpace.Opens.coe_disjoint, Set.disjoint_left] at hpair
+    exact hpair (X.basicOpen_le (f η) hyη) (X.basicOpen_le (f ζ) hyζ)
+  let A : X.Opens := ⨆ η : B, V' η
+  have hA : IsAffineOpen A := IsAffineOpen.iSup_of_disjoint hV'aff hV'pair
+  have hWA : Disjoint W A := by
+    rw [← TopologicalSpace.Opens.coe_disjoint, Set.disjoint_left]
+    intro y hyW hyA
+    obtain ⟨η, hyη⟩ := TopologicalSpace.Opens.mem_iSup.mp hyA
+    have hηdisj := hfW η
+    rw [← TopologicalSpace.Opens.coe_disjoint, Set.disjoint_left] at hηdisj
+    exact hηdisj hyη hyW
+  refine ⟨W ⊔ A, hW.sup_of_disjoint hA hWA,
+    TopologicalSpace.Opens.mem_sup.mpr (.inl hxW), ?_⟩
+  intro η
+  by_cases hηB : x ∉ closure {η.1}
+  · apply TopologicalSpace.Opens.mem_sup.mpr
+    right
+    apply TopologicalSpace.Opens.mem_iSup.mpr
+    exact ⟨⟨η, hηB⟩, hηf ⟨η, hηB⟩⟩
+  · have hxη : x ∈ closure {η.1} := not_not.mp hηB
+    obtain ⟨y, hyW, hyη⟩ := (mem_closure_iff.mp hxη) W W.isOpen hxW
+    simp only [Set.mem_singleton_iff] at hyη
+    apply TopologicalSpace.Opens.mem_sup.mpr
+    left
+    simpa [hyη] using hyW
+
 end AlgebraicGeometry
