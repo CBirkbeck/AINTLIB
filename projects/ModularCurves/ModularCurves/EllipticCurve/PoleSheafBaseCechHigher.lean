@@ -450,4 +450,43 @@ theorem FibrewiseElliptic.exists_sectionPoleSheafPower_orderedBaseCech_flat_boun
     exact h.sectionPoleSheafPower_field_orderedBaseCech_differential_exact
       hsm z hz U hU hUaff K hn q
 
+/-- The bounded flat ordered Cech model can be chosen so that every field fibre also has
+an `n`-dimensional degree-zero kernel. -/
+theorem FibrewiseElliptic.exists_sectionPoleSheafPower_orderedBaseCech_flat_bounded_field_exact_kernel_finrank
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsProper π] [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz) {n : ℕ} (hn : 1 ≤ n) :
+    ∃ (ι : Type u) (_ : Fintype ι) (_ : LinearOrder ι)
+      (U : ι → E.Opens),
+      IsOpenCover U ∧ (∀ i, IsAffineOpen (U i)) ∧
+        (∀ i, Nonempty
+          ((sectionPoleSheafPower π z hz n).restrict (U i).ι ≅
+            Scheme.Modules.unitObj (U i).toScheme)) ∧
+          let C := Scheme.Modules.orderedBaseCechComplex π
+            (sectionPoleSheafPower π z hz n) U
+          (∀ q, Module.Flat Γ(S, (⊤ : S.Opens)) (C.X q)) ∧
+            (∀ q, Fintype.card ι ≤ q → Subsingleton (C.X q)) ∧
+              (∀ (K : Type u) [Field K]
+                [Algebra Γ(S, (⊤ : S.Opens)) K] (q : ℕ),
+                Function.Exact
+                  ((C.d q (q + 1)).hom.baseChange K)
+                  ((C.d (q + 1) (q + 2)).hom.baseChange K)) ∧
+                ∀ (K : Type u) [Field K]
+                  [Algebra Γ(S, (⊤ : S.Opens)) K],
+                  Module.finrank K
+                    (LinearMap.ker ((C.d 0 1).hom.baseChange K)) = n := by
+  obtain ⟨ι, hι, hιord, U, hU, hUaff, htriv, hdata⟩ :=
+    h.exists_sectionPoleSheafPower_orderedBaseCech_flat_bounded_field_exact
+      hsm z hz hn
+  letI : Fintype ι := hι
+  letI : LinearOrder ι := hιord
+  dsimp only at hdata ⊢
+  obtain ⟨hflat, hbounded, hexact⟩ := hdata
+  refine ⟨ι, inferInstance, inferInstance, U, hU, hUaff, htriv,
+    hflat, hbounded, hexact, ?_⟩
+  intro K _ _
+  exact h.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank
+    hsm z hz U hU hUaff K hn
+
 end ModularCurves
