@@ -4,7 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.ProblemBaseChange
+import ModularCurves.EllipticCurve.GroupLawDescent
 import Mathlib.RingTheory.Spectrum.Prime.Topology
+import Mathlib.AlgebraicGeometry.Gluing
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 
 /-!
 # [T-E5f] The Katz–Mazur recollement theorem
@@ -371,6 +374,638 @@ noncomputable def overlapIso {P : ModuliProblem R} (a b : R)
       (eqToIso e_a)).uniqueUpToIso
     ((representableBy_baseChangeRing repr_b (awayProdHomRight a b)).ofIso (eqToIso e_b))
 
+/-! ## [R-glue-obj] Two-chart Zariski gluing (pushouts of open immersions)
+
+The pushout of a span of open immersions exists in `Scheme` — a `WidePushoutShape`-diagram of
+open immersions is a locally directed diagram, so mathlib's locally-directed gluing
+(`AlgebraicGeometry.Scheme.IsLocallyDirected`) provides the colimit with open-immersion
+coprojections — and the two coprojections are jointly surjective and are identified exactly
+along the span apex.  This is the entire (`Scheme.GlueData`-free) glue engine for
+[R-glue-obj]: `Spec R = D(a) ∪ D(b)` glues the two representing objects as the pushout of
+their overlap. -/
+
+section TwoChartGlue
+
+variable {W A B : Scheme.{u}} (f : W ⟶ A) (g : W ⟶ B)
+
+private theorem isOpenImmersion_span_map [IsOpenImmersion f] [IsOpenImmersion g] :
+    ∀ {i j : WalkingSpan} (h : i ⟶ j), IsOpenImmersion ((span f g).map h) := by
+  intro i j h
+  cases h with
+  | id i => rw [span_map_id]; infer_instance
+  | init j =>
+    cases j with
+    | left => rw [show (span f g).map (WidePushoutShape.Hom.init WalkingPair.left) = f from
+        span_map_fst f g]; assumption
+    | right => rw [show (span f g).map (WidePushoutShape.Hom.init WalkingPair.right) = g from
+        span_map_snd f g]; assumption
+
+variable [IsOpenImmersion f] [IsOpenImmersion g]
+
+private instance hasPushout_of_isOpenImmersion : HasPushout f g :=
+  haveI : ∀ {i j : WalkingSpan} (h : i ⟶ j), IsOpenImmersion ((span f g).map h) :=
+    isOpenImmersion_span_map f g
+  inferInstanceAs (HasColimit (span f g))
+
+private instance isOpenImmersion_pushout_inl : IsOpenImmersion (pushout.inl f g) :=
+  haveI : ∀ {i j : WalkingSpan} (h : i ⟶ j), IsOpenImmersion ((span f g).map h) :=
+    isOpenImmersion_span_map f g
+  inferInstanceAs (IsOpenImmersion (colimit.ι (span f g) WalkingSpan.left))
+
+private instance isOpenImmersion_pushout_inr : IsOpenImmersion (pushout.inr f g) :=
+  haveI : ∀ {i j : WalkingSpan} (h : i ⟶ j), IsOpenImmersion ((span f g).map h) :=
+    isOpenImmersion_span_map f g
+  inferInstanceAs (IsOpenImmersion (colimit.ι (span f g) WalkingSpan.right))
+
+/-- Points of the two charts of the pushout of open immersions are identified exactly along
+the apex: `inl x = inr y` iff both come from a common point of `W`. -/
+private theorem pushout_inl_eq_inr_iff (x : A) (y : B) :
+    pushout.inl f g x = pushout.inr f g y ↔ ∃ w : W, f w = x ∧ g w = y := by
+  haveI : ∀ {i j : WalkingSpan} (h : i ⟶ j), IsOpenImmersion ((span f g).map h) :=
+    isOpenImmersion_span_map f g
+  have hiff := Scheme.IsLocallyDirected.ι_eq_ι_iff (F := span f g)
+    (i := WalkingSpan.left) (j := WalkingSpan.right) (xi := x) (xj := y)
+  constructor
+  · intro h
+    obtain ⟨k, fi, fj, z, hz1, hz2⟩ := hiff.mp h
+    cases fi with
+    | id i => cases fj
+    | init j =>
+      cases fj with
+      | init j' =>
+        exact ⟨z, (congr($(span_map_fst f g) z)).symm.trans hz1,
+          (congr($(span_map_snd f g) z)).symm.trans hz2⟩
+  · rintro ⟨w, hw1, hw2⟩
+    exact hiff.mpr
+      ⟨WalkingSpan.zero, WalkingSpan.Hom.fst, WalkingSpan.Hom.snd, w,
+        (congr($(span_map_fst f g) w)).trans hw1, (congr($(span_map_snd f g) w)).trans hw2⟩
+
+/-- The two charts of the pushout of open immersions are jointly surjective. -/
+private theorem pushout_exists_inl_or_inr (x : ↑(pushout f g)) :
+    (∃ u : A, pushout.inl f g u = x) ∨ (∃ v : B, pushout.inr f g v = x) := by
+  haveI : ∀ {i j : WalkingSpan} (h : i ⟶ j), IsOpenImmersion ((span f g).map h) :=
+    isOpenImmersion_span_map f g
+  obtain ⟨i, xi, hxi⟩ := Scheme.IsLocallyDirected.ι_jointly_surjective (span f g) x
+  match i, xi, hxi with
+  | .some WalkingPair.left, xi, hxi => exact Or.inl ⟨xi, hxi⟩
+  | .some WalkingPair.right, xi, hxi => exact Or.inr ⟨xi, hxi⟩
+  | .none, xi, hxi =>
+    refine Or.inl ⟨(span f g).map WalkingSpan.Hom.fst xi, ?_⟩
+    have hw := congr($(colimit.w (span f g) WalkingSpan.Hom.fst) xi)
+    rw [Scheme.Hom.comp_apply] at hw
+    exact hw.trans hxi
+
+end TwoChartGlue
+
+/-! ## [R-glue-obj] the glued `Ell`-object
+
+Glue the two representing objects `Xa/R[1/a]` and `Xb/R[1/b]` along the overlap iso `φ` over
+`R[1/ab]` into a single object of `Ell/R`:
+
+* the **base** `S := Xa.base ⊔_W Xb.base` is the pushout of the open immersions
+  `W = Xa.base ×_{Spec R[1/a]} Spec R[1/ab] ⟶ Xa.base` and (through `φ.hom.baseHom`)
+  `W ⟶ Xb.base`;
+* the **total space** `E := Xa.curve.E ⊔_{W_E} Xb.curve.E` likewise on the curve level;
+* `π`, `zero`, and the structure map to `Spec R` are pushout-descents; each chart square
+  `(Xa.curve.E → E, Xa.base → S)` is **cartesian** (the chart ranges match up:
+  `range inlE = π⁻¹ (range inl)`);
+* smoothness, properness and the local Weierstrass model transfer chart-by-chart
+  (Zariski-local at the target), and the group structure is re-derived from the glued
+  *geometry* by `EllipticCurveGeom.toEllipticCurve` (T-W7) — **no group-scheme gluing**. -/
+
+section GlueObj
+
+/-- `baseHom` of an `Ell`-isomorphism is an isomorphism of schemes. -/
+private theorem isIso_baseHom_of_iso {R₀ : CommRingCat.{u}} {X Y : EllObj R₀} (e : X ≅ Y) :
+    IsIso e.hom.baseHom :=
+  ⟨e.inv.baseHom, by rw [← EllHom.comp_baseHom, e.hom_inv_id]; rfl,
+    by rw [← EllHom.comp_baseHom, e.inv_hom_id]; rfl⟩
+
+/-- `top` of an `Ell`-isomorphism is an isomorphism of schemes. -/
+private theorem isIso_top_of_iso {R₀ : CommRingCat.{u}} {X Y : EllObj R₀} (e : X ≅ Y) :
+    IsIso e.hom.top :=
+  ⟨e.inv.top, by rw [← EllHom.comp_top, e.hom_inv_id]; rfl,
+    by rw [← EllHom.comp_top, e.inv_hom_id]; rfl⟩
+
+private theorem baseChangeRing_curve_pi {R' R'' : CommRingCat.{u}} (X : EllObj R')
+    (τ : R' ⟶ R'') :
+    (X.baseChangeRing τ).curve.π
+      = pullback.snd X.curve.π (pullback.fst X.structMap (Spec.map τ)) := rfl
+
+variable (a b : R)
+variable (Xa : EllObj (CommRingCat.of (Localization.Away a)))
+variable (Xb : EllObj (CommRingCat.of (Localization.Away b)))
+variable (φ : Xa.baseChangeRing (awayProdHomLeft a b) ≅ Xb.baseChangeRing (awayProdHomRight a b))
+
+/-- Left leg of the base span: the overlap `W ⟶ Xa.base` (base change of `D(ab) ↪ D(a)`). -/
+private noncomputable def glueBaseFst :
+    (Xa.baseChangeRing (awayProdHomLeft a b)).base ⟶ Xa.base :=
+  pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b))
+
+/-- Right leg of the base span: `W ⟶ Xb.base` through the overlap iso `φ`. -/
+private noncomputable def glueBasePsi :
+    (Xa.baseChangeRing (awayProdHomLeft a b)).base ⟶ Xb.base :=
+  φ.hom.baseHom ≫ pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))
+
+private instance : IsOpenImmersion (glueBaseFst a b Xa) :=
+  inferInstanceAs (IsOpenImmersion (pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b))))
+
+private instance : IsOpenImmersion (glueBasePsi a b Xa Xb φ) := by
+  haveI : IsIso φ.hom.baseHom := isIso_baseHom_of_iso φ
+  exact @IsOpenImmersion.comp _ (pullback Xb.structMap (Spec.map (awayProdHomRight a b))) _
+    φ.hom.baseHom (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+    (IsOpenImmersion.of_isIso φ.hom.baseHom) _
+
+/-- **[R-glue-obj], base.** The glued base scheme `S = Xa.base ∪_W Xb.base`. -/
+private noncomputable def glueBase : Scheme.{u} :=
+  pushout (glueBaseFst a b Xa) (glueBasePsi a b Xa Xb φ)
+
+/-- The `a`-chart of the glued base. -/
+private noncomputable def glueBaseInl : Xa.base ⟶ glueBase a b Xa Xb φ := pushout.inl _ _
+
+/-- The `b`-chart of the glued base. -/
+private noncomputable def glueBaseInr : Xb.base ⟶ glueBase a b Xa Xb φ := pushout.inr _ _
+
+private instance : IsOpenImmersion (glueBaseInl a b Xa Xb φ) :=
+  inferInstanceAs (IsOpenImmersion (pushout.inl (glueBaseFst a b Xa) (glueBasePsi a b Xa Xb φ)))
+
+private instance : IsOpenImmersion (glueBaseInr a b Xa Xb φ) :=
+  inferInstanceAs (IsOpenImmersion (pushout.inr (glueBaseFst a b Xa) (glueBasePsi a b Xa Xb φ)))
+
+private theorem glueBase_condition :
+    glueBaseFst a b Xa ≫ glueBaseInl a b Xa Xb φ
+      = glueBasePsi a b Xa Xb φ ≫ glueBaseInr a b Xa Xb φ :=
+  pushout.condition
+
+private theorem glueBase_hom_ext {Z : Scheme.{u}} {u v : glueBase a b Xa Xb φ ⟶ Z}
+    (h1 : glueBaseInl a b Xa Xb φ ≫ u = glueBaseInl a b Xa Xb φ ≫ v)
+    (h2 : glueBaseInr a b Xa Xb φ ≫ u = glueBaseInr a b Xa Xb φ ≫ v) : u = v :=
+  pushout.hom_ext h1 h2
+
+private theorem glueBase_inl_eq_inr_iff (x : Xa.base) (y : Xb.base) :
+    glueBaseInl a b Xa Xb φ x = glueBaseInr a b Xa Xb φ y ↔
+      ∃ w, glueBaseFst a b Xa w = x ∧ glueBasePsi a b Xa Xb φ w = y :=
+  pushout_inl_eq_inr_iff _ _ x y
+
+private theorem glueBase_exists (x : glueBase a b Xa Xb φ) :
+    (∃ u, glueBaseInl a b Xa Xb φ u = x) ∨ (∃ v, glueBaseInr a b Xa Xb φ v = x) :=
+  pushout_exists_inl_or_inr _ _ x
+
+/-- The two structure maps to `Spec R` agree on the overlap (both are the `R[1/ab]`-structure
+map of the overlap followed by `D(ab) ↪ Spec R`, via the localization towers). -/
+private theorem glueQ_w :
+    glueBaseFst a b Xa ≫ Xa.structMap ≫ Spec.map (awayHom a)
+      = glueBasePsi a b Xa Xb φ ≫ Xb.structMap ≫ Spec.map (awayHom b) := by
+  have ha : glueBaseFst a b Xa ≫ Xa.structMap
+      = (Xa.baseChangeRing (awayProdHomLeft a b)).structMap ≫ Spec.map (awayProdHomLeft a b) :=
+    pullback.condition
+  have hpsi : glueBasePsi a b Xa Xb φ ≫ Xb.structMap
+      = (Xa.baseChangeRing (awayProdHomLeft a b)).structMap ≫ Spec.map (awayProdHomRight a b) := by
+    rw [glueBasePsi, Category.assoc, ← φ.hom.base_w, Category.assoc]
+    congr 1
+    exact pullback.condition
+  rw [reassoc_of% ha, reassoc_of% hpsi, ← Spec.map_comp, ← Spec.map_comp,
+    awayHom_comp_awayProdHomLeft, awayHom_comp_awayProdHomRight]
+
+/-- **[R-glue-obj], structure map.** `S ⟶ Spec R`, glued from the two localized structure
+maps. -/
+private noncomputable def glueQ : glueBase a b Xa Xb φ ⟶ Spec R :=
+  pushout.desc (Xa.structMap ≫ Spec.map (awayHom a)) (Xb.structMap ≫ Spec.map (awayHom b))
+    (glueQ_w a b Xa Xb φ)
+
+private theorem glueBaseInl_glueQ :
+    glueBaseInl a b Xa Xb φ ≫ glueQ a b Xa Xb φ = Xa.structMap ≫ Spec.map (awayHom a) :=
+  pushout.inl_desc _ _ _
+
+private theorem glueBaseInr_glueQ :
+    glueBaseInr a b Xa Xb φ ≫ glueQ a b Xa Xb φ = Xb.structMap ≫ Spec.map (awayHom b) :=
+  pushout.inr_desc _ _ _
+
+/-! ### The glued total space -/
+
+/-- Left leg of the curve span: the overlap curve `W_E ⟶ Xa.curve.E`. -/
+private noncomputable def glueCurveFst :
+    (Xa.baseChangeRing (awayProdHomLeft a b)).curve.E ⟶ Xa.curve.E :=
+  pullback.fst Xa.curve.π (pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b)))
+
+/-- Right leg of the curve span: `W_E ⟶ Xb.curve.E` through `φ.hom.top`. -/
+private noncomputable def glueCurvePsi :
+    (Xa.baseChangeRing (awayProdHomLeft a b)).curve.E ⟶ Xb.curve.E :=
+  φ.hom.top ≫ pullback.fst Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+
+private instance : IsOpenImmersion (glueCurveFst a b Xa) :=
+  inferInstanceAs (IsOpenImmersion
+    (pullback.fst Xa.curve.π (pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b)))))
+
+private instance : IsOpenImmersion (glueCurvePsi a b Xa Xb φ) := by
+  haveI : IsIso φ.hom.top := isIso_top_of_iso φ
+  exact @IsOpenImmersion.comp _
+    (pullback Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))) _
+    φ.hom.top
+    (pullback.fst Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))))
+    (IsOpenImmersion.of_isIso φ.hom.top) _
+
+/-- **[R-glue-obj], total space.** The glued total space `E = Xa.curve.E ∪_{W_E} Xb.curve.E`. -/
+private noncomputable def glueTotal : Scheme.{u} :=
+  pushout (glueCurveFst a b Xa) (glueCurvePsi a b Xa Xb φ)
+
+private noncomputable def glueTotalInl : Xa.curve.E ⟶ glueTotal a b Xa Xb φ := pushout.inl _ _
+
+private noncomputable def glueTotalInr : Xb.curve.E ⟶ glueTotal a b Xa Xb φ := pushout.inr _ _
+
+private instance : IsOpenImmersion (glueTotalInl a b Xa Xb φ) :=
+  inferInstanceAs (IsOpenImmersion (pushout.inl (glueCurveFst a b Xa) (glueCurvePsi a b Xa Xb φ)))
+
+private instance : IsOpenImmersion (glueTotalInr a b Xa Xb φ) :=
+  inferInstanceAs (IsOpenImmersion (pushout.inr (glueCurveFst a b Xa) (glueCurvePsi a b Xa Xb φ)))
+
+private theorem glueTotal_condition :
+    glueCurveFst a b Xa ≫ glueTotalInl a b Xa Xb φ
+      = glueCurvePsi a b Xa Xb φ ≫ glueTotalInr a b Xa Xb φ :=
+  pushout.condition
+
+private theorem glueTotal_hom_ext {Z : Scheme.{u}} {u v : glueTotal a b Xa Xb φ ⟶ Z}
+    (h1 : glueTotalInl a b Xa Xb φ ≫ u = glueTotalInl a b Xa Xb φ ≫ v)
+    (h2 : glueTotalInr a b Xa Xb φ ≫ u = glueTotalInr a b Xa Xb φ ≫ v) : u = v :=
+  pushout.hom_ext h1 h2
+
+private theorem glueTotal_inl_eq_inr_iff (x : Xa.curve.E) (y : Xb.curve.E) :
+    glueTotalInl a b Xa Xb φ x = glueTotalInr a b Xa Xb φ y ↔
+      ∃ w, glueCurveFst a b Xa w = x ∧ glueCurvePsi a b Xa Xb φ w = y :=
+  pushout_inl_eq_inr_iff _ _ x y
+
+private theorem glueTotal_exists (x : glueTotal a b Xa Xb φ) :
+    (∃ u, glueTotalInl a b Xa Xb φ u = x) ∨ (∃ v, glueTotalInr a b Xa Xb φ v = x) :=
+  pushout_exists_inl_or_inr _ _ x
+
+/-- The two chart projections agree on the overlap curve. -/
+private theorem gluePi_w :
+    glueCurveFst a b Xa ≫ Xa.curve.π ≫ glueBaseInl a b Xa Xb φ
+      = glueCurvePsi a b Xa Xb φ ≫ Xb.curve.π ≫ glueBaseInr a b Xa Xb φ := by
+  have ha : glueCurveFst a b Xa ≫ Xa.curve.π
+      = (Xa.baseChangeRing (awayProdHomLeft a b)).curve.π ≫ glueBaseFst a b Xa :=
+    pullback.condition
+  have hcurve : glueCurvePsi a b Xa Xb φ ≫ Xb.curve.π
+      = (Xa.baseChangeRing (awayProdHomLeft a b)).curve.π ≫ glueBasePsi a b Xa Xb φ := by
+    rw [glueCurvePsi, glueBasePsi]
+    simp only [Category.assoc]
+    rw [← reassoc_of% φ.hom.isPullback.w]
+    congr 1
+    exact pullback.condition
+  rw [reassoc_of% ha, glueBase_condition, reassoc_of% hcurve]
+
+/-- **[R-glue-obj], projection.** `π : E ⟶ S`, glued from the chart projections. -/
+private noncomputable def gluePi : glueTotal a b Xa Xb φ ⟶ glueBase a b Xa Xb φ :=
+  pushout.desc (Xa.curve.π ≫ glueBaseInl a b Xa Xb φ) (Xb.curve.π ≫ glueBaseInr a b Xa Xb φ)
+    (gluePi_w a b Xa Xb φ)
+
+private theorem glueTotalInl_gluePi :
+    glueTotalInl a b Xa Xb φ ≫ gluePi a b Xa Xb φ = Xa.curve.π ≫ glueBaseInl a b Xa Xb φ :=
+  pushout.inl_desc _ _ _
+
+private theorem glueTotalInr_gluePi :
+    glueTotalInr a b Xa Xb φ ≫ gluePi a b Xa Xb φ = Xb.curve.π ≫ glueBaseInr a b Xa Xb φ :=
+  pushout.inr_desc _ _ _
+
+/-- The two chart zero sections agree on the overlap. -/
+private theorem glueZero_w :
+    glueBaseFst a b Xa ≫ Xa.curve.zero ≫ glueTotalInl a b Xa Xb φ
+      = glueBasePsi a b Xa Xb φ ≫ Xb.curve.zero ≫ glueTotalInr a b Xa Xb φ := by
+  have ha : (Xa.baseChangeRing (awayProdHomLeft a b)).curve.zero ≫ glueCurveFst a b Xa
+      = glueBaseFst a b Xa ≫ Xa.curve.zero :=
+    baseChangeRing_curve_zero_comp_fst Xa (awayProdHomLeft a b)
+  have hzero : glueBasePsi a b Xa Xb φ ≫ Xb.curve.zero
+      = (Xa.baseChangeRing (awayProdHomLeft a b)).curve.zero ≫ glueCurvePsi a b Xa Xb φ := by
+    rw [glueBasePsi, glueCurvePsi]
+    simp only [Category.assoc]
+    rw [reassoc_of% φ.hom.zero_w]
+    congr 1
+    exact (baseChangeRing_curve_zero_comp_fst Xb (awayProdHomRight a b)).symm
+  rw [← reassoc_of% ha, glueTotal_condition, reassoc_of% hzero]
+
+/-- **[R-glue-obj], zero section.** `zero : S ⟶ E`, glued from the chart zero sections. -/
+private noncomputable def glueZero : glueBase a b Xa Xb φ ⟶ glueTotal a b Xa Xb φ :=
+  pushout.desc (Xa.curve.zero ≫ glueTotalInl a b Xa Xb φ)
+    (Xb.curve.zero ≫ glueTotalInr a b Xa Xb φ) (glueZero_w a b Xa Xb φ)
+
+private theorem glueBaseInl_glueZero :
+    glueBaseInl a b Xa Xb φ ≫ glueZero a b Xa Xb φ
+      = Xa.curve.zero ≫ glueTotalInl a b Xa Xb φ :=
+  pushout.inl_desc _ _ _
+
+private theorem glueBaseInr_glueZero :
+    glueBaseInr a b Xa Xb φ ≫ glueZero a b Xa Xb φ
+      = Xb.curve.zero ≫ glueTotalInr a b Xa Xb φ :=
+  pushout.inr_desc _ _ _
+
+private theorem glueZero_gluePi :
+    glueZero a b Xa Xb φ ≫ gluePi a b Xa Xb φ = 𝟙 (glueBase a b Xa Xb φ) := by
+  apply glueBase_hom_ext
+  · rw [← Category.assoc, glueBaseInl_glueZero, Category.assoc, glueTotalInl_gluePi,
+      ← Category.assoc, Xa.curve.zero_π, Category.id_comp, Category.comp_id]
+  · rw [← Category.assoc, glueBaseInr_glueZero, Category.assoc, glueTotalInr_gluePi,
+      ← Category.assoc, Xb.curve.zero_π, Category.id_comp, Category.comp_id]
+
+/-! ### The chart squares are cartesian -/
+
+/-- Range of the top of a cartesian square of schemes: `range fst = f ⁻¹' (range g)`
+(the general-`IsPullback` version of `Scheme.Pullback.range_fst`). -/
+private theorem range_fst_of_isPullback {P X Y Z : Scheme.{u}} {fst : P ⟶ X} {snd : P ⟶ Y}
+    {f : X ⟶ Z} {g : Y ⟶ Z} (h : IsPullback fst snd f g) :
+    Set.range fst = f ⁻¹' Set.range g := by
+  ext x
+  constructor
+  · rintro ⟨p, rfl⟩
+    refine ⟨snd p, ?_⟩
+    have := congr($(h.w) p)
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at this
+    exact this.symm
+  · rintro ⟨y, hy⟩
+    obtain ⟨z, hz1, hz2⟩ := Scheme.Pullback.exists_preimage_pullback (f := f) (g := g) x y hy.symm
+    refine ⟨h.isoPullback.inv z, ?_⟩
+    have := congr($(h.isoPullback_inv_fst) z)
+    rw [Scheme.Hom.comp_apply] at this
+    exact this.trans hz1
+
+/-- The `b`-side overlap square, pasted through `φ`: `W_E` is the pullback of
+`Xb.curve.E` along `W ⟶ Xb.base`. -/
+private theorem isPullback_glueCurvePsi :
+    IsPullback (glueCurvePsi a b Xa Xb φ) (Xa.baseChangeRing (awayProdHomLeft a b)).curve.π
+      Xb.curve.π (glueBasePsi a b Xa Xb φ) := by
+  have h2 : IsPullback
+      (pullback.fst Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))))
+      (Xb.baseChangeRing (awayProdHomRight a b)).curve.π Xb.curve.π
+      (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))) := by
+    rw [baseChangeRing_curve_pi]
+    exact IsPullback.of_hasPullback _ _
+  exact φ.hom.isPullback.paste_horiz h2
+
+/-- The `a`-side overlap square: `W_E` is the pullback of `Xa.curve.E` along `W ⟶ Xa.base`. -/
+private theorem isPullback_glueCurveFst :
+    IsPullback (glueCurveFst a b Xa) (Xa.baseChangeRing (awayProdHomLeft a b)).curve.π
+      Xa.curve.π (glueBaseFst a b Xa) := by
+  rw [baseChangeRing_curve_pi]
+  exact IsPullback.of_hasPullback _ _
+
+/-- **The key chart-range identity**: the `a`-chart of the total space is exactly the
+`π`-preimage of the `a`-chart of the base. -/
+private theorem range_glueTotalInl :
+    Set.range (glueTotalInl a b Xa Xb φ)
+      = gluePi a b Xa Xb φ ⁻¹' Set.range (glueBaseInl a b Xa Xb φ) := by
+  ext x
+  constructor
+  · rintro ⟨e, rfl⟩
+    refine ⟨Xa.curve.π e, ?_⟩
+    have := congr($(glueTotalInl_gluePi a b Xa Xb φ) e)
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at this
+    exact this.symm
+  · intro hx
+    obtain ⟨u, hu⟩ := hx
+    rcases glueTotal_exists a b Xa Xb φ x with ⟨e, rfl⟩ | ⟨e, rfl⟩
+    · exact ⟨e, rfl⟩
+    · -- `x = inrE e` with `π x ∈ range inl`: the base point comes from the overlap, hence
+      -- so does `e`, hence `x` is in the image of the `a`-chart via the glue relation.
+      have hpi : gluePi a b Xa Xb φ (glueTotalInr a b Xa Xb φ e)
+          = glueBaseInr a b Xa Xb φ (Xb.curve.π e) := by
+        have := congr($(glueTotalInr_gluePi a b Xa Xb φ) e)
+        rwa [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at this
+      obtain ⟨w, hw1, hw2⟩ := (glueBase_inl_eq_inr_iff a b Xa Xb φ u (Xb.curve.π e)).mp
+        (by rw [hu, hpi])
+      have he : e ∈ Set.range (glueCurvePsi a b Xa Xb φ) := by
+        rw [range_fst_of_isPullback (isPullback_glueCurvePsi a b Xa Xb φ)]
+        exact ⟨w, hw2⟩
+      obtain ⟨z, rfl⟩ := he
+      refine ⟨glueCurveFst a b Xa z, ?_⟩
+      have := congr($(glueTotal_condition a b Xa Xb φ) z)
+      rwa [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at this
+
+/-- The mirrored chart-range identity for the `b`-chart. -/
+private theorem range_glueTotalInr :
+    Set.range (glueTotalInr a b Xa Xb φ)
+      = gluePi a b Xa Xb φ ⁻¹' Set.range (glueBaseInr a b Xa Xb φ) := by
+  ext x
+  constructor
+  · rintro ⟨e, rfl⟩
+    refine ⟨Xb.curve.π e, ?_⟩
+    have := congr($(glueTotalInr_gluePi a b Xa Xb φ) e)
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at this
+    exact this.symm
+  · intro hx
+    obtain ⟨u, hu⟩ := hx
+    rcases glueTotal_exists a b Xa Xb φ x with ⟨e, rfl⟩ | ⟨e, rfl⟩
+    · have hpi : gluePi a b Xa Xb φ (glueTotalInl a b Xa Xb φ e)
+          = glueBaseInl a b Xa Xb φ (Xa.curve.π e) := by
+        have := congr($(glueTotalInl_gluePi a b Xa Xb φ) e)
+        rwa [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at this
+      obtain ⟨w, hw1, hw2⟩ := (glueBase_inl_eq_inr_iff a b Xa Xb φ (Xa.curve.π e) u).mp
+        ((hu.trans hpi).symm)
+      have he : e ∈ Set.range (glueCurveFst a b Xa) := by
+        rw [range_fst_of_isPullback (isPullback_glueCurveFst a b Xa)]
+        exact ⟨w, hw1⟩
+      obtain ⟨z, rfl⟩ := he
+      refine ⟨glueCurvePsi a b Xa Xb φ z, ?_⟩
+      have := congr($(glueTotal_condition a b Xa Xb φ) z)
+      rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at this
+      exact this.symm
+    · exact ⟨e, rfl⟩
+
+/-- **[R-glue-obj], chart square `a`.** The `a`-chart square of the glued curve is
+cartesian: `Xa.curve.E` is the restriction of the glued curve to the `a`-chart. -/
+private theorem isPullback_glueTotalInl :
+    IsPullback (glueTotalInl a b Xa Xb φ) Xa.curve.π (gluePi a b Xa Xb φ)
+      (glueBaseInl a b Xa Xb φ) := by
+  have hrange : Set.range (glueTotalInl a b Xa Xb φ)
+      = Set.range (pullback.fst (gluePi a b Xa Xb φ) (glueBaseInl a b Xa Xb φ)) := by
+    rw [Scheme.Pullback.range_fst, range_glueTotalInl]
+  have hcomm : CommSq (glueTotalInl a b Xa Xb φ) Xa.curve.π (gluePi a b Xa Xb φ)
+      (glueBaseInl a b Xa Xb φ) := ⟨glueTotalInl_gluePi a b Xa Xb φ⟩
+  refine IsPullback.of_iso_pullback hcomm
+    (IsOpenImmersion.isoOfRangeEq (glueTotalInl a b Xa Xb φ)
+      (pullback.fst (gluePi a b Xa Xb φ) (glueBaseInl a b Xa Xb φ)) hrange) ?_ ?_
+  · exact IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+  · rw [← cancel_mono (glueBaseInl a b Xa Xb φ), Category.assoc, ← pullback.condition,
+      ← Category.assoc, IsOpenImmersion.isoOfRangeEq_hom_fac, glueTotalInl_gluePi]
+
+/-- **[R-glue-obj], chart square `b`.** -/
+private theorem isPullback_glueTotalInr :
+    IsPullback (glueTotalInr a b Xa Xb φ) Xb.curve.π (gluePi a b Xa Xb φ)
+      (glueBaseInr a b Xa Xb φ) := by
+  have hrange : Set.range (glueTotalInr a b Xa Xb φ)
+      = Set.range (pullback.fst (gluePi a b Xa Xb φ) (glueBaseInr a b Xa Xb φ)) := by
+    rw [Scheme.Pullback.range_fst, range_glueTotalInr]
+  have hcomm : CommSq (glueTotalInr a b Xa Xb φ) Xb.curve.π (gluePi a b Xa Xb φ)
+      (glueBaseInr a b Xa Xb φ) := ⟨glueTotalInr_gluePi a b Xa Xb φ⟩
+  refine IsPullback.of_iso_pullback hcomm
+    (IsOpenImmersion.isoOfRangeEq (glueTotalInr a b Xa Xb φ)
+      (pullback.fst (gluePi a b Xa Xb φ) (glueBaseInr a b Xa Xb φ)) hrange) ?_ ?_
+  · exact IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+  · rw [← cancel_mono (glueBaseInr a b Xa Xb φ), Category.assoc, ← pullback.condition,
+      ← Category.assoc, IsOpenImmersion.isoOfRangeEq_hom_fac, glueTotalInr_gluePi]
+
+/-- **[R-glue-obj], property transfer.** Any morphism property `P` that is Zariski-local at the
+target and holds for both chart projections `Xa.curve.π`, `Xb.curve.π` holds for the glued
+projection `gluePi`: the two chart opens cover the glued base (`glueBase_exists`), and over each
+chart the restriction of `gluePi` is, as an arrow, the corresponding chart projection (the
+cartesian squares `isPullback_glueTotalInl/Inr` composed with `morphismRestrictOpensRange`). -/
+private theorem glue_zariskiLocalAtTarget (P : MorphismProperty Scheme.{u})
+    [IsZariskiLocalAtTarget P] (hPa : P Xa.curve.π) (hPb : P Xb.curve.π) :
+    P (gluePi a b Xa Xb φ) := by
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top
+    (fun i : Bool => cond i (glueBaseInr a b Xa Xb φ).opensRange
+      (glueBaseInl a b Xa Xb φ).opensRange) ?_ ?_
+  · refine top_le_iff.mp fun x _ => ?_
+    rcases glueBase_exists a b Xa Xb φ x with ⟨u, rfl⟩ | ⟨v, rfl⟩
+    · exact TopologicalSpace.Opens.mem_iSup.mpr ⟨false, u, rfl⟩
+    · exact TopologicalSpace.Opens.mem_iSup.mpr ⟨true, v, rfl⟩
+  · intro i
+    cases i
+    · refine (P.arrow_mk_iso_iff
+        (morphismRestrictOpensRange (gluePi a b Xa Xb φ) (glueBaseInl a b Xa Xb φ))).mpr ?_
+      refine (P.arrow_mk_iso_iff (Arrow.isoMk
+        (isPullback_glueTotalInl a b Xa Xb φ).isoPullback.symm (Iso.refl _) ?_)).mpr hPa
+      simp only [Arrow.mk_hom, Iso.symm_hom, Iso.refl_hom]
+      exact (isPullback_glueTotalInl a b Xa Xb φ).isoPullback_inv_snd
+    · refine (P.arrow_mk_iso_iff
+        (morphismRestrictOpensRange (gluePi a b Xa Xb φ) (glueBaseInr a b Xa Xb φ))).mpr ?_
+      refine (P.arrow_mk_iso_iff (Arrow.isoMk
+        (isPullback_glueTotalInr a b Xa Xb φ).isoPullback.symm (Iso.refl _) ?_)).mpr hPb
+      simp only [Arrow.mk_hom, Iso.symm_hom, Iso.refl_hom]
+      exact (isPullback_glueTotalInr a b Xa Xb φ).isoPullback_inv_snd
+
+/-! ### The glued geometric elliptic curve and the glued `Ell/R`-object
+
+The three geometry `Prop`s (`smooth`, `proper`, `localModel`) are Zariski-local on the glued
+base and transfer from the charts; they are quarantined as the leaves [RECOLL-SM],
+[RECOLL-PR], [RECOLL-LW] below. -/
+
+/-- **[RECOLL-SM] (leaf).** Smoothness of relative dimension 1 for the glued projection.
+
+*Recipe.* `SmoothOfRelativeDimension 1` is `IsZariskiLocalAtTarget` (mathlib). Apply
+`IsZariskiLocalAtTarget.of_iSup_eq_top` with the two chart opens
+`(glueBaseInl …).opensRange ⊔ (glueBaseInr …).opensRange = ⊤` (from `glueBase_exists`), or
+`of_openCover` with the two-chart open cover; on each chart the restriction of `gluePi` is
+isomorphic (as an arrow) to `Xa.curve.π` resp. `Xb.curve.π` via
+`isPullback_glueTotalInl/Inr` (`IsPullback.isoPullback` against
+`pullback (gluePi …) (glueBaseInl …)`), and `Xa.curve.smooth`/`Xb.curve.smooth` finish. -/
+private theorem glue_smooth :
+    SmoothOfRelativeDimension 1 (gluePi a b Xa Xb φ) :=
+  glue_zariskiLocalAtTarget a b Xa Xb φ (@SmoothOfRelativeDimension 1)
+    Xa.curve.smooth Xb.curve.smooth
+
+/-- **[RECOLL-PR] (proven).** Properness of the glued projection, via `glue_zariskiLocalAtTarget`
+with `IsProper` (`IsZariskiLocalAtTarget`) and `Xa.curve.proper`/`Xb.curve.proper`. -/
+private theorem glue_proper : IsProper (gluePi a b Xa Xb φ) :=
+  glue_zariskiLocalAtTarget a b Xa Xb φ (@IsProper) Xa.curve.proper Xb.curve.proper
+
+/-- **[RECOLL-LW] (leaf).** The glued curve is locally Weierstrass.
+
+*Recipe.* `LocallyWeierstrass` is a pointwise condition on the base. Given
+`s : glueBase …`, by `glueBase_exists` it is `glueBaseInl … sa` (or the mirrored `b`-case).
+Develop the transport lemma `LocallyWeierstrass.of_isPullback_of_isOpenImmersion`: if
+`IsPullback jE π' π j` with `j`, `jE` open immersions, `z' ≫ jE = j ≫ z` and
+`LocallyWeierstrass π' z' hz'`, then every point of `Set.range j` admits the chart data.
+Proof sketch: pick the chart `(U, W, e)` upstairs at `sa`; push `U` forward to the affine
+open `j ''ᵁ U` (`IsAffineOpen.image_of_isOpenImmersion`), transport the section ring along
+the iso `Γ(S, j''U) ≅ Γ(S', U)` (`Scheme.Hom.appIso`), map the Weierstrass curve along it
+(`WeierstrassCurve.map`, `IsElliptic` is preserved), and paste the chart pullback squares
+(the `U`-restriction of `π` is the `U`-restriction of `π'` via `IsPullback jE π' π j`
+restricted to `U`, cf. `LocallyWeierstrass.baseChange`/`of_iso` in
+`EllipticCurve/Basic.lean`). Zero-section compatibility follows from `z' ≫ jE = j ≫ z`
+by `pullback.hom_ext`. -/
+private theorem glue_locallyWeierstrass :
+    LocallyWeierstrass (gluePi a b Xa Xb φ) (glueZero a b Xa Xb φ)
+      (glueZero_gluePi a b Xa Xb φ) := by
+  sorry
+
+/-- **[R-glue-obj], geometry.** The glued geometric elliptic curve over the glued base. -/
+private noncomputable def glueGeom : EllipticCurveGeom (glueBase a b Xa Xb φ) where
+  E := glueTotal a b Xa Xb φ
+  π := gluePi a b Xa Xb φ
+  zero := glueZero a b Xa Xb φ
+  zero_π := glueZero_gluePi a b Xa Xb φ
+  smooth := glue_smooth a b Xa Xb φ
+  proper := glue_proper a b Xa Xb φ
+  localModel := glue_locallyWeierstrass a b Xa Xb φ
+
+/-- **[R-glue-obj].** The glued `Ell/R`-object: base `S = Xa.base ∪_W Xb.base`, structure map
+`glueQ`, and the glued curve with its group structure re-derived from the geometry by
+`EllipticCurveGeom.toEllipticCurve` (T-W7) — no group-scheme gluing. -/
+private noncomputable def glueEllObj : EllObj R where
+  base := glueBase a b Xa Xb φ
+  structMap := glueQ a b Xa Xb φ
+  curve := (glueGeom a b Xa Xb φ).toEllipticCurve
+
+/-- The `a`-chart inclusion, as a morphism of `Ell/R`. -/
+private noncomputable def glueJa :
+    (EllObj.restrictScalars (awayHom a)).obj Xa ⟶ glueEllObj a b Xa Xb φ where
+  baseHom := glueBaseInl a b Xa Xb φ
+  base_w := glueBaseInl_glueQ a b Xa Xb φ
+  top := glueTotalInl a b Xa Xb φ
+  isPullback := isPullback_glueTotalInl a b Xa Xb φ
+  zero_w := (glueBaseInl_glueZero a b Xa Xb φ).symm
+
+/-- The `b`-chart inclusion, as a morphism of `Ell/R`. -/
+private noncomputable def glueJb :
+    (EllObj.restrictScalars (awayHom b)).obj Xb ⟶ glueEllObj a b Xa Xb φ where
+  baseHom := glueBaseInr a b Xa Xb φ
+  base_w := glueBaseInr_glueQ a b Xa Xb φ
+  top := glueTotalInr a b Xa Xb φ
+  isPullback := isPullback_glueTotalInr a b Xa Xb φ
+  zero_w := (glueBaseInr_glueZero a b Xa Xb φ).symm
+
+end GlueObj
+
+/-! ## [R-glue-repr] the glued object represents `P` -/
+
+/-- **[R-glue-repr] — the YFULL Zariski-descent leaf (quarantined; `sorry`).**
+
+`glueEllObj a b Xa Xb (overlapIso …)` represents `P`, completing KM Cor. 4.7.1. This is the one
+genuinely global step: Zariski descent of the moduli functor along the cover
+`Spec R = D(a) ∪ D(b)` pulled back to each test object `Y : Ell/R`. Every *engine* input it
+consumes is already proven above; the gap is the descent bookkeeping (NEW-Y1's `YFULL` lane).
+
+*Recipe.* Produce `homEquiv {Y} : (Y ⟶ glueEllObj …) ≃ P.obj (op Y)`, natural in `Y`. Cover
+`Y.base` by `Ya := Y.structMap ⁻¹ᵁ (Spec.map (awayHom a)).opensRange` and `Yb` likewise; their
+union is `⊤` since `Y.structMap` lands in `Spec R = D(a) ∪ D(b)`
+(`basicOpen_sup_basicOpen_eq_top a b hab`).
+
+* **`P` is a Zariski sheaf on `Ell/R` — the crux, and the sole role of `hrel`.** By `hrel`, for
+  every `X : Ell/R`, `P.obj (op X) ≃ {sections of the relative representing scheme `Z_X ⟶ X.base`}`
+  (`hrel X` at `g = 𝟙 X.base`, via `X.pullbackAlong (𝟙 _) ≅ X`). Sections of a scheme over
+  `X.base` form a Zariski sheaf, so `P` glues and is separated along open covers of the base. This
+  is exactly what fails for the `𝔽₄ × 𝔽₉` counterexample (a bare presheaf is not a sheaf).
+
+* **Backward `P.obj (op Y) → (Y ⟶ glueEllObj)`.** Restrict `s : P(Y)` along the open immersions
+  `Ya.ι, Yb.ι` (functoriality of `P`) to `s_a, s_b`. Over `Ya` the restricted object factors
+  through `Spec R[1/a]`, so `s_a ∈ (P.baseChange (awayHom a)) (…)`; `repr_a.homEquiv.symm` turns it
+  into a morphism into `Xa` and `glueJa` post-composes to `Y|_{Ya} ⟶ glueEllObj`; symmetrically on
+  `Yb`. The two agree over `Y|_{Yab}` because `overlapIso` is *the* comparison of the two
+  representations over `D(ab)` (`representableBy_baseChangeRing` + uniqueness). Glue into
+  `Y ⟶ glueEllObj` by the pushout universal properties of `glueBase`/`glueTotal`
+  (`glueBase_hom_ext`, `pushout.desc`; morphisms into a glued scheme form a Zariski sheaf).
+
+* **Forward `(Y ⟶ glueEllObj) → P.obj (op Y)`.** Restrict `u` over `Ya` (it lands in the `a`-chart
+  `glueBaseInl`), pull back through the cartesian chart square `isPullback_glueTotalInl` to a
+  morphism into `Xa`, apply `repr_a.homEquiv` to land in `P(Y|_{Ya})`; symmetrically on `Yb`; glue
+  by the sheaf property of `P`.
+
+* **`left_inv`/`right_inv`/`homEquiv_comp`.** Both round-trips reduce chart-by-chart to the
+  `left_inv`/`right_inv` of `repr_a`/`repr_b` and `baseChangeRingHomEquiv`, then to separatedness of
+  the two sheaves; naturality is chart-wise `repr_a.homEquiv_comp`/`repr_b.homEquiv_comp`.
+
+Sub-leaves for a future worker: `[R-sheaf-P]` (`hrel ⟹ P` is a Zariski sheaf), `[R-hom-glue]`
+(Hom into `glueEllObj` is a sheaf, from the two pushouts), `[R-chart-eqv]` (the per-chart bijection
+via `repr_a`/`glueJa`). Also transitively depends on `glue_locallyWeierstrass` through
+`glueEllObj`. -/
+private noncomputable def glueEllObj_representableBy {P : ModuliProblem R} (a b : R)
+    (hab : ∃ x y : R, x * a + y * b = 1) (hrel : P.RelativelyRepresentable)
+    {Xa : EllObj (CommRingCat.of (Localization.Away a))}
+    {Xb : EllObj (CommRingCat.of (Localization.Away b))}
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) :
+    P.RepresentableBy (glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) := by
+  sorry
+
 /-! ## [T-E5f-main] the recollement theorem -/
 
 /-- **[T-E5f] The Katz–Mazur recollement theorem (KM Cor. 4.7.1).**
@@ -449,14 +1084,11 @@ theorem representable_of_baseChange_cover (P : ModuliProblem R) (a b : R)
     Functor.representableBy _
   have repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb :=
     Functor.representableBy _
-  -- [compat] ✅ engine: the gluing datum over `D(ab)` is the overlap iso in `Ell/R[1/ab]`.
-  have hcover : PrimeSpectrum.basicOpen a ⊔ PrimeSpectrum.basicOpen b = ⊤ :=
-    basicOpen_sup_basicOpen_eq_top a b hab
-  let _glue_datum : Xa.baseChangeRing (awayProdHomLeft a b) ≅ Xb.baseChangeRing (awayProdHomRight a b) :=
-    overlapIso a b repr_a repr_b
-  -- [R-glue-obj]/[R-glue-repr]/[assemble] ⟵ NEW-Y1 curve assembly (YFULL): glue `Xa`, `Xb` over
-  -- `Spec R = D(a) ∪ D(b)` into `X_glued : EllObj R` (via `_glue_datum` + the open-immersion
-  -- inclusions) and show it represents `P` by functor-of-points descent along the cover.
-  sorry
+  -- [compat]/[R-glue-obj] ✅ engine, delivered: `overlapIso` is the gluing datum over `D(ab)` and
+  -- `glueEllObj a b Xa Xb (overlapIso …)` is the glued `Ell/R`-object (base/total pushouts of the
+  -- open-immersion charts; `glue_smooth`/`glue_proper` proven, `glue_locallyWeierstrass` leaf).
+  -- [R-glue-repr]/[assemble]: it represents `P` by Zariski descent along the cover (`hrel` supplies
+  -- the sheaf condition that kills the bare-presheaf counterexample).
+  exact (glueEllObj_representableBy a b hab hrel repr_a repr_b).isRepresentable
 
 end ModularCurves
