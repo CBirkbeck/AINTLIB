@@ -99,6 +99,12 @@ noncomputable def optionChartRingEquiv :
   exact (chartRingEquiv R (none : Option σ)).trans
     (renameEquiv R (optionNeNoneEquiv σ)).toRingEquiv
 
+private lemma optionChartRingEquiv_symm_C (r : R) :
+    (optionChartRingEquiv (R := R) (σ := σ)).symm (C r) =
+      awayConst R (none : Option σ) r := by
+  simp [optionChartRingEquiv, chartRingEquiv, homogenizeAt, awayConst]
+  rfl
+
 /-- On a homogeneous fraction, the option chart is dehomogenization of its numerator. -/
 lemma optionChartRingEquiv_apply_mk (n : ℕ) (p : MvPolynomial (Option σ) R)
     (hp : p ∈ homogeneousSubmodule (Option σ) R (n • (1 : ℕ))) :
@@ -220,6 +226,47 @@ lemma homogenizedChartRingEquiv_mk
         (X none : MvPolynomial (Option σ) R) (optionChartRingEquiv.symm p) := by
   rfl
 
+/-- The coefficient-ring algebra structure on the homogenizing-coordinate chart. -/
+noncomputable instance homogenizedChartAwayAlgebra
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ) :
+    Algebra R
+      (Away (quotientGrading (homogenizedIdeal g d))
+        ((quotientGradingHom (homogenizedIdeal g d))
+          (X none : MvPolynomial (Option σ) R))) :=
+  ((fromZeroRingHom (quotientGrading (homogenizedIdeal g d)) _).comp
+    (algebraMapGradeZero (homogenizedIdeal g d))).toAlgebra
+
+/-- The homogenized chart equivalence sends coefficient classes to coefficient sections. -/
+lemma homogenizedChartRingEquiv_mk_C
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) (r : R) :
+    homogenizedChartRingEquiv g d hdeg
+        (Ideal.Quotient.mk (Ideal.span (Set.range g)) (C r)) =
+      algebraMap R
+        (Away (quotientGrading (homogenizedIdeal g d))
+          ((quotientGradingHom (homogenizedIdeal g d))
+            (X none : MvPolynomial (Option σ) R))) r := by
+  rw [homogenizedChartRingEquiv_mk, optionChartRingEquiv_symm_C, awayConst, Away.map_mk]
+  apply val_injective
+  rw [Away.val_mk]
+  rfl
+
+/-- The affine-chart identification as an equivalence of coefficient-ring algebras. -/
+noncomputable def homogenizedChartAlgEquiv
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    (MvPolynomial σ R ⧸ Ideal.span (Set.range g)) ≃ₐ[R]
+      Away (quotientGrading (homogenizedIdeal g d))
+        ((quotientGradingHom (homogenizedIdeal g d))
+          (X none : MvPolynomial (Option σ) R)) :=
+  AlgEquiv.ofRingEquiv (f := homogenizedChartRingEquiv g d hdeg) fun r => by
+    have hconst : algebraMap R (MvPolynomial σ R ⧸ Ideal.span (Set.range g)) r =
+        Ideal.Quotient.mk (Ideal.span (Set.range g)) (C r) := by
+      simp [IsScalarTower.algebraMap_apply R (MvPolynomial σ R)
+        (MvPolynomial σ R ⧸ Ideal.span (Set.range g)), MvPolynomial.algebraMap_eq,
+        Ideal.Quotient.algebraMap_eq]
+    rw [hconst, homogenizedChartRingEquiv_mk_C]
+
 /-- The original affine presentation as the homogenizing-coordinate chart of its projective
 closure. -/
 noncomputable def homogenizedChartOpen
@@ -242,6 +289,40 @@ lemma homogenizedChartOpen_isOpenImmersion
   unfold homogenizedChartOpen
   exact @IsOpenImmersion.comp _ _ _ _ _ (by infer_instance)
     (Proj.instIsOpenImmersionAwayι _ _ _ _)
+
+private lemma homogenizedAwayι_comp_homogenizedProjπ
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ) :
+    Proj.awayι (quotientGrading (homogenizedIdeal g d))
+        ((quotientGradingHom (homogenizedIdeal g d))
+          (X none : MvPolynomial (Option σ) R))
+        (by
+          rw [quotientGradingHom_apply]
+          exact mk_mem_quotientGrading (homogenizedIdeal g d)
+            (X_mem_homogeneousSubmodule_one R (none : Option σ))) one_pos ≫
+      homogenizedProjπ g d =
+    Spec.map (CommRingCat.ofHom
+      (algebraMap R
+        (Away (quotientGrading (homogenizedIdeal g d))
+          ((quotientGradingHom (homogenizedIdeal g d))
+            (X none : MvPolynomial (Option σ) R))))) := by
+  show Proj.awayι _ _ _ _ ≫ Proj.toSpecZero (quotientGrading (homogenizedIdeal g d)) ≫
+    Spec.map (CommRingCat.ofHom (algebraMapGradeZero (homogenizedIdeal g d))) = _
+  rw [← Category.assoc, Proj.awayι_toSpecZero, ← Spec.map_comp]
+  rfl
+
+/-- The affine chart immersion commutes with the structure morphisms to the coefficient ring. -/
+lemma homogenizedChartOpen_comp_homogenizedProjπ
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    homogenizedChartOpen g d hdeg ≫ homogenizedProjπ g d =
+      Spec.map (CommRingCat.ofHom
+        (algebraMap R (MvPolynomial σ R ⧸ Ideal.span (Set.range g)))) := by
+  unfold homogenizedChartOpen
+  rw [Category.assoc, homogenizedAwayι_comp_homogenizedProjπ]
+  rw [← Spec.map_comp]
+  congr 1
+  exact congrArg CommRingCat.ofHom
+    (homogenizedChartAlgEquiv g d hdeg).symm.toAlgHom.comp_algebraMap
 
 end OptionChart
 
