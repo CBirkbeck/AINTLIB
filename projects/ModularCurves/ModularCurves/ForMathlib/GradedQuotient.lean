@@ -9,6 +9,7 @@ import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Ideal
 import Mathlib.RingTheory.GradedAlgebra.RingHom
 import Mathlib.RingTheory.GradedAlgebra.Homogeneous.Maps
 import Mathlib.RingTheory.Ideal.Quotient.Operations
+import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 /-!
 # The quotient of a graded ring by a homogeneous ideal is graded
@@ -167,6 +168,38 @@ def algebraMapGradeZero : R →+* quotientGrading I 0 where
 lemma coe_algebraMapGradeZero (r : R) :
     (algebraMapGradeZero I r : A ⧸ I.toIdeal) = algebraMap R (A ⧸ I.toIdeal) r :=
   rfl
+
+section MvPolynomial
+
+variable {σ : Type*}
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- Every degree-zero class in a homogeneous quotient of a polynomial ring is represented by a
+base coefficient. -/
+lemma algebraMapGradeZero_surjective_mvPolynomial
+    (J : HomogeneousIdeal (MvPolynomial.homogeneousSubmodule σ R)) :
+    Function.Surjective (algebraMapGradeZero J) := by
+  rintro ⟨x, hx⟩
+  obtain ⟨p, hp, hpx⟩ := Submodule.mem_map.mp hx
+  have hp0 : p.totalDegree = 0 :=
+    (MvPolynomial.totalDegree_zero_iff_isHomogeneous σ).mpr
+      ((MvPolynomial.mem_homogeneousSubmodule _ _).mp hp)
+  have hpC : p = MvPolynomial.C (MvPolynomial.coeff 0 p) :=
+    MvPolynomial.totalDegree_eq_zero_iff_eq_C.mp hp0
+  refine ⟨MvPolynomial.coeff 0 p, Subtype.ext ?_⟩
+  change algebraMap R (MvPolynomial σ R ⧸ J.toIdeal) (MvPolynomial.coeff 0 p) = x
+  rw [← hpx]
+  change algebraMap R (MvPolynomial σ R ⧸ J.toIdeal) (MvPolynomial.coeff 0 p) =
+    Ideal.Quotient.mk J.toIdeal p
+  calc
+    _ = Ideal.Quotient.mk J.toIdeal (MvPolynomial.C (MvPolynomial.coeff 0 p)) := by
+      change Ideal.Quotient.mk J.toIdeal
+          (algebraMap R (MvPolynomial σ R) (MvPolynomial.coeff 0 p)) = _
+      rw [MvPolynomial.algebraMap_eq]
+    _ = Ideal.Quotient.mk J.toIdeal p := congrArg (Ideal.Quotient.mk J.toIdeal) hpC.symm
+
+end MvPolynomial
 
 instance : IsScalarTower R (↥(quotientGrading I 0)) (A ⧸ I.toIdeal) :=
   IsScalarTower.of_algebraMap_eq fun _ => rfl
