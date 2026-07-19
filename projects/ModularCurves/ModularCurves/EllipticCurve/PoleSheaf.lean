@@ -1918,7 +1918,7 @@ private theorem unitObjTensorIso_hom_comp_scalars (X : Scheme.{u})
 
 /-- The localized coherent tensor agrees with the explicit sheafified tensor used by
 the cover-local invertibility API. -/
-private noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules) :
+noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules) :
     M ⊗ N ≅ Scheme.Modules.tensorObj M N :=
   ((Scheme.Modules.sheafifyValIso M).symm ⊗ᵢ
       (Scheme.Modules.sheafifyValIso N).symm) ≪≫
