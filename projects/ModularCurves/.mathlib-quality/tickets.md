@@ -24055,3 +24055,20 @@ LESSON: "named deps exist" ≠ assembly-class — D found scaleTorsor_spec's con
 E/F land. If E lands: glueEllObj_representableBy CLEARED (1 receipt-cone leaf). If F lands: exists_localModel_core_at CLEARED.
 REMAINING (deep/owner/research): scaleTorsor_spec ← [T-E14-ACT'] √-dictionary (D banked step-iv + RHS pinning + B1);
 legendreDeltaGAction B2 (owner φ-free re-arch); BB-DELIGNE=Oort-Tate (mathlib gap, B3) + pull_nsmul_jetData. Receipt 7 clean.
+
+### v10.338-FIN addendum — LEVEL-4 as a concrete B2-resolution ALTERNATIVE for the D(2) leg (owner)
+Investigating the legendreDeltaGAction B2 resolution: the D(2) rigidifier need NOT be Legendre. For N ≥ 3 the level-N
+problem has a GENUINE global GL₂(ℤ/N) re-marking action (gammaFullNaiveGlAction N, no ω/√ — NO B2), is rigid
+(gammaFullNaiveProblem_map_negIso_ne_of_three_le, glSmul_eq_one_of_eq_self — both GENERAL N), and 4 = 2² is invertible
+over R[1/2]. So **LEVEL-4 over R[1/2] is a valid D(2) rigidifier with a genuine action** — swapping it for Legendre in
+EngineWiring's representable_baseChange_two removes the ENTIRE Legendre/√-cover subtree (legendreDeltaGAction B2,
+scaleTorsor_spec, glueData, the Legendre torsor leaves) from every receipt cone.
+COST (why it is not a free win): level-4's DIRECT absolute representability (naiveLevelFour_representable_by_affine)
+needs a full ℰ₄-machine — the analogue of the 3-specific ℰ₃-machine (universalE3_generation E[3]-rank-9 +
+isE3Datum_of_bridges Ψ₃-bridges); level-N absolute representability is proven for general N only VIA the engine
+(circular for a rigidifier). The level-3 TORSOR generalises cheaply (isIso_torsorSigmaDesc_of_existsUnique +
+glSmul_eq_one_of_eq_self are general; ℤ/4-is-a-ring vs 𝔽₃-field needs the free-module basis argument, not field-specific),
+but the ℰ₄ representability is the real cost. TRADE for owner: Legendre D(2) = √-cover representability (scaleTorsor_spec,
+being attacked) + impossible legendreDeltaGAction (B2); Level-4 D(2) = genuine action (no B2) + ℰ₄-machine. Both are
+major. THIRD option: φ-free TorsorData (mouth interface change). Owner picks. Receipt 7 clean; D(3)/level-3 leg is
+sorry-free (naiveLevelThree_representable_by_affine landed via the ℰ₃-machine).
