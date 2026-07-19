@@ -10,6 +10,7 @@ import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
 import ModularCurves.ForMathlib.GradedQuotient
 import ModularCurves.ForMathlib.MvPolynomialHomogenize
 import ModularCurves.ForMathlib.ProjClosedImmersion
+import ModularCurves.ForMathlib.ProjToSpecZero
 import ModularCurves.ForMathlib.ProjectiveSpaceChart
 
 /-!
@@ -30,6 +31,13 @@ universe u
 variable {R : Type u} {σ κ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
+
+/-- The structure morphism from the polynomial `Proj` to the coefficient ring. -/
+def homogeneousProjπ :
+    Proj (homogeneousSubmodule σ R) ⟶ Spec (.of R) :=
+  Proj.toSpecZero (homogeneousSubmodule σ R) ≫
+    Spec.map (CommRingCat.ofHom
+      (algebraMap R (↥(homogeneousSubmodule σ R 0))))
 
 /-- The projective scheme cut out by a family of homogenized polynomial relations. -/
 @[reducible]
@@ -66,6 +74,29 @@ lemma homogenizedProjπ_isProper [Finite σ] (g : κ → MvPolynomial σ R) (d :
     (Proj.toSpecZero (quotientGrading I) ≫
       Spec.map (CommRingCat.ofHom (algebraMapGradeZero I)))
   exact IsStableUnderComposition.comp_mem _ _ hproj hbase
+
+/-- A homogenized projective closure as a closed subscheme of polynomial `Proj`. -/
+def homogenizedProjι (g : κ → MvPolynomial σ R) (d : κ → ℕ) :
+    homogenizedProj g d ⟶ Proj (homogeneousSubmodule (Option σ) R) :=
+  Proj.map (quotientGradingHom (homogenizedIdeal g d))
+    (quotientGradingHom_irrelevant_le (homogenizedIdeal g d))
+
+/-- The projective-closure embedding is a closed immersion. -/
+lemma homogenizedProjι_isClosedImmersion
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ) :
+    IsClosedImmersion (homogenizedProjι g d) :=
+  isClosedImmersion_proj_map_quotientGradingHom (homogenizedIdeal g d)
+
+/-- The projective-closure embedding commutes with the structure morphisms to the
+coefficient ring. -/
+lemma homogenizedProjι_comp_homogeneousProjπ
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ) :
+    homogenizedProjι g d ≫ homogeneousProjπ (R := R) (σ := Option σ) =
+      homogenizedProjπ g d := by
+  unfold homogenizedProjι homogeneousProjπ homogenizedProjπ
+  rw [← Category.assoc, ModularCurves.map_comp_toSpecZero]
+  rw [Category.assoc, ← Spec.map_comp]
+  rfl
 
 section OptionChart
 
@@ -323,6 +354,40 @@ lemma homogenizedChartOpen_comp_homogenizedProjπ
   congr 1
   exact congrArg CommRingCat.ofHom
     (homogenizedChartAlgEquiv g d hdeg).symm.toAlgHom.comp_algebraMap
+
+/-- An affine presentation immersed into polynomial `Proj` through its homogenized projective
+closure. -/
+def homogenizedAffineImmersion
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    Spec (.of (MvPolynomial σ R ⧸ Ideal.span (Set.range g))) ⟶
+      Proj (homogeneousSubmodule (Option σ) R) :=
+  homogenizedChartOpen g d hdeg ≫ homogenizedProjι g d
+
+/-- The affine map into polynomial `Proj` obtained from the homogenized closure is an
+immersion. -/
+lemma homogenizedAffineImmersion_isImmersion
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    IsImmersion (homogenizedAffineImmersion g d hdeg) := by
+  letI : IsOpenImmersion (homogenizedChartOpen g d hdeg) :=
+    homogenizedChartOpen_isOpenImmersion g d hdeg
+  letI : IsClosedImmersion (homogenizedProjι g d) :=
+    homogenizedProjι_isClosedImmersion g d
+  unfold homogenizedAffineImmersion
+  infer_instance
+
+/-- The affine immersion into polynomial `Proj` is a morphism over the coefficient ring. -/
+lemma homogenizedAffineImmersion_comp_homogeneousProjπ
+    (g : κ → MvPolynomial σ R) (d : κ → ℕ)
+    (hdeg : ∀ j, (g j).totalDegree ≤ d j) :
+    homogenizedAffineImmersion g d hdeg ≫
+        homogeneousProjπ (R := R) (σ := Option σ) =
+      Spec.map (CommRingCat.ofHom
+        (algebraMap R (MvPolynomial σ R ⧸ Ideal.span (Set.range g)))) := by
+  unfold homogenizedAffineImmersion
+  rw [Category.assoc, homogenizedProjι_comp_homogeneousProjπ,
+    homogenizedChartOpen_comp_homogenizedProjπ]
 
 end OptionChart
 
