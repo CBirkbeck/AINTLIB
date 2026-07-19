@@ -797,6 +797,50 @@ noncomputable def affineOpenAmbientSection {Y : Scheme.{u}} (U : Y.affineOpens)
   Y.presheaf.map (homOfLE U.1.ι_image_top.ge).op
     ((U.1.ι.appIso ⊤).inv r)
 
+/-- Evaluating a top-open section after transport to its ambient affine open
+agrees with evaluating it on the top open of the affine subscheme. -/
+theorem sectionApp_affineOpenAmbientSection
+    {X Y : Scheme.{u}} (f : X ⟶ Y)
+    (U : Y.affineOpens) (hU : f ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) :
+    let htop : (⊤ : X.Opens) =
+        f ⁻¹ᵁ (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) := by
+      rw [U.1.ι_image_top, hU]
+    X.presheaf.map (eqToHom htop).op
+        (f.app (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))
+          ((U.1.ι.appIso (⊤ : U.1.toScheme.Opens)).inv r)) =
+      X.presheaf.map (eqToHom hU.symm).op
+        (f.app U.1 (affineOpenAmbientSection U r)) := by
+  let htop : (⊤ : X.Opens) =
+      f ⁻¹ᵁ (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) := by
+    rw [U.1.ι_image_top, hU]
+  change X.presheaf.map (eqToHom htop).op
+      (f.app (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))
+        ((U.1.ι.appIso (⊤ : U.1.toScheme.Opens)).inv r)) =
+    X.presheaf.map (eqToHom hU.symm).op
+      (f.app U.1 (affineOpenAmbientSection U r))
+  unfold affineOpenAmbientSection
+  let i := (homOfLE U.1.ι_image_top.ge).op
+  let r' := (U.1.ι.appIso (⊤ : U.1.toScheme.Opens)).inv r
+  have hnat := ConcreteCategory.congr_hom
+    (Scheme.Hom.naturality f i) r'
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hnat
+  rw [hnat]
+  let j := ((TopologicalSpace.Opens.map f.base).map i.unop).op
+  have hmaps : X.presheaf.map j ≫
+      X.presheaf.map (eqToHom hU.symm).op =
+      X.presheaf.map (eqToHom htop).op := by
+    rw [← X.presheaf.map_comp]
+    congr 1
+  change (X.presheaf.map (eqToHom htop).op).hom
+      ((f.app (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))).hom r') =
+    (X.presheaf.map (eqToHom hU.symm).op).hom
+      ((X.presheaf.map j).hom
+        ((f.app (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))).hom r'))
+  have hmapsApply := ConcreteCategory.congr_hom hmaps
+    ((f.app (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))).hom r')
+  simpa only [CommRingCat.comp_apply] using hmapsApply.symm
+
 @[simp]
 theorem affineOpenAmbientSection_add {Y : Scheme.{u}} (U : Y.affineOpens)
     (r s : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) :

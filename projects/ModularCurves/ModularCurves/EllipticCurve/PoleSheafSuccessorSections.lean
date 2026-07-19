@@ -17,6 +17,12 @@ universe u
 
 namespace ModularCurves
 
+local instance (X : Scheme.{u}) :
+    ∀ V, IsMulCommutative (X.ringCatSheaf.obj.obj V) :=
+  fun V ↦ by
+    change IsMulCommutative (X.presheaf.obj V)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+
 /-- Global base sections are exact at two consecutive pole modules. -/
 theorem sectionPoleSheafPower_baseSectionsSucc_exact
     {C S : Scheme.{u}} {π : C ⟶ S}
@@ -129,6 +135,123 @@ noncomputable def sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
         z hz U r hr hspan hnzd n) ≪≫
     Scheme.Modules.baseSectionsRestrictPushforwardUnitIsoOfSection
       π z hz U.1 hU
+
+/-- The canonical rank-one coordinate of a consecutive pole quotient is the
+compatible local pole coefficient evaluated along the marked section. -/
+theorem sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator_hom_baseSectionsMap
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1))) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    letI : QuasiCompact z := inferInstance
+    let hr : r ∈ z.ker.ideal U := by
+      rw [hspan]
+      exact Ideal.mem_span_singleton_self r
+    let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U.1 eGen.symm
+    let ePoleOver := SheafOfModules.dualOverIsoOfIso
+      C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+    let ePole := restrictTrivializationOfOverIso
+      (sectionPoleSheaf π z hz) U.1 ePoleOver
+    let ePsucc := sectionPoleSheafPowerTrivialization
+      z hz U.1 ePole (n + 1)
+    (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n).hom
+        (Scheme.Modules.baseSectionsMap π
+          (cokernel.π (sectionPoleSheafSuccHom π z hz n)) x) =
+      S.presheaf.map (eqToHom hU.symm).op
+        (z.app U.1
+          (localTrivializationCoefficient
+            (sectionPoleSheafPower π z hz (n + 1)) U ePsucc x)) := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  let M := sectionPoleSheafPower π z hz (n + 1)
+  let Q := sectionPoleSheafSuccCoker π z hz n
+  let c := cokernel.π (sectionPoleSheafSuccHom π z hz n)
+  let F := Scheme.Modules.restrictFunctor U.1.ι
+  have hr : r ∈ z.ker.ideal U := by
+    rw [hspan]
+    exact Ideal.mem_span_singleton_self r
+  let eGen := localIdealGeneratorIso z U r hr hspan hnzd
+  let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+    (sectionIdealModule π z hz) U.1 eGen.symm
+  let ePoleOver := SheafOfModules.dualOverIsoOfIso
+    C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
+  let ePole := restrictTrivializationOfOverIso
+    (sectionPoleSheaf π z hz) U.1 ePoleOver
+  let ePsucc := sectionPoleSheafPowerTrivialization
+    z hz U.1 ePole (n + 1)
+  let eUnit := Scheme.Modules.restrictUnitIso U.1.ι
+  let eLocal := sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit
+    z hz U r hr hspan hnzd n
+  let hbij := sectionPoleSheafSuccCoker_bijective_restrict_of_neighborhood
+    hsm z hz n U.1 hU
+  let eRestrict := Scheme.Modules.baseSectionsRestrictIsoOfBijective
+    π Q U.1 hbij
+  let eMap := Scheme.Modules.baseSectionsMapIso (U.1.ι ≫ π) eLocal
+  let ePush := Scheme.Modules.baseSectionsRestrictPushforwardUnitIsoOfSection
+    π z hz U.1 hU
+  let eGlobal := sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+    hsm z hz U hU r hspan hnzd n
+  let y := Scheme.Modules.baseSectionsMap π c x
+  let xU := localTrivializationRestriction M U x
+  let a := localTrivializationTopSection M U ePsucc x
+  let htop : (⊤ : S.Opens) =
+      z ⁻¹ᵁ (U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) := by
+    rw [U.1.ι_image_top, hU]
+  dsimp only
+  have hglobal : eGlobal.hom y =
+      ePush.hom (eMap.hom (eRestrict.hom y)) := by
+    rfl
+  have hrestrict : eRestrict.hom y =
+      localTrivializationRestriction Q U y := by
+    exact Scheme.Modules.baseSectionsRestrictIsoOfBijective_hom_apply
+      π Q U.1 hbij y
+  have hmap : eMap.hom (localTrivializationRestriction Q U y) =
+      eLocal.hom.val.app (.op ⊤)
+        (localTrivializationRestriction Q U y) := by
+    exact Scheme.Modules.baseSectionsMapIso_hom_apply
+      (U.1.ι ≫ π) eLocal (localTrivializationRestriction Q U y)
+  have hproj := sectionPoleSheafSuccCoker_restrictIsoPushforwardUnit_π_hom
+    z hz U r hr hspan hnzd n
+  dsimp only at hproj
+  have hprojApp := congrArg
+    (fun k ↦ k.val.app (.op ⊤) xU) hproj
+  erw [Scheme.Modules.sheafOfModules_comp_app_apply] at hprojApp
+  erw [Scheme.Modules.sheafOfModules_comp_app_apply] at hprojApp
+  erw [Scheme.Modules.sheafOfModules_comp_app_apply] at hprojApp
+  change eLocal.hom.val.app (.op ⊤)
+      ((F.map c).val.app (.op ⊤) xU) =
+    (F.map (SheafOfModules.unitToPushforwardObjUnit
+      z.toRingCatSheafHom)).val.app (.op ⊤)
+        (eUnit.inv.val.app (.op ⊤)
+          (ePsucc.hom.val.app (.op ⊤) xU)) at hprojApp
+  have hlocalMap : localTrivializationRestriction Q U y =
+      (F.map c).val.app (.op ⊤) xU := by
+    exact localTrivializationRestriction_map c U x
+  have ha : ePsucc.hom.val.app (.op ⊤) xU = a := by
+    rfl
+  have hcoordinate : eLocal.hom.val.app (.op ⊤)
+      (localTrivializationRestriction Q U y) =
+        (F.map (SheafOfModules.unitToPushforwardObjUnit
+          z.toRingCatSheafHom)).val.app (.op ⊤)
+            (eUnit.inv.val.app (.op ⊤) a) := by
+    rw [hlocalMap, hprojApp, ha]
+  have hpush :=
+    Scheme.Modules.baseSectionsRestrictPushforwardUnitIsoOfSection_hom_unitToPushforwardObjUnit
+      π z hz U.1 hU a
+  have htopCoordinate := hglobal.trans ((congrArg ePush.hom
+    (congrArg eMap.hom hrestrict)).trans
+      ((congrArg ePush.hom hmap).trans
+        ((congrArg ePush.hom hcoordinate).trans hpush)))
+  exact htopCoordinate.trans
+    (sectionApp_affineOpenAmbientSection z U hU a)
 
 /-- If the lower pole sheaf has vanishing first cohomology, the generator of a
 successive rank-one quotient lifts to a section of the next pole sheaf. -/

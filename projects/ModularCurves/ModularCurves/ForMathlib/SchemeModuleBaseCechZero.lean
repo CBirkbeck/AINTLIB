@@ -1,5 +1,6 @@
 import Mathlib.Algebra.Category.ModuleCat.Kernels
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
 import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
 import ModularCurves.ForMathlib.SheafCechInjectiveComparison
 import ModularCurves.ForMathlib.SheafCohomologyExact
@@ -374,6 +375,48 @@ theorem baseSectionsRestrictPushforwardUnitIsoOfSection_hom_apply
       π z hz U hU).hom x =
       OS.presheaf.map (eqToHom htop).op
         ((N.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).hom x) := by
+  rfl
+
+/-- The restricted structure-sheaf map, evaluated through the canonical
+section-pushforward isomorphism, is pullback of the corresponding local
+function along the section. -/
+theorem baseSectionsRestrictPushforwardUnitIsoOfSection_hom_unitToPushforwardObjUnit
+    {C S : Scheme.{u}} (π : C ⟶ S) (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.Opens) (hU : z ⁻¹ᵁ U = ⊤)
+    (x : Γ(U.toScheme, (⊤ : U.toScheme.Opens))) :
+    let F := restrictFunctor U.ι
+    let eUnit := restrictUnitIso U.ι
+    let htop : (⊤ : S.Opens) =
+        z ⁻¹ᵁ (U.ι ''ᵁ (⊤ : U.toScheme.Opens)) := by
+      rw [U.ι_image_top, hU]
+    (baseSectionsRestrictPushforwardUnitIsoOfSection
+      π z hz U hU).hom
+        (baseSectionsMap (U.ι ≫ π)
+          (F.map (_root_.SheafOfModules.unitToPushforwardObjUnit
+            z.toRingCatSheafHom))
+          (eUnit.inv.val.app (.op ⊤) x)) =
+      S.presheaf.map (eqToHom htop).op
+        (z.app (U.ι ''ᵁ (⊤ : U.toScheme.Opens))
+          ((U.ι.appIso (⊤ : U.toScheme.Opens)).inv x)) := by
+  let F := restrictFunctor U.ι
+  let eUnit := restrictUnitIso U.ι
+  let OS : S.Modules := _root_.SheafOfModules.unit S.ringCatSheaf
+  let N := (pushforward z).obj OS
+  let htop : (⊤ : S.Opens) =
+      z ⁻¹ᵁ (U.ι ''ᵁ (⊤ : U.toScheme.Opens)) := by
+    rw [U.ι_image_top, hU]
+  dsimp only
+  let y := baseSectionsMap (U.ι ≫ π)
+    (F.map (_root_.SheafOfModules.unitToPushforwardObjUnit
+      z.toRingCatSheafHom)) (eUnit.inv.val.app (.op ⊤) x)
+  have hpush :
+      (baseSectionsRestrictPushforwardUnitIsoOfSection
+        π z hz U hU).hom y =
+        S.presheaf.map (eqToHom htop).op
+          ((N.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).hom y) := by
+    exact baseSectionsRestrictPushforwardUnitIsoOfSection_hom_apply
+      π z hz U hU y
+  refine hpush.trans ?_
   rfl
 
 /-- Restriction of global sections to the degree-zero term of the base-linear
