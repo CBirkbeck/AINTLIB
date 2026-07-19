@@ -47,6 +47,15 @@ lemma IsSchemeTheoreticallyDominant.lift_of_isOpenImmersion
   exact IsSchemeTheoreticallyDominant.of_isPullback
     (IsOpenImmersion.isPullback_lift_id f j H).flip
 
+/-- If a composite is scheme-theoretically dominant, then its second factor is
+scheme-theoretically dominant. -/
+lemma IsSchemeTheoreticallyDominant.of_comp (f : X ⟶ Y) (g : Y ⟶ Z)
+    [IsSchemeTheoreticallyDominant (f ≫ g)] :
+    IsSchemeTheoreticallyDominant g := by
+  rw [isSchemeTheoreticallyDominant_iff]
+  exact le_antisymm
+    ((Scheme.Hom.le_ker_comp f g).trans_eq (f ≫ g).ker_eq_bot) bot_le
+
 /-- The closed embedding of the scheme-theoretic image of a quasi-compact dominant morphism is
 surjective. -/
 lemma Scheme.Hom.imageι_surjective_of_isDominant (f : X ⟶ Y) [QuasiCompact f]
