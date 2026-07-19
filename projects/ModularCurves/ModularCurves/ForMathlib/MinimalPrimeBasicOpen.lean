@@ -6,6 +6,7 @@ Authors: AINTLIB ModularCurves project
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.QuasiCompact
+import Mathlib.AlgebraicGeometry.Properties
 import Mathlib.RingTheory.Ideal.MinimalPrime.Localization
 
 /-!
@@ -163,5 +164,35 @@ lemma IsAffineOpen.exists_basicOpen_disjoint_of_closure_mem_irreducibleComponent
     rw [hU.fromSpec_primeIdealOf zU]
     exact hzW
   exact hfW.le_bot ⟨hqf, hqW⟩
+
+/-- If a scheme has finitely many generic points of irreducible components, then each generic
+point has an affine-open neighborhood disjoint from the closures of all the other generic points.
+-/
+lemma genericPoints.exists_affineOpen_disjoint_closure
+    [Finite (genericPoints X)] (η : genericPoints X) :
+    ∃ V : X.Opens, IsAffineOpen V ∧ η.1 ∈ V ∧
+      ∀ ζ : genericPoints X, ζ ≠ η → Disjoint (V : Set X) (closure {ζ.1}) := by
+  let S : Set (genericPoints X) := {ζ | ζ ≠ η}
+  have hS : S.Finite := Set.toFinite S
+  have hclosed : IsClosed (⋃ ζ ∈ S, closure {ζ.1}) :=
+    hS.isClosed_biUnion fun _ _ ↦ isClosed_closure
+  let C : X.Opens := ⟨(⋃ ζ ∈ S, closure {ζ.1})ᶜ, hclosed.isOpen_compl⟩
+  have hηC : η.1 ∈ C := by
+    intro hη
+    simp only [Set.mem_iUnion] at hη
+    obtain ⟨ζ, hζS, hηζ⟩ := hη
+    have hsub : closure {η.1} ⊆ closure {ζ.1} :=
+      closure_minimal (Set.singleton_subset_iff.mpr hηζ) isClosed_closure
+    have heq : genericPoints.component η = genericPoints.component ζ := by
+      apply Subtype.ext
+      exact hsub.antisymm (η.2.2 ζ.2.1 hsub)
+    exact hζS (genericPoints.component_injective heq).symm
+  obtain ⟨_, ⟨V : X.Opens, hV, rfl⟩, hηV, hVC⟩ :=
+    X.isBasis_affineOpens.exists_subset_of_mem_open hηC C.isOpen
+  refine ⟨V, hV, hηV, ?_⟩
+  intro ζ hζ
+  rw [Set.disjoint_left]
+  intro x hxV hxζ
+  exact hVC hxV (Set.mem_iUnion_of_mem ζ (Set.mem_iUnion_of_mem hζ hxζ))
 
 end AlgebraicGeometry
