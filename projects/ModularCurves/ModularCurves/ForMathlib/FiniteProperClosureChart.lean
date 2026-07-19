@@ -61,6 +61,56 @@ lemma chartToFactor_isProper (hp : ∀ i, IsProper (p i)) (i : ι) :
   exact MorphismProperty.of_isPullback
     (chartToFactor_isPullback p j q g hf i).flip inferInstance
 
+/-- The common source lifted to an inverse-image chart. -/
+def toChart (i : ι) : T ⟶ (chart p j q g hf i).toScheme :=
+  IsOpenImmersion.lift (chart p j q g hf i).ι
+    (toClosure p q (coordinates j g) hf) (by
+      rintro _ ⟨x, rfl⟩
+      refine ⟨⟨toClosure p q (coordinates j g) hf x, ?_⟩, rfl⟩
+      change (proj p q (coordinates j g) hf i)
+        (toClosure p q (coordinates j g) hf x) ∈ (j i).opensRange
+      exact Scheme.Hom.mem_opensRange.mpr ⟨g i x, by
+        simpa only [Scheme.Hom.comp_apply] using
+          congrArg (fun h : T ⟶ Z i ↦ h x)
+            (toClosure_proj p q (coordinates j g) hf i).symm⟩)
+
+@[reassoc (attr := simp)]
+lemma toChart_ι (i : ι) :
+    toChart p j q g hf i ≫ (chart p j q g hf i).ι =
+      toClosure p q (coordinates j g) hf :=
+  IsOpenImmersion.lift_fac _ _ _
+
+@[reassoc (attr := simp)]
+lemma toChart_chartToFactor (i : ι) :
+    toChart p j q g hf i ≫ chartToFactor p j q g hf i = g i := by
+  rw [← cancel_mono (j i)]
+  calc
+    (toChart p j q g hf i ≫ chartToFactor p j q g hf i) ≫ j i =
+        toChart p j q g hf i ≫
+          (chartToFactor p j q g hf i ≫ j i) :=
+      Category.assoc _ _ _
+    _ = toChart p j q g hf i ≫
+          ((chart p j q g hf i).ι ≫
+            proj p q (coordinates j g) hf i) := by
+      rw [chartToFactor_comp]
+    _ = (toChart p j q g hf i ≫
+          (chart p j q g hf i).ι) ≫
+            proj p q (coordinates j g) hf i :=
+      (Category.assoc _ _ _).symm
+    _ = toClosure p q (coordinates j g) hf ≫
+          proj p q (coordinates j g) hf i := by
+      rw [toChart_ι]
+    _ = g i ≫ j i := toClosure_proj p q (coordinates j g) hf i
+
+/-- The common source remains scheme-theoretically dense in every inverse-image chart. -/
+lemma toChart_isSchemeTheoreticallyDominant
+    [QuasiCompact (diagonal p q (coordinates j g) hf)] (i : ι) :
+    IsSchemeTheoreticallyDominant (toChart p j q g hf i) := by
+  letI : IsSchemeTheoreticallyDominant (toClosure p q (coordinates j g) hf) :=
+    toClosure_isSchemeTheoreticallyDominant p q (coordinates j g) hf
+  exact IsSchemeTheoreticallyDominant.lift_of_isOpenImmersion
+    (toClosure p q (coordinates j g) hf) (chart p j q g hf i).ι _
+
 variable (a : ∀ i, U i ⟶ X)
 
 /-- The map from an inverse-image chart to the original scheme. -/
