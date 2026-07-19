@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
+import ModularCurves.ForMathlib.AffinePatchBaseChange
 import ModularCurves.ForMathlib.SheafDisjointUnion
 
 /-!
@@ -67,5 +68,59 @@ theorem sectionPoleSheafSuccCoker_bijective_restrict_of_neighborhood
     infer_instance
   exact TopCat.Sheaf.bijective_restrict_of_sup_eq_top_of_subsingleton
     F hUV
+
+/-- Around every point of an affine base, the base-changed section has an affine
+neighborhood on which its ideal has an explicit regular generator. -/
+theorem exists_affineBaseChange_sectionCartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsAffine S]
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (s : S) :
+    ∃ V : S.affineOpens, s ∈ V.1 ∧
+      let t : V.1.toScheme ⟶ S := V.1.ι
+      let zV := sectionBaseChange z hz t
+      ∃ U : (pullback π t).affineOpens,
+        zV ⁻¹ᵁ U.1 = ⊤ ∧
+          ∃ r : Γ(pullback π t, U.1),
+            zV.ker.ideal U = Ideal.span {r} ∧
+              r ∈ nonZeroDivisors Γ(pullback π t, U.1) := by
+  obtain ⟨U, hzsU, r, hspan, hnzd⟩ :=
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm z hz).locallyPrincipal (z s)
+  obtain ⟨_, ⟨V, hV, rfl⟩, hsV, hVU⟩ :=
+    S.isBasis_affineOpens.exists_subset_of_mem_open
+      hzsU ((z ⁻¹ᵁ U.1).2)
+  let Vaff : S.affineOpens := ⟨V, hV⟩
+  refine ⟨Vaff, hsV, ?_⟩
+  dsimp only
+  let t : Vaff.1.toScheme ⟶ S := Vaff.1.ι
+  let g : pullback π t ⟶ C := pullback.fst π t
+  let zV : Vaff.1.toScheme ⟶ pullback π t := sectionBaseChange z hz t
+  let UV : (pullback π t).Opens := g ⁻¹ᵁ U.1
+  letI : IsAffine Vaff.1.toScheme := Vaff.2
+  have hUVaff : IsAffineOpen UV := by
+    dsimp only [UV, g]
+    exact IsAffineOpen.preimage_pullback_fst π t U.2
+  let UVaff : (pullback π t).affineOpens := ⟨UV, hUVaff⟩
+  have hzUV : zV ⁻¹ᵁ UV = ⊤ := by
+    rw [← Scheme.Hom.comp_preimage]
+    rw [show zV ≫ g = t ≫ z by
+      dsimp only [zV, g]
+      exact sectionBaseChange_fst z hz t]
+    rw [Scheme.Hom.comp_preimage]
+    ext x
+    change z x.1 ∈ U.1 ↔ x ∈ (⊤ : Vaff.1.toScheme.Opens)
+    simp only [Opens.mem_top, iff_true]
+    exact hVU x.2
+  let rV : Γ(pullback π t, UVaff.1) :=
+    affinePullbackSection g UVaff U le_rfl r
+  have hspanV : zV.ker.ideal UVaff = Ideal.span {rV} := by
+    have hker : zV.ker = z.ker.comap g := by
+      dsimp only [zV, g]
+      exact RelEffCartierDiv.ker_sectionBaseChange z hz t
+    rw [hker]
+    exact ideal_comap_affineOpens_span z.ker g UVaff U le_rfl r hspan
+  have hnzdV : rV ∈ nonZeroDivisors Γ(pullback π t, UVaff.1) := by
+    dsimp only [rV]
+    exact affinePullbackSection_mem_nonZeroDivisors g UVaff U le_rfl hnzd
+  exact ⟨UVaff, hzUV, rV, hspanV, hnzdV⟩
 
 end ModularCurves
