@@ -24111,3 +24111,29 @@ case is the elementary partition-of-unity split.) So the mouth core has NO deep 
 assembly (~1000 lines) with the unit-split via Pic(semilocal)=0 (mathlib) + the additive-split via partition-of-unity
 (elementary). This DE-RISKS exists_localModel_core_at fully: it is multi-session by VOLUME, not by any missing theorem.
 Builder I (a424befe) is attacking it via F's direct-over-A_a route with this understanding.
+
+## v10.340-FIN (2026-07-20) — mouth-core Stage-1/2 BANKED + CORRECTED gap analysis: 2 new ForMathlib lemmas needed (STREAM-FIN)
+
+Builder I built + banked (sorry-free, in the exists_localModel_core_at proof body, +42 lines, EngineDescent green 3861,
+one residual sorry): hfreeA; the subring/subalgebra prime transport (empirically confirms ↥FixedPoints.subalgebra ℤ ≡
+↥FixedPoints.subring defeq — the friction that stalls a fresh start); the full Stage-2 semilocalization (S, actL =
+localizationInvariant, IsLocalRing Lᴳ, hfreeL, Nontrivial (Localization S)) mirroring exists_away_invariant_descent
+Part 1; gotcha: drop hlocal/hfreeL type-ascriptions to avoid the Algebra ℤ (Localization S) diamond (Ring.toIntAlgebra
+vs OreLocalization.instAlgebra).
+
+**CORRECTION of v10.339's "de-risked to volume-only":** Stage 3 needs TWO genuinely-missing ForMathlib lemmas (both
+constructive, but new — neither exists, and both belong OUTSIDE EngineDescent):
+(i) **Semilocal ω-triviality bridge** (NEW gap): Nonempty (OmegaBasis) for the curve over Spec L. Chain L module-finite
+    over LOCAL Lᴳ ⟹ Finite (MaximalSpectrum L) ⟹ Subsingleton (Pic L) [mathlib PicardGroup:513]. MISSING: scheme-side
+    omegaModules (Scheme.Modules/IsInvertible over affine Spec L) ↔ ring-invertible L-module, so Subsingleton(Pic L) ⟹
+    free ⟹ global basis ⟹ Nonempty(OmegaBasis). PicComparison only reaches the scheme Picard SKELETON (toSkeleton),
+    not CommRing.Pic + the Subsingleton⟹IsBasis global-section consequence.
+(ii) **Nilpotent additive Čech-H¹ vanishing** (the flagged risk, CONFIRMED needed): after adapting orbit charts to a
+    global basis, transVC(Pᵢ,Pⱼ) have u=1 ⟹ land in the nilpotent translation group T={(1,r,s,t)} (central ext
+    0→(L,+)→T→(L²,+)→0). Need: this T-valued Čech 1-cocycle over the finite basic-open cover {D(fᵢ)} of Spec L is a
+    coboundary. This is Čech-H¹ over the CHART cover, NOT Galois-H¹ — exists_sub_smul_eq_of_isCocycle is H¹(G,A⁺)=0
+    (different complex), does NOT apply (correcting v10.339). Constructive over affine Spec L: project to (L²,+),
+    trivialize by partition of unity ∑aᵢfᵢᴺ=1; residual central (L,+)-cocycle likewise; recombine (~150-300 lines).
+    (The existing adaptedCoeff₄/₆ gluing sidesteps this ONLY by assuming 2,3 invertible — unavailable over general ℤ-base.)
+(iii) native glue over A_a + Stages 4-5 = mechanical (exists_cocycle_hρact_of_presentation DONE + exists_coboundary +
+    the Part-2 spread). So the mouth core = 2 new ForMathlib lemmas + ~1000-line assembly (genuine multi-session).
