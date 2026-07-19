@@ -32,6 +32,34 @@ lemma IsProper.of_comp_surjective {Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
   toUniversallyClosed := UniversallyClosed.of_comp_surjective f g
   toLocallyOfFiniteType := inferInstance
 
+/-- A surjective map between two spread stages remains surjective after transport to any
+common later stage. -/
+theorem Algebra.SpreadData.mapAtLaterStage_surjective
+    {R A : Type u} [CommRing R] [CommRing A]
+    {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+    {A₁ A₂ : Type u} [CommRing A₁] [Algebra A A₁]
+    [CommRing A₂] [Algebra A A₂]
+    (D₁ : Algebra.SpreadData 𝒮 uA A₁) (D₂ : Algebra.SpreadData 𝒮 uA A₂)
+    (H : Algebra.IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i) (hij : i ≤ j)
+    (f : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (hf : Function.Surjective f) :
+    Function.Surjective (D₁.mapAtLaterStage D₂ H h₁ h₂ hij f) := by
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  have hTensor : Function.Surjective
+      (Algebra.TensorProduct.map (AlgHom.id (𝒮 j) (𝒮 j)) f) :=
+    Algebra.TensorProduct.map_surjective _ _ Function.surjective_id hf
+  intro y
+  obtain ⟨y', hy'⟩ := (D₂.spreadStageBaseChangeEquiv hij h₂ H).surjective y
+  obtain ⟨x', hx'⟩ := hTensor y'
+  obtain ⟨x, hx⟩ := (D₁.spreadStageBaseChangeEquiv hij h₁ H).symm.surjective x'
+  refine ⟨x, ?_⟩
+  rw [D₁.mapAtLaterStage_apply D₂ H, hx, hx', hy']
+
 /-- A compatible affine map which is a closed immersion over the filtered
 colimit becomes a closed immersion at one later stage. -/
 theorem Algebra.SpreadData.exists_isClosedImmersion_specMapAtLaterStage
