@@ -7,6 +7,7 @@ import ModularCurves.Moduli.LegendreDeltaRelRep
 import ModularCurves.Moduli.LegendreDatumSymmetry
 import ModularCurves.Moduli.AbscissaDifference
 import ModularCurves.Moduli.LevelMarking
+import ModularCurves.Moduli.E3DatumAssembly
 import ModularCurves.GroupScheme.SqrtUnitCover
 import Mathlib.AlgebraicGeometry.RelativeGluing
 
@@ -100,6 +101,111 @@ noncomputable def univAbscissaDiff (X : EllObj R) (h2 : NIsInvertible X.base 2) 
       one_lt_two (NIsInvertible.of_hom (X.curve.fullLevelLocusπ 2 h2) h2)
       (tautPair R X h2).2 k t)
 
+/-! ## The abscissa-difference unit certificate (LEAF-U's engine) -/
+
+open WeierstrassCurve LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **The general marked-pair abscissa-difference certificate.** On a chart marking `P`
+at `(pP, qP)` and `Q` at `(pQ, qQ)`, if the pulled points satisfy `Q̄ ≠ ±P̄` at every
+geometric point, then the abscissa difference `x(Q) − x(P) = pQ − pP` is a unit: a
+vanishing fibre abscissa difference forces equal `X`-coordinates, so the two model points
+are `±` (`Y_eq_of_X_eq`), contradicting the `±`-independence. This is the general-marking
+analogue of `isUnit_x_of_marked_pair` (which pins `P` at the origin). -/
+private theorem isUnit_x_diff_of_marked_pair {S : Scheme.{u}} {E : EllipticCurve S}
+    {V : S.affineOpens} (Pr : LocalPresentation E.toEllipticCurveGeom V)
+    {σP : S ⟶ E.toEllipticCurveGeom.E} {hσP : σP ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    {σQ : S ⟶ E.toEllipticCurveGeom.E} {hσQ : σQ ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    {pP qP : Γ(S, V.1)} (heqP : Pr.W.toAffine.Equation pP qP)
+    (hMeqP : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσP V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W pP qP heqP)
+    {pQ qQ : Γ(S, V.1)} (heqQ : Pr.W.toAffine.Equation pQ qQ)
+    (hMeqQ : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσQ V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W pQ qQ heqQ)
+    (hpm : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      EllipticCurve.Point.pull E t ⟨σQ, hσQ⟩ ≠ EllipticCurve.Point.pull E t ⟨σP, hσP⟩ ∧
+      EllipticCurve.Point.pull E t ⟨σQ, hσQ⟩ ≠ -EllipticCurve.Point.pull E t ⟨σP, hσP⟩) :
+    IsUnit (pQ - pP) := by
+  letI := Pr.elliptic
+  refine isUnit_of_forall_algebraMap_residueField_ne_zero (fun 𝔭 => ?_)
+  intro hp0
+  set K : Type u := 𝔭.asIdeal.ResidueField with hK
+  set Kb : Type u := AlgebraicClosure K with hKb
+  letI : DecidableEq Kb := Classical.decEq Kb
+  letI : Algebra ↑Γ(S, V.1) Kb :=
+    ((algebraMap K Kb).comp (algebraMap ↑Γ(S, V.1) K)).toAlgebra
+  have halgKb : ∀ z : ↑Γ(S, V.1), algebraMap ↑Γ(S, V.1) Kb z =
+      algebraMap K Kb (algebraMap ↑Γ(S, V.1) K z) := fun _ => rfl
+  set tVb : Spec (CommRingCat.of Kb) ⟶ Spec Γ(S, V.1) :=
+    Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, V.1) Kb)) with htVb
+  haveI : ((Pr.W.baseChange Kb)).IsElliptic :=
+    inferInstanceAs ((Pr.W.map (algebraMap ↑Γ(S, V.1) Kb)).IsElliptic)
+  have hnsP : (Pr.W.baseChange Kb).toAffine.Nonsingular
+      (algebraMap ↑Γ(S, V.1) Kb pP) (algebraMap ↑Γ(S, V.1) Kb qP) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ heqP)
+  have hnsQ : (Pr.W.baseChange Kb).toAffine.Nonsingular
+      (algebraMap ↑Γ(S, V.1) Kb pQ) (algebraMap ↑Γ(S, V.1) Kb qQ) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ heqQ)
+  have hvalP : modelPointAddEquiv Pr.W (K' := Kb)
+      (chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σP, hσP⟩))
+      = WeierstrassCurve.Affine.Point.some _ _ hnsP := by
+    have hxpkg : chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σP, hσP⟩)
+        = ⟨(affineSectionSpecPoint Pr.W Kb pP qP heqP).1,
+          (affineSectionSpecPoint Pr.W Kb pP qP heqP).2⟩ := by
+      refine Subtype.ext ?_
+      rw [chartPointsEquiv_pull_marked Pr tVb heqP hMeqP]
+      rfl
+    rw [hxpkg]
+    show projModelPointsEquiv Pr.W Kb (affineSectionSpecPoint Pr.W Kb pP qP heqP) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint Pr.W pP qP heqP hnsP
+  have hvalQ : modelPointAddEquiv Pr.W (K' := Kb)
+      (chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σQ, hσQ⟩))
+      = WeierstrassCurve.Affine.Point.some _ _ hnsQ := by
+    have hxpkg : chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σQ, hσQ⟩)
+        = ⟨(affineSectionSpecPoint Pr.W Kb pQ qQ heqQ).1,
+          (affineSectionSpecPoint Pr.W Kb pQ qQ heqQ).2⟩ := by
+      refine Subtype.ext ?_
+      rw [chartPointsEquiv_pull_marked Pr tVb heqQ hMeqQ]
+      rfl
+    rw [hxpkg]
+    show projModelPointsEquiv Pr.W Kb (affineSectionSpecPoint Pr.W Kb pQ qQ heqQ) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint Pr.W pQ qQ heqQ hnsQ
+  -- equal abscissae at the residue field (from the vanishing difference)
+  have hxeq : algebraMap ↑Γ(S, V.1) Kb pP = algebraMap ↑Γ(S, V.1) Kb pQ := by
+    have h0 : algebraMap ↑Γ(S, V.1) Kb (pQ - pP) = 0 := by
+      rw [halgKb, hp0, map_zero]
+    rw [map_sub, sub_eq_zero] at h0
+    exact h0.symm
+  obtain ⟨hne1, hne2⟩ := hpm Kb (tVb ≫ chartρ V)
+  -- the `Y`-dichotomy from `Y_eq_of_X_eq`
+  rcases WeierstrassCurve.Affine.Y_eq_of_X_eq
+      (WeierstrassCurve.Affine.Equation.map (algebraMap ↑Γ(S, V.1) Kb) heqP)
+      (WeierstrassCurve.Affine.Equation.map (algebraMap ↑Γ(S, V.1) Kb) heqQ)
+      hxeq with hYeq | hYneg
+  · -- `Q̄ = P̄`
+    refine hne1 ?_
+    refine (chartPointsEquiv Pr tVb).injective ?_
+    apply (modelPointAddEquiv Pr.W (K' := Kb)).injective
+    rw [hvalQ, hvalP]
+    congr 1
+    · exact hxeq.symm
+    · exact hYeq.symm
+  · -- `Q̄ = −P̄`
+    refine hne2 ?_
+    refine (chartPointsEquiv Pr tVb).injective ?_
+    apply (modelPointAddEquiv Pr.W (K' := Kb)).injective
+    rw [hvalQ, map_neg, map_neg, hvalP, WeierstrassCurve.Affine.Point.neg_some]
+    congr 1
+    · exact hxeq.symm
+    · rw [hxeq, hYneg]
+      exact (WeierstrassCurve.Affine.negY_negY _ _).symm
+
 /-! ## The scale-torsor package and the funnel assembly -/
 
 /-- **The scale-torsor package** feeding the funnel `legendreDelta_relRep_finiteEtale_of_scaleTorsor`:
@@ -160,25 +266,35 @@ private theorem isUnit_two_res (V : (locusW R X h2).Opens) :
     (Scheme.resLE (le_top : V ≤ ⊤))
   rwa [map_natCast] at h
 
-/-- **(LEAF-U, quarantined.)** Each chart component of the universal abscissa
+/-- **(LEAF-U, discharged.)** Each chart component of the universal abscissa
 difference is a unit: `d_i = x(Q)_i − x(P)_i` is fibrewise nonvanishing on the
 level-`2` locus, because at a geometric point `t` a vanishing abscissa difference
 forces `Q̄ ∈ {±P̄}` (two points of a Weierstrass fibre with equal `x` are equal or
-negative), which contradicts the locus condition (the `(1, ±1)`-combinations of the
-tautological pair avoid the zero section; `pull_ne_pm`-style level-`2` distinctness).
+negative, `WeierstrassCurve.Affine.Y_eq_of_X_eq`), which contradicts the locus
+condition (`pull_ne_pm_of_isNaiveFullLevel`).
 
-Recipe: (i) read the marked chart coordinates at `t` through the marking pipeline
-(`markedCoordsAt_marksAt` + the `MarksAt`-to-fibre dictionary of
-`Moduli/SectionMarking`, as in `isUnit_x_of_marked_pair`/`e3_markChase` at level `3`);
-(ii) equal fibre abscissae give `t ≫ σQ = t ≫ σP` or `t ≫ σQ = t ≫ (σP ≫ neg)`;
-(iii) both are excluded by `IsNaiveFullLevel 2` (the combination conditions at
-`v = (1,1)` and `v = (1,-1)` avoid zero, via `tautPair`'s property); (iv) a section of
-`𝒪_W` over an open that is nonzero in every residue field is a unit
-(`Scheme.basicOpen`: `x ∈ X.basicOpen f ↔ IsUnit (germ f x)`, and
-`RingedSpace.isUnit_of_isUnit_germ`). -/
+Proof: reduce to residue-field nonvanishing (`isUnit_of_forall_algebraMap_residueField_ne_zero`
+after `IsUnit.map` through the chart restriction), read the marked chart coordinates as
+the model points via `markedCoordsAt_marksAt` + the `chartPointsEquiv`/`modelPointAddEquiv`
+dictionary, then apply the general marked-pair certificate `isUnit_x_diff_of_marked_pair`
+(the general-marking analogue of `isUnit_x_of_marked_pair`). -/
 private theorem isUnit_univAbscissaDiff_component (i : (locusCocycle R X h2).ι) :
     IsUnit ((univAbscissaDiff R X h2).1 i) := by
-  sorry
+  rw [univAbscissaDiff, abscissaDiff_component]
+  refine IsUnit.map (Scheme.resLE _) ?_
+  obtain ⟨heqP, hMeqP⟩ := markedCoordsAt_marksAt
+    (G := (locusCurve R X h2).toEllipticCurveGeom) (tautPair R X h2).1.1.2
+    (fun k _ _ t => (locusCurve R X h2).pull_ne_zero_left_of_isNaiveFullLevel 2
+      one_lt_two (NIsInvertible.of_hom (X.curve.fullLevelLocusπ 2 h2) h2)
+      (tautPair R X h2).2 k t) i
+  obtain ⟨heqQ, hMeqQ⟩ := markedCoordsAt_marksAt
+    (G := (locusCurve R X h2).toEllipticCurveGeom) (tautPair R X h2).1.2.2
+    (fun k _ _ t => (locusCurve R X h2).pull_ne_zero_right_of_isNaiveFullLevel 2
+      one_lt_two (NIsInvertible.of_hom (X.curve.fullLevelLocusπ 2 h2) h2)
+      (tautPair R X h2).2 k t) i
+  refine isUnit_x_diff_of_marked_pair _ heqP hMeqP heqQ hMeqQ (fun k _ _ t => ?_)
+  exact (locusCurve R X h2).pull_ne_pm_of_isNaiveFullLevel 2 one_lt_two
+    (NIsInvertible.of_hom (X.curve.fullLevelLocusπ 2 h2) h2) (tautPair R X h2).2 k t
 
 /-- The index of the square-root gluing cover: an affine open of the locus together
 with an `ω`-atlas chart containing it. -/
@@ -245,26 +361,37 @@ private noncomputable def twistUnit (p q : glueIdx R X h2) (h : p ≤ q) :
   Scheme.resUnit (le_inf p.2 ((show p.1.1.1 ≤ q.1.1.1 from h).trans q.2))
     ((locusCocycle R X h2).u p.1.2 q.1.2)
 
-/-- **(LEAF-COMPAT, quarantined.)** The trivialization comparison: on the smaller open,
+/-- **(LEAF-COMPAT, discharged.)** The trivialization comparison: on the smaller open,
 the `q`-chart unit is the square of the transition twist times the `p`-chart unit — the
 `ω^{⊗-2}`-cocycle compatibility of the universal abscissa difference, restricted to `V_p`.
 
-Recipe: this is exactly `(univAbscissaDiff R X h2).2 p.1.2 q.1.2` (the `Compatible ⊤`
-field of `abscissaDiff`, i.e. `abscissaDiff_compatible`) restricted to `V_p` and read in
-`Γ(V_p)ˣ`. Reduce to values via `Units.ext`, expand `chartUnit` by `chartUnit_val` and
-`twistUnit` by its definition. The compat gives `d_i = ((c.u i j)^{⊗-2}) · d_j` (with
-`c = locusCocycle`, `c.zpow (-2)` via `UnitCocycle.zpow_u`); the desired identity is its
-`{±}`-rearrangement `d_j = (c.u i j)² · d_i`, obtained by multiplying through by the unit
-`twistUnit² = (resUnit (c.u i j))²` and cancelling `((c.u i j)²)·((c.u i j)^{-2}) = 1`
-(`Units.mul_inv`/`zpow` bookkeeping). The only friction is normalizing the nested
-`Scheme.resLE`/`resUnit` restrictions to `V_p` (proof-irrelevant `≤` witnesses) and the
-`(-2 : ℤ)` unit power — a `simp only [Scheme.resLE_resLE, Scheme.resUnit_val,
-Units.val_mul, Units.val_zpow, map_zpow]` followed by `linear_combination`/`ring` on the
-unit values closes it (cf. the value-level `abscissaDiff_compatible` proof). -/
+Proof: restrict the `Compatible ⊤` field `(univAbscissaDiff R X h2).2 p.1.2 q.1.2` (i.e.
+`abscissaDiff_compatible`) to `V_p` via `congrArg (resLE hVp)`, normalizing the nested
+restrictions (`Scheme.resLE_resLE`, `Scheme.resLE_resUnit_val`, `UnitCocycle.zpow_u`). The
+compat gives `d_p = (c.u p q)^{⊗-2} · d_q`, whence the unit identity
+`chartUnit p = twistUnit^{-2} · resUnit (chartUnit q)` (via `Units.ext`, matching through a
+term-mode `map_zpow` to sidestep the `presheaf`-transparency landmine); the goal is its
+`group`-rearrangement `resUnit (chartUnit q) = twistUnit² · chartUnit p`. -/
 private theorem chartUnit_compat (p q : glueIdx R X h2) (h : p ≤ q) :
     Scheme.resUnit (show p.1.1.1 ≤ q.1.1.1 from h) (chartUnit R X h2 q) =
       twistUnit R X h2 p q h ^ 2 * chartUnit R X h2 p := by
-  sorry
+  have key : chartUnit R X h2 p =
+      twistUnit R X h2 p q h ^ (-2 : ℤ) *
+        Scheme.resUnit (show p.1.1.1 ≤ q.1.1.1 from h) (chartUnit R X h2 q) := by
+    apply Units.ext
+    set c := (omegaCocycle (locusCurve R X h2).toEllipticCurveGeom).zpow (-2) with hc_def
+    have hVp : p.1.1.1 ≤ (⊤ ⊓ c.U p.1.2) ⊓ c.U q.1.2 :=
+      le_inf (le_inf le_top p.2) ((show p.1.1.1 ≤ q.1.1.1 from h).trans q.2)
+    have hc := congrArg (⇑(Scheme.resLE hVp)) ((univAbscissaDiff R X h2).2 p.1.2 q.1.2)
+    rw [Scheme.resLE_resLE, map_mul, Scheme.resLE_resUnit_val, Scheme.resLE_resLE,
+      UnitCocycle.zpow_u] at hc
+    have hz := map_zpow
+      (Scheme.resUnit (le_inf p.2 ((show p.1.1.1 ≤ q.1.1.1 from h).trans q.2)))
+      ((locusCocycle R X h2).u p.1.2 q.1.2) (-2 : ℤ)
+    rw [Units.val_mul, chartUnit_val, Scheme.resUnit_val, chartUnit_val, Scheme.resLE_resLE,
+      twistUnit, ← hz]
+    exact hc
+  rw [key]; group
 
 /-! ### The transition ring maps and the piece functor -/
 
@@ -437,22 +564,24 @@ locally directed affine-in-chart cover of the level-`2` locus, glued along the
 private noncomputable def glueData : (glueCover R X h2).RelativeGluingData where
   functor := glueFunctor R X h2
   natTrans := glueNatTrans R X h2
-  -- **(LEAF-EF, quarantined.)** Equifiberedness: for each `p ⟶ q` the naturality square
-  -- (`glueFunctor.map f`, `natTrans.app p`, `natTrans.app q`, `functorOfLocallyDirected.map f`)
-  -- is a pullback. Recipe: this is the affine base-change square of the square-root cover.
-  -- Over the restriction `Scheme.resLE hpq : Γ(V_q) → Γ(V_p)`, the transition ring map
-  -- `transRingHom` exhibits `(sqrtPair (chartUnit q)).Ring ⊗_{Γ(V_q)} Γ(V_p) ≅
-  -- (sqrtPair (chartUnit p)).Ring` — the base change of the sqrt algebra of `d_q` is the
-  -- sqrt algebra of `d_p`, twisted by `sqrtPairCongr` (`chartUnit_compat` says
-  -- `d_q|_{V_p} = u² · d_p`, and `sqrtPairCongr` identifies the `u²·d`-cover with the
-  -- `d`-cover). Concretely: `StandardEtalePair.baseChangeEquiv` (`GroupScheme/SqrtUnitCover`)
-  -- gives `Γ(V_p) ⊗ sqrtPair(chartUnit q).Ring ≅ (sqrtPair (chartUnit q)).map (resLE).Ring
-  -- = sqrtPair (Units.map (resLE) (chartUnit q)).Ring` (`sqrtPair_map`), and
-  -- `chartUnit_compat` + `sqrtPairCongr` identify the latter with `sqrtPair (chartUnit p).Ring`;
-  -- transport that ring iso to the pullback square via `AlgebraicGeometry.Spec` sending
-  -- pushouts of rings to pullbacks of affines (`IsPullback` of `Spec` on a tensor-product
-  -- square, e.g. `AlgebraicGeometry.isPullback_Spec_map_of_isPushout`-style), matching the
-  -- top map to `glueFunctor.map f = Spec.map transRingHom` by `transRingHom_X`/`_algebraMap`.
+  -- **(LEAF-EF, quarantined — tractable, deprioritized.)** Equifiberedness: for each
+  -- `p ⟶ q` the naturality square (`glueFunctor.map f`, `natTrans.app p`, `natTrans.app q`,
+  -- `functorOfLocallyDirected.map f`) is a pullback. It is the affine base-change square of
+  -- the square-root cover. Concrete API path (single-session, not multi-week):
+  --  • The pure-`Spec` core is `AlgebraicGeometry.isPullback_SpecMap_of_isPushout`
+  --    (`Mathlib/AlgebraicGeometry/Pullbacks.lean`) applied to the CommRingCat pushout
+  --      A = Γ(V_q), B = Γ(V_p) (via `Scheme.resLE hpq`), C = (sqrtPair (chartUnit q)).Ring
+  --      (via `algebraMap`), P = (sqrtPair (chartUnit p)).Ring; `inl = algebraMap`,
+  --      `inr = transRingHom p q` — commutativity is `transRingHom_comp_algebraMap`.
+  --  • The pushout itself: `P ≅ Γ(V_p) ⊗_{Γ(V_q)} C` via `StandardEtalePair.baseChangeEquiv`
+  --    (`= sqrtPair (Units.map resLE (chartUnit q)).Ring` by `sqrtPair_map`) composed with
+  --    `sqrtPairCongr` + `chartUnit_compat` (`resUnit hpq (chartUnit q) = twistUnit² · chartUnit p`);
+  --    then transport the tensor pushout (`AlgebraicGeometry.pullbackSpecIso` / an
+  --    `Algebra.IsPushout`) along that AlgEquiv, checking `transRingHom` matches by
+  --    `transRingHom_X`/`transRingHom_algebraMap`.
+  --  • Finally re-point the two bottom corners `Spec Γ(V_p) → V_p`, `Spec Γ(V_q) → V_q`
+  --    through `IsAffineOpen.isoSpec` (`natTrans.app = sqrtCoverπ ≫ isoSpec.inv`,
+  --    `specMap_resLE_fromSpec`) and `IsPullback.flip` to match the goal's orientation.
   equifibered := by
     intro p q f
     sorry
