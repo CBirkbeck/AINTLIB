@@ -24009,3 +24009,15 @@ residual-SHRINKING (banks real theorems) but flips NO receipt this session. Rece
 BB-DELIGNE=Oort-Tate (mathlib has NO group-scheme theory — CONFIRMED via search). Receipt 7 clean. Honest session
 ceiling: engine WIRED + residual set shrunk by the 4-builder wave; the two receipt-blocking crux pieces
 (legendreDeltaGAction global-action concern, Oort-Tate) are owner-adjudication / research-class.
+
+### v10.337-FIN refinement — why the naive fix fails (the coupling is NECESSARY)
+Checked the obvious alternative for the D(2) leg: use the AMBIENT product δ' = gammaFullNaiveProblem R 2 ×
+omegaProblem R with a GENUINE product action (GL₂(𝔽₂) re-marks level-2 via glSmul — sorry-free, exactly like the
+sound D(3) `gammaFullNaiveGlAction`; {±1} negates ω). δ' IS rigid (fixing ω kills the [-1] that fixing level-2 alone
+cannot) and representable — BUT it is NOT a G-torsor: the ω-part is a 𝔾ₘ-torsor (ω-bases = a Γˣ-torsor), and {±1}
+is not simply transitive on it. The IsLegendreDatum marking cut (x(Q)−x(P)=1) is PRECISELY what reduces ω-freedom
+from 𝔾ₘ to {±1}, making δ a finite G-torsor — and that same cut is what forces the √-rescale under GL₂ re-marking.
+So the coupling is mathematically necessary for the torsor property, confirming the global `G →* Aut δ` cannot exist
+and the D(2) leg genuinely needs KM's torsor-first structure (δ = √-cover G-torsor; action lives on the cover, not
+on δ). D(3) leg (level 3) is SOUND (genuine global action, sorry-free). Owner: the D(2) TorsorData interface, not
+just [T-E14-ACT'], is what needs the reformulation.
