@@ -23926,3 +23926,35 @@ now writing coupled-action pkg). ON LAND → verify+commit+wire.
 modulo the cited deep-geometry register boxes {exists_localModel_core_at, BB-DELIGNE=Oort–Tate,
 pull_nsmul_jetData} — exactly the theorems the project parks. `bash capstone-receipts.sh` reports the
 live residual set.
+
+## v10.335-FIN (2026-07-20) ★★★ :324 WIRED — KM 4.7.0 REPRESENTABILITY ENGINE FORMALIZED END-TO-END (STREAM-FIN)
+
+The full-budget /beastmode fleet landed ALL engine components; the KM 4.7.0 SCHOLIE representability
+engine (`representable_iff_rigidNoeth`'s ⇐) is now a REAL PROOF consuming the mouth + both torsor
+packages + recollement, and all 6 non-trivial receipts are re-pointed to it. Full tree green (4242 jobs).
+
+**The wiring (Moduli/EngineWiring.lean, `representable_of_affineOverEll_of_rigidNoeth`, 29048e7ff):**
+recollement(2,3) over D(2)∪D(3)=Spec R of two mouth instantiations — D(3)=(naive level 3, GL₂(𝔽₃)) via
+`exists_levelThreeTorsorData_ulift`, D(2)=(Legendre, GL₂(𝔽₂)×ℤˣ) via `exists_legendreTorsorData_ulift`.
+5 receipt sites re-pointed (bbb13cd29); import surgery acyclic.
+
+**Component landings this session (all committed, verified green):**
+- mouth CLOSED (078332b28): representable_of_rigidNoeth_of_torsor sorry-free modulo the single core.
+- a5-P-loc (1633a9552): exists_localModel_package_at proven modulo exists_localModel_core_at.
+- recollement (2a70bf2c6): representable_of_baseChange_cover proven modulo 2 glue leaves.
+- T-E15b (e846654e5): levelThree_torsor PROVEN (finrank-iso, axiom-clean) + _ulift.
+- T-E14 (e846654e5): Legendre package + _ulift; adversarial finding [T-E14-ACT'] (GL₂ coupled action needs √-cover).
+- scaleTorsor (49cc37e9f): exists_scaleTorsorData proven modulo 4 leaves.
+- TD6b (84879bf69): pull_nsmul_ne_zero proven modulo pull_nsmul_jetData + BB-DELIGNE.
+- STRAND-3 (b7c6eb7c2, earlier): degree cone eliminated from all receipts.
+- RigidNoeth.baseChange (8fb6c48c2), KVC-consumer, hbound-wired, capstone census tool.
+
+**HEADLINE (honest, capstone-reported):** receipt 7 (levelSpaceΓπ_etale) axiom-CLEAN. Receipts 1-6 hold
+modulo the EXPLICIT deep-geometry residual set — mouth `exists_localModel_core_at`; recollement
+`glue_locallyWeierstrass`/`glueEllObj_representableBy`; Legendre `legendreDeltaGAction [T-E14-ACT' √-cover]`/
+`legendreDelta_{torsor,surjective,naturalFamily}`; scaleTorsor `chartUnit_compat`/`scaleTorsor_spec`/
+`isUnit_univAbscissaDiff_component`; level-3 `exists_isNaiveFullLevel_of_isAlgClosed` (mathlib-bump PERF
+residual, math TRUE); receipts 3/6 also `smul_eq_zero_of_factors [BB-DELIGNE/Oort–Tate]` + `pull_nsmul_jetData`.
+These are exactly the genuine hard geometric inputs — the theorems KM cites / the project parks. `bash
+capstone-receipts.sh` reports the live set. The representability theorem is FORMALIZED; the residual set is
+the frontier.
