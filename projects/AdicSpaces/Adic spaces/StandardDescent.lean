@@ -81,10 +81,10 @@ theorem IsEmbedding.of_comp_isEmbedding {α β γ : Type*} [TopologicalSpace α]
   refine ⟨Topology.isInducing_iff_nhds.mpr fun x => le_antisymm ?_ ?_, ?_⟩
   · exact (hf.tendsto x).le_comap
   · calc Filter.comap f (𝓝 (f x))
-        ≥ Filter.comap f (Filter.comap g (𝓝 (g (f x)))) :=
+        ≤ Filter.comap f (Filter.comap g (𝓝 (g (f x)))) :=
           Filter.comap_mono ((hg.tendsto (f x)).le_comap)
       _ = Filter.comap (g ∘ f) (𝓝 ((g ∘ f) x)) := Filter.comap_comap
-      _ = 𝓝 x := (hgf.isInducing.nhds_eq_comap x).symm
+      _ ≤ 𝓝 x := le_of_eq (hgf.isInducing.nhds_eq_comap x).symm
   · intro x y hxy
     exact hgf.injective (show (g ∘ f) x = (g ∘ f) y from congrArg g hxy)
 
@@ -112,36 +112,330 @@ which mentions only the intersection data. Upgrades
 theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
     (h : IsSheafyFor A Aplus) : StandardSheafCondition A := by
   classical
-  -- the sheaf axioms at the given pair
-  letI instP₁ : PlusSubring A := Aplus.toPlusSubring
-  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
-  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
-  haveI hSheafy₁ : IsSheafy A := isSheafy_of_isLimitSheaf h
   intro S B hB
-  -- the sheaf axioms at the target pair, by transport of the standard datum
-  letI instP₂ : PlusSubring A := ⟨B⟩
-  haveI hB' : @IsRingOfIntegralElements A _ _ (@ringPlus A _ instP₂) := hB
-  haveI hll₂ : @HasLocLiftPowerBounded A _ _ instP₂ _ :=
-    @hasLocLiftPowerBounded_faithful A _ _ instP₂ _ _ _ _ _ _ hB'
+  -- ——— assertions at the GIVEN pair (derived before the target instance enters) ———
+  have key : Topology.IsEmbedding (letI := Aplus.toPlusSubring;
+        haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+        haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+        productRestrictionSub A (StandardCoverData.toCovering S)) ∧
+      (letI := Aplus.toPlusSubring
+       haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+       haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+       ∀ (f : ∀ D : ↥(StandardCoverData.toCovering S).covers, presheafValue D.1),
+        (StandardCoverData.toCovering S).ExactIntersectionCompatible
+          (StandardCoverData.toCovering_isRational S) f →
+        ∃ x : presheafValue (StandardCoverData.toCovering S).base,
+          ∀ D : ↥(StandardCoverData.toCovering S).covers,
+            restrictionMap (StandardCoverData.toCovering S).base D.1
+              ((StandardCoverData.toCovering S).hsubset D.1 D.2) x = f D) := by
+    letI := Aplus.toPlusSubring
+    haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Aplus.2
+    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+    haveI hSheafy₁ : IsSheafy A := isSheafy_of_isLimitSheaf h
+    refine ⟨IsSheafy.embedding _ (StandardCoverData.toCovering_isRational S),
+      fun f hf => IsSheafy.gluing _ (StandardCoverData.toCovering_isRational S) f ?_⟩
+    exact (RationalCovering.allDataCompatible_iff_exactIntersectionCompatible
+      (StandardCoverData.toCovering_isRational S) f).mpr hf
+  -- ——— the assertions at the TARGET pair ———
+  letI : PlusSubring A := ⟨B⟩
+  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := hB
+  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
   refine ⟨?_, ?_⟩
-  · -- embedding: the assertion is `A⁺`-independent (the product restriction of the
-    -- standard datum is the same function at both pairs, by proof irrelevance)
-    exact @IsSheafy.embedding A _ _ _ instP₁ _ _ _ _ _ hSheafy₁
-      (@StandardCoverData.toCovering A _ _ _ instP₁ S)
-      (@StandardCoverData.toCovering_isRational A _ _ _ instP₁ S)
-  · -- gluing: transfer the compatibility hypothesis through the R3 bridge
+  · -- embedding: the product restriction of the standard datum is the **same
+    -- function** at both pairs (the instance and containment arguments are
+    -- proof-irrelevant, and the covering's data fields are shared)
+    exact key.1
+  · -- gluing: the compatibility hypothesis transfers through its
+    -- exact-intersection form, which mentions only the intersection data
     intro f hf
-    -- `f` is compatible at the target pair; its exact-intersection form mentions
-    -- only the intersection data, hence re-reads at the given pair
-    have hexact₂ := (@RationalCovering.allDataCompatible_iff_exactIntersectionCompatible
-      A _ _ _ instP₂ _ hll₂ _ (@StandardCoverData.toCovering A _ _ _ instP₂ S)
-      (@StandardCoverData.toCovering_isRational A _ _ _ instP₂ S) f).mp hf
-    have hdata₁ : (@StandardCoverData.toCovering A _ _ _ instP₁ S).AllDataCompatible f :=
-      (@RationalCovering.allDataCompatible_iff_exactIntersectionCompatible
-        A _ _ _ instP₁ _ _ _ (@StandardCoverData.toCovering A _ _ _ instP₁ S)
-        (@StandardCoverData.toCovering_isRational A _ _ _ instP₁ S) f).mpr hexact₂
-    exact @IsSheafy.gluing A _ _ _ instP₁ _ _ _ _ _ hSheafy₁
-      (@StandardCoverData.toCovering A _ _ _ instP₁ S)
-      (@StandardCoverData.toCovering_isRational A _ _ _ instP₁ S) f hdata₁
+    exact key.2 f ((RationalCovering.allDataCompatible_iff_exactIntersectionCompatible
+      (StandardCoverData.toCovering_isRational S) f).mp hf)
+
+/-! ### The descent input (Kedlaya Lemma 1.6.8's conclusion), named -/
+
+section Descent
+
+variable [DecidableEq A] [DecidableEq (RationalLocData A)]
+
+/-- The piece of the generated standard cover of `D₀` at generator `f` (the
+`StandardRefinement.lean` construction, `StandardCoverData.ofSpanTop`): the exact
+intersection `R(D₀) ∩ R(S/f)`. Depends only on the ring data — no `A⁺`. -/
+def stdPiece (D₀ : RationalLocData A) (hD₀ : D₀.IsRational) (S : Finset A)
+    (hS : Ideal.span (S : Set A) = ⊤) (f : A) : RationalLocData A :=
+  D₀.interRational (genPieceDatum D₀.P S f hS) hD₀
+    (RationalLocData.isRational_of_span_eq_top hS)
+
+variable (A) in
+/-- **The descent input** (the conclusion of Kedlaya Lemma 1.6.8 / Wedhorn Lemma
+7.54 / Huber [Hu3] Lemma 2.6, in the intersect-with-the-base vocabulary), at a
+chosen ring of integral elements: every rational covering is refined by the
+generated standard cover of some finite family spanning the unit ideal — each
+generated piece `R(base) ∩ R(S/f)` is contained in some member of the covering.
+
+**Status (recorded blocked dependency, 2026-07-20).** The *generation* side (the
+generated cover is standard: `Spa`-uniformly subordinate to the base and covering
+at every pair) is proved in `StandardRefinement.lean`. This *descent* side is:
+(i) for coverings of the **whole space**, Huber's product trick — its remaining
+completeness input is `span S = ⊤` from no-common-zero-on-`Spa` (Wedhorn Cor 7.53
+via Prop 7.51), whose proven project form
+(`isUnit_iff_forall_not_vle_zero_of_completePair`) consumes
+`[IsAdicComplete P.I P.A₀]`, currently discharged only via
+`principalPair_isAdicComplete_of_stronglyNoetherianTate`; (ii) for coverings of a
+**general rational base**, additionally Kedlaya's re-basing ("every rational
+subspace of `X` is itself the spectrum of a Huber pair"), whose ring-level keystone
+(`relativePiece_equiv`, Wedhorn Prop 8.16/Lemma 2.13) currently carries
+`[IsStronglyNoetherian]`. The exact missing declarations are therefore: a
+noetherian-free `IsAdicComplete`-from-`CompleteSpace` bridge, and a noetherian-free
+`relativePiece_equiv`. Until they exist, this input is a hypothesis — never
+supplied silently. -/
+def HasStandardRefinementsAt [PlusSubring A] : Prop :=
+  ∀ (C : RationalCovering A), C.IsRational →
+    ∃ (S : Finset A) (hS : Ideal.span (S : Set A) = ⊤),
+      ∀ (hbase : C.base.IsRational), ∀ f ∈ S, ∃ E ∈ C.covers,
+        rationalOpen (stdPiece C.base hbase S hS f).T (stdPiece C.base hbase S hS f).s
+          ⊆ rationalOpen E.T E.s
+
+end Descent
+
+/-! ### The transfer engine: standard condition + descent ⟹ the sheaf axioms -/
+
+section Engine
+
+variable [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [DecidableEq A] [DecidableEq (RationalLocData A)]
+
+/-- The generated standard cover of a base, as `StandardCoverData` (from
+`StandardRefinement.lean`), with pieces `stdPiece`. -/
+theorem stdPiece_mem_ofSpanTop (D₀ : RationalLocData A) (hD₀ : D₀.IsRational)
+    (S : Finset A) (hS : Ideal.span (S : Set A) = ⊤) {f : A} (hf : f ∈ S) :
+    stdPiece D₀ hD₀ S hS f ∈ (StandardCoverData.ofSpanTop D₀ hD₀ S hS).covers :=
+  (mem_genCoverPieces D₀ hD₀ S hS).mpr ⟨⟨f, hf⟩, rfl⟩
+
+theorem mem_ofSpanTop_covers {D₀ : RationalLocData A} {hD₀ : D₀.IsRational}
+    {S : Finset A} {hS : Ideal.span (S : Set A) = ⊤} {P : RationalLocData A}
+    (hP : P ∈ (StandardCoverData.ofSpanTop D₀ hD₀ S hS).covers) :
+    ∃ f ∈ S, stdPiece D₀ hD₀ S hS f = P := by
+  obtain ⟨f, hfeq⟩ := (mem_genCoverPieces D₀ hD₀ S hS).mp hP
+  exact ⟨f.1, f.2, hfeq⟩
+
+private theorem productRestrictionSub_continuous'' [HasLocLiftPowerBounded A]
+    (C : RationalCovering A) : Continuous (productRestrictionSub A C) := by
+  refine continuous_pi fun E => ?_
+  show Continuous fun x : presheafValue C.base =>
+    restrictionMap C.base E.1 (C.hsubset E.1 E.2) x
+  exact restrictionMapHom_continuous C.base E.1 (C.hsubset E.1 E.2)
+
+/-- **The reduction** (the Čech-refinement argument assembling Kedlaya Lemma 1.6.8
+into the sheaf axioms; Wedhorn's Prop A.3-style transfer, algebraic and topological
+halves): given the `A⁺`-free standard condition and the descent input at this pair,
+every rational covering at this pair satisfies the embedding and gluing axioms.
+
+* Embedding: the product restriction of the refining standard cover factors through
+  the product restriction of the given covering by further (continuous)
+  restrictions; conclude by the factorization principle
+  (`IsEmbedding.of_comp_isEmbedding`).
+* Gluing: restrict the compatible family to the standard pieces through the
+  refinement map, glue by the standard condition, and identify the result on each
+  member `E` by separation along the *induced* standard cover of `E` (the generated
+  cover of `E` for the **same** spanning family — again standard data, so again
+  supplied by the standard condition). -/
+theorem isSheafy_of_standardSheafCondition_at
+    (hstd : StandardSheafCondition A) (href : HasStandardRefinementsAt A) :
+    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+    IsSheafy A := by
+  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+  classical
+  constructor
+  · -- ——— embedding ———
+    intro C hC
+    obtain ⟨S, hS, hsub⟩ := href C hC
+    set Std := StandardCoverData.ofSpanTop C.base hC.base S hS with hStd
+    have hkey := hstd Std (A⁺ : Subring A) inferInstance
+    -- the refinement map: each standard piece into a member
+    have hr : ∀ P : ↥Std.toCovering.covers, ∃ E ∈ C.covers,
+        rationalOpen P.1.T P.1.s ⊆ rationalOpen E.T E.s := by
+      rintro ⟨P, hP⟩
+      obtain ⟨f, hfS, hfeq⟩ := mem_ofSpanTop_covers hP
+      obtain ⟨E, hEC, hEsub⟩ := hsub hC.base f hfS
+      exact ⟨E, hEC, hfeq ▸ hEsub⟩
+    choose r hrC hrsub using hr
+    -- factorization: the standard product restriction factors through the given one
+    have hfac : productRestrictionSub A Std.toCovering =
+        (fun y : ∀ E : ↥C.covers, presheafValue E.1 =>
+          fun P : ↥Std.toCovering.covers =>
+            restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ∘
+        (productRestrictionSub A C) := by
+      funext x P
+      exact (congr_fun (restrictionMap_comp C.base (r P) P.1
+        (C.hsubset (r P) (hrC P)) (hrsub P)) x).symm
+    have hΦcont : Continuous (fun y : ∀ E : ↥C.covers, presheafValue E.1 =>
+        fun P : ↥Std.toCovering.covers =>
+          restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) := by
+      refine continuous_pi fun P => ?_
+      exact (restrictionMapHom_continuous (r P) P.1 (hrsub P)).comp
+        (continuous_apply (⟨r P, hrC P⟩ : ↥C.covers))
+    refine IsEmbedding.of_comp_isEmbedding (g := fun y P =>
+      restrictionMap (r P) P.1 (hrsub P) (y ⟨r P, hrC P⟩)) ?_
+      (productRestrictionSub_continuous'' C) hΦcont
+    rw [← hfac]
+    exact hkey.1
+  · -- ——— gluing ———
+    intro C hC f hcompat
+    obtain ⟨S, hS, hsub⟩ := href C hC
+    set Std := StandardCoverData.ofSpanTop C.base hC.base S hS with hStd
+    have hkey := hstd Std (A⁺ : Subring A) inferInstance
+    have hr : ∀ P : ↥Std.toCovering.covers, ∃ E ∈ C.covers,
+        rationalOpen P.1.T P.1.s ⊆ rationalOpen E.T E.s := by
+      rintro ⟨P, hP⟩
+      obtain ⟨fₚ, hfS, hfeq⟩ := mem_ofSpanTop_covers hP
+      obtain ⟨E, hEC, hEsub⟩ := hsub hC.base fₚ hfS
+      exact ⟨E, hEC, hfeq ▸ hEsub⟩
+    choose r hrC hrsub using hr
+    -- the restricted family on the standard pieces
+    set g : ∀ P : ↥Std.toCovering.covers, presheafValue P.1 := fun P =>
+      restrictionMap (r P) P.1 (hrsub P) (f ⟨r P, hrC P⟩) with hgdef
+    have hgcompat : Std.toCovering.AllDataCompatible g := by
+      intro P₁ P₂ D₃ h₃₁ h₃₂
+      calc restrictionMap P₁.1 D₃ h₃₁ (g P₁)
+          = restrictionMap (r P₁) D₃ (h₃₁.trans (hrsub P₁)) (f ⟨r P₁, hrC P₁⟩) :=
+            congr_fun (restrictionMap_comp (r P₁) P₁.1 D₃ (hrsub P₁) h₃₁)
+              (f ⟨r P₁, hrC P₁⟩)
+        _ = restrictionMap (r P₂) D₃ (h₃₂.trans (hrsub P₂)) (f ⟨r P₂, hrC P₂⟩) :=
+            hcompat ⟨r P₁, hrC P₁⟩ ⟨r P₂, hrC P₂⟩ D₃ (h₃₁.trans (hrsub P₁))
+              (h₃₂.trans (hrsub P₂))
+        _ = restrictionMap P₂.1 D₃ h₃₂ (g P₂) :=
+            (congr_fun (restrictionMap_comp (r P₂) P₂.1 D₃ (hrsub P₂) h₃₂)
+              (f ⟨r P₂, hrC P₂⟩)).symm
+    obtain ⟨x, hx⟩ := hkey.2 g hgcompat
+    refine ⟨x, ?_⟩
+    rintro ⟨E, hEC⟩
+    -- identify on `E` by separation along the induced standard cover of `E`
+    set StdE := StandardCoverData.ofSpanTop E (hC.piece hEC) S hS with hStdE
+    have hkeyE := hstd StdE (A⁺ : Subring A) inferInstance
+    refine hkeyE.1.injective ?_
+    funext Q
+    obtain ⟨fq, hfqS, hfqeq⟩ := mem_ofSpanTop_covers Q.2
+    -- the `E`-piece sits inside the corresponding base-piece (at this pair)
+    have hQP : rationalOpen Q.1.T Q.1.s ⊆
+        rationalOpen (stdPiece C.base hC.base S hS fq).T
+          (stdPiece C.base hC.base S hS fq).s := by
+      rw [← hfqeq]
+      show rationalOpen (stdPiece E (hC.piece hEC) S hS fq).T
+          (stdPiece E (hC.piece hEC) S hS fq).s ⊆ _
+      rw [stdPiece, stdPiece, RationalLocData.interRational_rationalOpen,
+        RationalLocData.interRational_rationalOpen]
+      have hgen : rationalOpen (genPieceDatum E.P S fq hS).T
+          (genPieceDatum E.P S fq hS).s =
+          rationalOpen (genPieceDatum C.base.P S fq hS).T
+            (genPieceDatum C.base.P S fq hS).s := by
+        rw [genPieceDatum_T, genPieceDatum_T, genPieceDatum_s, genPieceDatum_s]
+      rw [hgen]
+      exact Set.inter_subset_inter_left _ (C.hsubset E hEC)
+    have hQE : rationalOpen Q.1.T Q.1.s ⊆ rationalOpen E.T E.s :=
+      StdE.toCovering.hsubset Q.1 Q.2
+    -- membership of the base-piece in the standard covering
+    have hPmem := stdPiece_mem_ofSpanTop C.base hC.base S hS hfqS
+    set P : ↥Std.toCovering.covers := ⟨stdPiece C.base hC.base S hS fq, hPmem⟩
+      with hPdef
+    -- left side: restrict `x` through the base piece
+    have hL : restrictionMap E Q.1 hQE
+        (restrictionMap C.base E (C.hsubset E hEC) x) =
+        restrictionMap P.1 Q.1 hQP (g P) := by
+      calc restrictionMap E Q.1 hQE (restrictionMap C.base E (C.hsubset E hEC) x)
+          = restrictionMap C.base Q.1 (hQE.trans (C.hsubset E hEC)) x :=
+            congr_fun (restrictionMap_comp C.base E Q.1 (C.hsubset E hEC) hQE) x
+        _ = restrictionMap P.1 Q.1 hQP
+            (restrictionMap C.base P.1 (Std.toCovering.hsubset P.1 P.2) x) :=
+            (congr_fun (restrictionMap_comp C.base P.1 Q.1
+              (Std.toCovering.hsubset P.1 P.2) hQP) x).symm
+        _ = restrictionMap P.1 Q.1 hQP (g P) :=
+            congrArg (restrictionMap P.1 Q.1 hQP) (hx P)
+    -- right side: the family agrees with the `E`-value on `Q`
+    have hR : restrictionMap P.1 Q.1 hQP (g P) =
+        restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) := by
+      calc restrictionMap P.1 Q.1 hQP (g P)
+          = restrictionMap (r P) Q.1 (hQP.trans (hrsub P)) (f ⟨r P, hrC P⟩) :=
+            congr_fun (restrictionMap_comp (r P) P.1 Q.1 (hrsub P) hQP)
+              (f ⟨r P, hrC P⟩)
+        _ = restrictionMap E Q.1 hQE (f ⟨E, hEC⟩) :=
+            hcompat ⟨r P, hrC P⟩ ⟨E, hEC⟩ Q.1 (hQP.trans (hrsub P)) hQE
+    show restrictionMap E Q.1 _ (restrictionMap C.base E (C.hsubset E hEC) x) =
+      restrictionMap E Q.1 _ (f ⟨E, hEC⟩)
+    exact hL.trans hR
+
+end Engine
+
+/-! ### Genuine `A⁺`-independence (conditional on the named descent input) -/
+
+variable (A) in
+/-- The descent input at a bundled pair, with the `Decidable` choices quantified
+(they are propositionally unique; quantifying keeps consumers instance-free). -/
+def RingOfIntegralElements.HasStandardRefinements
+    (Bplus : RingOfIntegralElements A) : Prop :=
+  ∀ (_ : DecidableEq A) (_ : DecidableEq (RationalLocData A)),
+    letI := Bplus.toPlusSubring
+    HasStandardRefinementsAt A
+
+/-- **The reduction, bundled-pair form** (Kedlaya Lemma 1.6.8 ⟹ the sheaf
+property): the `A⁺`-free standard sheaf condition, together with the descent input
+at a valid pair, makes that pair sheafy — the genuine all-open structure presheaf
+of `Spa (A, Bplus)` is a sheaf of topological rings. -/
+theorem isSheafyFor_of_standardSheafCondition (hstd : StandardSheafCondition A)
+    (Bplus : RingOfIntegralElements A)
+    (href : Bplus.HasStandardRefinements A) :
+    IsSheafyFor A Bplus := by
+  classical
+  letI := Bplus.toPlusSubring
+  haveI : IsRingOfIntegralElements (A⁺ : Subring A) := Bplus.2
+  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+  letI iA : DecidableEq A := Classical.decEq A
+  letI iR : DecidableEq (RationalLocData A) := Classical.decEq _
+  haveI : IsSheafy A := isSheafy_of_standardSheafCondition_at hstd (href iA iR)
+  show IsLimitSheaf A
+  exact isLimitSheaf_of_isSheafy
+
+/-- **Genuine `A⁺`-independence of pair-level sheafiness** (Kedlaya Remark 1.6.9)
+for a complete Tate ring, **conditional on exactly the descent input** (the
+conclusion of Kedlaya Lemma 1.6.8, `HasStandardRefinements` — see its docstring for
+the precise blocked dependencies): any two valid rings of integral elements — with
+no strong noetherianness, no inclusion or definitional relation between them, and
+no identification of the two adic spectra — give equivalent pair-level sheafiness.
+The proof is the genuine transfer
+`IsSheafyFor A Aplus → StandardSheafCondition A → IsSheafyFor A Bplus`:
+the `A⁺`-free standard condition is the common middle term, *not* an appeal to a
+condition implying both sides. -/
+theorem isSheafyFor_congr (Aplus Bplus : RingOfIntegralElements A)
+    (hA : Aplus.HasStandardRefinements A) (hB : Bplus.HasStandardRefinements A) :
+    IsSheafyFor A Aplus ↔ IsSheafyFor A Bplus :=
+  ⟨fun h => isSheafyFor_of_standardSheafCondition
+      (standardSheafCondition_of_isSheafyFor Aplus h) Bplus hB,
+   fun h => isSheafyFor_of_standardSheafCondition
+      (standardSheafCondition_of_isSheafyFor Bplus h) Aplus hA⟩
+
+/-- **The standard-cover criterion** (WO2 task 3, conditional form): for a complete
+Tate ring with the descent input at a pair, the all-rational-cover sheaf condition
+at that pair is *equivalent* to the `A⁺`-free standard-cover condition. -/
+theorem isSheafyFor_iff_standardSheafCondition (Aplus : RingOfIntegralElements A)
+    (hA : Aplus.HasStandardRefinements A) :
+    IsSheafyFor A Aplus ↔ StandardSheafCondition A :=
+  ⟨standardSheafCondition_of_isSheafyFor Aplus,
+   fun h => isSheafyFor_of_standardSheafCondition h Aplus hA⟩
+
+/-- **The universal specialization** (WO2 task 6): with the descent input at every
+valid pair, sheafiness at one pair is equivalent to sheafiness at all pairs
+(`IsSheafyComplete`, the ring-level Definition 8.26 for complete `A`). -/
+theorem isSheafyFor_iff_isSheafyComplete (Aplus : RingOfIntegralElements A)
+    (hall : ∀ Bplus : RingOfIntegralElements A, Bplus.HasStandardRefinements A) :
+    IsSheafyFor A Aplus ↔ IsSheafyComplete A :=
+  ⟨fun h Bplus => isSheafyFor_of_standardSheafCondition
+      (standardSheafCondition_of_isSheafyFor Aplus h) Bplus (hall Bplus),
+   fun h => h Aplus⟩
+
+/-- Regression (WO2 task 7 shape): the independence applies to two valid choices
+assumed *distinct* — nothing in the transfer identifies them. -/
+example (Aplus Bplus : RingOfIntegralElements A) (_ : Aplus ≠ Bplus)
+    (hA : Aplus.HasStandardRefinements A) (hB : Bplus.HasStandardRefinements A) :
+    IsSheafyFor A Aplus ↔ IsSheafyFor A Bplus :=
+  isSheafyFor_congr Aplus Bplus hA hB
 
 end ValuationSpectrum
