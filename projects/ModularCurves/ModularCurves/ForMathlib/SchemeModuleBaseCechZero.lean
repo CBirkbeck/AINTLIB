@@ -2,6 +2,7 @@ import Mathlib.Algebra.Category.ModuleCat.Kernels
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
 import ModularCurves.ForMathlib.SheafCechInjectiveComparison
+import ModularCurves.ForMathlib.SheafCohomologyExact
 
 /-!
 # Global sections as the kernel of the base-linear Cech differential
@@ -33,6 +34,24 @@ noncomputable def baseSectionsMap
     (((PresheafOfModules.forgetToPresheafModuleCat
       (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop)).map f.val).app
         (op (⊤ : X.Opens)))
+
+/-- If the source of a monomorphism has vanishing first cohomology, then
+global sections of its target surject onto global sections of its cokernel. -/
+theorem baseSectionsMap_cokernel_surjective_of_subsingleton_H_one
+    {X S : Scheme.{u}} (π : X ⟶ S) {M N : X.Modules} (f : M ⟶ N)
+    [Mono f] [Subsingleton (CategoryTheory.Sheaf.H M.sheaf 1)] :
+    Function.Surjective (baseSectionsMap π (cokernel.π f)) := by
+  let T := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
+  have hT : T.ShortExact :=
+    ShortComplex.ShortExact.mk (ShortComplex.exact_cokernel f)
+  let Ts := T.map (toSheaf X)
+  have hTs : Ts.ShortExact :=
+    ShortComplex.ShortExact.map_of_exact hT (toSheaf X)
+  letI : Subsingleton (Ts.X₁.H 1) := by
+    change Subsingleton (M.sheaf.H 1)
+    infer_instance
+  exact CategoryTheory.Sheaf.H.longSequence_surjective_of_subsingleton_H
+    hTs isTerminalTop
 
 /-- A monomorphism of scheme modules induces a monomorphism on global
 sections over the base ring. -/
