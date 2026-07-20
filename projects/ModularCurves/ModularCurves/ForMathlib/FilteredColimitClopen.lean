@@ -18,6 +18,25 @@ open TopologicalSpace
 
 universe u
 
+/-- A finite clopen union of basic opens remains clopen after applying a ring homomorphism
+to its generators. -/
+theorem PrimeSpectrum.isClopen_iSup_basicOpen_map
+    {R S κ : Type u} [CommRing R] [CommRing S] [Finite κ]
+    (φ : R →+* S) (f : κ → R)
+    (h : IsClopen
+      ((↑(⨆ k, PrimeSpectrum.basicOpen (f k)) : Set (PrimeSpectrum R)))) :
+    IsClopen
+      ((↑(⨆ k, PrimeSpectrum.basicOpen (φ (f k))) : Set (PrimeSpectrum S))) := by
+  have hopen :
+      (⨆ k, PrimeSpectrum.basicOpen (φ (f k))) =
+        TopologicalSpace.Opens.comap
+          ⟨PrimeSpectrum.comap φ, PrimeSpectrum.continuous_comap φ⟩
+          (⨆ k, PrimeSpectrum.basicOpen (f k)) := by
+    rw [map_iSup]
+    exact iSup_congr fun k => (PrimeSpectrum.comap_basicOpen φ (f k)).symm
+  rw [hopen, TopologicalSpace.Opens.coe_comap]
+  exact h.preimage (PrimeSpectrum.continuous_comap φ)
+
 namespace Algebra
 
 variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
@@ -172,5 +191,76 @@ theorem SpreadData.exists_isClopen_iSup_basicOpen
   letI : Algebra (S D.i₀) B :=
     ((algebraMap A B).comp (uA D.i₀).toRingHom).toAlgebra
   exact (D.isFilteredAlgColimit H).exists_isClopen_iSup_basicOpen f hclopen
+
+/-- Finitely many finite unions of basic opens on spread-stage charts which become
+clopen on their colimit charts are simultaneously clopen at one common later base stage. -/
+theorem SpreadData.exists_common_isClopen_iSup_basicOpen
+    (H : IsFilteredAlgColimit R S t A uA)
+    {ρ : Type u} [Finite ρ]
+    (B : ρ → Type u) [∀ r, CommRing (B r)] [∀ r, Algebra A (B r)]
+    (D : ∀ r, SpreadData S uA (B r))
+    {i : ι} (hi : ∀ r, (D r).i₀ ≤ i)
+    (κ : ρ → Type u) [∀ r, Finite (κ r)]
+    (f : ∀ r, κ r → (D r).spreadStage (t := t) (hi r))
+    (hclopen : ∀ r, IsClopen
+      ((↑(⨆ q, PrimeSpectrum.basicOpen
+        ((D r).stageToColimit H ⟨i, hi r⟩ (f r q))) :
+          Set (PrimeSpectrum (B r))))) :
+    ∃ (j : ι) (hij : i ≤ j), ∀ r, IsClopen
+      ((↑(⨆ q, PrimeSpectrum.basicOpen
+        ((D r).stageTransition H
+          (P := ⟨i, hi r⟩) (Q := ⟨j, (hi r).trans hij⟩)
+          hij (f r q))) :
+            Set (PrimeSpectrum
+              ((D r).spreadStage (t := t) ((hi r).trans hij))))) := by
+  classical
+  choose Q hPQ hQ using fun r =>
+    (D r).exists_isClopen_iSup_basicOpen H ⟨i, hi r⟩ (f r) (hclopen r)
+  letI : Fintype ρ := Fintype.ofFinite ρ
+  letI := H.directed
+  letI := H.nonempty
+  obtain ⟨j, hj⟩ := (insert i (Finset.univ.image fun r => (Q r).1)).exists_le
+  have hij : i ≤ j := hj i (Finset.mem_insert_self i _)
+  have hQj (r : ρ) : (Q r).1 ≤ j := hj (Q r).1
+    (Finset.mem_insert_of_mem (Finset.mem_image_of_mem (fun r => (Q r).1)
+      (Finset.mem_univ r)))
+  refine ⟨j, hij, fun r => ?_⟩
+  letI : Algebra (S (D r).i₀) ((D r).spreadStage (t := t) (hi r)) :=
+    ((algebraMap (S i) ((D r).spreadStage (t := t) (hi r))).comp
+      (t (hi r)).toRingHom).toAlgebra
+  letI : Algebra (S (D r).i₀) ((D r).spreadStage (t := t) (Q r).2) :=
+    ((algebraMap (S (Q r).1) ((D r).spreadStage (t := t) (Q r).2)).comp
+      (t (Q r).2).toRingHom).toAlgebra
+  letI : Algebra (S (D r).i₀)
+      ((D r).spreadStage (t := t) ((Q r).2.trans (hQj r))) :=
+    ((algebraMap (S j)
+      ((D r).spreadStage (t := t) ((Q r).2.trans (hQj r)))).comp
+        (t ((Q r).2.trans (hQj r))).toRingHom).toAlgebra
+  have hr := PrimeSpectrum.isClopen_iSup_basicOpen_map
+    ((D r).stageTransition H
+      (P := Q r) (Q := ⟨j, (Q r).2.trans (hQj r)⟩) (hQj r)).toRingHom
+    (fun q => (D r).stageTransition H
+      (P := ⟨i, hi r⟩) (Q := Q r) (hPQ r) (f r q)) (hQ r)
+  have htransition (q : κ r) :
+      (D r).stageTransition H
+          (P := Q r) (Q := ⟨j, (Q r).2.trans (hQj r)⟩) (hQj r)
+          ((D r).stageTransition H
+            (P := ⟨i, hi r⟩) (Q := Q r) (hPQ r) (f r q)) =
+        (D r).stageTransition H
+          (P := ⟨i, hi r⟩) (Q := ⟨j, (hi r).trans hij⟩) hij (f r q) := by
+    exact (D r).stageTransition_trans H (hi r) (hPQ r) (hQj r) (f r q)
+  have hbasic :
+      (fun q => PrimeSpectrum.basicOpen
+        (((D r).stageTransition H
+          (P := Q r) (Q := ⟨j, (Q r).2.trans (hQj r)⟩) (hQj r)).toRingHom
+            ((D r).stageTransition H
+              (P := ⟨i, hi r⟩) (Q := Q r) (hPQ r) (f r q)))) =
+        (fun q => PrimeSpectrum.basicOpen
+          ((D r).stageTransition H
+            (P := ⟨i, hi r⟩) (Q := ⟨j, (hi r).trans hij⟩) hij (f r q))) := by
+    funext q
+    exact congrArg PrimeSpectrum.basicOpen (htransition q)
+  rw [hbasic] at hr
+  exact hr
 
 end Algebra
