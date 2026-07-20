@@ -2238,22 +2238,11 @@ The Wedhorn 8.2 identification `Spa A⟨T/s⟩ ≃ R(T/s) ⊆ Spa A` is the basi
 geometric input for the IsSheafy proof. Stated here as the clean target;
 discharge requires the full `presheafValue D` topology + Spa-pullback API. -/
 
-/-- **(Wedhorn 8.2 — Spa of `presheafValue` equals rational subset)**
-*"`Spa A⟨T/s⟩ → Spa A` is a homeomorphism onto `R(T/s)`."*
-
-The localized presheaf value `presheafValue D` (which IS the completion, hence
-Wedhorn-honest — addressing the audit's "Localization.Away vs presheafValue"
-concern) is identified with the natural Spa subspace `R(D.T/D.s)`.
-
-This is the key step the audit flags as needed for `isUnit_algebraMap_s_of_tate`
-and the surrounding T-H.2.a cluster. -/
-theorem Spa_presheafValue_eq_rationalOpen
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
-    [NonarchimedeanRing A]
-    (D : RationalLocData A) :
-    Nonempty (Spa (presheafValue D) (presheafValue D)⁺ ≃
-      (rationalOpen D.T D.s ∩ Spa A A⁺ : Set (Spv A))) :=
-  sorry
+-- `Spa_presheafValue_eq_rationalOpen` (Wedhorn 8.2, the `Nonempty (… ≃ …)` headline)
+-- was DISCHARGED and moved to `SpaRationalOpenComparison.lean` (2026-07-20): the
+-- canonical equivalence is `spaPresheafValueEquivRationalOpen`, with forward map
+-- `comap D.canonicalMap`, exact image equality, and forward continuity — with no
+-- noetherian/strongly-noetherian/T2/nonarchimedean hypotheses.
 
 /-! ## Hidden-obligation audit pass 3 (2026-05-17): Spa.comap framework
 

@@ -9,7 +9,7 @@ import Mathlib.RingTheory.RingHom.FaithfullyFlat
 import Mathlib.RingTheory.Spectrum.Prime.RingHom
 import Mathlib.Algebra.Module.Pi
 import «Adic spaces».StructureSheaf
-import «Adic spaces».SpaPresheafValueEquivalence
+import «Adic spaces».SpaRationalOpenComparison
 import «Adic spaces».FlatnessResults
 import «Adic spaces».IdealClosedness
 import «Adic spaces».IdealLocalization
