@@ -230,71 +230,11 @@ def IsSheafyTateRing : Prop :=
 
 end CompletionModel
 
-/-! ### Comparison of completion models (Remark 8.3's uniqueness half)
-
-Any two completion models are canonically **compatibly equivalent**: the whole-space
-data `globalLocData P`, `globalLocData P'` have literally the same rational open (the
-conditions mention only `T = {1}`, `s = 1`), so the canonical restriction maps run in
-both directions, compose to the identity, are continuous, and intertwine the
-canonical maps from `A`. This is the "actual compatible topological-ring
-equivalence" of the models (WO3): it does not depend on completeness of `A`, only on
-the analytic scope where the restriction maps exist. -/
-
-section CompletionModelCompare
-
-variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [PlusSubring A] [IsHuberRing A] [IsTateRing A] [HasLocLiftPowerBounded A]
-
-private theorem globalLocData_rationalOpen_subset (P P' : PairOfDefinition A) :
-    rationalOpen (globalLocData P).T (globalLocData P).s ⊆
-      rationalOpen (globalLocData P').T (globalLocData P').s :=
-  fun _ hv => hv
-
-/-- The canonical comparison between two completion models: the restriction map
-along the (reflexive) containment of the two whole-space rational opens, with the
-reverse restriction map as inverse (`restrictionMap_comp` + `restrictionMap_id`). -/
-def completionModelCompare (P P' : PairOfDefinition A) :
-    CompletionModel A P ≃+* CompletionModel A P' where
-  toFun := restrictionMapHom (globalLocData P) (globalLocData P')
-    (globalLocData_rationalOpen_subset P' P)
-  invFun := restrictionMapHom (globalLocData P') (globalLocData P)
-    (globalLocData_rationalOpen_subset P P')
-  left_inv x :=
-    (congr_fun (restrictionMap_comp (globalLocData P) (globalLocData P')
-      (globalLocData P) (globalLocData_rationalOpen_subset P' P)
-      (globalLocData_rationalOpen_subset P P')) x).trans
-    (congr_fun (restrictionMap_id (globalLocData P)) x)
-  right_inv x :=
-    (congr_fun (restrictionMap_comp (globalLocData P') (globalLocData P)
-      (globalLocData P') (globalLocData_rationalOpen_subset P P')
-      (globalLocData_rationalOpen_subset P' P)) x).trans
-    (congr_fun (restrictionMap_id (globalLocData P')) x)
-  map_mul' := map_mul _
-  map_add' := map_add _
-
-theorem completionModelCompare_continuous (P P' : PairOfDefinition A) :
-    Continuous (completionModelCompare P P') :=
-  restrictionMapHom_continuous (globalLocData P) (globalLocData P')
-    (globalLocData_rationalOpen_subset P' P)
-
-theorem completionModelCompare_symm_continuous (P P' : PairOfDefinition A) :
-    Continuous (completionModelCompare P P').symm :=
-  restrictionMapHom_continuous (globalLocData P') (globalLocData P)
-    (globalLocData_rationalOpen_subset P P')
-
-/-- The comparison intertwines the canonical maps from `A` — the compatibility
-required of an equivalence of completions (Wedhorn Remark 8.3). (The
-`IsNoetherianRing` hypothesis is inherited from the current section scope of
-`restrictionMapHom_canonicalMap` and carries no mathematical content here.) -/
-theorem completionModelCompare_canonicalMap [IsNoetherianRing A] [T2Space A]
-    [NonarchimedeanRing A]
-    (P P' : PairOfDefinition A) (a : A) :
-    completionModelCompare P P' ((globalLocData P).canonicalMap a) =
-      (globalLocData P').canonicalMap a :=
-  restrictionMapHom_canonicalMap (globalLocData P) (globalLocData P')
-    (globalLocData_rationalOpen_subset P' P) a
-
-end CompletionModelCompare
+-- The comparison of completion models (`completionModelCompare` and its
+-- continuity/canonical-map compatibility) lives in
+-- `CompletionModelIndependence.lean` (P2.11 rebuild: through the whole-space
+-- topology equality, with NO ambient `PlusSubring`/`HasLocLiftPowerBounded`/
+-- `IsNoetherianRing`/`CompleteSpace` hypotheses).
 
 section NoncompleteWrapper
 

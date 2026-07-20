@@ -58,7 +58,7 @@ theorem problem25
     -- available)
     (hfinflat : True) :
     -- The inverse limit along f is a perfectoid space
-    ∃ (Y : AdicSpacePresentation.{u}), IsPerfectoidSpace p Y := by
+    ∃ (Y : AdicSpacePresentation.{u}), IsPerfectoidSpacePresentation p Y := by
   sorry
 
 end ScottishBook
