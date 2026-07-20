@@ -60,6 +60,13 @@ theorem baseModulePresheafFunctor_obj {X S : Scheme.{u}} (π : X ⟶ S)
     (baseModulePresheafFunctor π).obj M = baseModulePresheaf π M :=
   rfl
 
+instance baseModulePresheafFunctor_preservesZeroMorphisms
+    {X S : Scheme.{u}} (π : X ⟶ S) :
+    (baseModulePresheafFunctor π).PreservesZeroMorphisms where
+  map_zero M N := by
+    ext U x
+    rfl
+
 /-- Base-linear sections on an ambient open are naturally identified with
 top sections of the module restricted to that open. -/
 noncomputable def baseModulePresheafRestrictIso
