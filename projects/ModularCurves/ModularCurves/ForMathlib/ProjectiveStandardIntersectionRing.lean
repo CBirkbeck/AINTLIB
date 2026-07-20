@@ -26,19 +26,12 @@ variable {R : Type u} [CommRing R] {σ : Type v}
 attribute [local instance] MvPolynomial.gradedAlgebra
 local instance : DecidableEq σ := Classical.decEq σ
 
-private noncomputable def homogeneousDegreeZeroCoeffHom :
-    R →+* homogeneousSubmodule σ R 0 where
-  toFun r := ⟨C r, by simp⟩
-  map_one' := Subtype.ext (map_one C)
-  map_mul' r s := Subtype.ext (map_mul C r s)
-  map_zero' := Subtype.ext (map_zero C)
-  map_add' r s := Subtype.ext (map_add C r s)
-
 /-- The coefficient-ring map into a degree-zero homogeneous localization of a polynomial ring. -/
 noncomputable def homogeneousAwayCoeffHom (f : MvPolynomial σ R) :
     R →+* Away (homogeneousSubmodule σ R) f :=
   (HomogeneousLocalization.fromZeroRingHom (homogeneousSubmodule σ R)
-    (Submonoid.powers f)).comp homogeneousDegreeZeroCoeffHom
+    (Submonoid.powers f)).comp
+      (algebraMap R (homogeneousSubmodule σ R 0))
 
 noncomputable instance homogeneousAwayAlgebra (f : MvPolynomial σ R) :
     Algebra R (Away (homogeneousSubmodule σ R) f) :=
@@ -182,13 +175,14 @@ theorem coordinateTailAwayMap_algebraMap {n : ℕ}
       (x := coordinateProductPolynomial (R := R) a)
       (homogeneousSubmodule σ R) (coordinateTailPolynomial_mem (R := R) a) rfl
       (HomogeneousLocalization.fromZeroRingHom (homogeneousSubmodule σ R)
-        (Submonoid.powers (X (a 0))) (homogeneousDegreeZeroCoeffHom r)) =
+        (Submonoid.powers (X (a 0)))
+          (algebraMap R (homogeneousSubmodule σ R 0) r)) =
     HomogeneousLocalization.fromZeroRingHom (homogeneousSubmodule σ R)
       (Submonoid.powers (coordinateProductPolynomial (R := R) a))
-      (homogeneousDegreeZeroCoeffHom r)
+      (algebraMap R (homogeneousSubmodule σ R 0) r)
   exact HomogeneousLocalization.awayMap_fromZeroRingHom
     (homogeneousSubmodule σ R) (coordinateTailPolynomial_mem (R := R) a) rfl
-    (homogeneousDegreeZeroCoeffHom r)
+    (algebraMap R (homogeneousSubmodule σ R 0) r)
 
 private theorem chartRingEquiv_map_coordinateTailPowers {n : ℕ}
     (a : Fin (n + 1) → σ) :

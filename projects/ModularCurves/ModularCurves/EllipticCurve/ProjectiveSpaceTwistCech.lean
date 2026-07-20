@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
+import ModularCurves.ForMathlib.ProjToSpecZero
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 import ModularCurves.ForMathlib.ProjectiveStandardIntersectionRing
 
@@ -111,12 +112,196 @@ noncomputable def coordinateOpenCechIntersectionAwayIso {n : ℕ}
     CommRingCat.of
         (HomogeneousLocalization.Away (homogeneousSubmodule σ R)
           (coordinateProductPolynomial (R := R) (fun k => (a k).down))) ≅
-      Γ(Proj (homogeneousSubmodule σ R), coordinateOpenCechIntersection (R := R) a) := by
-  rw [coordinateOpenCechIntersection_eq_basicOpen]
-  exact Proj.basicOpenIsoAway (homogeneousSubmodule σ R)
-    (coordinateProductPolynomial (R := R) (fun k => (a k).down))
-    (coordinateProductPolynomial_mem (R := R) (fun k => (a k).down))
-    (Nat.succ_pos n)
+      Γ(Proj (homogeneousSubmodule σ R), coordinateOpenCechIntersection (R := R) a) :=
+  (Proj.basicOpenIsoAway (homogeneousSubmodule σ R)
+      (coordinateProductPolynomial (R := R) (fun k => (a k).down))
+      (coordinateProductPolynomial_mem (R := R) (fun k => (a k).down))
+      (Nat.succ_pos n)).trans
+    ((Proj (homogeneousSubmodule σ R)).presheaf.mapIso
+      (eqToIso (coordinateOpenCechIntersection_eq_basicOpen (R := R) a)).op)
+
+/-- Sections on a standard projective Cech intersection, in Laurent-monomial coordinates. -/
+noncomputable def coordinateOpenCechIntersectionLaurentRingEquiv {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    Γ(Proj (homogeneousSubmodule σ R),
+        coordinateOpenCechIntersection (R := R) a) ≃+*
+      AddMonoidAlgebra R
+        (laurentExponentSubmonoid
+          (coordinateTailExponent (fun k => (a k).down))) :=
+  (coordinateOpenCechIntersectionAwayIso (R := R) a).commRingCatIsoToRingEquiv.symm |>.trans
+    ((coordinateProductAwayRingEquiv (R := R) (fun k => (a k).down)).trans
+      (laurentMonomialRingEquiv R
+        (coordinateTailExponent (fun k => (a k).down))))
+
+/-- Laurent-monomial coordinates with coefficients transported to the global sections of the
+affine base. -/
+noncomputable def coordinateOpenCechIntersectionBaseLaurentRingEquiv {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    Γ(Proj (homogeneousSubmodule σ R),
+        coordinateOpenCechIntersection (R := R) a) ≃+*
+      AddMonoidAlgebra Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (laurentExponentSubmonoid
+          (coordinateTailExponent (fun k => (a k).down))) :=
+  (coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a).trans
+    (AddMonoidAlgebra.mapRingEquiv _
+      (Scheme.ΓSpecIso (CommRingCat.of R)).commRingCatIsoToRingEquiv.symm)
+
+/-- The structure morphism on a projective Cech intersection is the coefficient map into its
+homogeneous localization presentation. -/
+theorem coordinateOpenCechIntersection_structure_section_square {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
+        (homogeneousProjπ (R := R) (σ := σ)).appTop ≫
+        (Proj (homogeneousSubmodule σ R)).presheaf.map (homOfLE le_top).op ≫
+        (coordinateOpenCechIntersectionAwayIso (R := R) a).inv =
+      CommRingCat.ofHom
+        (homogeneousAwayCoeffHom
+          (coordinateProductPolynomial (R := R) (fun k => (a k).down))) := by
+  simp only [coordinateOpenCechIntersectionAwayIso, Iso.trans_inv,
+    Functor.mapIso_inv]
+  rw [← Category.assoc
+    ((Proj (homogeneousSubmodule σ R)).presheaf.map (homOfLE le_top).op)]
+  rw [← Functor.map_comp]
+  rw [show (homOfLE le_top).op ≫
+      (eqToIso (coordinateOpenCechIntersection_eq_basicOpen (R := R) a)).op.inv =
+        (homOfLE le_top).op from Subsingleton.elim _ _]
+  simpa [homogeneousProjπ, homogeneousAwayCoeffHom] using
+    (ModularCurves.Proj_structure_section_square
+      (homogeneousSubmodule σ R)
+      (algebraMap R (homogeneousSubmodule σ R 0))
+      (coordinateProductPolynomial (R := R) (fun k => (a k).down))
+      (coordinateProductPolynomial_mem (R := R) (fun k => (a k).down))
+      (Nat.succ_pos n))
+
+/-- The base scalar map into a projective Cech intersection in homogeneous-localization
+coordinates. -/
+theorem coordinateOpenCechIntersection_baseScalarHom {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    (homogeneousProjπ (R := R) (σ := σ)).appTop ≫
+        (Proj (homogeneousSubmodule σ R)).presheaf.map (homOfLE le_top).op ≫
+        (coordinateOpenCechIntersectionAwayIso (R := R) a).inv =
+      (Scheme.ΓSpecIso (CommRingCat.of R)).hom ≫
+        CommRingCat.ofHom
+          (homogeneousAwayCoeffHom
+            (coordinateProductPolynomial (R := R) (fun k => (a k).down))) := by
+  rw [← Iso.inv_comp_eq]
+  exact coordinateOpenCechIntersection_structure_section_square (R := R) a
+
+/-- A base scalar is the constant Laurent monomial in coefficient-ring coordinates. -/
+@[simp]
+theorem coordinateOpenCechIntersectionLaurentRingEquiv_baseScalar {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ)
+    (r : Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))) :
+    coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a
+        (((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE le_top).op).hom
+            ((homogeneousProjπ (R := R) (σ := σ)).appTop.hom r)) =
+      AddMonoidAlgebra.single 0
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).hom.hom r) := by
+  change laurentMonomialRingEquiv R _
+      (coordinateProductAwayRingEquiv (R := R) _
+        ((coordinateOpenCechIntersectionAwayIso (R := R) a).inv.hom
+          (((Proj (homogeneousSubmodule σ R)).presheaf.map
+            (homOfLE le_top).op).hom
+              ((homogeneousProjπ (R := R) (σ := σ)).appTop.hom r)))) = _
+  have hscalar := congrArg
+    (fun q : Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)) →+*
+        HomogeneousLocalization.Away (homogeneousSubmodule σ R)
+          (coordinateProductPolynomial (R := R) (fun k => (a k).down)) => q r)
+    (congrArg CommRingCat.Hom.hom
+      (coordinateOpenCechIntersection_baseScalarHom (R := R) a))
+  change (coordinateOpenCechIntersectionAwayIso (R := R) a).inv.hom
+      (((Proj (homogeneousSubmodule σ R)).presheaf.map
+        (homOfLE le_top).op).hom
+          ((homogeneousProjπ (R := R) (σ := σ)).appTop.hom r)) =
+    algebraMap R
+      (HomogeneousLocalization.Away (homogeneousSubmodule σ R)
+        (coordinateProductPolynomial (R := R) (fun k => (a k).down)))
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).hom.hom r) at hscalar
+  rw [hscalar, coordinateProductAwayRingEquiv_algebraMap,
+    laurentMonomialRingEquiv_algebraMap_coeff]
+  rfl
+
+/-- A base scalar is the constant Laurent monomial after transporting coefficients to the affine
+base's global-section ring. -/
+@[simp]
+theorem coordinateOpenCechIntersectionBaseLaurentRingEquiv_baseScalar {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ)
+    (r : Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))) :
+    coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a
+        (((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE le_top).op).hom
+            ((homogeneousProjπ (R := R) (σ := σ)).appTop.hom r)) =
+      algebraMap
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (AddMonoidAlgebra
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          (laurentExponentSubmonoid
+            (coordinateTailExponent (fun k => (a k).down)))) r := by
+  change AddMonoidAlgebra.mapRingEquiv _
+      (Scheme.ΓSpecIso (CommRingCat.of R)).commRingCatIsoToRingEquiv.symm
+        (coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a
+          (((Proj (homogeneousSubmodule σ R)).presheaf.map
+            (homOfLE le_top).op).hom
+              ((homogeneousProjπ (R := R) (σ := σ)).appTop.hom r))) = _
+  rw [coordinateOpenCechIntersectionLaurentRingEquiv_baseScalar,
+    AddMonoidAlgebra.mapRingEquiv_single]
+  change AddMonoidAlgebra.single 0
+      ((Scheme.ΓSpecIso (CommRingCat.of R)).commRingCatIsoToRingEquiv.symm
+        ((Scheme.ΓSpecIso (CommRingCat.of R)).commRingCatIsoToRingEquiv r)) =
+    AddMonoidAlgebra.single 0 r
+  rw [(Scheme.ΓSpecIso (CommRingCat.of R)).commRingCatIsoToRingEquiv.symm_apply_apply]
+
+private noncomputable def coordinateOpenCechIntersectionBaseCechFactorAddEquiv {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n a ≃+
+      Γ(Proj (homogeneousSubmodule σ R),
+        coordinateOpenCechIntersection (R := R) a) :=
+  AddEquiv.refl _
+
+private theorem coordinateOpenCechIntersectionBaseCechFactorAddEquiv_smul {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ)
+    (r : Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)))
+    (x : Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n a) :
+    coordinateOpenCechIntersectionBaseCechFactorAddEquiv (R := R) a (r • x) =
+      ((Proj (homogeneousSubmodule σ R)).presheaf.map
+        (homOfLE (show coordinateOpenCechIntersection (R := R) a ≤ ⊤ from
+          le_top)).op).hom
+          ((homogeneousProjπ (R := R) (σ := σ)).appTop.hom r) *
+        coordinateOpenCechIntersectionBaseCechFactorAddEquiv (R := R) a x := by
+  rfl
+
+/-- A standard projective Cech intersection factor is the free module on its allowed Laurent
+monomials over the affine base's global-section ring. -/
+noncomputable def coordinateOpenCechIntersectionBaseLaurentLinearEquiv {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n a ≃ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      AddMonoidAlgebra
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (laurentExponentSubmonoid
+          (coordinateTailExponent (fun k => (a k).down))) :=
+  { (coordinateOpenCechIntersectionBaseCechFactorAddEquiv (R := R) a).trans
+      (coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a).toAddEquiv with
+    map_smul' := by
+      intro r x
+      change coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a
+          (coordinateOpenCechIntersectionBaseCechFactorAddEquiv (R := R) a (r • x)) =
+        r • coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a
+          (coordinateOpenCechIntersectionBaseCechFactorAddEquiv (R := R) a x)
+      rw [coordinateOpenCechIntersectionBaseCechFactorAddEquiv_smul]
+      rw [map_mul,
+        coordinateOpenCechIntersectionBaseLaurentRingEquiv_baseScalar]
+      rw [Algebra.smul_def] }
 
 /-- The standard frame of `O(d)` restricted to an ordered Cech intersection. -/
 noncomputable def coordinateHyperplaneTwistCechTrivialization {n : ℕ}
