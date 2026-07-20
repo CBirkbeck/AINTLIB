@@ -724,23 +724,53 @@ lemma coordinateHyperplanePoleSheafPower_succ (j : σ) (n : ℕ) :
         coordinateHyperplanePoleSheaf (R := R) j :=
   rfl
 
+/-- A frame of `O(1)` on an open induces compatible frames of all nonnegative
+twists on that open. -/
+noncomputable def coordinateHyperplanePoleSheafPowerTrivializationOf
+    (U : (Proj (homogeneousSubmodule σ R)).Opens) (j : σ)
+    (e : (coordinateHyperplanePoleSheaf (R := R) j).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) : ∀ n : ℕ,
+      (coordinateHyperplanePoleSheafPower (R := R) j n).restrict U.ι ≅
+        Scheme.Modules.unitObj U.toScheme
+  | 0 => ModularCurves.restrictMonoidalUnitIso U.ι ≪≫
+      ModularCurves.monoidalUnitObjIso U.toScheme
+  | n + 1 =>
+      ModularCurves.restrictMonoidalTensorIso
+          U.ι
+          (coordinateHyperplanePoleSheafPower (R := R) j n)
+          (coordinateHyperplanePoleSheaf (R := R) j) ≪≫
+        (coordinateHyperplanePoleSheafPowerTrivializationOf U j e n ⊗ᵢ e) ≪≫
+        ModularCurves.unitObjTensorIso U.toScheme
+
+/-- Induced nonnegative-twist frames commute with restriction to a smaller
+open. -/
+theorem coordinateHyperplanePoleSheafPowerTrivializationOf_restrictOpen
+    {U V : (Proj (homogeneousSubmodule σ R)).Opens} (hVU : V ≤ U) (j : σ)
+    (e : (coordinateHyperplanePoleSheaf (R := R) j).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) : ∀ n : ℕ,
+    Scheme.Modules.restrictOpenTrivialization hVU
+        (coordinateHyperplanePoleSheafPowerTrivializationOf U j e n) =
+      coordinateHyperplanePoleSheafPowerTrivializationOf V j
+        (Scheme.Modules.restrictOpenTrivialization hVU e) n := by
+  intro n
+  induction n with
+  | zero =>
+      exact ModularCurves.restrictMonoidalUnitTrivialization_restrictOpen hVU
+  | succ n ih =>
+      simp only [coordinateHyperplanePoleSheafPowerTrivializationOf,
+        coordinateHyperplanePoleSheafPower]
+      rw [ModularCurves.restrictMonoidalTensorTrivialization_restrictOpen]
+      rw [ih]
+
 /-- The compatible standard-chart frame of the nonnegative twist `O(n)`. -/
 noncomputable def coordinateHyperplanePoleSheafPowerTrivialization
     (i j : σ) : ∀ n : ℕ,
       (coordinateHyperplanePoleSheafPower (R := R) j n).restrict
           (coordinateOpen (R := R) i).ι ≅
-        Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme
-  | 0 => ModularCurves.restrictMonoidalUnitIso
-        (coordinateOpen (R := R) i).ι ≪≫
-      ModularCurves.monoidalUnitObjIso (coordinateOpen (R := R) i).toScheme
-  | n + 1 =>
-      ModularCurves.restrictMonoidalTensorIso
-          (coordinateOpen (R := R) i).ι
-          (coordinateHyperplanePoleSheafPower (R := R) j n)
-          (coordinateHyperplanePoleSheaf (R := R) j) ≪≫
-        (coordinateHyperplanePoleSheafPowerTrivialization i j n ⊗ᵢ
-          coordinateHyperplanePoleSheafTrivialization (R := R) i j) ≪≫
-        ModularCurves.unitObjTensorIso (coordinateOpen (R := R) i).toScheme
+        Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme :=
+  coordinateHyperplanePoleSheafPowerTrivializationOf
+    (coordinateOpen (R := R) i) j
+      (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
 
 /-- Every nonnegative coordinate-hyperplane twist `O(n)` is invertible. -/
 theorem coordinateHyperplanePoleSheafPower_isInvertible (j : σ) (n : ℕ) :
@@ -776,23 +806,55 @@ lemma coordinateHyperplaneIdealModulePower_succ (j : σ) (n : ℕ) :
         ModularCurves.idealModule (coordinateHyperplaneι (R := R) j) :=
   rfl
 
+/-- A frame of `O(-1)` on an open induces compatible frames of all its
+nonnegative powers on that open. -/
+noncomputable def coordinateHyperplaneIdealModulePowerTrivializationOf
+    (U : (Proj (homogeneousSubmodule σ R)).Opens) (j : σ)
+    (e : (ModularCurves.idealModule
+        (coordinateHyperplaneι (R := R) j)).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) : ∀ n : ℕ,
+      (coordinateHyperplaneIdealModulePower (R := R) j n).restrict U.ι ≅
+        Scheme.Modules.unitObj U.toScheme
+  | 0 => ModularCurves.restrictMonoidalUnitIso U.ι ≪≫
+      ModularCurves.monoidalUnitObjIso U.toScheme
+  | n + 1 =>
+      ModularCurves.restrictMonoidalTensorIso
+          U.ι
+          (coordinateHyperplaneIdealModulePower (R := R) j n)
+          (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) ≪≫
+        (coordinateHyperplaneIdealModulePowerTrivializationOf U j e n ⊗ᵢ e) ≪≫
+        ModularCurves.unitObjTensorIso U.toScheme
+
+/-- Induced nonnegative `O(-1)`-power frames commute with restriction to a
+smaller open. -/
+theorem coordinateHyperplaneIdealModulePowerTrivializationOf_restrictOpen
+    {U V : (Proj (homogeneousSubmodule σ R)).Opens} (hVU : V ≤ U) (j : σ)
+    (e : (ModularCurves.idealModule
+        (coordinateHyperplaneι (R := R) j)).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) : ∀ n : ℕ,
+    Scheme.Modules.restrictOpenTrivialization hVU
+        (coordinateHyperplaneIdealModulePowerTrivializationOf U j e n) =
+      coordinateHyperplaneIdealModulePowerTrivializationOf V j
+        (Scheme.Modules.restrictOpenTrivialization hVU e) n := by
+  intro n
+  induction n with
+  | zero =>
+      exact ModularCurves.restrictMonoidalUnitTrivialization_restrictOpen hVU
+  | succ n ih =>
+      simp only [coordinateHyperplaneIdealModulePowerTrivializationOf,
+        coordinateHyperplaneIdealModulePower]
+      rw [ModularCurves.restrictMonoidalTensorTrivialization_restrictOpen]
+      rw [ih]
+
 /-- The compatible standard-chart frame of the nonnegative power of `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModulePowerTrivialization
     (i j : σ) : ∀ n : ℕ,
       (coordinateHyperplaneIdealModulePower (R := R) j n).restrict
           (coordinateOpen (R := R) i).ι ≅
-        Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme
-  | 0 => ModularCurves.restrictMonoidalUnitIso
-        (coordinateOpen (R := R) i).ι ≪≫
-      ModularCurves.monoidalUnitObjIso (coordinateOpen (R := R) i).toScheme
-  | n + 1 =>
-      ModularCurves.restrictMonoidalTensorIso
-          (coordinateOpen (R := R) i).ι
-          (coordinateHyperplaneIdealModulePower (R := R) j n)
-          (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) ≪≫
-        (coordinateHyperplaneIdealModulePowerTrivialization i j n ⊗ᵢ
-          (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm) ≪≫
-        ModularCurves.unitObjTensorIso (coordinateOpen (R := R) i).toScheme
+        Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme :=
+  coordinateHyperplaneIdealModulePowerTrivializationOf
+    (coordinateOpen (R := R) i) j
+      (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
 
 /-- Every nonnegative power of the coordinate-hyperplane `O(-1)` is
 invertible. -/
