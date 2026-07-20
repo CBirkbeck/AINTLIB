@@ -13,6 +13,34 @@ The degree-zero homogeneous localization at a product of projective coordinates 
 an affine polynomial ring localized at a monomial. This gives its canonical Laurent-monomial basis.
 -/
 
+namespace HomogeneousLocalization
+
+noncomputable section
+
+universe u v w
+
+variable {ι : Type u} {A : Type v} {σ : Type w}
+variable [CommRing A] [SetLike σ A] [AddSubgroupClass σ A]
+variable [AddCommMonoid ι] [DecidableEq ι]
+variable (𝒜 : ι → σ) [GradedRing 𝒜]
+
+/-- Successively adjoining two homogeneous factors to an away localization agrees with adjoining
+their product in one step. -/
+theorem awayMap_comp {d e l : ι} {f g h x y : A}
+    (hf : f ∈ 𝒜 d) (hg : g ∈ 𝒜 e) (hh : h ∈ 𝒜 l)
+    (hx : x = f * g) (hy : y = x * h) (hy' : y = f * (g * h)) :
+    (awayMap 𝒜 hh hy).comp (awayMap 𝒜 hg hx) =
+      awayMap 𝒜 (SetLike.mul_mem_graded hg hh) hy' := by
+  ext q
+  obtain ⟨n, a, ha, rfl⟩ := Away.mk_surjective 𝒜 hf q
+  rw [RingHom.comp_apply, awayMap_mk, awayMap_mk, awayMap_mk]
+  rw [Away.val_mk, Away.val_mk, mul_pow]
+  simp only [mul_assoc]
+
+end
+
+end HomogeneousLocalization
+
 namespace MvPolynomial
 
 open HomogeneousLocalization
