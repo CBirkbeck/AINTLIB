@@ -610,6 +610,27 @@ theorem coordinateOpenCechDelete_le [LinearOrder σ] {n : ℕ}
       coordinateOpenCechIntersection (R := R) (a.delete k).1 :=
   leOfHom (coordinateOpenCechDelete (R := R) a k)
 
+/-- Restriction from a deleted Cech intersection to the full intersection is the homogeneous
+localization map at the removed coordinate. -/
+theorem coordinateOpenCechIntersectionAwayIso_naturality_delete [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 2)) :
+    CommRingCat.ofHom
+        (HomogeneousLocalization.awayMap
+          (homogeneousSubmodule σ R)
+          (X_mem_homogeneousSubmodule_one R (a.1 k).down)
+          (coordinateProductPolynomial_eq_delete_mul (R := R) a k)) ≫
+      (coordinateOpenCechIntersectionAwayIso (R := R) a.1).hom =
+    (coordinateOpenCechIntersectionAwayIso (R := R) (a.delete k).1).hom ≫
+      (Proj (homogeneousSubmodule σ R)).presheaf.map
+        (coordinateOpenCechDelete (R := R) a k).op := by
+  simp only [coordinateOpenCechIntersectionAwayIso, Iso.trans_hom,
+    Functor.mapIso_hom, Proj.basicOpenIsoAway, asIso_hom]
+  rw [← Category.assoc, Proj.awayMap_awayToSection]
+  simp only [Category.assoc]
+  rw [← Functor.map_comp, ← Functor.map_comp]
+  congr 1
+
 /-- A full ordered Cech intersection lies in the overlap of its first two
 standard charts. -/
 theorem coordinateOpenCechIntersection_le_firstOverlap [LinearOrder σ] {n : ℕ}
