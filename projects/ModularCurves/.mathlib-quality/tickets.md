@@ -24252,3 +24252,14 @@ sympy check=0) and linear_combination-certified in Lean. isUnit_e4U/`_add_two_e4
 psiTwo statements gained the planned (hR : IsUnit (2:R)) hypothesis (per decomposition
 §2 certs — 2-power constants). Remaining in file: A2 killing ×2, A4 keystone, A5 map,
 A6 bridges ×2, A7 datum, A8 classifying/packaging ×3 (13 sorries). NEXT: T-E4A2.
+
+### v10.343 progress — [T-E4B] DONE (2026-07-20)
+LevelFourTorsor.lean COMPLETE, AXIOM-CLEAN (both exports exists_levelFourTorsorData +
+_ulift = clean triple; 659 insertions; build green 4105 jobs; 0 sorries). Reused the
+public generic layer of LevelThreeTorsor via import (relRepAut/relRepSchemeAction chain
++ gammaFullNaiveGl_freeAction); replicated the private leaves at general N
+(e4_exists_isNaiveFullLevel_of_isAlgClosed, e4_exists_glSmul_eq, e4_spec_factors_sigma,
+e4_isIso_torsorSigmaDesc_of_existsUnique); N=4 wrappers levelFourData(+Z/f/finite/etale),
+levelFourEquivariantData, levelFour_surjective, levelFour_torsor; γ⁻¹ [B2-TD-CONV] kept;
+ULift transport verbatim. Decomposition §3 generality audit held exactly — no
+3-hardcoded obstruction. KM 4.7.0 ENGINE AXIOM 2 FOR THE LEVEL-4 D(2) MOUTH IS DONE.
