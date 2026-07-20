@@ -389,6 +389,29 @@ theorem coordinateProductAwayLaurentRingEquiv_awayMap_comp_left
     (coordinateProductAwayLaurentRingEquiv_awayMap_comp
       (R := R) (σ := σ) (n := n) a)
 
+/-- Pointwise form of Laurent tail-localization naturality after postcomposition. -/
+theorem coordinateProductAwayLaurentRingEquiv_awayMap_comp_left_apply
+    {S : Type w} [Semiring S] {n : ℕ}
+    (a : Fin (n + 1) → σ)
+    (F : AddMonoidAlgebra R
+      (laurentExponentSubmonoid (coordinateTailExponent a)) →+* S)
+    (q : Away (homogeneousSubmodule σ R) (X (a 0) : MvPolynomial σ R)) :
+    F (laurentMonomialRingEquiv R (coordinateTailExponent a)
+      (coordinateProductAwayRingEquiv (R := R) a
+        (HomogeneousLocalization.awayMap
+          (f := X (a 0))
+          (g := coordinateTailPolynomial (R := R) a)
+          (x := coordinateProductPolynomial (R := R) a)
+          (homogeneousSubmodule σ R)
+          (coordinateTailPolynomial_mem (R := R) a) rfl q))) =
+      F (AddMonoidAlgebra.mapDomain
+        (laurentExponentAwayMap
+          (coordinateTailExponent a)).toAddMonoidHom
+        (chartRingEquiv R (a 0) q)) := by
+  exact congrArg (fun f => f q)
+    (coordinateProductAwayLaurentRingEquiv_awayMap_comp_left
+      (R := R) (σ := σ) (n := n) a F)
+
 @[simp]
 theorem coordinateProductAwayRingEquiv_algebraMap {n : ℕ}
     (a : Fin (n + 1) → σ) (r : R) :
