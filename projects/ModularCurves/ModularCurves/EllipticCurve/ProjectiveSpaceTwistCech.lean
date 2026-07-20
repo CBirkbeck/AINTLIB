@@ -482,6 +482,76 @@ theorem coordinateHomogeneousLaurentDeleteLinearMap_single [LinearOrder σ] {n :
     (S := Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)))
     (coordinateLaurentExponentDeleteEmbedding a k d) r e
 
+/-- For a noninitial deletion, a local Laurent exponent remains the same exponent and only gains
+the enlarged support permission from the full tuple. -/
+noncomputable def coordinateLaurentExponentDeleteAddMonoidHom [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1)) :
+    laurentExponentSubmonoid
+        (coordinateTailExponent (fun l => ((a.delete k.succ).1 l).down)) →+
+      laurentExponentSubmonoid
+        (coordinateTailExponent (fun l => (a.1 l).down)) where
+  toFun e := ⟨e.1, by
+    intro i hi
+    apply (coordinateTailExponent_ne_zero_iff
+      (fun l => (a.1 l).down) i).2
+    obtain ⟨l, hl⟩ := (coordinateTailExponent_ne_zero_iff
+      (fun l => ((a.delete k.succ).1 l).down) i).1 (e.2 i hi)
+    exact ⟨k.succ.succAbove l, hl⟩⟩
+  map_zero' := rfl
+  map_add' _ _ := rfl
+
+/-- The local exponent inclusion commutes with the natural-exponent maps into the two Laurent
+localizations. -/
+theorem coordinateLaurentExponentDeleteAddMonoidHom_awayMap [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1))
+    (e : {j : σ // j ≠ (a.1 0).down} →₀ ℕ) :
+    coordinateLaurentExponentDeleteAddMonoidHom a k
+        (laurentExponentAwayMap
+          (coordinateTailExponent
+            (fun l => ((a.delete k.succ).1 l).down)) e) =
+      laurentExponentAwayMap
+        (coordinateTailExponent (fun l => (a.1 l).down)) e := by
+  apply Subtype.ext
+  ext i
+  rfl
+
+/-- Reindexing local exponents by homogeneous weights identifies the noninitial local inclusion
+with the global deleted-tuple inclusion. -/
+theorem coordinateLaurentExponentEquiv_delete_succ [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1)) (d : ℤ)
+    (e : laurentExponentSubmonoid
+      (coordinateTailExponent (fun l => ((a.delete k.succ).1 l).down))) :
+    coordinateLaurentExponentEquiv (fun l => (a.1 l).down) d
+        (coordinateLaurentExponentDeleteAddMonoidHom a k e) =
+      coordinateLaurentExponentDeleteEmbedding a k.succ d
+        (coordinateLaurentExponentEquiv
+          (fun l => ((a.delete k.succ).1 l).down) d e) := by
+  apply Subtype.ext
+  apply Subtype.ext
+  ext i
+  change (coordinateLaurentExponentEquiv (fun l => (a.1 l).down) d
+      (coordinateLaurentExponentDeleteAddMonoidHom a k e)).1.1 i =
+    (coordinateLaurentExponentEquiv
+      (fun l => ((a.delete k.succ).1 l).down) d e).1.1 i
+  have hanchor : ((a.delete k.succ).1 0).down = (a.1 0).down := rfl
+  by_cases hi : i = (a.1 0).down
+  · subst i
+    rw [coordinateLaurentExponentEquiv_apply_anchor]
+    change d - Finsupp.degree e.1 =
+      (coordinateLaurentExponentEquiv
+        (fun l => ((a.delete k.succ).1 l).down) d e).1.1
+          ((a.delete k.succ).1 0).down
+    exact (coordinateLaurentExponentEquiv_apply_anchor
+      (fun l => ((a.delete k.succ).1 l).down) d e).symm
+  · have hi' : i ≠ ((a.delete k.succ).1 0).down := by
+      simpa [hanchor] using hi
+    rw [coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ hi,
+      coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ hi']
+    rfl
+
 /-- The standard frame of `O(d)` restricted to an ordered Cech intersection. -/
 noncomputable def coordinateHyperplaneTwistCechTrivialization {n : ℕ}
     (a : Fin (n + 1) → ULift.{u} σ) (j : σ) (d : ℤ) :
