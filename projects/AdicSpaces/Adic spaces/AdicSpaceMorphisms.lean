@@ -6,12 +6,18 @@ import «Adic spaces».AdicMorphismsCore
 import «Adic spaces».StructurePresheafBundled
 
 /-!
-# Adic morphisms of adic spaces (Wedhorn Definition 8.38, Prop 8.39, Cor 8.40)
+# Provisional presentation-level morphism predicates (towards Wedhorn §8.4)
 
-The space-level part of `AdicMorphisms.lean`, split off (WO1, 2026-07-20) because it
-consumes `AdicSpacePresentation`/`AffinoidAdicPresentation`, which now live downstream in
-`StructurePresheafBundled.lean` (their sheafiness field is the genuine Definition
-8.21 condition). Ring-level adicness (`IsAdicHom` etc.) stays in `AdicMorphisms.lean`.
+The carrier-presentation part of `AdicMorphisms.lean`, split off (WO1, 2026-07-20)
+because it consumes `AdicSpacePresentation`/`AffinoidAdicPresentation` from
+`StructurePresheafBundled.lean`. **Nothing here is a statement about actual adic
+spaces (objects of Wedhorn's `𝒱`)**: `AdicSpacePresentation` is a bundled carrier
+with presheaf data, `PresentationAffinoidNeighborhood` packages a chart
+*homeomorphism* of carriers, and `PresentationIsAdicMorphism` is a provisional
+carrier-level predicate (see its docstring — NOT Definition 8.38). Wedhorn
+Definition 8.38 / Proposition 8.39 / Corollary 8.40 for genuine adic spaces await
+the `𝒱`-layer; the affinoid (ring-level) content of Prop 8.39 is proved below.
+Ring-level adicness (`IsAdicHom` etc.) stays in `AdicMorphisms.lean`.
 -/
 
 noncomputable section
@@ -24,10 +30,12 @@ universe u
 
 open TopologicalSpace
 
-/-- An open affinoid neighborhood datum for a point in an adic space: an open set `U`,
-a point membership proof, an affinoid adic space `Y`, and a homeomorphism
-`U ≃ₜ Spa(Y.Ring)`. This packages the local chart data for Definition 8.38. -/
-structure AffinoidNeighborhood (X : AdicSpacePresentation.{u}) (x : X.carrier) where
+/-- An open affinoid chart datum for a point of a *presentation*: an open set `U`,
+a point membership proof, an affinoid adic presentation `aff`, and a
+**homeomorphism of carriers** `U ≃ₜ Spa(aff.Ring)` — no structure-sheaf or
+valuation compatibility is required, so this is strictly weaker than the affinoid
+opens of Wedhorn Definition 8.38 (hence the `Presentation` prefix). -/
+structure PresentationAffinoidNeighborhood (X : AdicSpacePresentation.{u}) (x : X.carrier) where
   /-- The open set containing `x`. -/
   U : Opens X.carrier
   /-- Proof that `x ∈ U`. -/
@@ -49,8 +57,8 @@ containment — a strictly provisional stand-in until the genuine `𝒱`-layer
 adic spaces and is deliberately **not** defined here. -/
 def PresentationIsAdicMorphism (X Y : AdicSpacePresentation.{u}) (f : C(X.carrier, Y.carrier)) : Prop :=
   ∀ (x : X.carrier),
-    ∃ (NX : AffinoidNeighborhood X x)
-      (NY : AffinoidNeighborhood Y (f x))
+    ∃ (NX : PresentationAffinoidNeighborhood X x)
+      (NY : PresentationAffinoidNeighborhood Y (f x))
       (_ : ∀ (p : ↥NX.U), f p.val ∈ NY.U)
       (_ : IsHuberRing NX.aff.Ring) (_ : IsHuberRing NY.aff.Ring)
       (φ : NY.aff.Ring →+* NX.aff.Ring),
@@ -137,45 +145,10 @@ theorem isAdicHom_iff_preserves_analytic {A B : Type*} [CommRing A] [CommRing B]
 
 end Prop839
 
-section Cor840
-
-/-- **Corollary 8.40 of Wedhorn.** Let `f : X → Y` be an adic morphism of adic
-spaces. Then for *all* open affinoid subspaces `U ⊆ X` and `V ⊆ Y` with
-`f(U) ⊆ V`, the induced ring homomorphism `𝒪_Y(V) → 𝒪_X(U)` is adic -- not
-just the witnessing neighborhoods from Definition 8.38.
-
-The proof reduces to Lemma 7.46(2) (`isAdicHom_of_complete_and_analytic_preserved`):
-if `Spa(φ)` preserves analytic points and the target ring is complete, then `φ` is
-adic. The analytic-preservation hypothesis `hφ_analytic` captures the consequence of
-Proposition 8.39(1) at the chart level: the adic morphism `f` preserves analytic
-points, and this transfers to `Spa(φ)` via the chart homeomorphisms.
-
-The hypotheses that are stated explicitly (`hφ_analytic`, `hφ_cont`, `hAB`, `PB`,
-`hBplus`) would be derivable from `hf` alone once the following infrastructure is
-formalized:
-1. **Proposition 8.36** (chart-independence of analyticity) connecting `f` to `Spa(φ)`.
-2. **Presheaf morphism** infrastructure extracting `φ` from `f` on charts.
-3. **Completeness** of affinoid rings (presheaf values are completions).
-
-Following Wedhorn p. 86, the intended argument is: Prop 8.39(1) gives
-`f(U_a) ⊆ V_a` (analytic-preservation), then Lemma 7.46(2) gives that `φ` is adic.
-
-**De-labelled (P0 honesty pass, 2026-07-20): this is NOT Corollary 8.40.** It is a
-chart-level restatement of Lemma 7.46(2); the previous version even carried an
-*unused* `PresentationIsAdicMorphism` hypothesis (now removed). Corollary 8.40
-proper is about morphisms of actual adic spaces and awaits the `𝒱`-layer. -/
-theorem ringHom_isAdic_of_charts_analytic_preserved {X Y : AdicSpacePresentation}
-    {f : C(X.carrier, Y.carrier)} {x : X.carrier}
-    (NX : AffinoidNeighborhood X x) (NY : AffinoidNeighborhood Y (f x))
-    (_hfUV : ∀ (p : ↥NX.U), f p.val ∈ NY.U) [IsHuberRing NX.aff.Ring]
-    [IsHuberRing NY.aff.Ring] (φ : NY.aff.Ring →+* NX.aff.Ring) (hφ_cont : Continuous φ)
-    (hAB : NY.aff.Ring⁺ ≤ (NX.aff.Ring⁺).comap φ)
-    (hφ_analytic : ∀ v ∈ Spa NX.aff.Ring NX.aff.Ring⁺,
-      IsAnalytic v → IsAnalytic (comap φ v))
-    (PB : PairOfDefinition NX.aff.Ring) [IsAdicComplete PB.I PB.A₀]
-    (hBplus : (NX.aff.Ring⁺ : Set NX.aff.Ring) ⊆ PB.A₀) : IsAdicHom φ :=
-  isAdicHom_of_complete_and_analytic_preserved hφ_cont hAB hφ_analytic PB hBplus
-
-end Cor840
+-- `ringHom_isAdic_of_charts_analytic_preserved` (a chart-decorated alias of the
+-- ring-level Lemma 7.46(2) `isAdicHom_of_complete_and_analytic_preserved`, with
+-- unused chart arguments) was DELETED in the 2026-07-20 fidelity pass: it had no
+-- consumers, and Corollary 8.40 proper is about morphisms of actual adic spaces
+-- and awaits the `𝒱`-layer.
 
 end ValuationSpectrum

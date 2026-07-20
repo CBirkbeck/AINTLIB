@@ -41,7 +41,8 @@ The literature-facing sheafiness API (Wedhorn Definition 8.26, Kedlaya Remarks
   `isSheafyTateRing_of_stronglyNoetherianTate` — its complete-case instantiation
   through the faithful transport. No `CompatiblePlusSubring`, no
   `HasLocLiftPowerBounded`, no `IsDomain` anywhere.
-* `A⁺`-independence lives in `StandardDescent.lean`: `isSheafyFor_congr` is the
+* `A⁺`-independence lives in `StandardDescent.lean`:
+  `isSheafyFor_congr_of_hasStandardRefinements` is the
   genuine transfer through the `A⁺`-free standard middle term (conditional on
   exactly Kedlaya Lemma 1.6.8's descent input `HasStandardRefinements`; no
   noetherianness, no `iff_of_true`), with the unconditional single-pair half
@@ -143,7 +144,8 @@ theorem isSheafyComplete_of_stronglyNoetherianTate [IsStronglyNoetherian A] :
 -- `A⁺`-independence is NOT stated here via `iff_of_true` from strong noetherianness
 -- (removed 2026-07-20, WO2/WO3 honesty constraint): the genuine transfer — through
 -- the `A⁺`-free standard middle term, conditional on exactly Kedlaya Lemma 1.6.8's
--- descent input and with no noetherian hypothesis — is `isSheafyFor_congr`
+-- descent input and with no noetherian hypothesis — is
+-- `isSheafyFor_congr_of_hasStandardRefinements`
 -- (`StandardDescent.lean`), with `standardSheafCondition_of_isSheafyFor` as its
 -- provable single-pair half.
 

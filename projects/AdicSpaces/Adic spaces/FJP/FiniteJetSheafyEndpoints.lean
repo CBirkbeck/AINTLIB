@@ -3,8 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.FiniteJetMain
-import «Adic spaces».StructurePresheafBundled
-import «Adic spaces».StandardDescent
+import «Adic spaces».SheafyEndpoints
 
 /-!
 # FJP: the literature-facing sheafiness endpoints (WO5)
@@ -75,6 +74,18 @@ theorem finiteJet_isSheafOfTopologicalRings :
   haveI : IsSheafy (JetA F) := finiteJet_isSheafy F
   exact isLimitSheaf_of_isSheafy
 
+/-- **The public structure presheaf of the pinching algebra is a sheaf of
+topological rings in the generic sense** (`TopCat.Presheaf.IsSheafOfTopologicalRings`,
+Wedhorn Remark 8.20 for the bundled presheaf) — the P0 wrapper applied to
+`finiteJet_isSheafyFor`. -/
+theorem finiteJet_structurePresheaf_isSheafOfTopologicalRings :
+    TopCat.Presheaf.IsSheafOfTopologicalRings
+      (ValuationSpectrum.structurePresheaf (JetA F)) := by
+  classical
+  refine (structurePresheaf_isSheafOfTopologicalRings_iff (JetA F)).mpr ?_
+  haveI : IsSheafy (JetA F) := finiteJet_isSheafy F
+  exact isLimitSheaf_of_isSheafy
+
 /-- **The bundled public structure presheaf of the pinching algebra satisfies the
 categorical sheaf condition** ([Stacks 00VR] `Hom`-by-`Hom` form). -/
 theorem finiteJet_structurePresheaf_isSheaf :
@@ -106,7 +117,8 @@ theorem finiteJet_isSheafyComplete_of_hasStandardRefinements
     (hall : ∀ Bplus : RingOfIntegralElements (JetA F),
       Bplus.HasStandardRefinements (JetA F)) :
     IsSheafyComplete (JetA F) :=
-  (isSheafyFor_iff_isSheafyComplete (finiteJetPlus F) hall).mp
+  (isSheafyFor_iff_isSheafyComplete_of_hasStandardRefinements
+    (finiteJetPlus F) hall).mp
     (finiteJet_isSheafyFor F)
 
 end FiniteJet

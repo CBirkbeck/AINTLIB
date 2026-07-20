@@ -6,24 +6,28 @@ import «Adic spaces».PerfectoidRing
 import «Adic spaces».StructurePresheafBundled
 
 /-!
-# Perfectoid Spaces
+# Perfectoid space *presentations*
 
-We define **affinoid perfectoid spaces** and **perfectoid spaces** following
-Scholze's *Perfectoid Spaces* (2012), Definition 3.19.
+Carrier-level **presentation** objects for perfectoid geometry. **Nothing in this
+file is an actual object of Wedhorn's category `𝒱`**: `AdicSpacePresentation` /
+`AffinoidAdicPresentation` are bundled carriers with presheaf data, and the
+perfectoid predicate below asks only for chart *homeomorphisms* of carriers —
+Scholze's Definition 3.19 (isomorphisms of adic spaces, with structure sheaves
+and valuations) awaits the genuine `𝒱`-layer.
 
 ## Main definitions
 
 * `AffinoidPerfectoidSpace p` : A bundled perfectoid ring with all instances needed to form
-  `Spa(A, A⁺)`. This is `Spa(A, A⁺)` where `A` is a perfectoid ring.
-* `IsPerfectoidSpacePresentation p X` : An adic space `X` is a **perfectoid space** if every point has
-  an open affinoid neighborhood that is isomorphic to `Spa(A, A⁺)` for some perfectoid ring `A`.
+  `Spa(A, A⁺)`.
+* `IsPerfectoidSpacePresentation p X` : the PROVISIONAL carrier-level perfectoid
+  predicate on a presentation (see its docstring; NOT Scholze Definition 3.19).
 
-## Main results (sorry'd)
+## Main results (sorry'd, producer WIP)
 
-* `AffinoidPerfectoidSpace.toAffinoidAdicPresentation` : Every affinoid perfectoid space is an
-  affinoid adic space (requires sheafiness of perfectoid rings).
-* `AffinoidPerfectoidSpace.toAdicSpace` : Every affinoid perfectoid space is an adic space.
-* `PerfectoidSpace.tilt` : The tilt of a perfectoid space is perfectoid (in characteristic `p`).
+* `AffinoidPerfectoidSpace.toAffinoidAdicPresentation` : Every affinoid perfectoid space gives
+  an affinoid adic *presentation* (requires sheafiness of perfectoid rings).
+* `AffinoidPerfectoidSpace.toAdicSpacePresentation` : Every affinoid perfectoid space gives
+  an adic space *presentation*.
 
 ## References
 
@@ -76,11 +80,11 @@ proof goes through almost mathematics and tilting. -/
 noncomputable def toAffinoidAdicPresentation : AffinoidAdicPresentation.{u} := by
   exact sorry
 
-/-- Every affinoid perfectoid space gives rise to an adic space.
+/-- Every affinoid perfectoid space gives rise to an adic space *presentation*.
 
-This combines `toAffinoidAdicPresentation` with the fact that every affinoid adic space
-is trivially an adic space (covered by itself). -/
-noncomputable def toAdicSpace : AdicSpacePresentation.{u} := by
+This combines `toAffinoidAdicPresentation` with the fact that every affinoid adic
+presentation is trivially an adic space presentation (covered by itself). -/
+noncomputable def toAdicSpacePresentation : AdicSpacePresentation.{u} := by
   exact sorry
 
 end AffinoidPerfectoidSpace
@@ -103,16 +107,12 @@ class IsPerfectoidSpacePresentation (p : ℕ) [Fact (Nat.Prime p)]
       ∃ (S : AffinoidPerfectoidSpace.{u} p),
         Nonempty (↥U ≃ₜ S.toTopCat)
 
-/-! ### Tilt of a perfectoid space -/
+/-! ### Tilting (space level): NOT formalized here
 
-/-- The **tilt** of a perfectoid space is again a perfectoid space (in characteristic `p`).
-
-This is a fundamental result in the theory of perfectoid spaces: the tilting functor
-preserves the perfectoid property. The proof requires showing that the tilt of each
-local perfectoid ring is again perfectoid, and that the local charts glue correctly.
-
-(Scholze, *Perfectoid Spaces*, Theorem 6.3) -/
-theorem PerfectoidSpace.tilt (p : ℕ) [Fact (Nat.Prime p)]
-    (X : AdicSpacePresentation.{u}) [IsPerfectoidSpacePresentation p X] :
-    ∃ (Y : AdicSpacePresentation.{u}), IsPerfectoidSpacePresentation p Y := by
-  exact sorry
+The space-level tilting equivalence (Scholze, *Perfectoid Spaces*, Theorem 6.3 —
+the tilt `X♭` of a perfectoid space, with its chart-wise gluing) is **not**
+formalized in this file. A previous statement named `PerfectoidSpace.tilt` was
+removed (2026-07-20): it asserted only `∃ Y, IsPerfectoidSpacePresentation p Y`,
+which does not mention the tilt of `X` at all and so did not formalize tilting.
+The genuine ring-level tilt `A♭` lives in `Tilting.lean`
+(`PerfectoidRing.tilt`); the space level awaits the genuine `𝒱`-layer. -/

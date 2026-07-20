@@ -44,7 +44,8 @@ assertions of the sheaf axiom for these coverings, depend only on `A`, not on `A
   transfers by the two-step Čech argument with the induced standard covers of the
   pieces (which are again standard data for the *same* spanning family, so the
   middle term supplies their separation).
-* `isSheafyFor_congr` — **genuine A⁺-independence** (Kedlaya Remark 1.6.9): for a
+* `isSheafyFor_congr_of_hasStandardRefinements` — **genuine A⁺-independence**
+  (Kedlaya Remark 1.6.9), conditional on the named descent input: for a
   complete Tate ring with the descent input, `IsSheafyFor A Aplus ↔ IsSheafyFor A
   Bplus` for *any* two valid rings of integral elements — no strong noetherianness,
   no inclusion between the plus rings, no identification of the two `Spa`'s; the
@@ -400,11 +401,13 @@ conclusion of Kedlaya Lemma 1.6.8, `HasStandardRefinements` — see its docstrin
 the precise blocked dependencies): any two valid rings of integral elements — with
 no strong noetherianness, no inclusion or definitional relation between them, and
 no identification of the two adic spectra — give equivalent pair-level sheafiness.
-The proof is the genuine transfer
+The unsuffixed name `isSheafyFor_congr` is reserved for the eventual
+*unconditional* theorem (descent input discharged). The proof is the genuine transfer
 `IsSheafyFor A Aplus → StandardSheafCondition A → IsSheafyFor A Bplus`:
 the `A⁺`-free standard condition is the common middle term, *not* an appeal to a
 condition implying both sides. -/
-theorem isSheafyFor_congr (Aplus Bplus : RingOfIntegralElements A)
+theorem isSheafyFor_congr_of_hasStandardRefinements
+    (Aplus Bplus : RingOfIntegralElements A)
     (hA : Aplus.HasStandardRefinements A) (hB : Bplus.HasStandardRefinements A) :
     IsSheafyFor A Aplus ↔ IsSheafyFor A Bplus :=
   ⟨fun h => isSheafyFor_of_standardSheafCondition
@@ -415,7 +418,8 @@ theorem isSheafyFor_congr (Aplus Bplus : RingOfIntegralElements A)
 /-- **The standard-cover criterion** (WO2 task 3, conditional form): for a complete
 Tate ring with the descent input at a pair, the all-rational-cover sheaf condition
 at that pair is *equivalent* to the `A⁺`-free standard-cover condition. -/
-theorem isSheafyFor_iff_standardSheafCondition (Aplus : RingOfIntegralElements A)
+theorem isSheafyFor_iff_standardSheafCondition_of_hasStandardRefinements
+    (Aplus : RingOfIntegralElements A)
     (hA : Aplus.HasStandardRefinements A) :
     IsSheafyFor A Aplus ↔ StandardSheafCondition A :=
   ⟨standardSheafCondition_of_isSheafyFor Aplus,
@@ -424,7 +428,8 @@ theorem isSheafyFor_iff_standardSheafCondition (Aplus : RingOfIntegralElements A
 /-- **The universal specialization** (WO2 task 6): with the descent input at every
 valid pair, sheafiness at one pair is equivalent to sheafiness at all pairs
 (`IsSheafyComplete`, the ring-level Definition 8.26 for complete `A`). -/
-theorem isSheafyFor_iff_isSheafyComplete (Aplus : RingOfIntegralElements A)
+theorem isSheafyFor_iff_isSheafyComplete_of_hasStandardRefinements
+    (Aplus : RingOfIntegralElements A)
     (hall : ∀ Bplus : RingOfIntegralElements A, Bplus.HasStandardRefinements A) :
     IsSheafyFor A Aplus ↔ IsSheafyComplete A :=
   ⟨fun h Bplus => isSheafyFor_of_standardSheafCondition
@@ -436,6 +441,6 @@ assumed *distinct* — nothing in the transfer identifies them. -/
 example (Aplus Bplus : RingOfIntegralElements A) (_ : Aplus ≠ Bplus)
     (hA : Aplus.HasStandardRefinements A) (hB : Bplus.HasStandardRefinements A) :
     IsSheafyFor A Aplus ↔ IsSheafyFor A Bplus :=
-  isSheafyFor_congr Aplus Bplus hA hB
+  isSheafyFor_congr_of_hasStandardRefinements Aplus Bplus hA hB
 
 end ValuationSpectrum

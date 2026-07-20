@@ -23,15 +23,13 @@ following §7.5 and §8.4 of [Wedhorn, *Adic Spaces*].
 * `ValuationSpectrum.isAdicHom_of_complete_and_analytic_preserved` : If `B` is complete and
   `Spa(φ)` preserves analytic points, then `φ` is adic (Lemma 7.46(2)).
 * `ValuationSpectrum.PresentationIsAdicMorphism` (in `AdicSpaceMorphisms.lean`) :
-  PROVISIONAL carrier-level adicness — NOT Definition 8.38 (see its docstring)
-  (Definition 8.38 of Wedhorn).
+  PROVISIONAL predicate on carrier *presentations* — NOT Definition 8.38 (see its
+  docstring; presentations are not objects of Wedhorn's `𝒱`, and the public name
+  `IsAdicMorphism` stays reserved for the eventual `𝒱`-level predicate).
 * `ValuationSpectrum.isAdicHom_iff_preserves_analytic` : A ring hom is adic iff it
   preserves analytic points on Spa (Proposition 8.39(1), affinoid iff version).
 * `ValuationSpectrum.morphism_preserves_nonAnalytic_affinoid` : Any continuous ring hom
   preserves non-analytic points (Proposition 8.39(2), affinoid case).
-* `ValuationSpectrum.ringHom_isAdic_of_charts_analytic_preserved` : chart-level
-  Lemma 7.46(2) restatement (formerly mislabelled Corollary 8.40); the ring map of an adic
-  morphism on affinoid charts is adic (Corollary 8.40).
 
 ## References
 

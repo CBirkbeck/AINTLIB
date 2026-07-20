@@ -114,3 +114,45 @@ Scope column: **pair** = fixed `(A, A⁺)`; **cTate** = complete Tate ring;
 5. `completionModelCompare_canonicalMap` carries `[IsNoetherianRing A] [T2Space A]
    [NonarchimedeanRing A]` inherited from the current section scope of
    `restrictionMapHom_canonicalMap` — no mathematical content; a cleanup candidate.
+
+---
+
+## Update — 2026-07-20 fidelity pass (post-`4f887b1c8`)
+
+Superseding items 3–5 of the list above:
+
+- **Item 5 is RESOLVED**: the restriction-map-based comparison was replaced by
+  `CompletionModelIndependence.lean` — `completionModelCompare` + continuity both
+  ways + `completionModelCompare_canonicalMap` now require **only**
+  `[CommRing] [TopologicalSpace] [IsTopologicalRing] [IsHuberRing]` (the
+  whole-space localization topology is pair-independent,
+  `locTopology_globalLocData_eq`; the comparison is the completion functor on the
+  identity across the equal topologies). Citation honesty: uniqueness is the
+  universal property of `UniformSpace.Completion`; Wedhorn Remark 8.3 is the
+  identification `𝒪_X(X) = Â`, not a uniqueness theorem; the topology statement
+  is Wedhorn §6.1/Definition 6.1.
+- **Item 4 has a delivered one-model form**: `IsStronglyNoetherianTateRing A`
+  (`∃ P, IsStronglyNoetherian (CompletionModel A P)`, with an explicit
+  `[IsTateRing A]` binder — the name promises Tate scope and the signature now
+  shows it), `completionModel_isStronglyNoetherian_congr` (hypothesis-clean
+  `∃ ↔ ∀` transport through the clean comparison + restricted-power-series
+  transport), and the wrapper `isSheafyTateRing_of_stronglyNoetherianTateRing`.
+- **Item 3 remains open** (the `IsSheafyFor` transport along
+  `completionModelCompare`); the affinoid ingredients are now in
+  `AffinoidTransport.lean` (`RingOfIntegralElements.map/congr`,
+  `spaHomeomorphOfRingEquiv : Spa (B, e(P)) ≃ₜ Spa (A, P)`), and the presheaf
+  half (datum transport + structure-presheaf natural isomorphism +
+  `IsLimitSheaf` invariance) is the remaining blocker for
+  `isSheafyTateRing_iff_for_completionModel` / `_iff_exists_completionModel` /
+  `_iff_isSheafyComplete`.
+- **Naming honesty**: the conditional descent trio is now suffixed —
+  `isSheafyFor_congr_of_hasStandardRefinements`,
+  `isSheafyFor_iff_standardSheafCondition_of_hasStandardRefinements`,
+  `isSheafyFor_iff_isSheafyComplete_of_hasStandardRefinements`; the unsuffixed
+  names are reserved for the eventual unconditional theorems.
+- **New public endpoints**: `isSheafyTateRing_isLimitSheaf` (named projection),
+  `finiteJet_structurePresheaf_isSheafOfTopologicalRings` (the generic
+  Remark-8.20 predicate for the public presheaf of `JetA F`).
+- **Removed**: `ringHom_isAdic_of_charts_analytic_preserved` (unused
+  chart-decorated alias of Lemma 7.46(2)); `PerfectoidSpace.tilt` (its statement
+  was a bare existential that did not formalize tilting).

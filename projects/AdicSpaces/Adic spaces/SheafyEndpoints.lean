@@ -97,10 +97,9 @@ theorem isSheafyTateRing_structurePresheaf_isSheaf
   isSheafyFor_structurePresheaf_isSheaf Bplus (h P Bplus)
 
 /-- `IsSheafyTateRing` gives `IsLimitSheaf` at every completion model and valid
-pair — the explicit projection requested by the campaign (the public all-open
-structure presheaf is then a sheaf of topological rings for every `P` and `B⁺`,
-by the two wrappers above). -/
-example (h : IsSheafyTateRing A) (P : PairOfDefinition A)
+pair — the explicit projection (the public all-open structure presheaf is then a
+sheaf of topological rings for every `P` and `B⁺`, by the two wrappers above). -/
+theorem isSheafyTateRing_isLimitSheaf (h : IsSheafyTateRing A) (P : PairOfDefinition A)
     (Bplus : RingOfIntegralElements (CompletionModel A P)) :
     letI := Bplus.toPlusSubring
     haveI : IsRingOfIntegralElements

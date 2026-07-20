@@ -25,8 +25,13 @@ the (equal) topologies, extended to the completions.
 
 ## Reference
 
-Wedhorn Remark 8.3 (uniqueness of the completion); §6.1 (any two pairs of
-definition induce the same topology).
+Wedhorn Definition 6.1 / §6.1: the pair `(A₀, I)` *defines* the topology of `A`,
+and any two pairs of definition present the same topology — that is the content of
+`locTopology_globalLocData_eq`. The uniqueness making `completionModelCompare`
+canonical is the universal property of the uniform completion
+(`UniformSpace.Completion`, via `DenseRange.equalizer`); Wedhorn Remark 8.3 itself
+is the identification of the global sections `𝒪_X(X)` with `Â` — it is *not* the
+uniqueness statement.
 -/
 
 noncomputable section
@@ -43,85 +48,18 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 /-! ### The whole-space localization topology is pair-independent -/
 
 /-- Membership in the `n`-th basic neighborhood of the whole-space datum: exactly
-the `algebraMap`-images of `Iⁿ`. -/
+the `algebraMap`-images of `Iⁿ` (mem-form of `locNhd_singleton_one_eq`). -/
 theorem mem_locNhd_globalLocData {P : PairOfDefinition A} {n : ℕ}
     {x : Localization.Away (1 : A)} :
     x ∈ locNhd P ({1} : Finset A) (1 : A) n ↔
       ∃ b : P.A₀, b ∈ (P.I ^ n : Ideal P.A₀) ∧
         algebraMap A (Localization.Away (1 : A)) (b : A) = x := by
+  rw [← SetLike.mem_coe, locNhd_singleton_one_eq]
   constructor
-  · rintro ⟨d, hd, rfl⟩
-    -- `locIdeal ^ n = Ideal.map algebraMapD (I ^ n)`; run span induction
-    have hd' : d ∈ Ideal.map (algebraMapD P ({1} : Finset A) (1 : A))
-        (P.I ^ n) := by
-      rw [Ideal.map_pow]
-      exact hd
-    refine Submodule.span_induction (p := fun d _ => ∃ b : P.A₀,
-      b ∈ (P.I ^ n : Ideal P.A₀) ∧
-        algebraMap A (Localization.Away (1 : A)) (b : A) =
-          ((d : locSubring P ({1} : Finset A) (1 : A)) :
-            Localization.Away (1 : A))) ?_ ?_ ?_ ?_ hd'
-    · rintro _ ⟨b, hb, rfl⟩
-      exact ⟨b, hb, rfl⟩
-    · exact ⟨0, Submodule.zero_mem _, by simp⟩
-    · rintro d₁ d₂ - - ⟨b₁, hb₁, hb₁x⟩ ⟨b₂, hb₂, hb₂x⟩
-      refine ⟨b₁ + b₂, Submodule.add_mem _ hb₁ hb₂, ?_⟩
-      have hcoe : ((b₁ + b₂ : P.A₀) : A) = (b₁ : A) + (b₂ : A) := rfl
-      rw [hcoe, map_add, hb₁x, hb₂x]
-      rfl
-    · rintro r d - ⟨b, hb, hbx⟩
-      -- `r ∈ locSubring` for the whole-space datum lies in the image of `A₀`
-      obtain ⟨a₀, ha₀⟩ : ∃ a₀ : P.A₀,
-          algebraMap A (Localization.Away (1 : A)) (a₀ : A) =
-            ((r : locSubring P ({1} : Finset A) (1 : A)) :
-              Localization.Away (1 : A)) := by
-        have hr := r.2
-        -- the generators: `A₀`-images and `divByS 1 1 = algebraMap 1`
-        have hgen : (algebraMap A (Localization.Away (1 : A))) ''
-            (P.A₀ : Set A) ∪
-            Set.range (fun t : ({1} : Finset A) => divByS (t : A) (1 : A)) ⊆
-            {x | ∃ a₀ : P.A₀,
-              algebraMap A (Localization.Away (1 : A)) (a₀ : A) = x} := by
-          rintro x (⟨a, ha, rfl⟩ | ⟨t, rfl⟩)
-          · exact ⟨⟨a, ha⟩, rfl⟩
-          · refine ⟨1, ?_⟩
-            show algebraMap A (Localization.Away (1 : A)) ((1 : P.A₀) : A) =
-              divByS (t : A) (1 : A)
-            have ht : (t : A) = 1 := Finset.mem_singleton.mp t.2
-            rw [ht, divByS_eq_algebraMap]
-            rfl
-        -- the image of `A₀` is a subring, so closure adds nothing
-        have himage : ∃ S : Subring (Localization.Away (1 : A)),
-            (S : Set (Localization.Away (1 : A))) =
-              {x | ∃ a₀ : P.A₀,
-                algebraMap A (Localization.Away (1 : A)) (a₀ : A) = x} := by
-          refine ⟨(P.A₀.map (algebraMap A (Localization.Away (1 : A)))), ?_⟩
-          ext x
-          constructor
-          · rintro ⟨a, ha, rfl⟩
-            exact ⟨⟨a, ha⟩, rfl⟩
-          · rintro ⟨a₀, rfl⟩
-            exact ⟨(a₀ : A), a₀.2, rfl⟩
-        obtain ⟨S, hS⟩ := himage
-        have hle : locSubring P ({1} : Finset A) (1 : A) ≤ S := by
-          rw [locSubring]
-          refine Subring.closure_le.mpr ?_
-          rw [hS]
-          exact hgen
-        have hmem := hle hr
-        rw [← SetLike.mem_coe, hS] at hmem
-        exact hmem
-      refine ⟨⟨(a₀ : A), a₀.2⟩ * b, Ideal.mul_mem_left _ _ hb, ?_⟩
-      have hcoe : (((⟨(a₀ : A), a₀.2⟩ : P.A₀) * b : P.A₀) : A) =
-          (a₀ : A) * (b : A) := rfl
-      rw [hcoe, map_mul, ha₀, hbx]
-      rfl
+  · rintro ⟨_, ⟨b, hb, rfl⟩, rfl⟩
+    exact ⟨b, hb, rfl⟩
   · rintro ⟨b, hb, rfl⟩
-    refine ⟨algebraMapD P ({1} : Finset A) (1 : A) b, ?_, rfl⟩
-    rw [show (locIdeal P ({1} : Finset A) (1 : A)) ^ n =
-      Ideal.map (algebraMapD P ({1} : Finset A) (1 : A)) (P.I ^ n) from
-      (Ideal.map_pow _ _ _).symm]
-    exact Ideal.mem_map_of_mem _ hb
+    exact ⟨(b : A), ⟨b, hb, rfl⟩, rfl⟩
 
 /-- **The whole-space localization topology does not depend on the pair of
 definition** (Wedhorn §6.1: any two pairs of definition present the same
@@ -270,8 +208,9 @@ theorem completionModelCompare_symm_continuous :
     Continuous (completionModelCompare P P').symm :=
   compareHom_continuous P' P
 
-/-- The clean comparison intertwines the canonical maps from `A` (Wedhorn
-Remark 8.3's compatibility). -/
+/-- The clean comparison intertwines the canonical maps `A → Â` (the completion
+maps into the global sections of Wedhorn Remark 8.3; the compatibility itself is
+the universal property of the completion). -/
 theorem completionModelCompare_canonicalMap (a : A) :
     completionModelCompare P P' ((globalLocData P).canonicalMap a) =
       (globalLocData P').canonicalMap a :=

@@ -126,15 +126,20 @@ section OneModel
 universe v
 
 variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A]
+  [IsHuberRing A]
 
 variable (A) in
 /-- **The source-facing strongly-noetherian predicate for a (possibly noncomplete)
 Tate ring** (Wedhorn Proposition & Definition 6.36: a condition on the completion
 `Â`): *some* completion model is strongly noetherian. By
 `completionModel_isStronglyNoetherian_congr` (hypothesis-clean), one model
-suffices for all. -/
-def IsStronglyNoetherianTateRing : Prop :=
+suffices for all.
+
+The `[IsTateRing A]` binder is deliberate and visible in the signature: the name
+promises Tate scope (Definition 6.36 and Theorem 8.28(b) are used at Tate scope in
+this project), so the predicate is only offered for Tate rings even though the
+underlying `∃`-statement would typecheck for any Huber ring. -/
+def IsStronglyNoetherianTateRing [IsTateRing A] : Prop :=
   ∃ P : PairOfDefinition A, IsStronglyNoetherian (CompletionModel A P)
 
 /-- **Model-independence of strong noetherianity** — one completion model is
@@ -151,14 +156,14 @@ theorem completionModel_isStronglyNoetherian_congr (P P' : PairOfDefinition A) :
 hypothesis in its `∃`-model form): a Tate ring one of whose completion models is
 strongly noetherian is sheafy in the ring-level sense. Hypothesis-clean (the
 model passage is the clean comparison). -/
-theorem isSheafyTateRing_of_stronglyNoetherianTateRing
+theorem isSheafyTateRing_of_stronglyNoetherianTateRing [IsTateRing A]
     (h : IsStronglyNoetherianTateRing A) : IsSheafyTateRing A := by
   obtain ⟨P₀, hP₀⟩ := h
   refine isSheafyTateRing_of_stronglyNoetherian_completion (fun P => ?_)
   exact (completionModel_isStronglyNoetherian_congr P₀ P).mp hP₀
 
 /-- One model strongly noetherian iff all models are (the `∃ ↔ ∀` collapse). -/
-theorem isStronglyNoetherianTateRing_iff_forall :
+theorem isStronglyNoetherianTateRing_iff_forall [IsTateRing A] :
     IsStronglyNoetherianTateRing A ↔
       ∀ P : PairOfDefinition A, IsStronglyNoetherian (CompletionModel A P) := by
   constructor
