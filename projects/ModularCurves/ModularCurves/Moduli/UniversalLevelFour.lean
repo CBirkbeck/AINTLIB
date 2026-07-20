@@ -91,41 +91,179 @@ def universalE4 : WeierstrassCurve (E4ModuliRing R) :=
 
 /-! ### E4A-2/E4A-3 — ellipticity and the automatic units -/
 
-/-- **(E4A-2)** `Δ(universalE4) = −B⁴(16B − 1)` is a unit (sympy-certified; `ring` +
-the `e4Delta` localization). -/
-theorem isUnit_universalE4_Δ : IsUnit (universalE4 R).Δ := by sorry
+/-- The composite `R[B,u,v] → E4Quotient → E4ModuliRing`. -/
+def e4Map : MvPolynomial (Fin 3) R →+* E4ModuliRing R :=
+  (algebraMap (E4Quotient R) (E4ModuliRing R)).comp
+    (Ideal.Quotient.mk (Ideal.span {e4CurveRel R, e4OrderRel R}))
+
+@[simp] theorem e4Map_X0 : e4Map R (X 0) = e4B R := rfl
+@[simp] theorem e4Map_X1 : e4Map R (X 1) = e4U R := rfl
+@[simp] theorem e4Map_X2 : e4Map R (X 2) = e4V R := rfl
+
+/-- The curve relation vanishes in the moduli ring. -/
+theorem e4CurveRel_map_eq_zero : e4Map R (e4CurveRel R) = 0 := by
+  have h : (Ideal.Quotient.mk (Ideal.span {e4CurveRel R, e4OrderRel R}))
+      (e4CurveRel R) = 0 :=
+    Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (Set.mem_insert _ _))
+  rw [e4Map, RingHom.comp_apply, h, map_zero]
+
+/-- The order-4 relation vanishes in the moduli ring. -/
+theorem e4OrderRel_map_eq_zero : e4Map R (e4OrderRel R) = 0 := by
+  have h : (Ideal.Quotient.mk (Ideal.span {e4CurveRel R, e4OrderRel R}))
+      (e4OrderRel R) = 0 :=
+    Ideal.Quotient.eq_zero_iff_mem.mpr
+      (Ideal.subset_span (Set.mem_insert_of_mem _ rfl))
+  rw [e4Map, RingHom.comp_apply, h, map_zero]
+
+/-- The curve relation among `e4B, e4U, e4V`. -/
+theorem e4_curve_rel :
+    e4V R ^ 2 + e4U R * e4V R + e4B R * e4V R - e4U R ^ 3 - e4B R * e4U R ^ 2 = 0 := by
+  have h := e4CurveRel_map_eq_zero R
+  simp only [e4CurveRel, map_add, map_sub, map_mul, map_pow,
+    e4Map_X0, e4Map_X1, e4Map_X2] at h
+  linear_combination h
+
+/-- The order-4 relation among `e4B, e4U`. -/
+theorem e4_order_rel :
+    2 * e4U R ^ 4 + e4U R ^ 3 + 3 * e4B R * e4U R ^ 2 + 4 * e4B R ^ 2 * e4U R
+      + 2 * e4B R ^ 3 = 0 := by
+  have h := e4OrderRel_map_eq_zero R
+  simp only [e4OrderRel, map_add, map_sub, map_mul, map_pow, map_ofNat,
+    e4Map_X0, e4Map_X1, e4Map_X2] at h
+  linear_combination h
+
+/-- The localized element `B(1 − 16B)` is a unit. -/
+theorem isUnit_e4B_mul_one_sub : IsUnit (e4B R * (1 - 16 * e4B R)) := by
+  have h := IsLocalization.Away.algebraMap_isUnit
+    (S := E4ModuliRing R) (e4Delta R)
+  have heq : algebraMap (E4Quotient R) (E4ModuliRing R) (e4Delta R)
+      = e4B R * (1 - 16 * e4B R) := by
+    simp only [e4Delta, e4B, map_mul, map_sub, map_one, map_ofNat]
+  rwa [heq] at h
+
+/-- **(E4A-3)** `B` is a unit in the moduli ring. -/
+theorem isUnit_e4B : IsUnit (e4B R) :=
+  isUnit_of_mul_isUnit_left (isUnit_e4B_mul_one_sub R)
+
+/-- **(E4A-3)** `1 − 16B` is a unit in the moduli ring. -/
+theorem isUnit_one_sub_sixteen_e4B : IsUnit (1 - 16 * e4B R) :=
+  isUnit_of_mul_isUnit_right (isUnit_e4B_mul_one_sub R)
+
+/-- **(E4A-2)** `Δ(universalE4) = B⁴(1 − 16B)` is a unit (sympy-certified identity,
+`ring`-checked below). -/
+theorem isUnit_universalE4_Δ : IsUnit (universalE4 R).Δ := by
+  have hΔ : (universalE4 R).Δ = e4B R ^ 4 * (1 - 16 * e4B R) := by
+    rw [WeierstrassCurve.Δ]
+    show -(universalE4 R).b₂ ^ 2 * (universalE4 R).b₈ - 8 * (universalE4 R).b₄ ^ 3
+        - 27 * (universalE4 R).b₆ ^ 2 + 9 * (universalE4 R).b₂ * (universalE4 R).b₄
+          * (universalE4 R).b₆ = _
+    rw [WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
+      WeierstrassCurve.b₈]
+    show -((1:E4ModuliRing R) ^ 2 + 4 * e4B R) ^ 2 * (1 ^ 2 * 0 + 4 * (e4B R) * 0
+        - 1 * (e4B R) * 0 + (e4B R) * (e4B R) ^ 2 - 0 ^ 2)
+      - 8 * (2 * 0 + 1 * (e4B R)) ^ 3 - 27 * ((e4B R) ^ 2 + 4 * 0) ^ 2
+      + 9 * (1 ^ 2 + 4 * e4B R) * (2 * 0 + 1 * (e4B R)) * ((e4B R) ^ 2 + 4 * 0) = _
+    ring
+  rw [hΔ]
+  exact ((isUnit_e4B R).pow 4).mul (isUnit_one_sub_sixteen_e4B R)
 
 instance : (universalE4 R).IsElliptic := by
   rw [WeierstrassCurve.isElliptic_iff]; exact isUnit_universalE4_Δ R
 
-/-- **(E4A-3)** `B` is a unit in the moduli ring. -/
-theorem isUnit_e4B : IsUnit (e4B R) := by sorry
-
-/-- **(E4A-3)** `1 − 16B` is a unit in the moduli ring. -/
-theorem isUnit_one_sub_sixteen_e4B : IsUnit (1 - 16 * e4B R) := by sorry
-
-/-- **(E4A-3)** `u = x(Q)` is a unit: from `e4Rel`,
+/-- **(E4A-3)** `u = x(Q)` is a unit (needs `2` invertible): from `e4Rel`,
 `u·(2u³ + u² + 3Bu + 4B²) = −2B³` is a unit (`Q ∉ {±P}` automatic). -/
-theorem isUnit_e4U : IsUnit (e4U R) := by sorry
+theorem isUnit_e4U (hR : IsUnit (2 : R)) : IsUnit (e4U R) := by
+  have h2 : IsUnit (2 : E4ModuliRing R) := by
+    have := hR.map (algebraMap R (E4ModuliRing R))
+    rwa [map_ofNat] at this
+  apply isUnit_of_mul_isUnit_left
+    (y := 2 * e4U R ^ 3 + e4U R ^ 2 + 3 * e4B R * e4U R + 4 * e4B R ^ 2)
+  rw [show e4U R * (2 * e4U R ^ 3 + e4U R ^ 2 + 3 * e4B R * e4U R + 4 * e4B R ^ 2)
+      = -(2 * e4B R ^ 3) by linear_combination e4_order_rel R]
+  exact ((h2.mul ((isUnit_e4B R).pow 3))).neg
 
-/-- **(E4A-3)** `u + 2B` is a unit: from `e4Rel`, `e4Rel(B, −2B) = 2B³(16B − 1)` is a
-unit (`2Q ≠ 2P` automatic — the locus `{2Q = 2P}` is `{x(Q) ∈ {0, −2B}}`). -/
-theorem isUnit_e4U_add_two_e4B : IsUnit (e4U R + 2 * e4B R) := by sorry
+/-- **(E4A-3)** `u + 2B` is a unit (needs `2` invertible): substituting `u = −2B` into
+`e4Rel` leaves the unit `2B³(16B − 1)` (`2Q ≠ 2P` automatic — the locus `{2Q = 2P}` is
+`{x(Q) ∈ {0, −2B}}`). -/
+theorem isUnit_e4U_add_two_e4B (hR : IsUnit (2 : R)) :
+    IsUnit (e4U R + 2 * e4B R) := by
+  have h2 : IsUnit (2 : E4ModuliRing R) := by
+    have := hR.map (algebraMap R (E4ModuliRing R))
+    rwa [map_ofNat] at this
+  apply isUnit_of_mul_isUnit_left
+    (y := 2 * e4U R ^ 3 + (1 - 4 * e4B R) * e4U R ^ 2
+      + (e4B R + 8 * e4B R ^ 2) * e4U R + 2 * e4B R ^ 2 * (1 - 8 * e4B R))
+  rw [show (e4U R + 2 * e4B R) * (2 * e4U R ^ 3 + (1 - 4 * e4B R) * e4U R ^ 2
+      + (e4B R + 8 * e4B R ^ 2) * e4U R + 2 * e4B R ^ 2 * (1 - 8 * e4B R))
+      = 2 * e4B R ^ 3 * (1 - 16 * e4B R)
+        + (2 * e4U R ^ 4 + e4U R ^ 3 + 3 * e4B R * e4U R ^ 2
+          + 4 * e4B R ^ 2 * e4U R + 2 * e4B R ^ 3) by ring]
+  rw [e4_order_rel R, add_zero]
+  exact (h2.mul ((isUnit_e4B R).pow 3)).mul (isUnit_one_sub_sixteen_e4B R)
 
-/-- **(E4A-3)** `ψ₂(Q) = 2v + u + B` is a unit: Bezout from
-`res_u(e4Rel, ψ₂²-abscissa-polynomial) = 8B⁸(16B − 1)²` (`2Q ≠ 0` automatic). -/
-theorem isUnit_psiTwo_e4Q : IsUnit (2 * e4V R + e4U R + e4B R) := by sorry
+/-- **(E4A-3)** `ψ₂(Q) = 2v + u + B` is a unit (needs `2` invertible): the square
+`ψ₂(Q)² = 4u³ + (1+4B)u² + 2Bu + B²` (mod the curve relation), and the sympy-solved
+Bezout identity `B₀·ψ₂² = 4B⁶(16B−1) + A₀·e4Rel` exhibits `ψ₂(Q)²` as a divisor of the
+unit `4B⁶(16B−1)` (`2Q ≠ 0` automatic). -/
+theorem isUnit_psiTwo_e4Q (hR : IsUnit (2 : R)) :
+    IsUnit (2 * e4V R + e4U R + e4B R) := by
+  have h2 : IsUnit (2 : E4ModuliRing R) := by
+    have := hR.map (algebraMap R (E4ModuliRing R))
+    rwa [map_ofNat] at this
+  set B := e4B R
+  set U := e4U R
+  have hsq : (2 * e4V R + U + B) ^ 2
+      = 4 * U ^ 3 + (1 + 4 * B) * U ^ 2 + 2 * B * U + B ^ 2 := by
+    linear_combination (4 : E4ModuliRing R) * e4_curve_rel R
+  have hsqUnit : IsUnit ((2 * e4V R + U + B) ^ 2) := by
+    apply isUnit_of_mul_isUnit_left
+      (y := 92 * B ^ 4 - 16 * B ^ 3 * U ^ 2 + 40 * B ^ 3 * U - 36 * B ^ 3
+        + 48 * B ^ 2 * U ^ 3 + 52 * B ^ 2 * U ^ 2 - 32 * B ^ 2 * U + 2 * B ^ 2
+        - 32 * B * U ^ 3 - 18 * B * U ^ 2 + 2 * B * U + 2 * U ^ 3 + U ^ 2)
+    have key : (2 * e4V R + U + B) ^ 2
+        * (92 * B ^ 4 - 16 * B ^ 3 * U ^ 2 + 40 * B ^ 3 * U - 36 * B ^ 3
+          + 48 * B ^ 2 * U ^ 3 + 52 * B ^ 2 * U ^ 2 - 32 * B ^ 2 * U + 2 * B ^ 2
+          - 32 * B * U ^ 3 - 18 * B * U ^ 2 + 2 * B * U + 2 * U ^ 3 + U ^ 2)
+        = 4 * B ^ 6 * (16 * B - 1) := by
+      linear_combination
+        (92 * B ^ 4 - 16 * B ^ 3 * U ^ 2 + 40 * B ^ 3 * U - 36 * B ^ 3
+          + 48 * B ^ 2 * U ^ 3 + 52 * B ^ 2 * U ^ 2 - 32 * B ^ 2 * U + 2 * B ^ 2
+          - 32 * B * U ^ 3 - 18 * B * U ^ 2 + 2 * B * U + 2 * U ^ 3 + U ^ 2) * hsq
+        + (-32 * B ^ 4 + 64 * B ^ 3 * U + 48 * B ^ 3 + 96 * B ^ 2 * U ^ 2
+          + 16 * B ^ 2 * U - 18 * B ^ 2 - 64 * B * U ^ 2 - 16 * B * U + B
+          + 4 * U ^ 2 + U) * e4_order_rel R
+    rw [key, show (4 : E4ModuliRing R) = 2 ^ 2 by norm_num]
+    have h16 : IsUnit (16 * B - 1) := by
+      have := (isUnit_one_sub_sixteen_e4B R).neg
+      rwa [neg_sub] at this
+    exact (((h2.pow 2).mul ((isUnit_e4B R).pow 6)).mul h16)
+  rw [sq] at hsqUnit
+  exact isUnit_of_mul_isUnit_left hsqUnit
 
 /-! ### E4A-4 — equation witnesses, the marked sections, and the killing -/
 
 /-- **(E4A-4)** `(0, 0)` lies on the universal curve (`a₆ = 0`). -/
 theorem universalE4_equation_zero :
-    (universalE4 R).toAffine.Equation 0 0 := by sorry
+    (universalE4 R).toAffine.Equation 0 0 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  show (0 : E4ModuliRing R) ^ 2 + (universalE4 R).a₁ * 0 * 0 +
+    (universalE4 R).a₃ * 0 =
+    0 ^ 3 + (universalE4 R).a₂ * 0 ^ 2 + (universalE4 R).a₄ * 0 + (universalE4 R).a₆
+  show (0 : E4ModuliRing R) ^ 2 + 1 * 0 * 0 + e4B R * 0
+    = 0 ^ 3 + e4B R * 0 ^ 2 + 0 * 0 + 0
+  ring
 
 /-- **(E4A-4)** `Q = (u, v)` lies on the universal curve: the affine equation at
 `(u, v)` is exactly the curve relation `e4CurveRel`. -/
 theorem universalE4_equation_Q :
-    (universalE4 R).toAffine.Equation (e4U R) (e4V R) := by sorry
+    (universalE4 R).toAffine.Equation (e4U R) (e4V R) := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  show e4V R ^ 2 + (universalE4 R).a₁ * e4U R * e4V R + (universalE4 R).a₃ * e4V R
+    = e4U R ^ 3 + (universalE4 R).a₂ * e4U R ^ 2 + (universalE4 R).a₄ * e4U R
+      + (universalE4 R).a₆
+  show e4V R ^ 2 + 1 * e4U R * e4V R + e4B R * e4V R
+    = e4U R ^ 3 + e4B R * e4U R ^ 2 + 0 * e4U R + 0
+  linear_combination e4_curve_rel R
 
 /-- **(E4A-1)** The universal `Ell/R`-object `ℰ₄`. -/
 def universalE4Obj : EllObj R where

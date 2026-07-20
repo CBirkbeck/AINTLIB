@@ -24242,3 +24242,13 @@ res(e4,ψ₂²)=8B⁸(16B−1)², disc=4B⁶(16B−1)³; excluded locus {2Q=2P} 
 
 **No cleanup tickets by design** — producers do not clean (AINTLIB CLAUDE.md); central cleanup on main.
 **Next:** /beastmode begins at T-E4A1 (+ parallel-safe T-E4D/T-E4E/T-E4F for concurrent sessions).
+
+### v10.343 progress — [T-E4A1] DONE (2026-07-20)
+ℰ₄ ring layer AXIOM-CLEAN (12 decls: e4_curve_rel, e4_order_rel, isUnit_e4B,
+isUnit_one_sub_sixteen_e4B, isUnit_universalE4_Δ + IsElliptic instance, isUnit_e4U,
+isUnit_e4U_add_two_e4B, isUnit_psiTwo_e4Q, universalE4_equation_zero/Q, universalE4P/Q).
+Bezout ψ₂-certificate solved exactly (B₀·ψ₂² = 4B⁶(16B−1) + A₀·e4Rel, integral cofactors,
+sympy check=0) and linear_combination-certified in Lean. isUnit_e4U/`_add_two_e4B`/
+psiTwo statements gained the planned (hR : IsUnit (2:R)) hypothesis (per decomposition
+§2 certs — 2-power constants). Remaining in file: A2 killing ×2, A4 keystone, A5 map,
+A6 bridges ×2, A7 datum, A8 classifying/packaging ×3 (13 sorries). NEXT: T-E4A2.
