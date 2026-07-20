@@ -79,6 +79,31 @@ noncomputable abbrev chowOpen :
 /-- The source scheme of the chosen Chow cover. -/
 noncomputable abbrev chowObj : Scheme.{u} := (chowOpen xπ U hU).toScheme
 
+/-- The finite proper closure containing the chosen Chow source as an open subscheme. -/
+noncomputable abbrev chowAmbient : Scheme.{u} :=
+  FiniteProperClosure.obj (p xπ U hU) (q xπ U)
+    (coordinates xπ U hU) (hf xπ U hU)
+
+/-- The structure morphism of the finite proper closure. -/
+noncomputable def chowAmbientπ : chowAmbient xπ U hU ⟶ Spec (.of R) :=
+  FiniteProperClosure.π (p xπ U hU) (q xπ U)
+    (coordinates xπ U hU) (hf xπ U hU)
+
+/-- The chosen Chow source as an open subscheme of its finite proper closure. -/
+noncomputable def chowImmersion : chowObj xπ U hU ⟶ chowAmbient xπ U hU :=
+  (chowOpen xπ U hU).ι
+
+/-- The ambient finite closure is proper over the affine base. -/
+lemma chowAmbientπ_isProper : IsProper (chowAmbientπ xπ U hU) :=
+  FiniteProperClosure.π_isProper (p xπ U hU) (q xπ U)
+    (coordinates xπ U hU) (hf xπ U hU)
+    (projectiveπ_isProper xπ U hU)
+
+/-- The Chow source is open in its ambient finite closure. -/
+lemma chowImmersion_isOpenImmersion : IsOpenImmersion (chowImmersion xπ U hU) := by
+  unfold chowImmersion
+  infer_instance
+
 omit [Finite ι] in
 /-- Each image chart structure map agrees with its projective compactification. -/
 lemma chartι_comp_imageπ (i : ι) :
@@ -102,6 +127,24 @@ noncomputable def chowMap [IsSeparated xπ] : chowObj xπ U hU ⟶ obj U := by
       (FiniteProperClosure.diagonal (p xπ U hU) (q xπ U)
         (coordinates xπ U hU) (hf xπ U hU)) := by infer_instance
   exact FiniteProperClosure.chartUnionToTarget
+    (p xπ U hU) (j xπ U hU) (q xπ U) (g U) (hf xπ U hU)
+    (fun i ↦ (chart U i).ι) (imageπ xπ U)
+    (chartι_comp_imageπ xπ U hU) (toChart_chartι_eq U)
+
+/-- The map to the scheme-theoretic image commutes with the two structure morphisms to the
+affine base. -/
+lemma chowMap_comp_imageπ [IsSeparated xπ] :
+    chowMap xπ U hU ≫ imageπ xπ U =
+      chowImmersion xπ U hU ≫ chowAmbientπ xπ U hU := by
+  letI : ∀ i, IsOpenImmersion (j xπ U hU i) :=
+    fun i ↦ projectiveOpen_isOpenImmersion xπ U hU i
+  letI : IsSeparated (imageπ xπ U) := by infer_instance
+  letI : IsNoetherian (commonOpen U).toScheme := commonOpen_isNoetherian U
+  letI : QuasiCompact
+      (FiniteProperClosure.diagonal (p xπ U hU) (q xπ U)
+        (coordinates xπ U hU) (hf xπ U hU)) := by infer_instance
+  unfold chowMap chowImmersion chowAmbientπ
+  exact FiniteProperClosure.chartUnionToTarget_comp
     (p xπ U hU) (j xπ U hU) (q xπ U) (g U) (hf xπ U hU)
     (fun i ↦ (chart U i).ι) (imageπ xπ U)
     (chartι_comp_imageπ xπ U hU) (toChart_chartι_eq U)
@@ -148,6 +191,15 @@ lemma chowMap_surjective [IsSeparated xπ] (hcover : ⨆ i, U i = ⊤) (i : ι) 
 /-- The chosen Chow cover mapped back to the original Noetherian scheme. -/
 noncomputable def chowToTarget [IsSeparated xπ] : chowObj xπ U hU ⟶ X :=
   chowMap xπ U hU ≫ inclusion U
+
+/-- The chosen Chow cover square over the affine base commutes. -/
+@[reassoc (attr := simp)]
+lemma chowToTarget_comp_xπ [IsSeparated xπ] :
+    chowToTarget xπ U hU ≫ xπ =
+      chowImmersion xπ U hU ≫ chowAmbientπ xπ U hU := by
+  unfold chowToTarget
+  rw [Category.assoc]
+  exact chowMap_comp_imageπ xπ U hU
 
 /-- The chosen Chow cover is proper over the original scheme. -/
 lemma chowToTarget_isProper [IsSeparated xπ] (hcover : ⨆ i, U i = ⊤) :
