@@ -710,6 +710,32 @@ theorem coordinateOpenCechIntersectionAwayIso_naturality_delete [LinearOrder σ]
   rw [← Functor.map_comp, ← Functor.map_comp]
   congr 1
 
+/-- Restriction from the first standard chart to a full Cech intersection is the homogeneous
+localization map at the product of the remaining coordinates. -/
+theorem coordinateOpenCechIntersectionAwayIso_naturality_firstChart {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    CommRingCat.ofHom
+        (HomogeneousLocalization.awayMap
+          (f := X (a 0).down)
+          (g := coordinateTailPolynomial (R := R) (fun k => (a k).down))
+          (x := coordinateProductPolynomial (R := R) (fun k => (a k).down))
+          (homogeneousSubmodule σ R)
+          (coordinateTailPolynomial_mem (R := R) (fun k => (a k).down))
+          (show coordinateProductPolynomial (R := R) (fun k => (a k).down) =
+            X (a 0).down * coordinateTailPolynomial (R := R) (fun k => (a k).down)
+            by rw [coordinateProductPolynomial])) ≫
+      (coordinateOpenCechIntersectionAwayIso (R := R) a).hom =
+    (Proj.basicOpenIsoAway (homogeneousSubmodule σ R) (X (a 0).down)
+        (X_mem_homogeneousSubmodule_one R (a 0).down) one_pos).hom ≫
+      (Proj (homogeneousSubmodule σ R)).presheaf.map
+        (homOfLE (coordinateOpenCechIntersection_le (R := R) a 0)).op := by
+  simp only [coordinateOpenCechIntersectionAwayIso, Iso.trans_hom,
+    Functor.mapIso_hom, Proj.basicOpenIsoAway, asIso_hom]
+  rw [← Category.assoc, Proj.awayMap_awayToSection]
+  simp only [Category.assoc]
+  rw [← Functor.map_comp]
+  congr 1
+
 /-- Laurent coordinates carry noninitial restriction between standard Cech intersections to the
 inclusion that preserves the underlying local exponent. -/
 theorem coordinateOpenCechIntersectionLaurentRingEquiv_naturality_delete_succ
@@ -1096,6 +1122,101 @@ theorem coordinateOpenCechIntersection_le_firstOverlap [LinearOrder σ] {n : ℕ
   exact le_inf
     (coordinateOpenCechIntersection_le (R := R) a.1 0)
     (coordinateOpenCechIntersection_le (R := R) a.1 1)
+
+/-- The first-chart transition section is the Laurent monomial represented by the second
+coordinate divided by the first. -/
+theorem coordinateOpenCechFirstTransition_laurent [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
+    let h10 : (a.1 1).down ≠ (a.1 0).down := by
+      intro h
+      have ha : a.1 1 = a.1 0 := ULift.ext _ _ h
+      exact one_ne_zero (a.2.injective ha)
+    coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a.1
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+            (R := R) a)).op
+          (coordinateOpenTransitionUnit
+            (R := R) (a.1 0).down (a.1 1).down :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))) =
+      AddMonoidAlgebra.single
+        (laurentExponentAwayMap
+          (coordinateTailExponent (fun k => (a.1 k).down))
+          (Finsupp.single ⟨(a.1 1).down, h10⟩ 1)) 1 := by
+  dsimp only
+  let h10 : (a.1 1).down ≠ (a.1 0).down := by
+    intro h
+    have ha : a.1 1 = a.1 0 := ULift.ext _ _ h
+    exact one_ne_zero (a.2.injective ha)
+  let q : HomogeneousLocalization.Away
+      (homogeneousSubmodule σ R) (X (a.1 0).down) :=
+    awayVar R (a.1 0).down ⟨(a.1 1).down, h10⟩
+  have hsection :
+      (Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+            (R := R) a)).op
+          (coordinateOpenTransitionUnit
+            (R := R) (a.1 0).down (a.1 1).down :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)) =
+        (Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenCechIntersection_le (R := R) a.1 0)).op
+          ((Proj.basicOpenIsoAway (homogeneousSubmodule σ R) (X (a.1 0).down)
+            (X_mem_homogeneousSubmodule_one R (a.1 0).down) one_pos).hom.hom q) := by
+    change (Proj (homogeneousSubmodule σ R)).presheaf.map
+        (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+          (R := R) a)).op
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left
+            (R := R) (a.1 0).down (a.1 1).down)).op
+          (coordinateHyperplaneLocalEquation
+            (R := R) (a.1 0).down (a.1 1).down)) = _
+    rw [← ConcreteCategory.comp_apply, ← Functor.map_comp]
+    rw [show (homOfLE (coordinateOpenOverlap_le_left
+        (R := R) (a.1 0).down (a.1 1).down)).op ≫
+          (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+            (R := R) a)).op =
+        (homOfLE (coordinateOpenCechIntersection_le (R := R) a.1 0)).op
+      from Subsingleton.elim _ _]
+    rw [coordinateHyperplaneLocalEquation_of_ne
+      (R := R) (a.1 0).down (a.1 1).down h10]
+  rw [hsection]
+  let qFull := HomogeneousLocalization.awayMap
+    (f := X (a.1 0).down)
+    (g := coordinateTailPolynomial (R := R) (fun k => (a.1 k).down))
+    (x := coordinateProductPolynomial (R := R) (fun k => (a.1 k).down))
+    (homogeneousSubmodule σ R)
+    (coordinateTailPolynomial_mem (R := R) (fun k => (a.1 k).down))
+    (show coordinateProductPolynomial (R := R) (fun k => (a.1 k).down) =
+      X (a.1 0).down * coordinateTailPolynomial (R := R) (fun k => (a.1 k).down)
+      by rw [coordinateProductPolynomial]) q
+  have hNat := coordinateOpenCechIntersectionAwayIso_naturality_firstChart
+    (R := R) a.1
+  have hNatq := ConcreteCategory.congr_hom hNat q
+  simp only [ConcreteCategory.comp_apply] at hNatq
+  have hq' := congrArg
+    (fun z => (coordinateOpenCechIntersectionAwayIso (R := R) a.1).inv.hom z)
+    hNatq
+  rw [Iso.hom_inv_id_apply] at hq'
+  have hq : (coordinateOpenCechIntersectionAwayIso (R := R) a.1).inv.hom
+      ((Proj (homogeneousSubmodule σ R)).presheaf.map
+        (homOfLE (coordinateOpenCechIntersection_le (R := R) a.1 0)).op
+        ((Proj.basicOpenIsoAway (homogeneousSubmodule σ R) (X (a.1 0).down)
+          (X_mem_homogeneousSubmodule_one R (a.1 0).down) one_pos).hom.hom q)) =
+      qFull := by
+    exact hq'.symm
+  change laurentMonomialRingEquiv R _
+      (coordinateProductAwayRingEquiv (R := R) _
+        ((coordinateOpenCechIntersectionAwayIso (R := R) a.1).inv.hom _)) = _
+  rw [hq]
+  rw [coordinateProductAwayLaurentRingEquiv_awayMap]
+  rw [chartRingEquiv_apply_awayVar]
+  change AddMonoidAlgebra.mapDomain _
+      (AddMonoidAlgebra.single
+        (Finsupp.single
+          (⟨(a.1 1).down, h10⟩ : {j : σ // j ≠ (a.1 0).down}) 1) 1) = _
+  rw [AddMonoidAlgebra.mapDomain_single]
+  rfl
 
 private noncomputable def coordinateOpenCechFirstTransitionRingHom
     [LinearOrder σ] {n : ℕ}
