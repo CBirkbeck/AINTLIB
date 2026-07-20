@@ -74,6 +74,92 @@ theorem coordinateHyperplanePoleSheaf_isInvertible (j : σ) :
     Scheme.Modules.IsInvertible (coordinateHyperplanePoleSheaf (R := R) j) :=
   (coordinateHyperplaneIdealModule_isInvertible (R := R) j).dual
 
+/-- The local equation of the coordinate hyperplane `X j = 0` on the standard
+chart `D₊(X i)`: it is `1` on the `j`-chart and `X j / X i` otherwise. -/
+noncomputable def coordinateHyperplaneLocalEquation (i j : σ) :
+    Γ(Proj (homogeneousSubmodule σ R), coordinateOpen (R := R) i) := by
+  classical
+  exact if hji : j = i then 1 else
+      (Proj.basicOpenIsoAway (homogeneousSubmodule σ R) (X i)
+        (X_mem_homogeneousSubmodule_one R i) one_pos).hom.hom
+          (awayVar R i ⟨j, hji⟩)
+
+@[simp]
+lemma coordinateHyperplaneLocalEquation_self (j : σ) :
+    coordinateHyperplaneLocalEquation (R := R) j j = 1 := by
+  simp [coordinateHyperplaneLocalEquation]
+
+lemma coordinateHyperplaneLocalEquation_of_ne (i j : σ) (hji : j ≠ i) :
+    coordinateHyperplaneLocalEquation (R := R) i j =
+      (Proj.basicOpenIsoAway (homogeneousSubmodule σ R) (X i)
+        (X_mem_homogeneousSubmodule_one R i) one_pos).hom.hom
+          (awayVar R i ⟨j, hji⟩) := by
+  simp [coordinateHyperplaneLocalEquation, hji]
+
+/-- The standard-chart local equation generates the coordinate-hyperplane
+ideal. -/
+lemma coordinateHyperplaneLocalEquation_span (i j : σ) :
+    (coordinateHyperplaneι (R := R) j).ker.ideal
+        ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩ =
+      Ideal.span {coordinateHyperplaneLocalEquation (R := R) i j} := by
+  by_cases hji : j = i
+  · subst i
+    rw [coordinateHyperplaneι_ker_ideal_coordinateOpen_self,
+      coordinateHyperplaneLocalEquation_self, Ideal.span_singleton_one]
+  · rw [coordinateHyperplaneLocalEquation_of_ne i j hji]
+    exact coordinateHyperplaneι_ker_ideal_coordinateOpen_of_ne i j hji
+
+/-- The standard-chart local equation of a coordinate hyperplane is a
+nonzerodivisor. -/
+lemma coordinateHyperplaneLocalEquation_mem_nonZeroDivisors (i j : σ) :
+    coordinateHyperplaneLocalEquation (R := R) i j ∈
+      nonZeroDivisors
+        Γ(Proj (homogeneousSubmodule σ R), coordinateOpen (R := R) i) := by
+  classical
+  by_cases hji : j = i
+  · subst i
+    rw [coordinateHyperplaneLocalEquation_self]
+    exact Submonoid.one_mem _
+  · rw [coordinateHyperplaneLocalEquation_of_ne i j hji]
+    let e := (Proj.basicOpenIsoAway (homogeneousSubmodule σ R) (X i)
+      (X_mem_homogeneousSubmodule_one R i) one_pos).commRingCatIsoToRingEquiv
+    change e (awayVar R i ⟨j, hji⟩) ∈
+      nonZeroDivisors Γ(Proj (homogeneousSubmodule σ R), coordinateOpen (R := R) i)
+    rw [← MulEquivClass.map_nonZeroDivisors e]
+    exact ⟨awayVar R i ⟨j, hji⟩, awayVar_mem_nonZeroDivisors R i ⟨j, hji⟩, rfl⟩
+
+/-- The explicit standard-chart trivialization of the coordinate-hyperplane
+ideal module `O(-1)`. -/
+noncomputable def coordinateHyperplaneIdealModuleTrivialization (i j : σ) :
+    Scheme.Modules.unitObj
+        (coordinateOpen (R := R) i).toScheme ≅
+      (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)).restrict
+        (coordinateOpen (R := R) i).ι := by
+  letI : IsClosedImmersion (coordinateHyperplaneι (R := R) j) :=
+    coordinateHyperplaneι_isClosedImmersion j
+  letI : QuasiCompact (coordinateHyperplaneι (R := R) j) := inferInstance
+  let U : (Proj (homogeneousSubmodule σ R)).affineOpens :=
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+  let r := coordinateHyperplaneLocalEquation (R := R) i j
+  have hr : r ∈ (coordinateHyperplaneι (R := R) j).ker.ideal U := by
+    rw [coordinateHyperplaneLocalEquation_span]
+    exact Ideal.mem_span_singleton_self r
+  exact ModularCurves.localIdealGeneratorIso
+    (coordinateHyperplaneι (R := R) j) U r hr
+      (coordinateHyperplaneLocalEquation_span i j)
+      (coordinateHyperplaneLocalEquation_mem_nonZeroDivisors i j)
+
+/-- The explicit standard-chart trivialization of the coordinate-hyperplane
+pole sheaf `O(1)`. -/
+noncomputable def coordinateHyperplanePoleSheafTrivialization (i j : σ) :
+    (coordinateHyperplanePoleSheaf (R := R) j).restrict
+        (coordinateOpen (R := R) i).ι ≅
+      Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme :=
+  Scheme.Modules.dualRestrictIsoOfRestrictIso
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+    (coordinateOpen (R := R) i)
+    (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+
 end
 
 end MvPolynomial
