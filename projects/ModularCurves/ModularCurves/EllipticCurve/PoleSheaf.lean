@@ -3756,7 +3756,7 @@ private theorem sheafOfModules_mono_of_mono_over_iSup_eq_top
     exact hx.trans ((congrArg (fun q ↦ N.val.map
       (homOfLE (inf_le_left : V.unop ⊓ U i ≤ V.unop)).op q) hxy).trans hy.symm)
 
-private theorem sheafOfModules_mono_over
+theorem sheafOfModules_mono_over
     {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
     {R : Sheaf J RingCat} {M N : SheafOfModules R}
     (f : M ⟶ N) (hf : Mono f) (U : C) : Mono (f.over U) := by
