@@ -81,6 +81,32 @@ instance presheafValue.instCompleteSpaceRight (D : RationalLocData A) :
 example [IsRingOfIntegralElements (A⁺ : Subring A)] (D : RationalLocData A) :
     HasLocLiftPowerBounded (presheafValue D) := inferInstance
 
+/-! ### Restriction/canonical compatibility (noetherian-free) -/
+
+section RestrictionCanonical
+
+variable [HasLocLiftPowerBounded A] (D₀ : RationalLocData A) {E : RationalLocData A}
+  (hE : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s)
+
+/-- The restriction map intertwines the canonical maps (noetherian-free restatement
+of `restrictionMapHom_canonicalMap`, via `extensionHom_coe`). -/
+theorem restriction_canonicalMap' (a : A) :
+    restrictionMapHom D₀ E hE (D₀.canonicalMap a) = E.canonicalMap a := by
+  letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
+  have hcoe : restrictionMapHom D₀ E hE
+      (D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) a)) =
+      restrictionMapAlg D₀ E hE (algebraMap A (Localization.Away D₀.s) a) :=
+    UniformSpace.Completion.extensionHom_coe _ _ _
+  calc restrictionMapHom D₀ E hE (D₀.canonicalMap a)
+      = restrictionMapAlg D₀ E hE (algebraMap A (Localization.Away D₀.s) a) := hcoe
+    _ = E.canonicalMap a :=
+        IsLocalization.Away.lift_eq D₀.s
+          (HasLocLiftPowerBounded.isUnit_canonicalMap_s D₀ E hE) a
+
+end RestrictionCanonical
+
 /-! ### The image datum over the section ring -/
 
 section ImgDatum
@@ -329,23 +355,6 @@ variable (D₀ : RationalLocData A) {E : RationalLocData A}
   [DecidableEq (presheafValue D₀)]
   (hspanE : Ideal.span (E.T : Set A) = ⊤)
   (hE : rationalOpen E.T E.s ⊆ rationalOpen D₀.T D₀.s)
-
-/-- The restriction map intertwines the canonical maps (noetherian-free restatement
-of `restrictionMapHom_canonicalMap`, via `extensionHom_coe`). -/
-theorem restriction_canonicalMap' (a : A) :
-    restrictionMapHom D₀ E hE (D₀.canonicalMap a) = E.canonicalMap a := by
-  letI : UniformSpace (Localization.Away D₀.s) := D₀.uniformSpace
-  letI : IsTopologicalRing (Localization.Away D₀.s) := D₀.isTopologicalRing
-  letI : IsUniformAddGroup (Localization.Away D₀.s) := D₀.isUniformAddGroup
-  have hcoe : restrictionMapHom D₀ E hE
-      (D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) a)) =
-      restrictionMapAlg D₀ E hE (algebraMap A (Localization.Away D₀.s) a) :=
-    UniformSpace.Completion.extensionHom_coe _ _ _
-  calc restrictionMapHom D₀ E hE (D₀.canonicalMap a)
-      = restrictionMapAlg D₀ E hE (algebraMap A (Localization.Away D₀.s) a) := hcoe
-    _ = E.canonicalMap a :=
-        IsLocalization.Away.lift_eq D₀.s
-          (HasLocLiftPowerBounded.isUnit_canonicalMap_s D₀ E hE) a
 
 /-- `imgDatum`'s denominator maps to a unit under the restriction map. -/
 theorem restriction_isUnit_imgS :
@@ -630,5 +639,75 @@ def keystone : presheafValue E ≃+* presheafValue (imgDatum D₀ E hspanE) wher
   map_add' := map_add _
 
 end KeystoneRoundtrip
+
+/-! ### The keystone restriction squares -/
+
+section KeystoneSquares
+
+variable [DecidableEq A] [HasLocLiftPowerBounded A]
+  [IsRingOfIntegralElements (A⁺ : Subring A)]
+
+variable (D₀ : RationalLocData A) {E E' : RationalLocData A}
+  [DecidableEq (presheafValue D₀)]
+  (hspanE : Ideal.span (E.T : Set A) = ⊤)
+  (hspanE' : Ideal.span (E'.T : Set A) = ⊤)
+  (hE'E : rationalOpen E'.T E'.s ⊆ rationalOpen E.T E.s)
+
+/-- **The keystone square**: the forward keystones intertwine the `A`-side and
+`B`-side restriction maps between pieces. (Both composites are continuous maps out
+of `𝒪_A(E)`; they agree on the canonical image of `A`, hence on the dense image of
+the `E`-localization, hence everywhere.) -/
+theorem keystone_restriction_square (x : presheafValue E) :
+    keystoneHom D₀ hspanE' (restrictionMap E E' hE'E x) =
+      restrictionMap (imgDatum D₀ E hspanE) (imgDatum D₀ E' hspanE')
+        (imgDatum_rationalOpen_subset D₀ hspanE hspanE' hE'E)
+        (keystoneHom D₀ hspanE x) := by
+  letI : UniformSpace (Localization.Away E.s) := E.uniformSpace
+  letI : IsTopologicalRing (Localization.Away E.s) := E.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away E.s) := E.isUniformAddGroup
+  -- ring-hom equality on the `E`-localization: both routes send `algebraMap a` to
+  -- the doubly-canonical image of `a`
+  have hloc : ((keystoneHom D₀ hspanE').comp (restrictionMapHom E E' hE'E)).comp
+      E.coeRingHom =
+      ((restrictionMapHom (imgDatum D₀ E hspanE) (imgDatum D₀ E' hspanE')
+          (imgDatum_rationalOpen_subset D₀ hspanE hspanE' hE'E)).comp
+        (keystoneHom D₀ hspanE)).comp E.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers E.s) ?_
+    ext a
+    have h₁ : restrictionMapHom E E' hE'E (E.canonicalMap a) = E'.canonicalMap a :=
+      restriction_canonicalMap' E hE'E a
+    have h₂ : restrictionMapHom (imgDatum D₀ E hspanE) (imgDatum D₀ E' hspanE')
+        (imgDatum_rationalOpen_subset D₀ hspanE hspanE' hE'E)
+        ((imgDatum D₀ E hspanE).canonicalMap (D₀.canonicalMap a)) =
+        (imgDatum D₀ E' hspanE').canonicalMap (D₀.canonicalMap a) :=
+      restriction_canonicalMap' (A := presheafValue D₀) (imgDatum D₀ E hspanE)
+        (imgDatum_rationalOpen_subset D₀ hspanE hspanE' hE'E) (D₀.canonicalMap a)
+    show keystoneHom D₀ hspanE' (restrictionMapHom E E' hE'E
+        (E.coeRingHom (algebraMap A (Localization.Away E.s) a))) =
+      restrictionMapHom (imgDatum D₀ E hspanE) (imgDatum D₀ E' hspanE')
+        (imgDatum_rationalOpen_subset D₀ hspanE hspanE' hE'E)
+        (keystoneHom D₀ hspanE
+          (E.coeRingHom (algebraMap A (Localization.Away E.s) a)))
+    have hcanE : E.coeRingHom (algebraMap A (Localization.Away E.s) a) =
+        E.canonicalMap a := rfl
+    rw [hcanE, h₁, keystoneHom_canonicalMap, keystoneHom_canonicalMap, h₂]
+  have hdense : DenseRange (⇑(E.coeRingHom)) :=
+    @UniformSpace.Completion.denseRange_coe _ E.uniformSpace
+  have hfun : ⇑(keystoneHom D₀ hspanE') ∘ ⇑(restrictionMapHom E E' hE'E) =
+      ⇑(restrictionMapHom (imgDatum D₀ E hspanE) (imgDatum D₀ E' hspanE')
+          (imgDatum_rationalOpen_subset D₀ hspanE hspanE' hE'E)) ∘
+        ⇑(keystoneHom D₀ hspanE) := by
+    refine hdense.equalizer ?_ ?_ ?_
+    · exact (keystoneHom_continuous D₀ hspanE').comp
+        (restrictionMapHom_continuous E E' hE'E)
+    · exact (restrictionMapHom_continuous (imgDatum D₀ E hspanE)
+        (imgDatum D₀ E' hspanE')
+        (imgDatum_rationalOpen_subset D₀ hspanE hspanE' hE'E)).comp
+        (keystoneHom_continuous D₀ hspanE)
+    · funext l
+      exact DFunLike.congr_fun hloc l
+  exact congr_fun hfun x
+
+end KeystoneSquares
 
 end ValuationSpectrum
