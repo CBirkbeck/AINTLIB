@@ -33,6 +33,24 @@ variable {R : Type u} {σ κ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
+/-- The monomials of total degree `n` form a basis of the degree-`n` homogeneous
+submodule of a multivariate polynomial ring. -/
+noncomputable def basisHomogeneousSubmodule (n : ℕ) :
+    Module.Basis {d : σ →₀ ℕ // d.degree = n} R (homogeneousSubmodule σ R n) := by
+  rw [homogeneousSubmodule_eq_finsupp_supported]
+  exact basisRestrictSupport R {d : σ →₀ ℕ | d.degree = n}
+
+/-- Every homogeneous piece of a multivariate polynomial ring is a free module over the
+coefficient ring. -/
+instance homogeneousSubmodule_free (n : ℕ) :
+    Module.Free R (homogeneousSubmodule σ R n) :=
+  Module.Free.of_basis (basisHomogeneousSubmodule n)
+
+/-- Over finitely many variables, every homogeneous piece is finite over the coefficient ring. -/
+instance homogeneousSubmodule_finite [Finite σ] (n : ℕ) :
+    Module.Finite R (homogeneousSubmodule σ R n) :=
+  Module.Finite.of_fg (homogeneousSubmodule_fg σ R n)
+
 /-- The structure morphism from the polynomial `Proj` to the coefficient ring. -/
 def homogeneousProjπ :
     Proj (homogeneousSubmodule σ R) ⟶ Spec (.of R) :=
