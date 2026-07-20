@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.GammaH
 import ModularCurves.LevelStructure.Incidence
+import ModularCurves.LevelStructure.ExactOrderInvertible
 
 /-!
 # Relative representability of the Drinfeld `Γ₁(N)` problem (KM 3.6.0, Γ₁ half)
@@ -147,10 +148,14 @@ theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
 
 set_option maxHeartbeats 1000000 in
 /-- **(KM 1.6.2, `ℤ/N`-Str — no rank hypothesis, hence no `c4`)** The Drinfeld `Γ₁(N)`
-moduli problem is affine over `Ell`: for each `E/S` the functor of Drinfeld exact-order-`N`
-points is represented by the exact-order locus `Z ⊆ E[N]`, finite (hence affine) over `S`.
-Assembled from `torsionPointsEquiv` (c2, KM 1.6.1) + `exists_exactOrderLocus` (c1). -/
-theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] :
+moduli problem is affine over `Ell` for `N` **invertible**: for each `E/S` the functor of
+Drinfeld exact-order-`N` points is represented by the exact-order locus `Z ⊆ E[N]`,
+finite (hence affine) over `S`. Assembled from `torsionPointsEquiv` (c2, KM 1.6.1) +
+`exists_exactOrderLocus` (c1); the `N`-killing that places a Drinfeld structure inside
+`E[N]` is KM 1.4.2 at invertible `N` (`smul_eq_zero_of_invertible`, T-E4F1 — the
+board-sanctioned `hinv` restatement; the over-`ℤ` form awaits the statement-protected
+BB-DELIGNE box). -/
+theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)) :
     (gammaOneDrinfeldProblem R N).AffineOverEll := by
   intro X
   obtain ⟨Z, hZ⟩ := exists_exactOrderLocus X.curve N
@@ -164,10 +169,17 @@ theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] :
           ⟨h.1 ≫ Z.subschemeι, by rw [Category.assoc]; exact h.2⟩).symm⟩⟩)
       (fun P => ?_) ?_ ?_, ?_⟩
   · -- invFun: a Γ₁-structure `P` on `E ×_S T` gives a `T`-point of the exact-order locus
+    have hinvT : NIsInvertible T N := by
+      have hSpec : NIsInvertible (Spec R) N := by
+        show IsUnit ((N : ℕ) : Γ(Spec R, ⊤))
+        have h2 := hinv.map (Scheme.ΓSpecIso R).inv.hom
+        rwa [map_natCast] at h2
+      exact hSpec.of_hom (g ≫ X.structMap)
     have hxsmul : (N : ℤ) • sectionToPoint X.curve g P.1 = 0 := by
       apply asSection_injective X.curve g
       rw [EllipticCurve.Point.asSection_zsmul, asSection_sectionToPoint, asSection_zero]
-      exact EllipticCurve.Section.HasExactOrder.smul_eq_zero (X.curve.baseChange g) P.2
+      exact EllipticCurve.Section.HasExactOrder.smul_eq_zero_of_invertible
+        (X.curve.baseChange g) hinvT P.2
     have hx := (X.curve.smul_eq_zero_iff_comp_mulByHom g N _).mp hxsmul
     have hle : Z ≤ (X.curve.pointToTorsion (sectionToPoint X.curve g P.1) hx).ker := by
       rw [← exists_factor_subschemeι_iff]
@@ -202,12 +214,14 @@ theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] :
     simp only [EllipticCurve.Point.restrict, torsionPointsEquiv_coe_fst, Category.assoc]
 
 /-- **(KM 4.2 / SCHOLIE 4.7.0 relative half — the Γ₁ relative-representability ★)** The
-Drinfeld `Γ₁(N)` moduli problem is relatively representable over `Ell`, immediately from
-`gammaOneDrinfeld_affineOverEll` (KM: "relatively representable *and* affine over (Ell)").
-The representing `S`-scheme is the exact-order locus `Z ⊆ E[N]` (finite over `S`). No rank
-hypothesis (`c4`) is used; the only inherited black box is `E[N]`-finiteness (KM 2.3.1). -/
-theorem gammaOneDrinfeld_relativelyRepresentable (N : ℕ) [NeZero N] :
+Drinfeld `Γ₁(N)` moduli problem is relatively representable over `Ell` for `N`
+invertible, immediately from `gammaOneDrinfeld_affineOverEll` (KM: "relatively
+representable *and* affine over (Ell)"). The representing `S`-scheme is the exact-order
+locus `Z ⊆ E[N]` (finite over `S`). No rank hypothesis (`c4`) is used; the only
+inherited black box is `E[N]`-finiteness (KM 2.3.1). -/
+theorem gammaOneDrinfeld_relativelyRepresentable (N : ℕ) [NeZero N]
+    (hinv : IsUnit (N : R)) :
     (gammaOneDrinfeldProblem R N).RelativelyRepresentable :=
-  (gammaOneDrinfeld_affineOverEll N).relativelyRepresentable
+  (gammaOneDrinfeld_affineOverEll N hinv).relativelyRepresentable
 
 end ModularCurves

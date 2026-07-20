@@ -24426,3 +24426,19 @@ group-law core). Remaining: β clearing calculus (localization_localization pins
 identity spreads (Part-2) + γ glueMorphisms/isPullback_of_iSup_eq_top/zero-leg assembly.
 Proof-engineering findings (barrier-lemma discipline for localization towers; term-mode
 mem_basicOpen; map_inv have-bridge) recorded at the EngineDescent frontier comment.
+
+### v10.343 progress — [T-E4F1+F2 COMPLETE] Drinfeld invertible-N cone CLEAN (2026-07-21)
+NEW LevelStructure/ExactOrderInvertible.lean (890L, 0 sorries): BOTH ExactOrder boxes at
+invertible N via an UNANTICIPATED route — the landed DeligneOrder Layer-B Hopf package +
+the proven abstract Deligne theorem (CartierDual.deligne_pointConv_pow_finrank, Tate §3.8):
+Γ-convolution dictionary (appTop_eq_convPow_of_factor, κ∘Δ pin + Sweedler), KM 1.4.2 over
+fields, unramifiedness of the divisor scheme at invertible N, clopen-equalizer globalization
+⟹ smul_eq_zero_of_factors_of_invertible at GENERAL base (NIsInvertible) + KM 1.4.2 for
+orderDivisor + nsmul_ne_zero (T-E4F2) via étale rank-N section-count exhaustion.
+Statement changes (board-sanctioned): gammaOneDrinfeld_affineOverEll +
+gammaOneDrinfeld_relativelyRepresentable now take hinv. Repoints: gammaOneDrinfeld_fix_absurd
+(:1206 → pull_nsmul_ne_zero_of_invertible; smul_eq_zero consumer removed),
+representable_prep passes hinv. ExactOrder general-base boxes untouched (docstring notes;
+sorries at :122/:859/:927/:958 remain statement-protected over-ℤ future work).
+DECISIVE: gammaOneDrinfeld_affineOverEll + gammaOneDrinfeld_rigidNoeth + hbound_of_kvc all
+CLEAN-TRIPLE — every receipt's residual sorryAx enters ONLY through the shared engine hpres.

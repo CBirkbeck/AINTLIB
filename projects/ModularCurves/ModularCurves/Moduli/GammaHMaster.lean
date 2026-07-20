@@ -1190,8 +1190,8 @@ theorem gammaOneDrinfeld_fix_absurd (N : ℕ) [NeZero N] (hN : 4 ≤ N)
         = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero :=
       congrArg (fun mm => (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ mm) hzc
     exact s1.trans s2
-  -- the geometric order facts at the base point itself
-  have hkill : (N : ℤ) • b.1 = 0 := b.2.smul_eq_zero
+  -- the geometric order facts at the base point itself (T-E4F1/T-E4F2: the
+  -- invertible-`N` instances, bypassing the statement-protected over-`ℤ` boxes)
   have hinvSpec : NIsInvertible (Spec (CommRingCat.of k)) N := by
     have hinvk : IsUnit ((N : ℕ) : k) := by
       have h := hinv.map (Spec.preimage sm).hom
@@ -1203,7 +1203,7 @@ theorem gammaOneDrinfeld_fix_absurd (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     Subtype.ext (Category.id_comp _)
   have hord : ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • b.1 ≠ 0 := by
     intro a ha0 haN
-    have h := b.2.pull_nsmul_ne_zero E hinvSpec hkill k
+    have h := b.2.pull_nsmul_ne_zero_of_invertible E hinvSpec k
       (𝟙 (Spec (CommRingCat.of k))) ha0 haN
     rwa [hpull_id] at h
   -- the equiv-form fix and the [RIG-2′] core (the NARROWED keystone contract:
@@ -1303,8 +1303,9 @@ theorem gammaOneDrinfeld_representable_prep (N : ℕ) [NeZero N] (hN : 4 ≤ N)
           = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) P →
         ε = 𝟙 E.asOver) :
     (gammaOneDrinfeldProblem R N).Representable :=
-  ModuliProblem.representable_of_affineOverEll_of_rigidNoeth _ (gammaOneDrinfeld_affineOverEll N)
-    (gammaOneDrinfeld_affineOverEll N).relativelyRepresentable
+  ModuliProblem.representable_of_affineOverEll_of_rigidNoeth _
+    (gammaOneDrinfeld_affineOverEll N hinv)
+    (gammaOneDrinfeld_affineOverEll N hinv).relativelyRepresentable
     (gammaOneDrinfeld_rigidNoeth R N hN hinv hbound)
 
 /-- **[Γ(N) rigidity] (KM 2.7.2 upgraded to the quotient problem at `H = ⊥`)** — the

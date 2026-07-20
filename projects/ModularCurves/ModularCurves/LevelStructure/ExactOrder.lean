@@ -109,7 +109,12 @@ def Section.HasExactOrder (P : E.Section) (N : ℕ) [NeZero N] : Prop :=
 /-- **Register box `BB-DELIGNE` (KM 1.4.2, cite [Oort–Tate])**, in the project's
 subgroup-divisor encoding: a subgroup divisor of constant degree `N` is killed by `N`
 — every point factoring through it is annihilated by `N`. KM (verbatim): *"a finite
-locally free commutative group scheme of rank `N` is killed by `N`"*. -/
+locally free commutative group scheme of rank `N` is killed by `N`"*.
+
+STATEMENT-PROTECTED (T-E4F1, board v10.343): this general-base form is the future
+over-`ℤ` project (DeligneOrder Layer-B L1/L5/L6). All invertible-`N` consumers are
+rerouted to the PROVEN `smul_eq_zero_of_factors_of_invertible`
+(`LevelStructure/ExactOrderInvertible.lean`). -/
 theorem _root_.ModularCurves.RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors
     {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup E) {N : ℕ} [NeZero N]
     (hdeg : ∀ s : S, D.degree s = N) {T : Scheme.{u}} (g : T ⟶ S) (Q : E.Point g)
@@ -828,7 +833,12 @@ DISCHARGE RECIPE (the residual scheme-theory, staged into named sub-steps):
       co-unit axioms and `F^lam = 0` from `x^lam = 0`.
 The pure-algebra endpoint (5)→conclusion is `jetCore_binomial` (PROVEN, above). Substrate
 available: `Torsion.torsionπ_etale` (T-B5′), `ForMathlib/EtaleSectionsCount`,
-`TorsionFibre.torsionPointsEquiv`. -/
+`TorsionFibre.torsionPointsEquiv`.
+
+STATEMENT-PROTECTED (T-E4F2, board v10.343): all invertible-`N` consumers are rerouted
+past this jet keystone to `Section.HasExactOrder.pull_nsmul_ne_zero_of_invertible`
+(`LevelStructure/ExactOrderInvertible.lean`, the étale/count route of KM 1.4.4(3));
+this box remains as the future char-`p`/over-`ℤ` work. -/
 private theorem Section.HasExactOrder.pull_nsmul_jetData {P : E.Section} {N : ℕ} [NeZero N]
     (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) (h : P.HasExactOrder E N)
     (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S)
