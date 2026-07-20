@@ -107,6 +107,60 @@ theorem coordinateTailPolynomial_eq_delete_succ_mul [LinearOrder σ] {n : ℕ}
   rw [mul_assoc] at h
   exact X_mul_cancel_left_iff.mp h
 
+/-- For a noninitial deletion, localization first at the deleted tail and then at the removed
+coordinate is localization directly at the full tail. -/
+theorem coordinateTailAwayMap_comp_delete_succ [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1))
+    (q : HomogeneousLocalization.Away
+      (homogeneousSubmodule σ R) (X (a.1 0).down)) :
+    HomogeneousLocalization.awayMap
+        (homogeneousSubmodule σ R)
+        (X_mem_homogeneousSubmodule_one R (a.1 k.succ).down)
+        (coordinateProductPolynomial_eq_delete_mul (R := R) a k.succ)
+        (HomogeneousLocalization.awayMap
+          (homogeneousSubmodule σ R)
+          (coordinateTailPolynomial_mem (R := R)
+            (fun l => ((a.delete k.succ).1 l).down))
+          (rfl : coordinateProductPolynomial (R := R)
+              (fun l => ((a.delete k.succ).1 l).down) =
+            X (a.1 0).down *
+              coordinateTailPolynomial (R := R)
+                (fun l => ((a.delete k.succ).1 l).down))
+          q) =
+      HomogeneousLocalization.awayMap
+        (homogeneousSubmodule σ R)
+        (coordinateTailPolynomial_mem (R := R) (fun l => (a.1 l).down))
+        (rfl : coordinateProductPolynomial (R := R) (fun l => (a.1 l).down) =
+          X (a.1 0).down *
+            coordinateTailPolynomial (R := R) (fun l => (a.1 l).down))
+        q := by
+  have hy' : coordinateProductPolynomial (R := R) (fun l => (a.1 l).down) =
+      X (a.1 0).down *
+        (coordinateTailPolynomial (R := R)
+          (fun l => ((a.delete k.succ).1 l).down) * X (a.1 k.succ).down) := by
+    rw [coordinateProductPolynomial, coordinateTailPolynomial_eq_delete_succ_mul]
+  have h := congrArg
+    (fun f : HomogeneousLocalization.Away
+        (homogeneousSubmodule σ R) (X (a.1 0).down) →+*
+        HomogeneousLocalization.Away (homogeneousSubmodule σ R)
+          (coordinateProductPolynomial (R := R) (fun l => (a.1 l).down)) => f q)
+    (HomogeneousLocalization.awayMap_comp
+      (homogeneousSubmodule σ R)
+      (X_mem_homogeneousSubmodule_one R (a.1 0).down)
+      (coordinateTailPolynomial_mem (R := R)
+        (fun l => ((a.delete k.succ).1 l).down))
+      (X_mem_homogeneousSubmodule_one R (a.1 k.succ).down)
+      (rfl : coordinateProductPolynomial (R := R)
+          (fun l => ((a.delete k.succ).1 l).down) =
+        X (a.1 0).down *
+          coordinateTailPolynomial (R := R)
+            (fun l => ((a.delete k.succ).1 l).down))
+      (coordinateProductPolynomial_eq_delete_mul (R := R) a k.succ)
+      hy')
+  rw [RingHom.comp_apply] at h
+  exact h
+
 private theorem basicOpen_prod {ι : Type*} [Fintype ι]
     (f : ι → MvPolynomial σ R) :
     Proj.basicOpen (homogeneousSubmodule σ R) (∏ i, f i) =
