@@ -1648,3 +1648,69 @@ the span-preservation half is missing (PHASE 6).
   `IteratedRational.restrictionMapHom_canonicalMap` deduped to a thin wrapper with the
   4 overscoped instances (`IsTateRing`/`IsNoetherianRing`/`T2Space`/`NonarchimedeanRing`)
   `omit`-ted.
+
+---
+
+# STATUS — 2026-07-21 six-phase campaign (base 05c89623a → 2805ddd49)
+
+All commits axiom-clean ({propext, Classical.choice, Quot.sound}); `lake build 'Adic spaces'`
+green (3301 jobs); FJP sorry-free; git diff --check clean; five frozen FJP types unchanged.
+
+## DELIVERED
+
+- **PHASE 0 (2007da08d)** — DONE: `restrictionMapHom_canonicalMap_generic` +
+  `presheafValueMapOfHom_restriction` extracted to `PresheafFunctoriality.lean` (min hyps);
+  FJP private duplicates deleted; `IteratedRational.restrictionMapHom_canonicalMap` deduped to a
+  wrapper (4 overscoped instances `omit`-ted). Header honesty (PASS B homeo = comparison only;
+  perturb = subset-equality half). **Frontier corrected**: PASS C is Huber form-(a) product
+  refinement (Lemma 2.6/7.54/1.6.8), NOT blocked on Wedhorn 8.34(ii)/Zavyalov §2.3.
+- **PHASE 1 (3a45e40da)** — DONE: empty-cover bug in `HasStandardRefinementsAt` fixed
+  (`C.covers.Nonempty` guard; `isSheafy_rationalCovering_of_covers_empty` empty branch via
+  subsingleton section ring; dropped unused `[IsNoetherianRing]` from
+  `presheafValue_subsingleton_of_rationalOpen_empty`).
+- **PHASE 2 (0b8dc0e0f, 8dd4e4f65)** — DONE, the campaign's central result:
+  * 2A `exists_dominating_unit_noHArch_finset_on` (compact-subset dominating unit).
+  * 2B `exists_finite_normalized_rational_refinement_on` (noeth-free relative Step 1).
+  * 2C `rationalOpen_distinguished_eq_on` (base-localized product identity).
+  * 2D `exists_spanTop_standard_refinement_of_rationalCovering_nonempty` (the unit-padded
+    relative product-trick refinement) + `RingOfIntegralElements.hasStandardRefinements`.
+  * 2E **UNCONDITIONAL** `isSheafyFor_congr`, `isSheafyFor_iff_standardSheafCondition`,
+    `isSheafyFor_iff_isSheafyComplete` (verified signatures carry NO CompatiblePlusSubring /
+    IsNoetherianRing / IsStronglyNoetherian / explicit HasLocLiftPowerBounded), plus FJP
+    `finiteJet_isSheafyComplete`, `finiteJet_isSheafyFor_all` (no noetherian bypass; JetA is
+    non-noetherian).
+- **PHASE 6A (2805ddd49)** — DONE: `exists_parameterPerturbation_span_top` (span-preservation
+  under perturbation, the second half of Kedlaya Ex 1.2.2).
+
+## NOT DELIVERED (precise reductions)
+
+- **PHASE 3** (ring-equivalence transport of the finite sheaf criterion): the gate to 4/5.
+  Requires `PairOfDefinition.mapRingEquiv` (subspace-topology homeomorphism + `IsAdic` basis
+  transport + `fg`/openness) → `RationalLocData.mapRingEquiv` (with `hopen` transported across the
+  localization equivalence `Localization.Away s ≃ Localization.Away (e s)`) →
+  `presheafValueRingEquivOfRingEquiv` (via `presheafValueMapOfHom` both ways + DenseRange.equalizer,
+  building blocks READY from PHASE 0) → `RationalCovering` transport + `productRestrictionSub`/
+  `restrictionMap` conjugation → `isSheafy_congr_of_ringEquiv` → `isSheafyFor_equiv`,
+  `isSheafyComplete_congr`. A ~350-line, defeq-heavy construction (subspace-topology homeomorphism
+  + hopen-across-localization-equiv are the thorny cores); deferred as beyond this session's budget
+  without risking the no-sorry gate.
+- **PHASE 4** (`isSheafyTateRing_iff_{for,exists}_completionModel`, `_iff_isSheafyComplete`):
+  all reduce to PHASE 3's `isSheafyComplete_congr` along `completionModelCompare` /
+  `completeRingEquivCompletionModel`. The complete-ring equiv already exists (overscoped) as
+  `globalSections_equiv : A ≃+* presheafValue (globalLocData P)` (WedhornCechAcyclicity.lean:8890) —
+  publicizing it (PHASE 4A) is bounded but yields nothing without PHASE 3C.
+- **PHASE 5** (`finiteJet_isSheafyTateRing`, `finiteJet_completionModel_structurePresheaf_...`):
+  needs PHASE 4's `isSheafyTateRing_iff_isSheafyComplete`.
+- **PHASE 6B** (Prop 8.2(2) rational-subset correspondence): needs the reverse-image construction
+  (approximate + span-preserve (6A DONE) + clear denominators + open-ideal padding). Independent of
+  3/4/5.
+
+## Acceptance `#check` status (13 required)
+
+DELIVERED (6): `RingOfIntegralElements.hasStandardRefinements`, `isSheafyFor_congr`,
+`isSheafyFor_iff_standardSheafCondition`, `isSheafyFor_iff_isSheafyComplete`,
+`finiteJet_isSheafyFor_all`, `finiteJet_isSheafyComplete`.
+REMAINING (7, all gated on PHASE 3): `isSheafyFor_equiv`, `isSheafyComplete_congr`,
+`isSheafyTateRing_iff_for_completionModel`, `isSheafyTateRing_iff_exists_completionModel`,
+`isSheafyTateRing_iff_isSheafyComplete`, `finiteJet_isSheafyTateRing`,
+`finiteJet_completionModel_structurePresheaf_isSheafOfTopologicalRings`.
