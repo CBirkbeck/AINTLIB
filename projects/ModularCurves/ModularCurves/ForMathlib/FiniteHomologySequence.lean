@@ -37,6 +37,17 @@ theorem finite_homology_X1 (hS : S.ShortExact) (i j : ι) (hij : c.Rel i j)
     ((ShortComplex.ShortExact.moduleCat_exact_iff_function_exact _).mp
       (hS.homology_exact₁ i j hij))
 
+/-- At a degree with no predecessor, finite homology of the middle complex implies finite
+homology of the first complex. -/
+theorem finite_homology_X1_of_not_rel (hS : S.ShortExact) (j : ι)
+    (hj : ∀ i, ¬ c.Rel i j) [Module.Finite R (S.X₂.homology j)] :
+    Module.Finite R (S.X₁.homology j) := by
+  letI := hS.mono_f
+  letI : Mono (HomologicalComplex.homologyMap S.f j) :=
+    HomologicalComplex.mono_homologyMap_of_mono_of_not_rel S.f j hj
+  exact Module.Finite.of_injective (HomologicalComplex.homologyMap S.f j).hom
+    ((ModuleCat.mono_iff_injective (HomologicalComplex.homologyMap S.f j)).mp inferInstance)
+
 /-- In a short exact sequence of complexes, finite homology of the first and third
 complexes in one degree implies finite homology of the second complex in that degree. -/
 theorem finite_homology_X2 (hS : S.ShortExact) (i : ι)
@@ -55,5 +66,19 @@ theorem finite_homology_X3 (hS : S.ShortExact) (i j : ι) (hij : c.Rel i j)
   Module.Finite.of_exact_of_finite _ _
     ((ShortComplex.ShortExact.moduleCat_exact_iff_function_exact _).mp
       (hS.homology_exact₃ i j hij))
+
+/-- In a short exact sequence of cochain complexes indexed by the natural numbers, finite
+homology of the middle and third complexes in every degree implies finite homology of the
+first complex in every degree. -/
+theorem finite_homology_X1_up_nat
+    {S : ShortComplex (CochainComplex (ModuleCat.{v} R) ℕ)} (hS : S.ShortExact)
+    [∀ n, Module.Finite R (S.X₂.homology n)] [∀ n, Module.Finite R (S.X₃.homology n)]
+    (n : ℕ) : Module.Finite R (S.X₁.homology n) := by
+  cases n with
+  | zero =>
+      apply finite_homology_X1_of_not_rel hS 0
+      simp [ComplexShape.up_Rel]
+  | succ n =>
+      exact finite_homology_X1 hS n (n + 1) (by simp [ComplexShape.up_Rel])
 
 end ModularCurves.CategoryTheory.ShortComplex.ShortExact
