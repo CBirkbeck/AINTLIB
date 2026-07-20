@@ -50,6 +50,9 @@ statement here is about such a map, in the maximal module-theoretic generality.
   bounded exact complex of flat modules (the algebraic content of Mumford §5, Lemma 2).
 * `LinearMap.exact_of_bounded_forall_field_baseChange_exact`: a bounded complex of
   finite projective modules that is exact over every field fibre is exact over the base.
+* `LinearMap.exact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology`:
+  the same conclusion for a bounded complex of flat modules whose explicit homology
+  modules are finite.
 * `kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact`: its
   degree-zero kernel is finite projective and commutes with arbitrary algebra base change.
 * `Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact`: if the degree-zero
@@ -772,6 +775,65 @@ theorem LinearMap.exact_of_forall_field_baseChange_exact_of_finite
       simpa only [LinearMap.comp_apply] using hx
   rw [← LinearMap.range_eq_top, ← Submodule.Quotient.subsingleton_iff]
   exact hcoker
+
+private theorem boundedFlatCokerAndExactOfFiniteHomology
+    (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+    (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfinite : ∀ n, n < N →
+      Module.Finite R
+        (LinearMap.ker (d (n + 1)) ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer (d n) (d (n + 1)) (hcomp n))))
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K))
+    (n : ℕ) (hn : n ≤ N) :
+    Module.Flat R (M (n + 1) ⧸ LinearMap.range (d n)) ∧
+      (n < N → Function.Exact (d n) (d (n + 1))) := by
+  induction hn using Nat.decreasingInduction with
+  | self =>
+      exact ⟨inferInstance, fun hn => (Nat.lt_irrefl N hn).elim⟩
+  | @of_succ k hk ih =>
+      letI : Module.Flat R
+          (M (k + 2) ⧸ LinearMap.range (d (k + 1))) := ih.1
+      letI : Module.Finite R
+          (LinearMap.ker (d (k + 1)) ⧸
+            LinearMap.range
+              (LinearMap.codRestrictToKer (d k) (d (k + 1)) (hcomp k))) :=
+        hfinite k hk
+      have hexact : Function.Exact (d k) (d (k + 1)) :=
+        LinearMap.exact_of_forall_field_baseChange_exact_of_finite
+          (d k) (d (k + 1)) (hcomp k) (hfield k hk)
+      letI : Module.Flat R (LinearMap.range (d (k + 1))) :=
+        Module.Flat.of_flat_quotient _
+      let e : (M (k + 1) ⧸ LinearMap.range (d k)) ≃ₗ[R]
+          LinearMap.range (d (k + 1)) :=
+        Submodule.quotEquivOfEq
+            (LinearMap.range (d k)) (LinearMap.ker (d (k + 1)))
+            (LinearMap.exact_iff.mp hexact).symm ≪≫ₗ
+          LinearMap.quotKerEquivRange (d (k + 1))
+      exact ⟨Module.Flat.of_linearEquiv e, fun _ => hexact⟩
+
+/-- A bounded complex of flat modules with finite explicit homology is exact when every
+field base change is exact. Boundedness lets one descend from the terminal zero term: the
+next cokernel is flat, finite homology detects exactness on field fibres, and exactness
+identifies the preceding cokernel with a flat range. -/
+theorem LinearMap.exact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology
+    (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+    (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfinite : ∀ n, n < N →
+      Module.Finite R
+        (LinearMap.ker (d (n + 1)) ⧸
+          LinearMap.range
+            (LinearMap.codRestrictToKer (d n) (d (n + 1)) (hcomp n))))
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K))
+    (n : ℕ) (hn : n < N) :
+    Function.Exact (d n) (d (n + 1)) :=
+  (boundedFlatCokerAndExactOfFiniteHomology M d N hcomp hfinite hfield n hn.le).2 hn
 
 end Exactness
 
