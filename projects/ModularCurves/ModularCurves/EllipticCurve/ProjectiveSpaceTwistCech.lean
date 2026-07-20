@@ -552,6 +552,135 @@ theorem coordinateLaurentExponentEquiv_delete_succ [LinearOrder σ] {n : ℕ}
       coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ hi']
     rfl
 
+section
+
+local instance : DecidableEq σ := Classical.decEq σ
+
+private theorem coordinateLaurentExponentDeleteRingHom_comp [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1)) :
+    (AddMonoidAlgebra.mapDomainRingHom R
+      (coordinateLaurentExponentDeleteAddMonoidHom a k)).comp
+        (AddMonoidAlgebra.mapDomainRingHom R
+          (laurentExponentAwayMap
+            (coordinateTailExponent
+              (fun l => ((a.delete k.succ).1 l).down))).toAddMonoidHom) =
+      AddMonoidAlgebra.mapDomainRingHom R
+        (laurentExponentAwayMap
+          (coordinateTailExponent (fun l => (a.1 l).down))).toAddMonoidHom := by
+  rw [← AddMonoidAlgebra.mapDomainRingHom_comp]
+  congr 1
+
+/-- For a noninitial deletion, Laurent coordinates identify restriction to the full ordered Cech
+intersection with the inclusion that preserves the underlying Laurent exponent. -/
+theorem coordinateProductAwayLaurentRingEquiv_naturality_delete_succ
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1)) :
+    (laurentMonomialRingEquiv R
+        (coordinateTailExponent (fun l => (a.1 l).down))).toRingHom.comp
+        ((coordinateProductAwayRingEquiv (R := R)
+          (fun l => (a.1 l).down)).toRingHom.comp
+          (HomogeneousLocalization.awayMap
+            (homogeneousSubmodule σ R)
+            (X_mem_homogeneousSubmodule_one R (a.1 k.succ).down)
+            (coordinateProductPolynomial_eq_delete_mul (R := R) a k.succ))) =
+      (AddMonoidAlgebra.mapDomainRingHom R
+        (coordinateLaurentExponentDeleteAddMonoidHom a k)).comp
+        ((laurentMonomialRingEquiv R
+          (coordinateTailExponent
+            (fun l => ((a.delete k.succ).1 l).down))).toRingHom.comp
+          (coordinateProductAwayRingEquiv (R := R)
+            (fun l => ((a.delete k.succ).1 l).down)).toRingHom) := by
+  letI := (HomogeneousLocalization.awayMap
+    (f := X (a.1 0).down)
+    (g := coordinateTailPolynomial (R := R)
+      (fun l => ((a.delete k.succ).1 l).down))
+    (x := coordinateProductPolynomial (R := R)
+      (fun l => ((a.delete k.succ).1 l).down))
+    (homogeneousSubmodule σ R)
+    (coordinateTailPolynomial_mem (R := R)
+      (fun l => ((a.delete k.succ).1 l).down)) rfl).toAlgebra
+  let t : HomogeneousLocalization.Away (homogeneousSubmodule σ R)
+      (X (a.1 0).down) :=
+    HomogeneousLocalization.Away.isLocalizationElem
+      (X_mem_homogeneousSubmodule_one R (a.1 0).down)
+      (coordinateTailPolynomial_mem (R := R)
+        (fun l => ((a.delete k.succ).1 l).down))
+  letI : IsLocalization.Away t
+      (HomogeneousLocalization.Away (homogeneousSubmodule σ R)
+        (coordinateProductPolynomial (R := R)
+          (fun l => ((a.delete k.succ).1 l).down))) :=
+    HomogeneousLocalization.Away.isLocalization_mul
+      (X_mem_homogeneousSubmodule_one R (a.1 0).down)
+      (coordinateTailPolynomial_mem (R := R)
+        (fun l => ((a.delete k.succ).1 l).down)) rfl one_ne_zero
+  apply IsLocalization.ringHom_ext (Submonoid.powers t)
+  apply DFunLike.ext _ _
+  intro q
+  simp only [RingHom.comp_apply]
+  rw [show algebraMap
+      (HomogeneousLocalization.Away (homogeneousSubmodule σ R) (X (a.1 0).down))
+      (HomogeneousLocalization.Away (homogeneousSubmodule σ R)
+        (coordinateProductPolynomial (R := R)
+          (fun l => ((a.delete k.succ).1 l).down))) q =
+    HomogeneousLocalization.awayMap
+      (f := X (a.1 0).down)
+      (g := coordinateTailPolynomial (R := R)
+        (fun l => ((a.delete k.succ).1 l).down))
+      (x := coordinateProductPolynomial (R := R)
+        (fun l => ((a.delete k.succ).1 l).down))
+      (homogeneousSubmodule σ R)
+      (coordinateTailPolynomial_mem (R := R)
+        (fun l => ((a.delete k.succ).1 l).down)) rfl q from rfl]
+  let p := chartRingEquiv R (a.1 0).down q
+  calc
+    _ = laurentMonomialRingEquiv R
+        (coordinateTailExponent (fun l => (a.1 l).down))
+        (coordinateProductAwayRingEquiv (R := R) (fun l => (a.1 l).down)
+          (HomogeneousLocalization.awayMap
+            (f := X (a.1 0).down)
+            (g := coordinateTailPolynomial (R := R) (fun l => (a.1 l).down))
+            (x := coordinateProductPolynomial (R := R) (fun l => (a.1 l).down))
+            (homogeneousSubmodule σ R)
+            (coordinateTailPolynomial_mem (R := R)
+              (fun l => (a.1 l).down)) rfl q)) := congrArg
+              (fun x => laurentMonomialRingEquiv R
+                (coordinateTailExponent (fun l => (a.1 l).down))
+                (coordinateProductAwayRingEquiv (R := R)
+                  (fun l => (a.1 l).down) x))
+              (coordinateTailAwayMap_comp_delete_succ (R := R) a k q)
+    _ = AddMonoidAlgebra.mapDomain
+        (laurentExponentAwayMap
+          (coordinateTailExponent (fun l => (a.1 l).down))).toAddMonoidHom p :=
+      coordinateProductAwayLaurentRingEquiv_awayMap
+        (R := R) (σ := σ) (n := n + 1) (fun l => (a.1 l).down) q
+    _ = AddMonoidAlgebra.mapDomain
+        (coordinateLaurentExponentDeleteAddMonoidHom a k)
+        (AddMonoidAlgebra.mapDomain
+          (laurentExponentAwayMap
+            (coordinateTailExponent
+              (fun l => ((a.delete k.succ).1 l).down))).toAddMonoidHom p) := by
+      change (AddMonoidAlgebra.mapDomainRingHom R
+          (laurentExponentAwayMap
+            (coordinateTailExponent (fun l => (a.1 l).down))).toAddMonoidHom) p =
+        ((AddMonoidAlgebra.mapDomainRingHom R
+          (coordinateLaurentExponentDeleteAddMonoidHom a k)).comp
+          (AddMonoidAlgebra.mapDomainRingHom R
+            (laurentExponentAwayMap
+              (coordinateTailExponent
+                (fun l => ((a.delete k.succ).1 l).down))).toAddMonoidHom)) p
+      exact congrArg (fun f => f p)
+        (coordinateLaurentExponentDeleteRingHom_comp (R := R) a k).symm
+    _ = _ := congrArg
+      (AddMonoidAlgebra.mapDomain
+        (coordinateLaurentExponentDeleteAddMonoidHom a k))
+      (coordinateProductAwayLaurentRingEquiv_awayMap
+        (R := R) (σ := σ) (n := n)
+        (fun l => ((a.delete k.succ).1 l).down) q).symm
+
+end
+
 /-- The standard frame of `O(d)` restricted to an ordered Cech intersection. -/
 noncomputable def coordinateHyperplaneTwistCechTrivialization {n : ℕ}
     (a : Fin (n + 1) → ULift.{u} σ) (j : σ) (d : ℤ) :
