@@ -1175,8 +1175,46 @@ noncomputable def coordinateOpenCechFirstTransitionFactorEnd
       ((coordinateOpenTransitionUnit (R := R) (a.1 0).down (a.1 1).down ^ d :
           Γ(Proj (homogeneousSubmodule σ R),
             coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
-        Γ(Proj (homogeneousSubmodule σ R),
-          coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)))
+          Γ(Proj (homogeneousSubmodule σ R),
+            coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)))
+
+/-- In Laurent coordinates, the first-chart transition endomorphism is multiplication by the
+restricted transition section. -/
+theorem coordinateOpenCechFirstTransitionFactorEnd_apply_laurent
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ)
+    (x : Scheme.Modules.baseCechFactor
+      (homogeneousProjπ (R := R) (σ := σ))
+      (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+      (coordinateOpenCover (R := R) (σ := σ)) (n + 1) a.1) :
+    coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a.1
+        (coordinateOpenCechFirstTransitionFactorEnd (R := R) a d x) =
+      coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a.1 x *
+        coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a.1
+          ((Proj (homogeneousSubmodule σ R)).presheaf.map
+            (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+              (R := R) a)).op
+            ((coordinateOpenTransitionUnit
+                (R := R) (a.1 0).down (a.1 1).down ^ d :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))) := by
+  let X := Proj (homogeneousSubmodule σ R)
+  let U := coordinateOpenCechIntersection (R := R) a.1
+  let s : Γ(X, U) := X.presheaf.map
+    (homOfLE (coordinateOpenCechIntersection_le_firstOverlap (R := R) a)).op
+    ((coordinateOpenTransitionUnit
+        (R := R) (a.1 0).down (a.1 1).down ^ d :
+      Γ(X, coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
+      Γ(X, coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))
+  change coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a.1
+      ((ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).val.app
+        (.op (Over.mk (𝟙 U))) x) = _
+  change coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a.1
+      ((show Γ(X, U) from x) * s) = _
+  rw [map_mul]
+  rfl
 
 /-- Deleting a noninitial entry preserves the anchor frame on the smaller
 standard intersection. -/
