@@ -320,6 +320,28 @@ theorem coordinateProductAwayRingEquiv_awayMap {n : ℕ}
         q) = _
   rw [IsLocalization.ringEquivOfRingEquiv_eq]
 
+/-- In Laurent coordinates, the tail away-map is induced by the natural-exponent localization
+map on monomials. -/
+theorem coordinateProductAwayLaurentRingEquiv_awayMap {n : ℕ}
+    (a : Fin (n + 1) → σ)
+    (q : Away (homogeneousSubmodule σ R) (X (a 0) : MvPolynomial σ R)) :
+    laurentMonomialRingEquiv R (coordinateTailExponent a)
+        (coordinateProductAwayRingEquiv (R := R) a
+          (HomogeneousLocalization.awayMap
+            (f := X (a 0))
+            (g := coordinateTailPolynomial (R := R) a)
+            (x := coordinateProductPolynomial (R := R) a)
+            (homogeneousSubmodule σ R)
+            (coordinateTailPolynomial_mem (R := R) a) rfl q)) =
+      AddMonoidAlgebra.mapDomain
+        (laurentExponentAwayMap
+          (coordinateTailExponent a)).toAddMonoidHom
+        (chartRingEquiv R (a 0) q) := by
+  rw [coordinateProductAwayRingEquiv_awayMap (R := R) a q]
+  exact laurentMonomialRingEquiv_algebraMap
+    (σ := {j : σ // j ≠ a 0}) R
+    (coordinateTailExponent a) (chartRingEquiv R (a 0) q)
+
 @[simp]
 theorem coordinateProductAwayRingEquiv_algebraMap {n : ℕ}
     (a : Fin (n + 1) → σ) (r : R) :
