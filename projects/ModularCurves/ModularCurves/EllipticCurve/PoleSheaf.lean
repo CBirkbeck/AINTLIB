@@ -2395,6 +2395,196 @@ theorem pullbackComp_monoidalTensorTrivialization
   erw [Category.assoc]
   erw [Category.assoc]
 
+/-- Converting two structure-sheaf-valued pullback frames to monoidal-unit
+frames commutes with forming their canonical tensor frame. -/
+theorem pullbackTensorTrivialization_eq_monoidal
+    {X T : Scheme.{u}} (f : T ⟶ X) (M N : X.Modules)
+    (e : (Scheme.Modules.pullback f).obj M ≅ Scheme.Modules.unitObj T)
+    (d : (Scheme.Modules.pullback f).obj N ≅ Scheme.Modules.unitObj T) :
+    (Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+        (e ⊗ᵢ d) ≪≫ unitObjTensorIso T =
+      (Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+        ((e ≪≫ (monoidalUnitObjIso T).symm) ⊗ᵢ
+          (d ≪≫ (monoidalUnitObjIso T).symm)) ≪≫
+        λ_ (𝟙_ T.Modules) ≪≫ monoidalUnitObjIso T := by
+  apply Iso.ext
+  simp only [Iso.trans_hom, MonoidalCategory.tensorIso_hom,
+    unitObjTensorIso, Iso.symm_hom]
+  slice_lhs 2 3 => rw [MonoidalCategory.tensorHom_comp_tensorHom]
+  simp only [Category.assoc]
+
+/-- A monoidal comparison between two composite pullbacks preserves the
+canonical tensor frame induced by two structure-sheaf-valued frames. -/
+theorem pullbackComp_tensorTrivialization
+    {X T U : Scheme.{u}} (f : T ⟶ X) (g : U ⟶ T) (h : U ⟶ X)
+    (α : Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g ≅
+      Scheme.Modules.pullback h) [α.hom.IsMonoidal]
+    (M N : X.Modules)
+    (e : (Scheme.Modules.pullback f).obj M ≅ Scheme.Modules.unitObj T)
+    (d : (Scheme.Modules.pullback f).obj N ≅ Scheme.Modules.unitObj T) :
+    (Functor.Monoidal.μIso (Scheme.Modules.pullback h) M N).symm ≪≫
+        (((α.app M).symm ≪≫ (Scheme.Modules.pullback g).mapIso e ≪≫
+            Scheme.Modules.pullbackUnitIso g) ⊗ᵢ
+          ((α.app N).symm ≪≫ (Scheme.Modules.pullback g).mapIso d ≪≫
+            Scheme.Modules.pullbackUnitIso g)) ≪≫
+        unitObjTensorIso U =
+      (α.app (M ⊗ N)).symm ≪≫
+        (Scheme.Modules.pullback g).mapIso
+          ((Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+            (e ⊗ᵢ d) ≪≫ unitObjTensorIso T) ≪≫
+        Scheme.Modules.pullbackUnitIso g := by
+  let uT := monoidalUnitObjIso T
+  let uU := monoidalUnitObjIso U
+  let e₀ := e ≪≫ uT.symm
+  let d₀ := d ≪≫ uT.symm
+  let eComp := (α.app M).symm ≪≫
+    (Scheme.Modules.pullback g).mapIso e ≪≫
+      Scheme.Modules.pullbackUnitIso g
+  let dComp := (α.app N).symm ≪≫
+    (Scheme.Modules.pullback g).mapIso d ≪≫
+      Scheme.Modules.pullbackUnitIso g
+  let eComp₀ := (α.app M).symm ≪≫
+    (Scheme.Modules.pullback g).mapIso e₀ ≪≫
+      (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm
+  let dComp₀ := (α.app N).symm ≪≫
+    (Scheme.Modules.pullback g).mapIso d₀ ≪≫
+      (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm
+  have hunit := Scheme.Modules.pullback_monoidalUnitObjIso g
+  change (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm ≪≫ uU =
+    (Scheme.Modules.pullback g).mapIso uT ≪≫
+      Scheme.Modules.pullbackUnitIso g at hunit
+  have hunitHom := congrArg Iso.hom hunit
+  simp only [Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom] at hunitHom
+  change (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv ≫ uU.hom =
+    ((Scheme.Modules.pullback g).mapIso uT).hom ≫
+      (Scheme.Modules.pullbackUnitIso g).hom at hunitHom
+  have hunitInv :
+      Scheme.Modules.pullbackUnitIso g ≪≫ uU.symm =
+        ((Scheme.Modules.pullback g).mapIso uT).symm ≪≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm := by
+    apply Iso.ext
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    calc
+      (Scheme.Modules.pullbackUnitIso g).hom ≫ uU.inv =
+          ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+            (((Scheme.Modules.pullback g).mapIso uT).hom ≫
+              (Scheme.Modules.pullbackUnitIso g).hom) ≫ uU.inv := by simp
+      _ = ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+          (((Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv ≫
+            uU.hom) ≫ uU.inv) := by rw [hunitHom]
+      _ = ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv := by simp
+  have hsimpleE : eComp ≪≫ uU.symm = eComp₀ := by
+    apply Iso.ext
+    simp only [eComp, eComp₀, e₀, Iso.trans_hom, Iso.symm_hom,
+      Functor.mapIso_hom, Category.assoc]
+    rw [← Category.assoc]
+    rw [show (Scheme.Modules.pullbackUnitIso g).hom ≫ uU.inv =
+        ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv by
+      exact congrArg Iso.hom hunitInv]
+    have hmapComp :=
+      ((Scheme.Modules.pullback g).map_comp e.hom uT.inv).symm
+    calc
+      (α.app M).inv ≫ (Scheme.Modules.pullback g).map e.hom ≫
+            (Scheme.Modules.pullback g).map uT.inv ≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv =
+          (α.app M).inv ≫
+            ((Scheme.Modules.pullback g).map e.hom ≫
+              (Scheme.Modules.pullback g).map uT.inv) ≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv := by
+        simp only [Category.assoc]
+      _ = (α.app M).inv ≫
+            ((Scheme.Modules.pullback g).map (e.hom ≫ uT.inv) ≫
+              (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv) :=
+        congrArg (fun q ↦ (α.app M).inv ≫
+          (q ≫ (Functor.Monoidal.εIso
+            (Scheme.Modules.pullback g)).inv)) hmapComp
+      _ = _ := rfl
+  have hsimpleD : dComp ≪≫ uU.symm = dComp₀ := by
+    apply Iso.ext
+    simp only [dComp, dComp₀, d₀, Iso.trans_hom, Iso.symm_hom,
+      Functor.mapIso_hom, Category.assoc]
+    rw [← Category.assoc]
+    rw [show (Scheme.Modules.pullbackUnitIso g).hom ≫ uU.inv =
+        ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv by
+      exact congrArg Iso.hom hunitInv]
+    have hmapComp :=
+      ((Scheme.Modules.pullback g).map_comp d.hom uT.inv).symm
+    calc
+      (α.app N).inv ≫ (Scheme.Modules.pullback g).map d.hom ≫
+            (Scheme.Modules.pullback g).map uT.inv ≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv =
+          (α.app N).inv ≫
+            ((Scheme.Modules.pullback g).map d.hom ≫
+              (Scheme.Modules.pullback g).map uT.inv) ≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv := by
+        simp only [Category.assoc]
+      _ = (α.app N).inv ≫
+            ((Scheme.Modules.pullback g).map (d.hom ≫ uT.inv) ≫
+              (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv) :=
+        congrArg (fun q ↦ (α.app N).inv ≫
+          (q ≫ (Functor.Monoidal.εIso
+            (Scheme.Modules.pullback g)).inv)) hmapComp
+      _ = _ := rfl
+  change
+    (Functor.Monoidal.μIso (Scheme.Modules.pullback h) M N).symm ≪≫
+        (eComp ⊗ᵢ dComp) ≪≫ unitObjTensorIso U =
+      (α.app (M ⊗ N)).symm ≪≫
+        (Scheme.Modules.pullback g).mapIso
+          ((Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+            (e ⊗ᵢ d) ≪≫ unitObjTensorIso T) ≪≫
+        Scheme.Modules.pullbackUnitIso g
+  rw [pullbackTensorTrivialization_eq_monoidal h M N eComp dComp]
+  rw [hsimpleE, hsimpleD]
+  dsimp only [eComp₀, dComp₀]
+  have hmonoidalU := congrArg (fun q ↦ q ≪≫ uU)
+    (pullbackComp_monoidalTensorTrivialization f g h α M N e₀ d₀)
+  simp only [CategoryTheory.Iso.trans_assoc] at hmonoidalU
+  rw [hmonoidalU]
+  rw [hunit]
+  have hmap :
+      (Scheme.Modules.pullback g).mapIso
+          ((Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+            (e₀ ⊗ᵢ d₀) ≪≫ λ_ (𝟙_ T.Modules)) ≪≫
+        (Scheme.Modules.pullback g).mapIso uT =
+      (Scheme.Modules.pullback g).mapIso
+        ((Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+          (e ⊗ᵢ d) ≪≫ unitObjTensorIso T) := by
+    rw [← (Scheme.Modules.pullback g).mapIso_trans]
+    simpa only [e₀, d₀, uT, CategoryTheory.Iso.trans_assoc] using congrArg
+      (Scheme.Modules.pullback g).mapIso
+      (pullbackTensorTrivialization_eq_monoidal f M N e d).symm
+  have hmap' := congrArg
+    (fun q ↦ q ≪≫ Scheme.Modules.pullbackUnitIso g) hmap
+  rw [CategoryTheory.Iso.trans_assoc] at hmap'
+  have hmap'' := congrArg
+    (fun q ↦ (α.app (M ⊗ N)).symm ≪≫ q) hmap'
+  exact hmap''
+
+/-- The canonical restriction-functor tensor frame is its direct pullback
+presentation after inserting the restriction-pullback comparison. -/
+theorem restrictMonoidalTensorTrivialization_eq_pullback
+    {X T : Scheme.{u}} (f : T ⟶ X) [IsOpenImmersion f]
+    (M N : X.Modules)
+    (e : (Scheme.Modules.restrictFunctor f).obj M ≅
+      Scheme.Modules.unitObj T)
+    (d : (Scheme.Modules.restrictFunctor f).obj N ≅
+      Scheme.Modules.unitObj T) :
+    restrictMonoidalTensorIso f M N ≪≫ (e ⊗ᵢ d) ≪≫
+        unitObjTensorIso T =
+      (Scheme.Modules.restrictFunctorIsoPullback f).app (M ⊗ N) ≪≫
+        (Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+        (((Scheme.Modules.restrictFunctorIsoPullback f).symm.app M ≪≫ e) ⊗ᵢ
+          ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app N ≪≫ d)) ≪≫
+        unitObjTensorIso T := by
+  apply Iso.ext
+  simp only [restrictMonoidalTensorIso, Iso.trans_hom,
+    MonoidalCategory.tensorIso_hom, Iso.symm_hom]
+  simp only [Category.assoc]
+  slice_lhs 3 4 => rw [MonoidalCategory.tensorHom_comp_tensorHom]
+
 /-- Monoidal pullback composition commutes with the recursively induced
 tensor-power trivializations. -/
 private theorem sectionPoleSheafPowerPullbackMonoidalTrivialization_comp
@@ -2704,6 +2894,107 @@ theorem restrictMonoidalUnitTrivialization_restrictOpen
     _ = rV.hom ≫ eV.hom ≫ sV.hom := by
       simpa only [Category.assoc] using
         congrArg (fun q ↦ rV.hom ≫ q ≫ sV.hom) hunitComp.symm
+
+/-- Restricting a canonical tensor frame to a smaller open agrees with the
+tensor frame induced by restricting its two factors. -/
+theorem restrictMonoidalTensorTrivialization_restrictOpen
+    {X : Scheme.{u}} (M N : X.Modules) {U V : X.Opens} (hVU : V ≤ U)
+    (e : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (d : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    Scheme.Modules.restrictOpenTrivialization hVU
+        (restrictMonoidalTensorIso U.ι M N ≪≫ (e ⊗ᵢ d) ≪≫
+          unitObjTensorIso U.toScheme) =
+      restrictMonoidalTensorIso V.ι M N ≪≫
+        (Scheme.Modules.restrictOpenTrivialization hVU e ⊗ᵢ
+          Scheme.Modules.restrictOpenTrivialization hVU d) ≪≫
+        unitObjTensorIso V.toScheme := by
+  let j := X.homOfLE hVU
+  let α : Scheme.Modules.pullback U.ι ⋙ Scheme.Modules.pullback j ≅
+      Scheme.Modules.pullback V.ι :=
+    Scheme.Modules.pullbackComp j U.ι ≪≫
+      (Scheme.Modules.pullbackCongr (X.homOfLE_ι hVU).symm).symm
+  letI hcomp : (Scheme.Modules.pullbackComp j U.ι).hom.IsMonoidal :=
+    Scheme.Modules.pullbackComp_hom_isMonoidal j U.ι
+  letI hcongr :
+      (Scheme.Modules.pullbackCongr
+        (X.homOfLE_ι hVU).symm).inv.IsMonoidal :=
+    pullbackCongr_inv_isMonoidal (X.homOfLE_ι hVU).symm
+  letI halpha : α.hom.IsMonoidal := by
+    change NatTrans.IsMonoidal
+      ((Scheme.Modules.pullbackComp j U.ι).hom ≫
+        (Scheme.Modules.pullbackCongr
+          (X.homOfLE_ι hVU).symm).inv)
+    exact NatTrans.IsMonoidal.comp _ _
+  let eU := (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app M ≪≫ e
+  let dU := (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app N ≪≫ d
+  let eV := (Scheme.Modules.restrictFunctorIsoPullback V.ι).symm.app M ≪≫
+    Scheme.Modules.restrictOpenTrivialization hVU e
+  let dV := (Scheme.Modules.restrictFunctorIsoPullback V.ι).symm.app N ≪≫
+    Scheme.Modules.restrictOpenTrivialization hVU d
+  let eComp := (α.app M).symm ≪≫
+    (Scheme.Modules.pullback j).mapIso eU ≪≫
+      Scheme.Modules.pullbackUnitIso j
+  let dComp := (α.app N).symm ≪≫
+    (Scheme.Modules.pullback j).mapIso dU ≪≫
+      Scheme.Modules.pullbackUnitIso j
+  have heV : eV = eComp := by
+    dsimp only [eV]
+    rw [Scheme.Modules.restrictOpenTrivialization_eq_pullback hVU e]
+    apply Iso.ext
+    simp only [eComp, Scheme.Modules.restrictOpenTrivializationPullback,
+      Scheme.Modules.restrictTrivialization, eU, α, j,
+      Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom]
+    simp
+  have hdV : dV = dComp := by
+    dsimp only [dV]
+    rw [Scheme.Modules.restrictOpenTrivialization_eq_pullback hVU d]
+    apply Iso.ext
+    simp only [dComp, Scheme.Modules.restrictOpenTrivializationPullback,
+      Scheme.Modules.restrictTrivialization, dU, α, j,
+      Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom]
+    simp
+  rw [restrictMonoidalTensorTrivialization_eq_pullback V.ι M N
+    (Scheme.Modules.restrictOpenTrivialization hVU e)
+    (Scheme.Modules.restrictOpenTrivialization hVU d)]
+  change _ = (Scheme.Modules.restrictFunctorIsoPullback V.ι).app (M ⊗ N) ≪≫
+    (Functor.Monoidal.μIso (Scheme.Modules.pullback V.ι) M N).symm ≪≫
+      (eV ⊗ᵢ dV) ≪≫ unitObjTensorIso V.toScheme
+  rw [heV, hdV]
+  rw [pullbackComp_tensorTrivialization U.ι j V.ι α M N eU dU]
+  rw [Scheme.Modules.restrictOpenTrivialization_eq_pullback hVU
+    (restrictMonoidalTensorIso U.ι M N ≪≫ (e ⊗ᵢ d) ≪≫
+      unitObjTensorIso U.toScheme)]
+  simp only [Scheme.Modules.restrictOpenTrivializationPullback,
+    Scheme.Modules.restrictTrivialization]
+  rw [restrictMonoidalTensorTrivialization_eq_pullback U.ι M N e d]
+  simp only [eU, dU, α, j]
+  let rInv := (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app (M ⊗ N)
+  let rHom := (Scheme.Modules.restrictFunctorIsoPullback U.ι).app (M ⊗ N)
+  let q := (Functor.Monoidal.μIso (Scheme.Modules.pullback U.ι) M N).symm ≪≫
+    (((Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app M ≪≫ e) ⊗ᵢ
+      ((Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app N ≪≫ d)) ≪≫
+    unitObjTensorIso U.toScheme
+  have hinside : rInv ≪≫ rHom ≪≫ q = q := by
+    dsimp only [rInv, rHom]
+    apply Iso.ext
+    simp
+  have hmapInside := congrArg
+    (fun k ↦ (Scheme.Modules.pullback j).mapIso k) hinside
+  dsimp only [rInv, rHom, q] at hmapInside
+  have halphaApp :
+      (α.app (M ⊗ N)).symm =
+        (Scheme.Modules.pullbackCongr
+            (X.homOfLE_ι hVU).symm).app (M ⊗ N) ≪≫
+          ((Scheme.Modules.pullbackComp j U.ι).app (M ⊗ N)).symm := by
+    rfl
+  rw [halphaApp]
+  have hfull := congrArg
+    (fun k ↦ (Scheme.Modules.restrictFunctorIsoPullback V.ι).app (M ⊗ N) ≪≫
+      (Scheme.Modules.pullbackCongr
+          (X.homOfLE_ι hVU).symm).app (M ⊗ N) ≪≫
+      ((Scheme.Modules.pullbackComp j U.ι).app (M ⊗ N)).symm ≪≫ k ≪≫
+      Scheme.Modules.pullbackUnitIso j) hmapInside
+  simpa only [j, CategoryTheory.Iso.trans_assoc] using hfull
 
 /-- Restricting a pole-power trivialization to a smaller open agrees with the
 power trivialization induced by the restricted simple-pole trivialization. -/
