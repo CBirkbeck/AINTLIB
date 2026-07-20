@@ -606,6 +606,176 @@ theorem coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit_hom_comp_π
     (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
       coordinateHyperplaneTwistBaseCechFactorIsoUnit (R := R) b.1 j d) a
 
+/-- Every noninitial ordered Cech coface becomes ordinary structure-sheaf
+restriction in the standard twist frames. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechCoface_of_ne_zero
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ)
+    (k : Fin (n + 2)) (hk : k ≠ 0) :
+    (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d n).hom ≫
+      Scheme.Modules.orderedBaseCechCoface
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n k =
+    Scheme.Modules.orderedBaseCechCoface
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n k ≫
+      (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d (n + 1)).hom := by
+  unfold coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+  unfold Scheme.Modules.orderedBaseCechCoface
+  unfold Scheme.Modules.orderedBaseCechObject
+  unfold FormalCoproduct.evalOp
+  apply Pi.hom_ext
+  intro a
+  erw [Category.assoc, Pi.lift_π, Pi.mapIso_hom_π_assoc,
+    Category.assoc, Pi.mapIso_hom_π]
+  conv_rhs => erw [← Category.assoc, Pi.lift_π]
+  let a' : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) := a
+  change Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a'.delete k) ≫
+      ((coordinateHyperplaneTwistBaseCechFactorIsoUnit
+          (R := R) (a'.delete k).1 j d).hom ≫
+        (Scheme.Modules.baseModulePresheaf
+          (homogeneousProjπ (R := R) (σ := σ))
+          (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+            (coordinateOpenCechDelete (R := R) a' k).op) =
+    Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a'.delete k) ≫
+      ((Scheme.Modules.baseModulePresheaf
+          (homogeneousProjπ (R := R) (σ := σ))
+          (coordinateHyperplaneTwist (R := R) j d)).map
+            (coordinateOpenCechDelete (R := R) a' k).op ≫
+        (coordinateHyperplaneTwistBaseCechFactorIsoUnit
+          (R := R) a'.1 j d).hom)
+  have hNat :=
+    coordinateHyperplaneTwistBaseCechFactorIsoUnit_naturality_delete_of_ne_zero
+    (R := R) a' k hk j d
+  exact congrArg
+    (fun q =>
+      Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+        Scheme.Modules.baseCechFactor
+          (homogeneousProjπ (R := R) (σ := σ))
+          (coordinateHyperplaneTwist (R := R) j d)
+          (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a'.delete k) ≫ q)
+    hNat.symm
+
+/-- The first coface in standard twist coordinates: ordinary restriction
+followed by multiplication by the first-chart transition factor. -/
+noncomputable def coordinateHyperplaneTwistOrderedBaseCechFirstCoface
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n ⟶
+      Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) (n + 1) :=
+  Pi.lift fun a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) =>
+    Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a.delete 0) ≫
+      (Scheme.Modules.baseModulePresheaf
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+          (coordinateOpenCechDelete (R := R) a 0).op ≫
+      coordinateOpenCechFirstTransitionFactorEnd (R := R) a d
+
+/-- The first coordinate coface has the advertised restriction-and-transition
+formula on every ordered tuple. -/
+@[reassoc]
+theorem coordinateHyperplaneTwistOrderedBaseCechFirstCoface_comp_π
+    [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
+    coordinateHyperplaneTwistOrderedBaseCechFirstCoface
+        (R := R) d n ≫
+      Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) =>
+        Scheme.Modules.baseCechFactor
+          (homogeneousProjπ (R := R) (σ := σ))
+          (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+          (coordinateOpenCover (R := R) (σ := σ)) (n + 1) b.1) a =
+    Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a.delete 0) ≫
+      (Scheme.Modules.baseModulePresheaf
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+          (coordinateOpenCechDelete (R := R) a 0).op ≫
+      coordinateOpenCechFirstTransitionFactorEnd (R := R) a d := by
+  exact Pi.lift_π _ a
+
+/-- The exceptional first twist coface becomes the coordinate coface carrying
+the first-chart transition factor. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechCoface_zero
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d n).hom ≫
+      coordinateHyperplaneTwistOrderedBaseCechFirstCoface
+        (R := R) d n =
+    Scheme.Modules.orderedBaseCechCoface
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n 0 ≫
+      (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d (n + 1)).hom := by
+  unfold coordinateHyperplaneTwistOrderedBaseCechFirstCoface
+  unfold coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+  unfold Scheme.Modules.orderedBaseCechCoface
+  unfold Scheme.Modules.orderedBaseCechObject
+  unfold FormalCoproduct.evalOp
+  apply Pi.hom_ext
+  intro a
+  erw [Category.assoc, Pi.lift_π, Pi.mapIso_hom_π_assoc,
+    Category.assoc, Pi.mapIso_hom_π]
+  conv_rhs => erw [← Category.assoc, Pi.lift_π]
+  let a' : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) := a
+  change Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a'.delete 0) ≫
+      ((coordinateHyperplaneTwistBaseCechFactorIsoUnit
+          (R := R) (a'.delete 0).1 j d).hom ≫
+        (Scheme.Modules.baseModulePresheaf
+          (homogeneousProjπ (R := R) (σ := σ))
+          (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+            (coordinateOpenCechDelete (R := R) a' 0).op ≫
+        coordinateOpenCechFirstTransitionFactorEnd (R := R) a' d) =
+    Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a'.delete 0) ≫
+      ((Scheme.Modules.baseModulePresheaf
+          (homogeneousProjπ (R := R) (σ := σ))
+          (coordinateHyperplaneTwist (R := R) j d)).map
+            (coordinateOpenCechDelete (R := R) a' 0).op ≫
+        (coordinateHyperplaneTwistBaseCechFactorIsoUnit
+          (R := R) a'.1 j d).hom)
+  have hNat :=
+    coordinateHyperplaneTwistBaseCechFactorIsoUnit_naturality_delete_zero
+      (R := R) a' j d
+  exact congrArg
+    (fun q =>
+      Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+        Scheme.Modules.baseCechFactor
+          (homogeneousProjπ (R := R) (σ := σ))
+          (coordinateHyperplaneTwist (R := R) j d)
+          (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a'.delete 0) ≫ q)
+    hNat.symm
+
 end
 
 end MvPolynomial
