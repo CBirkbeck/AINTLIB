@@ -143,3 +143,49 @@ with named theorems.
 
 
 # ADDENDUM 2026-07-20 (repair campaign): see tickets.md REOPENED section for phases P1–P6; the WO-table above records the prior pass's state. The conditional results there (isSheafyFor_congr etc.) are being upgraded to unconditional via: noetherian-free keystone, relative standard condition over section rings, 7.54-over-B, approximation, B-level engine.
+
+# FINAL STATE — repair campaign 2026-07-20 (commits d21408543..HEAD)
+
+Delivered (all axiom-clean, 33-target final audit, full tree 3293 jobs green):
+- P1 keystone LANDED (RelativeDescent.lean): noetherian-free `keystone`
+  O_A(E) ≃ O_B(imgDatum D₀ E) + continuity both ways + canonicalMap-compat +
+  base square + piece square; noetherian-free B-instance stack incl. the
+  right-uniformity CompleteSpace instance making HasLocLiftPowerBounded
+  synthesize at every section ring. This discharges blocked-dep #2 of
+  HasStandardRefinements.
+- P3 LANDED (StronglyNoetherianTransport.lean): restricted-series transport
+  along bicontinuous equivalences; IsStronglyNoetherianTateRing (∃-model);
+  ∃↔∀ collapse + one-model wrapper (at the analytic comparison scope — P2's
+  universal-property compare would clean it); 6.36-citation fixes.
+- P5 LANDED (HomSheafPredicate.lean + renames): generic
+  TopCat.Presheaf.IsSheafOfTopologicalRings + .isSheaf +
+  .ringPresheaf_isSheaf; VObj stores the topological condition;
+  structurePresheaf specialization; HONEST renames
+  AffinoidAdicPresentation/AdicSpacePresentation (8.21/8.22 claims removed).
+- P6 LANDED: AdicMorphisms aggregator (direct-import gate passes),
+  StructureSheaf header/contradiction fixes, beastmode archived, stale audit
+  archived, universe policy documented.
+
+STILL OPEN (exact blockers, do NOT rename-and-claim):
+- P1 unconditional endpoints (isSheafyFor_congr etc. hypothesis-free): the
+  ⟸-assembly (7.54-over-B + engine-over-B + keystone-Čech-transport) is
+  buildable on the landed keystone; the ⟹-half (IsSheafyFor at one pair ⟹
+  the relative standard condition for ARBITRARY spanning families F ⊆ O(U))
+  needs arbitrary-B-rational-datum A-realizability = the image-identification
+  half of `Spa_presheafValue_eq_rationalOpen` (sorried,
+  SpaPresheafValueEquivalence.lean) + the Kedlaya Ex-1.2.2 approximation
+  (units-open/spanning-open/same-subspace perturbation over complete Tate B).
+  Dependency chain: isSheafyFor_congr ⟸ {⟸-assembly (buildable now)} +
+  {⟹: sheafiness localizes ⟸ Spa(B,B⁺)≅U image-identification + approximation}.
+- P2 completionModelCompare hypothesis-cleanup (universal-property route via
+  the global-datum topology equality locTopology(P,{1},1) = locTopology(P',{1},1));
+  IsSheafyFor-transport along bicontinuous equivalences (RingOfIntegralElements
+  comap/map API); isSheafyTateRing_iff_for_completionModel; IsSheafyTateRing ↔
+  IsSheafyComplete for complete A (needs the Remark-8.3 A ≅ Model comparison
+  transport).
+- P4 unconditional finiteJet_isSheafyComplete/TateRing: blocked on P1's
+  unconditional endpoints (JetA is non-noetherian, so no other route).
+- P5 V-level: canonical Spa V-object needs the stalk-valuation layer for the
+  limit presheaf (Wedhorn Prop 8.6) — the Definition-8.5 valuations exist only
+  for the quarantined locally-fraction scaffolding; 8.38 morphisms through
+  V-morphisms; restriction API.

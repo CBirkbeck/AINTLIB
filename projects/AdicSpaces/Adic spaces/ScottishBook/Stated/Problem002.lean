@@ -50,7 +50,7 @@ theorem problem2
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [UniformSpace A] [IsLinearTopology A A] [PlusSubring A]
     [IsTateRing A]
-    (X : AdicSpace.{u}) (hX : IsPerfectoidSpace p X) :
+    (X : AdicSpacePresentation.{u}) (hX : IsPerfectoidSpace p X) :
     IsPerfectoidRing p A := by
   sorry
 
@@ -60,7 +60,7 @@ theorem problem2_counterexample :
     ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A) (_ : IsTopologicalRing A)
       (_ : UniformSpace A) (_ : IsLinearTopology A A) (_ : PlusSubring A)
       (_ : IsTateRing A),
-      (∃ (X : AdicSpace.{u}), IsPerfectoidSpace p X) ∧
+      (∃ (X : AdicSpacePresentation.{u}), IsPerfectoidSpace p X) ∧
       ¬ ∃ (_ : IsHuberRing A), IsPerfectoidRing p A := by
   sorry
 
@@ -70,7 +70,7 @@ theorem problem2_stablyUniform
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [UniformSpace A] [IsLinearTopology A A] [PlusSubring A]
     [IsTateRing A] [IsStablyUniform A]
-    (X : AdicSpace.{u}) (hX : IsPerfectoidSpace p X) :
+    (X : AdicSpacePresentation.{u}) (hX : IsPerfectoidSpace p X) :
     IsPerfectoidRing p A := by
   sorry
 

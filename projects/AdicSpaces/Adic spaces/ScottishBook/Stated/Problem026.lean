@@ -50,7 +50,7 @@ The statement says: there exists a perfectoid space `X` such that all higher coh
 cohomology vanishes (an abstract condition here) but `X` is not isomorphic to
 `Spa(A, A⁺)` for any perfectoid ring `A` (i.e., it is not affinoid perfectoid). -/
 theorem problem26 (p : ℕ) [Fact (Nat.Prime p)] :
-    ∃ (X : AdicSpace.{u}) (_ : IsPerfectoidSpace p X),
+    ∃ (X : AdicSpacePresentation.{u}) (_ : IsPerfectoidSpace p X),
       -- Higher cohomology vanishes (abstract condition)
       True ∧
       -- X is not affinoid perfectoid
