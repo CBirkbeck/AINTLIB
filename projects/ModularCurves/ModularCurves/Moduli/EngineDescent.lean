@@ -3124,15 +3124,12 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
   --        axiom-clean, including the 02M9 fibre input.]
   --        Vocabulary: transitions over `Γ(D(fᵢfⱼ)) ≅ Localization.Away (fᵢ*fⱼ)` enter the
   --        join form via `isLocalizedModule_sup_of_powers_mul` / `…_sup_sup_of_powers_mul`.
-  --        INPUT GAP (named sub-leaf, checked 2026-07-20): the instance
-  --        `Finite (MaximalSpectrum L)` has NO mathlib transfer lemma from
-  --        "module-finite over semilocal" (grep confirmed; only Artinian/PiLocalization
-  --        routes exist).  Obtain it via the ORBIT: MaxSpec L = the primes over the maximal
-  --        ideal of the LOCAL `Lᴳ` (lying-over/maximality transfer for the INTEGRAL extension
-  --        `Lᴳ ⊆ L` — integrality from finite `G`: `x` is a root of `∏_g (X − g•x)`), and
-  --        primes-over = one `G`-orbit (`Algebra.IsInvariant` pretransitivity, mathlib
-  --        `RingTheory/Invariant/Basic`, already CITED above for Stage-1) — finite since `G`
-  --        is finite.
+  --        The `Finite (MaximalSpectrum L)` input is LANDED:
+  --        `MaximalSpectrum.finite_of_isInvariant` (ForMathlib/MaximalSpectrumOrbit,
+  --        axiom-clean) — instantiate with `A := FixedPoints.subalgebra ℤ L` (the
+  --        tautological `Algebra.IsInvariant` instance, ForMathlib/SpecGroupAction:98) and
+  --        `[Finite (MaximalSpectrum A)]` from `IsLocalRing Lᴳ` (mathlib
+  --        `Unique (MaximalSpectrum _)` for local rings; `Lᴳ` local is in scope above).
   --   (3b) after normalization the transVC cocycle lands in the nilpotent `T = {(1,r,s,t)}`
   --        (central extension `0 → (L,+) → T → (L²,+) → 0`); split each additive layer over
   --        the finite basic cover by the n-COVER AFFINE-ČECH `H¹` VANISHING
@@ -3141,6 +3138,9 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
   --        `exists_liftOfLE_eq_pow_smul`, `exists_pow_smul_eq_zero_of_liftOfLE_eq_zero`):
   --        first the `(r,s)`-layer (`M := L²` componentwise, or two scalar passes), then —
   --        after correcting by the `(r,s)`-coboundary — the residual central `t`-layer.
+  --        Ready-to-call scalar form: `SemilocalUnitSplit.exists_sub_resLoc_eq_of_span_eq_top`
+  --        (same `resLoc` vocabulary as the unit split; call it three times, for the `r`, `s`
+  --        and corrected-`t` component cocycles of the `T`-valued `transVC` cocycle).
   --   (3c) correct the charts (`pointedIso_hom_of_transVC_eq_one`), glue coefficients to
   --        `W₀L / L` (structure-sheaf sheaf condition), spread them to a single `a₁ ∉ p`
   --        (`fixedAwayMap` / `existsUnique_factor_fixedPoints_away` Part-2 pattern of

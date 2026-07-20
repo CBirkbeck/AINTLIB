@@ -174,6 +174,48 @@ theorem exists_smul_eq_of_mem_smul_top {M M' : Type*} [AddCommGroup M] [Module R
 
 end QuotientFibre
 
+/-! ### The additive Čech split in the `resLoc` vocabulary (the `3b` entry point) -/
+
+section AdditiveResLoc
+
+/-- **Ring-form of the finite-cover affine Čech `H¹` vanishing**, in the `resLoc` vocabulary of
+this file: an additive Čech `1`-cocycle valued in the pairwise-overlap localizations splits as a
+coboundary `c i j = a i - a j`.  Thin wrapper of
+`IsLocalizedModule.exists_sub_liftOfLE_eq_of_span_eq_top` along `resLoc_eq_liftOfLE`; this is
+the form the nilpotent-layer chart-Čech splits (`r`, `s`, then central `t`) consume. -/
+theorem exists_sub_resLoc_eq_of_span_eq_top {ι : Type*} [Fintype ι] (f : ι → R)
+    (hf : Ideal.span (Set.range f) = ⊤)
+    (c : ∀ i j, Localization (Submonoid.powers (f i) ⊔ Submonoid.powers (f j)))
+    (hcoc : ∀ i j k,
+      resLoc (Submonoid.powers (f i) ⊔ Submonoid.powers (f j))
+          (Submonoid.powers (f i) ⊔ Submonoid.powers (f j) ⊔ Submonoid.powers (f k))
+          le_sup_left (c i j)
+        + resLoc (Submonoid.powers (f j) ⊔ Submonoid.powers (f k))
+            (Submonoid.powers (f i) ⊔ Submonoid.powers (f j) ⊔ Submonoid.powers (f k))
+            (sup_le (le_sup_of_le_left le_sup_right) le_sup_right) (c j k)
+      = resLoc (Submonoid.powers (f i) ⊔ Submonoid.powers (f k))
+          (Submonoid.powers (f i) ⊔ Submonoid.powers (f j) ⊔ Submonoid.powers (f k))
+          (sup_le (le_sup_of_le_left le_sup_left) le_sup_right) (c i k)) :
+    ∃ a : ∀ i, Localization (Submonoid.powers (f i)),
+      ∀ i j, c i j
+        = resLoc (Submonoid.powers (f i))
+            (Submonoid.powers (f i) ⊔ Submonoid.powers (f j)) le_sup_left (a i)
+          - resLoc (Submonoid.powers (f j))
+              (Submonoid.powers (f i) ⊔ Submonoid.powers (f j)) le_sup_right (a j) := by
+  obtain ⟨a, ha⟩ := IsLocalizedModule.exists_sub_liftOfLE_eq_of_span_eq_top f
+    (fun i => Algebra.linearMap R (Localization (Submonoid.powers (f i))))
+    (fun i j => Algebra.linearMap R
+      (Localization (Submonoid.powers (f i) ⊔ Submonoid.powers (f j))))
+    (fun i j k => Algebra.linearMap R
+      (Localization (Submonoid.powers (f i) ⊔ Submonoid.powers (f j)
+        ⊔ Submonoid.powers (f k))))
+    hf c (fun i j k => by
+      rw [← resLoc_eq_liftOfLE, ← resLoc_eq_liftOfLE, ← resLoc_eq_liftOfLE]
+      exact hcoc i j k)
+  exact ⟨a, fun i j => by rw [ha i j, ← resLoc_eq_liftOfLE, ← resLoc_eq_liftOfLE]⟩
+
+end AdditiveResLoc
+
 /-! ### The glued module of a unit cocycle -/
 
 section Glued

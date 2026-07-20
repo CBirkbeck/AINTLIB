@@ -24344,3 +24344,14 @@ NEW named 3a sub-leaf discovered + routed in the frontier comment: Finite (Maxim
 G-extension + Algebra.IsInvariant orbit-pretransitivity + finite G). Attack order for the
 assembly builder: (1) MaxSpec-finiteness sub-leaf; (2) 3a chart extraction; (3) 3b T-layer
 split ×2 (hoist as ForMathlib VariableChange-cocycle lemma); (4) 3c correction+glue+spread.
+
+### v10.343 progress — [T-E4D Stage-3 enablers part 3] MaxSpec-finiteness + resLoc Čech wrapper (2026-07-20)
+NEW ForMathlib/MaximalSpectrumOrbit.lean: MaximalSpectrum.finite_of_isInvariant AXIOM-CLEAN
+(finite G-action, Algebra.IsInvariant, finite MaxSpec of invariants ⟹ finite MaxSpec —
+lying-over + orbit-pretransitivity route; consumer instantiation documented: local Lᴳ has
+Unique MaxSpec). SemilocalUnitCocycleSplit += exists_sub_resLoc_eq_of_span_eq_top (the
+n-cover additive split in the resLoc vocabulary — 3a and 3b outputs now compose without
+dictionary friction; file still 0 sorries). hpres frontier comment lists ALL prerequisites
+axiom-clean and ready to call. Remaining: the EngineDescent scheme assembly only
+(chart extraction → rescale → T-layer splits ×3 → correction → coefficient glue →
+glueMorphisms → Part-2 spread) — dispatched to a fresh builder.
