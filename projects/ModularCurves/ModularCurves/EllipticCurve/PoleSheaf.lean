@@ -2089,6 +2089,53 @@ private theorem sectionPoleSheafPowerTrivialization_succ_hom
           (unitObjTensorIso U.toScheme).hom :=
   rfl
 
+/-- A scalar transition between compatible frames of a recursively
+tensor-built module family raises to its `n`th power in degree `n`. -/
+theorem recursiveTensorTrivialization_hom_eq_comp_scalar
+    {X : Scheme.{u}} {M : X.Modules} {P : ℕ → X.Modules}
+    (U : X.Opens)
+    (T : (M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) →
+      ∀ n : ℕ, (P n).restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (q : ∀ n : ℕ,
+      (P (n + 1)).restrict U.ι ≅
+        (P n).restrict U.ι ⊗ M.restrict U.ι)
+    (hzero : ∀ e g, (T e 0).hom = (T g 0).hom)
+    (hsucc : ∀ e n, (T e (n + 1)).hom =
+      (q n).hom ≫ ((T e n).hom ⊗ₘ e.hom) ≫
+        (unitObjTensorIso U.toScheme).hom)
+    (e g : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (r : Γ(U.toScheme, (⊤ : U.toScheme.Opens)))
+    (h : e.hom = g.hom ≫ unitEndomorphismOfTopSection r) :
+    ∀ n : ℕ, (T e n).hom = (T g n).hom ≫
+      unitEndomorphismOfTopSection (r ^ n) := by
+  intro n
+  induction n with
+  | zero =>
+      rw [pow_zero, unitEndomorphismOfTopSection_one, Category.comp_id]
+      exact hzero e g
+  | succ n hn =>
+      have htensor₀ :
+          (T e n).hom ⊗ₘ e.hom =
+            ((T g n).hom ≫ unitEndomorphismOfTopSection (r ^ n)) ⊗ₘ
+              (g.hom ≫ unitEndomorphismOfTopSection r) :=
+        congrArg₂ (fun a b ↦ a ⊗ₘ b) hn h
+      have htensor :
+          (T e n).hom ⊗ₘ e.hom =
+            ((T g n).hom ⊗ₘ g.hom) ≫
+              (unitEndomorphismOfTopSection (r ^ n) ⊗ₘ
+                unitEndomorphismOfTopSection r) :=
+        htensor₀.trans
+          (MonoidalCategory.tensorHom_comp_tensorHom
+            (T g n).hom g.hom
+            (unitEndomorphismOfTopSection (r ^ n))
+            (unitEndomorphismOfTopSection r)).symm
+      rw [hsucc e n, hsucc g n]
+      simp only [Category.assoc]
+      rw [htensor]
+      simp only [Category.assoc]
+      rw [unitObjTensorIso_hom_comp_scalars]
+      rw [pow_succ]
+
 /-- A scalar transition between simple-pole trivializations raises to its `n`th
 power on the induced trivializations of `𝒪(n[0])`. -/
 theorem sectionPoleSheafPowerTrivialization_hom_eq_comp_scalar
@@ -2101,58 +2148,15 @@ theorem sectionPoleSheafPowerTrivialization_hom_eq_comp_scalar
     ∀ n : ℕ,
       (sectionPoleSheafPowerTrivialization z hz U e n).hom =
         (sectionPoleSheafPowerTrivialization z hz U g n).hom ≫
-          unitEndomorphismOfTopSection (r ^ n)
-  | 0 => by
-      rw [pow_zero, unitEndomorphismOfTopSection_one, Category.comp_id]
-      rfl
-  | n + 1 => by
-      have hn := sectionPoleSheafPowerTrivialization_hom_eq_comp_scalar
-        z hz U e g r h n
-      have htensor₀ :
-          (sectionPoleSheafPowerTrivialization z hz U e n).hom ⊗ₘ e.hom =
-            ((sectionPoleSheafPowerTrivialization z hz U g n).hom ≫
-                unitEndomorphismOfTopSection (r ^ n)) ⊗ₘ
-              (g.hom ≫ unitEndomorphismOfTopSection r) :=
-        congrArg₂ (fun a b ↦ a ⊗ₘ b) hn h
-      have htensor :
-          (sectionPoleSheafPowerTrivialization z hz U e n).hom ⊗ₘ e.hom =
-            ((sectionPoleSheafPowerTrivialization z hz U g n).hom ⊗ₘ g.hom) ≫
-              (unitEndomorphismOfTopSection (r ^ n) ⊗ₘ
-                unitEndomorphismOfTopSection r) :=
-        htensor₀.trans
-          (MonoidalCategory.tensorHom_comp_tensorHom
-            (sectionPoleSheafPowerTrivialization z hz U g n).hom g.hom
-            (unitEndomorphismOfTopSection (r ^ n))
-            (unitEndomorphismOfTopSection r)).symm
-      have heSucc :
-          sectionPoleSheafPowerTrivialization z hz U e (n + 1) =
-            restrictMonoidalTensorIso U.ι
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
-              (sectionPoleSheafPowerTrivialization z hz U e n ⊗ᵢ e) ≪≫
-              unitObjTensorIso U.toScheme := rfl
-      have hgSucc :
-          sectionPoleSheafPowerTrivialization z hz U g (n + 1) =
-            restrictMonoidalTensorIso U.ι
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
-              (sectionPoleSheafPowerTrivialization z hz U g n ⊗ᵢ g) ≪≫
-              unitObjTensorIso U.toScheme := rfl
-      have hcomp :
-          (restrictMonoidalTensorIso U.ι
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
-              (sectionPoleSheafPowerTrivialization z hz U e n ⊗ᵢ e) ≪≫
-              unitObjTensorIso U.toScheme).hom =
-            (restrictMonoidalTensorIso U.ι
-                  (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
-                (sectionPoleSheafPowerTrivialization z hz U g n ⊗ᵢ g) ≪≫
-                unitObjTensorIso U.toScheme).hom ≫
-              unitEndomorphismOfTopSection (r ^ (n + 1)) := by
-        simp only [Iso.trans_hom, MonoidalCategory.tensorIso_hom]
-        rw [htensor]
-        simp only [Category.assoc]
-        rw [unitObjTensorIso_hom_comp_scalars]
-        rw [pow_succ]
-      rw [← heSucc, ← hgSucc] at hcomp
-      exact hcomp
+          unitEndomorphismOfTopSection (r ^ n) := by
+  exact recursiveTensorTrivialization_hom_eq_comp_scalar U
+    (fun e n ↦ sectionPoleSheafPowerTrivialization z hz U e n)
+    (fun n ↦ restrictMonoidalTensorIso U.ι
+      (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz))
+    (fun _ _ ↦ rfl)
+    (fun e n ↦ sectionPoleSheafPowerTrivialization_succ_hom
+      z hz U e n)
+    e g r h
 
 section PolePowerRestriction
 
