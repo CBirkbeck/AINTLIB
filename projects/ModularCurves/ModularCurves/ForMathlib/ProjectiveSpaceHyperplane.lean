@@ -56,6 +56,65 @@ lemma coordinateHyperplaneι_isClosedImmersion (j : σ) :
   isClosedImmersion_proj_map_quotientGradingHom
     (coordinateHyperplaneIdeal (R := R) j)
 
+section LocalEquations
+
+variable {τ : Type}
+
+local instance (j : τ) : IsClosedImmersion (coordinateHyperplaneι (R := R) j) :=
+  coordinateHyperplaneι_isClosedImmersion j
+
+/-- Away from its own coordinate chart, the coordinate hyperplane has local
+equation `X_j / X_i`. -/
+lemma coordinateHyperplaneι_ker_ideal_coordinateOpen_of_ne
+    (i j : τ) (hji : j ≠ i) :
+    (coordinateHyperplaneι (R := R) j).ker.ideal
+        (⟨coordinateOpen (R := R) i, by
+          exact coordinateOpen_isAffineOpen (R := R) i⟩ :
+          (Proj (homogeneousSubmodule τ R)).affineOpens) =
+      Ideal.span
+        {(Proj.basicOpenIsoAway (homogeneousSubmodule τ R) (X i)
+          (X_mem_homogeneousSubmodule_one R i) one_pos).hom.hom
+            (awayVar R i ⟨j, hji⟩)} := by
+  rw [coordinateHyperplaneι,
+    HomogeneousIdeal.ker_ideal_proj_map_quotientGradingHom_basicOpen
+      (hs := X_mem_homogeneousSubmodule_one R i)]
+  rw [HomogeneousIdeal.ker_away_map_quotientGradingHom
+    (hF := X_mem_homogeneousSubmodule_one R j)
+    (hI := coordinateHyperplaneIdeal_toIdeal j)
+    (hs := X_mem_homogeneousSubmodule_one R i)]
+  rw [Ideal.map_span, Set.image_singleton]
+  rfl
+
+/-- On the chart where its defining coordinate is invertible, the coordinate
+hyperplane has unit ideal. -/
+lemma coordinateHyperplaneι_ker_ideal_coordinateOpen_self (j : τ) :
+    (coordinateHyperplaneι (R := R) j).ker.ideal
+        (⟨coordinateOpen (R := R) j, by
+          exact coordinateOpen_isAffineOpen (R := R) j⟩ :
+          (Proj (homogeneousSubmodule τ R)).affineOpens) = ⊤ := by
+  rw [coordinateHyperplaneι,
+    HomogeneousIdeal.ker_ideal_proj_map_quotientGradingHom_basicOpen
+      (hs := X_mem_homogeneousSubmodule_one R j)]
+  rw [HomogeneousIdeal.ker_away_map_quotientGradingHom
+    (hF := X_mem_homogeneousSubmodule_one R j)
+    (hI := coordinateHyperplaneIdeal_toIdeal j)
+    (hs := X_mem_homogeneousSubmodule_one R j)]
+  rw [Ideal.map_span, Set.image_singleton]
+  have hmk :
+      HomogeneousLocalization.Away.mk (homogeneousSubmodule τ R)
+          (X_mem_homogeneousSubmodule_one R j) 1 (X j)
+          (by simpa using X_mem_homogeneousSubmodule_one R j) = 1 := by
+    apply HomogeneousLocalization.val_injective
+    rw [HomogeneousLocalization.Away.val_mk, HomogeneousLocalization.val_one]
+    convert Localization.mk_self_mk (X j : MvPolynomial τ R)
+      (show X j ∈ Submonoid.powers (X j : MvPolynomial τ R) from
+        ⟨1, pow_one _⟩) using 1
+    apply congrArg (Localization.mk (X j : MvPolynomial τ R))
+    exact Subtype.ext (pow_one _)
+  rw [hmk, map_one, Ideal.span_singleton_one]
+
+end LocalEquations
+
 end
 
 end MvPolynomial
