@@ -24319,3 +24319,28 @@ private helpers) — left UNCOMMITTED in the worktree for the post-reset resume.
 User directive reaffirmed mid-session: hard work flows /develop-plan-first → /beastmode
 (the STREAM-E4 board + decomposition-e4.md remain the plan of record; any newly-surfaced
 hard sub-work gets boarded before builders attack it).
+
+### v10.343 progress — [T-E4A COMPLETE] the ℰ₄ machine is DONE, AXIOM-CLEAN (2026-07-20)
+UniversalLevelFour.lean 0 sorries; headline naiveLevelFour_representable_by_affine =
+{propext, Classical.choice, Quot.sound} END-TO-END. All 8 remaining leaves closed:
+keystone universalE4_generation (Stage-B dictionary + staged quadratic 2Q̄≠2P̄ + combos4),
+IsE4Form.map, bridgeA (a₃(a₁−1)=0 + a₃-unit), bridgeQ4 (linear ψ₂ at 2Q + staged master
+identity + u/u+2B/ψ₂ unit certs), isE4Datum_of_bridges (atlas→translate→shear→a₂-unit via
+flex-contradiction→scale→bridges; e4_witness_transVC_eq_one MUCH simpler than E3's —
+s·B₂=0 kills everything, no IsUnit 2/3 side conditions in the gluing chain),
+e4ClassifyingEllHom chain, rt1/rt2, RepresentableBy packaging. KM 4.7.0 ENGINE AXIOM 1
+FOR THE LEVEL-4 D(2) MOUTH IS DONE (axiom 2 = T-E4B, already landed). NOTE: one
+set_option maxHeartbeats 6400000 on e4Top_pulled — the EXACT budget of its committed ℰ₃
+twin e3Top_pulled (UniversalLevelThree:2899, mirror-pattern precedent) — flagged for a
+later central /buzz pass, not blocking.
+
+### v10.343 progress — [T-E4D Stage-3 enablers part 2] SemilocalUnitCocycleSplit sorry-free (2026-07-20)
+finrank_quotient_tensor_gluedSubmodule CLOSED (QuotientFibre helpers: smul_cancel_of_isUnit,
+exists_one_tmul, one_tmul_smul, one_tmul_eq_zero_iff, exists_smul_eq_of_mem_smul_top) ⟹
+exists_units_eq_mul_of_span_eq_top AXIOM-CLEAN — the Stage-3a normalization engine fully
+banked (13/13 decls clean triple). EngineDescent: 1 sorry (hpres frontier, byte-stable).
+NEW named 3a sub-leaf discovered + routed in the frontier comment: Finite (MaximalSpectrum L)
+(no mathlib transfer from module-finite-over-local; route = lying-over for the integral
+G-extension + Algebra.IsInvariant orbit-pretransitivity + finite G). Attack order for the
+assembly builder: (1) MaxSpec-finiteness sub-leaf; (2) 3a chart extraction; (3) 3b T-layer
+split ×2 (hoist as ForMathlib VariableChange-cocycle lemma); (4) 3c correction+glue+spread.

@@ -114,6 +114,66 @@ theorem resLoc_injective (S₁ S₂ : Submonoid R) (h : S₁ ≤ S₂)
   rw [← map_mul, ← map_mul]
   exact congrArg (algebraMap R (Localization S₁)) hc
 
+/-! ### Fibre plumbing: `(R⧸I) ⊗ X` via pure tensors, kernels, and power-clearing -/
+
+section QuotientFibre
+
+/-- Cancellation of a unit scalar. -/
+theorem smul_cancel_of_isUnit {A : Type*} [CommRing A] {V : Type*} [AddCommGroup V]
+    [Module A V] {c : A} (hc : IsUnit c) {z : V} (h : c • z = 0) : z = 0 := by
+  obtain ⟨u, rfl⟩ := hc
+  calc z = (((u⁻¹ : Aˣ) : A) * ((u : Aˣ) : A)) • z := by rw [Units.inv_mul, one_smul]
+    _ = ((u⁻¹ : Aˣ) : A) • ((u : Aˣ) : A) • z := by rw [mul_smul]
+    _ = 0 := by rw [h, smul_zero]
+
+/-- Every element of `(R⧸I) ⊗[R] X` is a pure tensor `1 ⊗ x` (the scalars surject from `R`). -/
+theorem exists_one_tmul (I : Ideal R) {X : Type*} [AddCommGroup X] [Module R X]
+    (z : (R ⧸ I) ⊗[R] X) : ∃ x : X, z = 1 ⊗ₜ[R] x := by
+  induction z using TensorProduct.induction_on with
+  | zero => exact ⟨0, (TensorProduct.tmul_zero _ _).symm⟩
+  | tmul c x =>
+    obtain ⟨r, rfl⟩ := Ideal.Quotient.mk_surjective c
+    refine ⟨r • x, ?_⟩
+    rw [← TensorProduct.smul_tmul, ← Algebra.algebraMap_eq_smul_one,
+      Ideal.Quotient.algebraMap_eq]
+  | add z₁ z₂ h₁ h₂ =>
+    obtain ⟨x₁, rfl⟩ := h₁
+    obtain ⟨x₂, rfl⟩ := h₂
+    exact ⟨x₁ + x₂, (TensorProduct.tmul_add _ _ _).symm⟩
+
+/-- The `R`-action on `(R⧸I) ⊗[R] X` inside a pure tensor is the residue scalar action. -/
+theorem one_tmul_smul (I : Ideal R) {X : Type*} [AddCommGroup X] [Module R X]
+    (r : R) (x : X) :
+    (1 ⊗ₜ[R] (r • x) : (R ⧸ I) ⊗[R] X) = Ideal.Quotient.mk I r • (1 ⊗ₜ[R] x) := by
+  rw [TensorProduct.tmul_smul, ← Ideal.Quotient.algebraMap_eq, IsScalarTower.algebraMap_smul]
+
+/-- The kernel of `x ↦ 1 ⊗ x` into `(R⧸I) ⊗[R] X` is `I • ⊤`
+(`quotTensorEquivQuotSMul` in membership form). -/
+theorem one_tmul_eq_zero_iff (I : Ideal R) {X : Type*} [AddCommGroup X] [Module R X]
+    (x : X) : (1 ⊗ₜ[R] x : (R ⧸ I) ⊗[R] X) = 0 ↔ x ∈ I • (⊤ : Submodule R X) := by
+  rw [← (quotTensorEquivQuotSMul X I).map_eq_zero_iff,
+    TensorProduct.quotTensorEquivQuotSMul_mk_one_tmul, Submodule.Quotient.mk_eq_zero]
+
+/-- **Power-clearing in `I • ⊤` along a localization**: a member of `I • ⊤` of the localized
+module is, after multiplication by a denominator, the image of a member of `I • ⊤` upstairs. -/
+theorem exists_smul_eq_of_mem_smul_top {M M' : Type*} [AddCommGroup M] [Module R M]
+    [AddCommGroup M'] [Module R M'] (S : Submonoid R) (l : M →ₗ[R] M') [IsLocalizedModule S l]
+    (I : Ideal R) {x : M'} (hx : x ∈ I • (⊤ : Submodule R M')) :
+    ∃ (s : R) (_ : s ∈ S) (m : M), m ∈ I • (⊤ : Submodule R M) ∧ s • x = l m := by
+  refine Submodule.smul_induction_on hx ?_ ?_
+  · intro r hr n _
+    obtain ⟨⟨m, s⟩, hms⟩ := IsLocalizedModule.surj S l n
+    rw [Submonoid.smul_def] at hms
+    refine ⟨(s : R), s.2, r • m, Submodule.smul_mem_smul hr Submodule.mem_top, ?_⟩
+    rw [map_smul, ← hms, smul_comm]
+  · rintro x y ⟨s, hs, m, hm, hsm⟩ ⟨t, ht, n, hn, htn⟩
+    refine ⟨s * t, mul_mem hs ht, t • m + s • n,
+      Submodule.add_mem _ (Submodule.smul_mem _ _ hm) (Submodule.smul_mem _ _ hn), ?_⟩
+    rw [map_add, map_smul, map_smul, ← hsm, ← htn, smul_add, mul_smul, mul_smul,
+      smul_comm s t x]
+
+end QuotientFibre
+
 /-! ### The glued module of a unit cocycle -/
 
 section Glued
@@ -379,16 +439,14 @@ theorem powers_le_primeCompl {P : Ideal R} [P.IsPrime] {a : R} (ha : a ∉ P) :
   rintro x ⟨n, rfl⟩
   exact fun hx => ha (Ideal.IsPrime.mem_of_pow_mem ‹P.IsPrime› n hx)
 
-/-- **[RESIDUAL — mechanical tensor/quotient plumbing, no new mathematics.]**
-The Stacks 02M9 fibre-rank input for the glued module: at a maximal ideal `P` with chart witness
-`f i ∉ P`, the fibre `(R⧸P) ⊗ gluedSubmodule` is one-dimensional.
+/-- The Stacks 02M9 fibre-rank input for the glued module: at a maximal ideal `P` with chart
+witness `f i ∉ P`, the fibre `(R⧸P) ⊗ gluedSubmodule` is one-dimensional.
 
-Continuation route: `quotTensorEquivQuotSMul` identifies `(R⧸P) ⊗ M ≃ M ⧸ P•M`; the map induced
-by the localization `gluedProj f u i` on `M ⧸ P•M → Lᵢ ⧸ P•Lᵢ` is bijective (surjectivity from
-`IsLocalizedModule.surj` + invertibility of the image of `fᵢ` in the field `R⧸P`; injectivity from
-`IsLocalizedModule.exists_of_eq`-power-torsion + `fᵢ ∉ P`), and `Lᵢ ⧸ P•Lᵢ ≃ R⧸P` by the same
-power-clearing (the classical `κ(P) ⊗ R_f ≅ κ(P)` for `f ∉ P`).  All inputs are in scope:
-the `IsLocalizedModule` instance is `isLocalizedModule_gluedProj`. -/
+The base change of the localization `gluedProj f u i` along `R → R⧸P` is bijective —
+surjectivity from `IsLocalizedModule.surj` plus invertibility of the image of `fᵢ` in the field
+`R⧸P`, injectivity from the `I • ⊤` power-clearing (`exists_smul_eq_of_mem_smul_top`) and
+`IsLocalizedModule.exists_of_eq`-torsion — and `(R⧸P) ⊗ Lᵢ` is spanned by the nonzero vector
+`1 ⊗ 1` (the classical `κ(P) ⊗ R_f ≅ κ(P)` for `f ∉ P`). -/
 theorem finrank_quotient_tensor_gluedSubmodule [Fintype ι]
     (hone : ∀ i, u i i = 1)
     (hcoc : ∀ i j k,
@@ -403,7 +461,89 @@ theorem finrank_quotient_tensor_gluedSubmodule [Fintype ι]
           (sup_le (le_sup_of_le_left le_sup_left) le_sup_right) (u i k).val)
     (P : Ideal R) [P.IsMaximal] (i : ι) (hi : f i ∉ P) :
     Module.finrank (R ⧸ P) ((R ⧸ P) ⊗[R] (gluedSubmodule f u)) = 1 := by
-  sorry
+  classical
+  letI := Ideal.Quotient.field P
+  haveI := isLocalizedModule_gluedProj f u hone hcoc i
+  -- powers of `fᵢ` are units mod `P`
+  have hmkunit : ∀ s ∈ Submonoid.powers (f i), IsUnit (Ideal.Quotient.mk P s) := by
+    rintro s ⟨n, rfl⟩
+    refine isUnit_iff_ne_zero.mpr fun h0 => hi ?_
+    exact (Ideal.IsMaximal.isPrime ‹P.IsMaximal›).mem_of_pow_mem n
+      (Ideal.Quotient.eq_zero_iff_mem.mp h0)
+  -- `⊗ κ(P)` of the localization `gluedProj i` is bijective
+  have hsurj : Function.Surjective (LinearMap.baseChange (R ⧸ P) (gluedProj f u i)) := by
+    intro z
+    obtain ⟨y, rfl⟩ := exists_one_tmul P z
+    obtain ⟨⟨m, s⟩, hms⟩ := IsLocalizedModule.surj (Submonoid.powers (f i)) (gluedProj f u i) y
+    rw [Submonoid.smul_def] at hms
+    obtain ⟨c, hc⟩ := (hmkunit (s : R) s.2).exists_left_inv
+    refine ⟨c • (1 ⊗ₜ[R] m), ?_⟩
+    have hmap : (LinearMap.baseChange (R ⧸ P) (gluedProj f u i)) (c • (1 ⊗ₜ[R] m))
+        = c • (LinearMap.baseChange (R ⧸ P) (gluedProj f u i)) (1 ⊗ₜ[R] m) :=
+      (LinearMap.baseChange (R ⧸ P) (gluedProj f u i)).map_smul c (1 ⊗ₜ[R] m)
+    rw [hmap, LinearMap.baseChange_tmul, ← hms, one_tmul_smul, smul_smul, hc, one_smul]
+  have hinj : Function.Injective (LinearMap.baseChange (R ⧸ P) (gluedProj f u i)) := by
+    refine (injective_iff_map_eq_zero _).mpr fun z hz => ?_
+    obtain ⟨m, rfl⟩ := exists_one_tmul P z
+    rw [LinearMap.baseChange_tmul, one_tmul_eq_zero_iff] at hz
+    obtain ⟨s, hsS, m', hm', hsm'⟩ := exists_smul_eq_of_mem_smul_top
+      (Submonoid.powers (f i)) (gluedProj f u i) P hz
+    rw [← map_smul] at hsm'
+    obtain ⟨t, ht⟩ := IsLocalizedModule.exists_of_eq (S := Submonoid.powers (f i)) hsm'
+    simp only [Submonoid.smul_def] at ht
+    rw [smul_smul] at ht
+    have hmem : ((t : R) * s) • m ∈ P • (⊤ : Submodule R (gluedSubmodule f u)) := by
+      rw [ht]
+      exact Submodule.smul_mem _ _ hm'
+    have h0 : (Ideal.Quotient.mk P ((t : R) * s))
+        • (1 ⊗ₜ[R] m : (R ⧸ P) ⊗[R] (gluedSubmodule f u)) = 0 := by
+      rw [← one_tmul_smul]
+      exact (one_tmul_eq_zero_iff P _).mpr hmem
+    exact smul_cancel_of_isUnit (hmkunit _ (mul_mem t.2 hsS)) h0
+  -- `κ(P) ⊗ Lᵢ` is one-dimensional: `1 ⊗ 1` is a basis vector
+  have hv : (1 ⊗ₜ[R] (1 : Localization (Submonoid.powers (f i)))
+      : (R ⧸ P) ⊗[R] Localization (Submonoid.powers (f i))) ≠ 0 := by
+    intro h0
+    rw [one_tmul_eq_zero_iff] at h0
+    obtain ⟨s, hsS, r', hr', hsr'⟩ := exists_smul_eq_of_mem_smul_top
+      (Submonoid.powers (f i))
+      (Algebra.linearMap R (Localization (Submonoid.powers (f i)))) P h0
+    rw [Algebra.linearMap_apply, ← Algebra.algebraMap_eq_smul_one] at hsr'
+    obtain ⟨t, ht⟩ := (IsLocalization.eq_iff_exists (Submonoid.powers (f i))
+      (Localization (Submonoid.powers (f i)))).mp hsr'
+    have hr'P : r' ∈ P := by
+      refine Submodule.smul_induction_on hr' (fun r hr n _ => ?_)
+        (fun a b ha hb => P.add_mem ha hb)
+      rw [smul_eq_mul]
+      exact Ideal.mul_mem_right n P hr
+    have htsP : (t : R) * s ∈ P := ht ▸ Ideal.mul_mem_left P (t : R) hr'P
+    have := hmkunit _ (mul_mem t.2 hsS)
+    rw [Ideal.Quotient.eq_zero_iff_mem.mpr htsP] at this
+    exact this.ne_zero rfl
+  have hψsurj : Function.Surjective (LinearMap.toSpanSingleton (R ⧸ P)
+      ((R ⧸ P) ⊗[R] Localization (Submonoid.powers (f i))) (1 ⊗ₜ[R] 1)) := by
+    intro z
+    obtain ⟨y, rfl⟩ := exists_one_tmul P z
+    obtain ⟨⟨r, s⟩, hrs⟩ := IsLocalizedModule.surj (Submonoid.powers (f i))
+      (Algebra.linearMap R (Localization (Submonoid.powers (f i)))) y
+    rw [Submonoid.smul_def, Algebra.linearMap_apply] at hrs
+    obtain ⟨c, hc⟩ := (hmkunit (s : R) s.2).exists_left_inv
+    refine ⟨c * Ideal.Quotient.mk P r, ?_⟩
+    rw [LinearMap.toSpanSingleton_apply, mul_smul, ← one_tmul_smul,
+      ← Algebra.algebraMap_eq_smul_one, ← hrs, one_tmul_smul, smul_smul, hc, one_smul]
+  have hψinj : Function.Injective (LinearMap.toSpanSingleton (R ⧸ P)
+      ((R ⧸ P) ⊗[R] Localization (Submonoid.powers (f i))) (1 ⊗ₜ[R] 1)) := by
+    refine (injective_iff_map_eq_zero _).mpr fun c hc0 => ?_
+    by_contra hne
+    rw [LinearMap.toSpanSingleton_apply] at hc0
+    exact hv (smul_cancel_of_isUnit (isUnit_iff_ne_zero.mpr hne) hc0)
+  -- assemble the two equivalences and compute the rank
+  have E := LinearEquiv.ofBijective
+    (LinearMap.baseChange (R ⧸ P) (gluedProj f u i)) ⟨hinj, hsurj⟩
+  have E' := LinearEquiv.ofBijective
+    (LinearMap.toSpanSingleton (R ⧸ P)
+      ((R ⧸ P) ⊗[R] Localization (Submonoid.powers (f i))) (1 ⊗ₜ[R] 1)) ⟨hψinj, hψsurj⟩
+  rw [E.finrank_eq, ← E'.finrank_eq, Module.finrank_self]
 
 /-- **The glued module of a normalized unit cocycle over a semilocal ring is free of rank
 one.**  Finiteness and flatness are checked at the finitely many maximal ideals through the

@@ -3164,37 +3164,392 @@ theorem IsE4Datum.map {R : CommRingCat.{u}} {X' X : EllObj R} (φ : X' ⟶ X)
     simp only [map_add, map_mul, map_pow, map_ofNat, map_zero] at h
     exact h
 
-/-- **(E4A-14, the raw naive-functor `RepresentableBy` — OPEN FRONTIER, T-E4A8)**
-Given `hL` (the universal marked pair is a level-4 structure) and `hArb` (every naive
-level-4 structure is an `ℰ₄`-datum), the raw naive level-4 functor is representable by
-`universalE4Obj`.
+section Rt2
 
-CONTINUATION PLAN (the ℰ₃ literal pattern, `UniversalLevelThree.lean:2544–3095`;
-DEPENDS on the `e4ClassifyingEllHom` frontier above):
-1. `universalE4_isE4Datum` — mirror `universalE3_isE3Datum` (:1452): the tautological
-   presentation is an `ℰ₄`-datum witness (`tautPresentation_marksAt` at `(0,0)` and
-   `(e4U, e4V)`, `IsE4Form.map` of `universalE4_isE4Form`, `isUnit_e4B`,
-   `e4_order_rel` mapped through `ΓSpecIso.inv`).
-2. `IsE4Datum.map` — mirror `IsE3Datum.map` (:1478): transport along an
-   `Ell/R`-morphism (`Pr.transport` + `MarksAt.transport` + `IsE4Form.map` +
-   `IsUnit.map` + `sectionsMapLE` of the `e4Rel` equation — note the relation clause
-   maps because `sectionsMapLE` is a ring hom).
-3. rt1: `section_comp_e4Top` + `pullSection_e4ClassifyingEllHom_P/_Q` — mirror
-   :2549/2616/2646 at the coordinate pairs `(0,0)` and `(e4U, e4V)`.
-4. rt2: `e4PulledWitness` (:2708 mirror), `e4ClassifyingRingHom_pulled` (:2762 mirror
-   — the `MvPolynomial.induction_on` closes on the THREE generators via
-   `e4ClassifyingRingHom_B/U/V` and the `E4Quotient` layer peels with
-   `Ideal.Quotient.mk_surjective`), `e4ClassifyingMap_pulled` (:2870),
-   `e4Top_pulled` (:2903), `e4ClassifyingEllHom_pulled` (:3015).
-5. Assemble the `RepresentableBy` structure exactly as
-   `naiveLevelThreeRepresentableBy` (:3079), with `X.isUnit_two hR`
-   (`EllObj.isUnit_two`, `Moduli/UniversalLegendre.lean:2321`) supplying the
-   `h2`-argument of `e4ClassifyingEllHom`. -/
+variable {R : CommRingCat.{u}} {X : EllObj R} (φ : X ⟶ universalE4Obj R)
+  (hL : (universalE4Obj R).curve.IsNaiveFullLevel 4
+    (universalE4P R) (universalE4Q R))
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E4A-13, rt2 prerequisite ★)** The pulled-witness family: over each affine `V` of
+`X.base`, the tautological universal `ℰ₄`-chart transported along `φ` is an
+`E4Witness` for the pulled datum. Mirror of `e3PulledWitness` (three parameters
+`B, u, v`; the `Q`-marking is at `(e4U, e4V)` — no `map_add` juggling needed). -/
+noncomputable def e4PulledWitness (V : X.base.affineOpens) :
+    E4Witness X ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+      ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩) := by
+  refine
+    { V := V
+      Pr := (tautPresentation (universalE4 R)).transport
+        φ.baseHom φ.top φ.isPullback φ.zero_w
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+      B := sectionsMapLE φ.baseHom
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+        ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom (e4B R))
+      u := sectionsMapLE φ.baseHom
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+        ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom (e4U R))
+      v := sectionsMapLE φ.baseHom
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+        ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom (e4V R))
+      hF := ?_
+      hP := ?_
+      hQ := ?_ }
+  · rw [transport_W]
+    exact IsE4Form.map _ (IsE4Form.map _ (universalE4_isE4Form R))
+  · have hmark := tautPresentation_marksAt_e4P R
+    rw [map_zero] at hmark
+    have hcomm : (EllHom.pullSection R φ (universalE4P R)).1 ≫ φ.top =
+        φ.baseHom ≫ (universalE4P R).1 := φ.isPullback.lift_fst _ _ _
+    have htr := LocalPresentation.MarksAt.transport φ.baseHom φ.top
+      φ.isPullback φ.zero_w hmark
+      (EllHom.pullSection R φ (universalE4P R)).2 hcomm
+      (V' := V) (fun x _ => trivial)
+    rw [map_zero] at htr
+    exact htr
+  · have hmark := tautPresentation_marksAt_e4Q R
+    have hcomm : (EllHom.pullSection R φ (universalE4Q R)).1 ≫ φ.top =
+        φ.baseHom ≫ (universalE4Q R).1 := φ.isPullback.lift_fst _ _ _
+    exact LocalPresentation.MarksAt.transport φ.baseHom φ.top
+      φ.isPullback φ.zero_w hmark
+      (EllHom.pullSection R φ (universalE4Q R)).2 hcomm
+      (V' := V) (fun x _ => trivial)
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E4A-13, rt2a ★)** The classifying ring map of the pulled datum is the ring map
+of `φ` itself. Mirror of `e3ClassifyingRingHom_pulled`: `R`-scalars via `base_w`, the
+THREE generators `B, u, v` via the pulled-witness family + the glued specs, and the
+ext peels the `Away` localization, then the `E4Quotient` layer, then closes by
+`MvPolynomial.induction_on`. -/
+theorem e4ClassifyingRingHom_pulled :
+    e4ClassifyingRingHom X
+      ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+        ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩)
+      (IsE4Datum.map φ (universalE4_isE4Datum R hL)
+        ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+          ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩) rfl rfl) =
+    ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+      φ.baseHom.appTop).hom := by
+  set hD' := IsE4Datum.map φ (universalE4_isE4Datum R hL)
+    ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+      ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩) rfl rfl with hD'def
+  have hψR : ∀ r : R,
+      ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (algebraMap R (E4ModuliRing R) r) = X.baseRingHom r := by
+    intro r
+    have hb : CommRingCat.ofHom (algebraMap R (E4ModuliRing R)) ≫
+        (Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫ φ.baseHom.appTop =
+        CommRingCat.ofHom X.baseRingHom := by
+      rw [Scheme.ΓSpecIso_inv_naturality_assoc, ← Scheme.Hom.comp_appTop,
+        show φ.baseHom ≫ Spec.map (CommRingCat.ofHom
+            (algebraMap R (E4ModuliRing R))) = X.structMap from φ.base_w]
+      rfl
+    exact congrArg (fun g => CommRingCat.Hom.hom g r) hb
+  have hcover : (⊤ : X.base.Opens) ≤
+      iSup (fun V : X.base.affineOpens => V.1) := by
+    intro x _
+    obtain ⟨V₀, hVaff, hxV, -⟩ := exists_isAffineOpen_mem_and_subset
+      (show x ∈ (⊤ : X.base.Opens) from trivial)
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨V₀, hVaff⟩, hxV⟩
+  have hnat_B : (e4BGlued X _ hD').1 =
+      ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (e4B R) := by
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun V : X.base.affineOpens => V.1) ⊤
+      (fun V => homOfLE le_top) hcover _ _ (fun V => ?_)
+    show Scheme.resLE le_top (e4BGlued X _ hD').1 =
+      Scheme.resLE le_top
+        (((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e4B R))
+    have hres : Scheme.resLE (le_top : V.1 ≤ ⊤)
+        (((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e4B R)) =
+        sectionsMapLE φ.baseHom
+          (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom
+            (e4B R)) := rfl
+    rw [hres]
+    exact (e4BGlued X _ hD').2
+      (e4PulledWitness φ hL V).V (e4PulledWitness φ hL V).Pr
+      (e4PulledWitness φ hL V).B (e4PulledWitness φ hL V).u
+      (e4PulledWitness φ hL V).v
+      (e4PulledWitness φ hL V).hF (e4PulledWitness φ hL V).hP
+      (e4PulledWitness φ hL V).hQ
+  have hnat_U : (e4UGlued X _ hD').1 =
+      ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (e4U R) := by
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun V : X.base.affineOpens => V.1) ⊤
+      (fun V => homOfLE le_top) hcover _ _ (fun V => ?_)
+    show Scheme.resLE le_top (e4UGlued X _ hD').1 =
+      Scheme.resLE le_top
+        (((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e4U R))
+    have hres : Scheme.resLE (le_top : V.1 ≤ ⊤)
+        (((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e4U R)) =
+        sectionsMapLE φ.baseHom
+          (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom
+            (e4U R)) := rfl
+    rw [hres]
+    exact (e4UGlued X _ hD').2
+      (e4PulledWitness φ hL V).V (e4PulledWitness φ hL V).Pr
+      (e4PulledWitness φ hL V).B (e4PulledWitness φ hL V).u
+      (e4PulledWitness φ hL V).v
+      (e4PulledWitness φ hL V).hF (e4PulledWitness φ hL V).hP
+      (e4PulledWitness φ hL V).hQ
+  have hnat_V : (e4VGlued X _ hD').1 =
+      ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (e4V R) := by
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun V : X.base.affineOpens => V.1) ⊤
+      (fun V => homOfLE le_top) hcover _ _ (fun V => ?_)
+    show Scheme.resLE le_top (e4VGlued X _ hD').1 =
+      Scheme.resLE le_top
+        (((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e4V R))
+    have hres : Scheme.resLE (le_top : V.1 ≤ ⊤)
+        (((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e4V R)) =
+        sectionsMapLE φ.baseHom
+          (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom
+            (e4V R)) := rfl
+    rw [hres]
+    exact (e4VGlued X _ hD').2
+      (e4PulledWitness φ hL V).V (e4PulledWitness φ hL V).Pr
+      (e4PulledWitness φ hL V).B (e4PulledWitness φ hL V).u
+      (e4PulledWitness φ hL V).v
+      (e4PulledWitness φ hL V).hF (e4PulledWitness φ hL V).hP
+      (e4PulledWitness φ hL V).hQ
+  refine IsLocalization.ringHom_ext (Submonoid.powers (e4Delta R)) ?_
+  refine RingHom.ext fun x => ?_
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [RingHom.comp_apply]
+  induction a using MvPolynomial.induction_on with
+  | C r =>
+    have hcr : (algebraMap (E4Quotient R) (E4ModuliRing R))
+        (Ideal.Quotient.mk _ (MvPolynomial.C r)) = algebraMap R (E4ModuliRing R) r := by
+      rw [IsScalarTower.algebraMap_apply R (E4Quotient R) (E4ModuliRing R),
+        IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 3) R) (E4Quotient R)]
+      rfl
+    rw [hcr, e4ClassifyingRingHom_algebraMap]
+    exact (hψR r).symm
+  | add p q hp hq => simp only [map_add, hp, hq]
+  | mul_X p j hp =>
+    simp only [map_mul, hp]
+    congr 1
+    fin_cases j
+    · show e4ClassifyingRingHom X _ hD' (e4B R) = _
+      rw [e4ClassifyingRingHom_B]
+      exact hnat_B
+    · show e4ClassifyingRingHom X _ hD' (e4U R) = _
+      rw [e4ClassifyingRingHom_U]
+      exact hnat_U
+    · show e4ClassifyingRingHom X _ hD' (e4V R) = _
+      rw [e4ClassifyingRingHom_V]
+      exact hnat_V
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E4A-13, rt2b ★)** BaseHom determination: the classifying morphism of the pulled
+datum IS `φ`'s base morphism. Mirror of `e3ClassifyingMap_pulled`. -/
+theorem e4ClassifyingMap_pulled :
+    e4ClassifyingMap X
+      ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+        ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩)
+      (IsE4Datum.map φ (universalE4_isE4Datum R hL)
+        ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+          ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩) rfl rfl) = φ.baseHom := by
+  show X.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+    (e4ClassifyingRingHom X _ _)) = φ.baseHom
+  rw [show CommRingCat.ofHom
+      (e4ClassifyingRingHom X
+        ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+          ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩)
+        (IsE4Datum.map φ (universalE4_isE4Datum R hL)
+          ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+            ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩) rfl rfl)) =
+    (Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv ≫
+      φ.baseHom.appTop from by
+    rw [e4ClassifyingRingHom_pulled φ hL]
+    rfl]
+  rw [Spec.map_comp, ← Scheme.toSpecΓ_naturality_assoc]
+  show φ.baseHom ≫ (Spec (CommRingCat.of (E4ModuliRing R))).toSpecΓ ≫
+    Spec.map (Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv =
+    φ.baseHom
+  rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
+  exact Category.comp_id _
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 6400000 in
+/-- **(E4A-13, rt2c ★★)** Top determination: the glued classifying comparison of the
+pulled datum IS `φ`'s total-space morphism. Mirror of `e3Top_pulled`. -/
+theorem e4Top_pulled :
+    e4Top (IsE4Datum.map φ (universalE4_isE4Datum R hL)
+      ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+        ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩) rfl rfl) = φ.top := by
+  set hD' := IsE4Datum.map φ
+    (universalE4_isE4Datum R hL)
+    ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+      ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩)
+    rfl rfl with hD'def
+  letI : Algebra (E4ModuliRing R)
+      Γ(Spec (CommRingCat.of (E4ModuliRing R)), ⊤) :=
+    (Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom.toAlgebra
+  haveI : IsIso (⊤ : (Spec (CommRingCat.of (E4ModuliRing R))).Opens).ι := by
+    rw [← Scheme.topIso_hom]
+    infer_instance
+  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap (E4ModuliRing R)
+      Γ(Spec (CommRingCat.of (E4ModuliRing R)), ⊤)))) := by
+    have h : CommRingCat.ofHom (algebraMap (E4ModuliRing R)
+        Γ(Spec (CommRingCat.of (E4ModuliRing R)), ⊤)) =
+      (Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv := rfl
+    rw [h]
+    infer_instance
+  have hfst : pullback.fst (projModelπ (universalE4 R))
+      (⊤ : (Spec (CommRingCat.of (E4ModuliRing R))).Opens).ι =
+      (tautPresentation (universalE4 R)).e.hom ≫
+        (isPullback_projModelBaseChange (universalE4 R)).isoPullback.hom ≫
+        pullback.fst (projModelπ (universalE4 R))
+          (Spec.map (CommRingCat.ofHom (algebraMap (E4ModuliRing R)
+            Γ(Spec (CommRingCat.of (E4ModuliRing R)), ⊤)))) := by
+    rw [show (tautPresentation (universalE4 R)).e.hom =
+      (asIso (pullback.fst (projModelπ (universalE4 R))
+        (⊤ : (Spec (CommRingCat.of (E4ModuliRing R))).Opens).ι) ≪≫
+      (asIso (pullback.fst (projModelπ (universalE4 R))
+        (Spec.map (CommRingCat.ofHom (algebraMap (E4ModuliRing R)
+          Γ(Spec (CommRingCat.of (E4ModuliRing R)), ⊤)))))).symm ≪≫
+      (isPullback_projModelBaseChange (universalE4 R)).isoPullback.symm).hom
+      from rfl]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
+      Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
+  refine (e4WitnessCover hD').hom_ext _ _ (fun w => ?_)
+  rw [e4Top_piece hD' w, e4WitnessCover_f]
+  rw [e4Piece_congr hD' w (e4PulledWitness φ hL w.V) rfl, eqToHom_refl,
+    Category.id_comp]
+  -- now: chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side through the transport
+  rw [show pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι ≫ φ.top =
+    transportTheta φ.baseHom φ.top φ.isPullback
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+      pullback.fst (projModelπ (universalE4 R))
+        (⊤ : (Spec (CommRingCat.of (E4ModuliRing R))).Opens).ι from
+    (transportTheta_fst φ.baseHom φ.top φ.isPullback _).symm]
+  rw [hfst, ← Category.assoc,
+    show transportTheta φ.baseHom φ.top φ.isPullback
+        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+      (tautPresentation (universalE4 R)).e.hom =
+    ((tautPresentation (universalE4 R)).transport
+      φ.baseHom φ.top φ.isPullback φ.zero_w
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)).e.hom ≫
+      projModelBaseChange (sectionsMapLE φ.baseHom
+        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+        (tautPresentation (universalE4 R)).W from
+    (transport_e_baseChange φ.baseHom φ.top φ.isPullback φ.zero_w
+      (tautPresentation (universalE4 R)) _).symm]
+  -- collapse the universal-side chain into a single base change along the composite
+  have hσ : (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)).comp
+      ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom) =
+      ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e4ClassifyingRingHom X _ hD') := by
+    rw [sectionsMapLE_congr_hom (e4ClassifyingMap_pulled φ hL).symm
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)]
+    exact sectionsMapLE_e4ClassifyingMap hD' w.V (fun x _ => trivial)
+  rw [show projModelBaseChange (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      (tautPresentation (universalE4 R)).W =
+    projModelBaseChange (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      ((universalE4 R).map
+        ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom)) from rfl]
+  rw [show (isPullback_projModelBaseChange (universalE4 R)).isoPullback.hom ≫
+      pullback.fst (projModelπ (universalE4 R))
+        (Spec.map (CommRingCat.ofHom (algebraMap (E4ModuliRing R)
+          Γ(Spec (CommRingCat.of (E4ModuliRing R)), ⊤)))) =
+    projModelBaseChange
+      ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom)
+      (universalE4 R) from
+    (isPullback_projModelBaseChange (universalE4 R)).isoPullback_hom_fst]
+  rw [Category.assoc, ← projModelBaseChange_comp',
+    projModelBaseChange_congr_hom hσ (universalE4 R)]
+  rw [e4Piece]
+  rfl
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option linter.unusedVariables false in
+/-- **(E4A-13, rt2 ★★★, the uniqueness half of the universal property)** ANY
+`Ell/R`-morphism to the universal `ℰ₄` object IS the classifying morphism of the datum
+it pulls back. Mirror of `e3ClassifyingEllHom_pulled`. -/
+theorem e4ClassifyingEllHom_pulled (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    e4ClassifyingEllHom
+      (IsE4Datum.map φ (universalE4_isE4Datum R hL)
+        ((gammaFullNaiveProblem R 4).map (Opposite.op φ)
+          ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩) rfl rfl) h2 = φ :=
+  EllHom.ext (e4ClassifyingMap_pulled φ hL) (e4Top_pulled φ hL)
+
+end Rt2
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E4A-14, the raw naive-functor `RepresentableBy`)** Given `hL` (the universal
+marked pair is a level-4 structure) and `hArb` (every naive level-4 structure is an
+`ℰ₄`-datum), the raw naive level-4 functor is representable by `universalE4Obj`. The
+inverse classifies via `hArb`; `IsE4Datum` is a `Prop`, so `hArb X x` is defeq to the
+pulled datum, making the roundtrips reduce to rt1
+(`pullSection_e4ClassifyingEllHom_P/_Q`) and rt2 (`e4ClassifyingEllHom_pulled`).
+Mirror of `naiveLevelThreeRepresentableBy`. -/
 def naiveLevelFourRepresentableBy (R : CommRingCat.{u}) (hR : IsUnit (2 : R))
     (hL : (universalE4Obj R).curve.IsNaiveFullLevel 4
       (universalE4P R) (universalE4Q R))
     (hArb : ∀ (X : EllObj R) (L : X.curve.FullLevelPt 4), IsE4Datum X L) :
-    (gammaFullNaiveProblem R 4).RepresentableBy (universalE4Obj R) := sorry
+    (gammaFullNaiveProblem R 4).RepresentableBy (universalE4Obj R) where
+  homEquiv {X} :=
+    { toFun := fun φ => (gammaFullNaiveProblem R 4).map (Opposite.op φ)
+        ⟨⟨universalE4P R, universalE4Q R⟩, hL⟩
+      invFun := fun x => e4ClassifyingEllHom (hArb X x) (X.isUnit_two hR)
+      left_inv := fun φ => e4ClassifyingEllHom_pulled φ hL (X.isUnit_two hR)
+      right_inv := fun x => by
+        refine Subtype.ext (Prod.ext ?_ ?_)
+        · exact pullSection_e4ClassifyingEllHom_P (hArb X x) (X.isUnit_two hR)
+        · exact pullSection_e4ClassifyingEllHom_Q (hArb X x) (X.isUnit_two hR) }
+  homEquiv_comp {X X'} f g :=
+    (gammaFullNaiveProblem R 4).map_comp_apply
+      (Opposite.op g) (Opposite.op f) _
 
 /-- **(E4A-14)** The conditional affine representability, mirroring
 `naiveLevelThree_representable_by_affine_of_conditions`. -/

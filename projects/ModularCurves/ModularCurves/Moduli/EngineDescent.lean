@@ -3031,7 +3031,7 @@ Proof state (KM 2.2.5–2.2.6 + the a5-P-loc board; Stages per board v10.339/v10
   by the **semilocal unit-cocycle split**
   (`SemilocalUnitSplit.exists_units_eq_mul_of_span_eq_top`,
   ForMathlib/SemilocalUnitCocycleSplit — the ω/`OmegaBasis` bridge of residual (i) is BYPASSED;
-  one mechanical 02M9-fibre residual remains there, see its docstring) so the chart-difference
+  the file is sorry-free and axiom-clean) so the chart-difference
   cocycle `InvariantDifferential.transVC` lands in the nilpotent translation group
   `T = {(1,r,s,t)}`; split that chart-Čech cocycle by the partition-of-unity affine-Čech
   vanishing (`IsLocalizedModule.exists_sub_liftOfLE_eq_of_span_eq_top`,
@@ -3120,10 +3120,19 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
   --        `uᵢⱼ = (transVC Pᵢ Pⱼ).u` splits as `uᵢⱼ = vᵢ/vⱼ` over the semilocal `L`
   --        (`Finite (MaximalSpectrum L)`); rescale chart `i` by the `VariableChange`
   --        `⟨vᵢ, 0, 0, 0⟩` (`projModelVCIso`).  This BYPASSES `OmegaBasis`/residual (i) — no
-  --        `QCoh ≃ Modules` bridge needed.  [Its ring side is proven modulo ONE mechanical
-  --        02M9-fibre lemma `finrank_quotient_tensor_gluedSubmodule`, route in its docstring.]
+  --        `QCoh ≃ Modules` bridge needed.  [Ring side COMPLETE: the file is sorry-free and
+  --        axiom-clean, including the 02M9 fibre input.]
   --        Vocabulary: transitions over `Γ(D(fᵢfⱼ)) ≅ Localization.Away (fᵢ*fⱼ)` enter the
   --        join form via `isLocalizedModule_sup_of_powers_mul` / `…_sup_sup_of_powers_mul`.
+  --        INPUT GAP (named sub-leaf, checked 2026-07-20): the instance
+  --        `Finite (MaximalSpectrum L)` has NO mathlib transfer lemma from
+  --        "module-finite over semilocal" (grep confirmed; only Artinian/PiLocalization
+  --        routes exist).  Obtain it via the ORBIT: MaxSpec L = the primes over the maximal
+  --        ideal of the LOCAL `Lᴳ` (lying-over/maximality transfer for the INTEGRAL extension
+  --        `Lᴳ ⊆ L` — integrality from finite `G`: `x` is a root of `∏_g (X − g•x)`), and
+  --        primes-over = one `G`-orbit (`Algebra.IsInvariant` pretransitivity, mathlib
+  --        `RingTheory/Invariant/Basic`, already CITED above for Stage-1) — finite since `G`
+  --        is finite.
   --   (3b) after normalization the transVC cocycle lands in the nilpotent `T = {(1,r,s,t)}`
   --        (central extension `0 → (L,+) → T → (L²,+) → 0`); split each additive layer over
   --        the finite basic cover by the n-COVER AFFINE-ČECH `H¹` VANISHING
