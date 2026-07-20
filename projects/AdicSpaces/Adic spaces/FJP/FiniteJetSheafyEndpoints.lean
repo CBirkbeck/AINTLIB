@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.FiniteJetMain
 import «Adic spaces».SheafyEndpoints
+import «Adic spaces».RelativeStandardRefinement
 
 /-!
 # FJP: the literature-facing sheafiness endpoints (WO5)
@@ -120,5 +121,18 @@ theorem finiteJet_isSheafyComplete_of_hasStandardRefinements
   (isSheafyFor_iff_isSheafyComplete_of_hasStandardRefinements
     (finiteJetPlus F) hall).mp
     (finiteJet_isSheafyFor F)
+
+/-- **Pinching algebra: sheafiness at EVERY valid ring of integral elements**,
+unconditionally (PHASE 2E). `𝓐 = JetA F` is complete Tate; A⁺-independence
+(`isSheafyFor_iff_isSheafyComplete`, via Huber's form-(a) product refinement) upgrades
+the single proved pair `(𝓐, 𝓐⁺)` to all pairs — with **no** noetherian bypass
+(`𝓐` is non-noetherian, [FJP] Thm 1.3). -/
+theorem finiteJet_isSheafyComplete : IsSheafyComplete (JetA F) :=
+  (isSheafyFor_iff_isSheafyComplete (finiteJetPlus F)).mp (finiteJet_isSheafyFor F)
+
+/-- The `∀`-unfolding: the pinching algebra is sheafy at every valid `Bplus`. -/
+theorem finiteJet_isSheafyFor_all (Bplus : RingOfIntegralElements (JetA F)) :
+    IsSheafyFor (JetA F) Bplus :=
+  finiteJet_isSheafyComplete F Bplus
 
 end FiniteJet

@@ -70,6 +70,7 @@ import «Adic spaces».PseudoUniformizer
 import «Adic spaces».RationalRefinement
 import «Adic spaces».RationalSubsets
 import «Adic spaces».RelativeRationalLocData
+import «Adic spaces».RelativeStandardRefinement
 import «Adic spaces».RestrictionFlatness
 import «Adic spaces».LaurentRefinement
 import «Adic spaces».LaurentRefinementTree
