@@ -5,6 +5,7 @@ Authors: AINTLIB ModularCurves project
 -/
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
+import ModularCurves.ForMathlib.ProjectiveStandardIntersectionRing
 
 /-!
 # Cech factors for twists on polynomial projective space
@@ -65,6 +66,57 @@ theorem coordinateOpenCechIntersection_isAffineOpen {n : ℕ}
     (IsLimit.conePointUniqueUpToIso (limit.isLimit _)
       (Preorder.isLimitIInf _)).to_eq]
   exact IsAffineOpen.iInf fun k => coordinateOpenCover_isAffineOpen (R := R) (a k)
+
+private theorem coordinateProductPolynomial_eq_prod {n : ℕ}
+    (a : Fin (n + 1) → σ) :
+    coordinateProductPolynomial (R := R) a = ∏ k, X (a k) := by
+  classical
+  rw [coordinateProductPolynomial, coordinateTailPolynomial, Fin.prod_univ_succ]
+
+private theorem basicOpen_prod {ι : Type*} [Fintype ι]
+    (f : ι → MvPolynomial σ R) :
+    Proj.basicOpen (homogeneousSubmodule σ R) (∏ i, f i) =
+      ⨅ i, Proj.basicOpen (homogeneousSubmodule σ R) (f i) := by
+  classical
+  ext x
+  rw [TopologicalSpace.Opens.coe_iInf]
+  simp only [Set.mem_iInter]
+  let y : ProjectiveSpectrum (homogeneousSubmodule σ R) := x
+  change (∏ i, f i) ∉ y.asHomogeneousIdeal.toIdeal ↔
+    ∀ i, f i ∉ y.asHomogeneousIdeal.toIdeal
+  have hprod : (∏ i, f i) ∈ y.asHomogeneousIdeal.toIdeal ↔
+      ∃ i, f i ∈ y.asHomogeneousIdeal.toIdeal := by
+    simpa using (Ideal.IsPrime.prod_mem_iff
+      (s := Finset.univ) (x := f) (p := y.asHomogeneousIdeal.toIdeal))
+  rw [not_congr hprod]
+  simp
+
+/-- A standard Cech intersection is the single basic open at its tuple coordinate product. -/
+theorem coordinateOpenCechIntersection_eq_basicOpen {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    coordinateOpenCechIntersection (R := R) a =
+      Proj.basicOpen (homogeneousSubmodule σ R)
+        (coordinateProductPolynomial (R := R) (fun k => (a k).down)) := by
+  rw [show coordinateOpenCechIntersection (R := R) a =
+      ⨅ k : Fin (n + 1), coordinateOpenCover (R := R) (a k) from
+    (IsLimit.conePointUniqueUpToIso (limit.isLimit _)
+      (Preorder.isLimitIInf _)).to_eq]
+  rw [coordinateProductPolynomial_eq_prod]
+  exact (basicOpen_prod (R := R) (fun k : Fin (n + 1) => X (a k).down)).symm
+
+/-- The canonical homogeneous localization presentation of a standard Cech intersection's
+structure-sheaf sections. -/
+noncomputable def coordinateOpenCechIntersectionAwayIso {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    CommRingCat.of
+        (HomogeneousLocalization.Away (homogeneousSubmodule σ R)
+          (coordinateProductPolynomial (R := R) (fun k => (a k).down))) ≅
+      Γ(Proj (homogeneousSubmodule σ R), coordinateOpenCechIntersection (R := R) a) := by
+  rw [coordinateOpenCechIntersection_eq_basicOpen]
+  exact Proj.basicOpenIsoAway (homogeneousSubmodule σ R)
+    (coordinateProductPolynomial (R := R) (fun k => (a k).down))
+    (coordinateProductPolynomial_mem (R := R) (fun k => (a k).down))
+    (Nat.succ_pos n)
 
 /-- The standard frame of `O(d)` restricted to an ordered Cech intersection. -/
 noncomputable def coordinateHyperplaneTwistCechTrivialization {n : ℕ}

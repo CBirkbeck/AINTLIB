@@ -141,6 +141,14 @@ noncomputable def coordinateProductPolynomial {n : ℕ} (a : Fin (n + 1) → σ)
     MvPolynomial σ R :=
   X (a 0) * coordinateTailPolynomial (R := R) a
 
+/-- The full tuple coordinate product is homogeneous of degree `n + 1`. -/
+theorem coordinateProductPolynomial_mem {n : ℕ} (a : Fin (n + 1) → σ) :
+    coordinateProductPolynomial (R := R) a ∈ homogeneousSubmodule σ R (n + 1) := by
+  rw [coordinateProductPolynomial]
+  simpa [Nat.add_comm] using SetLike.mul_mem_graded
+    (X_mem_homogeneousSubmodule_one R (a 0))
+    (coordinateTailPolynomial_mem (R := R) a)
+
 /-- The element of the first chart ring whose inversion gives the full tuple intersection. -/
 noncomputable def coordinateTailLocalizationElement {n : ℕ} (a : Fin (n + 1) → σ) :
     Away (homogeneousSubmodule σ R) (X (a 0) : MvPolynomial σ R) :=
