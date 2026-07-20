@@ -138,6 +138,24 @@ theorem baseCechComplexFunctor_obj {X S : Scheme.{u}} (π : X ⟶ S)
     (baseCechComplexFunctor π U).obj M = baseCechComplex π M U :=
   rfl
 
+instance moduleCatCechComplexFunctor_preservesZeroMorphisms
+    {X : Scheme.{u}} {R : Type u} [CommRing R] {ι : Type u}
+    (U : ι → X.Opens) :
+    (cechComplexFunctor (A := ModuleCat.{u} R) U).PreservesZeroMorphisms where
+  map_zero F G := by
+    apply HomologicalComplex.Hom.ext
+    funext n
+    change Limits.Pi.map (fun _ ↦ 0) = 0
+    refine Pi.hom_ext _ _ fun i ↦ ?_
+    rw [Pi.map_π, comp_zero]
+    exact zero_comp.symm
+
+instance baseCechComplexFunctor_preservesZeroMorphisms
+    {X S : Scheme.{u}} (π : X ⟶ S) {ι : Type u} (U : ι → X.Opens) :
+    (baseCechComplexFunctor π U).PreservesZeroMorphisms := by
+  dsimp only [baseCechComplexFunctor]
+  infer_instance
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
