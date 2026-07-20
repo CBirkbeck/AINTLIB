@@ -45,6 +45,21 @@ theorem baseModulePresheaf_map_apply {X S : Scheme.{u}} (π : X ⟶ S)
     ((baseModulePresheaf π M).map f).hom x = M.presheaf.map f x :=
   rfl
 
+/-- Sections over source opens, functorially regarded as modules over the base ring. -/
+noncomputable def baseModulePresheafFunctor {X S : Scheme.{u}} (π : X ⟶ S) :
+    X.Modules ⥤ X.Opensᵒᵖ ⥤ ModuleCat.{u} Γ(S, (⊤ : S.Opens)) :=
+  toPresheafOfModules X ⋙
+    PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : X.Opens)) (initialOpOfTerminal isTerminalTop) ⋙
+    (Functor.whiskeringRight X.Opensᵒᵖ _ _).obj
+      (ModuleCat.restrictScalars π.appTop.hom)
+
+@[simp]
+theorem baseModulePresheafFunctor_obj {X S : Scheme.{u}} (π : X ⟶ S)
+    (M : X.Modules) :
+    (baseModulePresheafFunctor π).obj M = baseModulePresheaf π M :=
+  rfl
+
 /-- Base-linear sections on an ambient open are naturally identified with
 top sections of the module restricted to that open. -/
 noncomputable def baseModulePresheafRestrictIso
@@ -103,6 +118,18 @@ noncomputable def baseCechComplex {X S : Scheme.{u}} (π : X ⟶ S)
     (M : X.Modules) {ι : Type u} (U : ι → X.Opens) :
     CochainComplex (ModuleCat.{u} Γ(S, (⊤ : S.Opens))) ℕ :=
   (cechComplexFunctor U).obj (baseModulePresheaf π M)
+
+/-- The base-linear Cech complex, functorially in the scheme module. -/
+noncomputable def baseCechComplexFunctor {X S : Scheme.{u}} (π : X ⟶ S)
+    {ι : Type u} (U : ι → X.Opens) :
+    X.Modules ⥤ CochainComplex (ModuleCat.{u} Γ(S, (⊤ : S.Opens))) ℕ :=
+  baseModulePresheafFunctor π ⋙ cechComplexFunctor U
+
+@[simp]
+theorem baseCechComplexFunctor_obj {X S : Scheme.{u}} (π : X ⟶ S)
+    {ι : Type u} (U : ι → X.Opens) (M : X.Modules) :
+    (baseCechComplexFunctor π U).obj M = baseCechComplex π M U :=
+  rfl
 
 end
 
