@@ -776,6 +776,84 @@ theorem coordinateHyperplaneTwistOrderedBaseCechCoface_zero
           (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a'.delete 0) ≫ q)
     hNat.symm
 
+/-- The ordered Cech coface in standard twist coordinates. Only the first
+face carries a transition factor. -/
+noncomputable def coordinateHyperplaneTwistOrderedBaseCechCoface
+    [LinearOrder σ] (d : ℤ) (n : ℕ) (k : Fin (n + 2)) :
+    Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n ⟶
+      Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) (n + 1) :=
+  if k = 0 then
+    coordinateHyperplaneTwistOrderedBaseCechFirstCoface (R := R) d n
+  else
+    Scheme.Modules.orderedBaseCechCoface
+      (homogeneousProjπ (R := R) (σ := σ))
+      (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+      (coordinateOpenCover (R := R) (σ := σ)) n k
+
+/-- The degreewise twist comparison intertwines every twist coface with its
+explicit coordinate coface. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechCoface_naturality
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) (k : Fin (n + 2)) :
+    (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d n).hom ≫
+      coordinateHyperplaneTwistOrderedBaseCechCoface
+        (R := R) d n k =
+    Scheme.Modules.orderedBaseCechCoface
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n k ≫
+      (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d (n + 1)).hom := by
+  by_cases hk : k = 0
+  · subst k
+    exact coordinateHyperplaneTwistOrderedBaseCechCoface_zero
+      (R := R) j d n
+  · rw [coordinateHyperplaneTwistOrderedBaseCechCoface, if_neg hk]
+    exact coordinateHyperplaneTwistOrderedBaseCechCoface_of_ne_zero
+      (R := R) j d n k hk
+
+/-- The alternating ordered Cech differential in standard twist coordinates. -/
+noncomputable def coordinateHyperplaneTwistOrderedBaseCechDifferential
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n ⟶
+      Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) (n + 1) :=
+  ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+    coordinateHyperplaneTwistOrderedBaseCechCoface (R := R) d n k
+
+/-- The degreewise standard-frame comparison conjugates the twist Cech
+differential to the explicit coordinate differential. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechDifferential_naturality
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d n).hom ≫
+      coordinateHyperplaneTwistOrderedBaseCechDifferential
+        (R := R) d n =
+    Scheme.Modules.orderedBaseCechDifferential
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n ≫
+      (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d (n + 1)).hom := by
+  rw [coordinateHyperplaneTwistOrderedBaseCechDifferential,
+    Scheme.Modules.orderedBaseCechDifferential,
+    Preadditive.comp_sum, Preadditive.sum_comp]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [Preadditive.comp_zsmul, Preadditive.zsmul_comp,
+    coordinateHyperplaneTwistOrderedBaseCechCoface_naturality]
+
 end
 
 end MvPolynomial
