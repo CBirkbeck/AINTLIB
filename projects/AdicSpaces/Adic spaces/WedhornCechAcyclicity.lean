@@ -11353,7 +11353,7 @@ the complete-pair criterion (`isUnit_iff_forall_not_vle_zero_of_complete` at
 the concrete pair), so `1 = 0`. Used for the empty-σ₋-piece padding in the
 dichotomy engine. -/
 theorem presheafValue_subsingleton_of_rationalOpen_empty
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A]
+    [IsTateRing A] [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]

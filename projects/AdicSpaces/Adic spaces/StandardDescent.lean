@@ -190,11 +190,13 @@ noetherian-free `IsAdicComplete`-from-`CompleteSpace` bridge, and a noetherian-f
 `relativePiece_equiv`. Until they exist, this input is a hypothesis — never
 supplied silently. -/
 def HasStandardRefinementsAt [PlusSubring A] : Prop :=
-  ∀ (C : RationalCovering A), C.IsRational →
-    ∃ (S : Finset A) (hS : Ideal.span (S : Set A) = ⊤),
-      ∀ (hbase : C.base.IsRational), ∀ f ∈ S, ∃ E ∈ C.covers,
-        rationalOpen (stdPiece C.base hbase S hS f).T (stdPiece C.base hbase S hS f).s
-          ⊆ rationalOpen E.T E.s
+  ∀ (C : RationalCovering A) (hC : C.IsRational),
+    C.covers.Nonempty →
+      ∃ (S : Finset A) (hS : Ideal.span (S : Set A) = ⊤),
+        ∀ f ∈ S, ∃ E ∈ C.covers,
+          rationalOpen (stdPiece C.base hC.base S hS f).T
+              (stdPiece C.base hC.base S hS f).s
+            ⊆ rationalOpen E.T E.s
 
 end Descent
 
@@ -226,6 +228,34 @@ private theorem productRestrictionSub_continuous'' [HasLocLiftPowerBounded A]
     restrictionMap C.base E.1 (C.hsubset E.1 E.2) x
   exact restrictionMapHom_continuous C.base E.1 (C.hsubset E.1 E.2)
 
+/-- **Empty-cover branch** (Wedhorn's implicit degenerate case): a rational covering
+with no members forces the base rational open to be empty (via `C.hcover`), so the
+section ring `presheafValue C.base` is a subsingleton
+(`presheafValue_subsingleton_of_rationalOpen_empty`). Then the embedding is
+`IsEmbedding.of_subsingleton` and gluing is the (vacuously constrained) `0`-section.
+Extracted so the two `IsSheafy` fields do not duplicate it. -/
+theorem isSheafy_rationalCovering_of_covers_empty
+    (C : RationalCovering A) (he : C.covers = ∅) :
+    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+    Topology.IsEmbedding (productRestrictionSub A C) ∧
+    ∀ (f : ∀ D : ↥C.covers, presheafValue D.1),
+      (∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
+        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+        (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+        restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂)) →
+      ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
+        restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
+  haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+  have hbase_empty : rationalOpen C.base.T C.base.s = ∅ := by
+    rw [Set.eq_empty_iff_forall_notMem]
+    intro v hv
+    obtain ⟨D, hD, _⟩ := C.hcover v hv
+    exact Finset.eq_empty_iff_forall_notMem.mp he D hD
+  haveI : Subsingleton (presheafValue C.base) :=
+    presheafValue_subsingleton_of_rationalOpen_empty C.base hbase_empty
+  exact ⟨Topology.IsEmbedding.of_subsingleton _,
+    fun f _ => ⟨0, fun D => absurd D.2 (Finset.eq_empty_iff_forall_notMem.mp he D.1)⟩⟩
+
 /-- **The reduction** (the Čech-refinement argument assembling Kedlaya Lemma 1.6.8
 into the sheaf axioms; Wedhorn's Prop A.3-style transfer, algebraic and topological
 halves): given the `A⁺`-free standard condition and the descent input at this pair,
@@ -239,7 +269,8 @@ every rational covering at this pair satisfies the embedding and gluing axioms.
   refinement map, glue by the standard condition, and identify the result on each
   member `E` by separation along the *induced* standard cover of `E` (the generated
   cover of `E` for the **same** spanning family — again standard data, so again
-  supplied by the standard condition). -/
+  supplied by the standard condition).
+* Empty cover: `isSheafy_rationalCovering_of_covers_empty`. -/
 theorem isSheafy_of_standardSheafCondition_at
     (hstd : StandardSheafCondition A) (href : HasStandardRefinementsAt A) :
     haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
@@ -249,7 +280,9 @@ theorem isSheafy_of_standardSheafCondition_at
   constructor
   · -- ——— embedding ———
     intro C hC
-    obtain ⟨S, hS, hsub⟩ := href C hC
+    rcases C.covers.eq_empty_or_nonempty with he | hne
+    · exact (isSheafy_rationalCovering_of_covers_empty C he).1
+    obtain ⟨S, hS, hsub⟩ := href C hC hne
     set Std := StandardCoverData.ofSpanTop C.base hC.base S hS with hStd
     have hkey := hstd Std (A⁺ : Subring A) inferInstance
     -- the refinement map: each standard piece into a member
@@ -257,7 +290,7 @@ theorem isSheafy_of_standardSheafCondition_at
         rationalOpen P.1.T P.1.s ⊆ rationalOpen E.T E.s := by
       rintro ⟨P, hP⟩
       obtain ⟨f, hfS, hfeq⟩ := mem_ofSpanTop_covers hP
-      obtain ⟨E, hEC, hEsub⟩ := hsub hC.base f hfS
+      obtain ⟨E, hEC, hEsub⟩ := hsub f hfS
       exact ⟨E, hEC, hfeq ▸ hEsub⟩
     choose r hrC hrsub using hr
     -- factorization: the standard product restriction factors through the given one
@@ -282,14 +315,16 @@ theorem isSheafy_of_standardSheafCondition_at
     exact hkey.1
   · -- ——— gluing ———
     intro C hC f hcompat
-    obtain ⟨S, hS, hsub⟩ := href C hC
+    rcases C.covers.eq_empty_or_nonempty with he | hne
+    · exact (isSheafy_rationalCovering_of_covers_empty C he).2 f hcompat
+    obtain ⟨S, hS, hsub⟩ := href C hC hne
     set Std := StandardCoverData.ofSpanTop C.base hC.base S hS with hStd
     have hkey := hstd Std (A⁺ : Subring A) inferInstance
     have hr : ∀ P : ↥Std.toCovering.covers, ∃ E ∈ C.covers,
         rationalOpen P.1.T P.1.s ⊆ rationalOpen E.T E.s := by
       rintro ⟨P, hP⟩
       obtain ⟨fₚ, hfS, hfeq⟩ := mem_ofSpanTop_covers hP
-      obtain ⟨E, hEC, hEsub⟩ := hsub hC.base fₚ hfS
+      obtain ⟨E, hEC, hEsub⟩ := hsub fₚ hfS
       exact ⟨E, hEC, hfeq ▸ hEsub⟩
     choose r hrC hrsub using hr
     -- the restricted family on the standard pieces
@@ -363,6 +398,14 @@ theorem isSheafy_of_standardSheafCondition_at
     show restrictionMap E Q.1 _ (restrictionMap C.base E (C.hsubset E hEC) x) =
       restrictionMap E Q.1 _ (f ⟨E, hEC⟩)
     exact hL.trans hR
+
+/-- **Empty-cover regression** (PHASE 1): the empty-cover branch is discharged
+unconditionally on the covering (only the ambient complete-Tate structure), with
+no descent input — the section ring is a subsingleton. -/
+example (C : RationalCovering A) (he : C.covers = ∅) :
+    haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+    Topology.IsEmbedding (productRestrictionSub A C) :=
+  (isSheafy_rationalCovering_of_covers_empty C he).1
 
 end Engine
 
