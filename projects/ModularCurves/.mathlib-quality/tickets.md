@@ -24263,3 +24263,13 @@ e4_isIso_torsorSigmaDesc_of_existsUnique); N=4 wrappers levelFourData(+Z/f/finit
 levelFourEquivariantData, levelFour_surjective, levelFour_torsor; γ⁻¹ [B2-TD-CONV] kept;
 ULift transport verbatim. Decomposition §3 generality audit held exactly — no
 3-hardcoded obstruction. KM 4.7.0 ENGINE AXIOM 2 FOR THE LEVEL-4 D(2) MOUTH IS DONE.
+
+### v10.343 progress — [T-E4A2]+[T-E4A3] DONE (2026-07-20)
+combos4_ne_zero AXIOM-CLEAN (propext+Quot.sound; 16-case linear_combination(norm:=module)
+via combos4_ne_zero_aux) + four_zsmul_universalE4P/Q_of_isUnit AXIOM-CLEAN via the DIRECT
+SECTION ROUTE (route (a)): RING-DBL two_zsmul_affineSection with ψ₂-denominator units
+(B resp. ψ₂(Q)), negation-symmetry at 2P a pure ring identity, and the master identity
+ψ₂(Q)³·ψ₂(2Q) ≡ u(2B+u)·e4Rel Lean-certified by linear_combination with explicit integer
+cofactors. NO reducedness input, NO Stage-D transport needed (docstrings updated).
++import BridgeAssembly (leaf file, no cycle). Build green 4057. Remaining sorries: 8
+(A4 keystone, A5 map, A9/A10 bridges, A11 datum, A12 chain, A14 packaging+headline).

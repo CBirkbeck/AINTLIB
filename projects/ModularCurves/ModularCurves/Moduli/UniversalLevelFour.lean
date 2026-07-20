@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.Moduli.BridgeAssembly
 import ModularCurves.Moduli.UniversalLevelThree
 
 /-!
@@ -282,18 +283,177 @@ def universalE4Q : (universalE4Obj R).curve.Section :=
   ⟨projModelAffineSection (universalE4 R) (e4U R) (e4V R) (universalE4_equation_Q R),
     projModelAffineSection_projModelπ _ _ _ _⟩
 
-/-- **(E4A-4)** The section-level killing `[4]P = 0`: `2P = (−B, 0)` satisfies
-`ψ₂ = 2y + x + B` identically. Route: the ℰ₃ Stage-D pattern (reduced universal base
-`ℤ[1/2]` + `nsmul_section_eq_zero_of_forall_specPoint` + Stage-D transport). -/
+set_option linter.unusedVariables false in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E4A-4)** The section-level killing `[4]P = 0`, by the DIRECT section route:
+`RING-DBL` (`two_zsmul_affineSection`, tangent denominator `ψ₂(P) = a₃ = B` a unit)
+lands `2 • P` at the doubling-coordinate section `(−B, 0)`, which is negation-symmetric
+(`negY(−B, 0) = 0` — a pure `ring` identity), so `negModelHom` fixes it
+(`negModelHom_affineSection`) and `[−1] = negModelHom` (`modelEllipticCurve_mulByHom_neg_one`)
+gives `[2](2 • P) = 0`. No base reducedness is consumed (the ℰ₃ Stage-D detour is not
+needed at level 4); `hR` is not consumed either — the killing of `P` is unconditional. -/
 theorem four_zsmul_universalE4P_of_isUnit (hR : IsUnit (2 : R)) :
-    (4 : ℤ) • universalE4P R = 0 := by sorry
+    (4 : ℤ) • universalE4P R = 0 := by
+  obtain ⟨b, hb⟩ := (isUnit_e4B R).exists_right_inv
+  have he : (universalE4 R).tangentDen 0 0 * b = 1 := by
+    rw [show (universalE4 R).tangentDen 0 0 = e4B R from by
+      simp only [WeierstrassCurve.tangentDen, show (universalE4 R).a₁ = 1 from rfl,
+        show (universalE4 R).a₃ = e4B R from rfl]
+      ring]
+    exact hb
+  have heqd : (universalE4 R).toAffine.Equation
+      ((universalE4 R).dblX 0 0 b) ((universalE4 R).dblY 0 0 b) :=
+    equation_dblXY (universalE4 R) 0 0 b (universalE4_equation_zero R) he
+  have hdbl : (2 : ℤ) • universalE4P R
+      = (⟨projModelAffineSection (universalE4 R) ((universalE4 R).dblX 0 0 b)
+            ((universalE4 R).dblY 0 0 b) heqd,
+          projModelAffineSection_projModelπ _ _ _ _⟩ :
+        (universalE4Obj R).curve.Section) :=
+    two_zsmul_affineSection (universalE4 R) 0 0 b (universalE4_equation_zero R) he heqd
+  have hsym : -(universalE4 R).dblY 0 0 b
+      - (universalE4 R).a₁ * (universalE4 R).dblX 0 0 b - (universalE4 R).a₃
+      = (universalE4 R).dblY 0 0 b := by
+    simp only [WeierstrassCurve.dblY, WeierstrassCurve.dblX, WeierstrassCurve.dblSlope,
+      WeierstrassCurve.tangentNum, WeierstrassCurve.Affine.addY,
+      WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.addX,
+      WeierstrassCurve.Affine.negY, show (universalE4 R).a₁ = 1 from rfl,
+      show (universalE4 R).a₂ = e4B R from rfl,
+      show (universalE4 R).a₃ = e4B R from rfl,
+      show (universalE4 R).a₄ = 0 from rfl]
+    ring
+  have hneg := negModelHom_affineSection (universalE4 R) _ _ heqd hsym
+  set τ : (universalE4Obj R).curve.Section :=
+    ⟨projModelAffineSection (universalE4 R) ((universalE4 R).dblX 0 0 b)
+        ((universalE4 R).dblY 0 0 b) heqd,
+      projModelAffineSection_projModelπ _ _ _ _⟩ with hτdef
+  have hτneg : -τ = τ := by
+    refine Subtype.ext ?_
+    have hv : (-τ).1 = τ.1 ≫ (modelEllipticCurve (universalE4 R)).mulByHom (-1) := by
+      rw [show -τ = (-1 : ℤ) • τ from (neg_one_zsmul τ).symm]
+      exact (modelEllipticCurve (universalE4 R)).point_smul_eq_comp_mulBy _ (-1) τ
+    rw [hv, modelEllipticCurve_mulByHom_neg_one, hτdef]
+    exact hneg
+  have hτ2 : (2 : ℤ) • τ = 0 := by
+    calc (2 : ℤ) • τ = τ + τ := two_zsmul τ
+      _ = τ + -τ := by rw [hτneg]
+      _ = 0 := add_neg_cancel τ
+  rw [show (4 : ℤ) = 2 * 2 from by norm_num, mul_zsmul, hdbl]
+  exact hτ2
 
-/-- **(E4A-4)** The section-level killing `[4]Q = 0`: `e4Rel` puts `x([2]Q)` on the
-complementary 2-torsion quadratic, whose `y`-fibre is the degenerate (double) point. -/
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E4A-4)** The section-level killing `[4]Q = 0`, by the DIRECT section route:
+`RING-DBL` (`two_zsmul_affineSection`, tangent denominator `ψ₂(Q)` a unit by
+`isUnit_psiTwo_e4Q`) lands `2 • Q` at the doubling-coordinate section, and the
+`linear_combination` certificate of the master identity
+`ψ₂(Q)³ · ψ₂(2Q) ≡ u(2B + u) · e4Rel (mod curve)` against
+`e4_curve_rel`/`e4_order_rel` (with the inverse witness `ψ₂(Q)·e = 1` collapsing the
+`e`-powers) shows `ψ₂(2Q) = 0`: the double is negation-fixed, so `[2](2 • Q) = 0`. -/
 theorem four_zsmul_universalE4Q_of_isUnit (hR : IsUnit (2 : R)) :
-    (4 : ℤ) • universalE4Q R = 0 := by sorry
+    (4 : ℤ) • universalE4Q R = 0 := by
+  obtain ⟨e, he'⟩ := (isUnit_psiTwo_e4Q R hR).exists_right_inv
+  have he : (universalE4 R).tangentDen (e4U R) (e4V R) * e = 1 := by
+    rw [show (universalE4 R).tangentDen (e4U R) (e4V R)
+        = 2 * e4V R + e4U R + e4B R from by
+      simp only [WeierstrassCurve.tangentDen, show (universalE4 R).a₁ = 1 from rfl,
+        show (universalE4 R).a₃ = e4B R from rfl]
+      ring]
+    exact he'
+  have heqd : (universalE4 R).toAffine.Equation
+      ((universalE4 R).dblX (e4U R) (e4V R) e)
+      ((universalE4 R).dblY (e4U R) (e4V R) e) :=
+    equation_dblXY (universalE4 R) (e4U R) (e4V R) e (universalE4_equation_Q R) he
+  have hdbl : (2 : ℤ) • universalE4Q R
+      = (⟨projModelAffineSection (universalE4 R)
+            ((universalE4 R).dblX (e4U R) (e4V R) e)
+            ((universalE4 R).dblY (e4U R) (e4V R) e) heqd,
+          projModelAffineSection_projModelπ _ _ _ _⟩ :
+        (universalE4Obj R).curve.Section) :=
+    two_zsmul_affineSection (universalE4 R) (e4U R) (e4V R) e
+      (universalE4_equation_Q R) he heqd
+  have hsym : -(universalE4 R).dblY (e4U R) (e4V R) e
+      - (universalE4 R).a₁ * (universalE4 R).dblX (e4U R) (e4V R) e
+      - (universalE4 R).a₃
+      = (universalE4 R).dblY (e4U R) (e4V R) e := by
+    simp only [WeierstrassCurve.dblY, WeierstrassCurve.dblX, WeierstrassCurve.dblSlope,
+      WeierstrassCurve.tangentNum, WeierstrassCurve.Affine.addY,
+      WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.addX,
+      WeierstrassCurve.Affine.negY, show (universalE4 R).a₁ = 1 from rfl,
+      show (universalE4 R).a₂ = e4B R from rfl,
+      show (universalE4 R).a₃ = e4B R from rfl,
+      show (universalE4 R).a₄ = 0 from rfl]
+    linear_combination
+      e ^ 3 * (16 * e4V R ^ 2 + 16 * e4U R * e4V R + 16 * e4B R * e4V R
+          - 56 * e4U R ^ 3 - 56 * e4B R * e4U R ^ 2 - 16 * e4B R ^ 2 * e4U R
+          - 10 * e4U R ^ 2 - 4 * e4B R * e4U R + 4 * e4B R ^ 2 - e4U R - e4B R)
+        * e4_curve_rel R
+      - e ^ 3 * e4U R * (2 * e4B R + e4U R) * e4_order_rel R
+      + (-(3 * (3 * e4U R ^ 2 + 2 * e4B R * e4U R - e4V R) ^ 2 * e ^ 2)
+          + (2 * e4B R + 6 * e4U R - 1) * (3 * e4U R ^ 2 + 2 * e4B R * e4U R - e4V R)
+            * e * ((2 * e4V R + e4U R + e4B R) * e + 1)
+          - (2 * e4V R - 2 * e4U R)
+            * (((2 * e4V R + e4U R + e4B R) * e) ^ 2
+              + (2 * e4V R + e4U R + e4B R) * e + 1)) * he'
+  have hneg := negModelHom_affineSection (universalE4 R) _ _ heqd hsym
+  set τ : (universalE4Obj R).curve.Section :=
+    ⟨projModelAffineSection (universalE4 R) ((universalE4 R).dblX (e4U R) (e4V R) e)
+        ((universalE4 R).dblY (e4U R) (e4V R) e) heqd,
+      projModelAffineSection_projModelπ _ _ _ _⟩ with hτdef
+  have hτneg : -τ = τ := by
+    refine Subtype.ext ?_
+    have hv : (-τ).1 = τ.1 ≫ (modelEllipticCurve (universalE4 R)).mulByHom (-1) := by
+      rw [show -τ = (-1 : ℤ) • τ from (neg_one_zsmul τ).symm]
+      exact (modelEllipticCurve (universalE4 R)).point_smul_eq_comp_mulBy _ (-1) τ
+    rw [hv, modelEllipticCurve_mulByHom_neg_one, hτdef]
+    exact hneg
+  have hτ2 : (2 : ℤ) • τ = 0 := by
+    calc (2 : ℤ) • τ = τ + τ := two_zsmul τ
+      _ = τ + -τ := by rw [hτneg]
+      _ = 0 := add_neg_cancel τ
+  rw [show (4 : ℤ) = 2 * 2 from by norm_num, mul_zsmul, hdbl]
+  exact hτ2
 
 /-! ### E4A-5/E4A-6 — the generation keystone -/
+
+/-- **(E4A-5 core)** The `ℕ`-representative form of `combos4_ne_zero`: the 15 nontrivial
+combinations `mP + nQ` (`m, n < 4`) are nonzero. Doubling any vanishing combination
+reduces it (via `4P = 4Q = 0`) to one of the excluded relations `2P = 0`, `2Q = 0`,
+`2P + 2Q = 0` (the last contradicts `2Q ≠ 2P` since `−2P = 2P`); the 16-fold case split
+is discharged by `linear_combination (norm := module)`. -/
+private theorem combos4_ne_zero_aux {G : Type*} [AddCommGroup G] {P Q : G}
+    (hP4 : (4 : ℤ) • P = 0) (hQ4 : (4 : ℤ) • Q = 0)
+    (hP2 : (2 : ℤ) • P ≠ 0) (hQ2 : (2 : ℤ) • Q ≠ 0)
+    (hPQ : (2 : ℤ) • Q ≠ (2 : ℤ) • P)
+    {m n : ℕ} (hm : m < 4) (hn : n < 4) (hmn : ¬(m = 0 ∧ n = 0)) :
+    (m : ℤ) • P + (n : ℤ) • Q ≠ 0 := by
+  intro h
+  have hPP : -((2 : ℤ) • P) = (2 : ℤ) • P := by
+    apply neg_eq_of_add_eq_zero_left
+    linear_combination (norm := module) hP4
+  have hsum : (2 : ℤ) • P + (2 : ℤ) • Q ≠ 0 := by
+    intro hc
+    apply hPQ
+    have h1 : (2 : ℤ) • Q = -((2 : ℤ) • P) := eq_neg_of_add_eq_zero_right hc
+    rw [h1, hPP]
+  have hm' : m = 0 ∨ m = 1 ∨ m = 2 ∨ m = 3 := by omega
+  have hn' : n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 := by omega
+  rcases hm' with rfl | rfl | rfl | rfl <;> rcases hn' with rfl | rfl | rfl | rfl <;>
+    push_cast at h
+  · exact hmn ⟨rfl, rfl⟩
+  · exact hQ2 (by linear_combination (norm := module) (2 : ℤ) • h)
+  · exact hQ2 (by linear_combination (norm := module) h)
+  · exact hQ2 (by linear_combination (norm := module) (2 : ℤ) • h - hQ4)
+  · exact hP2 (by linear_combination (norm := module) (2 : ℤ) • h)
+  · exact hsum (by linear_combination (norm := module) (2 : ℤ) • h)
+  · exact hP2 (by linear_combination (norm := module) (2 : ℤ) • h - hQ4)
+  · exact hsum (by linear_combination (norm := module) (2 : ℤ) • h - hQ4)
+  · exact hP2 (by linear_combination (norm := module) h)
+  · exact hQ2 (by linear_combination (norm := module) (2 : ℤ) • h - hP4)
+  · exact hsum (by linear_combination (norm := module) h)
+  · exact hQ2 (by linear_combination (norm := module) (2 : ℤ) • h - hP4 - hQ4)
+  · exact hP2 (by linear_combination (norm := module) (2 : ℤ) • h - hP4)
+  · exact hsum (by linear_combination (norm := module) (2 : ℤ) • h - hP4)
+  · exact hP2 (by linear_combination (norm := module) (2 : ℤ) • h - hP4 - hQ4)
+  · exact hsum (by linear_combination (norm := module) (2 : ℤ) • h - hP4 - hQ4)
 
 /-- **(E4A-5, NEW group theory)** For `P, Q` in an abelian group with `4P = 4Q = 0`,
 `2P ≠ 0`, `2Q ≠ 0`, `2Q ≠ 2P`, every nontrivial `(ℤ/4)²`-combination `aP + bQ` is
@@ -305,7 +465,10 @@ theorem combos4_ne_zero {G : Type*} [AddCommGroup G] {P Q : G}
     (hP2 : (2 : ℤ) • P ≠ 0) (hQ2 : (2 : ℤ) • Q ≠ 0)
     (hPQ : (2 : ℤ) • Q ≠ (2 : ℤ) • P)
     (a b : ZMod 4) (hab : ¬(a = 0 ∧ b = 0)) :
-    (a.val : ℤ) • P + (b.val : ℤ) • Q ≠ 0 := by sorry
+    (a.val : ℤ) • P + (b.val : ℤ) • Q ≠ 0 := by
+  refine combos4_ne_zero_aux hP4 hQ4 hP2 hQ2 hPQ (ZMod.val_lt a) (ZMod.val_lt b) ?_
+  rintro ⟨h1, h2⟩
+  exact hab ⟨(ZMod.val_eq_zero a).mp h1, (ZMod.val_eq_zero b).mp h2⟩
 
 /-- **(E4A-6, the keystone)** Geometric generation: over every algebraically closed
 field point of the moduli ring, the pulled pair `(P̄, Q̄)` generates the 4-torsion.
