@@ -47,7 +47,7 @@ open HomogeneousLocalization
 
 noncomputable section
 
-universe u v
+universe u v w
 
 variable {R : Type u} [CommRing R] {σ : Type v}
 
@@ -364,6 +364,30 @@ theorem coordinateProductAwayLaurentRingEquiv_awayMap_comp {n : ℕ}
   simp only [RingHom.comp_apply]
   exact coordinateProductAwayLaurentRingEquiv_awayMap
     (R := R) (σ := σ) (n := n) a q
+
+/-- The Laurent-coordinate description of the tail localization remains valid after
+postcomposition by any ring homomorphism. -/
+theorem coordinateProductAwayLaurentRingEquiv_awayMap_comp_left
+    {S : Type w} [Semiring S] {n : ℕ}
+    (a : Fin (n + 1) → σ)
+    (F : AddMonoidAlgebra R
+      (laurentExponentSubmonoid (coordinateTailExponent a)) →+* S) :
+    F.comp ((laurentMonomialRingEquiv R
+      (coordinateTailExponent a)).toRingHom.comp
+        ((coordinateProductAwayRingEquiv (R := R) a).toRingHom.comp
+          (HomogeneousLocalization.awayMap
+            (f := X (a 0))
+            (g := coordinateTailPolynomial (R := R) a)
+            (x := coordinateProductPolynomial (R := R) a)
+            (homogeneousSubmodule σ R)
+            (coordinateTailPolynomial_mem (R := R) a) rfl))) =
+      F.comp ((AddMonoidAlgebra.mapDomainRingHom R
+        (laurentExponentAwayMap
+          (coordinateTailExponent a)).toAddMonoidHom).comp
+        (chartRingEquiv R (a 0)).toRingHom) := by
+  exact congrArg (fun f => F.comp f)
+    (coordinateProductAwayLaurentRingEquiv_awayMap_comp
+      (R := R) (σ := σ) (n := n) a)
 
 @[simp]
 theorem coordinateProductAwayRingEquiv_algebraMap {n : ℕ}
