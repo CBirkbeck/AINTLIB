@@ -776,6 +776,20 @@ theorem LinearMap.exact_of_forall_field_baseChange_exact_of_finite
   rw [← LinearMap.range_eq_top, ← Submodule.Quotient.subsingleton_iff]
   exact hcoker
 
+/-- Over a Noetherian ring, the middle module of an exact pair is finite when the two
+surrounding modules are finite. This is the module-theoretic sandwich used in long exact
+cohomology sequences. -/
+theorem Module.Finite.of_exact_of_finite [IsNoetherianRing R]
+    {M : Type*} {N : Type*} {T : Type*}
+    [AddCommGroup M] [AddCommGroup N] [AddCommGroup T]
+    [Module R M] [Module R N] [Module R T]
+    (f : M →ₗ[R] N) (g : N →ₗ[R] T)
+    [Module.Finite R M] [Module.Finite R T]
+    (h : Function.Exact f g) : Module.Finite R N := by
+  letI : IsNoetherian R N :=
+    isNoetherian_of_range_eq_ker f g (LinearMap.exact_iff.mp h).symm
+  infer_instance
+
 private theorem boundedFlatCokerAndExactOfFiniteHomology
     (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
     (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Flat R (M n)]
