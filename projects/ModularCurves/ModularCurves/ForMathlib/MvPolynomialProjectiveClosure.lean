@@ -7,6 +7,7 @@ ForMathlib (OURS, not vendored): upstream candidate.
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Proper
+import Mathlib.RingTheory.MvPolynomial.Ideal
 import ModularCurves.ForMathlib.GradedQuotient
 import ModularCurves.ForMathlib.MvPolynomialHomogenize
 import ModularCurves.ForMathlib.ProjClosedImmersion
@@ -97,6 +98,56 @@ lemma homogenizedProjι_comp_homogeneousProjπ
   rw [← Category.assoc, ModularCurves.map_comp_toSpecZero]
   rw [Category.assoc, ← Spec.map_comp]
   rfl
+
+private lemma irrelevant_le_span_X :
+    (irrelevant (homogeneousSubmodule σ R)).toIdeal ≤
+      Ideal.span (Set.range (X : σ → MvPolynomial σ R)) := by
+  rw [toIdeal_irrelevant_le]
+  intro n hn p hp
+  change p ∈ Ideal.span (Set.range (X : σ → MvPolynomial σ R))
+  rw [← idealOfVars, ← pow_one (idealOfVars σ R), mem_pow_idealOfVars_iff]
+  intro m hm
+  have hdegree := ((mem_homogeneousSubmodule _ _).mp hp).degree_eq_sum_deg_support hm
+  have hn' : 1 ≤ n := hn
+  simpa [Finsupp.degree_apply, ← hdegree] using hn'
+
+/-- The standard coordinate open in the `Proj` of a homogeneous polynomial quotient. -/
+abbrev quotientCoordinateOpen
+    (I : HomogeneousIdeal (homogeneousSubmodule σ R)) (i : σ) :
+    (Proj (quotientGrading I)).Opens :=
+  Proj.basicOpen (quotientGrading I) (quotientGradingHom I (X i))
+
+/-- Every standard coordinate open in a homogeneous polynomial quotient is affine. -/
+lemma quotientCoordinateOpen_isAffineOpen
+    (I : HomogeneousIdeal (homogeneousSubmodule σ R)) (i : σ) :
+    IsAffineOpen (quotientCoordinateOpen I i) :=
+  Proj.isAffineOpen_basicOpen (quotientGrading I) (quotientGradingHom I (X i))
+    (mk_mem_quotientGrading I (X_mem_homogeneousSubmodule_one R i)) one_pos
+
+/-- The standard coordinate opens cover the `Proj` of a homogeneous polynomial quotient. -/
+lemma iSup_quotientCoordinateOpen_eq_top
+    (I : HomogeneousIdeal (homogeneousSubmodule σ R)) :
+    ⨆ i : σ, quotientCoordinateOpen I i = ⊤ := by
+  apply Proj.iSup_basicOpen_eq_top
+  calc
+    (irrelevant (quotientGrading I)).toIdeal ≤
+        (HomogeneousIdeal.map (quotientGradingHom I)
+          (irrelevant (homogeneousSubmodule σ R))).toIdeal :=
+      quotientGradingHom_irrelevant_le I
+    _ = Ideal.map (quotientGradingHom I)
+        (irrelevant (homogeneousSubmodule σ R)).toIdeal := rfl
+    _ ≤ Ideal.map (quotientGradingHom I)
+        (Ideal.span (Set.range (X : σ → MvPolynomial σ R))) :=
+      Ideal.map_mono irrelevant_le_span_X
+    _ = Ideal.span (Set.range fun i : σ ↦ quotientGradingHom I (X i)) := by
+      rw [Ideal.map_span]
+      congr 1
+      ext x
+      constructor
+      · rintro ⟨_, ⟨i, rfl⟩, rfl⟩
+        exact ⟨i, rfl⟩
+      · rintro ⟨i, rfl⟩
+        exact ⟨X i, ⟨i, rfl⟩, rfl⟩
 
 section OptionChart
 
