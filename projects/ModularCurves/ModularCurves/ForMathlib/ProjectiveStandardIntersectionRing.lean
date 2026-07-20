@@ -79,6 +79,50 @@ noncomputable def coordinateTailExponent {n : ℕ} (a : Fin (n + 1) → σ) :
     {j : σ // j ≠ a 0} →₀ ℕ :=
   ∑ k : Fin n, coordinateTailExponentTerm a k
 
+/-- A nonanchor coordinate occurs in the dehomogenized tail monomial exactly when it occurs in
+the original tuple. -/
+theorem coordinateTailExponent_ne_zero_iff {n : ℕ} (a : Fin (n + 1) → σ)
+    (j : {j : σ // j ≠ a 0}) :
+    coordinateTailExponent a j ≠ 0 ↔ j.1 ∈ Set.range a := by
+  classical
+  simp only [coordinateTailExponent]
+  constructor
+  · intro h
+    by_contra hj
+    apply h
+    rw [Finset.sum_apply']
+    apply Finset.sum_eq_zero
+    intro k _
+    by_cases hk : a k.succ = a 0
+    · simp [coordinateTailExponentTerm, hk]
+    · have hne : a k.succ ≠ j.1 := by
+        intro hkj
+        exact hj ⟨k.succ, hkj⟩
+      have hne' : (⟨a k.succ, hk⟩ : {j : σ // j ≠ a 0}) ≠ j := by
+        intro hkj
+        exact hne (congrArg Subtype.val hkj)
+      simp [coordinateTailExponentTerm, hk, hne']
+  · rintro ⟨i, hi⟩
+    have hi0 : i ≠ 0 := by
+      intro h
+      subst i
+      exact j.2 hi.symm
+    obtain ⟨k, rfl⟩ := Fin.eq_succ_of_ne_zero hi0
+    have hk : a k.succ ≠ a 0 := by
+      intro h
+      exact j.2 (hi.symm.trans h)
+    have hterm : coordinateTailExponentTerm a k j = 1 := by
+      simp [coordinateTailExponentTerm, hi, j.2]
+    exact fun hsum => by
+      rw [Finset.sum_apply'] at hsum
+      have hle : coordinateTailExponentTerm a k j ≤
+          ∑ l : Fin n, coordinateTailExponentTerm a l j :=
+        Finset.single_le_sum
+          (fun l _ => Nat.zero_le (coordinateTailExponentTerm a l j))
+          (Finset.mem_univ k)
+      rw [hterm, hsum] at hle
+      exact Nat.not_succ_le_zero 0 hle
+
 /-- The tail coordinate product is homogeneous of degree `n`. -/
 theorem coordinateTailPolynomial_mem {n : ℕ} (a : Fin (n + 1) → σ) :
     coordinateTailPolynomial (R := R) a ∈ homogeneousSubmodule σ R n := by
