@@ -32,6 +32,21 @@ lemma IsProper.of_comp_surjective {Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
   toUniversallyClosed := UniversallyClosed.of_comp_surjective f g
   toLocallyOfFiniteType := inferInstance
 
+/-- A proper open immersion is also a closed immersion. -/
+lemma IsClosedImmersion.of_isOpenImmersion_isProper (f : X ⟶ S)
+    [IsOpenImmersion f] [IsProper f] : IsClosedImmersion f := by
+  apply IsClosedImmersion.of_isPreimmersion f
+  rw [← Set.image_univ]
+  exact f.isProperMap.isClosedMap _ isClosed_univ
+
+/-- An open immersion into a separated family is closed when its composite to the base
+is proper. -/
+lemma IsClosedImmersion.of_isOpenImmersion_comp_isProper
+    {Y : Scheme.{u}} (f : X ⟶ S) (g : S ⟶ Y) [IsOpenImmersion f]
+    [IsProper (f ≫ g)] [IsSeparated g] : IsClosedImmersion f := by
+  letI : IsProper f := IsProper.of_comp f g
+  exact IsClosedImmersion.of_isOpenImmersion_isProper f
+
 /-- A surjective map between two spread stages remains surjective after transport to any
 common later stage. -/
 theorem Algebra.SpreadData.mapAtLaterStage_surjective
