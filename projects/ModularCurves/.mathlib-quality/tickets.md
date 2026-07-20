@@ -24306,3 +24306,16 @@ EngineDescent hpres frontier byte-stable; Stage-3 continuation comments repointe
 landed lemmas (3a: exists_units_eq_mul_of_span_eq_top ⟨vᵢ,0,0,0⟩-rescale; 3b: n-cover split
 ×2 layers; 3c unchanged). Remaining mouth-core work: the 02M9 fibre leaf + Stage-3abc
 scheme assembly.
+
+### v10.343 progress — [T-E4A4-A8 partial] classifying-chain infrastructure GREEN (2026-07-20)
+A4-A8 builder (killed by session usage limit mid-run, resumes 22:30 KST) landed +2671
+GREEN lines in UniversalLevelFour.lean: the E4Witness/glued-parameter machinery and the
+classifying-chain infrastructure compiled first-try; remaining sorries sit at the
+unreached leaves (e4ClassifyingEllHom discharge, rt1/rt2, datum lemmas, keystone wiring).
+Committed as green partial progress. Recollement's +753 (E builder, also limit-killed)
+is RED at its mid-edit frontier (3 kernel deterministic timeouts :1882/:1959/:2016 —
+proofs needing hoist/split per the no-heartbeat rule — + 2 references to not-yet-written
+private helpers) — left UNCOMMITTED in the worktree for the post-reset resume.
+User directive reaffirmed mid-session: hard work flows /develop-plan-first → /beastmode
+(the STREAM-E4 board + decomposition-e4.md remain the plan of record; any newly-surfaced
+hard sub-work gets boarded before builders attack it).
