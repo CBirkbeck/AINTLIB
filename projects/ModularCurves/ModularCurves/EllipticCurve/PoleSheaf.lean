@@ -1895,7 +1895,7 @@ noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
 
 /-- The explicit structure module is the monoidal unit, so its tensor square is
 canonically the structure module again. -/
-private noncomputable def unitObjTensorIso (X : Scheme.{u}) :
+noncomputable def unitObjTensorIso (X : Scheme.{u}) :
     Scheme.Modules.unitObj X ⊗ Scheme.Modules.unitObj X ≅
       Scheme.Modules.unitObj X :=
   ((monoidalUnitObjIso X).symm ⊗ᵢ (monoidalUnitObjIso X).symm) ≪≫
@@ -2023,7 +2023,7 @@ noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules) :
       (Iso.refl _) M.val N.val
 
 /-- Restriction along an open immersion preserves the localized monoidal unit. -/
-private noncomputable def restrictMonoidalUnitIso
+noncomputable def restrictMonoidalUnitIso
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
     (Scheme.Modules.restrictFunctor f).obj (𝟙_ Y.Modules) ≅ 𝟙_ X.Modules := by
   letI : (Scheme.Modules.pullback f).Monoidal :=
@@ -2032,7 +2032,7 @@ private noncomputable def restrictMonoidalUnitIso
     (Functor.Monoidal.εIso (Scheme.Modules.pullback f)).symm
 
 /-- Restriction along an open immersion preserves the localized tensor product. -/
-private noncomputable def restrictMonoidalTensorIso
+noncomputable def restrictMonoidalTensorIso
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f]
     (M N : Y.Modules) :
     (Scheme.Modules.restrictFunctor f).obj (M ⊗ N) ≅
