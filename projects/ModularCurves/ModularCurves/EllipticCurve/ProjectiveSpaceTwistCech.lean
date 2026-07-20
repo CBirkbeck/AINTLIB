@@ -87,6 +87,26 @@ theorem coordinateProductPolynomial_eq_delete_mul [LinearOrder σ] {n : ℕ}
     Fin.prod_univ_succAbove, mul_comm]
   rfl
 
+/-- Deleting a noninitial Cech coordinate removes exactly that factor from the affine-chart tail
+product. -/
+theorem coordinateTailPolynomial_eq_delete_succ_mul [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1)) :
+    coordinateTailPolynomial (R := R) (fun l => (a.1 l).down) =
+      coordinateTailPolynomial (R := R)
+          (fun l => ((a.delete k.succ).1 l).down) *
+        X (a.1 k.succ).down := by
+  have h := coordinateProductPolynomial_eq_delete_mul (R := R) a k.succ
+  rw [coordinateProductPolynomial, coordinateProductPolynomial] at h
+  change X (a.1 0).down *
+      coordinateTailPolynomial (R := R) (fun l => (a.1 l).down) =
+    (X (a.1 0).down *
+      coordinateTailPolynomial (R := R)
+        (fun l => ((a.delete k.succ).1 l).down)) *
+      X (a.1 k.succ).down at h
+  rw [mul_assoc] at h
+  exact X_mul_cancel_left_iff.mp h
+
 private theorem basicOpen_prod {ι : Type*} [Fintype ι]
     (f : ι → MvPolynomial σ R) :
     Proj.basicOpen (homogeneousSubmodule σ R) (∏ i, f i) =
