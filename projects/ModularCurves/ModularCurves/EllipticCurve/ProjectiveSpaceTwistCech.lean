@@ -4,9 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwist
+import ModularCurves.ForMathlib.ProjectiveLaurentWeight
 import ModularCurves.ForMathlib.ProjToSpecZero
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
-import ModularCurves.ForMathlib.ProjectiveStandardIntersectionRing
 
 /-!
 # Cech factors for twists on polynomial projective space
@@ -302,6 +302,42 @@ noncomputable def coordinateOpenCechIntersectionBaseLaurentLinearEquiv {n : ℕ}
       rw [map_mul,
         coordinateOpenCechIntersectionBaseLaurentRingEquiv_baseScalar]
       rw [Algebra.smul_def] }
+
+/-- A standard projective Cech intersection factor, reindexed by global homogeneous Laurent
+weights of total degree `d` allowed on its coordinate tuple. -/
+noncomputable def coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) (d : ℤ) :
+    Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n a ≃ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      AddMonoidAlgebra
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        {e : HomogeneousLaurentExponent σ d //
+          e.IsAllowedOn (fun k => (a k).down)} :=
+  (coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a).trans
+    (AddMonoidAlgebra.mapDomainLinearEquiv
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateLaurentExponentEquiv (fun k => (a k).down) d))
+
+/-- The homogeneous-weight factor equivalence sends a local Laurent basis vector to the same
+monomial indexed by its global weight. -/
+@[simp]
+theorem coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_basis_apply
+    {n : ℕ} (a : Fin (n + 1) → ULift.{u} σ) (d : ℤ)
+    (e : laurentExponentSubmonoid
+      (coordinateTailExponent (fun k => (a k).down)))
+    (r : Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))) :
+    coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv (R := R) a d
+        ((coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a).symm
+          (AddMonoidAlgebra.single e r)) =
+      AddMonoidAlgebra.single
+        (coordinateLaurentExponentEquiv (fun k => (a k).down) d e) r := by
+  rw [coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv,
+    LinearEquiv.trans_apply, LinearEquiv.apply_symm_apply,
+    AddMonoidAlgebra.mapDomainLinearEquiv_single]
 
 /-- The standard frame of `O(d)` restricted to an ordered Cech intersection. -/
 noncomputable def coordinateHyperplaneTwistCechTrivialization {n : ℕ}
