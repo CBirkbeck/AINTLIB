@@ -7,6 +7,7 @@ import «Adic spaces».PresheafAdicCompletion
 import «Adic spaces».AdicConvergence
 import «Adic spaces».ArtinReesConvergence
 import «Adic spaces».AdicMorphisms
+import «Adic spaces».AdicMorphismsCore
 import «Adic spaces».AdicSpectrum
 import «Adic spaces».AlmostMathematics
 import «Adic spaces».CechCohomology

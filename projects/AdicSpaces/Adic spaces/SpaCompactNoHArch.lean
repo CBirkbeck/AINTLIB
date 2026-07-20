@@ -6,7 +6,7 @@ import «Adic spaces».SpaCompact
 import «Adic spaces».Presheaf
 import «Adic spaces».SpvAITopology
 import «Adic spaces».SpaQCviaSpvAI
-import «Adic spaces».AdicMorphisms
+import «Adic spaces».AdicMorphismsCore
 
 /-!
 # No-`hArch` compactness and per-`v` cofinality (T-COMPACT-NO-HARCH)

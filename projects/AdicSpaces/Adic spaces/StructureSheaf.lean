@@ -24,18 +24,26 @@ import Mathlib.Geometry.RingedSpace.PresheafedSpace
 import Mathlib.Geometry.RingedSpace.Stalks
 
 /-!
-# The Structure Sheaf on the Adic Spectrum
+# Rational-localization presheaf infrastructure and the internal sheafiness criterion
 
-We define the structure sheaf `𝒪_X` on `X = Spa(A, A⁺)` following §8.1 of Wedhorn.
+**The public structure sheaf does NOT live here** — it is the projective-limit
+presheaf `structurePresheaf` of `StructurePresheafBundled.lean` (values
+`limitSections`, Wedhorn §8.1 / Kedlaya Definition 1.2.3). This file provides:
 
 ## Main definitions
 
 * `SpaTop A` : The adic spectrum as an object of `TopCat`.
-* `locallyFractionPresheaf A` : the quarantined discrete locally-fraction comparison
-  presheaf (NOT the structure presheaf — see `StructurePresheafBundled.lean` for the
-  public `structurePresheaf`/`structureSheaf`).
+* `locallyFractionPresheaf A` : a quarantined **discrete** locally-fraction
+  comparison presheaf. It is *not* the structure presheaf, its values on rational
+  opens are *not* the completed rational localizations `A⟨T/s⟩`, and no sheaf
+  assertion is made about it; it survives only as scaffolding for the stalk/
+  valuation (`𝒱^pre`) machinery below.
 * `VPreObj` / `VObj` : Categories 𝒱^pre and 𝒱 (Definitions 8.5, 8.7, Remark 8.20).
-* `IsSheafy` : Sheaf condition for topological ring presheaves (Definition 8.26).
+* `IsSheafy` : the project's **internal fixed-pair finite rational-cover
+  criterion** — *not* Wedhorn's ring-level Definition 8.26 (that is
+  `IsSheafyTateRing`, `SheafyRing.lean`) and not the pair-level public notion
+  (`IsSheafyFor`); at complete Tate scope it is equivalent to the latter by
+  `isSheafy_iff_isLimitSheaf`.
 
 ## References
 
@@ -159,10 +167,13 @@ noncomputable instance sectionsIsUniformAddGroup (U : Opens (SpaTop A)) :
 
 /-- The presheaf value on an open `U` as a `CompleteTopCommRingCat` object.
 
-For each open `U`, the presheaf value is the subring of locally-fraction sections
-in `∏ₓ Localization.AtPrime x.supp` (Definition 8.5 of Wedhorn), equipped with
-the discrete uniformity. For rational subsets `U = R(T/s)`, this is canonically
-isomorphic to the completion `A⟨T/s⟩` (Proposition 8.2). -/
+For each open `U`, this is the subring of locally-fraction sections in
+`∏ₓ Localization.AtPrime x.supp` (Definition 8.5's shape), equipped with the
+**discrete** uniformity. **It is *not* canonically the completed rational
+localization `A⟨T/s⟩` on rational subsets** (an earlier docstring claimed
+Proposition 8.2 here — corrected 2026-07-20: Prop 8.2 concerns the genuine
+presheaf `presheafValue`/`limitSections`, whose topology is nondiscrete; this
+object is a set-level comparison device only). -/
 noncomputable def presheafSectionsObj (U : Opens (SpaTop A)) :
     CompleteTopCommRingCat.{u} :=
   CompleteTopCommRingCat.of ↥(sectionsSubring U)

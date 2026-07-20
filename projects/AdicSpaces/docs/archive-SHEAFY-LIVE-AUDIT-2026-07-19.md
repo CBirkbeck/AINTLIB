@@ -1,3 +1,4 @@
+# ARCHIVED 2026-07-20 — superseded by SHEAFY-INTEGRATION-2026-07-20.md and the repair campaign; kept for history.
 # Sheafiness completion — live-branch audit (2026-07-19)
 
 **Supersedes** (as status): `SHEAFY-REMAINING-WORK-PLAN.md`, `SHEAFY-FEASIBILITY-MAP.md`,

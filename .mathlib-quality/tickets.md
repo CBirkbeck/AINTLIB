@@ -1454,3 +1454,41 @@ pro-constructible subset of the spectral space Spv(A,I). … In particular it is
 - **T-ROIE-3** → **T-L2** (sharpened: openness automatic via 7.19; completion via 7.47(4)).
 - **T-ROIE-4** → **T-L3** (sharpened: general 7.45 branch only + existing maximality lemma).
 - The former **leaf #4 "[Hu2] 3.3 noetherian external"** framing → **T-L4** (7.52(1), red flag withdrawn).
+
+---
+
+# REOPENED — sheafy repair campaign 2026-07-20 (phases P1–P6, base a6a66d068)
+
+Reopened tickets (the WO0–WO6 pass delivered the public presheaf + the conditional
+engine; the following are NOT done and are hereby reopened):
+
+- **T-P1-APLUS-INDEP (reopened)** — unconditional A⁺-independence for complete Tate
+  rings. Blockers being discharged this campaign: noetherian-free keystone
+  `O_A(E) ≅ O_B(image datum)` (universal-property route, replaces the
+  noetherian-scoped `relativePiece_equiv`); relative standard condition over
+  section rings `B = 𝒪(U)` (Kedlaya-faithful shape); 7.54-over-B (span via
+  no-common-zero + `presheafValue_isAdicComplete`); Spa(B)→U point restriction;
+  approximation (Kedlaya Ex 1.2.2) for the forward direction; B-level engine +
+  keystone squares. Endpoints: `isSheafyFor_congr`,
+  `isSheafyFor_iff_standardSheafCondition`, `isSheafyFor_iff_isSheafyComplete` —
+  hypothesis-free apart from complete Tate/analytic scope.
+- **T-P2-COMPLETION-MODEL (reopened)** — transport API along bicontinuous compatible
+  ring equivalences (RingOfIntegralElements comap/map, StandardSheafCondition,
+  IsSheafyFor); hypothesis-clean `completionModelCompare`;
+  `isSheafyTateRing_iff_for_completionModel`; ∃-model ↔ ∀-model;
+  `IsSheafyTateRing ↔ IsSheafyComplete` for complete A.
+- **T-P3-SN-WRAPPER (reopened)** — `IsStronglyNoetherianTateRing := ∃ P, …`;
+  IsStronglyNoetherian transport along equivalences; one-model wrapper; fix 6.36
+  citations.
+- **T-P4-FJP-RING-LEVEL (reopened)** — unconditional `finiteJet_isSheafyComplete`,
+  `finiteJet_isSheafyTateRing`; end-to-end named theorems to the public presheaf.
+- **T-P5-V-LAYER (reopened)** — Hom-sheaf predicate for arbitrary
+  `F : Presheaf CompleteTopCommRingCat X`; `VObj` stores it; restriction API; Wedhorn
+  8.6 stalk result for the canonical Spa object; honest
+  `AffinoidAdicPresentation` rename + V-isomorphism-based affinoid/adic spaces;
+  8.38 morphisms through V-morphisms. Fallback (explicitly permitted): honest
+  renames removing the 8.21/8.22 claims.
+- **T-P6-COMPAT (reopened)** — `AdicMorphisms` aggregator (direct import must
+  expose `IsAdicMorphism`); StructureSheaf.lean header fixes; archive
+  beastmode_active + stale live-audit; universe policy note for the test-ring
+  quantifier.
