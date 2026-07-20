@@ -392,3 +392,18 @@ Sources now READ IN FULL with proofs: KM Ch. 1 §§1.1–1.9 (all of it) and GME
   #25218/#41300/#35151/#40500/#36345/#36218/#24434/#38472-lane; toric; XYin;
   Loeffler's OpenModularCurve; FLT stubs; AINTLIB incremental reuse for OT/DESC/COH/
   FLAT/IRR) + the binding coordinate-don't-duplicate policy + owner actions.
+
+## STREAM-E4 (2026-07-20, v5) — the receipts under the level-4 B2 resolution
+
+B2 adjudicated (board v10.342, b2_log B2-DECISION): D(2) rigidifier = naive level 4.
+Binding decomposition: `decomposition-e4.md` (verbatim KM quotes §0; trees §2–§8;
+sympy-certified ℰ₄ ring design). Skeleton LANDED GREEN this session:
+`Moduli/UniversalLevelFour.lean` (E4A: ring R[B,u,v][(B(1−16B))⁻¹]/(curve, e4Rel),
+curve ⟨1,B,B,0,0⟩, P=(0,0), Q=(u,v), units/killing/keystone/bridges/packaging — 15
+sorried leaves) + `Moduli/LevelFourTorsor.lean` (E4B: the two TorsorData exports).
+Streams: E4-A ℰ₄-machine; E4-B torsor re-instantiation (all deps general-N — audit in
+decomposition §3); E4-C engine rewire + Legendre quarantine; E4-D mouth core (route-map
+v10.339/340, ForMathlib prereqs ALL banked); E4-E recollement glue (in-file recipes);
+E4-F Drinfeld invertible-N reroutes (2 leaves); E4-G capstone census. Receipt matrix:
+decomposition §8. NO cleanup tickets — producers do not clean (AINTLIB CLAUDE.md);
+cleanup happens centrally on main post-merge.

@@ -24188,3 +24188,57 @@ a2f3d1a97 + AffineCechH1 f0035f720). Reuse = reference-only; no merge; reserved 
 
 **NEXT:** /develop (STREAM-E4 decomposition: ℰ₄-machine + level-4 torsor + rewire + mouth-core assembly + glueEllObj
 completion + Drinfeld invertible-N cone audit) → /beastmode.
+
+## v10.343 (2026-07-20) — STREAM-E4 BOARD: /develop complete — decomposition + green skeleton + ticket set (STREAM-E4)
+
+**Artifacts:** `decomposition-e4.md` (KM verbatim quote bank + full trees + census results + receipt matrix);
+`plan.md` v5 section; skeleton GREEN: `Moduli/UniversalLevelFour.lean` (~290 lines, 15 sorried leaves + real
+structure), `Moduli/LevelFourTorsor.lean` (2 sorried exports). Baseline tree green (4047 jobs). Design
+certificates sympy-verified this session (Δ = −B⁴(16B−1); e4Rel = 2u⁴+u³+3Bu²+4B²u+2B³; master identity
+ψ₂(Q)³·ψ₂(2Q) ≡ u(2B+u)·e4Rel mod curve; automatic units e4Rel(0)=2B³, e4Rel(−2B)=2B³(16B−1),
+res(e4,ψ₂²)=8B⁸(16B−1)², disc=4B⁶(16B−1)³; excluded locus {2Q=2P} = {u ∈ {0,−2B}}).
+
+**TICKETS (dependency order; statements = the skeleton decls by name; sketches+quotes = decomposition-e4.md §2–§7):**
+- [T-E4A1] ℰ₄ ring algebra: isUnit_universalE4_Δ, isUnit_e4B, isUnit_one_sub_sixteen_e4B, isUnit_e4U,
+  isUnit_e4U_add_two_e4B, isUnit_psiTwo_e4Q, universalE4_equation_zero, universalE4_equation_Q.
+  Route: Ideal.Quotient/Localization.Away algebra + linear_combination with the sympy Bezout certs. OPEN
+- [T-E4A2] killing: four_zsmul_universalE4P_of_isUnit, four_zsmul_universalE4Q_of_isUnit — ℰ₃ Stage-D pattern
+  (reduced ℤ[1/2] universal base + nsmul_section_eq_zero_of_forall_specPoint + zInvTwoHom transport;
+  fibre facts: 2P = (−B,0) explicit 2-torsion; e4Rel ⟹ 2Q on the degenerate quadratic fibre). DEPENDS A1. OPEN
+- [T-E4A3] combos4_ne_zero (4-case parity analysis; reconcile with pair_generates_iff_combos_ne_zero). OPEN
+- [T-E4A4] keystone universalE4_generation — mirror universalE3_generation:1001 with
+  torsion_geometricFibre_rank_two 4 + A3; Stage-B dictionary N-agnostic. DEPENDS A1,A2,A3. OPEN
+- [T-E4A5] IsE4Form.map + datum transport helpers (mirror IsE3Form.map / IsE3Datum.map). DEPENDS A1. OPEN
+- [T-E4A6] bridges: bridgeA_holds + bridgeQ4_holds via the hdbl4 master (RING-DBL two_zsmul_affineSection +
+  equation_dblXY at 4-torsion; a₂-unit + u,u+2B-unit certs via isUnit_x_of_marked_pair pattern;
+  master identity as linear_combination certificate). DEPENDS A1,A5. OPEN
+- [T-E4A7] isE4Datum_of_bridges — atlas + marking pipeline (N-agnostic) + ofNeZero/toTateNF
+  (ForMathlib/TateNormalForm: full chain applies at order 4!) + toTateNF_unique + A6. DEPENDS A6. OPEN
+- [T-E4A8] classifying chain + packaging: expand e4ClassifyingEllHom into the ℰ₃ literal chain
+  (e4BGlued/UGlued/VGlued via toTateNF_unique-agreement + E4Witness pullback-gluing + rt1/rt2), fill
+  naiveLevelFourRepresentableBy, discharge naiveLevelFour_representable_by_affine := _of_conditions +
+  ⟨⟨A2-killings⟩, A4⟩ + A7. DEPENDS A2,A4,A7. OPEN  ★ axiom-clean gate: #print axioms = clean triple.
+- [T-E4B] LevelFourTorsor: fill exists_levelFourTorsorData(_ulift) by copying LevelThreeTorsor wrappers at
+  N=4 (levelFourData/finite/etale/equivariant/surjective/torsor + ULift transport; γ⁻¹ convention;
+  general-N deps audit in decomposition §3 — no new mathematics). OPEN (parallel to E4A)
+- [T-E4C] EngineWiring rewire: representable_baseChange_two → level-4 leg (φ₄ = gammaFullNaiveGlAction R2 4
+  ∘ ulift; X0 from naiveLevelFour_representable_by_affine; TorsorData from E4B; drop LegendreTorsor import)
+  + quarantine Legendre subtree (LegendreTorsor 4 sorries, SqrtCoverGlue 2 sorries → documented non-goals
+  citing b2_log B2-DECISION). DEPENDS A8,B.  ★ receipts 1/4/5 flip here (with D,E).
+- [T-E4D] mouth core exists_localModel_core_at (EngineDescent:2593) — route v10.339/340: Stage-3a ω via
+  nonempty_omegaBasis_of_finite_maximalSpectrum (SemilocalOmegaBasis BANKED); Stage-3b nilpotent Čech split
+  via AffineCechH1 (BANKED) + partition-of-unity; Stage-3c native glue over A_a; Stage-4 banked; Stage-5
+  coboundary spread. ~1000 lines, volume-only. OPEN (parallel)
+- [T-E4E] recollement glue: [R-sheaf-P] zglue from Stack.lean fppf lemmas + homGlueDescentData
+  (Recollement:1392; [R-chart-eqv]+[R-hom-glue] per in-file recipe + consumption spec) + discharge :1491
+  via glueEllObj_representableBy_of_zariskiGlue. OPEN (parallel)
+- [T-E4F1] smul_eq_zero_of_factors_of_invertible (NEW lemma next to ExactOrder:113; étale/Lagrange route,
+  KM 1.4.4/3.7.2) + restate gammaOneDrinfeld_affineOverEll with hinv + repoint GammaHMaster:1194 +
+  DrinfeldRepresentability:170. General-base :117 stays statement-protected (future over-ℤ). OPEN (parallel)
+- [T-E4F2] direct invertible-N pull_nsmul_ne_zero (bypass ExactOrder:849 jet keystone; KM 1.4.4(3) distinct
+  geometric points) + repoint GammaHMaster:1206. :849 stays statement-protected. OPEN (parallel)
+- [T-E4G] capstone census: receipts 1–6 discharge through the engine; lean_verify + #print axioms = clean
+  triple each; board FIN entry. DEPENDS C,D,E (+F1,F2 for receipts 3/6; receipt 2 needs only C,D,E).
+
+**No cleanup tickets by design** — producers do not clean (AINTLIB CLAUDE.md); central cleanup on main.
+**Next:** /beastmode begins at T-E4A1 (+ parallel-safe T-E4D/T-E4E/T-E4F for concurrent sessions).
