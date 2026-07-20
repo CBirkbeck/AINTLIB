@@ -151,4 +151,26 @@ theorem IsFilteredAlgColimit.exists_isClopen_iSup_basicOpen
     PrimeSpectrum.basicOpen e₁ from hopen]
   exact PrimeSpectrum.isClopen_iff.mpr ⟨e₁, he₁, rfl⟩
 
+/-- A finite union of basic opens on a spread-stage affine chart which becomes clopen on
+the colimit chart is clopen at a common later spread stage. -/
+theorem SpreadData.exists_isClopen_iSup_basicOpen
+    {B : Type u} [CommRing B] [Algebra A B]
+    (D : SpreadData S uA B) (H : IsFilteredAlgColimit R S t A uA)
+    {κ : Type*} [Finite κ] (P : {i : ι // D.i₀ ≤ i})
+    (f : κ → D.spreadStage (t := t) P.2)
+    (hclopen : IsClopen
+      ((↑(⨆ k, PrimeSpectrum.basicOpen
+        (D.stageToColimit H P (f k))) : Set (PrimeSpectrum B)))) :
+    ∃ (Q : {i : ι // D.i₀ ≤ i}) (hPQ : P ≤ Q), IsClopen
+      ((↑(⨆ k, PrimeSpectrum.basicOpen
+        (D.stageTransition H hPQ (f k))) :
+          Set (PrimeSpectrum (D.spreadStage (t := t) Q.2)))) := by
+  letI : ∀ P : {j : ι // D.i₀ ≤ j},
+      Algebra (S D.i₀) (D.spreadStage (t := t) P.2) :=
+    fun P => ((algebraMap (S P.1) (D.spreadStage (t := t) P.2)).comp
+      (t P.2).toRingHom).toAlgebra
+  letI : Algebra (S D.i₀) B :=
+    ((algebraMap A B).comp (uA D.i₀).toRingHom).toAlgebra
+  exact (D.isFilteredAlgColimit H).exists_isClopen_iSup_basicOpen f hclopen
+
 end Algebra
