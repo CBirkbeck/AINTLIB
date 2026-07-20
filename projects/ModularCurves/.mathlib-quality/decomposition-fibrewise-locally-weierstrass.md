@@ -984,3 +984,153 @@ finite-intersection ring isomorphism's compatibility with the base algebra map, 
 geometric chart through `Scheme.isoSpec_hom_naturality`, and then uses glue-cover hom extensionality.
 Its focused build is green, its axiom audit is exactly `propext`, `Classical.choice`, and
 `Quot.sound`, and it adds no covering hypothesis, comparison structure, or proof-resource option.
+
+## Continuation audit (2026-07-20)
+
+This section supersedes the old "missing" annotations in Steps 1--6 above. It was produced by a
+fresh repository/mathlib/source audit after the pole-sheaf, Cech, finite-stage gluing, and Chow
+developments landed. The mathematical route is still Katz--Mazur 2.2.1--2.2.5; the arbitrary-base
+implementation follows Stacks 0A1G/0B91, with the proper finite-stage model supplied by Stacks
+081F and closed-immersion descent 01ZP.
+
+### Landed substrate
+
+The following parts of the old critical path are complete and axiom-clean.
+
+1. `sectionPoleSheafPowerBaseChangeIso` gives arbitrary pullback compatibility of
+   `O(n[0])`; the fibre comparison files identify its residue-field fibres with the explicit
+   model pole filtration.
+2. `FibrewiseElliptic.exists_sectionPoleSheafPower_orderedBaseCech_flat_bounded_field_exact_kernel_finrank`
+   gives one finite ordered affine Cech complex with flat terms, bounded tail, positive-degree
+   exactness after every field base change, and degree-zero fibre kernel dimension `n`.
+3. `BaseChangeKerCoker.lean` already proves the arbitrary-ring algebra needed once a bounded
+   finite-projective replacement exists: exactness, finite projective degree-zero kernel,
+   arbitrary kernel base change, and constant rank.
+4. `PoleSheafSuccessorHOne.lean`, `PoleSheafSuccessorSections.lean`, and the two pole
+   multiplication files already provide the successor-quotient vanishing, rank-one quotient,
+   splitting, leading coefficient, and multiplication compatibility used to choose `x` and `y`.
+5. `IsInvertible.exists_noetherianStageModelOfFinitePresentationSeparatedBaseChangeIso_of_isProper`
+   descends the family and any fixed invertible sheaf to a Noetherian, separated,
+   finite-presentation stage, but deliberately does not yet assert properness.
+6. `Scheme.Hom.exists_chowCover_of_isNoetherian` supplies the exact proper-surjective/open-in-
+   proper diagram used in Stacks 081F. The filtered-colimit clopen theorems and
+   `Scheme.Hom.exists_isClosedImmersion_scalarExtension_of_isOpenImmersion` now prove its affine
+   target-chart closedness descent.
+
+Thus arbitrary pole-sheaf base change, fibre identification, Cech comparison, field-fibre
+exactness, and the local pole algebra are no longer blockers. The first missing dependency is the
+global finite-cover form of the just-proved affine closed-immersion descent.
+
+### A. Proper Noetherian approximation (current frontier)
+
+The next three leaves implement Stacks 081F without adding Noetherianity to the final theorem.
+
+1. Prove the finite-family synchronization theorem
+
+   ```lean
+   Scheme.Hom.exists_common_isClosedImmersion_scalarExtension_of_isOpenImmersion
+   ```
+
+   for finitely many compact open immersions into finitely presented affine stage targets. Each
+   chart uses the landed one-chart theorem; closedness is transported to one common upper stage
+   by stability under base change. No injectivity or flatness of transition maps is permitted.
+2. Cover the proper Chow ambient by finitely many affine opens. Restrict the Chow immersion to
+   each target chart, use Noetherianity of the Chow source to obtain compact chart ranges, apply
+   the synchronized theorem, and reconstruct global closedness with
+   `IsZariskiLocalAtTarget.iff_of_openCover (P := @IsClosedImmersion)`. Package this as the
+   later-stage closedness of the chosen Chow immersion.
+3. At that later stage the Chow source is proper over the base because it is closed in the proper
+   ambient. Its map to the stage model is proper and surjective after scalar extension. Apply
+   `IsProper.of_comp_surjective` to conclude that the finite-stage model is proper. The public
+   capstone should be
+
+   ```lean
+   IsInvertible.exists_noetherianStageModelOfFinitePresentationProperBaseChangeIso_of_isProper
+   ```
+
+   with the same family/sheaf base-change comparison as the existing separated theorem and no
+   additional hypothesis on the original base.
+
+### B. The genuine cohomology-and-base-change leaf
+
+Properness alone does not discharge Stacks 0A1G. For a fixed `n`, the descended invertible sheaf
+on the proper Noetherian model must yield a finite-projective low-degree complex whose pullback
+computes the original ordered Cech complex after every affine base change.
+
+The required work is:
+
+1. Descend enough of smooth relative dimension one (or exactly the flat finite-presentation and
+   cohomological-dimension-one consequences) to the proper stage. Do not consume the existing
+   `SpreadData.exists_flat_stage` while it contains a `sorry`.
+2. Prove the Noetherian proper coherent-cohomology input needed for the stage Cech complex:
+   finite degree-zero and degree-one homology and exactness in degrees at least two. Finite
+   homology by itself is not enough; tail exactness is needed to make the degree-one cycle module
+   flat for `LowDegreeFiniteReplacement`.
+3. Apply the existing low-degree finite-projective replacement and prove that its scalar extension
+   to the original base computes the original Cech kernel and degree-one homology. This is the
+   concrete low-degree form of Stacks 0A1G/Remark 0A1I; it must be proved, not represented by a
+   `CohomologyPackage` hypothesis.
+4. Combine that replacement with the landed all-field exactness and kernel-finrank theorem. The
+   endpoint for each `n >= 1` is a local theorem saying that
+   `Scheme.Modules.baseSections pi (sectionPoleSheafPower pi z hz n)` is finite projective of
+   constant rank `n` and its canonical pushforward base-change morphism is an isomorphism for
+   every further affine base change.
+
+This is now the largest algebraic-geometric dependency. A fresh search found no mathlib theorem
+for proper coherent pushforward finiteness or the required perfect `RGamma`; the existing derived
+category API does not by itself supply this geometry.
+
+### C. Vanishing and pole coordinates
+
+Once B is available, fibrewise `H^1(O([0])) = 0` and finite-projective base change make
+`H^1(O([0]))` vanish after shrinking around any chosen base point. The landed successor theorem
+then gives `H^1(O(n[0])) = 0` for every positive `n`. The existing Cartier-generator and splitting
+APIs give, after a common affine shrink,
+
+```text
+P_1 = A,   P_2 = A + A*x,   P_3 = A + A*x + A*y,
+```
+
+with `x` and `y` of exact pole orders two and three. The multiplication/leading-coefficient API
+then supplies the expected bases of `P_4`, `P_5`, and `P_6`. This stage should introduce no new
+cohomological abstraction.
+
+### D. Equation and geometric identification
+
+1. Use the rank-six basis of `P_6` to prove the unique relation
+
+   ```text
+   y^2 + a1*x*y + a3*y = x^3 + a2*x^2 + a4*x + a6.
+   ```
+
+   This is finite locally-free module algebra using the landed pole multiplication maps.
+2. Construct the morphism to `P^2` from `1,x,y` and prove it identifies the family with the
+   projective cubic. This remains a separate geometric leaf: either prove relative very
+   ampleness of `O(3[0])`, or identify the relative section algebra with the Weierstrass graded
+   ring and invoke the existing Proj comparison. Search the relative-Proj/very-ample API again
+   immediately before choosing between these routes; do not postulate an embedding package.
+3. Apply `isElliptic_of_fibrewiseElliptic_projModel` to obtain unit discriminant, then use
+   `locallyWeierstrass_projModel` and the constructed pointed family isomorphism.
+
+### E. Final assembly
+
+The local construction around every base point proves, with no additional hypotheses,
+
+```lean
+FibrewiseElliptic.locallyWeierstrass :
+  SmoothOfRelativeDimension 1 pi ->
+  IsProper pi ->
+  FibrewiseElliptic pi z hz ->
+  LocallyWeierstrass pi z hz
+```
+
+Combining it with the three landed forward implications gives
+
+```lean
+locallyWeierstrass_iff_abstractConditions :
+  LocallyWeierstrass pi z hz <->
+    SmoothOfRelativeDimension 1 pi /\ IsProper pi /\ FibrewiseElliptic pi z hz
+```
+
+No part of the remaining chain uses `Pic^0`, the group law, a new monoidal layer, arbitrary-base
+Noetherianity, proof-resource options, axioms, unsafe declarations, or unboarded sorries.
