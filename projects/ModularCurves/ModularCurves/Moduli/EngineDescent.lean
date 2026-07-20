@@ -3027,13 +3027,16 @@ Proof state (KM 2.2.5–2.2.6 + the a5-P-loc board; Stages per board v10.339/v10
   `Spec A → Spec Aᴳ` over `s` is one finite `G`-orbit (`invariantsπ_apply_eq_iff` +
   `invariantsπ_surjective`, CITE not re-prove); extract per-point charts from `C.localModel`
   via `EllipticCurveGeom.atlas` / `WeierstrassAtlasData` / `LocalPresentation` and shrink to
-  basic opens `D(f_i)` covering `Spec L`; adapt them to a global `ω` over the semilocal `L`
-  (`nonempty_omegaBasis_of_finite_maximalSpectrum`, ForMathlib/SemilocalOmegaBasis — modulo the
-  affine `QCoh ≃ Modules` bridge `hInv`/`hTriv`, boarded residual (i)) so the chart-difference
+  basic opens `D(f_i)` covering `Spec L`; normalize the chart-transition `u`-components to `1`
+  by the **semilocal unit-cocycle split**
+  (`SemilocalUnitSplit.exists_units_eq_mul_of_span_eq_top`,
+  ForMathlib/SemilocalUnitCocycleSplit — the ω/`OmegaBasis` bridge of residual (i) is BYPASSED;
+  one mechanical 02M9-fibre residual remains there, see its docstring) so the chart-difference
   cocycle `InvariantDifferential.transVC` lands in the nilpotent translation group
   `T = {(1,r,s,t)}`; split that chart-Čech cocycle by the partition-of-unity affine-Čech
-  vanishing (ForMathlib/AffineCechH1, extended to the finite basic cover — boarded residual
-  (ii)); correct the charts (`pointedIso_hom_of_transVC_eq_one`), glue the coefficients
+  vanishing (`IsLocalizedModule.exists_sub_liftOfLE_eq_of_span_eq_top`,
+  ForMathlib/AffineCechH1 n-cover form — residual (ii) CLOSED, axiom-clean); correct the
+  charts (`pointedIso_hom_of_transVC_eq_one`), glue the coefficients
   (structure-sheaf sheaf condition) to `W₀L / L` and spread them to a single `a₁ ∉ s`; glue the
   presentation `ρR₁` natively over `A_{a₁}` (`Scheme.OpenCover.glueMorphisms` +
   `glueMorphisms_hf_of_agree`; legs by `isPullback_projModelBaseChange` and
@@ -3105,22 +3108,36 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
   -- over the LOCAL `Lᴳ = (Aᴳ)_p`, hence `Pic L = 0`), glue a global Weierstrass model `W₀L / L`
   -- presenting the base-changed curve, then spread the finitely many ring coefficients + the
   -- corrected chart isos to a basic open `D(a₁)`, `a₁ ∉ p`, and glue `ρR₁` NATIVELY over
-  -- `A_{a₁}` (board v10.339 finding 2 — no EGA IV §8).  Concretely (v10.340 + T-E4D):
-  --   (3a) `Nonempty (OmegaBasis …)` over `Spec L` from `Pic L = 0`
-  --        (`nonempty_omegaBasis_of_finite_maximalSpectrum`, ForMathlib/SemilocalOmegaBasis) —
-  --        its `hInv`/`hTriv` inputs are the affine `QCoh ≃ Modules` bridge (boarded residual
-  --        (i)); adapt the orbit charts of `C.localModel` (via `EllipticCurveGeom.atlas` /
-  --        `LocalPresentation`) to the global `ω`, so the chart-difference cocycle
-  --        `InvariantDifferential.transVC` lands in the nilpotent `T = {(1,r,s,t)}`;
-  --   (3b) split the `T`-valued chart-Čech cocycle over the finite basic cover of `Spec L` —
-  --        central extension `0 → (L,+) → T → (L²,+) → 0`, each additive layer by the
-  --        partition-of-unity split (`ForMathlib/AffineCechH1`, extended from the 2-cover to the
-  --        n-cover per the v10.339-addendum recipe — boarded residual (ii));
+  -- `A_{a₁}` (board v10.339 finding 2 — no EGA IV §8).  Concretely (v10.340 + T-E4D; both
+  -- ForMathlib prerequisites LANDED this session — see below):
+  --   (3a) pick per-orbit-point atlas charts (`EllipticCurveGeom.atlas` / `LocalPresentation`;
+  --        the orbit is the fibre over `s`, `invariantsπ_apply_eq_iff`+`invariantsπ_surjective`)
+  --        and shrink to invariant-cover basic opens `D(fᵢ)` of `Spec L` (the `fᵢ` generate the
+  --        unit ideal of `L` — MaxSpec L = the orbit primes, closed-point covering argument).
+  --        Normalize the transition `u`-components to `1` via the SEMILOCAL UNIT-COCYCLE SPLIT
+  --        `SemilocalUnitSplit.exists_units_eq_mul_of_span_eq_top`
+  --        (ForMathlib/SemilocalUnitCocycleSplit, LANDED): the `transUnit` Čech cocycle
+  --        `uᵢⱼ = (transVC Pᵢ Pⱼ).u` splits as `uᵢⱼ = vᵢ/vⱼ` over the semilocal `L`
+  --        (`Finite (MaximalSpectrum L)`); rescale chart `i` by the `VariableChange`
+  --        `⟨vᵢ, 0, 0, 0⟩` (`projModelVCIso`).  This BYPASSES `OmegaBasis`/residual (i) — no
+  --        `QCoh ≃ Modules` bridge needed.  [Its ring side is proven modulo ONE mechanical
+  --        02M9-fibre lemma `finrank_quotient_tensor_gluedSubmodule`, route in its docstring.]
+  --        Vocabulary: transitions over `Γ(D(fᵢfⱼ)) ≅ Localization.Away (fᵢ*fⱼ)` enter the
+  --        join form via `isLocalizedModule_sup_of_powers_mul` / `…_sup_sup_of_powers_mul`.
+  --   (3b) after normalization the transVC cocycle lands in the nilpotent `T = {(1,r,s,t)}`
+  --        (central extension `0 → (L,+) → T → (L²,+) → 0`); split each additive layer over
+  --        the finite basic cover by the n-COVER AFFINE-ČECH `H¹` VANISHING
+  --        `IsLocalizedModule.exists_sub_liftOfLE_eq_of_span_eq_top`
+  --        (ForMathlib/AffineCechH1, LANDED axiom-clean; toolkit `liftOfLE_liftOfLE`,
+  --        `exists_liftOfLE_eq_pow_smul`, `exists_pow_smul_eq_zero_of_liftOfLE_eq_zero`):
+  --        first the `(r,s)`-layer (`M := L²` componentwise, or two scalar passes), then —
+  --        after correcting by the `(r,s)`-coboundary — the residual central `t`-layer.
   --   (3c) correct the charts (`pointedIso_hom_of_transVC_eq_one`), glue coefficients to
-  --        `W₀L / L` (structure-sheaf sheaf condition), spread them to a single `a₁ ∉ p`, and
-  --        glue the presentation over `A_{a₁}` (`Scheme.OpenCover.glueMorphisms` +
-  --        `glueMorphisms_hf_of_agree`; legs via `isPullback_projModelBaseChange` /
-  --        `projModelZero_baseChange`).
+  --        `W₀L / L` (structure-sheaf sheaf condition), spread them to a single `a₁ ∉ p`
+  --        (`fixedAwayMap` / `existsUnique_factor_fixedPoints_away` Part-2 pattern of
+  --        `exists_away_invariant_descent`), and glue the presentation over `A_{a₁}`
+  --        (`Scheme.OpenCover.glueMorphisms` + `glueMorphisms_hf_of_agree`; legs via
+  --        `isPullback_projModelBaseChange` / `projModelZero_baseChange`).
   -- Stages 4–5 are DONE: `exists_localModel_core_of_presentation` (Stage-4 consumption +
   -- `exists_coboundary_spread_away` + the `D(a₁) → D(aF)` shrink) closes the core from `hpres`.
   have hpres : ∃ (a₁ : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a₁ ∉ p)

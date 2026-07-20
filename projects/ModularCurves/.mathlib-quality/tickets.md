@@ -24288,3 +24288,21 @@ nonempty_omegaBasis_of_finite_maximalSpectrum carries OPEN hInv/hTriv hypotheses
 affine QCoh≃Modules trivialisation bridge — SemilocalOmegaBasis's own "Missing fact");
 (ii) AffineCechH1 is 2-cover only (n-cover extension = the triple-overlap bookkeeping).
 Stage-3 successor scope: (i) + (ii) + 3a ω-adaptation + 3c chart-correct+native-glue.
+
+### v10.343 progress — [T-E4D Stage-3 enablers] LANDED (2026-07-20)
+Residual (ii) CLOSED: AffineCechH1 extended to the FINITE BASIC COVER —
+IsLocalizedModule.exists_sub_liftOfLE_eq_of_span_eq_top AXIOM-CLEAN (uniform power
+clearing + triple-defect torsion-killing + partition-of-unity weighted average; toolkit
+liftOfLE_liftOfLE / exists_liftOfLE_eq_pow_smul / exists_pow_smul_eq_zero_of_liftOfLE_eq_zero
+/ isLocalizedModule_sup_sup_of_powers_mul, all clean). Residual (i) BYPASSED: OmegaBasis
+bridge off the critical path — NEW ForMathlib/SemilocalUnitCocycleSplit.lean (507L,
+SemilocalUnitSplit): gluedSubmodule + isLocalizedModule_gluedProj (the H⁰ quasi-coherence
+theorem, AXIOM-CLEAN) + nonempty_basis_gluedSubmodule (semilocal ⟹ rank-1 basis, Stacks
+02M9) + exists_units_eq_mul_of_span_eq_top (consumer-facing unit-cocycle split) — the last
+two carry sorryAx through ONE boarded mechanical leaf finrank_quotient_tensor_gluedSubmodule
+(:392, quotient⊗-plumbing, route in docstring). Search verdict logged: no affine
+QCoh↔module bridge in-tree or mathlib (explicit mathlib TODOs) — gap is real but bypassed.
+EngineDescent hpres frontier byte-stable; Stage-3 continuation comments repointed at the
+landed lemmas (3a: exists_units_eq_mul_of_span_eq_top ⟨vᵢ,0,0,0⟩-rescale; 3b: n-cover split
+×2 layers; 3c unchanged). Remaining mouth-core work: the 02M9 fibre leaf + Stage-3abc
+scheme assembly.
