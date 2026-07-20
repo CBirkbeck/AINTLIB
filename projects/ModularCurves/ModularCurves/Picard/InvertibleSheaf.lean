@@ -92,6 +92,14 @@ noncomputable def pullbackUnitIso (f : Y ⟶ X) :
 theorem isInvertible_unit : IsInvertible (unitObj X) :=
   ⟨PUnit, fun _ ↦ ⊤, iSup_const, fun _ ↦ ⟨pullbackUnitIso (⊤ : X.Opens).ι⟩⟩
 
+/-- Cover-local invertibility is preserved under isomorphism. -/
+theorem IsInvertible.of_iso {M N : X.Modules} (hM : IsInvertible M)
+    (e : N ≅ M) : IsInvertible N := by
+  obtain ⟨ι, U, hU, htriv⟩ := hM
+  refine ⟨ι, U, hU, fun i => ?_⟩
+  obtain ⟨eM⟩ := htriv i
+  exact ⟨(Modules.pullback (U i).ι).mapIso e ≪≫ eM⟩
+
 /-- Sheafification of the presheaf underlying a sheaf of modules is the sheaf itself
 (the counit of the sheafification adjunction, an isomorphism on sheaves). Stated over
 `SheafOfModules X.ringCatSheaf` (definitionally `X.Modules`): the `≅`-type must
