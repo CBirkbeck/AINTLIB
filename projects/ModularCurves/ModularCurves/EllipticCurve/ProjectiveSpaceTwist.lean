@@ -317,6 +317,28 @@ noncomputable def coordinateOpenTransitionUnit (i k : σ) :
         simpa [coordinateHyperplaneLocalEquation_self] using
           (coordinateHyperplaneLocalEquation_restrict_product (R := R) i k i).symm
 
+/-- The standard-chart transition unit, transported to the top ring of the
+overlap open subscheme. -/
+noncomputable def coordinateOpenTransitionTopUnit (i k : σ) :
+    Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+      (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))ˣ :=
+  Units.map
+    ((((coordinateOpenOverlap (R := R) i k).ι.appIso ⊤).hom.hom.comp
+      ((Proj (homogeneousSubmodule σ R)).presheaf.map
+        (eqToHom (coordinateOpenOverlap (R := R) i k).ι_image_top).op).hom).toMonoidHom)
+    (coordinateOpenTransitionUnit (R := R) i k)
+
+@[simp]
+lemma coordinateOpenTransitionTopUnit_coe (i k : σ) :
+    (coordinateOpenTransitionTopUnit (R := R) i k :
+      Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+        (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))) =
+      Scheme.Modules.openTopSection (coordinateOpenOverlap (R := R) i k)
+        (coordinateOpenTransitionUnit (R := R) i k :
+          Γ(Proj (homogeneousSubmodule σ R),
+            coordinateOpenOverlap (R := R) i k)) :=
+  rfl
+
 /-- On a standard-coordinate overlap, every coordinate-hyperplane local
 equation changes by the unit `X_k / X_i`. -/
 lemma coordinateHyperplaneLocalEquation_restrict_eq_transition_mul (i k j : σ) :
@@ -1015,6 +1037,89 @@ noncomputable def coordinateHyperplaneTwistTrivialization (i j : σ) :
   | .ofNat n => coordinateHyperplanePoleSheafPowerTrivialization (R := R) i j n
   | .negSucc n =>
       coordinateHyperplaneIdealModulePowerTrivialization i j (n + 1)
+
+private lemma coordinateOpenTransitionTopUnit_zpow_ofNat_coe (i k : σ) (n : ℕ) :
+    ((coordinateOpenTransitionTopUnit (R := R) i k ^ (.ofNat n : ℤ) :
+        Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+          (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))ˣ) :
+      Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+        (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))) =
+      Scheme.Modules.openTopSection (coordinateOpenOverlap (R := R) i k)
+        (coordinateOpenTransitionUnit (R := R) i k :
+          Γ(Proj (homogeneousSubmodule σ R),
+            coordinateOpenOverlap (R := R) i k)) ^ n := by
+  change (((coordinateOpenTransitionTopUnit (R := R) i k) ^ n :
+      Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+        (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))ˣ) :
+    Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+      (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))) = _
+  rw [Units.val_pow_eq_pow_val]
+  exact congrArg (fun q => q ^ n)
+    (coordinateOpenTransitionTopUnit_coe (R := R) i k)
+
+/-- On a coordinate overlap, the two standard frames of `O(d)` differ by the
+integer power of `X_k / X_i`. -/
+theorem coordinateHyperplaneTwistTrivialization_restrict_transition
+    (i k j : σ) : ∀ d : ℤ,
+    (Scheme.Modules.restrictOpenTrivialization
+        (coordinateOpenOverlap_le_left (R := R) i k)
+        (coordinateHyperplaneTwistTrivialization (R := R) i j d)).hom =
+      (Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_right (R := R) i k)
+          (coordinateHyperplaneTwistTrivialization (R := R) k j d)).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          ((coordinateOpenTransitionTopUnit (R := R) i k ^ d :
+              Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+                (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))ˣ) :
+            Γ((coordinateOpenOverlap (R := R) i k).toScheme,
+              (⊤ : (coordinateOpenOverlap (R := R) i k).toScheme.Opens))) := by
+  intro d
+  cases d with
+  | ofNat n =>
+      simpa only [coordinateHyperplaneTwistTrivialization,
+        coordinateHyperplaneTwist_ofNat,
+        coordinateOpenTransitionTopUnit_zpow_ofNat_coe] using
+        coordinateHyperplanePoleSheafPowerTrivialization_restrict_transition
+          (R := R) i k j n
+  | negSucc n =>
+      let U := coordinateOpenOverlap (R := R) i k
+      let t := coordinateOpenTransitionTopUnit (R := R) i k
+      let A := ModularCurves.unitAutomorphismOfTopUnit (t ^ (n + 1))
+      have h := coordinateHyperplaneIdealModulePowerTrivialization_restrict_transition
+        (R := R) i k j (n + 1)
+      have htPow :
+          ((t ^ (n + 1) : Γ(U.toScheme, (⊤ : U.toScheme.Opens))ˣ) :
+              Γ(U.toScheme, (⊤ : U.toScheme.Opens))) =
+            Scheme.Modules.openTopSection U
+              (coordinateOpenTransitionUnit (R := R) i k :
+                Γ(Proj (homogeneousSubmodule σ R), U)) ^ (n + 1) := by
+        rw [Units.val_pow_eq_pow_val]
+        exact congrArg (fun q => q ^ (n + 1))
+          (coordinateOpenTransitionTopUnit_coe (R := R) i k)
+      have hA :
+          (Scheme.Modules.restrictOpenTrivialization
+              (coordinateOpenOverlap_le_right (R := R) i k)
+              (coordinateHyperplaneTwistTrivialization
+                (R := R) k j (.negSucc n))).hom =
+            (Scheme.Modules.restrictOpenTrivialization
+                (coordinateOpenOverlap_le_left (R := R) i k)
+                (coordinateHyperplaneTwistTrivialization
+                  (R := R) i j (.negSucc n))).hom ≫ A.hom := by
+        change _ = _ ≫ ModularCurves.unitEndomorphismOfTopSection
+          ((t ^ (n + 1) : Γ(U.toScheme, (⊤ : U.toScheme.Opens))ˣ) :
+            Γ(U.toScheme, (⊤ : U.toScheme.Opens)))
+        rw [htPow]
+        exact h
+      have hInv : A.inv =
+          ModularCurves.unitEndomorphismOfTopSection
+            ((coordinateOpenTransitionTopUnit (R := R) i k ^
+                (.negSucc n : ℤ) :
+              Γ(U.toScheme, (⊤ : U.toScheme.Opens))ˣ) :
+                Γ(U.toScheme, (⊤ : U.toScheme.Opens))) := by
+        simp only [A, t, ModularCurves.unitAutomorphismOfTopUnit_inv]
+        rw [zpow_negSucc]
+      rw [← hInv, hA]
+      simp only [Category.assoc, A.hom_inv_id, Category.comp_id]
 
 /-- Every integer twist `O(d)` is invertible. -/
 theorem coordinateHyperplaneTwist_isInvertible (j : σ) (d : ℤ) :
