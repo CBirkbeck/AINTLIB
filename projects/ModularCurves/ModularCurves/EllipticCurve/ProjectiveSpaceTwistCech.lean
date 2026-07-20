@@ -31,6 +31,18 @@ abbrev coordinateOpenCover (i : ULift.{u} σ) :
     (Proj (homogeneousSubmodule σ R)).Opens :=
   coordinateOpen (R := R) i.down
 
+/-- Every member of the universe-lifted standard coordinate cover is affine. -/
+theorem coordinateOpenCover_isAffineOpen (i : ULift.{u} σ) :
+    IsAffineOpen (coordinateOpenCover (R := R) i) :=
+  coordinateOpen_isAffineOpen i.down
+
+/-- The universe-lifted standard coordinate opens cover projective space. -/
+theorem iSup_coordinateOpenCover_eq_top :
+    ⨆ i : ULift.{u} σ, coordinateOpenCover (R := R) i = ⊤ := by
+  apply top_unique
+  rw [← iSup_coordinateOpen_eq_top (R := R)]
+  exact iSup_le fun i => le_iSup (coordinateOpenCover (R := R)) (ULift.up i)
+
 /-- The intersection of the standard coordinate charts indexed by a Cech tuple. -/
 abbrev coordinateOpenCechIntersection {n : ℕ}
     (a : Fin (n + 1) → ULift.{u} σ) :
