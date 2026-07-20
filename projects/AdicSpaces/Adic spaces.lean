@@ -101,6 +101,7 @@ import «Adic spaces».SheafyPair
 import «Adic spaces».SheafyRing
 import «Adic spaces».StandardRefinement
 import «Adic spaces».StandardDescent
+import «Adic spaces».RelativeDescent
 import «Adic spaces».StructurePresheafBundled
 import «Adic spaces».AdicSpaceMorphisms
 import «Adic spaces».StructureSheaf
