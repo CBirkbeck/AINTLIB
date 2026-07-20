@@ -1218,6 +1218,162 @@ theorem coordinateOpenCechFirstTransition_laurent [LinearOrder σ] {n : ℕ}
   rw [AddMonoidAlgebra.mapDomain_single]
   rfl
 
+private theorem coordinateOpenCechFirstSecond_ne [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
+    (a.1 1).down ≠ (a.1 0).down := by
+  intro h
+  have ha : a.1 1 = a.1 0 := ULift.ext _ _ h
+  exact one_ne_zero (a.2.injective ha)
+
+/-- The local Laurent exponent of an integer power of the first transition unit. -/
+noncomputable def coordinateOpenCechFirstTransitionExponent [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
+    ℤ →+ laurentExponentSubmonoid
+      (coordinateTailExponent (fun k => (a.1 k).down)) where
+  toFun d := ⟨Finsupp.single
+    (⟨(a.1 1).down, coordinateOpenCechFirstSecond_ne a⟩ :
+      {j : σ // j ≠ (a.1 0).down}) d, by
+    intro i hi
+    by_cases hij : i =
+        (⟨(a.1 1).down, coordinateOpenCechFirstSecond_ne a⟩ :
+          {j : σ // j ≠ (a.1 0).down})
+    · subst i
+      exact (coordinateTailExponent_ne_zero_iff
+        (fun k => (a.1 k).down)
+        (⟨(a.1 1).down, coordinateOpenCechFirstSecond_ne a⟩ :
+          {j : σ // j ≠ (a.1 0).down})).2 ⟨1, rfl⟩
+    · simp [hij] at hi⟩
+  map_zero' := by
+    apply Subtype.ext
+    simp
+  map_add' d e := by
+    apply Subtype.ext
+    simp
+
+private noncomputable def coordinateOpenCechFirstTransitionLaurentUnit
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
+    (AddMonoidAlgebra R
+      (laurentExponentSubmonoid
+        (coordinateTailExponent (fun k => (a.1 k).down))))ˣ where
+  val := AddMonoidAlgebra.single
+    (coordinateOpenCechFirstTransitionExponent (n := n) a 1) 1
+  inv := AddMonoidAlgebra.single
+    (coordinateOpenCechFirstTransitionExponent (n := n) a (-1)) 1
+  val_inv := by
+    rw [AddMonoidAlgebra.single_mul_single, ← map_add]
+    norm_num
+    exact AddMonoidAlgebra.one_def.symm
+  inv_val := by
+    rw [AddMonoidAlgebra.single_mul_single, ← map_add]
+    norm_num
+    exact AddMonoidAlgebra.one_def.symm
+
+private lemma coordinateOpenCechFirstTransitionLaurentUnit_zpow_val
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ) :
+    ((coordinateOpenCechFirstTransitionLaurentUnit (R := R) (n := n) a ^ d :
+        (AddMonoidAlgebra R
+          (laurentExponentSubmonoid
+            (coordinateTailExponent (fun k => (a.1 k).down))))ˣ) :
+      AddMonoidAlgebra R
+        (laurentExponentSubmonoid
+          (coordinateTailExponent (fun k => (a.1 k).down)))) =
+      AddMonoidAlgebra.single
+        (coordinateOpenCechFirstTransitionExponent (n := n) a d) 1 := by
+  cases d with
+  | ofNat m =>
+      calc
+        _ = (↑((coordinateOpenCechFirstTransitionLaurentUnit
+            (R := R) (n := n) a) ^ m) :
+            AddMonoidAlgebra R
+              (laurentExponentSubmonoid
+                (coordinateTailExponent (fun k => (a.1 k).down)))) :=
+          congrArg Units.val
+            (zpow_natCast
+              (coordinateOpenCechFirstTransitionLaurentUnit
+                (R := R) (n := n) a) m)
+        _ = _ := by
+          rw [Units.val_pow_eq_pow_val]
+          change (AddMonoidAlgebra.single
+            (coordinateOpenCechFirstTransitionExponent (n := n) a 1) 1) ^ m = _
+          rw [AddMonoidAlgebra.single_pow, one_pow, ← map_nsmul]
+          congr
+          simp
+  | negSucc m =>
+      rw [zpow_negSucc, ← inv_pow, Units.val_pow_eq_pow_val]
+      change (AddMonoidAlgebra.single
+        (coordinateOpenCechFirstTransitionExponent (n := n) a (-1)) 1) ^ (m + 1) = _
+      rw [AddMonoidAlgebra.single_pow, one_pow, ← map_nsmul]
+      congr
+      simp [Int.negSucc_eq]
+
+/-- The Laurent image of an integer power of the first transition unit is the corresponding
+single Laurent monomial. -/
+theorem coordinateOpenCechFirstTransition_zpow_laurent
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ) :
+    coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a.1
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+            (R := R) a)).op
+          ((coordinateOpenTransitionUnit
+              (R := R) (a.1 0).down (a.1 1).down ^ d :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))) =
+      AddMonoidAlgebra.single
+        (coordinateOpenCechFirstTransitionExponent (n := n) a d) 1 := by
+  let f := (coordinateOpenCechIntersectionLaurentRingEquiv
+      (R := R) a.1).toRingHom.comp
+    ((Proj (homogeneousSubmodule σ R)).presheaf.map
+      (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+        (R := R) a)).op).hom
+  let t := coordinateOpenTransitionUnit
+    (R := R) (a.1 0).down (a.1 1).down
+  have ht : Units.map f.toMonoidHom t =
+      coordinateOpenCechFirstTransitionLaurentUnit (R := R) (n := n) a := by
+    apply Units.ext
+    change coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a.1
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+            (R := R) a)).op
+          (coordinateOpenTransitionUnit
+            (R := R) (a.1 0).down (a.1 1).down :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))) = _
+    rw [coordinateOpenCechFirstTransition_laurent]
+    apply congrArg (fun e => AddMonoidAlgebra.single e (1 : R))
+    apply Subtype.ext
+    ext i
+    rw [laurentExponentAwayMap_apply]
+    let j : {j : σ // j ≠ (a.1 0).down} :=
+      ⟨(a.1 1).down, coordinateOpenCechFirstSecond_ne (n := n) a⟩
+    change ((Finsupp.single j 1 i : ℕ) : ℤ) = Finsupp.single j 1 i
+    by_cases hi : i = j
+    · subst i
+      simp
+    · simp [hi]
+  change f ((t ^ d :
+    Γ(Proj (homogeneousSubmodule σ R),
+      coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) : _) = _
+  calc
+    _ = (↑(Units.map f.toMonoidHom (t ^ d)) :
+        AddMonoidAlgebra R
+          (laurentExponentSubmonoid
+            (coordinateTailExponent (fun k => (a.1 k).down)))) :=
+      (Units.coe_map f.toMonoidHom (t ^ d)).symm
+    _ = (↑((Units.map f.toMonoidHom t) ^ d) :
+        AddMonoidAlgebra R
+          (laurentExponentSubmonoid
+            (coordinateTailExponent (fun k => (a.1 k).down)))) := by
+      exact congrArg Units.val ((Units.map f.toMonoidHom).map_zpow t d)
+    _ = _ := by
+      simpa only [ht] using
+        (coordinateOpenCechFirstTransitionLaurentUnit_zpow_val
+          (R := R) (n := n) a d)
+
 private noncomputable def coordinateOpenCechFirstTransitionRingHom
     [LinearOrder σ] {n : ℕ}
     (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
