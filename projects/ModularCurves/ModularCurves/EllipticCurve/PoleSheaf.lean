@@ -2300,6 +2300,101 @@ theorem pullbackComp_monoidalUnitIso
   slice_rhs 2 3 => erw [Functor.Monoidal.map_ε_η]
   simp
 
+/-- A monoidal comparison between two composite pullbacks preserves the
+canonical tensor frame induced by two monoidal-unit-valued frames. -/
+theorem pullbackComp_monoidalTensorTrivialization
+    {X T U : Scheme.{u}} (f : T ⟶ X) (g : U ⟶ T) (h : U ⟶ X)
+    (α : Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g ≅
+      Scheme.Modules.pullback h) [α.hom.IsMonoidal]
+    (M N : X.Modules)
+    (e : (Scheme.Modules.pullback f).obj M ≅ 𝟙_ T.Modules)
+    (d : (Scheme.Modules.pullback f).obj N ≅ 𝟙_ T.Modules) :
+    (Functor.Monoidal.μIso (Scheme.Modules.pullback h) M N).symm ≪≫
+        (((α.app M).symm ≪≫ (Scheme.Modules.pullback g).mapIso e ≪≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm) ⊗ᵢ
+          ((α.app N).symm ≪≫ (Scheme.Modules.pullback g).mapIso d ≪≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm)) ≪≫
+        λ_ (𝟙_ U.Modules) =
+      (α.app (M ⊗ N)).symm ≪≫
+        (Scheme.Modules.pullback g).mapIso
+          ((Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+            (e ⊗ᵢ d) ≪≫ λ_ (𝟙_ T.Modules)) ≪≫
+        (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm := by
+  apply Iso.ext
+  simp only [Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom,
+    MonoidalCategory.tensorIso_hom]
+  have htensor := NatTrans.IsMonoidal.tensor (τ := α.hom) M N
+  change (Functor.Monoidal.μIso
+      (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g) M N).hom ≫
+        (α.app (M ⊗ N)).hom =
+    ((α.app M).hom ⊗ₘ (α.app N).hom) ≫
+      (Functor.Monoidal.μIso (Scheme.Modules.pullback h) M N).hom at htensor
+  have hhom_delta :
+      (α.app (M ⊗ N)).hom ≫
+          Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h) M N =
+        Functor.OplaxMonoidal.δ
+            (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g) M N ≫
+          ((α.app M).hom ⊗ₘ (α.app N).hom) := by
+    apply (cancel_epi (Functor.Monoidal.μIso
+      (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g) M N).hom).1
+    slice_lhs 1 2 => rw [htensor]
+    slice_lhs 2 3 => erw [Functor.Monoidal.μ_δ]
+    slice_rhs 1 2 => erw [Functor.Monoidal.μ_δ]
+    simp
+  have hinv_delta :
+      (α.app (M ⊗ N)).inv ≫
+          Functor.OplaxMonoidal.δ
+            (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g) M N =
+        Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h) M N ≫
+          ((α.app M).inv ⊗ₘ (α.app N).inv) := by
+    apply (cancel_epi (α.app (M ⊗ N)).hom).1
+    slice_lhs 1 2 => erw [(α.app (M ⊗ N)).hom_inv_id]
+    rw [Category.id_comp]
+    slice_rhs 1 2 => rw [hhom_delta]
+    slice_rhs 2 3 => erw [MonoidalCategory.tensorHom_comp_tensorHom]
+    simp
+  let p := e.hom
+  let q := d.hom
+  let etaG := Functor.OplaxMonoidal.η (Scheme.Modules.pullback g)
+  have hunit_tensor :
+      Functor.OplaxMonoidal.δ (Scheme.Modules.pullback g)
+          (𝟙_ T.Modules) (𝟙_ T.Modules) ≫
+          (etaG ⊗ₘ etaG) ≫ (λ_ (𝟙_ U.Modules)).hom =
+        (Scheme.Modules.pullback g).map (λ_ (𝟙_ T.Modules)).hom ≫ etaG := by
+    dsimp only [etaG]
+    rw [tensorHom_def]
+    simp only [Category.assoc]
+    rw [MonoidalCategory.leftUnitor_naturality]
+    rw [Functor.OplaxMonoidal.left_unitality_hom_assoc]
+  have hchain :
+      (((α.app M).inv ≫ (Scheme.Modules.pullback g).map p ≫ etaG) ⊗ₘ
+          ((α.app N).inv ≫ (Scheme.Modules.pullback g).map q ≫ etaG)) =
+        ((α.app M).inv ⊗ₘ (α.app N).inv) ≫
+          ((Scheme.Modules.pullback g).map p ⊗ₘ
+            (Scheme.Modules.pullback g).map q) ≫ (etaG ⊗ₘ etaG) := by
+    rw [MonoidalCategory.tensorHom_comp_tensorHom]
+    rw [MonoidalCategory.tensorHom_comp_tensorHom]
+  change
+    Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h) M N ≫
+          (((α.app M).inv ≫
+              (Scheme.Modules.pullback g).map p ≫ etaG) ⊗ₘ
+            ((α.app N).inv ≫
+              (Scheme.Modules.pullback g).map q ≫ etaG)) ≫
+          (λ_ (𝟙_ U.Modules)).hom =
+      (α.app (M ⊗ N)).inv ≫
+        (Scheme.Modules.pullback g).map
+          (Functor.OplaxMonoidal.δ (Scheme.Modules.pullback f) M N ≫
+            (p ⊗ₘ q) ≫ (λ_ (𝟙_ T.Modules)).hom) ≫ etaG
+  rw [hchain]
+  simp only [Category.assoc]
+  slice_lhs 1 2 => rw [← hinv_delta]
+  rw [Functor.OplaxMonoidal.comp_δ]
+  slice_lhs 3 4 => erw [Functor.OplaxMonoidal.δ_natural]
+  slice_lhs 4 6 => rw [hunit_tensor]
+  simp only [Functor.map_comp]
+  erw [Category.assoc]
+  erw [Category.assoc]
+
 /-- Monoidal pullback composition commutes with the recursively induced
 tensor-power trivializations. -/
 private theorem sectionPoleSheafPowerPullbackMonoidalTrivialization_comp
@@ -2324,108 +2419,14 @@ private theorem sectionPoleSheafPowerPullbackMonoidalTrivialization_comp
         sectionPoleSheafPower] using
         pullbackComp_monoidalUnitIso f g h α
   | n + 1 => by
-      apply Iso.ext
       simp only [sectionPoleSheafPowerPullbackMonoidalTrivialization,
-        sectionPoleSheafPower, Iso.trans_hom, Iso.symm_hom,
-        Functor.mapIso_hom, MonoidalCategory.tensorIso_hom]
+        sectionPoleSheafPower]
       rw [sectionPoleSheafPowerPullbackMonoidalTrivialization_comp
         z hz f g h α e n]
-      have htensor := NatTrans.IsMonoidal.tensor (τ := α.hom)
-        (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)
-      change (Functor.Monoidal.μIso
-          (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
-          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).hom ≫
-            (α.app (sectionPoleSheafPower π z hz n ⊗
-              sectionPoleSheaf π z hz)).hom =
-        ((α.app (sectionPoleSheafPower π z hz n)).hom ⊗ₘ
-            (α.app (sectionPoleSheaf π z hz)).hom) ≫
-          (Functor.Monoidal.μIso (Scheme.Modules.pullback h)
-            (sectionPoleSheafPower π z hz n)
-              (sectionPoleSheaf π z hz)).hom at htensor
-      have hhom_delta :
-          (α.app (sectionPoleSheafPower π z hz n ⊗
-              sectionPoleSheaf π z hz)).hom ≫
-              Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h)
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) =
-            Functor.OplaxMonoidal.δ
-                (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
-              ((α.app (sectionPoleSheafPower π z hz n)).hom ⊗ₘ
-                (α.app (sectionPoleSheaf π z hz)).hom) := by
-        apply (cancel_epi (Functor.Monoidal.μIso
-          (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
-          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).hom).1
-        slice_lhs 1 2 => rw [htensor]
-        slice_lhs 2 3 => erw [Functor.Monoidal.μ_δ]
-        slice_rhs 1 2 => erw [Functor.Monoidal.μ_δ]
-        simp
-      have hinv_delta :
-          (α.app (sectionPoleSheafPower π z hz n ⊗
-              sectionPoleSheaf π z hz)).inv ≫
-              Functor.OplaxMonoidal.δ
-                (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) =
-            Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h)
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
-              ((α.app (sectionPoleSheafPower π z hz n)).inv ⊗ₘ
-                (α.app (sectionPoleSheaf π z hz)).inv) := by
-        apply (cancel_epi (α.app (sectionPoleSheafPower π z hz n ⊗
-          sectionPoleSheaf π z hz)).hom).1
-        slice_lhs 1 2 => erw [(α.app (sectionPoleSheafPower π z hz n ⊗
-          sectionPoleSheaf π z hz)).hom_inv_id]
-        rw [Category.id_comp]
-        slice_rhs 1 2 => rw [hhom_delta]
-        slice_rhs 2 3 => erw [MonoidalCategory.tensorHom_comp_tensorHom]
-        simp
-      let p :=
-        (sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f e n).hom
-      let q := e.hom
-      let etaG := Functor.OplaxMonoidal.η (Scheme.Modules.pullback g)
-      have hunit_tensor :
-          Functor.OplaxMonoidal.δ (Scheme.Modules.pullback g)
-              (𝟙_ T.Modules) (𝟙_ T.Modules) ≫
-              (etaG ⊗ₘ etaG) ≫ (λ_ (𝟙_ U.Modules)).hom =
-            (Scheme.Modules.pullback g).map (λ_ (𝟙_ T.Modules)).hom ≫
-              etaG := by
-        dsimp only [etaG]
-        rw [tensorHom_def]
-        simp only [Category.assoc]
-        rw [MonoidalCategory.leftUnitor_naturality]
-        rw [Functor.OplaxMonoidal.left_unitality_hom_assoc]
-      have hchain :
-          (((α.app (sectionPoleSheafPower π z hz n)).inv ≫
-                (Scheme.Modules.pullback g).map p ≫ etaG) ⊗ₘ
-              ((α.app (sectionPoleSheaf π z hz)).inv ≫
-                (Scheme.Modules.pullback g).map q ≫ etaG)) =
-            ((α.app (sectionPoleSheafPower π z hz n)).inv ⊗ₘ
-              (α.app (sectionPoleSheaf π z hz)).inv) ≫
-              ((Scheme.Modules.pullback g).map p ⊗ₘ
-                (Scheme.Modules.pullback g).map q) ≫ (etaG ⊗ₘ etaG) := by
-        rw [MonoidalCategory.tensorHom_comp_tensorHom]
-        rw [MonoidalCategory.tensorHom_comp_tensorHom]
-      change
-        Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h)
-              (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
-              (((α.app (sectionPoleSheafPower π z hz n)).inv ≫
-                  (Scheme.Modules.pullback g).map p ≫ etaG) ⊗ₘ
-                ((α.app (sectionPoleSheaf π z hz)).inv ≫
-                  (Scheme.Modules.pullback g).map q ≫ etaG)) ≫
-              (λ_ (𝟙_ U.Modules)).hom =
-          (α.app (sectionPoleSheafPower π z hz n ⊗
-              sectionPoleSheaf π z hz)).inv ≫
-            (Scheme.Modules.pullback g).map
-              (Functor.OplaxMonoidal.δ (Scheme.Modules.pullback f)
-                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
-              (p ⊗ₘ q) ≫ (λ_ (𝟙_ T.Modules)).hom) ≫ etaG
-      rw [hchain]
-      simp only [Category.assoc]
-      slice_lhs 1 2 => rw [← hinv_delta]
-      rw [Functor.OplaxMonoidal.comp_δ]
-      slice_lhs 3 4 => erw [Functor.OplaxMonoidal.δ_natural]
-      slice_lhs 4 6 => rw [hunit_tensor]
-      simp only [Functor.map_comp]
-      erw [Category.assoc]
-      erw [Category.assoc]
+      simpa only [sectionPoleSheafPowerCompMonoidalTrivialization] using
+        pullbackComp_monoidalTensorTrivialization f g h α
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)
+          (sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f e n) e
 
 /-- Converting the monoidal-unit pullback trivialization to the structure sheaf
 recovers the direct pullback trivialization. -/
