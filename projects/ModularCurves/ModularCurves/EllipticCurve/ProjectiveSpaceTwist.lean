@@ -16,7 +16,7 @@ of `O(-1)` used in the standard-cover cohomology calculation.
 
 namespace MvPolynomial
 
-open AlgebraicGeometry HomogeneousIdeal
+open AlgebraicGeometry CategoryTheory HomogeneousIdeal MonoidalCategory
 
 noncomputable section
 
@@ -25,6 +25,9 @@ universe u
 variable {R : Type u} {σ : Type} [CommRing R]
 
 attribute [local instance] MvPolynomial.gradedAlgebra
+
+noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+  Scheme.Modules.monoidalCategory X
 
 /-- The ideal module of a coordinate hyperplane is invertible. This is the
 concrete model of `O(-1)` on polynomial projective space. -/
@@ -159,6 +162,59 @@ noncomputable def coordinateHyperplanePoleSheafTrivialization (i j : σ) :
     (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
     (coordinateOpen (R := R) i)
     (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+
+/-- The nonnegative twists `O(n)` obtained as monoidal powers of the concrete
+coordinate-hyperplane `O(1)`. -/
+noncomputable def coordinateHyperplanePoleSheafPower (j : σ) :
+    ℕ → (Proj (homogeneousSubmodule σ R)).Modules
+  | 0 => 𝟙_ (Proj (homogeneousSubmodule σ R)).Modules
+  | n + 1 => coordinateHyperplanePoleSheafPower j n ⊗
+      coordinateHyperplanePoleSheaf (R := R) j
+
+@[simp]
+lemma coordinateHyperplanePoleSheafPower_zero (j : σ) :
+    coordinateHyperplanePoleSheafPower (R := R) j 0 =
+      𝟙_ (Proj (homogeneousSubmodule σ R)).Modules :=
+  rfl
+
+@[simp]
+lemma coordinateHyperplanePoleSheafPower_succ (j : σ) (n : ℕ) :
+    coordinateHyperplanePoleSheafPower (R := R) j (n + 1) =
+      coordinateHyperplanePoleSheafPower (R := R) j n ⊗
+        coordinateHyperplanePoleSheaf (R := R) j :=
+  rfl
+
+/-- The compatible standard-chart frame of the nonnegative twist `O(n)`. -/
+noncomputable def coordinateHyperplanePoleSheafPowerTrivialization
+    (i j : σ) : ∀ n : ℕ,
+      (coordinateHyperplanePoleSheafPower (R := R) j n).restrict
+          (coordinateOpen (R := R) i).ι ≅
+        Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme
+  | 0 => ModularCurves.restrictMonoidalUnitIso
+        (coordinateOpen (R := R) i).ι ≪≫
+      ModularCurves.monoidalUnitObjIso (coordinateOpen (R := R) i).toScheme
+  | n + 1 =>
+      ModularCurves.restrictMonoidalTensorIso
+          (coordinateOpen (R := R) i).ι
+          (coordinateHyperplanePoleSheafPower (R := R) j n)
+          (coordinateHyperplanePoleSheaf (R := R) j) ≪≫
+        (coordinateHyperplanePoleSheafPowerTrivialization i j n ⊗ᵢ
+          coordinateHyperplanePoleSheafTrivialization (R := R) i j) ≪≫
+        ModularCurves.unitObjTensorIso (coordinateOpen (R := R) i).toScheme
+
+/-- Every nonnegative coordinate-hyperplane twist `O(n)` is invertible. -/
+theorem coordinateHyperplanePoleSheafPower_isInvertible (j : σ) (n : ℕ) :
+    Scheme.Modules.IsInvertible
+      (coordinateHyperplanePoleSheafPower (R := R) j n) := by
+  induction n with
+  | zero =>
+      exact Scheme.Modules.isInvertible_unit.of_iso
+        (ModularCurves.monoidalUnitObjIso
+          (Proj (homogeneousSubmodule σ R)))
+  | succ n ih =>
+      exact (ih.tensorObj
+        (coordinateHyperplanePoleSheaf_isInvertible (R := R) j)).of_iso
+          (ModularCurves.monoidalTensorObjIso _ _)
 
 end
 
