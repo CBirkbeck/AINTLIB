@@ -1492,3 +1492,70 @@ engine; the following are NOT done and are hereby reopened):
   expose `IsAdicMorphism`); StructureSheaf.lean header fixes; archive
   beastmode_active + stale live-audit; universe policy note for the test-ring
   quantifier.
+
+---
+
+# STATUS UPDATE — 2026-07-20 continuation (base b84a29333, commits 5adba8640…34b3a6c71)
+
+## Landed this pass (all axiom-clean {propext, Classical.choice, Quot.sound}, full build green 3296 jobs)
+
+- **P0 (5adba8640)** — DONE: `PresentationIsAdicMorphism` rename (8.38 claims removed;
+  `IsAdicMorphism` reserved for the future V-object predicate),
+  `ringHom_isAdic_of_charts_analytic_preserved` de-labelled (unused hyp removed),
+  `IsPerfectoidSpacePresentation` rename, four end-to-end wrappers
+  (`SheafyEndpoints.lean`), `structurePresheaf_isSheafOfTopologicalRings_iff`
+  + deprecation note, citation fixes (RelativeDescent → 8.1/8.2(2)/8.4;
+  RestrictedPowerSeries §5.6; SheafyRing no "verbatim").
+- **P2.11 (04a72bcf7)** — DONE: `CompletionModelIndependence.lean` —
+  `mem_locNhd_globalLocData`, `locTopology_globalLocData_eq` (whole-space
+  localization topology is pair-independent), `completionModelCompare` +
+  `_continuous`/`_symm_continuous`/`_canonicalMap` requiring ONLY
+  [CommRing][TopologicalSpace][IsTopologicalRing][IsHuberRing] — no PlusSubring,
+  no HasLocLiftPowerBounded, no IsNoetherianRing, no CompatiblePlusSubring,
+  no CompleteSpace. Old restriction-based compare deleted from SheafyRing.lean.
+- **P2.14 (04a72bcf7)** — DONE: hypothesis drops in StronglyNoetherianTransport
+  (`isStronglyNoetherian_congr` duplicate binders;
+  `completionModel_isStronglyNoetherian_congr`,
+  `isSheafyTateRing_of_stronglyNoetherianTateRing`,
+  `isStronglyNoetherianTateRing_iff_forall` now PlusSubring/HasLocLift-free).
+  → **T-P3-SN-WRAPPER is now fully CLOSED** (∃-model predicate + clean transport
+  + one-model wrapper + 6.36 citations all landed).
+- **P2.12 partial (0e28746ab, 3ab4ce9d7)** — `AffinoidTransport.lean`:
+  `IsBounded.image`, `IsPowerBounded.ringEquiv` (honest; the sorried
+  `IsPowerBounded.map` for mere continuous homs is untouched and unused),
+  `IsRingOfIntegralElements.map`, `RingOfIntegralElements.map/map_symm_map/congr`,
+  `comap_mem_spa_map`/`comap_symm_mem_spa_map`, Spv roundtrips,
+  `spaHomeomorphOfRingEquiv : Spa (B, e(P)) ≃ₜ Spa (A, P)`,
+  `RingOfIntegralElements.spaHomeomorph`.
+- **Root wiring (34b3a6c71)** — SheafyEndpoints, CompletionModelIndependence,
+  AffinoidTransport added to the lib root imports (they were not being built by
+  `lake build 'Adic spaces'`). ScottishBook Problems 002/025/026 track the
+  IsPerfectoidSpacePresentation rename.
+
+## Remaining blockers (NOT delivered; do not re-mark as done)
+
+- **T-P2-COMPLETION-MODEL rest = P2.12 deep half + P2.13**: `RationalLocData`
+  transport along a bicontinuous equivalence (datum image + matched localization
+  topologies + presheafValue equivalence, i.e. a *relative* analogue of
+  `completionModelCompare` for arbitrary data), the structurePresheaf natural
+  isomorphism over `spaHomeomorphOfRingEquiv`, and `IsSheafyFor`/`IsSheafyComplete`
+  invariance. The three P2.13 iffs (`isSheafyTateRing_iff_for_completionModel`,
+  `_iff_exists_completionModel`, `_iff_isSheafyComplete`) all reduce to that
+  invariance applied to `completionModelCompare` — no shortcut exists.
+- **T-P1-APLUS-INDEP (P1.6–1.10)**: still blocked on (a) the image-identification
+  half of `Spa_presheafValue_eq_rationalOpen` (SpaPresheafValueEquivalence.lean —
+  the valuation-extension localization→completion step, Wedhorn 7.47-level;
+  the localization-level extension `valuationLocalizationLift_of_bounded` and its
+  continuity ARE proven), and (b) Kedlaya Ex 1.2.2 approximation over complete
+  Tate B (dense-image parameter perturbation + common-denominator clearing).
+  Without these, arbitrary B-rational data have no A-side realization, so
+  `hasStandardRefinements` stays conditional.
+- **P3 (unconditional FJP ring-level endpoints)**: `finiteJet_isSheafyComplete` /
+  `finiteJet_isSheafyTateRing` unconditional forms are blocked on P1 (the
+  conditional `finiteJet_isSheafyComplete_of_hasStandardRefinements` is the
+  honest current state; JetA F is non-noetherian so no strongly-noetherian
+  bypass exists).
+- **T-P5-V-LAYER / P4**: genuine V-object restriction + stalk-valuation layer
+  (Wedhorn Prop 8.6) for the limit presheaf, then the real
+  `ValuationSpectrum.IsAdicMorphism` on adic spaces (name deliberately still
+  absent; `PresentationIsAdicMorphism` is the honest placeholder).
