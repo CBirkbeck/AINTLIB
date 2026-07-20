@@ -786,6 +786,64 @@ theorem coordinateHyperplanePoleSheafPower_isInvertible (j : σ) (n : ℕ) :
         (coordinateHyperplanePoleSheaf_isInvertible (R := R) j)).of_iso
           (ModularCurves.monoidalTensorObjIso _ _)
 
+/-- On a coordinate overlap, the two `O(n)` frames differ by the `n`th power
+of `X_k / X_i`. -/
+theorem coordinateHyperplanePoleSheafPowerTrivialization_restrict_transition
+    (i k j : σ) (n : ℕ) :
+    (Scheme.Modules.restrictOpenTrivialization
+        (coordinateOpenOverlap_le_left (R := R) i k)
+        (coordinateHyperplanePoleSheafPowerTrivialization
+          (R := R) i j n)).hom =
+      (Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_right (R := R) i k)
+          (coordinateHyperplanePoleSheafPowerTrivialization
+            (R := R) k j n)).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          ((Scheme.Modules.openTopSection
+            (coordinateOpenOverlap (R := R) i k)
+            (coordinateOpenTransitionUnit (R := R) i k :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) i k))) ^ n) := by
+  let U := coordinateOpenOverlap (R := R) i k
+  let eI := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_left (R := R) i k)
+    (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
+  let eK := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_right (R := R) i k)
+    (coordinateHyperplanePoleSheafTrivialization (R := R) k j)
+  let r := Scheme.Modules.openTopSection U
+    (coordinateOpenTransitionUnit (R := R) i k :
+      Γ(Proj (homogeneousSubmodule σ R), U))
+  have hbase : eI.hom = eK.hom ≫
+      ModularCurves.unitEndomorphismOfTopSection r := by
+    exact coordinateHyperplanePoleSheafTrivialization_restrict_transition i k j
+  have hpower := ModularCurves.recursiveTensorTrivialization_hom_eq_comp_scalar U
+    (fun e n => coordinateHyperplanePoleSheafPowerTrivializationOf U j e n)
+    (fun n => ModularCurves.restrictMonoidalTensorIso U.ι
+      (coordinateHyperplanePoleSheafPower (R := R) j n)
+      (coordinateHyperplanePoleSheaf (R := R) j))
+    (fun _ _ => rfl) (fun _ _ => rfl) eI eK r hbase n
+  have hI :
+      Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_left (R := R) i k)
+          (coordinateHyperplanePoleSheafPowerTrivialization
+            (R := R) i j n) =
+        coordinateHyperplanePoleSheafPowerTrivializationOf U j eI n := by
+    exact coordinateHyperplanePoleSheafPowerTrivializationOf_restrictOpen
+      (coordinateOpenOverlap_le_left (R := R) i k) j
+        (coordinateHyperplanePoleSheafTrivialization (R := R) i j) n
+  have hK :
+      Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_right (R := R) i k)
+          (coordinateHyperplanePoleSheafPowerTrivialization
+            (R := R) k j n) =
+        coordinateHyperplanePoleSheafPowerTrivializationOf U j eK n := by
+    exact coordinateHyperplanePoleSheafPowerTrivializationOf_restrictOpen
+      (coordinateOpenOverlap_le_right (R := R) i k) j
+        (coordinateHyperplanePoleSheafTrivialization (R := R) k j) n
+  rw [hI, hK]
+  exact hpower
+
 /-- The nonnegative powers of the concrete coordinate-hyperplane `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModulePower (j : σ) :
     ℕ → (Proj (homogeneousSubmodule σ R)).Modules
@@ -870,6 +928,64 @@ theorem coordinateHyperplaneIdealModulePower_isInvertible (j : σ) (n : ℕ) :
       exact (ih.tensorObj
         (coordinateHyperplaneIdealModule_isInvertible (R := R) j)).of_iso
           (ModularCurves.monoidalTensorObjIso _ _)
+
+/-- On a coordinate overlap, the two `O(-n)` frames differ by the `n`th power
+of `X_k / X_i`, in the orientation of the `O(-1)` generator frames. -/
+theorem coordinateHyperplaneIdealModulePowerTrivialization_restrict_transition
+    (i k j : σ) (n : ℕ) :
+    (Scheme.Modules.restrictOpenTrivialization
+        (coordinateOpenOverlap_le_right (R := R) i k)
+        (coordinateHyperplaneIdealModulePowerTrivialization
+          (R := R) k j n)).hom =
+      (Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_left (R := R) i k)
+          (coordinateHyperplaneIdealModulePowerTrivialization
+            (R := R) i j n)).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          ((Scheme.Modules.openTopSection
+            (coordinateOpenOverlap (R := R) i k)
+            (coordinateOpenTransitionUnit (R := R) i k :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) i k))) ^ n) := by
+  let U := coordinateOpenOverlap (R := R) i k
+  let eI := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_left (R := R) i k)
+    (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+  let eK := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_right (R := R) i k)
+    (coordinateHyperplaneIdealModuleTrivialization (R := R) k j).symm
+  let r := Scheme.Modules.openTopSection U
+    (coordinateOpenTransitionUnit (R := R) i k :
+      Γ(Proj (homogeneousSubmodule σ R), U))
+  have hbase : eK.hom = eI.hom ≫
+      ModularCurves.unitEndomorphismOfTopSection r := by
+    exact coordinateHyperplaneIdealModuleTrivialization_restrict_transition i k j
+  have hpower := ModularCurves.recursiveTensorTrivialization_hom_eq_comp_scalar U
+    (fun e n => coordinateHyperplaneIdealModulePowerTrivializationOf U j e n)
+    (fun n => ModularCurves.restrictMonoidalTensorIso U.ι
+      (coordinateHyperplaneIdealModulePower (R := R) j n)
+      (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)))
+    (fun _ _ => rfl) (fun _ _ => rfl) eK eI r hbase n
+  have hI :
+      Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_left (R := R) i k)
+          (coordinateHyperplaneIdealModulePowerTrivialization
+            (R := R) i j n) =
+        coordinateHyperplaneIdealModulePowerTrivializationOf U j eI n := by
+    exact coordinateHyperplaneIdealModulePowerTrivializationOf_restrictOpen
+      (coordinateOpenOverlap_le_left (R := R) i k) j
+        (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm n
+  have hK :
+      Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_right (R := R) i k)
+          (coordinateHyperplaneIdealModulePowerTrivialization
+            (R := R) k j n) =
+        coordinateHyperplaneIdealModulePowerTrivializationOf U j eK n := by
+    exact coordinateHyperplaneIdealModulePowerTrivializationOf_restrictOpen
+      (coordinateOpenOverlap_le_right (R := R) i k) j
+        (coordinateHyperplaneIdealModuleTrivialization (R := R) k j).symm n
+  rw [hK, hI]
+  exact hpower
 
 /-- The integer twist `O(d)` on polynomial projective space, formed from the
 concrete coordinate-hyperplane `O(1)` and `O(-1)`. -/
