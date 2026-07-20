@@ -1472,6 +1472,111 @@ theorem coordinateLaurentExponentDeleteZeroAddMonoidHom_apply
         (fun k => ((a.delete 0).1 k).down) 0 e).1.1 j.1 :=
   coordinateLaurentExponentDeleteZeroRaw_apply a e j
 
+@[simp]
+private theorem coordinateOpenCechFirstTransitionExponent_apply_second
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ) :
+    (coordinateOpenCechFirstTransitionExponent (n := n) a d).1
+        ⟨(a.1 1).down, coordinateOpenCechFirstSecond_ne (n := n) a⟩ = d := by
+  simp [coordinateOpenCechFirstTransitionExponent]
+
+private theorem coordinateOpenCechFirstTransitionExponent_apply_of_ne
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ)
+    (j : {j : σ // j ≠ (a.1 0).down}) (hj : j.1 ≠ (a.1 1).down) :
+    (coordinateOpenCechFirstTransitionExponent (n := n) a d).1 j = 0 := by
+  have hj' :
+      (⟨(a.1 1).down, coordinateOpenCechFirstSecond_ne (n := n) a⟩ :
+        {j : σ // j ≠ (a.1 0).down}) ≠ j := by
+    intro h
+    exact hj (congrArg Subtype.val h).symm
+  simp [coordinateOpenCechFirstTransitionExponent, hj']
+
+@[simp]
+private theorem coordinateOpenCechFirstTransitionExponent_degree
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ) :
+    Finsupp.degree (coordinateOpenCechFirstTransitionExponent (n := n) a d).1 = d := by
+  simp [coordinateOpenCechFirstTransitionExponent, Finsupp.degree_single]
+
+private theorem coordinateLaurentExponentDeleteZeroAddMonoidHom_degree
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (e : laurentExponentSubmonoid
+      (coordinateTailExponent (fun k => ((a.delete 0).1 k).down))) :
+    Finsupp.degree (coordinateLaurentExponentDeleteZeroAddMonoidHom a e).1 =
+      - (coordinateLaurentExponentEquiv
+        (fun k => ((a.delete 0).1 k).down) 0 e).1.1 (a.1 0).down := by
+  have h := (coordinateLaurentExponentEquiv
+    (fun k => (a.1 k).down) 0).apply_symm_apply
+      (coordinateLaurentExponentDeleteEmbedding a 0 0
+        (coordinateLaurentExponentEquiv
+          (fun k => ((a.delete 0).1 k).down) 0 e))
+  have h0 := congrArg
+    (fun z => z.1.1 (a.1 0).down) h
+  change (coordinateLaurentExponentEquiv
+      (fun k => (a.1 k).down) 0
+      (coordinateLaurentExponentDeleteZeroAddMonoidHom a e)).1.1 (a.1 0).down =
+    (coordinateLaurentExponentEquiv
+      (fun k => ((a.delete 0).1 k).down) 0 e).1.1 (a.1 0).down at h0
+  rw [coordinateLaurentExponentEquiv_apply_anchor] at h0
+  omega
+
+/-- First-deletion restriction followed by the twist transition gives the same global homogeneous
+exponent as inclusion from the deleted tuple. -/
+theorem coordinateLaurentExponentEquiv_delete_zero_add_transition
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ)
+    (e : laurentExponentSubmonoid
+      (coordinateTailExponent (fun k => ((a.delete 0).1 k).down))) :
+    coordinateLaurentExponentEquiv (fun k => (a.1 k).down) d
+        (coordinateLaurentExponentDeleteZeroAddMonoidHom a e +
+          coordinateOpenCechFirstTransitionExponent (n := n) a d) =
+      coordinateLaurentExponentDeleteEmbedding a 0 d
+        (coordinateLaurentExponentEquiv
+          (fun k => ((a.delete 0).1 k).down) d e) := by
+  apply Subtype.ext
+  apply Subtype.ext
+  ext i
+  change (coordinateLaurentExponentEquiv (fun k => (a.1 k).down) d
+      (coordinateLaurentExponentDeleteZeroAddMonoidHom a e +
+        coordinateOpenCechFirstTransitionExponent (n := n) a d)).1.1 i =
+    (coordinateLaurentExponentEquiv
+      (fun k => ((a.delete 0).1 k).down) d e).1.1 i
+  by_cases hi0 : i = (a.1 0).down
+  · subst i
+    rw [coordinateLaurentExponentEquiv_apply_anchor]
+    change d - Finsupp.degree
+        ((coordinateLaurentExponentDeleteZeroAddMonoidHom a e).1 +
+          (coordinateOpenCechFirstTransitionExponent (n := n) a d).1) = _
+    rw [map_add,
+      coordinateLaurentExponentDeleteZeroAddMonoidHom_degree,
+      coordinateOpenCechFirstTransitionExponent_degree]
+    have h01 : (a.1 0).down ≠ ((a.delete 0).1 0).down := by
+      exact (coordinateOpenCechFirstSecond_ne (n := n) a).symm
+    rw [coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ h01,
+      coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ h01]
+    omega
+  · rw [coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ hi0]
+    change (coordinateLaurentExponentDeleteZeroAddMonoidHom a e).1 ⟨i, hi0⟩ +
+        (coordinateOpenCechFirstTransitionExponent (n := n) a d).1 ⟨i, hi0⟩ = _
+    rw [coordinateLaurentExponentDeleteZeroAddMonoidHom_apply]
+    by_cases hi1 : i = (a.1 1).down
+    · subst i
+      rw [coordinateOpenCechFirstTransitionExponent_apply_second]
+      change (coordinateLaurentExponentEquiv
+          (fun k => ((a.delete 0).1 k).down) 0 e).1.1
+            ((a.delete 0).1 0).down + d = _
+      have hanchor : ((a.delete 0).1 0).down = (a.1 1).down := rfl
+      rw [← hanchor, coordinateLaurentExponentEquiv_apply_anchor,
+        coordinateLaurentExponentEquiv_apply_anchor]
+      omega
+    · rw [coordinateOpenCechFirstTransitionExponent_apply_of_ne
+        (a := a) d ⟨i, hi0⟩ hi1, add_zero]
+      have hi1' : i ≠ ((a.delete 0).1 0).down := hi1
+      rw [coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ hi1',
+        coordinateLaurentExponentEquiv_apply_of_ne _ _ _ _ hi1']
+
 private noncomputable def coordinateOpenCechFirstTransitionRingHom
     [LinearOrder σ] {n : ℕ}
     (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
