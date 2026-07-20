@@ -74,6 +74,19 @@ private theorem coordinateProductPolynomial_eq_prod {n : ℕ}
   classical
   rw [coordinateProductPolynomial, coordinateTailPolynomial, Fin.prod_univ_succ]
 
+/-- The coordinate product of a full Cech tuple is the deleted tuple product times the removed
+coordinate. -/
+theorem coordinateProductPolynomial_eq_delete_mul [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 2)) :
+    coordinateProductPolynomial (R := R) (fun l => (a.1 l).down) =
+      coordinateProductPolynomial (R := R) (fun l => ((a.delete k).1 l).down) *
+        X (a.1 k).down := by
+  classical
+  rw [coordinateProductPolynomial_eq_prod, coordinateProductPolynomial_eq_prod,
+    Fin.prod_univ_succAbove, mul_comm]
+  rfl
+
 private theorem basicOpen_prod {ι : Type*} [Fintype ι]
     (f : ι → MvPolynomial σ R) :
     Proj.basicOpen (homogeneousSubmodule σ R) (∏ i, f i) =
