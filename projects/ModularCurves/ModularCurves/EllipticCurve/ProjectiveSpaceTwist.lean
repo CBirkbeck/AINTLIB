@@ -235,11 +235,13 @@ lemma coordinateOpenOverlap_eq (i k : σ) :
       coordinateOpen (R := R) i ⊓ coordinateOpen (R := R) k :=
   Proj.basicOpen_mul (homogeneousSubmodule σ R) (X i) (X k)
 
-private lemma coordinateOpenOverlap_le_left (i k : σ) :
+/-- The canonical coordinate overlap is contained in its left chart. -/
+lemma coordinateOpenOverlap_le_left (i k : σ) :
     coordinateOpenOverlap (R := R) i k ≤ coordinateOpen (R := R) i :=
   (coordinateOpenOverlap_eq (R := R) i k).trans_le inf_le_left
 
-private lemma coordinateOpenOverlap_le_right (i k : σ) :
+/-- The canonical coordinate overlap is contained in its right chart. -/
+lemma coordinateOpenOverlap_le_right (i k : σ) :
     coordinateOpenOverlap (R := R) i k ≤ coordinateOpen (R := R) k :=
   (coordinateOpenOverlap_eq (R := R) i k).trans_le inf_le_right
 
@@ -359,6 +361,347 @@ noncomputable def coordinateHyperplanePoleSheafTrivialization (i j : σ) :
     (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
     (coordinateOpen (R := R) i)
     (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+
+section
+
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+
+private noncomputable def coordinateHyperplaneIdealOverTrivialization
+    (i j : σ) :
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)).over
+        (coordinateOpen (R := R) i) ≅
+      SheafOfModules.unit
+        ((Proj (homogeneousSubmodule σ R)).ringCatSheaf.over
+          (coordinateOpen (R := R) i)) :=
+  Scheme.Modules.overTrivializationOfRestrictIso _ _
+    (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+
+private theorem coordinateHyperplaneIdealOverTrivialization_inv_comp
+    (i j : σ) :
+    (coordinateHyperplaneIdealOverTrivialization (R := R) i j).inv ≫
+        (ModularCurves.idealModuleToUnit
+          (coordinateHyperplaneι (R := R) j)).over
+            (coordinateOpen (R := R) i) =
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpen (R := R) i)
+        (coordinateHyperplaneLocalEquation (R := R) i j) := by
+  letI : IsClosedImmersion (coordinateHyperplaneι (R := R) j) :=
+    coordinateHyperplaneι_isClosedImmersion j
+  letI : QuasiCompact (coordinateHyperplaneι (R := R) j) := inferInstance
+  let U : (Proj (homogeneousSubmodule σ R)).affineOpens :=
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+  let r := coordinateHyperplaneLocalEquation (R := R) i j
+  have hr : r ∈ (coordinateHyperplaneι (R := R) j).ker.ideal U := by
+    rw [coordinateHyperplaneLocalEquation_span]
+    exact Ideal.mem_span_singleton_self r
+  simpa only [coordinateHyperplaneIdealOverTrivialization,
+    coordinateHyperplaneIdealModuleTrivialization] using
+      ModularCurves.localIdealGeneratorOverTrivialization_inv_comp
+        (coordinateHyperplaneι (R := R) j) U r hr
+          (coordinateHyperplaneLocalEquation_span i j)
+          (coordinateHyperplaneLocalEquation_mem_nonZeroDivisors i j)
+
+private noncomputable def coordinateHyperplaneIdealOverlapTrivializationLeft
+    (i k j : σ) :
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)).over
+        (coordinateOpenOverlap (R := R) i k) ≅
+      SheafOfModules.unit
+        ((Proj (homogeneousSubmodule σ R)).ringCatSheaf.over
+          (coordinateOpenOverlap (R := R) i k)) :=
+  ModularCurves.SheafOfModules.restrictOverTrivialization
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+    (coordinateOpen (R := R) i)
+    (coordinateHyperplaneIdealOverTrivialization (R := R) i j)
+    (Over.mk (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)))
+
+private noncomputable def coordinateHyperplaneIdealOverlapTrivializationRight
+    (i k j : σ) :
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)).over
+        (coordinateOpenOverlap (R := R) i k) ≅
+      SheafOfModules.unit
+        ((Proj (homogeneousSubmodule σ R)).ringCatSheaf.over
+          (coordinateOpenOverlap (R := R) i k)) :=
+  ModularCurves.SheafOfModules.restrictOverTrivialization
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+    (coordinateOpen (R := R) k)
+    (coordinateHyperplaneIdealOverTrivialization (R := R) k j)
+    (Over.mk (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)))
+
+private theorem coordinateHyperplaneIdealOverlapTrivializationLeft_inv_comp
+    (i k j : σ) :
+    (coordinateHyperplaneIdealOverlapTrivializationLeft
+        (R := R) i k j).inv ≫
+        (ModularCurves.idealModuleToUnit
+          (coordinateHyperplaneι (R := R) j)).over
+            (coordinateOpenOverlap (R := R) i k) =
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpenOverlap (R := R) i k)
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+          (coordinateHyperplaneLocalEquation (R := R) i j)) := by
+  simpa only [coordinateHyperplaneIdealOverlapTrivializationLeft] using
+    ModularCurves.restrictOverTrivialization_inv_comp_over
+      (ModularCurves.idealModuleToUnit
+        (coordinateHyperplaneι (R := R) j))
+      (coordinateOpen (R := R) i)
+      (coordinateHyperplaneIdealOverTrivialization (R := R) i j)
+      (coordinateHyperplaneLocalEquation (R := R) i j)
+      (coordinateHyperplaneIdealOverTrivialization_inv_comp (R := R) i j)
+      (coordinateOpenOverlap_le_left (R := R) i k)
+
+private theorem coordinateHyperplaneIdealOverlapTrivializationRight_inv_comp
+    (i k j : σ) :
+    (coordinateHyperplaneIdealOverlapTrivializationRight
+        (R := R) i k j).inv ≫
+        (ModularCurves.idealModuleToUnit
+          (coordinateHyperplaneι (R := R) j)).over
+            (coordinateOpenOverlap (R := R) i k) =
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpenOverlap (R := R) i k)
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+          (coordinateHyperplaneLocalEquation (R := R) k j)) := by
+  simpa only [coordinateHyperplaneIdealOverlapTrivializationRight] using
+    ModularCurves.restrictOverTrivialization_inv_comp_over
+      (ModularCurves.idealModuleToUnit
+        (coordinateHyperplaneι (R := R) j))
+      (coordinateOpen (R := R) k)
+      (coordinateHyperplaneIdealOverTrivialization (R := R) k j)
+      (coordinateHyperplaneLocalEquation (R := R) k j)
+      (coordinateHyperplaneIdealOverTrivialization_inv_comp (R := R) k j)
+      (coordinateOpenOverlap_le_right (R := R) i k)
+
+private theorem coordinateHyperplaneIdealOverlap_transition (i k j : σ) :
+    (coordinateHyperplaneIdealOverlapTrivializationRight
+        (R := R) i k j).hom =
+      (coordinateHyperplaneIdealOverlapTrivializationLeft
+          (R := R) i k j).hom ≫
+        ModularCurves.SheafOfModules.overUnitScalarEnd
+          (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+          (coordinateOpenOverlap (R := R) i k)
+          (coordinateOpenTransitionUnit (R := R) i k :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) i k)) := by
+  let eI := coordinateHyperplaneIdealOverlapTrivializationLeft
+    (R := R) i k j
+  let eK := coordinateHyperplaneIdealOverlapTrivializationRight
+    (R := R) i k j
+  let inc :
+      (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)).over
+          (coordinateOpenOverlap (R := R) i k) ⟶
+        SheafOfModules.unit
+          ((Proj (homogeneousSubmodule σ R)).ringCatSheaf.over
+            (coordinateOpenOverlap (R := R) i k)) :=
+    (ModularCurves.idealModuleToUnit
+      (coordinateHyperplaneι (R := R) j)).over
+        (coordinateOpenOverlap (R := R) i k)
+  let rI := (Proj (homogeneousSubmodule σ R)).presheaf.map
+    (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+    (coordinateHyperplaneLocalEquation (R := R) i j)
+  let rK := (Proj (homogeneousSubmodule σ R)).presheaf.map
+    (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+    (coordinateHyperplaneLocalEquation (R := R) k j)
+  let u : Γ(Proj (homogeneousSubmodule σ R),
+      coordinateOpenOverlap (R := R) i k) :=
+    coordinateOpenTransitionUnit (R := R) i k
+  let sI := ModularCurves.SheafOfModules.overUnitScalarEnd
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+    (coordinateOpenOverlap (R := R) i k) rI
+  let sK := ModularCurves.SheafOfModules.overUnitScalarEnd
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+    (coordinateOpenOverlap (R := R) i k) rK
+  let sU := ModularCurves.SheafOfModules.overUnitScalarEnd
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+    (coordinateOpenOverlap (R := R) i k) u
+  change eK.hom = eI.hom ≫ sU
+  have hI : eI.inv ≫ inc = sI :=
+    coordinateHyperplaneIdealOverlapTrivializationLeft_inv_comp
+      (R := R) i k j
+  have hK : eK.inv ≫ inc = sK :=
+    coordinateHyperplaneIdealOverlapTrivializationRight_inv_comp
+      (R := R) i k j
+  have hr : rI = u * rK :=
+    coordinateHyperplaneLocalEquation_restrict_eq_transition_mul
+      (R := R) i k j
+  have hmul :=
+    (ModularCurves.SheafOfModules.overUnitScalarEndRingHom
+      (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+      (coordinateOpenOverlap (R := R) i k)).map_mul rK u
+  change ModularCurves.SheafOfModules.overUnitScalarEnd
+      (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpenOverlap (R := R) i k) (rK * u) =
+    ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+          (coordinateOpenOverlap (R := R) i k) u ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+          (coordinateOpenOverlap (R := R) i k) rK at hmul
+  have hscalar : sI = sU ≫ sK := by
+    dsimp only [sI, sU, sK]
+    rw [hr, mul_comm u rK]
+    exact hmul
+  haveI : Mono inc := ModularCurves.sheafOfModules_mono_over
+    (ModularCurves.idealModuleToUnit (coordinateHyperplaneι (R := R) j))
+    (ModularCurves.idealModuleToUnit_mono
+      (coordinateHyperplaneι (R := R) j))
+    (coordinateOpenOverlap (R := R) i k)
+  have hmonoComp : Mono (eK.inv ≫ inc) :=
+    @mono_comp _ _ _ _ _ eK.inv inferInstance inc inferInstance
+  haveI : Mono sK := by
+    rw [← hK]
+    exact hmonoComp
+  apply (cancel_mono sK).1
+  calc
+    eK.hom ≫ sK = eK.hom ≫ (eK.inv ≫ inc) :=
+      congrArg (fun q ↦ eK.hom ≫ q) hK.symm
+    _ = inc := eK.hom_inv_id_assoc inc
+    _ = eI.hom ≫ (eI.inv ≫ inc) := (eI.hom_inv_id_assoc inc).symm
+    _ = eI.hom ≫ sI := congrArg (fun q ↦ eI.hom ≫ q) hI
+    _ = eI.hom ≫ (sU ≫ sK) :=
+      congrArg (fun q ↦ eI.hom ≫ q) hscalar
+    _ = (eI.hom ≫ sU) ≫ sK := (Category.assoc _ _ _).symm
+
+/-- On a coordinate overlap, the two `O(-1)` generator frames differ by
+multiplication by `X_k / X_i`. -/
+theorem coordinateHyperplaneIdealModuleTrivialization_restrict_transition
+    (i k j : σ) :
+    (Scheme.Modules.restrictOpenTrivialization
+        (coordinateOpenOverlap_le_right (R := R) i k)
+        (coordinateHyperplaneIdealModuleTrivialization
+          (R := R) k j).symm).hom =
+      (Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_left (R := R) i k)
+          (coordinateHyperplaneIdealModuleTrivialization
+            (R := R) i j).symm).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection
+            (coordinateOpenOverlap (R := R) i k)
+            (coordinateOpenTransitionUnit (R := R) i k :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) i k))) := by
+  let M := ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)
+  let tI := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_left (R := R) i k)
+    (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+  let tK := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_right (R := R) i k)
+    (coordinateHyperplaneIdealModuleTrivialization (R := R) k j).symm
+  let eI := coordinateHyperplaneIdealOverlapTrivializationLeft
+    (R := R) i k j
+  let eK := coordinateHyperplaneIdealOverlapTrivializationRight
+    (R := R) i k j
+  let u : Γ(Proj (homogeneousSubmodule σ R),
+      coordinateOpenOverlap (R := R) i k) :=
+    coordinateOpenTransitionUnit (R := R) i k
+  change tK.hom = tI.hom ≫
+    ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection
+        (coordinateOpenOverlap (R := R) i k) u)
+  have hOver : eK.hom = eI.hom ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpenOverlap (R := R) i k) u :=
+    coordinateHyperplaneIdealOverlap_transition (R := R) i k j
+  have hScheme :=
+    ModularCurves.restrictTrivializationOfOverIso_hom_eq_comp_scalar
+      M (coordinateOpenOverlap (R := R) i k) eK eI u hOver
+  have heI : Scheme.Modules.overTrivializationOfRestrictIso M
+      (coordinateOpenOverlap (R := R) i k) tI = eI := by
+    exact Scheme.Modules.overTrivializationOfRestrictOpenTrivialization
+      (coordinateOpenOverlap_le_left (R := R) i k)
+      (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+  have heK : Scheme.Modules.overTrivializationOfRestrictIso M
+      (coordinateOpenOverlap (R := R) i k) tK = eK := by
+    exact Scheme.Modules.overTrivializationOfRestrictOpenTrivialization
+      (coordinateOpenOverlap_le_right (R := R) i k)
+      (coordinateHyperplaneIdealModuleTrivialization (R := R) k j).symm
+  rw [← heK, ← heI] at hScheme
+  simpa only [ModularCurves.restrictTrivializationOfOverTrivializationOfRestrictIso]
+    using hScheme
+
+/-- On a coordinate overlap, dualizing the two generator frames makes the
+`O(1)` frames differ by multiplication by `X_k / X_i` in the reverse
+direction. -/
+theorem coordinateHyperplanePoleSheafTrivialization_restrict_transition
+    (i k j : σ) :
+    (Scheme.Modules.restrictOpenTrivialization
+        (coordinateOpenOverlap_le_left (R := R) i k)
+        (coordinateHyperplanePoleSheafTrivialization
+          (R := R) i j)).hom =
+      (Scheme.Modules.restrictOpenTrivialization
+          (coordinateOpenOverlap_le_right (R := R) i k)
+          (coordinateHyperplanePoleSheafTrivialization
+            (R := R) k j)).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection
+            (coordinateOpenOverlap (R := R) i k)
+            (coordinateOpenTransitionUnit (R := R) i k :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) i k))) := by
+  let M := ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)
+  let tI := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_left (R := R) i k)
+    (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
+  let tK := Scheme.Modules.restrictOpenTrivialization
+    (coordinateOpenOverlap_le_right (R := R) i k)
+    (coordinateHyperplanePoleSheafTrivialization (R := R) k j)
+  let eI := coordinateHyperplaneIdealOverlapTrivializationLeft
+    (R := R) i k j
+  let eK := coordinateHyperplaneIdealOverlapTrivializationRight
+    (R := R) i k j
+  let dI := ModularCurves.SheafOfModules.dualOverIsoOfIso
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf M
+    (coordinateOpenOverlap (R := R) i k) eI
+  let dK := ModularCurves.SheafOfModules.dualOverIsoOfIso
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf M
+    (coordinateOpenOverlap (R := R) i k) eK
+  let u : Γ(Proj (homogeneousSubmodule σ R),
+      coordinateOpenOverlap (R := R) i k) :=
+    coordinateOpenTransitionUnit (R := R) i k
+  change tI.hom = tK.hom ≫
+    ModularCurves.unitEndomorphismOfTopSection
+      (Scheme.Modules.openTopSection
+        (coordinateOpenOverlap (R := R) i k) u)
+  have hIdeal : eK.hom = eI.hom ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpenOverlap (R := R) i k) u :=
+    coordinateHyperplaneIdealOverlap_transition (R := R) i k j
+  have hDual : dI.hom = dK.hom ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpenOverlap (R := R) i k) u :=
+    ModularCurves.dualOverIsoOfIso_hom_eq_comp_scalar M
+      (coordinateOpenOverlap (R := R) i k) eI eK u hIdeal
+  have hScheme :=
+    ModularCurves.restrictTrivializationOfOverIso_hom_eq_comp_scalar
+      (Scheme.Modules.dualObj M) (coordinateOpenOverlap (R := R) i k)
+      dI dK u hDual
+  have htI :=
+    ModularCurves.restrictOpenTrivialization_dualRestrictIsoOfRestrictIso
+      M (coordinateOpenOverlap_le_left (R := R) i k)
+        (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+  have htK :=
+    ModularCurves.restrictOpenTrivialization_dualRestrictIsoOfRestrictIso
+      M (coordinateOpenOverlap_le_right (R := R) i k)
+        (coordinateHyperplaneIdealModuleTrivialization (R := R) k j).symm
+  change tI = ModularCurves.restrictTrivializationOfOverIso
+    (Scheme.Modules.dualObj M) (coordinateOpenOverlap (R := R) i k) dI at htI
+  change tK = ModularCurves.restrictTrivializationOfOverIso
+    (Scheme.Modules.dualObj M) (coordinateOpenOverlap (R := R) i k) dK at htK
+  rw [← htI, ← htK] at hScheme
+  exact hScheme
+
+end
 
 /-- The nonnegative twists `O(n)` obtained as monoidal powers of the concrete
 coordinate-hyperplane `O(1)`. -/
