@@ -24160,3 +24160,31 @@ do NOT unblock the B2/B3-blocked receipts.
 
 NEXT (owner): adjudicate the D(2) B2 architecture (the 3 resolutions), then the mouth-core assembly + scaleTorsor_spec
 Pieces are turnkey multi-session work. Board v10.336-341 + b2_log.jsonl + memory carry the full route-maps.
+
+## v10.342 (2026-07-20) — B2 ADJUDICATED (owner-delegated): D(2) rigidifier → LEVEL 4 (ℰ₄-machine); B3 DE-CONFLATED (receipts are invertible-N; Deligne order-kills = future over-ℤ project) (STREAM-E4)
+
+**B2 DECISION = OPTION 2 (level-4).** Full grounds in b2_log.jsonl (B2-DECISION entry). Literature verified against KM
+verbatim (4.6.2 print p.111; Scholie proof pp.112-115; alternatives 4.8-4.11; Appendix A.4): the Legendre constant-group
+torsor claim is FALSE AS STATED in KM itself — over the universal Legendre base the 6 marking-components are pairwise
+non-isomorphic quadratic étale algebras (square classes 1,−1,λ,−λ,λ−1,1−λ), so no constant group is fibre-transitive;
+the honest torsor group is a TWISTED μ₂-extension. This kills option 1 as advertised (no σZ on δ_X at general X either —
+φ-free TorsorData would have to become full groupoid descent, re-opening the sorry-free QuotientProblem/
+QuotientRepresentability/EngineMouth core) and prices option 3 = option 1 + √-subtree. Level 4 is the unique minimal
+clean rigidifier over ℤ[1/2] (E[2]-based data cannot kill −1 without the ω-twist; μ_N-Incl problems are not torsors;
+Δ=1 needs 1/6; {D(3),D(5)} forces ℰ₅). Interface UNCHANGED; gammaFullNaiveGlAction R 4 already proven; torsor package
+generalises per v10.338. COST = ℰ₄-machine (naiveLevelFour_representable_by_affine), patterned on the landed ℰ₃.
+
+**B3 DE-CONFLATED.** All 7 receipts verified invertible-N in-tree (adversarial fixes 2026-07-06 already pushed over-ℤ
+out of scope). At invertible N the exact-order/rel-rep leaves are étale/Lagrange — NO Deligne norm argument. KM 1.4.2's
+citation is Deligne's order-kills theorem ([Oort-Tate §1], Tate FFGS §3.8, Stix notes — confirmed via web check;
+INDEPENDENT of the O-T classification), which together with regularity 5.1.1 stays scoped as the future over-ℤ project;
+it blocks NO stated receipt. Receipts 2/3/6's residual non-engine leaves = invertible-N Drinfeld cone (audit at /develop).
+
+**CODEX BRANCH REVIEWED** (user flag): codex/fibrewise-weierstrass-picard-tranche3-monoidal = active [OWNER-FLW] stream
+(FibrewiseElliptic.locallyWeierstrass, KM 2.2.1-2.2.5 arbitrary-base via Stacks 0A1G+081F), 200/201 new files sorry-free,
+toolchain v4.33.0-rc1 (dev: v4.32.0-rc1), headline still open (proper coherent-cohomology leaf). Touches neither B2 nor
+B3; mouth core stays on dev's SEMILOCAL route (Pic-trivial, prereqs ALL BANKED: PicSubsingletonFree + SemilocalOmegaBasis
+a2f3d1a97 + AffineCechH1 f0035f720). Reuse = reference-only; no merge; reserved targets respected.
+
+**NEXT:** /develop (STREAM-E4 decomposition: ℰ₄-machine + level-4 torsor + rewire + mouth-core assembly + glueEllObj
+completion + Drinfeld invertible-N cone audit) → /beastmode.
