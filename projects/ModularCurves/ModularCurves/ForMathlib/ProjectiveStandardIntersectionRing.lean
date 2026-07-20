@@ -342,6 +342,29 @@ theorem coordinateProductAwayLaurentRingEquiv_awayMap {n : ℕ}
     (σ := {j : σ // j ≠ a 0}) R
     (coordinateTailExponent a) (chartRingEquiv R (a 0) q)
 
+/-- The Laurent-coordinate equivalence intertwines the homogeneous tail localization map with
+the natural-exponent map on monomials. -/
+theorem coordinateProductAwayLaurentRingEquiv_awayMap_comp {n : ℕ}
+    (a : Fin (n + 1) → σ) :
+    (laurentMonomialRingEquiv R
+      (coordinateTailExponent a)).toRingHom.comp
+        ((coordinateProductAwayRingEquiv (R := R) a).toRingHom.comp
+          (HomogeneousLocalization.awayMap
+            (f := X (a 0))
+            (g := coordinateTailPolynomial (R := R) a)
+            (x := coordinateProductPolynomial (R := R) a)
+            (homogeneousSubmodule σ R)
+            (coordinateTailPolynomial_mem (R := R) a) rfl)) =
+      (AddMonoidAlgebra.mapDomainRingHom R
+        (laurentExponentAwayMap
+          (coordinateTailExponent a)).toAddMonoidHom).comp
+        (chartRingEquiv R (a 0)).toRingHom := by
+  apply RingHom.ext
+  intro q
+  simp only [RingHom.comp_apply]
+  exact coordinateProductAwayLaurentRingEquiv_awayMap
+    (R := R) (σ := σ) (n := n) a q
+
 @[simp]
 theorem coordinateProductAwayRingEquiv_algebraMap {n : ℕ}
     (a : Fin (n + 1) → σ) (r : R) :
