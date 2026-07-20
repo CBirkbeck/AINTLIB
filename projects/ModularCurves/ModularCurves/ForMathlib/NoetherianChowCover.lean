@@ -224,3 +224,39 @@ lemma chowToTarget_surjective [IsSeparated xπ] (hcover : ⨆ i, U i = ⊤)
 end
 
 end AlgebraicGeometry.Scheme.FiniteAffineImageCover
+
+namespace AlgebraicGeometry
+
+noncomputable section
+
+variable {R : Type u} [CommRing R] {X : Scheme.{u}}
+
+/-- A separated locally finitely presented Noetherian scheme over an affine base admits a
+proper-surjective Chow cover which is open in a proper scheme over that base. -/
+theorem Scheme.Hom.exists_chowCover_of_isNoetherian
+    (xπ : X ⟶ Spec (.of R)) [IsNoetherian X]
+    [LocallyOfFinitePresentation xπ] [IsSeparated xπ] :
+    ∃ (X' Z : Scheme.{u}) (cover : X' ⟶ X) (immersion : X' ⟶ Z)
+      (zπ : Z ⟶ Spec (.of R)),
+      IsProper cover ∧ Surjective cover ∧ IsOpenImmersion immersion ∧
+        IsProper zπ ∧ cover ≫ xπ = immersion ≫ zπ := by
+  obtain ⟨ι, hι, hnonempty, U, hcover, hU, hDense⟩ :=
+    X.exists_nonempty_finite_affine_openCover_dense_iInf_of_isNoetherian
+  letI : Finite ι := hι
+  have hcover' : ⨆ i, U i = ⊤ := by
+    simpa only [IsOpenCover] using hcover
+  let i : ι := Classical.choice hnonempty
+  refine ⟨Scheme.FiniteAffineImageCover.chowObj xπ U hU,
+    Scheme.FiniteAffineImageCover.chowAmbient xπ U hU,
+    Scheme.FiniteAffineImageCover.chowToTarget xπ U hU,
+    Scheme.FiniteAffineImageCover.chowImmersion xπ U hU,
+    Scheme.FiniteAffineImageCover.chowAmbientπ xπ U hU, ?_⟩
+  exact ⟨Scheme.FiniteAffineImageCover.chowToTarget_isProper xπ U hU hcover',
+    Scheme.FiniteAffineImageCover.chowToTarget_surjective xπ U hU hcover' hDense i,
+    Scheme.FiniteAffineImageCover.chowImmersion_isOpenImmersion xπ U hU,
+    Scheme.FiniteAffineImageCover.chowAmbientπ_isProper xπ U hU,
+    Scheme.FiniteAffineImageCover.chowToTarget_comp_xπ xπ U hU⟩
+
+end
+
+end AlgebraicGeometry
