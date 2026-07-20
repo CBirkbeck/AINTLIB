@@ -24410,3 +24410,19 @@ REMAINING (Stage 3c, consumes the ★ package verbatim): D-rescale charts
 D(a₁)) → coefficient glue over A_{a₁} + glueMorphisms_hf_of_agree for ρR₁ → hpres. Wiring:
 prove hpres-shaped theorem in EngineMouthCharts (Stage-1/2 context re-derivable from
 (G,A,p)) and consume in EngineDescent, OR decompose the two slow EngineDescent proofs first.
+
+### v10.343 progress — [T-E4D Stage-3c-α DONE] the semilocal global model GLUES (2026-07-21)
+MouthCharts.exists_cover_glued_model AXIOM-CLEAN: corrected charts (coboundary +
+transVC_smul via the generic corrected_map_eq barrier) agree on overlaps; five
+coefficients glue by NEW ForMathlib/AffineCechH0 (exists_algebraMap_eq_of_span_eq_top
+H⁰-gluing via trivial-cocycle gluedSubmodule + isLocalizedModule_gluedProj +
+bijective_of_isLocalized_span; separatedness; IsUnit-is-Zariski-local; Weierstrass-curve
+glue with Δ-unit transfer) ⟹ global W₀L/L. THE KM 2.2.5–6 SEMILOCAL HEART IS PROVEN.
+Frontier now VERBATIM-hpres-shaped: MouthCharts.exists_invariant_away_presentation
+(EngineMouthCharts:851, ONE sorry = pure β/γ residual) with banked-clean β/γ ingredients:
+exists_invariant_span_away (span witness spreads to invariant k₀), basicOpen_le_iSup_
+basicOpen_mul (D(a·fᵢ) covers D(a), prime avoidance), transVC_ofVC_restrict_pair (γ1
+group-law core). Remaining: β clearing calculus (localization_localization pins) + W₀L/D/
+identity spreads (Part-2) + γ glueMorphisms/isPullback_of_iSup_eq_top/zero-leg assembly.
+Proof-engineering findings (barrier-lemma discipline for localization towers; term-mode
+mem_basicOpen; map_inv have-bridge) recorded at the EngineDescent frontier comment.

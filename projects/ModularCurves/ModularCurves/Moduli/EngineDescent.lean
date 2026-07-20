@@ -3131,30 +3131,46 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
   -- [`exists_units_eq_mul_of_span_eq_top`], then the abelian `(r,s)`- and central `t`-layers
   -- via the n-cover affine-Čech `H¹` vanishing [`exists_sub_resLoc_eq_of_span_eq_top`]).
   --
-  -- **Residual = Stage 3c (the chart correction + glue + spread), consuming exactly the
-  -- package above:**
-  --   (i)  rescale chart `i` by `D i` (`projModelVCIso`); corrected transitions are `1`
-  --        (`pointedIso_hom_of_transVC_eq_one`), so the corrected Weierstrass coefficients
-  --        agree on overlaps at the `L`-level;
-  --   (ii) spread: the `D i`-entries and the finitely many agreement identities have
-  --        `S`-denominators — clear them into one invariant `a₁ ∉ p` (`fixedAwayMap` /
-  --        `existsUnique_factor_fixedPoints_away`, the Part-2 pattern of
-  --        `exists_away_invariant_descent`, plus the span-witness spread so the `D(fᵢ)`
-  --        cover `D(a₁)`); glue the coefficients to `W₀R₁ / A_{a₁}` (structure-sheaf
-  --        condition on the basic cover) and the presentation `ρR₁` by
-  --        `Scheme.OpenCover.glueMorphisms` + `glueMorphisms_hf_of_agree`
-  --        (SpecBasicOpenAway; legs via `isPullback_projModelBaseChange` /
-  --        `projModelZero_baseChange`).
+  -- **Stage 3c-α is DONE, AXIOM-CLEAN (T-E4D session 2026-07-21):**
+  --   `MouthCharts.exists_cover_glued_model (C := C) S` — the corrected charts GLUE to a
+  --   global Weierstrass model `W₀L / L`: cover `f`/`P`, pairwise units `hU`, correction
+  --   cochain `D i / L[1/fᵢ]`, `W₀L` with `IsUnit W₀L.Δ`, the per-chart identity
+  --   `W₀L = D i • (P i).W` over `L[1/fᵢ]` (through `sectionsToLoc`), and the corrected
+  --   coboundary `transVC = (D i)⁻¹ * (D j)` on overlaps.  Engine: the NEW affine Čech
+  --   `H⁰` sheaf condition (`ForMathlib/AffineCechH0.lean`:
+  --   `exists_algebraMap_eq_of_span_eq_top` / `isUnit_of_span_eq_top` /
+  --   `exists_weierstrassCurve_map_eq_of_span_eq_top`, all clean — glued sections via the
+  --   trivial-cocycle `gluedSubmodule` + `isLocalizedModule_gluedProj` + mathlib
+  --   `bijective_of_isLocalized_span`).
+  -- **The `hpres`-SHAPED frontier theorem now EXISTS:**
+  --   `MouthCharts.exists_invariant_away_presentation G p`
+  --   (`Moduli/EngineMouthCharts.lean`) states THIS `hpres` verbatim — over any
+  --   `[Finite G] [MulSemiringAction G Γ(X,⊤)]` and prime `p` of the fixed subring — and
+  --   consumes Stages 1–2 + 3a–3c-α in its body; its single `sorry` is the pure Stage
+  --   3c-β/γ residual (β: invariant-denominator spread, Part-2 pattern; γ: native glue
+  --   over `D(a₁)` via `glueMorphisms` + `isPullback_of_iSup_eq_top`), with the full
+  --   β1/β2/γ1–γ4 recipe in its continuation comment (incl. the localization-tower
+  --   clearing calculus: mathlib `IsLocalization.localization_localization_isLocalization`
+  --   + `isLocalization_of_submonoid_le`).  Already banked clean beyond α: the span-witness
+  --   spread `exists_invariant_span_away` (wired into the frontier body), the cover lemma
+  --   `basicOpen_le_iSup_basicOpen_mul`, and the corrected-chart transition factorization
+  --   `transVC_ofVC_restrict_pair` (the γ1 group-law core).
   -- **Wiring note (import architecture):** `EngineMouthCharts` is a SEPARATE file because
   -- importing `EllipticCurve/InvariantDifferential` (the `LocalPresentation` calculus) into
   -- THIS file blows the elaboration budget of `exists_localModel_core_of_presentation`
-  -- (heartbeat regressions from the enriched instance set — measured 2026-07-21).  Stage 3c
-  -- should therefore EITHER be proven in `EngineMouthCharts` (or a successor file) as a
-  -- standalone `hpres`-shaped theorem that this file then consumes — decomposing
-  -- `exists_localModel_core_of_presentation` first if the import is added here — with the
-  -- Stage-1/2 semilocalization context re-derived there from `(G, A, p)` (it is
-  -- `a`-independent ring data), OR wired here after a `/buzz`-style split of the two slow
-  -- proofs.  Gotcha (measured): `FixedPoints.subalgebra ℤ (Localization …) G` does NOT
+  -- (heartbeat regressions from the enriched instance set — measured 2026-07-21).  When
+  -- 3c-β/γ closes there, replace THIS `sorry` by
+  --   `exact MouthCharts.exists_invariant_away_presentation G p`
+  -- after adding the import — decomposing/`/buzz`-splitting the two slow proofs of THIS
+  -- file FIRST (`exists_coboundary_spread_away`, `exists_localModel_core_of_presentation`).
+  -- Proof-engineering findings (measured this session): NEVER rw/simp on concrete
+  -- localization-tower or `Γ(X,·)`-typed curve terms (whnf blows the 200k budget even for
+  -- `simpa only [map_a₁]`) — hoist EVERY algebraic step as a variable-ring barrier lemma
+  -- and only APPLY it at the concrete types (`corrected_map_eq`, `smul_map_of_smul`,
+  -- `cob_inv_reshape`, `exists_weierstrassCurve_map_eq_of_span_eq_top` are the models);
+  -- scheme-point membership through `Spec Γ(X,⊤)` must use term-mode
+  -- `(PrimeSpectrum.mem_basicOpen _ _).mp/.mpr` (rw fails on the carrier coercion).
+  -- Gotcha (measured): `FixedPoints.subalgebra ℤ (Localization …) G` does NOT
   -- elaborate at a concrete localization (`OreLocalization` `SMul ℤ` diamond) — never spell
   -- it; use the generic-`L` lemmas (`finite_maximalSpectrum_of_isLocalRing_fixedPoints`).
   -- Stages 4–5 are DONE: `exists_localModel_core_of_presentation` (Stage-4 consumption +
