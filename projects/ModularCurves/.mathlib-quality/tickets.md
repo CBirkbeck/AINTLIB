@@ -24273,3 +24273,18 @@ SECTION ROUTE (route (a)): RING-DBL two_zsmul_affineSection with ψ₂-denominat
 cofactors. NO reducedness input, NO Stage-D transport needed (docstrings updated).
 +import BridgeAssembly (leaf file, no cycle). Build green 4057. Remaining sorries: 8
 (A4 keystone, A5 map, A9/A10 bridges, A11 datum, A12 chain, A14 packaging+headline).
+
+### v10.343 progress — [T-E4D] Stages 4–5 BANKED (2026-07-20); residual = pure Stage-3
+Mouth core exists_localModel_core_at: Stages 4–5 PROVEN AXIOM-CLEAN via two private
+hoisted helpers — exists_coboundary_spread_away (:2489, ~300L: Stage-5 ring core,
+coboundary at local Lᴳ + fraction-decomposition + Part-2 denominator-clearing to A_{aF},
+universal over algebra-compatible f) and exists_localModel_core_of_presentation (:2802,
+~170L: Stage-4 exists_cocycle_hρact_of_presentation consumption + D(a₁)→D(aF) transports
+via isPullback_projModelBaseChange₂/projModelZero_baseChange₂/actLoc_baseChange).
+Residual sorry (:3136) = EXACTLY the Stage-3 presentation existential hpres (a₁, W₀R₁
+elliptic, ρR₁, pullback square, zero-leg) — no cocycle/coboundary/action content left.
+CORRECTED prerequisite status (boarding v10.340's residuals as REAL): (i)
+nonempty_omegaBasis_of_finite_maximalSpectrum carries OPEN hInv/hTriv hypotheses (the
+affine QCoh≃Modules trivialisation bridge — SemilocalOmegaBasis's own "Missing fact");
+(ii) AffineCechH1 is 2-cover only (n-cover extension = the triple-overlap bookkeeping).
+Stage-3 successor scope: (i) + (ii) + 3a ω-adaptation + 3c chart-correct+native-glue.

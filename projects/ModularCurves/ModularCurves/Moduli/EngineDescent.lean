@@ -2460,6 +2460,530 @@ private theorem exists_cocycle_hρact_of_presentation [IsAffine X]
   simp only [← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp]
   exact hsnd g
 
+/-! #### The `[a5-P-loc]` Stage-5 ring core: coboundary at the semilocal `L`, spread to `A_a`
+
+`exists_coboundary_spread_away` is the pure commutative-algebra half of Stage 5 of
+`exists_localModel_core_at`: given the `VariableChange` cocycle at an invariant basic open
+`D(a₁)` (produced geometrically by Stage 4, `exists_cocycle_hρact_of_presentation`), it
+base-changes the cocycle to the semilocalization `L = Localization S` at the prime `p` (where
+the fixed subring `Lᴳ` is LOCAL), splits it there by `exists_coboundary`, and spreads the
+coboundary back to a smaller invariant basic open `D(aF)`, `a₁ ∣ aF`, `aF ∉ p` — the Part-2
+denominator-clearing pattern of `exists_away_invariant_descent`, run at the `A_{a₁}`-level
+instead of the `A`-level (no global model needed, and no `W₁`-half: the descended model is
+peeled off downstream by `exists_localModel_package_at`). -/
+
+open WeierstrassCurve in
+/-- **([a5-P-loc] Stage 5, ring half — coboundary at `L`, spread to `A_{aF}`.)** Let `G` act
+freely on `A`, let `p` be a prime of `Aᴳ`, and let `Cvc₁` be a `VariableChange` cocycle over
+`A_{a₁} = Localization.Away (a₁ : A)` at an invariant `a₁ ∉ p` (cocycle for the localized
+action, in the explicit `awayHom` form). Then there is an invariant multiple `aF` of `a₁` with
+`aF ∉ p` and a variable change `E` over `A_{aF}` splitting the image of the cocycle: for ANY
+ring hom `f : A_{a₁} →+* A_{aF}` commuting with the two `algebraMap`s (they all agree),
+`(Cvc₁ g).map f = E * (g • E)⁻¹` for all `g` (localized action in `awayHom` form).
+
+Route (the Part-2 pattern of `exists_away_invariant_descent`, at the `A_{a₁}`-level):
+base-change `Cvc₁` along `j₁ : A_{a₁} →+* L` to the semilocalization `L = Localization S`,
+`S = image of Aᴳ \ p` (where `Lᴳ` is LOCAL by `isLocalRing_fixedPoints_of_isLocalization`),
+split there by `exists_coboundary`; write the five entries of the splitting `D' = E'⁻¹` as
+fractions with denominators in `S`, realize `D'` at the invariant level `b₀ = a₁·a₀` (`a₀` the
+product of the denominators' invariant preimages), compare with the cocycle there, clear the
+per-`g` comparison constants into `aF = b₀·(pre cAll)`, and descend the four component
+identities by `IsUnit`-cancellation of the clearing constant. -/
+private theorem exists_coboundary_spread_away {A : Type u} [CommRing A] [MulSemiringAction G A]
+    [Fintype G] [DecidableEq G] (hfreeA : IsFreeAlgebraAction G ℤ A)
+    (p : Ideal (FixedPoints.subring A G)) [p.IsPrime]
+    (a₁ : FixedPoints.subring A G) (ha₁ : a₁ ∉ p)
+    (Cvc₁ : G → VariableChange (Localization.Away ((a₁ : A))))
+    (hcoc₁ : ∀ g h : G, Cvc₁ (g * h)
+      = Cvc₁ g * (Cvc₁ h).map (MulSemiringAction.awayHom (fun g' : G => a₁.2 g') g)) :
+    ∃ (aF : FixedPoints.subring A G) (_ : aF ∉ p) (_ : a₁ ∣ aF)
+      (E : VariableChange (Localization.Away ((aF : A)))),
+      ∀ (f : Localization.Away ((a₁ : A)) →+* Localization.Away ((aF : A))),
+        (∀ x : A, f (algebraMap A (Localization.Away ((a₁ : A))) x)
+          = algebraMap A (Localization.Away ((aF : A))) x) →
+        ∀ g : G, (Cvc₁ g).map f
+          = E * (E.map (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g))⁻¹ := by
+  classical
+  -- ### Part 1: the invariant multiplicative set and the localized action (as in
+  -- `exists_away_invariant_descent`)
+  set S : Submonoid A := p.primeCompl.map (algebraMap (FixedPoints.subring A G) A) with hSdef
+  have hS : ∀ (g : G), ∀ s ∈ S, g • s = s := primeComplImage_fixed p
+  letI : MulSemiringAction G (Localization S) := MulSemiringAction.localizationInvariant hS
+  have hcomp : ∀ (g : G) (r : A),
+      g • (algebraMap A (Localization S) r) = algebraMap A (Localization S) (g • r) :=
+    fun g r => MulSemiringAction.locHom_algebraMap hS g r
+  haveI : Nontrivial (Localization S) := nontrivial_localization_primeComplImage p
+  haveI := isLocalRing_fixedPoints_of_isLocalization p hcomp
+  have hfreeL := isFreeAlgebraAction_of_isLocalization hcomp hfreeA
+  -- ### the map `j₁ : A_{a₁} →+* L` and the base-changed cocycle
+  have ha₁S : ((a₁ : A)) ∈ S :=
+    Submonoid.mem_map_of_mem _ (show a₁ ∈ p.primeCompl from ha₁)
+  have hj₁le : Submonoid.powers ((a₁ : A)) ≤ S.comap (RingHom.id A) := by
+    rintro x ⟨n, rfl⟩
+    exact Submonoid.mem_comap.mpr (Submonoid.pow_mem S ha₁S n)
+  set j₁ : Localization.Away ((a₁ : A)) →+* Localization S :=
+    IsLocalization.map (Localization S) (RingHom.id A) hj₁le with hj₁def
+  have hj₁_alg : ∀ x : A,
+      j₁ (algebraMap A (Localization.Away ((a₁ : A))) x) = algebraMap A (Localization S) x :=
+    fun x => IsLocalization.map_eq hj₁le x
+  have hequivj₁ : ∀ g : G,
+      j₁.comp (MulSemiringAction.awayHom (fun g' : G => a₁.2 g') g)
+        = (MulSemiringAction.toRingHom G (Localization S) g).comp j₁ := by
+    intro g
+    apply IsLocalization.ringHom_ext (Submonoid.powers ((a₁ : A)))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    rw [MulSemiringAction.awayHom_algebraMap, hj₁_alg, hj₁_alg]
+    exact (hcomp g x).symm
+  set CvcL : G → VariableChange (Localization S) := fun g => (Cvc₁ g).map j₁ with hCvcLdef
+  have hcocL : IsVCocycle CvcL := by
+    intro g h
+    show (Cvc₁ (g * h)).map j₁ = (Cvc₁ g).map j₁ * g • ((Cvc₁ h).map j₁)
+    rw [hcoc₁ g h, vcSMul_smul_def, vcSMul_eq_map, VariableChange.map_map, ← hequivj₁ g,
+      ← VariableChange.map_map]
+    exact map_mul (VariableChange.mapHom j₁) _ _
+  -- ### the coboundary over `L` (the fixed subring `Lᴳ` is local)
+  obtain ⟨E', hE'⟩ := exists_coboundary hfreeL hcocL
+  set D' : VariableChange (Localization S) := E'⁻¹ with hD'def
+  have hDcob : ∀ g : G, D' * CvcL g = g • D' := by
+    intro g
+    rw [hD'def, hE' g, smul_inv', inv_mul_cancel_left]
+  -- ### fraction forms of the splitting data over `L`
+  obtain ⟨pu, du, hpu⟩ := IsLocalization.exists_mk'_eq S ((D'.u : Localization S))
+  obtain ⟨pv, dv, hpv⟩ := IsLocalization.exists_mk'_eq S ((↑(D'.u⁻¹) : Localization S))
+  obtain ⟨pr, dr, hpr⟩ := IsLocalization.exists_mk'_eq S D'.r
+  obtain ⟨ps, ds, hps⟩ := IsLocalization.exists_mk'_eq S D'.s
+  obtain ⟨pt, dt, hpt⟩ := IsLocalization.exists_mk'_eq S D'.t
+  -- the unit relation, cleared of denominators
+  have hunit_rel : ∃ cc : S, (cc : A) * (pu * pv) = (cc : A) * ((du : A) * (dv : A)) := by
+    have huv1 : IsLocalization.mk' (Localization S) (pu * pv) (du * dv) = 1 := by
+      rw [IsLocalization.mk'_mul, hpu, hpv]
+      exact D'.u.mul_inv
+    have h3 := IsLocalization.mk'_spec (Localization S) (pu * pv) (du * dv)
+    rw [huv1, one_mul] at h3
+    obtain ⟨cc, hcc⟩ := (IsLocalization.eq_iff_exists S _).mp h3.symm
+    exact ⟨cc, hcc⟩
+  obtain ⟨cuv, hcuv⟩ := hunit_rel
+  -- ### preimages in the fixed subring
+  have hpre' : ∀ s : S, ∃ k : FixedPoints.subring A G,
+      k ∉ p ∧ algebraMap (FixedPoints.subring A G) A k = (s : A) := by
+    intro s
+    obtain ⟨k, hk, hke⟩ := Submonoid.mem_map.mp s.2
+    exact ⟨k, hk, hke⟩
+  choose pre hpre_mem hpre_eq using hpre'
+  have hmulmem : ∀ {x y : FixedPoints.subring A G}, x ∉ p → y ∉ p → x * y ∉ p :=
+    fun hx hy => p.primeCompl.mul_mem hx hy
+  -- ### Part 2 (spread): the preliminary invariant element `a₀` and the level `b₀ = a₁·a₀`
+  set a₀ : FixedPoints.subring A G :=
+    pre du * (pre dv * (pre dr * (pre ds * (pre dt * pre cuv)))) with ha₀def
+  have ha₀ : a₀ ∉ p :=
+    hmulmem (hpre_mem _) (hmulmem (hpre_mem _) (hmulmem (hpre_mem _)
+      (hmulmem (hpre_mem _) (hmulmem (hpre_mem _) (hpre_mem _)))))
+  have hdvdu : pre du ∣ a₀ := dvd_mul_right _ _
+  have hdvdv : pre dv ∣ a₀ := (dvd_mul_right _ _).mul_left _
+  have hdvdr : pre dr ∣ a₀ := ((dvd_mul_right _ _).mul_left _).mul_left _
+  have hdvds : pre ds ∣ a₀ := (((dvd_mul_right _ _).mul_left _).mul_left _).mul_left _
+  have hdvdt : pre dt ∣ a₀ :=
+    ((((dvd_mul_right _ _).mul_left _).mul_left _).mul_left _).mul_left _
+  have hdvdc : pre cuv ∣ a₀ :=
+    ((((dvd_mul_left _ _).mul_left _).mul_left _).mul_left _).mul_left _
+  have hbmem : a₁ * a₀ ∉ p := hmulmem ha₁ ha₀
+  set b₀ : A := ((a₁ * a₀ : FixedPoints.subring A G) : A) with hb₀def
+  have hfixb : ∀ g : G, g • b₀ = b₀ := fun g => (a₁ * a₀).2 g
+  have hbS : b₀ ∈ S :=
+    Submonoid.mem_map_of_mem _ (show a₁ * a₀ ∈ p.primeCompl from hbmem)
+  -- ### rings and maps at level `b₀`
+  have hjble : Submonoid.powers b₀ ≤ S.comap (RingHom.id A) := by
+    rintro x ⟨n, rfl⟩
+    exact Submonoid.mem_comap.mpr (Submonoid.pow_mem S hbS n)
+  set jb : Localization.Away b₀ →+* Localization S :=
+    IsLocalization.map (Localization S) (RingHom.id A) hjble with hjbdef
+  have hjb_alg : ∀ x : A,
+      jb (algebraMap A (Localization.Away b₀) x) = algebraMap A (Localization S) x :=
+    fun x => IsLocalization.map_eq hjble x
+  have hf₁bu : ∀ y : Submonoid.powers ((a₁ : A)),
+      IsUnit (algebraMap A (Localization.Away b₀) ((y : A))) := by
+    rintro ⟨y, n, rfl⟩
+    show IsUnit (algebraMap A (Localization.Away b₀) (((a₁ : A)) ^ n))
+    rw [map_pow]
+    exact (isUnit_algebraMap_away ⟨((a₀ : A)), rfl⟩).pow n
+  set f₁b : Localization.Away ((a₁ : A)) →+* Localization.Away b₀ :=
+    IsLocalization.lift hf₁bu with hf₁bdef
+  have hf₁b_alg : ∀ x : A,
+      f₁b (algebraMap A (Localization.Away ((a₁ : A))) x)
+        = algebraMap A (Localization.Away b₀) x :=
+    fun x => IsLocalization.lift_eq hf₁bu x
+  have hjbf₁b : jb.comp f₁b = j₁ := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers ((a₁ : A)))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    rw [hf₁b_alg, hjb_alg, hj₁_alg]
+  -- ### units at level `b₀` and the realization `Dₗ` of `D'`
+  have hdvdRb : ∀ s : S, pre s ∣ a₀ → ((s : A)) ∣ b₀ := by
+    intro s hd
+    rw [← hpre_eq s, hb₀def]
+    exact (map_dvd (algebraMap (FixedPoints.subring A G) A) hd).mul_left _
+  have hUdu : IsUnit (algebraMap A (Localization.Away b₀) ((du : A))) :=
+    isUnit_algebraMap_away (hdvdRb du hdvdu)
+  have hUdv : IsUnit (algebraMap A (Localization.Away b₀) ((dv : A))) :=
+    isUnit_algebraMap_away (hdvdRb dv hdvdv)
+  have hUdr : IsUnit (algebraMap A (Localization.Away b₀) ((dr : A))) :=
+    isUnit_algebraMap_away (hdvdRb dr hdvdr)
+  have hUds : IsUnit (algebraMap A (Localization.Away b₀) ((ds : A))) :=
+    isUnit_algebraMap_away (hdvdRb ds hdvds)
+  have hUdt : IsUnit (algebraMap A (Localization.Away b₀) ((dt : A))) :=
+    isUnit_algebraMap_away (hdvdRb dt hdvdt)
+  have hUc : IsUnit (algebraMap A (Localization.Away b₀) ((cuv : A))) :=
+    isUnit_algebraMap_away (hdvdRb cuv hdvdc)
+  have hUpu : IsUnit (algebraMap A (Localization.Away b₀) pu) := by
+    have h1 : IsUnit (algebraMap A (Localization.Away b₀)
+        ((cuv : A) * ((du : A) * (dv : A)))) := by
+      rw [map_mul, map_mul]
+      exact hUc.mul (hUdu.mul hUdv)
+    rw [← hcuv] at h1
+    exact isUnit_of_dvd_unit (map_dvd _ ⟨(cuv : A) * pv, by ring⟩) h1
+  set Dₗ : VariableChange (Localization.Away b₀) :=
+    ⟨hUpu.unit * hUdu.unit⁻¹,
+     algebraMap A _ pr * ↑hUdr.unit⁻¹,
+     algebraMap A _ ps * ↑hUds.unit⁻¹,
+     algebraMap A _ pt * ↑hUdt.unit⁻¹⟩ with hDₗdef
+  have hDₗj : Dₗ.map jb = D' := by
+    refine VariableChange.ext ?_ ?_ ?_ ?_
+    · apply Units.ext
+      show jb (↑hUpu.unit * (↑hUdu.unit⁻¹ : Localization.Away b₀)) = ((D'.u : Localization S))
+      rw [hUpu.unit_spec, map_mul_isUnit_inv_eq_mk' jb hUdu (hjb_alg pu) (hjb_alg _)]
+      exact hpu
+    · show jb (algebraMap A _ pr * ↑hUdr.unit⁻¹) = D'.r
+      rw [map_mul_isUnit_inv_eq_mk' jb hUdr (hjb_alg pr) (hjb_alg _)]
+      exact hpr
+    · show jb (algebraMap A _ ps * ↑hUds.unit⁻¹) = D'.s
+      rw [map_mul_isUnit_inv_eq_mk' jb hUds (hjb_alg ps) (hjb_alg _)]
+      exact hps
+    · show jb (algebraMap A _ pt * ↑hUdt.unit⁻¹) = D'.t
+      rw [map_mul_isUnit_inv_eq_mk' jb hUdt (hjb_alg pt) (hjb_alg _)]
+      exact hpt
+  -- ### the cocycle comparison over `A_{b₀}`, and its clearers
+  have hequivjb : ∀ g : G, jb.comp (MulSemiringAction.awayHom hfixb g)
+      = (MulSemiringAction.toRingHom G (Localization S) g).comp jb := by
+    intro g
+    apply IsLocalization.ringHom_ext (Submonoid.powers b₀)
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    rw [MulSemiringAction.awayHom_algebraMap, hjb_alg, hjb_alg]
+    exact (hcomp g x).symm
+  have hDCg : ∀ g : G, (Dₗ * (Cvc₁ g).map f₁b).map jb
+      = (Dₗ.map (MulSemiringAction.awayHom hfixb g)).map jb := by
+    intro g
+    have hL : (Dₗ * (Cvc₁ g).map f₁b).map jb = D' * CvcL g := by
+      rw [show (Dₗ * (Cvc₁ g).map f₁b).map jb = Dₗ.map jb * ((Cvc₁ g).map f₁b).map jb from
+        map_mul (VariableChange.mapHom jb) _ _, hDₗj]
+      congr 1
+      rw [VariableChange.map_map, hjbf₁b]
+    have hR : (Dₗ.map (MulSemiringAction.awayHom hfixb g)).map jb = g • D' := by
+      rw [VariableChange.map_map, hequivjb g, ← VariableChange.map_map, hDₗj,
+        ← vcSMul_eq_map, ← vcSMul_smul_def]
+    rw [hL, hR, hDcob g]
+  -- clearing over `L`: `L` is a localization of `A_{b₀}` at the image of `S`
+  letI : Algebra (Localization.Away b₀) (Localization S) := jb.toAlgebra
+  have hcompalgb : jb.comp (algebraMap A (Localization.Away b₀))
+      = algebraMap A (Localization S) := RingHom.ext hjb_alg
+  haveI : IsScalarTower A (Localization.Away b₀) (Localization S) :=
+    IsScalarTower.of_algebraMap_eq' hcompalgb.symm
+  haveI : IsLocalization (S.map (algebraMap A (Localization.Away b₀))) (Localization S) :=
+    IsLocalization.isLocalization_of_submonoid_le (Localization.Away b₀) (Localization S)
+      (Submonoid.powers b₀) S (Submonoid.powers_le.mpr hbS)
+  have hclear : ∀ x y : Localization.Away b₀, jb x = jb y →
+      ∃ cc : S, algebraMap A (Localization.Away b₀) ((cc : A)) * x
+        = algebraMap A (Localization.Away b₀) ((cc : A)) * y := by
+    intro x y hxy
+    have hxy' : algebraMap (Localization.Away b₀) (Localization S) x
+        = algebraMap (Localization.Away b₀) (Localization S) y := hxy
+    obtain ⟨c', hc'⟩ := (IsLocalization.eq_iff_exists
+      (S.map (algebraMap A (Localization.Away b₀))) (Localization S)).mp hxy'
+    obtain ⟨cc, hccS, hcceq⟩ := Submonoid.mem_map.mp c'.2
+    refine ⟨⟨cc, hccS⟩, ?_⟩
+    show algebraMap A (Localization.Away b₀) cc * x = algebraMap A (Localization.Away b₀) cc * y
+    rw [hcceq]
+    exact hc'
+  have hclear_dvd : ∀ {c c' : S} {x y : Localization.Away b₀}, c ∣ c' →
+      algebraMap A (Localization.Away b₀) ((c : A)) * x
+        = algebraMap A (Localization.Away b₀) ((c : A)) * y →
+      algebraMap A (Localization.Away b₀) ((c' : A)) * x
+        = algebraMap A (Localization.Away b₀) ((c' : A)) * y := by
+    rintro c c' x y ⟨e, rfl⟩ h
+    have hcoe : (((c * e : S) : A)) = (c : A) * (e : A) := rfl
+    rw [hcoe, map_mul]
+    calc algebraMap A (Localization.Away b₀) ((c : A))
+          * algebraMap A (Localization.Away b₀) ((e : A)) * x
+        = algebraMap A (Localization.Away b₀) ((e : A))
+          * (algebraMap A (Localization.Away b₀) ((c : A)) * x) := by ring
+      _ = algebraMap A (Localization.Away b₀) ((e : A))
+          * (algebraMap A (Localization.Away b₀) ((c : A)) * y) := by rw [h]
+      _ = algebraMap A (Localization.Away b₀) ((c : A))
+          * algebraMap A (Localization.Away b₀) ((e : A)) * y := by ring
+  have hcob4 : ∀ g : G, ∃ cc : S,
+      (algebraMap A (Localization.Away b₀) ((cc : A))
+          * (((Dₗ * (Cvc₁ g).map f₁b).u : Localization.Away b₀))
+        = algebraMap A (Localization.Away b₀) ((cc : A))
+          * (((Dₗ.map (MulSemiringAction.awayHom hfixb g)).u : Localization.Away b₀))) ∧
+      (algebraMap A (Localization.Away b₀) ((cc : A)) * (Dₗ * (Cvc₁ g).map f₁b).r
+        = algebraMap A (Localization.Away b₀) ((cc : A))
+          * (Dₗ.map (MulSemiringAction.awayHom hfixb g)).r) ∧
+      (algebraMap A (Localization.Away b₀) ((cc : A)) * (Dₗ * (Cvc₁ g).map f₁b).s
+        = algebraMap A (Localization.Away b₀) ((cc : A))
+          * (Dₗ.map (MulSemiringAction.awayHom hfixb g)).s) ∧
+      (algebraMap A (Localization.Away b₀) ((cc : A)) * (Dₗ * (Cvc₁ g).map f₁b).t
+        = algebraMap A (Localization.Away b₀) ((cc : A))
+          * (Dₗ.map (MulSemiringAction.awayHom hfixb g)).t) := by
+    intro g
+    have h4g := hDCg g
+    have hu : jb (((Dₗ * (Cvc₁ g).map f₁b).u : Localization.Away b₀))
+        = jb (((Dₗ.map (MulSemiringAction.awayHom hfixb g)).u : Localization.Away b₀)) := by
+      have := congrArg (fun z : VariableChange (Localization S) =>
+        ((z.u : Localization S))) h4g
+      simpa using this
+    have hr : jb ((Dₗ * (Cvc₁ g).map f₁b).r)
+        = jb ((Dₗ.map (MulSemiringAction.awayHom hfixb g)).r) := by
+      have := congrArg VariableChange.r h4g
+      simpa using this
+    have hs : jb ((Dₗ * (Cvc₁ g).map f₁b).s)
+        = jb ((Dₗ.map (MulSemiringAction.awayHom hfixb g)).s) := by
+      have := congrArg VariableChange.s h4g
+      simpa using this
+    have ht : jb ((Dₗ * (Cvc₁ g).map f₁b).t)
+        = jb ((Dₗ.map (MulSemiringAction.awayHom hfixb g)).t) := by
+      have := congrArg VariableChange.t h4g
+      simpa using this
+    obtain ⟨cu, hcu⟩ := hclear _ _ hu
+    obtain ⟨cr, hcr⟩ := hclear _ _ hr
+    obtain ⟨cs, hcs⟩ := hclear _ _ hs
+    obtain ⟨ct, hct⟩ := hclear _ _ ht
+    refine ⟨((cu * cr) * cs) * ct, ?_, ?_, ?_, ?_⟩
+    · exact hclear_dvd (((dvd_mul_right cu cr).mul_right cs).mul_right ct) hcu
+    · exact hclear_dvd (((dvd_mul_left cr cu).mul_right cs).mul_right ct) hcr
+    · exact hclear_dvd ((dvd_mul_left cs (cu * cr)).mul_right ct) hcs
+    · exact hclear_dvd (dvd_mul_left ct ((cu * cr) * cs)) hct
+  choose cg hcgu hcgr hcgs hcgt using hcob4
+  -- ### fold the clearers into a single element of `S` and enlarge to `aF`
+  set cAll : S := ∏ g : G, cg g with hcAlldef
+  have hdvdcg : ∀ g : G, cg g ∣ cAll := fun g =>
+    Finset.dvd_prod_of_mem cg (Finset.mem_univ g)
+  set aF : FixedPoints.subring A G := (a₁ * a₀) * pre cAll with haFdef
+  have haF : aF ∉ p := hmulmem hbmem (hpre_mem _)
+  have ha₁_dvd : a₁ ∣ aF := ⟨a₀ * pre cAll, by rw [haFdef]; ring⟩
+  have hpre_dvd : pre cAll ∣ aF := ⟨a₁ * a₀, by rw [haFdef]; ring⟩
+  have hfixaF : ∀ g : G, g • ((aF : A)) = ((aF : A)) := fun g => aF.2 g
+  -- ### the map from level `b₀` to level `aF`
+  have hb₀_dvd : b₀ ∣ ((aF : A)) := ⟨((pre cAll : A)), by rw [haFdef, hb₀def]; push_cast; ring⟩
+  have hfbFu : ∀ y : Submonoid.powers b₀,
+      IsUnit (algebraMap A (Localization.Away ((aF : A))) ((y : A))) := by
+    rintro ⟨y, n, rfl⟩
+    show IsUnit (algebraMap A (Localization.Away ((aF : A))) (b₀ ^ n))
+    rw [map_pow]
+    exact (isUnit_algebraMap_away hb₀_dvd).pow n
+  set fbF : Localization.Away b₀ →+* Localization.Away ((aF : A)) :=
+    IsLocalization.lift hfbFu with hfbFdef
+  have hfbF_alg : ∀ x : A,
+      fbF (algebraMap A (Localization.Away b₀) x)
+        = algebraMap A (Localization.Away ((aF : A))) x :=
+    fun x => IsLocalization.lift_eq hfbFu x
+  -- ### descent of cleared equations along `fbF`
+  have hUcAll : IsUnit (algebraMap A (Localization.Away ((aF : A))) ((cAll : A))) := by
+    apply isUnit_algebraMap_away
+    rw [← hpre_eq cAll]
+    exact map_dvd (algebraMap (FixedPoints.subring A G) A) hpre_dvd
+  have hdescend : ∀ {x y : Localization.Away b₀},
+      algebraMap A (Localization.Away b₀) ((cAll : A)) * x
+        = algebraMap A (Localization.Away b₀) ((cAll : A)) * y → fbF x = fbF y := by
+    intro x y h
+    have h2 := congrArg fbF h
+    rw [map_mul, map_mul, hfbF_alg] at h2
+    exact hUcAll.mul_left_cancel h2
+  -- ### the final assembly
+  refine ⟨aF, haF, ha₁_dvd, (Dₗ.map fbF)⁻¹, ?_⟩
+  intro f hf g
+  have hfeq : f = fbF.comp f₁b := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers ((a₁ : A)))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    rw [hf x, hf₁b_alg, hfbF_alg]
+  rw [hfeq, show (Cvc₁ g).map (fbF.comp f₁b) = ((Cvc₁ g).map f₁b).map fbF from
+      (VariableChange.map_map _ _ _).symm,
+    show (((Dₗ.map fbF)⁻¹).map (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g))
+        = ((Dₗ.map fbF).map (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g))⁻¹ from
+      map_inv (VariableChange.mapHom _) _, inv_inv, eq_inv_mul_iff_mul_eq]
+  have hfbFequiv : (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g).comp fbF
+      = fbF.comp (MulSemiringAction.awayHom hfixb g) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers b₀)
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    rw [hfbF_alg, MulSemiringAction.awayHom_algebraMap,
+      MulSemiringAction.awayHom_algebraMap, hfbF_alg]
+  have hL : Dₗ.map fbF * ((Cvc₁ g).map f₁b).map fbF = (Dₗ * (Cvc₁ g).map f₁b).map fbF :=
+    (map_mul (VariableChange.mapHom fbF) _ _).symm
+  have hRt : (Dₗ.map fbF).map (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g)
+      = (Dₗ.map (MulSemiringAction.awayHom hfixb g)).map fbF := by
+    rw [VariableChange.map_map, VariableChange.map_map, hfbFequiv]
+  rw [hL, hRt]
+  refine VariableChange.ext (Units.ext ?_) ?_ ?_ ?_
+  · show fbF (((Dₗ * (Cvc₁ g).map f₁b).u : Localization.Away b₀))
+      = fbF (((Dₗ.map (MulSemiringAction.awayHom hfixb g)).u : Localization.Away b₀))
+    exact hdescend (hclear_dvd (hdvdcg g) (hcgu g))
+  · exact hdescend (hclear_dvd (hdvdcg g) (hcgr g))
+  · exact hdescend (hclear_dvd (hdvdcg g) (hcgs g))
+  · exact hdescend (hclear_dvd (hdvdcg g) (hcgt g))
+
+open WeierstrassCurve in
+/-- **([a5-P-loc] Stages 4–5, ASSEMBLED — the core follows from a localized presentation.)**
+Given the Stage-3 output at `s` — an invariant `a₁ ∉ s`, an elliptic model `W₀R₁ / A_{a₁}` and
+a presentation `ρR₁` of the curve over `D(a₁)` (pullback square + zero-leg) — the FULL
+geometric core `exists_localModel_core_at` follows at `s`:
+
+* **Stage 4 (banked):** `exists_cocycle_hρact_of_presentation` turns the presentation into the
+  `VariableChange` cocycle `Cvc₁ / A_{a₁}` with model-invariance `hCvc₁` and the
+  action-compatibility `hρact₁`.
+* **Stage 5 (ring half):** `exists_coboundary_spread_away` splits the cocycle over the
+  semilocalization `L` (`Lᴳ` LOCAL ⟹ `exists_coboundary`) and spreads the coboundary `E` to a
+  smaller invariant basic open `D(aF)`, `a₁ ∣ aF`, `aF ∉ s`.
+* **The shrink `D(a₁) → D(aF)`:** the model and presentation base-change along the canonical
+  `f1F : A_{a₁} →+* A_{aF}`; the pullback square is `isPullback_projModelBaseChange₂` pasted
+  onto the Stage-3 square (`IsPullback.paste_vert`), the zero-leg is
+  `projModelZero_baseChange₂`, the cocycle transports coefficientwise, and `hρact` transports
+  by `actLoc_baseChange` — nothing geometric is re-proven at the smaller open. -/
+private theorem exists_localModel_core_of_presentation [Finite G] [IsAffine X]
+    (hact : IsCurveAction σ C σE)
+    (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
+    letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+    ∀ (_s : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(X, ⊤) G))))
+      (a₁ : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a₁ ∉ _s.asIdeal)
+      (W₀R₁ : WeierstrassCurve (Localization.Away ((a₁ : ↑Γ(X, ⊤)))))
+      (_ : W₀R₁.IsElliptic) (ρR₁ : projModel W₀R₁ ⟶ C.E)
+      (_ : IsPullback (projModelπ W₀R₁) ρR₁
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+          (Localization.Away ((a₁ : ↑Γ(X, ⊤))))))) (C.π ≫ X.isoSpec.hom))
+      (_ : projModelZero W₀R₁ ≫ ρR₁
+        = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a₁ : ↑Γ(X, ⊤)))))) ≫ X.isoSpec.inv ≫ C.zero),
+    ∃ (a : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a ∉ _s.asIdeal)
+      (W₀R : WeierstrassCurve (Localization.Away ((a : ↑Γ(X, ⊤))))),
+      W₀R.IsElliptic ∧
+      ∃ ρR : projModel W₀R ⟶ C.E,
+        IsPullback (projModelπ W₀R) ρR
+          (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a : ↑Γ(X, ⊤))))))) (C.π ≫ X.isoSpec.hom) ∧
+        projModelZero W₀R ≫ ρR
+          = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+              (Localization.Away ((a : ↑Γ(X, ⊤)))))) ≫ X.isoSpec.inv ≫ C.zero ∧
+        ∃ (CvcR : G → VariableChange (Localization.Away ((a : ↑Γ(X, ⊤)))))
+          (hCvcR : ∀ g, CvcR g
+            • (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g)) = W₀R),
+          (∀ g, (eqToHom (congrArg projModel (hCvcR g).symm)
+              ≫ (projModelVCIso (CvcR g)
+                  (W₀R.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))).hom
+              ≫ projModelBaseChange (MulSemiringAction.awayHom
+                  (fun g' : G => a.2 g') g) W₀R) ≫ ρR = ρR ≫ σE.hom g) ∧
+          ∃ (E : VariableChange (Localization.Away ((a : ↑Γ(X, ⊤))))),
+            ∀ g : G, CvcR g
+              = E * (E.map (MulSemiringAction.awayHom (fun g' : G => a.2 g') g))⁻¹ := by
+  letI := σ.gammaMulSemiringAction (isStableOpen_top σ)
+  intro s a₁ ha₁ W₀R₁ hell₁ ρR₁ hρsq₁ hρzero₁
+  classical
+  cases nonempty_fintype G
+  set p : Ideal (FixedPoints.subring ↑Γ(X, ⊤) G) := s.asIdeal with hpdef
+  haveI : p.IsPrime := s.isPrime
+  have hfreeA : IsFreeAlgebraAction G ℤ ↑Γ(X, ⊤) :=
+    σ.isFreeAlgebraAction_of_free (isStableOpen_top σ) (isAffineOpen_top X) hfreeX
+  -- ### Stage 4 at `a₁`: the cocycle, its model-invariance and the action-compatibility
+  obtain ⟨Cvc₁, hCvc₁, hcoc₁, hρact₁⟩ :=
+    exists_cocycle_hρact_of_presentation hact a₁ W₀R₁ ρR₁ hρsq₁ hρzero₁
+  -- the cocycle law in explicit `awayHom` form (the localized action IS `map (awayHom …)`)
+  have hcoc₁' : ∀ g h : G, Cvc₁ (g * h)
+      = Cvc₁ g * (Cvc₁ h).map (MulSemiringAction.awayHom (fun g' : G => a₁.2 g') g) := by
+    letI := MulSemiringAction.away (fun g' : G => a₁.2 g')
+    intro g h
+    rw [hcoc₁ g h, vcSMul_smul_def, vcSMul_eq_map]
+    rfl
+  -- ### Stage 5 (ring half): the coboundary `E` at a smaller invariant basic open `D(aF)`
+  obtain ⟨aF, haF, hdvd, E, hEcob⟩ := exists_coboundary_spread_away hfreeA p a₁ ha₁ Cvc₁ hcoc₁'
+  -- ### the canonical shrink `f1F : A_{a₁} →+* A_{aF}`
+  have hdvdA : ((a₁ : ↑Γ(X, ⊤))) ∣ ((aF : ↑Γ(X, ⊤))) := by
+    obtain ⟨d, hd⟩ := hdvd
+    exact ⟨((d : ↑Γ(X, ⊤))), by rw [hd]; push_cast; ring⟩
+  have hf1u : ∀ y : Submonoid.powers ((a₁ : ↑Γ(X, ⊤))),
+      IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((aF : ↑Γ(X, ⊤))))
+        ((y : ↑Γ(X, ⊤)))) := by
+    rintro ⟨y, n, rfl⟩
+    show IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((aF : ↑Γ(X, ⊤))))
+      (((a₁ : ↑Γ(X, ⊤))) ^ n))
+    rw [map_pow]
+    exact (isUnit_algebraMap_away hdvdA).pow n
+  set f1F : Localization.Away ((a₁ : ↑Γ(X, ⊤)))
+      →+* Localization.Away ((aF : ↑Γ(X, ⊤))) := IsLocalization.lift hf1u with hf1Fdef
+  have hf1F_alg : ∀ x : ↑Γ(X, ⊤),
+      f1F (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₁ : ↑Γ(X, ⊤)))) x)
+        = algebraMap ↑Γ(X, ⊤) (Localization.Away ((aF : ↑Γ(X, ⊤)))) x :=
+    fun x => IsLocalization.lift_eq hf1u x
+  have hf1Fequiv : ∀ g : G,
+      (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g).comp f1F
+        = f1F.comp (MulSemiringAction.awayHom (fun g' : G => a₁.2 g') g) := by
+    intro g
+    apply IsLocalization.ringHom_ext (Submonoid.powers ((a₁ : ↑Γ(X, ⊤))))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply]
+    rw [hf1F_alg, MulSemiringAction.awayHom_algebraMap,
+      MulSemiringAction.awayHom_algebraMap, hf1F_alg]
+  have halgF : f1F.comp (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₁ : ↑Γ(X, ⊤)))))
+      = algebraMap ↑Γ(X, ⊤) (Localization.Away ((aF : ↑Γ(X, ⊤)))) := RingHom.ext hf1F_alg
+  have hSpecF : Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+        (Localization.Away ((aF : ↑Γ(X, ⊤))))))
+      = Spec.map (CommRingCat.ofHom f1F)
+        ≫ Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a₁ : ↑Γ(X, ⊤)))))) := by
+    rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, halgF]
+  -- ### the transported model, presentation and legs at `aF`
+  haveI := hell₁
+  have hell : (W₀R₁.map f1F).IsElliptic := inferInstance
+  have hρsq : IsPullback (projModelπ (W₀R₁.map f1F)) (projModelBaseChange f1F W₀R₁ ≫ ρR₁)
+      (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+        (Localization.Away ((aF : ↑Γ(X, ⊤))))))) (C.π ≫ X.isoSpec.hom) := by
+    rw [hSpecF]
+    exact (isPullback_projModelBaseChange₂ f1F W₀R₁).flip.paste_vert hρsq₁
+  have hρzero : projModelZero (W₀R₁.map f1F) ≫ projModelBaseChange f1F W₀R₁ ≫ ρR₁
+      = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+          (Localization.Away ((aF : ↑Γ(X, ⊤)))))) ≫ X.isoSpec.inv ≫ C.zero := by
+    rw [hSpecF, ← Category.assoc, projModelZero_baseChange₂ f1F W₀R₁, Category.assoc,
+      hρzero₁]
+    simp only [Category.assoc]
+  -- ### the transported cocycle: model-invariance and `hρact` (via `actLoc_baseChange`)
+  have hCvcR : ∀ g : G, ((Cvc₁ g).map f1F)
+      • ((W₀R₁.map f1F).map (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g))
+      = W₀R₁.map f1F := by
+    intro g
+    rw [WeierstrassCurve.map_map, hf1Fequiv g, ← WeierstrassCurve.map_map,
+      WeierstrassCurve.map_variableChange, hCvc₁ g]
+  have hρact : ∀ g : G,
+      (eqToHom (congrArg projModel (hCvcR g).symm)
+          ≫ (projModelVCIso ((Cvc₁ g).map f1F)
+              ((W₀R₁.map f1F).map (MulSemiringAction.awayHom
+                (fun g' : G => aF.2 g') g))).hom
+          ≫ projModelBaseChange (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g)
+              (W₀R₁.map f1F))
+        ≫ projModelBaseChange f1F W₀R₁ ≫ ρR₁
+      = (projModelBaseChange f1F W₀R₁ ≫ ρR₁) ≫ σE.hom g := by
+    intro g
+    have hkey := actLoc_baseChange f1F
+      (MulSemiringAction.awayHom (fun g' : G => a₁.2 g') g)
+      (MulSemiringAction.awayHom (fun g' : G => aF.2 g') g) (hf1Fequiv g) W₀R₁ (Cvc₁ g)
+      ((Cvc₁ g).map f1F) rfl (hCvc₁ g) (hCvcR g)
+      (eqToHom (congrArg projModel (hCvc₁ g).symm)
+        ≫ (projModelVCIso (Cvc₁ g)
+            (W₀R₁.map (MulSemiringAction.awayHom (fun g' : G => a₁.2 g') g))).hom
+        ≫ projModelBaseChange (MulSemiringAction.awayHom (fun g' : G => a₁.2 g') g) W₀R₁)
+      (by simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp])
+    rw [← Category.assoc, hkey, Category.assoc, hρact₁ g, ← Category.assoc]
+  exact ⟨aF, haF, W₀R₁.map f1F, hell, projModelBaseChange f1F W₀R₁ ≫ ρR₁, hρsq, hρzero,
+    fun g => (Cvc₁ g).map f1F, hCvcR, hρact, E, hEcob f1F hf1F_alg⟩
+
 /-! #### The `[a5]` reduction: splitting off the section-pair gap
 
 `locallyWeierstrass_quotientπ` below quantifies over a pair `(π', zero')` carrying the descent
@@ -2492,36 +3016,35 @@ this is how `locallyWeierstrass_quotientπ_of_globalModel` specializes), but in 
 model is obstructed by the class of `ω` in `Pic Γ(X,⊤)`, and the core must be produced
 semilocally:
 
-Proof plan (KM 2.2.5–2.2.6 + the a5-P-loc board):
-* **Charts.** The fibre of `Spec A → Spec Aᴳ` over `s` is one finite `G`-orbit (`Aᴳ ⊆ A` is an
-  invariant-integral extension; mathlib's `Algebra.IsInvariant` transitivity). Extract per-point
-  charts from `C.localModel` via `EllipticCurveGeom.atlas` / `WeierstrassAtlasData` (fields
-  `W`, `e`, `compat_π`, `compat_zero`; `LocalPresentation` for a single pointed chart) and shrink
-  to basic opens `D(f_i)`. The `G`-translates of one chart already cover the orbit (equivariance).
-* **Semilocalize.** Over `L := Localization S`, `S = s.primeCompl.map (algebraMap Aᴳ A)` (the ring
-  of `exists_away_invariant_descent` Part 1; `Localization S` action by `localizationInvariant`,
-  freeness by `isFreeAlgebraAction_of_isLocalization`), the fixed subring `Lᴳ` is LOCAL by
-  `isLocalRing_fixedPoints_of_isLocalization`, and the `D(f_i)` cover `Spec L`.
-* **Split the chart cocycle + glue the model over `L`.** The chart-difference `VariableChange`
-  Čech 1-cocycle (`InvariantDifferential.transVC` across overlapping charts) splits over the
-  semilocal `L`: unit part (avoidance of the finitely many orbit maximals; the `twistedInvariants`
-  module is projective hence free over `Lᴳ` — the mechanism inside
-  `exists_unit_smul_eq_of_isLocalRing`), additive part by affine Čech vanishing (partition of unity
-  in the `f_i`; cf. `exists_sub_smul_eq_of_isCocycle`). Correct the charts (cf. `AdaptedModel`,
-  `pointedIso_hom_of_transVC_eq_one`) and glue the coefficients (structure-sheaf sheaf condition on
-  the basic cover) to a model `W₀L / L`; the presentation `ρL` glues via
-  `Scheme.OpenCover.glueMorphisms` with overlaps discharged by `glueMorphisms_hf_of_agree`
-  (`SpecBasicOpenAway`); the two legs use `isPullback_projModelBaseChange` and
-  `projModelZero_baseChange`.
-* **`G`-cocycle + coboundary over `L`.** `pointedIso_exists_variableChange` (T-W7.1b) over `L`
-  gives `CvcL` (`isVCocycle_of_curveActionFamily'`); since `Lᴳ` is LOCAL, `exists_coboundary`
-  splits it to `E_L` directly (no spread needed at the `L` level).
-* **SPREAD to `A_a`.** The finitely many coefficients of `W₀L`, the entries of `CvcL`/`E_L`, and
-  the presentation `ρL` have finitely many denominators in `S`; clear them into a single invariant
-  `a ∉ s` exactly as in Part 2 of `exists_away_invariant_descent` (`fixedAwayMap`,
-  `mem_range_fixedPoints_awayMap_iff`, `existsUnique_factor_fixedPoints_away`), re-gluing the
-  finitely many corrected chart isos over the basic cover of `D((a : A))` to produce `ρR` and its
-  two legs; `hρact` follows from `projModelVCIso_*`. -/
+Proof state (KM 2.2.5–2.2.6 + the a5-P-loc board; Stages per board v10.339/v10.340/v10.343):
+* **Stages 1–2 (PROVEN, in-body).** The free base action `hfreeA`, and the semilocalization at
+  `s`: `S = s.primeCompl.map (algebraMap Aᴳ A)`, the localized action on `L := Localization S`
+  (`localizationInvariant`), `Lᴳ` LOCAL (`isLocalRing_fixedPoints_of_isLocalization`), freeness
+  `hfreeL` (`isFreeAlgebraAction_of_isLocalization`).
+* **Stage 3 (THE RESIDUAL — the `hpres` sorry).** Produce the presentation at an invariant
+  basic open: `a₁ ∉ s`, an elliptic `W₀R₁ / A_{a₁}` and `ρR₁ : projModel W₀R₁ ⟶ E` with the
+  pullback square against `Spec A_{a₁} → Spec A ≅ X` and the zero-leg. Route: the fibre of
+  `Spec A → Spec Aᴳ` over `s` is one finite `G`-orbit (`invariantsπ_apply_eq_iff` +
+  `invariantsπ_surjective`, CITE not re-prove); extract per-point charts from `C.localModel`
+  via `EllipticCurveGeom.atlas` / `WeierstrassAtlasData` / `LocalPresentation` and shrink to
+  basic opens `D(f_i)` covering `Spec L`; adapt them to a global `ω` over the semilocal `L`
+  (`nonempty_omegaBasis_of_finite_maximalSpectrum`, ForMathlib/SemilocalOmegaBasis — modulo the
+  affine `QCoh ≃ Modules` bridge `hInv`/`hTriv`, boarded residual (i)) so the chart-difference
+  cocycle `InvariantDifferential.transVC` lands in the nilpotent translation group
+  `T = {(1,r,s,t)}`; split that chart-Čech cocycle by the partition-of-unity affine-Čech
+  vanishing (ForMathlib/AffineCechH1, extended to the finite basic cover — boarded residual
+  (ii)); correct the charts (`pointedIso_hom_of_transVC_eq_one`), glue the coefficients
+  (structure-sheaf sheaf condition) to `W₀L / L` and spread them to a single `a₁ ∉ s`; glue the
+  presentation `ρR₁` natively over `A_{a₁}` (`Scheme.OpenCover.glueMorphisms` +
+  `glueMorphisms_hf_of_agree`; legs by `isPullback_projModelBaseChange` and
+  `projModelZero_baseChange`) — F's direct-over-`A_a` route, board v10.339 finding 2 (NO EGA IV
+  §8 morphism-spreading).
+* **Stages 4–5 (PROVEN — `exists_localModel_core_of_presentation`).** Stage 4
+  (`exists_cocycle_hρact_of_presentation`) turns the presentation into the cocycle
+  `CvcR`/`hCvcR`/`hρact`; Stage 5 (`exists_coboundary_spread_away`) splits it over `L`
+  (`exists_coboundary`, `Lᴳ` local) and spreads the coboundary `E` to `D(aF)`, `a₁ ∣ aF`;
+  the model/presentation/cocycle shrink `D(a₁) → D(aF)` by base change
+  (`actLoc_baseChange` for `hρact`). So the ONE residual gap is exactly Stage 3 (`hpres`). -/
 private theorem exists_localModel_core_at [Finite G] [IsAffine X]
     (hact : IsCurveAction σ C σE)
     (hfreeX : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
@@ -2577,20 +3100,43 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
   -- WeierstrassInvariantLocal:370–371 to avoid the `Algebra ℤ (Localization S)` diamond.)
   haveI := isLocalRing_fixedPoints_of_isLocalization p hcomp
   have hfreeL := isFreeAlgebraAction_of_isLocalization hcomp hfreeA
-  -- ### Stage 3 (THE CRUX — residual): over the semilocal `L := Localization S` (whose maximal
-  -- spectrum is finite since `L` is module-finite over the LOCAL `Lᴳ = (Aᴳ)_p`, hence `Pic L = 0`
-  -- by `CommRing.Pic.instSubsingleton…`), glue a global Weierstrass model `W₀L / L` presenting the
-  -- base-changed curve, then spread the finitely many ring coefficients + the corrected chart
-  -- isos to a basic open `D(a)`, `a ∉ p`, and glue `ρR` NATIVELY over `A_a`.  This needs two
-  -- results not yet in the library (see the accompanying report):
-  --   (i)  `Nonempty (OmegaBasis G_L)` from `Subsingleton (Pic L)` (the `ω`-line-bundle ↔ ring-Pic
-  --        bridge over the affine `Spec L`);  and
-  --   (ii) additive Čech-H¹ vanishing over the affine `Spec L` for the *nilpotent* `(r,s,t)`
-  --        translation cocycle `transVC` (the flagged research risk; `exists_sub_smul_eq_of_isCocycle`
-  --        is Galois-H¹, not the Čech vanishing needed here).
-  -- Stage 4 (`exists_cocycle_hρact_of_presentation`, DONE) then supplies `CvcR/hCvcR/hρact` at
-  -- `A_a`, and Stage 5 spreads the coboundary `E` (from `exists_coboundary` over the LOCAL `Lᴳ`).
-  sorry
+  -- ### Stage 3 (THE CRUX — the ONE residual): the localized presentation.  Over the semilocal
+  -- `L := Localization S` above (whose maximal spectrum is finite since `L` is module-finite
+  -- over the LOCAL `Lᴳ = (Aᴳ)_p`, hence `Pic L = 0`), glue a global Weierstrass model `W₀L / L`
+  -- presenting the base-changed curve, then spread the finitely many ring coefficients + the
+  -- corrected chart isos to a basic open `D(a₁)`, `a₁ ∉ p`, and glue `ρR₁` NATIVELY over
+  -- `A_{a₁}` (board v10.339 finding 2 — no EGA IV §8).  Concretely (v10.340 + T-E4D):
+  --   (3a) `Nonempty (OmegaBasis …)` over `Spec L` from `Pic L = 0`
+  --        (`nonempty_omegaBasis_of_finite_maximalSpectrum`, ForMathlib/SemilocalOmegaBasis) —
+  --        its `hInv`/`hTriv` inputs are the affine `QCoh ≃ Modules` bridge (boarded residual
+  --        (i)); adapt the orbit charts of `C.localModel` (via `EllipticCurveGeom.atlas` /
+  --        `LocalPresentation`) to the global `ω`, so the chart-difference cocycle
+  --        `InvariantDifferential.transVC` lands in the nilpotent `T = {(1,r,s,t)}`;
+  --   (3b) split the `T`-valued chart-Čech cocycle over the finite basic cover of `Spec L` —
+  --        central extension `0 → (L,+) → T → (L²,+) → 0`, each additive layer by the
+  --        partition-of-unity split (`ForMathlib/AffineCechH1`, extended from the 2-cover to the
+  --        n-cover per the v10.339-addendum recipe — boarded residual (ii));
+  --   (3c) correct the charts (`pointedIso_hom_of_transVC_eq_one`), glue coefficients to
+  --        `W₀L / L` (structure-sheaf sheaf condition), spread them to a single `a₁ ∉ p`, and
+  --        glue the presentation over `A_{a₁}` (`Scheme.OpenCover.glueMorphisms` +
+  --        `glueMorphisms_hf_of_agree`; legs via `isPullback_projModelBaseChange` /
+  --        `projModelZero_baseChange`).
+  -- Stages 4–5 are DONE: `exists_localModel_core_of_presentation` (Stage-4 consumption +
+  -- `exists_coboundary_spread_away` + the `D(a₁) → D(aF)` shrink) closes the core from `hpres`.
+  have hpres : ∃ (a₁ : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a₁ ∉ p)
+      (W₀R₁ : WeierstrassCurve (Localization.Away ((a₁ : ↑Γ(X, ⊤))))),
+      W₀R₁.IsElliptic ∧
+      ∃ ρR₁ : projModel W₀R₁ ⟶ C.E,
+        IsPullback (projModelπ W₀R₁) ρR₁
+          (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+            (Localization.Away ((a₁ : ↑Γ(X, ⊤))))))) (C.π ≫ X.isoSpec.hom) ∧
+        projModelZero W₀R₁ ≫ ρR₁
+          = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤)
+              (Localization.Away ((a₁ : ↑Γ(X, ⊤)))))) ≫ X.isoSpec.inv ≫ C.zero := by
+    sorry
+  obtain ⟨a₁, ha₁, W₀R₁, hell₁, ρR₁, hρsq₁, hρzero₁⟩ := hpres
+  exact exists_localModel_core_of_presentation hact hfreeX s a₁ ha₁ W₀R₁ hell₁ ρR₁ hρsq₁
+    hρzero₁
 
 open WeierstrassCurve in
 /-- **([a5-P-loc], the localized model package — assembled from the geometric core)** The full
