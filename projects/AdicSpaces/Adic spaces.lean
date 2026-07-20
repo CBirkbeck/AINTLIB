@@ -80,12 +80,14 @@ import «Adic spaces».CharacteristicSubgroup
 import «Adic spaces».SheafyEndpoints
 import «Adic spaces».SpaCompact
 import «Adic spaces».SpaCompactNoHArch
+import «Adic spaces».SpaParameterPerturbation
 import «Adic spaces».SpaQCviaSpvAI
 import «Adic spaces».ExampleLaurentSeries
 import «Adic spaces».ExampleUnitDisc
 import «Adic spaces».FJP.FiniteJetMain
 import «Adic spaces».FJP.FiniteJetSheafyEndpoints
 import «Adic spaces».SpaRationalOpenComparison
+import «Adic spaces».SpaRationalOpenHomeomorph
 import «Adic spaces».Vendored.XiaMvPowerSeriesEquiv
 import «Adic spaces».Vendored.CoramMvRestricted
 import «Adic spaces».Vendored.CoramMvGaussNorm
