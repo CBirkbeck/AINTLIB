@@ -50,12 +50,12 @@ agree on `d`).
 This theorem is thus a *pure reshuffling* of the gluing statement: it converts
 "gluing on `C`" into "gluing on `V`" + "surjective refinement map `τ`". The
 intended use is the **standard-cover reduction** (Wedhorn Lemma 8.34 / Zavyalov §2)
-— feed `RationalCovering.refines_by_standard_cover` to produce the refinement,
+— feed `RationalCoveringData.refines_by_standard_cover` to produce the refinement,
 then Laurent-cover induction to discharge `hV_glue`. -/
 theorem tateAcyclicity_gluing_via_refinement
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (V_covers : Finset (RationalLocData A))
     (hV_subset : ∀ D ∈ V_covers, rationalOpen D.T D.s ⊆
       rationalOpen C.base.T C.base.s)
@@ -149,7 +149,7 @@ private theorem tateAcyclicity_gluing_descent_witness_aux
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -177,7 +177,7 @@ theorem tateAcyclicity_gluing_descent_witness
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -206,7 +206,7 @@ theorem tateAcyclicity_gluing_witness_restricts
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -250,7 +250,7 @@ theorem tateAcyclicity_gluing
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -303,7 +303,7 @@ theorem tateAcyclicity
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty) :
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) :
     -- Part 1: Zero kernel (separation)
     (∀ x : presheafValue C.base,
       (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
@@ -404,7 +404,7 @@ theorem rationalCovering_hasSeparation
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp) :
     ∀ x y : presheafValue C.base,
@@ -438,7 +438,7 @@ theorem rationalCovering_hasGluing
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)

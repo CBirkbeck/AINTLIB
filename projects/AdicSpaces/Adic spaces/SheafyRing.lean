@@ -315,7 +315,7 @@ variable {A : Type w} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 **`Spa`-uniform** (pointwise in the valuation, no `A⁺`-membership test) — Kedlaya's
 standard rational coverings are of this form (`StandardRefinement.lean` provides the
 generation construction). Consequently a standard datum instantiates as a
-`RationalCovering` at **every** choice of `A⁺` simultaneously (`toCovering`) —
+`RationalCoveringData` at **every** choice of `A⁺` simultaneously (`toCovering`) —
 Kedlaya Remark 1.6.9's mechanism. -/
 structure StandardCoverData (A : Type w) [CommRing A] [TopologicalSpace A]
     [IsTopologicalRing A] where
@@ -339,7 +339,7 @@ structure StandardCoverData (A : Type w) [CommRing A] [TopologicalSpace A]
 /-- A standard cover datum instantiates as a rational covering at **every** choice of
 `A⁺` (the conditions were `Spa`-uniform). -/
 def StandardCoverData.toCovering [PlusSubring A] (S : StandardCoverData A) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := S.base
   covers := S.covers
   hsubset := fun D hD v hv =>

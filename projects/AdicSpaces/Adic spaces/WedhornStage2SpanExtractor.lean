@@ -32,7 +32,7 @@ ideal-theoretic span-top conclusion.
 
 * The **outside-base rescue** must be supplied by the caller; it cannot
   be derived from the `h_in_D` / `h_cover_D` data Theorem A produces
-  because `RationalCovering.hcover` only covers `rationalOpen C.base.T
+  because `RationalCoveringData.hcover` only covers `rationalOpen C.base.T
   C.base.s`, not all of `Spa A A⁺`.
 * The **strengthened per-D cover** (with `¬ v.vle f 0` clause) is the
   third-clause strengthening of Tertiary's
@@ -50,7 +50,7 @@ ideal-theoretic span-top conclusion.
   `StandardCoverConditionalBridge.lean`, `WedhornCompactExtraction.lean`,
   `WedhornStandardCoverRefinement.lean`, or `WedhornC1Assembly.lean`.
 * Imports only `StandardCover` (for `Spa`, `rationalOpen`,
-  `RationalCovering`, `spanTop_iff_noCommonZero_spa`). -/
+  `RationalCoveringData`, `spanTop_iff_noCommonZero_spa`). -/
 
 namespace ValuationSpectrum
 
@@ -79,7 +79,7 @@ theorem span_top_via_strengthened_cover_and_outside_rescue
     [IsRingOfIntegralElements (A⁺ : Subring A)] (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_cover_D_nonzero : ∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
       ∃ f ∈ mk_S_D D,

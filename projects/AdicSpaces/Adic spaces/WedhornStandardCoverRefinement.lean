@@ -83,7 +83,7 @@ Mirror of `StandardCover.exists_single_f_refinement_of_standardShape`
 (`StandardCover.lean:519`) with the additional explicit `t` parameter
 documenting the manager-target shape. -/
 theorem exists_single_f_refinement_at_t_of_standardShape
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (f₀ : A)
     (hD_shape : rationalOpen D.T D.s =
       rationalOpen (insert f₀ C.base.T) C.base.s)
@@ -122,7 +122,7 @@ the `mul_vle_mul_left` of `D.s ↦ 0` against `σ`, again using `hσ`.
   single-`f` consumer
   `exists_single_f_refinement_at_t_of_singleton_unit_rescaled` below. -/
 theorem rationalOpen_image_union_base_eq_of_unit_rescaled
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (hD_sub : rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s)
     (σ : Aˣ) (hσ : (σ : A) * D.s = C.base.s) :
     rationalOpen (D.T.image ((σ : A) * ·) ∪ C.base.T) C.base.s =
@@ -186,7 +186,7 @@ multi-`F`-style cancellation `v.vle ((σ : A) * t) C.base.s ↔ v.vle t D.s`
 `(σ : A) * D.s` rewritten as `C.base.s` via `hσ`. Specialisation of
 `rationalOpen_image_union_base_eq_of_unit_rescaled` to `D.T = {t}`. -/
 theorem exists_single_f_refinement_at_t_of_singleton_unit_rescaled
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (hD_sub : rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s)
     (t : A) (hT : D.T = {t})
     (σ : Aˣ) (hσ : (σ : A) * D.s = C.base.s)
@@ -310,7 +310,7 @@ Laurent pieces, and the cover `{V_τ}` is the natural target of
 Wedhorn's Lemma 8.33 (binary Laurent cover acyclicity) for cover-level
 acyclicity.
 
-These bridges intentionally avoid the **full `RationalCovering`
+These bridges intentionally avoid the **full `RationalCoveringData`
 packaging**: each per-piece `RationalLocData A` would require a
 non-trivial `hopen` verification (the localization at `σ⁻¹ * τ` having
 the right openness data — which depends on whether `τ` is a unit,
@@ -405,7 +405,7 @@ theorem exists_single_f_refinement_at_t_via_dominating_unit
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
       MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (D : RationalLocData A) (hD : D ∈ C.covers)
+    (C : RationalCoveringData A) (D : RationalLocData A) (hD : D ∈ C.covers)
     (v : Spv A) (hv : v ∈ rationalOpen D.T D.s)
     (t : A) (ht : t ∈ D.T)
     (_hvt : v.vle t D.s) (_hvD_s : ¬ v.vle D.s 0) :
@@ -549,7 +549,7 @@ piece. -/
 structure WedhornStep2RefinementCarryingFactor (A : Type*)
     [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A) where
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A) where
   /-- The Wedhorn σ parameter (`f := σ · t · D.s^(N-1)`). -/
   σ : A
   /-- The Spa-quasi-compactness N-choice exponent. -/
@@ -574,7 +574,7 @@ below as `wedhorn_834_step2_factor_carrying_constructor_target`). -/
 def WedhornStep2FactorCarryingProvider {A : Type*}
     [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A]
-    (C : RationalCovering A) : Prop :=
+    (C : RationalCoveringData A) : Prop :=
   ∀ (D : RationalLocData A), D ∈ C.covers →
   ∀ (t : A), t ∈ D.T →
     Nonempty (WedhornStep2RefinementCarryingFactor A C D t)
@@ -597,7 +597,7 @@ unpacks it to feed the per-call existential of T195's `h_struct`. -/
 theorem wedhorn_834_h_struct_via_step2_factor_carrying {A : Type*}
     [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_provider : WedhornStep2FactorCarryingProvider C) :
     ∀ (D : RationalLocData A), D ∈ C.covers →
     ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →
@@ -644,7 +644,7 @@ package, which then mechanically feeds `h_struct` via the bridge above. -/
 def wedhorn_834_step2_factor_carrying_constructor_target {A : Type*}
     [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A]
-    (C : RationalCovering A) : Prop :=
+    (C : RationalCoveringData A) : Prop :=
   WedhornStep2FactorCarryingProvider C
 
 /-! ### T200: per-call data → factor-carrying provider lower bridge
@@ -701,7 +701,7 @@ natural per-call shape of Wedhorn 8.34(ii) Step-2 data. The four sub-
 inputs (Cor 7.32 σ, Spa-quasi-compact N, algebraic identity, v-bound)
 can be discharged independently inside the existential. -/
 theorem WedhornStep2FactorCarryingProvider_of_per_call_carrying
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_carrying : ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (t : A), t ∈ D.T →
         ∃ (σ : A) (N : ℕ),
@@ -767,7 +767,7 @@ family is:
 ```
 theorem exists_per_call_carrying_factor_for_<cover_family>
     [<Tate hypothesis bundle>]
-    (P : PairOfDefinition A) (...) (C : RationalCovering A)
+    (P : PairOfDefinition A) (...) (C : RationalCoveringData A)
     (h_cover_shape : <cover-family-specific structural hypotheses>) :
     ∀ (D : RationalLocData A), D ∈ C.covers →
     ∀ (t : A), t ∈ D.T →
@@ -919,7 +919,7 @@ identity carried alongside the rationalOpen-side conclusion. -/
 def exists_single_f_factor_carrying_refinement_at_t_target
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A) : Prop :=
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A) : Prop :=
   ∃ (σ : A) (N : ℕ) (f : A),
     f = σ * t * D.s ^ N ∧
     C.base.s = D.s * f ∧
@@ -943,7 +943,7 @@ rationalOpen consumers, not for the carrying-factor data itself). -/
 theorem WedhornStep2RefinementCarryingFactor_of_strengthened_single_f
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A)
     (h_target : exists_single_f_factor_carrying_refinement_at_t_target C D t) :
     Nonempty (WedhornStep2RefinementCarryingFactor A C D t) := by
   obtain ⟨σ, N, f, rfl, h_factor, _h_subset, h_T_D_in_plus, h_v_bound⟩ :=
@@ -961,7 +961,7 @@ indirectly via the per-`(D, t)` carrying-factor structure. -/
 theorem WedhornStep2FactorCarryingProvider_of_strengthened_single_f
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_target : ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (t : A), t ∈ D.T →
         exists_single_f_factor_carrying_refinement_at_t_target C D t) :
@@ -979,7 +979,7 @@ target. -/
 theorem wedhorn_834_h_struct_via_strengthened_single_f
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_target : ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (t : A), t ∈ D.T →
         exists_single_f_factor_carrying_refinement_at_t_target C D t) :
@@ -1054,7 +1054,7 @@ to `w ∈ Spa(Loc D.s, ⁺)` via `exists_localization_lift_of_rationalOpen`
 theorem exists_single_f_factor_carrying_refinement_at_t_via_localisation_transfer
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A)
     (hA₀_le : D.P.A₀ ≤ A⁺)
     (σ : A) (N : ℕ) (f : A)
     (hf_eq : f = σ * t * D.s ^ N)
@@ -1131,7 +1131,7 @@ singleton bound via `Finset.mem_singleton_self`. -/
 theorem localised_sigma_reducer_to_single_f_bound_for_step2
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A)
     (σ : A) (N : ℕ) (f : A) (_hf_eq : f = σ * t * D.s ^ N)
     (T_test_loc : Finset (Localization.Away D.s))
     (σ_loc : (Localization.Away D.s)ˣ)
@@ -1188,7 +1188,7 @@ genuine Wedhorn 8.34(ii) Step-2 content). -/
 theorem exists_single_f_factor_carrying_refinement_at_t_via_localised_sigma
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A)
     (hA₀_le : D.P.A₀ ≤ A⁺)
     (σ : A) (N : ℕ) (f : A)
     (hf_eq : f = σ * t * D.s ^ N)
@@ -1236,7 +1236,7 @@ T201 fields. -/
 theorem wedhorn_834_h_struct_via_localised_sigma
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (t : A), t ∈ D.T →
@@ -1305,7 +1305,7 @@ work after T204**. -/
 theorem wedhorn_834_h_struct_via_localisation_transfer
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (t : A), t ∈ D.T →
@@ -1363,7 +1363,7 @@ inputs along the T207 → `h_per_τ_bound` path. -/
 theorem per_tau_algebraic_sigma_clearing_bridge_for_single_f_bound
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A)
     (σ : A) (N : ℕ) (f : A) (_hf_eq : f = σ * t * D.s ^ N)
     (h_factor : C.base.s = D.s * f)
     (T_test_loc : Finset (Localization.Away D.s))
@@ -1439,7 +1439,7 @@ T207's compound `h_per_τ_bound`. -/
 theorem exists_single_f_factor_carrying_refinement_at_t_via_per_tau_algebraic
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (t : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (t : A)
     (hA₀_le : D.P.A₀ ≤ A⁺)
     (σ : A) (N : ℕ) (f : A)
     (hf_eq : f = σ * t * D.s ^ N)
@@ -1497,7 +1497,7 @@ plus the two genuine algebraic suppliers (`w.vle 1 (algMap D.s)` and
 theorem wedhorn_834_h_struct_via_per_tau_algebraic
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (t : A), t ∈ D.T →

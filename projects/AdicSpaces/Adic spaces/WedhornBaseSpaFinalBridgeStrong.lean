@@ -93,7 +93,7 @@ theorem hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺)
     (h_C1_strong : C1SupplierStrong_local C.insertDenom) :
     rationalOpen C.base.T C.base.s ≠ ∅ →

@@ -9,11 +9,11 @@ import «Adic spaces».WedhornCoverNormalization
 # Wedhorn Normalized C1 Assembly
 
 Wraps `WedhornC1Assembly.exists_per_D_finset_via_C1_supplier_and_compactness`
-behind the cover-level `RationalCovering.insertDenom` normalization
+behind the cover-level `RationalCoveringData.insertDenom` normalization
 (`WedhornCoverNormalization.lean`). The result is a per-D Finset existential
 that does NOT require the artificial
 `h_normalized : ∀ D ∈ C.covers, D.s ∈ D.T` hypothesis: it is supplied
-internally via `RationalCovering.insertDenom_normalized`.
+internally via `RationalCoveringData.insertDenom_normalized`.
 
 ## What this file provides
 
@@ -24,7 +24,7 @@ internally via `RationalCovering.insertDenom_normalized`.
   `Finset.insert_comm` with `rationalOpen_insert_s`.
 
 * `exists_per_D_finset_via_normalized_C1_supplier` — the **C1-supplier
-  normalization wrapper**: takes only `C : RationalCovering A` and
+  normalization wrapper**: takes only `C : RationalCoveringData A` and
   `C1Supplier_local C.insertDenom` (no `h_normalized` hypothesis), produces
   per-D Finset data on the original `C`.
 
@@ -53,7 +53,7 @@ to the original `C.base.T`. Composes `Finset.insert_comm` (to swap `f` and
 `C.base.s` in the insert chain) with `rationalOpen_insert_s` (to drop the
 `C.base.s` insertion). -/
 theorem rationalOpen_insert_base_insertDenom_eq
-    (C : RationalCovering A) (f : A) :
+    (C : RationalCoveringData A) (f : A) :
     rationalOpen (insert f C.insertDenom.base.T) C.insertDenom.base.s =
       rationalOpen (insert f C.base.T) C.base.s := by
   show rationalOpen (insert f (insert C.base.s C.base.T)) C.base.s =
@@ -62,13 +62,13 @@ theorem rationalOpen_insert_base_insertDenom_eq
   exact rationalOpen_insert_s _ _
 
 /-- **C1-supplier normalization wrapper** — Theorem A on the unnormalized
-side. Takes only `C : RationalCovering A` and a C1 supplier on the
+side. Takes only `C : RationalCoveringData A` and a C1 supplier on the
 normalized cover `C.insertDenom`; produces per-D Finset data on the original
 `C` without requiring the `D.s ∈ D.T` hypothesis as an external input.
 
 Internal use:
 
-* `RationalCovering.insertDenom_normalized` discharges the required
+* `RationalCoveringData.insertDenom_normalized` discharges the required
   normalization hypothesis for `C.insertDenom`.
 * `RationalLocData.rationalOpen_insertDenom` translates the per-piece
   rational opens (`rationalOpen D.insertDenom.T D.insertDenom.s =
@@ -88,7 +88,7 @@ theorem exists_per_D_finset_via_normalized_C1_supplier
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_C1 : C1Supplier_local C.insertDenom) :
     ∃ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
@@ -99,7 +99,7 @@ theorem exists_per_D_finset_via_normalized_C1_supplier
   -- Apply the existing assembly theorem to the normalized cover.
   obtain ⟨mk_S_D', h_in_D', h_cover_D'⟩ :=
     exists_per_D_finset_via_C1_supplier_and_compactness P hA₀_le π hI hπ_tn hπ_unit
-      hArch C.insertDenom h_C1 (RationalCovering.insertDenom_normalized C)
+      hArch C.insertDenom h_C1 (RationalCoveringData.insertDenom_normalized C)
   -- Translate to the original cover via D ↦ D.insertDenom.
   let mk_S_D : RationalLocData A → Finset A := fun D =>
     if hD : D ∈ C.covers then mk_S_D' D.insertDenom else ∅
@@ -137,7 +137,7 @@ theorem hZavyalov_per_E_via_normalized_C1_supplier_with_h_span
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_C1 : C1Supplier_local C.insertDenom)
     (h_span_extractor : ∀ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,

@@ -72,7 +72,7 @@ via `not_vle_zero_of_strict_dominator`: strict σ-domination of `D.s`
 inequalities `∀ t' ∈ D.T, w.vle t' D.s` need to be supplied, and those
 are the genuine Wedhorn-content residual at this branch. -/
 theorem hT_test_compat_branch_D_s
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (σ : Aˣ)
     (h_per_t_chain : ∀ w ∈ Spa A A⁺,
       w.vle ((σ : A) * (∏ t ∈ D.T, t)) C.base.s →
@@ -100,7 +100,7 @@ satisfied via `not_vle_zero_of_strict_dominator`; for τ ∈ D.T branches,
 it must be supplied explicitly (the strict σ-domination at τ alone
 gives `¬ w.vle τ 0`, NOT `¬ w.vle D.s 0`). -/
 theorem hT_test_compat_of_per_branch_chain
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (σ : Aˣ) (T_test : Finset A)
     (h_per_branch_t : ∀ τ ∈ T_test, ∀ w ∈ Spa A A⁺,
       w.vle ((σ : A) * (∏ t ∈ D.T, t)) C.base.s →
@@ -125,7 +125,7 @@ Composes `hT_test_compat_of_per_branch_chain` with
 `rationalOpen_subset_via_strict_sigma_domination` to produce the C1
 candidate-side rational-open inclusion. -/
 theorem rationalOpen_subset_via_per_branch_chain
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (σ : Aˣ) (T_test : Finset A)
     (hσ : ∀ w ∈ Spa A A⁺, ∃ τ ∈ T_test,
       w.vle (σ : A) τ ∧ ¬ w.vle τ (σ : A))
@@ -152,7 +152,7 @@ The genuine Wedhorn content not landed by this file is the per-branch
 theorem h_per_branch_t_chain_of_cor732
     {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [PlusSubring A] [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (σ : Aˣ) (τ : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (σ : Aˣ) (τ : A)
     {w : Spv A} (hw_spa : w ∈ Spa A A⁺)
     (hw_f : w.vle ((σ : A) * (∏ t ∈ D.T, t)) C.base.s)
     (hστ : w.vle (σ : A) τ ∧ ¬ w.vle τ (σ : A))

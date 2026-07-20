@@ -25,12 +25,12 @@ attribute [-instance] ValuationSpectrum.hasLocLiftPowerBounded_of_stronglyNoethe
 
 This file states Wedhorn's Lemmas 8.33 and 8.34 (the 2-cover and
 ideal-generating-cover Čech-acyclicity statements) directly in terms
-of the project's `RationalCovering` and `presheafValue` types, and
+of the project's `RationalCoveringData` and `presheafValue` types, and
 states the Wedhorn-clean form of Theorem 8.28(b) (strongly noetherian
 Tate ⇒ sheafy).
 
 The abstract Čech framework lives in `CechCohomology.lean`. This file is
-the project-side adapter: it defines `RationalCovering.IsOXAcyclic` as
+the project-side adapter: it defines `RationalCoveringData.IsOXAcyclic` as
 the project's natural "separation + gluing" predicate (= the algebraic
 content of `IsSheafy.embedding ∩ IsSheafy.gluing`), and then composes
 Wedhorn's Lemmas 8.33 + 8.34 + Prop A.4 to derive sheafiness.
@@ -66,7 +66,7 @@ sub-lemmas with sorries remain for:
 * `isSheafy_ofStronglyNoetherianTate_clean`: top-level composed and
   closed; depends transitively on the substantive sub-sorries above.
 
-Reusable infrastructure: `RationalCovering.eqRec_restrictionMap_direct`
+Reusable infrastructure: `RationalCoveringData.eqRec_restrictionMap_direct`
 + `presheafValue_eqRec_double_cancel_forward` extracted for general
 Eq.rec cast manipulation on `presheafValue`.
 -/
@@ -78,7 +78,7 @@ open Pointwise
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [PlusSubring A] [IsHuberRing A]
 
-/-! ### `RationalCovering.IsOXAcyclic` — separation + gluing
+/-! ### `RationalCoveringData.IsOXAcyclic` — separation + gluing
 
 A rational covering `C` is **`O_X`-acyclic** if:
 
@@ -101,8 +101,8 @@ below uses `presheafValue` and `restrictionMap` directly. -/
 and gluing both hold for it. This is the project-side form of Wedhorn's
 "𝒰 is 𝒪_X-acyclic" predicate at the algebraic level (= sheaf condition). -/
 @[mk_iff]
-structure RationalCovering.IsOXAcyclic [HasLocLiftPowerBounded A]
-    (C : RationalCovering A) : Prop where
+structure RationalCoveringData.IsOXAcyclic [HasLocLiftPowerBounded A]
+    (C : RationalCoveringData A) : Prop where
   /-- (Separation, "sets to zero" form) any global section restricting to
   zero on every cover piece is itself zero. Equivalent to injectivity of
   the product restriction map, but in the form the project's existing
@@ -125,7 +125,7 @@ structure RationalCovering.IsOXAcyclic [HasLocLiftPowerBounded A]
 
 For any `D₀ : RationalLocData A` and `f : A`, the 2-element cover
 `{R(insert f D₀.T / D₀.s), R(...minus.../D₀.s · f)}` covers
-`R(D₀.T / D₀.s)`. We package it as a `RationalCovering A` with base `D₀`.
+`R(D₀.T / D₀.s)`. We package it as a `RationalCoveringData A` with base `D₀`.
 -/
 
 variable [DecidableEq (RationalLocData A)]
@@ -134,7 +134,7 @@ variable [DecidableEq (RationalLocData A)]
 Wedhorn's `𝒰_f = {R(f/1), R(1/f)}` (p. 83), with `R(f/1)` and `R(1/f)`
 defined relative to `D₀`. -/
 noncomputable def laurentRationalCover (D₀ : RationalLocData A) (f : A) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := D₀
   covers := {laurentPlusDatum D₀ f, laurentMinusDatum D₀ f}
   hsubset D hD := by
@@ -149,17 +149,17 @@ noncomputable def laurentRationalCover (D₀ : RationalLocData A) (f : A) :
     · refine ⟨laurentMinusDatum D₀ f, ?_, h_minus⟩
       simp [Finset.mem_insert]
 
-/-! ### `RationalCovering.presheafValueCast` — the C.base = C'.base bridge
+/-! ### `RationalCoveringData.presheafValueCast` — the C.base = C'.base bridge
 
-When `C, C' : RationalCovering A` share a base (`h : C'.base = C.base`), the
+When `C, C' : RationalCoveringData A` share a base (`h : C'.base = C.base`), the
 two `presheafValue`s are propositionally equal but Lean treats them as
 distinct types. `presheafValueCast` provides the canonical ring isomorphism
 between them, and `presheafValueCast_restrictionMap` says restriction maps
 commute with the cast. -/
 
 /-- Transport a presheaf section along a base equality. -/
-noncomputable def RationalCovering.presheafValueCast
-    [HasLocLiftPowerBounded A] {C C' : RationalCovering A}
+noncomputable def RationalCoveringData.presheafValueCast
+    [HasLocLiftPowerBounded A] {C C' : RationalCoveringData A}
     (h : C'.base = C.base) :
     presheafValue C.base ≃+* presheafValue C'.base :=
   @Eq.rec (RationalLocData A) C.base
@@ -168,7 +168,7 @@ noncomputable def RationalCovering.presheafValueCast
 
 /-- Eq.rec double cancellation for presheafValue (forward direction): for h : a = b
 and x : presheafValue b, casting back via h.symm then forward via h recovers x. -/
-theorem RationalCovering.presheafValue_eqRec_double_cancel_forward
+theorem RationalCoveringData.presheafValue_eqRec_double_cancel_forward
     [HasLocLiftPowerBounded A] (a b : RationalLocData A) (h : a = b)
     (x : presheafValue b) :
     @Eq.rec (RationalLocData A) a
@@ -182,7 +182,7 @@ theorem RationalCovering.presheafValue_eqRec_double_cancel_forward
 element vanishes. Used by the refinement-free Prop A.3(1) separation
 transfer (2026-06-10) to pull `x|Vⱼ = 0` back through the
 `(C_restr_at Vⱼ).base = Vⱼ` cast. -/
-theorem RationalCovering.presheafValue_eqRec_eq_zero_iff
+theorem RationalCoveringData.presheafValue_eqRec_eq_zero_iff
     [HasLocLiftPowerBounded A] (a b : RationalLocData A) (h : a = b)
     (x : presheafValue a) :
     (@Eq.rec (RationalLocData A) a (fun b _ => presheafValue b) x b h) = 0 ↔
@@ -193,7 +193,7 @@ theorem RationalCovering.presheafValue_eqRec_eq_zero_iff
 /-- Restriction map respects a direct Eq.rec base cast on presheafValue.
 This is a generalized version (without RingEquiv motive) of
 `presheafValueCast_restrictionMap`, used by propA3_part1_gluing Step 8. -/
-theorem RationalCovering.eqRec_restrictionMap_direct
+theorem RationalCoveringData.eqRec_restrictionMap_direct
     [HasLocLiftPowerBounded A] (baseC baseC' : RationalLocData A)
     (h : baseC = baseC') (D : RationalLocData A)
     (hsubC : rationalOpen D.T D.s ⊆ rationalOpen baseC.T baseC.s)
@@ -206,7 +206,7 @@ theorem RationalCovering.eqRec_restrictionMap_direct
   rfl
 
 /-- Restriction map respects the base cast (variable-base form). -/
-theorem RationalCovering.presheafValueCast_restrictionMap
+theorem RationalCoveringData.presheafValueCast_restrictionMap
     [HasLocLiftPowerBounded A] (baseC baseC' : RationalLocData A)
     (h : baseC' = baseC) (D : RationalLocData A)
     (hsubC : rationalOpen D.T D.s ⊆ rationalOpen baseC.T baseC.s)
@@ -234,12 +234,12 @@ rational open is ⊆ D's rational open.
 
 The `_hD_covers` hypothesis ensures the filtered C'-pieces actually cover D
 — this is the substantive content of "the induced cover at D exists". -/
-noncomputable def RationalCovering.restrictToPiece
-    (C' : RationalCovering A)
+noncomputable def RationalCoveringData.restrictToPiece
+    (C' : RationalCoveringData A)
     (D : RationalLocData A) (hD_covers : ∀ v ∈ rationalOpen D.T D.s,
       ∃ D' ∈ C'.covers, v ∈ rationalOpen D'.T D'.s ∧
         rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := D
   covers := C'.covers.filter fun D' =>
     Classical.propDecidable (rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -276,7 +276,7 @@ theorem propA3_part2_project_separation
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C C' : RationalCovering A)
+    (C C' : RationalCoveringData A)
     (h_same_base : C'.base = C.base)
     (h_refines : ∀ D' ∈ C'.covers, ∃ D ∈ C.covers,
         rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -288,7 +288,7 @@ theorem propA3_part2_project_separation
         restrictionMap C.base D (C.hsubset D hD) x = 0) → x = 0 := by
   intro x hx
   let f : presheafValue C.base ≃+* presheafValue C'.base :=
-    RationalCovering.presheafValueCast h_same_base
+    RationalCoveringData.presheafValueCast h_same_base
   suffices h_fx : f x = 0 by
     have h_inj : Function.Injective f := f.injective
     have : f x = f 0 := h_fx.trans f.map_zero.symm
@@ -300,7 +300,7 @@ theorem propA3_part2_project_separation
   have h_cast :
       restrictionMap C'.base D' (C'.hsubset D' hD') (f x) =
       restrictionMap C.base D' hsubD' x :=
-    RationalCovering.presheafValueCast_restrictionMap C.base C'.base
+    RationalCoveringData.presheafValueCast_restrictionMap C.base C'.base
       h_same_base D' hsubD' (C'.hsubset D' hD') x
   rw [h_cast]
   obtain ⟨D, hD_in_C, hD_contains_D'⟩ := h_refines D' hD'
@@ -326,7 +326,7 @@ theorem propA3_part2_project_gluing
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C C' : RationalCovering A)
+    (C C' : RationalCoveringData A)
     (_h_same_base : C'.base = C.base)
     (_h_refines : ∀ D' ∈ C'.covers, ∃ D ∈ C.covers,
         rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -338,7 +338,7 @@ theorem propA3_part2_project_gluing
     -- acyclic covering of each `D ∈ C.covers` whose pieces sit inside single
     -- `C'`-pieces. Instantiable by the filter-form `restrictToPiece` OR the
     -- faithful trace-form `restrictTo` (Wedhorn 4233-4235).
-    (E_at : ↥C.covers → RationalCovering A)
+    (E_at : ↥C.covers → RationalCoveringData A)
     (hE_base : ∀ D : ↥C.covers, (E_at D).base = D.1)
     (hE_pieces : ∀ D : ↥C.covers, ∀ E' ∈ (E_at D).covers,
       ∃ Q ∈ C'.covers, rationalOpen E'.T E'.s ⊆ rationalOpen Q.T Q.s)
@@ -404,19 +404,19 @@ theorem propA3_part2_project_gluing
   -- Step 6: cast x' from presheafValue C'.base to presheafValue C.base via
   -- presheafValueCast _h_same_base.
   let x : presheafValue C.base :=
-    (RationalCovering.presheafValueCast (C := C) (C' := C') _h_same_base).symm x'
+    (RationalCoveringData.presheafValueCast (C := C) (C' := C') _h_same_base).symm x'
   refine ⟨x, ?_⟩
   -- Step 7: verify x|D = f D for each D ∈ C.covers via (E_at D).separation
   -- (abstract base: transport through the (E_at D).base = D.1 cast).
   intro D
   rw [← sub_eq_zero]
-  rw [← RationalCovering.presheafValue_eqRec_eq_zero_iff D.1 (E_at D).base
+  rw [← RationalCoveringData.presheafValue_eqRec_eq_zero_iff D.1 (E_at D).base
     (hE_base D).symm (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x - f D)]
   apply (hE_acyclic D).separation
   intro E' hE'_in
   have hsub_D : rationalOpen E'.T E'.s ⊆ rationalOpen D.1.T D.1.s := by
     rw [← hE_base D]; exact (E_at D).hsubset E' hE'_in
-  rw [RationalCovering.eqRec_restrictionMap_direct D.1 (E_at D).base
+  rw [RationalCoveringData.eqRec_restrictionMap_direct D.1 (E_at D).base
     (hE_base D).symm E' hsub_D ((E_at D).hsubset E' hE'_in)
     (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x - f D)]
   show (restrictionMapHom D.1 E' hsub_D) _ = 0
@@ -438,17 +438,17 @@ theorem propA3_part2_project_gluing
     rw [_h_same_base]; exact chained
   have h_cast : restrictionMap C'.base E' hsubC' x' =
       restrictionMap C.base E' chained x := by
-    have key := RationalCovering.presheafValueCast_restrictionMap
+    have key := RationalCoveringData.presheafValueCast_restrictionMap
       C.base C'.base _h_same_base E' chained hsubC' x
     have h_cast_cancel :
-        (RationalCovering.presheafValueCast (C := C) (C' := C') _h_same_base) x
+        (RationalCoveringData.presheafValueCast (C := C) (C' := C') _h_same_base) x
           = x' := by
       simp only [x, RingEquiv.apply_symm_apply]
     rw [show
       (@Eq.rec (RationalLocData A) C.base
         (fun b _ => presheafValue C.base ≃+* presheafValue b)
         (RingEquiv.refl _) C'.base _h_same_base.symm x) =
-        ((RationalCovering.presheafValueCast (C := C) (C' := C') _h_same_base) x)
+        ((RationalCoveringData.presheafValueCast (C := C) (C' := C') _h_same_base) x)
       from rfl, h_cast_cancel] at key
     exact key
   rw [← h_cast]
@@ -482,7 +482,7 @@ theorem IsOXAcyclic_of_refining_acyclic_cover
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C C' : RationalCovering A)
+    (C C' : RationalCoveringData A)
     (h_same_base : C'.base = C.base)
     (h_refines : ∀ D' ∈ C'.covers, ∃ D ∈ C.covers,
         rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -490,7 +490,7 @@ theorem IsOXAcyclic_of_refining_acyclic_cover
     (h_C'_covers_each_D : ∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
       ∃ D' ∈ C'.covers, v ∈ rationalOpen D'.T D'.s ∧
         rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
-    (E_at : ↥C.covers → RationalCovering A)
+    (E_at : ↥C.covers → RationalCoveringData A)
     (hE_base : ∀ D : ↥C.covers, (E_at D).base = D.1)
     (hE_pieces : ∀ D : ↥C.covers, ∀ E' ∈ (E_at D).covers,
       ∃ Q ∈ C'.covers, rationalOpen E'.T E'.s ⊆ rationalOpen Q.T Q.s)
@@ -519,7 +519,7 @@ to Wedhorn's statement.
 /-- The predicate "C is the rational cover of `R(C.base.T / C.base.s)`
 generated by `T`". This is Wedhorn's "𝒰 = (U_t)_{t∈T} of the form
 U_t := R(T/t) with T ⊆ A generating A as an ideal" (p. 83). -/
-def RationalCovering.IsGeneratedBy (C : RationalCovering A) (T : Finset A) : Prop :=
+def RationalCoveringData.IsGeneratedBy (C : RationalCoveringData A) (T : Finset A) : Prop :=
   -- T generates the unit ideal:
   Ideal.span (T : Set A) = ⊤ ∧
   -- Bijection between C.covers and T, with each piece equal to R(T/t):
@@ -584,7 +584,7 @@ theorem laurentLeaves_cover [DecidableEq A] (fs : List A) :
 /-- The canonical relative Laurent cover of `D₀` generated by `fs`
 (Wedhorn 8.34(i), relativized: the iterated `laurentPlus`/`laurentMinus` split). -/
 noncomputable def laurentCoverOf [DecidableEq A] (D₀ : RationalLocData A)
-    (fs : List A) : RationalCovering A where
+    (fs : List A) : RationalCoveringData A where
   base := D₀
   covers := laurentLeaves D₀ fs
   hsubset D hD := laurentLeaves_subset fs D₀ hD
@@ -601,11 +601,11 @@ common pair of definition: pieces are the pairwise intersections
 `interSamePair P Q` (`P ∈ Uf`, `Q ∈ V`). This is Wedhorn's `𝒰 × 𝒱` (p. 105) at
 the rational-localisation level — the keystone for applying the abstract
 A.3(3) `isDegreeZeroAcyclic_prod` to the structure presheaf. -/
-noncomputable def RationalCovering.interProd (Uf V : RationalCovering A)
+noncomputable def RationalCoveringData.interProd (Uf V : RationalCoveringData A)
     (hbase : V.base = Uf.base)
     (hUfP : ∀ P ∈ Uf.covers, P.P = Uf.base.P)
     (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := Uf.base
   covers := (Uf.covers ×ˢ V.covers).attach.image (fun pq =>
     pq.1.1.interSamePair pq.1.2
@@ -627,14 +627,14 @@ noncomputable def RationalCovering.interProd (Uf V : RationalCovering A)
     · rw [RationalLocData.interSamePair_rationalOpen]; exact ⟨hvP, hvQ⟩
 
 omit [IsHuberRing A] in
-@[simp] theorem RationalCovering.interProd_base (Uf V : RationalCovering A)
+@[simp] theorem RationalCoveringData.interProd_base (Uf V : RationalCoveringData A)
     (hbase : V.base = Uf.base)
     (hUfP : ∀ P ∈ Uf.covers, P.P = Uf.base.P)
     (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P) :
     (Uf.interProd V hbase hUfP hVP).base = Uf.base := rfl
 
 omit [IsHuberRing A] in
-theorem RationalCovering.interProd_covers (Uf V : RationalCovering A)
+theorem RationalCoveringData.interProd_covers (Uf V : RationalCoveringData A)
     (hbase : V.base = Uf.base)
     (hUfP : ∀ P ∈ Uf.covers, P.P = Uf.base.P)
     (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P) :
@@ -648,11 +648,11 @@ theorem RationalCovering.interProd_covers (Uf V : RationalCovering A)
 pair): pieces are `{Q ∩ D : Q ∈ V.covers}` via `interSamePair`. This is `V|_D`
 (Wedhorn p. 105) at the rational-localisation level, used to state the
 `q ≤ 1` intersection-acyclicity hypotheses of the explicit A.3(3). -/
-noncomputable def RationalCovering.restrictTo (V : RationalCovering A)
+noncomputable def RationalCoveringData.restrictTo (V : RationalCoveringData A)
     (D : RationalLocData A)
     (hD : rationalOpen D.T D.s ⊆ rationalOpen V.base.T V.base.s)
     (hDP : D.P = V.base.P) (hVP : ∀ Q ∈ V.covers, Q.P = V.base.P) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := D
   covers := V.covers.attach.image (fun Q =>
     D.interSamePair Q.1 ((hVP _ Q.2).trans hDP.symm))
@@ -670,14 +670,14 @@ noncomputable def RationalCovering.restrictTo (V : RationalCovering A)
     · rw [RationalLocData.interSamePair_rationalOpen]; exact ⟨hv, hvQ⟩
 
 omit [IsHuberRing A] in
-@[simp] theorem RationalCovering.restrictTo_base (V : RationalCovering A)
+@[simp] theorem RationalCoveringData.restrictTo_base (V : RationalCoveringData A)
     (D : RationalLocData A)
     (hD : rationalOpen D.T D.s ⊆ rationalOpen V.base.T V.base.s)
     (hDP : D.P = V.base.P) (hVP : ∀ Q ∈ V.covers, Q.P = V.base.P) :
     (V.restrictTo D hD hDP hVP).base = D := rfl
 
 omit [IsHuberRing A] in
-theorem RationalCovering.restrictTo_covers (V : RationalCovering A)
+theorem RationalCoveringData.restrictTo_covers (V : RationalCoveringData A)
     (D : RationalLocData A)
     (hD : rationalOpen D.T D.s ⊆ rationalOpen V.base.T V.base.s)
     (hDP : D.P = V.base.P) (hVP : ∀ Q ∈ V.covers, Q.P = V.base.P) :
@@ -687,7 +687,7 @@ theorem RationalCovering.restrictTo_covers (V : RationalCovering A)
 
 omit [IsHuberRing A] in
 /-- A piece of `V|_P` (`P ∈ Uf.covers`) is a piece of `Uf × V`. -/
-theorem RationalCovering.restrictTo_mem_interProd (Uf V : RationalCovering A)
+theorem RationalCoveringData.restrictTo_mem_interProd (Uf V : RationalCoveringData A)
     (hbase : V.base = Uf.base)
     (hUfP : ∀ P ∈ Uf.covers, P.P = Uf.base.P)
     (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P)
@@ -696,9 +696,9 @@ theorem RationalCovering.restrictTo_mem_interProd (Uf V : RationalCovering A)
     (hDP : P.P = V.base.P) (hVP' : ∀ Q ∈ V.covers, Q.P = V.base.P)
     (E : RationalLocData A) (hE : E ∈ (V.restrictTo P hD hDP hVP').covers) :
     E ∈ (Uf.interProd V hbase hUfP hVP).covers := by
-  rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE
+  rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hE
   obtain ⟨Q, -, rfl⟩ := hE
-  rw [RationalCovering.interProd_covers, Finset.mem_image]
+  rw [RationalCoveringData.interProd_covers, Finset.mem_image]
   exact ⟨⟨(P, Q.1), Finset.mem_product.mpr ⟨hP, Q.2⟩⟩, Finset.mem_attach _ _, rfl⟩
 
 omit [IsHuberRing A] in
@@ -737,12 +737,12 @@ open Classical in
 `D₁ ∩ D₂`. This is the `q = 1` multi-index instance of Wedhorn's restricted
 cover `𝒰|V_{j₀j₁}` (Prop A.3, p. 105, wedhorn.txt:5316-5318) at the
 rational-localisation level. -/
-noncomputable def RationalCovering.interProdOn (C₁ C₂ : RationalCovering A)
+noncomputable def RationalCoveringData.interProdOn (C₁ C₂ : RationalCoveringData A)
     (I : RationalLocData A)
     (hI : rationalOpen I.T I.s =
       rationalOpen C₁.base.T C₁.base.s ∩ rationalOpen C₂.base.T C₂.base.s)
     (hP : ∀ D₁ ∈ C₁.covers, ∀ D₂ ∈ C₂.covers, D₂.P = D₁.P) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := I
   covers := (C₁.covers ×ˢ C₂.covers).attach.image (fun pq =>
     pq.1.1.interSamePair pq.1.2
@@ -768,7 +768,7 @@ noncomputable def RationalCovering.interProdOn (C₁ C₂ : RationalCovering A)
 
 omit [IsHuberRing A] in
 open Classical in
-@[simp] theorem RationalCovering.interProdOn_base (C₁ C₂ : RationalCovering A)
+@[simp] theorem RationalCoveringData.interProdOn_base (C₁ C₂ : RationalCoveringData A)
     (I : RationalLocData A)
     (hI : rationalOpen I.T I.s =
       rationalOpen C₁.base.T C₁.base.s ∩ rationalOpen C₂.base.T C₂.base.s)
@@ -778,7 +778,7 @@ open Classical in
 omit [IsHuberRing A] in
 open Classical in
 /-- Destructure a piece of `interProdOn` as a pairwise intersection. -/
-theorem RationalCovering.exists_of_mem_interProdOn (C₁ C₂ : RationalCovering A)
+theorem RationalCoveringData.exists_of_mem_interProdOn (C₁ C₂ : RationalCoveringData A)
     (I : RationalLocData A)
     (hI : rationalOpen I.T I.s =
       rationalOpen C₁.base.T C₁.base.s ∩ rationalOpen C₂.base.T C₂.base.s)
@@ -798,7 +798,7 @@ product set** (Wedhorn p. 84: the multi-index restrictions `𝒰|V_{j₀j₁}` a
 generating units). Pieces of `interProdOn` have generator set
 `units₁ * units₂` and denominator the product of the factors' denominators;
 `span(units₁·units₂) = span units₁ · span units₂ = ⊤`. -/
-theorem RationalCovering.interProdOn_isGeneratedBy (C₁ C₂ : RationalCovering A)
+theorem RationalCoveringData.interProdOn_isGeneratedBy (C₁ C₂ : RationalCoveringData A)
     (I : RationalLocData A)
     (hI : rationalOpen I.T I.s =
       rationalOpen C₁.base.T C₁.base.s ∩ rationalOpen C₂.base.T C₂.base.s)
@@ -848,7 +848,7 @@ theorem RationalCovering.interProdOn_isGeneratedBy (C₁ C₂ : RationalCovering
     · -- surjectivity: every intersection piece is hit
       rintro ⟨E, hE⟩
       obtain ⟨D₁, hD₁, D₂, hD₂, hEeq⟩ :=
-        RationalCovering.exists_of_mem_interProdOn C₁ C₂ I hI hP' E hE
+        RationalCoveringData.exists_of_mem_interProdOn C₁ C₂ I hI hP' E hE
       obtain ⟨t₁, ht₁⟩ := hφ₁_bij.2 ⟨D₁, hD₁⟩
       obtain ⟨t₂, ht₂⟩ := hφ₂_bij.2 ⟨D₂, hD₂⟩
       have hval₁ : (φ₁ t₁).1 = D₁ := congrArg Subtype.val ht₁
@@ -924,7 +924,7 @@ Laurent-induction `hV0`/`hV1`: `restrictTo` and the on-the-sub-base cover have
 equal `R`-image sets but different datum representatives. The two-existence
 interface — no surjective function — is what the sign-vector correspondence
 `laurentProdLeaves_restrict` supplies.) -/
-theorem isOXAcyclic_congr [HasLocLiftPowerBounded A] (C C' : RationalCovering A)
+theorem isOXAcyclic_congr [HasLocLiftPowerBounded A] (C C' : RationalCoveringData A)
     (hbase : C.base = C'.base)
     (hCC' : ∀ D ∈ C.covers, ∃ D' ∈ C'.covers,
       rationalOpen D.T D.s = rationalOpen D'.T D'.s)
@@ -987,13 +987,13 @@ theorem restrictionMap_sub [HasLocLiftPowerBounded A] (D D' : RationalLocData A)
       restrictionMap D D' h a - restrictionMap D D' h b :=
   map_sub (restrictionMapHom D D' h) a b
 
-/-- **Explicit Wedhorn A.3(3) in degree 0** for `RationalCovering`/`IsOXAcyclic`:
+/-- **Explicit Wedhorn A.3(3) in degree 0** for `RationalCoveringData`/`IsOXAcyclic`:
 the product cover `Uf × V` is `O_X`-acyclic given `Uf` is and `V` restricted to
 the `Uf`-pieces (`hV0`) and `Uf`-pairwise-intersections (`hV1`) is acyclic. This
 ports the abstract `isDegreeZeroAcyclic_prod` (CechCohomology.lean) to the
 explicit structure presheaf via `interProd`/`restrictTo`/`interSamePair`. The
 keystone of the Laurent-cover acyclicity induction (Wedhorn 8.34(i)). -/
-theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCovering A)
+theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoveringData A)
     (hbase : V.base = Uf.base)
     (hUfP : ∀ P ∈ Uf.covers, P.P = Uf.base.P)
     (hVP : ∀ Q ∈ V.covers, Q.P = Uf.base.P)
@@ -1015,14 +1015,14 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
     -- (via `hU`) zero.
     refine hU.separation x (fun P hP => ?_)
     refine (hV0 P hP).separation _ (fun E hE => ?_)
-    rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE
+    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hE
     obtain ⟨Q, -, rfl⟩ := hE
     have hE' : (P.interSamePair Q.1 ((hVP _ Q.2).trans (hUfP P hP).symm))
         ∈ (Uf.interProd V hbase hUfP hVP).covers := by
-      rw [RationalCovering.interProd_covers, Finset.mem_image]
+      rw [RationalCoveringData.interProd_covers, Finset.mem_image]
       exact ⟨⟨(P, Q.1), Finset.mem_product.mpr ⟨hP, Q.2⟩⟩,
         Finset.mem_attach _ _, rfl⟩
-    simp only [RationalCovering.restrictTo_base]
+    simp only [RationalCoveringData.restrictTo_base]
     have hcomp := congrFun (restrictionMap_comp Uf.base P
       (P.interSamePair Q.1 ((hVP _ Q.2).trans (hUfP P hP).symm))
       (Uf.hsubset P hP)
@@ -1035,12 +1035,12 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
     intro f hf
     choose g hg using fun (P : ↥Uf.covers) =>
       (hV0 P.1 P.2).gluing
-        (fun E => f ⟨E.1, RationalCovering.restrictTo_mem_interProd Uf V hbase hUfP hVP
+        (fun E => f ⟨E.1, RationalCoveringData.restrictTo_mem_interProd Uf V hbase hUfP hVP
           P.1 P.2 _ _ _ E.1 E.2⟩)
         (fun E₁ E₂ D₃ h₃₁ h₃₂ =>
-          hf ⟨E₁.1, RationalCovering.restrictTo_mem_interProd Uf V hbase hUfP hVP
+          hf ⟨E₁.1, RationalCoveringData.restrictTo_mem_interProd Uf V hbase hUfP hVP
               P.1 P.2 _ _ _ E₁.1 E₁.2⟩
-            ⟨E₂.1, RationalCovering.restrictTo_mem_interProd Uf V hbase hUfP hVP
+            ⟨E₂.1, RationalCoveringData.restrictTo_mem_interProd Uf V hbase hUfP hVP
               P.1 P.2 _ _ _ E₂.1 E₂.2⟩ D₃ h₃₁ h₃₂)
     have hgcoc : ∀ (P₁ P₂ : ↥Uf.covers) (D₃ : RationalLocData A)
         (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen P₁.1.T P₁.1.s)
@@ -1058,7 +1058,7 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
           restrictionMap P₂.1 M hMP₂ (g P₂) := by
         rw [← sub_eq_zero]
         refine (hV1 P₁.1 P₂.1 P₁.2 P₂.2).separation _ (fun E hE => ?_)
-        rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE
+        rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hE
         obtain ⟨Q, -, hQeq⟩ := hE
         have hQP₁ : Q.1.P = P₁.1.P := (hVP Q.1 Q.2).trans (hUfP P₁.1 P₁.2).symm
         have hQP₂ : Q.1.P = P₂.1.P := (hVP Q.1 Q.2).trans (hUfP P₂.1 P₂.2).symm
@@ -1078,29 +1078,29 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
           intro v hv; exact ⟨hv.1.2, hv.2⟩
         have hmem₁ : (P₁.1.interSamePair Q.1 hQP₁) ∈
             (Uf.interProd V hbase hUfP hVP).covers := by
-          rw [RationalCovering.interProd_covers, Finset.mem_image]
+          rw [RationalCoveringData.interProd_covers, Finset.mem_image]
           exact ⟨⟨(P₁.1, Q.1), Finset.mem_product.mpr ⟨P₁.2, Q.2⟩⟩,
             Finset.mem_attach _ _, rfl⟩
         have hmem₂ : (P₂.1.interSamePair Q.1 hQP₂) ∈
             (Uf.interProd V hbase hUfP hVP).covers := by
-          rw [RationalCovering.interProd_covers, Finset.mem_image]
+          rw [RationalCoveringData.interProd_covers, Finset.mem_image]
           exact ⟨⟨(P₂.1, Q.1), Finset.mem_product.mpr ⟨P₂.2, Q.2⟩⟩,
             Finset.mem_attach _ _, rfl⟩
         have hDmem₁ : (P₁.1.interSamePair Q.1 hQP₁) ∈
             (V.restrictTo P₁.1 (by rw [hbase]; exact Uf.hsubset P₁.1 P₁.2)
               (by rw [hbase]; exact hUfP P₁.1 P₁.2)
               (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
-          rw [RationalCovering.restrictTo_covers, Finset.mem_image]
+          rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
           exact ⟨⟨Q.1, Q.2⟩, Finset.mem_attach _ _, rfl⟩
         have hDmem₂ : (P₂.1.interSamePair Q.1 hQP₂) ∈
             (V.restrictTo P₂.1 (by rw [hbase]; exact Uf.hsubset P₂.1 P₂.2)
               (by rw [hbase]; exact hUfP P₂.1 P₂.2)
               (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
-          rw [RationalCovering.restrictTo_covers, Finset.mem_image]
+          rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
           exact ⟨⟨Q.1, Q.2⟩, Finset.mem_attach _ _, rfl⟩
         have hg₁ := hg P₁ ⟨_, hDmem₁⟩
         have hg₂ := hg P₂ ⟨_, hDmem₂⟩
-        simp only [RationalCovering.restrictTo_base] at hg₁ hg₂
+        simp only [RationalCoveringData.restrictTo_base] at hg₁ hg₂
         have hP₁Q : rationalOpen (P₁.1.interSamePair Q.1 hQP₁).T
             (P₁.1.interSamePair Q.1 hQP₁).s ⊆ rationalOpen P₁.1.T P₁.1.s :=
           RationalLocData.interSamePair_subset_left _ _ _
@@ -1139,16 +1139,16 @@ theorem isOXAcyclic_interProd [HasLocLiftPowerBounded A] (Uf V : RationalCoverin
     refine ⟨x, fun D => ?_⟩
     obtain ⟨D₀, hD₀⟩ := D
     have hD₀' := hD₀
-    rw [RationalCovering.interProd_covers, Finset.mem_image] at hD₀'
+    rw [RationalCoveringData.interProd_covers, Finset.mem_image] at hD₀'
     obtain ⟨⟨⟨P, Q⟩, hPQ⟩, -, hpq⟩ := hD₀'
     obtain ⟨hP, hQ⟩ := Finset.mem_product.mp hPQ
     have hDmem : D₀ ∈ (V.restrictTo P (by rw [hbase]; exact Uf.hsubset P hP)
         (by rw [hbase]; exact hUfP P hP)
         (fun Q hQ => by rw [hbase]; exact hVP Q hQ)).covers := by
-      rw [RationalCovering.restrictTo_covers, Finset.mem_image]
+      rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
       exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, hpq⟩
     have key := hg ⟨P, hP⟩ ⟨D₀, hDmem⟩
-    simp only [RationalCovering.restrictTo_base] at key
+    simp only [RationalCoveringData.restrictTo_base] at key
     have hcomp := congrFun (restrictionMap_comp Uf.base P D₀ (Uf.hsubset P hP)
       (by rw [← hpq]; exact RationalLocData.interSamePair_subset_left P Q _)) x
     simp only [Function.comp_def] at hcomp
@@ -1169,8 +1169,8 @@ and so is its restriction to every rational subset.*
 
 This is the induction from Lemma 8.33 via Prop A.3(3). The cover `𝒱` is
 the rational cover generated by `T = { ∏_{j ∈ J} f_j ; J ⊆ {1,...,r} }`. -/
-def RationalCovering.IsLaurentCover [DecidableEq A]
-    (C : RationalCovering A) (fs : List A) : Prop :=
+def RationalCoveringData.IsLaurentCover [DecidableEq A]
+    (C : RationalCoveringData A) (fs : List A) : Prop :=
   -- C is the RELATIVE Laurent cover of C.base generated by fs: its pieces are
   -- exactly the iterated laurentPlus/laurentMinus splits of C.base
   -- (Wedhorn p. 84, 4230-4234: 𝒱 := 𝒰_{f_1} × ⋯ × 𝒰_{f_r}, and 𝒱|U is the
@@ -1184,9 +1184,9 @@ def RationalCovering.IsLaurentCover [DecidableEq A]
     (fs : List A) : (laurentCoverOf D₀ fs).IsLaurentCover fs := rfl
 
 /-- The empty relative Laurent cover of `C` is the trivial cover `{C.base}`. -/
-theorem isLaurentCover_nil_iff [DecidableEq A] (C : RationalCovering A) :
+theorem isLaurentCover_nil_iff [DecidableEq A] (C : RationalCoveringData A) :
     C.IsLaurentCover ([] : List A) ↔ C.covers = {C.base} := by
-  rw [RationalCovering.IsLaurentCover, laurentLeaves_nil]
+  rw [RationalCoveringData.IsLaurentCover, laurentLeaves_nil]
 
 /-- **Anti-false-leaf anchor / single-generator case**: the relative Laurent cover
 by a single `f` has exactly the pieces of the existing 2-element cover
@@ -1214,7 +1214,7 @@ identity (`restrictionMap_id`), so separation and gluing are immediate. This is
 the relativized base of Lemma 8.34(i) (`laurentCoverOf D₀ [] = {D₀}`); it
 replaces the old whole-space `single_unit_piece` route (which needed Cor 8.32). -/
 theorem isOXAcyclic_of_trivial_cover [HasLocLiftPowerBounded A]
-    (V : RationalCovering A) (h_triv : V.covers = {V.base}) :
+    (V : RationalCoveringData A) (h_triv : V.covers = {V.base}) :
     V.IsOXAcyclic := by
   have hmem : V.base ∈ V.covers := by rw [h_triv]; exact Finset.mem_singleton_self _
   refine ⟨?_, ?_⟩
@@ -1309,7 +1309,7 @@ theorem laurentProdLeaves_cover [DecidableEq A] (fs : List A) :
 
 /-- The **base-independent Laurent cover** of `D₀` generated by `fs` (Wedhorn 4231). -/
 noncomputable def laurentProdCoverOf [DecidableEq A] (D₀ : RationalLocData A)
-    (fs : List A) : RationalCovering A where
+    (fs : List A) : RationalCoveringData A where
   base := D₀
   covers := laurentProdLeaves D₀ fs
   hsubset D hD := laurentProdLeaves_subset fs D₀ hD
@@ -1326,7 +1326,7 @@ noncomputable def laurentProdCoverOf [DecidableEq A] (D₀ : RationalLocData A)
 relativized `IsLaurentCover` (`laurentLeaves`/`laurentPlusDatum`) on the acyclicity
 path — the two are R-different at non-whole-space bases, and only this one satisfies
 restriction-commutation (`laurentProdLeaves_restrict`), hence is acyclic. -/
-def RationalCovering.IsLaurentProdCover [DecidableEq A] (C : RationalCovering A)
+def RationalCoveringData.IsLaurentProdCover [DecidableEq A] (C : RationalCoveringData A)
     (fs : List A) : Prop :=
   C.covers = laurentProdLeaves C.base fs
 
@@ -1334,9 +1334,9 @@ def RationalCovering.IsLaurentProdCover [DecidableEq A] (C : RationalCovering A)
     (D₀ : RationalLocData A) (fs : List A) :
     (laurentProdCoverOf D₀ fs).IsLaurentProdCover fs := rfl
 
-theorem isLaurentProdCover_nil_iff [DecidableEq A] (C : RationalCovering A) :
+theorem isLaurentProdCover_nil_iff [DecidableEq A] (C : RationalCoveringData A) :
     C.IsLaurentProdCover ([] : List A) ↔ C.covers = {C.base} := by
-  rw [RationalCovering.IsLaurentProdCover, laurentProdLeaves_nil]
+  rw [RationalCoveringData.IsLaurentProdCover, laurentProdLeaves_nil]
 
 /-- **Restriction-commutation (Wedhorn 4233)** for the base-independent Laurent
 cover: for `P ⊆ D₀`, the rational subsets `{R(P) ∩ R(Q) : Q ∈ laurentProdLeaves D₀ fs}`
@@ -6981,14 +6981,14 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
           (unitCover D₀ f).hsubset P hP
         refine isOXAcyclic_congr _ (laurentProdCoverOf P gs) rfl (fun D hD => ?_)
           (fun D' hD' => ?_) (ih P ((unitCover_isRational D₀ f hD₀).piece hP))
-        · rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hD
+        · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hD
           obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
           obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ P hPsub).1 Q hQ
           exact ⟨Q', hQ', by rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq⟩
         · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀ P hPsub).2 D' hD'
           refine ⟨P.interSamePair Q ((laurentProdLeaves_pair gs D₀ hQ).trans
             (hUfP P hP).symm), ?_, ?_⟩
-          · rw [RationalCovering.restrictTo_covers, Finset.mem_image]
+          · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
             exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
           · rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq
       · -- hV1: V|_{P∩P'} acyclic, via congr from the IH at base P∩P'
@@ -7002,14 +7002,14 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
             ((unitCover_isRational D₀ f hD₀).piece hP')
         refine isOXAcyclic_congr _ (laurentProdCoverOf Pm gs) rfl (fun D hD => ?_)
           (fun D' hD' => ?_) (ih Pm hPm_rat)
-        · rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hD
+        · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hD
           obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
           obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict gs D₀ Pm hPsub).1 Q hQ
           exact ⟨Q', hQ', by rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq⟩
         · obtain ⟨Q, hQ, hQeq⟩ := (laurentProdLeaves_restrict gs D₀ Pm hPsub).2 D' hD'
           refine ⟨Pm.interSamePair Q ((laurentProdLeaves_pair gs D₀ hQ).trans
             (hUfP P hP).symm), ?_, ?_⟩
-          · rw [RationalCovering.restrictTo_covers, Finset.mem_image]
+          · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
             exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
           · rw [RationalLocData.interSamePair_rationalOpen]; exact hQeq
     -- outer: the cons cover R-equals the product (the `unitCover` pieces ARE the
@@ -7029,7 +7029,7 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
         refine ⟨(D₀.interSamePair (unitDatum D₀.P f) rfl).interSamePair Q
           ((laurentProdLeaves_pair gs D₀ hQ).trans
             (RationalLocData.interSamePair_P D₀ (unitDatum D₀.P f) rfl).symm), ?_, ?_⟩
-        · rw [RationalCovering.interProd_covers, Finset.mem_image]
+        · rw [RationalCoveringData.interProd_covers, Finset.mem_image]
           exact ⟨⟨(D₀.interSamePair (unitDatum D₀.P f) rfl, Q),
             Finset.mem_product.mpr ⟨unit_mem_unitCover D₀ f, hQ⟩⟩,
             Finset.mem_attach _ _, rfl⟩
@@ -7043,7 +7043,7 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
         refine ⟨(D₀.interSamePair (coUnitDatum D₀.P f) rfl).interSamePair Q
           ((laurentProdLeaves_pair gs D₀ hQ).trans
             (RationalLocData.interSamePair_P D₀ (coUnitDatum D₀.P f) rfl).symm), ?_, ?_⟩
-        · rw [RationalCovering.interProd_covers, Finset.mem_image]
+        · rw [RationalCoveringData.interProd_covers, Finset.mem_image]
           exact ⟨⟨(D₀.interSamePair (coUnitDatum D₀.P f) rfl, Q),
             Finset.mem_product.mpr ⟨counit_mem_unitCover D₀ f, hQ⟩⟩,
             Finset.mem_attach _ _, rfl⟩
@@ -7051,7 +7051,7 @@ theorem laurentProdCoverOf_isOXAcyclic [DecidableEq A]
             (D₀.interSamePair (coUnitDatum D₀.P f) rfl) Q
             ((laurentProdLeaves_pair gs D₀ hQ).trans
               (RationalLocData.interSamePair_P D₀ (coUnitDatum D₀.P f) rfl).symm)).symm
-    · rw [RationalCovering.interProd_covers, Finset.mem_image] at hD'
+    · rw [RationalCoveringData.interProd_covers, Finset.mem_image] at hD'
       obtain ⟨⟨⟨P, Q⟩, hPQ⟩, -, rfl⟩ := hD'
       obtain ⟨hPmem, hQmem⟩ := Finset.mem_product.mp hPQ
       rw [mem_unitCover_iff] at hPmem
@@ -7076,12 +7076,12 @@ theorem wedhorn_lemma_834_part_i_laurent_acyclic [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (V : RationalCovering A) (fs : List A) (hV_laurent : V.IsLaurentProdCover fs)
+    (V : RationalCoveringData A) (fs : List A) (hV_laurent : V.IsLaurentProdCover fs)
     (hV_base : V.base.IsRational) :
     V.IsOXAcyclic := by
   -- The base-independent Laurent cover `V` IS (R-equal to) `laurentProdCoverOf V.base fs`
   -- (same base + same covers), which is acyclic by the faithful A.3(3) induction.
-  rw [RationalCovering.IsLaurentProdCover] at hV_laurent
+  rw [RationalCoveringData.IsLaurentProdCover] at hV_laurent
   refine isOXAcyclic_congr V (laurentProdCoverOf V.base fs) rfl (fun D hD => ?_)
     (fun D' hD' => ?_) (laurentProdCoverOf_isOXAcyclic V.base fs hV_base)
   · exact ⟨D, by rw [laurentProdCoverOf_covers, ← hV_laurent]; exact hD, rfl⟩
@@ -7097,7 +7097,7 @@ theorem wedhorn_lemma_834_part_i_laurent_acyclic [DecidableEq A]
 /-- The predicate "C is a rational cover generated by units of `𝒪_X(C.base)`".
 A unit-generated rational cover is one whose generators have non-zero
 canonical image in the completion. -/
-def RationalCovering.IsUnitGenerated (C : RationalCovering A) : Prop :=
+def RationalCoveringData.IsUnitGenerated (C : RationalCoveringData A) : Prop :=
   -- All canonical images of cover-piece generators (the `D.T` and `D.s`)
   -- are units in `presheafValue C.base`.
   ∀ D ∈ C.covers, ∀ t ∈ D.T, IsUnit (C.base.canonicalMap t)
@@ -7114,15 +7114,15 @@ unconstrained). Wedhorn's part (iii) σ-walk — "the Laurent cover generated
 by `{u_i u_j⁻¹}` refines 𝒰" — needs the `IsGeneratedBy units` structure: a
 ratio-piece with dominant unit `u_max` refines the `C`-piece `R(units/u_max)`,
 which exists *only* under `IsGeneratedBy`. -/
-def RationalCovering.IsGeneratedByUnits (C : RationalCovering A) : Prop :=
+def RationalCoveringData.IsGeneratedByUnits (C : RationalCoveringData A) : Prop :=
   ∃ units : Finset A,
     C.IsGeneratedBy units ∧ ∀ u ∈ units, IsUnit (C.base.canonicalMap u)
 
 /-- A `IsGeneratedByUnits` cover is in particular `IsUnitGenerated`
 (each piece-generator is a unit). The pieces of an `IsGeneratedBy units`
 cover have `T`-set `= units`, all of which are units. -/
-theorem RationalCovering.IsGeneratedByUnits.isUnitGenerated
-    {C : RationalCovering A} (h : C.IsGeneratedByUnits) : C.IsUnitGenerated := by
+theorem RationalCoveringData.IsGeneratedByUnits.isUnitGenerated
+    {C : RationalCoveringData A} (h : C.IsGeneratedByUnits) : C.IsUnitGenerated := by
   obtain ⟨units, ⟨_h_span, φ, hφ_bij, hφ_eq⟩, h_units⟩ := h
   intro D hD t ht
   -- D = φ ⟨u', _⟩ for some u' ∈ units (φ surjective), and (φ _).1.T = units,
@@ -7178,7 +7178,7 @@ noncomputable def genRestrictedCover
     [IsTateRing A] [IsNoetherianRing A] [DecidableEq A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
-    RationalCovering A :=
+    RationalCoveringData A :=
   { base := D₀
     covers := T.image (fun t => D₀.interSamePair (genPieceDatum D₀.P T t hspan) rfl)
     hsubset := by
@@ -7260,7 +7260,7 @@ theorem laurent_cover_from_dominating_unit [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A) (s : Aˣ) :
-    ∃ (V : RationalCovering A) (fs : List A),
+    ∃ (V : RationalCoveringData A) (fs : List A),
       V.IsLaurentProdCover fs ∧
       V.base = D₀ ∧
       -- The Laurent generators are `s⁻¹·T`:
@@ -7374,7 +7374,7 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
     [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (T : Finset A) (hT : T.Nonempty) (s : Aˣ) (V : RationalCovering A)
+    (T : Finset A) (hT : T.Nonempty) (s : Aˣ) (V : RationalCoveringData A)
     (h_dom : ∀ v ∈ Spa A A⁺, ∃ t ∈ T, v.vle (s : A) t ∧ ¬ v.vle t (s : A))
     (_fs : List A) (_hV_laurent : V.IsLaurentProdCover _fs)
     (_hfs_eq : _fs = (T.toList).map (fun t => ((s⁻¹ : Aˣ) : A) * t))
@@ -7384,7 +7384,7 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
   classical
   -- the leaf-membership in the `s⁻¹·T` Laurent-product cover
   have hVj' : Vj ∈ laurentProdLeaves V.base _fs := by
-    rw [RationalCovering.IsLaurentProdCover] at _hV_laurent
+    rw [RationalCoveringData.IsLaurentProdCover] at _hV_laurent
     rw [← _hV_laurent]; exact _hVj
   -- arithmetic transport: `v(s⁻¹t) ≥ 1 ⟹ v(s) ≤ v(t)` and `v(s⁻¹t) ≤ 1 ⟹ v(t) ≤ v(s)`
   have harith₁ : ∀ (t : A) (v : Spv A), v.vle 1 (((s⁻¹ : Aˣ) : A) * t) →
@@ -7491,7 +7491,7 @@ theorem restricted_cover_construction
       CompleteSpace A]
     (Vj : RationalLocData A) (T : Finset A) (_t_distinguished : A)
     (_h_t_in_T : _t_distinguished ∈ T) :
-    ∃ (C_restr : RationalCovering A), C_restr.base = Vj :=
+    ∃ (C_restr : RationalCoveringData A), C_restr.base = Vj :=
   -- Trivial: take the cover {Vj} of itself (single piece equal to base).
   -- This satisfies the existential — the *content* is captured by the
   -- companion lemmas (`unit_gen_restriction_of_dominating_laurent` etc).
@@ -7510,11 +7510,11 @@ theorem unit_gen_restriction_of_dominating_laurent [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (T : Finset A) (_hC_gen : C.IsGeneratedBy T)
+    (C : RationalCoveringData A) (T : Finset A) (_hC_gen : C.IsGeneratedBy T)
     (s : Aˣ)
     (_h_dom : ∀ v ∈ Spa A A⁺, ∃ t ∈ T,
       v.vle (s : A) t ∧ ¬ v.vle t (s : A))
-    (V : RationalCovering A)
+    (V : RationalCoveringData A)
     -- Construction hypotheses (2026-05-28 top-down restate): V is the s⁻¹·T
     -- Laurent cover, so Vj is a sign-vector piece — required by the
     -- index-selection σ-walk (step a). Threaded from `part_ii`.
@@ -7536,7 +7536,7 @@ theorem unit_gen_restriction_of_dominating_laurent [DecidableEq A]
   classical
   -- leaf membership in the `s⁻¹·T` Laurent-product cover
   have hVj' : Vj ∈ laurentProdLeaves V.base _fs := by
-    rw [RationalCovering.IsLaurentProdCover] at _hV_laurent
+    rw [RationalCoveringData.IsLaurentProdCover] at _hV_laurent
     rw [← _hV_laurent]; exact _hVj
   -- arithmetic transports (as in `index_selection_on_laurent_piece`)
   have harith₁ : ∀ (t : A) (v : Spv A), v.vle 1 (((s⁻¹ : Aˣ) : A) * t) →
@@ -7588,8 +7588,8 @@ theorem wedhorn_lemma_834_part_ii_unit_gen_via_dominating [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A) (T : Finset A) (hC_gen : C.IsGeneratedBy T) :
-    ∃ (V : RationalCovering A) (fs : List A) (s : Aˣ),
+    (C : RationalCoveringData A) (T : Finset A) (hC_gen : C.IsGeneratedBy T) :
+    ∃ (V : RationalCoveringData A) (fs : List A) (s : Aˣ),
       V.IsLaurentProdCover fs ∧
       V.base = C.base ∧
       -- Construction data exposed (2026-05-28 top-down restate): the dominating
@@ -7639,9 +7639,9 @@ theorem wedhorn_lemma_834_propA3_part1_separation
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C V : RationalCovering A) (h_V_base : V.base = C.base)
+    (C V : RationalCoveringData A) (h_V_base : V.base = C.base)
     (h_V_acyclic : V.IsOXAcyclic)
-    (C_restr_at : ↥V.covers → RationalCovering A)
+    (C_restr_at : ↥V.covers → RationalCoveringData A)
     (hC_restr_base : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1)
     (hC_restr_pieces : ∀ Vj : ↥V.covers, ∀ D' ∈ (C_restr_at Vj).covers,
       ∃ D ∈ C.covers, rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -7652,7 +7652,7 @@ theorem wedhorn_lemma_834_propA3_part1_separation
   intro x hx
   -- Cast x to presheafValue V.base via presheafValueCast.
   let g : presheafValue C.base ≃+* presheafValue V.base :=
-    RationalCovering.presheafValueCast h_V_base
+    RationalCoveringData.presheafValueCast h_V_base
   -- It suffices to show g x = 0; then x = 0 by g.injective.
   suffices h_gx : g x = 0 by
     have : g x = g 0 := h_gx.trans g.map_zero.symm
@@ -7666,13 +7666,13 @@ theorem wedhorn_lemma_834_propA3_part1_separation
   have h_cast :
       restrictionMap V.base V_j (V.hsubset V_j hV_j) (g x) =
       restrictionMap C.base V_j hsub_C x :=
-    RationalCovering.presheafValueCast_restrictionMap C.base V.base
+    RationalCoveringData.presheafValueCast_restrictionMap C.base V.base
       h_V_base V_j hsub_C (V.hsubset V_j hV_j) x
   rw [h_cast]
   -- Transport x|V_j through the (C_restr_at Vj).base = V_j cast and apply
   -- the SEPARATION of the acyclic covering C|V_j.
   have h_base : (C_restr_at ⟨V_j, hV_j⟩).base = V_j := hC_restr_base ⟨V_j, hV_j⟩
-  rw [← RationalCovering.presheafValue_eqRec_eq_zero_iff V_j
+  rw [← RationalCoveringData.presheafValue_eqRec_eq_zero_iff V_j
     (C_restr_at ⟨V_j, hV_j⟩).base h_base.symm
     (restrictionMap C.base V_j hsub_C x)]
   apply (hC_restr_acyclic ⟨V_j, hV_j⟩).separation
@@ -7681,7 +7681,7 @@ theorem wedhorn_lemma_834_propA3_part1_separation
   -- + restriction composition).
   have hsub_Vj : rationalOpen D'.T D'.s ⊆ rationalOpen V_j.T V_j.s := by
     rw [← h_base]; exact (C_restr_at ⟨V_j, hV_j⟩).hsubset D' hD'
-  rw [RationalCovering.eqRec_restrictionMap_direct V_j
+  rw [RationalCoveringData.eqRec_restrictionMap_direct V_j
     (C_restr_at ⟨V_j, hV_j⟩).base h_base.symm D' hsub_Vj
     ((C_restr_at ⟨V_j, hV_j⟩).hsubset D' hD')
     (restrictionMap C.base V_j hsub_C x)]
@@ -7709,9 +7709,9 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C V : RationalCovering A) (_hV_base : V.base = C.base)
+    (C V : RationalCoveringData A) (_hV_base : V.base = C.base)
     (_hV_acyclic : V.IsOXAcyclic)
-    (V_restr_at : ↥C.covers → RationalCovering A)
+    (V_restr_at : ↥C.covers → RationalCoveringData A)
     (_hV_restr_base : ∀ U : ↥C.covers, (V_restr_at U).base = U.1)
     -- TRACE-form (2026-06-10): pieces sit inside single V-pieces (no longer
     -- required to BE V-pieces — Wedhorn's V|U is the trace cover, 4233-4235).
@@ -7722,7 +7722,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
     (_hV_restr_covers : ∀ U : ↥C.covers, ∀ v ∈ rationalOpen U.1.T U.1.s,
       ∃ V' ∈ (V_restr_at U).covers, v ∈ rationalOpen V'.T V'.s ∧
         rationalOpen V'.T V'.s ⊆ rationalOpen U.1.T U.1.s)
-    (C_restr_at : ↥V.covers → RationalCovering A)
+    (C_restr_at : ↥V.covers → RationalCoveringData A)
     (_hC_restr_base : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1)
     (_hC_restr_pieces : ∀ Vj : ↥V.covers, ∀ D' ∈ (C_restr_at Vj).covers,
       ∃ D ∈ C.covers,
@@ -7741,7 +7741,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
     (hI_open : ∀ Vj₁ Vj₂ : ↥V.covers,
       rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s =
         rationalOpen Vj₁.1.T Vj₁.1.s ∩ rationalOpen Vj₂.1.T Vj₂.1.s)
-    (W_at : ↥V.covers → ↥V.covers → RationalCovering A)
+    (W_at : ↥V.covers → ↥V.covers → RationalCoveringData A)
     (hW_base : ∀ Vj₁ Vj₂ : ↥V.covers, (W_at Vj₁ Vj₂).base = I_at Vj₁ Vj₂)
     (hW_pieces₁ : ∀ Vj₁ Vj₂ : ↥V.covers, ∀ W' ∈ (W_at Vj₁ Vj₂).covers,
       ∃ D'₁ ∈ (C_restr_at Vj₁).covers,
@@ -7754,7 +7754,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
     -- (wedhorn.txt:5316-5318): an acyclic C-refining covering of each trace
     -- U ∩ Vⱼ, with pieces inside single pieces of C_restr_at Vⱼ. Used by the
     -- trace-form Step 8 (the per-trace glue-verification).
-    (M_at : ↥C.covers → ↥V.covers → RationalCovering A)
+    (M_at : ↥C.covers → ↥V.covers → RationalCoveringData A)
     (hM_base_open : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
       rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
         rationalOpen U.1.T U.1.s ∩ rationalOpen Vj.1.T Vj.1.s)
@@ -7879,7 +7879,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
       rw [hL, hR, h_on_I]
     -- Agreement on I via SEPARATION over the acyclic W_at Vj₁ Vj₂.
     rw [← sub_eq_zero]
-    rw [← RationalCovering.presheafValue_eqRec_eq_zero_iff (I_at Vj₁ Vj₂)
+    rw [← RationalCoveringData.presheafValue_eqRec_eq_zero_iff (I_at Vj₁ Vj₂)
       (W_at Vj₁ Vj₂).base (hW_base Vj₁ Vj₂).symm
       (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) -
         restrictionMap Vj₂.1 (I_at Vj₁ Vj₂) hI_sub₂ (yV Vj₂))]
@@ -7888,7 +7888,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
     have hsub_I : rationalOpen W'.T W'.s ⊆
         rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s := by
       rw [← hW_base Vj₁ Vj₂]; exact (W_at Vj₁ Vj₂).hsubset W' hW'
-    rw [RationalCovering.eqRec_restrictionMap_direct (I_at Vj₁ Vj₂)
+    rw [RationalCoveringData.eqRec_restrictionMap_direct (I_at Vj₁ Vj₂)
       (W_at Vj₁ Vj₂).base (hW_base Vj₁ Vj₂).symm W' hsub_I
       ((W_at Vj₁ Vj₂).hsubset W' hW')
       (restrictionMap Vj₁.1 (I_at Vj₁ Vj₂) hI_sub₁ (yV Vj₁) -
@@ -7937,7 +7937,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
           (@Eq.rec (RationalLocData A) (C_restr_at Vj₁).base
             (fun b _ => presheafValue b) (yVj Vj₁) Vj₁.1 (_hC_restr_base Vj₁)) =
         gVj Vj₁ ⟨D'₁, hD'₁_in⟩
-      rw [RationalCovering.eqRec_restrictionMap_direct (C_restr_at Vj₁).base
+      rw [RationalCoveringData.eqRec_restrictionMap_direct (C_restr_at Vj₁).base
         Vj₁.1 (_hC_restr_base Vj₁) D'₁ ((C_restr_at Vj₁).hsubset D'₁ hD'₁_in)
         hD'₁_sub (yVj Vj₁)]
       exact hyVj_spec₁ ⟨D'₁, hD'₁_in⟩
@@ -7947,7 +7947,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
           (@Eq.rec (RationalLocData A) (C_restr_at Vj₂).base
             (fun b _ => presheafValue b) (yVj Vj₂) Vj₂.1 (_hC_restr_base Vj₂)) =
         gVj Vj₂ ⟨D'₂, hD'₂_in⟩
-      rw [RationalCovering.eqRec_restrictionMap_direct (C_restr_at Vj₂).base
+      rw [RationalCoveringData.eqRec_restrictionMap_direct (C_restr_at Vj₂).base
         Vj₂.1 (_hC_restr_base Vj₂) D'₂ ((C_restr_at Vj₂).hsubset D'₂ hD'₂_in)
         hD'₂_sub (yVj Vj₂)]
       exact hyVj_spec₂ ⟨D'₂, hD'₂_in⟩
@@ -7982,7 +7982,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
   obtain ⟨x', hx'⟩ := _hV_acyclic.gluing yV h_yV_compat
   -- Step 7: cast x' to x : presheafValue C.base via presheafValueCast on _hV_base.
   let x : presheafValue C.base :=
-    (RationalCovering.presheafValueCast (C := C) (C' := V) _hV_base).symm x'
+    (RationalCoveringData.presheafValueCast (C := C) (C' := V) _hV_base).symm x'
   refine ⟨x, ?_⟩
   -- Step 8 (TRACE-form, 2026-06-10): verify x|D = f D for each D ∈ C.covers
   -- by separating over the trace cover (V_restr_at D); each trace piece V'
@@ -8018,7 +8018,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
   rw [show restrictionMap (V_restr_at D).base V'
       ((V_restr_at D).hsubset V' hV'_in) diff_cast =
       restrictionMap D.1 V' h_V'_sub_D diff_D from
-    RationalCovering.eqRec_restrictionMap_direct D.1 (V_restr_at D).base
+    RationalCoveringData.eqRec_restrictionMap_direct D.1 (V_restr_at D).base
       h_base_eq.symm V' h_V'_sub_D ((V_restr_at D).hsubset V' hV'_in) diff_D]
   show (restrictionMapHom D.1 V' h_V'_sub_D) _ = 0
   rw [map_sub, sub_eq_zero]
@@ -8034,17 +8034,17 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
     rw [_hV_base]; exact h_V'_sub_D.trans (C.hsubset D.1 D.2)
   have h_cast_x : restrictionMap V.base V' hsubV x' =
       restrictionMap C.base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) x := by
-    have key := RationalCovering.presheafValueCast_restrictionMap
+    have key := RationalCoveringData.presheafValueCast_restrictionMap
       C.base V.base _hV_base V' (h_V'_sub_D.trans (C.hsubset D.1 D.2)) hsubV x
     have h_cast_cancel :
-        (RationalCovering.presheafValueCast (C := C) (C' := V) _hV_base) x
+        (RationalCoveringData.presheafValueCast (C := C) (C' := V) _hV_base) x
           = x' := by
       simp only [x, RingEquiv.apply_symm_apply]
     rw [show
       (@Eq.rec (RationalLocData A) C.base
         (fun b _ => presheafValue C.base ≃+* presheafValue b)
         (RingEquiv.refl _) V.base _hV_base.symm x) =
-        ((RationalCovering.presheafValueCast (C := C) (C' := V) _hV_base) x)
+        ((RationalCoveringData.presheafValueCast (C := C) (C' := V) _hV_base) x)
       from rfl, h_cast_cancel] at key
     exact key
   rw [← h_cast_x]
@@ -8121,7 +8121,7 @@ theorem wedhorn_lemma_834_propA3_part1_gluing
           (@Eq.rec (RationalLocData A) (C_restr_at ⟨Vj, hVj⟩).base
             (fun b _ => presheafValue b) (yVj ⟨Vj, hVj⟩) Vj
             (_hC_restr_base ⟨Vj, hVj⟩)) = gVj ⟨Vj, hVj⟩ ⟨D'', hD''_in⟩
-      rw [RationalCovering.eqRec_restrictionMap_direct
+      rw [RationalCoveringData.eqRec_restrictionMap_direct
         (C_restr_at ⟨Vj, hVj⟩).base Vj (_hC_restr_base ⟨Vj, hVj⟩) D''
         ((C_restr_at ⟨Vj, hVj⟩).hsubset D'' hD''_in) hD''_sub_Vj
         (yVj ⟨Vj, hVj⟩)]
@@ -8173,15 +8173,15 @@ theorem wedhorn_lemma_834_propA3_part1_bridge
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C V : RationalCovering A) (hV_base : V.base = C.base)
+    (C V : RationalCoveringData A) (hV_base : V.base = C.base)
     (hV_acyclic : V.IsOXAcyclic)
-    (V_restr_at : ↥C.covers → RationalCovering A)
+    (V_restr_at : ↥C.covers → RationalCoveringData A)
     (hV_restr_base : ∀ U : ↥C.covers, (V_restr_at U).base = U.1)
     (hV_restr_pieces : ∀ U : ↥C.covers, ∀ V' ∈ (V_restr_at U).covers,
       ∃ V'' ∈ V.covers,
         rationalOpen V'.T V'.s ⊆ rationalOpen V''.T V''.s)
     (hV_restr_acyclic : ∀ U : ↥C.covers, (V_restr_at U).IsOXAcyclic)
-    (C_restr_at : ↥V.covers → RationalCovering A)
+    (C_restr_at : ↥V.covers → RationalCoveringData A)
     (hC_restr_base : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1)
     (hC_restr_pieces : ∀ Vj : ↥V.covers, ∀ D' ∈ (C_restr_at Vj).covers,
       ∃ D ∈ C.covers,
@@ -8199,7 +8199,7 @@ theorem wedhorn_lemma_834_propA3_part1_bridge
     (hI_open : ∀ Vj₁ Vj₂ : ↥V.covers,
       rationalOpen (I_at Vj₁ Vj₂).T (I_at Vj₁ Vj₂).s =
         rationalOpen Vj₁.1.T Vj₁.1.s ∩ rationalOpen Vj₂.1.T Vj₂.1.s)
-    (W_at : ↥V.covers → ↥V.covers → RationalCovering A)
+    (W_at : ↥V.covers → ↥V.covers → RationalCoveringData A)
     (hW_base : ∀ Vj₁ Vj₂ : ↥V.covers, (W_at Vj₁ Vj₂).base = I_at Vj₁ Vj₂)
     (hW_pieces₁ : ∀ Vj₁ Vj₂ : ↥V.covers, ∀ W' ∈ (W_at Vj₁ Vj₂).covers,
       ∃ D'₁ ∈ (C_restr_at Vj₁).covers,
@@ -8208,7 +8208,7 @@ theorem wedhorn_lemma_834_propA3_part1_bridge
       ∃ D'₂ ∈ (C_restr_at Vj₂).covers,
         rationalOpen W'.T W'.s ⊆ rationalOpen D'₂.T D'₂.s)
     (hW_acyclic : ∀ Vj₁ Vj₂ : ↥V.covers, (W_at Vj₁ Vj₂).IsOXAcyclic)
-    (M_at : ↥C.covers → ↥V.covers → RationalCovering A)
+    (M_at : ↥C.covers → ↥V.covers → RationalCoveringData A)
     (hM_base_open : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
       rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
         rationalOpen U.1.T U.1.s ∩ rationalOpen Vj.1.T Vj.1.s)
@@ -8257,10 +8257,10 @@ open Classical in
 itself generated by units: the products of the two unit sets (Wedhorn p. 84 —
 units restrict to units on the intersection, and products of units are
 units). -/
-theorem RationalCovering.interProdOn_isGeneratedByUnits
+theorem RationalCoveringData.interProdOn_isGeneratedByUnits
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [HasLocLiftPowerBounded A]
-    (C₁ C₂ : RationalCovering A) (I : RationalLocData A)
+    (C₁ C₂ : RationalCoveringData A) (I : RationalLocData A)
     (hI : rationalOpen I.T I.s =
       rationalOpen C₁.base.T C₁.base.s ∩ rationalOpen C₂.base.T C₂.base.s)
     (P₀ : PairOfDefinition A)
@@ -8272,7 +8272,7 @@ theorem RationalCovering.interProdOn_isGeneratedByUnits
     (C₁.interProdOn C₂ I hI (fun D₁ hD₁ D₂ hD₂ =>
       (hP₂ D₂ hD₂).trans (hP₁ D₁ hD₁).symm)).IsGeneratedByUnits := by
   refine ⟨units₁ * units₂,
-    RationalCovering.interProdOn_isGeneratedBy C₁ C₂ I hI P₀ hP₁ hP₂
+    RationalCoveringData.interProdOn_isGeneratedBy C₁ C₂ I hI P₀ hP₁ hP₂
       units₁ units₂ h₁ h₂, ?_⟩
   intro u hu
   obtain ⟨x, hx, y, hy, rfl⟩ := Finset.mem_mul.mp hu
@@ -8630,7 +8630,7 @@ noncomputable def imageGenCover
       CompleteSpace A]
     (D₀ : RationalLocData A) (T : Finset A)
     (hspan : Ideal.span (T : Set A) = ⊤) :
-    RationalCovering (presheafValue D₀) :=
+    RationalCoveringData (presheafValue D₀) :=
   haveI hTateB : IsTateRing (presheafValue D₀) := presheafValue_isTateRing_faithful D₀
   haveI : IsNoetherianRing (presheafValue D₀) :=
     presheafValue_isNoetherianRing_faithful D₀
@@ -10773,7 +10773,7 @@ theorem genRestrictedCover_gluing
         (genPiece_relative_equiv D₀ T (tof E) hspan (f (tof E) (htof_mem E))) := by
     intro E E₃ h₃
     rw [hg]
-    exact RationalCovering.eqRec_restrictionMap_direct _ _ (htof_eq E).symm E₃ _ h₃ _
+    exact RationalCoveringData.eqRec_restrictionMap_direct _ _ (htof_eq E).symm E₃ _ h₃ _
   -- B-side compatibility for `g` (factor through the pairwise intersection + W′)
   have hgcompat : ∀ (E₁ E₂ : ↥(imageGenCover D₀ T hspan).covers)
       (E₃ : RationalLocData (presheafValue D₀))
@@ -11005,9 +11005,9 @@ theorem ratio_laurent_refines_unitGen_cover [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (units : Finset A) (hne : units.Nonempty)
+    (C : RationalCoveringData A) (units : Finset A) (hne : units.Nonempty)
     (hC_gen : C.IsGeneratedBy units) (h_units : ∀ f ∈ units, IsUnit f) :
-    ∃ (fs : List A) (V : RationalCovering A),
+    ∃ (fs : List A) (V : RationalCoveringData A),
       V.IsLaurentProdCover fs ∧ V.base = C.base ∧
       ∀ V' ∈ V.covers, ∃ D ∈ C.covers,
         rationalOpen V'.T V'.s ⊆ rationalOpen D.T D.s := by
@@ -11088,9 +11088,9 @@ theorem ratio_laurent_unitGen_bundle [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (units : Finset A) (hne : units.Nonempty)
+    (C : RationalCoveringData A) (units : Finset A) (hne : units.Nonempty)
     (hC_gen : C.IsGeneratedBy units) (h_units : ∀ f ∈ units, IsUnit f) :
-    ∃ (fs : List A) (V : RationalCovering A),
+    ∃ (fs : List A) (V : RationalCoveringData A),
       V.IsLaurentProdCover fs ∧ V.base = C.base ∧
       (∀ V' ∈ V.covers, ∃ D ∈ C.covers,
         rationalOpen V'.T V'.s ⊆ rationalOpen D.T D.s) ∧
@@ -11233,7 +11233,7 @@ theorem laurentTrace_isOXAcyclic [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (V : RationalCovering A) (fs : List A) (hV_laurent : V.IsLaurentProdCover fs)
+    (V : RationalCoveringData A) (fs : List A) (hV_laurent : V.IsLaurentProdCover fs)
     (U : RationalLocData A) (hU_rat : U.IsRational)
     (hU_subset : rationalOpen U.T U.s ⊆ rationalOpen V.base.T V.base.s)
     (hUP : U.P = V.base.P)
@@ -11243,7 +11243,7 @@ theorem laurentTrace_isOXAcyclic [DecidableEq A]
   refine isOXAcyclic_congr _ (laurentProdCoverOf U fs) rfl (fun D hD => ?_)
     (fun D' hD' => ?_) (laurentProdCoverOf_isOXAcyclic U fs hU_rat)
   · -- each trace piece's open IS a `U`-leaf open
-    rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hD
+    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hD
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hD
     obtain ⟨Q', hQ', hQeq⟩ := (laurentProdLeaves_restrict fs V.base U hU_subset).1
       Q ((Finset.ext_iff.mp hV_laurent Q).mp hQ)
@@ -11255,7 +11255,7 @@ theorem laurentTrace_isOXAcyclic [DecidableEq A]
       D' (by rwa [laurentProdCoverOf_covers] at hD')
     have hQV : Q ∈ V.covers := (Finset.ext_iff.mp hV_laurent Q).mpr hQ
     refine ⟨U.interSamePair Q ((hVP Q hQV).trans hUP.symm), ?_, ?_⟩
-    · rw [RationalCovering.restrictTo_covers, Finset.mem_image]
+    · rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
       exact ⟨⟨Q, hQV⟩, Finset.mem_attach _ _, rfl⟩
     · rw [RationalLocData.interSamePair_rationalOpen]
       exact hQeq
@@ -11274,7 +11274,7 @@ theorem isOXAcyclic_of_isGeneratedBy_ring_units [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (units : Finset A) (hne : units.Nonempty)
+    (C : RationalCoveringData A) (units : Finset A) (hne : units.Nonempty)
     (hgen : C.IsGeneratedBy units) (h_units : ∀ f ∈ units, IsUnit f)
     (hC_rat : C.IsRational)
     (hP_pieces : ∀ D ∈ C.covers, D.P = C.base.P) :
@@ -11298,7 +11298,7 @@ theorem isOXAcyclic_of_isGeneratedBy_ring_units [DecidableEq A]
       hVP)
     (fun D => rfl) ?_ ?_
   · intro D E' hE'
-    rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE'
+    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hE'
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hE'
     exact ⟨Q, hQ, RationalLocData.interSamePair_subset_right _ _ _⟩
   · intro D
@@ -11321,8 +11321,8 @@ noncomputable def imageCover [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational) :
-    RationalCovering (presheafValue C.base) :=
+    (C : RationalCoveringData A) (hC : C.IsRational) :
+    RationalCoveringData (presheafValue C.base) :=
   haveI hTateB : IsTateRing (presheafValue C.base) :=
     presheafValue_isTateRing_faithful C.base
   haveI : IsNoetherianRing (presheafValue C.base) :=
@@ -11410,7 +11410,7 @@ theorem isOXAcyclic_of_empty_complement
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C C' : RationalCovering A) (hbase : C'.base = C.base)
+    (C C' : RationalCoveringData A) (hbase : C'.base = C.base)
     (hsub : C'.covers ⊆ C.covers)
     (hempty : ∀ D ∈ C.covers, D ∉ C'.covers → rationalOpen D.T D.s = ∅)
     (hC' : C'.IsOXAcyclic) : C.IsOXAcyclic := by
@@ -11419,7 +11419,7 @@ theorem isOXAcyclic_of_empty_complement
   · -- separation through the C'-subfamily (cast across the base equality).
     intro x hx
     let g : presheafValue C.base ≃+* presheafValue C'.base :=
-      RationalCovering.presheafValueCast hbase
+      RationalCoveringData.presheafValueCast hbase
     suffices h_gx : g x = 0 by
       have : g x = g 0 := h_gx.trans g.map_zero.symm
       exact g.injective this
@@ -11430,7 +11430,7 @@ theorem isOXAcyclic_of_empty_complement
     have h_cast :
         restrictionMap C'.base D' (C'.hsubset D' hD') (g x) =
         restrictionMap C.base D' hsub_C x :=
-      RationalCovering.presheafValueCast_restrictionMap C.base C'.base
+      RationalCoveringData.presheafValueCast_restrictionMap C.base C'.base
         hbase D' hsub_C (C'.hsubset D' hD') x
     rw [h_cast]
     exact hx D' (hsub hD')
@@ -11439,7 +11439,7 @@ theorem isOXAcyclic_of_empty_complement
     obtain ⟨x', hx'⟩ := hC'.gluing (fun D' => f ⟨D'.1, hsub D'.2⟩)
       (fun D'₁ D'₂ D₃ h₃₁ h₃₂ => hcompat ⟨D'₁.1, hsub D'₁.2⟩
         ⟨D'₂.1, hsub D'₂.2⟩ D₃ h₃₁ h₃₂)
-    refine ⟨(RationalCovering.presheafValueCast hbase).symm x', ?_⟩
+    refine ⟨(RationalCoveringData.presheafValueCast hbase).symm x', ?_⟩
     intro D
     by_cases hD' : D.1 ∈ C'.covers
     · -- a C'-piece: the glue-spec, transported across the base cast.
@@ -11448,13 +11448,13 @@ theorem isOXAcyclic_of_empty_complement
         rw [hbase]; exact C.hsubset D.1 D.2
       have h_cast :
           restrictionMap C'.base D.1 hsub_C'
-            ((RationalCovering.presheafValueCast hbase)
-              ((RationalCovering.presheafValueCast hbase).symm x')) =
+            ((RationalCoveringData.presheafValueCast hbase)
+              ((RationalCoveringData.presheafValueCast hbase).symm x')) =
           restrictionMap C.base D.1 (C.hsubset D.1 D.2)
-            ((RationalCovering.presheafValueCast hbase).symm x') :=
-        RationalCovering.presheafValueCast_restrictionMap C.base C'.base
+            ((RationalCoveringData.presheafValueCast hbase).symm x') :=
+        RationalCoveringData.presheafValueCast_restrictionMap C.base C'.base
           hbase D.1 (C.hsubset D.1 D.2) hsub_C'
-          ((RationalCovering.presheafValueCast hbase).symm x')
+          ((RationalCoveringData.presheafValueCast hbase).symm x')
       rw [RingEquiv.apply_symm_apply] at h_cast
       rw [← h_cast]
       exact hx' ⟨D.1, hD'⟩
@@ -11544,7 +11544,7 @@ theorem imageGenCover_isOXAcyclic_of_units
       hVP)
     (fun D => rfl) ?_ ?_
   · intro D E' hE'
-    rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hE'
+    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hE'
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hE'
     exact ⟨Q, hQ, RationalLocData.interSamePair_subset_right _ _ _⟩
   · intro D
@@ -11712,7 +11712,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
           (Finset.mem_image_of_mem _ hTne.choose_spec)))
         (_h_units hTne.choose hTne.choose_spec)
     -- the B-native Tpos-generated cover of Spa B
-    let C_gen : RationalCovering (presheafValue D₀) :=
+    let C_gen : RationalCoveringData (presheafValue D₀) :=
       { base := globalLocData (presheafValue_concretePair D₀)
         covers := (Tpos.image D₀.canonicalMap).image (fun u =>
           genPieceDatum (presheafValue_concretePair D₀)
@@ -11773,7 +11773,7 @@ theorem genRestrictedCover_isOXAcyclic_of_units_or_empty
       rw [Finset.coe_image]
       exact span_image_canonicalMap_eq_top D₀ T hspan
     -- the Tpos-indexed subfamily of the FULL image cover
-    let C_sub : RationalCovering (presheafValue D₀) :=
+    let C_sub : RationalCoveringData (presheafValue D₀) :=
       { base := globalLocData (presheafValue_concretePair D₀)
         covers := (Tpos.image D₀.canonicalMap).image (fun u =>
           genPieceDatum (presheafValue_concretePair D₀)
@@ -11874,8 +11874,8 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (T : Finset A) (hC_gen : C.IsGeneratedBy T)
-    (V : RationalCovering A) (_fs : List A)
+    (C : RationalCoveringData A) (T : Finset A) (hC_gen : C.IsGeneratedBy T)
+    (V : RationalCoveringData A) (_fs : List A)
     (_hV_laurent : V.IsLaurentProdCover _fs)
     (Tpos_at : ↥V.covers → Finset A)
     (hTpos_sub : ∀ Vj : ↥V.covers, Tpos_at Vj ⊆ T)
@@ -11886,7 +11886,7 @@ theorem wedhorn_lemma_834_pair_package_exists [DecidableEq A]
           (genPieceDatum Vj.1.P T t hC_gen.1) rfl).T
         (Vj.1.interSamePair (genPieceDatum Vj.1.P T t hC_gen.1) rfl).s = ∅)
     (Vj₁ Vj₂ : ↥V.covers) :
-    ∃ (I : RationalLocData A) (W : RationalCovering A),
+    ∃ (I : RationalLocData A) (W : RationalCoveringData A),
       rationalOpen I.T I.s =
         rationalOpen Vj₁.1.T Vj₁.1.s ∩ rationalOpen Vj₂.1.T Vj₂.1.s ∧
       W.base = I ∧
@@ -12011,7 +12011,7 @@ theorem wedhorn_lemma_834 [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A) (T : Finset A)
+    (C : RationalCoveringData A) (T : Finset A)
     (_hC_gen : C.IsGeneratedBy T)
     (hbase_rat : C.base.IsRational)
     (hCP : ∀ U ∈ C.covers, U.P = C.base.P) :
@@ -12050,7 +12050,7 @@ theorem wedhorn_lemma_834 [DecidableEq A]
   -- filter-form + its σ-walk cover-each are gone — traces always cover).
   have hVP_leaves : ∀ Q ∈ V.covers, Q.P = V.base.P := fun Q hQ =>
     laurentProdLeaves_pair fs V.base ((Finset.ext_iff.mp hV_laurent Q).mp hQ)
-  let V_restr_at : ↥C.covers → RationalCovering A := fun U =>
+  let V_restr_at : ↥C.covers → RationalCoveringData A := fun U =>
     V.restrictTo U.1 (by rw [hV_base]; exact C.hsubset U.1 U.2)
       ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm)
       hVP_leaves
@@ -12059,7 +12059,7 @@ theorem wedhorn_lemma_834 [DecidableEq A]
       ∃ V'' ∈ V.covers, rationalOpen V'.T V'.s ⊆ rationalOpen V''.T V''.s := by
     intro U V' hV'
     simp only [V_restr_at] at hV'
-    rw [RationalCovering.restrictTo_covers, Finset.mem_image] at hV'
+    rw [RationalCoveringData.restrictTo_covers, Finset.mem_image] at hV'
     obtain ⟨⟨Q, hQ⟩, -, rfl⟩ := hV'
     exact ⟨Q, hQ, RationalLocData.interSamePair_subset_right _ _ _⟩
   have hV_restr_acyclic : ∀ U : ↥C.covers, (V_restr_at U).IsOXAcyclic :=
@@ -12077,12 +12077,12 @@ theorem wedhorn_lemma_834 [DecidableEq A]
       ((hCP U.1 U.2).trans (congrArg RationalLocData.P hV_base).symm).symm),
       ?_, ?_, RationalLocData.interSamePair_subset_left _ _ _⟩
     · simp only [V_restr_at]
-      rw [RationalCovering.restrictTo_covers, Finset.mem_image]
+      rw [RationalCoveringData.restrictTo_covers, Finset.mem_image]
       exact ⟨⟨Q, hQ⟩, Finset.mem_attach _ _, rfl⟩
     · rw [RationalLocData.interSamePair_rationalOpen]
       exact ⟨hv, hvQ⟩
   -- The restricted covers: genRestrictedCover over the full set T.
-  let C_restr_at : ↥V.covers → RationalCovering A := fun Vj =>
+  let C_restr_at : ↥V.covers → RationalCoveringData A := fun Vj =>
     genRestrictedCover Vj.1 T _hC_gen.1
   have hC_restr_base' : ∀ Vj : ↥V.covers, (C_restr_at Vj).base = Vj.1 :=
     fun _ => rfl
@@ -12111,7 +12111,7 @@ theorem wedhorn_lemma_834 [DecidableEq A]
   have hP_UV : ∀ (U : ↥C.covers) (Vj : ↥V.covers), Vj.1.P = U.1.P :=
     fun U Vj => (hVP_leaves Vj.1 Vj.2).trans
       ((congrArg RationalLocData.P hV_base).trans (hCP U.1 U.2).symm)
-  let M_at : ↥C.covers → ↥V.covers → RationalCovering A := fun U Vj =>
+  let M_at : ↥C.covers → ↥V.covers → RationalCoveringData A := fun U Vj =>
     genRestrictedCover (U.1.interSamePair Vj.1 (hP_UV U Vj)) T _hC_gen.1
   have hM_base_open : ∀ (U : ↥C.covers) (Vj : ↥V.covers),
       rationalOpen (M_at U Vj).base.T (M_at U Vj).base.s =
@@ -12176,10 +12176,10 @@ theorem wedhorn_lemma_834 [DecidableEq A]
 
 /-- **Sub-lemma for `exists_ideal_gen_refinement`** — converting a
 standard cover (Finset S spanning top + refinement data) into a concrete
-`RationalCovering A` whose pieces are `{R(S/t) | t ∈ S}`.
+`RationalCoveringData A` whose pieces are `{R(S/t) | t ∈ S}`.
 
 This is the Lemma 7.54 "constructor" step: given the witness Finset S
-+ the refinement-into-C data + the span-top, produce a RationalCovering
++ the refinement-into-C data + the span-top, produce a RationalCoveringData
 generated by S. The `hopen` proofs for each piece are the substantive
 content.
 
@@ -12191,7 +12191,7 @@ theorem rationalCovering_from_idealGenSet [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (_hS_span : Ideal.span (S : Set A) = ⊤)
     -- **Form-(a)** data (2026-05-28 Branch-3 restate, Wedhorn-faithful). The
     -- refinement pieces are `R(S/f)` for `f ∈ S` — the *Wedhorn 7.54* form
@@ -12210,7 +12210,7 @@ theorem rationalCovering_from_idealGenSet [DecidableEq A]
         rationalOpen (piece f).T (piece f).s ⊆ rationalOpen D.T D.s)
     (h_contain : ∀ f ∈ S, ∃ D ∈ C.covers,
       rationalOpen (piece f).T (piece f).s ⊆ rationalOpen D.T D.s) :
-    ∃ C' : RationalCovering A,
+    ∃ C' : RationalCoveringData A,
       C'.IsGeneratedBy S ∧
       C'.base = C.base ∧
       (∀ U ∈ C'.covers, U.P = C'.base.P) ∧
@@ -12524,7 +12524,7 @@ ideal-generating.
 
 Composition: `exists_form_a_refinement` (the Wedhorn 7.54 form-(a)
 Nullstellensatz content) supplies `S` + the form-(a) pieces `R(S/f)`; then
-`rationalCovering_from_idealGenSet` packages them into a `RationalCovering`.
+`rationalCovering_from_idealGenSet` packages them into a `RationalCoveringData`.
 (2026-05-28: switched OFF the project's form-(b) `exists_standard_cover_refining`
 — it produces the Zavyalov "f small" pieces, a different cover than Wedhorn's
 8.34 "f dominates" `R(T/t)`.) -/
@@ -12561,7 +12561,7 @@ theorem exists_form_a_refinement [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
+    (C : RationalCoveringData A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
     ∃ (S : Finset A) (piece : A → RationalLocData A),
       Ideal.span (S : Set A) = ⊤ ∧
@@ -12629,9 +12629,9 @@ theorem exists_ideal_gen_refinement [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
+    (C : RationalCoveringData A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
-    ∃ (T : Finset A) (C' : RationalCovering A),
+    ∃ (T : Finset A) (C' : RationalCoveringData A),
       C'.IsGeneratedBy T ∧
       C'.base = C.base ∧
       (∀ U ∈ C'.covers, U.P = C'.base.P) ∧
@@ -12643,7 +12643,7 @@ theorem exists_ideal_gen_refinement [DecidableEq A]
   -- Step 1: form-(a) Nullstellensatz refinement (Wedhorn 7.54).
   obtain ⟨S, piece, hS_span, h_piece_T, h_piece_s, h_piece_P, h_piece_sub,
     h_cover_rel, h_contain⟩ := exists_form_a_refinement C hC_cov hbase
-  -- Step 2: package the form-(a) pieces into a generated `RationalCovering`.
+  -- Step 2: package the form-(a) pieces into a generated `RationalCoveringData`.
   obtain ⟨C', h_C'_gen, h_C'_base, h_C'_P, h_C'_refines, h_C'_covers_each⟩ :=
     rationalCovering_from_idealGenSet C S hS_span piece h_piece_T h_piece_s
       h_piece_P h_piece_sub h_cover_rel h_contain
@@ -12676,9 +12676,9 @@ theorem exists_ideal_gen_refinement_covers_each_D [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
+    (C : RationalCoveringData A) (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
-    ∃ (T : Finset A) (C' : RationalCovering A),
+    ∃ (T : Finset A) (C' : RationalCoveringData A),
       C'.IsGeneratedBy T ∧
       C'.base = C.base ∧
       (∀ U ∈ C'.covers, U.P = C'.base.P) ∧
@@ -12695,11 +12695,11 @@ theorem exists_ideal_gen_refinement_covers_each_D [DecidableEq A]
 
 /-! ##### Sub-lemmas for `IsOXAcyclic_of_refining_acyclic_cover` (Prop A.3(2) project bridge) -/
 
-/-- **Project-side bridge 1** (CORRECTED 2026-05-28): a `RationalCovering A`
+/-- **Project-side bridge 1** (CORRECTED 2026-05-28): a `RationalCoveringData A`
 corresponds to an abstract `FiniteCover` of its base's rational open
 (viewed as a subtype of `↥(Spa A A⁺)` via `Subtype.val ⁻¹'`).
 Signature originally targeted all of `↥(Spa A A⁺)` but C only covers its base. -/
-def RationalCovering.toFiniteCover [IsHuberRing A] (C : RationalCovering A) :
+def RationalCoveringData.toFiniteCover [IsHuberRing A] (C : RationalCoveringData A) :
     FiniteCover ↥(Subtype.val ⁻¹' rationalOpen C.base.T C.base.s :
       Set ↥(Spa A A⁺)) ↥C.covers where
   sets D := Subtype.val ⁻¹'
@@ -12712,7 +12712,7 @@ def RationalCovering.toFiniteCover [IsHuberRing A] (C : RationalCovering A) :
     obtain ⟨D, hD_mem, hv_in_D⟩ := C.hcover v hv_base
     exact ⟨⟨D, hD_mem⟩, hv_in_D⟩
 
-/-- **Project-side bridge 2**: a `RationalCovering` refinement gives a
+/-- **Project-side bridge 2**: a `RationalCoveringData` refinement gives a
 `Refinement` (in the `CechCohomology.lean` sense) of the corresponding
 `FiniteCover`s. Requires the cast on the base equality (post-2026-05-28
 toFiniteCover signature has carrier `↥(rationalOpen base...)`).
@@ -12720,8 +12720,8 @@ toFiniteCover signature has carrier `↥(rationalOpen base...)`).
 Approach (T-WC-PRESHEAFVALUECAST-FINITECOVER-HELPER, 2026-05-28):
 destructure C and C' so h_same_base is between free RationalLocData values,
 then `subst h_same_base` collapses the cast to identity. -/
-noncomputable def RationalCovering.toRefinement [IsHuberRing A]
-    {C C' : RationalCovering A}
+noncomputable def RationalCoveringData.toRefinement [IsHuberRing A]
+    {C C' : RationalCoveringData A}
     (h_same_base : C'.base = C.base)
     (h_refines : ∀ D' ∈ C'.covers, ∃ D ∈ C.covers,
         rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
@@ -12737,7 +12737,7 @@ noncomputable def RationalCovering.toRefinement [IsHuberRing A]
     simp only at h_same_base
     subst h_same_base
     intro v hv
-    simp only [RationalCovering.toFiniteCover, Set.mem_preimage] at hv ⊢
+    simp only [RationalCoveringData.toFiniteCover, Set.mem_preimage] at hv ⊢
     exact hsub hv
 
 -- Note: the conceptual bridge `IsOXAcyclic_iff_IsAcyclic` (project's IsOXAcyclic
@@ -12763,7 +12763,7 @@ theorem restrictedToPiece_inherits_IsUnitGenerated
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C' : RationalCovering A) (D : RationalLocData A)
+    (C' : RationalCoveringData A) (D : RationalLocData A)
     (hDbase : rationalOpen D.T D.s ⊆ rationalOpen C'.base.T C'.base.s)
     (hD_covers : ∀ v ∈ rationalOpen D.T D.s,
         ∃ D' ∈ C'.covers, v ∈ rationalOpen D'.T D'.s ∧
@@ -12779,7 +12779,7 @@ theorem restrictedToPiece_inherits_IsUnitGenerated
   --   5. (C'.restrictToPiece D).base = D, so this is the required clause.
   intro E hE t htT
   -- Step 1+2: E ∈ C'.covers (filter doesn't change pieces).
-  simp only [RationalCovering.restrictToPiece, Finset.mem_filter] at hE
+  simp only [RationalCoveringData.restrictToPiece, Finset.mem_filter] at hE
   obtain ⟨hE_in_C', _⟩ := hE
   -- Step 3: IsUnit (C'.base.canonicalMap t).
   have h_unit_C' : IsUnit (C'.base.canonicalMap t) := hC' E hE_in_C' t htT
@@ -12866,7 +12866,7 @@ theorem every_rational_cover_is_OXAcyclic_whole_space [DecidableEq A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
-    (C : RationalCovering A) (hbase_rat : C.base.IsRational)
+    (C : RationalCoveringData A) (hbase_rat : C.base.IsRational)
     (hC_cov : ∀ D ∈ C.covers, D.IsRational)
     (hbase : ∀ v ∈ Spa A A⁺, v ∈ rationalOpen C.base.T C.base.s) :
     C.IsOXAcyclic := by
@@ -12921,7 +12921,7 @@ theorem imageCover_isOXAcyclic [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational) :
+    (C : RationalCoveringData A) (hC : C.IsRational) :
     haveI hTateB : IsTateRing (presheafValue C.base) :=
       presheafValue_isTateRing_faithful C.base
     haveI : IsNoetherianRing (presheafValue C.base) :=
@@ -12995,7 +12995,7 @@ private theorem imageCover_keystone_compat [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational)
+    (C : RationalCoveringData A) (hC : C.IsRational)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers)
       (D₃ : RationalLocData A)
@@ -13121,7 +13121,7 @@ theorem imageCover_gluing_transport [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational)
+    (C : RationalCoveringData A) (hC : C.IsRational)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers)
       (D₃ : RationalLocData A)
@@ -13259,7 +13259,7 @@ theorem every_rational_cover_is_OXAcyclic [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational) :
+    (C : RationalCoveringData A) (hC : C.IsRational) :
     C.IsOXAcyclic := by
   classical
   haveI hTateB : IsTateRing (presheafValue C.base) :=
@@ -13373,7 +13373,7 @@ theorem lemma_8_34_gluing
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational)
+    (C : RationalCoveringData A) (hC : C.IsRational)
     (g : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -13395,7 +13395,7 @@ theorem productRestrictionSub_isInducing_via_equalizer
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    (C : RationalCovering A) (hC : C.IsRational) :
+    (C : RationalCoveringData A) (hC : C.IsRational) :
     Topology.IsInducing (productRestrictionSub A C) := by
   classical
   letI instModPiD : ∀ D : ↥C.covers, Module A (presheafValue D.1) :=

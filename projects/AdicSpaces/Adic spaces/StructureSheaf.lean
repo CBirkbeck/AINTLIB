@@ -241,12 +241,12 @@ theorem locallyFractionPresheaf_typeLevel_isSheaf [IsHuberRing A] :
 variable [IsHuberRing A] [HasLocLiftPowerBounded A]
 
 /-- The product restriction map for a rational covering. -/
-noncomputable def productRestriction (C : RationalCovering A) :
+noncomputable def productRestriction (C : RationalCoveringData A) :
     presheafValue C.base → ∀ D ∈ C.covers, presheafValue D :=
   fun x D hD ↦ restrictionMap C.base D (C.hsubset D hD) x
 
 /-- The product restriction map using a subtype-indexed product. -/
-noncomputable def productRestrictionSub (C : RationalCovering A) :
+noncomputable def productRestrictionSub (C : RationalCoveringData A) :
     presheafValue C.base → ∀ (D : ↥C.covers), presheafValue D.1 :=
   fun x ⟨D, hD⟩ ↦ restrictionMap C.base D (C.hsubset D hD) x
 
@@ -256,7 +256,7 @@ of Čech compatibility (matching the `IsSheafy.gluing` predicate). This is the
 compatible-family locus `E ⊆ ∏_D 𝒪_X(D)`, equal to the image of `productRestrictionSub` by
 gluing. Using all common refinements (rather than a single chosen intersection datum) avoids
 constructing pairwise intersections of pieces with heterogeneous pairs of definition. -/
-def sectionEqualizer (C : RationalCovering A) :
+def sectionEqualizer (C : RationalCoveringData A) :
     Set (∀ D : ↥C.covers, presheafValue D.1) :=
   {s | ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
         (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -268,7 +268,7 @@ def sectionEqualizer (C : RationalCovering A) :
 which is the equalizer of two continuous maps into the Hausdorff completion `𝒪_X(D₃)`, hence
 closed (`isClosed_eq`). This is the topological input for the embedding step of sheafiness
 (expert-review 2026-06-20, Q1: Čech-closedness via common refinements). -/
-theorem sectionEqualizer_isClosed (C : RationalCovering A) :
+theorem sectionEqualizer_isClosed (C : RationalCoveringData A) :
     IsClosed (sectionEqualizer A C) := by
   unfold sectionEqualizer
   simp only [Set.setOf_forall]
@@ -281,7 +281,7 @@ theorem sectionEqualizer_isClosed (C : RationalCovering A) :
 /-- The image of `productRestrictionSub` lands in the `sectionEqualizer` — i.e. a global
 section restricts compatibly to every common refinement (the easy "separation" direction of
 the equalizer, via functoriality of restriction `restrictionMap_comp`; no gluing needed). -/
-theorem productRestrictionSub_mem_sectionEqualizer (C : RationalCovering A)
+theorem productRestrictionSub_mem_sectionEqualizer (C : RationalCoveringData A)
     (x : presheafValue C.base) :
     productRestrictionSub A C x ∈ sectionEqualizer A C := by
   intro D₁ D₂ D₃ h₃₁ h₃₂
@@ -297,7 +297,7 @@ theorem productRestrictionSub_mem_sectionEqualizer (C : RationalCovering A)
 /-- The section equalizer is a **complete** space: it is closed (`sectionEqualizer_isClosed`)
 in the finite product `∏_D 𝒪_X(D)` of complete completions, hence complete as a closed
 subspace. (Foundation for applying the Banach OMT to `ρ̃ : 𝒪_X(U) → E`.) -/
-theorem sectionEqualizer_completeSpace (C : RationalCovering A) :
+theorem sectionEqualizer_completeSpace (C : RationalCoveringData A) :
     CompleteSpace ↥(sectionEqualizer A C) :=
   (sectionEqualizer_isClosed A C).completeSpace_coe
 
@@ -324,7 +324,7 @@ theorem presheafValue_uniformity_isCountablyGenerated (D : RationalLocData A) :
 /-- The uniformity on the section equalizer `E` is **countably generated**: `E` carries the
 subspace uniformity (the comap of `Subtype.val`) of the finite product `∏_D 𝒪_X(D)`, whose
 uniformity is countably generated (finite product of countably-generated completions). -/
-theorem sectionEqualizer_isCountablyGenerated (C : RationalCovering A) :
+theorem sectionEqualizer_isCountablyGenerated (C : RationalCoveringData A) :
     Filter.IsCountablyGenerated (uniformity ↥(sectionEqualizer A C)) := by
   haveI : ∀ D : ↥C.covers, Filter.IsCountablyGenerated (uniformity (presheafValue D.1)) :=
     fun D => presheafValue_uniformity_isCountablyGenerated A D.1
@@ -345,7 +345,7 @@ presheaf satisfies, on every rational cover, the conditions that Remark 8.20 mak
 equivalent to the sheaf-of-topological-rings property — two conditions on every
 rational cover `C` —
 quantified over coverings of rational subsets by rational subsets in Wedhorn
-Definition 7.29's sense (`RationalCovering.IsRational`: base and pieces have `T·A`
+Definition 7.29's sense (`RationalCoveringData.IsRational`: base and pieces have `T·A`
 open in `A`, wedhorn.txt:3100, 4143):
 1. **`embedding`**: the product restriction `O_X(base) → ∏ O_X(cover_i)` is a
    **topological embedding** (injective + the source topology equals the
@@ -373,9 +373,9 @@ class IsSheafy (A : Type u) [CommRing A] [TopologicalSpace A]
     [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)] : Prop where
-  embedding : ∀ (C : RationalCovering A), C.IsRational →
+  embedding : ∀ (C : RationalCoveringData A), C.IsRational →
     Topology.IsEmbedding (productRestrictionSub A C)
-  gluing : ∀ (C : RationalCovering A), C.IsRational →
+  gluing : ∀ (C : RationalCoveringData A), C.IsRational →
     ∀ (f : ∀ (D : ↥C.covers), presheafValue D.1),
     (∀ (D₁ D₂ : ↥C.covers)
        (D₃ : RationalLocData A)
@@ -391,7 +391,7 @@ extracted from the embedding field. -/
 theorem IsSheafy.separationSub [IsTopologicalRing A] [PlusSubring A]
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    [IsRingOfIntegralElements (A⁺)] [IsSheafy A] (C : RationalCovering A)
+    [IsRingOfIntegralElements (A⁺)] [IsSheafy A] (C : RationalCoveringData A)
     (hC : C.IsRational) :
     Function.Injective (productRestrictionSub A C) :=
   (IsSheafy.embedding (A := A) C hC).injective
@@ -400,7 +400,7 @@ theorem IsSheafy.separationSub [IsTopologicalRing A] [PlusSubring A]
 theorem IsSheafy.separation_injective [IsTopologicalRing A] [PlusSubring A]
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    [IsRingOfIntegralElements (A⁺)] [IsSheafy A] (C : RationalCovering A)
+    [IsRingOfIntegralElements (A⁺)] [IsSheafy A] (C : RationalCoveringData A)
     (hC : C.IsRational) :
     Function.Injective (productRestriction A C) := by
   intro x y hxy
@@ -625,7 +625,7 @@ This is the key factorization: the product restriction on the
 completion EXTENDS the algebraic product restriction on the dense
 subring. -/
 theorem productRestriction_coe_eq
-    (C : RationalCovering A) (z : Localization.Away C.base.s)
+    (C : RationalCoveringData A) (z : Localization.Away C.base.s)
     (D : RationalLocData A) (hD : D ∈ C.covers) :
     productRestriction A C (C.base.coeRingHom z) D hD =
       restrictionMapAlg C.base D (C.hsubset D hD) z := by
@@ -644,7 +644,7 @@ theorem productRestriction_coe_eq
 This is because `restrictionMap D D' h` is defined via
 `extensionHom`, which produces a `RingHom`. -/
 theorem productRestriction_map_sub
-    (C : RationalCovering A) (x y : presheafValue C.base)
+    (C : RationalCoveringData A) (x y : presheafValue C.base)
     (D : RationalLocData A) (hD : D ∈ C.covers) :
     productRestriction A C (x - y) D hD =
       productRestriction A C x D hD -
@@ -662,7 +662,7 @@ when `C.base.s` is a unit in `Localization.Away D.s`.
 Both sides are ring homs from `Localization.Away C.base.s` to
 `presheafValue D` that agree on `algebraMap(a)`, so they are equal
 by the universal property of localization. -/
-theorem restrictionMapAlg_factors (C : RationalCovering A)
+theorem restrictionMapAlg_factors (C : RationalCoveringData A)
     (D : RationalLocData A) (hD : D ∈ C.covers)
     (hs_unit : IsUnit (algebraMap A (Localization.Away D.s) C.base.s)) :
     D.coeRingHom.comp (IsLocalization.Away.lift (S := Localization.Away C.base.s)
@@ -763,7 +763,7 @@ theorem exists_spa_point_in_rationalOpen_of_isOpen_prime
 /-- If `D.s^k * a = 0` for each covering piece `D`, then `C.base.s ∈ radical(ann(a))`
 (Wedhorn Theorem 8.28). Uses the Spa-point construction at primes. -/
 theorem base_s_in_annihilator_radical_of_covering
-    (C : RationalCovering A) (a : A)
+    (C : RationalCoveringData A) (a : A)
     (ha_ann : ∀ (D : RationalLocData A), D ∈ C.covers →
       ∃ k : ℕ, D.s ^ k * a = 0)
     (hSpa_points : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
@@ -794,7 +794,7 @@ on the completion. Requires the `AdicCompletion` bridge (Wedhorn Thm 8.28, Stack
 product of `presheafValue D` over covering pieces is continuous
 (each component is `restrictionMapHom`, which extends the algebraic
 restriction map by continuity). -/
-private theorem continuous_productRestriction (C : RationalCovering A) :
+private theorem continuous_productRestriction (C : RationalCoveringData A) :
     Continuous (fun z : presheafValue C.base ↦
       fun (D : ↥C.covers) ↦ restrictionMap C.base D.1 (C.hsubset D.1 D.2) z) := by
   apply continuous_pi
@@ -803,7 +803,7 @@ private theorem continuous_productRestriction (C : RationalCovering A) :
 
 /-- The combined restriction is a ring homomorphism, so its kernel is
 an additive subgroup. -/
-private theorem map_sub_productRestriction (C : RationalCovering A)
+private theorem map_sub_productRestriction (C : RationalCoveringData A)
     (x y : presheafValue C.base) (D : RationalLocData A)
     (hD : D ∈ C.covers) :
     restrictionMap C.base D (C.hsubset D hD) (x - y) =
@@ -871,7 +871,7 @@ theorem tateQuotientProductRestriction_injective_on_algebraMap
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (e_base : presheafValue C.base ≃+*
       (↥(TateAlgebra A) ⧸ oneSubfXIdeal C.base.s))
     (_e_cover : ∀ D ∈ C.covers, presheafValue D ≃+*
@@ -906,7 +906,7 @@ theorem tateQuotientProductRestriction_injective
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (_e_base : presheafValue C.base ≃+*
       (↥(TateAlgebra A) ⧸ oneSubfXIdeal C.base.s))
     (_e_cover : ∀ D ∈ C.covers, presheafValue D ≃+*
@@ -937,7 +937,7 @@ theorem separation_ofStronglyNoetherianTate
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hb_base : TopologicalRing.IsPowerBounded (invS C.base))
     (hcs_base : @CompleteSpace _ (quotientTUniformSpace C.base.s))
     (ht0_base : @T0Space _ (quotientTTopology C.base.s))
@@ -1170,7 +1170,7 @@ theorem productRestriction_injective_of_laurentRefinement
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp) :
     Function.Injective (productRestriction A C) := by
@@ -1407,13 +1407,13 @@ gives:
   combined with the rational-open membership lift.
 
 Specialisation of `exists_hSpa_points_global_of_stronglyNoetherianTate` to
-the data of a `RationalCovering` (T = C.base.T, s = C.base.s). Inherits the
+the data of a `RationalCoveringData` (T = C.base.T, s = C.base.s). Inherits the
 shared Wedhorn 7.45 sorry transitively. -/
 theorem exists_spa_point_in_rationalOpen_of_prime
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
     [T2Space A] [NonarchimedeanRing A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp :=
   fun p hp hs ↦
@@ -1426,7 +1426,7 @@ supplied by P8 (`exists_wedhorn_ratio_laurent_refinement_tree_realized`). -/
 theorem productRestrictionSub_isInducing_tate
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     Topology.IsInducing (productRestrictionSub A C) :=
   sorry
 
@@ -1443,7 +1443,7 @@ theorem productRestrictionSub_isInducing_flat
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
     (_P : PairOfDefinition A) [IsNoetherianRing _P.A₀]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     Topology.IsInducing (productRestrictionSub A C) :=
   productRestrictionSub_isInducing_tate (A := A) C
 
@@ -1460,7 +1460,7 @@ theorem productRestrictionSub_injective_flat
     [NonarchimedeanRing A] [IsDomain A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     (_P : PairOfDefinition A) [IsNoetherianRing _P.A₀]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     Function.Injective (productRestrictionSub A C) := by
   intro x y hxy
   apply productRestriction_injective_of_laurentRefinement (A := A) _P C
@@ -1543,9 +1543,9 @@ theorem isSheafy_ofStronglyNoetherianTate_flat
       --
       -- **REMAINING WORK (Lane C induction)**:
       --
-      -- For ARBITRARY `C : RationalCovering A`, the IsEmbedding follows
+      -- For ARBITRARY `C : RationalCoveringData A`, the IsEmbedding follows
       -- by the standard-cover refinement + Laurent induction:
-      --   1. Use `RationalCovering.refines_by_standard_cover` to find a
+      --   1. Use `RationalCoveringData.refines_by_standard_cover` to find a
       --      standard cover `S` of `C.base` such that the induced
       --      V-cover refines `C` (S-GEOM-TAU is done, T250).
       --   2. Induct on `|S.elts|`:
@@ -1611,9 +1611,9 @@ theorem isSheafy_ofStronglyNoetherianTate_flat_of_topo_inducing
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (hSpa : ∀ (C : RationalCovering A) (p : Ideal A), p.IsPrime → C.base.s ∉ p →
+    (hSpa : ∀ (C : RationalCoveringData A) (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp)
-    (topo_inducing : ∀ (C : RationalCovering A),
+    (topo_inducing : ∀ (C : RationalCoveringData A),
       Topology.IsInducing (productRestrictionSub A C)) :
     IsSheafy A where
   embedding C _hC := by
@@ -1644,7 +1644,7 @@ the following diagram commutes:
 ```
 -/
 theorem productRestriction_comp_canonicalMap
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (a : A) (D : RationalLocData A) (hD : D ∈ C.covers) :
     productRestriction A C (C.base.canonicalMap a) D hD = D.canonicalMap a := by
   change restrictionMap C.base D (C.hsubset D hD) (C.base.canonicalMap a) = D.canonicalMap a
@@ -1797,7 +1797,7 @@ theorem tateAcyclicity_gluing_via_descent_with_P
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
     [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (_hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (_hne : C.covers.Nonempty)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -1820,7 +1820,7 @@ noeth-A₀ instance from `_aux_noeth_principalPair_A0_of_stronglyNoetherianTate`
 theorem tateAcyclicity_gluing_via_descent
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
     [T2Space A] [NonarchimedeanRing A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -1928,7 +1928,7 @@ theorem cor_8_32_clean_sub_with_P
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
     (_P : PairOfDefinition A) [IsNoetherianRing _P.A₀]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
         (presheafValue D.1) := fun D =>
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
@@ -1954,7 +1954,7 @@ points supplied via `exists_hSpa_points_global_of_stronglyNoetherianTate`. -/
 theorem cor_8_32_clean_sub
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
         (presheafValue D.1) := fun D =>
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
@@ -1977,7 +1977,7 @@ closed downstream — see its docstring for the file-graph note). -/
 theorem cor_8_32_clean
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
         (presheafValue D.1) := fun D ↦
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
@@ -1995,7 +1995,7 @@ faithful flatness from `cor_8_32_clean` upgrades the algebra map to a faithful
 theorem tateAcyclicity_separation_via_cor832
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
     [T2Space A] [NonarchimedeanRing A]
-    (C : RationalCovering A) (_hne : C.covers.Nonempty) :
+    (C : RationalCoveringData A) (_hne : C.covers.Nonempty) :
     ∀ x : presheafValue C.base,
       (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
         restrictionMap C.base D (C.hsubset D hD) x = 0) → x = 0 := by
@@ -2062,7 +2062,7 @@ theorem isSheafy_separation_empty_cover_of_stronglyNoetherianTate
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    (C : RationalCovering A) (_hs : C.base.s ≠ 0) (_hne : ¬ C.covers.Nonempty)
+    (C : RationalCoveringData A) (_hs : C.base.s ≠ 0) (_hne : ¬ C.covers.Nonempty)
     (x y : presheafValue C.base) :
     x = y := by
   -- Without [IsDomain A], we cannot use Ideal.isPrime_bot. Instead case-split

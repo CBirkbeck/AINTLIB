@@ -310,18 +310,18 @@ theorem LaurentTree.leaves_graftAt (t : LaurentTree A)
 **refines** a rational covering `C` if every leaf datum is contained in some
 piece of `C`. -/
 noncomputable def LaurentTree.Refines :
-    LaurentTree A → RationalLocData A → RationalCovering A → Prop
+    LaurentTree A → RationalLocData A → RationalCoveringData A → Prop
   | .leaf, D₀, C => ∃ E ∈ C.covers, rationalOpen D₀.T D₀.s ⊆ rationalOpen E.T E.s
   | .node f L R, D₀, C =>
       L.Refines (laurentPlusDatum D₀ f) C ∧ R.Refines (laurentMinusDatum D₀ f) C
 
 @[simp] theorem LaurentTree.refines_leaf (D₀ : RationalLocData A)
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     (LaurentTree.leaf : LaurentTree A).Refines D₀ C ↔
       ∃ E ∈ C.covers, rationalOpen D₀.T D₀.s ⊆ rationalOpen E.T E.s := Iff.rfl
 
 @[simp] theorem LaurentTree.refines_node (f : A) (L R : LaurentTree A)
-    (D₀ : RationalLocData A) (C : RationalCovering A) :
+    (D₀ : RationalLocData A) (C : RationalCoveringData A) :
     (LaurentTree.node f L R).Refines D₀ C ↔
       L.Refines (laurentPlusDatum D₀ f) C ∧ R.Refines (laurentMinusDatum D₀ f) C :=
   Iff.rfl
@@ -340,7 +340,7 @@ theorem LaurentTree.leaves_ne_nil (t : LaurentTree A) (D₀ : RationalLocData A)
 /-- `Refines` rephrased as a `∀ … ∈ leaves` statement, suitable for iterating
 over leaves rather than recursing on tree structure. -/
 theorem LaurentTree.refines_iff_forall_mem_leaves (t : LaurentTree A)
-    (D₀ : RationalLocData A) (C : RationalCovering A) :
+    (D₀ : RationalLocData A) (C : RationalCoveringData A) :
     t.Refines D₀ C ↔
       ∀ D ∈ t.leaves D₀, ∃ E ∈ C.covers,
         rationalOpen D.T D.s ⊆ rationalOpen E.T E.s := by
@@ -364,7 +364,7 @@ the per-leaf sub-tree `h L` refines C (interpreted at base L), then
 `t.graftAt D₀ h` refines C from D₀. -/
 theorem LaurentTree.Refines_graftAt (t : LaurentTree A)
     (D₀ : RationalLocData A) (h : RationalLocData A → LaurentTree A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_inner : ∀ L ∈ t.leaves D₀, (h L).Refines L C) :
     (t.graftAt D₀ h).Refines D₀ C := by
   rw [LaurentTree.refines_iff_forall_mem_leaves, leaves_graftAt]
@@ -504,7 +504,7 @@ theorem LaurentTree.toCoveringCovers_cover_base (t : LaurentTree A)
 /-- The rational covering of `D₀` induced by the leaves of a Laurent tree.
 Uses `toCoveringCovers` (the recursive Finset form) for the covers field. -/
 noncomputable def LaurentTree.toCovering (t : LaurentTree A)
-    (D₀ : RationalLocData A) : RationalCovering A where
+    (D₀ : RationalLocData A) : RationalCoveringData A where
   base := D₀
   covers := t.toCoveringCovers D₀
   hsubset := t.toCoveringCovers_subset_base D₀
@@ -832,7 +832,7 @@ combines them via iterated splitting. -/
 /-- The trivial Laurent tree `leaf` refines any covering containing the
 base datum `D₀` in its `covers`. -/
 theorem LaurentTree.leaf_refines_singleton (D₀ : RationalLocData A)
-    (C : RationalCovering A) (hcovers : D₀ ∈ C.covers) :
+    (C : RationalCoveringData A) (hcovers : D₀ ∈ C.covers) :
     (LaurentTree.leaf : LaurentTree A).Refines D₀ C := by
   refine ⟨D₀, hcovers, ?_⟩
   exact subset_refl _
@@ -857,7 +857,7 @@ theorem LaurentTree.node_leaf_leaf_refines_laurentCovering
 `C` is contained in some piece of `C'`, then `t.Refines D₀ C` implies
 `t.Refines D₀ C'`. -/
 theorem LaurentTree.Refines.mono (t : LaurentTree A) (D₀ : RationalLocData A)
-    {C C' : RationalCovering A}
+    {C C' : RationalCoveringData A}
     (hCC' : ∀ E ∈ C.covers, ∃ E' ∈ C'.covers,
       rationalOpen E.T E.s ⊆ rationalOpen E'.T E'.s)
     (h : t.Refines D₀ C) :
@@ -873,7 +873,7 @@ and `R` refines `C` from `laurentMinusDatum D₀ f`, then `node f L R`
 refines `C` from `D₀`. (Definitional from `LaurentTree.refines_node`.) -/
 theorem LaurentTree.node_refines_of_subtrees_refine
     (f : A) (L R : LaurentTree A) (D₀ : RationalLocData A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hL : L.Refines (laurentPlusDatum D₀ f) C)
     (hR : R.Refines (laurentMinusDatum D₀ f) C) :
     (LaurentTree.node f L R).Refines D₀ C :=
@@ -883,7 +883,7 @@ theorem LaurentTree.node_refines_of_subtrees_refine
 split elements and a `C`-refinement witness for each plus-piece and the
 terminal minus-piece, the right-branching tree refines `C`. -/
 theorem LaurentTree.ofRightBranchList_refines (D₀ : RationalLocData A)
-    (L : List A) (C : RationalCovering A)
+    (L : List A) (C : RationalCoveringData A)
     (h_plus : ∀ D ∈ LaurentTree.plusOfMinusChain D₀ L,
       ∃ E ∈ C.covers, rationalOpen D.T D.s ⊆ rationalOpen E.T E.s)
     (h_terminal : ∃ E ∈ C.covers,
@@ -903,7 +903,7 @@ is a singleton `{E}` has `leaf` as a refining tree. The leaf datum is
 `C.base`, and the refinement witness uses `C.hcover` (which guarantees
 that every `v ∈ rationalOpen C.base.T C.base.s` lies in some — here,
 the unique — piece). -/
-theorem LaurentTree.leaf_refines_of_singleton (C : RationalCovering A)
+theorem LaurentTree.leaf_refines_of_singleton (C : RationalCoveringData A)
     (E : RationalLocData A) (hE_eq : C.covers = {E}) :
     (LaurentTree.leaf : LaurentTree A).Refines C.base C := by
   refine ⟨E, hE_eq ▸ Finset.mem_singleton.mpr rfl, ?_⟩

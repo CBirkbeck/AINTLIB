@@ -238,7 +238,7 @@ is the cleanest C1 supplier shape that avoids the false universal-
 over-`Spa(Loc s, ⁺)` per-`w` upper-bound from T039–T042. -/
 def WedhornC1PerCallSupplyCovPlusPieceLift
     [DecidableEq A]
-    (P : PairOfDefinition A) (C : RationalCovering A)
+    (P : PairOfDefinition A) (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (v : Spv A) : Prop :=
@@ -274,7 +274,7 @@ piece lifts. -/
 theorem C1SupplierStrong_local_via_cov_plus_piece_lift_supplier
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (h_per_call_supply :

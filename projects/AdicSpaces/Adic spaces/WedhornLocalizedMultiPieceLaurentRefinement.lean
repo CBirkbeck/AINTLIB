@@ -1643,7 +1643,7 @@ branch-clearing route at the C1 layer. -/
 def WedhornC1PerCallSupplyLocalizedMultiPiece
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (v : Spv A) : Prop :=
@@ -1691,7 +1691,7 @@ source-restricted residual, no locSubring-integrally-closed route. -/
 theorem C1SupplierStrong_local_via_localized_multi_piece_data
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (h_per_call_supply :

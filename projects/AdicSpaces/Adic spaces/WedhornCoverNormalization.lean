@@ -23,11 +23,11 @@ making it a final-theorem hypothesis.
   `locSubring_mono_T`.
 * `RationalLocData.insertDenom_s_mem` — `D.s ∈ D.insertDenom.T`.
 * `RationalLocData.rationalOpen_insertDenom` — `rationalOpen` is unchanged.
-* `RationalCovering.insertDenom` — the cover-level normalization, applying
+* `RationalCoveringData.insertDenom` — the cover-level normalization, applying
   `RationalLocData.insertDenom` to base and each piece.
-* `RationalCovering.insertDenom_normalized` — every piece satisfies
+* `RationalCoveringData.insertDenom_normalized` — every piece satisfies
   `D.s ∈ D.T`.
-* `RationalCovering.insertDenom_base_open` — the base rational open is
+* `RationalCoveringData.insertDenom_base_open` — the base rational open is
   unchanged as a set of valuations.
 
 The transform is purely combinatorial / set-theoretic; no Lane B / Cor 8.32 /
@@ -83,7 +83,7 @@ theorem RationalLocData.insertDenom_s_mem (D : RationalLocData A) :
     D.s ∈ D.insertDenom.T :=
   Finset.mem_insert_self _ _
 
-section RationalCoveringSection
+section RationalCoveringDataSection
 
 variable [PlusSubring A]
 
@@ -101,8 +101,8 @@ theorem RationalLocData.rationalOpen_insertDenom
 pieces satisfy `D.s ∈ D.T` after the transform. The rational-open structure
 is unchanged on every piece because `rationalOpen_insert_s` is a set
 equality, so `hsubset`/`hcover` carry over from `C`. -/
-noncomputable def RationalCovering.insertDenom
-    (C : RationalCovering A) : RationalCovering A :=
+noncomputable def RationalCoveringData.insertDenom
+    (C : RationalCoveringData A) : RationalCoveringData A :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   { base := C.base.insertDenom
     covers := C.covers.image RationalLocData.insertDenom
@@ -120,25 +120,25 @@ noncomputable def RationalCovering.insertDenom
       rw [RationalLocData.rationalOpen_insertDenom D]
       exact hvD }
 
-/-- After `RationalCovering.insertDenom`, every piece is normalized:
+/-- After `RationalCoveringData.insertDenom`, every piece is normalized:
 `D.s ∈ D.T`. -/
-theorem RationalCovering.insertDenom_normalized
-    (C : RationalCovering A) :
+theorem RationalCoveringData.insertDenom_normalized
+    (C : RationalCoveringData A) :
     ∀ D ∈ C.insertDenom.covers, D.s ∈ D.T := by
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   intro D hD
   obtain ⟨D₀, _, rfl⟩ := Finset.mem_image.mp hD
   exact D₀.insertDenom_s_mem
 
-/-- After `RationalCovering.insertDenom`, the base rational open is
+/-- After `RationalCoveringData.insertDenom`, the base rational open is
 unchanged as a set of valuations. -/
-theorem RationalCovering.insertDenom_base_open
-    (C : RationalCovering A) :
+theorem RationalCoveringData.insertDenom_base_open
+    (C : RationalCoveringData A) :
     rationalOpen C.insertDenom.base.T C.insertDenom.base.s =
       rationalOpen C.base.T C.base.s :=
   RationalLocData.rationalOpen_insertDenom C.base
 
-end RationalCoveringSection
+end RationalCoveringDataSection
 
 /-! ## Integrality and pair-pinning support API (T118)
 
@@ -152,8 +152,8 @@ hypotheses on the rational data:
 * `D.s ∈ D.P.A₀` and `∀ t ∈ D.T, t ∈ D.P.A₀` — packaged here as
   `RationalLocData.IntegralInPair`.
 * `D.P = D₀.P` — packaged as `RationalLocData.SamePair`.
-* (Cover-level): all pieces of a `RationalCovering` carry the same pair as
-  the base — packaged as `RationalCovering.PinnedTo`.
+* (Cover-level): all pieces of a `RationalCoveringData` carry the same pair as
+  the base — packaged as `RationalCoveringData.PinnedTo`.
 
 Together with the existing `PairOfDefinition.mem_powerBoundedSubring`
 (`HuberRings.lean:188`), the integrality assumption gives A-level
@@ -173,9 +173,9 @@ that any ultimate discharge route must consume, not the algebraic core.
   preserves `IntegralInPair` (since `D.insertDenom.P = D.P` and
   `D.insertDenom.T = insert D.s D.T`).
 * `RationalLocData.SamePair.insertDenom` — the transform preserves `SamePair`.
-* `RationalCovering.PinnedTo.insertDenom` — the cover-level transform preserves
+* `RationalCoveringData.PinnedTo.insertDenom` — the cover-level transform preserves
   `PinnedTo`.
-* `RationalCovering.insertDenom_integralInPair_each` — preservation of
+* `RationalCoveringData.insertDenom_integralInPair_each` — preservation of
   per-piece `IntegralInPair` under the cover-level transform.
 -/
 
@@ -265,7 +265,7 @@ theorem RationalLocData.SamePair.insertDenom
     D₀.insertDenom.SamePair D.insertDenom := by
   simpa [RationalLocData.SamePair] using h
 
-section RationalCoveringSection2
+section RationalCoveringDataSection2
 
 variable [PlusSubring A]
 
@@ -275,8 +275,8 @@ base and every cover piece carry that pair as their pair of definition.
 This is the cover-level analogue of `SamePair`: it globally discharges
 the `D.P = base.P = P` side condition for every restriction map within
 the covering, so the corrected T089 chain can run uniformly. -/
-structure RationalCovering.PinnedTo (P : PairOfDefinition A)
-    (C : RationalCovering A) : Prop where
+structure RationalCoveringData.PinnedTo (P : PairOfDefinition A)
+    (C : RationalCoveringData A) : Prop where
   /-- The base carries the ambient pair. -/
   base_pair : C.base.P = P
   /-- Every cover piece carries the ambient pair. -/
@@ -285,8 +285,8 @@ structure RationalCovering.PinnedTo (P : PairOfDefinition A)
 omit [DecidableEq A] in
 /-- If a cover is pinned to a pair, every cover piece is `SamePair` to
 the base. Direct from transitivity through the ambient pair. -/
-theorem RationalCovering.PinnedTo.samePair_base
-    {P : PairOfDefinition A} {C : RationalCovering A} (hC : C.PinnedTo P)
+theorem RationalCoveringData.PinnedTo.samePair_base
+    {P : PairOfDefinition A} {C : RationalCoveringData A} (hC : C.PinnedTo P)
     {D : RationalLocData A} (hD : D ∈ C.covers) :
     C.base.SamePair D := by
   change D.P = C.base.P
@@ -294,8 +294,8 @@ theorem RationalCovering.PinnedTo.samePair_base
 
 /-- The cover-level `insertDenom` transform preserves `PinnedTo`: the
 piece-level `insertDenom` keeps `P` unchanged. -/
-theorem RationalCovering.PinnedTo.insertDenom
-    {P : PairOfDefinition A} {C : RationalCovering A} (hC : C.PinnedTo P) :
+theorem RationalCoveringData.PinnedTo.insertDenom
+    {P : PairOfDefinition A} {C : RationalCoveringData A} (hC : C.PinnedTo P) :
     C.insertDenom.PinnedTo P where
   base_pair := hC.base_pair
   covers_pair := by
@@ -306,8 +306,8 @@ theorem RationalCovering.PinnedTo.insertDenom
 
 /-- The cover-level `insertDenom` transform preserves per-piece (and
 base-level) `IntegralInPair`. -/
-theorem RationalCovering.insertDenom_integralInPair_each
-    {C : RationalCovering A}
+theorem RationalCoveringData.insertDenom_integralInPair_each
+    {C : RationalCoveringData A}
     (h_base : C.base.IntegralInPair)
     (h_covers : ∀ D ∈ C.covers, D.IntegralInPair) :
     C.insertDenom.base.IntegralInPair ∧
@@ -318,6 +318,6 @@ theorem RationalCovering.insertDenom_integralInPair_each
   obtain ⟨D', hD', rfl⟩ := Finset.mem_image.mp hD
   exact RationalLocData.IntegralInPair.insertDenom (h_covers D' hD')
 
-end RationalCoveringSection2
+end RationalCoveringDataSection2
 
 end ValuationSpectrum

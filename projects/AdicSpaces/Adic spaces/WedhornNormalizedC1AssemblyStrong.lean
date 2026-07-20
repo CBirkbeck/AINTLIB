@@ -12,13 +12,13 @@ Strengthened analogue of
 `WedhornNormalizedC1Assembly.exists_per_D_finset_via_normalized_C1_supplier`
 (commit landed by Secondary): wraps
 `WedhornC1AssemblyStrong.exists_per_D_finset_via_C1Strong_supplier_and_compactness`
-(commit `e7a86bb`) behind the cover-level `RationalCovering.insertDenom`
+(commit `e7a86bb`) behind the cover-level `RationalCoveringData.insertDenom`
 normalization (`WedhornCoverNormalization.lean`).
 
 The result is a per-D Finset existential that:
 * does NOT require the artificial
   `h_normalized : ∀ D ∈ C.covers, D.s ∈ D.T` hypothesis (supplied
-  internally via `RationalCovering.insertDenom_normalized`);
+  internally via `RationalCoveringData.insertDenom_normalized`);
 * carries the strengthened coverage clause `¬ v.vle f 0`, ready for
   consumption by
   `WedhornStage2SpanExtractor.span_top_via_strengthened_cover_and_outside_rescue`
@@ -29,7 +29,7 @@ The result is a per-D Finset existential that:
 
 * `exists_per_D_finset_via_normalized_C1Strong_supplier` — the
   strengthened normalized assembly. Sorry-free, axiom-clean. Given only
-  `C : RationalCovering A` and `C1SupplierStrong_local C.insertDenom`,
+  `C : RationalCoveringData A` and `C1SupplierStrong_local C.insertDenom`,
   produces a total `mk_S_D : RationalLocData A → Finset A` whose
   per-D coverage clause carries `¬ v.vle f 0`.
 
@@ -63,7 +63,7 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
 of `exists_per_D_finset_via_normalized_C1_supplier` at the strong-supplier
 level.
 
-Takes only `C : RationalCovering A` and a strong C1 supplier on the
+Takes only `C : RationalCoveringData A` and a strong C1 supplier on the
 normalized cover `C.insertDenom`; produces per-D Finset data on the
 original `C` with **both**:
 
@@ -80,7 +80,7 @@ an abstract `h_cover_D_nonzero` supplier.
 
 **Internal use:**
 
-* `RationalCovering.insertDenom_normalized` discharges `D.s ∈ D.T` for
+* `RationalCoveringData.insertDenom_normalized` discharges `D.s ∈ D.T` for
   `C.insertDenom`.
 * `RationalLocData.rationalOpen_insertDenom` translates the per-piece
   rational opens.
@@ -101,7 +101,7 @@ theorem exists_per_D_finset_via_normalized_C1Strong_supplier
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_C1_strong : C1SupplierStrong_local C.insertDenom) :
     ∃ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
@@ -114,7 +114,7 @@ theorem exists_per_D_finset_via_normalized_C1Strong_supplier
   obtain ⟨mk_S_D', h_in_D', h_cover_D'⟩ :=
     exists_per_D_finset_via_C1Strong_supplier_and_compactness P hA₀_le π hI hπ_tn
       hπ_unit hArch C.insertDenom h_C1_strong
-      (RationalCovering.insertDenom_normalized C)
+      (RationalCoveringData.insertDenom_normalized C)
   -- Translate to the original cover via D ↦ D.insertDenom.
   let mk_S_D : RationalLocData A → Finset A := fun D =>
     if hD : D ∈ C.covers then mk_S_D' D.insertDenom else ∅

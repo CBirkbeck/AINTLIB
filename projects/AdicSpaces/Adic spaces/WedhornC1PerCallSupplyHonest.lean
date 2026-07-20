@@ -78,7 +78,7 @@ downstream. -/
 def WedhornC1PerCallSupplyHonest
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (v : Spv A) : Prop :=
@@ -120,7 +120,7 @@ No `T_D` non-vanishing input is required at any point. -/
 theorem C1SupplierStrong_local_via_honest_residuals
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (h_per_call_supply :

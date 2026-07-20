@@ -117,7 +117,7 @@ The σ enters only via the internal σ-shift; the user-facing inputs
 are σ-free and natural for the C1 supplier consumer. -/
 noncomputable def WedhornC1Lemma833PerCallAssemblyData_of_t_indexed
     [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (v : Spv A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (v : Spv A)
     (σ : Aˣ) (f : A)
     (hv_in_plus : v ∈ rationalOpen (insert f C.base.T) C.base.s)
     (hvf_nz : ¬ v.vle f 0)
@@ -196,7 +196,7 @@ inside `rationalOpen_global_subset_via_sigma_shift_t_indexed`; no
 external alignment hypothesis required. -/
 theorem C1SupplierStrong_local_via_t_indexed_direct
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →

@@ -73,7 +73,7 @@ theorem produce_C1SupplierStrong_local_via_Wedhorn_834
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     -- Localization-topology openness data for the rational-open transfer
     -- (`rationalOpen_transfer_via_localization`):
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
@@ -126,7 +126,7 @@ identities. The conclusion's `f` is independent of `t` (only depends on
 `WedhornNormalizedC1AssemblyStrong.exists_per_D_finset_via_normalized_C1Strong_supplier`
 and onward into `WedhornBaseSpaFinalBridgeStrong`. -/
 theorem C1SupplierStrong_local_insertDenom_lift
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (h_covers_nonempty : ∀ D ∈ C.covers, D.T.Nonempty)
     (h_C1 : C1SupplierStrong_local C) :
     C1SupplierStrong_local C.insertDenom := by
@@ -212,7 +212,7 @@ the per-call delivery layer. -/
 theorem produce_C1SupplierStrong_local_via_Wedhorn_834_via_per_call_supply
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (h_per_call_supply :
@@ -248,7 +248,7 @@ split naturally into:
 
 * **Cover structural data**: `hT_covers_le_A₀ : ∀ D ∈ C.covers, ∀ t ∈ D.T, t ∈ P.A₀`
   — a cover-piece structural condition not present in
-  `RationalCovering`'s definition; must be supplied explicitly.
+  `RationalCoveringData`'s definition; must be supplied explicitly.
 
 * **σ/denominator/factorization construction (the genuinely missing
   per-call structural lemma)**: at each per-call `(D, v, t)`, construct
@@ -291,7 +291,7 @@ six per-call fields:
 
 The remaining `hT_D_le_A₀` is supplied separately as a cover-piece
 structural hypothesis (the natural Wedhorn `D.T ⊆ P.A₀` condition;
-explicitly required since `RationalCovering` does not embed it).
+explicitly required since `RationalCoveringData` does not embed it).
 
 This is the **first compiled boundary** for the per-call supply
 construction: the manageable inputs are isolated as cover structural
@@ -300,7 +300,7 @@ exactly as the σ/denominator/factorization construction supplier. -/
 theorem produce_WedhornC1PerCallSupplyLocalizedMultiPiece_via_factorization_and_dom_supply
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (v : Spv A)
@@ -338,7 +338,7 @@ T178's caller-facing reduction.
 * `P`, `hA₀_le`, `C`, `hopen_base` — natural cover-base structural data.
 * `hT_covers_le_A₀ : ∀ D ∈ C.covers, ∀ t ∈ D.T, t ∈ P.A₀` —
   cover-piece structural condition (the natural Wedhorn `D.T ⊆ P.A₀`
-  condition; explicit since `RationalCovering` does not embed it).
+  condition; explicit since `RationalCoveringData` does not embed it).
 * `h_per_call_construction` — per-call σ/denominator/factorization
   construction supplier (the genuinely missing Wedhorn 8.34(ii) per-call
   structural lemma).
@@ -353,7 +353,7 @@ the per-call level is the only remaining input. -/
 theorem produce_C1SupplierStrong_local_via_Wedhorn_834_via_factorization_and_dom_supply
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (hT_covers_le_A₀ : ∀ D ∈ C.covers, ∀ τ ∈ D.T, τ ∈ P.A₀)
@@ -460,7 +460,7 @@ ticket. -/
 theorem wedhorn_834_per_call_dom_supplier
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) :
@@ -544,7 +544,7 @@ weakest sufficient cover-piece structural condition. -/
 theorem wedhorn_834_localizedTestFamily_nonvanishing_supplier
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) :
@@ -585,7 +585,7 @@ per-cover non-vanishing condition on α D.s. -/
 theorem wedhorn_834_per_call_dom_supplier_via_α_D_s_ne
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) :
@@ -670,7 +670,7 @@ every `w`. -/
 theorem wedhorn_834_alpha_D_s_nonvanishing_of_base_factorization
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (f : A)
@@ -721,7 +721,7 @@ non-vanishing residual. -/
 theorem wedhorn_834_per_call_dom_supplier_via_base_factorization
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (f : A)
@@ -855,7 +855,7 @@ Output: T179's six-clause existential bundle, ready to feed
 theorem wedhorn_834_per_call_construction_via_factorization
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (v : Spv A)
@@ -923,7 +923,7 @@ cover refinement structure `C.hsubset D hD hv`, eliminating
     refinement; equivalently from the base rational-open membership).
 
 The cover refinement `C.hsubset D hD : rationalOpen D.T D.s ⊆ rationalOpen
-C.base.T C.base.s` is an axiom of `RationalCovering` itself.
+C.base.T C.base.s` is an axiom of `RationalCoveringData` itself.
 
 Provided:
 
@@ -947,7 +947,7 @@ for `D ∈ C.covers`.
   `x ∈ C.base.T`, use the second component of `C.hsubset D hD hv`. -/
 theorem wedhorn_834_v_in_plus_of_f_bound_and_cover
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (D : RationalLocData A) (hD : D ∈ C.covers)
     (v : Spv A) (hv : v ∈ rationalOpen D.T D.s)
     (f : A) (h_f_bound : v.vle f C.base.s) :
@@ -992,7 +992,7 @@ theorem-level ticket. -/
 theorem wedhorn_834_per_call_construction_via_factorization_and_f_bound
     [DecidableEq A]
     (P : PairOfDefinition A)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (hD : D ∈ C.covers)
@@ -1116,7 +1116,7 @@ remains on the RHS and the exact `h_alg` shape requires the
 exact-lift hypothesis stated by `wedhorn_834_exact_h_alg_target`. -/
 theorem wedhorn_834_power_cleared_h_alg_for_unit_product
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (D : RationalLocData A)
     (σ_loc : (Localization.Away C.base.s)ˣ) :
     letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
@@ -1158,7 +1158,7 @@ must combine into a "denominator-free" `Loc C.base.s`-element for the
 exact h_alg shape to hold without power factors. -/
 def wedhorn_834_exact_h_alg_target
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (D : RationalLocData A)
     (σ_loc : (Localization.Away C.base.s)ˣ) : Prop :=
   letI : DecidableEq (Localization.Away C.base.s) := Classical.decEq _
@@ -1252,7 +1252,7 @@ lift of the multi-product, not derivable from standard denominator
 clearing per T185/T186). -/
 def WedhornC1PerCallSupplyLocalizedSingleT
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (D : RationalLocData A) (v : Spv A) (t : A) : Prop :=
   ∃ (σ : A) (N : ℕ),
     v ∈ rationalOpen (insert (σ * t * D.s ^ N) C.base.T) C.base.s ∧
@@ -1273,7 +1273,7 @@ with `C1SupplierStrong_local`'s per-`(D, v, t)` interface directly,
 avoiding the misframed multi-product `h_alg` from T177/T179. -/
 theorem C1SupplierStrong_local_via_single_t_supply
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →
@@ -1401,7 +1401,7 @@ The clause-2 inclusion is dispatched via T188's
 1 (`hv_in_plus`) and 3 (`hvf_nz`) are passed through unchanged. -/
 theorem WedhornC1PerCallSupplyLocalizedSingleT_via_h_s_factor_and_T_D_in_plus
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (D : RationalLocData A) (v : Spv A) (t : A)
     (σ : A) (N : ℕ)
     (h_s_factor : C.base.s = D.s * (σ * t * D.s ^ N))
@@ -1467,7 +1467,7 @@ Their discharge from concrete Tate / pseudouniformizer data is the
 next theorem-level ticket. -/
 theorem WedhornC1PerCallSupplyLocalizedSingleT_via_h_s_factor_T_D_in_plus_and_f_bound
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (D : RationalLocData A) (hD : D ∈ C.covers)
     (v : Spv A) (hv : v ∈ rationalOpen D.T D.s)
     (t : A)
@@ -1511,7 +1511,7 @@ Wedhorn-content per-call provider (deferred upstream): producing
 Tate / pseudouniformizer setup data. -/
 theorem C1SupplierStrong_local_via_single_t_structural_data
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_struct :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →
@@ -1545,7 +1545,7 @@ cover from honest Wedhorn 8.34-style structural per-call data plus the
 mild non-emptiness condition `∀ D ∈ C.covers, D.T.Nonempty`. -/
 theorem C1SupplierStrong_local_insertDenom_via_single_t_structural_data
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_covers_nonempty : ∀ D ∈ C.covers, D.T.Nonempty)
     (h_struct :
       ∀ (D : RationalLocData A), D ∈ C.covers →

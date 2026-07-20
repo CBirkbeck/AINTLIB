@@ -2370,7 +2370,7 @@ so `m ≤ supp w = comap(restrictionMapHom) supp w'`, giving
 no OMT, and (crucially) **no** `restrictionMap_isLocalization` (the mathematically-false
 algebraic-localization predicate). The sole deep input is the isolated
 `cor_8_32_spaExtendsAlongRestriction` (Wedhorn 7.46/7.48/8.2). -/
-theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCovering A) :
+theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCoveringData A) :
     ∀ (m : Ideal (presheafValue C.base)), m.IsMaximal →
       ∃ (D : { D // D ∈ C.covers }),
         Ideal.map (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)) m ≠ ⊤ := by
@@ -2410,7 +2410,7 @@ theorem cor_8_32_maximal_liftedIdeal_ne_top (C : RationalCovering A) :
   exact (ValuationSpectrum.instIsPrimeSupp w').ne_top hmap_le
 
 omit [CompatiblePlusSubring A] in
-theorem cor_8_32_productRestriction_faithfullyFlat (C : RationalCovering A)
+theorem cor_8_32_productRestriction_faithfullyFlat (C : RationalCoveringData A)
     (hC : C.IsRational) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base) (presheafValue D.1) :=
       fun D => (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
@@ -2440,7 +2440,7 @@ product restriction `O_X(X) → ∏ O_X(Uᵢ)` is injective. Faithfully flat ⇒
 (`cor_8_32_productRestriction_faithfullyFlat`, via Prop 8.30 flatness + T-SUM-2's maximals
 criterion) gives `FaithfulSMul`, hence `algebraMap` injectivity, hence injectivity of the
 subtype-indexed product restriction. No noeth-`A₀`, no prime-surjection. -/
-theorem cor_8_32_productRestrictionSub_injective (C : RationalCovering A)
+theorem cor_8_32_productRestrictionSub_injective (C : RationalCoveringData A)
     (hC : C.IsRational) :
     Function.Injective (productRestrictionSub A C) := by
   letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base) (presheafValue D.1) :=
@@ -2466,14 +2466,14 @@ Tate-absorbing Banach OMT (`productRestrictionSubToEqualizer_isOpenMap`, `Banach
 Wedhorn Prop 6.18). Delegates to the single canonical inducing residual
 `productRestrictionSub_isInducing_tate` (`StructureSheaf.lean`, the 6.18-OMT leaf); inducing
 is purely topological, so the Def-7.29 hypothesis `hC` is not needed. -/
-theorem cor_8_32_productRestrictionSub_isInducing (C : RationalCovering A)
+theorem cor_8_32_productRestrictionSub_isInducing (C : RationalCoveringData A)
     (hC : C.IsRational) :
     Topology.IsInducing (productRestrictionSub A C) :=
   productRestrictionSub_isInducing_tate (A := A) C
 
 /-- **Corollary 8.32, topological strengthening** (the full `embedding` field of `IsSheafy`):
 the product restriction is a topological embedding = topological inducing + injectivity. -/
-theorem cor_8_32_productRestrictionSub_isEmbedding (C : RationalCovering A)
+theorem cor_8_32_productRestrictionSub_isEmbedding (C : RationalCoveringData A)
     (hC : C.IsRational) :
     Topology.IsEmbedding (productRestrictionSub A C) :=
   ⟨cor_8_32_productRestrictionSub_isInducing C hC,

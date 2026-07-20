@@ -64,7 +64,7 @@ The algebraic ingredients are all proved:
 The remaining gaps for the general case are topological:
 - **G2-topo**: Correct T-topology on Tate algebra (I-adic, not product topology)
 - **Presheaf identification**: Full isomorphism `presheafValue D ≅ A⟨X⟩/(1-sX)`
-- **Categorical wrapping**: Connecting `AbPresheaf`/`FiniteCover` to `RationalCovering`
+- **Categorical wrapping**: Connecting `AbPresheaf`/`FiniteCover` to `RationalCoveringData`
 
 ## References
 
@@ -232,7 +232,7 @@ The quotient rings `B₁ = A⟨X⟩/(f-X)` and `B₂ = A⟨X⟩/(1-fX)` are flat
 **Step 4** (GAP — requires Lemma 7.54 + categorical wrapping): Every standard
 rational covering is refined by a product of Laurent covers. This requires:
 - Decomposing rational subsets `R(T/s)` into basic pieces (Lemma 7.54)
-- Constructing `FiniteCover` from `RationalCovering`
+- Constructing `FiniteCover` from `RationalCoveringData`
 - Wrapping `presheafValue` as an `AbPresheaf`
 - Connecting `IsSeparating` to `productRestriction` injectivity
 
@@ -404,7 +404,7 @@ valuation in `rationalOpen C.base.T C.base.s` not covered by any piece, contradi
 `C.hcover`. Extracted from the `hspan_top` step of `discrete_gluing`. -/
 private theorem discrete_gluing_span_top {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
-    [IsHuberRing A] (C : RationalCovering A) :
+    [IsHuberRing A] (C : RationalCoveringData A) :
     Ideal.span (↑(C.covers.image
       (fun D ↦ algebraMap A (Localization.Away C.base.s) D.s)) :
       Set (Localization.Away C.base.s)) = ⊤ := by
@@ -485,7 +485,7 @@ with `hr'`, and reads off the annihilating power via `IsLocalization.Away.exists
 Extracted from the `hcompat_pow` step of `discrete_gluing`. -/
 private theorem discrete_gluing_numerator_compat {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
-    [IsHuberRing A] (C : RationalCovering A)
+    [IsHuberRing A] (C : RationalCoveringData A)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -652,7 +652,7 @@ to move the numerator past the sum. Extracted from the partition-of-unity tail o
 `discrete_gluing`. -/
 private theorem discrete_gluing_partition_of_unity {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
-    [IsHuberRing A] (C : RationalCovering A)
+    [IsHuberRing A] (C : RationalCoveringData A)
     (g : ∀ D : ↥C.covers, Localization.Away D.1.s)
     (φ : ∀ D : ↥C.covers, Localization.Away C.base.s →+* Localization.Away D.1.s)
     (hφ_alg : ∀ (D : ↥C.covers) (a : A),
@@ -747,7 +747,7 @@ the covering-implies-unit-ideal condition, and a direct partition-of-unity const
 in the localization ring. -/
 private theorem discrete_gluing {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
-    [IsHuberRing A] (C : RationalCovering A)
+    [IsHuberRing A] (C : RationalCoveringData A)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
        (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -1062,10 +1062,10 @@ with respect to the `I`-adic topology. This requires:
 - Proving that `A⟨X⟩/(1-sX)` with the quotient topology equals the adic completion
 - Building the chain: presheafValue D ← completion ← A⟨X⟩/(1-sX) quotient
 
-**Component B (Categorical wrapping):** Connect the `RationalCovering` / `presheafValue`
+**Component B (Categorical wrapping):** Connect the `RationalCoveringData` / `presheafValue`
 framework (from `Presheaf.lean`) to the `FiniteCover` / `AbPresheaf` / `IsSeparating`
 framework (from `CechCohomology.lean`). This requires:
-- Constructing `FiniteCover (Spa A A⁺) ι` from `RationalCovering A`
+- Constructing `FiniteCover (Spa A A⁺) ι` from `RationalCoveringData A`
 - Wrapping `presheafValue` into an `AbPresheaf (Spa A A⁺)`
 - Showing `IsSeparating F U` (Čech separation) ↔ `Function.Injective (productRestriction)`
 

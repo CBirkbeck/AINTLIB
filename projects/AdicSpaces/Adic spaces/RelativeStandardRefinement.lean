@@ -76,7 +76,7 @@ theorem rationalOpen_subset_of_numerator_subset {S₀ S : Finset A} (hSS : S₀ 
 
 /-- The rational open of the generated standard piece is the base rational open
 intersected with the form-(a) piece `R(S/f)`. -/
-theorem rationalOpen_stdPiece_eq [DecidableEq A] (C : RationalCovering A)
+theorem rationalOpen_stdPiece_eq [DecidableEq A] (C : RationalCoveringData A)
     (hC : C.IsRational) (S : Finset A) (hS : Ideal.span (S : Set A) = ⊤) (f : A) :
     rationalOpen (stdPiece C.base hC.base S hS f).T
         (stdPiece C.base hC.base S hS f).s =
@@ -90,7 +90,7 @@ For a nonempty rational covering `C` of its rational base, there is a finite fam
 `base ∩ R(S/f)` is contained in some covering member. Complete-Tate scope, **no
 noetherian / strongly-noetherian hypothesis**. -/
 theorem exists_spanTop_standard_refinement_of_rationalCovering_nonempty
-    [DecidableEq A] (C : RationalCovering A) (hC : C.IsRational)
+    [DecidableEq A] (C : RationalCoveringData A) (hC : C.IsRational)
     (hne : C.covers.Nonempty) :
     ∃ (S : Finset A) (hS : Ideal.span (S : Set A) = ⊤),
       ∀ f ∈ S, ∃ E ∈ C.covers,

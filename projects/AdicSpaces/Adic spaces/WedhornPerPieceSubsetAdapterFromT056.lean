@@ -285,7 +285,7 @@ arithmetic discharge of the pointwise clearing, the chain becomes
 unconditional. -/
 theorem C1SupplierStrong_local_via_pointwise_clearing
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →

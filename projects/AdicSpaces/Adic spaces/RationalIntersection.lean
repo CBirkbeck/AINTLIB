@@ -187,7 +187,7 @@ variable [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
 /-- **All-raw-data compatibility** — agreement after restriction to *every* raw datum
 contained in both pieces. This is verbatim the hypothesis shape of the legacy
 `IsSheafy.gluing` field (the strongest-looking condition; the legacy adapter). -/
-def RationalCovering.AllDataCompatible (C : RationalCovering A)
+def RationalCoveringData.AllDataCompatible (C : RationalCoveringData A)
     (f : ∀ D : ↥C.covers, presheafValue D.1) : Prop :=
   ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
     (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -196,7 +196,7 @@ def RationalCovering.AllDataCompatible (C : RationalCovering A)
 
 /-- **Valid-rational-refinement compatibility** — agreement on every valid rational
 common refinement (the literature's compatibility condition for Čech gluing). -/
-def RationalCovering.RationalRefinementCompatible (C : RationalCovering A)
+def RationalCoveringData.RationalRefinementCompatible (C : RationalCoveringData A)
     (f : ∀ D : ↥C.covers, presheafValue D.1) : Prop :=
   ∀ (D₁ D₂ : ↥C.covers) (E : RationalLocData A), E.IsRational →
     ∀ (h₁ : rationalOpen E.T E.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -208,7 +208,7 @@ variable [IsTateRing A]
 /-- **Exact-intersection compatibility** — agreement on the chosen exact intersection
 datum `interRational D₁ D₂` of each pair of pieces (whose rational open is *exactly*
 `R(D₁) ∩ R(D₂)`, `interRational_rationalOpen`). -/
-def RationalCovering.ExactIntersectionCompatible (C : RationalCovering A)
+def RationalCoveringData.ExactIntersectionCompatible (C : RationalCoveringData A)
     (hC : C.IsRational) (f : ∀ D : ↥C.covers, presheafValue D.1) : Prop :=
   ∀ (D₁ D₂ : ↥C.covers),
     restrictionMap D₁.1 (D₁.1.interRational D₂.1 (hC.piece D₁.2) (hC.piece D₂.2))
@@ -216,13 +216,13 @@ def RationalCovering.ExactIntersectionCompatible (C : RationalCovering A)
     restrictionMap D₂.1 (D₁.1.interRational D₂.1 (hC.piece D₁.2) (hC.piece D₂.2))
       (RationalLocData.interRational_subset_right _ _ _ _) (f D₂)
 
-theorem RationalCovering.AllDataCompatible.rationalRefinement
-    {C : RationalCovering A} {f : ∀ D : ↥C.covers, presheafValue D.1}
+theorem RationalCoveringData.AllDataCompatible.rationalRefinement
+    {C : RationalCoveringData A} {f : ∀ D : ↥C.covers, presheafValue D.1}
     (hf : C.AllDataCompatible f) : C.RationalRefinementCompatible f :=
   fun D₁ D₂ E _ h₁ h₂ => hf D₁ D₂ E h₁ h₂
 
-theorem RationalCovering.RationalRefinementCompatible.exactIntersection
-    {C : RationalCovering A} (hC : C.IsRational)
+theorem RationalCoveringData.RationalRefinementCompatible.exactIntersection
+    {C : RationalCoveringData A} (hC : C.IsRational)
     {f : ∀ D : ↥C.covers, presheafValue D.1}
     (hf : C.RationalRefinementCompatible f) : C.ExactIntersectionCompatible hC f :=
   fun D₁ D₂ => hf D₁ D₂ _
@@ -234,8 +234,8 @@ factors through the exact intersection `I` (`R(D₃) ⊆ R(D₁) ∩ R(D₂) = R
 direct restrictions are the `I`-restrictions of the agreeing values
 (`restrictionMap_comp` + proof irrelevance of the containment witnesses). The raw-data
 restriction infrastructure is confined to this legacy adapter. -/
-theorem RationalCovering.ExactIntersectionCompatible.allData
-    {C : RationalCovering A} (hC : C.IsRational)
+theorem RationalCoveringData.ExactIntersectionCompatible.allData
+    {C : RationalCoveringData A} (hC : C.IsRational)
     {f : ∀ D : ↥C.covers, presheafValue D.1}
     (hf : C.ExactIntersectionCompatible hC f) : C.AllDataCompatible f := by
   intro D₁ D₂ D₃ h₃₁ h₃₂
@@ -260,22 +260,22 @@ theorem RationalCovering.ExactIntersectionCompatible.allData
 rational covering of a Tate ring, all-raw-data, valid-rational-refinement, and
 exact-intersection compatibility coincide. In particular the legacy `IsSheafy.gluing`
 input is equivalent to the literature's valid-refinement condition. -/
-theorem RationalCovering.allDataCompatible_iff_rationalRefinementCompatible
-    {C : RationalCovering A} (hC : C.IsRational)
+theorem RationalCoveringData.allDataCompatible_iff_rationalRefinementCompatible
+    {C : RationalCoveringData A} (hC : C.IsRational)
     (f : ∀ D : ↥C.covers, presheafValue D.1) :
     C.AllDataCompatible f ↔ C.RationalRefinementCompatible f :=
   ⟨fun hf => hf.rationalRefinement,
    fun hf => ((hf.exactIntersection hC)).allData hC⟩
 
-theorem RationalCovering.rationalRefinementCompatible_iff_exactIntersectionCompatible
-    {C : RationalCovering A} (hC : C.IsRational)
+theorem RationalCoveringData.rationalRefinementCompatible_iff_exactIntersectionCompatible
+    {C : RationalCoveringData A} (hC : C.IsRational)
     (f : ∀ D : ↥C.covers, presheafValue D.1) :
     C.RationalRefinementCompatible f ↔ C.ExactIntersectionCompatible hC f :=
   ⟨fun hf => hf.exactIntersection hC,
    fun hf => (hf.allData hC).rationalRefinement⟩
 
-theorem RationalCovering.allDataCompatible_iff_exactIntersectionCompatible
-    {C : RationalCovering A} (hC : C.IsRational)
+theorem RationalCoveringData.allDataCompatible_iff_exactIntersectionCompatible
+    {C : RationalCoveringData A} (hC : C.IsRational)
     (f : ∀ D : ↥C.covers, presheafValue D.1) :
     C.AllDataCompatible f ↔ C.ExactIntersectionCompatible hC f :=
   (C.allDataCompatible_iff_rationalRefinementCompatible hC f).trans

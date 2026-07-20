@@ -29,7 +29,7 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
 
 /-- A rational covering has the *separation property* if the restriction
 maps to the covering pieces are jointly injective. -/
-def RationalCovering.HasSeparation (C : RationalCovering A) : Prop :=
+def RationalCoveringData.HasSeparation (C : RationalCoveringData A) : Prop :=
   ∀ x y : presheafValue C.base,
     (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
       restrictionMap C.base D (C.hsubset D hD) x =
@@ -39,7 +39,7 @@ def RationalCovering.HasSeparation (C : RationalCovering A) : Prop :=
 
 Given a covering `C` and a finer covering `V_covers` of the same base,
 if V has separation then C has separation. Uses `restrictionMap_comp`. -/
-theorem separation_of_finer_rational (C : RationalCovering A)
+theorem separation_of_finer_rational (C : RationalCoveringData A)
     (V_covers : Finset (RationalLocData A))
     (hV_subset : ∀ D ∈ V_covers, rationalOpen D.T D.s ⊆
       rationalOpen C.base.T C.base.s)
@@ -78,7 +78,7 @@ glued by combining:
   `D` with `τ D = E`). This local separation is needed to upgrade "x restricts
   to `fC τ(D)` on each `D`" to "x restricts to `fC E` on each `E`".
 
-The concrete refinement from `StandardCover.RationalCovering.refines_by_standard_cover`
+The concrete refinement from `StandardCover.RationalCoveringData.refines_by_standard_cover`
 together with separation for both `C` and each `E` (which in the full Wedhorn
 setting follows from `restrictionMapHom_injective` / Wedhorn Cor 8.32) will feed
 this theorem to transfer gluing from the standard-cover / Laurent-cover induction
@@ -90,7 +90,7 @@ and `restrictionMap_comp`. Apply `hV_glue` to get `x : presheafValue C.base`. Fo
 each `E ∈ C.covers`, apply `hE_sep E hE` to `restrictionMap C.base E _ x` and
 `fC E hE`; the equality of their further `V`-restrictions to each `D ∈ V_covers`
 with `τ⟨D,_⟩ = E` follows from `restrictionMap_comp` + the `x`-gluing property. -/
-theorem gluing_of_finer_rational (C : RationalCovering A)
+theorem gluing_of_finer_rational (C : RationalCoveringData A)
     (V_covers : Finset (RationalLocData A))
     (hV_subset : ∀ D ∈ V_covers, rationalOpen D.T D.s ⊆
       rationalOpen C.base.T C.base.s)

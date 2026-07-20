@@ -138,7 +138,7 @@ assumes a false statement. -/
 theorem tateAcyclicity_gluing_via_refinement_cover_level
     [IsTateRing A] [IsNoetherianRing A] [T2Space A]
     [NonarchimedeanRing A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (V_covers : Finset (RationalLocData A))
     (hV_subset : ∀ D ∈ V_covers, rationalOpen D.T D.s ⊆
       rationalOpen C.base.T C.base.s)
@@ -183,13 +183,13 @@ The helpers below package this construction.  -/
 rational covering `C`: exactly `laurentPlusDatum C.base f`. Its
 `rationalOpen` equals `rationalOpen (insert f C.base.T) C.base.s`.
 Introduced as an `abbrev` so projections (`.T`, `.s`) reduce transparently. -/
-noncomputable abbrev RationalCovering.plusDatum (C : RationalCovering A)
+noncomputable abbrev RationalCoveringData.plusDatum (C : RationalCoveringData A)
     (f : A) : RationalLocData A :=
   laurentPlusDatum C.base f
 
 /-- Each plus-piece `C.plusDatum f` is contained in `C.base`'s rational
 open — by `laurentPlus_subset`. -/
-theorem RationalCovering.plusDatum_subset_base (C : RationalCovering A) (f : A) :
+theorem RationalCoveringData.plusDatum_subset_base (C : RationalCoveringData A) (f : A) :
     rationalOpen (C.plusDatum f).T (C.plusDatum f).s ⊆
       rationalOpen C.base.T C.base.s :=
   laurentPlus_subset C.base f
@@ -197,8 +197,8 @@ theorem RationalCovering.plusDatum_subset_base (C : RationalCovering A) (f : A) 
 /-- The V-covers finset built from a standard-cover refinement: the image
 of `S.elts` under `C.plusDatum`. Uses `Classical.decEq` since
 `RationalLocData A` does not carry decidable equality in general. -/
-noncomputable def RationalCovering.standardCoverVCovers
-    (C : RationalCovering A) (S : Finset A) :
+noncomputable def RationalCoveringData.standardCoverVCovers
+    (C : RationalCoveringData A) (S : Finset A) :
     Finset (RationalLocData A) :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   S.image C.plusDatum
@@ -206,16 +206,16 @@ noncomputable def RationalCovering.standardCoverVCovers
 omit [HasLocLiftPowerBounded A] in
 /-- Membership in `standardCoverVCovers`: an element `D` is in the V-covers
 iff it equals `C.plusDatum f` for some `f ∈ S`. -/
-theorem RationalCovering.mem_standardCoverVCovers
-    (C : RationalCovering A) (S : Finset A) {D : RationalLocData A} :
+theorem RationalCoveringData.mem_standardCoverVCovers
+    (C : RationalCoveringData A) (S : Finset A) {D : RationalLocData A} :
     D ∈ C.standardCoverVCovers S ↔ ∃ f ∈ S, C.plusDatum f = D := by
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   change D ∈ (S.image C.plusDatum) ↔ _
   exact Finset.mem_image
 
 /-- Each element of `standardCoverVCovers S` is contained in `C.base`. -/
-theorem RationalCovering.standardCoverVCovers_subset_base
-    (C : RationalCovering A) (S : Finset A) (D : RationalLocData A)
+theorem RationalCoveringData.standardCoverVCovers_subset_base
+    (C : RationalCoveringData A) (S : Finset A) (D : RationalLocData A)
     (hD : D ∈ C.standardCoverVCovers S) :
     rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s := by
   obtain ⟨f, _, rfl⟩ := (C.mem_standardCoverVCovers S).mp hD
@@ -253,8 +253,8 @@ computed from `insert f C.base.T` (which uses the explicit ambient
 The DecidableEq diamond between the two `insert`s is sidestepped at the
 Prop level: membership in either yields the same disjunction
 `a = f ∨ a ∈ C.base.T` via `Finset.mem_insert`, independent of instance. -/
-theorem RationalCovering.rationalOpen_plusDatum_eq_insert
-    [DecidableEq A] (C : RationalCovering A) (f : A) :
+theorem RationalCoveringData.rationalOpen_plusDatum_eq_insert
+    [DecidableEq A] (C : RationalCoveringData A) (f : A) :
     rationalOpen (C.plusDatum f).T (C.plusDatum f).s =
       rationalOpen (insert f C.base.T) C.base.s := by
   ext v
@@ -268,7 +268,7 @@ theorem RationalCovering.rationalOpen_plusDatum_eq_insert
   -- Use `simp only [Finset.mem_insert]` to bypass a `DecidableEq A` /
   -- `Classical.propDecidable` diamond between `(C.plusDatum f).T` (built
   -- with Classical) and the ambient `[DecidableEq A]` on `insert f C.base.T`.
-  simp only [RationalCovering.plusDatum, laurentPlusDatum, Finset.mem_insert]
+  simp only [RationalCoveringData.plusDatum, laurentPlusDatum, Finset.mem_insert]
 
 /-! ### The standard-cover τ refinement map (S-GEOM-TAU)
 
@@ -286,8 +286,8 @@ omit [HasLocLiftPowerBounded A] in
 `standardCoverVCovers C S` maps to a cover piece `E ∈ C.covers`
 containing it. Uses `Classical.choose` on the existential extracted via
 `(C.mem_standardCoverVCovers S).mp d.2` and on the refinement witness. -/
-noncomputable def RationalCovering.standardCoverVTau
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+noncomputable def RationalCoveringData.standardCoverVTau
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hS_contain : refines_contain C S)
     (d : { d : RationalLocData A // d ∈ C.standardCoverVCovers S }) :
     { E : RationalLocData A // E ∈ C.covers } :=
@@ -301,8 +301,8 @@ noncomputable def RationalCovering.standardCoverVTau
 `DecidableEq` diamond between `(C.plusDatum f).T` (built with
 `Classical.decEq`) and `insert f C.base.T` (using ambient
 `[DecidableEq A]`) via `rationalOpen_plusDatum_eq_insert`. -/
-theorem RationalCovering.standardCoverVTau_subset
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+theorem RationalCoveringData.standardCoverVTau_subset
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hS_contain : refines_contain C S)
     (d : { d : RationalLocData A // d ∈ C.standardCoverVCovers S }) :
     rationalOpen d.1.T d.1.s ⊆
@@ -438,10 +438,10 @@ theorem restrictionMap_surjective_of_rationalOpen_eq
 point `f₀`, and explicit hypotheses certifying that the Laurent-plus of
 each cover piece lands in the Laurent-plus base (`hContain`) and that
 every valuation in the half's rational open is covered by some such
-piece (`hCov`), builds a `RationalCovering` of `laurentPlusDatum C.base f₀`
+piece (`hCov`), builds a `RationalCoveringData` of `laurentPlusDatum C.base f₀`
 whose covers are `{laurentPlusDatum E f₀ : E ∈ C.covers}`. -/
-noncomputable def RationalCovering.plusLaurentCovering
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A)
+noncomputable def RationalCoveringData.plusLaurentCovering
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ : A)
     (hContain : ∀ E ∈ C.covers,
       rationalOpen (laurentPlusDatum E f₀).T (laurentPlusDatum E f₀).s ⊆
         rationalOpen (laurentPlusDatum C.base f₀).T (laurentPlusDatum C.base f₀).s)
@@ -449,7 +449,7 @@ noncomputable def RationalCovering.plusLaurentCovering
                               (laurentPlusDatum C.base f₀).s,
       ∃ E ∈ C.covers,
         v ∈ rationalOpen (laurentPlusDatum E f₀).T (laurentPlusDatum E f₀).s) :
-    RationalCovering A :=
+    RationalCoveringData A :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   { base := laurentPlusDatum C.base f₀
     covers := C.covers.image (fun E => laurentPlusDatum E f₀)
@@ -468,8 +468,8 @@ noncomputable def RationalCovering.plusLaurentCovering
 containment reduces to a pure Finset-membership argument: adding `f₀` to
 both the original V-piece's T and the base's T preserves the containment
 direction. -/
-theorem RationalCovering.plusLaurentCovering_hContain_of_standardCoverVCovers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A) :
+theorem RationalCoveringData.plusLaurentCovering_hContain_of_standardCoverVCovers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A) :
     ∀ E ∈ C.standardCoverVCovers S,
       rationalOpen (laurentPlusDatum E f₀).T (laurentPlusDatum E f₀).s ⊆
         rationalOpen (laurentPlusDatum C.base f₀).T
@@ -487,7 +487,7 @@ theorem RationalCovering.plusLaurentCovering_hContain_of_standardCoverVCovers
   -- [Finset.mem_insert]` on both `ht` and the goal to bypass the
   -- `[DecidableEq A]` / `Classical.propDecidable` instance diamond that
   -- shows up inside `laurentPlusDatum`'s internal `insert`.
-  simp only [laurentPlusDatum, RationalCovering.plusDatum, Finset.mem_insert] at ht ⊢
+  simp only [laurentPlusDatum, RationalCoveringData.plusDatum, Finset.mem_insert] at ht ⊢
   rcases ht with rfl | ht'
   · exact Or.inl rfl
   · exact Or.inr (Or.inr ht')
@@ -497,8 +497,8 @@ theorem RationalCovering.plusLaurentCovering_hContain_of_standardCoverVCovers
 some plus-piece `insert f C.base.T / C.base.s`), combined with being in
 the Laurent-plus-`f₀` half, every valuation in the Laurent-plus base is
 covered by the corresponding iterated Laurent-plus V-piece. -/
-theorem RationalCovering.plusLaurentCovering_hCov_of_refines_cover
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.plusLaurentCovering_hCov_of_refines_cover
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S) :
     ∀ v ∈ rationalOpen (laurentPlusDatum C.base f₀).T
                        (laurentPlusDatum C.base f₀).s,
@@ -519,7 +519,7 @@ theorem RationalCovering.plusLaurentCovering_hCov_of_refines_cover
   refine ⟨hv_spa, fun t ht => ?_, hv_s⟩
   -- Decompose `t ∈ (laurentPlusDatum (C.plusDatum f) f₀).T` = `insert f₀ (insert f C.base.T)`
   -- via `simp only [Finset.mem_insert]` to bypass the instance diamond.
-  simp only [laurentPlusDatum, RationalCovering.plusDatum, Finset.mem_insert] at ht
+  simp only [laurentPlusDatum, RationalCoveringData.plusDatum, Finset.mem_insert] at ht
   rcases ht with h_t_f₀ | h_t_f | ht'
   · rw [h_t_f₀]; exact hv_f₀
   · rw [h_t_f]; exact hv_f_T f (Finset.mem_insert_self _ _)
@@ -531,14 +531,14 @@ theorem RationalCovering.plusLaurentCovering_hCov_of_refines_cover
 `hContain` and `hCov` from the preceding two theorems.
 
 Takes the `refines_cover` hypothesis (Wedhorn-normalised standard-cover
-condition on `S`) and produces a `RationalCovering` of
+condition on `S`) and produces a `RationalCoveringData` of
 `laurentPlusDatum C.base f₀` with iterated-plus-pieces as covers. -/
-noncomputable def RationalCovering.plusLaurentCovering_of_standardCoverVCovers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.plusLaurentCovering_of_standardCoverVCovers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S) :
-    RationalCovering A :=
-  -- Build a RationalCovering whose `covers = standardCoverVCovers S`, then split.
-  let C_std : RationalCovering A :=
+    RationalCoveringData A :=
+  -- Build a RationalCoveringData whose `covers = standardCoverVCovers S`, then split.
+  let C_std : RationalCoveringData A :=
     { base := C.base
       covers := C.standardCoverVCovers S
       hsubset := C.standardCoverVCovers_subset_base S
@@ -593,8 +593,8 @@ the plus half at `f₀` with the iterated-Laurent-plus swap, mapping
 `presheafValue (C.plusDatum g)` (outer V-piece at g) to
 `presheafValue (laurentPlusDatum (laurentPlusDatum C.base f₀) g)`
 (inner V-piece at g in the plus-half V-cover). -/
-noncomputable def RationalCovering.plusHalf_presheaf_transport
-    [DecidableEq A] (C : RationalCovering A) (f₀ g : A)
+noncomputable def RationalCoveringData.plusHalf_presheaf_transport
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ g : A)
     (u : presheafValue (C.plusDatum g)) :
     presheafValue (laurentPlusDatum (laurentPlusDatum C.base f₀) g) :=
   restrictionMap
@@ -610,15 +610,15 @@ The two-step transport equals a single composite `restrictionMap` from
 This is the key identity enabling item-3 compatibility transfer:
 `fV_plus D'` is structurally a single restriction of the outer `fV D`,
 so restrictionMap chains on `fV_plus` reduce to chains on `fV`. -/
-theorem RationalCovering.plusHalf_presheaf_transport_eq_single
-    [DecidableEq A] (C : RationalCovering A) (f₀ g : A)
+theorem RationalCoveringData.plusHalf_presheaf_transport_eq_single
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ g : A)
     (u : presheafValue (C.plusDatum g)) :
     C.plusHalf_presheaf_transport f₀ g u =
       restrictionMap (C.plusDatum g)
         (laurentPlusDatum (laurentPlusDatum C.base f₀) g)
         ((iteratedLaurentPlus_swap_rationalOpen C.base f₀ g).le.trans
           (laurentPlus_subset (C.plusDatum g) f₀)) u := by
-  unfold RationalCovering.plusHalf_presheaf_transport
+  unfold RationalCoveringData.plusHalf_presheaf_transport
   exact congr_fun (restrictionMap_comp (C.plusDatum g)
     (laurentPlusDatum (C.plusDatum g) f₀)
     (laurentPlusDatum (laurentPlusDatum C.base f₀) g)
@@ -644,8 +644,8 @@ of `fV D` to `D₃`. In the outer induction, this identifies
 `restrictionMap plusC.base D.1 _ u_plus` (for outer D in plus half)
 with `restrictionMap (laurentPlusDatum (...) g) D.1 _ (transport ...)`
 composed across the transport. -/
-theorem RationalCovering.plusHalf_transport_restrictionMap_eq
-    [DecidableEq A] (C : RationalCovering A) (f₀ g : A)
+theorem RationalCoveringData.plusHalf_transport_restrictionMap_eq
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ g : A)
     (D₃ : RationalLocData A)
     (h₃ : rationalOpen D₃.T D₃.s ⊆
       rationalOpen (laurentPlusDatum (laurentPlusDatum C.base f₀) g).T
@@ -675,8 +675,8 @@ iteration order used by the recursive IH on the plus half). -/
 and an explicit `g ∈ S.erase f₀`, produces the value at the inner
 V-piece shape expected by the recursive IH on
 `plusLaurentCovering_of_standardCoverVCovers C S f₀ hS_cover`. -/
-noncomputable def RationalCovering.plusHalf_fV_transport_at_g
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ g : A)
+noncomputable def RationalCoveringData.plusHalf_fV_transport_at_g
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ g : A)
     (hg_mem : g ∈ S.erase f₀)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1) :
     presheafValue (laurentPlusDatum (laurentPlusDatum C.base f₀) g) :=
@@ -689,8 +689,8 @@ noncomputable def RationalCovering.plusHalf_fV_transport_at_g
 `D₃` contained in the inner V-piece, restricting the transported value
 to `D₃` equals restricting the outer `fV` directly to `D₃` (chaining
 through the swap and plus-half subset). -/
-theorem RationalCovering.plusHalf_fV_transport_at_g_restrictionMap_eq
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ g : A)
+theorem RationalCoveringData.plusHalf_fV_transport_at_g_restrictionMap_eq
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ g : A)
     (hg_mem : g ∈ S.erase f₀)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (D₃ : RationalLocData A)
@@ -726,8 +726,8 @@ destructuring the V-piece subtype and applying `subst`. This helper
 absorbs the per-`g` restriction-compose + `hV_compat` chain into one
 named theorem, so downstream derivations of the full `plus_compat_fn`
 only need to handle the `Classical.choose` / `▸` substitution layer. -/
-theorem RationalCovering.plusHalf_transported_compat_at_g
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.plusHalf_transported_compat_at_g
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (g₁ g₂ : A) (hg₁ : g₁ ∈ S.erase f₀) (hg₂ : g₂ ∈ S.erase f₀)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
@@ -811,8 +811,8 @@ NOT the minus-then-plus shape `minusC.plusDatum g = laurentPlusDatum
 (laurentMinusDatum C.base f₀) g` expected by a naive recursive IH. See
 the doc block above. For callers using explicit minus-side hypotheses,
 this natural restriction is the cleanest starting point. -/
-noncomputable def RationalCovering.minusHalf_fV_restriction_at_g
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ g : A)
+noncomputable def RationalCoveringData.minusHalf_fV_restriction_at_g
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ g : A)
     (hg_mem : g ∈ S.erase f₀)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1) :
     presheafValue (laurentMinusDatum (C.plusDatum g) f₀) :=
@@ -827,8 +827,8 @@ any `D₃` contained in the plus-then-minus shape, restricting the
 natural restriction to `D₃` equals restricting the outer `fV` directly
 to `D₃` via `laurentMinus_subset` + the subset proof. Symmetric
 single-step version of the plus-half restriction identity. -/
-theorem RationalCovering.minusHalf_fV_restriction_at_g_restrictionMap_eq
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ g : A)
+theorem RationalCoveringData.minusHalf_fV_restriction_at_g_restrictionMap_eq
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ g : A)
     (hg_mem : g ∈ S.erase f₀)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (D₃ : RationalLocData A)
@@ -842,7 +842,7 @@ theorem RationalCovering.minusHalf_fV_restriction_at_g_restrictionMap_eq
         (fV ⟨C.plusDatum g,
           (C.mem_standardCoverVCovers S).mpr
             ⟨g, Finset.mem_of_mem_erase hg_mem, rfl⟩⟩) := by
-  unfold RationalCovering.minusHalf_fV_restriction_at_g
+  unfold RationalCoveringData.minusHalf_fV_restriction_at_g
   exact congr_fun (restrictionMap_comp (C.plusDatum g)
     (laurentMinusDatum (C.plusDatum g) f₀) D₃
     (laurentMinus_subset (C.plusDatum g) f₀) h₃) _
@@ -864,8 +864,8 @@ the rational open of `C.plusDatum g` equals that of
 `laurentPlusDatum (laurentPlusDatum C.base f₀) g` as sets. This uses
 `hD_plus` to "add back" the implicit `v.vle f₀ C.base.s` constraint
 that distinguishes the inner iteration from the outer. -/
-theorem RationalCovering.outer_plusDatum_eq_inner_when_subset_plusHalf
-    [DecidableEq A] (C : RationalCovering A) (f₀ g : A)
+theorem RationalCoveringData.outer_plusDatum_eq_inner_when_subset_plusHalf
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ g : A)
     (hD_plus : rationalOpen (C.plusDatum g).T (C.plusDatum g).s ⊆
       rationalOpen (laurentPlusDatum C.base f₀).T
                    (laurentPlusDatum C.base f₀).s) :
@@ -883,21 +883,21 @@ theorem RationalCovering.outer_plusDatum_eq_inner_when_subset_plusHalf
     · -- t = g
       rw [h_eq]
       apply hv_T
-      simp [RationalCovering.plusDatum, laurentPlusDatum]
+      simp [RationalCoveringData.plusDatum, laurentPlusDatum]
     · -- t = f₀
       rw [h_eq]
       apply h_plus.2.1
       simp [laurentPlusDatum]
     · -- t ∈ C.base.T
       apply hv_T
-      simp only [RationalCovering.plusDatum, laurentPlusDatum, Finset.mem_insert]
+      simp only [RationalCoveringData.plusDatum, laurentPlusDatum, Finset.mem_insert]
       exact Or.inr ht'
   · -- Inner ⊆ Outer: drop the f₀ constraint.
     intro v hv
     obtain ⟨hv_spa, hv_T, hv_s⟩ := hv
     refine ⟨hv_spa, fun t ht => ?_, hv_s⟩
     apply hv_T
-    simp only [RationalCovering.plusDatum, laurentPlusDatum, Finset.mem_insert] at ht ⊢
+    simp only [RationalCoveringData.plusDatum, laurentPlusDatum, Finset.mem_insert] at ht ⊢
     rcases ht with h_eq | ht'
     · exact Or.inl h_eq
     · exact Or.inr (Or.inr ht')
@@ -950,8 +950,8 @@ hypothesis `h_restriction_prop` (provable by combining `plus_hV_glue`'s
 own restriction property with `plusHalf_fV_transport_at_g_restrictionMap_eq`
 and `outer_plusDatum_eq_inner_when_subset_plusHalf`, but deferred here
 to keep the builder a single clean application). -/
-noncomputable def RationalCovering.plus_section_of_plus_hV_glue
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.plus_section_of_plus_hV_glue
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (_hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
@@ -1059,8 +1059,8 @@ that holds by `rfl` (both sides `plusC.plusDatum (Classical.choose ⋯)`).
 The `restrictionMap` of the cast value equals the outer `fV`
 restriction via `plusHalf_fV_transport_at_g_restrictionMap_eq`;
 `hV_compat` closes the matching of both sides. -/
-theorem RationalCovering.plus_compat_fn_from_outer_hV_compat
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.plus_compat_fn_from_outer_hV_compat
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
@@ -1136,8 +1136,8 @@ explicit `plus_compat` hypothesis, auto-deriving it from outer `hV_compat`
 via `plus_compat_fn_from_outer_hV_compat`. Callers now only supply
 `plus_hV_glue` (the inner IH) and `h_restriction_prop` (the outer
 V-piece bridge). -/
-noncomputable def RationalCovering.plus_section_of_plus_hV_glue_auto
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.plus_section_of_plus_hV_glue_auto
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
@@ -1197,8 +1197,8 @@ noncomputable def RationalCovering.plus_section_of_plus_hV_glue_auto
 data `(E, subset proof)` where `E ∈ C.covers` and `rationalOpen d.1.T d.1.s
 ⊆ rationalOpen E.1.T E.1.s`. Both `τ d := .1` and the subset theorem
 `.2` are extracted as projections below. -/
-private noncomputable def RationalCovering.standardCoverTauPair
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+private noncomputable def RationalCoveringData.standardCoverTauPair
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hS_contain : refines_contain C S)
     (d : { D // D ∈ C.standardCoverVCovers S }) :
     { Ep : { E // E ∈ C.covers } //
@@ -1222,8 +1222,8 @@ private noncomputable def RationalCovering.standardCoverTauPair
 /-- **The standard-cover refinement map τ.** Given a `refines_contain`
 witness `hS_contain` for `S`, produces a refinement map from the V-covers
 (plus-pieces at elements of `S`) to the original `C.covers`. -/
-noncomputable def RationalCovering.standardCoverTau
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+noncomputable def RationalCoveringData.standardCoverTau
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hS_contain : refines_contain C S)
     (d : { D // D ∈ C.standardCoverVCovers S }) :
     { E // E ∈ C.covers } :=
@@ -1232,8 +1232,8 @@ noncomputable def RationalCovering.standardCoverTau
 /-- **Containment property of `standardCoverTau`.** Each V-piece
 `d.1`'s rational open is contained in the rational open of its
 τ-image `(C.standardCoverTau S hS_contain d).1 ∈ C.covers`. -/
-theorem RationalCovering.standardCoverTau_subset
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+theorem RationalCoveringData.standardCoverTau_subset
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hS_contain : refines_contain C S)
     (d : { D // D ∈ C.standardCoverVCovers S }) :
     rationalOpen d.1.T d.1.s ⊆
@@ -1274,8 +1274,8 @@ to subtype-extensional equality matter) and the proof does not use it.
 
 Shape of the conclusion matches `hV_glue` specialised to
 `V_covers = C.standardCoverVCovers {f}`. -/
-theorem RationalCovering.standardCover_gluing_singleton
-    [DecidableEq A] (C : RationalCovering A) (f : A)
+theorem RationalCoveringData.standardCover_gluing_singleton
+    [DecidableEq A] (C : RationalCoveringData A) (f : A)
     (hSurj : Function.Surjective
       (restrictionMap C.base (C.plusDatum f) (C.plusDatum_subset_base f)))
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers ({f} : Finset A) },
@@ -1339,8 +1339,8 @@ Combines `rationalOpen_insert_of_vle` (set equality from the valuation
 condition) with `restrictionMap_surjective_of_rationalOpen_eq` (bijection
 bridge) to discharge `hSurj` of `standardCover_gluing_singleton` from the
 valuation-level hypothesis. -/
-theorem RationalCovering.restrictionMap_plusDatum_surjective_of_vle
-    [DecidableEq A] (C : RationalCovering A) (f : A)
+theorem RationalCoveringData.restrictionMap_plusDatum_surjective_of_vle
+    [DecidableEq A] (C : RationalCoveringData A) (f : A)
     (hvle : ∀ v ∈ rationalOpen C.base.T C.base.s, v.vle f C.base.s) :
     Function.Surjective (restrictionMap C.base (C.plusDatum f)
       (C.plusDatum_subset_base f)) := by
@@ -1360,8 +1360,8 @@ Replaces the `hSurj` parameter of `standardCover_gluing_singleton` with a
 valuation-level hypothesis `v.vle f C.base.s` (for every `v` in the base's
 rational open), which is the natural form in Wedhorn-normalised setups
 (`1 ∈ C.base.T` + `f` power-bounded makes the condition automatic). -/
-theorem RationalCovering.standardCover_gluing_singleton_of_vle
-    [DecidableEq A] (C : RationalCovering A) (f : A)
+theorem RationalCoveringData.standardCover_gluing_singleton_of_vle
+    [DecidableEq A] (C : RationalCoveringData A) (f : A)
     (hvle : ∀ v ∈ rationalOpen C.base.T C.base.s, v.vle f C.base.s)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers ({f} : Finset A) },
       presheafValue D.1)
@@ -1420,8 +1420,8 @@ Downstream consumers (e.g. the S-GEOM-IND inductive step) instantiate this
 directly; the `hSurj` / `hvle` intermediate forms remain available for
 contexts where the `A⁺`-membership + normalization hypotheses are not
 naturally in hand. -/
-theorem RationalCovering.standardCover_gluing_singleton_of_Aplus
-    [DecidableEq A] (C : RationalCovering A) (f : A)
+theorem RationalCoveringData.standardCover_gluing_singleton_of_Aplus
+    [DecidableEq A] (C : RationalCoveringData A) (f : A)
     (hf : f ∈ A⁺) (h1T : (1 : A) ∈ C.base.T)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers ({f} : Finset A) },
       presheafValue D.1)
@@ -1487,8 +1487,8 @@ here: those enter only through the caller's construction of `hx` via
 `laurentCover_gluing_presheaf`. Together with the T012 base case
 (`standardCover_gluing_singleton_of_Aplus`), this covers the full
 Laurent-cover induction on standard-cover size. -/
-theorem RationalCovering.standardCover_gluing_induction_step
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
+theorem RationalCoveringData.standardCover_gluing_induction_step
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
     (u_plus : presheafValue (laurentPlusDatum C.base f₀))
     (u_minus : presheafValue (laurentMinusDatum C.base f₀))
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
@@ -1551,11 +1551,11 @@ This is the **caller-ready** induction step. The unadorned
 `standardCover_gluing_induction_step` above remains available for
 contexts where the Laurent gluing has been produced by an alternative
 route (e.g., Route A via `row3_exact` once its analytic residuals close). -/
-theorem RationalCovering.standardCover_gluing_induction_step_via_laurentGluing
+theorem RationalCoveringData.standardCover_gluing_induction_step_via_laurentGluing
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (f₀ : A) (S : Finset A)
@@ -1665,7 +1665,7 @@ estimate): the composition is ~50 lines, the outer induction adds
 "direct Laurent recursion" bypass described in the plan.
 
 **Upstream hypotheses kept explicit** (not proved in this lane):
-* `hS_contain` — from `RationalCovering.refines_by_standard_cover`
+* `hS_contain` — from `RationalCoveringData.refines_by_standard_cover`
   (still requires `hZavyalov` per the plan's bypass-option analysis).
 * `hV_glue` — the Laurent-cover induction output (built from T012 + T014
   by the caller via structural recursion on `|S|` or by another route).
@@ -1692,15 +1692,15 @@ the structural recombination and `standardCover_gluing_singleton_of_Aplus`
 for the base case.
 
 **hypothesis discharge routes** (all external to this lane):
-* `hS_contain` — from `RationalCovering.refines_by_standard_cover`.
+* `hS_contain` — from `RationalCoveringData.refines_by_standard_cover`.
 * `hV_glue` — from `standardCover_gluing_singleton_of_Aplus` (base) +
   `standardCover_gluing_induction_step` (step) + outer recursion.
 * `hE_sep` — from `productRestriction_injective_tate_via_prime_extension_closed`
   (Cor832.lean) applied at each `E ∈ C.covers`'s local V-sub-cover. -/
-theorem RationalCovering.tateAcyclicity_Part2_from_standard_cover
+theorem RationalCoveringData.tateAcyclicity_Part2_from_standard_cover
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (hS_contain : refines_contain C S)
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
     (hC_compat : ∀ (E₁ E₂ : { E // E ∈ C.covers }) (D₃ : RationalLocData A)
@@ -1767,10 +1767,10 @@ the Lane B separations (`hE_sep`, `hBase_sep`), there is a UNIQUE
 `E ∈ C.covers`. Body: dispatch `standardCover_gluing_singleton_of_vle`
 for gluing + `tateAcyclicity_Part2_from_standard_cover` for cover-level
 Part 2 + `hBase_sep` for uniqueness. -/
-theorem RationalCovering.tateAcyclicity_augmentedCech_singleton
+theorem RationalCoveringData.tateAcyclicity_augmentedCech_singleton
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (f : A)
+    (C : RationalCoveringData A) (f : A)
     (hvle : ∀ v ∈ rationalOpen C.base.T C.base.s, v.vle f C.base.s)
     (hS_contain : refines_contain C ({f} : Finset A))
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
@@ -1819,13 +1819,13 @@ adjustment maintaining the V-cover structure on each half. Per the plan
 in `.mathlib-quality/tickets.md`, this is an additional 100–200 lines
 beyond the ~50-line composition above, deferred to a follow-up pass of
 this lane because it composes cleanly with the composition theorem but
-requires extensive auxiliary `RationalCovering`/`StandardCover` API on
+requires extensive auxiliary `RationalCoveringData`/`StandardCover` API on
 Laurent halves that is not currently in the project.
 
 The **next concrete steps** after this ticket:
 1. Formalize the Laurent-half rational covering structure: given
-   `C : RationalCovering A` and `f₀ : A`, construct
-   `C.plusLaurentCovering f₀ : RationalCovering A` with
+   `C : RationalCoveringData A` and `f₀ : A`, construct
+   `C.plusLaurentCovering f₀ : RationalCoveringData A` with
    `.base = laurentPlusDatum C.base f₀` (and similarly for minus).
 2. Formalize the sub-cover adjustment: given a standard cover `S` of `C`,
    construct standard covers `S_plus, S_minus` of the two Laurent halves
@@ -1858,7 +1858,7 @@ the `hV_glue` hypothesis of `tateAcyclicity_Part2_from_standard_cover`:
 
 The **outer induction** (`Finset.strongInductionOn` over `|S|`, invoking
 these two packages recursively via Laurent-half sub-covers) is
-**deferred**: it requires the Laurent-half `RationalCovering` theory
+**deferred**: it requires the Laurent-half `RationalCoveringData` theory
 (~300 lines) documented above. The `plus_section, minus_section`
 hypotheses of `hV_glue_step_from_laurent_halves` are exactly where the
 recursive IH would plug in; making them unconditional is the remaining
@@ -1870,8 +1870,8 @@ Wedhorn-normalised hypotheses `f ∈ A⁺` and `1 ∈ C.base.T`. Ready to plug
 directly into `tateAcyclicity_Part2_from_standard_cover`'s `hV_glue`
 argument when `S = {f}`. Pure currying / eta-expansion of
 `standardCover_gluing_singleton_of_Aplus`. -/
-theorem RationalCovering.hV_glue_singleton_of_Aplus
-    [DecidableEq A] (C : RationalCovering A) (f : A)
+theorem RationalCoveringData.hV_glue_singleton_of_Aplus
+    [DecidableEq A] (C : RationalCoveringData A) (f : A)
     (hf : f ∈ A⁺) (h1T : (1 : A) ∈ C.base.T) :
     ∀ (fV : ∀ D : { D // D ∈ C.standardCoverVCovers ({f} : Finset A) },
         presheafValue D.1),
@@ -1902,14 +1902,14 @@ induction hypothesis** on the Laurent halves would plug in. The outer
 induction constructs them by applying `hV_glue` on each Laurent half's
 sub-standard-cover (of size < |S|), extracting the guaranteed global
 section on the half, and packaging it as `u_plus` / `u_minus`. That
-construction requires the Laurent-half `RationalCovering` infrastructure
+construction requires the Laurent-half `RationalCoveringData` infrastructure
 (sub-ticket, ~300 lines).
 
 This packaging is ready for use as soon as the sub-ticket's Laurent-half
 recursion is provided; meanwhile it functions as the Laurent-step API
 for any caller with an alternative way to produce the half-sections. -/
-theorem RationalCovering.hV_glue_step_from_laurent_halves
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
+theorem RationalCoveringData.hV_glue_step_from_laurent_halves
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
     (plus_section : ∀ (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S },
         presheafValue D.1),
       (∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S }) (D₃ : RationalLocData A)
@@ -1988,12 +1988,12 @@ theorem RationalCovering.hV_glue_step_from_laurent_halves
     (hLaurentGlue (plus_section fV hV_compat).1 (minus_section fV hV_compat).1
       (hoverlap_of_compat fV hV_compat))
 
-/-! ### Laurent-half `RationalCovering` infrastructure
+/-! ### Laurent-half `RationalCoveringData` infrastructure
 
 Given a rational covering `C` and a Laurent split point `f₀`, the plus
 half is `laurentPlusDatum C.base f₀` with rational open
 `rationalOpen (insert f₀ C.base.T) C.base.s`. For the outer induction we
-need this half to carry its own `RationalCovering` structure, covered by
+need this half to carry its own `RationalCoveringData` structure, covered by
 Laurent-splits of the original cover pieces.
 
 **Generic definition**: `plusLaurentCovering C f₀ hContain hCov` takes
@@ -2044,8 +2044,8 @@ The statement below is the entry point: the analogous `hContain` and
 these to the general `plusLaurentCovering`-style constructor (with
 `laurentMinusDatum` in place of `laurentPlusDatum`) to produce the
 minus-half rational covering. -/
-theorem RationalCovering.minusLaurentCovering_hContain_of_standardCoverVCovers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A) :
+theorem RationalCoveringData.minusLaurentCovering_hContain_of_standardCoverVCovers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A) :
     ∀ E ∈ C.standardCoverVCovers S,
       rationalOpen (laurentMinusDatum E f₀).T (laurentMinusDatum E f₀).s ⊆
         rationalOpen (laurentMinusDatum C.base f₀).T
@@ -2072,7 +2072,7 @@ theorem RationalCovering.minusLaurentCovering_hContain_of_standardCoverVCovers
   obtain ⟨ht₁, ht₂⟩ := Finset.mem_product.mp hmem
   refine Finset.mem_image.mpr ⟨⟨t₁, t₂⟩, Finset.mem_product.mpr ⟨?_, ht₂⟩, rfl⟩
   -- `t₁ ∈ insert C.base.s C.base.T` → `t₁ ∈ insert (C.plusDatum f).s (C.plusDatum f).T`.
-  simp only [RationalCovering.plusDatum, laurentPlusDatum, Finset.mem_insert] at ht₁ ⊢
+  simp only [RationalCoveringData.plusDatum, laurentPlusDatum, Finset.mem_insert] at ht₁ ⊢
   rcases ht₁ with rfl | ht₁'
   · exact Or.inl rfl
   · exact Or.inr (Or.inr ht₁')
@@ -2123,8 +2123,8 @@ half with `S' := S.erase f₀`:
 These are exactly the static hypotheses of `standardCover_hV_glue_induction`;
 the remaining heavy hypothesis is `step_witness` for the inner call,
 which carries the Laurent-recursive structure one level deeper. -/
-theorem RationalCovering.standardCover_inner_IH_preconds_plusHalf
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.standardCover_inner_IH_preconds_plusHalf
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hf₀ : f₀ ∈ S) (hcard : 2 ≤ S.card)
     (hAplus : ∀ f ∈ S, f ∈ A⁺) (h1T : (1 : A) ∈ C.base.T) :
     (S.erase f₀).Nonempty ∧
@@ -2162,8 +2162,8 @@ nonemptyness and `A⁺`-closure for the `S.erase f₀` recursion on the
 minus half. The third precondition `1 ∈ (laurentMinusDatum C.base f₀).T`
 is NOT automatic (see doc block above); callers supply it explicitly
 when invoking the recursive IH on the minus half. -/
-theorem RationalCovering.standardCover_inner_IH_preconds_minusHalf_partial
-    [DecidableEq A] (_C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.standardCover_inner_IH_preconds_minusHalf_partial
+    [DecidableEq A] (_C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hf₀ : f₀ ∈ S) (hcard : 2 ≤ S.card)
     (hAplus : ∀ f ∈ S, f ∈ A⁺) :
     (S.erase f₀).Nonempty ∧ (∀ f ∈ S.erase f₀, f ∈ A⁺) :=
@@ -2216,8 +2216,8 @@ theorem rationalOpen_laurentMinusDatum_decomp [DecidableEq A]
 `refines_cover C S`, every valuation in the Laurent-minus base's rational
 open is covered by the corresponding iterated Laurent-minus V-piece.
 Proof via the `rationalOpen_laurentMinusDatum_decomp` identity. -/
-theorem RationalCovering.minusLaurentCovering_hCov_of_refines_cover
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.minusLaurentCovering_hCov_of_refines_cover
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S) :
     ∀ v ∈ rationalOpen (laurentMinusDatum C.base f₀).T
                        (laurentMinusDatum C.base f₀).s,
@@ -2246,14 +2246,14 @@ constructor (with `laurentMinusDatum` in place of `laurentPlusDatum`) to
 the standard-cover V-cover case. Uses the two discharges
 `minusLaurentCovering_hContain_of_standardCoverVCovers` and
 `minusLaurentCovering_hCov_of_refines_cover` to produce a
-`RationalCovering` of `laurentMinusDatum C.base f₀` with iterated-minus
+`RationalCoveringData` of `laurentMinusDatum C.base f₀` with iterated-minus
 cover pieces. -/
-noncomputable def RationalCovering.minusLaurentCovering_of_standardCoverVCovers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.minusLaurentCovering_of_standardCoverVCovers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S) :
-    RationalCovering A :=
+    RationalCoveringData A :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
-  let C_std : RationalCovering A :=
+  let C_std : RationalCoveringData A :=
     { base := C.base
       covers := C.standardCoverVCovers S
       hsubset := C.standardCoverVCovers_subset_base S
@@ -2303,8 +2303,8 @@ above. -/
 `g ∈ S.erase f₀`, the plus-piece `(plusLaurentCovering ...).plusDatum g`
 (i.e. `laurentPlusDatum (laurentPlusDatum C.base f₀) g`) is contained in
 the plus-half's base. Follows from `laurentPlus_subset` applied twice. -/
-theorem RationalCovering.plusLaurentCovering_plusDatum_subset_base
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A) (g : A)
+theorem RationalCoveringData.plusLaurentCovering_plusDatum_subset_base
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (g : A)
     (hContain : ∀ E ∈ C.covers,
       rationalOpen (laurentPlusDatum E f₀).T (laurentPlusDatum E f₀).s ⊆
         rationalOpen (laurentPlusDatum C.base f₀).T
@@ -2345,8 +2345,8 @@ scaffold) by stating directly in terms of the underlying
 `standardCoverVCovers` and `laurentPlusDatum` primitives. The caller
 packages this into a `refines_contain` statement once the upstream
 `DecidableEq (RationalLocData A)` synthesis is available. -/
-theorem RationalCovering.refines_contain_plusHalf_of_refines_cover
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.refines_contain_plusHalf_of_refines_cover
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (g : A) (hg : g ∈ S) :
     ∃ E ∈ C.standardCoverVCovers S,
       rationalOpen (insert g (laurentPlusDatum C.base f₀).T)
@@ -2358,7 +2358,7 @@ theorem RationalCovering.refines_contain_plusHalf_of_refines_cover
   -- explicit structure-literal forms, then close via `Finset` extensionality
   -- (which sidesteps a `DecidableEq` instance diamond between ambient
   -- `[DecidableEq A]` and `Classical.propDecidable` from `laurentPlusDatum`).
-  simp only [laurentPlusDatum, RationalCovering.plusDatum]
+  simp only [laurentPlusDatum, RationalCoveringData.plusDatum]
   congr 1 with x
   simp [Finset.mem_insert, or_left_comm]
 
@@ -2398,8 +2398,8 @@ hypothesised) uniform `refines_contain` transfer.
 This is a direct application of `minusLaurentCovering_hCov_of_refines_cover`
 after passing through the plus-piece's rational open inclusion into the
 Laurent-minus base. -/
-theorem RationalCovering.minusLaurentCovering_pointwise_contain_of_refines_cover
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.minusLaurentCovering_pointwise_contain_of_refines_cover
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S) (g : A) :
     ∀ v ∈ rationalOpen (insert g (laurentMinusDatum C.base f₀).T)
                         (laurentMinusDatum C.base f₀).s,
@@ -2450,8 +2450,8 @@ containment witnesses from
 (Deferred proof avoids ~60 lines of pure bookkeeping; the caller
 instantiates it by providing the restriction-map-compositional identity
 as a named hypothesis.) -/
-theorem RationalCovering.plusLaurent_compat_transfer_skeleton
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.plusLaurent_compat_transfer_skeleton
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (_hS_cover : refines_cover C S)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (_hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
@@ -2501,8 +2501,8 @@ compatibility `hV_compat` on the V-cover, the restrictions of each
 `fV D` to `laurentPlusDatum D.1 f₀` form a compatible family on the
 plus-half V-cover. Proof: compose `restrictionMap_comp` on each side,
 then invoke `hV_compat` on the composed-through witnesses. -/
-theorem RationalCovering.plusLaurent_compat_transfer
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.plusLaurent_compat_transfer
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
       (D₃ : RationalLocData A)
@@ -2535,8 +2535,8 @@ theorem RationalCovering.plusLaurent_compat_transfer
 /-- **Minus-half compatibility transfer (fully proved)**. Mirror of the
 plus-half transfer with `laurentMinusDatum` / `laurentMinus_subset`.
 Proof pattern identical: double `restrictionMap_comp` + `hV_compat`. -/
-theorem RationalCovering.minusLaurent_compat_transfer
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.minusLaurent_compat_transfer
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
       (D₃ : RationalLocData A)
@@ -2572,8 +2572,8 @@ Same proof pattern; statement only, with transferred compatibility
 supplied as an explicit hypothesis (to be discharged by
 `restrictionMap_comp` + outer compatibility, or by invoking T-OV-1's
 Laurent-overlap-compatible-family construction once that ticket lands). -/
-theorem RationalCovering.minusLaurent_compat_transfer_skeleton
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.minusLaurent_compat_transfer_skeleton
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (_hS_cover : refines_cover C S)
     (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S }, presheafValue D.1)
     (_hV_compat : ∀ (D₁ D₂ : { D // D ∈ C.standardCoverVCovers S })
@@ -2656,7 +2656,7 @@ equivalence; the A-level partial reduction is landed below):
 ```
 -- Localised Prop 7.14 on plus half (for full Laurent-half span-top in B):
 theorem spanTop_iff_noCommonZero_plusHalf
-    (P : PairOfDefinition A) ... (C : RationalCovering A) (f₀ : A)
+    (P : PairOfDefinition A) ... (C : RationalCoveringData A) (f₀ : A)
     (T : Finset A) :
     Ideal.span ((T : Set A) : Set (presheafValue (laurentPlusDatum C.base f₀))) = ⊤
       ↔ ∀ v ∈ rationalOpen (insert f₀ C.base.T) C.base.s,
@@ -2687,11 +2687,11 @@ unit ideal in `A`, then on the plus half at `f₀`, some `f ∈ S` has
 non-zero valuation. This is the "S itself, not `S.erase f₀`" direction;
 the `S.erase f₀` transfer requires the localised Prop 7.14 (see doc
 block above). -/
-theorem RationalCovering.noCommonZero_plusHalf_of_refines_span_top
+theorem RationalCoveringData.noCommonZero_plusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
-    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
     ∀ v ∈ rationalOpen (insert f₀ C.base.T) C.base.s,
       ∃ f ∈ S, ¬ v.vle f 0 := by
@@ -2705,11 +2705,11 @@ theorem RationalCovering.noCommonZero_plusHalf_of_refines_span_top
 
 /-- **Minus-half no-common-zero from `refines_span_top`**. Mirror of
 the plus-half version via `laurentMinus_subset`. -/
-theorem RationalCovering.noCommonZero_minusHalf_of_refines_span_top
+theorem RationalCoveringData.noCommonZero_minusHalf_of_refines_span_top
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
-    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
+    [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤) :
     ∀ v ∈ rationalOpen (laurentMinusDatum C.base f₀).T
                        (laurentMinusDatum C.base f₀).s,
@@ -2729,8 +2729,8 @@ and means that in any no-common-zero argument on the minus half, `f₀`
 trivially witnesses. It does NOT however give no-common-zero for
 `S.erase f₀` — the fundamental obstacle to a general Lean-level
 `S.erase f₀` span-top transfer. -/
-theorem RationalCovering.f₀_notZero_on_minusHalf
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A) :
+theorem RationalCoveringData.f₀_notZero_on_minusHalf
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) :
     ∀ v ∈ rationalOpen (laurentMinusDatum C.base f₀).T
                        (laurentMinusDatum C.base f₀).s,
       ¬ v.vle f₀ 0 := by
@@ -2750,7 +2750,7 @@ Prop 7.14 applied to `S`. Given `refines_span_top S` and `f₀ ∈ S`,
 for every `v ∈ Spa A A⁺` with `v(f₀) = 0` (i.e., `v.vle f₀ 0`), some
 `g ∈ S.erase f₀` has `v(g) ≠ 0`. Reason: Prop 7.14 gives `∃ f ∈ S,
 v(f) ≠ 0`; the witness cannot be `f₀` since `v(f₀) = 0`. -/
-theorem RationalCovering.noCommonZero_erase_of_f₀_zero
+theorem RationalCoveringData.noCommonZero_erase_of_f₀_zero
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
@@ -2788,7 +2788,7 @@ witness or from ancillary combinatorial data about `S`. The Laurent-
 minus half's natural property `f₀_notZero_on_minusHalf` covers the
 minus-half part of this region automatically; the portion of Spa
 outside the minus half with `v(f₀) ≠ 0` must be handled separately. -/
-theorem RationalCovering.refines_span_top_erase_of_noCommonZero_nonzero_f₀
+theorem RationalCoveringData.refines_span_top_erase_of_noCommonZero_nonzero_f₀
     (P : PairOfDefinition A) [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
     [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
@@ -2801,7 +2801,7 @@ theorem RationalCovering.refines_span_top_erase_of_noCommonZero_nonzero_f₀
   rw [spanTop_iff_noCommonZero_spa P]
   intro v hv_spa
   by_cases h_f₀_zero : v.vle f₀ 0
-  · exact RationalCovering.noCommonZero_erase_of_f₀_zero P hAplus_le_A₀
+  · exact RationalCoveringData.noCommonZero_erase_of_f₀_zero P hAplus_le_A₀
       f₀ S hspan h_f₀_mem v hv_spa h_f₀_zero
   · exact h_cover_nonzero_f₀ v hv_spa h_f₀_zero
 
@@ -2814,8 +2814,8 @@ Prefer `refines_span_top_erase_of_noCommonZero_nonzero_f₀` for new
 code: that version takes the narrower, cleaner "cover the `v(f₀) ≠ 0`
 locus" hypothesis and derives span-top directly via Prop 7.14, with
 no separate localised-Nullstellensatz input needed. -/
-theorem RationalCovering.refines_span_top_erase_of_localised_nullstellensatz
-    [DecidableEq A] (C : RationalCovering A) (f₀ : A) (S : Finset A)
+theorem RationalCoveringData.refines_span_top_erase_of_localised_nullstellensatz
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ : A) (S : Finset A)
     (hspan : Ideal.span ((S : Set A)) = ⊤)
     (h_f₀_mem : f₀ ∈ S)
     (h_localised_null :
@@ -2857,8 +2857,8 @@ bypassing the per-V-piece dichotomy obstacle. -/
 plus `laurentPlusDatum (C.plusDatum f) f₀` has more `T` constraints
 than the plus half `laurentPlusDatum C.base f₀` (adds `f`), so its
 rational open is contained in the plus half. -/
-theorem RationalCovering.refinedPlusPiece_in_plusHalf
-    [DecidableEq A] (C : RationalCovering A) (f₀ f : A) :
+theorem RationalCoveringData.refinedPlusPiece_in_plusHalf
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ f : A) :
     rationalOpen (laurentPlusDatum (C.plusDatum f) f₀).T
                  (laurentPlusDatum (C.plusDatum f) f₀).s ⊆
       rationalOpen (laurentPlusDatum C.base f₀).T
@@ -2869,7 +2869,7 @@ theorem RationalCovering.refinedPlusPiece_in_plusHalf
   -- `ht : t ∈ insert f₀ C.base.T`; use `hvT` on the larger
   -- `insert f₀ (insert f C.base.T)` containing `t`.
   apply hvT
-  simp only [laurentPlusDatum, RationalCovering.plusDatum, Finset.mem_insert] at ht ⊢
+  simp only [laurentPlusDatum, RationalCoveringData.plusDatum, Finset.mem_insert] at ht ⊢
   rcases ht with rfl | ht'
   · exact Or.inl rfl
   · exact Or.inr (Or.inr ht')
@@ -2878,8 +2878,8 @@ theorem RationalCovering.refinedPlusPiece_in_plusHalf
 minus `laurentMinusDatum (C.plusDatum f) f₀` has more `T` constraints
 than the minus half `laurentMinusDatum C.base f₀` (first factor of the
 product includes `f`), so its rational open is contained. -/
-theorem RationalCovering.refinedMinusPiece_in_minusHalf
-    [DecidableEq A] (C : RationalCovering A) (f₀ f : A) :
+theorem RationalCoveringData.refinedMinusPiece_in_minusHalf
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ f : A) :
     rationalOpen (laurentMinusDatum (C.plusDatum f) f₀).T
                  (laurentMinusDatum (C.plusDatum f) f₀).s ⊆
       rationalOpen (laurentMinusDatum C.base f₀).T
@@ -2895,7 +2895,7 @@ theorem RationalCovering.refinedMinusPiece_in_minusHalf
   obtain ⟨⟨t₁, t₂⟩, hmem, rfl⟩ := Finset.mem_image.mp ht
   obtain ⟨ht₁, ht₂⟩ := Finset.mem_product.mp hmem
   refine Finset.mem_image.mpr ⟨⟨t₁, t₂⟩, Finset.mem_product.mpr ⟨?_, ht₂⟩, rfl⟩
-  simp only [RationalCovering.plusDatum, laurentPlusDatum, Finset.mem_insert] at ht₁ ⊢
+  simp only [RationalCoveringData.plusDatum, laurentPlusDatum, Finset.mem_insert] at ht₁ ⊢
   rcases ht₁ with rfl | ht₁'
   · exact Or.inl rfl
   · exact Or.inr (Or.inr ht₁')
@@ -2904,8 +2904,8 @@ theorem RationalCovering.refinedMinusPiece_in_minusHalf
 union of the two refined pieces at `f` equals the outer V-piece at `f`
 (as sets of valuations), by Laurent-cover coverage applied at `f₀` on
 the V-piece base. -/
-theorem RationalCovering.refinedPieces_cover_Vpiece
-    [DecidableEq A] (C : RationalCovering A) (f₀ f : A) :
+theorem RationalCoveringData.refinedPieces_cover_Vpiece
+    [DecidableEq A] (C : RationalCoveringData A) (f₀ f : A) :
     rationalOpen (C.plusDatum f).T (C.plusDatum f).s ⊆
       rationalOpen (laurentPlusDatum (C.plusDatum f) f₀).T
                    (laurentPlusDatum (C.plusDatum f) f₀).s ∪
@@ -2917,8 +2917,8 @@ theorem RationalCovering.refinedPieces_cover_Vpiece
 produces two pieces: the plus-refined and minus-refined V-piece at `f₀`.
 The resulting `Finset` has at most `2|S|` elements (deduplicated by
 `Finset.image`). -/
-noncomputable def RationalCovering.refinedVCovers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A) :
+noncomputable def RationalCoveringData.refinedVCovers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A) :
     Finset (RationalLocData A) :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   S.image (fun f => laurentPlusDatum (C.plusDatum f) f₀) ∪
@@ -2926,21 +2926,21 @@ noncomputable def RationalCovering.refinedVCovers
 
 /-- Membership in the refined V-cover: each refined piece is either the
 plus-refined or minus-refined iterate at some `f ∈ S`. -/
-theorem RationalCovering.mem_refinedVCovers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.mem_refinedVCovers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     {D : RationalLocData A} :
     D ∈ C.refinedVCovers S f₀ ↔
       (∃ f ∈ S, laurentPlusDatum (C.plusDatum f) f₀ = D) ∨
       (∃ f ∈ S, laurentMinusDatum (C.plusDatum f) f₀ = D) := by
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
-  unfold RationalCovering.refinedVCovers
+  unfold RationalCoveringData.refinedVCovers
   rw [Finset.mem_union, Finset.mem_image, Finset.mem_image]
 
 /-- Refined pieces each lie in the `C.base` rational open. Follows from
 `laurentPlus_subset`/`laurentMinus_subset` composed with
 `plusDatum_subset_base`. -/
-theorem RationalCovering.refinedVCovers_subset_base
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.refinedVCovers_subset_base
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (D : RationalLocData A) (hD : D ∈ C.refinedVCovers S f₀) :
     rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s := by
   rcases (C.mem_refinedVCovers S f₀).mp hD with ⟨f, _hf, rfl⟩ | ⟨f, _hf, rfl⟩
@@ -2954,8 +2954,8 @@ every valuation in `C.base`'s rational open lies in some refined
 piece: first find `f ∈ S` with `v ∈ plus-piece-at-f` (outer
 refines_cover), then apply `laurentCover_covers` to split into plus-
 or minus-refined-at-`f`. -/
-theorem RationalCovering.refinedVCovers_covers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.refinedVCovers_covers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S) :
     ∀ v ∈ rationalOpen C.base.T C.base.s,
       ∃ D ∈ C.refinedVCovers S f₀, v ∈ rationalOpen D.T D.s := by
@@ -2977,8 +2977,8 @@ theorem RationalCovering.refinedVCovers_covers
 is contained entirely in plus-half OR minus-half at `f₀`, by
 construction — the key property enabling the `hrefine` discharge in
 `hV_glue_step_from_laurent_halves`. -/
-theorem RationalCovering.refinedVCovers_plusMinus_dichotomy
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.refinedVCovers_plusMinus_dichotomy
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (D : RationalLocData A) (hD : D ∈ C.refinedVCovers S f₀) :
     rationalOpen D.T D.s ⊆
       rationalOpen (laurentPlusDatum C.base f₀).T
@@ -2999,8 +2999,8 @@ contained in the τ-image's rational open (via `laurentPlus_subset` /
 
 Packaged as a `Subtype` to keep the containment proof alongside the
 τ-image, since both depend on the Classical-choice-picked `f`. -/
-noncomputable def RationalCovering.refinedVCoversTauPair
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.refinedVCoversTauPair
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (D : { D // D ∈ C.refinedVCovers S f₀ }) :
     { Ep : { E // E ∈ C.standardCoverVCovers S } //
       rationalOpen D.1.T D.1.s ⊆ rationalOpen Ep.1.T Ep.1.s } :=
@@ -3032,16 +3032,16 @@ noncomputable def RationalCovering.refinedVCoversTauPair
       exact laurentMinus_subset (C.plusDatum f) f₀ hv'⟩
 
 /-- τ map projection from `refinedVCoversTauPair`. -/
-noncomputable def RationalCovering.refinedVCoversTau
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.refinedVCoversTau
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (D : { D // D ∈ C.refinedVCovers S f₀ }) :
     { E // E ∈ C.standardCoverVCovers S } :=
   (C.refinedVCoversTauPair S f₀ D).1
 
 /-- **`τ_refined` is containment-preserving**. Each refined piece's
 rational open is contained in its `τ`-image's rational open. -/
-theorem RationalCovering.refinedVCoversTau_subset
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.refinedVCoversTau_subset
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (D : { D // D ∈ C.refinedVCovers S f₀ }) :
     rationalOpen D.1.T D.1.s ⊆
       rationalOpen (C.refinedVCoversTau S f₀ D).1.T
@@ -3093,8 +3093,8 @@ The theorem dispatches on `|S|`:
   will be discharged by a recursive `hV_glue` on `(laurent-half,
   S.erase f₀)` combined with the sub-cover transfer and
   `laurentCover_gluing_presheaf`. -/
-theorem RationalCovering.standardCover_hV_glue_induction
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+theorem RationalCoveringData.standardCover_hV_glue_induction
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hSnonempty : S.Nonempty)
     (hAplus : ∀ f ∈ S, f ∈ A⁺)
     (h1T : (1 : A) ∈ C.base.T)
@@ -3225,8 +3225,8 @@ supplied via `vle_s_of_mem_Aplus_of_one_mem_T`; strictly more flexible
 when the caller has a direct vle witness (e.g., from the recursive
 setup where the plus-half's vle follows automatically from outer
 `hBase_vle` + `laurentPlus_subset`). -/
-theorem RationalCovering.standardCover_hV_glue_induction_via_vle
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+theorem RationalCoveringData.standardCover_hV_glue_induction_via_vle
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hSnonempty : S.Nonempty)
     (hAplus : ∀ f ∈ S, f ∈ A⁺)
     (hBase_vle :
@@ -3324,8 +3324,8 @@ corresponding hypothesis on the plus-half
 holds automatically: the plus half is contained in the outer base
 (via `laurentPlus_subset`), the plus-half denominator equals the outer
 denominator (`.s = C.base.s`), so the outer vle witness restricts. -/
-theorem RationalCovering.hBase_vle_plusHalf_of_outer
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.hBase_vle_plusHalf_of_outer
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hBase_vle :
       ∀ f ∈ S, ∀ v ∈ rationalOpen C.base.T C.base.s, v.vle f C.base.s) :
     ∀ g ∈ S.erase f₀,
@@ -3390,8 +3390,8 @@ callers who build the components by hand or via the IH.
 time — it does NOT appear as a separate parameter here because each
 caller supplies it to their own `minus_section` builder. Similarly
 for the Laurent gluing's analytic preconditions. -/
-theorem RationalCovering.step_witness_of_parts
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+theorem RationalCoveringData.step_witness_of_parts
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (f₀ : A) (hf₀ : f₀ ∈ S)
     (plus_section : ∀ (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S },
         presheafValue D.1),
@@ -3526,8 +3526,8 @@ step: a caller supplying these 5 pieces (via their own Laurent-half
 recursion machinery at `S.erase f₀`) gets the outer `hV_glue` for free,
 without touching `step_witness_of_parts` or the `by_cases`-on-card
 induction internally. -/
-theorem RationalCovering.hV_glue_from_plusIH_and_minusBundle
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.hV_glue_from_plusIH_and_minusBundle
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hf₀ : f₀ ∈ S) (hSnonempty : S.Nonempty)
     (hAplus : ∀ f ∈ S, f ∈ A⁺)
     (hBase_vle :
@@ -3614,10 +3614,10 @@ This is the **strongest exported theorem** for a fixed standard cover
 `S` with |S| ≥ 2: it exposes only the genuinely non-geometric residuals
 (Lane A `hLaurentGlue`, Lane B `hE_sep`, minus-side `minus_section`)
 while internalizing all the outer-induction plumbing on `|S|`. -/
-theorem RationalCovering.tateAcyclicity_Part2_from_plusIH_and_minusBundle
+theorem RationalCoveringData.tateAcyclicity_Part2_from_plusIH_and_minusBundle
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hf₀ : f₀ ∈ S) (hSnonempty : S.Nonempty)
     (hAplus : ∀ f ∈ S, f ∈ A⁺)
     (hBase_vle :
@@ -3733,10 +3733,10 @@ residuals are genuinely non-geometric:
 * Plus-side `h_restriction_prop` + `plus_hV_glue` IH — the recursive
   call to outer induction at `|S.erase f₀|`, bottoming out via
   `tateAcyclicity_augmentedCech_singleton` at `|S| = 1`. -/
-theorem RationalCovering.tateAcyclicity_Part2_end_to_end
+theorem RationalCoveringData.tateAcyclicity_Part2_end_to_end
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hf₀ : f₀ ∈ S) (hSnonempty : S.Nonempty)
     (hAplus : ∀ f ∈ S, f ∈ A⁺)
     (hBase_vle :
@@ -3966,7 +3966,7 @@ the recursion structure combines:
 * **Termination**: `Finset.card_erase_of_mem_decreases` —
   `|S.erase f₀| < |S|` when `f₀ ∈ S`.
 * **Plus-half V-cover**: `plusLaurentCovering_of_standardCoverVCovers`
-  (above) — given `refines_cover C S`, yields a `RationalCovering` on
+  (above) — given `refines_cover C S`, yields a `RationalCoveringData` on
   the plus half.
 * **Minus-half V-cover**: `minusLaurentCovering_of_standardCoverVCovers`
   (above).
@@ -4104,8 +4104,8 @@ Laurent gluing, and overlap-from-compat, packages them into the
 This is the tuple-wrapping shape; the substantive work is supplying the
 five section-construction arguments. Each one is a hypothesis-shape
 match with `hV_glue_step_from_laurent_halves`'s input. -/
-theorem RationalCovering.step_witness_of_bundle
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+theorem RationalCoveringData.step_witness_of_bundle
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (f₀ : A) (hf₀ : f₀ ∈ S)
     (plus_section : ∀ (fV : ∀ D : { D // D ∈ C.standardCoverVCovers S },
         presheafValue D.1),
@@ -4264,10 +4264,10 @@ into the exact Part-2 shape required at `LaurentRefinement.lean:3737`.
 **Prefer `tateAcyclicity_Part2_via_hZavyalov_per_E_direct`** (direct
 per-E route) for new downstream code. This τ-route wrapper is kept for
 reference and backward compatibility. -/
-theorem RationalCovering.tateAcyclicity_Part2_via_geometric_reduction
+theorem RationalCoveringData.tateAcyclicity_Part2_via_geometric_reduction
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (hSnonempty : S.Nonempty)
     (hS_contain : refines_contain C S)
     (hAplus : ∀ f ∈ S, f ∈ A⁺)
@@ -4394,10 +4394,10 @@ intermediate V-cover. The refinement map `τ` composes
 
 Takes `hV_glue_refined` and `hE_sep_refined` as explicit hypotheses
 (discharged post-T-OV-1 and T-IDEAL-2 respectively). -/
-theorem RationalCovering.tateAcyclicity_Part2_via_refined_geometric_reduction
+theorem RationalCoveringData.tateAcyclicity_Part2_via_refined_geometric_reduction
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S)
     (hS_contain : refines_contain C S)
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
@@ -4474,8 +4474,8 @@ exact-row content.
 Statement only: full discharge requires the compat-transfer and
 section-identification machinery (see the S-GEOM-IND documentation
 above). -/
-theorem RationalCovering.hV_glue_refined_from_laurent_halves
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.hV_glue_refined_from_laurent_halves
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (_hS_cover : refines_cover C S)
     -- Inner hV_glue on the plus half (indexed by plus-refined subset of refined V-cover).
     (_plus_section_refined : ∀
@@ -4588,10 +4588,10 @@ leg specialized to the concrete caller-ready overlap theorem
 This removes the abstract `hLaurentGlue` input from
 `hV_glue_refined_from_laurent_halves`; the remaining explicit overlap input is
 the compatibility transfer `hOverlap`. -/
-theorem RationalCovering.hV_glue_refined_from_laurent_halves_via_primary
+theorem RationalCoveringData.hV_glue_refined_from_laurent_halves_via_primary
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -4725,10 +4725,10 @@ shape to:
 The only geometric input added here beyond
 `hV_glue_refined_from_laurent_halves_via_primary` is the weakening
 `refines_cover_of_refines_cover_per_E`. -/
-theorem RationalCovering.lane_A_supplier_via_primary
+theorem RationalCoveringData.lane_A_supplier_via_primary
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (f₀ : A)
+    (C : RationalCoveringData A) (f₀ : A)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -4854,8 +4854,8 @@ theorem RationalCovering.lane_A_supplier_via_primary
 omit [HasLocLiftPowerBounded A] in
 /-- Canonical completeness proof for the completed presheaf value, in the
 right-uniformity shape expected by the Example 6.38 bridge API. -/
-theorem RationalCovering.canonical_complete_presheafValue
-    (C : RationalCovering A) :
+theorem RationalCoveringData.canonical_complete_presheafValue
+    (C : RationalCoveringData A) :
     @CompleteSpace (presheafValue C.base)
       (IsTopologicalAddGroup.rightUniformSpace (presheafValue C.base)) := by
   rw [IsUniformAddGroup.rightUniformSpace_eq]
@@ -4868,9 +4868,9 @@ omit [HasLocLiftPowerBounded A] in
 This is the geometric-reduction-layer analogue of the final-assembly helper:
 the target datum is the iterated minus rational localization of the completed
 base, so the continuity follows from the Tate-case topology comparison theorem. -/
-theorem RationalCovering.canonical_hcont_eval
+theorem RationalCoveringData.canonical_hcont_eval
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
-    (C : RationalCovering A) [IsNoetherianRing C.base.P.A₀]
+    (C : RationalCoveringData A) [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)] (f₀ : A) :
     letI : IsTateRing (presheafValue C.base) :=
       presheafValue_isTateRing C.base.P C.base
@@ -4897,10 +4897,10 @@ non-mathematical proof arguments from the caller boundary:
 
 The remaining hypotheses are the genuine Lane A data, including the plus-side
 continuity proof, overlap bridge, and half-cover section suppliers. -/
-theorem RationalCovering.lane_A_supplier_via_primary_canonical
+theorem RationalCoveringData.lane_A_supplier_via_primary_canonical
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (f₀ : A)
+    (C : RationalCoveringData A) (f₀ : A)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -4938,7 +4938,7 @@ theorem RationalCovering.lane_A_supplier_via_primary_canonical
               (laurentOverlap_subset_plus C.base f₀) uplus)) =
         LaurentCover.posLift (C.base.canonicalMap f₀)
           (laurentPlusBridge C.base.P C.base f₀ hNoeth_B hLocLift_B hA₀Noeth_B
-            (RationalCovering.canonical_complete_presheafValue C)
+            (RationalCoveringData.canonical_complete_presheafValue C)
             hnoeth_B hcont_forward_B uplus))
     (h_minus_compat : ∀ uminus : presheafValue (laurentMinusDatum C.base f₀),
       (bivariateOverlap_equiv_B₁₂gen (presheafValue C.base) (C.base.canonicalMap f₀))
@@ -4947,7 +4947,7 @@ theorem RationalCovering.lane_A_supplier_via_primary_canonical
               (laurentOverlap_subset_minus C.base f₀) uminus)) =
         LaurentCover.negLift (C.base.canonicalMap f₀)
           (laurentMinusBridge C.base.P C.base f₀ hnoeth_B
-            (RationalCovering.canonical_hcont_eval C f₀) uminus))
+            (RationalCoveringData.canonical_hcont_eval C f₀) uminus))
     (S' : StandardCover A)
     (hS'_per_E : refines_cover_per_E C S'.elts)
     (_hS'_contain : refines_contain C S'.elts)
@@ -5008,9 +5008,9 @@ theorem RationalCovering.lane_A_supplier_via_primary_canonical
       ∃ x : presheafValue C.base, ∀ D : { D // D ∈ C.refinedVCovers S'.elts f₀ },
         restrictionMap C.base D.1
           (C.refinedVCovers_subset_base S'.elts f₀ D.1 D.2) x = fV D :=
-  RationalCovering.lane_A_supplier_via_primary C f₀
-    hNoeth_B hLocLift_B hA₀Noeth_B (RationalCovering.canonical_complete_presheafValue C)
-    hnoeth_B hcont_forward_B (RationalCovering.canonical_hcont_eval C f₀)
+  RationalCoveringData.lane_A_supplier_via_primary C f₀
+    hNoeth_B hLocLift_B hA₀Noeth_B (RationalCoveringData.canonical_complete_presheafValue C)
+    hnoeth_B hcont_forward_B (RationalCoveringData.canonical_hcont_eval C f₀)
     τ_preBiv h_plus_compat h_minus_compat S' hS'_per_E _hS'_contain
     _plus_section_refined _minus_section_refined hOverlap
 
@@ -5043,7 +5043,7 @@ sub-cover transfer; this remains the third independent dependency).
 
 We do NOT take `hZavyalov` directly here: the standard cover `S` is
 supplied by the caller (typically obtained from
-`RationalCovering.refines_by_standard_cover` with `hZavyalov`).
+`RationalCoveringData.refines_by_standard_cover` with `hZavyalov`).
 Caller-side composition is straightforward: invoke
 `refines_by_standard_cover`, destructure to get `S` + `refines_cover` +
 `refines_contain` + `refines_span_top`, then call this assembly. -/
@@ -5075,10 +5075,10 @@ External dependencies remaining at this entry point:
 * `hC_compat` — caller's sheaf condition (always external).
 * `hS_cover` / `hS_contain` — from the caller's
   `refines_by_standard_cover` invocation (with `hZavyalov`). -/
-theorem RationalCovering.tateAcyclicity_Part2_assembly
+theorem RationalCoveringData.tateAcyclicity_Part2_assembly
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_cover : refines_cover C S)
     (hS_contain : refines_contain C S)
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
@@ -5186,7 +5186,7 @@ This is equivalent to per-`E` injectivity of the product-restriction
 from `presheafValue E.1` to `∏_d presheafValue d.1` (ranging over `d`
 with `τ_full d = E`). The caller can discharge via
 `productRestriction_injective_tate_via_prime_extension_closed`
-(`Cor832.lean:1581`) applied at each `E` once a local `RationalCovering`
+(`Cor832.lean:1581`) applied at each `E` once a local `RationalCoveringData`
 with `base = E.1` is produced.
 
 Below we expose the MECHANICAL reduction `hE_sep ↔ per-E injectivity`
@@ -5200,9 +5200,9 @@ injective product-restriction to its τ-preimage d's (= 0 in →
 `x = 0`); the RHS conclusion is the `a = b` form used by
 `tateAcyclicity_Part2_assembly`. Proof: shift `x := a - b`, use
 `map_sub` on `restrictionMapHom` + `sub_eq_zero`. -/
-theorem RationalCovering.hE_sep_refined_of_per_E_injectivity
+theorem RationalCoveringData.hE_sep_refined_of_per_E_injectivity
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_contain : refines_contain C S)
     (per_E_inj : ∀ (E : { E // E ∈ C.covers }) (x : presheafValue E.1),
       (∀ (d : { D // D ∈ C.refinedVCovers S f₀ })
@@ -5248,7 +5248,7 @@ theorem RationalCovering.hE_sep_refined_of_per_E_injectivity
 The `per_E_inj` hypothesis of
 `hE_sep_refined_of_per_E_injectivity` is discharged per-E by
 `productRestriction_injective_tate_via_prime_extension_closed`
-(`Cor832.lean:1581`) applied to a `RationalCovering A` with `base = E.1`
+(`Cor832.lean:1581`) applied to a `RationalCoveringData A` with `base = E.1`
 whose `covers` include (at minimum) the d's mapping to E.
 
 **Data required** per-E (to invoke Cor832 at E):
@@ -5269,7 +5269,7 @@ whose `covers` include (at minimum) the d's mapping to E.
   stated as an explicit hypothesis here.
 
 We DO NOT package Step 2 as a single theorem here because the per-E
-`RationalCovering` construction requires filtering `refinedVCovers` to
+`RationalCoveringData` construction requires filtering `refinedVCovers` to
 the d's mapping to E, which needs a `Classical.decEq (RationalLocData A)`
 setup and `Finset.filter` plumbing that's cleaner to leave at the
 caller-site. See the documentation block below the T-ACYC-PART2 wrapper
@@ -5282,9 +5282,9 @@ Given the refined V-cover and `refines_contain`-backed τ chain, each
 `d ∈ refinedVCovers S f₀` with `τ_full d = E` (where `τ_full =
 standardCoverTau ∘ refinedVCoversTau`). Packaged as a `Finset`
 (`refinedVCovers_at`), these form the candidate covers of a per-E
-`RationalCovering A` with `base = E.1`.
+`RationalCoveringData A` with `base = E.1`.
 
-The per-E `RationalCovering` is a valid one iff its covers
+The per-E `RationalCoveringData` is a valid one iff its covers
 geometrically cover `E.1`'s rational open. This `hcover_at_E`
 property is an **explicit hypothesis** at this level; in the Wedhorn
 standard-cover construction (`refines_by_standard_cover` +
@@ -5292,7 +5292,7 @@ standard-cover construction (`refines_by_standard_cover` +
 bake that derivation into Step 2 itself since it involves a
 Finset-choice argument specific to the caller's S-provenance.
 
-With the per-E `RationalCovering` in hand, invoking
+With the per-E `RationalCoveringData` in hand, invoking
 `productRestriction_injective_tate_via_prime_extension_closed`
 (`Cor832.lean:1581`) at each `E` yields per-E separation, which Step 1
 converts to the `hE_sep_refined`-shape expected by the Part-2 assembly. -/
@@ -5303,9 +5303,9 @@ S f₀` only those pieces `d` whose τ-image
 
 Implementation: `attach` + `filter` (using `Classical` decidability)
 + `image` back to `RationalLocData A`. Used as the covers field of the
-per-E `RationalCovering` below. -/
-noncomputable def RationalCovering.refinedVCovers_at
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+per-E `RationalCoveringData` below. -/
+noncomputable def RationalCoveringData.refinedVCovers_at
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_contain : refines_contain C S)
     (E : { E // E ∈ C.covers }) : Finset (RationalLocData A) :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
@@ -5318,8 +5318,8 @@ noncomputable def RationalCovering.refinedVCovers_at
 /-- Membership in `refinedVCovers_at E`: a `RationalLocData A` is in
 the per-E filter iff it lies in `refinedVCovers S f₀` AND its
 τ-image equals `E`. -/
-theorem RationalCovering.mem_refinedVCovers_at
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.mem_refinedVCovers_at
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_contain : refines_contain C S)
     (E : { E // E ∈ C.covers }) (D : RationalLocData A) :
     D ∈ C.refinedVCovers_at S f₀ hS_contain E ↔
@@ -5328,7 +5328,7 @@ theorem RationalCovering.mem_refinedVCovers_at
           (C.refinedVCoversTau S f₀ ⟨D, hD⟩) = E := by
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   letI : DecidableEq { E' // E' ∈ C.covers } := Classical.decEq _
-  unfold RationalCovering.refinedVCovers_at
+  unfold RationalCoveringData.refinedVCovers_at
   simp only [Finset.mem_image, Finset.mem_filter, Finset.mem_attach, true_and]
   constructor
   · rintro ⟨d, hd_eq, rfl⟩
@@ -5339,8 +5339,8 @@ theorem RationalCovering.mem_refinedVCovers_at
 /-- **Per-E subset-to-base**. Each refined V-piece mapping to `E`
 has its rational open contained in `E.1`'s rational open, via the τ
 composition `refinedVCoversTau_subset` + `standardCoverTau_subset`. -/
-theorem RationalCovering.refinedVCovers_at_subset_base
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.refinedVCovers_at_subset_base
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_contain : refines_contain C S)
     (E : { E // E ∈ C.covers })
     (D : RationalLocData A) (hD : D ∈ C.refinedVCovers_at S f₀ hS_contain E) :
@@ -5365,22 +5365,22 @@ theorem RationalCovering.refinedVCovers_at_subset_base
             rationalOpen E.1.T E.1.s := by rw [hτ]
   exact h1.trans (h2.trans h3.le)
 
-/-- **Per-E local `RationalCovering`**. Given `hcover_at_E` (the
+/-- **Per-E local `RationalCoveringData`**. Given `hcover_at_E` (the
 covering property that `E.1`'s rational open is covered by its τ-preimage
-refined V-pieces), builds a `RationalCovering A` with `base = E.1` and
+refined V-pieces), builds a `RationalCoveringData A` with `base = E.1` and
 covers = `refinedVCovers_at S f₀ hS_contain E`.
 
 Used as the per-E target of
 `productRestriction_injective_tate_via_prime_extension_closed`
 (`Cor832.lean:1581`). -/
-noncomputable def RationalCovering.refinedVCovers_at_asRationalCovering
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.refinedVCovers_at_asRationalCoveringData
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_contain : refines_contain C S)
     (E : { E // E ∈ C.covers })
     (hcover_at_E : ∀ v ∈ rationalOpen E.1.T E.1.s,
       ∃ D ∈ C.refinedVCovers_at S f₀ hS_contain E,
         v ∈ rationalOpen D.T D.s) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := E.1
   covers := C.refinedVCovers_at S f₀ hS_contain E
   hsubset D hD := C.refinedVCovers_at_subset_base S f₀ hS_contain E D hD
@@ -5388,7 +5388,7 @@ noncomputable def RationalCovering.refinedVCovers_at_asRationalCovering
 
 /-- **Lane B Step 2**: reduction from `per_E_inj` (the Lane B Step 1
 hypothesis) to a per-E Cor832-shaped separation hypothesis on the
-local `RationalCovering`.
+local `RationalCoveringData`.
 
 Given `hcover_at_E` per-E and the per-E Cor832 output, produces the
 `per_E_inj` statement consumed by `hE_sep_refined_of_per_E_injectivity`.
@@ -5397,23 +5397,23 @@ Composition with Step 1 gives the full Lane B: `hE_sep_refined` reduces
 to `hcover_at_E` (explicit hypothesis, derivable from the
 Wedhorn-refinement provenance) + per-E Cor832 output (discharged via
 `productRestriction_injective_tate_via_prime_extension_closed` at each
-`refinedVCovers_at_asRationalCovering E hcover_at_E`). -/
-theorem RationalCovering.per_E_inj_of_per_E_cor832
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+`refinedVCovers_at_asRationalCoveringData E hcover_at_E`). -/
+theorem RationalCoveringData.per_E_inj_of_per_E_cor832
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_contain : refines_contain C S)
     (hcover_at_E : ∀ (E : { E // E ∈ C.covers }),
       ∀ v ∈ rationalOpen E.1.T E.1.s,
         ∃ D ∈ C.refinedVCovers_at S f₀ hS_contain E,
           v ∈ rationalOpen D.T D.s)
     (hCor832_at_E : ∀ (E : { E // E ∈ C.covers })
-      (x : presheafValue (C.refinedVCovers_at_asRationalCovering S f₀
+      (x : presheafValue (C.refinedVCovers_at_asRationalCoveringData S f₀
               hS_contain E (hcover_at_E E)).base),
       (∀ (D : RationalLocData A)
-         (hD : D ∈ (C.refinedVCovers_at_asRationalCovering S f₀
+         (hD : D ∈ (C.refinedVCovers_at_asRationalCoveringData S f₀
                       hS_contain E (hcover_at_E E)).covers),
-        restrictionMap (C.refinedVCovers_at_asRationalCovering S f₀
+        restrictionMap (C.refinedVCovers_at_asRationalCoveringData S f₀
                           hS_contain E (hcover_at_E E)).base D
-            ((C.refinedVCovers_at_asRationalCovering S f₀
+            ((C.refinedVCovers_at_asRationalCoveringData S f₀
                 hS_contain E (hcover_at_E E)).hsubset D hD) x = 0) →
       x = 0) :
     ∀ (E : { E // E ∈ C.covers }) (x : presheafValue E.1),
@@ -5426,10 +5426,10 @@ theorem RationalCovering.per_E_inj_of_per_E_cor832
                 (C.refinedVCoversTau S f₀ d)))) x = 0) →
       x = 0 := by
   intro E x hx
-  -- Transfer `x : presheafValue E.1` to the per-E RationalCovering's base
+  -- Transfer `x : presheafValue E.1` to the per-E RationalCoveringData's base
   -- (which is also E.1 by construction).
   have h_base_eq :
-      (C.refinedVCovers_at_asRationalCovering S f₀ hS_contain E
+      (C.refinedVCovers_at_asRationalCoveringData S f₀ hS_contain E
          (hcover_at_E E)).base = E.1 := rfl
   -- Apply hCor832_at_E: x = 0 if restriction to each D ∈ per_E covers is 0.
   apply hCor832_at_E E x
@@ -5460,12 +5460,12 @@ which makes directly deriving `hcover_at_E` from simpler hypotheses
 We therefore provide an alternative route that **bypasses the
 Classical.choose τ chain**: given the canonical `refines_cover_per_E`
 predicate from `StandardCover.lean`, we build a direct per-E
-`RationalCovering` `per_E_local_covering`. The construction uses
+`RationalCoveringData` `per_E_local_covering`. The construction uses
 `Finset.filter` on `S` to select f's with `plus-piece-at-f ⊆ E`, then
 takes plus- and minus-refined-at-f for those f's.
 
 The caller obtains `refines_cover_per_E` from
-`StandardCover.RationalCovering.refines_by_standard_cover_per_E` (the
+`StandardCover.RationalCoveringData.refines_by_standard_cover_per_E` (the
 strengthened Wedhorn/Hübner refinement theorem), which consumes a
 strengthened existence hypothesis `hZavyalov_per_E`.
 
@@ -5474,24 +5474,24 @@ via Cor 8.32 implies the τ-based `per_E_inj` consumed by Step 2 — is
 the remaining Lane B gap; it requires Classical.choose reasoning to
 identify the τ-image of plus/minus-refined-at-f with the user-specified
 E. We isolate this gap as a named bridge hypothesis / documented future
-work so the direct per-E `RationalCovering` construction itself is
+work so the direct per-E `RationalCoveringData` construction itself is
 usable by callers who have their own Cor832-at-E discharge. -/
 
-/-- **Direct per-E local `RationalCovering`** (no τ-indirection).
-Given `refines_cover_per_E`, builds a per-E `RationalCovering A` with
+/-- **Direct per-E local `RationalCoveringData`** (no τ-indirection).
+Given `refines_cover_per_E`, builds a per-E `RationalCoveringData A` with
 `base = E.1` and covers = plus/minus-refined-at-f for f ∈ S whose
 plus-piece is contained in E. The filter on `S` uses `Classical.dec`
 for the subset-predicate.
 
-This `RationalCovering` is directly suitable for Cor 8.32 per-E
+This `RationalCoveringData` is directly suitable for Cor 8.32 per-E
 application; the caller invokes
 `productRestriction_injective_tate_via_prime_extension_closed` at
 this covering to get `presheafValue E.1`-level separation. -/
-noncomputable def RationalCovering.per_E_local_covering
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+noncomputable def RationalCoveringData.per_E_local_covering
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (E : { E // E ∈ C.covers })
     (hprecise : refines_cover_per_E C S) :
-    RationalCovering A :=
+    RationalCoveringData A :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   letI : DecidablePred (fun f : A =>
     rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen E.1.T E.1.s) :=
@@ -5545,8 +5545,8 @@ noncomputable def RationalCovering.per_E_local_covering
 /-- Membership in the direct per-E local covering: a `RationalLocData A`
 is in `(per_E_local_covering E hprecise).covers` iff it is plus- or
 minus-refined-at-f for some f ∈ S with plus-piece-at-f ⊆ E. -/
-theorem RationalCovering.mem_per_E_local_covering_covers
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.mem_per_E_local_covering_covers
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (E : { E // E ∈ C.covers })
     (hprecise : refines_cover_per_E C S)
     (D : RationalLocData A) :
@@ -5559,7 +5559,7 @@ theorem RationalCovering.mem_per_E_local_covering_covers
   letI : DecidablePred (fun f : A =>
     rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen E.1.T E.1.s) :=
     fun _ => Classical.propDecidable _
-  unfold RationalCovering.per_E_local_covering
+  unfold RationalCoveringData.per_E_local_covering
   simp only [Finset.mem_union, Finset.mem_image, Finset.mem_filter]
   constructor
   · rintro (⟨f, ⟨hf, h_in_E⟩, rfl⟩ | ⟨f, ⟨hf, h_in_E⟩, rfl⟩)
@@ -5577,8 +5577,8 @@ nonempty-cover separation to `per_E_local_covering`: choose a point of
 `E`, use `refines_cover_per_E` to find a standard-cover generator whose
 plus-piece targets `E`, then use the two-piece Laurent cover of that
 plus-piece. -/
-theorem RationalCovering.per_E_local_covering_nonempty_of_rationalOpen_nonempty
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A) (f₀ : A)
+theorem RationalCoveringData.per_E_local_covering_nonempty_of_rationalOpen_nonempty
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (E : { E // E ∈ C.covers })
     (hprecise : refines_cover_per_E C S)
     (hE_nonempty : (rationalOpen E.1.T E.1.s).Nonempty) :
@@ -5599,7 +5599,7 @@ theorem RationalCovering.per_E_local_covering_nonempty_of_rationalOpen_nonempty
 
 /-! ### Lane B Step 3 documentation: wiring the direct per-E covering
 
-The `per_E_local_covering` above produces a `RationalCovering A` with
+The `per_E_local_covering` above produces a `RationalCoveringData A` with
 `base = E.1` and a concrete `covers` field (no `Classical.choose τ`).
 Callers invoke
 `productRestriction_injective_tate_via_prime_extension_closed`
@@ -5632,7 +5632,7 @@ Part-2 assembly to use the direct per-E covering instead of the
 τ-based one. Both are possible but deferred.
 
 **Current lane status**:
-* Direct per-E `RationalCovering` construction: ◆ AVAILABLE (axiom-clean).
+* Direct per-E `RationalCoveringData` construction: ◆ AVAILABLE (axiom-clean).
 * Bridge to τ-based Lane B Step 2: **GAP**, documented.
 * Callers with an independent Cor832-at-E source (e.g., from an
   alternative refinement API) can use `per_E_local_covering` directly
@@ -5694,10 +5694,10 @@ closure consuming the canonical `refines_cover_per_E` predicate from
 Internal `Classical.choose` on `refines_contain` is used to define the
 fV-building target per refined piece; reconciled at the Part-2 output
 via `hC_compat`. -/
-theorem RationalCovering.tateAcyclicity_Part2_direct_per_E
+theorem RationalCoveringData.tateAcyclicity_Part2_direct_per_E
     [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (S : Finset A) (f₀ : A)
     (hS_per_E : refines_cover_per_E C S)
     (hS_contain : refines_contain C S)
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
@@ -5833,7 +5833,7 @@ theorem RationalCovering.tateAcyclicity_Part2_direct_per_E
 
 The clean caller API for S-GEOM-ASM: consumes the strengthened
 `hZavyalov_per_E` existence hypothesis (matching the output shape of
-`StandardCover.RationalCovering.refines_by_standard_cover_per_E`),
+`StandardCover.RationalCoveringData.refines_by_standard_cover_per_E`),
 destructures internally to obtain the `StandardCover A` and its
 `refines_cover_per_E` / `refines_contain` witnesses, then applies
 `tateAcyclicity_Part2_direct_per_E`.
@@ -5863,7 +5863,7 @@ statement on `C.base`, unambiguous once the inputs are fixed. -/
 route, consuming `hZavyalov_per_E` + universal Lane A/B suppliers.
 
 Extracts the standard cover `S` via
-`RationalCovering.refines_by_standard_cover_per_E` and applies
+`RationalCoveringData.refines_by_standard_cover_per_E` and applies
 `tateAcyclicity_Part2_direct_per_E` with the chosen S plus the lane
 outputs for THAT S (supplied by the universal lane suppliers).
 
@@ -5880,10 +5880,10 @@ This is the **downstream-callable API** that `LaurentRefinement.lean`
 Both lane suppliers are universally quantified over `StandardCover A`
 and its refinement properties, matching the mathematical shape of
 Lanes A/B which hold uniformly across all standard covers. -/
-theorem RationalCovering.tateAcyclicity_Part2_via_hZavyalov_per_E_direct
+theorem RationalCoveringData.tateAcyclicity_Part2_via_hZavyalov_per_E_direct
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S)

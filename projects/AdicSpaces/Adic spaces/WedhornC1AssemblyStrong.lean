@@ -84,7 +84,7 @@ theorem exists_per_D_finset_via_C1Strong_supplier_and_compactness
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_C1_strong : C1SupplierStrong_local C)
     (h_normalized : ∀ D ∈ C.covers, D.s ∈ D.T) :
     ∃ mk_S_D : RationalLocData A → Finset A,

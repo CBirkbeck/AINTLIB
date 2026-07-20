@@ -238,7 +238,7 @@ theorem laurentCover_covers (D₀ : RationalLocData A) (f : A)
 
 /-- The 2-element Laurent covering of `D₀` at element `f`. -/
 noncomputable def laurentCovering (D₀ : RationalLocData A) (f : A) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := D₀
   covers := {laurentPlusDatum D₀ f, laurentMinusDatum D₀ f}
   hsubset D hD := by
@@ -539,7 +539,7 @@ set_option backward.isDefEq.respectTransparency false in
 /-- The base-independent **2-cover `𝒰_f`** of `D₀` (Wedhorn 4230): the two
 halves `R(f/1) ∩ D₀` and `R(1/f) ∩ D₀` (via `interSamePair`, base-independent
 conditions `v(f) ≤ 1` / `v(f) ≥ 1`). Covers by the valuation trichotomy. -/
-noncomputable def unitCover (D₀ : RationalLocData A) (f : A) : RationalCovering A where
+noncomputable def unitCover (D₀ : RationalLocData A) (f : A) : RationalCoveringData A where
   base := D₀
   covers := {D₀.interSamePair (unitDatum D₀.P f) rfl,
              D₀.interSamePair (coUnitDatum D₀.P f) rfl}
@@ -727,7 +727,7 @@ theorem ratioCover_covers (D₀ : RationalLocData A) (f g f_inv g_inv : A)
 noncomputable def ratioCovering (D₀ : RationalLocData A) (f g f_inv g_inv : A)
     (hf : f * f_inv = 1) (hf_inv : f_inv ∈ D₀.P.A₀)
     (hg : g * g_inv = 1) (hg_inv : g_inv ∈ D₀.P.A₀) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := D₀
   covers :=
     {ratioPlusDatum D₀ f g g_inv hg hg_inv,

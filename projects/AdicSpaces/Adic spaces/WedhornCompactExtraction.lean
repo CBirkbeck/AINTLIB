@@ -73,7 +73,7 @@ theorem mk_S_D_of_C1_and_compactness
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (D : RationalLocData A)
+    (C : RationalCoveringData A) (D : RationalLocData A)
     (hC1 : ∀ v ∈ rationalOpen D.T D.s, ∃ f : A,
       v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s) :

@@ -18,7 +18,7 @@ but it still asks the caller for both `lane_A_supplier` and
 
 This file lands the **Lane-A-internalized** variant: the Lane A
 supplier is discharged internally via the existing primary-Lane-A
-infrastructure (`RationalCovering.lane_A_supplier_via_primary` and the
+infrastructure (`RationalCoveringData.lane_A_supplier_via_primary` and the
 `PrimaryLaneAInputs C f₀` packaging in
 `TateAcyclicityFinalAssembly.lean`), leaving only Lane B and the
 unavoidable geometric / caller inputs at the consumer boundary.
@@ -36,7 +36,7 @@ unavoidable geometric / caller inputs at the consumer boundary.
 
 * `tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_allow_empty`
   — empty-piece-tolerant variant matching
-  `RationalCovering.part2_via_primary_laneA_allow_empty`. Lane B is
+  `RationalCoveringData.part2_via_primary_laneA_allow_empty`. Lane B is
   only requested for cover pieces with nonempty rational open;
   empty-base and empty-piece branches are handled structurally.
 
@@ -54,7 +54,7 @@ C1SupplierStrong_local C.insertDenom
   ▼
 hZavyalov_per_E
   │
-  │ (RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA,
+  │ (RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA,
   │  Lane A internalized via PrimaryLaneAInputs)
   ▼
 ∃ x ∈ presheafValue C.base, ∀ E ∈ C.covers,
@@ -116,7 +116,7 @@ f₀`. Composes:
 2. `hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa`
    — discharges Stage-2 strengthening and outside rescue internally
    under `h_base_eq_Spa`, producing `hZavyalov_per_E`.
-3. `RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA`
+3. `RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA`
    — final Part-2 assembly with Lane A discharged via `hLaneA` and
    only the Lane B supplier abstract.
 
@@ -138,7 +138,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -177,7 +177,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA
       P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C h_base_eq_Spa
       h_C1_strong_insertDenom
   -- Step 3: invoke the Lane-A-internalized Part 2 assembly.
-  exact RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
+  exact RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA
     (A := A) (C := C) (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
     lane_B_supplier hLaneA
 
@@ -201,7 +201,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_allow_empty
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -239,7 +239,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_allow_empty
     hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa
       P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C h_base_eq_Spa
       h_C1_strong_insertDenom
-  exact RationalCovering.part2_via_primary_laneA_allow_empty
+  exact RationalCoveringData.part2_via_primary_laneA_allow_empty
     (A := A) (C := C) (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
     lane_B_supplier hLaneA
 
@@ -266,7 +266,7 @@ Composition pipeline:
 1. T192 (`hZavyalov_per_E_via_single_t_structural_data_of_base_eq_Spa`)
    → `hZavyalov_per_E` shape directly from `h_struct` under
    `h_covers_nonempty` and `h_base_eq_Spa`.
-2. `RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA`
+2. `RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA`
    → the gluing existential `∃ x : presheafValue C.base, ∀ E ∈ C.covers,
    restrictionMap C.base E _ x = fC E` (Part 2 of `tateAcyclicity`)
    with Lane A discharged via `hLaneA : PrimaryLaneAInputs C f₀` and
@@ -290,7 +290,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -333,7 +333,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA
       P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C h_base_eq_Spa
       h_covers_nonempty h_struct
   -- Invoke the Lane-A-internalized Part 2 assembly.
-  exact RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
+  exact RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA
     (A := A) (C := C) (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
     lane_B_supplier hLaneA
 
@@ -357,7 +357,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_allow_empty
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -400,7 +400,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_allow_empty
     hZavyalov_per_E_via_single_t_structural_data_of_base_eq_Spa
       P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C h_base_eq_Spa
       h_covers_nonempty h_struct
-  exact RationalCovering.part2_via_primary_laneA_allow_empty
+  exact RationalCoveringData.part2_via_primary_laneA_allow_empty
     (A := A) (C := C) (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
     lane_B_supplier hLaneA
 

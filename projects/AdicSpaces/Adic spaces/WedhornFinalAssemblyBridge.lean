@@ -75,7 +75,7 @@ consumes:
 
 * `h_outside_rescue` — the explicit outside-base no-common-zero witness,
   also parameterized over `mk_S_D`. This piece does **not** follow from
-  the C1 chain because `RationalCovering.hcover` only covers
+  the C1 chain because `RationalCoveringData.hcover` only covers
   `rationalOpen C.base.T C.base.s`, not all of `Spa A A⁺`; it must be
   supplied externally (geometric content). -/
 theorem hZavyalov_per_E_via_normalized_C1_supplier_explicit_stage2
@@ -89,7 +89,7 @@ theorem hZavyalov_per_E_via_normalized_C1_supplier_explicit_stage2
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_C1 : C1Supplier_local C.insertDenom)
     (h_nonzero_cover_supplier : ∀ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,

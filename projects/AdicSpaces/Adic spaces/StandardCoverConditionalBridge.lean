@@ -74,7 +74,7 @@ This predicate is **local** to the conditional-bridge layer and will be
 removed once the unconditional `exists_single_f_refining_point_in_D`
 (itself derivable from Tertiary's helper + `D.s ∈ D.T`-normalization)
 is landed in `StandardCover.lean`. -/
-def C1Supplier_local [DecidableEq A] (C : RationalCovering A) : Prop :=
+def C1Supplier_local [DecidableEq A] (C : RationalCoveringData A) : Prop :=
   ∀ (D : RationalLocData A) (_hD : D ∈ C.covers)
     (v : Spv A) (_hv : v ∈ rationalOpen D.T D.s)
     (t : A) (_ht : t ∈ D.T)
@@ -116,7 +116,7 @@ accepting the membership witness for the original (non-normalized) `D`
 together with the `D.s ∈ D.T` hypothesis on the rewritten datum; the
 latter form is what `h_C1` consumes downstream. -/
 theorem exists_single_f_refining_point_in_D_via_C1Supplier
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (h_C1 : C1Supplier_local C)
     (D : RationalLocData A) (hD : D ∈ C.covers)
     (hD_s_mem : D.s ∈ D.T)
@@ -149,7 +149,7 @@ to keep the selector total over all valid `(D, hD, v, hv)`; downstream
 finite-subcover code can reconstruct the existential via
 `Subtype.property`. -/
 noncomputable def c1_pointwise_selector
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (h_C1_pointwise :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →
@@ -171,7 +171,7 @@ covering-level normalization `h_normalized : ∀ D ∈ C.covers, D.s ∈ D.T`,
 and obtain the function-style selector ready for the finite-subcover
 extraction. -/
 noncomputable def c1_selector_via_C1Supplier
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (h_C1 : C1Supplier_local C)
     (h_normalized : ∀ D ∈ C.covers, D.s ∈ D.T)
     (D : RationalLocData A) (hD : D ∈ C.covers)

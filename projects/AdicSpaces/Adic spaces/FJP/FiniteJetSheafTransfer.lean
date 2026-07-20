@@ -47,7 +47,7 @@ variable {F}
 /-- Injectivity (separation) for 𝓐: the localized Milnor rows are jointly injective on
 every rational piece ([FJP] Lemma 5.2: "It equals `J r_R`. Since `J` is itself an
 embedding …"; algebraic part). -/
-theorem productRestrictionSub_injective_JetA (C : RationalCovering (JetA F))
+theorem productRestrictionSub_injective_JetA (C : RationalCoveringData (JetA F))
     (hC : C.IsRational) :
     Function.Injective (productRestrictionSub (JetA F) C) := by
   haveI : IsSheafy (JetB F) := isSheafy_JetB F
@@ -204,7 +204,7 @@ theorem restrictionMap_cast {A : Type*} [CommRing A] [TopologicalSpace A]
 
 section Gluing
 
-variable (C : RationalCovering (JetA F)) (hC : C.IsRational)
+variable (C : RationalCoveringData (JetA F)) (hC : C.IsRational)
   (f : ∀ D : ↥C.covers, presheafValue D.1)
   (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData (JetA F))
     (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
@@ -637,7 +637,7 @@ set_option maxHeartbeats 1600000 in
 /-- The embedding transfer ([FJP] Lemma 5.2, topological half; Theorem 5.3's "the Banach
 open mapping theorem makes the continuous bijection onto that image a homeomorphism" —
 the σ-compact-free 828b-assembly mirrored at 𝓐). -/
-theorem productRestrictionSub_isEmbedding_JetA (C : RationalCovering (JetA F))
+theorem productRestrictionSub_isEmbedding_JetA (C : RationalCoveringData (JetA F))
     (hC : C.IsRational) :
     Topology.IsEmbedding (productRestrictionSub (JetA F) C) := by
   classical

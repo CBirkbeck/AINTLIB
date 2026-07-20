@@ -2205,8 +2205,8 @@ theorem mem_rationalOpen_pushDatumD_iff (D : RationalLocData (JetA F))
 /-- The pushed covering of a rational covering of 𝓐, at the 𝓒-vertex
 ([FJP] Lemma 5.2: "Inverse images preserve the defining valuation inequalities and unions.
 Hence, for `E = B, C, D`, `U_E = ⋃ᵢ (Uᵢ)_E` is a rational covering"). -/
-def pushCoveringC (C : RationalCovering (JetA F)) (hC : C.IsRational) :
-    RationalCovering (JetC F) where
+def pushCoveringC (C : RationalCoveringData (JetA F)) (hC : C.IsRational) :
+    RationalCoveringData (JetC F) where
   base := pushDatumC C.base hC.base
   covers := C.covers.attach.image fun d => pushDatumC d.1 (hC.piece d.2)
   hsubset := by
@@ -2225,8 +2225,8 @@ def pushCoveringC (C : RationalCovering (JetA F)) (hC : C.IsRational) :
       Finset.mem_image.mpr ⟨⟨D₀, hD₀⟩, Finset.mem_attach _ _, rfl⟩,
       (mem_rationalOpen_pushDatumC_iff D₀ (hC.piece hD₀) v hvspa).mpr hmem⟩
 
-def pushCoveringB (C : RationalCovering (JetA F)) (hC : C.IsRational) :
-    RationalCovering (JetB F) where
+def pushCoveringB (C : RationalCoveringData (JetA F)) (hC : C.IsRational) :
+    RationalCoveringData (JetB F) where
   base := pushDatumB C.base hC.base
   covers := C.covers.attach.image fun d => pushDatumB d.1 (hC.piece d.2)
   hsubset := by
@@ -2245,8 +2245,8 @@ def pushCoveringB (C : RationalCovering (JetA F)) (hC : C.IsRational) :
       Finset.mem_image.mpr ⟨⟨D₀, hD₀⟩, Finset.mem_attach _ _, rfl⟩,
       (mem_rationalOpen_pushDatumB_iff D₀ (hC.piece hD₀) v hvspa).mpr hmem⟩
 
-def pushCoveringD (C : RationalCovering (JetA F)) (hC : C.IsRational) :
-    RationalCovering (JetD F) where
+def pushCoveringD (C : RationalCoveringData (JetA F)) (hC : C.IsRational) :
+    RationalCoveringData (JetD F) where
   base := pushDatumD C.base hC.base
   covers := C.covers.attach.image fun d => pushDatumD d.1 (hC.piece d.2)
   hsubset := by
@@ -2265,21 +2265,21 @@ def pushCoveringD (C : RationalCovering (JetA F)) (hC : C.IsRational) :
       Finset.mem_image.mpr ⟨⟨D₀, hD₀⟩, Finset.mem_attach _ _, rfl⟩,
       (mem_rationalOpen_pushDatumD_iff D₀ (hC.piece hD₀) v hvspa).mpr hmem⟩
 
-theorem pushCoveringB_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
+theorem pushCoveringB_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsRational) :
     (pushCoveringB C hC).IsRational := by
   refine ⟨pushDatumB_isRational hC.base, ?_⟩
   intro D' hD'
   obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
   exact pushDatumB_isRational (hC.piece d.2)
 
-theorem pushCoveringC_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
+theorem pushCoveringC_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsRational) :
     (pushCoveringC C hC).IsRational := by
   refine ⟨pushDatumC_isRational hC.base, ?_⟩
   intro D' hD'
   obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
   exact pushDatumC_isRational (hC.piece d.2)
 
-theorem pushCoveringD_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
+theorem pushCoveringD_isRational {C : RationalCoveringData (JetA F)} (hC : C.IsRational) :
     (pushCoveringD C hC).IsRational := by
   refine ⟨pushDatumD_isRational hC.base, ?_⟩
   intro D' hD'

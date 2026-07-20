@@ -24,7 +24,7 @@ Wedhorn Theorem 8.28(b) tate acyclicity directly.
      normalized cover under `h_covers_nonempty`).
   2. `hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa`
      (Stage-2 + outside-rescue absorbed under `h_base_eq_Spa`).
-  3. `RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary`
+  3. `RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary`
      (final Part-2 assembly with abstract Lane A / Lane B).
 
   Output: the gluing clause `∃ x : presheafValue C.base, ∀ E ∈ C.covers,
@@ -116,7 +116,7 @@ Wedhorn data and the documented final-assembly residuals.
 2. `hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa`
    — discharges Stage-2 strengthening and outside rescue internally
    under `h_base_eq_Spa`, producing `hZavyalov_per_E`.
-3. `RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary` —
+3. `RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary` —
    final Part-2 assembly with abstract Lane A / Lane B suppliers and
    the caller's compatible section family.
 
@@ -140,7 +140,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺)
     (h_covers_nonempty : ∀ D ∈ C.covers, D.T.Nonempty)
     (h_C1_strong : C1SupplierStrong_local C)
@@ -178,7 +178,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local
   -- Compose the three accepted bridges: lift `C1SupplierStrong_local C` to the
   -- normalized cover, produce `hZavyalov_per_E` via the strong base-Spa bridge,
   -- then feed the final Part-2 assembly with abstract Lane A / Lane B.
-  RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary C hne
+  RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary C hne
     (hZavyalov_per_E_via_normalized_C1Strong_supplier_of_base_eq_Spa
       P hA₀_le hAplus_le_A₀ π hI hπ_tn hπ_unit hArch C h_base_eq_Spa
       (C1SupplierStrong_local_insertDenom_lift C h_covers_nonempty h_C1_strong))

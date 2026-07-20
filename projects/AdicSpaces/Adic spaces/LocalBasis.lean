@@ -74,7 +74,7 @@ which `spanTop_iff_noCommonZero_spa` (Prop 7.14) requires witness-wise.
 By reviewer guidance (2026-05-11, refined 2026-05-23), this is the correct
 boundary for Lane C C1 — stated as an existence statement with the
 non-vanishing strengthening built in. -/
-def LocalBasisHyp (C : RationalCovering A) : Prop :=
+def LocalBasisHyp (C : RationalCoveringData A) : Prop :=
   ∀ E ∈ C.covers, ∀ v ∈ rationalOpen E.T E.s,
     ∃ f : A,
       v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
@@ -84,7 +84,7 @@ def LocalBasisHyp (C : RationalCovering A) : Prop :=
 /-- Direct corollary of `LocalBasisHyp` formulated as a pointwise basis
 statement (rather than a per-E quantifier). Conclusion now includes the
 `v ∈ rationalOpen {f} f` non-vanishing clause per the strengthened predicate. -/
-theorem LocalBasisHyp.pointwise {C : RationalCovering A} (h : LocalBasisHyp C)
+theorem LocalBasisHyp.pointwise {C : RationalCoveringData A} (h : LocalBasisHyp C)
     {E : RationalLocData A} (hE : E ∈ C.covers)
     {v : Spv A} (hv : v ∈ rationalOpen E.T E.s) :
     ∃ f : A,
@@ -120,7 +120,7 @@ on `rationalOpen D.T D.s` (C2). The "containment per-`f`" is automatic from
 `LocalBasisHyp` provided each `f ∈ mk_S_D D` came from the basis witness
 construction. -/
 theorem per_D_construction_of_localBasisHyp
-    (C : RationalCovering A) (_h_basis : LocalBasisHyp C)
+    (C : RationalCoveringData A) (_h_basis : LocalBasisHyp C)
     (mk_S_D : RationalLocData A → Finset A)
     (h_witnesses : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)
@@ -144,7 +144,7 @@ ingredients:
    C3).
 
 Returns the `∃ S, refines_cover_per_E ∧ refines_contain ∧ refines_span_top`
-shape consumed by `RationalCovering.refines_by_standard_cover_per_E`.
+shape consumed by `RationalCoveringData.refines_by_standard_cover_per_E`.
 
 The `h_basis : LocalBasisHyp C` argument is documented but unused in the
 body: a caller would have used it to construct the per-D witness family
@@ -153,7 +153,7 @@ body: a caller would have used it to construct the per-D witness family
 witnesses' definition. The hypothesis is kept in the signature as a
 documentation marker for the Lane C C1 boundary. -/
 theorem exists_refines_cover_per_E_of_localBasisHyp
-    (C : RationalCovering A) (_h_basis : LocalBasisHyp C)
+    (C : RationalCoveringData A) (_h_basis : LocalBasisHyp C)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)

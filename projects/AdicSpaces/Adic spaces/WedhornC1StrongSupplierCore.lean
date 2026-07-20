@@ -99,7 +99,7 @@ C.base.s)` satisfies `v(f₀) ≤ v(C.base.s)`. The non-degeneracy
 `¬ v.vle f₀ 0` is supplied externally (often automatic when `f₀ = D.s`
 and `D.s` is the cover-piece denominator). -/
 theorem exists_single_f_refinement_at_t_strong_of_standardShape
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (f₀ : A)
     (hD_shape : rationalOpen D.T D.s =
       rationalOpen (insert f₀ C.base.T) C.base.s)
@@ -132,7 +132,7 @@ via an existential witness `⟨(σ : A) * t, ...⟩`, hiding the f-shape
 behind `Exists.intro`. To derive the third strong clause from the
 specific f-shape, we re-derive the f-construction directly. -/
 theorem exists_single_f_refinement_at_t_strong_of_singleton_unit_rescaled
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (hD_sub : rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s)
     (t : A) (hT : D.T = {t})
     (σ : Aˣ) (hσ : (σ : A) * D.s = C.base.s)
@@ -197,7 +197,7 @@ theorem exists_single_f_refinement_at_t_strong_via_dominating_unit
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (D : RationalLocData A) (hD : D ∈ C.covers)
+    (C : RationalCoveringData A) (D : RationalLocData A) (hD : D ∈ C.covers)
     (v : Spv A) (hv : v ∈ rationalOpen D.T D.s)
     (t : A) (ht : t ∈ D.T)
     (_hvt : v.vle t D.s) (_hvD_s : ¬ v.vle D.s 0)

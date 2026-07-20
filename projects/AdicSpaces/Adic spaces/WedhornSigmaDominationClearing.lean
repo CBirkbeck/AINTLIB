@@ -193,7 +193,7 @@ C.base.s) ∧ R(insert f' C.base.T, C.base.s) ⊆ R(D.T, D.s) ∧
 ¬ v.vle f' 0`. -/
 theorem exists_single_f_refinement_via_corrected_multi_clearing
     [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (f : A)
+    (C : RationalCoveringData A) (D : RationalLocData A) (f : A)
     (h_per_w :
       ∀ w ∈ Spa A A⁺,
         w.vle f C.base.s →
@@ -238,7 +238,7 @@ theorem C1SupplierStrong_local_via_corrected_multi_clearing
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (h_per_call_components :

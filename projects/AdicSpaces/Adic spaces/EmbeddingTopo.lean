@@ -85,7 +85,7 @@ This boundary theorem is the **right place** to consume future progress
 on the topological side, rather than mixing algebraic and topological
 ingredients in `isSheafy_ofStronglyNoetherianTate_flat`. -/
 theorem productRestrictionSub_isEmbedding_of_lane_inputs
-    (P : PairOfDefinition A) [IsNoetherianRing P.A₀] (C : RationalCovering A)
+    (P : PairOfDefinition A) [IsNoetherianRing P.A₀] (C : RationalCoveringData A)
     (h_alg_inj : Function.Injective (productRestrictionSub A C))
     (h_topo_inducing : Topology.IsInducing (productRestrictionSub A C)) :
     Topology.IsEmbedding (productRestrictionSub A C) :=
@@ -98,7 +98,7 @@ This consumes the `productRestriction_injective_tate`-style hypothesis with
 the conventional shape (from `Cor832.lean`) and lifts it to the
 subtype-indexed `productRestrictionSub`. -/
 theorem productRestrictionSub_injective_of_product_injective
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h : ∀ x y : presheafValue C.base,
       (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
         restrictionMap C.base D (C.hsubset D hD) x =
@@ -136,7 +136,7 @@ This is the topological analogue of `separation_of_finer_rational`
 "refinement preserves embedding" content; downstream consumers will
 supply it via the Laurent-cover base case + induction. -/
 theorem productRestrictionSub_isInducing_of_finer_rational
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (V_covers : Finset (RationalLocData A))
     (hV_subset : ∀ D ∈ V_covers, rationalOpen D.T D.s ⊆
       rationalOpen C.base.T C.base.s)
@@ -282,7 +282,7 @@ Each component is `restrictionMap C.base D _`, which is continuous via
 `restrictionMapHom_continuous` (the underlying-function form of the
 continuous ring homomorphism). The full Π-valued map is continuous by
 `continuous_pi`. -/
-theorem productRestrictionSub_continuous (C : RationalCovering A) :
+theorem productRestrictionSub_continuous (C : RationalCoveringData A) :
     Continuous (productRestrictionSub A C) := by
   refine continuous_pi fun ⟨D, hD⟩ => ?_
   exact restrictionMapHom_continuous C.base D (C.hsubset D hD)
@@ -305,7 +305,7 @@ This eliminates the substantial obligation to show `φ` is `IsInducing`
 (which would otherwise require independent topological analysis of the
 refinement map). -/
 theorem productRestrictionSub_isInducing_of_finer_rational_continuous
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (V_covers : Finset (RationalLocData A))
     (hV_subset : ∀ D ∈ V_covers, rationalOpen D.T D.s ⊆
       rationalOpen C.base.T C.base.s)
@@ -745,7 +745,7 @@ continuity + `restrictionMap` continuity. -/
 /-- **T285 (def)**: the natural refinement map `φ : Π_C → Π_V` for a
 τ-function from V back to C. -/
 noncomputable def naturalRefinementMap
-    {C : RationalCovering A}
+    {C : RationalCoveringData A}
     {V_covers : Finset (RationalLocData A)}
     (τ : { D // D ∈ V_covers } → { E // E ∈ C.covers })
     (hτ : ∀ d : { D // D ∈ V_covers },
@@ -756,7 +756,7 @@ noncomputable def naturalRefinementMap
 
 /-- **T285 (continuity)**: the natural refinement map is continuous. -/
 theorem naturalRefinementMap_continuous
-    {C : RationalCovering A}
+    {C : RationalCoveringData A}
     {V_covers : Finset (RationalLocData A)}
     (τ : { D // D ∈ V_covers } → { E // E ∈ C.covers })
     (hτ : ∀ d : { D // D ∈ V_covers },
@@ -769,7 +769,7 @@ theorem naturalRefinementMap_continuous
 `productRestrictionSub_C` to give `productRestrictionSub_V` (where V is
 the refined cover with subset proof factoring through τ). -/
 theorem naturalRefinementMap_comp
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (V_covers : Finset (RationalLocData A))
     (τ : { D // D ∈ V_covers } → { E // E ∈ C.covers })
     (hτ : ∀ d : { D // D ∈ V_covers },
@@ -788,7 +788,7 @@ the bridges hypothesis bundle + laurent refinement data + commutativity
 product restriction. -/
 theorem productRestrictionSub_isInducing_via_laurent_refinement
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (f₀ : A)
@@ -886,7 +886,7 @@ about C** (each laurent piece is contained in some C-piece), and it is
 what an actual consumer would need to provide. -/
 theorem productRestrictionSub_isInducing_via_laurent_refinement_tau
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (f₀ : A)
@@ -1201,7 +1201,7 @@ halves of a laurent split at `C.base`. Direct specialisation of T290
 to `Base := C.base` and `V_covers := C.covers`. -/
 theorem productRestrictionSub_isInducing_of_C_covers_contains_laurent_pair
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (f₀ : A)
@@ -1385,7 +1385,7 @@ verbatim; the new T282-side inputs are just the τ-map and containment.
 Conclusion: `Topology.IsInducing (productRestrictionSub A C)`. -/
 theorem productRestrictionSub_isInducing_via_V_containing_laurent_pair
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (f₀ : A)
@@ -1479,7 +1479,7 @@ This is the cleanest consumer for the case where C itself is "rich
 enough" to already contain a Laurent-at-base pair. -/
 theorem productRestrictionSub_isInducing_of_V_subset_C_with_laurent_pair
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (f₀ : A)
@@ -1706,7 +1706,7 @@ theorem productRestrictionSub_leafTree_isInducing
     Topology.IsInducing (productRestrictionSub A
       ((LaurentTree.leaf : LaurentTree A).toCovering D₀)) := by
   classical
-  set C : RationalCovering A := (LaurentTree.leaf : LaurentTree A).toCovering D₀
+  set C : RationalCoveringData A := (LaurentTree.leaf : LaurentTree A).toCovering D₀
   have hcovers : C.covers = ({D₀} : Finset _) := by
     change (LaurentTree.leaf.leaves D₀).toFinset = _
     simp [LaurentTree.leaves_leaf, List.toFinset_cons, List.toFinset_nil]
@@ -2024,7 +2024,7 @@ datum `D ∈ t.toCoveringCovers D₀`, a choice of `E ∈ C.covers` such that
 `D`'s rational open sits inside `E`'s rational open. Packaged as a
 τ-function for `naturalRefinementMap`. -/
 noncomputable def LaurentTree.refinementTau
-    (t : LaurentTree A) (D₀ : RationalLocData A) (C : RationalCovering A)
+    (t : LaurentTree A) (D₀ : RationalLocData A) (C : RationalCoveringData A)
     (h_refines : t.Refines D₀ C) :
     { D // D ∈ (t.toCovering D₀).covers } → { E // E ∈ C.covers } := by
   classical
@@ -2034,7 +2034,7 @@ noncomputable def LaurentTree.refinementTau
   exact ⟨h.choose, h.choose_spec.1⟩
 
 theorem LaurentTree.refinementTau_spec
-    (t : LaurentTree A) (D₀ : RationalLocData A) (C : RationalCovering A)
+    (t : LaurentTree A) (D₀ : RationalLocData A) (C : RationalCoveringData A)
     (h_refines : t.Refines D₀ C)
     (d : { D // D ∈ (t.toCovering D₀).covers }) :
     rationalOpen d.1.T d.1.s ⊆
@@ -2050,7 +2050,7 @@ theorem LaurentTree.refinementTau_spec
 `t` refining `C` whose splits are all inducing and whose nodes are all
 disjoint, the diagonal `productRestrictionSub A C` is `IsInducing`. -/
 theorem productRestrictionSub_isInducing_via_tree_refinement
-    (C : RationalCovering A) (t : LaurentTree A)
+    (C : RationalCoveringData A) (t : LaurentTree A)
     (h_refines : t.Refines C.base C)
     (h_split : t.allSplitsInducing C.base)
     (h_disj : t.allNodesDisjoint C.base) :
@@ -2274,7 +2274,7 @@ diagonal `productRestrictionSub A C` is `IsInducing`. Unlike
 `productRestrictionSub_isInducing_via_tree_refinement`, this version
 does NOT require `t.allNodesDisjoint C.base`. -/
 theorem productRestrictionSub_isInducing_via_tree_refinement_no_disj
-    (C : RationalCovering A) (t : LaurentTree A)
+    (C : RationalCoveringData A) (t : LaurentTree A)
     (h_refines : t.Refines C.base C)
     (h_split : t.allSplitsInducing C.base) :
     Topology.IsInducing (productRestrictionSub A C) := by
@@ -2330,9 +2330,9 @@ tree→C transfer.
 `Refines + allSplitsInducing` (no `allNodesDisjoint`), matching what
 Wedhorn's proof of Lemma 8.34 actually produces. -/
 theorem productRestrictionSub_isInducing_of_wedhorn_tree_existence
-    (h_wedhorn : ∀ (C : RationalCovering A), ∃ t : LaurentTree A,
+    (h_wedhorn : ∀ (C : RationalCoveringData A), ∃ t : LaurentTree A,
       t.Refines C.base C ∧ t.allSplitsInducing C.base) :
-    ∀ (C : RationalCovering A),
+    ∀ (C : RationalCoveringData A),
       Topology.IsInducing (productRestrictionSub A C) := by
   intro C
   obtain ⟨t, h_refines, h_split⟩ := h_wedhorn C
@@ -2363,9 +2363,9 @@ theorem isSheafy_ofStronglyNoetherianTate_flat_of_wedhorn_tree_existence
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (hSpa : ∀ (C : RationalCovering A) (p : Ideal A), p.IsPrime → C.base.s ∉ p →
+    (hSpa : ∀ (C : RationalCoveringData A) (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp)
-    (h_wedhorn : ∀ (C : RationalCovering A), ∃ t : LaurentTree A,
+    (h_wedhorn : ∀ (C : RationalCoveringData A), ∃ t : LaurentTree A,
       t.Refines C.base C ∧ t.allSplitsInducing C.base) :
     IsSheafy A :=
   isSheafy_ofStronglyNoetherianTate_flat_of_topo_inducing A P hSpa
@@ -2382,7 +2382,7 @@ the base datum, the `leaf` tree refines and trivially satisfies the
 inducing predicate (matching the Wedhorn-faithful Route A bundle: no
 `allNodesDisjoint` conjunct). -/
 theorem LaurentTree.exists_for_singleton_cover
-    (C : RationalCovering A) (h_base_mem : C.base ∈ C.covers) :
+    (C : RationalCoveringData A) (h_base_mem : C.base ∈ C.covers) :
     ∃ t : LaurentTree A,
       t.Refines C.base C ∧ t.allSplitsInducing C.base :=
   ⟨LaurentTree.leaf,
@@ -2395,7 +2395,7 @@ single `E`, the `leaf` tree witnesses Wedhorn 8.34 existence
 being vacuously satisfied). Matches the Wedhorn-faithful Route A
 bundle (no `allNodesDisjoint` conjunct). -/
 theorem LaurentTree.exists_for_singleton_cover_of_eq
-    (C : RationalCovering A) (E : RationalLocData A)
+    (C : RationalCoveringData A) (E : RationalLocData A)
     (hE_eq : C.covers = {E}) :
     ∃ t : LaurentTree A,
       t.Refines C.base C ∧ t.allSplitsInducing C.base :=
@@ -2582,7 +2582,7 @@ branching tree is exactly the simple Laurent split. -/
 elements and per-level hypotheses (refinement, inducing,
 disjointness), the right-branching tree witnesses existence. -/
 theorem LaurentTree.exists_for_rightBranchList
-    (D₀ : RationalLocData A) (L : List A) (C : RationalCovering A)
+    (D₀ : RationalLocData A) (L : List A) (C : RationalCoveringData A)
     (h_refines : (LaurentTree.ofRightBranchList L).Refines D₀ C)
     (h_split : LaurentTree.RightBranchInducing D₀ L)
     (h_disj : LaurentTree.RightBranchDisjoint D₀ L) :
@@ -2686,7 +2686,7 @@ hypothesis has been dropped; the no-disjointness inducing transfer
 (`productRestrictionSub_isInducing_via_tree_refinement_no_disj`) does
 not require it. -/
 theorem productRestrictionSub_isInducing_via_grafted_tree
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (t_outer : LaurentTree A)
     (h : RationalLocData A → LaurentTree A)
     (h_refines : (t_outer.graftAt C.base h).Refines C.base C)

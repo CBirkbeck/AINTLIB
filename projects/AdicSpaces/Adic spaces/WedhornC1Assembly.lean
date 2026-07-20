@@ -79,7 +79,7 @@ theorem exists_per_D_finset_via_C1_supplier_and_compactness
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_C1 : C1Supplier_local C)
     (h_normalized : ∀ D ∈ C.covers, D.s ∈ D.T) :
     ∃ mk_S_D : RationalLocData A → Finset A,
@@ -146,7 +146,7 @@ theorem hZavyalov_per_E_via_C1_supplier_and_compactness_with_h_span
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_C1 : C1Supplier_local C)
     (h_normalized : ∀ D ∈ C.covers, D.s ∈ D.T)
     (h_span_extractor : ∀ mk_S_D : RationalLocData A → Finset A,

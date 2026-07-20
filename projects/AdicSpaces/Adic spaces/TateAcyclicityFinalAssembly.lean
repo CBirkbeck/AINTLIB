@@ -12,12 +12,12 @@ import «Adic spaces».Cor832
 This file exports the caller-ready Part-2 closure theorem on the **direct
 per-E route** from `GeometricReduction.lean`:
 
-* `RationalCovering.tateAcyclicity_Part2_direct_per_E` — core direct per-E
+* `RationalCoveringData.tateAcyclicity_Part2_direct_per_E` — core direct per-E
   Part-2 assembly.
-* `RationalCovering.tateAcyclicity_Part2_via_hZavyalov_per_E_direct` —
+* `RationalCoveringData.tateAcyclicity_Part2_via_hZavyalov_per_E_direct` —
   caller wrapper threading `hZavyalov_per_E` existential through
   `refines_by_standard_cover_per_E` and applying the direct assembly.
-* `RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA` — full
+* `RationalCoveringData.tateAcyclicity_end_to_end_via_primary_laneA` — full
   separation-and-gluing conjunction from an explicit Part 1 supplier plus the
   Lane-A-internalized direct per-E Part 2 wrapper.
 
@@ -30,7 +30,7 @@ existential.
 
 ## The exported theorem
 
-`RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary` is the
+`RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary` is the
 downstream-facing name; its body is defeq to
 `tateAcyclicity_Part2_via_hZavyalov_per_E_direct`, i.e. the direct
 per-E wrapper with abstract Lane A/B suppliers.
@@ -41,7 +41,7 @@ All residuals are caller-supplied as abstract supplier hypotheses:
 
 * `hZavyalov_per_E` — `refines_cover_per_E C S ∧ refines_contain C S ∧
   refines_span_top S`-existential for non-empty `rationalOpen`. Produced by
-  `StandardCover.RationalCovering.refines_by_standard_cover_per_E` (Zavyalov-
+  `StandardCover.RationalCoveringData.refines_by_standard_cover_per_E` (Zavyalov-
   type Nullstellensatz refinement) modulo the residual
   `StandardCover.exists_nullstellensatz_refinement_of_rationalOpen_nonempty`
   obligation.
@@ -60,7 +60,7 @@ All residuals are caller-supplied as abstract supplier hypotheses:
 
 The direct per-E Part-2 wrappers in this file are axiom-clean relative to their
 explicit supplier hypotheses: `#print axioms` for
-`RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary` and the
+`RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary` and the
 `_laneA` variants, including the full-conjunction
 `tateAcyclicity_end_to_end_via_primary_laneA`, reports only `propext`,
 `Classical.choice`, and `Quot.sound`. The remaining non-clean acyclicity
@@ -72,9 +72,9 @@ theorem is the legacy final `ValuationSpectrum.tateAcyclicity` in
 ## References
 
 * `Adic spaces/GeometricReduction.lean:5176` —
-  `RationalCovering.tateAcyclicity_Part2_direct_per_E` (direct per-E core).
+  `RationalCoveringData.tateAcyclicity_Part2_direct_per_E` (direct per-E core).
 * `Adic spaces/GeometricReduction.lean:5361` —
-  `RationalCovering.tateAcyclicity_Part2_via_hZavyalov_per_E_direct` (caller
+  `RationalCoveringData.tateAcyclicity_Part2_via_hZavyalov_per_E_direct` (caller
   wrapper).
 * `Adic spaces/Presheaf.lean:795` —
   `ValuationSpectrum.spa_point_nonOpen_of_rational_subset` (T001 root
@@ -95,11 +95,11 @@ zero-kernel form used for Part 1. Most geometric assembly steps consume the
 equivalent equality form: if two sections agree after restriction to every
 cover piece, then they are equal. This theorem is just the additive shift
 `a - b`, with no new mathematical content. -/
-theorem RationalCovering.separation_via_prime_extension_closed
+theorem RationalCoveringData.separation_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ C.base.P.A₀)
     (hcanonicalMap_cont : Continuous C.base.canonicalMap)
@@ -131,24 +131,24 @@ This packages `separation_via_prime_extension_closed` into the exact supplier
 shape consumed by the final-assembly wrappers. The hypotheses are still the
 known Lane-B residuals, but callers no longer have to rebuild the
 `a - b` zero-kernel conversion for `C` and every per-E local covering. -/
-theorem RationalCovering.nonempty_separation_supplier_via_prime_extension_closed
+theorem RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀ : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀ : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
           ((Ideal.map (algebraMap A (Localization.Away C'.base.s)) p :
               Ideal (Localization.Away C'.base.s)) :
             Set (Localization.Away C'.base.s))) :
-    ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -157,7 +157,7 @@ theorem RationalCovering.nonempty_separation_supplier_via_prime_extension_closed
   intro C' hne a b hagree
   letI : IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s) :=
     hloc_noeth C'
-  exact RationalCovering.separation_via_prime_extension_closed P C' hne
+  exact RationalCoveringData.separation_via_prime_extension_closed P C' hne
     (hAplus_le_A₀ C') (hcanonicalMap_cont C') (h_closed_nonOpen C') a b hagree
 
 /-- Gluing over a rational covering whose base rational open is empty.
@@ -166,8 +166,8 @@ When the base open is empty, choose any cover piece `F` and restrict its
 section back to the base. Compatibility then shows that its restriction to
 every other cover piece is the prescribed section; the only geometry used is
 that `rationalOpen C.base.T C.base.s = ∅` is contained in every cover piece. -/
-theorem RationalCovering.gluing_of_rationalOpen_base_empty
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+theorem RationalCoveringData.gluing_of_rationalOpen_base_empty
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hbase_empty : rationalOpen C.base.T C.base.s = ∅)
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
     (hC_compat : ∀ (E₁ E₂ : { E // E ∈ C.covers }) (D₃ : RationalLocData A)
@@ -204,8 +204,8 @@ This is the local tool needed to avoid asking Cor 8.32-style separation for
 empty per-E local coverings: if `E` has empty rational open, then `E` is an
 overlap of any other cover piece with itself, so compatibility determines the
 section on `E`. -/
-theorem RationalCovering.empty_piece_eq_of_matches_piece
-    (C : RationalCovering A)
+theorem RationalCoveringData.empty_piece_eq_of_matches_piece
+    (C : RationalCoveringData A)
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
     (hC_compat : ∀ (E₁ E₂ : { E // E ∈ C.covers }) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
@@ -248,9 +248,9 @@ base is empty, `gluing_of_rationalOpen_base_empty` closes the whole case. If
 the base is nonempty, first prove the candidate section matches one nonempty
 piece and every other nonempty piece by local separation; empty pieces are then
 forced by compatibility using `empty_piece_eq_of_matches_piece`. -/
-theorem RationalCovering.tateAcyclicity_Part2_direct_per_E_allow_empty
+theorem RationalCoveringData.tateAcyclicity_Part2_direct_per_E_allow_empty
     [DecidableEq A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty) (S : Finset A) (f₀ : A)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) (S : Finset A) (f₀ : A)
     (hS_per_E : refines_cover_per_E C S)
     (hS_contain : refines_contain C S)
     (fC : ∀ E : { E // E ∈ C.covers }, presheafValue E.1)
@@ -391,7 +391,7 @@ Lane A/B suppliers).
 Wraps `tateAcyclicity_Part2_via_hZavyalov_per_E_direct`
 (`GeometricReduction.lean:5361`): extracts the standard cover `S` from the
 `hZavyalov_per_E` existential via
-`RationalCovering.refines_by_standard_cover_per_E`, then applies
+`RationalCoveringData.refines_by_standard_cover_per_E`, then applies
 `tateAcyclicity_Part2_direct_per_E` with the chosen `S` plus the lane
 outputs.
 
@@ -410,10 +410,10 @@ decouples the lane content from the classically chosen `S` inside the
 
 See the module docblock for the residual map and the T001 axiom-hygiene
 caveat. -/
-theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary
+theorem RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S)
@@ -458,10 +458,10 @@ Compared to `tateAcyclicity_Part2_end_to_end_via_primary`, this wrapper only
 asks the Lane B supplier for original cover pieces with nonempty rational open.
 The empty-base and empty-piece branches are handled structurally by
 `gluing_of_rationalOpen_base_empty` and `empty_piece_eq_of_matches_piece`. -/
-theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
+theorem RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S)
@@ -509,7 +509,7 @@ section ConcreteLaneA
 
 variable [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
   [DecidableEq A]
-variable (C : RationalCovering A) (f₀ : A)
+variable (C : RationalCoveringData A) (f₀ : A)
 variable [IsNoetherianRing C.base.P.A₀]
 variable [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
 variable [LaurentNormalized C.base]
@@ -671,7 +671,7 @@ def PrimaryLaneAInputs.of_canonical_completion
                   (laurentOverlap_subset_plus C.base f₀) uplus)) =
             LaurentCover.posLift (C.base.canonicalMap f₀)
               (laurentPlusBridge C.base.P C.base f₀ hNoeth_B hLocLift_B hA₀Noeth_B
-                (RationalCovering.canonical_complete_presheafValue C)
+                (RationalCoveringData.canonical_complete_presheafValue C)
                 hnoeth_B hcont_forward_B uplus))
     (h_minus_compat : ∀ uminus : presheafValue (laurentMinusDatum C.base f₀),
       (ValuationSpectrum.bivariateOverlap_equiv_B₁₂gen
@@ -681,7 +681,7 @@ def PrimaryLaneAInputs.of_canonical_completion
               (laurentOverlap_subset_minus C.base f₀) uminus)) =
             LaurentCover.negLift (C.base.canonicalMap f₀)
               (laurentMinusBridge C.base.P C.base f₀ hnoeth_B
-                (RationalCovering.canonical_hcont_eval C f₀)
+                (RationalCoveringData.canonical_hcont_eval C f₀)
                 uminus))
     (plus_section_refined : ∀ (S' : StandardCover A)
         (_hS'_per_E : refines_cover_per_E C S'.elts)
@@ -745,10 +745,10 @@ def PrimaryLaneAInputs.of_canonical_completion
         hLocLift_B := hLocLift_B
         hA₀Noeth_B := hA₀Noeth_B
         hA_complete_B := by
-          exact RationalCovering.canonical_complete_presheafValue C
+          exact RationalCoveringData.canonical_complete_presheafValue C
         hnoeth_B := hnoeth_B
         hcont_forward_B := hcont_forward_B
-        hcont_eval_B := RationalCovering.canonical_hcont_eval C f₀
+        hcont_eval_B := RationalCoveringData.canonical_hcont_eval C f₀
         τ_preBiv := τ_preBiv
         h_plus_compat := h_plus_compat
         h_minus_compat := h_minus_compat
@@ -798,7 +798,7 @@ structure PrimaryLaneAInputsCanonical where
             (laurentOverlap_subset_plus C.base f₀) uplus)) =
         LaurentCover.posLift (C.base.canonicalMap f₀)
           (laurentPlusBridge C.base.P C.base f₀ hNoeth_B hLocLift_B hA₀Noeth_B
-            (RationalCovering.canonical_complete_presheafValue C)
+            (RationalCoveringData.canonical_complete_presheafValue C)
             hnoeth_B hcont_forward_B uplus)
   h_minus_compat : ∀ uminus : presheafValue (laurentMinusDatum C.base f₀),
     (ValuationSpectrum.bivariateOverlap_equiv_B₁₂gen
@@ -808,7 +808,7 @@ structure PrimaryLaneAInputsCanonical where
             (laurentOverlap_subset_minus C.base f₀) uminus)) =
         LaurentCover.negLift (C.base.canonicalMap f₀)
           (laurentMinusBridge C.base.P C.base f₀ hnoeth_B
-            (RationalCovering.canonical_hcont_eval C f₀)
+            (RationalCoveringData.canonical_hcont_eval C f₀)
             uminus)
   plus_section_refined : ∀ (S' : StandardCover A)
       (_hS'_per_E : refines_cover_per_E C S'.elts)
@@ -883,7 +883,7 @@ supplier: the plus/minus bridge data are read from
 `PrimaryLaneAInputsCanonical`, while completion and minus-continuity are filled
 by the canonical presheaf-value helpers. The only remaining mathematical input
 is the exact Hübner/Krull condition on `D₀.canonicalMap f₀`. -/
-theorem RationalCovering.simpleLaurent_separation_via_primary_canonical_of_iInf
+theorem RationalCoveringData.simpleLaurent_separation_via_primary_canonical_of_iInf
     (hInf : (⨅ n : ℕ,
       Ideal.span ({C.base.canonicalMap f₀} : Set (presheafValue C.base)) ^ n) = ⊥)
     (hLaneA : PrimaryLaneAInputsCanonical C f₀)
@@ -896,15 +896,15 @@ theorem RationalCovering.simpleLaurent_separation_via_primary_canonical_of_iInf
   laurentCover_separation_presheaf_viaBridges_of_iInf_pow_eq_bot
     C.base.P C.base f₀ hInf
     hLaneA.hNoeth_B hLaneA.hLocLift_B hLaneA.hA₀Noeth_B
-    (RationalCovering.canonical_complete_presheafValue C)
+    (RationalCoveringData.canonical_complete_presheafValue C)
     hLaneA.hnoeth_B hLaneA.hcont_forward_B
-    (RationalCovering.canonical_hcont_eval C f₀)
+    (RationalCoveringData.canonical_hcont_eval C f₀)
     (laurentPlus_subset C.base f₀) (laurentMinus_subset C.base f₀)
     x hplus0 hminus0
 
 /-- Jacobson-radical specialization of
 `simpleLaurent_separation_via_primary_canonical_of_iInf`. -/
-theorem RationalCovering.simpleLaurent_separation_via_primary_canonical_of_jacobian
+theorem RationalCoveringData.simpleLaurent_separation_via_primary_canonical_of_jacobian
     (hf_jac : Ideal.span ({C.base.canonicalMap f₀} : Set (presheafValue C.base)) ≤
       Ideal.jacobson (⊥ : Ideal (presheafValue C.base)))
     (hLaneA : PrimaryLaneAInputsCanonical C f₀)
@@ -928,7 +928,7 @@ Under the local assumption `[IsDomain (presheafValue C.base)]` together with
 (`Ideal.iInf_pow_eq_bot_of_isDomain`) supplies the `hInf` hypothesis
 automatically. This wrapper is intentionally optional: `IsDomain` and the
 non-unit witness are kept local and never propagate to final acyclicity. -/
-theorem RationalCovering.simpleLaurent_separation_via_primary_canonical_of_isDomain
+theorem RationalCoveringData.simpleLaurent_separation_via_primary_canonical_of_isDomain
     [IsDomain (presheafValue C.base)]
     (hf_nonunit : ¬IsUnit (C.base.canonicalMap f₀))
     (hLaneA : PrimaryLaneAInputsCanonical C f₀)
@@ -948,7 +948,7 @@ theorem RationalCovering.simpleLaurent_separation_via_primary_canonical_of_isDom
 
 /-- The two-piece Laurent covering has separation from canonical Lane-A bridge
 data plus the explicit Hübner/Krull `iInf` input. -/
-theorem RationalCovering.laurentCovering_hasSeparation_via_primary_canonical_of_iInf
+theorem RationalCoveringData.laurentCovering_hasSeparation_via_primary_canonical_of_iInf
     (hInf : (⨅ n : ℕ,
       Ideal.span ({C.base.canonicalMap f₀} : Set (presheafValue C.base)) ^ n) = ⊥)
     (hLaneA : PrimaryLaneAInputsCanonical C f₀) :
@@ -998,7 +998,7 @@ theorem RationalCovering.laurentCovering_hasSeparation_via_primary_canonical_of_
 
 /-- Jacobson-radical specialization of
 `laurentCovering_hasSeparation_via_primary_canonical_of_iInf`. -/
-theorem RationalCovering.laurentCovering_hasSeparation_via_primary_canonical_of_jacobian
+theorem RationalCoveringData.laurentCovering_hasSeparation_via_primary_canonical_of_jacobian
     (hf_jac : Ideal.span ({C.base.canonicalMap f₀} : Set (presheafValue C.base)) ≤
       Ideal.jacobson (⊥ : Ideal (presheafValue C.base)))
     (hLaneA : PrimaryLaneAInputsCanonical C f₀) :
@@ -1015,7 +1015,7 @@ theorem RationalCovering.laurentCovering_hasSeparation_via_primary_canonical_of_
 Under `[IsDomain (presheafValue C.base)]` together with
 `¬IsUnit (C.base.canonicalMap f₀)`, Krull intersection
 (`Ideal.iInf_pow_eq_bot_of_isDomain`) discharges the `hInf` hypothesis. -/
-theorem RationalCovering.laurentCovering_hasSeparation_via_primary_canonical_of_isDomain
+theorem RationalCoveringData.laurentCovering_hasSeparation_via_primary_canonical_of_isDomain
     [IsDomain (presheafValue C.base)]
     (hf_nonunit : ¬IsUnit (C.base.canonicalMap f₀))
     (hLaneA : PrimaryLaneAInputsCanonical C f₀) :
@@ -1031,7 +1031,7 @@ theorem RationalCovering.laurentCovering_hasSeparation_via_primary_canonical_of_
 /-- Variant of the direct per-E wrapper with Lane A internalized via
 `lane_A_supplier_via_primary`. This leaves only the per-E refinement
 existence and the Lane B supplier abstract at the Part 2 boundary. -/
-theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
+theorem RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA
     (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
@@ -1058,7 +1058,7 @@ theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
   exact C.tateAcyclicity_Part2_via_hZavyalov_per_E_direct hne hZavyalov_per_E f₀
     fC hC_compat
     (fun S' hS'_per_E hS'_contain ↦
-      RationalCovering.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
+      RationalCoveringData.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
         hLaneA.hA₀Noeth_B hLaneA.hA_complete_B hLaneA.hnoeth_B hLaneA.hcont_forward_B
         hLaneA.hcont_eval_B hLaneA.τ_preBiv hLaneA.h_plus_compat hLaneA.h_minus_compat
         S' hS'_per_E hS'_contain
@@ -1074,7 +1074,7 @@ Lane A is internalized through `PrimaryLaneAInputs`; the remaining separation
 supplier is only requested for original cover pieces whose rational open is
 nonempty. Empty base and empty original pieces are handled structurally by
 `tateAcyclicity_Part2_end_to_end_via_primary_allow_empty`. -/
-theorem RationalCovering.part2_via_primary_laneA_allow_empty
+theorem RationalCoveringData.part2_via_primary_laneA_allow_empty
     (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
@@ -1103,7 +1103,7 @@ theorem RationalCovering.part2_via_primary_laneA_allow_empty
   exact C.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
     (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
     (fun S' hS'_per_E hS'_contain ↦
-      RationalCovering.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
+      RationalCoveringData.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
         hLaneA.hA₀Noeth_B hLaneA.hA_complete_B hLaneA.hnoeth_B hLaneA.hcont_forward_B
         hLaneA.hcont_eval_B hLaneA.τ_preBiv hLaneA.h_plus_compat hLaneA.h_minus_compat
         S' hS'_per_E hS'_contain
@@ -1120,7 +1120,7 @@ refinement witness is supplied by explicit per-cover-piece data
 This packages `StandardCover.hZavyalov_per_E_of_per_D_construction` into the
 direct per-E Part 2 closure, keeping Lane A internalized via
 `PrimaryLaneAInputs` and leaving only the Lane B supplier abstract. -/
-theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_per_D
+theorem RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_per_D
     (hne : C.covers.Nonempty)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
@@ -1149,7 +1149,7 @@ theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_pe
       restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
   classical
   exact
-    ValuationSpectrum.RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
+    ValuationSpectrum.RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA
       (A := A) (C := C) (f₀ := f₀) hne
       (hZavyalov_per_E_of_per_D_construction
         (A := A) (C := C) mk_S_D h_in_D h_cover_D h_span)
@@ -1166,7 +1166,7 @@ the direct per-E Part 2 closure. Compared to
 longer supplies an arbitrary per-D finset family `mk_S_D`; only the
 single-generator standard-shape witness `f_D` and the global span-top witness
 remain external. -/
-theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_standardShape
+theorem RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_standardShape
     (hne : C.covers.Nonempty)
     (f_D : RationalLocData A → A)
     (h_shape : ∀ D ∈ C.covers,
@@ -1195,7 +1195,7 @@ theorem RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_st
       restrictionMap C.base E.1 (C.hsubset E.1 E.2) x = fC E := by
   classical
   exact
-    ValuationSpectrum.RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_laneA
+    ValuationSpectrum.RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_laneA
       (A := A) (C := C) (f₀ := f₀) hne
       (fun _ ↦
         exists_refines_cover_per_E_of_standardShape
@@ -1208,7 +1208,7 @@ This is the same per-D construction entry point as
 `tateAcyclicity_Part2_end_to_end_via_primary_laneA_of_per_D`, but its
 remaining separation supplier is only required on nonempty original cover
 pieces. -/
-theorem RationalCovering.part2_via_primary_laneA_per_D_allow_empty
+theorem RationalCoveringData.part2_via_primary_laneA_per_D_allow_empty
     (hne : C.covers.Nonempty)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
@@ -1246,7 +1246,7 @@ theorem RationalCovering.part2_via_primary_laneA_per_D_allow_empty
 
 The only remaining geometric input is the span-top witness for the standard
 generators; empty original cover pieces do not create separation obligations. -/
-theorem RationalCovering.part2_via_primary_laneA_standardShape_allow_empty
+theorem RationalCoveringData.part2_via_primary_laneA_standardShape_allow_empty
     (hne : C.covers.Nonempty)
     (f_D : RationalLocData A → A)
     (h_shape : ∀ D ∈ C.covers,
@@ -1282,7 +1282,7 @@ theorem RationalCovering.part2_via_primary_laneA_standardShape_allow_empty
     fC hC_compat lane_B_supplier hLaneA
 
 /-- Canonical-Lane-A variant of `part2_via_primary_laneA_allow_empty`. -/
-theorem RationalCovering.part2_via_primary_canonical_allow_empty
+theorem RationalCoveringData.part2_via_primary_canonical_allow_empty
     (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
@@ -1311,7 +1311,7 @@ theorem RationalCovering.part2_via_primary_canonical_allow_empty
   exact C.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
     (f₀ := f₀) hne hZavyalov_per_E fC hC_compat
     (fun S' hS'_per_E hS'_contain ↦
-      RationalCovering.lane_A_supplier_via_primary_canonical C f₀ hLaneA.hNoeth_B
+      RationalCoveringData.lane_A_supplier_via_primary_canonical C f₀ hLaneA.hNoeth_B
         hLaneA.hLocLift_B hLaneA.hA₀Noeth_B hLaneA.hnoeth_B
         hLaneA.hcont_forward_B hLaneA.τ_preBiv hLaneA.h_plus_compat
         hLaneA.h_minus_compat S' hS'_per_E hS'_contain
@@ -1321,7 +1321,7 @@ theorem RationalCovering.part2_via_primary_canonical_allow_empty
     lane_B_supplier
 
 /-- Canonical-Lane-A per-D refinement variant of Part 2. -/
-theorem RationalCovering.part2_via_primary_canonical_per_D_allow_empty
+theorem RationalCoveringData.part2_via_primary_canonical_per_D_allow_empty
     (hne : C.covers.Nonempty)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
@@ -1356,7 +1356,7 @@ theorem RationalCovering.part2_via_primary_canonical_per_D_allow_empty
     fC hC_compat lane_B_supplier hLaneA
 
 /-- Canonical-Lane-A standard-shape variant of Part 2. -/
-theorem RationalCovering.part2_via_primary_canonical_standardShape_allow_empty
+theorem RationalCoveringData.part2_via_primary_canonical_standardShape_allow_empty
     (hne : C.covers.Nonempty)
     (f_D : RationalLocData A → A)
     (h_shape : ∀ D ∈ C.covers,
@@ -1406,7 +1406,7 @@ mathematical suppliers explicit:
 
 It does not change the legacy final theorem's hypotheses; it records the
 exact remaining proof boundary in an axiom-clean form. -/
-theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA
+theorem RationalCoveringData.tateAcyclicity_end_to_end_via_primary_laneA
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
@@ -1459,11 +1459,11 @@ coverings and applies it:
 
 This is the intended final assembly shape once separation is available as
 augmented Čech exactness for all rational covers. -/
-theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_universal_separation
+theorem RationalCoveringData.tateAcyclicity_end_to_end_via_primary_laneA_of_universal_separation
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A,
+    (separation_supplier : ∀ C' : RationalCoveringData A,
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1503,11 +1503,11 @@ Cor 8.32 cover-level injectivity requires a nonempty cover. The final cover
 `C` has `hne`; for the per-E local coverings, the caller supplies the exact
 nonemptiness proof. This keeps the empty-cover issue explicit instead of
 forcing a false/overstrong universal separation hypothesis. -/
-theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_separation
+theorem RationalCoveringData.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_separation
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1553,11 +1553,11 @@ nonempty covers. `per_E_local_covering_nonempty_of_rationalOpen_nonempty`
 shows this nonemptiness follows from a point of the original cover piece `E`,
 so the caller only supplies the geometrically natural cover-piece
 nonemptiness condition. -/
-theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_pieces
+theorem RationalCoveringData.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_pieces
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1597,11 +1597,11 @@ For a nonempty original piece `E`, `per_E_local_covering_nonempty_of_rationalOpe
 supplies the nonempty local covering needed by the separation supplier. Empty
 base and empty original pieces are discharged by the structural compatibility
 lemmas in this file. -/
-theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_allow_empty
+theorem RationalCoveringData.tateAcyclicity_end_to_end_via_primary_allow_empty
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1631,7 +1631,7 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_allow_empty
     exact C.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
       (f₀ := f₀) hne hZavyalov_per_E f hcompat
       (fun S' hS'_per_E hS'_contain ↦
-        RationalCovering.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
+        RationalCoveringData.lane_A_supplier_via_primary C f₀ hLaneA.hNoeth_B hLaneA.hLocLift_B
           hLaneA.hA₀Noeth_B hLaneA.hA_complete_B hLaneA.hnoeth_B hLaneA.hcont_forward_B
           hLaneA.hcont_eval_B hLaneA.τ_preBiv hLaneA.h_plus_compat hLaneA.h_minus_compat
           S' hS'_per_E hS'_contain
@@ -1650,11 +1650,11 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_allow_empty
 This keeps the same separation and standard-refinement boundary, but consumes
 `PrimaryLaneAInputsCanonical`, whose completion and minus-continuity fields are
 filled internally. -/
-theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_canonical_allow_empty
+theorem RationalCoveringData.tateAcyclicity_end_to_end_via_primary_canonical_allow_empty
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1698,17 +1698,17 @@ This does not add hypotheses to the root `tateAcyclicity` theorem; it is a
 caller-ready bridge showing exactly which existing Lane-B residuals are enough
 to supply the nonempty-cover separation input for the canonical Lane-A
 assembly. -/
-theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_canonical_primeExtensionClosed
+theorem RationalCoveringData.tateAcyclicity_end_to_end_via_primary_canonical_primeExtensionClosed
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀ : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀ : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
@@ -1732,7 +1732,7 @@ theorem RationalCovering.tateAcyclicity_end_to_end_via_primary_canonical_primeEx
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) := by
   exact C.tateAcyclicity_end_to_end_via_primary_canonical_allow_empty
     (f₀ := f₀) P hne
-    (RationalCovering.nonempty_separation_supplier_via_prime_extension_closed
+    (RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed
       P hloc_noeth hAplus_le_A₀ hcanonicalMap_cont h_closed_nonOpen)
     hZavyalov_per_E hLaneA
 
@@ -1743,11 +1743,11 @@ This is the full-conjunction analogue of
 `part2_via_primary_laneA_per_D_allow_empty`: empty original cover pieces are
 handled internally, and the caller no longer supplies the abstract
 `hZavyalov_per_E` refinement existential. -/
-theorem RationalCovering.tateAcyclicity_via_primary_per_D_allow_empty
+theorem RationalCoveringData.tateAcyclicity_via_primary_per_D_allow_empty
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1784,11 +1784,11 @@ This packages `exists_refines_cover_per_E_of_standardShape` into the strongest
 current allow-empty final-assembly boundary. The remaining inputs are the
 nonempty-cover separation supplier, the standard-shape presentation, the
 span-top condition, and the Lane A overlap package. -/
-theorem RationalCovering.tateAcyclicity_via_primary_standardShape_allow_empty
+theorem RationalCoveringData.tateAcyclicity_via_primary_standardShape_allow_empty
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1824,11 +1824,11 @@ theorem RationalCovering.tateAcyclicity_via_primary_standardShape_allow_empty
 Compared to `tateAcyclicity_via_primary_per_D_allow_empty`, this consumes
 `PrimaryLaneAInputsCanonical` and fills the canonical completion/minus
 continuity fields internally. -/
-theorem RationalCovering.tateAcyclicity_via_primary_per_D_canonical_allow_empty
+theorem RationalCoveringData.tateAcyclicity_via_primary_per_D_canonical_allow_empty
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -1863,11 +1863,11 @@ theorem RationalCovering.tateAcyclicity_via_primary_per_D_canonical_allow_empty
 Compared to `tateAcyclicity_via_primary_standardShape_allow_empty`, this
 consumes `PrimaryLaneAInputsCanonical` and fills the canonical
 completion/minus-continuity fields internally. -/
-theorem RationalCovering.tateAcyclicity_via_primary_standardShape_canonical_allow_empty
+theorem RationalCoveringData.tateAcyclicity_via_primary_standardShape_canonical_allow_empty
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hne : C.covers.Nonempty)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -2162,7 +2162,7 @@ existing assembly architecture.
 Composition:
 * Part 1 follows from a cover-level separation supplier
   (`global_separation`) — typically packaged via
-  `RationalCovering.separation_via_prime_extension_closed` /
+  `RationalCoveringData.separation_via_prime_extension_closed` /
   `nonempty_separation_supplier_via_prime_extension_closed` or — in the
   corrected (post-2026-05-11) route — the new
   `productRestriction_faithfullyFlat_tate_laurent_of_hSpa_points` chain
@@ -2174,10 +2174,10 @@ Composition:
 
 This wrapper does NOT propagate the misframed `restrictionMap_isLocalization`
 chain — all flatness is delegated to the caller via the lane suppliers. -/
-theorem RationalCovering.tateAcyclicityComplete
+theorem RationalCoveringData.tateAcyclicityComplete
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S)
@@ -2235,7 +2235,7 @@ theorem RationalCovering.tateAcyclicityComplete
     exact global_separation x 0 hagree
   · -- Part 2 via the existing assembly wrapper.
     intro fC hC_compat
-    exact RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary
+    exact RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary
       (A := A) C hne hZavyalov_per_E f₀ fC hC_compat
       lane_A_supplier lane_B_supplier
 
@@ -2244,10 +2244,10 @@ theorem RationalCovering.tateAcyclicityComplete
 Drop-in variant of `tateAcyclicityComplete` that uses the empty-piece-tolerant
 Part-2 assembly. The `lane_B_supplier` only needs to handle E's with nonempty
 `rationalOpen`. Empty cases are handled structurally. -/
-theorem RationalCovering.tateAcyclicityComplete_allow_empty
+theorem RationalCoveringData.tateAcyclicityComplete_allow_empty
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S)
@@ -2303,7 +2303,7 @@ theorem RationalCovering.tateAcyclicityComplete_allow_empty
       rw [map_zero]; exact hx D hD
     exact global_separation x 0 hagree
   · intro fC hC_compat
-    exact RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
+    exact RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary_allow_empty
       (A := A) C hne hZavyalov_per_E f₀ fC hC_compat
       lane_A_supplier lane_B_supplier
 
@@ -2322,24 +2322,24 @@ swapping out the `_via_prime_extension_closed` chain.
 
 `lane_A_supplier` remains abstract; this wrapper does NOT discharge Lane A
 overlap gluing. -/
-theorem RationalCovering.tateAcyclicityComplete_via_prime_extension_closed
+theorem RationalCoveringData.tateAcyclicityComplete_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S)
     (f₀ : A)
     -- Universal hypothesis bundle for the prime-extension-closed Cor 8.32 chain:
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀ : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀ : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
@@ -2369,9 +2369,9 @@ theorem RationalCovering.tateAcyclicityComplete_via_prime_extension_closed
       ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) := by
   classical
-  have sep_supplier := RationalCovering.nonempty_separation_supplier_via_prime_extension_closed
+  have sep_supplier := RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed
     P hloc_noeth hAplus_le_A₀ hcanonicalMap_cont h_closed_nonOpen
-  refine RationalCovering.tateAcyclicityComplete_allow_empty (A := A) C hne
+  refine RationalCoveringData.tateAcyclicityComplete_allow_empty (A := A) C hne
     hZavyalov_per_E f₀
     (sep_supplier C hne)
     lane_A_supplier
@@ -2386,7 +2386,7 @@ theorem RationalCovering.tateAcyclicityComplete_via_prime_extension_closed
   have hne_per_E :
       (C.per_E_local_covering S'.elts f₀ E hS'_per_E).covers.Nonempty := by
     refine ⟨laurentPlusDatum (C.plusDatum f) f₀, ?_⟩
-    rw [RationalCovering.mem_per_E_local_covering_covers]
+    rw [RationalCoveringData.mem_per_E_local_covering_covers]
     exact ⟨f, hf_elt, h_plus_in_E, Or.inl rfl⟩
   exact sep_supplier (C.per_E_local_covering S'.elts f₀ E hS'_per_E)
     hne_per_E a b hagree
@@ -2397,11 +2397,11 @@ Equality-form companion to T233's zero-kernel form. Combines
 `productRestriction_injective_tate_normalizedLaurent_of_hSpa_points` with the
 standard `a - b = 0` conversion to produce the `global_separation` hypothesis
 required by `tateAcyclicityComplete`. -/
-theorem RationalCovering.separation_via_normalizedLaurent
+theorem RationalCoveringData.separation_via_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },
@@ -2571,12 +2571,12 @@ Composes T234 (`separation_via_normalizedLaurent`) with `tateAcyclicityComplete`
 to discharge the `global_separation` hypothesis for covers consisting of
 normalized-minus pieces. The Part 2 lane suppliers remain as hypotheses
 (existing project infrastructure). -/
-theorem RationalCovering.tateAcyclicityComplete_via_normalizedLaurent
+theorem RationalCoveringData.tateAcyclicityComplete_via_normalizedLaurent
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },
@@ -2675,8 +2675,8 @@ theorem RationalCovering.tateAcyclicityComplete_via_normalizedLaurent
         restrictionMap D₁.1 D₃ h₃₁ (f D₁) = restrictionMap D₂.1 D₃ h₃₂ (f D₂)) →
       ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
         restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D) :=
-  RationalCovering.tateAcyclicityComplete C hne hZavyalov_per_E f₀
-    (RationalCovering.separation_via_normalizedLaurent P C hne
+  RationalCoveringData.tateAcyclicityComplete C hne hZavyalov_per_E f₀
+    (RationalCoveringData.separation_via_normalizedLaurent P C hne
       normalized_laurent_witness hSpa_points hNoeth_B hA_complete_B hnoeth_B
       hP_A₀Noeth_B hb_per_f hT_pb_per_f hcont_eval_per_f)
     lane_A_supplier lane_B_supplier
@@ -2720,7 +2720,7 @@ theorem rationalCovering_hasSeparation_via_normalizedLaurent
     [IsDomain A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
@@ -2783,7 +2783,7 @@ theorem rationalCovering_hasSeparation_via_normalizedLaurent
         restrictionMap C.base D (C.hsubset D hD) y) → x = y := by
   intro x y hxy
   by_cases hne : C.covers.Nonempty
-  · exact RationalCovering.separation_via_normalizedLaurent P C hne
+  · exact RationalCoveringData.separation_via_normalizedLaurent P C hne
       normalized_laurent_witness hSpa
       hNoeth_B hA_complete_B hnoeth_B hP_A₀Noeth_B
       hb_per_f hT_pb_per_f hcont_eval_per_f x y hxy
@@ -2803,7 +2803,7 @@ theorem rationalCovering_hasGluing_via_normalizedLaurent
     [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },
@@ -2895,7 +2895,7 @@ theorem rationalCovering_hasGluing_via_normalizedLaurent
     ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
       restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
   by_cases hne : C.covers.Nonempty
-  · exact (RationalCovering.tateAcyclicityComplete_via_normalizedLaurent
+  · exact (RationalCoveringData.tateAcyclicityComplete_via_normalizedLaurent
       P C hne normalized_laurent_witness hSpa_points
       hNoeth_B hA_complete_B hnoeth_B hP_A₀Noeth_B
       hb_per_f hT_pb_per_f hcont_eval_per_f
@@ -2920,7 +2920,7 @@ theorem tateAcyclicity_via_normalizedLaurent
     [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },
@@ -3055,7 +3055,7 @@ theorem tateAcyclicity_via_normalizedLaurent_autoComplete
     [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },
@@ -3171,7 +3171,7 @@ theorem tateAcyclicity_via_normalizedLaurent_autoTPB
     [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },
@@ -3291,7 +3291,7 @@ of `invS (relativeRationalLocData_laurentNormalized ...)`. -/
 theorem hb_per_f_auto_normalizedLaurent
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] :
@@ -3333,7 +3333,7 @@ theorem tateAcyclicity_via_normalizedLaurent_autoB
     [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },
@@ -3434,7 +3434,7 @@ theorem tateAcyclicity_via_normalizedLaurent_autoCont
     [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
     (normalized_laurent_witness : ∀ D : { D // D ∈ C.covers },

@@ -76,7 +76,7 @@ rational cover is flat over `A`.
 Each factor `presheafValue D` is flat over `A` (by `canonicalMap_flat_discrete`),
 so the product is flat over `A` (by `Module.Flat.pi`). -/
 theorem productPresheafValues_flat_discrete [DiscreteTopology A] [PlusSubring A]
-    (C : RationalCovering A) (D : ↥C.covers) :
+    (C : RationalCoveringData A) (D : ↥C.covers) :
     @Module.Flat A (presheafValue D.1) _ _
       (RingHom.toModule (RationalLocData.canonicalMap D.1)) :=
   canonicalMap_flat_discrete D.1

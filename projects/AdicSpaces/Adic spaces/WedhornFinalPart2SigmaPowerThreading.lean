@@ -154,7 +154,7 @@ theorem tateAcyclicity_Part2_via_sigma_power_and_integrated_laneB
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -182,7 +182,7 @@ theorem tateAcyclicity_Part2_via_sigma_power_and_integrated_laneB
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -228,7 +228,7 @@ theorem tateAcyclicity_Part2_via_sigma_power_and_integrated_laneB_allow_empty
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -256,7 +256,7 @@ theorem tateAcyclicity_Part2_via_sigma_power_and_integrated_laneB_allow_empty
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =

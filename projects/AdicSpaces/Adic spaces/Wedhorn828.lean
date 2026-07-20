@@ -31,7 +31,7 @@ Theorem 8.28(b)  IsSheafy A                     [A strongly noetherian Tate, com
 ```
 
 In Lean, `IsSheafy A` (`StructureSheaf.lean`) is the pair `(embedding, gluing)` on every
-`RationalCovering`. Cor 8.32 supplies `embedding` (faithful flatness ⇒ the product
+`RationalCoveringData`. Cor 8.32 supplies `embedding` (faithful flatness ⇒ the product
 restriction is injective; the topological inducing is the Banach-OMT input, `BanachOMT.lean`).
 Lemma 8.34 supplies `gluing`.
 

@@ -210,7 +210,7 @@ inequality supplier (per-call). All other inputs are routine
 denominator clearing) or basic rationalOpen-membership data. -/
 theorem C1SupplierStrong_local_via_sigma_construction_boundary
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →
@@ -249,7 +249,7 @@ through a separate σ-construction lane and want the residual exposed
 uniformly as a named hypothesis. -/
 theorem C1SupplierStrong_local_via_named_sigma_construction_supplier
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →

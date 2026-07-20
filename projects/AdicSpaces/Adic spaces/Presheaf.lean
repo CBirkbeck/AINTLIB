@@ -1881,7 +1881,7 @@ noncomputable def restrictionMapMor [HasLocLiftPowerBounded A] (D D' : RationalL
   ⟨restrictionMapHom D D' h, restrictionMapHom_continuous D D' h⟩
 
 /-- A *rational covering* of `R(T/s)` (Wedhorn §8.1). -/
-structure RationalCovering (A : Type*) [CommRing A] [TopologicalSpace A]
+structure RationalCoveringData (A : Type*) [CommRing A] [TopologicalSpace A]
     [IsTopologicalRing A] [PlusSubring A] where
   /-- The base rational localization datum. -/
   base : RationalLocData A
@@ -1893,23 +1893,23 @@ structure RationalCovering (A : Type*) [CommRing A] [TopologicalSpace A]
   hcover : ∀ v ∈ rationalOpen base.T base.s,
     ∃ D ∈ covers, v ∈ rationalOpen D.T D.s
 
-/-- **Wedhorn Definition 7.29 for coverings**: a `RationalCovering` is *rational* when
+/-- **Wedhorn Definition 7.29 for coverings**: a `RationalCoveringData` is *rational* when
 its base and every piece satisfy Definition 7.29's openness condition (`T·A` open in
 `A`, wedhorn.txt:3100) — i.e. it is a covering of a rational subset by rational subsets
 ("a finite covering of X be rational subsets", wedhorn.txt:4143). The sheaf condition
 (Definition 8.26 / Theorem 8.28) quantifies over exactly these coverings. -/
-def RationalCovering.IsRational {A : Type*} [CommRing A] [TopologicalSpace A]
-    [IsTopologicalRing A] [PlusSubring A] (C : RationalCovering A) : Prop :=
+def RationalCoveringData.IsRational {A : Type*} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [PlusSubring A] (C : RationalCoveringData A) : Prop :=
   C.base.IsRational ∧ ∀ D ∈ C.covers, D.IsRational
 
 /-- The base of a rational covering is a rational datum. -/
-theorem RationalCovering.IsRational.base {A : Type*} [CommRing A] [TopologicalSpace A]
-    [IsTopologicalRing A] [PlusSubring A] {C : RationalCovering A}
+theorem RationalCoveringData.IsRational.base {A : Type*} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [PlusSubring A] {C : RationalCoveringData A}
     (h : C.IsRational) : C.base.IsRational := h.1
 
 /-- Every piece of a rational covering is a rational datum. -/
-theorem RationalCovering.IsRational.piece {A : Type*} [CommRing A] [TopologicalSpace A]
-    [IsTopologicalRing A] [PlusSubring A] {C : RationalCovering A}
+theorem RationalCoveringData.IsRational.piece {A : Type*} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [PlusSubring A] {C : RationalCoveringData A}
     (h : C.IsRational) {D : RationalLocData A} (hD : D ∈ C.covers) : D.IsRational :=
   h.2 D hD
 
@@ -2807,7 +2807,7 @@ localization map (helper for `productRestriction_injective_discrete`). -/
 private theorem lift_map_zero_of_restrictionAlg_zero {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
     [IsHuberRing A]
-    (C : RationalCovering A) (z : Localization.Away C.base.s)
+    (C : RationalCoveringData A) (z : Localization.Away C.base.s)
     (hz_zero : ∀ (D : RationalLocData A) (hD : D ∈ C.covers),
       restrictionMapAlg C.base D (C.hsubset D hD) z = 0)
     (hs_unit : ∀ (D' : RationalLocData A), D' ∈ C.covers →
@@ -2831,7 +2831,7 @@ private theorem lift_map_zero_of_restrictionAlg_zero {A : Type*} [CommRing A]
 maps to zero in each cover piece (helper for `productRestriction_injective_discrete`). -/
 private theorem algebraMap_numerator_zero {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
-    (C : RationalCovering A) (z : Localization.Away C.base.s) (a : A) (m : ℕ)
+    (C : RationalCoveringData A) (z : Localization.Away C.base.s) (a : A) (m : ℕ)
     (hs_unit : ∀ (D' : RationalLocData A), D' ∈ C.covers →
       IsUnit (algebraMap A (Localization.Away D'.s) C.base.s))
     (hz_eq : z = IsLocalization.mk' (Localization.Away C.base.s) a
@@ -2855,7 +2855,7 @@ private theorem algebraMap_numerator_zero {A : Type*} [CommRing A]
 using a trivial valuation argument (helper for `productRestriction_injective_discrete`). -/
 private theorem base_s_mem_annihilator_radical {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
-    (C : RationalCovering A) (a : A)
+    (C : RationalCoveringData A) (a : A)
     (ha_ann : ∀ (D : RationalLocData A), D ∈ C.covers →
       ∃ k : ℕ, D.s ^ k * a = 0) :
     C.base.s ∈ (Ideal.span ({b : A | b * a = 0} : Set A)).radical := by
@@ -2908,7 +2908,7 @@ private theorem base_s_mem_annihilator_radical {A : Type*} [CommRing A]
 theorem productRestriction_injective_discrete {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [DiscreteTopology A]
     [IsHuberRing A]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     Function.Injective (fun x : presheafValue C.base ↦
       fun (D : C.covers) ↦ restrictionMap C.base D (C.hsubset D D.prop) x) := by
   have hbij_base := coeRingHom_bijective_of_discrete C.base

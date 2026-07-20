@@ -216,7 +216,7 @@ residual**; the other six components are routine Cor 7.32 /
 denominator-clearing / base-side data. -/
 theorem WedhornC1PerCallSupplyPerWCoverPiece_via_VK_residual
     [DecidableEq A]
-    (P : PairOfDefinition A) (C : RationalCovering A)
+    (P : PairOfDefinition A) (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (D : RationalLocData A) (v : Spv A) :
@@ -275,7 +275,7 @@ deduction restricted to the V_K-nonempty cover plus-piece. -/
 theorem C1SupplierStrong_local_via_VK_residual
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (h_per_call_components :

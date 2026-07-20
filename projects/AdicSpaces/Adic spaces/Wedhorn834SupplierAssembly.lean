@@ -122,7 +122,7 @@ theorem hZavyalov_per_E_via_unnormalized_C1Strong_supplier_of_base_eq_Spa
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     -- Residual H₁: base-Spa specialization (consumed by the outside-rescue
     -- pointwise-of-base-eq-Spa branch).
     (h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺)
@@ -190,7 +190,7 @@ theorem hZavyalov_per_E_via_single_t_structural_data_of_base_eq_Spa
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     -- Residual H₁: base-Spa specialization (consumed by the outside-rescue
     -- pointwise-of-base-eq-Spa branch).
     (h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺)
@@ -247,7 +247,7 @@ the precise missing Lean type:
 ```
 def wedhorn_834_h_struct_factorization_first_missing_upstream
     [DecidableEq A]
-    (C : RationalCovering A) : Prop :=
+    (C : RationalCoveringData A) : Prop :=
   ∀ (D : RationalLocData A), D ∈ C.covers →
   ∀ (t : A), t ∈ D.T →
     ∃ (σ : A) (N : ℕ), C.base.s = D.s * (σ * t * D.s ^ N)
@@ -270,7 +270,7 @@ leaf-level helper).
   `A` require the structural condition `n = 0` (not derivable from
   standard denominator clearing).
 
-* `RationalCovering.hsubset` — gives only the rational-open subset
+* `RationalCoveringData.hsubset` — gives only the rational-open subset
   relation `rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s`, no
   underlying algebraic identity.
 
@@ -360,7 +360,7 @@ acyclicity. It does **not** generalize: for any non-trivial cover with
 
 ## Why non-trivial concrete constructions fail
 
-Audit of existing `RationalLocData`/`RationalCovering` constructors,
+Audit of existing `RationalLocData`/`RationalCoveringData` constructors,
 checking whether each supplies `C.base.s = D.s * (σ * t * D.s ^ N)` in
 `A` for `D ∈ C.covers` and `t ∈ D.T`:
 
@@ -384,7 +384,7 @@ checking whether each supplies `C.base.s = D.s * (σ * t * D.s ^ N)` in
   factor. **Wrong direction**: `D.s` is a multiple of `C.base.s`, not
   a divisor.
 
-* **`RationalCovering.per_E_local_covering C S f₀ E hprecise`** (in
+* **`RationalCoveringData.per_E_local_covering C S f₀ E hprecise`** (in
   `Adic spaces/GeometricReduction.lean`, line 5431): base = `E.1`,
   covers built from `laurentPlusDatum`/`laurentMinusDatum` of
   `C.plusDatum f` for filtered `f ∈ S`. The pieces inherit the
@@ -399,7 +399,7 @@ checking whether each supplies `C.base.s = D.s * (σ * t * D.s ^ N)` in
   factorization parameters reduce to `1` in `A`. No non-trivial cover
   data.
 
-* **`RationalCovering.insertDenom`** (in
+* **`RationalCoveringData.insertDenom`** (in
   `Adic spaces/WedhornCoverNormalization.lean`, line 104): adds `D.s`
   to `D.T` without changing `D.s`. Does not introduce any algebraic
   factorization data; same issue as the underlying covering.
@@ -422,14 +422,14 @@ construction** — a refinement of the existing missing
 the per-piece algebraic identity in `A`:
 
 ```
-def WedhornStep2RefinementCarryingFactor (C : RationalCovering A) :
+def WedhornStep2RefinementCarryingFactor (C : RationalCoveringData A) :
     Type :=
   { D : RationalLocData A //
       D ∈ C.covers ∧
       ∀ (t : A), t ∈ D.T →
         ∃ (σ : A) (N : ℕ), C.base.s = D.s * (σ * t * D.s ^ N) }
 
-theorem RationalCovering.exists_step2_refinement_carrying_factor
+theorem RationalCoveringData.exists_step2_refinement_carrying_factor
     [DecidableEq A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
@@ -438,7 +438,7 @@ theorem RationalCovering.exists_step2_refinement_carrying_factor
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     Nonempty (∀ D ∈ C.covers, WedhornStep2RefinementCarryingFactor C)
 ```
 
@@ -481,7 +481,7 @@ subset relation evaluated at `v`.
 /-- The trivial whole-Spa rational covering using `globalLocData P` for
 both base and single cover-piece. -/
 noncomputable def globalTrivialCovering (P : PairOfDefinition A) :
-    RationalCovering A :=
+    RationalCoveringData A :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   { base := globalLocData P
     covers := ({globalLocData P} : Finset (RationalLocData A))

@@ -82,7 +82,7 @@ theorem cor_8_32_clean_proof
     [NonarchimedeanRing A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     letI : ∀ D : { D // D ∈ C.covers }, Algebra (presheafValue C.base)
         (presheafValue D.1) := fun D =>
       (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)).toAlgebra
@@ -129,7 +129,7 @@ theorem tateAcyclicity_separation_via_cor832_proof
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
     [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty) :
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) :
     ∀ x : presheafValue C.base,
       (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
         restrictionMap C.base D (C.hsubset D hD) x = 0) → x = 0 :=
@@ -149,7 +149,7 @@ hypothesis required by the canonical version is supplied via the
 theorem tateAcyclicity_gluing_via_descent_proof
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A]
     [T2Space A] [NonarchimedeanRing A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (f : ∀ (D : ↥C.covers), presheafValue D.1)
     (hcompat : ∀ (D₁ D₂ : ↥C.covers) (D₃ : RationalLocData A)
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)

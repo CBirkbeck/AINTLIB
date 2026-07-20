@@ -24,7 +24,7 @@ this is the "plus-type" Laurent piece for each `fᵢ` inside the base `D₀`
 Wedhorn's Theorem 8.28(b) is proved by the following reduction chain:
 
 1. **Standard-cover reduction** (this file, `refines_by_standard_cover`):
-   Any `RationalCovering A` admits a refinement by a standard cover. The
+   Any `RationalCoveringData A` admits a refinement by a standard cover. The
    refinement replaces the arbitrary rational pieces `Dᵢ` by plus-type
    pieces at elements `fⱼ ∈ A` whose ideal generates the unit ideal.
 
@@ -49,13 +49,13 @@ plan revision" (Q1 directive) for details.
 
 ## Status (2026-04-20, post-T-NULL-PER-E singleton supplier + per-E strengthening)
 
-* **`RationalCovering.refines_by_standard_cover`** — proved sorry-free
+* **`RationalCoveringData.refines_by_standard_cover`** — proved sorry-free
   modulo the explicit `hZavyalov` hypothesis (weak-form existence).
   Zero-ring branch fully discharged using `S.elts = ∅`; the nontrivial
   branch dispatches on rational-open nonemptiness and consumes
   `hZavyalov` in the nontrivial case.
 
-* **`RationalCovering.refines_by_standard_cover_per_E`** — STRENGTHENED
+* **`RationalCoveringData.refines_by_standard_cover_per_E`** — STRENGTHENED
   variant (2026-04-19): takes `hZavyalov_per_E` (the per-E existence
   shape) and outputs `refines_cover_per_E C S ∧ refines_contain C S`.
   This is the upstream supplier for the S-GEOM-ASM direct per-E
@@ -79,7 +79,7 @@ plan revision" (Q1 directive) for details.
 
 * **`exists_dominating_unit_from_covering`** — wraps Cor 7.32
   (`ValuationSpectrum.exists_dominating_unit`) for use with a
-  `RationalCovering`: given a finite test family `T ⊆ A` with no common
+  `RationalCoveringData`: given a finite test family `T ⊆ A` with no common
   zero on `Spa(A, A⁺)`, produces a unit `σ ∈ Aˣ` strictly dominating
   some `t ∈ T` at every Spa point.
 
@@ -164,20 +164,20 @@ end StandardCover
 /-! ### The three refinement clauses, named as predicates
 
 Rather than repeating the three-clause conjunction, we record each clause as a
-named predicate on `S : Finset A` relative to a `RationalCovering C`. This
+named predicate on `S : Finset A` relative to a `RationalCoveringData C`. This
 makes the structure of the Nullstellensatz refinement more transparent and
 lets downstream work attack each clause independently. -/
 
 /-- **Clause 1 (covering)**: Every point of the base rational open is contained
 in the plus-type piece at some element of `S`. -/
-def refines_cover [DecidableEq A] (C : RationalCovering A) (S : Finset A) : Prop :=
+def refines_cover [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) : Prop :=
   ∀ v ∈ rationalOpen C.base.T C.base.s,
     ∃ f ∈ S, v ∈ rationalOpen (insert f C.base.T) C.base.s
 
 /-- **Clause 2 (containment)**: Each plus-type piece at an element of `S` is
 contained in some piece of the original cover. This captures the *genuinely
 new* Nullstellensatz ingredient (Zavyalov §2.3). -/
-def refines_contain [DecidableEq A] (C : RationalCovering A) (S : Finset A) : Prop :=
+def refines_contain [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) : Prop :=
   ∀ f ∈ S, ∃ D ∈ C.covers,
     rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s
 
@@ -197,8 +197,8 @@ stronger than `refines_cover C S` alone (since it specifies the target
 `E` for each covering witness) and combined with `refines_contain C S`
 it carries the full precise-refinement information needed downstream for
 S-GEOM-ASM Lane B's per-E local covering construction
-(`GeometricReduction.RationalCovering.per_E_local_covering`). -/
-def refines_cover_per_E [DecidableEq A] (C : RationalCovering A) (S : Finset A) : Prop :=
+(`GeometricReduction.RationalCoveringData.per_E_local_covering`). -/
+def refines_cover_per_E [DecidableEq A] (C : RationalCoveringData A) (S : Finset A) : Prop :=
   ∀ E ∈ C.covers, ∀ v ∈ rationalOpen E.T E.s,
     ∃ f ∈ S,
       v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
@@ -208,7 +208,7 @@ def refines_cover_per_E [DecidableEq A] (C : RationalCovering A) (S : Finset A) 
 `C.hcover` (for each `v` in `C.base`'s rational open, `C.hcover` produces
 the target `E ∈ C.covers`; then apply the per-E witness). -/
 theorem refines_cover_of_refines_cover_per_E [DecidableEq A]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (h : refines_cover_per_E C S) :
     refines_cover C S := by
   intro v hv
@@ -225,7 +225,7 @@ differently: `refines_contain` quantifies over every `f ∈ S` (including
 potentially unused ones), whereas `refines_cover_per_E` only asserts
 existence of witnessing `f` for each `(E, v)`. Callers needing both
 pass them as independent hypotheses. -/
-example [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+example [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (_h : refines_cover_per_E C S) : True := trivial
 
 /-! ### T-NULL-PER-E decomposition: per-D construction → global `refines_cover_per_E`
@@ -260,9 +260,9 @@ reusable.
 
 Given a supplier of `mk_S_D` and its properties, this lemma
 discharges the `hZavyalov_per_E`-shaped hypothesis consumed by
-`RationalCovering.refines_by_standard_cover_per_E`. -/
+`RationalCoveringData.refines_by_standard_cover_per_E`. -/
 theorem exists_refines_cover_per_E_of_per_D_construction
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)
@@ -285,12 +285,12 @@ theorem exists_refines_cover_per_E_of_per_D_construction
 /-- **`hZavyalov_per_E` supplier via per-D construction**. Packages
 `exists_refines_cover_per_E_of_per_D_construction` into the
 `rationalOpen C.base.T C.base.s ≠ ∅ → ∃ S, ...` shape consumed by
-`RationalCovering.refines_by_standard_cover_per_E`. The
+`RationalCoveringData.refines_by_standard_cover_per_E`. The
 `rationalOpen ≠ ∅` hypothesis is unused since the decomposition is
 unconditional — callers supplying per-D data don't need the nonempty
 precondition. -/
 theorem hZavyalov_per_E_of_per_D_construction
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)
@@ -364,7 +364,7 @@ C1-extracted plus-piece-at-f, so `v(f) ≤ v(C.base.s) ≠ 0`, so `v(f)
 -- C1: single-f refinement at each v ∈ D
 theorem exists_single_f_refining_point_in_D
     [IsTateRing A] [IsNoetherianRing A] ...
-    (C : RationalCovering A) (D : RationalLocData A) (hD : D ∈ C.covers)
+    (C : RationalCoveringData A) (D : RationalLocData A) (hD : D ∈ C.covers)
     (v : Spv A) (hv : v ∈ rationalOpen D.T D.s) :
     ∃ f : A,
       v ∈ rationalOpen (insert f C.base.T) C.base.s ∧
@@ -390,7 +390,7 @@ C.base.s vs D.s), but may admit easier formulation via
 ∀ (A : Type*) [CommRing A] [TopologicalSpace A] [PlusSubring A]
   [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
   [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
-  [DecidableEq A] (C : RationalCovering A),
+  [DecidableEq A] (C : RationalCoveringData A),
   ∃ (mk_S_D : RationalLocData A → Finset A),
     (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s) ∧
@@ -448,7 +448,7 @@ residual. -/
 FORCED to equal `E ∈ C.covers` (since all cover pieces are equal), so
 the per-E assignment is automatic. -/
 theorem refines_cover_per_E_of_singleton_cover
-    [DecidableEq A] (C : RationalCovering A) (S : Finset A)
+    [DecidableEq A] (C : RationalCoveringData A) (S : Finset A)
     (hC_singleton : ∀ D₁ D₂, D₁ ∈ C.covers → D₂ ∈ C.covers → D₁ = D₂)
     (hS_cover : refines_cover C S)
     (hS_contain : refines_contain C S) :
@@ -470,7 +470,7 @@ the strengthened `hZavyalov_per_E` existence shape consumed by
 `refines_by_standard_cover_per_E`. Useful for callers whose rational
 covering has a single piece. -/
 theorem exists_nullstellensatz_refinement_per_E_of_singleton_cover
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (hC_singleton : ∀ D₁ D₂, D₁ ∈ C.covers → D₂ ∈ C.covers → D₁ = D₂)
     (hZavyalov : ∃ S : Finset A,
       refines_cover C S ∧ refines_contain C S ∧ refines_span_top S) :
@@ -484,13 +484,13 @@ theorem exists_nullstellensatz_refinement_per_E_of_singleton_cover
 /-- **`hZavyalov_per_E` supplier via singleton-cover reduction**. Packages
 `exists_nullstellensatz_refinement_per_E_of_singleton_cover` into the
 `rationalOpen C.base.T C.base.s ≠ ∅ → ∃ S, ...` shape consumed by
-`RationalCovering.refines_by_standard_cover_per_E`. Companion of
+`RationalCoveringData.refines_by_standard_cover_per_E`. Companion of
 `hZavyalov_per_E_of_per_D_construction` for the singleton-cover branch:
 the caller supplies the plain `hZavyalov` existence together with a
 singleton-cover witness, and `hZavyalov_per_E` follows unconditionally
 (the `rationalOpen ≠ ∅` premise is unused). -/
 theorem hZavyalov_per_E_of_singleton_cover
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (hC_singleton : ∀ D₁ D₂, D₁ ∈ C.covers → D₂ ∈ C.covers → D₁ = D₂)
     (hZavyalov : ∃ S : Finset A,
       refines_cover C S ∧ refines_contain C S ∧ refines_span_top S) :
@@ -517,7 +517,7 @@ after they have performed the Zavyalov refinement. -/
 form `R(insert f₀ base.T, base.s)` for some `f₀ : A`, then the single-
 `f` refinement at every `v ∈ D` is simply `f := f₀`. -/
 theorem exists_single_f_refinement_of_standardShape
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (f₀ : A)
     (hD_shape : rationalOpen D.T D.s =
       rationalOpen (insert f₀ C.base.T) C.base.s)
@@ -585,7 +585,7 @@ plus-piece at `f_D` lies inside `D`) and `h_cover_D` (each `v ∈ D` is
 in the plus-piece at `f_D`). The remaining `h_span` (unit-ideal span
 of the combined family) is the only external obligation. -/
 theorem per_D_construction_of_standardShape
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (f_D : RationalLocData A → A)
     (h_shape : ∀ D ∈ C.covers,
       rationalOpen D.T D.s =
@@ -615,7 +615,7 @@ combined family spans the unit ideal, then `hZavyalov_per_E` holds
 covers can discharge C1+C3 entirely; C2 remains handled by
 `SpaCompact.isCompact_preimage_rationalOpen_of_tate_pseudouniformizer`. -/
 theorem exists_refines_cover_per_E_of_standardShape
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (f_D : RationalLocData A → A)
     (h_shape : ∀ D ∈ C.covers,
       rationalOpen D.T D.s =
@@ -638,7 +638,7 @@ theorem exists_refines_cover_per_E_of_standardShape
 /-- **`hZavyalov_per_E` supplier via standard-shape per-piece witnesses**.
 Packages `exists_refines_cover_per_E_of_standardShape` into the
 `rationalOpen C.base.T C.base.s ≠ ∅ → ∃ S, ...` shape consumed by
-`RationalCovering.refines_by_standard_cover_per_E`. Companion of
+`RationalCoveringData.refines_by_standard_cover_per_E`. Companion of
 `hZavyalov_per_E_of_per_D_construction` for the standard-shape branch:
 the caller supplies a per-piece single-generator witness `f_D` with
 `R(D.T, D.s) = R(insert (f_D D) C.base.T, C.base.s)` together with a
@@ -647,7 +647,7 @@ global span-top for the collected family `C.covers.image f_D`. The
 for direct substitution into `tateAcyclicity_Part2_*_via_primary_*`
 callsites that expect the `hZavyalov_per_E` implication form. -/
 theorem hZavyalov_per_E_of_standardShape
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (f_D : RationalLocData A → A)
     (h_shape : ∀ D ∈ C.covers,
       rationalOpen D.T D.s =
@@ -666,7 +666,7 @@ pieces — requires the Wedhorn Prop 7.14 / Hübner 3.7-3.8 Nullstellensatz
 construction. Specifically, the missing ingredient is a **per-E
 candidate family construction**:
 
-**Missing lemma (T-NULL-PER-E-general)**: given `C : RationalCovering A`
+**Missing lemma (T-NULL-PER-E-general)**: given `C : RationalCoveringData A`
 and the Tate-ring hypotheses, produce a Finset `S ⊂ A` such that for
 EACH `E ∈ C.covers` and each `v` in `E`'s rational open, SOME `f ∈ S`
 has plus-piece-at-f targeting `E` specifically (not just some `D`).
@@ -679,7 +679,7 @@ is tracked as a per-E assignment by construction. The formal statement:
 ```
 theorem refines_by_standard_cover_per_E_unconditional
     [IsTateRing A] [IsNoetherianRing A] ...
-    (C : RationalCovering A) (hne : C.covers.Nonempty) :
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) :
     ∃ S : Finset A,
       refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S
 ```
@@ -746,7 +746,7 @@ covering `C` and a finite test family `T ⊆ A` with no common zero on
 `Spa(A, A⁺)`, Cor 7.32 produces a unit `σ ∈ Aˣ` with `v(σ) < v(t)` for
 some `t ∈ T`, at every Spa point `v`.
 
-This demonstrates the interface between `RationalCovering` data and
+This demonstrates the interface between `RationalCoveringData` data and
 `ValuationSpectrum.exists_dominating_unit` (Cor 7.32). It is a
 building block for the Zavyalov §2.3 candidate-family construction
 referenced by `hZavyalov`; the remaining obstruction is producing the
@@ -762,7 +762,7 @@ theorem exists_dominating_unit_from_covering
     (hArch : ∀ v : Spv A,
       letI : ValuativeRel A := v.toValuativeRel
       MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (_C : RationalCovering A) (T : Finset A)
+    (_C : RationalCoveringData A) (T : Finset A)
     (hT : ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0) :
     ∃ σ : Aˣ, ∀ v ∈ Spa A A⁺, ∃ t ∈ T,
       v.vle (σ : A) t ∧ ¬ v.vle t (σ : A) :=
@@ -958,7 +958,7 @@ theorem zavyalov_candidate_family_h_span_from_no_common_zero
     [IsRingOfIntegralElements (A⁺ : Subring A)] (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_no_common_zero : ∀ v ∈ Spa A A⁺,
       ∃ f ∈ C.covers.biUnion mk_S_D, ¬ v.vle f 0) :
@@ -982,7 +982,7 @@ required by `exists_refines_cover_per_E_of_per_D_construction`.
 h_no_common_zero)` are exactly the Zavyalov §2.3 output that remains
 UNFORMALISED. This wrapper merely repackages the combinatorial witness
 into the existential form expected downstream; the actual content
-(constructing `mk_S_D` from a `RationalCovering` under `[IsTateRing A]
+(constructing `mk_S_D` from a `RationalCoveringData` under `[IsTateRing A]
 ∧ [IsNoetherianRing A]`) is recorded as the target signature
 `exists_zavyalov_candidate_family` in the docstring above. -/
 theorem zavyalov_candidate_family_per_D_from_construction
@@ -990,7 +990,7 @@ theorem zavyalov_candidate_family_per_D_from_construction
     [IsRingOfIntegralElements (A⁺ : Subring A)] (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)
@@ -1014,7 +1014,7 @@ no-common-zero**. Composes
 `hZavyalov_per_E_of_per_D_construction` (line ~292) to produce the
 `rationalOpen ≠ ∅ → ∃ S, refines_cover_per_E ∧ refines_contain ∧
 refines_span_top` shape consumed by
-`RationalCovering.refines_by_standard_cover_per_E` and the direct per-E
+`RationalCoveringData.refines_by_standard_cover_per_E` and the direct per-E
 Tate-acyclicity assembly.
 
 This is the **end-to-end consumer-ready wrapper**: callers who can
@@ -1026,7 +1026,7 @@ theorem hZavyalov_per_E_from_candidate_family_construction
     [IsRingOfIntegralElements (A⁺ : Subring A)] (P : PairOfDefinition A)
     [IsAdicComplete P.I P.A₀]
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)
@@ -1060,7 +1060,7 @@ theorem exists_zavyalov_candidate_family
     (hArch : ∀ v : Spv A,
       letI : ValuativeRel A := v.toValuativeRel
       MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty) :
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) :
     ∃ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
         rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s) ∧
@@ -1096,7 +1096,7 @@ theorem zavyalov_candidate_family_per_D
     (hArch : ∀ v : Spv A,
       letI : ValuativeRel A := v.toValuativeRel
       MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty) :
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) :
     ∃ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
         rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s) ∧
@@ -1150,7 +1150,7 @@ The assembly theorem `exists_nullstellensatz_refinement` dispatches on
 any `D ∈ C.covers` suffices to witness Clause 2 for `S = {1}` (which satisfies
 Clause 3 by `Ideal.span {1} = ⊤`). -/
 private theorem exists_nullstellensatz_refinement_of_rationalOpen_empty
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (hne : C.covers.Nonempty)
     (hempty : rationalOpen C.base.T C.base.s = ∅) :
     ∃ S : Finset A, refines_cover C S ∧ refines_contain C S ∧ refines_span_top S := by
@@ -1180,7 +1180,7 @@ contradiction. Retained as a private helper so the main dispatcher
 `exists_nullstellensatz_refinement` can use it uniformly. -/
 private theorem exists_nullstellensatz_refinement_of_empty_covers
     [DecidableEq A] [Nontrivial A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty) (hcov : C.covers = ∅) :
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) (hcov : C.covers = ∅) :
     ∃ S : Finset A, refines_cover C S ∧ refines_contain C S ∧ refines_span_top S := by
   exfalso
   obtain ⟨D, hD⟩ := hne
@@ -1279,14 +1279,14 @@ empty case should use
 The `hZavyalov` hypothesis bundles the existence of the refining
 family `S` produced by the Zavyalov §2.3 construction (Cor 7.32
 dominating-unit + Prop 7.14 adic Nullstellensatz). Downstream callers
-(`RationalCovering.refines_by_standard_cover`) thread the same
+(`RationalCoveringData.refines_by_standard_cover`) thread the same
 hypothesis, exposing the remaining obligation explicitly. -/
 private theorem exists_nullstellensatz_refinement_of_rationalOpen_nonempty
     [DecidableEq A]
     [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [Nontrivial A]
-    (C : RationalCovering A) (_hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (_hne : C.covers.Nonempty)
     (_hne_rat : rationalOpen C.base.T C.base.s ≠ ∅)
     -- Zavyalov §2.3 existence hypothesis: the output of Wedhorn Lemma 8.34(ii),
     -- combining Cor 7.32's dominating-unit extraction with the adic
@@ -1359,7 +1359,7 @@ private theorem exists_nullstellensatz_refinement
     [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [Nontrivial A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     -- Zavyalov §2.3 existence hypothesis for the nonempty-rational-open branch.
     -- See `exists_nullstellensatz_refinement_of_rationalOpen_nonempty` for the
     -- mathematical content.
@@ -1404,11 +1404,11 @@ of standard covers, where Laurent-cover induction applies.
 3. Strong Nullstellensatz (Wedhorn 7.14) then gives `Ideal.span S.elts = ⊤`.
 4. The containment of each plus-piece in some `Dⱼ` comes from the
    construction in step 2. -/
-theorem RationalCovering.refines_by_standard_cover
+theorem RationalCoveringData.refines_by_standard_cover
     [DecidableEq A]
     [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     -- Zavyalov §2.3 existence hypothesis for the nonempty-rational-open branch.
     -- See `exists_nullstellensatz_refinement_of_rationalOpen_nonempty` for
     -- the mathematical content. Downstream callers obtain this from Cor 7.32
@@ -1474,7 +1474,7 @@ rational open is empty, every `E ∈ C.covers` has
 `C.hsubset`), so the per-E covering condition is vacuous. `S = {1}`
 witnesses all three clauses. -/
 private theorem exists_nullstellensatz_refinement_per_E_of_rationalOpen_empty
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (hne : C.covers.Nonempty)
     (hempty : rationalOpen C.base.T C.base.s = ∅) :
     ∃ S : Finset A,
@@ -1507,7 +1507,7 @@ private theorem exists_nullstellensatz_refinement_per_E_of_rationalOpen_nonempty
     [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [Nontrivial A]
-    (C : RationalCovering A) (_hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (_hne : C.covers.Nonempty)
     (_hne_rat : rationalOpen C.base.T C.base.s ≠ ∅)
     (hZavyalov_per_E : ∃ S : Finset A,
       refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S) :
@@ -1524,7 +1524,7 @@ private theorem exists_nullstellensatz_refinement_per_E
     [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     [Nontrivial A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S) :
@@ -1551,11 +1551,11 @@ for each `E ∈ C.covers` and each `v` in `E`'s rational open, a specific
 then threads through `exists_nullstellensatz_refinement_per_E` —
 mirroring the existing `refines_by_standard_cover` chain with the
 strengthened predicate. -/
-theorem RationalCovering.refines_by_standard_cover_per_E
+theorem RationalCoveringData.refines_by_standard_cover_per_E
     [DecidableEq A]
     [IsHuberRing A] [HasLocLiftPowerBounded A]
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hZavyalov_per_E : rationalOpen C.base.T C.base.s ≠ ∅ →
       ∃ S : Finset A,
         refines_cover_per_E C S ∧ refines_contain C S ∧ refines_span_top S) :
@@ -1585,7 +1585,7 @@ theorem RationalCovering.refines_by_standard_cover_per_E
 plan).
 
 Once a rational covering is refined to a standard cover (via
-`RationalCovering.refines_by_standard_cover`), the Tate acyclicity
+`RationalCoveringData.refines_by_standard_cover`), the Tate acyclicity
 (separation + gluing) transfers from the Laurent-cover induction to the
 original covering.
 
@@ -1597,7 +1597,7 @@ route (original Phase 1/5a) which was blocked on Bourbaki CA III §2.8.
 
 **Proof strategy**:
 
-1. Apply `RationalCovering.refines_by_standard_cover` to produce `S : StandardCover A`.
+1. Apply `RationalCoveringData.refines_by_standard_cover` to produce `S : StandardCover A`.
 2. Perform induction on `S.elts.card`:
    * base case `n = 1`: `{f}` with `Ideal.span {f} = ⊤` means `f` is a
      unit, so the plus-piece at `f` is the whole base and acyclicity is
@@ -1612,7 +1612,7 @@ theorem tateAcyclicity_via_standard_cover
     [NonarchimedeanRing A]
     [HasLocLiftPowerBounded A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty) :
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty) :
     -- Part 1: Separation (zero kernel).
     (∀ x : presheafValue C.base,
       (∀ (D : RationalLocData A) (hD : D ∈ C.covers),
@@ -1630,7 +1630,7 @@ theorem tateAcyclicity_via_standard_cover
   -- separately only to document the INTENDED proof route (refinement by a
   -- standard cover, followed by Laurent-cover induction), which the R1 ticket
   -- is meant to carry out. Until the standard-cover reduction is complete
-  -- (see `RationalCovering.refines_by_standard_cover` above), this theorem is
+  -- (see `RationalCoveringData.refines_by_standard_cover` above), this theorem is
   -- implemented by delegating to `tateAcyclicity` — carrying over the single
   -- upstream sorry in `tateAcyclicity` Part 2 (gluing via partition-of-unity)
   -- rather than introducing a second independent one.

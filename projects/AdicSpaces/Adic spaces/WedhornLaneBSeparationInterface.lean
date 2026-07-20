@@ -28,13 +28,13 @@ coverings nonempty-cover separation theorem already documented in
 * `laneB_supplier_via_perE_separation_interface_allow_empty` — the
   allow-empty variant matching the relaxed Lane B shape consumed by
   `tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_allow_empty`.
-  Uses `RationalCovering.per_E_local_covering_nonempty_of_rationalOpen_nonempty`
+  Uses `RationalCoveringData.per_E_local_covering_nonempty_of_rationalOpen_nonempty`
   (`GeometricReduction.lean`) to derive per-E local-cover nonemptiness
   from `(rationalOpen E.1.T E.1.s).Nonempty`.
 
 * `laneB_supplier_via_prime_extension_closed` — concrete variant
   using the Wedhorn Corollary 8.32 prime-extension-closed route via
-  `RationalCovering.nonempty_separation_supplier_via_prime_extension_closed`
+  `RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed`
   in `TateAcyclicityFinalAssembly.lean`. Narrows the Lane B residual
   to the four named Cor 8.32 hypotheses (`hloc_noeth`,
   `hAplus_le_A₀`, `hcanonicalMap_cont`, `h_closed_nonOpen`) on the
@@ -73,7 +73,7 @@ Wedhorn Corollary 8.32-style cover-level injectivity
 (`productRestriction_injective_tate_via_prime_extension_closed` in
 `Cor832.lean`) is the canonical source of the per-E separation. Its
 universal-over-rational-coverings packaging
-`RationalCovering.nonempty_separation_supplier_via_prime_extension_closed`
+`RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed`
 already takes the four-hypothesis bundle:
 
 * `hloc_noeth` — locSubring noetherianity per cover.
@@ -118,14 +118,14 @@ local-cover nonemptiness witness, produce the `lane_B_supplier` shape
 consumed by `tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA`.
 
 Mirrors the `lane_B_supplier` construction in
-`RationalCovering.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_separation`
+`RationalCoveringData.tateAcyclicity_end_to_end_via_primary_laneA_of_nonempty_separation`
 (`TateAcyclicityFinalAssembly.lean:1502`): apply the separation
 supplier at each per-E local covering with the supplied nonemptiness
 witness. Reusable across all consumer wrappers that need the full-form
 `lane_B_supplier` shape. -/
 theorem laneB_supplier_via_perE_separation_interface
-    (C : RationalCovering A) (f₀ : A)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (C : RationalCoveringData A) (f₀ : A)
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -159,12 +159,12 @@ Matches the relaxed `lane_B_supplier` shape consumed by
 the supplier is only required for cover pieces `E` with
 `(rationalOpen E.1.T E.1.s).Nonempty`. Per-E local-cover nonemptiness
 is derived structurally via
-`RationalCovering.per_E_local_covering_nonempty_of_rationalOpen_nonempty`
+`RationalCoveringData.per_E_local_covering_nonempty_of_rationalOpen_nonempty`
 (`GeometricReduction.lean`), so the caller no longer supplies an
 explicit per-E nonemptiness witness. -/
 theorem laneB_supplier_via_perE_separation_interface_allow_empty
-    (C : RationalCovering A) (f₀ : A)
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (C : RationalCoveringData A) (f₀ : A)
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -193,7 +193,7 @@ theorem laneB_supplier_via_perE_separation_interface_allow_empty
 route** (T068 concrete deliverable, full form).
 
 Composes
-`RationalCovering.nonempty_separation_supplier_via_prime_extension_closed`
+`RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed`
 with `laneB_supplier_via_perE_separation_interface` to produce the
 full-form `lane_B_supplier` directly from the four named Cor 8.32
 hypotheses. The per-E nonemptiness witness `per_E_nonempty` is left
@@ -201,14 +201,14 @@ explicit. -/
 theorem laneB_supplier_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (f₀ : A)
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (C : RationalCoveringData A) (f₀ : A)
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀ : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀ : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
@@ -232,7 +232,7 @@ theorem laneB_supplier_via_prime_extension_closed
             ((C.per_E_local_covering S'.elts f₀ E hS'_per_E).hsubset D hD) b) →
         a = b :=
   laneB_supplier_via_perE_separation_interface C f₀
-    (RationalCovering.nonempty_separation_supplier_via_prime_extension_closed
+    (RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed
       P hloc_noeth hAplus_le_A₀ hcanonicalMap_cont h_closed_nonOpen)
     per_E_nonempty
 
@@ -241,7 +241,7 @@ route, allow-empty form** (T068 concrete deliverable, allow-empty
 form).
 
 Composes
-`RationalCovering.nonempty_separation_supplier_via_prime_extension_closed`
+`RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed`
 with `laneB_supplier_via_perE_separation_interface_allow_empty` to
 produce the relaxed `lane_B_supplier` directly from the four named
 Cor 8.32 hypotheses. Per-E local-cover nonemptiness derives
@@ -249,14 +249,14 @@ structurally from `(rationalOpen E.1.T E.1.s).Nonempty`. -/
 theorem laneB_supplier_via_prime_extension_closed_allow_empty
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (f₀ : A)
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (C : RationalCoveringData A) (f₀ : A)
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀ : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀ : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
@@ -277,7 +277,7 @@ theorem laneB_supplier_via_prime_extension_closed_allow_empty
             ((C.per_E_local_covering S'.elts f₀ E hS'_per_E).hsubset D hD) b) →
         a = b :=
   laneB_supplier_via_perE_separation_interface_allow_empty C f₀
-    (RationalCovering.nonempty_separation_supplier_via_prime_extension_closed
+    (RationalCoveringData.nonempty_separation_supplier_via_prime_extension_closed
       P hloc_noeth hAplus_le_A₀ hcanonicalMap_cont h_closed_nonOpen)
 
 end ValuationSpectrum

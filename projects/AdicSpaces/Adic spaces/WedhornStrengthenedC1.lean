@@ -98,7 +98,7 @@ Mathematically: under Tertiary's actual ratio construction
 the normalized choice), `v(f) = v(σ) · v(D.s) ^ N`, with both factors
 non-zero on `rationalOpen D.T D.s`. So this strengthening is a
 signature-level update, not a new mathematical content step. -/
-def C1SupplierStrong_local [DecidableEq A] (C : RationalCovering A) : Prop :=
+def C1SupplierStrong_local [DecidableEq A] (C : RationalCoveringData A) : Prop :=
   ∀ (D : RationalLocData A) (_hD : D ∈ C.covers)
     (v : Spv A) (_hv : v ∈ rationalOpen D.T D.s)
     (t : A) (_ht : t ∈ D.T)
@@ -129,7 +129,7 @@ The third clause `¬ v.vle f 0` is what
 `WedhornStage2SpanExtractor.span_top_via_strengthened_cover_and_outside_rescue`
 (commit `63c8ecd`) consumes via its `h_cover_D_nonzero` hypothesis. -/
 theorem exists_single_f_refining_point_in_D_via_C1SupplierStrong
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (h_C1_strong : C1SupplierStrong_local C)
     (D : RationalLocData A) (hD : D ∈ C.covers)
     (hD_s_mem : D.s ∈ D.T)

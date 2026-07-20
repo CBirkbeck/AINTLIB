@@ -236,7 +236,7 @@ Tracked as an atomic sub-lemma; closing this discharges C1. -/
 theorem localBasisHyp_of_strongly_noetherian
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
-    (C : RationalCovering A) :
+    (C : RationalCoveringData A) :
     LocalBasisHyp C := by
   sorry
 
@@ -253,7 +253,7 @@ theorem exists_per_D_finite_cover_of_localBasisHyp
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
     (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
-    (C : RationalCovering A) (hC_rat : ∀ D ∈ C.covers, D.IsRational)
+    (C : RationalCoveringData A) (hC_rat : ∀ D ∈ C.covers, D.IsRational)
     (h_basis : LocalBasisHyp C) :
     ∃ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
@@ -441,7 +441,7 @@ Tracked as an atomic sub-lemma; the standard inequality
 theorem strengthened_cover_of_basic_cover
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_cover_D : ∀ D ∈ C.covers, ∀ v ∈ rationalOpen D.T D.s,
       ∃ f ∈ mk_S_D D, v ∈ rationalOpen (insert f C.base.T) C.base.s) :
@@ -460,7 +460,7 @@ ingredient. -/
 theorem outside_rescue_of_per_D_cover
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (_h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)
@@ -484,7 +484,7 @@ theorem span_top_of_per_D_finite_cover
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (mk_S_D : RationalLocData A → Finset A)
     (h_in_D : ∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,
       rationalOpen (insert f C.base.T) C.base.s ⊆ rationalOpen D.T D.s)
@@ -532,7 +532,7 @@ theorem exists_standard_cover_refining
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A] [CompatiblePlusSubring A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
-    (C : RationalCovering A) (hC_rat : ∀ D ∈ C.covers, D.IsRational) :
+    (C : RationalCoveringData A) (hC_rat : ∀ D ∈ C.covers, D.IsRational) :
     ∃ S : Finset A,
       refines_cover C S ∧
       refines_contain C S ∧
@@ -575,7 +575,7 @@ def restricted_standard_cover_generated_by_units
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A) (S : Finset A)
+    (L : RationalLocData A) (C : RationalCoveringData A) (S : Finset A)
     (s : Aˣ) (I_units : Finset A) : Prop :=
   I_units ⊆ S ∧
   (∀ f ∈ I_units, IsUnit (L.canonicalMap (((s⁻¹ : Aˣ) : A) * f))) ∧
@@ -624,7 +624,7 @@ ratio-Laurent argument needs. -/
 noncomputable def relativeUnitGenerator
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
-    (L : RationalLocData A) (C : RationalCovering A) (f : A)
+    (L : RationalLocData A) (C : RationalCoveringData A) (f : A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (h_unit_base : IsUnit (L.canonicalMap C.base.s)) :
@@ -653,7 +653,7 @@ def IsRelativeUnitPieceFor
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A)
+    (L : RationalLocData A) (C : RationalCoveringData A)
     (f : A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
@@ -683,13 +683,13 @@ def IsUnitGeneratedCoverFrom
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A)
+    (L : RationalLocData A) (C : RationalCoveringData A)
     (_s : Aˣ) (I_units : Finset A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
     (L_rel : RationalLocData (presheafValue L))
-    (unitCover : RationalCovering (presheafValue L)) : Prop :=
+    (unitCover : RationalCoveringData (presheafValue L)) : Prop :=
   unitCover.base = L_rel ∧
   -- (2) each piece corresponds to some f ∈ I_units
   (∀ piece ∈ unitCover.covers, ∃ f ∈ I_units,
@@ -721,7 +721,7 @@ def IsRatioLaurentTreeFrom
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A)
+    (L : RationalLocData A) (C : RationalCoveringData A)
     (I_units : Finset A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
@@ -749,7 +749,7 @@ theorem isUnit_relativeUnitGenerator_from_W2_unit
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A) (f : A)
+    (L : RationalLocData A) (C : RationalCoveringData A) (f : A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (s : Aˣ)
@@ -786,7 +786,7 @@ theorem isUnit_base_s_in_presheafValue_of_subset
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A)
+    (L : RationalLocData A) (C : RationalCoveringData A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (hL_subset : rationalOpen L.T L.s ⊆ rationalOpen C.base.T C.base.s) :
@@ -893,7 +893,7 @@ of `D` by `data.plus` and `data.minus`. Both `cover.base = D` and
 propositional) — eliminates casts in the NODE induction per
 round-15 reviewer feedback. -/
 noncomputable def RatioNodeData.cover {D : RationalLocData A} {f g : A}
-    (data : RatioNodeData D f g) : RationalCovering A :=
+    (data : RatioNodeData D f g) : RationalCoveringData A :=
   letI : DecidableEq (RationalLocData A) := Classical.decEq _
   { base := D
     covers := {data.plus, data.minus}
@@ -972,7 +972,7 @@ private theorem relativeUnitGenerator_vle_transport_aux
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A) (g h : A)
+    (L : RationalLocData A) (C : RationalCoveringData A) (g h : A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
@@ -1231,7 +1231,7 @@ private theorem exists_absolute_ratio_rationalLocData_aux
     [DecidableEq A]
     (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
     (L : RationalLocData A) (hL_rat : L.IsRational) (hA₀_le : L.P.A₀ ≤ A⁺)
-    (C : RationalCovering A) (g h : A)
+    (C : RationalCoveringData A) (g h : A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
@@ -1580,7 +1580,7 @@ theorem relative_ratio_split_transports_to_RatioNodeData
     [DecidableEq A]
     (hplus_open : IsOpen ((A⁺ : Subring A) : Set A))
     (L : RationalLocData A) (hL_rat : L.IsRational) (hA₀_le : L.P.A₀ ≤ A⁺)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
@@ -1661,7 +1661,7 @@ realization's `RatioNodeData`, so `Refines` and `allSplitsInducing`
 agree on them. -/
 def RatioTreeRealization.Refines : {t : RatioLaurentTree A} →
     {D : RationalLocData A} → RatioTreeRealization t D →
-    RationalCovering A → Prop
+    RationalCoveringData A → Prop
   | _, _, .leaf D, C => ∃ E ∈ C.covers, rationalOpen D.T D.s ⊆ rationalOpen E.T E.s
   | _, _, .nodeLaurent _ _ ρL ρR, C => ρL.Refines C ∧ ρR.Refines C
   | _, _, .nodeRatio _ _ _ _ ρL ρR, C => ρL.Refines C ∧ ρR.Refines C
@@ -1713,7 +1713,7 @@ theorem exists_first_stage_laurent_cover
     [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (S : Finset A)
     (_hS_cover : refines_cover C S)
     (_hS_contain : refines_contain C S)
@@ -1797,7 +1797,7 @@ theorem balancedTree_BalancedInducing_of_rescaled_S
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (_hS_contain : refines_contain C S)
     (s : Aˣ) :
     LaurentTree.BalancedInducing C.base
@@ -1820,7 +1820,7 @@ theorem balancedTree_allSplitsInducing_of_rescaled_S
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (hS_contain : refines_contain C S)
     (s : Aˣ) :
     (LaurentTree.ofBalancedList
@@ -1859,7 +1859,7 @@ theorem exists_first_stage_laurent_tree_unit_generated
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (_hS_cover : refines_cover C S)
     (_hS_contain : refines_contain C S)
     (_hS_span : refines_span_top S) :
@@ -1932,13 +1932,13 @@ theorem unitCover_refines_relative_balanced_ratio_tree_leaves
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A)
+    (L : RationalLocData A) (C : RationalCoveringData A)
     (I_units : Finset A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
     (h_unit_base : IsUnit (L.canonicalMap C.base.s))
     (L_rel : RationalLocData (presheafValue L))
-    (unitCover : RationalCovering (presheafValue L))
+    (unitCover : RationalCoveringData (presheafValue L))
     (h_units_invertible : ∀ h ∈ I_units,
       IsUnit (relativeUnitGenerator L C h h_unit_base))
     (h_unit_pieces : ∀ f ∈ I_units, ∃ piece ∈ unitCover.covers,
@@ -1969,7 +1969,7 @@ theorem balancedInducing_of_relative_unit_ratios
     {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
     [IsTopologicalRing A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     [DecidableEq A]
-    (L : RationalLocData A) (C : RationalCovering A)
+    (L : RationalLocData A) (C : RationalCoveringData A)
     (I_units : Finset A)
     [IsTopologicalRing (presheafValue L)] [PlusSubring (presheafValue L)]
     [IsHuberRing (presheafValue L)] [HasLocLiftPowerBounded (presheafValue L)]
@@ -2025,7 +2025,7 @@ theorem unitGeneratedCover_has_relative_ratioLaurentRefinement
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (_hS_contain : refines_contain C S)
     (s : Aˣ)
     (L : RationalLocData A)
@@ -2048,7 +2048,7 @@ theorem unitGeneratedCover_has_relative_ratioLaurentRefinement
     (_h_L_rel_canonical : IsCanonicalRelativeBase L L_rel)
     -- Strong predicate on unitCover (round-9 + round-10
     -- algebraic-identification + unit-generator clause):
-    (unitCover : RationalCovering (presheafValue L))
+    (unitCover : RationalCoveringData (presheafValue L))
     (_h_unitCover :
       IsUnitGeneratedCoverFrom L C s I_units h_unit_base L_rel unitCover) :
     -- Output (round-11): the relative tree refines the relative
@@ -2150,7 +2150,7 @@ theorem relative_laurent_tree_to_absolute
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (_hS_contain : refines_contain C S)
     (s : Aˣ)
     (L : RationalLocData A)
@@ -2169,7 +2169,7 @@ theorem relative_laurent_tree_to_absolute
     -- IsUnit clause).
     (L_rel : RationalLocData (presheafValue L))
     (_h_L_rel_canonical : IsCanonicalRelativeBase L L_rel)
-    (unitCover : RationalCovering (presheafValue L))
+    (unitCover : RationalCoveringData (presheafValue L))
     (_h_unitCover :
       IsUnitGeneratedCoverFrom L C s I_units h_unit_base L_rel unitCover)
     -- The relative inner tree REFINING unitCover (W3 output):
@@ -2346,7 +2346,7 @@ realization built by `RatioTreeRealization.ofLaurentTree`. -/
 theorem RatioTreeRealization.refines_ofLaurentTree
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
-    (t : LaurentTree A) (D : RationalLocData A) (C : RationalCovering A)
+    (t : LaurentTree A) (D : RationalLocData A) (C : RationalCoveringData A)
     (h : t.Refines D C) :
     (RatioTreeRealization.ofLaurentTree t D).Refines C := by
   induction t generalizing D with
@@ -2394,7 +2394,7 @@ theorem exists_inner_laurent_refinement_per_leaf
     [NonarchimedeanRing A] [IsDomain A] [DecidableEq A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (S : Finset A)
+    (C : RationalCoveringData A) (S : Finset A)
     (_hS_cover : refines_cover C S)
     (_hS_contain : refines_contain C S)
     (_hS_span : refines_span_top S)
@@ -2440,7 +2440,7 @@ theorem exists_wedhorn_laurent_refinement_tree
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational) :
+    (C : RationalCoveringData A) (hC_cov : ∀ D ∈ C.covers, D.IsRational) :
     ∃ t : LaurentTree A,
       t.Refines C.base C ∧
       t.allSplitsInducing C.base := by
@@ -2504,7 +2504,7 @@ theorem exists_wedhorn_ratio_laurent_refinement_tree_realized
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hC_cov : ∀ D ∈ C.covers, D.IsRational) :
+    (C : RationalCoveringData A) (hC_cov : ∀ D ∈ C.covers, D.IsRational) :
     ∃ (t : RatioLaurentTree A) (ρ : RatioTreeRealization t C.base),
       ρ.Refines C ∧ ρ.allSplitsInducing := by
   -- Promote the legacy `LaurentTree`-valued I.1 via the structural transfer
@@ -2542,7 +2542,7 @@ theorem exists_unit_generated_laurent_refinement
     -- of L) whose pieces are pairwise determined by valuation ordering
     -- on the units, and where each piece is contained in some
     -- unit-plus-piece `R(insert f L.T / L.s)` of the cover-by-units.
-    ∃ refined : RationalCovering A,
+    ∃ refined : RationalCoveringData A,
       refined.base = L ∧
       ∀ E ∈ refined.covers, ∃ f ∈ units,
         rationalOpen E.T E.s ⊆ rationalOpen (insert f L.T) L.s := by
@@ -2615,7 +2615,7 @@ theorem tateAcyclicity_part1_separation_via_cor832
     [NonarchimedeanRing A] [IsDomain A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     (hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp) :
     ∀ x : presheafValue C.base,
@@ -2638,7 +2638,7 @@ theorem tateAcyclicity_part2_gluing_via_flat_descent
     [NonarchimedeanRing A] [IsDomain A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (_hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (_hne : C.covers.Nonempty)
     (_hSpa : ∀ (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp)
     (f : ∀ D : ↥C.covers, presheafValue D.1)
@@ -2769,7 +2769,7 @@ theorem exists_spa_point_dominating_prime
     ∃ v ∈ rationalOpen D₀.T D₀.s, p ≤ v.supp := by
   -- Build a singleton rational covering with `C.base = D₀` and apply
   -- the existing axiom-clean `hSpa_points_via_lifted_ideal_proper`.
-  let C : RationalCovering A :=
+  let C : RationalCoveringData A :=
     { base := D₀
       covers := {D₀}
       hsubset := by
@@ -2860,7 +2860,7 @@ theorem tateAcyclicityComplete
     [NonarchimedeanRing A] [IsDomain A]
     [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     -- IV.1's side conditions, threaded through:
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
@@ -2915,7 +2915,7 @@ theorem isSheafyComplete
     -- Per-cover instance/witness inputs for IV.1's side conditions.
     -- (Universally quantified over all rational coverings since the
     -- IsSheafy structure consumes hSpa on every C.)
-    (hSpa_inputs : ∀ (C : RationalCovering A),
+    (hSpa_inputs : ∀ (C : RationalCoveringData A),
       IsNoetherianRing C.base.P.A₀ ∧
       IsNoetherianRing (locSubring C.base.P C.base.T C.base.s) ∧
       (A⁺ : Set A) ⊆ C.base.P.A₀ ∧

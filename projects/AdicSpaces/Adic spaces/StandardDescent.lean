@@ -135,7 +135,7 @@ theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
     haveI hSheafy₁ : IsSheafy A := isSheafy_of_isLimitSheaf h
     refine ⟨IsSheafy.embedding _ (StandardCoverData.toCovering_isRational S),
       fun f hf => IsSheafy.gluing _ (StandardCoverData.toCovering_isRational S) f ?_⟩
-    exact (RationalCovering.allDataCompatible_iff_exactIntersectionCompatible
+    exact (RationalCoveringData.allDataCompatible_iff_exactIntersectionCompatible
       (StandardCoverData.toCovering_isRational S) f).mpr hf
   -- ——— the assertions at the TARGET pair ———
   letI : PlusSubring A := ⟨B⟩
@@ -149,7 +149,7 @@ theorem standardSheafCondition_of_isSheafyFor (Aplus : RingOfIntegralElements A)
   · -- gluing: the compatibility hypothesis transfers through its
     -- exact-intersection form, which mentions only the intersection data
     intro f hf
-    exact key.2 f ((RationalCovering.allDataCompatible_iff_exactIntersectionCompatible
+    exact key.2 f ((RationalCoveringData.allDataCompatible_iff_exactIntersectionCompatible
       (StandardCoverData.toCovering_isRational S) f).mp hf)
 
 /-! ### The descent input (Kedlaya Lemma 1.6.8's conclusion), named -/
@@ -190,7 +190,7 @@ noetherian-free `IsAdicComplete`-from-`CompleteSpace` bridge, and a noetherian-f
 `relativePiece_equiv`. Until they exist, this input is a hypothesis — never
 supplied silently. -/
 def HasStandardRefinementsAt [PlusSubring A] : Prop :=
-  ∀ (C : RationalCovering A) (hC : C.IsRational),
+  ∀ (C : RationalCoveringData A) (hC : C.IsRational),
     C.covers.Nonempty →
       ∃ (S : Finset A) (hS : Ideal.span (S : Set A) = ⊤),
         ∀ f ∈ S, ∃ E ∈ C.covers,
@@ -222,7 +222,7 @@ theorem mem_ofSpanTop_covers {D₀ : RationalLocData A} {hD₀ : D₀.IsRational
   exact ⟨f.1, f.2, hfeq⟩
 
 private theorem productRestrictionSub_continuous'' [HasLocLiftPowerBounded A]
-    (C : RationalCovering A) : Continuous (productRestrictionSub A C) := by
+    (C : RationalCoveringData A) : Continuous (productRestrictionSub A C) := by
   refine continuous_pi fun E => ?_
   show Continuous fun x : presheafValue C.base =>
     restrictionMap C.base E.1 (C.hsubset E.1 E.2) x
@@ -235,7 +235,7 @@ section ring `presheafValue C.base` is a subsingleton
 `IsEmbedding.of_subsingleton` and gluing is the (vacuously constrained) `0`-section.
 Extracted so the two `IsSheafy` fields do not duplicate it. -/
 theorem isSheafy_rationalCovering_of_covers_empty
-    (C : RationalCovering A) (he : C.covers = ∅) :
+    (C : RationalCoveringData A) (he : C.covers = ∅) :
     haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
     Topology.IsEmbedding (productRestrictionSub A C) ∧
     ∀ (f : ∀ D : ↥C.covers, presheafValue D.1),
@@ -402,7 +402,7 @@ theorem isSheafy_of_standardSheafCondition_at
 /-- **Empty-cover regression** (PHASE 1): the empty-cover branch is discharged
 unconditionally on the covering (only the ambient complete-Tate structure), with
 no descent input — the section ring is a subsingleton. -/
-example (C : RationalCovering A) (he : C.covers = ∅) :
+example (C : RationalCoveringData A) (he : C.covers = ∅) :
     haveI : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
     Topology.IsEmbedding (productRestrictionSub A C) :=
   (isSheafy_rationalCovering_of_covers_empty C he).1

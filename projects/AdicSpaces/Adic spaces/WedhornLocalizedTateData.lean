@@ -135,7 +135,7 @@ T206's item-8 input (no-common-zero on `Spa(Loc s, ⁺)` for the test
 family `T_test_loc`) is the last per-cover residual after T208/T211.
 T213 below produces the supplier in the **generic** form parameterised
 directly by `(P, T, s, hopen)` and the per-cover-piece data
-`(T_D, s_D)`, rather than the existing `RationalCovering`-specialised
+`(T_D, s_D)`, rather than the existing `RationalCoveringData`-specialised
 `wedhorn_834_localizedTestFamily_nonvanishing_supplier`
 (`Adic spaces/WedhornC1StrongSupplierBridge.lean:553`).
 
@@ -171,9 +171,9 @@ ring.
 `wedhorn_834_localizedTestFamily_nonvanishing_supplier`
 (`WedhornC1StrongSupplierBridge.lean:553`) — the same reduction,
 parameterised by `(T_D, s_D)` directly rather than by
-`(C : RationalCovering A, D : RationalLocData A)`. Suitable as the
+`(C : RationalCoveringData A, D : RationalLocData A)`. Suitable as the
 `hT_loc` input at T206-style callsites that lack a
-`RationalCovering` packaging. -/
+`RationalCoveringData` packaging. -/
 theorem localizedTestFamily_nonvanishing_of_denominator_nonvanishing
     [PlusSubring A]
     (P : PairOfDefinition A) (T : Finset A) (s : A)

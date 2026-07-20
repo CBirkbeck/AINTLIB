@@ -95,7 +95,7 @@ end-to-end Part 2 chain in `TateAcyclicityFinalAssembly.lean`:
   → produces the Wedhorn refinement existential `hZavyalov_per_E`
   modulo the Stage-2 hypotheses (`h_outside_rescue`,
   `h_nonzero_cover_supplier`).
-* `RationalCovering.tateAcyclicity_Part2_end_to_end_via_primary`
+* `RationalCoveringData.tateAcyclicity_Part2_end_to_end_via_primary`
   (`TateAcyclicityFinalAssembly.lean`) → produces Part 2 of the
   cover-level tate acyclicity from `hZavyalov_per_E` plus the abstract
   `lane_A_supplier` and `lane_B_supplier` hypotheses.
@@ -153,7 +153,7 @@ The shape matches the input expected by
 `rationalOpen_global_subset_via_lemma833_assembly` exactly. -/
 structure WedhornC1Lemma833PerCallAssemblyData
     [DecidableEq A]
-    (C : RationalCovering A) (D : RationalLocData A) (v : Spv A) where
+    (C : RationalCoveringData A) (D : RationalLocData A) (v : Spv A) where
   /-- σ-construction dominating unit (Cor 7.32). -/
   σ : Aˣ
   /-- Base-side denominator candidate. -/
@@ -212,7 +212,7 @@ supplier route: it makes the dependency on the C1 cover assembly /
 multi-piece Wedhorn 8.33 theorem explicit. -/
 theorem C1SupplierStrong_local_via_lemma833_per_call_assembly
     [DecidableEq A]
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_per_call :
       ∀ (D : RationalLocData A), D ∈ C.covers →
       ∀ (v : Spv A), v ∈ rationalOpen D.T D.s →

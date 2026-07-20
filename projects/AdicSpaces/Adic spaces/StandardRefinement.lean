@@ -163,7 +163,7 @@ relative to a valid rational base): for a finite family `F` generating the unit
 ideal, the pieces `R(D₀) ∩ R(F/f)`, `f ∈ F`, are subordinate to `R(D₀)` and cover it
 **uniformly in the valuation** — the maximum argument places every valuation with the
 base conditions in the piece of a maximal-value generator. Instantiating
-(`StandardCoverData.toCovering`) yields a genuine `RationalCovering` at **every**
+(`StandardCoverData.toCovering`) yields a genuine `RationalCoveringData` at **every**
 choice of `A⁺` at once. -/
 def StandardCoverData.ofSpanTop (D₀ : RationalLocData A) (hD₀ : D₀.IsRational)
     (F : Finset A) (hF : Ideal.span (F : Set A) = ⊤) : StandardCoverData A where
@@ -214,7 +214,7 @@ def StandardCoverData.ofSpanTop (D₀ : RationalLocData A) (hD₀ : D₀.IsRatio
 /-- The generated standard cover instantiates as a rational covering at every valid
 `A⁺` (regression wiring: the object `StandardSheafCondition` quantifies over). -/
 example [PlusSubring A] (D₀ : RationalLocData A) (hD₀ : D₀.IsRational)
-    (F : Finset A) (hF : Ideal.span (F : Set A) = ⊤) : RationalCovering A :=
+    (F : Finset A) (hF : Ideal.span (F : Set A) = ⊤) : RationalCoveringData A :=
   (StandardCoverData.ofSpanTop D₀ hD₀ F hF).toCovering
 
 end ValuationSpectrum

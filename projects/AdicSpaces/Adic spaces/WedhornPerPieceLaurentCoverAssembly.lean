@@ -81,7 +81,7 @@ file containing only new declarations.
 gluing in **2-element** form (`laurentCover_gluing_presheaf`) and a
 general refinement-transfer API (`gluing_of_finer_rational`,
 `tateAcyclicity_gluing_via_refinement` in `RationalRefinement.lean`).
-Both expect `RationalCovering A` / `Finset (RationalLocData A)` inputs,
+Both expect `RationalCoveringData A` / `Finset (RationalLocData A)` inputs,
 NOT the `Set (Spv A)`-level Laurent pieces produced by T054.
 
 The natural connection is:
@@ -97,7 +97,7 @@ The natural connection is:
    `D_τ.T = {(1:A)}`, `D_τ.s = σ⁻¹ * τ`, suitable `P_τ`,
    `hopen`-witness), the multi-piece `Finset {D_τ : τ ∈ T_test}`
    together with a base `RationalLocData` (e.g., `Spa(A,A⁺)` itself
-   if it is `rationalOpen`-shaped) form a `RationalCovering A`. Then
+   if it is `rationalOpen`-shaped) form a `RationalCoveringData A`. Then
    `tateAcyclicity_gluing_via_refinement` applies, reducing the
    global gluing to per-piece gluing; the per-piece gluing on each
    Laurent piece is exactly the input `laurentCover_gluing_presheaf`

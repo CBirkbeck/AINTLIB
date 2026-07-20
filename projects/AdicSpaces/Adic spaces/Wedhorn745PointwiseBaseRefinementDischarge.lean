@@ -104,7 +104,7 @@ Direct enrichment of
 `StandardCover.exists_single_f_refinement_of_standardShape` with the
 non-vanishing third clause supplied as an explicit hypothesis. -/
 theorem exists_strong_C1_refinement_of_standardShape_pointwise
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (f₀ : A)
     (hD_shape : rationalOpen D.T D.s =
       rationalOpen (insert f₀ C.base.T) C.base.s)
@@ -145,7 +145,7 @@ to the singleton self-test case `D.T = {D.s}` with unit rescaling
   (by `hσ`): from `v ∈ rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s`
   (cover refinement) we get `¬ v.vle C.base.s 0` directly. -/
 theorem exists_strong_C1_refinement_singleton_self_unit_rescaled
-    [DecidableEq A] (C : RationalCovering A) (D : RationalLocData A)
+    [DecidableEq A] (C : RationalCoveringData A) (D : RationalLocData A)
     (hD_sub : rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s)
     (hT : D.T = {D.s})
     (σ : Aˣ) (hσ : (σ : A) * D.s = C.base.s)
@@ -191,7 +191,7 @@ unit-rescaled form** — i.e., `D.T = {D.s}` AND `∃ σ : Aˣ, (σ : A) * D.s
 R(C.base.T, C.base.s)` — derive `C1SupplierStrong_local C` directly
 from existing API. **No σ-construction hypotheses required**. -/
 theorem C1SupplierStrong_local_via_per_D_singleton_self_unit_rescaled
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (h_per_D :
       ∀ D ∈ C.covers,
         rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s ∧
@@ -220,7 +220,7 @@ Spa premises. The non-vanishing clause is mathematically free under
 the σ-construction (`f_D := σ · D.s^N`, with both `v(σ) ≠ 0` and
 `v(D.s) ≠ 0` on the cover piece). -/
 theorem C1SupplierStrong_local_via_per_D_strong_standardShape
-    [DecidableEq A] (C : RationalCovering A)
+    [DecidableEq A] (C : RationalCoveringData A)
     (h_per_D :
       ∀ D ∈ C.covers, ∃ f_D : A,
         rationalOpen D.T D.s =
@@ -262,7 +262,7 @@ theorem C1SupplierStrong_local_via_Wedhorn745_pointwise_refinement
     [DecidableEq A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
     (hAplus_le_A₀ : (A⁺ : Set A) ⊆ P.A₀)
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (hopen_base : ∃ N : ℕ, ∀ b : P.A₀, b ∈ P.I ^ N →
       divByS (↑b : A) C.base.s ∈ locSubring P C.base.T C.base.s)
     (h_pointwise_C1 :

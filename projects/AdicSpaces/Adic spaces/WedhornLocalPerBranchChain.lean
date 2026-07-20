@@ -22,7 +22,7 @@ localized dominating unit `σ_loc ∈ (Localization.Away s)ˣ`.
 
 ## Strategy
 
-1. Use a **freestanding local reducer** (no `RationalCovering` wrapper)
+1. Use a **freestanding local reducer** (no `RationalCoveringData` wrapper)
    at the localization to convert localized σ-strict-domination data
    plus the local per-branch chain (`hT_test_compat_loc`) into a local
    rational-open subset inclusion on
@@ -47,7 +47,7 @@ file consumes the σ-strict-domination output directly.
 * `rationalOpen_subset_via_strict_sigma_domination_freestanding` —
   freestanding analog of
   `WedhornMultiDominatingUnit.rationalOpen_subset_via_strict_sigma_domination`
-  with no `RationalCovering` wrapper. Direct proof; reusable at the
+  with no `RationalCoveringData` wrapper. Direct proof; reusable at the
   localization side.
 
 * `rationalOpen_subset_base_via_local_Cor732_chain` — the **caller-shaped
@@ -77,10 +77,10 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 
 omit [IsTopologicalRing A] in
 /-- **Freestanding strict-σ-domination rationalOpen subset reducer**
-(no `RationalCovering` wrapper). Same shape and proof as
+(no `RationalCoveringData` wrapper). Same shape and proof as
 `WedhornMultiDominatingUnit.rationalOpen_subset_via_strict_sigma_domination`,
 but parameterised directly by `(T_base, s_base, T_D, s_D)` rather than
-through `RationalCovering`/`RationalLocData` field accesses; reusable
+through `RationalCoveringData`/`RationalLocData` field accesses; reusable
 at any base ring including `Localization.Away s` with the `locSubring`
 plus-subring. -/
 theorem rationalOpen_subset_via_strict_sigma_domination_freestanding

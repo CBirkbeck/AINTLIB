@@ -29,7 +29,7 @@ The reduction engine: every open cover of a valid rational open admits a **finit
 refinement by valid rational opens** subordinate to the cover
 (`exists_finite_rational_refinement` — basis property 7.35(2) + quasi-compactness
 7.35(3), from `RationalBasis`), and the refinement assembles into a
-`RationalCovering` (`refinementCovering`) to which the `IsSheafy` fields apply.
+`RationalCoveringData` (`refinementCovering`) to which the `IsSheafy` fields apply.
 Compatibility inputs cross the legacy all-raw-data interface through the R3 bridge
 (`RationalIntersection`).
 -/
@@ -74,14 +74,14 @@ theorem exists_finite_rational_refinement (D : RationalLocData A) (hD : D.IsRati
     (fun q : RefinementIndex D U => spaOpen q.1.1) (fun q => isOpen_spaOpen _) hcov
   exact ⟨t, ht⟩
 
-/-- The `RationalCovering` assembled from a finite rational refinement of `spaOpen D`.
+/-- The `RationalCoveringData` assembled from a finite rational refinement of `spaOpen D`.
 `@[reducible]` so that `.base`/`.covers`-projections reduce at reducible transparency
 (v4.33 `kabstract` re-checks; cf. the wave-9 notes). -/
 @[reducible]
 def refinementCovering (D : RationalLocData A) {ι : Type*}
     {U : ι → Set ↥(Spa A A⁺)} (t : Finset (RefinementIndex D U))
     (ht : spaOpen D ⊆ ⋃ q ∈ t, spaOpen (q : RefinementIndex D U).1.1) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := D
   covers := t.image (fun q => q.1.1)
   hsubset := by
@@ -185,11 +185,11 @@ theorem limitRestrict_injective [IsSheafy A]
 /-- The pieces of the intersection covering: the exact intersections of `E'` with the
 pieces of `C` (extracted as a named `Finset` so the covering's field types stay small). -/
 def interCoveringPieces (E' : RationalLocData A) (hE' : E'.IsRational)
-    (C : RationalCovering A) (hC : C.IsRational) : Finset (RationalLocData A) :=
+    (C : RationalCoveringData A) (hC : C.IsRational) : Finset (RationalLocData A) :=
   C.covers.attach.image fun E => E'.interRational E.1 hE' (hC.piece E.2)
 
 theorem mem_interCoveringPieces (E' : RationalLocData A) (hE' : E'.IsRational)
-    (C : RationalCovering A) (hC : C.IsRational) {F : RationalLocData A} :
+    (C : RationalCoveringData A) (hC : C.IsRational) {F : RationalLocData A} :
     F ∈ interCoveringPieces E' hE' C hC ↔
       ∃ E : ↥C.covers, E'.interRational E.1 hE' (hC.piece E.2) = F := by
   unfold interCoveringPieces
@@ -198,9 +198,9 @@ theorem mem_interCoveringPieces (E' : RationalLocData A) (hE' : E'.IsRational)
 /-- The covering of a valid rational `E'` inside `C.base` by its exact intersections
 with the pieces of `C` (R1's `interRational` fold of one datum against a covering). -/
 def interCovering (E' : RationalLocData A) (hE' : E'.IsRational)
-    (C : RationalCovering A) (hC : C.IsRational)
+    (C : RationalCoveringData A) (hC : C.IsRational)
     (hsub : rationalOpen E'.T E'.s ⊆ rationalOpen C.base.T C.base.s) :
-    RationalCovering A where
+    RationalCoveringData A where
   base := E'
   covers := interCoveringPieces E' hE' C hC
   hsubset := by
@@ -216,7 +216,7 @@ def interCovering (E' : RationalLocData A) (hE' : E'.IsRational)
     exact ⟨hv, hvE⟩
 
 theorem interCovering_isRational (E' : RationalLocData A) (hE' : E'.IsRational)
-    (C : RationalCovering A) (hC : C.IsRational)
+    (C : RationalCoveringData A) (hC : C.IsRational)
     (hsub : rationalOpen E'.T E'.s ⊆ rationalOpen C.base.T C.base.s) :
     (interCovering E' hE' C hC hsub).IsRational := by
   refine ⟨hE', ?_⟩
@@ -542,11 +542,11 @@ theorem isLimitSheaf_of_isSheafy [IsSheafy A] : IsLimitSheaf A :=
 rational criterion -/
 
 /-- The cover-member inclusions of a rational covering, at the `Opens`-level. -/
-theorem spaOpens_le_of_covering (C : RationalCovering A) (E : ↥C.covers) :
+theorem spaOpens_le_of_covering (C : RationalCoveringData A) (E : ↥C.covers) :
     spaOpens E.1 ≤ spaOpens C.base :=
   spaOpen_subset_of_rationalOpen_subset (C.hsubset E.1 E.2)
 
-theorem spaOpens_covering_subset (C : RationalCovering A) :
+theorem spaOpens_covering_subset (C : RationalCoveringData A) :
     ((spaOpens C.base : Opens ↥(Spa A A⁺)) : Set ↥(Spa A A⁺)) ⊆
       ⋃ E : ↥C.covers, ((spaOpens E.1 : Opens ↥(Spa A A⁺)) : Set ↥(Spa A A⁺)) := by
   intro v hv
@@ -574,7 +574,7 @@ theorem nhds_eq_comap_limitOfValue {D₀ : RationalLocData A} (hD₀ : D₀.IsRa
 
 -- (`productRestrictionSub_continuous` is provided by `EmbeddingTopo.lean`; the same
 -- statement here is re-proved locally to keep this file's import cone small.)
-theorem productRestrictionSub_continuous' (C : RationalCovering A) :
+theorem productRestrictionSub_continuous' (C : RationalCoveringData A) :
     Continuous (productRestrictionSub A C) := by
   refine continuous_pi fun E => ?_
   show Continuous fun x : presheafValue C.base =>

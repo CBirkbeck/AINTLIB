@@ -17,13 +17,13 @@ h_outside_rescue : ∀ v ∈ Spa A A⁺,
 ```
 
 handling Spa-points outside `rationalOpen C.base.T C.base.s` that the
-C1/compactness chain cannot reach (because `RationalCovering.hcover`
+C1/compactness chain cannot reach (because `RationalCoveringData.hcover`
 only covers the base). This file audits the derivability of
 `h_outside_rescue` from existing data and lands the smallest bridge.
 
 ## Audit conclusion
 
-`h_outside_rescue` is **not** derivable from the `RationalCovering` data
+`h_outside_rescue` is **not** derivable from the `RationalCoveringData` data
 alone (`base`, `covers`, `hsubset`, `hcover`). The `hcover` field gives
 information only for `v ∈ rationalOpen C.base.T C.base.s`; it says
 nothing about `Spa A A⁺ \ rationalOpen C.base.T C.base.s`. The
@@ -40,7 +40,7 @@ h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺
 which makes the outside set empty and the rescue clause vacuously true.
 This is the **standard Wedhorn cover-of-Spa setup** (Wedhorn Remark 8.3
 realised at `Presheaf.rationalOpen_singleton_one`,
-`rationalOpen ({1} : Finset A) (1 : A) = Spa A A⁺`); a `RationalCovering`
+`rationalOpen ({1} : Finset A) (1 : A) = Spa A A⁺`); a `RationalCoveringData`
 constructed with `base.T := {1}` and `base.s := 1` satisfies it
 unconditionally.
 
@@ -83,7 +83,7 @@ augmented family, or (b) the `base = Spa` simplification below.
   `WedhornCoverNormalization`, `StandardCover`, Primary's strengthened
   assembly files, Tertiary's prelocalization-plus work, or root imports.
 * Imports only `StandardCover` (for `Spa`, `rationalOpen`,
-  `RationalCovering`).
+  `RationalCoveringData`).
 -/
 
 namespace ValuationSpectrum
@@ -98,7 +98,7 @@ Under `h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺`,
 the premise `v ∉ rationalOpen C.base.T C.base.s` (with `v ∈ Spa A A⁺`)
 is contradictory, so the conclusion is vacuously true. -/
 theorem outside_rescue_pointwise_of_base_eq_Spa
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺)
     (mk_S_D : RationalLocData A → Finset A) :
     ∀ v ∈ Spa A A⁺,
@@ -115,7 +115,7 @@ Under `h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺`,
 the outside set is empty and the rescue clause holds vacuously, for any
 `mk_S_D` and any `h_in_D` containment data. -/
 theorem outside_rescue_of_base_eq_Spa
-    (C : RationalCovering A)
+    (C : RationalCoveringData A)
     (h_base_eq_Spa : rationalOpen C.base.T C.base.s = Spa A A⁺) :
     ∀ mk_S_D : RationalLocData A → Finset A,
       (∀ D ∈ C.covers, ∀ f ∈ mk_S_D D,

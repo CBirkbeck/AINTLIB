@@ -33,7 +33,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separati
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -46,7 +46,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separati
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -79,7 +79,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separati
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -92,7 +92,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separati
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -120,7 +120,7 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_ex
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -133,13 +133,13 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_ex
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀_perCovers : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀_perCovers : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
@@ -174,7 +174,7 @@ tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -187,13 +187,13 @@ tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀_perCovers : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀_perCovers : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
@@ -222,7 +222,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separa
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -242,7 +242,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separa
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -275,7 +275,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separa
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -295,7 +295,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separa
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (separation_supplier : ∀ C' : RationalCovering A, C'.covers.Nonempty →
+    (separation_supplier : ∀ C' : RationalCoveringData A, C'.covers.Nonempty →
       ∀ a b : presheafValue C'.base,
         (∀ (D : RationalLocData A) (hD : D ∈ C'.covers),
           restrictionMap C'.base D (C'.hsubset D hD) a =
@@ -323,7 +323,7 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -343,13 +343,13 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀_perCovers : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀_perCovers : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology
@@ -384,7 +384,7 @@ tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_extensio
     (hπ_unit : IsUnit (P.A₀.subtype π))
     (hArch : ∀ v : Spv A, letI : ValuativeRel A := v.toValuativeRel
         MulArchimedean (ValuativeRel.ValueGroupWithZero A))
-    (C : RationalCovering A) (hne : C.covers.Nonempty)
+    (C : RationalCoveringData A) (hne : C.covers.Nonempty)
     [IsNoetherianRing C.base.P.A₀]
     [IsNoetherianRing (locSubring C.base.P C.base.T C.base.s)]
     [LaurentNormalized C.base]
@@ -404,13 +404,13 @@ tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_extensio
       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₁.1.T E₁.1.s)
       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen E₂.1.T E₂.1.s),
       restrictionMap E₁.1 D₃ h₃₁ (fC E₁) = restrictionMap E₂.1 D₃ h₃₂ (fC E₂))
-    (hloc_noeth : ∀ C' : RationalCovering A,
+    (hloc_noeth : ∀ C' : RationalCoveringData A,
       IsNoetherianRing (locSubring C'.base.P C'.base.T C'.base.s))
-    (hAplus_le_A₀_perCovers : ∀ C' : RationalCovering A,
+    (hAplus_le_A₀_perCovers : ∀ C' : RationalCoveringData A,
       (A⁺ : Set A) ⊆ C'.base.P.A₀)
-    (hcanonicalMap_cont : ∀ C' : RationalCovering A,
+    (hcanonicalMap_cont : ∀ C' : RationalCoveringData A,
       Continuous C'.base.canonicalMap)
-    (h_closed_nonOpen : ∀ C' : RationalCovering A,
+    (h_closed_nonOpen : ∀ C' : RationalCoveringData A,
       ∀ (p : Ideal A), p.IsPrime → C'.base.s ∉ p →
         ¬IsOpen (p : Set A) →
         @IsClosed _ C'.base.topology

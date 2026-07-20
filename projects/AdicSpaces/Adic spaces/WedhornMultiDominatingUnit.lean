@@ -148,7 +148,7 @@ inequalities and non-degeneracy clause comprising the RHS rational-open
 membership. -/
 theorem rationalOpen_subset_via_strict_sigma_domination
     [DecidableEq A] [TopologicalSpace A] [IsTopologicalRing A]
-    [PlusSubring A] (C : RationalCovering A) (D : RationalLocData A)
+    [PlusSubring A] (C : RationalCoveringData A) (D : RationalLocData A)
     (σ : Aˣ) (T_test : Finset A)
     (hσ : ∀ w ∈ Spa A A⁺, ∃ τ ∈ T_test,
       w.vle (σ : A) τ ∧ ¬ w.vle τ (σ : A))
@@ -213,7 +213,7 @@ cover-piece denominator that holds when the cover is non-trivially
 contained in the basic open at `D.s`). -/
 lemma hT_test_compat_of_empty_D_T
     [DecidableEq A] [TopologicalSpace A] [IsTopologicalRing A]
-    [PlusSubring A] (C : RationalCovering A) (D : RationalLocData A)
+    [PlusSubring A] (C : RationalCoveringData A) (D : RationalLocData A)
     (hD_empty : D.T = ∅) (σ : Aˣ) :
     ∀ τ ∈ ({D.s} : Finset A), ∀ w ∈ Spa A A⁺,
       w.vle ((σ : A) * (∏ t ∈ D.T, t)) C.base.s →
