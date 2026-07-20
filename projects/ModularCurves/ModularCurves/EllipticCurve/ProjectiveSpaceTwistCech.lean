@@ -124,6 +124,36 @@ private theorem baseModulePresheafObjIsoUnitOfOverIso_naturality
   rw [Over.mkIdTerminal_from_left] at hnat
   exact hnat
 
+private noncomputable def baseModulePresheafObjUnitScalar
+    {X S : Scheme.{u}} (π : X ⟶ S) (U : X.Opens) (s : Γ(X, U)) :
+    (Scheme.Modules.baseModulePresheaf π (Scheme.Modules.unitObj X)).obj (op U) ⟶
+      (Scheme.Modules.baseModulePresheaf π (Scheme.Modules.unitObj X)).obj (op U) := by
+  let q := ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s
+  let qVal := (SheafOfModules.forget (X.ringCatSheaf.over U)).map q
+  let qTop := (PresheafOfModules.evaluation (X.ringCatSheaf.over U).obj
+    (.op (Over.mk (𝟙 U)))).map qVal
+  let f : Γ(S, (⊤ : S.Opens)) →+* Γ(X, U) :=
+    (X.presheaf.map
+      ((Limits.initialOpOfTerminal Limits.isTerminalTop).to (op U))).hom.comp
+        π.appTop.hom
+  exact (ModuleCat.restrictScalars f).map qTop
+
+private theorem baseModulePresheafObjIsoUnitOfOverIso_comp_scalar
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (s : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
+    (baseModulePresheafObjIsoUnitOfOverIso π M U e).hom =
+      (baseModulePresheafObjIsoUnitOfOverIso π M U g).hom ≫
+        baseModulePresheafObjUnitScalar π U s := by
+  ext x
+  change e.hom.val.app (.op (Over.mk (𝟙 U))) x =
+    (ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).val.app
+      (.op (Over.mk (𝟙 U))) (g.hom.val.app (.op (Over.mk (𝟙 U))) x)
+  have happ := congrArg (fun q => q.val.app (.op (Over.mk (𝟙 U)))) h
+  exact ConcreteCategory.congr_hom happ x
+
 private lemma coordinateOpenTransitionTopUnit_zpow_coe_aux
     (i k : σ) (d : ℤ) :
     ((coordinateOpenTransitionTopUnit (R := R) i k ^ d :
@@ -305,6 +335,31 @@ private lemma coordinateOpenCechFirstTransitionTopUnit_zpow_coe
   rw [← (Units.map f.toMonoidHom).map_zpow]
   rfl
 
+/-- Multiplication by the first-chart transition unit on the structure-sheaf
+factor of a full ordered Cech intersection. -/
+noncomputable def coordinateOpenCechFirstTransitionFactorEnd
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ) :
+    Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) (n + 1) a.1 ⟶
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) (n + 1) a.1 :=
+  baseModulePresheafObjUnitScalar
+    (homogeneousProjπ (R := R) (σ := σ))
+    (coordinateOpenCechIntersection (R := R) a.1)
+    ((Proj (homogeneousSubmodule σ R)).presheaf.map
+      (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+        (R := R) a)).op
+      ((coordinateOpenTransitionUnit (R := R) (a.1 0).down (a.1 1).down ^ d :
+          Γ(Proj (homogeneousSubmodule σ R),
+            coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
+        Γ(Proj (homogeneousSubmodule σ R),
+          coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)))
+
 /-- Deleting a noninitial entry preserves the anchor frame on the smaller
 standard intersection. -/
 theorem coordinateHyperplaneTwistCechTrivialization_restrict_delete_of_ne_zero
@@ -439,6 +494,78 @@ theorem coordinateHyperplaneTwistBaseCechFactorIsoUnit_naturality_delete_of_ne_z
   rw [hover]
   exact baseModulePresheafObjIsoUnitOfOverIso_naturality
     (homogeneousProjπ (R := R) (σ := σ)) M hVU eU
+
+/-- The first Cech face is ordinary restriction followed by multiplication
+by the restricted integer-twist transition unit. -/
+theorem coordinateHyperplaneTwistBaseCechFactorIsoUnit_naturality_delete_zero
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (j : σ) (d : ℤ) :
+    (Scheme.Modules.baseModulePresheaf
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)).map
+          (coordinateOpenCechDelete (R := R) a 0).op ≫
+      (coordinateHyperplaneTwistBaseCechFactorIsoUnit
+        (R := R) a.1 j d).hom =
+    (coordinateHyperplaneTwistBaseCechFactorIsoUnit
+        (R := R) (a.delete 0).1 j d).hom ≫
+      (Scheme.Modules.baseModulePresheaf
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+          (coordinateOpenCechDelete (R := R) a 0).op ≫
+      coordinateOpenCechFirstTransitionFactorEnd (R := R) a d := by
+  let X := Proj (homogeneousSubmodule σ R)
+  let π := homogeneousProjπ (R := R) (σ := σ)
+  let M := coordinateHyperplaneTwist (R := R) j d
+  let U := coordinateOpenCechIntersection (R := R) (a.delete 0).1
+  let V := coordinateOpenCechIntersection (R := R) a.1
+  let hVU := coordinateOpenCechDelete_le (R := R) a 0
+  let eU := Scheme.Modules.overTrivializationOfRestrictIso M U
+    (coordinateHyperplaneTwistCechTrivialization (R := R) (a.delete 0).1 j d)
+  let eV := Scheme.Modules.overTrivializationOfRestrictIso M V
+    (coordinateHyperplaneTwistCechTrivialization (R := R) a.1 j d)
+  let eRes := ModularCurves.SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U eU (Over.mk (homOfLE hVU))
+  let s : Γ(X, V) :=
+    X.presheaf.map
+      (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+        (R := R) a)).op
+      ((coordinateOpenTransitionUnit (R := R) (a.1 0).down (a.1 1).down ^ d :
+        Γ(X, coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
+        Γ(X, coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))
+  have hframe := coordinateHyperplaneTwistCechTrivialization_restrict_delete_zero
+    (R := R) a j d
+  have hframe' :
+      (coordinateHyperplaneTwistCechTrivialization (R := R) a.1 j d).hom =
+        (Scheme.Modules.restrictOpenTrivialization hVU
+          (coordinateHyperplaneTwistCechTrivialization
+            (R := R) (a.delete 0).1 j d)).hom ≫
+          ModularCurves.unitEndomorphismOfTopSection
+            (Scheme.Modules.openTopSection V s) := by
+    rw [← coordinateOpenCechFirstTransitionTopUnit_zpow_coe]
+    exact hframe
+  have hOver := ModularCurves.overTrivializationOfRestrictIso_hom_eq_comp_scalar
+    M V
+      (coordinateHyperplaneTwistCechTrivialization (R := R) a.1 j d)
+      (Scheme.Modules.restrictOpenTrivialization hVU
+        (coordinateHyperplaneTwistCechTrivialization
+          (R := R) (a.delete 0).1 j d)) s hframe'
+  have heRes : Scheme.Modules.overTrivializationOfRestrictIso M V
+      (Scheme.Modules.restrictOpenTrivialization hVU
+        (coordinateHyperplaneTwistCechTrivialization
+          (R := R) (a.delete 0).1 j d)) = eRes :=
+    Scheme.Modules.overTrivializationOfRestrictOpenTrivialization hVU _
+  rw [heRes] at hOver
+  have hScalar := baseModulePresheafObjIsoUnitOfOverIso_comp_scalar
+    π M V eV eRes s hOver
+  have hNat := baseModulePresheafObjIsoUnitOfOverIso_naturality
+    π M hVU eU
+  change (Scheme.Modules.baseModulePresheaf π M).map (homOfLE hVU).op ≫
+    (baseModulePresheafObjIsoUnitOfOverIso π M V eV).hom =
+    (baseModulePresheafObjIsoUnitOfOverIso π M U eU).hom ≫
+      (Scheme.Modules.baseModulePresheaf π (Scheme.Modules.unitObj X)).map
+        (homOfLE hVU).op ≫ baseModulePresheafObjUnitScalar π V s
+  rw [hScalar, ← Category.assoc, hNat, Category.assoc]
 
 /-- The degree-`n` ordered Cech object of `O(d)` is factorwise identified with
 the ordered Cech object of the structure sheaf. -/
