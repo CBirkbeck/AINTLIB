@@ -288,6 +288,38 @@ noncomputable def coordinateProductAwayRingEquiv {n : ℕ}
     (Localization.Away (monomial (coordinateTailExponent a) (1 : R)))
     (chartRingEquiv R (a 0)) (chartRingEquiv_map_coordinateTailPowers (R := R) a)
 
+/-- In affine-chart coordinates, the tail away-map is the ordinary localization algebra map. -/
+theorem coordinateProductAwayRingEquiv_awayMap {n : ℕ}
+    (a : Fin (n + 1) → σ)
+    (q : Away (homogeneousSubmodule σ R) (X (a 0) : MvPolynomial σ R)) :
+    coordinateProductAwayRingEquiv (R := R) a
+        (HomogeneousLocalization.awayMap
+          (f := X (a 0)) (g := coordinateTailPolynomial (R := R) a)
+          (x := coordinateProductPolynomial (R := R) a)
+          (homogeneousSubmodule σ R) (coordinateTailPolynomial_mem (R := R) a) rfl q) =
+      algebraMap
+        (MvPolynomial {j : σ // j ≠ a 0} R)
+        (Localization.Away (monomial (coordinateTailExponent a) (1 : R)))
+        (chartRingEquiv R (a 0) q) := by
+  letI := (HomogeneousLocalization.awayMap
+    (f := X (a 0)) (g := coordinateTailPolynomial (R := R) a)
+    (x := coordinateProductPolynomial (R := R) a)
+    (homogeneousSubmodule σ R) (coordinateTailPolynomial_mem (R := R) a) rfl).toAlgebra
+  letI : IsLocalization.Away (coordinateTailLocalizationElement (R := R) a)
+      (Away (homogeneousSubmodule σ R) (coordinateProductPolynomial (R := R) a)) :=
+    Away.isLocalization_mul
+      (X_mem_homogeneousSubmodule_one R (a 0))
+      (coordinateTailPolynomial_mem (R := R) a) rfl one_ne_zero
+  change IsLocalization.ringEquivOfRingEquiv
+      (Away (homogeneousSubmodule σ R) (coordinateProductPolynomial (R := R) a))
+      (Localization.Away (monomial (coordinateTailExponent a) (1 : R)))
+      (chartRingEquiv R (a 0)) (chartRingEquiv_map_coordinateTailPowers (R := R) a)
+      (algebraMap
+        (Away (homogeneousSubmodule σ R) (X (a 0) : MvPolynomial σ R))
+        (Away (homogeneousSubmodule σ R) (coordinateProductPolynomial (R := R) a))
+        q) = _
+  rw [IsLocalization.ringEquivOfRingEquiv_eq]
+
 @[simp]
 theorem coordinateProductAwayRingEquiv_algebraMap {n : ℕ}
     (a : Fin (n + 1) → σ) (r : R) :
