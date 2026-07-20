@@ -1559,3 +1559,62 @@ engine; the following are NOT done and are hereby reopened):
   (Wedhorn Prop 8.6) for the limit presheaf, then the real
   `ValuationSpectrum.IsAdicMorphism` on adic spaces (name deliberately still
   absent; `PresentationIsAdicMorphism` is the honest placeholder).
+
+---
+
+# STATUS UPDATE — 2026-07-20 five-pass continuation (base 4f887b1c8 → a011ac244)
+
+All commits axiom-clean ({propext, Classical.choice, Quot.sound}); `lake build 'Adic spaces'`
+green (3299 jobs); FJP sorry-free; git diff --check clean; `IsAdicMorphism` deliberately absent;
+five frozen FJP headline types + the strongly-noetherian theorem unchanged.
+
+## DELIVERED
+
+- **PASS A (799ec5812)** — fidelity/API repair, DONE:
+  * `IsStronglyNoetherianTateRing` now carries explicit `[IsTateRing A]` (verified by `#print`).
+  * `toAdicSpace → toAdicSpacePresentation`; `PerfectoidSpace.tilt` DELETED (bare-∃ non-theorem);
+    `AffinoidNeighborhood → PresentationAffinoidNeighborhood`; presentation headers rewritten
+    (never "objects of 𝒱"); `ringHom_isAdic_of_charts_analytic_preserved` DELETED (unused).
+  * Remark 8.3 citation corrected (topology = Def 6.1; uniqueness = completion UP; 8.3 = 𝒪_X(X)=Â).
+  * conditional descent trio → `*_of_hasStandardRefinements`; unsuffixed names reserved.
+  * `finiteJet_structurePresheaf_isSheafOfTopologicalRings` added; `isSheafyTateRing_isLimitSheaf`
+    replaces the unnamed example; `mem_locNhd_globalLocData` refactored via `locNhd_singleton_one_eq`.
+- **PASS B (1473f3103, 7ad448f06)** — Wedhorn Proposition 8.2, DONE:
+  * `SpaRationalOpenComparison.lean` — extracted the axiom-clean 8.2 chain out of the (deleted)
+    `SpaPresheafValueEquivalence.lean`, dropped its unused noetherian binders, and **discharged the
+    long-standing `Spa_presheafValue_eq_rationalOpen` sorry** (in StructureSheaf.lean since 2026-05-17).
+    New: `spaPresheafValueEquivRationalOpen` (Equiv, fwd = `comap D.canonicalMap`),
+    `comap_canonicalMap_image_spa` (exact image), forward continuity.
+  * `SpaParameterPerturbation.lean` — **Kedlaya Ex 1.2.2** (item 10): `exists_uniform_spanning_bound`,
+    `indexedRationalSet_perturb_eq` (the perturbation theorem), ultrametric max principle.
+  * `SpaRationalOpenHomeomorph.lean` — **the homeomorphism** `spaPresheafValueHomeomorphRationalOpen :
+    Spa (presheafValue D) ((presheafValue D)⁺) ≃ₜ R(T/s) ∩ Spa (A,A⁺)` (Wedhorn 8.2(2), openness via
+    the perturbation argument: rational-basis trick + approximation + denominator clearing).
+- **PASS C** — item 10 DONE (in PASS B). Finite rational refinement (7.54 first half) already existed
+  as `SheafyPair.exists_finite_rational_refinement` (NOT re-proved — reuse rule).
+- **PASS D item 13 (a011ac244)** — `PresheafFunctoriality.lean`: generic `locMapOfHom` /
+  `pushMapAlg` / `presheafValueMapOfHom` extracted from `namespace FiniteJet` into
+  `ValuationSpectrum`; FJP reuses via `open`.
+
+## NOT DELIVERED (precise blockers)
+
+- **PASS C items 11–12** (unconditional `HasStandardRefinements` + unsuffixed `isSheafyFor_congr`
+  family): blocked on the **Wedhorn 8.34(ii) / Zavyalov §2.3 standard-form conversion**
+  (`vle_of_dominating_unit_multi` / `exists_single_f_refinement_at_t_via_dominating_unit`, target
+  signatures in `WedhornStandardCoverRefinement.lean`), which converts a finite RATIONAL refinement
+  (Wedhorn 7.54 first half, proven) into a STANDARD single-spanning-family cover. This constructor
+  DISCOVERS the spanning family (it does not perturb a given one), so it is NOT reducible to the
+  PASS-B homeomorphism + approximation; it has documented false intermediate shapes (project
+  T023/T024). Genuine [Hu3] Lemma 2.6 core. Conditional `*_of_hasStandardRefinements` forms retained.
+- **PASS D items 14–16** (ring-equivalence `IsLimitSheaf`/`IsSheafyFor` transport; the P2.13 iffs
+  `isSheafyTateRing_iff_{for,exists}_completionModel`, `_iff_isSheafyComplete`; item 16 direct
+  endpoint): all three iffs reduce to `IsSheafyFor` transport along `completionModelCompare`, which
+  reduces to transporting the `IsLimitSheaf` structure = reindexing `limitSections V` (a
+  compatibility-subring over `RationalIndex V`) along `spaHomeomorphOfRingEquiv`. Building blocks in
+  place (PASS D item 13 `presheafValueMapOfHom`; PASS B `spaHomeomorphOfRingEquiv`,
+  `RingOfIntegralElements.congr`); the remaining `limitSections`-reindexing + projective-topology
+  bookkeeping is a large high-defeq-risk construction deferred to a dedicated session.
+- **PASS E item 17** (unconditional `finiteJet_isSheafyComplete` / `finiteJet_isSheafyTateRing` +
+  endpoints): blocked on PASS C item 11 (JetA is complete Tate + non-noetherian, so needs
+  A⁺-independence = `HasStandardRefinements`, no strongly-noetherian bypass). Conditional
+  `finiteJet_isSheafyComplete_of_hasStandardRefinements` + frozen headliners intact.
