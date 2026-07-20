@@ -30,12 +30,14 @@ unconditional:
 
 Over a proper rational base `U = R(base)`, the normalized family `LP` covers only
 `U`, so `distinguishedProducts LP` need not span the unit ideal (points outside `U`
-may vanish on all of it). The fix (Huber): pad with a unit `σ` strictly dominated on
-`U` by some `distinguishedProducts` element (`exists_dominating_unit_noHArch_finset_on`
-on the compact `U`). Then `S := insert σ (distinguishedProducts LP)` spans (σ is a
-ring unit), the relative `σ`-piece `U ∩ R(S/σ)` is empty (domination), and for the
-other generators the product identity holds *after intersecting with `U`*
-(`rationalOpen_distinguished_eq_on`).
+may vanish on all of it). This is the project's direct relativization of Huber's
+whole-space argument to a proper base: pad with a unit `σ` strictly dominated on `U`
+by some `distinguishedProducts` element (the project lemma
+`exists_dominating_unit_noHArch_finset_on` on the compact `U`, i.e. Cor 7.32
+localized to a compact subset). Then `S := insert σ (distinguishedProducts LP)` spans
+(σ is a ring unit), the relative `σ`-piece `U ∩ R(S/σ)` is empty (domination), and for
+the other generators the product identity holds *after intersecting with `U`*
+(the project lemma `rationalOpen_distinguished_eq_on`).
 
 ## Source attribution
 
@@ -43,6 +45,13 @@ Kedlaya Lemma 1.6.8 / Remark 1.6.9 (standard-cover independence); the
 topological-embedding transfer in the `A⁺`-free standard condition
 (`standardSheafCondition_of_isSheafyFor` + the engine) is the project's own
 `IsEmbedding.of_comp_isEmbedding` argument — not asserted to be stated by Kedlaya.
+
+**Edition pin.** All Wedhorn section-numbering citations in this project
+(`Definition 7.14/7.23/7.29`, `Proposition 7.51/7.52`, `Lemma 7.54`,
+`Definition 8.26`, `Theorem 8.28`, `Remark 8.20`, …) refer to
+**T. Wedhorn, *Adic Spaces*, arXiv:1910.05934v1** (the file
+`Wedhorn-Adic_Spaces-1910.05934v1.pdf` / `references/wedhorn.txt`). Other public
+revisions shift the §8 numbering by one; use v1 to resolve any citation here.
 -/
 
 noncomputable section
@@ -52,6 +61,8 @@ open scoped Classical
 namespace ValuationSpectrum
 
 universe u
+
+section PairLocal
 
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [IsHuberRing A] [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
@@ -141,6 +152,16 @@ theorem exists_spanTop_standard_refinement_of_rationalCovering_nonempty
         _ ⊆ rationalOpen p.1 p.2 := hpsub
         _ ⊆ rationalOpen E.T E.s := hEsub
 
+end PairLocal
+
+/-! ### Public wrappers (no ambient plus ring; the pair is installed locally) -/
+
+section Public
+
+variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [IsHuberRing A] [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+
 /-- **The bundled descent input, unconditionally** (PHASE 2E): every valid ring of
 integral elements of a complete Tate ring has standard refinements. -/
 theorem RingOfIntegralElements.hasStandardRefinements
@@ -177,5 +198,7 @@ theorem isSheafyFor_iff_isSheafyComplete (Aplus : RingOfIntegralElements A) :
     IsSheafyFor A Aplus ↔ IsSheafyComplete A :=
   isSheafyFor_iff_isSheafyComplete_of_hasStandardRefinements Aplus
     (fun Bplus => RingOfIntegralElements.hasStandardRefinements Bplus)
+
+end Public
 
 end ValuationSpectrum

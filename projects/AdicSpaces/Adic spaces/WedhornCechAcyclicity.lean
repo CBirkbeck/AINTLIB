@@ -12348,7 +12348,6 @@ theorem exists_finite_normalized_rational_refinement_on [DecidableEq A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    [IsRingOfIntegralElements (A⁺ : Subring A)]
     (Y : Set (Spv A)) (hYspa : Y ⊆ Spa A A⁺)
     (𝒱 : Finset (RationalLocData A))
     (h𝒱 : ∀ D ∈ 𝒱, D.IsRational)
@@ -12452,11 +12451,10 @@ form, a thin wrapper over `exists_finite_normalized_rational_refinement_on` at `
 (the noetherian hypotheses are needed only to instantiate `Y = Spa` as a *set*, via the
 identity `Set.Subset.rfl`). -/
 theorem exists_finite_normalized_rational_refinement [DecidableEq A]
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [IsTateRing A] [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
-    [IsRingOfIntegralElements (A⁺ : Subring A)]
     (𝒱 : Finset (RationalLocData A))
     (h𝒱 : ∀ D ∈ 𝒱, D.IsRational)
     (hcov : ∀ v ∈ Spa A A⁺, ∃ D ∈ 𝒱, v ∈ rationalOpen D.T D.s) :

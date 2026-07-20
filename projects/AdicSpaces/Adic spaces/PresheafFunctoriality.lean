@@ -21,7 +21,7 @@ This is the ring-hom generalization of the noetherian-free keystone
 (`RelativeDescent.lean`, the same-ring image-datum case). It was previously
 stranded inside `namespace FiniteJet` (`FJP/FiniteJetFunctoriality.lean`); it is
 generic (no jet structure) and used here by the ring-equivalence presheaf
-transport (`RingEquivPresheafTransport.lean`) and re-used by FJP.
+transport (`RingEquivPresheafTransport.lean`, PASS 2) and re-used by FJP.
 
 ## Reference
 

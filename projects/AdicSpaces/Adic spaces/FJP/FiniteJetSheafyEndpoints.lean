@@ -31,8 +31,9 @@ through the generic bridges — **no FJP-specific re-proof of anything**:
   valid ring of integral elements, conditional on exactly the descent input
   (Kedlaya Lemma 1.6.8's conclusion, `HasStandardRefinements`; see
   `StandardDescent.lean` for the precise blocked dependencies). Stated conditionally
-  and honestly: `𝓐` is non-noetherian, so no unconditional route to all pairs exists
-  in the project yet.
+  (the older conditional form, retained as a lower-level result). The UNCONDITIONAL
+  all-pairs sheafiness `finiteJet_isSheafyComplete` is now available (below), via the
+  Huber form-(a) product refinement — with no strongly-noetherian bypass.
 
 All original FJP headline endpoints are untouched (regression-protected).
 -/
@@ -112,8 +113,8 @@ theorem finiteJet_standardSheafCondition : StandardSheafCondition (JetA F) :=
 
 /-- **Sheafiness of the pinching algebra at every valid ring of integral elements**,
 conditional on exactly the descent input (Kedlaya Lemma 1.6.8's conclusion) at each
-pair — the honest form: `𝓐` is non-noetherian, so the unconditional all-pairs
-statement awaits the descent branch (see `HasStandardRefinements`). -/
+pair — retained as a lower-level result; the UNCONDITIONAL `finiteJet_isSheafyComplete`
+(below) supersedes it via the Huber form-(a) product refinement (no noetherian bypass). -/
 theorem finiteJet_isSheafyComplete_of_hasStandardRefinements
     (hall : ∀ Bplus : RingOfIntegralElements (JetA F),
       Bplus.HasStandardRefinements (JetA F)) :
