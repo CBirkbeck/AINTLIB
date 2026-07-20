@@ -216,6 +216,95 @@ theorem coordinateHyperplanePoleSheafPower_isInvertible (j : σ) (n : ℕ) :
         (coordinateHyperplanePoleSheaf_isInvertible (R := R) j)).of_iso
           (ModularCurves.monoidalTensorObjIso _ _)
 
+/-- The nonnegative powers of the concrete coordinate-hyperplane `O(-1)`. -/
+noncomputable def coordinateHyperplaneIdealModulePower (j : σ) :
+    ℕ → (Proj (homogeneousSubmodule σ R)).Modules
+  | 0 => 𝟙_ (Proj (homogeneousSubmodule σ R)).Modules
+  | n + 1 => coordinateHyperplaneIdealModulePower j n ⊗
+      ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)
+
+@[simp]
+lemma coordinateHyperplaneIdealModulePower_zero (j : σ) :
+    coordinateHyperplaneIdealModulePower (R := R) j 0 =
+      𝟙_ (Proj (homogeneousSubmodule σ R)).Modules :=
+  rfl
+
+@[simp]
+lemma coordinateHyperplaneIdealModulePower_succ (j : σ) (n : ℕ) :
+    coordinateHyperplaneIdealModulePower (R := R) j (n + 1) =
+      coordinateHyperplaneIdealModulePower (R := R) j n ⊗
+        ModularCurves.idealModule (coordinateHyperplaneι (R := R) j) :=
+  rfl
+
+/-- The compatible standard-chart frame of the nonnegative power of `O(-1)`. -/
+noncomputable def coordinateHyperplaneIdealModulePowerTrivialization
+    (i j : σ) : ∀ n : ℕ,
+      (coordinateHyperplaneIdealModulePower (R := R) j n).restrict
+          (coordinateOpen (R := R) i).ι ≅
+        Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme
+  | 0 => ModularCurves.restrictMonoidalUnitIso
+        (coordinateOpen (R := R) i).ι ≪≫
+      ModularCurves.monoidalUnitObjIso (coordinateOpen (R := R) i).toScheme
+  | n + 1 =>
+      ModularCurves.restrictMonoidalTensorIso
+          (coordinateOpen (R := R) i).ι
+          (coordinateHyperplaneIdealModulePower (R := R) j n)
+          (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) ≪≫
+        (coordinateHyperplaneIdealModulePowerTrivialization i j n ⊗ᵢ
+          (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm) ≪≫
+        ModularCurves.unitObjTensorIso (coordinateOpen (R := R) i).toScheme
+
+/-- Every nonnegative power of the coordinate-hyperplane `O(-1)` is
+invertible. -/
+theorem coordinateHyperplaneIdealModulePower_isInvertible (j : σ) (n : ℕ) :
+    Scheme.Modules.IsInvertible
+      (coordinateHyperplaneIdealModulePower (R := R) j n) := by
+  induction n with
+  | zero =>
+      exact Scheme.Modules.isInvertible_unit.of_iso
+        (ModularCurves.monoidalUnitObjIso
+          (Proj (homogeneousSubmodule σ R)))
+  | succ n ih =>
+      exact (ih.tensorObj
+        (coordinateHyperplaneIdealModule_isInvertible (R := R) j)).of_iso
+          (ModularCurves.monoidalTensorObjIso _ _)
+
+/-- The integer twist `O(d)` on polynomial projective space, formed from the
+concrete coordinate-hyperplane `O(1)` and `O(-1)`. -/
+noncomputable def coordinateHyperplaneTwist (j : σ) :
+    ℤ → (Proj (homogeneousSubmodule σ R)).Modules
+  | .ofNat n => coordinateHyperplanePoleSheafPower (R := R) j n
+  | .negSucc n => coordinateHyperplaneIdealModulePower (R := R) j (n + 1)
+
+@[simp]
+lemma coordinateHyperplaneTwist_ofNat (j : σ) (n : ℕ) :
+    coordinateHyperplaneTwist (R := R) j (.ofNat n) =
+      coordinateHyperplanePoleSheafPower (R := R) j n :=
+  rfl
+
+@[simp]
+lemma coordinateHyperplaneTwist_negSucc (j : σ) (n : ℕ) :
+    coordinateHyperplaneTwist (R := R) j (.negSucc n) =
+      coordinateHyperplaneIdealModulePower (R := R) j (n + 1) :=
+  rfl
+
+/-- The standard-chart frame of the integer twist `O(d)`. -/
+noncomputable def coordinateHyperplaneTwistTrivialization (i j : σ) :
+    ∀ d : ℤ,
+      (coordinateHyperplaneTwist (R := R) j d).restrict
+          (coordinateOpen (R := R) i).ι ≅
+        Scheme.Modules.unitObj (coordinateOpen (R := R) i).toScheme
+  | .ofNat n => coordinateHyperplanePoleSheafPowerTrivialization (R := R) i j n
+  | .negSucc n =>
+      coordinateHyperplaneIdealModulePowerTrivialization i j (n + 1)
+
+/-- Every integer twist `O(d)` is invertible. -/
+theorem coordinateHyperplaneTwist_isInvertible (j : σ) (d : ℤ) :
+    Scheme.Modules.IsInvertible (coordinateHyperplaneTwist (R := R) j d) := by
+  cases d with
+  | ofNat n => exact coordinateHyperplanePoleSheafPower_isInvertible j n
+  | negSucc n => exact coordinateHyperplaneIdealModulePower_isInvertible j (n + 1)
+
 end
 
 end MvPolynomial
