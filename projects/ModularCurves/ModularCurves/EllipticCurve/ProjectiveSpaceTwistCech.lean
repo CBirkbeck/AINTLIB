@@ -339,6 +339,62 @@ theorem coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_basis_ap
     LinearEquiv.trans_apply, LinearEquiv.apply_symm_apply,
     AddMonoidAlgebra.mapDomainLinearEquiv_single]
 
+/-- Deleting a Cech coordinate can only shrink the tuple, so every weight allowed on the deleted
+tuple is allowed on the full tuple. -/
+def coordinateLaurentExponentDeleteEmbedding [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 2)) (d : ℤ) :
+    {e : HomogeneousLaurentExponent σ d //
+        e.IsAllowedOn (fun l => ((a.delete k).1 l).down)} ↪
+      {e : HomogeneousLaurentExponent σ d //
+        e.IsAllowedOn (fun l => (a.1 l).down)} where
+  toFun e := ⟨e.1, by
+    intro i hi
+    obtain ⟨l, hl⟩ := e.2 hi
+    refine ⟨k.succAbove l, ?_⟩
+    change (a.1 (k.succAbove l)).down = i at hl
+    exact hl⟩
+  inj' e f h := by
+    apply Subtype.ext
+    exact congrArg
+      (fun x : {e : HomogeneousLaurentExponent σ d //
+        e.IsAllowedOn (fun l => (a.1 l).down)} => x.1) h
+
+/-- The weight-coordinate form of a Cech coface: include the weights allowed on the deleted tuple
+among those allowed on the full tuple. -/
+noncomputable def coordinateHomogeneousLaurentDeleteLinearMap [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 2)) (d : ℤ) :
+    AddMonoidAlgebra
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        {e : HomogeneousLaurentExponent σ d //
+          e.IsAllowedOn (fun l => ((a.delete k).1 l).down)} →ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      AddMonoidAlgebra
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        {e : HomogeneousLaurentExponent σ d //
+          e.IsAllowedOn (fun l => (a.1 l).down)} :=
+  AddMonoidAlgebra.mapDomainLinearMap
+    Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+    Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+    (coordinateLaurentExponentDeleteEmbedding a k d)
+
+/-- A Cech deletion map preserves the underlying global homogeneous weight. -/
+@[simp]
+theorem coordinateHomogeneousLaurentDeleteLinearMap_single [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 2)) (d : ℤ)
+    (e : {e : HomogeneousLaurentExponent σ d //
+      e.IsAllowedOn (fun l => ((a.delete k).1 l).down)})
+    (r : Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))) :
+    coordinateHomogeneousLaurentDeleteLinearMap (R := R) a k d
+        (AddMonoidAlgebra.single e r) =
+      AddMonoidAlgebra.single (coordinateLaurentExponentDeleteEmbedding a k d e) r := by
+  exact AddMonoidAlgebra.mapDomainLinearMap_single
+    (R := Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)))
+    (S := Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)))
+    (coordinateLaurentExponentDeleteEmbedding a k d) r e
+
 /-- The standard frame of `O(d)` restricted to an ordered Cech intersection. -/
 noncomputable def coordinateHyperplaneTwistCechTrivialization {n : ℕ}
     (a : Fin (n + 1) → ULift.{u} σ) (j : σ) (d : ℤ) :
