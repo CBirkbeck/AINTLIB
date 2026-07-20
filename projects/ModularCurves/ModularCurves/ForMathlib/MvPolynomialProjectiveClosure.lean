@@ -117,7 +117,7 @@ lemma homogenizedProjι_comp_homogeneousProjπ
   rw [Category.assoc, ← Spec.map_comp]
   rfl
 
-private lemma irrelevant_le_span_X :
+lemma irrelevant_toIdeal_le_span_range_X :
     (irrelevant (homogeneousSubmodule σ R)).toIdeal ≤
       Ideal.span (Set.range (X : σ → MvPolynomial σ R)) := by
   rw [toIdeal_irrelevant_le]
@@ -128,6 +128,23 @@ private lemma irrelevant_le_span_X :
   have hdegree := ((mem_homogeneousSubmodule _ _).mp hp).degree_eq_sum_deg_support hm
   have hn' : 1 ≤ n := hn
   simpa [Finsupp.degree_apply, ← hdegree] using hn'
+
+/-- A standard coordinate open in polynomial projective space. -/
+abbrev coordinateOpen (i : σ) :
+    (Proj (homogeneousSubmodule σ R)).Opens :=
+  Proj.basicOpen (homogeneousSubmodule σ R) (X i)
+
+/-- Every standard coordinate open in polynomial projective space is affine. -/
+lemma coordinateOpen_isAffineOpen (i : σ) :
+    IsAffineOpen (coordinateOpen (R := R) i) :=
+  Proj.isAffineOpen_basicOpen (homogeneousSubmodule σ R) (X i)
+    (X_mem_homogeneousSubmodule_one R i) one_pos
+
+/-- The standard coordinate opens cover polynomial projective space. -/
+lemma iSup_coordinateOpen_eq_top :
+    ⨆ i : σ, coordinateOpen (R := R) i = ⊤ := by
+  apply Proj.iSup_basicOpen_eq_top
+  exact irrelevant_toIdeal_le_span_range_X
 
 /-- The standard coordinate open in the `Proj` of a homogeneous polynomial quotient. -/
 abbrev quotientCoordinateOpen
@@ -156,7 +173,7 @@ lemma iSup_quotientCoordinateOpen_eq_top
         (irrelevant (homogeneousSubmodule σ R)).toIdeal := rfl
     _ ≤ Ideal.map (quotientGradingHom I)
         (Ideal.span (Set.range (X : σ → MvPolynomial σ R))) :=
-      Ideal.map_mono irrelevant_le_span_X
+      Ideal.map_mono irrelevant_toIdeal_le_span_range_X
     _ = Ideal.span (Set.range fun i : σ ↦ quotientGradingHom I (X i)) := by
       rw [Ideal.map_span]
       congr 1
