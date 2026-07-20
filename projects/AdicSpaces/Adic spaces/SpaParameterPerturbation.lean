@@ -21,11 +21,17 @@ ring `B` with a topologically nilpotent unit `ϖ` and a ring of integral element
 * `exists_uniform_spanning_bound` — if a finite `T` spans the unit ideal, there
   is a **uniform** `M` with `v(ϖ^M) ≤ max_{t ∈ T} v(t)` for *every* `v ∈ Spa B B⁺`
   (the coefficients of a spanning combination are absorbed into `B⁺` by `ϖ^M`).
-* `indexedRationalSet_perturb_eq` — **the perturbation theorem**: perturbing the
-  parameters of a rational-subset presentation by elements of `ϖ^(M+1) · B⁺`
-  (with `M` a uniform spanning bound) does not change the subset. The proof is
-  the classical ultrametric argument (`Valuation.map_add_of_distinct_val`) run
-  through each point's canonical valuation.
+* `indexedRationalSet_perturb_eq` — the **subset-equality half** of Kedlaya
+  Exercise 1.2.2: perturbing the parameters of a rational-subset presentation by
+  elements of `ϖ^(M+1) · B⁺` (with `M` a uniform spanning bound) does not change
+  the subset. The proof is the classical ultrametric argument
+  (`Valuation.map_add_of_distinct_val`) run through each point's canonical
+  valuation.
+
+**Scope honesty.** Exercise 1.2.2 also asserts that the *perturbed parameters
+still generate the unit ideal*; that span-preservation half is NOT proved here
+(see PHASE 6 in the ticket board). This file delivers only the subset-equality
+statement, which is what the Wedhorn 8.2(2) openness argument consumes.
 
 These are stated for arbitrary index families (`indexedRationalSet`), with
 `indexedRationalSet_eq_rationalOpen` translating to the project's

@@ -32,8 +32,15 @@ Wedhorn's proof shape is followed faithfully:
 Main results:
 * `exists_A_level_open_presentation` — the composite of 1–4.
 * `spaPresheafValueEquivRationalOpen_isOpenMap` — openness.
-* `spaPresheafValueHomeomorphRationalOpen` — **the homeomorphism** (Wedhorn
-  Proposition 8.2(2), bijection + continuity both ways).
+* `spaPresheafValueHomeomorphRationalOpen` — the **comparison homeomorphism** in
+  Tate scope, with exact image the rational open (Wedhorn Proposition 8.2(2),
+  *homeomorphism part*).
+
+**Scope honesty.** This is the homeomorphism onto `R(T/s) ∩ Spa (A,A⁺)` with
+forward map `comap D.canonicalMap`. It is **not** yet all of Proposition 8.2(2):
+the remaining assertion — that this homeomorphism induces a *bijection between the
+valid rational subsets* of the two spectra — is deferred (see
+`SpaRationalSubsetCorrespondence` / PHASE 6 in the ticket board).
 -/
 
 noncomputable section

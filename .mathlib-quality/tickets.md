@@ -1618,3 +1618,33 @@ five frozen FJP headline types + the strongly-noetherian theorem unchanged.
   endpoints): blocked on PASS C item 11 (JetA is complete Tate + non-noetherian, so needs
   A⁺-independence = `HasStandardRefinements`, no strongly-noetherian bypass). Conditional
   `finiteJet_isSheafyComplete_of_hasStandardRefinements` + frozen headliners intact.
+
+---
+
+# CORRECTION — 2026-07-20 PHASE 0 (frontier description was wrong)
+
+**PASS C is NOT blocked on Wedhorn 8.34(ii) / Zavyalov §2.3 / `vle_of_dominating_unit_multi`.**
+The prior status block mis-attributed the blocker. `HasStandardRefinementsAt` uses pieces
+`base ∩ R(S/f)` — **Huber's form-(a) product refinement** (Huber Lemma 2.6 / Wedhorn
+Lemma 7.54 / Kedlaya Lemma 1.6.8), for which the project already has the product machinery
+in `WedhornCechAcyclicity.lean` (`transversalProducts`, `distinguishedProducts`,
+`distinguishedProducts_cover`, `rationalOpen_distinguished_eq`, `distinguishedProducts_refines`,
+`distinguishedProducts_cover_rel`) plus `exists_dominating_unit_noHArch_finset`,
+`exists_finite_normalized_rational_refinement`. Wedhorn 8.34 (form-(b)/Laurent acyclicity)
+is a SEPARATE lane; keep T023/T024 tickets only for that. → PASS C is being COMPLETED
+(PHASE 1 empty-cover fix + PHASE 2 nonempty product-trick refinement).
+
+**PASS B is the comparison-homeomorphism only** (Tate scope, exact image = rational open);
+Proposition 8.2(2)'s *rational-subset bijection* is still missing (PHASE 6).
+
+**`indexedRationalSet_perturb_eq` is only the subset-equality half of Kedlaya Ex 1.2.2**;
+the span-preservation half is missing (PHASE 6).
+
+## PHASE 0 delivered (this commit)
+- `PresheafFunctoriality.lean`: added `restrictionMapHom_canonicalMap_generic` (minimal hyps —
+  only `[HasLocLiftPowerBounded]` beyond Huber) and `presheafValueMapOfHom_restriction` (generic
+  restriction-naturality). FJP's private `restrictionMapHom_canonicalMap'` + duplicate
+  `presheafValueMapOfHom_restriction` DELETED; FJP uses upstream via `open`.
+  `IteratedRational.restrictionMapHom_canonicalMap` deduped to a thin wrapper with the
+  4 overscoped instances (`IsTateRing`/`IsNoetherianRing`/`T2Space`/`NonarchimedeanRing`)
+  `omit`-ted.

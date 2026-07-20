@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».PresheafTateStructure
 import «Adic spaces».TopologyComparison
 import «Adic spaces».CompletionLocalization
+import «Adic spaces».PresheafFunctoriality
 
 /-!
 # Iterated Rational Localization (Wedhorn Lemma 2.13): helpers
@@ -39,30 +40,15 @@ theorem canonicalMap_s_isUnit (D₀ : RationalLocData A) :
   exact RingHom.isUnit_map D₀.coeRingHom
     (IsLocalization.Away.algebraMap_isUnit D₀.s)
 
+omit [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A] in
 /-- Compatibility: `restrictionMapHom D₀ D' hsub ∘ D₀.canonicalMap = D'.canonicalMap`.
-Follows directly from `UniformSpace.Completion.extensionHom_coe` + the
-`IsLocalization.Away.lift_eq` identity for the underlying alg map. -/
+Thin wrapper over the upstream `restrictionMapHom_canonicalMap_generic`
+(`PresheafFunctoriality.lean`); the section's Tate/noetherian/T2/nonarch instances
+are unused here and `omit`-ted. -/
 theorem restrictionMapHom_canonicalMap (D₀ D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D₀.T D₀.s) (a : A) :
-    restrictionMapHom D₀ D' h (D₀.canonicalMap a) = D'.canonicalMap a := by
-  letI := D₀.uniformSpace
-  letI := D₀.isTopologicalRing
-  letI := D₀.isUniformAddGroup
-  letI := D'.uniformSpace
-  letI := D'.isTopologicalRing
-  letI := D'.isUniformAddGroup
-  change restrictionMapHom D₀ D' h
-      (D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) a)) =
-      D'.coeRingHom (algebraMap A (Localization.Away D'.s) a)
-  have h_ext :
-      restrictionMapHom D₀ D' h
-        (D₀.coeRingHom (algebraMap A (Localization.Away D₀.s) a)) =
-      restrictionMapAlg D₀ D' h (algebraMap A (Localization.Away D₀.s) a) :=
-    UniformSpace.Completion.extensionHom_coe (restrictionMapAlg D₀ D' h)
-      (restrictionMapAlg_continuous D₀ D' h)
-      (algebraMap A (Localization.Away D₀.s) a)
-  rw [h_ext, restrictionMapAlg, IsLocalization.Away.lift_eq]
-  rfl
+    restrictionMapHom D₀ D' h (D₀.canonicalMap a) = D'.canonicalMap a :=
+  restrictionMapHom_canonicalMap_generic D₀ D' h a
 
 end Helpers
 
