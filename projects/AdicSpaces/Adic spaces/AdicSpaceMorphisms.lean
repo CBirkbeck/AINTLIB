@@ -37,22 +37,17 @@ structure AffinoidNeighborhood (X : AdicSpacePresentation.{u}) (x : X.carrier) w
   /-- The homeomorphism `U ≃ₜ Spa(aff.Ring)`. -/
   homeo : ↥U ≃ₜ aff.toTopCat
 
-/-- **Definition 8.38 of Wedhorn.** A continuous map `f : X.carrier → Y.carrier`
-between the carriers of adic spaces is *adic* if for every `x ∈ X`, there exist
-open affinoid neighborhoods `U ∋ x` in `X` and `V ∋ f(x)` in `Y` with
-`f(U) ⊆ V`, such that the induced ring homomorphism
-`𝒪_Y(V) → 𝒪_X(U)` is adic in the sense of Definition 6.23.
-
-In the formal definition, we ask for affinoid neighborhood data (homeomorphisms to
-affinoid spectra) and require the ring homomorphism between the witnessing affinoid
-rings to be adic. The requirement `f(U) ⊆ V` is encoded by requiring that
-`f` maps points of `U` into `V`.
-
-The ring hom goes from the target ring to the source ring (`NY.aff.Ring →+* NX.aff.Ring`),
-matching the contravariant nature of `Spa(φ) : Spa(B) → Spa(A)` for `φ : A →+* B`.
-We require `IsHuberRing` instances on the affinoid rings since `IsAdicHom` is defined
-for Huber ring homomorphisms (Definition 6.23 of Wedhorn). -/
-def IsAdicMorphism (X Y : AdicSpacePresentation.{u}) (f : C(X.carrier, Y.carrier)) : Prop :=
+/-- **PROVISIONAL carrier-level adicness predicate — this is NOT Wedhorn
+Definition 8.38** (P0 honesty pass, 2026-07-20). Definition 8.38 is about a
+morphism of *adic spaces* (objects of `𝒱`), and its ring homomorphism is the map
+*induced on sections by that same `𝒱`-morphism*. This predicate lives on a bare
+continuous map of carrier presentations and merely asks for *some* existential
+adic ring homomorphism between chart rings, unrelated to `f` beyond the chart
+containment — a strictly provisional stand-in until the genuine `𝒱`-layer
+(canonical `Spa` objects of `𝒱`, restriction, Prop 8.6) exists. The public name
+`IsAdicMorphism` is reserved for the eventual predicate on morphisms of actual
+adic spaces and is deliberately **not** defined here. -/
+def PresentationIsAdicMorphism (X Y : AdicSpacePresentation.{u}) (f : C(X.carrier, Y.carrier)) : Prop :=
   ∀ (x : X.carrier),
     ∃ (NX : AffinoidNeighborhood X x)
       (NY : AffinoidNeighborhood Y (f x))
@@ -119,7 +114,7 @@ The full adic space version (Proposition 8.39(1) of Wedhorn) states that a morph
 `f : X → Y` of adic spaces is adic iff `f` maps analytic points of `X` to analytic
 points of `Y`. The reduction from the adic space level to the affinoid level uses
 Remark 8.37(2) of Wedhorn: it suffices to check the adic property on affinoid charts.
-Formalizing that reduction requires connecting the abstract `IsAdicMorphism` definition
+Formalizing that reduction requires connecting the provisional `PresentationIsAdicMorphism`
 (which asks for *some* witnessing affinoid charts) to the pointwise analytic-preservation
 property, which is not yet available.
 
@@ -162,10 +157,15 @@ formalized:
 2. **Presheaf morphism** infrastructure extracting `φ` from `f` on charts.
 3. **Completeness** of affinoid rings (presheaf values are completions).
 
-Following Wedhorn p. 86, the proof is: Prop 8.39(1) gives `f(U_a) ⊆ V_a`
-(analytic-preservation), then Lemma 7.46(2) gives that `φ` is adic. -/
-theorem IsAdicMorphism.ringHom_isAdic {X Y : AdicSpacePresentation}
-    {f : C(X.carrier, Y.carrier)} (_hf : IsAdicMorphism X Y f) {x : X.carrier}
+Following Wedhorn p. 86, the intended argument is: Prop 8.39(1) gives
+`f(U_a) ⊆ V_a` (analytic-preservation), then Lemma 7.46(2) gives that `φ` is adic.
+
+**De-labelled (P0 honesty pass, 2026-07-20): this is NOT Corollary 8.40.** It is a
+chart-level restatement of Lemma 7.46(2); the previous version even carried an
+*unused* `PresentationIsAdicMorphism` hypothesis (now removed). Corollary 8.40
+proper is about morphisms of actual adic spaces and awaits the `𝒱`-layer. -/
+theorem ringHom_isAdic_of_charts_analytic_preserved {X Y : AdicSpacePresentation}
+    {f : C(X.carrier, Y.carrier)} {x : X.carrier}
     (NX : AffinoidNeighborhood X x) (NY : AffinoidNeighborhood Y (f x))
     (_hfUV : ∀ (p : ↥NX.U), f p.val ∈ NY.U) [IsHuberRing NX.aff.Ring]
     [IsHuberRing NY.aff.Ring] (φ : NY.aff.Ring →+* NX.aff.Ring) (hφ_cont : Continuous φ)

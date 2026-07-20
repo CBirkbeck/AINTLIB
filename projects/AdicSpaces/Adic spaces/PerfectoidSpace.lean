@@ -15,7 +15,7 @@ Scholze's *Perfectoid Spaces* (2012), Definition 3.19.
 
 * `AffinoidPerfectoidSpace p` : A bundled perfectoid ring with all instances needed to form
   `Spa(A, A⁺)`. This is `Spa(A, A⁺)` where `A` is a perfectoid ring.
-* `IsPerfectoidSpace p X` : An adic space `X` is a **perfectoid space** if every point has
+* `IsPerfectoidSpacePresentation p X` : An adic space `X` is a **perfectoid space** if every point has
   an open affinoid neighborhood that is isomorphic to `Spa(A, A⁺)` for some perfectoid ring `A`.
 
 ## Main results (sorry'd)
@@ -87,15 +87,13 @@ end AffinoidPerfectoidSpace
 
 /-! ### Perfectoid spaces -/
 
-/-- An adic space `X` is a **perfectoid space** (for a prime `p`) if every point of `X`
-has an open neighborhood that is isomorphic (as a topological space) to `Spa(A, A⁺)`
-for some perfectoid ring `A`.
-
-This is the analogue of the locally affinoid condition in the definition of adic spaces,
-with the additional requirement that the local rings are perfectoid.
-
-(Scholze, *Perfectoid Spaces*, Definition 3.19) -/
-class IsPerfectoidSpace (p : ℕ) [Fact (Nat.Prime p)]
+/-- **PROVISIONAL carrier-level perfectoid predicate — NOT Scholze's Definition 3.19**
+(P0 honesty pass, 2026-07-20): every point of the *presentation* has an open
+neighborhood *homeomorphic* to the spectrum of a perfectoid ring. Scholze's actual
+definition of a perfectoid space requires the local identifications to be
+isomorphisms of adic spaces (carrying structure sheaves and valuations), not bare
+homeomorphisms of carriers; that awaits the genuine `𝒱`-layer. -/
+class IsPerfectoidSpacePresentation (p : ℕ) [Fact (Nat.Prime p)]
     (X : AdicSpacePresentation.{u}) : Prop where
   /-- Every point has an open neighborhood isomorphic to the adic spectrum of a
   perfectoid ring. -/
@@ -115,6 +113,6 @@ local perfectoid ring is again perfectoid, and that the local charts glue correc
 
 (Scholze, *Perfectoid Spaces*, Theorem 6.3) -/
 theorem PerfectoidSpace.tilt (p : ℕ) [Fact (Nat.Prime p)]
-    (X : AdicSpacePresentation.{u}) [IsPerfectoidSpace p X] :
-    ∃ (Y : AdicSpacePresentation.{u}), IsPerfectoidSpace p Y := by
+    (X : AdicSpacePresentation.{u}) [IsPerfectoidSpacePresentation p X] :
+    ∃ (Y : AdicSpacePresentation.{u}), IsPerfectoidSpacePresentation p Y := by
   exact sorry

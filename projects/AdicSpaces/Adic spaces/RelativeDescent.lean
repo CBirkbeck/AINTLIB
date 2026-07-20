@@ -24,7 +24,9 @@ noetherian-free). For a valid rational base `D₀` over `A` with section ring
   containment `R(E') ⊆ R(E)` transfers to the `B⁺`-level containment of the image
   opens, through the proven `Spa`-restriction
   (`comap_mem_spa`/`comap_canonicalMap_mem_rationalOpen`, HuberLocLift).
-* **The keystone, noetherian-free** (Wedhorn Prop 8.16 / Lemma 2.13 transitivity;
+* **The keystone, noetherian-free** (Wedhorn Lemma 8.1 / Proposition 8.2(2) /
+  Remark 8.4 — the universal property of `A⟨T/s⟩` and the identification of the
+  iterated rational localization;
   replaces the strongly-noetherian-scoped `relativePiece_equiv` on the descent
   path): `keystoneHom`/`keystoneInv` between `𝒪_A(E)` and `𝒪_B(imgDatum D₀ E)`,
   mutually inverse (`keystone` as a `RingEquiv`), continuous both ways,
@@ -37,8 +39,7 @@ noetherian-free). For a valid rational base `D₀` over `A` with section ring
 
 ## References
 
-* [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Prop 8.2, Prop 8.16, Lemma 2.13,
-  Remark 8.4.
+* [T. Wedhorn, *Adic Spaces*][wedhorn2019adic], Lemma 8.1, Prop 8.2(2), Remark 8.4.
 * [K. Kedlaya, AWS 2017], Lemma 1.6.8 ("every rational subspace of `X` is itself
   the spectrum of a Huber pair" — this file is that statement's section-ring level).
 -/
@@ -624,7 +625,7 @@ theorem keystoneHom_keystoneInv (y : presheafValue (imgDatum D₀ E hspanE)) :
       exact DFunLike.congr_fun hloc l
   exact congr_fun hfun y
 
-/-- **The noetherian-free keystone** (Wedhorn Prop 8.16 / Lemma 2.13): the section
+/-- **The noetherian-free keystone** (Wedhorn Lemma 8.1 / Prop 8.2(2) / Remark 8.4): the section
 ring of a rational piece over `A` is canonically the section ring of its image
 datum over `B = 𝒪(D₀)`, as topological rings
 (`keystoneHom_continuous`/`keystoneInv_continuous`), compatibly with the canonical

@@ -74,7 +74,7 @@ def MvPowerSeries.IsRestricted {k : ℕ} {A : Type*} [CommRing A] [TopologicalSp
 The closure under multiplication (convolution of tendsto-0 coefficient sequences)
 requires that `A` is a nonarchimedean topological ring (so that finite sums of elements in an
 open additive subgroup remain in the subgroup). This is the canonical definition of
-`A⟨T₁, …, Tₖ⟩` (Wedhorn, §6.9). -/
+`A⟨T₁, …, Tₖ⟩` (Wedhorn, (5.6.1)/§5.6). -/
 def restrictedMvPowerSeriesSubring (k : ℕ) (A : Type*) [CommRing A] [TopologicalSpace A]
     [NonarchimedeanRing A] : Subring (MvPowerSeries (Fin k) A) where
   carrier := {f | MvPowerSeries.IsRestricted f}

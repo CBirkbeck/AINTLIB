@@ -279,7 +279,15 @@ first form): for **every** topological commutative ring `T` — with no complete
 separation, or discreteness restriction — the presheaf `V ↦ Hom_cont(T, 𝒪_X(V))` of
 continuous ring homomorphisms is a sheaf of sets: every family of continuous ring
 homomorphisms into the members of an open cover that is compatible on pairwise
-intersections arises from a **unique** continuous ring homomorphism into `𝒪_X(V)`. -/
+intersections arises from a **unique** continuous ring homomorphism into `𝒪_X(V)`.
+
+**DEPRECATION NOTE (P0.4, 2026-07-20)**: this Spa-specific formulation is
+superseded by the generic `TopCat.Presheaf.IsSheafOfTopologicalRings` at
+`structurePresheaf A` — the two are equivalent by
+`structurePresheaf_isSheafOfTopologicalRings_iff` +
+`isSheafOfTopologicalRings_iff_isLimitSheaf`. New statements should use the
+generic predicate; this one remains for the equivalence theorems and existing
+consumers. -/
 def IsSheafOfTopologicalRings : Prop :=
   ∀ (T : Type u) [CommRing T] [TopologicalSpace T] [IsTopologicalRing T],
     ∀ {V : Opens ↥(Spa A A⁺)} {ι : Type u} {U : ι → Opens ↥(Spa A A⁺)}
@@ -599,6 +607,61 @@ theorem structurePresheaf_isSheafOfTopologicalRings (h : IsLimitSheaf A) :
   obtain ⟨g, hg, hguniq⟩ := h.homGlue (T := T) hle hcov
     (fun i => (f i).1) (fun i => (f i).2) hcompat
   exact ⟨g, hg, fun g' hg' => hguniq g' hg'⟩
+
+
+variable (A) in
+/-- **The generic predicate specializes exactly** (P0.4): the bundled public
+structure presheaf satisfies the arbitrary-presheaf sheaf-of-topological-rings
+condition iff the pair is sheafy (`IsLimitSheaf`). The forward direction
+transports a general-`V` cover to the `iSup`-form through the open-equality
+reindexing (`limitRestrict` along `V = iSup U`, mutually inverse by
+reindexing-`rfl`), then runs the Spa-specific Remark-8.20 argument. -/
+theorem structurePresheaf_isSheafOfTopologicalRings_iff :
+    TopCat.Presheaf.IsSheafOfTopologicalRings (structurePresheaf A) ↔
+      IsLimitSheaf A := by
+  constructor
+  · intro hgen
+    refine (isSheafOfTopologicalRings_iff_isLimitSheaf).mp ?_
+    intro T instC instTop instRing V ι U hle hcov f hfc hcompat
+    -- the cover forces `V = iSup U`
+    have hVeq : V = iSup U := by
+      refine le_antisymm ?_ (iSup_le hle)
+      intro v hv
+      obtain ⟨i, hvi⟩ := Set.mem_iUnion.mp (hcov hv)
+      exact Opens.mem_iSup.mpr ⟨i, hvi⟩
+    -- run the generic condition at the `iSup` cover, then reinterpret the
+    -- entire unique-gluing datum on the concrete (subring) side in ONE defeq step
+    obtain ⟨gPair, hgPair, hgPairUniq⟩ :
+        ∃! g : {g : T →+* ↥(limitSections (iSup U)) // Continuous g},
+          ∀ i, (limitRestrict (le_iSup U i)).comp g.1 = f i :=
+      hgen T instC instTop instRing U
+        (fun i => ⟨f i, hfc i⟩) (fun i j => hcompat i j)
+    obtain ⟨g₀, hg₀c⟩ := gPair
+    -- transport the glued hom along the open equality (note `limitRestrict` is
+    -- contravariant: `limitRestrict (V ≤ iSup U)` maps `iSup`-sections to `V`-sections)
+    refine ⟨⟨(limitRestrict hVeq.le).comp g₀, ?_⟩, fun i => ?_, ?_⟩
+    · exact (limitRestrict_continuous hVeq.le).comp hg₀c
+    · -- restriction check: collapse the reindexings
+      refine RingHom.ext fun t => ?_
+      show limitRestrict (hle i) (limitRestrict hVeq.le (g₀ t)) = f i t
+      rw [limitRestrict_limitRestrict]
+      exact DFunLike.congr_fun (hgPair i) t
+    · rintro ⟨g', hg'c⟩ hg'
+      -- the reverse transport of `g'` also glues at `iSup U`, hence equals `g₀`
+      have huniq := hgPairUniq ⟨(limitRestrict hVeq.ge).comp g',
+        (limitRestrict_continuous hVeq.ge).comp hg'c⟩ (fun i => by
+          refine RingHom.ext fun t => ?_
+          show limitRestrict (le_iSup U i) (limitRestrict hVeq.ge (g' t)) = f i t
+          rw [limitRestrict_limitRestrict]
+          exact DFunLike.congr_fun (hg' i) t)
+      refine Subtype.ext (RingHom.ext fun t => ?_)
+      have hval := congrArg Subtype.val huniq
+      have hstep := congr_fun (congrArg (fun z : T →+* ↥(limitSections (iSup U)) =>
+        (fun t => limitRestrict hVeq.le (z t))) hval) t
+      show g' t = limitRestrict hVeq.le (g₀ t)
+      calc g' t = limitRestrict hVeq.le (limitRestrict hVeq.ge (g' t)) := rfl
+        _ = limitRestrict hVeq.le (g₀ t) := hstep
+  · exact structurePresheaf_isSheafOfTopologicalRings A
 
 /-! ### Affinoid and adic presentations (towards Definitions 8.21/8.22) -/
 

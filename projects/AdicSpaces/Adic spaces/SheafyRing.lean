@@ -34,8 +34,9 @@ The literature-facing sheafiness API (Wedhorn Definition 8.26, Kedlaya Remarks
   — **the principal theorems** (Wedhorn Theorem 8.28(b) in the genuine all-open
   vocabulary): a complete strongly noetherian Tate ring is sheafy for **every** valid
   ring of integral elements. `isSheafyTateRing_of_stronglyNoetherian_completion` —
-  the general (noncomplete) wrapper with Definition 6.36's hypothesis verbatim
-  ("the completion is strongly noetherian"), with **no** `CompleteSpace A`, ambient
+  the general (noncomplete) wrapper whose hypothesis is strong noetherianity of
+  every completion model (the formalization's reading of Definition 6.36's
+  condition on `Â`; the one-model form is `IsStronglyNoetherianTateRing`), with **no** `CompleteSpace A`, ambient
   `PlusSubring A`, `IsNoetherianRing A`, or `HasLocLiftPowerBounded A`;
   `isSheafyTateRing_of_stronglyNoetherianTate` — its complete-case instantiation
   through the faithful transport. No `CompatiblePlusSubring`, no
@@ -56,9 +57,11 @@ The literature-facing sheafiness API (Wedhorn Definition 8.26, Kedlaya Remarks
 ## Scope notes (honest boundaries)
 
 The noncomplete ring-level wrapper (`isSheafyTateRing_of_stronglyNoetherian_completion`)
-takes Wedhorn Definition 6.36's hypothesis **verbatim** — strong noetherianity of the
-**completion** ("`Â⟨X₁, …, Xₙ⟩` noetherian for all `n`") — which is the literature's
-own hypothesis for 8.28(b) and requires nothing of noncomplete `A` itself. The
+takes strong noetherianity of **every completion model** as its hypothesis — the
+formalization's reading of Wedhorn Definition 6.36's condition on `Â`
+("`Â⟨X₁, …, Xₙ⟩` noetherian for all `n`"; Wedhorn has *the* completion, the
+formalization quantifies over the models, which are canonically compatibly
+equivalent). It requires nothing of noncomplete `A` itself. The
 `A`-level restatement ("`A`-level restricted series noetherian ⟹ the model's"), i.e.
 the transport `IsStronglyNoetherian A → IsStronglyNoetherian (CompletionModel A P)`
 for noncomplete `A`, remains recorded: `presheafValue_isStronglyNoetherian_faithful`
@@ -299,10 +302,11 @@ variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
   [IsHuberRing A] [IsTateRing A]
 
 /-- **The strongly noetherian sheafiness theorem, general (noncomplete) Tate form**
-(Wedhorn Theorem 8.28(b) with Definition 6.36's hypothesis taken *verbatim*): let
-`A` be a Tate ring whose **completion** is strongly noetherian — Definition 6.36(i)
-is literally a condition on `Â` ("`Â⟨X₁, …, Xₙ⟩` is noetherian for all `n`"), here
-read at every completion model. Then `A` is sheafy in the ring-level sense
+(Wedhorn Theorem 8.28(b), with the Definition 6.36 hypothesis read at every
+completion model): let `A` be a Tate ring all of whose completion models are
+strongly noetherian — Definition 6.36(i) is a condition on `Â`
+("`Â⟨X₁, …, Xₙ⟩` is noetherian for all `n`"); the formalization quantifies over
+the models (see `IsStronglyNoetherianTateRing` for the one-model form). Then `A` is sheafy in the ring-level sense
 (`IsSheafyTateRing`): for every pair of definition and every ring of integral
 elements of the completion, the completed pair's genuine all-open structure
 presheaf is a sheaf of topological rings.
