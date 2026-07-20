@@ -1,5 +1,6 @@
 import Mathlib.RingTheory.Extension.Presentation.Basic
 import ModularCurves.ForMathlib.FinitePresentationEquiv
+import ModularCurves.ForMathlib.FilteredColimitClopen
 
 /-!
 # Reflecting equivalences of finitely presented base changes
@@ -113,6 +114,123 @@ private noncomputable def Presentation.spreadStageEquiv
   letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
   letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
   exact P.baseChangeQuotientEquiv (𝒮 j)
+
+private theorem Presentation.presentedU_mk_map_σ
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (hij : i ≤ j)
+    {C : Type u} [CommRing C] [Algebra (𝒮 i) C]
+    {m k : ℕ} (P : Presentation (𝒮 i) C (Fin m) (Fin k)) (c : C) :
+    letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+    presentedU t uA H P.relation ⟨j, hij⟩
+        (Ideal.Quotient.mk _
+          (MvPolynomial.map (t hij).toRingHom (P.σ c))) =
+      (P.baseChangeQuotientEquiv A).symm ((1 : A) ⊗ₜ[𝒮 i] c) := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  rw [presentedU_mk, MvPolynomial.map_map, H.u_comp,
+    P.baseChangeQuotientEquiv_symm_tmul]
+  simp only [RingHom.algebraMap_toAlgebra]
+
+private theorem Presentation.spreadStageEquiv_presentedT_mk_map_σ
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i : ι} (Pidx Qidx : {j : ι // i ≤ j}) (hPQ : Pidx ≤ Qidx)
+    {C : Type u} [CommRing C] [Algebra (𝒮 i) C]
+    {m k : ℕ} (P : Presentation (𝒮 i) C (Fin m) (Fin k)) (c : C) :
+    letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+    letI : Algebra (𝒮 i) (𝒮 Qidx.1) := (t Qidx.2).toRingHom.toAlgebra
+    P.spreadStageEquiv (A := A) (uA := uA) Qidx.2
+        (presentedT t H P.relation hPQ
+          (Ideal.Quotient.mk _
+            (MvPolynomial.map (t Pidx.2).toRingHom (P.σ c)))) =
+      (1 : 𝒮 Qidx.1) ⊗ₜ[𝒮 i] c := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 Qidx.1) := (t Qidx.2).toRingHom.toAlgebra
+  change P.baseChangeQuotientEquiv (𝒮 Qidx.1)
+      (presentedT t H P.relation hPQ
+        (Ideal.Quotient.mk _
+          (MvPolynomial.map (t Pidx.2).toRingHom (P.σ c)))) = _
+  rw [presentedT_mk, MvPolynomial.map_map, H.t_comp]
+  change P.baseChangeQuotientEquiv (𝒮 Qidx.1)
+      (Ideal.Quotient.mk _
+        (MvPolynomial.map (algebraMap (𝒮 i) (𝒮 Qidx.1)) (P.σ c))) = _
+  rw [P.baseChangeQuotientEquiv_mk,
+    MvPolynomial.aeval_map_algebraMap, P.aeval_baseChange_val,
+    P.aeval_val_σ]
+
+/-- A finite union of basic opens in a finitely presented algebra which becomes clopen
+after base change to a filtered colimit is already clopen after base change to one later
+stage. -/
+theorem IsFilteredAlgColimit.exists_isClopen_iSup_basicOpen_tensorProduct
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i : ι} {C : Type u} [CommRing C] [Algebra (𝒮 i) C]
+    [FinitePresentation (𝒮 i) C]
+    {κ : Type u} [Finite κ] (f : κ → C)
+    (hclopen :
+      letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+      IsClopen
+        ((↑(⨆ q, PrimeSpectrum.basicOpen
+          ((1 : A) ⊗ₜ[𝒮 i] f q)) : Set (PrimeSpectrum (A ⊗[𝒮 i] C))))) :
+    ∃ (j : ι) (hij : i ≤ j),
+      letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+      IsClopen
+        ((↑(⨆ q, PrimeSpectrum.basicOpen
+          ((1 : 𝒮 j) ⊗ₜ[𝒮 i] f q)) :
+            Set (PrimeSpectrum (𝒮 j ⊗[𝒮 i] C)))) := by
+  classical
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  let m := Presentation.ofFinitePresentationVars (𝒮 i) C
+  let n := Presentation.ofFinitePresentationRels (𝒮 i) C
+  let P : Presentation (𝒮 i) C (Fin m) (Fin n) :=
+    Presentation.ofFinitePresentation (𝒮 i) C
+  let Pidx : {j : ι // i ≤ j} := ⟨i, le_rfl⟩
+  let fP : κ →
+      MvPolynomial (Fin m) (𝒮 Pidx.1) ⧸
+        Ideal.span (Set.range fun r =>
+          MvPolynomial.map (t Pidx.2).toRingHom (P.relation r)) := fun q =>
+    Ideal.Quotient.mk _
+      (MvPolynomial.map (t Pidx.2).toRingHom (P.σ (f q)))
+  have hquotient : IsClopen
+      ((↑(⨆ q, PrimeSpectrum.basicOpen
+        ((P.baseChangeQuotientEquiv A).symm
+          ((1 : A) ⊗ₜ[𝒮 i] f q))) :
+          Set (PrimeSpectrum
+            (MvPolynomial (Fin m) A ⧸
+              Ideal.span (Set.range fun r =>
+                MvPolynomial.map (uA i).toRingHom (P.relation r)))))) :=
+    PrimeSpectrum.isClopen_iSup_basicOpen_map
+      (P.baseChangeQuotientEquiv A).symm.toRingHom
+      (fun q => (1 : A) ⊗ₜ[𝒮 i] f q) hclopen
+  have hcolimit : IsClopen
+      ((↑(⨆ q, PrimeSpectrum.basicOpen
+        (presentedU t uA H P.relation Pidx (fP q))) :
+          Set (PrimeSpectrum
+            (MvPolynomial (Fin m) A ⧸
+              Ideal.span (Set.range fun r =>
+                MvPolynomial.map (uA i).toRingHom (P.relation r)))))) := by
+    have hgenerator (q : κ) :
+        presentedU t uA H P.relation Pidx (fP q) =
+          (P.baseChangeQuotientEquiv A).symm
+            ((1 : A) ⊗ₜ[𝒮 i] f q) := by
+      exact P.presentedU_mk_map_σ H Pidx.2 (f q)
+    simpa only [hgenerator] using hquotient
+  obtain ⟨Q, hPQ, hstage⟩ :=
+    (isFilteredAlgColimit_presented H P.relation).exists_isClopen_iSup_basicOpen
+      fP hcolimit
+  refine ⟨Q.1, Q.2, ?_⟩
+  letI : Algebra (𝒮 i) (𝒮 Q.1) := (t Q.2).toRingHom.toAlgebra
+  have hmapped := PrimeSpectrum.isClopen_iSup_basicOpen_map
+    (P.spreadStageEquiv (A := A) (uA := uA) Q.2).toRingHom
+    (fun q => presentedT t H P.relation hPQ (fP q)) hstage
+  have hgenerator (q : κ) :
+      P.spreadStageEquiv (A := A) (uA := uA) Q.2
+          (presentedT t H P.relation hPQ (fP q)) =
+        (1 : 𝒮 Q.1) ⊗ₜ[𝒮 i] f q := by
+    exact P.spreadStageEquiv_presentedT_mk_map_σ H Pidx Q hPQ (f q)
+  change IsClopen
+    ((↑(⨆ q, PrimeSpectrum.basicOpen
+      (P.spreadStageEquiv (A := A) (uA := uA) Q.2
+        (presentedT t H P.relation hPQ (fP q)))) :
+        Set (PrimeSpectrum (𝒮 Q.1 ⊗[𝒮 i] C)))) at hmapped
+  simpa only [hgenerator] using hmapped
 
 private noncomputable def Presentation.spreadBaseChangeEquiv
     (H : IsFilteredAlgColimit R 𝒮 t A uA)
