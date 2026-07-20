@@ -174,6 +174,20 @@ theorem Modules.isQuasicoherent_surjective_of_epi [IsAffine X]
   exact Modules.isQuasicoherent_spec_surjective_of_epi
     ((restrictFunctor (isoSpec X).inv).map f)
 
+/-- An epimorphism of quasicoherent modules is surjective on sections over an affine open. -/
+theorem Modules.isQuasicoherent_app_surjective_of_epi
+    (U : X.Opens) (hU : IsAffineOpen U)
+    {M N : X.Modules} (f : M ⟶ N)
+    [M.IsQuasicoherent] [N.IsQuasicoherent] [Epi f] :
+    Function.Surjective (f.val.app (op U)).hom := by
+  letI : IsAffine U.toScheme := hU
+  have h := Modules.isQuasicoherent_surjective_of_epi
+    ((restrictFunctor U.ι).map f)
+  change Function.Surjective
+    (f.val.app (op (U.ι ''ᵁ (⊤ : U.toScheme.Opens)))).hom at h
+  rw [U.ι_image_top] at h
+  exact h
+
 end
 
 end AlgebraicGeometry.Scheme
