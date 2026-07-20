@@ -24355,3 +24355,23 @@ dictionary friction; file still 0 sorries). hpres frontier comment lists ALL pre
 axiom-clean and ready to call. Remaining: the EngineDescent scheme assembly only
 (chart extraction → rescale → T-layer splits ×3 → correction → coefficient glue →
 glueMorphisms → Part-2 spread) — dispatched to a fresh builder.
+
+### v10.343 progress — [T-E4E COMPLETE] + [T-E4C COMPLETE] (2026-07-21)
+T-E4E: Recollement glue DONE — homGlueDescentData proven (chart-eqv factorization +
+overlap bridge + source-cover glueMorphisms machinery, ~2680 lines) and
+glueEllObj_representableBy discharged via _of_zariskiGlue with
+zariskiSheaf_of_relativelyRepresentable (built directly from the RelativelyRepresentable
+clause — flagged deviation from the Stack-lemma route, same mathematical content, KM
+standing hypothesis; Stack.lean untouched). **representable_of_baseChange_cover (the KM
+4.7.1 recollement) = AXIOM-CLEAN.** Kernel-engineering findings banked in the report
+(subst-congruence + structure-literal middles + exact-not-rw dodges for
+restrictScalars/Localization instance towers).
+T-E4C: EngineWiring D(2) leg REWIRED to level 4 (φ₄ = gammaFullNaiveGlAction R 4 ∘ ulift;
+X0 = naiveLevelFour_representable_by_affine; torsor = exists_levelFourTorsorData_ulift;
+LegendreTorsor import dropped) + quarantine banners on LegendreTorsor/SqrtCoverGlue
+(documented non-goals citing b2_log B2-DECISION). InvariantDifferential:
+transVC_restrict_restrict un-private'd for the mouth core (statement unchanged).
+ENGINE STATUS: representable_of_affineOverEll_of_rigidNoeth now carries sorryAx through
+EXACTLY ONE leaf — the mouth core's Stage-3 hpres (both legs, shared mouth). The hpres
+assembly builder is in flight. When it lands: receipts 1/2/4/5 flip clean; 3/6 additionally
+need F1/F2.

@@ -11,6 +11,23 @@ import ModularCurves.Moduli.E3DatumAssembly
 import ModularCurves.GroupScheme.SqrtUnitCover
 import Mathlib.AlgebraicGeometry.RelativeGluing
 
+/-! ## ⚠ QUARANTINED SUBTREE (B2-DECISION, board v10.342/v10.343, 2026-07-20)
+
+This file belongs to the **Legendre D(2)-mouth subtree**, removed from every
+receipt cone by the adjudicated B2 resolution: the engine's D(2) leg now runs on
+the naive level-4 rigidifier (`Moduli/UniversalLevelFour.lean` +
+`Moduli/LevelFourTorsor.lean`; `EngineWiring.representable_baseChange_two`).
+KM 4.6.2's constant-group torsor claim for the Legendre problem is FALSE as
+stated (b2_log `B2-DECISION`: over the universal Legendre base the six
+marking-components are pairwise non-isomorphic quadratic étale algebras, so no
+constant finite group acts fibre-transitively; the honest torsor group is a
+twisted μ₂-extension of GL₂(𝔽₂)). The sorried declarations below are DOCUMENTED
+NON-GOALS (kept per statement-protection protocol; a groupoid-descent engine
+would be required to make the Legendre route viable — see decomposition-e4.md).
+Do NOT work these sorries as receipt leaves. -/
+
+
+
 /-!
 # The `±ω` scale-torsor: gluing the square-root cover over the level-`2` locus (T-E14-AX2)
 

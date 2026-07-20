@@ -690,8 +690,10 @@ private lemma transportE_restrict_restrict {VP : S.affineOpens}
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 /-- **(T-OM-B5 coherence)** Double restriction agrees with the composite restriction on
-comparison variable changes (uniqueness through the chart-isomorphism coherence). -/
-private theorem transVC_restrict_restrict {VP VQ : S.affineOpens}
+comparison variable changes (uniqueness through the chart-isomorphism coherence).
+(Un-`private`d for the engine mouth core's Stage-3 chart-Čech cocycle laws,
+`Moduli/EngineDescent.lean`.) -/
+theorem transVC_restrict_restrict {VP VQ : S.affineOpens}
     (P : LocalPresentation G VP) (Q : LocalPresentation G VQ)
     {V V'' : S.affineOpens} (p : V.1 ≤ VP.1) (q : V.1 ≤ VQ.1) (h : V''.1 ≤ V.1) :
     ((P.restrict p).restrict h).transVC ((Q.restrict q).restrict h) =

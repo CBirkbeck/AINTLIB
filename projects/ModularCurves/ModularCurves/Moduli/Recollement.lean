@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.ProblemBaseChange
+import ModularCurves.Moduli.QuotientProblem
+import ModularCurves.Moduli.Stack
 import ModularCurves.EllipticCurve.GroupLawDescent
 import Mathlib.RingTheory.Spectrum.Prime.Topology
 import Mathlib.AlgebraicGeometry.Gluing
@@ -1314,6 +1316,1999 @@ theorem yOverlap_compat (Y : EllObj R) :
 
 end ZariskiDescent
 
+/-! ## [R-hom-glue] toolkit — cancellation, casts and localization ranges
+
+Generic helpers for the geometric descent `homGlueDescentData` below: mono-cancellation of
+`Ell/R`-morphisms, the `P.map`-of-`eqToHom` ↔ `cast` bridge, the ranges of the localization
+opens `D(a)`, `D(ab)` and their preimages in a test object, the map into the overlap chart,
+and the factorization of a morphism into the glued object through one of its charts. -/
+
+section HomGlueToolkit
+
+set_option backward.isDefEq.respectTransparency false
+
+/-- Cancel an `Ell/R`-morphism whose `baseHom` and `top` are monomorphisms. -/
+private theorem ellHom_cancel_mono {Z V Y₀ : EllObj R} (j : V ⟶ Y₀)
+    (hb : Mono j.baseHom) (ht : Mono j.top) {v w : Z ⟶ V}
+    (h : v ≫ j = w ≫ j) : v = w := by
+  have hbase : v.baseHom ≫ j.baseHom = w.baseHom ≫ j.baseHom := by
+    have hc := congrArg EllHom.baseHom h
+    simpa only [EllHom.comp_baseHom] using hc
+  have htop : v.top ≫ j.top = w.top ≫ j.top := by
+    have hc := congrArg EllHom.top h
+    simpa only [EllHom.comp_top] using hc
+  exact EllHom.ext ((cancel_mono j.baseHom).mp hbase) ((cancel_mono j.top).mp htop)
+
+/-- `P.map` of an `eqToHom` is the type-level cast. -/
+private theorem map_eqToHom_op {P : ModuliProblem R} {X₁ X₂ : EllObj R} (h : X₁ = X₂)
+    (x : P.obj (op X₂)) :
+    P.map (eqToHom h).op x = cast (congrArg (fun Z => P.obj (op Z)) h.symm) x := by
+  subst h
+  rw [eqToHom_refl, op_id, CategoryTheory.Functor.map_id]
+  rfl
+
+/-- Two casts of equal elements along (possibly different) proofs of the same type
+equality agree. -/
+private theorem cast_eq_cast {A B : Type u} (p₁ p₂ : A = B) {x y : A} (h : x = y) :
+    cast p₁ x = cast p₂ y := by
+  subst h
+  subst p₁
+  rfl
+
+/-- `P.map` along two `Ell/R`-morphisms with (heterogeneously) equal components, over an
+equality of source objects, agree up to cast. The equality proof stays opaque, so this is
+kernel-cheap at use sites. -/
+private theorem map_congr_ellHom {P : ModuliProblem R} {X X' Y₀ : EllObj R} (h : X = X')
+    (f : X ⟶ Y₀) (g : X' ⟶ Y₀) (hb : HEq f.baseHom g.baseHom) (ht : HEq f.top g.top)
+    (x : P.obj (op Y₀)) :
+    P.map f.op x = cast (congrArg (fun Z => P.obj (op Z)) h.symm) (P.map g.op x) := by
+  subst h
+  obtain rfl : f = g := EllHom.ext (eq_of_heq hb) (eq_of_heq ht)
+  rfl
+
+/-- In `Type u`, an `eqToHom` acts as the cast. -/
+private theorem eqToHom_apply_type {A B : Type u} (h : A = B) (x : A) :
+    eqToHom h x = cast h x := by
+  subst h
+  rfl
+
+/-- The range of `Spec R[1/c] ⟶ Spec R` is the basic open `D(c)`. -/
+private theorem range_SpecMap_awayHom (c : R) :
+    Set.range (Spec.map (awayHom c))
+      = (PrimeSpectrum.basicOpen c : Set (PrimeSpectrum R)) := by
+  show Set.range (Spec.map (CommRingCat.ofHom (algebraMap R (Localization.Away c)))) = _
+  rw [← Scheme.Hom.coe_opensRange, Scheme.Hom.opensRange_localizationAway]
+
+/-- Restriction of scalars is full over a mono: an `Ell/R`-morphism between two
+restricted objects lifts to `Ell/R'`. -/
+private noncomputable def unRestrictScalars {R' : CommRingCat.{u}} (ρ : R ⟶ R')
+    [Mono (Spec.map ρ)] {Z Z' : EllObj R'}
+    (w : (EllObj.restrictScalars ρ).obj Z ⟶ (EllObj.restrictScalars ρ).obj Z') : Z ⟶ Z' where
+  baseHom := w.baseHom
+  base_w := by
+    have hw : w.baseHom ≫ Z'.structMap ≫ Spec.map ρ = Z.structMap ≫ Spec.map ρ := w.base_w
+    rw [← Category.assoc] at hw
+    exact (cancel_mono (Spec.map ρ)).mp hw
+  top := w.top
+  isPullback := w.isPullback
+  zero_w := w.zero_w
+
+private theorem restrictScalars_map_unRestrictScalars {R' : CommRingCat.{u}} (ρ : R ⟶ R')
+    [Mono (Spec.map ρ)] {Z Z' : EllObj R'}
+    (w : (EllObj.restrictScalars ρ).obj Z ⟶ (EllObj.restrictScalars ρ).obj Z') :
+    (EllObj.restrictScalars ρ).map (unRestrictScalars ρ w) = w :=
+  EllHom.ext rfl rfl
+
+variable (a b : R)
+
+/-- Range condition for the overlap chart: a base map through both `D(a)` and `D(b)`
+lands in `D(ab)` after the structure map. -/
+private theorem range_toOverlap_cond (Y : EllObj R) {T : Scheme.{u}} (w : T ⟶ Y.base)
+    (H1 : ∀ t : T, Y.structMap (w t) ∈ Set.range (Spec.map (awayHom a)))
+    (H2 : ∀ t : T, Y.structMap (w t) ∈ Set.range (Spec.map (awayHom b))) :
+    Set.range (w ≫ Y.structMap) ⊆ Set.range (Spec.map (awayHom (a * b))) := by
+  rintro - ⟨t, rfl⟩
+  rw [Scheme.Hom.comp_apply, range_SpecMap_awayHom, PrimeSpectrum.basicOpen_mul]
+  refine ⟨?_, ?_⟩
+  · have h := H1 t; rwa [range_SpecMap_awayHom] at h
+  · have h := H2 t; rwa [range_SpecMap_awayHom] at h
+
+/-- The canonical map from a scheme over `D(ab)` into the overlap chart
+`Y ×_{Spec R} Spec R[1/ab]`. -/
+private noncomputable def toOverlapBase (Y : EllObj R) {T : Scheme.{u}} (w : T ⟶ Y.base)
+    (H : Set.range (w ≫ Y.structMap) ⊆ Set.range (Spec.map (awayHom (a * b)))) :
+    T ⟶ pullback Y.structMap (Spec.map (awayHom (a * b))) :=
+  pullback.lift w (IsOpenImmersion.lift (Spec.map (awayHom (a * b))) (w ≫ Y.structMap) H)
+    (IsOpenImmersion.lift_fac _ _ _).symm
+
+@[simp]
+private theorem toOverlapBase_fst (Y : EllObj R) {T : Scheme.{u}} (w : T ⟶ Y.base)
+    (H : Set.range (w ≫ Y.structMap) ⊆ Set.range (Spec.map (awayHom (a * b)))) :
+    toOverlapBase a b Y w H ≫ pullback.fst Y.structMap (Spec.map (awayHom (a * b))) = w :=
+  pullback.lift_fst _ _ _
+
+/-- The overlap map composed with the overlap-into-`a`-chart base leg recovers any given
+factorization through the `a`-chart. -/
+private theorem toOverlapBase_yOverlapBaseA (Y : EllObj R) {T : Scheme.{u}} (w : T ⟶ Y.base)
+    (H : Set.range (w ≫ Y.structMap) ⊆ Set.range (Spec.map (awayHom (a * b))))
+    (wA : T ⟶ pullback Y.structMap (Spec.map (awayHom a)))
+    (hwA : wA ≫ pullback.fst Y.structMap (Spec.map (awayHom a)) = w) :
+    toOverlapBase a b Y w H ≫ yOverlapBaseA a b Y = wA := by
+  rw [← cancel_mono (pullback.fst Y.structMap (Spec.map (awayHom a))), Category.assoc,
+    yOverlapBaseA_fst, toOverlapBase_fst, hwA]
+
+/-- The mirrored triangle through the `b`-chart. -/
+private theorem toOverlapBase_yOverlapBaseB (Y : EllObj R) {T : Scheme.{u}} (w : T ⟶ Y.base)
+    (H : Set.range (w ≫ Y.structMap) ⊆ Set.range (Spec.map (awayHom (a * b))))
+    (wB : T ⟶ pullback Y.structMap (Spec.map (awayHom b)))
+    (hwB : wB ≫ pullback.fst Y.structMap (Spec.map (awayHom b)) = w) :
+    toOverlapBase a b Y w H ≫ yOverlapBaseB a b Y = wB := by
+  rw [← cancel_mono (pullback.fst Y.structMap (Spec.map (awayHom b))), Category.assoc,
+    yOverlapBaseB_fst, toOverlapBase_fst, hwB]
+
+end HomGlueToolkit
+
+/-! ## [R-chart-eqv] factorization through the charts of the glued object
+
+A morphism `V ⟶ glueEllObj …` whose structure map lands in `D(a)` factors uniquely through
+the `a`-chart inclusion `glueJa` (and symmetrically for `b`). This is the geometric half of
+the per-chart bijection `(Y|D(a) ⟶ glueEllObj) ≃ (Y|D(a) ⟶ Xa over R[1/a])`. -/
+
+section ChartFactor
+
+set_option backward.isDefEq.respectTransparency false
+
+variable (a b : R)
+variable (Xa : EllObj (CommRingCat.of (Localization.Away a)))
+variable (Xb : EllObj (CommRingCat.of (Localization.Away b)))
+variable (φ : Xa.baseChangeRing (awayProdHomLeft a b) ≅ Xb.baseChangeRing (awayProdHomRight a b))
+
+private theorem scheme_id_apply {X : Scheme.{u}} (x : X) : (𝟙 X : X ⟶ X) x = x := by
+  simp
+
+/-- A point of the glued base over `D(a)` lies in the `a`-chart. -/
+private theorem mem_range_glueBaseInl (z : ↑(glueBase a b Xa Xb φ))
+    (hz : glueQ a b Xa Xb φ z ∈ Set.range (Spec.map (awayHom a))) :
+    z ∈ Set.range (glueBaseInl a b Xa Xb φ) := by
+  rcases glueBase_exists a b Xa Xb φ z with ⟨u, rfl⟩ | ⟨v, rfl⟩
+  · exact ⟨u, rfl⟩
+  · have h1 : glueQ a b Xa Xb φ (glueBaseInr a b Xa Xb φ v)
+        = Spec.map (awayHom b) (Xb.structMap v) := by
+      have hc := congr($(glueBaseInr_glueQ a b Xa Xb φ) v)
+      rwa [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+    have hinj : Function.Injective (Spec.map (awayHom b)) :=
+      (Spec.map (awayHom b)).isOpenEmbedding.injective
+    have hrr : Set.range (Spec.map (awayProdHomRight a b))
+        = Spec.map (awayHom b) ⁻¹' Set.range (Spec.map (awayHom (a * b))) := by
+      have hcomp : Spec.map (awayProdHomRight a b) ≫ Spec.map (awayHom b)
+          = Spec.map (awayHom (a * b)) := by
+        rw [← Spec.map_comp, awayHom_comp_awayProdHomRight]
+      have himg : Set.range (Spec.map (awayProdHomRight a b) ≫ Spec.map (awayHom b))
+          = Spec.map (awayHom b) '' Set.range (Spec.map (awayProdHomRight a b)) := by
+        simp [Scheme.Hom.comp_base, Set.range_comp]
+      rw [← hcomp, himg, Set.preimage_image_eq _ hinj]
+    have h2 : Xb.structMap v ∈ Set.range (Spec.map (awayProdHomRight a b)) := by
+      rw [hrr, Set.mem_preimage, range_SpecMap_awayHom, PrimeSpectrum.basicOpen_mul]
+      refine ⟨?_, ?_⟩
+      · have h := hz; rw [h1, range_SpecMap_awayHom] at h; exact h
+      · have h : Spec.map (awayHom b) (Xb.structMap v)
+            ∈ Set.range (Spec.map (awayHom b)) := ⟨Xb.structMap v, rfl⟩
+        rwa [range_SpecMap_awayHom] at h
+    have h3 : v ∈ Set.range (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))) := by
+      rw [Scheme.Pullback.range_fst]; exact h2
+    obtain ⟨w', hw'⟩ := h3
+    haveI : IsIso φ.hom.baseHom := isIso_baseHom_of_iso φ
+    refine ⟨glueBaseFst a b Xa (inv φ.hom.baseHom w'), ?_⟩
+    have hcond := congr($(glueBase_condition a b Xa Xb φ) (inv φ.hom.baseHom w'))
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hcond
+    rw [hcond]
+    have hpsidef : glueBasePsi a b Xa Xb φ
+        = φ.hom.baseHom ≫ pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)) := rfl
+    have hpsi : glueBasePsi a b Xa Xb φ (inv φ.hom.baseHom w')
+        = pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))
+            (φ.hom.baseHom (inv φ.hom.baseHom w')) := by
+      have hc := congr($(hpsidef) (inv φ.hom.baseHom w'))
+      rwa [Scheme.Hom.comp_apply] at hc
+    have hio : φ.hom.baseHom (inv φ.hom.baseHom w') = w' := by
+      have hc := congr($(IsIso.inv_hom_id φ.hom.baseHom) w')
+      rwa [Scheme.Hom.comp_apply, scheme_id_apply] at hc
+    rw [hpsi, hio, hw']
+
+/-- A point of the glued base over `D(b)` lies in the `b`-chart. -/
+private theorem mem_range_glueBaseInr (z : ↑(glueBase a b Xa Xb φ))
+    (hz : glueQ a b Xa Xb φ z ∈ Set.range (Spec.map (awayHom b))) :
+    z ∈ Set.range (glueBaseInr a b Xa Xb φ) := by
+  rcases glueBase_exists a b Xa Xb φ z with ⟨u, rfl⟩ | ⟨v, rfl⟩
+  · have h1 : glueQ a b Xa Xb φ (glueBaseInl a b Xa Xb φ u)
+        = Spec.map (awayHom a) (Xa.structMap u) := by
+      have hc := congr($(glueBaseInl_glueQ a b Xa Xb φ) u)
+      rwa [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+    have hinj : Function.Injective (Spec.map (awayHom a)) :=
+      (Spec.map (awayHom a)).isOpenEmbedding.injective
+    have hrr : Set.range (Spec.map (awayProdHomLeft a b))
+        = Spec.map (awayHom a) ⁻¹' Set.range (Spec.map (awayHom (a * b))) := by
+      have hcomp : Spec.map (awayProdHomLeft a b) ≫ Spec.map (awayHom a)
+          = Spec.map (awayHom (a * b)) := by
+        rw [← Spec.map_comp, awayHom_comp_awayProdHomLeft]
+      have himg : Set.range (Spec.map (awayProdHomLeft a b) ≫ Spec.map (awayHom a))
+          = Spec.map (awayHom a) '' Set.range (Spec.map (awayProdHomLeft a b)) := by
+        simp [Scheme.Hom.comp_base, Set.range_comp]
+      rw [← hcomp, himg, Set.preimage_image_eq _ hinj]
+    have h2 : Xa.structMap u ∈ Set.range (Spec.map (awayProdHomLeft a b)) := by
+      rw [hrr, Set.mem_preimage, range_SpecMap_awayHom, PrimeSpectrum.basicOpen_mul]
+      refine ⟨?_, ?_⟩
+      · have h : Spec.map (awayHom a) (Xa.structMap u)
+            ∈ Set.range (Spec.map (awayHom a)) := ⟨Xa.structMap u, rfl⟩
+        rwa [range_SpecMap_awayHom] at h
+      · have h := hz; rw [h1, range_SpecMap_awayHom] at h; exact h
+    have h3 : u ∈ Set.range (pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b))) := by
+      rw [Scheme.Pullback.range_fst]; exact h2
+    obtain ⟨w', hw'⟩ := h3
+    refine ⟨glueBasePsi a b Xa Xb φ w', ?_⟩
+    have hcond := congr($(glueBase_condition a b Xa Xb φ) w')
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hcond
+    rw [← hcond]
+    show glueBaseInl a b Xa Xb φ (glueBaseFst a b Xa w') = glueBaseInl a b Xa Xb φ u
+    rw [show glueBaseFst a b Xa w' = u from hw']
+  · exact ⟨v, rfl⟩
+
+variable {V : EllObj R}
+
+/-- Base range condition for factoring through the `a`-chart. -/
+private theorem factor_range_base_a (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom a))) :
+    Set.range v.baseHom ⊆ Set.range (glueBaseInl a b Xa Xb φ) := by
+  rintro - ⟨x, rfl⟩
+  refine mem_range_glueBaseInl a b Xa Xb φ _ ?_
+  have hb : glueQ a b Xa Xb φ (v.baseHom x) = V.structMap x := by
+    have hc := congr($(v.base_w) x)
+    rwa [Scheme.Hom.comp_apply] at hc
+  rw [hb]
+  exact hσ ⟨x, rfl⟩
+
+/-- Total-space range condition for factoring through the `a`-chart. -/
+private theorem factor_range_top_a (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom a))) :
+    Set.range v.top ⊆ Set.range (glueTotalInl a b Xa Xb φ) := by
+  show Set.range (v.top : V.curve.E ⟶ glueTotal a b Xa Xb φ)
+    ⊆ Set.range (glueTotalInl a b Xa Xb φ)
+  rw [range_glueTotalInl]
+  rintro - ⟨e, rfl⟩
+  rw [Set.mem_preimage]
+  have hw : (v.top : V.curve.E ⟶ glueTotal a b Xa Xb φ) ≫ gluePi a b Xa Xb φ
+      = V.curve.π ≫ (v.baseHom : V.base ⟶ glueBase a b Xa Xb φ) := v.isPullback.w
+  have hc := congr($(hw) e)
+  rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+  exact Set.mem_of_eq_of_mem hc
+    (factor_range_base_a a b Xa Xb φ v hσ ⟨V.curve.π e, rfl⟩)
+
+/-- Base range condition for factoring through the `b`-chart. -/
+private theorem factor_range_base_b (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom b))) :
+    Set.range v.baseHom ⊆ Set.range (glueBaseInr a b Xa Xb φ) := by
+  rintro - ⟨x, rfl⟩
+  refine mem_range_glueBaseInr a b Xa Xb φ _ ?_
+  have hb : glueQ a b Xa Xb φ (v.baseHom x) = V.structMap x := by
+    have hc := congr($(v.base_w) x)
+    rwa [Scheme.Hom.comp_apply] at hc
+  rw [hb]
+  exact hσ ⟨x, rfl⟩
+
+/-- Total-space range condition for factoring through the `b`-chart. -/
+private theorem factor_range_top_b (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom b))) :
+    Set.range v.top ⊆ Set.range (glueTotalInr a b Xa Xb φ) := by
+  show Set.range (v.top : V.curve.E ⟶ glueTotal a b Xa Xb φ)
+    ⊆ Set.range (glueTotalInr a b Xa Xb φ)
+  rw [range_glueTotalInr]
+  rintro - ⟨e, rfl⟩
+  rw [Set.mem_preimage]
+  have hw : (v.top : V.curve.E ⟶ glueTotal a b Xa Xb φ) ≫ gluePi a b Xa Xb φ
+      = V.curve.π ≫ (v.baseHom : V.base ⟶ glueBase a b Xa Xb φ) := v.isPullback.w
+  have hc := congr($(hw) e)
+  rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+  exact Set.mem_of_eq_of_mem hc
+    (factor_range_base_b a b Xa Xb φ v hσ ⟨V.curve.π e, rfl⟩)
+
+/-- Structure-map compatibility of an `a`-chart factorization. -/
+private theorem factor_base_w_a (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (tb : V.base ⟶ Xa.base) (hb : tb ≫ glueBaseInl a b Xa Xb φ = v.baseHom) :
+    tb ≫ Xa.structMap ≫ Spec.map (awayHom a) = V.structMap := by
+  rw [show Xa.structMap ≫ Spec.map (awayHom a)
+      = glueBaseInl a b Xa Xb φ ≫ glueQ a b Xa Xb φ from
+    (glueBaseInl_glueQ a b Xa Xb φ).symm, ← Category.assoc, hb]
+  exact v.base_w
+
+/-- The cartesian square of an `a`-chart factorization. -/
+private theorem factor_isPullback_a (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (tb : V.base ⟶ Xa.base) (tt : V.curve.E ⟶ Xa.curve.E)
+    (hb : tb ≫ glueBaseInl a b Xa Xb φ = v.baseHom)
+    (ht : tt ≫ glueTotalInl a b Xa Xb φ = v.top) :
+    IsPullback tt V.curve.π Xa.curve.π tb := by
+  have hbig : IsPullback v.top V.curve.π (gluePi a b Xa Xb φ) v.baseHom := v.isPullback
+  rw [← ht, ← hb] at hbig
+  refine IsPullback.of_right hbig ?_ (isPullback_glueTotalInl a b Xa Xb φ)
+  rw [← cancel_mono (glueBaseInl a b Xa Xb φ)]
+  calc (tt ≫ Xa.curve.π) ≫ glueBaseInl a b Xa Xb φ
+      = tt ≫ glueTotalInl a b Xa Xb φ ≫ gluePi a b Xa Xb φ := by
+        rw [Category.assoc, glueTotalInl_gluePi]
+    _ = v.top ≫ gluePi a b Xa Xb φ := by rw [← Category.assoc, ht]
+    _ = V.curve.π ≫ v.baseHom := v.isPullback.w
+    _ = (V.curve.π ≫ tb) ≫ glueBaseInl a b Xa Xb φ := by
+        rw [Category.assoc, hb]
+
+/-- Zero-section compatibility of an `a`-chart factorization. -/
+private theorem factor_zero_w_a (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (tb : V.base ⟶ Xa.base) (tt : V.curve.E ⟶ Xa.curve.E)
+    (hb : tb ≫ glueBaseInl a b Xa Xb φ = v.baseHom)
+    (ht : tt ≫ glueTotalInl a b Xa Xb φ = v.top) :
+    V.curve.zero ≫ tt = tb ≫ Xa.curve.zero := by
+  rw [← cancel_mono (glueTotalInl a b Xa Xb φ)]
+  calc (V.curve.zero ≫ tt) ≫ glueTotalInl a b Xa Xb φ
+      = V.curve.zero ≫ v.top := by rw [Category.assoc, ht]
+    _ = v.baseHom ≫ glueZero a b Xa Xb φ := v.zero_w
+    _ = tb ≫ glueBaseInl a b Xa Xb φ ≫ glueZero a b Xa Xb φ := by
+        rw [← Category.assoc, hb]
+    _ = (tb ≫ Xa.curve.zero) ≫ glueTotalInl a b Xa Xb φ := by
+        rw [glueBaseInl_glueZero, ← Category.assoc]
+
+/-- **Factorization through the `a`-chart**: a morphism into the glued object whose base
+lies over `D(a)` factors through `glueJa`. -/
+private noncomputable def factorGlueJa (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom a))) :
+    V ⟶ (EllObj.restrictScalars (awayHom a)).obj Xa where
+  baseHom := IsOpenImmersion.lift (glueBaseInl a b Xa Xb φ) v.baseHom
+    (factor_range_base_a a b Xa Xb φ v hσ)
+  base_w := factor_base_w_a a b Xa Xb φ v _ (IsOpenImmersion.lift_fac _ _ _)
+  top := IsOpenImmersion.lift (glueTotalInl a b Xa Xb φ) v.top
+    (factor_range_top_a a b Xa Xb φ v hσ)
+  isPullback := factor_isPullback_a a b Xa Xb φ v _ _
+    (IsOpenImmersion.lift_fac _ _ _) (IsOpenImmersion.lift_fac _ _ _)
+  zero_w := factor_zero_w_a a b Xa Xb φ v _ _
+    (IsOpenImmersion.lift_fac _ _ _) (IsOpenImmersion.lift_fac _ _ _)
+
+/-- The defining triangle of the `a`-chart factorization. -/
+private theorem factorGlueJa_glueJa (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom a))) :
+    factorGlueJa a b Xa Xb φ v hσ ≫ glueJa a b Xa Xb φ = v := by
+  refine EllHom.ext ?_ ?_
+  · show IsOpenImmersion.lift (glueBaseInl a b Xa Xb φ) v.baseHom
+        (factor_range_base_a a b Xa Xb φ v hσ) ≫ glueBaseInl a b Xa Xb φ = v.baseHom
+    exact IsOpenImmersion.lift_fac _ _ _
+  · show IsOpenImmersion.lift (glueTotalInl a b Xa Xb φ) v.top
+        (factor_range_top_a a b Xa Xb φ v hσ) ≫ glueTotalInl a b Xa Xb φ = v.top
+    exact IsOpenImmersion.lift_fac _ _ _
+
+/-- Structure-map compatibility of a `b`-chart factorization. -/
+private theorem factor_base_w_b (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (tb : V.base ⟶ Xb.base) (hb : tb ≫ glueBaseInr a b Xa Xb φ = v.baseHom) :
+    tb ≫ Xb.structMap ≫ Spec.map (awayHom b) = V.structMap := by
+  rw [show Xb.structMap ≫ Spec.map (awayHom b)
+      = glueBaseInr a b Xa Xb φ ≫ glueQ a b Xa Xb φ from
+    (glueBaseInr_glueQ a b Xa Xb φ).symm, ← Category.assoc, hb]
+  exact v.base_w
+
+/-- The cartesian square of a `b`-chart factorization. -/
+private theorem factor_isPullback_b (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (tb : V.base ⟶ Xb.base) (tt : V.curve.E ⟶ Xb.curve.E)
+    (hb : tb ≫ glueBaseInr a b Xa Xb φ = v.baseHom)
+    (ht : tt ≫ glueTotalInr a b Xa Xb φ = v.top) :
+    IsPullback tt V.curve.π Xb.curve.π tb := by
+  have hbig : IsPullback v.top V.curve.π (gluePi a b Xa Xb φ) v.baseHom := v.isPullback
+  rw [← ht, ← hb] at hbig
+  refine IsPullback.of_right hbig ?_ (isPullback_glueTotalInr a b Xa Xb φ)
+  rw [← cancel_mono (glueBaseInr a b Xa Xb φ)]
+  calc (tt ≫ Xb.curve.π) ≫ glueBaseInr a b Xa Xb φ
+      = tt ≫ glueTotalInr a b Xa Xb φ ≫ gluePi a b Xa Xb φ := by
+        rw [Category.assoc, glueTotalInr_gluePi]
+    _ = v.top ≫ gluePi a b Xa Xb φ := by rw [← Category.assoc, ht]
+    _ = V.curve.π ≫ v.baseHom := v.isPullback.w
+    _ = (V.curve.π ≫ tb) ≫ glueBaseInr a b Xa Xb φ := by
+        rw [Category.assoc, hb]
+
+/-- Zero-section compatibility of a `b`-chart factorization. -/
+private theorem factor_zero_w_b (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (tb : V.base ⟶ Xb.base) (tt : V.curve.E ⟶ Xb.curve.E)
+    (hb : tb ≫ glueBaseInr a b Xa Xb φ = v.baseHom)
+    (ht : tt ≫ glueTotalInr a b Xa Xb φ = v.top) :
+    V.curve.zero ≫ tt = tb ≫ Xb.curve.zero := by
+  rw [← cancel_mono (glueTotalInr a b Xa Xb φ)]
+  calc (V.curve.zero ≫ tt) ≫ glueTotalInr a b Xa Xb φ
+      = V.curve.zero ≫ v.top := by rw [Category.assoc, ht]
+    _ = v.baseHom ≫ glueZero a b Xa Xb φ := v.zero_w
+    _ = tb ≫ glueBaseInr a b Xa Xb φ ≫ glueZero a b Xa Xb φ := by
+        rw [← Category.assoc, hb]
+    _ = (tb ≫ Xb.curve.zero) ≫ glueTotalInr a b Xa Xb φ := by
+        rw [glueBaseInr_glueZero, ← Category.assoc]
+
+/-- **Factorization through the `b`-chart.** -/
+private noncomputable def factorGlueJb (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom b))) :
+    V ⟶ (EllObj.restrictScalars (awayHom b)).obj Xb where
+  baseHom := IsOpenImmersion.lift (glueBaseInr a b Xa Xb φ) v.baseHom
+    (factor_range_base_b a b Xa Xb φ v hσ)
+  base_w := factor_base_w_b a b Xa Xb φ v _ (IsOpenImmersion.lift_fac _ _ _)
+  top := IsOpenImmersion.lift (glueTotalInr a b Xa Xb φ) v.top
+    (factor_range_top_b a b Xa Xb φ v hσ)
+  isPullback := factor_isPullback_b a b Xa Xb φ v _ _
+    (IsOpenImmersion.lift_fac _ _ _) (IsOpenImmersion.lift_fac _ _ _)
+  zero_w := factor_zero_w_b a b Xa Xb φ v _ _
+    (IsOpenImmersion.lift_fac _ _ _) (IsOpenImmersion.lift_fac _ _ _)
+
+/-- The defining triangle of the `b`-chart factorization. -/
+private theorem factorGlueJb_glueJb (v : V ⟶ glueEllObj a b Xa Xb φ)
+    (hσ : Set.range V.structMap ⊆ Set.range (Spec.map (awayHom b))) :
+    factorGlueJb a b Xa Xb φ v hσ ≫ glueJb a b Xa Xb φ = v := by
+  refine EllHom.ext ?_ ?_
+  · show IsOpenImmersion.lift (glueBaseInr a b Xa Xb φ) v.baseHom
+        (factor_range_base_b a b Xa Xb φ v hσ) ≫ glueBaseInr a b Xa Xb φ = v.baseHom
+    exact IsOpenImmersion.lift_fac _ _ _
+  · show IsOpenImmersion.lift (glueTotalInr a b Xa Xb φ) v.top
+        (factor_range_top_b a b Xa Xb φ v hσ) ≫ glueTotalInr a b Xa Xb φ = v.top
+    exact IsOpenImmersion.lift_fac _ _ _
+
+/-- `glueJa` is a mono-pair, so factorizations through it are unique. -/
+private theorem glueJa_cancel {Z : EllObj R}
+    {v w : Z ⟶ (EllObj.restrictScalars (awayHom a)).obj Xa}
+    (h : v ≫ glueJa a b Xa Xb φ = w ≫ glueJa a b Xa Xb φ) : v = w :=
+  ellHom_cancel_mono (glueJa a b Xa Xb φ)
+    (inferInstanceAs (Mono (glueBaseInl a b Xa Xb φ)))
+    (inferInstanceAs (Mono (glueTotalInl a b Xa Xb φ))) h
+
+private theorem glueJb_cancel {Z : EllObj R}
+    {v w : Z ⟶ (EllObj.restrictScalars (awayHom b)).obj Xb}
+    (h : v ≫ glueJb a b Xa Xb φ = w ≫ glueJb a b Xa Xb φ) : v = w :=
+  ellHom_cancel_mono (glueJb a b Xa Xb φ)
+    (inferInstanceAs (Mono (glueBaseInr a b Xa Xb φ)))
+    (inferInstanceAs (Mono (glueTotalInr a b Xa Xb φ))) h
+
+end ChartFactor
+
+/-! ## [R-chart-eqv] the overlap bridge
+
+The overlap compatibility of the two chart values, matched through `overlapIso`. The two
+`P`-restrictions to the overlap chart `Y|D(ab)` are computed through the representations of
+`P.baseChange (awayHom (a*b))` by the two base-changed representing objects, and equality of
+the values is equivalent to a geometric equality of comparison morphisms through
+`overlapIso` — which in turn is equivalent to agreement of the two glued chart morphisms. -/
+
+section OverlapBridge
+
+set_option backward.isDefEq.respectTransparency false
+
+variable (a b : R)
+
+/-- The overlap-into-`a`-chart inclusion at the `R[1/a]`-level (same underlying data as
+`yOverlapInclA`, viewed as a morphism of `Ell/R[1/a]`). -/
+private noncomputable def yOverlapLiftA (Y : EllObj R) :
+    (EllObj.restrictScalars (awayProdHomLeft a b)).obj (Y.baseChangeRing (awayHom (a * b)))
+      ⟶ Y.baseChangeRing (awayHom a) where
+  baseHom := yOverlapBaseA a b Y
+  base_w := yOverlapBaseA_snd a b Y
+  top := yOverlapTopA a b Y
+  isPullback := (yOverlapInclA a b Y).isPullback
+  zero_w := (yOverlapInclA a b Y).zero_w
+
+/-- The overlap-into-`b`-chart inclusion at the `R[1/b]`-level. -/
+private noncomputable def yOverlapLiftB (Y : EllObj R) :
+    (EllObj.restrictScalars (awayProdHomRight a b)).obj (Y.baseChangeRing (awayHom (a * b)))
+      ⟶ Y.baseChangeRing (awayHom b) where
+  baseHom := yOverlapBaseB a b Y
+  base_w := yOverlapBaseB_snd a b Y
+  top := yOverlapTopB a b Y
+  isPullback := (yOverlapInclB a b Y).isPullback
+  zero_w := (yOverlapInclB a b Y).zero_w
+
+/-- Restriction along `awayHom (a*b)` is restriction along `awayProdHomLeft` then
+`awayHom a`, on objects. -/
+private theorem restrictScalars_obj_overlapA (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))
+      = (EllObj.restrictScalars (awayHom a)).obj
+          ((EllObj.restrictScalars (awayProdHomLeft a b)).obj
+            (Y.baseChangeRing (awayHom (a * b)))) := by
+  have h1 : awayHom (R := R) (a * b) = awayHom a ≫ awayProdHomLeft a b :=
+    (awayHom_comp_awayProdHomLeft a b).symm
+  calc (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))
+      = (EllObj.restrictScalars (awayHom a ≫ awayProdHomLeft a b)).obj
+          (Y.baseChangeRing (awayHom (a * b))) :=
+        congrArg (fun ρ => (EllObj.restrictScalars ρ).obj (Y.baseChangeRing (awayHom (a * b)))) h1
+    _ = _ :=
+        Functor.congr_obj (EllObj.restrictScalars_comp (awayHom a) (awayProdHomLeft a b))
+          (Y.baseChangeRing (awayHom (a * b)))
+
+private theorem restrictScalars_obj_overlapB (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))
+      = (EllObj.restrictScalars (awayHom b)).obj
+          ((EllObj.restrictScalars (awayProdHomRight a b)).obj
+            (Y.baseChangeRing (awayHom (a * b)))) := by
+  have h1 : awayHom (R := R) (a * b) = awayHom b ≫ awayProdHomRight a b :=
+    (awayHom_comp_awayProdHomRight a b).symm
+  calc (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))
+      = (EllObj.restrictScalars (awayHom b ≫ awayProdHomRight a b)).obj
+          (Y.baseChangeRing (awayHom (a * b))) :=
+        congrArg (fun ρ => (EllObj.restrictScalars ρ).obj (Y.baseChangeRing (awayHom (a * b)))) h1
+    _ = _ :=
+        Functor.congr_obj (EllObj.restrictScalars_comp (awayHom b) (awayProdHomRight a b))
+          (Y.baseChangeRing (awayHom (a * b)))
+
+/-- `ofIso` along an `eqToIso` of moduli problems is a cast of the value. -/
+private theorem ofIso_eqToIso_homEquiv {R₀ : CommRingCat.{u}} {F F' : ModuliProblem R₀}
+    {X : EllObj R₀} (e : F.RepresentableBy X) (h : F = F') {Z : EllObj R₀} (m : Z ⟶ X) :
+    (e.ofIso (eqToIso h)).homEquiv m
+      = cast (congrArg (fun G : ModuliProblem R₀ => G.obj (op Z)) h) (e.homEquiv m) := by
+  subst h
+  show ((eqToIso rfl).app (op Z)).toEquiv (e.homEquiv m) = _
+  rw [eqToIso_refl]
+  rfl
+
+variable {P : ModuliProblem R}
+variable {Xa : EllObj (CommRingCat.of (Localization.Away a))}
+variable {Xb : EllObj (CommRingCat.of (Localization.Away b))}
+
+/-- The representation of `P.baseChange (awayHom (a*b))` by `Xa.baseChangeRing …` used in
+`overlapIso` (the `a`-side). -/
+private noncomputable def reprOverlapA
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa) :
+    (P.baseChange (awayHom (a * b))).RepresentableBy
+      (Xa.baseChangeRing (awayProdHomLeft a b)) :=
+  (representableBy_baseChangeRing repr_a (awayProdHomLeft a b)).ofIso
+    (eqToIso (by rw [← ModuliProblem.baseChange_comp, awayHom_comp_awayProdHomLeft]))
+
+/-- The `b`-side. -/
+private noncomputable def reprOverlapB
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) :
+    (P.baseChange (awayHom (a * b))).RepresentableBy
+      (Xb.baseChangeRing (awayProdHomRight a b)) :=
+  (representableBy_baseChangeRing repr_b (awayProdHomRight a b)).ofIso
+    (eqToIso (by rw [← ModuliProblem.baseChange_comp, awayHom_comp_awayProdHomRight]))
+
+/-- `overlapIso` is the comparison of the two overlap representations. -/
+private theorem overlapIso_eq (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) :
+    overlapIso a b repr_a repr_b
+      = (reprOverlapA a b repr_a).uniqueUpToIso (reprOverlapB a b repr_b) := rfl
+
+/-- The Yoneda preimage of a transformation between representables is its value at the
+identity. -/
+private theorem yoneda_fullyFaithful_preimage_eq {C : Type*} [Category C] {X X' : C}
+    (τ : yoneda.obj X ⟶ yoneda.obj X') :
+    Yoneda.fullyFaithful.preimage τ = τ.app (op X) (𝟙 X) := by
+  conv_rhs => rw [← Functor.FullyFaithful.map_preimage Yoneda.fullyFaithful τ]
+  rw [yoneda_map_app]
+  show Yoneda.fullyFaithful.preimage τ = 𝟙 X ≫ Yoneda.fullyFaithful.preimage τ
+  rw [Category.id_comp]
+
+universe u₁ u₂
+
+/-- Generic form of the `uniqueUpToIso` compatibility: composing with the canonical
+comparison of two representing objects intertwines the two `homEquiv`s. Stated with the
+representations as variables, so all reductions are structural. -/
+private theorem uniqueUpToIso_homEquiv_hom {C : Type u₂} [Category.{u₁} C]
+    {F : Cᵒᵖ ⥤ Type u₁} {X₁ X₂ : C} (e₁ : F.RepresentableBy X₁) (e₂ : F.RepresentableBy X₂)
+    {Z : C} (m : Z ⟶ X₁) :
+    e₂.homEquiv (m ≫ (e₁.uniqueUpToIso e₂).hom) = e₁.homEquiv m := by
+  rw [Functor.RepresentableBy.homEquiv_comp, Functor.RepresentableBy.uniqueUpToIso_hom,
+    yoneda_fullyFaithful_preimage_eq]
+  show F.map m.op (e₂.homEquiv (e₂.homEquiv.symm (e₁.homEquiv (𝟙 X₁)))) = e₁.homEquiv m
+  rw [Equiv.apply_symm_apply, ← Functor.RepresentableBy.homEquiv_eq]
+
+/-- The two overlap representations agree through `overlapIso`. -/
+private theorem reprOverlap_homEquiv_hom
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb)
+    {Z : EllObj (CommRingCat.of (Localization.Away (a * b)))}
+    (m : Z ⟶ Xa.baseChangeRing (awayProdHomLeft a b)) :
+    (reprOverlapB a b repr_b).homEquiv (m ≫ (overlapIso a b repr_a repr_b).hom)
+      = (reprOverlapA a b repr_a).homEquiv m := by
+  rw [overlapIso_eq a b repr_a repr_b]
+  exact uniqueUpToIso_homEquiv_hom (reprOverlapA a b repr_a) (reprOverlapB a b repr_b) m
+
+/-- The comparison morphism from `Y|D(ab)` into the `a`-side overlap object, induced by a
+chart morphism `ka`. -/
+private noncomputable def overlapCompareA (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    Y.baseChangeRing (awayHom (a * b)) ⟶ Xa.baseChangeRing (awayProdHomLeft a b) :=
+  baseChangeRingHomEquivInv Xa (awayProdHomLeft a b) (Y.baseChangeRing (awayHom (a * b)))
+    (yOverlapLiftA a b Y ≫ ka)
+
+private noncomputable def overlapCompareB (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    Y.baseChangeRing (awayHom (a * b)) ⟶ Xb.baseChangeRing (awayProdHomRight a b) :=
+  baseChangeRingHomEquivInv Xb (awayProdHomRight a b) (Y.baseChangeRing (awayHom (a * b)))
+    (yOverlapLiftB a b Y ≫ kb)
+
+private theorem overlapCompareA_baseHom (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    (overlapCompareA a b Y ka).baseHom
+      = bcInvBase Xa (awayProdHomLeft a b) (Y.baseChangeRing (awayHom (a * b)))
+          (yOverlapLiftA a b Y ≫ ka) := rfl
+
+private theorem overlapCompareA_top (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    (overlapCompareA a b Y ka).top
+      = bcInvTop Xa (awayProdHomLeft a b) (Y.baseChangeRing (awayHom (a * b)))
+          (yOverlapLiftA a b Y ≫ ka) := rfl
+
+private theorem overlapCompareB_baseHom (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    (overlapCompareB a b Y kb).baseHom
+      = bcInvBase Xb (awayProdHomRight a b) (Y.baseChangeRing (awayHom (a * b)))
+          (yOverlapLiftB a b Y ≫ kb) := rfl
+
+private theorem overlapCompareB_top (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    (overlapCompareB a b Y kb).top
+      = bcInvTop Xb (awayProdHomRight a b) (Y.baseChangeRing (awayHom (a * b)))
+          (yOverlapLiftB a b Y ≫ kb) := rfl
+
+private theorem overlapA_hinner
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa) (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    P.map ((EllObj.restrictScalars (awayHom a)).map (yOverlapLiftA a b Y)).op
+      (repr_a.homEquiv ka) = repr_a.homEquiv (yOverlapLiftA a b Y ≫ ka) :=
+  (repr_a.homEquiv_comp (yOverlapLiftA a b Y) ka).symm
+
+private theorem overlapA_hfwd (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    baseChangeRingHomEquivFwd Xa (awayProdHomLeft a b)
+      (Y.baseChangeRing (awayHom (a * b))) (overlapCompareA a b Y ka)
+      = yOverlapLiftA a b Y ≫ ka := by
+  show (baseChangeRingHomEquiv Xa (awayProdHomLeft a b) (Y.baseChangeRing (awayHom (a * b))))
+      ((baseChangeRingHomEquiv Xa (awayProdHomLeft a b)
+        (Y.baseChangeRing (awayHom (a * b)))).symm (yOverlapLiftA a b Y ≫ ka))
+    = yOverlapLiftA a b Y ≫ ka
+  exact Equiv.apply_symm_apply _ _
+
+/-- Syntactic middle normal form of the double restriction
+`(restrictScalars (awayHom a)).obj ((restrictScalars (awayProdHomLeft a b)).obj (Y|D(ab)))`.
+Spelled as an explicit structure literal so that kernel comparisons against either
+presentation are cheap head-mismatch cascades (never a doomed congruence descent through
+mismatched localization instance towers). -/
+private noncomputable def overlapMidA (Y : EllObj R) : EllObj R where
+  base := ((EllObj.restrictScalars (awayProdHomLeft a b)).obj
+    (Y.baseChangeRing (awayHom (a * b)))).base
+  structMap := ((EllObj.restrictScalars (awayProdHomLeft a b)).obj
+    (Y.baseChangeRing (awayHom (a * b)))).structMap ≫ Spec.map (awayHom a)
+  curve := ((EllObj.restrictScalars (awayProdHomLeft a b)).obj
+    (Y.baseChangeRing (awayHom (a * b)))).curve
+
+private theorem overlapMidA_eq (Y : EllObj R) :
+    overlapMidA a b Y
+      = (EllObj.restrictScalars (awayHom a)).obj
+          ((EllObj.restrictScalars (awayProdHomLeft a b)).obj
+            (Y.baseChangeRing (awayHom (a * b)))) := rfl
+
+/-- The object identification `Y|D(ab)` (over `R`) with the middle normal form. -/
+private theorem overlapObjA_eq (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))
+      = overlapMidA a b Y :=
+  (restrictScalars_obj_overlapA a b Y).trans (overlapMidA_eq a b Y).symm
+
+/-- The overlap-into-`a`-chart inclusion re-typed at the middle normal form. -/
+private noncomputable def overlapMidHomA (Y : EllObj R) :
+    overlapMidA a b Y ⟶ (EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a))
+    where
+  baseHom := yOverlapBaseA a b Y
+  base_w := by
+    show yOverlapBaseA a b Y
+        ≫ pullback.snd Y.structMap (Spec.map (awayHom a)) ≫ Spec.map (awayHom a)
+      = (pullback.snd Y.structMap (Spec.map (awayHom (a * b)))
+          ≫ Spec.map (awayProdHomLeft a b)) ≫ Spec.map (awayHom a)
+    rw [← Category.assoc, yOverlapBaseA_snd]
+  top := yOverlapTopA a b Y
+  isPullback := (yOverlapInclA a b Y).isPullback
+  zero_w := (yOverlapInclA a b Y).zero_w
+
+/-- The middle-typed inclusion is the scalar restriction of the `R[1/a]`-level one. -/
+private theorem overlapMidHomA_eq (Y : EllObj R) :
+    overlapMidHomA a b Y
+      = ((EllObj.restrictScalars (awayHom a)).map (yOverlapLiftA a b Y) :
+          overlapMidA a b Y
+            ⟶ (EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a))) :=
+  EllHom.ext rfl rfl
+
+private theorem overlapA_hmap
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa) (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    P.map (yOverlapInclA a b Y).op (repr_a.homEquiv ka)
+      = cast (congrArg (fun Z => P.obj (op Z)) (overlapObjA_eq a b Y).symm)
+          (P.map ((EllObj.restrictScalars (awayHom a)).map (yOverlapLiftA a b Y)).op
+            (repr_a.homEquiv ka)) := by
+  have h1 : P.map (yOverlapInclA a b Y).op (repr_a.homEquiv ka)
+      = cast (congrArg (fun Z => P.obj (op Z)) (overlapObjA_eq a b Y).symm)
+          (P.map (overlapMidHomA a b Y).op (repr_a.homEquiv ka)) :=
+    map_congr_ellHom (overlapObjA_eq a b Y) (yOverlapInclA a b Y) (overlapMidHomA a b Y)
+      HEq.rfl HEq.rfl (repr_a.homEquiv ka)
+  rw [overlapMidHomA_eq a b Y] at h1
+  exact h1
+
+private theorem overlapA_hRHS
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa) (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    (reprOverlapA a b repr_a).homEquiv (overlapCompareA a b Y ka)
+      = cast (congrArg (fun G : ModuliProblem (CommRingCat.of (Localization.Away (a * b))) =>
+            G.obj (op (Y.baseChangeRing (awayHom (a * b)))))
+          (show (P.baseChange (awayHom a)).baseChange (awayProdHomLeft a b)
+              = P.baseChange (awayHom (a * b)) by
+            rw [← ModuliProblem.baseChange_comp, awayHom_comp_awayProdHomLeft]))
+          (repr_a.homEquiv (yOverlapLiftA a b Y ≫ ka)) := by
+  rw [show (reprOverlapA a b repr_a).homEquiv (overlapCompareA a b Y ka)
+      = ((representableBy_baseChangeRing repr_a (awayProdHomLeft a b)).ofIso
+          (eqToIso (by rw [← ModuliProblem.baseChange_comp,
+            awayHom_comp_awayProdHomLeft]))).homEquiv (overlapCompareA a b Y ka) from rfl]
+  rw [ofIso_eqToIso_homEquiv]
+  refine cast_eq_cast _ _ ?_
+  show repr_a.homEquiv (baseChangeRingHomEquivFwd Xa (awayProdHomLeft a b)
+      (Y.baseChangeRing (awayHom (a * b))) (overlapCompareA a b Y ka)) = _
+  rw [overlapA_hfwd a b Y ka]
+
+/-- **[OVL-a]** The `P`-restriction of an `a`-chart value to the overlap chart, computed
+through the `a`-side overlap representation. -/
+private theorem map_overlapA_homEquiv
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa) (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    P.map (yOverlapInclA a b Y).op (repr_a.homEquiv ka)
+      = (reprOverlapA a b repr_a).homEquiv (overlapCompareA a b Y ka) := by
+  rw [overlapA_hmap a b repr_a Y ka, overlapA_hinner a b repr_a Y ka]
+  exact (cast_eq_cast _ _ rfl).trans (overlapA_hRHS a b repr_a Y ka).symm
+
+private theorem overlapB_hinner
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    P.map ((EllObj.restrictScalars (awayHom b)).map (yOverlapLiftB a b Y)).op
+      (repr_b.homEquiv kb) = repr_b.homEquiv (yOverlapLiftB a b Y ≫ kb) :=
+  (repr_b.homEquiv_comp (yOverlapLiftB a b Y) kb).symm
+
+private theorem overlapB_hfwd (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    baseChangeRingHomEquivFwd Xb (awayProdHomRight a b)
+      (Y.baseChangeRing (awayHom (a * b))) (overlapCompareB a b Y kb)
+      = yOverlapLiftB a b Y ≫ kb := by
+  show (baseChangeRingHomEquiv Xb (awayProdHomRight a b) (Y.baseChangeRing (awayHom (a * b))))
+      ((baseChangeRingHomEquiv Xb (awayProdHomRight a b)
+        (Y.baseChangeRing (awayHom (a * b)))).symm (yOverlapLiftB a b Y ≫ kb))
+    = yOverlapLiftB a b Y ≫ kb
+  exact Equiv.apply_symm_apply _ _
+
+/-- Mirrored middle normal form for the `b`-side. -/
+private noncomputable def overlapMidB (Y : EllObj R) : EllObj R where
+  base := ((EllObj.restrictScalars (awayProdHomRight a b)).obj
+    (Y.baseChangeRing (awayHom (a * b)))).base
+  structMap := ((EllObj.restrictScalars (awayProdHomRight a b)).obj
+    (Y.baseChangeRing (awayHom (a * b)))).structMap ≫ Spec.map (awayHom b)
+  curve := ((EllObj.restrictScalars (awayProdHomRight a b)).obj
+    (Y.baseChangeRing (awayHom (a * b)))).curve
+
+private theorem overlapMidB_eq (Y : EllObj R) :
+    overlapMidB a b Y
+      = (EllObj.restrictScalars (awayHom b)).obj
+          ((EllObj.restrictScalars (awayProdHomRight a b)).obj
+            (Y.baseChangeRing (awayHom (a * b)))) := rfl
+
+private theorem overlapObjB_eq (Y : EllObj R) :
+    (EllObj.restrictScalars (awayHom (a * b))).obj (Y.baseChangeRing (awayHom (a * b)))
+      = overlapMidB a b Y :=
+  (restrictScalars_obj_overlapB a b Y).trans (overlapMidB_eq a b Y).symm
+
+private noncomputable def overlapMidHomB (Y : EllObj R) :
+    overlapMidB a b Y ⟶ (EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b))
+    where
+  baseHom := yOverlapBaseB a b Y
+  base_w := by
+    show yOverlapBaseB a b Y
+        ≫ pullback.snd Y.structMap (Spec.map (awayHom b)) ≫ Spec.map (awayHom b)
+      = (pullback.snd Y.structMap (Spec.map (awayHom (a * b)))
+          ≫ Spec.map (awayProdHomRight a b)) ≫ Spec.map (awayHom b)
+    rw [← Category.assoc, yOverlapBaseB_snd]
+  top := yOverlapTopB a b Y
+  isPullback := (yOverlapInclB a b Y).isPullback
+  zero_w := (yOverlapInclB a b Y).zero_w
+
+private theorem overlapMidHomB_eq (Y : EllObj R) :
+    overlapMidHomB a b Y
+      = ((EllObj.restrictScalars (awayHom b)).map (yOverlapLiftB a b Y) :
+          overlapMidB a b Y
+            ⟶ (EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b))) :=
+  EllHom.ext rfl rfl
+
+private theorem overlapB_hmap
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    P.map (yOverlapInclB a b Y).op (repr_b.homEquiv kb)
+      = cast (congrArg (fun Z => P.obj (op Z)) (overlapObjB_eq a b Y).symm)
+          (P.map ((EllObj.restrictScalars (awayHom b)).map (yOverlapLiftB a b Y)).op
+            (repr_b.homEquiv kb)) := by
+  have h1 : P.map (yOverlapInclB a b Y).op (repr_b.homEquiv kb)
+      = cast (congrArg (fun Z => P.obj (op Z)) (overlapObjB_eq a b Y).symm)
+          (P.map (overlapMidHomB a b Y).op (repr_b.homEquiv kb)) :=
+    map_congr_ellHom (overlapObjB_eq a b Y) (yOverlapInclB a b Y) (overlapMidHomB a b Y)
+      HEq.rfl HEq.rfl (repr_b.homEquiv kb)
+  rw [overlapMidHomB_eq a b Y] at h1
+  exact h1
+
+private theorem overlapB_hRHS
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    (reprOverlapB a b repr_b).homEquiv (overlapCompareB a b Y kb)
+      = cast (congrArg (fun G : ModuliProblem (CommRingCat.of (Localization.Away (a * b))) =>
+            G.obj (op (Y.baseChangeRing (awayHom (a * b)))))
+          (show (P.baseChange (awayHom b)).baseChange (awayProdHomRight a b)
+              = P.baseChange (awayHom (a * b)) by
+            rw [← ModuliProblem.baseChange_comp, awayHom_comp_awayProdHomRight]))
+          (repr_b.homEquiv (yOverlapLiftB a b Y ≫ kb)) := by
+  rw [show (reprOverlapB a b repr_b).homEquiv (overlapCompareB a b Y kb)
+      = ((representableBy_baseChangeRing repr_b (awayProdHomRight a b)).ofIso
+          (eqToIso (by rw [← ModuliProblem.baseChange_comp,
+            awayHom_comp_awayProdHomRight]))).homEquiv (overlapCompareB a b Y kb) from rfl]
+  rw [ofIso_eqToIso_homEquiv]
+  refine cast_eq_cast _ _ ?_
+  show repr_b.homEquiv (baseChangeRingHomEquivFwd Xb (awayProdHomRight a b)
+      (Y.baseChangeRing (awayHom (a * b))) (overlapCompareB a b Y kb)) = _
+  rw [overlapB_hfwd a b Y kb]
+
+/-- **[OVL-b]** The mirrored computation for the `b`-chart. -/
+private theorem map_overlapB_homEquiv
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) (Y : EllObj R)
+    (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    P.map (yOverlapInclB a b Y).op (repr_b.homEquiv kb)
+      = (reprOverlapB a b repr_b).homEquiv (overlapCompareB a b Y kb) := by
+  rw [overlapB_hmap a b repr_b Y kb, overlapB_hinner a b repr_b Y kb]
+  exact (cast_eq_cast _ _ rfl).trans (overlapB_hRHS a b repr_b Y kb).symm
+
+/-- **Value agreement on the overlap ⟺ the comparison morphisms match through
+`overlapIso`.** -/
+private theorem overlap_value_iff
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) (kb : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    (P.map (yOverlapInclA a b Y).op (repr_a.homEquiv ka)
+        = P.map (yOverlapInclB a b Y).op (repr_b.homEquiv kb))
+      ↔ overlapCompareA a b Y ka ≫ (overlapIso a b repr_a repr_b).hom
+          = overlapCompareB a b Y kb := by
+  rw [map_overlapA_homEquiv a b repr_a Y ka, map_overlapB_homEquiv a b repr_b Y kb,
+    ← reprOverlap_homEquiv_hom a b repr_a repr_b]
+  exact ⟨fun h => (reprOverlapB a b repr_b).homEquiv.injective h, fun h => congrArg _ h⟩
+
+/-- **[(⋆) ⟹ (†)]** If the two overlap comparison morphisms match through `overlapIso`,
+the glued chart morphisms agree on the overlap chart. -/
+private theorem overlap_agree_of_compare
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) (kb : Y.baseChangeRing (awayHom b) ⟶ Xb)
+    (h3 : overlapCompareA a b Y ka ≫ (overlapIso a b repr_a repr_b).hom
+      = overlapCompareB a b Y kb) :
+    yOverlapInclA a b Y ≫ (EllObj.restrictScalars (awayHom a)).map ka
+        ≫ glueJa a b Xa Xb (overlapIso a b repr_a repr_b)
+      = yOverlapInclB a b Y ≫ (EllObj.restrictScalars (awayHom b)).map kb
+        ≫ glueJb a b Xa Xb (overlapIso a b repr_a repr_b) := by
+  set φ := overlapIso a b repr_a repr_b with hφ
+  have h3base : (overlapCompareA a b Y ka).baseHom ≫ φ.hom.baseHom
+      = (overlapCompareB a b Y kb).baseHom := by
+    have hc := congrArg EllHom.baseHom h3
+    simpa only [EllHom.comp_baseHom] using hc
+  have h3top : (overlapCompareA a b Y ka).top ≫ φ.hom.top
+      = (overlapCompareB a b Y kb).top := by
+    have hc := congrArg EllHom.top h3
+    simpa only [EllHom.comp_top] using hc
+  have hA1 : (overlapCompareA a b Y ka).baseHom ≫ glueBaseFst a b Xa
+      = yOverlapBaseA a b Y ≫ ka.baseHom := by
+    rw [overlapCompareA_baseHom]
+    exact bcInvBase_fst _ _ _ _
+  have hB1 : (overlapCompareB a b Y kb).baseHom
+        ≫ pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))
+      = yOverlapBaseB a b Y ≫ kb.baseHom := by
+    rw [overlapCompareB_baseHom]
+    exact bcInvBase_fst _ _ _ _
+  have hA1t : (overlapCompareA a b Y ka).top ≫ glueCurveFst a b Xa
+      = yOverlapTopA a b Y ≫ ka.top := by
+    rw [overlapCompareA_top]
+    exact bcInvTop_fst _ _ _ _
+  have hB1t : (overlapCompareB a b Y kb).top
+        ≫ pullback.fst Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+      = yOverlapTopB a b Y ≫ kb.top := by
+    rw [overlapCompareB_top]
+    exact bcInvTop_fst _ _ _ _
+  have hpsib : φ.hom.baseHom ≫ pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))
+      = glueBasePsi a b Xa Xb φ := rfl
+  have hpsit : φ.hom.top
+        ≫ pullback.fst Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+      = glueCurvePsi a b Xa Xb φ := rfl
+  refine EllHom.ext ?_ ?_
+  · show yOverlapBaseA a b Y ≫ ka.baseHom ≫ glueBaseInl a b Xa Xb φ
+      = yOverlapBaseB a b Y ≫ kb.baseHom ≫ glueBaseInr a b Xa Xb φ
+    rw [← reassoc_of% hA1, glueBase_condition, ← hpsib, Category.assoc,
+      reassoc_of% h3base, reassoc_of% hB1]
+  · show yOverlapTopA a b Y ≫ ka.top ≫ glueTotalInl a b Xa Xb φ
+      = yOverlapTopB a b Y ≫ kb.top ≫ glueTotalInr a b Xa Xb φ
+    rw [← reassoc_of% hA1t, glueTotal_condition, ← hpsit, Category.assoc,
+      reassoc_of% h3top, reassoc_of% hB1t]
+
+/-- **[(†) ⟹ (⋆)]** If the glued chart morphisms agree on the overlap chart, the
+comparison morphisms match through `overlapIso`. -/
+private theorem overlap_compare_of_agree
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) (Y : EllObj R)
+    (ka : Y.baseChangeRing (awayHom a) ⟶ Xa) (kb : Y.baseChangeRing (awayHom b) ⟶ Xb)
+    (hagr : yOverlapInclA a b Y ≫ (EllObj.restrictScalars (awayHom a)).map ka
+        ≫ glueJa a b Xa Xb (overlapIso a b repr_a repr_b)
+      = yOverlapInclB a b Y ≫ (EllObj.restrictScalars (awayHom b)).map kb
+        ≫ glueJb a b Xa Xb (overlapIso a b repr_a repr_b)) :
+    overlapCompareA a b Y ka ≫ (overlapIso a b repr_a repr_b).hom
+      = overlapCompareB a b Y kb := by
+  set φ := overlapIso a b repr_a repr_b with hφ
+  have hagrb : yOverlapBaseA a b Y ≫ ka.baseHom ≫ glueBaseInl a b Xa Xb φ
+      = yOverlapBaseB a b Y ≫ kb.baseHom ≫ glueBaseInr a b Xa Xb φ := by
+    have hc := congrArg EllHom.baseHom hagr
+    simp only [EllHom.comp_baseHom] at hc
+    exact hc
+  have hagrt : yOverlapTopA a b Y ≫ ka.top ≫ glueTotalInl a b Xa Xb φ
+      = yOverlapTopB a b Y ≫ kb.top ≫ glueTotalInr a b Xa Xb φ := by
+    have hc := congrArg EllHom.top hagr
+    simp only [EllHom.comp_top] at hc
+    exact hc
+  have hA1 : (overlapCompareA a b Y ka).baseHom ≫ glueBaseFst a b Xa
+      = yOverlapBaseA a b Y ≫ ka.baseHom := by
+    rw [overlapCompareA_baseHom]
+    exact bcInvBase_fst _ _ _ _
+  have hB1 : (overlapCompareB a b Y kb).baseHom
+        ≫ pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))
+      = yOverlapBaseB a b Y ≫ kb.baseHom := by
+    rw [overlapCompareB_baseHom]
+    exact bcInvBase_fst _ _ _ _
+  have hA1t : (overlapCompareA a b Y ka).top ≫ glueCurveFst a b Xa
+      = yOverlapTopA a b Y ≫ ka.top := by
+    rw [overlapCompareA_top]
+    exact bcInvTop_fst _ _ _ _
+  have hB1t : (overlapCompareB a b Y kb).top
+        ≫ pullback.fst Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+      = yOverlapTopB a b Y ≫ kb.top := by
+    rw [overlapCompareB_top]
+    exact bcInvTop_fst _ _ _ _
+  have hpsib : φ.hom.baseHom ≫ pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))
+      = glueBasePsi a b Xa Xb φ := rfl
+  have hpsit : φ.hom.top
+        ≫ pullback.fst Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+      = glueCurvePsi a b Xa Xb φ := rfl
+  have hbase : (overlapCompareA a b Y ka).baseHom ≫ φ.hom.baseHom
+      = (overlapCompareB a b Y kb).baseHom := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [← cancel_mono (glueBaseInr a b Xa Xb φ)]
+      simp only [Category.assoc]
+      rw [reassoc_of% hpsib, ← glueBase_condition, reassoc_of% hA1, hagrb,
+        ← reassoc_of% hB1]
+    · have hw : φ.hom.baseHom ≫ pullback.snd Xb.structMap (Spec.map (awayProdHomRight a b))
+          = pullback.snd Xa.structMap (Spec.map (awayProdHomLeft a b)) := φ.hom.base_w
+      rw [Category.assoc, hw, overlapCompareA_baseHom, overlapCompareB_baseHom, bcInvBase_snd,
+        bcInvBase_snd]
+  refine EllHom.ext hbase ?_
+  show (overlapCompareA a b Y ka).top ≫ φ.hom.top = (overlapCompareB a b Y kb).top
+  refine pullback.hom_ext ?_ ?_
+  · rw [← cancel_mono (glueTotalInr a b Xa Xb φ)]
+    simp only [Category.assoc]
+    rw [reassoc_of% hpsit, ← glueTotal_condition, reassoc_of% hA1t, hagrt,
+      ← reassoc_of% hB1t]
+  · have hw : φ.hom.top
+        ≫ pullback.snd Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+        = pullback.snd Xa.curve.π (pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b)))
+          ≫ φ.hom.baseHom := φ.hom.isPullback.w
+    rw [Category.assoc, hw]
+    rw [reassoc_of% (show (overlapCompareA a b Y ka).top
+          ≫ pullback.snd Xa.curve.π (pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b)))
+        = (Y.baseChangeRing (awayHom (a * b))).curve.π ≫ (overlapCompareA a b Y ka).baseHom
+        from by rw [overlapCompareA_top, overlapCompareA_baseHom]; exact bcInvTop_snd _ _ _ _)]
+    rw [show (overlapCompareB a b Y kb).top
+          ≫ pullback.snd Xb.curve.π (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b)))
+        = (Y.baseChangeRing (awayHom (a * b))).curve.π ≫ (overlapCompareB a b Y kb).baseHom
+        from by rw [overlapCompareB_top, overlapCompareB_baseHom]; exact bcInvTop_snd _ _ _ _]
+    rw [hbase]
+
+end OverlapBridge
+
+/-! ## [R-hom-glue] source-cover gluing of an `Ell/R`-morphism into the glued object
+
+A pair of chart morphisms `Y|D(a) ⟶ glueEllObj`, `Y|D(b) ⟶ glueEllObj` agreeing on the
+overlap chart glues to a morphism `Y ⟶ glueEllObj`: the underlying scheme morphisms glue
+along the two-chart open covers of `Y.base` and `Y.curve.E` (`Scheme.Cover.glueMorphisms`),
+and the cartesian field is checked chart-by-chart via `Scheme.isPullback_of_openCover`. -/
+
+section SourceCover
+
+set_option backward.isDefEq.respectTransparency false
+
+variable (a b : R)
+
+/-- The structure map of the `a`-chart of `Y` lands in `D(a)`. -/
+private theorem chartA_structMap_range (Y : EllObj R) :
+    Set.range ((EllObj.restrictScalars (awayHom a)).obj
+        (Y.baseChangeRing (awayHom a))).structMap
+      ⊆ Set.range (Spec.map (awayHom a)) := by
+  rintro - ⟨x, rfl⟩
+  show ((Y.baseChangeRing (awayHom a)).structMap ≫ Spec.map (awayHom a)) x ∈ _
+  rw [Scheme.Hom.comp_apply]
+  exact ⟨_, rfl⟩
+
+private theorem chartB_structMap_range (Y : EllObj R) :
+    Set.range ((EllObj.restrictScalars (awayHom b)).obj
+        (Y.baseChangeRing (awayHom b))).structMap
+      ⊆ Set.range (Spec.map (awayHom b)) := by
+  rintro - ⟨x, rfl⟩
+  show ((Y.baseChangeRing (awayHom b)).structMap ≫ Spec.map (awayHom b)) x ∈ _
+  rw [Scheme.Hom.comp_apply]
+  exact ⟨_, rfl⟩
+
+/-- The two-chart open cover of the base of a test object (`true ↦ D(a)`-chart,
+`false ↦ D(b)`-chart). -/
+private noncomputable def yBaseCover (Y : EllObj R) (hab : ∃ x y : R, x * a + y * b = 1) :
+    Y.base.OpenCover :=
+  Scheme.Cover.mkOfCovers Bool
+    (fun i => i.casesOn (pullback Y.structMap (Spec.map (awayHom b)))
+      (pullback Y.structMap (Spec.map (awayHom a))))
+    (fun i => i.casesOn (pullback.fst Y.structMap (Spec.map (awayHom b)))
+      (pullback.fst Y.structMap (Spec.map (awayHom a))))
+    (fun x => by
+      have hx : Y.structMap x ∈ (⊤ : TopologicalSpace.Opens (PrimeSpectrum R)) := trivial
+      rw [← basicOpen_sup_basicOpen_eq_top a b hab] at hx
+      rcases hx with hxa | hxb
+      · have hr : Y.structMap x ∈ Set.range (Spec.map (awayHom a)) := by
+          rw [range_SpecMap_awayHom]; exact hxa
+        obtain ⟨s, hs⟩ := hr
+        obtain ⟨z, hz1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.structMap) (g := Spec.map (awayHom a)) x s hs.symm
+        exact ⟨true, z, hz1⟩
+      · have hr : Y.structMap x ∈ Set.range (Spec.map (awayHom b)) := by
+          rw [range_SpecMap_awayHom]; exact hxb
+        obtain ⟨s, hs⟩ := hr
+        obtain ⟨z, hz1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.structMap) (g := Spec.map (awayHom b)) x s hs.symm
+        exact ⟨false, z, hz1⟩)
+    (fun i => by cases i <;> infer_instance)
+
+/-- The two-chart open cover of the total space of a test object. -/
+private noncomputable def yTotalCover (Y : EllObj R) (hab : ∃ x y : R, x * a + y * b = 1) :
+    Y.curve.E.OpenCover :=
+  Scheme.Cover.mkOfCovers Bool
+    (fun i => i.casesOn
+      (pullback Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b))))
+      (pullback Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))))
+    (fun i => i.casesOn
+      (pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b))))
+      (pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))))
+    (fun e => by
+      have hx : Y.structMap (Y.curve.π e) ∈ (⊤ : TopologicalSpace.Opens (PrimeSpectrum R)) :=
+        trivial
+      rw [← basicOpen_sup_basicOpen_eq_top a b hab] at hx
+      rcases hx with hxa | hxb
+      · have hr : Y.structMap (Y.curve.π e) ∈ Set.range (Spec.map (awayHom a)) := by
+          rw [range_SpecMap_awayHom]; exact hxa
+        obtain ⟨s, hs⟩ := hr
+        obtain ⟨z, hz1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.structMap) (g := Spec.map (awayHom a)) (Y.curve.π e) s hs.symm
+        obtain ⟨w, hw1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.curve.π) (g := pullback.fst Y.structMap (Spec.map (awayHom a)))
+          e z hz1.symm
+        exact ⟨true, w, hw1⟩
+      · have hr : Y.structMap (Y.curve.π e) ∈ Set.range (Spec.map (awayHom b)) := by
+          rw [range_SpecMap_awayHom]; exact hxb
+        obtain ⟨s, hs⟩ := hr
+        obtain ⟨z, hz1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.structMap) (g := Spec.map (awayHom b)) (Y.curve.π e) s hs.symm
+        obtain ⟨w, hw1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.curve.π) (g := pullback.fst Y.structMap (Spec.map (awayHom b)))
+          e z hz1.symm
+        exact ⟨false, w, hw1⟩)
+    (fun i => by cases i <;> infer_instance)
+
+variable (Xa : EllObj (CommRingCat.of (Localization.Away a)))
+variable (Xb : EllObj (CommRingCat.of (Localization.Away b)))
+variable (φ : Xa.baseChangeRing (awayProdHomLeft a b) ≅ Xb.baseChangeRing (awayProdHomRight a b))
+variable (Y : EllObj R) (hab : ∃ x y : R, x * a + y * b = 1)
+variable (fa : (EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a))
+  ⟶ glueEllObj a b Xa Xb φ)
+variable (fb : (EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b))
+  ⟶ glueEllObj a b Xa Xb φ)
+
+/-- The chart pair of base morphisms, indexed over the base cover. -/
+private noncomputable def glueHomBaseFun :
+    ∀ i : Bool, (yBaseCover a b Y hab).X i ⟶ glueBase a b Xa Xb φ :=
+  fun i => i.casesOn fb.baseHom fa.baseHom
+
+/-- Base compatibility of the chart pair over the four cover overlaps. -/
+private theorem glueHomBase_compat
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    ∀ i j : Bool,
+      pullback.fst ((yBaseCover a b Y hab).f i) ((yBaseCover a b Y hab).f j)
+          ≫ glueHomBaseFun a b Xa Xb φ Y hab fa fb i
+        = pullback.snd ((yBaseCover a b Y hab).f i) ((yBaseCover a b Y hab).f j)
+          ≫ glueHomBaseFun a b Xa Xb φ Y hab fa fb j := by
+  have hagrb : yOverlapBaseA a b Y ≫ fa.baseHom = yOverlapBaseB a b Y ≫ fb.baseHom := by
+    have hc := congrArg EllHom.baseHom hagr
+    simp only [EllHom.comp_baseHom] at hc
+    exact hc
+  intro i j
+  cases i <;> cases j
+  · -- (b, b): diagonal, cancel the mono
+    show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        (pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ fb.baseHom
+      = pullback.snd _ _ ≫ fb.baseHom
+    rw [show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+          (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom b)))
+          (pullback.fst Y.structMap (Spec.map (awayHom b))) from
+      (cancel_mono (pullback.fst Y.structMap (Spec.map (awayHom b)))).mp pullback.condition]
+  · -- (b, a): cross, through the overlap chart
+    show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        (pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ fb.baseHom
+      = pullback.snd _ _ ≫ fa.baseHom
+    have H : Set.range ((pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+          (pullback.fst Y.structMap (Spec.map (awayHom a)))
+          ≫ pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ Y.structMap)
+        ⊆ Set.range (Spec.map (awayHom (a * b))) := by
+      refine range_toOverlap_cond a b Y _ ?_ ?_
+      · intro t
+        have hc := congr($(pullback.condition (f := pullback.fst Y.structMap
+          (Spec.map (awayHom b))) (g := pullback.fst Y.structMap (Spec.map (awayHom a)))) t)
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+        rw [Scheme.Hom.comp_apply, hc]
+        have hp := congr($(pullback.condition (f := Y.structMap)
+          (g := Spec.map (awayHom a))) (pullback.snd (pullback.fst Y.structMap
+            (Spec.map (awayHom b))) (pullback.fst Y.structMap (Spec.map (awayHom a))) t))
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+        rw [hp]
+        exact ⟨_, rfl⟩
+      · intro t
+        rw [Scheme.Hom.comp_apply]
+        have hp := congr($(pullback.condition (f := Y.structMap)
+          (g := Spec.map (awayHom b))) (pullback.fst (pullback.fst Y.structMap
+            (Spec.map (awayHom b))) (pullback.fst Y.structMap (Spec.map (awayHom a))) t))
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+        rw [hp]
+        exact ⟨_, rfl⟩
+    set dq := toOverlapBase a b Y _ H with hdq
+    have h1 : dq ≫ yOverlapBaseB a b Y
+        = pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+            (pullback.fst Y.structMap (Spec.map (awayHom a))) :=
+      toOverlapBase_yOverlapBaseB a b Y _ H _ rfl
+    have h2 : dq ≫ yOverlapBaseA a b Y
+        = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom b)))
+            (pullback.fst Y.structMap (Spec.map (awayHom a))) :=
+      toOverlapBase_yOverlapBaseA a b Y _ H _ pullback.condition.symm
+    rw [← h1, ← h2, Category.assoc, Category.assoc, hagrb]
+  · -- (a, b): cross
+    show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        (pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ fa.baseHom
+      = pullback.snd _ _ ≫ fb.baseHom
+    have H : Set.range ((pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+          (pullback.fst Y.structMap (Spec.map (awayHom b)))
+          ≫ pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ Y.structMap)
+        ⊆ Set.range (Spec.map (awayHom (a * b))) := by
+      refine range_toOverlap_cond a b Y _ ?_ ?_
+      · intro t
+        rw [Scheme.Hom.comp_apply]
+        have hp := congr($(pullback.condition (f := Y.structMap)
+          (g := Spec.map (awayHom a))) (pullback.fst (pullback.fst Y.structMap
+            (Spec.map (awayHom a))) (pullback.fst Y.structMap (Spec.map (awayHom b))) t))
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+        rw [hp]
+        exact ⟨_, rfl⟩
+      · intro t
+        have hc := congr($(pullback.condition (f := pullback.fst Y.structMap
+          (Spec.map (awayHom a))) (g := pullback.fst Y.structMap (Spec.map (awayHom b)))) t)
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+        rw [Scheme.Hom.comp_apply, hc]
+        have hp := congr($(pullback.condition (f := Y.structMap)
+          (g := Spec.map (awayHom b))) (pullback.snd (pullback.fst Y.structMap
+            (Spec.map (awayHom a))) (pullback.fst Y.structMap (Spec.map (awayHom b))) t))
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+        rw [hp]
+        exact ⟨_, rfl⟩
+    set dq := toOverlapBase a b Y _ H with hdq
+    have h1 : dq ≫ yOverlapBaseA a b Y
+        = pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+            (pullback.fst Y.structMap (Spec.map (awayHom b))) :=
+      toOverlapBase_yOverlapBaseA a b Y _ H _ rfl
+    have h2 : dq ≫ yOverlapBaseB a b Y
+        = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom a)))
+            (pullback.fst Y.structMap (Spec.map (awayHom b))) :=
+      toOverlapBase_yOverlapBaseB a b Y _ H _ pullback.condition.symm
+    rw [← h1, ← h2, Category.assoc, Category.assoc, hagrb]
+  · -- (a, a): diagonal
+    show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        (pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ fa.baseHom
+      = pullback.snd _ _ ≫ fa.baseHom
+    rw [show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+          (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom a)))
+          (pullback.fst Y.structMap (Spec.map (awayHom a))) from
+      (cancel_mono (pullback.fst Y.structMap (Spec.map (awayHom a)))).mp pullback.condition]
+
+/-- The glued base morphism `Y.base ⟶ glueBase`. -/
+private noncomputable def glueHomBase
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    Y.base ⟶ glueBase a b Xa Xb φ :=
+  (yBaseCover a b Y hab).glueMorphisms (glueHomBaseFun a b Xa Xb φ Y hab fa fb)
+    (glueHomBase_compat a b Xa Xb φ Y hab fa fb hagr)
+
+private theorem glueHomBase_res_a
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr
+      = fa.baseHom :=
+  (yBaseCover a b Y hab).ι_glueMorphisms _ _ true
+
+private theorem glueHomBase_res_b
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr
+      = fb.baseHom :=
+  (yBaseCover a b Y hab).ι_glueMorphisms _ _ false
+
+/-- Overlap range condition, `(a,b)`-order. -/
+private theorem overlap_range_ab :
+    Set.range ((pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        ≫ pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ Y.structMap)
+      ⊆ Set.range (Spec.map (awayHom (a * b))) := by
+  refine range_toOverlap_cond a b Y _ ?_ ?_
+  · intro t
+    rw [Scheme.Hom.comp_apply]
+    have hp := congr($(pullback.condition (f := Y.structMap)
+      (g := Spec.map (awayHom a))) (pullback.fst (pullback.fst Y.structMap
+        (Spec.map (awayHom a))) (pullback.fst Y.structMap (Spec.map (awayHom b))) t))
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+    rw [hp]
+    exact ⟨_, rfl⟩
+  · intro t
+    have hc := congr($(pullback.condition (f := pullback.fst Y.structMap
+      (Spec.map (awayHom a))) (g := pullback.fst Y.structMap (Spec.map (awayHom b)))) t)
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+    rw [Scheme.Hom.comp_apply, hc]
+    have hp := congr($(pullback.condition (f := Y.structMap)
+      (g := Spec.map (awayHom b))) (pullback.snd (pullback.fst Y.structMap
+        (Spec.map (awayHom a))) (pullback.fst Y.structMap (Spec.map (awayHom b))) t))
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+    rw [hp]
+    exact ⟨_, rfl⟩
+
+/-- Overlap range condition, `(b,a)`-order. -/
+private theorem overlap_range_ba :
+    Set.range ((pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        ≫ pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ Y.structMap)
+      ⊆ Set.range (Spec.map (awayHom (a * b))) := by
+  refine range_toOverlap_cond a b Y _ ?_ ?_
+  · intro t
+    have hc := congr($(pullback.condition (f := pullback.fst Y.structMap
+      (Spec.map (awayHom b))) (g := pullback.fst Y.structMap (Spec.map (awayHom a)))) t)
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+    rw [Scheme.Hom.comp_apply, hc]
+    have hp := congr($(pullback.condition (f := Y.structMap)
+      (g := Spec.map (awayHom a))) (pullback.snd (pullback.fst Y.structMap
+        (Spec.map (awayHom b))) (pullback.fst Y.structMap (Spec.map (awayHom a))) t))
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+    rw [hp]
+    exact ⟨_, rfl⟩
+  · intro t
+    rw [Scheme.Hom.comp_apply]
+    have hp := congr($(pullback.condition (f := Y.structMap)
+      (g := Spec.map (awayHom b))) (pullback.fst (pullback.fst Y.structMap
+        (Spec.map (awayHom b))) (pullback.fst Y.structMap (Spec.map (awayHom a))) t))
+    rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hp
+    rw [hp]
+    exact ⟨_, rfl⟩
+
+/-- The chart pair of total-space morphisms, indexed over the total cover. -/
+private noncomputable def glueHomTopFun :
+    ∀ i : Bool, (yTotalCover a b Y hab).X i ⟶ glueTotal a b Xa Xb φ :=
+  fun i => i.casesOn fb.top fa.top
+
+/-- Total-space compatibility of the chart pair over the four cover overlaps. -/
+private theorem glueHomTop_compat
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    ∀ i j : Bool,
+      pullback.fst ((yTotalCover a b Y hab).f i) ((yTotalCover a b Y hab).f j)
+          ≫ glueHomTopFun a b Xa Xb φ Y hab fa fb i
+        = pullback.snd ((yTotalCover a b Y hab).f i) ((yTotalCover a b Y hab).f j)
+          ≫ glueHomTopFun a b Xa Xb φ Y hab fa fb j := by
+  have hagrt : yOverlapTopA a b Y ≫ fa.top = yOverlapTopB a b Y ≫ fb.top := by
+    have hc := congrArg EllHom.top hagr
+    simp only [EllHom.comp_top] at hc
+    exact hc
+  intro i j
+  cases i <;> cases j
+  · -- (b, b)
+    show pullback.fst (pullback.fst Y.curve.π (pullback.fst Y.structMap
+        (Spec.map (awayHom b)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+        (Spec.map (awayHom b)))) ≫ fb.top = pullback.snd _ _ ≫ fb.top
+    rw [show pullback.fst (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom b)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom b))))
+        = pullback.snd (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom b)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom b)))) from
+      (cancel_mono (pullback.fst Y.curve.π (pullback.fst Y.structMap
+        (Spec.map (awayHom b))))).mp pullback.condition]
+  · -- (b, a)
+    show pullback.fst (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom b)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom a)))) ≫ fb.top
+      = pullback.snd _ _ ≫ fa.top
+    set gaP := pullback.fst Y.structMap (Spec.map (awayHom a)) with hgaP
+    set gbP := pullback.fst Y.structMap (Spec.map (awayHom b)) with hgbP
+    set tA := pullback.fst Y.curve.π gaP with htA
+    set tB := pullback.fst Y.curve.π gbP with htB
+    have hπc1 : tB ≫ Y.curve.π = pullback.snd Y.curve.π gbP ≫ gbP := pullback.condition
+    have hπc2 : tA ≫ Y.curve.π = pullback.snd Y.curve.π gaP ≫ gaP := pullback.condition
+    set πpb := pullback.map tB tA gbP gaP (pullback.snd Y.curve.π gbP)
+      (pullback.snd Y.curve.π gaP) Y.curve.π hπc1 hπc2 with hπpb
+    set dq := toOverlapBase a b Y _ (overlap_range_ba a b Y) with hdq
+    have hdq1 : dq ≫ yOverlapBaseB a b Y = pullback.fst gbP gaP :=
+      toOverlapBase_yOverlapBaseB a b Y _ _ _ rfl
+    have hdq2 : dq ≫ yOverlapBaseA a b Y = pullback.snd gbP gaP :=
+      toOverlapBase_yOverlapBaseA a b Y _ _ _ pullback.condition.symm
+    have h2 : dq ≫ pullback.fst Y.structMap (Spec.map (awayHom (a * b)))
+        = pullback.fst gbP gaP ≫ gbP := toOverlapBase_fst a b Y _ _
+    have h3 : πpb ≫ pullback.fst gbP gaP = pullback.fst tB tA ≫ pullback.snd Y.curve.π gbP :=
+      pullback.lift_fst _ _ _
+    have hcommE : (pullback.fst tB tA ≫ tB) ≫ Y.curve.π
+        = (πpb ≫ dq) ≫ pullback.fst Y.structMap (Spec.map (awayHom (a * b))) := by
+      rw [Category.assoc, hπc1, Category.assoc, h2, reassoc_of% h3]
+    set dE := pullback.lift (pullback.fst tB tA ≫ tB) (πpb ≫ dq) hcommE with hdE
+    have hdE1 : dE ≫ yOverlapTopB a b Y = pullback.fst tB tA := by
+      rw [← cancel_mono tB, Category.assoc]
+      rw [show yOverlapTopB a b Y ≫ tB
+          = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+          from yOverlapTopB_fst a b Y]
+      exact pullback.lift_fst _ _ _
+    have hdE2 : dE ≫ yOverlapTopA a b Y = pullback.snd tB tA := by
+      rw [← cancel_mono tA, Category.assoc]
+      rw [show yOverlapTopA a b Y ≫ tA
+          = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+          from yOverlapTopA_fst a b Y]
+      rw [show dE ≫ pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom (a * b)))) = pullback.fst tB tA ≫ tB from pullback.lift_fst _ _ _]
+      exact pullback.condition
+    rw [← hdE1, ← hdE2, Category.assoc, Category.assoc, ← hagrt]
+  · -- (a, b)
+    show pullback.fst (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom a)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom b)))) ≫ fa.top
+      = pullback.snd _ _ ≫ fb.top
+    set gaP := pullback.fst Y.structMap (Spec.map (awayHom a)) with hgaP
+    set gbP := pullback.fst Y.structMap (Spec.map (awayHom b)) with hgbP
+    set tA := pullback.fst Y.curve.π gaP with htA
+    set tB := pullback.fst Y.curve.π gbP with htB
+    have hπc1 : tA ≫ Y.curve.π = pullback.snd Y.curve.π gaP ≫ gaP := pullback.condition
+    have hπc2 : tB ≫ Y.curve.π = pullback.snd Y.curve.π gbP ≫ gbP := pullback.condition
+    set πpb := pullback.map tA tB gaP gbP (pullback.snd Y.curve.π gaP)
+      (pullback.snd Y.curve.π gbP) Y.curve.π hπc1 hπc2 with hπpb
+    set dq := toOverlapBase a b Y _ (overlap_range_ab a b Y) with hdq
+    have hdq1 : dq ≫ yOverlapBaseA a b Y = pullback.fst gaP gbP :=
+      toOverlapBase_yOverlapBaseA a b Y _ _ _ rfl
+    have hdq2 : dq ≫ yOverlapBaseB a b Y = pullback.snd gaP gbP :=
+      toOverlapBase_yOverlapBaseB a b Y _ _ _ pullback.condition.symm
+    have h2 : dq ≫ pullback.fst Y.structMap (Spec.map (awayHom (a * b)))
+        = pullback.fst gaP gbP ≫ gaP := toOverlapBase_fst a b Y _ _
+    have h3 : πpb ≫ pullback.fst gaP gbP = pullback.fst tA tB ≫ pullback.snd Y.curve.π gaP :=
+      pullback.lift_fst _ _ _
+    have hcommE : (pullback.fst tA tB ≫ tA) ≫ Y.curve.π
+        = (πpb ≫ dq) ≫ pullback.fst Y.structMap (Spec.map (awayHom (a * b))) := by
+      rw [Category.assoc, hπc1, Category.assoc, h2, reassoc_of% h3]
+    set dE := pullback.lift (pullback.fst tA tB ≫ tA) (πpb ≫ dq) hcommE with hdE
+    have hdE1 : dE ≫ yOverlapTopA a b Y = pullback.fst tA tB := by
+      rw [← cancel_mono tA, Category.assoc]
+      rw [show yOverlapTopA a b Y ≫ tA
+          = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+          from yOverlapTopA_fst a b Y]
+      exact pullback.lift_fst _ _ _
+    have hdE2 : dE ≫ yOverlapTopB a b Y = pullback.snd tA tB := by
+      rw [← cancel_mono tB, Category.assoc]
+      rw [show yOverlapTopB a b Y ≫ tB
+          = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom (a * b))))
+          from yOverlapTopB_fst a b Y]
+      rw [show dE ≫ pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom (a * b)))) = pullback.fst tA tB ≫ tA from pullback.lift_fst _ _ _]
+      exact pullback.condition
+    rw [← hdE1, ← hdE2, Category.assoc, Category.assoc, hagrt]
+  · -- (a, a)
+    show pullback.fst (pullback.fst Y.curve.π (pullback.fst Y.structMap
+        (Spec.map (awayHom a)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+        (Spec.map (awayHom a)))) ≫ fa.top = pullback.snd _ _ ≫ fa.top
+    rw [show pullback.fst (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom a)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom a))))
+        = pullback.snd (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom a)))) (pullback.fst Y.curve.π (pullback.fst Y.structMap
+          (Spec.map (awayHom a)))) from
+      (cancel_mono (pullback.fst Y.curve.π (pullback.fst Y.structMap
+        (Spec.map (awayHom a))))).mp pullback.condition]
+
+/-- The glued total-space morphism `Y.curve.E ⟶ glueTotal`. -/
+private noncomputable def glueHomTop
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    Y.curve.E ⟶ glueTotal a b Xa Xb φ :=
+  (yTotalCover a b Y hab).glueMorphisms (glueHomTopFun a b Xa Xb φ Y hab fa fb)
+    (glueHomTop_compat a b Xa Xb φ Y hab fa fb hagr)
+
+private theorem glueHomTop_res_a
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr
+      = fa.top :=
+  (yTotalCover a b Y hab).ι_glueMorphisms _ _ true
+
+private theorem glueHomTop_res_b
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr
+      = fb.top :=
+  (yTotalCover a b Y hab).ι_glueMorphisms _ _ false
+
+/-- Structure-map compatibility of the glued base morphism. -/
+private theorem glueHomBase_w
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    glueHomBase a b Xa Xb φ Y hab fa fb hagr ≫ glueQ a b Xa Xb φ = Y.structMap := by
+  refine (yBaseCover a b Y hab).hom_ext _ _ fun i => ?_
+  cases i
+  · show pullback.fst Y.structMap (Spec.map (awayHom b))
+        ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr ≫ glueQ a b Xa Xb φ
+      = pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ Y.structMap
+    rw [← Category.assoc, glueHomBase_res_b]
+    have hb1 : fb.baseHom ≫ glueQ a b Xa Xb φ
+        = ((EllObj.restrictScalars (awayHom b)).obj
+            (Y.baseChangeRing (awayHom b))).structMap := fb.base_w
+    rw [hb1]
+    exact (pullback.condition (f := Y.structMap) (g := Spec.map (awayHom b))).symm
+  · show pullback.fst Y.structMap (Spec.map (awayHom a))
+        ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr ≫ glueQ a b Xa Xb φ
+      = pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ Y.structMap
+    rw [← Category.assoc, glueHomBase_res_a]
+    have hb1 : fa.baseHom ≫ glueQ a b Xa Xb φ
+        = ((EllObj.restrictScalars (awayHom a)).obj
+            (Y.baseChangeRing (awayHom a))).structMap := fa.base_w
+    rw [hb1]
+    exact (pullback.condition (f := Y.structMap) (g := Spec.map (awayHom a))).symm
+
+/-- Projection compatibility of the glued morphisms. -/
+private theorem glueHomTop_w
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    glueHomTop a b Xa Xb φ Y hab fa fb hagr ≫ gluePi a b Xa Xb φ
+      = Y.curve.π ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr := by
+  refine (yTotalCover a b Y hab).hom_ext _ _ fun i => ?_
+  cases i
+  · show pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr ≫ gluePi a b Xa Xb φ
+      = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        ≫ Y.curve.π ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr
+    rw [← Category.assoc, glueHomTop_res_b]
+    have h1 : fb.top ≫ gluePi a b Xa Xb φ
+        = pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+          ≫ fb.baseHom := fb.isPullback.w
+    rw [h1, reassoc_of% (pullback.condition (f := Y.curve.π)
+      (g := pullback.fst Y.structMap (Spec.map (awayHom b)))), glueHomBase_res_b]
+  · show pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr ≫ gluePi a b Xa Xb φ
+      = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        ≫ Y.curve.π ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr
+    rw [← Category.assoc, glueHomTop_res_a]
+    have h1 : fa.top ≫ gluePi a b Xa Xb φ
+        = pullback.snd Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+          ≫ fa.baseHom := fa.isPullback.w
+    rw [h1, reassoc_of% (pullback.condition (f := Y.curve.π)
+      (g := pullback.fst Y.structMap (Spec.map (awayHom a)))), glueHomBase_res_a]
+
+/-- Zero-section compatibility of the glued morphisms. -/
+private theorem glueHom_zero_w
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    Y.curve.zero ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr
+      = glueHomBase a b Xa Xb φ Y hab fa fb hagr ≫ glueZero a b Xa Xb φ := by
+  refine (yBaseCover a b Y hab).hom_ext _ _ fun i => ?_
+  cases i
+  · show pullback.fst Y.structMap (Spec.map (awayHom b))
+        ≫ Y.curve.zero ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr
+      = pullback.fst Y.structMap (Spec.map (awayHom b))
+        ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr ≫ glueZero a b Xa Xb φ
+    have hz : (Y.baseChangeRing (awayHom b)).curve.zero
+          ≫ pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b)))
+        = pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ Y.curve.zero :=
+      baseChangeRing_curve_zero_comp_fst Y (awayHom b)
+    have hzw : (Y.baseChangeRing (awayHom b)).curve.zero ≫ fb.top
+        = fb.baseHom ≫ glueZero a b Xa Xb φ := fb.zero_w
+    rw [← reassoc_of% hz, glueHomTop_res_b, hzw, reassoc_of% glueHomBase_res_b]
+  · show pullback.fst Y.structMap (Spec.map (awayHom a))
+        ≫ Y.curve.zero ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr
+      = pullback.fst Y.structMap (Spec.map (awayHom a))
+        ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr ≫ glueZero a b Xa Xb φ
+    have hz : (Y.baseChangeRing (awayHom a)).curve.zero
+          ≫ pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a)))
+        = pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ Y.curve.zero :=
+      baseChangeRing_curve_zero_comp_fst Y (awayHom a)
+    have hzw : (Y.baseChangeRing (awayHom a)).curve.zero ≫ fa.top
+        = fa.baseHom ≫ glueZero a b Xa Xb φ := fa.zero_w
+    rw [← reassoc_of% hz, glueHomTop_res_a, hzw, reassoc_of% glueHomBase_res_a]
+
+/-- The two-chart open cover of the glued total space. -/
+private noncomputable def glueTotalCover : (glueTotal a b Xa Xb φ).OpenCover :=
+  Scheme.Cover.mkOfCovers Bool
+    (fun i => i.casesOn Xb.curve.E Xa.curve.E)
+    (fun i => i.casesOn (glueTotalInr a b Xa Xb φ) (glueTotalInl a b Xa Xb φ))
+    (fun x => by
+      rcases glueTotal_exists a b Xa Xb φ x with ⟨u, hu⟩ | ⟨v, hv⟩
+      · exact ⟨true, u, hu⟩
+      · exact ⟨false, v, hv⟩)
+    (fun i => by cases i <;> infer_instance)
+
+/-- **The glued morphism square is cartesian.** Checked chart-by-chart over the two-chart
+cover of the glued total space via `Scheme.isPullback_of_openCover`: over each chart the
+square is, up to the canonical identifications, the pasting of the chart factorization's
+cartesian square with the base-level chart square. -/
+private theorem glueHom_isPullback
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    IsPullback (glueHomTop a b Xa Xb φ Y hab fa fb hagr) Y.curve.π (gluePi a b Xa Xb φ)
+      (glueHomBase a b Xa Xb φ Y hab fa fb hagr) := by
+  have hw := glueHomTop_w a b Xa Xb φ Y hab fa fb hagr
+  have hbw := glueHomBase_w a b Xa Xb φ Y hab fa fb hagr
+  refine Scheme.isPullback_of_openCover _ _ _ _ (glueTotalCover a b Xa Xb φ) ?_
+  intro i
+  cases i
+  · -- `b`-chart
+    show IsPullback
+      (pullback.snd (glueHomTop a b Xa Xb φ Y hab fa fb hagr) (glueTotalInr a b Xa Xb φ))
+      (pullback.fst (glueHomTop a b Xa Xb φ Y hab fa fb hagr) (glueTotalInr a b Xa Xb φ)
+        ≫ Y.curve.π)
+      (glueTotalInr a b Xa Xb φ ≫ gluePi a b Xa Xb φ)
+      (glueHomBase a b Xa Xb φ Y hab fa fb hagr)
+    rw [glueTotalInr_gluePi a b Xa Xb φ]
+    set uT := glueHomTop a b Xa Xb φ Y hab fa fb hagr with huT
+    set uB := glueHomBase a b Xa Xb φ Y hab fa fb hagr with huB
+    set gbP := pullback.fst Y.structMap (Spec.map (awayHom b)) with hgbP
+    set tB := pullback.fst Y.curve.π gbP with htB
+    set vb := factorGlueJb a b Xa Xb φ fb (chartB_structMap_range b Y) with hvb
+    have hvb1 : vb.baseHom ≫ glueBaseInr a b Xa Xb φ = fb.baseHom :=
+      IsOpenImmersion.lift_fac _ _ _
+    have hvb2 : vb.top ≫ glueTotalInr a b Xa Xb φ = fb.top :=
+      IsOpenImmersion.lift_fac _ _ _
+    have hres : gbP ≫ uB = fb.baseHom := glueHomBase_res_b a b Xa Xb φ Y hab fa fb hagr
+    have hrest : tB ≫ uT = fb.top := glueHomTop_res_b a b Xa Xb φ Y hab fa fb hagr
+    have hrange : Set.range gbP = uB ⁻¹' Set.range (glueBaseInr a b Xa Xb φ) := by
+      apply Set.Subset.antisymm
+      · rintro - ⟨p, rfl⟩
+        rw [Set.mem_preimage]
+        have hc := congr($(hres) p)
+        rw [Scheme.Hom.comp_apply] at hc
+        rw [hc]
+        exact factor_range_base_b a b Xa Xb φ fb (chartB_structMap_range b Y) ⟨p, rfl⟩
+      · intro y hy
+        rw [Set.mem_preimage] at hy
+        obtain ⟨z, hz⟩ := hy
+        have hmem : Y.structMap y ∈ Set.range (Spec.map (awayHom b)) := by
+          have hc := congr($(hbw) y)
+          rw [Scheme.Hom.comp_apply] at hc
+          rw [← hc, ← hz]
+          have hq := congr($(glueBaseInr_glueQ a b Xa Xb φ) z)
+          rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hq
+          rw [hq]
+          exact ⟨_, rfl⟩
+        obtain ⟨s, hs⟩ := hmem
+        obtain ⟨z', hz1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.structMap) (g := Spec.map (awayHom b)) y s hs.symm
+        exact ⟨z', hz1⟩
+    have hBSQ : IsPullback vb.baseHom gbP (glueBaseInr a b Xa Xb φ) uB := by
+      have hrange2 : Set.range gbP
+          = Set.range (pullback.snd (glueBaseInr a b Xa Xb φ) uB) := by
+        rw [Scheme.Pullback.range_snd, hrange]
+      refine IsPullback.of_iso_pullback ⟨?_⟩
+        (IsOpenImmersion.isoOfRangeEq gbP (pullback.snd (glueBaseInr a b Xa Xb φ) uB)
+          hrange2) ?_ ?_
+      · rw [hvb1, hres]
+      · rw [← cancel_mono (glueBaseInr a b Xa Xb φ), Category.assoc, pullback.condition,
+          ← Category.assoc, IsOpenImmersion.isoOfRangeEq_hom_fac, hres, hvb1]
+      · exact IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+    have hvb_sq : IsPullback vb.top (pullback.snd Y.curve.π gbP) Xb.curve.π vb.baseHom :=
+      vb.isPullback
+    have hpaste : IsPullback vb.top (pullback.snd Y.curve.π gbP ≫ gbP)
+        (Xb.curve.π ≫ glueBaseInr a b Xa Xb φ) uB := hvb_sq.paste_vert hBSQ
+    have hαcomm : tB ≫ uT = vb.top ≫ glueTotalInr a b Xa Xb φ := by
+      rw [hvb2]; exact hrest
+    set α := pullback.lift tB vb.top hαcomm with hα
+    have hβcomm : pullback.snd uT (glueTotalInr a b Xa Xb φ)
+          ≫ Xb.curve.π ≫ glueBaseInr a b Xa Xb φ
+        = (pullback.fst uT (glueTotalInr a b Xa Xb φ) ≫ Y.curve.π) ≫ uB := by
+      rw [← glueTotalInr_gluePi a b Xa Xb φ, ← Category.assoc,
+        ← pullback.condition (f := uT) (g := glueTotalInr a b Xa Xb φ), Category.assoc, hw,
+        ← Category.assoc]
+    set β := hpaste.lift (pullback.snd uT (glueTotalInr a b Xa Xb φ))
+      (pullback.fst uT (glueTotalInr a b Xa Xb φ) ≫ Y.curve.π) hβcomm with hβ
+    have hβ1 : β ≫ vb.top = pullback.snd uT (glueTotalInr a b Xa Xb φ) :=
+      hpaste.lift_fst _ _ _
+    have hβ2 : β ≫ (pullback.snd Y.curve.π gbP ≫ gbP)
+        = pullback.fst uT (glueTotalInr a b Xa Xb φ) ≫ Y.curve.π :=
+      hpaste.lift_snd _ _ _
+    have hαβ : α ≫ β = 𝟙 _ := by
+      refine hpaste.hom_ext ?_ ?_
+      · rw [Category.assoc, hβ1, Category.id_comp, pullback.lift_snd]
+      · rw [Category.assoc, hβ2, Category.id_comp, ← Category.assoc, pullback.lift_fst]
+        exact pullback.condition
+    have hrangeE : Set.range (pullback.fst uT (glueTotalInr a b Xa Xb φ))
+        ⊆ Set.range tB := by
+      intro e he
+      obtain ⟨p, rfl⟩ := he
+      have h1 : uT (pullback.fst uT (glueTotalInr a b Xa Xb φ) p)
+          ∈ Set.range (glueTotalInr a b Xa Xb φ) := by
+        have hc := congr($(pullback.condition (f := uT)
+          (g := glueTotalInr a b Xa Xb φ)) p)
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+        rw [hc]
+        exact ⟨_, rfl⟩
+      rw [range_glueTotalInr, Set.mem_preimage] at h1
+      have h2 : uB (Y.curve.π (pullback.fst uT (glueTotalInr a b Xa Xb φ) p))
+          ∈ Set.range (glueBaseInr a b Xa Xb φ) := by
+        have hc := congr($(hw) (pullback.fst uT (glueTotalInr a b Xa Xb φ) p))
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+        rw [← hc]
+        exact h1
+      have h3 : Y.curve.π (pullback.fst uT (glueTotalInr a b Xa Xb φ) p)
+          ∈ Set.range gbP := by
+        rw [hrange]
+        exact Set.mem_preimage.mpr h2
+      obtain ⟨q, hq⟩ := h3
+      obtain ⟨w, hw1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+        (f := Y.curve.π) (g := gbP)
+        (pullback.fst uT (glueTotalInr a b Xa Xb φ) p) q hq.symm
+      exact ⟨w, hw1⟩
+    set liftq := IsOpenImmersion.lift tB (pullback.fst uT (glueTotalInr a b Xa Xb φ))
+      hrangeE with hliftq
+    have hliftq1 : liftq ≫ tB = pullback.fst uT (glueTotalInr a b Xa Xb φ) :=
+      IsOpenImmersion.lift_fac _ _ _
+    have hβliftq : β = liftq := by
+      refine hpaste.hom_ext ?_ ?_
+      · rw [hβ1, ← cancel_mono (glueTotalInr a b Xa Xb φ), Category.assoc, hvb2, ← hrest,
+          ← Category.assoc, hliftq1]
+        exact pullback.condition.symm
+      · rw [hβ2, ← pullback.condition (f := Y.curve.π) (g := gbP), ← Category.assoc,
+          hliftq1]
+    have hβα : β ≫ α = 𝟙 _ := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, Category.id_comp]
+        rw [show α ≫ pullback.fst uT (glueTotalInr a b Xa Xb φ) = tB from
+          pullback.lift_fst _ _ _]
+        rw [hβliftq, hliftq1]
+      · rw [Category.assoc, Category.id_comp]
+        rw [show α ≫ pullback.snd uT (glueTotalInr a b Xa Xb φ) = vb.top from
+          pullback.lift_snd _ _ _]
+        exact hβ1
+    refine IsPullback.of_iso_pullback ⟨hβcomm⟩
+      ({ hom := β ≫ hpaste.isoPullback.hom
+         inv := hpaste.isoPullback.inv ≫ α
+         hom_inv_id := by
+           rw [Category.assoc, Iso.hom_inv_id_assoc, hβα]
+         inv_hom_id := by
+           rw [Category.assoc, reassoc_of% hαβ, Iso.inv_hom_id] }) ?_ ?_
+    · rw [Category.assoc, IsPullback.isoPullback_hom_fst]
+      exact hβ1
+    · rw [Category.assoc, IsPullback.isoPullback_hom_snd]
+      exact hβ2
+  · -- `a`-chart
+    show IsPullback
+      (pullback.snd (glueHomTop a b Xa Xb φ Y hab fa fb hagr) (glueTotalInl a b Xa Xb φ))
+      (pullback.fst (glueHomTop a b Xa Xb φ Y hab fa fb hagr) (glueTotalInl a b Xa Xb φ)
+        ≫ Y.curve.π)
+      (glueTotalInl a b Xa Xb φ ≫ gluePi a b Xa Xb φ)
+      (glueHomBase a b Xa Xb φ Y hab fa fb hagr)
+    rw [glueTotalInl_gluePi a b Xa Xb φ]
+    set uT := glueHomTop a b Xa Xb φ Y hab fa fb hagr with huT
+    set uB := glueHomBase a b Xa Xb φ Y hab fa fb hagr with huB
+    set gaP := pullback.fst Y.structMap (Spec.map (awayHom a)) with hgaP
+    set tA := pullback.fst Y.curve.π gaP with htA
+    set va := factorGlueJa a b Xa Xb φ fa (chartA_structMap_range a Y) with hva
+    have hva1 : va.baseHom ≫ glueBaseInl a b Xa Xb φ = fa.baseHom :=
+      IsOpenImmersion.lift_fac _ _ _
+    have hva2 : va.top ≫ glueTotalInl a b Xa Xb φ = fa.top :=
+      IsOpenImmersion.lift_fac _ _ _
+    have hres : gaP ≫ uB = fa.baseHom := glueHomBase_res_a a b Xa Xb φ Y hab fa fb hagr
+    have hrest : tA ≫ uT = fa.top := glueHomTop_res_a a b Xa Xb φ Y hab fa fb hagr
+    have hrange : Set.range gaP = uB ⁻¹' Set.range (glueBaseInl a b Xa Xb φ) := by
+      apply Set.Subset.antisymm
+      · rintro - ⟨p, rfl⟩
+        rw [Set.mem_preimage]
+        have hc := congr($(hres) p)
+        rw [Scheme.Hom.comp_apply] at hc
+        rw [hc]
+        exact factor_range_base_a a b Xa Xb φ fa (chartA_structMap_range a Y) ⟨p, rfl⟩
+      · intro y hy
+        rw [Set.mem_preimage] at hy
+        obtain ⟨z, hz⟩ := hy
+        have hmem : Y.structMap y ∈ Set.range (Spec.map (awayHom a)) := by
+          have hc := congr($(hbw) y)
+          rw [Scheme.Hom.comp_apply] at hc
+          rw [← hc, ← hz]
+          have hq := congr($(glueBaseInl_glueQ a b Xa Xb φ) z)
+          rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hq
+          rw [hq]
+          exact ⟨_, rfl⟩
+        obtain ⟨s, hs⟩ := hmem
+        obtain ⟨z', hz1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+          (f := Y.structMap) (g := Spec.map (awayHom a)) y s hs.symm
+        exact ⟨z', hz1⟩
+    have hBSQ : IsPullback va.baseHom gaP (glueBaseInl a b Xa Xb φ) uB := by
+      have hrange2 : Set.range gaP
+          = Set.range (pullback.snd (glueBaseInl a b Xa Xb φ) uB) := by
+        rw [Scheme.Pullback.range_snd, hrange]
+      refine IsPullback.of_iso_pullback ⟨?_⟩
+        (IsOpenImmersion.isoOfRangeEq gaP (pullback.snd (glueBaseInl a b Xa Xb φ) uB)
+          hrange2) ?_ ?_
+      · rw [hva1, hres]
+      · rw [← cancel_mono (glueBaseInl a b Xa Xb φ), Category.assoc, pullback.condition,
+          ← Category.assoc, IsOpenImmersion.isoOfRangeEq_hom_fac, hres, hva1]
+      · exact IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+    have hva_sq : IsPullback va.top (pullback.snd Y.curve.π gaP) Xa.curve.π va.baseHom :=
+      va.isPullback
+    have hpaste : IsPullback va.top (pullback.snd Y.curve.π gaP ≫ gaP)
+        (Xa.curve.π ≫ glueBaseInl a b Xa Xb φ) uB := hva_sq.paste_vert hBSQ
+    have hαcomm : tA ≫ uT = va.top ≫ glueTotalInl a b Xa Xb φ := by
+      rw [hva2]; exact hrest
+    set α := pullback.lift tA va.top hαcomm with hα
+    have hβcomm : pullback.snd uT (glueTotalInl a b Xa Xb φ)
+          ≫ Xa.curve.π ≫ glueBaseInl a b Xa Xb φ
+        = (pullback.fst uT (glueTotalInl a b Xa Xb φ) ≫ Y.curve.π) ≫ uB := by
+      rw [← glueTotalInl_gluePi a b Xa Xb φ, ← Category.assoc,
+        ← pullback.condition (f := uT) (g := glueTotalInl a b Xa Xb φ), Category.assoc, hw,
+        ← Category.assoc]
+    set β := hpaste.lift (pullback.snd uT (glueTotalInl a b Xa Xb φ))
+      (pullback.fst uT (glueTotalInl a b Xa Xb φ) ≫ Y.curve.π) hβcomm with hβ
+    have hβ1 : β ≫ va.top = pullback.snd uT (glueTotalInl a b Xa Xb φ) :=
+      hpaste.lift_fst _ _ _
+    have hβ2 : β ≫ (pullback.snd Y.curve.π gaP ≫ gaP)
+        = pullback.fst uT (glueTotalInl a b Xa Xb φ) ≫ Y.curve.π :=
+      hpaste.lift_snd _ _ _
+    have hαβ : α ≫ β = 𝟙 _ := by
+      refine hpaste.hom_ext ?_ ?_
+      · rw [Category.assoc, hβ1, Category.id_comp, pullback.lift_snd]
+      · rw [Category.assoc, hβ2, Category.id_comp, ← Category.assoc, pullback.lift_fst]
+        exact pullback.condition
+    have hrangeE : Set.range (pullback.fst uT (glueTotalInl a b Xa Xb φ))
+        ⊆ Set.range tA := by
+      intro e he
+      obtain ⟨p, rfl⟩ := he
+      have h1 : uT (pullback.fst uT (glueTotalInl a b Xa Xb φ) p)
+          ∈ Set.range (glueTotalInl a b Xa Xb φ) := by
+        have hc := congr($(pullback.condition (f := uT)
+          (g := glueTotalInl a b Xa Xb φ)) p)
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+        rw [hc]
+        exact ⟨_, rfl⟩
+      rw [range_glueTotalInl, Set.mem_preimage] at h1
+      have h2 : uB (Y.curve.π (pullback.fst uT (glueTotalInl a b Xa Xb φ) p))
+          ∈ Set.range (glueBaseInl a b Xa Xb φ) := by
+        have hc := congr($(hw) (pullback.fst uT (glueTotalInl a b Xa Xb φ) p))
+        rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+        rw [← hc]
+        exact h1
+      have h3 : Y.curve.π (pullback.fst uT (glueTotalInl a b Xa Xb φ) p)
+          ∈ Set.range gaP := by
+        rw [hrange]
+        exact Set.mem_preimage.mpr h2
+      obtain ⟨q, hq⟩ := h3
+      obtain ⟨w', hw1, -⟩ := Scheme.Pullback.exists_preimage_pullback
+        (f := Y.curve.π) (g := gaP)
+        (pullback.fst uT (glueTotalInl a b Xa Xb φ) p) q hq.symm
+      exact ⟨w', hw1⟩
+    set liftq := IsOpenImmersion.lift tA (pullback.fst uT (glueTotalInl a b Xa Xb φ))
+      hrangeE with hliftq
+    have hliftq1 : liftq ≫ tA = pullback.fst uT (glueTotalInl a b Xa Xb φ) :=
+      IsOpenImmersion.lift_fac _ _ _
+    have hβliftq : β = liftq := by
+      refine hpaste.hom_ext ?_ ?_
+      · rw [hβ1, ← cancel_mono (glueTotalInl a b Xa Xb φ), Category.assoc, hva2, ← hrest,
+          ← Category.assoc, hliftq1]
+        exact pullback.condition.symm
+      · rw [hβ2, ← pullback.condition (f := Y.curve.π) (g := gaP), ← Category.assoc,
+          hliftq1]
+    have hβα : β ≫ α = 𝟙 _ := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, Category.id_comp]
+        rw [show α ≫ pullback.fst uT (glueTotalInl a b Xa Xb φ) = tA from
+          pullback.lift_fst _ _ _]
+        rw [hβliftq, hliftq1]
+      · rw [Category.assoc, Category.id_comp]
+        rw [show α ≫ pullback.snd uT (glueTotalInl a b Xa Xb φ) = va.top from
+          pullback.lift_snd _ _ _]
+        exact hβ1
+    refine IsPullback.of_iso_pullback ⟨hβcomm⟩
+      ({ hom := β ≫ hpaste.isoPullback.hom
+         inv := hpaste.isoPullback.inv ≫ α
+         hom_inv_id := by
+           rw [Category.assoc, Iso.hom_inv_id_assoc, hβα]
+         inv_hom_id := by
+           rw [Category.assoc, reassoc_of% hαβ, Iso.inv_hom_id] }) ?_ ?_
+    · rw [Category.assoc, IsPullback.isoPullback_hom_fst]
+      exact hβ1
+    · rw [Category.assoc, IsPullback.isoPullback_hom_snd]
+      exact hβ2
+
+/-- **[R-hom-glue] the glued `Ell/R`-morphism** from a compatible pair of chart
+morphisms into the glued object. -/
+private noncomputable def glueHomOfCharts
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    Y ⟶ glueEllObj a b Xa Xb φ where
+  baseHom := glueHomBase a b Xa Xb φ Y hab fa fb hagr
+  base_w := glueHomBase_w a b Xa Xb φ Y hab fa fb hagr
+  top := glueHomTop a b Xa Xb φ Y hab fa fb hagr
+  isPullback := glueHom_isPullback a b Xa Xb φ Y hab fa fb hagr
+  zero_w := glueHom_zero_w a b Xa Xb φ Y hab fa fb hagr
+
+/-- The glued morphism restricts to `fa` on the `a`-chart. -/
+private theorem yChartInclA_glueHomOfCharts
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    yChartInclA a Y ≫ glueHomOfCharts a b Xa Xb φ Y hab fa fb hagr = fa := by
+  refine EllHom.ext ?_ ?_
+  · show (yChartInclA a Y).baseHom ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr = fa.baseHom
+    rw [yChartInclA_baseHom]
+    exact glueHomBase_res_a a b Xa Xb φ Y hab fa fb hagr
+  · show (yChartInclA a Y).top ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr = fa.top
+    rw [yChartInclA_top]
+    exact glueHomTop_res_a a b Xa Xb φ Y hab fa fb hagr
+
+/-- The glued morphism restricts to `fb` on the `b`-chart. -/
+private theorem yChartInclB_glueHomOfCharts
+    (hagr : yOverlapInclA a b Y ≫ fa = yOverlapInclB a b Y ≫ fb) :
+    yChartInclB b Y ≫ glueHomOfCharts a b Xa Xb φ Y hab fa fb hagr = fb := by
+  refine EllHom.ext ?_ ?_
+  · show (yChartInclB b Y).baseHom ≫ glueHomBase a b Xa Xb φ Y hab fa fb hagr = fb.baseHom
+    rw [yChartInclB_baseHom]
+    exact glueHomBase_res_b a b Xa Xb φ Y hab fa fb hagr
+  · show (yChartInclB b Y).top ≫ glueHomTop a b Xa Xb φ Y hab fa fb hagr = fb.top
+    rw [yChartInclB_top]
+    exact glueHomTop_res_b a b Xa Xb φ Y hab fa fb hagr
+
+include hab in
+/-- Two morphisms into the glued object agreeing on both charts of the source agree. -/
+private theorem glueHom_source_ext {v w : Y ⟶ glueEllObj a b Xa Xb φ}
+    (hA : yChartInclA a Y ≫ v = yChartInclA a Y ≫ w)
+    (hB : yChartInclB b Y ≫ v = yChartInclB b Y ≫ w) : v = w := by
+  have hAb : (yChartInclA a Y).baseHom ≫ v.baseHom
+      = (yChartInclA a Y).baseHom ≫ w.baseHom := by
+    have hc := congrArg EllHom.baseHom hA
+    simpa only [EllHom.comp_baseHom] using hc
+  have hBb : (yChartInclB b Y).baseHom ≫ v.baseHom
+      = (yChartInclB b Y).baseHom ≫ w.baseHom := by
+    have hc := congrArg EllHom.baseHom hB
+    simpa only [EllHom.comp_baseHom] using hc
+  have hAt : (yChartInclA a Y).top ≫ v.top = (yChartInclA a Y).top ≫ w.top := by
+    have hc := congrArg EllHom.top hA
+    simpa only [EllHom.comp_top] using hc
+  have hBt : (yChartInclB b Y).top ≫ v.top = (yChartInclB b Y).top ≫ w.top := by
+    have hc := congrArg EllHom.top hB
+    simpa only [EllHom.comp_top] using hc
+  refine EllHom.ext ?_ ?_
+  · refine (yBaseCover a b Y hab).hom_ext _ _ fun i => ?_
+    cases i
+    · show pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ v.baseHom
+        = pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ w.baseHom
+      rw [← yChartInclB_baseHom]
+      exact hBb
+    · show pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ v.baseHom
+        = pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ w.baseHom
+      rw [← yChartInclA_baseHom]
+      exact hAb
+  · refine (yTotalCover a b Y hab).hom_ext _ _ fun i => ?_
+    cases i
+    · show pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ v.top
+        = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ w.top
+      rw [← yChartInclB_top]
+      exact hBt
+    · show pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ v.top
+        = pullback.fst Y.curve.π (pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ w.top
+      rw [← yChartInclA_top]
+      exact hAt
+
+end SourceCover
+
+/-! ## [R-chart-eqv] the per-chart hom-equivalences and chart naturality -/
+
+section ChartHomEquiv
+
+set_option backward.isDefEq.respectTransparency false
+
+variable (a b : R)
+variable (Xa : EllObj (CommRingCat.of (Localization.Away a)))
+variable (Xb : EllObj (CommRingCat.of (Localization.Away b)))
+variable (φ : Xa.baseChangeRing (awayProdHomLeft a b) ≅ Xb.baseChangeRing (awayProdHomRight a b))
+
+/-- **[R-chart-eqv], geometric half (`a`-side):** morphisms `Y|D(a) ⟶ glueEllObj` in
+`Ell/R` biject with morphisms `Y|D(a) ⟶ Xa` in `Ell/R[1/a]`, via the unique factorization
+through the chart inclusion `glueJa`. -/
+private noncomputable def glueChartHomEquivA (Y : EllObj R) :
+    ((EllObj.restrictScalars (awayHom a)).obj (Y.baseChangeRing (awayHom a))
+      ⟶ glueEllObj a b Xa Xb φ) ≃ (Y.baseChangeRing (awayHom a) ⟶ Xa) where
+  toFun v := unRestrictScalars (awayHom a)
+    (factorGlueJa a b Xa Xb φ v (chartA_structMap_range a Y))
+  invFun k := (EllObj.restrictScalars (awayHom a)).map k ≫ glueJa a b Xa Xb φ
+  left_inv v := by
+    dsimp only
+    have h1 : (EllObj.restrictScalars (awayHom a)).map
+        (unRestrictScalars (awayHom a)
+          (factorGlueJa a b Xa Xb φ v (chartA_structMap_range a Y)))
+        = factorGlueJa a b Xa Xb φ v (chartA_structMap_range a Y) :=
+      restrictScalars_map_unRestrictScalars _ _
+    rw [h1]
+    exact factorGlueJa_glueJa a b Xa Xb φ v (chartA_structMap_range a Y)
+  right_inv k := by
+    dsimp only
+    apply (EllObj.restrictScalars (awayHom a)).map_injective
+    rw [restrictScalars_map_unRestrictScalars]
+    refine glueJa_cancel a b Xa Xb φ ?_
+    rw [factorGlueJa_glueJa]
+
+/-- The `b`-side. -/
+private noncomputable def glueChartHomEquivB (Y : EllObj R) :
+    ((EllObj.restrictScalars (awayHom b)).obj (Y.baseChangeRing (awayHom b))
+      ⟶ glueEllObj a b Xa Xb φ) ≃ (Y.baseChangeRing (awayHom b) ⟶ Xb) where
+  toFun v := unRestrictScalars (awayHom b)
+    (factorGlueJb a b Xa Xb φ v (chartB_structMap_range b Y))
+  invFun k := (EllObj.restrictScalars (awayHom b)).map k ≫ glueJb a b Xa Xb φ
+  left_inv v := by
+    dsimp only
+    have h1 : (EllObj.restrictScalars (awayHom b)).map
+        (unRestrictScalars (awayHom b)
+          (factorGlueJb a b Xa Xb φ v (chartB_structMap_range b Y)))
+        = factorGlueJb a b Xa Xb φ v (chartB_structMap_range b Y) :=
+      restrictScalars_map_unRestrictScalars _ _
+    rw [h1]
+    exact factorGlueJb_glueJb a b Xa Xb φ v (chartB_structMap_range b Y)
+  right_inv k := by
+    dsimp only
+    apply (EllObj.restrictScalars (awayHom b)).map_injective
+    rw [restrictScalars_map_unRestrictScalars]
+    refine glueJb_cancel a b Xa Xb φ ?_
+    rw [factorGlueJb_glueJb]
+
+/-- The inverse of the chart hom-equivalence is composition with `glueJa`. -/
+private theorem glueChartHomEquivA_symm_apply (Y : EllObj R)
+    (k : Y.baseChangeRing (awayHom a) ⟶ Xa) :
+    (glueChartHomEquivA a b Xa Xb φ Y).symm k
+      = (EllObj.restrictScalars (awayHom a)).map k ≫ glueJa a b Xa Xb φ := rfl
+
+private theorem glueChartHomEquivB_symm_apply (Y : EllObj R)
+    (k : Y.baseChangeRing (awayHom b) ⟶ Xb) :
+    (glueChartHomEquivB a b Xa Xb φ Y).symm k
+      = (EllObj.restrictScalars (awayHom b)).map k ≫ glueJb a b Xa Xb φ := rfl
+
+/-- Naturality of the `a`-chart inclusion: any `f : Y' ⟶ Y` lifts to the `a`-charts,
+compatibly with the inclusions. -/
+private theorem yChartInclA_naturality (Y' Y : EllObj R) (f : Y' ⟶ Y) :
+    (EllObj.restrictScalars (awayHom a)).map
+        (baseChangeRingHomEquivInv Y (awayHom a) (Y'.baseChangeRing (awayHom a))
+          (yChartInclA a Y' ≫ f))
+      ≫ yChartInclA a Y = yChartInclA a Y' ≫ f := by
+  have hfwd : ∀ (m : Y'.baseChangeRing (awayHom a) ⟶ Y.baseChangeRing (awayHom a)),
+      baseChangeRingHomEquivFwd Y (awayHom a) (Y'.baseChangeRing (awayHom a)) m
+        = (EllObj.restrictScalars (awayHom a)).map m ≫ yChartInclA a Y := by
+    intro m
+    conv_lhs => rw [← Category.comp_id m]
+    rw [baseChangeRingHomEquivFwd_comp]
+    rfl
+  rw [← hfwd]
+  exact (baseChangeRingHomEquiv Y (awayHom a)
+    (Y'.baseChangeRing (awayHom a))).right_inv (yChartInclA a Y' ≫ f)
+
+/-- Naturality of the `b`-chart inclusion. -/
+private theorem yChartInclB_naturality (Y' Y : EllObj R) (f : Y' ⟶ Y) :
+    (EllObj.restrictScalars (awayHom b)).map
+        (baseChangeRingHomEquivInv Y (awayHom b) (Y'.baseChangeRing (awayHom b))
+          (yChartInclB b Y' ≫ f))
+      ≫ yChartInclB b Y = yChartInclB b Y' ≫ f := by
+  have hfwd : ∀ (m : Y'.baseChangeRing (awayHom b) ⟶ Y.baseChangeRing (awayHom b)),
+      baseChangeRingHomEquivFwd Y (awayHom b) (Y'.baseChangeRing (awayHom b)) m
+        = (EllObj.restrictScalars (awayHom b)).map m ≫ yChartInclB b Y := by
+    intro m
+    conv_lhs => rw [← Category.comp_id m]
+    rw [baseChangeRingHomEquivFwd_comp]
+    rfl
+  rw [← hfwd]
+  exact (baseChangeRingHomEquiv Y (awayHom b)
+    (Y'.baseChangeRing (awayHom b))).right_inv (yChartInclB b Y' ≫ f)
+
+end ChartHomEquiv
+
+
 /-! ## [R-sheaf-P] The Zariski-sheaf hypothesis on `P` and the parametrized descent
 
 The recollement's inverse direction needs *exactly one* global input about `P`: that it is a
@@ -1369,6 +3364,166 @@ structure HomGlueDescent {P : ModuliProblem R} (a b : R) (zglue : ZariskiSheaf P
   natural : ∀ {Y' Y : EllObj R} (f : Y' ⟶ Y) (g : Y ⟶ G),
     toEquiv Y' (f ≫ g) = zglue.equiv Y' (P.map f.op ((zglue.equiv Y).symm (toEquiv Y g)))
 
+/-! ## [R-hom-glue] the forward map to compatible pairs -/
+
+section HomGlueAssembly
+
+set_option backward.isDefEq.respectTransparency false
+
+variable {P : ModuliProblem R} (a b : R)
+variable {Xa : EllObj (CommRingCat.of (Localization.Away a))}
+variable {Xb : EllObj (CommRingCat.of (Localization.Away b))}
+variable (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+variable (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb)
+
+/-- The chart pair of a morphism into the glued object is compatible on the overlap. -/
+private theorem homGlueForward_compat (Y : EllObj R)
+    (u : Y ⟶ glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) :
+    P.map (yOverlapInclA a b Y).op
+        (repr_a.homEquiv
+          ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+            (yChartInclA a Y ≫ u)))
+      = P.map (yOverlapInclB a b Y).op
+        (repr_b.homEquiv
+          ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+            (yChartInclB b Y ≫ u))) := by
+  rw [overlap_value_iff a b repr_a repr_b Y]
+  refine overlap_compare_of_agree a b repr_a repr_b Y _ _ ?_
+  have hA : (EllObj.restrictScalars (awayHom a)).map
+      ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclA a Y ≫ u))
+      ≫ glueJa a b Xa Xb (overlapIso a b repr_a repr_b) = yChartInclA a Y ≫ u :=
+    (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y).symm_apply_apply
+      (yChartInclA a Y ≫ u)
+  have hB : (EllObj.restrictScalars (awayHom b)).map
+      ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclB b Y ≫ u))
+      ≫ glueJb a b Xa Xb (overlapIso a b repr_a repr_b) = yChartInclB b Y ≫ u :=
+    (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y).symm_apply_apply
+      (yChartInclB b Y ≫ u)
+  rw [hA, hB, ← Category.assoc, yOverlapInclA_chartInclA, ← Category.assoc,
+    yOverlapInclB_chartInclB]
+
+/-- **[R-hom-glue] the forward map**: the compatible chart pair of a morphism into the
+glued object. -/
+private noncomputable def homGlueForwardFun (Y : EllObj R)
+    (u : Y ⟶ glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) : CompatPair P a b Y :=
+  ⟨(repr_a.homEquiv
+      ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclA a Y ≫ u)),
+    repr_b.homEquiv
+      ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclB b Y ≫ u))),
+    homGlueForward_compat a b repr_a repr_b Y u⟩
+
+private theorem homGlueForwardFun_injective (Y : EllObj R)
+    (hab : ∃ x y : R, x * a + y * b = 1) :
+    Function.Injective (homGlueForwardFun a b repr_a repr_b Y) := by
+  intro u v huv
+  have h1 : repr_a.homEquiv
+      ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclA a Y ≫ u))
+      = repr_a.homEquiv
+      ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclA a Y ≫ v)) := congrArg (fun p => p.val.1) huv
+  have h2 : repr_b.homEquiv
+      ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclB b Y ≫ u))
+      = repr_b.homEquiv
+      ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclB b Y ≫ v)) := congrArg (fun p => p.val.2) huv
+  have hjA : yChartInclA a Y ≫ u = yChartInclA a Y ≫ v :=
+    (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y).injective
+      (repr_a.homEquiv.injective h1)
+  have hjB : yChartInclB b Y ≫ u = yChartInclB b Y ≫ v :=
+    (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y).injective
+      (repr_b.homEquiv.injective h2)
+  exact glueHom_source_ext a b Xa Xb (overlapIso a b repr_a repr_b) Y hab hjA hjB
+
+private theorem homGlueForwardFun_surjective (Y : EllObj R)
+    (hab : ∃ x y : R, x * a + y * b = 1) :
+    Function.Surjective (homGlueForwardFun a b repr_a repr_b Y) := by
+  rintro ⟨⟨p1, p2⟩, hp⟩
+  set kA := repr_a.homEquiv.symm p1 with hkA
+  set kB := repr_b.homEquiv.symm p2 with hkB
+  have e1 : repr_a.homEquiv kA = p1 := by
+    rw [hkA]; exact Equiv.apply_symm_apply _ _
+  have e2 : repr_b.homEquiv kB = p2 := by
+    rw [hkB]; exact Equiv.apply_symm_apply _ _
+  have hp' : P.map (yOverlapInclA a b Y).op (repr_a.homEquiv kA)
+      = P.map (yOverlapInclB a b Y).op (repr_b.homEquiv kB) := by
+    rw [e1, e2]
+    exact hp
+  have hstar := (overlap_value_iff a b repr_a repr_b Y kA kB).mp hp'
+  have hagr := overlap_agree_of_compare a b repr_a repr_b Y kA kB hstar
+  refine ⟨glueHomOfCharts a b Xa Xb (overlapIso a b repr_a repr_b) Y hab _ _ hagr, ?_⟩
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · show repr_a.homEquiv
+        ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+          (yChartInclA a Y
+            ≫ glueHomOfCharts a b Xa Xb (overlapIso a b repr_a repr_b) Y hab _ _ hagr))
+      = p1
+    rw [yChartInclA_glueHomOfCharts]
+    rw [show (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        ((EllObj.restrictScalars (awayHom a)).map kA
+          ≫ glueJa a b Xa Xb (overlapIso a b repr_a repr_b)) = kA from
+      (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y).apply_symm_apply kA]
+    exact e1
+  · show repr_b.homEquiv
+        ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+          (yChartInclB b Y
+            ≫ glueHomOfCharts a b Xa Xb (overlapIso a b repr_a repr_b) Y hab _ _ hagr))
+      = p2
+    rw [yChartInclB_glueHomOfCharts]
+    rw [show (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        ((EllObj.restrictScalars (awayHom b)).map kB
+          ≫ glueJb a b Xa Xb (overlapIso a b repr_a repr_b)) = kB from
+      (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y).apply_symm_apply kB]
+    exact e2
+
+/-- Naturality of the forward chart value (`a`-side). -/
+private theorem homGlueForward_natural_a {Y' Y : EllObj R} (f : Y' ⟶ Y)
+    (g : Y ⟶ glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) :
+    (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y')
+        (yChartInclA a Y' ≫ f ≫ g)
+      = baseChangeRingHomEquivInv Y (awayHom a) (Y'.baseChangeRing (awayHom a))
+          (yChartInclA a Y' ≫ f)
+        ≫ (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+          (yChartInclA a Y ≫ g) := by
+  refine (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y').symm.injective ?_
+  rw [Equiv.symm_apply_apply, glueChartHomEquivA_symm_apply, Functor.map_comp,
+    Category.assoc]
+  rw [show (EllObj.restrictScalars (awayHom a)).map
+      ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclA a Y ≫ g))
+      ≫ glueJa a b Xa Xb (overlapIso a b repr_a repr_b) = yChartInclA a Y ≫ g from
+    (glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y).symm_apply_apply
+      (yChartInclA a Y ≫ g)]
+  rw [reassoc_of% (yChartInclA_naturality a Y' Y f)]
+
+/-- Naturality of the forward chart value (`b`-side). -/
+private theorem homGlueForward_natural_b {Y' Y : EllObj R} (f : Y' ⟶ Y)
+    (g : Y ⟶ glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) :
+    (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y')
+        (yChartInclB b Y' ≫ f ≫ g)
+      = baseChangeRingHomEquivInv Y (awayHom b) (Y'.baseChangeRing (awayHom b))
+          (yChartInclB b Y' ≫ f)
+        ≫ (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+          (yChartInclB b Y ≫ g) := by
+  refine (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y').symm.injective ?_
+  rw [Equiv.symm_apply_apply, glueChartHomEquivB_symm_apply, Functor.map_comp,
+    Category.assoc]
+  rw [show (EllObj.restrictScalars (awayHom b)).map
+      ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+        (yChartInclB b Y ≫ g))
+      ≫ glueJb a b Xa Xb (overlapIso a b repr_a repr_b) = yChartInclB b Y ≫ g from
+    (glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y).symm_apply_apply
+      (yChartInclB b Y ≫ g)]
+  rw [reassoc_of% (yChartInclB_naturality b Y' Y f)]
+
+end HomGlueAssembly
+
+set_option linter.unusedVariables false in
 /-- **[R-hom-glue], the geometric descent for the glued object (the single remaining `sorry`).**
 
 `Hom(-, glueEllObj …)` is the two-chart Zariski sheaf `CompatPair P a b`. This is the sole
@@ -1389,7 +3544,62 @@ private noncomputable def homGlueDescentData {P : ModuliProblem R} (a b : R)
     (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb)
     (zglue : ZariskiSheaf P a b) :
     HomGlueDescent a b zglue (glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) :=
-  sorry
+  { toEquiv := fun Y => Equiv.ofBijective (homGlueForwardFun a b repr_a repr_b Y)
+      ⟨homGlueForwardFun_injective a b repr_a repr_b Y hab,
+        homGlueForwardFun_surjective a b repr_a repr_b Y hab⟩
+    natural := fun {Y' Y} f g => by
+      show homGlueForwardFun a b repr_a repr_b Y' (f ≫ g)
+        = zglue.equiv Y' (P.map f.op ((zglue.equiv Y).symm
+            (homGlueForwardFun a b repr_a repr_b Y g)))
+      refine Subtype.ext (Prod.ext ?_ ?_)
+      · show repr_a.homEquiv
+            ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y')
+              (yChartInclA a Y' ≫ f ≫ g))
+          = (zglue.equiv Y' (P.map f.op ((zglue.equiv Y).symm
+              (homGlueForwardFun a b repr_a repr_b Y g)))).val.1
+        rw [zglue.fst_eq]
+        have hs1 : P.map (yChartInclA a Y).op
+            ((zglue.equiv Y).symm (homGlueForwardFun a b repr_a repr_b Y g))
+            = repr_a.homEquiv
+              ((glueChartHomEquivA a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+                (yChartInclA a Y ≫ g)) := by
+          have h0 : zglue.equiv Y
+              ((zglue.equiv Y).symm (homGlueForwardFun a b repr_a repr_b Y g))
+              = homGlueForwardFun a b repr_a repr_b Y g :=
+            (zglue.equiv Y).apply_symm_apply _
+          have h1 := zglue.fst_eq Y
+            ((zglue.equiv Y).symm (homGlueForwardFun a b repr_a repr_b Y g))
+          rw [h0] at h1
+          exact h1.symm
+        rw [← Functor.map_comp_apply, ← op_comp, ← yChartInclA_naturality a Y' Y f,
+          op_comp, Functor.map_comp_apply, hs1]
+        exact (congrArg repr_a.homEquiv
+          (homGlueForward_natural_a a b repr_a repr_b f g)).trans
+          (repr_a.homEquiv_comp _ _)
+      · show repr_b.homEquiv
+            ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y')
+              (yChartInclB b Y' ≫ f ≫ g))
+          = (zglue.equiv Y' (P.map f.op ((zglue.equiv Y).symm
+              (homGlueForwardFun a b repr_a repr_b Y g)))).val.2
+        rw [zglue.snd_eq]
+        have hs1 : P.map (yChartInclB b Y).op
+            ((zglue.equiv Y).symm (homGlueForwardFun a b repr_a repr_b Y g))
+            = repr_b.homEquiv
+              ((glueChartHomEquivB a b Xa Xb (overlapIso a b repr_a repr_b) Y)
+                (yChartInclB b Y ≫ g)) := by
+          have h0 : zglue.equiv Y
+              ((zglue.equiv Y).symm (homGlueForwardFun a b repr_a repr_b Y g))
+              = homGlueForwardFun a b repr_a repr_b Y g :=
+            (zglue.equiv Y).apply_symm_apply _
+          have h1 := zglue.snd_eq Y
+            ((zglue.equiv Y).symm (homGlueForwardFun a b repr_a repr_b Y g))
+          rw [h0] at h1
+          exact h1.symm
+        rw [← Functor.map_comp_apply, ← op_comp, ← yChartInclB_naturality b Y' Y f,
+          op_comp, Functor.map_comp_apply, hs1]
+        exact (congrArg repr_b.homEquiv
+          (homGlueForward_natural_b a b repr_a repr_b f g)).trans
+          (repr_b.homEquiv_comp _ _) }
 
 /-- **[R-glue-repr], parametrized over the sheaf property.** `glueEllObj a b Xa Xb (overlapIso …)`
 represents `P`, *given* the two-chart Zariski-sheaf property `zglue` of `P`. This is the full
@@ -1415,6 +3625,474 @@ private noncomputable def glueEllObj_representableBy_of_zariskiGlue {P : ModuliP
       show (zglue.equiv Y').symm (hgd.toEquiv Y' (f ≫ g))
         = P.map f.op ((zglue.equiv Y).symm (hgd.toEquiv Y g))
       rw [hgd.natural f g, Equiv.symm_apply_apply] }
+
+/-! ## [R-sheaf-P] the two-chart Zariski-sheaf property from relative representability
+
+`P`-sections are classified, at every test object, by sections of the relative
+representing scheme (`hrel`, KM Cor. 4.7.1's standing "relatively representable" clause —
+the same clause the fppf lemmas of `Moduli/Stack.lean` consume); sections of a scheme over
+the base glue along the two-chart open cover (`Scheme.Cover.glueMorphisms`), so `P` is a
+two-chart Zariski sheaf. -/
+
+section ZariskiSheafConstruction
+
+set_option backward.isDefEq.respectTransparency false
+
+variable {P : ModuliProblem R} (a b : R)
+
+/-- Presentation-independent naturality of a relative representation datum (clone of the
+`Moduli/QuotientProblem.lean` helper, which is `private` there): transporting a chart value
+along *any* `Ell/R`-morphism `w` of charts which lies over `k` and commutes with the chart
+projections computes as precomposition of the classifying section by `k`. -/
+private theorem map_eqv_recoll {X₀ : EllObj R}
+    (d₀ : ModuliProblem.RelRepData P X₀) {T T' : Scheme.{u}}
+    {g : T ⟶ X₀.base} {g' : T' ⟶ X₀.base}
+    (w : X₀.pullbackAlong g' ⟶ X₀.pullbackAlong g) (k : T' ⟶ T)
+    (hbk : w.baseHom = k) (hk : k ≫ g = g')
+    (hwπ : w ≫ X₀.pullbackAlongπ g = X₀.pullbackAlongπ g')
+    (h : { h : T ⟶ d₀.Z // h ≫ d₀.f = g }) :
+    P.map w.op (d₀.eqv g h) =
+      d₀.eqv g' ⟨k ≫ h.1, by rw [Category.assoc, h.2, hk]⟩ := by
+  subst hk
+  have hw : w = X₀.pullbackAlongMap g k := by
+    apply (EllObj.homPullbackAlongEquiv X₀ g (X₀.pullbackAlong (k ≫ g))).injective
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show w ≫ X₀.pullbackAlongπ g =
+        X₀.pullbackAlongMap g k ≫ X₀.pullbackAlongπ g
+      rw [hwπ, ModuliProblem.pullbackAlongMap_pullbackAlongπ]
+    · exact hbk
+  rw [hw]
+  exact (d₀.nat g k h).symm
+
+/-- Restriction along an `Ell/R`-isomorphism is injective on `P`-values. -/
+private theorem map_iso_op_injective {V W : EllObj R} (e : V ≅ W) :
+    Function.Injective (P.map e.hom.op : P.obj (op W) → P.obj (op V)) := by
+  intro x y hxy
+  have h := congrArg (P.map e.inv.op) hxy
+  rwa [← Functor.map_comp_apply, ← op_comp, Iso.inv_hom_id, op_id, Functor.map_id_apply,
+    ← Functor.map_comp_apply, ← op_comp, Iso.inv_hom_id, op_id, Functor.map_id_apply] at h
+
+variable (Y : EllObj R)
+
+private theorem isoPA_id_hom_π :
+    (EllObj.isoPullbackAlong (𝟙 Y)).hom ≫ Y.pullbackAlongπ (𝟙 Y.base) = 𝟙 Y :=
+  EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Y)
+
+private theorem isoPA_inv_comp {V : EllObj R} (j : V ⟶ Y) :
+    (EllObj.isoPullbackAlong j).inv ≫ j = Y.pullbackAlongπ j.baseHom := by
+  rw [Iso.inv_comp_eq]
+  exact (EllObj.toPullbackAlong_pullbackAlongπ j).symm
+
+private theorem isoPA_hom_π {V : EllObj R} (j : V ⟶ Y) :
+    (EllObj.isoPullbackAlong j).hom ≫ Y.pullbackAlongπ j.baseHom = j :=
+  EllObj.toPullbackAlong_pullbackAlongπ j
+
+/-- The `a`-chart inclusion, conjugated into the tautological charts. -/
+private noncomputable def chartWA :
+    Y.pullbackAlong (yChartInclA a Y).baseHom ⟶ Y.pullbackAlong (𝟙 Y.base) :=
+  (EllObj.isoPullbackAlong (yChartInclA a Y)).inv ≫ yChartInclA a Y
+    ≫ (EllObj.isoPullbackAlong (𝟙 Y)).hom
+
+private noncomputable def chartWB :
+    Y.pullbackAlong (yChartInclB b Y).baseHom ⟶ Y.pullbackAlong (𝟙 Y.base) :=
+  (EllObj.isoPullbackAlong (yChartInclB b Y)).inv ≫ yChartInclB b Y
+    ≫ (EllObj.isoPullbackAlong (𝟙 Y)).hom
+
+private theorem chartWA_baseHom :
+    (chartWA a Y).baseHom = (yChartInclA a Y).baseHom := by
+  show (𝟙 _ ≫ (yChartInclA a Y).baseHom ≫ 𝟙 _ : _) = (yChartInclA a Y).baseHom
+  rw [Category.id_comp, Category.comp_id]
+
+private theorem chartWB_baseHom :
+    (chartWB b Y).baseHom = (yChartInclB b Y).baseHom := by
+  show (𝟙 _ ≫ (yChartInclB b Y).baseHom ≫ 𝟙 _ : _) = (yChartInclB b Y).baseHom
+  rw [Category.id_comp, Category.comp_id]
+
+private theorem chartWA_π :
+    chartWA a Y ≫ Y.pullbackAlongπ (𝟙 Y.base)
+      = Y.pullbackAlongπ (yChartInclA a Y).baseHom := by
+  rw [chartWA, Category.assoc, Category.assoc, isoPA_id_hom_π, Category.comp_id]
+  exact isoPA_inv_comp Y (yChartInclA a Y)
+
+private theorem chartWB_π :
+    chartWB b Y ≫ Y.pullbackAlongπ (𝟙 Y.base)
+      = Y.pullbackAlongπ (yChartInclB b Y).baseHom := by
+  rw [chartWB, Category.assoc, Category.assoc, isoPA_id_hom_π, Category.comp_id]
+  exact isoPA_inv_comp Y (yChartInclB b Y)
+
+/-- The overlap-into-`a`-chart inclusion, conjugated into the tautological charts. -/
+private noncomputable def overlapWA :
+    Y.pullbackAlong (yChartInclAB a b Y).baseHom
+      ⟶ Y.pullbackAlong (yChartInclA a Y).baseHom :=
+  (EllObj.isoPullbackAlong (yChartInclAB a b Y)).inv ≫ yOverlapInclA a b Y
+    ≫ (EllObj.isoPullbackAlong (yChartInclA a Y)).hom
+
+private noncomputable def overlapWB :
+    Y.pullbackAlong (yChartInclAB a b Y).baseHom
+      ⟶ Y.pullbackAlong (yChartInclB b Y).baseHom :=
+  (EllObj.isoPullbackAlong (yChartInclAB a b Y)).inv ≫ yOverlapInclB a b Y
+    ≫ (EllObj.isoPullbackAlong (yChartInclB b Y)).hom
+
+private theorem overlapWA_baseHom :
+    (overlapWA a b Y).baseHom = yOverlapBaseA a b Y := by
+  show (𝟙 _ ≫ yOverlapBaseA a b Y ≫ 𝟙 _ : _) = yOverlapBaseA a b Y
+  rw [Category.id_comp, Category.comp_id]
+
+private theorem overlapWB_baseHom :
+    (overlapWB a b Y).baseHom = yOverlapBaseB a b Y := by
+  show (𝟙 _ ≫ yOverlapBaseB a b Y ≫ 𝟙 _ : _) = yOverlapBaseB a b Y
+  rw [Category.id_comp, Category.comp_id]
+
+private theorem overlapWA_k :
+    yOverlapBaseA a b Y ≫ (yChartInclA a Y).baseHom = (yChartInclAB a b Y).baseHom := by
+  rw [yChartInclA_baseHom, yChartInclAB_baseHom]
+  exact yOverlapBaseA_fst a b Y
+
+private theorem overlapWB_k :
+    yOverlapBaseB a b Y ≫ (yChartInclB b Y).baseHom = (yChartInclAB a b Y).baseHom := by
+  rw [yChartInclB_baseHom, yChartInclAB_baseHom]
+  exact yOverlapBaseB_fst a b Y
+
+private theorem overlapWA_π :
+    overlapWA a b Y ≫ Y.pullbackAlongπ (yChartInclA a Y).baseHom
+      = Y.pullbackAlongπ (yChartInclAB a b Y).baseHom := by
+  rw [overlapWA, Category.assoc, Category.assoc, isoPA_hom_π Y (yChartInclA a Y),
+    yOverlapInclA_chartInclA]
+  exact isoPA_inv_comp Y (yChartInclAB a b Y)
+
+private theorem overlapWB_π :
+    overlapWB a b Y ≫ Y.pullbackAlongπ (yChartInclB b Y).baseHom
+      = Y.pullbackAlongπ (yChartInclAB a b Y).baseHom := by
+  rw [overlapWB, Category.assoc, Category.assoc, isoPA_hom_π Y (yChartInclB b Y),
+    yOverlapInclB_chartInclB]
+  exact isoPA_inv_comp Y (yChartInclAB a b Y)
+
+/-- The chart value of a `P`-section, computed through the classifying section of the
+relative representing scheme (`a`-side). -/
+private theorem map_yChartInclA_eqv (d : ModuliProblem.RelRepData P Y) (s : P.obj (op Y)) :
+    P.map (yChartInclA a Y).op s
+      = P.map (EllObj.isoPullbackAlong (yChartInclA a Y)).hom.op
+          (d.eqv (yChartInclA a Y).baseHom
+            ⟨(yChartInclA a Y).baseHom
+                ≫ ((d.eqv (𝟙 Y.base)).symm
+                  (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s)).1, by
+              rw [Category.assoc,
+                ((d.eqv (𝟙 Y.base)).symm
+                  (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s)).2,
+                Category.comp_id]⟩) := by
+  set s0 := P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s with hs0
+  set σ := (d.eqv (𝟙 Y.base)).symm s0 with hσdef
+  have hrec : s = P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) σ) := by
+    rw [hσdef, Equiv.apply_symm_apply, hs0, ← Functor.map_comp_apply, ← op_comp,
+      Iso.hom_inv_id, op_id, Functor.map_id_apply]
+  calc P.map (yChartInclA a Y).op s
+      = P.map (yChartInclA a Y).op
+          (P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) σ)) := by
+        rw [← hrec]
+    _ = P.map (yChartInclA a Y ≫ (EllObj.isoPullbackAlong (𝟙 Y)).hom).op
+          (d.eqv (𝟙 Y.base) σ) := by
+        rw [← Functor.map_comp_apply, ← op_comp]
+    _ = P.map ((EllObj.isoPullbackAlong (yChartInclA a Y)).hom ≫ chartWA a Y).op
+          (d.eqv (𝟙 Y.base) σ) := by
+        rw [show yChartInclA a Y ≫ (EllObj.isoPullbackAlong (𝟙 Y)).hom
+            = (EllObj.isoPullbackAlong (yChartInclA a Y)).hom ≫ chartWA a Y from by
+          rw [chartWA]
+          simp only [Iso.hom_inv_id_assoc]]
+        rfl
+    _ = P.map (EllObj.isoPullbackAlong (yChartInclA a Y)).hom.op
+          (P.map (chartWA a Y).op (d.eqv (𝟙 Y.base) σ)) := by
+        rw [op_comp, Functor.map_comp_apply]
+    _ = _ :=
+        congrArg (P.map (EllObj.isoPullbackAlong (yChartInclA a Y)).hom.op)
+          (map_eqv_recoll d (chartWA a Y) (yChartInclA a Y).baseHom (chartWA_baseHom a Y)
+            (Category.comp_id _) (chartWA_π a Y) σ)
+
+/-- The `b`-side. -/
+private theorem map_yChartInclB_eqv (d : ModuliProblem.RelRepData P Y) (s : P.obj (op Y)) :
+    P.map (yChartInclB b Y).op s
+      = P.map (EllObj.isoPullbackAlong (yChartInclB b Y)).hom.op
+          (d.eqv (yChartInclB b Y).baseHom
+            ⟨(yChartInclB b Y).baseHom
+                ≫ ((d.eqv (𝟙 Y.base)).symm
+                  (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s)).1, by
+              rw [Category.assoc,
+                ((d.eqv (𝟙 Y.base)).symm
+                  (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s)).2,
+                Category.comp_id]⟩) := by
+  set s0 := P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s with hs0
+  set σ := (d.eqv (𝟙 Y.base)).symm s0 with hσdef
+  have hrec : s = P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) σ) := by
+    rw [hσdef, Equiv.apply_symm_apply, hs0, ← Functor.map_comp_apply, ← op_comp,
+      Iso.hom_inv_id, op_id, Functor.map_id_apply]
+  calc P.map (yChartInclB b Y).op s
+      = P.map (yChartInclB b Y).op
+          (P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) σ)) := by
+        rw [← hrec]
+    _ = P.map (yChartInclB b Y ≫ (EllObj.isoPullbackAlong (𝟙 Y)).hom).op
+          (d.eqv (𝟙 Y.base) σ) := by
+        rw [← Functor.map_comp_apply, ← op_comp]
+    _ = P.map ((EllObj.isoPullbackAlong (yChartInclB b Y)).hom ≫ chartWB b Y).op
+          (d.eqv (𝟙 Y.base) σ) := by
+        rw [show yChartInclB b Y ≫ (EllObj.isoPullbackAlong (𝟙 Y)).hom
+            = (EllObj.isoPullbackAlong (yChartInclB b Y)).hom ≫ chartWB b Y from by
+          rw [chartWB]
+          simp only [Iso.hom_inv_id_assoc]]
+        rfl
+    _ = P.map (EllObj.isoPullbackAlong (yChartInclB b Y)).hom.op
+          (P.map (chartWB b Y).op (d.eqv (𝟙 Y.base) σ)) := by
+        rw [op_comp, Functor.map_comp_apply]
+    _ = _ :=
+        congrArg (P.map (EllObj.isoPullbackAlong (yChartInclB b Y)).hom.op)
+          (map_eqv_recoll d (chartWB b Y) (yChartInclB b Y).baseHom (chartWB_baseHom b Y)
+            (Category.comp_id _) (chartWB_π b Y) σ)
+
+/-- The overlap value of an `a`-chart value, computed on classifying sections. -/
+private theorem map_yOverlapInclA_eqv (d : ModuliProblem.RelRepData P Y)
+    (σA : { h : ((EllObj.restrictScalars (awayHom a)).obj
+        (Y.baseChangeRing (awayHom a))).base ⟶ d.Z //
+      h ≫ d.f = (yChartInclA a Y).baseHom }) :
+    P.map (yOverlapInclA a b Y).op
+        (P.map (EllObj.isoPullbackAlong (yChartInclA a Y)).hom.op
+          (d.eqv (yChartInclA a Y).baseHom σA))
+      = P.map (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom.op
+          (d.eqv (yChartInclAB a b Y).baseHom
+            ⟨yOverlapBaseA a b Y ≫ σA.1, by
+              rw [Category.assoc, σA.2, overlapWA_k]⟩) := by
+  calc P.map (yOverlapInclA a b Y).op
+        (P.map (EllObj.isoPullbackAlong (yChartInclA a Y)).hom.op
+          (d.eqv (yChartInclA a Y).baseHom σA))
+      = P.map (yOverlapInclA a b Y ≫ (EllObj.isoPullbackAlong (yChartInclA a Y)).hom).op
+          (d.eqv (yChartInclA a Y).baseHom σA) := by
+        rw [← Functor.map_comp_apply, ← op_comp]
+    _ = P.map ((EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom ≫ overlapWA a b Y).op
+          (d.eqv (yChartInclA a Y).baseHom σA) := by
+        rw [show yOverlapInclA a b Y ≫ (EllObj.isoPullbackAlong (yChartInclA a Y)).hom
+            = (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom ≫ overlapWA a b Y from by
+          rw [overlapWA]
+          simp only [Iso.hom_inv_id_assoc]]
+    _ = P.map (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom.op
+          (P.map (overlapWA a b Y).op (d.eqv (yChartInclA a Y).baseHom σA)) := by
+        rw [op_comp, Functor.map_comp_apply]
+    _ = _ :=
+        congrArg (P.map (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom.op)
+          (map_eqv_recoll d (overlapWA a b Y) (yOverlapBaseA a b Y)
+            (overlapWA_baseHom a b Y) (overlapWA_k a b Y) (overlapWA_π a b Y) σA)
+
+private theorem map_yOverlapInclB_eqv (d : ModuliProblem.RelRepData P Y)
+    (σB : { h : ((EllObj.restrictScalars (awayHom b)).obj
+        (Y.baseChangeRing (awayHom b))).base ⟶ d.Z //
+      h ≫ d.f = (yChartInclB b Y).baseHom }) :
+    P.map (yOverlapInclB a b Y).op
+        (P.map (EllObj.isoPullbackAlong (yChartInclB b Y)).hom.op
+          (d.eqv (yChartInclB b Y).baseHom σB))
+      = P.map (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom.op
+          (d.eqv (yChartInclAB a b Y).baseHom
+            ⟨yOverlapBaseB a b Y ≫ σB.1, by
+              rw [Category.assoc, σB.2, overlapWB_k]⟩) := by
+  calc P.map (yOverlapInclB a b Y).op
+        (P.map (EllObj.isoPullbackAlong (yChartInclB b Y)).hom.op
+          (d.eqv (yChartInclB b Y).baseHom σB))
+      = P.map (yOverlapInclB a b Y ≫ (EllObj.isoPullbackAlong (yChartInclB b Y)).hom).op
+          (d.eqv (yChartInclB b Y).baseHom σB) := by
+        rw [← Functor.map_comp_apply, ← op_comp]
+    _ = P.map ((EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom ≫ overlapWB a b Y).op
+          (d.eqv (yChartInclB b Y).baseHom σB) := by
+        rw [show yOverlapInclB a b Y ≫ (EllObj.isoPullbackAlong (yChartInclB b Y)).hom
+            = (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom ≫ overlapWB a b Y from by
+          rw [overlapWB]
+          simp only [Iso.hom_inv_id_assoc]]
+    _ = P.map (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom.op
+          (P.map (overlapWB a b Y).op (d.eqv (yChartInclB b Y).baseHom σB)) := by
+        rw [op_comp, Functor.map_comp_apply]
+    _ = _ :=
+        congrArg (P.map (EllObj.isoPullbackAlong (yChartInclAB a b Y)).hom.op)
+          (map_eqv_recoll d (overlapWB a b Y) (yOverlapBaseB a b Y)
+            (overlapWB_baseHom a b Y) (overlapWB_k a b Y) (overlapWB_π a b Y) σB)
+
+/-- The two-chart restriction map, valued in compatible pairs. -/
+private noncomputable def zariskiSheafRestrict (Y : EllObj R) (s : P.obj (op Y)) :
+    CompatPair P a b Y :=
+  ⟨(P.map (yChartInclA a Y).op s, P.map (yChartInclB b Y).op s), by
+    rw [← Functor.map_comp_apply, ← op_comp, yOverlapInclA_chartInclA,
+      ← Functor.map_comp_apply, ← op_comp, yOverlapInclB_chartInclB]⟩
+
+/-- **[R-sheaf-P]** The two-chart restriction map is bijective: `P`-sections are classified
+by sections of the relative representing scheme, and those glue uniquely along the
+two-chart open cover of the base. -/
+private theorem zariskiSheafRestrict_bijective
+    (hab : ∃ x y : R, x * a + y * b = 1) (hrel : P.RelativelyRepresentable)
+    (Y : EllObj R) :
+    Function.Bijective (zariskiSheafRestrict (P := P) a b Y) := by
+  obtain ⟨d⟩ := (ModuliProblem.relativelyRepresentable_iff_nonempty_relRepData P).mp hrel Y
+  refine ⟨?_, ?_⟩
+  · -- injectivity
+    intro s t hst
+    have h1 : P.map (yChartInclA a Y).op s = P.map (yChartInclA a Y).op t :=
+      congrArg (fun p => p.val.1) hst
+    have h2 : P.map (yChartInclB b Y).op s = P.map (yChartInclB b Y).op t :=
+      congrArg (fun p => p.val.2) hst
+    rw [map_yChartInclA_eqv a Y d s, map_yChartInclA_eqv a Y d t] at h1
+    rw [map_yChartInclB_eqv b Y d s, map_yChartInclB_eqv b Y d t] at h2
+    have h1' := congrArg Subtype.val
+      ((d.eqv (yChartInclA a Y).baseHom).injective
+        (map_iso_op_injective (EllObj.isoPullbackAlong (yChartInclA a Y)) h1))
+    have h2' := congrArg Subtype.val
+      ((d.eqv (yChartInclB b Y).baseHom).injective
+        (map_iso_op_injective (EllObj.isoPullbackAlong (yChartInclB b Y)) h2))
+    have hσ : ((d.eqv (𝟙 Y.base)).symm
+          (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s)).1
+        = ((d.eqv (𝟙 Y.base)).symm
+          (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op t)).1 := by
+      refine (yBaseCover a b Y hab).hom_ext _ _ fun i => ?_
+      cases i
+      · show pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ _
+          = pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ _
+        have hb1 := h2'
+        rw [yChartInclB_baseHom] at hb1
+        exact hb1
+      · show pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ _
+          = pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ _
+        have ha1 := h1'
+        rw [yChartInclA_baseHom] at ha1
+        exact ha1
+    have hs0 : P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s
+        = P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op t := by
+      have := congrArg (d.eqv (𝟙 Y.base)) (Subtype.ext hσ :
+        ((d.eqv (𝟙 Y.base)).symm (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op s))
+          = ((d.eqv (𝟙 Y.base)).symm
+            (P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op t)))
+      rwa [Equiv.apply_symm_apply, Equiv.apply_symm_apply] at this
+    have hfin := congrArg (P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op) hs0
+    rwa [← Functor.map_comp_apply, ← op_comp, Iso.hom_inv_id, op_id, Functor.map_id_apply,
+      ← Functor.map_comp_apply, ← op_comp, Iso.hom_inv_id, op_id,
+      Functor.map_id_apply] at hfin
+  · -- surjectivity
+    rintro ⟨⟨p1, p2⟩, hp⟩
+    set σA := (d.eqv (yChartInclA a Y).baseHom).symm
+      (P.map (EllObj.isoPullbackAlong (yChartInclA a Y)).inv.op p1) with hσA
+    set σB := (d.eqv (yChartInclB b Y).baseHom).symm
+      (P.map (EllObj.isoPullbackAlong (yChartInclB b Y)).inv.op p2) with hσB
+    have hp1 : p1 = P.map (EllObj.isoPullbackAlong (yChartInclA a Y)).hom.op
+        (d.eqv (yChartInclA a Y).baseHom σA) := by
+      rw [hσA, Equiv.apply_symm_apply, ← Functor.map_comp_apply, ← op_comp,
+        Iso.hom_inv_id, op_id, Functor.map_id_apply]
+    have hp2 : p2 = P.map (EllObj.isoPullbackAlong (yChartInclB b Y)).hom.op
+        (d.eqv (yChartInclB b Y).baseHom σB) := by
+      rw [hσB, Equiv.apply_symm_apply, ← Functor.map_comp_apply, ← op_comp,
+        Iso.hom_inv_id, op_id, Functor.map_id_apply]
+    -- the classifying sections agree on the overlap chart
+    have hagree : yOverlapBaseA a b Y ≫ σA.1 = yOverlapBaseB a b Y ≫ σB.1 := by
+      have h0 := hp
+      rw [hp1, hp2, map_yOverlapInclA_eqv a b Y d σA, map_yOverlapInclB_eqv a b Y d σB]
+        at h0
+      exact congrArg Subtype.val
+        ((d.eqv (yChartInclAB a b Y).baseHom).injective
+          (map_iso_op_injective (EllObj.isoPullbackAlong (yChartInclAB a b Y)) h0))
+    -- glue the classifying sections along the base cover
+    set secFun : ∀ i : Bool, (yBaseCover a b Y hab).X i ⟶ d.Z
+      := fun i => i.casesOn σB.1 σA.1 with hsecFun
+    have hcompat : ∀ i j : Bool,
+        pullback.fst ((yBaseCover a b Y hab).f i) ((yBaseCover a b Y hab).f j) ≫ secFun i
+          = pullback.snd ((yBaseCover a b Y hab).f i) ((yBaseCover a b Y hab).f j)
+            ≫ secFun j := by
+      intro i j
+      cases i <;> cases j
+      · show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+            (pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ σB.1
+          = pullback.snd _ _ ≫ σB.1
+        rw [show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+              (pullback.fst Y.structMap (Spec.map (awayHom b)))
+            = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom b)))
+              (pullback.fst Y.structMap (Spec.map (awayHom b))) from
+          (cancel_mono (pullback.fst Y.structMap (Spec.map (awayHom b)))).mp
+            pullback.condition]
+      · show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+            (pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ σB.1
+          = pullback.snd _ _ ≫ σA.1
+        have hdq1 : toOverlapBase a b Y _ (overlap_range_ba a b Y) ≫ yOverlapBaseB a b Y
+            = pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom b)))
+              (pullback.fst Y.structMap (Spec.map (awayHom a))) :=
+          toOverlapBase_yOverlapBaseB a b Y _ _ _ rfl
+        have hdq2 : toOverlapBase a b Y _ (overlap_range_ba a b Y) ≫ yOverlapBaseA a b Y
+            = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom b)))
+              (pullback.fst Y.structMap (Spec.map (awayHom a))) :=
+          toOverlapBase_yOverlapBaseA a b Y _ _ _ pullback.condition.symm
+        rw [← hdq1, ← hdq2, Category.assoc, Category.assoc, ← hagree]
+      · show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+            (pullback.fst Y.structMap (Spec.map (awayHom b))) ≫ σA.1
+          = pullback.snd _ _ ≫ σB.1
+        have hdq1 : toOverlapBase a b Y _ (overlap_range_ab a b Y) ≫ yOverlapBaseA a b Y
+            = pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+              (pullback.fst Y.structMap (Spec.map (awayHom b))) :=
+          toOverlapBase_yOverlapBaseA a b Y _ _ _ rfl
+        have hdq2 : toOverlapBase a b Y _ (overlap_range_ab a b Y) ≫ yOverlapBaseB a b Y
+            = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom a)))
+              (pullback.fst Y.structMap (Spec.map (awayHom b))) :=
+          toOverlapBase_yOverlapBaseB a b Y _ _ _ pullback.condition.symm
+        rw [← hdq1, ← hdq2, Category.assoc, Category.assoc, hagree]
+      · show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+            (pullback.fst Y.structMap (Spec.map (awayHom a))) ≫ σA.1
+          = pullback.snd _ _ ≫ σA.1
+        rw [show pullback.fst (pullback.fst Y.structMap (Spec.map (awayHom a)))
+              (pullback.fst Y.structMap (Spec.map (awayHom a)))
+            = pullback.snd (pullback.fst Y.structMap (Spec.map (awayHom a)))
+              (pullback.fst Y.structMap (Spec.map (awayHom a))) from
+          (cancel_mono (pullback.fst Y.structMap (Spec.map (awayHom a)))).mp
+            pullback.condition]
+    set σ := (yBaseCover a b Y hab).glueMorphisms secFun hcompat with hσdef
+    have hresA : pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ σ = σA.1 :=
+      (yBaseCover a b Y hab).ι_glueMorphisms _ _ true
+    have hresB : pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ σ = σB.1 :=
+      (yBaseCover a b Y hab).ι_glueMorphisms _ _ false
+    have hσf : σ ≫ d.f = 𝟙 Y.base := by
+      refine (yBaseCover a b Y hab).hom_ext _ _ fun i => ?_
+      cases i
+      · show pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ σ ≫ d.f
+          = pullback.fst Y.structMap (Spec.map (awayHom b)) ≫ 𝟙 Y.base
+        rw [← Category.assoc, hresB, σB.2, yChartInclB_baseHom, Category.comp_id]
+      · show pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ σ ≫ d.f
+          = pullback.fst Y.structMap (Spec.map (awayHom a)) ≫ 𝟙 Y.base
+        rw [← Category.assoc, hresA, σA.2, yChartInclA_baseHom, Category.comp_id]
+    refine ⟨P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) ⟨σ, hσf⟩), ?_⟩
+    have hback : P.map (EllObj.isoPullbackAlong (𝟙 Y)).inv.op
+        (P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) ⟨σ, hσf⟩))
+        = d.eqv (𝟙 Y.base) ⟨σ, hσf⟩ := by
+      rw [← Functor.map_comp_apply, ← op_comp, Iso.inv_hom_id, op_id, Functor.map_id_apply]
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show P.map (yChartInclA a Y).op
+          (P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) ⟨σ, hσf⟩)) = p1
+      rw [map_yChartInclA_eqv a Y d, hback]
+      rw [show ((d.eqv (𝟙 Y.base)).symm (d.eqv (𝟙 Y.base) ⟨σ, hσf⟩)) = ⟨σ, hσf⟩ from
+        Equiv.symm_apply_apply _ _]
+      rw [hp1]
+      refine congrArg _ (congrArg _ (Subtype.ext ?_))
+      show (yChartInclA a Y).baseHom ≫ σ = σA.1
+      have hresA' := hresA
+      rw [← yChartInclA_baseHom a Y] at hresA'
+      exact hresA'
+    · show P.map (yChartInclB b Y).op
+          (P.map (EllObj.isoPullbackAlong (𝟙 Y)).hom.op (d.eqv (𝟙 Y.base) ⟨σ, hσf⟩)) = p2
+      rw [map_yChartInclB_eqv b Y d, hback]
+      rw [show ((d.eqv (𝟙 Y.base)).symm (d.eqv (𝟙 Y.base) ⟨σ, hσf⟩)) = ⟨σ, hσf⟩ from
+        Equiv.symm_apply_apply _ _]
+      rw [hp2]
+      refine congrArg _ (congrArg _ (Subtype.ext ?_))
+      show (yChartInclB b Y).baseHom ≫ σ = σB.1
+      have hresB' := hresB
+      rw [← yChartInclB_baseHom b Y] at hresB'
+      exact hresB'
+
+/-- **[R-sheaf-P]** `P` is a two-chart Zariski sheaf: the `zglue` datum, from relative
+representability alone. -/
+private noncomputable def zariskiSheaf_of_relativelyRepresentable
+    (hab : ∃ x y : R, x * a + y * b = 1) (hrel : P.RelativelyRepresentable) :
+    ZariskiSheaf P a b where
+  equiv Y := Equiv.ofBijective (zariskiSheafRestrict a b Y)
+    (zariskiSheafRestrict_bijective a b hab hrel Y)
+  fst_eq _ _ := rfl
+  snd_eq _ _ := rfl
+
+end ZariskiSheafConstruction
 
 /-! ## [R-glue-repr] the glued object represents `P` -/
 
@@ -1487,8 +4165,9 @@ private noncomputable def glueEllObj_representableBy {P : ModuliProblem R} (a b 
     {Xb : EllObj (CommRingCat.of (Localization.Away b))}
     (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
     (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) :
-    P.RepresentableBy (glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) := by
-  sorry
+    P.RepresentableBy (glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b)) :=
+  glueEllObj_representableBy_of_zariskiGlue a b hab hrel repr_a repr_b
+    (zariskiSheaf_of_relativelyRepresentable a b hab hrel)
 
 /-! ## [T-E5f-main] the recollement theorem -/
 
