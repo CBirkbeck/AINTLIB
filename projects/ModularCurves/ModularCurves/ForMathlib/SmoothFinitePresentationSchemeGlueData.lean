@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import ModularCurves.ForMathlib.FiniteIntersectionFunctor
 import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
 import ModularCurves.ForMathlib.SmoothFinitePresentationDescent
 
@@ -13,6 +14,36 @@ finite family of singleton charts at one stage of a filtered algebra system.
 open CategoryTheory
 
 universe u
+
+namespace AlgebraicGeometry
+
+noncomputable section
+
+variable {X S : Scheme.{u}} {J : Type u}
+
+/-- Every object of the affine-intersection functor of a smooth morphism to an affine
+base is a smooth algebra over the base ring. -/
+theorem Scheme.Hom.affineIntersectionFunctor_obj_smooth
+    (π : X ⟶ S) [IsAffine S] [Smooth π]
+    (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (s : Finset J) :
+    Algebra.Smooth Γ(S, (⊤ : S.Opens))
+      ((π.affineIntersectionFunctor U).obj s) := by
+  classical
+  by_cases hs : s.Nonempty
+  · rw [π.affineIntersectionFunctor_obj_nonempty U s hs]
+    letI : IsAffine (X.finiteIntersectionOpen U s).toScheme := hU s hs
+    rw [← RingHom.smooth_algebraMap]
+    change (((X.finiteIntersectionOpen U s).ι ≫ π).appTop).hom.Smooth
+    exact HasRingHomProperty.appTop (P := @Smooth) _ inferInstance
+  · obtain rfl := Finset.not_nonempty_iff_eq_empty.mp hs
+    rw [π.affineIntersectionFunctor_obj_empty U]
+    infer_instance
+
+end
+
+end AlgebraicGeometry
 
 namespace AlgebraicGeometry.Scheme.GlueData
 
