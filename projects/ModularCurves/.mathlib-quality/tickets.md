@@ -24375,3 +24375,38 @@ ENGINE STATUS: representable_of_affineOverEll_of_rigidNoeth now carries sorryAx 
 EXACTLY ONE leaf — the mouth core's Stage-3 hpres (both legs, shared mouth). The hpres
 assembly builder is in flight. When it lands: receipts 1/2/4/5 flip clean; 3/6 additionally
 need F1/F2.
+
+### v10.343 progress — [T-E4D Stage 3a–3b COMPLETE] chart cover + split transition cocycle banked AXIOM-CLEAN (2026-07-21)
+The hpres frontier moved to PURE Stage-3c. Two new files, all decls = clean triple:
+(1) ForMathlib/SemilocalVariableChangeSplit.lean —
+`SemilocalUnitSplit.exists_variableChange_eq_mul_of_span_eq_top`: a normalized
+VariableChange-valued Čech 1-cocycle on a finite basic cover of a SEMILOCAL ring splits as
+a coboundary D i * (D j)⁻¹ (lower-central-series filtration: u-layer via
+exists_units_eq_mul_of_span_eq_top / Pic=0, then abelian (r,s)- and central t-layers via
+exists_sub_resLoc_eq_of_span_eq_top; vcConj conjugation calculus with mk-one component
+formulas).  (2) Moduli/EngineMouthCharts.lean (separate from EngineDescent BY DESIGN —
+importing InvariantDifferential into EngineDescent heartbeat-blows
+exists_localModel_core_of_presentation; measured) — finite_maximalSpectrum_localization
+(Finite (MaxSpec L), statement action-free; generic-L helper
+finite_maximalSpectrum_of_isLocalRing_fixedPoints since `FixedPoints.subalgebra ℤ
+(Localization …) G` does NOT elaborate at a concrete localization — OreLocalization SMul ℤ
+diamond, never spell it), exists_presentation_cover_span_top (per-maximal atlas charts
+shrunk to basic opens D(fᵢ) + span=⊤ in L via isoSpec point transport),
+transVC_restrict_trans (section-level chart-Čech law from transVC_transport +
+transVC_restrict_restrict [un-private'd] + transVC_trans), sectionsToLoc +
+vc_map_sectionsToLoc_factor (Γ(X,D(g)) →+* Localization S₂ Away-lift vocabulary bridge into
+resLoc), and the ★ package exists_cover_transVC_coboundary = Stage 3a–3b in ONE theorem
+(cover + hU unit-conditions + cochain D with transVC-coboundary identity).
+LEAN GOTCHAS (hard-won): (a) prove big-argument hypotheses INLINE as `(by …)` arguments —
+a standalone `have hcoc` followed by passing it costs a 200k-heartbeat isDefEq re-check of
+the independently-elaborated type (the file-killer here); (b) build cocycle-law proofs
+FORWARD (congrArg₂/trans chains) — rw/kabstract on scheme-typed VariableChange products
+whnf-blows; (c) rw with lemmas whose implicit affineOpens occur only under `.1` needs ALL
+subtype args explicit (higher-order pattern).  EngineDescent: continuation comment repointed
+(statements byte-stable, still exactly 1 sorry = hpres); builds green 3861 jobs.
+REMAINING (Stage 3c, consumes the ★ package verbatim): D-rescale charts
+(projModelVCIso/pointedIso_hom_of_transVC_eq_one) → corrected coefficients agree at L-level
+→ Part-2 denominator-clear into one invariant a₁ ∉ p (+ span-witness spread so D(fᵢ) cover
+D(a₁)) → coefficient glue over A_{a₁} + glueMorphisms_hf_of_agree for ρR₁ → hpres. Wiring:
+prove hpres-shaped theorem in EngineMouthCharts (Stage-1/2 context re-derivable from
+(G,A,p)) and consume in EngineDescent, OR decompose the two slow EngineDescent proofs first.

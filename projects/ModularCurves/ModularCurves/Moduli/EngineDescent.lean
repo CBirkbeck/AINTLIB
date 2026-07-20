@@ -3104,49 +3104,59 @@ private theorem exists_localModel_core_at [Finite G] [IsAffine X]
   haveI := isLocalRing_fixedPoints_of_isLocalization p hcomp
   have hfreeL := isFreeAlgebraAction_of_isLocalization hcomp hfreeA
   -- ### Stage 3 (THE CRUX — the ONE residual): the localized presentation.  Over the semilocal
-  -- `L := Localization S` above (whose maximal spectrum is finite since `L` is module-finite
-  -- over the LOCAL `Lᴳ = (Aᴳ)_p`, hence `Pic L = 0`), glue a global Weierstrass model `W₀L / L`
-  -- presenting the base-changed curve, then spread the finitely many ring coefficients + the
-  -- corrected chart isos to a basic open `D(a₁)`, `a₁ ∉ p`, and glue `ρR₁` NATIVELY over
-  -- `A_{a₁}` (board v10.339 finding 2 — no EGA IV §8).  Concretely (v10.340 + T-E4D; both
-  -- ForMathlib prerequisites LANDED this session — see below):
-  --   (3a) pick per-orbit-point atlas charts (`EllipticCurveGeom.atlas` / `LocalPresentation`;
-  --        the orbit is the fibre over `s`, `invariantsπ_apply_eq_iff`+`invariantsπ_surjective`)
-  --        and shrink to invariant-cover basic opens `D(fᵢ)` of `Spec L` (the `fᵢ` generate the
-  --        unit ideal of `L` — MaxSpec L = the orbit primes, closed-point covering argument).
-  --        Normalize the transition `u`-components to `1` via the SEMILOCAL UNIT-COCYCLE SPLIT
-  --        `SemilocalUnitSplit.exists_units_eq_mul_of_span_eq_top`
-  --        (ForMathlib/SemilocalUnitCocycleSplit, LANDED): the `transUnit` Čech cocycle
-  --        `uᵢⱼ = (transVC Pᵢ Pⱼ).u` splits as `uᵢⱼ = vᵢ/vⱼ` over the semilocal `L`
-  --        (`Finite (MaximalSpectrum L)`); rescale chart `i` by the `VariableChange`
-  --        `⟨vᵢ, 0, 0, 0⟩` (`projModelVCIso`).  This BYPASSES `OmegaBasis`/residual (i) — no
-  --        `QCoh ≃ Modules` bridge needed.  [Ring side COMPLETE: the file is sorry-free and
-  --        axiom-clean, including the 02M9 fibre input.]
-  --        Vocabulary: transitions over `Γ(D(fᵢfⱼ)) ≅ Localization.Away (fᵢ*fⱼ)` enter the
-  --        join form via `isLocalizedModule_sup_of_powers_mul` / `…_sup_sup_of_powers_mul`.
-  --        The `Finite (MaximalSpectrum L)` input is LANDED:
-  --        `MaximalSpectrum.finite_of_isInvariant` (ForMathlib/MaximalSpectrumOrbit,
-  --        axiom-clean) — instantiate with `A := FixedPoints.subalgebra ℤ L` (the
-  --        tautological `Algebra.IsInvariant` instance, ForMathlib/SpecGroupAction:98) and
-  --        `[Finite (MaximalSpectrum A)]` from `IsLocalRing Lᴳ` (mathlib
-  --        `Unique (MaximalSpectrum _)` for local rings; `Lᴳ` local is in scope above).
-  --   (3b) after normalization the transVC cocycle lands in the nilpotent `T = {(1,r,s,t)}`
-  --        (central extension `0 → (L,+) → T → (L²,+) → 0`); split each additive layer over
-  --        the finite basic cover by the n-COVER AFFINE-ČECH `H¹` VANISHING
-  --        `IsLocalizedModule.exists_sub_liftOfLE_eq_of_span_eq_top`
-  --        (ForMathlib/AffineCechH1, LANDED axiom-clean; toolkit `liftOfLE_liftOfLE`,
-  --        `exists_liftOfLE_eq_pow_smul`, `exists_pow_smul_eq_zero_of_liftOfLE_eq_zero`):
-  --        first the `(r,s)`-layer (`M := L²` componentwise, or two scalar passes), then —
-  --        after correcting by the `(r,s)`-coboundary — the residual central `t`-layer.
-  --        Ready-to-call scalar form: `SemilocalUnitSplit.exists_sub_resLoc_eq_of_span_eq_top`
-  --        (same `resLoc` vocabulary as the unit split; call it three times, for the `r`, `s`
-  --        and corrected-`t` component cocycles of the `T`-valued `transVC` cocycle).
-  --   (3c) correct the charts (`pointedIso_hom_of_transVC_eq_one`), glue coefficients to
-  --        `W₀L / L` (structure-sheaf sheaf condition), spread them to a single `a₁ ∉ p`
-  --        (`fixedAwayMap` / `existsUnique_factor_fixedPoints_away` Part-2 pattern of
-  --        `exists_away_invariant_descent`), and glue the presentation over `A_{a₁}`
-  --        (`Scheme.OpenCover.glueMorphisms` + `glueMorphisms_hf_of_agree`; legs via
-  --        `isPullback_projModelBaseChange` / `projModelZero_baseChange`).
+  -- `L := Localization S` above, glue a global Weierstrass model `W₀L / L` presenting the
+  -- base-changed curve, then spread the finitely many ring coefficients + the corrected chart
+  -- isos to a basic open `D(a₁)`, `a₁ ∉ p`, and glue `ρR₁` NATIVELY over `A_{a₁}` (board
+  -- v10.339 finding 2 — no EGA IV §8).
+  --
+  -- **Stages 3a–3b are DONE, AXIOM-CLEAN — `Moduli/EngineMouthCharts.lean` (T-E4D session
+  -- 2026-07-21).**  The single package theorem
+  --   `MouthCharts.exists_cover_transVC_coboundary (C := C) S`
+  -- yields, for any `[Finite (MaximalSpectrum (Localization S))]` (supplied by
+  --   `MouthCharts.finite_maximalSpectrum_localization G p` — no `letI` needed, the
+  --   statement does not mention the action):
+  -- a finite basic-open chart cover `f : ι → A`, pointed Weierstrass charts
+  -- `P i : LocalPresentation C ⟨X.basicOpen (f i), _⟩` from the atlas, the span condition
+  -- `Ideal.span (range (algebraMap A L ∘ f)) = ⊤` (the `D(fᵢ)` cover `Spec L`), and a
+  -- per-chart `VariableChange` cochain `D i / L[1/fᵢ]` whose coboundary is the chart
+  -- transition cocycle pushed into the join-localizations of `L`:
+  --   `(transVC of restricted charts).map (sectionsToLoc …) = (D i) * (D j)⁻¹`.
+  -- Under the hood (all axiom-clean): the chart extraction
+  -- `MouthCharts.exists_presentation_cover_span_top` (one chart per maximal of the semilocal
+  -- `L`), the section-level Čech law `MouthCharts.transVC_restrict_trans`, the vocabulary
+  -- bridge `MouthCharts.sectionsToLoc`/`vc_map_sectionsToLoc_factor`, and the layerwise
+  -- `VariableChange`-Čech splitting engine
+  -- `SemilocalUnitSplit.exists_variableChange_eq_mul_of_span_eq_top`
+  -- (ForMathlib/SemilocalVariableChangeSplit: `u`-layer via `Pic(semilocal) = 0`
+  -- [`exists_units_eq_mul_of_span_eq_top`], then the abelian `(r,s)`- and central `t`-layers
+  -- via the n-cover affine-Čech `H¹` vanishing [`exists_sub_resLoc_eq_of_span_eq_top`]).
+  --
+  -- **Residual = Stage 3c (the chart correction + glue + spread), consuming exactly the
+  -- package above:**
+  --   (i)  rescale chart `i` by `D i` (`projModelVCIso`); corrected transitions are `1`
+  --        (`pointedIso_hom_of_transVC_eq_one`), so the corrected Weierstrass coefficients
+  --        agree on overlaps at the `L`-level;
+  --   (ii) spread: the `D i`-entries and the finitely many agreement identities have
+  --        `S`-denominators — clear them into one invariant `a₁ ∉ p` (`fixedAwayMap` /
+  --        `existsUnique_factor_fixedPoints_away`, the Part-2 pattern of
+  --        `exists_away_invariant_descent`, plus the span-witness spread so the `D(fᵢ)`
+  --        cover `D(a₁)`); glue the coefficients to `W₀R₁ / A_{a₁}` (structure-sheaf
+  --        condition on the basic cover) and the presentation `ρR₁` by
+  --        `Scheme.OpenCover.glueMorphisms` + `glueMorphisms_hf_of_agree`
+  --        (SpecBasicOpenAway; legs via `isPullback_projModelBaseChange` /
+  --        `projModelZero_baseChange`).
+  -- **Wiring note (import architecture):** `EngineMouthCharts` is a SEPARATE file because
+  -- importing `EllipticCurve/InvariantDifferential` (the `LocalPresentation` calculus) into
+  -- THIS file blows the elaboration budget of `exists_localModel_core_of_presentation`
+  -- (heartbeat regressions from the enriched instance set — measured 2026-07-21).  Stage 3c
+  -- should therefore EITHER be proven in `EngineMouthCharts` (or a successor file) as a
+  -- standalone `hpres`-shaped theorem that this file then consumes — decomposing
+  -- `exists_localModel_core_of_presentation` first if the import is added here — with the
+  -- Stage-1/2 semilocalization context re-derived there from `(G, A, p)` (it is
+  -- `a`-independent ring data), OR wired here after a `/buzz`-style split of the two slow
+  -- proofs.  Gotcha (measured): `FixedPoints.subalgebra ℤ (Localization …) G` does NOT
+  -- elaborate at a concrete localization (`OreLocalization` `SMul ℤ` diamond) — never spell
+  -- it; use the generic-`L` lemmas (`finite_maximalSpectrum_of_isLocalRing_fixedPoints`).
   -- Stages 4–5 are DONE: `exists_localModel_core_of_presentation` (Stage-4 consumption +
   -- `exists_coboundary_spread_away` + the `D(a₁) → D(aF)` shrink) closes the core from `hpres`.
   have hpres : ∃ (a₁ : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a₁ ∉ p)
