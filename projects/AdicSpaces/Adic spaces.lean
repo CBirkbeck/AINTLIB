@@ -35,6 +35,7 @@ import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
 import «Adic spaces».HubnerSeparation
 import «Adic spaces».HuberRings
+import «Adic spaces».PresheafFunctoriality
 import «Adic spaces».QuotientTate
 import «Adic spaces».IdealClosedness
 import «Adic spaces».IdealLocalization
