@@ -20,7 +20,7 @@ Scholze's *Perfectoid Spaces* (2012), Definition 3.19.
 
 ## Main results (sorry'd)
 
-* `AffinoidPerfectoidSpace.toAffinoidAdicSpace` : Every affinoid perfectoid space is an
+* `AffinoidPerfectoidSpace.toAffinoidAdicPresentation` : Every affinoid perfectoid space is an
   affinoid adic space (requires sheafiness of perfectoid rings).
 * `AffinoidPerfectoidSpace.toAdicSpace` : Every affinoid perfectoid space is an adic space.
 * `PerfectoidSpace.tilt` : The tilt of a perfectoid space is perfectoid (in characteristic `p`).
@@ -73,14 +73,14 @@ def toTopCat : TopCat.{u} := SpaTop X.Ring
 This requires that perfectoid rings are sheafy (Scholze, Theorem 6.3), which
 follows from the deep result that perfectoid rings are stably uniform. The
 proof goes through almost mathematics and tilting. -/
-noncomputable def toAffinoidAdicSpace : AffinoidAdicSpace.{u} := by
+noncomputable def toAffinoidAdicPresentation : AffinoidAdicPresentation.{u} := by
   exact sorry
 
 /-- Every affinoid perfectoid space gives rise to an adic space.
 
-This combines `toAffinoidAdicSpace` with the fact that every affinoid adic space
+This combines `toAffinoidAdicPresentation` with the fact that every affinoid adic space
 is trivially an adic space (covered by itself). -/
-noncomputable def toAdicSpace : AdicSpace.{u} := by
+noncomputable def toAdicSpace : AdicSpacePresentation.{u} := by
   exact sorry
 
 end AffinoidPerfectoidSpace
@@ -96,7 +96,7 @@ with the additional requirement that the local rings are perfectoid.
 
 (Scholze, *Perfectoid Spaces*, Definition 3.19) -/
 class IsPerfectoidSpace (p : ℕ) [Fact (Nat.Prime p)]
-    (X : AdicSpace.{u}) : Prop where
+    (X : AdicSpacePresentation.{u}) : Prop where
   /-- Every point has an open neighborhood isomorphic to the adic spectrum of a
   perfectoid ring. -/
   locally_perfectoid : ∀ x : X.carrier,
@@ -115,6 +115,6 @@ local perfectoid ring is again perfectoid, and that the local charts glue correc
 
 (Scholze, *Perfectoid Spaces*, Theorem 6.3) -/
 theorem PerfectoidSpace.tilt (p : ℕ) [Fact (Nat.Prime p)]
-    (X : AdicSpace.{u}) [IsPerfectoidSpace p X] :
-    ∃ (Y : AdicSpace.{u}), IsPerfectoidSpace p Y := by
+    (X : AdicSpacePresentation.{u}) [IsPerfectoidSpace p X] :
+    ∃ (Y : AdicSpacePresentation.{u}), IsPerfectoidSpace p Y := by
   exact sorry

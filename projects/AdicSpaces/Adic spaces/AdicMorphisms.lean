@@ -13,6 +13,6 @@ import «Adic spaces».AdicSpaceMorphisms
 the space-level Wedhorn Definition 8.38 layer (`IsAdicMorphism`,
 `AffinoidNeighborhood`, … — `AdicSpaceMorphisms.lean`, downstream of the genuine
 structure-presheaf space definitions). The split exists because the space layer
-consumes `AffinoidAdicSpace`, which lives downstream of the sheaf-condition
+consumes `AffinoidAdicPresentation`, which lives downstream of the sheaf-condition
 equivalences, while `SpaCompactNoHArch.lean` (upstream) needs the ring-level part.
 -/

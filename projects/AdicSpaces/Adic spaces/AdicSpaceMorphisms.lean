@@ -9,7 +9,7 @@ import «Adic spaces».StructurePresheafBundled
 # Adic morphisms of adic spaces (Wedhorn Definition 8.38, Prop 8.39, Cor 8.40)
 
 The space-level part of `AdicMorphisms.lean`, split off (WO1, 2026-07-20) because it
-consumes `AdicSpace`/`AffinoidAdicSpace`, which now live downstream in
+consumes `AdicSpacePresentation`/`AffinoidAdicPresentation`, which now live downstream in
 `StructurePresheafBundled.lean` (their sheafiness field is the genuine Definition
 8.21 condition). Ring-level adicness (`IsAdicHom` etc.) stays in `AdicMorphisms.lean`.
 -/
@@ -27,13 +27,13 @@ open TopologicalSpace
 /-- An open affinoid neighborhood datum for a point in an adic space: an open set `U`,
 a point membership proof, an affinoid adic space `Y`, and a homeomorphism
 `U ≃ₜ Spa(Y.Ring)`. This packages the local chart data for Definition 8.38. -/
-structure AffinoidNeighborhood (X : AdicSpace.{u}) (x : X.carrier) where
+structure AffinoidNeighborhood (X : AdicSpacePresentation.{u}) (x : X.carrier) where
   /-- The open set containing `x`. -/
   U : Opens X.carrier
   /-- Proof that `x ∈ U`. -/
   mem : x ∈ U
   /-- The affinoid adic space that `U` is homeomorphic to. -/
-  aff : AffinoidAdicSpace.{u}
+  aff : AffinoidAdicPresentation.{u}
   /-- The homeomorphism `U ≃ₜ Spa(aff.Ring)`. -/
   homeo : ↥U ≃ₜ aff.toTopCat
 
@@ -52,7 +52,7 @@ The ring hom goes from the target ring to the source ring (`NY.aff.Ring →+* NX
 matching the contravariant nature of `Spa(φ) : Spa(B) → Spa(A)` for `φ : A →+* B`.
 We require `IsHuberRing` instances on the affinoid rings since `IsAdicHom` is defined
 for Huber ring homomorphisms (Definition 6.23 of Wedhorn). -/
-def IsAdicMorphism (X Y : AdicSpace.{u}) (f : C(X.carrier, Y.carrier)) : Prop :=
+def IsAdicMorphism (X Y : AdicSpacePresentation.{u}) (f : C(X.carrier, Y.carrier)) : Prop :=
   ∀ (x : X.carrier),
     ∃ (NX : AffinoidNeighborhood X x)
       (NY : AffinoidNeighborhood Y (f x))
@@ -164,7 +164,7 @@ formalized:
 
 Following Wedhorn p. 86, the proof is: Prop 8.39(1) gives `f(U_a) ⊆ V_a`
 (analytic-preservation), then Lemma 7.46(2) gives that `φ` is adic. -/
-theorem IsAdicMorphism.ringHom_isAdic {X Y : AdicSpace}
+theorem IsAdicMorphism.ringHom_isAdic {X Y : AdicSpacePresentation}
     {f : C(X.carrier, Y.carrier)} (_hf : IsAdicMorphism X Y f) {x : X.carrier}
     (NX : AffinoidNeighborhood X x) (NY : AffinoidNeighborhood Y (f x))
     (_hfUV : ∀ (p : ↥NX.U), f p.val ∈ NY.U) [IsHuberRing NX.aff.Ring]

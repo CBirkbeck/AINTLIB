@@ -13,7 +13,8 @@ import Mathlib.Topology.Algebra.Nonarchimedean.Basic
 # Restricted Power Series
 
 This file defines restricted power series `A⟨T₁, …, Tₖ⟩` and the notion of a strongly
-noetherian ring, following Wedhorn's *Adic Spaces*, §6.9.
+noetherian ring, following Wedhorn's *Adic Spaces*: the convergent/restricted power series ring is
+(5.6.1) in §5.6; strong noetherianity is Proposition & Definition 6.36 in §6.7.
 
 ## Main definitions
 
@@ -23,7 +24,9 @@ noetherian ring, following Wedhorn's *Adic Spaces*, §6.9.
   variables over `A`, denoted `A⟨T₁, …, Tₖ⟩`.
 * `IsStronglyNoetherian A`: A topological ring `A` is **strongly noetherian** if
   `restrictedMvPowerSeriesSubring k A` is noetherian for all `k ≥ 0`
-  (Definition 6.9 of Wedhorn).
+  (Proposition & Definition 6.36 of Wedhorn, stated here with `A`-level restricted
+  series; Definition 6.36(i) verbatim is the condition on the completion `Â` — see
+  `SheafyRing.lean`'s scope notes).
 
 ## Implementation notes
 
@@ -61,7 +64,7 @@ if its coefficients converge to `0` along the cofinite filter on multi-indices. 
 for every open neighborhood `U` of `0` in `A`, all but finitely many coefficients of `f`
 lie in `U`. This is the defining property of elements of `A⟨T₁, …, Tₖ⟩`.
 
-See Wedhorn, §6.9. -/
+See Wedhorn, (5.6.1) and §6.7. -/
 def MvPowerSeries.IsRestricted {k : ℕ} {A : Type*} [CommRing A] [TopologicalSpace A]
     (f : MvPowerSeries (Fin k) A) : Prop :=
   Tendsto (fun s : Fin k →₀ ℕ => MvPowerSeries.coeff s f) cofinite (nhds 0)
@@ -230,7 +233,9 @@ noncomputable instance restrictedMvPowerSeriesSubring.instAlgebra (k : ℕ) (A :
 /-! ### Strongly noetherian rings -/
 
 /-- A topological ring `A` is **strongly noetherian** if the ring of restricted power series
-`A⟨T₁, …, Tₖ⟩` is noetherian for all `k ≥ 0` (Definition 6.9 of Wedhorn).
+`A⟨T₁, …, Tₖ⟩` is noetherian for all `k ≥ 0` (Proposition & Definition 6.36 of Wedhorn, stated here with `A`-level restricted
+  series; Definition 6.36(i) verbatim is the condition on the completion `Â` — see
+  `SheafyRing.lean`'s scope notes).
 
 This is a fundamental finiteness condition in nonarchimedean geometry, introduced by
 Huber. For a noetherian Tate ring, being strongly noetherian is equivalent to saying

@@ -29,7 +29,7 @@ This file makes the genuine all-open projective-limit presheaf (`limitSections`,
   presheaf *is* the `Hom(E, −)`-by-`E` condition, [Stacks 00VR] — the same shape as
   Remark 8.20, tested along the category's objects).
 * `structureSheaf A : Sheaf CompleteTopCommRingCat (SpaTop A)` (for `[IsSheafy A]`)
-  and the rewired `AffinoidAdicSpace.sheaf` — **sorry-free**; the discrete
+  and the rewired `AffinoidAdicPresentation.sheaf` — **sorry-free**; the discrete
   locally-fraction placeholder is no longer referenced by any public name.
 * Universe reduction (`IsLimitSheaf.injective'`, `.glue'`, `.isEmbedding'`): the
   `ι : Type u` cover index of `IsLimitSheaf` extends to covers indexed by any
@@ -580,15 +580,41 @@ def structureSheaf [DecidableEq A] [DecidableEq (RationalLocData A)] [IsTateRing
     TopCat.Sheaf CompleteTopCommRingCat.{u} (SpaTop A) :=
   ⟨structurePresheaf A, structurePresheaf_isSheaf A isLimitSheaf_of_isSheafy⟩
 
-/-! ### Affinoid adic spaces (Definition 8.21) and adic spaces (Definition 8.22) -/
 
-/-- An *affinoid adic space* is `Spa(A, A⁺)` where `(A, A⁺)` is a complete affinoid
-ring whose **genuine all-open structure presheaf is a sheaf of topological rings**
-(Wedhorn Definition 8.21; the sheafiness field is Definition 8.26's condition in the
-concrete `IsLimitSheaf` form, equivalent to the `Hom(T, 𝒪_X(−))` form by
-`isSheafOfTopologicalRings_iff_isLimitSheaf`). Restriction maps are constructed from
-the ring data (Proposition 8.2), not assumed separately. -/
-structure AffinoidAdicSpace where
+variable (A) in
+/-- **The generic Hom-sheaf predicate specializes to the public structure
+presheaf**: under pair-level sheafiness, `structurePresheaf A` satisfies the
+arbitrary-presheaf sheaf-of-topological-rings condition of
+`HomSheafPredicate.lean` (hence in particular the categorical conditions for both
+the bundled and the underlying ring presheaf). -/
+theorem structurePresheaf_isSheafOfTopologicalRings (h : IsLimitSheaf A) :
+    TopCat.Presheaf.IsSheafOfTopologicalRings (structurePresheaf A) := by
+  intro T _ _ _ ι U f hcompat
+  have hle : ∀ i, U i ≤ iSup U := fun i => le_iSup U i
+  have hcov : ((iSup U : Opens ↥(SpaTop A)) : Set ↥(SpaTop A)) ⊆
+      ⋃ i, ((U i : Opens ↥(SpaTop A)) : Set ↥(SpaTop A)) := by
+    intro v hv
+    obtain ⟨i, hvi⟩ := Opens.mem_iSup.mp hv
+    exact Set.mem_iUnion.mpr ⟨i, hvi⟩
+  obtain ⟨g, hg, hguniq⟩ := h.homGlue (T := T) hle hcov
+    (fun i => (f i).1) (fun i => (f i).2) hcompat
+  exact ⟨g, hg, fun g' hg' => hguniq g' hg'⟩
+
+/-! ### Affinoid and adic presentations (towards Definitions 8.21/8.22) -/
+
+/-- **A presentation of an affinoid adic space** (honest naming, P5 repair
+2026-07-20): a complete affinoid pair `(A, A⁺)` whose genuine all-open structure
+presheaf is a sheaf of topological rings (the sheafiness field is Definition 8.26's
+condition in the concrete `IsLimitSheaf` form, equivalent to the `Hom(T, 𝒪_X(−))`
+form by `isSheafOfTopologicalRings_iff_isLimitSheaf`). Restriction maps are
+constructed from the ring data (Proposition 8.2), not assumed separately.
+
+**This is the ring/pair *presentation* only — it does not itself implement Wedhorn
+Definition 8.21** (an affinoid adic space is an object of `𝒱` isomorphic *in `𝒱`*
+to a `Spa`-object with its stalk valuations); constructing the canonical `𝒱`-object
+of a presentation requires the stalk-valuation layer (Wedhorn Prop 8.6 for the
+projective-limit presheaf), which is recorded as the open P5 leaf. -/
+structure AffinoidAdicPresentation where
   /-- The underlying affinoid ring. -/
   Ring : Type u
   [instCommRing : CommRing Ring]
@@ -606,27 +632,27 @@ structure AffinoidAdicSpace where
   condition for the pair, in the concrete all-open form). -/
   sheafy : IsLimitSheaf Ring
 
-attribute [instance] AffinoidAdicSpace.instCommRing
-  AffinoidAdicSpace.instTopologicalSpace AffinoidAdicSpace.instIsTopologicalRing
-  AffinoidAdicSpace.instPlusSubring AffinoidAdicSpace.instIsHuberRing
-  AffinoidAdicSpace.instT2Space AffinoidAdicSpace.instNonarchimedeanRing
-  AffinoidAdicSpace.instCompleteSpace AffinoidAdicSpace.instIsRingOfIntegralElements
+attribute [instance] AffinoidAdicPresentation.instCommRing
+  AffinoidAdicPresentation.instTopologicalSpace AffinoidAdicPresentation.instIsTopologicalRing
+  AffinoidAdicPresentation.instPlusSubring AffinoidAdicPresentation.instIsHuberRing
+  AffinoidAdicPresentation.instT2Space AffinoidAdicPresentation.instNonarchimedeanRing
+  AffinoidAdicPresentation.instCompleteSpace AffinoidAdicPresentation.instIsRingOfIntegralElements
 
-namespace AffinoidAdicSpace
+namespace AffinoidAdicPresentation
 
-variable (X : AffinoidAdicSpace.{u})
+variable (X : AffinoidAdicPresentation.{u})
 
 /-- The underlying topological space of an affinoid adic space. -/
 def toTopCat : TopCat.{u} := SpaTop X.Ring
 
-/-- **The structure sheaf of an affinoid adic space** (Definition 8.21 / Remark 8.20
-of Wedhorn): the genuine all-open projective-limit presheaf, a sheaf by the space's
-own sheafiness field. Sorry-free (WO1 acceptance gate; the former discrete
-locally-fraction placeholder is not referenced). -/
+/-- **The structure sheaf of an affinoid adic presentation** (Remark 8.20 of
+Wedhorn): the genuine all-open projective-limit presheaf, a sheaf by the
+presentation's own sheafiness field. Sorry-free; the former discrete
+locally-fraction placeholder is not referenced. -/
 noncomputable def sheaf : TopCat.Sheaf CompleteTopCommRingCat.{u} X.toTopCat :=
   ⟨structurePresheaf X.Ring, structurePresheaf_isSheaf X.Ring X.sheafy⟩
 
-/-- Build an affinoid adic space from the finite rational-cover criterion
+/-- Build an affinoid adic presentation from the finite rational-cover criterion
 (`IsSheafy`, complete Tate scope), through the C5 equivalence
 `isLimitSheaf_of_isSheafy`. -/
 noncomputable def ofIsSheafy (R : Type u) [CommRing R] [TopologicalSpace R]
@@ -635,23 +661,30 @@ noncomputable def ofIsSheafy (R : Type u) [CommRing R] [TopologicalSpace R]
     [letI : UniformSpace R := IsTopologicalAddGroup.rightUniformSpace R;
       CompleteSpace R]
     [IsRingOfIntegralElements (R⁺ : Subring R)] [IsSheafy R] :
-    AffinoidAdicSpace.{u} :=
+    AffinoidAdicPresentation.{u} :=
   letI : DecidableEq R := Classical.decEq R
   letI : DecidableEq (RationalLocData R) := Classical.decEq _
   { Ring := R
     sheafy := isLimitSheaf_of_isSheafy }
 
-end AffinoidAdicSpace
+end AffinoidAdicPresentation
 
-/-- An *adic space* (Definition 8.22 of Wedhorn). -/
-structure AdicSpace where
+/-- **A carrier-level presentation of an adic space** (honest naming, P5 repair
+2026-07-20): a topological space locally *homeomorphic* to the spectra of affinoid
+adic presentations. **This does not itself implement Wedhorn Definition 8.22** —
+an adic space is an object of `𝒱` locally `𝒱`-isomorphic to affinoid ones (the
+local identifications must carry the structure sheaves and stalk valuations, not
+only the topology); the `𝒱`-level definition awaits the canonical `Spa` object of
+`𝒱` (the open P5 leaf). -/
+structure AdicSpacePresentation where
   /-- The underlying topological space. -/
   carrier : Type u
   [instTopologicalSpace : TopologicalSpace carrier]
-  /-- Every point has an open neighborhood homeomorphic to an affinoid adic space. -/
+  /-- Every point has an open neighborhood homeomorphic to the spectrum of an
+  affinoid adic presentation (a *topological* chart only). -/
   isLocallyAffinoid : ∀ x : carrier, ∃ (U : Opens carrier) (_ : x ∈ U)
-    (X : AffinoidAdicSpace.{u}), Nonempty (↥U ≃ₜ X.toTopCat)
+    (X : AffinoidAdicPresentation.{u}), Nonempty (↥U ≃ₜ X.toTopCat)
 
-attribute [instance] AdicSpace.instTopologicalSpace
+attribute [instance] AdicSpacePresentation.instTopologicalSpace
 
 end ValuationSpectrum

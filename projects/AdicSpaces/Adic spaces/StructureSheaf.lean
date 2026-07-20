@@ -6,6 +6,7 @@ import «Adic spaces».Presheaf
 import «Adic spaces».HuberLocLift
 import «Adic spaces».Prop752
 import «Adic spaces».CompleteTopCommRingCat
+import «Adic spaces».HomSheafPredicate
 import «Adic spaces».Lemma745
 import «Adic spaces».TopologyComparison
 import «Adic spaces».LaurentRefinement
@@ -407,8 +408,9 @@ theorem IsSheafy.separation_injective [IsTopologicalRing A] [PlusSubring A]
   funext ⟨D, hD⟩
   exact congr_fun (congr_fun hxy D) hD
 
--- `AffinoidAdicSpace` (Wedhorn Definition 8.21) and `AdicSpace` (Definition 8.22)
--- live in `StructurePresheafBundled.lean` (WO1 rewiring 2026-07-20): the sheafiness
+-- `AffinoidAdicPresentation` and `AdicSpacePresentation` (honest presentation-level
+-- structures; NOT Wedhorn Definitions 8.21/8.22, which are 𝒱-level — see their
+-- docstrings) live in `StructurePresheafBundled.lean`: the sheafiness
 -- field of an affinoid adic space is Wedhorn's actual condition — the genuine
 -- all-open structure presheaf is a sheaf of topological rings (`IsLimitSheaf`) —
 -- which is only available downstream of `SheafyPair`.
@@ -559,8 +561,19 @@ instance : CategoryTheory.Category VPreObj.{u} where
 
 /-- An object of `𝒱`: a valued sheafed space (Remark 8.20 of Wedhorn). -/
 structure VObj extends VPreObj.{u} where
-  /-- The underlying ring presheaf is a sheaf (algebraic condition). -/
-  isSheaf : (toVPreObj.toPresheafedSpace.ringPresheaf).IsSheaf
+  /-- **The sheaf-of-topological-rings condition** (Wedhorn Remark 8.20, stored in
+  the `Hom_cont(T, −)` form for every topological commutative test ring in the
+  working universe — `HomSheafPredicate.lean`). This is Wedhorn's actual condition
+  for membership in `𝒱`; the merely-algebraic ring-presheaf sheaf condition is a
+  consequence (`VObj.ringPresheaf_isSheaf`), not the definition (P5 repair
+  2026-07-20; the previous field stored only the latter). -/
+  isSheafTopRings : toVPreObj.toPresheafedSpace.presheaf.IsSheafOfTopologicalRings
+
+/-- The underlying ring presheaf of a `𝒱`-object is a sheaf (the algebraic half of
+Remark 8.20; via discrete test rings). -/
+theorem VObj.ringPresheaf_isSheaf (V : VObj.{u}) :
+    (V.toVPreObj.toPresheafedSpace.ringPresheaf).IsSheaf :=
+  V.isSheafTopRings.ringPresheaf_isSheaf
 
 /-- The `Category` instance on `VObj` (full subcategory of `VPreObj`). -/
 instance : CategoryTheory.Category VObj.{u} where
