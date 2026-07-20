@@ -150,4 +150,74 @@ def congr (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm) :
 
 end RingOfIntegralElements
 
+/-! ### The `Spa` homeomorphism (P2.12) -/
+
+section SpaTransport
+
+variable (e : A ≃+* B) (P : Subring A)
+
+/-- Pull-back along `e` sends `Spa (B, e(P))` into `Spa (A, P)` (Wedhorn
+Remark 7.28 for an isomorphism of topological rings, explicit-subring form). -/
+theorem comap_mem_spa_map (he : Continuous e) {v : Spv B}
+    (hv : v ∈ Spa B (P.map e.toRingHom)) :
+    comap e.toRingHom v ∈ Spa A P := by
+  refine ⟨comap_isContinuous he hv.1, fun f hf => ?_⟩
+  have hle := hv.2 (e.toRingHom f) (Subring.mem_map.mpr ⟨f, hf, rfl⟩)
+  simpa only [comap_vle, map_one] using hle
+
+/-- Pull-back along the inverse sends `Spa (A, P)` into `Spa (B, e(P))`. -/
+theorem comap_symm_mem_spa_map (he' : Continuous e.symm) {w : Spv A}
+    (hw : w ∈ Spa A P) :
+    comap e.symm.toRingHom w ∈ Spa B (P.map e.toRingHom) := by
+  refine ⟨comap_isContinuous he' hw.1, fun g hg => ?_⟩
+  obtain ⟨f, hf, rfl⟩ := hg
+  have hsymm : e.symm.toRingHom (e.toRingHom f) = f := e.symm_apply_apply f
+  simpa only [comap_vle, map_one, hsymm] using hw.2 f hf
+
+/-- Round trip on `Spv B`. -/
+theorem comap_comap_of_ringEquiv (v : Spv B) :
+    comap e.symm.toRingHom (comap e.toRingHom v) = v := by
+  have h := comap_comp e.symm.toRingHom e.toRingHom
+  rw [show e.toRingHom.comp e.symm.toRingHom = RingHom.id B from
+    RingHom.ext fun b => e.apply_symm_apply b, comap_id] at h
+  exact (congr_fun h v).symm
+
+/-- Round trip on `Spv A`. -/
+theorem comap_symm_comap_of_ringEquiv (w : Spv A) :
+    comap e.toRingHom (comap e.symm.toRingHom w) = w := by
+  have h := comap_comp e.toRingHom e.symm.toRingHom
+  rw [show e.symm.toRingHom.comp e.toRingHom = RingHom.id A from
+    RingHom.ext fun a => e.symm_apply_apply a, comap_id] at h
+  exact (congr_fun h w).symm
+
+/-- **The `Spa` homeomorphism along a bicontinuous ring equivalence** (P2.12):
+`Spa (B, e(P)) ≃ₜ Spa (A, P)` by valuation pull-back, for any subring `P` —
+no `PlusSubring` instances, no validity hypotheses. -/
+def spaHomeomorphOfRingEquiv (he : Continuous e) (he' : Continuous e.symm) :
+    ↥(Spa B (P.map e.toRingHom)) ≃ₜ ↥(Spa A P) where
+  toFun v := ⟨comap e.toRingHom (v : Spv B), comap_mem_spa_map e P he v.2⟩
+  invFun w := ⟨comap e.symm.toRingHom (w : Spv A), comap_symm_mem_spa_map e P he' w.2⟩
+  left_inv v := Subtype.ext (comap_comap_of_ringEquiv e (v : Spv B))
+  right_inv w := Subtype.ext (comap_symm_comap_of_ringEquiv e (w : Spv A))
+  continuous_toFun := Continuous.subtype_mk
+    ((comap_continuous e.toRingHom).comp continuous_subtype_val) _
+  continuous_invFun := Continuous.subtype_mk
+    ((comap_continuous e.symm.toRingHom).comp continuous_subtype_val) _
+
+@[simp] theorem spaHomeomorphOfRingEquiv_apply (he : Continuous e)
+    (he' : Continuous e.symm) (v : ↥(Spa B (P.map e.toRingHom))) :
+    (spaHomeomorphOfRingEquiv e P he he' v : Spv A) = comap e.toRingHom (v : Spv B) :=
+  rfl
+
+/-- The bundled corollary: `Spa` at the transported ring of integral elements is
+homeomorphic to `Spa` at the original one. -/
+def RingOfIntegralElements.spaHomeomorph (he : Continuous e)
+    (he' : Continuous e.symm) (Aplus : RingOfIntegralElements A) :
+    ↥(Spa B ((RingOfIntegralElements.map e he he' Aplus :
+        RingOfIntegralElements B) : Subring B)) ≃ₜ
+      ↥(Spa A (Aplus : Subring A)) :=
+  spaHomeomorphOfRingEquiv e (Aplus : Subring A) he he'
+
+end SpaTransport
+
 end ValuationSpectrum
