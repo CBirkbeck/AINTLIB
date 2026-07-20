@@ -62,6 +62,18 @@ theorem coordinateHyperplaneIdealModule_isInvertible (j : σ) :
       rw [← MulEquivClass.map_nonZeroDivisors e]
       exact ⟨awayVar R i ⟨j, hji⟩, awayVar_mem_nonZeroDivisors R i ⟨j, hji⟩, rfl⟩
 
+/-- The dual of the coordinate-hyperplane ideal module, giving the concrete
+model of `O(1)` on polynomial projective space. -/
+noncomputable def coordinateHyperplanePoleSheaf (j : σ) :
+    (Proj (homogeneousSubmodule σ R)).Modules :=
+  Scheme.Modules.dualObj
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+
+/-- The concrete `O(1)` on polynomial projective space is invertible. -/
+theorem coordinateHyperplanePoleSheaf_isInvertible (j : σ) :
+    Scheme.Modules.IsInvertible (coordinateHyperplanePoleSheaf (R := R) j) :=
+  (coordinateHyperplaneIdealModule_isInvertible (R := R) j).dual
+
 end
 
 end MvPolynomial
