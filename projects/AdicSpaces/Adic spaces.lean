@@ -2,7 +2,9 @@ import «Adic spaces».AdicCompletionBridge
 import «Adic spaces».AdicCompletionFaithfullyFlat
 import «Adic spaces».AdicCompletionNoetherian
 import «Adic spaces».AdicCompletionTransfer
+import «Adic spaces».AffinoidTransport
 import «Adic spaces».CompletionLocalization
+import «Adic spaces».CompletionModelIndependence
 import «Adic spaces».PresheafAdicCompletion
 import «Adic spaces».AdicConvergence
 import «Adic spaces».ArtinReesConvergence
@@ -75,6 +77,7 @@ import «Adic spaces».RestrictedPowerSeries
 import «Adic spaces».RestrictedModule
 import «Adic spaces».SeminormalRing
 import «Adic spaces».CharacteristicSubgroup
+import «Adic spaces».SheafyEndpoints
 import «Adic spaces».SpaCompact
 import «Adic spaces».SpaCompactNoHArch
 import «Adic spaces».SpaQCviaSpvAI
