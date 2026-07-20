@@ -56,6 +56,16 @@ theorem coordinateOpenCechIntersection_le {n : ℕ}
     coordinateOpenCechIntersection (R := R) a ≤ coordinateOpenCover (R := R) (a k) :=
   leOfHom (Pi.π (fun l : Fin (n + 1) => coordinateOpenCover (R := R) (a l)) k)
 
+/-- Every finite intersection in the standard coordinate cover is affine. -/
+theorem coordinateOpenCechIntersection_isAffineOpen {n : ℕ}
+    (a : Fin (n + 1) → ULift.{u} σ) :
+    IsAffineOpen (coordinateOpenCechIntersection (R := R) a) := by
+  rw [show coordinateOpenCechIntersection (R := R) a =
+      ⨅ k : Fin (n + 1), coordinateOpenCover (R := R) (a k) from
+    (IsLimit.conePointUniqueUpToIso (limit.isLimit _)
+      (Preorder.isLimitIInf _)).to_eq]
+  exact IsAffineOpen.iInf fun k => coordinateOpenCover_isAffineOpen (R := R) (a k)
+
 /-- The standard frame of `O(d)` restricted to an ordered Cech intersection. -/
 noncomputable def coordinateHyperplaneTwistCechTrivialization {n : ℕ}
     (a : Fin (n + 1) → ULift.{u} σ) (j : σ) (d : ℤ) :
@@ -89,6 +99,45 @@ noncomputable def coordinateHyperplaneTwistBaseCechFactorIsoUnit {n : ℕ}
     (coordinateHyperplaneTwist (R := R) j d)
     (coordinateOpenCechIntersection (R := R) a)
     (coordinateHyperplaneTwistCechTrivialization (R := R) a j d)
+
+/-- The degree-`n` ordered Cech object of `O(d)` is factorwise identified with
+the ordered Cech object of the structure sheaf. -/
+noncomputable def coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n ≅
+      Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n :=
+  Pi.mapIso (fun a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+    coordinateHyperplaneTwistBaseCechFactorIsoUnit (R := R) a.1 j d)
+
+/-- The degreewise twist-to-unit Cech comparison is the landed factor
+comparison on every ordered tuple. -/
+@[reassoc]
+theorem coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit_hom_comp_π
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ)
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n) :
+    (coordinateHyperplaneTwistOrderedBaseCechObjectIsoUnit
+        (R := R) j d n).hom ≫
+      Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+        Scheme.Modules.baseCechFactor
+          (homogeneousProjπ (R := R) (σ := σ))
+          (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+          (coordinateOpenCover (R := R) (σ := σ)) n b.1) a =
+    Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ)) n b.1) a ≫
+      (coordinateHyperplaneTwistBaseCechFactorIsoUnit
+        (R := R) a.1 j d).hom := by
+  exact Pi.mapIso_hom_π
+    (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      coordinateHyperplaneTwistBaseCechFactorIsoUnit (R := R) b.1 j d) a
 
 end
 
