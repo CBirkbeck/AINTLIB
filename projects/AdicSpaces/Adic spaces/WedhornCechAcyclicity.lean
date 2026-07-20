@@ -8481,6 +8481,26 @@ theorem rationalOpen_distinguished_eq [DecidableEq A] (LP : List (Finset A × A)
     obtain ⟨s', hs', _, hvP', _⟩ := distinguishedProducts_cover LP hts h1 hvspa (hcovSpa v hvspa)
     exact ⟨hvspa, fun p hp => v.vle_trans (hvP' p hp) (hvS s' hs'), hvs0⟩
 
+/-- **Relative Step 6** (`Y`-localized `rationalOpen_distinguished_eq`): after
+intersecting with `Y`, the transversal-product piece and the distinguished-product
+piece agree, using only that `LP` covers `Y` (not all of `Spa`). This is the
+correction that makes the product trick work over a *proper* rational base. -/
+theorem rationalOpen_distinguished_eq_on [DecidableEq A] (Y : Set (Spv A))
+    (LP : List (Finset A × A))
+    (hts : ∀ p ∈ LP, p.2 ∈ p.1) (h1 : ∀ p ∈ LP, (1 : A) ∈ p.1)
+    (hcovY : ∀ v ∈ Y, ∃ p ∈ LP, v ∈ rationalOpen p.1 p.2)
+    {s : A} :
+    Y ∩ rationalOpen (transversalProducts (LP.map Prod.fst)) s
+      = Y ∩ rationalOpen (distinguishedProducts LP) s := by
+  apply Set.Subset.antisymm
+  · rintro v ⟨hvY, hvspa, hvP, hvs0⟩
+    exact ⟨hvY, hvspa,
+      fun t ht => hvP t (distinguishedProducts_subset LP hts ht), hvs0⟩
+  · rintro v ⟨hvY, hvspa, hvS, hvs0⟩
+    obtain ⟨s', hs', _, hvP', _⟩ :=
+      distinguishedProducts_cover LP hts h1 hvspa (hcovY v hvY)
+    exact ⟨hvY, hvspa, fun p hp => v.vle_trans (hvP' p hp) (hvS s' hs'), hvs0⟩
+
 /-- **Step 5 (Wedhorn 7.54 / Huber product trick):** the distinguished set `S` spans
 the unit ideal, `Ideal.span S = ⊤`. From Step 4 (`distinguishedProducts_cover`) the
 `(R(P/s))_{s∈S}` cover `Spa A`, so for every `v` some `s ∈ S` has `v(s) ≠ 0`
@@ -12318,37 +12338,25 @@ theorem spa_compactSpace_tate_noHArch
       (IsRingOfIntegralElements.isOpen (B := (A⁺ : Subring A)))
   exact compactSpace_spa_noHArch P hπ (fun x => hA₀le x.2) (Ideal.span {((π : A))}) rfl
 
-/-- **Step 1 (Wedhorn 7.54 / Huber [Hu3] 2.6 — analytic normalisation):** any
-rational cover `𝒱` of the whole space `Spa A` refines to a finite *normalised*
-family `LP = [(T₁,s₁),…,(Tₙ,sₙ)]` with `1 ∈ Tᵢ` and `sᵢ ∈ Tᵢ`, whose pieces
-`Wᵢ = R(Tᵢ/sᵢ)` still cover `Spa A` and each refine into some `D ∈ 𝒱`.
-
-**Proof (reviewer 2026-06-04, Huber-faithful).** For `x ∈ R(D.T/D.s) ⊆ Vⱼ` (so
-`x(D.s) ≠ 0`), the light QC-unit `exists_dominating_unit_noHArch` (Cor 7.32 no-hArch,
-Cor732:518 — itself Wedhorn 7.31 `exists_zero_nbhd_lt_on_qc` + a unit in a 0-nbhd)
-gives a unit `π` with `|π| < |D.s|` near `x`; set `s' := D.s·π⁻¹`, `T' := {1, s'} ∪ π⁻¹·D.T`,
-so `x ∈ R(T'/s') ⊆ R(D.T/D.s)` with `1, s' ∈ T'`. A finite subcover of the open
-cover `{R(T'/s')}` by the **hArch-free** quasi-compactness of `Spa A`
-(`isCompact_preimage_rationalOpen_noHArch`, SpaCompactNoHArch.lean) yields `LP`.
-
-**Status: `sorry`.** This is the genuinely-remaining analytic content of 7.54; it
-bottoms at the in-repo no-hArch Spa quasi-compactness
-`isCompact_preimage_rationalOpen_noHArch` (parked at
-`isClosed_image_spa_ιSpv_bool_noHArch_aux` = Wedhorn 7.35(2)). The combinatorial /
-algebraic heart (Steps 3–6 + refine) is complete and sorry-free. -/
-theorem exists_finite_normalized_rational_refinement [DecidableEq A]
-    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+/-- **Relative normalised refinement** (noetherian-free `_on` form of Step 1): from a
+rational family `𝒱` covering a subset `Y ⊆ Spa (A, A⁺)`, produce a finite normalised
+family `LP` (`1 ∈ Tᵢ`, `sᵢ ∈ Tᵢ`) whose pieces cover `Y` and each refine into some
+`D ∈ 𝒱`. Per-`D` quasi-compactness comes from `isCompact_preimage_rationalOpen_noHArch`
+(noeth-free); no whole-space compactness, no `[IsNoetherianRing]`/`[IsStronglyNoetherian]`. -/
+theorem exists_finite_normalized_rational_refinement_on [DecidableEq A]
+    [IsTateRing A] [T2Space A]
     [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
     [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (Y : Set (Spv A)) (hYspa : Y ⊆ Spa A A⁺)
     (𝒱 : Finset (RationalLocData A))
     (h𝒱 : ∀ D ∈ 𝒱, D.IsRational)
-    (hcov : ∀ v ∈ Spa A A⁺, ∃ D ∈ 𝒱, v ∈ rationalOpen D.T D.s) :
+    (hcov : ∀ v ∈ Y, ∃ D ∈ 𝒱, v ∈ rationalOpen D.T D.s) :
     ∃ LP : List (Finset A × A),
       (∀ p ∈ LP, p.2 ∈ p.1) ∧
       (∀ p ∈ LP, (1 : A) ∈ p.1) ∧
-      (∀ v ∈ Spa A A⁺, ∃ p ∈ LP, v ∈ rationalOpen p.1 p.2) ∧
+      (∀ v ∈ Y, ∃ p ∈ LP, v ∈ rationalOpen p.1 p.2) ∧
       -- D-RELATIVE refinement: per (D, v ∈ D), a slot containing v INSIDE D
       -- (Huber's per-point normalisation lives inside the given piece).
       (∀ D ∈ 𝒱, ∀ v ∈ rationalOpen D.T D.s, v ∈ Spa A A⁺ →
@@ -12366,7 +12374,7 @@ theorem exists_finite_normalized_rational_refinement [DecidableEq A]
     exact ⟨(T', s'), hs', h1, hvm, hsub⟩
   choose q hq₂ hq₁ hqv hqsub using hpt
   -- per-D finite subcover of the compact preimage of D's rational open
-  haveI hQC : CompactSpace ↥(Spa A A⁺) := spa_compactSpace_tate_noHArch
+  -- (noeth-free: uses isCompact_preimage_rationalOpen_noHArch, not whole-space compactness)
   have hsubD : ∀ (D : RationalLocData A) (hD : D ∈ 𝒱),
       ∃ ι : Finset {w : ↥(Spa A A⁺) //
         (w : Spv A) ∈ rationalOpen D.T D.s},
@@ -12411,10 +12419,10 @@ theorem exists_finite_normalized_rational_refinement [DecidableEq A]
     rw [List.mem_map] at hpl
     obtain ⟨x, -, rfl⟩ := hpl
     exact hq₁ _ _ _
-  · -- global cover: route through the containing piece
+  · -- cover of Y: route through the containing piece
     intro w hw
     obtain ⟨D, hD, hwD⟩ := hcov w hw
-    obtain ⟨x, hx, hmem⟩ := hι D hD ⟨w, hw⟩ hwD
+    obtain ⟨x, hx, hmem⟩ := hι D hD ⟨w, hYspa hw⟩ hwD
     refine ⟨q D hD x, ?_, hmem⟩
     rw [List.mem_flatten]
     exact ⟨(ι D hD).toList.map (q D hD),
@@ -12438,6 +12446,29 @@ theorem exists_finite_normalized_rational_refinement [DecidableEq A]
     rw [List.mem_map] at hpl
     obtain ⟨x, -, rfl⟩ := hpl
     exact ⟨D.1, Finset.mem_toList.mp D.2, hqsub _ _ _⟩
+
+/-- **Step 1 (Wedhorn 7.54 / Huber [Hu3] 2.6 — analytic normalisation):** whole-space
+form, a thin wrapper over `exists_finite_normalized_rational_refinement_on` at `Y := Spa A A⁺`
+(the noetherian hypotheses are needed only to instantiate `Y = Spa` as a *set*, via the
+identity `Set.Subset.rfl`). -/
+theorem exists_finite_normalized_rational_refinement [DecidableEq A]
+    [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
+    [NonarchimedeanRing A] [HasLocLiftPowerBounded A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺ : Subring A)]
+    (𝒱 : Finset (RationalLocData A))
+    (h𝒱 : ∀ D ∈ 𝒱, D.IsRational)
+    (hcov : ∀ v ∈ Spa A A⁺, ∃ D ∈ 𝒱, v ∈ rationalOpen D.T D.s) :
+    ∃ LP : List (Finset A × A),
+      (∀ p ∈ LP, p.2 ∈ p.1) ∧
+      (∀ p ∈ LP, (1 : A) ∈ p.1) ∧
+      (∀ v ∈ Spa A A⁺, ∃ p ∈ LP, v ∈ rationalOpen p.1 p.2) ∧
+      (∀ D ∈ 𝒱, ∀ v ∈ rationalOpen D.T D.s, v ∈ Spa A A⁺ →
+        ∃ p ∈ LP, v ∈ rationalOpen p.1 p.2 ∧
+          rationalOpen p.1 p.2 ⊆ rationalOpen D.T D.s) ∧
+      (∀ p ∈ LP, ∃ D ∈ 𝒱, rationalOpen p.1 p.2 ⊆ rationalOpen D.T D.s) :=
+  exists_finite_normalized_rational_refinement_on (Spa A A⁺) Set.Subset.rfl 𝒱 h𝒱 hcov
 
 /-- **Wedhorn Lemma 7.54 (whole space, FAITHFUL — Huber [Hu3] 2.6 product trick).**
 *"Every open covering of `X = Spa A` has a refinement `𝒰 = (U_t)_{t∈T}` of the form

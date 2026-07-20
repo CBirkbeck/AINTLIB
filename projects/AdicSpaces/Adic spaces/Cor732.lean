@@ -435,24 +435,16 @@ theorem exists_dominating_unit_noHArch
   -- Step 3: π is dominated by s on Y by hI.
   exact ⟨π, fun y hy => hI π hπ_mem y hy⟩
 
-/-- **Sub-lemma for `exists_dominating_unit_noHArch_finset`.**
-
-Captures the core obligation of the finset form of Wedhorn Cor 7.32 (no
-MulArchimedean assumption): from a finite no-common-zero family on the adic
-spectrum, extract a unit strictly dominated pointwise by some family member.
-Decomposed as a `:= by sorry` sub-lemma so that the consumer-facing theorem
-`exists_dominating_unit_noHArch_finset` carries a structural proof and the
-mathematical content lives in a single named obligation. The intended proof
-route requires the `[IsTateRing A]` hypothesis (topologically nilpotent unit)
-together with compactness of `Spa A A⁺` to upgrade `exists_dominating_unit_noHArch`
-(the singleton variant on `Y ⊆ Spa A A⁺`, line ~445) to the finset form via a
-cover-and-finite-subcover argument; in the current signature both are absent,
-so the proper closure of this sub-lemma is part of T-FOUND-D / future tickets. -/
-private theorem exists_dominating_unit_noHArch_finset_aux
-    [IsTateRing A] [CompactSpace ↥(Spa A A⁺)]
-    (T : Finset A) (hT : ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0) :
-    ∃ s : Aˣ, ∀ v ∈ Spa A A⁺, ∃ t ∈ T,
-      v.vle (s : A) t ∧ ¬ v.vle t (s : A) := by
+/-- **Wedhorn Cor 7.32 (no hArch), compact-subset Finset form.** For a compact
+subset `Y ⊆ Spa (A, A⁺)` and a finite family `T` with no common zero on `Y`,
+there exists a unit `s ∈ Aˣ` strictly dominated by some `t ∈ T` at every point of
+`Y`. Generalizes the whole-space version; no noetherian/complete/height-one
+hypothesis. -/
+theorem exists_dominating_unit_noHArch_finset_on
+    [IsTateRing A] {Y : Set ↥(Spa A A⁺)} (hY : IsCompact Y)
+    (T : Finset A) (hT : ∀ y ∈ Y, ∃ t ∈ T, ¬ (y.1 : Spv A).vle t 0) :
+    ∃ s : Aˣ, ∀ y ∈ Y, ∃ t ∈ T,
+      (y.1 : Spv A).vle (s : A) t ∧ ¬ (y.1 : Spv A).vle t (s : A) := by
   classical
   obtain ⟨u, hu_tn⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := A)
   -- The increasing open exhaustion `U n := ⋃ t ∈ T, {v : v(uⁿ) ≤ v(t) ≠ 0}`.
@@ -462,9 +454,9 @@ private theorem exists_dominating_unit_noHArch_finset_aux
     isOpen_biUnion fun t _ =>
       (isOpen_basicOpen _ t).preimage continuous_subtype_val
   -- Pointwise: continuity of `v` + topological nilpotence of `u` put `v` in some `U n`.
-  have hU_cover : (Set.univ : Set ↥(Spa A A⁺)) ⊆ ⋃ n, U n := by
-    rintro ⟨v, hvSpa⟩ -
-    obtain ⟨t, htT, ht0⟩ := hT v hvSpa
+  have hU_cover : Y ⊆ ⋃ n, U n := by
+    rintro ⟨v, hvSpa⟩ hy
+    obtain ⟨t, htT, ht0⟩ := hT ⟨v, hvSpa⟩ hy
     letI : ValuativeRel A := v.toValuativeRel
     set w := ValuativeRel.valuation A with hw_def
     have hwt_ne : w t ≠ 0 := by
@@ -493,17 +485,18 @@ private theorem exists_dominating_unit_noHArch_finset_aux
     rw [map_pow, map_pow]
     exact pow_le_pow_right_of_le_one' hu_le_one hmn
   -- Compactness extracts a single level `N`.
-  obtain ⟨F, hF⟩ := isCompact_univ.elim_finite_subcover U hU_open hU_cover
+  obtain ⟨F, hF⟩ := hY.elim_finite_subcover U hU_open hU_cover
   set N : ℕ := F.sup id with hN_def
-  have hUN : ∀ x : ↥(Spa A A⁺), x ∈ U N := by
-    intro x
-    have hx := hF (Set.mem_univ x)
+  have hUN : ∀ x ∈ Y, x ∈ U N := by
+    intro x hx0
+    have hx := hF hx0
     simp only [Set.mem_iUnion] at hx
     obtain ⟨n, hnF, hxn⟩ := hx
     exact hmono n N (Finset.le_sup (f := id) hnF) hxn
   -- Conclude with `s := u^(N+1)`.
-  refine ⟨u ^ (N + 1), fun v hvSpa => ?_⟩
-  have hvU := hUN ⟨v, hvSpa⟩
+  refine ⟨u ^ (N + 1), fun y hy => ?_⟩
+  obtain ⟨v, hvSpa⟩ := y
+  have hvU := hUN ⟨v, hvSpa⟩ hy
   simp only [hU_def, Set.mem_iUnion, Set.mem_preimage] at hvU
   obtain ⟨t, htT, hvle, hvt0⟩ := hvU
   letI : ValuativeRel A := v.toValuativeRel
@@ -552,7 +545,9 @@ theorem exists_dominating_unit_noHArch_finset
     [IsTateRing A] [CompactSpace ↥(Spa A A⁺)]
     (T : Finset A) (hT : ∀ v ∈ Spa A A⁺, ∃ t ∈ T, ¬ v.vle t 0) :
     ∃ s : Aˣ, ∀ v ∈ Spa A A⁺, ∃ t ∈ T,
-      v.vle (s : A) t ∧ ¬ v.vle t (s : A) :=
-  exists_dominating_unit_noHArch_finset_aux T hT
+      v.vle (s : A) t ∧ ¬ v.vle t (s : A) := by
+  obtain ⟨s, hs⟩ := exists_dominating_unit_noHArch_finset_on (Y := Set.univ)
+    isCompact_univ T (fun y _ => hT y.1 y.2)
+  exact ⟨s, fun v hvSpa => hs ⟨v, hvSpa⟩ (Set.mem_univ _)⟩
 
 end ValuationSpectrum
