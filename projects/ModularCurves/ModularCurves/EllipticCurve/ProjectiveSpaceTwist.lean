@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
 import ModularCurves.ForMathlib.ProjectiveSpaceHyperplane
+import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.EllipticCurve.PoleSheaf
 
 /-!
@@ -354,6 +355,47 @@ lemma coordinateOpenOverlap_le_left (i k : σ) :
 lemma coordinateOpenOverlap_le_right (i k : σ) :
     coordinateOpenOverlap (R := R) i k ≤ coordinateOpen (R := R) k :=
   (coordinateOpenOverlap_eq (R := R) i k).trans_le inf_le_right
+
+/-- If a global section of a quasicoherent module vanishes on one standard
+coordinate chart, then its restriction to any other chart is annihilated by
+some power of the corresponding coordinate ratio. -/
+lemma exists_pow_coordinateHyperplaneLocalEquation_smul_restrict_eq_zero
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (i j : σ) (t : Γ(M, ⊤))
+    (ht : M.presheaf.map (coordinateOpen (R := R) j).leTop.op t = 0) :
+    ∃ n : ℕ,
+      coordinateHyperplaneLocalEquation (R := R) i j ^ n •
+        M.presheaf.map (coordinateOpen (R := R) i).leTop.op t = 0 := by
+  let X := Proj (homogeneousSubmodule σ R)
+  let U : X.affineOpens :=
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen (R := R) i⟩
+  let V : X.Opens :=
+    X.basicOpen (coordinateHyperplaneLocalEquation (R := R) i j)
+  have hVi : V ≤ U.1 := X.basicOpen_le _
+  have hVj : V ≤ coordinateOpen (R := R) j := by
+    change X.basicOpen (coordinateHyperplaneLocalEquation (R := R) i j) ≤
+      coordinateOpen (R := R) j
+    rw [coordinateHyperplaneLocalEquation_basicOpen]
+    exact coordinateOpenOverlap_le_right (R := R) i j
+  have hi :
+      M.presheaf.map (homOfLE hVi).op
+          (M.presheaf.map U.1.leTop.op t) =
+        M.presheaf.map V.leTop.op t := by
+    rw [← M.presheaf.map_comp_apply]
+    congr 1
+  have hj :
+      M.presheaf.map (homOfLE hVj).op
+          (M.presheaf.map (coordinateOpen (R := R) j).leTop.op t) =
+        M.presheaf.map V.leTop.op t := by
+    rw [← M.presheaf.map_comp_apply]
+    congr 1
+  apply
+    Scheme.Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_of_isAffineOpen
+      M U (coordinateHyperplaneLocalEquation (R := R) i j)
+        (M.presheaf.map U.1.leTop.op t)
+  change M.presheaf.map (homOfLE hVi).op
+      (M.presheaf.map U.1.leTop.op t) = 0
+  rw [hi, ← hj, ht, map_zero]
 
 private lemma coordinateHyperplaneLocalEquation_restrict_product
     (i k j : σ) :
