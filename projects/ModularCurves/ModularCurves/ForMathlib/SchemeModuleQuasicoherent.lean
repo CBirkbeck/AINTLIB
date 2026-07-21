@@ -694,6 +694,159 @@ theorem Modules.globalSections_module_finite_of_isFiniteType_of_isAffine
   exact Modules.module_finite_app_of_over_generators_of_le M hi
     ((isAffineOpen_top X).basicOpen g.1) (q.generators i)
 
+/-- A quasicoherent module on an affine spectrum whose global sections are finite has finitely
+many global generating sections. -/
+theorem Modules.exists_generatingSections_of_moduleSpecΓ_finite
+    (M : (Spec R).Modules) [M.IsQuasicoherent]
+    [Module.Finite R Γ(M, ⊤)] :
+    ∃ G : M.GeneratingSections, G.IsFiniteType := by
+  letI : Module.Finite R (moduleSpecΓFunctor.obj M) := by
+    change Module.Finite R Γ(M, ⊤)
+    infer_instance
+  obtain ⟨n, s, hs⟩ := Module.Finite.exists_fin
+    (R := R) (M := moduleSpecΓFunctor.obj M)
+  let ι := ULift.{u} (Fin n)
+  let v : ι → moduleSpecΓFunctor.obj M := fun i ↦ s i.down
+  have hv : Submodule.span R (Set.range v) = ⊤ := by
+    have hrange : Set.range v = Set.range s := by
+      ext x
+      constructor
+      · rintro ⟨i, rfl⟩
+        exact ⟨i.down, rfl⟩
+      · rintro ⟨i, rfl⟩
+        exact ⟨ULift.up i, rfl⟩
+    rw [hrange, hs]
+  let p' : ModuleCat.of R (ι →₀ R) ⟶ moduleSpecΓFunctor.obj M := by
+    change ModuleCat.of R (ι →₀ R) ⟶
+      ModuleCat.of R (moduleSpecΓFunctor.obj M)
+    exact ModuleCat.ofHom (Finsupp.linearCombination R v)
+  letI : Epi p' := (ModuleCat.epi_iff_surjective p').mpr
+    ((span_range_eq_top_iff_surjective_finsuppLinearCombination R).mp hv)
+  letI : (tilde.functor R).PreservesEpimorphisms :=
+    Functor.preservesEpimorphisms_of_adjunction tilde.adjunction
+  have hmap : Epi ((tilde.functor R).map p') :=
+    Functor.map_epi (tilde.functor R) p'
+  letI : IsIso M.fromTildeΓ := inferInstance
+  have hfrom : Epi M.fromTildeΓ := IsIso.epi_of_iso M.fromTildeΓ
+  let e := tildeFinsupp (R := R) ι
+  letI : IsIso e.inv := e.isIso_inv
+  have he : Epi e.inv := IsIso.epi_of_iso e.inv
+  let f : SheafOfModules.free (R := (Spec R).ringCatSheaf) ι ⟶ M :=
+    e.inv ≫ (tilde.functor R).map p' ≫ M.fromTildeΓ
+  haveI : Epi f := by
+    have hleft : Epi (e.inv ≫ (tilde.functor R).map p') :=
+      epi_comp' he hmap
+    have hfull : Epi ((e.inv ≫ (tilde.functor R).map p') ≫ M.fromTildeΓ) :=
+      epi_comp' hleft hfrom
+    exact hfull
+  let G : M.GeneratingSections :=
+    { I := ι
+      s := M.freeHomEquiv f
+      epi := by
+        rw [Equiv.symm_apply_apply]
+        infer_instance }
+  haveI : G.IsFiniteType := ⟨inferInstance⟩
+  exact ⟨G, inferInstance⟩
+
+private theorem Modules.moduleSpecΓ_finite_of_isFiniteType_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
+    [M.IsFiniteType] :
+    Module.Finite Γ(X, ⊤)
+      (moduleSpecΓFunctor.obj (M.restrict (isoSpec X).inv)) := by
+  let M' := M.restrict (isoSpec X).inv
+  have hM : Module.Finite Γ(X, ⊤) Γ(M, ⊤) :=
+    Modules.globalSections_module_finite_of_isFiniteType_of_isAffine M
+  let eRight : ModuleCat.of Γ(X, ⊤) Γ(M, ⊤) ≅
+      (baseModulePresheaf (𝟙 X) M).obj (op (⊤ : X.Opens)) := by
+    refine ModuleCat.isoMk (Iso.refl _) ?_
+    intro r
+    ext (x : Γ(M, ⊤))
+    change X.presheaf.map (homOfLE le_rfl).op
+        ((Scheme.Hom.appTop (𝟙 X)) r) • x = r • x
+    rw [Scheme.Hom.id_appTop]
+    simp
+  letI : Module.Finite Γ(X, ⊤)
+      ((baseModulePresheaf (𝟙 X) M).obj (op (⊤ : X.Opens))) :=
+    Module.Finite.equiv eRight.toLinearEquiv
+  have hright : Module.Finite Γ(X, ⊤)
+      ((baseModulePresheaf (𝟙 X) M).obj
+        (op ((isoSpec X).inv ''ᵁ (⊤ : (Spec Γ(X, ⊤)).Opens)))) := by
+    rw [Scheme.Hom.image_top_eq_opensRange,
+      Scheme.Hom.opensRange_of_isIso]
+    infer_instance
+  let e := baseModulePresheafRestrictAppIso
+    (𝟙 X) (isoSpec X).inv M (⊤ : (Spec Γ(X, ⊤)).Opens)
+  letI : Module.Finite Γ(X, ⊤)
+      ((baseModulePresheaf (𝟙 X) M).obj
+        (op ((isoSpec X).inv ''ᵁ (⊤ : (Spec Γ(X, ⊤)).Opens)))) := hright
+  have hleft : Module.Finite Γ(X, ⊤)
+      ((baseModulePresheaf ((isoSpec X).inv ≫ 𝟙 X) M').obj
+        (op (⊤ : (Spec Γ(X, ⊤)).Opens))) :=
+    Module.Finite.equiv e.symm.toLinearEquiv
+  have happ : X.isoSpec.inv.appTop =
+      (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv := by
+    have hhom : X.isoSpec.hom.appTop =
+        (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).hom := by
+      simp [Scheme.isoSpec, Scheme.toSpecΓ_appTop]
+    rw [← cancel_mono (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).hom]
+    rw [← hhom]
+    rw [← Scheme.Hom.comp_appTop]
+    rw [X.isoSpec.hom_inv_id]
+    rw [hhom]
+    simp
+  let eLeft :
+      (baseModulePresheaf ((isoSpec X).inv ≫ 𝟙 X) M').obj
+          (op (⊤ : (Spec Γ(X, ⊤)).Opens)) ≅
+        moduleSpecΓFunctor.obj M' := by
+    refine ModuleCat.isoMk (Iso.refl _) ?_
+    intro r
+    ext (x : Γ(M', ⊤))
+    change
+      (Spec Γ(X, ⊤)).presheaf.map (homOfLE le_rfl).op
+          ((Scheme.ΓSpecIso Γ(X, ⊤)).inv r) • x =
+        (Spec Γ(X, ⊤)).presheaf.map (homOfLE le_rfl).op
+          ((X.isoSpec.inv ≫ 𝟙 X).appTop r) • x
+    rw [Scheme.Hom.comp_appTop, Scheme.Hom.id_appTop, Category.id_comp,
+      happ]
+  letI : Module.Finite Γ(X, ⊤)
+      ((baseModulePresheaf ((isoSpec X).inv ≫ 𝟙 X) M').obj
+        (op (⊤ : (Spec Γ(X, ⊤)).Opens))) := hleft
+  change Module.Finite Γ(X, ⊤)
+    (moduleSpecΓFunctor.obj (M.restrict (isoSpec X).inv))
+  exact Module.Finite.equiv eLeft.toLinearEquiv
+
+/-- A finite-type quasicoherent module on an affine scheme has finitely many global generating
+sections. -/
+theorem Modules.exists_generatingSections_of_isFiniteType_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
+    [M.IsFiniteType] :
+    ∃ G : M.GeneratingSections, G.IsFiniteType := by
+  let M' : (Spec Γ(X, ⊤)).Modules := M.restrict (isoSpec X).inv
+  have hfinite : Module.Finite Γ(X, ⊤) (moduleSpecΓFunctor.obj M') :=
+    Modules.moduleSpecΓ_finite_of_isFiniteType_of_isAffine M
+  letI : Module.Finite Γ(X, ⊤) Γ(M', ⊤) := by
+    change Module.Finite Γ(X, ⊤) (moduleSpecΓFunctor.obj M')
+    exact hfinite
+  obtain ⟨G', hG'⟩ :=
+    Modules.exists_generatingSections_of_moduleSpecΓ_finite M'
+  letI : G'.IsFiniteType := hG'
+  let F := Scheme.Modules.restrictFunctor (isoSpec X).hom
+  letI : PreservesColimitsOfSize.{u, u, u, u, u + 1, u + 1} F := by
+    dsimp [F]
+    infer_instance
+  have hF : PreservesColimitsOfSize.{u, u, u, u, u + 1, u + 1} F :=
+    inferInstance
+  let G'' := @SheafOfModules.GeneratingSections.map
+    _ _ _ _ _ _ _ _ _ _ _ _ _ G' F hF
+      (restrictUnitIso (isoSpec X).hom).symm
+  let G := SheafOfModules.GeneratingSections.equivOfIso
+    ((Scheme.Modules.restrictFunctor_inv_restrictFunctor_hom_id
+      (isoSpec X)).app M) G''
+  haveI : G.IsFiniteType := ⟨by
+    change Finite G'.I
+    exact hG'.finite⟩
+  exact ⟨G, inferInstance⟩
+
 /-- An epimorphism of quasicoherent modules is surjective on sections over an affine open. -/
 theorem Modules.isQuasicoherent_app_surjective_of_epi
     (U : X.Opens) (hU : IsAffineOpen U)
