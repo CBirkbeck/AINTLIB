@@ -6,6 +6,7 @@ Authors: AINTLIB ModularCurves project
 import ModularCurves.ForMathlib.ProjectiveSpaceHyperplane
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.EllipticCurve.PullbackTensorSection
 
 /-!
 # Twists on polynomial projective space
@@ -1594,6 +1595,34 @@ noncomputable def coordinateHyperplanePoleSheafPowerFrameSection
       (coordinateOpen (R := R) i)
       (coordinateHyperplanePoleSheafPowerTrivialization (R := R) i j n)) 1
 
+/-- The coefficient-one frame of `O(n + 1)` is the pure tensor of the
+coefficient-one frames of `O(n)` and `O(1)`. -/
+theorem coordinateHyperplanePoleSheafPowerFrameSection_succ
+    (i j : σ) (n : ℕ) :
+    coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j (n + 1) =
+      ModularCurves.tensorSection
+        (coordinateHyperplanePoleSheafPower (R := R) j n)
+        (coordinateHyperplanePoleSheaf (R := R) j)
+        (coordinateOpen (R := R) i)
+        (coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j n)
+        (ModularCurves.overTrivializationSection
+          (coordinateHyperplanePoleSheaf (R := R) j)
+          (coordinateOpen (R := R) i)
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (coordinateHyperplanePoleSheaf (R := R) j)
+            (coordinateOpen (R := R) i)
+            (coordinateHyperplanePoleSheafTrivialization (R := R) i j)) 1) := by
+  simpa only [coordinateHyperplanePoleSheafPowerFrameSection,
+    coordinateHyperplanePoleSheafPower,
+    coordinateHyperplanePoleSheafPowerTrivialization,
+    coordinateHyperplanePoleSheafPowerTrivializationOf] using
+    ModularCurves.overTrivializationSection_tensor_one
+      (coordinateHyperplanePoleSheafPower (R := R) j n)
+      (coordinateHyperplanePoleSheaf (R := R) j)
+      (coordinateOpen (R := R) i)
+      (coordinateHyperplanePoleSheafPowerTrivialization (R := R) i j n)
+      (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
+
 /-- On a coordinate overlap, multiplying the restricted `i`-frame of `O(n)`
 by `(X_k / X_i)^n` gives the restricted `k`-frame. -/
 theorem coordinateHyperplanePoleSheafPowerFrameSection_restrict_transition
@@ -2077,6 +2106,34 @@ noncomputable def coordinateHyperplaneIdealModulePowerFrameSection
       (coordinateHyperplaneIdealModulePower (R := R) j n)
       (coordinateOpen (R := R) i)
       (coordinateHyperplaneIdealModulePowerTrivialization (R := R) i j n)) 1
+
+/-- The coefficient-one frame of `O(-(n + 1))` is the pure tensor of the
+coefficient-one frames of `O(-n)` and `O(-1)`. -/
+theorem coordinateHyperplaneIdealModulePowerFrameSection_succ
+    (i j : σ) (n : ℕ) :
+    coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j (n + 1) =
+      ModularCurves.tensorSection
+        (coordinateHyperplaneIdealModulePower (R := R) j n)
+        (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+        (coordinateOpen (R := R) i)
+        (coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j n)
+        (ModularCurves.overTrivializationSection
+          (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+          (coordinateOpen (R := R) i)
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+            (coordinateOpen (R := R) i)
+            (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm) 1) := by
+  simpa only [coordinateHyperplaneIdealModulePowerFrameSection,
+    coordinateHyperplaneIdealModulePower,
+    coordinateHyperplaneIdealModulePowerTrivialization,
+    coordinateHyperplaneIdealModulePowerTrivializationOf] using
+    ModularCurves.overTrivializationSection_tensor_one
+      (coordinateHyperplaneIdealModulePower (R := R) j n)
+      (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+      (coordinateOpen (R := R) i)
+      (coordinateHyperplaneIdealModulePowerTrivialization (R := R) i j n)
+      (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
 
 /-- On a coordinate overlap, multiplying the restricted `k`-frame of `O(-n)`
 by `(X_k / X_i)^n` gives the restricted `i`-frame. -/
