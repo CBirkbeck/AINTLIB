@@ -4936,10 +4936,12 @@ private theorem monoidalTensorObjIso_unit_comp_unitObjTensorIso
       (𝟙_ X.PresheafOfModules) ≫ k) hidt
   exact hpre.symm.trans hunit
 
-private theorem unitObjTensorIso_hom_poleTensorTopSection (X : Scheme.{u})
+/-- Under the canonical tensor-unit identification, the pure tensor of two structure-sheaf
+sections is their product. -/
+theorem unitObjTensorIso_hom_tensorSection_top (X : Scheme.{u})
     (a b : Γ(X, (⊤ : X.Opens))) :
     (unitObjTensorIso X).hom.val.app (.op (⊤ : X.Opens))
-      (poleTensorTopSection _ _
+      (tensorSection _ _ ⊤
         (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from a)
         (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from b)) =
       a * b := by
@@ -5022,9 +5024,9 @@ private theorem unitObjTensorIso_inv_apply_one (X : Scheme.{u}) :
       (show X.presheaf.obj (.op ⊤) from 1))
   have hmul : e.hom.val.app (.op ⊤) q =
       (show X.presheaf.obj (.op ⊤) from 1) := by
-    dsimp only [e, q]
+    dsimp only [e, q, poleTensorTopSection]
     simpa only [one_mul] using
-      unitObjTensorIso_hom_poleTensorTopSection X
+      unitObjTensorIso_hom_tensorSection_top X
         (show Γ(X, (⊤ : X.Opens)) from 1)
         (show Γ(X, (⊤ : X.Opens)) from 1)
   have hcomp := congrArg (fun k ↦ k.val.app (.op (⊤ : X.Opens)))
@@ -5340,15 +5342,18 @@ private theorem poleTensor_restrict_unitObjTensorIso_inv
         Functor.Monoidal.μ_δ, Category.comp_id]
       exact hcore
 
-private theorem poleTensor_restrict_localTrivializationRestriction
+/-- Restricting a global pure tensor section to an affine open agrees, through the
+restriction functor's monoidal comparison, with the pure tensor of the restricted sections. -/
+theorem tensorSection_localTrivializationRestriction
     {X : Scheme.{u}} (M N : X.Modules) (U : X.affineOpens)
     (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
     (restrictMonoidalTensorIso U.1.ι M N).hom.val.app (.op ⊤)
         (localTrivializationRestriction (M ⊗ N) U
-          (poleTensorTopSection M N x y)) =
-      poleTensorTopSection
+          (tensorSection M N ⊤ x y)) =
+      tensorSection
         ((Scheme.Modules.restrictFunctor U.1.ι).obj M)
         ((Scheme.Modules.restrictFunctor U.1.ι).obj N)
+        ⊤
         (localTrivializationRestriction M U x)
         (localTrivializationRestriction N U y) := by
   let F := Scheme.Modules.restrictFunctor U.1.ι
@@ -5364,11 +5369,11 @@ private theorem poleTensor_restrict_localTrivializationRestriction
     (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
   let hx := poleTopSectionHom M x
   let hy := poleTopSectionHom N y
-  let q := poleTensorTopSection M N x y
+  let q := tensorSection M N ⊤ x y
   let xU := localTrivializationRestriction M U x
   let yU := localTrivializationRestriction N U y
   let qU := localTrivializationRestriction (M ⊗ N) U q
-  let tU := poleTensorTopSection (F.obj M) (F.obj N) xU yU
+  let tU := tensorSection (F.obj M) (F.obj N) ⊤ xU yU
   have hcomp := poleTopSectionHom_comp qU d.hom
   change poleTopSectionHom (F.obj (M ⊗ N)) qU ≫ d.hom =
     poleTopSectionHom (F.obj M ⊗ F.obj N)
@@ -5451,6 +5456,30 @@ private theorem poleTensor_restrict_localTrivializationRestriction
       (happ.trans (poleTopSectionHom_app_top_apply_one
         (F.obj M ⊗ F.obj N) tU))
 
+/-- Under tensor-product trivializations on an affine open, the local coordinate of a
+pure tensor section is the product of the two local coordinates. -/
+theorem localTrivializationTopSection_tensorSection
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.affineOpens)
+    (eM : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (eN : N.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
+    localTrivializationTopSection (M ⊗ N) U
+        (restrictMonoidalTensorIso U.1.ι M N ≪≫
+          (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.1.toScheme)
+        (tensorSection M N ⊤ x y) =
+      localTrivializationTopSection M U eM x *
+        localTrivializationTopSection N U eN y := by
+  change
+    (unitObjTensorIso U.1.toScheme).hom.val.app (.op ⊤)
+      ((eM.hom ⊗ₘ eN.hom).val.app (.op ⊤)
+        ((restrictMonoidalTensorIso U.1.ι M N).hom.val.app (.op ⊤)
+          (localTrivializationRestriction (M ⊗ N) U
+            (tensorSection M N ⊤ x y)))) = _
+  rw [tensorSection_localTrivializationRestriction, tensorSection_map]
+  exact unitObjTensorIso_hom_tensorSection_top U.1.toScheme
+    (eM.hom.val.app (.op ⊤) (localTrivializationRestriction M U x))
+    (eN.hom.val.app (.op ⊤) (localTrivializationRestriction N U y))
+
 /-- The local source coordinate of a canonical pure tensor of pole sections is
 the product of the two local power coordinates. -/
 theorem
@@ -5487,21 +5516,15 @@ theorem
   let P := sectionPoleSheafPower π z hz m
   let Q := sectionPoleSheafPower π z hz n
   change
-    (unitObjTensorIso U.1.toScheme).hom.val.app (.op ⊤)
-      (((sectionPoleSheafPowerTrivialization z hz U.1 e m).hom ⊗ₘ
-          (sectionPoleSheafPowerTrivialization z hz U.1 e n).hom).val.app
-        (.op ⊤)
-        ((restrictMonoidalTensorIso U.1.ι P Q).hom.val.app (.op ⊤)
-          (localTrivializationRestriction (P ⊗ Q) U
-            (poleTensorTopSection P Q x y)))) = _
-  have hrestrict := poleTensor_restrict_localTrivializationRestriction
-    P Q U x y
-  rw [hrestrict, poleTensorTopSection_map]
-  exact unitObjTensorIso_hom_poleTensorTopSection U.1.toScheme
-    ((sectionPoleSheafPowerTrivialization z hz U.1 e m).hom.val.app
-      (.op ⊤) (localTrivializationRestriction P U x))
-    ((sectionPoleSheafPowerTrivialization z hz U.1 e n).hom.val.app
-      (.op ⊤) (localTrivializationRestriction Q U y))
+    localTrivializationTopSection (P ⊗ Q) U
+      (restrictMonoidalTensorIso U.1.ι P Q ≪≫
+        (sectionPoleSheafPowerTrivialization z hz U.1 e m ⊗ᵢ
+          sectionPoleSheafPowerTrivialization z hz U.1 e n) ≪≫
+        unitObjTensorIso U.1.toScheme)
+      (tensorSection P Q ⊤ x y) = _
+  exact localTrivializationTopSection_tensorSection P Q U
+    (sectionPoleSheafPowerTrivialization z hz U.1 e m)
+    (sectionPoleSheafPowerTrivialization z hz U.1 e n) x y
 
 /-- Under the compatible tensor-power trivializations, multiplication of pole
 sheaves restricts to multiplication of two copies of the structure sheaf. -/
