@@ -1858,6 +1858,49 @@ theorem exists_global_coordinateChartTwistedSection
       (fun _ => homOfLE le_top) hcover sf hcpt
   exact ⟨q, hq⟩
 
+/-- Every section of a quasicoherent module on `D₊(X j)` extends, in the
+standard frame, to a global section after tensoring by some `O(n)`. -/
+lemma exists_coordinateTwist_extension [Fintype σ]
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (j : σ) (s : Γ(M, coordinateOpen (R := R) j)) :
+    ∃ (n : ℕ)
+        (q : Γ(M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n, ⊤)),
+      (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n).presheaf.map
+          (homOfLE (le_top : coordinateOpen (R := R) j ≤
+            (⊤ : (Proj (homogeneousSubmodule σ R)).Opens))).op q =
+        coordinateChartTwistedSection (R := R) M j j n s := by
+  classical
+  obtain ⟨n, t, ht⟩ := exists_coordinateChartExtension_forall M j s
+  obtain ⟨m, hm⟩ := exists_pow_coordinateChartDifference_eq_zero_forall
+    M j n s t ht
+  let d := n + m
+  let c : ∀ i : σ, Γ(M, coordinateOpen (R := R) i) := fun i =>
+    coordinateHyperplaneLocalEquation (R := R) i j ^ m • t i
+  have hc : ∀ i k : σ,
+      M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op (c i) =
+        (coordinateOpenTransitionUnit (R := R) i k :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) i k)) ^ d •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+            (c k) := by
+    intro i k
+    exact coordinateChartExtensions_corrected_compatible
+      (R := R) M i k j n m (t i) (t k) (hm i k)
+  obtain ⟨q, hq⟩ := exists_global_coordinateChartTwistedSection M j d c hc
+  refine ⟨d, q, ?_⟩
+  calc
+    (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j d).presheaf.map
+          (homOfLE (le_top : coordinateOpen (R := R) j ≤
+            (⊤ : (Proj (homogeneousSubmodule σ R)).Opens))).op q =
+        coordinateChartTwistedSection (R := R) M j j d (c j) := hq j
+    _ = coordinateChartTwistedSection (R := R) M j j d s := by
+      apply congrArg (coordinateChartTwistedSection (R := R) M j j d)
+      dsimp only [c]
+      rw [coordinateHyperplaneLocalEquation_self, one_pow, one_smul]
+      exact eq_of_coordinateChartExtension_self M j n s (t j) (ht j)
+
 /-- The nonnegative powers of the concrete coordinate-hyperplane `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModulePower (j : σ) :
     ℕ → (Proj (homogeneousSubmodule σ R)).Modules
