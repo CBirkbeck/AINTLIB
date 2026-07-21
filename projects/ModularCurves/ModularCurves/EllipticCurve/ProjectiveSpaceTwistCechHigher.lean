@@ -794,6 +794,139 @@ theorem exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentC
         (fun e => e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))) _
     _ = s := coordinateHomogeneousLaurentActiveWeights_reconstruct d (n + 1) s
 
+private theorem iCycles_coordinateDifferential_eq_zero
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ)
+    (z : (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).cycles n) :
+    (coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) d n).hom
+        ((coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).iCycles n z) = 0 := by
+  let K := coordinateHomogeneousLaurentOrderedCechComplex
+    (R := R) j d
+  have hz := congrArg (fun f => f z) (K.iCycles_d n (n + 1))
+  change K.d n (n + 1) (K.iCycles n z) = 0 at hz
+  have hd := congrArg (fun f => f (K.iCycles n z))
+    (coordinateHomogeneousLaurentOrderedCechComplex_d
+      (R := R) j d n)
+  exact hd.symm.trans hz
+
+private theorem fullNegativeCyclesToCycles_projection
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ)
+    (z : (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).cycles n) :
+    (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).iCycles n
+        ((coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+          (R := R) j d n).hom
+          ((coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+            (R := R) j d n).hom z)) =
+      coordinateHomogeneousLaurentFullNegativeAssembly
+        (R := R) (σ := σ) d n
+        (coordinateHomogeneousLaurentFullNegativeProjection
+          (R := R) d n
+          ((coordinateHomogeneousLaurentOrderedCechComplex
+            (R := R) j d).iCycles n z)) := by
+  let K := coordinateHomogeneousLaurentOrderedCechComplex
+    (R := R) j d
+  let q := (coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+    (R := R) j d n).hom z
+  have hqval :
+      (q : coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d n) =
+      coordinateHomogeneousLaurentFullNegativeProjection
+        (R := R) d n (K.iCycles n z) := by
+    have h := congrArg (fun f => f z)
+      (coordinateHomogeneousLaurentCyclesToFullNegativeCycles_i
+        (R := R) j d n)
+    change
+      ((coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+          (R := R) j d n).hom z :
+        coordinateHomogeneousLaurentFullNegativeCochain
+          (R := R) (σ := σ) d n) =
+        coordinateHomogeneousLaurentFullNegativeProjection
+          (R := R) d n (K.iCycles n z) at h
+    exact h
+  have hiq := congrArg (fun f => f q)
+    (coordinateHomogeneousLaurentFullNegativeCyclesToCycles_i
+      (R := R) j d n)
+  change
+    K.iCycles n
+        ((coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+          (R := R) j d n).hom q) =
+      coordinateHomogeneousLaurentFullNegativeCyclesAssembly
+        (R := R) (σ := σ) d n q at hiq
+  have hcyclesAssembly :
+      coordinateHomogeneousLaurentFullNegativeCyclesAssembly
+          (R := R) (σ := σ) d n q =
+        coordinateHomogeneousLaurentFullNegativeAssembly
+          (R := R) (σ := σ) d n q.1 := rfl
+  have hqassembly := congrArg
+    (coordinateHomogeneousLaurentFullNegativeAssembly
+      (R := R) (σ := σ) d n) hqval
+  exact hiq.trans (hcyclesAssembly.trans hqassembly)
+
+/-- Every homogeneous Laurent cycle differs from the cycle assembled from its full-negative
+projection by a boundary. -/
+theorem exists_boundary_coordinateHomogeneousLaurentCycle_sub_fullNegativeCycle
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ)
+    (z : (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).cycles (n + 1)) :
+    ∃ t : coordinateHomogeneousLaurentOrderedCechObject
+        (R := R) (σ := σ) d n,
+      (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).iCycles (n + 1) z -
+        (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).iCycles (n + 1)
+          ((coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+            (R := R) j d (n + 1)).hom
+            ((coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+              (R := R) j d (n + 1)).hom z)) =
+        (coordinateHomogeneousLaurentOrderedCechDifferential
+          (R := R) (σ := σ) d n).hom t := by
+  let K := coordinateHomogeneousLaurentOrderedCechComplex
+    (R := R) j d
+  let s := K.iCycles (n + 1) z
+  let q := (coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+    (R := R) j d (n + 1)).hom z
+  have hs :
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d (n + 1)).hom s = 0 := by
+    exact iCycles_coordinateDifferential_eq_zero
+      (R := R) j d (n + 1) z
+  obtain ⟨t, ht⟩ :=
+    exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentCocycle
+      (R := R) (σ := σ) d n s hs
+  have hiq :
+      K.iCycles (n + 1)
+          ((coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+            (R := R) j d (n + 1)).hom q) =
+        coordinateHomogeneousLaurentFullNegativeAssembly
+          (R := R) (σ := σ) d (n + 1)
+          (coordinateHomogeneousLaurentFullNegativeProjection
+            (R := R) d (n + 1) s) := by
+    exact fullNegativeCyclesToCycles_projection
+      (R := R) j d (n + 1) z
+  have hassembly := coordinateHomogeneousLaurentFullNegativeAssembly_projection
+    (R := R) (σ := σ) d (n + 1) s
+  rw [← hassembly] at ht
+  refine ⟨t, ?_⟩
+  change
+      K.iCycles (n + 1) z -
+          K.iCycles (n + 1)
+            ((coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+              (R := R) j d (n + 1)).hom q) =
+        (coordinateHomogeneousLaurentOrderedCechDifferential
+          (R := R) (σ := σ) d n).hom t
+  rw [hiq]
+  change s - _ = _
+  exact (congrArg (fun x => x -
+    coordinateHomogeneousLaurentFullNegativeAssembly
+      (R := R) (σ := σ) d (n + 1)
+      (coordinateHomogeneousLaurentFullNegativeProjection
+        (R := R) d (n + 1) s)) ht.symm).trans
+    (add_sub_cancel_right _ _)
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation of the ordered Cech
 complex for a nonnegative projective twist is a boundary. -/
 theorem exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
