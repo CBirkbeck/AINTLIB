@@ -24471,3 +24471,22 @@ heavy transVC/chart terms. FIX (documented at the frontier + in scratch referenc
 two clearing relations as def/structure (outputs reference a cheap def-application not the spelled
 equations) + extract the prelude/continuation into helpers so no declaration crosses 200k. γ-glue
 (:1729) not started; hpres wiring + engine flip pending β+γ. File GREEN, 2 sorries.
+
+### v10.343 progress — [T-E4D Stage-3c-β CLOSED axiom-clean + γ1/γ2 done] (2026-07-21)
+exists_invariant_chart_spread (the β-clearing) CLOSED, AXIOM-CLEAN — landed under default 200k
+heartbeats. Root-cause diagnosis (#count_heartbeats under Elab.async false): the monolithic body
+needed 443k, dominated NOT by conjunct threading but by the `set` tactic's kabstract scanning the
+huge hglue/hcobInv hypotheses (90k prelude + 165k fold) + the six IsLocalization.surj (50k). FIX
+(no maxHeartbeats): replaced all four `set`s with the `obtain ⟨x,hx⟩ : ∃ x, x = e := ⟨_,rfl⟩`
+zero-kabstract idiom + extracted the surj sweep into new helper spread_fractions (:2090) →
+443k→142k. exists_invariant_away_presentation now consumes the whole β-package + discharges
+ellipticity + proves γ1 (hQW corrected-chart W, hVC1 pairwise transVC=1) + γ2 (hcover) + barrier
+lemma vc_conj_cancel (:2334). RESIDUAL: γ3/γ4 ONLY (glue ρR₁ + pullback square + zero-leg,
+sorry :2464) — one missing infra lemma identified (Spec.map (awayToSections a₁ fᵢ) is an open
+immersion with range specBasicOpen, right-cancel against the two banked away-immersions after
+awayToSections_algebraMap) then follows worked templates (UniversalAdapted.classifyingTop,
+GroupLawDescent.negHomOf, AdditionChartGlobal.mulModelHom). WIRING (Target 3) blocked: importing
+EngineMouthCharts into EngineDescent regresses two heavy proofs (exists_coboundary_spread_away
+:2492, exists_localModel_core_of_presentation :2853) to 200k isDefEq/whnf timeouts from the
+enriched InvariantDifferential instances (respectTransparency false does NOT fix) — needs those two
+proofs (145+343L) decomposed first. File GREEN, 1 sorry.

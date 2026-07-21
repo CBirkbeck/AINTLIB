@@ -2084,6 +2084,35 @@ theorem spread_assemble_glue (G : Type*) [Group G] [IsAffine X]
 
 
 
+/-- **(β2 fractions)** Realize the five coefficients of the glued model `W₀L / L` and the
+`Δ`-inverse witness as fractions with denominators in `S'` (a single `IsLocalization.surj`
+sweep, extracted so the main spread body stays under the per-declaration heartbeat budget). -/
+theorem spread_fractions (S' : Submonoid ↑Γ(X, ⊤))
+    (W₀L : WeierstrassCurve (Localization S')) (hΔ : IsUnit W₀L.Δ) :
+    ∃ (b₁ b₂ b₃ b₄ b₆ bΔ : ↑Γ(X, ⊤)) (s₁ s₂ s₃ s₄ s₆ sΔ : S') (v : Localization S'),
+      W₀L.a₁ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₁ : ↑Γ(X, ⊤))
+          = algebraMap ↑Γ(X, ⊤) (Localization S') b₁ ∧
+      W₀L.a₂ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₂ : ↑Γ(X, ⊤))
+          = algebraMap ↑Γ(X, ⊤) (Localization S') b₂ ∧
+      W₀L.a₃ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₃ : ↑Γ(X, ⊤))
+          = algebraMap ↑Γ(X, ⊤) (Localization S') b₃ ∧
+      W₀L.a₄ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₄ : ↑Γ(X, ⊤))
+          = algebraMap ↑Γ(X, ⊤) (Localization S') b₄ ∧
+      W₀L.a₆ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₆ : ↑Γ(X, ⊤))
+          = algebraMap ↑Γ(X, ⊤) (Localization S') b₆ ∧
+      W₀L.Δ * v = 1 ∧
+      v * algebraMap ↑Γ(X, ⊤) (Localization S') (sΔ : ↑Γ(X, ⊤))
+          = algebraMap ↑Γ(X, ⊤) (Localization S') bΔ := by
+  obtain ⟨⟨b₁, s₁⟩, hb₁⟩ := IsLocalization.surj S' W₀L.a₁
+  obtain ⟨⟨b₂, s₂⟩, hb₂⟩ := IsLocalization.surj S' W₀L.a₂
+  obtain ⟨⟨b₃, s₃⟩, hb₃⟩ := IsLocalization.surj S' W₀L.a₃
+  obtain ⟨⟨b₄, s₄⟩, hb₄⟩ := IsLocalization.surj S' W₀L.a₄
+  obtain ⟨⟨b₆, s₆⟩, hb₆⟩ := IsLocalization.surj S' W₀L.a₆
+  obtain ⟨v, hv⟩ := hΔ.exists_right_inv
+  obtain ⟨⟨bΔ, sΔ⟩, hbΔ⟩ := IsLocalization.surj S' v
+  exact ⟨b₁, b₂, b₃, b₄, b₆, bΔ, s₁, s₂, s₃, s₄, s₆, sΔ, v,
+    hb₁, hb₂, hb₃, hb₄, hb₆, hv, hbΔ⟩
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **([a5-P-loc] Stage 3c-β, the invariant-denominator spread ★)** The α-package data over
 the semilocalization `L = Localization S'` — the glued model `W₀L`, the correction cochain
@@ -2188,27 +2217,25 @@ theorem exists_invariant_chart_spread (G : Type*) [Group G] [IsAffine X]
     fun i => exists_variableChange_sections_preimage S' (f i) (D i)
   choose sVC hsVC using hDsp
   -- ### fraction data for the five coefficients of `W₀L` and the `Δ`-witness
-  obtain ⟨⟨b₁, s₁⟩, hb₁⟩ := IsLocalization.surj S' W₀L.a₁
-  obtain ⟨⟨b₂, s₂⟩, hb₂⟩ := IsLocalization.surj S' W₀L.a₂
-  obtain ⟨⟨b₃, s₃⟩, hb₃⟩ := IsLocalization.surj S' W₀L.a₃
-  obtain ⟨⟨b₄, s₄⟩, hb₄⟩ := IsLocalization.surj S' W₀L.a₄
-  obtain ⟨⟨b₆, s₆⟩, hb₆⟩ := IsLocalization.surj S' W₀L.a₆
-  obtain ⟨v, hv⟩ := hΔ.exists_right_inv
-  obtain ⟨⟨bΔ, sΔ⟩, hbΔ⟩ := IsLocalization.surj S' v
-  -- ### the preliminary invariant level `a₀`
-  set sPre : S' := ((((((s₁ * s₂) * s₃) * s₄) * s₆) * sΔ) * ∏ i, sVC i) with hsPre
-  set a₀ : FixedPoints.subring ↑Γ(X, ⊤) G := k₀ * pre sPre with ha₀def
-  have ha₀ : a₀ ∉ p := hmulmem hk₀ (hpre_mem sPre)
+  obtain ⟨b₁, b₂, b₃, b₄, b₆, bΔ, s₁, s₂, s₃, s₄, s₆, sΔ, v,
+    hb₁, hb₂, hb₃, hb₄, hb₆, hv, hbΔ⟩ := spread_fractions S' W₀L hΔ
+  -- ### the preliminary invariant level `a₀`, introduced OPAQUELY via the `⟨_, rfl⟩`
+  -- existential (never `set`, whose `kabstract` over the huge `hglue`/`hcobInv`/clearing
+  -- hypotheses is what breaks the 200k budget — see the heartbeat-split note above).
+  obtain ⟨sPre, hsPre⟩ :
+      ∃ s : S', s = ((((((s₁ * s₂) * s₃) * s₄) * s₆) * sΔ) * ∏ i, sVC i) := ⟨_, rfl⟩
+  obtain ⟨a₀, ha₀def⟩ :
+      ∃ a : FixedPoints.subring ↑Γ(X, ⊤) G, a = k₀ * pre sPre := ⟨_, rfl⟩
+  have ha₀ : a₀ ∉ p := by rw [ha₀def]; exact hmulmem hk₀ (hpre_mem sPre)
   have ha₀S : ((a₀ : ↑Γ(X, ⊤))) ∈ S' := hmemS a₀ ha₀
   have hpre_dvd_a₀ : ((pre sPre : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := by
-    show ((pre sPre : ↑Γ(X, ⊤))) ∣ ((k₀ : ↑Γ(X, ⊤)) * ((pre sPre : ↑Γ(X, ⊤))))
-    exact dvd_mul_left _ _
+    rw [ha₀def]; push_cast; exact dvd_mul_left _ _
   have hsPre_dvd : ((sPre : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := by
-    rw [← hpre_eq sPre]
-    exact hpre_dvd_a₀
+    rw [← hpre_eq sPre]; exact hpre_dvd_a₀
   -- coefficient-denominator divisibilities into `a₀` (via the submonoid inclusion)
-  have hdvdS : ∀ t : S', t ∣ sPre → ((t : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := fun t ht =>
-    dvd_trans (map_dvd S'.subtype ht) hsPre_dvd
+  have hdvdS : ∀ t : S', t ∣ ((((((s₁ * s₂) * s₃) * s₄) * s₆) * sΔ) * ∏ i, sVC i) →
+      ((t : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := fun t ht =>
+    dvd_trans (map_dvd S'.subtype ht) (hsPre ▸ hsPre_dvd)
   have hdvd₁ : ((s₁ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := hdvdS s₁
     ((((((dvd_mul_right s₁ s₂).mul_right s₃).mul_right s₄).mul_right s₆).mul_right
       sΔ).mul_right _)
@@ -2225,23 +2252,88 @@ theorem exists_invariant_chart_spread (G : Type*) [Group G] [IsAffine X]
     ((dvd_mul_left sΔ ((((s₁ * s₂) * s₃) * s₄) * s₆)).mul_right _)
   have hdvdVC : ∀ i, ((sVC i : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := fun i => hdvdS (sVC i)
     ((Finset.dvd_prod_of_mem sVC (Finset.mem_univ i)).mul_left _)
-  -- `a₀` is henceforth OPAQUE: no definitional unfolding into the `choose`-terms
-  clear_value a₀
-  clear ha₀def hdvdS hsPre_dvd hpre_dvd_a₀ hsPre sPre
-  -- FRONTIER (β-clearing): the full proof is DECOMPOSED and VERIFIED via the nine
-  -- `spread_*` helpers above (all AXIOM-CLEAN, each < 200k heartbeats). Wiring them into
-  -- this thin body currently exceeds 200k because the body must `choose` BOTH clearing
-  -- outputs (`spread_glue_clear` → 5 equations, `spread_transVC_clear` → 4 equations),
-  -- whose conjunct types each spell the heavy `transVC`/chart term (5×+4×) under
-  -- `respectTransparency false`, on top of the ~150k fraction extraction above.
-  -- REMAINING STEP: package the glue/transVC clearing relations as a `def`/structure
-  -- (`GlueRel`, `TransVCRel`) so the clearing outputs and the assembly-goal helpers
-  -- reference a cheap def-application instead of spelling the equations; then this body
-  -- calls `spread_build_curve`, `spread_glue_clear`, `spread_transVC_clear`, folds the
-  -- multipliers into `a₁`, and discharges the four ∃-conjuncts via `spread_assemble_ell`,
-  -- `hspanA`, `spread_assemble_glue`, `spread_assemble_transVC` (the exact call sequence is
-  -- verified in `scratch_alg.lean`/`scratch_main.lean`).
-  sorry
+  have hk₀dvda₀ : k₀ ∣ a₀ := ⟨pre sPre, ha₀def⟩
+  clear hsPre_dvd hpre_dvd_a₀ hdvdS
+  -- ### (β2 build) the model curve `W₀R₀ / A_{a₀}` realizing `W₀L`'s coefficients + `Δ`-inv
+  obtain ⟨W₀R₀, vR₀, cΔ, hW₀R₀, hcΔ⟩ := spread_build_curve G S' W₀L a₀ ha₀S
+    b₁ b₂ b₃ b₄ b₆ bΔ s₁ s₂ s₃ s₄ s₆ sΔ v hb₁ hb₂ hb₃ hb₄ hb₆ hv hbΔ
+    hdvd₁ hdvd₂ hdvd₃ hdvd₄ hdvd₆ hdvdΔ
+  -- the `A_{a₀·fᵢ}`-unit of `a₀·fᵢ` and the per-chart correction `DA₀ i` over `D(a₀·fᵢ)`
+  have hψunit : ∀ i, IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * f i))) := by
+    intro i
+    rw [map_mul, map_mul]
+    exact ((IsLocalization.map_units (Localization S')
+        (⟨(a₀ : ↑Γ(X, ⊤)), ha₀S⟩ : S')).map
+        (algebraMap (Localization S') _)).mul (isUnit_algebraMap_powers_self _)
+  have hDA₀ : ∀ i, ∃ DB : VariableChange ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)),
+      DB.map (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i)) = D i := by
+    intro i
+    haveI := (isAffineOpen_top X).isLocalization_basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)
+    refine hsVC i ha₀S _ (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i))
+      (fun a => sectionsToLoc_algebraMap S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i) a) ?_
+    exact isUnit_algebraMap_of_isLocalizationAway_dvd _ ((a₀ : ↑Γ(X, ⊤)) * f i)
+      ((hdvdVC i).trans (dvd_mul_right _ _))
+  choose DA₀ hDA₀eq using hDA₀
+  -- ### (β2 clear) per-chart glue and pairwise transVC identities hold after one `S'`-mult
+  have hglue₀ := spread_glue_clear G S' f P D W₀L a₀ ha₀S W₀R₀ hW₀R₀ DA₀ hψunit hDA₀eq hglue
+  choose sGlue hsG1 hsG2 hsG3 hsG4 hsG6 using hglue₀
+  have hWij : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) ≤ X.basicOpen (f i * f j) :=
+    fun i j => basicOpen_le_basicOpen_of_dvd (dvd_mul_left (f i * f j) (a₀ : ↑Γ(X, ⊤)))
+  have hleAi : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i) :=
+    fun i j => basicOpen_le_basicOpen_of_dvd ⟨f j, by ring⟩
+  have hleAj : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f j) :=
+    fun i j => basicOpen_le_basicOpen_of_dvd ⟨f i, by ring⟩
+  have htriv₀ := spread_transVC_clear G S' f P D a₀ ha₀S DA₀ hψunit hDA₀eq hU hcobInv
+    hWij hleAi hleAj
+  choose cT hcTu hcTr hcTs hcTt using htriv₀
+  -- ### (β assembly) fold every clearing multiplier into a single invariant `a₁ ∉ p`
+  -- (`cAll`/`a₁` also introduced opaquely — same `kabstract`-avoidance as `sPre`/`a₀`)
+  obtain ⟨cAll, hcAlldef⟩ :
+      ∃ c : S', c = (cΔ * ∏ i, sGlue i) * ∏ q : ι × ι, cT q.1 q.2 := ⟨_, rfl⟩
+  have hcΔdvd : (cΔ : ↑Γ(X, ⊤)) ∣ (cAll : ↑Γ(X, ⊤)) := by
+    rw [hcAlldef]; exact map_dvd S'.subtype ((dvd_mul_right cΔ _).mul_right _)
+  have hsGdvd : ∀ i, (sGlue i : ↑Γ(X, ⊤)) ∣ (cAll : ↑Γ(X, ⊤)) := by
+    intro i; rw [hcAlldef]
+    exact map_dvd S'.subtype
+      (((Finset.dvd_prod_of_mem sGlue (Finset.mem_univ i)).mul_left cΔ).mul_right _)
+  have hcTdvd : ∀ i j, (cT i j : ↑Γ(X, ⊤)) ∣ (cAll : ↑Γ(X, ⊤)) := by
+    intro i j; rw [hcAlldef]
+    exact map_dvd S'.subtype
+      ((Finset.dvd_prod_of_mem (fun q : ι × ι => cT q.1 q.2) (Finset.mem_univ (i, j))).mul_left _)
+  obtain ⟨a₁, ha₁def⟩ :
+      ∃ a : FixedPoints.subring ↑Γ(X, ⊤) G, a = a₀ * pre cAll := ⟨_, rfl⟩
+  have ha₁ : a₁ ∉ p := by rw [ha₁def]; exact hmulmem ha₀ (hpre_mem cAll)
+  have ha₁coe : (a₁ : ↑Γ(X, ⊤)) = (a₀ : ↑Γ(X, ⊤)) * (pre cAll : ↑Γ(X, ⊤)) := by
+    rw [ha₁def]; push_cast; ring
+  have hcAllcoe : (pre cAll : ↑Γ(X, ⊤)) = (cAll : ↑Γ(X, ⊤)) := hpre_eq cAll
+  have ha₀dvda₁ : (a₀ : ↑Γ(X, ⊤)) ∣ (a₁ : ↑Γ(X, ⊤)) := ⟨(pre cAll : ↑Γ(X, ⊤)), ha₁coe⟩
+  have hcAlldvda₁ : (cAll : ↑Γ(X, ⊤)) ∣ (a₁ : ↑Γ(X, ⊤)) :=
+    ⟨(a₀ : ↑Γ(X, ⊤)), by rw [ha₁coe, hcAllcoe]; ring⟩
+  have hk₀dvda₁ : k₀ ∣ a₁ := by rw [ha₁def]; exact hk₀dvda₀.trans ⟨pre cAll, rfl⟩
+  have hDAle : ∀ i, X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i) ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i) :=
+    fun i => basicOpen_le_basicOpen_of_dvd ⟨(pre cAll : ↑Γ(X, ⊤)), by rw [ha₁coe]; ring⟩
+  refine ⟨a₁, ha₁, W₀R₀.map (awayMapDvd ha₀dvda₁),
+    fun i => (DA₀ i).map (Scheme.resLE (hDAle i)), ?_, ?_, ?_, ?_⟩
+  · exact spread_assemble_ell G S' a₀ a₁ W₀R₀ vR₀ cΔ cAll hcΔ hcΔdvd ha₀dvda₁ hcAlldvda₁
+  · exact hspanA a₁ hk₀dvda₁
+  · intro i
+    exact spread_assemble_glue G S' f P a₀ a₁ W₀R₀ DA₀ hDAle ha₀dvda₁ cAll sGlue hsGdvd
+      hcAlldvda₁ hsG1 hsG2 hsG3 hsG4 hsG6 i
+  · intro i j
+    exact spread_assemble_transVC G S' f P a₀ DA₀ a₁ hDAle cAll (pre cAll : ↑Γ(X, ⊤))
+      ha₁coe hcAlldvda₁ cT hWij hleAi hleAj hcTdvd hcTu hcTr hcTs hcTt i j
+
+/-- **(Stage 3c-γ barrier — the corrected-cochain conjugate collapses)** In any
+variable-change group, `a * (a⁻¹ * b) * b⁻¹ = 1`; used to collapse the corrected chart
+transition `transVC (Qᵢ|, Qⱼ|) = DAᵢ| * (DAᵢ|⁻¹ * DAⱼ|) * DAⱼ|⁻¹` to `1`.  Stated at a
+variable ring so the concrete `Γ(X, D(a₁·fᵢ))` cochains are never unfolded. -/
+private theorem vc_conj_cancel {R : Type*} [CommRing R]
+    (a b : WeierstrassCurve.VariableChange R) : a * (a⁻¹ * b) * b⁻¹ = 1 := by
+  group
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **([a5-P-loc] Stage 3c, the mouth-core presentation at an invariant prime — THE
@@ -2294,58 +2386,81 @@ theorem exists_invariant_away_presentation (G : Type*) [Group G] [Finite G] [IsA
   -- for every invariant `a` with `k₀ ∣ a`, the `f i`-images generate the unit ideal of
   -- `A[1/a]`, so the opens `D(a·fᵢ)` cover `D(a)` (`basicOpen_le_iSup_basicOpen_mul`).
   obtain ⟨k₀, hk₀, hspanA⟩ := exists_invariant_span_away G p f hspan
-  -- ### Stage 3c-β/γ (THE RESIDUAL — spread + native glue).  In context: the invariant
-  -- multiplicative set `S` with invariant preimages `hpre`, the spread span witness
-  -- `k₀`/`hspanA`, and the α-package: the finite chart cover `f`/`P` with span witness
-  -- `hspan` over `L = Localization S`, the pairwise units `hU`, the correction cochain
-  -- `D i / L[1/fᵢ]`, the glued model `W₀L / L` with `IsUnit W₀L.Δ` (`hΔ`), the per-chart
-  -- identity `hglue` (`W₀L = D i • (P i).W` over `L[1/fᵢ]` through `sectionsToLoc`), and
-  -- the corrected coboundary `hcobInv` (`transVC = (D i)⁻¹ * (D j)` on pairwise overlaps).
-  --
-  -- **β (the invariant-denominator spread — the Part-2 pattern of
-  -- `exists_away_invariant_descent`, `ForMathlib/WeierstrassInvariantLocal.lean:444–806`):**
-  -- (β1) register the clearing calculus: `L[1/fᵢ]` is a localization of `A = Γ(X, ⊤)` at
-  --      `IsLocalization.localizationLocalizationSubmodule S (Submonoid.powers fᵢ')`
-  --      (mathlib `IsLocalization.localization_localization_isLocalization`); against the
-  --      chart ring `Γ(X, D(a·fᵢ))` (`IsLocalization.Away (a·fᵢ)` via
-  --      `isLocalization_basicOpen`) use `IsLocalization.isLocalization_of_submonoid_le`
-  --      to clear equalities: two chart sections with equal `sectionsToLoc`-images differ
-  --      by a multiplier `c` whose `L`-image factors as `fᵢᵏ · (image of S)`
-  --      (`mem_localizationLocalizationSubmodule`), and a second clearing
-  --      (`IsLocalization.eq_iff_exists S L`) converts `c`-multiplication into
-  --      `s'·fᵢᵏ`-multiplication with `s' ∈ S`; the `fᵢ`-power is already invertible on
-  --      the chart, and `s'` has an invariant preimage (`hpre`) folded into `a₁`.
-  -- (β2) spread: the five coefficients of `W₀L` (fractions `mk' b s` with invariant
-  --      denominators — the `W₁ₗ` construction), the `Δ`-inverse witness
-  --      (⟹ `W₀R₁.IsElliptic`), the components of each `D i` (`u`/`u⁻¹`/`r`/`s`/`t` —
-  --      the `Dₗ` construction with the `hUpu` unit trick), the per-chart glue
-  --      identities, the pairwise transVC-triviality at chart level (reshape via
-  --      `transVC_restrict_ofVC` + `transVC_trans`/`transVC_self`:
-  --      `transVC (Qᵢ|, Qⱼ|) = Dᵢᴬ| * transVC (Pᵢ|, Pⱼ|) * (Dⱼᴬ|)⁻¹`, trivial after
-  --      clearing `hcobInv`), and the span witness (one `S`-clearing of `1 = Σ cᵢ fᵢ'`,
-  --      giving `Ideal.span (range (algebraMap A A_{a₁} ∘ f)) = ⊤`); fold the finitely
-  --      many invariant preimages into a single `a₁ ∉ p` and shrink along the canonical
-  --      `fK`/`fR` transport maps (`IsLocalization.lift` on powers).
-  -- **γ (the native glue over `D(a₁)` — no geometric spread):**
-  -- (γ1) corrected charts `Q i := ((P i).restrict h).ofVC Dᵢᴬ` over `D(a₁·fᵢ)` with
-  --      `(Q i).W = W₀R₁.map (toChartᵢ)` and pairwise `transVC = 1` — the transition
-  --      factorization `transVC (Q₁|, Q₂|) = C₁| * transVC (P₁|, P₂|) * (C₂|)⁻¹` is
-  --      BANKED (`transVC_ofVC_restrict_pair`, above);
-  -- (γ2) the cover `D(a₁) = ⋃ D(a₁·fᵢ)`: `basicOpen_le_iSup_basicOpen_mul` (above) with
-  --      the spread span witness `hspanA` (in context, from
-  --      `exists_invariant_span_away` — BANKED);
-  -- (γ3) `ρR₁` by `Scheme.OpenCover.glueMorphisms` on the `projModelπ W₀R₁`-preimages of
-  --      the basic opens `D(fᵢ) ⊆ Spec A_{a₁}` — each piece is the projective model of
-  --      the chart base change (`isPullback_projModelBaseChange` + open-immersion range
-  --      transport), mapped to `E` by `(Q i).e.inv ≫ pullback.fst`; overlap agreement
-  --      from `pointedIso_hom_of_transVC_eq_one` (`Moduli/AdaptedModel.lean:755`) on the
-  --      transVC-triviality + `restrict_e_baseChange` (the `glueMorphisms_hf_of_agree`
-  --      pattern, `ForMathlib/SpecBasicOpenAway.lean`);
-  -- (γ4) the pullback square by `isPullback_of_iSup_eq_top`
-  --      (`ForMathlib/PullbackLocalAtTarget.lean`) on the same cover of `Spec A_{a₁}`,
-  --      per piece from `(Q i).compat_π` + `isPullback_projModelBaseChange` pasting; the
-  --      zero-leg checked on the cover from `(Q i).compat_zero` +
-  --      `projModelZero_baseChange`.
+  -- ### Stage 3c-β (invariant-denominator spread) — CLOSED, AXIOM-CLEAN, via the mouth-core
+  -- theorem `exists_invariant_chart_spread` (the β2 clearing calculus + β-assembly, all
+  -- decomposed into the `spread_*` helpers above).  It consumes the whole α-package and the
+  -- spread span witness, delivering the invariant level `a₁ ∉ p`, an elliptic model
+  -- `W₀R₁ / A[1/a₁]`, per-chart corrections `DA i` over `Γ(X, D(a₁·fᵢ))`, the span over
+  -- `A[1/a₁]`, the per-chart glue `DA i • (P i).W| = W₀R₁ ⊗ Γ(X, D(a₁·fᵢ))`, and the
+  -- corrected chart coboundary `transVC ((P i)|, (P j)|) = (DA i|)⁻¹ * (DA j|)`.
+  have hmemS : ∀ k : FixedPoints.subring ↑Γ(X, ⊤) G, k ∉ p → ((k : ↑Γ(X, ⊤))) ∈ S :=
+    fun k hk => Submonoid.mem_map.mpr ⟨k, hk, rfl⟩
+  obtain ⟨a₁, ha₁, W₀R₁, DA, hΔ₁, hspan₁, hglue₁, hcob₁⟩ :=
+    exists_invariant_chart_spread G S p hpre hmemS f P k₀ hk₀ hspanA hU D W₀L hΔ hglue hcobInv
+  refine ⟨a₁, ha₁, W₀R₁, ⟨hΔ₁⟩, ?_⟩
+  -- ### Stage 3c-γ (THE NATIVE GLUE over `D(a₁)`).  γ1 (corrected charts + transVC = 1) and
+  -- γ2 (the cover) are proved GREEN below; the residual `sorry` is exactly γ3+γ4.
+  -- (γ1) corrected charts `Q i := ((P i).restrict (D(a₁·fᵢ) ≤ D(fᵢ))).ofVC (DA i)` over
+  --      `D(a₁·fᵢ)`, with `(Q i).W = W₀R₁.map (awayToSections a₁ fᵢ)` (`hQW`).
+  have hQW : ∀ i, (((P i).restrict (V' := ⟨X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i),
+        (isAffineOpen_top X).basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i)⟩)
+      (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f i))).ofVC (DA i)).W
+      = W₀R₁.map (awayToSections (a₁ : ↑Γ(X, ⊤)) (f i)) := fun i => by
+    rw [LocalPresentation.ofVC_W,
+      restrict_W_eq (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f i)) (P i)]
+    exact hglue₁ i
+  -- (γ2) the cover `D(a₁) ≤ ⋃ᵢ D(a₁·fᵢ)` (`basicOpen_le_iSup_basicOpen_mul` + `hspan₁`).
+  have hcover : X.basicOpen (a₁ : ↑Γ(X, ⊤)) ≤ ⨆ i, X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i) :=
+    basicOpen_le_iSup_basicOpen_mul (a₁ : ↑Γ(X, ⊤)) f hspan₁
+  -- (γ1) the pairwise transition-triviality `transVC (Qᵢ|, Qⱼ|) = 1`
+  --      (`transVC_ofVC_restrict_pair` + `transVC_restrict_restrict_left/right` + `hcob₁`);
+  --      note the two charts restrict to DIFFERENT opens `D(a₁·fᵢ)`/`D(a₁·fⱼ)`, so the
+  --      asymmetric `_left`/`_right` restriction laws are required (not the symmetric one).
+  have hVC1 : ∀ i j,
+      ((((P i).restrict (V' := ⟨X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i),
+            (isAffineOpen_top X).basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i)⟩)
+          (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f i))).ofVC (DA i)).restrict
+          (V' := ⟨X.basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j)),
+            (isAffineOpen_top X).basicOpen _⟩)
+          (basicOpen_mul_le_left ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j))).transVC
+        ((((P j).restrict (V' := ⟨X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f j),
+            (isAffineOpen_top X).basicOpen ((a₁ : ↑Γ(X, ⊤)) * f j)⟩)
+          (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f j))).ofVC (DA j)).restrict
+          (V' := ⟨X.basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j)),
+            (isAffineOpen_top X).basicOpen _⟩)
+          (basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j))) = 1 :=
+    fun i j => by
+    have key := transVC_ofVC_restrict_pair
+      ((P i).restrict (V' := ⟨X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i),
+          (isAffineOpen_top X).basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i)⟩)
+        (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f i)))
+      ((P j).restrict (V' := ⟨X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f j),
+          (isAffineOpen_top X).basicOpen ((a₁ : ↑Γ(X, ⊤)) * f j)⟩)
+        (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f j)))
+      (DA i) (DA j)
+      (V' := ⟨X.basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j)),
+          (isAffineOpen_top X).basicOpen _⟩)
+      (basicOpen_mul_le_left ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j))
+      (basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j))
+    rw [LocalPresentation.transVC_restrict_restrict_left,
+      LocalPresentation.transVC_restrict_restrict_right, hcob₁ i j] at key
+    rw [key]
+    simp only [LocalPresentation.sectionsMapLE_id]
+    exact vc_conj_cancel _ _
+  -- ### Stage 3c-γ RESIDUAL (γ3 + γ4 only).  With γ1 (`hQW`, `hVC1`) and γ2 (`hcover`) green,
+  -- the native glue of `ρR₁` remains.  γ3: glue via `Scheme.OpenCover.glueMorphisms` on the
+  -- `projModelπ W₀R₁`-preimages `U i := projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (Away a₁) fᵢ'`,
+  -- pieces `(isoOfRangeEq (projModelBaseChange (awayToSections a₁ fᵢ) W₀R₁) …).inv ≫
+  -- (Q i).e.inv ≫ pullback.fst C.π (D(a₁·fᵢ)).ι`, overlap agreement from `hVC1` via
+  -- `pointedIso_hom_of_transVC_eq_one` + `restrict_e_baseChange` (the `mulModelHom` /
+  -- `glueMorphisms_hf_of_agree` idiom).  γ4: `isPullback_of_iSup_eq_top` per piece from
+  -- `isPullback_projModelBaseChange` pasted on `(Q i).compat_π`; zero-leg from
+  -- `(Q i).compat_zero` + `projModelZero_baseChange`.  THE ONE MISSING BARRIER LEMMA:
+  -- `Spec.map (awayToSections a₁ fᵢ)` is an open immersion with range
+  -- `specBasicOpen (Away a₁) fᵢ'` — right-cancel it against `Spec.map (algebraMap A (Away a₁))`
+  -- and `Spec.map (algebraMap A Γ(X, D(a₁·fᵢ)))` (both banked localization-away open
+  -- immersions, equal after `awayToSections_algebraMap`); range via
+  -- `PrimeSpectrum.localization_away_comap_range`.
   sorry
 
 end MouthCharts
