@@ -636,6 +636,106 @@ lemma coordinateHyperplaneLocalEquation_restrict_eq_transition_mul (i k j : σ) 
           (coordinateHyperplaneLocalEquation (R := R) k j) :=
   coordinateHyperplaneLocalEquation_restrict_product (R := R) i k j
 
+/-- Two common-degree chart extensions of the same section agree up to the standard
+transition factor after multiplication by a power of the coordinate cutting out the
+triple overlap. -/
+lemma exists_pow_coordinateChartDifference_eq_zero
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (i k j : σ) (n : ℕ)
+    (s : Γ(M, coordinateOpen (R := R) j))
+    (tI : Γ(M, coordinateOpen (R := R) i))
+    (tK : Γ(M, coordinateOpen (R := R) k))
+    (hI : M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op tI =
+        (Proj (homogeneousSubmodule σ R)).presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op
+              (coordinateHyperplaneLocalEquation (R := R) i j ^ n) •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s)
+    (hK : M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) k j)).op tK =
+        (Proj (homogeneousSubmodule σ R)).presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) k j)).op
+              (coordinateHyperplaneLocalEquation (R := R) k j ^ n) •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) k j)).op s) :
+    ∃ m : ℕ,
+      ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+          (coordinateHyperplaneLocalEquation (R := R) i j)) ^ m •
+        (M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op tI -
+          (coordinateOpenTransitionUnit (R := R) i k :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) i k)) ^ n •
+            M.presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op tK) = 0 := by
+  let Xp := Proj (homogeneousSubmodule σ R)
+  let W := coordinateOpenOverlap (R := R) i k
+  let r : Γ(Xp, W) := Xp.presheaf.map
+    (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+    (coordinateHyperplaneLocalEquation (R := R) i j)
+  let d : Γ(M, W) := M.presheaf.map
+      (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op tI -
+    (coordinateOpenTransitionUnit (R := R) i k : Γ(Xp, W)) ^ n •
+      M.presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op tK
+  have hW : IsAffineOpen W :=
+    Proj.isAffineOpen_basicOpen (homogeneousSubmodule σ R) (X i * X k)
+      (SetLike.mul_mem_graded
+        (X_mem_homogeneousSubmodule_one R i)
+        (X_mem_homogeneousSubmodule_one R k)) (by omega)
+  let U : Xp.affineOpens := ⟨W, hW⟩
+  apply
+    Scheme.Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_of_isAffineOpen
+      M U r d
+  let V := Xp.basicOpen r
+  have hV : V = W ⊓ coordinateOpen (R := R) j :=
+    coordinateOpenOverlap_basicOpen_localEquation (R := R) i k j
+  have hVI : V ≤ coordinateOpenOverlap (R := R) i j := by
+    rw [hV]
+    dsimp only [W]
+    rw [coordinateOpenOverlap_eq, coordinateOpenOverlap_eq]
+    exact le_inf (inf_le_left.trans inf_le_left) inf_le_right
+  have hVK : V ≤ coordinateOpenOverlap (R := R) k j := by
+    rw [hV]
+    dsimp only [W]
+    rw [coordinateOpenOverlap_eq, coordinateOpenOverlap_eq]
+    exact le_inf (inf_le_left.trans inf_le_right) inf_le_right
+  have hMcomp : ∀ {A B C : Xp.Opens} (hBA : B ≤ A) (hCB : C ≤ B)
+      (x : Γ(M, A)),
+      M.presheaf.map (homOfLE hCB).op
+          (M.presheaf.map (homOfLE hBA).op x) =
+        M.presheaf.map (homOfLE (hCB.trans hBA)).op x := by
+    intro A B C hBA hCB x
+    rw [← M.presheaf.map_comp_apply]
+    exact ConcreteCategory.congr_hom
+      (M.presheaf.congr_map (Subsingleton.elim _ _)) x
+  have hXcomp : ∀ {A B C : Xp.Opens} (hBA : B ≤ A) (hCB : C ≤ B)
+      (x : Γ(Xp, A)),
+      Xp.presheaf.map (homOfLE hCB).op
+          (Xp.presheaf.map (homOfLE hBA).op x) =
+        Xp.presheaf.map (homOfLE (hCB.trans hBA)).op x := by
+    intro A B C hBA hCB x
+    rw [← Xp.presheaf.map_comp_apply]
+    exact ConcreteCategory.congr_hom
+      (Xp.presheaf.congr_map (Subsingleton.elim _ _)) x
+  have hI' := congrArg (M.presheaf.map (homOfLE hVI).op) hI
+  rw [M.map_smul, hMcomp, hXcomp, hMcomp] at hI'
+  have hK' := congrArg (M.presheaf.map (homOfLE hVK).op) hK
+  rw [M.map_smul, hMcomp, hXcomp, hMcomp] at hK'
+  change M.presheaf.map (homOfLE (Xp.basicOpen_le r)).op d = 0
+  dsimp only [d]
+  rw [map_sub, M.map_smul, hMcomp, map_pow, hMcomp]
+  rw [hI', hK']
+  have hr := congrArg
+    (Xp.presheaf.map (homOfLE (Xp.basicOpen_le r)).op)
+    (coordinateHyperplaneLocalEquation_restrict_eq_transition_mul
+      (R := R) i k j)
+  rw [map_mul, hXcomp, hXcomp] at hr
+  rw [map_pow, map_pow]
+  rw [hr, mul_pow, mul_smul, sub_self]
+
 /-- The explicit standard-chart trivialization of the coordinate-hyperplane
 ideal module `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModuleTrivialization (i j : σ) :
