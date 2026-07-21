@@ -83,6 +83,13 @@ noncomputable def coordinateHyperplanePoleUnitHom (j : σ) :
       (ModularCurves.idealModuleToUnit
         (coordinateHyperplaneι (R := R) j))
 
+/-- The canonical global coordinate section of the concrete `O(1)`. -/
+noncomputable def coordinateHyperplanePoleSection (j : σ) :
+    Γ(coordinateHyperplanePoleSheaf (R := R) j,
+      (⊤ : (Proj (homogeneousSubmodule σ R)).Opens)) :=
+  (coordinateHyperplanePoleUnitHom (R := R) j).val.app (.op ⊤)
+    (show (Proj (homogeneousSubmodule σ R)).presheaf.obj (.op ⊤) from 1)
+
 /-- The concrete `O(1)` on polynomial projective space is invertible. -/
 theorem coordinateHyperplanePoleSheaf_isInvertible (j : σ) :
     Scheme.Modules.IsInvertible (coordinateHyperplanePoleSheaf (R := R) j) :=
@@ -465,6 +472,40 @@ theorem coordinateHyperplanePoleUnitHom_over_comp_trivialization
     (coordinateHyperplaneLocalEquation (R := R) i j)
     (coordinateHyperplaneIdealOverTrivialization_inv_comp (R := R) i j)
 
+/-- In the standard-chart frame, the canonical global section of `O(1)` has
+coordinate equal to the local equation of the coordinate hyperplane. -/
+theorem coordinateHyperplanePoleSection_localTrivializationTopSection
+    (i j : σ) :
+    ModularCurves.localTrivializationTopSection
+        (coordinateHyperplanePoleSheaf (R := R) j)
+        ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+        (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
+        (coordinateHyperplanePoleSection (R := R) j) =
+      ModularCurves.affineOpenTopSection
+        ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+        (coordinateHyperplaneLocalEquation (R := R) i j) := by
+  let U : (Proj (homogeneousSubmodule σ R)).affineOpens :=
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+  let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) U.1
+      (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+  let ePole := ModularCurves.SheafOfModules.dualOverIsoOfIso
+    (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+    (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) U.1 eIdeal
+  have h := ModularCurves.localTrivializationTopSection_unitHom_apply_one
+    (coordinateHyperplanePoleSheaf (R := R) j) U
+    (coordinateHyperplanePoleUnitHom (R := R) j) ePole
+    (coordinateHyperplaneLocalEquation (R := R) i j)
+    (coordinateHyperplanePoleUnitHom_over_comp_trivialization
+      (R := R) i j)
+  have he : coordinateHyperplanePoleSheafTrivialization (R := R) i j =
+      ModularCurves.restrictTrivializationOfOverIso
+        (coordinateHyperplanePoleSheaf (R := R) j) U.1 ePole := by
+    apply Iso.ext
+    rfl
+  rw [he]
+  exact h
+
 private noncomputable def coordinateHyperplaneIdealOverlapTrivializationLeft
     (i k j : σ) :
     (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)).over
@@ -783,6 +824,20 @@ lemma coordinateHyperplanePoleSheafPower_succ (j : σ) (n : ℕ) :
         coordinateHyperplanePoleSheaf (R := R) j :=
   rfl
 
+/-- The canonical section of `O(n)`, obtained by starting with `1` in degree
+zero and tensoring with the coordinate section in each successor degree. -/
+noncomputable def coordinateHyperplanePoleSectionPower (j : σ) :
+    ∀ n : ℕ,
+      Γ(coordinateHyperplanePoleSheafPower (R := R) j n,
+        (⊤ : (Proj (homogeneousSubmodule σ R)).Opens))
+  | 0 => ModularCurves.monoidalUnitSection
+      (Proj (homogeneousSubmodule σ R))
+  | n + 1 => ModularCurves.tensorSection
+      (coordinateHyperplanePoleSheafPower (R := R) j n)
+      (coordinateHyperplanePoleSheaf (R := R) j) ⊤
+      (coordinateHyperplanePoleSectionPower j n)
+      (coordinateHyperplanePoleSection (R := R) j)
+
 /-- A frame of `O(1)` on an open induces compatible frames of all nonnegative
 twists on that open. -/
 noncomputable def coordinateHyperplanePoleSheafPowerTrivializationOf
@@ -830,6 +885,50 @@ noncomputable def coordinateHyperplanePoleSheafPowerTrivialization
   coordinateHyperplanePoleSheafPowerTrivializationOf
     (coordinateOpen (R := R) i) j
       (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
+
+/-- In the standard-chart frame, the canonical section of `O(n)` has
+coordinate equal to the `n`th power of the hyperplane's local equation. -/
+theorem coordinateHyperplanePoleSectionPower_localTrivializationTopSection
+    (i j : σ) (n : ℕ) :
+    ModularCurves.localTrivializationTopSection
+        (coordinateHyperplanePoleSheafPower (R := R) j n)
+        ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+        (coordinateHyperplanePoleSheafPowerTrivialization
+          (R := R) i j n)
+        (coordinateHyperplanePoleSectionPower (R := R) j n) =
+      (ModularCurves.affineOpenTopSection
+        ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+        (coordinateHyperplaneLocalEquation (R := R) i j)) ^ n := by
+  induction n with
+  | zero =>
+      simpa only [coordinateHyperplanePoleSectionPower,
+        coordinateHyperplanePoleSheafPower,
+        coordinateHyperplanePoleSheafPowerTrivialization,
+        coordinateHyperplanePoleSheafPowerTrivializationOf, pow_zero] using
+        ModularCurves.localTrivializationTopSection_monoidalUnitSection
+          ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+  | succ n ih =>
+      change ModularCurves.localTrivializationTopSection
+          (coordinateHyperplanePoleSheafPower (R := R) j n ⊗
+            coordinateHyperplanePoleSheaf (R := R) j)
+          ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen i⟩
+          (ModularCurves.restrictMonoidalTensorIso
+              (coordinateOpen (R := R) i).ι
+              (coordinateHyperplanePoleSheafPower (R := R) j n)
+              (coordinateHyperplanePoleSheaf (R := R) j) ≪≫
+            (coordinateHyperplanePoleSheafPowerTrivialization
+                (R := R) i j n ⊗ᵢ
+              coordinateHyperplanePoleSheafTrivialization (R := R) i j) ≪≫
+            ModularCurves.unitObjTensorIso
+              (coordinateOpen (R := R) i).toScheme)
+          (ModularCurves.tensorSection
+            (coordinateHyperplanePoleSheafPower (R := R) j n)
+            (coordinateHyperplanePoleSheaf (R := R) j) ⊤
+            (coordinateHyperplanePoleSectionPower (R := R) j n)
+            (coordinateHyperplanePoleSection (R := R) j)) = _
+      rw [ModularCurves.localTrivializationTopSection_tensorSection, ih,
+        coordinateHyperplanePoleSection_localTrivializationTopSection]
+      exact (pow_succ _ n).symm
 
 /-- Every nonnegative coordinate-hyperplane twist `O(n)` is invertible. -/
 theorem coordinateHyperplanePoleSheafPower_isInvertible (j : σ) (n : ℕ) :
