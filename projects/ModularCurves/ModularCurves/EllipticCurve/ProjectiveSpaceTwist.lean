@@ -432,6 +432,29 @@ lemma exists_coordinateChartExtension
     exact ConcreteCategory.congr_hom hcomp (f ^ n)
   exact hleft.trans (ht.trans hright.symm)
 
+/-- Over a finite standard coordinate cover, the chart extensions of a section may all be
+chosen with one common coordinate-ratio exponent. -/
+lemma exists_coordinateChartExtension_forall [Fintype σ]
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (j : σ) (s : Γ(M, coordinateOpen (R := R) j)) :
+    ∃ (n : ℕ) (t : ∀ i : σ, Γ(M, coordinateOpen (R := R) i)), ∀ i,
+      M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op (t i) =
+        (Proj (homogeneousSubmodule σ R)).presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op
+              (coordinateHyperplaneLocalEquation (R := R) i j ^ n) •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s := by
+  classical
+  choose n t ht using fun i ↦ exists_coordinateChartExtension M i j s
+  let N := Finset.univ.sup n
+  have hle (i : σ) : n i ≤ N := Finset.le_sup (Finset.mem_univ i)
+  refine ⟨N, fun i ↦
+    coordinateHyperplaneLocalEquation (R := R) i j ^ (N - n i) • t i,
+    fun i ↦ ?_⟩
+  rw [M.map_smul, ht i, ← mul_smul, ← map_mul, ← pow_add,
+    Nat.sub_add_cancel (hle i)]
+
 /-- If a global section of a quasicoherent module vanishes on one standard
 coordinate chart, then its restriction to any other chart is annihilated by
 some power of the corresponding coordinate ratio. -/
