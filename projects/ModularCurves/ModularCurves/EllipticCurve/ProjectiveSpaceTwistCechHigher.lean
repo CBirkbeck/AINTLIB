@@ -975,6 +975,48 @@ theorem coordinateHomogeneousLaurentOrderedCechComplex_homology_module_finite
     (coordinateHomogeneousLaurentFullNegativeCyclesToHomology_surjective
       (R := R) j d n)
 
+/-- Positive-degree homology of the explicit standard-coordinate ordered-Cech complex for a
+projective twist is finite over a Noetherian coefficient ring. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechComplex_homology_module_finite
+    [Fintype σ] [LinearOrder σ] [IsNoetherianRing R]
+    (j : σ) (d : ℤ) (n : ℕ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHyperplaneTwistOrderedBaseCechComplex
+        (R := R) j d).homology (n + 1)) := by
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).homology (n + 1)) :=
+    coordinateHomogeneousLaurentOrderedCechComplex_homology_module_finite
+      j d n
+  exact Module.Finite.equiv
+    (HomologicalComplex.homologyMapIso
+      (coordinateHomogeneousLaurentOrderedCechComplexIso
+        (R := R) j d) (n + 1)).symm.toLinearEquiv
+
+/-- Positive-degree homology of the native ordered-Cech complex for a coordinate-hyperplane twist
+is finite over a Noetherian coefficient ring. -/
+theorem coordinateHyperplaneTwist_orderedBaseCechComplex_homology_module_finite
+    [Fintype σ] [LinearOrder σ] [IsNoetherianRing R]
+    (j : σ) (d : ℤ) (n : ℕ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((Scheme.Modules.orderedBaseCechComplex
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ))).homology (n + 1)) := by
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHyperplaneTwistOrderedBaseCechComplex
+        (R := R) j d).homology (n + 1)) :=
+    coordinateHyperplaneTwistOrderedBaseCechComplex_homology_module_finite
+      j d n
+  exact Module.Finite.equiv
+    (HomologicalComplex.homologyMapIso
+      (coordinateHyperplaneTwistOrderedBaseCechComplexIso
+        (R := R) j d) (n + 1)).symm.toLinearEquiv
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation of the ordered Cech
 complex for a nonnegative projective twist is a boundary. -/
 theorem exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
