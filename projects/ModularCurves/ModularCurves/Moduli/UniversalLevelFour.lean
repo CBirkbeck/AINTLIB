@@ -1097,9 +1097,54 @@ theorem bridgeA_holds {R : CommRingCat.{u}} (X : EllObj R) (hR : IsUnit (2 : R))
   have h1 := (ha₃u.mul_right_eq_zero).mp key
   linear_combination h1
 
+/-- **(E4A-10 helper, the field-arithmetic core of the `u + 2B` exclusion)** In any field,
+given the curve relation, the tangent-denominator unit relation `(2V+U+B)·E = 1`, the two
+RING-DBL coordinate expansions for `Q̄ = (X, Y)`, and the residue-point hypothesis
+`U + 2B = 0`, the doubling coordinates of `Q̄` collapse onto those of `P̄`: `X = −B` and
+`Y = 0` (the sympy `EXCL-X` / `EXCL-Y` certificates). Extracted as a barrier lemma so the
+two heavy polynomial `linear_combination`s are checked once over a variable field, keeping
+the scheme-level wrapper under the default heartbeat budget. -/
+private theorem e4_double_collapse {k : Type u} [Field k] (B U V E X Y : k)
+    (hcv : V ^ 2 + U * V + B * V - U ^ 3 - B * U ^ 2 = 0)
+    (heR : (2 * V + U + B) * E = 1)
+    (hX : X = ((3 * U ^ 2 + 2 * B * U - V) * E) ^ 2
+      + (3 * U ^ 2 + 2 * B * U - V) * E - B - 2 * U)
+    (hY : Y = -((3 * U ^ 2 + 2 * B * U - V) * E * (X - U) + V) - X - B)
+    (hu2B : U + 2 * B = 0) :
+    X = -B ∧ Y = 0 := by
+  have hDne : (2 * V + U + B) ≠ 0 :=
+    (isUnit_of_mul_isUnit_left (y := E)
+      (by rw [heR]; exact isUnit_one)).ne_zero
+  have hstepX : (2 * V + U + B) ^ 2 * (X + B) = 0 := by
+    linear_combination (2 * V + U + B) ^ 2 * hX
+      + (-8 * U - 1) * hcv + (2 * B * U ^ 2 + U ^ 3) * hu2B
+      + (4 * B ^ 3 * E * U ^ 2 + 16 * B ^ 2 * E * U ^ 3
+        + 8 * B ^ 2 * E * U ^ 2 * V - 4 * B ^ 2 * E * U * V
+        + 4 * B ^ 2 * U ^ 2 + 2 * B ^ 2 * U + 21 * B * E * U ^ 4
+        + 24 * B * E * U ^ 3 * V - 10 * B * E * U ^ 2 * V
+        - 8 * B * E * U * V ^ 2 + B * E * V ^ 2 + 12 * B * U ^ 3
+        + 5 * B * U ^ 2 - B * V + 9 * E * U ^ 5 + 18 * E * U ^ 4 * V
+        - 6 * E * U ^ 3 * V - 12 * E * U ^ 2 * V ^ 2 + E * U * V ^ 2
+        + 2 * E * V ^ 3 + 9 * U ^ 4 + 3 * U ^ 3 - U * V - V ^ 2) * heR
+  have hxeq : X = -B := by
+    rcases mul_eq_zero.mp hstepX with h | h
+    · exact absurd h (pow_ne_zero 2 hDne)
+    · linear_combination h
+  have hstepY : (2 * V + U + B) * Y = 0 := by
+    linear_combination (2 * V + U + B) * hY
+      + (-(2 * V + U + B) * (3 * U ^ 2 + 2 * B * U - V) * E
+        - (2 * V + U + B)) * hxeq
+      + (-2 : k) * hcv + (B * U + U ^ 2) * hu2B
+      + (2 * B ^ 2 * U + 5 * B * U ^ 2 - B * V + 3 * U ^ 3
+        - U * V) * heR
+  have hyeq : Y = 0 := by
+    rcases mul_eq_zero.mp hstepY with h | h
+    · exact absurd h hDne
+    · exact h
+  exact ⟨hxeq, hyeq⟩
+
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(E4A-10 helper, the `u + 2B` exclusion ★★)** On an `ℰ₄`-form chart marking `P` at
 the origin and `Q` at `(u, v)`, with the pulled doubles fibrewise distinct
 (`2Q̄ ≠ 2P̄`), `u + 2B` is a unit: at a residue point with `ū = −2B̄`, the RING-DBL
@@ -1257,42 +1302,14 @@ private theorem isUnit_x_add_twoB_of_marked_pair {S : Scheme.{u}} {E : EllipticC
   have hYPk := congrArg (algebraMap ↑Γ(S, V.1) Kb) hYP
   simp only [map_add, map_sub, map_mul, map_pow, map_ofNat, map_zero, map_one,
     map_neg] at hcvk heRk hxdefk hydefk hXPk hYPk
-  set aB := algebraMap ↑Γ(S, V.1) Kb B with haB
-  set aU := algebraMap ↑Γ(S, V.1) Kb u with haU
-  set aV := algebraMap ↑Γ(S, V.1) Kb v with haV
-  set aE := algebraMap ↑Γ(S, V.1) Kb e with haE
-  set aX := algebraMap ↑Γ(S, V.1) Kb (Pr.W.dblX u v e) with haX
-  set aY := algebraMap ↑Γ(S, V.1) Kb (Pr.W.dblY u v e) with haY
-  -- `D̄ ≠ 0` and the two coordinate collapses (sympy `EXCL-X` / `EXCL-Y`)
-  have hDne : (2 * aV + aU + aB) ≠ 0 :=
-    (isUnit_of_mul_isUnit_left (y := aE)
-      (by rw [heRk]; exact isUnit_one)).ne_zero
-  have hstepX : (2 * aV + aU + aB) ^ 2 * (aX + aB) = 0 := by
-    linear_combination (2 * aV + aU + aB) ^ 2 * hxdefk
-      + (-8 * aU - 1) * hcvk + (2 * aB * aU ^ 2 + aU ^ 3) * hu2Bk
-      + (4 * aB ^ 3 * aE * aU ^ 2 + 16 * aB ^ 2 * aE * aU ^ 3
-        + 8 * aB ^ 2 * aE * aU ^ 2 * aV - 4 * aB ^ 2 * aE * aU * aV
-        + 4 * aB ^ 2 * aU ^ 2 + 2 * aB ^ 2 * aU + 21 * aB * aE * aU ^ 4
-        + 24 * aB * aE * aU ^ 3 * aV - 10 * aB * aE * aU ^ 2 * aV
-        - 8 * aB * aE * aU * aV ^ 2 + aB * aE * aV ^ 2 + 12 * aB * aU ^ 3
-        + 5 * aB * aU ^ 2 - aB * aV + 9 * aE * aU ^ 5 + 18 * aE * aU ^ 4 * aV
-        - 6 * aE * aU ^ 3 * aV - 12 * aE * aU ^ 2 * aV ^ 2 + aE * aU * aV ^ 2
-        + 2 * aE * aV ^ 3 + 9 * aU ^ 4 + 3 * aU ^ 3 - aU * aV - aV ^ 2) * heRk
-  have hxeq2 : aX = -aB := by
-    rcases mul_eq_zero.mp hstepX with h | h
-    · exact absurd h (pow_ne_zero 2 hDne)
-    · linear_combination h
-  have hstepY : (2 * aV + aU + aB) * aY = 0 := by
-    linear_combination (2 * aV + aU + aB) * hydefk
-      + (-(2 * aV + aU + aB) * (3 * aU ^ 2 + 2 * aB * aU - aV) * aE
-        - (2 * aV + aU + aB)) * hxeq2
-      + (-2 : Kb) * hcvk + (aB * aU + aU ^ 2) * hu2Bk
-      + (2 * aB ^ 2 * aU + 5 * aB * aU ^ 2 - aB * aV + 3 * aU ^ 3
-        - aU * aV) * heRk
-  have hyeq2 : aY = 0 := by
-    rcases mul_eq_zero.mp hstepY with h | h
-    · exact absurd h hDne
-    · exact h
+  -- the two coordinate collapses (sympy `EXCL-X` / `EXCL-Y`), factored through the
+  -- pure field-arithmetic barrier `e4_double_collapse`
+  obtain ⟨hxeq2, hyeq2⟩ := e4_double_collapse
+    (algebraMap ↑Γ(S, V.1) Kb B) (algebraMap ↑Γ(S, V.1) Kb u)
+    (algebraMap ↑Γ(S, V.1) Kb v) (algebraMap ↑Γ(S, V.1) Kb e)
+    (algebraMap ↑Γ(S, V.1) Kb (Pr.W.dblX u v e))
+    (algebraMap ↑Γ(S, V.1) Kb (Pr.W.dblY u v e))
+    hcvk heRk hxdefk hydefk hu2Bk
   -- assemble the contradiction: the two doubles coincide
   apply hne
   apply (modelPointAddEquiv Pr.W (K' := Kb)).injective
@@ -1303,7 +1320,6 @@ private theorem isUnit_x_add_twoB_of_marked_pair {S : Scheme.{u}} {E : EllipticC
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(E4A-10, bridge Q)** On an `ℰ₄`-form chart marking `P` at the origin and `Q` at
 `(u, v)`, the order-4 condition on `Q` forces the `e4Rel` relation, via the master
 identity `ψ₂(Q)³ · ψ₂(2Q) ≡ u(2B + u) · e4Rel (mod curve)` (sympy-certified) and the
@@ -1449,7 +1465,6 @@ theorem bridgeQ4_holds {R : CommRingCat.{u}} (X : EllObj R) (hR : IsUnit (2 : R)
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(E4A-11 helper, the `a₂`-unit certificate ★★)** On an `a₄ = a₆ = 0` chart with
 unit `a₃` marking a fibrewise `3P̄ ≠ 0` section at the origin, `a₂` is a unit: at a
 residue point with `ā₂ = 0` the fibre curve is in FLEX normal form, so the origin is
@@ -1567,7 +1582,6 @@ private theorem scale_vc_a₂_isUnit {A : Type u} [CommRing A] (W : WeierstrassC
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-11, the datum assembly)** Every naive full level-4 structure is an
 `ℰ₄`-datum: atlas charts + the (N-agnostic) marking pipeline
 (`marksAt_of_forall_pull_ne_zero`), translation of `P` to the origin
@@ -1765,7 +1779,6 @@ theorem e4_vc_marked {A : Type u} [CommRing A] {C : VariableChange A}
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12 kernel ★★)** Tate-normal-form uniqueness at the presentation level: two
 `ℰ₄`-form witnesses marking the same `P` at `(0,0)` and `Q` at `(uᵢ, vᵢ)` have
 `transVC = 1` and equal parameters. Mirror of `e3_witness_transVC_eq_one` (the
@@ -1826,7 +1839,6 @@ theorem restrict_W_e4form {S : Scheme.{u}} {G : EllipticCurveGeom S}
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12 ★)** Witness `(B, u, v)`-values agree on common affines: restrict both
 witnesses and apply the Tate-normal-form uniqueness. Mirror of
 `e3_witness_param_agree` (no `IsUnit 3`-style side condition needed at level 4). -/
@@ -1855,7 +1867,6 @@ theorem e4_witness_param_agree {R : CommRingCat.{u}} {X : EllObj R}
 
 open LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(E4A-12)** The glued `B` parameter of an `ℰ₄` datum. Mirror of `e3GammaGlued`. -/
 noncomputable def e4BGlued {R : CommRingCat.{u}} (X : EllObj R)
     (L : X.curve.FullLevelPt 4) (hD : IsE4Datum X L) :
@@ -1915,7 +1926,6 @@ noncomputable def e4BGlued {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(E4A-12)** The glued `u` parameter of an `ℰ₄` datum. -/
 noncomputable def e4UGlued {R : CommRingCat.{u}} (X : EllObj R)
     (L : X.curve.FullLevelPt 4) (hD : IsE4Datum X L) :
@@ -1975,7 +1985,6 @@ noncomputable def e4UGlued {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(E4A-12)** The glued `v` parameter of an `ℰ₄` datum. -/
 noncomputable def e4VGlued {R : CommRingCat.{u}} (X : EllObj R)
     (L : X.curve.FullLevelPt 4) (hD : IsE4Datum X L) :
@@ -2035,7 +2044,6 @@ noncomputable def e4VGlued {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12)** The glued parameters satisfy the curve relation
 `v² + uv + Bv − u³ − Bu² = 0` (each witness marks `Q` on an `ℰ₄`-form chart).
 Mirror of `e3_glued_flex`. -/
@@ -2070,7 +2078,6 @@ theorem e4_glued_curve_rel {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12)** The glued parameters satisfy the order-4 relation `e4Rel(B, u) = 0`
 (each witness carries it). Mirror of `e3_glued_flex`. -/
 theorem e4_glued_order_rel {R : CommRingCat.{u}} (X : EllObj R)
@@ -2097,7 +2104,6 @@ theorem e4_glued_order_rel {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation TopologicalSpace WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12 ★)** The localized element `B(1 − 16B)` at the glued parameters is a
 global unit (germwise: the witness `IsUnit B` plus `e4form_units`). Mirror of
 `e3Delta_glued_isUnit`. -/
@@ -2256,7 +2262,6 @@ theorem e4ClassifyingRingHom_V {R : CommRingCat.{u}} (X : EllObj R)
 
 open LocalPresentation MvPolynomial WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12 ★, the coefficient match)** Specializing the universal `ℰ₄` curve along
 the classifying map, restricted to a witness affine, recovers the witness chart curve.
 Mirror of `universalE3_map_classifying`. -/
@@ -2334,7 +2339,6 @@ noncomputable def E4Witness.restrict {R : CommRingCat.{u}} {X : EllObj R}
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12)** The pieces are compatible with restriction (Tate-normal-form
 uniqueness). Mirror of `e3Piece_restrict`. -/
 theorem e4Piece_restrict {R : CommRingCat.{u}} {X : EllObj R}
@@ -2412,7 +2416,6 @@ open CategoryTheory Limits in
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12)** The piece is witness-independent at a fixed affine. Mirror of
 `e3Piece_congr`. -/
 theorem e4Piece_congr {R : CommRingCat.{u}} {X : EllObj R}
@@ -2441,7 +2444,6 @@ theorem e4Piece_congr {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 private theorem e4Piece_agree {R : CommRingCat.{u}} {X : EllObj R}
     {L : X.curve.FullLevelPt 4} (hD : IsE4Datum X L)
     (p q : E4Witness X L) :
@@ -2591,7 +2593,6 @@ theorem e4Top_piece {R : CommRingCat.{u}} {X : EllObj R}
   (e4WitnessCover hD).ι_glueMorphisms _ _ w
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 800000 in
 /-- **(E4A-12)** The piece map lies over the restricted classifying map. Mirror of
 `e3Piece_π`. -/
 theorem e4Piece_π {R : CommRingCat.{u}} {X : EllObj R}
@@ -2623,7 +2624,6 @@ theorem e4Piece_π {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12 ★)** The glued comparison lies over the classifying map. Mirror of
 `e3Top_π_w`. -/
 theorem e4Top_π_w {R : CommRingCat.{u}} {X : EllObj R}
@@ -2667,7 +2667,6 @@ noncomputable def e4BaseCover {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12 ★)** The glued comparison respects the zero sections. Mirror of
 `e3Top_zero`. -/
 theorem e4Top_zero {R : CommRingCat.{u}} {X : EllObj R}
@@ -2739,7 +2738,6 @@ theorem e4Top_zero {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12)** The classifying map lies over `Spec R`. Mirror of
 `e3ClassifyingMap_structMap`. -/
 theorem e4ClassifyingMap_structMap {R : CommRingCat.{u}} {X : EllObj R}
@@ -2823,7 +2821,6 @@ theorem sectionsMapLE_e4ClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-12)** The per-witness classifying square is cartesian. Mirror of
 `e3Piece_isPullback`. -/
 theorem e4Piece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
@@ -2876,7 +2873,6 @@ theorem e4Piece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
 /-- **(E4A-12 ★★)** The classifying square is cartesian: `X` is the pullback of the
 universal `ℰ₄` curve along the classifying map. Mirror of `isPullback_e3Top`. -/
 theorem isPullback_e4Top {R : CommRingCat.{u}} {X : EllObj R}
@@ -2942,7 +2938,6 @@ def e4ClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-13, rt1)** The marking downstairs: a marked section composed with the glued
 comparison is the classifying map followed by the universal marked point. Mirror of
 `section_comp_e3Top`. -/
@@ -3010,7 +3005,6 @@ theorem section_comp_e4Top {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-13, rt1 ★★)** Pulling the universal marked `P` back recovers `P`. Mirror of
 `pullSection_e3ClassifyingEllHom_P`. -/
 theorem pullSection_e4ClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
@@ -3043,7 +3037,6 @@ theorem pullSection_e4ClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 /-- **(E4A-13, rt1 ★★)** Pulling the universal marked `Q` back recovers `Q`. Mirror of
 `pullSection_e3ClassifyingEllHom_Q`. -/
 theorem pullSection_e4ClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllObj R}
@@ -3400,7 +3393,21 @@ theorem e4ClassifyingMap_pulled :
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 6400000 in
+-- RESIDUAL BUMP (2×, was 32×): elaboration of this transport-chain proof lands at
+-- ~280k heartbeats and cannot reach the 200k default. The irreducible hotspot is the
+-- `whnf` of `(tautPresentation (universalE4 R)).W` (the `from rfl` step folding the
+-- taut presentation into a base change) together with the final `e4Piece` `rfl`: both
+-- force evaluation of `universalE4 R`'s `E4ModuliRing`-valued (localized-quotient)
+-- coefficients. This whnf is cheap over an abstract carrier (a `(tautPresentation W).W =
+-- W.map _` lemma over a variable ring is `rfl` in ~440 hb) but every device that keeps it
+-- abstract here — a barrier-lemma `rw`, a bare `rw`, or a positional `conv` — either makes
+-- the motive ill-typed or leaves the goal unclosed. A genuine 200k fix needs the whole
+-- `e4Piece`/classifying API generalised over
+-- an abstract curve (the mouth-core nativeGlue/reduceSide pattern), a file-wide refactor
+-- beyond golfing; the identical ℰ₃ mirror `e3Top_pulled` carries the same 32× bump.
+-- Valid golf applied: `hle` factoring of the 8 repeated open-inclusion proofs +
+-- `conv_lhs` scoping of the final `e4Piece` unfold (cut the need from >440k to ~280k).
+set_option maxHeartbeats 400000 in
 /-- **(E4A-13, rt2c ★★)** Top determination: the glued classifying comparison of the
 pulled datum IS `φ`'s total-space morphism. Mirror of `e3Top_pulled`. -/
 theorem e4Top_pulled :
@@ -3443,58 +3450,45 @@ theorem e4Top_pulled :
     simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
       Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
   refine (e4WitnessCover hD').hom_ext _ _ (fun w => ?_)
+  have hle : w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+      (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+        (E4ModuliRing R))).affineOpens).1 := fun x _ => trivial
   rw [e4Top_piece hD' w, e4WitnessCover_f]
   rw [e4Piece_congr hD' w (e4PulledWitness φ hL w.V) rfl, eqToHom_refl,
     Category.id_comp]
   -- now: chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side through the transport
   rw [show pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι ≫ φ.top =
     transportTheta φ.baseHom φ.top φ.isPullback
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+      hle ≫
       pullback.fst (projModelπ (universalE4 R))
         (⊤ : (Spec (CommRingCat.of (E4ModuliRing R))).Opens).ι from
     (transportTheta_fst φ.baseHom φ.top φ.isPullback _).symm]
   rw [hfst, ← Category.assoc,
     show transportTheta φ.baseHom φ.top φ.isPullback
-        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+        hle ≫
       (tautPresentation (universalE4 R)).e.hom =
     ((tautPresentation (universalE4 R)).transport
       φ.baseHom φ.top φ.isPullback φ.zero_w
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)).e.hom ≫
+      hle).e.hom ≫
       projModelBaseChange (sectionsMapLE φ.baseHom
-        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-            (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+        hle)
         (tautPresentation (universalE4 R)).W from
     (transport_e_baseChange φ.baseHom φ.top φ.isPullback φ.zero_w
       (tautPresentation (universalE4 R)) _).symm]
   -- collapse the universal-side chain into a single base change along the composite
   have hσ : (sectionsMapLE φ.baseHom
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)).comp
+      hle).comp
       ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom) =
       ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
         (e4ClassifyingRingHom X _ hD') := by
     rw [sectionsMapLE_congr_hom (e4ClassifyingMap_pulled φ hL).symm
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial)]
+      hle]
     exact sectionsMapLE_e4ClassifyingMap hD' w.V (fun x _ => trivial)
   rw [show projModelBaseChange (sectionsMapLE φ.baseHom
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      hle)
       (tautPresentation (universalE4 R)).W =
     projModelBaseChange (sectionsMapLE φ.baseHom
-      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
-        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
-          (E4ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      hle)
       ((universalE4 R).map
         ((Scheme.ΓSpecIso (CommRingCat.of (E4ModuliRing R))).inv.hom)) from rfl]
   rw [show (isPullback_projModelBaseChange (universalE4 R)).isoPullback.hom ≫
@@ -3507,7 +3501,7 @@ theorem e4Top_pulled :
     (isPullback_projModelBaseChange (universalE4 R)).isoPullback_hom_fst]
   rw [Category.assoc, ← projModelBaseChange_comp',
     projModelBaseChange_congr_hom hσ (universalE4 R)]
-  rw [e4Piece]
+  conv_lhs => rw [e4Piece]
   rfl
 
 open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
