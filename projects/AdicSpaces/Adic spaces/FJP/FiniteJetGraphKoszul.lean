@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.FiniteJetNoetherianVertices
+import «Adic spaces».FJP.KoszulFiniteFree
 import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
 import Mathlib.RingTheory.Flat.EquationalCriterion
 import Mathlib.RingTheory.LocalProperties.Submodule
@@ -240,6 +241,117 @@ theorem d2_koszul_single (r : Fin m → S) (u : Fin m → S) (h : d1 r u = 0) (i
     rw [hs1, hs2, sub_zero, mul_comm]
 
 end Differentials
+
+/-! ### Conjugation to the all-degree finite-free Koszul model
+
+`KoszulFiniteFree.lean` (namespace `FiniteJet.KoszulFree`) implements the Koszul complex
+of `r₁, …, r_m` in every exterior degree on the subset model
+`KoszulIndex m q = {I : Finset (Fin m) // I.card = q}`, with the insertion-position sign
+`(-1) ^ #{j ∈ J | j < i}`.  The two theorems below are the **sign check** promised by the
+FJP → CDVF campaign crosswalk (decision D3): under the canonical degree-`0`/`1`/`2`
+identifications `KoszulTerm S m 0 ≃ₗ[S] S`, `KoszulTerm S m 1 ≃ₗ[S] (Fin m → S)` and
+`KoszulTerm S m 2 ≃ₗ[S] (Pairs m → S)`, the subset-model differentials in degrees `0` and
+`1` are EXACTLY `d1` and `d2` above — for `q = 1` the subset-model formula reads
+`(d x)_{{k}} = ∑_{i<k} r_i x_{{i,k}} − ∑_{i>k} r_i x_{{k,i}}`, matching the [FJP] p.10
+convention `d₂(e_i ∧ e_j) = r_i e_j − r_j e_i` for `i < j`.  The statements of
+`d1`/`d2`/`d1_d2` are untouched. -/
+
+section KoszulFreeConjugation
+
+open KoszulFree
+
+variable {S : Type*} [CommRing S] {m : ℕ}
+
+private theorem min'_pair {a b : Fin m} (hab : a < b)
+    (H : ({a, b} : Finset (Fin m)).Nonempty) : ({a, b} : Finset (Fin m)).min' H = a :=
+  le_antisymm (Finset.min'_le _ a (Finset.mem_insert_self a {b}))
+    (Finset.le_min' _ _ a fun y hy => by
+      rcases Finset.mem_insert.mp hy with rfl | hy
+      · exact le_rfl
+      · exact hab.le.trans_eq (Finset.mem_singleton.mp hy).symm)
+
+private theorem max'_pair {a b : Fin m} (hab : a < b)
+    (H : ({a, b} : Finset (Fin m)).Nonempty) : ({a, b} : Finset (Fin m)).max' H = b :=
+  le_antisymm
+    (Finset.max'_le _ _ b fun y hy => by
+      rcases Finset.mem_insert.mp hy with rfl | hy
+      · exact hab.le
+      · exact (Finset.mem_singleton.mp hy).le)
+    (Finset.le_max' _ b (Finset.mem_insert_of_mem (Finset.mem_singleton_self b)))
+
+/-- Strictly ordered pairs are exactly the two-element subsets of `Fin m`. -/
+def pairsEquivKoszulIndexTwo (m : ℕ) : Pairs m ≃ KoszulIndex m 2 where
+  toFun p := ⟨{p.1.1, p.1.2}, Finset.card_pair_eq_two_iff.mpr p.2.ne⟩
+  invFun J :=
+    ⟨(J.1.min' (Finset.card_pos.mp (by rw [J.2]; exact Nat.zero_lt_two)),
+      J.1.max' (Finset.card_pos.mp (by rw [J.2]; exact Nat.zero_lt_two))),
+      Finset.min'_lt_max'_of_card _ (by rw [J.2]; exact Nat.one_lt_two)⟩
+  left_inv p := by
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · exact min'_pair p.2 (Finset.insert_nonempty _ _)
+    · exact max'_pair p.2 (Finset.insert_nonempty _ _)
+  right_inv J := by
+    obtain ⟨a, b, hab, hJ⟩ := Finset.card_eq_two.mp J.2
+    refine Subtype.ext ?_
+    rcases lt_or_gt_of_ne hab with h | h
+    · simp only [hJ]
+      rw [min'_pair h, max'_pair h]
+    · rw [Finset.pair_comm] at hJ
+      simp only [hJ]
+      rw [min'_pair h, max'_pair h]
+
+/-- Degree `2`: ordered-pair indexing is a linear equivalence
+`KoszulTerm S m 2 ≃ₗ[S] (Pairs m → S)`. -/
+def koszulTermTwoEquiv : KoszulTerm S m 2 ≃ₗ[S] (Pairs m → S) :=
+  LinearEquiv.funCongrLeft S S (pairsEquivKoszulIndexTwo m)
+
+@[simp] theorem koszulTermTwoEquiv_apply (x : KoszulTerm S m 2) (p : Pairs m) :
+    koszulTermTwoEquiv x p =
+      x ⟨{p.1.1, p.1.2}, Finset.card_pair_eq_two_iff.mpr p.2.ne⟩ :=
+  rfl
+
+/-- SIGN CHECK, degree 0: under the degree-`0`/`1` identifications, the subset-model
+Koszul differential `koszulDifferential r 0` is exactly `d1`. -/
+theorem koszulDifferential_zero_eq_d1 (r : Fin m → S) (x : KoszulTerm S m 1) :
+    koszulTermZeroEquiv (koszulDifferential r 0 x) = d1 r (koszulTermOneEquiv x) := by
+  rw [koszulTermZeroEquiv_apply]
+  simp only [koszulDifferential_apply]
+  unfold d1
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [dif_neg (Finset.notMem_empty i), koszulTermOneEquiv_apply]
+  simp only [Finset.filter_empty, Finset.card_empty, pow_zero, one_mul]
+  exact mul_comm _ _
+
+/-- SIGN CHECK, degree 1: under the degree-`1`/`2` identifications, the subset-model
+Koszul differential `koszulDifferential r 1` is exactly `d2` with the [FJP] p.10
+convention `d₂(e_i ∧ e_j) = r_i e_j − r_j e_i` for `i < j`: the subset-model formula
+`(d x)_{{j}} = ∑_{i<j} r_i x_{{i,j}} − ∑_{i>j} r_i x_{{j,i}}` matches summand by
+summand. -/
+theorem koszulDifferential_one_eq_d2 (r : Fin m → S) (x : KoszulTerm S m 2) (j : Fin m) :
+    koszulTermOneEquiv (koszulDifferential r 1 x) j = d2 r (koszulTermTwoEquiv x) j := by
+  rw [koszulTermOneEquiv_apply]
+  simp only [koszulDifferential_apply]
+  unfold d2
+  rw [← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rcases lt_trichotomy i j with hij | rfl | hji
+  · -- `i < j`: positive sign, wedge `{i, j}` read through the first `d2`-sum
+    rw [dif_neg (Finset.notMem_singleton.mpr hij.ne), dif_pos hij, dif_neg (asymm hij),
+      sub_zero]
+    simp only [Finset.filter_singleton, if_neg (asymm hij), Finset.card_empty, pow_zero,
+      one_mul, koszulTermTwoEquiv_apply]
+    exact mul_comm _ _
+  · -- `i = j`: both sides vanish (the two identical `i < i` dites rewrite in one step)
+    rw [dif_pos (Finset.mem_singleton_self i), dif_neg (lt_irrefl i), sub_zero]
+  · -- `j < i`: negative sign, wedge `{j, i}` read through the second `d2`-sum
+    rw [dif_neg (Finset.notMem_singleton.mpr hji.ne'), dif_neg (asymm hji), dif_pos hji,
+      zero_sub]
+    simp only [Finset.filter_singleton, if_pos hji, Finset.card_singleton, pow_one,
+      koszulTermTwoEquiv_apply, neg_one_mul]
+    rw [mul_comm (r i)]
+    exact congrArg (fun y => -(y * r i)) (congrArg x (Subtype.ext (Finset.pair_comm i j)))
+
+end KoszulFreeConjugation
 
 /-! ### Polynomial level: syzygies of the graph sequence are Koszul-generated
 
