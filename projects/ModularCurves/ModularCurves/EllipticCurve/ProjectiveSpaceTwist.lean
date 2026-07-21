@@ -2044,6 +2044,83 @@ theorem coordinateHyperplaneIdealModulePowerTrivialization_restrict_transition
   rw [hK, hI]
   exact hpower
 
+/-- The coefficient-one frame of `O(-n)` on a standard coordinate chart. -/
+noncomputable def coordinateHyperplaneIdealModulePowerFrameSection
+    (i j : σ) (n : ℕ) :
+    Γ(coordinateHyperplaneIdealModulePower (R := R) j n,
+      coordinateOpen (R := R) i) :=
+  ModularCurves.overTrivializationSection
+    (coordinateHyperplaneIdealModulePower (R := R) j n)
+    (coordinateOpen (R := R) i)
+    (Scheme.Modules.overTrivializationOfRestrictIso
+      (coordinateHyperplaneIdealModulePower (R := R) j n)
+      (coordinateOpen (R := R) i)
+      (coordinateHyperplaneIdealModulePowerTrivialization (R := R) i j n)) 1
+
+/-- On a coordinate overlap, multiplying the restricted `k`-frame of `O(-n)`
+by `(X_k / X_i)^n` gives the restricted `i`-frame. -/
+theorem coordinateHyperplaneIdealModulePowerFrameSection_restrict_transition
+    (i k j : σ) (n : ℕ) :
+    (coordinateOpenTransitionUnit (R := R) i k :
+        Γ(Proj (homogeneousSubmodule σ R),
+          coordinateOpenOverlap (R := R) i k)) ^ n •
+      (coordinateHyperplaneIdealModulePower (R := R) j n).presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+        (coordinateHyperplaneIdealModulePowerFrameSection (R := R) k j n) =
+      (coordinateHyperplaneIdealModulePower (R := R) j n).presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+        (coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j n) := by
+  let X := Proj (homogeneousSubmodule σ R)
+  let N := coordinateHyperplaneIdealModulePower (R := R) j n
+  let UI := coordinateOpen (R := R) i
+  let UK := coordinateOpen (R := R) k
+  let W := coordinateOpenOverlap (R := R) i k
+  let hI := coordinateOpenOverlap_le_left (R := R) i k
+  let hK := coordinateOpenOverlap_le_right (R := R) i k
+  let tI := coordinateHyperplaneIdealModulePowerTrivialization (R := R) i j n
+  let tK := coordinateHyperplaneIdealModulePowerTrivialization (R := R) k j n
+  let eI := Scheme.Modules.overTrivializationOfRestrictIso N UI tI
+  let eK := Scheme.Modules.overTrivializationOfRestrictIso N UK tK
+  let eIR := ModularCurves.SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf N UI eI (Over.mk (homOfLE hI))
+  let eKR := ModularCurves.SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf N UK eK (Over.mk (homOfLE hK))
+  let u : Γ(X, W) := coordinateOpenTransitionUnit (R := R) i k
+  have hsI := ModularCurves.overTrivializationSection_restrict N hI eI 1
+  have hsK := ModularCurves.overTrivializationSection_restrict N hK eK 1
+  have hTop : Scheme.Modules.openTopSection W (u ^ n) =
+      (Scheme.Modules.openTopSection W u) ^ n := by
+    unfold Scheme.Modules.openTopSection
+    rw [map_pow, map_pow]
+  have hOpen :
+      (Scheme.Modules.restrictOpenTrivialization hK tK).hom =
+        (Scheme.Modules.restrictOpenTrivialization hI tI).hom ≫
+          ModularCurves.unitEndomorphismOfTopSection
+            (Scheme.Modules.openTopSection W (u ^ n)) := by
+    rw [hTop]
+    exact coordinateHyperplaneIdealModulePowerTrivialization_restrict_transition
+      (R := R) i k j n
+  have hOver :=
+    ModularCurves.overTrivializationOfRestrictIso_hom_eq_comp_scalar
+      N W (Scheme.Modules.restrictOpenTrivialization hK tK)
+        (Scheme.Modules.restrictOpenTrivialization hI tI) (u ^ n) hOpen
+  have heIR : Scheme.Modules.overTrivializationOfRestrictIso N W
+      (Scheme.Modules.restrictOpenTrivialization hI tI) = eIR :=
+    Scheme.Modules.overTrivializationOfRestrictOpenTrivialization hI tI
+  have heKR : Scheme.Modules.overTrivializationOfRestrictIso N W
+      (Scheme.Modules.restrictOpenTrivialization hK tK) = eKR :=
+    Scheme.Modules.overTrivializationOfRestrictOpenTrivialization hK tK
+  rw [heIR, heKR] at hOver
+  change u ^ n •
+      N.presheaf.map (homOfLE hK).op
+        (ModularCurves.overTrivializationSection N UK eK 1) =
+    N.presheaf.map (homOfLE hI).op
+      (ModularCurves.overTrivializationSection N UI eI 1)
+  rw [hsI, hsK, map_one, map_one,
+    ModularCurves.overTrivializationSection_smul, mul_one]
+  exact ModularCurves.overTrivializationSection_eq_of_transition
+    N W eKR eIR (u ^ n) (u ^ n) 1 hOver (by rw [one_mul])
+
 /-- The integer twist `O(d)` on polynomial projective space, formed from the
 concrete coordinate-hyperplane `O(1)` and `O(-1)`. -/
 noncomputable def coordinateHyperplaneTwist (j : σ) :
