@@ -80,6 +80,162 @@ theorem coordinateHomogeneousLaurentOrderedCechObjectIso_hom_comp_π
       (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
         (R := R) b.1 d).toModuleIso) a
 
+/-- The ordered Cech coface on homogeneous Laurent weights deletes one entry from the ordered
+tuple and extends each allowed weight to the larger intersection. -/
+noncomputable def coordinateHomogeneousLaurentOrderedCechCoface
+    [LinearOrder σ] (d : ℤ) (n : ℕ) (k : Fin (n + 2)) :
+    coordinateHomogeneousLaurentOrderedCechObject (R := R) (σ := σ) d n ⟶
+      coordinateHomogeneousLaurentOrderedCechObject (R := R) (σ := σ) d (n + 1) :=
+  Pi.lift fun a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) =>
+    Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+      ModuleCat.of
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (AddMonoidAlgebra
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          {e : HomogeneousLaurentExponent σ d //
+            e.IsAllowedOn (fun l => (b.1 l).down)})) (a.delete k) ≫
+      ModuleCat.ofHom
+        (coordinateHomogeneousLaurentDeleteLinearMap (R := R) a k d)
+
+/-- Projecting a homogeneous-weight coface to an ordered tuple gives the corresponding deletion
+map on allowed weights. -/
+@[reassoc]
+theorem coordinateHomogeneousLaurentOrderedCechCoface_comp_π
+    [LinearOrder σ] (d : ℤ) (n : ℕ) (k : Fin (n + 2))
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
+    coordinateHomogeneousLaurentOrderedCechCoface
+        (R := R) (σ := σ) d n k ≫
+      Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1) =>
+        ModuleCat.of
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          (AddMonoidAlgebra
+            Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+            {e : HomogeneousLaurentExponent σ d //
+              e.IsAllowedOn (fun l => (b.1 l).down)})) a =
+      Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+        ModuleCat.of
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          (AddMonoidAlgebra
+            Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+            {e : HomogeneousLaurentExponent σ d //
+              e.IsAllowedOn (fun l => (b.1 l).down)})) (a.delete k) ≫
+        ModuleCat.ofHom
+          (coordinateHomogeneousLaurentDeleteLinearMap (R := R) a k d) := by
+  exact Pi.lift_π _ a
+
+/-- On the first face, the homogeneous-weight deletion map is conjugate to restriction followed
+by the first-face transition factor. -/
+theorem coordinateHomogeneousLaurentFactorCoface_naturality_delete_zero
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ) :
+    (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
+        (R := R) (a.delete 0).1 d).toModuleIso.hom ≫
+      ModuleCat.ofHom
+        (coordinateHomogeneousLaurentDeleteLinearMap (R := R) a 0 d) =
+    (Scheme.Modules.baseModulePresheaf
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+          (coordinateOpenCechDelete (R := R) a 0).op ≫
+      coordinateOpenCechFirstTransitionFactorEnd (R := R) a d ≫
+        (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
+          (R := R) a.1 d).toModuleIso.hom := by
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  exact (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_naturality_delete_zero
+    (R := R) a d x).symm
+
+/-- On every noninitial face, the homogeneous-weight deletion map is conjugate to ordinary
+restriction. -/
+theorem coordinateHomogeneousLaurentFactorCoface_naturality_delete_succ
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (k : Fin (n + 1)) (d : ℤ) :
+    (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
+        (R := R) (a.delete k.succ).1 d).toModuleIso.hom ≫
+      ModuleCat.ofHom
+        (coordinateHomogeneousLaurentDeleteLinearMap (R := R) a k.succ d) =
+    (Scheme.Modules.baseModulePresheaf
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+          (coordinateOpenCechDelete (R := R) a k.succ).op ≫
+        (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
+          (R := R) a.1 d).toModuleIso.hom := by
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  exact (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_naturality_delete_succ
+    (R := R) a k d x).symm
+
+/-- The factorwise homogeneous-weight equivalences conjugate every geometric ordered Cech coface
+to deletion of allowed global weights. -/
+theorem coordinateHomogeneousLaurentOrderedCechCoface_naturality
+    [LinearOrder σ] (d : ℤ) (n : ℕ) (k : Fin (n + 2)) :
+    (coordinateHomogeneousLaurentOrderedCechObjectIso
+        (R := R) (σ := σ) d n).hom ≫
+      coordinateHomogeneousLaurentOrderedCechCoface
+        (R := R) (σ := σ) d n k =
+    coordinateHyperplaneTwistOrderedBaseCechCoface
+        (R := R) (σ := σ) d n k ≫
+      (coordinateHomogeneousLaurentOrderedCechObjectIso
+        (R := R) (σ := σ) d (n + 1)).hom := by
+  unfold coordinateHomogeneousLaurentOrderedCechObjectIso
+  unfold coordinateHomogeneousLaurentOrderedCechCoface
+  apply Pi.hom_ext
+  intro a
+  erw [Category.assoc, Pi.lift_π, Pi.mapIso_hom_π_assoc,
+    Category.assoc, Pi.mapIso_hom_π]
+  by_cases hk : k = 0
+  · subst k
+    rw [coordinateHyperplaneTwistOrderedBaseCechCoface, if_pos rfl]
+    conv_rhs =>
+      erw [← Category.assoc,
+        coordinateHyperplaneTwistOrderedBaseCechFirstCoface_comp_π]
+    let p : Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n ⟶
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n (a.delete 0).1 :=
+      Pi.π _ (a.delete 0)
+    have hp :
+        Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+          Scheme.Modules.baseCechFactor
+            (homogeneousProjπ (R := R) (σ := σ))
+            (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+            (coordinateOpenCover (R := R) (σ := σ)) n b.1) (a.delete 0) = p := rfl
+    rw [hp]
+    exact congrArg (fun f => p ≫ f)
+      (coordinateHomogeneousLaurentFactorCoface_naturality_delete_zero
+        (R := R) a d)
+  · obtain ⟨k, rfl⟩ := Fin.eq_succ_of_ne_zero hk
+    rw [coordinateHyperplaneTwistOrderedBaseCechCoface,
+      if_neg (Fin.succ_ne_zero k)]
+    conv_rhs =>
+      erw [← Category.assoc, Scheme.Modules.orderedBaseCechCoface_comp_π]
+    let p : Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n ⟶
+      Scheme.Modules.baseCechFactor
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n (a.delete k.succ).1 :=
+      Pi.π _ (a.delete k.succ)
+    have hp :
+        Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+          Scheme.Modules.baseCechFactor
+            (homogeneousProjπ (R := R) (σ := σ))
+            (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+            (coordinateOpenCover (R := R) (σ := σ)) n b.1)
+          (a.delete k.succ) = p := rfl
+    rw [hp]
+    exact congrArg (fun f => p ≫ f)
+      (coordinateHomogeneousLaurentFactorCoface_naturality_delete_succ
+        (R := R) a k d)
+
 end
 
 end MvPolynomial
