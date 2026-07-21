@@ -3854,6 +3854,43 @@ theorem restrictFunctor_map_monoidalUnitObjIso_hom_comp_unitTrivialization
   rw [Category.assoc]
   rw [hrestrict]
 
+/-- The coefficient-one frame of the localized monoidal unit is sent to the
+unit section by the comparison with the structure module. -/
+theorem monoidalUnitObjIso_hom_overTrivializationSection_one
+    {X : Scheme.{u}} (U : X.Opens) :
+    (monoidalUnitObjIso X).hom.val.app (.op U)
+        (overTrivializationSection (𝟙_ X.Modules) U
+          (Scheme.Modules.overTrivializationOfRestrictIso (𝟙_ X.Modules) U
+            (restrictMonoidalUnitIso U.ι ≪≫
+              monoidalUnitObjIso U.toScheme)) 1) =
+      (show Γ(X, U) from 1) := by
+  let M := 𝟙_ X.Modules
+  let N := Scheme.Modules.unitObj X
+  let c := monoidalUnitObjIso X
+  let F := Scheme.Modules.restrictFunctor U.ι
+  let eNOver : N.over U ≅
+      SheafOfModules.unit (X.ringCatSheaf.over U) := Iso.refl _
+  let eM : F.obj M ≅ Scheme.Modules.unitObj U.toScheme :=
+    restrictMonoidalUnitIso U.ι ≪≫ monoidalUnitObjIso U.toScheme
+  let g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U) :=
+    (SheafOfModules.overFunctor X.ringCatSheaf U).mapIso c ≪≫ eNOver
+  have hgRestrict : restrictTrivializationOfOverIso M U g = eM := by
+    apply Iso.ext
+    change _ = eM.hom
+    rw [← restrictFunctor_map_monoidalUnitObjIso_hom_comp_unitTrivialization U]
+    simp only [restrictTrivializationOfOverIso, g, Iso.trans_hom]
+    exact (Scheme.Modules.overFunctorEquiv U).inv.naturality c.hom
+  have hgOver :
+      Scheme.Modules.overTrivializationOfRestrictIso M U eM = g := by
+    rw [← hgRestrict]
+    exact overTrivializationOfRestrictTrivializationOfOverIso M U g
+  change c.hom.val.app (.op U)
+      (overTrivializationSection M U
+        (Scheme.Modules.overTrivializationOfRestrictIso M U eM)
+        (show Γ(X, U) from 1)) = (show Γ(X, U) from 1)
+  rw [hgOver]
+  exact overTrivializationSection_coefficient M U g 1
+
 /-- The canonical section of the localized monoidal unit has coordinate `1`
 in its canonical frame on every affine open. -/
 theorem localTrivializationTopSection_monoidalUnitSection
