@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.CartierDivisor
-import ModularCurves.Picard.Dual
+import ModularCurves.Picard.Evaluation
 import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.Pic
@@ -5463,6 +5463,48 @@ theorem sectionContractionHom_tensorSection {X : Scheme.{u}}
   simp [Category.assoc]
 
 end SectionContraction
+
+/-- Evaluation against the sheaf dual, expressed using the localized monoidal tensor. -/
+noncomputable def dualPairing {X : Scheme.{u}} (M : X.Modules) :
+    M ⊗ Scheme.Modules.dualObj M ⟶ Scheme.Modules.unitObj X :=
+  (monoidalTensorObjIso M (Scheme.Modules.dualObj M)).hom ≫
+    Scheme.Modules.ev M
+
+/-- The localized dual pairing evaluates a pure tensor section pointwise. -/
+theorem dualPairing_tensorSection {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens) (x : Γ(M, U))
+    (φ : Γ(Scheme.Modules.dualObj M, U)) :
+    (dualPairing M).val.app (.op U)
+        (tensorSection M (Scheme.Modules.dualObj M) U x φ) =
+      SheafOfModules.evalSection X.ringCatSheaf M U φ x := by
+  let D := Scheme.Modules.dualObj M
+  let P := M.val ⊗ D.val
+  let k := monoidalTensorObjIso M D
+  let t : P.obj (.op U) := x ⊗ₜ φ
+  let a : ((PresheafOfModules.sheafification
+      (CategoryStruct.id X.ringCatSheaf.obj)).obj P).val.obj (.op U) :=
+    ((PresheafOfModules.sheafificationAdjunction
+      (CategoryStruct.id X.ringCatSheaf.obj)).unit.app P).app (.op U) t
+  have hk := Scheme.Modules.iso_inv_hom_app_applyT k (.op U) a
+  have hev := ((PresheafOfModules.sheafificationAdjunction
+    (CategoryStruct.id X.ringCatSheaf.obj)).homEquiv
+      P (Scheme.Modules.unitObj X)).apply_symm_apply
+        (Scheme.Modules.evPre M)
+  change
+    (PresheafOfModules.sheafificationAdjunction
+        (CategoryStruct.id X.ringCatSheaf.obj)).unit.app P ≫
+        (Scheme.Modules.ev M).val = Scheme.Modules.evPre M at hev
+  have hevApp := congrArg (fun q => q.app (.op U)) hev
+  have hevApply := ConcreteCategory.congr_hom hevApp t
+  change (Scheme.Modules.ev M).val.app (.op U) a =
+    (Scheme.Modules.evPre M).app (.op U) t at hevApply
+  change (Scheme.Modules.ev M).val.app (.op U) a =
+    SheafOfModules.evalSection X.ringCatSheaf M U φ x at hevApply
+  change (k.hom ≫ Scheme.Modules.ev M).val.app (.op U)
+      (k.inv.val.app (.op U) a) = _
+  erw [Scheme.Modules.sheafOfModules_comp_app_apply]
+  rw [hk]
+  exact hevApply
 
 private theorem poleTopSectionHom_comp
     {X : Scheme.{u}} {M N : X.Modules} (x : Γ(M, (⊤ : X.Opens)))

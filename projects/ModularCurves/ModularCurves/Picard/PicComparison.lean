@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.LinearAlgebra.TensorProduct.Finiteness
-import ModularCurves.Picard.Dual
+import ModularCurves.Picard.Evaluation
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.InvertibleSheaf
 
@@ -40,84 +40,6 @@ open Opposite
 variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
   (R : Sheaf J RingCat.{u})
 
-/-- **[PAIR-1a]** A section of `M` over `U` as a section of the restriction of `M` to the
-over-site of `U` (mirror of `overUnitSection` at a general module). -/
-noncomputable def overSection (M : _root_.SheafOfModules R) (U : C)
-    (m : M.val.obj (op U)) : (M.over U).sections :=
-  PresheafOfModules.sectionsMk
-    (fun (V : (Over U)ᵒᵖ) => M.val.map V.unop.hom.op m)
-    (fun {V W : (Over U)ᵒᵖ} f => by
-      change M.val.map f.unop.left.op (M.val.map V.unop.hom.op m) =
-        M.val.map W.unop.hom.op m
-      rw [← PresheafOfModules.map_comp_apply, ← op_comp, Over.w])
-
-/-- Sections of the over-site restriction are exactly sections over `U`, by evaluation at
-the terminal object (mirror of `overUnitSectionEquiv` at a general module). -/
-noncomputable def overSectionEquiv (M : _root_.SheafOfModules R) (U : C) :
-    M.val.obj (op U) ≃ (M.over U).sections where
-  toFun := overSection R M U
-  invFun s := s.val (op (Over.mk (𝟙 U)))
-  left_inv m := by
-    change M.val.map (𝟙 U).op m = m
-    rw [op_id, M.val.map_id]
-    rfl
-  right_inv s := by
-    apply PresheafOfModules.sections_ext
-    intro V
-    change M.val.map V.unop.hom.op (s.val (op (Over.mk (𝟙 U)))) = s.val V
-    have h := s.property (Over.mkIdTerminal.from V.unop).op
-    change M.val.map (Over.mkIdTerminal.from V.unop).left.op
-      (s.val (op (Over.mk (𝟙 U)))) = s.val V at h
-    rw [Over.mkIdTerminal_from_left] at h
-    exact h
-
-@[simp]
-theorem overSection_apply (M : _root_.SheafOfModules R) (U : C)
-    (m : M.val.obj (op U)) (V : (Over U)ᵒᵖ) :
-    (overSection R M U m).val V = M.val.map V.unop.hom.op m :=
-  rfl
-
-/-- **[PAIR-1b]** Evaluation of a local linear functional (a section of the sheaf dual)
-against a section of `M`, landing in the structure sheaf: push the section into the
-over-site, apply the functional, and read off the unit-section at the terminal object. -/
-noncomputable def evalSection (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m : M.val.obj (op U)) : R.obj.obj (op U) :=
-  (overUnitSectionEquiv R U).symm
-    (_root_.SheafOfModules.sectionsMap φ (overSection R M U m))
-
-@[simp]
-theorem evalSection_eq (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m : M.val.obj (op U)) :
-    evalSection R M U φ m = φ.val.app (op (Over.mk (𝟙 U))) (M.val.map (𝟙 U).op m) :=
-  rfl
-
-theorem evalSection_add_right (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m m' : M.val.obj (op U)) :
-    evalSection R M U φ (m + m') = evalSection R M U φ m + evalSection R M U φ m' := by
-  simp only [evalSection_eq, map_add]
-  exact map_add _ _ _
-
-theorem evalSection_smul_right (M : _root_.SheafOfModules R) (U : C)
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
-    evalSection R M U φ (r • m) = r • evalSection R M U φ m := by
-  simp only [evalSection_eq]
-  rw [PresheafOfModules.map_smul]
-  erw [(φ.val.app (op (Over.mk (𝟙 U)))).hom.map_smul]
-  congr 1
-  rw [op_id, R.obj.map_id]
-  rfl
-
-theorem evalSection_add_left (M : _root_.SheafOfModules R) (U : C)
-    (φ ψ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (m : M.val.obj (op U)) :
-    evalSection R M U (φ + ψ) m = evalSection R M U φ m + evalSection R M U ψ m := by
-  simp only [evalSection_eq]
-  rfl
-
 theorem evalSection_unit_mul (U : C) [∀ V, IsMulCommutative (R.obj.obj V)]
     (φ : (_root_.SheafOfModules.unit R).over U ⟶
       _root_.SheafOfModules.unit (R.over U))
@@ -149,43 +71,6 @@ theorem evalSection_unit_one (U : C)
   show R.obj.map (𝟙 U).op (1 : R.obj.obj (op U)) = (1 : R.obj.obj (op U))
   rw [op_id, R.obj.map_id]
   rfl
-
-theorem evalSection_smul_left (M : _root_.SheafOfModules R) (U : C)
-    [∀ V, IsMulCommutative (R.obj.obj V)]
-    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
-    (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
-    evalSection R M U (letI := dualSectionsModule R M U; r • φ) m =
-      r • evalSection R M U φ m := by
-  show evalSection R M U (φ ≫ overUnitScalarEnd R U r) m = _
-  simp only [evalSection_eq]
-  show (overUnitScalarEnd R U r).val.app (op (Over.mk (𝟙 U)))
-    (φ.val.app (op (Over.mk (𝟙 U))) (M.val.map (𝟙 U).op m)) = _
-  rw [overUnitScalarEnd_app_apply]
-  simp only [Over.mk_hom]
-  have hr : (ConcreteCategory.hom (R.obj.map (𝟙 U).op)) r = r := by
-    rw [op_id, R.obj.map_id]
-    rfl
-  rw [smul_eq_mul]
-  erw [hr]
-  exact (mul_comm' r _).symm
-
-/-- **[PAIR-1c]** Naturality of the evaluation: evaluating the restricted functional on the
-restricted section is the restriction of the evaluation. -/
-theorem evalSection_naturality (M : _root_.SheafOfModules R) {U V : Cᵒᵖ} (i : U ⟶ V)
-    (φ : M.over U.unop ⟶ _root_.SheafOfModules.unit (R.over U.unop))
-    (m : M.val.obj U) :
-    evalSection R M V.unop (dualRestrict R M i φ) (M.val.map i m) =
-      R.obj.map i (evalSection R M U.unop φ m) := by
-  simp only [evalSection_eq]
-  dsimp [dualRestrict, _root_.SheafOfModules.overMapUnitIso, _root_.SheafOfModules.overMap,
-    _root_.SheafOfModules.pushforward, _root_.SheafOfModules.overFunctorMap]
-  simp
-  exact PresheafOfModules.naturality_apply φ.val
-    ((Over.homMk i.unop (by
-      show i.unop ≫ 𝟙 (Opposite.unop U) = 𝟙 (Opposite.unop V) ≫ i.unop
-      simp) :
-      (Over.map i.unop).obj (Over.mk (𝟙 (Opposite.unop V))) ⟶
-        Over.mk (𝟙 (Opposite.unop U))).op) m
 
 /-- **Factorization of the evaluation through a trivialization**: for an isomorphism
 `ψ : M|ᵤ ≅ 𝒪|ᵤ` on the over-site, every functional is a scalar multiple of `ψ.hom`, and
@@ -337,37 +222,6 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj U)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
-open ModularCurves.SheafOfModules in
-/-- **[PAIR-2]** The evaluation morphism of presheaves: `M ⊗ᵖ M^∨ ⟶ 𝒪ₓ`,
-pointwise the lift of the bilinear evaluation pairing. -/
-noncomputable def evPre (M : X.Modules) :
-    (M.val ⊗ (dualObj M).val :
-      _root_.PresheafOfModules (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶
-      𝟙_ (_root_.PresheafOfModules (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) where
-  app U := ModuleCat.ofHom (TensorProduct.lift (by
-    letI := dualSectionsModule X.ringCatSheaf M U.unop
-    letI : SMulCommClass ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U) :=
-      ⟨fun a b c => by
-        show a * (b * c) = b * (a * c)
-        rw [← mul_assoc, mul_comm' a b, mul_assoc]⟩
-    exact LinearMap.mk₂ ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
-      (fun m φ => evalSection X.ringCatSheaf M U.unop φ m)
-      (fun m m' φ => evalSection_add_right X.ringCatSheaf M U.unop φ m m')
-      (fun r m φ => evalSection_smul_right X.ringCatSheaf M U.unop φ r m)
-      (fun m φ ψ => evalSection_add_left X.ringCatSheaf M U.unop φ ψ m)
-      (fun r m φ => evalSection_smul_left X.ringCatSheaf M U.unop φ r m)))
-  naturality {U V} i := by
-    refine ModuleCat.MonoidalCategory.tensor_ext (fun m φ => ?_)
-    exact ModularCurves.SheafOfModules.evalSection_naturality X.ringCatSheaf M i φ m
-
-/-- **[PAIR-2, sheaf level]** The evaluation morphism `M ⊗ M^∨ ⟶ 𝒪ₓ` on the sheafified
-tensor: the sheafification of `evPre`, collapsed onto the unit by the counit. -/
-noncomputable def ev (M : X.Modules) : tensorObj M (dualObj M) ⟶ unitObj X :=
-  (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map (evPre M) ≫
-    (sheafifyValIso (unitObj X)).hom
-
 set_option backward.isDefEq.respectTransparency.types false in
 /-- **[CMP-T]** The hand-rolled sheafified tensor of `Picard/InvertibleSheaf.lean` agrees
 with the localized monoidal tensor: `tensorObj M N ≅ M ⊗ N` — both are the sheafification
@@ -475,7 +329,7 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
     let eFac := eTensor ≪≫ eRight
     change IsIso eFac.hom
     exact eFac.isIso_hom
-  dsimp only [ev]
+  rw [ev_eq_sheafification_map]
   let ePre := @asIso _ _ _ _ (evPre (unitObj Y)) hEvPre
   exact IsIso.comp_isIso'
     ((PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).mapIso ePre).isIso_hom
