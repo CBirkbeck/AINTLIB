@@ -24535,3 +24535,18 @@ Findings: hVC1 is genuinely necessary (C.π not mono, so pullback-uniqueness sho
 REMAINING: split reduceSide into 3 opaque-term barrier lemmas ((∗∗) factorization,
 projModelBaseChange_congr'' step, B1 step) so hagree lands under 200k — mechanical, per the
 in-file sharpened frontier comment.
+
+### v10.343 progress — [T-E4D hagree: reduceSide split DONE, full proof type-checks] (2026-07-21)
+The reduceSide 200k-split is COMPLETE — 5 more axiom-clean barrier lemmas: bc_triple_comp
+(:2930, generic base-change triple collapse, comp'+congr_hom via subst on abstract ring homs),
+gluePieceIso_factor (:2940, the (∗∗) mono-cancellation, map_map=rfl), bc_chart_reduce (:2976,
+congr''+B1 restricted-chart projection), reduceSide (:2994, one side reduced with the overlap iso
+passed as OPAQUE morphism zinv so the statement stays <200k, body via congrArg/calc zero-kabstract),
+overlapMap_comm (:3040, R1' the two overlap composites agree via IsLocalization.ringHom_ext). THE
+200k TRICK (banked): generic ring-hom lemmas + congrArg term-mode + opaque-morphism parameters —
+NEVER rw/simp on concrete gluePiece/isoOfRangeEq/projModelBaseChange (kabstract whnf-blowup). The
+FULL hagree proof (setup + overlapMap_comm + hrange transport + reduceSide k/l + hzrel combine +
+hpi from pointedIso_hom_of_transVC_eq_one_loc) TYPE-CHECKS END-TO-END in scratch under a temp bump
+— the descent-glue MATH IS COMPLETE. Module GREEN, single sorry :3146. REMAINING (mechanical only):
+(1) 200k-split of the hagree assembly (extract setup+combine into barrier lemmas, same pattern);
+(2) one cosmetic eqToHom-associativity step. This is the LAST fitting before the engine flips.
