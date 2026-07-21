@@ -68,6 +68,80 @@ theorem HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
     ext i
     exact congrFun hef i
 
+/-- For fixed total degree and finitely many coordinates, there are only finitely many homogeneous
+Laurent exponents that are nonnegative in every coordinate. -/
+theorem HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_empty
+    [Fintype σ] (d : ℤ) :
+    {e : HomogeneousLaurentExponent σ d |
+      e.liftedNegativeSupport = ∅}.Finite := by
+  classical
+  apply Set.Finite.of_finite_image
+      (f := fun e : HomogeneousLaurentExponent σ d => (e.1 : σ → ℤ))
+  · apply (Set.Finite.pi' fun _ => Set.finite_Icc 0 d).subset
+    rintro f ⟨e, he, rfl⟩
+    intro i
+    have hnonneg (j : σ) : 0 ≤ e.1 j := by
+      by_contra hj
+      have hj' : ULift.up j ∈ e.liftedNegativeSupport := by
+        simpa [HomogeneousLaurentExponent.liftedNegativeSupport] using
+          (lt_of_not_ge hj)
+      rw [he] at hj'
+      exact hj'
+    have hrest : 0 ≤ ∑ j ∈ Finset.univ.erase i, e.1 j := by
+      apply Finset.sum_nonneg
+      intro j _
+      exact hnonneg j
+    have hsum : ∑ j, e.1 j = d := by
+      rw [← Finsupp.degree_eq_sum]
+      exact e.2
+    have hi : i ∈ (Finset.univ : Finset σ) := Finset.mem_univ i
+    have hsplit := Finset.sum_erase_add (Finset.univ : Finset σ)
+      (fun j => e.1 j) hi
+    simp only [Set.mem_Icc]
+    constructor
+    · exact hnonneg i
+    · omega
+  · intro e _ f _ hef
+    apply Subtype.ext
+    ext i
+    exact congrFun hef i
+
+/-- The finite product of degree-zero support cochains indexed by homogeneous Laurent exponents
+that are nonnegative in every coordinate. -/
+abbrev coordinateHomogeneousLaurentNonnegativeCochain
+    [LinearOrder σ] (d : ℤ) :=
+  (e : {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (∅ : Set (ULift.{u} σ))}) →
+    ModularCurves.OrderedCechSupportCochain
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      e.1.liftedNegativeSupport 0
+
+/-- Nonnegative homogeneous Laurent degree-zero cochains form a finite module over a Noetherian
+affine coefficient ring. -/
+theorem coordinateHomogeneousLaurentNonnegativeCochain.module_finite
+    [Fintype σ] [LinearOrder σ] [IsNoetherianRing R] (d : ℤ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentNonnegativeCochain
+        (R := R) (σ := σ) d) := by
+  letI : IsNoetherianRing
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)) :=
+    isNoetherianRing_of_ringEquiv R
+      (Scheme.ΓSpecIso (CommRingCat.of R)).symm.commRingCatIsoToRingEquiv
+  letI : Finite {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (∅ : Set (ULift.{u} σ))} :=
+    (HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_empty
+      (σ := σ) d).to_subtype
+  letI (e : {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (∅ : Set (ULift.{u} σ))}) :
+      Module.Finite
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (ModularCurves.OrderedCechSupportCochain
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          e.1.liftedNegativeSupport 0) :=
+    ModularCurves.OrderedCechSupportCochain.module_finite _ _ _
+  infer_instance
+
 /-- The finite product of support cochains indexed by the homogeneous Laurent exponents that are
 negative in every coordinate. -/
 abbrev coordinateHomogeneousLaurentFullNegativeCochain
