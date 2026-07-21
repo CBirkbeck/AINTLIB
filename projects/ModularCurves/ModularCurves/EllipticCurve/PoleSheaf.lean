@@ -1893,6 +1893,13 @@ noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
     𝟙_ X.Modules ≅ Scheme.Modules.unitObj X :=
   Scheme.Modules.sheafifyValIso (Scheme.Modules.unitObj X)
 
+/-- The section `1` of the structure module, transported to the localized
+monoidal unit. -/
+noncomputable def monoidalUnitSection (X : Scheme.{u}) :
+    Γ(𝟙_ X.Modules, (⊤ : X.Opens)) :=
+  (monoidalUnitObjIso X).inv.val.app (.op ⊤)
+    (show X.presheaf.obj (.op ⊤) from 1)
+
 /-- The explicit structure module is the monoidal unit, so its tensor square is
 canonically the structure module again. -/
 noncomputable def unitObjTensorIso (X : Scheme.{u}) :
@@ -3498,6 +3505,144 @@ theorem localTrivializationTopSection_unitHom_apply_one
   have htop := congrArg (affineOpenTopSection U) hcoeffLocal
   exact (affineOpenTopSection_ambientSection U _).symm.trans htop
 
+/-- Restricting the comparison between the localized monoidal unit and the
+structure module agrees with the canonical local monoidal-unit frame. -/
+theorem restrictFunctor_map_monoidalUnitObjIso_hom_comp_unitTrivialization
+    {X : Scheme.{u}} (U : X.Opens) :
+    (Scheme.Modules.restrictFunctor U.ι).map (monoidalUnitObjIso X).hom ≫
+        (restrictTrivializationOfOverIso (Scheme.Modules.unitObj X) U
+          (Iso.refl _)).hom =
+      (restrictMonoidalUnitIso U.ι ≪≫ monoidalUnitObjIso U.toScheme).hom := by
+  let F := Scheme.Modules.restrictFunctor U.ι
+  letI : (Scheme.Modules.pullback U.ι).Monoidal :=
+    Scheme.Modules.pullbackMonoidal U.ι
+  letI : F.Monoidal := Functor.Monoidal.transport
+    (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm
+  let eUnitOver :
+      (Scheme.Modules.unitObj X).over U ≅
+        SheafOfModules.unit (X.ringCatSheaf.over U) := Iso.refl _
+  let eUnit := restrictTrivializationOfOverIso
+    (Scheme.Modules.unitObj X) U eUnitOver
+  let eZero : F.obj (𝟙_ X.Modules) ≅ Scheme.Modules.unitObj U.toScheme :=
+    restrictMonoidalUnitIso U.ι ≪≫ monoidalUnitObjIso U.toScheme
+  change F.map (monoidalUnitObjIso X).hom ≫ eUnit.hom = eZero.hom
+  let R := Scheme.Modules.restrictFunctorIsoPullback U.ι
+  let G := Scheme.Modules.pullback U.ι
+  let q : F.obj (Scheme.Modules.unitObj X) ⟶
+      Scheme.Modules.unitObj U.toScheme :=
+    (Scheme.Modules.restrictUnitIso U.ι).hom
+  let p : G.obj (Scheme.Modules.unitObj X) ⟶
+      Scheme.Modules.unitObj U.toScheme :=
+    (Scheme.Modules.pullbackUnitIso U.ι).hom
+  have heUnit : eUnit.hom = q := by
+    have hfirst :
+        ((Scheme.Modules.overFunctorEquiv U).symm.app
+          (Scheme.Modules.unitObj X)).hom = q := by
+      change ((Scheme.Modules.overFunctorEquiv U).app
+        (Scheme.Modules.unitObj X)).inv =
+          (Scheme.Modules.restrictUnitIso U.ι).hom
+      rw [Scheme.Modules.overFunctorEquiv_unitP]
+      rfl
+    let H := (Scheme.Modules.overEquiv U).functor
+    let A := (Scheme.Modules.unitObj X).over U
+    let a := ((Scheme.Modules.overFunctorEquiv U).symm.app
+      (Scheme.Modules.unitObj X)).hom
+    change a ≫ H.map (𝟙 A) ≫ 𝟙 (H.obj A) = q
+    have hmap : H.map (𝟙 A) = 𝟙 (H.obj A) := H.map_id A
+    have hreplace :
+        a ≫ H.map (𝟙 A) ≫ 𝟙 (H.obj A) =
+          a ≫ 𝟙 (H.obj A) ≫ 𝟙 (H.obj A) :=
+      congrArg (fun k ↦ a ≫ k ≫ 𝟙 (H.obj A)) hmap
+    have hremove : a ≫ 𝟙 (H.obj A) ≫ 𝟙 (H.obj A) = a := by
+      rw [Category.comp_id]
+      exact Category.comp_id a
+    exact hreplace.trans (hremove.trans hfirst)
+  have hpull :
+      (Functor.Monoidal.εIso G).inv ≫ (monoidalUnitObjIso U.toScheme).hom =
+        G.map (monoidalUnitObjIso X).hom ≫ p := by
+    have h := congrArg Iso.hom
+      (Scheme.Modules.pullback_monoidalUnitObjIso U.ι)
+    change (Functor.Monoidal.εIso G).inv ≫
+        (monoidalUnitObjIso U.toScheme).hom =
+      G.map (monoidalUnitObjIso X).hom ≫ p at h
+    exact h
+  have hrestrict :
+      R.hom.app (Scheme.Modules.unitObj X) ≫ p = q := by
+    have h := restrictFunctorIsoPullback_inv_comp_restrictUnitIso U.ι
+    let eR := R.app (Scheme.Modules.unitObj X)
+    have h' : eR.inv ≫ q = p := h
+    calc
+      eR.hom ≫ p = eR.hom ≫ (eR.inv ≫ q) :=
+        congrArg (fun k ↦ eR.hom ≫ k) h'.symm
+      _ = (eR.hom ≫ eR.inv) ≫ q := (Category.assoc _ _ _).symm
+      _ = 𝟙 _ ≫ q := congrArg (fun k ↦ k ≫ q) eR.hom_inv_id
+      _ = q := Category.id_comp q
+  have hnat := R.hom.naturality (monoidalUnitObjIso X).hom
+  change F.map (monoidalUnitObjIso X).hom ≫ eUnit.hom =
+    R.hom.app (𝟙_ X.Modules) ≫
+      (Functor.Monoidal.εIso G).inv ≫
+        (monoidalUnitObjIso U.toScheme).hom
+  rw [heUnit]
+  rw [hpull]
+  rw [← Category.assoc]
+  rw [← hnat]
+  rw [Category.assoc]
+  rw [hrestrict]
+
+/-- The canonical section of the localized monoidal unit has coordinate `1`
+in its canonical frame on every affine open. -/
+theorem localTrivializationTopSection_monoidalUnitSection
+    {X : Scheme.{u}} (U : X.affineOpens) :
+    localTrivializationTopSection (𝟙_ X.Modules) U
+        (restrictMonoidalUnitIso U.1.ι ≪≫
+          monoidalUnitObjIso U.1.toScheme)
+        (monoidalUnitSection X) = 1 := by
+  letI : ∀ V, IsMulCommutative (X.ringCatSheaf.obj.obj V) :=
+    fun V ↦ by
+      change IsMulCommutative (X.presheaf.obj V)
+      exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+  let F := Scheme.Modules.restrictFunctor U.1.ι
+  let eUnitOver :
+      (Scheme.Modules.unitObj X).over U.1 ≅
+        SheafOfModules.unit (X.ringCatSheaf.over U.1) := Iso.refl _
+  let eUnit := restrictTrivializationOfOverIso
+    (Scheme.Modules.unitObj X) U.1 eUnitOver
+  let eZero : F.obj (𝟙_ X.Modules) ≅
+      Scheme.Modules.unitObj U.1.toScheme :=
+    restrictMonoidalUnitIso U.1.ι ≪≫ monoidalUnitObjIso U.1.toScheme
+  have hzero : F.map (monoidalUnitObjIso X).hom ≫ eUnit.hom = eZero.hom :=
+    restrictFunctor_map_monoidalUnitObjIso_hom_comp_unitTrivialization U.1
+  have hzeroInv : F.map (monoidalUnitObjIso X).inv ≫ eZero.hom = eUnit.hom := by
+    rw [← hzero, ← Category.assoc, ← F.map_comp]
+    rw [(monoidalUnitObjIso X).inv_hom_id, F.map_id, Category.id_comp]
+  let f : Scheme.Modules.unitObj X ⟶ Scheme.Modules.unitObj X := 𝟙 _
+  have honeOver :
+      f.over U.1 ≫ eUnitOver.hom =
+        SheafOfModules.overUnitScalarEnd X.ringCatSheaf U.1 1 := by
+    change 𝟙 (SheafOfModules.unit (X.ringCatSheaf.over U.1)) =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U.1 1
+    exact (map_one (SheafOfModules.overUnitScalarEndRingHom
+      X.ringCatSheaf U.1)).symm
+  have hone := localTrivializationTopSection_unitHom_apply_one
+    (Scheme.Modules.unitObj X) U f eUnitOver 1 honeOver
+  change eZero.hom.val.app (.op ⊤)
+      (localTrivializationRestriction (𝟙_ X.Modules) U
+        ((monoidalUnitObjIso X).inv.val.app (.op ⊤)
+          (show X.presheaf.obj (.op ⊤) from 1))) =
+    (show U.1.toScheme.presheaf.obj (.op ⊤) from 1)
+  have hrestrict := localTrivializationRestriction_map
+    (monoidalUnitObjIso X).inv U
+      (show X.presheaf.obj (.op ⊤) from 1)
+  rw [hrestrict]
+  have happ := congrArg (fun k ↦ k.val.app (.op ⊤)) hzeroInv
+  have happOne := ConcreteCategory.congr_hom happ
+    (localTrivializationRestriction (Scheme.Modules.unitObj X) U
+      (show X.presheaf.obj (.op ⊤) from 1))
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at happOne
+  rw [happOne]
+  exact hone.trans (by simp [affineOpenTopSection])
+
 /-- The over-site coefficient associated to an affine-open trivialization is the
 same as the coefficient obtained directly on the open subscheme. -/
 theorem overTrivializationCoefficient_overTrivializationOfRestrictIso
@@ -4197,68 +4342,7 @@ theorem sectionPoleSheafSuccHom_restrict_comp_generatorTrivialization
   let eZero : F.obj (𝟙_ C.Modules) ≅ Scheme.Modules.unitObj U.1.toScheme :=
     sectionPoleSheafPowerTrivialization z hz U.1 ePole 0
   have hzero : F.map (monoidalUnitObjIso C).hom ≫ eUnit.hom = eZero.hom := by
-    let R := Scheme.Modules.restrictFunctorIsoPullback U.1.ι
-    let G := Scheme.Modules.pullback U.1.ι
-    let q : F.obj (Scheme.Modules.unitObj C) ⟶
-        Scheme.Modules.unitObj U.1.toScheme :=
-      (Scheme.Modules.restrictUnitIso U.1.ι).hom
-    let p : G.obj (Scheme.Modules.unitObj C) ⟶
-        Scheme.Modules.unitObj U.1.toScheme :=
-      (Scheme.Modules.pullbackUnitIso U.1.ι).hom
-    have heUnit : eUnit.hom = q := by
-      have hfirst :
-          ((Scheme.Modules.overFunctorEquiv U.1).symm.app
-            (Scheme.Modules.unitObj C)).hom = q := by
-        change ((Scheme.Modules.overFunctorEquiv U.1).app
-          (Scheme.Modules.unitObj C)).inv =
-            (Scheme.Modules.restrictUnitIso U.1.ι).hom
-        rw [Scheme.Modules.overFunctorEquiv_unitP]
-        rfl
-      let H := (Scheme.Modules.overEquiv U.1).functor
-      let A := (Scheme.Modules.unitObj C).over U.1
-      let a := ((Scheme.Modules.overFunctorEquiv U.1).symm.app
-        (Scheme.Modules.unitObj C)).hom
-      change a ≫ H.map (𝟙 A) ≫ 𝟙 (H.obj A) = q
-      have hmap : H.map (𝟙 A) = 𝟙 (H.obj A) := H.map_id A
-      have hreplace :
-          a ≫ H.map (𝟙 A) ≫ 𝟙 (H.obj A) =
-            a ≫ 𝟙 (H.obj A) ≫ 𝟙 (H.obj A) :=
-        congrArg (fun k ↦ a ≫ k ≫ 𝟙 (H.obj A)) hmap
-      have hremove : a ≫ 𝟙 (H.obj A) ≫ 𝟙 (H.obj A) = a := by
-        rw [Category.comp_id]
-        exact Category.comp_id a
-      exact hreplace.trans (hremove.trans hfirst)
-    have hpull :
-        (Functor.Monoidal.εIso G).inv ≫ (monoidalUnitObjIso U.1.toScheme).hom =
-          G.map (monoidalUnitObjIso C).hom ≫ p := by
-      have h := congrArg Iso.hom
-        (Scheme.Modules.pullback_monoidalUnitObjIso U.1.ι)
-      change (Functor.Monoidal.εIso G).inv ≫
-          (monoidalUnitObjIso U.1.toScheme).hom =
-        G.map (monoidalUnitObjIso C).hom ≫ p at h
-      exact h
-    have hrestrict :
-        R.hom.app (Scheme.Modules.unitObj C) ≫ p = q := by
-      have h := restrictFunctorIsoPullback_inv_comp_restrictUnitIso U.1.ι
-      let eR := R.app (Scheme.Modules.unitObj C)
-      have h' : eR.inv ≫ q = p := h
-      calc
-        eR.hom ≫ p = eR.hom ≫ (eR.inv ≫ q) :=
-          congrArg (fun k ↦ eR.hom ≫ k) h'.symm
-        _ = (eR.hom ≫ eR.inv) ≫ q := (Category.assoc _ _ _).symm
-        _ = 𝟙 _ ≫ q := congrArg (fun k ↦ k ≫ q) eR.hom_inv_id
-        _ = q := Category.id_comp q
-    have hnat := R.hom.naturality (monoidalUnitObjIso C).hom
-    change F.map (monoidalUnitObjIso C).hom ≫ eUnit.hom =
-      R.hom.app (𝟙_ C.Modules) ≫
-        (Functor.Monoidal.εIso G).inv ≫
-          (monoidalUnitObjIso U.1.toScheme).hom
-    rw [heUnit]
-    rw [hpull]
-    rw [← Category.assoc]
-    rw [← hnat]
-    rw [Category.assoc]
-    rw [hrestrict]
+    exact restrictFunctor_map_monoidalUnitObjIso_hom_comp_unitTrivialization U.1
   have hg : F.map g ≫ ePole.hom = eZero.hom ≫ d := by
     dsimp only [g]
     rw [F.map_comp]
