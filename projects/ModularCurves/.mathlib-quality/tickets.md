@@ -24563,3 +24563,22 @@ piece of the whole engine) IS PROVEN AXIOM-CLEAN. Remaining to flip the engine: 
 hpres := exists_invariant_away_presentation (the import regresses EngineDescent's two heavy Stage-4/5
 proofs — solve via the same opaque-morphism/generic-lemma discipline that closed hagree, or a
 module restructure).
+
+### v10.343 — ★★★★ [KM 4.7.0 ENGINE COMPLETE] representable_of_affineOverEll_of_rigidNoeth AXIOM-CLEAN (2026-07-22)
+VERIFIED (own full build 8940 jobs + axiom check): representable_of_affineOverEll_of_rigidNoeth +
+representable_baseChange_two + representable_baseChange_three ALL = [propext, Classical.choice,
+Quot.sound], NO sorryAx. THE ENTIRE KM 4.7.0 SCHOLIE ENGINE IS PROVEN — the D(2) level-4 leg
+(ℰ₄-machine + level-4 torsor), the D(3) level-3 leg, the recollement (KM 4.7.1), and the a5-P-loc
+semilocal Weierstrass-model mouth core (exists_localModel_core_at, the hardest piece). WIRING: hpres
+discharged via MouthCharts.exists_invariant_away_presentation after the file-split — NEW
+Moduli/EngineDescentCore.lean (674L) holds exists_localModel_core_at + downstream quotient assembly
+(imports EngineDescent + EngineMouthCharts); the two heavy Stage-4/5 proofs STAY in EngineDescent
+(no EngineMouthCharts import → no regression, STEP-1 direct-import confirmed the 200k regression, so
+the reverse contiguous split was used); importers EngineMouth + QuotientRepresentability repointed;
+8 lower-layer decls un-privated for the moved tail. NO maxHeartbeats added (the 2 pre-existing 800k
+bumps just split between files), no new sorries, statements byte-stable.
+DOWNSTREAM FINDING (parsing, NOT math): EngineMouthCharts pulls mathlib CategoryTheory/Monoidal/
+Mod.lean's `scoped[MonObj] notation "γ" => ModObj.smul` into GammaHMaster's graph; GammaHMaster
+`open MonObj` (for η[…]) + its 25 `γ`-binder sites now MIS-PARSE → GammaHMaster+GammaHClosure
+fail to parse, blocking the 5-receipt axiom-check. FIX = rename the 25 γ-binders in GammaHMaster
+(γ→g, keep open MonObj). Confined to that one file; the receipts' math/engine is clean.

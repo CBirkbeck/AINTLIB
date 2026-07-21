@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.EngineDescent
+import ModularCurves.Moduli.EngineDescentCore
 import ModularCurves.ForMathlib.QuotientTorsor
 import ModularCurves.Moduli.GlobalModelTransport
 import ModularCurves.ForMathlib.TorsorMap
