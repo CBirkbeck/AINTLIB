@@ -224,6 +224,77 @@ theorem coordinateHomogeneousLaurentFullNegativeAssembly_differential
     coordinateHomogeneousLaurentFullNegativeDifferential_apply
       (R := R) (σ := σ) (d := d) (n := n) (s := s) (e := e)]
 
+/-- The full-negative cocycles in one degree of the homogeneous Laurent ordered Cech
+presentation. -/
+def coordinateHomogeneousLaurentFullNegativeCycles
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :=
+  LinearMap.ker
+    (coordinateHomogeneousLaurentFullNegativeDifferential
+      (R := R) (σ := σ) d n)
+
+/-- Full-negative homogeneous Laurent cycles form a finite module over a Noetherian affine
+coefficient ring. -/
+theorem coordinateHomogeneousLaurentFullNegativeCycles.module_finite
+    [Fintype σ] [LinearOrder σ] [IsNoetherianRing R] (d : ℤ) (n : ℕ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentFullNegativeCycles
+        (R := R) (σ := σ) d n) := by
+  letI : IsNoetherianRing
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)) :=
+    isNoetherianRing_of_ringEquiv R
+      (Scheme.ΓSpecIso (CommRingCat.of R)).symm.commRingCatIsoToRingEquiv
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d n) :=
+    coordinateHomogeneousLaurentFullNegativeCochain.module_finite d n
+  have hsource : IsNoetherian
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d n) :=
+    isNoetherian_of_isNoetherianRing_of_finite _ _
+  letI : IsNoetherian
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentFullNegativeCycles
+        (R := R) (σ := σ) d n) :=
+    isNoetherian_of_submodule_of_noetherian _ _ _ hsource
+  infer_instance
+
+/-- Assemble a full-negative cocycle into the homogeneous Laurent ordered Cech term. -/
+noncomputable def coordinateHomogeneousLaurentFullNegativeCyclesAssembly
+    [Fintype σ] [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentFullNegativeCycles
+        (R := R) (σ := σ) d n →ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      coordinateHomogeneousLaurentOrderedCechObject
+        (R := R) (σ := σ) d n :=
+  (coordinateHomogeneousLaurentFullNegativeAssembly
+    (R := R) (σ := σ) d n).comp
+      (coordinateHomogeneousLaurentFullNegativeCycles
+        (R := R) (σ := σ) d n).subtype
+
+/-- The assembly of a full-negative cocycle is a cocycle in the homogeneous Laurent ordered Cech
+complex. -/
+theorem coordinateHomogeneousLaurentFullNegativeCyclesAssembly_differential
+    [Fintype σ] [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (s : coordinateHomogeneousLaurentFullNegativeCycles
+      (R := R) (σ := σ) d n) :
+    (coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) d n).hom
+        (coordinateHomogeneousLaurentFullNegativeCyclesAssembly
+          (R := R) (σ := σ) d n s) = 0 := by
+  change
+    (coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) d n).hom
+        (coordinateHomogeneousLaurentFullNegativeAssembly
+          (R := R) (σ := σ) d n s.1) = 0
+  rw [coordinateHomogeneousLaurentFullNegativeAssembly_differential]
+  have hs : coordinateHomogeneousLaurentFullNegativeDifferential
+      (R := R) (σ := σ) d n s.1 = 0 := by
+    simpa [coordinateHomogeneousLaurentFullNegativeCycles] using s.2
+  rw [hs, map_zero]
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation is a boundary modulo
 the active weights that are negative in every coordinate. -/
 theorem exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentCocycle
