@@ -745,6 +745,884 @@ theorem transVC_ofVC_restrict_pair {V₁ V₂ V' : X.affineOpens}
     hinv, LocalPresentation.transVC_restrict_ofVC, LocalPresentation.transVC_restrict_ofVC,
     mul_assoc]
 
+/-! ### Stage 3c-β1: the invariant-denominator clearing calculus (generic barrier lemmas)
+
+Everything in this section is stated over *variable* rings — `A` any commutative ring, `S` a
+submonoid, `L := Localization S` the semilocalization, `T := L[1/f']` the per-chart tower
+localization (`f' := algebraMap A L f`), and the chart ring `B` any
+`IsLocalization.Away (g·f)`-algebra with `g ∈ S` (concretely `Γ(X, D(a·fᵢ))` at an invariant
+level `a`).  At the concrete chart sections these lemmas are *applied*, never unfolded
+(v10.343 barrier-lemma discipline). -/
+
+section ClearingCalculus
+
+variable {A : Type u} [CommRing A]
+
+/-- **(β1, two-step clearing at `A`-level)** Two elements of `A` with equal images in the
+tower localization `L[1/f']` differ by an `S`-multiplier after an `f`-power: one
+`eq_iff_exists` at the `f'`-powers over `L`, one at `S` over `A`. -/
+theorem exists_mem_pow_mul_eq_of_map_eq (S : Submonoid A) (f : A) {x y : A}
+    (h : algebraMap (Localization S)
+        (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+        (algebraMap A (Localization S) x)
+      = algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+          (algebraMap A (Localization S) y)) :
+    ∃ (s : S) (k : ℕ), (s : A) * (f ^ k * x) = (s : A) * (f ^ k * y) := by
+  obtain ⟨c, hc⟩ := (IsLocalization.eq_iff_exists
+    (Submonoid.powers (algebraMap A (Localization S) f))
+    (Localization (Submonoid.powers (algebraMap A (Localization S) f)))).mp h
+  obtain ⟨k, hk⟩ := c.2
+  have hk' : algebraMap A (Localization S) f ^ k = (c : Localization S) := hk
+  have hL : algebraMap A (Localization S) (f ^ k * x)
+      = algebraMap A (Localization S) (f ^ k * y) := by
+    rw [map_mul, map_mul, map_pow, hk']
+    exact hc
+  obtain ⟨s, hs⟩ := (IsLocalization.eq_iff_exists S (Localization S)).mp hL
+  exact ⟨s, k, hs⟩
+
+/-- **(β1, tower fractions)** Every element of the tower localization `L[1/f']` clears to an
+element of `A` after multiplying by an `S`-denominator and an `f`-power. -/
+theorem exists_mem_pow_mul_map_eq (S : Submonoid A) (f : A)
+    (x : Localization (Submonoid.powers (algebraMap A (Localization S) f))) :
+    ∃ (b : A) (s : S) (k : ℕ),
+      algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+          (algebraMap A (Localization S) ((s : A) * f ^ k)) * x
+        = algebraMap (Localization S)
+            (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+            (algebraMap A (Localization S) b) := by
+  obtain ⟨⟨xL, c⟩, hc⟩ := IsLocalization.surj
+    (Submonoid.powers (algebraMap A (Localization S) f)) x
+  obtain ⟨k, hk⟩ := c.2
+  have hk' : algebraMap A (Localization S) f ^ k = (c : Localization S) := hk
+  obtain ⟨⟨b, s⟩, hs⟩ := IsLocalization.surj S xL
+  refine ⟨b, s, k, ?_⟩
+  have hfc : algebraMap A (Localization S) ((s : A) * f ^ k)
+      = algebraMap A (Localization S) ((s : A)) * (c : Localization S) := by
+    rw [map_mul, map_pow, hk']
+  rw [hfc, map_mul, mul_assoc,
+    mul_comm (algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f))) (c : Localization S)) x,
+    hc, ← map_mul, mul_comm (algebraMap A (Localization S) ((s : A))) xL, hs]
+
+/-- **(β1, chart-level clearing into the tower)** Two chart sections with equal images in the
+tower localization `L[1/f']` differ by an invertible-after-`S` multiplier: the `f`-power is
+already invertible on the chart, so a *pure* `S`-multiplier suffices. -/
+theorem exists_mem_mul_eq_of_sections_map_eq (S : Submonoid A) {g f : A} (hg : g ∈ S)
+    (B : Type u) [CommRing B] [Algebra A B] [IsLocalization.Away (g * f) B]
+    (ψ : B →+* Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+    (hψ : ∀ a : A, ψ (algebraMap A B a)
+      = algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+          (algebraMap A (Localization S) a))
+    {x y : B} (h : ψ x = ψ y) :
+    ∃ s : S, algebraMap A B ((s : A)) * x = algebraMap A B ((s : A)) * y := by
+  obtain ⟨⟨bx, cx⟩, hbx⟩ := IsLocalization.surj (Submonoid.powers (g * f)) x
+  obtain ⟨n, hn⟩ := cx.2
+  have hn' : (g * f) ^ n = (cx : A) := hn
+  obtain ⟨⟨by', cy⟩, hby⟩ := IsLocalization.surj (Submonoid.powers (g * f)) y
+  obtain ⟨m, hm⟩ := cy.2
+  have hm' : (g * f) ^ m = (cy : A) := hm
+  -- the `T`-level identity between the `A`-numerators
+  have hx' : ψ x * algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+      (algebraMap A (Localization S) ((g * f) ^ n))
+      = algebraMap (Localization S) _ (algebraMap A (Localization S) bx) := by
+    have h0 := congrArg ψ hbx
+    rw [map_mul, hψ, hψ] at h0
+    rw [← hn'] at h0
+    exact h0
+  have hy' : ψ y * algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+      (algebraMap A (Localization S) ((g * f) ^ m))
+      = algebraMap (Localization S) _ (algebraMap A (Localization S) by') := by
+    have h0 := congrArg ψ hby
+    rw [map_mul, hψ, hψ] at h0
+    rw [← hm'] at h0
+    exact h0
+  have hT : algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+      (algebraMap A (Localization S) (bx * (g * f) ^ m))
+      = algebraMap (Localization S) _ (algebraMap A (Localization S) (by' * (g * f) ^ n)) := by
+    rw [map_mul, map_mul, map_mul, map_mul]
+    calc algebraMap (Localization S) _ (algebraMap A (Localization S) bx)
+          * algebraMap (Localization S) _ (algebraMap A (Localization S) ((g * f) ^ m))
+        = (ψ x * algebraMap (Localization S) _ (algebraMap A (Localization S) ((g * f) ^ n)))
+            * algebraMap (Localization S) _ (algebraMap A (Localization S) ((g * f) ^ m)) := by
+          rw [hx']
+      _ = (ψ y * algebraMap (Localization S) _ (algebraMap A (Localization S) ((g * f) ^ m)))
+            * algebraMap (Localization S) _ (algebraMap A (Localization S) ((g * f) ^ n)) := by
+          rw [h]; ring
+      _ = algebraMap (Localization S) _ (algebraMap A (Localization S) by')
+            * algebraMap (Localization S) _ (algebraMap A (Localization S) ((g * f) ^ n)) := by
+          rw [hy']
+  obtain ⟨s, k, hs⟩ := exists_mem_pow_mul_eq_of_map_eq S f hT
+  have hBid := congrArg (algebraMap A B) hs
+  simp only [map_mul, map_pow] at hBid
+  -- units on the chart
+  have hgfB : IsUnit (algebraMap A B (g * f)) := IsLocalization.Away.algebraMap_isUnit _
+  have hgB : IsUnit (algebraMap A B g) :=
+    isUnit_of_dvd_unit (map_dvd (algebraMap A B) (dvd_mul_right g f)) hgfB
+  have hfB : IsUnit (algebraMap A B f) :=
+    isUnit_of_dvd_unit (map_dvd (algebraMap A B) (dvd_mul_left f g)) hgfB
+  -- substitute the numerators back
+  have hbxB : algebraMap A B bx = x * (algebraMap A B g * algebraMap A B f) ^ n := by
+    rw [← hbx, ← hn', map_pow, map_mul]
+  have hbyB : algebraMap A B by' = y * (algebraMap A B g * algebraMap A B f) ^ m := by
+    rw [← hby, ← hm', map_pow, map_mul]
+  rw [hbxB, hbyB] at hBid
+  refine ⟨s, ((hfB.pow k).mul ((hgB.mul hfB).pow (n + m))).mul_left_cancel ?_⟩
+  linear_combination hBid
+
+/-- **(β1, chart-level clearing into the semilocalization)** Two `Away`-chart sections with
+equal images in `L = Localization S` differ by an `S`-multiplier. -/
+theorem exists_mem_mul_eq_of_away_map_eq (S : Submonoid A) {g : A}
+    (B : Type u) [CommRing B] [Algebra A B] [IsLocalization.Away g B]
+    (j : B →+* Localization S)
+    (hj : ∀ a : A, j (algebraMap A B a) = algebraMap A (Localization S) a)
+    {x y : B} (h : j x = j y) :
+    ∃ s : S, algebraMap A B ((s : A)) * x = algebraMap A B ((s : A)) * y := by
+  obtain ⟨⟨bx, cx⟩, hbx⟩ := IsLocalization.surj (Submonoid.powers g) x
+  obtain ⟨n, hn⟩ := cx.2
+  have hn' : g ^ n = (cx : A) := hn
+  obtain ⟨⟨by', cy⟩, hby⟩ := IsLocalization.surj (Submonoid.powers g) y
+  obtain ⟨m, hm⟩ := cy.2
+  have hm' : g ^ m = (cy : A) := hm
+  have hx' : j x * algebraMap A (Localization S) (g ^ n)
+      = algebraMap A (Localization S) bx := by
+    have h0 := congrArg j hbx
+    rw [map_mul, hj, hj] at h0
+    rw [← hn'] at h0
+    exact h0
+  have hy' : j y * algebraMap A (Localization S) (g ^ m)
+      = algebraMap A (Localization S) by' := by
+    have h0 := congrArg j hby
+    rw [map_mul, hj, hj] at h0
+    rw [← hm'] at h0
+    exact h0
+  have hL : algebraMap A (Localization S) (bx * g ^ m)
+      = algebraMap A (Localization S) (by' * g ^ n) := by
+    rw [map_mul, map_mul]
+    calc algebraMap A (Localization S) bx * algebraMap A (Localization S) (g ^ m)
+        = (j x * algebraMap A (Localization S) (g ^ n))
+            * algebraMap A (Localization S) (g ^ m) := by rw [hx']
+      _ = (j y * algebraMap A (Localization S) (g ^ m))
+            * algebraMap A (Localization S) (g ^ n) := by rw [h]; ring
+      _ = algebraMap A (Localization S) by' * algebraMap A (Localization S) (g ^ n) := by
+          rw [hy']
+  obtain ⟨s, hs⟩ := (IsLocalization.eq_iff_exists S (Localization S)).mp hL
+  have hBid := congrArg (algebraMap A B) hs
+  simp only [map_mul, map_pow] at hBid
+  have hgB : IsUnit (algebraMap A B g) := IsLocalization.Away.algebraMap_isUnit _
+  have hbxB : algebraMap A B bx = x * algebraMap A B g ^ n := by
+    rw [← hbx, ← hn', map_pow]
+  have hbyB : algebraMap A B by' = y * algebraMap A B g ^ m := by
+    rw [← hby, ← hm', map_pow]
+  rw [hbxB, hbyB] at hBid
+  refine ⟨s, (hgB.pow (n + m)).mul_left_cancel ?_⟩
+  linear_combination hBid
+
+/-- **(β1, fraction preimages)** Mapping the chart fraction `b·d⁻¹` recovers any element `x`
+with `x · φ(d) = φ(b)`. -/
+theorem map_num_mul_inv_eq {B : Type u} [CommRing B] [Algebra A B] {L' : Type u} [CommRing L']
+    (φ : B →+* L') {x : L'} {b d : A}
+    (hx : x * φ (algebraMap A B d) = φ (algebraMap A B b))
+    (hd : IsUnit (algebraMap A B d)) :
+    φ (algebraMap A B b * ↑hd.unit⁻¹) = x := by
+  refine (hd.map φ).mul_left_cancel ?_
+  rw [← map_mul,
+    show algebraMap A B d * (algebraMap A B b * ↑hd.unit⁻¹)
+      = algebraMap A B b * (↑hd.unit * ↑hd.unit⁻¹) from by rw [IsUnit.unit_spec]; ring,
+    Units.mul_inv, mul_one, ← hx, mul_comm]
+
+/-- Clearing multipliers upgrade along divisibility. -/
+theorem mul_eq_mul_of_dvd {B : Type*} [CommRing B] {u v x y : B} (hd : u ∣ v)
+    (h : u * x = u * y) : v * x = v * y := by
+  obtain ⟨e, rfl⟩ := hd
+  linear_combination e * h
+
+/-- Cleared equalities descend along any ring hom that makes the multiplier invertible. -/
+theorem map_eq_of_isUnit_mul_eq {B B' : Type*} [CommRing B] [CommRing B'] (ρ : B →+* B')
+    {u x y : B} (hu : IsUnit (ρ u)) (h : u * x = u * y) : ρ x = ρ y :=
+  hu.mul_left_cancel (by rw [← map_mul, ← map_mul, h])
+
+/-- **(β1, `VariableChange`-level clearing)** Two variable changes over the chart with equal
+`ψ`-images have componentwise-`S`-cleared equal components. -/
+theorem exists_mem_clear_variableChange (S : Submonoid A) {g f : A} (hg : g ∈ S)
+    (B : Type u) [CommRing B] [Algebra A B] [IsLocalization.Away (g * f) B]
+    (ψ : B →+* Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+    (hψ : ∀ a : A, ψ (algebraMap A B a)
+      = algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+          (algebraMap A (Localization S) a))
+    {T₁ T₂ : VariableChange B} (h : T₁.map ψ = T₂.map ψ) :
+    ∃ s : S, algebraMap A B ((s : A)) * (T₁.u : B) = algebraMap A B ((s : A)) * (T₂.u : B)
+      ∧ algebraMap A B ((s : A)) * T₁.r = algebraMap A B ((s : A)) * T₂.r
+      ∧ algebraMap A B ((s : A)) * T₁.s = algebraMap A B ((s : A)) * T₂.s
+      ∧ algebraMap A B ((s : A)) * T₁.t = algebraMap A B ((s : A)) * T₂.t := by
+  have hu : ψ ((T₁.u : B)) = ψ ((T₂.u : B)) := by
+    have h0 := congrArg (fun z : VariableChange
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f))) => ((z.u :
+        Localization (Submonoid.powers (algebraMap A (Localization S) f)))) ) h
+    simpa using h0
+  have hr : ψ T₁.r = ψ T₂.r := by
+    have h0 := congrArg VariableChange.r h
+    simpa using h0
+  have hs : ψ T₁.s = ψ T₂.s := by
+    have h0 := congrArg VariableChange.s h
+    simpa using h0
+  have ht : ψ T₁.t = ψ T₂.t := by
+    have h0 := congrArg VariableChange.t h
+    simpa using h0
+  obtain ⟨s₁, hc₁⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ hu
+  obtain ⟨s₂, hc₂⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ hr
+  obtain ⟨s₃, hc₃⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ hs
+  obtain ⟨s₄, hc₄⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ ht
+  refine ⟨((s₁ * s₂) * s₃) * s₄, ?_, ?_, ?_, ?_⟩
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (((dvd_mul_right (s₁ : A) (s₂ : A)).mul_right (s₃ : A)).mul_right (s₄ : A))) hc₁
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (((dvd_mul_left (s₂ : A) (s₁ : A)).mul_right (s₃ : A)).mul_right (s₄ : A))) hc₂
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      ((dvd_mul_left (s₃ : A) ((s₁ : A) * (s₂ : A))).mul_right (s₄ : A))) hc₃
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (dvd_mul_left (s₄ : A) (((s₁ : A) * (s₂ : A)) * (s₃ : A)))) hc₄
+
+/-- **(β1, `WeierstrassCurve`-level clearing)** Two chart curves with equal `ψ`-images have
+componentwise-`S`-cleared equal coefficients. -/
+theorem exists_mem_clear_weierstrassCurve (S : Submonoid A) {g f : A} (hg : g ∈ S)
+    (B : Type u) [CommRing B] [Algebra A B] [IsLocalization.Away (g * f) B]
+    (ψ : B →+* Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+    (hψ : ∀ a : A, ψ (algebraMap A B a)
+      = algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+          (algebraMap A (Localization S) a))
+    {W₁ W₂ : WeierstrassCurve B} (h : W₁.map ψ = W₂.map ψ) :
+    ∃ s : S, algebraMap A B ((s : A)) * W₁.a₁ = algebraMap A B ((s : A)) * W₂.a₁
+      ∧ algebraMap A B ((s : A)) * W₁.a₂ = algebraMap A B ((s : A)) * W₂.a₂
+      ∧ algebraMap A B ((s : A)) * W₁.a₃ = algebraMap A B ((s : A)) * W₂.a₃
+      ∧ algebraMap A B ((s : A)) * W₁.a₄ = algebraMap A B ((s : A)) * W₂.a₄
+      ∧ algebraMap A B ((s : A)) * W₁.a₆ = algebraMap A B ((s : A)) * W₂.a₆ := by
+  obtain ⟨s₁, hc₁⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ
+    (congrArg WeierstrassCurve.a₁ h)
+  obtain ⟨s₂, hc₂⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ
+    (congrArg WeierstrassCurve.a₂ h)
+  obtain ⟨s₃, hc₃⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ
+    (congrArg WeierstrassCurve.a₃ h)
+  obtain ⟨s₄, hc₄⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ
+    (congrArg WeierstrassCurve.a₄ h)
+  obtain ⟨s₆, hc₆⟩ := exists_mem_mul_eq_of_sections_map_eq S hg B ψ hψ
+    (congrArg WeierstrassCurve.a₆ h)
+  refine ⟨(((s₁ * s₂) * s₃) * s₄) * s₆, ?_, ?_, ?_, ?_, ?_⟩
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      ((((dvd_mul_right (s₁ : A) (s₂ : A)).mul_right (s₃ : A)).mul_right
+        (s₄ : A)).mul_right (s₆ : A))) hc₁
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      ((((dvd_mul_left (s₂ : A) (s₁ : A)).mul_right (s₃ : A)).mul_right
+        (s₄ : A)).mul_right (s₆ : A))) hc₂
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (((dvd_mul_left (s₃ : A) ((s₁ : A) * (s₂ : A))).mul_right (s₄ : A)).mul_right
+        (s₆ : A))) hc₃
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      ((dvd_mul_left (s₄ : A) (((s₁ : A) * (s₂ : A)) * (s₃ : A))).mul_right (s₆ : A))) hc₄
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (dvd_mul_left (s₆ : A) ((((s₁ : A) * (s₂ : A)) * (s₃ : A)) * (s₄ : A)))) hc₆
+
+/-- **(β1, two-step clearing at `A`-level, join form)** As
+`exists_mem_pow_mul_eq_of_map_eq`, over the pairwise-overlap localization
+`L[1/f'₁, 1/f'₂]`. -/
+theorem exists_mem_pow_mul_eq_of_map_eq₂ (S : Submonoid A) (f₁ f₂ : A) {x y : A}
+    (h : algebraMap (Localization S)
+        (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+          ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+        (algebraMap A (Localization S) x)
+      = algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+            ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+          (algebraMap A (Localization S) y)) :
+    ∃ (s : S) (k l : ℕ), (s : A) * (f₁ ^ k * (f₂ ^ l * x))
+      = (s : A) * (f₁ ^ k * (f₂ ^ l * y)) := by
+  obtain ⟨c, hc⟩ := (IsLocalization.eq_iff_exists
+    (Submonoid.powers (algebraMap A (Localization S) f₁)
+      ⊔ Submonoid.powers (algebraMap A (Localization S) f₂))
+    (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+      ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))).mp h
+  obtain ⟨c₁, hc₁, c₂, hc₂, hcc⟩ := Submonoid.mem_sup.mp c.2
+  obtain ⟨k, hk⟩ := hc₁
+  obtain ⟨l, hl⟩ := hc₂
+  have hk' : algebraMap A (Localization S) f₁ ^ k = c₁ := hk
+  have hl' : algebraMap A (Localization S) f₂ ^ l = c₂ := hl
+  have hL : algebraMap A (Localization S) (f₁ ^ k * (f₂ ^ l * x))
+      = algebraMap A (Localization S) (f₁ ^ k * (f₂ ^ l * y)) := by
+    rw [map_mul, map_mul, map_mul, map_mul, map_pow, map_pow, hk', hl', ← mul_assoc,
+      ← mul_assoc, hcc]
+    exact hc
+  obtain ⟨s, hs⟩ := (IsLocalization.eq_iff_exists S (Localization S)).mp hL
+  exact ⟨s, k, l, hs⟩
+
+/-- **(β1, chart-level clearing into the join tower)** As
+`exists_mem_mul_eq_of_sections_map_eq`, for the pairwise-overlap chart
+`B = A[1/(g·(f₁·f₂))]` and the join localization. -/
+theorem exists_mem_mul_eq_of_sections_map_eq₂ (S : Submonoid A) {g f₁ f₂ : A} (hg : g ∈ S)
+    (B : Type u) [CommRing B] [Algebra A B] [IsLocalization.Away (g * (f₁ * f₂)) B]
+    (ψ : B →+* Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+      ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+    (hψ : ∀ a : A, ψ (algebraMap A B a)
+      = algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+            ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+          (algebraMap A (Localization S) a))
+    {x y : B} (h : ψ x = ψ y) :
+    ∃ s : S, algebraMap A B ((s : A)) * x = algebraMap A B ((s : A)) * y := by
+  obtain ⟨⟨bx, cx⟩, hbx⟩ := IsLocalization.surj (Submonoid.powers (g * (f₁ * f₂))) x
+  obtain ⟨n, hn⟩ := cx.2
+  have hn' : (g * (f₁ * f₂)) ^ n = (cx : A) := hn
+  obtain ⟨⟨by', cy⟩, hby⟩ := IsLocalization.surj (Submonoid.powers (g * (f₁ * f₂))) y
+  obtain ⟨m, hm⟩ := cy.2
+  have hm' : (g * (f₁ * f₂)) ^ m = (cy : A) := hm
+  have hx' : ψ x * algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+        ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+      (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ n))
+      = algebraMap (Localization S) _ (algebraMap A (Localization S) bx) := by
+    have h0 := congrArg ψ hbx
+    rw [map_mul, hψ, hψ] at h0
+    rw [← hn'] at h0
+    exact h0
+  have hy' : ψ y * algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+        ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+      (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ m))
+      = algebraMap (Localization S) _ (algebraMap A (Localization S) by') := by
+    have h0 := congrArg ψ hby
+    rw [map_mul, hψ, hψ] at h0
+    rw [← hm'] at h0
+    exact h0
+  have hT : algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+        ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+      (algebraMap A (Localization S) (bx * (g * (f₁ * f₂)) ^ m))
+      = algebraMap (Localization S) _
+          (algebraMap A (Localization S) (by' * (g * (f₁ * f₂)) ^ n)) := by
+    rw [map_mul, map_mul, map_mul, map_mul]
+    calc algebraMap (Localization S) _ (algebraMap A (Localization S) bx)
+          * algebraMap (Localization S) _
+            (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ m))
+        = (ψ x * algebraMap (Localization S) _
+              (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ n)))
+            * algebraMap (Localization S) _
+              (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ m)) := by
+          rw [hx']
+      _ = (ψ y * algebraMap (Localization S) _
+              (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ m)))
+            * algebraMap (Localization S) _
+              (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ n)) := by
+          rw [h]; ring
+      _ = algebraMap (Localization S) _ (algebraMap A (Localization S) by')
+            * algebraMap (Localization S) _
+              (algebraMap A (Localization S) ((g * (f₁ * f₂)) ^ n)) := by
+          rw [hy']
+  obtain ⟨s, k, l, hs⟩ := exists_mem_pow_mul_eq_of_map_eq₂ S f₁ f₂ hT
+  have hBid := congrArg (algebraMap A B) hs
+  simp only [map_mul, map_pow] at hBid
+  have hgfB : IsUnit (algebraMap A B (g * (f₁ * f₂))) :=
+    IsLocalization.Away.algebraMap_isUnit _
+  have hgB : IsUnit (algebraMap A B g) :=
+    isUnit_of_dvd_unit (map_dvd (algebraMap A B) (dvd_mul_right g (f₁ * f₂))) hgfB
+  have hf₁B : IsUnit (algebraMap A B f₁) :=
+    isUnit_of_dvd_unit (map_dvd (algebraMap A B)
+      ((dvd_mul_right f₁ f₂).mul_left g)) hgfB
+  have hf₂B : IsUnit (algebraMap A B f₂) :=
+    isUnit_of_dvd_unit (map_dvd (algebraMap A B)
+      ((dvd_mul_left f₂ f₁).mul_left g)) hgfB
+  have hbxB : algebraMap A B bx
+      = x * (algebraMap A B g * (algebraMap A B f₁ * algebraMap A B f₂)) ^ n := by
+    rw [← hbx, ← hn', map_pow, map_mul, map_mul]
+  have hbyB : algebraMap A B by'
+      = y * (algebraMap A B g * (algebraMap A B f₁ * algebraMap A B f₂)) ^ m := by
+    rw [← hby, ← hm', map_pow, map_mul, map_mul]
+  rw [hbxB, hbyB] at hBid
+  refine ⟨s, (((hf₁B.pow k).mul (hf₂B.pow l)).mul
+    ((hgB.mul (hf₁B.mul hf₂B)).pow (n + m))).mul_left_cancel ?_⟩
+  linear_combination hBid
+
+/-- **(β1, `VariableChange`-level clearing, join form)** -/
+theorem exists_mem_clear_variableChange₂ (S : Submonoid A) {g f₁ f₂ : A} (hg : g ∈ S)
+    (B : Type u) [CommRing B] [Algebra A B] [IsLocalization.Away (g * (f₁ * f₂)) B]
+    (ψ : B →+* Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+      ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+    (hψ : ∀ a : A, ψ (algebraMap A B a)
+      = algebraMap (Localization S)
+          (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+            ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))
+          (algebraMap A (Localization S) a))
+    {T₁ T₂ : VariableChange B} (h : T₁.map ψ = T₂.map ψ) :
+    ∃ s : S, algebraMap A B ((s : A)) * (T₁.u : B) = algebraMap A B ((s : A)) * (T₂.u : B)
+      ∧ algebraMap A B ((s : A)) * T₁.r = algebraMap A B ((s : A)) * T₂.r
+      ∧ algebraMap A B ((s : A)) * T₁.s = algebraMap A B ((s : A)) * T₂.s
+      ∧ algebraMap A B ((s : A)) * T₁.t = algebraMap A B ((s : A)) * T₂.t := by
+  have hu : ψ ((T₁.u : B)) = ψ ((T₂.u : B)) := by
+    have h0 := congrArg (fun z : VariableChange
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+        ⊔ Submonoid.powers (algebraMap A (Localization S) f₂))) => ((z.u :
+        Localization (Submonoid.powers (algebraMap A (Localization S) f₁)
+          ⊔ Submonoid.powers (algebraMap A (Localization S) f₂)))) ) h
+    simpa using h0
+  have hr : ψ T₁.r = ψ T₂.r := by
+    have h0 := congrArg VariableChange.r h
+    simpa using h0
+  have hs : ψ T₁.s = ψ T₂.s := by
+    have h0 := congrArg VariableChange.s h
+    simpa using h0
+  have ht : ψ T₁.t = ψ T₂.t := by
+    have h0 := congrArg VariableChange.t h
+    simpa using h0
+  obtain ⟨s₁, hc₁⟩ := exists_mem_mul_eq_of_sections_map_eq₂ S hg B ψ hψ hu
+  obtain ⟨s₂, hc₂⟩ := exists_mem_mul_eq_of_sections_map_eq₂ S hg B ψ hψ hr
+  obtain ⟨s₃, hc₃⟩ := exists_mem_mul_eq_of_sections_map_eq₂ S hg B ψ hψ hs
+  obtain ⟨s₄, hc₄⟩ := exists_mem_mul_eq_of_sections_map_eq₂ S hg B ψ hψ ht
+  refine ⟨((s₁ * s₂) * s₃) * s₄, ?_, ?_, ?_, ?_⟩
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (((dvd_mul_right (s₁ : A) (s₂ : A)).mul_right (s₃ : A)).mul_right (s₄ : A))) hc₁
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (((dvd_mul_left (s₂ : A) (s₁ : A)).mul_right (s₃ : A)).mul_right (s₄ : A))) hc₂
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      ((dvd_mul_left (s₃ : A) ((s₁ : A) * (s₂ : A))).mul_right (s₄ : A))) hc₃
+  · exact mul_eq_mul_of_dvd (map_dvd _
+      (dvd_mul_left (s₄ : A) (((s₁ : A) * (s₂ : A)) * (s₃ : A)))) hc₄
+
+/-- `map` along a ring hom is compatible with `⁻¹ * ·` (composition-friendly shape). -/
+theorem vc_map_inv_mul {B B' : Type*} [CommRing B] [CommRing B'] (φ : B →+* B')
+    (Z₁ Z₂ : VariableChange B) : (Z₁⁻¹ * Z₂).map φ = (Z₁.map φ)⁻¹ * Z₂.map φ := by
+  rw [show (Z₁⁻¹ * Z₂).map φ = (Z₁⁻¹).map φ * Z₂.map φ from
+      map_mul (VariableChange.mapHom φ) _ _,
+    show (Z₁⁻¹).map φ = (Z₁.map φ)⁻¹ from map_inv (VariableChange.mapHom φ) _]
+
+/-- **(β1, descend a cleared `VariableChange` equality)** -/
+theorem variableChange_map_eq_of_mul_eq {B B' : Type u} [CommRing B] [CommRing B']
+    (ρ : B →+* B') {u : B} (hu : IsUnit (ρ u)) {T₁ T₂ : VariableChange B}
+    (h1 : u * (T₁.u : B) = u * (T₂.u : B)) (h2 : u * T₁.r = u * T₂.r)
+    (h3 : u * T₁.s = u * T₂.s) (h4 : u * T₁.t = u * T₂.t) :
+    T₁.map ρ = T₂.map ρ := by
+  refine VariableChange.ext (Units.ext ?_) ?_ ?_ ?_
+  · exact map_eq_of_isUnit_mul_eq ρ hu h1
+  · exact map_eq_of_isUnit_mul_eq ρ hu h2
+  · exact map_eq_of_isUnit_mul_eq ρ hu h3
+  · exact map_eq_of_isUnit_mul_eq ρ hu h4
+
+/-- **(β1, descend a cleared `WeierstrassCurve` equality)** -/
+theorem weierstrassCurve_map_eq_of_mul_eq {B B' : Type u} [CommRing B] [CommRing B']
+    (ρ : B →+* B') {u : B} (hu : IsUnit (ρ u)) {W₁ W₂ : WeierstrassCurve B}
+    (h1 : u * W₁.a₁ = u * W₂.a₁) (h2 : u * W₁.a₂ = u * W₂.a₂)
+    (h3 : u * W₁.a₃ = u * W₂.a₃) (h4 : u * W₁.a₄ = u * W₂.a₄)
+    (h6 : u * W₁.a₆ = u * W₂.a₆) :
+    W₁.map ρ = W₂.map ρ := by
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+  · exact map_eq_of_isUnit_mul_eq ρ hu h1
+  · exact map_eq_of_isUnit_mul_eq ρ hu h2
+  · exact map_eq_of_isUnit_mul_eq ρ hu h3
+  · exact map_eq_of_isUnit_mul_eq ρ hu h4
+  · exact map_eq_of_isUnit_mul_eq ρ hu h6
+
+/-- **(β2, the `VariableChange` spread)** A variable change `D` over the tower localization
+`T = L[1/f']` spreads, after ONE invariant multiplier `s`, to a preimage over EVERY chart
+ring `B = A[1/(g·f)]` (`g ∈ S`) in which `s` is invertible, compatibly with the comparison
+`ψ` (`DB.map ψ = D`).  The unit component uses the `bu·bv`-relation trick: the numerator of
+`D.u` is invertible on the chart because `bu·bv` equals the (invertible) product of
+denominators after one more clearing. -/
+theorem exists_variableChange_sections_preimage (S : Submonoid A) (f : A)
+    (D : VariableChange (Localization (Submonoid.powers (algebraMap A (Localization S) f)))) :
+    ∃ s : S, ∀ {g : A}, g ∈ S → ∀ (B : Type u) [CommRing B] [Algebra A B]
+      [IsLocalization.Away (g * f) B]
+      (ψ : B →+* Localization (Submonoid.powers (algebraMap A (Localization S) f))),
+      (∀ a : A, ψ (algebraMap A B a)
+        = algebraMap (Localization S)
+            (Localization (Submonoid.powers (algebraMap A (Localization S) f)))
+            (algebraMap A (Localization S) a)) →
+      IsUnit (algebraMap A B ((s : A))) →
+      ∃ DB : VariableChange B, DB.map ψ = D := by
+  obtain ⟨bu, su, ku, hu⟩ := exists_mem_pow_mul_map_eq S f ((D.u :
+    Localization (Submonoid.powers (algebraMap A (Localization S) f))))
+  obtain ⟨bv, sv, kv, hv⟩ := exists_mem_pow_mul_map_eq S f ((↑D.u⁻¹ :
+    Localization (Submonoid.powers (algebraMap A (Localization S) f))))
+  obtain ⟨br, sr, kr, hr⟩ := exists_mem_pow_mul_map_eq S f D.r
+  obtain ⟨bs, ss, ks, hs⟩ := exists_mem_pow_mul_map_eq S f D.s
+  obtain ⟨bt, st, kt, ht⟩ := exists_mem_pow_mul_map_eq S f D.t
+  -- the unit relation over `T`, cleared to `A` (through the composite comparison `φ`)
+  set φ : A →+* Localization (Submonoid.powers (algebraMap A (Localization S) f)) :=
+    (algebraMap (Localization S)
+      (Localization (Submonoid.powers (algebraMap A (Localization S) f)))).comp
+      (algebraMap A (Localization S)) with hφ
+  have huφ : φ ((su : A) * f ^ ku) * ((D.u :
+      Localization (Submonoid.powers (algebraMap A (Localization S) f)))) = φ bu := hu
+  have hvφ : φ ((sv : A) * f ^ kv) * ((↑D.u⁻¹ :
+      Localization (Submonoid.powers (algebraMap A (Localization S) f)))) = φ bv := hv
+  have h1 : ((D.u : Localization (Submonoid.powers (algebraMap A (Localization S) f))))
+      * ((↑D.u⁻¹ : Localization (Submonoid.powers (algebraMap A (Localization S) f))))
+      = 1 := D.u.mul_inv
+  have huv : φ (bu * bv) = φ (((su : A) * f ^ ku) * ((sv : A) * f ^ kv)) := by
+    rw [map_mul, map_mul]
+    calc φ bu * φ bv
+        = (φ ((su : A) * f ^ ku) * ((D.u :
+              Localization (Submonoid.powers (algebraMap A (Localization S) f)))))
+          * (φ ((sv : A) * f ^ kv) * ((↑D.u⁻¹ :
+              Localization (Submonoid.powers (algebraMap A (Localization S) f))))) := by
+          rw [huφ, hvφ]
+      _ = (φ ((su : A) * f ^ ku) * φ ((sv : A) * f ^ kv))
+          * (((D.u : Localization (Submonoid.powers (algebraMap A (Localization S) f))))
+            * ((↑D.u⁻¹ :
+              Localization (Submonoid.powers (algebraMap A (Localization S) f))))) := by
+          ring
+      _ = φ ((su : A) * f ^ ku) * φ ((sv : A) * f ^ kv) := by rw [h1, mul_one]
+  obtain ⟨s₀, k₀, h₀⟩ := exists_mem_pow_mul_eq_of_map_eq S f huv
+  refine ⟨((((su * sv) * s₀) * sr) * ss) * st, ?_⟩
+  intro g hg B _ _ _ ψ hψ hsU
+  -- the divisibility chain into the folded multiplier
+  have hdvd_su : (su : A) ∣ (((((((su * sv) * s₀) * sr) * ss) * st : S)) : A) := by
+    show (su : A) ∣ (((((su : A) * (sv : A)) * (s₀ : A)) * (sr : A)) * (ss : A)) * (st : A)
+    exact ((((dvd_mul_right _ _).mul_right _).mul_right _).mul_right _).mul_right _
+  have hdvd_sv : (sv : A) ∣ (((((((su * sv) * s₀) * sr) * ss) * st : S)) : A) := by
+    show (sv : A) ∣ (((((su : A) * (sv : A)) * (s₀ : A)) * (sr : A)) * (ss : A)) * (st : A)
+    exact ((((dvd_mul_left _ _).mul_right _).mul_right _).mul_right _).mul_right _
+  have hdvd_s₀ : (s₀ : A) ∣ (((((((su * sv) * s₀) * sr) * ss) * st : S)) : A) := by
+    show (s₀ : A) ∣ (((((su : A) * (sv : A)) * (s₀ : A)) * (sr : A)) * (ss : A)) * (st : A)
+    exact (((dvd_mul_left _ _).mul_right _).mul_right _).mul_right _
+  have hdvd_sr : (sr : A) ∣ (((((((su * sv) * s₀) * sr) * ss) * st : S)) : A) := by
+    show (sr : A) ∣ (((((su : A) * (sv : A)) * (s₀ : A)) * (sr : A)) * (ss : A)) * (st : A)
+    exact ((dvd_mul_left _ _).mul_right _).mul_right _
+  have hdvd_ss : (ss : A) ∣ (((((((su * sv) * s₀) * sr) * ss) * st : S)) : A) := by
+    show (ss : A) ∣ (((((su : A) * (sv : A)) * (s₀ : A)) * (sr : A)) * (ss : A)) * (st : A)
+    exact (dvd_mul_left _ _).mul_right _
+  have hdvd_st : (st : A) ∣ (((((((su * sv) * s₀) * sr) * ss) * st : S)) : A) := by
+    show (st : A) ∣ (((((su : A) * (sv : A)) * (s₀ : A)) * (sr : A)) * (ss : A)) * (st : A)
+    exact dvd_mul_left _ _
+  have hsuB : IsUnit (algebraMap A B ((su : A))) :=
+    isUnit_of_dvd_unit (map_dvd _ hdvd_su) hsU
+  have hsvB : IsUnit (algebraMap A B ((sv : A))) :=
+    isUnit_of_dvd_unit (map_dvd _ hdvd_sv) hsU
+  have hs₀B : IsUnit (algebraMap A B ((s₀ : A))) :=
+    isUnit_of_dvd_unit (map_dvd _ hdvd_s₀) hsU
+  have hsrB : IsUnit (algebraMap A B ((sr : A))) :=
+    isUnit_of_dvd_unit (map_dvd _ hdvd_sr) hsU
+  have hssB : IsUnit (algebraMap A B ((ss : A))) :=
+    isUnit_of_dvd_unit (map_dvd _ hdvd_ss) hsU
+  have hstB : IsUnit (algebraMap A B ((st : A))) :=
+    isUnit_of_dvd_unit (map_dvd _ hdvd_st) hsU
+  have hgfB : IsUnit (algebraMap A B (g * f)) := IsLocalization.Away.algebraMap_isUnit _
+  have hfB : IsUnit (algebraMap A B f) :=
+    isUnit_of_dvd_unit (map_dvd (algebraMap A B) (dvd_mul_left f g)) hgfB
+  -- the denominator units
+  have hdu : IsUnit (algebraMap A B ((su : A) * f ^ ku)) := by
+    rw [map_mul, map_pow]; exact hsuB.mul (hfB.pow ku)
+  have hdv : IsUnit (algebraMap A B ((sv : A) * f ^ kv)) := by
+    rw [map_mul, map_pow]; exact hsvB.mul (hfB.pow kv)
+  have hdr : IsUnit (algebraMap A B ((sr : A) * f ^ kr)) := by
+    rw [map_mul, map_pow]; exact hsrB.mul (hfB.pow kr)
+  have hds : IsUnit (algebraMap A B ((ss : A) * f ^ ks)) := by
+    rw [map_mul, map_pow]; exact hssB.mul (hfB.pow ks)
+  have hdt : IsUnit (algebraMap A B ((st : A) * f ^ kt)) := by
+    rw [map_mul, map_pow]; exact hstB.mul (hfB.pow kt)
+  -- the numerator of the unit component is invertible on the chart
+  have hbb : algebraMap A B bu * algebraMap A B bv
+      = (algebraMap A B ((su : A)) * algebraMap A B f ^ ku)
+        * (algebraMap A B ((sv : A)) * algebraMap A B f ^ kv) := by
+    have h0 := congrArg (algebraMap A B) h₀
+    simp only [map_mul, map_pow] at h0
+    exact (hs₀B.mul (hfB.pow k₀)).mul_left_cancel (by linear_combination h0)
+  have hbuU : IsUnit (algebraMap A B bu) :=
+    isUnit_of_mul_isUnit_left (show IsUnit (algebraMap A B bu * algebraMap A B bv) from by
+      rw [hbb]; exact (hsuB.mul (hfB.pow ku)).mul ((hsvB.mul (hfB.pow kv))))
+  refine ⟨⟨hbuU.unit * hdu.unit⁻¹,
+    algebraMap A B br * ↑hdr.unit⁻¹,
+    algebraMap A B bs * ↑hds.unit⁻¹,
+    algebraMap A B bt * ↑hdt.unit⁻¹⟩, ?_⟩
+  refine VariableChange.ext (Units.ext ?_) ?_ ?_ ?_
+  · show ψ ((hbuU.unit * hdu.unit⁻¹ : Bˣ) : B)
+      = ((D.u : Localization (Submonoid.powers (algebraMap A (Localization S) f))))
+    rw [show ((hbuU.unit * hdu.unit⁻¹ : Bˣ) : B) = algebraMap A B bu * ↑hdu.unit⁻¹ from by
+      rw [Units.val_mul, IsUnit.unit_spec]]
+    exact map_num_mul_inv_eq ψ (by rw [hψ, hψ, mul_comm]; exact hu) hdu
+  · exact map_num_mul_inv_eq ψ (by rw [hψ, hψ, mul_comm]; exact hr) hdr
+  · exact map_num_mul_inv_eq ψ (by rw [hψ, hψ, mul_comm]; exact hs) hds
+  · exact map_num_mul_inv_eq ψ (by rw [hψ, hψ, mul_comm]; exact ht) hdt
+
+/-- **(β2, element spread into an `Away`-ring)** An element `x` of the semilocalization `L`
+with fraction data `x·s = b` has a preimage in every `Away`-chart in which the denominator
+`s` is invertible. -/
+theorem awayPreimage_map_eq {S : Submonoid A}
+    (B : Type u) [CommRing B] [Algebra A B]
+    (j : B →+* Localization S)
+    (hj : ∀ a : A, j (algebraMap A B a) = algebraMap A (Localization S) a)
+    {x : Localization S} {b : A} {s : S}
+    (hx : x * algebraMap A (Localization S) ((s : A)) = algebraMap A (Localization S) b)
+    (hs : IsUnit (algebraMap A B ((s : A)))) :
+    j (algebraMap A B b * ↑hs.unit⁻¹) = x :=
+  map_num_mul_inv_eq j (by rw [hj, hj]; exact hx) hs
+
+end ClearingCalculus
+
+/-! ### Stage 3c-β2: the level maps and the restriction vocabulary -/
+
+/-- `resLoc` at equal submonoids is the identity. -/
+theorem resLoc_self {R : Type*} [CommRing R] (S₂ : Submonoid R) :
+    resLoc S₂ S₂ le_rfl = RingHom.id (Localization S₂) := by
+  apply IsLocalization.ringHom_ext S₂
+  ext r
+  simp only [RingHom.coe_comp, Function.comp_apply, RingHom.id_apply, resLoc_algebraMap]
+
+/-- The comparison maps at nested basic opens into the SAME localization agree along
+restriction (the `S₂ = S₃` degeneration of `sectionsToLoc_factor`). -/
+theorem sectionsToLoc_comp_resLE [IsAffine X] (S' : Submonoid ↑Γ(X, ⊤))
+    (g₁ g₂ : ↑Γ(X, ⊤)) (hle : X.basicOpen g₂ ≤ X.basicOpen g₁)
+    (S₂ : Submonoid (Localization S'))
+    (hg₁ : IsUnit (algebraMap (Localization S') (Localization S₂)
+      (algebraMap ↑Γ(X, ⊤) (Localization S') g₁)))
+    (hg₂ : IsUnit (algebraMap (Localization S') (Localization S₂)
+      (algebraMap ↑Γ(X, ⊤) (Localization S') g₂))) :
+    (sectionsToLoc S' g₂ S₂ hg₂).comp (Scheme.resLE hle) = sectionsToLoc S' g₁ S₂ hg₁ := by
+  have h := sectionsToLoc_factor S' g₁ g₂ hle S₂ S₂ le_rfl hg₁ hg₂
+  rw [resLoc_self, RingHom.id_comp] at h
+  exact h.symm
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(the restricted-comparison fold)** The comparison variable change of a restricted chart
+pair, restricted further, is the `resLE`-image (the standalone form of the `hfold` step of
+`transVC_restrict_trans`). -/
+theorem transVC_restrict_map_resLE {VA VB : X.affineOpens} (PA : LocalPresentation C VA)
+    (PB : LocalPresentation C VB) {VAB W' : X.affineOpens} (hA : VAB.1 ≤ VA.1)
+    (hB : VAB.1 ≤ VB.1) (hW : W'.1 ≤ VAB.1) :
+    ((PA.restrict hA).transVC (PB.restrict hB)).map (Scheme.resLE hW)
+      = (PA.restrict (hW.trans hA)).transVC (PB.restrict (hW.trans hB)) := by
+  have htr : ((PA.restrict hA).restrict hW).transVC ((PB.restrict hB).restrict hW)
+      = ((PA.restrict hA).transVC (PB.restrict hB)).map
+        (sectionsMapLE (𝟙 X) (show W'.1 ≤ (𝟙 X : X ⟶ X) ⁻¹ᵁ VAB.1 by simpa using hW)) :=
+    LocalPresentation.transVC_transport (𝟙 X) (𝟙 C.E)
+      (IsPullback.of_horiz_isIso ⟨by simp⟩) (by simp) (PA.restrict hA) (PB.restrict hB)
+      (show W'.1 ≤ (𝟙 X : X ⟶ X) ⁻¹ᵁ VAB.1 by simpa using hW)
+  rw [← LocalPresentation.transVC_restrict_restrict PA PB hA hB hW, htr,
+    LocalPresentation.sectionsMapLE_id]
+
+/-- The comparison variable change is antisymmetric under inversion. -/
+theorem transVC_inv_eq {V : X.affineOpens} (P Q : LocalPresentation C V) :
+    (P.transVC Q)⁻¹ = Q.transVC P :=
+  inv_eq_of_mul_eq_one_left (by
+    rw [LocalPresentation.transVC_trans, LocalPresentation.transVC_self])
+
+/-- Right-argument collapse of a double restriction in a comparison. -/
+theorem transVC_restrict_restrict_right {VQ V V'' : X.affineOpens}
+    (R : LocalPresentation C V'') (Q : LocalPresentation C VQ)
+    (q : V.1 ≤ VQ.1) (h : V''.1 ≤ V.1) :
+    R.transVC ((Q.restrict q).restrict h) = R.transVC (Q.restrict (h.trans q)) := by
+  rw [← transVC_inv_eq, LocalPresentation.transVC_restrict_restrict_left, transVC_inv_eq]
+
+/-- Basic opens are antitone in divisibility. -/
+theorem basicOpen_le_basicOpen_of_dvd {U : X.Opens} {a b : Γ(X, U)} (h : a ∣ b) :
+    X.basicOpen b ≤ X.basicOpen a := by
+  obtain ⟨c, rfl⟩ := h
+  exact basicOpen_mul_le_left a c
+
+/-- A divisor of the localized element is a unit in any `Away`-localization. -/
+theorem isUnit_algebraMap_of_isLocalizationAway_dvd {A : Type u} [CommRing A]
+    (B : Type u) [CommRing B] [Algebra A B] (w : A) [IsLocalization.Away w B]
+    {x : A} (h : x ∣ w) : IsUnit (algebraMap A B x) :=
+  isUnit_of_dvd_unit (map_dvd _ h) (IsLocalization.Away.algebraMap_isUnit _)
+
+/-- The canonical map `A[1/a] →+* Γ(X, D(a·g))` (the chart-sections incarnation of the
+level inclusion; `a` is invertible on `D(a·g)` because `a ∣ a·g`). -/
+noncomputable def awayToSections [IsAffine X] (a g : ↑Γ(X, ⊤)) :
+    Localization.Away a →+* ↑Γ(X, X.basicOpen (a * g)) :=
+  haveI := (isAffineOpen_top X).isLocalization_basicOpen (a * g)
+  IsLocalization.Away.lift (g := algebraMap ↑Γ(X, ⊤) ↑Γ(X, X.basicOpen (a * g))) a
+    (isUnit_algebraMap_of_isLocalizationAway_dvd _ (a * g) (dvd_mul_right a g))
+
+@[simp] theorem awayToSections_algebraMap [IsAffine X] (a g x : ↑Γ(X, ⊤)) :
+    awayToSections (X := X) a g (algebraMap ↑Γ(X, ⊤) (Localization.Away a) x)
+      = algebraMap ↑Γ(X, ⊤) ↑Γ(X, X.basicOpen (a * g)) x := by
+  haveI := (isAffineOpen_top X).isLocalization_basicOpen (a * g)
+  exact IsLocalization.Away.lift_eq a _ x
+
+/-- The canonical map `A[1/a] →+* Localization S` for `a ∈ S`. -/
+noncomputable def awayToLocalization {A : Type u} [CommRing A] (S : Submonoid A)
+    {a : A} (ha : a ∈ S) : Localization.Away a →+* Localization S :=
+  IsLocalization.Away.lift (g := algebraMap A (Localization S)) a
+    (IsLocalization.map_units (Localization S) ⟨a, ha⟩)
+
+@[simp] theorem awayToLocalization_algebraMap {A : Type u} [CommRing A] (S : Submonoid A)
+    {a : A} (ha : a ∈ S) (x : A) :
+    awayToLocalization S ha (algebraMap A (Localization.Away a) x)
+      = algebraMap A (Localization S) x :=
+  IsLocalization.Away.lift_eq a _ x
+
+/-- The canonical map `A[1/a] →+* A[1/b]` for `a ∣ b`. -/
+noncomputable def awayMapDvd {A : Type u} [CommRing A] {a b : A} (h : a ∣ b) :
+    Localization.Away a →+* Localization.Away b :=
+  IsLocalization.lift (M := Submonoid.powers a)
+    (g := algebraMap A (Localization.Away b)) (by
+      rintro ⟨y, n, rfl⟩
+      show IsUnit (algebraMap A (Localization.Away b) (a ^ n))
+      rw [map_pow]
+      exact (isUnit_algebraMap_away h).pow n)
+
+@[simp] theorem awayMapDvd_algebraMap {A : Type u} [CommRing A] {a b : A} (h : a ∣ b)
+    (x : A) :
+    awayMapDvd h (algebraMap A (Localization.Away a) x)
+      = algebraMap A (Localization.Away b) x :=
+  IsLocalization.lift_eq _ x
+
+/-- Restriction of a global section to a smaller basic open is the smaller algebra map. -/
+theorem resLE_algebraMap [IsAffine X] {g₁ g₂ : ↑Γ(X, ⊤)}
+    (hle : X.basicOpen g₂ ≤ X.basicOpen g₁) (x : ↑Γ(X, ⊤)) :
+    Scheme.resLE hle (algebraMap ↑Γ(X, ⊤) ↑Γ(X, X.basicOpen g₁) x)
+      = algebraMap ↑Γ(X, ⊤) ↑Γ(X, X.basicOpen g₂) x :=
+  Scheme.resLE_resLE hle (X.basicOpen_le g₁) x
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **([a5-P-loc] Stage 3c-β, the invariant-denominator spread ★)** The α-package data over
+the semilocalization `L = Localization S'` — the glued model `W₀L`, the correction cochain
+`D i / L[1/fᵢ]`, the per-chart glue identities and the corrected coboundary — spreads to a
+single invariant level `a₁ ∉ p`: an elliptic model `W₀R₁ / A[1/a₁]`, per-chart corrections
+`DA i` over the chart sections `Γ(X, D(a₁·fᵢ))` with
+
+* `DA i • (P i).W|_{D(a₁fᵢ)} = W₀R₁ ⊗ Γ(X, D(a₁·fᵢ))` (through `awayToSections`), and
+* the corrected chart coboundary
+  `transVC ((P i)|, (P j)|) = (DA i|)⁻¹ * (DA j|)` on the chart overlaps `D((a₁fᵢ)(a₁fⱼ))`,
+
+together with the span condition over `A[1/a₁]`.  This is the Part-2 pattern of
+`exists_away_invariant_descent` run through the chart-clearing calculus above: choose
+fraction data over `L`/`L[1/fᵢ]`, fold the denominators into a preliminary invariant `a₀`,
+build the data at level `a₀`, clear the finitely many identities (each `ψ`-image holds on
+the nose), fold the clearing multipliers into `a₁` and descend along the canonical
+restriction maps. -/
+theorem exists_invariant_chart_spread (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    (p : Ideal (FixedPoints.subring ↑Γ(X, ⊤) G)) [p.IsPrime]
+    (hpreS : ∀ s : S', ∃ k : FixedPoints.subring ↑Γ(X, ⊤) G,
+      k ∉ p ∧ algebraMap (FixedPoints.subring ↑Γ(X, ⊤) G) ↑Γ(X, ⊤) k = (s : ↑Γ(X, ⊤)))
+    (hmemS : ∀ k : FixedPoints.subring ↑Γ(X, ⊤) G, k ∉ p → ((k : ↑Γ(X, ⊤))) ∈ S')
+    {ι : Type u} [Fintype ι] (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (k₀ : FixedPoints.subring ↑Γ(X, ⊤) G) (hk₀ : k₀ ∉ p)
+    (hspanA : ∀ a : FixedPoints.subring ↑Γ(X, ⊤) G, k₀ ∣ a →
+      Ideal.span (Set.range fun i =>
+        algebraMap ↑Γ(X, ⊤) (Localization.Away ((a : ↑Γ(X, ⊤)))) (f i)) = ⊤)
+    (hU : ∀ i j, IsUnit (algebraMap (Localization S')
+      (Localization
+        (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+          ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') (f i * f j))))
+    (D : ∀ i, VariableChange (Localization
+      (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))
+    (W₀L : WeierstrassCurve (Localization S'))
+    (hΔ : IsUnit W₀L.Δ)
+    (hglue : ∀ i, W₀L.map (algebraMap (Localization S')
+        (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))
+      = D i • ((P i).W.map (sectionsToLoc S' (f i)
+          (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))
+          (isUnit_algebraMap_powers_self
+            (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))))
+    (hcobInv : ∀ i j,
+      (((P i).restrict (V' := ⟨X.basicOpen (f i * f j),
+            (isAffineOpen_top X).basicOpen (f i * f j)⟩)
+          (basicOpen_mul_le_left (f i) (f j))).transVC
+        ((P j).restrict (basicOpen_mul_le_right (f i) (f j)))).map
+          (sectionsToLoc S' (f i * f j) _ (hU i j))
+      = ((D i).map (resLoc
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+              ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            le_sup_left))⁻¹
+        * (D j).map (resLoc
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+              ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            le_sup_right)) :
+    ∃ (a₁ : FixedPoints.subring ↑Γ(X, ⊤) G) (_ : a₁ ∉ p)
+      (W₀R₁ : WeierstrassCurve (Localization.Away ((a₁ : ↑Γ(X, ⊤)))))
+      (DA : ∀ i, VariableChange ↑Γ(X, X.basicOpen (((a₁ : ↑Γ(X, ⊤))) * f i))),
+      IsUnit W₀R₁.Δ ∧
+      Ideal.span (Set.range fun i =>
+        algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₁ : ↑Γ(X, ⊤)))) (f i)) = ⊤ ∧
+      (∀ i, DA i • ((P i).W.map (Scheme.resLE
+          (basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤))) (f i))))
+        = W₀R₁.map (awayToSections ((a₁ : ↑Γ(X, ⊤))) (f i))) ∧
+      (∀ i j,
+        ((P i).restrict (V' := ⟨X.basicOpen ((((a₁ : ↑Γ(X, ⊤))) * f i)
+              * (((a₁ : ↑Γ(X, ⊤))) * f j)),
+            (isAffineOpen_top X).basicOpen ((((a₁ : ↑Γ(X, ⊤))) * f i)
+              * (((a₁ : ↑Γ(X, ⊤))) * f j))⟩)
+          ((basicOpen_mul_le_left (((a₁ : ↑Γ(X, ⊤))) * f i) (((a₁ : ↑Γ(X, ⊤))) * f j)).trans
+            (basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤))) (f i)))).transVC
+        ((P j).restrict
+          ((basicOpen_mul_le_right (((a₁ : ↑Γ(X, ⊤))) * f i) (((a₁ : ↑Γ(X, ⊤))) * f j)).trans
+            (basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤))) (f j))))
+        = ((DA i).map (Scheme.resLE
+            (basicOpen_mul_le_left (((a₁ : ↑Γ(X, ⊤))) * f i) (((a₁ : ↑Γ(X, ⊤))) * f j))))⁻¹
+          * (DA j).map (Scheme.resLE
+            (basicOpen_mul_le_right (((a₁ : ↑Γ(X, ⊤))) * f i)
+              (((a₁ : ↑Γ(X, ⊤))) * f j)))) := by
+  classical
+  choose pre hpre_mem hpre_eq using hpreS
+  have hmulmem : ∀ {x y : FixedPoints.subring ↑Γ(X, ⊤) G}, x ∉ p → y ∉ p → x * y ∉ p :=
+    fun hx hy => p.primeCompl.mul_mem hx hy
+  -- ### the per-chart `VariableChange`-spread multipliers (level-independent)
+  have hDsp : ∀ i, ∃ s : S', ∀ {g : ↑Γ(X, ⊤)}, g ∈ S' →
+      ∀ (B : Type u) [CommRing B] [Algebra ↑Γ(X, ⊤) B]
+        [IsLocalization.Away (g * f i) B]
+        (ψ : B →+* Localization
+          (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))),
+        (∀ a : ↑Γ(X, ⊤), ψ (algebraMap ↑Γ(X, ⊤) B a)
+          = algebraMap (Localization S')
+              (Localization
+                (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))
+              (algebraMap ↑Γ(X, ⊤) (Localization S') a)) →
+        IsUnit (algebraMap ↑Γ(X, ⊤) B ((s : ↑Γ(X, ⊤)))) →
+        ∃ DB : VariableChange B, DB.map ψ = D i :=
+    fun i => exists_variableChange_sections_preimage S' (f i) (D i)
+  choose sVC hsVC using hDsp
+  -- ### fraction data for the five coefficients of `W₀L` and the `Δ`-witness
+  obtain ⟨⟨b₁, s₁⟩, hb₁⟩ := IsLocalization.surj S' W₀L.a₁
+  obtain ⟨⟨b₂, s₂⟩, hb₂⟩ := IsLocalization.surj S' W₀L.a₂
+  obtain ⟨⟨b₃, s₃⟩, hb₃⟩ := IsLocalization.surj S' W₀L.a₃
+  obtain ⟨⟨b₄, s₄⟩, hb₄⟩ := IsLocalization.surj S' W₀L.a₄
+  obtain ⟨⟨b₆, s₆⟩, hb₆⟩ := IsLocalization.surj S' W₀L.a₆
+  obtain ⟨v, hv⟩ := hΔ.exists_right_inv
+  obtain ⟨⟨bΔ, sΔ⟩, hbΔ⟩ := IsLocalization.surj S' v
+  -- ### the preliminary invariant level `a₀`
+  set sPre : S' := ((((((s₁ * s₂) * s₃) * s₄) * s₆) * sΔ) * ∏ i, sVC i) with hsPre
+  set a₀ : FixedPoints.subring ↑Γ(X, ⊤) G := k₀ * pre sPre with ha₀def
+  have ha₀ : a₀ ∉ p := hmulmem hk₀ (hpre_mem sPre)
+  have ha₀S : ((a₀ : ↑Γ(X, ⊤))) ∈ S' := hmemS a₀ ha₀
+  have hpre_dvd_a₀ : ((pre sPre : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := by
+    show ((pre sPre : ↑Γ(X, ⊤))) ∣ ((k₀ : ↑Γ(X, ⊤)) * ((pre sPre : ↑Γ(X, ⊤))))
+    exact dvd_mul_left _ _
+  have hsPre_dvd : ((sPre : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := by
+    rw [← hpre_eq sPre]
+    exact hpre_dvd_a₀
+  -- coefficient-denominator divisibilities into `a₀` (via the submonoid inclusion)
+  have hdvdS : ∀ t : S', t ∣ sPre → ((t : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := fun t ht =>
+    dvd_trans (map_dvd S'.subtype ht) hsPre_dvd
+  have hdvd₁ : ((s₁ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := hdvdS s₁
+    ((((((dvd_mul_right s₁ s₂).mul_right s₃).mul_right s₄).mul_right s₆).mul_right
+      sΔ).mul_right _)
+  have hdvd₂ : ((s₂ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := hdvdS s₂
+    ((((((dvd_mul_left s₂ s₁).mul_right s₃).mul_right s₄).mul_right s₆).mul_right
+      sΔ).mul_right _)
+  have hdvd₃ : ((s₃ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := hdvdS s₃
+    (((((dvd_mul_left s₃ (s₁ * s₂)).mul_right s₄).mul_right s₆).mul_right sΔ).mul_right _)
+  have hdvd₄ : ((s₄ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := hdvdS s₄
+    ((((dvd_mul_left s₄ ((s₁ * s₂) * s₃)).mul_right s₆).mul_right sΔ).mul_right _)
+  have hdvd₆ : ((s₆ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := hdvdS s₆
+    (((dvd_mul_left s₆ (((s₁ * s₂) * s₃) * s₄)).mul_right sΔ).mul_right _)
+  have hdvdΔ : ((sΔ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := hdvdS sΔ
+    ((dvd_mul_left sΔ ((((s₁ * s₂) * s₃) * s₄) * s₆)).mul_right _)
+  have hdvdVC : ∀ i, ((sVC i : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))) := fun i => hdvdS (sVC i)
+    ((Finset.dvd_prod_of_mem sVC (Finset.mem_univ i)).mul_left _)
+  -- `a₀` is henceforth OPAQUE: no definitional unfolding into the `choose`-terms
+  clear_value a₀
+  clear ha₀def hdvdS hsPre_dvd hpre_dvd_a₀ hsPre sPre
+  sorry
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **([a5-P-loc] Stage 3c, the mouth-core presentation at an invariant prime — THE
 FRONTIER)** At every prime `p` of the invariants `Aᴳ = Γ(X, ⊤)ᴳ` there is an invariant

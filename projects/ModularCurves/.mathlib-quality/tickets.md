@@ -24442,3 +24442,17 @@ representable_prep passes hinv. ExactOrder general-base boxes untouched (docstri
 sorries at :122/:859/:927/:958 remain statement-protected over-ℤ future work).
 DECISIVE: gammaOneDrinfeld_affineOverEll + gammaOneDrinfeld_rigidNoeth + hbound_of_kvc all
 CLEAN-TRIPLE — every receipt's residual sorryAx enters ONLY through the shared engine hpres.
+
+### v10.343 progress — [T-E4D Stage-3c-β plumbing GREEN intermediate] (2026-07-21)
+The β-spread + γ-glue frontier is now two well-scoped green sorries in EngineMouthCharts
+(the Fable-5 credit budget was exhausted mid-rewrite; work is green + banked, continued on
+Opus). NEW exists_invariant_chart_spread (:1497): the heavy β-spread theorem (L → A_{a₁}) —
+statement delivers spread W₀R₁ + per-chart DA + span-over-A_{a₁} + glue identities + pairwise
+transVC coboundary at the A_{a₁} level; body has ALL fraction-extraction (IsLocalization.surj
+on the 5 coeffs + Δ-inverse + per-chart VC-spread multipliers via
+exists_variableChange_sections_preimage) and denominator-divisibility-into-a₀ plumbing done,
+sorry at :1624 = the final clearing+descent. Frontier theorem exists_invariant_away_presentation
+(:1643) states hpres VERBATIM, consumes Stages 1-2 + α-package + the span spread, sorry at
+:1729 = pure γ native-glue with the full γ1-γ4 recipe in its continuation comment. Wiring
+caveat recorded: EngineDescent ← EngineMouthCharts import pulls heavy InvariantDifferential
+instances (decompose the two slow EngineDescent proofs first, or thread context through hyps).
