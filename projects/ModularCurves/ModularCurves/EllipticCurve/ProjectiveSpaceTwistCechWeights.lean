@@ -236,6 +236,107 @@ theorem coordinateHomogeneousLaurentOrderedCechCoface_naturality
       (coordinateHomogeneousLaurentFactorCoface_naturality_delete_succ
         (R := R) a k d)
 
+/-- The alternating ordered Cech differential in homogeneous Laurent weights. -/
+noncomputable def coordinateHomogeneousLaurentOrderedCechDifferential
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentOrderedCechObject (R := R) (σ := σ) d n ⟶
+      coordinateHomogeneousLaurentOrderedCechObject (R := R) (σ := σ) d (n + 1) :=
+  ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+    coordinateHomogeneousLaurentOrderedCechCoface (R := R) (σ := σ) d n k
+
+/-- The degreewise homogeneous-weight comparison conjugates the geometric coordinate differential
+to the alternating deletion differential. -/
+theorem coordinateHomogeneousLaurentOrderedCechDifferential_naturality
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    (coordinateHomogeneousLaurentOrderedCechObjectIso
+        (R := R) (σ := σ) d n).hom ≫
+      coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d n =
+    coordinateHyperplaneTwistOrderedBaseCechDifferential
+        (R := R) (σ := σ) d n ≫
+      (coordinateHomogeneousLaurentOrderedCechObjectIso
+        (R := R) (σ := σ) d (n + 1)).hom := by
+  rw [coordinateHomogeneousLaurentOrderedCechDifferential,
+    coordinateHyperplaneTwistOrderedBaseCechDifferential,
+    Preadditive.comp_sum, Preadditive.sum_comp]
+  apply Finset.sum_congr rfl
+  intro k _
+  rw [Preadditive.comp_zsmul, Preadditive.zsmul_comp,
+    coordinateHomogeneousLaurentOrderedCechCoface_naturality]
+
+/-- Consecutive homogeneous-weight differentials compose to zero. -/
+theorem coordinateHomogeneousLaurentOrderedCechDifferential_comp
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d n ≫
+      coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d (n + 1) = 0 := by
+  apply (cancel_epi
+    (coordinateHomogeneousLaurentOrderedCechObjectIso
+      (R := R) (σ := σ) d n).hom).1
+  rw [Limits.comp_zero, ← Category.assoc,
+    coordinateHomogeneousLaurentOrderedCechDifferential_naturality,
+    Category.assoc,
+    coordinateHomogeneousLaurentOrderedCechDifferential_naturality,
+    ← Category.assoc,
+    coordinateHyperplaneTwistOrderedBaseCechDifferential_comp (R := R) j d n,
+    Limits.zero_comp]
+
+/-- The homogeneous-weight presentation of the ordered Cech complex for `O(d)`. -/
+noncomputable def coordinateHomogeneousLaurentOrderedCechComplex
+    [LinearOrder σ] (j : σ) (d : ℤ) :
+    CochainComplex
+      (ModuleCat.{u} Γ(Spec (CommRingCat.of R),
+        (⊤ : (Spec (CommRingCat.of R)).Opens))) ℕ :=
+  CochainComplex.of
+    (coordinateHomogeneousLaurentOrderedCechObject (R := R) (σ := σ) d)
+    (coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) d)
+    (coordinateHomogeneousLaurentOrderedCechDifferential_comp
+      (R := R) j d)
+
+@[simp]
+theorem coordinateHomogeneousLaurentOrderedCechComplex_X
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).X n =
+      coordinateHomogeneousLaurentOrderedCechObject
+        (R := R) (σ := σ) d n := rfl
+
+@[simp]
+theorem coordinateHomogeneousLaurentOrderedCechComplex_d
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).d n (n + 1) =
+      coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d n := by
+  simp [coordinateHomogeneousLaurentOrderedCechComplex]
+
+/-- The geometric coordinate Cech complex for `O(d)` is isomorphic to its homogeneous-weight
+presentation. -/
+noncomputable def coordinateHomogeneousLaurentOrderedCechComplexIso
+    [LinearOrder σ] (j : σ) (d : ℤ) :
+    coordinateHyperplaneTwistOrderedBaseCechComplex (R := R) j d ≅
+      coordinateHomogeneousLaurentOrderedCechComplex (R := R) j d :=
+  HomologicalComplex.Hom.isoOfComponents
+    (fun n => coordinateHomogeneousLaurentOrderedCechObjectIso
+      (R := R) (σ := σ) d n) (by
+        intro n m hnm
+        simp only [ComplexShape.up_Rel] at hnm
+        subst m
+        rw [coordinateHyperplaneTwistOrderedBaseCechComplex_d,
+          coordinateHomogeneousLaurentOrderedCechComplex_d]
+        exact coordinateHomogeneousLaurentOrderedCechDifferential_naturality
+          (R := R) d n)
+
+@[simp]
+theorem coordinateHomogeneousLaurentOrderedCechComplexIso_hom_f
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    (coordinateHomogeneousLaurentOrderedCechComplexIso
+      (R := R) j d).hom.f n =
+      (coordinateHomogeneousLaurentOrderedCechObjectIso
+        (R := R) (σ := σ) d n).hom := rfl
+
 end
 
 end MvPolynomial
