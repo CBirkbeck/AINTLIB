@@ -161,7 +161,8 @@ base HEAD `79f069da0` (dev/adic-spaces). Companion documents in this directory:
 | K2a | 2 | `FJP/AdicCompletionPrincipal.lean`: `R⟦X⟧ ↠ AdicCompletion (span {a}) R`, noetherianity | — | **DONE** (11 decls; route = `AdicCompletion.liftRingHom` universal property + `evalₐ` interface, never the raw subtype; bonus `isNoetherianRing_of_isPrincipal`; mathlib-PR candidate; K2c note: instantiate at `R := MvPolynomial (Fin m) (unitBall K)`, `a := C ⟨ϖ,…⟩`, rewrite the ideal BEFORE going under `AdicCompletion`) |
 | K2b | 2 | `FJP/RestrictedGaussAdic.lean`: extract AdicBridge from GraphKoszul (import-cycle fix) | K3 lands first (same file) | queued |
 | K2c | 2 | `IsNoetherianRing (unitBall (P K m))`, `P K m`, `IsStronglyNoetherian K` from D2 chain | K1, K2a, K2b | queued |
-| K3 | 4 | `FJP/KoszulFiniteFree.lean` (mathlib-only) + conjugation section appended to GraphKoszul; edge cases m=0/1, q>m; sign tests | — | **dispatch now** |
+| K3 | 4 | `FJP/KoszulFiniteFree.lean` (mathlib-only) + conjugation section appended to GraphKoszul; edge cases m=0/1, q>m; sign tests | — | **DONE** (26 decls; d²=0 via pairTerm involution; KoszulIndex is an abbrev — semireducible broke rw; `koszulDifferential_apply` deliberately not @[simp]; K4 traps + sign-support API documented in the K3 report) |
+| K8a | 3 | `FJP/Over/JetRings.lean`: generic Milnor square, piA-D uniformizer family, Huber/Tate feeders, instance stack | K1 | **DONE** (131 constants; Huber/Tate as ϖ-taking theorems, chooser instances deferred to K9; no scoped-opens needed downstream of CDVFBase) |
 | K4 | 5 | coordinate all-degree exactness (induction on m) + graph localization → polynomial all-degree exactness | K3 | queued |
 | K5 | 6 | flat transfer to `P E m` (lTensor_exact + piScalarRight conjugation), noetherian-pod E | K3, K4, K2 | queued |
 | K6 | 7 | closed images + strictness all degrees + headline | K5 | queued |

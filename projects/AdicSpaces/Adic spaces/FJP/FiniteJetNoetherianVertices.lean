@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FJP.FiniteJetRings
+import «Adic spaces».FJP.RestrictedGaussAdic
 import «Adic spaces».WedhornCechAcyclicity
 
 /-!
@@ -43,10 +44,6 @@ section MapRestricted
 
 variable {B C : Type*} [NormedCommRing B] [NormedCommRing C]
   [IsUltrametricDist B] [IsUltrametricDist C]
-
-theorem finsupp_prod_one {m : ℕ} (t : Fin m →₀ ℕ) :
-    (t.prod fun _ k => (1 : ℝ) ^ k) = 1 := by
-  simp
 
 /-- Coefficientwise application of a norm-nonincreasing ring homomorphism to radius-one
 restricted multivariate power series. -/
@@ -126,29 +123,6 @@ theorem mapRestrictedGauss_surjective (m : ℕ) (φ : B →+* C) (hφ : ∀ x, �
     Function.Surjective (mapRestrictedGauss m φ hφ) := fun y =>
   let ⟨x, hx, _⟩ := mapRestrictedGauss_exists_norm_le m φ hφ hsec y
   ⟨x, hx⟩
-
-/-- Radius-one restricted rings over a `NormOneClass` base have norm-one unit. -/
-noncomputable instance {R : Type*} [NormedCommRing R] [IsUltrametricDist R] [NormOneClass R]
-    {k : ℕ} : NormOneClass (MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ))) := by
-  refine ⟨?_⟩
-  rw [MvRestricted.norm_eq]
-  refine le_antisymm ?_ ?_
-  · rw [MvPowerSeries.gaussNorm]
-    refine Real.iSup_le (fun t => ?_) zero_le_one
-    rw [finsupp_prod_one, mul_one]
-    show ‖MvPowerSeries.coeff t (1 : MvPowerSeries (Fin k) R)‖ ≤ 1
-    rw [MvPowerSeries.coeff_one]
-    split
-    · rw [norm_one]
-    · rw [norm_zero]
-      exact zero_le_one
-  · have h := MvPowerSeries.le_gaussNorm _ _ _
-      (MvRestricted.hasGaussNorm _ (1 : MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ))))
-      (0 : Fin k →₀ ℕ)
-    rw [finsupp_prod_one, mul_one] at h
-    calc (1 : ℝ) = ‖MvPowerSeries.coeff (0 : Fin k →₀ ℕ) (1 : MvPowerSeries (Fin k) R)‖ := by
-          rw [MvPowerSeries.coeff_one, if_pos rfl, norm_one]
-      _ ≤ _ := h
 
 end MapRestricted
 
