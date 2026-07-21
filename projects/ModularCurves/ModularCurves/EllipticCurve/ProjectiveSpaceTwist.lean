@@ -356,6 +356,82 @@ lemma coordinateOpenOverlap_le_right (i k : σ) :
     coordinateOpenOverlap (R := R) i k ≤ coordinateOpen (R := R) k :=
   (coordinateOpenOverlap_eq (R := R) i k).trans_le inf_le_right
 
+/-- A section on one standard coordinate chart extends to any other chart after its overlap
+restriction is multiplied by a power of the corresponding coordinate ratio. -/
+lemma exists_coordinateChartExtension
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (i j : σ) (s : Γ(M, coordinateOpen (R := R) j)) :
+    ∃ (n : ℕ) (t : Γ(M, coordinateOpen (R := R) i)),
+      M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op t =
+        (Proj (homogeneousSubmodule σ R)).presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op
+              (coordinateHyperplaneLocalEquation (R := R) i j ^ n) •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s := by
+  let X := Proj (homogeneousSubmodule σ R)
+  let U : X.affineOpens :=
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen (R := R) i⟩
+  let f := coordinateHyperplaneLocalEquation (R := R) i j
+  have hV : X.basicOpen f = coordinateOpenOverlap (R := R) i j :=
+    coordinateHyperplaneLocalEquation_basicOpen (R := R) i j
+  let e : Γ(M, coordinateOpenOverlap (R := R) i j) ≅
+      Γ(M, X.basicOpen f) :=
+    M.presheaf.mapIso (eqToIso hV).op
+  let r : Γ(M, X.basicOpen f) :=
+    e.hom (M.presheaf.map
+      (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s)
+  obtain ⟨n, t, ht⟩ :=
+    Scheme.Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffineOpen
+      M U f r
+  refine ⟨n, t, ?_⟩
+  apply (ConcreteCategory.bijective_of_isIso e.hom).1
+  have hleft :
+      e.hom
+          (M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op t) =
+        M.presheaf.map (homOfLE (X.basicOpen_le f)).op t := by
+    simp only [e, Functor.mapIso_hom, ← M.presheaf.map_comp_apply]
+    exact ConcreteCategory.congr_hom
+      (M.presheaf.congr_map (Subsingleton.elim _ _)) _
+  have hright :
+      e.hom
+          ((Proj (homogeneousSubmodule σ R)).presheaf.map
+                (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op
+                (coordinateHyperplaneLocalEquation (R := R) i j ^ n) •
+            M.presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s) =
+        X.presheaf.map (homOfLE (X.basicOpen_le f)).op (f ^ n) • r := by
+    have hmap := M.val.map_smul (eqToIso hV).op.hom
+      ((Proj (homogeneousSubmodule σ R)).presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op
+        (coordinateHyperplaneLocalEquation (R := R) i j ^ n))
+      (M.presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s)
+    refine hmap.trans ?_
+    have hsection :
+        M.val.map (eqToIso hV).op.hom
+            (M.presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s) =
+          r := by
+      rfl
+    rw [hsection]
+    apply congrArg (fun a : Γ(X, X.basicOpen f) ↦ a • r)
+    change X.ringCatSheaf.obj.map (eqToIso hV).op.hom
+        (X.ringCatSheaf.obj.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op
+          (f ^ n)) =
+      X.ringCatSheaf.obj.map (homOfLE (X.basicOpen_le f)).op (f ^ n)
+    have hcomp :
+        X.ringCatSheaf.obj.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op ≫
+            X.ringCatSheaf.obj.map (eqToIso hV).op.hom =
+          X.ringCatSheaf.obj.map (homOfLE (X.basicOpen_le f)).op := by
+      rw [← Functor.map_comp]
+      exact X.ringCatSheaf.obj.congr_map (Subsingleton.elim _ _)
+    exact ConcreteCategory.congr_hom hcomp (f ^ n)
+  exact hleft.trans (ht.trans hright.symm)
+
 /-- If a global section of a quasicoherent module vanishes on one standard
 coordinate chart, then its restriction to any other chart is annihilated by
 some power of the corresponding coordinate ratio. -/
