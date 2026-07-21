@@ -511,6 +511,58 @@ noncomputable def coordinateHomogeneousLaurentFullNegativeCyclesToHomology
     (coordinateHomogeneousLaurentOrderedCechComplex
       (R := R) j d).homologyπ n
 
+/-- Cycles whose difference is a boundary have the same class in homogeneous Laurent ordered-Cech
+homology. -/
+theorem coordinateHomogeneousLaurentOrderedCech_homologyπ_eq_of_sub_eq_boundary
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ)
+    (z w : (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).cycles (n + 1))
+    (t : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d n)
+    (h : (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).iCycles (n + 1) z -
+        (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).iCycles (n + 1) w =
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d n).hom t) :
+    (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).homologyπ (n + 1) z =
+      (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).homologyπ (n + 1) w := by
+  let K := coordinateHomogeneousLaurentOrderedCechComplex
+    (R := R) j d
+  change K.homologyπ (n + 1) z = K.homologyπ (n + 1) w
+  have hcycles : z - w = K.toCycles n (n + 1) t := by
+    apply (ModuleCat.mono_iff_injective (K.iCycles (n + 1))).mp inferInstance
+    have hsub :
+        K.iCycles (n + 1) z - K.iCycles (n + 1) w =
+          (coordinateHomogeneousLaurentOrderedCechDifferential
+            (R := R) (σ := σ) d n).hom t := by
+      simpa only [K] using h
+    have hd :
+        (coordinateHomogeneousLaurentOrderedCechDifferential
+            (R := R) (σ := σ) d n).hom t =
+          K.d n (n + 1) t := by
+      have hd' := congrArg (fun f => f t)
+        (coordinateHomogeneousLaurentOrderedCechComplex_d
+          (R := R) j d n)
+      exact hd'.symm
+    have hi :
+        K.d n (n + 1) t =
+          K.iCycles (n + 1) (K.toCycles n (n + 1) t) := by
+      have hi' := congrArg (fun f => f t) (K.toCycles_i n (n + 1))
+      change K.iCycles (n + 1) (K.toCycles n (n + 1) t) =
+        K.d n (n + 1) t at hi'
+      exact hi'.symm
+    rw [map_sub]
+    exact hsub.trans (hd.trans hi)
+  have hboundary := congrArg (fun f => f t)
+    (K.toCycles_comp_homologyπ n (n + 1))
+  change K.homologyπ (n + 1) (K.toCycles n (n + 1) t) = 0 at hboundary
+  apply sub_eq_zero.mp
+  rw [← map_sub, hcycles]
+  exact hboundary
+
 /-- Project a cycle in the homogeneous Laurent complex to its full-negative weight cycle. -/
 noncomputable def coordinateHomogeneousLaurentCyclesToFullNegativeCycles
     [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
