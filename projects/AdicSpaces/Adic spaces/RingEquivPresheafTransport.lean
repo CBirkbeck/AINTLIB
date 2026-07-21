@@ -159,4 +159,162 @@ theorem mapRationalRingEquiv_isRational (e : A ≃+* B) (he : Continuous e)
 
 end Datum
 
+/-! ### 2.4 The completed rational-localization equivalence -/
+
+section PresheafValue
+
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [IsHuberRing A] [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
+  [DecidableEq B] [DecidableEq A]
+  (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+  (D : RationalLocData A) (hD : D.IsRational)
+
+/-- The forward denominator obligation. -/
+private theorem hs_fwd : (D.mapRationalRingEquiv e he he' hD).s = e.toRingHom D.s := by
+  rw [mapRationalRingEquiv_s]; rfl
+
+/-- The backward denominator obligation. -/
+private theorem hs_bwd : D.s = e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD).s := by
+  rw [mapRationalRingEquiv_s]; exact (e.symm_apply_apply D.s).symm
+
+/-- The forward numerator-containment obligation. -/
+private theorem hT_fwd :
+    ∀ t ∈ D.T, e.toRingHom t ∈ (D.mapRationalRingEquiv e he he' hD).T := by
+  intro t ht
+  rw [mapRationalRingEquiv_T]
+  exact Finset.mem_image_of_mem _ ht
+
+/-- The backward numerator-containment obligation. -/
+private theorem hT_bwd :
+    ∀ t ∈ (D.mapRationalRingEquiv e he he' hD).T, e.symm.toRingHom t ∈ D.T := by
+  intro t ht
+  rw [mapRationalRingEquiv_T] at ht
+  obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+  rwa [show e.symm.toRingHom (e t₀) = t₀ from e.symm_apply_apply t₀]
+
+/-- The forward completed covariant map `𝒪(D) →+* 𝒪(D')`. -/
+private noncomputable def pvFwd :
+    presheafValue D →+* presheafValue (D.mapRationalRingEquiv e he he' hD) :=
+  presheafValueMapOfHom e.toRingHom he D (D.mapRationalRingEquiv e he he' hD)
+    (hs_fwd e he he' D hD) (hT_fwd e he he' D hD)
+
+/-- The backward completed covariant map `𝒪(D') →+* 𝒪(D)`. -/
+private noncomputable def pvBwd :
+    presheafValue (D.mapRationalRingEquiv e he he' hD) →+* presheafValue D :=
+  presheafValueMapOfHom e.symm.toRingHom he' (D.mapRationalRingEquiv e he he' hD) D
+    (hs_bwd e he he' D hD) (hT_bwd e he he' D hD)
+
+private theorem pvFwd_continuous : Continuous (pvFwd e he he' D hD) :=
+  presheafValueMapOfHom_continuous _ _ _ _ _ _
+
+private theorem pvBwd_continuous : Continuous (pvBwd e he he' D hD) :=
+  presheafValueMapOfHom_continuous _ _ _ _ _ _
+
+/-- The forward map on the localization image. -/
+private theorem pvFwd_coe (l : Localization.Away D.s) :
+    pvFwd e he he' D hD (D.coeRingHom l) =
+      (D.mapRationalRingEquiv e he he' hD).coeRingHom
+        (locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD)
+          (hs_fwd e he he' D hD) l) :=
+  presheafValueMapOfHom_coe e.toRingHom he D (D.mapRationalRingEquiv e he he' hD)
+    (hs_fwd e he he' D hD) (hT_fwd e he he' D hD) l
+
+/-- The backward map on the localization image. -/
+private theorem pvBwd_coe (l : Localization.Away (D.mapRationalRingEquiv e he he' hD).s) :
+    pvBwd e he he' D hD ((D.mapRationalRingEquiv e he he' hD).coeRingHom l) =
+      D.coeRingHom (locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
+        (hs_bwd e he he' D hD) l) :=
+  presheafValueMapOfHom_coe e.symm.toRingHom he' (D.mapRationalRingEquiv e he he' hD) D
+    (hs_bwd e he he' D hD) (hT_bwd e he he' D hD) l
+
+/-- The localization-level composite (forward then backward) is the identity. -/
+private theorem locMap_roundtrip (l : Localization.Away D.s) :
+    locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
+        (hs_bwd e he he' D hD)
+        (locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD)
+          (hs_fwd e he he' D hD) l) = l := by
+  have hid : (locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
+        (hs_bwd e he he' D hD)).comp
+      (locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD)
+        (hs_fwd e he he' D hD)) = RingHom.id (Localization.Away D.s) := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) (RingHom.ext fun a => ?_)
+    simp only [RingHom.comp_apply, RingHom.id_comp, locMapOfHom_algebraMap]
+    rw [show e.symm.toRingHom (e.toRingHom a) = a from e.symm_apply_apply a]
+  exact DFunLike.congr_fun hid l
+
+/-- The localization-level composite (backward then forward) is the identity. -/
+private theorem locMap_roundtrip_symm
+    (l : Localization.Away (D.mapRationalRingEquiv e he he' hD).s) :
+    locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD) (hs_fwd e he he' D hD)
+        (locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
+          (hs_bwd e he he' D hD) l) = l := by
+  have hid : (locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD)
+        (hs_fwd e he he' D hD)).comp
+      (locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
+        (hs_bwd e he he' D hD)) =
+      RingHom.id (Localization.Away (D.mapRationalRingEquiv e he he' hD).s) := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers
+      (D.mapRationalRingEquiv e he he' hD).s) (RingHom.ext fun a => ?_)
+    simp only [RingHom.comp_apply, RingHom.id_comp, locMapOfHom_algebraMap]
+    rw [show e.toRingHom (e.symm.toRingHom a) = a from e.apply_symm_apply a]
+  exact DFunLike.congr_fun hid l
+
+/-- **The completed rational-localization equivalence** (2.4): for a bicontinuous ring
+equivalence `e` and a valid rational datum `D`, the completed localizations are
+canonically bicontinuously isomorphic. -/
+noncomputable def presheafValueRingEquivOfRingEquiv :
+    presheafValue D ≃+* presheafValue (D.mapRationalRingEquiv e he he' hD) where
+  toFun := pvFwd e he he' D hD
+  invFun := pvBwd e he he' D hD
+  left_inv x := by
+    letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+    have hdense : DenseRange (⇑(D.coeRingHom)) :=
+      @UniformSpace.Completion.denseRange_coe _ D.uniformSpace
+    have hfun : ⇑(pvBwd e he he' D hD) ∘ ⇑(pvFwd e he he' D hD) =
+        (id : presheafValue D → presheafValue D) := by
+      refine hdense.equalizer ((pvBwd_continuous e he he' D hD).comp
+        (pvFwd_continuous e he he' D hD)) continuous_id ?_
+      funext l
+      show pvBwd e he he' D hD (pvFwd e he he' D hD (D.coeRingHom l)) = D.coeRingHom l
+      rw [pvFwd_coe, pvBwd_coe, locMap_roundtrip]
+    exact congr_fun hfun x
+  right_inv y := by
+    letI : UniformSpace (Localization.Away (D.mapRationalRingEquiv e he he' hD).s) :=
+      (D.mapRationalRingEquiv e he he' hD).uniformSpace
+    have hdense : DenseRange (⇑((D.mapRationalRingEquiv e he he' hD).coeRingHom)) :=
+      @UniformSpace.Completion.denseRange_coe _
+        (D.mapRationalRingEquiv e he he' hD).uniformSpace
+    have hfun : ⇑(pvFwd e he he' D hD) ∘ ⇑(pvBwd e he he' D hD) =
+        (id : presheafValue (D.mapRationalRingEquiv e he he' hD) →
+          presheafValue (D.mapRationalRingEquiv e he he' hD)) := by
+      refine hdense.equalizer ((pvFwd_continuous e he he' D hD).comp
+        (pvBwd_continuous e he he' D hD)) continuous_id ?_
+      funext l
+      show pvFwd e he he' D hD (pvBwd e he he' D hD
+        ((D.mapRationalRingEquiv e he he' hD).coeRingHom l)) =
+        (D.mapRationalRingEquiv e he he' hD).coeRingHom l
+      rw [pvBwd_coe, pvFwd_coe, locMap_roundtrip_symm]
+    exact congr_fun hfun y
+  map_mul' := map_mul _
+  map_add' := map_add _
+
+theorem presheafValueRingEquivOfRingEquiv_continuous :
+    Continuous (presheafValueRingEquivOfRingEquiv e he he' D hD) :=
+  pvFwd_continuous e he he' D hD
+
+theorem presheafValueRingEquivOfRingEquiv_symm_continuous :
+    Continuous (presheafValueRingEquivOfRingEquiv e he he' D hD).symm :=
+  pvBwd_continuous e he he' D hD
+
+/-- The equivalence intertwines the canonical maps from `A`/`B`. -/
+theorem presheafValueRingEquivOfRingEquiv_canonicalMap (a : A) :
+    presheafValueRingEquivOfRingEquiv e he he' D hD (D.canonicalMap a) =
+      (D.mapRationalRingEquiv e he he' hD).canonicalMap (e a) := by
+  show pvFwd e he he' D hD (D.canonicalMap a) = _
+  rw [show D.canonicalMap a = D.coeRingHom (algebraMap A (Localization.Away D.s) a)
+      from rfl, pvFwd_coe, locMapOfHom_algebraMap]
+  rfl
+
+end PresheafValue
+
 end ValuationSpectrum
