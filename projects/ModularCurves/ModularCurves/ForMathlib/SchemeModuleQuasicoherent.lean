@@ -599,6 +599,75 @@ theorem Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_o
   rw [Scheme.Hom.id_appTop] at hn
   simpa using hn
 
+/-- If a section of a quasicoherent module over an affine open vanishes on an intrinsic basic
+open, then some power of the function defining that basic open annihilates the section. -/
+theorem Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_of_isAffineOpen
+    (M : X.Modules) [M.IsQuasicoherent]
+    (U : X.affineOpens) (f : Γ(X, U.1)) (t : Γ(M, U.1))
+    (ht : M.presheaf.map (homOfLE (X.basicOpen_le f)).op t = 0) :
+    ∃ n : ℕ, f ^ n • t = 0 := by
+  let N := M.restrict U.1.ι
+  let g : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) := U.1.topIso.inv f
+  have hTop : U.1 = U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens) :=
+    U.1.ι_image_top.symm
+  have hBasic : X.basicOpen f =
+      U.1.ι ''ᵁ U.1.toScheme.basicOpen g := by
+    exact (U.1.ι_image_basicOpen_topIso_inv f).symm
+  let eTop : Γ(N, (⊤ : U.1.toScheme.Opens)) ≅ Γ(M, U.1) :=
+    M.restrictAppIso U.1.ι ⊤ ≪≫
+      M.presheaf.mapIso (eqToIso hTop).op
+  let eBasic : Γ(N, U.1.toScheme.basicOpen g) ≅ Γ(M, X.basicOpen f) :=
+    M.restrictAppIso U.1.ι (U.1.toScheme.basicOpen g) ≪≫
+      M.presheaf.mapIso (eqToIso hBasic).op
+  let s : Γ(N, (⊤ : U.1.toScheme.Opens)) := eTop.inv t
+  have hs : N.presheaf.map (U.1.toScheme.basicOpen g).leTop.op s = 0 := by
+    apply (ConcreteCategory.bijective_of_isIso eBasic.hom).1
+    rw [map_zero]
+    simp only [N, s, eTop, eBasic, Iso.trans_hom,
+      ConcreteCategory.comp_apply, Scheme.Modules.map_restrictAppIso_hom_apply,
+      Iso.trans_inv, Iso.inv_hom_id_apply, Functor.mapIso_hom,
+      Functor.mapIso_inv, ← M.presheaf.map_comp_apply]
+    rw [show (((eqToIso hTop).op.inv ≫
+          (homOfLE (U.1.ι.image_mono
+            (show U.1.toScheme.basicOpen g ≤ ⊤ from le_top))).op) ≫
+          (eqToIso hBasic).op.hom) =
+        (homOfLE (X.basicOpen_le f)).op by
+      apply Subsingleton.elim]
+    exact ht
+  obtain ⟨n, hn⟩ :=
+    Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_of_isAffine
+      N g s hs
+  refine ⟨n, ?_⟩
+  have hn' := congr(eTop.hom $hn)
+  rw [map_zero] at hn'
+  have hscalarOne :
+      X.presheaf.map (eqToIso hTop).hom.op
+          ((U.1.ι.appIso (⊤ : U.1.toScheme.Opens)).inv g) = f := by
+    dsimp [g]
+    rw [Scheme.Opens.topIso_inv, Scheme.Opens.ι_appIso]
+    change X.presheaf.map (eqToIso hTop).hom.op
+      (X.presheaf.map (eqToIso hTop).op.inv f) = f
+    rw [← X.presheaf.map_comp_apply]
+    simp
+  have hscalar :
+      X.presheaf.map (eqToIso hTop).hom.op
+          ((U.1.ι.appIso (⊤ : U.1.toScheme.Opens)).inv
+            (g ^ n)) = f ^ n := by
+    rw [map_pow, map_pow, hscalarOne]
+  simp only [eTop, Iso.trans_hom, ConcreteCategory.comp_apply] at hn'
+  rw [smul_restrictAppIso_hom_apply] at hn'
+  simp only [Functor.mapIso_hom] at hn'
+  rw [show (eqToIso hTop).op.hom = (eqToIso hTop).hom.op by
+    apply Subsingleton.elim] at hn'
+  rw [M.map_smul, hscalar] at hn'
+  have hsection :
+      M.presheaf.map (eqToIso hTop).hom.op
+          ((M.restrictAppIso U.1.ι ⊤).hom s) = t := by
+    change eTop.hom s = t
+    exact eTop.inv_hom_id_apply t
+  rw [hsection] at hn'
+  exact hn'
+
 /-- On an affine scheme, a section of a quasicoherent module over `D(f)` extends globally after
 multiplication by a power of the restriction of `f`. -/
 theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffine
