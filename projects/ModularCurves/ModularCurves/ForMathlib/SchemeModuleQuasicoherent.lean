@@ -579,6 +579,40 @@ theorem Modules.baseModulePresheaf_isLocalized_basicOpen
       simpa only [U] using Modules.isoSpecInv_image_basic f)
     Modules.isoSpecInv_image_top f himage
 
+/-- On an affine scheme, a section of a quasicoherent module over `D(f)` extends globally after
+multiplication by a power of the restriction of `f`. -/
+theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
+    (f : Γ(X, ⊤)) (s : Γ(M, X.basicOpen f)) :
+    ∃ (n : ℕ) (t : Γ(M, ⊤)),
+      M.presheaf.map (X.basicOpen f).leTop.op t =
+        X.presheaf.map (X.basicOpen f).leTop.op (f ^ n) • s := by
+  let B := baseModulePresheaf (𝟙 X) M
+  let ψ := (B.map (X.basicOpen f).leTop.op).hom
+  letI : IsLocalizedModule.Away f ψ :=
+    Modules.baseModulePresheaf_isLocalized_basicOpen M f
+  obtain ⟨n, t, ht⟩ := IsLocalizedModule.Away.surj ψ f s
+  exact ⟨n, t, ht.symm⟩
+
+/-- On an affine scheme, finitely many sections of a quasicoherent module over `D(f)` extend
+globally after multiplication by one common power of the restriction of `f`. -/
+theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_finite_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
+    (f : Γ(X, ⊤)) {ι : Type*} [Finite ι]
+    (s : ι → Γ(M, X.basicOpen f)) :
+    ∃ (n : ℕ) (t : ι → Γ(M, ⊤)), ∀ i,
+      M.presheaf.map (X.basicOpen f).leTop.op (t i) =
+        X.presheaf.map (X.basicOpen f).leTop.op (f ^ n) • s i := by
+  choose n t ht using fun i ↦
+    Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffine
+      M f (s i)
+  have hle (i : ι) : n i ≤ ⨆ i, n i :=
+    le_ciSup (Finite.bddAbove_range n) i
+  refine ⟨⨆ i, n i, fun i ↦ f ^ ((⨆ i, n i) - n i) • t i,
+    fun i ↦ ?_⟩
+  rw [M.map_smul, ht i, ← mul_smul, ← map_mul, ← pow_add,
+    Nat.sub_add_cancel (hle i)]
+
 /-- A finite-type quasicoherent module on an affine scheme has finite global sections. -/
 theorem Modules.globalSections_module_finite_of_isFiniteType_of_isAffine
     [IsAffine X] (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType] :
