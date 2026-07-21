@@ -2135,6 +2135,70 @@ theorem coordinateHyperplaneIdealModulePowerFrameSection_succ
       (coordinateHyperplaneIdealModulePowerTrivialization (R := R) i j n)
       (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
 
+/-- The coefficient-one standard-chart frames of `O(-1)` and `O(1)` pair to
+the unit section. -/
+theorem coordinateHyperplaneDualPairing_frameSection (i j : σ) :
+    (ModularCurves.dualPairing
+      (ModularCurves.idealModule
+        (coordinateHyperplaneι (R := R) j))).val.app
+        (.op (coordinateOpen (R := R) i))
+        (ModularCurves.tensorSection
+          (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+          (coordinateHyperplanePoleSheaf (R := R) j)
+          (coordinateOpen (R := R) i)
+          (ModularCurves.overTrivializationSection
+            (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+            (coordinateOpen (R := R) i)
+            (Scheme.Modules.overTrivializationOfRestrictIso
+              (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+              (coordinateOpen (R := R) i)
+              (coordinateHyperplaneIdealModuleTrivialization
+                (R := R) i j).symm) 1)
+          (ModularCurves.overTrivializationSection
+            (coordinateHyperplanePoleSheaf (R := R) j)
+            (coordinateOpen (R := R) i)
+            (Scheme.Modules.overTrivializationOfRestrictIso
+              (coordinateHyperplanePoleSheaf (R := R) j)
+              (coordinateOpen (R := R) i)
+              (coordinateHyperplanePoleSheafTrivialization
+                (R := R) i j)) 1)) =
+      (show Γ(Proj (homogeneousSubmodule σ R),
+        coordinateOpen (R := R) i) from 1) := by
+  let X := Proj (homogeneousSubmodule σ R)
+  letI : ∀ V, IsMulCommutative (X.ringCatSheaf.obj.obj V) :=
+    fun V ↦ by
+      change IsMulCommutative (X.presheaf.obj V)
+      exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+  let M := ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)
+  let U := coordinateOpen (R := R) i
+  let e := Scheme.Modules.overTrivializationOfRestrictIso M U
+    (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
+  let d := ModularCurves.SheafOfModules.dualOverIsoOfIso
+    X.ringCatSheaf M U e
+  have hrestrict :
+      coordinateHyperplanePoleSheafTrivialization (R := R) i j =
+        ModularCurves.restrictTrivializationOfOverIso
+          (Scheme.Modules.dualObj M) U d := by
+    apply Iso.ext
+    rfl
+  have hd :
+      Scheme.Modules.overTrivializationOfRestrictIso
+          (Scheme.Modules.dualObj M) U
+          (coordinateHyperplanePoleSheafTrivialization (R := R) i j) = d := by
+    rw [hrestrict]
+    exact ModularCurves.overTrivializationOfRestrictTrivializationOfOverIso
+      (Scheme.Modules.dualObj M) U d
+  change (ModularCurves.dualPairing M).val.app (.op U)
+      (ModularCurves.tensorSection M (Scheme.Modules.dualObj M) U
+        (ModularCurves.overTrivializationSection M U e 1)
+        (ModularCurves.overTrivializationSection (Scheme.Modules.dualObj M) U
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (Scheme.Modules.dualObj M) U
+            (coordinateHyperplanePoleSheafTrivialization (R := R) i j)) 1)) = _
+  rw [hd]
+  simpa only [d] using
+    ModularCurves.dualPairing_overTrivializationSection_one M U e
+
 /-- On a coordinate overlap, multiplying the restricted `k`-frame of `O(-n)`
 by `(X_k / X_i)^n` gives the restricted `i`-frame. -/
 theorem coordinateHyperplaneIdealModulePowerFrameSection_restrict_transition
