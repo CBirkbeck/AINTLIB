@@ -101,9 +101,9 @@ def PairOfDefinition.mapRingEquiv (e : A ≃+* B) (he : Continuous e) (he' : Con
   fg := P.fg.map _
   isAdic :=
     -- transport `IsAdic P.I` on `↥P.A₀` to `↥(P.A₀.map e)` via the subring homeomorph
-    IsAdic.map_ringEquiv (e.subringMap (s := P.A₀))
-      (subringMapHomeomorph e he he' P.A₀).continuous_toFun
-      (subringMapHomeomorph e he he' P.A₀).continuous_invFun P.isAdic
+    let h := subringMapHomeomorph e he he' P.A₀
+    IsAdic.map_ringEquiv (e.subringMap (s := P.A₀)) h.continuous_toFun h.continuous_invFun
+      P.isAdic
 
 @[simp] theorem PairOfDefinition.mapRingEquiv_A₀ (e : A ≃+* B) (he : Continuous e)
     (he' : Continuous e.symm) (P : PairOfDefinition A) :
@@ -428,36 +428,49 @@ private theorem pvBwd_coe (l : Localization.Away (D.mapRationalRingEquiv e he he
   presheafValueMapOfHom_coe e.symm.toRingHom he' (D.mapRationalRingEquiv e he he' hD) D
     (hs_bwd e he he' D hD) (hT_bwd e he he' D hD) l
 
+-- Generic localization-level roundtrip: `locMapOfHom` along a hom followed by
+-- `locMapOfHom` along a one-sided inverse is the identity (the shared engine
+-- for the two directions below).
+private theorem locMapOfHom_roundtrip {R : Type*} {S : Type*} [CommRing R]
+    [TopologicalSpace R] [IsTopologicalRing R] [CommRing S] [TopologicalSpace S]
+    [IsTopologicalRing S] (f : R →+* S) (g : S →+* R) (hgf : ∀ a, g (f a) = a)
+    (DR : RationalLocData R) (DS : RationalLocData S) (hs : DS.s = f DR.s)
+    (hs' : DR.s = g DS.s) (l : Localization.Away DR.s) :
+    locMapOfHom g DS DR hs' (locMapOfHom f DR DS hs l) = l := by
+  have hid : (locMapOfHom g DS DR hs').comp (locMapOfHom f DR DS hs) =
+      RingHom.id (Localization.Away DR.s) := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers DR.s) (RingHom.ext fun a ↦ ?_)
+    simp only [RingHom.comp_apply, RingHom.id_comp, locMapOfHom_algebraMap]
+    exact congrArg _ (hgf a)
+  exact DFunLike.congr_fun hid l
+
 -- The localization-level composite (forward then backward) is the identity.
 private theorem locMap_roundtrip (l : Localization.Away D.s) :
     locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D (hs_bwd e he he' D hD)
       (locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD)
-        (hs_fwd e he he' D hD) l) = l := by
-  have hid : (locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
-        (hs_bwd e he he' D hD)).comp
-      (locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD)
-        (hs_fwd e he he' D hD)) = RingHom.id (Localization.Away D.s) := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) (RingHom.ext fun a ↦ ?_)
-    simp only [RingHom.comp_apply, RingHom.id_comp, locMapOfHom_algebraMap]
-    exact congrArg _ (e.symm_apply_apply a)
-  exact DFunLike.congr_fun hid l
+        (hs_fwd e he he' D hD) l) = l :=
+  locMapOfHom_roundtrip e.toRingHom e.symm.toRingHom e.symm_apply_apply D
+    (D.mapRationalRingEquiv e he he' hD) (hs_fwd e he he' D hD) (hs_bwd e he he' D hD) l
 
 -- The localization-level composite (backward then forward) is the identity.
 private theorem locMap_roundtrip_symm
     (l : Localization.Away (D.mapRationalRingEquiv e he he' hD).s) :
     locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD) (hs_fwd e he he' D hD)
       (locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
-        (hs_bwd e he he' D hD) l) = l := by
-  have hid : (locMapOfHom e.toRingHom D (D.mapRationalRingEquiv e he he' hD)
-        (hs_fwd e he he' D hD)).comp
-      (locMapOfHom e.symm.toRingHom (D.mapRationalRingEquiv e he he' hD) D
-        (hs_bwd e he he' D hD)) =
-      RingHom.id (Localization.Away (D.mapRationalRingEquiv e he he' hD).s) := by
-    refine IsLocalization.ringHom_ext (Submonoid.powers
-      (D.mapRationalRingEquiv e he he' hD).s) (RingHom.ext fun a ↦ ?_)
-    simp only [RingHom.comp_apply, RingHom.id_comp, locMapOfHom_algebraMap]
-    exact congrArg _ (e.apply_symm_apply a)
-  exact DFunLike.congr_fun hid l
+        (hs_bwd e he he' D hD) l) = l :=
+  locMapOfHom_roundtrip e.symm.toRingHom e.toRingHom e.apply_symm_apply
+    (D.mapRationalRingEquiv e he he' hD) D (hs_bwd e he he' D hD) (hs_fwd e he he' D hD) l
+
+-- A continuous self-map of a completed localization agreeing with the identity
+-- on the dense localization image is the identity (the shared dense-extension
+-- uniqueness engine for the two inverse-law fields below).
+private theorem presheafValue_eq_id_of_coeRingHom {R : Type*} [CommRing R]
+    [TopologicalSpace R] [IsTopologicalRing R] (E : RationalLocData R)
+    {F : presheafValue E → presheafValue E} (hF : Continuous F)
+    (h : ∀ l, F (E.coeRingHom l) = E.coeRingHom l) (x : presheafValue E) : F x = x := by
+  have hdense : DenseRange (⇑(E.coeRingHom)) :=
+    @UniformSpace.Completion.denseRange_coe _ E.uniformSpace
+  exact congr_fun (hdense.equalizer hF continuous_id (funext h)) x
 
 /-- **The completed rational-localization equivalence** (2.4): for a bicontinuous ring
 equivalence `e` and a valid rational datum `D`, the completed localizations are
@@ -466,32 +479,20 @@ noncomputable def presheafValueRingEquivOfRingEquiv :
     presheafValue D ≃+* presheafValue (D.mapRationalRingEquiv e he he' hD) where
   toFun := pvFwd e he he' D hD
   invFun := pvBwd e he he' D hD
-  left_inv x := by
-    have hdense : DenseRange (⇑(D.coeRingHom)) :=
-      @UniformSpace.Completion.denseRange_coe _ D.uniformSpace
-    have hfun : ⇑(pvBwd e he he' D hD) ∘ ⇑(pvFwd e he he' D hD) =
-        (id : presheafValue D → presheafValue D) := by
-      refine hdense.equalizer ((pvBwd_continuous e he he' D hD).comp
-        (pvFwd_continuous e he he' D hD)) continuous_id ?_
-      funext l
-      show pvBwd e he he' D hD (pvFwd e he he' D hD (D.coeRingHom l)) = D.coeRingHom l
-      rw [pvFwd_coe, pvBwd_coe, locMap_roundtrip]
-    exact congr_fun hfun x
-  right_inv y := by
-    have hdense : DenseRange (⇑((D.mapRationalRingEquiv e he he' hD).coeRingHom)) :=
-      @UniformSpace.Completion.denseRange_coe _
-        (D.mapRationalRingEquiv e he he' hD).uniformSpace
-    have hfun : ⇑(pvFwd e he he' D hD) ∘ ⇑(pvBwd e he he' D hD) =
-        (id : presheafValue (D.mapRationalRingEquiv e he he' hD) →
-          presheafValue (D.mapRationalRingEquiv e he he' hD)) := by
-      refine hdense.equalizer ((pvFwd_continuous e he he' D hD).comp
-        (pvBwd_continuous e he he' D hD)) continuous_id ?_
-      funext l
-      show pvFwd e he he' D hD (pvBwd e he he' D hD
-        ((D.mapRationalRingEquiv e he he' hD).coeRingHom l)) =
-        (D.mapRationalRingEquiv e he he' hD).coeRingHom l
-      rw [pvBwd_coe, pvFwd_coe, locMap_roundtrip_symm]
-    exact congr_fun hfun y
+  left_inv x :=
+    presheafValue_eq_id_of_coeRingHom D
+      ((pvBwd_continuous e he he' D hD).comp (pvFwd_continuous e he he' D hD))
+      (fun l ↦ by
+        show pvBwd e he he' D hD (pvFwd e he he' D hD (D.coeRingHom l)) = D.coeRingHom l
+        rw [pvFwd_coe, pvBwd_coe, locMap_roundtrip]) x
+  right_inv y :=
+    presheafValue_eq_id_of_coeRingHom (D.mapRationalRingEquiv e he he' hD)
+      ((pvFwd_continuous e he he' D hD).comp (pvBwd_continuous e he he' D hD))
+      (fun l ↦ by
+        show pvFwd e he he' D hD (pvBwd e he he' D hD
+          ((D.mapRationalRingEquiv e he he' hD).coeRingHom l)) =
+          (D.mapRationalRingEquiv e he he' hD).coeRingHom l
+        rw [pvBwd_coe, pvFwd_coe, locMap_roundtrip_symm]) y
   map_mul' := map_mul _
   map_add' := map_add _
 

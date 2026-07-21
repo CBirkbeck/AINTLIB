@@ -72,7 +72,6 @@ theorem isSheafyFor_mapRingEquiv (e : A ≃+* B) (he : Continuous e)
   -- 5: the T6 transport (the mapped plus ring is definitionally the image)
   haveI : IsSheafy B := isSheafy_mapRingEquiv e he he' rfl
   -- 6: convert back
-  show IsLimitSheaf B
   exact isLimitSheaf_of_isSheafy
 
 /-- **Pair-level sheafiness transports as an equivalence** (T7): sheafiness of
