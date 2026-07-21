@@ -167,16 +167,22 @@ theorem RationalLocData.isRational_of_span_eq_top {A : Type*} [CommRing A]
   rw [h, Submodule.top_coe]
   exact isOpen_univ
 
+/-- In a Tate ring, a finite family generating an open ideal generates the unit
+ideal (Wedhorn Remark 7.30(1) for Definition 7.29's condition). -/
+theorem span_eq_top_of_isOpen_span {B : Type*} [CommRing B] [TopologicalSpace B] [IsTateRing B]
+    {T : Finset B} (h : IsOpen (((Ideal.span (T : Set B) : Ideal B) : Set B))) :
+    Ideal.span (T : Set B) = ⊤ := by
+  obtain ⟨u, hu⟩ := ‹IsTateRing B›.exists_topologicallyNilpotent_unit
+  obtain ⟨n, hn⟩ := hu.exists_pow_mem_of_mem_nhds (h.mem_nhds (Ideal.span (T : Set B)).zero_mem)
+  exact Ideal.eq_top_of_isUnit_mem _ hn (u.isUnit.pow n)
+
 /-- In a Tate ring an open ideal contains a power of the topologically nilpotent unit,
 hence is the unit ideal: Wedhorn Definition 7.29's "`T·A` open" is equivalent to
 `span T = ⊤` (cf. Remark 7.30(1) specialised to Tate rings, wedhorn.txt:3109). -/
 theorem RationalLocData.IsRational.span_eq_top {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [IsTateRing A] {D : RationalLocData A}
-    (h : D.IsRational) : Ideal.span (D.T : Set A) = ⊤ := by
-  obtain ⟨u, hu⟩ := ‹IsTateRing A›.exists_topologicallyNilpotent_unit
-  obtain ⟨n, hn⟩ :=
-    (hu.eventually_mem (h.mem_nhds (Ideal.span (D.T : Set A)).zero_mem)).exists
-  exact Ideal.eq_top_of_isUnit_mem _ hn (u.isUnit.pow n)
+    (h : D.IsRational) : Ideal.span (D.T : Set A) = ⊤ :=
+  span_eq_top_of_isOpen_span h
 
 /-- For Tate rings, Wedhorn Definition 7.29's openness condition is exactly
 `span T = ⊤`. -/
