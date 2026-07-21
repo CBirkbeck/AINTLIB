@@ -157,7 +157,7 @@ base HEAD `79f069da0` (dev/adic-spaces). Companion documents in this directory:
 | # | Phase | Content | Depends on | Status |
 |---|---|---|---|---|
 | K0 | 0 | this crosswalk + the two scout docs, committed | — | done when committed |
-| K1 | 1 | `FJP/CDVFBase.lean`: two-layer uniformizer API + derived facts + `unitBall K ↔ 𝒪[K]` bridge + GraphKoszul scaling-bundle feeder | — | **dispatch now** |
+| K1 | 1 | `FJP/CDVFBase.lean`: two-layer uniformizer API + derived facts + `unitBall K ↔ 𝒪[K]` bridge + GraphKoszul scaling-bundle feeder | — | **DONE** (22 decls; `[CompleteSpace K]` deliberately absent — unused; needs `open scoped NormedField` AND `open scoped Valued` for `𝒪[K]`; `unitBall_eq_integer` is a Subring `=`, rw-able) |
 | K2a | 2 | `FJP/AdicCompletionPrincipal.lean`: `R⟦X⟧ ↠ AdicCompletion (span {a}) R`, noetherianity | — | **dispatch now** |
 | K2b | 2 | `FJP/RestrictedGaussAdic.lean`: extract AdicBridge from GraphKoszul (import-cycle fix) | K3 lands first (same file) | queued |
 | K2c | 2 | `IsNoetherianRing (unitBall (P K m))`, `P K m`, `IsStronglyNoetherian K` from D2 chain | K1, K2a, K2b | queued |
