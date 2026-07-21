@@ -5,6 +5,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».PresheafFunctoriality
 import «Adic spaces».AffinoidTransport
 import «Adic spaces».RelativePieceKeystone
+import «Adic spaces».RationalIntersection
+import «Adic spaces».StructureSheaf
+import «Adic spaces».FaithfulLocLift
 
 /-!
 # Transport of the rational-localization layer along a bicontinuous ring equivalence
@@ -891,7 +894,7 @@ theorem RationalCoveringData.productSectionsHomeomorph_apply_index
     (f : ∀ D : ↥C.covers, presheafValue D.1) (D : ↥C.covers) :
     C.productSectionsHomeomorph e he he' hC hplus f
         (C.pullbackIndexEquiv e he he' hC hplus D) =
-      presheafValueHomeomorphOfRingEquiv e.symm he' he D.1 (hC.piece D.2) (f D) :=
+      presheafValueRingEquivOfRingEquiv e.symm he' he D.1 (hC.piece D.2) (f D) :=
   Equiv.piCongr_apply_apply
     (W := fun D : ↥C.covers => presheafValue D.1)
     (Z := fun D' : ↥(C.pullbackRingEquiv e he he' hC hplus).covers =>
@@ -922,7 +925,7 @@ transported data — nothing is cast). -/
 theorem RationalCoveringData.productRestrictionSub_conj (x : presheafValue C.base) :
     C.productSectionsHomeomorph e he he' hC hplus (productRestrictionSub B C x) =
       productRestrictionSub A (C.pullbackRingEquiv e he he' hC hplus)
-        (presheafValueHomeomorphOfRingEquiv e.symm he' he C.base hC.base x) := by
+        (presheafValueRingEquivOfRingEquiv e.symm he' he C.base hC.base x) := by
   funext D'
   obtain ⟨D, rfl⟩ := (C.pullbackIndexEquiv e he he' hC hplus).surjective D'
   rw [RationalCoveringData.productSectionsHomeomorph_apply_index]
@@ -937,5 +940,177 @@ theorem RationalCoveringData.productRestrictionSub_conj (x : presheafValue C.bas
     D.1 (hC.piece D.2) (C.hsubset D.1 D.2) _ x
 
 end ProductConj
+
+/-! ### 2.8 Transport of the internal `IsSheafy` criterion (T6) -/
+
+section SheafyTransport
+
+variable {A : Type u} {B : Type v}
+  [CommRing A] [TopologicalSpace A] [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+  [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [CommRing B] [TopologicalSpace B] [IsTateRing B] [T2Space B] [NonarchimedeanRing B]
+  [letI : UniformSpace B := IsTopologicalAddGroup.rightUniformSpace B; CompleteSpace B]
+  [PlusSubring B] [IsRingOfIntegralElements (B⁺ : Subring B)]
+
+/-- **Transport of the internal finite rational-cover criterion** (T6): if the
+pair `(A, A⁺)` satisfies `IsSheafy` and `e : A ≃+* B` is a bicontinuous ring
+equivalence matching the plus rings (`B⁺ = e(A⁺)`), then `(B, B⁺)` satisfies
+`IsSheafy`.
+
+* Embedding: pull the target cover back (T4), conjugate the product restriction
+  through the central square (T5), and factor with `IsEmbedding.of_comp_iff`
+  along the product homeomorphism — the full topological embedding transports,
+  not merely injectivity.
+* Gluing: transport the compatible family through the product homeomorphism,
+  prove only `RationalRefinementCompatible` on the source (each valid common
+  refinement is pushed forward through `validRationalLocDataEquiv` and the
+  original family's `AllDataCompatible` hypothesis is applied there), convert
+  with the R3 bridge, glue at the source, and push the glued section back. -/
+theorem isSheafy_mapRingEquiv (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm)
+    (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom)
+    [IsSheafy A] : IsSheafy B := by
+  haveI hllA : HasLocLiftPowerBounded A := hasLocLiftPowerBounded_faithful
+  haveI hllB : HasLocLiftPowerBounded B := hasLocLiftPowerBounded_faithful
+  constructor
+  · -- ——— embedding ———
+    intro C hC
+    have hCprat := C.pullbackRingEquiv_isRational e he he' hC hplus
+    have hembA : Topology.IsEmbedding
+        (productRestrictionSub A (C.pullbackRingEquiv e he he' hC hplus)) :=
+      IsSheafy.embedding _ hCprat
+    have hconj : ⇑(C.productSectionsHomeomorph e he he' hC hplus) ∘
+        productRestrictionSub B C =
+        productRestrictionSub A (C.pullbackRingEquiv e he he' hC hplus) ∘
+          ⇑(presheafValueRingEquivOfRingEquiv e.symm he' he C.base hC.base) :=
+      funext fun x => C.productRestrictionSub_conj e he he' hC hplus x
+    have hcomp : Topology.IsEmbedding
+        (⇑(C.productSectionsHomeomorph e he he' hC hplus) ∘
+          productRestrictionSub B C) := by
+      rw [hconj]
+      exact hembA.comp
+        (presheafValueHomeomorphOfRingEquiv e.symm he' he C.base hC.base).isEmbedding
+    exact ((C.productSectionsHomeomorph e he he'
+      hC hplus).isEmbedding.of_comp_iff).mp hcomp
+  · -- ——— gluing ———
+    intro C hC f hf
+    have hCprat := C.pullbackRingEquiv_isRational e he he' hC hplus
+    -- the transported family
+    set g : ∀ D' : ↥(C.pullbackRingEquiv e he he' hC hplus).covers,
+        presheafValue D'.1 :=
+      C.productSectionsHomeomorph e he he' hC hplus f with hgdef
+    -- Step 3: only the valid-refinement compatibility is proved on the source
+    have hgRR : (C.pullbackRingEquiv e he he'
+        hC hplus).RationalRefinementCompatible g := by
+      intro D₁' D₂' E hE h₁ h₂
+      obtain ⟨D₁, rfl⟩ := (C.pullbackIndexEquiv e he he' hC hplus).surjective D₁'
+      obtain ⟨D₂, rfl⟩ := (C.pullbackIndexEquiv e he he' hC hplus).surjective D₂'
+      -- Step 4: send the valid source refinement forward
+      have hÊ : (E.mapRationalRingEquiv e he he' hE).IsRational :=
+        mapRationalRingEquiv_isRational e he he' E hE
+      have hEE : (E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv
+          e.symm he' he hÊ = E :=
+        E.mapRationalRingEquiv_symm_map e he he' hE hÊ
+      -- the equality-derived containment `R(E) ⊆ R(Ê ↓)`
+      have hEeq : rationalOpen E.T E.s ⊆
+          rationalOpen ((E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv
+            e.symm he' he hÊ).T
+          ((E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv
+            e.symm he' he hÊ).s := by
+        rw [hEE]
+      -- Step 5: transport the two containments to the target (over `B`)
+      have htransport : ∀ (D : ↥C.covers),
+          rationalOpen E.T E.s ⊆
+            rationalOpen (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2)).T
+              (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2)).s →
+          rationalOpen (E.mapRationalRingEquiv e he he' hE).T
+              (E.mapRationalRingEquiv e he he' hE).s ⊆
+            rationalOpen D.1.T D.1.s := by
+        intro D hD
+        rw [← hEE] at hD
+        exact (rationalOpen_mapRationalRingEquiv_subset_iff e.symm he' he
+          (ringPlus_map_symm_of_map e hplus) (E.mapRationalRingEquiv e he he' hE)
+          hÊ D.1 (hC.piece D.2)).mp hD
+      have h₁B := htransport D₁ h₁
+      have h₂B := htransport D₂ h₂
+      -- Step 6: the original family's compatibility at the transported datum
+      have hstep := hf D₁ D₂ (E.mapRationalRingEquiv e he he' hE) h₁B h₂B
+      -- Step 7: rewrite both restrictions through the T3 square + composition
+      have hside : ∀ (D : ↥C.covers)
+          (hiA : rationalOpen E.T E.s ⊆
+            rationalOpen (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2)).T
+              (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2)).s)
+          (hiB : rationalOpen (E.mapRationalRingEquiv e he he' hE).T
+              (E.mapRationalRingEquiv e he he' hE).s ⊆
+            rationalOpen D.1.T D.1.s),
+          restrictionMap (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2))
+              E hiA
+            (presheafValueRingEquivOfRingEquiv e.symm he' he D.1 (hC.piece D.2)
+              (f D)) =
+          restrictionMap ((E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv
+              e.symm he' he hÊ) E hEeq
+            (presheafValueRingEquivOfRingEquiv e.symm he' he
+              (E.mapRationalRingEquiv e he he' hE) hÊ
+              (restrictionMap D.1 (E.mapRationalRingEquiv e he he' hE) hiB
+                (f D))) := by
+        intro D hiA hiB
+        have hBsub : rationalOpen ((E.mapRationalRingEquiv e he he'
+              hE).mapRationalRingEquiv e.symm he' he hÊ).T
+            ((E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv
+              e.symm he' he hÊ).s ⊆
+            rationalOpen (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2)).T
+              (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2)).s :=
+          rationalOpen_mapRationalRingEquiv_subset_of_subset e.symm he' he
+            (ringPlus_map_symm_of_map e hplus)
+            (E.mapRationalRingEquiv e he he' hE) hÊ D.1 (hC.piece D.2) hiB
+        have hsq := presheafValueRingEquivOfRingEquiv_restriction e.symm he' he
+          D.1 (hC.piece D.2) (E.mapRationalRingEquiv e he he' hE) hÊ hiB hBsub
+          (f D)
+        have hcompose := congr_fun (restrictionMap_comp
+          (D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2))
+          ((E.mapRationalRingEquiv e he he' hE).mapRationalRingEquiv
+            e.symm he' he hÊ) E hBsub hEeq)
+          (presheafValueRingEquivOfRingEquiv e.symm he' he D.1 (hC.piece D.2)
+            (f D))
+        simp only [Function.comp_apply] at hcompose
+        rw [hsq, hcompose]
+      -- assemble the two sides
+      show restrictionMap (D₁.1.mapRationalRingEquiv e.symm he' he
+          (hC.piece D₁.2)) E h₁
+          (g (C.pullbackIndexEquiv e he he' hC hplus D₁)) =
+        restrictionMap (D₂.1.mapRationalRingEquiv e.symm he' he
+          (hC.piece D₂.2)) E h₂
+          (g (C.pullbackIndexEquiv e he he' hC hplus D₂))
+      rw [hgdef, RationalCoveringData.productSectionsHomeomorph_apply_index,
+        RationalCoveringData.productSectionsHomeomorph_apply_index,
+        hside D₁ h₁ h₁B, hside D₂ h₂ h₂B, hstep]
+    -- Step 8: convert to the raw-data form through the R3 bridge
+    have hgAll : (C.pullbackRingEquiv e he he' hC hplus).AllDataCompatible g :=
+      ((C.pullbackRingEquiv e he he'
+        hC hplus).allDataCompatible_iff_rationalRefinementCompatible
+        hCprat g).mpr hgRR
+    -- Step 9: glue at the source
+    obtain ⟨x, hx⟩ := IsSheafy.gluing (A := A)
+      (C.pullbackRingEquiv e he he' hC hplus) hCprat g hgAll
+    -- Step 10: push the glued base section to the target
+    refine ⟨(presheafValueRingEquivOfRingEquiv e.symm he' he C.base
+      hC.base).symm x, fun D => ?_⟩
+    -- Step 11: verify the restrictions through the central square
+    apply (presheafValueRingEquivOfRingEquiv e.symm he' he D.1
+      (hC.piece D.2)).injective
+    have hpt := congr_fun (C.productRestrictionSub_conj e he he' hC hplus
+      ((presheafValueRingEquivOfRingEquiv e.symm he' he C.base hC.base).symm x))
+      (C.pullbackIndexEquiv e he he' hC hplus D)
+    have hyx : presheafValueRingEquivOfRingEquiv e.symm he' he C.base hC.base
+        ((presheafValueRingEquivOfRingEquiv e.symm he' he C.base hC.base).symm x)
+        = x :=
+      RingEquiv.apply_symm_apply _ x
+    rw [RationalCoveringData.productSectionsHomeomorph_apply_index, hyx] at hpt
+    have hxD := hx (C.pullbackIndexEquiv e he he' hC hplus D)
+    rw [hgdef, RationalCoveringData.productSectionsHomeomorph_apply_index] at hxD
+    exact hpt.trans hxD
+
+end SheafyTransport
 
 end ValuationSpectrum
