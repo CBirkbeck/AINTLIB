@@ -2038,6 +2038,29 @@ noncomputable def tensorSection {X : Scheme.{u}} (M N : X.Modules)
       (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app
         (.op U) (x ⊗ₜ y))
 
+/-- Scalar multiplication may be moved between the two factors of a canonical
+pure tensor section. -/
+theorem tensorSection_smul {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (a : Γ(X, U)) (x : Γ(M, U)) (y : Γ(N, U)) :
+    tensorSection M N U (a • x) y = tensorSection M N U x (a • y) := by
+  unfold tensorSection
+  let S := X.sheaf.obj.obj (.op U)
+  let MM : ModuleCat S := by
+    change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+    exact M.val.obj (.op U)
+  let NN : ModuleCat S := by
+    change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+    exact N.val.obj (.op U)
+  let aa : S := a
+  let xx : MM := x
+  let yy : NN := y
+  have h : (aa • xx) ⊗ₜ[S] yy = xx ⊗ₜ[S] (aa • yy) :=
+    TensorProduct.smul_tmul aa xx yy
+  exact congrArg
+    (fun q => (monoidalTensorObjIso M N).inv.val.app (.op U)
+      (((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app (.op U) q)) h
+
 /-- If a structure-sheaf section annihilates a module section, then their
 canonical pure tensor section is zero. -/
 theorem tensorSection_eq_zero_of_smul_eq_zero
