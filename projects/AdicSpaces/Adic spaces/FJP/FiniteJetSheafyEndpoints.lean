@@ -136,4 +136,28 @@ theorem finiteJet_isSheafyFor_all (Bplus : RingOfIntegralElements (JetA F)) :
     IsSheafyFor (JetA F) Bplus :=
   finiteJet_isSheafyComplete F Bplus
 
+/-- **The public structure presheaf of the pinching algebra is a sheaf of topological
+rings at EVERY valid ring of integral elements** (PASS 4): the P0 wrapper applied to the
+unconditional all-pairs sheafiness. The presheaf is `structurePresheaf` with its
+projective/`limitSections` topology — never the discrete locally-fraction presheaf. -/
+theorem finiteJet_structurePresheaf_isSheafOfTopologicalRings_all
+    (Bplus : RingOfIntegralElements (JetA F)) :
+    letI := Bplus.toPlusSubring
+    haveI : IsRingOfIntegralElements ((JetA F)⁺ : Subring (JetA F)) := Bplus.2
+    haveI : HasLocLiftPowerBounded (JetA F) := hasLocLiftPowerBounded_faithful
+    TopCat.Presheaf.IsSheafOfTopologicalRings
+      (ValuationSpectrum.structurePresheaf (JetA F)) :=
+  isSheafyFor_structurePresheaf_isSheafOfTopologicalRings Bplus
+    (finiteJet_isSheafyFor_all F Bplus)
+
+/-- **The public structure presheaf of the pinching algebra satisfies the categorical
+sheaf condition at EVERY valid ring of integral elements** (PASS 4). -/
+theorem finiteJet_structurePresheaf_isSheaf_all
+    (Bplus : RingOfIntegralElements (JetA F)) :
+    letI := Bplus.toPlusSubring
+    haveI : IsRingOfIntegralElements ((JetA F)⁺ : Subring (JetA F)) := Bplus.2
+    haveI : HasLocLiftPowerBounded (JetA F) := hasLocLiftPowerBounded_faithful
+    (ValuationSpectrum.structurePresheaf (JetA F)).IsSheaf :=
+  isSheafyFor_structurePresheaf_isSheaf Bplus (finiteJet_isSheafyFor_all F Bplus)
+
 end FiniteJet

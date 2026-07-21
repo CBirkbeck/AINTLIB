@@ -77,6 +77,7 @@ import «Adic spaces».LaurentRefinementTree
 import «Adic spaces».LaurentSeparationPresheaf
 import «Adic spaces».RestrictedPowerSeries
 import «Adic spaces».RestrictedModule
+import «Adic spaces».RingEquivPresheafTransport
 import «Adic spaces».SeminormalRing
 import «Adic spaces».CharacteristicSubgroup
 import «Adic spaces».SheafyEndpoints
