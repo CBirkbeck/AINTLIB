@@ -3,6 +3,7 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
+import Mathlib.RingTheory.Noetherian.Basic
 import ModularCurves.ForMathlib.CechSupportContraction
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
@@ -104,6 +105,19 @@ def OrderedCechSupportCochain (N : Set ι) (n : ℕ) :
   smul_mem' := by
     intro r s hs a ha
     simp [hs a ha]
+
+/-- Ordered support-restricted Cech cochains on a finite index type form a finite module over a
+Noetherian coefficient ring. -/
+theorem OrderedCechSupportCochain.module_finite
+    [IsNoetherianRing R] [Finite ι] (N : Set ι) (n : ℕ) :
+    Module.Finite R (OrderedCechSupportCochain R N n) := by
+  letI : Finite (AlgebraicGeometry.Scheme.Modules.OrderedCechIndex ι n) :=
+    Subtype.finite
+  letI : IsNoetherian R
+      (AlgebraicGeometry.Scheme.Modules.OrderedCechIndex ι n → R) := inferInstance
+  letI : IsNoetherian R (OrderedCechSupportCochain R N n) :=
+    isNoetherian_of_submodule_of_noetherian R _ _ inferInstance
+  infer_instance
 
 private theorem orderedCechDelete_range_subset {n : ℕ}
     (a : AlgebraicGeometry.Scheme.Modules.OrderedCechIndex ι (n + 1))
