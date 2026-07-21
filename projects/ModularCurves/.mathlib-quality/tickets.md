@@ -24550,3 +24550,16 @@ hpi from pointedIso_hom_of_transVC_eq_one_loc) TYPE-CHECKS END-TO-END in scratch
 — the descent-glue MATH IS COMPLETE. Module GREEN, single sorry :3146. REMAINING (mechanical only):
 (1) 200k-split of the hagree assembly (extract setup+combine into barrier lemmas, same pattern);
 (2) one cosmetic eqToHom-associativity step. This is the LAST fitting before the engine flips.
+
+### v10.343 — ★★★ [T-E4D MOUTH CORE COMPLETE] hagree CLOSED, exists_invariant_away_presentation AXIOM-CLEAN (2026-07-21)
+VERIFIED (own full build + axiom check, not builder-reported): EngineMouthCharts green (8700 jobs,
+ZERO sorries); exists_invariant_away_presentation + nativeGlue = [propext, Classical.choice,
+Quot.sound], NO sorryAx, NO maxHeartbeats. The hagree assembly-split closed it: overlapIso_congr
+(:3051), chartPi (:3068), nativeGlue_agree (:3092, the full γ3 agreement extracted as its own decl
+under default 200k via respectTransparency-false, composing reduceSide k/l + overlapMap_comm +
+overlapIso_congr + chartPi), and hagree := fun k l => nativeGlue_agree … (:3301). THE ENTIRE KM
+2.2.5-6 SEMILOCAL WEIERSTRASS-MODEL DESCENT GLUING (the a5-P-loc mouth core, the single hardest
+piece of the whole engine) IS PROVEN AXIOM-CLEAN. Remaining to flip the engine: wire EngineDescent
+hpres := exists_invariant_away_presentation (the import regresses EngineDescent's two heavy Stage-4/5
+proofs — solve via the same opaque-morphism/generic-lemma discipline that closed hagree, or a
+module restructure).

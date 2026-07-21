@@ -3046,6 +3046,195 @@ lemma overlapMap_comm [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤)) :
   simp only [RingHom.coe_comp, Function.comp_apply, RingHom.comp_apply,
     LocalPresentation.sectionsMapLE_id, awayToSections_algebraMap, resLE_algebraMap]
 
+open Scheme LocalPresentation in
+/-- The two overlap isos (over ring-hom-equal base changes) relate by the induced `eqToHom`. -/
+lemma overlapIso_congr [IsAffine X] {a : ↑Γ(X, ⊤)}
+    (W : WeierstrassCurve (Localization.Away a)) {Uov : (projModel W).Opens}
+    {V : X.affineOpens} {ρ₁ ρ₂ : Localization.Away a →+* ↑Γ(X, V.1)} (hR1 : ρ₁ = ρ₂)
+    [IsOpenImmersion (projModelBaseChange ρ₁ W)] [IsOpenImmersion (projModelBaseChange ρ₂ W)]
+    (hrange₁ : Set.range ⇑(projModelBaseChange ρ₁ W) = Set.range ⇑Uov.ι)
+    (hrange₂ : Set.range ⇑(projModelBaseChange ρ₂ W) = Set.range ⇑Uov.ι) :
+    (IsOpenImmersion.isoOfRangeEq (projModelBaseChange ρ₂ W) Uov.ι hrange₂).inv
+      = (IsOpenImmersion.isoOfRangeEq (projModelBaseChange ρ₁ W) Uov.ι hrange₁).inv
+        ≫ eqToHom (congrArg (fun r => projModel (W.map r)) hR1) := by
+  apply (cancel_mono (projModelBaseChange ρ₂ W)).mp
+  rw [IsOpenImmersion.isoOfRangeEq_inv_fac, Category.assoc, ← projModelBaseChange_congr_hom hR1]
+  exact (IsOpenImmersion.isoOfRangeEq_inv_fac _ _ hrange₁).symm
+
+
+open Scheme LocalPresentation in
+/-- The pointedIso step: two presentations over the same affine with trivial comparison give the
+    same chart projection up to `eqToHom`. -/
+lemma chartPi [IsAffine X] {V' : X.affineOpens} {Q₁' Q₂' : LocalPresentation C V'}
+    (hVC : Q₁'.transVC Q₂' = 1) {T : Scheme.{u}} (m : (pullback C.π V'.1.ι : Scheme.{u}) ⟶ T) :
+    Q₁'.e.inv ≫ m
+      = eqToHom (show projModel Q₁'.W = projModel Q₂'.W by
+          rw [show Q₂'.W = Q₁'.W from by
+            have := Q₁'.transVC_smul Q₂'; rwa [hVC, one_smul] at this])
+        ≫ Q₂'.e.inv ≫ m := by
+  have hIso := pointedIso_hom_of_transVC_eq_one_loc hVC
+  rw [show (Q₁'.pointedIso Q₂').hom = Q₁'.e.inv ≫ Q₂'.e.hom from rfl] at hIso
+  have hE : Q₁'.e.inv
+      = eqToHom (show projModel Q₁'.W = projModel Q₂'.W by
+          rw [show Q₂'.W = Q₁'.W from by
+            have := Q₁'.transVC_smul Q₂'; rwa [hVC, one_smul] at this])
+        ≫ Q₂'.e.inv := by
+    rw [← hIso, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  rw [hE, Category.assoc]
+
+
+set_option backward.isDefEq.respectTransparency false in
+open Scheme LocalPresentation in
+/-- **(γ3 agreement)** The pairwise agreement of the native-glue pieces on the overlaps
+`Uₖ ⊓ Uₗ` — the descent glue of `nativeGlue`.  Extracted as its own declaration so it (not the
+larger `nativeGlue`) carries the assembly cost; the split under 200k is the `reduceSide` /
+`overlapIso_congr` / `chartPi` barrier toolkit above. -/
+theorem nativeGlue_agree [IsAffine X] (a : ↑Γ(X, ⊤)) {ι : Type u}
+    (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (W₀R₁ : WeierstrassCurve (Localization.Away a))
+    (DA : ∀ i, VariableChange ↑Γ(X, X.basicOpen (a * f i)))
+    (hQW : ∀ i, (((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+          (isAffineOpen_top X).basicOpen (a * f i)⟩)
+        (basicOpen_mul_le_right a (f i))).ofVC (DA i)).W
+        = W₀R₁.map (awayToSections a (f i)))
+    (hVC1 : ∀ i j,
+        ((((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+              (isAffineOpen_top X).basicOpen (a * f i)⟩)
+            (basicOpen_mul_le_right a (f i))).ofVC (DA i)).restrict
+            (V' := ⟨X.basicOpen ((a * f i) * (a * f j)),
+              (isAffineOpen_top X).basicOpen _⟩)
+            (basicOpen_mul_le_left (a * f i) (a * f j))).transVC
+          ((((P j).restrict (V' := ⟨X.basicOpen (a * f j),
+              (isAffineOpen_top X).basicOpen (a * f j)⟩)
+            (basicOpen_mul_le_right a (f j))).ofVC (DA j)).restrict
+            (V' := ⟨X.basicOpen ((a * f i) * (a * f j)),
+              (isAffineOpen_top X).basicOpen _⟩)
+            (basicOpen_mul_le_right (a * f i) (a * f j))) = 1)
+    (k l : ι) :
+    (projModel W₀R₁).homOfLE (inf_le_left :
+        (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f k))) ⊓
+        (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f l))) ≤ _)
+      ≫ gluePiece a (f k) W₀R₁
+          (((P k).restrict (basicOpen_mul_le_right a (f k))).ofVC (DA k)) (hQW k)
+      = (projModel W₀R₁).homOfLE (inf_le_right :
+          (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f k))) ⊓
+          (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f l))) ≤ _)
+        ≫ gluePiece a (f l) W₀R₁
+            (((P l).restrict (basicOpen_mul_le_right a (f l))).ofVC (DA l)) (hQW l) := by
+  classical
+  set V : X.affineOpens := ⟨X.basicOpen ((a * f k) * (a * f l)),
+    (isAffineOpen_top X).basicOpen _⟩ with hVdef
+  have hk : V.1 ≤ X.basicOpen (a * f k) := basicOpen_mul_le_left (a * f k) (a * f l)
+  have hl : V.1 ≤ X.basicOpen (a * f l) := basicOpen_mul_le_right (a * f k) (a * f l)
+  set Uov : (projModel W₀R₁).Opens :=
+    (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f k))) ⊓
+      (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f l))) with hUovdef
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * f k)) :=
+    (awayToSections a (f k)).toAlgebra
+  haveI : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, X.basicOpen (a * f k))))) :=
+    isOpenImmersion_specMap_awayToSections a (f k)
+  haveI hOIk : IsOpenImmersion (projModelBaseChange (awayToSections a (f k)) W₀R₁) :=
+    isOpenImmersion_projModelBaseChange W₀R₁
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * f l)) :=
+    (awayToSections a (f l)).toAlgebra
+  haveI : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, X.basicOpen (a * f l))))) :=
+    isOpenImmersion_specMap_awayToSections a (f l)
+  haveI hOIl : IsOpenImmersion (projModelBaseChange (awayToSections a (f l)) W₀R₁) :=
+    isOpenImmersion_projModelBaseChange W₀R₁
+  have hρk_om : (sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))
+      = overlapMap a (f k) (f l) := by
+    rw [overlapMap, LocalPresentation.sectionsMapLE_id]
+  have hρl_om : (sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l))
+      = overlapMap a (f k) (f l) := (overlapMap_comm a (f k) (f l)).symm.trans hρk_om
+  letI : Algebra (Localization.Away a) ↑Γ(X, V.1) := (overlapMap a (f k) (f l)).toAlgebra
+  haveI : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, V.1)))) :=
+    isOpenImmersion_specMap_overlapMap a (f k) (f l)
+  haveI hOIov : IsOpenImmersion (projModelBaseChange (overlapMap a (f k) (f l)) W₀R₁) :=
+    isOpenImmersion_projModelBaseChange W₀R₁
+  haveI hOIρk : IsOpenImmersion (projModelBaseChange
+      ((sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))) W₀R₁) := by
+    rw [hρk_om]; exact hOIov
+  haveI hOIρl : IsOpenImmersion (projModelBaseChange
+      ((sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l))) W₀R₁) := by
+    rw [hρl_om]; exact hOIov
+  have hrangek : Set.range ⇑(projModelBaseChange
+        ((sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))) W₀R₁) = Set.range ⇑Uov.ι :=
+    (congrArg (fun r => Set.range ⇑(projModelBaseChange r W₀R₁)) hρk_om).trans
+      (overlapRange a (f k) (f l) W₀R₁)
+  have hrangel : Set.range ⇑(projModelBaseChange
+        ((sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l))) W₀R₁) = Set.range ⇑Uov.ι :=
+    (congrArg (fun r => Set.range ⇑(projModelBaseChange r W₀R₁)) hρl_om).trans
+      (overlapRange a (f k) (f l) W₀R₁)
+  -- reduceSide applied to each side (via gluePieceIso_factor for `hz`)
+  have hz_k := gluePieceIso_factor a (f k) W₀R₁ V hk Uov inf_le_left hrangek
+  have hz_l := gluePieceIso_factor a (f l) W₀R₁ V hl Uov inf_le_right hrangel
+  have hfac_k : (IsOpenImmersion.isoOfRangeEq (projModelBaseChange
+        ((sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))) W₀R₁) Uov.ι hrangek).inv
+        ≫ projModelBaseChange (sectionsMapLE (𝟙 X) hk) (W₀R₁.map (awayToSections a (f k)))
+        ≫ projModelBaseChange (awayToSections a (f k)) W₀R₁ = Uov.ι :=
+    (congrArg ((IsOpenImmersion.isoOfRangeEq (projModelBaseChange
+        ((sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))) W₀R₁) Uov.ι hrangek).inv ≫ ·)
+      (projModelBaseChange_comp' (sectionsMapLE (𝟙 X) hk) (awayToSections a (f k)) W₀R₁).symm).trans
+      (IsOpenImmersion.isoOfRangeEq_inv_fac _ _ hrangek)
+  have hfac_l : (IsOpenImmersion.isoOfRangeEq (projModelBaseChange
+        ((sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l))) W₀R₁) Uov.ι hrangel).inv
+        ≫ projModelBaseChange (sectionsMapLE (𝟙 X) hl) (W₀R₁.map (awayToSections a (f l)))
+        ≫ projModelBaseChange (awayToSections a (f l)) W₀R₁ = Uov.ι :=
+    (congrArg ((IsOpenImmersion.isoOfRangeEq (projModelBaseChange
+        ((sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l))) W₀R₁) Uov.ι hrangel).inv ≫ ·)
+      (projModelBaseChange_comp' (sectionsMapLE (𝟙 X) hl) (awayToSections a (f l)) W₀R₁).symm).trans
+      (IsOpenImmersion.isoOfRangeEq_inv_fac _ _ hrangel)
+  have hredk := reduceSide a (f k) W₀R₁
+    (((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩)
+      (basicOpen_mul_le_right a (f k))).ofVC (DA k)) (hQW k) V hk Uov inf_le_left
+    _ hfac_k hz_k
+  have hredl := reduceSide a (f l) W₀R₁
+    (((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩)
+      (basicOpen_mul_le_right a (f l))).ofVC (DA l)) (hQW l) V hl Uov inf_le_right
+    _ hfac_l hz_l
+  rw [hredk, hredl]
+  set fstV := pullback.fst C.π V.1.ι with hfstV
+  have hR1 : (sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))
+      = (sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l)) := hρk_om.trans hρl_om.symm
+  have hpi : ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).e.inv ≫ fstV
+      = eqToHom (by rw [show ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).W = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).W from by
+          have := ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).transVC_smul ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl)
+          rwa [hVC1 k l, one_smul] at this])
+        ≫ ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).e.inv ≫ fstV := by
+    have hIso := pointedIso_hom_of_transVC_eq_one_loc (hVC1 k l)
+    rw [show (((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).pointedIso ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl)).hom
+      = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).e.inv ≫ ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).e.hom from rfl] at hIso
+    have hEk : ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).e.inv
+        = eqToHom (by rw [show ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).W = ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).W from by
+            have := ((((P k).restrict (V' := ⟨X.basicOpen (a * f k), (isAffineOpen_top X).basicOpen (a * f k)⟩) (basicOpen_mul_le_right a (f k))).ofVC (DA k)).restrict hk).transVC_smul ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl)
+            rwa [hVC1 k l, one_smul] at this])
+          ≫ ((((P l).restrict (V' := ⟨X.basicOpen (a * f l), (isAffineOpen_top X).basicOpen (a * f l)⟩) (basicOpen_mul_le_right a (f l))).ofVC (DA l)).restrict hl).e.inv := by
+      rw [← hIso, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    rw [hEk, Category.assoc]
+  have hzrel : (IsOpenImmersion.isoOfRangeEq (projModelBaseChange
+        ((sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l))) W₀R₁) Uov.ι hrangel).inv
+      = (IsOpenImmersion.isoOfRangeEq (projModelBaseChange
+          ((sectionsMapLE (𝟙 X) hk).comp (awayToSections a (f k))) W₀R₁) Uov.ι hrangek).inv
+        ≫ eqToHom (congrArg (fun r => projModel (W₀R₁.map r)) hR1) := by
+    apply (cancel_mono (projModelBaseChange
+      ((sectionsMapLE (𝟙 X) hl).comp (awayToSections a (f l))) W₀R₁)).mp
+    rw [IsOpenImmersion.isoOfRangeEq_inv_fac, Category.assoc,
+      ← projModelBaseChange_congr_hom hR1]
+    exact (IsOpenImmersion.isoOfRangeEq_inv_fac _ _ hrangek).symm
+  rw [hzrel, hpi]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_trans]
+
+
 /-- The native glue over `D(a)` (γ3 + γ4). -/
 theorem nativeGlue [IsAffine X] (a : ↑Γ(X, ⊤)) {ι : Type u}
     (f : ι → ↑Γ(X, ⊤))
@@ -3095,55 +3284,21 @@ theorem nativeGlue [IsAffine X] (a : ↑Γ(X, ⊤)) {ι : Type u}
         (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i)) = ⊤ :=
       PrimeSpectrum.iSup_basicOpen_eq_top_iff.mpr hspan₁
     exact (projModelπ W₀R₁).iSup_preimage_eq_top hspanTop
-  -- ### γ3 AGREEMENT — THE SINGLE REMAINING FRONTIER (the genuine descent glue).
-  -- Everything else of the KM 4.7.0 mouth core is now AXIOM-CLEAN: the five barrier lemmas
-  -- (`gluePieceRange`, `gluePiece`, `specMap_awayToSections_range`, `gluePiece_isPullback`,
-  -- `gluePiece_zero`), the cover `hcov3`, `ρR₁` (built below), the per-piece `hpiece`, the γ4
-  -- pullback square, and the zero-leg are ALL proved sorry-free.  What remains is exactly the
-  -- pairwise agreement of the native-glue pieces on the overlaps `Uₖ ⊓ Uₗ`:  the two corrected
-  -- charts `Q k`, `Q l` restrict to the common affine `D((a·fₖ)·(a·fₗ))` where their comparison
-  -- variable change is trivial (`hVC1 k l : … .transVC … = 1`), so the two chart maps into `C.E`
-  -- coincide there.  Formally: feed `hVC1 k l` through `pointedIso_hom_of_transVC_eq_one`
-  -- (`Moduli/AdaptedModel.lean`) to identify the restricted chart isos, and connect `F k`/`F l`
-  -- to those restricted charts by `restrict_e_baseChange` + `restrictTheta_fst`
-  -- (`EllipticCurve/InvariantDifferential.lean`), transporting across the base-change comparison
-  -- over the overlap (`projModelBaseChange_comp'`).  Mirror `chartPiece_index_congr` +
-  -- `chartPiece_restrict` (`Moduli/UniversalAdapted.lean`), reversed (proj-model → E).
-  -- NOTE the one friction point: `hVC1`'s overlap is `D(a²·fₖfₗ)` whereas the away-charts live
-  -- over `D(a·fₖfₗ)` — the SAME open, different terms (transport with an `eqToHom`/`≤`-restrict).
-  --
-  -- BANKED TOOLKIT (all AXIOM-CLEAN, above `nativeGlue`): the reversed template is now assembled —
-  -- `pointedIso_hom_of_transVC_eq_one_loc` (B0, a local reproof since AdaptedModel isn't imported),
-  -- `chart_baseChange_fst` (B1 = the `‡` identity), `gluePiece_chart_congr` (B2 = reversed index
-  -- congruence), and the overlap range `overlapMap` / `overlapMap_range` / `overlapRange` (the
-  -- localization-tower identification `range(projModelBaseChange (overlapMap a fₖ fₗ) W) = Uₖ ⊓ Uₗ`,
-  -- with the `a`-unit collapsing the `a²`-vs-`a` friction).  The full per-side reduction is now ALSO
-  -- banked (the 200k split the prior board flagged is DONE — the `bc_triple_comp`/`bc_chart_reduce`/
-  -- `gluePieceIso_factor`/`reduceSide` barrier lemmas above, plus `overlapMap_comm` = R1'):
-  --   `reduceSide` : `homOfLE hincl ≫ gluePiece a g W Q hQW
-  --       = zinv ≫ eqToHom qᵍ ≫ (Q.restrict hgV).e.inv ≫ pullback.fst C.π V.ι`
-  --   with the overlap iso passed as an OPAQUE morphism `zinv` (statement stays under 200k), the
-  --   `(∗∗)` mono-cancellation (`gluePieceIso_factor`) supplied as `hz`, and the `congr'' + B1`
-  --   step (`bc_chart_reduce`) composed via `congrArg` (zero kabstract on the heavy terms).
-  --
-  -- REMAINING for `hagree` (the WIRING, mechanical, fully verified in scratch — the whole assembly
-  -- type-checks under a temporary `maxHeartbeats` bump, so the math is complete; the only work left
-  -- is fitting it under the default 200k by extracting the SETUP and the COMBINE into their own
-  -- barrier lemmas, exactly as `reduceSide` was extracted):
-  --   • setup: the common affine `V = D((a·fₖ)(a·fₗ))`, `hk/hl`, `Uov = Uₖ⊓Uₗ`, the away-chart OI
-  --     instances, `ρ· = (sectionsMapLE h·).comp (awayToSections a f·)`, `hρ·_om : ρ· = overlapMap`
-  --     (via `sectionsMapLE_id`), `overlapMap_comm : ρₖ = ρₗ` (R1'), and `hrange·` (from
-  --     `overlapRange` transported along `hρ·_om`);
-  --   • `hredk/hredl := reduceSide … zinv· hfac· (gluePieceIso_factor …)`;
-  --   • combine: `rw [hredk, hredl]`, then `hzrel : zinvₗ = zinvₖ ≫ eqToHom(brk)` (mono-cancel
-  --     `projModelBaseChange ρₗ W₀R₁`, `projModelBaseChange_congr_hom` on R1'), and
-  --     `hpi : (Qₖ.restrict hk).e.inv ≫ fst = eqToHom hW ≫ (Qₗ.restrict hl).e.inv ≫ fst`
-  --     (`pointedIso_hom_of_transVC_eq_one_loc (hVC1 k l)`); `erw [hpi]` + `eqToHom_trans_assoc`
-  --     (proof-irrelevance) closes.  Use `congrArg`/opaque-morphism params — never `rw`/`simp` on the
-  --     concrete `gluePiece`/`isoOfRangeEq`/`projModelBaseChange` terms (they whnf-blow-up).
+  -- ### γ3 AGREEMENT — the genuine descent glue, now CLOSED (axiom-clean).
+  -- The pairwise agreement of the native-glue pieces on the overlaps `Uₖ ⊓ Uₗ` is the reversed
+  -- `chartPiece_agree` for the native glue, discharged by `nativeGlue_agree` (above).  Its proof
+  -- assembles the banked reversed-template toolkit: `reduceSide` reduces each side to the common
+  -- restricted-chart projection over `D((a·fₖ)(a·fₗ))` (through `gluePieceIso_factor`'s `(∗∗)`
+  -- factorisation, `bc_chart_reduce`'s `congr'' + B1` step, and the overlap range `overlapRange`);
+  -- `overlapMap_comm` (R1') + `overlapIso_congr` relate the two overlap isos, and `chartPi`
+  -- (from `pointedIso_hom_of_transVC_eq_one_loc (hVC1 k l)`) identifies the restricted charts.
+  -- The `a`-unit collapses the `D(a²·fₖfₗ)`-vs-`D(a·fₖfₗ)` friction inside `overlapMap_range`.
+  -- Split so no declaration crosses the default 200k heartbeat ceiling (no `maxHeartbeats`) — the
+  -- heavy `projModelBaseChange`/`isoOfRangeEq`/`gluePiece` terms are kept out of `kabstract` via
+  -- generic ring-hom lemmas, `congrArg` term-mode, and opaque-morphism parameters.
   have hagree : ∀ k l, (projModel W₀R₁).homOfLE (inf_le_left : U k ⊓ U l ≤ U k) ≫ F k =
-      (projModel W₀R₁).homOfLE (inf_le_right : U k ⊓ U l ≤ U l) ≫ F l := by
-    sorry
+      (projModel W₀R₁).homOfLE (inf_le_right : U k ⊓ U l ≤ U l) ≫ F l :=
+    fun k l => nativeGlue_agree a f P W₀R₁ DA hQW hVC1 k l
   -- the glued native model map
   set ρR₁ : projModel W₀R₁ ⟶ C.E :=
     (projModel W₀R₁).topIso.inv ≫ (projModel W₀R₁).homOfLE hcov3.ge ≫
