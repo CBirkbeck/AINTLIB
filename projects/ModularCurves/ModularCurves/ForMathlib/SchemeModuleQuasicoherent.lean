@@ -579,6 +579,26 @@ theorem Modules.baseModulePresheaf_isLocalized_basicOpen
       simpa only [U] using Modules.isoSpecInv_image_basic f)
     Modules.isoSpecInv_image_top f himage
 
+/-- On an affine scheme, if a global section of a quasicoherent module vanishes on a basic open,
+then some power of the function defining that open annihilates the section. -/
+theorem Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
+    (f : Γ(X, ⊤)) (t : Γ(M, ⊤))
+    (ht : M.presheaf.map (X.basicOpen f).leTop.op t = 0) :
+    ∃ n : ℕ, f ^ n • t = 0 := by
+  let B := baseModulePresheaf (𝟙 X) M
+  let ψ := (B.map (X.basicOpen f).leTop.op).hom
+  letI : IsLocalizedModule.Away f ψ :=
+    Modules.baseModulePresheaf_isLocalized_basicOpen M f
+  change ψ t = 0 at ht
+  obtain ⟨⟨_, n, rfl⟩, hn⟩ :=
+    (IsLocalizedModule.eq_zero_iff (Submonoid.powers f) ψ).mp ht
+  refine ⟨n, ?_⟩
+  change X.presheaf.map (homOfLE le_rfl).op
+      ((Scheme.Hom.appTop (𝟙 X)) (f ^ n)) • t = 0 at hn
+  rw [Scheme.Hom.id_appTop] at hn
+  simpa using hn
+
 /-- On an affine scheme, a section of a quasicoherent module over `D(f)` extends globally after
 multiplication by a power of the restriction of `f`. -/
 theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffine
