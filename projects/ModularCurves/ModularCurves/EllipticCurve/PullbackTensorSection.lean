@@ -501,3 +501,27 @@ theorem pullback_δ_unit_tensorSection
   exact hinvApply
 
 end ModularCurves
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+/-- The canonical comparison from open restriction to pullback sends a
+restriction-unit section to the corresponding pullback-unit section. -/
+theorem restrictFunctorIsoPullback_hom_unit_app_apply
+    {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
+    (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
+    ((restrictFunctorIsoPullback f).app M).hom.val.app (.op (f ⁻¹ᵁ U))
+        (((restrictAdjunction f).unit.app M).val.app (.op U) x) =
+      ((pullbackPushforwardAdjunction f).unit.app M).val.app (.op U) x := by
+  let adjr := restrictAdjunction f
+  let adjp := pullbackPushforwardAdjunction f
+  let e := (restrictFunctorIsoPullback f).app M
+  have he := Adjunction.homEquiv_leftAdjointUniq_hom_app adjr adjp M
+  change (adjr.homEquiv _ _) e.hom = adjp.unit.app M at he
+  rw [Adjunction.homEquiv_unit] at he
+  have happ := congrArg (fun q => q.val.app (.op U) x) he
+  conv_lhs at happ =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  exact happ
+
+end AlgebraicGeometry.Scheme.Modules
