@@ -1142,6 +1142,67 @@ theorem coordinateHomogeneousLaurentFullNegativeCyclesToHomology_surjective
           (R := R) j d (n + 1)).hom q) = x
   exact heq.symm.trans hz
 
+/-- Degree-zero homogeneous Laurent ordered-Cech homology is finite over a Noetherian coefficient
+ring. -/
+theorem coordinateHomogeneousLaurentOrderedCechComplex_homology_zero_module_finite
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    (j : σ) (d : ℤ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).homology 0) := by
+  let K := coordinateHomogeneousLaurentOrderedCechComplex
+    (R := R) j d
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (K.cycles 0) :=
+    coordinateHomogeneousLaurentOrderedCechComplex_cycles_zero_module_finite
+      j d
+  exact Module.Finite.of_surjective (K.homologyπ 0).hom
+    ((ModuleCat.epi_iff_surjective (K.homologyπ 0)).mp inferInstance)
+
+/-- Degree-zero homology of the explicit standard-coordinate ordered-Cech complex for a projective
+twist is finite over a Noetherian coefficient ring. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechComplex_homology_zero_module_finite
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    (j : σ) (d : ℤ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHyperplaneTwistOrderedBaseCechComplex
+        (R := R) j d).homology 0) := by
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).homology 0) :=
+    coordinateHomogeneousLaurentOrderedCechComplex_homology_zero_module_finite
+      j d
+  exact Module.Finite.equiv
+    (HomologicalComplex.homologyMapIso
+      (coordinateHomogeneousLaurentOrderedCechComplexIso
+        (R := R) j d) 0).symm.toLinearEquiv
+
+/-- Degree-zero homology of the native ordered-Cech complex for a coordinate-hyperplane twist is
+finite over a Noetherian coefficient ring. -/
+theorem coordinateHyperplaneTwist_orderedBaseCechComplex_homology_zero_module_finite
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    (j : σ) (d : ℤ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((Scheme.Modules.orderedBaseCechComplex
+        (homogeneousProjπ (R := R) (σ := σ))
+        (coordinateHyperplaneTwist (R := R) j d)
+        (coordinateOpenCover (R := R) (σ := σ))).homology 0) := by
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHyperplaneTwistOrderedBaseCechComplex
+        (R := R) j d).homology 0) :=
+    coordinateHyperplaneTwistOrderedBaseCechComplex_homology_zero_module_finite
+      j d
+  exact Module.Finite.equiv
+    (HomologicalComplex.homologyMapIso
+      (coordinateHyperplaneTwistOrderedBaseCechComplexIso
+        (R := R) j d) 0).symm.toLinearEquiv
+
 /-- Positive-degree homogeneous Laurent ordered-Cech homology is finite over a Noetherian
 coefficient ring. -/
 theorem coordinateHomogeneousLaurentOrderedCechComplex_homology_module_finite
