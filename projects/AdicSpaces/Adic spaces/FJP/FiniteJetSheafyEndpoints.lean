@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».FJP.FiniteJetMain
 import «Adic spaces».SheafyEndpoints
 import «Adic spaces».RelativeStandardRefinement
+import «Adic spaces».SheafyCompletionModel
 
 /-!
 # FJP: the literature-facing sheafiness endpoints (WO5)
@@ -159,5 +160,53 @@ theorem finiteJet_structurePresheaf_isSheaf_all
     haveI : HasLocLiftPowerBounded (JetA F) := hasLocLiftPowerBounded_faithful
     (ValuationSpectrum.structurePresheaf (JetA F)).IsSheaf :=
   isSheafyFor_structurePresheaf_isSheaf Bplus (finiteJet_isSheafyFor_all F Bplus)
+
+/-! ### The unconditional literature-facing endpoint (PASS F) -/
+
+/-- **The pinching algebra is sheafy in the ring-level Tate sense**
+(Wedhorn Definition 8.26 at Tate scope, the unconditional literature-facing
+endpoint): every ring of integral elements of every completion model of
+`𝓐 = JetA F` gives a sheafy pair. Formal consequence of the all-pairs
+complete-ring sheafiness (`finiteJet_isSheafyComplete`) through the generic
+completion-model collapse `isSheafyTateRing_iff_isSheafyComplete` — `𝓐` is
+complete Tate, so its completion models are canonically isomorphic to `𝓐`
+itself. No noetherian or strongly noetherian hypotheses are available or used
+(`𝓐` is deliberately non-noetherian, [FJP] Theorem 1.3). -/
+theorem finiteJet_isSheafyTateRing : IsSheafyTateRing (JetA F) :=
+  (isSheafyTateRing_iff_isSheafyComplete (A := JetA F)).2
+    (finiteJet_isSheafyComplete F)
+
+/-- **The public projective-topology structure presheaf of every completion model
+of the pinching algebra, at every valid ring of integral elements, is a sheaf of
+topological rings** (PASS F): the explicit-`P`-and-`Bplus` endpoint, concluding
+sheafiness of the actual `structurePresheaf` — never a discrete comparison
+object. -/
+theorem finiteJet_completionModel_structurePresheaf_isSheafOfTopologicalRings
+    (P : PairOfDefinition (JetA F))
+    (Bplus : RingOfIntegralElements (CompletionModel (JetA F) P)) :
+    letI := Bplus.toPlusSubring
+    haveI : IsRingOfIntegralElements
+      ((CompletionModel (JetA F) P)⁺ : Subring (CompletionModel (JetA F) P)) :=
+      Bplus.2
+    haveI : HasLocLiftPowerBounded (CompletionModel (JetA F) P) :=
+      hasLocLiftPowerBounded_faithful
+    TopCat.Presheaf.IsSheafOfTopologicalRings
+      (ValuationSpectrum.structurePresheaf (CompletionModel (JetA F) P)) :=
+  isSheafyTateRing_structurePresheaf_isSheafOfTopologicalRings
+    (finiteJet_isSheafyTateRing F) P Bplus
+
+/-- **The categorical sheaf condition for every completion model of the pinching
+algebra** ([Stacks 00VR] form, PASS F). -/
+theorem finiteJet_completionModel_structurePresheaf_isSheaf
+    (P : PairOfDefinition (JetA F))
+    (Bplus : RingOfIntegralElements (CompletionModel (JetA F) P)) :
+    letI := Bplus.toPlusSubring
+    haveI : IsRingOfIntegralElements
+      ((CompletionModel (JetA F) P)⁺ : Subring (CompletionModel (JetA F) P)) :=
+      Bplus.2
+    haveI : HasLocLiftPowerBounded (CompletionModel (JetA F) P) :=
+      hasLocLiftPowerBounded_faithful
+    (ValuationSpectrum.structurePresheaf (CompletionModel (JetA F) P)).IsSheaf :=
+  isSheafyTateRing_structurePresheaf_isSheaf (finiteJet_isSheafyTateRing F) P Bplus
 
 end FiniteJet
