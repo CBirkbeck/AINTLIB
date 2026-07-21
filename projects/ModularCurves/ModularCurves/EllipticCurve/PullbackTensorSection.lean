@@ -672,4 +672,158 @@ theorem restrictMonoidalTensorIso_localModuleSection
     Scheme.Modules.overFunctorEquiv_hom_localModuleSection_preimageT N U y]
   exact restrictMonoidalTensorIso_restrictUnit_tensorSection M N U x y
 
+private theorem overTrivialization_hom_app_injective
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    Function.Injective (e.hom.val.app (.op (Over.mk (𝟙 U)))) := by
+  intro x y hxy
+  have hback := congrArg
+    (fun z ↦ e.inv.val.app (.op (Over.mk (𝟙 U))) z) hxy
+  have hcomp := congrArg
+    (fun q ↦ q.val.app (.op (Over.mk (𝟙 U)))) e.hom_inv_id
+  have hx := ConcreteCategory.congr_hom hcomp x
+  have hy := ConcreteCategory.congr_hom hcomp y
+  exact hx.symm.trans (hback.trans hy)
+
+private theorem overTrivializationOfRestrictIso_local_one
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    let Z := U.ι ⁻¹ᵁ U
+    e.hom.val.app (.op Z)
+        (((Scheme.Modules.overFunctorEquiv U).app M).hom.val.app (.op Z)
+          (Scheme.Modules.localModuleSection M U Z
+            (overTrivializationSection M U
+              (Scheme.Modules.overTrivializationOfRestrictIso M U e) 1))) =
+      (show Γ(U.toScheme, Z) from 1) := by
+  dsimp only
+  let eOver := Scheme.Modules.overTrivializationOfRestrictIso M U e
+  let x := overTrivializationSection M U eOver 1
+  have h := Scheme.Modules.overEquiv_map_localModuleSectionT M U eOver.hom x
+  dsimp only [x] at h
+  rw [overTrivializationSection_coefficient] at h
+  change _ = (X.ringCatSheaf.over U).obj.map _ 1 at h
+  rw [map_one] at h
+  simp only [eOver, Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom] at h
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at h
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at h
+  change e.hom.val.app (.op (U.ι ⁻¹ᵁ U))
+      (((Scheme.Modules.overFunctorEquiv U).app M).hom.val.app
+        (.op (U.ι ⁻¹ᵁ U))
+        (Scheme.Modules.localModuleSection M U (U.ι ⁻¹ᵁ U)
+          (overTrivializationSection M U eOver 1))) =
+      (show Γ(U.toScheme, U.ι ⁻¹ᵁ U) from 1) at h
+  exact h
+
+private theorem tensorSection_map_restrictIso
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (eM : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (eN : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (Z : U.toScheme.Opens)
+    (x : Γ((Scheme.Modules.restrictFunctor U.ι).obj M, Z))
+    (y : Γ((Scheme.Modules.restrictFunctor U.ι).obj N, Z)) :
+    (eM.hom ⊗ₘ eN.hom).val.app (.op Z)
+        (tensorSection ((Scheme.Modules.restrictFunctor U.ι).obj M)
+          ((Scheme.Modules.restrictFunctor U.ι).obj N) Z x y) =
+      tensorSection (Scheme.Modules.unitObj U.toScheme)
+        (Scheme.Modules.unitObj U.toScheme) Z
+        (eM.hom.val.app (.op Z) x) (eN.hom.val.app (.op Z) y) := by
+  exact tensorSection_map
+    (X := U.toScheme)
+    (M := (Scheme.Modules.restrictFunctor U.ι).obj M)
+    (M' := Scheme.Modules.unitObj U.toScheme)
+    (N := (Scheme.Modules.restrictFunctor U.ι).obj N)
+    (N' := Scheme.Modules.unitObj U.toScheme)
+    eM.hom eN.hom Z x y
+
+private theorem overTrivialization_tensor_one_coefficient
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (eM : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (eN : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    let eT := Scheme.Modules.overTrivializationOfRestrictIso (M ⊗ N) U
+      (restrictMonoidalTensorIso U.ι M N ≪≫
+        (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme)
+    eT.hom.val.app (.op (Over.mk (𝟙 U)))
+        (tensorSection M N U
+          (overTrivializationSection M U
+            (Scheme.Modules.overTrivializationOfRestrictIso M U eM) 1)
+          (overTrivializationSection N U
+            (Scheme.Modules.overTrivializationOfRestrictIso N U eN) 1)) =
+      (show Γ(X, U) from 1) := by
+  dsimp only
+  apply Scheme.Modules.terminal_apply_eq_of_overEquivT
+  dsimp only
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom]
+  change _ = (X.ringCatSheaf.over U).obj.map _ 1
+  rw [map_one]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  change (restrictMonoidalTensorIso U.ι M N ≪≫
+      (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme).hom.val.app
+        (.op (U.ι ⁻¹ᵁ U)) _ =
+    (show Γ(U.toScheme, U.ι ⁻¹ᵁ U) from 1)
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  rw [restrictMonoidalTensorIso_localModuleSection]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  simp only [MonoidalCategory.tensorIso_hom]
+  let Z := U.ι ⁻¹ᵁ U
+  let xM := ((Scheme.Modules.overFunctorEquiv U).app M).hom.val.app (.op Z)
+    (Scheme.Modules.localModuleSection M U Z
+      (overTrivializationSection M U
+        (Scheme.Modules.overTrivializationOfRestrictIso M U eM) 1))
+  let xN := ((Scheme.Modules.overFunctorEquiv U).app N).hom.val.app (.op Z)
+    (Scheme.Modules.localModuleSection N U Z
+      (overTrivializationSection N U
+        (Scheme.Modules.overTrivializationOfRestrictIso N U eN) 1))
+  change (unitObjTensorIso U.toScheme).hom.val.app (.op Z)
+      ((eM.hom ⊗ₘ eN.hom).val.app (.op Z)
+        (tensorSection ((Scheme.Modules.restrictFunctor U.ι).obj M)
+          ((Scheme.Modules.restrictFunctor U.ι).obj N) Z xM xN)) =
+    (show Γ(U.toScheme, Z) from 1)
+  have hmap := tensorSection_map_restrictIso M N U eM eN Z xM xN
+  have hmap' := congrArg
+    (fun q ↦ (unitObjTensorIso U.toScheme).hom.val.app (.op Z) q) hmap
+  refine hmap'.trans ?_
+  have hxM : eM.hom.val.app (.op Z) xM =
+      (show Γ(U.toScheme, Z) from 1) := by
+    dsimp only [Z, xM]
+    exact overTrivializationOfRestrictIso_local_one M U eM
+  have hxN : eN.hom.val.app (.op Z) xN =
+      (show Γ(U.toScheme, Z) from 1) := by
+    dsimp only [Z, xN]
+    exact overTrivializationOfRestrictIso_local_one N U eN
+  rw [hxM, hxN]
+  rw [unitObjTensorIso_hom_tensorSection, one_mul]
+
+/-- The coefficient-one section in the tensor-product trivialization is the
+pure tensor of the two coefficient-one frame sections. -/
+theorem overTrivializationSection_tensor_one
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (eM : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (eN : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    overTrivializationSection (M ⊗ N) U
+        (Scheme.Modules.overTrivializationOfRestrictIso (M ⊗ N) U
+          (restrictMonoidalTensorIso U.ι M N ≪≫
+            (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme)) 1 =
+      tensorSection M N U
+        (overTrivializationSection M U
+          (Scheme.Modules.overTrivializationOfRestrictIso M U eM) 1)
+        (overTrivializationSection N U
+          (Scheme.Modules.overTrivializationOfRestrictIso N U eN) 1) := by
+  let eT := Scheme.Modules.overTrivializationOfRestrictIso (M ⊗ N) U
+    (restrictMonoidalTensorIso U.ι M N ≪≫
+      (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme)
+  apply overTrivialization_hom_app_injective (M ⊗ N) U eT
+  rw [overTrivializationSection_coefficient]
+  exact (overTrivialization_tensor_one_coefficient M N U eM eN).symm
+
 end ModularCurves
