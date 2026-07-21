@@ -7,6 +7,7 @@ import «Adic spaces».CompletionLocalization
 import «Adic spaces».CompletionModelIndependence
 import «Adic spaces».SheafyRingEquivTransport
 import «Adic spaces».SheafyCompletionModel
+import «Adic spaces».SpaRationalSubsetCorrespondence
 import «Adic spaces».PresheafAdicCompletion
 import «Adic spaces».AdicConvergence
 import «Adic spaces».ArtinReesConvergence

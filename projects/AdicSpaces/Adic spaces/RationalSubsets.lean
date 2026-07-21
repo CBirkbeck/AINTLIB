@@ -58,10 +58,34 @@ variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A] [Decidabl
 additionally requires the open-ideal condition `T·A` open (i.e.
 `RationalLocData.IsRational`); a genuinely-rational-subset statement (e.g. the
 Proposition 8.2(2) correspondence) must carry a `RationalLocData.IsRational` witness,
-not merely this presentation predicate. Renamed from the misleading `IsRationalSubset`
+not merely this presentation predicate — that stronger predicate is
+`IsRationalSubset` below. Renamed from the misleading `IsRationalSubset`
 (2026-07-21). -/
 def HasRationalPresentation (U : Set (Spv A)) : Prop :=
   ∃ (T : Finset A) (s : A), U = rationalOpen T s
+
+/-- `U` **is a rational subset** in the honest sense of Wedhorn Definition 7.29:
+`U = R(T/s)` for a presentation whose numerator family generates an *open* ideal
+("`T·A` is open in `A`", wedhorn.txt:3100). This is the predicate the
+Proposition 8.2(2) correspondence quantifies over; the presentation-only
+predicate (no openness condition) is `HasRationalPresentation`. -/
+def IsRationalSubset (U : Set (Spv A)) : Prop :=
+  ∃ (T : Finset A) (s : A),
+    IsOpen (((Ideal.span (T : Set A) : Ideal A) : Set A)) ∧ U = rationalOpen T s
+
+omit [DecidableEq A] in
+/-- A rational subset has, in particular, a rational presentation. -/
+theorem IsRationalSubset.hasRationalPresentation {U : Set (Spv A)}
+    (hU : IsRationalSubset U) : HasRationalPresentation U := by
+  obtain ⟨T, s, -, hU⟩ := hU
+  exact ⟨T, s, hU⟩
+
+variable (A) in
+/-- The type of **rational subsets** of `Spv A` (Wedhorn Definition 7.29, bundled):
+a set together with a proof that it is presented by a finite family generating an
+open ideal. -/
+def RationalSubset : Type _ :=
+  {U : Set (Spv A) // IsRationalSubset U}
 
 /-- Adding `s` to `T` does not change `R(T/s)` (Remark 7.30(3)). -/
 theorem rationalOpen_insert_s (T : Finset A) (s : A) :

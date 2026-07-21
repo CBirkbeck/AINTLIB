@@ -1770,3 +1770,67 @@ isSheafyFor_equiv/isSheafyComplete_congr is a ~250-line geometric site-transport
 PASS 5 (Prop 8.2(2) rational-subset bijection: reverse-image construction from the perturbation
 results — subset-equality indexedRationalSet_perturb_eq + span-preservation
 exists_parameterPerturbation_span_top, both DONE) is INDEPENDENT of 2.5 and remains open.
+
+---
+
+# STATUS — 2026-07-21 (session 2): choice-independence chain + Prop 8.2(2) COMPLETE (base e96405f90)
+
+Accounting correction (audit): the acceptance list is FIFTEEN endpoints — eight delivered
+before this session (listed above) + SEVEN delivered in this session (the earlier "13" figure
+miscounted). All fifteen now DELIVERED and verified.
+
+Verification: `lake build 'Adic spaces'` green (3305 jobs); every new public endpoint and the
+internal `IsSheafy` transport `#print axioms`-audited to exactly {propext, Classical.choice,
+Quot.sound}; FJP sorry-free; no code sorry/admit/axiom/unsafe/native_decide added;
+`git diff --check` clean; five frozen FJP statement types unchanged; regression gates
+(isSheafy_iff_isLimitSheaf, isSheafy_of_stronglyNoetherian_828b,
+isSheafyTateRing_of_stronglyNoetherianTate) intact and axiom-clean.
+
+## DELIVERED (this session)
+
+- **T0** — transport-API cleanup: no DecidableEq in any transport signature (file-local scoped
+  Classical); redundant IsHuberRing/IsTopologicalRing binders dropped where IsTateRing supplies
+  them; `mapRationalRingEquiv_P` simp lemma; `RationalLocData.ext_of_fields` relocated to
+  Presheaf.lean; `restrictionMap_cast` extracted (generic) to PresheafFunctoriality.lean; the
+  RingEquivPresheafTransport header now describes exactly what the file contains.
+- **T1** — `PairOfDefinition.mapRingEquiv_symm_map`/`_map_symm` (dependent ideal via
+  `Ideal.map_map` + a coercion-fixing `HEq` collapse), `PairOfDefinition.ringEquivCongr`,
+  `ValidRationalLocData`, both datum roundtrips, `validRationalLocDataEquiv`.
+- **T2** — `mem_rationalOpen_mapRationalRingEquiv_iff` + preimage/subset transport (both
+  directions; `ringPlus_map_symm_of_map` for the inverse plus-compatibility).
+- **T3** — `presheafValueHomeomorphOfRingEquiv`; `presheafValueRingEquivOfRingEquiv_restriction`
+  (+ inverse-direction corollary) as a direct specialization of
+  `presheafValueMapOfHom_restriction`.
+- **T4** — `RationalCoveringData.pullbackRingEquiv` (pieces via `Finset.map` of
+  `pullbackPieceEmbedding` — exact, choice-free), `pullbackIndexEquiv` (+ `_val`/`_symm_val`
+  simp lemmas), `pullbackRingEquiv_isRational`.
+- **T5** — `productSectionsHomeomorph` (ONE-call `Homeomorph.piCongr`; the two-stage `.trans`
+  form hits a catastrophic-defeq wall — 664k unfolds at 1.6M heartbeats — recorded here as the
+  playbook fix), `_apply_index` (via `Equiv.piCongr_apply_apply` with explicit families),
+  `_symm_apply` (rfl), and the central square `productRestrictionSub_conj`.
+- **T6** — `isSheafy_mapRingEquiv`: embedding by cover pullback + central square +
+  `IsEmbedding.of_comp_iff` (never weakened to injectivity); gluing via
+  `RationalRefinementCompatible` on the source only, converted by the R3 bridge, glued, pushed
+  back and verified through the square.
+- **T7** (`SheafyRingEquivTransport.lean`) — `isSheafyFor_mapRingEquiv`, `isSheafyFor_equiv`,
+  `isSheafyComplete_congr`; signatures carry only the two complete-Tate stacks + the
+  bicontinuous equivalence.
+- **C0** (`SheafyCompletionModel.lean`) — `completeRingEquivCompletionModel` (+ `_apply` simp,
+  `_continuous`, `_symm_continuous`) under complete-Huber-only hypotheses (away-one collapse +
+  `locTopology_continuous_lift` + completion extension); replaces the overscoped
+  `globalSections_equiv` for downstream use.
+- **C1** — `isSheafyTateRing_iff_for_completionModel`, `isSheafyTateRing_iff_exists_completionModel`
+  (Tate scope, no completeness), `isSheafyTateRing_iff_isSheafyComplete` (complete Tate).
+- **PASS F** — `finiteJet_isSheafyTateRing` (no noetherian input — JetA F is non-noetherian),
+  `finiteJet_completionModel_structurePresheaf_isSheafOfTopologicalRings`, and the categorical
+  `finiteJet_completionModel_structurePresheaf_isSheaf`: every completion model, every valid
+  plus ring, the actual public projective-topology structurePresheaf.
+- **Prop 8.2(2) lane** — `IsRationalSubset` restored (honest strong predicate with the
+  open-ideal condition; `HasRationalPresentation` unchanged) + bundled `RationalSubset`;
+  `SpaRationalSubsetCorrespondence.lean`: `imgDatum_mem_rationalOpen_iff` (clean scope),
+  `exists_downstairs_rationalDatum` (approximation + denominator clearing + compact `π^N`
+  padding; `exists_parameterPerturbation_span_top` deliberately not consumed),
+  `comap_image_imgDatum_rationalOpen` (= R(D) ∩ R(W) — Wedhorn's U ∩ W, via interRational),
+  `spaPresheafValueRationalSubsetEquiv` (+ carrier simp lemmas). Advertised as the
+  complete-Tate specialization, not the arbitrary-affinoid theorem. Stale docs in
+  SpaParameterPerturbation/SpaRationalOpenHomeomorph refreshed.

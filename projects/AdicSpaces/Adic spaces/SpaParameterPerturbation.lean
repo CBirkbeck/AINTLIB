@@ -28,10 +28,14 @@ ring `B` with a topologically nilpotent unit `ϖ` and a ring of integral element
   (`Valuation.map_add_of_distinct_val`) run through each point's canonical
   valuation.
 
-**Scope honesty.** Exercise 1.2.2 also asserts that the *perturbed parameters
-still generate the unit ideal*; that span-preservation half is NOT proved here
-(see PHASE 6 in the ticket board). This file delivers only the subset-equality
-statement, which is what the Wedhorn 8.2(2) openness argument consumes.
+**Scope note.** Exercise 1.2.2 also asserts that the *perturbed parameters
+still generate the unit ideal*; that span-preservation half is proved in
+`SpaSpanPerturbation.lean` (`exists_parameterPerturbation_span_top`,
+2026-07-20). This file delivers the subset-equality statement, which is what
+the Wedhorn 8.2(2) openness argument consumes; the direct Tate proof of the
+rational-subset correspondence (`SpaRationalSubsetCorrespondence.lean`) instead
+enforces downstairs span-top by padding with a dominated unit power, so it does
+not consume the span-preservation theorem.
 
 These are stated for arbitrary index families (`indexedRationalSet`), with
 `indexedRationalSet_eq_rationalOpen` translating to the project's
