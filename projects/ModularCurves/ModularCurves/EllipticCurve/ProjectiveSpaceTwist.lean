@@ -1623,6 +1623,23 @@ theorem coordinateHyperplanePoleSheafPowerFrameSection_succ
       (coordinateHyperplanePoleSheafPowerTrivialization (R := R) i j n)
       (coordinateHyperplanePoleSheafTrivialization (R := R) i j)
 
+/-- The degree-zero positive-twist frame is the local monoidal-unit frame. -/
+theorem coordinateHyperplanePoleSheafPowerFrameSection_zero_apply
+    (i j : σ) :
+    (ModularCurves.monoidalUnitObjIso
+      (Proj (homogeneousSubmodule σ R))).hom.val.app
+        (.op (coordinateOpen (R := R) i))
+        (coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j 0) =
+      (show Γ(Proj (homogeneousSubmodule σ R),
+        coordinateOpen (R := R) i) from 1) := by
+  simpa only [coordinateHyperplanePoleSheafPowerFrameSection,
+    coordinateHyperplanePoleSheafPower,
+    coordinateHyperplanePoleSheafPowerTrivialization,
+    coordinateHyperplanePoleSheafPowerTrivializationOf] using
+    ModularCurves.monoidalUnitObjIso_hom_overTrivializationSection_one
+      (X := Proj (homogeneousSubmodule σ R))
+      (coordinateOpen (R := R) i)
+
 /-- On a coordinate overlap, multiplying the restricted `i`-frame of `O(n)`
 by `(X_k / X_i)^n` gives the restricted `k`-frame. -/
 theorem coordinateHyperplanePoleSheafPowerFrameSection_restrict_transition
@@ -1971,6 +1988,62 @@ noncomputable def coordinateHyperplanePowerPairing (j : σ) :
           (ModularCurves.idealModule
             (coordinateHyperplaneι (R := R) j)))
 
+@[simp]
+lemma coordinateHyperplanePowerPairing_zero (j : σ) :
+    coordinateHyperplanePowerPairing (R := R) j 0 =
+      ((ModularCurves.monoidalUnitObjIso
+          (Proj (homogeneousSubmodule σ R))).hom ⊗ₘ
+        (ModularCurves.monoidalUnitObjIso
+          (Proj (homogeneousSubmodule σ R))).hom) ≫
+        (ModularCurves.unitObjTensorIso
+          (Proj (homogeneousSubmodule σ R))).hom :=
+  rfl
+
+@[simp]
+lemma coordinateHyperplanePowerPairing_succ (j : σ) (n : ℕ) :
+    coordinateHyperplanePowerPairing (R := R) j (n + 1) =
+      ModularCurves.tensorPairing
+        (coordinateHyperplanePowerPairing (R := R) j n)
+        (ModularCurves.dualPairing
+          (ModularCurves.idealModule
+            (coordinateHyperplaneι (R := R) j))) :=
+  rfl
+
+/-- The successor power pairing on nested pure tensors factors into the
+previous power pairing and the basic dual pairing. -/
+theorem coordinateHyperplanePowerPairing_succ_tensorSection
+    (j : σ) (n : ℕ) (U : (Proj (homogeneousSubmodule σ R)).Opens)
+    (x₁ : Γ(coordinateHyperplaneIdealModulePower (R := R) j n, U))
+    (x₂ : Γ(ModularCurves.idealModule
+      (coordinateHyperplaneι (R := R) j), U))
+    (y₁ : Γ(coordinateHyperplanePoleSheafPower (R := R) j n, U))
+    (y₂ : Γ(coordinateHyperplanePoleSheaf (R := R) j, U)) :
+    (coordinateHyperplanePowerPairing (R := R) j (n + 1)).val.app (.op U)
+        (ModularCurves.tensorSection
+          (coordinateHyperplaneIdealModulePower (R := R) j (n + 1))
+          (coordinateHyperplanePoleSheafPower (R := R) j (n + 1)) U
+          (ModularCurves.tensorSection
+            (coordinateHyperplaneIdealModulePower (R := R) j n)
+            (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+            U x₁ x₂)
+          (ModularCurves.tensorSection
+            (coordinateHyperplanePoleSheafPower (R := R) j n)
+            (coordinateHyperplanePoleSheaf (R := R) j) U y₁ y₂)) =
+      (show Γ(Proj (homogeneousSubmodule σ R), U) from
+        (coordinateHyperplanePowerPairing (R := R) j n).val.app (.op U)
+          (ModularCurves.tensorSection
+            (coordinateHyperplaneIdealModulePower (R := R) j n)
+            (coordinateHyperplanePoleSheafPower (R := R) j n) U x₁ y₁)) *
+        (show Γ(Proj (homogeneousSubmodule σ R), U) from
+          (ModularCurves.dualPairing
+            (ModularCurves.idealModule
+              (coordinateHyperplaneι (R := R) j))).val.app (.op U)
+            (ModularCurves.tensorSection
+              (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+              (coordinateHyperplanePoleSheaf (R := R) j) U x₂ y₂)) := by
+  rw [coordinateHyperplanePowerPairing_succ]
+  apply ModularCurves.tensorPairing_tensorSection
+
 /-- A frame of `O(-1)` on an open induces compatible frames of all its
 nonnegative powers on that open. -/
 noncomputable def coordinateHyperplaneIdealModulePowerTrivializationOf
@@ -2135,6 +2208,23 @@ theorem coordinateHyperplaneIdealModulePowerFrameSection_succ
       (coordinateHyperplaneIdealModulePowerTrivialization (R := R) i j n)
       (coordinateHyperplaneIdealModuleTrivialization (R := R) i j).symm
 
+/-- The degree-zero standard frame is the local monoidal-unit frame. -/
+theorem coordinateHyperplaneIdealModulePowerFrameSection_zero_apply
+    (i j : σ) :
+    (ModularCurves.monoidalUnitObjIso
+      (Proj (homogeneousSubmodule σ R))).hom.val.app
+        (.op (coordinateOpen (R := R) i))
+        (coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j 0) =
+      (show Γ(Proj (homogeneousSubmodule σ R),
+        coordinateOpen (R := R) i) from 1) := by
+  simpa only [coordinateHyperplaneIdealModulePowerFrameSection,
+    coordinateHyperplaneIdealModulePower,
+    coordinateHyperplaneIdealModulePowerTrivialization,
+    coordinateHyperplaneIdealModulePowerTrivializationOf] using
+    ModularCurves.monoidalUnitObjIso_hom_overTrivializationSection_one
+      (X := Proj (homogeneousSubmodule σ R))
+      (coordinateOpen (R := R) i)
+
 /-- The coefficient-one standard-chart frames of `O(-1)` and `O(1)` pair to
 the unit section. -/
 theorem coordinateHyperplaneDualPairing_frameSection (i j : σ) :
@@ -2198,6 +2288,126 @@ theorem coordinateHyperplaneDualPairing_frameSection (i j : σ) :
   rw [hd]
   simpa only [d] using
     ModularCurves.dualPairing_overTrivializationSection_one M U e
+
+/-- The standard-chart frames of `O(-n)` and `O(n)` pair to the unit section. -/
+theorem coordinateHyperplanePowerPairing_frameSection
+    (i j : σ) (n : ℕ) :
+    (coordinateHyperplanePowerPairing (R := R) j n).val.app
+        (.op (coordinateOpen (R := R) i))
+        (ModularCurves.tensorSection
+          (coordinateHyperplaneIdealModulePower (R := R) j n)
+          (coordinateHyperplanePoleSheafPower (R := R) j n)
+          (coordinateOpen (R := R) i)
+          (coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j n)
+          (coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j n)) =
+      (show Γ(Proj (homogeneousSubmodule σ R),
+        coordinateOpen (R := R) i) from 1) := by
+  induction n with
+  | zero =>
+      let X := Proj (homogeneousSubmodule σ R)
+      let U := coordinateOpen (R := R) i
+      let c := ModularCurves.monoidalUnitObjIso X
+      let u := ModularCurves.unitObjTensorIso X
+      let x : Γ(𝟙_ X.Modules, U) :=
+        coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j 0
+      let y : Γ(𝟙_ X.Modules, U) :=
+        coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j 0
+      let a : Γ(X, U) := c.hom.val.app (.op U) x
+      let b : Γ(X, U) := c.hom.val.app (.op U) y
+      change
+        u.hom.val.app (.op U)
+          ((c.hom ⊗ₘ c.hom).val.app (.op U)
+            (ModularCurves.tensorSection (𝟙_ X.Modules) (𝟙_ X.Modules)
+              U x y)) = (show Γ(X, U) from 1)
+      have hmap := ModularCurves.tensorSection_map
+        (X := X)
+        (M := 𝟙_ X.Modules) (M' := Scheme.Modules.unitObj X)
+        (N := 𝟙_ X.Modules) (N' := Scheme.Modules.unitObj X)
+        c.hom c.hom U x y
+      have hmap' :
+          u.hom.val.app (.op U)
+              ((c.hom ⊗ₘ c.hom).val.app (.op U)
+                (ModularCurves.tensorSection (𝟙_ X.Modules) (𝟙_ X.Modules)
+                  U x y)) =
+            u.hom.val.app (.op U)
+              (ModularCurves.tensorSection
+                (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X) U
+                (show Γ(Scheme.Modules.unitObj X, U) from a)
+                (show Γ(Scheme.Modules.unitObj X, U) from b)) := by
+        simpa only [a, b] using
+          congrArg (fun q => u.hom.val.app (.op U) q) hmap
+      have hmul :
+          u.hom.val.app (.op U)
+              (ModularCurves.tensorSection
+                (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X) U
+                (show Γ(Scheme.Modules.unitObj X, U) from a)
+                (show Γ(Scheme.Modules.unitObj X, U) from b)) = a * b :=
+        ModularCurves.unitObjTensorIso_hom_tensorSection X U a b
+      have ha : a = (show Γ(X, U) from 1) := by
+        exact coordinateHyperplaneIdealModulePowerFrameSection_zero_apply
+          (R := R) i j
+      have hb : b = (show Γ(X, U) from 1) := by
+        exact coordinateHyperplanePoleSheafPowerFrameSection_zero_apply
+          (R := R) i j
+      have hab : a * b = (show Γ(X, U) from 1) := by
+        rw [ha, hb, one_mul]
+      exact hmap'.trans (hmul.trans hab)
+  | succ n ih =>
+      rw [coordinateHyperplaneIdealModulePowerFrameSection_succ,
+        coordinateHyperplanePoleSheafPowerFrameSection_succ]
+      have hpair := coordinateHyperplanePowerPairing_succ_tensorSection
+          (R := R) j n (coordinateOpen (R := R) i)
+          (coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j n)
+          (ModularCurves.overTrivializationSection
+            (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+            (coordinateOpen (R := R) i)
+            (Scheme.Modules.overTrivializationOfRestrictIso
+              (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+              (coordinateOpen (R := R) i)
+              (coordinateHyperplaneIdealModuleTrivialization
+                (R := R) i j).symm) 1)
+          (coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j n)
+          (ModularCurves.overTrivializationSection
+            (coordinateHyperplanePoleSheaf (R := R) j)
+            (coordinateOpen (R := R) i)
+            (Scheme.Modules.overTrivializationOfRestrictIso
+              (coordinateHyperplanePoleSheaf (R := R) j)
+              (coordinateOpen (R := R) i)
+              (coordinateHyperplanePoleSheafTrivialization (R := R) i j)) 1)
+      let X := Proj (homogeneousSubmodule σ R)
+      let U := coordinateOpen (R := R) i
+      let r₁ : Γ(X, U) :=
+        (coordinateHyperplanePowerPairing (R := R) j n).val.app (.op U)
+          (ModularCurves.tensorSection
+            (coordinateHyperplaneIdealModulePower (R := R) j n)
+            (coordinateHyperplanePoleSheafPower (R := R) j n) U
+            (coordinateHyperplaneIdealModulePowerFrameSection (R := R) i j n)
+            (coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j n))
+      let r₂ : Γ(X, U) :=
+        (ModularCurves.dualPairing
+          (ModularCurves.idealModule
+            (coordinateHyperplaneι (R := R) j))).val.app (.op U)
+          (ModularCurves.tensorSection
+            (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
+            (coordinateHyperplanePoleSheaf (R := R) j) U
+            (ModularCurves.overTrivializationSection
+              (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) U
+              (Scheme.Modules.overTrivializationOfRestrictIso
+                (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j)) U
+                (coordinateHyperplaneIdealModuleTrivialization
+                  (R := R) i j).symm) 1)
+            (ModularCurves.overTrivializationSection
+              (coordinateHyperplanePoleSheaf (R := R) j) U
+              (Scheme.Modules.overTrivializationOfRestrictIso
+                (coordinateHyperplanePoleSheaf (R := R) j) U
+                (coordinateHyperplanePoleSheafTrivialization (R := R) i j)) 1))
+      have hr₁ : r₁ = (show Γ(X, U) from 1) := ih
+      have hr₂ : r₂ = (show Γ(X, U) from 1) :=
+        coordinateHyperplaneDualPairing_frameSection (R := R) i j
+      have hvalue : r₁ * r₂ = (show Γ(X, U) from 1) := by
+        rw [hr₁, hr₂, one_mul]
+      have hfinal := hpair.trans hvalue
+      exact hfinal
 
 /-- On a coordinate overlap, multiplying the restricted `k`-frame of `O(-n)`
 by `(X_k / X_i)^n` gives the restricted `i`-frame. -/
