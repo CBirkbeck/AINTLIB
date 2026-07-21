@@ -2827,6 +2827,34 @@ theorem localTrivializationRestriction_smul_restrict
   rw [M.map_smul, Scheme.Modules.smul_restrictAppIso_inv_apply]
   rfl
 
+/-- Restriction of a global module section to an affine open vanishes iff its
+transport to the top open of the corresponding open subscheme vanishes. -/
+theorem localTrivializationRestriction_eq_zero_iff
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (x : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationRestriction M U x = 0 ↔
+      M.presheaf.map U.1.leTop.op x = 0 := by
+  constructor
+  · intro h
+    let r := M.presheaf.map U.1.leTop.op x
+    let e := M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)
+    let p := M.presheaf.mapIso (eqToIso U.1.ι_image_top).op
+    change e.inv
+        (M.presheaf.map (eqToHom U.1.ι_image_top).op r) = 0 at h
+    have h₁ := congrArg (fun q ↦ e.hom q) h
+    rw [map_zero, e.inv_hom_id_apply] at h₁
+    change r = 0
+    apply (ConcreteCategory.bijective_of_isIso p.hom).1
+    rw [map_zero]
+    exact h₁
+  · intro h
+    let r := M.presheaf.map U.1.leTop.op x
+    let e := M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)
+    let p := M.presheaf.mapIso (eqToIso U.1.ι_image_top).op
+    change r = 0 at h
+    change e.inv (p.hom r) = 0
+    rw [h, map_zero, map_zero]
+
 /-- Restricting a global section commutes with a morphism of scheme modules. -/
 theorem localTrivializationRestriction_map
     {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N)
