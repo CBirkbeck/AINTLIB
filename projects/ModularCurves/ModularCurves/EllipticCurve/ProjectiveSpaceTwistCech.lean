@@ -1218,7 +1218,8 @@ theorem coordinateOpenCechFirstTransition_laurent [LinearOrder σ] {n : ℕ}
   rw [AddMonoidAlgebra.mapDomain_single]
   rfl
 
-private theorem coordinateOpenCechFirstSecond_ne [LinearOrder σ] {n : ℕ}
+/-- The first two entries of an ordered Cech index are distinct. -/
+theorem coordinateOpenCechFirstSecond_ne [LinearOrder σ] {n : ℕ}
     (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) :
     (a.1 1).down ≠ (a.1 0).down := by
   intro h
