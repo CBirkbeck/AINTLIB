@@ -24599,3 +24599,19 @@ invertible-N, closed via the elementary KM 1.4.4 étale/Lagrange route + the lan
 layer for the ExactOrder boxes — no Oort-Tate needed). Final fix: GammaHMaster MonObj/η notation
 surgery (drop open MonObj — which now carries mathlib's γ:=ModObj.smul via the engine's transitive
 Mod.lean import — reproduce η[·] file-locally) to unblock the 5-receipt parse. STREAM-E4 DONE.
+
+## v10.344-FIN (2026-07-22) — STREAM-E4 MARATHON CONCLUDED: KM 4.7.0 ENGINE + ALL 7 RECEIPTS AXIOM-CLEAN
+
+The receipts workstream is DONE. Full ModularCurves library GREEN (8957 jobs). All 7 KM 4.7.0
+receipts + the engine verified [propext, Classical.choice, Quot.sound], NO sorryAx (own build +
+census). Delivered this marathon (~35 axiom-clean commits): ℰ₄-machine (UniversalLevelFour) +
+level-4 torsor (LevelFourTorsor) + engine rewire (EngineWiring D(2)→level-4) + recollement glue
+(Recollement homGlueDescentData/glueEllObj_representableBy) + Drinfeld invertible-N reroute
+(ExactOrderInvertible, via the landed Hopf/Deligne layer) + the FULL a5-P-loc semilocal mouth core
+(EngineMouthCharts: chart cover → transVC-cocycle split → global W₀L glue → invariant spread →
+native ρR₁ glue + pullback square + zero-leg; supported by 6 new ForMathlib files) + the hpres
+wiring file-split (EngineDescentCore) + the GammaHMaster MonObj/η notation fix. B2 resolved
+(level-4), B3 dissolved (invertible-N étale/Lagrange). Legendre subtree + over-ℤ ExactOrder boxes
+remain documented non-goals (statement-protected). Board v10.343 entries carry the full narrative +
+the reusable engineering lessons (200k barrier-lemma/zero-kabstract fixes, import-regression
+file-split, notation clash). STREAM-E4 CONCLUDED at genuine completion.
