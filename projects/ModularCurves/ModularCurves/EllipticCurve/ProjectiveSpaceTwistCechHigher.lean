@@ -927,6 +927,34 @@ theorem exists_boundary_coordinateHomogeneousLaurentCycle_sub_fullNegativeCycle
         (R := R) d (n + 1) s)) ht.symm).trans
     (add_sub_cancel_right _ _)
 
+/-- Full-negative cycles generate positive-degree homogeneous Laurent ordered-Cech homology. -/
+theorem coordinateHomogeneousLaurentFullNegativeCyclesToHomology_surjective
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    Function.Surjective
+      (coordinateHomogeneousLaurentFullNegativeCyclesToHomology
+        (R := R) j d (n + 1)).hom := by
+  let K := coordinateHomogeneousLaurentOrderedCechComplex
+    (R := R) j d
+  intro x
+  obtain ⟨z, hz⟩ :=
+    (ModuleCat.epi_iff_surjective (K.homologyπ (n + 1))).mp inferInstance x
+  let q := (coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+    (R := R) j d (n + 1)).hom z
+  obtain ⟨t, hboundary⟩ :=
+    exists_boundary_coordinateHomogeneousLaurentCycle_sub_fullNegativeCycle
+      (R := R) j d n z
+  have heq :=
+    coordinateHomogeneousLaurentOrderedCech_homologyπ_eq_of_sub_eq_boundary
+      (R := R) j d n z
+      ((coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+        (R := R) j d (n + 1)).hom q) t hboundary
+  refine ⟨q, ?_⟩
+  change
+    K.homologyπ (n + 1)
+        ((coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+          (R := R) j d (n + 1)).hom q) = x
+  exact heq.symm.trans hz
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation of the ordered Cech
 complex for a nonnegative projective twist is a boundary. -/
 theorem exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
