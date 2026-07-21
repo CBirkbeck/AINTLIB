@@ -5588,6 +5588,228 @@ theorem topSectionHom_comp
   simpa only [Scheme.Modules.topSectionHom, poleTopSectionHom] using
     poleTopSectionHom_comp x f
 
+section TensorPairingSections
+
+noncomputable local instance (X : Scheme.{u}) : SymmetricCategory X.Modules :=
+  Scheme.Modules.symmetricCategory X
+
+private theorem tensorPairing_unit_tensorμ (X : Scheme.{u}) :
+    let O := Scheme.Modules.unitObj X
+    let u := unitObjTensorIso X
+    u.inv ≫ (u.inv ⊗ₘ u.inv) ≫ tensorμ O O O O =
+      u.inv ≫ (u.inv ⊗ₘ u.inv) := by
+  let O := Scheme.Modules.unitObj X
+  let u := unitObjTensorIso X
+  let c := monoidalUnitObjIso X
+  let l := (λ_ (𝟙_ X.Modules)).inv
+  have hsource :
+      ((l ≫ (c.hom ⊗ₘ c.hom)) ⊗ₘ (l ≫ (c.hom ⊗ₘ c.hom))) =
+        (l ⊗ₘ l) ≫ ((c.hom ⊗ₘ c.hom) ⊗ₘ (c.hom ⊗ₘ c.hom)) :=
+    (tensorHom_comp_tensorHom l l (c.hom ⊗ₘ c.hom)
+      (c.hom ⊗ₘ c.hom)).symm
+  have hnatural := tensorμ_natural c.hom c.hom c.hom c.hom
+  have hunit :
+      (l ⊗ₘ l) ≫ tensorμ (𝟙_ X.Modules) (𝟙_ X.Modules)
+          (𝟙_ X.Modules) (𝟙_ X.Modules) = l ⊗ₘ l := by
+    dsimp only [l]
+    simp only [tensorμ, braiding_tensorUnit_left]
+    monoidal
+  have hinner :
+      ((l ≫ (c.hom ⊗ₘ c.hom)) ⊗ₘ (l ≫ (c.hom ⊗ₘ c.hom))) ≫
+          tensorμ (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
+            (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X) =
+        ((l ≫ (c.hom ⊗ₘ c.hom)) ⊗ₘ
+          (l ≫ (c.hom ⊗ₘ c.hom))) := by
+    calc
+      _ = (l ⊗ₘ l) ≫ ((c.hom ⊗ₘ c.hom) ⊗ₘ (c.hom ⊗ₘ c.hom)) ≫
+            tensorμ (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X)
+              (Scheme.Modules.unitObj X) (Scheme.Modules.unitObj X) := by
+        rw [hsource]
+        simp only [Category.assoc]
+      _ = (l ⊗ₘ l) ≫
+            tensorμ (𝟙_ X.Modules) (𝟙_ X.Modules)
+              (𝟙_ X.Modules) (𝟙_ X.Modules) ≫
+            ((c.hom ⊗ₘ c.hom) ⊗ₘ (c.hom ⊗ₘ c.hom)) := by
+        simpa only [Category.assoc] using
+          congrArg (fun k ↦ (l ⊗ₘ l) ≫ k) hnatural
+      _ = (l ⊗ₘ l) ≫
+            ((c.hom ⊗ₘ c.hom) ⊗ₘ (c.hom ⊗ₘ c.hom)) := by
+        rw [reassoc_of% hunit]
+      _ = _ := hsource.symm
+  simpa [u, O, c, l, unitObjTensorIso, Category.assoc] using hinner
+
+private theorem tensorPairing_morphism {X : Scheme.{u}}
+    {L₁ L₂ P₁ P₂ : X.Modules}
+    (e₁ : L₁ ⊗ P₁ ⟶ Scheme.Modules.unitObj X)
+    (e₂ : L₂ ⊗ P₂ ⟶ Scheme.Modules.unitObj X)
+    (a₁ : Scheme.Modules.unitObj X ⟶ L₁)
+    (a₂ : Scheme.Modules.unitObj X ⟶ L₂)
+    (b₁ : Scheme.Modules.unitObj X ⟶ P₁)
+    (b₂ : Scheme.Modules.unitObj X ⟶ P₂) :
+    (unitObjTensorIso X).inv ≫
+        (((unitObjTensorIso X).inv ≫ (a₁ ⊗ₘ a₂)) ⊗ₘ
+          ((unitObjTensorIso X).inv ≫ (b₁ ⊗ₘ b₂))) ≫
+        tensorPairing e₁ e₂ =
+      (unitObjTensorIso X).inv ≫
+        (((unitObjTensorIso X).inv ≫ (a₁ ⊗ₘ b₁) ≫ e₁) ⊗ₘ
+          ((unitObjTensorIso X).inv ≫ (a₂ ⊗ₘ b₂) ≫ e₂)) ≫
+        (unitObjTensorIso X).hom := by
+  let O := Scheme.Modules.unitObj X
+  let u := unitObjTensorIso X
+  have hsource :
+      ((u.inv ≫ (a₁ ⊗ₘ a₂)) ⊗ₘ (u.inv ≫ (b₁ ⊗ₘ b₂))) =
+        (u.inv ⊗ₘ u.inv) ≫ ((a₁ ⊗ₘ a₂) ⊗ₘ (b₁ ⊗ₘ b₂)) :=
+    (tensorHom_comp_tensorHom u.inv u.inv (a₁ ⊗ₘ a₂) (b₁ ⊗ₘ b₂)).symm
+  have hnatural := tensorμ_natural a₁ a₂ b₁ b₂
+  have hunit :
+      u.inv ≫ (u.inv ⊗ₘ u.inv) ≫ tensorμ O O O O =
+        u.inv ≫ (u.inv ⊗ₘ u.inv) :=
+    tensorPairing_unit_tensorμ X
+  have htarget₀ :
+      ((u.inv ≫ (a₁ ⊗ₘ b₁) ≫ e₁) ⊗ₘ
+          (u.inv ≫ (a₂ ⊗ₘ b₂) ≫ e₂)) =
+        (u.inv ⊗ₘ u.inv) ≫
+          (((a₁ ⊗ₘ b₁) ≫ e₁) ⊗ₘ ((a₂ ⊗ₘ b₂) ≫ e₂)) :=
+    (tensorHom_comp_tensorHom u.inv u.inv
+      ((a₁ ⊗ₘ b₁) ≫ e₁) ((a₂ ⊗ₘ b₂) ≫ e₂)).symm
+  have htarget₁ :
+      (((a₁ ⊗ₘ b₁) ≫ e₁) ⊗ₘ ((a₂ ⊗ₘ b₂) ≫ e₂)) =
+        ((a₁ ⊗ₘ b₁) ⊗ₘ (a₂ ⊗ₘ b₂)) ≫ (e₁ ⊗ₘ e₂) :=
+    (tensorHom_comp_tensorHom (a₁ ⊗ₘ b₁) (a₂ ⊗ₘ b₂) e₁ e₂).symm
+  simp only [tensorPairing]
+  calc
+    u.inv ≫
+          ((u.inv ≫ (a₁ ⊗ₘ a₂)) ⊗ₘ (u.inv ≫ (b₁ ⊗ₘ b₂))) ≫
+          tensorμ L₁ L₂ P₁ P₂ ≫ (e₁ ⊗ₘ e₂) ≫ u.hom =
+        u.inv ≫ (u.inv ⊗ₘ u.inv) ≫
+          ((a₁ ⊗ₘ a₂) ⊗ₘ (b₁ ⊗ₘ b₂)) ≫
+          tensorμ L₁ L₂ P₁ P₂ ≫ (e₁ ⊗ₘ e₂) ≫ u.hom := by
+      rw [hsource]
+      simp only [Category.assoc]
+    _ = u.inv ≫ (u.inv ⊗ₘ u.inv) ≫ tensorμ O O O O ≫
+          ((a₁ ⊗ₘ b₁) ⊗ₘ (a₂ ⊗ₘ b₂)) ≫
+          (e₁ ⊗ₘ e₂) ≫ u.hom := by
+      rw [reassoc_of% hnatural]
+    _ = u.inv ≫ (u.inv ⊗ₘ u.inv) ≫
+          ((a₁ ⊗ₘ b₁) ⊗ₘ (a₂ ⊗ₘ b₂)) ≫
+          (e₁ ⊗ₘ e₂) ≫ u.hom := by
+      rw [reassoc_of% hunit]
+    _ = u.inv ≫
+          ((u.inv ≫ (a₁ ⊗ₘ b₁) ≫ e₁) ⊗ₘ
+            (u.inv ≫ (a₂ ⊗ₘ b₂) ≫ e₂)) ≫ u.hom := by
+      rw [htarget₀, htarget₁]
+      simp only [Category.assoc]
+
+/-- Pairing two nested pure tensor sections over the top open multiplies the
+two factorwise pairing values. -/
+theorem tensorPairing_tensorSection_top {X : Scheme.{u}}
+    {L₁ L₂ P₁ P₂ : X.Modules}
+    (e₁ : L₁ ⊗ P₁ ⟶ Scheme.Modules.unitObj X)
+    (e₂ : L₂ ⊗ P₂ ⟶ Scheme.Modules.unitObj X)
+    (x₁ : Γ(L₁, (⊤ : X.Opens))) (x₂ : Γ(L₂, (⊤ : X.Opens)))
+    (y₁ : Γ(P₁, (⊤ : X.Opens))) (y₂ : Γ(P₂, (⊤ : X.Opens))) :
+    (tensorPairing e₁ e₂).val.app (.op ⊤)
+        (tensorSection (L₁ ⊗ L₂) (P₁ ⊗ P₂) ⊤
+          (tensorSection L₁ L₂ ⊤ x₁ x₂)
+          (tensorSection P₁ P₂ ⊤ y₁ y₂)) =
+      (show Γ(X, (⊤ : X.Opens)) from
+        e₁.val.app (.op ⊤) (tensorSection L₁ P₁ ⊤ x₁ y₁)) *
+        (show Γ(X, (⊤ : X.Opens)) from
+          e₂.val.app (.op ⊤) (tensorSection L₂ P₂ ⊤ x₂ y₂)) := by
+  let u := unitObjTensorIso X
+  let a₁ := Scheme.Modules.topSectionHom L₁ x₁
+  let a₂ := Scheme.Modules.topSectionHom L₂ x₂
+  let b₁ := Scheme.Modules.topSectionHom P₁ y₁
+  let b₂ := Scheme.Modules.topSectionHom P₂ y₂
+  let x := tensorSection L₁ L₂ ⊤ x₁ x₂
+  let y := tensorSection P₁ P₂ ⊤ y₁ y₂
+  let q := tensorSection (L₁ ⊗ L₂) (P₁ ⊗ P₂) ⊤ x y
+  let z₁ := tensorSection L₁ P₁ ⊤ x₁ y₁
+  let z₂ := tensorSection L₂ P₂ ⊤ x₂ y₂
+  let r₁ : Γ(X, (⊤ : X.Opens)) := e₁.val.app (.op ⊤) z₁
+  let r₂ : Γ(X, (⊤ : X.Opens)) := e₂.val.app (.op ⊤) z₂
+  have hx : Scheme.Modules.topSectionHom (L₁ ⊗ L₂) x =
+      u.inv ≫ (a₁ ⊗ₘ a₂) := by
+    exact topSectionHom_tensorSection L₁ L₂ x₁ x₂
+  have hy : Scheme.Modules.topSectionHom (P₁ ⊗ P₂) y =
+      u.inv ≫ (b₁ ⊗ₘ b₂) := by
+    exact topSectionHom_tensorSection P₁ P₂ y₁ y₂
+  have hq : Scheme.Modules.topSectionHom ((L₁ ⊗ L₂) ⊗ (P₁ ⊗ P₂)) q =
+      u.inv ≫
+        (Scheme.Modules.topSectionHom (L₁ ⊗ L₂) x ⊗ₘ
+          Scheme.Modules.topSectionHom (P₁ ⊗ P₂) y) := by
+    exact topSectionHom_tensorSection (L₁ ⊗ L₂) (P₁ ⊗ P₂) x y
+  have hz₁ : Scheme.Modules.topSectionHom (L₁ ⊗ P₁) z₁ =
+      u.inv ≫ (a₁ ⊗ₘ b₁) := by
+    exact topSectionHom_tensorSection L₁ P₁ x₁ y₁
+  have hz₂ : Scheme.Modules.topSectionHom (L₂ ⊗ P₂) z₂ =
+      u.inv ≫ (a₂ ⊗ₘ b₂) := by
+    exact topSectionHom_tensorSection L₂ P₂ x₂ y₂
+  have hr₁ : u.inv ≫ (a₁ ⊗ₘ b₁) ≫ e₁ =
+      unitEndomorphismOfTopSection r₁ := by
+    calc
+      _ = Scheme.Modules.topSectionHom (L₁ ⊗ P₁) z₁ ≫ e₁ := by
+        rw [hz₁]
+        simp only [Category.assoc]
+      _ = Scheme.Modules.topSectionHom (Scheme.Modules.unitObj X) r₁ :=
+        topSectionHom_comp z₁ e₁
+      _ = _ := rfl
+  have hr₂ : u.inv ≫ (a₂ ⊗ₘ b₂) ≫ e₂ =
+      unitEndomorphismOfTopSection r₂ := by
+    calc
+      _ = Scheme.Modules.topSectionHom (L₂ ⊗ P₂) z₂ ≫ e₂ := by
+        rw [hz₂]
+        simp only [Category.assoc]
+      _ = Scheme.Modules.topSectionHom (Scheme.Modules.unitObj X) r₂ :=
+        topSectionHom_comp z₂ e₂
+      _ = _ := rfl
+  have hpair :
+      Scheme.Modules.topSectionHom ((L₁ ⊗ L₂) ⊗ (P₁ ⊗ P₂)) q ≫
+          tensorPairing e₁ e₂ =
+        unitEndomorphismOfTopSection (r₁ * r₂) := by
+    calc
+      _ = u.inv ≫
+          ((u.inv ≫ (a₁ ⊗ₘ a₂)) ⊗ₘ (u.inv ≫ (b₁ ⊗ₘ b₂))) ≫
+            tensorPairing e₁ e₂ := by
+        rw [hq, hx, hy]
+        simp only [Category.assoc]
+      _ = u.inv ≫
+          ((u.inv ≫ (a₁ ⊗ₘ b₁) ≫ e₁) ⊗ₘ
+            (u.inv ≫ (a₂ ⊗ₘ b₂) ≫ e₂)) ≫ u.hom :=
+        tensorPairing_morphism e₁ e₂ a₁ a₂ b₁ b₂
+      _ = u.inv ≫
+          (unitEndomorphismOfTopSection r₁ ⊗ₘ
+            unitEndomorphismOfTopSection r₂) ≫ u.hom := by
+        rw [hr₁, hr₂]
+      _ = _ := by
+        rw [unitObjTensorIso_hom_comp_scalars]
+        exact u.inv_hom_id_assoc _
+  have hresult :
+      Scheme.Modules.topSectionHom (Scheme.Modules.unitObj X)
+          ((tensorPairing e₁ e₂).val.app (.op ⊤) q) =
+        Scheme.Modules.topSectionHom (Scheme.Modules.unitObj X) (r₁ * r₂) := by
+    calc
+      _ = Scheme.Modules.topSectionHom ((L₁ ⊗ L₂) ⊗ (P₁ ⊗ P₂)) q ≫
+          tensorPairing e₁ e₂ := (topSectionHom_comp q (tensorPairing e₁ e₂)).symm
+      _ = unitEndomorphismOfTopSection (r₁ * r₂) := hpair
+      _ = _ := rfl
+  have happ := congrArg
+    (fun k ↦ k.val.app (.op (⊤ : X.Opens))
+      (show X.presheaf.obj (.op ⊤) from 1)) hresult
+  have hfinal : (tensorPairing e₁ e₂).val.app (.op ⊤) q = r₁ * r₂ :=
+    (Scheme.Modules.topSectionHom_app_top_apply_one
+      (Scheme.Modules.unitObj X)
+      ((tensorPairing e₁ e₂).val.app (.op ⊤) q)).symm.trans
+        (happ.trans (Scheme.Modules.topSectionHom_app_top_apply_one
+          (Scheme.Modules.unitObj X) (r₁ * r₂)))
+  dsimp only [q] at hfinal
+  dsimp only [x, y] at hfinal
+  dsimp only [r₁, r₂] at hfinal
+  dsimp only [z₁, z₂] at hfinal
+  exact hfinal
+
+end TensorPairingSections
+
 private theorem poleTensor_restrict_monoidalUnitObjIso
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
     let F := Scheme.Modules.restrictFunctor f
