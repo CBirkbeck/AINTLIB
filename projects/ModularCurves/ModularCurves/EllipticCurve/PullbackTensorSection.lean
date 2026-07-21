@@ -524,4 +524,152 @@ theorem restrictFunctorIsoPullback_hom_unit_app_apply
       ModuleCat.comp_apply]
   exact happ
 
+private theorem restrictFunctorIsoPullback_inv_unit_app_apply
+    {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
+    (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
+    ((restrictFunctorIsoPullback f).app M).inv.val.app (.op (f ⁻¹ᵁ U))
+        (((pullbackPushforwardAdjunction f).unit.app M).val.app (.op U) x) =
+      ((restrictAdjunction f).unit.app M).val.app (.op U) x := by
+  let e := (restrictFunctorIsoPullback f).app M
+  let r := ((restrictAdjunction f).unit.app M).val.app (.op U) x
+  have hhom := restrictFunctorIsoPullback_hom_unit_app_apply f M U x
+  have happ := congrArg
+    (fun z => e.inv.val.app (.op (f ⁻¹ᵁ U)) z) hhom
+  have hcancel := congrArg (fun q => q.val.app (.op (f ⁻¹ᵁ U)) r)
+    e.hom_inv_id
+  conv_lhs at hcancel =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  exact happ.symm.trans hcancel
+
 end AlgebraicGeometry.Scheme.Modules
+
+namespace ModularCurves
+
+private theorem restrictMonoidalTensorIso_hom
+    {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
+    (M N : X.Modules) :
+    let PB := Scheme.Modules.pullback f
+    let eT := (Scheme.Modules.restrictFunctorIsoPullback f).app (M ⊗ N)
+    let eM := (Scheme.Modules.restrictFunctorIsoPullback f).app M
+    let eN := (Scheme.Modules.restrictFunctorIsoPullback f).app N
+    letI : PB.Monoidal := Scheme.Modules.pullbackMonoidal f
+    (restrictMonoidalTensorIso f M N).hom =
+      eT.hom ≫ Functor.OplaxMonoidal.δ PB M N ≫ (eM.inv ⊗ₘ eN.inv) := by
+  rfl
+
+private theorem restrictMonoidalTensorIso_restrictUnit_tensorSection
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (x : Γ(M, U)) (y : Γ(N, U)) :
+    let Z := U.ι ⁻¹ᵁ U
+    let F := Scheme.Modules.restrictFunctor U.ι
+    (restrictMonoidalTensorIso U.ι M N).hom.val.app (.op Z)
+        (((Scheme.Modules.restrictAdjunction U.ι).unit.app
+          (M ⊗ N)).val.app (.op U) (tensorSection M N U x y)) =
+      tensorSection (F.obj M) (F.obj N) Z
+        (((Scheme.Modules.restrictAdjunction U.ι).unit.app M).val.app
+          (.op U) x)
+        (((Scheme.Modules.restrictAdjunction U.ι).unit.app N).val.app
+          (.op U) y) := by
+  dsimp only
+  let Z := U.ι ⁻¹ᵁ U
+  let F := Scheme.Modules.restrictFunctor U.ι
+  let PB := Scheme.Modules.pullback U.ι
+  let eT := (Scheme.Modules.restrictFunctorIsoPullback U.ι).app (M ⊗ N)
+  let eM := (Scheme.Modules.restrictFunctorIsoPullback U.ι).app M
+  let eN := (Scheme.Modules.restrictFunctorIsoPullback U.ι).app N
+  let rT := ((Scheme.Modules.restrictAdjunction U.ι).unit.app
+    (M ⊗ N)).val.app (.op U) (tensorSection M N U x y)
+  let pM := ((Scheme.Modules.pullbackPushforwardAdjunction U.ι).unit.app
+    M).val.app (.op U) x
+  let pN := ((Scheme.Modules.pullbackPushforwardAdjunction U.ι).unit.app
+    N).val.app (.op U) y
+  letI pbMonoidal : PB.Monoidal := Scheme.Modules.pullbackMonoidal U.ι
+  have hT := Scheme.Modules.restrictFunctorIsoPullback_hom_unit_app_apply
+    U.ι (M ⊗ N) U (tensorSection M N U x y)
+  have hδ := pullback_δ_unit_tensorSection U.ι M N U x y
+  have hmap := tensorSection_map eM.inv eN.inv Z pM pN
+  have hM := Scheme.Modules.restrictFunctorIsoPullback_inv_unit_app_apply
+    U.ι M U x
+  have hN := Scheme.Modules.restrictFunctorIsoPullback_inv_unit_app_apply
+    U.ι N U y
+  have hcomp := restrictMonoidalTensorIso_hom U.ι M N
+  dsimp only at hT hδ hM hN
+  change eT.hom.val.app (.op Z) rT =
+    ((Scheme.Modules.pullbackPushforwardAdjunction U.ι).unit.app
+      (M ⊗ N)).val.app (.op U) (tensorSection M N U x y) at hT
+  change
+    (Functor.OplaxMonoidal.δ PB M N).val.app (.op Z)
+        (((Scheme.Modules.pullbackPushforwardAdjunction U.ι).unit.app
+          (M ⊗ N)).val.app (.op U) (tensorSection M N U x y)) =
+      tensorSection (PB.obj M) (PB.obj N) Z pM pN at hδ
+  change eM.inv.val.app (.op Z) pM =
+    ((Scheme.Modules.restrictAdjunction U.ι).unit.app M).val.app
+      (.op U) x at hM
+  change eN.inv.val.app (.op Z) pN =
+    ((Scheme.Modules.restrictAdjunction U.ι).unit.app N).val.app
+      (.op U) y at hN
+  change
+    (eM.inv ⊗ₘ eN.inv).val.app (.op Z)
+        (tensorSection (PB.obj M) (PB.obj N) Z pM pN) =
+      tensorSection (F.obj M) (F.obj N) Z
+        (eM.inv.val.app (.op Z) pM) (eN.inv.val.app (.op Z) pN) at hmap
+  dsimp only at hcomp
+  have hcompApply := congrArg (fun q => q.val.app (.op Z) rT) hcomp
+  conv_rhs at hcompApply =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply, SheafOfModules.comp_val,
+      PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  have hpullback :
+      (restrictMonoidalTensorIso U.ι M N).hom.val.app (.op Z) rT =
+        (eM.inv ⊗ₘ eN.inv).val.app (.op Z)
+          (tensorSection (PB.obj M) (PB.obj N) Z pM pN) := by
+    calc
+      _ = (eM.inv ⊗ₘ eN.inv).val.app (.op Z)
+          ((Functor.OplaxMonoidal.δ PB M N).val.app (.op Z)
+            (eT.hom.val.app (.op Z) rT)) := hcompApply
+      _ = (eM.inv ⊗ₘ eN.inv).val.app (.op Z)
+          ((Functor.OplaxMonoidal.δ PB M N).val.app (.op Z)
+            (((Scheme.Modules.pullbackPushforwardAdjunction U.ι).unit.app
+              (M ⊗ N)).val.app (.op U) (tensorSection M N U x y))) := by
+        rw [hT]
+      _ = (eM.inv ⊗ₘ eN.inv).val.app (.op Z)
+          (tensorSection (PB.obj M) (PB.obj N) Z pM pN) := by
+        rw [hδ]
+  have hrestrict :
+      (eM.inv ⊗ₘ eN.inv).val.app (.op Z)
+          (tensorSection (PB.obj M) (PB.obj N) Z pM pN) =
+        tensorSection (F.obj M) (F.obj N) Z
+          (((Scheme.Modules.restrictAdjunction U.ι).unit.app M).val.app
+            (.op U) x)
+          (((Scheme.Modules.restrictAdjunction U.ι).unit.app N).val.app
+            (.op U) y) := by
+    rw [hmap, hM, hN]
+  exact hpullback.trans hrestrict
+
+/-- The canonical restriction tensor comparison sends a local pure tensor to
+the pure tensor of the corresponding restricted local sections. -/
+theorem restrictMonoidalTensorIso_localModuleSection
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (x : Γ(M, U)) (y : Γ(N, U)) :
+    let Z := U.ι ⁻¹ᵁ U
+    let F := Scheme.Modules.restrictFunctor U.ι
+    let P : X.Modules := M ⊗ N
+    (restrictMonoidalTensorIso U.ι M N).hom.val.app (.op Z)
+        (((Scheme.Modules.overFunctorEquiv U).app P).hom.val.app
+          (.op Z)
+          (Scheme.Modules.localModuleSection P U Z
+            (tensorSection M N U x y))) =
+      tensorSection (F.obj M) (F.obj N) Z
+        (((Scheme.Modules.overFunctorEquiv U).app M).hom.val.app (.op Z)
+          (Scheme.Modules.localModuleSection M U Z x))
+        (((Scheme.Modules.overFunctorEquiv U).app N).hom.val.app (.op Z)
+          (Scheme.Modules.localModuleSection N U Z y)) := by
+  dsimp only
+  rw [Scheme.Modules.overFunctorEquiv_hom_localModuleSection_preimageT
+      (M ⊗ N) U (tensorSection M N U x y),
+    Scheme.Modules.overFunctorEquiv_hom_localModuleSection_preimageT M U x,
+    Scheme.Modules.overFunctorEquiv_hom_localModuleSection_preimageT N U y]
+  exact restrictMonoidalTensorIso_restrictUnit_tensorSection M N U x y
+
+end ModularCurves
