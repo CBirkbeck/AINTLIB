@@ -3,6 +3,8 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
+import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
 
 /-!
@@ -144,6 +146,35 @@ theorem exists_preimage_coordinateHyperplaneTwistOrderedBaseCechDifferential_zer
     simpa only [ModuleCat.hom_comp, LinearMap.coe_comp, Function.comp_apply] using h
   rw [← h']
   simpa using ht
+
+/-- The explicit standard-coordinate ordered Cech complex for a nonnegative projective twist is
+exact in degree one. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechComplex_exactAt_one
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (hd : 0 ≤ d) :
+    (coordinateHyperplaneTwistOrderedBaseCechComplex
+      (R := R) j d).ExactAt 1 := by
+  rw [HomologicalComplex.exactAt_iff' _ 0 1 2 (by simp) (by simp)]
+  rw [ShortComplex.moduleCat_exact_iff]
+  intro s hs
+  change (coordinateHyperplaneTwistOrderedBaseCechDifferential
+    (R := R) (σ := σ) d 1).hom s = 0 at hs
+  change ∃ t, (coordinateHyperplaneTwistOrderedBaseCechDifferential
+    (R := R) (σ := σ) d 0).hom t = s
+  exact exists_preimage_coordinateHyperplaneTwistOrderedBaseCechDifferential_zero
+    (R := R) (σ := σ) j d hd s hs
+
+/-- The native ordered Cech complex of a nonnegative coordinate-hyperplane twist is exact in
+degree one. -/
+theorem coordinateHyperplaneTwist_orderedBaseCechComplex_exactAt_one
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (hd : 0 ≤ d) :
+    (Scheme.Modules.orderedBaseCechComplex
+      (homogeneousProjπ (R := R) (σ := σ))
+      (coordinateHyperplaneTwist (R := R) j d)
+      (coordinateOpenCover (R := R) (σ := σ))).ExactAt 1 := by
+  exact (coordinateHyperplaneTwistOrderedBaseCechComplex_exactAt_one
+    (R := R) (σ := σ) j d hd).of_iso
+      (coordinateHyperplaneTwistOrderedBaseCechComplexIso
+        (R := R) j d).symm
 
 end
 
