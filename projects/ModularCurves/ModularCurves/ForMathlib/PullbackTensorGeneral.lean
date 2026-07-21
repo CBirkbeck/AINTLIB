@@ -429,6 +429,64 @@ theorem pullback_δ_unit_tmul
   dsimp only
   exact pushforwardFactored_map_pullback_δ_unit_tmul φ P Q V x y
 
+/-- After module sheafification, the doctrinal presheaf-pullback tensor comparison
+sends the sheafification-unit image of an adjunction-unit pure tensor to the
+sheafification-unit image of the pure tensor of the two unit images. -/
+theorem sheafification_map_pullback_δ_unit_tmul
+    {K : GrothendieckTopology D}
+    [K.WEqualsLocallyBijective AddCommGrpCat.{u}]
+    [HasWeakSheafify K AddCommGrpCat.{u}]
+    (hR : Presheaf.IsSheaf K (R ⋙ forget₂ CommRingCat RingCat))
+    [(pushforward.{u} φ).IsRightAdjoint]
+    (P Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
+    (V : Cᵒᵖ) (x : P.obj V) (y : Q.obj V) :
+    let PB := pullback.{u} φ
+    let Rsh : Sheaf K RingCat.{u} := ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩
+    let L := sheafification.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+    let adj := pullbackPushforwardFactoredAdjunction φ
+    let shAdj := sheafificationAdjunction.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+    letI : (pushforwardFactored φ).LaxMonoidal :=
+      pushforwardFactoredLaxMonoidal φ
+    letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+    ((L.map (Functor.OplaxMonoidal.δ PB P Q)).val.app (F.op.obj V))
+        ((shAdj.unit.app (PB.obj (P ⊗ Q))).app (F.op.obj V)
+          (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+            (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) =
+      (shAdj.unit.app (PB.obj P ⊗ PB.obj Q)).app (F.op.obj V)
+        ((show (PB.obj P).obj (F.op.obj V) from
+            (adj.unit.app P).app V x) ⊗ₜ
+          (show (PB.obj Q).obj (F.op.obj V) from
+            (adj.unit.app Q).app V y)) := by
+  dsimp only
+  let PB := pullback.{u} φ
+  let Rsh : Sheaf K RingCat.{u} := ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩
+  let L := sheafification.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+  let adj := pullbackPushforwardFactoredAdjunction φ
+  let shAdj := sheafificationAdjunction.{u} (R₀ := Rsh.obj) (𝟙 Rsh.obj)
+  letI : (pushforwardFactored φ).LaxMonoidal :=
+    pushforwardFactoredLaxMonoidal φ
+  letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+  have hδ := pullback_δ_unit_tmul φ P Q V x y
+  dsimp only at hδ
+  have hnat := shAdj.unit.naturality (Functor.OplaxMonoidal.δ PB P Q)
+  have happ := congrArg
+    (fun q => q.app (F.op.obj V)
+      (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+        (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) hnat
+  conv_lhs at happ => erw [comp_app, ModuleCat.comp_apply]
+  conv_rhs at happ => erw [comp_app, ModuleCat.comp_apply]
+  change
+    (shAdj.unit.app (PB.obj P ⊗ PB.obj Q)).app (F.op.obj V)
+        ((Functor.OplaxMonoidal.δ PB P Q).app (F.op.obj V)
+          (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+            (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) =
+      ((L.map (Functor.OplaxMonoidal.δ PB P Q)).val.app (F.op.obj V))
+        ((shAdj.unit.app (PB.obj (P ⊗ Q))).app (F.op.obj V)
+          (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+            (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y))) at happ
+  exact happ.symm.trans (congrArg
+    (fun z => (shAdj.unit.app (PB.obj P ⊗ PB.obj Q)).app (F.op.obj V) z) hδ)
+
 /-- **[D-PresPB′-general], leaves B1+B2 (fused milestone).** The presheaf pullback along an
 arbitrary ring comparison carries an oplax monoidal structure: transport the
 pullback–pushforward adjunction to the factored spelling of the pushforward
