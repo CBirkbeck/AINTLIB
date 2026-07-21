@@ -1428,6 +1428,38 @@ noncomputable local instance pullbackTensorSheafPushforwardIsRightAdjoint
   change (Scheme.Modules.pushforward f).IsRightAdjoint
   infer_instance
 
+/-- The inverse of the canonical comparison from sheafification of the underlying
+presheaf to a sheaf is the sheafification-adjunction unit on sections. -/
+theorem sheafifyValIso_inv_app_apply
+    (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
+    (sheafifyValIso M).inv.val.app (.op U) x =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 X.ringCatSheaf.obj)).unit.app M.val).app (.op U) x := by
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let c := sheafifyValIso M
+  have htri := adj.right_triangle_components M
+  change adj.unit.app M.val ≫ c.hom.val = 𝟙 M.val at htri
+  have htriApply := congrArg (fun q => q.app (.op U) x) htri
+  conv_lhs at htriApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  change c.hom.val.app (.op U)
+      ((adj.unit.app M.val).app (.op U) x) = x at htriApply
+  have hcancel := congrArg (fun q => q.val.app (.op U) x) c.inv_hom_id
+  conv_lhs at hcancel =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  change c.hom.val.app (.op U) (c.inv.val.app (.op U) x) = x at hcancel
+  have hinj : Function.Injective (c.hom.val.app (.op U)) := by
+    apply Function.LeftInverse.injective
+    intro y
+    have hleft := congrArg (fun q => q.val.app (.op U) y) c.hom_inv_id
+    conv_lhs at hleft =>
+      erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+        ModuleCat.comp_apply]
+    exact hleft
+  exact hinj (hcancel.trans htriApply.symm)
+
 /-- The canonical presentation of sheaf pullback as sheafified presheaf pullback sends
 the pullback-adjunction unit of a section to the sheafification-unit image of the
 corresponding presheaf-pullback-adjunction unit. -/
