@@ -2981,6 +2981,15 @@ theorem overTrivializationSection_add {X : Scheme.{u}} (M : X.Modules)
   exact (e.inv.val.app (.op (Over.mk (𝟙 U)))).hom.map_add r s
 
 @[simp]
+theorem overTrivializationSection_smul {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (a b : Γ(X, U)) :
+    a • overTrivializationSection M U e b =
+      overTrivializationSection M U e (a * b) := by
+  exact ((e.inv.val.app (.op (Over.mk (𝟙 U)))).hom.map_smul a b).symm
+
+@[simp]
 theorem overTrivializationSection_zero {X : Scheme.{u}} (M : X.Modules)
     (U : X.Opens)
     (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
