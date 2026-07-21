@@ -965,6 +965,163 @@ theorem coordinateOpenCechIntersectionBaseLaurentLinearEquiv_naturality_delete_z
     (AddMonoidAlgebra.mapRingHom_comp_mapDomainRingHom e.toRingHom
       (coordinateLaurentExponentDeleteZeroAddMonoidHom a)) y
 
+/-- The first transition power remains the corresponding single Laurent monomial after extending
+coefficients to global sections of the affine base. -/
+theorem coordinateOpenCechFirstTransition_zpow_baseLaurent
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ) :
+    coordinateOpenCechIntersectionBaseLaurentRingEquiv (R := R) a.1
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+            (R := R) a)).op
+          ((coordinateOpenTransitionUnit
+              (R := R) (a.1 0).down (a.1 1).down ^ d :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down))) =
+      AddMonoidAlgebra.single
+        (coordinateOpenCechFirstTransitionExponent (n := n) a d) 1 := by
+  let e := (Scheme.ΓSpecIso
+    (CommRingCat.of R)).commRingCatIsoToRingEquiv.symm
+  change AddMonoidAlgebra.mapRingEquiv _ e
+      (coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a.1
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenCechIntersection_le_firstOverlap
+            (R := R) a)).op
+          ((coordinateOpenTransitionUnit
+              (R := R) (a.1 0).down (a.1 1).down ^ d :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)ˣ) :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) (a.1 0).down (a.1 1).down)))) = _
+  rw [coordinateOpenCechFirstTransition_zpow_laurent,
+    AddMonoidAlgebra.mapRingEquiv_single, map_one]
+
+/-- In affine-base Laurent coordinates, the first transition endomorphism is multiplication by
+the single monomial carrying its transition exponent. -/
+theorem coordinateOpenCechFirstTransitionFactorEnd_apply_baseLaurent
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ)
+    (x : Scheme.Modules.baseCechFactor
+      (homogeneousProjπ (R := R) (σ := σ))
+      (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+      (coordinateOpenCover (R := R) (σ := σ)) (n + 1) a.1) :
+    coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a.1
+        (coordinateOpenCechFirstTransitionFactorEnd (R := R) a d x) =
+      coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a.1 x *
+        AddMonoidAlgebra.single
+          (coordinateOpenCechFirstTransitionExponent (n := n) a d) 1 := by
+  rw [coordinateOpenCechFirstTransitionFactorEnd_apply_laurent,
+    coordinateOpenCechFirstTransition_zpow_baseLaurent]
+
+/-- The exceptional first coface is first-anchor restriction followed by multiplication by the
+transition monomial in affine-base Laurent coordinates. -/
+theorem coordinateOpenCechFirstCoface_apply_baseLaurent
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ)
+    (x : Scheme.Modules.baseCechFactor
+      (homogeneousProjπ (R := R) (σ := σ))
+      (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+      (coordinateOpenCover (R := R) (σ := σ)) n (a.delete 0).1) :
+    coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a.1
+        (coordinateOpenCechFirstTransitionFactorEnd (R := R) a d
+          ((Scheme.Modules.baseModulePresheaf
+            (homogeneousProjπ (R := R) (σ := σ))
+            (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+              (coordinateOpenCechDelete (R := R) a 0).op x)) =
+      AddMonoidAlgebra.mapDomain
+          (coordinateLaurentExponentDeleteZeroAddMonoidHom a)
+          (coordinateOpenCechIntersectionBaseLaurentLinearEquiv
+            (R := R) (a.delete 0).1 x) *
+        AddMonoidAlgebra.single
+          (coordinateOpenCechFirstTransitionExponent (n := n) a d) 1 := by
+  rw [coordinateOpenCechFirstTransitionFactorEnd_apply_baseLaurent,
+    coordinateOpenCechIntersectionBaseLaurentLinearEquiv_naturality_delete_zero]
+
+/-- After reindexing by global homogeneous weights, the first coface is the same weight-preserving
+deletion map as every other coface: the transition monomial exactly corrects the anchor change. -/
+theorem
+    coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_naturality_delete_zero
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ)
+    (x : Scheme.Modules.baseCechFactor
+      (homogeneousProjπ (R := R) (σ := σ))
+      (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+      (coordinateOpenCover (R := R) (σ := σ)) n (a.delete 0).1) :
+    coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
+        (R := R) a.1 d
+        (coordinateOpenCechFirstTransitionFactorEnd (R := R) a d
+          ((Scheme.Modules.baseModulePresheaf
+            (homogeneousProjπ (R := R) (σ := σ))
+            (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+              (coordinateOpenCechDelete (R := R) a 0).op x)) =
+      coordinateHomogeneousLaurentDeleteLinearMap (R := R) a 0 d
+        (coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
+          (R := R) (a.delete 0).1 d x) := by
+  let S := Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+  let y := coordinateOpenCechIntersectionBaseLaurentLinearEquiv
+    (R := R) (a.delete 0).1 x
+  change AddMonoidAlgebra.mapDomainLinearEquiv S S
+      (coordinateLaurentExponentEquiv (fun l => (a.1 l).down) d)
+      (coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a.1
+        (coordinateOpenCechFirstTransitionFactorEnd (R := R) a d
+          ((Scheme.Modules.baseModulePresheaf
+            (homogeneousProjπ (R := R) (σ := σ))
+            (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+              (coordinateOpenCechDelete (R := R) a 0).op x))) =
+    AddMonoidAlgebra.mapDomainLinearMap S S
+      (coordinateLaurentExponentDeleteEmbedding a 0 d)
+      (AddMonoidAlgebra.mapDomainLinearEquiv S S
+        (coordinateLaurentExponentEquiv
+          (fun l => ((a.delete 0).1 l).down) d) y)
+  rw [coordinateOpenCechFirstCoface_apply_baseLaurent]
+  change AddMonoidAlgebra.mapDomainLinearEquiv S S
+      (coordinateLaurentExponentEquiv (fun l => (a.1 l).down) d)
+      (AddMonoidAlgebra.mapDomain
+          (coordinateLaurentExponentDeleteZeroAddMonoidHom a) y *
+        AddMonoidAlgebra.single
+          (coordinateOpenCechFirstTransitionExponent (n := n) a d) 1) = _
+  induction y using AddMonoidAlgebra.induction_linear with
+  | zero => simp
+  | add x y hx hy =>
+      simp only [AddMonoidAlgebra.mapDomain_add, add_mul, map_add, hx, hy]
+  | single e r =>
+      simp only [AddMonoidAlgebra.mapDomain_single,
+        AddMonoidAlgebra.single_mul_single, mul_one,
+        AddMonoidAlgebra.mapDomainLinearEquiv_single,
+        AddMonoidAlgebra.mapDomainLinearMap_single]
+      rw [coordinateLaurentExponentEquiv_delete_zero_add_transition]
+
+/-- On a Laurent basis vector, the exceptional first coface preserves its global homogeneous
+weight after the anchor-transition correction. -/
+theorem
+    coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_basis_naturality_delete_zero
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1)) (d : ℤ)
+    (e : laurentExponentSubmonoid
+      (coordinateTailExponent (fun l => ((a.delete 0).1 l).down)))
+    (r : Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))) :
+    coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv
+        (R := R) a.1 d
+        (coordinateOpenCechFirstTransitionFactorEnd (R := R) a d
+          ((Scheme.Modules.baseModulePresheaf
+            (homogeneousProjπ (R := R) (σ := σ))
+            (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+              (coordinateOpenCechDelete (R := R) a 0).op
+            ((coordinateOpenCechIntersectionBaseLaurentLinearEquiv
+              (R := R) (a.delete 0).1).symm
+              (AddMonoidAlgebra.single e r)))) =
+      AddMonoidAlgebra.single
+        (coordinateLaurentExponentDeleteEmbedding a 0 d
+          (coordinateLaurentExponentEquiv
+            (fun l => ((a.delete 0).1 l).down) d e)) r := by
+  rw [coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_naturality_delete_zero
+    (R := R) a d]
+  rw [coordinateOpenCechIntersectionBaseHomogeneousLaurentLinearEquiv_basis_apply]
+  exact coordinateHomogeneousLaurentDeleteLinearMap_single
+    (R := R) a 0 d _ r
+
 
 end
 
