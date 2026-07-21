@@ -30,6 +30,43 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 local instance : DecidableEq σ := Classical.decEq σ
 
+/-- For fixed total degree and finitely many coordinates, there are only finitely many homogeneous
+Laurent exponents that are negative in every coordinate. -/
+theorem HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
+    [Fintype σ] (d : ℤ) :
+    {e : HomogeneousLaurentExponent σ d |
+      e.liftedNegativeSupport = Set.univ}.Finite := by
+  classical
+  apply Set.Finite.of_finite_image
+      (f := fun e : HomogeneousLaurentExponent σ d => (e.1 : σ → ℤ))
+  · apply (Set.Finite.pi' fun _ => Set.finite_Icc d (-1)).subset
+    rintro f ⟨e, he, rfl⟩
+    intro i
+    have hneg (j : σ) : e.1 j < 0 := by
+      have hj : ULift.up j ∈ e.liftedNegativeSupport := by
+        rw [he]
+        exact Set.mem_univ _
+      exact hj
+    have hrest : ∑ j ∈ Finset.univ.erase i, e.1 j ≤ 0 := by
+      apply Finset.sum_nonpos
+      intro j _
+      exact (hneg j).le
+    have hsum : ∑ j, e.1 j = d := by
+      rw [← Finsupp.degree_eq_sum]
+      exact e.2
+    have hi : i ∈ (Finset.univ : Finset σ) := Finset.mem_univ i
+    have hsplit := Finset.sum_erase_add (Finset.univ : Finset σ)
+      (fun j => e.1 j) hi
+    simp only [Set.mem_Icc]
+    constructor
+    · omega
+    · have := hneg i
+      omega
+  · intro e _ f _ hef
+    apply Subtype.ext
+    ext i
+    exact congrFun hef i
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation of the ordered Cech
 complex for a nonnegative projective twist is a boundary. -/
 theorem exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
