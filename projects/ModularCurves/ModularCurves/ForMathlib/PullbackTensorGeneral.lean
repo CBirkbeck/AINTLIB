@@ -360,6 +360,52 @@ lemma pushforwardFactored_μ_app_tmul
       (x ⊗ₜ y : ((pushforwardFactored φ).obj (M ⊗ N)).obj V) :=
   rfl
 
+/-- After applying the factored pushforward, the doctrinal pullback tensor comparison
+sends the adjunction-unit image of a pure tensor to the pure tensor of the two
+adjunction-unit images. -/
+theorem pushforwardFactored_map_pullback_δ_unit_tmul
+    [(pushforward.{u} φ).IsRightAdjoint]
+    (P Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
+    (V : Cᵒᵖ) (x : P.obj V) (y : Q.obj V) :
+    let PB := pullback.{u} φ
+    let PF := pushforwardFactored φ
+    let adj := pullbackPushforwardFactoredAdjunction φ
+    letI : PF.LaxMonoidal := pushforwardFactoredLaxMonoidal φ
+    letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+    ((PF.map (Functor.OplaxMonoidal.δ PB P Q)).app V)
+        ((adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y)) =
+      ((adj.unit.app P).app V x ⊗ₜ (adj.unit.app Q).app V y :
+        (PF.obj (PB.obj P ⊗ PB.obj Q)).obj V) := by
+  dsimp only
+  let PB := pullback.{u} φ
+  let PF := pushforwardFactored φ
+  let adj := pullbackPushforwardFactoredAdjunction φ
+  letI : PF.LaxMonoidal := pushforwardFactoredLaxMonoidal φ
+  letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+  letI : adj.IsMonoidal := inferInstance
+  have h := adj.unit_app_tensor_comp_map_δ P Q
+  have hV :
+      (adj.unit.app (P ⊗ Q)).app V ≫
+          ((PF.map (Functor.OplaxMonoidal.δ PB P Q)).app V) =
+        ((adj.unit.app P ⊗ₘ adj.unit.app Q).app V) ≫
+          ((Functor.LaxMonoidal.μ PF (PB.obj P) (PB.obj Q)).app V) := by
+    simpa only [comp_app] using congrArg (fun a => a.app V) h
+  have happ := congrArg (fun k => k (x ⊗ₜ y)) hV
+  change
+    ((PF.map (Functor.OplaxMonoidal.δ PB P Q)).app V)
+        ((adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y)) =
+      ((Functor.LaxMonoidal.μ PF (PB.obj P) (PB.obj Q)).app V)
+        ((adj.unit.app P ⊗ₘ adj.unit.app Q).app V (x ⊗ₜ y)) at happ
+  have htensor :
+      (adj.unit.app P ⊗ₘ adj.unit.app Q).app V (x ⊗ₜ y) =
+        ((adj.unit.app P).app V x ⊗ₜ (adj.unit.app Q).app V y :
+          (PF.obj (PB.obj P) ⊗ PF.obj (PB.obj Q)).obj V) :=
+    ModuleCat.MonoidalCategory.tensorHom_tmul
+      ((adj.unit.app P).app V) ((adj.unit.app Q).app V) x y
+  rw [htensor] at happ
+  rw [pushforwardFactored_μ_app_tmul] at happ
+  exact happ
+
 /-- **[D-PresPB′-general], leaves B1+B2 (fused milestone).** The presheaf pullback along an
 arbitrary ring comparison carries an oplax monoidal structure: transport the
 pullback–pushforward adjunction to the factored spelling of the pushforward
