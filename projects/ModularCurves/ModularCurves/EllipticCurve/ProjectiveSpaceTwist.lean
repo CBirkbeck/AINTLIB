@@ -1921,6 +1921,27 @@ lemma coordinateHyperplaneIdealModulePower_succ (j : σ) (n : ℕ) :
         ModularCurves.idealModule (coordinateHyperplaneι (R := R) j) :=
   rfl
 
+/-- The factorwise evaluation pairing `O(-n) ⊗ O(n) ⟶ O` for the concrete
+coordinate-hyperplane twists. -/
+noncomputable def coordinateHyperplanePowerPairing (j : σ) :
+    ∀ n : ℕ,
+      coordinateHyperplaneIdealModulePower (R := R) j n ⊗
+          coordinateHyperplanePoleSheafPower (R := R) j n ⟶
+        Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R))
+  | 0 =>
+      ((ModularCurves.monoidalUnitObjIso
+          (Proj (homogeneousSubmodule σ R))).hom ⊗ₘ
+        (ModularCurves.monoidalUnitObjIso
+          (Proj (homogeneousSubmodule σ R))).hom) ≫
+        (ModularCurves.unitObjTensorIso
+          (Proj (homogeneousSubmodule σ R))).hom
+  | n + 1 =>
+      ModularCurves.tensorPairing
+        (coordinateHyperplanePowerPairing j n)
+        (ModularCurves.dualPairing
+          (ModularCurves.idealModule
+            (coordinateHyperplaneι (R := R) j)))
+
 /-- A frame of `O(-1)` on an open induces compatible frames of all its
 nonnegative powers on that open. -/
 noncomputable def coordinateHyperplaneIdealModulePowerTrivializationOf
