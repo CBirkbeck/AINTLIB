@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.Modules.Tilde
+import Mathlib.LinearAlgebra.Dimension.Finite
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
@@ -113,6 +114,36 @@ theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_finite
   refine ⟨⨆ i, n i, fun i ↦ f ^ ((⨆ i, n i) - n i) • t i, fun i ↦ ?_⟩
   rw [M.map_smul_Spec, ht i, ← mul_smul, ← pow_add,
     Nat.sub_add_cancel (hle i)]
+
+/-- A quasicoherent module on an affine spectrum with finitely many global generators has a
+finite module of global sections. -/
+theorem Modules.globalSections_module_finite_of_generatingSections
+    (M : (Spec R).Modules) [M.IsQuasicoherent]
+    (G : M.GeneratingSections) [G.IsFiniteType] :
+    Module.Finite R Γ(M, ⊤) := by
+  haveI : Finite G.I :=
+    SheafOfModules.GeneratingSections.IsFiniteType.finite
+  let f : SheafOfModules.free G.I ⟶ M := G.π
+  letI : Epi f := G.epi
+  haveI : Module.Finite R (G.I →₀ R) :=
+    Module.finite_finsupp_self_iff.mpr (.inr inferInstance)
+  letI : (SheafOfModules.free G.I (R := (Spec R).ringCatSheaf)).IsQuasicoherent :=
+    (SheafOfModules.isQuasicoherent (Spec R).ringCatSheaf).prop_of_iso
+      (tildeFinsupp G.I) (by infer_instance)
+  let e : ModuleCat.of R (G.I →₀ R) ≅
+      moduleSpecΓFunctor.obj (SheafOfModules.free G.I) :=
+    tilde.isoTop (ModuleCat.of R (G.I →₀ R)) ≪≫
+      moduleSpecΓFunctor.mapIso (tildeFinsupp G.I)
+  haveI : Module.Finite R
+      (moduleSpecΓFunctor.obj (SheafOfModules.free G.I)) :=
+    Module.Finite.equiv e.toLinearEquiv
+  have hf : Epi f := inferInstance
+  have hsurj : Function.Surjective (moduleSpecΓFunctor.map f).hom := by
+    have h := @Modules.isQuasicoherent_spec_surjective_of_epi R
+      (SheafOfModules.free G.I) M f inferInstance inferInstance hf
+    exact h
+  exact Module.Finite.of_surjective
+    (moduleSpecΓFunctor.map f).hom hsurj
 
 namespace Modules
 
