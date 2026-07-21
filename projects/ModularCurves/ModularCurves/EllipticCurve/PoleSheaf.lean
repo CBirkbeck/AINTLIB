@@ -3419,6 +3419,85 @@ private theorem overTrivializationCoefficient_eq_local_of_overIso
   have hnat := PresheafOfModules.naturality_apply e.hom.val k.op mU
   exact hnat.symm
 
+/-- If a morphism from the structure module is multiplication by `r` in an over-site
+trivialization, then the affine local coordinate of its value at `1` is `r`. -/
+theorem localTrivializationTopSection_unitHom_apply_one
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (f : Scheme.Modules.unitObj X ⟶ M)
+    (e : M.over U.1 ≅ SheafOfModules.unit (X.ringCatSheaf.over U.1))
+    (r : Γ(X, U.1))
+    (h : f.over U.1 ≫ e.hom =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U.1 r) :
+    localTrivializationTopSection M U
+        (restrictTrivializationOfOverIso M U.1 e)
+        (f.val.app (.op ⊤) (show X.presheaf.obj (.op ⊤) from 1)) =
+      affineOpenTopSection U r := by
+  let m := f.val.app (.op ⊤) (show X.presheaf.obj (.op ⊤) from 1)
+  have hcoeffOver : overTrivializationCoefficient M U.1 e m = r := by
+    unfold overTrivializationCoefficient
+    have hnat := PresheafOfModules.naturality_apply f.val
+      (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op
+      (show X.presheaf.obj (.op ⊤) from 1)
+    let oneU : (Scheme.Modules.unitObj X).val.obj (.op U.1) :=
+      show X.presheaf.obj (.op U.1) from 1
+    have honeRestrict :
+        (Scheme.Modules.unitObj X).presheaf.map
+            (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op
+            (show X.presheaf.obj (.op ⊤) from 1) = oneU := by
+      change X.presheaf.map (homOfLE le_top).op 1 = 1
+      exact map_one _
+    have hnat' : f.val.app (.op U.1) oneU =
+        M.presheaf.map (homOfLE le_top).op m := by
+      exact (congrArg (fun a ↦ f.val.app (.op U.1) a)
+        honeRestrict.symm).trans hnat
+    have happ := congrArg
+      (fun q ↦ q.val.app (.op (Over.mk (𝟙 U.1)))) h
+    let oneRing : X.ringCatSheaf.obj.obj (.op U.1) := by
+      change X.presheaf.obj (.op U.1)
+      exact 1
+    have hone := ConcreteCategory.congr_hom happ
+      oneRing
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply] at hone
+    erw [SheafOfModules.overUnitScalarEnd_app_apply] at hone
+    have hover :
+        (f.over U.1).val.app (.op (Over.mk (𝟙 U.1))) oneRing =
+          f.val.app (.op U.1) oneU := by
+      rfl
+    let rRing : X.ringCatSheaf.obj.obj (.op U.1) := by
+      change X.presheaf.obj (.op U.1)
+      exact r
+    have hrOver : X.ringCatSheaf.obj.map
+        (Opposite.unop (.op (Over.mk (𝟙 U.1)))).hom.op r = rRing := by
+      rw [Subsingleton.elim
+        (Opposite.unop (.op (Over.mk (𝟙 U.1)))).hom.op
+        (𝟙 (Opposite.op U.1))]
+      have hr' := ConcreteCategory.congr_hom
+        (X.ringCatSheaf.obj.map_id (.op U.1)) r
+      exact hr'.trans rfl
+    have hone' : e.hom.val.app (.op (Over.mk (𝟙 U.1)))
+        (f.val.app (.op U.1) oneU) = r := by
+      rw [hrOver] at hone
+      have honeMul : oneRing * rRing = rRing := by
+        change (1 : X.presheaf.obj (.op U.1)) * r = r
+        exact one_mul r
+      change e.hom.val.app (.op (Over.mk (𝟙 U.1)))
+          ((f.over U.1).val.app (.op (Over.mk (𝟙 U.1))) oneRing) =
+        oneRing * rRing at hone
+      rw [honeMul] at hone
+      have hlocal := (congrArg
+        (fun a ↦ e.hom.val.app (.op (Over.mk (𝟙 U.1))) a)
+        hover.symm).trans hone
+      exact hlocal
+    exact (congrArg (fun a ↦ e.hom.val.app (.op (Over.mk (𝟙 U.1))) a)
+      hnat'.symm).trans hone'
+  have hcoeffLocal :
+      localTrivializationCoefficient M U
+          (restrictTrivializationOfOverIso M U.1 e) m = r :=
+    (overTrivializationCoefficient_eq_local_of_overIso M U e m).symm.trans hcoeffOver
+  have htop := congrArg (affineOpenTopSection U) hcoeffLocal
+  exact (affineOpenTopSection_ambientSection U _).symm.trans htop
+
 /-- The over-site coefficient associated to an affine-open trivialization is the
 same as the coefficient obtained directly on the open subscheme. -/
 theorem overTrivializationCoefficient_overTrivializationOfRestrictIso
