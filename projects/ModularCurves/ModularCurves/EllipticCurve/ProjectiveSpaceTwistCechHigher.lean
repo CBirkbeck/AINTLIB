@@ -104,6 +104,49 @@ theorem coordinateHomogeneousLaurentFullNegativeCochain.module_finite
     ModularCurves.OrderedCechSupportCochain.module_finite _ _ _
   infer_instance
 
+/-- Assemble the finitely many full-negative homogeneous Laurent weights into the ordered Cech
+term. -/
+noncomputable def coordinateHomogeneousLaurentFullNegativeAssembly
+    [Fintype σ] [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d n →ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      coordinateHomogeneousLaurentOrderedCechObject
+        (R := R) (σ := σ) d n := by
+  classical
+  letI : Fintype {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))} :=
+    (HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
+      (σ := σ) d).fintype
+  exact LinearMap.lsum
+    Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+    (fun e : {e : HomogeneousLaurentExponent σ d //
+        e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))} =>
+      ModularCurves.OrderedCechSupportCochain
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        e.1.liftedNegativeSupport n)
+    Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+    (fun e => coordinateHomogeneousLaurentWeightInclusion
+      (R := R) d e.1 n)
+
+/-- Full-negative assembly is the finite sum of the fixed-weight inclusions. -/
+theorem coordinateHomogeneousLaurentFullNegativeAssembly_apply
+    [Fintype σ] [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (s : coordinateHomogeneousLaurentFullNegativeCochain
+      (R := R) (σ := σ) d n) :
+    letI : Fintype {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))} :=
+    (HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
+      (σ := σ) d).fintype
+    coordinateHomogeneousLaurentFullNegativeAssembly
+        (R := R) (σ := σ) d n s =
+      ∑ e : {e : HomogeneousLaurentExponent σ d //
+          e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))},
+        coordinateHomogeneousLaurentWeightInclusion
+          (R := R) d e.1 n (s e) := by
+  classical
+  simp [coordinateHomogeneousLaurentFullNegativeAssembly, LinearMap.lsum_apply]
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation is a boundary modulo
 the active weights that are negative in every coordinate. -/
 theorem exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentCocycle
