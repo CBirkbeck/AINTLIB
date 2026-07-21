@@ -786,6 +786,24 @@ theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffineOpen
     exact congrArg (fun z : Γ(X, X.basicOpen f) ↦ z • s) hscalar
   exact hleft.trans ((congrArg eBasic.hom ht).trans hright)
 
+/-- Finitely many sections on an intrinsic basic open of an affine open extend to the affine
+open after multiplication by one common power of the restricted function. -/
+theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_finite_of_isAffineOpen
+    (M : X.Modules) [M.IsQuasicoherent]
+    (U : X.affineOpens) (f : Γ(X, U.1)) {I : Type*} [Finite I]
+    (s : I → Γ(M, X.basicOpen f)) :
+    ∃ (n : ℕ) (t : I → Γ(M, U.1)), ∀ i,
+      M.presheaf.map (homOfLE (X.basicOpen_le f)).op (t i) =
+        X.presheaf.map (homOfLE (X.basicOpen_le f)).op (f ^ n) • s i := by
+  choose n t ht using fun i ↦
+    Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffineOpen
+      M U f (s i)
+  have hle (i : I) : n i ≤ ⨆ i, n i :=
+    le_ciSup (Finite.bddAbove_range n) i
+  refine ⟨⨆ i, n i, fun i ↦ f ^ ((⨆ i, n i) - n i) • t i, fun i ↦ ?_⟩
+  rw [M.map_smul, ht i, ← mul_smul, ← map_mul, ← pow_add,
+    Nat.sub_add_cancel (hle i)]
+
 /-- On an affine scheme, finitely many sections of a quasicoherent module over `D(f)` extend
 globally after multiplication by one common power of the restriction of `f`. -/
 theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_finite_of_isAffine
