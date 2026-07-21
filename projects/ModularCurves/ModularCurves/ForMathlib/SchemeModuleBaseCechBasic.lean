@@ -67,6 +67,74 @@ instance baseModulePresheafFunctor_preservesZeroMorphisms
     ext U x
     rfl
 
+/-- Base-linear sections of a restricted module agree with the corresponding sections on the
+image open. -/
+noncomputable def baseModulePresheafRestrictAppIso
+    {Y S Z : Scheme.{u}} (π : Y ⟶ S) (f : Z ⟶ Y) [IsOpenImmersion f]
+    (M : Y.Modules) (U : Z.Opens) :
+    (baseModulePresheaf (f ≫ π) (M.restrict f)).obj (op U) ≅
+      (baseModulePresheaf π M).obj (op (f ''ᵁ U)) := by
+  refine ModuleCat.isoMk (M.restrictAppIso f U) ?_
+  intro r
+  ext (x : Γ(M.restrict f, U))
+  change
+    (Y.presheaf.map
+        ((initialOpOfTerminal isTerminalTop).to (op (f ''ᵁ U))))
+          (π.appTop r) • (M.restrictAppIso f U).hom x =
+      (M.restrictAppIso f U).hom
+        (Z.presheaf.map ((initialOpOfTerminal isTerminalTop).to (op U))
+          ((f ≫ π).appTop r) • x)
+  rw [Scheme.Modules.smul_restrictAppIso_hom_apply]
+  congr 1
+  have hrestrict (s : Γ(Y, (⊤ : Y.Opens))) :
+      (f.appIso U).inv
+          (Z.presheaf.map
+            ((initialOpOfTerminal isTerminalTop).to (op U))
+              (f.appTop s)) =
+        Y.presheaf.map
+          ((initialOpOfTerminal isTerminalTop).to (op (f ''ᵁ U))) s := by
+    have hmap :
+        f.appTop ≫ Z.presheaf.map
+            ((initialOpOfTerminal isTerminalTop).to (op U)) ≫
+              (f.appIso U).inv =
+          Y.presheaf.map
+            ((initialOpOfTerminal isTerminalTop).to (op (f ''ᵁ U))) := by
+      rw [f.appIso_inv_naturality]
+      rw [← Category.assoc]
+      have htop :
+          f.appTop ≫ (f.appIso (⊤ : Z.Opens)).inv =
+            Y.presheaf.map
+              (homOfLE (show f ''ᵁ (⊤ : Z.Opens) ≤
+                (⊤ : Y.Opens) from le_top)).op := by
+        have happLE :
+            f.appLE (⊤ : Y.Opens) (⊤ : Z.Opens) le_rfl =
+              f.appTop := by
+          change f.appTop ≫ Z.presheaf.map (homOfLE le_rfl).op = f.appTop
+          rw [Subsingleton.elim (homOfLE le_rfl).op (𝟙 _)]
+          simp
+        have h := f.appLE_appIso_inv (U := (⊤ : Y.Opens))
+          (V := (⊤ : Z.Opens)) le_rfl
+        rw [happLE] at h
+        exact h
+      rw [htop]
+      rw [← Functor.map_comp]
+      rfl
+    exact ConcreteCategory.congr_hom hmap s
+  rw [Scheme.Hom.comp_appTop]
+  exact (hrestrict (π.appTop r)).symm
+
+/-- Naturality of the base-linear section isomorphism for restriction along an open immersion. -/
+theorem baseModulePresheafRestrictAppIso_hom_naturality
+    {Y S Z : Scheme.{u}} (π : Y ⟶ S) (f : Z ⟶ Y) [IsOpenImmersion f]
+    (M : Y.Modules) {U V : Z.Opens} (i : op V ⟶ op U) :
+    (baseModulePresheaf (f ≫ π) (M.restrict f)).map i ≫
+        (baseModulePresheafRestrictAppIso π f M U).hom =
+      (baseModulePresheafRestrictAppIso π f M V).hom ≫
+        (baseModulePresheaf π M).map
+          (homOfLE (f.image_mono (leOfHom i.unop))).op := by
+  ext x
+  exact congr($((M.map_restrictAppIso_hom f i)) x)
+
 /-- Base-linear sections on an ambient open are naturally identified with
 top sections of the module restricted to that open. -/
 noncomputable def baseModulePresheafRestrictIso
