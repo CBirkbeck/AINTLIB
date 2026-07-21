@@ -420,6 +420,139 @@ noncomputable def coordinateHomogeneousLaurentFullNegativeCyclesToHomology
     (coordinateHomogeneousLaurentOrderedCechComplex
       (R := R) j d).homologyπ n
 
+/-- Project a cycle in the homogeneous Laurent complex to its full-negative weight cycle. -/
+noncomputable def coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).cycles n ⟶
+      ModuleCat.of
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (coordinateHomogeneousLaurentFullNegativeCycles
+          (R := R) (σ := σ) d n) :=
+  by
+    let p : (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).cycles n ⟶ ModuleCat.of
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (coordinateHomogeneousLaurentFullNegativeCochain
+          (R := R) (σ := σ) d n) :=
+      (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).iCycles n ≫
+        ModuleCat.ofHom
+          (coordinateHomogeneousLaurentFullNegativeProjection
+            (R := R) d n)
+    have hprojection :
+        (ModuleCat.ofHom
+            (coordinateHomogeneousLaurentFullNegativeProjection
+              (R := R) d n) :
+          coordinateHomogeneousLaurentOrderedCechObject
+              (R := R) (σ := σ) d n ⟶
+            ModuleCat.of
+              Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+              (coordinateHomogeneousLaurentFullNegativeCochain
+                (R := R) (σ := σ) d n)) ≫
+          ModuleCat.ofHom
+            (coordinateHomogeneousLaurentFullNegativeDifferential
+              (R := R) (σ := σ) d n) =
+        coordinateHomogeneousLaurentOrderedCechDifferential
+            (R := R) (σ := σ) d n ≫
+          ModuleCat.ofHom
+            (coordinateHomogeneousLaurentFullNegativeProjection
+              (R := R) d (n + 1)) := by
+      apply ModuleCat.hom_ext
+      apply LinearMap.ext
+      intro s
+      exact coordinateHomogeneousLaurentFullNegativeProjection_differential
+        (R := R) (σ := σ) d n s
+    have hp : p ≫ ModuleCat.ofHom
+        (coordinateHomogeneousLaurentFullNegativeDifferential
+          (R := R) (σ := σ) d n) = 0 := by
+      dsimp only [p]
+      calc
+        ((coordinateHomogeneousLaurentOrderedCechComplex
+              (R := R) j d).iCycles n ≫
+            ModuleCat.ofHom
+              (coordinateHomogeneousLaurentFullNegativeProjection
+                (R := R) d n)) ≫
+            ModuleCat.ofHom
+              (coordinateHomogeneousLaurentFullNegativeDifferential
+                (R := R) (σ := σ) d n) =
+          (coordinateHomogeneousLaurentOrderedCechComplex
+              (R := R) j d).iCycles n ≫
+            (ModuleCat.ofHom
+                (coordinateHomogeneousLaurentFullNegativeProjection
+                  (R := R) d n) ≫
+              ModuleCat.ofHom
+                (coordinateHomogeneousLaurentFullNegativeDifferential
+                  (R := R) (σ := σ) d n)) := Category.assoc _ _ _
+        _ = (coordinateHomogeneousLaurentOrderedCechComplex
+              (R := R) j d).iCycles n ≫
+            (coordinateHomogeneousLaurentOrderedCechDifferential
+                (R := R) (σ := σ) d n ≫
+              ModuleCat.ofHom
+                (coordinateHomogeneousLaurentFullNegativeProjection
+                  (R := R) d (n + 1))) :=
+          congrArg (fun q =>
+            (coordinateHomogeneousLaurentOrderedCechComplex
+              (R := R) j d).iCycles n ≫ q) hprojection
+        _ = ((coordinateHomogeneousLaurentOrderedCechComplex
+              (R := R) j d).iCycles n ≫
+            coordinateHomogeneousLaurentOrderedCechDifferential
+              (R := R) (σ := σ) d n) ≫
+              ModuleCat.ofHom
+                (coordinateHomogeneousLaurentFullNegativeProjection
+                  (R := R) d (n + 1)) := (Category.assoc _ _ _).symm
+        _ = ((coordinateHomogeneousLaurentOrderedCechComplex
+              (R := R) j d).iCycles n ≫
+            (coordinateHomogeneousLaurentOrderedCechComplex
+              (R := R) j d).d n (n + 1)) ≫
+              ModuleCat.ofHom
+                (coordinateHomogeneousLaurentFullNegativeProjection
+                  (R := R) d (n + 1)) :=
+          congrArg (fun q =>
+            ((coordinateHomogeneousLaurentOrderedCechComplex
+                (R := R) j d).iCycles n ≫ q) ≫
+              ModuleCat.ofHom
+                (coordinateHomogeneousLaurentFullNegativeProjection
+                  (R := R) d (n + 1)))
+            (coordinateHomogeneousLaurentOrderedCechComplex_d
+              (R := R) j d n).symm
+        _ = 0 := calc
+          _ = 0 ≫ ModuleCat.ofHom
+              (coordinateHomogeneousLaurentFullNegativeProjection
+                (R := R) d (n + 1)) :=
+            congrArg (fun q => q ≫ ModuleCat.ofHom
+              (coordinateHomogeneousLaurentFullNegativeProjection
+                (R := R) d (n + 1)))
+              ((coordinateHomogeneousLaurentOrderedCechComplex
+                (R := R) j d).iCycles_d n (n + 1))
+          _ = 0 := Limits.zero_comp
+    refine ModuleCat.ofHom (p.hom.codRestrict
+      (coordinateHomogeneousLaurentFullNegativeCycles
+        (R := R) (σ := σ) d n) (fun s => ?_))
+    rw [coordinateHomogeneousLaurentFullNegativeCycles, LinearMap.mem_ker]
+    change coordinateHomogeneousLaurentFullNegativeDifferential
+      (R := R) (σ := σ) d n (p.hom s) = 0
+    exact congrArg (fun f => f s) hp
+
+/-- Projecting an ambient cycle and then including the full-negative cycle recovers the
+componentwise projection of that ambient cycle. -/
+theorem coordinateHomogeneousLaurentCyclesToFullNegativeCycles_i
+    [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentCyclesToFullNegativeCycles
+        (R := R) j d n ≫
+        ModuleCat.ofHom
+          (coordinateHomogeneousLaurentFullNegativeCycles
+            (R := R) (σ := σ) d n).subtype =
+      (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).iCycles n ≫
+        ModuleCat.ofHom
+          (coordinateHomogeneousLaurentFullNegativeProjection
+            (R := R) d n) := by
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro s
+  rfl
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation is a boundary modulo
 the active weights that are negative in every coordinate. -/
 theorem exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentCocycle
