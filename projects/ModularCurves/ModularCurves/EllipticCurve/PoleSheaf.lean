@@ -1999,7 +1999,7 @@ private theorem tensorUnitIso_hom_naturality_left
 
 /-- Under `𝒪_X ⊗ 𝒪_X ≅ 𝒪_X`, tensoring multiplication by `r` and by `s`
 is multiplication by `r * s`. -/
-private theorem unitObjTensorIso_hom_comp_scalars (X : Scheme.{u})
+theorem unitObjTensorIso_hom_comp_scalars (X : Scheme.{u})
     (r s : Γ(X, (⊤ : X.Opens))) :
     (unitEndomorphismOfTopSection r ⊗ₘ
         unitEndomorphismOfTopSection s) ≫ (unitObjTensorIso X).hom =
@@ -5577,6 +5577,16 @@ private theorem poleTopSectionHom_comp
         (show X.presheaf.obj (.op ⊤) from 1) :=
       (poleTopSectionHom_app_top_apply_one N
         (f.val.app (.op ⊤) x)).symm
+
+/-- Postcomposing the morphism associated to a top-open section applies the
+postcomposed morphism to that section. -/
+theorem topSectionHom_comp
+    {X : Scheme.{u}} {M N : X.Modules} (x : Γ(M, (⊤ : X.Opens)))
+    (f : M ⟶ N) :
+    Scheme.Modules.topSectionHom M x ≫ f =
+      Scheme.Modules.topSectionHom N (f.val.app (.op ⊤) x) := by
+  simpa only [Scheme.Modules.topSectionHom, poleTopSectionHom] using
+    poleTopSectionHom_comp x f
 
 private theorem poleTensor_restrict_monoidalUnitObjIso
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
