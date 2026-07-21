@@ -5,6 +5,7 @@ Authors: AINTLIB ModularCurves project
 -/
 import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
+import Mathlib.AlgebraicGeometry.Noetherian
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
 import ModularCurves.ForMathlib.OrderedCechSupportAlternating
 
@@ -66,6 +67,42 @@ theorem HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
     apply Subtype.ext
     ext i
     exact congrFun hef i
+
+/-- The finite product of support cochains indexed by the homogeneous Laurent exponents that are
+negative in every coordinate. -/
+abbrev coordinateHomogeneousLaurentFullNegativeCochain
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :=
+  (e : {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))}) →
+    ModularCurves.OrderedCechSupportCochain
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      e.1.liftedNegativeSupport n
+
+/-- Full-negative homogeneous Laurent cochains form a finite module over a Noetherian affine
+coefficient ring. -/
+theorem coordinateHomogeneousLaurentFullNegativeCochain.module_finite
+    [Fintype σ] [LinearOrder σ] [IsNoetherianRing R] (d : ℤ) (n : ℕ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d n) := by
+  letI : IsNoetherianRing
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)) :=
+    isNoetherianRing_of_ringEquiv R
+      (Scheme.ΓSpecIso (CommRingCat.of R)).symm.commRingCatIsoToRingEquiv
+  letI : Finite {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))} :=
+    (HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
+      (σ := σ) d).to_subtype
+  letI (e : {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))}) :
+      Module.Finite
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (ModularCurves.OrderedCechSupportCochain
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          e.1.liftedNegativeSupport n) :=
+    ModularCurves.OrderedCechSupportCochain.module_finite _ _ _
+  infer_instance
 
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation is a boundary modulo
 the active weights that are negative in every coordinate. -/
