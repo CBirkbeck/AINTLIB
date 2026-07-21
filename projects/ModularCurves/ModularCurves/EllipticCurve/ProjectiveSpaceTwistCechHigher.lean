@@ -147,6 +147,83 @@ theorem coordinateHomogeneousLaurentFullNegativeAssembly_apply
   classical
   simp [coordinateHomogeneousLaurentFullNegativeAssembly, LinearMap.lsum_apply]
 
+/-- The componentwise ordered support differential on full-negative homogeneous Laurent
+cochains. -/
+noncomputable def coordinateHomogeneousLaurentFullNegativeDifferential
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d n →ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d (n + 1) :=
+  LinearMap.pi fun e =>
+    (ModularCurves.orderedCechSupportDifferential
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      e.1.liftedNegativeSupport n).comp (LinearMap.proj e)
+
+@[simp]
+theorem coordinateHomogeneousLaurentFullNegativeDifferential_apply
+    [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (s : coordinateHomogeneousLaurentFullNegativeCochain
+      (R := R) (σ := σ) d n)
+    (e : {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))}) :
+    coordinateHomogeneousLaurentFullNegativeDifferential
+        (R := R) d n s e =
+      ModularCurves.orderedCechSupportDifferential
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        e.1.liftedNegativeSupport n (s e) := rfl
+
+/-- Full-negative assembly commutes with the homogeneous Laurent ordered Cech differential. -/
+theorem coordinateHomogeneousLaurentFullNegativeAssembly_differential
+    [Fintype σ] [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (s : coordinateHomogeneousLaurentFullNegativeCochain
+      (R := R) (σ := σ) d n) :
+    (coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) d n).hom
+        (coordinateHomogeneousLaurentFullNegativeAssembly
+          (R := R) (σ := σ) d n s) =
+      coordinateHomogeneousLaurentFullNegativeAssembly
+        (R := R) (σ := σ) d (n + 1)
+        (coordinateHomogeneousLaurentFullNegativeDifferential
+          (R := R) d n s) := by
+  classical
+  letI : Fintype {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))} :=
+    (HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
+      (σ := σ) d).fintype
+  have hleft :
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d n).hom
+          (coordinateHomogeneousLaurentFullNegativeAssembly
+            (R := R) (σ := σ) d n s) =
+        ∑ e : {e : HomogeneousLaurentExponent σ d //
+            e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))},
+          (coordinateHomogeneousLaurentOrderedCechDifferential
+            (R := R) (σ := σ) d n).hom
+            (coordinateHomogeneousLaurentWeightInclusion
+              (R := R) d e.1 n (s e)) := by
+    rw [coordinateHomogeneousLaurentFullNegativeAssembly_apply, map_sum]
+  have hright :
+      coordinateHomogeneousLaurentFullNegativeAssembly
+          (R := R) (σ := σ) d (n + 1)
+          (coordinateHomogeneousLaurentFullNegativeDifferential
+            (R := R) d n s) =
+        ∑ e : {e : HomogeneousLaurentExponent σ d //
+            e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))},
+          coordinateHomogeneousLaurentWeightInclusion
+            (R := R) d e.1 (n + 1)
+            (coordinateHomogeneousLaurentFullNegativeDifferential
+              (R := R) d n s e) := by
+    rw [coordinateHomogeneousLaurentFullNegativeAssembly_apply]
+  rw [hleft, hright]
+  apply Finset.sum_congr rfl
+  intro e _
+  rw [coordinateHomogeneousLaurentWeightInclusion_differential
+    (R := R) (σ := σ) (d := d) (e := e.1) (n := n),
+    coordinateHomogeneousLaurentFullNegativeDifferential_apply
+      (R := R) (σ := σ) (d := d) (n := n) (s := s) (e := e)]
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation is a boundary modulo
 the active weights that are negative in every coordinate. -/
 theorem exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentCocycle
