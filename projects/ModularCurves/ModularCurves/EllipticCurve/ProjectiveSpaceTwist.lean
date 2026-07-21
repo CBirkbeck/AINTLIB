@@ -772,6 +772,65 @@ lemma exists_pow_coordinateChartDifference_eq_zero_forall [Fintype σ]
   obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hle
   rw [hd, pow_add, mul_comm, mul_smul, he (i, k), smul_zero]
 
+/-- Multiplying two chart extensions by the common annihilating coordinate power
+turns their degree-`n` compatibility modulo torsion into exact degree-`n + m`
+compatibility. -/
+lemma coordinateChartExtensions_corrected_compatible
+    (M : (Proj (homogeneousSubmodule σ R)).Modules)
+    (i k j : σ) (n m : ℕ)
+    (tI : Γ(M, coordinateOpen (R := R) i))
+    (tK : Γ(M, coordinateOpen (R := R) k))
+    (h :
+      ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+          (coordinateHyperplaneLocalEquation (R := R) i j)) ^ m •
+        (M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op tI -
+          (coordinateOpenTransitionUnit (R := R) i k :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) i k)) ^ n •
+            M.presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op tK) = 0) :
+    M.presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+        (coordinateHyperplaneLocalEquation (R := R) i j ^ m • tI) =
+      (coordinateOpenTransitionUnit (R := R) i k :
+          Γ(Proj (homogeneousSubmodule σ R),
+            coordinateOpenOverlap (R := R) i k)) ^ (n + m) •
+        M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+          (coordinateHyperplaneLocalEquation (R := R) k j ^ m • tK) := by
+  let Xp := Proj (homogeneousSubmodule σ R)
+  let W := coordinateOpenOverlap (R := R) i k
+  let r : Γ(Xp, W) := Xp.presheaf.map
+    (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+    (coordinateHyperplaneLocalEquation (R := R) i j)
+  let q : Γ(Xp, W) := Xp.presheaf.map
+    (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+    (coordinateHyperplaneLocalEquation (R := R) k j)
+  let u : Γ(Xp, W) := coordinateOpenTransitionUnit (R := R) i k
+  let a : Γ(M, W) := M.presheaf.map
+    (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op tI
+  let b : Γ(M, W) := M.presheaf.map
+    (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op tK
+  have hr : r = u * q :=
+    coordinateHyperplaneLocalEquation_restrict_eq_transition_mul
+      (R := R) i k j
+  have hab : r ^ m • a = r ^ m • (u ^ n • b) := by
+    apply sub_eq_zero.mp
+    rw [← smul_sub]
+    exact h
+  have hscalar : r ^ m * u ^ n = u ^ (n + m) * q ^ m := by
+    rw [hr, mul_pow, pow_add]
+    ring
+  calc
+    _ = r ^ m • a := by rw [M.map_smul, map_pow]
+    _ = r ^ m • (u ^ n • b) := hab
+    _ = (r ^ m * u ^ n) • b := by rw [mul_smul]
+    _ = (u ^ (n + m) * q ^ m) • b := by rw [hscalar]
+    _ = u ^ (n + m) • (q ^ m • b) := by rw [mul_smul]
+    _ = _ := by rw [M.map_smul, map_pow]
+
 /-- The explicit standard-chart trivialization of the coordinate-hyperplane
 ideal module `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModuleTrivialization (i j : σ) :
