@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.Modules.Tilde
+import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
 # Quasicoherent modules on affine schemes
@@ -81,6 +82,22 @@ theorem Modules.isQuasicoherent_spec_surjective_of_epi
     (Modules.moduleSpecΓ_epi_of_epi f)
 
 noncomputable section
+
+/-- A section of a quasicoherent module on `D(f)` extends globally after multiplication by a
+power of `f`. -/
+theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent
+    (M : (Spec R).Modules) [M.IsQuasicoherent] (f : R)
+    (s : Γ(M, specBasicOpen R f)) :
+    ∃ (n : ℕ) (t : Γ(M, ⊤)),
+      M.presheaf.map (specBasicOpen R f).leTop.op t = f ^ n • s := by
+  have hlocal : IsLocalizing (modulesSpecToSheaf.obj M) :=
+    (isIso_fromTildeΓ_iff_isLocalizing M).mp inferInstance
+  letI : IsLocalizedModule.Away f
+      ((modulesSpecToSheaf.obj M).obj.map (specBasicOpen R f).leTop.op).hom :=
+    hlocal f
+  obtain ⟨n, t, ht⟩ := IsLocalizedModule.Away.surj
+    ((modulesSpecToSheaf.obj M).obj.map (specBasicOpen R f).leTop.op).hom f s
+  exact ⟨n, t, ht.symm⟩
 
 namespace Modules
 
