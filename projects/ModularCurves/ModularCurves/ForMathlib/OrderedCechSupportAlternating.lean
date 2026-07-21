@@ -101,6 +101,17 @@ theorem orderedCechSupportAlternatingExtend_restrict (N : Set ι) (n : ℕ)
     simp [hnot]
   · simp
 
+/-- Restriction to ordered tuples commutes with the alternating deletion differentials. -/
+theorem orderedCechSupportRestrict_differential (N : Set ι) (n : ℕ)
+    (s : CechSupportCochain R N n) :
+    orderedCechSupportRestrict R N (n + 1)
+        (cechSupportDifferential R N n s) =
+      orderedCechSupportDifferential R N n
+        (orderedCechSupportRestrict R N n s) := by
+  apply Subtype.ext
+  funext a
+  rfl
+
 end
 
 end ModularCurves
