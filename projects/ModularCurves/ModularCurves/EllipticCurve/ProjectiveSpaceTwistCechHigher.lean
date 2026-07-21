@@ -67,6 +67,104 @@ theorem HomogeneousLaurentExponent.finite_setOf_liftedNegativeSupport_eq_univ
     ext i
     exact congrFun hef i
 
+/-- Every positive-degree cocycle in the homogeneous Laurent presentation is a boundary modulo
+the active weights that are negative in every coordinate. -/
+theorem exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentCocycle
+    [Fintype σ] [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (s : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d (n + 1))
+    (hs : (coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) d (n + 1)).hom s = 0) :
+    ∃ t : coordinateHomogeneousLaurentOrderedCechObject
+        (R := R) (σ := σ) d n,
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+          (R := R) (σ := σ) d n).hom t +
+        (∑ e ∈ (coordinateHomogeneousLaurentActiveWeights d (n + 1) s).filter
+            fun e => e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ)),
+          coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+            (coordinateHomogeneousLaurentWeightComponent
+              (R := R) d e (n + 1) s)) = s := by
+  classical
+  let A := coordinateHomogeneousLaurentActiveWeights d (n + 1) s
+  let N := A.filter fun e =>
+    e.liftedNegativeSupport ≠ (Set.univ : Set (ULift.{u} σ))
+  have hcomponent_cycle (e : HomogeneousLaurentExponent σ d) :
+      ModularCurves.orderedCechSupportDifferential
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          e.liftedNegativeSupport (n + 1)
+          (coordinateHomogeneousLaurentWeightComponent
+            (R := R) d e (n + 1) s) = 0 := by
+    rw [← coordinateHomogeneousLaurentWeightComponent_differential
+      (R := R) (σ := σ) (d := d) (e := e) (n := n + 1), hs]
+    exact map_zero
+      (coordinateHomogeneousLaurentWeightComponent (R := R) d e (n + 2))
+  have hpreimage (e : {e : HomogeneousLaurentExponent σ d // e ∈ N}) :
+      ∃ t : ModularCurves.OrderedCechSupportCochain
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          e.1.liftedNegativeSupport n,
+        ModularCurves.orderedCechSupportDifferential
+            Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+            e.1.liftedNegativeSupport n t =
+          coordinateHomogeneousLaurentWeightComponent
+            (R := R) d e.1 (n + 1) s := by
+    have he : e.1.liftedNegativeSupport ≠ (Set.univ : Set (ULift.{u} σ)) := by
+      exact (Finset.mem_filter.mp e.2).2
+    obtain ⟨i, hi⟩ := (Set.ne_univ_iff_exists_notMem _).mp he
+    exact ModularCurves.exists_preimage_orderedCechSupportDifferential
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      e.1.liftedNegativeSupport i hi n
+      (coordinateHomogeneousLaurentWeightComponent (R := R) d e.1 (n + 1) s)
+      (hcomponent_cycle e.1)
+  choose t ht using hpreimage
+  refine ⟨∑ e : {e : HomogeneousLaurentExponent σ d // e ∈ N},
+    coordinateHomogeneousLaurentWeightInclusion (R := R) d e.1 n (t e), ?_⟩
+  rw [map_sum]
+  simp only [coordinateHomogeneousLaurentWeightInclusion_differential, ht]
+  rw [Finset.univ_eq_attach N]
+  have hsum :
+      (∑ x ∈ N.attach,
+        coordinateHomogeneousLaurentWeightInclusion (R := R) d x.1 (n + 1)
+          (coordinateHomogeneousLaurentWeightComponent
+            (R := R) d x.1 (n + 1) s)) =
+      ∑ e ∈ N,
+        coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+          (coordinateHomogeneousLaurentWeightComponent
+            (R := R) d e (n + 1) s) :=
+    Finset.sum_attach N fun e =>
+      coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+        (coordinateHomogeneousLaurentWeightComponent
+          (R := R) d e (n + 1) s)
+  rw [hsum]
+  change (∑ e ∈ N,
+      coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+        (coordinateHomogeneousLaurentWeightComponent
+          (R := R) d e (n + 1) s)) +
+      (∑ e ∈ A.filter (fun e =>
+          e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))),
+        coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+          (coordinateHomogeneousLaurentWeightComponent
+            (R := R) d e (n + 1) s)) = s
+  rw [show N = A.filter (fun e =>
+      ¬e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))) by rfl]
+  calc
+    _ = (∑ e ∈ A.filter (fun e =>
+          e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))),
+          coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+            (coordinateHomogeneousLaurentWeightComponent
+              (R := R) d e (n + 1) s)) +
+        (∑ e ∈ A.filter (fun e =>
+          ¬e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))),
+          coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+            (coordinateHomogeneousLaurentWeightComponent
+              (R := R) d e (n + 1) s)) := add_comm _ _
+    _ = ∑ e ∈ A,
+          coordinateHomogeneousLaurentWeightInclusion (R := R) d e (n + 1)
+            (coordinateHomogeneousLaurentWeightComponent
+              (R := R) d e (n + 1) s) :=
+      Finset.sum_filter_add_sum_filter_not A
+        (fun e => e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))) _
+    _ = s := coordinateHomogeneousLaurentActiveWeights_reconstruct d (n + 1) s
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation of the ordered Cech
 complex for a nonnegative projective twist is a boundary. -/
 theorem exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
