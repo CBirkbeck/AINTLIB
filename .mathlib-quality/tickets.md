@@ -1714,3 +1714,59 @@ REMAINING (7, all gated on PHASE 3): `isSheafyFor_equiv`, `isSheafyComplete_cong
 `isSheafyTateRing_iff_for_completionModel`, `isSheafyTateRing_iff_exists_completionModel`,
 `isSheafyTateRing_iff_isSheafyComplete`, `finiteJet_isSheafyTateRing`,
 `finiteJet_completionModel_structurePresheaf_isSheafOfTopologicalRings`.
+
+---
+
+# STATUS — 2026-07-21 PASS-campaign (base 36eda6e0f → 62491a935, 5 commits)
+
+All commits axiom-clean ({propext, Classical.choice, Quot.sound}); `lake build 'Adic spaces'`
+green (3302 jobs); git diff --check clean; FJP sorry-free; no code sorry/axiom added
+(the 4 diff matches for "sorry"/"axiom" are pre-existing doc prose touched by the rename);
+five frozen FJP types literally unchanged.
+
+## DELIVERED
+
+- **PASS 0 (f9ced4a60)** — removed the ambient plus-ring leak from
+  hasStandardRefinements/isSheafyFor_congr/isSheafyFor_iff_* (fresh `Public` section, pair
+  installed locally — signatures verified clean); deduped the double IRIE + dropped noeth from
+  exists_finite_normalized_rational_refinement(_on); doc honesty fixes; Wedhorn edition pinned to
+  arXiv:1910.05934v1.
+- **PASS 1 (18607da05)** — mechanical rename RationalCovering → RationalCoveringData (82 files),
+  freeing `RationalCovering`; IsRationalSubset → HasRationalPresentation (with a docstring flagging
+  it omits the open-ideal condition).
+- **PASS 2.1-2.4 (cfd52e3a0, 2eab23c48)** — the algebraic transport core, all axiom-clean:
+  PairOfDefinition.mapRingEquiv (+ subringMapHomeomorph, IsAdic.mapRingEquiv),
+  RationalLocData.mapRationalRingEquiv (reconstructed via genPieceDatum, no hopen transport),
+  presheafValueRingEquivOfRingEquiv (+ _continuous/_symm_continuous/_canonicalMap).
+- **PASS 4.1 (62491a935)** — finiteJet_structurePresheaf_isSheafOfTopologicalRings_all +
+  _isSheaf_all (public structurePresheaf, projective topology, every valid Bplus), independent of
+  the gated chain.
+
+## Acceptance `#check` status (13 required)
+
+DELIVERED (8): RingOfIntegralElements.hasStandardRefinements, isSheafyFor_congr,
+isSheafyFor_iff_standardSheafCondition, isSheafyFor_iff_isSheafyComplete,
+finiteJet_isSheafyComplete, finiteJet_isSheafyFor_all,
+finiteJet_structurePresheaf_isSheafOfTopologicalRings_all, finiteJet_structurePresheaf_isSheaf_all.
+(All verified: no ambient PlusSubring, no CompatiblePlusSubring/IsNoetherianRing/
+IsStronglyNoetherian/explicit HasLocLiftPowerBounded.)
+
+REMAINING (5, all gated on PASS 2.5): isSheafyFor_equiv, isSheafyComplete_congr,
+isSheafyTateRing_iff_for_completionModel, isSheafyTateRing_iff_exists_completionModel,
+isSheafyTateRing_iff_isSheafyComplete, finiteJet_isSheafyTateRing,
+finiteJet_completionModel_structurePresheaf_isSheafOfTopologicalRings.
+
+## The remaining gate: PASS 2.5 (isSheafy_congr_of_ringEquiv)
+
+The algebraic core (2.1-2.4) is done. The remaining 2.3 (rational-open correspondence, plus-ring
+entangled) + 2.5 (cover pullback with per-element rationality via ↥C.covers.attach; product
+homeomorphism via Homeomorph.piCongr over the cover-index equiv; productRestrictionSub/restrictionMap
+conjugation; embedding transport; gluing via allDataCompatible_iff_rationalRefinementCompatible) →
+isSheafyFor_equiv/isSheafyComplete_congr is a ~250-line geometric site-transport. It gates:
+- PASS 3 (completion-model iffs: isSheafyComplete_congr + completionModelCompare; complete-ring
+  equiv globalSections_equiv WedhornCechAcyclicity:8890 to publicize);
+- PASS 4.2 (finiteJet_isSheafyTateRing via isSheafyTateRing_iff_isSheafyComplete;
+  finiteJet_completionModel_structurePresheaf_...).
+PASS 5 (Prop 8.2(2) rational-subset bijection: reverse-image construction from the perturbation
+results — subset-equality indexedRationalSet_perturb_eq + span-preservation
+exists_parameterPerturbation_span_top, both DONE) is INDEPENDENT of 2.5 and remains open.
