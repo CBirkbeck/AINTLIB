@@ -356,6 +356,19 @@ lemma coordinateOpenOverlap_le_right (i k : σ) :
     coordinateOpenOverlap (R := R) i k ≤ coordinateOpen (R := R) k :=
   (coordinateOpenOverlap_eq (R := R) i k).trans_le inf_le_right
 
+/-- Within a standard-coordinate overlap, the basic open cut out by a third coordinate
+ratio is its intersection with the third standard chart. -/
+lemma coordinateOpenOverlap_basicOpen_localEquation (i k j : σ) :
+    (Proj (homogeneousSubmodule σ R)).basicOpen
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+          (coordinateHyperplaneLocalEquation (R := R) i j)) =
+      coordinateOpenOverlap (R := R) i k ⊓ coordinateOpen (R := R) j := by
+  rw [Scheme.basicOpen_res,
+    coordinateHyperplaneLocalEquation_basicOpen,
+    coordinateOpenOverlap_eq, coordinateOpenOverlap_eq]
+  ac_rfl
+
 /-- A section on one standard coordinate chart extends to any other chart after its overlap
 restriction is multiplied by a power of the corresponding coordinate ratio. -/
 lemma exists_coordinateChartExtension
