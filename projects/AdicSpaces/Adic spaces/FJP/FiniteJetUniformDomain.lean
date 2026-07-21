@@ -29,9 +29,9 @@ local notation "K" => LaurentSeries F
 /-! ### Norm multiplicativity and the domain property ([FJP] Prop 2.3) -/
 
 /-- The Gauss norm on `L = K⟨W,W⁻¹⟩` is multiplicative (specialisation of
-`RestrictedLaurent.norm_mul_eq` to the discretely valued `K`). -/
+`RestrictedLaurent.norm_mul_eq` to `K`). -/
 theorem norm_L_mul (f g : L F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
-  RestrictedLaurent.norm_mul_eq (norm_K_discrete F) f g
+  RestrictedLaurent.norm_mul_eq f g
 
 theorem norm_L_eq_zero {f : L F} (hf : ‖f‖ = 0) : f = 0 :=
   norm_eq_zero.mp hf

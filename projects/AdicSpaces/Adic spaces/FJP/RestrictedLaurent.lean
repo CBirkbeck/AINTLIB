@@ -606,12 +606,10 @@ theorem norm_tsum_lt_of_forall_lt {F : ℤ → K}
     refine (IsUltrametricDist.norm_tsum_le_of_forall_le hbound).trans_lt ?_
     exact max_lt (h a₀) (by linarith)
 
-/-- Norm multiplicativity for restricted Laurent series over a complete nonarchimedean field
-with discrete value group ([FJP] Prop 2.3; the hypothesis `hd` records the discreteness of
-the [FJP] setting — the minimal-achiever proof below in fact works for any complete
-nonarchimedean field). -/
-theorem norm_mul_eq (_hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n)
-    (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g‖ := by
+/-- Norm multiplicativity for restricted Laurent series over any complete nonarchimedean
+field ([FJP] Prop 2.3 states this for a discretely valued base, but the minimal-achiever
+proof below needs no discreteness of the value group). -/
+theorem norm_mul_eq (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g‖ := by
   classical
   rcases eq_or_ne f 0 with rfl | hf
   · simp
@@ -720,10 +718,10 @@ theorem norm_restrictedC_mul (t : K) (f : PowerSeries.Restricted K (1 : ℝ)) :
     PowerSeries.coeff_C_mul, norm_mul]
   ring
 
-theorem mul_ne_zero_of_ne_zero (hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n)
-    {f g : RestrictedLaurent K} (hf : f ≠ 0) (hg : g ≠ 0) : f * g ≠ 0 := by
+theorem mul_ne_zero_of_ne_zero {f g : RestrictedLaurent K} (hf : f ≠ 0) (hg : g ≠ 0) :
+    f * g ≠ 0 := by
   intro hcon
-  have h := norm_mul_eq hd f g
+  have h := norm_mul_eq f g
   rw [hcon] at h
   have h0 : ‖(0 : RestrictedLaurent K)‖ = 0 := norm_zero
   rw [h0] at h
