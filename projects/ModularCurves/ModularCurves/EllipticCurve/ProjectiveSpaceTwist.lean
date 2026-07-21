@@ -736,6 +736,42 @@ lemma exists_pow_coordinateChartDifference_eq_zero
   rw [map_pow, map_pow]
   rw [hr, mul_pow, mul_smul, sub_self]
 
+/-- Over a finite standard coordinate cover, all transition-adjusted differences between
+common-degree chart extensions are annihilated by one common coordinate power. -/
+lemma exists_pow_coordinateChartDifference_eq_zero_forall [Fintype σ]
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (j : σ) (n : ℕ)
+    (s : Γ(M, coordinateOpen (R := R) j))
+    (t : ∀ i : σ, Γ(M, coordinateOpen (R := R) i))
+    (ht : ∀ i,
+      M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op (t i) =
+        (Proj (homogeneousSubmodule σ R)).presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) i j)).op
+              (coordinateHyperplaneLocalEquation (R := R) i j ^ n) •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) i j)).op s) :
+    ∃ m : ℕ, ∀ i k : σ,
+      ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+          (coordinateHyperplaneLocalEquation (R := R) i j)) ^ m •
+        (M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op (t i) -
+          (coordinateOpenTransitionUnit (R := R) i k :
+              Γ(Proj (homogeneousSubmodule σ R),
+                coordinateOpenOverlap (R := R) i k)) ^ n •
+            M.presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op (t k)) = 0 := by
+  classical
+  choose e he using fun p : σ × σ ↦
+    exists_pow_coordinateChartDifference_eq_zero
+      M p.1 p.2 j n s (t p.1) (t p.2) (ht p.1) (ht p.2)
+  let m := Finset.univ.sup e
+  refine ⟨m, fun i k ↦ ?_⟩
+  have hle : e (i, k) ≤ m := Finset.le_sup (Finset.mem_univ (i, k))
+  obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hle
+  rw [hd, pow_add, mul_comm, mul_smul, he (i, k), smul_zero]
+
 /-- The explicit standard-chart trivialization of the coordinate-hyperplane
 ideal module `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModuleTrivialization (i j : σ) :
