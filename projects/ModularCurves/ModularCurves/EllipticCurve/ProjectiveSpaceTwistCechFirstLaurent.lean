@@ -930,6 +930,41 @@ theorem coordinateOpenCechIntersectionLaurentRingEquiv_naturality_delete_zero
     (coordinateProductAwayLaurentRingEquiv_naturality_delete_zero
       (R := R) a) q
 
+/-- Restriction along the first Cech face is the first-anchor exponent map after extending
+Laurent coefficients to global sections of the affine base. -/
+theorem coordinateOpenCechIntersectionBaseLaurentLinearEquiv_naturality_delete_zero
+    [LinearOrder σ] {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) (n + 1))
+    (x : Scheme.Modules.baseCechFactor
+      (homogeneousProjπ (R := R) (σ := σ))
+      (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+      (coordinateOpenCover (R := R) (σ := σ)) n (a.delete 0).1) :
+    coordinateOpenCechIntersectionBaseLaurentLinearEquiv (R := R) a.1
+        ((Scheme.Modules.baseModulePresheaf
+          (homogeneousProjπ (R := R) (σ := σ))
+          (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))).map
+            (coordinateOpenCechDelete (R := R) a 0).op x) =
+      AddMonoidAlgebra.mapDomain
+        (coordinateLaurentExponentDeleteZeroAddMonoidHom a)
+        (coordinateOpenCechIntersectionBaseLaurentLinearEquiv
+          (R := R) (a.delete 0).1 x) := by
+  let e := (Scheme.ΓSpecIso
+    (CommRingCat.of R)).commRingCatIsoToRingEquiv.symm
+  let y := coordinateOpenCechIntersectionLaurentRingEquiv
+    (R := R) (a.delete 0).1 x
+  change AddMonoidAlgebra.mapRingEquiv _ e
+      (coordinateOpenCechIntersectionLaurentRingEquiv (R := R) a.1
+        ((Proj (homogeneousSubmodule σ R)).presheaf.map
+          (coordinateOpenCechDelete (R := R) a 0).op x)) =
+    AddMonoidAlgebra.mapDomain
+      (coordinateLaurentExponentDeleteZeroAddMonoidHom a)
+      (AddMonoidAlgebra.mapRingEquiv _ e y)
+  rw [coordinateOpenCechIntersectionLaurentRingEquiv_naturality_delete_zero
+    (R := R) a x]
+  exact DFunLike.congr_fun
+    (AddMonoidAlgebra.mapRingHom_comp_mapDomainRingHom e.toRingHom
+      (coordinateLaurentExponentDeleteZeroAddMonoidHom a)) y
+
 
 end
 
