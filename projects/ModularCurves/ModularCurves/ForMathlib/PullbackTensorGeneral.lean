@@ -406,6 +406,29 @@ theorem pushforwardFactored_map_pullback_δ_unit_tmul
   rw [pushforwardFactored_μ_app_tmul] at happ
   exact happ
 
+/-- At an object mapped by the site functor, the doctrinal pullback tensor comparison
+sends the adjunction-unit image of a pure tensor to the pure tensor of the two unit
+images. -/
+theorem pullback_δ_unit_tmul
+    [(pushforward.{u} φ).IsRightAdjoint]
+    (P Q : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat))
+    (V : Cᵒᵖ) (x : P.obj V) (y : Q.obj V) :
+    let PB := pullback.{u} φ
+    let adj := pullbackPushforwardFactoredAdjunction φ
+    letI : (pushforwardFactored φ).LaxMonoidal :=
+      pushforwardFactoredLaxMonoidal φ
+    letI : PB.OplaxMonoidal := pullbackOplaxMonoidal φ
+    (Functor.OplaxMonoidal.δ PB P Q).app (F.op.obj V)
+        (show (PB.obj (P ⊗ Q)).obj (F.op.obj V) from
+          (adj.unit.app (P ⊗ Q)).app V (x ⊗ₜ y)) =
+      ((show (PB.obj P).obj (F.op.obj V) from
+          (adj.unit.app P).app V x) ⊗ₜ
+        (show (PB.obj Q).obj (F.op.obj V) from
+          (adj.unit.app Q).app V y) :
+        (PB.obj P ⊗ PB.obj Q).obj (F.op.obj V)) := by
+  dsimp only
+  exact pushforwardFactored_map_pullback_δ_unit_tmul φ P Q V x y
+
 /-- **[D-PresPB′-general], leaves B1+B2 (fused milestone).** The presheaf pullback along an
 arbitrary ring comparison carries an oplax monoidal structure: transport the
 pullback–pushforward adjunction to the factored spelling of the pushforward
