@@ -308,6 +308,31 @@ theorem orderedCechSupportDifferential_zero_injective
     · exact (s - t).2 a ha
   exact sub_eq_zero.mp hsub
 
+/-- On a nontrivial index type, every nonempty support has injective degree-zero ordered support
+differential. -/
+theorem orderedCechSupportDifferential_zero_injective_of_nonempty
+    [Nontrivial ι] (N : Set ι) (hN : N.Nonempty) :
+    Function.Injective (orderedCechSupportDifferential R N 0) := by
+  by_cases htop : N = Set.univ
+  · intro s t _
+    apply Subtype.ext
+    funext a
+    have hnot : ¬N ⊆ Set.range a.1 := by
+      intro hsubset
+      obtain ⟨i, hi⟩ := exists_ne (a.1 0)
+      have hiN : i ∈ N := by
+        rw [htop]
+        exact Set.mem_univ i
+      obtain ⟨k, hk⟩ := hsubset hiN
+      fin_cases k
+      exact hi hk.symm
+    rw [s.2 a hnot, t.2 a hnot]
+  · have hnot : ¬(Set.univ : Set ι) ⊆ N := by
+      intro hsubset
+      exact htop (Set.Subset.antisymm (Set.subset_univ N) hsubset)
+    obtain ⟨i₀, _, hi₀⟩ := Set.not_subset.mp hnot
+    exact orderedCechSupportDifferential_zero_injective R N hN i₀ hi₀
+
 private theorem orderedCechSupport_cycle_triple (N : Set ι)
     (s : OrderedCechSupportCochain R N 1)
     (hs : orderedCechSupportDifferential R N 1 s = 0)
