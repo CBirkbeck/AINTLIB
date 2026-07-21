@@ -2815,6 +2815,18 @@ theorem localTrivializationRestriction_zero {X : Scheme.{u}} (M : X.Modules)
     (U : X.affineOpens) : localTrivializationRestriction M U 0 = 0 := by
   simp [localTrivializationRestriction, map_zero]
 
+/-- Transporting a scalar multiple of an ambient-open restriction to the top
+open of the open subscheme transports the scalar as well. -/
+theorem localTrivializationRestriction_smul_restrict
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (r : Γ(X, U.1)) (x : Γ(M, (⊤ : X.Opens))) :
+    (M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)).inv
+        (M.presheaf.map (eqToHom U.1.ι_image_top).op
+          (r • M.presheaf.map U.1.leTop.op x)) =
+      affineOpenTopSection U r • localTrivializationRestriction M U x := by
+  rw [M.map_smul, Scheme.Modules.smul_restrictAppIso_inv_apply]
+  rfl
+
 /-- Restricting a global section commutes with a morphism of scheme modules. -/
 theorem localTrivializationRestriction_map
     {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N)
