@@ -72,6 +72,17 @@ noncomputable def coordinateHyperplanePoleSheaf (j : σ) :
   Scheme.Modules.dualObj
     (ModularCurves.idealModule (coordinateHyperplaneι (R := R) j))
 
+/-- The canonical coordinate section `O → O(1)`, obtained by dualizing the inclusion of
+the coordinate-hyperplane ideal. -/
+noncomputable def coordinateHyperplanePoleUnitHom (j : σ) :
+    Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)) ⟶
+      coordinateHyperplanePoleSheaf (R := R) j :=
+  (Scheme.Modules.dualUnitObjIso
+      (X := Proj (homogeneousSubmodule σ R))).inv ≫
+    Scheme.Modules.dualMapObj
+      (ModularCurves.idealModuleToUnit
+        (coordinateHyperplaneι (R := R) j))
+
 /-- The concrete `O(1)` on polynomial projective space is invertible. -/
 theorem coordinateHyperplanePoleSheaf_isInvertible (j : σ) :
     Scheme.Modules.IsInvertible (coordinateHyperplanePoleSheaf (R := R) j) :=
@@ -427,6 +438,32 @@ private theorem coordinateHyperplaneIdealOverTrivialization_inv_comp
         (coordinateHyperplaneι (R := R) j) U r hr
           (coordinateHyperplaneLocalEquation_span i j)
           (coordinateHyperplaneLocalEquation_mem_nonZeroDivisors i j)
+
+/-- In a standard-chart frame, the canonical coordinate section of `O(1)` is
+multiplication by the local equation of the coordinate hyperplane. -/
+theorem coordinateHyperplanePoleUnitHom_over_comp_trivialization
+    (i j : σ) :
+    ((coordinateHyperplanePoleUnitHom (R := R) j).over
+        (coordinateOpen (R := R) i)) ≫
+        (ModularCurves.SheafOfModules.dualOverIsoOfIso
+          (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+          (ModularCurves.idealModule
+            (coordinateHyperplaneι (R := R) j))
+          (coordinateOpen (R := R) i)
+          (Scheme.Modules.overTrivializationOfRestrictIso _ _
+            (coordinateHyperplaneIdealModuleTrivialization
+              (R := R) i j).symm)).hom =
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        (Proj (homogeneousSubmodule σ R)).ringCatSheaf
+        (coordinateOpen (R := R) i)
+        (coordinateHyperplaneLocalEquation (R := R) i j) := by
+  exact ModularCurves.dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
+    (ModularCurves.idealModuleToUnit
+      (coordinateHyperplaneι (R := R) j))
+    (coordinateOpen (R := R) i)
+    (coordinateHyperplaneIdealOverTrivialization (R := R) i j)
+    (coordinateHyperplaneLocalEquation (R := R) i j)
+    (coordinateHyperplaneIdealOverTrivialization_inv_comp (R := R) i j)
 
 private noncomputable def coordinateHyperplaneIdealOverlapTrivializationLeft
     (i k j : σ) :

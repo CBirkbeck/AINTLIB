@@ -3775,7 +3775,7 @@ private theorem localIdealGeneratorScalar_mono
     f U r hr hspan hnzd]
   exact hcomp
 
-private theorem dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
+theorem dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
     {X : Scheme.{u}} {M : X.Modules}
     (i : M ⟶ Scheme.Modules.unitObj X) (U : X.Opens)
     (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
