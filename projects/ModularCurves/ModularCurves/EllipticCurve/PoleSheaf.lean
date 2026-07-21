@@ -5348,6 +5348,122 @@ theorem topSectionHom_tensorSection
     poleTensorTopSection] using
     poleTopSectionHom_tensorTopSection M N x y
 
+section SectionContraction
+
+noncomputable local instance (X : Scheme.{u}) : SymmetricCategory X.Modules :=
+  Scheme.Modules.symmetricCategory X
+
+/-- Contract a global section of `M ⊗ P` against a pairing `L ⊗ P ⟶ 𝒪_X`
+to obtain a morphism `L ⟶ M`. -/
+noncomputable def sectionContractionHom {X : Scheme.{u}}
+    (L M P : X.Modules) (pairing : L ⊗ P ⟶ Scheme.Modules.unitObj X)
+    (q : Γ(M ⊗ P, (⊤ : X.Opens))) : L ⟶ M :=
+  (ρ_ L).inv ≫
+    L ◁ ((monoidalUnitObjIso X).hom ≫
+      Scheme.Modules.topSectionHom (M ⊗ P) q) ≫
+    (α_ L M P).inv ≫
+    (β_ L M).hom ▷ P ≫
+    (α_ M L P).hom ≫
+    M ◁ pairing ≫
+    M ◁ (monoidalUnitObjIso X).inv ≫
+    (ρ_ M).hom
+
+private theorem sectionContraction_scalarSlide {X : Scheme.{u}}
+    (L M : X.Modules) (a : 𝟙_ X.Modules ⟶ M)
+    (f : L ⟶ 𝟙_ X.Modules) :
+    L ◁ a ≫ (β_ L M).hom ≫ M ◁ f ≫ (ρ_ M).hom =
+      (ρ_ L).hom ≫ f ≫ a := by
+  simp [Category.assoc]
+  slice_lhs 2 3 => rw [← tensorHom_def]
+  slice_lhs 2 2 => rw [tensorHom_def']
+  simp [Category.assoc, ← unitors_equal]
+
+private theorem sectionContraction_assocWhisker {X : Scheme.{u}}
+    (L M P : X.Modules) (b : 𝟙_ X.Modules ⟶ P) :
+    (α_ L M (𝟙_ X.Modules)).hom ≫
+        L ◁ M ◁ b ≫
+        (α_ L M P).inv =
+      (L ⊗ M) ◁ b := by
+  monoidal
+
+private theorem sectionContraction_splitTensorStart {X : Scheme.{u}}
+    (L M P : X.Modules)
+    (a : 𝟙_ X.Modules ⟶ M) (b : 𝟙_ X.Modules ⟶ P) :
+    L ◁ (λ_ (𝟙_ X.Modules)).inv ≫
+        L ◁ (a ⊗ₘ b) =
+      L ◁ a ≫
+        (ρ_ (L ⊗ M)).inv ≫
+        (α_ L M (𝟙_ X.Modules)).hom ≫
+        L ◁ M ◁ b := by
+  simp [tensorHom_def, Category.assoc]
+
+private theorem sectionContraction_gatherRight {X : Scheme.{u}}
+    (L M P : X.Modules) (b : 𝟙_ X.Modules ⟶ P)
+    (e : L ⊗ P ⟶ 𝟙_ X.Modules) :
+    (ρ_ (L ⊗ M)).inv ≫
+        (α_ L M (𝟙_ X.Modules)).hom ≫
+        L ◁ M ◁ b ≫
+        (α_ L M P).inv ≫
+        (β_ L M).hom ▷ P ≫
+        (α_ M L P).hom ≫
+        M ◁ e =
+      (β_ L M).hom ≫
+        M ◁ ((ρ_ L).inv ≫ L ◁ b ≫ e) := by
+  simp only [MonoidalCategory.whiskerLeft_comp]
+  slice_lhs 2 4 =>
+    rw [sectionContraction_assocWhisker (X := X) L M P b]
+  slice_lhs 2 3 => rw [whisker_exchange]
+  slice_lhs 1 2 => rw [← rightUnitor_inv_naturality]
+  slice_lhs 3 4 => rw [associator_naturality_right]
+  slice_lhs 2 3 => rw [← whiskerLeft_rightUnitor_inv]
+  simp only [Category.assoc]
+
+private theorem sectionContraction_pure {X : Scheme.{u}}
+    (L M P : X.Modules)
+    (a : 𝟙_ X.Modules ⟶ M) (b : 𝟙_ X.Modules ⟶ P)
+    (e : L ⊗ P ⟶ 𝟙_ X.Modules) :
+    L ◁ (λ_ (𝟙_ X.Modules)).inv ≫
+        L ◁ (a ⊗ₘ b) ≫
+        (α_ L M P).inv ≫
+        (β_ L M).hom ▷ P ≫
+        (α_ M L P).hom ≫
+        M ◁ e ≫
+        (ρ_ M).hom =
+      L ◁ b ≫ e ≫ a := by
+  calc
+    _ = L ◁ a ≫ (β_ L M).hom ≫
+        M ◁ ((ρ_ L).inv ≫ L ◁ b ≫ e) ≫ (ρ_ M).hom := by
+      slice_lhs 1 2 =>
+        rw [sectionContraction_splitTensorStart (X := X) L M P a b]
+      slice_lhs 2 8 =>
+        rw [sectionContraction_gatherRight (X := X) L M P b e]
+      simp only [Category.assoc]
+    _ = (ρ_ L).hom ≫ ((ρ_ L).inv ≫ L ◁ b ≫ e) ≫ a :=
+      sectionContraction_scalarSlide (X := X) L M a
+        ((ρ_ L).inv ≫ L ◁ b ≫ e)
+    _ = _ := by simp
+
+/-- Contracting a pure tensor evaluates its `P`-factor against the pairing and
+then applies the section of `M`. -/
+theorem sectionContractionHom_tensorSection {X : Scheme.{u}}
+    (L M P : X.Modules) (pairing : L ⊗ P ⟶ Scheme.Modules.unitObj X)
+    (x : Γ(M, (⊤ : X.Opens))) (y : Γ(P, (⊤ : X.Opens))) :
+    sectionContractionHom L M P pairing (tensorSection M P ⊤ x y) =
+      (ρ_ L).inv ≫
+        L ◁ ((monoidalUnitObjIso X).hom ≫
+          Scheme.Modules.topSectionHom P y) ≫
+        pairing ≫ Scheme.Modules.topSectionHom M x := by
+  rw [sectionContractionHom, topSectionHom_tensorSection]
+  simp [unitObjTensorIso, Category.assoc]
+  slice_lhs 6 7 => rw [← MonoidalCategory.whiskerLeft_comp]
+  rw [sectionContraction_pure (X := X) L M P
+    ((monoidalUnitObjIso X).hom ≫ Scheme.Modules.topSectionHom M x)
+    ((monoidalUnitObjIso X).hom ≫ Scheme.Modules.topSectionHom P y)
+    (pairing ≫ (monoidalUnitObjIso X).inv)]
+  simp [Category.assoc]
+
+end SectionContraction
+
 private theorem poleTopSectionHom_comp
     {X : Scheme.{u}} {M N : X.Modules} (x : Γ(M, (⊤ : X.Opens)))
     (f : M ⟶ N) :
