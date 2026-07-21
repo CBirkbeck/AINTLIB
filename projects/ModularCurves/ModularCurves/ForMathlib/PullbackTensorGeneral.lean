@@ -1458,6 +1458,47 @@ theorem pullbackIso_hom_unit_app_apply
       ModuleCat.comp_apply]
   exact happ
 
+/-- The comparison between pullback after sheafification and sheafification after
+presheaf pullback sends the unit of the first composite adjunction to the unit of the
+second, on elements. -/
+theorem sheafificationCompPullback_hom_unit_app_apply
+    (f : Y ⟶ X) (P : X.PresheafOfModules) (U : X.Opens)
+    (x : P.obj (.op U)) :
+    let LX := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+    let PB := PresheafOfModules.pullback
+      (_root_.PresheafOfModules.schemeRingPresheafHom f)
+    let shAdjX := PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)
+    let shAdjY := PresheafOfModules.sheafificationAdjunction
+      (𝟙 Y.ringCatSheaf.obj)
+    let preAdj := PresheafOfModules.pullbackPushforwardAdjunction
+      (_root_.PresheafOfModules.schemeRingPresheafHom f)
+    ((SheafOfModules.sheafificationCompPullback
+      f.toRingCatSheafHom).hom.app P).val.app (.op (f ⁻¹ᵁ U))
+        (((pullbackPushforwardAdjunction f).unit.app (LX.obj P)).val.app
+          (.op U) ((shAdjX.unit.app P).app (.op U) x)) =
+      (shAdjY.unit.app (PB.obj P)).app (.op (f ⁻¹ᵁ U))
+        ((preAdj.unit.app P).app (.op U) x) := by
+  dsimp only
+  let shAdjX := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let shAdjY := PresheafOfModules.sheafificationAdjunction
+    (𝟙 Y.ringCatSheaf.obj)
+  let pbAdj := SheafOfModules.pullbackPushforwardAdjunction
+    f.toRingCatSheafHom
+  let preAdj := PresheafOfModules.pullbackPushforwardAdjunction
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+  let adj₁ := shAdjX.comp pbAdj
+  let adj₂ := preAdj.comp shAdjY
+  let e := SheafOfModules.sheafificationCompPullback f.toRingCatSheafHom
+  have he := Adjunction.homEquiv_leftAdjointUniq_hom_app adj₁ adj₂ P
+  change (adj₁.homEquiv _ _) (e.hom.app P) = adj₂.unit.app P at he
+  rw [Adjunction.homEquiv_unit] at he
+  have happ := congrArg (fun q => q.app (.op U) x) he
+  conv_lhs at happ =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  exact happ
+
 /-- **[D-PresPB′-general], payoff packaging (leaves G3 + A).** The pullback of sheaves of
 modules along an arbitrary morphism of schemes is a monoidal functor for the (v10.97)
 localized-monoidal structures: the objectwise content is the general-`f` sheafified
