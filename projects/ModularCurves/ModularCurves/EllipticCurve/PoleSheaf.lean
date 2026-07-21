@@ -5540,6 +5540,28 @@ theorem dualPairing_overTrivializationSection_one
   rw [op_id, hmap]
   exact overTrivializationSection_coefficient M U e 1
 
+section TensorPairing
+
+noncomputable local instance (X : Scheme.{u}) : SymmetricCategory X.Modules :=
+  Scheme.Modules.symmetricCategory X
+
+/-- Pair two tensor products by interchanging the middle factors and pairing
+the corresponding factors. -/
+noncomputable def tensorPairing {X : Scheme.{u}}
+    {L₁ L₂ P₁ P₂ : X.Modules}
+    (e₁ : L₁ ⊗ P₁ ⟶ Scheme.Modules.unitObj X)
+    (e₂ : L₂ ⊗ P₂ ⟶ Scheme.Modules.unitObj X) :
+    (L₁ ⊗ L₂) ⊗ (P₁ ⊗ P₂) ⟶ Scheme.Modules.unitObj X :=
+  (α_ L₁ L₂ (P₁ ⊗ P₂)).hom ≫
+    L₁ ◁ (α_ L₂ P₁ P₂).inv ≫
+    L₁ ◁ ((β_ L₂ P₁).hom ▷ P₂) ≫
+    L₁ ◁ (α_ P₁ L₂ P₂).hom ≫
+    (α_ L₁ P₁ (L₂ ⊗ P₂)).inv ≫
+    (e₁ ⊗ₘ e₂) ≫
+    (unitObjTensorIso X).hom
+
+end TensorPairing
+
 private theorem poleTopSectionHom_comp
     {X : Scheme.{u}} {M N : X.Modules} (x : Γ(M, (⊤ : X.Opens)))
     (f : M ⟶ N) :
