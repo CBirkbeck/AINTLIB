@@ -24502,3 +24502,21 @@ range fact preserved as an inline-derivation note for the γ assembly.) γ3/γ4 
 frontier sorry (glue ρR₁ via glueMorphisms on the awayToSections-cover + pullback square +
 zero-leg — all primitives now banked). Machine note: a concurrent cleaner fleet (~156 lean procs)
 is saturating CPU, making builds slow — verified green via a full standalone lake build.
+
+### v10.343 progress — [T-E4D Stage-3c-γ ALMOST CLOSED: only hagree left] (2026-07-21)
+The entire γ3/γ4 native-glue is PROVEN except ONE lemma. Module GREEN (8700 jobs), single sorry
+:2803. NativeGlueAssembly section, all AXIOM-CLEAN except the one hagree sorry:
+- γ3 cover ⨆Uᵢ=⊤ PROVEN (iSup_basicOpen_eq_top_iff + iSup_preimage_eq_top)
+- gluePieceRange (:2448), gluePiece (:2481, the i-th piece Uᵢ⟶C.E), specMap_awayToSections_range
+  (:2503) — axiom-clean
+- gluePiece_isPullback (:2511) — THE γ4 per-piece pullback square, the hardest lemma (paste
+  of_vert_isIso ∘ chart square via paste_vert, isoSpec/toSpecΓ naturality + awayToSections
+  factoring) — axiom-clean
+- gluePiece_zero (:2629) — zero-leg per-piece — axiom-clean
+- ρR₁ BUILT (topIso.inv ≫ homOfLE ≫ iSupOpenCover.glueMorphisms); γ4 pullback square + zero-leg
+  BOTH PROVEN via isPullback_of_iSup_eq_top on the Uᵢ / Spec(A[1/a]) covers
+- nativeGlue (:2737) full assembly; exists_invariant_away_presentation := nativeGlue (:3044)
+THE SINGLE REMAINING SORRY = hagree (:2803): the γ3 pairwise chart-AGREEMENT (the genuine descent
+glue — hVC1 → pointedIso_hom_of_transVC_eq_one + restrict_e_baseChange over the overlap), ~100L
+with D(a²fₖfₗ) vs D(a·fₖfₗ) term friction. +import PullbackLocalAtTarget. This is the LAST
+mathematical content of the entire KM 4.7.0 engine.

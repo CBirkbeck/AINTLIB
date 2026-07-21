@@ -9,6 +9,7 @@ import ModularCurves.ForMathlib.MaximalSpectrumOrbit
 import ModularCurves.ForMathlib.SemilocalVariableChangeSplit
 import ModularCurves.ForMathlib.SpecGroupAction
 import ModularCurves.ForMathlib.WeierstrassInvariantLocal
+import ModularCurves.ForMathlib.PullbackLocalAtTarget
 
 /-!
 # The engine mouth core, Stage 3a–3b: the semilocal chart cover and its split transition
@@ -2440,6 +2441,460 @@ private theorem vc_conj_cancel {R : Type*} [CommRing R]
     (a b : WeierstrassCurve.VariableChange R) : a * (a⁻¹ * b) * b⁻¹ = 1 := by
   group
 
+section NativeGlueAssembly
+open CategoryTheory.Limits
+
+/-- Range of the base-change piece. -/
+lemma gluePieceRange [IsAffine X] (a g : ↑Γ(X, ⊤))
+    (W : WeierstrassCurve (Localization.Away a)) :
+    Set.range ⇑(projModelBaseChange (awayToSections a g) W) =
+      Set.range ⇑(projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    (awayToSections a g).toAlgebra
+  haveI hoi1 : IsOpenImmersion (Spec.map (CommRingCat.ofHom (awayToSections a g))) :=
+    isOpenImmersion_specMap_awayToSections a g
+  haveI hoi2 : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, X.basicOpen (a * g))))) := hoi1
+  haveI : IsOpenImmersion (projModelBaseChange (awayToSections a g) W) :=
+    isOpenImmersion_projModelBaseChange W
+  have hpb := isPullback_projModelBaseChange (R := Localization.Away a)
+    (R' := ↑Γ(X, X.basicOpen (a * g))) W
+  have hsurj : Function.Surjective ⇑(hpb.isoPullback.hom) :=
+    (Scheme.homeoOfIso hpb.isoPullback).surjective
+  rw [Scheme.Opens.range_ι]
+  show Set.range ⇑(projModelBaseChange (awayToSections a g) W) = _
+  rw [show (projModelBaseChange (awayToSections a g) W)
+        = hpb.isoPullback.hom ≫ pullback.fst (projModelπ W)
+            (Spec.map (CommRingCat.ofHom (awayToSections a g)))
+      from hpb.isoPullback_hom_fst.symm]
+  rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp,
+    Set.range_eq_univ.mpr hsurj, Set.image_univ,
+    Scheme.Pullback.range_fst]
+  rw [show Set.range ⇑(Spec.map (CommRingCat.ofHom (awayToSections a g)))
+      = ↑(specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)) from by
+    rw [← opensRange_specMap_awayToSections a g]; rfl]
+  rfl
+
+/-- The `i`-th native-glue piece `Uᵢ ⟶ C.E`. -/
+noncomputable def gluePiece [IsAffine X] (a g : ↑Γ(X, ⊤))
+    (W : WeierstrassCurve (Localization.Away a))
+    (Q : LocalPresentation C ⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩)
+    (hQW : Q.W = W.map (awayToSections a g)) :
+    (projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).toScheme ⟶ C.E :=
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    (awayToSections a g).toAlgebra
+  haveI : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, X.basicOpen (a * g))))) :=
+    isOpenImmersion_specMap_awayToSections a g
+  haveI : IsOpenImmersion (projModelBaseChange (awayToSections a g) W) :=
+    isOpenImmersion_projModelBaseChange W
+  (IsOpenImmersion.isoOfRangeEq (projModelBaseChange (awayToSections a g) W)
+      (projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι
+      (gluePieceRange a g W)).inv ≫
+    eqToHom (congrArg projModel hQW).symm ≫ Q.e.inv ≫
+      pullback.fst C.π
+        (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι
+
+/-- Range of `Spec.map (awayToSections a g)` equals that of the basic-open inclusion. -/
+lemma specMap_awayToSections_range [IsAffine X] (a g : ↑Γ(X, ⊤)) :
+    Set.range ⇑(Spec.map (CommRingCat.ofHom (awayToSections a g))) =
+      Set.range ⇑(specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι := by
+  rw [Scheme.Opens.range_ι, ← Scheme.Hom.coe_opensRange, opensRange_specMap_awayToSections]
+
+
+/-- **(γ4 per-piece)** Over `U'ᵢ = D(fᵢ')` the model restriction is the base change of `C.E`. -/
+lemma gluePiece_isPullback [IsAffine X] (a g : ↑Γ(X, ⊤))
+    (W : WeierstrassCurve (Localization.Away a))
+    (Q : LocalPresentation C ⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩)
+    (hQW : Q.W = W.map (awayToSections a g)) :
+    IsPullback
+      (projModelπ W ∣_ specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g))
+      (gluePiece a g W Q hQW)
+      ((specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a))))
+      (C.π ≫ X.isoSpec.hom) := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    (awayToSections a g).toAlgebra
+  haveI hoi1 : IsOpenImmersion (Spec.map (CommRingCat.ofHom (awayToSections a g))) :=
+    isOpenImmersion_specMap_awayToSections a g
+  haveI hoi2 : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, X.basicOpen (a * g))))) := hoi1
+  haveI : IsOpenImmersion (projModelBaseChange (awayToSections a g) W) :=
+    isOpenImmersion_projModelBaseChange W
+  -- the chart square
+  have S_chart : IsPullback (Q.e.inv ≫ pullback.fst C.π
+        (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι)
+      (projModelπ Q.W) C.π
+      ((⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ :
+          X.affineOpens).2.isoSpec.inv ≫
+        (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι) := by
+    refine (IsPullback.of_hasPullback C.π
+      (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι).of_iso
+      Q.e (Iso.refl _) (⟨X.basicOpen (a * g),
+        (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).2.isoSpec (Iso.refl _) ?_ ?_ ?_ ?_
+    · simp
+    · exact Q.compat_π.symm
+    · simp
+    · simp
+  -- the two iso comparisons
+  have hSbc : IsPullback (projModelBaseChange (awayToSections a g) W)
+      (projModelπ (W.map (awayToSections a g))) (projModelπ W)
+      (Spec.map (CommRingCat.ofHom (awayToSections a g))) :=
+    isPullback_projModelBaseChange (R := Localization.Away a)
+      (R' := ↑Γ(X, X.basicOpen (a * g))) W
+  set ζ := IsOpenImmersion.isoOfRangeEq (projModelBaseChange (awayToSections a g) W)
+    (projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+      (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι (gluePieceRange a g W) with hζ
+  set κ := ζ.symm ≪≫ eqToIso (congrArg projModel hQW).symm with hκ
+  set ξ := IsOpenImmersion.isoOfRangeEq (Spec.map (CommRingCat.ofHom (awayToSections a g)))
+    (specBasicOpen (CommRingCat.of (Localization.Away a))
+      (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι (specMap_awayToSections_range a g) with hξ
+  -- the top square `s`: iso on two edges
+  have hs_w : (projModelπ W ∣_ specBasicOpen (CommRingCat.of (Localization.Away a))
+      (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)) ≫ ξ.inv = κ.hom ≫ projModelπ Q.W := by
+    rw [← cancel_mono (Spec.map (CommRingCat.ofHom (awayToSections a g))), Category.assoc,
+      Category.assoc, hξ,
+      IsOpenImmersion.isoOfRangeEq_inv_fac (Spec.map (CommRingCat.ofHom (awayToSections a g)))
+        (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι (specMap_awayToSections_range a g),
+      morphismRestrict_ι, hκ]
+    simp only [Iso.trans_hom, Iso.symm_hom, eqToIso.hom, Category.assoc]
+    have hpc : eqToHom (congrArg projModel hQW).symm ≫ projModelπ Q.W =
+        projModelπ (W.map (awayToSections a g)) := LocalPresentation.projModelπ_congr hQW.symm
+    rw [reassoc_of% hpc, ← hSbc.w, ← Category.assoc, hζ,
+      IsOpenImmersion.isoOfRangeEq_inv_fac]
+  have s : IsPullback (projModelπ W ∣_ specBasicOpen (CommRingCat.of (Localization.Away a))
+      (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)) κ.hom ξ.inv (projModelπ Q.W) :=
+    IsPullback.of_vert_isIso ⟨hs_w⟩
+  -- paste `s` with `S_chart.flip`
+  have hpaste := s.paste_vert S_chart.flip
+  -- identify the resulting maps
+  have hFi : κ.hom ≫ Q.e.inv ≫ pullback.fst C.π
+      (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι
+      = gluePiece a g W Q hQW := by
+    rw [hκ, hζ, gluePiece]
+    simp only [Iso.trans_hom, Iso.symm_hom, eqToIso.hom, Category.assoc]
+  -- the restriction `Γ(X,⊤) → Γ(X, D(a·g))` factors as `awayToSections ∘ algebraMap`
+  have hrestr : Spec.map (X.presheaf.map
+        (homOfLE (le_top : X.basicOpen (a * g) ≤ ⊤)).op) =
+      Spec.map (CommRingCat.ofHom (awayToSections a g)) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a))) := by
+    rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
+    congr 1
+    refine CommRingCat.hom_ext ?_
+    refine RingHom.ext fun x => ?_
+    rw [CommRingCat.hom_ofHom, RingHom.comp_apply, awayToSections_algebraMap]
+    rfl
+  have hbot : ξ.inv ≫ (⟨X.basicOpen (a * g),
+        (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).2.isoSpec.inv ≫
+      (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι =
+      (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a)))
+        ≫ X.isoSpec.inv := by
+    have hmid : (⟨X.basicOpen (a * g),
+          (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).2.isoSpec.inv ≫
+        (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι ≫
+          X.isoSpec.hom =
+        Spec.map (X.presheaf.map (homOfLE (le_top : X.basicOpen (a * g) ≤ ⊤)).op) := by
+      rw [show X.isoSpec.hom = X.toSpecΓ from rfl,
+        ← Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top, ← Category.assoc,
+        show (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩
+            : X.affineOpens).2.isoSpec.inv ≫ (X.basicOpen (a * g)).toSpecΓ = 𝟙 _ from by
+          rw [show (X.basicOpen (a * g)).toSpecΓ = (⟨X.basicOpen (a * g),
+              (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).2.isoSpec.hom from rfl,
+            Iso.inv_hom_id],
+        Category.id_comp]
+    rw [← cancel_mono X.isoSpec.hom, Category.assoc, Category.assoc, Category.assoc,
+      Category.assoc, Iso.inv_hom_id, Category.comp_id, hmid, hrestr, ← Category.assoc, hξ,
+      IsOpenImmersion.isoOfRangeEq_inv_fac]
+  -- transport the pasted square through `isoSpec` on the bottom-right corner
+  rw [hFi] at hpaste
+  refine hpaste.of_iso (Iso.refl _) (Iso.refl _) (Iso.refl _) X.isoSpec ?_ ?_ ?_ ?_
+  · simp
+  · simp
+  · rw [Iso.refl_hom, Category.id_comp, hbot, Category.assoc, Category.assoc,
+      Iso.inv_hom_id, Category.comp_id]
+  · simp
+
+
+/-- **(zero-leg per-piece)** The point at infinity of the model over `Uᵢ` is `C.zero`. -/
+lemma gluePiece_zero [IsAffine X] (a g : ↑Γ(X, ⊤))
+    (W : WeierstrassCurve (Localization.Away a))
+    (Q : LocalPresentation C ⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩)
+    (hQW : Q.W = W.map (awayToSections a g)) :
+    ∃ z : (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).toScheme ⟶
+        (projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).toScheme,
+      z ≫ (projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι =
+        (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι ≫ projModelZero W ∧
+      z ≫ gluePiece a g W Q hQW =
+        (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι ≫
+          Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a))) ≫
+            X.isoSpec.inv ≫ C.zero := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    (awayToSections a g).toAlgebra
+  haveI hoi1 : IsOpenImmersion (Spec.map (CommRingCat.ofHom (awayToSections a g))) :=
+    isOpenImmersion_specMap_awayToSections a g
+  haveI hoi2 : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, X.basicOpen (a * g))))) := hoi1
+  haveI : IsOpenImmersion (projModelBaseChange (awayToSections a g) W) :=
+    isOpenImmersion_projModelBaseChange W
+  set ζ := IsOpenImmersion.isoOfRangeEq (projModelBaseChange (awayToSections a g) W)
+    (projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+      (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι (gluePieceRange a g W) with hζ
+  set ξ := IsOpenImmersion.isoOfRangeEq (Spec.map (CommRingCat.ofHom (awayToSections a g)))
+    (specBasicOpen (CommRingCat.of (Localization.Away a))
+      (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι (specMap_awayToSections_range a g) with hξ
+  -- bottom-edge identity (as in `gluePiece_isPullback`)
+  have hrestr : Spec.map (X.presheaf.map
+        (homOfLE (le_top : X.basicOpen (a * g) ≤ ⊤)).op) =
+      Spec.map (CommRingCat.ofHom (awayToSections a g)) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a))) := by
+    rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
+    congr 1
+    refine CommRingCat.hom_ext (RingHom.ext fun x => ?_)
+    rw [CommRingCat.hom_ofHom, RingHom.comp_apply, awayToSections_algebraMap]
+    rfl
+  have hbot : ξ.inv ≫ (⟨X.basicOpen (a * g),
+        (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).2.isoSpec.inv ≫
+      (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι =
+      (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a)))
+        ≫ X.isoSpec.inv := by
+    have hmid : (⟨X.basicOpen (a * g),
+          (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).2.isoSpec.inv ≫
+        (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι ≫
+          X.isoSpec.hom =
+        Spec.map (X.presheaf.map (homOfLE (le_top : X.basicOpen (a * g) ≤ ⊤)).op) := by
+      rw [show X.isoSpec.hom = X.toSpecΓ from rfl,
+        ← Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top, ← Category.assoc,
+        show (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩
+            : X.affineOpens).2.isoSpec.inv ≫ (X.basicOpen (a * g)).toSpecΓ = 𝟙 _ from by
+          rw [show (X.basicOpen (a * g)).toSpecΓ = (⟨X.basicOpen (a * g),
+              (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).2.isoSpec.hom from rfl,
+            Iso.inv_hom_id],
+        Category.id_comp]
+    rw [← cancel_mono X.isoSpec.hom, Category.assoc, Category.assoc, Category.assoc,
+      Category.assoc, Iso.inv_hom_id, Category.comp_id, hmid, hrestr, ← Category.assoc, hξ,
+      IsOpenImmersion.isoOfRangeEq_inv_fac]
+  -- the zero point over the piece
+  refine ⟨ξ.inv ≫ projModelZero (W.map (awayToSections a g)) ≫ ζ.hom, ?_, ?_⟩
+  · -- lifts the model zero section
+    have hzbc : projModelZero (W.map (awayToSections a g)) ≫
+          projModelBaseChange (awayToSections a g) W =
+        Spec.map (CommRingCat.ofHom (awayToSections a g)) ≫ projModelZero W :=
+      projModelZero_baseChange (R' := ↑Γ(X, X.basicOpen (a * g))) W
+    rw [Category.assoc, Category.assoc, hζ, IsOpenImmersion.isoOfRangeEq_hom_fac, hzbc,
+      ← Category.assoc, hξ, IsOpenImmersion.isoOfRangeEq_inv_fac]
+  · -- realises `C.zero` through the chart
+    rw [gluePiece]
+    have hZ1 : projModelZero Q.W ≫ Q.e.inv ≫ pullback.fst C.π
+          (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι =
+        (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ :
+            X.affineOpens).2.isoSpec.inv ≫
+          (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι ≫
+            C.zero := by
+      rw [← Q.compat_zero, Category.assoc, Category.assoc, Iso.hom_inv_id_assoc,
+        pullback.lift_fst]
+    have hZzero : projModelZero (W.map (awayToSections a g)) ≫
+          eqToHom (congrArg projModel hQW).symm = projModelZero Q.W := by
+      rw [LocalPresentation.projModelZero_congr hQW]
+    calc (ξ.inv ≫ projModelZero (W.map (awayToSections a g)) ≫ ζ.hom) ≫
+            (IsOpenImmersion.isoOfRangeEq (projModelBaseChange (awayToSections a g) W)
+              (projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+                (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)).ι (gluePieceRange a g W)).inv ≫
+            eqToHom (congrArg projModel hQW).symm ≫ Q.e.inv ≫ pullback.fst C.π
+              (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ : X.affineOpens).1.ι
+        = ξ.inv ≫ projModelZero (W.map (awayToSections a g)) ≫
+            eqToHom (congrArg projModel hQW).symm ≫ Q.e.inv ≫ pullback.fst C.π
+              (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ :
+                X.affineOpens).1.ι := by
+          rw [← hζ]
+          simp only [Category.assoc, Iso.hom_inv_id_assoc]
+      _ = ξ.inv ≫ projModelZero Q.W ≫ Q.e.inv ≫ pullback.fst C.π
+              (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ :
+                X.affineOpens).1.ι := by rw [← Category.assoc _ (eqToHom _), hZzero]
+      _ = ξ.inv ≫ (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ :
+              X.affineOpens).2.isoSpec.inv ≫
+            (⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩ :
+                X.affineOpens).1.ι ≫ C.zero := by rw [hZ1]
+      _ = _ := by rw [reassoc_of% hbot]
+
+/-- The native glue over `D(a)` (γ3 + γ4). -/
+theorem nativeGlue [IsAffine X] (a : ↑Γ(X, ⊤)) {ι : Type u}
+    (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (W₀R₁ : WeierstrassCurve (Localization.Away a))
+    (DA : ∀ i, VariableChange ↑Γ(X, X.basicOpen (a * f i)))
+    (hQW : ∀ i, (((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+          (isAffineOpen_top X).basicOpen (a * f i)⟩)
+        (basicOpen_mul_le_right a (f i))).ofVC (DA i)).W
+        = W₀R₁.map (awayToSections a (f i)))
+    (hspan₁ : Ideal.span (Set.range fun i =>
+        algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i)) = ⊤)
+    (hVC1 : ∀ i j,
+        ((((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+              (isAffineOpen_top X).basicOpen (a * f i)⟩)
+            (basicOpen_mul_le_right a (f i))).ofVC (DA i)).restrict
+            (V' := ⟨X.basicOpen ((a * f i) * (a * f j)),
+              (isAffineOpen_top X).basicOpen _⟩)
+            (basicOpen_mul_le_left (a * f i) (a * f j))).transVC
+          ((((P j).restrict (V' := ⟨X.basicOpen (a * f j),
+              (isAffineOpen_top X).basicOpen (a * f j)⟩)
+            (basicOpen_mul_le_right a (f j))).ofVC (DA j)).restrict
+            (V' := ⟨X.basicOpen ((a * f i) * (a * f j)),
+              (isAffineOpen_top X).basicOpen _⟩)
+            (basicOpen_mul_le_right (a * f i) (a * f j))) = 1) :
+    ∃ ρR₁ : projModel W₀R₁ ⟶ C.E,
+      IsPullback (projModelπ W₀R₁) ρR₁
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a))))
+        (C.π ≫ X.isoSpec.hom) ∧
+      projModelZero W₀R₁ ≫ ρR₁
+        = Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a)))
+          ≫ X.isoSpec.inv ≫ C.zero := by
+  classical
+  -- the cover of `projModel W₀R₁` by preimages of the basic opens `D(fᵢ')`
+  set U : ι → (projModel W₀R₁).Opens := fun i =>
+    projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+      (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i)) with hUdef
+  -- the pieces
+  set F : ∀ i, (U i).toScheme ⟶ C.E := fun i =>
+    gluePiece a (f i) W₀R₁
+      (((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+          (isAffineOpen_top X).basicOpen (a * f i)⟩)
+        (basicOpen_mul_le_right a (f i))).ofVC (DA i)) (hQW i) with hFdef
+  -- γ3 cover: `⨆ᵢ Uᵢ = ⊤`
+  have hcov3 : ⨆ i, U i = ⊤ := by
+    have hspanTop : ⨆ i, specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i)) = ⊤ :=
+      PrimeSpectrum.iSup_basicOpen_eq_top_iff.mpr hspan₁
+    exact (projModelπ W₀R₁).iSup_preimage_eq_top hspanTop
+  -- ### γ3 AGREEMENT — THE SINGLE REMAINING FRONTIER (the genuine descent glue).
+  -- Everything else of the KM 4.7.0 mouth core is now AXIOM-CLEAN: the five barrier lemmas
+  -- (`gluePieceRange`, `gluePiece`, `specMap_awayToSections_range`, `gluePiece_isPullback`,
+  -- `gluePiece_zero`), the cover `hcov3`, `ρR₁` (built below), the per-piece `hpiece`, the γ4
+  -- pullback square, and the zero-leg are ALL proved sorry-free.  What remains is exactly the
+  -- pairwise agreement of the native-glue pieces on the overlaps `Uₖ ⊓ Uₗ`:  the two corrected
+  -- charts `Q k`, `Q l` restrict to the common affine `D((a·fₖ)·(a·fₗ))` where their comparison
+  -- variable change is trivial (`hVC1 k l : … .transVC … = 1`), so the two chart maps into `C.E`
+  -- coincide there.  Formally: feed `hVC1 k l` through `pointedIso_hom_of_transVC_eq_one`
+  -- (`Moduli/AdaptedModel.lean`) to identify the restricted chart isos, and connect `F k`/`F l`
+  -- to those restricted charts by `restrict_e_baseChange` + `restrictTheta_fst`
+  -- (`EllipticCurve/InvariantDifferential.lean`), transporting across the base-change comparison
+  -- over the overlap (`projModelBaseChange_comp'`).  Mirror `chartPiece_index_congr` +
+  -- `chartPiece_restrict` (`Moduli/UniversalAdapted.lean`), reversed (proj-model → E).
+  -- NOTE the one friction point: `hVC1`'s overlap is `D(a²·fₖfₗ)` whereas the away-charts live
+  -- over `D(a·fₖfₗ)` — the SAME open, different terms (transport with an `eqToHom`/`≤`-restrict).
+  have hagree : ∀ k l, (projModel W₀R₁).homOfLE (inf_le_left : U k ⊓ U l ≤ U k) ≫ F k =
+      (projModel W₀R₁).homOfLE (inf_le_right : U k ⊓ U l ≤ U l) ≫ F l := by
+    sorry
+  -- the glued native model map
+  set ρR₁ : projModel W₀R₁ ⟶ C.E :=
+    (projModel W₀R₁).topIso.inv ≫ (projModel W₀R₁).homOfLE hcov3.ge ≫
+      (Scheme.Opens.iSupOpenCover U).glueMorphisms F
+        (glueMorphisms_hf_of_agree U F hagree) with hρdef
+  -- per-piece: `Uᵢ.ι ≫ ρR₁ = Fᵢ`
+  have hpiece : ∀ i, (U i).ι ≫ ρR₁ = F i := by
+    intro i
+    have hstep : (U i).ι ≫ (projModel W₀R₁).topIso.inv ≫
+        (projModel W₀R₁).homOfLE hcov3.ge = (projModel W₀R₁).homOfLE (le_iSup U i) := by
+      rw [← cancel_mono (⨆ i, U i).ι, Category.assoc, Category.assoc, Scheme.homOfLE_ι,
+        Scheme.toIso_inv_ι, Category.comp_id, Scheme.homOfLE_ι]
+    rw [hρdef, reassoc_of% hstep]
+    exact (Scheme.Opens.iSupOpenCover U).ι_glueMorphisms F _ i
+  -- the `Uᵢ` cover `projModel W₀R₁` (for hom-extensionality)
+  have hcov_pt : ∀ x : ↥(projModel W₀R₁), ∃ i, x ∈ (U i).1 := fun x =>
+    TopologicalSpace.Opens.mem_iSup.mp (hcov3 ▸ (show x ∈ (⊤ : (projModel W₀R₁).Opens) from
+      trivial))
+  set cover : (projModel W₀R₁).OpenCover :=
+    Scheme.Cover.mkOfCovers ι (fun i => (U i).toScheme) (fun i => (U i).ι)
+      (fun x => by obtain ⟨i, hi⟩ := hcov_pt x; exact ⟨i, ⟨x, hi⟩, rfl⟩) with hcover
+  refine ⟨ρR₁, ?_, ?_⟩
+  · -- γ4 square, via `isPullback_of_iSup_eq_top` on the basic-open cover of `Spec A[1/a]`
+    refine isPullback_of_iSup_eq_top ?_
+      (fun i => specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i)))
+      (PrimeSpectrum.iSup_basicOpen_eq_top_iff.mpr hspan₁) (fun i => ?_)
+    · -- the square commutes (checked on the `Uᵢ` cover)
+      refine cover.hom_ext _ _ (fun i => ?_)
+      have keyw : (U i).ι ≫ projModelπ W₀R₁ ≫
+            Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a))) =
+          (U i).ι ≫ ρR₁ ≫ C.π ≫ X.isoSpec.hom := by
+        have hw := (gluePiece_isPullback a (f i) W₀R₁
+          (((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+              (isAffineOpen_top X).basicOpen (a * f i)⟩)
+            (basicOpen_mul_le_right a (f i))).ofVC (DA i)) (hQW i)).w
+        rw [← Category.assoc,
+          morphismRestrict_ι (projModelπ W₀R₁)
+            (specBasicOpen (CommRingCat.of (Localization.Away a))
+              (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i)))] at hw
+        rw [show (U i).ι ≫ ρR₁ ≫ C.π ≫ X.isoSpec.hom = F i ≫ C.π ≫ X.isoSpec.hom from by
+            rw [← Category.assoc, hpiece i], ← Category.assoc]
+        exact hw
+      rw [show cover.f i = (U i).ι from rfl]
+      exact keyw
+    · -- the per-piece square is `gluePiece_isPullback` (snd leg rewritten via `hpiece`)
+      rw [show (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).ι ≫ ρR₁ = F i from hpiece i]
+      exact gluePiece_isPullback a (f i) W₀R₁
+        (((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+            (isAffineOpen_top X).basicOpen (a * f i)⟩)
+          (basicOpen_mul_le_right a (f i))).ofVC (DA i)) (hQW i)
+  · -- zero-leg, via the basic-open cover of `Spec A[1/a]` + `gluePiece_zero`
+    have hcov_pt' : ∀ x : ↥(Spec (CommRingCat.of (Localization.Away a))),
+        ∃ i, x ∈ (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).1 := fun x =>
+      TopologicalSpace.Opens.mem_iSup.mp
+        ((PrimeSpectrum.iSup_basicOpen_eq_top_iff.mpr hspan₁) ▸
+          (show x ∈ (⊤ : (Spec (CommRingCat.of (Localization.Away a))).Opens) from trivial))
+    refine (Scheme.Cover.mkOfCovers ι
+      (fun i => (specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).toScheme)
+      (fun i => (specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).ι)
+      (fun x => by obtain ⟨i, hi⟩ := hcov_pt' x; exact ⟨i, ⟨x, hi⟩, rfl⟩)).hom_ext _ _ (fun i => ?_)
+    obtain ⟨z, hz1, hz2⟩ := gluePiece_zero a (f i) W₀R₁
+      (((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+          (isAffineOpen_top X).basicOpen (a * f i)⟩)
+        (basicOpen_mul_le_right a (f i))).ofVC (DA i)) (hQW i)
+    have keyz : (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).ι ≫ projModelZero W₀R₁ ≫ ρR₁ =
+        (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).ι ≫
+          Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(X, ⊤) (Localization.Away a))) ≫
+            X.isoSpec.inv ≫ C.zero := by
+      have hpi : (projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).ι ≫ ρR₁ =
+          gluePiece a (f i) W₀R₁
+            (((P i).restrict (V' := ⟨X.basicOpen (a * f i),
+                (isAffineOpen_top X).basicOpen (a * f i)⟩)
+              (basicOpen_mul_le_right a (f i))).ofVC (DA i)) (hQW i) := hpiece i
+      rw [← Category.assoc, ← hz1, Category.assoc, hpi, hz2]
+    rw [show (Scheme.Cover.mkOfCovers ι
+        (fun i => (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).toScheme)
+        (fun i => (specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).ι)
+        (fun x => by obtain ⟨i, hi⟩ := hcov_pt' x; exact ⟨i, ⟨x, hi⟩, rfl⟩)).f i =
+      (specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (f i))).ι from rfl]
+    exact keyz
+
+end NativeGlueAssembly
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **([a5-P-loc] Stage 3c, the mouth-core presentation at an invariant prime — THE
 FRONTIER)** At every prime `p` of the invariants `Aᴳ = Γ(X, ⊤)ᴳ` there is an invariant
@@ -2583,7 +3038,10 @@ theorem exists_invariant_away_presentation (G : Type*) [Group G] [Finite G] [IsA
   --   γ4: `isPullback_of_iSup_eq_top` on `{specBasicOpen (Away a₁) fᵢ'}` (cover of Spec A[1/a₁]),
   --     per-piece from `(Q i).compat_π` pasted on `isPullback_projModelBaseChange`; zero-leg from
   --     `(Q i).compat_zero` + `projModelZero_baseChange`, both checked on the cover per piece.
-  sorry
+  -- γ1/γ2 are the `hQW`/`hVC1`/`hspan₁` in scope; γ3+γ4 are assembled by `nativeGlue`
+  -- (ρR₁ built, γ4 pullback square + zero-leg PROVEN; residual `sorry` = the γ3 native-glue
+  -- agreement `hagree`, the descent glue from `hVC1` inside `nativeGlue`).
+  exact nativeGlue (C := C) ((a₁ : ↑Γ(X, ⊤))) f P W₀R₁ DA hQW hspan₁ hVC1
 
 end MouthCharts
 
