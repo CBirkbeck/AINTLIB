@@ -1,4 +1,8 @@
+import Mathlib.Algebra.Category.ModuleCat.Products
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import Mathlib.AlgebraicGeometry.Modules.Tilde
+import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 import Mathlib.LinearAlgebra.Dimension.Finite
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 
@@ -236,6 +240,67 @@ theorem Modules.isQuasicoherent_surjective_of_epi [IsAffine X]
     (((restrictFunctor (isoSpec X).inv).map f).val.app (op ⊤))
   exact Modules.isQuasicoherent_spec_surjective_of_epi
     ((restrictFunctor (isoSpec X).inv).map f)
+
+/-- The global sections of a finite free sheaf form a finite module. -/
+theorem Modules.free_globalSections_module_finite
+    (X : Scheme.{u}) (I : Type u) [Finite I] :
+    Module.Finite (X.ringCatSheaf.obj.obj (op ⊤))
+      ((SheafOfModules.evaluation X.ringCatSheaf (op ⊤)).obj
+        (SheafOfModules.free I (R := X.ringCatSheaf))) := by
+  let F := SheafOfModules.evaluation X.ringCatSheaf (op ⊤)
+  let U := fun _ : I ↦ SheafOfModules.unit X.ringCatSheaf
+  letI : HasBiproduct U := HasBiproduct.of_hasCoproduct U
+  letI : F.Additive := by
+    change (SheafOfModules.evaluation X.ringCatSheaf (op ⊤)).Additive
+    unfold SheafOfModules.evaluation
+    infer_instance
+  letI : PreservesLimit (Discrete.functor U) F := by
+    dsimp [F]
+    infer_instance
+  letI : PreservesBiproduct U F :=
+    preservesBiproduct_of_preservesProduct F
+  let e : F.obj (SheafOfModules.free I) ≅
+      ModuleCat.of (X.ringCatSheaf.obj.obj (op ⊤))
+        (∀ i, F.obj (U i)) :=
+    F.mapIso (biproduct.isoCoproduct U).symm ≪≫
+      F.mapBiproduct U ≪≫
+      biproduct.isoProduct (F.obj ∘ U) ≪≫
+      ModuleCat.piIsoPi (F.obj ∘ U)
+  have hfinite (i : I) :
+      Module.Finite (X.ringCatSheaf.obj.obj (op ⊤)) (F.obj (U i)) := by
+    change Module.Finite (X.ringCatSheaf.obj.obj (op ⊤))
+      (X.ringCatSheaf.obj.obj (op ⊤))
+    infer_instance
+  haveI : Module.Finite (X.ringCatSheaf.obj.obj (op ⊤)) (∀ i, F.obj (U i)) :=
+    @Module.Finite.pi _ _ I (fun i ↦ F.obj (U i)) inferInstance
+      (fun _ ↦ inferInstance) (fun _ ↦ inferInstance) hfinite
+  exact Module.Finite.equiv e.symm.toLinearEquiv
+
+/-- A quasicoherent module on an affine scheme with finitely many global generators has a
+finite module of global sections. -/
+theorem Modules.globalSections_module_finite_of_generatingSections_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
+    (G : M.GeneratingSections) [G.IsFiniteType] :
+    Module.Finite Γ(X, ⊤) Γ(M, ⊤) := by
+  haveI : Finite G.I :=
+    SheafOfModules.GeneratingSections.IsFiniteType.finite
+  let L : X.Modules := SheafOfModules.free G.I
+  let f : L ⟶ M := G.π
+  letI : Epi f := G.epi
+  letI : L.IsQuasicoherent := inferInstance
+  have hL : Module.Finite Γ(X, ⊤) Γ(L, ⊤) := by
+    change Module.Finite (X.ringCatSheaf.obj.obj (op ⊤))
+      ((SheafOfModules.evaluation X.ringCatSheaf (op ⊤)).obj
+        (SheafOfModules.free G.I (R := X.ringCatSheaf)))
+    exact Modules.free_globalSections_module_finite X G.I
+  letI : Module.Finite Γ(X, ⊤) Γ(L, ⊤) := hL
+  have hf : Epi f := inferInstance
+  have hsurj : Function.Surjective (f.val.app (op ⊤)).hom := by
+    exact @Modules.isQuasicoherent_surjective_of_epi X inferInstance
+      L M f inferInstance inferInstance hf
+  exact @Module.Finite.of_surjective
+    _ _ _ _ _ _ _ _ _ _ _ RingHomSurjective.ids hL
+    (f.val.app (op ⊤)).hom hsurj
 
 /-- An epimorphism of quasicoherent modules is surjective on sections over an affine open. -/
 theorem Modules.isQuasicoherent_app_surjective_of_epi
