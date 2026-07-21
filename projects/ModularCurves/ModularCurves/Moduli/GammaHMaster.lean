@@ -41,7 +41,15 @@ The assembly itself is pure: relative representability of `P_H` is repackaged fr
 
 universe u
 
-open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
+open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory
+
+-- `open MonObj` is deliberately AVOIDED: since the KM 4.7.0 engine (`Moduli/EngineWiring`,
+-- consumed by the receipts below) transitively imports mathlib's
+-- `CategoryTheory/Monoidal/Mod.lean`, `MonObj` now also carries the scoped notation
+-- `notation "γ" => ModObj.smul`, which would shadow this file's 25 `γ`-binders (group
+-- elements). We reproduce the one `MonObj` notation actually used here — the unit
+-- `η[·]` — file-locally instead; every other `MonObj`/`GrpObj` use is already qualified.
+local notation "η[" M "]" => CategoryTheory.MonObj.one (X := M)
 
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
