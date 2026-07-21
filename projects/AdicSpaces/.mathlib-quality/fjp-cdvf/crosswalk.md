@@ -160,17 +160,19 @@ base HEAD `79f069da0` (dev/adic-spaces). Companion documents in this directory:
 | K1 | 1 | `FJP/CDVFBase.lean`: two-layer uniformizer API + derived facts + `unitBall K ↔ 𝒪[K]` bridge + GraphKoszul scaling-bundle feeder | — | **DONE** (22 decls; `[CompleteSpace K]` deliberately absent — unused; needs `open scoped NormedField` AND `open scoped Valued` for `𝒪[K]`; `unitBall_eq_integer` is a Subring `=`, rw-able) |
 | K2a | 2 | `FJP/AdicCompletionPrincipal.lean`: `R⟦X⟧ ↠ AdicCompletion (span {a}) R`, noetherianity | — | **DONE** (11 decls; route = `AdicCompletion.liftRingHom` universal property + `evalₐ` interface, never the raw subtype; bonus `isNoetherianRing_of_isPrincipal`; mathlib-PR candidate; K2c note: instantiate at `R := MvPolynomial (Fin m) (unitBall K)`, `a := C ⟨ϖ,…⟩`, rewrite the ideal BEFORE going under `AdicCompletion`) |
 | K2b | 2 | `FJP/RestrictedGaussAdic.lean`: extract AdicBridge from GraphKoszul (import-cycle fix) | K3 lands first (same file) | queued |
-| K2c | 2 | `IsNoetherianRing (unitBall (P K m))`, `P K m`, `IsStronglyNoetherian K` from D2 chain | K1, K2a, K2b | queued |
-| K3 | 4 | `FJP/KoszulFiniteFree.lean` (mathlib-only) + conjugation section appended to GraphKoszul; edge cases m=0/1, q>m; sign tests | — | **DONE** (26 decls; d²=0 via pairTerm involution; KoszulIndex is an abbrev — semireducible broke rw; `koszulDifferential_apply` deliberately not @[simp]; K4 traps + sign-support API documented in the K3 report) |
-| K8a | 3 | `FJP/Over/JetRings.lean`: generic Milnor square, piA-D uniformizer family, Huber/Tate feeders, instance stack | K1 | **DONE** (131 constants; Huber/Tate as ϖ-taking theorems, chooser instances deferred to K9; no scoped-opens needed downstream of CDVFBase) |
-| K4 | 5 | coordinate all-degree exactness (induction on m) + graph localization → polynomial all-degree exactness | K3 | queued |
-| K5 | 6 | flat transfer to `P E m` (lTensor_exact + piScalarRight conjugation), noetherian-pod E | K3, K4, K2 | queued |
-| K6 | 7 | closed images + strictness all degrees + headline | K5 | queued |
-| K7 | 8 | equations (9)/(10), both forms | K6 | queued |
-| K8 | 3 | `FiniteJetOver` generic core (rings→…→sheaf transfer→endpoints), ϖ-parametric chart | K1 (K2c for sheafy pieces) | queued |
-| K9 | 9 | general public endpoints incl. structure-presheaf (all A⁺, completion models) | K6, K7, K8 | queued |
-| K10 | 3/9 | Laurent compatibility wrappers; five frozen types byte-checked | K8, K9 | queued |
-| K11 | 3 | `FJP/Over/ExamplePadic.lean` p-adic regression | K8 (K9 for endpoints) | queued |
+| K2c | 2 | `IsNoetherianRing (unitBall (P K m))`, `P K m`, `IsStronglyNoetherian K` from D2 chain | K1, K2a, K2b | **DONE** (4ca717095; IsStronglyNoetherian K as DVR-layer instance) |
+| K3 | 4 | `FJP/KoszulFiniteFree.lean` (mathlib-only) + conjugation section appended to GraphKoszul; edge cases m=0/1, q>m; sign tests | — | **DONE** (7c35d9ae7; 26 decls; d²=0 via pairTerm involution; KoszulIndex abbrev; `koszulDifferential_apply` not @[simp]) |
+| K8a | 3 | `FJP/Over/JetRings.lean`: generic Milnor square, piA-D uniformizer family, Huber/Tate feeders, instance stack | K1 | **DONE** (9f9ad0429; 131 constants) |
+| K4 | 5 | coordinate all-degree exactness + graph localization → polynomial all-degree exactness | K3 | **DONE** (d270c94c7; DIVERGENCE-A multidegree route not mapping-cone; DIVERGENCE-B standard-cover localization not maximal-ideal) |
+| K5 | 6 | flat transfer to `P E m` (lTensor_exact + piScalarRight conjugation), noetherian-pod E | K3, K4, K2 | **DONE** (ac3d97fa5; pure lTensor, no per-degree equational; no transparency set_option) |
+| K6 | 7 | closed images + strictness all degrees + headline | K5 | **DONE** (7ba853560; IsStrictLinearMap via no-Baire OMT bridge) |
+| K7 | 8 | equations (9)/(10), both forms | K6 | **DONE** (7ba853560; lattice form `pow_smul_graphIdeal_inter_unitBall_subset` renamed from crosswalk placeholder) |
+| K8b | 3 | `FJP/Over/UniformDomain.lean` + sanctioned `_hd` drop | K8a | **DONE** (04b0b8ac4) |
+| K8c | 3 | `FJP/Over/Chart.lean` (W;ϖ) chart + not_isStablyUniform | K8a, K8b | **DONE** (bdb8626fe; no maxHeartbeats needed at abstract K) |
+| K8d | 3 | `FJP/Over/{StrictLocalization,Functoriality,SheafTransfer}.lean` → isSheafy_JetA | K8a-c, K2c, K5 | **DONE** (5d4ee5ef0; ~4373 lines; loc-lift + Tate/Huber as ϖ-free instances) |
+| K9 | 9 | general public endpoints incl. structure-presheaf (all A⁺, completion models) | K6, K7, K8 | **DONE** (ac4b7a2b7; 35 decls; real structurePresheaf, 2 layers) |
+| K10 | 3/9 | Laurent compatibility wrappers; five frozen types byte-checked | K8, K9 | **in flight** |
+| K11 | 3 | `FJP/Over/ExamplePadic.lean` p-adic regression | K8 (K9 for endpoints) | **in flight** |
 | K12 | — | acceptance sweep: axiom audit, added-line scan, targeted + umbrella builds, `git diff --check`, final report | all | queued |
 
 ## Risk register
