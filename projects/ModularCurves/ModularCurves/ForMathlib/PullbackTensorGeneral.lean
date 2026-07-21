@@ -1414,6 +1414,50 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X Y : Scheme.{u}}
 
+noncomputable local instance pullbackTensorPresheafPushforwardIsRightAdjoint
+    (f : Y ⟶ X) :
+    (PresheafOfModules.pushforward.{u} f.toRingCatSheafHom.hom).IsRightAdjoint := by
+  change (PresheafOfModules.pushforward.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)).IsRightAdjoint
+  exact PresheafOfModules.instIsRightAdjointPushforward
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+
+noncomputable local instance pullbackTensorSheafPushforwardIsRightAdjoint
+    (f : Y ⟶ X) :
+    (SheafOfModules.pushforward.{u} f.toRingCatSheafHom).IsRightAdjoint := by
+  change (Scheme.Modules.pushforward f).IsRightAdjoint
+  infer_instance
+
+/-- The canonical presentation of sheaf pullback as sheafified presheaf pullback sends
+the pullback-adjunction unit of a section to the sheafification-unit image of the
+corresponding presheaf-pullback-adjunction unit. -/
+theorem pullbackIso_hom_unit_app_apply
+    (f : Y ⟶ X) (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
+    ((SheafOfModules.pullbackIso f.toRingCatSheafHom).hom.app M).val.app
+        (.op (f ⁻¹ᵁ U))
+        (((pullbackPushforwardAdjunction f).unit.app M).val.app (.op U) x) =
+      ((PresheafOfModules.sheafificationAdjunction
+        (𝟙 Y.ringCatSheaf.obj)).unit.app
+          ((PresheafOfModules.pullback
+            (_root_.PresheafOfModules.schemeRingPresheafHom f)).obj M.val)).app
+        (.op (f ⁻¹ᵁ U))
+          (((PresheafOfModules.pullbackPushforwardAdjunction
+            (_root_.PresheafOfModules.schemeRingPresheafHom f)).unit.app M.val).app
+              (.op U) x) := by
+  let adj₁ := SheafOfModules.pullbackPushforwardAdjunction f.toRingCatSheafHom
+  let adj₂ := SheafOfModules.PullbackConstruction.adjunction f.toRingCatSheafHom
+  let e := SheafOfModules.pullbackIso f.toRingCatSheafHom
+  have he := Adjunction.homEquiv_leftAdjointUniq_hom_app adj₁ adj₂ M
+  change (adj₁.homEquiv _ _) (e.hom.app M) = adj₂.unit.app M at he
+  change adj₁.unit.app M ≫
+    (SheafOfModules.pushforward f.toRingCatSheafHom).map (e.hom.app M) =
+      adj₂.unit.app M at he
+  have happ := congrArg (fun q => q.val.app (.op U) x) he
+  conv_lhs at happ =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  exact happ
+
 /-- **[D-PresPB′-general], payoff packaging (leaves G3 + A).** The pullback of sheaves of
 modules along an arbitrary morphism of schemes is a monoidal functor for the (v10.97)
 localized-monoidal structures: the objectwise content is the general-`f` sheafified
