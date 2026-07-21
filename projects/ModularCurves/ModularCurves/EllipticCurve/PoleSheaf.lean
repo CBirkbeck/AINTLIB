@@ -5506,6 +5506,40 @@ theorem dualPairing_tensorSection {X : Scheme.{u}} (M : X.Modules)
   rw [hk]
   exact hevApply
 
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U => by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b => mul_comm a b
+
+/-- A coefficient-one local frame evaluates to `1` against its coefficient-one
+dual frame. -/
+theorem dualPairing_overTrivializationSection_one
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    (dualPairing M).val.app (.op U)
+        (tensorSection M (Scheme.Modules.dualObj M) U
+          (overTrivializationSection M U e 1)
+          (overTrivializationSection (Scheme.Modules.dualObj M) U
+            (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U e) 1)) =
+      (show Γ(X, U) from 1) := by
+  let d := SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U e
+  let x : Γ(M, U) := overTrivializationSection M U e 1
+  let φ : Γ(Scheme.Modules.dualObj M, U) :=
+    overTrivializationSection (Scheme.Modules.dualObj M) U d 1
+  have hφ : φ = e.hom := by
+    dsimp only [φ, overTrivializationSection, d]
+    exact Scheme.Modules.dualOverIsoOfIso_inv_terminal_apply_oneT M U e
+  rw [dualPairing_tensorSection]
+  change SheafOfModules.evalSection X.ringCatSheaf M U φ x = _
+  rw [hφ]
+  change e.hom.val.app (.op (Over.mk (𝟙 U)))
+      (M.val.map (𝟙 U).op x) = _
+  have hmap : M.val.map (𝟙 (.op U)) x = x := by
+    exact Functor.map_id_apply M.val.presheaf (.op U) x
+  rw [op_id, hmap]
+  exact overTrivializationSection_coefficient M U e 1
+
 private theorem poleTopSectionHom_comp
     {X : Scheme.{u}} {M N : X.Modules} (x : Γ(M, (⊤ : X.Opens)))
     (f : M ⟶ N) :
