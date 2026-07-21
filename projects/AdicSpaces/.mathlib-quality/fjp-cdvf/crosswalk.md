@@ -158,7 +158,7 @@ base HEAD `79f069da0` (dev/adic-spaces). Companion documents in this directory:
 |---|---|---|---|---|
 | K0 | 0 | this crosswalk + the two scout docs, committed | — | done when committed |
 | K1 | 1 | `FJP/CDVFBase.lean`: two-layer uniformizer API + derived facts + `unitBall K ↔ 𝒪[K]` bridge + GraphKoszul scaling-bundle feeder | — | **DONE** (22 decls; `[CompleteSpace K]` deliberately absent — unused; needs `open scoped NormedField` AND `open scoped Valued` for `𝒪[K]`; `unitBall_eq_integer` is a Subring `=`, rw-able) |
-| K2a | 2 | `FJP/AdicCompletionPrincipal.lean`: `R⟦X⟧ ↠ AdicCompletion (span {a}) R`, noetherianity | — | **dispatch now** |
+| K2a | 2 | `FJP/AdicCompletionPrincipal.lean`: `R⟦X⟧ ↠ AdicCompletion (span {a}) R`, noetherianity | — | **DONE** (11 decls; route = `AdicCompletion.liftRingHom` universal property + `evalₐ` interface, never the raw subtype; bonus `isNoetherianRing_of_isPrincipal`; mathlib-PR candidate; K2c note: instantiate at `R := MvPolynomial (Fin m) (unitBall K)`, `a := C ⟨ϖ,…⟩`, rewrite the ideal BEFORE going under `AdicCompletion`) |
 | K2b | 2 | `FJP/RestrictedGaussAdic.lean`: extract AdicBridge from GraphKoszul (import-cycle fix) | K3 lands first (same file) | queued |
 | K2c | 2 | `IsNoetherianRing (unitBall (P K m))`, `P K m`, `IsStronglyNoetherian K` from D2 chain | K1, K2a, K2b | queued |
 | K3 | 4 | `FJP/KoszulFiniteFree.lean` (mathlib-only) + conjugation section appended to GraphKoszul; edge cases m=0/1, q>m; sign tests | — | **dispatch now** |
