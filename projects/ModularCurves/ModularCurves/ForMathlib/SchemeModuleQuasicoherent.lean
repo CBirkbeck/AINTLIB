@@ -99,6 +99,21 @@ theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent
     ((modulesSpecToSheaf.obj M).obj.map (specBasicOpen R f).leTop.op).hom f s
   exact ⟨n, t, ht.symm⟩
 
+/-- Finitely many sections of a quasicoherent module on `D(f)` extend globally after
+multiplication by one common power of `f`. -/
+theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_finite
+    (M : (Spec R).Modules) [M.IsQuasicoherent] (f : R)
+    {ι : Type*} [Finite ι] (s : ι → Γ(M, specBasicOpen R f)) :
+    ∃ (n : ℕ) (t : ι → Γ(M, ⊤)), ∀ i,
+      M.presheaf.map (specBasicOpen R f).leTop.op (t i) = f ^ n • s i := by
+  choose n t ht using fun i ↦
+    Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent M f (s i)
+  have hle (i : ι) : n i ≤ ⨆ i, n i :=
+    le_ciSup (Finite.bddAbove_range n) i
+  refine ⟨⨆ i, n i, fun i ↦ f ^ ((⨆ i, n i) - n i) • t i, fun i ↦ ?_⟩
+  rw [M.map_smul_Spec, ht i, ← mul_smul, ← pow_add,
+    Nat.sub_add_cancel (hle i)]
+
 namespace Modules
 
 variable (φ : X ≅ Y)
