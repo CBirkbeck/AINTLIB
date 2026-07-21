@@ -298,6 +298,19 @@ theorem coordinateHomogeneousLaurentFullNegativeAssembly_differential
     coordinateHomogeneousLaurentFullNegativeDifferential_apply
       (R := R) (σ := σ) (d := d) (n := n) (s := s) (e := e)]
 
+/-- Project a degree-zero homogeneous Laurent ordered Cech cochain onto all nonnegative weight
+components. -/
+noncomputable def coordinateHomogeneousLaurentNonnegativeProjection
+    [LinearOrder σ] (d : ℤ) :
+    coordinateHomogeneousLaurentOrderedCechObject
+        (R := R) (σ := σ) d 0 →ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      coordinateHomogeneousLaurentNonnegativeCochain
+        (R := R) (σ := σ) d :=
+  LinearMap.pi fun e =>
+    coordinateHomogeneousLaurentWeightComponent
+      (R := R) (σ := σ) d e.1 0
+
 /-- Project a homogeneous Laurent ordered Cech cochain onto all full-negative weight
 components. -/
 noncomputable def coordinateHomogeneousLaurentFullNegativeProjection
@@ -884,6 +897,106 @@ private theorem iCycles_coordinateDifferential_eq_zero
     (coordinateHomogeneousLaurentOrderedCechComplex_d
       (R := R) j d n)
   exact hd.symm.trans hz
+
+/-- Project a degree-zero homogeneous Laurent cycle onto all weight components with empty negative
+support. -/
+noncomputable def coordinateHomogeneousLaurentCyclesZeroToNonnegativeCochain
+    [LinearOrder σ] (j : σ) (d : ℤ) :
+    (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).cycles 0 →ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      coordinateHomogeneousLaurentNonnegativeCochain
+        (R := R) (σ := σ) d :=
+  (coordinateHomogeneousLaurentNonnegativeProjection
+    (R := R) (σ := σ) d).comp
+    ((coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).iCycles 0).hom
+
+/-- A degree-zero homogeneous Laurent cycle is determined by its weight components with empty
+negative support. -/
+theorem coordinateHomogeneousLaurentCyclesZeroToNonnegativeCochain_injective
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] (j : σ) (d : ℤ) :
+    Function.Injective
+      (coordinateHomogeneousLaurentCyclesZeroToNonnegativeCochain
+        (R := R) j d) := by
+  classical
+  intro z w hzw
+  apply (ModuleCat.mono_iff_injective
+    ((coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).iCycles 0)).mp inferInstance
+  let z' : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d 0 :=
+    (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).iCycles 0 z
+  let w' : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d 0 :=
+    (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).iCycles 0 w
+  let x : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d 0 := z' - w'
+  have hz' :
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d 0).hom z' = 0 := by
+    dsimp only [z']
+    exact iCycles_coordinateDifferential_eq_zero (R := R) j d 0 z
+  have hw' :
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d 0).hom w' = 0 := by
+    dsimp only [w']
+    exact iCycles_coordinateDifferential_eq_zero (R := R) j d 0 w
+  have hxcycle :
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d 0).hom x = 0 := by
+    change (coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) d 0).hom (z' - w') = 0
+    rw [map_sub, hz', hw', sub_zero]
+  have hcomponent (e : HomogeneousLaurentExponent σ d) :
+      coordinateHomogeneousLaurentWeightComponent
+          (R := R) d e 0 x = 0 := by
+    by_cases he : e.liftedNegativeSupport = ∅
+    · have heq := congrFun hzw ⟨e, he⟩
+      change coordinateHomogeneousLaurentWeightComponent
+          (R := R) d e 0 z' =
+        coordinateHomogeneousLaurentWeightComponent
+          (R := R) d e 0 w' at heq
+      dsimp only [x]
+      rw [map_sub, heq, sub_self]
+    · apply ModularCurves.orderedCechSupportDifferential_zero_injective_of_nonempty
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          e.liftedNegativeSupport (Set.nonempty_iff_ne_empty.mpr he)
+      rw [map_zero]
+      rw [← coordinateHomogeneousLaurentWeightComponent_differential
+        (R := R) (σ := σ) (d := d) (e := e) (n := 0)]
+      rw [hxcycle, map_zero]
+  have hx : x = 0 := by
+    rw [← coordinateHomogeneousLaurentActiveWeights_reconstruct d 0 x]
+    simp only [hcomponent, map_zero, Finset.sum_const_zero]
+  simpa only [x, z', w',
+    coordinateHomogeneousLaurentOrderedCechComplex_X] using sub_eq_zero.mp hx
+
+/-- Degree-zero cycles of the homogeneous Laurent ordered Cech complex form a finite module over a
+Noetherian coefficient ring. -/
+theorem coordinateHomogeneousLaurentOrderedCechComplex_cycles_zero_module_finite
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    (j : σ) (d : ℤ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).cycles 0) := by
+  letI : IsNoetherianRing
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens)) :=
+    isNoetherianRing_of_ringEquiv R
+      (Scheme.ΓSpecIso (CommRingCat.of R)).symm.commRingCatIsoToRingEquiv
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentNonnegativeCochain
+        (R := R) (σ := σ) d) :=
+    coordinateHomogeneousLaurentNonnegativeCochain.module_finite d
+  exact Module.Finite.of_injective
+    (coordinateHomogeneousLaurentCyclesZeroToNonnegativeCochain
+      (R := R) j d)
+    (coordinateHomogeneousLaurentCyclesZeroToNonnegativeCochain_injective
+      (R := R) j d)
 
 private theorem fullNegativeCyclesToCycles_projection
     [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ)
