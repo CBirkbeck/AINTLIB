@@ -397,6 +397,26 @@ lemma exists_pow_coordinateHyperplaneLocalEquation_smul_restrict_eq_zero
       (M.presheaf.map U.1.leTop.op t) = 0
   rw [hi, ← hj, ht, map_zero]
 
+/-- For a finite standard coordinate cover, the chartwise annihilating powers
+of a coordinate ratio may be replaced by one common exponent. -/
+lemma exists_pow_coordinateHyperplaneLocalEquation_smul_restrict_eq_zero_forall
+    [Fintype σ]
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (j : σ) (t : Γ(M, ⊤))
+    (ht : M.presheaf.map (coordinateOpen (R := R) j).leTop.op t = 0) :
+    ∃ n : ℕ, ∀ i : σ,
+      coordinateHyperplaneLocalEquation (R := R) i j ^ n •
+        M.presheaf.map (coordinateOpen (R := R) i).leTop.op t = 0 := by
+  classical
+  choose e he using fun i ↦
+    exists_pow_coordinateHyperplaneLocalEquation_smul_restrict_eq_zero
+      M i j t ht
+  let n := Finset.univ.sup e
+  refine ⟨n, fun i ↦ ?_⟩
+  have hle : e i ≤ n := Finset.le_sup (Finset.mem_univ i)
+  obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hle
+  rw [hd, pow_add, mul_comm, mul_smul, he i, smul_zero]
+
 private lemma coordinateHyperplaneLocalEquation_restrict_product
     (i k j : σ) :
     (Proj (homogeneousSubmodule σ R)).presheaf.map
