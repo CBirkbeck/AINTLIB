@@ -224,6 +224,50 @@ theorem coordinateHomogeneousLaurentFullNegativeAssembly_differential
     coordinateHomogeneousLaurentFullNegativeDifferential_apply
       (R := R) (σ := σ) (d := d) (n := n) (s := s) (e := e)]
 
+/-- Project a homogeneous Laurent ordered Cech cochain onto all full-negative weight
+components. -/
+noncomputable def coordinateHomogeneousLaurentFullNegativeProjection
+    [LinearOrder σ] (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentOrderedCechObject
+        (R := R) (σ := σ) d n →ₗ[
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))]
+      coordinateHomogeneousLaurentFullNegativeCochain
+        (R := R) (σ := σ) d n :=
+  LinearMap.pi fun e =>
+    coordinateHomogeneousLaurentWeightComponent
+      (R := R) d e.1 n
+
+@[simp]
+theorem coordinateHomogeneousLaurentFullNegativeProjection_apply
+    [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (s : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d n)
+    (e : {e : HomogeneousLaurentExponent σ d //
+      e.liftedNegativeSupport = (Set.univ : Set (ULift.{u} σ))}) :
+    coordinateHomogeneousLaurentFullNegativeProjection
+        (R := R) d n s e =
+      coordinateHomogeneousLaurentWeightComponent
+        (R := R) d e.1 n s := rfl
+
+/-- Projection onto the full-negative weights commutes with the ordered Cech differential. -/
+theorem coordinateHomogeneousLaurentFullNegativeProjection_differential
+    [LinearOrder σ] (d : ℤ) (n : ℕ)
+    (s : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d n) :
+    coordinateHomogeneousLaurentFullNegativeDifferential
+        (R := R) (σ := σ) d n
+        (coordinateHomogeneousLaurentFullNegativeProjection
+          (R := R) d n s) =
+      coordinateHomogeneousLaurentFullNegativeProjection
+        (R := R) d (n + 1)
+        ((coordinateHomogeneousLaurentOrderedCechDifferential
+          (R := R) (σ := σ) d n).hom s) := by
+  ext e
+  rw [coordinateHomogeneousLaurentFullNegativeDifferential_apply,
+    coordinateHomogeneousLaurentFullNegativeProjection_apply,
+    coordinateHomogeneousLaurentFullNegativeProjection_apply,
+    coordinateHomogeneousLaurentWeightComponent_differential]
+
 /-- The full-negative cocycles in one degree of the homogeneous Laurent ordered Cech
 presentation. -/
 def coordinateHomogeneousLaurentFullNegativeCycles
