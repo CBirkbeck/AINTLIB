@@ -360,6 +360,23 @@ theorem orderedCechSupportAlternatingExtend_differential
     exact (orderedCechSupportAlternatingExtend_apply_of_not_injective
       R N (n + 1) (orderedCechSupportDifferential R N n s) a ha).symm
 
+/-- Every positive-degree ordered support cocycle is a boundary. -/
+theorem exists_preimage_orderedCechSupportDifferential
+    (N : Set ι) (i₀ : ι) (hi₀ : i₀ ∉ N) (n : ℕ)
+    (s : OrderedCechSupportCochain R N (n + 1))
+    (hs : orderedCechSupportDifferential R N (n + 1) s = 0) :
+    ∃ t : OrderedCechSupportCochain R N n,
+      orderedCechSupportDifferential R N n t = s := by
+  have hcycle :
+      cechSupportDifferential R N (n + 1)
+          (orderedCechSupportAlternatingExtend R N (n + 1) s) = 0 := by
+    rw [orderedCechSupportAlternatingExtend_differential, hs, map_zero]
+  obtain ⟨t, ht⟩ := exists_preimage_cechSupportDifferential
+    R N i₀ hi₀ n (orderedCechSupportAlternatingExtend R N (n + 1) s) hcycle
+  refine ⟨orderedCechSupportRestrict R N n t, ?_⟩
+  rw [← orderedCechSupportRestrict_differential, ht,
+    orderedCechSupportAlternatingExtend_restrict]
+
 end
 
 end ModularCurves
