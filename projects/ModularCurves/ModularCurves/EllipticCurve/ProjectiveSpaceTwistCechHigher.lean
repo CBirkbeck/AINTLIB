@@ -955,6 +955,26 @@ theorem coordinateHomogeneousLaurentFullNegativeCyclesToHomology_surjective
           (R := R) j d (n + 1)).hom q) = x
   exact heq.symm.trans hz
 
+/-- Positive-degree homogeneous Laurent ordered-Cech homology is finite over a Noetherian
+coefficient ring. -/
+theorem coordinateHomogeneousLaurentOrderedCechComplex_homology_module_finite
+    [Fintype σ] [LinearOrder σ] [IsNoetherianRing R]
+    (j : σ) (d : ℤ) (n : ℕ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).homology (n + 1)) := by
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentFullNegativeCycles
+        (R := R) (σ := σ) d (n + 1)) :=
+    coordinateHomogeneousLaurentFullNegativeCycles.module_finite d (n + 1)
+  exact Module.Finite.of_surjective
+    (coordinateHomogeneousLaurentFullNegativeCyclesToHomology
+      (R := R) j d (n + 1)).hom
+    (coordinateHomogeneousLaurentFullNegativeCyclesToHomology_surjective
+      (R := R) j d n)
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation of the ordered Cech
 complex for a nonnegative projective twist is a boundary. -/
 theorem exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
