@@ -185,6 +185,17 @@ theorem RationalLocData.isRational_iff_span_eq_top {A : Type*} [CommRing A]
     D.IsRational ↔ Ideal.span (D.T : Set A) = ⊤ :=
   ⟨RationalLocData.IsRational.span_eq_top, RationalLocData.isRational_of_span_eq_top⟩
 
+/-- Extensionality for `RationalLocData` from the three data fields (the
+`hopen` field is a proposition). -/
+theorem RationalLocData.ext_of_fields {A : Type*} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] {D₁ D₂ : RationalLocData A}
+    (hP : D₁.P = D₂.P) (hT : D₁.T = D₂.T) (hs : D₁.s = D₂.s) : D₁ = D₂ := by
+  obtain ⟨P₁, T₁, s₁, h₁⟩ := D₁
+  obtain ⟨P₂, T₂, s₂, h₂⟩ := D₂
+  dsimp only at hP hT hs
+  subst hP; subst hT; subst hs
+  rfl
+
 /-- **Compatible plus subring** — a project-internal normalization condition, **not**
 a consequence of being a ring of integral elements and **not** a statement from
 Wedhorn (source-attribution corrected 2026-07-19; the earlier citation of

@@ -7,27 +7,49 @@ import «Adic spaces».AffinoidTransport
 import «Adic spaces».RelativePieceKeystone
 
 /-!
-# Transport of sheafiness along a bicontinuous ring equivalence (PASS 2)
+# Transport of the rational-localization layer along a bicontinuous ring equivalence
 
 For a bicontinuous ring equivalence `e : A ≃+* B` (an isomorphism of topological
-rings), pairs of definition, valid rational data, completed rational
-localizations, and ultimately the finite-rational sheafiness criterion `IsSheafy`
-transport to `B`.
+rings), this file transports the *data layer* of the rational-localization
+presheaf: pairs of definition, valid rational data, and the completed rational
+localizations, together with the exact equivalences (roundtrips) that make the
+transports reversible.
 
 Crucially, every datum used by sheafiness carries `D.IsRational`, so in Tate scope
 `Ideal.span D.T = ⊤`; the transported datum is reconstructed by `genPieceDatum`
 (which supplies `hopen` from the span condition) rather than by transporting an
 arbitrary `hopen` proof across the localization equivalence.
 
-* `PairOfDefinition.mapRingEquiv` (+ `subringMapHomeomorph`, `IsAdic.mapRingEquiv`).
-* `RationalLocData.mapRationalRingEquiv` — transport of *valid* rational data.
-* `presheafValueRingEquivOfRingEquiv` — the completed-localization equivalence.
-* `isSheafyFor_equiv`, `isSheafyComplete_congr` — the endpoints.
+Contents (all delivered in this file):
+
+* `PairOfDefinition.mapRingEquiv` (+ `subringMapHomeomorph`, `IsAdic.mapRingEquiv`),
+  its two roundtrips `mapRingEquiv_symm_map` / `mapRingEquiv_map_symm`, and the
+  packaged equivalence `PairOfDefinition.ringEquivCongr`.
+* `RationalLocData.mapRationalRingEquiv` — transport of *valid* rational data —
+  with the field simp lemmas (`_P`, `_T`, `_s`), the instance-free membership
+  characterization `mem_mapRationalRingEquiv_T`, both roundtrips, and the packaged
+  equivalence `validRationalLocDataEquiv : ValidRationalLocData A ≃
+  ValidRationalLocData B` (the exact, injective transport that cover
+  constructions use through `Finset.map`).
+* `presheafValueRingEquivOfRingEquiv` — the completed-localization equivalence
+  (with `_continuous`, `_symm_continuous`, `_canonicalMap`).
+
+Downstream (same campaign): rational-open transport, restriction conjugation, the
+cover pullback, the product homeomorphism, and the internal `IsSheafy` transport
+continue in this file; the public `IsSheafyFor`/`IsSheafyComplete` endpoints
+(`isSheafyFor_equiv`, `isSheafyComplete_congr`) live in
+`SheafyRingEquivTransport.lean` (they need `SheafyRing.lean`, which sits above
+this file in the import graph).
+
+`Finset.image` computations are performed under the file-local scoped `Classical`
+instance — no `DecidableEq` binder appears in any signature.
 -/
 
 noncomputable section
 
 open Filter Topology
+
+open scoped Classical
 
 namespace ValuationSpectrum
 
@@ -113,24 +135,112 @@ def PairOfDefinition.mapRingEquiv (e : A ≃+* B) (he : Continuous e)
       (PairOfDefinition.subringMapHomeomorph e he he' P.A₀).continuous_invFun
       P.isAdic
 
+@[simp] theorem PairOfDefinition.mapRingEquiv_A₀ (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) (P : PairOfDefinition A) :
+    (PairOfDefinition.mapRingEquiv e he he' P).A₀ = P.A₀.map e.toRingHom := rfl
+
+/-! #### The pair roundtrips (T1) -/
+
+/-- Extensionality for `PairOfDefinition` from the two data fields (the other
+fields are propositions); the ideal is compared as a `HEq` across the subring
+equality. -/
+theorem PairOfDefinition.ext_of_fields {P₁ P₂ : PairOfDefinition A}
+    (hA : P₁.A₀ = P₂.A₀) (hI : HEq P₁.I P₂.I) : P₁ = P₂ := by
+  obtain ⟨A₁, I₁, h₁, h₂, h₃⟩ := P₁
+  obtain ⟨A₂, I₂, g₁, g₂, g₃⟩ := P₂
+  dsimp only at hA hI
+  subst hA
+  have hI' : I₁ = I₂ := eq_of_heq hI
+  subst hI'
+  rfl
+
+/-- Mapping an ideal along a coercion-fixing hom between equal subrings is the
+identity, as a `HEq` across the subring equality (the dependent-ideal collapse
+used by the pair roundtrips). -/
+private theorem ideal_map_heq_of_coe_fix {S S' : Subring A} (h : S' = S)
+    (φ : S →+* S') (hφ : ∀ x : S, ((φ x : S') : A) = (x : A)) (I : Ideal S) :
+    HEq (I.map φ) I := by
+  subst h
+  exact heq_of_eq (by
+    rw [show φ = RingHom.id _ from RingHom.ext fun x => Subtype.ext (hφ x),
+      Ideal.map_id])
+
+/-- The subring roundtrip: mapping forward along `e` and back along `e.symm`
+recovers the subring. -/
+theorem PairOfDefinition.subring_map_symm_map (e : A ≃+* B) (s : Subring A) :
+    (s.map e.toRingHom).map e.symm.toRingHom = s := by
+  rw [Subring.map_map, show e.symm.toRingHom.comp e.toRingHom = RingHom.id A from
+    RingHom.ext fun a => e.symm_apply_apply a, Subring.map_id]
+
+/-- **The pair roundtrip** (T1): transporting a pair of definition forward along
+`e` and back along `e.symm` recovers the pair. The subrings agree by the map
+roundtrip; the dependent ideals agree because the composite restricted ring
+equivalence fixes the ambient coercion. -/
+theorem PairOfDefinition.mapRingEquiv_symm_map (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) (P : PairOfDefinition A) :
+    PairOfDefinition.mapRingEquiv e.symm he' he
+      (PairOfDefinition.mapRingEquiv e he he' P) = P := by
+  refine PairOfDefinition.ext_of_fields
+    (PairOfDefinition.subring_map_symm_map e P.A₀) ?_
+  show HEq ((P.I.map (e.subringMap (s := P.A₀)).toRingHom).map
+    (e.symm.subringMap (s := P.A₀.map e.toRingHom)).toRingHom) P.I
+  rw [Ideal.map_map]
+  exact ideal_map_heq_of_coe_fix (PairOfDefinition.subring_map_symm_map e P.A₀)
+    _ (fun x => e.symm_apply_apply (x : A)) P.I
+
+/-- **The pair roundtrip, other direction** (T1). -/
+theorem PairOfDefinition.mapRingEquiv_map_symm (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) (Q : PairOfDefinition B) :
+    PairOfDefinition.mapRingEquiv e he he'
+      (PairOfDefinition.mapRingEquiv e.symm he' he Q) = Q := by
+  have hsub : (Q.A₀.map e.symm.toRingHom).map e.toRingHom = Q.A₀ := by
+    rw [Subring.map_map, show e.toRingHom.comp e.symm.toRingHom = RingHom.id B from
+      RingHom.ext fun b => e.apply_symm_apply b, Subring.map_id]
+  refine PairOfDefinition.ext_of_fields hsub ?_
+  show HEq ((Q.I.map (e.symm.subringMap (s := Q.A₀)).toRingHom).map
+    (e.subringMap (s := Q.A₀.map e.symm.toRingHom)).toRingHom) Q.I
+  rw [Ideal.map_map]
+  exact ideal_map_heq_of_coe_fix hsub _ (fun x => e.apply_symm_apply (x : B)) Q.I
+
+/-- **Pairs of definition as an actual equivalence** (T1): a bicontinuous ring
+equivalence induces an equivalence of the types of pairs of definition. -/
+def PairOfDefinition.ringEquivCongr (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) :
+    PairOfDefinition A ≃ PairOfDefinition B where
+  toFun := PairOfDefinition.mapRingEquiv e he he'
+  invFun := PairOfDefinition.mapRingEquiv e.symm he' he
+  left_inv := PairOfDefinition.mapRingEquiv_symm_map e he he'
+  right_inv := PairOfDefinition.mapRingEquiv_map_symm e he he'
+
+@[simp] theorem PairOfDefinition.ringEquivCongr_apply (e : A ≃+* B)
+    (he : Continuous e) (he' : Continuous e.symm) (P : PairOfDefinition A) :
+    PairOfDefinition.ringEquivCongr e he he' P =
+      PairOfDefinition.mapRingEquiv e he he' P := rfl
+
+@[simp] theorem PairOfDefinition.ringEquivCongr_symm_apply (e : A ≃+* B)
+    (he : Continuous e) (he' : Continuous e.symm) (Q : PairOfDefinition B) :
+    (PairOfDefinition.ringEquivCongr e he he').symm Q =
+      PairOfDefinition.mapRingEquiv e.symm he' he Q := rfl
+
 end Pair
 
 /-! ### 2.2 Transport of valid rational data (reconstructed via `genPieceDatum`) -/
 
-section Datum
-
-variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
-  [DecidableEq B]
-
-/-- The image of a spanning family spans. -/
-theorem span_image_eq_top_of_ringEquiv (e : A ≃+* B) {T : Finset A}
+/-- The image of a spanning family spans (pure algebra; stated once with the
+file-local classical `Finset.image`). -/
+theorem span_image_eq_top_of_ringEquiv {A : Type u} {B : Type v} [CommRing A]
+    [CommRing B] (e : A ≃+* B) {T : Finset A}
     (h : Ideal.span (T : Set A) = ⊤) :
     Ideal.span ((T.image e : Finset B) : Set B) = ⊤ := by
   have hmap := congrArg (Ideal.map e.toRingHom) h
   rw [Ideal.map_span, Ideal.map_top] at hmap
   rw [Finset.coe_image]
   simpa using hmap
+
+section Datum
+
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
 
 /-- **Transport of a valid rational datum** (2.2): reconstruct via `genPieceDatum`
 from the transported pair `D.P.mapRingEquiv e`, numerators `D.T.image e`, denominator
@@ -142,6 +252,11 @@ def RationalLocData.mapRationalRingEquiv (e : A ≃+* B) (he : Continuous e)
   genPieceDatum (PairOfDefinition.mapRingEquiv e he he' D.P) (D.T.image e) (e D.s)
     (span_image_eq_top_of_ringEquiv e hD.span_eq_top)
 
+@[simp] theorem mapRationalRingEquiv_P (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) (D : RationalLocData A) (hD : D.IsRational) :
+    (D.mapRationalRingEquiv e he he' hD).P =
+      PairOfDefinition.mapRingEquiv e he he' D.P := rfl
+
 @[simp] theorem mapRationalRingEquiv_T (e : A ≃+* B) (he : Continuous e)
     (he' : Continuous e.symm) (D : RationalLocData A) (hD : D.IsRational) :
     (D.mapRationalRingEquiv e he he' hD).T = D.T.image e := rfl
@@ -149,6 +264,19 @@ def RationalLocData.mapRationalRingEquiv (e : A ≃+* B) (he : Continuous e)
 @[simp] theorem mapRationalRingEquiv_s (e : A ≃+* B) (he : Continuous e)
     (he' : Continuous e.symm) (D : RationalLocData A) (hD : D.IsRational) :
     (D.mapRationalRingEquiv e he he' hD).s = e D.s := rfl
+
+/-- Instance-free membership characterization of the transported numerator family:
+`b` is a transported numerator iff `e.symm b` is an original one. -/
+theorem mem_mapRationalRingEquiv_T (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) (D : RationalLocData A) (hD : D.IsRational) {b : B} :
+    b ∈ (D.mapRationalRingEquiv e he he' hD).T ↔ e.symm b ∈ D.T := by
+  rw [mapRationalRingEquiv_T]
+  constructor
+  · intro hb
+    obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp hb
+    rwa [e.symm_apply_apply]
+  · intro hb
+    simpa [e.apply_symm_apply] using Finset.mem_image_of_mem e hb
 
 /-- The transported datum is rational (its numerator family spans). -/
 theorem mapRationalRingEquiv_isRational (e : A ≃+* B) (he : Continuous e)
@@ -159,13 +287,217 @@ theorem mapRationalRingEquiv_isRational (e : A ≃+* B) (he : Continuous e)
 
 end Datum
 
+/-! ### 2.3 The valid-datum roundtrips and the exact equivalence (T1) -/
+
+section ValidData
+
+variable (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+
+/-- A **valid rational localization datum**: a `RationalLocData` bundled with
+Wedhorn Definition 7.29's openness condition. The sheafiness layer quantifies over
+exactly these; bundling makes the ring-equivalence transport an *equivalence* of
+types (`validRationalLocDataEquiv`), which is what supplies the injectivity needed
+by exact (`Finset.map`) cover transport. -/
+abbrev ValidRationalLocData : Type _ :=
+  {D : RationalLocData A // D.IsRational}
+
+end ValidData
+
+section Roundtrip
+
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTateRing B]
+
+/-- The `Finset.image` roundtrip along a ring equivalence. -/
+theorem finset_image_symm_image (e : A ≃+* B) (T : Finset A) :
+    (T.image e).image e.symm = T := by
+  rw [Finset.image_image,
+    show (⇑e.symm ∘ ⇑e : A → A) = id from funext fun a => e.symm_apply_apply a,
+    Finset.image_id]
+
+/-- **The valid-datum roundtrip** (T1): transporting forward along `e` and back
+along `e.symm` recovers the datum — fieldwise, via the pair roundtrip, the
+`Finset.image` roundtrip, and the inverse law of `e` (`hopen` and the validity
+proofs disappear by proof irrelevance). -/
+theorem RationalLocData.mapRationalRingEquiv_symm_map (e : A ≃+* B)
+    (he : Continuous e) (he' : Continuous e.symm) (D : RationalLocData A)
+    (hD : D.IsRational)
+    (hD' : (D.mapRationalRingEquiv e he he' hD).IsRational) :
+    (D.mapRationalRingEquiv e he he' hD).mapRationalRingEquiv e.symm he' he hD'
+      = D := by
+  refine RationalLocData.ext_of_fields ?_ ?_ ?_
+  · show PairOfDefinition.mapRingEquiv e.symm he' he
+      (PairOfDefinition.mapRingEquiv e he he' D.P) = D.P
+    exact PairOfDefinition.mapRingEquiv_symm_map e he he' D.P
+  · show (D.T.image e).image e.symm = D.T
+    exact finset_image_symm_image e D.T
+  · show e.symm (e D.s) = D.s
+    exact e.symm_apply_apply D.s
+
+/-- **The valid-datum roundtrip, other direction** (T1). -/
+theorem RationalLocData.mapRationalRingEquiv_map_symm (e : A ≃+* B)
+    (he : Continuous e) (he' : Continuous e.symm) (E : RationalLocData B)
+    (hE : E.IsRational)
+    (hE' : (E.mapRationalRingEquiv e.symm he' he hE).IsRational) :
+    (E.mapRationalRingEquiv e.symm he' he hE).mapRationalRingEquiv e he he' hE'
+      = E := by
+  refine RationalLocData.ext_of_fields ?_ ?_ ?_
+  · show PairOfDefinition.mapRingEquiv e he he'
+      (PairOfDefinition.mapRingEquiv e.symm he' he E.P) = E.P
+    exact PairOfDefinition.mapRingEquiv_map_symm e he he' E.P
+  · show (E.T.image e.symm).image e = E.T
+    rw [Finset.image_image,
+      show (⇑e ∘ ⇑e.symm : B → B) = id from funext fun b => e.apply_symm_apply b,
+      Finset.image_id]
+  · show e (e.symm E.s) = E.s
+    exact e.apply_symm_apply E.s
+
+variable (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+
+/-- **Valid rational data as an actual equivalence** (T1): a bicontinuous ring
+equivalence induces an equivalence of the types of valid rational localization
+data. This is the exact (choice-free, injective) transport that cover
+constructions consume through `Finset.map` — never a bare `Finset.image`. -/
+def validRationalLocDataEquiv :
+    ValidRationalLocData A ≃ ValidRationalLocData B where
+  toFun D := ⟨D.1.mapRationalRingEquiv e he he' D.2,
+    mapRationalRingEquiv_isRational e he he' D.1 D.2⟩
+  invFun E := ⟨E.1.mapRationalRingEquiv e.symm he' he E.2,
+    mapRationalRingEquiv_isRational e.symm he' he E.1 E.2⟩
+  left_inv D := Subtype.ext
+    (D.1.mapRationalRingEquiv_symm_map e he he' D.2
+      (mapRationalRingEquiv_isRational e he he' D.1 D.2))
+  right_inv E := Subtype.ext
+    (E.1.mapRationalRingEquiv_map_symm e he he' E.2
+      (mapRationalRingEquiv_isRational e.symm he' he E.1 E.2))
+
+@[simp] theorem validRationalLocDataEquiv_apply_coe (D : ValidRationalLocData A) :
+    (validRationalLocDataEquiv e he he' D).1 =
+      D.1.mapRationalRingEquiv e he he' D.2 := rfl
+
+@[simp] theorem validRationalLocDataEquiv_symm_apply_coe
+    (E : ValidRationalLocData B) :
+    ((validRationalLocDataEquiv e he he').symm E).1 =
+      E.1.mapRationalRingEquiv e.symm he' he E.2 := rfl
+
+end Roundtrip
+
+/-! ### 2.3½ Rational-open transport (T2) -/
+
+section RationalOpen
+
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
+  [PlusSubring A] [PlusSubring B]
+  (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+
+/-- Corresponding plus rings, read in the other direction: if `B⁺` is the image
+of `A⁺` then `A⁺` is the image of `B⁺` under the inverse. -/
+theorem ringPlus_map_symm_of_map
+    (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom) :
+    (A⁺ : Subring A) = (B⁺ : Subring B).map e.symm.toRingHom := by
+  rw [hplus]
+  exact (PairOfDefinition.subring_map_symm_map e (A⁺ : Subring A)).symm
+
+/-- **Pointwise rational-open transport** (T2): for corresponding plus rings, an
+upstairs valuation lies in the transported rational open `R(e(T)/e(s))` of
+`Spa (B, e(A⁺))` iff its pull-back lies in `R(T/s)` of `Spa (A, A⁺)`. For a
+bicontinuous ring equivalence no auxiliary `Spa`-membership hypothesis is needed
+(compare the one-sided FJP `mem_rationalOpen_pushDatumC_iff`). -/
+theorem mem_rationalOpen_mapRationalRingEquiv_iff
+    (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom)
+    (D : RationalLocData A) (hD : D.IsRational) {v : Spv B} :
+    v ∈ rationalOpen (D.mapRationalRingEquiv e he he' hD).T
+        (D.mapRationalRingEquiv e he he' hD).s ↔
+      comap e.toRingHom v ∈ rationalOpen D.T D.s := by
+  constructor
+  · rintro ⟨hvspa, hvle, hs0⟩
+    refine ⟨?_, fun t ht => ?_, fun h0 => hs0 ?_⟩
+    · exact comap_mem_spa_map e (A⁺ : Subring A) he (hplus ▸ hvspa)
+    · rw [comap_vle]
+      exact hvle (e t) (by
+        rw [mapRationalRingEquiv_T]; exact Finset.mem_image_of_mem _ ht)
+    · have hiff := comap_vle e.toRingHom v D.s 0
+      rw [map_zero] at hiff
+      rw [show (D.mapRationalRingEquiv e he he' hD).s = e.toRingHom D.s from rfl]
+      exact hiff.mp h0
+  · rintro ⟨hwspa, hwle, hws0⟩
+    refine ⟨?_, fun t' ht' => ?_, fun h0 => hws0 ?_⟩
+    · have hv' : comap e.symm.toRingHom (comap e.toRingHom v) ∈
+          Spa B ((A⁺ : Subring A).map e.toRingHom) :=
+        comap_symm_mem_spa_map e (A⁺ : Subring A) he' hwspa
+      rw [comap_comap_of_ringEquiv] at hv'
+      rw [show (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom from hplus]
+      exact hv'
+    · rw [mapRationalRingEquiv_T] at ht'
+      obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      have := hwle t ht
+      rw [comap_vle] at this
+      exact this
+    · have hiff := comap_vle e.toRingHom v D.s 0
+      rw [map_zero] at hiff
+      exact hiff.mpr (by
+        rw [show e.toRingHom D.s = (D.mapRationalRingEquiv e he he' hD).s from rfl]
+        exact h0)
+
+/-- **Set-level rational-open transport** (T2): the transported rational open is
+the `comap`-preimage of the original one. -/
+theorem rationalOpen_mapRationalRingEquiv_eq_preimage
+    (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom)
+    (D : RationalLocData A) (hD : D.IsRational) :
+    rationalOpen (D.mapRationalRingEquiv e he he' hD).T
+        (D.mapRationalRingEquiv e he he' hD).s =
+      comap e.toRingHom ⁻¹' rationalOpen D.T D.s :=
+  Set.ext fun _ => mem_rationalOpen_mapRationalRingEquiv_iff e he he' hplus D hD
+
+/-- **Subset transport** (T2): containment of transported rational opens is
+equivalent to containment of the originals. -/
+theorem rationalOpen_mapRationalRingEquiv_subset_iff
+    (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom)
+    (D : RationalLocData A) (hD : D.IsRational)
+    (E : RationalLocData A) (hE : E.IsRational) :
+    rationalOpen (D.mapRationalRingEquiv e he he' hD).T
+        (D.mapRationalRingEquiv e he he' hD).s ⊆
+      rationalOpen (E.mapRationalRingEquiv e he he' hE).T
+        (E.mapRationalRingEquiv e he he' hE).s ↔
+      rationalOpen D.T D.s ⊆ rationalOpen E.T E.s := by
+  constructor
+  · intro h w hw
+    have hvD : comap e.symm.toRingHom w ∈
+        rationalOpen (D.mapRationalRingEquiv e he he' hD).T
+          (D.mapRationalRingEquiv e he he' hD).s := by
+      rw [mem_rationalOpen_mapRationalRingEquiv_iff e he he' hplus D hD,
+        comap_symm_comap_of_ringEquiv]
+      exact hw
+    have hvE := h hvD
+    rw [mem_rationalOpen_mapRationalRingEquiv_iff e he he' hplus E hE,
+      comap_symm_comap_of_ringEquiv] at hvE
+    exact hvE
+  · intro h v hv
+    rw [mem_rationalOpen_mapRationalRingEquiv_iff e he he' hplus E hE]
+    exact h ((mem_rationalOpen_mapRationalRingEquiv_iff e he he' hplus D hD).mp hv)
+
+/-- One-way subset transport, downstairs to upstairs (the direction cover
+constructions consume). -/
+theorem rationalOpen_mapRationalRingEquiv_subset_of_subset
+    (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom)
+    (D : RationalLocData A) (hD : D.IsRational)
+    (E : RationalLocData A) (hE : E.IsRational)
+    (h : rationalOpen D.T D.s ⊆ rationalOpen E.T E.s) :
+    rationalOpen (D.mapRationalRingEquiv e he he' hD).T
+        (D.mapRationalRingEquiv e he he' hD).s ⊆
+      rationalOpen (E.mapRationalRingEquiv e he he' hE).T
+        (E.mapRationalRingEquiv e he he' hE).s :=
+  (rationalOpen_mapRationalRingEquiv_subset_iff e he he' hplus D hD E hE).mpr h
+
+end RationalOpen
+
 /-! ### 2.4 The completed rational-localization equivalence -/
 
 section PresheafValue
 
-variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
-  [DecidableEq B] [DecidableEq A]
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
   (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
   (D : RationalLocData A) (hD : D.IsRational)
 
@@ -315,6 +647,295 @@ theorem presheafValueRingEquivOfRingEquiv_canonicalMap (a : A) :
       from rfl, pvFwd_coe, locMapOfHom_algebraMap]
   rfl
 
+/-- **The completed rational-localization homeomorphism** (T3): the bundled
+topological form of `presheafValueRingEquivOfRingEquiv`. -/
+noncomputable def presheafValueHomeomorphOfRingEquiv :
+    presheafValue D ≃ₜ presheafValue (D.mapRationalRingEquiv e he he' hD) where
+  toEquiv := (presheafValueRingEquivOfRingEquiv e he he' D hD).toEquiv
+  continuous_toFun := presheafValueRingEquivOfRingEquiv_continuous e he he' D hD
+  continuous_invFun := presheafValueRingEquivOfRingEquiv_symm_continuous e he he' D hD
+
+@[simp] theorem presheafValueHomeomorphOfRingEquiv_apply (x : presheafValue D) :
+    presheafValueHomeomorphOfRingEquiv e he he' D hD x =
+      presheafValueRingEquivOfRingEquiv e he he' D hD x := rfl
+
+@[simp] theorem presheafValueHomeomorphOfRingEquiv_symm_apply
+    (y : presheafValue (D.mapRationalRingEquiv e he he' hD)) :
+    (presheafValueHomeomorphOfRingEquiv e he he' D hD).symm y =
+      (presheafValueRingEquivOfRingEquiv e he he' D hD).symm y := rfl
+
 end PresheafValue
+
+/-! ### 2.5 Restriction conjugation (T3) -/
+
+section Restriction
+
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [PlusSubring A] [HasLocLiftPowerBounded A]
+  [CommRing B] [TopologicalSpace B] [IsHuberRing B] [PlusSubring B]
+  [HasLocLiftPowerBounded B]
+  (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+
+/-- **The restriction conjugation square** (T3): the completed-localization
+equivalence commutes with restriction maps — for valid `D`, `E` with
+`R(E) ⊆ R(D)` (and the transported containment), the square
+
+    O(D)  ─────────────→ O(eD)
+     │ restriction          │ restriction
+     ▼                      ▼
+    O(E)  ─────────────→ O(eE)
+
+commutes. Direct specialization of `presheafValueMapOfHom_restriction`. -/
+theorem presheafValueRingEquivOfRingEquiv_restriction
+    (D : RationalLocData A) (hD : D.IsRational)
+    (E : RationalLocData A) (hE : E.IsRational)
+    (h : rationalOpen E.T E.s ⊆ rationalOpen D.T D.s)
+    (hBsub : rationalOpen (E.mapRationalRingEquiv e he he' hE).T
+        (E.mapRationalRingEquiv e he he' hE).s ⊆
+      rationalOpen (D.mapRationalRingEquiv e he he' hD).T
+        (D.mapRationalRingEquiv e he he' hD).s)
+    (x : presheafValue D) :
+    presheafValueRingEquivOfRingEquiv e he he' E hE (restrictionMap D E h x) =
+      restrictionMap (D.mapRationalRingEquiv e he he' hD)
+        (E.mapRationalRingEquiv e he he' hE) hBsub
+        (presheafValueRingEquivOfRingEquiv e he he' D hD x) := by
+  show pvFwd e he he' E hE (restrictionMap D E h x) =
+    restrictionMap _ _ hBsub (pvFwd e he he' D hD x)
+  exact presheafValueMapOfHom_restriction e.toRingHom he D E
+    (D.mapRationalRingEquiv e he he' hD) (E.mapRationalRingEquiv e he he' hE)
+    (hs_fwd e he he' D hD) (hT_fwd e he he' D hD)
+    (hs_fwd e he he' E hE) (hT_fwd e he he' E hE) h hBsub x
+
+/-- The inverse-direction restriction square (T3, corollary). -/
+theorem presheafValueRingEquivOfRingEquiv_symm_restriction
+    (D : RationalLocData A) (hD : D.IsRational)
+    (E : RationalLocData A) (hE : E.IsRational)
+    (h : rationalOpen E.T E.s ⊆ rationalOpen D.T D.s)
+    (hBsub : rationalOpen (E.mapRationalRingEquiv e he he' hE).T
+        (E.mapRationalRingEquiv e he he' hE).s ⊆
+      rationalOpen (D.mapRationalRingEquiv e he he' hD).T
+        (D.mapRationalRingEquiv e he he' hD).s)
+    (y : presheafValue (D.mapRationalRingEquiv e he he' hD)) :
+    (presheafValueRingEquivOfRingEquiv e he he' E hE).symm
+        (restrictionMap (D.mapRationalRingEquiv e he he' hD)
+          (E.mapRationalRingEquiv e he he' hE) hBsub y) =
+      restrictionMap D E h
+        ((presheafValueRingEquivOfRingEquiv e he he' D hD).symm y) := by
+  have hsq := presheafValueRingEquivOfRingEquiv_restriction e he he' D hD E hE h hBsub
+    ((presheafValueRingEquivOfRingEquiv e he he' D hD).symm y)
+  rw [RingEquiv.apply_symm_apply] at hsq
+  exact (presheafValueRingEquivOfRingEquiv e he he' E hE).symm_apply_eq.mpr hsq.symm
+
+end Restriction
+
+/-! ### 2.6 Pulling back a valid cover with an exact index equivalence (T4) -/
+
+section Pullback
+
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTateRing B]
+  [PlusSubring A] [PlusSubring B]
+  (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+
+/-- The **piece embedding** of a valid cover over `B` into the rational data of
+`A`: each piece is pulled back through (the inverse of) `validRationalLocDataEquiv`.
+Injectivity comes from the equivalence — this is the exact transport that
+`Finset.map` requires (never a bare `Finset.image`). -/
+def RationalCoveringData.pullbackPieceEmbedding (C : RationalCoveringData B)
+    (hC : C.IsRational) : {D // D ∈ C.covers} ↪ RationalLocData A where
+  toFun D := D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2)
+  inj' D₁ D₂ hDD := by
+    have h2 := (validRationalLocDataEquiv e he he').symm.injective
+      (Subtype.ext hDD :
+        (validRationalLocDataEquiv e he he').symm ⟨D₁.1, hC.piece D₁.2⟩ =
+        (validRationalLocDataEquiv e he he').symm ⟨D₂.1, hC.piece D₂.2⟩)
+    exact Subtype.ext
+      (congrArg (fun X : {D : RationalLocData B // D.IsRational} => X.1) h2)
+
+@[simp] theorem RationalCoveringData.pullbackPieceEmbedding_apply
+    (C : RationalCoveringData B) (hC : C.IsRational) (D : {D // D ∈ C.covers}) :
+    C.pullbackPieceEmbedding e he he' hC D =
+      D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2) := rfl
+
+/-- **Pull back a valid cover along a bicontinuous ring equivalence** (T4): the
+base and the pieces are pulled back through `validRationalLocDataEquiv`; the
+subordination and covering conditions transport through the pointwise
+rational-open correspondence (T2). The pieces are indexed *exactly* — by
+`C.covers.attach.map` of an embedding — so the cover has a genuine index
+equivalence (`pullbackIndexEquiv`) with no choice and no collapsing. -/
+def RationalCoveringData.pullbackRingEquiv (C : RationalCoveringData B)
+    (hC : C.IsRational)
+    (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom) :
+    RationalCoveringData A where
+  base := C.base.mapRationalRingEquiv e.symm he' he hC.base
+  covers := C.covers.attach.map (C.pullbackPieceEmbedding e he he' hC)
+  hsubset := by
+    intro D' hD'
+    obtain ⟨D₀, -, rfl⟩ := Finset.mem_map.mp hD'
+    show rationalOpen
+      (D₀.1.mapRationalRingEquiv e.symm he' he (hC.piece D₀.2)).T
+      (D₀.1.mapRationalRingEquiv e.symm he' he (hC.piece D₀.2)).s ⊆ _
+    exact rationalOpen_mapRationalRingEquiv_subset_of_subset e.symm he' he
+      (ringPlus_map_symm_of_map e hplus) D₀.1 (hC.piece D₀.2) C.base hC.base
+      (C.hsubset D₀.1 D₀.2)
+  hcover := by
+    intro v hv
+    have hvdown : comap e.symm.toRingHom v ∈ rationalOpen C.base.T C.base.s :=
+      (mem_rationalOpen_mapRationalRingEquiv_iff e.symm he' he
+        (ringPlus_map_symm_of_map e hplus) C.base hC.base).mp hv
+    obtain ⟨D₀, hD₀, hvD₀⟩ := C.hcover _ hvdown
+    refine ⟨C.pullbackPieceEmbedding e he he' hC ⟨D₀, hD₀⟩,
+      Finset.mem_map_of_mem _ (Finset.mem_attach _ _), ?_⟩
+    show v ∈ rationalOpen
+      (D₀.mapRationalRingEquiv e.symm he' he (hC.piece hD₀)).T
+      (D₀.mapRationalRingEquiv e.symm he' he (hC.piece hD₀)).s
+    exact (mem_rationalOpen_mapRationalRingEquiv_iff e.symm he' he
+      (ringPlus_map_symm_of_map e hplus) D₀ (hC.piece hD₀)).mpr hvD₀
+
+variable (C : RationalCoveringData B) (hC : C.IsRational)
+  (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom)
+
+@[simp] theorem RationalCoveringData.pullbackRingEquiv_base :
+    (C.pullbackRingEquiv e he he' hC hplus).base =
+      C.base.mapRationalRingEquiv e.symm he' he hC.base := rfl
+
+@[simp] theorem RationalCoveringData.pullbackRingEquiv_covers :
+    (C.pullbackRingEquiv e he he' hC hplus).covers =
+      C.covers.attach.map (C.pullbackPieceEmbedding e he he' hC) := rfl
+
+/-- Every piece of the pulled-back cover is valid. -/
+theorem RationalCoveringData.pullbackRingEquiv_covers_isRational
+    {D' : RationalLocData A}
+    (hD' : D' ∈ (C.pullbackRingEquiv e he he' hC hplus).covers) :
+    D'.IsRational := by
+  rw [RationalCoveringData.pullbackRingEquiv_covers] at hD'
+  obtain ⟨D₀, -, rfl⟩ := Finset.mem_map.mp hD'
+  exact mapRationalRingEquiv_isRational e.symm he' he D₀.1 (hC.piece D₀.2)
+
+/-- **The pulled-back cover is rational** (T4). -/
+theorem RationalCoveringData.pullbackRingEquiv_isRational :
+    (C.pullbackRingEquiv e he he' hC hplus).IsRational :=
+  ⟨mapRationalRingEquiv_isRational e.symm he' he C.base hC.base,
+   fun _ hD' => C.pullbackRingEquiv_covers_isRational e he he' hC hplus hD'⟩
+
+/-- **The exact index equivalence of the pulled-back cover** (T4): the pieces of
+`C` and of its pullback are in canonical bijection — choice-free in the function
+values (only membership/validity proofs are recovered from `Finset.mem_map`). -/
+def RationalCoveringData.pullbackIndexEquiv :
+    ↥C.covers ≃ ↥(C.pullbackRingEquiv e he he' hC hplus).covers where
+  toFun D := ⟨D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2), by
+    rw [RationalCoveringData.pullbackRingEquiv_covers]
+    exact Finset.mem_map_of_mem (C.pullbackPieceEmbedding e he he' hC)
+      (Finset.mem_attach _ ⟨D.1, D.2⟩)⟩
+  invFun D' := ⟨((validRationalLocDataEquiv e he he')
+      ⟨D'.1, C.pullbackRingEquiv_covers_isRational e he he' hC hplus D'.2⟩).1, by
+    obtain ⟨D₀, -, hval⟩ := Finset.mem_map.mp
+      (show D'.1 ∈ C.covers.attach.map (C.pullbackPieceEmbedding e he he' hC)
+        from D'.2)
+    have hvalid : (⟨D'.1, C.pullbackRingEquiv_covers_isRational e he he' hC hplus
+        D'.2⟩ : ValidRationalLocData A) =
+        (validRationalLocDataEquiv e he he').symm ⟨D₀.1, hC.piece D₀.2⟩ :=
+      Subtype.ext hval.symm
+    rw [hvalid, Equiv.apply_symm_apply]
+    exact D₀.2⟩
+  left_inv D := Subtype.ext
+    (RationalLocData.mapRationalRingEquiv_map_symm e he he' D.1 (hC.piece D.2)
+      (mapRationalRingEquiv_isRational e.symm he' he D.1 (hC.piece D.2)))
+  right_inv D' := Subtype.ext
+    (RationalLocData.mapRationalRingEquiv_symm_map e he he' D'.1
+      (C.pullbackRingEquiv_covers_isRational e he he' hC hplus D'.2)
+      (mapRationalRingEquiv_isRational e he he' D'.1
+        (C.pullbackRingEquiv_covers_isRational e he he' hC hplus D'.2)))
+
+/-- The underlying datum of a forward-transported index (T4 simp interface). -/
+@[simp] theorem RationalCoveringData.pullbackIndexEquiv_val (D : ↥C.covers) :
+    ((C.pullbackIndexEquiv e he he' hC hplus D : ↥(C.pullbackRingEquiv e he he'
+        hC hplus).covers) : RationalLocData A) =
+      D.1.mapRationalRingEquiv e.symm he' he (hC.piece D.2) := rfl
+
+/-- The underlying datum of a backward-transported index (T4 simp interface). -/
+@[simp] theorem RationalCoveringData.pullbackIndexEquiv_symm_val
+    (D' : ↥(C.pullbackRingEquiv e he he' hC hplus).covers) :
+    (((C.pullbackIndexEquiv e he he' hC hplus).symm D' : ↥C.covers) :
+        RationalLocData B) =
+      D'.1.mapRationalRingEquiv e he he'
+        (C.pullbackRingEquiv_covers_isRational e he he' hC hplus D'.2) := rfl
+
+end Pullback
+
+/-! ### 2.7 The product homeomorphism and the central conjugation square (T5) -/
+
+section ProductConj
+
+variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [PlusSubring A] [HasLocLiftPowerBounded A]
+  [CommRing B] [TopologicalSpace B] [IsTateRing B] [PlusSubring B]
+  [HasLocLiftPowerBounded B]
+  (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+  (C : RationalCoveringData B) (hC : C.IsRational)
+  (hplus : (B⁺ : Subring B) = (A⁺ : Subring A).map e.toRingHom)
+
+/-- **The product-of-sections homeomorphism** (T5): `Homeomorph.piCongr` along
+the exact index equivalence of the pulled-back cover, with the per-piece
+completed localization homeomorphisms in the fibers. -/
+noncomputable def RationalCoveringData.productSectionsHomeomorph :
+    (∀ D : ↥C.covers, presheafValue D.1) ≃ₜ
+      (∀ D' : ↥(C.pullbackRingEquiv e he he' hC hplus).covers, presheafValue D'.1) :=
+  Homeomorph.piCongr (C.pullbackIndexEquiv e he he' hC hplus)
+    (fun D => presheafValueHomeomorphOfRingEquiv e.symm he' he D.1 (hC.piece D.2))
+
+/-- Evaluation of the product homeomorphism at a forward-transported index: no
+cast appears because the index equivalence's value is definitionally the
+transported datum. -/
+theorem RationalCoveringData.productSectionsHomeomorph_apply_index
+    (f : ∀ D : ↥C.covers, presheafValue D.1) (D : ↥C.covers) :
+    C.productSectionsHomeomorph e he he' hC hplus f
+        (C.pullbackIndexEquiv e he he' hC hplus D) =
+      presheafValueHomeomorphOfRingEquiv e.symm he' he D.1 (hC.piece D.2) (f D) :=
+  Equiv.piCongr_apply_apply
+    (W := fun D : ↥C.covers => presheafValue D.1)
+    (Z := fun D' : ↥(C.pullbackRingEquiv e he he' hC hplus).covers =>
+      presheafValue D'.1)
+    (C.pullbackIndexEquiv e he he' hC hplus)
+    (fun D => (presheafValueHomeomorphOfRingEquiv e.symm he' he D.1
+      (hC.piece D.2)).toEquiv) f D
+
+/-- Pointwise evaluation of the inverse product homeomorphism: the backward
+transport is index-free (`Equiv.piCongr_symm_apply` is definitional). -/
+theorem RationalCoveringData.productSectionsHomeomorph_symm_apply
+    (g : ∀ D' : ↥(C.pullbackRingEquiv e he he' hC hplus).covers, presheafValue D'.1)
+    (D : ↥C.covers) :
+    (C.productSectionsHomeomorph e he he' hC hplus).symm g D =
+      (presheafValueRingEquivOfRingEquiv e.symm he' he D.1 (hC.piece D.2)).symm
+        (g (C.pullbackIndexEquiv e he he' hC hplus D)) := rfl
+
+/-- **The central conjugation square** (T5, the one theorem the `IsSheafy`
+transport consumes). Orientation:
+
+    productSectionsHomeomorph (productRestrictionSub B C x)
+      = productRestrictionSub A Cpull (baseHomeomorph x),
+
+where `baseHomeomorph` is the completed-localization homeomorphism at the base
+datum. Proved pointwise from the T3 restriction square; the dependent fibers are
+handled by the exact index equivalence (its values are definitionally the
+transported data — nothing is cast). -/
+theorem RationalCoveringData.productRestrictionSub_conj (x : presheafValue C.base) :
+    C.productSectionsHomeomorph e he he' hC hplus (productRestrictionSub B C x) =
+      productRestrictionSub A (C.pullbackRingEquiv e he he' hC hplus)
+        (presheafValueHomeomorphOfRingEquiv e.symm he' he C.base hC.base x) := by
+  funext D'
+  obtain ⟨D, rfl⟩ := (C.pullbackIndexEquiv e he he' hC hplus).surjective D'
+  rw [RationalCoveringData.productSectionsHomeomorph_apply_index]
+  show presheafValueRingEquivOfRingEquiv e.symm he' he D.1 (hC.piece D.2)
+      (restrictionMap C.base D.1 (C.hsubset D.1 D.2) x) =
+    restrictionMap (C.pullbackRingEquiv e he he' hC hplus).base
+      (C.pullbackIndexEquiv e he he' hC hplus D).1
+      ((C.pullbackRingEquiv e he he' hC hplus).hsubset _
+        (C.pullbackIndexEquiv e he he' hC hplus D).2)
+      (presheafValueRingEquivOfRingEquiv e.symm he' he C.base hC.base x)
+  exact presheafValueRingEquivOfRingEquiv_restriction e.symm he' he C.base hC.base
+    D.1 (hC.piece D.2) (C.hsubset D.1 D.2) _ x
+
+end ProductConj
 
 end ValuationSpectrum

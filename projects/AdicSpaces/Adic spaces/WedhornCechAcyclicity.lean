@@ -701,16 +701,8 @@ theorem RationalCoveringData.restrictTo_mem_interProd (Uf V : RationalCoveringDa
   rw [RationalCoveringData.interProd_covers, Finset.mem_image]
   exact ⟨⟨(P, Q.1), Finset.mem_product.mpr ⟨hP, Q.2⟩⟩, Finset.mem_attach _ _, rfl⟩
 
-omit [IsHuberRing A] in
-/-- Extensionality for `RationalLocData` from the three data fields (the
-`hopen` field is a proposition). -/
-theorem RationalLocData.ext_of_fields {D₁ D₂ : RationalLocData A}
-    (hP : D₁.P = D₂.P) (hT : D₁.T = D₂.T) (hs : D₁.s = D₂.s) : D₁ = D₂ := by
-  obtain ⟨P₁, T₁, s₁, h₁⟩ := D₁
-  obtain ⟨P₂, T₂, s₂, h₂⟩ := D₂
-  dsimp only at hP hT hs
-  subst hP; subst hT; subst hs
-  rfl
+-- `RationalLocData.ext_of_fields` was relocated to `Presheaf.lean` (T0, 2026-07-21):
+-- it is generic extensionality for the structure and belongs next to its definition.
 
 omit [IsHuberRing A] in
 open Classical in

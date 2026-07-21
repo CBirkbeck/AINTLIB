@@ -193,14 +193,9 @@ theorem pushDatumC_interOpen (d₁ d₂ : RationalLocData (JetA F))
     exact ⟨(mem_rationalOpen_pushDatumC_iff d₁ h₁ v hvspa).mp hv₁,
       (mem_rationalOpen_pushDatumC_iff d₂ h₂ v hvspa).mp hv₂⟩
 
-/-- Transport along a datum equality is restriction (the cast-elimination identity;
-`subst`-provable because the target is free). -/
-theorem restrictionMap_cast {A : Type*} [CommRing A] [TopologicalSpace A]
-    [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
-    (E₁ E₂ : RationalLocData A) (heq : E₁ = E₂) (v : presheafValue E₁) :
-    heq ▸ v = restrictionMap E₁ E₂ (by rw [heq]) v := by
-  subst heq
-  exact (congrFun (restrictionMap_id E₁) v).symm
+-- `restrictionMap_cast` was extracted to `PresheafFunctoriality.lean` (T0,
+-- 2026-07-21): it is fully generic (no jet structure); uses below resolve to
+-- `ValuationSpectrum.restrictionMap_cast` through the `open ValuationSpectrum`.
 
 section Gluing
 

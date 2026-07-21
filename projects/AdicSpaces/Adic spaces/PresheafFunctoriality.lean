@@ -64,6 +64,19 @@ theorem restrictionMapHom_canonicalMap_generic {A : Type*} [CommRing A]
     D.coeRingHom (algebraMap A (Localization.Away D.s) a) from rfl]
   rw [h_ext, restrictionMapAlg, IsLocalization.Away.lift_eq]
 
+/-- **Transport along a datum equality is restriction** (the cast-elimination
+identity; `subst`-provable because the target is free): rewriting a completed
+section along `E₁ = E₂` agrees with the restriction map for the induced
+(equality-derived) containment. Extracted from FJP (T0, 2026-07-21) — it is fully
+generic and is the standard tool for eliminating `▸`-casts between
+propositionally equal presheaf values. -/
+theorem restrictionMap_cast {A : Type*} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+    (E₁ E₂ : RationalLocData A) (heq : E₁ = E₂) (v : presheafValue E₁) :
+    heq ▸ v = restrictionMap E₁ E₂ (by rw [heq]) v := by
+  subst heq
+  exact (congrFun (restrictionMap_id E₁) v).symm
+
 section CovariantPush
 
 variable {R S : Type*} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
