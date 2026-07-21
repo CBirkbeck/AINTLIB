@@ -2038,6 +2038,52 @@ noncomputable def tensorSection {X : Scheme.{u}} (M N : X.Modules)
       (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app
         (.op U) (x ⊗ₜ y))
 
+/-- If a structure-sheaf section annihilates a module section, then their
+canonical pure tensor section is zero. -/
+theorem tensorSection_eq_zero_of_smul_eq_zero
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (x : Γ(M, U)) (a : Γ(X, U)) (h : a • x = 0) :
+    tensorSection M (Scheme.Modules.unitObj X) U x
+        (show Γ(Scheme.Modules.unitObj X, U) from a) = 0 := by
+  unfold tensorSection
+  have hq :
+      (x ⊗ₜ
+        (show Γ(Scheme.Modules.unitObj X, U) from a) :
+          (M.val ⊗ (Scheme.Modules.unitObj X).val).obj (.op U)) = 0 := by
+    let S := X.sheaf.obj.obj (.op U)
+    let MM : ModuleCat S := by
+      change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+      exact M.val.obj (.op U)
+    let AA : ModuleCat S := by
+      change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+      exact (Scheme.Modules.unitObj X).val.obj (.op U)
+    let xx : MM := x
+    let aa : S := a
+    let av : AA := show Γ(Scheme.Modules.unitObj X, U) from a
+    let onev : AA := show Γ(Scheme.Modules.unitObj X, U) from
+      (show Γ(X, U) from 1)
+    have hav : av = aa • onev := by
+      change a = a * 1
+      rw [mul_one]
+    have hx : aa • xx = 0 := h
+    change (xx ⊗ₜ[S] av : TensorProduct S MM AA) = 0
+    rw [hav]
+    calc
+      _ = (aa • xx) ⊗ₜ[S] onev :=
+        (TensorProduct.smul_tmul aa xx onev).symm
+      _ = 0 := by rw [hx, TensorProduct.zero_tmul]
+  let η := ((PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).unit.app
+      (M.val ⊗ (Scheme.Modules.unitObj X).val)).app (.op U)
+  let e := (monoidalTensorObjIso M (Scheme.Modules.unitObj X)).inv.val.app
+    (.op U)
+  change e.hom (η.hom
+      (x ⊗ₜ (show Γ(Scheme.Modules.unitObj X, U) from a))) = 0
+  calc
+    _ = e.hom (η.hom 0) := congrArg (fun q ↦ e.hom (η.hom q)) hq
+    _ = e.hom 0 := congrArg e.hom (map_zero η.hom)
+    _ = 0 := map_zero e.hom
+
 /-- Forming a pure tensor section commutes with restriction to a smaller open. -/
 theorem tensorSection_restrict {X : Scheme.{u}} (M N : X.Modules)
     {U V : X.Opens} (hVU : V ≤ U) (x : Γ(M, U)) (y : Γ(N, U)) :
