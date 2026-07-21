@@ -5366,31 +5366,30 @@ private theorem monoidalTensorObjIso_unit_comp_unitObjTensorIso
 
 /-- Under the canonical tensor-unit identification, the pure tensor of two structure-sheaf
 sections is their product. -/
-theorem unitObjTensorIso_hom_tensorSection_top (X : Scheme.{u})
-    (a b : Γ(X, (⊤ : X.Opens))) :
-    (unitObjTensorIso X).hom.val.app (.op (⊤ : X.Opens))
-      (tensorSection _ _ ⊤
-        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from a)
-        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from b)) =
+theorem unitObjTensorIso_hom_tensorSection (X : Scheme.{u})
+    (U : X.Opens) (a b : Γ(X, U)) :
+    (unitObjTensorIso X).hom.val.app (.op U)
+      (tensorSection _ _ U
+        (show Γ(Scheme.Modules.unitObj X, U) from a)
+        (show Γ(Scheme.Modules.unitObj X, U) from b)) =
       a * b := by
   let A := Scheme.Modules.unitObj X
   let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
   let adj := PresheafOfModules.sheafificationAdjunction
     (𝟙 X.ringCatSheaf.obj)
   let c := monoidalUnitObjIso X
-  let q₀ : (A.val ⊗ A.val).obj (.op (⊤ : X.Opens)) :=
-    (show Γ(A, (⊤ : X.Opens)) from a) ⊗ₜ
-      (show Γ(A, (⊤ : X.Opens)) from b)
+  let q₀ : (A.val ⊗ A.val).obj (.op U) :=
+    (show Γ(A, U) from a) ⊗ₜ
+      (show Γ(A, U) from b)
   let uq := (adj.unit.app (A.val ⊗ A.val)).app
-    (.op (⊤ : X.Opens)) q₀
+    (.op U) q₀
   have hmor := monoidalTensorObjIso_unit_comp_unitObjTensorIso X
-  have hmorTop := congrArg
-    (fun k ↦ k.val.app (.op (⊤ : X.Opens))) hmor
-  have hmorApply := ConcreteCategory.congr_hom hmorTop uq
+  have hmorU := congrArg (fun k ↦ k.val.app (.op U)) hmor
+  have hmorApply := ConcreteCategory.congr_hom hmorU uq
   erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
     ModuleCat.comp_apply] at hmorApply
-  change (unitObjTensorIso X).hom.val.app (.op (⊤ : X.Opens))
-      ((monoidalTensorObjIso A A).inv.val.app (.op (⊤ : X.Opens)) uq) = _
+  change (unitObjTensorIso X).hom.val.app (.op U)
+      ((monoidalTensorObjIso A A).inv.val.app (.op U) uq) = _
   rw [hmorApply]
   let f := (λ_ A.val).hom
   have hnat := adj.unit_naturality f
@@ -5409,30 +5408,37 @@ theorem unitObjTensorIso_hom_tensorSection_top (X : Scheme.{u})
     exact (Category.assoc _ _ _).symm |>.trans <|
       hnatp.trans <| (Category.assoc _ _ _).trans <|
         htrip.trans (Category.comp_id f)
-  have hpresheafTop := congrArg
-    (fun k ↦ k.app (.op (⊤ : X.Opens))) hpresheaf
-  have hpresheafApply := ConcreteCategory.congr_hom hpresheafTop q₀
+  have hpresheafU := congrArg (fun k ↦ k.app (.op U)) hpresheaf
+  have hpresheafApply := ConcreteCategory.congr_hom hpresheafU q₀
   erw [PresheafOfModules.comp_app, ModuleCat.comp_apply,
     PresheafOfModules.comp_app, ModuleCat.comp_apply] at hpresheafApply
-  have hleft : ((λ_ A.val).hom.app (.op (⊤ : X.Opens))) q₀ = a * b := by
-    have happ := PresheafOfModules.leftUnitor_hom_app A.val
-      (.op (⊤ : X.Opens))
+  have hleft : ((λ_ A.val).hom.app (.op U)) q₀ = a * b := by
+    have happ := PresheafOfModules.leftUnitor_hom_app A.val (.op U)
     have heval := ConcreteCategory.congr_hom happ q₀
     have hmodule :
-        ((λ_ (ModuleCat.of (X.sheaf.obj.obj (.op (⊤ : X.Opens)))
-          (X.sheaf.obj.obj (.op (⊤ : X.Opens))))).hom)
+        ((λ_ (ModuleCat.of (X.sheaf.obj.obj (.op U))
+          (X.sheaf.obj.obj (.op U)))).hom)
             (a ⊗ₜ b) = a • b :=
       ModuleCat.MonoidalCategory.leftUnitor_hom_apply
-        (R := X.sheaf.obj.obj (.op (⊤ : X.Opens)))
-        (M := ModuleCat.of (X.sheaf.obj.obj (.op (⊤ : X.Opens)))
-          (X.sheaf.obj.obj (.op (⊤ : X.Opens))))
-        (show X.sheaf.obj.obj (.op (⊤ : X.Opens)) from a)
-        (show X.sheaf.obj.obj (.op (⊤ : X.Opens)) from b)
+        (R := X.sheaf.obj.obj (.op U))
+        (M := ModuleCat.of (X.sheaf.obj.obj (.op U))
+          (X.sheaf.obj.obj (.op U)))
+        (show X.sheaf.obj.obj (.op U) from a)
+        (show X.sheaf.obj.obj (.op U) from b)
     have hsmul : a • b = a * b := by
       rfl
     exact heval.trans (hmodule.trans hsmul)
   dsimp only [uq]
   exact hpresheafApply.trans hleft
+
+theorem unitObjTensorIso_hom_tensorSection_top (X : Scheme.{u})
+    (a b : Γ(X, (⊤ : X.Opens))) :
+    (unitObjTensorIso X).hom.val.app (.op (⊤ : X.Opens))
+      (tensorSection _ _ ⊤
+        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from a)
+        (show Γ(Scheme.Modules.unitObj X, (⊤ : X.Opens)) from b)) =
+      a * b :=
+  unitObjTensorIso_hom_tensorSection X ⊤ a b
 
 private theorem unitObjTensorIso_inv_apply_one (X : Scheme.{u}) :
     (unitObjTensorIso X).inv.val.app (.op ⊤)
