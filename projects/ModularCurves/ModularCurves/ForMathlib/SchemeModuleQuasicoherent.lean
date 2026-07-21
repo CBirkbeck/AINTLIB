@@ -4,6 +4,7 @@ import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import Mathlib.AlgebraicGeometry.Modules.Tilde
 import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 import Mathlib.LinearAlgebra.Dimension.Finite
+import Mathlib.RingTheory.Localization.Finiteness
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
@@ -301,6 +302,131 @@ theorem Modules.globalSections_module_finite_of_generatingSections_of_isAffine
   exact @Module.Finite.of_surjective
     _ _ _ _ _ _ _ _ _ _ _ RingHomSurjective.ids hL
     (f.val.app (op ⊤)).hom hsurj
+
+private theorem Modules.module_finite_restrict_of_over_generators
+    (M : X.Modules) [M.IsQuasicoherent]
+    (U : X.Opens) (hU : IsAffineOpen U)
+    (G : (M.over U).GeneratingSections) [G.IsFiniteType] :
+    Module.Finite Γ(U.toScheme, ⊤) Γ(M.restrict U.ι, ⊤) := by
+  letI : IsAffine U.toScheme := hU
+  let F := (Modules.overEquiv U).functor
+  letI : PreservesColimitsOfSize.{u, u, u, u, u + 1, u + 1} F :=
+    (Modules.overEquiv U).toAdjunction.leftAdjoint_preservesColimits
+  have hF : PreservesColimitsOfSize.{u, u, u, u, u + 1, u + 1} F :=
+    inferInstance
+  let G' := @SheafOfModules.GeneratingSections.map
+    _ _ _ _ _ _ _ _ _ _ _ _ _ G F hF (Iso.refl _)
+  let G'' := SheafOfModules.GeneratingSections.equivOfIso
+    ((Modules.overFunctorEquiv U).app M) G'
+  haveI : G''.IsFiniteType := ⟨by
+    change Finite G.I
+    infer_instance⟩
+  exact Modules.globalSections_module_finite_of_generatingSections_of_isAffine
+    (M.restrict U.ι) G''
+
+private theorem Modules.module_finite_app_of_over_generators
+    (M : X.Modules) [M.IsQuasicoherent]
+    (U : X.Opens) (hU : IsAffineOpen U)
+    (G : (M.over U).GeneratingSections) [G.IsFiniteType] :
+    Module.Finite Γ(X, U) Γ(M, U) := by
+  have hfinite : Module.Finite Γ(U.toScheme, ⊤) Γ(M.restrict U.ι, ⊤) :=
+    Modules.module_finite_restrict_of_over_generators M U hU G
+  let eR' := U.ι.appIso (⊤ : U.toScheme.Opens)
+  let eR : Γ(X, U.ι ''ᵁ (⊤ : U.toScheme.Opens)) ≃+* Γ(U.toScheme, ⊤) :=
+    eR'.commRingCatIsoToRingEquiv
+  let eM' := M.restrictAppIso U.ι ⊤
+  let σ : Γ(U.toScheme, ⊤) →+*
+      Γ(X, U.ι ''ᵁ (⊤ : U.toScheme.Opens)) := eR'.inv.hom
+  let eM : Γ(M.restrict U.ι, ⊤) →ₛₗ[σ]
+      Γ(M, U.ι ''ᵁ (⊤ : U.toScheme.Opens)) :=
+    { toFun := eM'.hom
+      map_add' := eM'.hom.hom.map_add
+      map_smul' := by
+        intro r x
+        change eM'.hom (r • x) = eR'.inv.hom r • eM'.hom x
+        exact Modules.smul_restrictAppIso_hom_apply U.ι M ⊤ r x }
+  have hσ : Function.Surjective σ := by
+    change Function.Surjective
+      (eR.symm : Γ(U.toScheme, ⊤) →+*
+        Γ(X, U.ι ''ᵁ (⊤ : U.toScheme.Opens)))
+    exact eR.symm.surjective
+  letI : RingHomSurjective σ := ⟨hσ⟩
+  have heM : Function.Bijective eM := by
+    change Function.Bijective eM'.hom
+    exact ConcreteCategory.bijective_of_isIso eM'.hom
+  have htarget : Module.Finite
+      Γ(X, U.ι ''ᵁ (⊤ : U.toScheme.Opens))
+      Γ(M, U.ι ''ᵁ (⊤ : U.toScheme.Opens)) :=
+    (eM.finite_iff_of_bijective heM).mp hfinite
+  rw [U.ι_image_top] at htarget
+  exact htarget
+
+private theorem Modules.module_finite_app_of_over_generators_of_le
+    (M : X.Modules) [M.IsQuasicoherent]
+    {U V : X.Opens} (hVU : V ≤ U) (hV : IsAffineOpen V)
+    (G : (M.over U).GeneratingSections) [G.IsFiniteType] :
+    Module.Finite Γ(X, V) Γ(M, V) := by
+  let i : V ⟶ U := homOfLE hVU
+  let F := SheafOfModules.overMap X.ringCatSheaf i
+  letI : PreservesColimitsOfSize.{u, u, u, u, u + 1, u + 1} F :=
+    (SheafOfModules.overMapPushforwardAdj X.ringCatSheaf i).leftAdjoint_preservesColimits
+  have hF : PreservesColimitsOfSize.{u, u, u, u, u + 1, u + 1} F :=
+    inferInstance
+  let G' := @SheafOfModules.GeneratingSections.map
+    _ _ _ _ _ _ _ _ _ _ _ _ _ G F hF
+      (SheafOfModules.overMapUnitIso i).symm
+  let G'' := SheafOfModules.GeneratingSections.equivOfIso
+    ((SheafOfModules.overFunctorMap X.ringCatSheaf i).app M) G'
+  haveI : G''.IsFiniteType := ⟨by
+    change Finite G.I
+    infer_instance⟩
+  exact Modules.module_finite_app_of_over_generators M V hV G''
+
+/-- A finite-type quasicoherent module on an affine spectrum has finite global sections. -/
+theorem Modules.globalSections_module_finite_of_isFiniteType
+    (M : (Spec R).Modules) [M.IsQuasicoherent] [M.IsFiniteType] :
+    Module.Finite R Γ(M, ⊤) := by
+  obtain ⟨q, hq⟩ := SheafOfModules.IsFiniteType.exists_localGeneratorsData M
+  letI : q.IsFiniteType := hq
+  let t : Set R := { f | ∃ i, specBasicOpen R f ≤ q.X i }
+  have hqcover : ⨆ i, q.X i = ⊤ := by
+    simpa only [IsOpenCover] using
+      (Opens.coversTop_iff (T := Spec R) q.X).mp q.coversTop
+  have hopen : ⨆ f ∈ t, specBasicOpen R f = ⊤ := by
+    apply top_unique
+    rw [← hqcover]
+    refine iSup_le fun i ↦ ?_
+    rintro x hx
+    obtain ⟨_, ⟨_, ⟨f, rfl⟩, rfl⟩, hxf, hf⟩ :=
+      PrimeSpectrum.isBasis_basic_opens.exists_subset_of_mem_open hx (q.X i).2
+    have hle : specBasicOpen R f ≤ ⨆ f ∈ t, specBasicOpen R f :=
+      le_iSup_of_le f (le_iSup_of_le (show f ∈ t from ⟨i, hf⟩) le_rfl)
+    exact hle hxf
+  have ht : Ideal.span t = ⊤ :=
+    PrimeSpectrum.iSup_basicOpen_eq_top_iff'.mp hopen
+  let φ : (g : t) → Γ(M, ⊤) →ₗ[R] Γ(M, specBasicOpen R g.1) :=
+    fun g ↦ ((modulesSpecToSheaf.obj M).obj.map
+      (specBasicOpen R g.1).leTop.op).hom
+  have hlocal : IsLocalizing (modulesSpecToSheaf.obj M) :=
+    (isIso_fromTildeΓ_iff_isLocalizing M).mp inferInstance
+  letI (g : t) : Algebra R Γ(Spec R, specBasicOpen R g.1) :=
+    inferInstance
+  letI (g : t) : IsLocalization.Away g.1
+      Γ(Spec R, specBasicOpen R g.1) := inferInstance
+  letI (g : t) : IsScalarTower R
+      Γ(Spec R, specBasicOpen R g.1) Γ(M, specBasicOpen R g.1) :=
+    inferInstance
+  letI : ∀ g : t, IsLocalizedModule.Away g.1 (φ g) :=
+    fun g ↦ hlocal g.1
+  refine Module.Finite.of_localizationSpan'
+    (Mₚ := fun g : t ↦ Γ(M, specBasicOpen R g.1))
+    (Rₚ := fun g : t ↦ Γ(Spec R, specBasicOpen R g.1))
+    t ht φ ?_
+  intro g
+  obtain ⟨i, hi⟩ := g.2
+  letI : (q.generators i).IsFiniteType := hq.isFiniteType i
+  exact Modules.module_finite_app_of_over_generators_of_le M hi
+    (IsAffineOpen.Spec_basicOpen g.1) (q.generators i)
 
 /-- An epimorphism of quasicoherent modules is surjective on sections over an affine open. -/
 theorem Modules.isQuasicoherent_app_surjective_of_epi
