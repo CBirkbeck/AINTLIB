@@ -56,6 +56,18 @@ local instance (X : Scheme.{u}) :
 noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
+noncomputable local instance (X : Scheme.{u}) :
+    MonoidalCategory (SheafOfModules X.ringCatSheaf) := by
+  change MonoidalCategory X.Modules
+  exact Scheme.Modules.monoidalCategory X
+
+noncomputable local instance (X : Scheme.{u}) :
+    (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).Monoidal :=
+  inferInstanceAs ((Localization.Monoidal.toMonoidalCategory
+    (L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+    (W := PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+    (Iso.refl _)).Monoidal)
+
 namespace ModularCurves
 
 /-- Base change of a section along a morphism of bases. -/
@@ -2037,6 +2049,141 @@ noncomputable def tensorSection {X : Scheme.{u}} (M N : X.Modules)
     (((PresheafOfModules.sheafificationAdjunction
       (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app
         (.op U) (x ⊗ₜ y))
+
+/-- The cotensorator of module sheafification is obtained by mapping the tensor of the
+two sheafification units and then applying the canonical inverse tensor comparison. -/
+theorem sheafification_δ_eq_map_unit_tensor_comp_monoidalTensorObjIso_inv
+    {X : Scheme.{u}} (A B : X.PresheafOfModules) :
+    let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+    let adj := PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)
+    Functor.OplaxMonoidal.δ L A B =
+      L.map (adj.unit.app A ⊗ₘ adj.unit.app B) ≫
+        (monoidalTensorObjIso (L.obj A) (L.obj B)).inv := by
+  dsimp only
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)
+  let cA := Scheme.Modules.sheafifyValIso (L.obj A)
+  let cB := Scheme.Modules.sheafifyValIso (L.obj B)
+  have hδ := Functor.OplaxMonoidal.δ_natural L
+    (adj.unit.app A) (adj.unit.app B)
+  change
+    Functor.OplaxMonoidal.δ L A B ≫
+        (L.map (adj.unit.app A) ⊗ₘ L.map (adj.unit.app B)) =
+      L.map (adj.unit.app A ⊗ₘ adj.unit.app B) ≫
+        Functor.OplaxMonoidal.δ L (L.obj A).val (L.obj B).val at hδ
+  have hA : L.map (adj.unit.app A) ≫ cA.hom = 𝟙 (L.obj A) := by
+    change L.map (adj.unit.app A) ≫ adj.counit.app (L.obj A) = 𝟙 (L.obj A)
+    exact adj.left_triangle_components A
+  have hB : L.map (adj.unit.app B) ≫ cB.hom = 𝟙 (L.obj B) := by
+    change L.map (adj.unit.app B) ≫ adj.counit.app (L.obj B) = 𝟙 (L.obj B)
+    exact adj.left_triangle_components B
+  have hmono :
+      (monoidalTensorObjIso (L.obj A) (L.obj B)).inv =
+        (Localization.Monoidal.μ L
+          (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+          (Iso.refl _) (L.obj A).val (L.obj B).val).inv ≫
+            (cA.hom ⊗ₘ cB.hom) := rfl
+  rw [hmono]
+  change
+    Functor.OplaxMonoidal.δ L A B =
+      L.map (adj.unit.app A ⊗ₘ adj.unit.app B) ≫
+        Functor.OplaxMonoidal.δ L (L.obj A).val (L.obj B).val ≫
+          (cA.hom ⊗ₘ cB.hom)
+  have hcancel :
+      (L.map (adj.unit.app A) ⊗ₘ L.map (adj.unit.app B)) ≫
+          (cA.hom ⊗ₘ cB.hom) = 𝟙 (L.obj A ⊗ L.obj B) := by
+    calc
+      _ = (L.map (adj.unit.app A) ≫ cA.hom) ⊗ₘ
+          (L.map (adj.unit.app B) ≫ cB.hom) :=
+        tensorHom_comp_tensorHom _ _ _ _
+      _ = (𝟙 _) ⊗ₘ (𝟙 _) := congrArg₂ (· ⊗ₘ ·) hA hB
+      _ = 𝟙 _ := by
+        simpa only [Functor.id_obj] using id_tensorHom_id (L.obj A) (L.obj B)
+  calc
+    _ = Functor.OplaxMonoidal.δ L A B ≫ 𝟙 _ :=
+      (Category.comp_id _).symm
+    _ = Functor.OplaxMonoidal.δ L A B ≫
+        ((L.map (adj.unit.app A) ⊗ₘ L.map (adj.unit.app B)) ≫
+          (cA.hom ⊗ₘ cB.hom)) :=
+      congrArg (Functor.OplaxMonoidal.δ L A B ≫ ·) hcancel.symm
+    _ = (Functor.OplaxMonoidal.δ L A B ≫
+          (L.map (adj.unit.app A) ⊗ₘ L.map (adj.unit.app B))) ≫
+            (cA.hom ⊗ₘ cB.hom) :=
+      Category.assoc _ _ _
+    _ = (L.map (adj.unit.app A ⊗ₘ adj.unit.app B) ≫
+          Functor.OplaxMonoidal.δ L (L.obj A).val (L.obj B).val) ≫
+            (cA.hom ⊗ₘ cB.hom) :=
+      congrArg (· ≫ (cA.hom ⊗ₘ cB.hom)) hδ
+    _ = _ := (Category.assoc _ _ _).symm
+
+/-- Applying the sheafification cotensorator to the unit image of a pure tensor gives
+the canonical pure tensor section of the two unit images. -/
+theorem sheafification_δ_unit_tmul_eq_tensorSection
+    {X : Scheme.{u}} (A B : X.PresheafOfModules) (U : X.Opens)
+    (x : A.obj (.op U)) (y : B.obj (.op U)) :
+    let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+    let adj := PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)
+    (Functor.OplaxMonoidal.δ L A B).val.app (.op U)
+        ((adj.unit.app (A ⊗ B)).app (.op U) (x ⊗ₜ y)) =
+      tensorSection (L.obj A) (L.obj B) U
+        ((adj.unit.app A).app (.op U) x)
+        ((adj.unit.app B).app (.op U) y) := by
+  dsimp only
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)
+  let f := adj.unit.app A ⊗ₘ adj.unit.app B
+  have hδ :=
+    sheafification_δ_eq_map_unit_tensor_comp_monoidalTensorObjIso_inv A B
+  have hδapp := congrArg
+    (fun q => q.val.app (.op U)
+      ((adj.unit.app (A ⊗ B)).app (.op U) (x ⊗ₜ y))) hδ
+  conv_rhs at hδapp =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  have hnat := adj.unit.naturality f
+  have hnatapp := congrArg (fun q => q.app (.op U) (x ⊗ₜ y)) hnat
+  conv_lhs at hnatapp =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  conv_rhs at hnatapp =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  let S := X.sheaf.obj.obj (.op U)
+  let AA : ModuleCat S := by
+    change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+    exact A.obj (.op U)
+  let BB : ModuleCat S := by
+    change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+    exact B.obj (.op U)
+  let LA : ModuleCat S := by
+    change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+    exact (L.obj A).val.obj (.op U)
+  let LB : ModuleCat S := by
+    change ModuleCat ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U))
+    exact (L.obj B).val.obj (.op U)
+  let uA : AA ⟶ LA := by
+    change A.obj (.op U) ⟶ (L.obj A).val.obj (.op U)
+    exact (adj.unit.app A).app (.op U)
+  let uB : BB ⟶ LB := by
+    change B.obj (.op U) ⟶ (L.obj B).val.obj (.op U)
+    exact (adj.unit.app B).app (.op U)
+  let xx : AA := x
+  let yy : BB := y
+  let x' : LA := uA xx
+  let y' : LB := uB yy
+  let t' : TensorProduct S LA LB := x' ⊗ₜ[S] y'
+  have htmul : f.app (.op U) (x ⊗ₜ y) =
+      (show ((L.obj A).val ⊗ (L.obj B).val).obj (.op U) from t') :=
+    ModuleCat.MonoidalCategory.tensorHom_tmul uA uB xx yy
+  change
+    (adj.unit.app ((L.obj A).val ⊗ (L.obj B).val)).app (.op U)
+        (f.app (.op U) (x ⊗ₜ y)) =
+      (L.map f).val.app (.op U)
+        ((adj.unit.app (A ⊗ B)).app (.op U) (x ⊗ₜ y)) at hnatapp
+  unfold tensorSection
+  exact hδapp.trans (congrArg
+    (fun z => (monoidalTensorObjIso (L.obj A) (L.obj B)).inv.val.app (.op U) z)
+    (hnatapp.symm.trans (congrArg
+      (fun z => (adj.unit.app ((L.obj A).val ⊗ (L.obj B).val)).app (.op U) z)
+      htmul)))
 
 /-- Scalar multiplication may be moved between the two factors of a canonical
 pure tensor section. -/
