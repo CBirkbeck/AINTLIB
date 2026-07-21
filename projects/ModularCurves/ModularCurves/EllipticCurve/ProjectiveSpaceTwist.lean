@@ -1730,6 +1730,99 @@ theorem coordinateChartTwistedSection_restrict_eq
           (ModularCurves.tensorSection M N _ tK eK) :=
       (ModularCurves.tensorSection_restrict M N hK tK eK).symm
 
+/-- Standard-chart coefficients satisfying the degree-`n` transition equations
+glue to a global section of `M ⊗ O(n)`. -/
+theorem exists_global_coordinateChartTwistedSection
+    (M : (Proj (homogeneousSubmodule σ R)).Modules)
+    (j : σ) (n : ℕ)
+    (t : ∀ i : σ, Γ(M, coordinateOpen (R := R) i))
+    (ht : ∀ i k : σ,
+      M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op (t i) =
+        (coordinateOpenTransitionUnit (R := R) i k :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) i k)) ^ n •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+            (t k)) :
+    ∃ q : Γ(M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n, ⊤),
+      ∀ i : σ,
+        (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n).presheaf.map
+            (homOfLE (le_top : coordinateOpen (R := R) i ≤
+              (⊤ : (Proj (homogeneousSubmodule σ R)).Opens))).op q =
+          coordinateChartTwistedSection (R := R) M i j n (t i) := by
+  let X := Proj (homogeneousSubmodule σ R)
+  let N := coordinateHyperplanePoleSheafPower (R := R) j n
+  let U : σ → X.Opens := fun i => coordinateOpen (R := R) i
+  let sf : ∀ i, Γ(M ⊗ N, U i) := fun i =>
+    coordinateChartTwistedSection (R := R) M i j n (t i)
+  have hcpt : TopCat.Presheaf.IsCompatible (M ⊗ N).presheaf U sf := by
+    intro i k
+    dsimp only [U, sf]
+    have h := coordinateChartTwistedSection_restrict_eq
+      (R := R) M i k j n (t i) (t k) (ht i k)
+    let P := M ⊗ N
+    have hVW : coordinateOpen (R := R) i ⊓ coordinateOpen (R := R) k ≤
+        coordinateOpenOverlap (R := R) i k := by
+      rw [coordinateOpenOverlap_eq]
+    have h' := congrArg (P.presheaf.map (homOfLE hVW).op) h
+    have hleft :
+        P.presheaf.map (homOfLE hVW).op
+            (P.presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+              (coordinateChartTwistedSection (R := R) M i j n (t i))) =
+          P.presheaf.map
+            (TopologicalSpace.Opens.infLELeft
+              (coordinateOpen (R := R) i) (coordinateOpen (R := R) k)).op
+            (coordinateChartTwistedSection (R := R) M i j n (t i)) := by
+      change (P.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op ≫
+        P.presheaf.map (homOfLE hVW).op)
+          (coordinateChartTwistedSection (R := R) M i j n (t i)) = _
+      have hMapComp := P.presheaf.map_comp
+        (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+        (homOfLE hVW).op
+      have hArrows :
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op ≫
+              (homOfLE hVW).op =
+            (TopologicalSpace.Opens.infLELeft
+              (coordinateOpen (R := R) i) (coordinateOpen (R := R) k)).op :=
+        Subsingleton.elim _ _
+      exact ConcreteCategory.congr_hom
+        (hMapComp.symm.trans (P.presheaf.congr_map hArrows)) _
+    have hright :
+        P.presheaf.map (homOfLE hVW).op
+            (P.presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+              (coordinateChartTwistedSection (R := R) M k j n (t k))) =
+          P.presheaf.map
+            (TopologicalSpace.Opens.infLERight
+              (coordinateOpen (R := R) i) (coordinateOpen (R := R) k)).op
+            (coordinateChartTwistedSection (R := R) M k j n (t k)) := by
+      change (P.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op ≫
+        P.presheaf.map (homOfLE hVW).op)
+          (coordinateChartTwistedSection (R := R) M k j n (t k)) = _
+      have hMapComp := P.presheaf.map_comp
+        (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+        (homOfLE hVW).op
+      have hArrows :
+          (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op ≫
+              (homOfLE hVW).op =
+            (TopologicalSpace.Opens.infLERight
+              (coordinateOpen (R := R) i) (coordinateOpen (R := R) k)).op :=
+        Subsingleton.elim _ _
+      exact ConcreteCategory.congr_hom
+        (hMapComp.symm.trans (P.presheaf.congr_map hArrows)) _
+    exact hleft.symm.trans (h'.trans hright)
+  have hcover : (⊤ : X.Opens) ≤ iSup U := by
+    change (⊤ : X.Opens) ≤ ⨆ i : σ, coordinateOpen (R := R) i
+    rw [iSup_coordinateOpen_eq_top]
+  obtain ⟨q, hq, -⟩ := TopCat.Sheaf.existsUnique_gluing'
+    ⟨(M ⊗ N).presheaf, (M ⊗ N).isSheaf⟩ U ⊤
+      (fun _ => homOfLE le_top) hcover sf hcpt
+  exact ⟨q, hq⟩
+
 /-- The nonnegative powers of the concrete coordinate-hyperplane `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModulePower (j : σ) :
     ℕ → (Proj (homogeneousSubmodule σ R)).Modules
