@@ -579,6 +579,87 @@ theorem Modules.baseModulePresheaf_isLocalized_basicOpen
       simpa only [U] using Modules.isoSpecInv_image_basic f)
     Modules.isoSpecInv_image_top f himage
 
+/-- A finite-type quasicoherent module on an affine scheme has finite global sections. -/
+theorem Modules.globalSections_module_finite_of_isFiniteType_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType] :
+    Module.Finite Γ(X, ⊤) Γ(M, ⊤) := by
+  obtain ⟨q, hq⟩ := SheafOfModules.IsFiniteType.exists_localGeneratorsData M
+  letI : q.IsFiniteType := hq
+  let t : Set Γ(X, ⊤) := { f | ∃ i, X.basicOpen f ≤ q.X i }
+  have hqcover : ⨆ i, q.X i = ⊤ := by
+    simpa only [IsOpenCover] using
+      (Opens.coversTop_iff (T := X) q.X).mp q.coversTop
+  have hopen : ⨆ f : t, X.basicOpen f.1 = ⊤ := by
+    apply top_unique
+    calc
+      ⊤ = ⨆ i, q.X i := hqcover.symm
+      _ ≤ ⨆ f : t, X.basicOpen f.1 := by
+        refine iSup_le fun i ↦ ?_
+        rintro x hx
+        obtain ⟨f, hf, hxf⟩ :=
+          (isAffineOpen_top X).exists_basicOpen_le ⟨x, hx⟩ (by simp)
+        have hle : X.basicOpen f ≤ ⨆ f : t, X.basicOpen f.1 :=
+          le_iSup_of_le ⟨f, i, hf⟩ le_rfl
+        exact hle hxf
+  have ht : Ideal.span t = ⊤ :=
+    (isAffineOpen_top X).iSup_basicOpen_eq_self_iff.mp hopen
+  let B := baseModulePresheaf (𝟙 X) M
+  letI (g : t) : Algebra Γ(X, ⊤) Γ(X, X.basicOpen g.1) :=
+    inferInstance
+  letI (g : t) : Module Γ(X, ⊤) Γ(M, X.basicOpen g.1) :=
+    Module.compHom _ (algebraMap _ Γ(X, X.basicOpen g.1))
+  letI (g : t) : IsLocalization.Away g.1 Γ(X, X.basicOpen g.1) :=
+    inferInstance
+  letI (g : t) : IsScalarTower Γ(X, ⊤)
+      Γ(X, X.basicOpen g.1) Γ(M, X.basicOpen g.1) :=
+    IsScalarTower.of_algebraMap_smul fun _ _ ↦ rfl
+  let eTop : B.obj (op ⊤) ≅ ModuleCat.of Γ(X, ⊤) Γ(M, ⊤) := by
+    refine ModuleCat.isoMk (Iso.refl _) ?_
+    intro r
+    ext (x : Γ(M, ⊤))
+    change r • x =
+      X.presheaf.map
+        ((initialOpOfTerminal isTerminalTop).to (op (⊤ : X.Opens)))
+          (Scheme.Hom.appTop (𝟙 X) r) • x
+    rw [Scheme.Hom.id_appTop]
+    rw [Subsingleton.elim
+      ((initialOpOfTerminal isTerminalTop).to (op (⊤ : X.Opens))) (𝟙 _)]
+    simp
+  let eBasic (g : t) :
+      B.obj (op (X.basicOpen g.1)) ≅
+        ModuleCat.of Γ(X, ⊤) Γ(M, X.basicOpen g.1) := by
+    refine ModuleCat.isoMk (Iso.refl _) ?_
+    intro r
+    ext (x : Γ(M, X.basicOpen g.1))
+    change
+      algebraMap Γ(X, ⊤) Γ(X, X.basicOpen g.1) r • x =
+        X.presheaf.map
+          ((initialOpOfTerminal isTerminalTop).to
+            (op (X.basicOpen g.1)))
+            (Scheme.Hom.appTop (𝟙 X) r) • x
+    rw [Scheme.Hom.id_appTop]
+    rfl
+  let φCat (g : t) :
+      ModuleCat.of Γ(X, ⊤) Γ(M, ⊤) ⟶
+        ModuleCat.of Γ(X, ⊤) Γ(M, X.basicOpen g.1) :=
+    eTop.inv ≫ B.map (X.basicOpen g.1).leTop.op ≫ (eBasic g).hom
+  let φ : (g : t) → Γ(M, ⊤) →ₗ[Γ(X, ⊤)] Γ(M, X.basicOpen g.1) :=
+    fun g ↦ (φCat g).hom
+  letI : ∀ g : t, IsLocalizedModule.Away g.1 (φ g) := fun g ↦ by
+    exact Modules.isLocalizedModuleAway_of_iso_square g.1
+      (B.map (X.basicOpen g.1).leTop.op) (φCat g)
+      eTop (eBasic g) (by simp [φCat])
+      (Modules.baseModulePresheaf_isLocalized_basicOpen M g.1)
+  refine Module.Finite.of_localizationSpan'
+    (Mₚ := fun g : t ↦ Γ(M, X.basicOpen g.1))
+    (Rₚ := fun g : t ↦ Γ(X, X.basicOpen g.1))
+    t ht φ ?_
+  intro g
+  obtain ⟨i, hi⟩ := g.2
+  letI : (q.generators i).IsFiniteType := hq.isFiniteType i
+  exact Modules.module_finite_app_of_over_generators_of_le M hi
+    ((isAffineOpen_top X).basicOpen g.1) (q.generators i)
+
 /-- An epimorphism of quasicoherent modules is surjective on sections over an affine open. -/
 theorem Modules.isQuasicoherent_app_surjective_of_epi
     (U : X.Opens) (hU : IsAffineOpen U)
