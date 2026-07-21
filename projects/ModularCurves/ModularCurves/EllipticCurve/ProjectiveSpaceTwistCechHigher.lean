@@ -295,6 +295,87 @@ theorem coordinateHomogeneousLaurentFullNegativeCyclesAssembly_differential
     simpa [coordinateHomogeneousLaurentFullNegativeCycles] using s.2
   rw [hs, map_zero]
 
+/-- The exceptional full-negative cycles, lifted to the cycle object of the homogeneous Laurent
+ordered Cech complex. -/
+noncomputable def coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    ModuleCat.of
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (coordinateHomogeneousLaurentFullNegativeCycles
+          (R := R) (σ := σ) d n) ⟶
+      (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).cycles n :=
+  by
+    let k : ModuleCat.of
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (coordinateHomogeneousLaurentFullNegativeCycles
+          (R := R) (σ := σ) d n) ⟶
+        (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).X n :=
+      ModuleCat.ofHom
+        (coordinateHomogeneousLaurentFullNegativeCyclesAssembly
+          (R := R) (σ := σ) d n)
+    refine (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).liftCycles (i := n) k (n + 1) (by simp) ?_
+    rw [coordinateHomogeneousLaurentOrderedCechComplex_d]
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro s
+    exact coordinateHomogeneousLaurentFullNegativeCyclesAssembly_differential
+      (R := R) (σ := σ) d n s
+
+/-- The exceptional-cycle lift followed by the cycle inclusion is the original assembly. -/
+theorem coordinateHomogeneousLaurentFullNegativeCyclesToCycles_i
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+        (R := R) j d n ≫
+      (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).iCycles n =
+    (ModuleCat.ofHom
+        (coordinateHomogeneousLaurentFullNegativeCyclesAssembly
+          (R := R) (σ := σ) d n) :
+      ModuleCat.of
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          (coordinateHomogeneousLaurentFullNegativeCycles
+            (R := R) (σ := σ) d n) ⟶
+        (coordinateHomogeneousLaurentOrderedCechComplex
+          (R := R) j d).X n) := by
+  let k : ModuleCat.of
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      (coordinateHomogeneousLaurentFullNegativeCycles
+        (R := R) (σ := σ) d n) ⟶
+      (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).X n :=
+    ModuleCat.ofHom
+      (coordinateHomogeneousLaurentFullNegativeCyclesAssembly
+        (R := R) (σ := σ) d n)
+  have hk : k ≫ (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).d n (n + 1) = 0 := by
+    rw [coordinateHomogeneousLaurentOrderedCechComplex_d]
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro s
+    exact coordinateHomogeneousLaurentFullNegativeCyclesAssembly_differential
+      (R := R) (σ := σ) d n s
+  simpa only [coordinateHomogeneousLaurentFullNegativeCyclesToCycles, k] using
+    (HomologicalComplex.liftCycles_i
+      (coordinateHomogeneousLaurentOrderedCechComplex (R := R) j d)
+      k (n + 1) (by simp) hk)
+
+/-- The homology class represented by an exceptional full-negative cycle. -/
+noncomputable def coordinateHomogeneousLaurentFullNegativeCyclesToHomology
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (n : ℕ) :
+    ModuleCat.of
+        Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+        (coordinateHomogeneousLaurentFullNegativeCycles
+          (R := R) (σ := σ) d n) ⟶
+      (coordinateHomogeneousLaurentOrderedCechComplex
+        (R := R) j d).homology n :=
+  coordinateHomogeneousLaurentFullNegativeCyclesToCycles
+      (R := R) j d n ≫
+    (coordinateHomogeneousLaurentOrderedCechComplex
+      (R := R) j d).homologyπ n
+
 /-- Every positive-degree cocycle in the homogeneous Laurent presentation is a boundary modulo
 the active weights that are negative in every coordinate. -/
 theorem exists_boundary_add_fullNegativeWeights_eq_coordinateHomogeneousLaurentCocycle
