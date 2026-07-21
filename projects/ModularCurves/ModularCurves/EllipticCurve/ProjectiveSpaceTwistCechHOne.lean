@@ -6,6 +6,9 @@ Authors: AINTLIB ModularCurves project
 import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
+import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
+import ModularCurves.Picard.InvertibleSheafLocallyFree
 
 /-!
 # Degree-one exactness for nonnegative projective twists
@@ -175,6 +178,38 @@ theorem coordinateHyperplaneTwist_orderedBaseCechComplex_exactAt_one
     (R := R) (σ := σ) j d hd).of_iso
       (coordinateHyperplaneTwistOrderedBaseCechComplexIso
         (R := R) j d).symm
+
+/-- The native standard-coordinate Cech complex of a nonnegative coordinate-hyperplane twist is
+exact in degree one. -/
+theorem coordinateHyperplaneTwist_baseCechComplex_exactAt_one
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (hd : 0 ≤ d) :
+    (Scheme.Modules.baseCechComplex
+      (homogeneousProjπ (R := R) (σ := σ))
+      (coordinateHyperplaneTwist (R := R) j d)
+      (coordinateOpenCover (R := R) (σ := σ))).ExactAt 1 :=
+  Scheme.Modules.baseCechComplex_exactAt_one_of_orderedBaseCechComplex_exactAt_one
+    (homogeneousProjπ (R := R) (σ := σ))
+    (coordinateHyperplaneTwist (R := R) j d)
+    (coordinateOpenCover (R := R) (σ := σ))
+    (coordinateHyperplaneTwist_orderedBaseCechComplex_exactAt_one
+      (R := R) (σ := σ) j d hd)
+
+/-- A nonnegative coordinate-hyperplane twist on polynomial projective space has vanishing first
+sheaf cohomology. -/
+theorem coordinateHyperplaneTwist_subsingleton_H_one
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (hd : 0 ≤ d) :
+    Subsingleton (CategoryTheory.Sheaf.H
+      (coordinateHyperplaneTwist (R := R) j d).sheaf 1) := by
+  letI : (coordinateHyperplaneTwist (R := R) j d).IsQuasicoherent :=
+    (coordinateHyperplaneTwist_isInvertible (R := R) j d).isQuasicoherent
+  exact (Scheme.Modules.baseCechComplex_exactAt_one_iff_subsingleton_H
+    (homogeneousProjπ (R := R) (σ := σ))
+    (coordinateHyperplaneTwist (R := R) j d)
+    (coordinateOpenCover (R := R) (σ := σ))
+    (iSup_coordinateOpenCover_eq_top (R := R) (σ := σ))
+    (coordinateOpenCover_isAffineOpen (R := R))).mp
+      (coordinateHyperplaneTwist_baseCechComplex_exactAt_one
+        (R := R) (σ := σ) j d hd)
 
 end
 
