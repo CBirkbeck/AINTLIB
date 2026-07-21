@@ -1442,6 +1442,111 @@ noncomputable def awayToSections [IsAffine X] (a g : ↑Γ(X, ⊤)) :
   haveI := (isAffineOpen_top X).isLocalization_basicOpen (a * g)
   exact IsLocalization.Away.lift_eq a _ x
 
+/-- **(ForMathlib, localization-away tower)** Localizing the localization of `A` away from `a`
+further at the image of `g` gives the localization of `A` away from `a * g`.  Tower form:
+if `R₁` is `A` away from `a` and `Γ` is `A` away from `a * g`, and `Γ` is a compatible
+`R₁`-algebra (scalar tower), then `Γ` is `R₁` away from the image of `g`. -/
+theorem isLocalizationAway_of_tower {A R₁ Γ : Type*} [CommRing A] [CommRing R₁] [CommRing Γ]
+    [Algebra A R₁] [Algebra A Γ] [Algebra R₁ Γ] [IsScalarTower A R₁ Γ]
+    (a g : A) [IsLocalization.Away a R₁] [IsLocalization.Away (a * g) Γ] :
+    IsLocalization.Away (algebraMap A R₁ g) Γ := by
+  have hau : IsUnit (algebraMap A R₁ a) := IsLocalization.Away.algebraMap_isUnit a
+  have htower : ∀ x : A, algebraMap R₁ Γ (algebraMap A R₁ x) = algebraMap A Γ x :=
+    fun x => (IsScalarTower.algebraMap_apply A R₁ Γ x).symm
+  have hunit_val : algebraMap R₁ Γ (↑hau.unit) = algebraMap A Γ a := by
+    rw [hau.unit_spec, htower]
+  set v : Γ := algebraMap R₁ Γ (↑hau.unit⁻¹) with hv
+  have hav : algebraMap A Γ a * v = 1 := by
+    rw [hv, ← hunit_val, ← map_mul, Units.mul_inv, map_one]
+  apply IsLocalization.Away.mk
+  · rw [htower]
+    exact isUnit_of_dvd_unit (map_dvd (algebraMap A Γ) (dvd_mul_left g a))
+      (IsLocalization.Away.algebraMap_isUnit (a * g))
+  · intro s
+    obtain ⟨m, b, hmb⟩ := IsLocalization.Away.surj (a * g) s
+    rw [map_mul, mul_pow] at hmb
+    refine ⟨m, algebraMap A R₁ b * (↑hau.unit⁻¹) ^ m, ?_⟩
+    rw [htower, map_mul, map_pow, htower, ← hv]
+    have hav1 : (algebraMap A Γ a) ^ m * v ^ m = 1 := by rw [← mul_pow, hav, one_pow]
+    calc s * (algebraMap A Γ g) ^ m
+        = s * (algebraMap A Γ g) ^ m * ((algebraMap A Γ a) ^ m * v ^ m) := by rw [hav1, mul_one]
+      _ = s * ((algebraMap A Γ a) ^ m * (algebraMap A Γ g) ^ m) * v ^ m := by ring
+      _ = algebraMap A Γ b * v ^ m := by rw [hmb]
+  · intro b c hbc
+    obtain ⟨j, b₀, hb₀⟩ := IsLocalization.Away.surj a b
+    obtain ⟨k, c₀, hc₀⟩ := IsLocalization.Away.surj a c
+    have hθ : algebraMap A Γ (b₀ * a ^ k) = algebraMap A Γ (c₀ * a ^ j) := by
+      have hψb : algebraMap R₁ Γ b * algebraMap A Γ a ^ j = algebraMap A Γ b₀ := by
+        have := congrArg (algebraMap R₁ Γ) hb₀
+        rwa [map_mul, map_pow, htower, htower] at this
+      have hψc : algebraMap R₁ Γ c * algebraMap A Γ a ^ k = algebraMap A Γ c₀ := by
+        have := congrArg (algebraMap R₁ Γ) hc₀
+        rwa [map_mul, map_pow, htower, htower] at this
+      rw [map_mul, map_mul, map_pow, map_pow, ← hψb, ← hψc, hbc]
+      ring
+    obtain ⟨p, hp⟩ := IsLocalization.Away.exists_of_eq (a * g) hθ
+    refine ⟨p, ?_⟩
+    have hφp : algebraMap A R₁ ((a * g) ^ p * (b₀ * a ^ k))
+        = algebraMap A R₁ ((a * g) ^ p * (c₀ * a ^ j)) := congrArg (algebraMap A R₁) hp
+    simp only [map_mul, map_pow] at hφp
+    rw [← hb₀, ← hc₀, mul_pow] at hφp
+    have hunit : IsUnit (algebraMap A R₁ a ^ (p + j + k)) := hau.pow _
+    apply hunit.mul_right_cancel
+    rw [pow_add, pow_add]
+    linear_combination hφp
+
+/-- **(Stage 3c-γ, THE missing barrier — open immersion)** `Spec.map (awayToSections a g)` is an
+open immersion: `Γ(X, D(a·g))` is the localization of `A[1/a]` away from the image of `g`
+(`isLocalizationAway_of_tower`), so this is `Spec` of a localization-away map.  An `instance` so
+`(Spec.map (awayToSections a g)).opensRange` elaborates downstream. -/
+instance isOpenImmersion_specMap_awayToSections [IsAffine X] (a g : ↑Γ(X, ⊤)) :
+    IsOpenImmersion (Spec.map (CommRingCat.ofHom (awayToSections a g))) := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    (awayToSections a g).toAlgebra
+  letI : IsScalarTower ↑Γ(X, ⊤) (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    IsScalarTower.of_algebraMap_eq (fun x => (awayToSections_algebraMap a g x).symm)
+  haveI := isLocalizationAway_of_tower (A := ↑Γ(X, ⊤)) (R₁ := Localization.Away a)
+    (Γ := ↑Γ(X, X.basicOpen (a * g))) a g
+  exact IsOpenImmersion.of_isLocalization (R := Localization.Away a)
+    (S := ↑Γ(X, X.basicOpen (a * g)))
+    (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)
+
+/-- **(Stage 3c-γ, THE missing barrier — range)** The open range of `Spec.map (awayToSections a g)`
+is the basic open `D(g')` of `Spec A[1/a]`, where `g'` is the image of `g`
+(`localization_away_comap_range` at the tower localization). -/
+theorem opensRange_specMap_awayToSections [IsAffine X] (a g : ↑Γ(X, ⊤)) :
+    (Spec.map (CommRingCat.ofHom (awayToSections a g))).opensRange =
+      specBasicOpen (CommRingCat.of (Localization.Away a))
+        (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g) := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    (awayToSections a g).toAlgebra
+  letI : IsScalarTower ↑Γ(X, ⊤) (Localization.Away a) ↑Γ(X, X.basicOpen (a * g)) :=
+    IsScalarTower.of_algebraMap_eq (fun x => (awayToSections_algebraMap a g x).symm)
+  haveI := isLocalizationAway_of_tower (A := ↑Γ(X, ⊤)) (R₁ := Localization.Away a)
+    (Γ := ↑Γ(X, X.basicOpen (a * g))) a g
+  apply TopologicalSpace.Opens.ext
+  show Set.range ⇑(Spec.map (CommRingCat.ofHom (awayToSections a g))) = _
+  exact PrimeSpectrum.localization_away_comap_range ↑Γ(X, X.basicOpen (a * g))
+    (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)
+
+/-- **(Stage 3c-γ helper, banked)** The base-change model map `projModelBaseChange σ W` is an open
+immersion when the base `Spec σ` is: it is the base change of `Spec σ` along `projModelπ W`.  An
+`instance` so `(projModelBaseChange σ W).opensRange` elaborates downstream. -/
+instance isOpenImmersion_projModelBaseChange {R : Type u} [CommRing R] {R' : Type u} [CommRing R']
+    [Algebra R R'] (W : WeierstrassCurve R)
+    [IsOpenImmersion (Spec.map (CommRingCat.ofHom (algebraMap R R')))] :
+    IsOpenImmersion (projModelBaseChange (algebraMap R R') W) :=
+  MorphismProperty.IsStableUnderBaseChange.of_isPullback
+    (isPullback_projModelBaseChange W).flip inferInstance
+
+-- NOTE (banked, γ3): the *range* of `projModelBaseChange σ W` equals
+-- `projModelπ W ⁻¹ᵁ (Spec σ).opensRange`.  As a standalone `= ...opensRange` lemma this hits an
+-- `opensRange` dependent-motive snag (rewriting the morphism under `.opensRange`, whose type
+-- carries the `IsOpenImmersion` instance); derive it inline where needed, at the `Set`-level:
+-- `apply Opens.ext; show Set.range ⇑(projModelBaseChange σ W) = _;`
+-- `rw [← (isPullback_projModelBaseChange W).isoPullback_hom_fst]` (motive OK at `Set.range ⇑·`),
+-- then `Scheme.Hom.comp_apply` + `Set.range_comp` + iso-surjectivity + `Scheme.Pullback.range_fst`.
+
 /-- The canonical map `A[1/a] →+* Localization S` for `a ∈ S`. -/
 noncomputable def awayToLocalization {A : Type u} [CommRing A] (S : Submonoid A)
     {a : A} (ha : a ∈ S) : Localization.Away a →+* Localization S :=
@@ -2447,20 +2552,37 @@ theorem exists_invariant_away_presentation (G : Type*) [Group G] [Finite G] [IsA
     rw [key]
     simp only [LocalPresentation.sectionsMapLE_id]
     exact vc_conj_cancel _ _
-  -- ### Stage 3c-γ RESIDUAL (γ3 + γ4 only).  With γ1 (`hQW`, `hVC1`) and γ2 (`hcover`) green,
-  -- the native glue of `ρR₁` remains.  γ3: glue via `Scheme.OpenCover.glueMorphisms` on the
-  -- `projModelπ W₀R₁`-preimages `U i := projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (Away a₁) fᵢ'`,
-  -- pieces `(isoOfRangeEq (projModelBaseChange (awayToSections a₁ fᵢ) W₀R₁) …).inv ≫
-  -- (Q i).e.inv ≫ pullback.fst C.π (D(a₁·fᵢ)).ι`, overlap agreement from `hVC1` via
-  -- `pointedIso_hom_of_transVC_eq_one` + `restrict_e_baseChange` (the `mulModelHom` /
-  -- `glueMorphisms_hf_of_agree` idiom).  γ4: `isPullback_of_iSup_eq_top` per piece from
-  -- `isPullback_projModelBaseChange` pasted on `(Q i).compat_π`; zero-leg from
-  -- `(Q i).compat_zero` + `projModelZero_baseChange`.  THE ONE MISSING BARRIER LEMMA:
-  -- `Spec.map (awayToSections a₁ fᵢ)` is an open immersion with range
-  -- `specBasicOpen (Away a₁) fᵢ'` — right-cancel it against `Spec.map (algebraMap A (Away a₁))`
-  -- and `Spec.map (algebraMap A Γ(X, D(a₁·fᵢ)))` (both banked localization-away open
-  -- immersions, equal after `awayToSections_algebraMap`); range via
-  -- `PrimeSpectrum.localization_away_comap_range`.
+  -- ### Stage 3c-γ RESIDUAL (γ3 + γ4 only).  γ1 (`hQW`, `hVC1`) and γ2 (`hcover`/`hspan₁`) are
+  -- green, and THE localization barrier the prior session flagged as "the one missing lemma" is
+  -- now DISCHARGED, axiom-clean, above (banked, reusable):
+  --   • `isLocalizationAway_of_tower` (KEY, ForMathlib): `A[1/(a·g)]` IS `A[1/a]` localized at
+  --     the image `g'` of `g` — so `Γ(X, D(a₁·fᵢ)) = A[1/a₁]`-away-at-`fᵢ'` via `awayToSections`.
+  --   • `isOpenImmersion_specMap_awayToSections` : `Spec.map (awayToSections a₁ fᵢ)` is an OPEN
+  --     IMMERSION (via `IsOpenImmersion.of_isLocalization` at the tower localization).
+  --   • `opensRange_specMap_awayToSections` : its range is `specBasicOpen (Away a₁) fᵢ'` (via
+  --     `PrimeSpectrum.localization_away_comap_range`).
+  --   • `isOpenImmersion_projModelBaseChange` (instance) : `bcᵢ := projModelBaseChange
+  --     (awayToSections a₁ fᵢ) W₀R₁` is an OPEN IMMERSION (OI is stable under base change).  Its
+  --     range `bcᵢ.opensRange = Uᵢ := projModelπ W₀R₁ ⁻¹ᵁ specBasicOpen (Away a₁) fᵢ'` is derived
+  --     inline at the `Set`-level from `isPullback_projModelBaseChange` + `Scheme.Pullback.range_fst`
+  --     (see the NOTE above `awayToLocalization` — a standalone `.opensRange` lemma hits a motive snag).
+  -- Note: `isOpenImmersion_specMap_awayToSections` and `isOpenImmersion_projModelBaseChange` are
+  -- `instance`s, so `(Spec.map (awayToSections a₁ fᵢ)).opensRange` and `bcᵢ.opensRange` elaborate;
+  -- set `letI : Algebra (Away a₁) Γ(X, D(a₁·fᵢ)) := (awayToSections a₁ (f i)).toAlgebra` so
+  -- `projModelBaseChange (awayToSections a₁ fᵢ) W₀R₁` matches `isPullback_projModelBaseChange`.
+  --
+  -- REMAINING (pure scheme-gluing, mechanical, mirrors `negHomOf`/`mulModelHom`):
+  --   γ3 cover:  `⨆ᵢ Uᵢ = ⊤` from `iSup_basicOpen_eq_top_iff.mpr hspan₁` (rewriting each
+  --     `opensRange` by `opensRange_specMap_awayToSections`) + `Scheme.Hom.iSup_preimage_eq_top`.
+  --   γ3 pieces:  `Fᵢ := (IsOpenImmersion.isoOfRangeEq bcᵢ (Uᵢ).ι …).inv ≫
+  --     eqToHom (congrArg projModel (hQW i)).symm ≫ (Q i).e.inv ≫ pullback.fst C.π (D(a₁·fᵢ)).ι`.
+  --   γ3 agreement (the true remaining math): pairwise on `Uₓ ⊓ Uᵧ` from `hVC1` via
+  --     `pointedIso_hom_of_transVC_eq_one` + `restrict_e_baseChange`, fed to
+  --     `glueMorphisms_hf_of_agree`; then
+  --     `ρR₁ := (topIso).inv ≫ (Scheme.Opens.iSupOpenCover U).glueMorphisms F …`.
+  --   γ4: `isPullback_of_iSup_eq_top` on `{specBasicOpen (Away a₁) fᵢ'}` (cover of Spec A[1/a₁]),
+  --     per-piece from `(Q i).compat_π` pasted on `isPullback_projModelBaseChange`; zero-leg from
+  --     `(Q i).compat_zero` + `projModelZero_baseChange`, both checked on the cover per piece.
   sorry
 
 end MouthCharts

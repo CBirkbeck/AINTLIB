@@ -24490,3 +24490,15 @@ EngineMouthCharts into EngineDescent regresses two heavy proofs (exists_cobounda
 :2492, exists_localModel_core_of_presentation :2853) to 200k isDefEq/whnf timeouts from the
 enriched InvariantDifferential instances (respectTransparency false does NOT fix) — needs those two
 proofs (145+343L) decomposed first. File GREEN, 1 sorry.
+
+### v10.343 progress — [T-E4D Stage-3c-γ infrastructure banked, module GREEN] (2026-07-21)
+The γ3/γ4 "one missing piece" barrier is DISCHARGED and banked (module green, single clean γ
+sorry at :2586): isLocalizationAway_of_tower (:1449, ForMathlib-worthy — A[1/(a·g)] IS A[1/a]
+localized at g, IsLocalization.Away.mk from scratch), isOpenImmersion_specMap_awayToSections
+(:1502, instance) + opensRange_specMap_awayToSections (Spec.map(awayToSections a g) is an open
+immersion with range specBasicOpen), and the projModelBaseChange OI instance. (One over-eager
+range helper opensRange_projModelBaseChange was removed — an unused .opensRange-motive snag; its
+range fact preserved as an inline-derivation note for the γ assembly.) γ3/γ4 remains the single
+frontier sorry (glue ρR₁ via glueMorphisms on the awayToSections-cover + pullback square +
+zero-leg — all primitives now banked). Machine note: a concurrent cleaner fleet (~156 lean procs)
+is saturating CPU, making builds slow — verified green via a full standalone lake build.
