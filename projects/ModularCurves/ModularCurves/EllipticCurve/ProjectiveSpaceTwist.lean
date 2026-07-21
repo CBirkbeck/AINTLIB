@@ -1658,6 +1658,78 @@ theorem coordinateHyperplanePoleSheafPowerFrameSection_restrict_transition
   exact ModularCurves.overTrivializationSection_eq_of_transition
     N W eIR eKR (u ^ n) (u ^ n) 1 hOver (by rw [one_mul])
 
+/-- A module section on a standard chart, tensored with the standard local
+frame of `O(n)`. -/
+noncomputable def coordinateChartTwistedSection
+    (M : (Proj (homogeneousSubmodule σ R)).Modules)
+    (i j : σ) (n : ℕ) (t : Γ(M, coordinateOpen (R := R) i)) :
+    Γ(M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n,
+      coordinateOpen (R := R) i) :=
+  ModularCurves.tensorSection M
+    (coordinateHyperplanePoleSheafPower (R := R) j n)
+    (coordinateOpen (R := R) i) t
+    (coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j n)
+
+/-- Coefficients related by the degree-`n` transition function determine equal
+restricted sections of the twist `M ⊗ O(n)`. -/
+theorem coordinateChartTwistedSection_restrict_eq
+    (M : (Proj (homogeneousSubmodule σ R)).Modules)
+    (i k j : σ) (n : ℕ)
+    (tI : Γ(M, coordinateOpen (R := R) i))
+    (tK : Γ(M, coordinateOpen (R := R) k))
+    (h :
+      M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op tI =
+        (coordinateOpenTransitionUnit (R := R) i k :
+            Γ(Proj (homogeneousSubmodule σ R),
+              coordinateOpenOverlap (R := R) i k)) ^ n •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op tK) :
+    (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n).presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_left (R := R) i k)).op
+        (coordinateChartTwistedSection (R := R) M i j n tI) =
+      (M ⊗ coordinateHyperplanePoleSheafPower (R := R) j n).presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_right (R := R) i k)).op
+        (coordinateChartTwistedSection (R := R) M k j n tK) := by
+  let N := coordinateHyperplanePoleSheafPower (R := R) j n
+  let W := coordinateOpenOverlap (R := R) i k
+  let hI := coordinateOpenOverlap_le_left (R := R) i k
+  let hK := coordinateOpenOverlap_le_right (R := R) i k
+  let u : Γ(Proj (homogeneousSubmodule σ R), W) :=
+    coordinateOpenTransitionUnit (R := R) i k
+  let eI := coordinateHyperplanePoleSheafPowerFrameSection (R := R) i j n
+  let eK := coordinateHyperplanePoleSheafPowerFrameSection (R := R) k j n
+  calc
+    (M ⊗ N).presheaf.map (homOfLE hI).op
+          (ModularCurves.tensorSection M N _ tI eI) =
+        ModularCurves.tensorSection M N W
+          (M.presheaf.map (homOfLE hI).op tI)
+          (N.presheaf.map (homOfLE hI).op eI) :=
+      ModularCurves.tensorSection_restrict M N hI tI eI
+    _ = ModularCurves.tensorSection M N W
+          (u ^ n • M.presheaf.map (homOfLE hK).op tK)
+          (N.presheaf.map (homOfLE hI).op eI) :=
+      congrArg
+        (fun q => ModularCurves.tensorSection M N W q
+          (N.presheaf.map (homOfLE hI).op eI)) h
+    _ = ModularCurves.tensorSection M N W
+          (M.presheaf.map (homOfLE hK).op tK)
+          (u ^ n • N.presheaf.map (homOfLE hI).op eI) :=
+      ModularCurves.tensorSection_smul M N W (u ^ n)
+        (M.presheaf.map (homOfLE hK).op tK)
+        (N.presheaf.map (homOfLE hI).op eI)
+    _ = ModularCurves.tensorSection M N W
+          (M.presheaf.map (homOfLE hK).op tK)
+          (N.presheaf.map (homOfLE hK).op eK) :=
+      congrArg
+        (ModularCurves.tensorSection M N W
+          (M.presheaf.map (homOfLE hK).op tK))
+        (coordinateHyperplanePoleSheafPowerFrameSection_restrict_transition
+          (R := R) i k j n)
+    _ = (M ⊗ N).presheaf.map (homOfLE hK).op
+          (ModularCurves.tensorSection M N _ tK eK) :=
+      (ModularCurves.tensorSection_restrict M N hK tK eK).symm
+
 /-- The nonnegative powers of the concrete coordinate-hyperplane `O(-1)`. -/
 noncomputable def coordinateHyperplaneIdealModulePower (j : σ) :
     ℕ → (Proj (homogeneousSubmodule σ R)).Modules
