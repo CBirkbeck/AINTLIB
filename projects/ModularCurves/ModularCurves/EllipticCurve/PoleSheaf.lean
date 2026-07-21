@@ -5264,6 +5264,310 @@ theorem tensorSection_map
     (congrArg
       (fun b ↦ (monoidalTensorObjIso M' N').inv.val.app (.op U) b) hLa)
 
+section TensorMuSections
+
+universe u₁ u₂ v₁ v₂
+
+noncomputable local instance (X : Scheme.{u}) :
+    SymmetricCategory (SheafOfModules X.ringCatSheaf) := by
+  change SymmetricCategory X.Modules
+  exact Scheme.Modules.symmetricCategory X
+
+noncomputable local instance (X : Scheme.{u}) :
+    (PresheafOfModules.sheafification
+      (𝟙 X.ringCatSheaf.obj)).Braided :=
+  inferInstanceAs ((Localization.Monoidal.toMonoidalCategory
+    (L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
+    (W := PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
+    (Iso.refl _)).Braided)
+
+private theorem tensorMu_delta
+    {C : Type u₁} {D : Type u₂} [Category.{v₁} C] [Category.{v₂} D]
+    [MonoidalCategory C] [MonoidalCategory D]
+    [BraidedCategory C] [BraidedCategory D]
+    (F : C ⥤ D) [F.Braided] (W X Y Z : C) :
+    Functor.OplaxMonoidal.δ F (W ⊗ X) (Y ⊗ Z) ≫
+        (Functor.OplaxMonoidal.δ F W X ⊗ₘ
+          Functor.OplaxMonoidal.δ F Y Z) ≫
+        tensorμ (F.obj W) (F.obj X) (F.obj Y) (F.obj Z) =
+      F.map (tensorμ W X Y Z) ≫
+        Functor.OplaxMonoidal.δ F (W ⊗ Y) (X ⊗ Z) ≫
+        (Functor.OplaxMonoidal.δ F W Y ⊗ₘ
+          Functor.OplaxMonoidal.δ F X Z) := by
+  let s :=
+    (Functor.LaxMonoidal.μ F W X ⊗ₘ Functor.LaxMonoidal.μ F Y Z) ≫
+      Functor.LaxMonoidal.μ F (W ⊗ X) (Y ⊗ Z)
+  apply (cancel_epi s).1
+  have hμ := tensorμ_comp_μ_tensorHom_μ_comp_μ F W X Y Z
+  have hsmap :
+      s ≫ F.map (tensorμ W X Y Z) =
+        tensorμ (F.obj W) (F.obj X) (F.obj Y) (F.obj Z) ≫
+          (Functor.LaxMonoidal.μ F W Y ⊗ₘ
+            Functor.LaxMonoidal.μ F X Z) ≫
+          Functor.LaxMonoidal.μ F (W ⊗ Y) (X ⊗ Z) := by
+    simpa only [s, Category.assoc] using hμ.symm
+  calc
+    s ≫ Functor.OplaxMonoidal.δ F (W ⊗ X) (Y ⊗ Z) ≫
+          (Functor.OplaxMonoidal.δ F W X ⊗ₘ
+            Functor.OplaxMonoidal.δ F Y Z) ≫
+          tensorμ (F.obj W) (F.obj X) (F.obj Y) (F.obj Z) =
+        tensorμ (F.obj W) (F.obj X) (F.obj Y) (F.obj Z) := by
+      simp [s, Category.assoc]
+    _ = s ≫ F.map (tensorμ W X Y Z) ≫
+          Functor.OplaxMonoidal.δ F (W ⊗ Y) (X ⊗ Z) ≫
+          (Functor.OplaxMonoidal.δ F W Y ⊗ₘ
+            Functor.OplaxMonoidal.δ F X Z) := by
+      rw [← Category.assoc]
+      rw [hsmap]
+      simp [Category.assoc]
+
+private theorem sheafification_delta_nested_tmul
+    {X : Scheme.{u}} (A B C D : X.PresheafOfModules) (U : X.Opens)
+    (x : A.obj (.op U)) (y : B.obj (.op U))
+    (z : C.obj (.op U)) (w : D.obj (.op U)) :
+    let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+    let adj := PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)
+    let tAB : (A ⊗ B).obj (.op U) := x ⊗ₜ y
+    let tCD : (C ⊗ D).obj (.op U) := z ⊗ₜ w
+    ((Functor.OplaxMonoidal.δ L A B ⊗ₘ
+        Functor.OplaxMonoidal.δ L C D).val.app (.op U))
+      ((Functor.OplaxMonoidal.δ L (A ⊗ B) (C ⊗ D)).val.app (.op U)
+        ((adj.unit.app ((A ⊗ B) ⊗ (C ⊗ D))).app (.op U)
+          (tAB ⊗ₜ tCD))) =
+      tensorSection (L.obj A ⊗ L.obj B) (L.obj C ⊗ L.obj D) U
+        (tensorSection (L.obj A) (L.obj B) U
+          ((adj.unit.app A).app (.op U) x)
+          ((adj.unit.app B).app (.op U) y))
+        (tensorSection (L.obj C) (L.obj D) U
+          ((adj.unit.app C).app (.op U) z)
+          ((adj.unit.app D).app (.op U) w)) := by
+  dsimp only
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let tAB : (A ⊗ B).obj (.op U) := x ⊗ₜ y
+  let tCD : (C ⊗ D).obj (.op U) := z ⊗ₜ w
+  let dAB := Functor.OplaxMonoidal.δ L A B
+  let dCD := Functor.OplaxMonoidal.δ L C D
+  have hOuter := sheafification_δ_unit_tmul_eq_tensorSection
+    (A ⊗ B) (C ⊗ D) U tAB tCD
+  have hAB := sheafification_δ_unit_tmul_eq_tensorSection A B U x y
+  have hCD := sheafification_δ_unit_tmul_eq_tensorSection C D U z w
+  have hMap := tensorSection_map dAB dCD U
+    ((adj.unit.app (A ⊗ B)).app (.op U) tAB)
+    ((adj.unit.app (C ⊗ D)).app (.op U) tCD)
+  have hInner := congrArg₂
+    (tensorSection (L.obj A ⊗ L.obj B) (L.obj C ⊗ L.obj D) U)
+      hAB hCD
+  exact (congrArg (fun q ↦ (dAB ⊗ₘ dCD).val.app (.op U) q) hOuter).trans
+    (hMap.trans hInner)
+
+private theorem sheafification_map_tensorMu_unit
+    {X : Scheme.{u}} (A B C D : X.PresheafOfModules) (U : X.Opens)
+    (x : A.obj (.op U)) (y : B.obj (.op U))
+    (z : C.obj (.op U)) (w : D.obj (.op U)) :
+    let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+    let adj := PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)
+    let tSource : ((A ⊗ B) ⊗ (C ⊗ D)).obj (.op U) :=
+      (show (A ⊗ B).obj (.op U) from x ⊗ₜ y) ⊗ₜ
+        (show (C ⊗ D).obj (.op U) from z ⊗ₜ w)
+    let tTarget : ((A ⊗ C) ⊗ (B ⊗ D)).obj (.op U) :=
+      (show (A ⊗ C).obj (.op U) from x ⊗ₜ z) ⊗ₜ
+        (show (B ⊗ D).obj (.op U) from y ⊗ₜ w)
+    (L.map (tensorμ A B C D)).val.app (.op U)
+        ((adj.unit.app ((A ⊗ B) ⊗ (C ⊗ D))).app (.op U) tSource) =
+      (adj.unit.app ((A ⊗ C) ⊗ (B ⊗ D))).app (.op U) tTarget := by
+  dsimp only
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let tSource : ((A ⊗ B) ⊗ (C ⊗ D)).obj (.op U) :=
+    (show (A ⊗ B).obj (.op U) from x ⊗ₜ y) ⊗ₜ
+      (show (C ⊗ D).obj (.op U) from z ⊗ₜ w)
+  let tTarget : ((A ⊗ C) ⊗ (B ⊗ D)).obj (.op U) :=
+    (show (A ⊗ C).obj (.op U) from x ⊗ₜ z) ⊗ₜ
+      (show (B ⊗ D).obj (.op U) from y ⊗ₜ w)
+  have ht : (tensorμ A B C D).app (.op U) tSource = tTarget := by
+    rfl
+  have hunit := adj.unit.naturality (tensorμ A B C D)
+  have hunitU := congrArg (fun k ↦ k.app (.op U)) hunit
+  have hunitApply := ConcreteCategory.congr_hom hunitU tSource
+  conv_lhs at hunitApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  conv_rhs at hunitApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  exact hunitApply.symm.trans (congrArg
+    (fun q ↦ (adj.unit.app ((A ⊗ C) ⊗ (B ⊗ D))).app (.op U) q) ht)
+
+private theorem sheafification_tensorMu_tensorSection
+    {X : Scheme.{u}} (A B C D : X.PresheafOfModules) (U : X.Opens)
+    (x : A.obj (.op U)) (y : B.obj (.op U))
+    (z : C.obj (.op U)) (w : D.obj (.op U)) :
+    let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+    let adj := PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)
+    (tensorμ (L.obj A) (L.obj B) (L.obj C) (L.obj D)).val.app (.op U)
+        (tensorSection (L.obj A ⊗ L.obj B) (L.obj C ⊗ L.obj D) U
+          (tensorSection (L.obj A) (L.obj B) U
+            ((adj.unit.app A).app (.op U) x)
+            ((adj.unit.app B).app (.op U) y))
+          (tensorSection (L.obj C) (L.obj D) U
+            ((adj.unit.app C).app (.op U) z)
+            ((adj.unit.app D).app (.op U) w))) =
+      tensorSection (L.obj A ⊗ L.obj C) (L.obj B ⊗ L.obj D) U
+        (tensorSection (L.obj A) (L.obj C) U
+          ((adj.unit.app A).app (.op U) x)
+          ((adj.unit.app C).app (.op U) z))
+        (tensorSection (L.obj B) (L.obj D) U
+          ((adj.unit.app B).app (.op U) y)
+          ((adj.unit.app D).app (.op U) w)) := by
+  dsimp only
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let tSource : ((A ⊗ B) ⊗ (C ⊗ D)).obj (.op U) :=
+    (show (A ⊗ B).obj (.op U) from x ⊗ₜ y) ⊗ₜ
+      (show (C ⊗ D).obj (.op U) from z ⊗ₜ w)
+  have hSource := sheafification_delta_nested_tmul A B C D U x y z w
+  have hTarget := sheafification_delta_nested_tmul A C B D U x z y w
+  have hMap := sheafification_map_tensorMu_unit A B C D U x y z w
+  have hcoh := tensorMu_delta L A B C D
+  have hcohApply := congrArg
+    (fun k ↦ k.val.app (.op U)
+      ((adj.unit.app ((A ⊗ B) ⊗ (C ⊗ D))).app (.op U) tSource)) hcoh
+  conv_lhs at hcohApply =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  conv_rhs at hcohApply =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  conv_lhs at hcohApply =>
+    rw [hSource]
+  conv_rhs at hcohApply =>
+    rw [hMap]
+    rw [hTarget]
+  exact hcohApply
+
+end TensorMuSections
+
+section TensorMuModuleSections
+
+noncomputable local instance (X : Scheme.{u}) :
+    SymmetricCategory (SheafOfModules X.ringCatSheaf) := by
+  change SymmetricCategory X.Modules
+  exact Scheme.Modules.symmetricCategory X
+
+private theorem sheafifyValIso_hom_unit_apply
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens) (x : Γ(M, U)) :
+    (Scheme.Modules.sheafifyValIso M).hom.val.app (.op U)
+        (((PresheafOfModules.sheafificationAdjunction
+          (𝟙 X.ringCatSheaf.obj)).unit.app M.val).app (.op U) x) = x := by
+  rw [← Scheme.Modules.sheafifyValIso_inv_app_apply M U x]
+  exact Scheme.Modules.iso_inv_hom_app_applyT
+    (Scheme.Modules.sheafifyValIso M) (.op U) x
+
+private theorem tensorSection_map_four
+    {X : Scheme.{u}}
+    {M₁ M₂ P₁ P₂ M₁' M₂' P₁' P₂' : X.Modules}
+    (f₁ : M₁ ⟶ M₁') (f₂ : M₂ ⟶ M₂')
+    (g₁ : P₁ ⟶ P₁') (g₂ : P₂ ⟶ P₂') (U : X.Opens)
+    (x₁ : Γ(M₁, U)) (x₂ : Γ(M₂, U))
+    (y₁ : Γ(P₁, U)) (y₂ : Γ(P₂, U)) :
+    (((f₁ ⊗ₘ f₂) ⊗ₘ (g₁ ⊗ₘ g₂)).val.app (.op U))
+        (tensorSection (M₁ ⊗ M₂) (P₁ ⊗ P₂) U
+          (tensorSection M₁ M₂ U x₁ x₂)
+          (tensorSection P₁ P₂ U y₁ y₂)) =
+      tensorSection (M₁' ⊗ M₂') (P₁' ⊗ P₂') U
+        (tensorSection M₁' M₂' U
+          (f₁.val.app (.op U) x₁) (f₂.val.app (.op U) x₂))
+        (tensorSection P₁' P₂' U
+          (g₁.val.app (.op U) y₁) (g₂.val.app (.op U) y₂)) := by
+  rw [tensorSection_map]
+  rw [tensorSection_map, tensorSection_map]
+
+noncomputable local instance (X : Scheme.{u}) : SymmetricCategory X.Modules := by
+  change SymmetricCategory (SheafOfModules X.ringCatSheaf)
+  infer_instance
+
+/-- Interchanging the middle factors of nested pure tensor sections acts
+factorwise over every open. -/
+theorem tensorMu_tensorSection
+    {X : Scheme.{u}} (L₁ L₂ P₁ P₂ : X.Modules) (U : X.Opens)
+    (x₁ : Γ(L₁, U)) (x₂ : Γ(L₂, U))
+    (y₁ : Γ(P₁, U)) (y₂ : Γ(P₂, U)) :
+    (tensorμ L₁ L₂ P₁ P₂).val.app (.op U)
+        (tensorSection (L₁ ⊗ L₂) (P₁ ⊗ P₂) U
+          (tensorSection L₁ L₂ U x₁ x₂)
+          (tensorSection P₁ P₂ U y₁ y₂)) =
+      tensorSection (L₁ ⊗ P₁) (L₂ ⊗ P₂) U
+        (tensorSection L₁ P₁ U x₁ y₁)
+        (tensorSection L₂ P₂ U x₂ y₂) := by
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let c₁ := Scheme.Modules.sheafifyValIso L₁
+  let c₂ := Scheme.Modules.sheafifyValIso L₂
+  let d₁ := Scheme.Modules.sheafifyValIso P₁
+  let d₂ := Scheme.Modules.sheafifyValIso P₂
+  let u₁ := (adj.unit.app L₁.val).app (.op U) x₁
+  let u₂ := (adj.unit.app L₂.val).app (.op U) x₂
+  let v₁ := (adj.unit.app P₁.val).app (.op U) y₁
+  let v₂ := (adj.unit.app P₂.val).app (.op U) y₂
+  let qSource :=
+    tensorSection (L.obj L₁.val ⊗ L.obj L₂.val)
+      (L.obj P₁.val ⊗ L.obj P₂.val) U
+      (tensorSection (L.obj L₁.val) (L.obj L₂.val) U u₁ u₂)
+      (tensorSection (L.obj P₁.val) (L.obj P₂.val) U v₁ v₂)
+  let qTarget :=
+    tensorSection (L.obj L₁.val ⊗ L.obj P₁.val)
+      (L.obj L₂.val ⊗ L.obj P₂.val) U
+      (tensorSection (L.obj L₁.val) (L.obj P₁.val) U u₁ v₁)
+      (tensorSection (L.obj L₂.val) (L.obj P₂.val) U u₂ v₂)
+  let sourceMap := (c₁.hom ⊗ₘ c₂.hom) ⊗ₘ (d₁.hom ⊗ₘ d₂.hom)
+  let targetMap := (c₁.hom ⊗ₘ d₁.hom) ⊗ₘ (c₂.hom ⊗ₘ d₂.hom)
+  have hu₁ := sheafifyValIso_hom_unit_apply L₁ U x₁
+  have hu₂ := sheafifyValIso_hom_unit_apply L₂ U x₂
+  have hv₁ := sheafifyValIso_hom_unit_apply P₁ U y₁
+  have hv₂ := sheafifyValIso_hom_unit_apply P₂ U y₂
+  change c₁.hom.val.app (.op U) u₁ = x₁ at hu₁
+  change c₂.hom.val.app (.op U) u₂ = x₂ at hu₂
+  change d₁.hom.val.app (.op U) v₁ = y₁ at hv₁
+  change d₂.hom.val.app (.op U) v₂ = y₂ at hv₂
+  have hSource := tensorSection_map_four c₁.hom c₂.hom d₁.hom d₂.hom
+    U u₁ u₂ v₁ v₂
+  change sourceMap.val.app (.op U) qSource = _ at hSource
+  rw [hu₁, hu₂, hv₁, hv₂] at hSource
+  have hTarget := tensorSection_map_four c₁.hom d₁.hom c₂.hom d₂.hom
+    U u₁ v₁ u₂ v₂
+  change targetMap.val.app (.op U) qTarget = _ at hTarget
+  rw [hu₁, hu₂, hv₁, hv₂] at hTarget
+  have hSheaf := sheafification_tensorMu_tensorSection
+    L₁.val L₂.val P₁.val P₂.val U x₁ x₂ y₁ y₂
+  change
+    (tensorμ (L.obj L₁.val) (L.obj L₂.val)
+      (L.obj P₁.val) (L.obj P₂.val)).val.app (.op U) qSource = qTarget at hSheaf
+  have hnatural := tensorμ_natural c₁.hom c₂.hom d₁.hom d₂.hom
+  have hnaturalU := congrArg (fun k ↦ k.val.app (.op U)) hnatural
+  have hnaturalApply := ConcreteCategory.congr_hom hnaturalU qSource
+  conv_lhs at hnaturalApply =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  conv_rhs at hnaturalApply =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  have hStart := congrArg
+    (fun q ↦ (tensorμ L₁ L₂ P₁ P₂).val.app (.op U) q) hSource.symm
+  have hMiddle := congrArg (fun q ↦ targetMap.val.app (.op U) q) hSheaf
+  exact hStart.trans (hnaturalApply.trans (hMiddle.trans hTarget))
+
+end TensorMuModuleSections
+
 private theorem poleTensorTopSection_map
     {X : Scheme.{u}} {M M' N N' : X.Modules}
     (f : M ⟶ M') (g : N ⟶ N')
@@ -5708,6 +6012,36 @@ noncomputable def tensorPairing {X : Scheme.{u}}
   tensorμ L₁ L₂ P₁ P₂ ≫
     (e₁ ⊗ₘ e₂) ≫
     (unitObjTensorIso X).hom
+
+/-- Pairing two nested pure tensor sections over an arbitrary open multiplies
+the two factorwise pairing values. -/
+theorem tensorPairing_tensorSection {X : Scheme.{u}}
+    {L₁ L₂ P₁ P₂ : X.Modules}
+    (e₁ : L₁ ⊗ P₁ ⟶ Scheme.Modules.unitObj X)
+    (e₂ : L₂ ⊗ P₂ ⟶ Scheme.Modules.unitObj X)
+    (U : X.Opens) (x₁ : Γ(L₁, U)) (x₂ : Γ(L₂, U))
+    (y₁ : Γ(P₁, U)) (y₂ : Γ(P₂, U)) :
+    (tensorPairing e₁ e₂).val.app (.op U)
+        (tensorSection (L₁ ⊗ L₂) (P₁ ⊗ P₂) U
+          (tensorSection L₁ L₂ U x₁ x₂)
+          (tensorSection P₁ P₂ U y₁ y₂)) =
+      (show Γ(X, U) from
+        e₁.val.app (.op U) (tensorSection L₁ P₁ U x₁ y₁)) *
+        (show Γ(X, U) from
+          e₂.val.app (.op U) (tensorSection L₂ P₂ U x₂ y₂)) := by
+  change
+    ((tensorμ L₁ L₂ P₁ P₂ ≫ (e₁ ⊗ₘ e₂) ≫
+      (unitObjTensorIso X).hom).val.app (.op U)) _ = _
+  conv_lhs =>
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+  rw [tensorMu_tensorSection]
+  rw [tensorSection_map]
+  exact unitObjTensorIso_hom_tensorSection X U
+    (e₁.val.app (.op U) (tensorSection L₁ P₁ U x₁ y₁))
+    (e₂.val.app (.op U) (tensorSection L₂ P₂ U x₂ y₂))
 
 end TensorPairing
 
