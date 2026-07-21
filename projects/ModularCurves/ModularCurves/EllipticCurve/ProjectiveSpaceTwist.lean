@@ -1084,6 +1084,124 @@ theorem coordinateHyperplanePoleSectionPower_localTrivializationTopSection
         coordinateHyperplanePoleSection_localTrivializationTopSection]
       exact (pow_succ _ n).symm
 
+/-- A quasicoherent section that vanishes on a standard coordinate open is
+annihilated globally after tensoring with a sufficiently high power of the
+corresponding coordinate-hyperplane section. This is the injective half of
+the principal-open twisting argument of Stacks Project, Tag 01PW. -/
+theorem exists_tensorSection_coordinateHyperplanePoleSectionPower_eq_zero_of_restrict_eq_zero
+    [Fintype σ]
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (j : σ) (t : Γ(M, ⊤))
+    (ht : M.presheaf.map (coordinateOpen (R := R) j).leTop.op t = 0) :
+    ∃ n : ℕ,
+      ModularCurves.tensorSection M
+          (coordinateHyperplanePoleSheafPower (R := R) j n) ⊤ t
+          (coordinateHyperplanePoleSectionPower (R := R) j n) = 0 := by
+  classical
+  obtain ⟨n, hn⟩ :=
+    exists_pow_coordinateHyperplaneLocalEquation_smul_restrict_eq_zero_forall
+      M j t ht
+  refine ⟨n, ?_⟩
+  let X := Proj (homogeneousSubmodule σ R)
+  let N := coordinateHyperplanePoleSheafPower (R := R) j n
+  let s := coordinateHyperplanePoleSectionPower (R := R) j n
+  let q := ModularCurves.tensorSection M N ⊤ t s
+  change q = 0
+  refine TopCat.Presheaf.IsSheaf.section_ext (M ⊗ N).2 fun x hx ↦ ?_
+  have hxCover : x ∈ ⨆ i : σ, coordinateOpen (R := R) i := by
+    rw [iSup_coordinateOpen_eq_top]
+    exact hx
+  obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hxCover
+  let U : X.affineOpens :=
+    ⟨coordinateOpen (R := R) i, coordinateOpen_isAffineOpen (R := R) i⟩
+  refine ⟨U.1, le_top, hi, ?_⟩
+  refine Eq.trans ?_ (map_zero _).symm
+  apply (ModularCurves.localTrivializationRestriction_eq_zero_iff
+    (M ⊗ N) U q).mp
+  let P := (Scheme.Modules.restrictFunctor U.1.ι).obj M
+  let Q := (Scheme.Modules.restrictFunctor U.1.ι).obj N
+  let d := ModularCurves.restrictMonoidalTensorIso U.1.ι M N
+  let e := coordinateHyperplanePoleSheafPowerTrivialization
+    (R := R) i j n
+  let k : P ⊗ Q ≅ P ⊗ Scheme.Modules.unitObj U.1.toScheme :=
+    Iso.refl P ⊗ᵢ e
+  let a : Γ(U.1.toScheme, ⊤) :=
+    ModularCurves.affineOpenTopSection U
+      (coordinateHyperplaneLocalEquation (R := R) i j ^ n)
+  have hscalar :
+      a • ModularCurves.localTrivializationRestriction M U t = 0 := by
+    have htransport := congrArg
+      (fun y ↦
+        (M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)).inv
+          (M.presheaf.map (eqToHom U.1.ι_image_top).op y)) (hn i)
+    rw [map_zero, map_zero] at htransport
+    exact (ModularCurves.localTrivializationRestriction_smul_restrict
+      M U (coordinateHyperplaneLocalEquation (R := R) i j ^ n) t).symm.trans
+        htransport
+  have hpow :
+      ModularCurves.affineOpenTopSection U
+          (coordinateHyperplaneLocalEquation (R := R) i j ^ n) =
+        (ModularCurves.affineOpenTopSection U
+          (coordinateHyperplaneLocalEquation (R := R) i j)) ^ n := by
+    unfold ModularCurves.affineOpenTopSection
+    rw [map_pow, map_pow]
+  have hcoordinate :
+      e.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+          (ModularCurves.localTrivializationRestriction N U s) =
+        (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from a) := by
+    exact (coordinateHyperplanePoleSectionPower_localTrivializationTopSection
+      (R := R) i j n).trans hpow.symm
+  have hzero :
+      ModularCurves.tensorSection P (Scheme.Modules.unitObj U.1.toScheme) ⊤
+          (ModularCurves.localTrivializationRestriction M U t)
+          (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from a) = 0 :=
+    ModularCurves.tensorSection_eq_zero_of_smul_eq_zero P ⊤
+      (ModularCurves.localTrivializationRestriction M U t)
+      a hscalar
+  have hd :
+      d.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+          (ModularCurves.localTrivializationRestriction (M ⊗ N) U q) =
+        ModularCurves.tensorSection P Q ⊤
+          (ModularCurves.localTrivializationRestriction M U t)
+          (ModularCurves.localTrivializationRestriction N U s) := by
+    exact ModularCurves.tensorSection_localTrivializationRestriction M N U t s
+  have hk :
+      k.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+          (ModularCurves.tensorSection P Q ⊤
+            (ModularCurves.localTrivializationRestriction M U t)
+            (ModularCurves.localTrivializationRestriction N U s)) =
+        ModularCurves.tensorSection P (Scheme.Modules.unitObj U.1.toScheme) ⊤
+          (ModularCurves.localTrivializationRestriction M U t)
+          (show Γ(Scheme.Modules.unitObj U.1.toScheme, ⊤) from a) := by
+    rw [← hcoordinate]
+    exact ModularCurves.tensorSection_map (𝟙 P) e.hom ⊤
+      (ModularCurves.localTrivializationRestriction M U t)
+      (ModularCurves.localTrivializationRestriction N U s)
+  have hkzero :
+      k.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+          (ModularCurves.tensorSection P Q ⊤
+            (ModularCurves.localTrivializationRestriction M U t)
+            (ModularCurves.localTrivializationRestriction N U s)) = 0 :=
+    hk.trans hzero
+  have hlocalTensor :
+      ModularCurves.tensorSection P Q ⊤
+          (ModularCurves.localTrivializationRestriction M U t)
+          (ModularCurves.localTrivializationRestriction N U s) = 0 := by
+    have hback := congrArg
+      (fun y ↦ k.inv.val.app (.op (⊤ : U.1.toScheme.Opens)) y) hkzero
+    exact (Scheme.Modules.iso_hom_inv_app_applyT k
+      (.op (⊤ : U.1.toScheme.Opens)) _).symm.trans
+        (hback.trans (map_zero _))
+  have hdzero :
+      d.hom.val.app (.op (⊤ : U.1.toScheme.Opens))
+          (ModularCurves.localTrivializationRestriction (M ⊗ N) U q) = 0 :=
+    hd.trans hlocalTensor
+  have hback := congrArg
+    (fun y ↦ d.inv.val.app (.op (⊤ : U.1.toScheme.Opens)) y) hdzero
+  exact (Scheme.Modules.iso_hom_inv_app_applyT d
+    (.op (⊤ : U.1.toScheme.Opens)) _).symm.trans
+      (hback.trans (map_zero _))
+
 /-- Every nonnegative coordinate-hyperplane twist `O(n)` is invertible. -/
 theorem coordinateHyperplanePoleSheafPower_isInvertible (j : σ) (n : ℕ) :
     Scheme.Modules.IsInvertible
