@@ -3,6 +3,8 @@ Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB ModularCurves project
 -/
+import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechWeightAssembly
 import ModularCurves.ForMathlib.OrderedCechSupportAlternating
 
@@ -148,6 +150,43 @@ theorem exists_preimage_coordinateHyperplaneTwistOrderedBaseCechDifferential
     simpa only [ModuleCat.hom_comp, LinearMap.coe_comp, Function.comp_apply] using h
   rw [← h']
   simpa using ht
+
+/-- The explicit standard-coordinate ordered Cech complex for a nonnegative projective twist is
+exact in every positive degree. -/
+theorem coordinateHyperplaneTwistOrderedBaseCechComplex_exactAt_succ
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (hd : 0 ≤ d) (n : ℕ) :
+    (coordinateHyperplaneTwistOrderedBaseCechComplex
+      (R := R) j d).ExactAt (n + 1) := by
+  rw [HomologicalComplex.exactAt_iff' _ n (n + 1) ((n + 1) + 1)
+    (by simp) (by simp)]
+  have hsc : (ShortComplex.mk
+      (coordinateHyperplaneTwistOrderedBaseCechDifferential
+        (R := R) (σ := σ) d n)
+      (coordinateHyperplaneTwistOrderedBaseCechDifferential
+        (R := R) (σ := σ) d (n + 1))
+      (coordinateHyperplaneTwistOrderedBaseCechDifferential_comp
+        (R := R) j d n)).Exact := by
+    rw [ShortComplex.moduleCat_exact_iff]
+    intro s hs
+    exact exists_preimage_coordinateHyperplaneTwistOrderedBaseCechDifferential
+      (R := R) (σ := σ) j d hd n s hs
+  simpa only [HomologicalComplex.sc',
+    HomologicalComplex.shortComplexFunctor',
+    coordinateHyperplaneTwistOrderedBaseCechComplex_X,
+    coordinateHyperplaneTwistOrderedBaseCechComplex_d] using hsc
+
+/-- The native ordered Cech complex of a nonnegative coordinate-hyperplane twist is exact in
+every positive degree. -/
+theorem coordinateHyperplaneTwist_orderedBaseCechComplex_exactAt_succ
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (hd : 0 ≤ d) (n : ℕ) :
+    (Scheme.Modules.orderedBaseCechComplex
+      (homogeneousProjπ (R := R) (σ := σ))
+      (coordinateHyperplaneTwist (R := R) j d)
+      (coordinateOpenCover (R := R) (σ := σ))).ExactAt (n + 1) := by
+  exact (coordinateHyperplaneTwistOrderedBaseCechComplex_exactAt_succ
+    (R := R) (σ := σ) j d hd n).of_iso
+      (coordinateHyperplaneTwistOrderedBaseCechComplexIso
+        (R := R) j d).symm
 
 end
 
