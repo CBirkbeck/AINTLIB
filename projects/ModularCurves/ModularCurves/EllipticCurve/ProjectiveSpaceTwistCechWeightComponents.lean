@@ -281,6 +281,38 @@ private theorem coordinateHomogeneousLaurentWeightComponent_apply
       (coordinateHomogeneousLaurentWeightCoefficientProjection
         (R := R) d e a).hom x := rfl
 
+/-- On a tuple allowing `e`, the `e`-component is the corresponding Laurent coefficient. -/
+theorem coordinateHomogeneousLaurentWeightComponent_apply_of_allowed
+    [LinearOrder σ] (d : ℤ) (e : HomogeneousLaurentExponent σ d) {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n)
+    (h : e.IsAllowedOn (fun k => (a.1 k).down))
+    (x : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d n) :
+    (coordinateHomogeneousLaurentWeightComponent (R := R) d e n x).1 a =
+      ((Pi.π (fun b : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n =>
+        ModuleCat.of
+          Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+          (AddMonoidAlgebra
+            Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+            {e : HomogeneousLaurentExponent σ d //
+              e.IsAllowedOn (fun k => (b.1 k).down)})) a).hom x).coeff
+        (⟨e, h⟩ : {e : HomogeneousLaurentExponent σ d //
+          e.IsAllowedOn (fun k => (a.1 k).down)}) := by
+  rw [coordinateHomogeneousLaurentWeightComponent_apply,
+    coordinateHomogeneousLaurentWeightCoefficientProjection_apply_of_allowed (h := h)]
+  rfl
+
+/-- On a tuple not allowing `e`, the `e`-component vanishes. -/
+theorem coordinateHomogeneousLaurentWeightComponent_apply_of_not_allowed
+    [LinearOrder σ] (d : ℤ) (e : HomogeneousLaurentExponent σ d) {n : ℕ}
+    (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n)
+    (h : ¬e.IsAllowedOn (fun k => (a.1 k).down))
+    (x : coordinateHomogeneousLaurentOrderedCechObject
+      (R := R) (σ := σ) d n) :
+    (coordinateHomogeneousLaurentWeightComponent (R := R) d e n x).1 a = 0 := by
+  rw [coordinateHomogeneousLaurentWeightComponent_apply,
+    coordinateHomogeneousLaurentWeightCoefficientProjection_apply_of_not_allowed (h := h)]
+
 private def orderedCechSupportEvaluation
     [LinearOrder σ] (d : ℤ) (e : HomogeneousLaurentExponent σ d) (n : ℕ)
     (a : Scheme.Modules.OrderedCechIndex (ULift.{u} σ) n) :
