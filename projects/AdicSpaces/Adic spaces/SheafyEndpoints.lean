@@ -29,8 +29,8 @@ namespace ValuationSpectrum
 
 section PairLevel
 
-variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+variable {A : Type u} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
 
 /-- **Pair-level sheafiness makes the public structure presheaf a sheaf of
@@ -65,8 +65,8 @@ end PairLevel
 
 section TateLevel
 
-variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A]
+variable {A : Type u} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A]
 
 /-- **Ring-level (Tate) sheafiness makes the public structure presheaf of every
 completion model, at every valid ring of integral elements, a sheaf of topological

@@ -89,8 +89,8 @@ theorem IsEmbedding.of_comp_isEmbedding {α β γ : Type*} [TopologicalSpace α]
   · intro x y hxy
     exact hgf.injective (show (g ∘ f) x = (g ∘ f) y from congrArg g hxy)
 
-variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+variable {A : Type u} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
 
 /-! ### The single-pair derivation of the `A⁺`-free standard condition -/
@@ -207,6 +207,8 @@ section Engine
 variable [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)]
   [DecidableEq A] [DecidableEq (RationalLocData A)]
 
+omit [T2Space A] [NonarchimedeanRing A] 
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 /-- The generated standard cover of a base, as `StandardCoverData` (from
 `StandardRefinement.lean`), with pieces `stdPiece`. -/
 theorem stdPiece_mem_ofSpanTop (D₀ : RationalLocData A) (hD₀ : D₀.IsRational)
@@ -214,6 +216,8 @@ theorem stdPiece_mem_ofSpanTop (D₀ : RationalLocData A) (hD₀ : D₀.IsRation
     stdPiece D₀ hD₀ S hS f ∈ (StandardCoverData.ofSpanTop D₀ hD₀ S hS).covers :=
   (mem_genCoverPieces D₀ hD₀ S hS).mpr ⟨⟨f, hf⟩, rfl⟩
 
+omit [T2Space A] [NonarchimedeanRing A] 
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [PlusSubring A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 theorem mem_ofSpanTop_covers {D₀ : RationalLocData A} {hD₀ : D₀.IsRational}
     {S : Finset A} {hS : Ideal.span (S : Set A) = ⊤} {P : RationalLocData A}
     (hP : P ∈ (StandardCoverData.ofSpanTop D₀ hD₀ S hS).covers) :
@@ -221,6 +225,8 @@ theorem mem_ofSpanTop_covers {D₀ : RationalLocData A} {hD₀ : D₀.IsRational
   obtain ⟨f, hfeq⟩ := (mem_genCoverPieces D₀ hD₀ S hS).mp hP
   exact ⟨f.1, f.2, hfeq⟩
 
+omit [T2Space A] [NonarchimedeanRing A] 
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A] [DecidableEq (RationalLocData A)] in
 private theorem productRestrictionSub_continuous'' [HasLocLiftPowerBounded A]
     (C : RationalCoveringData A) : Continuous (productRestrictionSub A C) := by
   refine continuous_pi fun E => ?_
@@ -228,6 +234,7 @@ private theorem productRestrictionSub_continuous'' [HasLocLiftPowerBounded A]
     restrictionMap C.base E.1 (C.hsubset E.1 E.2) x
   exact restrictionMapHom_continuous C.base E.1 (C.hsubset E.1 E.2)
 
+omit [DecidableEq A] in
 /-- **Empty-cover branch** (Wedhorn's implicit degenerate case): a rational covering
 with no members forces the base rational open to be empty (via `C.hcover`), so the
 section ring `presheafValue C.base` is a subsingleton

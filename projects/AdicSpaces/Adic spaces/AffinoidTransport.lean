@@ -174,6 +174,7 @@ theorem comap_symm_mem_spa_map (he' : Continuous e.symm) {w : Spv A}
   have hsymm : e.symm.toRingHom (e.toRingHom f) = f := e.symm_apply_apply f
   simpa only [comap_vle, map_one, hsymm] using hw.2 f hf
 
+omit [TopologicalSpace A] [TopologicalSpace B] in
 /-- Round trip on `Spv B`. -/
 theorem comap_comap_of_ringEquiv (v : Spv B) :
     comap e.symm.toRingHom (comap e.toRingHom v) = v := by
@@ -182,6 +183,7 @@ theorem comap_comap_of_ringEquiv (v : Spv B) :
     RingHom.ext fun b => e.apply_symm_apply b, comap_id] at h
   exact (congr_fun h v).symm
 
+omit [TopologicalSpace A] [TopologicalSpace B] in
 /-- Round trip on `Spv A`. -/
 theorem comap_symm_comap_of_ringEquiv (w : Spv A) :
     comap e.toRingHom (comap e.symm.toRingHom w) = w := by

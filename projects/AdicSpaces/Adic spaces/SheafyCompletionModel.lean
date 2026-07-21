@@ -49,7 +49,7 @@ universe u
 
 section C0
 
-variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+variable {A : Type u} [CommRing A] [TopologicalSpace A]
   [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
 
@@ -58,14 +58,18 @@ of the identity along the (unit) image of `1`. -/
 private noncomputable def completeRingCollapseAlg (P : PairOfDefinition A) :
     Localization.Away ((globalLocData P).s) →+* A :=
   IsLocalization.Away.lift (globalLocData P).s
-    (show IsUnit ((RingHom.id A) (1 : A)) by simpa using isUnit_one)
+    (isUnit_one.map (RingHom.id A) : IsUnit ((RingHom.id A) (1 : A)))
 
+omit [T2Space A] [NonarchimedeanRing A] 
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- The collapse tracks the algebra map. -/
 private theorem completeRingCollapseAlg_algebraMap (P : PairOfDefinition A) (a : A) :
     completeRingCollapseAlg P
       (algebraMap A (Localization.Away ((globalLocData P).s)) a) = a :=
   IsLocalization.Away.lift_eq (g := RingHom.id A) _ _ a
 
+omit [T2Space A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- Continuity of the collapse for the whole-space localization topology: the
 generator set is `{1}`, whose image is power-bounded. -/
 private theorem completeRingCollapseAlg_continuous (P : PairOfDefinition A) :

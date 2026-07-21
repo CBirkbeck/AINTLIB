@@ -52,7 +52,7 @@ universe v u
 
 namespace ValuationSpectrum
 
-variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+variable {A : Type u} [CommRing A] [TopologicalSpace A]
   [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
 
 /-! ### Uniform coherence of the limit values
@@ -303,6 +303,7 @@ section HomSheafCore
 
 variable {T : Type u} [CommRing T] [TopologicalSpace T] [IsTopologicalRing T]
 
+omit [IsTopologicalRing T] in
 /-- **The `Hom`-gluing core** (the substantive half of Wedhorn Remark 8.20's "⟸"):
 under `IsLimitSheaf A`, compatible families of continuous ring homomorphisms glue
 uniquely. Pointwise gluing gives the function; separation gives additivity,
@@ -416,6 +417,7 @@ private theorem polyProbeEval_comp {R S : Type u} [CommRing R] [CommRing S]
 
 end HomSheafCore
 
+set_option warn.classDefReducibility false in
 /-- The topology on `𝒪_X(V)` induced from the cover product — the test topology of
 Wedhorn Remark 8.20's embedding direction. A plain definition (deliberately **not** a
 local hypothesis or instance, so it never shadows the projective-limit instance
@@ -542,8 +544,7 @@ theorem isSheafOfTopologicalRings_iff_isLimitSheaf :
         exact continuous_iff_le_induced.mp
           (continuous_pi fun i => limitRestrict_continuous (hle i))
       exact ⟨hind, fun x y hxy => hinj hle hcov fun i => congr_fun hxy i⟩
-  · intro hlimit
-    intro T _ _ _ V ι U hle hcov f hfc hcompat
+  · intro hlimit T _ _ _ V ι U hle hcov f hfc hcompat
     exact hlimit.homGlue hle hcov f hfc hcompat
 
 /-! ### The categorical sheaf condition and the public sheaf object
@@ -719,7 +720,7 @@ noncomputable def sheaf : TopCat.Sheaf CompleteTopCommRingCat.{u} X.toTopCat :=
 (`IsSheafy`, complete Tate scope), through the C5 equivalence
 `isLimitSheaf_of_isSheafy`. -/
 noncomputable def ofIsSheafy (R : Type u) [CommRing R] [TopologicalSpace R]
-    [IsTopologicalRing R] [PlusSubring R] [IsHuberRing R] [IsTateRing R]
+    [PlusSubring R] [IsTateRing R]
     [T2Space R] [NonarchimedeanRing R]
     [letI : UniformSpace R := IsTopologicalAddGroup.rightUniformSpace R;
       CompleteSpace R]

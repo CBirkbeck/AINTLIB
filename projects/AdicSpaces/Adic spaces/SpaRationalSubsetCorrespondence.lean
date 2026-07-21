@@ -63,7 +63,7 @@ variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTateRing A]
 /-- In a Tate ring, a finite family generating an open ideal generates the unit
 ideal (Wedhorn Remark 7.30(1) for Definition 7.29's condition). -/
 theorem span_eq_top_of_isOpen_span {B : Type*} [CommRing B] [TopologicalSpace B]
-    [IsTopologicalRing B] [IsTateRing B] {T : Finset B}
+    [IsTateRing B] {T : Finset B}
     (h : IsOpen (((Ideal.span (T : Set B) : Ideal B) : Set B))) :
     Ideal.span (T : Set B) = ⊤ := by
   obtain ⟨u, hu⟩ := ‹IsTateRing B›.exists_topologicallyNilpotent_unit
@@ -81,6 +81,8 @@ theorem RationalLocData.isRationalSubset_rationalOpen {B : Type*} [CommRing B]
 
 /-! ### The clean membership theorem for the image datum -/
 
+omit [T2Space A] 
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 /-- **Membership in an image-datum rational open** (Wedhorn Prop 8.2 + Remark
 8.4, clean form): an upstairs valuation lies in `R(imgDatum D E)` iff it is a
 Spa-point of the completed localization whose canonical-map pull-back lies in
@@ -113,6 +115,8 @@ theorem imgDatum_mem_rationalOpen_iff (D E : RationalLocData A)
 
 /-! ### The hard direction: every upstairs rational subset descends -/
 
+omit [T2Space A] 
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- **The reverse-image construction** (Wedhorn Proposition 8.2(2), hard
 direction, complete-Tate specialization): every valid rational datum `E` over
 the completed localization `A⟨T/s⟩` presents the same rational open as the
@@ -126,7 +130,7 @@ uniformly dominated by the denominator on the *compact* upstairs subset — so
 that the downstairs family spans `⊤` (the unit is in it) while the upstairs
 subset is unchanged (the added condition holds throughout). -/
 theorem exists_downstairs_rationalDatum
-    (D : RationalLocData A) (hD : D.IsRational)
+    (D : RationalLocData A) (_hD : D.IsRational)
     (E : RationalLocData (presheafValue D)) (hE : E.IsRational) :
     ∃ (W : RationalLocData A) (hW : W.IsRational),
       rationalOpen E.T E.s =
@@ -287,6 +291,8 @@ theorem exists_downstairs_rationalDatum
 
 /-! ### The comap image of an image-datum open -/
 
+omit [T2Space A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- The `comap`-image of an image-datum rational open is the **intersection with
 the base**: `R(D) ∩ R(W)` (Wedhorn 8.2(2): the image is `U ∩ W`, not `W`). -/
 theorem comap_image_imgDatum_rationalOpen (D : RationalLocData A)
@@ -304,6 +310,8 @@ theorem comap_image_imgDatum_rationalOpen (D : RationalLocData A)
     exact ⟨w, (imgDatum_mem_rationalOpen_iff D W hspanW w).mpr
       ⟨hwspa, by rw [hwcomap]; exact hvW⟩, hwcomap⟩
 
+omit [T2Space A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] in
 /-- The backward carrier, presentation-free: the set of upstairs Spa-points
 whose pull-back lies in a downstairs set `V`, at `V = R(W)`, is exactly the
 image-datum rational open. -/
@@ -321,6 +329,8 @@ section Correspondence
 
 variable (D : RationalLocData A) (hD : D.IsRational)
 
+omit [T2Space A] [NonarchimedeanRing A] 
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A] [IsRingOfIntegralElements (A⁺ : Subring A)] in
 /-- Forward carrier lands inside the base rational subset. -/
 private theorem forward_subset (V : RationalSubset (presheafValue D)) :
     comap D.canonicalMap '' V.1 ⊆ rationalOpen D.T D.s := by

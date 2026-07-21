@@ -42,11 +42,12 @@ universe u
 
 namespace ValuationSpectrum
 
-variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+variable {A : Type u} [CommRing A] [TopologicalSpace A]
   [IsHuberRing A]
 
 /-! ### The whole-space localization topology is pair-independent -/
 
+omit [IsHuberRing A] in
 /-- Membership in the `n`-th basic neighborhood of the whole-space datum: exactly
 the `algebraMap`-images of `Iⁿ` (mem-form of `locNhd_singleton_one_eq`). -/
 theorem mem_locNhd_globalLocData {P : PairOfDefinition A} {n : ℕ}

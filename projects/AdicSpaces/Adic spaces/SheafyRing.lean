@@ -80,8 +80,8 @@ namespace ValuationSpectrum
 
 universe u
 
-variable (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+variable (A : Type u) [CommRing A] [TopologicalSpace A]
+  [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
 
 /-! ### Pair-level sheafiness for an explicit valid choice -/
@@ -159,7 +159,7 @@ universe v
 
 section CompletionModel
 
-variable (A : Type v) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+variable (A : Type v) [CommRing A] [TopologicalSpace A]
   [IsHuberRing A]
 
 /-- **The completion `Â` of a Huber ring**, realized by the project's completion
@@ -240,8 +240,8 @@ end CompletionModel
 
 section NoncompleteWrapper
 
-variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsHuberRing A] [IsTateRing A]
+variable {A : Type v} [CommRing A] [TopologicalSpace A]
+  [IsTateRing A]
 
 /-- **The strongly noetherian sheafiness theorem, general (noncomplete) Tate form**
 (Wedhorn Theorem 8.28(b), with the Definition 6.36 hypothesis read at every
@@ -274,8 +274,8 @@ end NoncompleteWrapper
 
 section CompletionTheorem
 
-variable {A : Type v} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [PlusSubring A] [IsHuberRing A] [IsTateRing A] [IsNoetherianRing A]
+variable {A : Type v} [CommRing A] [TopologicalSpace A]
+  [PlusSubring A] [IsTateRing A] [IsNoetherianRing A]
   [IsStronglyNoetherian A] [T2Space A] [NonarchimedeanRing A]
   [HasLocLiftPowerBounded A]
   [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
@@ -354,6 +354,7 @@ theorem StandardCoverData.toCovering_isRational [PlusSubring A]
   ⟨S.base_isRational, S.covers_isRational⟩
 
 variable (A) in
+omit [IsTopologicalRing A] in
 /-- **The `A⁺`-free standard sheaf condition** (Kedlaya Remarks 1.6.8/1.6.9, the
 common middle term of the independence theorem): for every standard cover datum and
 **every** valid integral subring, the instantiated covering satisfies the separation,
@@ -362,7 +363,7 @@ gluing, and topological-embedding assertions. The signature carries no `PlusSubr
 subrings are quantified in the body and the restriction-map package is derived from
 the analytic scope. The rings `presheafValue D`, the restriction maps, and the
 standard covers themselves depend only on `A`. -/
-def StandardSheafCondition [IsHuberRing A] [IsTateRing A] [T2Space A]
+def StandardSheafCondition [IsTateRing A] [T2Space A]
     [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A] : Prop :=
@@ -389,7 +390,7 @@ its generation-side ingredients are proved in `StandardRefinement.lean` and the
 remaining descent branch is the missing API recorded in
 `WedhornStandardCoverRefinement.lean`. It is *not* on the dependency path of the
 strongly noetherian theorems, which quantify over all valid pairs directly. -/
-theorem standardSheafCondition_of_isSheafyComplete [IsHuberRing A] [IsTateRing A]
+theorem standardSheafCondition_of_isSheafyComplete [IsTateRing A]
     [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A]
@@ -409,7 +410,7 @@ theorem standardSheafCondition_of_isSheafyComplete [IsHuberRing A] [IsTateRing A
 variable (A) in
 /-- A complete strongly noetherian Tate ring satisfies the `A⁺`-free standard sheaf
 condition. -/
-theorem standardSheafCondition_of_stronglyNoetherianTate [IsHuberRing A] [IsTateRing A]
+theorem standardSheafCondition_of_stronglyNoetherianTate [IsTateRing A]
     [IsStronglyNoetherian A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
       CompleteSpace A] : StandardSheafCondition A :=

@@ -63,7 +63,7 @@ open Topology
 
 namespace ValuationSpectrum
 
-variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+variable {A : Type*} [CommRing A] [TopologicalSpace A]
   [PlusSubring A] [IsHuberRing A]
 
 /-! ### Rational opens inside the subtype `↥(Spa A A⁺)` -/
@@ -256,6 +256,7 @@ def RationalIndex.self (D₀ : RationalLocData A) (hD₀ : D₀.IsRational) :
     RationalIndex (spaOpens D₀) :=
   ⟨D₀, hD₀, subset_rfl⟩
 
+omit [HasLocLiftPowerBounded A] in
 /-- Every index of `spaOpens D₀` has rational open contained in `R(D₀.T/D₀.s)`
 (in `Spv A` terms). -/
 theorem RationalIndex.rationalOpen_subset {D₀ : RationalLocData A}

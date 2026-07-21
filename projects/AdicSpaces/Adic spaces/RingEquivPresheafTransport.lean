@@ -144,6 +144,7 @@ def PairOfDefinition.mapRingEquiv (e : A ≃+* B) (he : Continuous e)
 
 /-! #### The pair roundtrips (T1) -/
 
+omit [IsTopologicalRing A] in
 /-- Extensionality for `PairOfDefinition` from the two data fields (the other
 fields are propositions); the ideal is compared as a `HEq` across the subring
 equality. -/
@@ -157,6 +158,7 @@ theorem PairOfDefinition.ext_of_fields {P₁ P₂ : PairOfDefinition A}
   subst hI'
   rfl
 
+omit [TopologicalSpace A] [IsTopologicalRing A] in
 /-- Mapping an ideal along a coercion-fixing hom between equal subrings is the
 identity, as a `HEq` across the subring equality (the dependent-ideal collapse
 used by the pair roundtrips). -/
@@ -168,6 +170,7 @@ private theorem ideal_map_heq_of_coe_fix {S S' : Subring A} (h : S' = S)
     rw [show φ = RingHom.id _ from RingHom.ext fun x => Subtype.ext (hφ x),
       Ideal.map_id])
 
+omit [TopologicalSpace A] [IsTopologicalRing A] [TopologicalSpace B] [IsTopologicalRing B] in
 /-- The subring roundtrip: mapping forward along `e` and back along `e.symm`
 recovers the subring. -/
 theorem PairOfDefinition.subring_map_symm_map (e : A ≃+* B) (s : Subring A) :
@@ -311,6 +314,7 @@ section Roundtrip
 variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
   [IsTateRing A] [CommRing B] [TopologicalSpace B] [IsTateRing B]
 
+omit [TopologicalSpace A] [IsTateRing A] [TopologicalSpace B] [IsTateRing B] in
 /-- The `Finset.image` roundtrip along a ring equivalence. -/
 theorem finset_image_symm_image (e : A ≃+* B) (T : Finset A) :
     (T.image e).image e.symm = T := by
@@ -394,6 +398,7 @@ variable {A : Type u} {B : Type v} [CommRing A] [TopologicalSpace A]
   [PlusSubring A] [PlusSubring B]
   (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
 
+omit [TopologicalSpace A] [IsTateRing A] [TopologicalSpace B] [IsTopologicalRing B] in
 /-- Corresponding plus rings, read in the other direction: if `B⁺` is the image
 of `A⁺` then `A⁺` is the image of `B⁺` under the inverse. -/
 theorem ringPlus_map_symm_of_map
@@ -755,6 +760,7 @@ def RationalCoveringData.pullbackPieceEmbedding (C : RationalCoveringData B)
     exact Subtype.ext
       (congrArg (fun X : {D : RationalLocData B // D.IsRational} => X.1) h2)
 
+omit [PlusSubring A] in
 @[simp] theorem RationalCoveringData.pullbackPieceEmbedding_apply
     (C : RationalCoveringData B) (hC : C.IsRational) (D : {D // D ∈ C.covers}) :
     C.pullbackPieceEmbedding e he he' hC D =
@@ -887,6 +893,7 @@ noncomputable def RationalCoveringData.productSectionsHomeomorph :
   Homeomorph.piCongr (C.pullbackIndexEquiv e he he' hC hplus)
     (fun D => presheafValueHomeomorphOfRingEquiv e.symm he' he D.1 (hC.piece D.2))
 
+omit [HasLocLiftPowerBounded A] [HasLocLiftPowerBounded B] in
 /-- Evaluation of the product homeomorphism at a forward-transported index: no
 cast appears because the index equivalence's value is definitionally the
 transported datum. -/
@@ -903,6 +910,7 @@ theorem RationalCoveringData.productSectionsHomeomorph_apply_index
     (fun D => (presheafValueHomeomorphOfRingEquiv e.symm he' he D.1
       (hC.piece D.2)).toEquiv) f D
 
+omit [HasLocLiftPowerBounded A] [HasLocLiftPowerBounded B] in
 /-- Pointwise evaluation of the inverse product homeomorphism: the backward
 transport is index-free (`Equiv.piCongr_symm_apply` is definitional). -/
 theorem RationalCoveringData.productSectionsHomeomorph_symm_apply

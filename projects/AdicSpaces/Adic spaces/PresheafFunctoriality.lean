@@ -43,7 +43,7 @@ structure); the previously-used copies (`IteratedRational.restrictionMapHom_cano
 which was overscoped with `[IsTateRing]…[NonarchimedeanRing]`, and the private FJP
 `restrictionMapHom_canonicalMap'`) route through this. -/
 theorem restrictionMapHom_canonicalMap_generic {A : Type*} [CommRing A]
-    [TopologicalSpace A] [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A]
+    [TopologicalSpace A] [PlusSubring A] [IsHuberRing A]
     [HasLocLiftPowerBounded A] (D D' : RationalLocData A)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) (a : A) :
     restrictionMapHom D D' h (D.canonicalMap a) = D'.canonicalMap a := by
@@ -71,7 +71,7 @@ section along `E₁ = E₂` agrees with the restriction map for the induced
 generic and is the standard tool for eliminating `▸`-casts between
 propositionally equal presheaf values. -/
 theorem restrictionMap_cast {A : Type*} [CommRing A] [TopologicalSpace A]
-    [IsTopologicalRing A] [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+    [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
     (E₁ E₂ : RationalLocData A) (heq : E₁ = E₂) (v : presheafValue E₁) :
     heq ▸ v = restrictionMap E₁ E₂ (by rw [heq]) v := by
   subst heq
@@ -226,9 +226,9 @@ end CovariantPush
 `R`- and `S`-side need `[HasLocLiftPowerBounded]` (so `restrictionMap` is defined);
 no noetherian/T2 hypotheses. -/
 theorem presheafValueMapOfHom_restriction
-    {R S : Type*} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
+    {R S : Type*} [CommRing R] [TopologicalSpace R]
     [PlusSubring R] [IsHuberRing R] [HasLocLiftPowerBounded R]
-    [CommRing S] [TopologicalSpace S] [IsTopologicalRing S]
+    [CommRing S] [TopologicalSpace S]
     [PlusSubring S] [IsHuberRing S] [HasLocLiftPowerBounded S]
     (φ : R →+* S) (hφ : Continuous φ)
     (D D' : RationalLocData R) (E E' : RationalLocData S)
