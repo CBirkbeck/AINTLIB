@@ -2022,6 +2022,54 @@ noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules) :
       (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
       (Iso.refl _) M.val N.val
 
+/-- The pure tensor of two sections over the same open, regarded as a section of the
+localized tensor product of sheaves of modules. -/
+noncomputable def tensorSection {X : Scheme.{u}} (M N : X.Modules)
+    (U : X.Opens) (x : Γ(M, U)) (y : Γ(N, U)) : Γ(M ⊗ N, U) :=
+  (monoidalTensorObjIso M N).inv.val.app (.op U)
+    (((PresheafOfModules.sheafificationAdjunction
+      (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app
+        (.op U) (x ⊗ₜ y))
+
+/-- Forming a pure tensor section commutes with restriction to a smaller open. -/
+theorem tensorSection_restrict {X : Scheme.{u}} (M N : X.Modules)
+    {U V : X.Opens} (hVU : V ≤ U) (x : Γ(M, U)) (y : Γ(N, U)) :
+    (M ⊗ N).val.map (homOfLE hVU).op (tensorSection M N U x y) =
+      tensorSection M N V
+        (M.val.map (homOfLE hVU).op x)
+        (N.val.map (homOfLE hVU).op y) := by
+  let i := (homOfLE hVU).op
+  let A := M.val ⊗ N.val
+  let q := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).unit.app A
+  let κ := (monoidalTensorObjIso M N).inv.val
+  let t : A.obj (.op U) := x ⊗ₜ y
+  have hq := q.naturality i
+  have hqApply := ConcreteCategory.congr_hom hq t
+  have hκ := κ.naturality i
+  have hκApply := ConcreteCategory.congr_hom hκ (q.app (.op U) t)
+  change (M ⊗ N).val.map i
+      (κ.app (.op U) (q.app (.op U) t)) =
+    κ.app (.op V)
+      (q.app (.op V) (M.val.map i x ⊗ₜ N.val.map i y))
+  conv_lhs at hκApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  conv_rhs at hκApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  conv_lhs at hqApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  conv_rhs at hqApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  have h₁ := hκApply.symm
+  have h₂ := congrArg (κ.app (.op V)) hqApply.symm
+  have hA : A.map i t =
+      (M.val.map i x ⊗ₜ N.val.map i y : A.obj (.op V)) := by
+    erw [PresheafOfModules.Monoidal.tensorObj_map_tmul]
+    rfl
+  have h₃ := congrArg
+    (fun a ↦ κ.app (.op V) (q.app (.op V) a)) hA
+  exact h₁.trans (h₂.trans h₃)
+
 /-- Restriction along an open immersion preserves the localized monoidal unit. -/
 noncomputable def restrictMonoidalUnitIso
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
@@ -4540,10 +4588,7 @@ private noncomputable def poleTensorTopSection
     {X : Scheme.{u}} (M N : X.Modules)
     (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
     Γ(M ⊗ N, (⊤ : X.Opens)) :=
-  (monoidalTensorObjIso M N).inv.val.app (.op (⊤ : X.Opens))
-    (((PresheafOfModules.sheafificationAdjunction
-      (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app
-      (.op (⊤ : X.Opens)) (x ⊗ₜ y))
+  tensorSection M N ⊤ x y
 
 private noncomputable def poleTopSectionHom
     {X : Scheme.{u}} (M : X.Modules)
@@ -4743,52 +4788,62 @@ private theorem monoidalTensorObjIso_inv_natural
     (Category.assoc _ _ _).symm
   exact h₁.trans (h₂.trans (h₃.trans (h₄.trans h₅)))
 
+/-- Forming a pure tensor section commutes with morphisms in both module factors. -/
+theorem tensorSection_map
+    {X : Scheme.{u}} {M M' N N' : X.Modules}
+    (f : M ⟶ M') (g : N ⟶ N') (U : X.Opens)
+    (x : Γ(M, U)) (y : Γ(N, U)) :
+    (f ⊗ₘ g).val.app (.op U) (tensorSection M N U x y) =
+      tensorSection M' N' U
+        (f.val.app (.op U) x) (g.val.app (.op U) y) := by
+  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  let adj := PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)
+  let t : (M.val ⊗ N.val).obj (.op U) := x ⊗ₜ y
+  let t' : (M'.val ⊗ N'.val).obj (.op U) :=
+    f.val.app (.op U) x ⊗ₜ g.val.app (.op U) y
+  let q := adj.unit.app (M.val ⊗ N.val)
+  let q' := adj.unit.app (M'.val ⊗ N'.val)
+  let a := q.app (.op U) t
+  let a' := q'.app (.op U) t'
+  have ht : (f.val ⊗ₘ g.val).app (.op U) t = t' := by
+    rfl
+  have hunit := adj.unit_naturality (f.val ⊗ₘ g.val)
+  change adj.unit.app (M.val ⊗ N.val) ≫
+      (L.map (f.val ⊗ₘ g.val)).val =
+    (f.val ⊗ₘ g.val) ≫ adj.unit.app (M'.val ⊗ N'.val) at hunit
+  have hunitU := congrArg (fun k ↦ k.app (.op U)) hunit
+  have hunitApply := ConcreteCategory.congr_hom hunitU t
+  conv_lhs at hunitApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  conv_rhs at hunitApply =>
+    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
+  have hLa : (L.map (f.val ⊗ₘ g.val)).val.app (.op U) a = a' := by
+    dsimp only [a, a', q, q']
+    have hright := congrArg
+      (fun b ↦ (adj.unit.app (M'.val ⊗ N'.val)).app (.op U) b) ht
+    exact hunitApply.trans hright
+  have hk := monoidalTensorObjIso_inv_natural f g
+  have hkU := congrArg (fun k ↦ k.val.app (.op U)) hk
+  have hkApply := ConcreteCategory.congr_hom hkU a
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply, SheafOfModules.comp_val,
+    PresheafOfModules.comp_app, ModuleCat.comp_apply] at hkApply
+  change (f ⊗ₘ g).val.app (.op U)
+      ((monoidalTensorObjIso M N).inv.val.app (.op U) a) =
+    (monoidalTensorObjIso M' N').inv.val.app (.op U) a'
+  exact hkApply.symm.trans
+    (congrArg
+      (fun b ↦ (monoidalTensorObjIso M' N').inv.val.app (.op U) b) hLa)
+
 private theorem poleTensorTopSection_map
     {X : Scheme.{u}} {M M' N N' : X.Modules}
     (f : M ⟶ M') (g : N ⟶ N')
     (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
     (f ⊗ₘ g).val.app (.op ⊤) (poleTensorTopSection M N x y) =
       poleTensorTopSection M' N'
-        (f.val.app (.op ⊤) x) (g.val.app (.op ⊤) y) := by
-  let L := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
-  let adj := PresheafOfModules.sheafificationAdjunction
-    (𝟙 X.ringCatSheaf.obj)
-  let t : (M.val ⊗ N.val).obj (.op ⊤) := x ⊗ₜ y
-  let t' : (M'.val ⊗ N'.val).obj (.op ⊤) :=
-    f.val.app (.op ⊤) x ⊗ₜ g.val.app (.op ⊤) y
-  let q := adj.unit.app (M.val ⊗ N.val)
-  let q' := adj.unit.app (M'.val ⊗ N'.val)
-  let a := q.app (.op ⊤) t
-  let a' := q'.app (.op ⊤) t'
-  have ht : (f.val ⊗ₘ g.val).app (.op ⊤) t = t' := by
-    rfl
-  have hunit := adj.unit_naturality (f.val ⊗ₘ g.val)
-  change adj.unit.app (M.val ⊗ N.val) ≫
-      (L.map (f.val ⊗ₘ g.val)).val =
-    (f.val ⊗ₘ g.val) ≫ adj.unit.app (M'.val ⊗ N'.val) at hunit
-  have hunitTop := congrArg (fun k ↦ k.app (.op (⊤ : X.Opens))) hunit
-  have hunitApply := ConcreteCategory.congr_hom hunitTop t
-  conv_lhs at hunitApply =>
-    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
-  conv_rhs at hunitApply =>
-    erw [PresheafOfModules.comp_app, ModuleCat.comp_apply]
-  have hLa : (L.map (f.val ⊗ₘ g.val)).val.app (.op ⊤) a = a' := by
-    dsimp only [a, a', q, q']
-    have hright := congrArg
-      (fun b ↦ (adj.unit.app (M'.val ⊗ N'.val)).app (.op ⊤) b) ht
-    exact hunitApply.trans hright
-  have hk := monoidalTensorObjIso_inv_natural f g
-  have hkTop := congrArg (fun k ↦ k.val.app (.op (⊤ : X.Opens))) hk
-  have hkApply := ConcreteCategory.congr_hom hkTop a
-  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
-    ModuleCat.comp_apply, SheafOfModules.comp_val,
-    PresheafOfModules.comp_app, ModuleCat.comp_apply] at hkApply
-  change (f ⊗ₘ g).val.app (.op ⊤)
-      ((monoidalTensorObjIso M N).inv.val.app (.op ⊤) a) =
-    (monoidalTensorObjIso M' N').inv.val.app (.op ⊤) a'
-  exact hkApply.symm.trans
-    (congrArg
-      (fun b ↦ (monoidalTensorObjIso M' N').inv.val.app (.op ⊤) b) hLa)
+        (f.val.app (.op ⊤) x) (g.val.app (.op ⊤) y) :=
+  tensorSection_map f g ⊤ x y
 
 private theorem monoidalTensorObjIso_unit_comp_unitObjTensorIso
     (X : Scheme.{u}) :
