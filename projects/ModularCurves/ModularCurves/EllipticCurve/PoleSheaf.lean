@@ -5334,6 +5334,20 @@ private theorem poleTopSectionHom_tensorTopSection
     (poleTopSectionHom_app_top_apply_one M x).symm
     (poleTopSectionHom_app_top_apply_one N y).symm
 
+/-- The unit morphism associated to a pure tensor of global sections is the
+tensor of the associated unit morphisms, precomposed with the canonical
+inverse multiplication of the structure module. -/
+theorem topSectionHom_tensorSection
+    {X : Scheme.{u}} (M N : X.Modules)
+    (x : Γ(M, (⊤ : X.Opens))) (y : Γ(N, (⊤ : X.Opens))) :
+    Scheme.Modules.topSectionHom (M ⊗ N) (tensorSection M N ⊤ x y) =
+      (unitObjTensorIso X).inv ≫
+        (Scheme.Modules.topSectionHom M x ⊗ₘ
+          Scheme.Modules.topSectionHom N y) := by
+  simpa only [Scheme.Modules.topSectionHom, poleTopSectionHom,
+    poleTensorTopSection] using
+    poleTopSectionHom_tensorTopSection M N x y
+
 private theorem poleTopSectionHom_comp
     {X : Scheme.{u}} {M N : X.Modules} (x : Γ(M, (⊤ : X.Opens)))
     (f : M ⟶ N) :
