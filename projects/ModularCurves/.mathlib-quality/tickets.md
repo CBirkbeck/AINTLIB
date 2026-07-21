@@ -24456,3 +24456,18 @@ sorry at :1624 = the final clearing+descent. Frontier theorem exists_invariant_a
 :1729 = pure γ native-glue with the full γ1-γ4 recipe in its continuation comment. Wiring
 caveat recorded: EngineDescent ← EngineMouthCharts import pulls heavy InvariantDifferential
 instances (decompose the two slow EngineDescent proofs first, or thread context through hyps).
+
+### v10.343 progress — [T-E4D Stage-3c-β math SOLVED, 10 helpers GREEN] (2026-07-21)
+The β-clearing (exists_invariant_chart_spread :1624) is MATHEMATICALLY DONE — proven sorry-free
+end-to-end (verified in scratch_alg.lean test_spread; reference preserved at scratchpad/
+scratch_alg_beta_clearing_reference.lean, 505L) and decomposed into 10 axiom-clean helpers all
+GREEN under default 200k heartbeats in EngineMouthCharts: resLE_comp_resLE (:1482, reusable
+Scheme.resLE composition), spread_glue_clear (:1494), spread_transVC_T1/DAmap/T2/clear
+(:1586/1629/1671/1711), spread_build_curve (:1802), spread_assemble_transVC/ell/glue
+(:1884/1989/2017). RESIDUAL BLOCKER (mechanical, NOT math): the thin main body of
+exists_invariant_chart_spread — even calling all 10 helpers — crosses 200k because the
+fraction-extraction prelude is ~150k and threading both clearing choose-outputs respells the
+heavy transVC/chart terms. FIX (documented at the frontier + in scratch reference): package the
+two clearing relations as def/structure (outputs reference a cheap def-application not the spelled
+equations) + extract the prelude/continuation into helpers so no declaration crosses 200k. γ-glue
+(:1729) not started; hpres wiring + engine flip pending β+γ. File GREEN, 2 sorries.

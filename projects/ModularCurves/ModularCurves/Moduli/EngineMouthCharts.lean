@@ -1477,6 +1477,613 @@ theorem resLE_algebraMap [IsAffine X] {g₁ g₂ : ↑Γ(X, ⊤)}
       = algebraMap ↑Γ(X, ⊤) ↑Γ(X, X.basicOpen g₂) x :=
   Scheme.resLE_resLE hle (X.basicOpen_le g₁) x
 
+/-! ### Stage 3c-β decomposition helpers (heartbeat-scoped) -/
+
+theorem resLE_comp_resLE [IsAffine X] {g₁ g₂ g₃ : ↑Γ(X, ⊤)}
+    (h12 : X.basicOpen g₂ ≤ X.basicOpen g₁) (h23 : X.basicOpen g₃ ≤ X.basicOpen g₂) :
+    (Scheme.resLE h23).comp (Scheme.resLE h12) = Scheme.resLE (h23.trans h12) := by
+  haveI := (isAffineOpen_top X).isLocalization_basicOpen g₁
+  apply IsLocalization.ringHom_ext (Submonoid.powers g₁)
+  ext x
+  simp only [RingHom.coe_comp, Function.comp_apply]
+  rw [resLE_algebraMap, resLE_algebraMap, resLE_algebraMap]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β2 glue clearing)** Per chart, `DA₀ i • (P i).W|` and `W₀R₀ ⊗ Γ(X, D(a₀·fᵢ))`
+agree after one invariant `S'`-multiplier. -/
+theorem spread_glue_clear (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    {ι : Type u} (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (D : ∀ i, VariableChange (Localization
+      (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))
+    (W₀L : WeierstrassCurve (Localization S'))
+    (a₀ : FixedPoints.subring ↑Γ(X, ⊤) G) (ha₀S : ((a₀ : ↑Γ(X, ⊤))) ∈ S')
+    (W₀R₀ : WeierstrassCurve (Localization.Away ((a₀ : ↑Γ(X, ⊤)))))
+    (hW₀R₀ : W₀R₀.map (awayToLocalization S' ha₀S) = W₀L)
+    (DA₀ : ∀ i, VariableChange ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)))
+    (hψunit : ∀ i, IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * f i))))
+    (hDA₀eq : ∀ i, (DA₀ i).map (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i)) = D i)
+    (hglue : ∀ i, W₀L.map (algebraMap (Localization S')
+        (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))
+      = D i • ((P i).W.map (sectionsToLoc S' (f i)
+          (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))
+          (isUnit_algebraMap_powers_self
+            (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))) :
+    ∀ i, ∃ s : S',
+      algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+              (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₁
+        = algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₁
+      ∧ algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+              (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₂
+        = algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₂
+      ∧ algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+              (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₃
+        = algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₃
+      ∧ algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+              (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₄
+        = algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₄
+      ∧ algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+              (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₆
+        = algebraMap ↑Γ(X, ⊤) _ (s : ↑Γ(X, ⊤))
+          * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₆ := by
+  intro i
+  set j₀ : Localization.Away ((a₀ : ↑Γ(X, ⊤))) →+* Localization S' :=
+    awayToLocalization S' ha₀S with hj₀def
+  have hj₀alg : ∀ x : ↑Γ(X, ⊤),
+      j₀ (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) x)
+        = algebraMap ↑Γ(X, ⊤) (Localization S') x :=
+    fun x => awayToLocalization_algebraMap S' ha₀S x
+  haveI := (isAffineOpen_top X).isLocalization_basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)
+  have hcompᵢ : (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i)).comp
+        (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))
+      = (algebraMap (Localization S')
+          (Localization (Submonoid.powers
+            (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))).comp j₀ := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (a₀ : ↑Γ(X, ⊤)))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply, awayToSections_algebraMap,
+      sectionsToLoc_algebraMap, hj₀alg]
+  have hLHS : ((DA₀ i) • ((P i).W.map (Scheme.resLE
+          (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).map
+        (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i))
+      = D i • ((P i).W.map (sectionsToLoc S' (f i) _
+          (isUnit_algebraMap_powers_self (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))) := by
+    rw [← WeierstrassCurve.map_variableChange, hDA₀eq i, WeierstrassCurve.map_map,
+      sectionsToLoc_comp_resLE S' (f i) ((a₀ : ↑Γ(X, ⊤)) * f i)
+        (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i)) _
+        (isUnit_algebraMap_powers_self _) (hψunit i)]
+  have hRHS : (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).map
+        (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i))
+      = W₀L.map (algebraMap (Localization S')
+          (Localization (Submonoid.powers
+            (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))) := by
+    rw [WeierstrassCurve.map_map, hcompᵢ, ← WeierstrassCurve.map_map, hW₀R₀]
+  have hWeq : ((DA₀ i) • ((P i).W.map (Scheme.resLE
+        (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).map
+          (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i))
+      = (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).map
+          (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i)) := by
+    rw [hLHS, hRHS]; exact (hglue i).symm
+  exact exists_mem_clear_weierstrassCurve S' (g := (a₀ : ↑Γ(X, ⊤))) (f := f i) ha₀S _
+    (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i))
+    (fun a => sectionsToLoc_algebraMap S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i) a) hWeq
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β2 transVC LHS-image)** The `ψ₂`-image of the corrected transition equals the
+pairwise transition over the join tower. -/
+theorem spread_transVC_T1 (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    {ι : Type u} (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (a₀ : FixedPoints.subring ↑Γ(X, ⊤) G)
+    (hU : ∀ i j, IsUnit (algebraMap (Localization S')
+      (Localization
+        (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+          ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') (f i * f j))))
+    (i j : ι)
+    (hWij : X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) ≤ X.basicOpen (f i * f j))
+    (hJ2 : IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+        ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))))) :
+    (((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+          (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+          ((hWij).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+        ((P j).restrict ((hWij).trans (basicOpen_mul_le_right (f i) (f j))))).map
+          (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) _ hJ2)
+      = (((P i).restrict (V' := ⟨X.basicOpen (f i * f j),
+            (isAffineOpen_top X).basicOpen (f i * f j)⟩)
+            (basicOpen_mul_le_left (f i) (f j))).transVC
+          ((P j).restrict (basicOpen_mul_le_right (f i) (f j)))).map
+            (sectionsToLoc S' (f i * f j) _ (hU i j)) := by
+  set ψ₂ := sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) _ hJ2 with hψ₂def
+  have hcomp2 : ψ₂.comp (Scheme.resLE hWij)
+      = sectionsToLoc S' (f i * f j) _ (hU i j) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (f i * f j))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply, resLE_algebraMap,
+      sectionsToLoc_algebraMap, hψ₂def]
+  rw [← transVC_restrict_map_resLE (P i) (P j)
+    (VAB := ⟨X.basicOpen (f i * f j), (isAffineOpen_top X).basicOpen (f i * f j)⟩)
+    (W' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+      (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+    (basicOpen_mul_le_left (f i) (f j))
+    (basicOpen_mul_le_right (f i) (f j)) (hWij), VariableChange.map_map, hcomp2]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β2 transVC single-chart image)** For one chart `k` of the pair `(i,j)`, the
+`ψ₂`-image of the restricted correction `DA₀ k|` is the tower-restriction of `D k`. -/
+theorem spread_transVC_DAmap (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    {ι : Type u} (f : ι → ↑Γ(X, ⊤))
+    (D : ∀ i, VariableChange (Localization
+      (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))
+    (a₀ : FixedPoints.subring ↑Γ(X, ⊤) G)
+    (DA₀ : ∀ i, VariableChange ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)))
+    (hψunit : ∀ i, IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * f i))))
+    (hDA₀eq : ∀ i, (DA₀ i).map (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i)) = D i)
+    (i j k : ι)
+    (hleAk : X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f k))
+    (hsub : Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f k))
+      ≤ (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+        ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+    (hJ2 : IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+        ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))))) :
+    ((DA₀ k).map (Scheme.resLE hleAk)).map
+        (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) _ hJ2)
+      = (D k).map (resLoc (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f k)))
+          (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+            ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))) hsub) := by
+  have hcompDA : (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) _ hJ2).comp
+        (Scheme.resLE hleAk)
+      = (resLoc (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f k)))
+          (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+            ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))) hsub).comp
+        (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f k) _ (hψunit k)) := by
+    haveI := (isAffineOpen_top X).isLocalization_basicOpen ((a₀ : ↑Γ(X, ⊤)) * f k)
+    apply IsLocalization.ringHom_ext (Submonoid.powers ((a₀ : ↑Γ(X, ⊤)) * f k))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply, resLE_algebraMap,
+      sectionsToLoc_algebraMap, resLoc_algebraMap]
+  rw [VariableChange.map_map, hcompDA, ← VariableChange.map_map, hDA₀eq k]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β2 transVC RHS-image)** The `ψ₂`-image of `(DA₀|)⁻¹·(DA₀|)` equals the correction
+coboundary over the join tower. -/
+theorem spread_transVC_T2 (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    {ι : Type u} (f : ι → ↑Γ(X, ⊤))
+    (D : ∀ i, VariableChange (Localization
+      (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))
+    (a₀ : FixedPoints.subring ↑Γ(X, ⊤) G)
+    (DA₀ : ∀ i, VariableChange ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)))
+    (hψunit : ∀ i, IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * f i))))
+    (hDA₀eq : ∀ i, (DA₀ i).map (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i)) = D i)
+    (i j : ι)
+    (hleAi : X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i))
+    (hleAj : X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f j))
+    (hJ2 : IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+        ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))))) :
+    ((((DA₀ i).map (Scheme.resLE hleAi))⁻¹
+        * (DA₀ j).map (Scheme.resLE hleAj)).map
+        (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) _ hJ2))
+      = ((D i).map (resLoc
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+              ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            le_sup_left))⁻¹
+        * (D j).map (resLoc
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+              ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            le_sup_right) := by
+  rw [vc_map_inv_mul,
+    spread_transVC_DAmap G S' f D a₀ DA₀ hψunit hDA₀eq i j i hleAi le_sup_left hJ2,
+    spread_transVC_DAmap G S' f D a₀ DA₀ hψunit hDA₀eq i j j hleAj le_sup_right hJ2]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β2 transVC clearing)** Per overlap, the corrected transition and `(DA₀|)⁻¹·(DA₀|)`
+agree after one invariant `S'`-multiplier. -/
+theorem spread_transVC_clear (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    {ι : Type u} (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (D : ∀ i, VariableChange (Localization
+      (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))))
+    (a₀ : FixedPoints.subring ↑Γ(X, ⊤) G) (ha₀S : ((a₀ : ↑Γ(X, ⊤))) ∈ S')
+    (DA₀ : ∀ i, VariableChange ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)))
+    (hψunit : ∀ i, IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * f i))))
+    (hDA₀eq : ∀ i, (DA₀ i).map (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * f i) _ (hψunit i)) = D i)
+    (hU : ∀ i j, IsUnit (algebraMap (Localization S')
+      (Localization
+        (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+          ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') (f i * f j))))
+    (hcobInv : ∀ i j,
+      (((P i).restrict (V' := ⟨X.basicOpen (f i * f j),
+            (isAffineOpen_top X).basicOpen (f i * f j)⟩)
+          (basicOpen_mul_le_left (f i) (f j))).transVC
+        ((P j).restrict (basicOpen_mul_le_right (f i) (f j)))).map
+          (sectionsToLoc S' (f i * f j) _ (hU i j))
+      = ((D i).map (resLoc
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i)))
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+              ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            le_sup_left))⁻¹
+        * (D j).map (resLoc
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+              ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j)))
+            le_sup_right))
+    (hWij : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) ≤ X.basicOpen (f i * f j))
+    (hleAi : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i))
+    (hleAj : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f j)) :
+    ∀ i j, ∃ c : S',
+      algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * ((((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+              (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+              ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+              ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).u
+            : ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))))
+        = algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * ((((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+              * (DA₀ j).map (Scheme.resLE (hleAj i j))).u
+            : ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))))
+      ∧ algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * (((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+              (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+              ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+              ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).r
+        = algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * (((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+              * (DA₀ j).map (Scheme.resLE (hleAj i j))).r
+      ∧ algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * (((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+              (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+              ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+              ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).s
+        = algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * (((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+              * (DA₀ j).map (Scheme.resLE (hleAj i j))).s
+      ∧ algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * (((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+              (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+              ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+              ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).t
+        = algebraMap ↑Γ(X, ⊤) _ (c : ↑Γ(X, ⊤))
+          * (((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+              * (DA₀ j).map (Scheme.resLE (hleAj i j))).t := by
+  intro i j
+  haveI := (isAffineOpen_top X).isLocalization_basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+  have hJ2 : IsUnit (algebraMap (Localization S')
+      (Localization (Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f i))
+        ⊔ Submonoid.powers (algebraMap ↑Γ(X, ⊤) (Localization S') (f j))))
+      (algebraMap ↑Γ(X, ⊤) (Localization S') ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)))) := by
+    rw [map_mul, map_mul]
+    exact ((IsLocalization.map_units (Localization S')
+        (⟨(a₀ : ↑Γ(X, ⊤)), ha₀S⟩ : S')).map (algebraMap (Localization S') _)).mul (hU i j)
+  exact exists_mem_clear_variableChange₂ S' (g := (a₀ : ↑Γ(X, ⊤))) (f₁ := f i) (f₂ := f j)
+    ha₀S _ (sectionsToLoc S' ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) _ hJ2)
+    (fun a => sectionsToLoc_algebraMap S' ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) _ hJ2 a)
+    ((spread_transVC_T1 G S' f P a₀ hU i j (hWij i j) hJ2).trans
+      ((hcobInv i j).trans
+        (spread_transVC_T2 G S' f D a₀ DA₀ hψunit hDA₀eq i j (hleAi i j) (hleAj i j) hJ2).symm))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β2 model curve)** Realize `W₀L`'s coefficients and `Δ`-inverse over `A_{a₀}`. -/
+theorem spread_build_curve (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    (W₀L : WeierstrassCurve (Localization S'))
+    (a₀ : FixedPoints.subring ↑Γ(X, ⊤) G) (ha₀S : ((a₀ : ↑Γ(X, ⊤))) ∈ S')
+    (b₁ b₂ b₃ b₄ b₆ bΔ : ↑Γ(X, ⊤)) (s₁ s₂ s₃ s₄ s₆ sΔ : S') (v : Localization S')
+    (hb₁ : W₀L.a₁ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₁ : ↑Γ(X, ⊤))
+      = algebraMap ↑Γ(X, ⊤) (Localization S') b₁)
+    (hb₂ : W₀L.a₂ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₂ : ↑Γ(X, ⊤))
+      = algebraMap ↑Γ(X, ⊤) (Localization S') b₂)
+    (hb₃ : W₀L.a₃ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₃ : ↑Γ(X, ⊤))
+      = algebraMap ↑Γ(X, ⊤) (Localization S') b₃)
+    (hb₄ : W₀L.a₄ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₄ : ↑Γ(X, ⊤))
+      = algebraMap ↑Γ(X, ⊤) (Localization S') b₄)
+    (hb₆ : W₀L.a₆ * algebraMap ↑Γ(X, ⊤) (Localization S') (s₆ : ↑Γ(X, ⊤))
+      = algebraMap ↑Γ(X, ⊤) (Localization S') b₆)
+    (hv : W₀L.Δ * v = 1)
+    (hbΔ : v * algebraMap ↑Γ(X, ⊤) (Localization S') (sΔ : ↑Γ(X, ⊤))
+      = algebraMap ↑Γ(X, ⊤) (Localization S') bΔ)
+    (hdvd₁ : ((s₁ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤)))) (hdvd₂ : ((s₂ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))))
+    (hdvd₃ : ((s₃ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤)))) (hdvd₄ : ((s₄ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤))))
+    (hdvd₆ : ((s₆ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤)))) (hdvdΔ : ((sΔ : ↑Γ(X, ⊤))) ∣ ((a₀ : ↑Γ(X, ⊤)))) :
+    ∃ (W₀R₀ : WeierstrassCurve (Localization.Away ((a₀ : ↑Γ(X, ⊤)))))
+      (vR₀ : Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cΔ : S'),
+      W₀R₀.map (awayToLocalization S' ha₀S) = W₀L ∧
+      algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cΔ : ↑Γ(X, ⊤))
+          * (W₀R₀.Δ * vR₀)
+        = algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cΔ : ↑Γ(X, ⊤)) * 1 := by
+  set j₀ : Localization.Away ((a₀ : ↑Γ(X, ⊤))) →+* Localization S' :=
+    awayToLocalization S' ha₀S with hj₀def
+  have hj₀alg : ∀ x : ↑Γ(X, ⊤),
+      j₀ (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) x)
+        = algebraMap ↑Γ(X, ⊤) (Localization S') x :=
+    fun x => awayToLocalization_algebraMap S' ha₀S x
+  have hu₁ : IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (s₁ : ↑Γ(X, ⊤))) :=
+    isUnit_algebraMap_away hdvd₁
+  have hu₂ : IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (s₂ : ↑Γ(X, ⊤))) :=
+    isUnit_algebraMap_away hdvd₂
+  have hu₃ : IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (s₃ : ↑Γ(X, ⊤))) :=
+    isUnit_algebraMap_away hdvd₃
+  have hu₄ : IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (s₄ : ↑Γ(X, ⊤))) :=
+    isUnit_algebraMap_away hdvd₄
+  have hu₆ : IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (s₆ : ↑Γ(X, ⊤))) :=
+    isUnit_algebraMap_away hdvd₆
+  have huΔ : IsUnit (algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (sΔ : ↑Γ(X, ⊤))) :=
+    isUnit_algebraMap_away hdvdΔ
+  set W₀R₀ : WeierstrassCurve (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) :=
+    ⟨algebraMap _ _ b₁ * ↑hu₁.unit⁻¹, algebraMap _ _ b₂ * ↑hu₂.unit⁻¹,
+     algebraMap _ _ b₃ * ↑hu₃.unit⁻¹, algebraMap _ _ b₄ * ↑hu₄.unit⁻¹,
+     algebraMap _ _ b₆ * ↑hu₆.unit⁻¹⟩ with hW₀R₀def
+  set vR₀ : Localization.Away ((a₀ : ↑Γ(X, ⊤))) :=
+    algebraMap _ _ bΔ * ↑huΔ.unit⁻¹ with hvR₀def
+  have hW₀R₀ : W₀R₀.map j₀ = W₀L := by
+    refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+    · show j₀ (algebraMap _ _ b₁ * ↑hu₁.unit⁻¹) = W₀L.a₁
+      rw [map_mul_isUnit_inv_eq_mk' j₀ hu₁ (hj₀alg b₁) (hj₀alg (s₁ : ↑Γ(X, ⊤)))]
+      exact (IsLocalization.eq_mk'_iff_mul_eq.mpr hb₁).symm
+    · show j₀ (algebraMap _ _ b₂ * ↑hu₂.unit⁻¹) = W₀L.a₂
+      rw [map_mul_isUnit_inv_eq_mk' j₀ hu₂ (hj₀alg b₂) (hj₀alg (s₂ : ↑Γ(X, ⊤)))]
+      exact (IsLocalization.eq_mk'_iff_mul_eq.mpr hb₂).symm
+    · show j₀ (algebraMap _ _ b₃ * ↑hu₃.unit⁻¹) = W₀L.a₃
+      rw [map_mul_isUnit_inv_eq_mk' j₀ hu₃ (hj₀alg b₃) (hj₀alg (s₃ : ↑Γ(X, ⊤)))]
+      exact (IsLocalization.eq_mk'_iff_mul_eq.mpr hb₃).symm
+    · show j₀ (algebraMap _ _ b₄ * ↑hu₄.unit⁻¹) = W₀L.a₄
+      rw [map_mul_isUnit_inv_eq_mk' j₀ hu₄ (hj₀alg b₄) (hj₀alg (s₄ : ↑Γ(X, ⊤)))]
+      exact (IsLocalization.eq_mk'_iff_mul_eq.mpr hb₄).symm
+    · show j₀ (algebraMap _ _ b₆ * ↑hu₆.unit⁻¹) = W₀L.a₆
+      rw [map_mul_isUnit_inv_eq_mk' j₀ hu₆ (hj₀alg b₆) (hj₀alg (s₆ : ↑Γ(X, ⊤)))]
+      exact (IsLocalization.eq_mk'_iff_mul_eq.mpr hb₆).symm
+  have hvR₀ : j₀ vR₀ = v := by
+    rw [hvR₀def, map_mul_isUnit_inv_eq_mk' j₀ huΔ (hj₀alg bΔ) (hj₀alg (sΔ : ↑Γ(X, ⊤)))]
+    exact (IsLocalization.eq_mk'_iff_mul_eq.mpr hbΔ).symm
+  have hΔ01 : j₀ W₀R₀.Δ = W₀L.Δ := by
+    have h := congrArg WeierstrassCurve.Δ hW₀R₀
+    rwa [WeierstrassCurve.map_Δ] at h
+  have hunitΔ : j₀ (W₀R₀.Δ * vR₀) = j₀ 1 := by
+    rw [map_mul, hΔ01, hvR₀, map_one]; exact hv
+  obtain ⟨cΔ, hcΔ⟩ := exists_mem_mul_eq_of_away_map_eq S' (g := (a₀ : ↑Γ(X, ⊤)))
+    (B := Localization.Away ((a₀ : ↑Γ(X, ⊤)))) j₀ hj₀alg hunitΔ
+  exact ⟨W₀R₀, vR₀, cΔ, hW₀R₀, hcΔ⟩
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β assembly, transVC-triviality goal at `a₁`)** -/
+theorem spread_assemble_transVC (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    {ι : Type u} (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (a₀ : FixedPoints.subring ↑Γ(X, ⊤) G)
+    (DA₀ : ∀ i, VariableChange ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)))
+    (a₁ : FixedPoints.subring ↑Γ(X, ⊤) G)
+    (hDAle : ∀ i, X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i) ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i))
+    (cAll : S') (pc : ↑Γ(X, ⊤))
+    (ha₁coe : (a₁ : ↑Γ(X, ⊤)) = (a₀ : ↑Γ(X, ⊤)) * pc)
+    (hcAlldvda₁ : (cAll : ↑Γ(X, ⊤)) ∣ (a₁ : ↑Γ(X, ⊤)))
+    (cT : ι → ι → S')
+    (hWij : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) ≤ X.basicOpen (f i * f j))
+    (hleAi : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i))
+    (hleAj : ∀ i j, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f j))
+    (hcTdvd : ∀ i j, (cT i j : ↑Γ(X, ⊤)) ∣ (cAll : ↑Γ(X, ⊤)))
+    (hcTu : ∀ i j, algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * ((((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+            (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+            ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+            ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).u
+          : ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))))
+      = algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * ((((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+            * (DA₀ j).map (Scheme.resLE (hleAj i j))).u
+          : ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)))))
+    (hcTr : ∀ i j, algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * (((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+            (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+            ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+            ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).r
+      = algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * (((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+            * (DA₀ j).map (Scheme.resLE (hleAj i j))).r)
+    (hcTs : ∀ i j, algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * (((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+            (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+            ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+            ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).s
+      = algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * (((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+            * (DA₀ j).map (Scheme.resLE (hleAj i j))).s)
+    (hcTt : ∀ i j, algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * (((P i).restrict (V' := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+            (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+            ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))).transVC
+            ((P j).restrict ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))))).t
+      = algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤))
+        * (((DA₀ i).map (Scheme.resLE (hleAi i j)))⁻¹
+            * (DA₀ j).map (Scheme.resLE (hleAj i j))).t)
+    (i j : ι) :
+    ((P i).restrict (V' := ⟨X.basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j)),
+        (isAffineOpen_top X).basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j))⟩)
+        ((basicOpen_mul_le_left ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j)).trans
+          (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f i)))).transVC
+      ((P j).restrict
+        ((basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j)).trans
+          (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f j))))
+      = (((DA₀ i).map (Scheme.resLE (hDAle i))).map (Scheme.resLE
+          (basicOpen_mul_le_left ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j))))⁻¹
+        * ((DA₀ j).map (Scheme.resLE (hDAle j))).map (Scheme.resLE
+          (basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤)) * f i) ((a₁ : ↑Γ(X, ⊤)) * f j))) := by
+  have hle₂ : X.basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j))
+      ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)) :=
+    basicOpen_le_basicOpen_of_dvd
+      ⟨(a₀ : ↑Γ(X, ⊤)) * (pc * pc), by rw [ha₁coe]; ring⟩
+  have hUcAll_ij : IsUnit (algebraMap ↑Γ(X, ⊤)
+      ↑Γ(X, X.basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j)))
+      (cAll : ↑Γ(X, ⊤))) := by
+    haveI := (isAffineOpen_top X).isLocalization_basicOpen
+      (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j))
+    exact isUnit_algebraMap_of_isLocalizationAway_dvd _
+      (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j))
+      (hcAlldvda₁.trans ((dvd_mul_right (a₁ : ↑Γ(X, ⊤)) (f i)).mul_right _))
+  have hup : ∀ (w₁ w₂ : ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)))),
+      algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤)) * w₁
+        = algebraMap ↑Γ(X, ⊤) _ (cT i j : ↑Γ(X, ⊤)) * w₂ →
+      algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)) * w₁
+        = algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)) * w₂ :=
+    fun w₁ w₂ h => mul_eq_mul_of_dvd (map_dvd _ (hcTdvd i j)) h
+  have hmapeq := variableChange_map_eq_of_mul_eq (Scheme.resLE hle₂)
+    (u := algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)))
+    (show IsUnit (Scheme.resLE hle₂
+      (algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)))) by rw [resLE_algebraMap]; exact hUcAll_ij)
+    (hup _ _ (hcTu i j)) (hup _ _ (hcTr i j)) (hup _ _ (hcTs i j)) (hup _ _ (hcTt i j))
+  rw [← transVC_restrict_map_resLE (P i) (P j)
+    (VAB := ⟨X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j)),
+      (isAffineOpen_top X).basicOpen ((a₀ : ↑Γ(X, ⊤)) * (f i * f j))⟩)
+    (W' := ⟨X.basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j)),
+      (isAffineOpen_top X).basicOpen (((a₁ : ↑Γ(X, ⊤)) * f i) * ((a₁ : ↑Γ(X, ⊤)) * f j))⟩)
+    ((hWij i j).trans (basicOpen_mul_le_left (f i) (f j)))
+    ((hWij i j).trans (basicOpen_mul_le_right (f i) (f j))) hle₂,
+    VariableChange.map_map, VariableChange.map_map,
+    resLE_comp_resLE (hDAle i) (basicOpen_mul_le_left ((a₁ : ↑Γ(X, ⊤)) * f i)
+      ((a₁ : ↑Γ(X, ⊤)) * f j)),
+    resLE_comp_resLE (hDAle j) (basicOpen_mul_le_right ((a₁ : ↑Γ(X, ⊤)) * f i)
+      ((a₁ : ↑Γ(X, ⊤)) * f j))]
+  rw [vc_map_inv_mul, VariableChange.map_map, VariableChange.map_map,
+    resLE_comp_resLE (hleAi i j) hle₂, resLE_comp_resLE (hleAj i j) hle₂] at hmapeq
+  exact hmapeq
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β assembly, ellipticity goal at `a₁`)** -/
+theorem spread_assemble_ell (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    (a₀ a₁ : FixedPoints.subring ↑Γ(X, ⊤) G)
+    (W₀R₀ : WeierstrassCurve (Localization.Away ((a₀ : ↑Γ(X, ⊤)))))
+    (vR₀ : Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cΔ cAll : S')
+    (hcΔ : algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cΔ : ↑Γ(X, ⊤))
+        * (W₀R₀.Δ * vR₀)
+      = algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cΔ : ↑Γ(X, ⊤)) * 1)
+    (hcΔdvd : (cΔ : ↑Γ(X, ⊤)) ∣ (cAll : ↑Γ(X, ⊤)))
+    (ha₀dvda₁ : (a₀ : ↑Γ(X, ⊤)) ∣ (a₁ : ↑Γ(X, ⊤)))
+    (hcAlldvda₁ : (cAll : ↑Γ(X, ⊤)) ∣ (a₁ : ↑Γ(X, ⊤))) :
+    IsUnit (W₀R₀.map (awayMapDvd ha₀dvda₁)).Δ := by
+  refine IsUnit.of_mul_eq_one (awayMapDvd ha₀dvda₁ vR₀) ?_
+  have hcΔcAll : algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cAll : ↑Γ(X, ⊤))
+        * (W₀R₀.Δ * vR₀)
+      = algebraMap ↑Γ(X, ⊤) (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cAll : ↑Γ(X, ⊤)) * 1 :=
+    mul_eq_mul_of_dvd (map_dvd _ hcΔdvd) hcΔ
+  have hUcAllAway : IsUnit (awayMapDvd ha₀dvda₁ (algebraMap ↑Γ(X, ⊤)
+      (Localization.Away ((a₀ : ↑Γ(X, ⊤)))) (cAll : ↑Γ(X, ⊤)))) := by
+    rw [awayMapDvd_algebraMap]
+    exact isUnit_algebraMap_away hcAlldvda₁
+  have h := map_eq_of_isUnit_mul_eq (awayMapDvd ha₀dvda₁) hUcAllAway hcΔcAll
+  rw [map_mul, map_one] at h
+  rw [WeierstrassCurve.map_Δ]
+  exact h
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(β assembly, glue goal at `a₁`)** -/
+theorem spread_assemble_glue (G : Type*) [Group G] [IsAffine X]
+    [MulSemiringAction G ↑Γ(X, ⊤)] (S' : Submonoid ↑Γ(X, ⊤))
+    {ι : Type u} (f : ι → ↑Γ(X, ⊤))
+    (P : ∀ i, LocalPresentation C ⟨X.basicOpen (f i), (isAffineOpen_top X).basicOpen (f i)⟩)
+    (a₀ a₁ : FixedPoints.subring ↑Γ(X, ⊤) G)
+    (W₀R₀ : WeierstrassCurve (Localization.Away ((a₀ : ↑Γ(X, ⊤)))))
+    (DA₀ : ∀ i, VariableChange ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i)))
+    (hDAle : ∀ i, X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i) ≤ X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i))
+    (ha₀dvda₁ : (a₀ : ↑Γ(X, ⊤)) ∣ (a₁ : ↑Γ(X, ⊤)))
+    (cAll : S') (sGlue : ι → S')
+    (hsGdvd : ∀ i, (sGlue i : ↑Γ(X, ⊤)) ∣ (cAll : ↑Γ(X, ⊤)))
+    (hcAlldvda₁ : (cAll : ↑Γ(X, ⊤)) ∣ (a₁ : ↑Γ(X, ⊤)))
+    (hsG1 : ∀ i, algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+            (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₁
+      = algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₁)
+    (hsG2 : ∀ i, algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+            (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₂
+      = algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₂)
+    (hsG3 : ∀ i, algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+            (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₃
+      = algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₃)
+    (hsG4 : ∀ i, algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+            (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₄
+      = algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₄)
+    (hsG6 : ∀ i, algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * ((DA₀ i) • ((P i).W.map (Scheme.resLE
+            (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i))))).a₆
+      = algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤))
+        * (W₀R₀.map (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))).a₆)
+    (i : ι) :
+    (DA₀ i).map (Scheme.resLE (hDAle i)) • ((P i).W.map (Scheme.resLE
+        (basicOpen_mul_le_right (a₁ : ↑Γ(X, ⊤)) (f i))))
+      = (W₀R₀.map (awayMapDvd ha₀dvda₁)).map (awayToSections (a₁ : ↑Γ(X, ⊤)) (f i)) := by
+  have hUcAll_i : IsUnit (algebraMap ↑Γ(X, ⊤)
+      ↑Γ(X, X.basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i)) (cAll : ↑Γ(X, ⊤))) := by
+    haveI := (isAffineOpen_top X).isLocalization_basicOpen ((a₁ : ↑Γ(X, ⊤)) * f i)
+    exact isUnit_algebraMap_of_isLocalizationAway_dvd _ ((a₁ : ↑Γ(X, ⊤)) * f i)
+      (hcAlldvda₁.trans (dvd_mul_right _ _))
+  have hup : ∀ (w₁ w₂ : ↑Γ(X, X.basicOpen ((a₀ : ↑Γ(X, ⊤)) * f i))),
+      algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤)) * w₁
+        = algebraMap ↑Γ(X, ⊤) _ (sGlue i : ↑Γ(X, ⊤)) * w₂ →
+      algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)) * w₁
+        = algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)) * w₂ :=
+    fun w₁ w₂ h => mul_eq_mul_of_dvd (map_dvd _ (hsGdvd i)) h
+  have hmapeq := weierstrassCurve_map_eq_of_mul_eq (Scheme.resLE (hDAle i))
+    (u := algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)))
+    (show IsUnit (Scheme.resLE (hDAle i)
+      (algebraMap ↑Γ(X, ⊤) _ (cAll : ↑Γ(X, ⊤)))) by rw [resLE_algebraMap]; exact hUcAll_i)
+    (hup _ _ (hsG1 i)) (hup _ _ (hsG2 i)) (hup _ _ (hsG3 i)) (hup _ _ (hsG4 i)) (hup _ _ (hsG6 i))
+  have hcompRHS : (Scheme.resLE (hDAle i)).comp (awayToSections (a₀ : ↑Γ(X, ⊤)) (f i))
+      = (awayToSections (a₁ : ↑Γ(X, ⊤)) (f i)).comp (awayMapDvd ha₀dvda₁) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (a₀ : ↑Γ(X, ⊤)))
+    ext x
+    simp only [RingHom.coe_comp, Function.comp_apply, awayToSections_algebraMap,
+      resLE_algebraMap, awayMapDvd_algebraMap]
+  rw [← WeierstrassCurve.map_variableChange, WeierstrassCurve.map_map,
+    resLE_comp_resLE (basicOpen_mul_le_right (a₀ : ↑Γ(X, ⊤)) (f i)) (hDAle i),
+    WeierstrassCurve.map_map, hcompRHS, ← WeierstrassCurve.map_map] at hmapeq
+  exact hmapeq
+
+
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **([a5-P-loc] Stage 3c-β, the invariant-denominator spread ★)** The α-package data over
 the semilocalization `L = Localization S'` — the glued model `W₀L`, the correction cochain
@@ -1621,6 +2228,19 @@ theorem exists_invariant_chart_spread (G : Type*) [Group G] [IsAffine X]
   -- `a₀` is henceforth OPAQUE: no definitional unfolding into the `choose`-terms
   clear_value a₀
   clear ha₀def hdvdS hsPre_dvd hpre_dvd_a₀ hsPre sPre
+  -- FRONTIER (β-clearing): the full proof is DECOMPOSED and VERIFIED via the nine
+  -- `spread_*` helpers above (all AXIOM-CLEAN, each < 200k heartbeats). Wiring them into
+  -- this thin body currently exceeds 200k because the body must `choose` BOTH clearing
+  -- outputs (`spread_glue_clear` → 5 equations, `spread_transVC_clear` → 4 equations),
+  -- whose conjunct types each spell the heavy `transVC`/chart term (5×+4×) under
+  -- `respectTransparency false`, on top of the ~150k fraction extraction above.
+  -- REMAINING STEP: package the glue/transVC clearing relations as a `def`/structure
+  -- (`GlueRel`, `TransVCRel`) so the clearing outputs and the assembly-goal helpers
+  -- reference a cheap def-application instead of spelling the equations; then this body
+  -- calls `spread_build_curve`, `spread_glue_clear`, `spread_transVC_clear`, folds the
+  -- multipliers into `a₁`, and discharges the four ∃-conjuncts via `spread_assemble_ell`,
+  -- `hspanA`, `spread_assemble_glue`, `spread_assemble_transVC` (the exact call sequence is
+  -- verified in `scratch_alg.lean`/`scratch_main.lean`).
   sorry
 
 set_option backward.isDefEq.respectTransparency false in
