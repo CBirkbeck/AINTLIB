@@ -2733,6 +2733,184 @@ lemma gluePiece_zero [IsAffine X] (a g : ↑Γ(X, ⊤))
                 X.affineOpens).1.ι ≫ C.zero := by rw [hZ1]
       _ = _ := by rw [reassoc_of% hbot]
 
+/-! ### γ3 agreement infrastructure (banked — the reversed-template toolkit for `hagree`)
+
+These are the reusable pieces the γ3 native-glue agreement (`hagree`, inside `nativeGlue`) is
+built from — the reversed analogues of `chartPiece_restrict` / `chartPiece_index_congr`
+(`Moduli/UniversalAdapted.lean`) together with the overlap base-change range.  All AXIOM-CLEAN.
+* `chart_baseChange_fst` — the `‡` identity: over `V' ≤ V` the base-changed big-chart projection
+  IS the restricted-chart projection (`restrict_e_baseChange` + `restrictTheta_fst`).
+* `gluePiece_chart_congr` — reversed index congruence: two charts over the same affine with
+  `transVC = 1` give the same `gluePiece` (via `pointedIso_hom_of_transVC_eq_one_loc`).
+* `overlapMap` / `overlapMap_range` / `overlapRange` — the composite localization map
+  `A[1/a] → Γ(X, D((a·g₁)(a·g₂)))` and the identification of the base-change range with the
+  overlap `Uₖ ⊓ Uₗ` (localization tower + `localization_away_comap_range`; the `a`-unit cancels the
+  `a²`-vs-`a` discrepancy between `D(a²·g₁g₂)` and `D(a·g₁g₂)`). -/
+
+open LocalPresentation in
+/-- Local reproof of `pointedIso_hom_of_transVC_eq_one` (which lives in `Moduli/AdaptedModel.lean`,
+not imported here): presentations with trivial comparison have `eqToHom` as their pointed iso. -/
+private theorem pointedIso_hom_of_transVC_eq_one_loc {V : X.affineOpens}
+    {P Q : LocalPresentation C V} (h : P.transVC Q = 1) :
+    (P.pointedIso Q).hom =
+      eqToHom (show projModel P.W = projModel Q.W by
+        rw [show Q.W = P.W from by
+          have := P.transVC_smul Q; rwa [h, one_smul] at this]) := by
+  have congr_vc : ∀ {D₁ D₂ : VariableChange ↑Γ(X, V.1)} (hh : D₁ = D₂),
+      (projModelVCIso D₁ Q.W).hom
+        = eqToHom (congrArg (fun t => projModel (t • Q.W)) hh)
+          ≫ (projModelVCIso D₂ Q.W).hom := by
+    intro D₁ D₂ hh; subst hh; rw [eqToHom_refl, Category.id_comp]
+  rw [P.transVC_spec Q, congr_vc h, projModelVCIso_one, eqToHom_trans, eqToHom_trans]
+
+open Scheme LocalPresentation in
+/-- **(reversed `chartPiece_restrict`, the `‡` identity)** Over a smaller affine `V' ≤ V`, the
+base change of `Q.W` post-composed with the big chart projection equals the restricted chart
+projection. -/
+lemma chart_baseChange_fst {V : X.affineOpens} (Q : LocalPresentation C V)
+    {V' : X.affineOpens} (h : V'.1 ≤ V.1) :
+    projModelBaseChange (sectionsMapLE (𝟙 X) h) Q.W ≫ Q.e.inv ≫ pullback.fst C.π V.1.ι
+      = (Q.restrict h).e.inv ≫ pullback.fst C.π V'.1.ι := by
+  have goal2 : (Q.restrict h).e.hom ≫ projModelBaseChange (sectionsMapLE (𝟙 X) h) Q.W
+        ≫ Q.e.inv ≫ pullback.fst C.π V.1.ι
+      = (Q.restrict h).e.hom ≫ (Q.restrict h).e.inv ≫ pullback.fst C.π V'.1.ι := by
+    rw [Iso.hom_inv_id_assoc, reassoc_of% (LocalPresentation.restrict_e_baseChange Q h),
+      Iso.hom_inv_id_assoc, restrictTheta_fst]
+  exact (cancel_epi (Q.restrict h).e.hom).mp goal2
+
+open Scheme LocalPresentation in
+/-- **(reversed `chartPiece_index_congr`)** Two presentations of `C` over the same away-affine,
+both with chart curve `W₀.map (awayToSections a g)` and trivial comparison, give the same
+native-glue piece. -/
+lemma gluePiece_chart_congr [IsAffine X] (a g : ↑Γ(X, ⊤))
+    (W : WeierstrassCurve (Localization.Away a))
+    (Q Q' : LocalPresentation C ⟨X.basicOpen (a * g), (isAffineOpen_top X).basicOpen (a * g)⟩)
+    (hQW : Q.W = W.map (awayToSections a g)) (hQW' : Q'.W = W.map (awayToSections a g))
+    (hVC : Q.transVC Q' = 1) :
+    gluePiece a g W Q hQW = gluePiece a g W Q' hQW' := by
+  rw [gluePiece, gluePiece]
+  have hIso := pointedIso_hom_of_transVC_eq_one_loc hVC
+  rw [show (Q.pointedIso Q').hom = Q.e.inv ≫ Q'.e.hom from rfl] at hIso
+  have key : eqToHom (congrArg projModel hQW).symm ≫ Q.e.inv
+      = eqToHom (congrArg projModel hQW').symm ≫ Q'.e.inv := by
+    calc eqToHom (congrArg projModel hQW).symm ≫ Q.e.inv
+        = eqToHom (congrArg projModel hQW).symm ≫ (Q.e.inv ≫ Q'.e.hom) ≫ Q'.e.inv := by
+          rw [Category.assoc, Iso.hom_inv_id, Category.comp_id]
+      _ = eqToHom (congrArg projModel hQW).symm ≫ eqToHom (by rw [hQW, hQW']) ≫ Q'.e.inv := by
+          rw [hIso]
+      _ = eqToHom (congrArg projModel hQW').symm ≫ Q'.e.inv := by
+          rw [← Category.assoc, eqToHom_trans]
+  rw [reassoc_of% key]
+
+/-- The composite localization map `A[1/a] → Γ(X, D((a·g₁)·(a·g₂)))` — restriction of
+`awayToSections a g₁` to the common away-affine. -/
+noncomputable def overlapMap [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤)) :
+    Localization.Away a →+* ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+  (Scheme.resLE (basicOpen_mul_le_left (a * g₁) (a * g₂))).comp (awayToSections a g₁)
+
+/-- `Spec.map (overlapMap …)` is an open immersion: `Γ(X, D((a·g₁)(a·g₂)))` is `A[1/a]` localized
+away from the image of `a·g₁·g₂` (localization tower). -/
+instance isOpenImmersion_specMap_overlapMap [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤)) :
+    IsOpenImmersion (Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂))) := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+    (overlapMap a g₁ g₂).toAlgebra
+  letI : IsScalarTower ↑Γ(X, ⊤) (Localization.Away a)
+      ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+    IsScalarTower.of_algebraMap_eq (fun x => by
+      show algebraMap _ _ x = overlapMap a g₁ g₂ (algebraMap _ _ x)
+      rw [overlapMap, RingHom.comp_apply, awayToSections_algebraMap, resLE_algebraMap])
+  haveI hbo : IsLocalization.Away ((a * g₁) * (a * g₂))
+      ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+    (isAffineOpen_top X).isLocalization_basicOpen ((a * g₁) * (a * g₂))
+  haveI : IsLocalization.Away (a * (a * g₁ * g₂))
+      ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) := by
+    rw [show a * (a * g₁ * g₂) = (a * g₁) * (a * g₂) from by ring]; exact hbo
+  haveI := isLocalizationAway_of_tower (A := ↑Γ(X, ⊤)) (R₁ := Localization.Away a)
+    (Γ := ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂)))) a (a * g₁ * g₂)
+  exact IsOpenImmersion.of_isLocalization (R := Localization.Away a)
+    (S := ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))))
+    (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (a * g₁ * g₂))
+
+/-- The range of `Spec.map (overlapMap …)` is `D(g₁') ⊓ D(g₂')` in `Spec A[1/a]` — the `a`-power
+inside `a·g₁·g₂` is a unit, so `D(a·g₁·g₂) = D(g₁') ⊓ D(g₂')`. -/
+theorem overlapMap_range [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤)) :
+    Set.range ⇑(Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂)))
+      = ↑(specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₁) ⊓
+          specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₂)) := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+    (overlapMap a g₁ g₂).toAlgebra
+  letI : IsScalarTower ↑Γ(X, ⊤) (Localization.Away a)
+      ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+    IsScalarTower.of_algebraMap_eq (fun x => by
+      show algebraMap _ _ x = overlapMap a g₁ g₂ (algebraMap _ _ x)
+      rw [overlapMap, RingHom.comp_apply, awayToSections_algebraMap, resLE_algebraMap])
+  haveI hbo : IsLocalization.Away ((a * g₁) * (a * g₂))
+      ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+    (isAffineOpen_top X).isLocalization_basicOpen ((a * g₁) * (a * g₂))
+  haveI : IsLocalization.Away (a * (a * g₁ * g₂))
+      ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) := by
+    rw [show a * (a * g₁ * g₂) = (a * g₁) * (a * g₂) from by ring]; exact hbo
+  haveI := isLocalizationAway_of_tower (A := ↑Γ(X, ⊤)) (R₁ := Localization.Away a)
+    (Γ := ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂)))) a (a * g₁ * g₂)
+  have hopen : PrimeSpectrum.basicOpen (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (a * g₁ * g₂))
+      = specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₁) ⊓
+        specBasicOpen (CommRingCat.of (Localization.Away a))
+          (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₂) := by
+    have hunit : PrimeSpectrum.basicOpen (algebraMap ↑Γ(X, ⊤) (Localization.Away a) a) = ⊤ := by
+      obtain ⟨u, hu⟩ := IsLocalization.Away.algebraMap_isUnit (S := Localization.Away a) a
+      have h1 : PrimeSpectrum.basicOpen
+          ((u : Localization.Away a) * (↑u⁻¹ : Localization.Away a)) = ⊤ := by
+        rw [Units.mul_inv, PrimeSpectrum.basicOpen_one]
+      rw [PrimeSpectrum.basicOpen_mul, hu] at h1
+      exact top_le_iff.mp (h1 ▸ inf_le_left)
+    rw [map_mul, map_mul, PrimeSpectrum.basicOpen_mul, PrimeSpectrum.basicOpen_mul, hunit,
+      top_inf_eq]; rfl
+  rw [← hopen]
+  show Set.range ⇑(Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂))) = _
+  exact PrimeSpectrum.localization_away_comap_range
+    ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂)))
+    (algebraMap ↑Γ(X, ⊤) (Localization.Away a) (a * g₁ * g₂))
+
+/-- **(the overlap range)** The base-change model map over `overlapMap` has range exactly the
+overlap `Uₖ ⊓ Uₗ = projModelπ ⁻¹ᵁ (D(g₁') ⊓ D(g₂'))` of the two native-glue domains. -/
+theorem overlapRange [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤))
+    (W : WeierstrassCurve (Localization.Away a)) :
+    Set.range ⇑(projModelBaseChange (overlapMap a g₁ g₂) W)
+      = Set.range ⇑((projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₁) ⊓
+          projModelπ W ⁻¹ᵁ specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₂)).ι) := by
+  letI : Algebra (Localization.Away a) ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂))) :=
+    (overlapMap a g₁ g₂).toAlgebra
+  haveI : IsOpenImmersion (Spec.map (CommRingCat.ofHom
+      (algebraMap (Localization.Away a) ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂)))))) :=
+    isOpenImmersion_specMap_overlapMap a g₁ g₂
+  haveI : IsOpenImmersion (projModelBaseChange (algebraMap (Localization.Away a)
+      ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂)))) W) :=
+    isOpenImmersion_projModelBaseChange W
+  have hpb := isPullback_projModelBaseChange (R := Localization.Away a)
+    (R' := ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂)))) W
+  have hsurj : Function.Surjective ⇑(hpb.isoPullback.hom) :=
+    (Scheme.homeoOfIso hpb.isoPullback).surjective
+  rw [Scheme.Opens.range_ι]
+  show Set.range ⇑(projModelBaseChange (overlapMap a g₁ g₂) W) = _
+  rw [show (projModelBaseChange (overlapMap a g₁ g₂) W)
+        = hpb.isoPullback.hom ≫ pullback.fst (projModelπ W)
+            (Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂)))
+      from hpb.isoPullback_hom_fst.symm]
+  rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp,
+    Set.range_eq_univ.mpr hsurj, Set.image_univ, Scheme.Pullback.range_fst]
+  rw [show Set.range ⇑(Spec.map (CommRingCat.ofHom (overlapMap a g₁ g₂)))
+      = ↑(specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₁) ⊓
+          specBasicOpen (CommRingCat.of (Localization.Away a))
+            (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g₂))
+      from overlapMap_range a g₁ g₂]
+  rfl
+
 /-- The native glue over `D(a)` (γ3 + γ4). -/
 theorem nativeGlue [IsAffine X] (a : ↑Γ(X, ⊤)) {ι : Type u}
     (f : ι → ↑Γ(X, ⊤))
@@ -2798,6 +2976,27 @@ theorem nativeGlue [IsAffine X] (a : ↑Γ(X, ⊤)) {ι : Type u}
   -- `chartPiece_restrict` (`Moduli/UniversalAdapted.lean`), reversed (proj-model → E).
   -- NOTE the one friction point: `hVC1`'s overlap is `D(a²·fₖfₗ)` whereas the away-charts live
   -- over `D(a·fₖfₗ)` — the SAME open, different terms (transport with an `eqToHom`/`≤`-restrict).
+  --
+  -- BANKED TOOLKIT (all AXIOM-CLEAN, above `nativeGlue`): the reversed template is now assembled —
+  -- `pointedIso_hom_of_transVC_eq_one_loc` (B0, a local reproof since AdaptedModel isn't imported),
+  -- `chart_baseChange_fst` (B1 = the `‡` identity), `gluePiece_chart_congr` (B2 = reversed index
+  -- congruence), and the overlap range `overlapMap` / `overlapMap_range` / `overlapRange` (the
+  -- localization-tower identification `range(projModelBaseChange (overlapMap a fₖ fₗ) W) = Uₖ ⊓ Uₗ`,
+  -- with the `a`-unit collapsing the `a²`-vs-`a` friction).  REMAINING (a `reduceSide` per-side
+  -- lemma, developed + green in scratch but split-blocked): with the shared iso
+  -- `ζτ := isoOfRangeEq (projModelBaseChange (overlapMap a fₖ fₗ) W₀R₁) (Uₖ⊓Uₗ).ι overlapRange`,
+  --   (∗∗)  `homOfLE hincl ≫ ζ_g.inv = ζτ.inv ≫ projModelBaseChange (sectionsMapLE hgV) (W.map σ_g)`
+  --         (cancel the mono `projModelBaseChange σ_g W`; both sides `≫ it = (Uₖ⊓Uₗ).ι`, using
+  --         `projModelBaseChange_comp'` + `(sectionsMapLE hgV).comp σ_g = overlapMap` [`rfl` on the
+  --         `fₖ`-side, `IsLocalization.ringHom_ext` on the `fₗ`-side]);
+  --   then `gluePiece`-unfold + (∗∗) + `projModelBaseChange_congr''` + B1 reduces each side to
+  --         `ζτ.inv ≫ eqToHom qᵢ ≫ (Qᵢ.restrict hᵢ).e.inv ≫ pullback.fst C.π V.ι`;
+  --   finish: `cancel_epi ζτ.inv`, then `pointedIso_hom_of_transVC_eq_one_loc (hVC1 k l)` gives
+  --         `(Qₖ.restrict hk).e.inv ≫ fst = eqToHom hW ≫ (Qₗ.restrict hl).e.inv ≫ fst`, and
+  --         `eqToHom_trans` (proof-irrelevance) closes.  The `reduceSide` proof over-runs the 200k
+  --         heartbeat ceiling on the concrete chart/base-change terms; it needs splitting (opaque
+  --         `set` of `(∗∗)`, the `projModelBaseChange_congr''` step, and the B1 step into separate
+  --         barrier lemmas) — no `maxHeartbeats` bump.
   have hagree : ∀ k l, (projModel W₀R₁).homOfLE (inf_le_left : U k ⊓ U l ≤ U k) ≫ F k =
       (projModel W₀R₁).homOfLE (inf_le_right : U k ⊓ U l ≤ U l) ≫ F l := by
     sorry

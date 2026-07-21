@@ -24520,3 +24520,18 @@ THE SINGLE REMAINING SORRY = hagree (:2803): the γ3 pairwise chart-AGREEMENT (t
 glue — hVC1 → pointedIso_hom_of_transVC_eq_one + restrict_e_baseChange over the overlap), ~100L
 with D(a²fₖfₗ) vs D(a·fₖfₗ) term friction. +import PullbackLocalAtTarget. This is the LAST
 mathematical content of the entire KM 4.7.0 engine.
+
+### v10.343 progress — [T-E4D hagree: math SOLVED in scratch, toolkit banked] (2026-07-21)
+hagree MATH DONE (reduceSide green in scratch at raised heartbeats) — SAME pattern as the
+β-clearing: only the 200k heartbeat-split remains (maxHeartbeats forbidden). Module GREEN
+(8700 jobs, single sorry :3002). 7 axiom-clean reusable toolkit lemmas banked above nativeGlue:
+pointedIso_hom_of_transVC_eq_one_loc (B0, local reproof — AdaptedModel is NOT imported here, a
+wall the recipe missed; via public transVC_spec/projModelVCIso_one), chart_baseChange_fst (B1,
+the ‡ identity via cancel_epi to dodge (Q.restrict h).W defeq), gluePiece_chart_congr (B2,
+reversed chartPiece_index_congr), overlapMap + isOpenImmersion_specMap_overlapMap +
+overlapMap_range + overlapRange (the localization-tower range id resolving the D(a²fₖfₗ)=D(afₖfₗ)
+friction — a-unit collapse). The (∗∗) mono-cancellation factorization also proven in scratch.
+Findings: hVC1 is genuinely necessary (C.π not mono, so pullback-uniqueness shortcut fails).
+REMAINING: split reduceSide into 3 opaque-term barrier lemmas ((∗∗) factorization,
+projModelBaseChange_congr'' step, B1 step) so hagree lands under 200k — mechanical, per the
+in-file sharpened frontier comment.
