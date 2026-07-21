@@ -249,6 +249,65 @@ private theorem orderedCechSupportDifferential_zero_apply_pair (N : Set ι)
       t.1 (orderedCechSingleton j) - t.1 (orderedCechSingleton i) := by
   simp [orderedCechSupportDifferential, Fin.sum_univ_succ, sub_eq_add_neg]
 
+/-- If `N` is nonempty and omits an index, the degree-zero ordered support differential is
+injective. -/
+theorem orderedCechSupportDifferential_zero_injective
+    (N : Set ι) (hN : N.Nonempty) (i₀ : ι) (hi₀ : i₀ ∉ N) :
+    Function.Injective (orderedCechSupportDifferential R N 0) := by
+  intro s t hst
+  have hzero : orderedCechSupportDifferential R N 0 (s - t) = 0 := by
+    rw [map_sub, hst, sub_self]
+  have hi₀_not_subset : ¬N ⊆ Set.range (orderedCechSingleton i₀).1 := by
+    intro hsubset
+    obtain ⟨i, hi⟩ := hN
+    obtain ⟨k, hk⟩ := hsubset hi
+    have hik : i = i₀ := by
+      fin_cases k
+      exact hk.symm
+    exact hi₀ (hik ▸ hi)
+  have hi₀_value : (s - t).1 (orderedCechSingleton i₀) = 0 :=
+    (s - t).2 (orderedCechSingleton i₀) hi₀_not_subset
+  have hsub : s - t = 0 := by
+    apply Subtype.ext
+    funext a
+    change (s - t).1 a = 0
+    by_cases ha : N ⊆ Set.range a.1
+    · obtain ⟨i, hi⟩ := hN
+      obtain ⟨k, hk⟩ := ha hi
+      have hia : i = a.1 0 := by
+        fin_cases k
+        exact hk.symm
+      have ha_mem : a.1 0 ∈ N := hia ▸ hi
+      have hi₀_ne : i₀ ≠ a.1 0 := by
+        intro h
+        exact hi₀ (h.symm ▸ ha_mem)
+      have ha_singleton : a = orderedCechSingleton (a.1 0) := by
+        apply Subtype.ext
+        funext k
+        fin_cases k
+        rfl
+      rcases lt_or_gt_of_ne hi₀_ne with hi₀a | hai₀
+      · have hp :
+            (orderedCechSupportDifferential R N 0 (s - t)).1
+                (orderedCechPair i₀ (a.1 0) hi₀a) = 0 := by
+          rw [hzero]
+          rfl
+        rw [orderedCechSupportDifferential_zero_apply_pair, hi₀_value,
+          sub_zero] at hp
+        exact (congrArg (fun b => (s - t).1 b) ha_singleton).trans hp
+      · have hp :
+            (orderedCechSupportDifferential R N 0 (s - t)).1
+                (orderedCechPair (a.1 0) i₀ hai₀) = 0 := by
+          rw [hzero]
+          rfl
+        rw [orderedCechSupportDifferential_zero_apply_pair, hi₀_value,
+          zero_sub] at hp
+        have hp' : (s - t).1 (orderedCechSingleton (a.1 0)) = 0 :=
+          neg_eq_zero.mp hp
+        exact (congrArg (fun b => (s - t).1 b) ha_singleton).trans hp'
+    · exact (s - t).2 a ha
+  exact sub_eq_zero.mp hsub
+
 private theorem orderedCechSupport_cycle_triple (N : Set ι)
     (s : OrderedCechSupportCochain R N 1)
     (hs : orderedCechSupportDifferential R N 1 s = 0)
