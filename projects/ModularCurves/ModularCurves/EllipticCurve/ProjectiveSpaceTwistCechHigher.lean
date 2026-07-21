@@ -92,6 +92,63 @@ theorem exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
           rw [ht e]
     _ = s := coordinateHomogeneousLaurentActiveWeights_reconstruct d (n + 1) s
 
+/-- Every positive-degree cocycle in the explicit standard-coordinate ordered Cech complex for a
+nonnegative projective twist is a boundary. -/
+theorem exists_preimage_coordinateHyperplaneTwistOrderedBaseCechDifferential
+    [Fintype σ] [LinearOrder σ] (j : σ) (d : ℤ) (hd : 0 ≤ d) (n : ℕ)
+    (s : Scheme.Modules.orderedBaseCechObject
+      (homogeneousProjπ (R := R) (σ := σ))
+      (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+      (coordinateOpenCover (R := R) (σ := σ)) (n + 1))
+    (hs : (coordinateHyperplaneTwistOrderedBaseCechDifferential
+      (R := R) (σ := σ) d (n + 1)).hom s = 0) :
+    ∃ t : Scheme.Modules.orderedBaseCechObject
+        (homogeneousProjπ (R := R) (σ := σ))
+        (Scheme.Modules.unitObj (Proj (homogeneousSubmodule σ R)))
+        (coordinateOpenCover (R := R) (σ := σ)) n,
+      (coordinateHyperplaneTwistOrderedBaseCechDifferential
+        (R := R) (σ := σ) d n).hom t = s := by
+  have hs_weight :
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d (n + 1)).hom
+          ((coordinateHomogeneousLaurentOrderedCechObjectIso
+            (R := R) (σ := σ) d (n + 1)).hom.hom s) = 0 := by
+    have h := congrArg (fun f => f.hom s)
+      (coordinateHomogeneousLaurentOrderedCechDifferential_naturality
+        (R := R) (σ := σ) d (n + 1))
+    simpa [hs] using h
+  obtain ⟨t, ht⟩ :=
+    exists_preimage_coordinateHomogeneousLaurentOrderedCechDifferential
+      (R := R) (σ := σ) j d hd n
+      ((coordinateHomogeneousLaurentOrderedCechObjectIso
+        (R := R) (σ := σ) d (n + 1)).hom.hom s) hs_weight
+  refine ⟨(coordinateHomogeneousLaurentOrderedCechObjectIso
+    (R := R) (σ := σ) d n).inv.hom t, ?_⟩
+  apply (ConcreteCategory.bijective_of_isIso
+    (coordinateHomogeneousLaurentOrderedCechObjectIso
+      (R := R) (σ := σ) d (n + 1)).hom).1
+  have h := congrArg (fun f => f.hom
+      ((coordinateHomogeneousLaurentOrderedCechObjectIso
+        (R := R) (σ := σ) d n).inv.hom t))
+    (coordinateHomogeneousLaurentOrderedCechDifferential_naturality
+      (R := R) (σ := σ) d n)
+  have h' :
+      (coordinateHomogeneousLaurentOrderedCechDifferential
+        (R := R) (σ := σ) d n).hom
+          ((coordinateHomogeneousLaurentOrderedCechObjectIso
+            (R := R) (σ := σ) d n).hom.hom
+            ((coordinateHomogeneousLaurentOrderedCechObjectIso
+              (R := R) (σ := σ) d n).inv.hom t)) =
+        (coordinateHomogeneousLaurentOrderedCechObjectIso
+          (R := R) (σ := σ) d (n + 1)).hom.hom
+          ((coordinateHyperplaneTwistOrderedBaseCechDifferential
+            (R := R) (σ := σ) d n).hom
+            ((coordinateHomogeneousLaurentOrderedCechObjectIso
+              (R := R) (σ := σ) d n).inv.hom t)) := by
+    simpa only [ModuleCat.hom_comp, LinearMap.coe_comp, Function.comp_apply] using h
+  rw [← h']
+  simpa using ht
+
 end
 
 end MvPolynomial
