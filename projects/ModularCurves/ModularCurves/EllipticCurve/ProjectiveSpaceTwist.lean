@@ -117,6 +117,36 @@ lemma coordinateHyperplaneLocalEquation_of_ne (i j : σ) (hji : j ≠ i) :
           (awayVar R i ⟨j, hji⟩) := by
   simp [coordinateHyperplaneLocalEquation, hji]
 
+/-- The homogeneous-localization element defining the preimage of `D₊(X j)` on the
+`X i`-chart maps to the local equation of the coordinate hyperplane. -/
+lemma coordinateHyperplaneLocalEquation_eq_isLocalizationElem (i j : σ) :
+    coordinateHyperplaneLocalEquation (R := R) i j =
+      (Proj.basicOpenIsoAway (homogeneousSubmodule σ R) (X i)
+        (X_mem_homogeneousSubmodule_one R i) one_pos).hom.hom
+          (HomogeneousLocalization.Away.isLocalizationElem
+            (X_mem_homogeneousSubmodule_one R i)
+            (X_mem_homogeneousSubmodule_one R j)) := by
+  classical
+  by_cases hji : j = i
+  · subst j
+    rw [coordinateHyperplaneLocalEquation_self]
+    have hloc :
+        HomogeneousLocalization.Away.isLocalizationElem
+            (X_mem_homogeneousSubmodule_one R i)
+            (X_mem_homogeneousSubmodule_one R i) = 1 := by
+      apply HomogeneousLocalization.val_injective
+      simp [HomogeneousLocalization.Away.isLocalizationElem]
+    rw [hloc, map_one]
+  · rw [coordinateHyperplaneLocalEquation_of_ne i j hji]
+    have hloc :
+        HomogeneousLocalization.Away.isLocalizationElem
+            (X_mem_homogeneousSubmodule_one R i)
+            (X_mem_homogeneousSubmodule_one R j) =
+          awayVar R i ⟨j, hji⟩ := by
+      apply HomogeneousLocalization.val_injective
+      simp [HomogeneousLocalization.Away.isLocalizationElem, awayVar]
+    rw [hloc]
+
 /-- The standard-chart local equation generates the coordinate-hyperplane
 ideal. -/
 lemma coordinateHyperplaneLocalEquation_span (i j : σ) :
