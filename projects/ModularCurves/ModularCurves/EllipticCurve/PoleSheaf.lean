@@ -5552,11 +5552,7 @@ noncomputable def tensorPairing {X : Scheme.{u}}
     (e₁ : L₁ ⊗ P₁ ⟶ Scheme.Modules.unitObj X)
     (e₂ : L₂ ⊗ P₂ ⟶ Scheme.Modules.unitObj X) :
     (L₁ ⊗ L₂) ⊗ (P₁ ⊗ P₂) ⟶ Scheme.Modules.unitObj X :=
-  (α_ L₁ L₂ (P₁ ⊗ P₂)).hom ≫
-    L₁ ◁ (α_ L₂ P₁ P₂).inv ≫
-    L₁ ◁ ((β_ L₂ P₁).hom ▷ P₂) ≫
-    L₁ ◁ (α_ P₁ L₂ P₂).hom ≫
-    (α_ L₁ P₁ (L₂ ⊗ P₂)).inv ≫
+  tensorμ L₁ L₂ P₁ P₂ ≫
     (e₁ ⊗ₘ e₂) ≫
     (unitObjTensorIso X).hom
 
