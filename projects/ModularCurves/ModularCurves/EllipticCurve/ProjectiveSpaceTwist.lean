@@ -283,6 +283,68 @@ lemma coordinateOpenOverlap_eq (i k : σ) :
       coordinateOpen (R := R) i ⊓ coordinateOpen (R := R) k :=
   Proj.basicOpen_mul (homogeneousSubmodule σ R) (X i) (X k)
 
+/-- On the `i`-th standard chart, the principal open cut out by the `j`-th
+coordinate ratio is the overlap with the `j`-th standard chart. -/
+lemma coordinateHyperplaneLocalEquation_basicOpen (i j : σ) :
+    (Proj (homogeneousSubmodule σ R)).basicOpen
+        (coordinateHyperplaneLocalEquation (R := R) i j) =
+      coordinateOpenOverlap (R := R) i j := by
+  let A := homogeneousSubmodule σ R
+  have hi : X i ∈ A 1 := X_mem_homogeneousSubmodule_one R i
+  have hj : X j ∈ A 1 := X_mem_homogeneousSubmodule_one R j
+  let U : (Proj A).Opens := coordinateOpen (R := R) i
+  let e := Proj.basicOpenIsoSpec A (X i) hi one_pos
+  let a : HomogeneousLocalization.Away A (X i) :=
+    HomogeneousLocalization.Away.isLocalizationElem hi hj
+  have hchart :
+      U.toScheme.basicOpen
+          (U.topIso.inv (coordinateHyperplaneLocalEquation (R := R) i j)) =
+        U.ι ⁻¹ᵁ coordinateOpen (R := R) j := by
+    calc
+      _ = e.hom ⁻¹ᵁ
+          (Spec (CommRingCat.of
+            (HomogeneousLocalization.Away A (X i)))).basicOpen
+              ((Scheme.ΓSpecIso _).inv a) := by
+        rw [Scheme.preimage_basicOpen_top]
+        apply congrArg U.toScheme.basicOpen
+        change U.topIso.inv
+            (coordinateHyperplaneLocalEquation (R := R) i j) =
+          (Proj.basicOpenToSpec A (X i)).appTop
+            ((Scheme.ΓSpecIso _).inv a)
+        rw [show (Proj.basicOpenToSpec A (X i)).appTop =
+            (Scheme.ΓSpecIso _).hom ≫ Proj.awayToSection A (X i) ≫
+              U.topIso.inv from Proj.basicOpenToSpec_app_top A (X i)]
+        simp only [CommRingCat.comp_apply, Iso.inv_hom_id_apply]
+        rw [show Proj.awayToSection A (X i) =
+            (Proj.basicOpenIsoAway A (X i)
+              (X_mem_homogeneousSubmodule_one R i) one_pos).hom from rfl]
+        exact congrArg U.topIso.inv
+          (coordinateHyperplaneLocalEquation_eq_isLocalizationElem
+            (R := R) i j)
+      _ = e.hom ⁻¹ᵁ
+          (Proj.awayι A (X i)
+            hi one_pos ⁻¹ᵁ
+              coordinateOpen (R := R) j) := by
+        rw [basicOpen_eq_of_affine,
+          Proj.awayι_preimage_basicOpen A
+          hi one_pos hj one_pos]
+      _ = U.ι ⁻¹ᵁ coordinateOpen (R := R) j := by
+        rw [← Scheme.Hom.comp_preimage]
+        rw [← Proj.basicOpenIsoSpec_inv_ι A (X i)
+          hi one_pos]
+        simp [e, U, A]
+  calc
+    _ = U.ι ''ᵁ U.toScheme.basicOpen
+        (U.topIso.inv (coordinateHyperplaneLocalEquation (R := R) i j)) :=
+      (U.ι_image_basicOpen_topIso_inv
+        (coordinateHyperplaneLocalEquation (R := R) i j)).symm
+    _ = U.ι ''ᵁ (U.ι ⁻¹ᵁ coordinateOpen (R := R) j) := by rw [hchart]
+    _ = U ⊓ coordinateOpen (R := R) j := by
+      rw [Scheme.Hom.image_preimage_eq_opensRange_inf]
+      simp [U]
+    _ = coordinateOpenOverlap (R := R) i j := by
+      rw [coordinateOpenOverlap_eq]
+
 /-- The canonical coordinate overlap is contained in its left chart. -/
 lemma coordinateOpenOverlap_le_left (i k : σ) :
     coordinateOpenOverlap (R := R) i k ≤ coordinateOpen (R := R) i :=
