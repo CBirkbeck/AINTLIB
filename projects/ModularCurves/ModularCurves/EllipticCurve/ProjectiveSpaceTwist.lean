@@ -1730,6 +1730,41 @@ theorem coordinateChartTwistedSection_restrict_eq
           (ModularCurves.tensorSection M N _ tK eK) :=
       (ModularCurves.tensorSection_restrict M N hK tK eK).symm
 
+/-- A chart-extension equation on the self-overlap of `D₊(X j)` identifies
+the two original sections, since `X j / X j = 1`. -/
+lemma eq_of_coordinateChartExtension_self
+    (M : (Proj (homogeneousSubmodule σ R)).Modules)
+    (j : σ) (n : ℕ)
+    (s t : Γ(M, coordinateOpen (R := R) j))
+    (h :
+      M.presheaf.map
+          (homOfLE (coordinateOpenOverlap_le_left (R := R) j j)).op t =
+        (Proj (homogeneousSubmodule σ R)).presheaf.map
+              (homOfLE (coordinateOpenOverlap_le_left (R := R) j j)).op
+              (coordinateHyperplaneLocalEquation (R := R) j j ^ n) •
+          M.presheaf.map
+            (homOfLE (coordinateOpenOverlap_le_right (R := R) j j)).op s) :
+    t = s := by
+  let U := coordinateOpen (R := R) j
+  let W := coordinateOpenOverlap (R := R) j j
+  have hWU : W = U := by
+    dsimp only [W, U]
+    rw [coordinateOpenOverlap_eq, inf_idem]
+  let e : Γ(M, U) ≅ Γ(M, W) := M.presheaf.mapIso (eqToIso hWU).op
+  apply (ConcreteCategory.bijective_of_isIso e.hom).1
+  have hleft : e.hom t =
+      M.presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_left (R := R) j j)).op t := by
+    exact ConcreteCategory.congr_hom
+      (M.presheaf.congr_map (Subsingleton.elim _ _)) t
+  have hright : e.hom s =
+      M.presheaf.map
+        (homOfLE (coordinateOpenOverlap_le_right (R := R) j j)).op s := by
+    exact ConcreteCategory.congr_hom
+      (M.presheaf.congr_map (Subsingleton.elim _ _)) s
+  rw [hleft, h, coordinateHyperplaneLocalEquation_self,
+    one_pow, map_one, one_smul, ← hright]
+
 /-- Standard-chart coefficients satisfying the degree-`n` transition equations
 glue to a global section of `M ⊗ O(n)`. -/
 theorem exists_global_coordinateChartTwistedSection
