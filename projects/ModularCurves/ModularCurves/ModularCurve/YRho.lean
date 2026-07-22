@@ -541,6 +541,70 @@ theorem wFramesRightMul_one (D : GaloisRepData N) :
     Spec.map_id]
   rfl
 
+/-- [T-YR-3b helper] Naturality of the Galois-points counit in the continuous Galois
+set: the fiber functor applied to a correspondence-morphism matches the underlying
+set-map (mirror of `pointsEquivOfContAction_smul`, with the counit's naturality square
+in place of equivariance). -/
+lemma pointsEquivOfContAction_map {X Y : ContAction FintypeCat.{0}
+    (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)} (m : X ⟶ Y)
+    (x : ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).obj
+      ((finiteEtaleEquivContAction ℚ).inverse.obj X) : Type 0)) :
+    FiniteEtaleGalois.pointsEquivOfContAction ℚ Y
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+          ((finiteEtaleEquivContAction ℚ).inverse.map m) x) =
+      m.hom.hom (FiniteEtaleGalois.pointsEquivOfContAction ℚ X x) := by
+  have hc := ((finiteEtaleEquivContAction ℚ).counitIso.hom.naturality m)
+  have h2 := congrArg (fun q => q.hom.hom x) hc
+  exact h2
+
+/-- **[T-YR-3b]** The frame points-reading intertwines the right translation:
+composing a `ℚ̄`-point with `wFramesRightMul γ` multiplies the frame by `γ`
+(3-layer mirror of `vRhoPointsEquiv_equivariant`: `Spec.preimage`-extraction,
+`arrowCongr`-transport, and the counit's naturality `pointsEquivOfContAction_map`). -/
+theorem wFramesPointsEquiv_rightMul (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (h : { h : Spec (.of (AlgebraicClosure ℚ)) ⟶ wFrames D //
+      h ≫ wFramesπ D =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }) :
+    wFramesPointsEquiv D ⟨h.1 ≫ wFramesRightMul D γ, by
+        rw [Category.assoc, wFramesRightMul_π, h.2]⟩ =
+      wFramesPointsEquiv D h * γ := by
+  set L1 := specPointsEquivAlgHom ℚ (wFramesAlgebra D : Type 0)
+    (AlgebraicClosure ℚ) with hL1
+  set L2 := AlgEquiv.arrowCongr
+    (AlgEquiv.refl (R := ℚ) (A₁ := (wFramesAlgebra D : Type 0)))
+    sepClosureQAlgEquiv.symm with hL2
+  have hA : ∀ hp : (h.1 ≫ wFramesRightMul D γ) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (wFramesAlgebra D : Type 0))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))),
+      L1 ⟨h.1 ≫ wFramesRightMul D γ, hp⟩ =
+        (L1 h).comp (wFramesRightMulAlg D γ).hom.hom := by
+    intro hp
+    have hpre : Spec.preimage (h.1 ≫ wFramesRightMul D γ) =
+        CommRingCat.ofHom (wFramesRightMulAlg D γ).hom.hom.toRingHom ≫
+          Spec.preimage h.1 := by
+      apply Spec.map_injective
+      rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage]
+      rfl
+    refine AlgHom.ext fun w => ?_
+    exact congrArg (fun q : CommRingCat.of (wFramesAlgebra D : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hpre
+  have hB : ∀ ψ : (wFramesAlgebra D : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ,
+      L2 (ψ.comp (wFramesRightMulAlg D γ).hom.hom) =
+        (L2 ψ).comp (wFramesRightMulAlg D γ).hom.hom := by
+    intro ψ
+    exact AlgHom.ext fun w => rfl
+  have hC : FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D)
+      ((L2 (L1 h)).comp (wFramesRightMulAlg D γ).hom.hom) =
+      FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D)
+        (L2 (L1 h)) * γ :=
+    pointsEquivOfContAction_map (frameRightMulMor D γ) (L2 (L1 h))
+  refine Eq.trans (congrArg (fun y => FiniteEtaleGalois.pointsEquivOfContAction ℚ
+    (frameContAction D) (L2 y)) (hA _)) ?_
+  refine Eq.trans (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+    (frameContAction D)) (hB (L1 h))) ?_
+  exact hC
+
 end FrameSubstrate
 
 section FramedProblem
