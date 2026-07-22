@@ -941,6 +941,29 @@ theorem flat_relQuotientπ_of_free : Flat (σ.relQuotientπ f hover) := by
     CommRingCat.hom_ofHom, RingHom.flat_algebraMap_iff]
   infer_instance
 
+/-- The `G`-action on the base change of the projection along `w` (trivial on the base
+leg; the `relQuotient` analogue of `pullbackQuotientπSMul`). -/
+noncomputable def pullbackRelQSMul {W : Scheme.{u}}
+    (w : W ⟶ σ.relQuotient f hover) (γ : G) :
+    pullback (σ.relQuotientπ f hover) w ⟶ pullback (σ.relQuotientπ f hover) w :=
+  pullback.lift (pullback.fst _ _ ≫ σ.hom γ) (pullback.snd _ _)
+    (by rw [Category.assoc, σ.hom_comp_relQuotientπ f hover]
+        exact pullback.condition)
+
+@[reassoc (attr := simp)]
+theorem pullbackRelQSMul_fst {W : Scheme.{u}}
+    (w : W ⟶ σ.relQuotient f hover) (γ : G) :
+    σ.pullbackRelQSMul f hover w γ ≫ pullback.fst (σ.relQuotientπ f hover) w =
+      pullback.fst (σ.relQuotientπ f hover) w ≫ σ.hom γ :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem pullbackRelQSMul_snd {W : Scheme.{u}}
+    (w : W ⟶ σ.relQuotient f hover) (γ : G) :
+    σ.pullbackRelQSMul f hover w γ ≫ pullback.snd (σ.relQuotientπ f hover) w =
+      pullback.snd (σ.relQuotientπ f hover) w :=
+  pullback.lift_snd _ _ _
+
 include hfree in
 /-- Free case: the base change of the projection along ANY morphism is an epimorphism
 (fppf: flat + surjective). -/
