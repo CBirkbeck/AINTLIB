@@ -25200,3 +25200,31 @@ T-Y1F-1 → T-Y1F-2 → T-Y1F-4 → T-YR-1 → T-YR-2 → T-YR-4 → T-YR-3 → 
   needs torsion-baseChange comparison plumbing for torsionIso pullback + coord
   naturality) → T-YR-4 → T-YR-3 → T-Y1F-3 → T-YR-5/6/7. All ticket detail in the
   v10.352 block above. Committed through 8399b6dbb + this session's T-Y1F-1/2 commit.
+
+### v10.352 T-YR-2 sub-tickets (spawned 2026-07-23, Parent: T-YR-2; audit-backed)
+- **[T-YR-2a] EllHom mulByHom-naturality** — `A.curve.mulByHom N ≫ g.top = g.top ≫ B.curve.mulByHom N`
+  for g : A ⟶ B in Ell/ℚ (or general R). Route: the cartesian square (g.isPullback) exhibits
+  A.curve.E as pullback of B.curve.E along g.baseHom; the point-level group compat is LANDED
+  (`EllHom.pullSection_add`, Representability:458 = T-E4a); morphism-level: compare through
+  `mulByHom_baseChange_fst` (GroupLaw.lean:227) + the isPullback comparison — A.mulByHom is
+  DETERMINED by its composites with the two legs of g's square (IsPullback.hom_ext): fst-leg
+  (≫ g.top) via baseChange-naturality transported, snd-leg (≫ A.curve.π) = π-equivariance
+  (mulByHom_π? exists: mulByHom over S). Status: open.
+- **[T-YR-2b] torsionMapOfEllHom** τg := pullback.lift (A.torsionι ≫ g.top) (A.torsionπ ≫ g.baseHom)
+  (condition from T-YR-2a + g.zero_w; torsion = pullback (mulByHom N) zero, Torsion.lean:61).
+  + spec lemmas _ι/_π. Status: open.
+- **[T-YR-2c] isPullback_torsionMapOfEllHom** — IsPullback τg (A.torsionπ N) (B.torsionπ N)
+  g.baseHom: paste g.isPullback with the two kernel-pullback squares (mirror
+  torsion_baseChange_isPullback's PullbackCone.IsLimit.mk shape, TorsionFibre:250-258, with
+  the abstract square replacing the constructed baseChange). Status: open.
+- **[T-YR-2d] fill ellHomTorsionIso/_over** := (T-YR-2c).isoPullback + isoPullback_hom_snd.
+  Status: open.
+- **[T-YR-2e] fill RhoLevelStructure.pull** — torsionIso' := ellHomTorsionIso ≪≫
+  (pullback-functor of α.torsionIso along g.baseHom) ≪≫ pullback-paste ≪≫ eqToIso(base_w);
+  over_T from _over-spec chain; coords_additive/pairing_compat: transport via coord-naturality
+  (coord D … (pulled) t' = coord D … at the composed geometric point — unfold coord: both sides
+  are vRhoPointsEquiv of pasted torsion-points; equality by pointToTorsion-naturality along τg).
+  Status: open.
+- **[T-YR-2f] fill rhoProblem.map_id/map_comp** — needs RhoLevelStructure.ext (torsionIso-field
+  determines; other fields Prop) + pull-functoriality (τ_{id}=𝟙 via hom_ext on the kernel
+  pullback; τ_{g≫h} composite). Status: open.
