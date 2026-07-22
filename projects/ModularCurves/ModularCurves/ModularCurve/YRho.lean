@@ -1324,6 +1324,123 @@ theorem framedSymp_pull (D : GaloisRepData N) {A B : EllObj (CommRingCat.of ℚ)
       (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))
       (wFramesPointsEquiv_congr D (Category.assoc t g.baseHom h) _)
 
+/-- [T-YR-3b helper] Integer combinations of `N`-killed sections are `N`-killed. -/
+theorem comb_kill {T : Scheme.{0}} {E : EllipticCurve T} {P Q : E.Section}
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) (a b : ℤ) :
+    (N : ℤ) • (a • P + b • Q) = 0 := by
+  rw [smul_add, smul_comm (N : ℤ) a, smul_comm (N : ℤ) b, hP, hQ,
+    smul_zero, smul_zero, add_zero]
+
+/-- [T-YR-3b helper] `p` of a product exponent is the `val`-power (the
+`Multiplicative`/`ZMod` power dictionary). -/
+theorem p_ofAdd_mul_val (D : GaloisRepData N) (z w : ZMod N) :
+    (((D.p (Multiplicative.ofAdd (z * w))) : (AlgebraicClosure ℚ)ˣ) :
+      AlgebraicClosure ℚ) =
+    (((D.p (Multiplicative.ofAdd z)) : (AlgebraicClosure ℚ)ˣ) :
+      AlgebraicClosure ℚ) ^ w.val := by
+  have h1 : z * w = (w.val : ZMod N) * z := by
+    rw [ZMod.natCast_val, ZMod.cast_id, mul_comm]
+  rw [h1, ← nsmul_eq_mul, ofAdd_nsmul, map_pow]
+  norm_cast
+
+/-- **[T-YR-3b]** `FramedSymp` is invariant under the diagonal `GL₂`-twist: acting on
+the full-level pair by the matrix columns and on the frame by right translation
+preserves the pairing-match. The pairing side is the registered symplectic formula
+(`weilPairingEval_symplectic`, T-C2c); the frame side is `wFramesPointsEquiv_rightMul`;
+the exponents match by `ZMod.val_intCast` + `Matrix.det_fin_two`. -/
+theorem framedSymp_glSmul (D : GaloisRepData N) {T : Scheme.{0}}
+    {sT : T ⟶ Spec (.of ℚ)} {E : EllipticCurve T} {P Q : E.Section}
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    {h : T ⟶ wFrames D} {hover : h ≫ wFramesπ D = sT}
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hsymp : FramedSymp D sT E P Q hP hQ h hover) :
+    FramedSymp D sT E
+      ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ) • P +
+        (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) • Q)
+      ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ) • P +
+        (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) • Q)
+      (comb_kill hP hQ _ _) (comb_kill hP hQ _ _)
+      (h ≫ wFramesRightMul D γ)
+      (by rw [Category.assoc, wFramesRightMul_π, hover]) := by
+  intro t ht
+  have hs := hsymp t ht
+  -- notation
+  set m : Matrix (Fin 2) (Fin 2) (ZMod N) := (γ : Matrix (Fin 2) (Fin 2) (ZMod N))
+    with hm
+  -- 1. pull-normalization of the twisted basis
+  have hPP : EllipticCurve.Point.pull E t
+      ((((m 0 0).val : ℤ) • P + ((m 1 0).val : ℤ) • Q)) =
+      ((m 0 0).val : ℤ) • EllipticCurve.Point.pull E t P +
+        ((m 1 0).val : ℤ) • EllipticCurve.Point.pull E t Q := by
+    rw [EllipticCurve.Point.pull_add, EllipticCurve.Point.pull_zsmul,
+      EllipticCurve.Point.pull_zsmul]
+  have hQQ : EllipticCurve.Point.pull E t
+      ((((m 0 1).val : ℤ) • P + ((m 1 1).val : ℤ) • Q)) =
+      ((m 0 1).val : ℤ) • EllipticCurve.Point.pull E t P +
+        ((m 1 1).val : ℤ) • EllipticCurve.Point.pull E t Q := by
+    rw [EllipticCurve.Point.pull_add, EllipticCurve.Point.pull_zsmul,
+      EllipticCurve.Point.pull_zsmul]
+  -- 2. kill-conditions for the pulled basis
+  have hppk : (EllipticCurve.Point.pull E t P).1 ≫ E.mulByHom N = t ≫ E.zero :=
+    sectionPull_raw_kill t hP
+  have hpqk : (EllipticCurve.Point.pull E t Q).1 ≫ E.mulByHom N = t ≫ E.zero :=
+    sectionPull_raw_kill t hQ
+  have hcomb1 : (((m 0 0).val : ℤ) • EllipticCurve.Point.pull E t P +
+      ((m 1 0).val : ℤ) • EllipticCurve.Point.pull E t Q).1 ≫ E.mulByHom N =
+      t ≫ E.zero := by
+    have := sectionPull_raw_kill (E := E) t (comb_kill hP hQ ((m 0 0).val : ℤ)
+      ((m 1 0).val : ℤ))
+    rwa [hPP] at this
+  have hcomb2 : (((m 0 1).val : ℤ) • EllipticCurve.Point.pull E t P +
+      ((m 1 1).val : ℤ) • EllipticCurve.Point.pull E t Q).1 ≫ E.mulByHom N =
+      t ≫ E.zero := by
+    have := sectionPull_raw_kill (E := E) t (comb_kill hP hQ ((m 0 1).val : ℤ)
+      ((m 1 1).val : ℤ))
+    rwa [hQQ] at this
+  -- 3. the registered symplectic formula
+  have hW := E.weilPairingEval_symplectic
+    (EllipticCurve.Point.pull E t P) (EllipticCurve.Point.pull E t Q)
+    (((m 0 0).val : ℤ)) (((m 1 0).val : ℤ)) (((m 0 1).val : ℤ)) (((m 1 1).val : ℤ))
+    hppk hpqk hcomb1 hcomb2
+  -- 4. LHS-chain: twisted eval = original eval to the determinant power
+  have hLHS : (E.weilPairingEval
+      (EllipticCurve.Point.pull E t
+        ((((m 0 0).val : ℤ) • P + ((m 1 0).val : ℤ) • Q)))
+      (EllipticCurve.Point.pull E t
+        ((((m 0 1).val : ℤ) • P + ((m 1 1).val : ℤ) • Q)))
+      (sectionPull_raw_kill t (comb_kill hP hQ _ _))
+      (sectionPull_raw_kill t (comb_kill hP hQ _ _))).1 =
+      (E.weilPairingEval (EllipticCurve.Point.pull E t P)
+        (EllipticCurve.Point.pull E t Q) hppk hpqk).1 ^
+        (((((m 0 0).val : ℤ) * ((m 1 1).val : ℤ) -
+          ((m 1 0).val : ℤ) * ((m 0 1).val : ℤ)) % (N : ℤ)).toNat) :=
+    (weilPairingEval_congr hPP hQQ _ _).trans hW
+  -- 5. the frame side: right translation multiplies the frame
+  have hframe : wFramesPointsEquiv D ⟨t ≫ (h ≫ wFramesRightMul D γ), by
+      rw [Category.assoc,
+        show (h ≫ wFramesRightMul D γ) ≫ wFramesπ D = sT from by
+          rw [Category.assoc, wFramesRightMul_π, hover], ht]⟩ =
+      wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩ * γ := by
+    refine Eq.trans (wFramesPointsEquiv_congr D
+      ((Category.assoc t h (wFramesRightMul D γ)).symm) _) ?_
+    exact wFramesPointsEquiv_rightMul D γ ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩
+  -- 6. assembly: exponent identification + the power dictionary
+  have hdet2 : ((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N) =
+      Matrix.det m := rfl
+  have hcoedet : ((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N) =
+      ((((m 0 0).val : ℤ) * ((m 1 1).val : ℤ) -
+        ((m 1 0).val : ℤ) * ((m 0 1).val : ℤ) : ℤ) : ZMod N) := by
+    rw [hdet2, Matrix.det_fin_two]
+    push_cast [ZMod.natCast_val, ZMod.cast_id]
+    ring
+  have hk : ((((m 0 0).val : ℤ) * ((m 1 1).val : ℤ) -
+      ((m 1 0).val : ℤ) * ((m 0 1).val : ℤ)) % (N : ℤ)).toNat =
+      ((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N).val := by
+    rw [hcoedet]
+    exact ((congrArg Int.toNat (ZMod.val_intCast _)).symm.trans
+      (Int.toNat_natCast _))
+  rw [hLHS, map_pow, hs, hk, hframe, map_mul, Units.val_mul, p_ofAdd_mul_val]
+
 /-- **[T-YR-3b]** The framed-symplectic moduli problem: naive full level-`N` pairs
 equipped with a symplectically matched frame of `V_ρ` (the contracted-product
 presentation of the ρ-level problem, before the free `GL₂`-quotient). -/
