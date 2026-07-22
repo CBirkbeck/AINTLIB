@@ -1474,6 +1474,35 @@ noncomputable def framedProblem (D : GaloisRepData N) :
         (EllHom.pullSection_comp (CommRingCat.of ℚ) g.unop f.unop Lh.val.1.val.2))
     · exact Category.assoc _ _ _
 
+/-- **[T-YR-3b-v]** The *bare* framed problem: full-level pairs with a frame, WITHOUT
+the symplectic condition — the ambient problem whose free `GL₂`-quotient the landed
+[GHB7] machinery computes; the symplectic locus is carved per-`X` on the relative
+data (route-fork of record, board v10.353). -/
+noncomputable def bareFramedProblem (D : GaloisRepData N) :
+    ModularCurves.ModuliProblem (CommRingCat.of ℚ) where
+  obj X := ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).obj X) ×
+    { h : X.unop.base ⟶ wFrames D // h ≫ wFramesπ D = X.unop.structMap }
+  map f := ↾fun Lh => ⟨⟨⟨EllHom.pullSection (CommRingCat.of ℚ) f.unop Lh.1.val.1,
+      EllHom.pullSection (CommRingCat.of ℚ) f.unop Lh.1.val.2⟩,
+      EllHom.isNaiveFullLevel_pullSection (CommRingCat.of ℚ) f.unop
+        Lh.1.property⟩,
+    ⟨f.unop.baseHom ≫ Lh.2.val, by
+      rw [Category.assoc, Lh.2.property, f.unop.base_w]⟩⟩
+  map_id := by
+    intro X
+    ext Lh
+    · exact Subtype.ext (Prod.ext
+        (EllHom.pullSection_id (CommRingCat.of ℚ) Lh.1.val.1)
+        (EllHom.pullSection_id (CommRingCat.of ℚ) Lh.1.val.2))
+    · exact Category.id_comp _
+  map_comp := by
+    intro X Y Z f g
+    ext Lh
+    · exact Subtype.ext (Prod.ext
+        (EllHom.pullSection_comp (CommRingCat.of ℚ) g.unop f.unop Lh.1.val.1)
+        (EllHom.pullSection_comp (CommRingCat.of ℚ) g.unop f.unop Lh.1.val.2))
+    · exact Category.assoc _ _ _
+
 /-- **[T-YR-3b-iv]** The diagonal `GL₂`-translation of the framed problem:
 `glSmul γ` on the full-level pair, right `γ`-translation on the frame; the symplectic
 match is preserved by `framedSymp_glSmul`. Natural by `pullSection_glSmul` and
