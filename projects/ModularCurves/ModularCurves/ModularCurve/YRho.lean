@@ -1181,6 +1181,121 @@ end RhoRigidity
 
 end RhoProblem
 
+section FramedProblemFunctor
+
+variable {N : ℕ} [NeZero N]
+
+/-- [T-YR-3b helper] `pullSection` preserves global `N`-killing (additivity). -/
+theorem pullSection_kill {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {P : B.curve.Section} (hP : (N : ℤ) • P = 0) :
+    (N : ℤ) • EllHom.pullSection (CommRingCat.of ℚ) g P = 0 := by
+  calc (N : ℤ) • EllHom.pullSection (CommRingCat.of ℚ) g P
+      = AddMonoidHom.mk' (EllHom.pullSection (CommRingCat.of ℚ) g)
+          (EllHom.pullSection_add (CommRingCat.of ℚ) g) ((N : ℤ) • P) :=
+        (map_zsmul (AddMonoidHom.mk' _
+          (EllHom.pullSection_add (CommRingCat.of ℚ) g)) (N : ℤ) P).symm
+    _ = 0 := by rw [hP, map_zero]
+
+/-- [T-YR-3b helper] Pushing the pull of a pulled-back section forward recovers the
+pull at the composed point (valuewise: `lift_fst`). -/
+theorem mapPoint_pull_pullSection {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T' : Scheme.{0}} (t : T' ⟶ A.base) (P : B.curve.Section) :
+    EllHom.mapPoint g t (EllipticCurve.Point.pull A.curve t
+        (EllHom.pullSection (CommRingCat.of ℚ) g P)) =
+      EllipticCurve.Point.pull B.curve (t ≫ g.baseHom) P := by
+  refine Subtype.ext ?_
+  rw [EllHom.mapPoint_coe]
+  show (t ≫ (EllHom.pullSection (CommRingCat.of ℚ) g P).1) ≫ g.top =
+    (t ≫ g.baseHom) ≫ P.1
+  rw [Category.assoc,
+    show (EllHom.pullSection (CommRingCat.of ℚ) g P).1 ≫ g.top =
+      g.baseHom ≫ P.1 from g.isPullback.lift_fst _ _ _,
+    ← Category.assoc]
+
+/-- [T-YR-3b helper] `weilPairingEval` is congruent in the points (proof-irrelevant). -/
+theorem weilPairingEval_congr {T T' : Scheme.{0}} {E : EllipticCurve T}
+    {t : T' ⟶ T} {x x' y y' : E.Point t} (hx' : x = x') (hy' : y = y')
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    (E.weilPairingEval x y hx hy).1 =
+      (E.weilPairingEval x' y' (hx' ▸ hx) (hy' ▸ hy)).1 := by
+  subst hx'; subst hy'; rfl
+
+/-- [T-YR-3b helper] The frame points-reading is congruent in the point. -/
+theorem wFramesPointsEquiv_congr (D : GaloisRepData N)
+    {a b : Spec (.of (AlgebraicClosure ℚ)) ⟶ wFrames D} (hab : a = b)
+    (pa : a ≫ wFramesπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    wFramesPointsEquiv D ⟨a, pa⟩ = wFramesPointsEquiv D ⟨b, hab ▸ pa⟩ := by
+  subst hab; rfl
+
+/-- **[T-YR-3b]** `FramedSymp` pulls back along `Ell/ℚ`-morphisms (through the
+registered Weil-naturality `weilPairingEval_mapPoint`, T-YR-2e-W). -/
+theorem framedSymp_pull (D : GaloisRepData N) {A B : EllObj (CommRingCat.of ℚ)}
+    (g : A ⟶ B) {P Q : B.curve.Section}
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    {h : B.base ⟶ wFrames D} {hover : h ≫ wFramesπ D = B.structMap}
+    (hsymp : FramedSymp D B.structMap B.curve P Q hP hQ h hover) :
+    FramedSymp D A.structMap A.curve
+      (EllHom.pullSection (CommRingCat.of ℚ) g P)
+      (EllHom.pullSection (CommRingCat.of ℚ) g Q)
+      (pullSection_kill g hP) (pullSection_kill g hQ)
+      (g.baseHom ≫ h) (by rw [Category.assoc, hover, g.base_w]) := by
+  intro t ht
+  have ht' : (t ≫ g.baseHom) ≫ B.structMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) := by
+    rw [Category.assoc, g.base_w, ht]
+  have hs := hsymp (t ≫ g.baseHom) ht'
+  have hW := weilPairingEval_mapPoint g t
+    (EllipticCurve.Point.pull A.curve t (EllHom.pullSection (CommRingCat.of ℚ) g P))
+    (EllipticCurve.Point.pull A.curve t (EllHom.pullSection (CommRingCat.of ℚ) g Q))
+    (sectionPull_raw_kill t (pullSection_kill g hP))
+    (sectionPull_raw_kill t (pullSection_kill g hQ))
+  refine Eq.trans ?_ (Eq.trans hs ?_)
+  · exact congrArg (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+      (hW.symm.trans (weilPairingEval_congr
+        (mapPoint_pull_pullSection g t P) (mapPoint_pull_pullSection g t Q) _ _))
+  · exact congrArg (fun A' => ((D.p (Multiplicative.ofAdd
+      (((Matrix.GeneralLinearGroup.det A' : (ZMod N)ˣ) : ZMod N))) :
+      (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))
+      (wFramesPointsEquiv_congr D (Category.assoc t g.baseHom h) _)
+
+/-- **[T-YR-3b]** The framed-symplectic moduli problem: naive full level-`N` pairs
+equipped with a symplectically matched frame of `V_ρ` (the contracted-product
+presentation of the ρ-level problem, before the free `GL₂`-quotient). -/
+noncomputable def framedProblem (D : GaloisRepData N) :
+    ModularCurves.ModuliProblem (CommRingCat.of ℚ) where
+  obj X := { Lh : ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).obj X) ×
+      { h : X.unop.base ⟶ wFrames D // h ≫ wFramesπ D = X.unop.structMap } //
+    FramedSymp D X.unop.structMap X.unop.curve Lh.1.val.1 Lh.1.val.2
+      Lh.1.property.1.1 Lh.1.property.1.2 Lh.2.val Lh.2.property }
+  map f := ↾fun Lh => ⟨⟨⟨⟨EllHom.pullSection (CommRingCat.of ℚ) f.unop
+        Lh.val.1.val.1,
+      EllHom.pullSection (CommRingCat.of ℚ) f.unop Lh.val.1.val.2⟩,
+      EllHom.isNaiveFullLevel_pullSection (CommRingCat.of ℚ) f.unop
+        Lh.val.1.property⟩,
+    ⟨f.unop.baseHom ≫ Lh.val.2.val, by
+      rw [Category.assoc, Lh.val.2.property, f.unop.base_w]⟩⟩,
+    framedSymp_pull D f.unop Lh.val.1.property.1.1 Lh.val.1.property.1.2
+      Lh.property⟩
+  map_id := by
+    intro X
+    ext Lh
+    · exact Subtype.ext (Prod.ext
+        (EllHom.pullSection_id (CommRingCat.of ℚ) Lh.val.1.val.1)
+        (EllHom.pullSection_id (CommRingCat.of ℚ) Lh.val.1.val.2))
+    · exact Category.id_comp _
+  map_comp := by
+    intro X Y Z f g
+    ext Lh
+    · exact Subtype.ext (Prod.ext
+        (EllHom.pullSection_comp (CommRingCat.of ℚ) g.unop f.unop Lh.val.1.val.1)
+        (EllHom.pullSection_comp (CommRingCat.of ℚ) g.unop f.unop Lh.val.1.val.2))
+    · exact Category.assoc _ _ _
+
+end FramedProblemFunctor
+
+
 /-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route)** Relative
 representability of the ρ-level problem: for every elliptic curve `E` over a
 `ℚ`-scheme `T`, the functor `T' ↦ {ρ-level structures on E ×_T T'}` is representable
