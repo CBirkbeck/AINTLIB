@@ -20,6 +20,30 @@ open AlgebraicTopology CategoryTheory CategoryTheory.Limits Opposite
 
 universe u
 
+namespace AlgebraicGeometry
+
+/-- Inverse image commutes with the finite product open indexing a Cech cochain factor. -/
+theorem Scheme.Hom.preimage_cechIntersection
+    {X Y : Scheme.{u}} (g : Y ⟶ X) {ι : Type u}
+    (U : ι → X.Opens) (n : ℕ) (i : Fin (n + 1) → ι) :
+    g ⁻¹ᵁ (∏ᶜ fun k : Fin (n + 1) => U (i k)) =
+      ∏ᶜ fun k : Fin (n + 1) => g ⁻¹ᵁ U (i k) := by
+  rw [show (∏ᶜ fun k : Fin (n + 1) => U (i k)) =
+      ⨅ k, U (i k) from
+    (IsLimit.conePointUniqueUpToIso (limit.isLimit _)
+      (Preorder.isLimitIInf _)).to_eq]
+  rw [show (∏ᶜ fun k : Fin (n + 1) => g ⁻¹ᵁ U (i k)) =
+      ⨅ k, g ⁻¹ᵁ U (i k) from
+    (IsLimit.conePointUniqueUpToIso (limit.isLimit _)
+      (Preorder.isLimitIInf _)).to_eq]
+  ext y
+  rw [TopologicalSpace.Opens.coe_iInf]
+  change g y ∈ (((⨅ k, U (i k)) : X.Opens) : Set X) ↔ _
+  rw [TopologicalSpace.Opens.coe_iInf]
+  simp
+
+end AlgebraicGeometry
+
 namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section

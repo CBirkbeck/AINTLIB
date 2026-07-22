@@ -39,25 +39,6 @@ noncomputable instance extendScalars_additive
 
 end ModuleCat
 
-namespace AlgebraicGeometry
-
-/-- Inverse image commutes with the finite product open indexing a Cech
-cochain factor. -/
-theorem Scheme.Hom.preimage_cechIntersection
-    {X Y : Scheme.{u}} (g : Y ⟶ X) {ι : Type u}
-    (U : ι → X.Opens) (n : ℕ) (i : Fin (n + 1) → ι) :
-    g ⁻¹ᵁ (∏ᶜ fun k : Fin (n + 1) => U (i k)) =
-      ∏ᶜ fun k : Fin (n + 1) => g ⁻¹ᵁ U (i k) := by
-  rw [TopologicalSpace.Opens.piObj_eq_iInf,
-    TopologicalSpace.Opens.piObj_eq_iInf]
-  ext y
-  rw [TopologicalSpace.Opens.coe_iInf]
-  change g y ∈ (((⨅ k, U (i k)) : X.Opens) : Set X) ↔ _
-  rw [TopologicalSpace.Opens.coe_iInf]
-  simp
-
-end AlgebraicGeometry
-
 namespace AlgebraicGeometry.Scheme.Modules
 
 private noncomputable def extendScalarsDiscreteIso
