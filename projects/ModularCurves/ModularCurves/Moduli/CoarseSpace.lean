@@ -79,7 +79,11 @@ theorem _root_.CategoryTheory.Functor.RepresentableBy.baseSchemeAction_over
 theorem _root_.CategoryTheory.Functor.RepresentableBy.isAffine_base_transport
     {P : ModuliProblem R} {X Y : EllObj R} (rX : P.RepresentableBy X)
     (rY : P.RepresentableBy Y) (h : IsAffine X.base) : IsAffine Y.base := by
-  sorry
+  let e : Y ≅ X := rY.uniqueUpToIso rX
+  haveI := h
+  haveI : IsIso e.hom.baseHom := ⟨e.inv.baseHom,
+    congrArg EllHom.baseHom e.hom_inv_id, congrArg EllHom.baseHom e.inv_hom_id⟩
+  exact IsAffine.of_isIso e.hom.baseHom
 
 /-- **[Y0-AFF5] The full-level problem is representable by an object with affine
 base** (`N ≥ 3` invertible): the D(2)/D(3) recollement of the two engine outputs, each
@@ -89,7 +93,15 @@ theorem gammaFullNaive_exists_representableBy_isAffineHom (N : ℕ) [NeZero N]
     (hN : 3 ≤ (N : ℤ)) (hinv : IsUnit (N : R)) :
     ∃ X : EllObj R, IsAffineHom X.structMap ∧
       Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X) := by
-  sorry
+  exact exists_representableBy_isAffineHom_of_baseChange_cover
+    (gammaFullNaiveProblem R N) 2 3 ⟨-1, 1, by ring⟩
+    (gammaFullNaive_affineOverEll R N hinv).relativelyRepresentable
+    (ModuliProblem.exists_representableBy_isAffine_baseChange_two R
+      (gammaFullNaiveProblem R N) (gammaFullNaive_affineOverEll R N hinv)
+      (gammaFullNaive_rigidNoeth R N hN hinv))
+    (ModuliProblem.exists_representableBy_isAffine_baseChange_three R
+      (gammaFullNaiveProblem R N) (gammaFullNaive_affineOverEll R N hinv)
+      (gammaFullNaive_rigidNoeth R N hN hinv))
 
 /-- Affineness of the structure morphism for EVERY representing object of the
 full-level problem (transport of [Y0-AFF5] along the unique iso). -/
@@ -97,7 +109,14 @@ theorem gammaFullNaive_isAffineHom_structMap (N : ℕ) [NeZero N]
     (hN : 3 ≤ (N : ℤ)) (hinv : IsUnit (N : R)) {X : EllObj R}
     (r : (gammaFullNaiveProblem R N).RepresentableBy X) :
     IsAffineHom X.structMap := by
-  sorry
+  obtain ⟨X₀, hX₀, ⟨r₀⟩⟩ :=
+    gammaFullNaive_exists_representableBy_isAffineHom (R := R) N hN hinv
+  let e : X ≅ X₀ := r.uniqueUpToIso r₀
+  haveI : IsIso e.hom.baseHom := ⟨e.inv.baseHom,
+    congrArg EllHom.baseHom e.hom_inv_id, congrArg EllHom.baseHom e.inv_hom_id⟩
+  haveI := hX₀
+  rw [← e.hom.base_w]
+  infer_instance
 
 /-! ## The coarse quotient (KM 8.1.1, fixed-base form) -/
 

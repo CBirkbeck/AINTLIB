@@ -4269,6 +4269,186 @@ theorem exists_representableBy_isAffineHom_of_baseChange_cover (P : ModuliProble
     (h_b : ∃ Xb : EllObj (CommRingCat.of (Localization.Away b)),
       IsAffine Xb.base ∧ Nonempty ((P.baseChange (awayHom b)).RepresentableBy Xb)) :
     ∃ X : EllObj R, IsAffineHom X.structMap ∧ Nonempty (P.RepresentableBy X) := by
-  sorry
+  classical
+  obtain ⟨Xa', hXa'aff, ⟨rXa'⟩⟩ := h_a
+  obtain ⟨Xb', hXb'aff, ⟨rXb'⟩⟩ := h_b
+  haveI : (P.baseChange (awayHom a)).IsRepresentable := rXa'.isRepresentable
+  haveI : (P.baseChange (awayHom b)).IsRepresentable := rXb'.isRepresentable
+  set Xa : EllObj (CommRingCat.of (Localization.Away a)) :=
+    Functor.reprX (P.baseChange (awayHom a)) with hXa
+  set Xb : EllObj (CommRingCat.of (Localization.Away b)) :=
+    Functor.reprX (P.baseChange (awayHom b)) with hXb
+  have repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa := Functor.representableBy _
+  have repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb := Functor.representableBy _
+  haveI hXaaff : IsAffine Xa.base := by
+    let e : Xa ≅ Xa' := repr_a.uniqueUpToIso rXa'
+    haveI := hXa'aff
+    haveI : IsIso e.hom.baseHom := ⟨e.inv.baseHom,
+      congrArg EllHom.baseHom e.hom_inv_id, congrArg EllHom.baseHom e.inv_hom_id⟩
+    exact IsAffine.of_isIso e.hom.baseHom
+  haveI hXbaff : IsAffine Xb.base := by
+    let e : Xb ≅ Xb' := repr_b.uniqueUpToIso rXb'
+    haveI := hXb'aff
+    haveI : IsIso e.hom.baseHom := ⟨e.inv.baseHom,
+      congrArg EllHom.baseHom e.hom_inv_id, congrArg EllHom.baseHom e.inv_hom_id⟩
+    exact IsAffine.of_isIso e.hom.baseHom
+  refine ⟨glueEllObj a b Xa Xb (overlapIso a b repr_a repr_b), ?_,
+    ⟨glueEllObj_representableBy a b hab hrel repr_a repr_b⟩⟩
+  set φover := overlapIso a b repr_a repr_b with hφover
+  show IsAffineHom (glueQ a b Xa Xb φover)
+  -- the target cover `Spec R = D(a) ∪ D(b)`
+  have hsup : (⨆ i : Bool, cond i (Spec.map (awayHom (R := R) b)).opensRange
+      (Spec.map (awayHom (R := R) a)).opensRange) = ⊤ := by
+    rw [eq_top_iff]
+    intro p _
+    have hp : p ∈ PrimeSpectrum.basicOpen a ⊔ PrimeSpectrum.basicOpen b := by
+      rw [basicOpen_sup_basicOpen_eq_top a b hab]; trivial
+    rcases TopologicalSpace.Opens.mem_sup.mp hp with hpa | hpb
+    · refine TopologicalSpace.Opens.mem_iSup.mpr ⟨false, ?_⟩
+      show p ∈ Set.range (Spec.map (awayHom a))
+      rw [range_SpecMap_awayHom]; exact hpa
+    · refine TopologicalSpace.Opens.mem_iSup.mpr ⟨true, ?_⟩
+      show p ∈ Set.range (Spec.map (awayHom b))
+      rw [range_SpecMap_awayHom]; exact hpb
+  rw [IsZariskiLocalAtTarget.iff_of_iSup_eq_top (P := @IsAffineHom) _ hsup]
+  intro i
+  cases i
+  · -- over `D(a)`: the preimage is the `inl`-chart, isomorphic to the affine `Xa.base`
+    show IsAffineHom
+      (glueQ a b Xa Xb φover ∣_ (Spec.map (awayHom (R := R) a)).opensRange)
+    have hpre : glueQ a b Xa Xb φover ⁻¹ᵁ (Spec.map (awayHom a)).opensRange
+        = (glueBaseInl a b Xa Xb φover).opensRange := by
+      ext x
+      constructor
+      · intro hx
+        rcases glueBase_exists a b Xa Xb φover x with ⟨u, rfl⟩ | ⟨v, rfl⟩
+        · exact ⟨u, rfl⟩
+        · have hval : (Spec.map (awayHom b)) (Xb.structMap v) ∈
+              Set.range (Spec.map (awayHom a)) := by
+            have h1 : glueQ a b Xa Xb φover (glueBaseInr a b Xa Xb φover v)
+                = (Spec.map (awayHom b)) (Xb.structMap v) := by
+              rw [← Scheme.Hom.comp_apply, glueBaseInr_glueQ, Scheme.Hom.comp_apply]
+            have hx' : glueQ a b Xa Xb φover (glueBaseInr a b Xa Xb φover v) ∈
+                Set.range (Spec.map (awayHom a)) := hx
+            rwa [h1] at hx'
+          have hcomp : Spec.map (awayProdHomRight a b) ≫ Spec.map (awayHom b)
+              = Spec.map (awayHom (a * b)) := by
+            rw [← Spec.map_comp, awayHom_comp_awayProdHomRight]
+          have hy : (Spec.map (awayHom b)) (Xb.structMap v) ∈
+              Set.range (Spec.map (awayHom (a * b))) := by
+            rw [range_SpecMap_awayHom, PrimeSpectrum.basicOpen_mul]
+            constructor
+            · rwa [range_SpecMap_awayHom] at hval
+            · have hb2 : (Spec.map (awayHom b)) (Xb.structMap v) ∈
+                  Set.range (Spec.map (awayHom b)) := ⟨_, rfl⟩
+              rwa [range_SpecMap_awayHom] at hb2
+          have hv : Xb.structMap v ∈ Set.range (Spec.map (awayProdHomRight a b)) := by
+            rw [← hcomp] at hy
+            obtain ⟨z, hz⟩ := hy
+            rw [Scheme.Hom.comp_apply] at hz
+            exact ⟨z, (Spec.map (awayHom b)).isOpenEmbedding.injective hz⟩
+          have hv2 : v ∈ Set.range
+              (pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))) := by
+            rw [IsOpenImmersion.range_pullbackFst]; exact hv
+          obtain ⟨w0, hw0⟩ := hv2
+          haveI : IsIso φover.hom.baseHom := isIso_baseHom_of_iso φover
+          set w : (Xa.baseChangeRing (awayProdHomLeft a b)).base :=
+            (Scheme.homeoOfIso (asIso φover.hom.baseHom)).symm w0 with hwdef
+          have hφw : φover.hom.baseHom w = w0 :=
+            (Scheme.homeoOfIso (asIso φover.hom.baseHom)).apply_symm_apply w0
+          have hpsiw : glueBasePsi a b Xa Xb φover w = v := by
+            show (φover.hom.baseHom ≫
+              pullback.fst Xb.structMap (Spec.map (awayProdHomRight a b))) w = v
+            rw [Scheme.Hom.comp_apply, hφw]
+            exact hw0
+          refine ⟨glueBaseFst a b Xa w, ?_⟩
+          calc glueBaseInl a b Xa Xb φover (glueBaseFst a b Xa w)
+              = (glueBaseFst a b Xa ≫ glueBaseInl a b Xa Xb φover) w :=
+                (Scheme.Hom.comp_apply _ _ _).symm
+            _ = (glueBasePsi a b Xa Xb φover ≫ glueBaseInr a b Xa Xb φover) w := by
+                rw [glueBase_condition]
+            _ = glueBaseInr a b Xa Xb φover (glueBasePsi a b Xa Xb φover w) :=
+                Scheme.Hom.comp_apply _ _ _
+            _ = glueBaseInr a b Xa Xb φover v := by rw [hpsiw]
+      · rintro ⟨u, rfl⟩
+        show glueQ a b Xa Xb φover (glueBaseInl a b Xa Xb φover u) ∈
+          Set.range (Spec.map (awayHom a))
+        rw [← Scheme.Hom.comp_apply, glueBaseInl_glueQ, Scheme.Hom.comp_apply]
+        exact ⟨Xa.structMap u, rfl⟩
+    haveI : IsAffine (glueQ a b Xa Xb φover ⁻¹ᵁ
+        (Spec.map (awayHom a)).opensRange : Scheme) := by
+      have e := IsOpenImmersion.isoOfRangeEq
+        ((glueQ a b Xa Xb φover ⁻¹ᵁ (Spec.map (awayHom a)).opensRange).ι)
+        (glueBaseInl a b Xa Xb φover)
+        (by rw [Scheme.Opens.range_ι, ← Scheme.Hom.coe_opensRange]
+            exact congr($(hpre).1))
+      exact IsAffine.of_isIso e.hom
+    haveI : IsAffine ((Spec.map (awayHom (R := R) a)).opensRange : Scheme) :=
+      isAffineOpen_opensRange (Spec.map (awayHom a))
+    infer_instance
+  · -- over `D(b)`: the preimage is the `inr`-chart, isomorphic to the affine `Xb.base`
+    show IsAffineHom
+      (glueQ a b Xa Xb φover ∣_ (Spec.map (awayHom (R := R) b)).opensRange)
+    have hpre : glueQ a b Xa Xb φover ⁻¹ᵁ (Spec.map (awayHom b)).opensRange
+        = (glueBaseInr a b Xa Xb φover).opensRange := by
+      ext x
+      constructor
+      · intro hx
+        rcases glueBase_exists a b Xa Xb φover x with ⟨u, rfl⟩ | ⟨v, rfl⟩
+        · have hval : (Spec.map (awayHom a)) (Xa.structMap u) ∈
+              Set.range (Spec.map (awayHom b)) := by
+            have h1 : glueQ a b Xa Xb φover (glueBaseInl a b Xa Xb φover u)
+                = (Spec.map (awayHom a)) (Xa.structMap u) := by
+              rw [← Scheme.Hom.comp_apply, glueBaseInl_glueQ, Scheme.Hom.comp_apply]
+            have hx' : glueQ a b Xa Xb φover (glueBaseInl a b Xa Xb φover u) ∈
+                Set.range (Spec.map (awayHom b)) := hx
+            rwa [h1] at hx'
+          have hcomp : Spec.map (awayProdHomLeft a b) ≫ Spec.map (awayHom a)
+              = Spec.map (awayHom (a * b)) := by
+            rw [← Spec.map_comp, awayHom_comp_awayProdHomLeft]
+          have hy : (Spec.map (awayHom a)) (Xa.structMap u) ∈
+              Set.range (Spec.map (awayHom (a * b))) := by
+            rw [range_SpecMap_awayHom, PrimeSpectrum.basicOpen_mul]
+            constructor
+            · have ha2 : (Spec.map (awayHom a)) (Xa.structMap u) ∈
+                  Set.range (Spec.map (awayHom a)) := ⟨_, rfl⟩
+              rwa [range_SpecMap_awayHom] at ha2
+            · rwa [range_SpecMap_awayHom] at hval
+          have hu : Xa.structMap u ∈ Set.range (Spec.map (awayProdHomLeft a b)) := by
+            rw [← hcomp] at hy
+            obtain ⟨z, hz⟩ := hy
+            rw [Scheme.Hom.comp_apply] at hz
+            exact ⟨z, (Spec.map (awayHom a)).isOpenEmbedding.injective hz⟩
+          have hu2 : u ∈ Set.range (glueBaseFst a b Xa) := by
+            show u ∈ Set.range
+              (pullback.fst Xa.structMap (Spec.map (awayProdHomLeft a b)))
+            rw [IsOpenImmersion.range_pullbackFst]; exact hu
+          obtain ⟨w, hw⟩ := hu2
+          refine ⟨glueBasePsi a b Xa Xb φover w, ?_⟩
+          calc glueBaseInr a b Xa Xb φover (glueBasePsi a b Xa Xb φover w)
+              = (glueBasePsi a b Xa Xb φover ≫ glueBaseInr a b Xa Xb φover) w :=
+                (Scheme.Hom.comp_apply _ _ _).symm
+            _ = (glueBaseFst a b Xa ≫ glueBaseInl a b Xa Xb φover) w := by
+                rw [glueBase_condition]
+            _ = glueBaseInl a b Xa Xb φover (glueBaseFst a b Xa w) :=
+                Scheme.Hom.comp_apply _ _ _
+            _ = glueBaseInl a b Xa Xb φover u := by rw [hw]
+        · exact ⟨v, rfl⟩
+      · rintro ⟨v, rfl⟩
+        show glueQ a b Xa Xb φover (glueBaseInr a b Xa Xb φover v) ∈
+          Set.range (Spec.map (awayHom b))
+        rw [← Scheme.Hom.comp_apply, glueBaseInr_glueQ, Scheme.Hom.comp_apply]
+        exact ⟨Xb.structMap v, rfl⟩
+    haveI : IsAffine (glueQ a b Xa Xb φover ⁻¹ᵁ
+        (Spec.map (awayHom b)).opensRange : Scheme) := by
+      have e := IsOpenImmersion.isoOfRangeEq
+        ((glueQ a b Xa Xb φover ⁻¹ᵁ (Spec.map (awayHom b)).opensRange).ι)
+        (glueBaseInr a b Xa Xb φover)
+        (by rw [Scheme.Opens.range_ι, ← Scheme.Hom.coe_opensRange]
+            exact congr($(hpre).1))
+      exact IsAffine.of_isIso e.hom
+    haveI : IsAffine ((Spec.map (awayHom (R := R) b)).opensRange : Scheme) :=
+      isAffineOpen_opensRange (Spec.map (awayHom b))
+    infer_instance
 
 end ModularCurves
