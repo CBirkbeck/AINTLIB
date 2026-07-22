@@ -917,6 +917,44 @@ theorem basePullback_hover {T : Scheme.{u}} (g : T ⟶ S) (γ : G) :
   simp only [SchemeAction.basePullback, pullback.lift_snd, Category.comp_id]
 
 include hfree in
+/-- Free case: the projection is flat (chartwise finite projective ⟹ flat). -/
+theorem flat_relQuotientπ_of_free : Flat (σ.relQuotientπ f hover) := by
+  refine σ.morphismProperty_relQuotientπ_of_charts f hover @Flat (fun U => ?_)
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  haveI : IsIso (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ := by
+    rw [← (U.2.preimage f).isoSpec_hom]
+    infer_instance
+  rw [MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+  have halg : IsFreeAlgebraAction G ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) :=
+    σ.isFreeAlgebraAction_of_free (σ.isStableOpen_preimage f hover U.1)
+      (U.2.preimage f) (fun γ hγ T t ht => hfree t γ hγ ht)
+  haveI : Module.Finite (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1) := Module.Finite.of_isFreeAlgebraAction G ℤ _ halg
+  haveI : Module.Projective (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1) := Module.Projective.of_isFreeAlgebraAction G ℤ _ halg
+  haveI : Module.Flat (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1) := Module.Flat.of_projective
+  rw [show CommRingCat.ofHom
+      (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom
+    = CommRingCat.ofHom (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1)) from rfl, AlgebraicGeometry.Flat.SpecMap_iff,
+    CommRingCat.hom_ofHom, RingHom.flat_algebraMap_iff]
+  infer_instance
+
+include hfree in
+/-- Free case: the base change of the projection along ANY morphism is an epimorphism
+(fppf: flat + surjective). -/
+theorem epi_pullback_snd_relQuotientπ {W : Scheme.{u}}
+    (j : W ⟶ σ.relQuotient f hover) :
+    Epi (pullback.snd (σ.relQuotientπ f hover) j) := by
+  haveI : Flat (σ.relQuotientπ f hover) := σ.flat_relQuotientπ_of_free f hover hfree
+  haveI : Surjective (σ.relQuotientπ f hover) :=
+    σ.surjective_relQuotientπ_of_free f hover
+  haveI : Surjective (pullback.snd (σ.relQuotientπ f hover) j) :=
+    MorphismProperty.pullback_snd _ _ ‹Surjective (σ.relQuotientπ f hover)›
+  exact Flat.epi_of_flat_of_surjective _
+
+include hfree in
 /-- **The base-changed descent core** ([GHB5a′], the [A711-BC] crux): for a free action,
 an invariant morphism out of the base-changed total space descends uniquely through the
 base-changed projection. Chart-level engine:
