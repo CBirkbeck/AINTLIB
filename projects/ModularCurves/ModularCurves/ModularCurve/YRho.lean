@@ -878,6 +878,15 @@ noncomputable def piAlgHomEquiv (k : Type) [Field k] (ι : Type) [Fintype ι]
 
 end PiAlgHom
 
+/-- **[asm-1]** The correspondence-image of the split algebra is the trivial Galois
+set (statement-shape pin; fill = the `piAlgHomEquiv`-transport with
+`piAlgHomIndex_comp` equivariance). -/
+noncomputable def constVecCorrespondenceIso (N : ℕ) [NeZero N] :
+    (finiteEtaleEquivContAction ℚ).functor.obj
+        (Opposite.op (CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ))) ≅
+      constVecContAction N := by
+  sorry
+
 /-- The finite étale `ℚ`-algebra of the constant `(ℤ/N)²`-scheme. -/
 noncomputable def constVecAlgebra (N : ℕ) [NeZero N] : CommAlgCat.FiniteEtale.{0} ℚ :=
   ((finiteEtaleEquivContAction ℚ).inverse.obj (constVecContAction N)).unop
