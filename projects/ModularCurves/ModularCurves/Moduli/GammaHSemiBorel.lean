@@ -379,8 +379,9 @@ theorem gammaH_semiBorel_closure (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (hinv : IsUnit (N : R)) :
     Nonempty (ModuliProblem.QuotientProblemData (gammaHAut R N H)) ∧
       ∀ qpd : ModuliProblem.QuotientProblemData (gammaHAut R N H),
-        qpd.prob.Representable := by
-  sorry
+        qpd.prob.Representable :=
+  ⟨gammaH_relativelyRepresentable R N H hinv,
+    fun qpd => gammaH_representable_of_le_semiBorel R N hN H hle hinv qpd⟩
 
 /-! ## The Borel no-go: the `orderOf` pin is refutable for `−1 ∈ H` -/
 

@@ -13,6 +13,7 @@ import ModularCurves.Moduli.LevelSpaceEtaleClose
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.GroupScheme.DeligneOrder
 import ModularCurves.ForMathlib.SchemeActionFree
+import ModularCurves.ForMathlib.RelativeInvariantSpec
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements
@@ -283,24 +284,9 @@ T-Q3/T-Q5 quotient machinery (`ForMathlib/AffineQuotient.lean`,
 
 section SchemeQuotientLayer
 
-/-- The base change of a scheme action lying over `S` along `g : T ⟶ S`: the induced
-action on `pullback f g` (trivial on the `T`-leg). Needed to *state* KM 7.1.3(3c). -/
-noncomputable def _root_.AlgebraicGeometry.SchemeAction.basePullback
-    {G : Type*} [Group G] {Z S T : Scheme.{u}}
-    (σ : SchemeAction G Z) (f : Z ⟶ S) (hover : ∀ γ : G, σ.hom γ ≫ f = f)
-    (g : T ⟶ S) : SchemeAction G (pullback f g) where
-  hom γ := pullback.map f g f g (σ.hom γ) (𝟙 T) (𝟙 S)
-    (by rw [Category.comp_id, hover γ]) (by rw [Category.comp_id, Category.id_comp])
-  hom_one := by
-    refine pullback.hom_ext ?_ ?_
-    · rw [pullback.lift_fst, σ.hom_one, Category.comp_id, Category.id_comp]
-    · rw [pullback.lift_snd, Category.comp_id, Category.id_comp]
-  hom_mul := fun a b => by
-    refine pullback.hom_ext ?_ ?_
-    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, pullback.lift_fst_assoc,
-        σ.hom_mul, Category.assoc]
-    · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, pullback.lift_snd_assoc,
-        Category.comp_id, Category.comp_id]
+/- `SchemeAction.basePullback` (the base change of a scheme action lying over `S`
+along `g : T ⟶ S`) now lives in `ForMathlib/RelativeInvariantSpec.lean` — the local
+copy that used to sit here was hoisted verbatim (T-RIS8 dedup). -/
 
 open EllObj in
 /-- **The base change of an equivariant relative representation datum** along an
@@ -440,38 +426,21 @@ X = Spec(A) affine, Spec(A^G) works, and one can show that these patch nicely. (
 needs quasiprojectiveness and finiteness of G here.)" — our patching datum is the
 `IsAffineHom`-preimage atlas of affine opens of `S` (stable by `hover`, affine by
 `IsAffineHom`), fed to `SchemeAction.quotient`/`quotientπ`/`hom_quotientπ`/
-`quotientπ_hom_ext`/`existsUnique_quotientπ_lift` (T-Q5, all PROVEN); `f₀` is the
-unique descent of the invariant `f`. -/
+`quotientπ_hom_ext`/`existsUnique_quotientπ_lift` (T-Q5, all PROVEN). DIAGONAL-FREE
+(T-RIS8): the body now delegates to the relative-invariant-Spec engine
+(`exists_quotient_of_isAffineHom_rel`, `ForMathlib/RelativeInvariantSpec.lean`), which
+needs no hypothesis on the diagonal of `Z` — the quotient is glued from
+`Spec Γ(Z, f⁻¹U)ᴳ` over the directed affine cover of `S`. -/
 theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_of_isAffineHom
     {G : Type*} [Group G] [Finite G]
-    {Z S : Scheme.{u}} [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z))]
+    {Z S : Scheme.{u}}
     (σ : SchemeAction G Z) (f : Z ⟶ S) [IsAffineHom f]
     (hover : ∀ γ : G, σ.hom γ ≫ f = f) :
     ∃ (Z₀ : Scheme.{u}) (π : Z ⟶ Z₀) (f₀ : Z₀ ⟶ S), π ≫ f₀ = f ∧
       (∀ γ : G, σ.hom γ ≫ π = π) ∧
       ∀ {Y : Scheme.{u}} (F : Z ⟶ Y), (∀ γ : G, σ.hom γ ≫ F = F) →
-        ∃! q : Z₀ ⟶ Y, π ≫ q = F := by
-  -- The `IsAffineHom`-preimage atlas: an affine open of `S` around each `f x`, pulled back.
-  have hcov : ∀ x : Z, ∃ W : S.Opens, IsAffineOpen W ∧ f.base x ∈ W := fun x => by
-    obtain ⟨W, hW, hmem, -⟩ :=
-      exists_isAffineOpen_mem_and_subset (X := S) (TopologicalSpace.Opens.mem_top (f.base x))
-    exact ⟨W, hW, hmem⟩
-  choose US hUS_aff hUS_mem using hcov
-  -- Each `f ⁻¹ᵁ (US x)` is `σ`-stable (immediate from `hover`) and affine (`f` affine).
-  have hVs : ∀ x : Z, σ.IsStableOpen (f ⁻¹ᵁ US x) := by
-    intro x g
-    show (σ.hom g ≫ f) ⁻¹ᵁ US x = f ⁻¹ᵁ US x
-    rw [hover g]
-  have hVa : ∀ x : Z, IsAffineOpen (f ⁻¹ᵁ US x) := fun x => (hUS_aff x).preimage f
-  have hVmem : ∀ x : Z, x ∈ f ⁻¹ᵁ US x := fun x => hUS_mem x
-  -- `f₀` is the unique descent of the invariant `f` along the quotient projection.
-  obtain ⟨f₀, hf₀, -⟩ :=
-    σ.existsUnique_quotientπ_lift (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem f hover
-  refine ⟨σ.quotient (fun x => f ⁻¹ᵁ US x) hVs hVa,
-    σ.quotientπ (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem, f₀, hf₀,
-    fun γ => σ.hom_quotientπ (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem γ, ?_⟩
-  intro Y F hF
-  exact σ.existsUnique_quotientπ_lift (fun x => f ⁻¹ᵁ US x) hVs hVa hVmem F hF
+        ∃! q : Z₀ ⟶ Y, π ≫ q = F :=
+  σ.exists_quotient_of_isAffineHom_rel f hover
 
 /-- **[GHB4] (KM 7.1.3(2),(4) — gate [A711-FP])** — verbatim: "If G operates freely on
 𝒫 … 𝒫_{E/S} is an etale G-torsor over (𝒫/G)_{E/S}"; "(4) The morphism 𝒫 → 𝒫/G is
@@ -484,7 +453,6 @@ quotient universal property (all such are canonically isomorphic). -/
 theorem _root_.AlgebraicGeometry.SchemeAction.quotientπ_finite_etale_surjective
     {G : Type*} [Group G] [Finite G]
     {Z S Z₀ : Scheme.{u}}
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z))]
     (σ : SchemeAction G Z) (f : Z ⟶ S) [IsAffineHom f]
     (hover : ∀ γ : G, σ.hom γ ≫ f = f)
     (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ Z) (γ : G), γ ≠ 1 →
@@ -495,33 +463,21 @@ theorem _root_.AlgebraicGeometry.SchemeAction.quotientπ_finite_etale_surjective
       ∃! q : Z₀ ⟶ Y, π ≫ q = F) :
     IsFinite π ∧ Etale π ∧ Surjective π := by
   classical
-  -- The `IsAffineHom`-preimage atlas (as in GHB3), giving the concrete quotient.
-  have hcov : ∀ x : Z, ∃ W : S.Opens, IsAffineOpen W ∧ f.base x ∈ W := fun x => by
-    obtain ⟨W, hW, hmem, -⟩ :=
-      exists_isAffineOpen_mem_and_subset (X := S) (TopologicalSpace.Opens.mem_top (f.base x))
-    exact ⟨W, hW, hmem⟩
-  choose US hUS_aff hUS_mem using hcov
-  have hVs : ∀ x : Z, σ.IsStableOpen (f ⁻¹ᵁ US x) := fun x g => by
-    show (σ.hom g ≫ f) ⁻¹ᵁ US x = f ⁻¹ᵁ US x; rw [hover g]
-  have hVa : ∀ x : Z, IsAffineOpen (f ⁻¹ᵁ US x) := fun x => (hUS_aff x).preimage f
-  have hVmem : ∀ x : Z, x ∈ f ⁻¹ᵁ US x := fun x => hUS_mem x
-  set V : Z → Z.Opens := fun x => f ⁻¹ᵁ US x with hVdef
-  set π₀ := σ.quotientπ V hVs hVa hVmem with hπ₀def
-  have hfree' : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ Z),
-      t ≫ σ.hom γ = t → IsEmpty T := fun γ hγ T t ht => hfree t γ hγ ht
-  haveI hFin₀ : IsFinite π₀ := σ.isFinite_quotientπ V hVs hVa hVmem hfree'
-  haveI hEt₀ : Etale π₀ := σ.etale_quotientπ V hVs hVa hVmem hfree'
-  haveI hSurj₀ : Surjective π₀ := ⟨σ.quotientπ_surjective V hVs hVa hVmem⟩
-  have hπ₀inv : ∀ g : G, σ.hom g ≫ π₀ = π₀ := σ.hom_quotientπ V hVs hVa hVmem
+  -- The concrete diagonal-free quotient (`ForMathlib/RelativeInvariantSpec.lean`).
+  set π₀ := σ.relQuotientπ f hover with hπ₀def
+  haveI hFin₀ : IsFinite π₀ := σ.isFinite_relQuotientπ_of_free f hover hfree
+  haveI hEt₀ : Etale π₀ := σ.etale_relQuotientπ_of_free f hover hfree
+  haveI hSurj₀ : Surjective π₀ := σ.surjective_relQuotientπ_of_free f hover
+  have hπ₀inv : ∀ g : G, σ.hom g ≫ π₀ = π₀ := σ.hom_comp_relQuotientπ f hover
   -- Unique iso between the abstract quotient `Z₀` and the concrete one.
   obtain ⟨q, hq, -⟩ := hdesc π₀ hπ₀inv
-  obtain ⟨q', hq', -⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem π hπinv
+  obtain ⟨q', hq', -⟩ := σ.existsUnique_relQuotientπ_lift f hover π hπinv
   have hqq' : q ≫ q' = 𝟙 Z₀ := by
     obtain ⟨_, -, huniq⟩ := hdesc π hπinv
     rw [huniq (q ≫ q') (show π ≫ (q ≫ q') = π by rw [← Category.assoc, hq, hq']),
       huniq (𝟙 Z₀) (show π ≫ 𝟙 Z₀ = π by rw [Category.comp_id])]
   have hq'q : q' ≫ q = 𝟙 _ := by
-    obtain ⟨_, -, huniq⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem π₀ hπ₀inv
+    obtain ⟨_, -, huniq⟩ := σ.existsUnique_relQuotientπ_lift f hover π₀ hπ₀inv
     rw [huniq (q' ≫ q) (show π₀ ≫ (q' ≫ q) = π₀ by rw [← Category.assoc, hq', hq]),
       huniq (𝟙 _) (show π₀ ≫ 𝟙 _ = π₀ by rw [Category.comp_id])]
   haveI : IsIso q := ⟨q', hqq', hq'q⟩
@@ -545,7 +501,6 @@ condition; non-free quotients do not commute with base change). -/
 theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free
     {G : Type*} [Group G]
     [Finite G] {Z S Z₀ : Scheme.{u}}
-    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z))]
     (σ : SchemeAction G Z) (f : Z ⟶ S)
     [IsAffineHom f] (hover : ∀ γ : G, σ.hom γ ≫ f = f)
     (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ Z) (γ : G), γ ≠ 1 →
@@ -590,63 +545,64 @@ theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free
     -- projection is an epimorphism (`epi_pullback_snd_quotientπ`, free actions).
     intro Y F hF
     classical
-    -- the stable affine atlas and the concrete quotient (as in `quotientπ_finite_etale_surjective`)
-    have hcov : ∀ x : Z, ∃ W : S.Opens, IsAffineOpen W ∧ f.base x ∈ W := fun x => by
-      obtain ⟨W, hW, hmem, -⟩ :=
-        exists_isAffineOpen_mem_and_subset (X := S) (TopologicalSpace.Opens.mem_top (f.base x))
-      exact ⟨W, hW, hmem⟩
-    choose US hUS_aff hUS_mem using hcov
-    have hVs : ∀ x : Z, σ.IsStableOpen (f ⁻¹ᵁ US x) := fun x γ => by
-      show (σ.hom γ ≫ f) ⁻¹ᵁ US x = f ⁻¹ᵁ US x; rw [hover γ]
-    have hVa : ∀ x : Z, IsAffineOpen (f ⁻¹ᵁ US x) := fun x => (hUS_aff x).preimage f
-    have hVmem : ∀ x : Z, x ∈ f ⁻¹ᵁ US x := fun x => hUS_mem x
-    set V : Z → Z.Opens := fun x => f ⁻¹ᵁ US x with hVdef
-    have hfree' : ∀ {T' : Scheme.{u}} (t : T' ⟶ Z) (γ : G), γ ≠ 1 →
-        t ≫ σ.hom γ = t → IsEmpty T' := fun t γ hγ ht => hfree t γ hγ ht
-    have hπinv₀ : ∀ γ : G, σ.hom γ ≫ (σ.quotientπ V hVs hVa hVmem) = (σ.quotientπ V hVs hVa hVmem) := σ.hom_quotientπ V hVs hVa hVmem
+    -- the concrete diagonal-free quotient (`ForMathlib/RelativeInvariantSpec.lean`)
+    have hπinv₀ : ∀ γ : G, σ.hom γ ≫ σ.relQuotientπ f hover = σ.relQuotientπ f hover :=
+      σ.hom_comp_relQuotientπ f hover
     -- the unique iso between the abstract and the concrete quotient
-    obtain ⟨q, hq, -⟩ := hdesc (σ.quotientπ V hVs hVa hVmem) hπinv₀
-    obtain ⟨q', hq', -⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem π hπinv
+    obtain ⟨q, hq, -⟩ := hdesc (σ.relQuotientπ f hover) hπinv₀
+    obtain ⟨q', hq', -⟩ := σ.existsUnique_relQuotientπ_lift f hover π hπinv
     have hqq' : q ≫ q' = 𝟙 Z₀ := by
       obtain ⟨_, -, huniq⟩ := hdesc π hπinv
       rw [huniq (q ≫ q') (show π ≫ (q ≫ q') = π by rw [← Category.assoc, hq, hq']),
         huniq (𝟙 Z₀) (show π ≫ 𝟙 Z₀ = π by rw [Category.comp_id])]
     have hq'q : q' ≫ q = 𝟙 _ := by
-      obtain ⟨_, -, huniq⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem (σ.quotientπ V hVs hVa hVmem) hπinv₀
-      rw [huniq (q' ≫ q) (show (σ.quotientπ V hVs hVa hVmem) ≫ (q' ≫ q) = (σ.quotientπ V hVs hVa hVmem) by rw [← Category.assoc, hq', hq]),
-        huniq (𝟙 _) (show (σ.quotientπ V hVs hVa hVmem) ≫ 𝟙 _ = (σ.quotientπ V hVs hVa hVmem) by rw [Category.comp_id])]
+      obtain ⟨_, -, huniq⟩ := σ.existsUnique_relQuotientπ_lift f hover (σ.relQuotientπ f hover) hπinv₀
+      rw [huniq (q' ≫ q) (show (σ.relQuotientπ f hover) ≫ (q' ≫ q) = (σ.relQuotientπ f hover) by rw [← Category.assoc, hq', hq]),
+        huniq (𝟙 _) (show (σ.relQuotientπ f hover) ≫ 𝟙 _ = (σ.relQuotientπ f hover) by rw [Category.comp_id])]
     haveI : IsIso q := ⟨q', hqq', hq'q⟩
     -- the base map into the concrete quotient, and the comparison iso of base changes
-    set jc : pullback f₀ g ⟶ σ.quotient V hVs hVa := pullback.fst f₀ g ≫ q with hjc
-    have hkey : pullback.fst (σ.quotientπ V hVs hVa hVmem) jc ≫ π = pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.fst f₀ g := by
-      have h1 : (pullback.fst (σ.quotientπ V hVs hVa hVmem) jc ≫ π) ≫ q =
-          (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.fst f₀ g) ≫ q := by
-        rw [Category.assoc, hq, pullback.condition (f := (σ.quotientπ V hVs hVa hVmem)) (g := jc), hjc,
+    set jc : pullback f₀ g ⟶ σ.relQuotient f hover := pullback.fst f₀ g ≫ q with hjc
+    have hkey : pullback.fst (σ.relQuotientπ f hover) jc ≫ π = pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.fst f₀ g := by
+      have h1 : (pullback.fst (σ.relQuotientπ f hover) jc ≫ π) ≫ q =
+          (pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.fst f₀ g) ≫ q := by
+        rw [Category.assoc, hq, pullback.condition (f := (σ.relQuotientπ f hover)) (g := jc), hjc,
           Category.assoc]
       exact (cancel_mono q).mp h1
-    have hsq : pullback.fst (σ.quotientπ V hVs hVa hVmem) jc ≫ f = (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.snd f₀ g) ≫ g := by
-      rw [← hπf, ← Category.assoc, hkey, Category.assoc, Category.assoc,
-        pullback.condition (f := f₀) (g := g), ← Category.assoc]
-    set E : pullback (σ.quotientπ V hVs hVa hVmem) jc ⟶ pullback f g :=
-      pullback.lift (pullback.fst (σ.quotientπ V hVs hVa hVmem) jc) (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.snd f₀ g) hsq
+    have hsq : pullback.fst (σ.relQuotientπ f hover) jc ≫ f = (pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.snd f₀ g) ≫ g :=
+      calc pullback.fst (σ.relQuotientπ f hover) jc ≫ f
+          = pullback.fst (σ.relQuotientπ f hover) jc ≫ π ≫ f₀ :=
+            congrArg (pullback.fst (σ.relQuotientπ f hover) jc ≫ ·) hπf.symm
+        _ = (pullback.fst (σ.relQuotientπ f hover) jc ≫ π) ≫ f₀ :=
+            (Category.assoc _ _ _).symm
+        _ = (pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.fst f₀ g) ≫ f₀ :=
+            congrArg (· ≫ f₀) hkey
+        _ = pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.fst f₀ g ≫ f₀ :=
+            Category.assoc _ _ _
+        _ = pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.snd f₀ g ≫ g :=
+            congrArg (pullback.snd (σ.relQuotientπ f hover) jc ≫ ·)
+              (pullback.condition (f := f₀) (g := g))
+        _ = (pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.snd f₀ g) ≫ g :=
+            (Category.assoc _ _ _).symm
+    set E : pullback (σ.relQuotientπ f hover) jc ⟶ pullback f g :=
+      pullback.lift (pullback.fst (σ.relQuotientπ f hover) jc) (pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.snd f₀ g) hsq
       with hE
-    have hEfst : E ≫ pullback.fst f g = pullback.fst (σ.quotientπ V hVs hVa hVmem) jc := by
+    have hEfst : E ≫ pullback.fst f g = pullback.fst (σ.relQuotientπ f hover) jc := by
       rw [hE]; exact pullback.lift_fst _ _ _
-    have hEsnd : E ≫ pullback.snd f g = pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.snd f₀ g := by
+    have hEsnd : E ≫ pullback.snd f g = pullback.snd (σ.relQuotientπ f hover) jc ≫ pullback.snd f₀ g := by
       rw [hE]; exact pullback.lift_snd _ _ _
     -- `E ≫ πT` is the concrete base-changed projection
-    have hEπT : E ≫ πT = pullback.snd (σ.quotientπ V hVs hVa hVmem) jc := by
+    have hEπT : E ≫ πT = pullback.snd (σ.relQuotientπ f hover) jc := by
       refine pullback.hom_ext ?_ ?_
       · rw [Category.assoc, hfst, ← Category.assoc, hEfst, hkey]
       · rw [Category.assoc, hsnd, hEsnd]
     -- `E` is an isomorphism, with inverse assembled from `πT`
-    have hsq' : pullback.fst f g ≫ (σ.quotientπ V hVs hVa hVmem) = πT ≫ jc := by
+    have hsq' : pullback.fst f g ≫ (σ.relQuotientπ f hover) = πT ≫ jc := by
       rw [← hq, hjc, ← Category.assoc, ← hfst, Category.assoc]
-    set E' : pullback f g ⟶ pullback (σ.quotientπ V hVs hVa hVmem) jc :=
+    set E' : pullback f g ⟶ pullback (σ.relQuotientπ f hover) jc :=
       pullback.lift (pullback.fst f g) πT hsq' with hE'
-    have hE'fst : E' ≫ pullback.fst (σ.quotientπ V hVs hVa hVmem) jc = pullback.fst f g := by
+    have hE'fst : E' ≫ pullback.fst (σ.relQuotientπ f hover) jc = pullback.fst f g := by
       rw [hE']; exact pullback.lift_fst _ _ _
-    have hE'snd : E' ≫ pullback.snd (σ.quotientπ V hVs hVa hVmem) jc = πT := by
+    have hE'snd : E' ≫ pullback.snd (σ.relQuotientπ f hover) jc = πT := by
       rw [hE']; exact pullback.lift_snd _ _ _
     haveI : IsIso E := by
       refine ⟨E', ?_, ?_⟩
@@ -658,28 +614,28 @@ theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free
         · rw [Category.assoc, hEsnd, Category.id_comp, ← Category.assoc, hE'snd, hsnd]
     -- the comparison intertwines the actions
     have hEact : ∀ γ : G, E ≫ (σ.basePullback f hover g).hom γ =
-        σ.pullbackQuotientπSMul V hVs hVa hVmem jc γ ≫ E := by
+        σ.pullbackRelQSMul f hover jc γ ≫ E := by
       intro γ
       refine pullback.hom_ext ?_ ?_
       · rw [Category.assoc, hbfst, ← Category.assoc, hEfst, Category.assoc, hEfst,
-          SchemeAction.pullbackQuotientπSMul_fst]
+          SchemeAction.pullbackRelQSMul_fst]
       · rw [Category.assoc, hbsnd, hEsnd, Category.assoc, hEsnd, ← Category.assoc,
-          SchemeAction.pullbackQuotientπSMul_snd]
+          SchemeAction.pullbackRelQSMul_snd]
     -- existence of the descent, through the concrete engine [GHB5a]
-    have hFE : ∀ γ : G, σ.pullbackQuotientπSMul V hVs hVa hVmem jc γ ≫ (E ≫ F) = E ≫ F := by
+    have hFE : ∀ γ : G, σ.pullbackRelQSMul f hover jc γ ≫ (E ≫ F) = E ≫ F := by
       intro γ
       rw [← Category.assoc, ← hEact γ, Category.assoc, hF γ]
-    obtain ⟨q₀, hq₀⟩ := σ.exists_quotientπ_lift_baseChange V hVs hVa hVmem hfree' jc
+    obtain ⟨q₀, hq₀⟩ := σ.exists_relQuotientπ_lift_baseChange f hover hfree jc
       (E ≫ F) hFE
-    haveI : Epi (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc) :=
-      σ.epi_pullback_snd_quotientπ V hVs hVa hVmem hfree' jc
+    haveI : Epi (pullback.snd (σ.relQuotientπ f hover) jc) :=
+      σ.epi_pullback_snd_relQuotientπ f hover hfree jc
     refine ⟨q₀, ?_, ?_⟩
     · show πT ≫ q₀ = F
       rw [← cancel_epi E, ← Category.assoc, hEπT]
       exact hq₀
     · intro q₁ hq₁
       have hq₁' : πT ≫ q₁ = F := hq₁
-      rw [← cancel_epi (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc), hq₀, ← hEπT,
+      rw [← cancel_epi (pullback.snd (σ.relQuotientπ f hover) jc), hq₀, ← hEπT,
         Category.assoc, hq₁']
 
 /-- **[GHB6] (KM 7.1.3(6), freeness-sharpened)** — KM: "If 𝒫 is finite over (Ell/R),
@@ -748,14 +704,11 @@ structure QuotPkg {Q : ModuliProblem R} {G : Type*} [Group G] [Finite G]
 /-- Every object carries a quotient package ([GHB3] + choice of datum). -/
 theorem nonempty_quotPkg {Q : ModuliProblem R} {G : Type*} [Group G] [Finite G]
     (φ : G →* Aut Q) (hdata : ∀ X : EllObj R, Nonempty (EquivariantRelRepData φ X))
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) (X : EllObj R) :
+    (X : EllObj R) :
     Nonempty (QuotPkg φ X) := by
   obtain ⟨d⟩ := hdata X
   haveI := d.finite
   haveI : IsAffineHom d.f := inferInstance
-  haveI := hbase X
-  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom d.f
   obtain ⟨Z₀, π, f₀, hπf, hπinv, hdesc⟩ :=
     AlgebraicGeometry.SchemeAction.exists_quotient_of_isAffineHom d.σZ d.f d.over_base
   exact ⟨⟨d, Z₀, π, f₀, hπf, hπinv, hdesc⟩⟩
@@ -764,13 +717,10 @@ theorem nonempty_quotPkg {Q : ModuliProblem R} {G : Type*} [Group G] [Finite G]
 the package; needs freeness). -/
 theorem QuotPkg.π_finite_etale_surjective {Q : ModuliProblem R} {G : Type*} [Group G]
     [Finite G] {φ : G →* Aut Q} {X : EllObj R} (p : QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbX : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X.base))) :
+    (hfree : FreeAction φ) :
     IsFinite p.π ∧ Etale p.π ∧ Surjective p.π := by
   haveI := p.d.finite
   haveI : IsAffineHom p.d.f := inferInstance
-  haveI := hbX
-  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom p.d.f
   exact AlgebraicGeometry.SchemeAction.quotientπ_finite_etale_surjective p.d.σZ p.d.f
     p.d.over_base (p.d.free_on_points hfree) p.π p.f₀ p.hπf p.hπinv p.hdesc
 
@@ -781,16 +731,48 @@ affine chart of the base, `ForMathlib/EtaleCancellation.lean` +
 `ForMathlib/SchemeActionFree.lean`). -/
 theorem QuotPkg.f₀_finite_etale {Q : ModuliProblem R} {G : Type*} [Group G]
     [Finite G] {φ : G →* Aut Q} {X : EllObj R} (p : QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbX : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X.base))) :
+    (hfree : FreeAction φ) :
     IsFinite p.f₀ ∧ Etale p.f₀ := by
   haveI := p.d.finite
   haveI : IsAffineHom p.d.f := inferInstance
-  haveI := hbX
-  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom p.d.f
-  exact AlgebraicGeometry.SchemeAction.quotient_desc_finite_etale p.d.σZ p.d.f
-    p.d.over_base (fun γ hγ T t ht => p.d.free_on_points hfree t γ hγ ht)
-    p.d.finite p.d.etale p.π p.f₀ p.hπf p.hπinv p.hdesc
+  classical
+  -- the `hdesc`-iso to the concrete diagonal-free quotient
+  have hπinv₀ : ∀ γ : G, p.d.σZ.hom γ ≫ p.d.σZ.relQuotientπ p.d.f p.d.over_base =
+      p.d.σZ.relQuotientπ p.d.f p.d.over_base :=
+    p.d.σZ.hom_comp_relQuotientπ p.d.f p.d.over_base
+  obtain ⟨q, hq, -⟩ := p.hdesc (p.d.σZ.relQuotientπ p.d.f p.d.over_base) hπinv₀
+  obtain ⟨q', hq', -⟩ :=
+    p.d.σZ.existsUnique_relQuotientπ_lift p.d.f p.d.over_base p.π p.hπinv
+  have hqq' : q ≫ q' = 𝟙 p.Z₀ := by
+    obtain ⟨_, -, huniq⟩ := p.hdesc p.π p.hπinv
+    rw [huniq (q ≫ q') (show p.π ≫ (q ≫ q') = p.π by
+        rw [← Category.assoc, hq, hq']),
+      huniq (𝟙 p.Z₀) (show p.π ≫ 𝟙 p.Z₀ = p.π by rw [Category.comp_id])]
+  have hq'q : q' ≫ q = 𝟙 _ := by
+    obtain ⟨_, -, huniq⟩ := p.d.σZ.existsUnique_relQuotientπ_lift p.d.f p.d.over_base
+      (p.d.σZ.relQuotientπ p.d.f p.d.over_base) hπinv₀
+    rw [huniq (q' ≫ q) (show p.d.σZ.relQuotientπ p.d.f p.d.over_base ≫ (q' ≫ q) =
+          p.d.σZ.relQuotientπ p.d.f p.d.over_base by
+        rw [← Category.assoc, hq', hq]),
+      huniq (𝟙 _) (show p.d.σZ.relQuotientπ p.d.f p.d.over_base ≫ 𝟙 _ =
+          p.d.σZ.relQuotientπ p.d.f p.d.over_base by rw [Category.comp_id])]
+  haveI : IsIso q := ⟨q', hqq', hq'q⟩
+  -- `f₀ = q ≫ relQuotientStruct` by uniqueness of descents of `f`
+  have hstruct : q ≫ p.d.σZ.relQuotientStruct p.d.f p.d.over_base = p.f₀ := by
+    obtain ⟨_, -, huniq⟩ := p.hdesc p.d.f p.d.over_base
+    rw [huniq (q ≫ p.d.σZ.relQuotientStruct p.d.f p.d.over_base) (show
+        p.π ≫ q ≫ p.d.σZ.relQuotientStruct p.d.f p.d.over_base = p.d.f by
+        rw [← Category.assoc, hq,
+          p.d.σZ.relQuotientπ_comp_relQuotientStruct p.d.f p.d.over_base]),
+      huniq p.f₀ p.hπf]
+  obtain ⟨hFin, hEt⟩ :=
+    p.d.σZ.relQuotientStruct_finite_etale_of_free p.d.f p.d.over_base
+      (p.d.free_on_points hfree) p.d.finite p.d.etale
+  constructor
+  · rw [← hstruct, MorphismProperty.cancel_left_of_respectsIso @IsFinite]
+    exact hFin
+  · rw [← hstruct, MorphismProperty.cancel_left_of_respectsIso @Etale]
+    exact hEt
 
 /-- **[GHB7-3b] The base-change transport of quotient packages.** For `k : X' ⟶ X`,
 the base change `pullback pX.f₀ k.baseHom` is a quotient of the pulled action
@@ -801,7 +783,6 @@ lying over `X'.base`. The engine of the [GHB7] functor's `map`. -/
 theorem QuotPkg.exists_mapDescent {Q : ModuliProblem R} {G : Type*} [Group G]
     [Finite G] {φ : G →* Aut Q} {X X' : EllObj R} (pX : QuotPkg φ X)
     (pX' : QuotPkg φ X') (hfree : FreeAction φ)
-    (hbX : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X.base)))
     (k : X' ⟶ X) :
     ∃ (πT : CategoryTheory.Limits.pullback pX.d.f k.baseHom ⟶
         CategoryTheory.Limits.pullback pX.f₀ k.baseHom)
@@ -817,8 +798,6 @@ theorem QuotPkg.exists_mapDescent {Q : ModuliProblem R} {G : Type*} [Group G]
       q ≫ pX'.f₀ = pullback.snd pX.f₀ k.baseHom := by
   haveI := pX.d.finite
   haveI : IsAffineHom pX.d.f := inferInstance
-  haveI := hbX
-  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom pX.d.f
   -- the base-changed quotient is a quotient of the pulled action ([GHB5])
   obtain ⟨πT, hsnd, hfst, hinv, hUP⟩ :=
     AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free pX.d.σZ pX.d.f
@@ -861,60 +840,50 @@ variable {Q : ModuliProblem R} {G : Type*} [Group G] [Finite G] {φ : G →* Aut
 
 /-- The chosen base-change quotient projection for a package family ([GHB5] output,
 choice-extracted; [GHB7-3c]). -/
-noncomputable def QuotPkg.πT (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) {X X' : EllObj R} (k : X' ⟶ X) :
+noncomputable def QuotPkg.πT (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ) {X X' : EllObj R} (k : X' ⟶ X) :
     CategoryTheory.Limits.pullback (pkg X).d.f k.baseHom ⟶
       CategoryTheory.Limits.pullback (pkg X).f₀ k.baseHom :=
-  ((pkg X).exists_mapDescent (pkg X') hfree (hbase X) k).choose
+  ((pkg X).exists_mapDescent (pkg X') hfree k).choose
 
 /-- The chosen base-change transport morphism ([GHB7-3b] output, choice-extracted). -/
-noncomputable def QuotPkg.mapT (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) {X X' : EllObj R} (k : X' ⟶ X) :
+noncomputable def QuotPkg.mapT (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ) {X X' : EllObj R} (k : X' ⟶ X) :
     CategoryTheory.Limits.pullback (pkg X).f₀ k.baseHom ⟶ (pkg X').Z₀ :=
-  ((pkg X).exists_mapDescent (pkg X') hfree (hbase X) k).choose_spec.choose
+  ((pkg X).exists_mapDescent (pkg X') hfree k).choose_spec.choose
 
 /-- The defining clauses of the chosen transports. -/
-theorem QuotPkg.mapT_spec (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) {X X' : EllObj R} (k : X' ⟶ X) :
-    QuotPkg.πT pkg hfree hbase k ≫ pullback.snd (pkg X).f₀ k.baseHom =
+theorem QuotPkg.mapT_spec (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ) {X X' : EllObj R} (k : X' ⟶ X) :
+    QuotPkg.πT pkg hfree k ≫ pullback.snd (pkg X).f₀ k.baseHom =
       pullback.snd (pkg X).d.f k.baseHom ∧
-    QuotPkg.πT pkg hfree hbase k ≫ pullback.fst (pkg X).f₀ k.baseHom =
+    QuotPkg.πT pkg hfree k ≫ pullback.fst (pkg X).f₀ k.baseHom =
       pullback.fst (pkg X).d.f k.baseHom ≫ (pkg X).π ∧
     (∀ γ : G, ((pkg X).d.σZ.basePullback (pkg X).d.f (pkg X).d.over_base
-      k.baseHom).hom γ ≫ QuotPkg.πT pkg hfree hbase k = QuotPkg.πT pkg hfree hbase k) ∧
+      k.baseHom).hom γ ≫ QuotPkg.πT pkg hfree k = QuotPkg.πT pkg hfree k) ∧
     (∀ {Y : Scheme.{u}} (F : CategoryTheory.Limits.pullback (pkg X).d.f k.baseHom ⟶ Y),
       (∀ γ : G, ((pkg X).d.σZ.basePullback (pkg X).d.f (pkg X).d.over_base
         k.baseHom).hom γ ≫ F = F) →
         ∃! q' : CategoryTheory.Limits.pullback (pkg X).f₀ k.baseHom ⟶ Y,
-          QuotPkg.πT pkg hfree hbase k ≫ q' = F) ∧
-    QuotPkg.πT pkg hfree hbase k ≫ QuotPkg.mapT pkg hfree hbase k =
+          QuotPkg.πT pkg hfree k ≫ q' = F) ∧
+    QuotPkg.πT pkg hfree k ≫ QuotPkg.mapT pkg hfree k =
       (((pkg X).d.pullback k).toRelRepData.compare (pkg X').d.toRelRepData).1 ≫
         (pkg X').π ∧
-    QuotPkg.mapT pkg hfree hbase k ≫ (pkg X').f₀ = pullback.snd (pkg X).f₀ k.baseHom :=
-  ((pkg X).exists_mapDescent (pkg X') hfree (hbase X) k).choose_spec.choose_spec
+    QuotPkg.mapT pkg hfree k ≫ (pkg X').f₀ = pullback.snd (pkg X).f₀ k.baseHom :=
+  ((pkg X).exists_mapDescent (pkg X') hfree k).choose_spec.choose_spec
 
 /-- Transport of `mapT` along an equality of `Ell/R`-morphisms (the source pullback
 moves with the base morphism; subst-internal, `map_eqv`-style). -/
-theorem QuotPkg.mapT_congr (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) {X X' : EllObj R} {k₁ k₂ : X' ⟶ X}
+theorem QuotPkg.mapT_congr (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ) {X X' : EllObj R} {k₁ k₂ : X' ⟶ X}
     (hk : k₁ = k₂) :
-    QuotPkg.mapT pkg hfree hbase k₁ =
-      eqToHom (by rw [hk]) ≫ QuotPkg.mapT pkg hfree hbase k₂ := by
+    QuotPkg.mapT pkg hfree k₁ =
+      eqToHom (by rw [hk]) ≫ QuotPkg.mapT pkg hfree k₂ := by
   subst hk
   rw [eqToHom_refl, Category.id_comp]
 
 /-- **The identity transport is the first projection** ([GHB7-3c] map-id law, via
 `compare_pullback_id` and descent uniqueness). -/
-theorem QuotPkg.mapT_id (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) (X : EllObj R) :
-    QuotPkg.mapT pkg hfree hbase (𝟙 X) =
+theorem QuotPkg.mapT_id (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ) (X : EllObj R) :
+    QuotPkg.mapT pkg hfree (𝟙 X) =
       pullback.fst (pkg X).f₀ (𝟙 X : X ⟶ X).baseHom := by
-  obtain ⟨hsnd, hfst, hinv, hUP, hq, hqf⟩ := QuotPkg.mapT_spec pkg hfree hbase (𝟙 X)
+  obtain ⟨hsnd, hfst, hinv, hUP, hq, hqf⟩ := QuotPkg.mapT_spec pkg hfree (𝟙 X)
   have hbfst : ∀ γ : G, ((pkg X).d.σZ.basePullback (pkg X).d.f (pkg X).d.over_base
       (𝟙 X : X ⟶ X).baseHom).hom γ ≫ pullback.fst (pkg X).d.f (𝟙 X : X ⟶ X).baseHom =
       pullback.fst (pkg X).d.f (𝟙 X : X ⟶ X).baseHom ≫ (pkg X).d.σZ.hom γ := fun γ => by
@@ -922,7 +891,7 @@ theorem QuotPkg.mapT_id (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeActi
   obtain ⟨w, hw, hwu⟩ := hUP
     (pullback.fst (pkg X).d.f (𝟙 X : X ⟶ X).baseHom ≫ (pkg X).π) (fun γ => by
       rw [← Category.assoc, hbfst γ, Category.assoc, (pkg X).hπinv γ])
-  rw [hwu (QuotPkg.mapT pkg hfree hbase (𝟙 X)) (hq.trans
+  rw [hwu (QuotPkg.mapT pkg hfree (𝟙 X)) (hq.trans
       (congrArg (· ≫ (pkg X).π)
         (ModuliProblem.RelRepData.compare_pullback_id (pkg X).d.toRelRepData))),
     hwu (pullback.fst (pkg X).f₀ (𝟙 X : X ⟶ X).baseHom) hfst]
@@ -931,9 +900,7 @@ theorem QuotPkg.mapT_id (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeActi
 through any reassociation lifts with the stated projection clauses (`id'`/`e'` at the
 representing-scheme level, `iQ`/`cQ` at the quotient level). Uniqueness of descents
 along `πT (k₂ ≫ k₁)` + the comparison cocycle `compare_pullback_comp`. -/
-theorem QuotPkg.mapT_comp (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) {X X' X'' : EllObj R}
+theorem QuotPkg.mapT_comp (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ) {X X' X'' : EllObj R}
     (k₁ : X' ⟶ X) (k₂ : X'' ⟶ X')
     (id' : CategoryTheory.Limits.pullback (pkg X).d.f (k₂ ≫ k₁).baseHom ⟶
       CategoryTheory.Limits.pullback (pkg X).d.f k₁.baseHom)
@@ -956,63 +923,63 @@ theorem QuotPkg.mapT_comp (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAc
     (cQ : CategoryTheory.Limits.pullback (pkg X).f₀ (k₂ ≫ k₁).baseHom ⟶
       CategoryTheory.Limits.pullback (pkg X').f₀ k₂.baseHom)
     (hcQ_fst : cQ ≫ pullback.fst (pkg X').f₀ k₂.baseHom =
-      iQ ≫ QuotPkg.mapT pkg hfree hbase k₁)
+      iQ ≫ QuotPkg.mapT pkg hfree k₁)
     (hcQ_snd : cQ ≫ pullback.snd (pkg X').f₀ k₂.baseHom =
       pullback.snd (pkg X).f₀ (k₂ ≫ k₁).baseHom) :
-    cQ ≫ QuotPkg.mapT pkg hfree hbase k₂ = QuotPkg.mapT pkg hfree hbase (k₂ ≫ k₁) := by
-  obtain ⟨hsnd₁, hfst₁, hinv₁, hUP₁, hq₁, hqf₁⟩ := QuotPkg.mapT_spec pkg hfree hbase k₁
-  obtain ⟨hsnd₂, hfst₂, hinv₂, hUP₂, hq₂, hqf₂⟩ := QuotPkg.mapT_spec pkg hfree hbase k₂
+    cQ ≫ QuotPkg.mapT pkg hfree k₂ = QuotPkg.mapT pkg hfree (k₂ ≫ k₁) := by
+  obtain ⟨hsnd₁, hfst₁, hinv₁, hUP₁, hq₁, hqf₁⟩ := QuotPkg.mapT_spec pkg hfree k₁
+  obtain ⟨hsnd₂, hfst₂, hinv₂, hUP₂, hq₂, hqf₂⟩ := QuotPkg.mapT_spec pkg hfree k₂
   obtain ⟨hsndB, hfstB, hinvB, hUPB, hqB, hqfB⟩ :=
-    QuotPkg.mapT_spec pkg hfree hbase (k₂ ≫ k₁)
+    QuotPkg.mapT_spec pkg hfree (k₂ ≫ k₁)
   -- square 1: the quotient-level inner reassociation descends the d-level one
-  have hsq1 : QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ iQ =
-      id' ≫ QuotPkg.πT pkg hfree hbase k₁ := by
+  have hsq1 : QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ iQ =
+      id' ≫ QuotPkg.πT pkg hfree k₁ := by
     apply pullback.hom_ext
-    · calc (QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ iQ) ≫
+    · calc (QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ iQ) ≫
             pullback.fst (pkg X).f₀ k₁.baseHom
-          = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+          = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             (iQ ≫ pullback.fst (pkg X).f₀ k₁.baseHom) := Category.assoc _ _ _
-        _ = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+        _ = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             pullback.fst (pkg X).f₀ (k₂ ≫ k₁).baseHom := by rw [hiQ_fst]
         _ = pullback.fst (pkg X).d.f (k₂ ≫ k₁).baseHom ≫ (pkg X).π := hfstB
         _ = (id' ≫ pullback.fst (pkg X).d.f k₁.baseHom) ≫ (pkg X).π := by rw [hid_fst]
         _ = id' ≫ (pullback.fst (pkg X).d.f k₁.baseHom ≫ (pkg X).π) :=
             Category.assoc _ _ _
-        _ = id' ≫ (QuotPkg.πT pkg hfree hbase k₁ ≫ pullback.fst (pkg X).f₀ k₁.baseHom)
+        _ = id' ≫ (QuotPkg.πT pkg hfree k₁ ≫ pullback.fst (pkg X).f₀ k₁.baseHom)
             := by rw [hfst₁]
-        _ = (id' ≫ QuotPkg.πT pkg hfree hbase k₁) ≫ pullback.fst (pkg X).f₀ k₁.baseHom
+        _ = (id' ≫ QuotPkg.πT pkg hfree k₁) ≫ pullback.fst (pkg X).f₀ k₁.baseHom
             := (Category.assoc _ _ _).symm
-    · calc (QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ iQ) ≫
+    · calc (QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ iQ) ≫
             pullback.snd (pkg X).f₀ k₁.baseHom
-          = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+          = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             (iQ ≫ pullback.snd (pkg X).f₀ k₁.baseHom) := Category.assoc _ _ _
-        _ = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+        _ = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             (pullback.snd (pkg X).f₀ (k₂ ≫ k₁).baseHom ≫ k₂.baseHom) := by
             rw [hiQ_snd]
-        _ = (QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+        _ = (QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             pullback.snd (pkg X).f₀ (k₂ ≫ k₁).baseHom) ≫ k₂.baseHom :=
             (Category.assoc _ _ _).symm
         _ = pullback.snd (pkg X).d.f (k₂ ≫ k₁).baseHom ≫ k₂.baseHom := by rw [hsndB]
         _ = id' ≫ pullback.snd (pkg X).d.f k₁.baseHom := hid_snd.symm
-        _ = id' ≫ (QuotPkg.πT pkg hfree hbase k₁ ≫ pullback.snd (pkg X).f₀ k₁.baseHom)
+        _ = id' ≫ (QuotPkg.πT pkg hfree k₁ ≫ pullback.snd (pkg X).f₀ k₁.baseHom)
             := by rw [hsnd₁]
-        _ = (id' ≫ QuotPkg.πT pkg hfree hbase k₁) ≫ pullback.snd (pkg X).f₀ k₁.baseHom
+        _ = (id' ≫ QuotPkg.πT pkg hfree k₁) ≫ pullback.snd (pkg X).f₀ k₁.baseHom
             := (Category.assoc _ _ _).symm
   -- square 2: the quotient-level reassociation descends the d-level one
-  have hsq2 : QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ cQ =
-      e' ≫ QuotPkg.πT pkg hfree hbase k₂ := by
+  have hsq2 : QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ cQ =
+      e' ≫ QuotPkg.πT pkg hfree k₂ := by
     apply pullback.hom_ext
-    · calc (QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ cQ) ≫
+    · calc (QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ cQ) ≫
             pullback.fst (pkg X').f₀ k₂.baseHom
-          = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+          = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             (cQ ≫ pullback.fst (pkg X').f₀ k₂.baseHom) := Category.assoc _ _ _
-        _ = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
-            (iQ ≫ QuotPkg.mapT pkg hfree hbase k₁) := by rw [hcQ_fst]
-        _ = (QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ iQ) ≫
-            QuotPkg.mapT pkg hfree hbase k₁ := (Category.assoc _ _ _).symm
-        _ = (id' ≫ QuotPkg.πT pkg hfree hbase k₁) ≫
-            QuotPkg.mapT pkg hfree hbase k₁ := by rw [hsq1]
-        _ = id' ≫ (QuotPkg.πT pkg hfree hbase k₁ ≫ QuotPkg.mapT pkg hfree hbase k₁)
+        _ = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
+            (iQ ≫ QuotPkg.mapT pkg hfree k₁) := by rw [hcQ_fst]
+        _ = (QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ iQ) ≫
+            QuotPkg.mapT pkg hfree k₁ := (Category.assoc _ _ _).symm
+        _ = (id' ≫ QuotPkg.πT pkg hfree k₁) ≫
+            QuotPkg.mapT pkg hfree k₁ := by rw [hsq1]
+        _ = id' ≫ (QuotPkg.πT pkg hfree k₁ ≫ QuotPkg.mapT pkg hfree k₁)
             := Category.assoc _ _ _
         _ = id' ≫ ((((pkg X).d.pullback k₁).toRelRepData.compare
             (pkg X').d.toRelRepData).1 ≫ (pkg X').π) := by rw [hq₁]; rfl
@@ -1022,21 +989,21 @@ theorem QuotPkg.mapT_comp (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAc
             rw [he_fst]
         _ = e' ≫ (pullback.fst (pkg X').d.f k₂.baseHom ≫ (pkg X').π) :=
             Category.assoc _ _ _
-        _ = e' ≫ (QuotPkg.πT pkg hfree hbase k₂ ≫ pullback.fst (pkg X').f₀ k₂.baseHom)
+        _ = e' ≫ (QuotPkg.πT pkg hfree k₂ ≫ pullback.fst (pkg X').f₀ k₂.baseHom)
             := by rw [hfst₂]
-        _ = (e' ≫ QuotPkg.πT pkg hfree hbase k₂) ≫ pullback.fst (pkg X').f₀ k₂.baseHom
+        _ = (e' ≫ QuotPkg.πT pkg hfree k₂) ≫ pullback.fst (pkg X').f₀ k₂.baseHom
             := (Category.assoc _ _ _).symm
-    · calc (QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ cQ) ≫
+    · calc (QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ cQ) ≫
             pullback.snd (pkg X').f₀ k₂.baseHom
-          = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+          = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             (cQ ≫ pullback.snd (pkg X').f₀ k₂.baseHom) := Category.assoc _ _ _
-        _ = QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
+        _ = QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
             pullback.snd (pkg X).f₀ (k₂ ≫ k₁).baseHom := by rw [hcQ_snd]
         _ = pullback.snd (pkg X).d.f (k₂ ≫ k₁).baseHom := hsndB
         _ = e' ≫ pullback.snd (pkg X').d.f k₂.baseHom := he_snd.symm
-        _ = e' ≫ (QuotPkg.πT pkg hfree hbase k₂ ≫ pullback.snd (pkg X').f₀ k₂.baseHom)
+        _ = e' ≫ (QuotPkg.πT pkg hfree k₂ ≫ pullback.snd (pkg X').f₀ k₂.baseHom)
             := by rw [hsnd₂]
-        _ = (e' ≫ QuotPkg.πT pkg hfree hbase k₂) ≫ pullback.snd (pkg X').f₀ k₂.baseHom
+        _ = (e' ≫ QuotPkg.πT pkg hfree k₂) ≫ pullback.snd (pkg X').f₀ k₂.baseHom
             := (Category.assoc _ _ _).symm
   -- both sides descend the composite comparison; conclude by uniqueness
   have hcinvB : ∀ γ : G, (((pkg X).d.σZ.basePullback (pkg X).d.f (pkg X).d.over_base
@@ -1078,17 +1045,17 @@ theorem QuotPkg.mapT_comp (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAc
   obtain ⟨w, hw, hwu⟩ := hUPB
     ((((pkg X).d.pullback (k₂ ≫ k₁)).toRelRepData.compare
       (pkg X'').d.toRelRepData).1 ≫ (pkg X'').π) hcinvB
-  have hchase : QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
-      (cQ ≫ QuotPkg.mapT pkg hfree hbase k₂) =
+  have hchase : QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
+      (cQ ≫ QuotPkg.mapT pkg hfree k₂) =
       (((pkg X).d.pullback (k₂ ≫ k₁)).toRelRepData.compare
         (pkg X'').d.toRelRepData).1 ≫ (pkg X'').π := by
-    calc QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫
-          (cQ ≫ QuotPkg.mapT pkg hfree hbase k₂)
-        = (QuotPkg.πT pkg hfree hbase (k₂ ≫ k₁) ≫ cQ) ≫
-          QuotPkg.mapT pkg hfree hbase k₂ := (Category.assoc _ _ _).symm
-      _ = (e' ≫ QuotPkg.πT pkg hfree hbase k₂) ≫ QuotPkg.mapT pkg hfree hbase k₂ :=
-          congrArg (· ≫ QuotPkg.mapT pkg hfree hbase k₂) hsq2
-      _ = e' ≫ (QuotPkg.πT pkg hfree hbase k₂ ≫ QuotPkg.mapT pkg hfree hbase k₂) :=
+    calc QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫
+          (cQ ≫ QuotPkg.mapT pkg hfree k₂)
+        = (QuotPkg.πT pkg hfree (k₂ ≫ k₁) ≫ cQ) ≫
+          QuotPkg.mapT pkg hfree k₂ := (Category.assoc _ _ _).symm
+      _ = (e' ≫ QuotPkg.πT pkg hfree k₂) ≫ QuotPkg.mapT pkg hfree k₂ :=
+          congrArg (· ≫ QuotPkg.mapT pkg hfree k₂) hsq2
+      _ = e' ≫ (QuotPkg.πT pkg hfree k₂ ≫ QuotPkg.mapT pkg hfree k₂) :=
           Category.assoc _ _ _
       _ = e' ≫ ((((pkg X').d.pullback k₂).toRelRepData.compare
           (pkg X'').d.toRelRepData).1 ≫ (pkg X'').π) := by rw [hq₂]; rfl
@@ -1100,31 +1067,29 @@ theorem QuotPkg.mapT_comp (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAc
             (ModuliProblem.RelRepData.compare_pullback_comp
               (pkg X).d.toRelRepData (pkg X').d.toRelRepData (pkg X'').d.toRelRepData
               k₁ k₂ id' hid_fst hid_snd e' he_fst he_snd)
-  rw [hwu (cQ ≫ QuotPkg.mapT pkg hfree hbase k₂) hchase,
-    hwu (QuotPkg.mapT pkg hfree hbase (k₂ ≫ k₁)) hqB]
+  rw [hwu (cQ ≫ QuotPkg.mapT pkg hfree k₂) hchase,
+    hwu (QuotPkg.mapT pkg hfree (k₂ ≫ k₁)) hqB]
 
 /-- **The quotient moduli problem** ([GHB7-3c], the functor): sections of the chosen
 per-object quotients, with base change through the chosen transports. Functoriality is
 `mapT_id`/`mapT_comp` fed with explicit reassociation lifts. -/
 noncomputable def QuotPkg.quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) : ModuliProblem R where
+    (hfree : FreeAction φ) : ModuliProblem R where
   obj Xop := { s : Xop.unop.base ⟶ (pkg Xop.unop).Z₀ //
     s ≫ (pkg Xop.unop).f₀ = 𝟙 Xop.unop.base }
   map {Xop X'op} kop := ↾fun s =>
     ⟨pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base) (by
         rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
-      QuotPkg.mapT pkg hfree hbase kop.unop, by
-      rw [Category.assoc, (QuotPkg.mapT_spec pkg hfree hbase kop.unop).2.2.2.2.2,
+      QuotPkg.mapT pkg hfree kop.unop, by
+      rw [Category.assoc, (QuotPkg.mapT_spec pkg hfree kop.unop).2.2.2.2.2,
         pullback.lift_snd]⟩
   map_id Xop := by
     ext s
     show pullback.lift ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom ≫ s.1)
         (𝟙 Xop.unop.base) (by
           rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
-      QuotPkg.mapT pkg hfree hbase (𝟙 Xop.unop) = s.1
-    rw [QuotPkg.mapT_id pkg hfree hbase Xop.unop, pullback.lift_fst]
+      QuotPkg.mapT pkg hfree (𝟙 Xop.unop) = s.1
+    rw [QuotPkg.mapT_id pkg hfree Xop.unop, pullback.lift_fst]
     show 𝟙 Xop.unop.base ≫ s.1 = s.1
     rw [Category.id_comp]
   map_comp {Xop X'op X''op} kop₁ kop₂ := by
@@ -1132,26 +1097,26 @@ noncomputable def QuotPkg.quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
     -- the inner value is a section
     have hsec : (pullback.lift (kop₁.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base) (by
           rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
-        QuotPkg.mapT pkg hfree hbase kop₁.unop) ≫ (pkg X'op.unop).f₀ =
+        QuotPkg.mapT pkg hfree kop₁.unop) ≫ (pkg X'op.unop).f₀ =
         𝟙 X'op.unop.base := by
-      rw [Category.assoc, (QuotPkg.mapT_spec pkg hfree hbase kop₁.unop).2.2.2.2.2,
+      rw [Category.assoc, (QuotPkg.mapT_spec pkg hfree kop₁.unop).2.2.2.2.2,
         pullback.lift_snd]
     show pullback.lift ((kop₂.unop ≫ kop₁.unop).baseHom ≫ s.1) (𝟙 X''op.unop.base) (by
         rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
-      QuotPkg.mapT pkg hfree hbase (kop₂.unop ≫ kop₁.unop) =
+      QuotPkg.mapT pkg hfree (kop₂.unop ≫ kop₁.unop) =
       pullback.lift (kop₂.unop.baseHom ≫
           (pullback.lift (kop₁.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base) (by
             rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
-          QuotPkg.mapT pkg hfree hbase kop₁.unop)) (𝟙 X''op.unop.base) (by
+          QuotPkg.mapT pkg hfree kop₁.unop)) (𝟙 X''op.unop.base) (by
           rw [Category.assoc, hsec, Category.comp_id, Category.id_comp]) ≫
-      QuotPkg.mapT pkg hfree hbase kop₂.unop
+      QuotPkg.mapT pkg hfree kop₂.unop
     -- the comparison bridge for the reassociation lift
     have hc₁f : (((pkg Xop.unop).d.pullback kop₁.unop).toRelRepData.compare
         (pkg X'op.unop).d.toRelRepData).1 ≫ (pkg X'op.unop).d.f =
         pullback.snd (pkg Xop.unop).d.f kop₁.unop.baseHom :=
       (((pkg Xop.unop).d.pullback kop₁.unop).toRelRepData.compare
         (pkg X'op.unop).d.toRelRepData).2
-    rw [← QuotPkg.mapT_comp pkg hfree hbase kop₁.unop kop₂.unop
+    rw [← QuotPkg.mapT_comp pkg hfree kop₁.unop kop₂.unop
       (pullback.lift (pullback.fst (pkg Xop.unop).d.f (kop₂.unop ≫ kop₁.unop).baseHom)
         (pullback.snd (pkg Xop.unop).d.f (kop₂.unop ≫ kop₁.unop).baseHom ≫
           kop₂.unop.baseHom)
@@ -1180,10 +1145,10 @@ noncomputable def QuotPkg.quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
           (pullback.snd (pkg Xop.unop).f₀ (kop₂.unop ≫ kop₁.unop).baseHom ≫
             kop₂.unop.baseHom)
           (by rw [Category.assoc]; exact pullback.condition)) ≫
-          QuotPkg.mapT pkg hfree hbase kop₁.unop)
+          QuotPkg.mapT pkg hfree kop₁.unop)
         (pullback.snd (pkg Xop.unop).f₀ (kop₂.unop ≫ kop₁.unop).baseHom)
         ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·)
-            (QuotPkg.mapT_spec pkg hfree hbase kop₁.unop).2.2.2.2.2).trans
+            (QuotPkg.mapT_spec pkg hfree kop₁.unop).2.2.2.2.2).trans
           (pullback.lift_snd _ _ _))))
       (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _),
       ← Category.assoc]
@@ -1206,10 +1171,8 @@ noncomputable def QuotPkg.quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
 `Q ⟶ quotProb`, sending a value to its identity-index classification composed with
 the chosen quotient projection. Naturality is [GHB7-4a] + the descent square. -/
 noncomputable def QuotPkg.projQ (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) :
-    Q ⟶ QuotPkg.quotProb pkg hfree hbase where
+    (hfree : FreeAction φ) :
+    Q ⟶ QuotPkg.quotProb pkg hfree where
   app Xop := ↾fun a =>
     ⟨(((pkg Xop.unop).d.eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
         (Q.map (Xop.unop.pullbackAlongπ
@@ -1224,7 +1187,7 @@ noncomputable def QuotPkg.projQ (pkg : ∀ X : EllObj R, QuotPkg φ X)
     ext a
     refine Subtype.ext ?_
     obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ :=
-      QuotPkg.mapT_spec pkg hfree hbase kop.unop
+      QuotPkg.mapT_spec pkg hfree kop.unop
     -- the canonical classification at `X` and its lift over `X'.base`
     have hva := ((pkg Xop.unop).d.eqv
         ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).apply_symm_apply
@@ -1290,7 +1253,7 @@ noncomputable def QuotPkg.projQ (pkg : ∀ X : EllObj R, QuotPkg φ X)
           ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
           (Q.map (Xop.unop.pullbackAlongπ
             ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1)
-          (𝟙 X'op.unop.base) wℓ ≫ QuotPkg.πT pkg hfree hbase kop.unop := by
+          (𝟙 X'op.unop.base) wℓ ≫ QuotPkg.πT pkg hfree kop.unop := by
       apply pullback.hom_ext
       · rw [pullback.lift_fst, Category.assoc, hfstT, ← Category.assoc,
           ← Category.assoc, pullback.lift_fst]
@@ -1317,7 +1280,7 @@ noncomputable def QuotPkg.projQ (pkg : ∀ X : EllObj R, QuotPkg φ X)
                 (Q.map (Xop.unop.pullbackAlongπ
                   ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2,
             Category.comp_id, Category.id_comp]) ≫
-        QuotPkg.mapT pkg hfree hbase kop.unop
+        QuotPkg.mapT pkg hfree kop.unop
     rw [show ((((pkg X'op.unop).d.eqv
         ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).symm
         (Q.map (X'op.unop.pullbackAlongπ
@@ -1340,10 +1303,8 @@ composed with the projection is the projection, since the identity-index
 classification intertwines the action (`equivariant`) and the chosen projection kills
 it (`hπinv`). -/
 theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) (γ : G) :
-    (φ γ).hom ≫ QuotPkg.projQ pkg hfree hbase = QuotPkg.projQ pkg hfree hbase := by
+    (hfree : FreeAction φ) (γ : G) :
+    (φ γ).hom ≫ QuotPkg.projQ pkg hfree = QuotPkg.projQ pkg hfree := by
   ext Xop a
   refine Subtype.ext ?_
   have hmem : ((((pkg Xop.unop).d.eqv
@@ -1398,21 +1359,19 @@ theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
 ([GHB7-5] enabler): both sides are quotients of canonically isomorphic data, so the
 comparison-descended inverse exists by double descent uniqueness. -/
 theorem QuotPkg.isIso_mapT_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) {X' : EllObj R} {T : Scheme.{u}}
+    (hfree : FreeAction φ) {X' : EllObj R} {T : Scheme.{u}}
     (g : T ⟶ X'.base) :
-    IsIso (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) := by
+    IsIso (QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g)) := by
   obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ :=
-    QuotPkg.mapT_spec pkg hfree hbase (X'.pullbackAlongπ g)
+    QuotPkg.mapT_spec pkg hfree (X'.pullbackAlongπ g)
   -- the reverse comparison composed with the base-changed projection is invariant
   have hFinv : ∀ γ : G, (pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
       (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
         ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1 ≫
-      QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) =
+      QuotPkg.πT pkg hfree (X'.pullbackAlongπ g)) =
       ((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
         ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1 ≫
-      QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) := by
+      QuotPkg.πT pkg hfree (X'.pullbackAlongπ g) := by
     intro γ
     have hce : (pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
         (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
@@ -1432,54 +1391,54 @@ theorem QuotPkg.isIso_mapT_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X
     calc (pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
         (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
           ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1 ≫
-        QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g))
+        QuotPkg.πT pkg hfree (X'.pullbackAlongπ g))
         = ((pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
           (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
             ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1)) ≫
-          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) :=
+          QuotPkg.πT pkg hfree (X'.pullbackAlongπ g) :=
           (Category.assoc _ _ _).symm
       _ = ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
             ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
           ((pkg X').d.σZ.basePullback (pkg X').d.f (pkg X').d.over_base
             (X'.pullbackAlongπ g).baseHom).hom γ) ≫
-          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) :=
-          congrArg (· ≫ QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) hce'
+          QuotPkg.πT pkg hfree (X'.pullbackAlongπ g) :=
+          congrArg (· ≫ QuotPkg.πT pkg hfree (X'.pullbackAlongπ g)) hce'
       _ = (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
             ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
           (((pkg X').d.σZ.basePullback (pkg X').d.f (pkg X').d.over_base
             (X'.pullbackAlongπ g).baseHom).hom γ ≫
-          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) := Category.assoc _ _ _
+          QuotPkg.πT pkg hfree (X'.pullbackAlongπ g)) := Category.assoc _ _ _
       _ = (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
             ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
-          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) :=
+          QuotPkg.πT pkg hfree (X'.pullbackAlongπ g) :=
           congrArg ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
             ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫ ·)
             (hinvT γ)
   obtain ⟨q', hq', -⟩ := (pkg (X'.pullbackAlong g)).hdesc
     ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
       ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
-      QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) hFinv
+      QuotPkg.πT pkg hfree (X'.pullbackAlongπ g)) hFinv
   refine ⟨q', ?_, ?_⟩
   · -- `mapT ≫ q' = 𝟙`: both descend `πT` along `πT`
-    obtain ⟨w, hw, hwu⟩ := hUPT (QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g))
+    obtain ⟨w, hw, hwu⟩ := hUPT (QuotPkg.πT pkg hfree (X'.pullbackAlongπ g))
       hinvT
-    rw [hwu (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g) ≫ q')
+    rw [hwu (QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g) ≫ q')
       ((Category.assoc _ _ _).symm.trans ((congrArg (· ≫ q') hqT).trans
         ((Category.assoc _ _ _).trans
           ((congrArg ((((pkg X').d.pullback
               (X'.pullbackAlongπ g)).toRelRepData.compare
               (pkg (X'.pullbackAlong g)).d.toRelRepData).1 ≫ ·) hq').trans
             ((Category.assoc _ _ _).symm.trans
-              ((congrArg (· ≫ QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g))
+              ((congrArg (· ≫ QuotPkg.πT pkg hfree (X'.pullbackAlongπ g))
                 (ModuliProblem.RelRepData.compare_comp_compare _ _)).trans
                 (Category.id_comp _))))))),
       hwu (𝟙 _) (Category.comp_id _)]
   · -- `q' ≫ mapT = 𝟙`: both descend the chosen projection along it
     obtain ⟨w, hw, hwu⟩ := (pkg (X'.pullbackAlong g)).hdesc
       (pkg (X'.pullbackAlong g)).π (pkg (X'.pullbackAlong g)).hπinv
-    rw [hwu (q' ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+    rw [hwu (q' ≫ QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))
       ((Category.assoc _ _ _).symm.trans ((congrArg
-          (· ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) hq').trans
+          (· ≫ QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g)) hq').trans
         ((Category.assoc _ _ _).trans
           ((congrArg ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
               ((pkg X').d.pullback
@@ -1496,40 +1455,37 @@ theorem QuotPkg.isIso_mapT_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X
 bijection composes the pullback universal property with the transport isomorphism
 `isIso_mapT_pullbackAlongπ`; naturality is the transport cocycle. -/
 noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) (X' : EllObj R) :
-    ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree hbase) X' := by
+    (hfree : FreeAction φ) (X' : EllObj R) :
+    ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree) X' := by
   have hqf : ∀ {T : Scheme.{u}} (g : T ⟶ X'.base),
-      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g) ≫
+      QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g) ≫
         (pkg (X'.pullbackAlong g)).f₀ =
       (pullback.snd (pkg X').f₀ g :
         CategoryTheory.Limits.pullback (pkg X').f₀ g ⟶ T) :=
-    fun g => (QuotPkg.mapT_spec pkg hfree hbase (X'.pullbackAlongπ g)).2.2.2.2.2
+    fun g => (QuotPkg.mapT_spec pkg hfree (X'.pullbackAlongπ g)).2.2.2.2.2
   have hinvf : ∀ {T : Scheme.{u}} (g : T ⟶ X'.base)
-      [IsIso (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))],
-      inv (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) ≫
+      [IsIso (QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))],
+      inv (QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g)) ≫
         (pullback.snd (pkg X').f₀ g :
           CategoryTheory.Limits.pullback (pkg X').f₀ g ⟶ T) =
       (pkg (X'.pullbackAlong g)).f₀ := by
     intro T g _
-    exact (congrArg (inv (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) ≫ ·)
+    exact (congrArg (inv (QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g)) ≫ ·)
         (hqf g).symm).trans
       ((Category.assoc _ _ _).symm.trans
         ((congrArg (· ≫ (pkg (X'.pullbackAlong g)).f₀)
           (IsIso.inv_hom_id _)).trans (Category.id_comp _)))
   refine ⟨(pkg X').Z₀, (pkg X').f₀, fun {T} g =>
-    haveI := QuotPkg.isIso_mapT_pullbackAlongπ pkg hfree hbase (X' := X') g; {
+    haveI := QuotPkg.isIso_mapT_pullbackAlongπ pkg hfree (X' := X') g; {
     toFun := fun h => ⟨pullback.lift h.1 (𝟙 T)
         (h.2.trans (Category.id_comp g).symm) ≫
-        QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g),
+        QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g),
       (Category.assoc _ _ _).trans ((congrArg (pullback.lift h.1 (𝟙 T)
           (h.2.trans (Category.id_comp g).symm) ≫ ·) (hqf g)).trans
         (pullback.lift_snd _ _ _))⟩
-    invFun := fun s => ⟨(s.1 ≫ inv (QuotPkg.mapT pkg hfree hbase
+    invFun := fun s => ⟨(s.1 ≫ inv (QuotPkg.mapT pkg hfree
         (X'.pullbackAlongπ g))) ≫ pullback.fst (pkg X').f₀ g,
-      (Category.assoc _ _ _).trans ((congrArg ((s.1 ≫ inv (QuotPkg.mapT pkg hfree
-          hbase (X'.pullbackAlongπ g))) ≫ ·) pullback.condition).trans
+      (Category.assoc _ _ _).trans ((congrArg ((s.1 ≫ inv (QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))) ≫ ·) pullback.condition).trans
         ((Category.assoc _ _ _).symm.trans
           ((congrArg (· ≫ g)
             ((Category.assoc _ _ _).trans
@@ -1539,34 +1495,34 @@ noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
       ((congrArg (· ≫ pullback.fst (pkg X').f₀ g)
         ((Category.assoc _ _ _).trans ((congrArg (pullback.lift h.1 (𝟙 T)
             (h.2.trans (Category.id_comp g).symm) ≫ ·)
-          (IsIso.hom_inv_id (QuotPkg.mapT pkg hfree hbase
+          (IsIso.hom_inv_id (QuotPkg.mapT pkg hfree
             (X'.pullbackAlongπ g)))).trans (Category.comp_id _)))).trans
         (pullback.lift_fst _ _ _))
     right_inv := fun s => Subtype.ext
-      ((congrArg (· ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+      ((congrArg (· ≫ QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))
         (pullback.hom_ext (pullback.lift_fst _ _ _)
           ((pullback.lift_snd _ _ _).trans
             ((Category.assoc _ _ _).trans
               ((congrArg (s.1 ≫ ·) (hinvf g)).trans s.2)).symm) :
-          pullback.lift ((s.1 ≫ inv (QuotPkg.mapT pkg hfree hbase
+          pullback.lift ((s.1 ≫ inv (QuotPkg.mapT pkg hfree
               (X'.pullbackAlongπ g))) ≫ pullback.fst (pkg X').f₀ g) (𝟙 T)
             ((Category.assoc _ _ _).trans ((congrArg ((s.1 ≫ inv (QuotPkg.mapT pkg
-                hfree hbase (X'.pullbackAlongπ g))) ≫ ·)
+                hfree (X'.pullbackAlongπ g))) ≫ ·)
               pullback.condition).trans
               ((Category.assoc _ _ _).symm.trans
                 ((congrArg (· ≫ g)
                   ((Category.assoc _ _ _).trans
                     ((congrArg (s.1 ≫ ·) (hinvf g)).trans s.2))).trans
                   (Category.id_comp g))))) =
-          s.1 ≫ inv (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)))).trans
+          s.1 ≫ inv (QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g)))).trans
         ((Category.assoc _ _ _).trans ((congrArg (s.1 ≫ ·)
-          (IsIso.inv_hom_id (QuotPkg.mapT pkg hfree hbase
+          (IsIso.inv_hom_id (QuotPkg.mapT pkg hfree
             (X'.pullbackAlongπ g)))).trans (Category.comp_id _)))) }, ?_⟩
   -- naturality in `T` (the transport cocycle along the base-change triangle)
   intro T T' g k h
   refine Subtype.ext ?_
   have hsec : (pullback.lift h.1 (𝟙 T) (h.2.trans (Category.id_comp g).symm) ≫
-      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) ≫
+      QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g)) ≫
       (pkg (X'.pullbackAlong g)).f₀ = 𝟙 T :=
     (Category.assoc _ _ _).trans ((congrArg (pullback.lift h.1 (𝟙 T)
         (h.2.trans (Category.id_comp g).symm) ≫ ·) (hqf g)).trans
@@ -1579,19 +1535,19 @@ noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
   show pullback.lift (k ≫ h.1) (𝟙 T')
       ((show (k ≫ h.1) ≫ (pkg X').f₀ = k ≫ g from by
         rw [Category.assoc, h.2]).trans (Category.id_comp (k ≫ g)).symm) ≫
-      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ (k ≫ g)) =
+      QuotPkg.mapT pkg hfree (X'.pullbackAlongπ (k ≫ g)) =
     pullback.lift (k ≫ (pullback.lift h.1 (𝟙 T)
         (h.2.trans (Category.id_comp g).symm) ≫
-        QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) (𝟙 T')
+        QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))) (𝟙 T')
       ((show (k ≫ (pullback.lift h.1 (𝟙 T)
           (h.2.trans (Category.id_comp g).symm) ≫
-          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) ≫
+          QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))) ≫
           (pkg (X'.pullbackAlong g)).f₀ = k from
         (Category.assoc _ _ _).trans
           ((congrArg (k ≫ ·) hsec).trans (Category.comp_id k))).trans
         (Category.id_comp k).symm) ≫
-      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongMap g k)
-  rw [QuotPkg.mapT_congr pkg hfree hbase
+      QuotPkg.mapT pkg hfree (X'.pullbackAlongMap g k)
+  rw [QuotPkg.mapT_congr pkg hfree
       (ModuliProblem.pullbackAlongMap_pullbackAlongπ X' g k).symm,
     show (eqToHom (by rw [(ModuliProblem.pullbackAlongMap_pullbackAlongπ
           X' g k).symm]) :
@@ -1604,7 +1560,7 @@ noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
       ((show (k ≫ h.1) ≫ (pkg X').f₀ = k ≫ g from by
         rw [Category.assoc, h.2]).trans (Category.id_comp (k ≫ g)).symm) ≫ ·)
     (Category.id_comp _)).trans ?_
-  rw [← QuotPkg.mapT_comp pkg hfree hbase (X'.pullbackAlongπ g)
+  rw [← QuotPkg.mapT_comp pkg hfree (X'.pullbackAlongπ g)
       (X'.pullbackAlongMap g k)
       (pullback.lift (pullback.fst (pkg X').d.f (k ≫ g))
         (pullback.snd (pkg X').d.f (k ≫ g) ≫ k)
@@ -1628,7 +1584,7 @@ noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
         ((pullback.lift (pullback.fst (pkg X').f₀ (k ≫ g))
           (pullback.snd (pkg X').f₀ (k ≫ g) ≫ k)
           (by rw [Category.assoc]; exact pullback.condition)) ≫
-          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+          QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))
         (pullback.snd (pkg X').f₀ (k ≫ g))
         ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·) (hqf g)).trans
           (pullback.lift_snd _ _ _))))
@@ -1642,16 +1598,16 @@ noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
         ((pullback.lift (pullback.fst (pkg X').f₀ (k ≫ g))
           (pullback.snd (pkg X').f₀ (k ≫ g) ≫ k)
           (by rw [Category.assoc]; exact pullback.condition)) ≫
-          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+          QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))
         (pullback.snd (pkg X').f₀ (k ≫ g))
         ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·) (hqf g)).trans
           (pullback.lift_snd _ _ _))) =
       pullback.lift (k ≫ (pullback.lift h.1 (𝟙 T)
           (h.2.trans (Category.id_comp g).symm) ≫
-          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) (𝟙 T')
+          QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))) (𝟙 T')
         ((show (k ≫ (pullback.lift h.1 (𝟙 T)
             (h.2.trans (Category.id_comp g).symm) ≫
-            QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) ≫
+            QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))) ≫
             (pkg (X'.pullbackAlong g)).f₀ = k from
           (Category.assoc _ _ _).trans
             ((congrArg (k ≫ ·) hsec).trans (Category.comp_id k))).trans
@@ -1668,7 +1624,7 @@ noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
             pullback.lift_fst]
         · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, hu2,
             Category.id_comp, Category.assoc, pullback.lift_snd, Category.comp_id]
-      exact (congrArg (· ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+      exact (congrArg (· ≫ QuotPkg.mapT pkg hfree (X'.pullbackAlongπ g))
         hinner).trans (Category.assoc _ _ _)
     · rw [Category.assoc, pullback.lift_snd, hu2, pullback.lift_snd]
   exact hleg _ (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
@@ -1676,14 +1632,12 @@ noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
 /-- **The quotient problem is relatively representable, finite étale** ([GHB7-5];
 `relRepDatum` packaged with the [GHB6]-gated conjuncts). -/
 theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) (X' : EllObj R) :
-    ∃ d' : ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree hbase) X',
+    (hfree : FreeAction φ) (X' : EllObj R) :
+    ∃ d' : ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree) X',
       IsFinite d'.f ∧ Etale d'.f :=
-  ⟨QuotPkg.relRepDatum pkg hfree hbase X',
-    ((pkg X').f₀_finite_etale hfree (hbase X')).1,
-    ((pkg X').f₀_finite_etale hfree (hbase X')).2⟩
+  ⟨QuotPkg.relRepDatum pkg hfree X',
+    ((pkg X').f₀_finite_etale hfree).1,
+    ((pkg X').f₀_finite_etale hfree).2⟩
 
 /-- **The cross-problem transport** ([GHB7-couniv-i], KM 7.1.3(1) scheme-level
 content): a `G`-invariant morphism to a relatively representable problem induces, at
@@ -1893,8 +1847,6 @@ pulled descended transport followed by the `P'`-side comparison. Descent uniquen
 along `πT` + `crossTransport_natural`. -/
 theorem QuotPkg.crossDescent_mapT_square (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base)))
     {P' : ModuliProblem R} {X X' : EllObj R}
     (dP : ModuliProblem.RelRepData P' X) (dP' : ModuliProblem.RelRepData P' X')
     (ν' : Q ⟶ P') (k : X' ⟶ X)
@@ -1910,14 +1862,14 @@ theorem QuotPkg.crossDescent_mapT_square (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (μX : (pkg X).Z₀ ⟶ dP.Z) (hμX : (pkg X).π ≫ μX = νX)
     (hμXf : μX ≫ dP.f = (pkg X).f₀)
     (μX' : (pkg X').Z₀ ⟶ dP'.Z) (hμX' : (pkg X').π ≫ μX' = νX') :
-    QuotPkg.mapT pkg hfree hbase k ≫ μX' =
+    QuotPkg.mapT pkg hfree k ≫ μX' =
       pullback.lift (pullback.fst (pkg X).f₀ k.baseHom ≫ μX)
         (pullback.snd (pkg X).f₀ k.baseHom)
         ((Category.assoc _ _ _).trans
           ((congrArg (pullback.fst (pkg X).f₀ k.baseHom ≫ ·) hμXf).trans
             pullback.condition)) ≫
       ((dP.pullback k).compare dP').1 := by
-  obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ := QuotPkg.mapT_spec pkg hfree hbase k
+  obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ := QuotPkg.mapT_spec pkg hfree k
   have W0 : (pullback.fst (pkg X).f₀ k.baseHom ≫ μX) ≫ dP.f =
       pullback.snd (pkg X).f₀ k.baseHom ≫ k.baseHom :=
     (Category.assoc _ _ _).trans
@@ -1925,18 +1877,18 @@ theorem QuotPkg.crossDescent_mapT_square (pkg : ∀ X : EllObj R, QuotPkg φ X)
         pullback.condition)
   -- both sides descend the same map along `πT`
   have hinv2 : ∀ γ : G, ((pkg X).d.σZ.basePullback (pkg X).d.f (pkg X).d.over_base
-      k.baseHom).hom γ ≫ (QuotPkg.πT pkg hfree hbase k ≫
-        (QuotPkg.mapT pkg hfree hbase k ≫ μX')) =
-      QuotPkg.πT pkg hfree hbase k ≫ (QuotPkg.mapT pkg hfree hbase k ≫ μX') :=
+      k.baseHom).hom γ ≫ (QuotPkg.πT pkg hfree k ≫
+        (QuotPkg.mapT pkg hfree k ≫ μX')) =
+      QuotPkg.πT pkg hfree k ≫ (QuotPkg.mapT pkg hfree k ≫ μX') :=
     fun γ => (Category.assoc _ _ _).symm.trans
-      (congrArg (· ≫ (QuotPkg.mapT pkg hfree hbase k ≫ μX')) (hinvT γ))
-  obtain ⟨w, hw, hwu⟩ := hUPT (QuotPkg.πT pkg hfree hbase k ≫
-    (QuotPkg.mapT pkg hfree hbase k ≫ μX')) hinv2
-  rw [hwu (QuotPkg.mapT pkg hfree hbase k ≫ μX') rfl,
+      (congrArg (· ≫ (QuotPkg.mapT pkg hfree k ≫ μX')) (hinvT γ))
+  obtain ⟨w, hw, hwu⟩ := hUPT (QuotPkg.πT pkg hfree k ≫
+    (QuotPkg.mapT pkg hfree k ≫ μX')) hinv2
+  rw [hwu (QuotPkg.mapT pkg hfree k ≫ μX') rfl,
     hwu (pullback.lift (pullback.fst (pkg X).f₀ k.baseHom ≫ μX)
       (pullback.snd (pkg X).f₀ k.baseHom) W0 ≫ ((dP.pullback k).compare dP').1) ?_]
   -- the lift-side also descends it: chase through `crossTransport_natural`
-  have hsq : QuotPkg.πT pkg hfree hbase k ≫
+  have hsq : QuotPkg.πT pkg hfree k ≫
       pullback.lift (pullback.fst (pkg X).f₀ k.baseHom ≫ μX)
         (pullback.snd (pkg X).f₀ k.baseHom) W0 =
       pullback.lift (pullback.fst (pkg X).d.f k.baseHom ≫ νX)
@@ -1969,8 +1921,6 @@ enter as clause hypotheses; naturality is `crossDescent_mapT_square` + the
 `P'`-instance of the [GHB7-4a] transport. -/
 noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base)))
     {P' : ModuliProblem R} (dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X)
     (ν' : Q ⟶ P')
     (νf : ∀ X : EllObj R, (pkg X).d.Z ⟶ (dP X).Z)
@@ -1981,7 +1931,7 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (μf : ∀ X : EllObj R, (pkg X).Z₀ ⟶ (dP X).Z)
     (hμ : ∀ X : EllObj R, (pkg X).π ≫ μf X = νf X)
     (hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀) :
-    QuotPkg.quotProb pkg hfree hbase ⟶ P' where
+    QuotPkg.quotProb pkg hfree ⟶ P' where
   app Xop := ↾fun s =>
     P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
       ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
@@ -1994,9 +1944,9 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
       ((dP X'op.unop).eqv ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)
         ⟨(pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
           (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
-          QuotPkg.mapT pkg hfree hbase kop.unop) ≫ μf X'op.unop, by
+          QuotPkg.mapT pkg hfree kop.unop) ≫ μf X'op.unop, by
           rw [Category.assoc, hμf X'op.unop, Category.assoc,
-            (QuotPkg.mapT_spec pkg hfree hbase kop.unop).2.2.2.2.2,
+            (QuotPkg.mapT_spec pkg hfree kop.unop).2.2.2.2.2,
             pullback.lift_snd]
           rfl⟩) =
       P'.map kop (P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
@@ -2011,7 +1961,7 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
       (Category.assoc _ _ _).trans
         ((congrArg (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫ ·)
           (hμf Xop.unop)).trans pullback.condition)
-    have hsquare := QuotPkg.crossDescent_mapT_square pkg hfree hbase
+    have hsquare := QuotPkg.crossDescent_mapT_square pkg hfree
       (dP Xop.unop) (dP X'op.unop) ν' kop.unop
       (νf Xop.unop) (hνf Xop.unop) (hcl Xop.unop)
       (νf X'op.unop) (hνf X'op.unop) (hcl X'op.unop)
@@ -2053,9 +2003,9 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
         ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom))
         ⟨(pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
           (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
-          QuotPkg.mapT pkg hfree hbase kop.unop) ≫ μf X'op.unop, by
+          QuotPkg.mapT pkg hfree kop.unop) ≫ μf X'op.unop, by
           rw [Category.assoc, hμf X'op.unop, Category.assoc,
-            (QuotPkg.mapT_spec pkg hfree hbase kop.unop).2.2.2.2.2,
+            (QuotPkg.mapT_spec pkg hfree kop.unop).2.2.2.2.2,
             pullback.lift_snd]
           rfl⟩ =
       ((dP X'op.unop).eqv
@@ -2148,8 +2098,6 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
 factors the invariant map through the projection (KM 7.1.3(1), existence half). -/
 theorem QuotPkg.projQ_crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base)))
     {P' : ModuliProblem R} (dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X)
     (ν' : Q ⟶ P')
     (νf : ∀ X : EllObj R, (pkg X).d.Z ⟶ (dP X).Z)
@@ -2160,8 +2108,8 @@ theorem QuotPkg.projQ_crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (μf : ∀ X : EllObj R, (pkg X).Z₀ ⟶ (dP X).Z)
     (hμ : ∀ X : EllObj R, (pkg X).π ≫ μf X = νf X)
     (hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀) :
-    QuotPkg.projQ pkg hfree hbase ≫
-      QuotPkg.crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf = ν' := by
+    QuotPkg.projQ pkg hfree ≫
+      QuotPkg.crossμ pkg hfree dP ν' νf hνf hcl μf hμ hμf = ν' := by
   ext Xop a
   show P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
     ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
@@ -2276,23 +2224,21 @@ element** ([GHB7-couniv-v-a]): the compatibility between `relRepDatum`'s classif
 bijection and `projQ`, at the index of the structure map. The scheme-level content of
 the couniversal uniqueness. -/
 theorem QuotPkg.relRepDatum_eqv_π (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) (X : EllObj R) :
-    (QuotPkg.relRepDatum pkg hfree hbase X).eqv (pkg X).d.f
+    (hfree : FreeAction φ) (X : EllObj R) :
+    (QuotPkg.relRepDatum pkg hfree X).eqv (pkg X).d.f
       ⟨(pkg X).π, (pkg X).hπf⟩ =
-    (QuotPkg.projQ pkg hfree hbase).app
+    (QuotPkg.projQ pkg hfree).app
       (Opposite.op (X.pullbackAlong (pkg X).d.f))
       ((pkg X).d.eqv (pkg X).d.f ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩) := by
   obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ :=
-    QuotPkg.mapT_spec pkg hfree hbase (X.pullbackAlongπ (pkg X).d.f)
+    QuotPkg.mapT_spec pkg hfree (X.pullbackAlongπ (pkg X).d.f)
   refine Subtype.ext ?_
   show pullback.lift (pkg X).π (𝟙 (X.pullbackAlong (pkg X).d.f).base)
       (show (pkg X).π ≫ (pkg X).f₀ =
         𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
           (X.pullbackAlongπ (pkg X).d.f).baseHom from
         (pkg X).hπf.trans (Category.id_comp (pkg X).d.f).symm) ≫
-      QuotPkg.mapT pkg hfree hbase (X.pullbackAlongπ (pkg X).d.f) =
+      QuotPkg.mapT pkg hfree (X.pullbackAlongπ (pkg X).d.f) =
     (((pkg (X.pullbackAlong (pkg X).d.f)).d.eqv
         ((𝟙 (X.pullbackAlong (pkg X).d.f) :
           X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom)).symm
@@ -2309,7 +2255,7 @@ theorem QuotPkg.relRepDatum_eqv_π (pkg : ∀ X : EllObj R, QuotPkg φ X)
       (show 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
         𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
           (X.pullbackAlongπ (pkg X).d.f).baseHom from rfl) ≫
-      QuotPkg.πT pkg hfree hbase (X.pullbackAlongπ (pkg X).d.f) =
+      QuotPkg.πT pkg hfree (X.pullbackAlongπ (pkg X).d.f) =
       pullback.lift (pkg X).π (𝟙 (X.pullbackAlong (pkg X).d.f).base)
         (show (pkg X).π ≫ (pkg X).f₀ =
           𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
@@ -2536,16 +2482,14 @@ theorem QuotPkg.relRepDatum_eqv_π (pkg : ∀ X : EllObj R, QuotPkg φ X)
 ([GHB7-couniv-v-b]): pulling a `quotProb`-value back along the tautological
 projection is the `relRepDatum`-classification of its underlying section. -/
 theorem QuotPkg.quotProb_map_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X)
-    (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) (X : EllObj R)
-    (s : (QuotPkg.quotProb pkg hfree hbase).obj (Opposite.op X)) :
-    (QuotPkg.quotProb pkg hfree hbase).map
+    (hfree : FreeAction φ) (X : EllObj R)
+    (s : (QuotPkg.quotProb pkg hfree).obj (Opposite.op X)) :
+    (QuotPkg.quotProb pkg hfree).map
       (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op s =
-    (QuotPkg.relRepDatum pkg hfree hbase X).eqv ((𝟙 X : X ⟶ X).baseHom)
+    (QuotPkg.relRepDatum pkg hfree X).eqv ((𝟙 X : X ⟶ X).baseHom)
       ⟨s.1, s.2.trans rfl⟩ := by
   refine Subtype.ext ?_
-  refine congrArg (· ≫ QuotPkg.mapT pkg hfree hbase
+  refine congrArg (· ≫ QuotPkg.mapT pkg hfree
     (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom))) (pullback.hom_ext ?_ ?_)
   · exact (pullback.lift_fst _ _ _).trans
       ((Category.id_comp s.1).trans (pullback.lift_fst _ _ _).symm)
@@ -2558,8 +2502,6 @@ quotient, so descent uniqueness pins it to `μf`; the pointwise values follow th
 `relKey_of_classifies` and the tautological roundtrip. -/
 theorem QuotPkg.crossμ_unique (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base)))
     {P' : ModuliProblem R} (dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X)
     (ν' : Q ⟶ P')
     (νf : ∀ X : EllObj R, (pkg X).d.Z ⟶ (dP X).Z)
@@ -2571,130 +2513,130 @@ theorem QuotPkg.crossμ_unique (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (μf : ∀ X : EllObj R, (pkg X).Z₀ ⟶ (dP X).Z)
     (hμ : ∀ X : EllObj R, (pkg X).π ≫ μf X = νf X)
     (hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀)
-    (μ'' : QuotPkg.quotProb pkg hfree hbase ⟶ P')
-    (hfact : QuotPkg.projQ pkg hfree hbase ≫ μ'' = ν') :
-    μ'' = QuotPkg.crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf := by
+    (μ'' : QuotPkg.quotProb pkg hfree ⟶ P')
+    (hfact : QuotPkg.projQ pkg hfree ≫ μ'' = ν') :
+    μ'' = QuotPkg.crossμ pkg hfree dP ν' νf hνf hcl μf hμ hμf := by
   ext Xop s
   -- the induced transport at this object and its classifying property
-  have hclt : (dP Xop.unop).eqv (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+  have hclt : (dP Xop.unop).eqv (QuotPkg.relRepDatum pkg hfree Xop.unop).f
       ⟨(((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1,
         (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).2⟩ =
       μ''.app (Opposite.op (Xop.unop.pullbackAlong
-        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-        ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-          ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+        (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+        ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+          ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
             Category.id_comp _⟩) :=
     (congrArg ((dP Xop.unop).eqv
-        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f) (Subtype.eta _ _)).trans
+        (QuotPkg.relRepDatum pkg hfree Xop.unop).f) (Subtype.eta _ _)).trans
       (((dP Xop.unop).eqv
-        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).apply_symm_apply _)
+        (QuotPkg.relRepDatum pkg hfree Xop.unop).f).apply_symm_apply _)
   -- STEP 1: the transport descends `νf` along the chosen projection
   have m₁ : ((pkg Xop.unop).π ≫ (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1) ≫ (dP Xop.unop).f = (pkg Xop.unop).d.f :=
     (Category.assoc _ _ _).trans
       ((congrArg ((pkg Xop.unop).π ≫ ·) (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).2).trans (pkg Xop.unop).hπf)
   have h1 : (pkg Xop.unop).π ≫ (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1 = νf Xop.unop := by
     have hkey := ((dP Xop.unop).eqv (pkg Xop.unop).d.f).injective
       (a₁ := ⟨(⟨(pkg Xop.unop).π, (pkg Xop.unop).hπf⟩ :
-        { h : (pkg Xop.unop).d.Z ⟶ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z //
-          h ≫ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f = (pkg Xop.unop).d.f }).1 ≫ (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+        { h : (pkg Xop.unop).d.Z ⟶ (QuotPkg.relRepDatum pkg hfree Xop.unop).Z //
+          h ≫ (QuotPkg.relRepDatum pkg hfree Xop.unop).f = (pkg Xop.unop).d.f }).1 ≫ (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1, m₁⟩)
       (a₂ := ⟨νf Xop.unop, hνf Xop.unop⟩) ?_
     · exact congrArg Subtype.val hkey
     rw [ModuliProblem.relKey_of_classifies
-        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop)
+        (QuotPkg.relRepDatum pkg hfree Xop.unop)
         (dP Xop.unop) μ'' (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1 (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).2 hclt (pkg Xop.unop).d.f
         ⟨(pkg Xop.unop).π, (pkg Xop.unop).hπf⟩ m₁,
-      QuotPkg.relRepDatum_eqv_π pkg hfree hbase Xop.unop,
+      QuotPkg.relRepDatum_eqv_π pkg hfree Xop.unop,
       show μ''.app (Opposite.op (Xop.unop.pullbackAlong (pkg Xop.unop).d.f))
-          ((QuotPkg.projQ pkg hfree hbase).app
+          ((QuotPkg.projQ pkg hfree).app
             (Opposite.op (Xop.unop.pullbackAlong (pkg Xop.unop).d.f))
             ((pkg Xop.unop).d.eqv (pkg Xop.unop).d.f
               ⟨𝟙 (pkg Xop.unop).d.Z, Category.id_comp (pkg Xop.unop).d.f⟩)) =
-        ((QuotPkg.projQ pkg hfree hbase ≫ μ'').app
+        ((QuotPkg.projQ pkg hfree ≫ μ'').app
           (Opposite.op (Xop.unop.pullbackAlong (pkg Xop.unop).d.f)))
           ((pkg Xop.unop).d.eqv (pkg Xop.unop).d.f
             ⟨𝟙 (pkg Xop.unop).d.Z, Category.id_comp (pkg Xop.unop).d.f⟩) from rfl,
       hfact, hcl Xop.unop]
   -- STEP 2: descent uniqueness pins the transport to `μf`
   have h2 : (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1 = μf Xop.unop := by
     obtain ⟨w, hw, hwu⟩ := (pkg Xop.unop).hdesc (νf Xop.unop) (hνinv Xop.unop)
     rw [hwu (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1 h1, hwu (μf Xop.unop) (hμ Xop.unop)]
   -- STEP 3: the pointwise value through the tautological roundtrip
   have hround : μ''.app Xop s =
       P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
         (μ''.app (Opposite.op (Xop.unop.pullbackAlong
           ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)))
-          ((QuotPkg.quotProb pkg hfree hbase).map
+          ((QuotPkg.quotProb pkg hfree).map
             (Xop.unop.pullbackAlongπ
               ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op s)) := by
     rw [NatTrans.naturality_apply μ''
@@ -2712,54 +2654,54 @@ theorem QuotPkg.crossμ_unique (pkg : ∀ X : EllObj R, QuotPkg φ X)
             (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Xop.unop)))).trans
         (FunctorToTypes.map_id_apply P' (μ''.app Xop s)))).symm
   have m₃ : (s.1 ≫ (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1) ≫ (dP Xop.unop).f =
       (𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom :=
     (Category.assoc _ _ _).trans
       ((congrArg (s.1 ≫ ·) (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).2).trans (s.2.trans rfl))
   refine hround.trans ?_
-  rw [QuotPkg.quotProb_map_pullbackAlongπ pkg hfree hbase Xop.unop s,
+  rw [QuotPkg.quotProb_map_pullbackAlongπ pkg hfree Xop.unop s,
     ← ModuliProblem.relKey_of_classifies
-      (QuotPkg.relRepDatum pkg hfree hbase Xop.unop)
+      (QuotPkg.relRepDatum pkg hfree Xop.unop)
       (dP Xop.unop) μ'' (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1 (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).2 hclt
       ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
       ⟨s.1, s.2.trans rfl⟩ m₃,
     show (⟨(⟨s.1, s.2.trans rfl⟩ :
-      { h : Xop.unop.base ⟶ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z //
-        h ≫ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f =
+      { h : Xop.unop.base ⟶ (QuotPkg.relRepDatum pkg hfree Xop.unop).Z //
+        h ≫ (QuotPkg.relRepDatum pkg hfree Xop.unop).f =
           (𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom }).1 ≫ (((dP Xop.unop).eqv
-          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (QuotPkg.relRepDatum pkg hfree Xop.unop).f).symm
           (μ''.app (Opposite.op (Xop.unop.pullbackAlong
-            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
-            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
-              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
-              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            (QuotPkg.relRepDatum pkg hfree Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree Xop.unop).Z,
                 Category.id_comp _⟩))).1, m₃⟩ :
       { v : Xop.unop.base ⟶ (dP Xop.unop).Z //
         v ≫ (dP Xop.unop).f =
@@ -2792,17 +2734,15 @@ surjective `π` along the section has a section (`natCard_sections_eq_finrank` +
 `one_le_finrank_iff_surjective`). -/
 theorem QuotPkg.projQ_geom_surjective (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base)))
     (k : Type u) [Field k] [IsAlgClosed k]
     (sm : Spec (CommRingCat.of k) ⟶ Spec R)
     (E : EllipticCurve (Spec (CommRingCat.of k))) :
     Function.Surjective
-      ((QuotPkg.projQ pkg hfree hbase).app
+      ((QuotPkg.projQ pkg hfree).app
         (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) := by
   set X : EllObj R := ⟨Spec (CommRingCat.of k), sm, E⟩ with hXdef
   intro s
-  obtain ⟨hfin, het, hsurj⟩ := (pkg X).π_finite_etale_surjective hfree (hbase X)
+  obtain ⟨hfin, het, hsurj⟩ := (pkg X).π_finite_etale_surjective hfree
   haveI := hfin; haveI := het; haveI := hsurj
   haveI : IsFinite (pullback.snd (pkg X).π s.1) :=
     MorphismProperty.pullback_snd _ _ hfin
@@ -2920,8 +2860,6 @@ orbit** ([GHB7-geom-o] scheme level): via the affine model, `Spec`-faithfulness,
 the `k̄`-point orbit lemma. -/
 theorem QuotPkg.exists_smul_of_π_eq (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base)))
     {X : EllObj R} (k : Type u) [Field k] [IsAlgClosed k]
     (hXb : X.base = Spec (CommRingCat.of k))
     (h₁ h₂ : X.base ⟶ (pkg X).d.Z)
@@ -3075,13 +3013,11 @@ theorem QuotPkg.exists_smul_of_π_eq (pkg : ∀ X : EllObj R, QuotPkg φ X)
 KM 7.1.3(3) injectivity half; Loeffler Fact 3.8.1's "H-orbits"). -/
 theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base)))
     (k : Type u) [Field k] [IsAlgClosed k]
     {X : EllObj R} (hXb : X.base = Spec (CommRingCat.of k))
     (a b : Q.obj (Opposite.op X)) :
-    (QuotPkg.projQ pkg hfree hbase).app (Opposite.op X) a =
-      (QuotPkg.projQ pkg hfree hbase).app (Opposite.op X) b ↔
+    (QuotPkg.projQ pkg hfree).app (Opposite.op X) a =
+      (QuotPkg.projQ pkg hfree).app (Opposite.op X) b ↔
     ∃ γ : G, (φ γ).hom.app (Opposite.op X) a = b := by
   constructor
   · intro heq
@@ -3092,7 +3028,7 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
         (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
         (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b)).1 ≫
         (pkg X).π := congrArg Subtype.val heq
-    obtain ⟨γ₀, hγ₀⟩ := QuotPkg.exists_smul_of_π_eq pkg hfree hbase (X := X) k hXb
+    obtain ⟨γ₀, hγ₀⟩ := QuotPkg.exists_smul_of_π_eq pkg hfree (X := X) k hXb
       ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
         (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).1)
       ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
@@ -3158,9 +3094,9 @@ theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
     rw [hrec b, hrec ((φ γ₀⁻¹).hom.app (Opposite.op X) a)] at this
     exact this.symm
   · rintro ⟨γ, rfl⟩
-    exact (congrArg (fun η : Q ⟶ QuotPkg.quotProb pkg hfree hbase =>
+    exact (congrArg (fun η : Q ⟶ QuotPkg.quotProb pkg hfree =>
       η.app (Opposite.op X) a)
-      (QuotPkg.projQ_invariant pkg hfree hbase γ)).symm
+      (QuotPkg.projQ_invariant pkg hfree γ)).symm
 
 end Transport
 
@@ -3183,15 +3119,13 @@ the `simulRepresentableBy` construction pattern of T-Q6c); the geometric clauses
 from the torsor property ([GHB4]) and splitting of finite étale covers over `k̄`. -/
 theorem exists_quotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G]
     [Finite G] (φ : G →* Aut Q) (hfree : FreeAction φ)
-    (hdata : ∀ X : EllObj R, Nonempty (EquivariantRelRepData φ X))
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) :
+    (hdata : ∀ X : EllObj R, Nonempty (EquivariantRelRepData φ X)) :
     Nonempty (QuotientProblemData φ) := by
   let pkg : ∀ X : EllObj R, QuotPkg φ X := fun X =>
-    (nonempty_quotPkg φ hdata hbase X).some
-  refine ⟨⟨QuotPkg.quotProb pkg hfree hbase, QuotPkg.projQ pkg hfree hbase,
-    QuotPkg.projQ_invariant pkg hfree hbase,
-    QuotPkg.relRep_quotProb pkg hfree hbase, ?_, ?_, ?_⟩⟩
+    (nonempty_quotPkg φ hdata X).some
+  refine ⟨⟨QuotPkg.quotProb pkg hfree, QuotPkg.projQ pkg hfree,
+    QuotPkg.projQ_invariant pkg hfree,
+    QuotPkg.relRep_quotProb pkg hfree, ?_, ?_, ?_⟩⟩
   · -- couniversal (KM 7.1.3(1) verbatim)
     intro P' hP' ν' hν'
     let dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X := fun X =>
@@ -3217,16 +3151,16 @@ theorem exists_quotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G]
       (hcd X).choose_spec.1
     have hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀ := fun X =>
       (hcd X).choose_spec.2.1
-    exact ⟨QuotPkg.crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf,
-      QuotPkg.projQ_crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf,
-      fun μ'' hμ'' => QuotPkg.crossμ_unique pkg hfree hbase dP ν' νf hνf hcl
+    exact ⟨QuotPkg.crossμ pkg hfree dP ν' νf hνf hcl μf hμ hμf,
+      QuotPkg.projQ_crossμ pkg hfree dP ν' νf hνf hcl μf hμ hμf,
+      fun μ'' hμ'' => QuotPkg.crossμ_unique pkg hfree dP ν' νf hνf hcl
         hνinv μf hμ hμf μ'' hμ''⟩
   · -- geometric surjectivity (KM 7.1.3(3), surjectivity half)
     intro k _ _ sm E
-    exact QuotPkg.projQ_geom_surjective pkg hfree hbase k sm E
+    exact QuotPkg.projQ_geom_surjective pkg hfree k sm E
   · -- fibres are orbits (KM 7.1.3(3), injectivity half)
     intro k _ _ sm E a b
-    exact QuotPkg.projQ_geom_orbits pkg hfree hbase k rfl a b
+    exact QuotPkg.projQ_geom_orbits pkg hfree k rfl a b
 
 end ModuliProblem
 
@@ -3552,9 +3486,7 @@ representable by finite étale morphisms, couniversal, and with
 ([GHC4]); the two statements agree exactly at `H = ⊥` ([GHC2]). -/
 theorem gammaH_relativelyRepresentable (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
-    (hinv : IsUnit (N : R))
-    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
-      (Limits.terminal.from X.base))) :
+    (hinv : IsUnit (N : R)) :
     Nonempty (ModuliProblem.QuotientProblemData (gammaHAut R N H)) :=
   -- [GHB7] applied to the `H`-action: freeness = [GH2] (`gammaFullNaive_freeAction`),
   -- equivariant finite-étale data at every object = [GHA5]
@@ -3562,7 +3494,7 @@ theorem gammaH_relativelyRepresentable (N : ℕ) [NeZero N]
   -- of `GL₂(ℤ/N)` (`N` invertible ⟹ `NeZero N` ⟹ `ZMod N` finite).
   ModuliProblem.exists_quotientProblemData (gammaHAut R N H)
     (gammaFullNaive_freeAction R N H hinv)
-    (fun X => gammaFullNaive_equivariantRelRepData R N H hinv X) hbase
+    (fun X => gammaFullNaive_equivariantRelRepData R N H hinv X)
 
 /-- Relative representability transports across a functor isomorphism of moduli problems:
 the representing datum `(Z, f)` is reused and the classifying bijections are post-composed
