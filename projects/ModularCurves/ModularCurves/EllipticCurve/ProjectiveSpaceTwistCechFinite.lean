@@ -8,6 +8,8 @@ import ModularCurves.EllipticCurve.ProjectiveSpaceTwistFinitePresentation
 import ModularCurves.ForMathlib.FiniteHomologySequence
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechExact
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechFunctor
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechPushforward
+import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.Picard.InvertibleSheafLocallyFree
 
 /-!
@@ -269,6 +271,35 @@ theorem finiteType_orderedBaseCechComplex_homology_module_finite
         (coordinateOpenCover (R := R) (σ := σ))).homology q) := by
   exact finiteType_orderedBaseCechComplex_homology_module_finite_of_card_le_add
     M q (Fintype.card (ULift.{u} σ)) (by omega)
+
+/-- Ordered base-Cech homology of a finite-type quasicoherent module on a closed subscheme of
+polynomial projective space is finite in every degree over a Noetherian coefficient ring. -/
+theorem closedImmersion_finiteType_orderedBaseCechComplex_homology_module_finite
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {X : Scheme.{u}}
+    (f : X ⟶ Proj (homogeneousSubmodule σ R)) [IsClosedImmersion f]
+    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType] (q : ℕ) :
+    Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex
+        (f ≫ homogeneousProjπ (R := R) (σ := σ)) M
+        (fun j => f ⁻¹ᵁ coordinateOpenCover (R := R) (σ := σ) j)).homology q) := by
+  let N := (AlgebraicGeometry.Scheme.Modules.pushforward f).obj M
+  letI : N.IsQuasicoherent :=
+    AlgebraicGeometry.Scheme.Modules.isQuasicoherent_pushforward_of_isAffineHom f
+  letI : N.IsFiniteType :=
+    AlgebraicGeometry.Scheme.Modules.isFiniteType_pushforward_of_isClosedImmersion f
+  letI : Module.Finite
+      Γ(Spec (CommRingCat.of R), (⊤ : (Spec (CommRingCat.of R)).Opens))
+      ((AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplex
+        (homogeneousProjπ (R := R) (σ := σ)) N
+        (coordinateOpenCover (R := R) (σ := σ))).homology q) :=
+    finiteType_orderedBaseCechComplex_homology_module_finite N q
+  exact Module.Finite.equiv
+    (HomologicalComplex.homologyMapIso
+      (AlgebraicGeometry.Scheme.Modules.orderedBaseCechComplexPushforwardIso f
+        (homogeneousProjπ (R := R) (σ := σ)) M
+        (coordinateOpenCover (R := R) (σ := σ))) q).symm.toLinearEquiv
 
 end
 
