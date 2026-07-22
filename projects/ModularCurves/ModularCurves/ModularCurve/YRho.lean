@@ -879,13 +879,30 @@ noncomputable def piAlgHomEquiv (k : Type) [Field k] (ι : Type) [Fintype ι]
 end PiAlgHom
 
 /-- **[asm-1]** The correspondence-image of the split algebra is the trivial Galois
-set (statement-shape pin; fill = the `piAlgHomEquiv`-transport with
-`piAlgHomIndex_comp` equivariance). -/
+set: the fiber is the `AlgHom`-set, identified with `(ℤ/N)²` by `piAlgHomEquiv`; the
+Galois action is post-composition, which fixes the evaluation index
+(`piAlgHomIndex_comp`), matching the trivial action. -/
 noncomputable def constVecCorrespondenceIso (N : ℕ) [NeZero N] :
     (finiteEtaleEquivContAction ℚ).functor.obj
         (Opposite.op (CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ))) ≅
-      constVecContAction N := by
-  sorry
+      constVecContAction N where
+  hom := ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun φ => piAlgHomIndex φ)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun φ => piAlgHomIndex_comp σ φ }
+  inv := ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun i =>
+        (Algebra.ofId ℚ (SeparableClosure ℚ)).comp
+          (Pi.evalAlgHom ℚ (fun _ => ℚ) i))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun i => AlgHom.ext fun x =>
+        (σ.commutes _).symm }
+  hom_inv_id := by
+    ext φ
+    exact congrArg (fun ψ => ψ)
+      ((piAlgHomEquiv ℚ (Fin 2 → ZMod N) (SeparableClosure ℚ)).left_inv φ)
+  inv_hom_id := by
+    ext i x
+    exact congrFun
+      ((piAlgHomEquiv ℚ (Fin 2 → ZMod N) (SeparableClosure ℚ)).right_inv i) x
 
 /-- The finite étale `ℚ`-algebra of the constant `(ℤ/N)²`-scheme. -/
 noncomputable def constVecAlgebra (N : ℕ) [NeZero N] : CommAlgCat.FiniteEtale.{0} ℚ :=
