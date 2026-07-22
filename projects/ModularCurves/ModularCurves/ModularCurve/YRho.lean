@@ -2211,9 +2211,11 @@ theorem frameEval_points (D : GaloisRepData N)
       CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hL1
   -- the evaluation comultiplication factors through the correspondence-bridge
   -- (definitional in `frameEvalAlgHom`): precomposition with it is the fiber-map
-  -- of the evaluation morphism after the bridge-conjugation. The counit naturality
-  -- (`pointsEquivOfContAction_map`) then computes the ρ-reading as the evaluation
-  -- of the product-reading, whose components are `hfst`/`hsnd`.
+  -- of the evaluation morphism after the bridge-conjugation.
+  have hSplit : (frameEvalAlgHom D).hom.hom =
+      ((frameProdAlgebraIso D).inv.unop.hom.hom).comp
+        (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameEvalMor D)).unop.hom.hom) := rfl
   sorry
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
