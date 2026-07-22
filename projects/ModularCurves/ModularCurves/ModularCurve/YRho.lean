@@ -746,6 +746,128 @@ noncomputable def frameProdIsProduct (D : GaloisRepData N) :
     · exact congrArg (fun q : s.pt ⟶ constVecContAction N => q.hom.hom x) h₁
     · exact congrArg (fun q : s.pt ⟶ frameContAction D => q.hom.hom x) h₂
 
+section PiAlgHom
+
+/-- [asm-1 leaf] The coordinate idempotents of a finite split algebra map to
+zero-or-one in a domain. -/
+private theorem piAlgHom_single_zero_or_one {k : Type} [Field k] {ι : Type}
+    [Fintype ι] [DecidableEq ι] {L : Type} [CommRing L] [NoZeroDivisors L]
+    [Algebra k L] (φ : (ι → k) →ₐ[k] L) (i : ι) :
+    φ (Pi.single i 1) = 0 ∨ φ (Pi.single i 1) = 1 := by
+  have hidem : φ (Pi.single i 1) * φ (Pi.single i 1) = φ (Pi.single i 1) := by
+    rw [← map_mul]
+    congr 1
+    ext j
+    by_cases hj : j = i <;> simp [Pi.single_apply, hj]
+  have h2 : φ (Pi.single i 1) * (φ (Pi.single i 1) - 1) = 0 := by
+    rw [mul_sub, mul_one, hidem, sub_self]
+  rcases mul_eq_zero.mp h2 with h3 | h3
+  · exact Or.inl h3
+  · exact Or.inr (sub_eq_zero.mp h3)
+
+/-- [asm-1 leaf] Distinct coordinate idempotents are orthogonal after `φ`. -/
+private theorem piAlgHom_single_orth {k : Type} [Field k] {ι : Type}
+    [Fintype ι] [DecidableEq ι] {L : Type} [CommRing L]
+    [Algebra k L] (φ : (ι → k) →ₐ[k] L) {i j : ι} (hij : i ≠ j) :
+    φ (Pi.single i 1) * φ (Pi.single j 1) = 0 := by
+  rw [← map_mul]
+  have h0 : (Pi.single i 1 : ι → k) * Pi.single j 1 = 0 := by
+    ext m
+    by_cases hm : m = i
+    · subst hm
+      simp [Pi.single_apply, hij.symm]
+    · simp [Pi.single_apply, hm]
+  rw [h0, map_zero]
+
+/-- [asm-1 leaf] The images of the coordinate idempotents sum to one. -/
+private theorem piAlgHom_single_sum {k : Type} [Field k] {ι : Type}
+    [Fintype ι] [DecidableEq ι] {L : Type} [CommRing L]
+    [Algebra k L] (φ : (ι → k) →ₐ[k] L) :
+    ∑ i, φ (Pi.single i 1) = 1 := by
+  rw [← map_sum]
+  have h1 : (∑ i, Pi.single i (1 : k)) = (1 : ι → k) := by
+    ext j
+    rw [Finset.sum_apply]
+    simp [Pi.single_apply]
+  rw [h1, map_one]
+
+/-- [asm-1 leaf] The index at which a split-algebra homomorphism into a domain
+evaluates. -/
+noncomputable def piAlgHomIndex {k : Type} [Field k] {ι : Type} [Fintype ι]
+    [DecidableEq ι] {L : Type} [CommRing L] [Nontrivial L] [NoZeroDivisors L]
+    [Algebra k L] (φ : (ι → k) →ₐ[k] L) : ι := by
+  classical
+  refine Finset.choose (fun i => φ (Pi.single i 1) = 1) Finset.univ ?_
+  obtain ⟨i, hi⟩ : ∃ i, φ (Pi.single i 1) = 1 := by
+    by_contra hnone
+    push_neg at hnone
+    have hall : ∀ i, φ (Pi.single i 1) = 0 := fun i =>
+      (piAlgHom_single_zero_or_one φ i).resolve_right (hnone i)
+    have hs := piAlgHom_single_sum φ
+    rw [Finset.sum_congr rfl (fun i _ => hall i), Finset.sum_const_zero] at hs
+    exact zero_ne_one hs
+  refine ⟨i, ⟨Finset.mem_univ i, hi⟩, ?_⟩
+  rintro j ⟨-, hj⟩
+  by_contra hji
+  have horth := piAlgHom_single_orth φ hji
+  rw [hj, hi, one_mul] at horth
+  exact one_ne_zero horth
+
+theorem piAlgHomIndex_spec {k : Type} [Field k] {ι : Type} [Fintype ι]
+    [DecidableEq ι] {L : Type} [CommRing L] [Nontrivial L] [NoZeroDivisors L]
+    [Algebra k L] (φ : (ι → k) →ₐ[k] L) :
+    φ (Pi.single (piAlgHomIndex φ) 1) = 1 := by
+  classical
+  exact Finset.choose_property (fun i => φ (Pi.single i 1) = 1) Finset.univ _
+
+theorem piAlgHomIndex_unique {k : Type} [Field k] {ι : Type} [Fintype ι]
+    [DecidableEq ι] {L : Type} [CommRing L] [Nontrivial L] [NoZeroDivisors L]
+    [Algebra k L] (φ : (ι → k) →ₐ[k] L) {j : ι}
+    (hj : φ (Pi.single j 1) = 1) : j = piAlgHomIndex φ := by
+  by_contra hji
+  have horth := piAlgHom_single_orth φ hji
+  rw [hj, piAlgHomIndex_spec, one_mul] at horth
+  exact one_ne_zero horth
+
+/-- **[asm-1 leaf]** Algebra homomorphisms out of a finite split `k`-algebra into a
+domain are coordinate evaluations. -/
+noncomputable def piAlgHomEquiv (k : Type) [Field k] (ι : Type) [Fintype ι]
+    [DecidableEq ι] (L : Type) [CommRing L] [Nontrivial L] [NoZeroDivisors L]
+    [Algebra k L] :
+    ((ι → k) →ₐ[k] L) ≃ ι where
+  toFun := piAlgHomIndex
+  invFun i := (Algebra.ofId k L).comp (Pi.evalAlgHom k (fun _ => k) i)
+  left_inv φ := by
+    classical
+    refine (AlgHom.ext fun x => ?_).symm
+    have hx : x = ∑ j, x j • Pi.single j (1 : k) := by
+      ext m
+      rw [Finset.sum_apply]
+      simp [Pi.single_apply]
+    calc φ x = ∑ j, x j • φ (Pi.single j (1 : k)) := by
+          conv_lhs => rw [hx]
+          rw [map_sum]
+          exact Finset.sum_congr rfl fun j _ => map_smul φ _ _
+      _ = x (piAlgHomIndex φ) • φ (Pi.single (piAlgHomIndex φ) (1 : k)) := by
+          refine Finset.sum_eq_single_of_mem _ (Finset.mem_univ _) ?_
+          intro j _ hj
+          have h0 : φ (Pi.single j (1 : k)) = 0 :=
+            (piAlgHom_single_zero_or_one φ j).resolve_right
+              (fun h1 => hj (piAlgHomIndex_unique φ h1))
+          rw [h0, smul_zero]
+      _ = ((Algebra.ofId k L).comp
+            (Pi.evalAlgHom k (fun _ => k) (piAlgHomIndex φ))) x := by
+          rw [piAlgHomIndex_spec, Algebra.smul_def, mul_one]
+          rfl
+  right_inv i := by
+    classical
+    refine (piAlgHomIndex_unique _ ?_).symm
+    show (Algebra.ofId k L) ((Pi.evalAlgHom k (fun _ => k) i) (Pi.single i 1)) = 1
+    rw [show (Pi.evalAlgHom k (fun _ => k) i) (Pi.single i 1) = 1 from by
+      simp [Pi.single_apply], map_one]
+
+end PiAlgHom
+
 /-- The finite étale `ℚ`-algebra of the constant `(ℤ/N)²`-scheme. -/
 noncomputable def constVecAlgebra (N : ℕ) [NeZero N] : CommAlgCat.FiniteEtale.{0} ℚ :=
   ((finiteEtaleEquivContAction ℚ).inverse.obj (constVecContAction N)).unop
