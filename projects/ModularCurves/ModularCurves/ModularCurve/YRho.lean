@@ -346,6 +346,115 @@ theorem vRhoPointsEquiv_equivariant {N : ℕ} [NeZero N] (D : GaloisRepData N) (
     (rhoContAction D)) (hB (L1 h))) ?_
   exact hC
 
+section FrameSubstrate
+
+open ModularCurves.FiniteEtaleGalois
+
+open scoped FintypeCatDiscrete
+
+variable {N : ℕ} [NeZero N]
+
+/-- **[T-YR-3a]** `GL₂(ℤ/N)` as a `Gal(ℚ^sep/ℚ)`-set via left `ρ`-multiplication: the
+Galois set of *frames* — bare isomorphisms `(ℤ/N)²_{ℚ̄} ≅ V_ρ ×_ℚ ℚ̄` (a frame is the
+image matrix of the standard basis; `σ` translates a frame to `ρ(σ)·A`). -/
+noncomputable abbrev frameAction (D : GaloisRepData N) :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk
+        (fun A => D.ρ (galSepMulEquivGalQ σ) * A)
+      map_one' := FintypeCat.hom_ext _ _ fun A => by
+        show D.ρ (galSepMulEquivGalQ 1) * A = A
+        rw [map_one, map_one, one_mul]
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun A => by
+        show D.ρ (galSepMulEquivGalQ (σ * τ)) * A = _
+        rw [map_mul, map_mul, mul_assoc]
+        rfl }
+
+open scoped Pointwise in
+/-- The frame action is continuous (discrete fiber, kernel contains `ker ρ`, which is
+open — the same kernel set as `rhoAction`). -/
+lemma frameAction_isContinuous (D : GaloisRepData N) :
+    (frameAction D).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj (frameAction D) :
+          Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (frameAction D) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (frameAction D),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hAct : (frameAction D).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun A => ?_
+    show D.ρ (galSepMulEquivGalQ τ) *
+      (A : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = A
+    rw [hτ1, one_mul]
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((frameAction D).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
+
+/-- The frames as a continuous Galois set. -/
+noncomputable abbrev frameContAction (D : GaloisRepData N) :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨frameAction D, frameAction_isContinuous D⟩
+
+/-- The finite étale `ℚ`-algebra of the frame scheme. -/
+noncomputable def wFramesAlgebra (D : GaloisRepData N) : CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((finiteEtaleEquivContAction ℚ).inverse.obj (frameContAction D)).unop
+
+/-- **[T-YR-3a]** The finite étale `ℚ`-scheme of frames `Isom((ℤ/N)², V_ρ)`: the
+`GL₂(ℤ/N)`-worth of bare isomorphisms from the constant group to `V_ρ`, as a scheme
+via the Grothendieck–Galois correspondence (mirror of `vRho`). -/
+noncomputable def wFrames (D : GaloisRepData N) : Scheme.{0} :=
+  Spec (.of (wFramesAlgebra D : Type 0))
+
+/-- The structure morphism of the frame scheme. -/
+noncomputable def wFramesπ (D : GaloisRepData N) :
+    wFrames D ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (wFramesAlgebra D : Type 0)))
+
+/-- **[T-YR-3a]** `wFrames ⟶ Spec ℚ` is finite étale. -/
+theorem wFramesπ_finite_etale (D : GaloisRepData N) :
+    IsFinite (wFramesπ D) ∧ Etale (wFramesπ D) := by
+  constructor
+  · show IsFinite (Spec.map (CommRingCat.ofHom (algebraMap ℚ (wFramesAlgebra D : Type 0))))
+    rw [IsFinite.SpecMap_iff]
+    exact RingHom.finite_algebraMap.mpr inferInstance
+  · show Etale (Spec.map (CommRingCat.ofHom (algebraMap ℚ (wFramesAlgebra D : Type 0))))
+    rw [HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Etale)]
+    exact RingHom.etale_algebraMap.mpr inferInstance
+
+/-- **[T-YR-3a]** The canonical `ℚ̄`-points description of the frame scheme: points over
+`ℚ̄` biject with `GL₂(ℤ/N)`. -/
+noncomputable def wFramesPointsEquiv (D : GaloisRepData N) :
+    { h : Spec (.of (AlgebraicClosure ℚ)) ⟶ wFrames D //
+        h ≫ wFramesπ D = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }
+      ≃ Matrix.GeneralLinearGroup (Fin 2) (ZMod N) :=
+  ((specPointsEquivAlgHom ℚ (wFramesAlgebra D : Type 0) (AlgebraicClosure ℚ)).trans
+    (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
+    (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D))
+
+end FrameSubstrate
+
 /-- The `(ℤ/N)²`-coordinate of a `ℚ̄`-valued raw `N`-torsion point of `E`, read through a
 `ρ`-level isomorphism and the canonical points description of `V_ρ`. Real construction
 (pullback plumbing) modulo the registered data it consumes. -/
