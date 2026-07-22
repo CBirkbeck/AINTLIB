@@ -6,6 +6,7 @@ import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 import Mathlib.LinearAlgebra.Dimension.Finite
 import Mathlib.RingTheory.Localization.Finiteness
 import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
+import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
