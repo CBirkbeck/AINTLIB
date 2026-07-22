@@ -186,6 +186,22 @@ theorem HomologicalComplex.baseChangeKernelZeroLinearEquiv_coe
     rw [T.moduleCatCyclesIso_inv_iCycles_assoc]
   exact ConcreteCategory.congr_hom hcomp x
 
+/-- The inverse categorical-to-algebraic base-change equivalence on the degree-zero kernel
+has the expected underlying tensor-product element. -/
+theorem HomologicalComplex.baseChangeKernelZeroLinearEquiv_symm_coe
+    (K : CochainComplex (ModuleCat.{v} R) ℕ)
+    (A : Type v) [CommRing A] [Algebra R A]
+    (x : LinearMap.ker
+      (((((ModuleCat.extendScalars (algebraMap R A)).mapHomologicalComplex
+        (.up ℕ)).obj K).d 0 1).hom)) :
+    ((HomologicalComplex.baseChangeKernelZeroLinearEquiv K A).symm x).1 =
+      (moduleCatExtendScalarsObjLinearEquiv A (K.X 0)).symm x.1 := by
+  apply (moduleCatExtendScalarsObjLinearEquiv A (K.X 0)).injective
+  rw [← HomologicalComplex.baseChangeKernelZeroLinearEquiv_coe]
+  rw [(HomologicalComplex.baseChangeKernelZeroLinearEquiv K A).apply_symm_apply]
+  symm
+  exact (moduleCatExtendScalarsObjLinearEquiv A (K.X 0)).apply_symm_apply x.1
+
 /-- Exactness at a positive degree after categorical extension of scalars is
 exactness of the corresponding algebraically base-changed linear differentials. -/
 theorem cochainComplex_baseChange_functionExact_of_map_exactAt
