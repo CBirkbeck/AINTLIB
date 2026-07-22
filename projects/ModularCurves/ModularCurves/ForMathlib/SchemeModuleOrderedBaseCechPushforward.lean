@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechComparison
+import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
+import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 
 /-!
 # Ordered Cech complexes and pushforward
@@ -42,6 +44,29 @@ noncomputable def baseModulePresheafPushforwardAppIso
     rw [f.app_eq_appLE]
     simpa only [CommRingCat.comp_apply] using hr
   exact congrArg (fun q => q • x') hr'
+
+/-- Base-linear global sections of a module agree with top-open sections of
+its pushforward. -/
+noncomputable def baseSectionsPushforwardTopIso
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules) :
+    baseSections f M ≅
+      (baseModulePresheaf (𝟙 S) ((pushforward f).obj M)).obj
+        (op (⊤ : S.Opens)) := by
+  let ePush := baseModulePresheafPushforwardAppIso f (𝟙 S) M
+    (⊤ : S.Opens)
+  rw [Category.comp_id] at ePush
+  exact (baseModulePresheaf f M).mapIso
+      (eqToIso (Scheme.Hom.preimage_top f)).op ≪≫ ePush
+
+/-- The top-open pushforward isomorphism is the canonical transport from the
+preimage of the top open. -/
+@[simp]
+theorem baseSectionsPushforwardTopIso_hom_apply
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules)
+    (m : baseSections f M) :
+    (baseSectionsPushforwardTopIso f M).hom m =
+      pushforwardTopSection f M m := by
+  rfl
 
 /-- Each Cech factor on the inverse-image cover agrees with the corresponding factor of the
 pushforward. -/
