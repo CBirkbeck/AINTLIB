@@ -1076,4 +1076,51 @@ theorem
   rw [hfun]
   exact eTarget.bijective
 
+/-- The canonical pole-sheaf pushforward base-change morphism is an
+isomorphism for every affine base change of a projectively presented
+fibrewise elliptic family. -/
+theorem
+    FibrewiseElliptic.sectionPoleSheafPowerPushforwardBaseChange_projectiveClosed_isIso
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R))
+    [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {n : ℕ} (hn : 1 ≤ n) {T : Scheme.{u}} [IsAffine T]
+    (t : T ⟶ Spec (.of R)) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    IsIso (sectionPoleSheafPowerPushforwardBaseChange
+      (π := π) hsm z hz t n) := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz n
+  let N := (Scheme.Modules.pushforward π).obj M
+  let πT := pullback.snd π t
+  let zT := sectionBaseChange z hz t
+  let hzT := sectionBaseChange_snd z hz t
+  let MT := sectionPoleSheafPower πT zT hzT n
+  let NT := (Scheme.Modules.pushforward πT).obj MT
+  let φ := sectionPoleSheafPowerPushforwardBaseChange hsm z hz t n
+  letI : E.IsSeparated := ⟨by
+    rw [← terminal.comp_from π]
+    infer_instance⟩
+  letI : N.IsQuasicoherent :=
+    h.sectionPoleSheafPowerPushforward_projectiveClosed_isQuasicoherent
+      f hsm z hz hn
+  letI : ((Scheme.Modules.pullback t).obj N).IsQuasicoherent :=
+    Scheme.Modules.isQuasicoherent_pullback_of_isAffine t N
+  letI : NT.IsQuasicoherent :=
+    FibrewiseElliptic.sectionPoleSheafPowerPushforward_baseChange_projectiveClosed_isQuasicoherent
+      f hsm z hz n t
+  exact Scheme.Modules.isIso_of_isQuasicoherent_of_isIso_app_top φ
+    (h.sectionPoleSheafPowerPushforwardBaseChange_projectiveClosed_app_top_isIso
+      f hsm z hz hn t)
+
 end ModularCurves
