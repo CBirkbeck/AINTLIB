@@ -119,4 +119,21 @@ theorem representable_of_affineOverEll_of_rigidNoeth {R : CommRingCat.{u}} (P : 
     (representable_baseChange_two R P hP hrig)
     (representable_baseChange_three R P hP hrig)
 
+
+/-- **[Y0-AFF3] `∃`-affine form of the D(3) leg.** -/
+theorem exists_representableBy_isAffine_baseChange_three (R : CommRingCat.{u})
+    (P : ModuliProblem R) (hP : P.AffineOverEll) (hrig : P.RigidNoeth) :
+    ∃ X₀ : EllObj (CommRingCat.of (Localization.Away (3 : R))),
+      IsAffine X₀.base ∧
+      Nonempty ((P.baseChange (awayHomWire R 3)).RepresentableBy X₀) := by
+  sorry
+
+/-- **[Y0-AFF2] `∃`-affine form of the D(2) leg.** -/
+theorem exists_representableBy_isAffine_baseChange_two (R : CommRingCat.{u})
+    (P : ModuliProblem R) (hP : P.AffineOverEll) (hrig : P.RigidNoeth) :
+    ∃ X₀ : EllObj (CommRingCat.of (Localization.Away (2 : R))),
+      IsAffine X₀.base ∧
+      Nonempty ((P.baseChange (awayHomWire R 2)).RepresentableBy X₀) := by
+  sorry
+
 end ModularCurves.ModuliProblem

@@ -699,6 +699,22 @@ theorem representable_of_rigid_of_torsor (P Q : ModuliProblem R)
     P.Representable :=
   representable_of_rigidNoeth_of_torsor P Q φ hQrep hQaff hPaff htors hrig.rigidNoeth
 
+
+/-- **[Y0-AFF1] `∃`-affine form of `representable_of_rigidNoeth_of_torsor`** (KM 8.1.1
+print p. 224: "It 'exists' because 𝔐(𝒫,δ) is itself affine"): the engine's
+representing object `X₀ = 𝔐(𝒫,δ)/G` can be taken with affine base — the quotient of
+the affine `𝔐(𝒫,δ)` (unique-iso comparison against `Spec Γ(𝔐(𝒫,δ), ⊤)ᴳ` through the
+recorded quotient universal property `hqlift` + `existsUnique_invariantsπ_lift`). -/
+theorem exists_representableBy_isAffine_of_rigidNoeth_of_torsor (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q)
+    (hQrep : Q.Representable)
+    (hQaff : ∀ {XQ : EllObj R}, Q.RepresentableBy XQ → IsAffine XQ.base)
+    (hPaff : ∀ X : EllObj R, ∃ d : RelRepData P X, IsAffineHom d.f)
+    (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (hrig : P.RigidNoeth) :
+    ∃ X₀ : EllObj R, IsAffine X₀.base ∧ Nonempty (P.RepresentableBy X₀) := by
+  sorry
+
 end EngineMouth
 
 end ModuliProblem

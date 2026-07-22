@@ -4255,4 +4255,20 @@ theorem representable_of_baseChange_cover (P : ModuliProblem R) (a b : R)
   -- the sheaf condition that kills the bare-presheaf counterexample).
   exact (glueEllObj_representableBy a b hab hrel repr_a repr_b).isRepresentable
 
+
+/-- **[Y0-AFF4] `∃`-affine-hom form of the recollement** (KM 8.1.1 print p. 224:
+"(and so patches together)"): if both localized legs are representable by objects with
+affine bases, the glued representing object over `R` has affine structure morphism —
+`IsAffineHom` is Zariski-local on the target over `D(a) ∪ D(b) = Spec R`, and over each
+piece the glued base restricts to the (affine) leg base. -/
+theorem exists_representableBy_isAffineHom_of_baseChange_cover (P : ModuliProblem R)
+    (a b : R) (hab : ∃ x y : R, x * a + y * b = 1)
+    (hrel : P.RelativelyRepresentable)
+    (h_a : ∃ Xa : EllObj (CommRingCat.of (Localization.Away a)),
+      IsAffine Xa.base ∧ Nonempty ((P.baseChange (awayHom a)).RepresentableBy Xa))
+    (h_b : ∃ Xb : EllObj (CommRingCat.of (Localization.Away b)),
+      IsAffine Xb.base ∧ Nonempty ((P.baseChange (awayHom b)).RepresentableBy Xb)) :
+    ∃ X : EllObj R, IsAffineHom X.structMap ∧ Nonempty (P.RepresentableBy X) := by
+  sorry
+
 end ModularCurves

@@ -24968,3 +24968,69 @@ Y₀(N) STATUS (unchanged by this stream, for the next dispatch): Borel ⊋ semi
 −1 ∈ H handled — refuted for FINE representability by hH_refuted_of_neg_one_mem (the
 no-go block); the Y₀(N) object is the COARSE quotient (KM 8.1.1/8.1.5) or the rigidified
 [Γ₀(N)]-with-auxiliary route (KM 7.4.3) — a NEW /develop pass, not a residual here.
+
+---
+
+## v10.350 — STREAM-Y0 ticket set (M3 = Option 2, user-ratified; /develop pass 2026-07-22)
+
+**Goal**: `YZeroCoarse` = the coarse `Y₀(N)` over fixed `R` (`IsUnit (N:R)`, `N ≥ 3`) as the
+Borel instance of `YHCoarse := 𝔐([Γ(N)]).base/H` (KM 8.1.1 at δ = [Γ(N)] + KM 8.1.5 + 7.4.2(4);
+Loeffler 3.6.1/3.6.2). Decomposition of record: `.mathlib-quality/decomposition-coarse-y0.md`
+(verbatim KM pp. 100/198/199/224/225/226/227 + Loeffler pp. 17/18/19 quotes, all page-images
+read this session). Skeleton COMPILED green (sorries only): `Moduli/CoarseSpace.lean` (new) +
+mirrors in EngineMouth/EngineWiring/Recollement. NOT in scope (source-faithful exclusions,
+doc §prose): fine representability (−1 no-go), base-change functoriality (KM 8.1.7), étale of
+the projection (action not free: −1 acts trivially on the scheme), KM 8.1.3.1 k̄-points (P2 —
+REQUIRES a KM A7.2.2 source pass first), 8.1.2 normality, M4 smoothness.
+
+- **[T-Y0-1] baseSchemeAction lies over Spec R** — `CoarseSpace.lean`
+  `RepresentableBy.baseSchemeAction_over` (:~80). Sketch: unfold `baseSchemeAction` =
+  `ofAut ((X₀.autBase.comp r.autMulHom).comp φ)`; `(… ).hom γ` is the `baseHom` of an
+  `Ell/R`-(auto)morphism (possibly the ofAut-inverted one — follow `SchemeAction.ofAut`'s def,
+  SchemeQuotient:54); conclude by `EllHom.base_w` (EllCategory:61). Mirror any needed spec from
+  `simulSchemeAction`'s consumers. Deps: none. Status: open.
+- **[T-Y0-2] [AFF1] EngineMouth ∃-affine mirror** —
+  `exists_representableBy_isAffine_of_rigidNoeth_of_torsor` (EngineMouth, appended). Sketch:
+  re-walk the landed :628 body verbatim through `exists_engineQuotient` (keep `haff : IsAffine
+  XM.base`); NEW: `IsAffine X₀.base` via unique-iso vs `Spec Γ(XM.base,⊤)ᴳ`: q' from `hqlift`
+  applied to `XM.base.isoSpec.hom ≫ invariantsπ …`-side, q from
+  `existsUnique_invariantsπ_lift` (AffineQuotient, PROVEN) — the v10.349 GHB4/f₀ comparison
+  dance; `IsAffine.of_isIso`. Then finish the landed body's RepresentableBy and return the
+  ∃-tuple. Deps: none. Status: open.
+- **[T-Y0-3] [AFF2/3] EngineWiring leg mirrors** — `exists_representableBy_isAffine_baseChange_
+  two/three`. Sketch: copy :41-68/:77-108 verbatim, final call → T-Y0-2's mirror. Deps: T-Y0-2.
+  Status: open.
+- **[T-Y0-4] [AFF4] Recollement glued-structMap mirror** —
+  `exists_representableBy_isAffineHom_of_baseChange_cover` (Recollement, appended; keeps the
+  v10.326 `hrel`). Sketch: extract reprX legs as in :4233; transport leg-affineness by
+  `uniqueUpToIso` idiom; `IsAffineHom (glueEllObj …).structMap` by
+  `IsZariskiLocalAtTarget @IsAffineHom` over `D(a) ⊔ D(b) = Spec R` (hab) + the construction's
+  chart identifications of `glueQ` (AUDIT `glueQ`/`glueHomBase` :1053/:2747 region first);
+  fallback route: restriction-iso from leg-level uniqueness. Return glued ∃-tuple via
+  `glueEllObj_representableBy`. Deps: none (parallel with T-Y0-2/3). Status: open.
+- **[T-Y0-5] [AFF5] top-level affineness + transport** — `CoarseSpace.lean`
+  `isAffine_base_transport`, `gammaFullNaive_exists_representableBy_isAffineHom`,
+  `gammaFullNaive_isAffineHom_structMap`. Sketch: transport = EngineWiring:53-59 idiom
+  (uniqueUpToIso + IsIso baseHom + IsAffine.of_isIso); AFF5 = T-Y0-4 at (2,3)/⟨-1,1,by ring⟩ +
+  T-Y0-3 legs + hrel from `(gammaFullNaive_affineOverEll …).relativelyRepresentable`
+  (mirror EngineWiring:115-120; NOTE awayHom vs awayHomWire defeq seam); reprX-level: from the
+  ∃-witness by transport + (IsAffineHom from base-iso via
+  MorphismProperty.cancel_left_of_respectsIso + base_w, or IsAffine source + affine target).
+  Deps: T-Y0-3, T-Y0-4. Status: open.
+- **[T-Y0-6] engine delegations** — `CoarseSpace.lean`: `coarsePr_comp_coarseStruct`
+  (= relQuotientπ_comp_relQuotientStruct), `baseSchemeAction_comp_coarsePr`
+  (= hom_comp_relQuotientπ), `coarsePr_existsUnique_lift` (= existsUnique_relQuotientπ_lift),
+  instances IsIntegralHom/Surjective (coarsePr) + IsAffineHom (coarseStruct)
+  (= isIntegralHom_relQuotientπ / surjective_relQuotientπ_of_free / isAffineHom_
+  relQuotientStruct). All 1-3-liners. Deps: T-Y0-1. Status: open.
+- **[T-Y0-7] borel + Y₀** — `borel` closure proofs (mirror semiBorel's, GammaHSemiBorel:65+;
+  (1,0)-entry: product g₁₀h₀₀+g₁₁h₁₀=0; inverse via 2×2 adjugate entry −g₁₀·det⁻¹),
+  `semiBorel_le_borel` (carrier unfold). `YHCoarse`/`YZeroCoarse` defs already compile.
+  Deps: none. Status: open.
+- **[CLEANUP-Y0]** DEFERRED-TO-MAIN (producer rule).
+- **MILESTONE GATE** (all of T-Y0-1..7): full `lake build` green; `#print axioms` clean triple
+  on `coarsePr_existsUnique_lift`, the three instances, `gammaFullNaive_isAffineHom_structMap`;
+  7-receipt census unchanged; landed statements byte-stable (mirrors are ADDITIVE).
+
+Dispatch order: T-Y0-1 → T-Y0-6 → T-Y0-7 (quick wins, definitional layer usable) →
+T-Y0-2 → T-Y0-3 → T-Y0-4 → T-Y0-5 (the affineness cascade) → gate.
