@@ -400,29 +400,135 @@ def relQuotient : Scheme.{u} :=
 def relQuotientStruct : σ.relQuotient f hover ⟶ S :=
   (σ.invariantsGlueData f hover).toBase
 
+instance : ((σ.invariantsGlueData f hover).functor ⋙ Scheme.forget).IsLocallyDirected :=
+  Scheme.Cover.RelativeGluingData.instIsLocallyDirectedI₀CompFunctorForgetOfIsThin ..
+
+/-- The chart component of the quotient projection (an atomic definition so the gluing
+lemma unifies cheaply — the zero-kabstract barrier idiom). -/
+def relQuotientπChart (U : S.AffineZariskiSite) :
+    ((Scheme.AffineZariskiSite.directedCover S).pullback₁ f).X U ⟶
+      σ.relQuotient f hover :=
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  (pullbackRestrictIsoRestrict f _).hom ≫ (f ⁻¹ᵁ U.1).toSpecΓ ≫
+    Spec.map (CommRingCat.ofHom
+      (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom) ≫
+    (σ.invariantsGlueData f hover).cover.f U
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Compatibility of the chart maps with the transition maps of the pullback cover
+(the gluing obligation, named so the glue and its defining lemma elaborate
+syntactically). -/
+theorem relQuotientπ_compat {U V : S.AffineZariskiSite} (i : U ⟶ V) :
+    Scheme.Cover.trans ((Scheme.AffineZariskiSite.directedCover S).pullback₁ f) i ≫
+      σ.relQuotientπChart f hover V = σ.relQuotientπChart f hover U := by
+  delta relQuotientπChart
+  have hres : (pullbackRestrictIsoRestrict f U.1).inv ≫
+      Scheme.Cover.trans ((Scheme.AffineZariskiSite.directedCover S).pullback₁ f) i ≫
+      (pullbackRestrictIsoRestrict f V.1).hom = Z.homOfLE
+        (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono i.1.1)) := by
+    rw [← cancel_mono (Scheme.Opens.ι _)]
+    simp +instances [Scheme.Cover.trans, Scheme.Cover.locallyDirectedPullbackCover]
+  rw [← Iso.inv_comp_eq, reassoc_of% hres,
+    ← Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_assoc, ← Spec.map_comp_assoc]
+  show _ ≫ Spec.map _ ≫ (σ.invariantsGlueData f hover).cover.f V = _
+  simp only [Scheme.Cover.RelativeGluingData.cover_f]
+  rw [← colimit.w (σ.invariantsGlueData f hover).functor i]
+  dsimp [invariantsGlueData, Scheme.AffineZariskiSite.relativeGluingData]
+  rw [← Spec.map_comp_assoc]
+  rfl
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- The quotient projection `Z ⟶ Z/G`, glued over the directed affine cover of `S`
 from the chartwise `Spec Γ(Z, f⁻¹U) ⟶ Spec Γ(Z, f⁻¹U)ᴳ` (mirror of
 `toNormalization`). -/
 def relQuotientπ : Z ⟶ σ.relQuotient f hover :=
   Scheme.OpenCover.glueMorphismsOfLocallyDirected
     ((Scheme.AffineZariskiSite.directedCover S).pullback₁ f)
-    (fun U =>
-      letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
-      (pullbackRestrictIsoRestrict f _).hom ≫ (f ⁻¹ᵁ U.1).toSpecΓ ≫
-        Spec.map (CommRingCat.ofHom
-          (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom) ≫
-        (σ.invariantsGlueData f hover).cover.f U)
-    (by sorry)
+    (fun U => σ.relQuotientπChart f hover U)
+    (fun {U V} i => σ.relQuotientπ_compat f hover i)
 
-/-- The projection descends `f`: `π ≫ f₀ = f`. -/
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The pullback-cover component of the projection is the chart map (atomic gluing
+lemma; `g` passed syntactically so unification is cheap). -/
+theorem pullbackCover_f_comp_relQuotientπ (U : S.AffineZariskiSite) :
+    ((Scheme.AffineZariskiSite.directedCover S).pullback₁ f).f U ≫
+      σ.relQuotientπ f hover = σ.relQuotientπChart f hover U := by
+  delta relQuotientπ
+  exact Scheme.OpenCover.map_glueMorphismsOfLocallyDirected
+    ((Scheme.AffineZariskiSite.directedCover S).pullback₁ f)
+    (fun U => σ.relQuotientπChart f hover U)
+    (fun {U V} i => σ.relQuotientπ_compat f hover i) U
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Defining property of the quotient projection on each chart (mirror of
+`ι_toNormalization`). -/
+@[reassoc]
+theorem ι_relQuotientπ (U : S.AffineZariskiSite) :
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+    (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.relQuotientπ f hover =
+      (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ (U.1 : S.Opens)) G).val.toRingHom) ≫
+      (σ.invariantsGlueData f hover).cover.f U := by
+  rw [← cancel_epi (pullbackRestrictIsoRestrict f U.1).hom, ← Category.assoc]
+  trans ((Scheme.AffineZariskiSite.directedCover S).pullback₁ f).f U ≫
+    σ.relQuotientπ f hover
+  · congr 1
+    simp
+  rw [σ.pullbackCover_f_comp_relQuotientπ f hover U]
+  rfl
+
+/-- The structure map on each glued chart (mirror of `ι_fromNormalization`). -/
+@[reassoc]
+theorem ι_relQuotientStruct (U : S.AffineZariskiSite) :
+    colimit.ι (σ.invariantsGlueData f hover).functor U ≫ σ.relQuotientStruct f hover =
+      Spec.map ((σ.invariantsDiagramMap f hover).app (.op U)) ≫ U.2.fromSpec :=
+  colimit.ι_desc _ _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The projection descends `f`: `π ≫ f₀ = f` (mirror of
+`toNormalization_fromNormalization`). -/
+@[reassoc]
 theorem relQuotientπ_comp_relQuotientStruct :
     σ.relQuotientπ f hover ≫ σ.relQuotientStruct f hover = f := by
-  sorry
+  refine Scheme.Cover.hom_ext (Z.openCoverOfIsOpenCover _
+    (.comap (iSup_affineOpens_eq_top S) f.base.1)) _ _ fun U => ?_
+  refine (σ.ι_relQuotientπ_assoc f hover _ _).trans ?_
+  simp only [Scheme.Cover.RelativeGluingData.cover_f]
+  rw [σ.ι_relQuotientStruct f hover, ← Spec.map_comp_assoc]
+  change (f ⁻¹ᵁ U.1).toSpecΓ ≫ Spec.map (f.appLE _ _ le_rfl) ≫ _ = (f ⁻¹ᵁ U.1).ι ≫ _
+  simp [Scheme.Hom.appLE]
 
-/-- The projection coequalizes the action. -/
+set_option backward.isDefEq.respectTransparency false in
+/-- The projection coequalizes the action (chartwise: `γ` acts trivially on
+invariants, so `Spec (γ♯)` cancels against the invariants inclusion). -/
 theorem hom_comp_relQuotientπ (γ : G) :
     σ.hom γ ≫ σ.relQuotientπ f hover = σ.relQuotientπ f hover := by
-  sorry
+  refine Scheme.Cover.hom_ext (Z.openCoverOfIsOpenCover _
+    (.comap (iSup_affineOpens_eq_top S) f.base.1)) _ _ fun U => ?_
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  have hst := σ.isStableOpen_preimage f hover U.1
+  show (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.hom γ ≫ σ.relQuotientπ f hover
+    = (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.relQuotientπ f hover
+  have hres : (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.hom γ
+      = (σ.hom γ).resLE (f ⁻¹ᵁ (U.1 : S.Opens)) (f ⁻¹ᵁ (U.1 : S.Opens))
+        (hst.le_preimage γ) ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι :=
+    (Scheme.Hom.resLE_comp_ι (e := hst.le_preimage γ)).symm
+  rw [← Category.assoc, hres, Category.assoc, σ.ι_relQuotientπ f hover U,
+    ← Scheme.Opens.toSpecΓ_SpecMap_appLE_assoc (σ.hom γ) (f ⁻¹ᵁ (U.1 : S.Opens))
+      (f ⁻¹ᵁ (U.1 : S.Opens)) (hst.le_preimage γ), ← Spec.map_comp_assoc]
+  have hcol : CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ (U.1 : S.Opens)) G).val.toRingHom ≫
+        (σ.hom γ).appLE (f ⁻¹ᵁ (U.1 : S.Opens)) (f ⁻¹ᵁ (U.1 : S.Opens))
+          (hst.le_preimage γ)
+      = CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ (U.1 : S.Opens)) G).val.toRingHom := by
+    ext r
+    exact r.2 γ
+  rw [hcol]
 
 /-- **The chart bridge**: over each affine chart `U` of the base, the quotient
 projection restricts to the affine invariants projection
