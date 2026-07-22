@@ -488,6 +488,40 @@ lemma EllHom.pullSection_zero :
   exact (add_left_cancel (a := EllHom.pullSection R f 0)
     (by rw [← h, add_zero])).symm
 
+/-- **[T-YR-2a] `[n]`-naturality along an `Ell/R`-morphism**: the top map of an
+`EllHom` intertwines multiplication-by-`n` (the morphism-level form of T-E4a; the
+K4-canonicity MonHom `curveIsoPullbackOverIso` + `mulByHom_comp_left_of_isMonHom` +
+`mulByHom_baseChange_fst`). -/
+theorem EllHom.mulByHom_top (n : ℤ) :
+    X.curve.mulByHom n ≫ f.top = f.top ≫ Y.curve.mulByHom n := by
+  haveI : IsMonHom (EllHom.curveIsoPullbackOverIso R f).hom :=
+    EllHom.isMonHom_curveIsoPullbackOverIso_hom R f
+  have h1 : X.curve.mulByHom n ≫ (EllHom.curveIsoPullback R f).hom =
+      (EllHom.curveIsoPullback R f).hom ≫
+        (Y.curve.baseChange f.baseHom).mulByHom n :=
+    EllipticCurve.mulByHom_comp_left_of_isMonHom X.curve
+      (Y.curve.baseChange f.baseHom) (EllHom.curveIsoPullbackOverIso R f).hom n
+  have hfst : (EllHom.curveIsoPullback R f).hom ≫
+      pullback.fst Y.curve.π f.baseHom = f.top := f.isPullback.isoPullback_hom_fst
+  have hbc : (Y.curve.baseChange f.baseHom).mulByHom n ≫
+      pullback.fst Y.curve.π f.baseHom =
+      pullback.fst Y.curve.π f.baseHom ≫ Y.curve.mulByHom n :=
+    EllipticCurve.mulByHom_baseChange_fst Y.curve f.baseHom n
+  calc X.curve.mulByHom n ≫ f.top
+      = X.curve.mulByHom n ≫ (EllHom.curveIsoPullback R f).hom ≫
+          pullback.fst Y.curve.π f.baseHom := by rw [hfst]
+    _ = ((EllHom.curveIsoPullback R f).hom ≫
+          (Y.curve.baseChange f.baseHom).mulByHom n) ≫
+          pullback.fst Y.curve.π f.baseHom := by
+        rw [← Category.assoc]
+        exact congrArg (· ≫ pullback.fst Y.curve.π f.baseHom) h1
+    _ = (EllHom.curveIsoPullback R f).hom ≫ pullback.fst Y.curve.π f.baseHom ≫
+          Y.curve.mulByHom n := by
+        rw [Category.assoc]
+        exact congrArg ((EllHom.curveIsoPullback R f).hom ≫ ·) hbc
+    _ = f.top ≫ Y.curve.mulByHom n := by
+        rw [← Category.assoc, hfst]
+
 /-- **(T-E4b ★, the level-preservation input — de-parks the naive functor sorries)**
 `pullSection` preserves the naive full-level condition: killing transports through the
 additivity (T-E4a), and fibrewise generation transports through the point-level
