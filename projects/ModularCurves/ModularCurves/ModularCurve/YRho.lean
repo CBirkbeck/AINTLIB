@@ -2216,6 +2216,30 @@ theorem frameEval_points (D : GaloisRepData N)
       ((frameProdAlgebraIso D).inv.unop.hom.hom).comp
         (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
           (frameEvalMor D)).unop.hom.hom) := rfl
+  -- the bridged product-reading of the tensor point
+  set χ := (AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)) sepClosureQAlgEquiv.symm
+      (specPointsEquivAlgHom ℚ (TensorProduct ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)) (AlgebraicClosure ℚ)
+        ⟨p', hover'⟩)).comp (frameProdAlgebraIso D).inv.unop.hom.hom with hχ
+  -- the counit naturality computes the ρ-reading as the evaluation of the
+  -- product-reading
+  have hC : FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D)
+      ((AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)) sepClosureQAlgEquiv.symm)
+        (specPointsEquivAlgHom ℚ (vRhoAlgebra D : Type 0) (AlgebraicClosure ℚ)
+          ⟨p ≫ frameEval D, hqv⟩)) =
+      (frameEvalMor D).hom.hom
+        (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameProdContAction D) χ) := by
+    have hx : (AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ))
+        sepClosureQAlgEquiv.symm)
+        (specPointsEquivAlgHom ℚ (vRhoAlgebra D : Type 0) (AlgebraicClosure ℚ)
+          ⟨p ≫ frameEval D, hqv⟩) =
+        χ.comp (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameEvalMor D)).unop.hom.hom) := by
+      rw [hA]
+      exact AlgHom.ext fun w => rfl
+    exact (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+        (rhoContAction D)) hx).trans
+      (pointsEquivOfContAction_map (frameEvalMor D) χ)
   sorry
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
