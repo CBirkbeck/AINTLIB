@@ -2209,6 +2209,11 @@ theorem frameEval_points (D : GaloisRepData N)
     refine AlgHom.ext fun w => ?_
     exact congrArg (fun q : CommRingCat.of (vRhoAlgebra D : Type 0) ⟶
       CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hL1
+  -- the evaluation comultiplication factors through the correspondence-bridge
+  -- (definitional in `frameEvalAlgHom`): precomposition with it is the fiber-map
+  -- of the evaluation morphism after the bridge-conjugation. The counit naturality
+  -- (`pointsEquivOfContAction_map`) then computes the ρ-reading as the evaluation
+  -- of the product-reading, whose components are `hfst`/`hsnd`.
   sorry
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
