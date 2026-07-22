@@ -2148,6 +2148,35 @@ theorem frameProdAlgebraIso_inv_left (D : GaloisRepData N) :
       (congrArg ((frameProdAlgebraIso D).inv ≫ ·) (Category.comp_id _))
   exact (congrArg Quiver.Hom.unop hop.symm).trans rfl
 
+/-- **[asm-2a]** The tensor-splitting bridge is compatible with the right
+cofan-injection: precomposing the bridge with the correspondence image of the
+second product-projection is `includeRight`. -/
+theorem frameProdAlgebraIso_inv_right (D : GaloisRepData N) :
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdSnd D)).unop ≫ (frameProdAlgebraIso D).inv.unop =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ) :
+          (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  have hcomp := Limits.IsLimit.conePointUniqueUpToIso_hom_comp
+    ((Limits.IsLimit.postcomposeHomEquiv
+        (Limits.pairComp (constVecContAction N) (frameContAction D)
+          (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse) _).symm
+      (Limits.isLimitOfPreserves _ (frameProdIsProduct D)))
+    (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (constVecAlgebra N)
+      (wFramesAlgebra D))
+    ⟨Limits.WalkingPair.right⟩
+  have hop : ((FiniteEtaleGalois.tensorBinaryCofan (constVecAlgebra N)
+        (wFramesAlgebra D)).op).π.app ⟨Limits.WalkingPair.right⟩
+      = (frameProdAlgebraIso D).inv
+          ≫ (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+              (frameProdSnd D) :=
+    ((Iso.inv_hom_id_assoc (frameProdAlgebraIso D) _).symm.trans
+      (congrArg ((frameProdAlgebraIso D).inv ≫ ·) hcomp)).trans
+      (congrArg ((frameProdAlgebraIso D).inv ≫ ·) (Category.comp_id _))
+  exact (congrArg Quiver.Hom.unop hop.symm).trans rfl
+
 /-- **[asm-2a]** The universal-frame evaluation on `ℚ̄`-points: the `V_ρ`-reading of
 the evaluated point is the classified frame acting on the vector (scaffold; the
 proof is the counit-naturality assembly through the tensor pair-split). -/
