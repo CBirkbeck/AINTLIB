@@ -715,6 +715,75 @@ noncomputable def RhoLevelStructure.pull (D : GaloisRepData N)
       coord_pull D g α t ht x hx, coord_pull D g α t ht y hy]
     exact hB
 
+/-- [T-YR-2f helper] A ρ-level structure is determined by its torsion trivialization
+(the other fields are `Prop`s). -/
+theorem RhoLevelStructure.ext_torsionIso {D : GaloisRepData N} {T : Scheme.{0}}
+    {sT : T ⟶ Spec (.of ℚ)} {E : EllipticCurve T}
+    {α β : RhoLevelStructure D sT E} (h : α.torsionIso = β.torsionIso) : α = β := by
+  cases α; cases β; cases h; rfl
+
+/-- [T-YR-2f helper] `torsionMapOfEllHom` respects identities. -/
+theorem torsionMapOfEllHom_id {A : EllObj (CommRingCat.of ℚ)} (N : ℕ) [NeZero N] :
+    torsionMapOfEllHom (𝟙 A) N = 𝟙 (A.curve.torsion N) := by
+  apply pullback.hom_ext
+  · show torsionMapOfEllHom (𝟙 A) N ≫ A.curve.torsionι N =
+      𝟙 (A.curve.torsion N) ≫ A.curve.torsionι N
+    rw [torsionMapOfEllHom_ι, Category.id_comp]
+    exact Category.comp_id _
+  · show torsionMapOfEllHom (𝟙 A) N ≫ A.curve.torsionπ N =
+      𝟙 (A.curve.torsion N) ≫ A.curve.torsionπ N
+    rw [torsionMapOfEllHom_π, Category.id_comp]
+    exact Category.comp_id _
+
+/-- [T-YR-2f helper] `torsionMapOfEllHom` respects composition. -/
+theorem torsionMapOfEllHom_comp {A B C : EllObj (CommRingCat.of ℚ)} (g₁ : A ⟶ B)
+    (g₂ : B ⟶ C) (N : ℕ) [NeZero N] :
+    torsionMapOfEllHom (g₁ ≫ g₂) N =
+      torsionMapOfEllHom g₁ N ≫ torsionMapOfEllHom g₂ N := by
+  apply pullback.hom_ext
+  · show torsionMapOfEllHom (g₁ ≫ g₂) N ≫ C.curve.torsionι N =
+      (torsionMapOfEllHom g₁ N ≫ torsionMapOfEllHom g₂ N) ≫ C.curve.torsionι N
+    rw [torsionMapOfEllHom_ι, Category.assoc, torsionMapOfEllHom_ι, ← Category.assoc,
+      torsionMapOfEllHom_ι, Category.assoc]
+    rfl
+  · show torsionMapOfEllHom (g₁ ≫ g₂) N ≫ C.curve.torsionπ N =
+      (torsionMapOfEllHom g₁ N ≫ torsionMapOfEllHom g₂ N) ≫ C.curve.torsionπ N
+    rw [torsionMapOfEllHom_π, Category.assoc, torsionMapOfEllHom_π, ← Category.assoc,
+      torsionMapOfEllHom_π, Category.assoc]
+    rfl
+
+/-- [T-YR-2f] Pulling back along the identity is the identity. -/
+theorem RhoLevelStructure.pull_id (D : GaloisRepData N)
+    {A : EllObj (CommRingCat.of ℚ)} (α : RhoLevelStructure D A.structMap A.curve) :
+    RhoLevelStructure.pull D (𝟙 A) α = α := by
+  refine RhoLevelStructure.ext_torsionIso (Iso.ext (pullback.hom_ext ?_ ?_))
+  · rw [show (RhoLevelStructure.pull D (𝟙 A) α).torsionIso =
+        pullTorsionIso D (𝟙 A) α from rfl,
+      pullTorsionIso_fst, torsionMapOfEllHom_id, Category.id_comp]
+  · rw [show (RhoLevelStructure.pull D (𝟙 A) α).torsionIso =
+        pullTorsionIso D (𝟙 A) α from rfl,
+      pullTorsionIso_over, α.over_T]
+
+/-- [T-YR-2f] Pulling back along a composite is the composite of the pullbacks. -/
+theorem RhoLevelStructure.pull_comp (D : GaloisRepData N)
+    {A B C : EllObj (CommRingCat.of ℚ)} (g₁ : A ⟶ B) (g₂ : B ⟶ C)
+    (α : RhoLevelStructure D C.structMap C.curve) :
+    RhoLevelStructure.pull D (g₁ ≫ g₂) α =
+      RhoLevelStructure.pull D g₁ (RhoLevelStructure.pull D g₂ α) := by
+  refine RhoLevelStructure.ext_torsionIso (Iso.ext (pullback.hom_ext ?_ ?_))
+  · rw [show (RhoLevelStructure.pull D (g₁ ≫ g₂) α).torsionIso =
+        pullTorsionIso D (g₁ ≫ g₂) α from rfl,
+      show (RhoLevelStructure.pull D g₁ (RhoLevelStructure.pull D g₂ α)).torsionIso =
+        pullTorsionIso D g₁ (RhoLevelStructure.pull D g₂ α) from rfl,
+      pullTorsionIso_fst, pullTorsionIso_fst, torsionMapOfEllHom_comp,
+      show (RhoLevelStructure.pull D g₂ α).torsionIso = pullTorsionIso D g₂ α from rfl,
+      pullTorsionIso_fst, Category.assoc]
+  · rw [show (RhoLevelStructure.pull D (g₁ ≫ g₂) α).torsionIso =
+        pullTorsionIso D (g₁ ≫ g₂) α from rfl,
+      show (RhoLevelStructure.pull D g₁ (RhoLevelStructure.pull D g₂ α)).torsionIso =
+        pullTorsionIso D g₁ (RhoLevelStructure.pull D g₂ α) from rfl,
+      pullTorsionIso_over, pullTorsionIso_over]
+
 /-- **[T-YR-2] The ρ-level moduli problem** (Buzzard p. 33 verbatim: "the functor on
 ℚ-schemes S parametrising elliptic curves E/S such that E[N] ≅ ρ̄_N as
 representations-with-pairing"), functorialized over `Ell/ℚ` (mirror of
@@ -723,8 +792,14 @@ noncomputable def rhoProblem (D : GaloisRepData N) :
     ModularCurves.ModuliProblem (CommRingCat.of ℚ) where
   obj X := RhoLevelStructure D X.unop.structMap X.unop.curve
   map f := ↾fun α => RhoLevelStructure.pull D f.unop α
-  map_id := by sorry
-  map_comp := by sorry
+  map_id := by
+    intro X
+    ext α
+    exact RhoLevelStructure.pull_id D α
+  map_comp := by
+    intro X Y Z f g
+    ext α
+    exact RhoLevelStructure.pull_comp D g.unop f.unop α
 
 end RhoProblem
 
