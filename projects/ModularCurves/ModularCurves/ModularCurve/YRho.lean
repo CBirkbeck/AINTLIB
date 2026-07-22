@@ -373,7 +373,15 @@ def PairingCompatAt {N : ℕ} [NeZero N] (D : GaloisRepData N) {T : Scheme.{0}}
     (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
     (x y : E.Point t)
     (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
-    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) : Prop := sorry
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) : Prop :=
+  (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+      (E.weilPairingEval x y hx hy).1 =
+    ((D.p (Multiplicative.ofAdd
+      (coord D sT torsionIso hOver t ht x hx 0 *
+          coord D sT torsionIso hOver t ht y hy 1 -
+        coord D sT torsionIso hOver t ht x hx 1 *
+          coord D sT torsionIso hOver t ht y hy 0)) :
+      (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
 
 /-- A **ρ-level structure** on an elliptic curve `E` over a `ℚ`-scheme `T`: an
 isomorphism of group schemes over `T` between `E[N]` and the pullback of `V_ρ`, carrying

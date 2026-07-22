@@ -45,6 +45,28 @@ attack blocks, gate register and LOC grounding — in
   the same GME 2.2.5 canonicity chain discharges `isNaiveGammaOne_pullSection_iff` below.
 
 AINTLIB ModularCurves STREAM-Y1 (T-E7; planning-only skeleton, all leaves `sorry`).
+
+**[T-Y1F-4 CROSS-LINK AUDIT, 2026-07-23 — documentation only, no proofs changed.]**
+STATUS OF THIS FILE: the goal it was planned for (the fine `Y₁(N)`) is now DELIVERED by
+the abstract representability route — `YOneFine` (`Moduli/CoarseSpace.lean`), the base of
+the representing object of the semi-Borel quotient problem (`gammaH_semiBorel_closure`,
+v10.349, axiom-clean), together with the coarse counterpart `YHCoarse (semiBorel N)`.
+This file remains the (optional) EXPLICIT Tate-normal-form MODEL of `Y₁(N)`; its 23
+`sorry` leaves are the explicit-model chain, PARKED, and are NOT required for the fine
+`Y₁(N)` to exist. Per-leaf audit against the tree (2026-07-23):
+* `projModel_locallyWeierstrass` (:150) — STRONG duplicate candidate:
+  `EllipticCurve/Comparison.lean:243 locallyWeierstrass_projModel` (+ the iff-forms
+  :414/:427) covers this content; on any future resumption REUSE Comparison, do not
+  re-prove (signature alignment to be checked at that point).
+* The fibrewise vocabulary (§A: `IsNaiveGammaOne.nowhereGeomOrderLEThree`,
+  `exists_properDivisor_smul_eq_zero`, `pull_smul_eq_zero_iff_residue`) — the
+  order-of-points/residue-detection THEMES are developed in `LevelStructure/ExactOrder`
+  + `ExactOrderRigidity` + `EllipticCurve/TorsionRestrict`; the specific
+  `NowhereGeomOrderLEThree`/killedLocus vocabulary exists ONLY here (parked-unique).
+* The Tate chain (`tateUniversal`/`tatePoint`/`killedLocus*`/`yOneSet`/`yOne` incl.
+  `IsAffine (yOne R N)` :427) — parked-unique explicit-model leaves; the abstract
+  affineness of the fine curve's base is reachable instead through the v10.351 cascade
+  (`isAffine_base_transport` + engine ∃-affine mirrors) if ever needed.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
