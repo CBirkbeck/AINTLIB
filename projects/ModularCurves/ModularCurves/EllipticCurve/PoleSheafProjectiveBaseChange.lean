@@ -19,6 +19,7 @@ change for a projectively presented fibrewise elliptic family over a Noetherian 
 
 open AlgebraicGeometry CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 open TensorProduct
+open scoped ChangeOfRings
 
 universe u
 
@@ -198,6 +199,24 @@ end AlgebraicGeometry.Scheme.Modules
 namespace ModularCurves
 
 attribute [local instance] MvPolynomial.gradedAlgebra
+
+private noncomputable def baseModulePresheafIdTopIso
+    {S : Scheme.{u}} (N : S.Modules) :
+    ModuleCat.of Γ(S, (⊤ : S.Opens)) Γ(N, (⊤ : S.Opens)) ≅
+      (Scheme.Modules.baseModulePresheaf (𝟙 S) N).obj
+        (.op (⊤ : S.Opens)) := by
+  refine ModuleCat.isoMk (Iso.refl _) ?_
+  intro r
+  ext (x : Γ(N, (⊤ : S.Opens)))
+  change
+    S.presheaf.map
+        ((initialOpOfTerminal isTerminalTop).to
+          (.op (⊤ : S.Opens)))
+        (Scheme.Hom.appTop (𝟙 S) r) • x = r • x
+  rw [Scheme.Hom.id_appTop]
+  rw [show (initialOpOfTerminal isTerminalTop).to
+    (.op (⊤ : S.Opens)) = 𝟙 _ from Subsingleton.elim _ _]
+  simp
 
 /-- Global sections of `O(n[0])` on a projectively presented fibrewise elliptic family commute
 with every affine base change. -/
@@ -700,5 +719,122 @@ theorem
       Scheme.Modules.pushforwardTopSection π M s := rfl
   have hTopMapped := congrArg (fun y => ψ y) hTop.symm
   exact hOpen.trans hTopMapped
+
+/-- The canonical pole-sheaf pushforward base-change morphism is an isomorphism on global
+sections for every affine base change of a projectively presented fibrewise elliptic family. -/
+theorem
+    FibrewiseElliptic.sectionPoleSheafPowerPushforwardBaseChange_projectiveClosed_app_top_isIso
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R))
+    [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {n : ℕ} (hn : 1 ≤ n) {T : Scheme.{u}} [IsAffine T]
+    (t : T ⟶ Spec (.of R)) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    IsIso ((sectionPoleSheafPowerPushforwardBaseChange (π := π) hsm z hz t n).val.app
+      (.op (⊤ : T.Opens))) := by
+  dsimp only
+  let S := Spec (.of R)
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz n
+  let N := (Scheme.Modules.pushforward π).obj M
+  let πT := pullback.snd π t
+  let zT := sectionBaseChange z hz t
+  let hzT := sectionBaseChange_snd z hz t
+  let MT := sectionPoleSheafPower πT zT hzT n
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  letI : E.IsSeparated := ⟨by
+    rw [← terminal.comp_from π]
+    infer_instance⟩
+  letI : N.IsQuasicoherent :=
+    h.sectionPoleSheafPowerPushforward_projectiveClosed_isQuasicoherent
+      f hsm z hz hn
+  let ePush := Scheme.Modules.baseSectionsPushforwardTopIso π M
+  let eSourceIso :=
+    (ModuleCat.extendScalars t.appTop.hom).mapIso ePush ≪≫
+      Scheme.Modules.affinePullbackΓIso t N
+  let eSource :
+      A ⊗[B] Scheme.Modules.baseSections π M ≃ₗ[A]
+        Γ((Scheme.Modules.pullback t).obj N, (⊤ : T.Opens)) :=
+    eSourceIso.toLinearEquiv
+  let eProjective :=
+    h.sectionPoleSheafPower_projectiveClosed_baseSectionsBaseChangeLinearEquiv
+      f hsm z hz hn t
+  let eTargetTopIso :=
+    Scheme.Modules.baseSectionsPushforwardTopIso πT MT ≪≫
+      (baseModulePresheafIdTopIso
+        ((Scheme.Modules.pushforward πT).obj MT)).symm
+  let eTargetTop :
+      Scheme.Modules.baseSections πT MT ≃ₗ[A]
+        Γ((Scheme.Modules.pushforward πT).obj MT, (⊤ : T.Opens)) :=
+    eTargetTopIso.toLinearEquiv
+  let eTarget := eProjective.trans eTargetTop
+  let φ := sectionPoleSheafPowerPushforwardBaseChange hsm z hz t n
+  let φTop :
+      Γ((Scheme.Modules.pullback t).obj N, (⊤ : T.Opens)) →ₗ[A]
+        Γ((Scheme.Modules.pushforward πT).obj MT, (⊤ : T.Opens)) :=
+    (φ.val.app (.op (⊤ : T.Opens))).hom
+  have hSource (s : Scheme.Modules.baseSections π M) :
+      eSource ((1 : A) ⊗ₜ[B] s) =
+        Scheme.Modules.affinePullbackUnitTop t N
+          (Scheme.Modules.pushforwardTopSection π M s) := by
+    change (Scheme.Modules.affinePullbackΓIso t N).hom
+        (((ModuleCat.extendScalars t.appTop.hom).map ePush.hom)
+          ((1 : Γ(T, (⊤ : T.Opens)))
+            ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] s)) = _
+    rw [ModuleCat.ExtendScalars.map_tmul
+      (f := t.appTop.hom) ePush.hom
+        (1 : Γ(T, (⊤ : T.Opens))) s]
+    rw [Scheme.Modules.baseSectionsPushforwardTopIso_hom_apply]
+    exact Scheme.Modules.affinePullbackΓIso_hom_one_tmul t N
+      (Scheme.Modules.pushforwardTopSection π M s)
+  have hTarget (s : Scheme.Modules.baseSections π M) :
+      eTarget ((1 : A) ⊗ₜ[B] s) =
+        Scheme.Modules.pushforwardTopSection πT MT
+          (eProjective ((1 : A) ⊗ₜ[B] s)) := by
+    change (baseModulePresheafIdTopIso
+        ((Scheme.Modules.pushforward πT).obj MT)).inv
+        ((Scheme.Modules.baseSectionsPushforwardTopIso πT MT).hom
+          (eProjective ((1 : A) ⊗ₜ[B] s))) = _
+    rw [Scheme.Modules.baseSectionsPushforwardTopIso_hom_apply]
+    rfl
+  have hOne (s : Scheme.Modules.baseSections π M) :
+      (φTop.comp eSource.toLinearMap) ((1 : A) ⊗ₜ[B] s) =
+        eTarget ((1 : A) ⊗ₜ[B] s) := by
+    rw [LinearMap.comp_apply]
+    change φTop (eSource ((1 : A) ⊗ₜ[B] s)) =
+      eTarget ((1 : A) ⊗ₜ[B] s)
+    rw [hSource, hTarget]
+    exact h.sectionPoleSheafPowerPushforwardBaseChange_projectiveClosed_app_top_one_tmul
+      f hsm z hz hn t s
+  have hcomp : φTop.comp eSource.toLinearMap = eTarget.toLinearMap := by
+    ext q
+    induction q using TensorProduct.induction_on with
+    | zero => rw [map_zero, map_zero]
+    | tmul a s =>
+        rw [show a ⊗ₜ[B] s = a • ((1 : A) ⊗ₜ[B] s) by
+          rw [TensorProduct.smul_tmul']
+          simp]
+        simp only [map_smul]
+        exact congrArg (fun y => a • y) (hOne s)
+    | add x y hx hy => rw [map_add, map_add, hx, hy]
+  rw [ConcreteCategory.isIso_iff_bijective]
+  change Function.Bijective φTop
+  apply (Function.Bijective.of_comp_iff φTop eSource.bijective).mp
+  have hfun : φTop ∘ eSource = eTarget := by
+    funext q
+    exact LinearMap.congr_fun hcomp q
+  rw [hfun]
+  exact eTarget.bijective
 
 end ModularCurves
