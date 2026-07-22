@@ -327,4 +327,108 @@ private theorem baseCechComplexBaseChange_zero_one_tmul_augmentation
     _ = _ := hNormalize
     _ = _ := hTarget.symm
 
+private theorem baseSections_cechKernelComparison_one_tmul_coe
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (hker :
+      letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+        t.appTop.hom.toAlgebra
+      Function.Bijective
+        (ModularCurves.kerBaseChangeComparison Γ(T, (⊤ : T.Opens))
+          ((orderedBaseCechComplex f M U).d 0 1).hom))
+    (s : baseSections f M) :
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Γ(T, (⊤ : T.Opens))
+    letI : Algebra B A := t.appTop.hom.toAlgebra
+    let g := pullback.fst f t
+    let f' := pullback.snd f t
+    let P := (pullback g).obj M
+    let Uf : ι → (Limits.pullback f t).Opens := fun i ↦ g ⁻¹ᵁ U i
+    let C := baseCechComplex f M U
+    let eSource := (baseSectionsIsoKernelOrderedBaseCechDifferential
+      f M U hU).toLinearEquiv
+    let eSourceA := LinearEquiv.baseChange B A _ _ eSource
+    let eKernel : A ⊗[B]
+          LinearMap.ker ((orderedBaseCechComplex f M U).d 0 1).hom ≃ₗ[A]
+        LinearMap.ker
+          (((orderedBaseCechComplex f M U).d 0 1).hom.baseChange A) :=
+      LinearEquiv.ofBijective
+        (ModularCurves.kerBaseChangeComparison A
+          ((orderedBaseCechComplex f M U).d 0 1).hom) hker
+    let eOrderedNative :=
+      (baseCechKernelOrderedBaseChangeLinearEquiv f M U A).symm
+    let eCategorical :=
+      ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv C A
+    let eComplex :=
+      (HomologicalComplex.kernelZeroIsoOfIso
+        (baseCechComplexBaseChangeIso f t M U hUaff)).toLinearEquiv
+    (eComplex (eCategorical (eOrderedNative
+      (eKernel (eSourceA ((1 : A) ⊗ₜ[B] s)))))).1 =
+        (baseCechAugmentation f' P Uf).hom
+          (affinePullbackUnitTop g M s) := by
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  let g := pullback.fst f t
+  let f' := pullback.snd f t
+  let P := (pullback g).obj M
+  let Uf : ι → (Limits.pullback f t).Opens := fun i ↦ g ⁻¹ᵁ U i
+  let C := baseCechComplex f M U
+  let eSource := (baseSectionsIsoKernelOrderedBaseCechDifferential
+    f M U hU).toLinearEquiv
+  let eSourceA := LinearEquiv.baseChange B A _ _ eSource
+  let eKernel : A ⊗[B]
+        LinearMap.ker ((orderedBaseCechComplex f M U).d 0 1).hom ≃ₗ[A]
+      LinearMap.ker
+        (((orderedBaseCechComplex f M U).d 0 1).hom.baseChange A) :=
+    LinearEquiv.ofBijective
+      (ModularCurves.kerBaseChangeComparison A
+        ((orderedBaseCechComplex f M U).d 0 1).hom) hker
+  let eOrderedNative :=
+    (baseCechKernelOrderedBaseChangeLinearEquiv f M U A).symm
+  let eCategorical :=
+    ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv C A
+  let eComplex :=
+    (HomologicalComplex.kernelZeroIsoOfIso
+      (baseCechComplexBaseChangeIso f t M U hUaff)).toLinearEquiv
+  let x := eOrderedNative (eKernel (eSourceA ((1 : A) ⊗ₜ[B] s)))
+  change (eComplex (eCategorical x)).1 =
+    (baseCechAugmentation f' P Uf).hom
+      (affinePullbackUnitTop g M s)
+  have hSource : x.1 =
+      (1 : A) ⊗ₜ[B] (baseCechAugmentation f M U).hom s :=
+    baseSections_orderedCechKernelComparison_one_tmul_coe
+      f t M U hU hker s
+  have hComparison : (eComplex (eCategorical x)).1 =
+      (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+        (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0) x.1) :=
+    baseCechKernelComparison_coe f t M U hUaff x
+  have hTmul :
+      ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0)
+          ((1 : A) ⊗ₜ[B] (baseCechAugmentation f M U).hom s) =
+        (1 : A) ⊗ₜ[B, t.appTop.hom]
+          (baseCechAugmentation f M U).hom s :=
+    ModularCurves.moduleCatExtendScalarsObjLinearEquiv_tmul A (C.X 0) 1
+      ((baseCechAugmentation f M U).hom s)
+  calc
+    _ = (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+        (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0) x.1) :=
+      hComparison
+    _ = (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+        (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0)
+          ((1 : A) ⊗ₜ[B] (baseCechAugmentation f M U).hom s)) :=
+      congrArg
+        (fun z => (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+          (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0) z))
+        hSource
+    _ = (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+        ((1 : A) ⊗ₜ[B, t.appTop.hom]
+          (baseCechAugmentation f M U).hom s) :=
+      congrArg
+        (fun z => (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0 z) hTmul
+    _ = _ := baseCechComplexBaseChange_zero_one_tmul_augmentation
+      f t M U hUaff s
+
 end AlgebraicGeometry.Scheme.Modules
