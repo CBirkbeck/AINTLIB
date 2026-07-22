@@ -351,6 +351,18 @@ theorem orderedBaseCechObject_flat_of_trivializingCover
   orderedBaseCechObject_flat_of_factors π M U n fun i =>
     baseCechFactor_flat_of_trivializingCover π M U hU htriv n i
 
+/-- Every term of the ordered base-linear Cech complex of an invertible module is flat on a
+finite affine cover of a separated flat family. -/
+theorem orderedBaseCechObject_flat_of_isInvertible
+    {X S : Scheme.{u}} (π : X ⟶ S) [IsAffine S] [Flat π]
+    [X.IsSeparated] (M : X.Modules) (hM : IsInvertible M)
+    {ι : Type u} [Fintype ι] [LinearOrder ι]
+    (U : ι → X.Opens) (hU : ∀ i, IsAffineOpen (U i))
+    (n : ℕ) :
+    Module.Flat Γ(S, (⊤ : S.Opens)) (orderedBaseCechObject π M U n) :=
+  orderedBaseCechObject_flat_of_factors π M U n fun i =>
+    baseCechFactor_flat_of_isInvertible π M hM U hU n i
+
 /-- The ordered Cech complex vanishes above the cardinality of its finite cover. -/
 theorem orderedBaseCechTerm_subsingleton_of_card_le
     {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
