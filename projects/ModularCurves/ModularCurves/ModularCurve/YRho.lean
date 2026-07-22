@@ -775,6 +775,23 @@ noncomputable def frameEvalAlgHom (D : GaloisRepData N) :
   ((frameProdAlgebraIso D).inv ≫
     (finiteEtaleEquivContAction ℚ).inverse.map (frameEvalMor D)).unop
 
+/-- The constant-`(ℤ/N)²` scheme via the correspondence, with its structure map. -/
+noncomputable def constVecScheme (N : ℕ) [NeZero N] : Scheme.{0} :=
+  Spec (.of (constVecAlgebra N : Type 0))
+
+noncomputable def constVecSchemeπ (N : ℕ) [NeZero N] :
+    constVecScheme N ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0)))
+
+/-- **[T-YR-3d-1c step-4]** The universal-frame evaluation at the scheme level:
+`(ℤ/N)²_ℚ ×_ℚ Isom((ℤ/N)², V_ρ) ⟶ V_ρ` (mirror of `vRhoAdd`: the fibre-product/tensor
+identification followed by `Spec` of the evaluation comultiplication). -/
+noncomputable def frameEval (D : GaloisRepData N) :
+    pullback (constVecSchemeπ N) (wFramesπ D) ⟶ vRho D :=
+  (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+    (wFramesAlgebra D : Type 0)).hom ≫
+    AlgebraicGeometry.Spec.map (CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom)
+
 end FrameSubstrate
 
 section FramedProblem
