@@ -943,6 +943,41 @@ noncomputable def frameEvalAlgHom (D : GaloisRepData N) :
   ((frameProdAlgebraIso D).inv ≫
     (finiteEtaleEquivContAction ℚ).inverse.map (frameEvalMor D)).unop
 
+/-- **[asm-1]** `Spec` of the split-vs-constVec algebra identification. -/
+noncomputable def constVecSpecIso (N : ℕ) [NeZero N] :
+    Spec (CommRingCat.of ((Fin 2 → ZMod N) → ℚ)) ≅
+      Spec (CommRingCat.of (constVecAlgebra N : Type 0)) where
+  hom := Spec.map (CommRingCat.ofHom
+    (constVecAlgebraIso N).hom.hom.hom.toRingHom)
+  inv := Spec.map (CommRingCat.ofHom
+    (constVecAlgebraIso N).inv.hom.hom.toRingHom)
+  hom_inv_id := by
+    rw [← Spec.map_comp,
+      show CommRingCat.ofHom (constVecAlgebraIso N).inv.hom.hom.toRingHom ≫
+          CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom =
+        𝟙 (CommRingCat.of ((Fin 2 → ZMod N) → ℚ)) from ?_, Spec.map_id]
+    have h := congrArg (fun (f : CommAlgCat.FiniteEtale.of ℚ
+        ((Fin 2 → ZMod N) → ℚ) ⟶ CommAlgCat.FiniteEtale.of ℚ
+        ((Fin 2 → ZMod N) → ℚ)) =>
+      CommRingCat.ofHom f.hom.hom.toRingHom) ((constVecAlgebraIso N).inv_hom_id)
+    exact h
+  inv_hom_id := by
+    rw [← Spec.map_comp,
+      show CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom ≫
+          CommRingCat.ofHom (constVecAlgebraIso N).inv.hom.hom.toRingHom =
+        𝟙 (CommRingCat.of (constVecAlgebra N : Type 0)) from ?_, Spec.map_id]
+    have h := congrArg (fun (f : constVecAlgebra N ⟶ constVecAlgebra N) =>
+      CommRingCat.ofHom f.hom.hom.toRingHom) ((constVecAlgebraIso N).hom_inv_id)
+    exact h
+
+/-- **[asm-1 COMPLETE]** The constant scheme over `Spec ℚ` is the correspondence-built
+constant-vector scheme: `constSchemeSpecIso` composed with `Spec` of the algebra
+identification. -/
+noncomputable def constVecSchemeIso (N : ℕ) [NeZero N] :
+    constScheme (Spec (CommRingCat.of ℚ)) (Fin 2 → ZMod N) ≅
+      Spec (CommRingCat.of (constVecAlgebra N : Type 0)) :=
+  constSchemeSpecIso (CommRingCat.of ℚ) (Fin 2 → ZMod N) ≪≫ constVecSpecIso N
+
 /-- The constant-`(ℤ/N)²` scheme via the correspondence, with its structure map. -/
 noncomputable def constVecScheme (N : ℕ) [NeZero N] : Scheme.{0} :=
   Spec (.of (constVecAlgebra N : Type 0))
