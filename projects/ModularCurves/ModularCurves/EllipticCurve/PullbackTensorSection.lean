@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.ForMathlib.AffineModuleBaseChange
 
 /-!
 # Pullback of pure tensor sections
@@ -524,7 +525,9 @@ theorem restrictFunctorIsoPullback_hom_unit_app_apply
       ModuleCat.comp_apply]
   exact happ
 
-private theorem restrictFunctorIsoPullback_inv_unit_app_apply
+/-- The inverse comparison from pullback to open restriction sends a pullback-unit section to
+the corresponding restriction-unit section. -/
+theorem restrictFunctorIsoPullback_inv_unit_app_apply
     {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
     (M : X.Modules) (U : X.Opens) (x : M.val.obj (.op U)) :
     ((restrictFunctorIsoPullback f).app M).inv.val.app (.op (f ⁻¹ᵁ U))
@@ -541,6 +544,31 @@ private theorem restrictFunctorIsoPullback_inv_unit_app_apply
     erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
       ModuleCat.comp_apply]
   exact happ.symm.trans hcancel
+
+/-- On top sections, the inverse comparison from pullback to open restriction carries the
+transported pullback unit to the transported restriction unit. -/
+theorem restrictFunctorIsoPullback_inv_affinePullbackUnitTop
+    {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
+    (M : X.Modules) (x : M.val.obj (.op (⊤ : X.Opens))) :
+    ((restrictFunctorIsoPullback f).app M).inv.val.app (.op ⊤)
+        (affinePullbackUnitTop f M x) =
+      (M.restrict f).presheaf.map
+        (eqToHom (Scheme.Hom.preimage_top f).symm).op
+        (((restrictAdjunction f).unit.app M).val.app (.op ⊤) x) := by
+  let e := (restrictFunctorIsoPullback f).app M
+  let P := (pullback f).obj M
+  let R := M.restrict f
+  let htop := Scheme.Hom.preimage_top f
+  let unitTop := (((pullbackPushforwardAdjunction f).unit.app M).val.app
+    (.op (⊤ : X.Opens))) x
+  have hnat := e.inv.val.naturality (eqToHom htop.symm).op
+  have hnatApply := ConcreteCategory.congr_hom hnat unitTop
+  change e.inv.val.app (.op (⊤ : Y.Opens))
+      (P.presheaf.map (eqToHom htop.symm).op unitTop) =
+    R.presheaf.map (eqToHom htop.symm).op
+      (e.inv.val.app (.op (f ⁻¹ᵁ (⊤ : X.Opens))) unitTop) at hnatApply
+  rw [restrictFunctorIsoPullback_inv_unit_app_apply] at hnatApply
+  exact hnatApply
 
 end AlgebraicGeometry.Scheme.Modules
 
