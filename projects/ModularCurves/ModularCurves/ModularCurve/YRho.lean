@@ -2130,7 +2130,23 @@ theorem frameProdAlgebraIso_inv_left (D : GaloisRepData N) :
           (constVecAlgebra N : Type 0) →ₐ[ℚ]
             TensorProduct ℚ (constVecAlgebra N : Type 0)
               (wFramesAlgebra D : Type 0))) := by
-  sorry
+  have hcomp := Limits.IsLimit.conePointUniqueUpToIso_hom_comp
+    ((Limits.IsLimit.postcomposeHomEquiv
+        (Limits.pairComp (constVecContAction N) (frameContAction D)
+          (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse) _).symm
+      (Limits.isLimitOfPreserves _ (frameProdIsProduct D)))
+    (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (constVecAlgebra N)
+      (wFramesAlgebra D))
+    ⟨Limits.WalkingPair.left⟩
+  have hop : ((FiniteEtaleGalois.tensorBinaryCofan (constVecAlgebra N)
+        (wFramesAlgebra D)).op).π.app ⟨Limits.WalkingPair.left⟩
+      = (frameProdAlgebraIso D).inv
+          ≫ (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+              (frameProdFst D) :=
+    ((Iso.inv_hom_id_assoc (frameProdAlgebraIso D) _).symm.trans
+      (congrArg ((frameProdAlgebraIso D).inv ≫ ·) hcomp)).trans
+      (congrArg ((frameProdAlgebraIso D).inv ≫ ·) (Category.comp_id _))
+  exact (congrArg Quiver.Hom.unop hop.symm).trans rfl
 
 /-- **[asm-2a]** The universal-frame evaluation on `ℚ̄`-points: the `V_ρ`-reading of
 the evaluated point is the classified frame acting on the vector (scaffold; the
