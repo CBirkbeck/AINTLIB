@@ -968,6 +968,50 @@ theorem Modules.isQuasicoherent_of_isLocalized_basicOpen
     (Modules.isoSpecInv_isLocalized_basicOpen_of_isLocalized_basicOpen
       M f (h f))
 
+/-- A morphism between quasicoherent modules on an affine scheme is an
+isomorphism if it is an isomorphism on global sections. -/
+theorem Modules.isIso_of_isQuasicoherent_of_isIso_app_top
+    [IsAffine X] {M N : X.Modules} (φ : M ⟶ N)
+    [M.IsQuasicoherent] [N.IsQuasicoherent]
+    (h : IsIso (φ.val.app (.op (⊤ : X.Opens)))) : IsIso φ := by
+  let F := baseModulePresheafFunctor (𝟙 X)
+  let φB := F.map φ
+  letI : IsIso (φ.val.app (.op (⊤ : X.Opens))) := h
+  haveI hφBTop : IsIso (φB.app (.op (⊤ : X.Opens))) := by
+    rw [ConcreteCategory.isIso_iff_bijective]
+    exact ConcreteCategory.bijective_of_isIso
+      (φ.val.app (.op (⊤ : X.Opens)))
+  letI hreflect : (SheafOfModules.toSheaf.{u}
+      X.ringCatSheaf).ReflectsIsomorphisms :=
+    PresheafOfModules.instReflectsIsomorphismsSheafOfModulesSheafAddCommGrpCatToSheaf_1
+  haveI hmap : IsIso ((SheafOfModules.toSheaf.{u} X.ringCatSheaf).map φ) := by
+    apply TopCat.Sheaf.isIso_iff_isIso_basis (isBasis_basicOpen X)
+    intro r
+    let V := X.basicOpen r
+    let i := V.leTop.op
+    let sourceRestriction := (F.obj M).map i
+    let targetRestriction := (F.obj N).map i
+    have hSource : IsLocalizedModule.Away r sourceRestriction.hom := by
+      dsimp only [sourceRestriction, F, i, V]
+      exact Modules.baseModulePresheaf_isLocalized_basicOpen M r
+    have hTarget : IsLocalizedModule.Away r targetRestriction.hom := by
+      dsimp only [targetRestriction, F, i, V]
+      exact Modules.baseModulePresheaf_isLocalized_basicOpen N r
+    haveI hφBOpen : IsIso (φB.app (.op V)) := by
+      refine ModuleCat.isIso_of_isLocalizedModule_comp hSource ?_
+      change IsLocalizedModule.Away r
+        (sourceRestriction ≫ φB.app (.op V)).hom
+      rw [φB.naturality i]
+      change IsLocalizedModule.Away r
+        (φB.app (.op (⊤ : X.Opens)) ≫ targetRestriction).hom
+      exact IsLocalizedModule.of_linearEquiv_right
+        (Submonoid.powers r) targetRestriction.hom
+        (asIso (φB.app (.op (⊤ : X.Opens)))).toLinearEquiv
+    rw [ConcreteCategory.isIso_iff_bijective]
+    exact ConcreteCategory.bijective_of_isIso (φB.app (.op V))
+  exact @Functor.ReflectsIsomorphisms.reflects _ _ _ _
+    (SheafOfModules.toSheaf.{u} X.ringCatSheaf) hreflect _ _ φ hmap
+
 /-- On an affine scheme, if a global section of a quasicoherent module vanishes on a basic open,
 then some power of the function defining that open annihilates the section. -/
 theorem Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_of_isAffine
