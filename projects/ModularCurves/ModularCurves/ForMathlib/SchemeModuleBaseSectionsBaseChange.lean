@@ -118,6 +118,42 @@ theorem baseSections_orderedCechSourceBaseChange_one_tmul
   exact congrArg
     (fun y => (1 : A) ⊗ₜ[Γ(S, (⊤ : S.Opens))] y) hinner
 
+private theorem baseSections_orderedCechKernelComparison_one_tmul_coe
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U)
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (hker :
+      letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+        t.appTop.hom.toAlgebra
+      Function.Bijective
+        (ModularCurves.kerBaseChangeComparison Γ(T, (⊤ : T.Opens))
+          ((orderedBaseCechComplex f M U).d 0 1).hom))
+    (s : baseSections f M) :
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Γ(T, (⊤ : T.Opens))
+    letI : Algebra B A := t.appTop.hom.toAlgebra
+    let eSource := (baseSectionsIsoKernelOrderedBaseCechDifferential
+      f M U hU).toLinearEquiv
+    let eSourceA := LinearEquiv.baseChange B A _ _ eSource
+    let eKernel : A ⊗[B]
+          LinearMap.ker ((orderedBaseCechComplex f M U).d 0 1).hom ≃ₗ[A]
+        LinearMap.ker
+          (((orderedBaseCechComplex f M U).d 0 1).hom.baseChange A) :=
+      LinearEquiv.ofBijective
+        (ModularCurves.kerBaseChangeComparison A
+          ((orderedBaseCechComplex f M U).d 0 1).hom) hker
+    let eOrderedNative :=
+      (baseCechKernelOrderedBaseChangeLinearEquiv f M U A).symm
+    (eOrderedNative (eKernel (eSourceA ((1 : A) ⊗ₜ[B] s)))).1 =
+      (1 : A) ⊗ₜ[B] (baseCechAugmentation f M U).hom s := by
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  dsimp only
+  rw [LinearEquiv.baseChange_tmul]
+  exact baseSections_orderedCechSourceBaseChange_one_tmul f M U hU A s
+
 private theorem affinePullbackUnitTop_restrict
     {X Y : Scheme.{u}} (g : Y ⟶ X) (M : X.Modules)
     (V : Y.Opens) (s : M.presheaf.obj (op (⊤ : X.Opens))) :
