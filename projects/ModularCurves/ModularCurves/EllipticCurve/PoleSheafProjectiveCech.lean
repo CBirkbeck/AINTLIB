@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFinite
+import ModularCurves.ForMathlib.CochainComplexBoundedFlat
 
 /-!
 # Projective Cech data for pole sheaves
@@ -115,5 +116,80 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_orderedBaseCech
   · intro K _ _
     exact h.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank
       hsm z hz U hU hUaff K hn
+
+/-- For a projectively presented fibrewise elliptic family over a Noetherian ring, the
+degree-zero kernel in the common pole-sheaf Cech complex is finite projective, commutes with
+arbitrary algebra base change, and has constant rank equal to the pole order. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R)) [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {n : ℕ} (hn : 1 ≤ n) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let M := sectionPoleSheafPower π z hz n
+    let U := fun j => f ⁻¹ᵁ MvPolynomial.coordinateOpenCover
+      (R := R) (σ := σ) j
+    let C := Scheme.Modules.orderedBaseCechComplex π M U
+    let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+    Module.Finite B (LinearMap.ker (C.d 0 1).hom) ∧
+      Module.Projective B (LinearMap.ker (C.d 0 1).hom) ∧
+      (∀ (A : Type u) [CommRing A] [Algebra B A],
+        Function.Bijective (kerBaseChangeComparison A (C.d 0 1).hom)) ∧
+      Module.rankAtStalk (R := B) (LinearMap.ker (C.d 0 1).hom) = fun _ ↦ n := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz n
+  let U := fun j => f ⁻¹ᵁ MvPolynomial.coordinateOpenCover
+    (R := R) (σ := σ) j
+  let C := Scheme.Modules.orderedBaseCechComplex π M U
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  obtain ⟨hflat, hfinite, hbounded, hfield, hrank⟩ :=
+    h.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_data
+      f hsm z hz hn
+  letI (q : ℕ) : Module.Flat B (C.X q) := hflat q
+  letI (q : ℕ) : Module.Finite B (C.homology q) := hfinite q
+  let N := Fintype.card (ULift.{u} σ)
+  letI : Subsingleton (C.X (N + 1)) := hbounded (N + 1) (Nat.le_succ N)
+  have hexact : ∀ q, q < N →
+      Function.Exact (C.d q (q + 1)).hom (C.d (q + 1) (q + 2)).hom := by
+    intro q hq
+    exact
+      HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology
+        C N (fun i _ K _ _ ↦ hfield K i) q hq
+  have hkerFinite : Module.Finite B (LinearMap.ker (C.d 0 1).hom) :=
+    HomologicalComplex.finite_kernel_zero_of_finite_homology C
+  letI : Module.Finite B (LinearMap.ker (C.d 0 1).hom) := hkerFinite
+  letI : IsNoetherianRing B := by
+    exact isNoetherianRing_of_ringEquiv R
+      (Scheme.ΓSpecIso (.of R)).symm.commRingCatIsoToRingEquiv
+  have hkerProjective : Module.Projective B (LinearMap.ker (C.d 0 1).hom) :=
+    Module.Projective.ker_of_bounded_exact_of_finite
+      (fun q ↦ C.X q) (fun q ↦ (C.d q (q + 1)).hom) N hexact
+  letI : Module.Projective B (LinearMap.ker (C.d 0 1).hom) := hkerProjective
+  have hbase : ∀ (A : Type u) [CommRing A] [Algebra B A],
+      Function.Bijective (kerBaseChangeComparison A (C.d 0 1).hom) := by
+    intro A _ _
+    exact kerBaseChangeComparison_bijective_of_bounded_exact
+      A (fun q ↦ C.X q) (fun q ↦ (C.d q (q + 1)).hom) N hexact
+  have hrankAt :
+      Module.rankAtStalk (R := B) (LinearMap.ker (C.d 0 1).hom) = fun _ ↦ n := by
+    letI : Module.Flat B (LinearMap.ker (C.d 0 1).hom) := inferInstance
+    funext p
+    rw [Module.rankAtStalk_eq]
+    let e : p.asIdeal.Fiber (LinearMap.ker (C.d 0 1).hom) ≃ₗ[p.asIdeal.ResidueField]
+        LinearMap.ker ((C.d 0 1).hom.baseChange p.asIdeal.ResidueField) :=
+      LinearEquiv.ofBijective
+        (kerBaseChangeComparison p.asIdeal.ResidueField (C.d 0 1).hom)
+        (hbase p.asIdeal.ResidueField)
+    exact e.finrank_eq.trans (hrank p.asIdeal.ResidueField)
+  exact ⟨hkerFinite, hkerProjective, hbase, hrankAt⟩
 
 end ModularCurves
