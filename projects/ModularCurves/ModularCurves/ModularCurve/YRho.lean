@@ -2104,6 +2104,21 @@ theorem frameEval_π (D : GaloisRepData N) :
     (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ
       (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0))
 
+/-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
+carrying a frame-classifier `h`, the constant vector scheme maps to the
+`V_ρ`-pullback (evaluation of the classified frame on the constant vectors). -/
+noncomputable def frameEvalSlice (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT) :
+    pullback sT (constVecSchemeπ N) ⟶ pullback (vRhoπ D) sT :=
+  pullback.lift
+    (pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ h)
+        (by rw [Category.assoc, hover, ← pullback.condition]) ≫ frameEval D)
+    (pullback.fst sT (constVecSchemeπ N))
+    (by rw [Category.assoc, frameEval_π, ← Category.assoc, pullback.lift_fst,
+      ← pullback.condition])
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
