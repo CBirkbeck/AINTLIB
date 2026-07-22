@@ -221,14 +221,18 @@ private theorem pullbackPushforwardBaseChange_unit
   rw [hmate] at h
   simpa only [Functor.id_obj] using h
 
-private noncomputable def pushforwardTopSection
+/-- Transport a section over the top open across the canonical identification
+between the inverse image of the top open and the top open. -/
+noncomputable def pushforwardTopSection
     (M : X.Modules) (m : Γ(M, (⊤ : X.Opens))) :
     Γ((pushforward f).obj M, (⊤ : S.Opens)) := by
   change Γ(M, f ⁻¹ᵁ (⊤ : S.Opens))
   exact M.presheaf.map
     (eqToHom (Scheme.Hom.preimage_top f)).op m
 
-private theorem pushforwardMap_app_top_pushforwardTopSection
+/-- A pushforward map on the top open commutes with the canonical top-open
+transport. -/
+theorem pushforwardMap_app_top_pushforwardTopSection
     {M N : X.Modules} (φ : M ⟶ N) (m : Γ(M, (⊤ : X.Opens))) :
     ((pushforward f).map φ).app (⊤ : S.Opens)
         (pushforwardTopSection f M m) =
