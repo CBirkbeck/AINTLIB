@@ -249,4 +249,122 @@ noncomputable def YZeroCoarse (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (hinv : IsUnit (N : R)) : Scheme.{u} :=
   YHCoarse (R := R) N hN hinv (borel N)
 
+/-- The chosen semi-Borel quotient-problem datum (the `Y₁`-datum of record;
+KM 7.4.2(3) `[Γ₁(N)] = [Γ(N)]/{(1 ∗; 0 ∗)}`). -/
+noncomputable def semiBorelQPD (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
+    ModuliProblem.QuotientProblemData (gammaHAut R N (semiBorel N)) :=
+  (gammaH_semiBorel_closure R N hN4 (semiBorel N) le_rfl hinv).1.some
+
+/-- The representing object of the semi-Borel quotient problem (the fine `Y₁`-object). -/
+noncomputable def xOneFine (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) : EllObj R :=
+  haveI : (semiBorelQPD (R := R) N hN4 hinv).prob.IsRepresentable :=
+    (gammaH_semiBorel_closure R N hN4 (semiBorel N) le_rfl hinv).2 _
+  Functor.reprX (semiBorelQPD (R := R) N hN4 hinv).prob
+
+/-- The chosen representation of the semi-Borel quotient problem by `xOneFine`. -/
+noncomputable def xOneFineRepr (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
+    (semiBorelQPD (R := R) N hN4 hinv).prob.RepresentableBy
+      (xOneFine (R := R) N hN4 hinv) :=
+  haveI : (semiBorelQPD (R := R) N hN4 hinv).prob.IsRepresentable :=
+    (gammaH_semiBorel_closure R N hN4 (semiBorel N) le_rfl hinv).2 _
+  Functor.representableBy _
+
+/-- **The fine modular curve `Y₁(N)` over `R`** (`N ≥ 4` invertible): the base of the
+representing object of the semi-Borel quotient problem `[Γ(N)]/{(1 ∗; 0 ∗)}`
+(KM 7.4.2(3): "[Γ₁(N)] … the quotient of [Γ(N)] by the 'semi-Borel' subgroup";
+existence + representability = `gammaH_semiBorel_closure`, v10.349). -/
+noncomputable def YOneFine (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) : Scheme.{u} :=
+  (xOneFine (R := R) N hN4 hinv).base
+
+/-- The representing object of the full-level problem (the fine `Y(N)`-object). -/
+noncomputable def xFullNaive (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R)) : EllObj R :=
+  haveI : (gammaFullNaiveProblem R N).IsRepresentable :=
+    (gammaFullNaive_rigid_and_representable R N hN hinv).2
+  Functor.reprX (gammaFullNaiveProblem R N)
+
+/-- The chosen representation of the full-level problem by `xFullNaive`. -/
+noncomputable def xFullNaiveRepr (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R)) :
+    (gammaFullNaiveProblem R N).RepresentableBy (xFullNaive (R := R) N hN hinv) :=
+  haveI : (gammaFullNaiveProblem R N).IsRepresentable :=
+    (gammaFullNaive_rigid_and_representable R N hN hinv).2
+  Functor.representableBy _
+
+/-- The fine projection at the `Ell/R`-level: the Yoneda-classified image of the
+problem projection `[Γ(N)] ⟶ [Γ(N)]/semiBorel` at the universal full level
+structure. -/
+noncomputable def piOneFineEll (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
+    xFullNaive (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4) hinv ⟶
+      xOneFine (R := R) N hN4 hinv :=
+  (xOneFineRepr (R := R) N hN4 hinv).homEquiv.symm
+    ((semiBorelQPD (R := R) N hN4 hinv).proj.app
+      (Opposite.op (xFullNaive (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+        hinv))
+      ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+        hinv).homEquiv (𝟙 _)))
+
+/-- **The fine projection `Y(N) ⟶ Y₁(N)`** (KM 7.4.2(3)'s map `(P,Q) ↦ P` at the
+scheme level). -/
+noncomputable def piOneFine (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
+    (xFullNaive (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4) hinv).base ⟶
+      YOneFine (R := R) N hN4 hinv :=
+  (piOneFineEll (R := R) N hN4 hinv).baseHom
+
+/-- The classified projection coequalizes the semi-Borel action at the `Ell/R`-level
+(Yoneda transport of `proj_invariant`). -/
+theorem gammaHAut_inv_comp_piOneFineEll (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) (γ : (semiBorel N)) :
+    ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+        hinv).autMulHom (gammaHAut R N (semiBorel N) γ)).inv ≫
+      piOneFineEll (R := R) N hN4 hinv = piOneFineEll (R := R) N hN4 hinv := by
+  classical
+  apply (xOneFineRepr (R := R) N hN4 hinv).homEquiv.injective
+  rw [(xOneFineRepr (R := R) N hN4 hinv).homEquiv_comp, piOneFineEll,
+    Equiv.apply_symm_apply, ← NatTrans.naturality_apply
+      (semiBorelQPD (R := R) N hN4 hinv).proj]
+  have h2 : (gammaFullNaiveProblem R N).map
+      (((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+        hinv).autMulHom (gammaHAut R N (semiBorel N) γ)).inv).op
+      ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+        hinv).homEquiv (𝟙 _)) =
+      (gammaHAut R N (semiBorel N) γ).inv.app _
+        ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+          hinv).homEquiv (𝟙 _)) := by
+    have hchar := (xFullNaiveRepr (R := R) N
+      (by exact_mod_cast Nat.le_of_succ_le hN4) hinv).homEquiv_comp_transportHom
+      (gammaHAut R N (semiBorel N) γ).inv (𝟙 _)
+    rw [Category.id_comp] at hchar
+    rw [← hchar, ← (xFullNaiveRepr (R := R) N
+      (by exact_mod_cast Nat.le_of_succ_le hN4) hinv).homEquiv_comp]
+    rfl
+  rw [h2]
+  have h3 : (gammaHAut R N (semiBorel N) γ).inv =
+      (gammaHAut R N (semiBorel N) γ⁻¹).hom := by
+    rw [map_inv]; rfl
+  have h4 := congrArg (fun (m : gammaFullNaiveProblem R N ⟶
+      (semiBorelQPD (R := R) N hN4 hinv).prob) =>
+    m.app (Opposite.op (xFullNaive (R := R) N
+      (by exact_mod_cast Nat.le_of_succ_le hN4) hinv))
+      ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+        hinv).homEquiv (𝟙 _)))
+    ((semiBorelQPD (R := R) N hN4 hinv).proj_invariant γ⁻¹)
+  rw [h3]
+  exact h4
+
+/-- **The fine projection coequalizes the transported semi-Borel action on `Y(N)`**
+(the scheme-level invariance feeding the coarse universal property). -/
+theorem baseSchemeAction_comp_piOneFine (N : ℕ) [NeZero N] (hN4 : 4 ≤ N)
+    (hinv : IsUnit (N : R)) (γ : (semiBorel N)) :
+    ((xFullNaiveRepr (R := R) N (by exact_mod_cast Nat.le_of_succ_le hN4)
+        hinv).baseSchemeAction (gammaHAut R N (semiBorel N))).hom γ ≫
+      piOneFine (R := R) N hN4 hinv = piOneFine (R := R) N hN4 hinv :=
+  congrArg EllHom.baseHom (gammaHAut_inv_comp_piOneFineEll (R := R) N hN4 hinv γ)
+
 end ModularCurves
