@@ -13,8 +13,9 @@ This file turns base change for the first kernel of a finite affine Cech complex
 change for global sections.
 -/
 
-open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
 open TensorProduct
+open scoped ChangeOfRings
 
 universe u
 
@@ -116,5 +117,130 @@ theorem baseSections_orderedCechSourceBaseChange_one_tmul
           f M U hU) s
   exact congrArg
     (fun y => (1 : A) ⊗ₜ[Γ(S, (⊤ : S.Opens))] y) hinner
+
+private theorem affinePullbackUnitTop_restrict
+    {X Y : Scheme.{u}} (g : Y ⟶ X) (M : X.Modules)
+    (V : Y.Opens) (s : M.presheaf.obj (op (⊤ : X.Opens))) :
+    ((pullback g).obj M).presheaf.map
+        (homOfLE (show V ≤ (⊤ : Y.Opens) from le_top)).op
+        (affinePullbackUnitTop g M s) =
+      ((pullback g).obj M).presheaf.map
+        (homOfLE (show V ≤ g ⁻¹ᵁ (⊤ : X.Opens) by simp)).op
+        ((((pullbackPushforwardAdjunction g).unit.app M).val.app
+          (op (⊤ : X.Opens))) s) := by
+  let P := (pullback g).obj M
+  let htop : (⊤ : Y.Opens) = g ⁻¹ᵁ (⊤ : X.Opens) := by simp
+  let unitTop := (((pullbackPushforwardAdjunction g).unit.app M).val.app
+    (op (⊤ : X.Opens))) s
+  change P.presheaf.map (homOfLE le_top).op
+      (P.presheaf.map (eqToHom htop).op unitTop) = _
+  have hmaps :
+      P.presheaf.map (eqToHom htop).op ≫
+          P.presheaf.map (homOfLE le_top).op =
+        P.presheaf.map
+          (homOfLE (show V ≤ g ⁻¹ᵁ (⊤ : X.Opens) by simp)).op := by
+    rw [← P.presheaf.map_comp]
+    exact P.presheaf.congr_map (Subsingleton.elim _ _)
+  exact ConcreteCategory.congr_hom hmaps unitTop
+
+private theorem baseCechXIsoPi_hom_apply
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (n : ℕ)
+    (x : (baseCechComplex f M U).X n) (i : Fin (n + 1) → ι) :
+    (baseCechXIsoPi f M U n).hom x i =
+      Pi.π (fun j : Fin (n + 1) → ι => baseCechFactor f M U n j) i x := by
+  calc
+    _ = ((baseCechXIsoPi f M U n).hom ≫
+        ModuleCat.ofHom (LinearMap.proj i)) x := rfl
+    _ = _ := ConcreteCategory.congr_hom
+      (baseCechXIsoPi_hom_comp_proj f M U n i) x
+
+private theorem baseCechComplexBaseChange_zero_one_tmul_augmentation
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] (U : ι → X.Opens)
+    (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (s : baseSections f M) :
+    let g := pullback.fst f t
+    let f' := pullback.snd f t
+    let P := (pullback g).obj M
+    let Uf : ι → (Limits.pullback f t).Opens := fun i ↦ g ⁻¹ᵁ U i
+    (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+        ((1 : Γ(T, (⊤ : T.Opens)))
+          ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom]
+            (baseCechAugmentation f M U).hom s) =
+      (baseCechAugmentation f' P Uf).hom
+        (affinePullbackUnitTop g M s) := by
+  dsimp only
+  let g := pullback.fst f t
+  let f' := pullback.snd f t
+  let P := (pullback g).obj M
+  let Uf : ι → (Limits.pullback f t).Opens := fun i ↦ g ⁻¹ᵁ U i
+  let x : (baseCechComplex f' P Uf).X 0 :=
+    (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+      ((1 : Γ(T, (⊤ : T.Opens)))
+        ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom]
+          (baseCechAugmentation f M U).hom s)
+  let y : (baseCechComplex f' P Uf).X 0 :=
+    (baseCechAugmentation f' P Uf).hom
+      (affinePullbackUnitTop g M s)
+  change x = y
+  apply (baseCechXIsoPi f' P Uf 0).toLinearEquiv.injective
+  change (baseCechXIsoPi f' P Uf 0).hom x =
+    (baseCechXIsoPi f' P Uf 0).hom y
+  funext i
+  rw [baseCechXIsoPi_hom_apply]
+  rw [baseCechXIsoPi_hom_apply]
+  dsimp only [x, y]
+  rw [baseCechComplexBaseChangeIso_hom_f]
+  let sourceAug := (baseCechAugmentation f M U).hom s
+  let sourcePi := Pi.π (fun j : Fin 1 → ι =>
+    (baseModulePresheaf f M).obj
+      (op (∏ᶜ fun k : Fin 1 => U (j k)))) i
+  let targetPi := Pi.π (fun j : Fin 1 → ι =>
+    (baseModulePresheaf f' P).obj
+      (op (∏ᶜ fun k : Fin 1 => Uf (j k)))) i
+  let targetUnit := affinePullbackUnitTop g M s
+  change targetPi
+      ((baseCechXBaseChangeIso f t M U hUaff 0).hom
+        ((1 : Γ(T, (⊤ : T.Opens)))
+          ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] sourceAug)) =
+    targetPi ((baseCechAugmentation f' P Uf).hom targetUnit)
+  have hm : sourcePi sourceAug =
+      (baseModulePresheaf f M).map
+        (homOfLE (show (∏ᶜ fun k : Fin 1 => U (i k)) ≤
+          (⊤ : X.Opens) from le_top)).op s := by
+    dsimp only [sourcePi, sourceAug]
+    exact ConcreteCategory.congr_hom
+      (baseCechAugmentation_comp_π f M U i) s
+  have hComponent := baseCechXBaseChangeIso_zero_one_tmul_of_projection_eq
+    f t M U hUaff sourceAug s i hm
+  have hNormalize :
+      (baseModulePresheaf f' P).map
+          (homOfLE (show (∏ᶜ fun k : Fin 1 => Uf (i k)) ≤
+            (⊤ : (Limits.pullback f t).Opens) from le_top)).op
+          ((((pullbackPushforwardAdjunction g).unit.app M).val.app
+            (op (⊤ : X.Opens))) s) =
+        (baseModulePresheaf f' P).map
+          (homOfLE (show (∏ᶜ fun k : Fin 1 => Uf (i k)) ≤
+            (⊤ : (Limits.pullback f t).Opens) from le_top)).op targetUnit := by
+    exact (affinePullbackUnitTop_restrict g M
+      (∏ᶜ fun k : Fin 1 => Uf (i k)) s).symm
+  have hTarget : targetPi
+      ((baseCechAugmentation f' P Uf).hom targetUnit) =
+      (baseModulePresheaf f' P).map
+        (homOfLE (show (∏ᶜ fun k : Fin 1 => Uf (i k)) ≤
+          (⊤ : (Limits.pullback f t).Opens) from le_top)).op targetUnit := by
+    dsimp only [targetPi]
+    exact ConcreteCategory.congr_hom
+      (baseCechAugmentation_comp_π f' P Uf i) targetUnit
+  calc
+    _ = ((baseCechXBaseChangeIso f t M U hUaff 0).hom ≫ targetPi)
+        ((1 : Γ(T, (⊤ : T.Opens)))
+          ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] sourceAug) :=
+      (CategoryTheory.comp_apply _ _ _).symm
+    _ = _ := hComponent
+    _ = _ := hNormalize
+    _ = _ := hTarget.symm
 
 end AlgebraicGeometry.Scheme.Modules
