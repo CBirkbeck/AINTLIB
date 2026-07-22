@@ -24684,3 +24684,118 @@ QuotPkg decls reduce to mechanical hypothesis deletion.
   shape) so no future worker re-attempts Y₀-fine through `gammaH_representable_of_orderOf`.
 
 NEXT: /develop over M1+M2 (M3 scoped), then /beastmode. — new worker, 2026-07-22
+
+## v10.346 (2026-07-22) — TICKET SET for the rectified gates (streams M1 + M2; /develop complete)
+
+*Skeletons landed and COMPILING (own builds, sorry-warnings only):
+`ForMathlib/RelativeInvariantSpec.lean` (M1: real defs `invariantsDiagram`/`invariantsDiagramMap`/
+`invariantsGlueData`/`relQuotient`/`relQuotientStruct`/`relQuotientπ` + hoisted `basePullback`;
+17 sorried Props) and `Moduli/GammaHSemiBorel.lean` (M2: real `semiBorel` def; 17 sorried Props
+incl. the headline `gammaH_semiBorel_closure` and the Borel no-go `hH_refuted_of_neg_one_mem`).
+Statements in the skeleton are the CONTRACTS (board standing rule). Full per-leaf source quotes,
+discharge citations, and adversarial blocks: `decomposition-quotient-rectified.md`. Prior-B2 log
+consulted (naive-orbit-presheaf B2s routed around by design — everything targets `qpd.prob`).*
+
+**Dependency shape.** M2 (T-SB1…T-SB5) is independent of M1 and dispatchable NOW. M1 is a chain
+T-RIS1 → … → T-RIS8. The headline T-SB6 joins both (needs T-RIS8 + T-SB4).
+
+### M1 — relative-affine quotient (file `ForMathlib/RelativeInvariantSpec.lean`)
+
+- **[T-RIS1] Diagram layer** — discharge `isStableOpen_preimage`, `gamma_map_smul`,
+  `invariantsDiagram.map_id/map_comp` + the `MapsTo`-hole in `invariantsDiagram.map`,
+  `invariantsDiagramMap.naturality`. Sketch: [GHB3]-inline stability extraction
+  (GammaHRepresentability:461-464); `appLE_comp_appLE` equivariance à la
+  `gamma_appLE_invariant` (SchemeActionFree:207); functor laws mirror
+  `normalizationDiagram` (`Subtype.ext` + presheaf `map_id/map_comp`); naturality via
+  `ofHom_quotientDescRing_algebraMap` (SchemeActionFree:235) + inclusion-injectivity.
+  Status: open.
+- **[T-RIS2] Coequifibered core** — discharge `coequifibered_invariantsDiagramMap` via
+  `coequifibered_iff_forall_isLocalizationAway`; chart identifications
+  (`IsAffineOpen.preimage`, `Scheme.preimage_basicOpen`, `isLocalization_basicOpen`) +
+  the PROVEN InvariantLocalization triple (`mem_range_fixedPoints_awayMap_iff`,
+  `fixedPoints_awayMap_injective`, `exists_fixed_mk'_eq_of_forall_awayHom_eq`).
+  KM A7.1 (print 215) flat case. Depends: T-RIS1. Status: open.
+- **[T-RIS3] π layer** — discharge the glue-compat hole inside `relQuotientπ`,
+  `relQuotientπ_comp_relQuotientStruct`, `hom_comp_relQuotientπ`. Mirror
+  `toNormalization`'s compat block + `ι_toBase`; invariance chartwise via
+  `Spec (γ♯)`-fixes-invariants. Depends: T-RIS2. Status: open.
+- **[CLEANUP-RIS1]** `/cleanup` on `RelativeInvariantSpec.lean`. Depends: T-RIS3. Status: open.
+- **[T-RIS4] Chart bridge + structure instances** — discharge
+  `isPullback_relQuotientπ_chart` (paste `isPullback_natTrans_ι_toBase` with the
+  `map_glueMorphismsOfLocallyDirected` triangle + `pullbackRestrictIsoRestrict`),
+  `isAffineHom_relQuotientStruct` (local-at-target + `toBase_preimage_eq_opensRange_ι`),
+  `isIntegralHom_relQuotientπ` (chartwise `∏_g (T − g•a)`, KM print 193; try mathlib
+  `prod_X_sub_smul`-layer first). Depends: T-RIS3 (+CLEANUP-RIS1). Status: open.
+- **[T-RIS5] Universal property + [GHB3′] package** — discharge
+  `existsUnique_relQuotientπ_lift` (chart-level `existsUnique_invariantsπ_lift`
+  AffineQuotient:519 + `invariantsπ_hom_ext` :243 through the T-RIS4 bridge, glued by
+  `glueMorphismsOfLocallyDirected`; uniqueness by epi-on-charts cancel) and the
+  package `exists_quotient_of_isAffineHom_rel` (tuple assembly). Depends: T-RIS4.
+  Status: open.
+- **[T-RIS6] Free addenda** — discharge `isFinite_relQuotientπ_of_free`,
+  `etale_relQuotientπ_of_free`, `surjective_relQuotientπ_of_free`: T-RIS4 bridge +
+  PROVEN chart cores (`isFreeAlgebraAction_of_free`,
+  `Module.Finite/Projective.of_isFreeAlgebraAction`,
+  `Algebra.Etale.of_isFreeAlgebraAction`, `fppf_invariantsπ`); each property
+  IsZariskiLocalAtTarget. Depends: T-RIS4. Parallel with T-RIS5. Status: open.
+- **[T-RIS7] Base change [GHB5′]** — discharge `exists_relQuotient_baseChange_of_free`:
+  port the current GHB5 body onto the new charts; cores
+  `exists_invariantsπ_lift_baseChange_of_free` (AffineQuotient:1153) +
+  `epi_pullback_snd_invariantsπ_of_free` (:946). Depends: T-RIS5, T-RIS6. Status: open.
+- **[CLEANUP-RIS2]** final `/cleanup` on `RelativeInvariantSpec.lean`. Depends: T-RIS7. Status: open.
+- **[T-RIS8] THE REWIRE (GammaHRepresentability.lean)** — import RelativeInvariantSpec;
+  DELETE the local `basePullback` (:288, hoisted); rewire the three consumers to the
+  new foundation with conclusion shapes UNCHANGED and the
+  `[IsAffineHom (pullback.diagonal (terminal.from Z))]` instance DELETED:
+  `exists_quotient_of_isAffineHom` (:445 ⟸ delegate `exists_quotient_of_isAffineHom_rel`),
+  `quotientπ_finite_etale_surjective` (:484 ⟸ existing unique-iso comparison :516-533
+  against `relQuotient`), `exists_quotient_baseChange_of_free` (:545 ⟸ delegate/port).
+  Then DELETE `hbase` end-to-end: `nonempty_quotPkg` (:749), the ~30 `QuotPkg.*`
+  threadings (:733-3230), `exists_quotientProblemData` (:3184),
+  `gammaH_relativelyRepresentable` (:3553). STATEMENT CHANGES = HYPOTHESIS DELETIONS
+  ONLY (strengthenings, sanctioned by v10.345-AMEND §B; flag on board at completion).
+  Verify: full `lake build` + `#print axioms gammaH_relativelyRepresentable` = clean
+  triple + receipts census unchanged. Depends: T-RIS5, T-RIS6, T-RIS7. Status: open.
+- **[CLEANUP-RIS3]** `/cleanup` on the touched GammaHRepresentability sections.
+  Depends: T-RIS8. Status: open.
+
+### M2 — semi-Borel rigidity + Borel no-go (file `Moduli/GammaHSemiBorel.lean`) — dispatchable NOW
+
+- **[T-SB1] semiBorel + first-component fix** — discharge `semiBorel.mul_mem'/one_mem'/
+  inv_mem'` (2×2 entry computations; inverse via `Matrix.inv_def`/adjugate entries) and
+  `glSmul_fst_of_mem_semiBorel` (unfold `glSmul`; `ZMod.val_one` (1 < N), `ZMod.val_zero`,
+  `one_smul`, `zero_smul`, `add_zero`). Status: open.
+- **[T-SB2] Untwist + order supply** — discharge `gammaFullNaive_fix_fst_of_le_semiBorel`
+  (untwist block verbatim from `gammaH_hfree_of_orderOf_absurd` :862-874 —
+  `gammaHAut_app_val`, `glSmul_mul`, `inv_inv`-coe; then `congrArg (fun z => z.1.1)` +
+  T-SB1) and `gammaFullNaive_fst_smul_ne_zero` (mirror [GH2]
+  `gammaFullNaive_freeAction`'s geometric-fibre basis pinning:
+  `torsion_geometricFibre_rank_two` at t = 𝟙 + generation clause ⟹ component order N:
+  if aP = 0 with 0 < a < N then |⟨P,Q⟩| ≤ aN < N²). Depends: T-SB1. Status: open.
+- **[T-SB3] Naive keystone kill** — discharge `gammaFullNaive_fix_fst_absurd`: mirror
+  `gammaOneDrinfeld_fix_absurd` (:1152-1290) with hord := T-SB2's supply (NO Drinfeld
+  boxes), keystone `aut_endo_eq_one_of_fixes_point` (ExactOrderRigidity:83), hbound
+  via `hbound_of_kvc` exactly as GammaHClosure:176-180; endgame εO = 𝟙 ⟹ e = refl ⟹
+  hne. Depends: T-SB2. Status: open.
+- **[CLEANUP-SB1]** `/cleanup` on `GammaHSemiBorel.lean`. Depends: T-SB3. Status: open.
+- **[T-SB4] Assemblies** — discharge `gammaH_hfree_of_le_semiBorel` (T-SB2 + T-SB3),
+  `gammaH_rigidNoeth_of_le_semiBorel` (`gammaH_rigidNoeth` :1029 + hfree; 3 ≤ (N:ℤ)
+  from 4 ≤ N), `gammaH_representable_of_le_semiBorel` (mirror
+  `gammaH_representable_of_orderOf` :1123-1138 with the rigidNoeth input). Depends:
+  T-SB3. Status: open.
+- **[T-SB5] Borel no-go block** — discharge `orderOf_neg_one_gl` ((−1)² = 1, −1 ≠ 1
+  for N ≥ 3), `isoPow_negIso_two` (`negHom_comp_negHom`), `negIso_ne_refl`
+  (`mulByHom_neg_one_ne_id`), `hH_refuted_of_neg_one_mem` (witness assembly). Parallel
+  with T-SB2-4. Depends: T-SB1. Status: open.
+- **[CLEANUP-SB2]** final `/cleanup` on `GammaHSemiBorel.lean`. Depends: T-SB4, T-SB5. Status: open.
+- **[T-SB6] HEADLINE closure** — discharge `gammaH_semiBorel_closure`
+  (⟨M1-unconditional `gammaH_relativelyRepresentable`, fun qpd =>
+  `gammaH_representable_of_le_semiBorel`⟩). Depends: T-RIS8, T-SB4. Status: open.
+- **[CLEANUP-ALL-RECTIFIED]** `/cleanup-all` pass over the two new files + touched
+  sections before declaring the milestone. Depends: T-SB6. Status: open.
+
+### M3 (scoped, NO tickets yet — follow-on /develop after T-RIS8 + T-SB6)
+Y₀(N) coarse scheme = quotient of the representing scheme (KM 8.1.1/8.1.5; Loeffler
+3.6.2). Gap list in `decomposition-quotient-rectified.md` §M3: representing-object
+extraction API, absolute affineness of Y(N), affine quotient step (machinery exists),
+coarse k̄-points assembly; smoothness /ℤ[1/N] = M4, parked.
