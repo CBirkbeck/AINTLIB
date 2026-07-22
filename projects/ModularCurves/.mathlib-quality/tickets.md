@@ -25228,3 +25228,20 @@ T-Y1F-1 → T-Y1F-2 → T-Y1F-4 → T-YR-1 → T-YR-2 → T-YR-4 → T-YR-3 → 
 - **[T-YR-2f] fill rhoProblem.map_id/map_comp** — needs RhoLevelStructure.ext (torsionIso-field
   determines; other fields Prop) + pull-functoriality (τ_{id}=𝟙 via hom_ext on the kernel
   pullback; τ_{g≫h} composite). Status: open.
+
+### T-YR-2a route note (2026-07-23, audit session)
+Morphism-level [N]-naturality along a general EllHom is NOT in-tree; the landed adjacent
+facts: `EllHom.pullSection_zsmul` (GammaH.lean:380, SECTION-level), `pullSection_add`
+(Representability:458, T-E4a), `mulByHom_baseChange_fst/snd` (GroupLaw.lean:227+, the
+CONSTRUCTED baseChange only), `mulByHom_π` (GroupLaw:94), `HomOver.mapPoint`
+(Moduli/Coarse.lean:37, same-base homs). Two candidate routes for 2a:
+(i) UNIVERSAL-POINT: generalize pullSection_zsmul to Point-level pull along an EllHom
+(mapPoint-for-EllHom, mirroring pullSection's construction at arbitrary T), then apply at
+the tautological point 𝟙 A.curve.E over A.curve.π and use t := 𝟙 to get the morphism
+equation. READ the pullSection_add proof (Representability:458+) first — its technique is
+the substrate.
+(ii) COMPARISON: through g.isPullback.isoPullback to the constructed baseChange +
+mulByHom_baseChange_fst; needs "pointed cartesian iso is a group iso" (GroupLawDescent
+pointedIso_exists_variableChange territory) — likely heavier.
+Prefer (i). NOTE: 2a is exactly the morphism-level form of T-E4a; if it resists, check
+with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
