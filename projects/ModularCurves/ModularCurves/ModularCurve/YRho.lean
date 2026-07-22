@@ -2310,7 +2310,78 @@ theorem frameEval_points (D : GaloisRepData N)
   show (FiniteEtaleGalois.pointsEquivOfContAction ℚ
       (frameProdContAction D) χ).2 •
     (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameProdContAction D) χ).1 = _
-  sorry
+  -- the split points over ℚ (hoisted for the subtype elements)
+  have hfp : (p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D)) ≫
+      constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) := by
+    rw [Category.assoc]; exact hp
+  have hsp : (p ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D)) ≫ wFramesπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) := by
+    rw [Category.assoc, ← pullback.condition]; exact hp
+  -- left component-read: the vector-factor reading is the bridge after the
+  -- left cofan-injection
+  have hxf : (AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)) sepClosureQAlgEquiv.symm)
+      (specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0) (AlgebraicClosure ℚ)
+        ⟨p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D), hfp⟩) =
+      χ.comp (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdFst D)).unop.hom.hom) := by
+    have hAfst : specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+        (AlgebraicClosure ℚ)
+        ⟨p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D), hfp⟩ =
+        (specPointsEquivAlgHom ℚ (TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)) (AlgebraicClosure ℚ)
+          ⟨p', hover'⟩).comp
+          (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ)) := by
+      refine AlgHom.ext fun w => ?_
+      exact congrArg (fun q : CommRingCat.of (constVecAlgebra N : Type 0) ⟶
+        CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hfst
+    rw [hAfst]
+    refine AlgHom.ext fun w => ?_
+    exact congrArg (fun t => sepClosureQAlgEquiv.symm
+      ((specPointsEquivAlgHom ℚ (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)) (AlgebraicClosure ℚ) ⟨p', hover'⟩) t))
+      (congrArg (fun m => m.hom.hom w) (frameProdAlgebraIso_inv_left D)).symm
+  -- right component-read: the frame-factor reading is the bridge after the
+  -- right cofan-injection
+  have hxs : (AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)) sepClosureQAlgEquiv.symm)
+      (specPointsEquivAlgHom ℚ (wFramesAlgebra D : Type 0) (AlgebraicClosure ℚ)
+        ⟨p ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D), hsp⟩) =
+      χ.comp (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdSnd D)).unop.hom.hom) := by
+    have hAsnd : specPointsEquivAlgHom ℚ (wFramesAlgebra D : Type 0)
+        (AlgebraicClosure ℚ)
+        ⟨p ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D), hsp⟩ =
+        (specPointsEquivAlgHom ℚ (TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)) (AlgebraicClosure ℚ)
+          ⟨p', hover'⟩).comp
+          (Algebra.TensorProduct.includeRight (R := ℚ)) := by
+      refine AlgHom.ext fun w => ?_
+      exact congrArg (fun q : CommRingCat.of (wFramesAlgebra D : Type 0) ⟶
+        CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hsnd
+    rw [hAsnd]
+    refine AlgHom.ext fun w => ?_
+    exact congrArg (fun t => sepClosureQAlgEquiv.symm
+      ((specPointsEquivAlgHom ℚ (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)) (AlgebraicClosure ℚ) ⟨p', hover'⟩) t))
+      (congrArg (fun m => m.hom.hom w) (frameProdAlgebraIso_inv_right D)).symm
+  -- the two factor-readings via counit-naturality at the projections
+  have hread1 : constVecPointsEquiv N
+      ⟨p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D), hfp⟩ =
+      (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameProdContAction D) χ).1 :=
+    (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+      (constVecContAction N)) hxf).trans
+      (pointsEquivOfContAction_map (frameProdFst D) χ)
+  have hread2 : wFramesPointsEquiv D
+      ⟨p ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D), hsp⟩ =
+      (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameProdContAction D) χ).2 :=
+    (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+      (frameContAction D)) hxs).trans
+      (pointsEquivOfContAction_map (frameProdSnd D) χ)
+  exact ((congrArg (fun A : Matrix.GeneralLinearGroup (Fin 2) (ZMod N) =>
+      A • (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+        (frameProdContAction D) χ).1) hread2).symm.trans
+    (congrArg (fun v => wFramesPointsEquiv D
+      ⟨p ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D), hsp⟩ • v) hread1.symm))
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
 carrying a frame-classifier `h`, the constant vector scheme maps to the
