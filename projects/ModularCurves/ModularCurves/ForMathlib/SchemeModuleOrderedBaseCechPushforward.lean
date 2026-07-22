@@ -45,6 +45,25 @@ noncomputable def baseModulePresheafPushforwardAppIso
     simpa only [CommRingCat.comp_apply] using hr
   exact congrArg (fun q => q • x') hr'
 
+/-- Base-linear global sections commute with pushforward over an arbitrary
+further base morphism. -/
+noncomputable def baseSectionsPushforwardIso
+    {X Y S : Scheme.{u}} (f : X ⟶ Y) (π : Y ⟶ S) (M : X.Modules) :
+    baseSections (f ≫ π) M ≅ baseSections π ((pushforward f).obj M) :=
+  (baseModulePresheaf (f ≫ π) M).mapIso
+      (eqToIso (Scheme.Hom.preimage_top f)).op ≪≫
+    baseModulePresheafPushforwardAppIso f π M (⊤ : Y.Opens)
+
+/-- The pushforward isomorphism on base-linear global sections is the
+canonical top-open transport. -/
+@[simp]
+theorem baseSectionsPushforwardIso_hom_apply
+    {X Y S : Scheme.{u}} (f : X ⟶ Y) (π : Y ⟶ S) (M : X.Modules)
+    (m : baseSections (f ≫ π) M) :
+    (baseSectionsPushforwardIso f π M).hom m =
+      pushforwardTopSection f M m := by
+  rfl
+
 /-- Base-linear global sections of a module agree with top-open sections of
 its pushforward. -/
 noncomputable def baseSectionsPushforwardTopIso
