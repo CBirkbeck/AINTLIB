@@ -605,6 +605,40 @@ theorem wFramesPointsEquiv_rightMul (D : GaloisRepData N)
     (frameContAction D)) (hB (L1 h))) ?_
   exact hC
 
+/-- **[T-YR-3d-1c]** The trivial Galois action on `(ℤ/N)²` (the Galois set of the
+constant scheme `(ℤ/N)²_ℚ`). -/
+noncomputable abbrev constVecAction (N : ℕ) [NeZero N] :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of (Fin 2 → ZMod N)
+  ρ := { toFun := fun _ => FintypeCat.homMk id
+         map_one' := rfl
+         map_mul' := fun _ _ => rfl }
+
+lemma constVecAction_isContinuous (N : ℕ) [NeZero N] :
+    (constVecAction N).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
+          (constVecAction N) : Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun y => ?_
+  have huniv : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+      (CategoryTheory.forget₂ _ TopCat).obj (constVecAction N) => p.1 • p.2) ⁻¹'
+      ({y} : Set _) = Set.univ ×ˢ ({y} : Set _) := by
+    ext p
+    constructor
+    · intro hp
+      exact ⟨trivial, hp⟩
+    · intro hp
+      exact hp.2
+  rw [huniv]
+  exact IsOpen.prod isOpen_univ trivial
+
+/-- The constant `(ℤ/N)²` as a continuous Galois set. -/
+noncomputable abbrev constVecContAction (N : ℕ) [NeZero N] :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨constVecAction N, constVecAction_isContinuous N⟩
+
 /-- **[T-YR-3d-1c]** The mixed product Galois set `(ℤ/N)² × GL₂` (trivial action on
 the vector factor, left `ρ`-multiplication on the frame factor) — the Galois set of
 `(ℤ/N)²_ℚ ×_ℚ wFrames`. -/
@@ -679,6 +713,38 @@ noncomputable def frameEvalMor (D : GaloisRepData N) :
         show (D.ρ (galSepMulEquivGalQ σ) * vA.2) • vA.1 =
           D.ρ (galSepMulEquivGalQ σ) • (vA.2 • vA.1)
         rw [mul_smul] }
+
+/-- First projection of the mixed product (to the trivial vector factor). -/
+noncomputable def frameProdFst (D : GaloisRepData N) :
+    frameProdContAction D ⟶ constVecContAction N :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.fst
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vA => rfl }
+
+/-- Second projection of the mixed product (to the frames). -/
+noncomputable def frameProdSnd (D : GaloisRepData N) :
+    frameProdContAction D ⟶ frameContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.snd
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vA => rfl }
+
+/-- **[T-YR-3d-1c]** The mixed product with its projections is the categorical binary
+product of continuous Galois sets (mirror of `rhoSqIsProduct`). -/
+noncomputable def frameProdIsProduct (D : GaloisRepData N) :
+    Limits.IsLimit (Limits.BinaryFan.mk (frameProdFst D) (frameProdSnd D)) := by
+  refine Limits.BinaryFan.isLimitMk
+    (fun s => ObjectProperty.homMk
+      { hom := FintypeCat.homMk (fun x => (s.fst.hom.hom x, s.snd.hom.hom x))
+        comm := fun σ => FintypeCat.hom_ext _ _ fun x => ?_ })
+    (fun s => rfl) (fun s => rfl) (fun s m h₁ h₂ => ?_)
+  · have h1 := congrArg (fun q => q x) (s.fst.hom.comm σ)
+    have h2 := congrArg (fun q => q x) (s.snd.hom.comm σ)
+    rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at h1 h2
+    exact Prod.ext h1 h2
+  · ext x : 3
+    refine Prod.ext ?_ ?_
+    · exact congrArg (fun q : s.pt ⟶ constVecContAction N => q.hom.hom x) h₁
+    · exact congrArg (fun q : s.pt ⟶ frameContAction D => q.hom.hom x) h₂
 
 end FrameSubstrate
 
