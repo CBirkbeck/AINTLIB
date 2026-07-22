@@ -978,6 +978,89 @@ theorem epi_pullback_snd_relQuotientπ {W : Scheme.{u}}
   exact Flat.epi_of_flat_of_surjective _
 
 include hfree in
+/-- **The chart step of free base change** (`[GHB5a′]`-local): if the base map factors
+through the `U`-th chart `Spec Γ(Z, f⁻¹U)ᴳ` of the quotient, invariant morphisms out of
+the base change of the projection descend — the pasted chart bridge reduces to the
+free-action affine engine `exists_invariantsπ_lift_baseChange_of_free` ([A711-BC]). -/
+theorem exists_relQuotientπ_lift_baseChange_of_factors {WT Y : Scheme.{u}}
+    (U : S.AffineZariskiSite) (wq : WT ⟶ σ.relQuotient f hover)
+    (wc : WT ⟶ (σ.invariantsGlueData f hover).functor.obj U)
+    (hw : wq = wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)
+    (F : pullback (σ.relQuotientπ f hover) wq ⟶ Y)
+    (hF : ∀ γ : G, σ.pullbackRelQSMul f hover wq γ ≫ F = F) :
+    ∃ q : WT ⟶ Y, pullback.snd (σ.relQuotientπ f hover) wq ≫ q = F := by
+  classical
+  subst hw
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  have hfree' : ∀ {T' : Scheme.{u}} (t : T' ⟶ Spec (CommRingCat.of ↑Γ(Z, f ⁻¹ᵁ U.1)))
+      (γ : G), γ ≠ 1 → t ≫ specSMul γ = t → IsEmpty T' := by
+    intro T' t γ hγ ht
+    refine hfree (t ≫ (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι) γ hγ ?_
+    have h1 : (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.hom γ =
+        (σ.hom γ).resLE _ _ ((σ.isStableOpen_preimage f hover U.1).le_preimage γ) ≫
+        (f ⁻¹ᵁ (U.1 : S.Opens)).ι := (Scheme.Hom.resLE_comp_ι
+          (e := (σ.isStableOpen_preimage f hover U.1).le_preimage γ)).symm
+    have h2 := specSMul_isoSpec_inv σ (σ.isStableOpen_preimage f hover U.1)
+      (U.2.preimage f) γ
+    simp only [Category.assoc]
+    rw [h1, ← Category.assoc ((U.2.preimage f).isoSpec.inv), ← h2,
+      Category.assoc, ← Category.assoc t, ht]
+  have sq1 : IsPullback ((U.2.preimage f).isoSpec.inv)
+      (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ)
+      ((f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom))
+      (𝟙 _) := by
+    refine IsPullback.of_horiz_isIso ⟨?_⟩
+    rw [Category.comp_id, ← Category.assoc, show (U.2.preimage f).isoSpec.inv ≫
+      (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ = 𝟙 _ from by
+        rw [← (U.2.preimage f).isoSpec_hom, Iso.inv_hom_id], Category.id_comp]
+    rfl
+  have hpaste := ((IsPullback.of_hasPullback
+      (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc).paste_horiz
+    (sq1.paste_horiz (σ.isPullback_relQuotientπ_chart f hover U).flip))
+  simp only [Category.id_comp] at hpaste
+  set E := hpaste.isoPullback with hE
+  have hEfst : E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
+      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) =
+      pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
+        (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι := by
+    rw [hE]
+    exact hpaste.isoPullback_hom_fst
+  have hEsnd : E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
+      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) =
+      pullback.snd (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc := by
+    rw [hE]
+    exact hpaste.isoPullback_hom_snd
+  have hact : ∀ γ : G, E.hom ≫ σ.pullbackRelQSMul f hover
+      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ =
+      pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ E.hom := by
+    intro γ
+    have h1 : (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.hom γ =
+        (σ.hom γ).resLE _ _ ((σ.isStableOpen_preimage f hover U.1).le_preimage γ) ≫
+        (f ⁻¹ᵁ (U.1 : S.Opens)).ι := (Scheme.Hom.resLE_comp_ι
+          (e := (σ.isStableOpen_preimage f hover U.1).le_preimage γ)).symm
+    have h2 := specSMul_isoSpec_inv σ (σ.isStableOpen_preimage f hover U.1)
+      (U.2.preimage f) γ
+    refine pullback.hom_ext ?_ ?_
+    · -- [T-RIS7-µ1] fst-intertwining: pullbackRelQSMul_fst + reassoc hEfst + h1 + h2
+      sorry
+    · -- [T-RIS7-µ2] snd-intertwining: pullbackRelQSMul_snd + hEsnd + pullbackSpecSMul_snd
+      sorry
+  have hFE : ∀ γ : G, pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ (E.hom ≫ F)
+      = E.hom ≫ F := by
+    intro γ
+    have h := congrArg (· ≫ F) (hact γ)
+    simp only [Category.assoc] at h
+    exact h.symm.trans (congrArg (fun m => E.hom ≫ m) (hF γ))
+  obtain ⟨q, hq⟩ := exists_invariantsπ_lift_baseChange_of_free G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ
+    hfree' wc (E.hom ≫ F) hFE
+  refine ⟨q, ?_⟩
+  have h3 : E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
+      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) ≫ q = E.hom ≫ F :=
+    ((Category.assoc _ _ _).symm.trans (congrArg (· ≫ q) hEsnd)).trans hq
+  exact (cancel_epi E.hom).mp h3
+
+include hfree in
 /-- **The base-changed descent core** ([GHB5a′], the [A711-BC] crux): for a free action,
 an invariant morphism out of the base-changed total space descends uniquely through the
 base-changed projection. Chart-level engine:
