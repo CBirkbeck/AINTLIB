@@ -24729,40 +24729,40 @@ not mentioning them; site-subtype literals need `(⟨W, hW⟩ : S.AffineZariskiS
   `gamma_appLE_invariant` (SchemeActionFree:207); functor laws mirror
   `normalizationDiagram` (`Subtype.ext` + presheaf `map_id/map_comp`); naturality via
   `ofHom_quotientDescRing_algebraMap` (SchemeActionFree:235) + inclusion-injectivity.
-  Status: open.
+  Status: DONE (v10.349, 2026-07-22).
 - **[T-RIS2] Coequifibered core** — discharge `coequifibered_invariantsDiagramMap` via
   `coequifibered_iff_forall_isLocalizationAway`; chart identifications
   (`IsAffineOpen.preimage`, `Scheme.preimage_basicOpen`, `isLocalization_basicOpen`) +
   the PROVEN InvariantLocalization triple (`mem_range_fixedPoints_awayMap_iff`,
   `fixedPoints_awayMap_injective`, `exists_fixed_mk'_eq_of_forall_awayHom_eq`).
-  KM A7.1 (print 215) flat case. Depends: T-RIS1. Status: open.
+  KM A7.1 (print 215) flat case. Depends: T-RIS1. Status: DONE (v10.349, 2026-07-22).
 - **[T-RIS3] π layer** — discharge the glue-compat hole inside `relQuotientπ`,
   `relQuotientπ_comp_relQuotientStruct`, `hom_comp_relQuotientπ`. Mirror
   `toNormalization`'s compat block + `ι_toBase`; invariance chartwise via
-  `Spec (γ♯)`-fixes-invariants. Depends: T-RIS2. Status: open.
+  `Spec (γ♯)`-fixes-invariants. Depends: T-RIS2. Status: DONE (v10.349, 2026-07-22).
 - **[CLEANUP-RIS1]** `/cleanup` on `RelativeInvariantSpec.lean`. Depends: T-RIS3. Status: open.
 - **[T-RIS4] Chart bridge + structure instances** — discharge
   `isPullback_relQuotientπ_chart` (paste `isPullback_natTrans_ι_toBase` with the
   `map_glueMorphismsOfLocallyDirected` triangle + `pullbackRestrictIsoRestrict`),
   `isAffineHom_relQuotientStruct` (local-at-target + `toBase_preimage_eq_opensRange_ι`),
   `isIntegralHom_relQuotientπ` (chartwise `∏_g (T − g•a)`, KM print 193; try mathlib
-  `prod_X_sub_smul`-layer first). Depends: T-RIS3 (+CLEANUP-RIS1). Status: open.
+  `prod_X_sub_smul`-layer first). Depends: T-RIS3 (+CLEANUP-RIS1). Status: DONE (v10.349, 2026-07-22).
 - **[T-RIS5] Universal property + [GHB3′] package** — discharge
   `existsUnique_relQuotientπ_lift` (chart-level `existsUnique_invariantsπ_lift`
   AffineQuotient:519 + `invariantsπ_hom_ext` :243 through the T-RIS4 bridge, glued by
   `glueMorphismsOfLocallyDirected`; uniqueness by epi-on-charts cancel) and the
   package `exists_quotient_of_isAffineHom_rel` (tuple assembly). Depends: T-RIS4.
-  Status: open.
+  Status: DONE (v10.349, 2026-07-22).
 - **[T-RIS6] Free addenda** — discharge `isFinite_relQuotientπ_of_free`,
   `etale_relQuotientπ_of_free`, `surjective_relQuotientπ_of_free`: T-RIS4 bridge +
   PROVEN chart cores (`isFreeAlgebraAction_of_free`,
   `Module.Finite/Projective.of_isFreeAlgebraAction`,
   `Algebra.Etale.of_isFreeAlgebraAction`, `fppf_invariantsπ`); each property
-  IsZariskiLocalAtTarget. Depends: T-RIS4. Parallel with T-RIS5. Status: open.
+  IsZariskiLocalAtTarget. Depends: T-RIS4. Parallel with T-RIS5. Status: DONE (v10.349, 2026-07-22).
 - **[T-RIS7] Base change [GHB5′]** — discharge `exists_relQuotient_baseChange_of_free`:
   port the current GHB5 body onto the new charts; cores
   `exists_invariantsπ_lift_baseChange_of_free` (AffineQuotient:1153) +
-  `epi_pullback_snd_invariantsπ_of_free` (:946). Depends: T-RIS5, T-RIS6. Status: open.
+  `epi_pullback_snd_invariantsπ_of_free` (:946). Depends: T-RIS5, T-RIS6. Status: DONE (v10.349, 2026-07-22).
 - **[CLEANUP-RIS2]** final `/cleanup` on `RelativeInvariantSpec.lean`. Depends: T-RIS7. Status: open.
 - **[T-RIS8] THE REWIRE (GammaHRepresentability.lean)** — import RelativeInvariantSpec;
   DELETE the local `basePullback` (:288, hoisted); rewire the three consumers to the
@@ -24776,7 +24776,7 @@ not mentioning them; site-subtype literals need `(⟨W, hW⟩ : S.AffineZariskiS
   `gammaH_relativelyRepresentable` (:3553). STATEMENT CHANGES = HYPOTHESIS DELETIONS
   ONLY (strengthenings, sanctioned by v10.345-AMEND §B; flag on board at completion).
   Verify: full `lake build` + `#print axioms gammaH_relativelyRepresentable` = clean
-  triple + receipts census unchanged. Depends: T-RIS5, T-RIS6, T-RIS7. Status: open.
+  triple + receipts census unchanged. Depends: T-RIS5, T-RIS6, T-RIS7. Status: DONE (v10.349, 2026-07-22).
 - **[CLEANUP-RIS3]** `/cleanup` on the touched GammaHRepresentability sections.
   Depends: T-RIS8. Status: open.
 
@@ -24785,35 +24785,35 @@ not mentioning them; site-subtype literals need `(⟨W, hW⟩ : S.AffineZariskiS
 - **[T-SB1] semiBorel + first-component fix** (DONE 2026-07-22, axiom-clean) — discharge `semiBorel.mul_mem'/one_mem'/
   inv_mem'` (2×2 entry computations; inverse via `Matrix.inv_def`/adjugate entries) and
   `glSmul_fst_of_mem_semiBorel` (unfold `glSmul`; `ZMod.val_one` (1 < N), `ZMod.val_zero`,
-  `one_smul`, `zero_smul`, `add_zero`). Status: open.
+  `one_smul`, `zero_smul`, `add_zero`). Status: DONE (v10.349, 2026-07-22).
 - **[T-SB2] Untwist + order supply** (DONE 2026-07-22, axiom-clean) — discharge `gammaFullNaive_fix_fst_of_le_semiBorel`
   (untwist block verbatim from `gammaH_hfree_of_orderOf_absurd` :862-874 —
   `gammaHAut_app_val`, `glSmul_mul`, `inv_inv`-coe; then `congrArg (fun z => z.1.1)` +
   T-SB1) and `gammaFullNaive_fst_smul_ne_zero` (mirror [GH2]
   `gammaFullNaive_freeAction`'s geometric-fibre basis pinning:
   `torsion_geometricFibre_rank_two` at t = 𝟙 + generation clause ⟹ component order N:
-  if aP = 0 with 0 < a < N then |⟨P,Q⟩| ≤ aN < N²). Depends: T-SB1. Status: open.
+  if aP = 0 with 0 < a < N then |⟨P,Q⟩| ≤ aN < N²). Depends: T-SB1. Status: DONE (v10.349, 2026-07-22).
 - **[T-SB3] Naive keystone kill** (DONE 2026-07-22, axiom-clean; IMPROVED ROUTE: pointedAuto_eq_id_of_fixes_point_kvc single-point KVC kill — no hbound plumbing consumed) — discharge `gammaFullNaive_fix_fst_absurd`: mirror
   `gammaOneDrinfeld_fix_absurd` (:1152-1290) with hord := T-SB2's supply (NO Drinfeld
   boxes), keystone `aut_endo_eq_one_of_fixes_point` (ExactOrderRigidity:83), hbound
   via `hbound_of_kvc` exactly as GammaHClosure:176-180; endgame εO = 𝟙 ⟹ e = refl ⟹
-  hne. Depends: T-SB2. Status: open.
+  hne. Depends: T-SB2. Status: DONE (v10.349, 2026-07-22).
 - **[CLEANUP-SB1]** DEFERRED-TO-MAIN (CLAUDE.md producer rule: no cleanup on dev branches; the fleet cleans on main post-merge).
 - **[T-SB4] Assemblies** (DONE 2026-07-22, axiom-clean) — discharge `gammaH_hfree_of_le_semiBorel` (T-SB2 + T-SB3),
   `gammaH_rigidNoeth_of_le_semiBorel` (`gammaH_rigidNoeth` :1029 + hfree; 3 ≤ (N:ℤ)
   from 4 ≤ N), `gammaH_representable_of_le_semiBorel` (mirror
   `gammaH_representable_of_orderOf` :1123-1138 with the rigidNoeth input). Depends:
-  T-SB3. Status: open.
+  T-SB3. Status: DONE (v10.349, 2026-07-22).
 - **[T-SB5] Borel no-go block** (DONE 2026-07-22, axiom-clean) — discharge `orderOf_neg_one_gl` ((−1)² = 1, −1 ≠ 1
   for N ≥ 3), `isoPow_negIso_two` (`negHom_comp_negHom`), `negIso_ne_refl`
   (`mulByHom_neg_one_ne_id`), `hH_refuted_of_neg_one_mem` (witness assembly). Parallel
-  with T-SB2-4. Depends: T-SB1. Status: open.
+  with T-SB2-4. Depends: T-SB1. Status: DONE (v10.349, 2026-07-22).
 - **[CLEANUP-SB2]** DEFERRED-TO-MAIN (same producer rule).
 - **[T-SB6] HEADLINE closure** — discharge `gammaH_semiBorel_closure`
   (⟨M1-unconditional `gammaH_relativelyRepresentable`, fun qpd =>
-  `gammaH_representable_of_le_semiBorel`⟩). Depends: T-RIS8, T-SB4. Status: open.
-- **[CLEANUP-ALL-RECTIFIED]** `/cleanup-all` pass over the two new files + touched
-  sections before declaring the milestone. Depends: T-SB6. Status: open.
+  `gammaH_representable_of_le_semiBorel`⟩). Depends: T-RIS8, T-SB4. Status: DONE (v10.349, 2026-07-22).
+- **[CLEANUP-ALL-RECTIFIED]** DEFERRED-TO-MAIN (producer rule, same as CLEANUP-RIS1/2 +
+  CLEANUP-SB2 — cleanup is central on `main`). Was: depends T-SB6 (now done).
 
 ### M3 (scoped, NO tickets yet — follow-on /develop after T-RIS8 + T-SB6)
 Y₀(N) coarse scheme = quotient of the representing scheme (KM 8.1.1/8.1.5; Loeffler
@@ -24895,7 +24895,7 @@ uniformizes all chart-flavored statements, fixes colimit/relQuotient Quiver.Hom 
 instance search. isIntegral via IsIntegralHom.SpecMap_iff + Algebra.IsInvariant.isIntegral.
 
 ### [T-RIS8a] relQuotientStruct is finite étale for a free action (diagonal-free [GHB6])
-- **Status**: in_progress
+- **Status**: done (v10.349, 2026-07-22)
 - **Parent**: T-RIS8
 - **File**: ForMathlib/RelativeInvariantSpec.lean (new thm), then Moduli/GammaHRepresentability.lean `QuotPkg.f₀_finite_etale`
 - **Why**: T-RIS8 discovered a 4th old-engine consumer beyond the board's 3: `QuotPkg.f₀_finite_etale`
