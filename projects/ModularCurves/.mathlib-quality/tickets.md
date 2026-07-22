@@ -25259,6 +25259,48 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### asm-2a COMPLETE + 2b plan (2026-07-26)
+**asm-2a LANDED**: `frameEval_points` PROVEN + AXIOM-CLEAN [propext, Classical.choice,
+Quot.sound] (census verified, pushed 428ed655f): the ℚ̄-points of the evaluation read
+as frame•vector. Proof archaeology (all pure term-chains, zero heartbeat bumps):
+hL1/hfst/hsnd preimage-split → hover'/hqv/hA → hSplit (rfl!) → χ (bridged reading) →
+hC (counit-pivot via pointsEquivOfContAction_map at frameEvalMor) → goal-connection
+rfl-show (vRhoPointsEquiv IS the 3-layer chain definitionally) → hfp/hsp hoists →
+hxf/hxs (cofan-compat pointwise: congrArg (fun m => m.hom.hom w) on
+frameProdAlgebraIso_inv_left/right — the unascribed lambda postponement WORKS) →
+hread1/hread2 (counit-map at Fst/Snd; constVec/wFrames-PointsEquiv defeq-match the
+3-layer chain; homMk-Prod.fst/snd application defeq .1/.2) → smul-congrArg close.
+NEW REGISTERED LEMMAS: `frameProdAlgebraIso_inv_left/right` (the tensor-bridge eats
+the cofan-injections — inline-P/Q conePointUniqueUpToIso_hom_comp + inv_hom_id_assoc
++ comp_id congrArg-chain + unop-leg-rfl; NOTE: re-derived limit-terms must be INLINE,
+have-bound fvars are opaque and break the defeq to the def-body).
+
+**asm-2b plan-of-record (ContAction-shear route — chosen over the Γ-engine port:
+reuses the landed correspondence+bridge machinery, no étale-local work):**
+the slice-iso comes from an explicit inverse built by transporting the finite-set
+shear inverse (w,A) ↦ A⁻¹w through the Galois correspondence. Sub-tickets:
+- [2b-i] rhoFrameProd substrate: `rhoFrameProdAction` (carrier (Fin 2 → ZMod N) × GL₂,
+  σ(w,A) = (ρσ·w, ρσ·A)) + continuity + ContAction + Fst/Snd + IsProduct — line-mirror
+  of the frameProd block (YRho :700-760) with the rhoAction first factor.
+- [2b-ii] `rhoFrameProdAlgebraIso` + `_inv_left/_inv_right` cofan-compats at
+  (vRhoAlgebra, wFramesAlgebra) — line-mirror of frameProdAlgebraIso + the two compats.
+- [2b-iii] `frameCoevalMor : rhoFrameProdContAction ⟶ constVecContAction`,
+  (w,A) ↦ A⁻¹•w (equivariant: (ρσA)⁻¹(ρσw) = A⁻¹w; lands in the trivial set) + the
+  finite-set identities evalPair∘coevalPair-laws (inv_smul_smul/smul_inv_smul).
+- [2b-iv] scheme-level: `frameCoeval : pullback (vRhoπ D) (wFramesπ D) ⟶
+  constVecScheme N` (bridge-conjugated Spec.map, mirror of frameEval) + `frameCoeval_π`
+  + the ℚ-level pairings Φ := pullback.lift frameEval snd (via frameEval_π +
+  pullback.condition) : pullback constVecπ wFramesπ ⟶ pullback vRhoπ wFramesπ,
+  Ψ := pullback.lift frameCoeval snd : the other direction.
+- [2b-v] CORE identities (the real work): Φ ≫ frameCoeval = pullback.fst and
+  Ψ ≫ frameEval = pullback.fst — both between affines; via the pairing-compat (the
+  bridge-conjugated correspondence-image of the ContAction-pair-lift IS the scheme
+  pullback.lift — pullback.hom_ext + cofan-compats + Functor.map_comp) transporting
+  the 2b-iii finite-set identities.
+- [2b-vi] `frameEvalSlice_isIso`: inverse-slice := pullback.lift fst
+  (graph-lift ≫ frameCoeval); the two slice laws via pullback.hom_ext reduce to
+  CORE-1/2 precomposed with the h-graph-lift (ℚ-level equalities precompose ✓).
+
 ### asm-2 progress (2026-07-25)
 - frameEval_π (over-ℚ spec: pullbackSpecIso_hom_fst' + IsScalarTower at the RAW
   tensor — tensorObj-coe blocks instance synthesis, respell raw) + frameEvalSlice
