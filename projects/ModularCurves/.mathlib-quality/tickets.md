@@ -25034,3 +25034,41 @@ REQUIRES a KM A7.2.2 source pass first), 8.1.2 normality, M4 smoothness.
 
 Dispatch order: T-Y0-1 → T-Y0-6 → T-Y0-7 (quick wins, definitional layer usable) →
 T-Y0-2 → T-Y0-3 → T-Y0-4 → T-Y0-5 (the affineness cascade) → gate.
+
+---
+
+## v10.351 — ★★★★ [STREAM-Y0 COMPLETE] Y₀(N) COARSE MODULAR CURVE LANDED (2026-07-22)
+
+ALL of T-Y0-1..7 DONE in one session. Delivered (all axiom census [propext, Classical.choice,
+Quot.sound], own runs; full `lake build` GREEN 9994 jobs, zero errors):
+
+- `Moduli/CoarseSpace.lean` (SORRY-FREE): `RepresentableBy.baseSchemeAction`(+`_over`) — the
+  KM 8.1.1 G-action on 𝔐(𝒫) via autMulHom/autBase/ofAut; `coarseQuotient`/`coarsePr`/
+  `coarseStruct` + spec + **the categorical-quotient UP `coarsePr_existsUnique_lift`**
+  (Loeffler 3.6.1) + instances IsIntegralHom/Surjective(coarsePr), IsAffineHom(coarseStruct)
+  (definitionally the relQuotient engine instances, censused clean this session);
+  `isAffine_base_transport`; `gammaFullNaive_exists_representableBy_isAffineHom` +
+  `gammaFullNaive_isAffineHom_structMap` (KM 8.1.1's existence sentence, delivered);
+  `borel` + `mem_borel_iff` + `semiBorel_le_borel`; **`YHCoarse R N hN hinv H` and
+  `YZeroCoarse R N hN hinv`** — fully unconditional definitions (N ≥ 3, IsUnit (N:R)).
+- Affineness cascade (ADDITIVE mirrors; landed statements byte-stable):
+  EngineMouth `exists_representableBy_isAffine_of_rigidNoeth_of_torsor` (X₀-affineness by
+  unique-iso comparison vs the relQuotient over the terminal Spec (ULift ℤ) — hqlift-epi one
+  way, existsUnique_relQuotientπ_lift the other); EngineWiring
+  `exists_representableBy_isAffine_baseChange_two/three`; Recollement
+  `exists_representableBy_isAffineHom_of_baseChange_cover` (IsZariskiLocalAtTarget over
+  D(a)/D(b), preimage=chart identification by glueBase_exists + localization-tower ranges +
+  open-immersion injectivity + pushout-condition point-chase).
+
+Proof-tech notes banked: ∃!-destructuring needs `⟨_, -, huniq⟩` (a `-` witness kills the
+dependent uniqueness clause); synonym-typed pullback coercions (baseChangeRing.base vs raw
+pullback) break `rw` — finish with defeq-`exact`; `cases i` on a Bool-indexed cover leaves
+`bif` unreduced in the ∣_-argument — open each branch with `show`; specZIsTerminal is
+universe-0, use `specULiftZIsTerminal` for Scheme.{u}.
+
+P2 follow-ons (NOT ticketed; each needs its own source pass): KM 8.1.3.1 k̄-points
+(read KM A7.2.2 print ~pp. 508+ first), KM 8.1.2 normality, M4 smoothness /ℤ[1/N],
+Y₁-comparison (YHCoarse at semiBorel vs the FINE Y₁(N) — an iso via the UP).
+
+Ticket status: T-Y0-1 done, T-Y0-2 done, T-Y0-3 done, T-Y0-4 done, T-Y0-5 done,
+T-Y0-6 done, T-Y0-7 done. CLEANUP-Y0 deferred-to-main (producer rule).
