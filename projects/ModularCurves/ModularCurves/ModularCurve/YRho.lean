@@ -2134,6 +2134,17 @@ theorem frameEval_points (D : GaloisRepData N)
         exact hp⟩) •
       (constVecPointsEquiv N ⟨p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D),
         by rw [Category.assoc]; exact hp⟩) := by
+  -- the tensor-level point and its algebra reading
+  set p' := p ≫ (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+    (wFramesAlgebra D : Type 0)).hom with hp'
+  -- L1-extraction: the evaluation-composite reads as precomposition with the
+  -- evaluation comultiplication
+  have hL1 : Spec.preimage (p ≫ frameEval D) =
+      CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom ≫
+        Spec.preimage p' := by
+    apply Spec.map_injective
+    rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, hp', frameEval]
+    exact (Category.assoc _ _ _).symm
   sorry
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
