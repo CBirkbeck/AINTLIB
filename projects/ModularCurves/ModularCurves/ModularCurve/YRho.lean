@@ -908,6 +908,16 @@ noncomputable def constVecCorrespondenceIso (N : ℕ) [NeZero N] :
 noncomputable def constVecAlgebra (N : ℕ) [NeZero N] : CommAlgCat.FiniteEtale.{0} ℚ :=
   ((finiteEtaleEquivContAction ℚ).inverse.obj (constVecContAction N)).unop
 
+/-- **[asm-1]** The constant-scheme algebra is the split algebra: transport of
+`constVecCorrespondenceIso` through the correspondence's inverse and unit. -/
+noncomputable def constVecAlgebraIso (N : ℕ) [NeZero N] :
+    constVecAlgebra N ≅ CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) :=
+  (((finiteEtaleEquivContAction ℚ).inverse.mapIso
+      (constVecCorrespondenceIso N).symm ≪≫
+    ((finiteEtaleEquivContAction ℚ).unitIso.app
+      (Opposite.op (CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)))).symm).unop).symm
+
+
 /-- **[T-YR-3d-1c step-3]** Transport of the mixed product through the Galois
 correspondence: the algebra of the product is the tensor product (mirror of
 `vRhoSqAlgebraIso`). -/
