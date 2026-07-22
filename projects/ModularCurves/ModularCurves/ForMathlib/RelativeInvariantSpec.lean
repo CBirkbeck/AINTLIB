@@ -916,14 +916,25 @@ theorem basePullback_hover {T : Scheme.{u}} (g : T ⟶ S) (γ : G) :
     (σ.basePullback f hover g).hom γ ≫ pullback.snd f g = pullback.snd f g := by
   simp only [SchemeAction.basePullback, pullback.lift_snd, Category.comp_id]
 
-/-- **[GHB5′] (KM 7.1.3(3c), diagonal-free)** — for a free action the quotient commutes
-with arbitrary base change `g : T ⟶ S`: the base-changed projection
-`pullback f g ⟶ pullback f₀ g` satisfies the quotient universal property for the
-base-changed action. Conclusion tuple = the former `exists_quotient_baseChange_of_free`
-minus the diagonal instance. Chart-level content: `[A711-BC]`
-(`fixedPointsBaseChange_bijective_of_isFreeAlgebraAction`) via
-`exists_invariantsπ_lift_baseChange_of_free` (`ForMathlib/AffineQuotient.lean`);
-uniqueness via `epi_pullback_snd_invariantsπ_of_free`. -/
+include hfree in
+/-- **The base-changed descent core** ([GHB5a′], the [A711-BC] crux): for a free action,
+an invariant morphism out of the base-changed total space descends uniquely through the
+base-changed projection. Chart-level engine:
+`exists_invariantsπ_lift_baseChange_of_free` + `epi_pullback_snd_invariantsπ_of_free`
+(`ForMathlib/AffineQuotient.lean`, both PROVEN), pasted over the affine cover of
+`pullback f₀ g` through the chart bridge `isPullback_relQuotientπ_chart`. -/
+theorem existsUnique_pullbackMap_lift {T : Scheme.{u}} (g : T ⟶ S)
+    {Y : Scheme.{u}} (F : pullback f g ⟶ Y)
+    (hFinv : ∀ γ : G, (σ.basePullback f hover g).hom γ ≫ F = F) :
+    ∃! q : pullback (σ.relQuotientStruct f hover) g ⟶ Y,
+      pullback.map f g (σ.relQuotientStruct f hover) g (σ.relQuotientπ f hover) (𝟙 T)
+        (𝟙 S) (by rw [Category.comp_id, σ.relQuotientπ_comp_relQuotientStruct f hover])
+        (by rw [Category.comp_id, Category.id_comp]) ≫ q = F := by
+  sorry
+
+include hfree in
+/-- **[GHB5′] (KM 7.1.3(3c), diagonal-free)** — the base-change package of the former
+`exists_quotient_baseChange_of_free`, minus the diagonal instance. -/
 theorem exists_relQuotient_baseChange_of_free {T : Scheme.{u}} (g : T ⟶ S) :
     ∃ πT : pullback f g ⟶ pullback (σ.relQuotientStruct f hover) g,
       πT ≫ pullback.snd (σ.relQuotientStruct f hover) g = pullback.snd f g ∧
@@ -933,7 +944,21 @@ theorem exists_relQuotient_baseChange_of_free {T : Scheme.{u}} (g : T ⟶ S) :
       ∀ {Y : Scheme.{u}} (F : pullback f g ⟶ Y),
         (∀ γ : G, (σ.basePullback f hover g).hom γ ≫ F = F) →
           ∃! q : pullback (σ.relQuotientStruct f hover) g ⟶ Y, πT ≫ q = F := by
-  sorry
+  refine ⟨pullback.map f g (σ.relQuotientStruct f hover) g (σ.relQuotientπ f hover)
+    (𝟙 T) (𝟙 S)
+    (by rw [Category.comp_id, σ.relQuotientπ_comp_relQuotientStruct f hover])
+    (by rw [Category.comp_id, Category.id_comp]), ?_, ?_, ?_, ?_⟩
+  · rw [pullback.lift_snd, Category.comp_id]
+  · rw [pullback.lift_fst]
+  · intro γ
+    refine pullback.hom_ext ?_ ?_
+    · simp only [Category.assoc, pullback.lift_fst, SchemeAction.basePullback]
+      rw [← Category.assoc, pullback.lift_fst, Category.assoc,
+        σ.hom_comp_relQuotientπ f hover γ]
+    · simp only [Category.assoc, pullback.lift_snd, Category.comp_id,
+        SchemeAction.basePullback]
+  · intro Y F hFinv
+    exact σ.existsUnique_pullbackMap_lift f hover hfree g F hFinv
 
 end Free
 
