@@ -25259,6 +25259,44 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### T-YR-3d-1c ASSEMBLY decomposition (2026-07-24)
+- **[asm-1] the const-bridge**: `constVecSchemeIso : constScheme (Spec (.of ℚ))
+  (Fin 2 → ZMod N) ≅ constVecScheme N` over `Spec ℚ` — via constSchemeSpecIso (T := .of ℚ)
+  ≪≫ Spec-of-an-algebra-iso ((Fin 2 → ZMod N) → ℚ) ≅ constVecAlgebra N. The algebra-iso is
+  NOT definitional (the correspondence-inverse is adjoint-constructed); build it through
+  the counit/points: both algebras are finite étale over ℚ with ℚ̄-points ≃ (Fin 2 → ZMod N)
+  Galois-TRIVIALLY — two routes: (a) the correspondence's inverse applied to the ISO of
+  ContActions between constVecContAction and the image-of-the-split-algebra (need the
+  functor-direction object-computation — messy); (b) DIRECT: both are ∏-of-ℚ-algebras;
+  an explicit AlgHom (ι → ℚ) → constVecAlgebra from the idempotent-decomposition of the
+  counit-points... (c) CLEANEST: avoid the bridge entirely — restate the dictionary
+  torsionIso THROUGH constVecScheme (never constScheme): E[N] ≅ constScheme via
+  fullLevelIso, then compose with constSchemeSpecIso-BASECHANGE + the (b)-free... the
+  fullLevelIso TARGET is constScheme S — its base-change to the ℚ-fibre-product form
+  still needs the same bridge. DECISION: build (a)-route as a ContAction-iso
+  `constVecCorrespondenceIso` : (functor-image of the split-algebra-op) ≅
+  constVecContAction — then inverse-map + unop + Spec gives the algebra-side; the
+  ContAction-iso's data = the points-identification (Fin2→ZMod N with trivial action on
+  both sides — an Action-iso from an Equiv of fixed-points... the functor-image of the
+  split algebra has V = AlgHoms((ι→ℚ), ℚ̄-sep) ≃ ι (evaluation at the idempotents) with
+  trivial action ✓ — the Equiv ι ≃ AlgHoms is Pi.evalAlgHom-classification (finite-split
+  -algebra Hom-description — mathlib-hunt: AlgHom from function-algebra ≃ points —
+  `AlgHom.equivPi`-ish?)). ESTIMATE 60-100 lines with one mathlib-hunt.
+- **[asm-2] frameEval partial-iso**: for sT : T ⟶ Spec ℚ and h : T ⟶ wFrames over ℚ,
+  the induced T-morphism T ×_ℚ constVec-scheme ⟶ pullback (vRhoπ D) sT (from
+  (pullback.map-into frameEval at the (𝟙×h)-slice) is an ISO — route: both sides finite
+  étale over T; fibrewise bijective at geometric points (the evaluation at a frame A is
+  v ↦ A·v, bijective since A ∈ GL₂ — via wFramesPointsEquiv + vRhoPointsEquiv +
+  a frameEval-points-spec lemma (the counit-level computation of frameEval on
+  ℚ̄-points — mirror the equivariance-3-layer once more)); conclude by the
+  fullLevelHom_isIso-PATTERN (READ its proof at GLSchemeAction:366-516 at pickup —
+  the affine+fibrewise-bijective ⟹ iso engine there may be directly reusable as a
+  general lemma!). ESTIMATE 100-150 lines.
+- **[asm-3] the dictionary**: torsionIso (L,h) := (fullLevelIso hinv L).symm-side ≪≫
+  base-changed-asm-1 ≪≫ asm-2-iso; over_T; coords_additive/pairing_compat for the
+  SYMP-framed pairs (symp gives pairing_compat by construction; coords_additive from
+  fullLevelHom's combination-structure). ESTIMATE 80-120 lines.
+
 ### T-YR-3d-1c substrate COMPLETE (2026-07-24)
 Landed green (4 steps, all pushed): frameProdAction/ContAction (mixed trivial×ρ pair)
 + frameEvalMor ((v,A) ↦ A•v) + constVecAction/ContAction + frameProdFst/Snd +
