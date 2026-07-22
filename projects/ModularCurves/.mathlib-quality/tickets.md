@@ -25236,6 +25236,23 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   consume the two curves' independent registered pairings. Discharged by stream-C with
   DS4. Consumed by RhoLevelStructure.pull's pairing_compat (T-YR-2e). Status: registered.
 
+### v10.352 session-B late progress (2026-07-23)
+- T-YR-4 COMPLETE (rho_fix_absurd + rho_rigidNoeth; KVC keystone; pushed a9c4c7191).
+- T-YR-3a COMPLETE (wFrames substrate + right GL₂-translation + functoriality; cb102ff3f).
+- T-YR-3b-i/ii COMPLETE (FramedSymp + framedSymp_pull + framedProblem functor; ab2c82675).
+  PROOF-TECH bank: ext on the framed-obj gives L-SUBTYPE-level + frames-VAL-level goals
+  (2 bullets; frames auto-discharged by ext-simp on id_comp/assoc) — diagnose with
+  lean_goal, close at the RIGHT level (Subtype.ext∘Prod.ext of pullSection_id/comp);
+  literal pullSection-pairs in the map (abstract gammaFull.map blocks unification);
+  weilPairingEval_symplectic (T-C2c register) IS the matrix formula — 3b-iii's
+  invariance is ONE register consumption + ZMod.val_intCast exponent-alignment.
+- 3b-iii IN FLIGHT: pointsEquivOfContAction_map (counit-naturality) → 
+  wFramesPointsEquiv_rightMul (3-layer mirror) → framedSymp_glSmul → diagonal Aut +
+  FreeAction (via gammaFullNaive_freeAction L-component). Then 3b-iv EquivariantRelRepData
+  per-X (GHA5 at H=⊤ × frames-side W_X) → GHB7 exists_quotientProblemData → [GHC5]-shape.
+  NOTE: quotient-couniversal is CIRCULAR for rhoProblem (needs P'-rel-rep) — final
+  identification stays the direct per-X eqv (3d), riding QuotPkg's torsor-clauses.
+
 ### v10.352 progress (2026-07-23, session A)
 - T-Y1F-1 DONE (YOneFine via semiBorelQPD/xOneFine). T-Y1F-2 DONE (piOneFine + both
   invariance theorems; proof = homEquiv-injective + homEquiv_comp + piOneFineEll-eqn +
