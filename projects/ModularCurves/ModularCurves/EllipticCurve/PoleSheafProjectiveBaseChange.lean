@@ -194,6 +194,162 @@ private theorem baseSectionsOpenAfterIso_hom_pullbackUnit
   exact hAfter.trans
     (baseSectionsOpenRestrictIso_hom_pullbackUnit f U M m)
 
+private noncomputable def
+    baseSectionsRestrictLinearEquivOfOrderedCechKernelComparison
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    [IsOpenImmersion t]
+    (hker :
+      letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+        t.appTop.hom.toAlgebra
+      Function.Bijective
+        (ModularCurves.kerBaseChangeComparison Γ(T, (⊤ : T.Opens))
+          ((orderedBaseCechComplex f M U).d 0 1).hom)) :
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Γ(T, (⊤ : T.Opens))
+    letI : Algebra B A := t.appTop.hom.toAlgebra
+    let g := pullback.fst f t
+    let fT := pullback.snd f t
+    A ⊗[B] baseSections f M ≃ₗ[A]
+      baseSections fT (M.restrict g) := by
+  dsimp only
+  let g := pullback.fst f t
+  let fT := pullback.snd f t
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  letI : IsOpenImmersion g :=
+    MorphismProperty.pullback_fst f t inferInstance
+  let ePullback :=
+    baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison
+      f t M U hU hUaff hker
+  let eRestrict := (baseSectionsMapIso fT
+    ((restrictFunctorIsoPullback g).app M)).symm.toLinearEquiv
+  exact ePullback.trans eRestrict
+
+private theorem
+    baseSectionsRestrictLinearEquivOfOrderedCechKernelComparison_one_tmul
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    [IsOpenImmersion t]
+    (hker :
+      letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+        t.appTop.hom.toAlgebra
+      Function.Bijective
+        (ModularCurves.kerBaseChangeComparison Γ(T, (⊤ : T.Opens))
+          ((orderedBaseCechComplex f M U).d 0 1).hom))
+    (s : baseSections f M) :
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Γ(T, (⊤ : T.Opens))
+    letI : Algebra B A := t.appTop.hom.toAlgebra
+    let g := pullback.fst f t
+    baseSectionsRestrictLinearEquivOfOrderedCechKernelComparison
+        f t M U hU hUaff hker ((1 : A) ⊗ₜ[B] s) =
+      ((restrictFunctorIsoPullback g).app M).inv.val.app (.op ⊤)
+        (affinePullbackUnitTop g M s) := by
+  dsimp only
+  let g := pullback.fst f t
+  let fT := pullback.snd f t
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  letI : IsOpenImmersion g :=
+    MorphismProperty.pullback_fst f t inferInstance
+  let ePullback :=
+    baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison
+      f t M U hU hUaff hker
+  let eRestrictIso := baseSectionsMapIso fT
+    ((restrictFunctorIsoPullback g).app M)
+  dsimp only [baseSectionsRestrictLinearEquivOfOrderedCechKernelComparison]
+  change eRestrictIso.inv (ePullback ((1 : A) ⊗ₜ[B] s)) = _
+  rw [baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison_one_tmul]
+  rfl
+
+private noncomputable def finiteAffineCoverBasicOpenBaseSectionsEquiv
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [M.IsQuasicoherent]
+    (r : Γ(S, (⊤ : S.Opens))) :
+    let V := S.basicOpen r
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Γ(V.toScheme, (⊤ : V.toScheme.Opens))
+    letI : Algebra B A := V.ι.appTop.hom.toAlgebra
+    TensorProduct B A (baseSections f M) ≃ₗ[B]
+      (baseModulePresheaf (𝟙 S) ((pushforward f).obj M)).obj (op V) := by
+  dsimp only
+  let V := S.basicOpen r
+  let t := V.ι
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(V.toScheme, (⊤ : V.toScheme.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  letI : IsLocalization.Away r A := inferInstance
+  letI : Module.Flat B A :=
+    IsLocalization.flat A (Submonoid.powers r)
+  let hker := ModularCurves.kerBaseChangeComparison_bijective_of_flat
+    (A := A) (f := ((orderedBaseCechComplex f M U).d 0 1).hom)
+  let eBefore :=
+    baseSectionsRestrictLinearEquivOfOrderedCechKernelComparison
+      f t M U hU hUaff hker
+  let eBeforeB := ((ModuleCat.restrictScalars t.appTop.hom).mapIso
+    eBefore.toModuleIso).toLinearEquiv
+  let eAfter := (baseSectionsOpenAfterIso f V M).toLinearEquiv
+  exact eBeforeB.trans eAfter
+
+private theorem finiteAffineCoverBasicOpenBaseSectionsEquiv_one_tmul
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [M.IsQuasicoherent]
+    (r : Γ(S, (⊤ : S.Opens))) (s : baseSections f M) :
+    let V := S.basicOpen r
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Γ(V.toScheme, (⊤ : V.toScheme.Opens))
+    letI : Algebra B A := V.ι.appTop.hom.toAlgebra
+    finiteAffineCoverBasicOpenBaseSectionsEquiv f M U hU hUaff r
+        ((1 : A) ⊗ₜ[B] s) =
+      (baseModulePresheaf (𝟙 S) ((pushforward f).obj M)).map V.leTop.op
+        (pushforwardTopSection f M s) := by
+  dsimp only
+  let V := S.basicOpen r
+  let t := V.ι
+  let g := pullback.fst f t
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(V.toScheme, (⊤ : V.toScheme.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  letI : IsLocalization.Away r A := inferInstance
+  letI : Module.Flat B A :=
+    IsLocalization.flat A (Submonoid.powers r)
+  let hker := ModularCurves.kerBaseChangeComparison_bijective_of_flat
+    (A := A) (f := ((orderedBaseCechComplex f M U).d 0 1).hom)
+  let eBefore :=
+    baseSectionsRestrictLinearEquivOfOrderedCechKernelComparison
+      f t M U hU hUaff hker
+  let eBeforeB := ((ModuleCat.restrictScalars t.appTop.hom).mapIso
+    eBefore.toModuleIso).toLinearEquiv
+  let eAfter := (baseSectionsOpenAfterIso f V M).toLinearEquiv
+  have hBefore :=
+    baseSectionsRestrictLinearEquivOfOrderedCechKernelComparison_one_tmul
+      f t M U hU hUaff hker s
+  have hBeforeB : eBeforeB ((1 : A) ⊗ₜ[B] s) =
+      ((restrictFunctorIsoPullback g).app M).inv.val.app (.op ⊤)
+        (affinePullbackUnitTop g M s) := hBefore
+  have hAfter := baseSectionsOpenAfterIso_hom_pullbackUnit f V M s
+  have hMain :
+      finiteAffineCoverBasicOpenBaseSectionsEquiv f M U hU hUaff r =
+        eBeforeB.trans eAfter := rfl
+  have hMainApply := congrArg
+    (fun e => e ((1 : A) ⊗ₜ[B] s)) hMain
+  have hTrans := LinearEquiv.trans_apply
+    (e₁₂ := eBeforeB) (e₂₃ := eAfter) ((1 : A) ⊗ₜ[B] s)
+  calc
+    _ = eAfter (eBeforeB ((1 : A) ⊗ₜ[B] s)) := hMainApply.trans hTrans
+    _ = _ := congrArg (fun x => eAfter x) hBeforeB |>.trans hAfter
+
 end AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves
@@ -679,6 +835,31 @@ private theorem isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv
     (S := Submonoid.powers r) eTop.toLinearMap eTop.bijective).mp
       hComposedLocalized
 
+private theorem pushforward_isQuasicoherent_of_finiteAffineCover
+    {X S : Scheme.{u}} (f : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [M.IsQuasicoherent] :
+    ((Scheme.Modules.pushforward f).obj M).IsQuasicoherent := by
+  let N := (Scheme.Modules.pushforward f).obj M
+  let eTopIso := Scheme.Modules.baseSectionsPushforwardTopIso f M
+  let eTop := eTopIso.toLinearEquiv
+  let eOpen := fun r =>
+    Scheme.Modules.finiteAffineCoverBasicOpenBaseSectionsEquiv
+      f M U hU hUaff r
+  apply isQuasicoherent_of_basicOpen_tensorEquiv_of_topEquiv N
+    (Scheme.Modules.baseSections f M) eTop eOpen
+  intro r s
+  let V := S.basicOpen r
+  let ψ := ((Scheme.Modules.baseModulePresheaf (𝟙 S) N).map V.leTop.op).hom
+  have hOpen :=
+    Scheme.Modules.finiteAffineCoverBasicOpenBaseSectionsEquiv_one_tmul
+      f M U hU hUaff r s
+  have hTop : eTopIso.hom s =
+      Scheme.Modules.pushforwardTopSection f M s := rfl
+  have hTopMapped := congrArg (fun y => ψ y) hTop.symm
+  exact hOpen.trans hTopMapped
+
 /-- Positive pole-sheaf pushforwards on a projectively presented fibrewise
 elliptic family are quasicoherent. -/
 theorem
@@ -719,6 +900,64 @@ theorem
       Scheme.Modules.pushforwardTopSection π M s := rfl
   have hTopMapped := congrArg (fun y => ψ y) hTop.symm
   exact hOpen.trans hTopMapped
+
+/-- After an arbitrary affine base change, pole-sheaf pushforwards on a
+projectively presented smooth relative curve are quasicoherent. -/
+theorem
+    FibrewiseElliptic.sectionPoleSheafPowerPushforward_baseChange_projectiveClosed_isQuasicoherent
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R))
+    [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (n : ℕ) {T : Scheme.{u}} [IsAffine T]
+    (t : T ⟶ Spec (.of R)) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let πT := pullback.snd π t
+    let zT := sectionBaseChange z hz t
+    let hzT := sectionBaseChange_snd z hz t
+    let MT := sectionPoleSheafPower πT zT hzT n
+    ((Scheme.Modules.pushforward πT).obj MT).IsQuasicoherent := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let g := pullback.fst π t
+  let πT := pullback.snd π t
+  let zT := sectionBaseChange z hz t
+  let hzT := sectionBaseChange_snd z hz t
+  letI : IsSeparated π := by
+    dsimp only [π, MvPolynomial.homogeneousProjπ]
+    infer_instance
+  letI : IsSeparated πT := inferInstance
+  letI : (pullback π t).IsSeparated := ⟨by
+    rw [← terminal.comp_from πT]
+    infer_instance⟩
+  have hsmT : SmoothOfRelativeDimension 1 πT :=
+    (AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
+      (IsPullback.of_hasPullback π t) hsm
+  let MT := sectionPoleSheafPower πT zT hzT n
+  letI : MT.IsQuasicoherent :=
+    sectionPoleSheafPower_isQuasicoherent hsmT zT hzT n
+  let U := fun j => f ⁻¹ᵁ MvPolynomial.coordinateOpenCover
+    (R := R) (σ := σ) j
+  have hU : IsOpenCover U := by
+    exact f.iSup_preimage_eq_top
+      (MvPolynomial.iSup_coordinateOpenCover_eq_top (R := R) (σ := σ))
+  have hUaff : ∀ j, IsAffineOpen (U j) := by
+    intro j
+    exact (MvPolynomial.coordinateOpenCover_isAffineOpen
+      (R := R) j).preimage f
+  let UT := fun j => g ⁻¹ᵁ U j
+  have hUT : IsOpenCover UT := g.iSup_preimage_eq_top hU
+  have hUTaff : ∀ j, IsAffineOpen (UT j) := by
+    intro j
+    exact IsAffineOpen.preimage_pullback_fst π t (hUaff j)
+  exact pushforward_isQuasicoherent_of_finiteAffineCover
+    πT MT UT hUT hUTaff
 
 /-- The canonical pole-sheaf pushforward base-change morphism is an isomorphism on global
 sections for every affine base change of a projectively presented fibrewise elliptic family. -/
