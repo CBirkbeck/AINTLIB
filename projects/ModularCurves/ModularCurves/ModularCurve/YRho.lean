@@ -2104,6 +2104,20 @@ theorem frameEval_π (D : GaloisRepData N) :
     (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ
       (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0))
 
+/-- **[asm-2a]** The canonical `ℚ̄`-points description of the constant-vector scheme:
+points over `ℚ̄` biject with `(ℤ/N)²` (mirror of `wFramesPointsEquiv` at the trivial
+Galois set). -/
+noncomputable def constVecPointsEquiv (N : ℕ) [NeZero N] :
+    { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+        Spec (CommRingCat.of (constVecAlgebra N : Type 0)) //
+      h ≫ constVecSchemeπ N =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }
+      ≃ (Fin 2 → ZMod N) :=
+  ((specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+      (AlgebraicClosure ℚ)).trans
+    (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
+    (FiniteEtaleGalois.pointsEquivOfContAction ℚ (constVecContAction N))
+
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
 carrying a frame-classifier `h`, the constant vector scheme maps to the
 `V_ρ`-pullback (evaluation of the classified frame on the constant vectors). -/
