@@ -452,7 +452,7 @@ representations-with-pairing"), functorialized over `Ell/ℚ` (mirror of
 noncomputable def rhoProblem (D : GaloisRepData N) :
     ModularCurves.ModuliProblem (CommRingCat.of ℚ) where
   obj X := RhoLevelStructure D X.unop.structMap X.unop.curve
-  map f := fun α => RhoLevelStructure.pull D f.unop α
+  map f := ↾fun α => RhoLevelStructure.pull D f.unop α
   map_id := by sorry
   map_comp := by sorry
 
