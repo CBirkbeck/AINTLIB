@@ -130,6 +130,66 @@ private theorem baseCechFactorBaseChangeIso_hom
               ((pullback.fst f t).preimage_cechIntersection U n i).symm).op := by
   rfl
 
+private theorem pullbackUnit_restrict_transport
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    (W : X.Opens) {V : (Limits.pullback f t).Opens}
+    (hV : V = pullback.fst f t ⁻¹ᵁ W)
+    (s : (baseModulePresheaf f M).obj (op (⊤ : X.Opens))) :
+    (baseModulePresheaf (pullback.snd f t)
+      ((pullback (pullback.fst f t)).obj M)).map
+        (eqToHom hV).op
+      ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
+        (op W))
+        ((baseModulePresheaf f M).map
+          (homOfLE (show W ≤ (⊤ : X.Opens) from le_top)).op s)) =
+    (baseModulePresheaf (pullback.snd f t)
+      ((pullback (pullback.fst f t)).obj M)).map
+        (homOfLE (show V ≤ (⊤ : (Limits.pullback f t).Opens) from le_top)).op
+      ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
+        (op (⊤ : X.Opens))) s) := by
+  let g := pullback.fst f t
+  let P := (pullback g).obj M
+  let Q := baseModulePresheaf (pullback.snd f t) P
+  let hWtop : W ≤ (⊤ : X.Opens) := le_top
+  let sourceRestriction := (homOfLE hWtop).op
+  let targetRestriction := (homOfLE (g.preimage_mono hWtop)).op
+  let targetTransport := (eqToHom hV).op
+  let finalRestriction :=
+    (homOfLE (show V ≤ (⊤ : (Limits.pullback f t).Opens) from le_top)).op
+  let unitTop :=
+    (((pullbackPushforwardAdjunction g).unit.app M).val.app
+      (op (⊤ : X.Opens))) s
+  have hunitNaturality := PresheafOfModules.naturality_apply
+    ((pullbackPushforwardAdjunction g).unit.app M).val sourceRestriction s
+  have htarget :
+      (((pullback g ⋙ pushforward g).obj M).val.map
+        sourceRestriction) unitTop =
+      Q.map targetRestriction unitTop := by
+    calc
+      _ = P.presheaf.map
+          (((TopologicalSpace.Opens.map g.base).map
+            (homOfLE hWtop)).op) unitTop := by
+        rfl
+      _ = P.presheaf.map
+          (homOfLE (g.preimage_mono hWtop)).op unitTop :=
+        P.val.congr_map_apply (Subsingleton.elim _ _) unitTop
+      _ = _ := by
+        rfl
+  have hmaps :
+      Q.map targetRestriction ≫ Q.map targetTransport =
+        Q.map finalRestriction := by
+    rw [← Q.map_comp]
+    exact Q.congr_map (Subsingleton.elim _ _)
+  calc
+    _ = Q.map targetTransport
+        ((((pullback g ⋙ pushforward g).obj M).val.map
+          sourceRestriction) unitTop) := congrArg _ hunitNaturality
+    _ = Q.map targetTransport (Q.map targetRestriction unitTop) :=
+      congrArg _ htarget
+    _ = (Q.map targetRestriction ≫ Q.map targetTransport) unitTop := rfl
+    _ = Q.map finalRestriction unitTop :=
+      ConcreteCategory.congr_hom hmaps unitTop
+
 private theorem baseCechFactorBaseChangeIso_naturality
     {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
     {ι : Type u} (U : ι → X.Opens) (hU : ∀ i, IsAffineOpen (U i))
