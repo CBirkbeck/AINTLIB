@@ -1071,14 +1071,14 @@ theorem Modules.exists_generatingSections_of_moduleSpecΓ_finite
   haveI : G.IsFiniteType := ⟨inferInstance⟩
   exact ⟨G, inferInstance⟩
 
-private theorem Modules.moduleSpecΓ_finite_of_isFiniteType_of_isAffine
+private theorem Modules.moduleSpecΓ_finite_of_globalSections_module_finite_of_isAffine
     [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
-    [M.IsFiniteType] :
+    [Module.Finite Γ(X, ⊤) Γ(M, ⊤)] :
     Module.Finite Γ(X, ⊤)
       (moduleSpecΓFunctor.obj (M.restrict (isoSpec X).inv)) := by
   let M' := M.restrict (isoSpec X).inv
   have hM : Module.Finite Γ(X, ⊤) Γ(M, ⊤) :=
-    Modules.globalSections_module_finite_of_isFiniteType_of_isAffine M
+    inferInstance
   let eRight : ModuleCat.of Γ(X, ⊤) Γ(M, ⊤) ≅
       (baseModulePresheaf (𝟙 X) M).obj (op (⊤ : X.Opens)) := by
     refine ModuleCat.isoMk (Iso.refl _) ?_
@@ -1138,15 +1138,15 @@ private theorem Modules.moduleSpecΓ_finite_of_isFiniteType_of_isAffine
     (moduleSpecΓFunctor.obj (M.restrict (isoSpec X).inv))
   exact Module.Finite.equiv eLeft.toLinearEquiv
 
-/-- A finite-type quasicoherent module on an affine scheme has finitely many global generating
-sections. -/
-theorem Modules.exists_generatingSections_of_isFiniteType_of_isAffine
+/-- A quasicoherent module with finite global sections on an affine scheme has finitely many
+global generating sections. -/
+theorem Modules.exists_generatingSections_of_globalSections_module_finite_of_isAffine
     [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
-    [M.IsFiniteType] :
+    [Module.Finite Γ(X, ⊤) Γ(M, ⊤)] :
     ∃ G : M.GeneratingSections, G.IsFiniteType := by
   let M' : (Spec Γ(X, ⊤)).Modules := M.restrict (isoSpec X).inv
   have hfinite : Module.Finite Γ(X, ⊤) (moduleSpecΓFunctor.obj M') :=
-    Modules.moduleSpecΓ_finite_of_isFiniteType_of_isAffine M
+    Modules.moduleSpecΓ_finite_of_globalSections_module_finite_of_isAffine M
   letI : Module.Finite Γ(X, ⊤) Γ(M', ⊤) := by
     change Module.Finite Γ(X, ⊤) (moduleSpecΓFunctor.obj M')
     exact hfinite
@@ -1169,6 +1169,66 @@ theorem Modules.exists_generatingSections_of_isFiniteType_of_isAffine
     change Finite G'.I
     exact hG'.finite⟩
   exact ⟨G, inferInstance⟩
+
+/-- A finite-type quasicoherent module on an affine scheme has finitely many global generating
+sections. -/
+theorem Modules.exists_generatingSections_of_isFiniteType_of_isAffine
+    [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
+    [M.IsFiniteType] :
+    ∃ G : M.GeneratingSections, G.IsFiniteType := by
+  letI : Module.Finite Γ(X, ⊤) Γ(M, ⊤) :=
+    Modules.globalSections_module_finite_of_isFiniteType_of_isAffine M
+  exact
+    Modules.exists_generatingSections_of_globalSections_module_finite_of_isAffine M
+
+/-- Restriction of a finite-type quasicoherent module to an affine open has finitely many global
+generating sections. -/
+theorem Modules.exists_generatingSections_restrict_of_isFiniteType_of_isAffineOpen
+    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
+    (U : X.affineOpens) :
+    ∃ G : (M.restrict U.1.ι).GeneratingSections, G.IsFiniteType := by
+  let N := M.restrict U.1.ι
+  letI : IsAffine U.1.toScheme := U.2
+  have hfinite : Module.Finite Γ(X, U.1) Γ(M, U.1) :=
+    Modules.sections_module_finite_of_isFiniteType_of_isAffineOpen M U
+  let eR' := U.1.ι.appIso (⊤ : U.1.toScheme.Opens)
+  let eR : Γ(X, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) ≃+*
+      Γ(U.1.toScheme, ⊤) :=
+    eR'.commRingCatIsoToRingEquiv
+  let eM' := M.restrictAppIso U.1.ι ⊤
+  let σ : Γ(U.1.toScheme, ⊤) →+*
+      Γ(X, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) :=
+    eR'.inv.hom
+  let eM : Γ(N, ⊤) →ₛₗ[σ]
+      Γ(M, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) :=
+    {
+      toFun := eM'.hom
+      map_add' := eM'.hom.hom.map_add
+      map_smul' := by
+        intro r x
+        change eM'.hom (r • x) = eR'.inv.hom r • eM'.hom x
+        exact Modules.smul_restrictAppIso_hom_apply U.1.ι M ⊤ r x
+    }
+  have hσ : Function.Surjective σ := by
+    change Function.Surjective
+      (eR.symm : Γ(U.1.toScheme, ⊤) →+*
+        Γ(X, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)))
+    exact eR.symm.surjective
+  letI : RingHomSurjective σ := ⟨hσ⟩
+  have heM : Function.Bijective eM := by
+    change Function.Bijective eM'.hom
+    exact ConcreteCategory.bijective_of_isIso eM'.hom
+  have htarget : Module.Finite
+      Γ(X, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens))
+      Γ(M, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) := by
+    rw [U.1.ι_image_top]
+    exact hfinite
+  have hsource : Module.Finite Γ(U.1.toScheme, ⊤) Γ(N, ⊤) :=
+    (eM.finite_iff_of_bijective heM).mpr htarget
+  letI : Module.Finite Γ(U.1.toScheme, ⊤) Γ(N, ⊤) :=
+    hsource
+  exact
+    Modules.exists_generatingSections_of_globalSections_module_finite_of_isAffine N
 
 /-- An epimorphism of quasicoherent modules is surjective on sections over an affine open. -/
 theorem Modules.isQuasicoherent_app_surjective_of_epi
