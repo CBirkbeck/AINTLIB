@@ -2118,6 +2118,24 @@ noncomputable def constVecPointsEquiv (N : ℕ) [NeZero N] :
     (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
     (FiniteEtaleGalois.pointsEquivOfContAction ℚ (constVecContAction N))
 
+/-- **[asm-2a]** The universal-frame evaluation on `ℚ̄`-points: the `V_ρ`-reading of
+the evaluated point is the classified frame acting on the vector (scaffold; the
+proof is the counit-naturality assembly through the tensor pair-split). -/
+theorem frameEval_points (D : GaloisRepData N)
+    (p : Spec (.of (AlgebraicClosure ℚ)) ⟶
+      pullback (constVecSchemeπ N) (wFramesπ D))
+    (hp : p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) ≫ constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    vRhoPointsEquiv D ⟨p ≫ frameEval D, by
+        rw [Category.assoc, frameEval_π]
+        exact hp⟩ =
+      (wFramesPointsEquiv D ⟨p ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D), by
+        rw [Category.assoc, ← pullback.condition]
+        exact hp⟩) •
+      (constVecPointsEquiv N ⟨p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D),
+        by rw [Category.assoc]; exact hp⟩) := by
+  sorry
+
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
 carrying a frame-classifier `h`, the constant vector scheme maps to the
 `V_ρ`-pullback (evaluation of the classified frame on the constant vectors). -/
