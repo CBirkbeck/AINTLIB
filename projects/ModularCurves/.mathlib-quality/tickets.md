@@ -25188,6 +25188,54 @@ existing sorried statements ARE the skeleton for T-YR-1/3(∃-form)/7. Dispatch 
 T-Y1F-1 → T-Y1F-2 → T-Y1F-4 → T-YR-1 → T-YR-2 → T-YR-4 → T-YR-3 → T-Y1F-3 → T-YR-5 → T-YR-6 → T-YR-7.
 
 
+### T-YR-3 sub-ticket decomposition (2026-07-23, session B — contracted-product route)
+Route lock (Q9 + engine-vocabulary audit): the per-X symplectic Isom-scheme is built as a
+**contracted product**: Z_X := relQuotient of (fullLevelSpace ×_base frames) by diagonal
+GL₂(ℤ/N), symplectically carved. Effective étale descent is NOT in-tree (red-flag route);
+the relQuotient engine (landed, RelativeInvariantSpec) + the vRho Galois substrate ARE.
+KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — circular).
+- **[T-YR-3a] Frame substrate** — mirror vRho/VRhoGroup: `frameContAction D` := the
+  continuous Gal(ℚ̄/ℚ)-action on the finite set GL₂(ZMod N) by left ρ-multiplication
+  (σ • A := ρ(σ) * A; continuity from D.ker_open as in rhoContAction); `wFrames D` :=
+  associated finite étale ℚ-scheme via `finiteEtaleEquivContAction`; `wFramesπ`;
+  `wFramesPointsEquiv` (+ σ-equivariance, mirror vRhoPointsEquiv); the FREE right
+  GL₂(ZMod N)-action on wFrames by right multiplication (commutes with the left Galois
+  action, hence descends through the correspondence — mirror VRhoGroup's rhoAddMor
+  pattern: right-mult is a ContAction-morphism, Spec of the algebra map). Freeness on
+  points: right-mult on a group is free. Source: Q9 reply ("symplectic Isom scheme");
+  the GL₂-form is the bare Isom((ℤ/N)²,V_ρ) — symplectic carving deferred to 3c
+  (det_cyclo makes the symplectic locus clopen). Status: open.
+- **[T-YR-3b] Per-X product + action** — P_X := pullback (fullLevelSpaceStruct X N)
+  (pullback-of wFramesπ along X.structMap...): concretely the fibre product over X.base
+  of the landed full-level space (YFull.fullLevelSpace X N, finite by
+  isFinite_fullLevelSpaceStruct) with X.base ×_ℚ wFrames D (finite étale). Diagonal
+  right-GL₂ SchemeAction (full-level side: the landed γ-action on level spaces [GHB];
+  frames side: 3a's right action); freeness from the frames factor alone. Affineness:
+  finite ≫ finite ⟹ affine. Status: open.
+- **[T-YR-3c] Quotient + symplectic carving** — Z_X := relQuotient of P_X by GL₂
+  (free finite action on an affine-over-X.base scheme; engine gives scheme + affine +
+  UP); Z_X^symp := the clopen locus where the universal Weil pairing matches p through
+  the frame (weilPairingCharZero + D.det_cyclo select components; char-0 base). Clopen
+  immersion ≫ affine = affine over X.base. Status: open.
+- **[T-YR-3d] Points identification** — {h : T → Z_X^symp over X.base} ≃
+  RhoLevelStructure D (pullbackAlong-structMap) (E ×_X T): the ρ-structure at a
+  T-point = (full-level structure, frame) mod GL₂ with pairing-match — surjectivity of
+  the quotient presentation on T-points needs the finite-étale-torsor local-sections
+  argument (the qpd/TorsorData vocabulary [W5]-adjacent, NOT the full engine); étale-
+  locally on T both E[N] and V_ρ trivialize, a frame + full-level pair exists, and two
+  lifts differ by unique γ. THE HEAVY LEAF — expect further splitting (surjectivity /
+  injectivity / naturality). Status: open.
+- **[T-YR-3e] Assembly** — `rho_affineOverEll : (rhoProblem D).AffineOverEll` from
+  3b-3d; corollary fills `rhoLevel_relativelyRepresentable` (the sorried ∃-form).
+  Status: open.
+
+### DS4-register addition (2026-07-23, session B)
+- **[T-YR-2e-W] `weilPairingEval_mapPoint` (YRho.lean)** — naturality of the Weil-pairing
+  evaluation along an Ell/ℚ-morphism (KM 2.8.4.2 base-change compatibility). SORRIED as
+  DS4-register: `weilPairing` is register-defined with NO naturality spec; the two sides
+  consume the two curves' independent registered pairings. Discharged by stream-C with
+  DS4. Consumed by RhoLevelStructure.pull's pairing_compat (T-YR-2e). Status: registered.
+
 ### v10.352 progress (2026-07-23, session A)
 - T-Y1F-1 DONE (YOneFine via semiBorelQPD/xOneFine). T-Y1F-2 DONE (piOneFine + both
   invariance theorems; proof = homEquiv-injective + homEquiv_comp + piOneFineEll-eqn +
@@ -25195,6 +25243,16 @@ T-Y1F-1 → T-Y1F-2 → T-Y1F-4 → T-YR-1 → T-YR-2 → T-YR-4 → T-YR-3 → 
   proj_invariant at inverse; NO set-binders — set/rfl-show broke on ConcreteCategory-coe
   boundaries, full spellings work). T-Y1F-4 DONE (audit block in YOneAssembly header;
   no proofs touched). T-YR-1 DONE (PairingCompatAt real def; YRho builds green).
+- Session B (2026-07-23): T-YR-2 COMPLETE — 2a EllHom.mulByHom_top (Representability,
+  LevelPreservation section); 2b torsionMapOfEllHom + specs; 2c
+  isPullback_torsionMapOfEllHom (torsion-ascribed cone lift; wrapper-typed lift_fst/snd
+  via defeq congrArg/Eq.trans chains); 2d ellHomTorsionIso; 2e RhoLevelStructure.pull
+  (pointMapOfMonHom + EllHom.mapPoint additive pushforward + pointToTorsion_mapPoint +
+  pullTorsionPB paste + coord_pull + coord_congr; pairing via registered 2e-W sorry);
+  2f pull_id/pull_comp + rhoProblem functor laws (`ext` not `funext` on ↾-Type-homs).
+  T-YR-4 rho_fix_absurd + rho_rigidNoeth written (KVC keystone route; τ=𝟙 by iso-cancel
+  on the pasted rectangle; direct all-torsion fixed-supply — NO span induction needed);
+  imports GammaHMaster+YFullRoute added to YRho.
 - NEXT per dispatch: T-YR-2 (rhoProblem functor — mirror gammaFullNaiveProblem's
   functorialization at Representability.lean:601+; values = RhoLevelStructure sets;
   needs torsion-baseChange comparison plumbing for torsionIso pullback + coord
