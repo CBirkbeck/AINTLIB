@@ -6,7 +6,7 @@ Authors: AINTLIB ModularCurves project
 import ModularCurves.ForMathlib.ProjectiveSpaceHyperplane
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.EllipticCurve.PoleSheaf
-import ModularCurves.EllipticCurve.PullbackTensorSection
+import ModularCurves.EllipticCurve.SectionContractionLocal
 
 /-!
 # Twists on polynomial projective space
@@ -2408,6 +2408,38 @@ theorem coordinateHyperplanePowerPairing_frameSection
         rw [hr₁, hr₂, one_mul]
       have hfinal := hpair.trans hvalue
       exact hfinal
+
+/-- Every section of a quasicoherent module on a standard coordinate chart is
+the image of the coefficient-one frame under a morphism from some `O(-n)`. -/
+theorem exists_coordinateNegativeTwistHom_frameSection_eq [Fintype σ]
+    (M : (Proj (homogeneousSubmodule σ R)).Modules) [M.IsQuasicoherent]
+    (j : σ) (s : Γ(M, coordinateOpen (R := R) j)) :
+    ∃ (n : ℕ)
+        (f : coordinateHyperplaneIdealModulePower (R := R) j n ⟶ M),
+      f.val.app (.op (coordinateOpen (R := R) j))
+          (coordinateHyperplaneIdealModulePowerFrameSection
+            (R := R) j j n) = s := by
+  obtain ⟨n, q, hq⟩ := exists_coordinateTwist_extension M j s
+  let f := ModularCurves.sectionContractionHom
+    (coordinateHyperplaneIdealModulePower (R := R) j n) M
+    (coordinateHyperplanePoleSheafPower (R := R) j n)
+    (coordinateHyperplanePowerPairing (R := R) j n) q
+  refine ⟨n, f, ?_⟩
+  have h :=
+    ModularCurves.sectionContractionHom_apply_of_restrict_eq_tensorSection
+      (coordinateHyperplaneIdealModulePower (R := R) j n) M
+      (coordinateHyperplanePoleSheafPower (R := R) j n)
+      (coordinateHyperplanePowerPairing (R := R) j n) q
+      (coordinateOpen (R := R) j)
+      (coordinateHyperplaneIdealModulePowerFrameSection
+        (R := R) j j n) s
+      (coordinateHyperplanePoleSheafPowerFrameSection
+        (R := R) j j n) hq
+  change f.val.app (.op (coordinateOpen (R := R) j))
+      (coordinateHyperplaneIdealModulePowerFrameSection
+        (R := R) j j n) = _ at h
+  rw [coordinateHyperplanePowerPairing_frameSection, one_smul] at h
+  exact h
 
 /-- On a coordinate overlap, multiplying the restricted `k`-frame of `O(-n)`
 by `(X_k / X_i)^n` gives the restricted `i`-frame. -/
