@@ -605,6 +605,81 @@ theorem wFramesPointsEquiv_rightMul (D : GaloisRepData N)
     (frameContAction D)) (hB (L1 h))) ?_
   exact hC
 
+/-- **[T-YR-3d-1c]** The mixed product Galois set `(ℤ/N)² × GL₂` (trivial action on
+the vector factor, left `ρ`-multiplication on the frame factor) — the Galois set of
+`(ℤ/N)²_ℚ ×_ℚ wFrames`. -/
+noncomputable abbrev frameProdAction (D : GaloisRepData N) :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of ((Fin 2 → ZMod N) ×
+    Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk
+        (fun vA => (vA.1, D.ρ (galSepMulEquivGalQ σ) * vA.2))
+      map_one' := FintypeCat.hom_ext _ _ fun vA => by
+        show (vA.1, D.ρ (galSepMulEquivGalQ 1) * vA.2) = vA
+        rw [map_one, map_one, one_mul]
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun vA => by
+        show (vA.1, D.ρ (galSepMulEquivGalQ (σ * τ)) * vA.2) = _
+        rw [map_mul, map_mul, mul_assoc]
+        rfl }
+
+open scoped Pointwise in
+lemma frameProdAction_isContinuous (D : GaloisRepData N) :
+    (frameProdAction D).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
+          (frameProdAction D) : Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (frameProdAction D) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (frameProdAction D),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hAct : (frameProdAction D).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun vA => ?_
+    show ((vA : (Fin 2 → ZMod N) ×
+      Matrix.GeneralLinearGroup (Fin 2) (ZMod N)).1,
+      D.ρ (galSepMulEquivGalQ τ) * vA.2) = vA
+    rw [hτ1, one_mul]
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((frameProdAction D).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
+
+/-- The mixed product as a continuous Galois set. -/
+noncomputable abbrev frameProdContAction (D : GaloisRepData N) :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨frameProdAction D, frameProdAction_isContinuous D⟩
+
+/-- **[T-YR-3d-1c]** The universal-frame evaluation `(v, A) ↦ A·v` as a morphism of
+continuous Galois sets (equivariant: the vector factor is trivial and
+`σ·(A·v) = (ρσ·A)·v`). -/
+noncomputable def frameEvalMor (D : GaloisRepData N) :
+    frameProdContAction D ⟶ rhoContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun vA => vA.2 • vA.1)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vA => by
+        show (D.ρ (galSepMulEquivGalQ σ) * vA.2) • vA.1 =
+          D.ρ (galSepMulEquivGalQ σ) • (vA.2 • vA.1)
+        rw [mul_smul] }
+
 end FrameSubstrate
 
 section FramedProblem
