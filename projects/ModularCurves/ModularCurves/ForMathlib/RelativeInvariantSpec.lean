@@ -547,9 +547,32 @@ theorem isPullback_relQuotientπ_chart (U : S.AffineZariskiSite) :
       ((f ⁻¹ᵁ U.1).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
         (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom))
       (f ⁻¹ᵁ U.1).ι
-      ((σ.invariantsGlueData f hover).cover.f U)
+      (colimit.ι (σ.invariantsGlueData f hover).functor U)
       (σ.relQuotientπ f hover) := by
-  sorry
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  have hcomm : (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.relQuotientπ f hover
+      = ((f ⁻¹ᵁ U.1).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+          (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom)) ≫
+        colimit.ι (σ.invariantsGlueData f hover).functor U := by
+    have h := σ.ι_relQuotientπ f hover U
+    simp only [Scheme.Cover.RelativeGluingData.cover_f] at h
+    rw [h, Category.assoc]
+  have hpre : σ.relQuotientπ f hover ⁻¹ᵁ
+        (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange
+      = ((f ⁻¹ᵁ (U.1 : S.Opens)).ι).opensRange := by
+    have h := (σ.invariantsGlueData f hover).toBase_preimage_eq_opensRange_ι U
+    have h2 : ((Scheme.AffineZariskiSite.directedCover S).f U).opensRange
+        = (U.1 : S.Opens) := Scheme.Opens.opensRange_ι _
+    rw [h2] at h
+    rw [← h, show (σ.invariantsGlueData f hover).toBase = σ.relQuotientStruct f hover
+        from rfl]
+    have h3 : σ.relQuotientπ f hover ⁻¹ᵁ σ.relQuotientStruct f hover ⁻¹ᵁ (U.1 : S.Opens)
+        = f ⁻¹ᵁ (U.1 : S.Opens) :=
+      congrArg (fun (m : Z ⟶ S) => m ⁻¹ᵁ (U.1 : S.Opens))
+        (σ.relQuotientπ_comp_relQuotientStruct f hover)
+    exact h3.trans (Scheme.Opens.opensRange_ι _).symm
+  exact @IsOpenImmersion.isPullback _ _ _ _ _ _ _ _ inferInstance
+    ((σ.invariantsGlueData f hover).cover.map_prop U) hcomm hpre
 
 /-- The structure morphism of the quotient is affine (chartwise it is
 `Spec Γ(Z, f⁻¹U)ᴳ ⟶ U`; affineness is Zariski-local on the target along the
