@@ -911,6 +911,11 @@ theorem surjective_relQuotientπ_of_free : Surjective (σ.relQuotientπ f hover)
   rw [MorphismProperty.cancel_left_of_respectsIso (P := @Surjective)]
   exact ⟨invariantsπ_surjective G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ⟩
 
+/-- The base-changed action lies over `T` (the `snd`-triviality of `basePullback`). -/
+theorem basePullback_hover {T : Scheme.{u}} (g : T ⟶ S) (γ : G) :
+    (σ.basePullback f hover g).hom γ ≫ pullback.snd f g = pullback.snd f g := by
+  simp only [SchemeAction.basePullback, pullback.lift_snd, Category.comp_id]
+
 /-- **[GHB5′] (KM 7.1.3(3c), diagonal-free)** — for a free action the quotient commutes
 with arbitrary base change `g : T ⟶ S`: the base-changed projection
 `pullback f g ⟶ pullback f₀ g` satisfies the quotient universal property for the
