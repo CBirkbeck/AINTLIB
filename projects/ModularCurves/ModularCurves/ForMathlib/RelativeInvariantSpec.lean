@@ -1042,10 +1042,83 @@ theorem exists_relQuotientπ_lift_baseChange_of_factors {WT Y : Scheme.{u}}
     have h2 := specSMul_isoSpec_inv σ (σ.isStableOpen_preimage f hover U.1)
       (U.2.preimage f) γ
     refine pullback.hom_ext ?_ ?_
-    · -- [T-RIS7-µ1] fst-intertwining: pullbackRelQSMul_fst + reassoc hEfst + h1 + h2
-      sorry
-    · -- [T-RIS7-µ2] snd-intertwining: pullbackRelQSMul_snd + hEsnd + pullbackSpecSMul_snd
-      sorry
+    · calc (E.hom ≫ σ.pullbackRelQSMul f hover
+            (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ) ≫
+            pullback.fst (σ.relQuotientπ f hover)
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)
+          = E.hom ≫ σ.pullbackRelQSMul f hover
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ ≫
+              pullback.fst (σ.relQuotientπ f hover)
+                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+            Category.assoc _ _ _
+        _ = E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) ≫ σ.hom γ :=
+            congrArg (fun m => E.hom ≫ m) (σ.pullbackRelQSMul_fst f hover
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ)
+        _ = (E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)) ≫ σ.hom γ :=
+            (Category.assoc _ _ _).symm
+        _ = (pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
+              (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι) ≫ σ.hom γ := by
+            rw [hEfst]
+        _ = pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
+              (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.hom γ := by
+            rw [Category.assoc, Category.assoc]
+        _ = pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
+              (U.2.preimage f).isoSpec.inv ≫
+              (σ.hom γ).resLE _ _ ((σ.isStableOpen_preimage f hover U.1).le_preimage γ) ≫
+              (f ⁻¹ᵁ (U.1 : S.Opens)).ι := by
+            rw [h1]
+        _ = pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
+              ((U.2.preimage f).isoSpec.inv ≫
+                (σ.hom γ).resLE _ _
+                  ((σ.isStableOpen_preimage f hover U.1).le_preimage γ)) ≫
+              (f ⁻¹ᵁ (U.1 : S.Opens)).ι := by
+            rw [Category.assoc]
+        _ = pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
+              (specSMul γ ≫ (U.2.preimage f).isoSpec.inv) ≫
+              (f ⁻¹ᵁ (U.1 : S.Opens)).ι := by
+            rw [h2]
+        _ = (pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫ specSMul γ) ≫
+              (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι := by
+            rw [Category.assoc, Category.assoc]
+        _ = (pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫
+              pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc) ≫
+              (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι := by
+            rw [pullbackSpecSMul_fst]
+        _ = pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫
+              (E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
+                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)) := by
+            rw [hEfst, Category.assoc]
+        _ = (pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ E.hom) ≫
+              pullback.fst (σ.relQuotientπ f hover)
+                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+            (Category.assoc _ _ _).symm
+    · calc (E.hom ≫ σ.pullbackRelQSMul f hover
+            (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ) ≫
+            pullback.snd (σ.relQuotientπ f hover)
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)
+          = E.hom ≫ σ.pullbackRelQSMul f hover
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ ≫
+              pullback.snd (σ.relQuotientπ f hover)
+                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+            Category.assoc _ _ _
+        _ = E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+            congrArg (fun m => E.hom ≫ m) (σ.pullbackRelQSMul_snd f hover
+              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ)
+        _ = pullback.snd (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc := hEsnd
+        _ = pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫
+              pullback.snd (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc := by
+            rw [pullbackSpecSMul_snd]
+        _ = pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫
+              (E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
+                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)) := by
+            rw [hEsnd]
+        _ = (pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ E.hom) ≫
+              pullback.snd (σ.relQuotientπ f hover)
+                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+            (Category.assoc _ _ _).symm
   have hFE : ∀ γ : G, pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ (E.hom ≫ F)
       = E.hom ≫ F := by
     intro γ
