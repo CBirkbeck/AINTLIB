@@ -3,6 +3,7 @@ import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
 import Mathlib.Algebra.Module.LocalizedModule.Submodule
 import Mathlib.AlgebraicGeometry.Modules.Tilde
+import Mathlib.AlgebraicGeometry.Noetherian
 import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 import Mathlib.LinearAlgebra.Dimension.Finite
 import Mathlib.RingTheory.Localization.Finiteness
@@ -1427,16 +1428,15 @@ theorem Modules.exists_generatingSections_of_isFiniteType_of_isAffine
   exact
     Modules.exists_generatingSections_of_globalSections_module_finite_of_isAffine M
 
-/-- Restriction of a finite-type quasicoherent module to an affine open has finitely many global
-generating sections. -/
-theorem Modules.exists_generatingSections_restrict_of_isFiniteType_of_isAffineOpen
-    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
-    (U : X.affineOpens) :
+/-- If the sections of a quasicoherent module on an affine open are finite, then its restriction
+has finitely many global generating sections. -/
+theorem Modules.exists_generatingSections_restrict_of_sections_module_finite_of_isAffineOpen
+    (M : X.Modules) [M.IsQuasicoherent]
+    (U : X.affineOpens) [Module.Finite Γ(X, U.1) Γ(M, U.1)] :
     ∃ G : (M.restrict U.1.ι).GeneratingSections, G.IsFiniteType := by
   let N := M.restrict U.1.ι
   letI : IsAffine U.1.toScheme := U.2
-  have hfinite : Module.Finite Γ(X, U.1) Γ(M, U.1) :=
-    Modules.sections_module_finite_of_isFiniteType_of_isAffineOpen M U
+  have hfinite : Module.Finite Γ(X, U.1) Γ(M, U.1) := inferInstance
   let eR' := U.1.ι.appIso (⊤ : U.1.toScheme.Opens)
   let eR : Γ(X, U.1.ι ''ᵁ (⊤ : U.1.toScheme.Opens)) ≃+*
       Γ(U.1.toScheme, ⊤) :=
@@ -1475,6 +1475,112 @@ theorem Modules.exists_generatingSections_restrict_of_isFiniteType_of_isAffineOp
     hsource
   exact
     Modules.exists_generatingSections_of_globalSections_module_finite_of_isAffine N
+
+/-- Restriction of a finite-type quasicoherent module to an affine open has finitely many global
+generating sections. -/
+theorem Modules.exists_generatingSections_restrict_of_isFiniteType_of_isAffineOpen
+    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
+    (U : X.affineOpens) :
+    ∃ G : (M.restrict U.1.ι).GeneratingSections, G.IsFiniteType := by
+  letI : Module.Finite Γ(X, U.1) Γ(M, U.1) :=
+    Modules.sections_module_finite_of_isFiniteType_of_isAffineOpen M U
+  exact Modules.exists_generatingSections_restrict_of_sections_module_finite_of_isAffineOpen
+    M U
+
+namespace Modules
+
+private noncomputable def kernelAppLinearEquivOverOpen
+    {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N) (U : X.Opens) :
+    Γ(kernel f, U) ≃ₗ[Γ(X, U)]
+      (show Γ(M, U) →ₗ[Γ(X, U)] Γ(N, U) from
+        (f.val.app (op U)).hom).ker := by
+  let e := (PreservesKernel.iso
+    (SheafOfModules.evaluation X.ringCatSheaf (op U)) f).trans
+      (ModuleCat.kernelIsoKer _)
+  let fU : Γ(M, U) →ₗ[Γ(X, U)] Γ(N, U) :=
+    (f.val.app (op U)).hom
+  let eΓ : Γ(kernel f, U) ≃ₗ[Γ(X, U)] fU.ker :=
+    e.toLinearEquiv
+  exact eΓ
+
+private theorem kernel_sections_module_finite_of_isAffineOpen
+    {X : Scheme.{u}} [IsLocallyNoetherian X]
+    {M N : X.Modules} [M.IsQuasicoherent] [M.IsFiniteType]
+    (f : M ⟶ N) (U : X.affineOpens) :
+    Module.Finite Γ(X, U.1) Γ(kernel f, U.1) := by
+  letI : IsNoetherianRing Γ(X, U.1) :=
+    IsLocallyNoetherian.component_noetherian U
+  letI : Module.Finite Γ(X, U.1) Γ(M, U.1) :=
+    sections_module_finite_of_isFiniteType_of_isAffineOpen M U
+  let fU : Γ(M, U.1) →ₗ[Γ(X, U.1)] Γ(N, U.1) :=
+    (f.val.app (op U.1)).hom
+  letI : _root_.IsNoetherian Γ(X, U.1) Γ(M, U.1) :=
+    isNoetherian_of_isNoetherianRing_of_finite _ _
+  letI : _root_.IsNoetherian Γ(X, U.1) fU.ker :=
+    isNoetherian_of_submodule_of_noetherian _ _ fU.ker inferInstance
+  letI : Module.Finite Γ(X, U.1) fU.ker :=
+    Module.IsNoetherian.finite _ _
+  exact Module.Finite.equiv (kernelAppLinearEquivOverOpen f U.1).symm
+
+private noncomputable def generatingSectionsOverOfRestrict
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (G : (M.restrict U.ι).GeneratingSections) :
+    (M.over U).GeneratingSections := by
+  let N := M.restrict U.ι
+  letI : (overEquiv U).inverse.IsEquivalence := by
+    infer_instance
+  let hPres : PreservesColimitsOfSize.{u, u} (overEquiv U).inverse := by
+    infer_instance
+  let G' := @SheafOfModules.GeneratingSections.map
+    _ _ _ _ _ _ _ _ _ _ _ _ _ G (overEquiv U).inverse hPres
+      (U.sheafOfModulesEquivOverInverseUnit X.ringCatSheaf).symm
+  let e : M.over U ≅ (overEquiv U).inverse.obj N :=
+    (overEquiv U).unitIso.app (M.over U) ≪≫
+      (overEquiv U).inverse.mapIso ((overFunctorEquiv U).app M)
+  exact (SheafOfModules.GeneratingSections.equivOfIso e).symm G'
+
+private theorem generatingSectionsOverOfRestrict_isFiniteType
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (G : (M.restrict U.ι).GeneratingSections) [G.IsFiniteType] :
+    (generatingSectionsOverOfRestrict M U G).IsFiniteType where
+  finite := by
+    change Finite G.I
+    exact SheafOfModules.GeneratingSections.IsFiniteType.finite
+
+/-- On a locally Noetherian scheme, the kernel of a morphism from a finite-type quasicoherent
+module to a quasicoherent module is of finite type. -/
+theorem isFiniteType_kernel
+    {X : Scheme.{u}} [IsLocallyNoetherian X]
+    {M N : X.Modules} [M.IsQuasicoherent] [N.IsQuasicoherent] [M.IsFiniteType]
+    (f : M ⟶ N) : (kernel f).IsFiniteType := by
+  let K := kernel f
+  letI : K.IsQuasicoherent := isQuasicoherent_kernel f
+  have hfinite (U : X.affineOpens) :
+      Module.Finite Γ(X, U.1) Γ(K, U.1) :=
+    kernel_sections_module_finite_of_isAffineOpen f U
+  choose G hG using fun U : X.affineOpens ↦ by
+    letI : Module.Finite Γ(X, U.1) Γ(K, U.1) := hfinite U
+    exact exists_generatingSections_restrict_of_sections_module_finite_of_isAffineOpen K U
+  let q : K.LocalGeneratorsData :=
+    { I := X.affineOpens
+      X := fun U ↦ (U : X.Opens)
+      coversTop := by
+        rw [Opens.coversTop_iff, IsOpenCover, iSup_affineOpens_eq_top X]
+      generators := fun U ↦ generatingSectionsOverOfRestrict K U.1 (G U) }
+  have hq : q.IsFiniteType := by
+    constructor
+    intro U
+    letI : (G U).IsFiniteType := hG U
+    exact generatingSectionsOverOfRestrict_isFiniteType K U.1 (G U)
+  have hqShrink : q.shrink.IsFiniteType := by
+    constructor
+    intro i
+    dsimp [SheafOfModules.LocalGeneratorsData.shrink]
+    exact hq.isFiniteType i.2.choose
+  refine { exists_localGeneratorsData := ?_ }
+  exact ⟨q.shrink, hqShrink⟩
+
+end Modules
 
 /-- An epimorphism of quasicoherent modules is surjective on sections over an affine open. -/
 theorem Modules.isQuasicoherent_app_surjective_of_epi
