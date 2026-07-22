@@ -526,6 +526,29 @@ private theorem isIso_affineTildeAdjunction_unit_app
   change IsIso (α ≫ β)
   exact @IsIso.comp_isIso _ _ _ _ _ α β hα hβ
 
+/-- Pullback between affine schemes preserves quasicoherent modules. -/
+theorem isQuasicoherent_pullback_of_isAffine
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X)
+    (M : X.Modules) [M.IsQuasicoherent] :
+    ((pullback g).obj M).IsQuasicoherent := by
+  let A := (affineΓFunctor X).obj M
+  let B := (ModuleCat.extendScalars g.appTop.hom).obj A
+  letI : IsIso ((affineTildeAdjunction X).counit.app M) :=
+    isIso_affineTildeAdjunction_counit_app M
+  let eTilde := (affineTildePullbackIsoExtendScalars g).app A
+  let eCounit := (pullback g).mapIso
+    (asIso ((affineTildeAdjunction X).counit.app M))
+  let e : (affineTildeFunctor Y).obj B ≅ (pullback g).obj M :=
+    eTilde.symm ≪≫ eCounit
+  have hTilde : ((affineTildeFunctor Y).obj B).IsQuasicoherent := by
+    let Q := (tilde.functor Γ(Y, (⊤ : Y.Opens))).obj B
+    letI : Q.IsQuasicoherent := inferInstance
+    letI : (Q.restrict Y.isoSpec.hom).IsQuasicoherent := inferInstance
+    exact (SheafOfModules.isQuasicoherent Y.ringCatSheaf).prop_of_iso
+      ((restrictFunctorIsoPullback Y.isoSpec.hom).app Q) inferInstance
+  exact (SheafOfModules.isQuasicoherent Y.ringCatSheaf).prop_of_iso
+    e hTilde
+
 private noncomputable def affineΓLiteralIso (X : Scheme.{u}) (M : X.Modules) :
     ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(M, (⊤ : X.Opens)) ≅
       (affineΓFunctor X).obj M := by
