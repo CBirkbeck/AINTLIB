@@ -9,6 +9,7 @@ import Mathlib.LinearAlgebra.Dimension.Finite
 import Mathlib.RingTheory.Localization.Finiteness
 import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
 import ModularCurves.ForMathlib.SchemeModuleRestrictLimits
+import ModularCurves.ForMathlib.SchemeModuleRestrictPushforward
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 
 /-!
@@ -423,6 +424,38 @@ private theorem isQuasicoherent_over_of_restrict_of_isAffineOpen
     @SheafOfModules.Presentation.ofIsIso _ _ _ _ _ _ _ _
       e.inv e.isIso_inv Q
   exact Q'.isQuasicoherent
+
+/-- Pushforward along an affine morphism preserves quasicoherent modules. -/
+theorem isQuasicoherent_pushforward_of_isAffineHom
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsAffineHom f]
+    {M : X.Modules} [M.IsQuasicoherent] :
+    ((pushforward f).obj M).IsQuasicoherent := by
+  have hlocal (U : Y.affineOpens) :
+      (((pushforward f).obj M).over (U : Y.Opens)).IsQuasicoherent := by
+    let V := f ⁻¹ᵁ U.1
+    let fU := f ∣_ U.1
+    let MU := (restrictFunctor V.ι).obj M
+    letI : IsAffine U.1.toScheme := U.2
+    letI : IsAffine V.toScheme := U.2.preimage f
+    haveI : MU.IsQuasicoherent := inferInstance
+    have hPush : ((pushforward fU).obj MU).IsQuasicoherent :=
+      isQuasicoherent_of_pushforward fU MU
+    have hRestrict :
+        ((restrictFunctor U.1.ι).obj ((pushforward f).obj M)).IsQuasicoherent :=
+      (isQuasicoherent U.1).prop_of_iso
+        (restrictPushforwardIsoOfIsPullbackApp f fU V.ι U.1.ι
+          (isPullback_morphismRestrict f U.1) M).symm
+        hPush
+    letI :
+        ((restrictFunctor U.1.ι).obj ((pushforward f).obj M)).IsQuasicoherent :=
+      hRestrict
+    exact isQuasicoherent_over_of_restrict_of_isAffineOpen ((pushforward f).obj M) U.1
+  have hcover : (Opens.grothendieckTopology Y).CoversTop
+      (fun U : Y.affineOpens ↦ (U : Y.Opens)) := by
+    rw [Opens.coversTop_iff, IsOpenCover, iSup_affineOpens_eq_top Y]
+  exact @SheafOfModules.IsQuasicoherent.of_coversTop
+    _ _ _ _ _ _ _ _ ((pushforward f).obj M) _
+      (fun U : Y.affineOpens ↦ (U : Y.Opens)) hcover hlocal
 
 /-- On an affine scheme, the kernel of a morphism between quasicoherent modules is
 quasicoherent. -/
