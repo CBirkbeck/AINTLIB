@@ -829,6 +829,16 @@ theorem piAlgHomIndex_unique {k : Type} [Field k] {ι : Type} [Fintype ι]
   rw [hj, piAlgHomIndex_spec, one_mul] at horth
   exact one_ne_zero horth
 
+/-- [asm-1 leaf] The evaluation index is invariant under post-composition with an
+algebra automorphism (`σ 1 = 1`). -/
+theorem piAlgHomIndex_comp {k : Type} [Field k] {ι : Type} [Fintype ι]
+    [DecidableEq ι] {L : Type} [CommRing L] [Nontrivial L] [NoZeroDivisors L]
+    [Algebra k L] (σ : L ≃ₐ[k] L) (φ : (ι → k) →ₐ[k] L) :
+    piAlgHomIndex ((σ : L →ₐ[k] L).comp φ) = piAlgHomIndex φ := by
+  refine (piAlgHomIndex_unique _ ?_).symm
+  show σ (φ (Pi.single (piAlgHomIndex φ) 1)) = 1
+  rw [piAlgHomIndex_spec, map_one]
+
 /-- **[asm-1 leaf]** Algebra homomorphisms out of a finite split `k`-algebra into a
 domain are coordinate evaluations. -/
 noncomputable def piAlgHomEquiv (k : Type) [Field k] (ι : Type) [Fintype ι]
