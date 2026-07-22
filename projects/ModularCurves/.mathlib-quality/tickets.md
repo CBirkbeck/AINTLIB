@@ -24882,3 +24882,44 @@ Residual tickets refreshed with transcribed port-sources (read verbatim this ses
 
 Dispatch order: T-RIS7-µ → T-RIS7-global(plumbing→existence→reduction) → T-RIS8 → T-SB6 →
 T-RIS7-int. — /develop --continue, 2026-07-22
+
+---
+
+## v10.348 — T-RIS7 COMPLETE (µ+global+int, pushed a35f1da52); T-RIS8 in flight; sub-ticket T-RIS8a spawned (2026-07-22)
+
+**T-RIS7 DONE**: RelativeInvariantSpec.lean SORRY-FREE, axiom census [propext, Classical.choice, Quot.sound]
+on all 13 key decls. µ-branches = transcribed SchemeQuotient calc + term congrArg on the 2 keyed-match
+failures; global = pullbackRelQRes plumbing + relChartCover + glued existence + identity-comparison ∃!;
+NEW API `relQuotientChartι` (chart ι ascribed to relQuotient codomain) + IsOpenImmersion instance —
+uniformizes all chart-flavored statements, fixes colimit/relQuotient Quiver.Hom mixing that killed
+instance search. isIntegral via IsIntegralHom.SpecMap_iff + Algebra.IsInvariant.isIntegral.
+
+### [T-RIS8a] relQuotientStruct is finite étale for a free action (diagonal-free [GHB6])
+- **Status**: in_progress
+- **Parent**: T-RIS8
+- **File**: ForMathlib/RelativeInvariantSpec.lean (new thm), then Moduli/GammaHRepresentability.lean `QuotPkg.f₀_finite_etale`
+- **Why**: T-RIS8 discovered a 4th old-engine consumer beyond the board's 3: `QuotPkg.f₀_finite_etale`
+  (:726) routes through `SchemeActionFree.quotient_desc_finite_etale` (:402), which lives in a section
+  carrying `[IsAffineHom (pullback.diagonal (terminal.from X))]` — so hbase deletion requires a
+  diagonal-free [GHB6].
+- **Statement**: `theorem relQuotientStruct_finite_etale_of_free (hfin : IsFinite f) (het : Etale f) :
+  IsFinite (σ.relQuotientStruct f hover) ∧ Etale (σ.relQuotientStruct f hover)` (include hfree), plus
+  abstract-datum transport in f₀_finite_etale via hdesc-uniqueness iso (f₀ = q ≫ relQuotientStruct).
+- **Sketch**: (1) IsZariskiLocalAtTarget over iSup_affineOpens_eq_top S exactly as
+  `isAffineHom_relQuotientStruct` (:605-619) — chart identification e := isoOfRangeEq + cancel-isos +
+  `convert!` to `Spec.map ((invariantsDiagramMap f hover).app (op U))`; (2) chart ring map IS
+  `quotientDescRing` = invariantsCorestrict of `f.appLE U (f⁻¹U)`; discharge by
+  `RingHom.invariantsCorestrict_finite` / `RingHom.invariantsCorestrict_etale`
+  (EtaleCancellation.lean, PROVEN — same citations as SchemeActionFree:380-395: appLE finite via
+  `f.finite_appLE`, étale via `HasRingHomProperty.appLE (P := @Etale)`, free algebra action via
+  `isFreeAlgebraAction_of_free` on the preimage chart); (3) in GammaHRepresentability, f₀ = q ≫ struct
+  by hdesc-f-uniqueness, transport along IsIso q by cancel_left_of_respectsIso.
+- **Sources**: KM 7.1.3(6) print p. 193 (statement); trace-retract étale cancellation = the PROVEN
+  EtaleCancellation layer (unchanged); the diagonal-free chart structure is DG III §2 6.1 as for the
+  whole RIS engine.
+- **Generality**: same section variables as the RIS Free section (σ f hover hfree; [IsAffineHom f]).
+
+**T-RIS8 progress (this session)**: import + basePullback dedup DONE; GHB3 delegated to
+exists_quotient_of_isAffineHom_rel DONE; GHB4 rewired to relQuotient engine DONE; GHB5 E-block
+name-swapped to relQuotient engine DONE (build pending). Remaining: T-RIS8a, hbase/hbX deletion
+(295 mentions, QuotPkg thread + endgame :3184/:3553), full build + receipts census.
