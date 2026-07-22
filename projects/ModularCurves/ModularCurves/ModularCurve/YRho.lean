@@ -1753,6 +1753,133 @@ noncomputable def bareFramedRelRepData (D : GaloisRepData N)
         rw [Category.assoc]; exact u.2⟩
     · exact Subtype.ext (Category.assoc _ _ _)
 
+/-- [T-YR-3b-v(c)] The frames-factor action on `W_X = X.base ×_ℚ wFrames`. -/
+noncomputable def wxAction (D : GaloisRepData N) (X : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    pullback X.structMap (wFramesπ D) ⟶ pullback X.structMap (wFramesπ D) :=
+  pullback.map X.structMap (wFramesπ D) X.structMap (wFramesπ D)
+    (𝟙 X.base) (wFramesRightMul D γ) (𝟙 (Spec (.of ℚ)))
+    (by rw [Category.comp_id, Category.id_comp])
+    (by rw [Category.comp_id, wFramesRightMul_π])
+
+theorem wxAction_fst (D : GaloisRepData N) (X : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    wxAction D X γ ≫ pullback.fst X.structMap (wFramesπ D) =
+      pullback.fst X.structMap (wFramesπ D) := by
+  rw [wxAction, pullback.lift_fst, Category.comp_id]
+
+theorem wxAction_snd (D : GaloisRepData N) (X : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    wxAction D X γ ≫ pullback.snd X.structMap (wFramesπ D) =
+      pullback.snd X.structMap (wFramesπ D) ≫ wFramesRightMul D γ := by
+  rw [wxAction, pullback.lift_snd]
+
+/-- [T-YR-3b-v(c)] The diagonal action on the product relative scheme (raw-typed;
+the `SchemeAction`-laws are proven on these spec lemmas). -/
+noncomputable def zxAction (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    pullback dE.f (pullback.fst X.structMap (wFramesπ D)) ⟶
+      pullback dE.f (pullback.fst X.structMap (wFramesπ D)) :=
+  pullback.map dE.f (pullback.fst X.structMap (wFramesπ D)) dE.f
+    (pullback.fst X.structMap (wFramesπ D))
+    (dE.σZ.hom (Subgroup.topEquiv.symm γ)) (wxAction D X γ) (𝟙 X.base)
+    (by rw [Category.comp_id, dE.over_base])
+    (by rw [Category.comp_id, wxAction_fst])
+
+theorem zxAction_fst (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    zxAction D dE γ ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) =
+      pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        dE.σZ.hom (Subgroup.topEquiv.symm γ) := by
+  rw [zxAction, pullback.lift_fst]
+
+theorem zxAction_snd (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    zxAction D dE γ ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D)) =
+      pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        wxAction D X γ := by
+  rw [zxAction, pullback.lift_snd]
+
+theorem zxAction_one (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    zxAction D dE 1 = 𝟙 (pullback dE.f (pullback.fst X.structMap (wFramesπ D))) := by
+  apply pullback.hom_ext
+  · rw [zxAction_fst, Category.id_comp,
+      show Subgroup.topEquiv.symm
+        (1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 1 from map_one _,
+      dE.σZ.hom_one, Category.comp_id]
+  · rw [zxAction_snd, Category.id_comp,
+      show wxAction D X (1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 𝟙 _ from by
+        apply pullback.hom_ext
+        · rw [wxAction_fst, Category.id_comp]
+        · rw [wxAction_snd, wFramesRightMul_one, Category.comp_id,
+            Category.id_comp],
+      Category.comp_id]
+
+theorem zxAction_mul (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ₁ γ₂ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    zxAction D dE (γ₁ * γ₂) = zxAction D dE γ₁ ≫ zxAction D dE γ₂ := by
+  apply pullback.hom_ext
+  · rw [zxAction_fst, Category.assoc, zxAction_fst, ← Category.assoc,
+      zxAction_fst, Category.assoc,
+      show Subgroup.topEquiv.symm (γ₁ * γ₂) =
+        Subgroup.topEquiv.symm γ₁ * Subgroup.topEquiv.symm γ₂ from map_mul _ _ _,
+      dE.σZ.hom_mul]
+  · rw [zxAction_snd, Category.assoc, zxAction_snd, ← Category.assoc,
+      zxAction_snd, Category.assoc,
+      show wxAction D X (γ₁ * γ₂) = wxAction D X γ₁ ≫ wxAction D X γ₂ from by
+        apply pullback.hom_ext
+        · rw [wxAction_fst, Category.assoc, wxAction_fst, wxAction_fst]
+        · rw [wxAction_snd, Category.assoc, wxAction_snd, ← Category.assoc,
+            wxAction_snd, Category.assoc, wFramesRightMul_mul]]
+
+/-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
+`X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
+frames factor, carrying the diagonal action. -/
+theorem bareFramed_equivariantRelRepData (D : GaloisRepData N)
+    (X : EllObj (CommRingCat.of ℚ)) :
+    Nonempty (ModuliProblem.EquivariantRelRepData (bareFramedAut D) X) := by
+  have hinvQ : IsUnit ((N : ℕ) : ℚ) :=
+    isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N))
+  obtain ⟨dE⟩ := gammaFullNaive_equivariantRelRepData (CommRingCat.of ℚ) N ⊤ hinvQ X
+  refine ⟨{ bareFramedRelRepData D dE.toRelRepData with
+    σZ := ⟨fun γ => zxAction D dE γ, zxAction_one D dE, zxAction_mul D dE⟩
+    over_base := ?_, equivariant := ?_, finite := ?_, etale := ?_ }⟩
+  · intro γ
+    show zxAction D dE γ ≫
+      (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f) = _
+    rw [← Category.assoc, zxAction_fst, Category.assoc, dE.over_base]
+    rfl
+  · intro T g u γ
+    sorry
+  · haveI h1 : IsFinite (wFramesπ D) := (wFramesπ_finite_etale D).1
+    haveI h2 : IsFinite (pullback.fst X.structMap (wFramesπ D)) :=
+      MorphismProperty.pullback_fst _ _ h1
+    haveI h3 : IsFinite (pullback.fst dE.f
+        (pullback.fst X.structMap (wFramesπ D))) :=
+      MorphismProperty.pullback_fst _ _ h2
+    haveI h4 : IsFinite dE.f := dE.finite
+    show IsFinite (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f)
+    exact inferInstance
+  · haveI h1 : Etale (wFramesπ D) := (wFramesπ_finite_etale D).2
+    haveI h2 : Etale (pullback.fst X.structMap (wFramesπ D)) :=
+      MorphismProperty.pullback_fst _ _ h1
+    haveI h3 : Etale (pullback.fst dE.f
+        (pullback.fst X.structMap (wFramesπ D))) :=
+      MorphismProperty.pullback_fst _ _ h2
+    haveI h4 : Etale dE.f := dE.etale
+    show Etale (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f)
+    exact inferInstance
+
 end FramedProblemFunctor
 
 
