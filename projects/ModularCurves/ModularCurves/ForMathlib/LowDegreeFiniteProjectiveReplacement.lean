@@ -149,6 +149,43 @@ noncomputable def HomologicalComplex.baseChangeKernelZeroLinearEquiv
           (.up ℕ)).obj K).d 0 1).hom := by
   exact ShortComplex.baseChangeCyclesLinearEquiv (K.sc' 0 0 1) A
 
+/-- The algebraic-to-categorical base-change equivalence on the degree-zero kernel has the
+expected underlying extension-of-scalars element. -/
+theorem HomologicalComplex.baseChangeKernelZeroLinearEquiv_coe
+    (K : CochainComplex (ModuleCat.{v} R) ℕ)
+    (A : Type v) [CommRing A] [Algebra R A]
+    (x : LinearMap.ker ((K.d 0 1).hom.baseChange A)) :
+    (HomologicalComplex.baseChangeKernelZeroLinearEquiv K A x).1 =
+      moduleCatExtendScalarsObjLinearEquiv A (K.X 0) x.1 := by
+  let S := K.sc' 0 0 1
+  let T := ShortComplex.moduleCatMk
+    (S.f.hom.baseChange A) (S.g.hom.baseChange A)
+    (LinearMap.baseChange_comp_eq_zero S.f.hom S.g.hom
+      (shortComplexModuleCatCompEqZero S) A)
+  let e := shortComplexModuleCatMkBaseChangeIso S A
+  change
+    (((T.moduleCatCyclesIso.symm ≪≫
+      ShortComplex.cyclesMapIso e ≪≫
+      (S.map (ModuleCat.extendScalars (algebraMap R A))).moduleCatCyclesIso).hom x :
+        LinearMap.ker
+          ((S.map (ModuleCat.extendScalars (algebraMap R A))).g.hom))).1 = _
+  have hcomp :
+      ((T.moduleCatCyclesIso.symm ≪≫
+          ShortComplex.cyclesMapIso e ≪≫
+          (S.map (ModuleCat.extendScalars (algebraMap R A))).moduleCatCyclesIso).hom ≫
+        (S.map (ModuleCat.extendScalars (algebraMap R A))).moduleCatLeftHomologyData.i) =
+      T.moduleCatLeftHomologyData.i ≫ e.hom.τ₂ := by
+    simp only [Iso.trans_hom, Category.assoc]
+    rw [(S.map (ModuleCat.extendScalars
+      (algebraMap R A))).moduleCatCyclesIso_hom_i]
+    change T.moduleCatCyclesIso.inv ≫
+        ShortComplex.cyclesMap e.hom ≫
+          (S.map (ModuleCat.extendScalars (algebraMap R A))).iCycles =
+      T.moduleCatLeftHomologyData.i ≫ e.hom.τ₂
+    rw [ShortComplex.cyclesMap_i]
+    rw [T.moduleCatCyclesIso_inv_iCycles_assoc]
+  exact ConcreteCategory.congr_hom hcomp x
+
 /-- Exactness at a positive degree after categorical extension of scalars is
 exactness of the corresponding algebraically base-changed linear differentials. -/
 theorem cochainComplex_baseChange_functionExact_of_map_exactAt
