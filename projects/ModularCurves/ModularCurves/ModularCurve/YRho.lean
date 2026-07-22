@@ -425,6 +425,81 @@ open CategoryTheory
 
 variable {N : ℕ} [NeZero N]
 
+/-- **[T-YR-2b]** The `N`-torsion map along an `Ell/ℚ`-morphism (`[N]`-naturality
+`EllHom.mulByHom_top` + the zero-section compatibility give the kernel-square lift). -/
+noncomputable def torsionMapOfEllHom {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] : A.curve.torsion N ⟶ B.curve.torsion N :=
+  pullback.lift (A.curve.torsionι N ≫ g.top) (A.curve.torsionπ N ≫ g.baseHom) (by
+    rw [Category.assoc, ← ModularCurves.EllHom.mulByHom_top, ← Category.assoc]
+    rw [show A.curve.torsionι N ≫ A.curve.mulByHom N =
+      A.curve.torsionπ N ≫ A.curve.zero from pullback.condition]
+    rw [Category.assoc, g.zero_w, ← Category.assoc])
+
+@[reassoc (attr := simp)]
+theorem torsionMapOfEllHom_ι {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] :
+    torsionMapOfEllHom g N ≫ B.curve.torsionι N = A.curve.torsionι N ≫ g.top :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem torsionMapOfEllHom_π {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] :
+    torsionMapOfEllHom g N ≫ B.curve.torsionπ N = A.curve.torsionπ N ≫ g.baseHom :=
+  pullback.lift_snd _ _ _
+
+/-- **[T-YR-2c]** The torsion square of an `Ell/ℚ`-morphism is cartesian (the
+abstract-square version of `torsion_baseChange_isPullback`). -/
+theorem isPullback_torsionMapOfEllHom {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] :
+    IsPullback (torsionMapOfEllHom g N) (A.curve.torsionπ N) (B.curve.torsionπ N)
+      g.baseHom := by
+  have hcond : ∀ {W : Scheme.{0}} (sfst : W ⟶ B.curve.torsion N)
+      (ssnd : W ⟶ A.base), sfst ≫ B.curve.torsionπ N = ssnd ≫ g.baseHom →
+      (sfst ≫ B.curve.torsionι N) ≫ B.curve.π = ssnd ≫ g.baseHom := by
+    intro W sfst ssnd hs
+    rw [Category.assoc, B.curve.torsionι_π N, hs]
+  have hkill : ∀ {W : Scheme.{0}} (sfst : W ⟶ B.curve.torsion N)
+      (ssnd : W ⟶ A.base) (hs : sfst ≫ B.curve.torsionπ N = ssnd ≫ g.baseHom),
+      g.isPullback.lift (sfst ≫ B.curve.torsionι N) ssnd (hcond sfst ssnd hs) ≫
+          A.curve.mulByHom N = ssnd ≫ A.curve.zero := by
+    intro W sfst ssnd hs
+    apply g.isPullback.hom_ext
+    · rw [Category.assoc, ModularCurves.EllHom.mulByHom_top, ← Category.assoc,
+        g.isPullback.lift_fst, Category.assoc,
+        show B.curve.torsionι N ≫ B.curve.mulByHom N =
+          B.curve.torsionπ N ≫ B.curve.zero from pullback.condition,
+        ← Category.assoc, hs, Category.assoc, ← g.zero_w, ← Category.assoc]
+    · rw [Category.assoc, EllipticCurve.mulByHom_π, g.isPullback.lift_snd,
+        Category.assoc, A.curve.zero_π, Category.comp_id]
+  refine IsPullback.of_isLimit (PullbackCone.IsLimit.mk (torsionMapOfEllHom_π g N)
+    (fun s => (pullback.lift
+      (g.isPullback.lift (s.fst ≫ B.curve.torsionι N) s.snd
+        (hcond s.fst s.snd s.condition))
+      s.snd (hkill s.fst s.snd s.condition) : s.pt ⟶ A.curve.torsion N))
+    (fun s => ?_) (fun s => pullback.lift_snd _ _ _) (fun s m hm1 hm2 => ?_))
+  · apply pullback.hom_ext
+    · show (_ ≫ torsionMapOfEllHom g N) ≫ B.curve.torsionι N =
+        s.fst ≫ B.curve.torsionι N
+      rw [Category.assoc, torsionMapOfEllHom_ι g N, ← Category.assoc]
+      exact (congrArg (· ≫ g.top) (pullback.lift_fst _ _ _)).trans
+        (g.isPullback.lift_fst _ _ _)
+    · show (_ ≫ torsionMapOfEllHom g N) ≫ B.curve.torsionπ N =
+        s.fst ≫ B.curve.torsionπ N
+      rw [Category.assoc, torsionMapOfEllHom_π g N, ← Category.assoc]
+      exact (congrArg (· ≫ g.baseHom) (pullback.lift_snd _ _ _)).trans
+        s.condition.symm
+  · apply pullback.hom_ext
+    · show m ≫ A.curve.torsionι N = _ ≫ A.curve.torsionι N
+      refine Eq.trans ?_ (pullback.lift_fst
+        (g.isPullback.lift (s.fst ≫ B.curve.torsionι N) s.snd
+          (hcond s.fst s.snd s.condition))
+        s.snd (hkill s.fst s.snd s.condition)).symm
+      apply g.isPullback.hom_ext
+      · rw [g.isPullback.lift_fst, Category.assoc, ← torsionMapOfEllHom_ι g N,
+          ← Category.assoc, hm1]
+      · rw [g.isPullback.lift_snd, Category.assoc, A.curve.torsionι_π N, hm2]
+    · show m ≫ A.curve.torsionπ N = _ ≫ A.curve.torsionπ N
+      exact hm2.trans (pullback.lift_snd _ _ _).symm
 /-- [T-YR-2 helper, SKELETON] Transport of `N`-torsion along an `Ell/ℚ`-morphism: the
 cartesian curve square (`EllHom.isPullback`) pasted with
 `torsion_baseChange_isPullback` (TorsionFibre.lean) identifies the source torsion with
