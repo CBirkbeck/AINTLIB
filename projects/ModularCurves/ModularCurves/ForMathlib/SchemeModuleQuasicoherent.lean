@@ -1634,6 +1634,36 @@ theorem isFiniteType_of_sections_module_finite
   refine { exists_localGeneratorsData := ?_ }
   exact ⟨q.shrink, hqShrink⟩
 
+private theorem pushforward_sections_module_finite_of_isClosedImmersion
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsClosedImmersion f]
+    {M : X.Modules} [M.IsQuasicoherent] [M.IsFiniteType]
+    (U : Y.affineOpens) :
+    Module.Finite Γ(Y, U.1) Γ((pushforward f).obj M, U.1) := by
+  let V : X.affineOpens := ⟨f ⁻¹ᵁ U.1, U.2.preimage f⟩
+  have hM : Module.Finite Γ(X, V.1) Γ(M, V.1) :=
+    sections_module_finite_of_isFiniteType_of_isAffineOpen M V
+  letI : Module.Finite Γ(X, V.1) Γ(M, V.1) := hM
+  letI : Algebra Γ(Y, U.1) Γ(X, V.1) := (f.app U.1).hom.toAlgebra
+  letI : Module Γ(Y, U.1) Γ(M, V.1) :=
+    Module.compHom Γ(M, V.1) (f.app U.1).hom
+  letI : IsScalarTower Γ(Y, U.1) Γ(X, V.1) Γ(M, V.1) :=
+    IsScalarTower.of_algebraMap_smul fun _ _ ↦ rfl
+  rw [Module.finite_def]
+  change (⊤ : Submodule Γ(Y, U.1) Γ(M, V.1)).FG
+  rw [← Submodule.restrictScalars_top (S := Γ(Y, U.1))
+    (R := Γ(X, V.1)) (M := Γ(M, V.1))]
+  exact hM.fg_top.restrictScalars_of_surjective (f.app_surjective U.1 U.2)
+
+/-- Pushforward along a closed immersion preserves finite-type quasicoherent modules. -/
+theorem isFiniteType_pushforward_of_isClosedImmersion
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsClosedImmersion f]
+    {M : X.Modules} [M.IsQuasicoherent] [M.IsFiniteType] :
+    ((pushforward f).obj M).IsFiniteType := by
+  let N := (pushforward f).obj M
+  letI : N.IsQuasicoherent := isQuasicoherent_pushforward_of_isAffineHom f
+  exact isFiniteType_of_sections_module_finite N
+    (pushforward_sections_module_finite_of_isClosedImmersion f)
+
 /-- On a locally Noetherian scheme, the kernel of a morphism from a finite-type quasicoherent
 module to a quasicoherent module is of finite type. -/
 theorem isFiniteType_kernel
