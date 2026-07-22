@@ -68,6 +68,27 @@ theorem moduleCatExtendScalarsObjLinearEquiv_tmul
       a ⊗ₜ[R, algebraMap R A] m := by
   rfl
 
+/-- The algebraic tensor-product comparison with categorical extension of scalars
+intertwines base change of linear maps with the extension-of-scalars functor. -/
+theorem moduleCatExtendScalarsObjLinearEquiv_baseChange
+    (A : Type w) [CommRing A] [Algebra R A]
+    {M N : ModuleCat.{v} R} (f : M ⟶ N) (x : A ⊗[R] M) :
+    moduleCatExtendScalarsObjLinearEquiv A N
+        (f.hom.baseChange A x) =
+      (ModuleCat.extendScalars (algebraMap R A)).map f
+        (moduleCatExtendScalarsObjLinearEquiv A M x) := by
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a m =>
+      rw [LinearMap.baseChange_tmul,
+        moduleCatExtendScalarsObjLinearEquiv_tmul,
+        moduleCatExtendScalarsObjLinearEquiv_tmul]
+      exact (ModuleCat.ExtendScalars.map_tmul
+        (f := algebraMap R A) f a m).symm
+  | add x y hx hy =>
+      rw [map_add, map_add, map_add, hx, hy]
+      exact (((ModuleCat.extendScalars (algebraMap R A)).map f).hom.map_add _ _).symm
+
 /-- The linear maps underlying a short complex of modules compose to zero. -/
 theorem shortComplexModuleCatCompEqZero
     (S : ShortComplex (ModuleCat.{v} R)) :
