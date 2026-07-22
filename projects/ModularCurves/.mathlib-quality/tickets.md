@@ -25259,6 +25259,20 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### T-YR-3d-1c substrate COMPLETE (2026-07-24)
+Landed green (4 steps, all pushed): frameProdAction/ContAction (mixed trivial×ρ pair)
++ frameEvalMor ((v,A) ↦ A•v) + constVecAction/ContAction + frameProdFst/Snd +
+frameProdIsProduct (gas-3 ext + Prod.ext extraction discipline) + constVecAlgebra +
+frameProdAlgebraIso (tensor-transport) + frameEvalAlgHom + constVecScheme/π +
+**frameEval : pullback (constVecSchemeπ N) (wFramesπ D) ⟶ vRho D** (the universal
+frame evaluation). REMAINING 3d: (i) the dictionary-ASSEMBLY — RhoLevelStructure from
+a framed (L,h)-pair: torsionIso built from fullLevelIso (GLSchemeAction:517) + the
+h-classified pullback of frameEval + the constScheme-vs-constVecScheme bridge
+(constSchemeSpecIso + trivial-action-algebra identification — check
+definitional-vs-iso); (ii) 3d-2 per-X eqv (QuotPkg + [GHB4]-torsor + morphism-
+descent); (iii) symp-carve (T-C2c clopen); (iv) 3e rho_affineOverEll +
+rhoLevel_relativelyRepresentable-fill. Then T-Y1F-3, T-YR-5/6/7 per dispatch.
+
 ### T-YR-3d-1 — DISSOLVED BY REUSE (2026-07-24)
 GroupScheme/GLSchemeAction.lean ALREADY LANDS the whole leaf, sorry-free:
 `fullLevelHom` (:40 = 3d-1a, Sigma.desc of combination-torsion-points),
