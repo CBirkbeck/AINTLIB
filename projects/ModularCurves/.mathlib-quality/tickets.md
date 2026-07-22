@@ -25259,6 +25259,26 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### T-YR-3d-1 constSumMap decomposition (2026-07-24, KM-SOURCED)
+KM 2.3.1 (print p. 73, READ verbatim): "[N]: E → E is finite locally free of rank N².
+If N is invertible on S, its kernel E[N] is finite etale over S, locally for the etale
+topology on S isomorphic to Z/NZ × Z/NZ." (proof: reduction to the universal
+Weierstrass family, normal+connected base, check at one geometric ℂ-point) — this IS
+the landed torsion_etaleLocal_triv. The 3d-leaf decomposes as:
+- **[3d-1a] constSumMap** (def): for a killed pair (P,Q), the S-morphism
+  constScheme S (Fin 2 → ZMod N) ⟶ E.torsion N := Sigma.desc over v of
+  pointToTorsion ((v 0 |>.val:ℤ) • P + (v 1 |>.val:ℤ) • Q) (comb_kill supplies the
+  raw-kill via sectionPull-free global form) + over-S spec + the frame-compat spec.
+- **[3d-1b] isIso for naive full level, N invertible**: étale-locally on the
+  torsion_etaleLocal_triv-cover both sides are (ℤ/N)²-const; the composite
+  endo-matrix is fibrewise invertible (naive generation at geometric points ⟹
+  GL₂-matrix by finite cardinality); local iso ⟹ iso by IsIso-descent along the
+  étale surjective cover (MATHLIB-HUNT: IsIso fppf-descent along faithfully flat —
+  MorphismProperty-descent vocabulary; fallback: openness+bijectivity criteria).
+- **[3d-1c] the ρ-dictionary**: α := (frame-of-h) ∘ (constSumMap-iso)⁻¹-transported
+  gives RhoLevelStructure from a symp-framed pair; inverse étale-locally by
+  trivializing α and reading the basis (the [GHB4]-torsor uniqueness globalizes).
+
 ### 3d API-read (2026-07-24, banked)
 - QuotPkg (GHRepr:689): d/Z₀/π/f₀/hπf/hπinv/hdesc(couniversal-UP) +
   QuotPkg.π_finite_etale_surjective ([GHB4], needs freeness) — the per-X quotient
