@@ -746,6 +746,35 @@ noncomputable def frameProdIsProduct (D : GaloisRepData N) :
     · exact congrArg (fun q : s.pt ⟶ constVecContAction N => q.hom.hom x) h₁
     · exact congrArg (fun q : s.pt ⟶ frameContAction D => q.hom.hom x) h₂
 
+/-- The finite étale `ℚ`-algebra of the constant `(ℤ/N)²`-scheme. -/
+noncomputable def constVecAlgebra (N : ℕ) [NeZero N] : CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((finiteEtaleEquivContAction ℚ).inverse.obj (constVecContAction N)).unop
+
+/-- **[T-YR-3d-1c step-3]** Transport of the mixed product through the Galois
+correspondence: the algebra of the product is the tensor product (mirror of
+`vRhoSqAlgebraIso`). -/
+noncomputable def frameProdAlgebraIso (D : GaloisRepData N) :
+    (finiteEtaleEquivContAction ℚ).inverse.obj (frameProdContAction D) ≅
+      Opposite.op (FiniteEtaleGalois.tensorObj (constVecAlgebra N)
+        (wFramesAlgebra D)) := by
+  have h1 : Limits.IsLimit ((finiteEtaleEquivContAction ℚ).inverse.mapCone
+      (Limits.BinaryFan.mk (frameProdFst D) (frameProdSnd D))) :=
+    Limits.isLimitOfPreserves _ (frameProdIsProduct D)
+  have h1' := (Limits.IsLimit.postcomposeHomEquiv
+    (Limits.pairComp (constVecContAction N) (frameContAction D)
+      (finiteEtaleEquivContAction ℚ).inverse) _).symm h1
+  exact h1'.conePointUniqueUpToIso
+    (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (constVecAlgebra N)
+      (wFramesAlgebra D))
+
+/-- **[T-YR-3d-1c step-3]** The evaluation comultiplication: the finite étale algebra
+map corresponding to the universal-frame evaluation (mirror of `vRhoComulHom`). -/
+noncomputable def frameEvalAlgHom (D : GaloisRepData N) :
+    vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (constVecAlgebra N)
+      (wFramesAlgebra D) :=
+  ((frameProdAlgebraIso D).inv ≫
+    (finiteEtaleEquivContAction ℚ).inverse.map (frameEvalMor D)).unop
+
 end FrameSubstrate
 
 section FramedProblem
