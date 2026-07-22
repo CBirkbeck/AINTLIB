@@ -25236,6 +25236,50 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   consume the two curves' independent registered pairings. Discharged by stream-C with
   DS4. Consumed by RhoLevelStructure.pull's pairing_compat (T-YR-2e). Status: registered.
 
+### v10.353 (2026-07-23/24, session-B end) — 3b-iv COMPLETE, 3b-v dispatch
+- 3b-iii COMPLETE: framedSymp_glSmul (registered T-C2c matrix formula + Point.pull
+  normalization + p_ofAdd_mul_val power dictionary + Int.toNat-transported
+  ZMod.val_intCast exponent-match; 0a4443a57). wFramesPointsEquiv_rightMul (3-layer)
+  + pointsEquivOfContAction_map (counit naturality) landed (5bd60cbbd).
+- 3b-iv COMPLETE (2c5521616): framedSmulNat (glSmul + right-translation diagonal;
+  naturality = pullSection_glSmul + assoc at whole-element level — ext STOPS at
+  whole-element for composition-goals, component-splits only for literal-vs-literal)
+  + framedAut (γ⁻¹-convention Aut-assembly) + framedAut_freeAction (via
+  glSmul_eq_one_of_eq_self on the L-component; GREEN FIRST BUILD).
+- **[T-YR-3b-v] per-X EquivariantRelRepData (framedAut D) X** — THE remaining
+  constructive 3b piece. Construction: obtain dL := (gammaFullNaive_equivariantRelRepData
+  ℚ N ⊤ hinvQ X).some (GHA5; H = ⊤ — CAREFUL: gammaHAut ⊤ vs framedAut GROUP-mismatch
+  (↥⊤ vs GL₂) — either compose with the ⊤-iso Subgroup.topEquiv or re-derive the
+  needed pieces from dL's fields at coerced elements); W_X := pullback X.structMap
+  (wFramesπ D) (frames-side relative scheme; finite étale base-change of wFramesπ);
+  Z := pullback dL.f (pullback.fst : W_X ⟶ X.base) carved by the SYMP-CLOPEN locus
+  (subtlety: the symp-condition is CLOSED+OPEN in char 0 — carve via the
+  T-C2c/weilPairingCharZero matching locus, OR carry symp in the eqv-fibers only
+  and let Z be the UNCARVED product — CHECK: FramedSymp is a condition on
+  (L,h)-pairs; the eqv must be onto framed-VALUES which include symp — if symp is
+  NOT clopen-carved in Z the eqv can't be a bijection onto the symp-subtype.
+  DECISION NEEDED at pickup: construct the clopen carve (weilPairing-matching locus
+  on the product — components-selection over char-0) OR redefine framedProblem
+  WITHOUT symp (bare framed problem), run the quotient machinery on the bare
+  problem, and carve symp on the QUOTIENT-side per-X in 3d (the original 3c-plan).
+  The BARE route avoids the carve here and keeps 3b-v pure product-plumbing —
+  RECOMMENDED: strip symp from framedProblem? NO — statement-editing landed defs
+  is forbidden; instead define bareFramedProblem as a SECOND functor + a forgetful
+  inclusion framedProblem ⟶ bareFramedProblem, run GHB7 on bare, carve on the
+  relative data. OWNER-ADJACENT ROUTE CHOICE — pick pragmatically at pickup.)
+  eqv := product of dL.eqv and the frames-eqv (maps T → W_X over X.base ≃ maps
+  T → wFrames over ℚ compat — pullback-UP); σZ := diagonal (dL.σZ × wFramesRightMul-
+  pulled); equivariant-field from dL.equivariant + wFramesPointsEquiv-free frames-side
+  (the frames-equivariance is definitional composition); finite/etale: pullback-
+  stability of dL.finite/etale + wFramesπ_finite_etale base-change.
+- After 3b-v: GHB7 exists_quotientProblemData (framedAut D) framedAut_freeAction
+  hdata → pkg; pkg.affineOverEll [GHC5-shape]; then 3d: per-X eqv rhoProblem-value ≃
+  {T → Z_ρ over base} via pkg.relRep + QuotPkg torsor-clauses + the frame-to-
+  trivialization dictionary (a framed pair (L,h) ↦ RhoLevelStructure: torsionIso from
+  the L-basis-trivialization (constSumMap — E[N] ≅ (ℤ/N)²-const from a naive basis,
+  N invertible — CHECK in-tree: FullLevelDictionary/LevelSpaces!) composed with h's
+  frame; the SYMP-condition ↦ pairing_compat); 3e rho_affineOverEll assembly.
+
 ### v10.352 session-B late progress (2026-07-23)
 - T-YR-4 COMPLETE (rho_fix_absurd + rho_rigidNoeth; KVC keystone; pushed a9c4c7191).
 - T-YR-3a COMPLETE (wFrames substrate + right GL₂-translation + functoriality; cb102ff3f).
