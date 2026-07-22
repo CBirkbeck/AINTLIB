@@ -1474,6 +1474,23 @@ noncomputable def framedProblem (D : GaloisRepData N) :
         (EllHom.pullSection_comp (CommRingCat.of ℚ) g.unop f.unop Lh.val.1.val.2))
     · exact Category.assoc _ _ _
 
+/-- **[T-YR-3b-iv]** The diagonal `GL₂`-translation of the framed problem:
+`glSmul γ` on the full-level pair, right `γ`-translation on the frame; the symplectic
+match is preserved by `framedSymp_glSmul`. Natural by `pullSection_glSmul` and
+associativity. -/
+noncomputable def framedSmulNat (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    framedProblem D ⟶ framedProblem D where
+  app X := ↾fun Lh => ⟨⟨X.unop.curve.glSmul γ Lh.val.1,
+    ⟨Lh.val.2.val ≫ wFramesRightMul D γ, by
+      rw [Category.assoc, wFramesRightMul_π, Lh.val.2.property]⟩⟩,
+    framedSymp_glSmul D Lh.val.1.property.1.1 Lh.val.1.property.1.2 γ Lh.property⟩
+  naturality X Y f := by
+    ext Lh
+    exact Subtype.ext (Prod.ext
+      (EllHom.pullSection_glSmul (CommRingCat.of ℚ) f.unop γ Lh.val.1)
+      (Subtype.ext (Category.assoc _ _ _)))
+
 end FramedProblemFunctor
 
 
