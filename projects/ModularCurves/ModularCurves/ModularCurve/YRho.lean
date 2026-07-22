@@ -2,6 +2,8 @@ import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Coarse
+import ModularCurves.Moduli.GammaHMaster
+import ModularCurves.ModularCurve.YFullRoute
 import Mathlib.FieldTheory.AbsoluteGaloisGroup
 import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
 import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
@@ -800,6 +802,147 @@ noncomputable def rhoProblem (D : GaloisRepData N) :
     intro X Y Z f g
     ext α
     exact RhoLevelStructure.pull_comp D g.unop f.unop α
+
+section RhoRigidity
+
+open MonoidalCategory
+
+-- `open MonObj` is avoided (its scoped `γ`-notation, brought in by the engine's
+-- `Mod.lean` import, shadows group-element binders); reproduce the unit locally,
+-- exactly as `GammaHMaster` does.
+local notation "η[" M "]" => CategoryTheory.MonObj.one (X := M)
+
+/-- **[T-YR-4, k̄-core] (classical ρ-rigidity)** — no nontrivial base-identical
+self-iso fixes a ρ-level structure over a field mapping to `Spec ℚ` (`N ≥ 3`): the fixed
+trivialization forces `torsionMapOfEllHom e = 𝟙` (iso-cancel on the pasted rectangle),
+hence every geometric `N`-torsion point is fixed, and the KVC keystone
+(`pointedAuto_eq_id_of_fixes_torsion_kvc`, [KVC-drop-in D]) kills. -/
+theorem rho_fix_absurd (D : GaloisRepData N) (hN : 3 ≤ (N : ℤ))
+    (k : Type) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of ℚ))
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj (CommRingCat.of ℚ)) ≅
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj (CommRingCat.of ℚ)))
+    (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
+    (aT : (rhoProblem D).obj (Opposite.op
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj (CommRingCat.of ℚ))))
+    (hfix : (rhoProblem D).map e.hom.op aT = aT) : False := by
+  classical
+  -- 1. the fixed trivialization forces the torsion map to be the identity
+  have htiso : pullTorsionIso D e.hom aT = aT.torsionIso :=
+    congrArg RhoLevelStructure.torsionIso hfix
+  have hhom : (pullTorsionIso D e.hom aT).hom = aT.torsionIso.hom :=
+    congrArg Iso.hom htiso
+  have h1 := pullTorsionIso_fst D e.hom aT
+  rw [hhom] at h1
+  have hτcomp : torsionMapOfEllHom e.hom N ≫ aT.torsionIso.hom =
+      aT.torsionIso.hom := by
+    apply pullback.hom_ext
+    · rw [Category.assoc]
+      exact h1.symm
+    · rw [Category.assoc, aT.over_T, torsionMapOfEllHom_π, he, Category.comp_id]
+  have hτ : torsionMapOfEllHom e.hom N = 𝟙 (E.torsion N) :=
+    (cancel_mono aT.torsionIso.hom).mp (by
+      rw [Category.id_comp]; exact hτcomp)
+  -- 2. the induced pointed `Over`-automorphism
+  have hcπ : e.hom.top ≫ E.π = E.π := by
+    have h := e.hom.isPullback.w
+    rw [he, Category.comp_id] at h
+    exact h
+  have hzc : E.zero ≫ e.hom.top = E.zero := by
+    have h := e.hom.zero_w
+    rw [he, Category.id_comp] at h
+    exact h
+  have hη : η[E.asOver] ≫ (Over.homMk e.hom.top hcπ : E.asOver ⟶ E.asOver) =
+      η[E.asOver] := by
+    refine Over.OverMorphism.ext ?_
+    show (η[E.asOver]).left ≫ e.hom.top = (η[E.asOver]).left
+    rw [E.one_eq_zero]
+    have s1 : ((𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero) ≫ e.hom.top
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ e.hom.top :=
+      Category.assoc _ _ _
+    have s2 : (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ e.hom.top
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero :=
+      congrArg (fun m => (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ m) hzc
+    exact s1.trans s2
+  haveI hIsoεO : IsIso (Over.homMk e.hom.top hcπ : E.asOver ⟶ E.asOver) := by
+    have hcπ' : e.inv.top ≫ E.π = E.π := by
+      have h := e.inv.isPullback.w
+      rw [EllObj.isoInv_baseHom e he, Category.comp_id] at h
+      exact h
+    refine ⟨Over.homMk e.inv.top hcπ', ?_, ?_⟩
+    · exact Over.OverMorphism.ext (congrArg EllHom.top e.hom_inv_id)
+    · exact Over.OverMorphism.ext (congrArg EllHom.top e.inv_hom_id)
+  -- 3. numeric side conditions
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := by
+    haveI : IsNoetherianRing k := inferInstance
+    infer_instance
+  have hNnat : 3 ≤ N := by exact_mod_cast hN
+  have hNk : ((N : ℕ) : k) ≠ 0 := by
+    intro h0
+    have hφ : (Spec.preimage sm).hom ((N : ℚ)) = ((N : ℕ) : k) := map_natCast _ N
+    have hinj : Function.Injective (Spec.preimage sm).hom := RingHom.injective _
+    have hQ : ((N : ℕ) : ℚ) = 0 := hinj (by rw [hφ, h0, map_zero])
+    exact absurd hQ (Nat.cast_ne_zero.mpr (NeZero.ne N))
+  -- 4. every geometric `N`-torsion point is fixed
+  have hfixAll : ∀ x : E.Point (𝟙 (Spec (CommRingCat.of k))), (N : ℤ) • x = 0 →
+      (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x ≫
+        (Over.homMk e.hom.top hcπ : E.asOver ⟶ E.asOver) =
+      (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x := by
+    intro x hx
+    have hval := congrArg Subtype.val hx
+    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
+    have hxc : x.1 ≫ e.hom.top = x.1 := by
+      calc x.1 ≫ e.hom.top
+          = (E.pointToTorsion x hval ≫ E.torsionι N) ≫ e.hom.top := by
+            rw [E.pointToTorsion_torsionι]
+        _ = E.pointToTorsion x hval ≫ torsionMapOfEllHom e.hom N ≫
+              E.torsionι N :=
+            (Category.assoc _ _ _).trans (congrArg
+              (E.pointToTorsion x hval ≫ ·) (torsionMapOfEllHom_ι e.hom N).symm)
+        _ = E.pointToTorsion x hval ≫ E.torsionι N := by
+            rw [hτ, Category.id_comp]
+        _ = x.1 := E.pointToTorsion_torsionι x hval
+    refine Over.OverMorphism.ext ?_
+    show x.1 ≫ e.hom.top = x.1
+    exact hxc
+  -- 5. the KVC keystone closes
+  have hεid : (Over.homMk e.hom.top hcπ : E.asOver ⟶ E.asOver) = 𝟙 E.asOver :=
+    EllipticCurve.pointedAuto_eq_id_of_fixes_torsion_kvc E
+      (Over.homMk e.hom.top hcπ) hIsoεO hη N hNnat hNk hfixAll
+  have hcid : e.hom.top = 𝟙 E.E := congrArg CommaMorphism.left hεid
+  exact hne (Iso.ext (EllHom.ext he hcid))
+
+/-- **[T-YR-4] The ρ-level problem is noetherian-locally rigid** (`N ≥ 3`): the PROVEN
+detection (`exists_isoFibre_ne_refl`) finds a geometric fibre where a base-identical
+iso stays nontrivial; the fixed ρ-structure transports along the fibre square; the
+`ρ`-k̄-core (`rho_fix_absurd`) kills. -/
+theorem rho_rigidNoeth (D : GaloisRepData N) (hN : 3 ≤ (N : ℤ)) :
+    (rhoProblem D).RigidNoeth := by
+  intro X hX e he hne a hfix
+  haveI := hX
+  have hinvQ : IsUnit ((N : ℕ) : ℚ) :=
+    isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N))
+  obtain ⟨k, _, _, t, hfib⟩ := EllObj.exists_isoFibre_ne_refl N hN
+    (YFull.nIsInvertible_over_spec (CommRingCat.of ℚ) X.structMap hinvQ) e he hne
+  set eT := EllObj.isoFibre e he t with heT
+  have hcomp : eT.hom ≫ X.pullbackAlongπ t = X.pullbackAlongπ t ≫ e.hom :=
+    EllHom.fibre_pullbackAlongπ e.hom he t
+  set aT := (rhoProblem D).map (X.pullbackAlongπ t).op a with haT
+  have hfixT : (rhoProblem D).map eT.hom.op aT = aT := by
+    calc (rhoProblem D).map eT.hom.op aT
+        = (rhoProblem D).map ((X.pullbackAlongπ t).op ≫ eT.hom.op) a := by
+          rw [haT, ← Functor.map_comp_apply]
+      _ = (rhoProblem D).map (e.hom.op ≫ (X.pullbackAlongπ t).op) a := by
+          rw [← op_comp, ← op_comp, hcomp]
+      _ = (rhoProblem D).map (X.pullbackAlongπ t).op
+            ((rhoProblem D).map e.hom.op a) := by
+          rw [Functor.map_comp_apply]
+      _ = aT := by rw [hfix, haT]
+  exact rho_fix_absurd D hN k (t ≫ X.structMap) (X.curve.baseChange t)
+    eT rfl hfib aT hfixT
+
+end RhoRigidity
 
 end RhoProblem
 
