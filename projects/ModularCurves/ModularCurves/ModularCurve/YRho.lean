@@ -543,6 +543,44 @@ theorem wFramesRightMul_one (D : GaloisRepData N) :
 
 end FrameSubstrate
 
+section FramedProblem
+
+variable {N : ℕ} [NeZero N]
+
+/-- [T-YR-3b helper] The pull of a globally `N`-killed section is raw-killed at any
+point (the `weilPairingEval`-input form; `Point.pull_zsmul` + the T-YR-4 smul→raw
+conversion). -/
+theorem sectionPull_raw_kill {T T' : Scheme.{0}} {E : EllipticCurve T} (t : T' ⟶ T)
+    {P : E.Section} (hP : (N : ℤ) • P = 0) :
+    (EllipticCurve.Point.pull E t P).1 ≫ E.mulByHom N = t ≫ E.zero := by
+  have h1 : (N : ℤ) • EllipticCurve.Point.pull E t P = 0 := by
+    rw [← EllipticCurve.Point.pull_zsmul, hP, EllipticCurve.Point.pull_zero]
+  have hval := congrArg Subtype.val h1
+  rw [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
+  exact hval
+
+/-- **[T-YR-3b]** Symplectic compatibility of a full-level pair with a frame, at
+geometric points: the Weil pairing of the pulled basis equals `p` of the frame's
+determinant. Diagonal-`GL₂`-invariant (both sides twist by `det γ`; the invariance
+lemma is the quotient-descent supply). -/
+def FramedSymp (D : GaloisRepData N) {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ))
+    (E : EllipticCurve T) (P Q : E.Section)
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) : Prop :=
+  ∀ (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))),
+    (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+        (E.weilPairingEval (EllipticCurve.Point.pull E t P)
+          (EllipticCurve.Point.pull E t Q)
+          (sectionPull_raw_kill t hP) (sectionPull_raw_kill t hQ)).1 =
+      ((D.p (Multiplicative.ofAdd
+        (((Matrix.GeneralLinearGroup.det
+          (wFramesPointsEquiv D ⟨t ≫ h, by
+            rw [Category.assoc, hover, ht]⟩) : (ZMod N)ˣ) : ZMod N))) :
+        (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
+
+end FramedProblem
+
 /-- The `(ℤ/N)²`-coordinate of a `ℚ̄`-valued raw `N`-torsion point of `E`, read through a
 `ρ`-level isomorphism and the canonical points description of `V_ρ`. Real construction
 (pullback plumbing) modulo the registered data it consumes. -/
