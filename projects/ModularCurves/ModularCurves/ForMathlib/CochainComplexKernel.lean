@@ -58,6 +58,32 @@ noncomputable def kernelZeroLinearEquivOfHom
       apply Subtype.ext
       exact ConcreteCategory.congr_hom hfg x.1)
 
+/-- The kernel equivalence induced by inverse cochain maps is given by the
+degree-zero component of the forward map. -/
+theorem kernelZeroLinearEquivOfHom_coe
+    {R : Type u} [CommRing R]
+    {K L : CochainComplex (ModuleCat.{v} R) ℕ}
+    (f : K ⟶ L) (g : L ⟶ K)
+    (hfg : f.f 0 ≫ g.f 0 = 𝟙 _)
+    (hgf : g.f 0 ≫ f.f 0 = 𝟙 _)
+    (x : LinearMap.ker (K.d 0 1).hom) :
+    (kernelZeroLinearEquivOfHom f g hfg hgf x).1 =
+      (f.f 0).hom x.1 := by
+  rfl
+
+/-- The inverse kernel equivalence induced by inverse cochain maps is given by
+the degree-zero component of the inverse map. -/
+theorem kernelZeroLinearEquivOfHom_symm_coe
+    {R : Type u} [CommRing R]
+    {K L : CochainComplex (ModuleCat.{v} R) ℕ}
+    (f : K ⟶ L) (g : L ⟶ K)
+    (hfg : f.f 0 ≫ g.f 0 = 𝟙 _)
+    (hgf : g.f 0 ≫ f.f 0 = 𝟙 _)
+    (x : LinearMap.ker (L.d 0 1).hom) :
+    ((kernelZeroLinearEquivOfHom f g hfg hgf).symm x).1 =
+      (g.f 0).hom x.1 := by
+  rfl
+
 /-- An isomorphism of cochain complexes of modules identifies the kernels of
 their first differentials. -/
 noncomputable def kernelZeroIsoOfIso
