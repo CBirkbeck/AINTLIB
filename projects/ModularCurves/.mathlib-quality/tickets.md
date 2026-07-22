@@ -24988,7 +24988,7 @@ REQUIRES a KM A7.2.2 source pass first), 8.1.2 normality, M4 smoothness.
   `ofAut ((X₀.autBase.comp r.autMulHom).comp φ)`; `(… ).hom γ` is the `baseHom` of an
   `Ell/R`-(auto)morphism (possibly the ofAut-inverted one — follow `SchemeAction.ofAut`'s def,
   SchemeQuotient:54); conclude by `EllHom.base_w` (EllCategory:61). Mirror any needed spec from
-  `simulSchemeAction`'s consumers. Deps: none. Status: open.
+  `simulSchemeAction`'s consumers. Deps: none. Status: DONE (v10.351, 2026-07-22).
 - **[T-Y0-2] [AFF1] EngineMouth ∃-affine mirror** —
   `exists_representableBy_isAffine_of_rigidNoeth_of_torsor` (EngineMouth, appended). Sketch:
   re-walk the landed :628 body verbatim through `exists_engineQuotient` (keep `haff : IsAffine
@@ -24996,10 +24996,10 @@ REQUIRES a KM A7.2.2 source pass first), 8.1.2 normality, M4 smoothness.
   applied to `XM.base.isoSpec.hom ≫ invariantsπ …`-side, q from
   `existsUnique_invariantsπ_lift` (AffineQuotient, PROVEN) — the v10.349 GHB4/f₀ comparison
   dance; `IsAffine.of_isIso`. Then finish the landed body's RepresentableBy and return the
-  ∃-tuple. Deps: none. Status: open.
+  ∃-tuple. Deps: none. Status: DONE (v10.351, 2026-07-22).
 - **[T-Y0-3] [AFF2/3] EngineWiring leg mirrors** — `exists_representableBy_isAffine_baseChange_
   two/three`. Sketch: copy :41-68/:77-108 verbatim, final call → T-Y0-2's mirror. Deps: T-Y0-2.
-  Status: open.
+  Status: DONE (v10.351, 2026-07-22).
 - **[T-Y0-4] [AFF4] Recollement glued-structMap mirror** —
   `exists_representableBy_isAffineHom_of_baseChange_cover` (Recollement, appended; keeps the
   v10.326 `hrel`). Sketch: extract reprX legs as in :4233; transport leg-affineness by
@@ -25007,7 +25007,7 @@ REQUIRES a KM A7.2.2 source pass first), 8.1.2 normality, M4 smoothness.
   `IsZariskiLocalAtTarget @IsAffineHom` over `D(a) ⊔ D(b) = Spec R` (hab) + the construction's
   chart identifications of `glueQ` (AUDIT `glueQ`/`glueHomBase` :1053/:2747 region first);
   fallback route: restriction-iso from leg-level uniqueness. Return glued ∃-tuple via
-  `glueEllObj_representableBy`. Deps: none (parallel with T-Y0-2/3). Status: open.
+  `glueEllObj_representableBy`. Deps: none (parallel with T-Y0-2/3). Status: DONE (v10.351, 2026-07-22).
 - **[T-Y0-5] [AFF5] top-level affineness + transport** — `CoarseSpace.lean`
   `isAffine_base_transport`, `gammaFullNaive_exists_representableBy_isAffineHom`,
   `gammaFullNaive_isAffineHom_structMap`. Sketch: transport = EngineWiring:53-59 idiom
@@ -25016,17 +25016,17 @@ REQUIRES a KM A7.2.2 source pass first), 8.1.2 normality, M4 smoothness.
   (mirror EngineWiring:115-120; NOTE awayHom vs awayHomWire defeq seam); reprX-level: from the
   ∃-witness by transport + (IsAffineHom from base-iso via
   MorphismProperty.cancel_left_of_respectsIso + base_w, or IsAffine source + affine target).
-  Deps: T-Y0-3, T-Y0-4. Status: open.
+  Deps: T-Y0-3, T-Y0-4. Status: DONE (v10.351, 2026-07-22).
 - **[T-Y0-6] engine delegations** — `CoarseSpace.lean`: `coarsePr_comp_coarseStruct`
   (= relQuotientπ_comp_relQuotientStruct), `baseSchemeAction_comp_coarsePr`
   (= hom_comp_relQuotientπ), `coarsePr_existsUnique_lift` (= existsUnique_relQuotientπ_lift),
   instances IsIntegralHom/Surjective (coarsePr) + IsAffineHom (coarseStruct)
   (= isIntegralHom_relQuotientπ / surjective_relQuotientπ_of_free / isAffineHom_
-  relQuotientStruct). All 1-3-liners. Deps: T-Y0-1. Status: open.
+  relQuotientStruct). All 1-3-liners. Deps: T-Y0-1. Status: DONE (v10.351, 2026-07-22).
 - **[T-Y0-7] borel + Y₀** — `borel` closure proofs (mirror semiBorel's, GammaHSemiBorel:65+;
   (1,0)-entry: product g₁₀h₀₀+g₁₁h₁₀=0; inverse via 2×2 adjugate entry −g₁₀·det⁻¹),
   `semiBorel_le_borel` (carrier unfold). `YHCoarse`/`YZeroCoarse` defs already compile.
-  Deps: none. Status: open.
+  Deps: none. Status: DONE (v10.351, 2026-07-22).
 - **[CLEANUP-Y0]** DEFERRED-TO-MAIN (producer rule).
 - **MILESTONE GATE** (all of T-Y0-1..7): full `lake build` green; `#print axioms` clean triple
   on `coarsePr_existsUnique_lift`, the three instances, `gammaFullNaive_isAffineHom_structMap`;
