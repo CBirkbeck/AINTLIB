@@ -25259,6 +25259,20 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### asm-1 COMPLETE (2026-07-24/25)
+Landed green, all pushed: piAlgHomEquiv (+index/spec/unique/comp — the split-algebra
+evaluation dictionary with Galois-invariance) → constVecCorrespondenceIso (the
+correspondence-image of the split algebra IS the trivial Galois set; V-carrier
+defeq-exposes as AlgHoms, σ•φ ≡ σ∘φ defeq CONFIRMED, comm = piAlgHomIndex_comp /
+σ.commutes; inverse laws via piAlgHomEquiv + coordinate-congrFun) →
+constVecAlgebraIso (inverse+unit transport; unop-direction symm-flipped) →
+constVecSpecIso (Spec-transport; CommRingCat comp-order CROSSES the algebra laws:
+Spec-hom_inv consumes algebra-inv_hom_id) → **constVecSchemeIso : constScheme
+(Spec ℚ) (Fin 2 → ZMod N) ≅ Spec (constVecAlgebra N)** (constSchemeSpecIso-composite).
+NEXT: asm-2 (frameEval partial-iso — the (𝟙×h)-slice of frameEval is an iso onto
+pullback (vRhoπ) sT; Γ-bijectivity engine or fibrewise+descent; sub-decompose at
+write), asm-3 (ρ-dictionary), 3d-2, carve, 3e, T-Y1F-3, T-YR-5/6/7.
+
 ### T-YR-3d-1c ASSEMBLY decomposition (2026-07-24)
 - **[asm-1] the const-bridge**: `constVecSchemeIso : constScheme (Spec (.of ℚ))
   (Fin 2 → ZMod N) ≅ constVecScheme N` over `Spec ℚ` — via constSchemeSpecIso (T := .of ℚ)
