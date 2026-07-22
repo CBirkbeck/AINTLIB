@@ -25236,6 +25236,29 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   consume the two curves' independent registered pairings. Discharged by stream-C with
   DS4. Consumed by RhoLevelStructure.pull's pairing_compat (T-YR-2e). Status: registered.
 
+### v10.354 (2026-07-24) — ★★★ T-YR-3b FULLY CLOSED
+- 3b-v COMPLETE (0cb689eae): framesEqv/wFramesAction (a); bareFramedRelRepData via
+  pullbackSplitEquiv∘prodCongr + relRep_eqv_congr (b); wxAction/zxAction raw-typed
+  diagonal + bareFramed_equivariantRelRepData (c) — equivariance = dE.equivariant at
+  topEquiv.symm + gammaHAut_app_val + inv_inv coe-bridge; catToReflQuiver-vs-
+  instCategory quiver DIAMOND discovered (keyed rw dead on cross-instance composites
+  — pure congrArg/assoc term-chains are the discipline).
+- **[GHB7]-INVOKE LANDED**: `bareFramed_quotientProblemData` — the free GL₂-quotient
+  of the bare framed problem EXISTS (relatively representable finite étale, projection,
+  couniversal) + `bareFramed_quotient_affineOverEll` [GHC5]. **AXIOM-CLEAN**
+  [propext, Classical.choice, Quot.sound] — the bare path avoids the Weil register.
+  rho_rigidNoeth/framedProblem carry the expected DS4 sorryAx (2e-W + T-C2c) per the
+  honesty clause.
+- NEXT [T-YR-3d]: the symplectic carve + ρ-identification: per-X, the quotient-datum's
+  eqv-fibers ≃ bare-framed-orbits; carve the symp-locus (T-C2c matching, clopen in
+  char 0) on the relative scheme; then rhoProblem-value ≃ carved-fibers via the
+  frame-to-trivialization dictionary (constSumMap leaf: E[N] ≅ (ℤ/N)²-const from a
+  naive basis, N invertible — étale-local via torsion_etaleLocal_triv; NEEDS its own
+  sub-decomposition — next /develop-inline pass). Then 3e rho_affineOverEll +
+  rhoLevel_relativelyRepresentable-fill; T-Y1F-3 (KM print 192-197 READ FIRST);
+  T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
+  (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
+
 ### v10.353 (2026-07-23/24, session-B end) — 3b-iv COMPLETE, 3b-v dispatch
 - 3b-iii COMPLETE: framedSymp_glSmul (registered T-C2c matrix formula + Point.pull
   normalization + p_ofAdd_mul_val power dictionary + Int.toNat-transported
