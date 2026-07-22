@@ -403,6 +403,20 @@ def relQuotientStruct : σ.relQuotient f hover ⟶ S :=
 instance : ((σ.invariantsGlueData f hover).functor ⋙ Scheme.forget).IsLocallyDirected :=
   Scheme.Cover.RelativeGluingData.instIsLocallyDirectedI₀CompFunctorForgetOfIsThin ..
 
+/-- The `U`-th chart inclusion `Spec Γ(Z, f⁻¹U)ᴳ ⟶ Z//G`, ascribed to the codomain
+`relQuotient` so that instance search (open immersion, ranges) works without mixing
+`colimit`- and `relQuotient`-typed forms — the `Quiver.Hom` codomain must be
+syntactically `relQuotient` wherever pullbacks against `relQuotient`-valued morphisms
+are formed. -/
+def relQuotientChartι (U : S.AffineZariskiSite) :
+    (σ.invariantsGlueData f hover).functor.obj U ⟶ σ.relQuotient f hover :=
+  colimit.ι (σ.invariantsGlueData f hover).functor U
+
+instance (U : S.AffineZariskiSite) :
+    IsOpenImmersion (σ.relQuotientChartι f hover U) :=
+  inferInstanceAs
+    (IsOpenImmersion (colimit.ι (σ.invariantsGlueData f hover).functor U))
+
 /-- The chart component of the quotient projection (an atomic definition so the gluing
 lemma unifies cheaply — the zero-kabstract barrier idiom). -/
 def relQuotientπChart (U : S.AffineZariskiSite) :
@@ -977,6 +991,67 @@ theorem epi_pullback_snd_relQuotientπ {W : Scheme.{u}}
     MorphismProperty.pullback_snd _ _ ‹Surjective (σ.relQuotientπ f hover)›
   exact Flat.epi_of_flat_of_surjective _
 
+/-- The comparison morphism between base changes of `relQuotientπ` (the
+`relQuotientπ`-level `AffineQuotient.pullbackRes`). -/
+private noncomputable def pullbackRelQRes {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.relQuotient f hover) (w : W' ⟶ σ.relQuotient f hover)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    pullback (σ.relQuotientπ f hover) w ⟶ pullback (σ.relQuotientπ f hover) j'' :=
+  pullback.map _ _ _ _ (𝟙 _) u (𝟙 _) (by simp) (by rw [Category.comp_id, hw])
+
+@[reassoc]
+private theorem pullbackRelQRes_fst {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.relQuotient f hover) (w : W' ⟶ σ.relQuotient f hover)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    σ.pullbackRelQRes f hover j'' w u hw ≫
+        pullback.fst (σ.relQuotientπ f hover) j'' =
+      pullback.fst (σ.relQuotientπ f hover) w :=
+  (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+@[reassoc]
+private theorem pullbackRelQRes_snd {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.relQuotient f hover) (w : W' ⟶ σ.relQuotient f hover)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    σ.pullbackRelQRes f hover j'' w u hw ≫
+        pullback.snd (σ.relQuotientπ f hover) j'' =
+      pullback.snd (σ.relQuotientπ f hover) w ≫ u :=
+  pullback.lift_snd _ _ _
+
+/-- The comparison morphisms intertwine the base-changed actions. -/
+private theorem pullbackRelQSMul_pullbackRelQRes {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.relQuotient f hover) (w : W' ⟶ σ.relQuotient f hover)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') (γ : G) :
+    σ.pullbackRelQSMul f hover w γ ≫ σ.pullbackRelQRes f hover j'' w u hw =
+      σ.pullbackRelQRes f hover j'' w u hw ≫ σ.pullbackRelQSMul f hover j'' γ := by
+  refine pullback.hom_ext ?_ ?_
+  · simp only [Category.assoc, pullbackRelQRes_fst, pullbackRelQRes_fst_assoc,
+      pullbackRelQSMul_fst]
+  · simp only [Category.assoc, pullbackRelQRes_snd, pullbackRelQSMul_snd,
+      pullbackRelQSMul_snd_assoc]
+
+/-- The pullback of the chart cover of `relQuotient` along a base map `j : W ⟶ Z//G`:
+the pieces are `j⁻¹(chart U)`, presented as pullbacks so the chart-factoring is
+definitional. -/
+@[reducible]
+private noncomputable def relChartCover {W : Scheme.{u}}
+    (j : W ⟶ σ.relQuotient f hover) : W.OpenCover where
+  I₀ := S.AffineZariskiSite
+  X U := pullback j (σ.relQuotientChartι f hover U)
+  f U := pullback.fst j (σ.relQuotientChartι f hover U)
+  mem₀ := by
+    rw [Scheme.presieve₀_mem_precoverage_iff]
+    refine ⟨fun w => ?_, fun U => inferInstance⟩
+    obtain ⟨U, y, hy⟩ := Scheme.IsLocallyDirected.ι_jointly_surjective
+      (σ.invariantsGlueData f hover).functor (j w)
+    refine ⟨U, ?_⟩
+    rw [IsOpenImmersion.range_pullbackFst]
+    exact ⟨y, hy⟩
+
+private theorem relChartCover_f {W : Scheme.{u}} (j : W ⟶ σ.relQuotient f hover)
+    (U : S.AffineZariskiSite) :
+    (σ.relChartCover f hover j).f U =
+      pullback.fst j (σ.relQuotientChartι f hover U) := rfl
+
 include hfree in
 /-- **The chart step of free base change** (`[GHB5a′]`-local): if the base map factors
 through the `U`-th chart `Spec Γ(Z, f⁻¹U)ᴳ` of the quotient, invariant morphisms out of
@@ -985,7 +1060,7 @@ free-action affine engine `exists_invariantsπ_lift_baseChange_of_free` ([A711-B
 theorem exists_relQuotientπ_lift_baseChange_of_factors {WT Y : Scheme.{u}}
     (U : S.AffineZariskiSite) (wq : WT ⟶ σ.relQuotient f hover)
     (wc : WT ⟶ (σ.invariantsGlueData f hover).functor.obj U)
-    (hw : wq = wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)
+    (hw : wq = wc ≫ σ.relQuotientChartι f hover U)
     (F : pullback (σ.relQuotientπ f hover) wq ⟶ Y)
     (hF : ∀ γ : G, σ.pullbackRelQSMul f hover wq γ ≫ F = F) :
     ∃ q : WT ⟶ Y, pullback.snd (σ.relQuotientπ f hover) wq ≫ q = F := by
@@ -1021,18 +1096,18 @@ theorem exists_relQuotientπ_lift_baseChange_of_factors {WT Y : Scheme.{u}}
   simp only [Category.id_comp] at hpaste
   set E := hpaste.isoPullback with hE
   have hEfst : E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
-      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) =
+      (wc ≫ σ.relQuotientChartι f hover U) =
       pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
         (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι := by
     rw [hE]
     exact hpaste.isoPullback_hom_fst
   have hEsnd : E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
-      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) =
+      (wc ≫ σ.relQuotientChartι f hover U) =
       pullback.snd (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc := by
     rw [hE]
     exact hpaste.isoPullback_hom_snd
   have hact : ∀ γ : G, E.hom ≫ σ.pullbackRelQSMul f hover
-      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ =
+      (wc ≫ σ.relQuotientChartι f hover U) γ =
       pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ E.hom := by
     intro γ
     have h1 : (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.hom γ =
@@ -1043,20 +1118,20 @@ theorem exists_relQuotientπ_lift_baseChange_of_factors {WT Y : Scheme.{u}}
       (U.2.preimage f) γ
     refine pullback.hom_ext ?_ ?_
     · calc (E.hom ≫ σ.pullbackRelQSMul f hover
-            (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ) ≫
+            (wc ≫ σ.relQuotientChartι f hover U) γ) ≫
             pullback.fst (σ.relQuotientπ f hover)
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)
+              (wc ≫ σ.relQuotientChartι f hover U)
           = E.hom ≫ σ.pullbackRelQSMul f hover
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ ≫
+              (wc ≫ σ.relQuotientChartι f hover U) γ ≫
               pullback.fst (σ.relQuotientπ f hover)
-                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+                (wc ≫ σ.relQuotientChartι f hover U) :=
             Category.assoc _ _ _
         _ = E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) ≫ σ.hom γ :=
+              (wc ≫ σ.relQuotientChartι f hover U) ≫ σ.hom γ :=
             congrArg (fun m => E.hom ≫ m) (σ.pullbackRelQSMul_fst f hover
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ)
+              (wc ≫ σ.relQuotientChartι f hover U) γ)
         _ = (E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)) ≫ σ.hom γ :=
+              (wc ≫ σ.relQuotientChartι f hover U)) ≫ σ.hom γ :=
             (Category.assoc _ _ _).symm
         _ = (pullback.fst (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc ≫
               (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι) ≫ σ.hom γ := by
@@ -1088,36 +1163,36 @@ theorem exists_relQuotientπ_lift_baseChange_of_factors {WT Y : Scheme.{u}}
             rw [pullbackSpecSMul_fst]
         _ = pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫
               (E.hom ≫ pullback.fst (σ.relQuotientπ f hover)
-                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)) := by
+                (wc ≫ σ.relQuotientChartι f hover U)) := by
             rw [hEfst, Category.assoc]
         _ = (pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ E.hom) ≫
               pullback.fst (σ.relQuotientπ f hover)
-                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+                (wc ≫ σ.relQuotientChartι f hover U) :=
             (Category.assoc _ _ _).symm
     · calc (E.hom ≫ σ.pullbackRelQSMul f hover
-            (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ) ≫
+            (wc ≫ σ.relQuotientChartι f hover U) γ) ≫
             pullback.snd (σ.relQuotientπ f hover)
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)
+              (wc ≫ σ.relQuotientChartι f hover U)
           = E.hom ≫ σ.pullbackRelQSMul f hover
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ ≫
+              (wc ≫ σ.relQuotientChartι f hover U) γ ≫
               pullback.snd (σ.relQuotientπ f hover)
-                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+                (wc ≫ σ.relQuotientChartι f hover U) :=
             Category.assoc _ _ _
         _ = E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+              (wc ≫ σ.relQuotientChartι f hover U) :=
             congrArg (fun m => E.hom ≫ m) (σ.pullbackRelQSMul_snd f hover
-              (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) γ)
+              (wc ≫ σ.relQuotientChartι f hover U) γ)
         _ = pullback.snd (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc := hEsnd
         _ = pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫
               pullback.snd (invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ) wc := by
             rw [pullbackSpecSMul_snd]
         _ = pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫
               (E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
-                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U)) := by
+                (wc ≫ σ.relQuotientChartι f hover U)) := by
             rw [hEsnd]
         _ = (pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ E.hom) ≫
               pullback.snd (σ.relQuotientπ f hover)
-                (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) :=
+                (wc ≫ σ.relQuotientChartι f hover U) :=
             (Category.assoc _ _ _).symm
   have hFE : ∀ γ : G, pullbackSpecSMul G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ wc γ ≫ (E.hom ≫ F)
       = E.hom ≫ F := by
@@ -1129,9 +1204,336 @@ theorem exists_relQuotientπ_lift_baseChange_of_factors {WT Y : Scheme.{u}}
     hfree' wc (E.hom ≫ F) hFE
   refine ⟨q, ?_⟩
   have h3 : E.hom ≫ pullback.snd (σ.relQuotientπ f hover)
-      (wc ≫ colimit.ι (σ.invariantsGlueData f hover).functor U) ≫ q = E.hom ≫ F :=
+      (wc ≫ σ.relQuotientChartι f hover U) ≫ q = E.hom ≫ F :=
     ((Category.assoc _ _ _).symm.trans (congrArg (· ≫ q) hEsnd)).trans hq
   exact (cancel_epi E.hom).mp h3
+
+include hfree in
+/-- **[GHB5a′] Base change commutes with the relative quotient for a FREE action**
+(existence of descent; KM 7.1.3(3c), the free case): for any base map
+`j : W ⟶ Z//G`, the base-changed projection
+`pullback.snd (relQuotientπ) j : pullback (relQuotientπ) j ⟶ W` descends every
+morphism invariant under the base-changed action. Glued from the chart step
+`exists_relQuotientπ_lift_baseChange_of_factors` over `relChartCover`, with overlap
+compatibility by cancelling the (epi, by freeness) base-changed projection. -/
+theorem exists_relQuotientπ_lift_baseChange {W Y : Scheme.{u}}
+    (j : W ⟶ σ.relQuotient f hover)
+    (F : pullback (σ.relQuotientπ f hover) j ⟶ Y)
+    (hF : ∀ γ : G, σ.pullbackRelQSMul f hover j γ ≫ F = F) :
+    ∃ q : W ⟶ Y, pullback.snd (σ.relQuotientπ f hover) j ≫ q = F := by
+  classical
+  -- chart-wise descents of the restricted morphisms
+  have hFx : ∀ (U : S.AffineZariskiSite) (γ : G),
+      σ.pullbackRelQSMul f hover
+          (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j) γ ≫
+        (σ.pullbackRelQRes f hover j
+          (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j)
+          (pullback.fst j (σ.relQuotientChartι f hover U)) rfl ≫
+          F) =
+      σ.pullbackRelQRes f hover j
+        (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j)
+        (pullback.fst j (σ.relQuotientChartι f hover U)) rfl ≫
+        F := by
+    intro U γ
+    rw [← Category.assoc, pullbackRelQSMul_pullbackRelQRes, Category.assoc, hF γ]
+  choose qx hqx using fun U : S.AffineZariskiSite =>
+    σ.exists_relQuotientπ_lift_baseChange_of_factors f hover hfree U
+      (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j)
+      (pullback.snd j (σ.relQuotientChartι f hover U))
+      pullback.condition
+      (σ.pullbackRelQRes f hover j
+        (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j)
+        (pullback.fst j (σ.relQuotientChartι f hover U)) rfl ≫ F)
+      (hFx U)
+  -- gluing compatibility on overlaps, cancelling the (epi) base-changed projection
+  have hcompat : ∀ U₁ U₂ : S.AffineZariskiSite,
+      pullback.fst ((σ.relChartCover f hover j).f U₁)
+          ((σ.relChartCover f hover j).f U₂) ≫ qx U₁ =
+      pullback.snd ((σ.relChartCover f hover j).f U₁)
+          ((σ.relChartCover f hover j).f U₂) ≫ qx U₂ := by
+    intro U₁ U₂
+    rw [relChartCover_f, relChartCover_f]
+    have hbase : pullback.fst
+          (pullback.fst j (σ.relQuotientChartι f hover U₁))
+          (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+          pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j =
+        pullback.snd
+          (pullback.fst j (σ.relQuotientChartι f hover U₁))
+          (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+          pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j := by
+      rw [← Category.assoc, ← Category.assoc, pullback.condition]
+    have hσρ : σ.pullbackRelQRes f hover
+          (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+          (pullback.fst
+            (pullback.fst j (σ.relQuotientChartι f hover U₁))
+            (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+            pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+          (pullback.fst
+            (pullback.fst j (σ.relQuotientChartι f hover U₁))
+            (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+          rfl ≫
+          σ.pullbackRelQRes f hover j
+            (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst j (σ.relQuotientChartι f hover U₁)) rfl =
+        σ.pullbackRelQRes f hover
+          (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+          (pullback.fst
+            (pullback.fst j (σ.relQuotientChartι f hover U₁))
+            (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+            pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+          (pullback.snd
+            (pullback.fst j (σ.relQuotientChartι f hover U₁))
+            (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+          hbase ≫
+          σ.pullbackRelQRes f hover j
+            (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+            (pullback.fst j (σ.relQuotientChartι f hover U₂)) rfl := by
+      refine pullback.hom_ext ?_ ?_
+      · simp only [Category.assoc, pullbackRelQRes_fst]
+      · simp only [Category.assoc, pullbackRelQRes_snd, pullbackRelQRes_snd_assoc]
+        rw [pullback.condition
+          (f := pullback.fst j (σ.relQuotientChartι f hover U₁))
+          (g := pullback.fst j (σ.relQuotientChartι f hover U₂))]
+    haveI := σ.epi_pullback_snd_relQuotientπ f hover hfree
+      (pullback.fst
+        (pullback.fst j (σ.relQuotientChartι f hover U₁))
+        (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+        pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+    refine (cancel_epi (pullback.snd (σ.relQuotientπ f hover)
+      (pullback.fst
+        (pullback.fst j (σ.relQuotientChartι f hover U₁))
+        (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+        pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j))).mp ?_
+    calc pullback.snd (σ.relQuotientπ f hover)
+          (pullback.fst
+            (pullback.fst j (σ.relQuotientChartι f hover U₁))
+            (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+            pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j) ≫
+          pullback.fst
+            (pullback.fst j (σ.relQuotientChartι f hover U₁))
+            (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+          qx U₁
+        = (pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j) ≫
+            pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂))) ≫
+            qx U₁ :=
+          (Category.assoc _ _ _).symm
+      _ = (σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            rfl ≫
+            pullback.snd (σ.relQuotientπ f hover)
+              (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫
+                j)) ≫ qx U₁ := by
+          rw [pullbackRelQRes_snd]
+      _ = σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            rfl ≫
+            pullback.snd (σ.relQuotientπ f hover)
+              (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫
+                j) ≫ qx U₁ :=
+          Category.assoc _ _ _
+      _ = σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            rfl ≫
+            σ.pullbackRelQRes f hover j
+              (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              rfl ≫ F := by
+          rw [hqx U₁]
+      _ = (σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            rfl ≫
+            σ.pullbackRelQRes f hover j
+              (pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              rfl) ≫ F :=
+          (Category.assoc _ _ _).symm
+      _ = (σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.snd
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            hbase ≫
+            σ.pullbackRelQRes f hover j
+              (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+              (pullback.fst j (σ.relQuotientChartι f hover U₂))
+              rfl) ≫ F := by
+          rw [hσρ]
+      _ = σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.snd
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            hbase ≫
+            σ.pullbackRelQRes f hover j
+              (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+              (pullback.fst j (σ.relQuotientChartι f hover U₂))
+              rfl ≫ F :=
+          Category.assoc _ _ _
+      _ = σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.snd
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            hbase ≫
+            pullback.snd (σ.relQuotientπ f hover)
+              (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫
+                j) ≫ qx U₂ := by
+          rw [← hqx U₂]
+      _ = (σ.pullbackRelQRes f hover
+            (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫ j)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j)
+            (pullback.snd
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)))
+            hbase ≫
+            pullback.snd (σ.relQuotientπ f hover)
+              (pullback.fst j (σ.relQuotientChartι f hover U₂) ≫
+                j)) ≫ qx U₂ :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j) ≫
+            pullback.snd
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂))) ≫
+            qx U₂ := by
+          rw [pullbackRelQRes_snd]
+      _ = pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+              pullback.fst j (σ.relQuotientChartι f hover U₁) ≫ j) ≫
+            pullback.snd
+              (pullback.fst j (σ.relQuotientChartι f hover U₁))
+              (pullback.fst j (σ.relQuotientChartι f hover U₂)) ≫
+            qx U₂ :=
+          Category.assoc _ _ _
+  refine ⟨(σ.relChartCover f hover j).glueMorphisms qx hcompat, ?_⟩
+  -- verify the factorization on a cover of the base change
+  refine Scheme.Cover.hom_ext (Scheme.Cover.mkOfCovers (J := S.AffineZariskiSite)
+    (fun U => pullback (pullback.snd (σ.relQuotientπ f hover) j)
+      (pullback.fst j (σ.relQuotientChartι f hover U)))
+    (fun U => pullback.fst (pullback.snd (σ.relQuotientπ f hover) j)
+      (pullback.fst j (σ.relQuotientChartι f hover U)))
+    (fun e => by
+      obtain ⟨U, y, hy⟩ := Scheme.IsLocallyDirected.ι_jointly_surjective
+        (σ.invariantsGlueData f hover).functor
+        (j ((pullback.snd (σ.relQuotientπ f hover) j) e))
+      have h2 : e ∈ Set.range ⇑(pullback.fst
+          (pullback.snd (σ.relQuotientπ f hover) j)
+          (pullback.fst j (σ.relQuotientChartι f hover U))) := by
+        rw [IsOpenImmersion.range_pullbackFst]
+        show (pullback.snd (σ.relQuotientπ f hover) j) e ∈
+          Set.range ⇑(pullback.fst j
+            (σ.relQuotientChartι f hover U))
+        rw [IsOpenImmersion.range_pullbackFst]
+        exact ⟨y, hy⟩
+      obtain ⟨y', hy'⟩ := h2
+      exact ⟨U, y', hy'⟩)
+    (fun U => inferInstance)) _ _ fun U : S.AffineZariskiSite => ?_
+  show pullback.fst (pullback.snd (σ.relQuotientπ f hover) j)
+      (pullback.fst j (σ.relQuotientChartι f hover U)) ≫
+      pullback.snd (σ.relQuotientπ f hover) j ≫
+        (σ.relChartCover f hover j).glueMorphisms qx hcompat =
+    pullback.fst (pullback.snd (σ.relQuotientπ f hover) j)
+      (pullback.fst j (σ.relQuotientChartι f hover U)) ≫ F
+  have hι := (σ.relChartCover f hover j).ι_glueMorphisms qx hcompat U
+  rw [relChartCover_f] at hι
+  rw [← Category.assoc,
+    pullback.condition (f := pullback.snd (σ.relQuotientπ f hover) j)
+      (g := pullback.fst j (σ.relQuotientChartι f hover U)),
+    Category.assoc, hι]
+  -- compare through the canonical map into the chart base change
+  set θ : pullback (pullback.snd (σ.relQuotientπ f hover) j)
+      (pullback.fst j (σ.relQuotientChartι f hover U)) ⟶
+      pullback (σ.relQuotientπ f hover)
+        (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j) :=
+    pullback.lift
+      (pullback.fst (pullback.snd (σ.relQuotientπ f hover) j)
+        (pullback.fst j (σ.relQuotientChartι f hover U)) ≫
+        pullback.fst (σ.relQuotientπ f hover) j)
+      (pullback.snd (pullback.snd (σ.relQuotientπ f hover) j)
+        (pullback.fst j (σ.relQuotientChartι f hover U)))
+      (by
+        rw [Category.assoc,
+          pullback.condition (f := σ.relQuotientπ f hover) (g := j),
+          ← Category.assoc,
+          pullback.condition
+            (f := pullback.snd (σ.relQuotientπ f hover) j)
+            (g := pullback.fst j
+              (σ.relQuotientChartι f hover U)),
+          Category.assoc])
+      with hθ
+  have hθsnd : θ ≫ pullback.snd (σ.relQuotientπ f hover)
+      (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j) =
+      pullback.snd (pullback.snd (σ.relQuotientπ f hover) j)
+        (pullback.fst j (σ.relQuotientChartι f hover U)) := by
+    rw [hθ]
+    exact pullback.lift_snd _ _ _
+  have hθρ : θ ≫ σ.pullbackRelQRes f hover j
+      (pullback.fst j (σ.relQuotientChartι f hover U) ≫ j)
+      (pullback.fst j (σ.relQuotientChartι f hover U)) rfl =
+      pullback.fst (pullback.snd (σ.relQuotientπ f hover) j)
+        (pullback.fst j (σ.relQuotientChartι f hover U)) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullbackRelQRes_fst, hθ, pullback.lift_fst]
+    · rw [Category.assoc, pullbackRelQRes_snd, ← Category.assoc, hθsnd,
+        pullback.condition
+          (f := pullback.snd (σ.relQuotientπ f hover) j)
+          (g := pullback.fst j
+            (σ.relQuotientChartι f hover U))]
+  rw [← hθsnd, Category.assoc, hqx U, ← Category.assoc, hθρ]
 
 include hfree in
 /-- **The base-changed descent core** ([GHB5a′], the [A711-BC] crux): for a free action,
