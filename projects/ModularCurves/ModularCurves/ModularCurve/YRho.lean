@@ -2145,6 +2145,26 @@ theorem frameEval_points (D : GaloisRepData N)
     apply Spec.map_injective
     rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, hp', frameEval]
     exact (Category.assoc _ _ _).symm
+  -- the pair-split: the tensor-point's components are the pullback projections
+  have hfst : Spec.preimage (p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D)) =
+      CommRingCat.ofHom (algebraMap (constVecAlgebra N : Type 0)
+        (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0))) ≫ Spec.preimage p' := by
+    apply Spec.map_injective
+    rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, hp', Category.assoc]
+    exact congrArg (p ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).symm
+  have hsnd : Spec.preimage (p ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D)) =
+      CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)).toRingHom ≫ Spec.preimage p' := by
+    apply Spec.map_injective
+    rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, hp', Category.assoc]
+    exact congrArg (p ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_hom_snd ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).symm
   sorry
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
