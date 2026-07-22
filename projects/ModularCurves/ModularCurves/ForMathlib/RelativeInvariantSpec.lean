@@ -66,7 +66,9 @@ include hover in
 /-- The `f`-preimage of any open of the base is stable under an action over `f`
 (immediate from `hover`; the atlas-stability observation of [GHB3], now a lemma). -/
 theorem isStableOpen_preimage (U : S.Opens) : σ.IsStableOpen (f ⁻¹ᵁ U) := by
-  sorry
+  intro g
+  show (σ.hom g ≫ f) ⁻¹ᵁ U = f ⁻¹ᵁ U
+  rw [hover g]
 
 /-- Restriction of sections along nested stable opens is `G`-equivariant: the section
 action (`gammaMulSemiringAction`) commutes with the presheaf restriction map. -/
@@ -75,7 +77,14 @@ theorem gamma_map_smul {V U : Z.Opens} (hV : σ.IsStableOpen V) (hU : σ.IsStabl
     letI := σ.gammaMulSemiringAction hV
     letI := σ.gammaMulSemiringAction hU
     (Z.presheaf.map (homOfLE hle).op) (g • s) = g • (Z.presheaf.map (homOfLE hle).op) s := by
-  sorry
+  letI := σ.gammaMulSemiringAction hV
+  letI := σ.gammaMulSemiringAction hU
+  show (Z.presheaf.map (homOfLE hle).op).hom
+      (((σ.hom g).appLE V V (hV.le_preimage g)).hom s)
+    = ((σ.hom g).appLE U U (hU.le_preimage g)).hom
+      ((Z.presheaf.map (homOfLE hle).op).hom s)
+  rw [← CommRingCat.comp_apply, ← CommRingCat.comp_apply, Scheme.Hom.appLE_map,
+    Scheme.Hom.map_appLE]
 
 /-- The base change of a scheme action lying over `S` along `g : T ⟶ S`: the induced
 action on `pullback f g` (trivial on the `T`-leg). Needed to *state* KM 7.1.3(3c).
@@ -116,13 +125,39 @@ def invariantsDiagram : S.AffineZariskiSiteᵒᵖ ⥤ CommRingCat where
           (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op).hom.comp
         (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ V.unop.1) G).val.toRingHom).invariantsCorestrict
         (R₀ := ℤ) (fun g r => by
-          have := σ.gamma_map_smul (σ.isStableOpen_preimage f hover V.unop.1)
+          have h := σ.gamma_map_smul (σ.isStableOpen_preimage f hover V.unop.1)
             (σ.isStableOpen_preimage f hover U.unop.1)
             (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono i.unop.le)) g
             (r : Γ(Z, f ⁻¹ᵁ V.unop.1))
-          sorry)
-  map_id := by sorry
-  map_comp := by sorry
+          show g • (Z.presheaf.map (homOfLE (f.preimage_mono
+              (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op).hom
+              (r : Γ(Z, f ⁻¹ᵁ V.unop.1))
+            = (Z.presheaf.map (homOfLE (f.preimage_mono
+              (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op).hom
+              (r : Γ(Z, f ⁻¹ᵁ V.unop.1))
+          rw [← h, r.2 g])
+  map_id := by
+    intro U
+    ext r
+    change (Z.presheaf.map (𝟙 (Opposite.op (f ⁻¹ᵁ (U.unop.1 : S.Opens))))).hom
+        (r : Γ(Z, f ⁻¹ᵁ (U.unop.1 : S.Opens)))
+      = (r : Γ(Z, f ⁻¹ᵁ (U.unop.1 : S.Opens)))
+    rw [CategoryTheory.Functor.map_id]
+    rfl
+  map_comp := by
+    intro U V W i j
+    ext r
+    change (Z.presheaf.map
+        ((homOfLE (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op ≫
+          (homOfLE (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono j.unop.le))).op)).hom
+        (r : Γ(Z, f ⁻¹ᵁ (U.unop.1 : S.Opens)))
+      = (Z.presheaf.map
+          (homOfLE (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono j.unop.le))).op).hom
+        ((Z.presheaf.map
+          (homOfLE (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op).hom
+          (r : Γ(Z, f ⁻¹ᵁ (U.unop.1 : S.Opens))))
+    rw [CategoryTheory.Functor.map_comp]
+    rfl
 
 /-- The structural map `𝒪_S ⟶ (U ↦ Γ(Z, f⁻¹U)ᴳ)`: per chart it is the descended
 chart ring map `quotientDescRing` (the corestriction of `f.appLE` to the invariants,
@@ -132,7 +167,58 @@ def invariantsDiagramMap :
       σ.invariantsDiagram f hover where
   app U := CommRingCat.ofHom
     (σ.quotientDescRing f hover U.unop.1 (σ.isStableOpen_preimage f hover U.unop.1))
-  naturality := by sorry
+  naturality := by
+    intro U V i
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover (U.unop.1 : S.Opens))
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover (V.unop.1 : S.Opens))
+    ext r
+    refine Subtype.ext ?_
+    have hdiag : (σ.invariantsDiagram f hover).map i ≫
+          CommRingCat.ofHom (algebraMap
+            (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ (V.unop.1 : S.Opens)) G)
+            ↑Γ(Z, f ⁻¹ᵁ (V.unop.1 : S.Opens)))
+        = CommRingCat.ofHom (algebraMap
+            (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ (U.unop.1 : S.Opens)) G)
+            ↑Γ(Z, f ⁻¹ᵁ (U.unop.1 : S.Opens))) ≫
+          Z.presheaf.map (homOfLE (f.preimage_mono
+            (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op := by
+      ext x
+      rfl
+    have hcollV := σ.ofHom_quotientDescRing_algebraMap f hover (V.unop.1 : S.Opens)
+      (σ.isStableOpen_preimage f hover (V.unop.1 : S.Opens))
+    have hcollU := σ.ofHom_quotientDescRing_algebraMap f hover (U.unop.1 : S.Opens)
+      (σ.isStableOpen_preimage f hover (U.unop.1 : S.Opens))
+    have hkey : (((Scheme.AffineZariskiSite.toOpensFunctor S).op ⋙ S.presheaf).map i ≫
+          CommRingCat.ofHom (σ.quotientDescRing f hover (V.unop.1 : S.Opens)
+            (σ.isStableOpen_preimage f hover (V.unop.1 : S.Opens)))) ≫
+          CommRingCat.ofHom (algebraMap
+            (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ (V.unop.1 : S.Opens)) G)
+            ↑Γ(Z, f ⁻¹ᵁ (V.unop.1 : S.Opens)))
+        = (CommRingCat.ofHom (σ.quotientDescRing f hover (U.unop.1 : S.Opens)
+            (σ.isStableOpen_preimage f hover (U.unop.1 : S.Opens))) ≫
+          (σ.invariantsDiagram f hover).map i) ≫
+          CommRingCat.ofHom (algebraMap
+            (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ (V.unop.1 : S.Opens)) G)
+            ↑Γ(Z, f ⁻¹ᵁ (V.unop.1 : S.Opens))) := by
+      refine ((Category.assoc _ _ _).trans ?_).trans (Category.assoc _ _ _).symm
+      refine (congrArg (fun φ =>
+        (((Scheme.AffineZariskiSite.toOpensFunctor S).op ⋙ S.presheaf).map i) ≫ φ)
+        hcollV).trans ?_
+      refine Eq.trans ?_ (congrArg (fun φ =>
+        CommRingCat.ofHom (σ.quotientDescRing f hover (U.unop.1 : S.Opens)
+          (σ.isStableOpen_preimage f hover (U.unop.1 : S.Opens))) ≫ φ) hdiag.symm)
+      have hmid : (((Scheme.AffineZariskiSite.toOpensFunctor S).op ⋙ S.presheaf).map i ≫
+            f.appLE (V.unop.1 : S.Opens) (f ⁻¹ᵁ (V.unop.1 : S.Opens)) le_rfl)
+          = f.appLE (U.unop.1 : S.Opens) (f ⁻¹ᵁ (U.unop.1 : S.Opens)) le_rfl ≫
+            Z.presheaf.map (homOfLE (f.preimage_mono
+              (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op :=
+        (Scheme.Hom.map_appLE f le_rfl
+          ((Scheme.AffineZariskiSite.toOpensFunctor S).op.map i)).trans
+          (Scheme.Hom.appLE_map f le_rfl (homOfLE (f.preimage_mono
+            (Scheme.AffineZariskiSite.toOpens_mono i.unop.le))).op).symm
+      refine hmid.trans ?_
+      rw [← Category.assoc, hcollU]
+    exact congr($(hkey) r)
 
 /-- **Invariants form a quasi-coherent `𝒪_S`-algebra**: the structural map is
 `Coequifibered`, i.e. `Γ(Z, f⁻¹(D_U(r)))ᴳ` is the away-localization of

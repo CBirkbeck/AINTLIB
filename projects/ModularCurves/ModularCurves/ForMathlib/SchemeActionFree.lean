@@ -220,6 +220,7 @@ theorem gamma_appLE_invariant (hover : ∀ γ : G, σ.hom γ ≫ f = f)
   show ((σ.hom g).appLE V V (hVst.le_preimage g)).hom ((f.appLE U V hle).hom r) = _
   rw [← CommRingCat.comp_apply, hcomp]
 
+omit [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))] in
 /-- The descended chart ring map `Γ(S, W) ⟶ Γ(X, f⁻¹W)ᴳ` of an invariant morphism: the
 corestriction of `f.appLE` to the invariants of the section-ring action. -/
 noncomputable def quotientDescRing (hover : ∀ γ : G, σ.hom γ ≫ f = f) (W : S.Opens)
@@ -230,6 +231,7 @@ noncomputable def quotientDescRing (hover : ∀ γ : G, σ.hom γ ≫ f = f) (W 
   (f.appLE W (f ⁻¹ᵁ W) le_rfl).hom.invariantsCorestrict (R₀ := ℤ)
     (fun g r => σ.gamma_appLE_invariant f hover hVst le_rfl g r)
 
+omit [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))] in
 /-- The composition of the descended chart ring map with the invariants inclusion is the
 chart ring map itself. -/
 theorem ofHom_quotientDescRing_algebraMap (hover : ∀ γ : G, σ.hom γ ≫ f = f) (W : S.Opens)
