@@ -24820,3 +24820,65 @@ Y₀(N) coarse scheme = quotient of the representing scheme (KM 8.1.1/8.1.5; Loe
 3.6.2). Gap list in `decomposition-quotient-rectified.md` §M3: representing-object
 extraction API, absolute affineness of Y(N), affine quotient step (machinery exists),
 coarse k̄-points assembly; smoothness /ℤ[1/N] = M4, parked.
+
+## v10.347 (2026-07-22) — /develop --continue REFRESH of the T-RIS7 residuals (post-b3fb7ec5e audit)
+
+**R1 audit (live, verified):** T-SB1..5 done ✓; T-RIS1..6 done ✓; RelativeInvariantSpec.lean
+has FOUR sorries (:610 isIntegral deferred, :1046/:1048 the µ-branches, :1073 the global
+assembly); GammaHSemiBorel.lean has ONE (gammaH_semiBorel_closure = T-SB6). All ticket
+statuses on the board match reality. Cleanup stays deferred-to-main (CLAUDE.md producer rule).
+Residual tickets refreshed with transcribed port-sources (read verbatim this session):
+
+- **[T-RIS7-µ] the two intertwining branches** (:1046/:1048) — REFRESHED RECIPE: transcribe
+  the OLD file's own calc, SchemeQuotient.lean:1509-1560, which proves the IDENTICAL statement
+  shape for the old quotient. Renaming dictionary: pullbackQuotientπSMul ↦ pullbackRelQSMul;
+  (hVa x).isoSpec ↦ (U.2.preimage f).isoSpec; V x ↦ f ⁻¹ᵁ (U.1 : S.Opens); jS ↦ wc;
+  wq ↦ wc ≫ colimit.ι (invariantsGlueData).functor U; quotientπ-pullbacks ↦ relQuotientπ-
+  pullbacks. The calc's step-list (fst-branch): assoc → rw [pullbackRelQSMul_fst] → assoc⁻¹ →
+  rw [hEfst] → assoc² → rw [Scheme.Hom.resLE_comp_ι-symm via h1] → assoc-shuffle →
+  rw [specSMul_isoSpec_inv via h2] → assoc² → rw [pullbackSpecSMul_fst] → rw [hEfst, assoc] →
+  assoc⁻¹. snd-branch (6 steps): assoc → rw [pullbackRelQSMul_snd] → hEsnd → rw
+  [pullbackSpecSMul_snd] → rw [hEsnd] → assoc⁻¹. DO NOT retry: bare simp-only (Γ-synonym
+  no-fire) or a single nested refine-congrArg (isDefEq 200k blowup — observed). If an
+  individual calc-step's rw hits a motive failure, convert THAT STEP ONLY to a
+  congrArg-term with the function explicit. Fallback: set_option
+  backward.isDefEq.respectTransparency false on the chart-step theorem (allowed).
+- **[T-RIS7-global] existsUnique_pullbackMap_lift** (:1073) — REFRESHED PLAN, three ported
+  blocks: (1) plumbing: pullbackResQ-analogue `pullbackRelQRes` (pullback.map (𝟙,u,𝟙)-def +
+  _fst/_snd + the SMul-intertwining pullbackRelQSMul_pullbackRelQRes) — port
+  SchemeQuotient.lean:1400-1447 verbatim (generic pullback algebra, no chart content);
+  (2) EXISTENCE `exists_relQuotientπ_lift_baseChange (j : W ⟶ relQuotient)(F)(hF-RelQSMul) :
+  ∃ q, pullback.snd π j ≫ q = F` — port :1603-1700+: chartCover-analogue of W with pieces
+  `pullback j ((colimit.ι functor U).opensRange).ι` (mem₀ via the iSup-ranges-⊤ argument
+  already proven inline in morphismProperty_relQuotientπ_of_charts — extract it as
+  `iSup_chart_opensRange_eq_top` first), per-piece descent via the PROVEN chart step
+  exists_relQuotientπ_lift_baseChange_of_factors (factor-hyp: pullback.condition gives
+  wq = fst ≫ j factoring through the chart-range ι — NOTE the chart step wants factoring
+  through colimit.ι itself, not the range-ι: compose with the range-iso
+  IsOpenImmersion.isoOfRangeEq (range.ι) (colimit.ι) as in morphismProperty-transfer),
+  overlap-compat by cancel_epi (epi_pullback_snd_relQuotientπ, PROVEN) + the hσρ
+  pullbackRes-square, glue by Scheme.Cover.hom_ext-of the chartCover; (3) the ∃!-reduction
+  from (πT := pullback.map, basePullback)-form: port the OLD GHB5 E-comparison block
+  GammaHRepresentability.lean:604-680 AT the identity comparison — jc := pullback.fst f₀ g,
+  hkey/hsq/E := pullback.lift-pair/hEfst/hEsnd/hEπT/hEact verbatim (construction-agnostic;
+  only its GHB5a-call swaps to (2) and its epi-uniqueness to epi_pullback_snd_relQuotientπ).
+  Sub-ticket order: plumbing → existence → reduction; each committed separately.
+- **[T-RIS7-int] isIntegralHom_relQuotientπ** (:610) — LOW PRIORITY (KM 7.1.3(4)
+  completeness, blocks nothing): morphismProperty_relQuotientπ_of_charts (IsIntegralHom is
+  IsZariskiLocalAtTarget) + toSpecΓ-iso-cancel + IsIntegralHom.SpecMap_iff + chartwise
+  integrality from the mathlib instance chain already instantiated at SpecGroupAction.lean:98
+  (`Algebra.IsInvariant (FixedPoints.subalgebra R B G) B G` + `Algebra.IsInvariant.isIntegral`
+  — same route as invariantsπ_surjective's proof at :123-130) — algebraMap-form + rfl-bridge
+  to val.toRingHom as in the finite/étale lemmas. Schedule AFTER T-RIS8.
+- **[T-RIS8]** unchanged (re-confirmed): import + basePullback-dedup (:288) + three consumer
+  rewires (:445 delegate GHB3′; :484 unique-iso comparison :516-533 against relQuotient
+  consuming isFinite/etale/surjective_relQuotientπ_of_free + existsUnique_relQuotientπ_lift +
+  relQuotientπ_comp/hom_comp; :545 delegate GHB5′) + hbase deletion sweep (:749, :733-3230,
+  :3184, :3553). Hypothesis-deletions only. Gate: full lake build + #print axioms
+  gammaH_relativelyRepresentable = clean triple + 7-receipt census unchanged.
+- **[T-SB6]** unchanged: after T-RIS8, gammaH_semiBorel_closure :=
+  ⟨gammaH_relativelyRepresentable (now hbase-free), fun qpd =>
+  gammaH_representable_of_le_semiBorel …⟩.
+
+Dispatch order: T-RIS7-µ → T-RIS7-global(plumbing→existence→reduction) → T-RIS8 → T-SB6 →
+T-RIS7-int. — /develop --continue, 2026-07-22
