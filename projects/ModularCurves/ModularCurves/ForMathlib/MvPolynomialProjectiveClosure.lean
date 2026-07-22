@@ -58,6 +58,29 @@ def homogeneousProjπ :
     Spec.map (CommRingCat.ofHom
       (algebraMap R (↥(homogeneousSubmodule σ R 0))))
 
+/-- Polynomial projective space in finitely many homogeneous coordinates is locally of finite
+type over the coefficient spectrum. -/
+lemma homogeneousProjπ_locallyOfFiniteType [Finite σ] :
+    LocallyOfFiniteType (homogeneousProjπ (R := R) (σ := σ)) := by
+  letI : Algebra.FiniteType R (MvPolynomial σ R) := by infer_instance
+  letI : IsScalarTower R (homogeneousSubmodule σ R 0) (MvPolynomial σ R) :=
+    IsScalarTower.of_algebraMap_eq'
+      (R := R) (S := homogeneousSubmodule σ R 0) (A := MvPolynomial σ R)
+      (by ext r; rfl)
+  letI : Algebra.FiniteType (homogeneousSubmodule σ R 0) (MvPolynomial σ R) :=
+    Algebra.FiniteType.of_restrictScalars_finiteType R
+      (homogeneousSubmodule σ R 0) (MvPolynomial σ R)
+  letI : Algebra.FiniteType R (homogeneousSubmodule σ R 0) := by infer_instance
+  letI hproj : LocallyOfFiniteType
+      (Proj.toSpecZero (homogeneousSubmodule σ R)) := inferInstance
+  letI hbase : LocallyOfFiniteType
+      (Spec.map (CommRingCat.ofHom
+        (algebraMap R (homogeneousSubmodule σ R 0)))) :=
+    (AlgebraicGeometry.HasRingHomProperty.Spec_iff
+      (P := @LocallyOfFiniteType)).mpr
+        ((RingHom.finiteType_algebraMap).mpr inferInstance)
+  exact IsStableUnderComposition.comp_mem _ _ hproj hbase
+
 /-- The projective scheme cut out by a family of homogenized polynomial relations. -/
 @[reducible]
 def homogenizedProj (g : κ → MvPolynomial σ R) (d : κ → ℕ) : Scheme.{u} :=
