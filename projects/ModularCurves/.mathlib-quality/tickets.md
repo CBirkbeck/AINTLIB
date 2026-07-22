@@ -25259,6 +25259,26 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### asm-2 progress (2026-07-25)
+- frameEval_π (over-ℚ spec: pullbackSpecIso_hom_fst' + IsScalarTower at the RAW
+  tensor — tensorObj-coe blocks instance synthesis, respell raw) + frameEvalSlice
+  (the h-slice via nested lifts) LANDED + PUSHED (d895a3349 + slice-commit).
+- REMAINING asm-2: frameEvalSlice_isIso — sub-decomposition:
+  (2a) frameEval-points-spec: at a ℚ̄-point (v-pt, A-pt) of the product,
+  vRhoPointsEquiv (frameEval-composite) = (wFramesPointsEquiv A-pt) • (constVec-
+  points-reading of v-pt) — the counit-3-layer mirror at frameEvalMor
+  (pointsEquivOfContAction_map is LANDED — the L1/L2-layers + the product-points-
+  split via frameProdIsProduct/pullbackSpecIso-points remain); needs a
+  constVec-points-equiv (mirror wFramesPointsEquiv at constVecContAction — the
+  trivial-set points-reading, same 3-layer form).
+  (2b) the iso-conclusion: EITHER the Γ-engine template (GLSchemeAction:366-516:
+  affine-case Γ-bijectivity + base-change-naturality + globalize) OR the
+  finite-étale-fibrewise-bijective criterion (mathlib-hunt: étale+universally-
+  bijective ⟹ iso; fallback: both sides finite étale over T, the map over T,
+  isomorphism-checking étale-locally after trivializing BOTH sides — then it is a
+  constant-scheme endo given by the invertible matrix A).
+- THEN asm-3 (the ρ-dictionary — board 3d-1c-assembly block), 3d-2, carve, 3e.
+
 ### asm-1 COMPLETE (2026-07-24/25)
 Landed green, all pushed: piAlgHomEquiv (+index/spec/unique/comp — the split-algebra
 evaluation dictionary with Galois-invariance) → constVecCorrespondenceIso (the
