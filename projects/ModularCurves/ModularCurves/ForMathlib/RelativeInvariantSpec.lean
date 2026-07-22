@@ -1549,7 +1549,138 @@ theorem existsUnique_pullbackMap_lift {T : Scheme.{u}} (g : T ⟶ S)
       pullback.map f g (σ.relQuotientStruct f hover) g (σ.relQuotientπ f hover) (𝟙 T)
         (𝟙 S) (by rw [Category.comp_id, σ.relQuotientπ_comp_relQuotientStruct f hover])
         (by rw [Category.comp_id, Category.id_comp]) ≫ q = F := by
-  sorry
+  classical
+  -- the base-changed projection and its leg identities
+  set πT : pullback f g ⟶ pullback (σ.relQuotientStruct f hover) g :=
+    pullback.map f g (σ.relQuotientStruct f hover) g (σ.relQuotientπ f hover) (𝟙 T)
+      (𝟙 S) (by rw [Category.comp_id, σ.relQuotientπ_comp_relQuotientStruct f hover])
+      (by rw [Category.comp_id, Category.id_comp]) with hπTdef
+  have hfst : πT ≫ pullback.fst (σ.relQuotientStruct f hover) g =
+      pullback.fst f g ≫ σ.relQuotientπ f hover := by
+    rw [hπTdef]; exact pullback.lift_fst _ _ _
+  have hsnd : πT ≫ pullback.snd (σ.relQuotientStruct f hover) g =
+      pullback.snd f g := by
+    rw [hπTdef]; exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  -- the comparison iso between `pullback π jc` and `pullback f g` at `jc := fst f₀ g`
+  have hπf := σ.relQuotientπ_comp_relQuotientStruct f hover
+  have hkey : pullback.fst (σ.relQuotientπ f hover)
+        (pullback.fst (σ.relQuotientStruct f hover) g) ≫ σ.relQuotientπ f hover =
+      pullback.snd (σ.relQuotientπ f hover)
+        (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+        pullback.fst (σ.relQuotientStruct f hover) g :=
+    pullback.condition
+  have hsq : pullback.fst (σ.relQuotientπ f hover)
+        (pullback.fst (σ.relQuotientStruct f hover) g) ≫ f =
+      (pullback.snd (σ.relQuotientπ f hover)
+        (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+        pullback.snd (σ.relQuotientStruct f hover) g) ≫ g :=
+    calc pullback.fst (σ.relQuotientπ f hover)
+          (pullback.fst (σ.relQuotientStruct f hover) g) ≫ f
+        = pullback.fst (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+            σ.relQuotientπ f hover ≫ σ.relQuotientStruct f hover :=
+          congrArg (pullback.fst (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫ ·) hπf.symm
+      _ = (pullback.fst (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+            σ.relQuotientπ f hover) ≫ σ.relQuotientStruct f hover :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+            pullback.fst (σ.relQuotientStruct f hover) g) ≫
+            σ.relQuotientStruct f hover :=
+          congrArg (· ≫ σ.relQuotientStruct f hover) hkey
+      _ = pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+            pullback.fst (σ.relQuotientStruct f hover) g ≫
+            σ.relQuotientStruct f hover :=
+          Category.assoc _ _ _
+      _ = pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+            pullback.snd (σ.relQuotientStruct f hover) g ≫ g :=
+          congrArg (pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫ ·) pullback.condition
+      _ = (pullback.snd (σ.relQuotientπ f hover)
+            (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+            pullback.snd (σ.relQuotientStruct f hover) g) ≫ g :=
+          (Category.assoc _ _ _).symm
+  set E : pullback (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g) ⟶ pullback f g :=
+    pullback.lift
+      (pullback.fst (σ.relQuotientπ f hover)
+        (pullback.fst (σ.relQuotientStruct f hover) g))
+      (pullback.snd (σ.relQuotientπ f hover)
+        (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+        pullback.snd (σ.relQuotientStruct f hover) g)
+      hsq with hE
+  have hEfst : E ≫ pullback.fst f g = pullback.fst (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g) := by
+    rw [hE]; exact pullback.lift_fst _ _ _
+  have hEsnd : E ≫ pullback.snd f g = pullback.snd (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g) ≫
+      pullback.snd (σ.relQuotientStruct f hover) g := by
+    rw [hE]; exact pullback.lift_snd _ _ _
+  -- `E ≫ πT` is the base-changed projection
+  have hEπT : E ≫ πT = pullback.snd (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, hfst, ← Category.assoc, hEfst, hkey]
+    · rw [Category.assoc, hsnd, hEsnd]
+  -- `E` is an isomorphism, with inverse assembled from `πT`
+  have hsq' : pullback.fst f g ≫ σ.relQuotientπ f hover =
+      πT ≫ pullback.fst (σ.relQuotientStruct f hover) g := hfst.symm
+  set E' : pullback f g ⟶ pullback (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g) :=
+    pullback.lift (pullback.fst f g) πT hsq' with hE'
+  have hE'fst : E' ≫ pullback.fst (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g) = pullback.fst f g := by
+    rw [hE']; exact pullback.lift_fst _ _ _
+  have hE'snd : E' ≫ pullback.snd (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g) = πT := by
+    rw [hE']; exact pullback.lift_snd _ _ _
+  haveI : IsIso E := by
+    refine ⟨E', ?_, ?_⟩
+    · refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, hE'fst, Category.id_comp, hEfst]
+      · rw [Category.assoc, hE'snd, Category.id_comp, hEπT]
+    · refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, hEfst, Category.id_comp, hE'fst]
+      · rw [Category.assoc, hEsnd, Category.id_comp, ← Category.assoc, hE'snd, hsnd]
+  -- the comparison intertwines the actions
+  have hbfst : ∀ γ : G, (σ.basePullback f hover g).hom γ ≫ pullback.fst f g =
+      pullback.fst f g ≫ σ.hom γ := fun γ => by
+    simp only [SchemeAction.basePullback, pullback.lift_fst]
+  have hbsnd : ∀ γ : G, (σ.basePullback f hover g).hom γ ≫ pullback.snd f g =
+      pullback.snd f g := fun γ => σ.basePullback_hover f hover g γ
+  have hEact : ∀ γ : G, E ≫ (σ.basePullback f hover g).hom γ =
+      σ.pullbackRelQSMul f hover
+        (pullback.fst (σ.relQuotientStruct f hover) g) γ ≫ E := by
+    intro γ
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, hbfst γ, ← Category.assoc, hEfst, Category.assoc, hEfst,
+        pullbackRelQSMul_fst]
+    · rw [Category.assoc, hbsnd γ, hEsnd, Category.assoc, hEsnd, ← Category.assoc,
+        pullbackRelQSMul_snd]
+  -- existence of the descent, through the glued engine [GHB5a′]
+  have hFE : ∀ γ : G, σ.pullbackRelQSMul f hover
+      (pullback.fst (σ.relQuotientStruct f hover) g) γ ≫ (E ≫ F) = E ≫ F := by
+    intro γ
+    rw [← Category.assoc, ← hEact γ, Category.assoc, hFinv γ]
+  obtain ⟨q₀, hq₀⟩ := σ.exists_relQuotientπ_lift_baseChange f hover hfree
+    (pullback.fst (σ.relQuotientStruct f hover) g) (E ≫ F) hFE
+  haveI : Epi (pullback.snd (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g)) :=
+    σ.epi_pullback_snd_relQuotientπ f hover hfree
+      (pullback.fst (σ.relQuotientStruct f hover) g)
+  refine ⟨q₀, ?_, ?_⟩
+  · show πT ≫ q₀ = F
+    rw [← cancel_epi E, ← Category.assoc, hEπT]
+    exact hq₀
+  · intro q₁ hq₁
+    have hq₁' : πT ≫ q₁ = F := hq₁
+    rw [← cancel_epi (pullback.snd (σ.relQuotientπ f hover)
+      (pullback.fst (σ.relQuotientStruct f hover) g)), hq₀, ← hEπT,
+      Category.assoc, hq₁']
 
 include hfree in
 /-- **[GHB5′] (KM 7.1.3(3c), diagonal-free)** — the base-change package of the former
