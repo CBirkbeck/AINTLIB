@@ -431,4 +431,72 @@ private theorem baseSections_cechKernelComparison_one_tmul_coe
     _ = _ := baseCechComplexBaseChange_zero_one_tmul_augmentation
       f t M U hUaff s
 
+/-- The global-sections base-change equivalence obtained from an ordered Cech
+kernel comparison agrees on pure tensors with the pullback adjunction unit. -/
+theorem baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison_one_tmul
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (hker :
+      letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+        t.appTop.hom.toAlgebra
+      Function.Bijective
+        (ModularCurves.kerBaseChangeComparison Γ(T, (⊤ : T.Opens))
+          ((orderedBaseCechComplex f M U).d 0 1).hom))
+    (s : baseSections f M) :
+    letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+      t.appTop.hom.toAlgebra
+    baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison
+        f t M U hU hUaff hker
+        ((1 : Γ(T, (⊤ : T.Opens)))
+          ⊗ₜ[Γ(S, (⊤ : S.Opens))] s) =
+      affinePullbackUnitTop (pullback.fst f t) M s := by
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  let g := pullback.fst f t
+  let f' := pullback.snd f t
+  let P := (pullback g).obj M
+  let Uf : ι → (Limits.pullback f t).Opens := fun i ↦ g ⁻¹ᵁ U i
+  have hUf : IsOpenCover Uf := g.iSup_preimage_eq_top hU
+  let C := baseCechComplex f M U
+  let eSource := (baseSectionsIsoKernelOrderedBaseCechDifferential
+    f M U hU).toLinearEquiv
+  let eSourceA := LinearEquiv.baseChange B A _ _ eSource
+  let eKernel : A ⊗[B]
+        LinearMap.ker ((orderedBaseCechComplex f M U).d 0 1).hom ≃ₗ[A]
+      LinearMap.ker
+        (((orderedBaseCechComplex f M U).d 0 1).hom.baseChange A) :=
+    LinearEquiv.ofBijective
+      (ModularCurves.kerBaseChangeComparison A
+        ((orderedBaseCechComplex f M U).d 0 1).hom) hker
+  let eOrderedNative :=
+    (baseCechKernelOrderedBaseChangeLinearEquiv f M U A).symm
+  let eCategorical :=
+    ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv C A
+  let eComplex :=
+    (HomologicalComplex.kernelZeroIsoOfIso
+      (baseCechComplexBaseChangeIso f t M U hUaff)).toLinearEquiv
+  let eTarget := (baseSectionsIsoKernelBaseCechDifferential
+    f' P Uf hUf).toLinearEquiv.symm
+  change eTarget (eComplex (eCategorical (eOrderedNative
+    (eKernel (eSourceA ((1 : A) ⊗ₜ[B] s)))))) = _
+  apply eTarget.symm.injective
+  rw [eTarget.symm_apply_apply]
+  apply Subtype.ext
+  change (eComplex (eCategorical (eOrderedNative
+      (eKernel (eSourceA ((1 : A) ⊗ₜ[B] s)))))).1 =
+    ((baseSectionsIsoKernelBaseCechDifferential f' P Uf hUf).hom
+      (affinePullbackUnitTop g M s)).1
+  calc
+    _ = (baseCechAugmentation f' P Uf).hom
+        (affinePullbackUnitTop g M s) :=
+      baseSections_cechKernelComparison_one_tmul_coe
+        f t M U hU hUaff hker s
+    _ = _ := (ConcreteCategory.congr_hom
+      (baseSectionsIsoKernelBaseCechDifferential_hom_subtype
+        f' P Uf hUf)
+      (affinePullbackUnitTop g M s)).symm
+
 end AlgebraicGeometry.Scheme.Modules
