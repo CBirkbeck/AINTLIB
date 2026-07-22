@@ -151,6 +151,29 @@ theorem baseSections_smul
   rw [hinner, htop]
   simp
 
+/-- Restricting scalars on base-linear global sections agrees with composing
+the structural morphism to the base. -/
+noncomputable def baseSectionsCompIso
+    {X Y S : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ S) (M : X.Modules) :
+    (ModuleCat.restrictScalars g.appTop.hom).obj (baseSections f M) ≅
+      baseSections (f ≫ g) M := by
+  refine ModuleCat.isoMk (Iso.refl _) ?_
+  intro r
+  ext x
+  let x' : Γ(M, (⊤ : X.Opens)) := x
+  have hleft := baseSections_smul f M (g.appTop.hom r) x'
+  have hright := baseSections_smul (f ≫ g) M r x'
+  rw [Scheme.Hom.comp_appTop] at hright
+  exact hleft.trans hright.symm
+
+/-- The composite-base isomorphism is the identity on underlying sections. -/
+@[simp]
+theorem baseSectionsCompIso_hom_apply
+    {X Y S : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ S) (M : X.Modules)
+    (m : baseSections f M) :
+    (baseSectionsCompIso f g M).hom m = m := by
+  rfl
+
 /-- Base-linear global sections agree with top sections equipped with the
 directly restricted scalar action. -/
 noncomputable def baseSectionsIsoRestrictScalarsTop
