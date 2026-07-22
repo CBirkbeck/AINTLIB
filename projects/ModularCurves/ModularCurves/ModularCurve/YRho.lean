@@ -1670,6 +1670,39 @@ theorem framedAut_freeAction (D : GaloisRepData N) :
     glSmul_eq_one_of_eq_self N hinvQ X hne γ⁻¹ a.val.1 hL
   rwa [inv_eq_one] at hg1
 
+/-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
+scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
+noncomputable def wFramesAction (D : GaloisRepData N) :
+    SchemeAction (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (wFrames D) where
+  hom γ := wFramesRightMul D γ
+  hom_one := wFramesRightMul_one D
+  hom_mul γ₁ γ₂ := wFramesRightMul_mul D γ₁ γ₂
+
+/-- **[T-YR-3b-v]** The frames-side representing bijection: maps to
+`W_X := X.base ×_ℚ wFrames` over `g` are frames over the pulled-back base. -/
+noncomputable def framesEqv (D : GaloisRepData N) (X : EllObj (CommRingCat.of ℚ))
+    {T : Scheme.{0}} (g : T ⟶ X.base) :
+    { h : T ⟶ pullback X.structMap (wFramesπ D) //
+      h ≫ pullback.fst X.structMap (wFramesπ D) = g } ≃
+    { h : T ⟶ wFrames D // h ≫ wFramesπ D = g ≫ X.structMap } where
+  toFun h := ⟨h.1 ≫ pullback.snd X.structMap (wFramesπ D), by
+    rw [Category.assoc, ← pullback.condition, ← Category.assoc, h.2]⟩
+  invFun h := ⟨pullback.lift g h.1 h.2.symm, pullback.lift_fst _ _ _⟩
+  left_inv h := Subtype.ext (by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst, h.2]
+    · rw [pullback.lift_snd])
+  right_inv h := Subtype.ext (pullback.lift_snd _ _ _)
+
+/-- Naturality of the frames-side bijection: restriction along `k` is composition. -/
+theorem framesEqv_nat (D : GaloisRepData N) (X : EllObj (CommRingCat.of ℚ))
+    {T T' : Scheme.{0}} (g : T ⟶ X.base) (k : T' ⟶ T)
+    (h : { h : T ⟶ pullback X.structMap (wFramesπ D) //
+      h ≫ pullback.fst X.structMap (wFramesπ D) = g }) :
+    (framesEqv D X (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩).1 =
+      k ≫ (framesEqv D X g h).1 :=
+  Category.assoc _ _ _
+
 end FramedProblemFunctor
 
 
