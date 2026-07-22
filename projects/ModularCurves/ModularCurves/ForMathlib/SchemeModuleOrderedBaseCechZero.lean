@@ -136,6 +136,26 @@ noncomputable def baseCechKernelOrderedLinearEquiv
     (baseCechKernelToOrdered_comp_orderedBaseCechKernelToBase π M U)
     (orderedBaseCechKernelToBase_comp_baseCechKernelToOrdered π M U)
 
+/-- The native-to-ordered kernel equivalence is induced by the degree-zero
+projection to the ordered Cech complex. -/
+theorem baseCechKernelOrderedLinearEquiv_coe
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
+    (x : LinearMap.ker ((baseCechComplex π M U).d 0 1).hom) :
+    (baseCechKernelOrderedLinearEquiv π M U x).1 =
+      (baseCechToOrderedF π M U 0).hom x.1 := by
+  rfl
+
+/-- The ordered-to-native kernel equivalence is induced by the degree-zero
+alternating extension to the native Cech complex. -/
+theorem baseCechKernelOrderedLinearEquiv_symm_coe
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
+    (x : LinearMap.ker ((orderedBaseCechComplex π M U).d 0 1).hom) :
+    ((baseCechKernelOrderedLinearEquiv π M U).symm x).1 =
+      (orderedToBaseCechAlternatingF π M U 0).hom x.1 := by
+  rfl
+
 /-- Algebraic base change preserves the degree-zero kernel equivalence between the native
 and ordered base-linear Cech complexes. -/
 noncomputable def baseCechKernelOrderedBaseChangeLinearEquiv
