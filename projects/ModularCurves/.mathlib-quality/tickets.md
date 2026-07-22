@@ -24761,33 +24761,33 @@ T-RIS1 → … → T-RIS8. The headline T-SB6 joins both (needs T-RIS8 + T-SB4).
 
 ### M2 — semi-Borel rigidity + Borel no-go (file `Moduli/GammaHSemiBorel.lean`) — dispatchable NOW
 
-- **[T-SB1] semiBorel + first-component fix** — discharge `semiBorel.mul_mem'/one_mem'/
+- **[T-SB1] semiBorel + first-component fix** (DONE 2026-07-22, axiom-clean) — discharge `semiBorel.mul_mem'/one_mem'/
   inv_mem'` (2×2 entry computations; inverse via `Matrix.inv_def`/adjugate entries) and
   `glSmul_fst_of_mem_semiBorel` (unfold `glSmul`; `ZMod.val_one` (1 < N), `ZMod.val_zero`,
   `one_smul`, `zero_smul`, `add_zero`). Status: open.
-- **[T-SB2] Untwist + order supply** — discharge `gammaFullNaive_fix_fst_of_le_semiBorel`
+- **[T-SB2] Untwist + order supply** (DONE 2026-07-22, axiom-clean) — discharge `gammaFullNaive_fix_fst_of_le_semiBorel`
   (untwist block verbatim from `gammaH_hfree_of_orderOf_absurd` :862-874 —
   `gammaHAut_app_val`, `glSmul_mul`, `inv_inv`-coe; then `congrArg (fun z => z.1.1)` +
   T-SB1) and `gammaFullNaive_fst_smul_ne_zero` (mirror [GH2]
   `gammaFullNaive_freeAction`'s geometric-fibre basis pinning:
   `torsion_geometricFibre_rank_two` at t = 𝟙 + generation clause ⟹ component order N:
   if aP = 0 with 0 < a < N then |⟨P,Q⟩| ≤ aN < N²). Depends: T-SB1. Status: open.
-- **[T-SB3] Naive keystone kill** — discharge `gammaFullNaive_fix_fst_absurd`: mirror
+- **[T-SB3] Naive keystone kill** (DONE 2026-07-22, axiom-clean; IMPROVED ROUTE: pointedAuto_eq_id_of_fixes_point_kvc single-point KVC kill — no hbound plumbing consumed) — discharge `gammaFullNaive_fix_fst_absurd`: mirror
   `gammaOneDrinfeld_fix_absurd` (:1152-1290) with hord := T-SB2's supply (NO Drinfeld
   boxes), keystone `aut_endo_eq_one_of_fixes_point` (ExactOrderRigidity:83), hbound
   via `hbound_of_kvc` exactly as GammaHClosure:176-180; endgame εO = 𝟙 ⟹ e = refl ⟹
   hne. Depends: T-SB2. Status: open.
-- **[CLEANUP-SB1]** `/cleanup` on `GammaHSemiBorel.lean`. Depends: T-SB3. Status: open.
-- **[T-SB4] Assemblies** — discharge `gammaH_hfree_of_le_semiBorel` (T-SB2 + T-SB3),
+- **[CLEANUP-SB1]** DEFERRED-TO-MAIN (CLAUDE.md producer rule: no cleanup on dev branches; the fleet cleans on main post-merge).
+- **[T-SB4] Assemblies** (DONE 2026-07-22, axiom-clean) — discharge `gammaH_hfree_of_le_semiBorel` (T-SB2 + T-SB3),
   `gammaH_rigidNoeth_of_le_semiBorel` (`gammaH_rigidNoeth` :1029 + hfree; 3 ≤ (N:ℤ)
   from 4 ≤ N), `gammaH_representable_of_le_semiBorel` (mirror
   `gammaH_representable_of_orderOf` :1123-1138 with the rigidNoeth input). Depends:
   T-SB3. Status: open.
-- **[T-SB5] Borel no-go block** — discharge `orderOf_neg_one_gl` ((−1)² = 1, −1 ≠ 1
+- **[T-SB5] Borel no-go block** (DONE 2026-07-22, axiom-clean) — discharge `orderOf_neg_one_gl` ((−1)² = 1, −1 ≠ 1
   for N ≥ 3), `isoPow_negIso_two` (`negHom_comp_negHom`), `negIso_ne_refl`
   (`mulByHom_neg_one_ne_id`), `hH_refuted_of_neg_one_mem` (witness assembly). Parallel
   with T-SB2-4. Depends: T-SB1. Status: open.
-- **[CLEANUP-SB2]** final `/cleanup` on `GammaHSemiBorel.lean`. Depends: T-SB4, T-SB5. Status: open.
+- **[CLEANUP-SB2]** DEFERRED-TO-MAIN (same producer rule).
 - **[T-SB6] HEADLINE closure** — discharge `gammaH_semiBorel_closure`
   (⟨M1-unconditional `gammaH_relativelyRepresentable`, fun qpd =>
   `gammaH_representable_of_le_semiBorel`⟩). Depends: T-RIS8, T-SB4. Status: open.
