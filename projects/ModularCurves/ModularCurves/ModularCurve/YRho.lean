@@ -1860,7 +1860,55 @@ theorem bareFramed_equivariantRelRepData (D : GaloisRepData N)
     rw [← Category.assoc, zxAction_fst, Category.assoc, dE.over_base]
     rfl
   · intro T g u γ
-    sorry
+    refine Prod.ext ?_ (Subtype.ext ?_)
+    · have hLtrans : (u.1 ≫ zxAction D dE γ) ≫
+          pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) =
+          (u.1 ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            dE.σZ.hom (Subgroup.topEquiv.symm γ) :=
+        (Category.assoc _ _ _).trans
+          ((congrArg (u.1 ≫ ·) (zxAction_fst D dE γ)).trans
+            (Category.assoc _ _ _).symm)
+      have hL := dE.equivariant g ⟨u.1 ≫ pullback.fst _ _, by
+          rw [Category.assoc]; exact u.2⟩ (Subgroup.topEquiv.symm γ)
+      have helem : ((((Subgroup.topEquiv.symm γ)⁻¹)⁻¹ : (⊤ : Subgroup
+          (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) :
+          Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = (γ⁻¹)⁻¹ := by
+        rw [inv_inv, inv_inv]
+        rfl
+      refine Eq.trans (relRep_eqv_congr dE.toRelRepData g hLtrans _) ?_
+      refine Eq.trans hL ?_
+      refine Eq.trans (gammaHAut_app_val (CommRingCat.of ℚ) N ⊤
+        ((Subgroup.topEquiv.symm γ))⁻¹ (X.pullbackAlong g) _) ?_
+      exact congrArg (fun m => (X.pullbackAlong g).curve.glSmul m
+        (dE.eqv g ⟨u.1 ≫ pullback.fst _ _, by
+          rw [Category.assoc]; exact u.2⟩)) helem
+    · show ((u.1 ≫ zxAction D dE γ) ≫
+          pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+          pullback.snd X.structMap (wFramesπ D) = _
+      calc ((u.1 ≫ zxAction D dE γ) ≫
+            pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            pullback.snd X.structMap (wFramesπ D)
+          = ((u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+              wxAction D X γ) ≫ pullback.snd X.structMap (wFramesπ D) :=
+            congrArg (· ≫ pullback.snd X.structMap (wFramesπ D))
+              ((Category.assoc _ _ _).trans
+                ((congrArg (u.1 ≫ ·) (zxAction_snd D dE γ)).trans
+                  (Category.assoc _ _ _).symm))
+        _ = (u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+              (pullback.snd X.structMap (wFramesπ D) ≫ wFramesRightMul D γ) :=
+            (Category.assoc _ _ _).trans
+              (congrArg ((u.1 ≫ pullback.snd dE.f
+                (pullback.fst X.structMap (wFramesπ D))) ≫ ·) (wxAction_snd D X γ))
+        _ = ((u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+              pullback.snd X.structMap (wFramesπ D)) ≫ wFramesRightMul D γ :=
+            (Category.assoc _ _ _).symm
+        _ = ((u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+              pullback.snd X.structMap (wFramesπ D)) ≫
+              wFramesRightMul D ((γ⁻¹)⁻¹) :=
+            congrArg (fun m => ((u.1 ≫ pullback.snd dE.f
+              (pullback.fst X.structMap (wFramesπ D))) ≫
+              pullback.snd X.structMap (wFramesπ D)) ≫ wFramesRightMul D m)
+              (inv_inv γ).symm
   · haveI h1 : IsFinite (wFramesπ D) := (wFramesπ_finite_etale D).1
     haveI h2 : IsFinite (pullback.fst X.structMap (wFramesπ D)) :=
       MorphismProperty.pullback_fst _ _ h1
