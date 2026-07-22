@@ -2118,6 +2118,20 @@ noncomputable def constVecPointsEquiv (N : ℕ) [NeZero N] :
     (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
     (FiniteEtaleGalois.pointsEquivOfContAction ℚ (constVecContAction N))
 
+/-- [asm-2a helper] The bridge is compatible with the left cofan-injection: the
+correspondence of the first projection composed with the bridge-inverse is the
+tensor inclusion (the `conePointUniqueUpToIso` compatibility, extracted by
+re-deriving the defining limit terms). -/
+theorem frameProdAlgebraIso_inv_left (D : GaloisRepData N) :
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdFst D)).unop ≫ (frameProdAlgebraIso D).inv.unop =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+          (constVecAlgebra N : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  sorry
+
 /-- **[asm-2a]** The universal-frame evaluation on `ℚ̄`-points: the `V_ρ`-reading of
 the evaluated point is the classified frame acting on the vector (scaffold; the
 proof is the counit-naturality assembly through the tensor pair-split). -/
