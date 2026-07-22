@@ -433,6 +433,20 @@ noncomputable def baseCechAugmentation
     (baseModulePresheaf π M).map
       (homOfLE (show (∏ᶜ fun k : Fin 1 => U (i k)) ≤ ⊤ from le_top)).op
 
+/-- A component of the degree-zero Cech augmentation is restriction from the
+top open to the corresponding one-fold intersection. -/
+@[reassoc]
+theorem baseCechAugmentation_comp_π
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} (U : ι → X.Opens) (i : Fin 1 → ι) :
+    baseCechAugmentation π M U ≫
+        Pi.π (fun j : Fin 1 → ι =>
+          (baseModulePresheaf π M).obj
+            (op (∏ᶜ fun k : Fin 1 => U (j k)))) i =
+      (baseModulePresheaf π M).map
+        (homOfLE (show (∏ᶜ fun k : Fin 1 => U (i k)) ≤ ⊤ from le_top)).op := by
+  exact Pi.lift_π _ i
+
 /-- Forgetting the base action on global sections agrees with the global
 sections object of the underlying additive sheaf. -/
 noncomputable def baseSectionsForgetIso
