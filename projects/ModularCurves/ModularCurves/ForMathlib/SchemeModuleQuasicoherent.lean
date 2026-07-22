@@ -786,6 +786,55 @@ theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffineOpen
     exact congrArg (fun z : Γ(X, X.basicOpen f) ↦ z • s) hscalar
   exact hleft.trans ((congrArg eBasic.hom ht).trans hright)
 
+/-- Restriction of a quasicoherent module from an affine open to an intrinsic basic open is
+localization away from the function defining that basic open. -/
+theorem Modules.isLocalizedModuleAway_basicOpen_of_isQuasicoherent_of_isAffineOpen
+    (M : X.Modules) [M.IsQuasicoherent]
+    (U : X.affineOpens) (f : Γ(X, U.1)) :
+    letI : Module Γ(X, U.1) Γ(M, X.basicOpen f) :=
+      Module.compHom _ (algebraMap Γ(X, U.1) Γ(X, X.basicOpen f))
+    IsLocalizedModule.Away f
+      ({
+          toFun := M.presheaf.map (homOfLE (X.basicOpen_le f)).op
+          map_add' :=
+            (M.presheaf.map (homOfLE (X.basicOpen_le f)).op).hom.map_add
+          map_smul' := fun r x ↦
+            M.map_smul (homOfLE (X.basicOpen_le f)) r x
+        } : Γ(M, U.1) →ₗ[Γ(X, U.1)] Γ(M, X.basicOpen f)) := by
+  letI : Module Γ(X, U.1) Γ(M, X.basicOpen f) :=
+    Module.compHom _ (algebraMap Γ(X, U.1) Γ(X, X.basicOpen f))
+  letI : IsLocalization.Away f Γ(X, X.basicOpen f) :=
+    U.2.isLocalization_basicOpen f
+  let ψ : Γ(M, U.1) →ₗ[Γ(X, U.1)] Γ(M, X.basicOpen f) :=
+    {
+      toFun := M.presheaf.map (homOfLE (X.basicOpen_le f)).op
+      map_add' :=
+        (M.presheaf.map (homOfLE (X.basicOpen_le f)).op).hom.map_add
+      map_smul' := fun r x ↦
+        M.map_smul (homOfLE (X.basicOpen_le f)) r x
+    }
+  change IsLocalizedModule.Away f ψ
+  refine IsLocalizedModule.Away.mk_of_addCommGroup ?_ ?_ ?_
+  · have hunit : IsUnit
+        (algebraMap Γ(X, U.1) Γ(X, X.basicOpen f) f) :=
+      IsLocalization.Away.algebraMap_isUnit _
+    have hunitEnd := hunit.map
+      (algebraMap Γ(X, X.basicOpen f)
+        (Module.End Γ(X, X.basicOpen f) Γ(M, X.basicOpen f)))
+    rw [Module.End.isUnit_iff] at hunitEnd ⊢
+    convert hunitEnd using 1
+    ext x
+    rfl
+  · intro s
+    obtain ⟨n, t, ht⟩ :=
+      Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_of_isAffineOpen
+        M U f s
+    exact ⟨n, t, ht.symm⟩
+  · intro t ht
+    exact
+      Modules.exists_pow_smul_eq_zero_of_restrict_eq_zero_of_isQuasicoherent_of_isAffineOpen
+        M U f t ht
+
 /-- Finitely many sections on an intrinsic basic open of an affine open extend to the affine
 open after multiplication by one common power of the restricted function. -/
 theorem Modules.exists_restrict_eq_pow_smul_of_isQuasicoherent_finite_of_isAffineOpen
