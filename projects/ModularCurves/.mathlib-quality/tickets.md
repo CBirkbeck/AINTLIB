@@ -25259,6 +25259,23 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### 3d API-read (2026-07-24, banked)
+- QuotPkg (GHRepr:689): d/Z₀/π/f₀/hπf/hπinv/hdesc(couniversal-UP) +
+  QuotPkg.π_finite_etale_surjective ([GHB4], needs freeness) — the per-X quotient
+  scheme with descent-UP. nonempty_quotPkg from hdata (via
+  SchemeAction.exists_quotient_of_isAffineHom — the relQuotient engine).
+- torsion_etaleLocal_triv (TorsionEtaleTriv:328) is PROVEN (affine-charts assembly),
+  gives ∃ étale surjective p with E[N]×p ≅ (ℤ/N)²-const as Over-iso — the 3d
+  local-trivialization input. constScheme/constSchemeπ vocabulary (:34+).
+- 3d heart: per-X bijection {ρ-structures on pullbackAlong g} ≃ {T-maps to the
+  symp-carved Z₀ over g}: étale-locally a ρ-structure factors as (naive basis L,
+  frame A) with α = frame∘triv(L) (constSumMap-leaf: the sum-morphism
+  (ℤ/N)²-const → E[N] induced by a naive basis is an ISO for N invertible — KM
+  2.3.1-adjacent; SUB-DECOMPOSE against KM before writing); two local factorizations
+  differ by unique γ (freeness/torsor [GHB4]) → the classifying map descends along
+  the étale cover (UnramifiedEqualizer/EngineDescent morphism-descent, NOT
+  effectivity); symp-carve = clopen selection via T-C2c matching.
+
 ### v10.353 (2026-07-23/24, session-B end) — 3b-iv COMPLETE, 3b-v dispatch
 - 3b-iii COMPLETE: framedSymp_glSmul (registered T-C2c matrix formula + Point.pull
   normalization + p_ofAdd_mul_val power dictionary + Int.toNat-transported
