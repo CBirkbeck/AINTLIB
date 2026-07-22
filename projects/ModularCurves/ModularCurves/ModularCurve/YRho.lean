@@ -1928,6 +1928,22 @@ theorem bareFramed_equivariantRelRepData (D : GaloisRepData N)
     show Etale (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f)
     exact inferInstance
 
+/-- **[T-YR-3b CLOSURE] (KM 7.1.2/7.1.3 via [GHB7])** The free `GL₂`-quotient of the
+bare framed problem exists as a quotient-problem package: relatively representable by
+finite étale morphisms, with projection and couniversal property. This is the
+contracted-product Isom-scheme substrate for `Y(ρ̄)`. -/
+theorem bareFramed_quotientProblemData (D : GaloisRepData N) :
+    Nonempty (ModuliProblem.QuotientProblemData (bareFramedAut D)) :=
+  ModuliProblem.exists_quotientProblemData (bareFramedAut D)
+    (bareFramedAut_freeAction D) (bareFramed_equivariantRelRepData D)
+
+/-- **[T-YR-3b CLOSURE, GHC5-shape]** The quotient of the bare framed problem is
+affine over `Ell/ℚ`. -/
+theorem bareFramed_quotient_affineOverEll (D : GaloisRepData N)
+    (pkg : ModuliProblem.QuotientProblemData (bareFramedAut D)) :
+    pkg.prob.AffineOverEll :=
+  pkg.affineOverEll
+
 end FramedProblemFunctor
 
 
