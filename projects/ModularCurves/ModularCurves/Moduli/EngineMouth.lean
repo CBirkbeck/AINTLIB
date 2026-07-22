@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.EngineDescent
 import ModularCurves.Moduli.EngineDescentCore
 import ModularCurves.EllipticCurve.GroupLawDescent
+import ModularCurves.ForMathlib.RelativeInvariantSpec
 
 /-!
 # [T-Q6d.γ] The KM 4.7 engine mouth
@@ -713,7 +714,78 @@ theorem exists_representableBy_isAffine_of_rigidNoeth_of_torsor (P Q : ModuliPro
     (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
     (hrig : P.RigidNoeth) :
     ∃ X₀ : EllObj R, IsAffine X₀.base ∧ Nonempty (P.RepresentableBy X₀) := by
-  sorry
+  classical
+  -- `𝕸(𝒫,δ)`: the simultaneous representing object, with affine base (KM 4.7 step (i))
+  obtain ⟨Xδ, ⟨rδ⟩⟩ := hQrep.has_representation
+  haveI hXδaff : IsAffine Xδ.base := hQaff rδ
+  obtain ⟨dP, hdPf⟩ := hPaff Xδ
+  haveI := hdPf
+  set XM : EllObj R := Xδ.pullbackAlong dP.f with hXMdef
+  set rM : (P.simul Q).RepresentableBy XM :=
+    P.simulRepresentableBy Q rδ @dP.eqv @dP.nat with hrMdef
+  have haffZ : IsAffine dP.Z := isAffine_of_isAffineHom dP.f
+  have haff : IsAffine XM.base := haffZ
+  have hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ XM.base),
+      t ≫ (P.simulSchemeAction Q φ rM).hom γ = t → IsEmpty T :=
+    fun γ hγ T t ht =>
+      simulSchemeAction_free_of_rigidNoeth P Q φ rM hrig htors γ hγ T t ht
+  obtain ⟨X₀, q, hqfull, hqepi, hqlift, hqsurj, hqetale⟩ :=
+    exists_engineQuotient P Q φ rM haff hfree
+  -- NEW ([Y0-AFF1]): `X₀.base` is affine — unique-iso comparison against the
+  -- relative-invariant-Spec quotient over the terminal `Spec ℤ`
+  haveI := haff
+  have hX₀aff : IsAffine X₀.base := by
+    set σ : AlgebraicGeometry.SchemeAction G XM.base :=
+      P.simulSchemeAction Q φ rM with hσdef
+    set fT : XM.base ⟶ Spec (CommRingCat.of (ULift.{u} ℤ)) :=
+      AlgebraicGeometry.specULiftZIsTerminal.from XM.base with hfT
+    have hover : ∀ γ : G, σ.hom γ ≫ fT = fT := fun γ =>
+      AlgebraicGeometry.specULiftZIsTerminal.hom_ext _ _
+    have hqinv : ∀ γ : G, σ.hom γ ≫ q.baseHom = q.baseHom := fun γ =>
+      congrArg EllHom.baseHom (hqfull γ)
+    obtain ⟨w, hw⟩ := hqlift (σ.relQuotientπ fT hover)
+      (fun γ => σ.hom_comp_relQuotientπ fT hover γ)
+    obtain ⟨w', hw', -⟩ := σ.existsUnique_relQuotientπ_lift fT hover q.baseHom hqinv
+    have hww' : w ≫ w' = 𝟙 X₀.base := by
+      refine (cancel_epi q.baseHom).mp ?_
+      rw [← Category.assoc, hw, hw', Category.comp_id]
+    have hw'w : w' ≫ w = 𝟙 (σ.relQuotient fT hover) := by
+      obtain ⟨_, -, huniq⟩ := σ.existsUnique_relQuotientπ_lift fT hover
+        (σ.relQuotientπ fT hover) (fun γ => σ.hom_comp_relQuotientπ fT hover γ)
+      rw [huniq (w' ≫ w) (show σ.relQuotientπ fT hover ≫ w' ≫ w =
+            σ.relQuotientπ fT hover by rw [← Category.assoc, hw', hw]),
+        huniq (𝟙 _) (show σ.relQuotientπ fT hover ≫ 𝟙 _ =
+            σ.relQuotientπ fT hover by rw [Category.comp_id])]
+    haveI : IsIso w := ⟨w', hww', hw'w⟩
+    haveI : IsAffine (σ.relQuotient fT hover) :=
+      isAffine_of_isAffineHom (σ.relQuotientStruct fT hover)
+    exact IsAffine.of_isIso w
+  -- descend the universal `P`-class along `q` ([B1] α-descent, PROVEN)
+  obtain ⟨d₀, -⟩ := hPaff X₀
+  obtain ⟨α₀, hα₀, -⟩ :=
+    existsUnique_alpha_descent q d₀ (P.simulSchemeAction Q φ rM)
+      (fun γ => (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) (fun γ => rfl) hqfull
+      (fun {W} F hF => hqlift F hF) hqepi
+      ((rM.homEquiv (𝟙 XM)).1) (map_fst_autMulHom_inv φ rM)
+  -- the representability bijection (KM pp. 114–116)
+  refine ⟨X₀, hX₀aff, ⟨⟨fun {Y} => Equiv.ofBijective (fun v => P.map v.op α₀)
+    ⟨?_, ?_⟩, ?_⟩⟩⟩
+  · -- injectivity: both morphisms retract onto the canonically descended one
+    intro v₁ v₂ h12
+    obtain ⟨td⟩ := htors Y
+    obtain ⟨v0, hv0⟩ := exists_descended rM q hqfull td (P.map v₂.op α₀)
+    exact (eq_descended rM q α₀ hα₀ hqsurj hqetale td _ v0 hv0 v₁ h12).trans
+      (eq_descended rM q α₀ hα₀ hqsurj hqetale td _ v0 hv0 v₂ rfl).symm
+  · -- surjectivity: descend the classifying morphism through the δ-torsor
+    intro α
+    obtain ⟨td⟩ := htors Y
+    obtain ⟨dY, -⟩ := hPaff Y
+    obtain ⟨v0, hv0⟩ := exists_descended rM q hqfull td α
+    exact ⟨v0, map_descended rM q α₀ hα₀ td dY α v0 hv0⟩
+  · -- naturality of the representation
+    intro Y Y' k v
+    show P.map (k ≫ v).op α₀ = P.map k.op (P.map v.op α₀)
+    rw [op_comp, Functor.map_comp_apply]
 
 end EngineMouth
 

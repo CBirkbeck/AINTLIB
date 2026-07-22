@@ -126,7 +126,32 @@ theorem exists_representableBy_isAffine_baseChange_three (R : CommRingCat.{u})
     ∃ X₀ : EllObj (CommRingCat.of (Localization.Away (3 : R))),
       IsAffine X₀.base ∧
       Nonempty ((P.baseChange (awayHomWire R 3)).RepresentableBy X₀) := by
-  sorry
+  set R3 := CommRingCat.of (Localization.Away (3:R)) with hR3
+  have hinv3 : IsUnit (3 : R3) := by
+    have h := IsLocalization.Away.algebraMap_isUnit (S := Localization.Away (3:R)) (3 : R)
+    rw [map_ofNat] at h; exact h
+  haveI : Finite (ULift.{u} (Matrix.GeneralLinearGroup (Fin 2) (ZMod 3))) := inferInstance
+  set φ3 : ULift.{u} (Matrix.GeneralLinearGroup (Fin 2) (ZMod 3)) →*
+      Aut (gammaFullNaiveProblem R3 3) :=
+    (gammaFullNaiveGlAction R3 3).comp MulEquiv.ulift.toMonoidHom with hφ3
+  obtain ⟨X0, hX0aff, ⟨rX0⟩⟩ := naiveLevelThree_representable_by_affine R3 hinv3
+  have hQaff3 : ∀ {XQ : EllObj R3},
+      (gammaFullNaiveProblem R3 3).RepresentableBy XQ → IsAffine XQ.base := by
+    intro XQ rXQ; haveI := hX0aff
+    let e : XQ ≅ X0 := rXQ.uniqueUpToIso rX0
+    haveI : IsIso e.hom.baseHom := ⟨e.inv.baseHom,
+      congrArg EllHom.baseHom e.hom_inv_id, congrArg EllHom.baseHom e.inv_hom_id⟩
+    exact IsAffine.of_isIso e.hom.baseHom
+  have hPaff3 : ∀ X : EllObj R3,
+      ∃ d : RelRepData (P.baseChange (awayHomWire R 3)) X, IsAffineHom d.f := by
+    intro X
+    obtain ⟨Z, f, hf, eqv, nat⟩ := AffineOverEll.baseChange (awayHomWire R 3) hP X
+    exact ⟨⟨Z, f, eqv, nat⟩, hf⟩
+  exact exists_representableBy_isAffine_of_rigidNoeth_of_torsor
+    (P.baseChange (awayHomWire R 3))
+    (gammaFullNaiveProblem R3 3) φ3 ⟨⟨X0, ⟨rX0⟩⟩⟩ hQaff3 hPaff3
+    (fun X => exists_levelThreeTorsorData_ulift R3 hinv3 X)
+    (RigidNoeth.baseChange (awayHomWire R 3) hrig)
 
 /-- **[Y0-AFF2] `∃`-affine form of the D(2) leg.** -/
 theorem exists_representableBy_isAffine_baseChange_two (R : CommRingCat.{u})
@@ -134,6 +159,35 @@ theorem exists_representableBy_isAffine_baseChange_two (R : CommRingCat.{u})
     ∃ X₀ : EllObj (CommRingCat.of (Localization.Away (2 : R))),
       IsAffine X₀.base ∧
       Nonempty ((P.baseChange (awayHomWire R 2)).RepresentableBy X₀) := by
-  sorry
+  set R2 := CommRingCat.of (Localization.Away (2:R)) with hR2
+  have hinv2 : IsUnit (2 : R2) := by
+    have h := IsLocalization.Away.algebraMap_isUnit (S := Localization.Away (2:R)) (2 : R)
+    rw [map_ofNat] at h; exact h
+  have hinv4 : IsUnit (4 : R2) := by
+    have := hinv2.mul hinv2
+    rwa [show (2 : R2) * 2 = 4 by norm_num] at this
+  haveI : Finite (ULift.{u} (Matrix.GeneralLinearGroup (Fin 2) (ZMod 4))) := inferInstance
+  set φ4 : ULift.{u} (Matrix.GeneralLinearGroup (Fin 2) (ZMod 4)) →*
+      Aut (gammaFullNaiveProblem R2 4) :=
+    (gammaFullNaiveGlAction R2 4).comp
+      (MulEquiv.ulift (α := Matrix.GeneralLinearGroup (Fin 2) (ZMod 4))).toMonoidHom with hφ4
+  obtain ⟨X0, hX0aff, ⟨rX0⟩⟩ := naiveLevelFour_representable_by_affine R2 hinv2
+  have hQaff4 : ∀ {XQ : EllObj R2},
+      (gammaFullNaiveProblem R2 4).RepresentableBy XQ → IsAffine XQ.base := by
+    intro XQ rXQ; haveI := hX0aff
+    let e : XQ ≅ X0 := rXQ.uniqueUpToIso rX0
+    haveI : IsIso e.hom.baseHom := ⟨e.inv.baseHom,
+      congrArg EllHom.baseHom e.hom_inv_id, congrArg EllHom.baseHom e.inv_hom_id⟩
+    exact IsAffine.of_isIso e.hom.baseHom
+  have hPaff2 : ∀ X : EllObj R2,
+      ∃ d : RelRepData (P.baseChange (awayHomWire R 2)) X, IsAffineHom d.f := by
+    intro X
+    obtain ⟨Z, f, hf, eqv, nat⟩ := AffineOverEll.baseChange (awayHomWire R 2) hP X
+    exact ⟨⟨Z, f, eqv, nat⟩, hf⟩
+  exact exists_representableBy_isAffine_of_rigidNoeth_of_torsor
+    (P.baseChange (awayHomWire R 2))
+    (gammaFullNaiveProblem R2 4) φ4 ⟨⟨X0, ⟨rX0⟩⟩⟩ hQaff4 hPaff2
+    (fun X => exists_levelFourTorsorData_ulift R2 hinv4 X)
+    (RigidNoeth.baseChange (awayHomWire R 2) hrig)
 
 end ModularCurves.ModuliProblem

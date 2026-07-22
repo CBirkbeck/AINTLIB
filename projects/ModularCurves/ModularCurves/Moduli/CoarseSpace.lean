@@ -68,8 +68,8 @@ automorphisms). -/
 theorem _root_.CategoryTheory.Functor.RepresentableBy.baseSchemeAction_over
     {P : ModuliProblem R} {X₀ : EllObj R} (r : P.RepresentableBy X₀)
     {G : Type*} [Group G] (φ : G →* Aut P) (γ : G) :
-    (r.baseSchemeAction φ).hom γ ≫ X₀.structMap = X₀.structMap := by
-  sorry
+    (r.baseSchemeAction φ).hom γ ≫ X₀.structMap = X₀.structMap :=
+  (r.autMulHom (φ γ)).inv.base_w
 
 /-! ## Affineness of the representing base (KM 8.1.1: "𝔐(𝒫,δ) is itself affine") -/
 
@@ -129,13 +129,15 @@ variable (r : P.RepresentableBy X₀) (φ : G →* Aut P) [IsAffineHom X₀.stru
 
 /-- The projection lies over `Spec R`. -/
 theorem _root_.CategoryTheory.Functor.RepresentableBy.coarsePr_comp_coarseStruct :
-    r.coarsePr φ ≫ r.coarseStruct φ = X₀.structMap := by
-  sorry
+    r.coarsePr φ ≫ r.coarseStruct φ = X₀.structMap :=
+  (r.baseSchemeAction φ).relQuotientπ_comp_relQuotientStruct X₀.structMap
+    (r.baseSchemeAction_over φ)
 
 /-- The projection coequalizes the action. -/
 theorem _root_.CategoryTheory.Functor.RepresentableBy.baseSchemeAction_comp_coarsePr
-    (γ : G) : (r.baseSchemeAction φ).hom γ ≫ r.coarsePr φ = r.coarsePr φ := by
-  sorry
+    (γ : G) : (r.baseSchemeAction φ).hom γ ≫ r.coarsePr φ = r.coarsePr φ :=
+  (r.baseSchemeAction φ).hom_comp_relQuotientπ X₀.structMap
+    (r.baseSchemeAction_over φ) γ
 
 /-- **The categorical-quotient universal property** (Loeffler Prop 3.6.1: the unique
 `S`-scheme "representing the functor `Y ↦ (homs of S-schemes X → Y commuting with the
@@ -143,22 +145,26 @@ G-action)`"; KM 8.1.1's quotient): every invariant morphism factors uniquely. -/
 theorem _root_.CategoryTheory.Functor.RepresentableBy.coarsePr_existsUnique_lift
     {Y : Scheme.{u}} (F : X₀.base ⟶ Y)
     (hF : ∀ γ : G, (r.baseSchemeAction φ).hom γ ≫ F = F) :
-    ∃! q : r.coarseQuotient φ ⟶ Y, r.coarsePr φ ≫ q = F := by
-  sorry
+    ∃! q : r.coarseQuotient φ ⟶ Y, r.coarsePr φ ≫ q = F :=
+  (r.baseSchemeAction φ).existsUnique_relQuotientπ_lift X₀.structMap
+    (r.baseSchemeAction_over φ) F hF
 
 /-- The projection is integral (KM 7.1.3(4) via the engine; no freeness needed). -/
-instance : IsIntegralHom (r.coarsePr φ) := by
-  sorry
+instance : IsIntegralHom (r.coarsePr φ) :=
+  (r.baseSchemeAction φ).isIntegralHom_relQuotientπ X₀.structMap
+    (r.baseSchemeAction_over φ)
 
 /-- The projection is surjective. -/
-instance : Surjective (r.coarsePr φ) := by
-  sorry
+instance : Surjective (r.coarsePr φ) :=
+  (r.baseSchemeAction φ).surjective_relQuotientπ_of_free X₀.structMap
+    (r.baseSchemeAction_over φ)
 
 /-- The structure morphism of the coarse space is affine (chartwise
 `Spec Γ(𝔐(P).base, ·)ᴳ`; in particular the coarse space is an affine scheme over the
 affine `Spec R`). -/
-instance : IsAffineHom (r.coarseStruct φ) := by
-  sorry
+instance : IsAffineHom (r.coarseStruct φ) :=
+  (r.baseSchemeAction φ).isAffineHom_relQuotientStruct X₀.structMap
+    (r.baseSchemeAction_over φ)
 
 end CoarseQuotient
 
@@ -170,13 +176,39 @@ end ModuliProblem
 def borel (N : ℕ) [NeZero N] :
     Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) where
   carrier := {g | (g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0 = 0}
-  mul_mem' := by sorry
-  one_mem' := by sorry
-  inv_mem' := by sorry
+  mul_mem' := by
+    rintro a b ha hb
+    show ((a : Matrix (Fin 2) (Fin 2) (ZMod N)) * b) 1 0 = 0
+    rw [Matrix.mul_apply, Fin.sum_univ_two, ha, hb, zero_mul, mul_zero, add_zero]
+  one_mem' := by
+    show (1 : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0 = 0
+    simp
+  inv_mem' := by
+    rintro g h10
+    have hmul : (g : Matrix (Fin 2) (Fin 2) (ZMod N)) *
+        ((g⁻¹ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+          Matrix (Fin 2) (Fin 2) (ZMod N)) = 1 := g.mul_inv
+    have h11 : IsUnit ((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1) := by
+      have hdet : IsUnit (g : Matrix (Fin 2) (Fin 2) (ZMod N)).det :=
+        (Matrix.isUnit_iff_isUnit_det _).mp g.isUnit
+      rw [Matrix.det_fin_two, h10, mul_zero, sub_zero] at hdet
+      exact (IsUnit.mul_iff.mp hdet).2
+    have e10 : ((g : Matrix (Fin 2) (Fin 2) (ZMod N)) *
+        ((g⁻¹ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+          Matrix (Fin 2) (Fin 2) (ZMod N))) 1 0 = 0 := by
+      rw [hmul]; simp
+    rw [Matrix.mul_apply, Fin.sum_univ_two, h10, zero_mul, zero_add] at e10
+    exact (IsUnit.mul_right_eq_zero h11).mp e10
+
+/-- Membership in the Borel subgroup, unfolded. -/
+theorem mem_borel_iff (N : ℕ) [NeZero N]
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    g ∈ borel N ↔ (g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0 = 0 :=
+  Iff.rfl
 
 /-- The semi-Borel is contained in the Borel. -/
-theorem semiBorel_le_borel (N : ℕ) [NeZero N] : semiBorel N ≤ borel N := by
-  sorry
+theorem semiBorel_le_borel (N : ℕ) [NeZero N] : semiBorel N ≤ borel N :=
+  fun _ hg => hg.2
 
 /-- **The coarse modular curve `Y_H` over `R`** (`N ≥ 3` invertible): the quotient of
 the full-level modular curve `Y(N) = 𝔐([Γ(N)]).base` by `H ≤ GL₂(ℤ/N)` acting through
