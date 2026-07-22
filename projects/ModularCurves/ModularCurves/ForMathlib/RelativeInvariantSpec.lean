@@ -618,11 +618,6 @@ instance isAffineHom_relQuotientStruct : IsAffineHom (σ.relQuotientStruct f hov
   rw [← cancel_mono U.2.fromSpec]
   simp [IsAffineOpen.isoSpec_hom, e, σ.ι_relQuotientStruct f hover]
 
-/-- The projection is integral (chartwise `Aᴳ → A` is integral: every `a` is a root of
-`∏_g (T − g•a)`, KM 7.1.3(4) print p. 193; mathlib `Algebra.IsInvariant.isIntegral`). -/
-instance isIntegralHom_relQuotientπ : IsIntegralHom (σ.relQuotientπ f hover) := by
-  sorry
-
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- **The categorical quotient property** (vs an ARBITRARY target scheme): an invariant
@@ -869,6 +864,23 @@ theorem morphismProperty_relQuotientπ_of_charts (P : MorphismProperty Scheme.{u
           simp only [Category.assoc]
   rw [hkey]
   exact hP U
+
+/-- The projection is integral (chartwise `Aᴳ → A` is integral: every `a` is a root of
+`∏_g (T − g•a)`, KM 7.1.3(4) print p. 193; mathlib `Algebra.IsInvariant.isIntegral`). -/
+instance isIntegralHom_relQuotientπ : IsIntegralHom (σ.relQuotientπ f hover) := by
+  refine σ.morphismProperty_relQuotientπ_of_charts f hover @IsIntegralHom (fun U => ?_)
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  haveI : IsIso (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ := by
+    rw [← (U.2.preimage f).isoSpec_hom]
+    infer_instance
+  rw [MorphismProperty.cancel_left_of_respectsIso (P := @IsIntegralHom)]
+  rw [show CommRingCat.ofHom
+      (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom
+    = CommRingCat.ofHom (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1)) from rfl, IsIntegralHom.SpecMap_iff]
+  exact Algebra.isIntegral_def.mp
+    (Algebra.IsInvariant.isIntegral (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1) G)
 
 section Free
 
