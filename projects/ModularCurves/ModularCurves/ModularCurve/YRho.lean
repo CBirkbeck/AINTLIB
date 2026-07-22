@@ -2165,6 +2165,50 @@ theorem frameEval_points (D : GaloisRepData N)
     exact congrArg (p ≫ ·)
       (AlgebraicGeometry.pullbackSpecIso_hom_snd ℚ
         (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).symm
+  -- the tensor-point lies over ℚ
+  have hover' : p' ≫ Spec.map (CommRingCat.ofHom (algebraMap ℚ
+      (TensorProduct ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)))) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) := by
+    have hfac : CommRingCat.ofHom (algebraMap ℚ
+        (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0))) =
+        CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0)) ≫
+        CommRingCat.ofHom (algebraMap (constVecAlgebra N : Type 0)
+          (TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0))) := by
+      ext r
+      exact (IsScalarTower.algebraMap_apply ℚ (constVecAlgebra N : Type 0)
+        (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)) r)
+    rw [hfac, Spec.map_comp, ← Category.assoc]
+    rw [show p' ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap (constVecAlgebra N : Type 0)
+          (TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)))) =
+      p ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) from by
+      rw [hp', Category.assoc]
+      exact congrArg (p ≫ ·)
+        (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ
+          (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0))]
+    exact (Category.assoc _ _ _).trans hp
+  -- the evaluated point lies over ℚ (hoisted for the subtype below)
+  have hqv : (p ≫ frameEval D) ≫ Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (vRhoAlgebra D : Type 0))) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) := by
+    rw [show Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (vRhoAlgebra D : Type 0))) = vRhoπ D from rfl,
+      Category.assoc, frameEval_π]
+    exact hp
+  -- the vRho-side reading of the evaluated point is the evaluation-precomposition
+  have hA : specPointsEquivAlgHom ℚ (vRhoAlgebra D : Type 0) (AlgebraicClosure ℚ)
+      ⟨p ≫ frameEval D, hqv⟩ =
+      (specPointsEquivAlgHom ℚ (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)) (AlgebraicClosure ℚ)
+        ⟨p', hover'⟩).comp (frameEvalAlgHom D).hom.hom := by
+    refine AlgHom.ext fun w => ?_
+    exact congrArg (fun q : CommRingCat.of (vRhoAlgebra D : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hL1
   sorry
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
