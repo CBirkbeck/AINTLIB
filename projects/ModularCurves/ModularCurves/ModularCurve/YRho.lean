@@ -1491,6 +1491,77 @@ noncomputable def framedSmulNat (D : GaloisRepData N)
       (EllHom.pullSection_glSmul (CommRingCat.of ℚ) f.unop γ Lh.val.1)
       (Subtype.ext (Category.assoc _ _ _)))
 
+/-- **[T-YR-3b-iv]** The `GL₂(ℤ/N)`-action on the framed problem (the `γ⁻¹`-hom
+convention of `gammaHAut`: the smul laws are right-action laws, `Aut`-homomorphisms
+are left actions). -/
+noncomputable def framedAut (D : GaloisRepData N) :
+    Matrix.GeneralLinearGroup (Fin 2) (ZMod N) →* Aut (framedProblem D) where
+  toFun γ :=
+    { hom := framedSmulNat D γ⁻¹
+      inv := framedSmulNat D γ
+      hom_inv_id := by
+        ext X Lh
+        exact Subtype.ext (Prod.ext
+          (by
+            show X.unop.curve.glSmul γ (X.unop.curve.glSmul γ⁻¹ Lh.val.1) =
+              Lh.val.1
+            rw [← EllipticCurve.glSmul_mul, inv_mul_cancel,
+              EllipticCurve.glSmul_one])
+          (Subtype.ext (by
+            show (Lh.val.2.val ≫ wFramesRightMul D γ⁻¹) ≫ wFramesRightMul D γ =
+              Lh.val.2.val
+            rw [Category.assoc, ← wFramesRightMul_mul, inv_mul_cancel,
+              wFramesRightMul_one, Category.comp_id])))
+      inv_hom_id := by
+        ext X Lh
+        exact Subtype.ext (Prod.ext
+          (by
+            show X.unop.curve.glSmul γ⁻¹ (X.unop.curve.glSmul γ Lh.val.1) =
+              Lh.val.1
+            rw [← EllipticCurve.glSmul_mul, mul_inv_cancel,
+              EllipticCurve.glSmul_one])
+          (Subtype.ext (by
+            show (Lh.val.2.val ≫ wFramesRightMul D γ) ≫ wFramesRightMul D γ⁻¹ =
+              Lh.val.2.val
+            rw [Category.assoc, ← wFramesRightMul_mul, mul_inv_cancel,
+              wFramesRightMul_one, Category.comp_id]))) }
+  map_one' := by
+    ext X Lh
+    exact Subtype.ext (Prod.ext
+      (by
+        show X.unop.curve.glSmul
+          ((1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹ Lh.val.1 = Lh.val.1
+        rw [inv_one, EllipticCurve.glSmul_one])
+      (Subtype.ext (by
+        show Lh.val.2.val ≫ wFramesRightMul D
+          ((1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹ = Lh.val.2.val
+        rw [inv_one, wFramesRightMul_one, Category.comp_id])))
+  map_mul' γ δ := by
+    ext X Lh
+    exact Subtype.ext (Prod.ext
+      (by
+        show X.unop.curve.glSmul (γ * δ)⁻¹ Lh.val.1 =
+          X.unop.curve.glSmul γ⁻¹ (X.unop.curve.glSmul δ⁻¹ Lh.val.1)
+        rw [mul_inv_rev, EllipticCurve.glSmul_mul])
+      (Subtype.ext (by
+        show Lh.val.2.val ≫ wFramesRightMul D (γ * δ)⁻¹ =
+          (Lh.val.2.val ≫ wFramesRightMul D δ⁻¹) ≫ wFramesRightMul D γ⁻¹
+        rw [mul_inv_rev, wFramesRightMul_mul, Category.assoc])))
+
+/-- **[T-YR-3b-iv]** The diagonal action is free over nonempty bases: the full-level
+component already is (`glSmul_eq_one_of_eq_self`; `N` is invertible in `ℚ`). -/
+theorem framedAut_freeAction (D : GaloisRepData N) :
+    ModuliProblem.FreeAction (framedAut D) := by
+  intro X hne γ hγ a hfix
+  apply hγ
+  have hinvQ : IsUnit ((N : ℕ) : ℚ) :=
+    isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N))
+  have hL : X.curve.glSmul γ⁻¹ a.val.1 = a.val.1 :=
+    congrArg (fun z => z.val.1) hfix
+  have hg1 : (γ⁻¹ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 1 :=
+    glSmul_eq_one_of_eq_self N hinvQ X hne γ⁻¹ a.val.1 hL
+  rwa [inv_eq_one] at hg1
+
 end FramedProblemFunctor
 
 
