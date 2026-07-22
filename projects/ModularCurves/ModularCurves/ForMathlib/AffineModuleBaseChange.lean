@@ -22,10 +22,12 @@ private noncomputable def moduleSpecPushforwardΓIso₁
             sheafCompose (Opens.grothendieckTopology (Spec R))
               (ModuleCat.restrictScalars φ.hom)) ⋙
         TopCat.Sheaf.forget (ModuleCat R) (Spec R) ⋙
-          (evaluation (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
+          (CategoryTheory.evaluation
+            (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
             (op (⊤ : (Spec R).Opens)) := by
   let H := TopCat.Sheaf.forget (ModuleCat R) (Spec R) ⋙
-    (evaluation (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
+    (CategoryTheory.evaluation
+      (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
       (op (⊤ : (Spec R).Opens))
   exact (Functor.associator
       (pushforward (Spec.map φ)) modulesSpecToSheaf H).symm ≪≫
@@ -38,7 +40,8 @@ private noncomputable def moduleSpecPushforwardΓIsoApp₂
             sheafCompose (Opens.grothendieckTopology (Spec R))
               (ModuleCat.restrictScalars φ.hom)) ⋙
         TopCat.Sheaf.forget (ModuleCat R) (Spec R) ⋙
-          (evaluation (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
+          (CategoryTheory.evaluation
+            (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
             (op (⊤ : (Spec R).Opens))).obj N) ≅
       (moduleSpecΓFunctor ⋙ ModuleCat.restrictScalars φ.hom).obj N := by
   have htop :
@@ -55,7 +58,8 @@ private noncomputable def moduleSpecPushforwardΓIso₂
             sheafCompose (Opens.grothendieckTopology (Spec R))
               (ModuleCat.restrictScalars φ.hom)) ⋙
         TopCat.Sheaf.forget (ModuleCat R) (Spec R) ⋙
-          (evaluation (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
+          (CategoryTheory.evaluation
+            (Opens (Spec R))ᵒᵖ (ModuleCat R)).obj
             (op (⊤ : (Spec R).Opens)) ≅
       moduleSpecΓFunctor ⋙ ModuleCat.restrictScalars φ.hom :=
   NatIso.ofComponents (moduleSpecPushforwardΓIsoApp₂ φ) (by
@@ -306,7 +310,8 @@ private noncomputable def affineΓFunctor (X : Scheme.{u}) :
   toPresheafOfModules X ⋙
     PresheafOfModules.forgetToPresheafModuleCat
       (op (⊤ : X.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop) ⋙
-    (evaluation X.Opensᵒᵖ (ModuleCat Γ(X, (⊤ : X.Opens)))).obj
+    (CategoryTheory.evaluation X.Opensᵒᵖ
+      (ModuleCat Γ(X, (⊤ : X.Opens)))).obj
       (op (⊤ : X.Opens))
 
 private noncomputable def affineΓPushforwardIsoSpecApp
