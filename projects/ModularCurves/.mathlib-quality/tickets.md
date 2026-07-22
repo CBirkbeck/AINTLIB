@@ -24615,3 +24615,72 @@ wiring file-split (EngineDescentCore) + the GammaHMaster MonObj/η notation fix.
 remain documented non-goals (statement-protected). Board v10.343 entries carry the full narrative +
 the reusable engineering lessons (200k barrier-lemma/zero-kabstract fixes, import-regression
 file-split, notation clash). STREAM-E4 CONCLUDED at genuine completion.
+
+## v10.345-AMEND (2026-07-22) — GATE-2 RECTIFICATION: hH IS REFUTABLE FOR BOREL (Y₀-FINE IS IMPOSSIBLE); GATE-1 hbase IS FALSE AS STATED — BOTH GATES REFRAMED FROM THE LITERATURE (new worker, pre-/develop)
+
+**HANDOVER CORRECTION (verified against the tree at a74fba0c0 + KM/Loeffler page reads; no code
+changed yet).** The post-engine handover's §2 framing of the two Y₀/Y_H gates is amended as follows.
+
+### (A) Gate 2 as stated is mathematically IMPOSSIBLE at H = Borel
+The pin `hH` of `gammaH_representable_of_orderOf` (GammaHMaster.lean:1123) demands: no nontrivial
+base-identical `e` with `isoPow e (orderOf γ) = refl` for `γ ∈ H`. **This is refutable inside the
+library for EVERY `H` containing an element of even order** — take `e := EllObj.negIso`
+(GammaH.lean:586): `isoPow e 2 = refl` is `negHom_comp_negHom`, and `e ≠ refl` over k̄ is T-H7c
+`EllipticCurve.mulByHom_neg_one_ne_id` (GammaH.lean:613, needs a point of order ≥ 3, available at
+N ≥ 3 invertible); any even-order `γ ∈ H` (Cauchy: any even-order `H`) closes the refutation.
+Borel = upper-triangular ∋ −I (order 2 for N ≥ 3) ⟹ `hH`(Borel) FALSE. Deeper: the underlying
+freeness `hfree` itself fails for −I ∈ H (`[-1]` fixes every Borel-orbit of full level structures),
+so `P_Borel` is NOT rigid, hence NOT representable — this is CLASSICAL, not a formalization gap:
+- **Loeffler Prop 3.8.3 (modcurvesnotes.pdf p. 19, verbatim):** "𝒫_H is rigid on Ell/R[1/6] if and
+  only if the preimage in SL₂(ℤ) of H ∩ SL₂(ℤ/N) contains no elements of finite order (i.e. has
+  no elliptic points and does not contain −1)." Borel fails; semi-Borel {(1 *; 0 *)} passes for
+  N ≥ 4 (preimage = Γ₁(N), torsion-free ⟺ N ≥ 4).
+- **KM 7.4.2(4) (print p. 198):** the natural map [Γ(N)] → [Γ₀(N)], (P,Q) ↦ ⟨P⟩ "identifies
+  [Γ₀(N)] with the quotient of [Γ(N)] by the Borel subgroup (* *; 0 *) of GL(2, ℤ/N)" — a
+  QUOTIENT problem (7.1.3(1): rel-rep, affine over Ell, couniversal), never a representable one.
+- **KM 8.1.1 + 8.1.5 (print pp. 224–226) / Loeffler Def 3.6.2 (p. 17):** the scheme Y₀(N) is the
+  COARSE moduli scheme M([Γ₀(N)]) = M([Γ(N)])/Borel (8.1.5: M(𝒫)/G ≅ M(𝒫/G)); Loeffler defines
+  Y₀(N) := Y₁(N)/(ℤ/N)ˣ (= KM 7.4.2(7)) and states Y₀(N) smooth over ℤ[1/N] as a Fact (p. 18).
+
+### (B) Gate 1's `hbase` is FALSE as a universally-quantified statement — the fix is a rebuild,
+not a proof. `EllObj` bases are arbitrary schemes (EllCategory.lean:38); a constant curve over a
+plane-with-doubled-origin gives an `X` whose absolute diagonal is not affine (𝔸²∖{0} not affine),
+so `∀ X : EllObj R, IsAffineHom (pullback.diagonal (terminal.from X.base))` is refutable. The
+affine-diagonal instance enters ONLY through T-Q5's glued quotient (SchemeQuotient.lean §Glue:812 —
+it makes atlas intersections `V i ⊓ V j` affine). The literature does this step with NO such
+hypothesis: **KM p. 190 (verbatim): "By [De-Ga III, §2, 6.1], … if a finite group G operates freely
+and S-linearly on an affine S-scheme X, then the quotient X/G exists, X is a finite étale G-torsor
+over X/G, and the formation of X/G commutes with arbitrary base-change S′ → S"** — i.e. the
+quotient of a RELATIVELY-affine `Z ⟶ S` over an ARBITRARY base. Mathlib (pinned) has the exact
+construction engine: `AlgebraicGeometry/Normalization.lean` (Andrew Yang, 2025) builds relative
+normalization as the glued relative Spec of a localizing (`Coequifibered`) algebra presheaf via
+`Scheme.Cover.RelativeGluingData` (`RelativeGluing.lean`, Christian Merten, stacks 01LH) over the
+`SmallAffineZariski` site. PLAN: mirror it with the invariants presheaf `U ↦ Γ(Z, f⁻¹U)^G`
+(coequifibered because localization is exact and invariants of a finite group are a finite-limit
+kernel; the G-action on sections over stable opens = `gammaMulSemiringAction`, already in T-Q5a);
+keep the conclusion SHAPES of `exists_quotient_of_isAffineHom` / `quotientπ_finite_etale_surjective`
+/ `exists_quotient_baseChange_of_free` (GammaHRepresentability.lean:445/484/545) so the per-chart
+SchemeActionFree algebra (finite/étale/torsor/[A711-BC]) rewires verbatim and the ~30 hbase-threaded
+QuotPkg decls reduce to mechanical hypothesis deletion.
+
+### Rectified milestone ladder (replaces handover §2's "two hypotheses")
+- **M1 (Gate 1 rebuilt):** relative-affine quotient over arbitrary base (DG III §2 6.1 core) ⟹
+  `gammaH_relativelyRepresentable` UNCONDITIONAL for every `H` ⟹ KM 7.4.2-grade quotient problems,
+  including [Γ₀(N)] = [Γ(N)]/Borel with its geometric-orbit clauses. (The honest "Y₀ at the moduli-
+  problem level".)
+- **M2 (Gate 2 rectified):** discharge `hfree` (NOT `hH`) for semi-Borel-type `H ≤ {(1 *; 0 *)}`,
+  N ≥ 4: a γ-twisted fix with γ = (1 b; 0 d) fixes the first basis vector — a point of exact order
+  N — and the PROVEN keystone `aut_endo_eq_one_of_fixes_point` (ExactOrderRigidity.lean:83, hbound
+  discharged as in the Y₁ closure via `hbound_of_kvc`) kills `e`. Feed `gammaH_rigidNoeth`
+  (GammaHMaster.lean:1029, takes `hfree` directly — interface EXISTS) ⟹ engine ⟹ **first
+  unconditional representable Y_H beyond ⊥**; by KM 7.4.2(3) that quotient IS [Γ₁(N)].
+- **M3 (Y₀ scheme):** Y₀(N) := quotient of the [Γ(N)]-representing scheme by the Borel action
+  (KM 8.1.1/8.1.5; equivalently Y₁(N)/(ℤ/N)ˣ) — an AFFINE-side quotient (no hbase analogue), plus
+  k̄-points = Γ₀-orbits from qpd.geom_* (coarse-lite). Needs: representing-scheme extraction +
+  affineness/affine-diagonal audit + the Aut-transport of the H-action ([GHB1] machinery).
+- **M4 (parked):** smoothness of Y₀(N) over ℤ[1/N] (Loeffler p. 18 Fact; KM Ch. 8/10 route) and the
+  full Loeffler-3.8.3 iff (torsion-free-preimage ⟺ rigid; needs char-0 lifting/CM-unit theory).
+- **Bonus (cheap, protective):** formalize the (A)-refutation as a no-go lemma (`hH_borel_false`-
+  shape) so no future worker re-attempts Y₀-fine through `gammaH_representable_of_orderOf`.
+
+NEXT: /develop over M1+M2 (M3 scoped), then /beastmode. — new worker, 2026-07-22
