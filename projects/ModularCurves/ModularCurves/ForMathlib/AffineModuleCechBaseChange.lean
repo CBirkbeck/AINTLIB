@@ -95,35 +95,6 @@ private theorem cechCoface_π
     FormalCoproduct.cech_map]
   exact Pi.lift_π _ i
 
-private theorem isoTransHomApply
-    {R : Type u} [CommRing R] {A B C : ModuleCat.{u} R}
-    (e : A ≅ B) (d : B ≅ C) (x : A) :
-    (e ≪≫ d).hom x = d.hom (e.hom x) := by
-  rw [Iso.trans_hom]
-  rfl
-
-private theorem affineModuleSectionsBaseChangeIso_mapIso_hom_one_tmul
-    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
-    (W : X.Opens) (hW : IsAffineOpen W)
-    {V : (pullback f t).Opens}
-    (hV : pullback.fst f t ⁻¹ᵁ W = V)
-    [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
-    (m : (baseModulePresheaf f M).obj (op W)) :
-    ((affineModuleSectionsBaseChangeIso f t M W hW) ≪≫
-      (baseModulePresheaf (pullback.snd f t)
-        ((pullback (pullback.fst f t)).obj M)).mapIso
-          (eqToIso hV).op).hom
-        ((1 : Γ(T, (⊤ : T.Opens)))
-          ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m) =
-      (baseModulePresheaf (pullback.snd f t)
-        ((pullback (pullback.fst f t)).obj M)).map
-          (eqToHom hV).op
-        ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
-          (op W)) m) := by
-  rw [isoTransHomApply]
-  exact congrArg _
-    (affineModuleSectionsBaseChangeIso_hom_one_tmul f t M W hW m)
-
 private noncomputable def baseCechFactorBaseChangeIso
     {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
     {ι : Type u} (U : ι → X.Opens) (hU : ∀ i, IsAffineOpen (U i))
@@ -158,27 +129,6 @@ private theorem baseCechFactorBaseChangeIso_hom
             (eqToHom
               ((pullback.fst f t).preimage_cechIntersection U n i).symm).op := by
   rfl
-
-private theorem baseCechFactorBaseChangeIso_hom_one_tmul
-    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
-    {ι : Type u} (U : ι → X.Opens) (hU : ∀ i, IsAffineOpen (U i))
-    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
-    (n : ℕ) (i : Fin (n + 1) → ι)
-    (m : (baseModulePresheaf f M).obj
-      (op (∏ᶜ fun k : Fin (n + 1) => U (i k)))) :
-    (baseCechFactorBaseChangeIso f t M U hU n i).hom
-        ((1 : Γ(T, (⊤ : T.Opens)))
-          ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m) =
-      (baseModulePresheaf (pullback.snd f t)
-        ((pullback (pullback.fst f t)).obj M)).map
-        (eqToHom ((pullback.fst f t).preimage_cechIntersection
-          U n i).symm).op
-        ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
-          (op (∏ᶜ fun k : Fin (n + 1) => U (i k)))) m) := by
-  exact affineModuleSectionsBaseChangeIso_mapIso_hom_one_tmul
-    f t M (∏ᶜ fun k : Fin (n + 1) => U (i k))
-      (IsAffineOpen.cechIntersection U hU n i)
-      ((pullback.fst f t).preimage_cechIntersection U n i).symm m
 
 private theorem baseCechFactorBaseChangeIso_naturality
     {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
