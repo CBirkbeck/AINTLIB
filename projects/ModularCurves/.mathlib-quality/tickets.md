@@ -25186,3 +25186,17 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
 etc.) — context-bounded session; compensation = full statements in tickets + YRho.lean's
 existing sorried statements ARE the skeleton for T-YR-1/3(∃-form)/7. Dispatch order:
 T-Y1F-1 → T-Y1F-2 → T-Y1F-4 → T-YR-1 → T-YR-2 → T-YR-4 → T-YR-3 → T-Y1F-3 → T-YR-5 → T-YR-6 → T-YR-7.
+
+
+### v10.352 progress (2026-07-23, session A)
+- T-Y1F-1 DONE (YOneFine via semiBorelQPD/xOneFine). T-Y1F-2 DONE (piOneFine + both
+  invariance theorems; proof = homEquiv-injective + homEquiv_comp + piOneFineEll-eqn +
+  apply_symm_apply + naturality_apply-reversed + homEquiv_comp_transportHom-char +
+  proj_invariant at inverse; NO set-binders — set/rfl-show broke on ConcreteCategory-coe
+  boundaries, full spellings work). T-Y1F-4 DONE (audit block in YOneAssembly header;
+  no proofs touched). T-YR-1 DONE (PairingCompatAt real def; YRho builds green).
+- NEXT per dispatch: T-YR-2 (rhoProblem functor — mirror gammaFullNaiveProblem's
+  functorialization at Representability.lean:601+; values = RhoLevelStructure sets;
+  needs torsion-baseChange comparison plumbing for torsionIso pullback + coord
+  naturality) → T-YR-4 → T-YR-3 → T-Y1F-3 → T-YR-5/6/7. All ticket detail in the
+  v10.352 block above. Committed through 8399b6dbb + this session's T-Y1F-1/2 commit.
