@@ -1573,6 +1573,34 @@ private theorem generatingSectionsOverOfRestrict_isFiniteType
     change Finite G.I
     exact SheafOfModules.GeneratingSections.IsFiniteType.finite
 
+/-- A quasicoherent module whose sections on every affine open are finite is of finite type. -/
+theorem isFiniteType_of_sections_module_finite
+    {X : Scheme.{u}} (M : X.Modules) [M.IsQuasicoherent]
+    (hfinite : ∀ U : X.affineOpens,
+      Module.Finite Γ(X, U.1) Γ(M, U.1)) :
+    M.IsFiniteType := by
+  choose G hG using fun U : X.affineOpens ↦ by
+    letI : Module.Finite Γ(X, U.1) Γ(M, U.1) := hfinite U
+    exact exists_generatingSections_restrict_of_sections_module_finite_of_isAffineOpen M U
+  let q : M.LocalGeneratorsData :=
+    { I := X.affineOpens
+      X := fun U ↦ (U : X.Opens)
+      coversTop := by
+        rw [Opens.coversTop_iff, IsOpenCover, iSup_affineOpens_eq_top X]
+      generators := fun U ↦ generatingSectionsOverOfRestrict M U.1 (G U) }
+  have hq : q.IsFiniteType := by
+    constructor
+    intro U
+    letI : (G U).IsFiniteType := hG U
+    exact generatingSectionsOverOfRestrict_isFiniteType M U.1 (G U)
+  have hqShrink : q.shrink.IsFiniteType := by
+    constructor
+    intro i
+    dsimp [SheafOfModules.LocalGeneratorsData.shrink]
+    exact hq.isFiniteType i.2.choose
+  refine { exists_localGeneratorsData := ?_ }
+  exact ⟨q.shrink, hqShrink⟩
+
 /-- On a locally Noetherian scheme, the kernel of a morphism from a finite-type quasicoherent
 module to a quasicoherent module is of finite type. -/
 theorem isFiniteType_kernel
@@ -1581,30 +1609,81 @@ theorem isFiniteType_kernel
     (f : M ⟶ N) : (kernel f).IsFiniteType := by
   let K := kernel f
   letI : K.IsQuasicoherent := isQuasicoherent_kernel f
-  have hfinite (U : X.affineOpens) :
-      Module.Finite Γ(X, U.1) Γ(K, U.1) :=
-    kernel_sections_module_finite_of_isAffineOpen f U
-  choose G hG using fun U : X.affineOpens ↦ by
-    letI : Module.Finite Γ(X, U.1) Γ(K, U.1) := hfinite U
-    exact exists_generatingSections_restrict_of_sections_module_finite_of_isAffineOpen K U
-  let q : K.LocalGeneratorsData :=
-    { I := X.affineOpens
-      X := fun U ↦ (U : X.Opens)
-      coversTop := by
-        rw [Opens.coversTop_iff, IsOpenCover, iSup_affineOpens_eq_top X]
-      generators := fun U ↦ generatingSectionsOverOfRestrict K U.1 (G U) }
-  have hq : q.IsFiniteType := by
-    constructor
-    intro U
-    letI : (G U).IsFiniteType := hG U
-    exact generatingSectionsOverOfRestrict_isFiniteType K U.1 (G U)
-  have hqShrink : q.shrink.IsFiniteType := by
-    constructor
-    intro i
-    dsimp [SheafOfModules.LocalGeneratorsData.shrink]
-    exact hq.isFiniteType i.2.choose
-  refine { exists_localGeneratorsData := ?_ }
-  exact ⟨q.shrink, hqShrink⟩
+  exact isFiniteType_of_sections_module_finite K
+    (kernel_sections_module_finite_of_isAffineOpen f)
+
+private theorem fin_coproduct_sections_module_finite
+    {X : Scheme.{u}} {r : ℕ} (M : Fin r → X.Modules)
+    (hqc : ∀ i, (M i).IsQuasicoherent)
+    (hft : ∀ i, (M i).IsFiniteType) (U : X.affineOpens) :
+    Module.Finite Γ(X, U.1) Γ(∐ M, U.1) := by
+  letI : HasZeroMorphisms X.Modules :=
+    CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+  letI : HasZeroMorphisms
+      (ModuleCat.{u} (X.ringCatSheaf.obj.obj (op U.1))) :=
+    CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+  letI : HasFiniteBiproducts X.Modules :=
+    HasFiniteBiproducts.of_hasFiniteProducts
+  let F := SheafOfModules.evaluation X.ringCatSheaf (op U.1)
+  letI : HasFiniteBiproducts
+      (ModuleCat.{u} (X.ringCatSheaf.obj.obj (op U.1))) :=
+    HasFiniteBiproducts.of_hasFiniteProducts
+  letI : F.Additive := by
+    dsimp only [F, SheafOfModules.evaluation]
+    infer_instance
+  let hPresZero : F.PreservesZeroMorphisms :=
+    Functor.preservesZeroMorphisms_of_additive F
+  letI : F.PreservesZeroMorphisms := hPresZero
+  let hFinite : PreservesFiniteBiproducts F :=
+    Functor.preservesFiniteBiproductsOfAdditive F
+  letI (i : Fin r) : (M i).IsQuasicoherent := hqc i
+  letI (i : Fin r) : (M i).IsFiniteType := hft i
+  letI (i : Fin r) : Module.Finite Γ(X, U.1) Γ(M i, U.1) :=
+    sections_module_finite_of_isFiniteType_of_isAffineOpen (M i) U
+  letI : Module.Finite Γ(X, U.1) (∀ i : Fin r, Γ(M i, U.1)) :=
+    Module.Finite.pi
+  let hBM : HasBiproduct M := HasBiproduct.of_hasCoproduct M
+  letI : HasBiproduct M := hBM
+  let hBF : HasBiproduct (F.obj ∘ M) :=
+    HasBiproduct.of_hasProduct (F.obj ∘ M)
+  letI : HasBiproduct (F.obj ∘ M) := hBF
+  let hShape : PreservesBiproductsOfShape (Fin r) F :=
+    @PreservesFiniteBiproducts.preserves
+      X.Modules _
+      (ModuleCat.{u} (X.ringCatSheaf.obj.obj (op U.1))) _
+      CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+      CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+      F hPresZero hFinite (Fin r) inferInstance
+  let hPres :=
+    @PreservesBiproductsOfShape.preserves
+      X.Modules _
+      (ModuleCat.{u} (X.ringCatSheaf.obj.obj (op U.1))) _
+      CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+      CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+      (Fin r) F hPresZero hShape M
+  let e₀ := F.mapIso (biproduct.isoCoproduct M).symm
+  let e₁ := @Functor.mapBiproduct
+    X.Modules _
+    (ModuleCat.{u} (X.ringCatSheaf.obj.obj (op U.1))) _
+    CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+    CategoryTheory.Preadditive.preadditiveHasZeroMorphisms
+    (Fin r) F M hBM hPresZero hPres
+  let e₂ := biproduct.isoProduct (F.obj ∘ M)
+  let e₃ := ModuleCat.piIsoPi (F.obj ∘ M)
+  let e : ModuleCat.of Γ(X, U.1) Γ(∐ M, U.1) ≅
+      ModuleCat.of Γ(X, U.1) (∀ i : Fin r, Γ(M i, U.1)) :=
+    e₀ ≪≫ e₁ ≪≫ e₂ ≪≫ e₃
+  exact Module.Finite.equiv e.symm.toLinearEquiv
+
+/-- A finite coproduct of finite-type quasicoherent modules is of finite type. -/
+theorem isFiniteType_fin_coproduct
+    {X : Scheme.{u}} {r : ℕ} (M : Fin r → X.Modules)
+    (hqc : ∀ i, (M i).IsQuasicoherent)
+    (hft : ∀ i, (M i).IsFiniteType) :
+    (∐ M).IsFiniteType := by
+  letI : (∐ M).IsQuasicoherent := isQuasicoherent_coproduct M hqc
+  exact isFiniteType_of_sections_module_finite (∐ M)
+    (fin_coproduct_sections_module_finite M hqc hft)
 
 end Modules
 
