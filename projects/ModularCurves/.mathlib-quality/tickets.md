@@ -24701,6 +24701,27 @@ T-RIS1 → … → T-RIS8. The headline T-SB6 joins both (needs T-RIS8 + T-SB4).
 
 ### M1 — relative-affine quotient (file `ForMathlib/RelativeInvariantSpec.lean`)
 
+**PROGRESS 2026-07-22 (beastmode session 1):** T-RIS1..T-RIS6 ALL DONE, axiom-clean, pushed
+through 7335427e5. RelativeInvariantSpec.lean now PROVES: the full invariants diagram +
+coequifibered core (incl. the general `isLocalization_away_fixedPoints`), relQuotient/π/f₀ with
+π≫f₀=f + invariance + the categorical ∃!-lift (`existsUnique_relQuotientπ_lift`) + the [GHB3′]
+package + chart bridge (`isPullback_relQuotientπ_chart`) + `isAffineHom_relQuotientStruct` +
+the generic chart-transfer (`morphismProperty_relQuotientπ_of_charts`) + free-case
+finite/étale/surjective. REMAINING sorries in the file: `isIntegralHom_relQuotientπ` (:610,
+KM-completeness, NON-blocking — mathlib `prodXSubSMul` toolkit identified) and
+`exists_relQuotient_baseChange_of_free` (T-RIS7). T-RIS7 PLAN (refined): apply
+`existsUnique_relQuotientπ_lift` to the base-changed action (σ.basePullback f hover g over
+`pullback.snd f g : pullback f g ⟶ T`, affine by base-change-stability) to get the T-side
+quotient + universal property; identify `pullback f₀ g` with it via the chart-level
+`[A711-BC]` (`exists_invariantsπ_lift_baseChange_of_free` AffineQuotient:1153 +
+`epi_pullback_snd_invariantsπ_of_free` :946); ALTERNATIVELY port the old GHB5-tail (E-comparison
+:604-680 of GammaHRepresentability is construction-agnostic; only its [GHB5a]-consumption swaps
+to the new package). Engineering notes for the continuation: rw/motive fails on Γ-synonyms
+everywhere — use term-mode congrArg/trans chains or simp only [Category.assoc]; `set_option
+backward.isDefEq.respectTransparency false in` on every heavy decl (allowed); explicit-cover
+args to glueMorphisms-lemmas kill whnf-blowups; `include hover/hfree in` needed on statements
+not mentioning them; site-subtype literals need `(⟨W, hW⟩ : S.AffineZariskiSite)` ascriptions.
+
 - **[T-RIS1] Diagram layer** — discharge `isStableOpen_preimage`, `gamma_map_smul`,
   `invariantsDiagram.map_id/map_comp` + the `MapsTo`-hole in `invariantsDiagram.map`,
   `invariantsDiagramMap.naturality`. Sketch: [GHB3]-inline stability extraction
