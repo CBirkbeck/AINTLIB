@@ -71,4 +71,32 @@ noncomputable def kernelZeroIsoOfIso
     ShortComplex.cyclesMapIso eSc ≪≫
     (L.sc' 0 0 1).moduleCatCyclesIso
 
+/-- The kernel equivalence induced by a cochain-complex isomorphism commutes with the
+inclusions into degree zero. -/
+@[reassoc]
+theorem kernelZeroIsoOfIso_hom_subtype
+    {R : Type u} [CommRing R]
+    {K L : CochainComplex (ModuleCat.{v} R) ℕ} (e : K ≅ L) :
+    (kernelZeroIsoOfIso e).hom ≫
+        ModuleCat.ofHom (LinearMap.ker (L.d 0 1).hom).subtype =
+      ModuleCat.ofHom (LinearMap.ker (K.d 0 1).hom).subtype ≫ e.hom.f 0 := by
+  apply ModuleCat.hom_ext
+  ext x
+  simp [kernelZeroIsoOfIso]
+  let eSc := (shortComplexFunctor' (ModuleCat.{v} R) (.up ℕ) 0 0 1).mapIso e
+  have hcomp :
+      (((K.sc' 0 0 1).moduleCatCyclesIso.symm ≪≫
+          ShortComplex.cyclesMapIso eSc ≪≫
+          (L.sc' 0 0 1).moduleCatCyclesIso).hom ≫
+        (L.sc' 0 0 1).moduleCatLeftHomologyData.i) =
+      (K.sc' 0 0 1).moduleCatLeftHomologyData.i ≫ e.hom.f 0 := by
+    simp only [Iso.trans_hom, Category.assoc]
+    rw [(L.sc' 0 0 1).moduleCatCyclesIso_hom_i]
+    change (K.sc' 0 0 1).moduleCatCyclesIso.inv ≫
+        ShortComplex.cyclesMap eSc.hom ≫ (L.sc' 0 0 1).iCycles =
+      (K.sc' 0 0 1).moduleCatLeftHomologyData.i ≫ eSc.hom.τ₂
+    rw [ShortComplex.cyclesMap_i]
+    rw [(K.sc' 0 0 1).moduleCatCyclesIso_inv_iCycles_assoc]
+  exact ConcreteCategory.congr_hom hcomp x
+
 end HomologicalComplex
