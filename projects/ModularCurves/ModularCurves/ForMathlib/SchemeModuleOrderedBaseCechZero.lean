@@ -172,6 +172,65 @@ noncomputable def baseCechKernelOrderedBaseChangeLinearEquiv
     ((HomologicalComplex.kernelZeroLinearEquivOfHom p i hpi hip).trans
       (ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv D A).symm)
 
+/-- The inverse ordered/native base-changed Cech-kernel equivalence is induced by
+the algebraic base change of the degree-zero alternating extension. -/
+theorem baseCechKernelOrderedBaseChangeLinearEquiv_symm_coe
+    {X S : Scheme.{u}} (π : X ⟶ S) (M : X.Modules)
+    {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
+    (A : Type u) [CommRing A] [Algebra Γ(S, (⊤ : S.Opens)) A]
+    (x : LinearMap.ker
+      (((orderedBaseCechComplex π M U).d 0 1).hom.baseChange A)) :
+    ((baseCechKernelOrderedBaseChangeLinearEquiv π M U A).symm x).1 =
+      ((orderedToBaseCechAlternatingF π M U 0).hom.baseChange A) x.1 := by
+  let F := ModuleCat.extendScalars (algebraMap Γ(S, (⊤ : S.Opens)) A)
+  let C := baseCechComplex π M U
+  let D := orderedBaseCechComplex π M U
+  let p := (F.mapHomologicalComplex (.up ℕ)).map
+    (baseCechToOrdered π M U)
+  let i := (F.mapHomologicalComplex (.up ℕ)).map
+    (orderedToBaseCechAlternating π M U)
+  have hpi : p.f 0 ≫ i.f 0 = 𝟙 _ := by
+    change F.map (baseCechToOrderedF π M U 0) ≫
+      F.map (orderedToBaseCechAlternatingF π M U 0) =
+        𝟙 (F.obj ((baseCechComplex π M U).X 0))
+    rw [← F.map_comp,
+      baseCechToOrderedF_comp_orderedToBaseCechAlternatingF_zero,
+      F.map_id]
+  have hip : i.f 0 ≫ p.f 0 = 𝟙 _ := by
+    change F.map (orderedToBaseCechAlternatingF π M U 0) ≫
+      F.map (baseCechToOrderedF π M U 0) =
+        𝟙 (F.obj ((orderedBaseCechComplex π M U).X 0))
+    rw [← F.map_comp,
+      orderedToBaseCechAlternatingF_comp_baseCechToOrderedF,
+      F.map_id]
+    rfl
+  change ((ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv
+      C A).symm
+    ((HomologicalComplex.kernelZeroLinearEquivOfHom p i hpi hip).symm
+      (ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv
+        D A x))).1 = _
+  rw [ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv_symm_coe]
+  rw [HomologicalComplex.kernelZeroLinearEquivOfHom_symm_coe]
+  rw [ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv_coe]
+  apply (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0)).injective
+  calc
+    _ = (i.f 0).hom
+        (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (D.X 0) x.1) :=
+      (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A
+        (C.X 0)).apply_symm_apply _
+    _ = _ := by
+      change
+        ((ModuleCat.extendScalars
+          (algebraMap Γ(S, (⊤ : S.Opens)) A)).map
+            (orderedToBaseCechAlternatingF π M U 0)).hom
+              (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A
+                ((orderedBaseCechComplex π M U).X 0) x.1) =
+          ModularCurves.moduleCatExtendScalarsObjLinearEquiv A
+            ((baseCechComplex π M U).X 0)
+              (((orderedToBaseCechAlternatingF π M U 0).hom.baseChange A) x.1)
+      exact (ModularCurves.moduleCatExtendScalarsObjLinearEquiv_baseChange A
+        (orderedToBaseCechAlternatingF π M U 0) x.1).symm
+
 /-- For an ordered open cover, global sections are the kernel of the first differential in the
 ordered base-linear Cech complex. -/
 noncomputable def baseSectionsIsoKernelOrderedBaseCechDifferential
