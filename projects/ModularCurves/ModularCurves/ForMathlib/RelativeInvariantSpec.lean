@@ -574,11 +574,35 @@ theorem isPullback_relQuotientπ_chart (U : S.AffineZariskiSite) :
   exact @IsOpenImmersion.isPullback _ _ _ _ _ _ _ _ inferInstance
     ((σ.invariantsGlueData f hover).cover.map_prop U) hcomm hpre
 
+/-- The `f₀`-preimage of an affine open is the corresponding glued chart (mirror of
+`fromNormalization_preimage`). -/
+theorem relQuotientStruct_preimage (U : S.affineOpens) :
+    σ.relQuotientStruct f hover ⁻¹ᵁ U
+      = (colimit.ι (σ.invariantsGlueData f hover).functor ⟨U.1, U.2⟩).opensRange := by
+  have h := (σ.invariantsGlueData f hover).toBase_preimage_eq_opensRange_ι ⟨U.1, U.2⟩
+  have h2 : ((Scheme.AffineZariskiSite.directedCover S).f ⟨U.1, U.2⟩).opensRange
+      = (U.1 : S.Opens) := Scheme.Opens.opensRange_ι _
+  rw [h2] at h
+  exact h
+
+set_option backward.isDefEq.respectTransparency false in
 /-- The structure morphism of the quotient is affine (chartwise it is
-`Spec Γ(Z, f⁻¹U)ᴳ ⟶ U`; affineness is Zariski-local on the target along the
-directed cover, via `toBase_preimage_eq_opensRange_ι`). -/
+`Spec Γ(Z, f⁻¹U)ᴳ ⟶ U`; mirror of the `IsIntegralHom fromNormalization` instance). -/
 instance isAffineHom_relQuotientStruct : IsAffineHom (σ.relQuotientStruct f hover) := by
-  sorry
+  rw [IsZariskiLocalAtTarget.iff_of_iSup_eq_top (P := @IsAffineHom) _
+    (iSup_affineOpens_eq_top _)]
+  intro U
+  let e := IsOpenImmersion.isoOfRangeEq (σ.relQuotientStruct f hover ⁻¹ᵁ U).ι
+    (colimit.ι (σ.invariantsGlueData f hover).functor ⟨U.1, U.2⟩)
+    (by
+      rw [Scheme.Opens.range_ι]
+      exact congr($(σ.relQuotientStruct_preimage f hover U).1))
+  rw [← MorphismProperty.cancel_left_of_respectsIso @IsAffineHom e.inv,
+    ← MorphismProperty.cancel_right_of_respectsIso @IsAffineHom _ U.2.isoSpec.hom]
+  convert! (inferInstance : IsAffineHom (Spec.map
+    ((σ.invariantsDiagramMap f hover).app (.op ⟨U.1, U.2⟩))))
+  rw [← cancel_mono U.2.fromSpec]
+  simp [IsAffineOpen.isoSpec_hom, e, σ.ι_relQuotientStruct f hover]
 
 /-- The projection is integral (chartwise `Aᴳ → A` is integral: every `a` is a root of
 `∏_g (T − g•a)`, KM 7.1.3(4) print p. 193; mathlib `Algebra.IsInvariant.isIntegral`). -/
