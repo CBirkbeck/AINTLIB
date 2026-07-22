@@ -41,6 +41,13 @@ theorem orderedBaseCechObjectFunctor_obj
       orderedBaseCechObject π M U n :=
   rfl
 
+instance orderedBaseCechObjectFunctor_additive
+    {X S : Scheme.{u}} (π : X ⟶ S) {ι : Type u} [LinearOrder ι]
+    (U : ι → X.Opens) (n : ℕ) :
+    (orderedBaseCechObjectFunctor π U n).Additive := by
+  dsimp only [orderedBaseCechObjectFunctor]
+  infer_instance
+
 private theorem orderedBaseCechCoface_naturality
     {X S : Scheme.{u}} (π : X ⟶ S) {M N : X.Modules} (f : M ⟶ N)
     {ι : Type u} [LinearOrder ι] (U : ι → X.Opens)
@@ -139,6 +146,19 @@ theorem orderedBaseCechComplexFunctor_obj
     (orderedBaseCechComplexFunctor π U).obj M =
       orderedBaseCechComplex π M U :=
   rfl
+
+instance orderedBaseCechComplexFunctor_additive
+    {X S : Scheme.{u}} (π : X ⟶ S) {ι : Type u} [LinearOrder ι]
+    (U : ι → X.Opens) :
+    (orderedBaseCechComplexFunctor π U).Additive where
+  map_add := by
+    intro M N f g
+    apply HomologicalComplex.Hom.ext
+    funext n
+    change (orderedBaseCechObjectFunctor π U n).map (f + g) =
+      (orderedBaseCechObjectFunctor π U n).map f +
+        (orderedBaseCechObjectFunctor π U n).map g
+    exact Functor.map_add _
 
 instance orderedBaseCechComplexFunctor_preservesZeroMorphisms
     {X S : Scheme.{u}} (π : X ⟶ S) {ι : Type u} [LinearOrder ι]

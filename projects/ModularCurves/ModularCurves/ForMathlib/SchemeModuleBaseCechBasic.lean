@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.Algebra.Category.ModuleCat.Limits
 import Mathlib.AlgebraicGeometry.Modules.Sheaf
 import Mathlib.CategoryTheory.Sites.SheafCohomology.Cech
+import ModularCurves.ForMathlib.FormalCoproductAdditive
 
 /-!
 # Base-linear Cech complexes of scheme modules
@@ -64,6 +65,14 @@ instance baseModulePresheafFunctor_preservesZeroMorphisms
     {X S : Scheme.{u}} (π : X ⟶ S) :
     (baseModulePresheafFunctor π).PreservesZeroMorphisms where
   map_zero M N := by
+    ext U x
+    rfl
+
+instance baseModulePresheafFunctor_additive
+    {X S : Scheme.{u}} (π : X ⟶ S) :
+    (baseModulePresheafFunctor π).Additive where
+  map_add := by
+    intro M N f g
     ext U x
     rfl
 
