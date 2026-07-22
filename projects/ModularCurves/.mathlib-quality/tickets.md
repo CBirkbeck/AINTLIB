@@ -25259,6 +25259,23 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### T-YR-3d-1 — DISSOLVED BY REUSE (2026-07-24)
+GroupScheme/GLSchemeAction.lean ALREADY LANDS the whole leaf, sorry-free:
+`fullLevelHom` (:40 = 3d-1a, Sigma.desc of combination-torsion-points),
+`fullLevelHom_torsionπ` (:71 over-spec), `fullLevelFibreMap_bijective` (:94),
+`fullLevelHom_isIso` (:467, N invertible) + **`fullLevelIso`** (:517 —
+constScheme ≅ E[N], THE basis-trivialization = 3d-1b), `fullLevelHom_baseChange` +
+`isPullback_fullLevelHom` (:397/:451), `glEquiv/constGL/glSchemeSmul` + laws
+(:524-590 — the GL₂-equivariance of the trivialization). 3d-1c (the ρ-dictionary)
+is now direct plumbing: given (L, h)-framed pair at X, torsionIso :=
+(fullLevelIso hinv L).symm ≪≫ (const-to-frames comparison via h) — the wFrames-side
+needs constScheme (Fin 2 → ZMod N) vs the frame-pullback comparison (h classifies a
+frame; the induced V_ρ-pullback-iso: étale-locally h reads a matrix — the comparison
+constScheme ≅ pullback (vRhoπ) via a ℚ̄-points-free scheme-level map — NEXT UNIT:
+scope whether wFrames-pullback trivializes against constScheme by h or whether the
+ρ-dictionary should be stated étale-locally only, with the [GHB4]-descent doing the
+globalization as planned).
+
 ### T-YR-3d-1 constSumMap decomposition (2026-07-24, KM-SOURCED)
 KM 2.3.1 (print p. 73, READ verbatim): "[N]: E → E is finite locally free of rank N².
 If N is invertible on S, its kernel E[N] is finite etale over S, locally for the etale
