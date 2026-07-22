@@ -192,4 +192,51 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_orderedBaseCech
     exact e.finrank_eq.trans (hrank p.asIdeal.ResidueField)
   exact ⟨hkerFinite, hkerProjective, hbase, hrankAt⟩
 
+/-- On a projectively presented fibrewise elliptic family over a Noetherian ring, global
+sections of `O(n[0])` form a finite projective module of constant rank `n`. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_baseSections_data
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R)) [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {n : ℕ} (hn : 1 ≤ n) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let M := sectionPoleSheafPower π z hz n
+    let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+    Module.Finite B (Scheme.Modules.baseSections π M) ∧
+      Module.Projective B (Scheme.Modules.baseSections π M) ∧
+      Module.rankAtStalk (R := B) (Scheme.Modules.baseSections π M) = fun _ ↦ n := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz n
+  let U := fun j => f ⁻¹ᵁ MvPolynomial.coordinateOpenCover
+    (R := R) (σ := σ) j
+  let C := Scheme.Modules.orderedBaseCechComplex π M U
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  obtain ⟨hfinite, hprojective, _, hrank⟩ :=
+    h.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_kernel_data
+      f hsm z hz hn
+  letI : Module.Finite B (LinearMap.ker (C.d 0 1).hom) := hfinite
+  letI : Module.Projective B (LinearMap.ker (C.d 0 1).hom) := hprojective
+  have hU : IsOpenCover U := by
+    exact f.iSup_preimage_eq_top
+      (MvPolynomial.iSup_coordinateOpenCover_eq_top (R := R) (σ := σ))
+  let e := (sectionPoleSheafPower_baseSectionsIsoKernelOrderedBaseCechDifferential
+    z hz n U hU).toLinearEquiv
+  have hsectionsFinite : Module.Finite B (Scheme.Modules.baseSections π M) :=
+    Module.Finite.equiv e.symm
+  have hsectionsProjective : Module.Projective B (Scheme.Modules.baseSections π M) :=
+    Module.Projective.of_equiv' e.symm
+  have hsectionsRank :
+      Module.rankAtStalk (R := B) (Scheme.Modules.baseSections π M) = fun _ ↦ n :=
+    (Module.rankAtStalk_eq_of_equiv e).trans hrank
+  exact ⟨hsectionsFinite, hsectionsProjective, hsectionsRank⟩
+
 end ModularCurves
