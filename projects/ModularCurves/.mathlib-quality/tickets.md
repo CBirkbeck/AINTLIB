@@ -24923,3 +24923,48 @@ instance search. isIntegral via IsIntegralHom.SpecMap_iff + Algebra.IsInvariant.
 exists_quotient_of_isAffineHom_rel DONE; GHB4 rewired to relQuotient engine DONE; GHB5 E-block
 name-swapped to relQuotient engine DONE (build pending). Remaining: T-RIS8a, hbase/hbX deletion
 (295 mentions, QuotPkg thread + endgame :3184/:3553), full build + receipts census.
+
+---
+
+## v10.349 — ★★★★★ [Y_H(N) SEMI-BOREL HEADLINE LANDED] T-RIS8 + T-RIS8a + T-SB6 DONE (2026-07-22, pushed 0214fbd8b)
+
+**THE HANDOVER'S TWO GATES ARE CLOSED.** `hbase` is DELETED from the entire pipeline (the
+rectified plan's M1), and the per-H gate is discharged for the full semi-Borel family (M2):
+
+FINAL GATES (all verified this session, own builds):
+- Full workspace `lake build`: GREEN, 9994 jobs, zero errors.
+- `gammaH_relativelyRepresentable (N) [NeZero N] (H) (hinv : IsUnit (N:R))` — now
+  UNCONDITIONAL (no hbase, no diagonal instance) — [propext, Classical.choice, Quot.sound].
+- `gammaH_semiBorel_closure (N≥4) (H ≤ semiBorel N) (hinv)`:
+  `Nonempty (QuotientProblemData (gammaHAut R N H)) ∧ ∀ qpd, qpd.prob.Representable`
+  — [propext, Classical.choice, Quot.sound]. **This is Y_H(N) as a fine moduli scheme for
+  every H ≤ {(1 *; 0 *)}, KM 7.4.2(3)-grade, first unconditional per-H family beyond ⊥.**
+  Contains Y₁(N) = Y_{semiBorel}(N) itself.
+- 7-receipt census UNCHANGED (all clean triple): engine, levelSpaceΓπ_etale,
+  gammaBot_representable, gammaH_representable_of_orderOf, gammaFullNaive/-FullDrinfeld/
+  -OneDrinfeld_rigid_and_representable.
+- `QuotPkg.f₀_finite_etale` clean triple on the NEW diagonal-free GHB6′ route.
+
+Ticket closures:
+- [T-RIS8] done: import + basePullback dedup; GHB3 = delegation to
+  exists_quotient_of_isAffineHom_rel; GHB4/GHB5 reimplemented on the relQuotient engine
+  (atlas blocks deleted; the E-block's hsq via term congrArg-calc — rw [← hπf] motive
+  fails now that π mentions f); 23 hbase binder blocks + 275 argument occurrences deleted.
+- [T-RIS8a] done: isFinite/etale_relQuotientStruct_of_free + ∧-package
+  (isAffineHom_relQuotientStruct chart template + RingHom.invariantsCorestrict_finite/
+  _etale); QuotPkg.f₀_finite_etale transports along the hdesc-uniqueness iso
+  (f₀ = q ≫ relQuotientStruct — beta-reduce huniq args with an explicit `show`).
+- [T-SB6] done: gammaH_semiBorel_closure := ⟨gammaH_relativelyRepresentable …,
+  fun qpd => gammaH_representable_of_le_semiBorel …⟩.
+- [T-RIS7-int] done earlier this session (isIntegralHom_relQuotientπ).
+
+Old-engine notes for the fleet (cleanup lane, NOT for producers): SchemeQuotient.lean /
+SchemeActionFree.lean's diagonal-carrying quotient layer is now CONSUMED ONLY by itself
+(quotient_desc_finite_etale has no in-pipeline consumers; GammaHRepresentability:671's
+isFinite_etale_of_comp_of_finite_etale_surjective stays the pre-existing [GH-DESC-GAP]
+sorried marker, untouched). Dedup/retirement is a main-branch cleanup decision.
+
+Y₀(N) STATUS (unchanged by this stream, for the next dispatch): Borel ⊋ semiBorel needs
+−1 ∈ H handled — refuted for FINE representability by hH_refuted_of_neg_one_mem (the
+no-go block); the Y₀(N) object is the COARSE quotient (KM 8.1.1/8.1.5) or the rigidified
+[Γ₀(N)]-with-auxiliary route (KM 7.4.3) — a NEW /develop pass, not a residual here.
