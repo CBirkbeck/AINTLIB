@@ -41,6 +41,12 @@ end ModuleCat
 
 namespace AlgebraicGeometry.Scheme.Modules
 
+private theorem homEqComp_apply {R : Type u} [CommRing R]
+    {A B C : ModuleCat.{u} R} {p : A ⟶ C} {a : A ⟶ B} {b : B ⟶ C}
+    (h : p = a ≫ b) (x : A) : p x = b (a x) := by
+  rw [h]
+  exact CategoryTheory.comp_apply a b x
+
 private noncomputable def extendScalarsDiscreteIso
     {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S)
     {ι : Type u} (P : ι → ModuleCat.{u} R) :
@@ -652,5 +658,133 @@ theorem baseCechComplexBaseChangeIso_hom_f
     (baseCechComplexBaseChangeIso f t M U hU).hom.f n =
       (baseCechXBaseChangeIso f t M U hU n).hom :=
   rfl
+
+/-- The degree-zero affine-Cech comparison is canonical on a pure tensor
+whenever the selected source component is the restriction of a global section. -/
+theorem baseCechXBaseChangeIso_zero_one_tmul_of_projection_eq
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (m : ((∏ᶜ fun j : Fin 1 → ι =>
+      (baseModulePresheaf f M).obj
+        (op (∏ᶜ fun k : Fin 1 => U (j k)))) :
+          ModuleCat Γ(S, (⊤ : S.Opens))))
+    (s : (baseModulePresheaf f M).obj (op (⊤ : X.Opens)))
+    (i : Fin 1 → ι)
+    (hm : (Pi.π (fun j : Fin 1 → ι =>
+      (baseModulePresheaf f M).obj
+        (op (∏ᶜ fun k : Fin 1 => U (j k)))) i) m =
+      (baseModulePresheaf f M).map
+        (homOfLE (show (∏ᶜ fun k : Fin 1 => U (i k)) ≤
+          (⊤ : X.Opens) from le_top)).op s) :
+    ((baseCechXBaseChangeIso f t M U hU 0).hom ≫
+        Pi.π (fun j : Fin 1 → ι =>
+          (baseModulePresheaf (pullback.snd f t)
+            ((pullback (pullback.fst f t)).obj M)).obj
+              (op (∏ᶜ fun k : Fin 1 =>
+                pullback.fst f t ⁻¹ᵁ U (j k)))) i)
+        ((1 : Γ(T, (⊤ : T.Opens)))
+          ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m) =
+      (baseModulePresheaf (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M)).map
+          (homOfLE (show
+            (∏ᶜ fun k : Fin 1 => pullback.fst f t ⁻¹ᵁ U (i k)) ≤
+              (⊤ : (Limits.pullback f t).Opens) from le_top)).op
+        ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
+          (op (⊤ : X.Opens))) s) := by
+  let g := pullback.fst f t
+  let f' := pullback.snd f t
+  let P := (pullback g).obj M
+  let Uf : ι → (Limits.pullback f t).Opens := fun j => g ⁻¹ᵁ U j
+  let W := ∏ᶜ fun k : Fin 1 => U (i k)
+  let V := ∏ᶜ fun k : Fin 1 => Uf (i k)
+  let hW : IsAffineOpen W := IsAffineOpen.cechIntersection U hU 0 i
+  let sourceProjection := Pi.π (fun j : Fin 1 → ι =>
+    (baseModulePresheaf f M).obj
+      (op (∏ᶜ fun k : Fin 1 => U (j k)))) i
+  let targetProjection := Pi.π (fun j : Fin 1 → ι =>
+    (baseModulePresheaf f' P).obj
+      (op (∏ᶜ fun k : Fin 1 => Uf (j k)))) i
+  let sourceRestriction := (baseModulePresheaf f M).map
+    (homOfLE (show W ≤ (⊤ : X.Opens) from le_top)).op
+  let targetTransport := (baseModulePresheaf f' P).map
+    (eqToHom (g.preimage_cechIntersection U 0 i).symm).op
+  let targetRestriction := (baseModulePresheaf f' P).map
+    (homOfLE (show V ≤ (⊤ : (Limits.pullback f t).Opens) from le_top)).op
+  let factorIso := baseCechFactorBaseChangeIso f t M U hU 0 i
+  let affineIso := affineModuleSectionsBaseChangeIso f t M W hW
+  let restrictedSource := sourceRestriction s
+  let restrictedTensor :
+      (ModuleCat.extendScalars t.appTop.hom).obj
+        ((baseModulePresheaf f M).obj (op W)) :=
+    (1 : Γ(T, (⊤ : T.Opens)))
+      ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] restrictedSource
+  let unitTop :=
+    (((pullbackPushforwardAdjunction g).unit.app M).val.app
+      (op (⊤ : X.Opens))) s
+  let unitW :=
+    (((pullbackPushforwardAdjunction g).unit.app M).val.app
+      (op W)) restrictedSource
+  let x : (ModuleCat.extendScalars t.appTop.hom).obj
+      (∏ᶜ fun j : Fin 1 → ι =>
+        (baseModulePresheaf f M).obj
+          (op (∏ᶜ fun k : Fin 1 => U (j k)))) :=
+    (1 : Γ(T, (⊤ : T.Opens)))
+      ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m
+  let A : ModuleCat Γ(T, (⊤ : T.Opens)) :=
+    (ModuleCat.extendScalars t.appTop.hom).obj
+      (∏ᶜ fun j : Fin 1 → ι =>
+        (baseModulePresheaf f M).obj
+          (op (∏ᶜ fun k : Fin 1 => U (j k))))
+  let B : ModuleCat Γ(T, (⊤ : T.Opens)) :=
+    (ModuleCat.extendScalars t.appTop.hom).obj
+      ((baseModulePresheaf f M).obj (op W))
+  let C : ModuleCat Γ(T, (⊤ : T.Opens)) :=
+    (baseModulePresheaf f' P).obj (op V)
+  let D : ModuleCat Γ(T, (⊤ : T.Opens)) :=
+    (baseModulePresheaf f' P).obj (op (g ⁻¹ᵁ W))
+  let p : A ⟶ C :=
+    (baseCechXBaseChangeIso f t M U hU 0).hom ≫ targetProjection
+  let a : A ⟶ B :=
+    (ModuleCat.extendScalars t.appTop.hom).map sourceProjection
+  let b : B ⟶ C := factorIso.hom
+  change p x = targetRestriction unitTop
+  have hDegreeMorph : p = a ≫ b :=
+    baseCechXBaseChangeIso_hom_π f t M U hU 0 i
+  have hDegree : p x = b (a x) :=
+    homEqComp_apply (R := Γ(T, (⊤ : T.Opens)))
+      (A := A) (B := B) (C := C) (p := p) (a := a) (b := b) hDegreeMorph x
+  have hProjectionTensor := ModuleCat.ExtendScalars.map_tmul
+    (f := t.appTop.hom)
+      (Pi.π (fun j : Fin 1 → ι =>
+        (baseModulePresheaf f M).obj
+          (op (∏ᶜ fun k : Fin 1 => U (j k)))) i)
+      (1 : Γ(T, (⊤ : T.Opens))) m
+  have hProjectionInput : a x = restrictedTensor := by
+    dsimp only [a, sourceProjection, x, restrictedTensor]
+    exact hProjectionTensor.trans <| congrArg
+      (fun y => (1 : Γ(T, (⊤ : T.Opens)))
+        ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] y) hm
+  have hFactorMorph : b = affineIso.hom ≫ targetTransport :=
+    baseCechFactorBaseChangeIso_hom f t M U hU 0 i
+  have hFactor : b restrictedTensor =
+      targetTransport (affineIso.hom restrictedTensor) :=
+    homEqComp_apply (R := Γ(T, (⊤ : T.Opens)))
+      (A := B) (B := D) (C := C) (p := b) (a := affineIso.hom)
+      (b := targetTransport) hFactorMorph restrictedTensor
+  have hAffine : affineIso.hom restrictedTensor = unitW := by
+    dsimp only [affineIso, restrictedTensor, unitW]
+    exact affineModuleSectionsBaseChangeIso_hom_one_tmul f t M W hW restrictedSource
+  have hFactorInput := congrArg b hProjectionInput
+  have hAffineTransport := congrArg targetTransport hAffine
+  have hUnit : targetTransport unitW = targetRestriction unitTop :=
+    pullbackUnit_restrict_transport f t M W
+      (g.preimage_cechIntersection U 0 i).symm s
+  rw [hDegree]
+  rw [hFactorInput]
+  rw [hFactor]
+  rw [hAffineTransport]
+  exact hUnit
 
 end AlgebraicGeometry.Scheme.Modules
