@@ -1703,6 +1703,56 @@ theorem framesEqv_nat (D : GaloisRepData N) (X : EllObj (CommRingCat.of ℚ))
       k ≫ (framesEqv D X g h).1 :=
   Category.assoc _ _ _
 
+/-- [T-YR-3b-v helper] The universal-property split of maps into a fibre product,
+subtype-form. -/
+noncomputable def pullbackSplitEquiv {Z₁ Z₂ B T : Scheme.{0}} (f₁ : Z₁ ⟶ B)
+    (f₂ : Z₂ ⟶ B) (g : T ⟶ B) :
+    { u : T ⟶ pullback f₁ f₂ // u ≫ (pullback.fst f₁ f₂ ≫ f₁) = g } ≃
+    ({ v : T ⟶ Z₁ // v ≫ f₁ = g } × { w : T ⟶ Z₂ // w ≫ f₂ = g }) where
+  toFun u := ⟨⟨u.1 ≫ pullback.fst f₁ f₂, by rw [Category.assoc]; exact u.2⟩,
+    ⟨u.1 ≫ pullback.snd f₁ f₂, by
+      rw [Category.assoc, ← pullback.condition]
+      exact u.2⟩⟩
+  invFun vw := ⟨pullback.lift vw.1.1 vw.2.1 (vw.1.2.trans vw.2.2.symm), by
+    rw [← Category.assoc, pullback.lift_fst]; exact vw.1.2⟩
+  left_inv u := Subtype.ext (by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst]
+    · rw [pullback.lift_snd])
+  right_inv vw := by
+    refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
+    · exact pullback.lift_fst _ _ _
+    · exact pullback.lift_snd _ _ _
+
+/-- [T-YR-3b-v helper] A relative datum's bijection is congruent in the classifying
+map (proofs transport). -/
+theorem relRep_eqv_congr {Q : ModularCurves.ModuliProblem (CommRingCat.of ℚ)}
+    {X : EllObj (CommRingCat.of ℚ)} (d : ModuliProblem.RelRepData Q X)
+    {T : Scheme.{0}} (g : T ⟶ X.base) {v w : T ⟶ d.Z} (hvw : v = w)
+    (pv : v ≫ d.f = g) :
+    d.eqv g ⟨v, pv⟩ = d.eqv g ⟨w, hvw ▸ pv⟩ := by
+  subst hvw; rfl
+
+/-- **[T-YR-3b-v(b)]** The product relative datum: given a full-level relative datum
+`dL` at `X`, the fibre product `dL.Z ×_{X.base} (X.base ×_ℚ wFrames)` represents the
+bare framed problem (`pullbackSplitEquiv` then `dL.eqv × framesEqv`). -/
+noncomputable def bareFramedRelRepData (D : GaloisRepData N)
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dL : ModuliProblem.RelRepData (gammaFullNaiveProblem (CommRingCat.of ℚ) N) X) :
+    ModuliProblem.RelRepData (bareFramedProblem D) X where
+  Z := pullback dL.f (pullback.fst X.structMap (wFramesπ D))
+  f := pullback.fst dL.f (pullback.fst X.structMap (wFramesπ D)) ≫ dL.f
+  eqv g := (pullbackSplitEquiv dL.f (pullback.fst X.structMap (wFramesπ D)) g).trans
+    (Equiv.prodCongr (dL.eqv g) (framesEqv D X g))
+  nat g k u := by
+    refine Prod.ext ?_ ?_
+    · refine Eq.trans (relRep_eqv_congr dL (k ≫ g)
+        (Category.assoc k u.1
+          (pullback.fst dL.f (pullback.fst X.structMap (wFramesπ D)))) _) ?_
+      exact dL.nat g k ⟨u.1 ≫ pullback.fst _ _, by
+        rw [Category.assoc]; exact u.2⟩
+    · exact Subtype.ext (Category.assoc _ _ _)
+
 end FramedProblemFunctor
 
 
