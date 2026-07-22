@@ -419,6 +419,45 @@ structure RhoLevelStructure {N : ℕ} [NeZero N] (D : GaloisRepData N)
     (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
     PairingCompatAt D sT torsionIso over_T t ht x y hx hy
 
+section RhoProblem
+
+open CategoryTheory
+
+variable {N : ℕ} [NeZero N]
+
+/-- [T-YR-2 helper, SKELETON] Transport of `N`-torsion along an `Ell/ℚ`-morphism: the
+cartesian curve square (`EllHom.isPullback`) pasted with
+`torsion_baseChange_isPullback` (TorsionFibre.lean) identifies the source torsion with
+the pullback of the target torsion along the base map. -/
+noncomputable def ellHomTorsionIso {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] :
+    A.curve.torsion N ≅ pullback (B.curve.torsionπ N) g.baseHom := by sorry
+
+/-- [T-YR-2 helper, SKELETON] The torsion transport lies over the base. -/
+theorem ellHomTorsionIso_over {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] :
+    (ellHomTorsionIso g N).hom ≫ pullback.snd (B.curve.torsionπ N) g.baseHom =
+      A.curve.torsionπ N := by sorry
+
+/-- [T-YR-2, SKELETON] Pull a ρ-level structure back along an `Ell/ℚ`-morphism. -/
+noncomputable def RhoLevelStructure.pull (D : GaloisRepData N)
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (α : RhoLevelStructure D B.structMap B.curve) :
+    RhoLevelStructure D A.structMap A.curve := by sorry
+
+/-- **[T-YR-2] The ρ-level moduli problem** (Buzzard p. 33 verbatim: "the functor on
+ℚ-schemes S parametrising elliptic curves E/S such that E[N] ≅ ρ̄_N as
+representations-with-pairing"), functorialized over `Ell/ℚ` (mirror of
+`gammaFullNaiveProblem`'s functorialization). -/
+noncomputable def rhoProblem (D : GaloisRepData N) :
+    ModularCurves.ModuliProblem (CommRingCat.of ℚ) where
+  obj X := RhoLevelStructure D X.unop.structMap X.unop.curve
+  map f := fun α => RhoLevelStructure.pull D f.unop α
+  map_id := by sorry
+  map_comp := by sorry
+
+end RhoProblem
+
 /-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route)** Relative
 representability of the ρ-level problem: for every elliptic curve `E` over a
 `ℚ`-scheme `T`, the functor `T' ↦ {ρ-level structures on E ×_T T'}` is representable
