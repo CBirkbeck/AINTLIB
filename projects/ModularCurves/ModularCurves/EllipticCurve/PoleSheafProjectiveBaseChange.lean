@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.PoleSheafProjectiveCech
+import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.ForMathlib.SchemeModuleBaseSectionsBaseChange
 
 /-!
@@ -148,5 +149,65 @@ theorem
   change ePole (ePullback ((1 : A) ⊗ₜ[B] s)) = _
   rw [Scheme.Modules.baseSectionsBaseChangeLinearEquivOfOrderedCechKernelComparison_one_tmul]
   rfl
+
+/-- On pure tensors, the projective pole-section base-change equivalence agrees
+with the canonical pole-sheaf pushforward base-change morphism. -/
+theorem
+    FibrewiseElliptic.sectionPoleSheafPowerPushforwardBaseChange_projectiveClosed_app_top_one_tmul
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R)) [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {n : ℕ} (hn : 1 ≤ n) {T : Scheme.{u}} [IsAffine T]
+    (t : T ⟶ Spec (.of R))
+    (s : Scheme.Modules.baseSections
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ))
+      (sectionPoleSheafPower
+        (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz n)) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let M := sectionPoleSheafPower π z hz n
+    let πT := pullback.snd π t
+    let zT := sectionBaseChange z hz t
+    let hzT := sectionBaseChange_snd z hz t
+    let MT := sectionPoleSheafPower πT zT hzT n
+    let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+    let A := Γ(T, (⊤ : T.Opens))
+    letI : Algebra B A := t.appTop.hom.toAlgebra
+    (sectionPoleSheafPowerPushforwardBaseChange hsm z hz t n).app
+        (⊤ : T.Opens)
+          (Scheme.Modules.affinePullbackUnitTop t
+            ((Scheme.Modules.pushforward π).obj M)
+              (Scheme.Modules.pushforwardTopSection π M s)) =
+      Scheme.Modules.pushforwardTopSection πT MT
+        (h.sectionPoleSheafPower_projectiveClosed_baseSectionsBaseChangeLinearEquiv
+          f hsm z hz hn t ((1 : A) ⊗ₜ[B] s)) := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz n
+  let g := pullback.fst π t
+  let πT := pullback.snd π t
+  let zT := sectionBaseChange z hz t
+  let hzT := sectionBaseChange_snd z hz t
+  let MT := sectionPoleSheafPower πT zT hzT n
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  let e := sectionPoleSheafPowerBaseChangeIso hsm z hz t n
+  let fibreUnit := Scheme.Modules.affinePullbackUnitTop g M s
+  calc
+    _ = Scheme.Modules.pushforwardTopSection πT MT (e.hom.app
+        (⊤ : (pullback π t).Opens) fibreUnit) :=
+      sectionPoleSheafPowerPushforwardBaseChange_app_top_pullbackUnit
+        hsm z hz t n s
+    _ = _ := congrArg (Scheme.Modules.pushforwardTopSection πT MT)
+      (h.sectionPoleSheafPower_projectiveClosed_baseSectionsBaseChangeLinearEquiv_one_tmul
+        f hsm z hz hn t s).symm
 
 end ModularCurves
