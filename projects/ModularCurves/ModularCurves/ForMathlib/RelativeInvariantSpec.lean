@@ -220,6 +220,136 @@ def invariantsDiagramMap :
       rw [← Category.assoc, hcollU]
     exact congr($(hkey) r)
 
+/-- **Localization of invariants = invariants of the localization** (abstract form, the
+KM A7.1 flat case for a finite group): if `ρ : A →+* A'` is an equivariant
+`Away s`-localization at an invariant `s`, then the corestriction
+`Aᴳ →+* A'ᴳ` is an `Away ⟨s⟩`-localization. No freeness, no invertibility of `|G|` —
+only finiteness (to clear denominators uniformly over the group). -/
+theorem _root_.AlgebraicGeometry.isLocalization_away_fixedPoints
+    {G₀ : Type*} [Group G₀] [Finite G₀]
+    {A A' : Type*} [CommRing A] [CommRing A']
+    [MulSemiringAction G₀ A] [MulSemiringAction G₀ A']
+    (ρ : A →+* A') (hρ : ∀ (g : G₀) (a : A), ρ (g • a) = g • ρ a)
+    (s : A) (hs : ∀ g : G₀, g • s = s)
+    [Algebra A A'] (halg : algebraMap A A' = ρ) [IsLocalization.Away s A']
+    (ρG : FixedPoints.subalgebra ℤ A G₀ →+* FixedPoints.subalgebra ℤ A' G₀)
+    (hρG : ∀ x : FixedPoints.subalgebra ℤ A G₀, (ρG x : A') = ρ (x : A)) :
+    letI : Algebra (FixedPoints.subalgebra ℤ A G₀) (FixedPoints.subalgebra ℤ A' G₀) :=
+      ρG.toAlgebra
+    IsLocalization.Away (⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀)
+      (FixedPoints.subalgebra ℤ A' G₀) := by
+  letI : Algebra (FixedPoints.subalgebra ℤ A G₀) (FixedPoints.subalgebra ℤ A' G₀) :=
+    ρG.toAlgebra
+  classical
+  haveI := Fintype.ofFinite G₀
+  have halgG : ∀ x : FixedPoints.subalgebra ℤ A G₀,
+      (algebraMap (FixedPoints.subalgebra ℤ A G₀) (FixedPoints.subalgebra ℤ A' G₀) x : A')
+        = ρ (x : A) := fun x => hρG x
+  have hρs : ∀ g : G₀, g • ρ s = ρ s := fun g => by rw [← hρ, hs]
+  refine ⟨?_, ?_, ?_⟩
+  · -- map_units
+    rintro ⟨y, n, rfl⟩
+    have hu' : IsUnit ((ρ s) ^ n) := by
+      have h := IsLocalization.Away.algebraMap_pow_isUnit (S := A') (x := s) n
+      rwa [halg] at h
+    obtain ⟨u, hu⟩ := hu'
+    have hUinv : ∀ g : G₀, g • (↑u : A') = ↑u := fun g => by
+      rw [hu, smul_pow', hρs]
+    have hInvinv : ∀ g : G₀, g • (↑u⁻¹ : A') = ↑u⁻¹ := by
+      intro g
+      have h1 : (g • (↑u⁻¹ : A')) * ↑u = 1 := by
+        conv_lhs => rw [← hUinv g]
+        rw [← smul_mul', u.inv_mul, smul_one]
+      calc g • (↑u⁻¹ : A') = (g • (↑u⁻¹ : A')) * (↑u * ↑u⁻¹) := by
+            rw [u.mul_inv, mul_one]
+        _ = ((g • (↑u⁻¹ : A')) * ↑u) * ↑u⁻¹ := (mul_assoc _ _ _).symm
+        _ = ↑u⁻¹ := by rw [h1, one_mul]
+    refine IsUnit.of_mul_eq_one
+      (⟨(↑u⁻¹ : A'), fun g => hInvinv g⟩ : FixedPoints.subalgebra ℤ A' G₀) ?_
+    refine Subtype.ext ?_
+    show (algebraMap (FixedPoints.subalgebra ℤ A G₀) (FixedPoints.subalgebra ℤ A' G₀)
+        ((⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ n) : A') * ↑u⁻¹ = 1
+    rw [halgG, show (((⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ n : _) : A) = s ^ n from
+      SubmonoidClass.coe_pow _ _, map_pow, ← hu, u.mul_inv]
+  · -- surj
+    rintro ⟨z, hz⟩
+    obtain ⟨n, a, ha⟩ := IsLocalization.Away.surj (S := A') (x := s) z
+    rw [halg] at ha
+    have heq : ∀ g : G₀, ρ (g • a) = ρ a := by
+      intro g
+      rw [hρ, ← ha, smul_mul', hz g, smul_pow', hρs]
+    have hker : ∀ g : G₀, ∃ m : ℕ, s ^ m * (g • a) = s ^ m * a := by
+      intro g
+      obtain ⟨c, hc⟩ := (IsLocalization.eq_iff_exists (Submonoid.powers s) A').mp
+        (by simpa [halg] using heq g)
+      obtain ⟨m, hm⟩ := c.2
+      rw [← hm] at hc
+      exact ⟨m, hc⟩
+    choose m hm using hker
+    set M := Finset.univ.sup m with hM
+    have hMs : ∀ g : G₀, s ^ M * (g • a) = s ^ M * a := by
+      intro g
+      have hle : m g ≤ M := Finset.le_sup (Finset.mem_univ g)
+      obtain ⟨d, hd⟩ := Nat.exists_eq_add_of_le hle
+      calc s ^ M * (g • a) = s ^ d * (s ^ m g * (g • a)) := by rw [hd, pow_add]; ring
+        _ = s ^ d * (s ^ m g * a) := by rw [hm g]
+        _ = s ^ M * a := by rw [hd, pow_add]; ring
+    have hbInv : ∀ g : G₀, g • (s ^ M * a) = s ^ M * a := by
+      intro g
+      have h1 : g • (s ^ M * a) = s ^ M * (g • a) := by
+        rw [smul_mul', smul_pow', hs]
+      rw [h1, hMs g]
+    refine ⟨⟨⟨s ^ M * a, hbInv⟩,
+      ⟨(⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ (n + M), ⟨n + M, rfl⟩⟩⟩, ?_⟩
+    refine Subtype.ext ?_
+    show z * (algebraMap (FixedPoints.subalgebra ℤ A G₀) (FixedPoints.subalgebra ℤ A' G₀)
+        ((⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ (n + M)) : A')
+      = (algebraMap (FixedPoints.subalgebra ℤ A G₀) (FixedPoints.subalgebra ℤ A' G₀)
+        (⟨s ^ M * a, hbInv⟩ : FixedPoints.subalgebra ℤ A G₀) : A')
+    rw [halgG, halgG, show (((⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ (n + M) : _) : A)
+        = s ^ (n + M) from SubmonoidClass.coe_pow _ _]
+    show z * ρ (s ^ (n + M)) = ρ (s ^ M * a)
+    rw [map_pow, map_mul, map_pow, pow_add]
+    linear_combination (ρ s) ^ M * ha
+  · -- exists_of_eq
+    intro x y hxy
+    have hval : ρ (x : A) = ρ (y : A) := by
+      have h := congrArg Subtype.val hxy
+      rwa [halgG, halgG] at h
+    obtain ⟨c, hc⟩ := (IsLocalization.eq_iff_exists (Submonoid.powers s) A').mp
+      (by simpa [halg] using hval)
+    obtain ⟨k, hk⟩ := c.2
+    rw [← hk] at hc
+    refine ⟨⟨(⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ k, ⟨k, rfl⟩⟩, ?_⟩
+    refine Subtype.ext ?_
+    show (((⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ k : _) : A) * (x : A)
+      = (((⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ k : _) : A) * (y : A)
+    rw [show (((⟨s, hs⟩ : FixedPoints.subalgebra ℤ A G₀) ^ k : _) : A) = s ^ k from
+      SubmonoidClass.coe_pow _ _]
+    exact hc
+
+/-- Scheme-side chart localization for an affine morphism: over an affine open `U₀` of
+the base, the preimage of `D_{U₀}(r)` is the basic open of the `appLE`-image, and its
+sections are the away-localization. -/
+theorem _root_.AlgebraicGeometry.isLocalization_away_preimage_basicOpen
+    {Z S : Scheme.{u}} (f : Z ⟶ S) [IsAffineHom f] {U₀ : S.Opens}
+    (hU : IsAffineOpen U₀) (r : Γ(S, U₀)) :
+    letI : Algebra Γ(Z, f ⁻¹ᵁ U₀) Γ(Z, f ⁻¹ᵁ S.basicOpen r) :=
+      ((Z.presheaf.map (homOfLE (f.preimage_mono (S.basicOpen_le r))).op).hom).toAlgebra
+    IsLocalization.Away ((f.appLE U₀ (f ⁻¹ᵁ U₀) le_rfl).hom r)
+      Γ(Z, f ⁻¹ᵁ S.basicOpen r) := by
+  letI : Algebra Γ(Z, f ⁻¹ᵁ U₀) Γ(Z, f ⁻¹ᵁ S.basicOpen r) :=
+    ((Z.presheaf.map (homOfLE (f.preimage_mono (S.basicOpen_le r))).op).hom).toAlgebra
+  haveI hUZ : IsAffineOpen (f ⁻¹ᵁ U₀) := hU.preimage f
+  have hopens : f ⁻¹ᵁ S.basicOpen r
+      = Z.basicOpen ((f.appLE U₀ (f ⁻¹ᵁ U₀) le_rfl).hom r) := by
+    rw [Scheme.basicOpen_appLE]
+    exact (inf_eq_right.mpr (f.preimage_mono (S.basicOpen_le r))).symm
+  exact hUZ.isLocalization_of_eq_basicOpen _
+    (homOfLE (f.preimage_mono (S.basicOpen_le r))) hopens
+
+variable [IsAffineHom f]
+
 /-- **Invariants form a quasi-coherent `𝒪_S`-algebra**: the structural map is
 `Coequifibered`, i.e. `Γ(Z, f⁻¹(D_U(r)))ᴳ` is the away-localization of
 `Γ(Z, f⁻¹U)ᴳ` at the (invariant) image of `r`. Chart-level content: `f` affine
@@ -230,7 +360,28 @@ identifies `Γ(Z, f⁻¹(D_U(r)))` with the localization of `Γ(Z, f⁻¹U)` at 
 `coequifibered_normalizationDiagramMap`. -/
 theorem coequifibered_invariantsDiagramMap :
     (σ.invariantsDiagramMap f hover).Coequifibered := by
-  sorry
+  refine Scheme.AffineZariskiSite.coequifibered_iff_forall_isLocalizationAway.mpr
+    fun U r => ?_
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover (S.basicOpen r))
+  letI : Algebra Γ(Z, f ⁻¹ᵁ (U.1 : S.Opens)) Γ(Z, f ⁻¹ᵁ S.basicOpen r) :=
+    ((Z.presheaf.map (homOfLE (f.preimage_mono (S.basicOpen_le r))).op).hom).toAlgebra
+  haveI hloc : IsLocalization.Away ((f.appLE (U.1 : S.Opens) (f ⁻¹ᵁ (U.1 : S.Opens))
+      le_rfl).hom r) Γ(Z, f ⁻¹ᵁ S.basicOpen r) :=
+    AlgebraicGeometry.isLocalization_away_preimage_basicOpen f U.2 r
+  exact AlgebraicGeometry.isLocalization_away_fixedPoints
+    (G₀ := G)
+    (ρ := (Z.presheaf.map (homOfLE (f.preimage_mono (S.basicOpen_le r))).op).hom)
+    (fun g a => σ.gamma_map_smul (σ.isStableOpen_preimage f hover U.1)
+      (σ.isStableOpen_preimage f hover (S.basicOpen r))
+      (f.preimage_mono (S.basicOpen_le r)) g a)
+    ((f.appLE (U.1 : S.Opens) (f ⁻¹ᵁ (U.1 : S.Opens)) le_rfl).hom r)
+    (fun g => σ.gamma_appLE_invariant f hover
+      (σ.isStableOpen_preimage f hover U.1) le_rfl g r)
+    rfl
+    (((σ.invariantsDiagram f hover).map
+      (homOfLE (Scheme.AffineZariskiSite.basicOpen_le U r)).op).hom)
+    (fun x => rfl)
 
 /-! ### The quotient scheme, projection, and structure morphism -/
 
