@@ -506,19 +506,214 @@ cartesian curve square (`EllHom.isPullback`) pasted with
 the pullback of the target torsion along the base map. -/
 noncomputable def ellHomTorsionIso {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
     (N : ℕ) [NeZero N] :
-    A.curve.torsion N ≅ pullback (B.curve.torsionπ N) g.baseHom := by sorry
+    A.curve.torsion N ≅ pullback (B.curve.torsionπ N) g.baseHom :=
+  (isPullback_torsionMapOfEllHom g N).isoPullback
 
 /-- [T-YR-2 helper, SKELETON] The torsion transport lies over the base. -/
 theorem ellHomTorsionIso_over {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
     (N : ℕ) [NeZero N] :
     (ellHomTorsionIso g N).hom ≫ pullback.snd (B.curve.torsionπ N) g.baseHom =
-      A.curve.torsionπ N := by sorry
+      A.curve.torsionπ N :=
+  (isPullback_torsionMapOfEllHom g N).isoPullback_hom_snd
+
+/-- [T-YR-2e helper] Post-composition with a pointed monoid-object morphism of
+elliptic-curve records over a fixed base is an *additive* map on `t`-points:
+`IsMonHom.monoidHom` postcomposition transported through `pointEquivOverHom`. -/
+noncomputable def EllipticCurve.pointMapOfMonHom {S : Scheme.{u}}
+    {E F : EllipticCurve S} (φ : E.asOver ⟶ F.asOver) [IsMonHom φ]
+    {T : Scheme.{u}} (t : T ⟶ S) : E.Point t →+ F.Point t :=
+  letI : CommGroup (Over.mk t ⟶ E.asOver) := Hom.commGroup
+  letI : CommGroup (Over.mk t ⟶ F.asOver) := Hom.commGroup
+  AddMonoidHom.mk'
+    (fun x => (F.pointEquivOverHom t).symm
+      (IsMonHom.monoidHom φ (Over.mk t) ((E.pointEquivOverHom t) x)))
+    (by
+      intro x y
+      apply (F.pointEquivOverHom t).injective
+      rw [Equiv.apply_symm_apply, E.pointEquivOverHom_add t, map_mul,
+        F.pointEquivOverHom_add t, Equiv.apply_symm_apply, Equiv.apply_symm_apply])
+
+/-- [T-YR-2e helper] Additive pushforward of `t`-points along an `Ell/ℚ`-morphism:
+through the `IsMonHom` K4-canonicity iso onto the base-changed curve
+(`curveIsoPullbackOverIso`), then the additive base-change dictionary
+(`Point.baseChangeEquiv`). -/
+noncomputable def EllHom.mapPoint {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T : Scheme.{0}} (t : T ⟶ A.base) :
+    A.curve.Point t →+ B.curve.Point (t ≫ g.baseHom) :=
+  haveI : IsMonHom (EllHom.curveIsoPullbackOverIso (CommRingCat.of ℚ) g).hom :=
+    EllHom.isMonHom_curveIsoPullbackOverIso_hom (CommRingCat.of ℚ) g
+  (EllipticCurve.Point.baseChangeEquiv B.curve g.baseHom t).toAddMonoidHom.comp
+    (EllipticCurve.pointMapOfMonHom
+      (EllHom.curveIsoPullbackOverIso (CommRingCat.of ℚ) g).hom t)
+
+theorem EllHom.mapPoint_coe {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T : Scheme.{0}} (t : T ⟶ A.base) (x : A.curve.Point t) :
+    (EllHom.mapPoint g t x).1 = x.1 ≫ g.top := by
+  have hleft : (EllHom.curveIsoPullbackOverIso (CommRingCat.of ℚ) g).hom.left ≫
+      pullback.fst B.curve.π g.baseHom = g.top := g.isPullback.isoPullback_hom_fst
+  show (x.1 ≫ (EllHom.curveIsoPullbackOverIso (CommRingCat.of ℚ) g).hom.left) ≫
+      pullback.fst B.curve.π g.baseHom = x.1 ≫ g.top
+  exact (Category.assoc _ _ _).trans (congrArg (x.1 ≫ ·) hleft)
+
+/-- [T-YR-2e helper] The pushforward of a raw `N`-killed point is raw `N`-killed. -/
+theorem EllHom.mapPoint_torsion {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T : Scheme.{0}} {t : T ⟶ A.base} (x : A.curve.Point t)
+    (hx : x.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero) :
+    (EllHom.mapPoint g t x).1 ≫ B.curve.mulByHom N =
+      (t ≫ g.baseHom) ≫ B.curve.zero := by
+  rw [EllHom.mapPoint_coe, Category.assoc, ← ModularCurves.EllHom.mulByHom_top,
+    ← Category.assoc, hx, Category.assoc, g.zero_w, ← Category.assoc]
+
+/-- [T-YR-2e helper] `pointToTorsion` is natural in the curve: pushing the point
+forward and lifting agrees with lifting and applying `torsionMapOfEllHom`. -/
+theorem pointToTorsion_mapPoint {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T : Scheme.{0}} {t : T ⟶ A.base} (x : A.curve.Point t)
+    (hx : x.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero) :
+    A.curve.pointToTorsion x hx ≫ torsionMapOfEllHom g N =
+      B.curve.pointToTorsion (EllHom.mapPoint g t x)
+        (EllHom.mapPoint_torsion g x hx) := by
+  apply pullback.hom_ext
+  · show (A.curve.pointToTorsion x hx ≫ torsionMapOfEllHom g N) ≫
+        B.curve.torsionι N =
+      B.curve.pointToTorsion (EllHom.mapPoint g t x)
+          (EllHom.mapPoint_torsion g x hx) ≫ B.curve.torsionι N
+    rw [Category.assoc, torsionMapOfEllHom_ι g N, ← Category.assoc,
+      A.curve.pointToTorsion_torsionι, B.curve.pointToTorsion_torsionι,
+      EllHom.mapPoint_coe]
+  · show (A.curve.pointToTorsion x hx ≫ torsionMapOfEllHom g N) ≫
+        B.curve.torsionπ N =
+      B.curve.pointToTorsion (EllHom.mapPoint g t x)
+          (EllHom.mapPoint_torsion g x hx) ≫ B.curve.torsionπ N
+    rw [Category.assoc, torsionMapOfEllHom_π g N, ← Category.assoc,
+      A.curve.pointToTorsion_torsionπ, B.curve.pointToTorsion_torsionπ]
+
+/-- **[T-YR-2e-W, DS4-register]** Naturality of the Weil-pairing evaluation along an
+`Ell/ℚ`-morphism: `e_N` of the pushed-forward points agrees with `e_N` upstairs (the
+cartesian square identifies `A[N]` with the base change of `B[N]`, and `e_N` is
+base-change compatible, KM 2.8.4.2). BLOCKED on DS4: `weilPairing` is
+register-`sorry`-defined (WeilPairing/Basic.lean DS4) with no naturality spec, and the
+two sides consume the two curves' *independent* registered pairings; discharged by
+stream-C together with DS4's closure. -/
+theorem weilPairingEval_mapPoint {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T : Scheme.{0}} (t : T ⟶ A.base) (x y : A.curve.Point t)
+    (hx : x.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero)
+    (hy : y.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero) :
+    (B.curve.weilPairingEval (EllHom.mapPoint g t x) (EllHom.mapPoint g t y)
+        (EllHom.mapPoint_torsion g x hx) (EllHom.mapPoint_torsion g y hy)).1 =
+      (A.curve.weilPairingEval x y hx hy).1 := by sorry
+
+/-- [T-YR-2e] The pulled-back ρ-torsion trivialization square: the cartesian torsion
+square of `g` (T-YR-2c) pasted with `α`'s trivialization square is cartesian over
+`A.structMap`. -/
+theorem pullTorsionPB (D : GaloisRepData N) {A B : EllObj (CommRingCat.of ℚ)}
+    (g : A ⟶ B) (α : RhoLevelStructure D B.structMap B.curve) :
+    IsPullback
+      (torsionMapOfEllHom g N ≫
+        (α.torsionIso.hom ≫ pullback.fst (vRhoπ D) B.structMap))
+      (A.curve.torsionπ N) (vRhoπ D) A.structMap := by
+  have hB : IsPullback (α.torsionIso.hom ≫ pullback.fst (vRhoπ D) B.structMap)
+      (B.curve.torsionπ N) (vRhoπ D) B.structMap := by
+    refine IsPullback.of_iso_pullback ⟨?_⟩ α.torsionIso rfl α.over_T
+    rw [Category.assoc, pullback.condition, ← Category.assoc, α.over_T]
+  have hpaste := (isPullback_torsionMapOfEllHom g N).paste_horiz hB
+  rw [g.base_w] at hpaste
+  exact hpaste
+
+/-- [T-YR-2e] The pulled ρ-torsion trivialization. -/
+noncomputable def pullTorsionIso (D : GaloisRepData N)
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (α : RhoLevelStructure D B.structMap B.curve) :
+    A.curve.torsion N ≅ pullback (vRhoπ D) A.structMap :=
+  (pullTorsionPB D g α).isoPullback
+
+theorem pullTorsionIso_over (D : GaloisRepData N)
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (α : RhoLevelStructure D B.structMap B.curve) :
+    (pullTorsionIso D g α).hom ≫ pullback.snd (vRhoπ D) A.structMap =
+      A.curve.torsionπ N :=
+  (pullTorsionPB D g α).isoPullback_hom_snd
+
+theorem pullTorsionIso_fst (D : GaloisRepData N)
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (α : RhoLevelStructure D B.structMap B.curve) :
+    (pullTorsionIso D g α).hom ≫ pullback.fst (vRhoπ D) A.structMap =
+      torsionMapOfEllHom g N ≫
+        (α.torsionIso.hom ≫ pullback.fst (vRhoπ D) B.structMap) :=
+  (pullTorsionPB D g α).isoPullback_hom_fst
+
+/-- [T-YR-2e] Coordinates read through the pulled trivialization are the coordinates
+of the pushed-forward point read through `α`. -/
+theorem coord_pull (D : GaloisRepData N) {A B : EllObj (CommRingCat.of ℚ)}
+    (g : A ⟶ B) (α : RhoLevelStructure D B.structMap B.curve)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ A.base)
+    (ht : t ≫ A.structMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (x : A.curve.Point t)
+    (hx : x.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero) :
+    coord D A.structMap (pullTorsionIso D g α) (pullTorsionIso_over D g α) t ht x hx =
+      coord D B.structMap α.torsionIso α.over_T (t ≫ g.baseHom)
+        (by rw [Category.assoc, g.base_w, ht]) (EllHom.mapPoint g t x)
+        (EllHom.mapPoint_torsion g x hx) := by
+  refine congrArg (vRhoPointsEquiv D) (Subtype.ext ?_)
+  show A.curve.pointToTorsion x hx ≫ (pullTorsionIso D g α).hom ≫
+      pullback.fst (vRhoπ D) A.structMap =
+    B.curve.pointToTorsion (EllHom.mapPoint g t x)
+        (EllHom.mapPoint_torsion g x hx) ≫ α.torsionIso.hom ≫
+      pullback.fst (vRhoπ D) B.structMap
+  calc A.curve.pointToTorsion x hx ≫ (pullTorsionIso D g α).hom ≫
+      pullback.fst (vRhoπ D) A.structMap
+      = A.curve.pointToTorsion x hx ≫ torsionMapOfEllHom g N ≫
+          (α.torsionIso.hom ≫ pullback.fst (vRhoπ D) B.structMap) :=
+        congrArg (A.curve.pointToTorsion x hx ≫ ·) (pullTorsionIso_fst D g α)
+    _ = (A.curve.pointToTorsion x hx ≫ torsionMapOfEllHom g N) ≫
+          (α.torsionIso.hom ≫ pullback.fst (vRhoπ D) B.structMap) :=
+        (Category.assoc _ _ _).symm
+    _ = B.curve.pointToTorsion (EllHom.mapPoint g t x)
+          (EllHom.mapPoint_torsion g x hx) ≫
+          (α.torsionIso.hom ≫ pullback.fst (vRhoπ D) B.structMap) :=
+        congrArg (· ≫ (α.torsionIso.hom ≫ pullback.fst (vRhoπ D) B.structMap))
+          (pointToTorsion_mapPoint g x hx)
+
+/-- [T-YR-2e helper] `coord` is congruent in the point (the raw-kill proof transports;
+proofs are irrelevant). -/
+theorem coord_congr (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
+    (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    {x y : E.Point t} (h : x = y)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    coord D sT torsionIso hOver t ht x hx =
+      coord D sT torsionIso hOver t ht y (h ▸ hx) := by
+  subst h; rfl
 
 /-- [T-YR-2, SKELETON] Pull a ρ-level structure back along an `Ell/ℚ`-morphism. -/
 noncomputable def RhoLevelStructure.pull (D : GaloisRepData N)
     {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
     (α : RhoLevelStructure D B.structMap B.curve) :
-    RhoLevelStructure D A.structMap A.curve := by sorry
+    RhoLevelStructure D A.structMap A.curve where
+  torsionIso := pullTorsionIso D g α
+  over_T := pullTorsionIso_over D g α
+  coords_additive := by
+    intro t ht x y hx hy hxy
+    rw [coord_pull D g α t ht (x + y) hxy, coord_pull D g α t ht x hx,
+      coord_pull D g α t ht y hy,
+      coord_congr D B.structMap α.torsionIso α.over_T (t ≫ g.baseHom) _
+        (map_add (EllHom.mapPoint g t) x y)
+        (EllHom.mapPoint_torsion g (x + y) hxy)]
+    exact α.coords_additive _ _ _ _ _ _ _
+  pairing_compat := by
+    intro t ht x y hx hy
+    have hB := α.pairing_compat (t ≫ g.baseHom)
+      (by rw [Category.assoc, g.base_w, ht])
+      (EllHom.mapPoint g t x) (EllHom.mapPoint g t y)
+      (EllHom.mapPoint_torsion g x hx) (EllHom.mapPoint_torsion g y hy)
+    show (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+        (A.curve.weilPairingEval x y hx hy).1 = _
+    rw [← weilPairingEval_mapPoint g t x y hx hy,
+      coord_pull D g α t ht x hx, coord_pull D g α t ht y hy]
+    exact hB
 
 /-- **[T-YR-2] The ρ-level moduli problem** (Buzzard p. 33 verbatim: "the functor on
 ℚ-schemes S parametrising elliptic curves E/S such that E[N] ≅ ρ̄_N as
