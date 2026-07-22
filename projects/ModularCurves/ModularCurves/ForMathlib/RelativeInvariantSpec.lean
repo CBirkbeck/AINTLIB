@@ -775,25 +775,141 @@ theorem exists_quotient_of_isAffineHom_rel :
 
 /-! ### The free-action addenda: finite étale torsor, base change (KM 7.1.3(2),(3c)) -/
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **Chart-transfer principle**: a target-local, iso-respecting property holds for the
+quotient projection as soon as it holds for every chart composite
+`(f⁻¹U) ⟶ Spec Γ(Z, f⁻¹U)ᴳ`. The workhorse consumer of the chart bridge. -/
+theorem morphismProperty_relQuotientπ_of_charts (P : MorphismProperty Scheme.{u})
+    [IsZariskiLocalAtTarget P]
+    (hP : ∀ U : S.AffineZariskiSite,
+      letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+      P ((f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom))) :
+    P (σ.relQuotientπ f hover) := by
+  have hTop : ⨆ U : S.AffineZariskiSite,
+      (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange = ⊤ := by
+    rw [eq_top_iff]
+    intro x _
+    obtain ⟨j, y, rfl⟩ := Scheme.IsLocallyDirected.ι_jointly_surjective
+      (σ.invariantsGlueData f hover).functor x
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨j, ⟨y, rfl⟩⟩
+  rw [IsZariskiLocalAtTarget.iff_of_iSup_eq_top (P := P) _ hTop]
+  intro U
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  have h := (σ.invariantsGlueData f hover).toBase_preimage_eq_opensRange_ι U
+  have h2 : ((Scheme.AffineZariskiSite.directedCover S).f U).opensRange
+      = (U.1 : S.Opens) := Scheme.Opens.opensRange_ι _
+  rw [h2] at h
+  have hpre : σ.relQuotientπ f hover ⁻¹ᵁ
+      (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange
+      = f ⁻¹ᵁ (U.1 : S.Opens) := by
+    rw [← h, show (σ.invariantsGlueData f hover).toBase = σ.relQuotientStruct f hover
+        from rfl]
+    exact congrArg (fun (m : Z ⟶ S) => m ⁻¹ᵁ (U.1 : S.Opens))
+      (σ.relQuotientπ_comp_relQuotientStruct f hover)
+  let eS := IsOpenImmersion.isoOfRangeEq
+    ((σ.relQuotientπ f hover ⁻¹ᵁ
+      (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange).ι)
+    ((f ⁻¹ᵁ (U.1 : S.Opens)).ι)
+    (by rw [Scheme.Opens.range_ι, Scheme.Opens.range_ι, hpre])
+  let eT := IsOpenImmersion.isoOfRangeEq
+    (((colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange).ι)
+    (colimit.ι (σ.invariantsGlueData f hover).functor U)
+    (by rw [Scheme.Opens.range_ι]; rfl)
+  rw [← MorphismProperty.cancel_left_of_respectsIso P eS.inv,
+    ← MorphismProperty.cancel_right_of_respectsIso P _ eT.hom]
+  have hkey : (eS.inv ≫ σ.relQuotientπ f hover ∣_
+        (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange) ≫ eT.hom
+      = (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom) := by
+    rw [← cancel_mono (colimit.ι (σ.invariantsGlueData f hover).functor U)]
+    have hfacT : eT.hom ≫ colimit.ι (σ.invariantsGlueData f hover).functor U
+        = ((colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange).ι :=
+      IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+    have hfacS : eS.inv ≫ (σ.relQuotientπ f hover ⁻¹ᵁ
+        (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange).ι
+        = (f ⁻¹ᵁ (U.1 : S.Opens)).ι :=
+      IsOpenImmersion.isoOfRangeEq_inv_fac _ _ _
+    have hres := morphismRestrict_ι (σ.relQuotientπ f hover)
+      (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange
+    have hι := σ.ι_relQuotientπ f hover U
+    simp only [Scheme.Cover.RelativeGluingData.cover_f] at hι
+    calc ((eS.inv ≫ σ.relQuotientπ f hover ∣_ _) ≫ eT.hom) ≫
+          colimit.ι (σ.invariantsGlueData f hover).functor U
+        = eS.inv ≫ (σ.relQuotientπ f hover ∣_ _) ≫ eT.hom ≫
+          colimit.ι (σ.invariantsGlueData f hover).functor U := by
+          simp only [Category.assoc]
+      _ = eS.inv ≫ (σ.relQuotientπ f hover ∣_ _) ≫
+          ((colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange).ι := by
+          rw [hfacT]
+      _ = eS.inv ≫ (σ.relQuotientπ f hover ⁻¹ᵁ
+          (colimit.ι (σ.invariantsGlueData f hover).functor U).opensRange).ι ≫
+          σ.relQuotientπ f hover := by
+          rw [hres]
+      _ = (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ σ.relQuotientπ f hover := by
+          rw [← Category.assoc, hfacS]
+      _ = ((f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+          (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom)) ≫
+          colimit.ι (σ.invariantsGlueData f hover).functor U := by
+          rw [hι]
+          simp only [Category.assoc]
+  rw [hkey]
+  exact hP U
+
 section Free
 
 variable (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ Z) (γ : G), γ ≠ 1 →
   t ≫ σ.hom γ = t → IsEmpty T)
 
+include hfree in
 /-- Free case: the projection is finite (chartwise `Aᴳ → A` is module-finite for a free
 algebra action, `Module.Finite.of_isFreeAlgebraAction`; local on the target along the
 chart cover). -/
 theorem isFinite_relQuotientπ_of_free : IsFinite (σ.relQuotientπ f hover) := by
-  sorry
+  refine σ.morphismProperty_relQuotientπ_of_charts f hover @IsFinite (fun U => ?_)
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  haveI : IsIso (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ := by
+    rw [← (U.2.preimage f).isoSpec_hom]
+    infer_instance
+  rw [MorphismProperty.cancel_left_of_respectsIso (P := @IsFinite)]
+  haveI := σ.finite_gamma_of_free (σ.isStableOpen_preimage f hover U.1)
+    (U.2.preimage f) (fun γ hγ T t ht => hfree t γ hγ ht)
+  rw [show CommRingCat.ofHom
+      (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom
+    = CommRingCat.ofHom (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1)) from rfl, IsFinite.SpecMap_iff]
+  exact RingHom.finite_algebraMap.mpr inferInstance
 
+include hfree in
 /-- Free case: the projection is étale (chartwise `Algebra.Etale.of_isFreeAlgebraAction`). -/
 theorem etale_relQuotientπ_of_free : Etale (σ.relQuotientπ f hover) := by
-  sorry
+  refine σ.morphismProperty_relQuotientπ_of_charts f hover @Etale (fun U => ?_)
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  haveI : IsIso (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ := by
+    rw [← (U.2.preimage f).isoSpec_hom]
+    infer_instance
+  rw [MorphismProperty.cancel_left_of_respectsIso (P := @Etale)]
+  haveI : Algebra.Etale (FixedPoints.subalgebra ℤ (↑Γ(Z, f ⁻¹ᵁ U.1)) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1) :=
+    Algebra.Etale.of_isFreeAlgebraAction G ℤ _
+      (σ.isFreeAlgebraAction_of_free (σ.isStableOpen_preimage f hover U.1)
+        (U.2.preimage f) (fun γ hγ T t ht => hfree t γ hγ ht))
+  rw [show CommRingCat.ofHom
+      (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom
+    = CommRingCat.ofHom (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)
+      ↑Γ(Z, f ⁻¹ᵁ U.1)) from rfl, HasRingHomProperty.Spec_iff (P := @Etale)]
+  exact RingHom.etale_algebraMap.mpr inferInstance
 
 /-- Free case: the projection is surjective (chartwise `Spec A ⟶ Spec Aᴳ` is surjective:
 `Aᴳ → A` is integral and injective... chart core as in `quotientπ_surjective`). -/
 theorem surjective_relQuotientπ_of_free : Surjective (σ.relQuotientπ f hover) := by
-  sorry
+  refine σ.morphismProperty_relQuotientπ_of_charts f hover @Surjective (fun U => ?_)
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+  haveI : IsIso (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ := by
+    rw [← (U.2.preimage f).isoSpec_hom]
+    infer_instance
+  rw [MorphismProperty.cancel_left_of_respectsIso (P := @Surjective)]
+  exact ⟨invariantsπ_surjective G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ⟩
 
 /-- **[GHB5′] (KM 7.1.3(3c), diagonal-free)** — for a free action the quotient commutes
 with arbitrary base change `g : T ⟶ S`: the base-changed projection
