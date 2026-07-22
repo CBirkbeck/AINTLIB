@@ -561,6 +561,25 @@ theorem kerBaseChangeComparison_bijective
   -- `congrArg Subtype.val` / `Subtype.ext` in each direction.
   kerLTensorComparison_bijective A f
 
+/-- If the scalar-extension algebra is flat, the canonical comparison from the
+base change of a kernel to the kernel of the base-changed map is bijective. -/
+theorem kerBaseChangeComparison_bijective_of_flat
+    [Module.Flat R A] :
+    Function.Bijective (kerBaseChangeComparison A f) := by
+  have hComparison : kerBaseChangeComparison A f =
+      LinearMap.tensorKer A A f := by
+    apply LinearMap.ext
+    intro y
+    apply Subtype.ext
+    rw [kerBaseChangeComparison_coe]
+    change (LinearMap.ker f).subtype.baseChange A y =
+      ((LinearMap.tensorKer A A f y :
+        LinearMap.ker (AlgebraTensorModule.lTensor A A f)) : A ⊗[R] P)
+    rw [LinearMap.tensorKer_coe]
+    rfl
+  rw [hComparison]
+  exact (LinearMap.tensorKerEquiv A A f).bijective
+
 /-- Extending scalars between fields preserves the dimension of the kernel of a
 base-changed linear map. -/
 theorem LinearMap.finrank_ker_baseChange_eq
