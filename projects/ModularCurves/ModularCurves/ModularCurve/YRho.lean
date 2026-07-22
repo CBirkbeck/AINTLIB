@@ -2240,6 +2240,17 @@ theorem frameEval_points (D : GaloisRepData N)
     exact (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
         (rhoContAction D)) hx).trans
       (pointsEquivOfContAction_map (frameEvalMor D) χ)
+  -- the goal is the counit-chain (definitional unfold of `vRhoPointsEquiv`),
+  -- and the evaluation morphism acts by the frame-on-vector smul (definitional);
+  -- the product-reading's components are the two factor-readings.
+  refine Eq.trans (show vRhoPointsEquiv D ⟨p ≫ frameEval D, _⟩ =
+    FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D)
+      ((AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)) sepClosureQAlgEquiv.symm)
+        (specPointsEquivAlgHom ℚ (vRhoAlgebra D : Type 0) (AlgebraicClosure ℚ)
+          ⟨p ≫ frameEval D, hqv⟩)) from rfl) (hC.trans ?_)
+  show (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+      (frameProdContAction D) χ).2 •
+    (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameProdContAction D) χ).1 = _
   sorry
 
 /-- **[asm-2]** The `h`-slice of the universal-frame evaluation: over a base `T`
