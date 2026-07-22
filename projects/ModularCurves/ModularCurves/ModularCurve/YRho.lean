@@ -453,6 +453,94 @@ noncomputable def wFramesPointsEquiv (D : GaloisRepData N) :
     (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
     (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D))
 
+/-- **[T-YR-3a]** Right `γ`-translation of frames as a morphism of continuous Galois
+sets (right multiplication commutes with the left `ρ`-action). -/
+noncomputable def frameRightMulMor (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameContAction D ⟶ frameContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun A => A * γ)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun A => by
+        show (D.ρ (galSepMulEquivGalQ σ) * A) * γ =
+          D.ρ (galSepMulEquivGalQ σ) * (A * γ)
+        rw [mul_assoc] }
+
+theorem frameRightMulMor_mul (D : GaloisRepData N)
+    (γ₁ γ₂ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameRightMulMor D (γ₁ * γ₂) =
+      frameRightMulMor D γ₁ ≫ frameRightMulMor D γ₂ := by
+  ext A i j
+  exact congrArg (fun M : Matrix.GeneralLinearGroup (Fin 2) (ZMod N) =>
+    (M : Matrix (Fin 2) (Fin 2) (ZMod N)) i j) ((mul_assoc A γ₁ γ₂).symm)
+
+theorem frameRightMulMor_one (D : GaloisRepData N) :
+    frameRightMulMor D 1 = 𝟙 (frameContAction D) := by
+  ext A i j
+  exact congrArg (fun M : Matrix.GeneralLinearGroup (Fin 2) (ZMod N) =>
+    (M : Matrix (Fin 2) (Fin 2) (ZMod N)) i j) (mul_one A)
+
+/-- The right translation at the algebra level, through the Galois correspondence
+(contravariant: the composite flips). -/
+noncomputable def wFramesRightMulAlg (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    wFramesAlgebra D ⟶ wFramesAlgebra D :=
+  ((finiteEtaleEquivContAction ℚ).inverse.map (frameRightMulMor D γ)).unop
+
+/-- **[T-YR-3a]** The right `GL₂(ℤ/N)`-translation on the frame scheme. -/
+noncomputable def wFramesRightMul (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) : wFrames D ⟶ wFrames D :=
+  Spec.map (CommRingCat.ofHom (wFramesRightMulAlg D γ).hom.hom.toRingHom)
+
+/-- The right translation lies over `Spec ℚ`. -/
+theorem wFramesRightMul_π (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    wFramesRightMul D γ ≫ wFramesπ D = wFramesπ D := by
+  show Spec.map (CommRingCat.ofHom (wFramesRightMulAlg D γ).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (wFramesAlgebra D : Type 0))) =
+    Spec.map (CommRingCat.ofHom (algebraMap ℚ (wFramesAlgebra D : Type 0)))
+  rw [← Spec.map_comp]
+  congr 1
+  ext r
+  exact (wFramesRightMulAlg D γ).hom.hom.commutes r
+
+/-- Functoriality of the right translation (double contravariance = covariance). -/
+theorem wFramesRightMul_mul (D : GaloisRepData N)
+    (γ₁ γ₂ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    wFramesRightMul D (γ₁ * γ₂) =
+      wFramesRightMul D γ₁ ≫ wFramesRightMul D γ₂ := by
+  have hAlg : wFramesRightMulAlg D (γ₁ * γ₂) =
+      wFramesRightMulAlg D γ₂ ≫ wFramesRightMulAlg D γ₁ := by
+    have h2 := congrArg
+      (fun m => ((finiteEtaleEquivContAction ℚ).inverse.map m).unop)
+      (frameRightMulMor_mul D γ₁ γ₂)
+    exact h2.trans (congrArg Quiver.Hom.unop
+      ((finiteEtaleEquivContAction ℚ).inverse.map_comp _ _))
+  show Spec.map (CommRingCat.ofHom
+      (wFramesRightMulAlg D (γ₁ * γ₂)).hom.hom.toRingHom) = _
+  rw [hAlg,
+    show CommRingCat.ofHom (wFramesRightMulAlg D γ₂ ≫
+        wFramesRightMulAlg D γ₁).hom.hom.toRingHom =
+      CommRingCat.ofHom (wFramesRightMulAlg D γ₂).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (wFramesRightMulAlg D γ₁).hom.hom.toRingHom from rfl,
+    Spec.map_comp]
+  rfl
+
+theorem wFramesRightMul_one (D : GaloisRepData N) :
+    wFramesRightMul D 1 = 𝟙 (wFrames D) := by
+  have hAlg : wFramesRightMulAlg D 1 = 𝟙 (wFramesAlgebra D) := by
+    have h2 := congrArg
+      (fun m => ((finiteEtaleEquivContAction ℚ).inverse.map m).unop)
+      (frameRightMulMor_one D)
+    exact h2.trans (congrArg Quiver.Hom.unop
+      ((finiteEtaleEquivContAction ℚ).inverse.map_id _))
+  show Spec.map (CommRingCat.ofHom (wFramesRightMulAlg D 1).hom.hom.toRingHom) = _
+  rw [hAlg,
+    show CommRingCat.ofHom (𝟙 (wFramesAlgebra D) :
+        wFramesAlgebra D ⟶ wFramesAlgebra D).hom.hom.toRingHom =
+      𝟙 (CommRingCat.of (wFramesAlgebra D : Type 0)) from rfl,
+    Spec.map_id]
+  rfl
+
 end FrameSubstrate
 
 /-- The `(ℤ/N)²`-coordinate of a `ℚ̄`-valued raw `N`-torsion point of `E`, read through a
