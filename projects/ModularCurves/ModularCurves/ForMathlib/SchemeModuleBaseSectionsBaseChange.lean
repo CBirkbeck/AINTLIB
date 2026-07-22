@@ -154,6 +154,54 @@ private theorem baseSections_orderedCechKernelComparison_one_tmul_coe
   rw [LinearEquiv.baseChange_tmul]
   exact baseSections_orderedCechSourceBaseChange_one_tmul f M U hU A s
 
+private theorem kernelZeroIsoOfIso_hom_coe
+    {R : Type u} [CommRing R]
+    {K L : CochainComplex (ModuleCat.{u} R) ℕ} (e : K ≅ L)
+    (x : LinearMap.ker (K.d 0 1).hom) :
+    ((HomologicalComplex.kernelZeroIsoOfIso e).hom x).1 =
+      e.hom.f 0 x.1 := by
+  exact ConcreteCategory.congr_hom
+    (HomologicalComplex.kernelZeroIsoOfIso_hom_subtype e) x
+
+private theorem baseCechKernelComparison_coe
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] (U : ι → X.Opens)
+    (hUaff : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (x :
+      letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+        t.appTop.hom.toAlgebra
+      LinearMap.ker
+        (((baseCechComplex f M U).d 0 1).hom.baseChange
+          Γ(T, (⊤ : T.Opens)))) :
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Γ(T, (⊤ : T.Opens))
+    letI : Algebra B A := t.appTop.hom.toAlgebra
+    let C := baseCechComplex f M U
+    let eCategorical :=
+      ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv C A
+    let eComplex :=
+      (HomologicalComplex.kernelZeroIsoOfIso
+        (baseCechComplexBaseChangeIso f t M U hUaff)).toLinearEquiv
+    (eComplex (eCategorical x)).1 =
+      (baseCechComplexBaseChangeIso f t M U hUaff).hom.f 0
+        (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0) x.1) := by
+  let B := Γ(S, (⊤ : S.Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  let C := baseCechComplex f M U
+  let e := baseCechComplexBaseChangeIso f t M U hUaff
+  let y := ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv C A x
+  change ((HomologicalComplex.kernelZeroIsoOfIso e).hom y).1 =
+    e.hom.f 0
+      (ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0) x.1)
+  have hComplex : ((HomologicalComplex.kernelZeroIsoOfIso e).hom y).1 =
+      e.hom.f 0 y.1 := kernelZeroIsoOfIso_hom_coe e y
+  have hCategorical : y.1 =
+      ModularCurves.moduleCatExtendScalarsObjLinearEquiv A (C.X 0) x.1 :=
+    ModularCurves.HomologicalComplex.baseChangeKernelZeroLinearEquiv_coe C A x
+  exact hComplex.trans (congrArg (fun z => e.hom.f 0 z) hCategorical)
+
 private theorem affinePullbackUnitTop_restrict
     {X Y : Scheme.{u}} (g : Y ⟶ X) (M : X.Modules)
     (V : Y.Opens) (s : M.presheaf.obj (op (⊤ : X.Opens))) :
