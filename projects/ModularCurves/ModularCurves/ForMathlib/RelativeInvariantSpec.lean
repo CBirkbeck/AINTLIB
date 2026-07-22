@@ -967,6 +967,87 @@ theorem flat_relQuotientπ_of_free : Flat (σ.relQuotientπ f hover) := by
     CommRingCat.hom_ofHom, RingHom.flat_algebraMap_iff]
   infer_instance
 
+include hfree in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GHB6′] finiteness half (KM 7.1.3(6) print p. 193, diagonal-free)**: for a free
+action with `f` finite, the descended structure map is finite — chartwise the
+invariants corestriction `Γ(S,U) → Γ(Z,f⁻¹U)ᴳ` is module-finite
+(`RingHom.invariantsCorestrict_finite`, the PROVEN trace-retract layer). -/
+theorem isFinite_relQuotientStruct_of_free (hfin : IsFinite f) :
+    IsFinite (σ.relQuotientStruct f hover) := by
+  haveI := hfin
+  rw [IsZariskiLocalAtTarget.iff_of_iSup_eq_top (P := @IsFinite) _
+    (iSup_affineOpens_eq_top _)]
+  intro U
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover (U.1 : S.Opens))
+  let e := IsOpenImmersion.isoOfRangeEq (σ.relQuotientStruct f hover ⁻¹ᵁ U).ι
+    (colimit.ι (σ.invariantsGlueData f hover).functor ⟨U.1, U.2⟩)
+    (by
+      rw [Scheme.Opens.range_ι]
+      exact congr($(σ.relQuotientStruct_preimage f hover U).1))
+  rw [← MorphismProperty.cancel_left_of_respectsIso @IsFinite e.inv,
+    ← MorphismProperty.cancel_right_of_respectsIso @IsFinite _ U.2.isoSpec.hom]
+  have hchart : IsFinite (Spec.map
+      ((σ.invariantsDiagramMap f hover).app (.op ⟨U.1, U.2⟩))) := by
+    rw [IsFinite.SpecMap_iff]
+    exact RingHom.invariantsCorestrict_finite
+      (f.appLE (U.1 : S.Opens) (f ⁻¹ᵁ (U.1 : S.Opens)) le_rfl).hom
+      (fun g r => σ.gamma_appLE_invariant f hover
+        (σ.isStableOpen_preimage f hover (U.1 : S.Opens)) le_rfl g r)
+      (σ.isFreeAlgebraAction_of_free
+        (σ.isStableOpen_preimage f hover (U.1 : S.Opens)) (U.2.preimage f)
+        (fun γ hγ T t ht => hfree t γ hγ ht))
+      (f.finite_appLE U.2)
+  convert! hchart
+  rw [← cancel_mono U.2.fromSpec]
+  simp [IsAffineOpen.isoSpec_hom, e, σ.ι_relQuotientStruct f hover]
+
+include hfree in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[GHB6′] étale half (KM 7.1.3(6), diagonal-free)**: for a free action with `f`
+finite étale, the descended structure map is étale — chartwise
+`RingHom.invariantsCorestrict_etale` (trace-retract étale cancellation, PROVEN). -/
+theorem etale_relQuotientStruct_of_free (hfin : IsFinite f) (het : Etale f) :
+    Etale (σ.relQuotientStruct f hover) := by
+  haveI := hfin
+  rw [IsZariskiLocalAtTarget.iff_of_iSup_eq_top (P := @Etale) _
+    (iSup_affineOpens_eq_top _)]
+  intro U
+  letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover (U.1 : S.Opens))
+  let e := IsOpenImmersion.isoOfRangeEq (σ.relQuotientStruct f hover ⁻¹ᵁ U).ι
+    (colimit.ι (σ.invariantsGlueData f hover).functor ⟨U.1, U.2⟩)
+    (by
+      rw [Scheme.Opens.range_ι]
+      exact congr($(σ.relQuotientStruct_preimage f hover U).1))
+  rw [← MorphismProperty.cancel_left_of_respectsIso @Etale e.inv,
+    ← MorphismProperty.cancel_right_of_respectsIso @Etale _ U.2.isoSpec.hom]
+  have hetR : RingHom.Etale (f.appLE (U.1 : S.Opens) (f ⁻¹ᵁ (U.1 : S.Opens))
+      le_rfl).hom :=
+    HasRingHomProperty.appLE (P := @Etale) (f := f) het ⟨(U.1 : S.Opens), U.2⟩
+      ⟨f ⁻¹ᵁ (U.1 : S.Opens), U.2.preimage f⟩ le_rfl
+  have hchart : Etale (Spec.map
+      ((σ.invariantsDiagramMap f hover).app (.op ⟨U.1, U.2⟩))) := by
+    rw [HasRingHomProperty.Spec_iff (P := @Etale)]
+    exact RingHom.invariantsCorestrict_etale
+      (f.appLE (U.1 : S.Opens) (f ⁻¹ᵁ (U.1 : S.Opens)) le_rfl).hom
+      (fun g r => σ.gamma_appLE_invariant f hover
+        (σ.isStableOpen_preimage f hover (U.1 : S.Opens)) le_rfl g r)
+      (σ.isFreeAlgebraAction_of_free
+        (σ.isStableOpen_preimage f hover (U.1 : S.Opens)) (U.2.preimage f)
+        (fun γ hγ T t ht => hfree t γ hγ ht))
+      (f.finite_appLE U.2) hetR
+  convert! hchart
+  rw [← cancel_mono U.2.fromSpec]
+  simp [IsAffineOpen.isoSpec_hom, e, σ.ι_relQuotientStruct f hover]
+
+include hfree in
+/-- **[GHB6′] (KM 7.1.3(6), diagonal-free)** — the `∧`-package consumed by
+`QuotPkg.f₀_finite_etale`. -/
+theorem relQuotientStruct_finite_etale_of_free (hfin : IsFinite f) (het : Etale f) :
+    IsFinite (σ.relQuotientStruct f hover) ∧ Etale (σ.relQuotientStruct f hover) :=
+  ⟨σ.isFinite_relQuotientStruct_of_free f hover hfree hfin,
+    σ.etale_relQuotientStruct_of_free f hover hfree hfin het⟩
+
 /-- The `G`-action on the base change of the projection along `w` (trivial on the base
 leg; the `relQuotient` analogue of `pullbackQuotientπSMul`). -/
 noncomputable def pullbackRelQSMul {W : Scheme.{u}}
