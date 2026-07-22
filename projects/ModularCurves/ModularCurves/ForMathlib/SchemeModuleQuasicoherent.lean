@@ -775,6 +775,57 @@ private theorem Modules.baseModulePresheaf_isLocalized_image_of_restrict
     (Modules.baseModulePresheafRestrictAppIso_hom_naturality π j M i)
     h
 
+private noncomputable def Modules.isoSpecInvBaseModuleIso
+    [IsAffine X] (M : X.Modules)
+    (V : (Spec Γ(X, (⊤ : X.Opens))).Opens) :
+    (baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X)
+        (M.restrict X.isoSpec.inv)).obj (op V) ≅
+      (modulesSpecToSheaf.obj (M.restrict X.isoSpec.inv)).obj.obj (op V) := by
+  have happ : X.isoSpec.inv.appTop =
+      (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv := by
+    have hhom : X.isoSpec.hom.appTop =
+        (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).hom := by
+      simp [Scheme.isoSpec, Scheme.toSpecΓ_appTop]
+    rw [← cancel_mono (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).hom]
+    rw [← hhom]
+    rw [← Scheme.Hom.comp_appTop]
+    rw [X.isoSpec.hom_inv_id]
+    rw [hhom]
+    simp
+  refine ModuleCat.isoMk (Iso.refl _) ?_
+  intro r
+  ext (x : Γ(M.restrict X.isoSpec.inv, V))
+  change
+    (Spec Γ(X, (⊤ : X.Opens))).presheaf.map V.leTop.op
+          ((Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv r) • x =
+      (Spec Γ(X, (⊤ : X.Opens))).presheaf.map V.leTop.op
+          (X.isoSpec.inv.appTop r) • x
+  rw [happ]
+
+private theorem Modules.modulesSpec_isLocalized_basicOpen_of_isoSpecInv
+    [IsAffine X] (M : X.Modules) (f : Γ(X, ⊤))
+    (h : IsLocalizedModule.Away f
+      ((baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X)
+        (M.restrict X.isoSpec.inv)).map
+          (PrimeSpectrum.basicOpen f).leTop.op).hom) :
+    IsLocalizedModule.Away f
+      ((modulesSpecToSheaf.obj (M.restrict X.isoSpec.inv)).obj.map
+        (PrimeSpectrum.basicOpen f).leTop.op).hom := by
+  let N : (Spec Γ(X, ⊤)).Modules := M.restrict X.isoSpec.inv
+  let U : (Spec Γ(X, ⊤)).Opens := PrimeSpectrum.basicOpen f
+  let i := U.leTop.op
+  let ψ := ((baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X) N).map i).hom
+  let φ := ((modulesSpecToSheaf.obj N).obj.map i).hom
+  let eTop := (Modules.isoSpecInvBaseModuleIso M
+    (⊤ : (Spec Γ(X, ⊤)).Opens)).toLinearEquiv
+  let eBasic := (Modules.isoSpecInvBaseModuleIso M U).toLinearEquiv
+  have hsquare :
+      eBasic.symm.toLinearMap.comp φ = ψ.comp eTop.symm.toLinearMap := by
+    ext x
+    rfl
+  exact isLocalizedModuleAway_of_linearEquiv_square f ψ φ
+    eTop.symm eBasic.symm hsquare h
+
 private theorem Modules.isoSpecInv_isLocalized_basicOpen
     [IsAffine X] (M : X.Modules) [M.IsQuasicoherent]
     (f : Γ(X, ⊤)) :
@@ -786,53 +837,19 @@ private theorem Modules.isoSpecInv_isLocalized_basicOpen
   haveI : N.IsQuasicoherent := inferInstance
   have hlocal : IsLocalizing (modulesSpecToSheaf.obj N) :=
     (isIso_fromTildeΓ_iff_isLocalizing N).mp inferInstance
-  have hf := hlocal f
+  let φ := ((modulesSpecToSheaf.obj N).obj.map
+    (PrimeSpectrum.basicOpen f).leTop.op).hom
   let ψ := ((baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X) N).map
     (PrimeSpectrum.basicOpen f).leTop.op).hom
-  change IsLocalizedModule.Away f ψ
-  show IsLocalizedModule.Away f ψ
-  ·
-    have happ : X.isoSpec.inv.appTop =
-        (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv := by
-      have hhom : X.isoSpec.hom.appTop =
-          (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).hom := by
-        simp [Scheme.isoSpec, Scheme.toSpecΓ_appTop]
-      rw [← cancel_mono (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).hom]
-      rw [← hhom]
-      rw [← Scheme.Hom.comp_appTop]
-      rw [X.isoSpec.hom_inv_id]
-      rw [hhom]
-      simp
-    let e (V : (Spec Γ(X, (⊤ : X.Opens))).Opens) :
-        (baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X) N).obj (op V) ≅
-          (modulesSpecToSheaf.obj N).obj.obj (op V) := by
-      refine ModuleCat.isoMk (Iso.refl _) ?_
-      intro r
-      ext (x : Γ(N, V))
-      change
-        (Spec Γ(X, (⊤ : X.Opens))).presheaf.map V.leTop.op
-              ((Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv r) • x =
-          (Spec Γ(X, (⊤ : X.Opens))).presheaf.map V.leTop.op
-              (X.isoSpec.inv.appTop r) • x
-      rw [happ]
-    let φ := ((modulesSpecToSheaf.obj N).obj.map
-      (PrimeSpectrum.basicOpen f).leTop.op).hom
-    let eTop :=
-      (e (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)).toLinearEquiv
-    let eBasic := (e (PrimeSpectrum.basicOpen f)).toLinearEquiv
-    let g := φ.comp eTop.toLinearMap
-    letI : IsLocalizedModule.Away f φ := hf
-    letI : IsLocalizedModule.Away f g :=
-      IsLocalizedModule.of_linearEquiv_right
-        (Submonoid.powers f) φ eTop
-    let h := eBasic.symm.toLinearMap.comp g
-    letI : IsLocalizedModule.Away f h :=
-      IsLocalizedModule.of_linearEquiv
-        (Submonoid.powers f) g eBasic.symm
-    have hh : IsLocalizedModule.Away f h := inferInstance
-    convert hh using 1
+  let eTop := (Modules.isoSpecInvBaseModuleIso M
+    (⊤ : (Spec Γ(X, ⊤)).Opens)).toLinearEquiv
+  let eBasic := (Modules.isoSpecInvBaseModuleIso M
+    (PrimeSpectrum.basicOpen f)).toLinearEquiv
+  have hsquare : eBasic.toLinearMap.comp ψ = φ.comp eTop.toLinearMap := by
     ext x
     rfl
+  exact isLocalizedModuleAway_of_linearEquiv_square f φ ψ
+    eTop eBasic hsquare (hlocal f)
 
 private lemma Modules.isoSpecInv_image_top [IsAffine X] :
     X.isoSpec.inv ''ᵁ (⊤ : (Spec Γ(X, ⊤)).Opens) = ⊤ := by
@@ -884,6 +901,72 @@ theorem Modules.baseModulePresheaf_isLocalized_basicOpen
     (show X.isoSpec.inv ''ᵁ U = X.basicOpen f by
       simpa only [U] using Modules.isoSpecInv_image_basic f)
     Modules.isoSpecInv_image_top f himage
+
+private theorem Modules.isoSpecInv_isLocalized_basicOpen_of_isLocalized_basicOpen
+    [IsAffine X] (M : X.Modules) (f : Γ(X, ⊤))
+    (h : IsLocalizedModule.Away f
+      ((baseModulePresheaf (𝟙 X) M).map
+        (X.basicOpen f).leTop.op).hom) :
+    IsLocalizedModule.Away f
+      ((baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X)
+        (M.restrict X.isoSpec.inv)).map
+          (PrimeSpectrum.basicOpen f).leTop.op).hom := by
+  let N : (Spec Γ(X, ⊤)).Modules := M.restrict X.isoSpec.inv
+  let U : (Spec Γ(X, ⊤)).Opens := PrimeSpectrum.basicOpen f
+  let i := U.leTop.op
+  let target := ((baseModulePresheaf (𝟙 X) M).map
+    (homOfLE (X.isoSpec.inv.image_mono (leOfHom i.unop))).op).hom
+  have htarget : IsLocalizedModule.Away f target := by
+    exact Modules.isLocalizedModuleAway_map_of_eq
+      (baseModulePresheaf (𝟙 X) M)
+      (X.basicOpen f).leTop.op
+      (homOfLE (X.isoSpec.inv.image_mono (leOfHom i.unop))).op
+      (Modules.isoSpecInv_image_basic (X := X) f).symm
+      (Modules.isoSpecInv_image_top (X := X)).symm f h
+  let eTop := Modules.baseModulePresheafRestrictAppIso
+    (𝟙 X) X.isoSpec.inv M (⊤ : (Spec Γ(X, ⊤)).Opens)
+  let eBasic := Modules.baseModulePresheafRestrictAppIso
+    (𝟙 X) X.isoSpec.inv M U
+  have hsquare :
+      ((baseModulePresheaf (𝟙 X) M).map
+          (homOfLE (X.isoSpec.inv.image_mono (leOfHom i.unop))).op) ≫
+          eBasic.inv =
+        eTop.inv ≫
+          (baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X) N).map i := by
+    have hnat := Modules.baseModulePresheafRestrictAppIso_hom_naturality
+      (𝟙 X) X.isoSpec.inv M i
+    calc
+      _ = eTop.inv ≫
+          (eTop.hom ≫
+            (baseModulePresheaf (𝟙 X) M).map
+              (homOfLE (X.isoSpec.inv.image_mono (leOfHom i.unop))).op) ≫
+            eBasic.inv := by simp
+      _ = eTop.inv ≫
+          ((baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X) N).map i ≫
+            eBasic.hom) ≫ eBasic.inv := by rw [hnat]
+      _ = _ := by simp
+  exact Modules.isLocalizedModuleAway_of_iso_square f
+    ((baseModulePresheaf (𝟙 X) M).map
+      (homOfLE (X.isoSpec.inv.image_mono (leOfHom i.unop))).op)
+    ((baseModulePresheaf (X.isoSpec.inv ≫ 𝟙 X) N).map i)
+    eTop.symm eBasic.symm hsquare htarget
+
+/-- On an affine scheme, a module whose restriction to every intrinsic basic
+open is localization of its global sections is quasicoherent. -/
+theorem Modules.isQuasicoherent_of_isLocalized_basicOpen
+    [IsAffine X] (M : X.Modules)
+    (h : ∀ f : Γ(X, ⊤), IsLocalizedModule.Away f
+      ((baseModulePresheaf (𝟙 X) M).map
+        (X.basicOpen f).leTop.op).hom) :
+    M.IsQuasicoherent := by
+  apply (Modules.isQuasicoherent_restrictFunctor_iff X.isoSpec.symm).mp
+  let N : (Spec Γ(X, ⊤)).Modules := M.restrict X.isoSpec.inv
+  rw [isQuasicoherent_iff_isIso_fromTildeΓ]
+  rw [isIso_fromTildeΓ_iff_isLocalizing]
+  intro f
+  exact Modules.modulesSpec_isLocalized_basicOpen_of_isoSpecInv M f
+    (Modules.isoSpecInv_isLocalized_basicOpen_of_isLocalized_basicOpen
+      M f (h f))
 
 /-- On an affine scheme, if a global section of a quasicoherent module vanishes on a basic open,
 then some power of the function defining that open annihilates the section. -/
