@@ -1,6 +1,7 @@
 import Mathlib.Algebra.Category.ModuleCat.Products
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
+import Mathlib.Algebra.Module.LocalizedModule.Submodule
 import Mathlib.AlgebraicGeometry.Modules.Tilde
 import Mathlib.CategoryTheory.Preadditive.AdditiveFunctor
 import Mathlib.LinearAlgebra.Dimension.Finite
@@ -58,6 +59,177 @@ instance [Finite J] :
   exact
     instIsClosedUnderLimitsOfShapeEssImageOfHasLimitsOfShapeOfPreservesLimitsOfShapeOfFullOfFaithful
       (tilde.functor R)
+
+namespace Modules
+
+noncomputable section
+
+private noncomputable def kernelAppLinearEquiv
+    {M N : (Spec R).Modules} (f : M ⟶ N) (U : (Spec R).Opens) :
+    Γ(kernel f, U) ≃ₗ[R]
+      ((modulesSpecToSheaf.map f).hom.app (op U)).hom.ker :=
+  let e := (PreservesKernel.iso
+    (SheafOfModules.evaluation (Spec R).ringCatSheaf (op U)) f).trans
+      (ModuleCat.kernelIsoKer _)
+  let fU : Γ(M, U) →ₗ[Γ(Spec R, U)] Γ(N, U) :=
+    (f.val.app (op U)).hom
+  letI : Module R fU.ker :=
+    Module.compHom (R := Γ(Spec R, U)) fU.ker
+      (algebraMap R Γ(Spec R, U))
+  letI : IsScalarTower R Γ(Spec R, U) fU.ker :=
+    .of_algebraMap_smul fun _ _ ↦ rfl
+  let eΓ : Γ(kernel f, U) ≃ₗ[Γ(Spec R, U)] fU.ker :=
+    e.toLinearEquiv
+  let eR : Γ(kernel f, U) ≃ₗ[R] fU.ker :=
+    { toEquiv := eΓ.toEquiv
+      map_add' := eΓ.map_add
+      map_smul' := by
+        intro r x
+        change eΓ ((algebraMap R Γ(Spec R, U)) r • x) =
+          (algebraMap R Γ(Spec R, U)) r • eΓ x
+        exact eΓ.map_smul _ _ }
+  let eKer : fU.ker ≃ₗ[R]
+      ((modulesSpecToSheaf.map f).hom.app (op U)).hom.ker :=
+    { toFun := fun x ↦ ⟨x.1, x.2⟩
+      invFun := fun x ↦ ⟨x.1, x.2⟩
+      left_inv := fun _ ↦ rfl
+      right_inv := fun _ ↦ rfl
+      map_add' := fun _ _ ↦ rfl
+      map_smul' := by
+        intro r x
+        apply Subtype.ext
+        change (algebraMap R Γ(Spec R, U)) r • (x : Γ(M, U)) = _
+        rfl }
+  eR.trans eKer
+
+private theorem kernelAppLinearEquiv_coe
+    {M N : (Spec R).Modules} (f : M ⟶ N) (U : (Spec R).Opens)
+    (x : Γ(kernel f, U)) :
+    (kernelAppLinearEquiv f U x).1 =
+      (kernel.ι f).val.app (op U) x := by
+  change (((ModuleCat.kernelIsoKer
+      ((SheafOfModules.evaluation (Spec R).ringCatSheaf (op U)).map f)).hom
+        ((PreservesKernel.iso
+          (SheafOfModules.evaluation (Spec R).ringCatSheaf (op U)) f).hom x)).1) =
+      (kernel.ι f).val.app (op U) x
+  let F := SheafOfModules.evaluation (Spec R).ringCatSheaf (op U)
+  have hsub := ConcreteCategory.congr_hom
+    (ModuleCat.kernelIsoKer_hom_ker_subtype (F.map f))
+    ((PreservesKernel.iso F f).hom x)
+  have hcomparison := ConcreteCategory.congr_hom
+    (PreservesKernel.iso_inv_ι (G := F) (f := f))
+    ((PreservesKernel.iso F f).hom x)
+  change F.map (kernel.ι f)
+      ((PreservesKernel.iso F f).inv ((PreservesKernel.iso F f).hom x)) =
+    (kernel.ι (F.map f)) ((PreservesKernel.iso F f).hom x) at hcomparison
+  have hinv : (PreservesKernel.iso F f).inv
+      ((PreservesKernel.iso F f).hom x) = x :=
+    ConcreteCategory.congr_hom (PreservesKernel.iso F f).hom_inv_id x
+  rw [hinv] at hcomparison
+  symm at hcomparison
+  exact hsub.trans hcomparison
+
+private theorem isLocalizedModuleAway_of_linearEquiv_square
+    {A : Type u} [CommRing A] {M N M' N' : Type u}
+    [AddCommGroup M] [AddCommGroup N] [AddCommGroup M'] [AddCommGroup N']
+    [Module A M] [Module A N] [Module A M'] [Module A N']
+    (r : A) (f : M →ₗ[A] N) (g : M' →ₗ[A] N')
+    (eM : M' ≃ₗ[A] M) (eN : N' ≃ₗ[A] N)
+    (hsquare : eN.toLinearMap.comp g = f.comp eM.toLinearMap)
+    (hf : IsLocalizedModule.Away r f) :
+    IsLocalizedModule.Away r g := by
+  letI : IsLocalizedModule.Away r f := hf
+  let f' := f.comp eM.toLinearMap
+  letI : IsLocalizedModule.Away r f' :=
+    IsLocalizedModule.of_linearEquiv_right
+      (Submonoid.powers r) f eM
+  let g' := eN.symm.toLinearMap.comp f'
+  letI : IsLocalizedModule.Away r g' :=
+    IsLocalizedModule.of_linearEquiv
+      (Submonoid.powers r) f' eN.symm
+  have hg' : IsLocalizedModule.Away r g' := inferInstance
+  convert hg' using 1
+  ext x
+  have hx := LinearMap.congr_fun hsquare x
+  change eN (g x) = f (eM x) at hx
+  change g x = eN.symm (f (eM x))
+  rw [← hx]
+  exact (eN.symm_apply_apply (g x)).symm
+
+private theorem isQuasicoherent_kernel_spec
+    {M N : (Spec R).Modules} [M.IsQuasicoherent] [N.IsQuasicoherent]
+    (f : M ⟶ N) : (kernel f).IsQuasicoherent := by
+  rw [isQuasicoherent_iff_isIso_fromTildeΓ]
+  rw [isIso_fromTildeΓ_iff_isLocalizing]
+  intro r
+  let U : (Spec R).Opens := PrimeSpectrum.basicOpen r
+  let m := ((modulesSpecToSheaf.obj M).obj.map U.leTop.op).hom
+  let n := ((modulesSpecToSheaf.obj N).obj.map U.leTop.op).hom
+  have hm : IsLocalizedModule.Away r m :=
+    ((isIso_fromTildeΓ_iff_isLocalizing M).mp inferInstance) r
+  have hn : IsLocalizedModule.Away r n :=
+    ((isIso_fromTildeΓ_iff_isLocalizing N).mp inferInstance) r
+  letI : IsLocalizedModule.Away r m := hm
+  letI : IsLocalizedModule.Away r n := hn
+  let g := ((modulesSpecToSheaf.map f).hom.app (op ⊤)).hom
+  let gU := ((modulesSpecToSheaf.map f).hom.app (op U)).hom
+  have hmap : IsLocalizedModule.map (Submonoid.powers r) m n g = gU := by
+    apply IsLocalizedModule.linearMap_ext (Submonoid.powers r) m n
+    rw [IsLocalizedModule.map_comp]
+    ext x
+    change N.presheaf.map U.leTop.op (f.val.app (op ⊤) x) =
+      f.val.app (op U) (M.presheaf.map U.leTop.op x)
+    exact (ConcreteCategory.congr_hom (f.val.naturality U.leTop.op) x).symm
+  let k := LinearMap.toKerIsLocalized (Submonoid.powers r) m n g
+  let eTop := kernelAppLinearEquiv f ⊤
+  let eMap : gU.ker ≃ₗ[R]
+      (IsLocalizedModule.map (Submonoid.powers r) m n g).ker :=
+    LinearEquiv.ofEq _ _ (congrArg LinearMap.ker hmap.symm)
+  let eU := kernelAppLinearEquiv f U ≪≫ₗ eMap
+  let a : Γ(kernel f, ⊤) →ₗ[R] Γ(kernel f, U) :=
+    ((modulesSpecToSheaf.obj (kernel f)).obj.map U.leTop.op).hom
+  have hsquare : eU.toLinearMap.comp a = k.comp eTop.toLinearMap := by
+    ext x
+    change (eMap (kernelAppLinearEquiv f U (a x))).1 =
+      m (kernelAppLinearEquiv f ⊤ x).1
+    change (kernelAppLinearEquiv f U (a x)).1 =
+      m (kernelAppLinearEquiv f ⊤ x).1
+    rw [kernelAppLinearEquiv_coe, kernelAppLinearEquiv_coe]
+    exact ConcreteCategory.congr_hom
+      ((kernel.ι f).val.naturality U.leTop.op) x
+  letI : Module Γ(Spec R, U)
+      ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
+    (inferInstance : Module Γ(Spec R, U) Γ(M, U))
+  letI : IsScalarTower R Γ(Spec R, U)
+      ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
+    (inferInstance : IsScalarTower R Γ(Spec R, U) Γ(M, U))
+  letI : Module Γ(Spec R, U)
+      ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
+    (inferInstance : Module Γ(Spec R, U) Γ(N, U))
+  letI : IsScalarTower R Γ(Spec R, U)
+      ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
+    (inferInstance : IsScalarTower R Γ(Spec R, U) Γ(N, U))
+  exact isLocalizedModuleAway_of_linearEquiv_square r k a eTop eU hsquare
+    (LinearMap.toKerLocalized_isLocalizedModule
+      (S := Γ(Spec R, U))
+      (Submonoid.powers r) m n g)
+
+private noncomputable def presentationOfIsQuasicoherentSpec
+    (M : (Spec R).Modules) [M.IsQuasicoherent] : M.Presentation := by
+  have hIso : IsIso M.fromTildeΓ :=
+    (isQuasicoherent_iff_isIso_fromTildeΓ M).mp inferInstance
+  let P : (tilde (moduleSpecΓFunctor.obj M)).Presentation :=
+    presentationTilde (moduleSpecΓFunctor.obj M) Set.univ (by simp) _
+      (Submodule.span_eq _)
+  let e : tilde (moduleSpecΓFunctor.obj M) ≅ M :=
+    @asIso _ _ _ _ M.fromTildeΓ hIso
+  let f : tilde (moduleSpecΓFunctor.obj M) ⟶ M := e.hom
+  exact @SheafOfModules.Presentation.ofIsIso _ _ _ _ _ _ _ _
+    f e.isIso_hom P
+
+end
+
+end Modules
 
 /-- On an affine spectrum, global sections send epimorphisms of quasicoherent modules to
 epimorphisms of modules. -/
@@ -217,6 +389,79 @@ instance isQuasicoherent_of_pushforward [IsAffine X] [IsAffine Y]
     simp only [Functor.comp_obj]
     infer_instance
   exact (isQuasicoherent Y).prop_of_iso (e.app M) this
+
+private noncomputable def presentationOfIsQuasicoherentOfIsAffine
+    {X : Scheme.{u}} [IsAffine X] (M : X.Modules) [M.IsQuasicoherent] :
+    M.Presentation := by
+  let F := restrictFunctor (isoSpec X).inv
+  let M' := F.obj M
+  let P' : M'.Presentation := presentationOfIsQuasicoherentSpec M'
+  let P : ((M.restrict (isoSpec X).inv).restrict (isoSpec X).hom).Presentation :=
+    presentationRestrict (isoSpec X).hom P'
+  let e := (restrictFunctor_inv_restrictFunctor_hom_id (isoSpec X)).app M
+  exact @SheafOfModules.Presentation.ofIsIso _ _ _ _ _ _ _ _
+    e.hom e.isIso_hom P
+
+private theorem isQuasicoherent_over_of_restrict_of_isAffineOpen
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens) [IsAffine U]
+    [(M.restrict U.ι).IsQuasicoherent] : (M.over U).IsQuasicoherent := by
+  let N := M.restrict U.ι
+  let P : N.Presentation := presentationOfIsQuasicoherentOfIsAffine N
+  letI : (overEquiv U).inverse.IsEquivalence := by
+    infer_instance
+  let hPres : PreservesColimitsOfSize.{u, u} (overEquiv U).inverse := by
+    infer_instance
+  let Q : ((overEquiv U).inverse.obj N).Presentation :=
+    @SheafOfModules.Presentation.map _ _ _ _ _ _ _ _ _ _ _ _ _
+      P (overEquiv U).inverse hPres
+        (U.sheafOfModulesEquivOverInverseUnit X.ringCatSheaf).symm
+  let e : M.over U ≅ (overEquiv U).inverse.obj N :=
+    (overEquiv U).unitIso.app (M.over U) ≪≫
+      (overEquiv U).inverse.mapIso ((overFunctorEquiv U).app M)
+  let Q' : (M.over U).Presentation :=
+    @SheafOfModules.Presentation.ofIsIso _ _ _ _ _ _ _ _
+      e.inv e.isIso_inv Q
+  exact Q'.isQuasicoherent
+
+/-- On an affine scheme, the kernel of a morphism between quasicoherent modules is
+quasicoherent. -/
+theorem isQuasicoherent_kernel_of_isAffine
+    {X : Scheme.{u}} [IsAffine X] {M N : X.Modules}
+    [M.IsQuasicoherent] [N.IsQuasicoherent] (f : M ⟶ N) :
+    (kernel f).IsQuasicoherent := by
+  let F := restrictFunctor (isoSpec X).inv
+  letI : F.IsEquivalence := by
+    exact Functor.IsEquivalence.mk' _
+      (restrictFunctor_inv_restrictFunctor_hom_id (isoSpec X)).symm
+      (restrictFunctor_inv_restrictFunctor_hom_id (isoSpec X).symm)
+  have hKernel : (kernel (F.map f)).IsQuasicoherent :=
+    isQuasicoherent_kernel_spec (F.map f)
+  have hRestrict : (F.obj (kernel f)).IsQuasicoherent :=
+    (isQuasicoherent (Spec Γ(X, ⊤))).prop_of_iso
+      (PreservesKernel.iso F f).symm hKernel
+  exact (isQuasicoherent_restrictFunctor_iff (isoSpec X).symm).mp hRestrict
+
+/-- The kernel of a morphism between quasicoherent modules on a scheme is quasicoherent. -/
+theorem isQuasicoherent_kernel
+    {X : Scheme.{u}} {M N : X.Modules}
+    [M.IsQuasicoherent] [N.IsQuasicoherent] (f : M ⟶ N) :
+    (kernel f).IsQuasicoherent := by
+  have hlocal (U : X.affineOpens) :
+      ((kernel f).over (U : X.Opens)).IsQuasicoherent := by
+    let F := restrictFunctor U.1.ι
+    letI : PreservesLimits F := restrictFunctor_preservesLimits U.1.ι
+    have hKernel : (kernel (F.map f)).IsQuasicoherent :=
+      isQuasicoherent_kernel_of_isAffine (F.map f)
+    have hRestrict : (F.obj (kernel f)).IsQuasicoherent :=
+      (isQuasicoherent U.1).prop_of_iso (PreservesKernel.iso F f).symm hKernel
+    letI : (F.obj (kernel f)).IsQuasicoherent := hRestrict
+    exact isQuasicoherent_over_of_restrict_of_isAffineOpen (kernel f) U.1
+  have hcover : (Opens.grothendieckTopology X).CoversTop
+      (fun U : X.affineOpens ↦ (U : X.Opens)) := by
+    rw [Opens.coversTop_iff, IsOpenCover, iSup_affineOpens_eq_top X]
+  exact @SheafOfModules.IsQuasicoherent.of_coversTop
+    _ _ _ _ _ _ _ _ (kernel f) _
+      (fun U : X.affineOpens ↦ (U : X.Opens)) hcover hlocal
 
 variable [IsAffine X] (F : J ⥤ X.Modules)
 
