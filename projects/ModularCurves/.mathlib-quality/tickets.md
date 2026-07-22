@@ -25072,3 +25072,117 @@ Y₁-comparison (YHCoarse at semiBorel vs the FINE Y₁(N) — an iso via the UP
 
 Ticket status: T-Y0-1 done, T-Y0-2 done, T-Y0-3 done, T-Y0-4 done, T-Y0-5 done,
 T-Y0-6 done, T-Y0-7 done. CLEANUP-Y0 deferred-to-main (producer rule).
+
+---
+
+## v10.352 — STREAM-Y1FIN + STREAM-YRHO /develop (user-dispatched 2026-07-23) + AMENDMENT: YRho ownership
+
+**AMENDMENT (fleet)**: the OWNER dispatched this seat onto `ModularCurve/YRho.lean` (STREAM-F's
+file; T-F1a/b landed by F) to construct Y(ρ̄) and prove representability. F's registered route is
+FOLLOWED (plan.md D8 = review Q9: "Direct symplectic-Isom construction … carries the moduli
+interpretation by construction; Galois-twist identification is a separate later theorem").
+
+**Audit results (this session, in-context reads)**: Buzzard p. 33 verbatim (page image): "the
+functor on ℚ-schemes S parametrising elliptic curves E/S such that E[N] ≅ ρ̄_N as
+representations-with-pairing … representable by a smooth, geometrically irreducible curve
+Y(ρ̄_N) over ℚ." Q9 reply (expert-review/2026-07-05/reply.md:157+): define the twisted functor
+directly, represent by Isom^symp(E[N], V_ρ̄) over the full-level/rigidified base. GaloisRepData
+(YRho:68-85): ρ + ker_open + det_cyclo + p : Mult (ZMod N) ≃* rootsOfUnity N ℚ̄ + p_equivariant.
+LANDED in YRho: vRho/vRhoπ (finite étale ✓) + vRhoPointsEquiv(+equivariant) + coord. SORRIED:
+PairingCompatAt (Prop := sorry, T-F3), rhoLevel_relativelyRepresentable (:421, T-F6),
+yRho_representable (:455, T-F4), yRho_geometricallyIrreducible (:467 = BB-IRR, stays). WEIL
+REGISTER (WeilPairing/): `weilPairing` (DS4) + spec lemmas SORRIED (8 in Basic.lean);
+`weilPairingEval` EXISTS as a def (:53) — T-F3's definition is UNBLOCKED against the register;
+`weilPairingCharZero` (CharZeroDescent:193) near-real (1 sorry in file). ⇒ **HONESTY CLAUSE:
+Arc-B results carry the DS4 register's sorryAx in axiom profiles until stream-C closes it —
+normal dev-branch black-box practice (as T-D8 was); report profiles explicitly.**
+`RepresentsYRho` (:434) demands SmoothOfRelativeDimension 1 + IsAffineHom + Quot-points — the
+SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page image read
+2026-07-22) is the source argument (Weierstrass-lift + [N]-étale lifting), adapted to ρ-level
+(α lifts uniquely: BOTH E[N] and V_ρ étale ⟹ unique infinitesimal lifting).
+
+### ARC A tickets (fine Y₁ + agreement; NO re-proving of YOneAssembly leaves)
+
+- **[T-Y1F-1] named fine Y₁** — `Moduli/CoarseSpace.lean`. Statement:
+  `noncomputable def YOneFine (N : ℕ) [NeZero N] (hN4 : 4 ≤ N) (hinv : IsUnit (N : R)) : Scheme.{u}`
+  := base of `Functor.reprX qpd.prob` for `qpd := (gammaH_semiBorel_closure … (semiBorel N)
+  le_rfl …).1.some`, IsRepresentable from `….2 qpd`. (hN : 3 ≤ (N:ℤ) derivable from hN4.)
+  Sketch: mirror YHCoarse's haveI-wiring. Deps: none. Status: open.
+- **[T-Y1F-2] the H-invariant fine projection** — same file. Statement:
+  `piOneFine : (reprX (gammaFullNaiveProblem R N)).base ⟶ YOneFine …` := baseHom of the
+  Yoneda-classified `qpd.proj`-image of the universal Γ(N)-structure
+  (`(reprX-P₁-repr).homEquiv.symm (qpd.proj.app _ (homEquiv (𝟙 _)))`), + theorem
+  `baseSchemeAction_comp_piOneFine : (baseSchemeAction r (gammaHAut R N (semiBorel N))).hom γ ≫
+  piOneFine = piOneFine` — via homEquiv_comp + `qpd.proj_invariant` (mirror
+  rigid_of_representable's Yoneda manipulation, EllCategory:225-245) then `EllHom.base_w`-project.
+  Deps: T-Y1F-1. Status: open.
+- **[T-Y1F-3] AGREEMENT (KM 8.1.1 "agrees")** — Statement:
+  `noncomputable def yHCoarseIsoYOneFine … : YHCoarse R N hN hinv (semiBorel N) ≅ YOneFine …`.
+  Route (decide at pickup after READING KM 7.1.3 print pp. 192-197 = pdf 203-208, the (Q2)/
+  geometric-iso clauses — REQUIRED READ): (i) coarse-UP gives q with coarsePr ≫ q = piOneFine;
+  (ii) inverse from the fine side: CANDIDATE ROUTES: (a) π₁base satisfies existsUnique-lift via
+  étale descent of morphisms along the free semiBorel action — substrate audit at pickup:
+  `ForMathlib/UnramifiedEqualizer` + EngineDescent `exists_descended/eq_descended` (their
+  torsor-descent shape); freeness from the M2 stream (`gammaH_hfree_of_le_semiBorel`-family);
+  (b) KM 8.1.5-style quotient-commutation through the qpd/QuotPkg relative identification.
+  Uniqueness endgame = the 6×-precedented unique-iso dance. Deps: T-Y1F-2. Status: open.
+- **[T-Y1F-4] YOneAssembly cross-link audit (documentation ONLY)** — walk the 23 sorries of
+  `ModularCurve/YOneAssembly.lean` (v10.37 skeleton); for each: if the mathematical content is
+  landed elsewhere (candidates: ExactOrder.lean, Torsion.lean, MulByHomUnramified/Degree,
+  Comparison.lean, EllHom.pullSection_add, DrinfeldRepresentability, TateNormalForm) record
+  `-- LANDED ELSEWHERE: <decl>` cross-links in a header audit block + board table; leave
+  genuinely-new explicit-model leaves (tateUniversal/killedLocus/yOneSet chain) PARKED with a
+  one-line status. NO proofs re-done, NO statements changed. Deps: none (parallel). Status: open.
+
+### ARC B tickets (Y(ρ̄); route of record = Q9 symplectic-Isom; register-honest)
+
+- **[T-YR-1 = T-F3] PairingCompatAt becomes a real definition** — `ModularCurve/YRho.lean:368`.
+  Replace `Prop := sorry` by the D7-pinned equation through `weilPairingEval` (WeilPairing/
+  Basic.lean:53, exists) + `D.p` + `coord` (YRho:350): e_N(x,y) as a Γ(Spec ℚ̄,⊤)ˣ-root equals
+  the image of `p (a₁b₂ − a₂b₁)` under the canonical Γ–Spec iso, where (a,b) = coords of x,y.
+  Definition-only ticket (its consumers re-elaborate; downstream axiom profiles unchanged —
+  still register-gated). Deps: none. Status: open.
+- **[T-YR-2] the ρ-moduli problem as a functor** — `ModularCurve/YRho.lean` (new section).
+  `noncomputable def rhoProblem (D : GaloisRepData N) : ModuliProblem (CommRingCat.of ℚ)` with
+  values `RhoLevelStructure D X.structMap X.curve`-sets and pullback maps via torsionIso
+  base-change plumbing (mirror `gammaFullNaiveProblem`'s functorialization, Representability
+  :601+; torsion-baseChange comparison lemmas from Torsion.lean). Include the map-lemmas needed
+  for functoriality (coords_additive/pairing_compat transport along Ell-morphisms — the
+  `coord`-naturality is pullback-plumbing + vRhoPointsEquiv naturality). Deps: T-YR-1.
+  Status: open.
+- **[T-YR-3 = T-F6] AffineOverEll (rhoProblem D)** (⟹ also `rhoLevel_relativelyRepresentable`
+  :421 as a corollary in its stated ∃-form). Route (Q9): the symplectic Isom-scheme. PRIMARY
+  construction: étale-locally on T the finite étale `V_ρ` trivializes to (ℤ/N)²-const and the
+  problem reduces to the LANDED untwisted relRepData ([GHA4] `gammaFullNaive_relRepData`, read
+  its construction at pickup: GammaHRepresentability ~:3400-3460) carved by the symplectic
+  condition via `weilPairingCharZero` (CharZeroDescent:193); assemble by finite-étale descent
+  of affine morphisms (IsAffineHom is fppf/étale-local on target — mathlib) OR direct
+  Hom-scheme of finite étale group schemes. EXPECT sub-tickets (Isom-scheme substrate). Deps:
+  T-YR-2. Status: open.
+- **[T-YR-4] RigidNoeth (rhoProblem D), N ≥ 3** — adapt `gammaFullNaive_rigidNoeth`: an
+  automorphism over 𝟙 fixing a ρ-level structure fixes the induced torsion trivialization
+  étale-locally; the landed KVC keystone (`pointedAuto_eq_id_of_fixes_point_kvc`) closes as in
+  the full-level case (geometric-fibre detection ✓ RigidNoeth form). Deps: T-YR-2. Status: open.
+- **[T-YR-5] Representable + affine structure** — engine call:
+  `(rhoProblem D).Representable` via `representable_of_affineOverEll_of_rigidNoeth` + the
+  ∃-affineHom mirror chain AT P := rhoProblem (the v10.351 cascade is GENERIC in P — direct
+  reuse of exists_representableBy_isAffineHom_of_baseChange_cover at (2,3)). Deps: T-YR-3,
+  T-YR-4. Status: open.
+- **[T-YR-6] SmoothOfRelativeDimension 1** — the parked conjunct, now sourced: Loeffler Thm
+  3.4.4 (p. 15 verbatim: lift Weierstrass coefficients; "Can we lift P₀ … Yes, since
+  [N] : E → E is smooth" — étale ⟹ unique lifting) adapted to α : E[N] ≅ V_ρ (both sides
+  étale ⟹ α lifts uniquely along square-zero). Audit mathlib SmoothOfRelativeDimension +
+  formal-smoothness API at pickup; EXPECT sub-tickets (this is the deepest leaf; may consume
+  its own /develop --continue). Deps: T-YR-5. Status: open.
+- **[T-YR-7] ASSEMBLY `yRho_representable` (:455)** — Y := reprX.base, sY := structMap;
+  clauses: smooth = T-YR-6; affine = T-YR-5; Quot-points ≃ = RepresentableBy.homEquiv
+  composed with "iso-classes collapse under rigidity" (each Quot-class has a canonical
+  functor-value; bridge lemma from T-YR-4's rigidity + coords-invariance defining the Quot
+  relation). Deps: T-YR-5, T-YR-6. Status: open.
+- NOT in scope: yRho_geometricallyIrreducible (BB-IRR), the D8 twist-comparison, closing DS4
+  (stream-C). CLEANUP-Y1F/YR: DEFERRED-TO-MAIN (producer rule).
+
+**Plan-discipline note**: skeleton-first partially waived for Arc B's NEW decls (rhoProblem
+etc.) — context-bounded session; compensation = full statements in tickets + YRho.lean's
+existing sorried statements ARE the skeleton for T-YR-1/3(∃-form)/7. Dispatch order:
+T-Y1F-1 → T-Y1F-2 → T-Y1F-4 → T-YR-1 → T-YR-2 → T-YR-4 → T-YR-3 → T-Y1F-3 → T-YR-5 → T-YR-6 → T-YR-7.
