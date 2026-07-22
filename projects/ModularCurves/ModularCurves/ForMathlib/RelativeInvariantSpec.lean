@@ -609,6 +609,8 @@ instance isAffineHom_relQuotientStruct : IsAffineHom (σ.relQuotientStruct f hov
 instance isIntegralHom_relQuotientπ : IsIntegralHom (σ.relQuotientπ f hover) := by
   sorry
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The categorical quotient property** (vs an ARBITRARY target scheme): an invariant
 morphism `F : Z ⟶ Y` factors uniquely through the projection. Chart-level content is
 `existsUnique_invariantsπ_lift` (`ForMathlib/AffineQuotient.lean`); glued over the
@@ -617,8 +619,143 @@ directed cover. Conclusion shape = the universal-property clause of the [GHB3]
 theorem existsUnique_relQuotientπ_lift {Y : Scheme.{u}} (F : Z ⟶ Y)
     (hF : ∀ γ : G, σ.hom γ ≫ F = F) :
     ∃! q : σ.relQuotient f hover ⟶ Y, σ.relQuotientπ f hover ≫ q = F := by
-  sorry
+  classical
+  -- the per-chart lift through the affine invariants engine
+  have hchart : ∀ U : S.AffineZariskiSite,
+      letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+      ∃ qU : Spec (CommRingCat.of (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G)) ⟶ Y,
+        invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ ≫ qU =
+          (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ F := by
+    intro U
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+    refine exists_invariantsπ_lift G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ _ (fun γ => ?_)
+    rw [specSMul_isoSpec_inv_assoc σ (σ.isStableOpen_preimage f hover U.1)
+      (U.2.preimage f) γ,
+      reassoc_of% (Scheme.Hom.resLE_comp_ι
+        (e := (σ.isStableOpen_preimage f hover U.1).le_preimage γ)), hF γ]
+  choose qU hqU using hchart
+  -- the transition square between chart projections
+  have hsq : ∀ {U V : S.AffineZariskiSite} (i : U ⟶ V),
+      letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+      letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover V.1)
+      invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ ≫
+        (σ.invariantsGlueData f hover).functor.map i
+      = Spec.map (Z.presheaf.map (homOfLE (f.preimage_mono
+          (Scheme.AffineZariskiSite.toOpens_mono i.1.1))).op) ≫
+        invariantsπ G ↑Γ(Z, f ⁻¹ᵁ V.1) ℤ := by
+    intro U V i
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover V.1)
+    show invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ ≫
+        Spec.map ((σ.invariantsDiagram f hover).map i.op) = _
+    rw [invariantsπ, invariantsπ, ← Spec.map_comp, ← Spec.map_comp]
+    congr 1
+  -- the transition triangle for the isoSpec conjugation
+  have htri : ∀ {U V : S.AffineZariskiSite} (i : U ⟶ V),
+      Spec.map (Z.presheaf.map (homOfLE (f.preimage_mono
+          (Scheme.AffineZariskiSite.toOpens_mono i.1.1))).op) ≫
+        (V.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (V.1 : S.Opens)).ι ≫ F
+      = (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ F := by
+    intro U V i
+    have h := Scheme.Opens.toSpecΓ_SpecMap_presheaf_map
+      (f ⁻¹ᵁ (U.1 : S.Opens)) (f ⁻¹ᵁ (V.1 : S.Opens))
+      (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono i.1.1))
+    have h2 : (U.2.preimage f).isoSpec.hom ≫ Spec.map (Z.presheaf.map (homOfLE
+        (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono i.1.1))).op)
+        = Z.homOfLE (f.preimage_mono (Scheme.AffineZariskiSite.toOpens_mono i.1.1)) ≫
+          (V.2.preimage f).isoSpec.hom := by
+      rw [IsAffineOpen.isoSpec_hom, IsAffineOpen.isoSpec_hom]
+      exact h
+    have h3 : Spec.map (Z.presheaf.map (homOfLE (f.preimage_mono
+        (Scheme.AffineZariskiSite.toOpens_mono i.1.1))).op) ≫
+        (V.2.preimage f).isoSpec.inv
+      = (U.2.preimage f).isoSpec.inv ≫ Z.homOfLE (f.preimage_mono
+          (Scheme.AffineZariskiSite.toOpens_mono i.1.1)) := by
+      rw [Iso.comp_inv_eq, Category.assoc, ← h2, ← Category.assoc, Iso.inv_hom_id,
+        Category.id_comp]
+    have h4 := congrArg (· ≫ (f ⁻¹ᵁ (V.1 : S.Opens)).ι ≫ F) h3
+    simp only [Category.assoc] at h4
+    rw [h4, reassoc_of% (Scheme.homOfLE_ι Z (f.preimage_mono
+      (Scheme.AffineZariskiSite.toOpens_mono i.1.1)))]
+  -- glue the chart lifts over the locally-directed cover of the quotient
+  have hcompat : ∀ {U V : S.AffineZariskiSite} (i : U ⟶ V),
+      (σ.invariantsGlueData f hover).functor.map i ≫ qU V = qU U := by
+    intro U V i
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover V.1)
+    refine invariantsπ_hom_ext G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ _ _ ?_
+    have h5 := congrArg (· ≫ qU V) (hsq i)
+    simp only [Category.assoc] at h5
+    refine h5.trans ?_
+    refine (congrArg (fun m => Spec.map (Z.presheaf.map (homOfLE (f.preimage_mono
+      (Scheme.AffineZariskiSite.toOpens_mono i.1.1))).op) ≫ m) (hqU V)).trans ?_
+    exact (htri i).trans (hqU U).symm
+  refine ⟨Scheme.OpenCover.glueMorphismsOfLocallyDirected
+    (σ.invariantsGlueData f hover).cover (fun U => qU U)
+    (fun {U V} i => hcompat i), ?_, ?_⟩
+  · -- π ≫ q = F, pointwise-locally on the source (cover-free ext)
+    refine Scheme.hom_ext_of_forall _ _ fun z => ?_
+    obtain ⟨W, hW, hmem, -⟩ := exists_isAffineOpen_mem_and_subset (X := S)
+      (TopologicalSpace.Opens.mem_top (f.base z))
+    refine ⟨f ⁻¹ᵁ W, hmem, ?_⟩
+    letI := σ.gammaMulSemiringAction
+      (σ.isStableOpen_preimage f hover ((⟨W, hW⟩ : S.AffineZariskiSite).1))
+    refine Eq.trans (σ.ι_relQuotientπ_assoc f hover (⟨W, hW⟩ : S.AffineZariskiSite) _) ?_
+    have hmap : (σ.invariantsGlueData f hover).cover.f (⟨W, hW⟩ : S.AffineZariskiSite) ≫
+        Scheme.OpenCover.glueMorphismsOfLocallyDirected
+          (σ.invariantsGlueData f hover).cover (fun U => qU U)
+          (fun {U V} i => hcompat i) = qU ⟨W, hW⟩ :=
+      Scheme.OpenCover.map_glueMorphismsOfLocallyDirected
+        (σ.invariantsGlueData f hover).cover (fun U => qU U)
+        (fun {U V} i => hcompat i) (⟨W, hW⟩ : S.AffineZariskiSite)
+    refine (congrArg (fun m => (f ⁻¹ᵁ W).toSpecΓ ≫
+      Spec.map (CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ W) G).val.toRingHom) ≫ m) hmap).trans ?_
+    show (f ⁻¹ᵁ W).toSpecΓ ≫ invariantsπ G ↑Γ(Z, f ⁻¹ᵁ W) ℤ ≫ qU ⟨W, hW⟩
+      = (f ⁻¹ᵁ W).ι ≫ F
+    have h7 := congrArg (fun m => (f ⁻¹ᵁ W).toSpecΓ ≫ m) (hqU ⟨W, hW⟩)
+    refine h7.trans ?_
+    have h8 : (f ⁻¹ᵁ W).toSpecΓ ≫ ((⟨W, hW⟩ : S.AffineZariskiSite).2.preimage f).isoSpec.inv
+        = 𝟙 _ := by
+      rw [← ((⟨W, hW⟩ : S.AffineZariskiSite).2.preimage f).isoSpec_hom, Iso.hom_inv_id]
+    have h9 := congrArg (fun m => m ≫ (f ⁻¹ᵁ W).ι ≫ F) h8
+    simp only [Category.assoc, Category.id_comp] at h9
+    exact h9
+  · -- uniqueness
+    intro q' hq'
+    refine ((σ.invariantsGlueData f hover).cover.hom_ext _ _ fun U => ?_)
+    letI := σ.gammaMulSemiringAction (σ.isStableOpen_preimage f hover U.1)
+    have hmap : (σ.invariantsGlueData f hover).cover.f U ≫
+        Scheme.OpenCover.glueMorphismsOfLocallyDirected
+          (σ.invariantsGlueData f hover).cover (fun U => qU U)
+          (fun {U V} i => hcompat i) = qU U :=
+      Scheme.OpenCover.map_glueMorphismsOfLocallyDirected _ _ _ U
+    refine Eq.trans ?_ hmap.symm
+    refine invariantsπ_hom_ext G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ _ _ ?_
+    have hπchart : invariantsπ G ↑Γ(Z, f ⁻¹ᵁ U.1) ℤ ≫
+        (σ.invariantsGlueData f hover).cover.f U
+        = (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫
+          σ.relQuotientπ f hover := by
+      have hι := σ.ι_relQuotientπ f hover U
+      have h10 := congrArg (fun m => (U.2.preimage f).isoSpec.inv ≫ m) hι
+      have h11 : (U.2.preimage f).isoSpec.inv ≫ (f ⁻¹ᵁ (U.1 : S.Opens)).toSpecΓ
+          = 𝟙 _ := by
+        rw [← (U.2.preimage f).isoSpec_hom, Iso.inv_hom_id]
+      have h12 := congrArg (fun m => m ≫ Spec.map (CommRingCat.ofHom
+        (FixedPoints.subalgebra ℤ ↑Γ(Z, f ⁻¹ᵁ U.1) G).val.toRingHom) ≫
+        (σ.invariantsGlueData f hover).cover.f U) h11
+      simp only [Category.assoc, Category.id_comp] at h12
+      refine Eq.trans ?_ h10.symm
+      exact h12.symm
+    have h13 := congrArg (fun m => m ≫ q') hπchart
+    simp only [Category.assoc] at h13
+    refine h13.trans ?_
+    have h14 := congrArg (fun m => (U.2.preimage f).isoSpec.inv ≫
+      (f ⁻¹ᵁ (U.1 : S.Opens)).ι ≫ m) hq'
+    refine h14.trans ?_
+    exact (hqU U).symm
 
+include hover in
 /-- **[GHB3′] (KM 7.1.3(1)/(3) existence, diagonal-free)** — the full package of the
 former `exists_quotient_of_isAffineHom`, with the `IsAffineHom (pullback.diagonal
 (terminal.from Z))` instance DELETED: for any affine invariant `f : Z ⟶ S` the
@@ -630,8 +767,11 @@ theorem exists_quotient_of_isAffineHom_rel :
     ∃ (Z₀ : Scheme.{u}) (π : Z ⟶ Z₀) (f₀ : Z₀ ⟶ S), π ≫ f₀ = f ∧
       (∀ γ : G, σ.hom γ ≫ π = π) ∧
       ∀ {Y : Scheme.{u}} (F : Z ⟶ Y), (∀ γ : G, σ.hom γ ≫ F = F) →
-        ∃! q : Z₀ ⟶ Y, π ≫ q = F := by
-  sorry
+        ∃! q : Z₀ ⟶ Y, π ≫ q = F :=
+  ⟨σ.relQuotient f hover, σ.relQuotientπ f hover, σ.relQuotientStruct f hover,
+    σ.relQuotientπ_comp_relQuotientStruct f hover,
+    fun γ => σ.hom_comp_relQuotientπ f hover γ,
+    fun {_Y} F hF => σ.existsUnique_relQuotientπ_lift f hover F hF⟩
 
 /-! ### The free-action addenda: finite étale torsor, base change (KM 7.1.3(2),(3c)) -/
 
