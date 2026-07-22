@@ -2060,6 +2060,50 @@ theorem framedAut_freeAction (D : GaloisRepData N) :
     glSmul_eq_one_of_eq_self N hinvQ X hne γ⁻¹ a.val.1 hL
   rwa [inv_eq_one] at hg1
 
+/-- **[asm-2]** The universal-frame evaluation lies over `Spec ℚ`. -/
+theorem frameEval_π (D : GaloisRepData N) :
+    frameEval D ≫ vRhoπ D =
+      pullback.fst (constVecSchemeπ N) (wFramesπ D) ≫ constVecSchemeπ N := by
+  have hcomp : CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0)) ≫
+      CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom =
+      CommRingCat.ofHom (algebraMap ℚ (FiniteEtaleGalois.tensorObj
+        (constVecAlgebra N) (wFramesAlgebra D) : Type 0)) := by
+    ext r
+    exact (frameEvalAlgHom D).hom.hom.commutes r
+  show ((AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+      (wFramesAlgebra D : Type 0)).hom ≫
+    AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+      (frameEvalAlgHom D).hom.hom.toRingHom)) ≫
+    Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0))) = _
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    (Spec.map_comp _ _).symm) ?_
+  refine Eq.trans (congrArg (fun f => (AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+      AlgebraicGeometry.Spec.map f) hcomp) ?_
+  have hfactor : CommRingCat.ofHom (algebraMap ℚ (FiniteEtaleGalois.tensorObj
+      (constVecAlgebra N) (wFramesAlgebra D) : Type 0)) =
+      CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0)) ≫
+      CommRingCat.ofHom (algebraMap (constVecAlgebra N : Type 0)
+        (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0))) := by
+    ext r
+    exact (IsScalarTower.algebraMap_apply ℚ (constVecAlgebra N : Type 0)
+      (TensorProduct ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)) r)
+  refine Eq.trans (congrArg (fun f => (AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+      AlgebraicGeometry.Spec.map f) hfactor) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    (Spec.map_comp _ _)) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  exact congrArg (· ≫ Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (constVecAlgebra N : Type 0))))
+    (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0))
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
