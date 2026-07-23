@@ -25378,7 +25378,7 @@ eqv' := bareFramedEqv ∘ ι-composition restricted by factor_iff + the value-le
 symp-condition-bridge (the (c-i)-VALUE half: needs (b-iii)-ii/v reads at ℚ̄-points
 against FramedSymp/pairing_scheme)); freeness sub of bareFramedAut_freeAction.
 
-#### [PARKED A2: T-CV-3b-iii-v-b] the correspondence pow-square — status: parked (2026-07-23)
+#### [T-CV-3b-iii-v-b] the correspondence pow-square — status: UNPARKED+DONE (2026-07-23: route-alpha worked — finiteEtaleEquivContAction_functor_map_hom is rfl in ForMathlib; muNRootsCorrespondence_pow landed via projection-splits + ConcreteCategory.comp_apply + show-form coercions). REMAINING for leaf-v: the ALGEBRA square (muNRootsPowAlg vs cycloQuotPow through muNRootsAlgebraIso — derive from the correspondence square via unitIso-naturality + inverse.map, wFramesRightMul_mul-style) then the Spec-intertwine + read-of-pow. Historical analysis:
 `muNRootsCorrespondence_pow : functor.map (cycloQuotPow N k).op ≫ corrIso.hom =
 corrIso.hom ≫ muNRootsPowMor D k` — the elementwise content is PROVEN-shape (h1: the
 mkOfPowEq-read raises to the k-th power; the model pow cycloQuotPowAlgHom/root/
