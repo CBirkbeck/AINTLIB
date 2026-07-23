@@ -876,6 +876,20 @@ theorem detPowRing_eq_inverse_map (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ)
   rw [hsplit]
   rfl
 
+/-- **[PIN-6c-iv-γ]** Finite étale algebra maps over `ℚ` are determined by their
+`ℚ̄`-fiber maps (faithfulness of the Galois correspondence). -/
+theorem finiteEtale_hom_ext_of_fiber
+    {A B : (CommAlgCat.FiniteEtale.{0} ℚ)ᵒᵖ} {f g : A ⟶ B}
+    (h : (CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map f =
+      (CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map g) : f = g := by
+  refine (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map_injective ?_
+  ext x : 3
+  show (ConcreteCategory.hom
+      ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map f)) x =
+    (ConcreteCategory.hom
+      ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map g)) x
+  rw [h]
+
 end
 
 end ModularCurves
