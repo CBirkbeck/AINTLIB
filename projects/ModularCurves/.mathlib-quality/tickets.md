@@ -25475,7 +25475,8 @@ original sketch (etale-local torsor lifts + descent; the (vi)-pin feeds the
 symp-condition transfer). Remaining deps for T-EQ-3: T-F3a(vi) pin (parked),
 framedTorsionIsoPinned_glSmul (new T-EQ-2), EngineDescent exports audit.
 
-#### [T-EQ-2 PROGRESS] (2026-07-23/24 beastmode) leaves a/b/c LANDED
+#### [T-EQ-2] — status: DONE (2026-07-24 beastmode): rhoLevelStructureOfFramed_glSmul landed — the dictionary descends the diagonal GL2-action morphism-level. Full leaf-trail: (a) fullLevelIso_glSmul pre-existing; (b) frameEval contracted-product square (Galois-set twists + tensor conjugates + include-chases + pullbackSpecIso conjugations); (c) frameEvalSlice_rightMul; P0/P1 constVec coordinate-change pin (piGLAlgHom + correspondence/algebra/Spec squares); d2-core constGL_constVecSchemeIso; N-abs/N-idx read-naturalities => readCorrection_smul => d3 corr-commutations; d1 constGL C-leg square; d2 generic pullback_map_snd_square; (e) framedTorsionIsoPinned_glSmul; (f) via existing ext_torsionIso. Supersedes T-EQ-1 (pointwise rigidity not needed on this path).
+#### [T-EQ-2 PROGRESS-archive] leaves a/b/c LANDED
 (a) fullLevelIso_glSmul pre-existing (GLSchemeAction:629). (b) COMPLETE at c2568d8d4:
 constVecGLMor/Alg/Scheme + frameProdVecTwist/FrameTwist + frameProdTwist_eval
 (smul_smul) + 4 projection squares + tensor-side conjugate twists +
