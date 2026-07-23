@@ -18,7 +18,8 @@ namespace ModularCurves
 
 noncomputable section
 
-local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+local instance poleSheafBaseSectionsMulMonoidalCategory (X : Scheme.{u}) :
+    MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 private noncomputable def sectionPoleSheafPower_baseSectionsMulTopHom
