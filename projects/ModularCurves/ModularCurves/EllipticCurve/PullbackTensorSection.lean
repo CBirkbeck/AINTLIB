@@ -16,7 +16,8 @@ universe u
 
 noncomputable section
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance pullbackTensorSectionMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
 namespace ModularCurves
