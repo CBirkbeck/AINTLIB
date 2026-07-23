@@ -2393,6 +2393,170 @@ noncomputable def constVecPointsEquiv (N : ℕ) [NeZero N] :
     (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
     (FiniteEtaleGalois.pointsEquivOfContAction ℚ (constVecContAction N))
 
+/-- **[3c-A]** Precomposition with the split-algebra identification. -/
+noncomputable def precompCvIsoEquiv (N : ℕ) [NeZero N] :
+    ((constVecAlgebra N : Type 0) →ₐ[ℚ] SeparableClosure ℚ) ≃
+      (((Fin 2 → ZMod N) → ℚ) →ₐ[ℚ] SeparableClosure ℚ) where
+  toFun φ := φ.comp (constVecAlgebraIso N).inv.hom.hom
+  invFun ψ := ψ.comp (constVecAlgebraIso N).hom.hom.hom
+  left_inv φ := AlgHom.ext fun x => congrArg φ
+    (congrArg (fun (m : constVecAlgebra N ⟶ constVecAlgebra N) => m.hom.hom x)
+      (constVecAlgebraIso N).hom_inv_id)
+  right_inv ψ := AlgHom.ext fun x => congrArg ψ
+    (congrArg (fun (m : CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+        CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) => m.hom.hom x)
+      (constVecAlgebraIso N).inv_hom_id)
+
+/-- **[3c-A]** The concrete (counit-free) index-read of a `ℚ̄`-point of the constant
+vector scheme: the evaluation index of its algebra reading through the split-algebra
+identification. -/
+noncomputable def constVecIndexRead (N : ℕ) [NeZero N] :
+    { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+        Spec (CommRingCat.of (constVecAlgebra N : Type 0)) //
+      h ≫ constVecSchemeπ N =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }
+      ≃ (Fin 2 → ZMod N) :=
+  (((specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+      (AlgebraicClosure ℚ)).trans
+    (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
+    (precompCvIsoEquiv N)).trans
+    (piAlgHomEquiv ℚ (Fin 2 → ZMod N) (SeparableClosure ℚ))
+
+/-- **[3c-A]** The read-correction bijection: the abstract counit-read measured
+against the concrete index-read. -/
+noncomputable def readCorrection (N : ℕ) [NeZero N] :
+    (Fin 2 → ZMod N) ≃ (Fin 2 → ZMod N) :=
+  (constVecIndexRead N).symm.trans (constVecPointsEquiv N)
+
+/-- **[3c-A]** The inverse correction as an endomorphism of the trivial Galois set
+(every function is equivariant for the trivial action). -/
+noncomputable def corrMor (N : ℕ) [NeZero N] :
+    constVecContAction N ⟶ constVecContAction N :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (readCorrection N).symm
+      comm := fun σ => FintypeCat.hom_ext _ _ fun v => rfl }
+
+/-- The forward correction (the inverse morphism). -/
+noncomputable def corrMorInv (N : ℕ) [NeZero N] :
+    constVecContAction N ⟶ constVecContAction N :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (readCorrection N)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun v => rfl }
+
+theorem corrMor_corrMorInv (N : ℕ) [NeZero N] :
+    corrMor N ≫ corrMorInv N = 𝟙 _ := by
+  ext v : 3
+  exact (readCorrection N).apply_symm_apply v
+
+theorem corrMorInv_corrMor (N : ℕ) [NeZero N] :
+    corrMorInv N ≫ corrMor N = 𝟙 _ := by
+  ext v : 3
+  exact (readCorrection N).symm_apply_apply v
+
+/-- **[3c-A]** The correction transported to the constant-vector algebra. -/
+noncomputable def corrAlgHom (N : ℕ) [NeZero N] :
+    constVecAlgebra N ⟶ constVecAlgebra N :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (corrMor N)).unop
+
+noncomputable def corrAlgHomInv (N : ℕ) [NeZero N] :
+    constVecAlgebra N ⟶ constVecAlgebra N :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (corrMorInv N)).unop
+
+theorem corrAlgHomInv_corrAlgHom (N : ℕ) [NeZero N] :
+    corrAlgHomInv N ≫ corrAlgHom N = 𝟙 _ :=
+  congrArg Quiver.Hom.unop
+    ((((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+        _ _).symm).trans
+      ((congrArg
+        (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+        (corrMor_corrMorInv N)).trans
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_id _)))
+
+theorem corrAlgHom_corrAlgHomInv (N : ℕ) [NeZero N] :
+    corrAlgHom N ≫ corrAlgHomInv N = 𝟙 _ :=
+  congrArg Quiver.Hom.unop
+    ((((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+        _ _).symm).trans
+      ((congrArg
+        (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+        (corrMorInv_corrMor N)).trans
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_id _)))
+
+/-- **[3c-A]** The correction as a scheme automorphism of the constant vector
+scheme. -/
+noncomputable def corrSchemeIso (N : ℕ) [NeZero N] :
+    constVecScheme N ≅ constVecScheme N where
+  hom := Spec.map (CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom)
+  inv := Spec.map (CommRingCat.ofHom (corrAlgHomInv N).hom.hom.toRingHom)
+  hom_inv_id :=
+    (AlgebraicGeometry.Spec.map_comp _ _).symm.trans
+      ((congrArg AlgebraicGeometry.Spec.map
+        (congrArg (fun (f : constVecAlgebra N ⟶ constVecAlgebra N) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          (corrAlgHomInv_corrAlgHom N))).trans
+        (AlgebraicGeometry.Spec.map_id _))
+  inv_hom_id :=
+    (AlgebraicGeometry.Spec.map_comp _ _).symm.trans
+      ((congrArg AlgebraicGeometry.Spec.map
+        (congrArg (fun (f : constVecAlgebra N ⟶ constVecAlgebra N) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          (corrAlgHom_corrAlgHomInv N))).trans
+        (AlgebraicGeometry.Spec.map_id _))
+
+/-- **[3c-A]** The correction lies over `Spec ℚ`. -/
+theorem corrSchemeIso_π (N : ℕ) [NeZero N] :
+    (corrSchemeIso N).hom ≫ constVecSchemeπ N = constVecSchemeπ N := by
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  exact congrArg AlgebraicGeometry.Spec.map (by
+    ext r
+    exact (corrAlgHom N).hom.hom.commutes r)
+
+/-- **[3c-A]** THE PIN: the abstract counit-read of a corrected point is the concrete
+index-read of the point (counit-naturality at the transported correction plus the
+correction's defining triangle). -/
+theorem constVecPointsEquiv_corrScheme (N : ℕ) [NeZero N]
+    (pt : Spec (.of (AlgebraicClosure ℚ)) ⟶
+      Spec (CommRingCat.of (constVecAlgebra N : Type 0)))
+    (hpt : pt ≫ constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    constVecPointsEquiv N ⟨pt ≫ (corrSchemeIso N).hom, Eq.trans (Category.assoc _ _ _)
+        (Eq.trans (congrArg (pt ≫ ·) (corrSchemeIso_π N)) hpt)⟩ =
+      constVecIndexRead N ⟨pt, hpt⟩ := by
+  have hL : Spec.preimage (pt ≫ (corrSchemeIso N).hom) =
+      CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom ≫ Spec.preimage pt := by
+    apply Spec.map_injective
+    rw [AlgebraicGeometry.Spec.map_comp, Spec.map_preimage, Spec.map_preimage]
+    rfl
+  have hAcorr : specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+      (AlgebraicClosure ℚ)
+      ⟨pt ≫ (corrSchemeIso N).hom, Eq.trans (Category.assoc _ _ _)
+        (Eq.trans (congrArg (pt ≫ ·) (corrSchemeIso_π N)) hpt)⟩ =
+      (specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0) (AlgebraicClosure ℚ)
+        ⟨pt, hpt⟩).comp (corrAlgHom N).hom.hom := by
+    refine AlgHom.ext fun w => ?_
+    exact congrArg (fun q : CommRingCat.of (constVecAlgebra N : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hL
+  have hxcorr : (AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ))
+      sepClosureQAlgEquiv.symm)
+      (specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0) (AlgebraicClosure ℚ)
+        ⟨pt ≫ (corrSchemeIso N).hom, Eq.trans (Category.assoc _ _ _)
+          (Eq.trans (congrArg (pt ≫ ·) (corrSchemeIso_π N)) hpt)⟩) =
+      ((AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)) sepClosureQAlgEquiv.symm)
+        (specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+          (AlgebraicClosure ℚ) ⟨pt, hpt⟩)).comp
+        (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (corrMor N)).unop.hom.hom) := by
+    rw [hAcorr]
+    exact AlgHom.ext fun w => rfl
+  refine Eq.trans (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+    (constVecContAction N)) hxcorr) ?_
+  refine Eq.trans (pointsEquivOfContAction_map (corrMor N)
+    ((AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)) sepClosureQAlgEquiv.symm)
+      (specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+        (AlgebraicClosure ℚ) ⟨pt, hpt⟩))) ?_
+  exact congrArg (constVecIndexRead N)
+    (Equiv.symm_apply_apply (constVecPointsEquiv N) ⟨pt, hpt⟩)
+
 /-- [asm-2a helper] The bridge is compatible with the left cofan-injection: the
 correspondence of the first projection composed with the bridge-inverse is the
 tensor inclusion (the `conePointUniqueUpToIso` compatibility, extracted by
