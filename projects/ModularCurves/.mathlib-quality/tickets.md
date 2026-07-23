@@ -25570,6 +25570,39 @@ RhoLevelStructure D (k ≫ sT) (E.baseChange k) decomposes:
    closes rhoLevel_relativelyRepresentable (:7289-sorry).
 PARKED-PIN DEPENDENCY: T-F3a(vi) (the pairing-side pin) feeds 3c/3d symp-transfers —
 schedule FIRST at execution if its statement-shape is confirmed needed.
+#### [T-EQ-3c-PIN] (2026-07-23 beastmode) The (vi)-bridge CONFIRMED NEEDED + decomposed.
+TARGET: framedPinned_pairing_scheme : pairEZMap-condition (hcond : pairEZMap D sT E L-pair
+= frameDetMap D h — the sympFramedProblem subtype-condition, map-level at the LEVEL pair)
+⟹ hsymp_scheme (∀ W t x y, torsionPairEval = coordPairLift(framedTorsionIsoPinned) ≫
+vRhoPairingMap — the dictionary hypothesis). KEY DISCOVERIES: (1) pairEZMap D sT E P Q =
+torsionPairEval D sT (𝟙 T) P Q definitionally (same lift ≫ weilPairing ≫ muNMapAlong ≫
+muNSpecQIso composite — rfl-check); (2) muNRoots_hom_ext LANDED (YRho ~6816: maps into the
+roots scheme over a common base are determined by muNRootsRead) — reduces every map-identity
+into muNRootsScheme to a Γ-read identity; (3) weilPairingEval_symplectic (WeilPairing/Basic:124
+DS4-register) is T-GENERIC (arbitrary base, Γ(T)-valued) — usable per-piece; (4)
+constSchemePointsEquiv + constFiberCofanIsColimit (MuN:383/370: T = colimit of the clopen
+constFiber pieces of a locally-constant read, with hom_ext) — the W-generic replacement for
+torsion_qbar_factor. LEAVES (work in NEW file ModularCurve/RhoPairingBridge.lean import YRho):
+PIN-1 torsionPairEval_π + torsionPairEval_read (Γ-read = weilPairingEval.1 at GENERIC t;
+  transcribe pairEZMap_read's muNPointsEquiv_mapAlong+naturality proof) + pairEZMap-defeq-note.
+PIN-2 universal-pair reduction: hsymp_scheme ⟸ (‡) [weilPairing ≫ muNMapAlong sT ≫ muNSpecQIso
+  = pairSquare(pinnedIso.hom ≫ fst) ≫ vRhoPairingMap : pullback(torsionπ,torsionπ) ⟶ roots]
+  via pairW := pullback.lift(p2t x, p2t y) plumbing (lift≫map=lift; both sides = pairW ≫ ‡-side).
+PIN-3 source decomposition: κ := pair-square-of-fullLevelIso.inv iso onto TorSq; tautological
+  pair-index c₀ : LocallyConstant (constPair-scheme) (F2Z × F2Z) from the two legs' constIndex;
+  (constFiberCofanIsColimit c₀).hom_ext reduces (‡)∘κ to per-(v,w)-piece identities; piece-legs
+  = (v-comb, w-comb) of L-sections (fullLevelHom spec).
+PIN-4 LHS-piece-read = eval(v•L+, w•L+) = eval(L₁,L₂)^sympl(v,w) (torsionPairEval_read +
+  weilPairingEval_symplectic + Point-restrict plumbing).
+PIN-5 RHS-piece-read: pinnedIso at a combination-point = frame-corrected index-read
+  (fullLevelIso-inverse kills the comb to the index; constVecPointsEquiv_corrScheme pin +
+  frameEvalSlice-read) then vRhoPairingMap-read at concrete index-pairs = p(ofAdd(sympl-wedge
+  of twisted indices)) via the rhoPairSchemeMap algebra-side (Spec-functor Γ-reads). DEEP LEAF —
+  decompose further at execution against the landed CV-pin family.
+PIN-6 per-piece Γ-arithmetic: hcond-read (pairEZMap_read_self: eval(L₁,L₂) = det-read) +
+  det-twist-sympl exponent algebra — transcribe pairingCompat_framedPinned's tail (sympl_glSmul
+  + ofAdd-pow + toNat/emod casts) at Γ(piece).
+PIN-7 assemble framedPinned_pairing_scheme := muNRoots_hom_ext ∘ (PIN-2..6).
 
 #### [T-EQ-3] Value-equivalence (the KM 4.7 content) — status: open, deps: T-CV-4,T-EQ-2
 Statement: per (T', k): {sections of the carved-quotient I over k} ≃
