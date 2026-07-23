@@ -25412,6 +25412,38 @@ re-read the eZMap-def-elaboration (lean_goal/hover on the def) FIRST to fix ever
 spelling, then transcribe. All support-lemmas (muNRootsRead_pow, hom_ext,
 muNPointsEquiv_mapAlong/natural/pow) are landed and spelling-agnostic.
 
+#### [T-CV-3(c) DECOMPOSITION] map-level carve problem — status: in_progress (2026-07-23 beastmode)
+(b-iii) COMPLETE (eZMap_zxAction landed, ee074f1f2: H3 univLevel_eval_restrict via the
+9-ingredient chain; whnf-discipline: show-ascribed fullLevel_eval_eqToHom +
+weilPairingEval_congr_raw + binder-annotated congrArg-lambdas + univPzx/univQzx
+uniform-typing defs). (b-iv) COMPLETE (sympLocusι_agree, sympLocus_zxAction_stable,
+zxSympAction + _ι/_one/_mul via cancel_mono of the clopen ι).
+(c) EXECUTION PLAN (map-level per the re-scope — the symp-condition is VALUE-LEVEL
+MAP EQUALITY, no pointwise vacuity; mirrors the T-F3 morphism-level fix philosophy):
+c-1. defs `pairEZMap D sT E P Q hP hQ : T ⟶ muNRootsScheme D` (the eZMap-tail at an
+   arbitrary framed value: ptTorsion-lift ≫ weilPairing ≫ muNMapAlong sT ≫ QIso.hom)
+   + `frameDetMap D h := h ≫ detFrameScheme ≫ detCompScheme` + π-lemmas +
+   rfl-factorizations `eZMap = fst ≫ pairEZMap(univ)` / `dZMap = snd≫snd ≫ …`.
+c-2. `pairEZMap_read` — GENERIC read (mirror of eZMap_read minus the
+   pullbackAlong-spelling trap: T is a plain variable): muNRootsRead of k ≫ pairEZMap
+   = Γ.map k.op (weilPairingEval P Q).1.
+c-3. naturality (N1) `pairEZMap_pullSection`: pairEZMap of the f-pulled value =
+   f.baseHom ≫ pairEZMap — via muNRoots_hom_ext + c-2-reads + the H3-steps-1-3 chain
+   (restrict-register + mapPoint-register + mapPoint_pull_pullSection raws);
+   (N2) frameDetMap naturality = assoc (trivial).
+c-4. value twist squares (N3): `pairEZMap_glSmul` (= ≫ muNRootsPowScheme (det γ).val;
+   hom_ext + c-2 + weilPairingEval_symplectic + muNRootsRead_pow — the
+   univLevel_glSmul_eval pattern at arbitrary values) + `frameDetMap_rightMul`
+   (detFrameScheme_rightMul + detCompScheme_mul assoc-chase).
+c-5. `sympFramedProblem D` (subfunctor of bareFramedProblem by pairEZMap = frameDetMap;
+   map-functoriality from c-3) + `sympFramedSmulNat/Aut` (condition preserved by c-4:
+   both sides ≫ pow) + `sympFramedAut_freeAction` (sub of bareFramedAut_freeAction).
+c-6. bridge (B1) `bareEqv-value-of-h has pairEZMap = h ≫ eZMap` (dL.nat at the
+   tautological section + c-3 + assoc; frames-side via framesEqv-def) ⟹ carved eqv
+   {h : T ⟶ sympLocus // over} ≃ sympFramedProblem-value (factor_iff + B1 both ways)
+   ⟹ `sympFramed_equivariantRelRepData` (Z := sympLocus, σZ := zxSympAction,
+   finite/etale := clopen ∘ bare-legs) ⟹ T-CV-4 one-liner.
+
 #### [T-CV-4] The carved quotient — status: open, deps: T-CV-3
 Statement: `sympFramed_quotientProblemData D : Nonempty (QuotientProblemData
 (sympFramedAut D))` := exists_quotientProblemData _ (carved-freeness) (carved-rel-rep)
