@@ -422,6 +422,169 @@ theorem framedPinned_pairing_scheme_of_core (D : GaloisRepData N) [Fact (1 < N)]
   refine Eq.trans (congrArg (· ≫ muNRootsPowScheme D _) hcond) ?_
   exact (hcore v w).symm
 
+/-- **[PIN-6a]** The corrected `v`-component point of the constant vector scheme
+over `ℚ` (component inclusion, read through the correspondence identification and
+the read-correction). -/
+noncomputable def constVecCorrPt (N : ℕ) [NeZero N] (v : Fin 2 → ZMod N) :
+    Spec (CommRingCat.of ℚ) ⟶ constVecScheme N :=
+  Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) v ≫
+    (constVecSchemeIso N).hom ≫ (corrSchemeIso N).hom
+
+theorem constVecCorrPt_π (N : ℕ) [NeZero N] (v : Fin 2 → ZMod N) :
+    constVecCorrPt N v ≫ constVecSchemeπ N = 𝟙 (Spec (CommRingCat.of ℚ)) := by
+  rw [constVecCorrPt]
+  simp only [Category.assoc]
+  refine Eq.trans (congrArg (fun m : constVecScheme N ⟶ Spec (CommRingCat.of ℚ) =>
+    Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) v ≫
+      ((constVecSchemeIso N).hom ≫ m)) (corrSchemeIso_π N)) ?_
+  refine Eq.trans (congrArg (fun m : constScheme (Spec (CommRingCat.of ℚ))
+      (Fin 2 → ZMod N) ⟶ Spec (CommRingCat.of ℚ) =>
+    Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) v ≫ m)
+    (constVecSchemeIso_π N)) ?_
+  rw [show constSchemeπ (Spec (CommRingCat.of ℚ)) (Fin 2 → ZMod N) =
+    Limits.Sigma.desc (fun _ => 𝟙 (Spec (CommRingCat.of ℚ))) from rfl,
+    Limits.Sigma.ι_desc]
+
+/-- **[PIN-6a]** The absolute `v`-slot evaluation of the universal frame: pair the
+corrected `v`-component with the tautological frame and evaluate. -/
+noncomputable def frameSlotEval (D : GaloisRepData N) (v : Fin 2 → ZMod N) :
+    wFrames D ⟶ vRho D :=
+  pullback.lift (wFramesπ D ≫ constVecCorrPt N v) (𝟙 (wFrames D)) (by
+    rw [Category.assoc, constVecCorrPt_π, Category.comp_id, Category.id_comp]) ≫
+    frameEval D
+
+/-- **[PIN-6a]** The pinned framed leg at a level combination is the absolute
+slot evaluation precomposed with the frame classifier. -/
+theorem framedPinned_leg_comb (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) (v : Fin 2 → ZMod N) :
+    E.pointToTorsion (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v)) ≫
+      (framedTorsionIsoPinned D sT E hinv L h hover).hom ≫
+      pullback.fst (vRhoπ D) sT =
+    h ≫ frameSlotEval D v := by
+  letI := frameEvalSlice_isIso D sT h hover
+  have hstep1 : Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) v ≫ E.fullLevelHom L =
+      E.pointToTorsion
+        (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v)) := by
+    rw [EllipticCurve.fullLevelHom]
+    exact Sigma.ι_desc _ _
+  rw [← hstep1]
+  rw [show (framedTorsionIsoPinned D sT E hinv L h hover).hom =
+    (E.fullLevelIso hinv L).inv ≫
+      ((isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+      (pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+      (pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) ≫
+      frameEvalSlice D sT h hover))) from rfl]
+  rw [show E.fullLevelHom L = (E.fullLevelIso hinv L).hom from rfl]
+  simp only [Category.assoc]
+  rw [Iso.hom_inv_id_assoc]
+  have hkey : Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) v ≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+      pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+      pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) ≫
+      pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ h)
+        (by rw [Category.assoc, hover, ← pullback.condition]) =
+      h ≫ pullback.lift (wFramesπ D ≫ constVecCorrPt N v) (𝟙 (wFrames D)) (by
+        rw [Category.assoc, constVecCorrPt_π, Category.comp_id,
+          Category.id_comp]) := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd,
+        pullback.lift_snd_assoc]
+      rw [IsPullback.isoPullback_hom_snd_assoc, ι_constSchemeMapAlong_assoc,
+        constVecCorrPt, reassoc_of% hover]
+      exact rfl
+    · simp only [Category.assoc, pullback.lift_fst_assoc, pullback.lift_snd,
+        Category.comp_id]
+      rw [← Category.assoc _ _ h,
+        IsPullback.isoPullback_hom_fst]
+      rw [show constSchemeπ T (Fin 2 → ZMod N) =
+        Limits.Sigma.desc (fun _ => 𝟙 T) from rfl]
+      rw [← Category.assoc, Limits.Sigma.ι_desc, Category.id_comp]
+  rw [frameEvalSlice_fst]
+  rw [show pullback.lift (pullback.snd sT (constVecSchemeπ N))
+      (pullback.fst sT (constVecSchemeπ N) ≫ h)
+      (by rw [Category.assoc, hover, ← pullback.condition]) ≫ frameEval D =
+    pullback.lift (pullback.snd sT (constVecSchemeπ N))
+      (pullback.fst sT (constVecSchemeπ N) ≫ h)
+      (by rw [Category.assoc, hover, ← pullback.condition]) ≫ frameEval D
+    from rfl]
+  rw [reassoc_of% hkey]
+  rw [frameSlotEval]
+
+theorem frameSlotEval_π (D : GaloisRepData N) (v : Fin 2 → ZMod N) :
+    frameSlotEval D v ≫ vRhoπ D = wFramesπ D := by
+  rw [frameSlotEval, Category.assoc, frameEval_π, ← Category.assoc,
+    pullback.lift_fst, Category.assoc, constVecCorrPt_π, Category.comp_id]
+
+/-- **[PIN-6b]** The pinned coordinate pair at a combination pair is the frame
+classifier followed by the absolute slot-evaluation pair. -/
+theorem coordPairLift_comb_framedPinned (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) (v w : Fin 2 → ZMod N) :
+    coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+        (framedTorsionIsoPinned_π D sT E hinv L h hover) (𝟙 T)
+        (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)
+        (((w 0).val : ℤ) • L.1.1 + ((w 1).val : ℤ) • L.1.2)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v))
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L w)) =
+      h ≫ pullback.lift (frameSlotEval D v) (frameSlotEval D w)
+        ((frameSlotEval_π D v).trans (frameSlotEval_π D w).symm) := by
+  apply pullback.hom_ext
+  · show pullback.lift _ _ _ ≫ pullback.fst (vRhoπ D) (vRhoπ D) =
+      (h ≫ pullback.lift _ _ _) ≫ pullback.fst (vRhoπ D) (vRhoπ D)
+    rw [pullback.lift_fst, Category.assoc, pullback.lift_fst]
+    exact framedPinned_leg_comb D sT hinv L h hover v
+  · show pullback.lift _ _ _ ≫ pullback.snd (vRhoπ D) (vRhoπ D) =
+      (h ≫ pullback.lift _ _ _) ≫ pullback.snd (vRhoπ D) (vRhoπ D)
+    rw [pullback.lift_snd, Category.assoc, pullback.lift_snd]
+    exact framedPinned_leg_comb D sT hinv L h hover w
+
+/-- **[PIN-6, layered]** The frame-side core identity of the pinned trivialization
+follows from the ABSOLUTE pairing-determinant identity on the universal frame
+(`habs`, [PIN-6c] — no base, level, or classifier in sight). -/
+theorem framedPinned_hcore_of_abs (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (habs : ∀ v w : Fin 2 → ZMod N,
+      pullback.lift (frameSlotEval D v) (frameSlotEval D w)
+          ((frameSlotEval_π D v).trans (frameSlotEval_π D w).symm) ≫
+          vRhoPairingMap D =
+        detFrameScheme D ≫ detCompScheme D ≫ muNRootsPowScheme D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat))
+    (v w : Fin 2 → ZMod N) :
+    coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+        (framedTorsionIsoPinned_π D sT E hinv L h hover) (𝟙 T)
+        (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)
+        (((w 0).val : ℤ) • L.1.1 + ((w 1).val : ℤ) • L.1.2)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v))
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L w)) ≫
+        vRhoPairingMap D =
+      frameDetMap D h ≫ muNRootsPowScheme D
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+          ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) := by
+  rw [coordPairLift_comb_framedPinned D sT hinv L h hover v w]
+  rw [Category.assoc, habs v w, frameDetMap]
+  simp only [Category.assoc]
+
 end
 
 end ModularCurves
