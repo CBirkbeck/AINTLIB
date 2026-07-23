@@ -951,6 +951,94 @@ theorem muNπ_etale_iff (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     Etale (muNπ S N) ↔ IsUnit (N : Γ(S, ⊤)) :=
   ⟨isUnit_of_etale_muNπ S N, etale_muNπ_of_isUnit S N⟩
 
+/-- **[T-CV-1a]** The étale model: for `N` a unit in `A`, the algebra
+`A[X]/(Xᴺ − 1)` is étale over `A` (standard étale pair `(Xᴺ − 1, C N)`). -/
+theorem muNModel_algebra_etale_of_isUnit (A : Type u) [CommRing A] (N : ℕ)
+    [NeZero N] (h : IsUnit (N : A)) :
+    Algebra.Etale A (AdjoinRoot ((X : Polynomial A) ^ N - 1)) := by
+  let P : StandardEtalePair A :=
+    { f := (X : Polynomial A) ^ N - 1
+      monic_f := by simpa using Polynomial.monic_X_pow_sub_C (1 : A) (NeZero.ne N)
+      g := Polynomial.C (N : A)
+      cond := by
+        refine ⟨X, -Polynomial.C (N : A), 1, ?_⟩
+        have h1 : (X : (Polynomial A)) ^ (N - 1) * X = X ^ N := by
+          rw [← pow_succ, Nat.sub_add_cancel NeZero.one_le]
+        have hder : derivative ((X : Polynomial A) ^ N - 1)
+            = Polynomial.C (N : A) * X ^ (N - 1) := by
+          simp [Polynomial.derivative_X_pow]
+        rw [hder, mul_assoc, h1]
+        ring }
+  have hg : IsUnit (AdjoinRoot.mk P.f P.g) := by
+    show IsUnit (AdjoinRoot.mk ((X : Polynomial A) ^ N - 1) (Polynomial.C (N : A)))
+    rw [AdjoinRoot.mk_C]
+    exact h.map (AdjoinRoot.of ((X : Polynomial A) ^ N - 1))
+  have e2 := IsLocalization.atUnits (AdjoinRoot P.f)
+    (Submonoid.powers (AdjoinRoot.mk P.f P.g))
+    (S := Localization.Away (AdjoinRoot.mk P.f P.g))
+    (Submonoid.powers_le.mpr ((IsUnit.mem_submonoid_iff _).mpr hg))
+  have e3 : P.Ring ≃ₐ[A] AdjoinRoot ((X : Polynomial A) ^ N - 1) :=
+    P.equivAwayAdjoinRoot.trans (AlgEquiv.restrictScalars A e2).symm
+  exact Algebra.Etale.of_equiv e3
+
+/-- **[T-CV-1a]** The model is module-finite (the defining polynomial is monic). -/
+theorem muNModel_finite (A : Type u) [CommRing A] (N : ℕ) [NeZero N] :
+    Module.Finite A (AdjoinRoot ((X : Polynomial A) ^ N - 1)) := by
+  have hm : ((X : Polynomial A) ^ N - 1).Monic := by
+    simpa using Polynomial.monic_X_pow_sub_C (1 : A) (NeZero.ne N)
+  exact hm.finite_quotient
+
+/-- **[T-CV-1a]** Over a field, `μ_N` is `Spec` of the model `K[X]/(Xᴺ − 1)`. -/
+noncomputable def muNSpecFieldIso (K : Type u) [Field K] (N : ℕ) [NeZero N] :
+    muN (Spec (CommRingCat.of K)) N ≅
+      Spec (CommRingCat.of (AdjoinRoot ((X : Polynomial K) ^ N - 1))) := by
+  have t := (isPullback_SpecMap_of_isPushout _ _ _ _ (muNModel_isPushout K N)).flip
+  have hterm : terminal.from (Spec (CommRingCat.of K)) ≫
+      (terminalIsoIsTerminal specULiftZIsTerminal).hom = Spec.map (muNBaseMap K) :=
+    specULiftZIsTerminal.hom_ext _ _
+  have b := (isPullback_muN (Spec (CommRingCat.of K)) N).flip
+  rw [hterm] at b
+  let mid := t.lift (pullback.snd _ _) (muNπ _ N) b.w
+  have hmid1 : mid ≫ Spec.map (muNModelCompare K N) = pullback.snd _ _ :=
+    t.lift_fst _ _ _
+  have hmid2 : mid ≫ Spec.map (muNModelStruct K N) = muNπ _ N := t.lift_snd _ _ _
+  have big2 : IsPullback (mid ≫ Spec.map (muNModelCompare K N))
+      (muNπ (Spec (CommRingCat.of K)) N) (Spec.map (muNRingMap N))
+      (𝟙 (Spec (CommRingCat.of K)) ≫ Spec.map (muNBaseMap K)) := by
+    rw [Category.id_comp, hmid1]
+    exact b
+  have LEFT := IsPullback.of_right big2 (by rw [Category.comp_id]; exact hmid2) t
+  have triv : IsPullback (𝟙 (Spec (muNModelRing K N))) (Spec.map (muNModelStruct K N))
+      (Spec.map (muNModelStruct K N)) (𝟙 (Spec (CommRingCat.of K))) :=
+    IsPullback.of_horiz_isIso ⟨by simp⟩
+  exact LEFT.isoIsPullback _ _ triv
+
+/-- **[T-CV-1a]** The field-model identification lies over the base. -/
+theorem muNSpecFieldIso_struct (K : Type u) [Field K] (N : ℕ) [NeZero N] :
+    (muNSpecFieldIso K N).hom ≫
+      Spec.map (CommRingCat.ofHom (AdjoinRoot.of ((X : Polynomial K) ^ N - 1))) =
+      muNπ (Spec (CommRingCat.of K)) N := by
+  have t := (isPullback_SpecMap_of_isPushout _ _ _ _ (muNModel_isPushout K N)).flip
+  have hterm : terminal.from (Spec (CommRingCat.of K)) ≫
+      (terminalIsoIsTerminal specULiftZIsTerminal).hom = Spec.map (muNBaseMap K) :=
+    specULiftZIsTerminal.hom_ext _ _
+  have b := (isPullback_muN (Spec (CommRingCat.of K)) N).flip
+  rw [hterm] at b
+  let mid := t.lift (pullback.snd _ _) (muNπ _ N) b.w
+  have hmid1 : mid ≫ Spec.map (muNModelCompare K N) = pullback.snd _ _ :=
+    t.lift_fst _ _ _
+  have hmid2 : mid ≫ Spec.map (muNModelStruct K N) = muNπ _ N := t.lift_snd _ _ _
+  have big2 : IsPullback (mid ≫ Spec.map (muNModelCompare K N))
+      (muNπ (Spec (CommRingCat.of K)) N) (Spec.map (muNRingMap N))
+      (𝟙 (Spec (CommRingCat.of K)) ≫ Spec.map (muNBaseMap K)) := by
+    rw [Category.id_comp, hmid1]
+    exact b
+  have LEFT := IsPullback.of_right big2 (by rw [Category.comp_id]; exact hmid2) t
+  have triv : IsPullback (𝟙 (Spec (muNModelRing K N))) (Spec.map (muNModelStruct K N))
+      (Spec.map (muNModelStruct K N)) (𝟙 (Spec (CommRingCat.of K))) :=
+    IsPullback.of_horiz_isIso ⟨by simp⟩
+  exact LEFT.isoIsPullback_hom_snd _ _ triv
+
 end RankAndEtale
 
 /-- **(T-B2, DS3 naturality spec — register rule (iii))** The points description of
