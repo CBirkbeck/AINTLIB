@@ -2557,6 +2557,55 @@ theorem constVecPointsEquiv_corrScheme (N : ℕ) [NeZero N]
   exact congrArg (constVecIndexRead N)
     (Equiv.symm_apply_apply (constVecPointsEquiv N) ⟨pt, hpt⟩)
 
+/-- **[3c-B3]** The concrete index-read of a constant `ℚ̄`-point is its index. -/
+theorem constVecIndexRead_const (N : ℕ) [NeZero N] (u : Fin 2 → ZMod N)
+    (hov : (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+      Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u ≫
+      (constVecSchemeIso N).hom) ≫ constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    constVecIndexRead N ⟨_, hov⟩ = u := by
+  have hpre : Spec.preimage (Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+      Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u ≫
+      (constVecSchemeIso N).hom) =
+      CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom ≫
+        CommRingCat.ofHom (Pi.evalRingHom
+          (fun _ : (Fin 2 → ZMod N) => (ℚ : Type 0)) u) ≫
+        CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)) := by
+    apply Spec.map_injective
+    rw [Spec.map_preimage]
+    refine Eq.trans (congrArg (Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ ·)
+      (constSchemeSpecIso_ι_hom_assoc (CommRingCat.of ℚ) (Fin 2 → ZMod N) u
+        (constVecSpecIso N).hom)) ?_
+    refine Eq.trans (congrArg (fun t => Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+        Spec.map (CommRingCat.ofHom (Pi.evalRingHom
+          (fun _ : (Fin 2 → ZMod N) => (ℚ : Type 0)) u)) ≫ t)
+      (show (constVecSpecIso N).hom = Spec.map (CommRingCat.ofHom
+        (constVecAlgebraIso N).hom.hom.hom.toRingHom) from rfl)) ?_
+    refine Eq.trans (congrArg (Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ ·)
+      (AlgebraicGeometry.Spec.map_comp _ _).symm) ?_
+    exact (AlgebraicGeometry.Spec.map_comp _ _).symm
+  refine (piAlgHomIndex_unique _ ?_).symm
+  refine Eq.trans (congrArg (fun z => sepClosureQAlgEquiv.symm z)
+    (congrArg (fun q : CommRingCat.of (constVecAlgebra N : Type 0) ⟶
+        CommRingCat.of (AlgebraicClosure ℚ) =>
+      q.hom ((constVecAlgebraIso N).inv.hom.hom (Pi.single u 1))) hpre)) ?_
+  refine Eq.trans (congrArg (fun z => sepClosureQAlgEquiv.symm
+      (algebraMap ℚ (AlgebraicClosure ℚ) ((Pi.evalRingHom
+        (fun _ : (Fin 2 → ZMod N) => (ℚ : Type 0)) u) z)))
+    (congrArg (fun (m : CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+        CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) =>
+      m.hom.hom (Pi.single u (1 : ℚ))) (constVecAlgebraIso N).inv_hom_id)) ?_
+  show sepClosureQAlgEquiv.symm ((algebraMap ℚ (AlgebraicClosure ℚ))
+      ((Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => (ℚ : Type 0)) u)
+        (Pi.single u 1))) = 1
+  rw [show (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => (ℚ : Type 0)) u)
+      (Pi.single u (1 : ℚ)) = 1 from Pi.single_eq_same u 1]
+  rw [map_one, map_one]
+
 /-- [asm-2a helper] The bridge is compatible with the left cofan-injection: the
 correspondence of the first projection composed with the bridge-inverse is the
 tensor inclusion (the `conePointUniqueUpToIso` compatibility, extracted by
