@@ -5342,6 +5342,163 @@ theorem dZMap_π (D : GaloisRepData N) [Fact (1 < N)]
   rw [detCompScheme_π, detFrameScheme_π, ← pullback.condition,
     ← Category.assoc, ← pullback.condition, Category.assoc]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-i]** Multiplication by a fixed unit on the cyclo-twisted units set
+(equivariant since the group is abelian). -/
+noncomputable def cycloUnitsMulMor (D : GaloisRepData N) (u₀ : (ZMod N)ˣ) :
+    cycloUnitsContAction D ⟶ cycloUnitsContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun u => u * u₀)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun u => by
+        show (modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv * u) * u₀ =
+          modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv * (u * u₀)
+        rw [mul_assoc] }
+
+/-- **[T-CV-3b-i]** Its algebra avatar. -/
+noncomputable def cycloUnitsMulAlg (D : GaloisRepData N) (u₀ : (ZMod N)ˣ) :
+    cycloUnitsAlgebra D ⟶ cycloUnitsAlgebra D :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+    (cycloUnitsMulMor D u₀)).unop
+
+/-- **[T-CV-3b-i]** Its scheme avatar. -/
+noncomputable def cycloUnitsMulScheme (D : GaloisRepData N) (u₀ : (ZMod N)ˣ) :
+    cycloUnitsScheme D ⟶ cycloUnitsScheme D :=
+  Spec.map (CommRingCat.ofHom (cycloUnitsMulAlg D u₀).hom.hom.toRingHom)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-i]** The determinant intertwines right translation with unit
+multiplication (`det (A·γ) = det A · det γ`), continuous-set level. -/
+theorem detFrameMor_rightMul (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameRightMulMor D γ ≫ detFrameMor D =
+      detFrameMor D ≫ cycloUnitsMulMor D (Matrix.GeneralLinearGroup.det γ) := by
+  ext A
+  exact congrArg (fun w : (ZMod N)ˣ => ((w : ZMod N)))
+    (map_mul Matrix.GeneralLinearGroup.det A γ)
+
+/-- **[T-CV-3b-i]** The scheme-level square (double contravariance = covariance;
+`wFramesRightMul_mul` transport pattern). -/
+theorem detFrameScheme_rightMul (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    wFramesRightMul D γ ≫ detFrameScheme D =
+      detFrameScheme D ≫ cycloUnitsMulScheme D (Matrix.GeneralLinearGroup.det γ) := by
+  have hAlg : detFrameAlgHom D ≫ wFramesRightMulAlg D γ =
+      cycloUnitsMulAlg D (Matrix.GeneralLinearGroup.det γ) ≫ detFrameAlgHom D := by
+    have h2 := congrArg
+      (fun m => ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m).unop)
+      (detFrameMor_rightMul D γ)
+    exact ((congrArg Quiver.Hom.unop
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp _ _)).symm.trans
+      h2).trans (congrArg Quiver.Hom.unop
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp _ _))
+  show Spec.map (CommRingCat.ofHom (wFramesRightMulAlg D γ).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom) =
+    Spec.map (CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom
+        (cycloUnitsMulAlg D (Matrix.GeneralLinearGroup.det γ)).hom.hom.toRingHom)
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  exact congrArg Spec.map (congrArg
+    (fun (m : cycloUnitsAlgebra D ⟶ wFramesAlgebra D) =>
+      CommRingCat.ofHom m.hom.hom.toRingHom) hAlg)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-ii]** The `k`-th power endo of the roots set — equivariant for EVERY
+`k` (Galois commutes with powers), unlike constant multiplication. -/
+noncomputable def muNRootsPowMor (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsContAction D ⟶ muNRootsContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun ζ => ζ ^ k)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun ζ => Subtype.ext (Units.ext (by
+        show ((Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1 ^ k :
+            (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) =
+          ((Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom (ζ ^ k).1 :
+            (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
+        rw [← map_pow]
+        rfl)) }
+
+/-- **[T-CV-3b-ii]** Its algebra avatar. -/
+noncomputable def muNRootsPowAlg (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsAlgebra D ⟶ muNRootsAlgebra D :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+    (muNRootsPowMor D k)).unop
+
+/-- **[T-CV-3b-ii]** Its scheme avatar. -/
+noncomputable def muNRootsPowScheme (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsScheme D ⟶ muNRootsScheme D :=
+  Spec.map (CommRingCat.ofHom (muNRootsPowAlg D k).hom.hom.toRingHom)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-ii]** The pairing normalisation intertwines unit multiplication with
+the power endo (`p(ofAdd (u·u₀)) = p(ofAdd u)^{u₀.val}`). -/
+theorem detCompMor_mul (D : GaloisRepData N) [Fact (1 < N)] (u₀ : (ZMod N)ˣ) :
+    cycloUnitsMulMor D u₀ ≫ detCompMor D =
+      detCompMor D ≫ muNRootsPowMor D ((u₀ : ZMod N)).val := by
+  ext u
+  show ((D.p (Multiplicative.ofAdd (((u * u₀ : (ZMod N)ˣ) : ZMod N))) :
+      (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) =
+    (((D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) ^
+        ((u₀ : ZMod N)).val : rootsOfUnity N (AlgebraicClosure ℚ)) :
+      (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
+  rw [show ((D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) ^
+      ((u₀ : ZMod N)).val : rootsOfUnity N (AlgebraicClosure ℚ)) :
+      (AlgebraicClosure ℚ)ˣ) =
+    ((D.p ((Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) ^
+      ((u₀ : ZMod N)).val)) : (AlgebraicClosure ℚ)ˣ) from by
+    rw [map_pow]]
+  congr 2
+  rw [show (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) ^
+      ((u₀ : ZMod N)).val =
+    Multiplicative.ofAdd (((u₀ : ZMod N)).val •
+      ((u : (ZMod N)ˣ) : ZMod N)) from rfl]
+  rw [Units.val_mul, nsmul_eq_mul]
+  rw [show ((((u₀ : ZMod N)).val : ZMod N)) = ((u₀ : ZMod N)) from by
+    simp only [ZMod.natCast_val, ZMod.cast_id]]
+  rw [mul_comm]
+
+/-- **[T-CV-3b-ii]** The scheme-level square. -/
+theorem detCompScheme_mul (D : GaloisRepData N) [Fact (1 < N)] (u₀ : (ZMod N)ˣ) :
+    cycloUnitsMulScheme D u₀ ≫ detCompScheme D =
+      detCompScheme D ≫ muNRootsPowScheme D ((u₀ : ZMod N)).val := by
+  have hAlg : detCompAlgHom D ≫ cycloUnitsMulAlg D u₀ =
+      muNRootsPowAlg D ((u₀ : ZMod N)).val ≫ detCompAlgHom D := by
+    have h2 := congrArg
+      (fun m => ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m).unop)
+      (detCompMor_mul D u₀)
+    exact ((congrArg Quiver.Hom.unop
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp _ _)).symm.trans
+      h2).trans (congrArg Quiver.Hom.unop
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp _ _))
+  show Spec.map (CommRingCat.ofHom (cycloUnitsMulAlg D u₀).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom) =
+    Spec.map (CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom
+        (muNRootsPowAlg D ((u₀ : ZMod N)).val).hom.hom.toRingHom)
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  exact congrArg Spec.map (congrArg
+    (fun (m : muNRootsAlgebra D ⟶ cycloUnitsAlgebra D) =>
+      CommRingCat.ofHom m.hom.hom.toRingHom) hAlg)
+
+/-- **[T-CV-3b]** The determinant-side comparison twists by the power endo under the
+diagonal action. -/
+theorem dZMap_zxAction (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    zxAction D dE γ ≫ dZMap D dE =
+      dZMap D dE ≫ muNRootsPowScheme D
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
+  rw [dZMap]
+  rw [← Category.assoc, zxAction_snd]
+  simp only [Category.assoc]
+  rw [reassoc_of% (wxAction_snd D X γ),
+    reassoc_of% (detFrameScheme_rightMul D γ),
+    detCompScheme_mul D (Matrix.GeneralLinearGroup.det γ)]
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :
