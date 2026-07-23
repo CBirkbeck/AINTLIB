@@ -4679,6 +4679,51 @@ noncomputable def vRhoPairSpecIso (D : GaloisRepData N) :
           ((vRhoPairTensorIso D).hom_inv_id))).trans
         (Spec.map_id _))
 
+open scoped TensorProduct in
+/-- **[T-F3a-v]** The fibre square of `V_ρ` over `ℚ` is the paired scheme
+(mathlib's `pullbackSpecIso` composed with the tensor identification). -/
+noncomputable def pullbackVRhoIso (D : GaloisRepData N) :
+    pullback (vRhoπ D) (vRhoπ D) ≅ vRhoPairScheme D :=
+  AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+    (vRhoAlgebra D : Type 0) ≪≫ vRhoPairSpecIso D
+
+/-- **[T-F3a-v]** The `V_ρ`-pairing map on the fibre square: transport to the paired
+scheme and compare into the roots scheme. -/
+noncomputable def vRhoPairingMap (D : GaloisRepData N) [Fact (1 < N)] :
+    pullback (vRhoπ D) (vRhoπ D) ⟶ muNRootsScheme D :=
+  (pullbackVRhoIso D).hom ≫ rhoPairSchemeMap D
+
+open scoped TensorProduct in
+/-- **[T-F3a-v]** The pairing map lies over the base. -/
+theorem vRhoPairingMap_π (D : GaloisRepData N) [Fact (1 < N)] :
+    vRhoPairingMap D ≫ muNRootsSchemeπ D =
+      pullback.fst (vRhoπ D) (vRhoπ D) ≫ vRhoπ D := by
+  have h1 : (vRhoPairSpecIso D).hom ≫ vRhoPairSchemeπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ
+        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) :=
+    (AlgebraicGeometry.Spec.map_comp _ _).symm.trans
+      (congrArg AlgebraicGeometry.Spec.map (by
+        ext r
+        exact ((vRhoPairTensorIso D).hom.hom.hom.commutes r)))
+  have h2 : Spec.map (CommRingCat.ofHom (algebraMap ℚ
+      ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) =
+      Spec.map (CommRingCat.ofHom (algebraMap (vRhoAlgebra D : Type 0)
+        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) ≫ vRhoπ D := by
+    refine Eq.trans ?_ (AlgebraicGeometry.Spec.map_comp _ _)
+    exact congrArg AlgebraicGeometry.Spec.map (by
+      ext r
+      exact (IsScalarTower.algebraMap_apply ℚ (vRhoAlgebra D : Type 0)
+        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)) r))
+  rw [vRhoPairingMap, pullbackVRhoIso]
+  simp only [Iso.trans_hom, Category.assoc]
+  rw [rhoPairSchemeMap_π]
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (vRhoAlgebra D : Type 0)).hom ≫ ·)
+    (h1.trans h2)) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  exact congrArg (· ≫ vRhoπ D)
+    (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ _ _)
+
 /-- **[T-CV-1b]** The root of the cyclotomic quotient is an `N`-th root of unity. -/
 theorem cycloRoot_pow (N : ℕ) [NeZero N] :
     (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ N = 1 := by
