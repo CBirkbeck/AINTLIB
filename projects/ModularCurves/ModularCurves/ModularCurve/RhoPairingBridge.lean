@@ -324,6 +324,104 @@ theorem pairing_scheme_of_combPairs (D : GaloisRepData N) [Fact (1 < N)]
   simp only [Category.assoc]
   rfl
 
+/-- **[PIN-5]** The roots-scheme read is natural under precomposition. -/
+theorem muNRootsRead_comp (D : GaloisRepData N) [Fact (1 < N)]
+    {W W' : Scheme.{0}} (u : W' ⟶ W) {b : W ⟶ Spec (CommRingCat.of ℚ)}
+    (φ : W ⟶ muNRootsScheme D) (hφ : φ ≫ muNRootsSchemeπ D = b) :
+    muNRootsRead D (u ≫ b) (u ≫ φ) (by rw [Category.assoc, hφ]) =
+      (Scheme.Γ.map u.op).hom (muNRootsRead D b φ hφ) := by
+  show (muNPointsEquiv (Spec (CommRingCat.of ℚ)) N (u ≫ b)
+      ⟨(u ≫ φ) ≫ (muNSpecQIso D).inv, by
+        rw [Category.assoc, muNSpecQIso_π_inv, Category.assoc, hφ]⟩ :
+      Γ(W', ⊤)) = _
+  have hsub : (⟨(u ≫ φ) ≫ (muNSpecQIso D).inv, by
+        rw [Category.assoc, muNSpecQIso_π_inv, Category.assoc, hφ]⟩ :
+      { m : W' ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        m ≫ muNπ (Spec (CommRingCat.of ℚ)) N = u ≫ b }) =
+      ⟨u ≫ (φ ≫ (muNSpecQIso D).inv), by
+        rw [Category.assoc, Category.assoc, muNSpecQIso_π_inv, hφ]⟩ :=
+    Subtype.ext (Category.assoc u φ (muNSpecQIso D).inv)
+  refine Eq.trans (congrArg
+    (fun v : { m : W' ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        m ≫ muNπ (Spec (CommRingCat.of ℚ)) N = u ≫ b } =>
+      (muNPointsEquiv (Spec (CommRingCat.of ℚ)) N (u ≫ b) v : Γ(W', ⊤))) hsub) ?_
+  exact muNPointsEquiv_natural (Spec (CommRingCat.of ℚ)) N b u
+    ⟨φ ≫ (muNSpecQIso D).inv, by
+      rw [Category.assoc, muNSpecQIso_π_inv, hφ]⟩
+
+/-- **[PIN-5]** The scheme-level Weil read at a level-combination pair is the
+level-pair comparison powered by the symplectic exponent (map-level symplectic
+formula, from the DS4 register through the `Γ`-read dictionary). -/
+theorem torsionPairEval_comb (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (L : E.FullLevelPt N) (v w : Fin 2 → ZMod N) :
+    torsionPairEval D sT (𝟙 T)
+        (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)
+        (((w 0).val : ℤ) • L.1.1 + ((w 1).val : ℤ) • L.1.2)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v))
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L w)) =
+      pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 ≫ muNRootsPowScheme D
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+          ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) := by
+  refine muNRoots_hom_ext D
+    (torsionPairEval_π D sT (𝟙 T) _ _ _ _)
+    (by
+      rw [Category.assoc, muNRootsPowScheme_π, pairEZMap_π, Category.id_comp])
+    ?_
+  refine Eq.trans (torsionPairEval_read D sT (𝟙 T) _ _ _ _) ?_
+  refine Eq.trans (E.weilPairingEval_symplectic L.1.1 L.1.2
+    ((v 0).val : ℤ) ((v 1).val : ℤ) ((w 0).val : ℤ) ((w 1).val : ℤ)
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp L.2.1.1)
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp L.2.1.2)
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v))
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L w))) ?_
+  refine Eq.trans ?_ (muNRootsRead_pow D (𝟙 T ≫ sT)
+    (pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2)
+    (by rw [pairEZMap_π, Category.id_comp])
+    (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+      ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)).symm
+  refine congrArg (· ^ (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+    ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)) ?_
+  refine Eq.trans ?_ (muNRootsRead_congr D (Category.id_comp sT)
+    (rfl : pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 = _)
+    (by rw [pairEZMap_π, Category.id_comp])).symm
+  exact (pairEZMap_read_self D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2).symm
+
+/-- **[PIN-7, layered]** The morphism-level pairing identity of the pinned framed
+trivialization, from the value-level symplectic condition and the frame-side core
+identity (`hcore`, the `(v,w)`-component computation of the pinned coordinate pair
+against the pairing map — [PIN-6]). -/
+theorem framedPinned_pairing_scheme_of_core (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (hcond : pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 = frameDetMap D h)
+    (hcore : ∀ v w : Fin 2 → ZMod N,
+      coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+          (framedTorsionIsoPinned_π D sT E hinv L h hover) (𝟙 T)
+          (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)
+          (((w 0).val : ℤ) • L.1.1 + ((w 1).val : ℤ) • L.1.2)
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v))
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L w)) ≫
+          vRhoPairingMap D =
+        frameDetMap D h ≫ muNRootsPowScheme D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat))
+    {W : Scheme.{0}} (t : W ⟶ T) (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    torsionPairEval D sT t x y hx hy =
+      coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+        (framedTorsionIsoPinned_π D sT E hinv L h hover) t x y hx hy ≫
+        vRhoPairingMap D := by
+  refine pairing_scheme_of_combPairs D sT
+    (framedTorsionIsoPinned D sT E hinv L h hover)
+    (framedTorsionIsoPinned_π D sT E hinv L h hover) hinv L
+    (fun v w => ?_) t x y hx hy
+  refine Eq.trans (torsionPairEval_comb D sT L v w) ?_
+  refine Eq.trans (congrArg (· ≫ muNRootsPowScheme D _) hcond) ?_
+  exact (hcore v w).symm
+
 end
 
 end ModularCurves
