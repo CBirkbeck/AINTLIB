@@ -856,6 +856,26 @@ theorem framedPinned_pairing_scheme_of_ring (D : GaloisRepData N) [Fact (1 < N)]
     (fun v w => framedPinned_hcore_of_abs D sT hinv L h hover
       (fun v' w' => habs_of_ring D hring v' w') v w) t x y hx hy
 
+/-- **[PIN-6c-iv-γ]** The determinant-power ring composite is the correspondence
+image of the composed set-level morphism. -/
+theorem detPowRing_eq_inverse_map (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    CommRingCat.ofHom (muNRootsPowAlg D k).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom =
+    CommRingCat.ofHom (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (detFrameMor D ≫ detCompMor D ≫ muNRootsPowMor D k)).unop.hom.hom.toRingHom) := by
+  have hsplit : (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (detFrameMor D ≫ detCompMor D ≫ muNRootsPowMor D k) =
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (detFrameMor D) ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (detCompMor D) ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (muNRootsPowMor D k) := by
+    rw [Functor.map_comp, Functor.map_comp]
+  rw [hsplit]
+  rfl
+
 end
 
 end ModularCurves
