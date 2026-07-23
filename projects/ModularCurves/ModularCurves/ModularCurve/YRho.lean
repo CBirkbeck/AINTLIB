@@ -2514,6 +2514,355 @@ noncomputable def framePairCoeval (D : GaloisRepData N) :
   pullback.lift (frameCoeval D) (pullback.snd _ _)
     (by rw [frameCoeval_π, pullback.condition])
 
+/-- **[asm-2b-v]** The shear comultiplication eats the left injection to the
+evaluation comultiplication. -/
+theorem frameShearAlgHom_inl (D : GaloisRepData N) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+      (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+        (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (vRhoAlgebra D : Type 0)
+            (wFramesAlgebra D : Type 0))) ≫ frameShearAlgHom D =
+      frameEvalAlgHom D := by
+  have hop : ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameShearMor D) ≫
+      (rhoFrameProdAlgebraIso D).hom) ≫
+      ((rhoFrameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (rhoFrameProdFst D)) =
+      (frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameEvalMor D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact congrArg ((frameProdAlgebraIso D).inv ≫ ·)
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          _ _).symm.trans
+        (congrArg
+          (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+          (frameShearMor_fst D)))
+  exact (congrArg (· ≫ frameShearAlgHom D)
+    (rhoFrameProdAlgebraIso_inv_left D).symm).trans (congrArg Quiver.Hom.unop hop)
+
+/-- **[asm-2b-v]** The shear comultiplication eats the right injection to the right
+injection. -/
+theorem frameShearAlgHom_inr (D : GaloisRepData N) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+      (Algebra.TensorProduct.includeRight (R := ℚ) :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (vRhoAlgebra D : Type 0)
+            (wFramesAlgebra D : Type 0))) ≫ frameShearAlgHom D =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ) :
+          (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  have hop : ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameShearMor D) ≫
+      (rhoFrameProdAlgebraIso D).hom) ≫
+      ((rhoFrameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (rhoFrameProdSnd D)) =
+      (frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdSnd D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact congrArg ((frameProdAlgebraIso D).inv ≫ ·)
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          _ _).symm.trans
+        (congrArg
+          (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+          (frameShearMor_snd D)))
+  exact (congrArg (· ≫ frameShearAlgHom D)
+    (rhoFrameProdAlgebraIso_inv_right D).symm).trans
+    ((congrArg Quiver.Hom.unop hop).trans (frameProdAlgebraIso_inv_right D))
+
+/-- **[asm-2b-v]** The co-shear comultiplication eats the left injection to the
+co-evaluation comultiplication. -/
+theorem frameCoshearAlgHom_inl (D : GaloisRepData N) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+      (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+        (constVecAlgebra N : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0))) ≫ frameCoshearAlgHom D =
+      frameCoevalAlgHom D := by
+  have hop : ((rhoFrameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameCoshearMor D) ≫
+      (frameProdAlgebraIso D).hom) ≫
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdFst D)) =
+      (rhoFrameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameCoevalMor D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact congrArg ((rhoFrameProdAlgebraIso D).inv ≫ ·)
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          _ _).symm.trans
+        (congrArg
+          (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+          (frameCoshearMor_fst D)))
+  exact (congrArg (· ≫ frameCoshearAlgHom D)
+    (frameProdAlgebraIso_inv_left D).symm).trans (congrArg Quiver.Hom.unop hop)
+
+/-- **[asm-2b-v]** The co-shear comultiplication eats the right injection to the
+right injection. -/
+theorem frameCoshearAlgHom_inr (D : GaloisRepData N) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+      (Algebra.TensorProduct.includeRight (R := ℚ) :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0))) ≫ frameCoshearAlgHom D =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ) :
+          (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (vRhoAlgebra D : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  have hop : ((rhoFrameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameCoshearMor D) ≫
+      (frameProdAlgebraIso D).hom) ≫
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdSnd D)) =
+      (rhoFrameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (rhoFrameProdSnd D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact congrArg ((rhoFrameProdAlgebraIso D).inv ≫ ·)
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          _ _).symm.trans
+        (congrArg
+          (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+          (frameCoshearMor_snd D)))
+  exact (congrArg (· ≫ frameCoshearAlgHom D)
+    (frameProdAlgebraIso_inv_right D).symm).trans
+    ((congrArg Quiver.Hom.unop hop).trans (rhoFrameProdAlgebraIso_inv_right D))
+
+/-- **[asm-2b-v]** The co-evaluation then the shear is the left injection
+(`v = A⁻¹·(A·v)` transported through the correspondence). -/
+theorem frameShearAlgHom_coeval (D : GaloisRepData N) :
+    frameCoevalAlgHom D ≫ frameShearAlgHom D =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+          (constVecAlgebra N : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  have hop : ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameShearMor D) ≫
+      (rhoFrameProdAlgebraIso D).hom) ≫
+      ((rhoFrameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameCoevalMor D)) =
+      (frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdFst D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact congrArg ((frameProdAlgebraIso D).inv ≫ ·)
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          _ _).symm.trans
+        (congrArg
+          (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+          (frameShearMor_coeval D)))
+  exact (congrArg Quiver.Hom.unop hop).trans (frameProdAlgebraIso_inv_left D)
+
+/-- **[asm-2b-v]** The evaluation then the co-shear is the left injection
+(`w = A·(A⁻¹·w)` transported through the correspondence). -/
+theorem frameCoshearAlgHom_eval (D : GaloisRepData N) :
+    frameEvalAlgHom D ≫ frameCoshearAlgHom D =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+          (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (vRhoAlgebra D : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  have hop : ((rhoFrameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameCoshearMor D) ≫
+      (frameProdAlgebraIso D).hom) ≫
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameEvalMor D)) =
+      (rhoFrameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (rhoFrameProdFst D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact congrArg ((rhoFrameProdAlgebraIso D).inv ≫ ·)
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          _ _).symm.trans
+        (congrArg
+          (fun t => (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map t)
+          (frameCoshearMor_eval D)))
+  exact (congrArg Quiver.Hom.unop hop).trans (rhoFrameProdAlgebraIso_inv_left D)
+
+/-- **[asm-2b-v]** The Φ-conjugation: under the tensor identifications, the pairing
+`(v, A) ↦ (A·v, A)` is `Spec` of the shear comultiplication. -/
+theorem framePairEval_conj (D : GaloisRepData N) :
+    (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)).inv ≫ framePairEval D =
+      AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+        (frameShearAlgHom D).hom.hom.toRingHom) ≫
+      (AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)).inv := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      (pullback.lift_fst _ _ _)) ?_
+    refine Eq.trans (Iso.inv_hom_id_assoc _ _) ?_
+    refine Eq.trans ?_ (Category.assoc _ _ _).symm
+    refine Eq.trans ?_ (congrArg (AlgebraicGeometry.Spec.map _ ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_fst' ℚ (vRhoAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)).symm)
+    refine Eq.trans (congrArg AlgebraicGeometry.Spec.map ?_)
+      (AlgebraicGeometry.Spec.map_comp _ _)
+    show CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom =
+      CommRingCat.ofHom (algebraMap (vRhoAlgebra D : Type 0)
+        (TensorProduct ℚ (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0))) ≫
+      CommRingCat.ofHom (frameShearAlgHom D).hom.hom.toRingHom
+    ext x
+    exact (congrArg (fun m => m.hom.hom x) (frameShearAlgHom_inl D)).symm
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)) ?_
+    refine Eq.trans ?_ (Category.assoc _ _ _).symm
+    refine Eq.trans ?_ (congrArg (AlgebraicGeometry.Spec.map _ ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ (vRhoAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)).symm)
+    refine Eq.trans (congrArg AlgebraicGeometry.Spec.map ?_)
+      (AlgebraicGeometry.Spec.map_comp _ _)
+    show CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ) :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)).toRingHom =
+      CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ) :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (vRhoAlgebra D : Type 0)
+            (wFramesAlgebra D : Type 0)).toRingHom ≫
+      CommRingCat.ofHom (frameShearAlgHom D).hom.hom.toRingHom
+    ext x
+    exact (congrArg (fun m => m.hom.hom x) (frameShearAlgHom_inr D)).symm
+
+/-- **[asm-2b-v]** The Ψ-conjugation: the pairing `(w, A) ↦ (A⁻¹·w, A)` is `Spec` of
+the co-shear comultiplication. -/
+theorem framePairCoeval_conj (D : GaloisRepData N) :
+    (AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)).inv ≫ framePairCoeval D =
+      AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+        (frameCoshearAlgHom D).hom.hom.toRingHom) ≫
+      (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)).inv := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      (pullback.lift_fst _ _ _)) ?_
+    refine Eq.trans (Iso.inv_hom_id_assoc _ _) ?_
+    refine Eq.trans ?_ (Category.assoc _ _ _).symm
+    refine Eq.trans ?_ (congrArg (AlgebraicGeometry.Spec.map _ ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_fst' ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)).symm)
+    refine Eq.trans (congrArg AlgebraicGeometry.Spec.map ?_)
+      (AlgebraicGeometry.Spec.map_comp _ _)
+    show CommRingCat.ofHom (frameCoevalAlgHom D).hom.hom.toRingHom =
+      CommRingCat.ofHom (algebraMap (constVecAlgebra N : Type 0)
+        (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0))) ≫
+      CommRingCat.ofHom (frameCoshearAlgHom D).hom.hom.toRingHom
+    ext x
+    exact (congrArg (fun m => m.hom.hom x) (frameCoshearAlgHom_inl D)).symm
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)) ?_
+    refine Eq.trans ?_ (Category.assoc _ _ _).symm
+    refine Eq.trans ?_ (congrArg (AlgebraicGeometry.Spec.map _ ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)).symm)
+    refine Eq.trans (congrArg AlgebraicGeometry.Spec.map ?_)
+      (AlgebraicGeometry.Spec.map_comp _ _)
+    show CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ) :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (vRhoAlgebra D : Type 0)
+            (wFramesAlgebra D : Type 0)).toRingHom =
+      CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := ℚ) :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+          TensorProduct ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)).toRingHom ≫
+      CommRingCat.ofHom (frameCoshearAlgHom D).hom.hom.toRingHom
+    ext x
+    exact (congrArg (fun m => m.hom.hom x) (frameCoshearAlgHom_inr D)).symm
+
+/-- **[asm-2b-v]** CORE-A: pairing with the frame then co-evaluating recovers the
+vector. -/
+theorem framePairEval_coeval (D : GaloisRepData N) :
+    framePairEval D ≫ frameCoeval D =
+      pullback.fst (constVecSchemeπ N) (wFramesπ D) := by
+  refine Eq.trans (congrArg (· ≫ frameCoeval D)
+    ((Iso.hom_inv_id_assoc (AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0))
+      (framePairEval D)).symm.trans
+    (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)).hom ≫ ·) (framePairEval_conj D)))) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    ((Category.assoc _ _ _).trans
+      (congrArg (AlgebraicGeometry.Spec.map _ ≫ ·)
+        (Iso.inv_hom_id_assoc _ _)))) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    (AlgebraicGeometry.Spec.map_comp _ _).symm) ?_
+  refine Eq.trans (congrArg (fun t => (AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+      AlgebraicGeometry.Spec.map t) ?_)
+    (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ (constVecAlgebra N : Type 0)
+      (wFramesAlgebra D : Type 0))
+  show CommRingCat.ofHom (frameCoevalAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (frameShearAlgHom D).hom.hom.toRingHom =
+    CommRingCat.ofHom (algebraMap (constVecAlgebra N : Type 0)
+      (TensorProduct ℚ (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)))
+  ext x
+  exact congrArg (fun m => m.hom.hom x) (frameShearAlgHom_coeval D)
+
+/-- **[asm-2b-v]** CORE-B: pairing with the frame then evaluating recovers the
+`ρ`-vector. -/
+theorem framePairCoeval_eval (D : GaloisRepData N) :
+    framePairCoeval D ≫ frameEval D =
+      pullback.fst (vRhoπ D) (wFramesπ D) := by
+  refine Eq.trans (congrArg (· ≫ frameEval D)
+    ((Iso.hom_inv_id_assoc (AlgebraicGeometry.pullbackSpecIso ℚ
+        (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0))
+      (framePairCoeval D)).symm.trans
+    (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)).hom ≫ ·) (framePairCoeval_conj D)))) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    ((Category.assoc _ _ _).trans
+      (congrArg (AlgebraicGeometry.Spec.map _ ≫ ·)
+        (Iso.inv_hom_id_assoc _ _)))) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    (AlgebraicGeometry.Spec.map_comp _ _).symm) ?_
+  refine Eq.trans (congrArg (fun t => (AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+      AlgebraicGeometry.Spec.map t) ?_)
+    (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ (vRhoAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0))
+  show CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (frameCoshearAlgHom D).hom.hom.toRingHom =
+    CommRingCat.ofHom (algebraMap (vRhoAlgebra D : Type 0)
+      (TensorProduct ℚ (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)))
+  ext x
+  exact congrArg (fun m => m.hom.hom x) (frameCoshearAlgHom_eval D)
+
 /-- **[asm-2a]** The universal-frame evaluation on `ℚ̄`-points: the `V_ρ`-reading of
 the evaluated point is the classified frame acting on the vector (scaffold; the
 proof is the counit-naturality assembly through the tensor pair-split). -/
