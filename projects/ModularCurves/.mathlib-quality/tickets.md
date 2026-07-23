@@ -25652,6 +25652,26 @@ REMAINING = PIN-6 (hcore): forall v w, coordPairLift(framedTorsionIsoPinned)(1 T
        muNRootsPowScheme correspondence-shape).
     THEN: framedPinned_pairing_scheme (UNCONDITIONAL) := _of_core with hcore := hcore_of_abs habs;
     THEN 3c dictionary-application.
+    6c-STATUS (2026-07-23, 5204cb9d6+): i,ii,ii-a,iii ★★ DONE GREEN (constVecCorrPtRing/Alg +
+    _eq_Spec; frameSlotRing/Alg + frameSlotEval_eq_Spec; lift_pullbackSpecIso_hom;
+    pairSlot_vRhoPairingMap_eq_Spec — LHS of habs = Spec.map(ofHom rhoPairAlgHom-ring >>
+    ofHom vRhoPairTensorIso-ring >> ofHom productMap(frameSlotAlg v, frameSlotAlg w)-ring)).
+    REMAINING 6c-iv: (α) RHS-conversion: detFrameScheme >> detCompScheme >> muNRootsPowScheme K
+    = Spec.map(ofHom powRing-K >> ofHom detCompAlgHom-ring >> ofHom detFrameAlgHom-ring)
+    [detFrame/detComp are Spec-maps by def; READ muNRootsPowScheme def (~YRho:6726) for its
+    Spec-shape]; (β) reduce habs to the CommRingCat-identity via Spec-faithfulness
+    (Spec.map_injective / Scheme.Spec fully faithful); (γ) prove the ring identity via the
+    FiniteEtale-correspondence: express BOTH ring-composites as toRingHom-strips of
+    CommAlgCat.FiniteEtale-composites (productMap/ofId-legs enter via fullness — homMk);
+    push through (finiteEtaleEquivContAction Q).inverse-functoriality (map_comp) to ONE
+    ContAction-morphism-equality; faithfulness of inverse (equivalence!) + FintypeCat
+    elementwise at a frame-element f: pairing-of-corrected-slot-reads = p(sympl(f-corr-v,
+    f-corr-w)) = p(det f * sympl(v,w)) = pow-K-of-det-read (sympl_glSmul ZMod-arithmetic;
+    corr-index-effect from corrAlgHom's ContAction-source corrMor — grep corrMor def; slot-read
+    set-level from frameEvalMor def; det-read from detFrameMor def). CAUTION: the tensor-legs
+    (productMap vs FiniteEtaleGalois.tensorObj-UP) need the landed tensor-correspondence
+    plumbing (frameProdAlgebraIso, tensorObj-map-lemmas from the T-EQ-2 era — grep
+    FiniteEtaleGalois.tensor lemmas before hand-rolling).
 
 #### [T-EQ-3] Value-equivalence (the KM 4.7 content) — status: open, deps: T-CV-4,T-EQ-2
 Statement: per (T', k): {sections of the carved-quotient I over k} ≃
