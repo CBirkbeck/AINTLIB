@@ -827,6 +827,35 @@ theorem habs_of_ring (D : GaloisRepData N) [Fact (1 < N)]
   rw [pairSlot_vRhoPairingMap_eq_Spec D v w, detPow_eq_Spec D]
   exact congrArg Spec.map (hring v w)
 
+/-- **[PIN, stitched]** The morphism-level pairing identity of the pinned framed
+trivialization, from the value-level symplectic condition and the ring-side
+pairing-determinant identity. -/
+theorem framedPinned_pairing_scheme_of_ring (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (hcond : pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 = frameDetMap D h)
+    (hring : ∀ v w : Fin 2 → ZMod N,
+      CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (vRhoPairTensorIso D).hom.hom.hom.toRingHom ≫
+        CommRingCat.ofHom (Algebra.TensorProduct.productMap (frameSlotAlg D v)
+          (frameSlotAlg D w)).toRingHom =
+      CommRingCat.ofHom (muNRootsPowAlg D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom)
+    {W : Scheme.{0}} (t : W ⟶ T) (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    torsionPairEval D sT t x y hx hy =
+      coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+        (framedTorsionIsoPinned_π D sT E hinv L h hover) t x y hx hy ≫
+        vRhoPairingMap D :=
+  framedPinned_pairing_scheme_of_core D sT hinv L h hover hcond
+    (fun v w => framedPinned_hcore_of_abs D sT hinv L h hover
+      (fun v' w' => habs_of_ring D hring v' w') v w) t x y hx hy
+
 end
 
 end ModularCurves
