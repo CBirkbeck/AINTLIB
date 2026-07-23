@@ -719,6 +719,68 @@ theorem frameSlotEval_eq_Spec (D : GaloisRepData N) [Fact (1 < N)]
   refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
   rfl
 
+/-- **[PIN-6c-iii]** The absolute slot evaluation, algebra side. -/
+noncomputable def frameSlotAlg (D : GaloisRepData N) [Fact (1 < N)]
+    (v : Fin 2 → ZMod N) :
+    (vRhoAlgebra D : Type 0) →ₐ[ℚ] (wFramesAlgebra D : Type 0) :=
+  (Algebra.TensorProduct.productMap
+      ((Algebra.ofId ℚ (wFramesAlgebra D : Type 0)).comp (constVecCorrPtAlg N v))
+      (AlgHom.id ℚ (wFramesAlgebra D : Type 0))).comp
+    (frameEvalAlgHom D).hom.hom
+
+theorem frameSlotRing_eq_alg (D : GaloisRepData N) [Fact (1 < N)]
+    (v : Fin 2 → ZMod N) :
+    frameSlotRing D v = CommRingCat.ofHom (frameSlotAlg D v).toRingHom := rfl
+
+/-- **[PIN-6c-iii]** The paired slot evaluation against the pairing map is a single
+`Spec` map. -/
+theorem pairSlot_vRhoPairingMap_eq_Spec (D : GaloisRepData N) [Fact (1 < N)]
+    (v w : Fin 2 → ZMod N) :
+    pullback.lift (frameSlotEval D v) (frameSlotEval D w)
+        ((frameSlotEval_π D v).trans (frameSlotEval_π D w).symm) ≫
+      vRhoPairingMap D =
+    Spec.map (CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (vRhoPairTensorIso D).hom.hom.hom.toRingHom ≫
+      CommRingCat.ofHom (Algebra.TensorProduct.productMap (frameSlotAlg D v)
+        (frameSlotAlg D w)).toRingHom) := by
+  have hlift : pullback.lift (frameSlotEval D v) (frameSlotEval D w)
+      ((frameSlotEval_π D v).trans (frameSlotEval_π D w).symm) =
+      pullback.lift
+        (Spec.map (CommRingCat.ofHom (frameSlotAlg D v).toRingHom))
+        (Spec.map (CommRingCat.ofHom (frameSlotAlg D w).toRingHom))
+        (by
+          rw [← frameSlotRing_eq_alg, ← frameSlotRing_eq_alg,
+            ← frameSlotEval_eq_Spec, ← frameSlotEval_eq_Spec]
+          exact (frameSlotEval_π D v).trans (frameSlotEval_π D w).symm) := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst]
+      refine Eq.trans ?_ (pullback.lift_fst _ _ _).symm
+      exact (frameSlotEval_eq_Spec D v).trans
+        (congrArg Spec.map (frameSlotRing_eq_alg D v))
+    · rw [pullback.lift_snd]
+      refine Eq.trans ?_ (pullback.lift_snd _ _ _).symm
+      exact (frameSlotEval_eq_Spec D w).trans
+        (congrArg Spec.map (frameSlotRing_eq_alg D w))
+  rw [hlift]
+  rw [show vRhoPairingMap D = ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (vRhoAlgebra D : Type 0)).hom ≫
+    Spec.map (CommRingCat.ofHom (vRhoPairTensorIso D).hom.hom.hom.toRingHom)) ≫
+    Spec.map (CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom) from rfl]
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ Spec.map (CommRingCat.ofHom
+      (rhoPairAlgHom D).hom.hom.toRingHom)) (Category.assoc _ _ _).symm) ?_
+  refine Eq.trans (congrArg (fun m => (m ≫ Spec.map (CommRingCat.ofHom
+      (vRhoPairTensorIso D).hom.hom.hom.toRingHom)) ≫
+      Spec.map (CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom))
+    (lift_pullbackSpecIso_hom ℚ (vRhoAlgebra D : Type 0)
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)
+      (frameSlotAlg D v) (frameSlotAlg D w) _)) ?_
+  refine Eq.trans (congrArg (· ≫ Spec.map (CommRingCat.ofHom
+      (rhoPairAlgHom D).hom.hom.toRingHom))
+    (AlgebraicGeometry.Spec.map_comp _ _).symm) ?_
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  rfl
+
 end
 
 end ModularCurves
