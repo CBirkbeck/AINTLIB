@@ -222,6 +222,41 @@ def descTorsionIso
   hom_inv_id := descTorsion_hom_inv_id D X c α Hhom Hinv
   inv_hom_id := descTorsion_inv_hom_id D X c α Hhom Hinv
 
+/-- **[T-EQ-3b-iv]** The coordinate read of the descended trivialization at a
+transported point is the original coordinate read (the two reads are reads of the
+*same* `V_ρ`-point, by the descent factorization). -/
+theorem coord_descTorsionIso (Hhom) (Hinv)
+    (t'' : Spec (.of (AlgebraicClosure ℚ)) ⟶ T'')
+    (ht : (t'' ≫ c) ≫ X.structMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (x'' : (X.pullbackAlong c).curve.Point t'')
+    (hx'' : x''.1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      t'' ≫ (X.pullbackAlong c).curve.zero) :
+    coord D X.structMap (descTorsionIso D X c α Hhom Hinv)
+      (descTorsionHom_over D X c α Hhom) (t'' ≫ c) ht
+      (EllHom.mapPoint (X.pullbackAlongπ c) t'' x'')
+      (EllHom.mapPoint_torsion (X.pullbackAlongπ c) x'' hx'') =
+    coord D (X.pullbackAlong c).structMap α.torsionIso α.over_T t''
+      (by
+        show t'' ≫ (X.pullbackAlong c).structMap = _
+        rw [show (X.pullbackAlong c).structMap = c ≫ X.structMap from rfl,
+          ← Category.assoc]
+        exact ht) x'' hx'' := by
+  refine congrArg (vRhoPointsEquiv D) (Subtype.ext ?_)
+  show X.curve.pointToTorsion (EllHom.mapPoint (X.pullbackAlongπ c) t'' x'')
+      (EllHom.mapPoint_torsion (X.pullbackAlongπ c) x'' hx'') ≫
+      (descTorsionIso D X c α Hhom Hinv).hom ≫
+      pullback.fst (vRhoπ D) X.structMap =
+    (X.pullbackAlong c).curve.pointToTorsion x'' hx'' ≫
+      α.torsionIso.hom ≫ pullback.fst (vRhoπ D) (X.pullbackAlong c).structMap
+  rw [← pointToTorsion_mapPoint (X.pullbackAlongπ c) x'' hx'']
+  rw [show (descTorsionIso D X c α Hhom Hinv).hom =
+    descTorsionHom D X c α Hhom from rfl]
+  rw [Category.assoc, ← Category.assoc
+    (torsionMapOfEllHom (X.pullbackAlongπ c) N),
+    descTorsionHom_fac]
+  rw [Category.assoc, vRhoCoverPrj_fst]
+
 end Descend
 
 /-- **[T-EQ-3b-iv]** Geometric points lift through a finite étale surjective cover
