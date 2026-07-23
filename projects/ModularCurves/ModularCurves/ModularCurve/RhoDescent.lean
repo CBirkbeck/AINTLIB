@@ -294,6 +294,157 @@ theorem exists_lift_of_finite_etale_surjective {T' T'' : Scheme.{0}}
   rw [Category.assoc, pullback.condition, ← Category.assoc, hs,
     Category.id_comp]
 
+/-- `pointToTorsion` under precomposition: a point whose underlying section is
+`k ≫ x.1` reads to `k ≫` the torsion read (the base point is forced). -/
+theorem pointToTorsion_comp {S : Scheme.{0}} {E : EllipticCurve S}
+    {W W' : Scheme.{0}} (k : W' ⟶ W) {t : W ⟶ S} {t' : W' ⟶ S}
+    (x : E.Point t) (x' : E.Point t') (hval : x'.1 = k ≫ x.1)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hx' : x'.1 ≫ E.mulByHom N = t' ≫ E.zero) :
+    E.pointToTorsion x' hx' = k ≫ E.pointToTorsion x hx := by
+  apply pullback.hom_ext
+  · show E.pointToTorsion x' hx' ≫ E.torsionι N =
+      (k ≫ E.pointToTorsion x hx) ≫ E.torsionι N
+    rw [E.pointToTorsion_torsionι, Category.assoc, E.pointToTorsion_torsionι]
+    exact hval
+  · show E.pointToTorsion x' hx' ≫ E.torsionπ N =
+      (k ≫ E.pointToTorsion x hx) ≫ E.torsionπ N
+    rw [E.pointToTorsion_torsionπ, Category.assoc, E.pointToTorsion_torsionπ]
+    rw [← x'.2, hval, Category.assoc, x.2]
+
+/-- `torsionPairEval` is congruent in the points (proofs transport). -/
+theorem torsionPairEval_congr (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
+    {W : Scheme.{0}} {t : W ⟶ T} {x₁ x₂ y₁ y₂ : E.Point t}
+    (hx12 : x₁ = x₂) (hy12 : y₁ = y₂)
+    (hx : x₁.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y₁.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    torsionPairEval D sT t x₁ y₁ hx hy =
+      torsionPairEval D sT t x₂ y₂ (hx12 ▸ hx) (hy12 ▸ hy) := by
+  subst hx12; subst hy12; rfl
+
+/-- `coordPairLift` is congruent in the points (proofs transport). -/
+theorem coordPairLift_congr (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
+    (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N)
+    {W : Scheme.{0}} {t : W ⟶ T} {x₁ x₂ y₁ y₂ : E.Point t}
+    (hx12 : x₁ = x₂) (hy12 : y₁ = y₂)
+    (hx : x₁.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y₁.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    coordPairLift D sT torsionIso hOver t x₁ y₁ hx hy =
+      coordPairLift D sT torsionIso hOver t x₂ y₂ (hx12 ▸ hx) (hy12 ▸ hy) := by
+  subst hx12; subst hy12; rfl
+
+/-- `torsionPairEval` under precomposition. -/
+theorem torsionPairEval_comp (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
+    {W W' : Scheme.{0}} (k : W' ⟶ W) {t : W ⟶ T} {t' : W' ⟶ T}
+    (x y : E.Point t) (x' y' : E.Point t')
+    (hxval : x'.1 = k ≫ x.1) (hyval : y'.1 = k ≫ y.1)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hx' : x'.1 ≫ E.mulByHom N = t' ≫ E.zero)
+    (hy' : y'.1 ≫ E.mulByHom N = t' ≫ E.zero) :
+    torsionPairEval D sT t' x' y' hx' hy' =
+      k ≫ torsionPairEval D sT t x y hx hy := by
+  have hlift : pullback.lift (f := E.torsionπ N) (g := E.torsionπ N)
+      (E.pointToTorsion x' hx') (E.pointToTorsion y' hy')
+      (by simp) = k ≫ pullback.lift (f := E.torsionπ N) (g := E.torsionπ N)
+      (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst, Category.assoc, pullback.lift_fst]
+      exact pointToTorsion_comp k x x' hxval hx hx'
+    · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd]
+      exact pointToTorsion_comp k y y' hyval hy hy'
+  show pullback.lift (E.pointToTorsion x' hx') (E.pointToTorsion y' hy')
+      (by simp) ≫ E.weilPairing N ≫ muNMapAlong sT N ≫ (muNSpecQIso D).hom =
+    k ≫ (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy)
+      (by simp) ≫ E.weilPairing N ≫ muNMapAlong sT N ≫ (muNSpecQIso D).hom)
+  rw [hlift]
+  simp only [Category.assoc]
+
+/-- `coordPairLift` under precomposition. -/
+theorem coordPairLift_comp (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
+    (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N)
+    {W W' : Scheme.{0}} (k : W' ⟶ W) {t : W ⟶ T} {t' : W' ⟶ T}
+    (x y : E.Point t) (x' y' : E.Point t')
+    (hxval : x'.1 = k ≫ x.1) (hyval : y'.1 = k ≫ y.1)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hx' : x'.1 ≫ E.mulByHom N = t' ≫ E.zero)
+    (hy' : y'.1 ≫ E.mulByHom N = t' ≫ E.zero) :
+    coordPairLift D sT torsionIso hOver t' x' y' hx' hy' =
+      k ≫ coordPairLift D sT torsionIso hOver t x y hx hy := by
+  apply pullback.hom_ext
+  · show pullback.lift _ _ _ ≫ pullback.fst (vRhoπ D) (vRhoπ D) =
+      (k ≫ pullback.lift _ _ _) ≫ pullback.fst (vRhoπ D) (vRhoπ D)
+    rw [pullback.lift_fst, Category.assoc, pullback.lift_fst]
+    rw [pointToTorsion_comp k x x' hxval hx hx']
+    simp only [Category.assoc]
+  · show pullback.lift _ _ _ ≫ pullback.snd (vRhoπ D) (vRhoπ D) =
+      (k ≫ pullback.lift _ _ _) ≫ pullback.snd (vRhoπ D) (vRhoπ D)
+    rw [pullback.lift_snd, Category.assoc, pullback.lift_snd]
+    rw [pointToTorsion_comp k y y' hyval hy hy']
+    simp only [Category.assoc]
+
+/-- **[T-EQ-3b-vi]** Naturality of the scheme-level Weil-pairing read along an
+`Ell/ℚ`-morphism (the `W`-generic crossing extracted from
+`RhoLevelStructure.pull`, riding the DS4-registered `weilPairingEval_mapPoint`
+through the `μ_N`-points dictionary). -/
+theorem torsionPairEval_mapPoint (D : GaloisRepData N) [Fact (1 < N)]
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {W : Scheme.{0}} (t : W ⟶ A.base) (x y : A.curve.Point t)
+    (hx : x.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero)
+    (hy : y.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero) :
+    torsionPairEval D A.structMap t x y hx hy =
+      torsionPairEval D B.structMap (t ≫ g.baseHom)
+        (EllHom.mapPoint g t x) (EllHom.mapPoint g t y)
+        (EllHom.mapPoint_torsion g x hx) (EllHom.mapPoint_torsion g y hy) := by
+  have hoverA : (pullback.lift (A.curve.pointToTorsion x hx)
+      (A.curve.pointToTorsion y hy) (by simp) ≫ A.curve.weilPairing N) ≫
+      muNπ A.base N = t := by
+    rw [Category.assoc, A.curve.weilPairing_over N, ← Category.assoc,
+      pullback.lift_fst, A.curve.pointToTorsion_torsionπ]
+  have h1 : ((muNPointsEquiv B.base N (t ≫ g.baseHom))
+      ⟨(pullback.lift (A.curve.pointToTorsion x hx)
+          (A.curve.pointToTorsion y hy) (by simp) ≫ A.curve.weilPairing N) ≫
+        muNMapAlong g.baseHom N, by
+          rw [Category.assoc, muNMapAlong_π, ← Category.assoc, hoverA]⟩ :
+        Γ(W, ⊤)) =
+      ((muNPointsEquiv B.base N (t ≫ g.baseHom))
+        ⟨pullback.lift (B.curve.pointToTorsion (EllHom.mapPoint g t x)
+              (EllHom.mapPoint_torsion g x hx))
+            (B.curve.pointToTorsion (EllHom.mapPoint g t y)
+              (EllHom.mapPoint_torsion g y hy)) (by simp) ≫
+          B.curve.weilPairing N, by
+            rw [Category.assoc, B.curve.weilPairing_over N, ← Category.assoc,
+              pullback.lift_fst, B.curve.pointToTorsion_torsionπ]⟩ : Γ(W, ⊤)) := by
+    rw [muNPointsEquiv_mapAlong g.baseHom N t
+      ⟨pullback.lift (A.curve.pointToTorsion x hx)
+          (A.curve.pointToTorsion y hy) (by simp) ≫ A.curve.weilPairing N,
+        hoverA⟩]
+    exact (weilPairingEval_mapPoint g t x y hx hy).symm
+  have h3 := congrArg Subtype.val
+    ((muNPointsEquiv B.base N (t ≫ g.baseHom)).injective (Subtype.ext h1))
+  show pullback.lift (A.curve.pointToTorsion x hx)
+      (A.curve.pointToTorsion y hy) (by simp) ≫ A.curve.weilPairing N ≫
+      muNMapAlong A.structMap N ≫ (muNSpecQIso D).hom =
+    pullback.lift (B.curve.pointToTorsion (EllHom.mapPoint g t x)
+        (EllHom.mapPoint_torsion g x hx))
+      (B.curve.pointToTorsion (EllHom.mapPoint g t y)
+        (EllHom.mapPoint_torsion g y hy)) (by simp) ≫
+      B.curve.weilPairing N ≫ muNMapAlong B.structMap N ≫ (muNSpecQIso D).hom
+  have hstruct : muNMapAlong A.structMap N =
+      muNMapAlong g.baseHom N ≫ muNMapAlong B.structMap N :=
+    (congrArg (fun m => muNMapAlong m N) g.base_w.symm).trans
+      (muNMapAlong_comp g.baseHom B.structMap N)
+  rw [hstruct]
+  simp only [Category.assoc]
+  rw [reassoc_of% h3]
+
 section Fields
 
 variable {D : GaloisRepData N} {X : EllObj (CommRingCat.of ℚ)}
@@ -303,7 +454,7 @@ variable {α : RhoLevelStructure D (X.pullbackAlong c).structMap
   (X.pullbackAlong c).curve}
 
 /-- Kill transfer along the point transport (backwards). -/
-theorem point_kill_of_mapPoint_kill {t'' : Spec (.of (AlgebraicClosure ℚ)) ⟶ T''}
+theorem point_kill_of_mapPoint_kill {W'' : Scheme.{0}} {t'' : W'' ⟶ T''}
     (x'' : (X.pullbackAlong c).curve.Point t'')
     (hx : (EllHom.mapPoint (X.pullbackAlongπ c) t'' x'').1 ≫
       X.curve.mulByHom N = (t'' ≫ (X.pullbackAlongπ c).baseHom) ≫ X.curve.zero) :
@@ -395,6 +546,125 @@ theorem descTorsion_pairing_compat [IsFinite c] [Etale c] (Hhom) (Hinv)
   rw [coord_descTorsionIso D X c α Hhom Hinv t'' ht x'' hx'',
     coord_descTorsionIso D X c α Hhom Hinv t'' ht y'' hy'']
   exact hα
+
+/-- **[T-EQ-3b-vi]** The map-level first leg of the descended trivialization at a
+transported torsion point (the `W`-generic core of `coord_descTorsionIso`). -/
+theorem descTorsionIso_fst_leg (Hhom) (Hinv) {W' : Scheme.{0}} (tW : W' ⟶ T'')
+    (x'' : (X.pullbackAlong c).curve.Point tW)
+    (hx'' : x''.1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      tW ≫ (X.pullbackAlong c).curve.zero) :
+    X.curve.pointToTorsion (EllHom.mapPoint (X.pullbackAlongπ c) tW x'')
+        (EllHom.mapPoint_torsion (X.pullbackAlongπ c) x'' hx'') ≫
+      (descTorsionIso D X c α Hhom Hinv).hom ≫ pullback.fst (vRhoπ D) X.structMap =
+    (X.pullbackAlong c).curve.pointToTorsion x'' hx'' ≫
+      α.torsionIso.hom ≫ pullback.fst (vRhoπ D) (X.pullbackAlong c).structMap := by
+  rw [← pointToTorsion_mapPoint (X.pullbackAlongπ c) x'' hx'']
+  rw [show (descTorsionIso D X c α Hhom Hinv).hom =
+    descTorsionHom D X c α Hhom from rfl]
+  rw [Category.assoc, ← Category.assoc
+    (torsionMapOfEllHom (X.pullbackAlongπ c) N),
+    descTorsionHom_fac]
+  rw [Category.assoc, vRhoCoverPrj_fst]
+
+/-- **[T-EQ-3b-vi]** The coordinate-pair read of the descended trivialization at
+transported points is the original coordinate-pair read. -/
+theorem coordPairLift_descTorsionIso (Hhom) (Hinv) {W' : Scheme.{0}}
+    (tW : W' ⟶ T'') (x'' y'' : (X.pullbackAlong c).curve.Point tW)
+    (hx'' : x''.1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      tW ≫ (X.pullbackAlong c).curve.zero)
+    (hy'' : y''.1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      tW ≫ (X.pullbackAlong c).curve.zero) :
+    coordPairLift D X.structMap (descTorsionIso D X c α Hhom Hinv)
+      (descTorsionHom_over D X c α Hhom) (tW ≫ c)
+      (EllHom.mapPoint (X.pullbackAlongπ c) tW x'')
+      (EllHom.mapPoint (X.pullbackAlongπ c) tW y'')
+      (EllHom.mapPoint_torsion (X.pullbackAlongπ c) x'' hx'')
+      (EllHom.mapPoint_torsion (X.pullbackAlongπ c) y'' hy'') =
+    coordPairLift D (X.pullbackAlong c).structMap α.torsionIso α.over_T tW
+      x'' y'' hx'' hy'' := by
+  apply pullback.hom_ext
+  · show pullback.lift _ _ _ ≫ pullback.fst (vRhoπ D) (vRhoπ D) =
+      pullback.lift _ _ _ ≫ pullback.fst (vRhoπ D) (vRhoπ D)
+    rw [pullback.lift_fst, pullback.lift_fst]
+    exact descTorsionIso_fst_leg Hhom Hinv tW x'' hx''
+  · show pullback.lift _ _ _ ≫ pullback.snd (vRhoπ D) (vRhoπ D) =
+      pullback.lift _ _ _ ≫ pullback.snd (vRhoπ D) (vRhoπ D)
+    rw [pullback.lift_snd, pullback.lift_snd]
+    exact descTorsionIso_fst_leg Hhom Hinv tW y'' hy''
+
+/-- **[T-EQ-3b-vi]** Scheme-level pairing identity of the descended trivialization
+(cancel along the base-changed cover, transport through the point equivalence, and
+use the original scheme-level identity). -/
+theorem descTorsion_pairing_scheme [Fact (1 < N)] (Hhom) (Hinv)
+    {W : Scheme.{0}} (t : W ⟶ X.base) (x y : X.curve.Point t)
+    (hx : x.1 ≫ X.curve.mulByHom N = t ≫ X.curve.zero)
+    (hy : y.1 ≫ X.curve.mulByHom N = t ≫ X.curve.zero) :
+    torsionPairEval D X.structMap t x y hx hy =
+      coordPairLift D X.structMap (descTorsionIso D X c α Hhom Hinv)
+        (descTorsionHom_over D X c α Hhom) t x y hx hy ≫ vRhoPairingMap D := by
+  haveI : Flat (pullback.snd c t) :=
+    MorphismProperty.pullback_snd _ _ ‹Flat c›
+  haveI : Surjective (pullback.snd c t) :=
+    MorphismProperty.pullback_snd _ _ ‹Surjective c›
+  haveI : QuasiCompact (pullback.snd c t) :=
+    MorphismProperty.pullback_snd _ _ ‹QuasiCompact c›
+  refine (cancel_epi (pullback.snd c t)).mp ?_
+  let px : X.curve.Point (pullback.fst c t ≫ c) :=
+    ⟨pullback.snd c t ≫ x.1, by
+      rw [Category.assoc, x.2, ← pullback.condition]⟩
+  let py : X.curve.Point (pullback.fst c t ≫ c) :=
+    ⟨pullback.snd c t ≫ y.1, by
+      rw [Category.assoc, y.2, ← pullback.condition]⟩
+  have hpx : px.1 ≫ X.curve.mulByHom N =
+      (pullback.fst c t ≫ c) ≫ X.curve.zero := by
+    show (pullback.snd c t ≫ x.1) ≫ _ = _
+    rw [Category.assoc, hx, ← Category.assoc, ← pullback.condition,
+      Category.assoc]
+  have hpy : py.1 ≫ X.curve.mulByHom N =
+      (pullback.fst c t ≫ c) ≫ X.curve.zero := by
+    show (pullback.snd c t ≫ y.1) ≫ _ = _
+    rw [Category.assoc, hy, ← Category.assoc, ← pullback.condition,
+      Category.assoc]
+  obtain ⟨x', hmx⟩ : ∃ x'', EllHom.mapPoint (X.pullbackAlongπ c)
+      (pullback.fst c t) x'' = px :=
+    ⟨(mapPointEquiv (X.pullbackAlongπ c) (pullback.fst c t)).symm px,
+      (mapPointEquiv (X.pullbackAlongπ c) (pullback.fst c t)).apply_symm_apply px⟩
+  obtain ⟨y', hmy⟩ : ∃ y'', EllHom.mapPoint (X.pullbackAlongπ c)
+      (pullback.fst c t) y'' = py :=
+    ⟨(mapPointEquiv (X.pullbackAlongπ c) (pullback.fst c t)).symm py,
+      (mapPointEquiv (X.pullbackAlongπ c) (pullback.fst c t)).apply_symm_apply py⟩
+  have hkx : (EllHom.mapPoint (X.pullbackAlongπ c) (pullback.fst c t) x').1 ≫
+      X.curve.mulByHom N =
+      (pullback.fst c t ≫ (X.pullbackAlongπ c).baseHom) ≫ X.curve.zero := by
+    rw [hmx]; exact hpx
+  have hky : (EllHom.mapPoint (X.pullbackAlongπ c) (pullback.fst c t) y').1 ≫
+      X.curve.mulByHom N =
+      (pullback.fst c t ≫ (X.pullbackAlongπ c).baseHom) ≫ X.curve.zero := by
+    rw [hmy]; exact hpy
+  have hx' : x'.1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      pullback.fst c t ≫ (X.pullbackAlong c).curve.zero :=
+    point_kill_of_mapPoint_kill x' hkx
+  have hy' : y'.1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      pullback.fst c t ≫ (X.pullbackAlong c).curve.zero :=
+    point_kill_of_mapPoint_kill y' hky
+  refine Eq.trans (torsionPairEval_comp D X.structMap (pullback.snd c t)
+    x y px py rfl rfl hx hy hpx hpy).symm ?_
+  refine Eq.trans (torsionPairEval_congr D X.structMap hmx.symm hmy.symm
+    hpx hpy) ?_
+  refine Eq.trans (torsionPairEval_mapPoint D (X.pullbackAlongπ c)
+    (pullback.fst c t) x' y' hx' hy').symm ?_
+  refine Eq.trans (α.pairing_scheme (pullback.fst c t) x' y' hx' hy') ?_
+  rw [← Category.assoc]
+  refine congrArg (· ≫ vRhoPairingMap D) ?_
+  refine Eq.trans (coordPairLift_descTorsionIso Hhom Hinv (pullback.fst c t)
+    x' y' hx' hy').symm ?_
+  refine Eq.trans (coordPairLift_congr D X.structMap
+    (descTorsionIso D X c α Hhom Hinv) (descTorsionHom_over D X c α Hhom)
+    hmx hmy (EllHom.mapPoint_torsion (X.pullbackAlongπ c) x' hx')
+    (EllHom.mapPoint_torsion (X.pullbackAlongπ c) y' hy')) ?_
+  exact coordPairLift_comp D X.structMap (descTorsionIso D X c α Hhom Hinv)
+    (descTorsionHom_over D X c α Hhom) (pullback.snd c t)
+    x y px py rfl rfl hx hy hpx hpy
 
 end Fields
 
