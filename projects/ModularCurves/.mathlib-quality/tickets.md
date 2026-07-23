@@ -25603,6 +25603,29 @@ PIN-6 per-piece Γ-arithmetic: hcond-read (pairEZMap_read_self: eval(L₁,L₂) 
   det-twist-sympl exponent algebra — transcribe pairingCompat_framedPinned's tail (sympl_glSmul
   + ofAdd-pow + toNat/emod casts) at Γ(piece).
 PIN-7 assemble framedPinned_pairing_scheme := muNRoots_hom_ext ∘ (PIN-2..6).
+STATUS (2026-07-23 beastmode, ALL GREEN through df4247e2e, file ModularCurve/RhoPairingBridge.lean
++ MuN public piece-API): PIN-1 ★ DONE (pairEZMap_eq_torsionPairEval rfl + torsionPairEval_π/_read);
+PIN-2 ★ DONE (torsionLeg_vRhoπ + coordPairLift_eq_lift_map + pairing_scheme_of_universal);
+PIN-3 ★ DONE (MuN: locConstPiece/mem/locConst_hom_ext/constMap_factor_of_le; bridge: levelComb_kill
++ levelPairLift + fullLevelIso_inv_constSchemeπ + torsionPairSquare_hom_ext — maps out of the torsion
+pair square agree iff they agree at every level-combination pair; pieces ARE rho >> levelPairLift);
+PIN-4 ★ DONE (pairing_scheme_of_combPairs — hsymp_scheme from finitely many T-level checks);
+PIN-5 ★ DONE (muNRootsRead_comp + torsionPairEval_comb: comb-read = pairEZMap >> powScheme K(v,w),
+K := ((v0*w1 - v1*w0) % N).toNat, via the T-generic DS4 symplectic register);
+PIN-7 ★ DONE LAYERED (framedPinned_pairing_scheme_of_core: hsymp_scheme <= hcond + hcore).
+REMAINING = PIN-6 (hcore): forall v w, coordPairLift(framedTorsionIsoPinned)(1 T, vcomb, wcomb)
+>> vRhoPairingMap D = frameDetMap D h >> muNRootsPowScheme D K(v,w). Decomposition:
+(a) leg-unwind: p2t(vcomb) = Sigma.i v >> fullLevelHom (Sigma.i_desc); through the 5-factor pinned
+    iso (fullLevelIso.symm CANCELS; A2 := (isPullback_constSchemeMapAlong sT F2Z).flip.isoPullback
+    legs; A3/A4 := pullback.map-legs with constVecSchemeIso/corrSchemeIso components;
+    A5 := frameEvalSlice_fst => leg = (v-const-pair-with-h) >> frameEval D). Pure plumbing.
+(b) pair-of-two-frameEval-legs >> vRhoPairingMap = (pair-data-with-h) >> universal-pair-eval
+    (pullbackVRhoIso/pullbackSpecIso leg-plumbing).
+(c) THE CONTENT: universal pair-eval vs detFrame >> pow — ONE correspondence-level identity on the
+    FintypeCat side (rhoPairContAction elementwise: pairing(frameEval v, frameEval w) =
+    p(det(frame) * sympl(v,w))), transported by the landed functorial-transport technique
+    (finiteEtaleEquivContAction_functor_map_hom rfl-gate, muNRootsCorrespondence_pow pattern);
+    scheme-side det-lemmas detFrameScheme_rightMul/detCompScheme_mul supply the exponent-shape.
 
 #### [T-EQ-3] Value-equivalence (the KM 4.7 content) — status: open, deps: T-CV-4,T-EQ-2
 Statement: per (T', k): {sections of the carved-quotient I over k} ≃
