@@ -3450,6 +3450,77 @@ theorem framedTorsionIso_π (D : GaloisRepData N) {T : Scheme.{0}}
     IsPullback.isoPullback_hom_fst, ← E.fullLevelHom_torsionπ L]
   exact Iso.inv_hom_id_assoc _ _
 
+/-- **[3c-A]** The PINNED framed torsion trivialization: the read-correction is
+inserted before the evaluation slice, so the induced coordinate reads compute to the
+concrete index-read (`constVecPointsEquiv_corrScheme`). -/
+noncomputable def framedTorsionIsoPinned (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) :
+    E.torsion N ≅ pullback (vRhoπ D) sT :=
+  letI := frameEvalSlice_isIso D sT h hover
+  (E.fullLevelIso hinv L).symm ≪≫
+    (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback ≪≫
+    asIso (pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+      (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+      (by rw [Category.comp_id, Category.id_comp])
+      (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm)) ≪≫
+    asIso (pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+      (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+      (by rw [Category.comp_id, Category.id_comp])
+      (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) ≪≫
+    asIso (frameEvalSlice D sT h hover)
+
+/-- **[3c-A]** The pinned framed torsion trivialization lies over `T`. -/
+theorem framedTorsionIsoPinned_π (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) :
+    (framedTorsionIsoPinned D sT E hinv L h hover).hom ≫
+      pullback.snd (vRhoπ D) sT = E.torsionπ N := by
+  haveI := frameEvalSlice_isIso D sT h hover
+  rw [show framedTorsionIsoPinned D sT E hinv L h hover =
+    (E.fullLevelIso hinv L).symm ≪≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback ≪≫
+      asIso (pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm)) ≪≫
+      asIso (pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) ≪≫
+      asIso (frameEvalSlice D sT h hover) from rfl]
+  rw [Iso.trans_hom, Iso.trans_hom, Iso.trans_hom, Iso.trans_hom, Iso.symm_hom,
+    asIso_hom, asIso_hom, asIso_hom]
+  simp only [Category.assoc]
+  refine Eq.trans (congrArg (fun t => (E.fullLevelIso hinv L).inv ≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+      pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+      pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) ≫ t)
+    (frameEvalSlice_snd D sT h hover)) ?_
+  refine Eq.trans (congrArg (fun t => (E.fullLevelIso hinv L).inv ≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+      pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫ t)
+    ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+  refine Eq.trans (congrArg (fun t => (E.fullLevelIso hinv L).inv ≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom ≫ t)
+    ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+  refine Eq.trans (congrArg (fun t => (E.fullLevelIso hinv L).inv ≫ t)
+    (IsPullback.isoPullback_hom_fst _)) ?_
+  refine Eq.trans (congrArg ((E.fullLevelIso hinv L).inv ≫ ·)
+    (E.fullLevelHom_torsionπ L).symm) ?_
+  exact Iso.inv_hom_id_assoc _ _
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
