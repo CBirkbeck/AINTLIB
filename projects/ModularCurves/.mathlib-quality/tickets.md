@@ -25514,6 +25514,51 @@ T-EQ-1 + coord-invariance: coord_framedPinned twice + A·γ • (γ⁻¹u) = A�
 γ·L-basis vs L-basis differs by γ⁻¹-mulVec — via torsion_factor_point_eq +
 comb-γ-arithmetic)). This is the descent-hypothesis feeding the quotient-UP.
 
+#### [T-EQ-3 DECOMPOSITION v2] (2026-07-24 beastmode, post-T-EQ-2) QuotPkg-level route
+INTERFACE DECISION: discharge T-3E DIRECTLY at the QuotPkg-level (GammaHRepresentability:689
+— fields d/Z0/pi/f0/hpif/hpiinv/hdesc + pi_finite_etale_surjective [GHB4] +
+f0_finite_etale [GHB6]) — do NOT route through the opaque Nonempty-QuotientProblemData:
+at X := (T,sT,E) take pkgX := (nonempty_quotPkg (sympFramedAut D)
+(sympFramed_equivariantRelRepData D) X).some; I := pkgX.Z0, f := pkgX.f0;
+finite/etale := f0_finite_etale. The forall-k equivalence {h // h ≫ f0 = k} ≃
+RhoLevelStructure D (k ≫ sT) (E.baseChange k) decomposes:
+3a. DESCENT TOOLKIT (mathlib Amitsur: RingTheory/Flat/Equalizer.lean
+   AlgHom.tensorEqualizerEquiv + FaithfullyFlat/Descent.lean): descent of
+   T'-morphisms INTO an affine-over-T' scheme along a finite-etale-SURJECTIVE cover
+   c : T'' → T' (finite+etale+surjective => faithfully flat + qc; affine-chart-reduce
+   on T'; the section-functor of an affine-over-base = algebra-maps => Amitsur).
+   Deliverable: descend_hom_of_affine (exists-unique glue of W''-maps with equal
+   double-pullbacks).
+3b. RHO-STRUCTURE DESCENT: torsionIso-descent via 3a on both directions of the iso
+   (E.torsion N and pullback (vRhoπ D) sT are both affine-over-T'; iso-ness +
+   over_T-fields glue; prop-fields (coords_additive/pairing_compat/pairing_scheme)
+   descend by composing with the cover (pointwise fields) resp. the W-quantified
+   field restricting (morphism-level field quantifies over all W-points — descends
+   for free since it is a forall over W-maps and the cover is epi — CHECK epi-argument
+   per-field at execution).
+3c. (→) sections-to-structures: h : T' ⟶ Z0 over k — cover T'' := pullback h?? pi
+   (h-pullback of the torsor pi — f.e.s. by GHB4-base-change); the T''-lift lands in
+   d.Z; d.eqv reads a sympFramed VALUE; dictionary rhoLevelStructureOfFramed applies
+   (its FramedSymp-pointwise-hypothesis from the value's MAP-LEVEL symp condition
+   composed with points; hsymp_scheme from the map-level condition via the T-F3a(vi)
+   pin — THE PARKED PIN SURFACES HERE); double-pullback lifts differ by gamma
+   (free-action/orbit-transitivity on the torsor — the free_on_points/torsor clauses)
+   => T-EQ-2 (rhoLevelStructureOfFramed_glSmul) gives double-pullback agreement =>
+   3b descends to T'. Well-definedness (cover-choice-independence) via common
+   refinement + 3b-uniqueness.
+3d. (←) structures-to-sections: alpha ↦ etale-local trivialization
+   (torsion_etaleLocal_triv LANDED, TorsionEtaleTriv:328) → local full-level L'' +
+   local frame h'' (the alpha∘fullLevelIso-composite read through frameEvalSlice-inverse
+   — the Isom-value slice-inversion; symp-check from alpha.pairing_scheme via the
+   (vi)-pin) → local d.Z-classifying maps → compose pi → local Z0-sections; agreement
+   on overlaps (orbit-uniqueness: two symp-framed lifts of the same alpha differ by
+   gamma — the dictionary-injectivity half) => glue sections of Z0 along the cover
+   (3a at target Z0 — affine-over-T' since f0 finite).
+3e. mutual-inverse (pointwise via the torsor + 3b-uniqueness) + assembly => T-3E
+   closes rhoLevel_relativelyRepresentable (:7289-sorry).
+PARKED-PIN DEPENDENCY: T-F3a(vi) (the pairing-side pin) feeds 3c/3d symp-transfers —
+schedule FIRST at execution if its statement-shape is confirmed needed.
+
 #### [T-EQ-3] Value-equivalence (the KM 4.7 content) — status: open, deps: T-CV-4,T-EQ-2
 Statement: per (T', k): {sections of the carved-quotient I over k} ≃
 RhoLevelStructure D (k≫sT) (E.baseChange k).
