@@ -25603,6 +25603,17 @@ PIN-6 per-piece Γ-arithmetic: hcond-read (pairEZMap_read_self: eval(L₁,L₂) 
   det-twist-sympl exponent algebra — transcribe pairingCompat_framedPinned's tail (sympl_glSmul
   + ofAdd-pow + toNat/emod casts) at Γ(piece).
 PIN-7 assemble framedPinned_pairing_scheme := muNRoots_hom_ext ∘ (PIN-2..6).
+★★★ [T-EQ-3c-PIN COMPLETE 2026-07-24, b88d28a31] THE ENTIRE (vi)-BRIDGE IS PROVEN:
+framedPinned_pairing_scheme (UNCONDITIONAL — hsymp_scheme from hcond := the carve condition
+pairEZMap = frameDetMap alone; the dictionary rhoLevelStructureOfFramed's hypothesis is
+DISCHARGED). CENSUS: pairSlot_hFE + readCorrection_eq_refl AXIOM-CLEAN
+[propext, Classical.choice, Quot.sound]; the stitched theorem carries only the expected
+DS4-register sorryAx. STRUCTURAL DISCOVERY: readCorrection N = Equiv.refl (the engine-era
+read-correction is provably vacuous — counit read ≡ concrete index read by the unit-counit
+triangle; corrScheme-machinery is the identity). The full chain: hcond → (comb-pairs via the
+clopen decomposition torsionPairSquare_hom_ext + map-level symplectic torsionPairEval_comb)
+→ hcore (leg-unwind to the absolute frame) → habs → hring → hFE (fiber-faithfulness +
+per-point correspondence descent: pair/slot/const reads + sympl_glSmul + emod/toNat).
 STATUS (2026-07-23 beastmode, ALL GREEN through df4247e2e, file ModularCurve/RhoPairingBridge.lean
 + MuN public piece-API): PIN-1 ★ DONE (pairEZMap_eq_torsionPairEval rfl + torsionPairEval_π/_read);
 PIN-2 ★ DONE (torsionLeg_vRhoπ + coordPairLift_eq_lift_map + pairing_scheme_of_universal);
