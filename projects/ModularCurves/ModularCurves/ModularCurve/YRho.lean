@@ -5499,6 +5499,36 @@ theorem dZMap_zxAction (D : GaloisRepData N) [Fact (1 < N)]
     reassoc_of% (detFrameScheme_rightMul D γ),
     detCompScheme_mul D (Matrix.GeneralLinearGroup.det γ)]
 
+/-- **[T-CV-3b-iii-i]** The inverse of the DS3 bridge lies over the base. -/
+theorem muNSpecQIso_π_inv (D : GaloisRepData N) [Fact (1 < N)] :
+    (muNSpecQIso D).inv ≫ muNπ (Spec (CommRingCat.of ℚ)) N =
+      muNRootsSchemeπ D := by
+  rw [Iso.inv_comp_eq, muNSpecQIso_π]
+
+/-- **[T-CV-3b-iii-i]** The `Γ`-read of a map into the roots scheme, through the DS3
+bridge and the `μ_N`-points dictionary. -/
+noncomputable def muNRootsRead (D : GaloisRepData N) [Fact (1 < N)] {W : Scheme.{0}}
+    (b : W ⟶ Spec (CommRingCat.of ℚ)) (φ : W ⟶ muNRootsScheme D)
+    (hφ : φ ≫ muNRootsSchemeπ D = b) : Γ(W, ⊤) :=
+  (muNPointsEquiv (Spec (CommRingCat.of ℚ)) N b
+    ⟨φ ≫ (muNSpecQIso D).inv, by
+      rw [Category.assoc, muNSpecQIso_π_inv, hφ]⟩ : Γ(W, ⊤))
+
+/-- **[T-CV-3b-iii-i]** Maps into the roots scheme over a common base are determined
+by their `Γ`-reads. -/
+theorem muNRoots_hom_ext (D : GaloisRepData N) [Fact (1 < N)] {W : Scheme.{0}}
+    {b : W ⟶ Spec (CommRingCat.of ℚ)} {φ ψ : W ⟶ muNRootsScheme D}
+    (hφ : φ ≫ muNRootsSchemeπ D = b) (hψ : ψ ≫ muNRootsSchemeπ D = b)
+    (h : muNRootsRead D b φ hφ = muNRootsRead D b ψ hψ) : φ = ψ := by
+  have h3 := congrArg Subtype.val
+    ((muNPointsEquiv (Spec (CommRingCat.of ℚ)) N b).injective (Subtype.ext h))
+  have h4 : φ ≫ (muNSpecQIso D).inv = ψ ≫ (muNSpecQIso D).inv := h3
+  calc φ = (φ ≫ (muNSpecQIso D).inv) ≫ (muNSpecQIso D).hom := by
+        rw [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+    _ = (ψ ≫ (muNSpecQIso D).inv) ≫ (muNSpecQIso D).hom :=
+        congrArg (· ≫ (muNSpecQIso D).hom) h4
+    _ = ψ := by rw [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :

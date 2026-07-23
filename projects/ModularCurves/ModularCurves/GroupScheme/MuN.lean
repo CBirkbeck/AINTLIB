@@ -593,6 +593,68 @@ noncomputable def muNPointsEquiv (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Sche
     { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } :=
   muNPointsEquivAux S N g
 
+/-- The `k`-th power endomorphism of the absolute `μ_N`-ring (`T ↦ Tᵏ`). -/
+private noncomputable def muNRingPowHom (N : ℕ) (k : ℕ) : muNRing N ⟶ muNRing N :=
+  muNRingLift ((muNRingGen N) ^ k) (by
+    rw [← pow_mul, mul_comm, pow_mul, muNRingGen_pow, one_pow])
+
+private lemma muNRingPowHom_gen (N : ℕ) (k : ℕ) :
+    muNRingPowHom N k (muNRingGen N) = (muNRingGen N) ^ k :=
+  muNRingLift_gen _ _
+
+/-- The `k`-th power endomorphism of the absolute `μ_N`. -/
+noncomputable def muNAbsPow (N : ℕ) (k : ℕ) : muNAbs N ⟶ muNAbs N :=
+  Spec.map (muNRingPowHom N k)
+
+/-- The `k`-th power endomorphism of `μ_{N,S}` (acting on the absolute leg). -/
+noncomputable def muNPow (S : Scheme.{u}) (N : ℕ) (k : ℕ) : muN S N ⟶ muN S N :=
+  pullback.map (terminal.from S) (terminal.from (muNAbs N))
+    (terminal.from S) (terminal.from (muNAbs N)) (𝟙 S) (muNAbsPow N k)
+    (𝟙 (⊤_ Scheme.{u})) (terminal.hom_ext _ _) (terminal.hom_ext _ _)
+
+/-- The power endomorphism lies over the base. -/
+theorem muNPow_π (S : Scheme.{u}) (N : ℕ) (k : ℕ) :
+    muNPow S N k ≫ muNπ S N = muNπ S N := by
+  rw [muNPow, muNπ]
+  exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+/-- The points dictionary reads the power endomorphism as the `k`-th power. -/
+lemma muNPointsEquiv_pow (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Scheme.{u}}
+    (g : T ⟶ S) (v : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) (k : ℕ) :
+    (muNPointsEquiv S N g ⟨v.1 ≫ muNPow S N k, by
+        rw [Category.assoc, muNPow_π, v.2]⟩ : Γ(T, ⊤)) =
+      (muNPointsEquiv S N g v : Γ(T, ⊤)) ^ k := by
+  show (muNPointsEquivAux S N g ⟨v.1 ≫ muNPow S N k, _⟩ : Γ(T, ⊤)) =
+    (muNPointsEquivAux S N g v : Γ(T, ⊤)) ^ k
+  rw [muNPointsEquivAux_coe, muNPointsEquivAux_coe]
+  have hsnd : (v.1 ≫ muNPow S N k) ≫
+      pullback.snd (terminal.from S) (terminal.from (muNAbs N)) =
+      (v.1 ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))) ≫
+        muNAbsPow N k := by
+    rw [Category.assoc, Category.assoc]
+    exact congrArg (Subtype.val v ≫ ·) (pullback.lift_snd _ _ _)
+  rw [hsnd]
+  rw [Scheme.Hom.comp_appTop, CommRingCat.comp_apply]
+  rw [show (muNAbsPow N k).appTop
+      ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) =
+    ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) ^ k from by
+    have hnat := Scheme.ΓSpecIso_inv_naturality (muNRingPowHom N k)
+    calc (muNAbsPow N k).appTop
+          ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N))
+        = ((Scheme.ΓSpecIso (muNRing N)).inv ≫
+            (Spec.map (muNRingPowHom N k)).appTop) (muNRingGen N) :=
+          (CommRingCat.comp_apply _ _ _).symm
+      _ = ((muNRingPowHom N k) ≫ (Scheme.ΓSpecIso (muNRing N)).inv)
+            (muNRingGen N) := by rw [← hnat]
+      _ = (Scheme.ΓSpecIso (muNRing N)).inv
+            ((muNRingPowHom N k) (muNRingGen N)) :=
+          CommRingCat.comp_apply _ _ _
+      _ = (Scheme.ΓSpecIso (muNRing N)).inv ((muNRingGen N) ^ k) := by
+          rw [muNRingPowHom_gen]
+      _ = ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) ^ k :=
+          map_pow _ _ _]
+  exact map_pow _ _ _
+
 /-- The points dictionary is natural in the base: reading a point after the
 base-change comparison gives the same `Γ`-value (the read factors through the
 absolute leg, which `muNMapAlong` preserves). -/
