@@ -1147,6 +1147,126 @@ theorem muNSpecFieldIso_struct (K : Type u) [Field K] (N : ℕ) [NeZero N] :
     IsPullback.of_horiz_isIso ⟨by simp⟩
   exact LEFT.isoIsPullback_hom_snd _ _ triv
 
+/-- The model root is an `N`-th root of unity (generic base). -/
+theorem muNModelRoot_pow (A : Type u) [CommRing A] (N : ℕ) [NeZero N] :
+    (AdjoinRoot.root ((X : Polynomial A) ^ N - 1)) ^ N = 1 := by
+  have h := AdjoinRoot.mk_self (f := (X : Polynomial A) ^ N - 1)
+  rw [map_sub, map_pow, AdjoinRoot.mk_X, map_one, sub_eq_zero] at h
+  exact h
+
+/-- The model-side power endomorphism (`root ↦ rootᵏ`). -/
+noncomputable def muNModelPowAlgHom (A : Type u) [CommRing A] (N : ℕ) [NeZero N]
+    (k : ℕ) : (AdjoinRoot ((X : Polynomial A) ^ N - 1)) →ₐ[A]
+      (AdjoinRoot ((X : Polynomial A) ^ N - 1)) :=
+  AdjoinRoot.liftAlgHom _ (Algebra.ofId A _)
+    ((AdjoinRoot.root ((X : Polynomial A) ^ N - 1)) ^ k) (by
+      rw [Polynomial.eval₂_sub, Polynomial.eval₂_pow, Polynomial.eval₂_X,
+        Polynomial.eval₂_one, ← pow_mul, mul_comm k N, pow_mul, muNModelRoot_pow,
+        one_pow]
+      exact sub_self 1)
+
+theorem muNModelPowAlgHom_root (A : Type u) [CommRing A] (N : ℕ) [NeZero N]
+    (k : ℕ) :
+    muNModelPowAlgHom A N k (AdjoinRoot.root _) =
+      (AdjoinRoot.root ((X : Polynomial A) ^ N - 1)) ^ k :=
+  AdjoinRoot.liftAlgHom_root _ _ _ _
+
+private theorem muNModelCompare_powHom (A : Type u) [CommRing A] (N : ℕ)
+    [NeZero N] (k : ℕ) :
+    muNModelCompare A N ≫ CommRingCat.ofHom (muNModelPowAlgHom A N k).toRingHom =
+      muNRingPowHom N k ≫ muNModelCompare A N := by
+  refine muNRing_hom_ext ?_
+  have hL : (muNModelCompare A N ≫
+      CommRingCat.ofHom (muNModelPowAlgHom A N k).toRingHom) (muNRingGen N) =
+      (muNModelPowAlgHom A N k) ((muNModelCompare A N) (muNRingGen N)) :=
+    CommRingCat.comp_apply _ _ _
+  have hR : (muNRingPowHom N k ≫ muNModelCompare A N) (muNRingGen N) =
+      (muNModelCompare A N) ((muNRingPowHom N k) (muNRingGen N)) :=
+    CommRingCat.comp_apply _ _ _
+  refine Eq.trans hL (Eq.trans ?_ hR.symm)
+  rw [show (muNModelCompare A N) (muNRingGen N) =
+    AdjoinRoot.root (muNModelPoly A N) from muNRingLift_gen _ _,
+    show (muNRingPowHom N k) (muNRingGen N) = (muNRingGen N) ^ k from
+      muNRingPowHom_gen N k, map_pow,
+    show (muNModelCompare A N) (muNRingGen N) =
+      AdjoinRoot.root (muNModelPoly A N) from muNRingLift_gen _ _]
+  exact muNModelPowAlgHom_root A N k
+
+/-- The inverse of the field-model identification lies over the base. -/
+theorem muNSpecFieldIso_inv_π (K : Type u) [Field K] (N : ℕ) [NeZero N] :
+    (muNSpecFieldIso K N).inv ≫ muNπ (Spec (CommRingCat.of K)) N =
+      Spec.map (CommRingCat.ofHom (AdjoinRoot.of ((X : Polynomial K) ^ N - 1))) := by
+  rw [Iso.inv_comp_eq]
+  exact (muNSpecFieldIso_struct K N).symm
+
+/-- The inverse of the field-model identification reads the absolute leg through the
+model comparison (PI-safe re-derivation of the defining pullback block). -/
+theorem muNSpecFieldIso_inv_snd (K : Type u) [Field K] (N : ℕ) [NeZero N] :
+    (muNSpecFieldIso K N).inv ≫
+        pullback.snd (terminal.from (Spec (CommRingCat.of K)))
+          (terminal.from (muNAbs N)) =
+      Spec.map (muNModelCompare K N) := by
+  have t := (isPullback_SpecMap_of_isPushout _ _ _ _ (muNModel_isPushout K N)).flip
+  have hterm : terminal.from (Spec (CommRingCat.of K)) ≫
+      (terminalIsoIsTerminal specULiftZIsTerminal).hom = Spec.map (muNBaseMap K) :=
+    specULiftZIsTerminal.hom_ext _ _
+  have b := (isPullback_muN (Spec (CommRingCat.of K)) N).flip
+  rw [hterm] at b
+  let mid := t.lift (pullback.snd _ _) (muNπ _ N) b.w
+  have hmid1 : mid ≫ Spec.map (muNModelCompare K N) = pullback.snd _ _ :=
+    t.lift_fst _ _ _
+  have hmid2 : mid ≫ Spec.map (muNModelStruct K N) = muNπ _ N := t.lift_snd _ _ _
+  have big2 : IsPullback (mid ≫ Spec.map (muNModelCompare K N))
+      (muNπ (Spec (CommRingCat.of K)) N) (Spec.map (muNRingMap N))
+      (𝟙 (Spec (CommRingCat.of K)) ≫ Spec.map (muNBaseMap K)) := by
+    rw [Category.id_comp, hmid1]
+    exact b
+  have LEFT := IsPullback.of_right big2 (by rw [Category.comp_id]; exact hmid2) t
+  have triv : IsPullback (𝟙 (Spec (muNModelRing K N))) (Spec.map (muNModelStruct K N))
+      (Spec.map (muNModelStruct K N)) (𝟙 (Spec (CommRingCat.of K))) :=
+    IsPullback.of_horiz_isIso ⟨by simp⟩
+  have hhom : (muNSpecFieldIso K N).hom ≫ 𝟙 _ = mid :=
+    LEFT.isoIsPullback_hom_fst _ _ triv
+  rw [Category.comp_id] at hhom
+  rw [show pullback.snd (terminal.from (Spec (CommRingCat.of K)))
+      (terminal.from (muNAbs N)) = mid ≫ Spec.map (muNModelCompare K N) from
+    hmid1.symm]
+  rw [← hhom]
+  exact Iso.inv_hom_id_assoc _ _
+
+/-- The field-model identification intertwines the model power with `muNPow`. -/
+theorem muNSpecFieldIso_pow (K : Type u) [Field K] (N : ℕ) [NeZero N] (k : ℕ) :
+    Spec.map (CommRingCat.ofHom (muNModelPowAlgHom K N k).toRingHom) ≫
+        (muNSpecFieldIso K N).inv =
+      (muNSpecFieldIso K N).inv ≫ muNPow (Spec (CommRingCat.of K)) N k := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _)
+      (Eq.trans ?_ (Category.assoc _ _ _).symm)
+    refine Eq.trans (congrArg
+      (Spec.map (CommRingCat.ofHom (muNModelPowAlgHom K N k).toRingHom) ≫ ·)
+      (muNSpecFieldIso_inv_π K N)) ?_
+    refine Eq.trans ?_ (congrArg ((muNSpecFieldIso K N).inv ≫ ·)
+      ((pullback.lift_fst _ _ _).trans (Category.comp_id _)).symm)
+    refine Eq.trans ?_ (muNSpecFieldIso_inv_π K N).symm
+    rw [← Spec.map_comp]
+    exact congrArg Spec.map (by
+      ext r
+      refine Eq.trans (CommRingCat.comp_apply _ _ _) ?_
+      exact ((muNModelPowAlgHom K N k).commutes r))
+  · refine Eq.trans (Category.assoc _ _ _)
+      (Eq.trans ?_ (Category.assoc _ _ _).symm)
+    refine Eq.trans (congrArg
+      (Spec.map (CommRingCat.ofHom (muNModelPowAlgHom K N k).toRingHom) ≫ ·)
+      (muNSpecFieldIso_inv_snd K N)) ?_
+    refine Eq.trans ?_ (congrArg ((muNSpecFieldIso K N).inv ≫ ·)
+      (pullback.lift_snd _ _ _).symm)
+    refine Eq.trans ?_ ((congrArg (· ≫ muNAbsPow N k)
+      (muNSpecFieldIso_inv_snd K N).symm).trans (Category.assoc _ _ _))
+    rw [muNAbsPow]
+    exact ((Spec.map_comp _ _).symm.trans
+      (congrArg Spec.map (muNModelCompare_powHom K N k))).trans
+      (Spec.map_comp _ _)
+
 end RankAndEtale
 
 /-- **(T-B2, DS3 naturality spec — register rule (iii))** The points description of
