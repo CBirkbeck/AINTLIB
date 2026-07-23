@@ -4,6 +4,7 @@ import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.GammaHMaster
 import ModularCurves.ModularCurve.YFullRoute
+import ModularCurves.GroupScheme.GLSchemeAction
 import Mathlib.FieldTheory.AbsoluteGaloisGroup
 import Mathlib.NumberTheory.Cyclotomic.CyclotomicCharacter
 import Mathlib.RingTheory.Polynomial.Cyclotomic.Roots
@@ -1229,6 +1230,36 @@ noncomputable def constVecScheme (N : ℕ) [NeZero N] : Scheme.{0} :=
 noncomputable def constVecSchemeπ (N : ℕ) [NeZero N] :
     constVecScheme N ⟶ Spec (.of ℚ) :=
   Spec.map (CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0)))
+
+/-- **[asm-3a]** The constant-scheme identification lies over `Spec ℚ`. -/
+theorem constVecSchemeIso_π (N : ℕ) [NeZero N] :
+    (constVecSchemeIso N).hom ≫ constVecSchemeπ N =
+      constSchemeπ (Spec (CommRingCat.of ℚ)) (Fin 2 → ZMod N) := by
+  refine Limits.Sigma.hom_ext _ _ fun v => ?_
+  rw [← Category.assoc]
+  rw [show (constVecSchemeIso N).hom =
+    (constSchemeSpecIso (CommRingCat.of ℚ) (Fin 2 → ZMod N)).hom ≫
+      (constVecSpecIso N).hom from rfl]
+  rw [← Category.assoc, constSchemeSpecIso_ι_hom]
+  rw [show (constVecSpecIso N).hom = Spec.map (CommRingCat.ofHom
+    (constVecAlgebraIso N).hom.hom.hom.toRingHom) from rfl]
+  rw [show constVecSchemeπ N = Spec.map (CommRingCat.ofHom
+    (algebraMap ℚ (constVecAlgebra N : Type 0))) from rfl]
+  rw [Category.assoc, ← AlgebraicGeometry.Spec.map_comp,
+    ← AlgebraicGeometry.Spec.map_comp]
+  rw [show (CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0)) ≫
+      CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom) ≫
+      CommRingCat.ofHom (Pi.evalRingHom
+        (fun _ : (Fin 2 → ZMod N) => (ℚ : Type 0)) v) =
+    𝟙 (CommRingCat.of ℚ) from by
+    ext r
+    show (Pi.evalRingHom _ v) ((constVecAlgebraIso N).hom.hom.hom
+      (algebraMap ℚ (constVecAlgebra N : Type 0) r)) = r
+    rw [AlgHom.commutes]
+    rfl]
+  rw [AlgebraicGeometry.Spec.map_id]
+  exact (Limits.Sigma.ι_desc (f := fun _ : (Fin 2 → ZMod N) =>
+    Spec (CommRingCat.of ℚ)) (fun _ => 𝟙 _) v).symm
 
 /-- **[T-YR-3d-1c step-4]** The universal-frame evaluation at the scheme level:
 `(ℤ/N)²_ℚ ×_ℚ Isom((ℤ/N)², V_ρ) ⟶ V_ρ` (mirror of `vRhoAdd`: the fibre-product/tensor
@@ -3213,6 +3244,47 @@ theorem frameEvalSlice_isIso (D : GaloisRepData N) {T : Scheme.{0}}
         pullback.lift_fst]
     · simp only [Category.assoc, Category.id_comp, frameEvalSlice_snd,
         frameEvalSliceInv_fst, frameEvalSliceInv_fst_assoc]
+
+/-- **[asm-3b]** The framed torsion trivialization: a full level structure `L` and a
+frame `h` over `T` identify `E[N]` with the pulled-back `V_ρ` — the ρ-dictionary's
+torsion isomorphism (`fullLevelIso` to the constant scheme, base-change comparison,
+the constant-vector identification, then the evaluation slice along `h`). -/
+noncomputable def framedTorsionIso (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) :
+    E.torsion N ≅ pullback (vRhoπ D) sT :=
+  letI := frameEvalSlice_isIso D sT h hover
+  (E.fullLevelIso hinv L).symm ≪≫
+    (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback ≪≫
+    asIso (pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+      (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+      (by rw [Category.comp_id, Category.id_comp])
+      (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm)) ≪≫
+    asIso (frameEvalSlice D sT h hover)
+
+/-- **[asm-3b]** The framed torsion trivialization lies over `T`. -/
+theorem framedTorsionIso_π (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) :
+    (framedTorsionIso D sT E hinv L h hover).hom ≫ pullback.snd (vRhoπ D) sT =
+      E.torsionπ N := by
+  haveI := frameEvalSlice_isIso D sT h hover
+  rw [show framedTorsionIso D sT E hinv L h hover =
+    (E.fullLevelIso hinv L).symm ≪≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback ≪≫
+      asIso (pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm)) ≪≫
+      asIso (frameEvalSlice D sT h hover) from rfl]
+  rw [Iso.trans_hom, Iso.trans_hom, Iso.trans_hom, Iso.symm_hom, asIso_hom,
+    asIso_hom]
+  simp only [Category.assoc]
+  rw [frameEvalSlice_snd, pullback.lift_fst, Category.comp_id,
+    IsPullback.isoPullback_hom_fst, ← E.fullLevelHom_torsionπ L]
+  exact Iso.inv_hom_id_assoc _ _
 
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
