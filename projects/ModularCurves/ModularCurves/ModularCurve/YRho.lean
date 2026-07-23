@@ -3976,6 +3976,44 @@ theorem coord_framedPinned_additive (D : GaloisRepData N) {T : Scheme.{0}}
     coord_framedPinned D sT E hinv L h hover t ht (x + y) hxy hfw,
     torsion_factor_index_add hinv L t x y hx hy hxy hfx hfy hfw, smul_add]
 
+/-- **[3d-i]** The standard symplectic form twists by the determinant under the
+matrix action on coordinates. -/
+theorem sympl_glSmul (A : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (u v : Fin 2 → ZMod N) :
+    (A • u) 0 * (A • v) 1 - (A • u) 1 * (A • v) 0 =
+      ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) *
+        (u 0 * v 1 - u 1 * v 0) := by
+  show ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec u) 0 *
+      ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 1 -
+    ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec u) 1 *
+      ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 0 =
+    ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) *
+      (u 0 * v 1 - u 1 * v 0)
+  rw [show ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) =
+    (A : Matrix (Fin 2) (Fin 2) (ZMod N)).det from rfl]
+  simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two,
+    Matrix.det_fin_two]
+  ring
+
+/-- **[3d-ii]** The point-level characterization of a factored torsion point: it is
+the pulled standard combination at its index. -/
+theorem torsion_factor_point_eq {T : Scheme.{0}} {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (x : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    {u : Fin 2 → ZMod N}
+    (hfac : E.pointToTorsion x hx ≫ (E.fullLevelIso hinv L).inv =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u) :
+    x = EllipticCurve.Point.pull E t
+      (((u 0).val : ℤ) • L.1.1 + ((u 1).val : ℤ) • L.1.2) := by
+  refine Subtype.ext ?_
+  have h1 := congrArg (· ≫ E.torsionι N)
+    ((torsion_qbar_factor_eq hinv L t (E.pointToTorsion x hx) hfac).trans
+      (congrArg (t ≫ ·) (sigmaι_fullLevelHom L u)))
+  simp only [Category.assoc] at h1
+  rw [E.pointToTorsion_torsionι, E.pointToTorsion_torsionι] at h1
+  exact h1
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
