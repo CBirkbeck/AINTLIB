@@ -113,6 +113,68 @@ theorem sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator
   rw [appendBasisOfSplit_castAdd,
     sectionPoleSheafPower_succ_baseSectionsSplitEquiv_symm_apply_inl]
 
+/-- In a compatible successor basis, the last basis coordinate is the canonical
+coordinate on the rank-one successor quotient. -/
+theorem sectionPoleSheafPower_succ_baseSectionsBasis_repr_last_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (b : Module.Basis (Fin n) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz n)))
+    (b' : Module.Basis (Fin (n + 1)) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz (n + 1))))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1)))
+    (hb : ∀ i : Fin n,
+      b' (Fin.castAdd 1 i) =
+        Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz n) (b i))
+    (hbx : b' (Fin.last n) = x)
+    (hx : (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd n).hom
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz n)) x) = 1)
+    (q : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1))) :
+    b'.repr q (Fin.last n) =
+      (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd n).hom
+        (Scheme.Modules.baseSectionsMap π
+          (cokernel.π (sectionPoleSheafSuccHom π z hz n)) q) := by
+  let c : Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz (n + 1)) →ₗ[Γ(S, (⊤ : S.Opens))]
+      Γ(S, (⊤ : S.Opens)) :=
+    (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd n).toLinearEquiv.toLinearMap.comp
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz n))).hom
+  have hc_old (i : Fin n) : c (b' (Fin.castAdd 1 i)) = 0 := by
+    rw [hb i]
+    change (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd n).hom
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz n))
+        (Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz n) (b i))) = 0
+    rw [(sectionPoleSheafPower_baseSectionsSucc_exact hsm z hz n).apply_apply_eq_zero]
+    exact map_zero _
+  have hcoord : b'.coord (Fin.last n) = c := by
+    apply b'.ext
+    intro j
+    refine Fin.lastCases ?_ (fun i => ?_) j
+    · rw [Module.Basis.coord_apply, Module.Basis.repr_self_apply, if_pos rfl, hbx]
+      exact hx.symm
+    · change b'.coord (Fin.last n) (b' (Fin.castAdd 1 i)) =
+        c (b' (Fin.castAdd 1 i))
+      have hne : Fin.castAdd 1 i ≠ Fin.last n := Fin.castSucc_ne_last i
+      rw [Module.Basis.coord_apply, Module.Basis.repr_self_apply, if_neg hne, hc_old]
+  rw [← Module.Basis.coord_apply]
+  exact LinearMap.congr_fun hcoord q
+
 /-- Normalized pole-order-two and pole-order-three sections successively extend
 a basis of the first pole module to compatible bases of the next two modules. -/
 theorem sectionPoleSheafPower_two_three_baseSectionsBasesOfCartierGenerator
