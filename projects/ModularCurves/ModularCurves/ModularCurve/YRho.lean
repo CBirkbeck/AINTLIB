@@ -4297,6 +4297,60 @@ noncomputable abbrev muNRootsAction (N : ℕ) [NeZero N] :
           rw [map_mul]
           rfl)) }
 
+open scoped Pointwise FintypeCatDiscrete in
+/-- **[CARVE-1d-i]** Continuity of the roots set: the kernel of `ρ` acts trivially
+(its cyclotomic image is `1`, and the character's spec fixes every root). -/
+lemma muNRootsAction_isContinuous (D : GaloisRepData N) [Fact (1 < N)] :
+    (muNRootsAction N).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
+          (muNRootsAction N) : Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (muNRootsAction N) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (muNRootsAction N),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hcy : modularCyclotomicCharacter (AlgebraicClosure ℚ)
+      (card_rootsOfUnity_algClosureQ N) (galSepMulEquivGalQ τ).toRingEquiv = 1 := by
+    rw [show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+        (card_rootsOfUnity_algClosureQ N)
+        (galSepMulEquivGalQ τ).toRingEquiv =
+      Matrix.GeneralLinearGroup.det (D.ρ (galSepMulEquivGalQ τ)) from
+      (D.det_cyclo (galSepMulEquivGalQ τ)).symm]
+    rw [hτ1, map_one]
+  have hAct : (muNRootsAction N).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun ζ => Subtype.ext ?_
+    have hspec := modularCyclotomicCharacter.spec (AlgebraicClosure ℚ)
+      (card_rootsOfUnity_algClosureQ N)
+      (galSepMulEquivGalQ τ).toRingEquiv ζ.2
+    rw [hcy] at hspec
+    rw [show (((1 : (ZMod N)ˣ) : ZMod N)).val = 1 from by
+      rw [Units.val_one, ZMod.val_one]] at hspec
+    rw [pow_one] at hspec
+    exact Units.ext hspec
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((muNRootsAction N).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
