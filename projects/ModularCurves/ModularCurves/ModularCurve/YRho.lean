@@ -5691,6 +5691,67 @@ theorem muNRootsPowScheme_specIso (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ)
     (fun (m : cycloQuotAlgebra N ⟶ muNRootsAlgebra D) =>
       CommRingCat.ofHom m.hom.hom.toRingHom) (muNRootsPowAlg_square_inv D k))
 
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-e]** The roots power lies over the base. -/
+theorem muNRootsPowScheme_π (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsPowScheme D k ≫ muNRootsSchemeπ D = muNRootsSchemeπ D := by
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  exact congrArg AlgebraicGeometry.Spec.map (by
+    ext r
+    exact (muNRootsPowAlg D k).hom.hom.commutes r)
+
+/-- **[T-CV-3b-iii-v-e]** The two model pows agree. -/
+theorem cycloQuotPow_eq_model (N : ℕ) [NeZero N] (k : ℕ) :
+    cycloQuotPowAlgHom N k = muNModelPowAlgHom ℚ N k :=
+  AdjoinRoot.algHom_ext (by
+    rw [cycloQuotPowAlgHom_root, muNModelPowAlgHom_root])
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-e]** The power endo through the DS3 bridge is `muNPow`. -/
+theorem muNRootsPowScheme_QIso (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsPowScheme D k ≫ (muNSpecQIso D).inv =
+      (muNSpecQIso D).inv ≫ muNPow (Spec (CommRingCat.of ℚ)) N k := by
+  rw [show (muNSpecQIso D).inv =
+    (muNRootsSpecIso D).inv ≫ (muNSpecFieldIso ℚ N).inv from rfl]
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ (muNSpecFieldIso ℚ N).inv)
+    (muNRootsPowScheme_specIso D k)) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg ((muNRootsSpecIso D).inv ≫ ·) ?_)
+    (Category.assoc _ _ _).symm
+  rw [show (cycloQuotPowAlgHom N k) = muNModelPowAlgHom ℚ N k from
+    cycloQuotPow_eq_model N k]
+  exact muNSpecFieldIso_pow ℚ N k
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-e]** The `Γ`-read of the power endo is the power of the read. -/
+theorem muNRootsRead_pow (D : GaloisRepData N) [Fact (1 < N)] {W : Scheme.{0}}
+    (b : W ⟶ Spec (CommRingCat.of ℚ)) (φ : W ⟶ muNRootsScheme D)
+    (hφ : φ ≫ muNRootsSchemeπ D = b) (k : ℕ) :
+    muNRootsRead D b (φ ≫ muNRootsPowScheme D k) (by
+        rw [Category.assoc, muNRootsPowScheme_π, hφ]) =
+      muNRootsRead D b φ hφ ^ k := by
+  have hkey : (φ ≫ muNRootsPowScheme D k) ≫ (muNSpecQIso D).inv =
+      (φ ≫ (muNSpecQIso D).inv) ≫ muNPow (Spec (CommRingCat.of ℚ)) N k :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (φ ≫ ·) (muNRootsPowScheme_QIso D k)).trans
+        (Category.assoc _ _ _).symm)
+  have hsub : (⟨(φ ≫ muNRootsPowScheme D k) ≫ (muNSpecQIso D).inv, by
+      rw [Category.assoc, muNSpecQIso_π_inv, Category.assoc,
+        muNRootsPowScheme_π, hφ]⟩ :
+      { h : W ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        h ≫ muNπ (Spec (CommRingCat.of ℚ)) N = b }) =
+    ⟨(φ ≫ (muNSpecQIso D).inv) ≫ muNPow (Spec (CommRingCat.of ℚ)) N k, by
+      rw [Category.assoc, muNPow_π, Category.assoc, muNSpecQIso_π_inv, hφ]⟩ :=
+    Subtype.ext hkey
+  refine Eq.trans (congrArg
+    (fun v : { h : W ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        h ≫ muNπ (Spec (CommRingCat.of ℚ)) N = b } =>
+      (muNPointsEquiv (Spec (CommRingCat.of ℚ)) N b v : Γ(W, ⊤))) hsub) ?_
+  exact muNPointsEquiv_pow (Spec (CommRingCat.of ℚ)) N b
+    ⟨φ ≫ (muNSpecQIso D).inv, by
+      rw [Category.assoc, muNSpecQIso_π_inv, hφ]⟩ k
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :
