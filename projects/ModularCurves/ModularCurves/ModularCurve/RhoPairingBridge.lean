@@ -1333,6 +1333,283 @@ theorem constPt_fiber_read (D : GaloisRepData N) [Fact (1 < N)]
       (constVecCorrespondenceIso N).hom.hom.hom ψ) hcanon) ?_
   exact (piAlgHomEquiv ℚ (Fin 2 → ZMod N) (SeparableClosure ℚ)).right_inv v
 
+open scoped FintypeCatDiscrete in
+/-- **[PIN-6c-iv-γ, WIP-skeleton]** The finite-étale pairing-determinant identity:
+fiber-ext skeleton (op-transport; per-point computation in progress). -/
+theorem pairSlot_hFE (D : GaloisRepData N) [Fact (1 < N)]
+    (v w : Fin 2 → ZMod N) :
+    rhoPairAlgHom D ≫ (vRhoPairTensorIso D).hom ≫ pairSlotFE D v w =
+    muNRootsPowAlg D
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+          ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) ≫
+      detCompAlgHom D ≫ detFrameAlgHom D := by
+  have hop : (rhoPairAlgHom D ≫ (vRhoPairTensorIso D).hom ≫
+      pairSlotFE D v w).op =
+      (muNRootsPowAlg D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) ≫
+        detCompAlgHom D ≫ detFrameAlgHom D).op := by
+    apply finiteEtale_hom_ext_of_fiber
+    refine FintypeCat.hom_ext _ _ fun x => ?_
+    refine (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+      (muNRootsContAction D)).injective ?_
+    have hRop : (muNRootsPowAlg D
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+          ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) ≫
+        detCompAlgHom D ≫ detFrameAlgHom D).op =
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (detFrameMor D ≫ detCompMor D ≫ muNRootsPowMor D
+            (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+              ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)) := by
+      rw [Functor.map_comp, Functor.map_comp]
+      rfl
+    refine Eq.trans ?_ ((congrArg (fun m =>
+        (FiniteEtaleGalois.pointsEquivOfContAction ℚ (muNRootsContAction D))
+          ((ConcreteCategory.hom
+            ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map m)) x))
+        hRop).trans
+      (pointsEquivOfContAction_map
+        (detFrameMor D ≫ detCompMor D ≫ muNRootsPowMor D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)) x)).symm
+    refine Eq.trans (congrArg (fun m =>
+        (FiniteEtaleGalois.pointsEquivOfContAction ℚ (muNRootsContAction D))
+          ((ConcreteCategory.hom
+            ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map m)) x))
+      (show (rhoPairAlgHom D ≫ (vRhoPairTensorIso D).hom ≫ pairSlotFE D v w).op =
+        ((vRhoPairTensorIso D).hom ≫ pairSlotFE D v w).op ≫
+          (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+            (rhoPairMor D) from rfl)) ?_
+    refine Eq.trans (congrArg (fun mm =>
+        (FiniteEtaleGalois.pointsEquivOfContAction ℚ (muNRootsContAction D))
+          ((ConcreteCategory.hom mm) x))
+      ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map_comp
+        (((vRhoPairTensorIso D).hom ≫ pairSlotFE D v w).op)
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (rhoPairMor D)))) ?_
+    refine Eq.trans (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+        (muNRootsContAction D)) (ConcreteCategory.comp_apply _ _ x)) ?_
+    refine Eq.trans (pointsEquivOfContAction_map (rhoPairMor D)
+      ((ConcreteCategory.hom
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+          (((vRhoPairTensorIso D).hom ≫ pairSlotFE D v w).op))) x)) ?_
+    have hsplit2 : (ConcreteCategory.hom
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+          (((vRhoPairTensorIso D).hom ≫ pairSlotFE D v w).op))) x =
+        (ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+              (pairCorrespondenceIso D).hom)))
+          ((ConcreteCategory.hom
+            ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+              ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+                (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+                  (vRhoAlgebra D))))))
+            ((ConcreteCategory.hom
+              ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+                ((pairSlotFE D v w).op))) x)) := by
+      refine Eq.trans (congrArg (fun m => (ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map m)) x)
+        (show ((vRhoPairTensorIso D).hom ≫ pairSlotFE D v w).op =
+          (pairSlotFE D v w).op ≫
+            ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+              (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+                (vRhoAlgebra D))) ≫
+            (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+              (pairCorrespondenceIso D).hom) from rfl)) ?_
+      rfl
+    refine Eq.trans (congrArg (fun z => (rhoPairMor D).hom.hom
+        ((FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoPairContAction D)) z))
+      hsplit2) ?_
+    refine Eq.trans (congrArg (rhoPairMor D).hom.hom
+      (pointsEquivOfContAction_map ((pairCorrespondenceIso D).hom) _)) ?_
+    refine Eq.trans (congrArg (fun u => (rhoPairMor D).hom.hom
+        ((pairCorrespondenceIso D).hom.hom.hom u)) (pointsEquiv_fiber_unit _ _)) ?_
+    have hfst : ∀ y, (rhoPairFst D).hom.hom
+        ((pairCorrespondenceIso D).hom.hom.hom y) =
+        (vRhoFiberIso D).hom.hom.hom
+          ((ConcreteCategory.hom
+            ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+              (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom
+                (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+                  (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+                    TensorProduct ℚ (vRhoAlgebra D : Type 0)
+                      (vRhoAlgebra D : Type 0))) :
+                vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+                  (vRhoAlgebra D))))) y) := by
+      intro y
+      have hc := congrArg (fun (q :
+          (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+            (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+              (vRhoAlgebra D))) ⟶ rhoContAction D) => q.hom.hom y)
+        (pairCorrespondenceIso_hom_fst D)
+      exact hc
+    have hsnd : ∀ y, (rhoPairSnd D).hom.hom
+        ((pairCorrespondenceIso D).hom.hom.hom y) =
+        (vRhoFiberIso D).hom.hom.hom
+          ((ConcreteCategory.hom
+            ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+              (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom
+                (Algebra.TensorProduct.includeRight (R := ℚ) :
+                  (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+                    TensorProduct ℚ (vRhoAlgebra D : Type 0)
+                      (vRhoAlgebra D : Type 0))) :
+                vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+                  (vRhoAlgebra D))))) y) := by
+      intro y
+      have hc := congrArg (fun (q :
+          (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+            (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+              (vRhoAlgebra D))) ⟶ rhoContAction D) => q.hom.hom y)
+        (pairCorrespondenceIso_hom_snd D)
+      exact hc
+    have hcomp1 : (ConcreteCategory.hom
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+          (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom
+            (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+              (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+                TensorProduct ℚ (vRhoAlgebra D : Type 0)
+                  (vRhoAlgebra D : Type 0))) :
+            vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+              (vRhoAlgebra D)))))
+        ((ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((pairSlotFE D v w).op))) x) =
+        (ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((ObjectProperty.homMk (CommAlgCat.ofHom (frameSlotAlg D v)) :
+              vRhoAlgebra D ⟶ wFramesAlgebra D).op))) x := by
+      exact congrArg (fun m => (ConcreteCategory.hom
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map m)) x)
+        (congrArg Quiver.Hom.op (inclLeft_pairSlotFE D v w))
+    have hcomp2 : (ConcreteCategory.hom
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+          (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom
+            (Algebra.TensorProduct.includeRight (R := ℚ) :
+              (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+                TensorProduct ℚ (vRhoAlgebra D : Type 0)
+                  (vRhoAlgebra D : Type 0))) :
+            vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+              (vRhoAlgebra D)))))
+        ((ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((pairSlotFE D v w).op))) x) =
+        (ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((ObjectProperty.homMk (CommAlgCat.ofHom (frameSlotAlg D w)) :
+              vRhoAlgebra D ⟶ wFramesAlgebra D).op))) x := by
+      exact congrArg (fun m => (ConcreteCategory.hom
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map m)) x)
+        (congrArg Quiver.Hom.op (inclRight_pairSlotFE D v w))
+    have hzp : (ConcreteCategory.hom (pairCorrespondenceIso D).hom.hom.hom)
+        ((ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((pairSlotFE D v w).op))) x) =
+        ((ConcreteCategory.hom (vRhoFiberIso D).hom.hom.hom)
+          ((ConcreteCategory.hom
+            ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+              ((ObjectProperty.homMk (CommAlgCat.ofHom (frameSlotAlg D v))).op)))
+            x),
+         (ConcreteCategory.hom (vRhoFiberIso D).hom.hom.hom)
+          ((ConcreteCategory.hom
+            ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+              ((ObjectProperty.homMk (CommAlgCat.ofHom (frameSlotAlg D w))).op)))
+            x)) :=
+      Prod.ext
+        ((hfst _).trans (congrArg
+          (ConcreteCategory.hom (vRhoFiberIso D).hom.hom.hom) hcomp1))
+        ((hsnd _).trans (congrArg
+          (ConcreteCategory.hom (vRhoFiberIso D).hom.hom.hom) hcomp2))
+    have hsv : (ConcreteCategory.hom (vRhoFiberIso D).hom.hom.hom)
+        ((ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((ObjectProperty.homMk (CommAlgCat.ofHom (frameSlotAlg D v))).op)))
+          x) =
+        (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) • v := by
+      refine Eq.trans (slot_fiber_read D v x) ?_
+      refine congrArg₂ (· • ·) rfl ?_
+      refine Eq.trans (constPt_fiber_read D v x) ?_
+      rw [readCorrection_eq_refl]
+      rfl
+    have hsw : (ConcreteCategory.hom (vRhoFiberIso D).hom.hom.hom)
+        ((ConcreteCategory.hom
+          ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+            ((ObjectProperty.homMk (CommAlgCat.ofHom (frameSlotAlg D w))).op)))
+          x) =
+        (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) • w := by
+      refine Eq.trans (slot_fiber_read D w x) ?_
+      refine congrArg₂ (· • ·) rfl ?_
+      refine Eq.trans (constPt_fiber_read D w x) ?_
+      rw [readCorrection_eq_refl]
+      rfl
+    refine Eq.trans (congrArg (ConcreteCategory.hom (rhoPairMor D).hom.hom)
+      (hzp.trans (congrArg₂ Prod.mk hsv hsw))) ?_
+    show D.p (Multiplicative.ofAdd
+        (((FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) • v) 0 *
+          ((FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) • w) 1 -
+        ((FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) • v) 1 *
+          ((FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) • w) 0)) =
+      (D.p (Multiplicative.ofAdd
+        (((Matrix.GeneralLinearGroup.det
+          (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) :
+          (ZMod N)ˣ) : ZMod N)))) ^
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+          ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)
+    rw [sympl_glSmul]
+    generalize (((Matrix.GeneralLinearGroup.det
+      (FiniteEtaleGalois.pointsEquivOfContAction ℚ (frameContAction D) x) :
+      (ZMod N)ˣ) : ZMod N)) = dA
+    generalize hK : (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+      ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) = K
+    refine Eq.trans (congrArg D.p ?_) (map_pow D.p (Multiplicative.ofAdd dA) K)
+    show Multiplicative.ofAdd (dA * (v 0 * w 1 - v 1 * w 0)) =
+      (Multiplicative.ofAdd dA) ^ K
+    rw [show (Multiplicative.ofAdd dA) ^ K =
+      Multiplicative.ofAdd (K • dA) from rfl]
+    rw [nsmul_eq_mul, mul_comm]
+    congr 1
+    have hnneg : (0 : ℤ) ≤ (((v 0).val : ℤ) * ((w 1).val : ℤ) -
+        ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ) :=
+      Int.emod_nonneg _ (by exact_mod_cast (NeZero.ne N))
+    rw [← hK]
+    have h3 : (((((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+        ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat : ℕ)) : ZMod N) =
+        (((((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+        ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat : ℤ)) : ZMod N) := by
+      push_cast
+      rfl
+    have h2 : (((((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+        ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat : ℤ)) : ZMod N) =
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+        ((v 1).val : ℤ) * ((w 0).val : ℤ)) : ℤ) : ZMod N) := by
+      rw [Int.toNat_of_nonneg hnneg, Int.emod_def]
+      push_cast
+      rw [ZMod.natCast_self]
+      ring
+    rw [h3, h2]
+    push_cast
+    simp only [ZMod.natCast_val, ZMod.cast_id]
+  exact Quiver.Hom.op_inj hop
+
+/-- **[T-EQ-3c-PIN COMPLETE]** The morphism-level pairing identity of the pinned
+framed trivialization, from the value-level symplectic condition alone: the
+`hsymp_scheme` hypothesis of the `ρ`-dictionary is discharged by the carve. -/
+theorem framedPinned_pairing_scheme (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (hcond : pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 = frameDetMap D h)
+    {W : Scheme.{0}} (t : W ⟶ T) (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    torsionPairEval D sT t x y hx hy =
+      coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+        (framedTorsionIsoPinned_π D sT E hinv L h hover) t x y hx hy ≫
+        vRhoPairingMap D :=
+  framedPinned_pairing_scheme_of_ring D sT hinv L h hover hcond
+    (fun v w => hring_of_finiteEtale D (fun v' w' => pairSlot_hFE D v' w') v w)
+    t x y hx hy
+
 end
 
 end ModularCurves
