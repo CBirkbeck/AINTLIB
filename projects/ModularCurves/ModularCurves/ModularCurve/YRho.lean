@@ -5342,6 +5342,118 @@ theorem dZMap_π (D : GaloisRepData N) [Fact (1 < N)]
   rw [detCompScheme_π, detFrameScheme_π, ← pullback.condition,
     ← Category.assoc, ← pullback.condition, Category.assoc]
 
+/-- **[T-CV-3a]** The roots-scheme structure map is finite étale
+(`vRhoπ_finite_etale` mirror). -/
+theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :
+    IsFinite (muNRootsSchemeπ D) ∧ Etale (muNRootsSchemeπ D) := by
+  constructor
+  · show IsFinite (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (muNRootsAlgebra D : Type 0))))
+    rw [IsFinite.SpecMap_iff]
+    exact RingHom.finite_algebraMap.mpr inferInstance
+  · show Etale (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (muNRootsAlgebra D : Type 0))))
+    rw [HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Etale)]
+    exact RingHom.etale_algebraMap.mpr inferInstance
+
+/-- **[T-CV-3a]** The paired comparison into the fibre square of the roots scheme. -/
+noncomputable def sympPair (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    pullback dE.f (pullback.fst X.structMap (wFramesπ D)) ⟶
+      pullback (muNRootsSchemeπ D) (muNRootsSchemeπ D) :=
+  pullback.lift (eZMap D dE) (dZMap D dE)
+    ((eZMap_π D dE).trans (dZMap_π D dE).symm)
+
+/-- **[T-CV-3a]** The symplectic locus: the agreement locus of the pairing-side and
+determinant-side comparisons, as the pullback of the diagonal of the roots scheme. -/
+noncomputable def sympLocus (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) : Scheme.{0} :=
+  pullback (pullback.diagonal (muNRootsSchemeπ D)) (sympPair D dE)
+
+/-- **[T-CV-3a]** Its inclusion into the framed test space. -/
+noncomputable def sympLocusι (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    sympLocus D dE ⟶ pullback dE.f (pullback.fst X.structMap (wFramesπ D)) :=
+  pullback.snd _ _
+
+/-- **[T-CV-3a]** The inclusion is an open immersion (unramified + finite-type
+diagonal). -/
+theorem sympLocusι_isOpenImmersion (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    IsOpenImmersion (sympLocusι D dE) := by
+  haveI : Etale (muNRootsSchemeπ D) := (muNRootsSchemeπ_finite_etale D).2
+  haveI : IsFinite (muNRootsSchemeπ D) := (muNRootsSchemeπ_finite_etale D).1
+  show IsOpenImmersion
+    (pullback.snd (pullback.diagonal (muNRootsSchemeπ D)) (sympPair D dE))
+  infer_instance
+
+/-- **[T-CV-3a]** The inclusion is a closed immersion (separated diagonal). -/
+theorem sympLocusι_isClosedImmersion (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    IsClosedImmersion (sympLocusι D dE) := by
+  haveI : IsSeparated (muNRootsSchemeπ D) :=
+    inferInstanceAs (IsSeparated (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (muNRootsAlgebra D : Type 0)))))
+  show IsClosedImmersion
+    (pullback.snd (pullback.diagonal (muNRootsSchemeπ D)) (sympPair D dE))
+  exact MorphismProperty.pullback_snd (P := @IsClosedImmersion) _ _ inferInstance
+
+/-- **[T-CV-3(c-i), map-level core]** Factoring through the symplectic locus is
+exactly the agreement of the two comparison maps. -/
+theorem sympLocus_factor_iff (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}}
+    (h : T ⟶ pullback dE.f (pullback.fst X.structMap (wFramesπ D))) :
+    (∃ w : T ⟶ sympLocus D dE, w ≫ sympLocusι D dE = h) ↔
+      h ≫ eZMap D dE = h ≫ dZMap D dE := by
+  have hcond : sympLocusι D dE ≫ sympPair D dE =
+      pullback.fst (pullback.diagonal (muNRootsSchemeπ D)) (sympPair D dE) ≫
+        pullback.diagonal (muNRootsSchemeπ D) :=
+    pullback.condition.symm
+  have hιe : sympLocusι D dE ≫ eZMap D dE =
+      pullback.fst (pullback.diagonal (muNRootsSchemeπ D)) (sympPair D dE) :=
+    (congrArg (sympLocusι D dE ≫ ·) (pullback.lift_fst _ _ _).symm).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ pullback.fst (muNRootsSchemeπ D) (muNRootsSchemeπ D))
+            hcond).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (pullback.fst (pullback.diagonal (muNRootsSchemeπ D))
+                (sympPair D dE) ≫ ·) (pullback.diagonal_fst _)).trans
+              (Category.comp_id _)))))
+  have hιd : sympLocusι D dE ≫ dZMap D dE =
+      pullback.fst (pullback.diagonal (muNRootsSchemeπ D)) (sympPair D dE) :=
+    (congrArg (sympLocusι D dE ≫ ·) (pullback.lift_snd _ _ _).symm).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ pullback.snd (muNRootsSchemeπ D) (muNRootsSchemeπ D))
+            hcond).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (pullback.fst (pullback.diagonal (muNRootsSchemeπ D))
+                (sympPair D dE) ≫ ·) (pullback.diagonal_snd _)).trans
+              (Category.comp_id _)))))
+  constructor
+  · rintro ⟨w, rfl⟩
+    rw [Category.assoc, Category.assoc, hιe, hιd]
+  · intro he
+    refine ⟨pullback.lift (h ≫ eZMap D dE) h ?_, pullback.lift_snd _ _ _⟩
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc, pullback.diagonal_fst, Category.comp_id,
+        sympPair, Category.assoc, pullback.lift_fst]
+    · rw [Category.assoc, Category.assoc, pullback.diagonal_snd, Category.comp_id,
+        sympPair, Category.assoc, pullback.lift_snd]
+      exact he
+
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
 frames factor, carrying the diagonal action. -/
