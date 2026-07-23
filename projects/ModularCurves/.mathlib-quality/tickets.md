@@ -25522,13 +25522,13 @@ at X := (T,sT,E) take pkgX := (nonempty_quotPkg (sympFramedAut D)
 (sympFramed_equivariantRelRepData D) X).some; I := pkgX.Z0, f := pkgX.f0;
 finite/etale := f0_finite_etale. The forall-k equivalence {h // h ≫ f0 = k} ≃
 RhoLevelStructure D (k ≫ sT) (E.baseChange k) decomposes:
-3a. DESCENT TOOLKIT (mathlib Amitsur: RingTheory/Flat/Equalizer.lean
-   AlgHom.tensorEqualizerEquiv + FaithfullyFlat/Descent.lean): descent of
-   T'-morphisms INTO an affine-over-T' scheme along a finite-etale-SURJECTIVE cover
-   c : T'' → T' (finite+etale+surjective => faithfully flat + qc; affine-chart-reduce
-   on T'; the section-functor of an affine-over-base = algebra-maps => Amitsur).
-   Deliverable: descend_hom_of_affine (exists-unique glue of W''-maps with equal
-   double-pullbacks).
+3a. DESCENT TOOLKIT — COLLAPSED ONTO MATHLIB (2026-07-24 audit): mathlib
+   Sites/Fpqc.lean:110 has `instance (f) [QuasiCompact f] [Surjective f] [Flat f] :
+   EffectiveEpi f` for SCHEMES (general targets, not just affine!) — descend-hom =
+   EffectiveEpi.desc/fac + Epi-uniqueness. Per-cover instance-chase only: IsFinite ⟹
+   QuasiCompact (affine-homs qc), Etale ⟹ Flat, Surjective ✓. The hand-rolled
+   Amitsur file (ForMathlib/AmitsurDescent.lean, written 2026-07-24) is bonus
+   ForMathlib-material — keep if green, not on the critical path.
 3b. RHO-STRUCTURE DESCENT: torsionIso-descent via 3a on both directions of the iso
    (E.torsion N and pullback (vRhoπ D) sT are both affine-over-T'; iso-ness +
    over_T-fields glue; prop-fields (coords_additive/pairing_compat/pairing_scheme)
