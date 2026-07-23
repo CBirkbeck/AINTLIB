@@ -3734,6 +3734,196 @@ theorem constGL_constVecSchemeIso (N : ℕ) [NeZero N]
   rw [← CommRingCat.ofHom_comp]
   rfl
 
+/-- **[T-EQ-2 N-abs]** The abstract counit-read intertwines the coordinate change
+(3-layer `wFramesPointsEquiv_rightMul` template). -/
+theorem constVecPointsEquiv_GL (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (h : { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+        Spec (CommRingCat.of (constVecAlgebra N : Type 0)) //
+      h ≫ constVecSchemeπ N =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }) :
+    constVecPointsEquiv N ⟨h.1 ≫
+        Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom), by
+      rw [Category.assoc]
+      rw [show Spec.map (CommRingCat.ofHom
+          (constVecGLAlg N γ).hom.hom.toRingHom) ≫ constVecSchemeπ N =
+        constVecSchemeπ N from constVecGLScheme_π N γ]
+      exact h.2⟩ =
+      γ • constVecPointsEquiv N h := by
+  set L1 := specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+    (AlgebraicClosure ℚ) with hL1
+  set L2 := AlgEquiv.arrowCongr
+    (AlgEquiv.refl (R := ℚ) (A₁ := (constVecAlgebra N : Type 0)))
+    sepClosureQAlgEquiv.symm with hL2
+  have hA : ∀ hp : (h.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom)) ≫
+        Spec.map (CommRingCat.ofHom
+          (algebraMap ℚ (constVecAlgebra N : Type 0))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))),
+      L1 ⟨h.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom), hp⟩ =
+        (L1 h).comp (constVecGLAlg N γ).hom.hom := by
+    intro hp
+    have hpre : Spec.preimage (h.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom)) =
+        CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom ≫
+          Spec.preimage h.1 := by
+      apply Spec.map_injective
+      rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage]
+    refine AlgHom.ext fun w => ?_
+    exact congrArg (fun q : CommRingCat.of (constVecAlgebra N : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hpre
+  have hB : ∀ ψ : (constVecAlgebra N : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ,
+      L2 (ψ.comp (constVecGLAlg N γ).hom.hom) =
+        (L2 ψ).comp (constVecGLAlg N γ).hom.hom := by
+    intro ψ
+    exact AlgHom.ext fun w => rfl
+  have hC : FiniteEtaleGalois.pointsEquivOfContAction ℚ (constVecContAction N)
+      ((L2 (L1 h)).comp (constVecGLAlg N γ).hom.hom) =
+      γ • FiniteEtaleGalois.pointsEquivOfContAction ℚ (constVecContAction N)
+        (L2 (L1 h)) :=
+    pointsEquivOfContAction_map (constVecGLMor N γ) (L2 (L1 h))
+  refine Eq.trans (congrArg (fun y => FiniteEtaleGalois.pointsEquivOfContAction ℚ
+    (constVecContAction N) (L2 y)) (hA _)) ?_
+  refine Eq.trans (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+    (constVecContAction N)) (hB (L1 h))) ?_
+  exact hC
+
+/-- **[T-EQ-2 N-idx]** The concrete index-read intertwines the coordinate change
+(the `Pi`-side of the pin). -/
+theorem constVecIndexRead_GL (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (h : { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+        Spec (CommRingCat.of (constVecAlgebra N : Type 0)) //
+      h ≫ constVecSchemeπ N =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }) :
+    constVecIndexRead N ⟨h.1 ≫
+        Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom), by
+      rw [Category.assoc]
+      rw [show Spec.map (CommRingCat.ofHom
+          (constVecGLAlg N γ).hom.hom.toRingHom) ≫ constVecSchemeπ N =
+        constVecSchemeπ N from constVecGLScheme_π N γ]
+      exact h.2⟩ =
+      γ • constVecIndexRead N h := by
+  set L1 := specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+    (AlgebraicClosure ℚ) with hL1
+  set L2 := AlgEquiv.arrowCongr
+    (AlgEquiv.refl (R := ℚ) (A₁ := (constVecAlgebra N : Type 0)))
+    sepClosureQAlgEquiv.symm with hL2
+  have hA : ∀ hp : (h.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom)) ≫
+        Spec.map (CommRingCat.ofHom
+          (algebraMap ℚ (constVecAlgebra N : Type 0))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))),
+      L1 ⟨h.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom), hp⟩ =
+        (L1 h).comp (constVecGLAlg N γ).hom.hom := by
+    intro hp
+    have hpre : Spec.preimage (h.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom)) =
+        CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom ≫
+          Spec.preimage h.1 := by
+      apply Spec.map_injective
+      rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage]
+    refine AlgHom.ext fun w => ?_
+    exact congrArg (fun q : CommRingCat.of (constVecAlgebra N : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom w) hpre
+  have hB : ∀ ψ : (constVecAlgebra N : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ,
+      L2 (ψ.comp (constVecGLAlg N γ).hom.hom) =
+        (L2 ψ).comp (constVecGLAlg N γ).hom.hom := by
+    intro ψ
+    exact AlgHom.ext fun w => rfl
+  have hP : ∀ ψ : (constVecAlgebra N : Type 0) →ₐ[ℚ] SeparableClosure ℚ,
+      precompCvIsoEquiv N (ψ.comp (constVecGLAlg N γ).hom.hom) =
+        (precompCvIsoEquiv N ψ).comp (piGLAlgHom N γ) := by
+    intro ψ
+    refine AlgHom.ext fun w => ?_
+    show ψ ((constVecGLAlg N γ).hom.hom ((constVecAlgebraIso N).inv.hom.hom w)) =
+      ψ ((constVecAlgebraIso N).inv.hom.hom (piGLAlgHom N γ w))
+    refine congrArg ψ ?_
+    exact congrArg (fun (m : CommAlgCat.FiniteEtale.of ℚ
+        ((Fin 2 → ZMod N) → ℚ) ⟶ constVecAlgebra N) => m.hom.hom w)
+      (constVecGLAlg_square_inv N γ)
+  refine Eq.trans (congrArg (fun y => piAlgHomEquiv ℚ (Fin 2 → ZMod N)
+    (SeparableClosure ℚ) (precompCvIsoEquiv N (L2 y))) (hA _)) ?_
+  refine Eq.trans (congrArg (fun y => piAlgHomEquiv ℚ (Fin 2 → ZMod N)
+    (SeparableClosure ℚ) (precompCvIsoEquiv N y)) (hB (L1 h))) ?_
+  refine Eq.trans (congrArg (piAlgHomEquiv ℚ (Fin 2 → ZMod N)
+    (SeparableClosure ℚ)) (hP (L2 (L1 h)))) ?_
+  exact piAlgHomIndex_piGL N γ (precompCvIsoEquiv N (L2 (L1 h)))
+
+/-- **[T-EQ-2 rc-comm]** The read-correction commutes with the coordinate change
+(both reads intertwine it). -/
+theorem readCorrection_smul (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N) :
+    readCorrection N (γ • v) = γ • readCorrection N v := by
+  show constVecPointsEquiv N ((constVecIndexRead N).symm (γ • v)) =
+    γ • constVecPointsEquiv N ((constVecIndexRead N).symm v)
+  have hidx : (constVecIndexRead N).symm (γ • v) =
+      ⟨((constVecIndexRead N).symm v).1 ≫
+        Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom), by
+        rw [Category.assoc]
+        rw [show Spec.map (CommRingCat.ofHom
+            (constVecGLAlg N γ).hom.hom.toRingHom) ≫ constVecSchemeπ N =
+          constVecSchemeπ N from constVecGLScheme_π N γ]
+        exact ((constVecIndexRead N).symm v).2⟩ := by
+    refine (constVecIndexRead N).injective ?_
+    rw [Equiv.apply_symm_apply]
+    exact ((constVecIndexRead_GL N γ ((constVecIndexRead N).symm v)).trans
+      (congrArg (γ • ·) (Equiv.apply_symm_apply _ v))).symm
+  rw [hidx]
+  exact (constVecPointsEquiv_GL N γ ((constVecIndexRead N).symm v)).trans
+    (congrArg (γ • ·) (by
+      show constVecPointsEquiv N ((constVecIndexRead N).symm v) = _
+      rfl))
+
+/-- **[T-EQ-2 d3]** The correction morphism commutes with the coordinate change. -/
+theorem corrMor_constVecGLMor (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    corrMor N ≫ constVecGLMor N γ = constVecGLMor N γ ≫ corrMor N := by
+  ext v : 3
+  show γ • (readCorrection N).symm v = (readCorrection N).symm (γ • v)
+  refine ((readCorrection N).injective ?_).symm
+  rw [Equiv.apply_symm_apply, readCorrection_smul, Equiv.apply_symm_apply]
+
+/-- **[T-EQ-2 d3]** The algebra-level commutation. -/
+theorem corrAlgHom_constVecGLAlg (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    constVecGLAlg N γ ≫ corrAlgHom N = corrAlgHom N ≫ constVecGLAlg N γ := by
+  show ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (constVecGLMor N γ)).unop ≫
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (corrMor N)).unop =
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (corrMor N)).unop ≫
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (constVecGLMor N γ)).unop
+  rw [← CategoryTheory.unop_comp, ← CategoryTheory.unop_comp]
+  refine congrArg Quiver.Hom.unop ?_
+  rw [← CategoryTheory.Functor.map_comp, ← CategoryTheory.Functor.map_comp]
+  exact congrArg (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+    (corrMor_constVecGLMor N γ)
+
+/-- **[T-EQ-2 d3]** The scheme-level commutation: the read-correction commutes with
+the coordinate change on the constant-vector scheme. -/
+theorem corrSchemeIso_constVecGL (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom) ≫
+        (corrSchemeIso N).hom =
+      (corrSchemeIso N).hom ≫
+        Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom) := by
+  show Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom) =
+    Spec.map (CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom)
+  rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp,
+    ← CommRingCat.ofHom_comp]
+  refine congrArg Spec.map ?_
+  show CommRingCat.ofHom ((corrAlgHom N ≫ constVecGLAlg N γ).hom.hom.toRingHom) =
+    CommRingCat.ofHom ((constVecGLAlg N γ ≫ corrAlgHom N).hom.hom.toRingHom)
+  exact congrArg (fun (m : constVecAlgebra N ⟶ constVecAlgebra N) =>
+    CommRingCat.ofHom m.hom.hom.toRingHom) (corrAlgHom_constVecGLAlg N γ).symm
+
 /-- [asm-2a helper] The bridge is compatible with the left cofan-injection: the
 correspondence of the first projection composed with the bridge-inverse is the
 tensor inclusion (the `conePointUniqueUpToIso` compatibility, extracted by
