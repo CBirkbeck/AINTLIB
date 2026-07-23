@@ -67,6 +67,19 @@ def muN (S : Scheme.{u}) (N : ℕ) : Scheme.{u} :=
 /-- The structure morphism of `μ_{N,S}`. -/
 def muNπ (S : Scheme.{u}) (N : ℕ) : muN S N ⟶ S := pullback.fst _ _
 
+/-- Base-change functoriality of `μ_N`: the canonical comparison `μ_{N,S'} ⟶ μ_{N,S}`
+over `g : S' ⟶ S` (both sides are pulled back from the absolute `μ_N`). -/
+noncomputable def muNMapAlong {S' S : Scheme.{u}} (g : S' ⟶ S) (N : ℕ) :
+    muN S' N ⟶ muN S N :=
+  pullback.map (terminal.from S') (terminal.from (muNAbs N))
+    (terminal.from S) (terminal.from (muNAbs N)) g (𝟙 (muNAbs N)) (𝟙 (⊤_ Scheme.{u}))
+    (terminal.hom_ext _ _) (terminal.hom_ext _ _)
+
+/-- The base-change comparison lies over `g`. -/
+theorem muNMapAlong_π {S' S : Scheme.{u}} (g : S' ⟶ S) (N : ℕ) :
+    muNMapAlong g N ≫ muNπ S N = muNπ S' N ≫ g := by
+  rw [muNMapAlong, muNπ, muNπ]; exact pullback.lift_fst _ _ _
+
 /-- The constant `S`-scheme on a finite type `A`: the disjoint union of copies of `S`
 indexed by `A`. For `A = ZMod N` this is the constant group scheme `(ℤ/N)_S` of
 KM 1.4.4(5). -/

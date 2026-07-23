@@ -4815,6 +4815,100 @@ theorem zxAction_mul (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
         · rw [wxAction_snd, Category.assoc, wxAction_snd, ← Category.assoc,
             wxAction_snd, Category.assoc, wFramesRightMul_mul]]
 
+/-- **[T-CV-2b]** The universal naive full-level structure carried by the relative
+representing scheme: the image of the tautological section under the representing
+bijection (the problem value over `dE.Z` itself). -/
+noncomputable def univLevel {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    (gammaFullNaiveProblem (CommRingCat.of ℚ) N).obj
+      (Opposite.op (X.pullbackAlong dE.f)) :=
+  dE.eqv dE.f ⟨𝟙 dE.Z, Category.id_comp dE.f⟩
+
+/-- **[T-CV-2b]** The first universal point is raw-killed by `N`. -/
+theorem univLevel_fst_killed {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    ((univLevel dE).1.1).1 ≫ (X.curve.baseChange dE.f).mulByHom N =
+      𝟙 dE.Z ≫ (X.curve.baseChange dE.f).zero :=
+  ((X.curve.baseChange dE.f).smul_eq_zero_iff_comp_mulByHom (𝟙 dE.Z) N
+    (univLevel dE).1.1).mp (univLevel dE).2.1.1
+
+/-- **[T-CV-2b]** The second universal point is raw-killed by `N`. -/
+theorem univLevel_snd_killed {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    ((univLevel dE).1.2).1 ≫ (X.curve.baseChange dE.f).mulByHom N =
+      𝟙 dE.Z ≫ (X.curve.baseChange dE.f).zero :=
+  ((X.curve.baseChange dE.f).smul_eq_zero_iff_comp_mulByHom (𝟙 dE.Z) N
+    (univLevel dE).1.2).mp (univLevel dE).2.1.2
+
+/-- **[T-CV-2b]** The pairing-side comparison map on the framed test space
+`Z = dE.Z ×_{X.base} (X.base ×_ℚ wFrames)`: evaluate the Weil pairing on the
+universal full-level pair and read the value in the roots scheme. -/
+noncomputable def eZMap (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    pullback dE.f (pullback.fst X.structMap (wFramesπ D)) ⟶ muNRootsScheme D :=
+  pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+    pullback.lift
+      ((X.curve.baseChange dE.f).pointToTorsion (univLevel dE).1.1
+        (univLevel_fst_killed dE))
+      ((X.curve.baseChange dE.f).pointToTorsion (univLevel dE).1.2
+        (univLevel_snd_killed dE))
+      (((X.curve.baseChange dE.f).pointToTorsion_torsionπ _ _).trans
+        ((X.curve.baseChange dE.f).pointToTorsion_torsionπ _ _).symm) ≫
+    (X.curve.baseChange dE.f).weilPairing N ≫
+    muNMapAlong (dE.f ≫ X.structMap) N ≫ (muNSpecQIso D).hom
+
+/-- **[T-CV-2b]** The pairing-side comparison lies over the base. -/
+theorem eZMap_π (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    eZMap D dE ≫ muNRootsSchemeπ D =
+      pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        dE.f ≫ X.structMap := by
+  rw [eZMap]
+  simp only [Category.assoc]
+  rw [muNSpecQIso_π, muNMapAlong_π,
+    reassoc_of% ((X.curve.baseChange dE.f).weilPairing_over N),
+    pullback.lift_fst_assoc]
+  have htail : (X.curve.baseChange dE.f).pointToTorsion (univLevel dE).1.1
+      (univLevel_fst_killed dE) ≫ (X.curve.baseChange dE.f).torsionπ N ≫
+      dE.f ≫ X.structMap = dE.f ≫ X.structMap :=
+    (Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ dE.f ≫ X.structMap)
+        ((X.curve.baseChange dE.f).pointToTorsion_torsionπ _ _)).trans
+        (Category.id_comp _))
+  exact congrArg
+    (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ ·) htail
+
+/-- **[T-CV-2a]** The determinant-side comparison map on the framed test space:
+read the frame, take its cyclotomically twisted determinant, and land in the
+roots scheme. -/
+noncomputable def dZMap (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    pullback dE.f (pullback.fst X.structMap (wFramesπ D)) ⟶ muNRootsScheme D :=
+  pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+    pullback.snd X.structMap (wFramesπ D) ≫ detFrameScheme D ≫ detCompScheme D
+
+/-- **[T-CV-2a]** The determinant-side comparison lies over the base. -/
+theorem dZMap_π (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    dZMap D dE ≫ muNRootsSchemeπ D =
+      pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        dE.f ≫ X.structMap := by
+  rw [dZMap]
+  simp only [Category.assoc]
+  rw [detCompScheme_π, detFrameScheme_π, ← pullback.condition,
+    ← Category.assoc, ← pullback.condition, Category.assoc]
+
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
 frames factor, carrying the diagonal action. -/
