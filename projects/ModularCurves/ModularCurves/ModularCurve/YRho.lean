@@ -6533,6 +6533,93 @@ theorem pairEZMap_read (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
       (muNPointsEquiv T N _ v : Γ(W, ⊤))) ?_
   exact Subtype.ext rfl
 
+/-- **[T-CV-3c-2]** The self-read of the value-level pairing comparison is the
+pairing evaluation itself. -/
+theorem pairEZMap_read_self (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T) (P Q : E.Section)
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) :
+    muNRootsRead D sT (pairEZMap D sT E P Q hP hQ)
+        (pairEZMap_π D sT E P Q hP hQ) =
+      (E.weilPairingEval P Q
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ)).1 := by
+  refine Eq.trans (muNRootsRead_congr D (Category.id_comp sT).symm
+    (Category.id_comp (pairEZMap D sT E P Q hP hQ)).symm
+    (pairEZMap_π D sT E P Q hP hQ)) ?_
+  refine Eq.trans (pairEZMap_read D sT E P Q hP hQ (𝟙 T)) ?_
+  simp only [op_id, CategoryTheory.Functor.map_id]
+  rfl
+
+/-- **[T-CV-3c-3]** Naturality of the value-level pairing comparison: the comparison
+of the pulled framed value is the base-restriction of the comparison (the map-level
+symplectic condition is functorial — proven through the `Γ`-reads and the DS4
+registers, the `H3`-chain at an arbitrary value). -/
+theorem pairEZMap_pullSection (D : GaloisRepData N) [Fact (1 < N)]
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (P Q : B.curve.Section) (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) :
+    pairEZMap D A.structMap A.curve
+        (EllHom.pullSection (CommRingCat.of ℚ) g P)
+        (EllHom.pullSection (CommRingCat.of ℚ) g Q)
+        (pullSection_kill g hP) (pullSection_kill g hQ) =
+      g.baseHom ≫ pairEZMap D B.structMap B.curve P Q hP hQ := by
+  have hPraw : P.1 ≫ B.curve.mulByHom N = 𝟙 B.base ≫ B.curve.zero :=
+    (B.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 B.base) N P).mp hP
+  have hQraw : Q.1 ≫ B.curve.mulByHom N = 𝟙 B.base ≫ B.curve.zero :=
+    (B.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 B.base) N Q).mp hQ
+  have hψ : (g.baseHom ≫ pairEZMap D B.structMap B.curve P Q hP hQ) ≫
+      muNRootsSchemeπ D = A.structMap := by
+    rw [Category.assoc, pairEZMap_π, g.base_w]
+  have kres₁ : (EllipticCurve.Point.restrict B.curve g.baseHom P).1 ≫
+        B.curve.mulByHom N = (g.baseHom ≫ 𝟙 B.base) ≫ B.curve.zero := by
+    show (g.baseHom ≫ P.1) ≫ _ = _
+    rw [Category.assoc, hPraw, ← Category.assoc]
+  have kres₂ : (EllipticCurve.Point.restrict B.curve g.baseHom Q).1 ≫
+        B.curve.mulByHom N = (g.baseHom ≫ 𝟙 B.base) ≫ B.curve.zero := by
+    show (g.baseHom ≫ Q.1) ≫ _ = _
+    rw [Category.assoc, hQraw, ← Category.assoc]
+  have hlift₁ : (EllHom.pullSection (CommRingCat.of ℚ) g P).1 ≫ g.top =
+      g.baseHom ≫ P.1 := g.isPullback.lift_fst _ _ _
+  have hlift₂ : (EllHom.pullSection (CommRingCat.of ℚ) g Q).1 ≫ g.top =
+      g.baseHom ≫ Q.1 := g.isPullback.lift_fst _ _ _
+  have hraw₁ : (EllipticCurve.Point.restrict B.curve g.baseHom P).1 =
+      (EllHom.mapPoint g (𝟙 A.base)
+        (EllHom.pullSection (CommRingCat.of ℚ) g P)).1 :=
+    hlift₁.symm.trans (EllHom.mapPoint_coe _ _ _).symm
+  have hraw₂ : (EllipticCurve.Point.restrict B.curve g.baseHom Q).1 =
+      (EllHom.mapPoint g (𝟙 A.base)
+        (EllHom.pullSection (CommRingCat.of ℚ) g Q)).1 :=
+    hlift₂.symm.trans (EllHom.mapPoint_coe _ _ _).symm
+  refine muNRoots_hom_ext D (pairEZMap_π D _ _ _ _ _ _) hψ ?_
+  refine Eq.trans (pairEZMap_read_self D _ _ _ _ _ _) ?_
+  refine Eq.symm ?_
+  refine Eq.trans (muNRootsRead_congr D g.base_w.symm rfl hψ) ?_
+  refine Eq.trans (pairEZMap_read D B.structMap B.curve P Q hP hQ g.baseHom) ?_
+  refine Eq.trans
+    ((B.curve.weilPairingEval_restrict g.baseHom P Q hPraw hQraw
+      kres₁ kres₂).symm) ?_
+  refine Eq.trans (weilPairingEval_congr_raw
+    ((Category.comp_id g.baseHom).trans (Category.id_comp g.baseHom).symm)
+    hraw₁ hraw₂ kres₁ kres₂
+    (EllHom.mapPoint_torsion g (EllHom.pullSection (CommRingCat.of ℚ) g P)
+      ((A.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 A.base) N _).mp
+        (pullSection_kill g hP)))
+    (EllHom.mapPoint_torsion g (EllHom.pullSection (CommRingCat.of ℚ) g Q)
+      ((A.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 A.base) N _).mp
+        (pullSection_kill g hQ)))) ?_
+  exact weilPairingEval_mapPoint g (𝟙 A.base)
+    (EllHom.pullSection (CommRingCat.of ℚ) g P)
+    (EllHom.pullSection (CommRingCat.of ℚ) g Q)
+    ((A.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 A.base) N _).mp
+      (pullSection_kill g hP))
+    ((A.curve.smul_eq_zero_iff_comp_mulByHom (𝟙 A.base) N _).mp
+      (pullSection_kill g hQ))
+
+/-- **[T-CV-3c-3]** Naturality of the value-level determinant comparison. -/
+theorem frameDetMap_baseHom (D : GaloisRepData N) [Fact (1 < N)]
+    {T T' : Scheme.{0}} (k : T' ⟶ T) (h : T ⟶ wFrames D) :
+    frameDetMap D (k ≫ h) = k ≫ frameDetMap D h := by
+  rw [frameDetMap, frameDetMap, Category.assoc]
+
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
 frames factor, carrying the diagonal action. -/
