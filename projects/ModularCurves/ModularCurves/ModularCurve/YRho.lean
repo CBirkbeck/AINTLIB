@@ -4123,6 +4123,22 @@ theorem pairingCompat_framedPinned (D : GaloisRepData N) {T : Scheme.{0}}
   push_cast
   simp only [ZMod.natCast_val, ZMod.cast_id]
 
+/-- **[asm-3 COMPLETE]** The ρ-dictionary: a full level structure together with a
+symplectically compatible frame yields a ρ-level structure — all four fields carried
+by the pinned framed construction. -/
+noncomputable def rhoLevelStructureOfFramed (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (hsymp : FramedSymp D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 h hover) :
+    RhoLevelStructure D sT E where
+  torsionIso := framedTorsionIsoPinned D sT E hinv L h hover
+  over_T := framedTorsionIsoPinned_π D sT E hinv L h hover
+  coords_additive := fun t ht x y hx hy hxy =>
+    coord_framedPinned_additive D sT E hinv L h hover t ht x y hx hy hxy
+  pairing_compat := fun t ht x y hx hy =>
+    pairingCompat_framedPinned D sT E hinv L h hover hsymp t ht x y hx hy
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
