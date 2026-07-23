@@ -3704,6 +3704,36 @@ theorem constVecGLScheme_specIso (N : ℕ) [NeZero N]
         CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) =>
       m.hom.hom.toRingHom) (constVecGLAlg_square N γ)).symm))
 
+/-- **[T-EQ-2 d2-core]** The Sigma-side coordinate change transports to the
+constant-vector scheme through the split identification: `constGL` becomes
+`constVecGLScheme`. -/
+theorem constGL_constVecSchemeIso (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (EllipticCurve.constGL (S := Spec (CommRingCat.of ℚ)) γ).hom ≫
+        (constVecSchemeIso N).hom =
+      (constVecSchemeIso N).hom ≫
+        Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom) := by
+  refine Limits.Sigma.hom_ext _ _ fun a => ?_
+  rw [show (constVecSchemeIso N).hom =
+    (constSchemeSpecIso (CommRingCat.of ℚ) (Fin 2 → ZMod N)).hom ≫
+      (constVecSpecIso N).hom from rfl]
+  simp only [Category.assoc]
+  rw [show (EllipticCurve.constGL (S := Spec (CommRingCat.of ℚ)) γ).hom =
+    Limits.Sigma.desc (fun a => Limits.Sigma.ι
+      (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ))
+      (EllipticCurve.glEquiv γ a)) from rfl]
+  rw [Limits.Sigma.ι_desc_assoc]
+  rw [constSchemeSpecIso_ι_hom_assoc, constSchemeSpecIso_ι_hom_assoc]
+  rw [show (constVecSpecIso N).hom = Spec.map (CommRingCat.ofHom
+    (constVecAlgebraIso N).hom.hom.hom.toRingHom) from rfl]
+  rw [← constVecGLScheme_specIso N γ]
+  rw [← AlgebraicGeometry.Spec.map_comp_assoc]
+  refine congrArg (· ≫ Spec.map (CommRingCat.ofHom
+    (constVecAlgebraIso N).hom.hom.hom.toRingHom)) ?_
+  refine congrArg Spec.map ?_
+  rw [← CommRingCat.ofHom_comp]
+  rfl
+
 /-- [asm-2a helper] The bridge is compatible with the left cofan-injection: the
 correspondence of the first projection composed with the bridge-inverse is the
 tensor inclusion (the `conePointUniqueUpToIso` compatibility, extracted by
