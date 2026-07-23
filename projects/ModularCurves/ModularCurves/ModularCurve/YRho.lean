@@ -6716,10 +6716,11 @@ noncomputable def sympFramedProblem (D : GaloisRepData N) [Fact (1 < N)] :
       ((congrArg (f.unop.baseHom ≫ ·) Lh.property).trans
         (frameDetMap_baseHom D f.unop.baseHom Lh.val.2.val).symm)⟩
   map_id X := by
-    ext Lh
-    exact Subtype.ext (FunctorToTypes.map_id_apply (bareFramedProblem D) Lh.val)
+    ext Lh : 3
+    exact Subtype.ext
+      (FunctorToTypes.map_id_apply (bareFramedProblem D) Lh.val)
   map_comp f g := by
-    ext Lh
+    ext Lh : 3
     exact Subtype.ext
       (FunctorToTypes.map_comp_apply (bareFramedProblem D) f g Lh.val)
 
@@ -6813,6 +6814,143 @@ theorem sympFramedAut_freeAction (D : GaloisRepData N) [Fact (1 < N)] :
   have hg1 : (γ⁻¹ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 1 :=
     glSmul_eq_one_of_eq_self N hinvQ X hne γ⁻¹ a.val.1 hL
   rwa [inv_eq_one] at hg1
+
+/-- **[T-CV-3c-6]** The value-level pairing comparison of the classified full-level
+structure at a test map `h` into the framed space is `h ≫ eZMap` (the [B1]-bridge:
+the classified value's components are the `h`-pull of the universal pair, and the
+value-level comparison is natural; the classifying-map equality is `subst`-ed away
+so no `eqToHom` appears). -/
+theorem pairEZMap_classified (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}} {g : T ⟶ X.base}
+    (h : T ⟶ pullback dE.f (pullback.fst X.structMap (wFramesπ D)))
+    (p : (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+      dE.f = g) :
+    pairEZMap D (X.pullbackAlong g).structMap (X.pullbackAlong g).curve
+        (dE.eqv g ⟨h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)),
+          p⟩).1.1
+        (dE.eqv g ⟨h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)),
+          p⟩).1.2
+        (dE.eqv g ⟨h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)),
+          p⟩).2.1.1
+        (dE.eqv g ⟨h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)),
+          p⟩).2.1.2 =
+      h ≫ eZMap D dE := by
+  subst p
+  have h1 := dE.nat dE.f
+    (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)))
+    ⟨𝟙 dE.Z, Category.id_comp dE.f⟩
+  have h3 := relRep_eqv_congr dE.toRelRepData
+    ((h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫ dE.f)
+    (Category.comp_id
+      (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))))
+    (by rw [Category.comp_id])
+  have hVAL : dE.eqv
+      ((h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫ dE.f)
+      ⟨h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)), rfl⟩ =
+      (gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+        (X.pullbackAlongMap dE.f
+          (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)))).op
+        (univLevel dE) :=
+    h3.symm.trans h1
+  refine Eq.trans (congrArg
+    (fun w : (gammaFullNaiveProblem (CommRingCat.of ℚ) N).obj
+        (Opposite.op (X.pullbackAlong
+          ((h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            dE.f))) =>
+      pairEZMap D
+        (X.pullbackAlong
+          ((h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            dE.f)).structMap
+        (X.pullbackAlong
+          ((h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            dE.f)).curve
+        w.1.1 w.1.2 w.2.1.1 w.2.1.2) hVAL) ?_
+  refine Eq.trans (pairEZMap_pullSection D
+    (X.pullbackAlongMap dE.f
+      (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))))
+    (univP dE) (univQ dE) (univLevel dE).2.1.1 (univLevel dE).2.1.2) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact congrArg (h ≫ ·) (eZMap_eq_pairEZMap D dE).symm
+
+/-- **[T-CV-3c-6]** The bare framed classifying bijection is `zxAction`-equivariant
+(the standalone form of the `bareFramed_equivariantRelRepData` equivariance field,
+reused by the carved datum through the `zxSympAction`-conjugation). -/
+theorem bareFramed_zxAction_eqv (D : GaloisRepData N)
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}} (g : T ⟶ X.base)
+    (u : { h : T ⟶ pullback dE.f (pullback.fst X.structMap (wFramesπ D)) //
+      h ≫ (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f) =
+        g })
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (bareFramedRelRepData D dE.toRelRepData).eqv g
+        ⟨u.1 ≫ zxAction D dE γ, by
+          show (u.1 ≫ zxAction D dE γ) ≫
+            (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+              dE.f) = g
+          rw [Category.assoc]
+          rw [show zxAction D dE γ ≫
+              (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+                dE.f) =
+              pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+                dE.f from by
+            rw [← Category.assoc, zxAction_fst, Category.assoc, dE.over_base]]
+          exact u.2⟩ =
+      ((bareFramedAut D) γ⁻¹).hom.app (Opposite.op (X.pullbackAlong g))
+        ((bareFramedRelRepData D dE.toRelRepData).eqv g u) := by
+  refine Prod.ext ?_ (Subtype.ext ?_)
+  · have hLtrans : (u.1 ≫ zxAction D dE γ) ≫
+        pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) =
+        (u.1 ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+          dE.σZ.hom (Subgroup.topEquiv.symm γ) :=
+      (Category.assoc _ _ _).trans
+        ((congrArg (u.1 ≫ ·) (zxAction_fst D dE γ)).trans
+          (Category.assoc _ _ _).symm)
+    have hL := dE.equivariant g ⟨u.1 ≫ pullback.fst _ _, by
+        rw [Category.assoc]; exact u.2⟩ (Subgroup.topEquiv.symm γ)
+    have helem : ((((Subgroup.topEquiv.symm γ)⁻¹)⁻¹ : (⊤ : Subgroup
+        (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) :
+        Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = (γ⁻¹)⁻¹ := by
+      rw [inv_inv, inv_inv]
+      rfl
+    refine Eq.trans (relRep_eqv_congr dE.toRelRepData g hLtrans _) ?_
+    refine Eq.trans hL ?_
+    refine Eq.trans (gammaHAut_app_val (CommRingCat.of ℚ) N ⊤
+      ((Subgroup.topEquiv.symm γ))⁻¹ (X.pullbackAlong g) _) ?_
+    exact congrArg (fun m => (X.pullbackAlong g).curve.glSmul m
+      (dE.eqv g ⟨u.1 ≫ pullback.fst _ _, by
+        rw [Category.assoc]; exact u.2⟩)) helem
+  · show ((u.1 ≫ zxAction D dE γ) ≫
+        pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+        pullback.snd X.structMap (wFramesπ D) = _
+    calc ((u.1 ≫ zxAction D dE γ) ≫
+          pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+          pullback.snd X.structMap (wFramesπ D)
+        = ((u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            wxAction D X γ) ≫ pullback.snd X.structMap (wFramesπ D) :=
+          congrArg (· ≫ pullback.snd X.structMap (wFramesπ D))
+            ((Category.assoc _ _ _).trans
+              ((congrArg (u.1 ≫ ·) (zxAction_snd D dE γ)).trans
+                (Category.assoc _ _ _).symm))
+      _ = (u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            (pullback.snd X.structMap (wFramesπ D) ≫ wFramesRightMul D γ) :=
+          (Category.assoc _ _ _).trans
+            (congrArg ((u.1 ≫ pullback.snd dE.f
+              (pullback.fst X.structMap (wFramesπ D))) ≫ ·) (wxAction_snd D X γ))
+      _ = ((u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            pullback.snd X.structMap (wFramesπ D)) ≫ wFramesRightMul D γ :=
+          (Category.assoc _ _ _).symm
+      _ = ((u.1 ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            pullback.snd X.structMap (wFramesπ D)) ≫
+            wFramesRightMul D ((γ⁻¹)⁻¹) :=
+          congrArg (fun m => ((u.1 ≫ pullback.snd dE.f
+            (pullback.fst X.structMap (wFramesπ D))) ≫
+            pullback.snd X.structMap (wFramesπ D)) ≫ wFramesRightMul D m)
+            (inv_inv γ).symm
 
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
