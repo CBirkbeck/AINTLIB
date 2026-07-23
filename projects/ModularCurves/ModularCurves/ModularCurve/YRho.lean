@@ -4614,6 +4614,106 @@ theorem frameEvalSlice_snd (D : GaloisRepData N) {T : Scheme.{0}}
       pullback.fst sT (constVecSchemeπ N) :=
   pullback.lift_snd _ _ _
 
+/-- **[T-EQ-2 c]** The slice-level contracted-product relation: twisting the constant
+coordinates by `γ` equals slicing along the right-`γ`-translated frame. -/
+theorem frameEvalSlice_rightMul (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (constVecGLScheme N γ) (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, constVecGLScheme_π]) ≫
+      frameEvalSlice D sT h hover =
+      frameEvalSlice D sT (h ≫ wFramesRightMul D γ)
+        (by rw [Category.assoc, wFramesRightMul_π, hover]) := by
+  have hTL : pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+      (constVecGLScheme N γ) (𝟙 (Spec (CommRingCat.of ℚ)))
+      (by rw [Category.comp_id, Category.id_comp])
+      (by rw [Category.comp_id, constVecGLScheme_π]) ≫
+      pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ h)
+        (by rw [Category.assoc, hover, ← pullback.condition]) =
+      pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ h)
+        (by rw [Category.assoc, hover, ← pullback.condition]) ≫
+      pullback.map (constVecSchemeπ N) (wFramesπ D) (constVecSchemeπ N)
+        (wFramesπ D) (constVecGLScheme N γ) (𝟙 (wFrames D))
+        (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, constVecGLScheme_π])
+        (by rw [Category.comp_id, Category.id_comp]) := by
+    apply pullback.hom_ext
+    · refine Eq.trans (Category.assoc _ _ _) (Eq.trans (congrArg
+        (pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+          (constVecGLScheme N γ) (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+        (pullback.lift_fst _ _ _)) ?_)
+      refine Eq.trans (pullback.lift_snd _ _ _) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (pullback.lift _ _ _ ≫ ·)
+        (pullback.lift_fst _ _ _)) ?_
+      exact (Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ constVecGLScheme N γ) (pullback.lift_fst _ _ _))
+    · refine Eq.trans (Category.assoc _ _ _) (Eq.trans (congrArg
+        (pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+          (constVecGLScheme N γ) (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+        (pullback.lift_snd _ _ _)) ?_)
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      refine Eq.trans (congrArg (· ≫ h) (pullback.lift_fst _ _ _)) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (pullback.fst sT (constVecSchemeπ N) ≫ ·)
+        (Category.id_comp h)) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (pullback.lift _ _ _ ≫ ·)
+        ((pullback.lift_snd _ _ _).trans (Category.comp_id _))) ?_
+      exact pullback.lift_snd _ _ _
+  have hLF : pullback.lift (pullback.snd sT (constVecSchemeπ N))
+      (pullback.fst sT (constVecSchemeπ N) ≫ h)
+      (by rw [Category.assoc, hover, ← pullback.condition]) ≫
+      pullback.map (constVecSchemeπ N) (wFramesπ D) (constVecSchemeπ N)
+        (wFramesπ D) (𝟙 (constVecScheme N)) (wFramesRightMul D γ)
+        (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, wFramesRightMul_π]) =
+      pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ (h ≫ wFramesRightMul D γ))
+        (by rw [Category.assoc, Category.assoc, wFramesRightMul_π, hover,
+          ← pullback.condition]) := by
+    apply pullback.hom_ext
+    · refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (pullback.lift _ _ _ ≫ ·)
+        ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+      exact (pullback.lift_fst _ _ _).trans (pullback.lift_fst _ _ _).symm
+    · refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (pullback.lift _ _ _ ≫ ·)
+        (pullback.lift_snd _ _ _)) ?_
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      refine Eq.trans (congrArg (· ≫ wFramesRightMul D γ)
+        (pullback.lift_snd _ _ _)) ?_
+      exact (Category.assoc _ _ _).trans (pullback.lift_snd _ _ _).symm
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.map sT (constVecSchemeπ N) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecGLScheme N γ)
+        (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+      (pullback.lift_fst _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ frameEval D) hTL) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.lift _ _ _ ≫ ·)
+      (frameEval_twist D γ)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ frameEval D) hLF) ?_
+    exact (pullback.lift_fst _ _ _).symm
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.map sT (constVecSchemeπ N) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecGLScheme N γ)
+        (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans ((pullback.lift_fst _ _ _).trans (Category.comp_id _)) ?_
+    exact (pullback.lift_snd _ _ _).symm
+
 @[reassoc]
 theorem frameEvalSliceInv_fst (D : GaloisRepData N) {T : Scheme.{0}}
     (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
