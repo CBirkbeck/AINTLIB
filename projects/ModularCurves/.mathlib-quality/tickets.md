@@ -25259,6 +25259,40 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### asm-3a/3b COMPLETE (2026-07-26) + 3c ANALYSIS
+**LANDED + PUSHED**: `constVecSchemeIso_π` (Sigma.hom_ext component: ι-eval-ring
+composite collapses to 𝟙 — NOTE Sigma.ι_desc/hom_ext need (f := …)-pins in YRho
+context), `framedTorsionIso` (the ρ-dictionary torsion iso: fullLevelIso.symm ≪≫
+flip.isoPullback of the LANDED isPullback_constSchemeMapAlong (MuN — asm-3a was
+FREE, no new MuN API needed) ≪≫ pullback.map-iso along constVecSchemeIso ≪≫
+asIso frameEvalSlice), `framedTorsionIso_π` (cheap-delta-show to the ≪≫-spelling +
+trans_hom-rws + slice_snd/lift_fst/isoPullback_hom_fst + fullLevelHom_torsionπ +
+inv_hom_id_assoc). YRho now imports GroupScheme.GLSchemeAction (fullLevelIso).
+LESSON: giant shows that spell UNFOLDED trans-hom-chains whnf-timeout; the cheap
+show is the ≪≫-SPELLING (delta+zeta+PI only), then Iso.trans_hom-rws.
+
+**asm-3c coords_additive — DERIVED PLAN (banked from the frameEval_points-read):**
+coord D sT (framedTorsionIso …) _ t ht x hx unfolds (via frameEvalSlice_fst +
+inner-lift-projections + map/bridge-projections) to
+  wFramesPointsEquiv(t ≫ h) • constVecRead(ptTorsion-x ≫ fullLevelIso.inv ≫
+    constSchemeMapAlong sT ≫ constVecSchemeIso.hom)
+so additivity = Matrix-linearity (mulVec_add via smul-add of the GL-action) ∘
+additivity of the FULL-LEVEL coordinate read. Sub-leaves:
+- [3c-i] the read-characterization: for a ℚ̄-point z of E.torsion over t,
+  constVecRead(z ≫ iso.inv ≫ MapAlong ≫ cvIso.hom) = u ↔ z = pointToTorsion
+  ((u 0)•pull-L₁ + (u 1)•pull-L₂)-over-t — connects constVecPointsEquiv
+  (correspondence-side) with the coproduct-index read (constIndex_mapAlong LANDED in
+  MuN) + fullLevelHom's Sigma.desc-components + pointToTorsion-pull. Needs a
+  compat lemma constVecPointsEquiv-vs-ι-index (via piAlgHomIndex — the
+  correspondence-read of a split-algebra point IS the coordinate-index; route
+  through constVecCorrespondenceIso/piAlgHomEquiv).
+- [3c-ii] additivity by uniqueness: read(x+y) computed by exhibiting the
+  (ux+uy)-factorization via Point-arithmetic (add_smul, smul-juggling of the
+  pulled L-sections), then the characterization pins it.
+- [3d] pairing_compat: same read + weilPairingEval_symplectic (T-C2c) at the
+  matrix A_h(t) — det-twist via D.p; the symp-carve enters here (the bare framed
+  problem must be restricted to symplectic frames OR the det-twist tracked).
+
 ### asm-2b COMPLETE (2026-07-26) — asm-2 FULLY DONE
 **frameEvalSlice_isIso PROVEN + PUSHED.** The whole 2b-i..vi chain landed in ~5 build
 cycles, all zero-bump term-chains:
