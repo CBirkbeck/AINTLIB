@@ -934,6 +934,46 @@ theorem hring_of_finiteEtale (D : GaloisRepData N) [Fact (1 < N)]
         CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
         CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom := rfl
 
+open scoped FintypeCatDiscrete in
+/-- **[PIN-6c-iv-γ]** First-leg compatibility of the pair correspondence. -/
+theorem pairCorrespondenceIso_hom_fst (D : GaloisRepData N) [Fact (1 < N)] :
+    (pairCorrespondenceIso D).hom ≫ rhoPairFst D =
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom
+          (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+            (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+              TensorProduct ℚ (vRhoAlgebra D : Type 0) (vRhoAlgebra D : Type 0))) :
+          vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+            (vRhoAlgebra D))) ≫ (vRhoFiberIso D).hom := by
+  have hcomp := Limits.IsLimit.conePointsIsoOfNatIso_hom_comp
+    (Limits.isLimitOfPreserves
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor
+      (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D) (vRhoAlgebra D)))
+    (rhoPairBinaryFanIsLimit D)
+    (Limits.pairComp _ _ _ ≪≫ Limits.mapPairIso (vRhoFiberIso D) (vRhoFiberIso D))
+    ⟨Limits.WalkingPair.left⟩
+  exact hcomp
+
+open scoped FintypeCatDiscrete in
+/-- **[PIN-6c-iv-γ]** Second-leg compatibility of the pair correspondence. -/
+theorem pairCorrespondenceIso_hom_snd (D : GaloisRepData N) [Fact (1 < N)] :
+    (pairCorrespondenceIso D).hom ≫ rhoPairSnd D =
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom
+          (Algebra.TensorProduct.includeRight (R := ℚ) :
+            (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+              TensorProduct ℚ (vRhoAlgebra D : Type 0) (vRhoAlgebra D : Type 0))) :
+          vRhoAlgebra D ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+            (vRhoAlgebra D))) ≫ (vRhoFiberIso D).hom := by
+  have hcomp := Limits.IsLimit.conePointsIsoOfNatIso_hom_comp
+    (Limits.isLimitOfPreserves
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor
+      (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D) (vRhoAlgebra D)))
+    (rhoPairBinaryFanIsLimit D)
+    (Limits.pairComp _ _ _ ≪≫ Limits.mapPairIso (vRhoFiberIso D) (vRhoFiberIso D))
+    ⟨Limits.WalkingPair.right⟩
+  exact hcomp
+
 end
 
 end ModularCurves
