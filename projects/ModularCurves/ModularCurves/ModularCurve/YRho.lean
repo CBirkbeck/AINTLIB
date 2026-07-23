@@ -747,6 +747,75 @@ noncomputable def frameProdIsProduct (D : GaloisRepData N) :
     · exact congrArg (fun q : s.pt ⟶ constVecContAction N => q.hom.hom x) h₁
     · exact congrArg (fun q : s.pt ⟶ frameContAction D => q.hom.hom x) h₂
 
+/-- **[T-EQ-2 b-1]** The `γ`-coordinate change on the constant vector Galois set
+(trivially equivariant since the action is trivial). -/
+noncomputable def constVecGLMor (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    constVecContAction N ⟶ constVecContAction N :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun v => γ • v)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun v => rfl }
+
+/-- **[T-EQ-2 b-2]** The vector-side `γ`-twist of the mixed product. -/
+noncomputable def frameProdVecTwist (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameProdContAction D ⟶ frameProdContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun vA => (γ • vA.1, vA.2))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vA => rfl }
+
+/-- **[T-EQ-2 b-2]** The frame-side right-`γ`-twist of the mixed product. -/
+noncomputable def frameProdFrameTwist (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameProdContAction D ⟶ frameProdContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun vA => (vA.1, vA.2 * γ))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vA => by
+        show (vA.1, (D.ρ (galSepMulEquivGalQ σ) * vA.2) * γ) =
+          (vA.1, D.ρ (galSepMulEquivGalQ σ) * (vA.2 * γ))
+        rw [mul_assoc] }
+
+/-- **[T-EQ-2 b-2]** The contracted-product relation at the Galois-set level:
+evaluating the `γ`-changed coordinates equals evaluating along the right-translated
+frame (`A·(γ·v) = (A·γ)·v`). -/
+theorem frameProdTwist_eval (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameProdVecTwist D γ ≫ frameEvalMor D =
+      frameProdFrameTwist D γ ≫ frameEvalMor D := by
+  ext vA : 3
+  show vA.2 • (γ • vA.1) = (vA.2 * γ) • vA.1
+  exact smul_smul vA.2 γ vA.1
+
+/-- **[T-EQ-2 b-2]** The vector twist over the first projection. -/
+theorem frameProdVecTwist_fst (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameProdVecTwist D γ ≫ frameProdFst D =
+      frameProdFst D ≫ constVecGLMor N γ := by
+  ext vA
+  rfl
+
+/-- **[T-EQ-2 b-2]** The vector twist fixes the second projection. -/
+theorem frameProdVecTwist_snd (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameProdVecTwist D γ ≫ frameProdSnd D = frameProdSnd D := by
+  ext vA
+  rfl
+
+/-- **[T-EQ-2 b-2]** The frame twist fixes the first projection. -/
+theorem frameProdFrameTwist_fst (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameProdFrameTwist D γ ≫ frameProdFst D = frameProdFst D := by
+  ext vA
+  rfl
+
+/-- **[T-EQ-2 b-2]** The frame twist over the second projection. -/
+theorem frameProdFrameTwist_snd (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameProdFrameTwist D γ ≫ frameProdSnd D =
+      frameProdSnd D ≫ frameRightMulMor D γ := by
+  ext vA
+  rfl
+
 /-- **[asm-2b-i]** The `ρ`-mixed product Galois set: vectors-with-frames where *both*
 factors carry the `ρ`-translation, `σ·(w, A) = (ρσ·w, ρσ·A)` — the target of the
 shear `(v, A) ↦ (A·v, A)`. -/
@@ -1269,6 +1338,77 @@ noncomputable def frameEval (D : GaloisRepData N) :
   (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
     (wFramesAlgebra D : Type 0)).hom ≫
     AlgebraicGeometry.Spec.map (CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom)
+
+/-- **[T-EQ-2 b-3]** The `γ`-coordinate change at the algebra level. -/
+noncomputable def constVecGLAlg (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    constVecAlgebra N ⟶ constVecAlgebra N :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+    (constVecGLMor N γ)).unop
+
+/-- **[T-EQ-2 b-3]** The `γ`-coordinate change on the constant vector scheme. -/
+noncomputable def constVecGLScheme (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    constVecScheme N ⟶ constVecScheme N :=
+  Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom)
+
+/-- **[T-EQ-2 b-3]** The coordinate change lies over the base. -/
+theorem constVecGLScheme_π (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    constVecGLScheme N γ ≫ constVecSchemeπ N = constVecSchemeπ N := by
+  show Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0))) =
+    Spec.map (CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0)))
+  rw [← Spec.map_comp]
+  congr 1
+  ext r
+  exact (constVecGLAlg N γ).hom.hom.commutes r
+
+/-- **[T-EQ-2 b-3]** The tensor-side vector twist (the correspondence-conjugate of
+`frameProdVecTwist`). -/
+noncomputable def tensorVecTwistAlg (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    FiniteEtaleGalois.tensorObj (constVecAlgebra N) (wFramesAlgebra D) ⟶
+      FiniteEtaleGalois.tensorObj (constVecAlgebra N) (wFramesAlgebra D) :=
+  ((frameProdAlgebraIso D).inv ≫
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (frameProdVecTwist D γ) ≫ (frameProdAlgebraIso D).hom).unop
+
+/-- **[T-EQ-2 b-3]** The tensor-side frame twist (the correspondence-conjugate of
+`frameProdFrameTwist`). -/
+noncomputable def tensorFrameTwistAlg (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    FiniteEtaleGalois.tensorObj (constVecAlgebra N) (wFramesAlgebra D) ⟶
+      FiniteEtaleGalois.tensorObj (constVecAlgebra N) (wFramesAlgebra D) :=
+  ((frameProdAlgebraIso D).inv ≫
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (frameProdFrameTwist D γ) ≫ (frameProdAlgebraIso D).hom).unop
+
+/-- **[T-EQ-2 b-3]** The evaluation comultiplication intertwines the two twists (the
+`b-2` square transported functorially — no elementwise computation). -/
+theorem frameEvalAlgHom_twist (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameEvalAlgHom D ≫ tensorVecTwistAlg D γ =
+      frameEvalAlgHom D ≫ tensorFrameTwistAlg D γ := by
+  show ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameEvalMor D)).unop ≫
+    ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdVecTwist D γ) ≫ (frameProdAlgebraIso D).hom).unop =
+    ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameEvalMor D)).unop ≫
+    ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdFrameTwist D γ) ≫ (frameProdAlgebraIso D).hom).unop
+  rw [← CategoryTheory.unop_comp, ← CategoryTheory.unop_comp]
+  congr 1
+  simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  rw [← CategoryTheory.Functor.map_comp, ← CategoryTheory.Functor.map_comp]
+  exact congrArg (fun m => (frameProdAlgebraIso D).inv ≫
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m)
+    (frameProdTwist_eval D γ)
 
 end FrameSubstrate
 
@@ -3420,6 +3560,341 @@ theorem frameProdAlgebraIso_inv_right (D : GaloisRepData N) :
       (congrArg ((frameProdAlgebraIso D).inv ≫ ·) hcomp)).trans
       (congrArg ((frameProdAlgebraIso D).inv ≫ ·) (Category.comp_id _))
   exact (congrArg Quiver.Hom.unop hop.symm).trans rfl
+
+/-- **[T-EQ-2 b-4]** The tensor vector twist under the left cofan injection is the
+coordinate change. -/
+theorem tensorVecTwistAlg_includeLeft (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+          (constVecAlgebra N : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) ≫ tensorVecTwistAlg D γ =
+      constVecGLAlg N γ ≫ ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ))) := by
+  have hE : ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdVecTwist D γ) ≫ (frameProdAlgebraIso D).hom) ≫
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdFst D)) =
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdFst D)) ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (constVecGLMor N γ) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    rw [← CategoryTheory.Functor.map_comp, ← CategoryTheory.Functor.map_comp]
+    exact congrArg (fun m => (frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m)
+      (frameProdVecTwist_fst D γ)
+  refine Eq.trans (congrArg (· ≫ tensorVecTwistAlg D γ)
+    (frameProdAlgebraIso_inv_left D).symm) ?_
+  refine Eq.trans (congrArg Quiver.Hom.unop hE) ?_
+  exact congrArg (constVecGLAlg N γ ≫ ·) (frameProdAlgebraIso_inv_left D)
+
+/-- **[T-EQ-2 b-4]** The tensor vector twist fixes the right cofan injection. -/
+theorem tensorVecTwistAlg_includeRight (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ) :
+          (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) ≫ tensorVecTwistAlg D γ =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ))) := by
+  have hE : ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdVecTwist D γ) ≫ (frameProdAlgebraIso D).hom) ≫
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdSnd D)) =
+      (frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdSnd D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    rw [← CategoryTheory.Functor.map_comp]
+    exact congrArg (fun m => (frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m)
+      (frameProdVecTwist_snd D γ)
+  refine Eq.trans (congrArg (· ≫ tensorVecTwistAlg D γ)
+    (frameProdAlgebraIso_inv_right D).symm) ?_
+  exact Eq.trans (congrArg Quiver.Hom.unop hE) (frameProdAlgebraIso_inv_right D)
+
+/-- **[T-EQ-2 b-4]** The tensor frame twist fixes the left cofan injection. -/
+theorem tensorFrameTwistAlg_includeLeft (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+          (constVecAlgebra N : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) ≫ tensorFrameTwistAlg D γ =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ))) := by
+  have hE : ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdFrameTwist D γ) ≫ (frameProdAlgebraIso D).hom) ≫
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdFst D)) =
+      (frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdFst D) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    rw [← CategoryTheory.Functor.map_comp]
+    exact congrArg (fun m => (frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m)
+      (frameProdFrameTwist_fst D γ)
+  refine Eq.trans (congrArg (· ≫ tensorFrameTwistAlg D γ)
+    (frameProdAlgebraIso_inv_left D).symm) ?_
+  exact Eq.trans (congrArg Quiver.Hom.unop hE) (frameProdAlgebraIso_inv_left D)
+
+/-- **[T-EQ-2 b-4]** The tensor frame twist under the right cofan injection is the
+right translation. -/
+theorem tensorFrameTwistAlg_includeRight (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ) :
+          (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0))) ≫ tensorFrameTwistAlg D γ =
+      wFramesRightMulAlg D γ ≫ ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ))) := by
+  have hE : ((frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (frameProdFrameTwist D γ) ≫ (frameProdAlgebraIso D).hom) ≫
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdSnd D)) =
+      ((frameProdAlgebraIso D).inv ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameProdSnd D)) ≫
+        (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (frameRightMulMor D γ) := by
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    rw [← CategoryTheory.Functor.map_comp, ← CategoryTheory.Functor.map_comp]
+    exact congrArg (fun m => (frameProdAlgebraIso D).inv ≫
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m)
+      (frameProdFrameTwist_snd D γ)
+  refine Eq.trans (congrArg (· ≫ tensorFrameTwistAlg D γ)
+    (frameProdAlgebraIso_inv_right D).symm) ?_
+  refine Eq.trans (congrArg Quiver.Hom.unop hE) ?_
+  exact congrArg (wFramesRightMulAlg D γ ≫ ·) (frameProdAlgebraIso_inv_right D)
+
+/-- [T-EQ-2 b-5 helper] `Spec` of the ring image of a finite-étale-algebra composite
+splits. -/
+theorem specMap_finiteEtale_comp {A B C : CommAlgCat.FiniteEtale.{0} ℚ}
+    (x : A ⟶ B) (y : B ⟶ C) :
+    Spec.map (CommRingCat.ofHom ((x ≫ y).hom.hom.toRingHom)) =
+      Spec.map (CommRingCat.ofHom y.hom.hom.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom x.hom.hom.toRingHom) := by
+  rw [show (x ≫ y).hom.hom.toRingHom =
+    (y.hom.hom.toRingHom).comp (x.hom.hom.toRingHom) from rfl,
+    CommRingCat.ofHom_comp, Spec.map_comp]
+
+/-- **[T-EQ-2 b-5]** The vector twist through the `Spec`-tensor identification. -/
+theorem pullbackSpecIso_vecTwist (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)).inv ≫
+      pullback.map (constVecSchemeπ N) (wFramesπ D) (constVecSchemeπ N)
+        (wFramesπ D) (constVecGLScheme N γ) (𝟙 (wFrames D))
+        (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, constVecGLScheme_π])
+        (by rw [Category.comp_id, Category.id_comp]) =
+      Spec.map (CommRingCat.ofHom (tensorVecTwistAlg D γ).hom.hom.toRingHom) ≫
+        (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)).inv := by
+  have hRL : CommRingCat.ofHom
+      (Algebra.TensorProduct.includeLeftRingHom :
+        (constVecAlgebra N : Type 0) →+* TensorProduct ℚ
+          (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)) ≫
+      CommRingCat.ofHom (tensorVecTwistAlg D γ).hom.hom.toRingHom =
+      CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom ≫
+        CommRingCat.ofHom Algebra.TensorProduct.includeLeftRingHom := by
+    rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+    exact congrArg (fun m => CommRingCat.ofHom m.hom.hom.toRingHom)
+      (tensorVecTwistAlg_includeLeft D γ)
+  have hRR : CommRingCat.ofHom
+      ((Algebra.TensorProduct.includeRight :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ] TensorProduct ℚ
+          (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).toRingHom) ≫
+      CommRingCat.ofHom (tensorVecTwistAlg D γ).hom.hom.toRingHom =
+      CommRingCat.ofHom
+        ((Algebra.TensorProduct.includeRight :
+          (wFramesAlgebra D : Type 0) →ₐ[ℚ] TensorProduct ℚ
+            (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)).toRingHom) := by
+    rw [← CommRingCat.ofHom_comp]
+    exact congrArg (fun m => CommRingCat.ofHom m.hom.hom.toRingHom)
+      (tensorVecTwistAlg_includeRight D γ)
+  apply pullback.hom_ext
+  · refine ((Category.assoc _ _ _).trans ?_).trans
+      ((Category.assoc _ _ _).symm.trans (congrArg (· ≫ pullback.fst _ _)
+        rfl)).symm
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      (pullback.lift_fst _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ constVecGLScheme N γ)
+      (AlgebraicGeometry.pullbackSpecIso_inv_fst ℚ _ _)) ?_
+    refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+    refine Eq.trans (congrArg Spec.map hRL.symm) ?_
+    refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _) ?_
+    exact (congrArg (Spec.map (CommRingCat.ofHom
+      (tensorVecTwistAlg D γ).hom.hom.toRingHom) ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_fst ℚ _ _)).symm.trans
+      (Category.assoc _ _ _).symm
+  · refine ((Category.assoc _ _ _).trans ?_)
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      ((pullback.lift_snd _ _ _).trans (Category.comp_id _))) ?_
+    refine Eq.trans (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ _ _) ?_
+    refine Eq.trans (congrArg Spec.map hRR.symm) ?_
+    refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _) ?_
+    exact ((congrArg (Spec.map (CommRingCat.ofHom
+      (tensorVecTwistAlg D γ).hom.hom.toRingHom) ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ _ _)).symm).trans
+      (Category.assoc _ _ _).symm
+
+/-- **[T-EQ-2 b-5]** The frame twist through the `Spec`-tensor identification. -/
+theorem pullbackSpecIso_frameTwist (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+        (wFramesAlgebra D : Type 0)).inv ≫
+      pullback.map (constVecSchemeπ N) (wFramesπ D) (constVecSchemeπ N)
+        (wFramesπ D) (𝟙 (constVecScheme N)) (wFramesRightMul D γ)
+        (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, wFramesRightMul_π]) =
+      Spec.map (CommRingCat.ofHom (tensorFrameTwistAlg D γ).hom.hom.toRingHom) ≫
+        (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)).inv := by
+  have hRL : CommRingCat.ofHom
+      (Algebra.TensorProduct.includeLeftRingHom :
+        (constVecAlgebra N : Type 0) →+* TensorProduct ℚ
+          (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)) ≫
+      CommRingCat.ofHom (tensorFrameTwistAlg D γ).hom.hom.toRingHom =
+      CommRingCat.ofHom Algebra.TensorProduct.includeLeftRingHom := by
+    rw [← CommRingCat.ofHom_comp]
+    exact congrArg (fun m => CommRingCat.ofHom m.hom.hom.toRingHom)
+      (tensorFrameTwistAlg_includeLeft D γ)
+  have hRR : CommRingCat.ofHom
+      ((Algebra.TensorProduct.includeRight :
+        (wFramesAlgebra D : Type 0) →ₐ[ℚ] TensorProduct ℚ
+          (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).toRingHom) ≫
+      CommRingCat.ofHom (tensorFrameTwistAlg D γ).hom.hom.toRingHom =
+      CommRingCat.ofHom (wFramesRightMulAlg D γ).hom.hom.toRingHom ≫
+        CommRingCat.ofHom
+          ((Algebra.TensorProduct.includeRight :
+            (wFramesAlgebra D : Type 0) →ₐ[ℚ] TensorProduct ℚ
+              (constVecAlgebra N : Type 0)
+              (wFramesAlgebra D : Type 0)).toRingHom) := by
+    rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+    exact congrArg (fun m => CommRingCat.ofHom m.hom.hom.toRingHom)
+      (tensorFrameTwistAlg_includeRight D γ)
+  apply pullback.hom_ext
+  · refine ((Category.assoc _ _ _).trans ?_)
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+    refine Eq.trans (AlgebraicGeometry.pullbackSpecIso_inv_fst ℚ _ _) ?_
+    refine Eq.trans (congrArg Spec.map hRL.symm) ?_
+    refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _) ?_
+    exact ((congrArg (Spec.map (CommRingCat.ofHom
+      (tensorFrameTwistAlg D γ).hom.hom.toRingHom) ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_fst ℚ _ _)).symm).trans
+      (Category.assoc _ _ _).symm
+  · refine ((Category.assoc _ _ _).trans ?_)
+    refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).inv ≫ ·)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ wFramesRightMul D γ)
+      (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ _ _)) ?_
+    refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+    refine Eq.trans (congrArg Spec.map hRR.symm) ?_
+    refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _) ?_
+    exact ((congrArg (Spec.map (CommRingCat.ofHom
+      (tensorFrameTwistAlg D γ).hom.hom.toRingHom) ≫ ·)
+      (AlgebraicGeometry.pullbackSpecIso_inv_snd ℚ _ _)).symm).trans
+      (Category.assoc _ _ _).symm
+
+/-- **[T-EQ-2 b-5]** The contracted-product relation for the universal-frame
+evaluation: changing coordinates by `γ` equals right-translating the frame by `γ`. -/
+theorem frameEval_twist (D : GaloisRepData N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    pullback.map (constVecSchemeπ N) (wFramesπ D) (constVecSchemeπ N)
+        (wFramesπ D) (constVecGLScheme N γ) (𝟙 (wFrames D))
+        (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, constVecGLScheme_π])
+        (by rw [Category.comp_id, Category.id_comp]) ≫ frameEval D =
+      pullback.map (constVecSchemeπ N) (wFramesπ D) (constVecSchemeπ N)
+        (wFramesπ D) (𝟙 (constVecScheme N)) (wFramesRightMul D γ)
+        (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, wFramesRightMul_π]) ≫ frameEval D := by
+  have hIso : ∀ (m : pullback (constVecSchemeπ N) (wFramesπ D) ⟶
+        pullback (constVecSchemeπ N) (wFramesπ D))
+      (a : CommRingCat.of (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)) ⟶
+        CommRingCat.of (TensorProduct ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0))),
+      (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)).inv ≫ m =
+        Spec.map a ≫
+          (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+            (wFramesAlgebra D : Type 0)).inv →
+      m ≫ (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)).hom =
+        (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)).hom ≫ Spec.map a := by
+    intro m a h
+    have hA : m = (AlgebraicGeometry.pullbackSpecIso ℚ
+        (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+        (AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+          (wFramesAlgebra D : Type 0)).inv ≫ m :=
+      (Iso.hom_inv_id_assoc _ _).symm
+    have hB := congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·) h
+    refine Eq.trans (congrArg (· ≫ (AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom)
+      (hA.trans hB)) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    exact (congrArg (Spec.map a ≫ ·) (Iso.inv_hom_id _)).trans
+      (Category.comp_id _)
+  have hV := hIso _
+    (CommRingCat.ofHom (tensorVecTwistAlg D γ).hom.hom.toRingHom)
+    (pullbackSpecIso_vecTwist D γ)
+  have hF := hIso _
+    (CommRingCat.ofHom (tensorFrameTwistAlg D γ).hom.hom.toRingHom)
+    (pullbackSpecIso_frameTwist D γ)
+  show _ ≫ ((AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+      (wFramesAlgebra D : Type 0)).hom ≫
+      Spec.map (CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom)) =
+    _ ≫ ((AlgebraicGeometry.pullbackSpecIso ℚ (constVecAlgebra N : Type 0)
+      (wFramesAlgebra D : Type 0)).hom ≫
+      Spec.map (CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom))
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ Spec.map
+    (CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom)) hV) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.symm ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ Spec.map
+    (CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom)) hF) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+    (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·) ?_
+  refine Eq.trans (specMap_finiteEtale_comp
+    (frameEvalAlgHom D) (tensorFrameTwistAlg D γ)).symm ?_
+  refine Eq.trans (congrArg (fun m => Spec.map
+    (CommRingCat.ofHom m.hom.hom.toRingHom))
+    (frameEvalAlgHom_twist D γ).symm) ?_
+  exact specMap_finiteEtale_comp (frameEvalAlgHom D) (tensorVecTwistAlg D γ)
 
 /-- **[asm-2b-iv]** The co-evaluation comultiplication: the finite étale algebra map
 corresponding to the co-evaluation (mirror of `frameEvalAlgHom`). -/
