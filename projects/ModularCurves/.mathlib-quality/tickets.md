@@ -25475,6 +25475,21 @@ original sketch (etale-local torsor lifts + descent; the (vi)-pin feeds the
 symp-condition transfer). Remaining deps for T-EQ-3: T-F3a(vi) pin (parked),
 framedTorsionIsoPinned_glSmul (new T-EQ-2), EngineDescent exports audit.
 
+#### [T-EQ-2 PROGRESS] (2026-07-23/24 beastmode) leaves a/b/c LANDED
+(a) fullLevelIso_glSmul pre-existing (GLSchemeAction:629). (b) COMPLETE at c2568d8d4:
+constVecGLMor/Alg/Scheme + frameProdVecTwist/FrameTwist + frameProdTwist_eval
+(smul_smul) + 4 projection squares + tensor-side conjugate twists +
+frameEvalAlgHom_twist (functorial) + 4 include-chases (op-level congrArg-unop
+crossing) + specMap_finiteEtale_comp + pullbackSpecIso_vecTwist/frameTwist
+(term-chain legs — the spelling-mixture kabstract trap is dodged by NEVER rw-ing
+against mixed pullback-spellings; pure Eq.trans/congrArg chains) + frameEval_twist.
+(c) frameEvalSlice_rightMul LANDED (two inner-lift squares + b-square).
+REMAINING (recon complete, see sentinel for the leaf-map): P0 glEquiv_smul-link;
+P1 constVecGLAlg_eval pin (correspondence-elementwise, muNRootsCorrespondence_pow
+technique) powering both (d2-core) constGL-vs-constVecSchemeIso and (N-idx);
+(N-abs) via pointsEquivOfContAction_map; rc-commutation => (d3) corr-vs-GL;
+(d1) constGL-vs-mapAlong Sigma-square; (e) pinned-iso assembly; (f) ext + T-EQ-2.
+
 #### [T-EQ-1] Torsion-iso rigidity — status: open, deps: none (parallel)
 Statement: two isos φ ψ : E.torsion N ≅ pullback (vRhoπ D) sT over T (both π-compat)
 with equal vRhoPointsEquiv-reads at every ℚ̄-point of E.torsion over every ℚ̄-point of
