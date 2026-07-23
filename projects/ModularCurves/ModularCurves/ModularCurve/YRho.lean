@@ -3924,6 +3924,139 @@ theorem corrSchemeIso_constVecGL (N : ℕ) [NeZero N]
   exact congrArg (fun (m : constVecAlgebra N ⟶ constVecAlgebra N) =>
     CommRingCat.ofHom m.hom.hom.toRingHom) (corrAlgHom_constVecGLAlg N γ).symm
 
+/-- **[T-EQ-2 d1]** The coordinate change lies over the constant-scheme
+projection. -/
+theorem constGL_constSchemeπ (S : Scheme.{0}) (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (EllipticCurve.constGL (S := S) γ).hom ≫
+        constSchemeπ S (Fin 2 → ZMod N) =
+      constSchemeπ S (Fin 2 → ZMod N) := by
+  refine Limits.Sigma.hom_ext _ _ fun a => ?_
+  rw [show (EllipticCurve.constGL (S := S) γ).hom = Limits.Sigma.desc (fun a =>
+    Limits.Sigma.ι (fun _ : (Fin 2 → ZMod N) => S)
+      (EllipticCurve.glEquiv γ a)) from rfl]
+  rw [Limits.Sigma.ι_desc_assoc]
+  show Limits.Sigma.ι (fun _ : (Fin 2 → ZMod N) => S)
+      (EllipticCurve.glEquiv γ a) ≫ Limits.Sigma.desc (fun _ => 𝟙 S) =
+    Limits.Sigma.ι (fun _ : (Fin 2 → ZMod N) => S) a ≫
+      Limits.Sigma.desc (fun _ => 𝟙 S)
+  rw [Limits.Sigma.ι_desc, Limits.Sigma.ι_desc]
+
+/-- **[T-EQ-2 d1]** The coordinate change commutes with the base-change
+comparison. -/
+theorem constGL_mapAlong {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ))
+    (N : ℕ) [NeZero N] (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (EllipticCurve.constGL (S := T) γ).hom ≫
+        constSchemeMapAlong sT (Fin 2 → ZMod N) =
+      constSchemeMapAlong sT (Fin 2 → ZMod N) ≫
+        (EllipticCurve.constGL (S := Spec (CommRingCat.of ℚ)) γ).hom := by
+  refine Limits.Sigma.hom_ext _ _ fun a => ?_
+  rw [show (EllipticCurve.constGL (S := T) γ).hom = Limits.Sigma.desc (fun a =>
+    Limits.Sigma.ι (fun _ : (Fin 2 → ZMod N) => T)
+      (EllipticCurve.glEquiv γ a)) from rfl]
+  rw [Limits.Sigma.ι_desc_assoc, ι_constSchemeMapAlong,
+    ι_constSchemeMapAlong_assoc]
+  rw [show (EllipticCurve.constGL (S := Spec (CommRingCat.of ℚ)) γ).hom =
+    Limits.Sigma.desc (fun a => Limits.Sigma.ι
+      (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ))
+      (EllipticCurve.glEquiv γ a)) from rfl]
+  rw [Limits.Sigma.ι_desc]
+
+/-- **[T-EQ-2 d1]** The C-leg square: the coordinate change transports through the
+base-change comparison isomorphism into the frame of the pinned trivialization. -/
+theorem constGL_isoPullback {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ))
+    (N : ℕ) [NeZero N] (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (EllipticCurve.constGL (S := T) γ).hom ≫
+        (isPullback_constSchemeMapAlong sT
+          (Fin 2 → ZMod N)).flip.isoPullback.hom =
+      (isPullback_constSchemeMapAlong sT
+          (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+        pullback.map sT (constSchemeπ (Spec (CommRingCat.of ℚ))
+            (Fin 2 → ZMod N)) sT
+          (constSchemeπ (Spec (CommRingCat.of ℚ)) (Fin 2 → ZMod N))
+          (𝟙 T) (EllipticCurve.constGL
+            (S := Spec (CommRingCat.of ℚ)) γ).hom
+          (𝟙 (Spec (CommRingCat.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id, constGL_constSchemeπ]) := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((EllipticCurve.constGL (S := T) γ).hom ≫ ·)
+      ((isPullback_constSchemeMapAlong sT
+        (Fin 2 → ZMod N)).flip.isoPullback_hom_fst)) ?_
+    refine Eq.trans (constGL_constSchemeπ T N γ) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((isPullback_constSchemeMapAlong sT
+        (Fin 2 → ZMod N)).flip.isoPullback.hom ≫ ·)
+      ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+    exact (isPullback_constSchemeMapAlong sT
+      (Fin 2 → ZMod N)).flip.isoPullback_hom_fst
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((EllipticCurve.constGL (S := T) γ).hom ≫ ·)
+      ((isPullback_constSchemeMapAlong sT
+        (Fin 2 → ZMod N)).flip.isoPullback_hom_snd)) ?_
+    refine Eq.trans (constGL_mapAlong sT N γ) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((isPullback_constSchemeMapAlong sT
+        (Fin 2 → ZMod N)).flip.isoPullback.hom ≫ ·)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    exact congrArg (· ≫ (EllipticCurve.constGL
+      (S := Spec (CommRingCat.of ℚ)) γ).hom)
+      ((isPullback_constSchemeMapAlong sT
+        (Fin 2 → ZMod N)).flip.isoPullback_hom_snd)
+
+/-- **[T-EQ-2 d2]** A component square over `Spec ℚ` transports to the `T`-pullback
+frames of the pinned trivialization (generic: both twists on the second factor). -/
+theorem pullback_map_snd_square {T A B : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ))
+    {πA : A ⟶ Spec (CommRingCat.of ℚ)} {πB : B ⟶ Spec (CommRingCat.of ℚ)}
+    (u : A ⟶ A) (v : A ⟶ B) (u' : B ⟶ B)
+    (hu : u ≫ πA = πA) (hv : v ≫ πB = πA) (hu' : u' ≫ πB = πB)
+    (hsq : u ≫ v = v ≫ u') :
+    pullback.map sT πA sT πA (𝟙 T) u (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, hu]) ≫
+      pullback.map sT πA sT πB (𝟙 T) v (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, hv]) =
+      pullback.map sT πA sT πB (𝟙 T) v (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, hv]) ≫
+      pullback.map sT πB sT πB (𝟙 T) u' (𝟙 (Spec (CommRingCat.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, hu']) := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.map sT πA sT πA (𝟙 T) u
+        (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+      ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+    refine Eq.trans ((pullback.lift_fst _ _ _).trans (Category.comp_id _)) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.map sT πA sT πB (𝟙 T) v
+        (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+      ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.map sT πA sT πA (𝟙 T) u
+        (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ v) (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.snd sT πA ≫ ·) hsq) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.map sT πA sT πB (𝟙 T) v
+        (𝟙 (Spec (CommRingCat.of ℚ))) _ _ ≫ ·)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ u') (pullback.lift_snd _ _ _)) ?_
+    exact Category.assoc _ _ _
+
 /-- [asm-2a helper] The bridge is compatible with the left cofan-injection: the
 correspondence of the first projection composed with the bridge-inverse is the
 tensor inclusion (the `conePointUniqueUpToIso` compatibility, extracted by
