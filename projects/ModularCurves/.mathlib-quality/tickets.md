@@ -25269,7 +25269,7 @@ directly would overcount by orbits. The engine (bareFramed_quotientProblemData,
 [GHB7]-instantiated, LANDED :4692) is the quotient-provider; the carve threads
 through it. Producer rules: no cleanup tickets (deferred to main centrally).
 
-#### [T-CV-1] The DS3 μ_N-bridge — status: open, file: YRho.lean, deps: none
+#### [T-CV-1] The DS3 μ_N-bridge — status: in_progress (2026-07-27), file: YRho.lean, deps: none
 Statement: `noncomputable def muNSpecQIso (D) [Fact (1 < N)] : muN (Spec (.of ℚ)) N ≅
 muNRootsScheme D` + `muNSpecQIso_π : hom ≫ muNRootsSchemeπ D = muNπ (Spec (.of ℚ)) N`.
 Sketch (per the banked sentinel-recipe, verified against MuN.lean):
@@ -25400,6 +25400,88 @@ morphism form a sheaf: mathlib/engine-API). Mutual-inverse checks pointwise.
 Sources: KM 4.7 (the print pp. as in the standing T-Y1F-3 note); Q9-docstring
 (in-file, quoted in the audit); torsion_etaleLocal_triv (TorsionEtaleTriv:328).
 RISK-RANK: highest of the arc; sub-decompose at execution per beastmode A2 as needed.
+
+### AMENDMENT v3 (2026-07-23, beastmode G6): T-F3 elevated to the critical path
+
+**Finding (adversarial audit of the final-arc statements, during T-CV-3 planning).**
+`rhoLevel_relativelyRepresentable` as currently stated is FALSE with the current
+(pointwise-only) `RhoLevelStructure`: its `coords_additive`/`pairing_compat` fields
+quantify over `t : Spec ℚ̄ ⟶ T'` and are VACUOUS over any `T'` with no `ℚ̄`-points.
+Counterexample: `T := Spec ℚ`, any `E/ℚ`, `N ≥ 3`. `k₁ : Spec ℚ̄ → Spec ℚ` forces
+`deg f = #(additive symplectic isos) ≤ |GL₂(ℤ/N)|`; `k₂ : Spec ℂ → Spec ℚ` demands
+`#sections = #(ALL π-compatible scheme isos over ℂ) = (N²)!` (both fields vacuous:
+there is NO `Spec ℚ̄ → Spec ℂ` over `ℚ` — no ring map `ℂ → ℚ̄`). For `N = 3`:
+`48 < 362880`. Both counts are finite and must equal `deg f`. Contradiction.
+**This is NOT a B2**: the board's own [T-F3] ("upgrade coords_additive/pairing_compat
+to morphism-level"), already a dependency of the [T-F4] milestone, is exactly the fix;
+the headline statement TEXT is unchanged — only the `RhoLevelStructure` fields
+strengthen per the pre-existing T-F3 plan. Tier-A3: execute T-F3 now.
+
+**Fix design (minimal sufficient).** ONE new morphism-level field (pointwise fields
+stay; over exotic bases, form-preservation pointwise-at-every-residue-field forces
+additivity automatically — nondegeneracy ⟹ form-preserving bijections are linear —
+so upgrading `pairing_compat` alone kills the counterexample):
+`pairing_scheme : ∀ [Fact (1 < N)], pairSrc ≫ E.weilPairing N ≫ muNMapAlong sT N ≫
+  (muNSpecQIso D).hom = pairTorsionIso ≫ vRhoPairingMap D` where `pairSrc` is the
+identity pair on `pullback (E.torsionπ N) (E.torsionπ N)`, `pairTorsionIso` the
+`torsionIso.hom`-pair into `pullback (vRhoπ D) (vRhoπ D)` (exchange lift), and
+`vRhoPairingMap` the `p(u∧v)`-map (new layer below). Conditional-instance field ⟹
+NO signature change anywhere outside the structure.
+
+#### [T-F3a] The V_ρ pairing layer — status: open, deps: T-CV-1 (pattern+muNRoots)
+Leaves (mirror the CARVE/CV-1 patterns exactly):
+i. `rhoPairAction/ContAction D`: explicit product Galois set on
+   `(Fin 2 → ZMod N) × (Fin 2 → ZMod N)`, `σ·(u,v) = (ρσ u, ρσ v)`; continuity via
+   ker-ρ (rhoAction_isContinuous pattern).
+ii. wedge-det lemma `(ρσ u)∧(ρσ v) = det(ρσ)·(u∧v)` (2×2 arithmetic, ZMod-ring;
+   `u∧v := u 0 * v 1 - u 1 * v 0`; framedSymp_glSmul-arithmetic pattern) +
+   `rhoPairMor : rhoPairContAction D ⟶ muNRootsContAction N` by
+   `(u,v) ↦ p(ofAdd (u∧v))-as-root` (mkOfPowEq of the p-value; equivariance via
+   det_cyclo + p_equivariant + (ii); detCompMor pattern verbatim).
+iii. `vRhoPairAlgebra D := (finiteEtaleEquivContAction ℚ).inverse.obj (op-flip …)`
+   abstract side + `rhoPairAlgHom : muNRootsAlgebra D ⟶ vRhoPairAlgebra D`
+   (inverse.map of rhoPairMor; detCompAlgHom pattern) + Spec-transports
+   `vRhoPairScheme/π` + `rhoPairSchemeMap : vRhoPairScheme D ⟶ muNRootsScheme D` + π.
+iv. tensor model: `A ⊗[ℚ] A` (A := vRhoAlgebra D) is finite étale
+   (Module.Finite + Algebra.Etale via FiniteEtale.baseChange-composite instances);
+   correspondence `functor.obj (op (.of ℚ (A ⊗[ℚ] A))) ≅ rhoPairContAction D`
+   (AlgHom(A⊗A, Sep) ≃ pairs via Algebra.TensorProduct.liftEquiv-UP, then
+   componentwise pointsEquiv-reads; cycloAlgHomEquivRoots/muNRootsCorrespondenceIso
+   pattern) + `vRhoPairAlgebraIso : vRhoPairAlgebra D ≅ .of ℚ (A ⊗[ℚ] A)`
+   (constVecAlgebraIso mirror) + SpecIso (term-chained laws).
+v. bridge `pullbackVRhoIso : pullback (vRhoπ D) (vRhoπ D) ≅ vRhoPairScheme D` :=
+   pullbackSpecIso ℚ A A (mathlib, Pullbacks.lean:719, verified) ≪≫ SpecIso-inv;
+   `vRhoPairingMap D : pullback (vRhoπ D) (vRhoπ D) ⟶ muNRootsScheme D :=
+   pullbackVRhoIso.hom ≫ rhoPairSchemeMap D` + π-compat (fst-side).
+vi. the ℚ̄-points pin: reading a pair of vRho-points through pullbackVRhoIso +
+   rhoPairSchemeMap at a ℚ̄-point = `p(ofAdd(vRhoPointsEquiv-read-1 ∧
+   vRhoPointsEquiv-read-2))` as a muNRoots-ℚ̄-point-read
+   (constVecPointsEquiv_corrScheme pin pattern; consumed by T-CV-3(c-i)v2 + T-3E).
+RISK: (iv) liftEquiv-vs-fiber-carrier plumbing (same class as CV-1c/d, solved there);
+(vi) is the deep pin — состав the landed pin-discipline (standalone comp-lemmas,
+term-chains, no keyed-rw on InducedCategory).
+
+#### [T-F3b] The morphism-level pairing field — status: open, deps: T-F3a
+Add to `RhoLevelStructure` the field `pairing_scheme` (statement above; the
+`pairTorsionIso`-exchange-lift: `pullback.lift (fst ≫ torsionIso.hom)
+(snd ≫ torsionIso.hom) (π-square via over_T + pullback.condition)`). Keep both
+pointwise fields. All existing consumers compile unchanged (new field only ADDS
+obligations at constructor sites: exactly rhoLevelStructureOfFramed (T-F3c) and any
+future construction).
+
+#### [T-F3c] Dictionary refit — status: open, deps: T-F3b
+`rhoLevelStructureOfFramed` gains hypothesis `hsymp_scheme` (the map-level framed
+condition: the T-level carve-read equation through the PIN-machinery) and proves
+`pairing_scheme` from it. The pointwise `FramedSymp`-input stays for the pointwise
+fields. Consumers (T-3E forward direction) HAVE the map-level condition from the
+carve — that is the point of the carve.
+
+**[T-CV-3 re-scope]** (c-i) `sympLocus_sections_iff` is now MAP-LEVEL native:
+`h : T ⟶ Z` factors through `sympLocusι` ⟺ `h ≫ eZMap = h ≫ dZMap` (equalizer-UP
+of the diagonal-pullback; no exotic-base issue) — and the T-F3a(vi) pin ties this to
+the `pairing_scheme` field through the dictionary. The pointwise FramedSymp bridge
+(landed `framedProblem`/`framedAut`, :2114/:2270) is NOT deleted but is no longer on
+the critical path — the quotient runs on bareFramed + carve.
 
 #### [T-3E] Assemble rhoLevel_relativelyRepresentable — status: open, deps: T-EQ-3
 I := (the carved-quotient rel-rep-Z at X := EllObj-of(T,sT,E)); IsFinite+Etale from
