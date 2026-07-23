@@ -3570,6 +3570,103 @@ theorem framedTorsionIsoPinned_π (D : GaloisRepData N) {T : Scheme.{0}}
     (E.fullLevelHom_torsionπ L).symm) ?_
   exact Iso.inv_hom_id_assoc _ _
 
+/-- **[3c-B4]** Every `ℚ̄`-point of a constant scheme lying over a `ℚ̄`-point of the
+base factors through the inclusion at a constant index (the `ℚ̄`-spectrum is a
+single point, so the locally constant read is constant). -/
+noncomputable instance : Unique ↥(Spec (CommRingCat.of (AlgebraicClosure ℚ))) :=
+  inferInstanceAs (Unique (PrimeSpectrum (AlgebraicClosure ℚ)))
+
+theorem constScheme_qbar_factor {T : Scheme.{0}}
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (w : Spec (.of (AlgebraicClosure ℚ)) ⟶ constScheme T (Fin 2 → ZMod N))
+    (hw : w ≫ constSchemeπ T (Fin 2 → ZMod N) = t) :
+    ∃ u : Fin 2 → ZMod N,
+      w = t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u := by
+  refine ⟨constSchemePointsEquiv T (Fin 2 → ZMod N) (t ≫ 𝟙 T)
+    ⟨w, hw.trans (Category.comp_id t).symm⟩ default, ?_⟩
+  set c := constSchemePointsEquiv T (Fin 2 → ZMod N) (t ≫ 𝟙 T)
+    ⟨w, hw.trans (Category.comp_id t).symm⟩ with hc
+  have hnat := constSchemePointsEquiv_natural T (Fin 2 → ZMod N) (𝟙 T) t
+    ⟨Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (c default),
+      Limits.Sigma.ι_desc _ _⟩
+  rw [constSchemePointsEquiv_sigmaι] at hnat
+  have hread2 : constSchemePointsEquiv T (Fin 2 → ZMod N) (t ≫ 𝟙 T)
+      ⟨t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (c default), by
+        rw [Category.assoc, Limits.Sigma.ι_desc]⟩ = c := by
+    refine Eq.trans hnat ?_
+    refine LocallyConstant.ext fun p => ?_
+    refine Eq.trans ?_ (congrArg c (Subsingleton.elim default p))
+    rfl
+  have hinj := (constSchemePointsEquiv T (Fin 2 → ZMod N) (t ≫ 𝟙 T)).injective
+    hread2
+  exact (congrArg Subtype.val hinj).symm
+
+/-- **[3c-B4]** The factorization index over a `ℚ̄`-point is unique. -/
+theorem sigmaι_qbar_index_injective {T : Scheme.{0}}
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T) {u v : Fin 2 → ZMod N}
+    (h : t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) v) : u = v := by
+  have h1 := constSchemePointsEquiv_natural T (Fin 2 → ZMod N) (𝟙 T) t
+    ⟨Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u, Limits.Sigma.ι_desc _ _⟩
+  have h2 := constSchemePointsEquiv_natural T (Fin 2 → ZMod N) (𝟙 T) t
+    ⟨Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) v, Limits.Sigma.ι_desc _ _⟩
+  rw [constSchemePointsEquiv_sigmaι] at h1 h2
+  have hsub : (⟨t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u, by
+      rw [Category.assoc, Limits.Sigma.ι_desc]⟩ :
+      { m : Spec (.of (AlgebraicClosure ℚ)) ⟶ constScheme T (Fin 2 → ZMod N) //
+        m ≫ constSchemeπ T (Fin 2 → ZMod N) = t ≫ 𝟙 T }) =
+      ⟨t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) v, by
+      rw [Category.assoc, Limits.Sigma.ι_desc]⟩ :=
+    Subtype.ext h
+  have hcc := (h1.symm.trans (congrArg
+    (constSchemePointsEquiv T (Fin 2 → ZMod N) (t ≫ 𝟙 T)) hsub)).trans h2
+  exact congrArg (fun (f : LocallyConstant
+    ↥(Spec (CommRingCat.of (AlgebraicClosure ℚ))) (Fin 2 → ZMod N)) => f default)
+    hcc
+
+/-- **[3c-B5]** A `ℚ̄`-torsion point factors through the full-level trivialization at
+an index. -/
+theorem torsion_qbar_factor {T : Scheme.{0}} {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (z : Spec (.of (AlgebraicClosure ℚ)) ⟶ E.torsion N)
+    (hz : z ≫ E.torsionπ N = t) :
+    ∃ u : Fin 2 → ZMod N,
+      z ≫ (E.fullLevelIso hinv L).inv =
+        t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u :=
+  constScheme_qbar_factor t (z ≫ (E.fullLevelIso hinv L).inv) (by
+    rw [Category.assoc]
+    rw [show (E.fullLevelIso hinv L).inv ≫ constSchemeπ T (Fin 2 → ZMod N) =
+      E.torsionπ N from (congrArg ((E.fullLevelIso hinv L).inv ≫ ·)
+        (E.fullLevelHom_torsionπ L).symm).trans (Iso.inv_hom_id_assoc _ _)]
+    exact hz)
+
+/-- **[3c-B5]** A factored torsion point is the inclusion-composite at its index. -/
+theorem torsion_qbar_factor_eq {T : Scheme.{0}} {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (z : Spec (.of (AlgebraicClosure ℚ)) ⟶ E.torsion N)
+    {u : Fin 2 → ZMod N}
+    (hfac : z ≫ (E.fullLevelIso hinv L).inv =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u) :
+    z = t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u ≫ E.fullLevelHom L := by
+  have h1 : z = (z ≫ (E.fullLevelIso hinv L).inv) ≫
+      (E.fullLevelIso hinv L).hom := by
+    rw [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  rw [h1, hfac, Category.assoc]
+  rfl
+
+/-- **[3c-B5]** The inclusion-composite is the pulled standard combination. -/
+theorem sigmaι_fullLevelHom {T : Scheme.{0}} {E : EllipticCurve T}
+    (L : E.FullLevelPt N) (u : Fin 2 → ZMod N) :
+    Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u ≫ E.fullLevelHom L =
+      E.pointToTorsion (((u 0).val : ℤ) • L.1.1 + ((u 1).val : ℤ) • L.1.2)
+        ((E.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+          rw [smul_add, smul_comm (N : ℤ) ((u 0).val : ℤ),
+            smul_comm (N : ℤ) ((u 1).val : ℤ), L.2.1.1, L.2.1.2, smul_zero,
+            smul_zero, add_zero])) :=
+  Limits.Sigma.ι_desc _ _
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
