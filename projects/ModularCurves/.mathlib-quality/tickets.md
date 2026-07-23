@@ -25395,6 +25395,23 @@ lemma (muNRootsRead-of-pow = read^k), hence eZMap_zxAction assembly route via re
 NOT blocked: leaves ii (eZMap-read), iii (univLevel action), iv (symplectic eval) —
 independent; the (c)-datum's non-equivariant parts.
 
+#### [(b-iii) leaf-ii IN-FLIGHT NOTE] eZMap_read — attempt 1 reverted (2026-07-23)
+The read-lemma (muNRootsRead of h ≫ eZMap = Γ-restrict of the universal eval) is
+architecturally proven: hcancel (QIso hom-inv cancel through eZMap-def) GREEN;
+the chain muNPointsEquiv_mapAlong → muNPointsEquiv_natural (g := 𝟙) → eval-def works.
+BLOCKER: the `dE.Z` vs `(X.pullbackAlong dE.f).base` SPELLING-MIX — univLevel's
+Sections are `Point (𝟙 (X.pullbackAlong dE.f).base)` (Section-abbrev forces the
+pullbackAlong-spelling), so the eZMap-internal lift/killed-lemmas elaborate g at that
+spelling while my hover/mapAlong/natural-instantiations spelled `𝟙 dE.Z`/`muNπ dE.Z` —
+defeq but kabstract/simp trip (the known InducedCategory-class discipline).
+FIX-RECIPE for the next attempt: state hover + the t/g-args + muNπ UNIFORMLY at
+`(X.pullbackAlong dE.f).base` (the forced spelling); the muNRootsRead-b becomes
+(h ≫ fst) ≫ ((X.pullbackAlong dE.f).structMap)?? — NO: structMap = dE.f ≫ X.structMap
+per pullbackAlong-def, and muNMapAlong's arg in eZMap-def is (dE.f ≫ X.structMap) —
+re-read the eZMap-def-elaboration (lean_goal/hover on the def) FIRST to fix every
+spelling, then transcribe. All support-lemmas (muNRootsRead_pow, hom_ext,
+muNPointsEquiv_mapAlong/natural/pow) are landed and spelling-agnostic.
+
 #### [T-CV-4] The carved quotient — status: open, deps: T-CV-3
 Statement: `sympFramed_quotientProblemData D : Nonempty (QuotientProblemData
 (sympFramedAut D))` := exists_quotientProblemData _ (carved-freeness) (carved-rel-rep)
