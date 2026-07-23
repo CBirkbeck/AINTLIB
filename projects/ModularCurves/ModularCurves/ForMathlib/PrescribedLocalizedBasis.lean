@@ -185,21 +185,15 @@ theorem Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero
   change l 1 = x
   simp [l, LinearMap.toSpanSingleton_apply]
 
-/-- If an element of a finitely presented flat module is nonzero after base change to a field
-whose structure-map kernel is `p`, then it is the unique vector of a basis on a principal
-neighbourhood of `p`. -/
-theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_field_ne_zero
+/-- Nonvanishing after scalar extension to a field implies nonvanishing in the
+residue fibre determined by the kernel of the field structure map. -/
+theorem Module.one_tmul_fiber_ne_zero_of_field_ne_zero
     {R M K : Type u} [CommRing R] [AddCommGroup M] [Module R M]
-    [Module.FinitePresentation R M] [Module.Flat R M]
     [Field K] [Algebra R K]
     (p : Ideal R) [p.IsPrime] (x : M)
-    (hrank : Module.rankAtStalk M ⟨p, inferInstance⟩ = 1)
     (hker : RingHom.ker (algebraMap R K) = p)
     (hx : (1 : K) ⊗ₜ[R] x ≠ (0 : K ⊗[R] M)) :
-    ∃ g : R, g ∉ p ∧
-      ∃ b : Module.Basis (Fin 1) (Localization.Away g)
-          (LocalizedModule.Away g M),
-        b 0 = LocalizedModule.mkLinearMap (.powers g) M x := by
+    (1 : p.ResidueField) ⊗ₜ[R] x ≠ (0 : p.Fiber M) := by
   have hp_le : p ≤ RingHom.ker (algebraMap R K) := hker.symm.le
   have hp_unit : p.primeCompl ≤
       (IsUnit.submonoid K).comap (algebraMap R K) := by
@@ -216,20 +210,35 @@ theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_field_ne_zero
     IsScalarTower.of_algebraMap_eq fun r ↦ by
       exact (Ideal.ResidueField.lift_algebraMap
         p (algebraMap R K) hp_le hp_unit r).symm
-  have hresidue :
-      (1 : p.ResidueField) ⊗ₜ[R] x ≠ (0 : p.Fiber M) := by
-    intro hzero
-    apply hx
-    calc
-      (1 : K) ⊗ₜ[R] x =
-          (TensorProduct.AlgebraTensorModule.cancelBaseChange
-            R p.ResidueField K K M)
-            ((1 : K) ⊗ₜ[p.ResidueField]
-              ((1 : p.ResidueField) ⊗ₜ[R] x)) := by simp
-      _ = (TensorProduct.AlgebraTensorModule.cancelBaseChange
-            R p.ResidueField K K M)
-            ((1 : K) ⊗ₜ[p.ResidueField] (0 : p.Fiber M)) := by
-              rw [hzero]
-      _ = 0 := by simp
+  intro hzero
+  apply hx
+  calc
+    (1 : K) ⊗ₜ[R] x =
+        (TensorProduct.AlgebraTensorModule.cancelBaseChange
+          R p.ResidueField K K M)
+          ((1 : K) ⊗ₜ[p.ResidueField]
+            ((1 : p.ResidueField) ⊗ₜ[R] x)) := by simp
+    _ = (TensorProduct.AlgebraTensorModule.cancelBaseChange
+          R p.ResidueField K K M)
+          ((1 : K) ⊗ₜ[p.ResidueField] (0 : p.Fiber M)) := by
+            rw [hzero]
+    _ = 0 := by simp
+
+/-- If an element of a finitely presented flat module is nonzero after base change to a field
+whose structure-map kernel is `p`, then it is the unique vector of a basis on a principal
+neighbourhood of `p`. -/
+theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_field_ne_zero
+    {R M K : Type u} [CommRing R] [AddCommGroup M] [Module R M]
+    [Module.FinitePresentation R M] [Module.Flat R M]
+    [Field K] [Algebra R K]
+    (p : Ideal R) [p.IsPrime] (x : M)
+    (hrank : Module.rankAtStalk M ⟨p, inferInstance⟩ = 1)
+    (hker : RingHom.ker (algebraMap R K) = p)
+    (hx : (1 : K) ⊗ₜ[R] x ≠ (0 : K ⊗[R] M)) :
+    ∃ g : R, g ∉ p ∧
+      ∃ b : Module.Basis (Fin 1) (Localization.Away g)
+          (LocalizedModule.Away g M),
+        b 0 = LocalizedModule.mkLinearMap (.powers g) M x := by
   exact exists_notMem_basis_singleton_of_fiber_ne_zero
-    p x hrank hresidue
+    p x hrank (Module.one_tmul_fiber_ne_zero_of_field_ne_zero
+      p x hker hx)
