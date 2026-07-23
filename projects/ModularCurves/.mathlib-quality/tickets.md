@@ -25259,6 +25259,36 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### 3c COMPLETE (2026-07-27) — THE PINNED DICTIONARY'S ADDITIVITY LANDED
+All of the replan executed and pushed, axiom-clean pattern maintained:
+- [3c-A] precompCvIsoEquiv, constVecIndexRead (concrete piAlgHomIndex-read),
+  readCorrection g = r∘s⁻¹, corrMor/corrMorInv + laws, corrAlgHom(...Inv) + laws
+  (map_comp/map_id-FIELD congrArg-unop chains), corrSchemeIso (term-chained
+  Spec-laws — rw-motives over InducedCategory-typed extractions FAIL, terms don't),
+  corrSchemeIso_π, THE PIN constVecPointsEquiv_corrScheme, framedTorsionIsoPinned+π
+  (stepwise congrArg assembly).
+- [3c-B] MuN: constSchemePointsEquiv_sigmaι + _mapAlong (public read-lemmas).
+  YRho: constVecIndexRead_const (B3 — preimage-normalization + piAlgHomIndex_unique
+  at the coordinate idempotent + defeq-show through the 𝟙-application),
+  constScheme_qbar_factor (B4 — noncomputable Unique-instance on the ℚ̄-spectrum
+  carrier hoisted OUT of the theorem (compile-error inside), t≫𝟙-indexed reads to
+  dodge the dependent-motive on the g-index, LocallyConstant.ext depth-pin),
+  sigmaι_qbar_index_injective, torsion_qbar_factor(_eq), sigmaι_fullLevelHom.
+- [3c-C] coord_framedPinned: the q-chase with SET-ATOMIZED maps (R1/R2/R3/SL/IN +
+  per-atom projection-haves — motives over atoms are type-correct; mixed
+  constVecScheme-vs-Spec-obj composites choke simp's instance-recheck → motive-free
+  congrArg chains), frameEval_points + PIN + B3 endgame.
+- [3c-D] zmodVal_add_smul (Int.emod_def + ring; omega can't link the nonlinear
+  div-term), comb_add, torsion_factor_index_add (pointToTorsion-goals arrive
+  RAW-pullback-spelled after hom_ext — show-retype to torsionι/π first),
+  **coord_framedPinned_additive** — the coords_additive field-shape for the framed
+  construction. THE COUNIT-OPACITY OBSTRUCTION IS FULLY DEFEATED.
+
+REMAINING for the RhoLevelStructure-dictionary: [3d] pairing_compat
+(weilPairingEval_symplectic at the frame + det-twist through D.p; the symp-carve
+interacts), then the structure-assembly + the value-level dictionary; then 3d-2
+(per-X eqv), carve, 3e, T-Y1F-3, T-YR-5/6/7 per the standing board.
+
 ### 3c REPLAN (2026-07-26) — THE READ-PINNING CORRECTION (plan-of-record update)
 **Obstruction found**: `pointsEquivOfContAction` (hence constVecPointsEquiv /
 vRhoPointsEquiv / the `coord`-reads) is the asEquivalence-COUNIT — Classical.choice-
