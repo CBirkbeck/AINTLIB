@@ -647,6 +647,78 @@ theorem constVecCorrPt_eq_Spec (N : ℕ) [NeZero N] (v : Fin 2 → ZMod N) :
       (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ) v))).symm ?_
   rfl
 
+/-- **[PIN-6c-ii]** The corrected component point, algebra side. -/
+noncomputable def constVecCorrPtAlg (N : ℕ) [NeZero N] (v : Fin 2 → ZMod N) :
+    (constVecAlgebra N : Type 0) →ₐ[ℚ] ℚ :=
+  (Pi.evalAlgHom ℚ (fun _ : (Fin 2 → ZMod N) => ℚ) v).comp
+    ((constVecAlgebraIso N).hom.hom.hom.comp (corrAlgHom N).hom.hom)
+
+theorem constVecCorrPtRing_eq_alg (N : ℕ) [NeZero N] (v : Fin 2 → ZMod N) :
+    constVecCorrPtRing N v =
+      CommRingCat.ofHom (constVecCorrPtAlg N v).toRingHom := rfl
+
+/-- **[PIN-6c-ii]** The absolute slot evaluation, ring side. -/
+noncomputable def frameSlotRing (D : GaloisRepData N) [Fact (1 < N)]
+    (v : Fin 2 → ZMod N) :
+    CommRingCat.of (vRhoAlgebra D : Type 0) ⟶
+      CommRingCat.of ((wFramesAlgebra D : Type 0)) :=
+  CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom ≫
+    CommRingCat.ofHom (Algebra.TensorProduct.productMap
+      ((Algebra.ofId ℚ (wFramesAlgebra D : Type 0)).comp (constVecCorrPtAlg N v))
+      (AlgHom.id ℚ (wFramesAlgebra D : Type 0))).toRingHom
+
+/-- **[PIN-6c-ii]** The absolute slot evaluation is the `Spec` of its ring side. -/
+theorem frameSlotEval_eq_Spec (D : GaloisRepData N) [Fact (1 < N)]
+    (v : Fin 2 → ZMod N) :
+    frameSlotEval D v = Spec.map (frameSlotRing D v) := by
+  have hlift : pullback.lift (wFramesπ D ≫ constVecCorrPt N v) (𝟙 (wFrames D))
+      (by rw [Category.assoc, constVecCorrPt_π, Category.comp_id,
+        Category.id_comp]) =
+      pullback.lift
+        (Spec.map (CommRingCat.ofHom ((Algebra.ofId ℚ
+            (wFramesAlgebra D : Type 0)).comp
+          (constVecCorrPtAlg N v)).toRingHom))
+        (Spec.map (CommRingCat.ofHom
+          (AlgHom.id ℚ (wFramesAlgebra D : Type 0)).toRingHom))
+        (by
+          rw [show CommRingCat.ofHom
+              (AlgHom.id ℚ (wFramesAlgebra D : Type 0)).toRingHom =
+            𝟙 (CommRingCat.of (wFramesAlgebra D : Type 0)) from rfl,
+            AlgebraicGeometry.Spec.map_id, Category.id_comp]
+          refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+          exact congrArg AlgebraicGeometry.Spec.map (by
+            ext r
+            exact ((Algebra.ofId ℚ (wFramesAlgebra D : Type 0)).comp
+              (constVecCorrPtAlg N v)).commutes r)) := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst]
+      refine Eq.trans ?_ (pullback.lift_fst _ _ _).symm
+      rw [constVecCorrPt_eq_Spec]
+      refine Eq.trans (AlgebraicGeometry.Spec.map_comp (constVecCorrPtRing N v)
+        (CommRingCat.ofHom (algebraMap ℚ (wFramesAlgebra D : Type 0)))).symm ?_
+      exact congrArg AlgebraicGeometry.Spec.map rfl
+    · rw [pullback.lift_snd]
+      refine Eq.trans ?_ (pullback.lift_snd _ _ _).symm
+      rw [show CommRingCat.ofHom (AlgHom.id ℚ
+          (wFramesAlgebra D : Type 0)).toRingHom =
+        𝟙 (CommRingCat.of (wFramesAlgebra D : Type 0)) from rfl,
+        AlgebraicGeometry.Spec.map_id]
+      exact rfl
+  rw [frameSlotEval, hlift]
+  rw [show frameEval D = (AlgebraicGeometry.pullbackSpecIso ℚ
+      (constVecAlgebra N : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+    Spec.map (CommRingCat.ofHom (frameEvalAlgHom D).hom.hom.toRingHom)
+    from rfl]
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ Spec.map (CommRingCat.ofHom
+      (frameEvalAlgHom D).hom.hom.toRingHom))
+    (lift_pullbackSpecIso_hom ℚ (constVecAlgebra N : Type 0)
+      (wFramesAlgebra D : Type 0) (wFramesAlgebra D : Type 0)
+      ((Algebra.ofId ℚ (wFramesAlgebra D : Type 0)).comp (constVecCorrPtAlg N v))
+      (AlgHom.id ℚ (wFramesAlgebra D : Type 0)) _)) ?_
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  rfl
+
 end
 
 end ModularCurves
