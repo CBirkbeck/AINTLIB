@@ -1272,6 +1272,646 @@ noncomputable def frameEval (D : GaloisRepData N) :
 
 end FrameSubstrate
 
+section PairingLayer
+
+variable {N : ℕ} [NeZero N]
+
+/-- **[CARVE-1d-i]** The `μ_N`-roots Galois set (natural action on roots of unity in
+`ℚ̄`, transported along `galSepMulEquivGalQ`). -/
+noncomputable abbrev muNRootsAction (N : ℕ) [NeZero N] :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of (rootsOfUnity N (AlgebraicClosure ℚ))
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk
+        (fun ζ => ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
+          rw [mem_rootsOfUnity]
+          rw [← map_pow]
+          rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ (N : ℕ) = 1 from
+            (mem_rootsOfUnity _ _).mp ζ.2]
+          exact map_one _⟩)
+      map_one' := FintypeCat.hom_ext _ _ fun ζ => Subtype.ext (Units.ext (by
+        show (galSepMulEquivGalQ 1) (ζ.1 : (AlgebraicClosure ℚ)ˣ).val = _
+        rw [map_one]
+        rfl))
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun ζ => Subtype.ext
+        (Units.ext (by
+          show (galSepMulEquivGalQ (σ * τ)) (ζ.1 : (AlgebraicClosure ℚ)ˣ).val = _
+          rw [map_mul]
+          rfl)) }
+
+open scoped Pointwise FintypeCatDiscrete in
+/-- **[CARVE-1d-i]** Continuity of the roots set: the kernel of `ρ` acts trivially
+(its cyclotomic image is `1`, and the character's spec fixes every root). -/
+lemma muNRootsAction_isContinuous (D : GaloisRepData N) [Fact (1 < N)] :
+    (muNRootsAction N).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
+          (muNRootsAction N) : Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (muNRootsAction N) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (muNRootsAction N),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hcy : modularCyclotomicCharacter (AlgebraicClosure ℚ)
+      (card_rootsOfUnity_algClosureQ N) (galSepMulEquivGalQ τ).toRingEquiv = 1 := by
+    rw [show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+        (card_rootsOfUnity_algClosureQ N)
+        (galSepMulEquivGalQ τ).toRingEquiv =
+      Matrix.GeneralLinearGroup.det (D.ρ (galSepMulEquivGalQ τ)) from
+      (D.det_cyclo (galSepMulEquivGalQ τ)).symm]
+    rw [hτ1, map_one]
+  have hAct : (muNRootsAction N).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun ζ => Subtype.ext ?_
+    have hspec := modularCyclotomicCharacter.spec (AlgebraicClosure ℚ)
+      (card_rootsOfUnity_algClosureQ N)
+      (galSepMulEquivGalQ τ).toRingEquiv ζ.2
+    rw [hcy] at hspec
+    rw [show (((1 : (ZMod N)ˣ) : ZMod N)).val = 1 from by
+      rw [Units.val_one, ZMod.val_one]] at hspec
+    rw [pow_one] at hspec
+    exact Units.ext hspec
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((muNRootsAction N).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
+
+open scoped FintypeCatDiscrete in
+/-- The roots set as a continuous Galois set. -/
+noncomputable abbrev muNRootsContAction (D : GaloisRepData N) [Fact (1 < N)] :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨muNRootsAction N, muNRootsAction_isContinuous D⟩
+
+
+/-- **[CARVE-1d-i]** The finite étale algebra and scheme of the roots set, with the
+comparison comultiplication and its scheme map. -/
+noncomputable def muNRootsAlgebra (D : GaloisRepData N) [Fact (1 < N)] :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
+    (muNRootsContAction D)).unop
+
+noncomputable def muNRootsScheme (D : GaloisRepData N) [Fact (1 < N)] : Scheme.{0} :=
+  Spec (.of (muNRootsAlgebra D : Type 0))
+
+noncomputable def muNRootsSchemeπ (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsScheme D ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (muNRootsAlgebra D : Type 0)))
+
+
+/-- **[3d-i]** The standard symplectic form twists by the determinant under the
+matrix action on coordinates. -/
+theorem sympl_glSmul (A : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (u v : Fin 2 → ZMod N) :
+    (A • u) 0 * (A • v) 1 - (A • u) 1 * (A • v) 0 =
+      ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) *
+        (u 0 * v 1 - u 1 * v 0) := by
+  show ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec u) 0 *
+      ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 1 -
+    ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec u) 1 *
+      ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 0 =
+    ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) *
+      (u 0 * v 1 - u 1 * v 0)
+  rw [show ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) =
+    (A : Matrix (Fin 2) (Fin 2) (ZMod N)).det from rfl]
+  simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two,
+    Matrix.det_fin_two]
+  ring
+
+
+/-- **[T-CV-1b]** The root of the cyclotomic quotient is an `N`-th root of unity. -/
+theorem cycloRoot_pow (N : ℕ) [NeZero N] :
+    (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ N = 1 := by
+  have h := AdjoinRoot.mk_self (f := (Polynomial.X : Polynomial ℚ) ^ N - 1)
+  rw [map_sub, map_pow, map_one, AdjoinRoot.mk_X, sub_eq_zero] at h
+  exact h
+
+/-- **[T-CV-1b]** The cyclotomic quotient `ℚ[X]/(Xᴺ − 1)` as a finite étale
+`ℚ`-algebra. -/
+noncomputable def cycloQuotAlgebra (N : ℕ) [NeZero N] :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  haveI := muNModel_finite ℚ N
+  haveI := muNModel_algebra_etale_of_isUnit ℚ N
+    (isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N)))
+  CommAlgCat.FiniteEtale.of ℚ (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1))
+
+/-- **[T-CV-1c]** Algebra maps out of the cyclotomic quotient into a field are the
+`N`-th roots of unity (evaluation at the root). -/
+noncomputable def cycloAlgHomEquivRoots (N : ℕ) [NeZero N] (L : Type) [Field L]
+    [Algebra ℚ L] :
+    ((AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ] L) ≃
+      rootsOfUnity N L where
+  toFun φ := rootsOfUnity.mkOfPowEq (φ (AdjoinRoot.root _)) (by
+    rw [← map_pow, cycloRoot_pow, map_one])
+  invFun ζ := AdjoinRoot.liftAlgHom _ (Algebra.ofId ℚ L) ((ζ : Lˣ) : L) (by
+    rw [Polynomial.eval₂_sub, Polynomial.eval₂_pow, Polynomial.eval₂_X,
+      Polynomial.eval₂_one]
+    rw [show (((ζ : Lˣ) : L)) ^ N = 1 from (mem_rootsOfUnity' N _).mp ζ.2]
+    exact sub_self 1)
+  left_inv φ := AdjoinRoot.algHom_ext (by
+    rw [AdjoinRoot.liftAlgHom_root]
+    exact rootsOfUnity.coe_mkOfPowEq _)
+  right_inv ζ := Subtype.ext (Units.ext (by
+    rw [rootsOfUnity.coe_mkOfPowEq, AdjoinRoot.liftAlgHom_root]))
+
+/-- **[T-CV-1c]** Roots of unity transport along the separable-vs-algebraic closure
+identification. -/
+noncomputable def rootsSepQbarEquiv (N : ℕ) [NeZero N] :
+    rootsOfUnity N (SeparableClosure ℚ) ≃ rootsOfUnity N (AlgebraicClosure ℚ) where
+  toFun ζ := rootsOfUnity.mkOfPowEq
+    (sepClosureQAlgEquiv (((ζ : (SeparableClosure ℚ)ˣ) : SeparableClosure ℚ)))
+    (by
+      rw [← map_pow]
+      rw [show (((ζ : (SeparableClosure ℚ)ˣ) : SeparableClosure ℚ)) ^ N = 1 from
+        (mem_rootsOfUnity' N _).mp ζ.2]
+      rw [map_one])
+  invFun ζ := rootsOfUnity.mkOfPowEq
+    (sepClosureQAlgEquiv.symm
+      (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)))
+    (by
+      rw [← map_pow]
+      rw [show (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) ^ N = 1 from
+        (mem_rootsOfUnity' N _).mp ζ.2]
+      rw [map_one])
+  left_inv ζ := Subtype.ext (Units.ext (by
+    rw [rootsOfUnity.coe_mkOfPowEq, rootsOfUnity.coe_mkOfPowEq,
+      AlgEquiv.symm_apply_apply]))
+  right_inv ζ := Subtype.ext (Units.ext (by
+    rw [rootsOfUnity.coe_mkOfPowEq, rootsOfUnity.coe_mkOfPowEq,
+      AlgEquiv.apply_symm_apply]))
+
+/-- **[T-CV-1c]** The Galois transport compatibility of the closure identification. -/
+theorem galSep_sepQ_compat (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
+    (x : SeparableClosure ℚ) :
+    (galSepMulEquivGalQ σ) (sepClosureQAlgEquiv x) = sepClosureQAlgEquiv (σ x) := by
+  show (AlgEquiv.autCongr sepClosureQAlgEquiv σ) (sepClosureQAlgEquiv x) = _
+  simp [AlgEquiv.autCongr]
+
+/-- **[T-CV-1d]** The forward read intertwines the Galois actions. -/
+theorem cycloRead_comp (N : ℕ) [NeZero N]
+    (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
+    (φ : (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ]
+      SeparableClosure ℚ) :
+    rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
+        ((σ : SeparableClosure ℚ →ₐ[ℚ] SeparableClosure ℚ).comp φ)) =
+      ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom
+        (rootsSepQbarEquiv N
+          (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).1, by
+        rw [mem_rootsOfUnity]
+        rw [← map_pow]
+        rw [show ((rootsSepQbarEquiv N
+            (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).1 :
+            (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
+          (mem_rootsOfUnity N _).mp (rootsSepQbarEquiv N
+            (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).2]
+        exact map_one _⟩ := by
+  refine Subtype.ext (Units.ext ?_)
+  show sepClosureQAlgEquiv (((σ : SeparableClosure ℚ →ₐ[ℚ]
+      SeparableClosure ℚ).comp φ) (AdjoinRoot.root _)) =
+    (galSepMulEquivGalQ σ) (sepClosureQAlgEquiv (φ (AdjoinRoot.root _)))
+  rw [galSep_sepQ_compat]
+  rfl
+
+/-- **[T-CV-1d]** The inverse read intertwines the Galois actions. -/
+theorem cycloReadInv_comp (N : ℕ) [NeZero N]
+    (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
+    (ζ : rootsOfUnity N (AlgebraicClosure ℚ)) :
+    (σ : SeparableClosure ℚ →ₐ[ℚ] SeparableClosure ℚ).comp
+        ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+          ((rootsSepQbarEquiv N).symm ζ)) =
+      (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+        ((rootsSepQbarEquiv N).symm
+          ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
+            rw [mem_rootsOfUnity]
+            rw [← map_pow]
+            rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
+              (mem_rootsOfUnity N _).mp ζ.2]
+            exact map_one _⟩) := by
+  refine AdjoinRoot.algHom_ext ?_
+  rw [AlgHom.comp_apply]
+  show σ ((AdjoinRoot.liftAlgHom _ (Algebra.ofId ℚ (SeparableClosure ℚ))
+      (sepClosureQAlgEquiv.symm
+        (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))) _)
+      (AdjoinRoot.root _)) = _
+  rw [AdjoinRoot.liftAlgHom_root]
+  rw [show ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+      ((rootsSepQbarEquiv N).symm
+        (⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
+          rw [mem_rootsOfUnity]
+          rw [← map_pow]
+          rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
+            (mem_rootsOfUnity N _).mp ζ.2]
+          exact map_one _⟩ : rootsOfUnity N (AlgebraicClosure ℚ))))
+      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) =
+    sepClosureQAlgEquiv.symm ((galSepMulEquivGalQ σ)
+      (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))) from
+    AdjoinRoot.liftAlgHom_root _ _ _ _]
+  have hc := galSep_sepQ_compat σ (sepClosureQAlgEquiv.symm
+    (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)))
+  rw [AlgEquiv.apply_symm_apply] at hc
+  rw [hc, AlgEquiv.symm_apply_apply]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-1d]** The correspondence image of the cyclotomic quotient is the roots
+Galois set. -/
+noncomputable def muNRootsCorrespondenceIso (D : GaloisRepData N) [Fact (1 < N)] :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+        (Opposite.op (cycloQuotAlgebra N)) ≅ muNRootsContAction D where
+  hom := ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun φ => rootsSepQbarEquiv N
+        (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun φ => cycloRead_comp N σ φ }
+  inv := ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun ζ =>
+        (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+          ((rootsSepQbarEquiv N).symm ζ))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun ζ =>
+        (cycloReadInv_comp N σ ζ).symm }
+  hom_inv_id := by
+    ext φ
+    show (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+      ((rootsSepQbarEquiv N).symm (rootsSepQbarEquiv N
+        (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ))) = φ
+    rw [Equiv.symm_apply_apply, Equiv.symm_apply_apply]
+  inv_hom_id := by
+    ext ζ
+    have h1 : rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
+        ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+          ((rootsSepQbarEquiv N).symm ζ))) = ζ := by
+      rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply]
+    exact congrArg (fun w : rootsOfUnity N (AlgebraicClosure ℚ) =>
+      ((w : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) h1
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-1e]** The roots algebra is the cyclotomic quotient (transport through the
+correspondence's inverse and unit — mirror of `constVecAlgebraIso`). -/
+noncomputable def muNRootsAlgebraIso (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsAlgebra D ≅ cycloQuotAlgebra N :=
+  (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mapIso
+      (muNRootsCorrespondenceIso D).symm ≪≫
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.app
+      (Opposite.op (cycloQuotAlgebra N))).symm).unop).symm
+
+/-- **[T-CV-1e]** `Spec` of the roots-algebra identification (mirror of
+`constVecSpecIso`). -/
+noncomputable def muNRootsSpecIso (D : GaloisRepData N) [Fact (1 < N)] :
+    Spec (CommRingCat.of (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ≅
+      Spec (CommRingCat.of (muNRootsAlgebra D : Type 0)) where
+  hom := Spec.map (CommRingCat.ofHom
+    (muNRootsAlgebraIso D).hom.hom.hom.toRingHom)
+  inv := Spec.map (CommRingCat.ofHom
+    (muNRootsAlgebraIso D).inv.hom.hom.toRingHom)
+  hom_inv_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : cycloQuotAlgebra N ⟶ cycloQuotAlgebra N) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((muNRootsAlgebraIso D).inv_hom_id))).trans
+        (Spec.map_id _))
+  inv_hom_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : muNRootsAlgebra D ⟶ muNRootsAlgebra D) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((muNRootsAlgebraIso D).hom_inv_id))).trans
+        (Spec.map_id _))
+
+/-- **[T-CV-1 CLOSE]** The DS3 bridge: `μ_N` over `Spec ℚ` is the roots scheme. -/
+noncomputable def muNSpecQIso (D : GaloisRepData N) [Fact (1 < N)] :
+    muN (Spec (CommRingCat.of ℚ)) N ≅ muNRootsScheme D :=
+  muNSpecFieldIso ℚ N ≪≫ muNRootsSpecIso D
+
+/-- **[T-CV-1 CLOSE]** The bridge lies over the base. -/
+theorem muNSpecQIso_π (D : GaloisRepData N) [Fact (1 < N)] :
+    (muNSpecQIso D).hom ≫ muNRootsSchemeπ D =
+      muNπ (Spec (CommRingCat.of ℚ)) N := by
+  have hinner : (muNRootsSpecIso D).hom ≫ muNRootsSchemeπ D =
+      Spec.map (CommRingCat.ofHom
+        (AdjoinRoot.of ((Polynomial.X : Polynomial ℚ) ^ N - 1))) :=
+    (Spec.map_comp _ _).symm.trans (congrArg Spec.map (by
+      ext r
+      exact ((muNRootsAlgebraIso D).hom.hom.hom.commutes r)))
+  exact (Category.assoc _ _ _).trans
+    ((congrArg ((muNSpecFieldIso ℚ N).hom ≫ ·) hinner).trans
+      (muNSpecFieldIso_struct ℚ N))
+
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-i]** The paired `ρ`-set: the diagonal Galois action on ordered pairs of
+`(ℤ/N)²`-vectors. -/
+noncomputable abbrev rhoPairAction (D : GaloisRepData N) :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk (fun uv =>
+        (D.ρ (galSepMulEquivGalQ σ) • uv.1, D.ρ (galSepMulEquivGalQ σ) • uv.2))
+      map_one' := FintypeCat.hom_ext _ _ fun uv => by
+        show (D.ρ (galSepMulEquivGalQ 1) • uv.1,
+          D.ρ (galSepMulEquivGalQ 1) • uv.2) = uv
+        rw [map_one, map_one, one_smul, one_smul]
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun uv => by
+        show (D.ρ (galSepMulEquivGalQ (σ * τ)) • uv.1,
+          D.ρ (galSepMulEquivGalQ (σ * τ)) • uv.2) = _
+        rw [map_mul, map_mul, mul_smul, mul_smul]
+        rfl }
+
+open scoped Pointwise FintypeCatDiscrete in
+/-- **[T-F3a-i]** Continuity of the paired `ρ`-action (same open kernel). -/
+lemma rhoPairAction_isContinuous (D : GaloisRepData N) :
+    (rhoPairAction D).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
+          (rhoPairAction D) : Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (rhoPairAction D) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (rhoPairAction D),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hAct : (rhoPairAction D).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun uv => ?_
+    show (D.ρ (galSepMulEquivGalQ τ) • uv.1,
+      D.ρ (galSepMulEquivGalQ τ) • uv.2) = uv
+    rw [hτ1, one_smul, one_smul]
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((rhoPairAction D).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
+
+open scoped FintypeCatDiscrete in
+/-- The paired `ρ`-set as a continuous Galois set. -/
+noncomputable abbrev rhoPairContAction (D : GaloisRepData N) :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨rhoPairAction D, rhoPairAction_isContinuous D⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-ii]** The symplectic-pairing comparison: `(u,v) ↦ p(ofAdd (u∧v))` is
+equivariant from the paired `ρ`-set into the roots (`sympl_glSmul` + `det_cyclo` +
+`p_equivariant`). -/
+noncomputable def rhoPairMor (D : GaloisRepData N) [Fact (1 < N)] :
+    rhoPairContAction D ⟶ muNRootsContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk
+        (fun uv => D.p (Multiplicative.ofAdd
+          (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => Subtype.ext (Units.ext (by
+        show ((D.p (Multiplicative.ofAdd
+            ((D.ρ (galSepMulEquivGalQ σ) • uv.1) 0 *
+                (D.ρ (galSepMulEquivGalQ σ) • uv.2) 1 -
+              (D.ρ (galSepMulEquivGalQ σ) • uv.1) 1 *
+                (D.ρ (galSepMulEquivGalQ σ) • uv.2) 0)) :
+            (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) =
+          (galSepMulEquivGalQ σ)
+            ((D.p (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) :
+              (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
+        rw [sympl_glSmul, D.det_cyclo (galSepMulEquivGalQ σ)]
+        rw [D.p_equivariant (galSepMulEquivGalQ σ)
+          (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0))]
+        congr 2
+        rw [show (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) ^
+            ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+              (card_rootsOfUnity_algClosureQ N)
+              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val =
+          Multiplicative.ofAdd
+            (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+              (card_rootsOfUnity_algClosureQ N)
+              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val •
+            (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) from rfl]
+        rw [nsmul_eq_mul]
+        congr 1
+        rw [show (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val :
+            ZMod N) =
+          ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N) from by
+          simp only [ZMod.natCast_val, ZMod.cast_id]])) }
+
+/-- **[T-F3a-iii]** The finite étale algebra of the paired `ρ`-set. -/
+noncomputable def vRhoPairAlgebra (D : GaloisRepData N) :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
+    (rhoPairContAction D)).unop
+
+/-- **[T-F3a-iii]** Its spectrum. -/
+noncomputable def vRhoPairScheme (D : GaloisRepData N) : Scheme.{0} :=
+  Spec (.of (vRhoPairAlgebra D : Type 0))
+
+/-- **[T-F3a-iii]** The structure morphism. -/
+noncomputable def vRhoPairSchemeπ (D : GaloisRepData N) :
+    vRhoPairScheme D ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoPairAlgebra D : Type 0)))
+
+/-- **[T-F3a-iii]** The pairing comparison, algebra side. -/
+noncomputable def rhoPairAlgHom (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsAlgebra D ⟶ vRhoPairAlgebra D :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (rhoPairMor D)).unop
+
+/-- **[T-F3a-iii]** The pairing comparison, scheme side. -/
+noncomputable def rhoPairSchemeMap (D : GaloisRepData N) [Fact (1 < N)] :
+    vRhoPairScheme D ⟶ muNRootsScheme D :=
+  Spec.map (CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom)
+
+/-- **[T-F3a-iii]** The pairing comparison lies over `ℚ`. -/
+theorem rhoPairSchemeMap_π (D : GaloisRepData N) [Fact (1 < N)] :
+    rhoPairSchemeMap D ≫ muNRootsSchemeπ D = vRhoPairSchemeπ D := by
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  exact congrArg AlgebraicGeometry.Spec.map (by
+    ext r
+    exact (rhoPairAlgHom D).hom.hom.commutes r)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The abstract fiber of `V_ρ`'s algebra is the `ρ`-set (the counit of
+the Galois correspondence at the `ρ`-set; `op (unop _)` is definitionally the original).
+-/
+noncomputable def vRhoFiberIso (D : GaloisRepData N) :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+        (Opposite.op (vRhoAlgebra D)) ≅ rhoContAction D :=
+  (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).counitIso.app (rhoContAction D)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** First projection of the paired `ρ`-set. -/
+noncomputable def rhoPairFst (D : GaloisRepData N) :
+    rhoPairContAction D ⟶ rhoContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.fst
+      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => rfl }
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** Second projection of the paired `ρ`-set. -/
+noncomputable def rhoPairSnd (D : GaloisRepData N) :
+    rhoPairContAction D ⟶ rhoContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.snd
+      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => rfl }
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The paired `ρ`-set with its projections is a binary product fan. -/
+noncomputable def rhoPairBinaryFan (D : GaloisRepData N) :
+    Limits.BinaryFan (rhoContAction D) (rhoContAction D) :=
+  Limits.BinaryFan.mk (rhoPairFst D) (rhoPairSnd D)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The paired `ρ`-set is the binary product of the `ρ`-set with
+itself. -/
+noncomputable def rhoPairBinaryFanIsLimit (D : GaloisRepData N) :
+    Limits.IsLimit (rhoPairBinaryFan D) := by
+  refine Limits.BinaryFan.isLimitMk
+    (fun s => ObjectProperty.homMk
+      { hom := FintypeCat.homMk (fun x => (s.fst.hom.hom x, s.snd.hom.hom x))
+        comm := fun σ => FintypeCat.hom_ext _ _ fun x => ?_ })
+    (fun s => ?_) (fun s => ?_) (fun s m h₁ h₂ => ?_)
+  · have hf := congrArg (fun (h : s.pt.obj.V ⟶ (rhoAction D).V) => h x)
+      (s.fst.hom.comm σ)
+    have hg := congrArg (fun (h : s.pt.obj.V ⟶ (rhoAction D).V) => h x)
+      (s.snd.hom.comm σ)
+    exact Prod.ext hf hg
+  · ext x
+    rfl
+  · ext x
+    rfl
+  · ext x
+    exacts [congrFun (congrArg (fun (q : s.pt ⟶ rhoContAction D) =>
+        q.hom.hom x) h₁) _,
+      congrFun (congrArg (fun (q : s.pt ⟶ rhoContAction D) =>
+        q.hom.hom x) h₂) _]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The correspondence image of the tensor square of `V_ρ`'s algebra is
+the paired `ρ`-set: both are binary products (the op-tensor cofan through the
+limit-preserving equivalence, and the explicit pair fan), matched leg-wise by the
+counit. -/
+noncomputable def pairCorrespondenceIso (D : GaloisRepData N) :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+        (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D))) ≅
+      rhoPairContAction D :=
+  Limits.IsLimit.conePointsIsoOfNatIso
+    (Limits.isLimitOfPreserves
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor
+      (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D) (vRhoAlgebra D)))
+    (rhoPairBinaryFanIsLimit D)
+    (Limits.pairComp _ _ _ ≪≫ Limits.mapPairIso (vRhoFiberIso D) (vRhoFiberIso D))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The abstract paired algebra is the tensor square (transport through
+the correspondence's inverse and unit — `muNRootsAlgebraIso` mirror). -/
+noncomputable def vRhoPairTensorIso (D : GaloisRepData N) :
+    vRhoPairAlgebra D ≅
+      FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D) :=
+  (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mapIso
+      (pairCorrespondenceIso D).symm ≪≫
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.app
+      (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+        (vRhoAlgebra D)))).symm).unop).symm
+
+open scoped TensorProduct in
+/-- **[T-F3a-iv]** `Spec` of the tensor identification (`muNRootsSpecIso` mirror). -/
+noncomputable def vRhoPairSpecIso (D : GaloisRepData N) :
+    Spec (CommRingCat.of ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0))) ≅
+      Spec (CommRingCat.of (vRhoPairAlgebra D : Type 0)) where
+  hom := Spec.map (CommRingCat.ofHom
+    (vRhoPairTensorIso D).hom.hom.hom.toRingHom)
+  inv := Spec.map (CommRingCat.ofHom
+    (vRhoPairTensorIso D).inv.hom.hom.toRingHom)
+  hom_inv_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+            (vRhoAlgebra D) ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+            (vRhoAlgebra D)) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((vRhoPairTensorIso D).inv_hom_id))).trans
+        (Spec.map_id _))
+  inv_hom_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : vRhoPairAlgebra D ⟶ vRhoPairAlgebra D) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((vRhoPairTensorIso D).hom_inv_id))).trans
+        (Spec.map_id _))
+
+open scoped TensorProduct in
+/-- **[T-F3a-v]** The fibre square of `V_ρ` over `ℚ` is the paired scheme
+(mathlib's `pullbackSpecIso` composed with the tensor identification). -/
+noncomputable def pullbackVRhoIso (D : GaloisRepData N) :
+    pullback (vRhoπ D) (vRhoπ D) ≅ vRhoPairScheme D :=
+  AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+    (vRhoAlgebra D : Type 0) ≪≫ vRhoPairSpecIso D
+
+/-- **[T-F3a-v]** The `V_ρ`-pairing map on the fibre square: transport to the paired
+scheme and compare into the roots scheme. -/
+noncomputable def vRhoPairingMap (D : GaloisRepData N) [Fact (1 < N)] :
+    pullback (vRhoπ D) (vRhoπ D) ⟶ muNRootsScheme D :=
+  (pullbackVRhoIso D).hom ≫ rhoPairSchemeMap D
+
+open scoped TensorProduct in
+/-- **[T-F3a-v]** The pairing map lies over the base. -/
+theorem vRhoPairingMap_π (D : GaloisRepData N) [Fact (1 < N)] :
+    vRhoPairingMap D ≫ muNRootsSchemeπ D =
+      pullback.fst (vRhoπ D) (vRhoπ D) ≫ vRhoπ D := by
+  have h1 : (vRhoPairSpecIso D).hom ≫ vRhoPairSchemeπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ
+        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) :=
+    (AlgebraicGeometry.Spec.map_comp _ _).symm.trans
+      (congrArg AlgebraicGeometry.Spec.map (by
+        ext r
+        exact ((vRhoPairTensorIso D).hom.hom.hom.commutes r)))
+  have h2 : Spec.map (CommRingCat.ofHom (algebraMap ℚ
+      ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) =
+      Spec.map (CommRingCat.ofHom (algebraMap (vRhoAlgebra D : Type 0)
+        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) ≫ vRhoπ D := by
+    refine Eq.trans ?_ (AlgebraicGeometry.Spec.map_comp _ _)
+    exact congrArg AlgebraicGeometry.Spec.map (by
+      ext r
+      exact (IsScalarTower.algebraMap_apply ℚ (vRhoAlgebra D : Type 0)
+        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)) r))
+  rw [vRhoPairingMap, pullbackVRhoIso]
+  simp only [Iso.trans_hom, Category.assoc]
+  rw [rhoPairSchemeMap_π]
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (vRhoAlgebra D : Type 0)).hom ≫ ·)
+    (h1.trans h2)) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  exact congrArg (· ≫ vRhoπ D)
+    (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ _ _)
+
+
+end PairingLayer
+
 section FramedProblem
 
 variable {N : ℕ} [NeZero N]
@@ -3976,25 +4616,6 @@ theorem coord_framedPinned_additive (D : GaloisRepData N) {T : Scheme.{0}}
     coord_framedPinned D sT E hinv L h hover t ht (x + y) hxy hfw,
     torsion_factor_index_add hinv L t x y hx hy hxy hfx hfy hfw, smul_add]
 
-/-- **[3d-i]** The standard symplectic form twists by the determinant under the
-matrix action on coordinates. -/
-theorem sympl_glSmul (A : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
-    (u v : Fin 2 → ZMod N) :
-    (A • u) 0 * (A • v) 1 - (A • u) 1 * (A • v) 0 =
-      ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) *
-        (u 0 * v 1 - u 1 * v 0) := by
-  show ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec u) 0 *
-      ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 1 -
-    ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec u) 1 *
-      ((A : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 0 =
-    ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) *
-      (u 0 * v 1 - u 1 * v 0)
-  rw [show ((Matrix.GeneralLinearGroup.det A : (ZMod N)ˣ) : ZMod N) =
-    (A : Matrix (Fin 2) (Fin 2) (ZMod N)).det from rfl]
-  simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two,
-    Matrix.det_fin_two]
-  ring
-
 /-- **[3d-ii]** The point-level characterization of a factored torsion point: it is
 the pulled standard combination at its index. -/
 theorem torsion_factor_point_eq {T : Scheme.{0}} {E : EllipticCurve T}
@@ -4274,89 +4895,6 @@ theorem detFrameScheme_π (D : GaloisRepData N) :
     ext r
     exact (detFrameAlgHom D).hom.hom.commutes r)
 
-/-- **[CARVE-1d-i]** The `μ_N`-roots Galois set (natural action on roots of unity in
-`ℚ̄`, transported along `galSepMulEquivGalQ`). -/
-noncomputable abbrev muNRootsAction (N : ℕ) [NeZero N] :
-    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
-  V := FintypeCat.of (rootsOfUnity N (AlgebraicClosure ℚ))
-  ρ :=
-    { toFun := fun σ => FintypeCat.homMk
-        (fun ζ => ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
-          rw [mem_rootsOfUnity]
-          rw [← map_pow]
-          rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ (N : ℕ) = 1 from
-            (mem_rootsOfUnity _ _).mp ζ.2]
-          exact map_one _⟩)
-      map_one' := FintypeCat.hom_ext _ _ fun ζ => Subtype.ext (Units.ext (by
-        show (galSepMulEquivGalQ 1) (ζ.1 : (AlgebraicClosure ℚ)ˣ).val = _
-        rw [map_one]
-        rfl))
-      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun ζ => Subtype.ext
-        (Units.ext (by
-          show (galSepMulEquivGalQ (σ * τ)) (ζ.1 : (AlgebraicClosure ℚ)ˣ).val = _
-          rw [map_mul]
-          rfl)) }
-
-open scoped Pointwise FintypeCatDiscrete in
-/-- **[CARVE-1d-i]** Continuity of the roots set: the kernel of `ρ` acts trivially
-(its cyclotomic image is `1`, and the character's spec fixes every root). -/
-lemma muNRootsAction_isContinuous (D : GaloisRepData N) [Fact (1 < N)] :
-    (muNRootsAction N).IsContinuous := by
-  constructor
-  haveI : DiscreteTopology
-      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
-        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
-          (muNRootsAction N) : Type 0) := ⟨rfl⟩
-  refine continuous_discrete_rng.mpr fun w => ?_
-  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
-        (CategoryTheory.forget₂ _ TopCat).obj (muNRootsAction N) => p.1 • p.2) ⁻¹'
-        ({w} : Set _) =
-      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (muNRootsAction N),
-        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
-    ext ⟨σ, v⟩
-    simp
-  rw [hdecomp]
-  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
-  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
-  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
-      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
-    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
-    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
-  refine Filter.mem_of_superset hnb ?_
-  rintro σ ⟨τ, hτ, rfl⟩
-  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
-  have hcy : modularCyclotomicCharacter (AlgebraicClosure ℚ)
-      (card_rootsOfUnity_algClosureQ N) (galSepMulEquivGalQ τ).toRingEquiv = 1 := by
-    rw [show modularCyclotomicCharacter (AlgebraicClosure ℚ)
-        (card_rootsOfUnity_algClosureQ N)
-        (galSepMulEquivGalQ τ).toRingEquiv =
-      Matrix.GeneralLinearGroup.det (D.ρ (galSepMulEquivGalQ τ)) from
-      (D.det_cyclo (galSepMulEquivGalQ τ)).symm]
-    rw [hτ1, map_one]
-  have hAct : (muNRootsAction N).ρ τ = 𝟙 _ := by
-    refine FintypeCat.hom_ext _ _ fun ζ => Subtype.ext ?_
-    have hspec := modularCyclotomicCharacter.spec (AlgebraicClosure ℚ)
-      (card_rootsOfUnity_algClosureQ N)
-      (galSepMulEquivGalQ τ).toRingEquiv ζ.2
-    rw [hcy] at hspec
-    rw [show (((1 : (ZMod N)ˣ) : ZMod N)).val = 1 from by
-      rw [Units.val_one, ZMod.val_one]] at hspec
-    rw [pow_one] at hspec
-    exact Units.ext hspec
-  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
-    _ = σ₀ • v := by
-        congr 1
-        show ((CategoryTheory.forget₂ _ TopCat).map ((muNRootsAction N).ρ τ)) v = v
-        rw [hAct, CategoryTheory.Functor.map_id]
-        rfl
-    _ = w := hσ₀
-
-open scoped FintypeCatDiscrete in
-/-- The roots set as a continuous Galois set. -/
-noncomputable abbrev muNRootsContAction (D : GaloisRepData N) [Fact (1 < N)] :
-    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
-  ⟨muNRootsAction N, muNRootsAction_isContinuous D⟩
-
 open scoped FintypeCatDiscrete in
 /-- **[CARVE-1d-i]** The pairing-normalisation comparison: `u ↦ p(ofAdd u)` is
 equivariant from the twisted units into the roots (by `p_equivariant`). -/
@@ -4397,20 +4935,6 @@ noncomputable def detCompMor (D : GaloisRepData N) [Fact (1 < N)] :
             (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N) from by
           simp only [ZMod.natCast_val, ZMod.cast_id]])) }
 
-/-- **[CARVE-1d-i]** The finite étale algebra and scheme of the roots set, with the
-comparison comultiplication and its scheme map. -/
-noncomputable def muNRootsAlgebra (D : GaloisRepData N) [Fact (1 < N)] :
-    CommAlgCat.FiniteEtale.{0} ℚ :=
-  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
-    (muNRootsContAction D)).unop
-
-noncomputable def muNRootsScheme (D : GaloisRepData N) [Fact (1 < N)] : Scheme.{0} :=
-  Spec (.of (muNRootsAlgebra D : Type 0))
-
-noncomputable def muNRootsSchemeπ (D : GaloisRepData N) [Fact (1 < N)] :
-    muNRootsScheme D ⟶ Spec (.of ℚ) :=
-  Spec.map (CommRingCat.ofHom (algebraMap ℚ (muNRootsAlgebra D : Type 0)))
-
 noncomputable def detCompAlgHom (D : GaloisRepData N) [Fact (1 < N)] :
     muNRootsAlgebra D ⟶ cycloUnitsAlgebra D :=
   ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
@@ -4426,519 +4950,6 @@ theorem detCompScheme_π (D : GaloisRepData N) [Fact (1 < N)] :
   exact congrArg AlgebraicGeometry.Spec.map (by
     ext r
     exact (detCompAlgHom D).hom.hom.commutes r)
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-i]** The paired `ρ`-set: the diagonal Galois action on ordered pairs of
-`(ℤ/N)²`-vectors. -/
-noncomputable abbrev rhoPairAction (D : GaloisRepData N) :
-    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
-  V := FintypeCat.of ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))
-  ρ :=
-    { toFun := fun σ => FintypeCat.homMk (fun uv =>
-        (D.ρ (galSepMulEquivGalQ σ) • uv.1, D.ρ (galSepMulEquivGalQ σ) • uv.2))
-      map_one' := FintypeCat.hom_ext _ _ fun uv => by
-        show (D.ρ (galSepMulEquivGalQ 1) • uv.1,
-          D.ρ (galSepMulEquivGalQ 1) • uv.2) = uv
-        rw [map_one, map_one, one_smul, one_smul]
-      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun uv => by
-        show (D.ρ (galSepMulEquivGalQ (σ * τ)) • uv.1,
-          D.ρ (galSepMulEquivGalQ (σ * τ)) • uv.2) = _
-        rw [map_mul, map_mul, mul_smul, mul_smul]
-        rfl }
-
-open scoped Pointwise FintypeCatDiscrete in
-/-- **[T-F3a-i]** Continuity of the paired `ρ`-action (same open kernel). -/
-lemma rhoPairAction_isContinuous (D : GaloisRepData N) :
-    (rhoPairAction D).IsContinuous := by
-  constructor
-  haveI : DiscreteTopology
-      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
-        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
-          (rhoPairAction D) : Type 0) := ⟨rfl⟩
-  refine continuous_discrete_rng.mpr fun w => ?_
-  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
-        (CategoryTheory.forget₂ _ TopCat).obj (rhoPairAction D) => p.1 • p.2) ⁻¹'
-        ({w} : Set _) =
-      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (rhoPairAction D),
-        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
-    ext ⟨σ, v⟩
-    simp
-  rw [hdecomp]
-  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
-  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
-  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
-      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
-    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
-    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
-  refine Filter.mem_of_superset hnb ?_
-  rintro σ ⟨τ, hτ, rfl⟩
-  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
-  have hAct : (rhoPairAction D).ρ τ = 𝟙 _ := by
-    refine FintypeCat.hom_ext _ _ fun uv => ?_
-    show (D.ρ (galSepMulEquivGalQ τ) • uv.1,
-      D.ρ (galSepMulEquivGalQ τ) • uv.2) = uv
-    rw [hτ1, one_smul, one_smul]
-  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
-    _ = σ₀ • v := by
-        congr 1
-        show ((CategoryTheory.forget₂ _ TopCat).map ((rhoPairAction D).ρ τ)) v = v
-        rw [hAct, CategoryTheory.Functor.map_id]
-        rfl
-    _ = w := hσ₀
-
-open scoped FintypeCatDiscrete in
-/-- The paired `ρ`-set as a continuous Galois set. -/
-noncomputable abbrev rhoPairContAction (D : GaloisRepData N) :
-    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
-  ⟨rhoPairAction D, rhoPairAction_isContinuous D⟩
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-ii]** The symplectic-pairing comparison: `(u,v) ↦ p(ofAdd (u∧v))` is
-equivariant from the paired `ρ`-set into the roots (`sympl_glSmul` + `det_cyclo` +
-`p_equivariant`). -/
-noncomputable def rhoPairMor (D : GaloisRepData N) [Fact (1 < N)] :
-    rhoPairContAction D ⟶ muNRootsContAction D :=
-  ObjectProperty.homMk
-    { hom := FintypeCat.homMk
-        (fun uv => D.p (Multiplicative.ofAdd
-          (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)))
-      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => Subtype.ext (Units.ext (by
-        show ((D.p (Multiplicative.ofAdd
-            ((D.ρ (galSepMulEquivGalQ σ) • uv.1) 0 *
-                (D.ρ (galSepMulEquivGalQ σ) • uv.2) 1 -
-              (D.ρ (galSepMulEquivGalQ σ) • uv.1) 1 *
-                (D.ρ (galSepMulEquivGalQ σ) • uv.2) 0)) :
-            (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) =
-          (galSepMulEquivGalQ σ)
-            ((D.p (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) :
-              (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
-        rw [sympl_glSmul, D.det_cyclo (galSepMulEquivGalQ σ)]
-        rw [D.p_equivariant (galSepMulEquivGalQ σ)
-          (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0))]
-        congr 2
-        rw [show (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) ^
-            ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
-              (card_rootsOfUnity_algClosureQ N)
-              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val =
-          Multiplicative.ofAdd
-            (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
-              (card_rootsOfUnity_algClosureQ N)
-              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val •
-            (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) from rfl]
-        rw [nsmul_eq_mul]
-        congr 1
-        rw [show (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
-            (card_rootsOfUnity_algClosureQ N)
-            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val :
-            ZMod N) =
-          ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
-            (card_rootsOfUnity_algClosureQ N)
-            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N) from by
-          simp only [ZMod.natCast_val, ZMod.cast_id]])) }
-
-/-- **[T-F3a-iii]** The finite étale algebra of the paired `ρ`-set. -/
-noncomputable def vRhoPairAlgebra (D : GaloisRepData N) :
-    CommAlgCat.FiniteEtale.{0} ℚ :=
-  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
-    (rhoPairContAction D)).unop
-
-/-- **[T-F3a-iii]** Its spectrum. -/
-noncomputable def vRhoPairScheme (D : GaloisRepData N) : Scheme.{0} :=
-  Spec (.of (vRhoPairAlgebra D : Type 0))
-
-/-- **[T-F3a-iii]** The structure morphism. -/
-noncomputable def vRhoPairSchemeπ (D : GaloisRepData N) :
-    vRhoPairScheme D ⟶ Spec (.of ℚ) :=
-  Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoPairAlgebra D : Type 0)))
-
-/-- **[T-F3a-iii]** The pairing comparison, algebra side. -/
-noncomputable def rhoPairAlgHom (D : GaloisRepData N) [Fact (1 < N)] :
-    muNRootsAlgebra D ⟶ vRhoPairAlgebra D :=
-  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (rhoPairMor D)).unop
-
-/-- **[T-F3a-iii]** The pairing comparison, scheme side. -/
-noncomputable def rhoPairSchemeMap (D : GaloisRepData N) [Fact (1 < N)] :
-    vRhoPairScheme D ⟶ muNRootsScheme D :=
-  Spec.map (CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom)
-
-/-- **[T-F3a-iii]** The pairing comparison lies over `ℚ`. -/
-theorem rhoPairSchemeMap_π (D : GaloisRepData N) [Fact (1 < N)] :
-    rhoPairSchemeMap D ≫ muNRootsSchemeπ D = vRhoPairSchemeπ D := by
-  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
-  exact congrArg AlgebraicGeometry.Spec.map (by
-    ext r
-    exact (rhoPairAlgHom D).hom.hom.commutes r)
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-iv]** The abstract fiber of `V_ρ`'s algebra is the `ρ`-set (the counit of
-the Galois correspondence at the `ρ`-set; `op (unop _)` is definitionally the original).
--/
-noncomputable def vRhoFiberIso (D : GaloisRepData N) :
-    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
-        (Opposite.op (vRhoAlgebra D)) ≅ rhoContAction D :=
-  (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).counitIso.app (rhoContAction D)
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-iv]** First projection of the paired `ρ`-set. -/
-noncomputable def rhoPairFst (D : GaloisRepData N) :
-    rhoPairContAction D ⟶ rhoContAction D :=
-  ObjectProperty.homMk
-    { hom := FintypeCat.homMk Prod.fst
-      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => rfl }
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-iv]** Second projection of the paired `ρ`-set. -/
-noncomputable def rhoPairSnd (D : GaloisRepData N) :
-    rhoPairContAction D ⟶ rhoContAction D :=
-  ObjectProperty.homMk
-    { hom := FintypeCat.homMk Prod.snd
-      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => rfl }
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-iv]** The paired `ρ`-set with its projections is a binary product fan. -/
-noncomputable def rhoPairBinaryFan (D : GaloisRepData N) :
-    Limits.BinaryFan (rhoContAction D) (rhoContAction D) :=
-  Limits.BinaryFan.mk (rhoPairFst D) (rhoPairSnd D)
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-iv]** The paired `ρ`-set is the binary product of the `ρ`-set with
-itself. -/
-noncomputable def rhoPairBinaryFanIsLimit (D : GaloisRepData N) :
-    Limits.IsLimit (rhoPairBinaryFan D) := by
-  refine Limits.BinaryFan.isLimitMk
-    (fun s => ObjectProperty.homMk
-      { hom := FintypeCat.homMk (fun x => (s.fst.hom.hom x, s.snd.hom.hom x))
-        comm := fun σ => FintypeCat.hom_ext _ _ fun x => ?_ })
-    (fun s => ?_) (fun s => ?_) (fun s m h₁ h₂ => ?_)
-  · have hf := congrArg (fun (h : s.pt.obj.V ⟶ (rhoAction D).V) => h x)
-      (s.fst.hom.comm σ)
-    have hg := congrArg (fun (h : s.pt.obj.V ⟶ (rhoAction D).V) => h x)
-      (s.snd.hom.comm σ)
-    exact Prod.ext hf hg
-  · ext x
-    rfl
-  · ext x
-    rfl
-  · ext x
-    exacts [congrFun (congrArg (fun (q : s.pt ⟶ rhoContAction D) =>
-        q.hom.hom x) h₁) _,
-      congrFun (congrArg (fun (q : s.pt ⟶ rhoContAction D) =>
-        q.hom.hom x) h₂) _]
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-iv]** The correspondence image of the tensor square of `V_ρ`'s algebra is
-the paired `ρ`-set: both are binary products (the op-tensor cofan through the
-limit-preserving equivalence, and the explicit pair fan), matched leg-wise by the
-counit. -/
-noncomputable def pairCorrespondenceIso (D : GaloisRepData N) :
-    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
-        (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D))) ≅
-      rhoPairContAction D :=
-  Limits.IsLimit.conePointsIsoOfNatIso
-    (Limits.isLimitOfPreserves
-      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor
-      (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D) (vRhoAlgebra D)))
-    (rhoPairBinaryFanIsLimit D)
-    (Limits.pairComp _ _ _ ≪≫ Limits.mapPairIso (vRhoFiberIso D) (vRhoFiberIso D))
-
-open scoped FintypeCatDiscrete in
-/-- **[T-F3a-iv]** The abstract paired algebra is the tensor square (transport through
-the correspondence's inverse and unit — `muNRootsAlgebraIso` mirror). -/
-noncomputable def vRhoPairTensorIso (D : GaloisRepData N) :
-    vRhoPairAlgebra D ≅
-      FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D) :=
-  (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mapIso
-      (pairCorrespondenceIso D).symm ≪≫
-    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.app
-      (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
-        (vRhoAlgebra D)))).symm).unop).symm
-
-open scoped TensorProduct in
-/-- **[T-F3a-iv]** `Spec` of the tensor identification (`muNRootsSpecIso` mirror). -/
-noncomputable def vRhoPairSpecIso (D : GaloisRepData N) :
-    Spec (CommRingCat.of ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0))) ≅
-      Spec (CommRingCat.of (vRhoPairAlgebra D : Type 0)) where
-  hom := Spec.map (CommRingCat.ofHom
-    (vRhoPairTensorIso D).hom.hom.hom.toRingHom)
-  inv := Spec.map (CommRingCat.ofHom
-    (vRhoPairTensorIso D).inv.hom.hom.toRingHom)
-  hom_inv_id :=
-    (Spec.map_comp _ _).symm.trans
-      ((congrArg Spec.map
-        (congrArg (fun (f : FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
-            (vRhoAlgebra D) ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
-            (vRhoAlgebra D)) =>
-          CommRingCat.ofHom f.hom.hom.toRingHom)
-          ((vRhoPairTensorIso D).inv_hom_id))).trans
-        (Spec.map_id _))
-  inv_hom_id :=
-    (Spec.map_comp _ _).symm.trans
-      ((congrArg Spec.map
-        (congrArg (fun (f : vRhoPairAlgebra D ⟶ vRhoPairAlgebra D) =>
-          CommRingCat.ofHom f.hom.hom.toRingHom)
-          ((vRhoPairTensorIso D).hom_inv_id))).trans
-        (Spec.map_id _))
-
-open scoped TensorProduct in
-/-- **[T-F3a-v]** The fibre square of `V_ρ` over `ℚ` is the paired scheme
-(mathlib's `pullbackSpecIso` composed with the tensor identification). -/
-noncomputable def pullbackVRhoIso (D : GaloisRepData N) :
-    pullback (vRhoπ D) (vRhoπ D) ≅ vRhoPairScheme D :=
-  AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
-    (vRhoAlgebra D : Type 0) ≪≫ vRhoPairSpecIso D
-
-/-- **[T-F3a-v]** The `V_ρ`-pairing map on the fibre square: transport to the paired
-scheme and compare into the roots scheme. -/
-noncomputable def vRhoPairingMap (D : GaloisRepData N) [Fact (1 < N)] :
-    pullback (vRhoπ D) (vRhoπ D) ⟶ muNRootsScheme D :=
-  (pullbackVRhoIso D).hom ≫ rhoPairSchemeMap D
-
-open scoped TensorProduct in
-/-- **[T-F3a-v]** The pairing map lies over the base. -/
-theorem vRhoPairingMap_π (D : GaloisRepData N) [Fact (1 < N)] :
-    vRhoPairingMap D ≫ muNRootsSchemeπ D =
-      pullback.fst (vRhoπ D) (vRhoπ D) ≫ vRhoπ D := by
-  have h1 : (vRhoPairSpecIso D).hom ≫ vRhoPairSchemeπ D =
-      Spec.map (CommRingCat.ofHom (algebraMap ℚ
-        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) :=
-    (AlgebraicGeometry.Spec.map_comp _ _).symm.trans
-      (congrArg AlgebraicGeometry.Spec.map (by
-        ext r
-        exact ((vRhoPairTensorIso D).hom.hom.hom.commutes r)))
-  have h2 : Spec.map (CommRingCat.ofHom (algebraMap ℚ
-      ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) =
-      Spec.map (CommRingCat.ofHom (algebraMap (vRhoAlgebra D : Type 0)
-        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)))) ≫ vRhoπ D := by
-    refine Eq.trans ?_ (AlgebraicGeometry.Spec.map_comp _ _)
-    exact congrArg AlgebraicGeometry.Spec.map (by
-      ext r
-      exact (IsScalarTower.algebraMap_apply ℚ (vRhoAlgebra D : Type 0)
-        ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0)) r))
-  rw [vRhoPairingMap, pullbackVRhoIso]
-  simp only [Iso.trans_hom, Category.assoc]
-  rw [rhoPairSchemeMap_π]
-  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
-      (vRhoAlgebra D : Type 0) (vRhoAlgebra D : Type 0)).hom ≫ ·)
-    (h1.trans h2)) ?_
-  refine Eq.trans (Category.assoc _ _ _).symm ?_
-  exact congrArg (· ≫ vRhoπ D)
-    (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ _ _)
-
-/-- **[T-CV-1b]** The root of the cyclotomic quotient is an `N`-th root of unity. -/
-theorem cycloRoot_pow (N : ℕ) [NeZero N] :
-    (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ N = 1 := by
-  have h := AdjoinRoot.mk_self (f := (Polynomial.X : Polynomial ℚ) ^ N - 1)
-  rw [map_sub, map_pow, map_one, AdjoinRoot.mk_X, sub_eq_zero] at h
-  exact h
-
-/-- **[T-CV-1b]** The cyclotomic quotient `ℚ[X]/(Xᴺ − 1)` as a finite étale
-`ℚ`-algebra. -/
-noncomputable def cycloQuotAlgebra (N : ℕ) [NeZero N] :
-    CommAlgCat.FiniteEtale.{0} ℚ :=
-  haveI := muNModel_finite ℚ N
-  haveI := muNModel_algebra_etale_of_isUnit ℚ N
-    (isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N)))
-  CommAlgCat.FiniteEtale.of ℚ (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1))
-
-/-- **[T-CV-1c]** Algebra maps out of the cyclotomic quotient into a field are the
-`N`-th roots of unity (evaluation at the root). -/
-noncomputable def cycloAlgHomEquivRoots (N : ℕ) [NeZero N] (L : Type) [Field L]
-    [Algebra ℚ L] :
-    ((AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ] L) ≃
-      rootsOfUnity N L where
-  toFun φ := rootsOfUnity.mkOfPowEq (φ (AdjoinRoot.root _)) (by
-    rw [← map_pow, cycloRoot_pow, map_one])
-  invFun ζ := AdjoinRoot.liftAlgHom _ (Algebra.ofId ℚ L) ((ζ : Lˣ) : L) (by
-    rw [Polynomial.eval₂_sub, Polynomial.eval₂_pow, Polynomial.eval₂_X,
-      Polynomial.eval₂_one]
-    rw [show (((ζ : Lˣ) : L)) ^ N = 1 from (mem_rootsOfUnity' N _).mp ζ.2]
-    exact sub_self 1)
-  left_inv φ := AdjoinRoot.algHom_ext (by
-    rw [AdjoinRoot.liftAlgHom_root]
-    exact rootsOfUnity.coe_mkOfPowEq _)
-  right_inv ζ := Subtype.ext (Units.ext (by
-    rw [rootsOfUnity.coe_mkOfPowEq, AdjoinRoot.liftAlgHom_root]))
-
-/-- **[T-CV-1c]** Roots of unity transport along the separable-vs-algebraic closure
-identification. -/
-noncomputable def rootsSepQbarEquiv (N : ℕ) [NeZero N] :
-    rootsOfUnity N (SeparableClosure ℚ) ≃ rootsOfUnity N (AlgebraicClosure ℚ) where
-  toFun ζ := rootsOfUnity.mkOfPowEq
-    (sepClosureQAlgEquiv (((ζ : (SeparableClosure ℚ)ˣ) : SeparableClosure ℚ)))
-    (by
-      rw [← map_pow]
-      rw [show (((ζ : (SeparableClosure ℚ)ˣ) : SeparableClosure ℚ)) ^ N = 1 from
-        (mem_rootsOfUnity' N _).mp ζ.2]
-      rw [map_one])
-  invFun ζ := rootsOfUnity.mkOfPowEq
-    (sepClosureQAlgEquiv.symm
-      (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)))
-    (by
-      rw [← map_pow]
-      rw [show (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) ^ N = 1 from
-        (mem_rootsOfUnity' N _).mp ζ.2]
-      rw [map_one])
-  left_inv ζ := Subtype.ext (Units.ext (by
-    rw [rootsOfUnity.coe_mkOfPowEq, rootsOfUnity.coe_mkOfPowEq,
-      AlgEquiv.symm_apply_apply]))
-  right_inv ζ := Subtype.ext (Units.ext (by
-    rw [rootsOfUnity.coe_mkOfPowEq, rootsOfUnity.coe_mkOfPowEq,
-      AlgEquiv.apply_symm_apply]))
-
-/-- **[T-CV-1c]** The Galois transport compatibility of the closure identification. -/
-theorem galSep_sepQ_compat (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
-    (x : SeparableClosure ℚ) :
-    (galSepMulEquivGalQ σ) (sepClosureQAlgEquiv x) = sepClosureQAlgEquiv (σ x) := by
-  show (AlgEquiv.autCongr sepClosureQAlgEquiv σ) (sepClosureQAlgEquiv x) = _
-  simp [AlgEquiv.autCongr]
-
-/-- **[T-CV-1d]** The forward read intertwines the Galois actions. -/
-theorem cycloRead_comp (N : ℕ) [NeZero N]
-    (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
-    (φ : (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ]
-      SeparableClosure ℚ) :
-    rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
-        ((σ : SeparableClosure ℚ →ₐ[ℚ] SeparableClosure ℚ).comp φ)) =
-      ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom
-        (rootsSepQbarEquiv N
-          (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).1, by
-        rw [mem_rootsOfUnity]
-        rw [← map_pow]
-        rw [show ((rootsSepQbarEquiv N
-            (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).1 :
-            (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
-          (mem_rootsOfUnity N _).mp (rootsSepQbarEquiv N
-            (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).2]
-        exact map_one _⟩ := by
-  refine Subtype.ext (Units.ext ?_)
-  show sepClosureQAlgEquiv (((σ : SeparableClosure ℚ →ₐ[ℚ]
-      SeparableClosure ℚ).comp φ) (AdjoinRoot.root _)) =
-    (galSepMulEquivGalQ σ) (sepClosureQAlgEquiv (φ (AdjoinRoot.root _)))
-  rw [galSep_sepQ_compat]
-  rfl
-
-/-- **[T-CV-1d]** The inverse read intertwines the Galois actions. -/
-theorem cycloReadInv_comp (N : ℕ) [NeZero N]
-    (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
-    (ζ : rootsOfUnity N (AlgebraicClosure ℚ)) :
-    (σ : SeparableClosure ℚ →ₐ[ℚ] SeparableClosure ℚ).comp
-        ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
-          ((rootsSepQbarEquiv N).symm ζ)) =
-      (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
-        ((rootsSepQbarEquiv N).symm
-          ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
-            rw [mem_rootsOfUnity]
-            rw [← map_pow]
-            rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
-              (mem_rootsOfUnity N _).mp ζ.2]
-            exact map_one _⟩) := by
-  refine AdjoinRoot.algHom_ext ?_
-  rw [AlgHom.comp_apply]
-  show σ ((AdjoinRoot.liftAlgHom _ (Algebra.ofId ℚ (SeparableClosure ℚ))
-      (sepClosureQAlgEquiv.symm
-        (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))) _)
-      (AdjoinRoot.root _)) = _
-  rw [AdjoinRoot.liftAlgHom_root]
-  rw [show ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
-      ((rootsSepQbarEquiv N).symm
-        (⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
-          rw [mem_rootsOfUnity]
-          rw [← map_pow]
-          rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
-            (mem_rootsOfUnity N _).mp ζ.2]
-          exact map_one _⟩ : rootsOfUnity N (AlgebraicClosure ℚ))))
-      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) =
-    sepClosureQAlgEquiv.symm ((galSepMulEquivGalQ σ)
-      (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))) from
-    AdjoinRoot.liftAlgHom_root _ _ _ _]
-  have hc := galSep_sepQ_compat σ (sepClosureQAlgEquiv.symm
-    (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)))
-  rw [AlgEquiv.apply_symm_apply] at hc
-  rw [hc, AlgEquiv.symm_apply_apply]
-
-open scoped FintypeCatDiscrete in
-/-- **[T-CV-1d]** The correspondence image of the cyclotomic quotient is the roots
-Galois set. -/
-noncomputable def muNRootsCorrespondenceIso (D : GaloisRepData N) [Fact (1 < N)] :
-    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
-        (Opposite.op (cycloQuotAlgebra N)) ≅ muNRootsContAction D where
-  hom := ObjectProperty.homMk
-    { hom := FintypeCat.homMk (fun φ => rootsSepQbarEquiv N
-        (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ))
-      comm := fun σ => FintypeCat.hom_ext _ _ fun φ => cycloRead_comp N σ φ }
-  inv := ObjectProperty.homMk
-    { hom := FintypeCat.homMk (fun ζ =>
-        (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
-          ((rootsSepQbarEquiv N).symm ζ))
-      comm := fun σ => FintypeCat.hom_ext _ _ fun ζ =>
-        (cycloReadInv_comp N σ ζ).symm }
-  hom_inv_id := by
-    ext φ
-    show (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
-      ((rootsSepQbarEquiv N).symm (rootsSepQbarEquiv N
-        (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ))) = φ
-    rw [Equiv.symm_apply_apply, Equiv.symm_apply_apply]
-  inv_hom_id := by
-    ext ζ
-    have h1 : rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
-        ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
-          ((rootsSepQbarEquiv N).symm ζ))) = ζ := by
-      rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply]
-    exact congrArg (fun w : rootsOfUnity N (AlgebraicClosure ℚ) =>
-      ((w : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) h1
-
-open scoped FintypeCatDiscrete in
-/-- **[T-CV-1e]** The roots algebra is the cyclotomic quotient (transport through the
-correspondence's inverse and unit — mirror of `constVecAlgebraIso`). -/
-noncomputable def muNRootsAlgebraIso (D : GaloisRepData N) [Fact (1 < N)] :
-    muNRootsAlgebra D ≅ cycloQuotAlgebra N :=
-  (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mapIso
-      (muNRootsCorrespondenceIso D).symm ≪≫
-    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.app
-      (Opposite.op (cycloQuotAlgebra N))).symm).unop).symm
-
-/-- **[T-CV-1e]** `Spec` of the roots-algebra identification (mirror of
-`constVecSpecIso`). -/
-noncomputable def muNRootsSpecIso (D : GaloisRepData N) [Fact (1 < N)] :
-    Spec (CommRingCat.of (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ≅
-      Spec (CommRingCat.of (muNRootsAlgebra D : Type 0)) where
-  hom := Spec.map (CommRingCat.ofHom
-    (muNRootsAlgebraIso D).hom.hom.hom.toRingHom)
-  inv := Spec.map (CommRingCat.ofHom
-    (muNRootsAlgebraIso D).inv.hom.hom.toRingHom)
-  hom_inv_id :=
-    (Spec.map_comp _ _).symm.trans
-      ((congrArg Spec.map
-        (congrArg (fun (f : cycloQuotAlgebra N ⟶ cycloQuotAlgebra N) =>
-          CommRingCat.ofHom f.hom.hom.toRingHom)
-          ((muNRootsAlgebraIso D).inv_hom_id))).trans
-        (Spec.map_id _))
-  inv_hom_id :=
-    (Spec.map_comp _ _).symm.trans
-      ((congrArg Spec.map
-        (congrArg (fun (f : muNRootsAlgebra D ⟶ muNRootsAlgebra D) =>
-          CommRingCat.ofHom f.hom.hom.toRingHom)
-          ((muNRootsAlgebraIso D).hom_inv_id))).trans
-        (Spec.map_id _))
-
-/-- **[T-CV-1 CLOSE]** The DS3 bridge: `μ_N` over `Spec ℚ` is the roots scheme. -/
-noncomputable def muNSpecQIso (D : GaloisRepData N) [Fact (1 < N)] :
-    muN (Spec (CommRingCat.of ℚ)) N ≅ muNRootsScheme D :=
-  muNSpecFieldIso ℚ N ≪≫ muNRootsSpecIso D
-
-/-- **[T-CV-1 CLOSE]** The bridge lies over the base. -/
-theorem muNSpecQIso_π (D : GaloisRepData N) [Fact (1 < N)] :
-    (muNSpecQIso D).hom ≫ muNRootsSchemeπ D =
-      muNπ (Spec (CommRingCat.of ℚ)) N := by
-  have hinner : (muNRootsSpecIso D).hom ≫ muNRootsSchemeπ D =
-      Spec.map (CommRingCat.ofHom
-        (AdjoinRoot.of ((Polynomial.X : Polynomial ℚ) ^ N - 1))) :=
-    (Spec.map_comp _ _).symm.trans (congrArg Spec.map (by
-      ext r
-      exact ((muNRootsAlgebraIso D).hom.hom.hom.commutes r)))
-  exact (Category.assoc _ _ _).trans
-    ((congrArg ((muNSpecFieldIso ℚ N).hom ≫ ·) hinner).trans
-      (muNSpecFieldIso_struct ℚ N))
 
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
