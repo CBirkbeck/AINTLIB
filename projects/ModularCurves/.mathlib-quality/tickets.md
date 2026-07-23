@@ -25259,6 +25259,37 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### CARVE progress (2026-07-27) — 1a/1b/1c LANDED, 1d derived
+LANDED+PUSHED (12613f911): cycloUnitsAction (twisted units, RingAut-mul spelling) +
+_isContinuous (ker-ρ superset via det_cyclo; FintypeCatDiscrete scoped-opens needed
+per-decl outside FrameSubstrate) + cycloUnitsContAction + detFrameMor (det_cyclo
+equivariance) + cycloUnitsAlgebra/Scheme/π + detFrameAlgHom + detFrameScheme + π.
+
+[CARVE-1d] DISCOVERY: fullLevelSpace X N := levelSpaceΓ X.curve N with
+levelSpaceΓι : fullLevelSpace ⟶ pullback (torsionπ N) (torsionπ N) — so the
+e_N-comparison map is IMMEDIATE: eSide := levelSpaceΓι ≫ weilPairing (the
+DS4-registered scheme-level pairing) : fullLevelSpace X N ⟶ muN X.base N.
+REMAINING for the carve:
+- [1d-i] TARGET-ALIGNMENT: the det-side lands in cycloUnitsScheme (over ℚ, via the
+  correspondence) while eSide lands in muN X.base N (MuN.lean's pullback-terminal
+  μ_N). Bridge: D.p gives a ContAction-iso cycloUnitsContAction ≅ (μ_N-roots-of-Sep
+  Galois set) [p_equivariant]; transport to schemes; then the DS3-bridge
+  μ_N-correspondence-scheme ≅ muN (Spec ℚ) N (via muNPointsEquiv-register or a
+  direct points-computation); then base-change both sides to Z and compare there.
+  ALTERNATIVE (cheaper?): compare in cycloUnitsScheme instead — transport the
+  e_N-map through p⁻¹: needs the muN-points-read of the pairing as a
+  (ZMod N)ˣ-valued map — same bridge, other direction.
+- [1d-ii] the two maps on Z := pullback dE.f (fst X.structMap wFramesπ):
+  eZ := fst ≫ (dE.Z→fullLevelSpace-identification?) ≫ eSide-bridged and
+  dZ := snd ≫ snd ≫ detFrameScheme-bridged; NOTE dE.Z-vs-fullLevelSpace: dE comes
+  from gammaFullNaive_equivariantRelRepData — check whether dE.Z IS fullLevelSpace
+  syntactically or needs the identification lemma.
+- [1d-iii] the equalizer-carve: agreement-locus of eZ, dZ — both into a finite
+  étale separated ℚ-scheme base-changed; clopen via
+  AlgebraicGeometry.isOpenImmersion_diagonal [FormallyUnramified+LocallyOfFiniteType]
+  (open) + separated-diagonal (closed); I := the locus, f-restriction finite étale.
+- then [INV-DICT] + [3e] per the standing plan below.
+
 ### THE FINAL ARC — 3d-2/carve/3e decomposition (2026-07-27, plan-of-record)
 Target chain: rhoLevel_relativelyRepresentable (:4432-region sorry) → T-YR-5 →
 yRho_representable (:4461). The I-candidate: X := the EllObj (T, sT, E);
