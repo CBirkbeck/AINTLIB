@@ -844,6 +844,79 @@ noncomputable def rhoFrameProdIsProduct (D : GaloisRepData N) :
     · exact congrArg (fun q : s.pt ⟶ rhoContAction D => q.hom.hom x) h₁
     · exact congrArg (fun q : s.pt ⟶ frameContAction D => q.hom.hom x) h₂
 
+/-- **[asm-2b-iii]** The shear `(v, A) ↦ (A·v, A)` as a morphism of continuous Galois
+sets (equivariance: `(ρσ·A)·v = ρσ·(A·v)` in the first factor). -/
+noncomputable def frameShearMor (D : GaloisRepData N) :
+    frameProdContAction D ⟶ rhoFrameProdContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun vA => (vA.2 • vA.1, vA.2))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun vA => by
+        show ((D.ρ (galSepMulEquivGalQ σ) * vA.2) • vA.1,
+            D.ρ (galSepMulEquivGalQ σ) * vA.2) =
+          (D.ρ (galSepMulEquivGalQ σ) • vA.2 • vA.1,
+            D.ρ (galSepMulEquivGalQ σ) * vA.2)
+        rw [mul_smul] }
+
+/-- **[asm-2b-iii]** The inverse shear `(w, A) ↦ (A⁻¹·w, A)` as a morphism of
+continuous Galois sets (equivariance: `(ρσ·A)⁻¹·(ρσ·w) = A⁻¹·w`). -/
+noncomputable def frameCoshearMor (D : GaloisRepData N) :
+    rhoFrameProdContAction D ⟶ frameProdContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun wA => (wA.2⁻¹ • wA.1, wA.2))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun wA => by
+        show ((D.ρ (galSepMulEquivGalQ σ) * wA.2)⁻¹ •
+            (D.ρ (galSepMulEquivGalQ σ) • wA.1),
+            D.ρ (galSepMulEquivGalQ σ) * wA.2) =
+          (wA.2⁻¹ • wA.1, D.ρ (galSepMulEquivGalQ σ) * wA.2)
+        rw [mul_inv_rev, mul_smul, inv_smul_smul] }
+
+/-- **[asm-2b-iii]** The co-evaluation `(w, A) ↦ A⁻¹·w` as a morphism of continuous
+Galois sets (lands in the trivial vector set — the Galois twist cancels). -/
+noncomputable def frameCoevalMor (D : GaloisRepData N) :
+    rhoFrameProdContAction D ⟶ constVecContAction N :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun wA => wA.2⁻¹ • wA.1)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun wA => by
+        show (D.ρ (galSepMulEquivGalQ σ) * wA.2)⁻¹ •
+            (D.ρ (galSepMulEquivGalQ σ) • wA.1) = wA.2⁻¹ • wA.1
+        rw [mul_inv_rev, mul_smul, inv_smul_smul] }
+
+/-- Shear then `ρ`-first-projection is the evaluation. -/
+theorem frameShearMor_fst (D : GaloisRepData N) :
+    frameShearMor D ≫ rhoFrameProdFst D = frameEvalMor D := by
+  ext x : 3
+  rfl
+
+/-- Shear then `ρ`-second-projection is the frame projection. -/
+theorem frameShearMor_snd (D : GaloisRepData N) :
+    frameShearMor D ≫ rhoFrameProdSnd D = frameProdSnd D := by
+  ext x : 3
+  rfl
+
+/-- Shear then co-evaluation is the vector projection (`A⁻¹·(A·v) = v`). -/
+theorem frameShearMor_coeval (D : GaloisRepData N) :
+    frameShearMor D ≫ frameCoevalMor D = frameProdFst D := by
+  ext x : 3
+  exact inv_smul_smul _ _
+
+/-- Co-shear then first projection is the co-evaluation. -/
+theorem frameCoshearMor_fst (D : GaloisRepData N) :
+    frameCoshearMor D ≫ frameProdFst D = frameCoevalMor D := by
+  ext x : 3
+  rfl
+
+/-- Co-shear then second projection is the `ρ`-frame projection. -/
+theorem frameCoshearMor_snd (D : GaloisRepData N) :
+    frameCoshearMor D ≫ frameProdSnd D = rhoFrameProdSnd D := by
+  ext x : 3
+  rfl
+
+/-- Co-shear then evaluation is the `ρ`-vector projection (`A·(A⁻¹·w) = w`). -/
+theorem frameCoshearMor_eval (D : GaloisRepData N) :
+    frameCoshearMor D ≫ frameEvalMor D = rhoFrameProdFst D := by
+  ext x : 3
+  exact smul_inv_smul _ _
+
 section PiAlgHom
 
 /-- [asm-1 leaf] The coordinate idempotents of a finite split algebra map to
@@ -2347,6 +2420,99 @@ theorem frameProdAlgebraIso_inv_right (D : GaloisRepData N) :
       (congrArg ((frameProdAlgebraIso D).inv ≫ ·) hcomp)).trans
       (congrArg ((frameProdAlgebraIso D).inv ≫ ·) (Category.comp_id _))
   exact (congrArg Quiver.Hom.unop hop.symm).trans rfl
+
+/-- **[asm-2b-iv]** The co-evaluation comultiplication: the finite étale algebra map
+corresponding to the co-evaluation (mirror of `frameEvalAlgHom`). -/
+noncomputable def frameCoevalAlgHom (D : GaloisRepData N) :
+    constVecAlgebra N ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+      (wFramesAlgebra D) :=
+  ((rhoFrameProdAlgebraIso D).inv ≫
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (frameCoevalMor D)).unop
+
+/-- **[asm-2b-iv]** The shear comultiplication: the algebra map of the transported
+shear, from the `ρ`-mixed tensor algebra to the plain mixed tensor algebra. -/
+noncomputable def frameShearAlgHom (D : GaloisRepData N) :
+    FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (wFramesAlgebra D) ⟶
+      FiniteEtaleGalois.tensorObj (constVecAlgebra N) (wFramesAlgebra D) :=
+  ((frameProdAlgebraIso D).inv ≫
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (frameShearMor D) ≫
+    (rhoFrameProdAlgebraIso D).hom).unop
+
+/-- **[asm-2b-iv]** The co-shear comultiplication (mirror). -/
+noncomputable def frameCoshearAlgHom (D : GaloisRepData N) :
+    FiniteEtaleGalois.tensorObj (constVecAlgebra N) (wFramesAlgebra D) ⟶
+      FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (wFramesAlgebra D) :=
+  ((rhoFrameProdAlgebraIso D).inv ≫
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (frameCoshearMor D) ≫
+    (frameProdAlgebraIso D).hom).unop
+
+/-- **[asm-2b-iv]** The co-evaluation at the scheme level:
+`V_ρ ×_ℚ Isom((ℤ/N)², V_ρ) ⟶ (ℤ/N)²_ℚ`, `(w, A) ↦ A⁻¹·w` (mirror of `frameEval`). -/
+noncomputable def frameCoeval (D : GaloisRepData N) :
+    pullback (vRhoπ D) (wFramesπ D) ⟶ constVecScheme N :=
+  (AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+    (wFramesAlgebra D : Type 0)).hom ≫
+    AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+      (frameCoevalAlgHom D).hom.hom.toRingHom)
+
+/-- **[asm-2b-iv]** The co-evaluation lies over the `ρ`-side projection (mirror of
+`frameEval_π`). -/
+theorem frameCoeval_π (D : GaloisRepData N) :
+    frameCoeval D ≫ constVecSchemeπ N =
+      pullback.fst (vRhoπ D) (wFramesπ D) ≫ vRhoπ D := by
+  have hcomp : CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0)) ≫
+      CommRingCat.ofHom (frameCoevalAlgHom D).hom.hom.toRingHom =
+      CommRingCat.ofHom (algebraMap ℚ (FiniteEtaleGalois.tensorObj
+        (vRhoAlgebra D) (wFramesAlgebra D) : Type 0)) := by
+    ext r
+    exact (frameCoevalAlgHom D).hom.hom.commutes r
+  show ((AlgebraicGeometry.pullbackSpecIso ℚ (vRhoAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0)).hom ≫
+    AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+      (frameCoevalAlgHom D).hom.hom.toRingHom)) ≫
+    Spec.map (CommRingCat.ofHom (algebraMap ℚ (constVecAlgebra N : Type 0))) = _
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    (Spec.map_comp _ _).symm) ?_
+  refine Eq.trans (congrArg (fun f => (AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+      AlgebraicGeometry.Spec.map f) hcomp) ?_
+  have hfactor : CommRingCat.ofHom (algebraMap ℚ (FiniteEtaleGalois.tensorObj
+      (vRhoAlgebra D) (wFramesAlgebra D) : Type 0)) =
+      CommRingCat.ofHom (algebraMap ℚ (vRhoAlgebra D : Type 0)) ≫
+      CommRingCat.ofHom (algebraMap (vRhoAlgebra D : Type 0)
+        (TensorProduct ℚ (vRhoAlgebra D : Type 0)
+          (wFramesAlgebra D : Type 0))) := by
+    ext r
+    exact (IsScalarTower.algebraMap_apply ℚ (vRhoAlgebra D : Type 0)
+      (TensorProduct ℚ (vRhoAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)) r)
+  refine Eq.trans (congrArg (fun f => (AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).hom ≫
+      AlgebraicGeometry.Spec.map f) hfactor) ?_
+  refine Eq.trans (congrArg ((AlgebraicGeometry.pullbackSpecIso ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0)).hom ≫ ·)
+    (Spec.map_comp _ _)) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  exact congrArg (· ≫ Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (vRhoAlgebra D : Type 0))))
+    (AlgebraicGeometry.pullbackSpecIso_hom_fst' ℚ
+      (vRhoAlgebra D : Type 0) (wFramesAlgebra D : Type 0))
+
+/-- **[asm-2b-iv]** The evaluation-with-frame pairing `(v, A) ↦ (A·v, A)` at the
+scheme level. -/
+noncomputable def framePairEval (D : GaloisRepData N) :
+    pullback (constVecSchemeπ N) (wFramesπ D) ⟶ pullback (vRhoπ D) (wFramesπ D) :=
+  pullback.lift (frameEval D) (pullback.snd _ _)
+    (by rw [frameEval_π, pullback.condition])
+
+/-- **[asm-2b-iv]** The co-evaluation-with-frame pairing `(w, A) ↦ (A⁻¹·w, A)` at the
+scheme level. -/
+noncomputable def framePairCoeval (D : GaloisRepData N) :
+    pullback (vRhoπ D) (wFramesπ D) ⟶ pullback (constVecSchemeπ N) (wFramesπ D) :=
+  pullback.lift (frameCoeval D) (pullback.snd _ _)
+    (by rw [frameCoeval_π, pullback.condition])
 
 /-- **[asm-2a]** The universal-frame evaluation on `ℚ̄`-points: the `V_ρ`-reading of
 the evaluated point is the classified frame acting on the vector (scaffold; the
