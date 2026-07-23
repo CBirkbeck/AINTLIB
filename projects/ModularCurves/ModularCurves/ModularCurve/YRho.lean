@@ -4397,6 +4397,36 @@ noncomputable def detCompMor (D : GaloisRepData N) [Fact (1 < N)] :
             (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N) from by
           simp only [ZMod.natCast_val, ZMod.cast_id]])) }
 
+/-- **[CARVE-1d-i]** The finite étale algebra and scheme of the roots set, with the
+comparison comultiplication and its scheme map. -/
+noncomputable def muNRootsAlgebra (D : GaloisRepData N) [Fact (1 < N)] :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
+    (muNRootsContAction D)).unop
+
+noncomputable def muNRootsScheme (D : GaloisRepData N) [Fact (1 < N)] : Scheme.{0} :=
+  Spec (.of (muNRootsAlgebra D : Type 0))
+
+noncomputable def muNRootsSchemeπ (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsScheme D ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (muNRootsAlgebra D : Type 0)))
+
+noncomputable def detCompAlgHom (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsAlgebra D ⟶ cycloUnitsAlgebra D :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+    (detCompMor D)).unop
+
+noncomputable def detCompScheme (D : GaloisRepData N) [Fact (1 < N)] :
+    cycloUnitsScheme D ⟶ muNRootsScheme D :=
+  Spec.map (CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom)
+
+theorem detCompScheme_π (D : GaloisRepData N) [Fact (1 < N)] :
+    detCompScheme D ≫ muNRootsSchemeπ D = cycloUnitsSchemeπ D := by
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  exact congrArg AlgebraicGeometry.Spec.map (by
+    ext r
+    exact (detCompAlgHom D).hom.hom.commutes r)
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
