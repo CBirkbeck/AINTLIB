@@ -615,6 +615,38 @@ theorem lift_pullbackSpecIso_hom (R A B C : Type) [CommRing R] [CommRing A]
     show g b = (Algebra.TensorProduct.productMap f g) (1 ⊗ₜ[R] b)
     rw [Algebra.TensorProduct.productMap_apply_tmul, map_one, one_mul]
 
+/-- **[PIN-6c-i]** The corrected component point, ring side. -/
+noncomputable def constVecCorrPtRing (N : ℕ) [NeZero N] (v : Fin 2 → ZMod N) :
+    CommRingCat.of (constVecAlgebra N : Type 0) ⟶ CommRingCat.of ℚ :=
+  CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom ≫
+    CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom ≫
+    CommRingCat.ofHom (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ) v)
+
+/-- **[PIN-6c-i]** The corrected component point is the `Spec` of its ring side. -/
+theorem constVecCorrPt_eq_Spec (N : ℕ) [NeZero N] (v : Fin 2 → ZMod N) :
+    constVecCorrPt N v = Spec.map (constVecCorrPtRing N v) := by
+  rw [constVecCorrPt]
+  rw [show (constVecSchemeIso N).hom =
+    (constSchemeSpecIso (CommRingCat.of ℚ) (Fin 2 → ZMod N)).hom ≫
+      (constVecSpecIso N).hom from rfl]
+  simp only [Category.assoc]
+  rw [constSchemeSpecIso_ι_hom_assoc]
+  rw [show (constVecSpecIso N).hom = Spec.map (CommRingCat.ofHom
+    (constVecAlgebraIso N).hom.hom.hom.toRingHom) from rfl]
+  rw [show (corrSchemeIso N).hom = Spec.map (CommRingCat.ofHom
+    (corrAlgHom N).hom.hom.toRingHom) from rfl]
+  refine Eq.trans (congrArg (fun m => Spec.map (CommRingCat.ofHom
+      (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ) v)) ≫ m)
+    (AlgebraicGeometry.Spec.map_comp
+      (CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom)
+      (CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom)).symm) ?_
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp
+    (CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom)
+    (CommRingCat.ofHom
+      (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ) v))).symm ?_
+  rfl
+
 end
 
 end ModularCurves
