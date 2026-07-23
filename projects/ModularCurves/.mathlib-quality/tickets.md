@@ -25259,6 +25259,157 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### /develop --continue (2026-07-27) — FINAL-ARC TICKET BOARD (plan-of-record v2)
+AUDIT: all landed work green+pushed (d21785e14). Remaining code-sorries = the two
+targets + DS4-register + out-of-scope-irreducibility. PLANNING CORRECTION (binding):
+the Isom-scheme I of Q9 is the QUOTIENT of the symplectic carve by the diagonal
+GL₂-action — the dictionary is diagonal-invariant (FramedSymp's own docstring: "both
+sides twist by det γ"; coord-invariance: A·γ • γ⁻¹-translated-u = A•u), so carved-Z
+directly would overcount by orbits. The engine (bareFramed_quotientProblemData,
+[GHB7]-instantiated, LANDED :4692) is the quotient-provider; the carve threads
+through it. Producer rules: no cleanup tickets (deferred to main centrally).
+
+#### [T-CV-1] The DS3 μ_N-bridge — status: open, file: YRho.lean, deps: none
+Statement: `noncomputable def muNSpecQIso (D) [Fact (1 < N)] : muN (Spec (.of ℚ)) N ≅
+muNRootsScheme D` + `muNSpecQIso_π : hom ≫ muNRootsSchemeπ D = muNπ (Spec (.of ℚ)) N`.
+Sketch (per the banked sentinel-recipe, verified against MuN.lean):
+1. muN S N := pullback (terminal.from S) (terminal.from (muNAbs N)); muNAbs = Spec
+   (muNRing N); muNRing N = ULift (ℤ[X]/(X^N−1)) (MuN.lean:55).
+2. Terminal-alignment: mathlib `terminalIsSpecZ`-family (grep
+   `AlgebraicGeometry.terminal` — `Scheme.specZIsTerminal`-ish) converts both
+   terminal.from-legs to Spec.map-of-unique-ℤ-algebra maps; then muN (Spec ℚ) N ≅
+   Spec (ℚ ⊗[ℤ] muNRing)-form via pullbackSpecIso ℤ ℚ (muNRing-unlifted) (the ULift
+   needs a ring-iso ULift-collapse: `ULift.ringEquiv`).
+3. The algebra-iso ℚ ⊗[ℤ] ℤ[X]/(X^N−1) ≅ muNRootsAlgebra D: MIRROR
+   constVecCorrespondenceIso→constVecAlgebraIso (the landed asm-1 route): compute the
+   correspondence-image of the ℚ-algebra ℚ[X]/(X^N−1): fiber = AlgHoms(ℚ[X]/(X^N−1),
+   Sep) ≃ N-th-roots-in-Sep (evaluation at mk X; classification: `Polynomial.aeval`,
+   `Ideal.Quotient.liftₐ`, roots-of-X^N−1; sub-lemma family mirroring
+   piAlgHomIndex/piAlgHomEquiv but for the cyclotomic quotient: rootAlgHomEquiv :
+   (ℚ[X]/(X^N−1) →ₐ[ℚ] Sep) ≃ rootsOfUnity N Sep — NOTE Sep-vs-ℚ̄-roots bridged by
+   sepClosureQAlgEquiv-transport as in the landed layers); action-match σ∘φ ↦ σ•root
+   (natural ✓); then inverse+unitIso transport verbatim-mirror of constVecAlgebraIso;
+   then Spec + π (commutes-ext).
+Mathlib needed: pullbackSpecIso (✓ used), ULift.ringEquiv (verify), the Spec-ℤ-terminal
+iso (verify name via loogle "IsTerminal (Spec _)"), Polynomial.aeval_X,
+Ideal.Quotient.mkₐ/liftₐ-family. Sources: MuN.lean:42-83 (in-repo); the asm-1 landed
+route (board block "asm-1 COMPLETE"). Generality: N arbitrary [NeZero N] [Fact (1<N)]
+(the Fact only via muNRoots-continuity). Est: source-mirror asm-1 was ~300 LOC over 6
+decls; expect similar.
+
+#### [T-CV-2] The comparison maps on the framed space — status: open, deps: T-CV-1
+Statement: for X : EllObj (.of ℚ) and dE : EquivariantRelRepData (gammaHAut … ⊤) X,
+on Z := pullback dE.f (pullback.fst X.structMap (wFramesπ D)) define
+`eZMap D dE : Z ⟶ muNRootsScheme D` and `dZMap D dE : Z ⟶ muNRootsScheme D` + their
+π-compats.
+Sketch:
+1. dZMap := pullback.snd _ _ ≫ pullback.snd _ _ ≫ detFrameScheme D ≫ detCompScheme D
+   (all landed) — π-compat by the landed π-lemmas chain.
+2. eZMap (universal-element trick — dE.Z is choice-abstract, NOT fullLevelSpace):
+   the tautological section ⟨𝟙 dE.Z, rfl-ish⟩ ∈ {h : dE.Z ⟶ dE.Z // h ≫ dE.f = dE.f}
+   under dE.eqv dE.f gives the universal problem-value: a pair (P,Q) of sections of
+   the pulled curve (gammaFullNaiveProblem-value = IsNaiveFullLevel-pair — read the
+   problem-def for the exact carrier; the pair is N-killed) over dE.Z. Then
+   eZMap := fst ≫ (pullback.lift (ptTorsion P kill) (ptTorsion Q kill) (π-agree)) ≫
+   (X.pullbackAlong-curve).weilPairing N ≫ [muN-basechange: pullback.map along the
+   structmaps to muN (Spec ℚ) N] ≫ (muNSpecQIso D).inv — wait ORIENTATION: weilPairing
+   lands in muN (dE.Z-base) — its basechange-comparison to muN (Spec ℚ) is
+   pullback.map (terminal.from-squares, 𝟙-legs) — then muNSpecQIso.hom?? direction:
+   compare IN muNRootsScheme: ≫ (muNSpecQIso D).hom. π-compat via weilPairing_over +
+   the chain.
+Mathlib needed: (landed project API only). Sources: WeilPairing/Basic.lean:42
+(weilPairing register), the gammaFullNaiveProblem def (YFullRoute), the engine's own
+tautological-section usage (GammaHRepresentability — grep `𝟙` near eqv-usages for the
+pattern). Generality: per-X, dE-parametric (matches the rel-rep-flow). RISK: the
+problem-value carrier-shape (P,Q as Point-pairs vs sections) — read
+gammaFullNaiveProblem first; adjust ptTorsion-packaging accordingly.
+
+#### [T-CV-3] The symplectic carve — status: open, deps: T-CV-2
+Statement family:
+a. `sympLocus D dE : Scheme` := the equalizer-locus of eZMap/dZMap as a clopen
+   subscheme of Z, via: hEq : IsOpenImmersion (equalizer-map) from
+   AlgebraicGeometry.isOpenImmersion_diagonal [FormallyUnramified+LocallyOfFiniteType
+   of muNRootsSchemeπ-basechange] pulled back along ⟨eZMap, dZMap⟩; PLUS closed
+   (separated diagonal of an affine map is a closed immersion — IsAffineHom ⟹
+   separated: mathlib `IsAffineHom.isSeparated`-family) — so clopen immersion ι.
+b. carve-stability: the diagonal zxAction restricts to sympLocus (both maps'
+   γ-equivariance: eZMap∘γ = eZMap-twisted-by-det-γ and dZMap∘γ likewise — VIA
+   weilPairingEval_symplectic (register) on the e-side and det-map_mul on the d-side;
+   the agreement-locus is preserved since both sides twist identically).
+   FORM: as the statement that zxAction γ restricted-lifts through ι.
+c. carved EquivariantRelRepData + FreeAction for the carved problem
+   `sympFramedProblem D` (the subfunctor: bareFramedProblem-values whose pair
+   satisfies FramedSymp): the rel-rep restricts (sections of sympLocus ↔ symp-pairs:
+   the pointwise-agreement-of-maps ⟺ FramedSymp — the ℚ̄-points-read of the two maps
+   through muNSpecQIso match the pairing-values — a points-computation leaf using the
+   muN-points-dictionary + the pinned reads; call it (c-i) sympLocus_sections_iff);
+   freeness inherits from bareFramedAut_freeAction (subfunctor of a free action).
+Sources: FramedSymp docstring (YRho:1290-region) — the det-twist claim verbatim;
+isOpenImmersion_diagonal (mathlib FormallyUnramified.lean:124 ✓ verified);
+the landed frameEval_points/PIN-machinery for (c-i). RISK: (c-i) is the biggest leaf
+here — mirror of frameEval_points-style chasing at the muN-target.
+
+#### [T-CV-4] The carved quotient — status: open, deps: T-CV-3
+Statement: `sympFramed_quotientProblemData D : Nonempty (QuotientProblemData
+(sympFramedAut D))` := exists_quotientProblemData _ (carved-freeness) (carved-rel-rep)
+— one-liner mirror of bareFramed_quotientProblemData (:4692). + affineOverEll via
+pkg.affineOverEll.
+
+#### [T-EQ-1] Torsion-iso rigidity — status: open, deps: none (parallel)
+Statement: two isos φ ψ : E.torsion N ≅ pullback (vRhoπ D) sT over T (both π-compat)
+with equal vRhoPointsEquiv-reads at every ℚ̄-point of E.torsion over every ℚ̄-point of
+T, and T connected?? — NO: state the CLOPEN form: the agreement locus of φ.hom, ψ.hom
+(maps between finite-étale T-schemes) is clopen in E.torsion N; hence agreement at the
+geometric points of each fiber ⟹ equality when the reads pin every fiber. FORM per
+consumer (T-EQ-2's descent): `torsionIso_ext : (∀ geometric-point-agreement) → φ = ψ`
+with the fiberwise-pinning hypothesis stated via the coords. Proof: equalizer-clopen
+(same isOpenImmersion_diagonal engine as T-CV-3a) + a clopen subset of E.torsion
+containing every geometric point of every fiber is everything (surjectivity of
+geometric points on a finite-type ℚ-scheme: mathlib `Scheme`-jacobson/closedPoint
+machinery — RISK: locate the right mathlib entry; fallback: the clopen complement has
+empty ℚ̄-points hence is empty for finite-étale-over-T via fiber-nonemptiness — needs
+care; ticket carries this as its one open sub-leaf).
+
+#### [T-EQ-2] The dictionary descends — status: open, deps: T-EQ-1
+Statement: for (L,h,symp) and its γ-translate (γ·L, h·γ-right-mul, symp-twisted),
+rhoLevelStructureOfFramed gives EQUAL RhoLevelStructures (torsionIso-equality via
+T-EQ-1 + coord-invariance: coord_framedPinned twice + A·γ • (γ⁻¹u) = A•u
+(smul-assoc/mul_smul + the fullLevel-index-translation lemma: the factor-index of
+γ·L-basis vs L-basis differs by γ⁻¹-mulVec — via torsion_factor_point_eq +
+comb-γ-arithmetic)). This is the descent-hypothesis feeding the quotient-UP.
+
+#### [T-EQ-3] Value-equivalence (the KM 4.7 content) — status: open, deps: T-CV-4,T-EQ-2
+Statement: per (T', k): {sections of the carved-quotient I over k} ≃
+RhoLevelStructure D (k≫sT) (E.baseChange k).
+Sketch: (→) a quotient-section étale-locally lifts to a symp-pair (QuotPkg's torsor
+property [GHB4]); the dictionary's local values glue by T-EQ-2 (agreement on overlaps
+⟹ the RhoLevelStructures glue — torsionIso glues by T-EQ-1-rigidity + descent of
+morphisms along the étale cover: the ISO-data glues since isos of finite-étale
+schemes satisfy étale descent — RISK: morphism-gluing needs the cover-descent API —
+the engine's EngineDescent module was built for this, grep its exports).
+(←) given α: étale-locally trivialize E[N] (torsion_etaleLocal_triv LANDED) → local L;
+local frame h := the α∘fullLevelIso-composite read as a frames-section (the Isom-value:
+α.torsionIso.hom precomposed with fullLevelIso gives constVec→vRho-pullback-iso ↦ via
+the slice-machinery a wFrames-point — the INVERSE-slice consumption: frameEvalSlice
+is an iso, its inverse applied to α-composite reads h — plus the symp-check from
+α.pairing_compat + FramedSymp-defn); the local symp-pairs give local quotient-sections
+which AGREE on overlaps (T-EQ-2-uniqueness: two symp-pairs with the same α differ by
+γ — the torsor-matching: injectivity-side argument) hence glue to a global
+quotient-section (étale descent of sections of a scheme — sections of an affine
+morphism form a sheaf: mathlib/engine-API). Mutual-inverse checks pointwise.
+Sources: KM 4.7 (the print pp. as in the standing T-Y1F-3 note); Q9-docstring
+(in-file, quoted in the audit); torsion_etaleLocal_triv (TorsionEtaleTriv:328).
+RISK-RANK: highest of the arc; sub-decompose at execution per beastmode A2 as needed.
+
+#### [T-3E] Assemble rhoLevel_relativelyRepresentable — status: open, deps: T-EQ-3
+I := (the carved-quotient rel-rep-Z at X := EllObj-of(T,sT,E)); IsFinite+Etale from
+the engine-outputs (pkg's rel-rep finite/étale fields — verify which field carries
+them; bareFramed-route carried hfin/het through exists_quotientProblemData); the
+∀k-equivalence := T-EQ-3. Closes the :4720-sorry.
+
+#### [T-YR-5/6/7] — standing (unchanged): representable_of_affineOverEll_of_rigidNoeth
++ rho_rigidNoeth cascade → yRho_representable (:4749). deps: T-3E.
+
 ### CARVE progress (2026-07-27) — 1a/1b/1c LANDED, 1d derived
 LANDED+PUSHED (12613f911): cycloUnitsAction (twisted units, RingAut-mul spelling) +
 _isContinuous (ker-ρ superset via det_cyclo; FintypeCatDiscrete scoped-opens needed
