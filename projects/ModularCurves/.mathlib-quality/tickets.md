@@ -25656,7 +25656,25 @@ REMAINING = PIN-6 (hcore): forall v w, coordPairLift(framedTorsionIsoPinned)(1 T
     _eq_Spec; frameSlotRing/Alg + frameSlotEval_eq_Spec; lift_pullbackSpecIso_hom;
     pairSlot_vRhoPairingMap_eq_Spec — LHS of habs = Spec.map(ofHom rhoPairAlgHom-ring >>
     ofHom vRhoPairTensorIso-ring >> ofHom productMap(frameSlotAlg v, frameSlotAlg w)-ring)).
-    REMAINING 6c-iv: (α) RHS-conversion: detFrameScheme >> detCompScheme >> muNRootsPowScheme K
+    6c-iv-α/β ★★ DONE (2026-07-24, b33263e66): detPow_eq_Spec + habs_of_ring + detPowRing_eq_inverse_map
+    (RHS-ring = unop-inverse-image of detFrameMor >> detCompMor >> powMor) + STITCH
+    framedPinned_pairing_scheme_of_ring (hsymp_scheme <= hcond + hring). CENSUS: geometric/Spec
+    layers AXIOM-CLEAN; pairing-consumers carry expected DS4 sorryAx. REMAINING = hring-γ ONLY:
+    (γ-1) LHS-collapse: ofHom vRhoPairTensorIso-ring >> ofHom productMap(frameSlotAlg v, frameSlotAlg w)-ring
+      = ofHom (inverse.map (PsiMor v w)).unop-ring for the pair-morphism PsiMor determined by the
+      collapse — assemble from: rhoPairBinaryFanIsLimit (pair-set = product), vRhoPairTensorIso
+      provenance, frameProdAlgebraIso_inv_left/right-pattern (YRho:1204+ mirrors), the
+      cPtAlg-provenance (evalAlg_v ∘ constVecAlgebraIso [unit-conjugation via
+      constVecCorrespondenceIso] ∘ corrAlgHom [inverse corrMor]), fEA-alg :=
+      unop(frameProdAlgebraIso.inv >> inverse.map frameEvalMor), equivalence_unit_conjugate_square
+      technique. The collapse DETERMINES the index-form (corr-effect) — do NOT guess PsiMor's
+      index; derive it.
+    (γ-2) elementwise close: PsiMor v w >> rhoPairMor = detFrameMor >> detCompMor >> powMor-K in
+      ContAction via unop-injectivity + inverse-faithfulness; FintypeCat ext at frame A:
+      sympl_glSmul det-factor + the derived corr-index arithmetic (pointwise shadow
+      pairingCompat_framedPinned's ofAdd-pow/toNat/emod tail transcribes; readCorrection_smul
+      equivariance available).
+    [orig plan follows] (α) RHS-conversion: detFrameScheme >> detCompScheme >> muNRootsPowScheme K
     = Spec.map(ofHom powRing-K >> ofHom detCompAlgHom-ring >> ofHom detFrameAlgHom-ring)
     [detFrame/detComp are Spec-maps by def; READ muNRootsPowScheme def (~YRho:6726) for its
     Spec-shape]; (β) reduce habs to the CommRingCat-identity via Spec-faithfulness
