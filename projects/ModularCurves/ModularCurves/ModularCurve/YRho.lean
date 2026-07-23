@@ -6042,6 +6042,364 @@ theorem univLevel_glSmul_eval {X : EllObj (CommRingCat.of ℚ)}
   exact ((congrArg Int.toNat (ZMod.val_intCast _)).symm.trans
     (Int.toNat_natCast _))
 
+/-- [T-CV-3b-iii helper] The pairing evaluation is congruent along a base-map equality
+and raw component equalities (crosses `Point` types over propositionally equal
+classifying maps). -/
+theorem weilPairingEval_congr_raw {T T' : Scheme.{0}} {E : EllipticCurve T}
+    {t t' : T' ⟶ T} (htt : t = t') {x y : E.Point t} {x' y' : E.Point t'}
+    (hx : x.1 = x'.1) (hy : y.1 = y'.1)
+    (kx : x.1 ≫ E.mulByHom N = t ≫ E.zero) (ky : y.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (kx' : x'.1 ≫ E.mulByHom N = t' ≫ E.zero)
+    (ky' : y'.1 ≫ E.mulByHom N = t' ≫ E.zero) :
+    (E.weilPairingEval x y kx ky).1 = (E.weilPairingEval x' y' kx' ky').1 := by
+  subst htt
+  have hxx : x = x' := Subtype.ext hx
+  have hyy : y = y' := Subtype.ext hy
+  subst hxx; subst hyy
+  rfl
+
+/-- [T-CV-3b-iii helper] The pairing evaluation of a full-level structure is invariant
+under the `eqToHom`-transport along an equality of classifying maps (the transport is
+the identity after `subst`; stated in the composite form `RelRepData.eqv_congr`
+produces, with every point `show`-ascribed to the uniform `𝟙 T` spelling). -/
+theorem fullLevel_eval_eqToHom {X : EllObj (CommRingCat.of ℚ)} {T : Scheme.{0}}
+    {g₁ g₂ : T ⟶ X.base} (hg : g₁ = g₂)
+    (v : (gammaFullNaiveProblem (CommRingCat.of ℚ) N).obj
+      (Opposite.op (X.pullbackAlong g₁))) :
+    ((X.curve.baseChange g₂).weilPairingEval
+        (show (X.curve.baseChange g₂).Point (𝟙 T) from
+          ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+            (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg))
+            v).1.1)
+        (show (X.curve.baseChange g₂).Point (𝟙 T) from
+          ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+            (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg))
+            v).1.2)
+        (((X.curve.baseChange g₂).smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+          ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+            (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg))
+            v).2.1.1)
+        (((X.curve.baseChange g₂).smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+          ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+            (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg))
+            v).2.1.2)).1 =
+      ((X.curve.baseChange g₁).weilPairingEval
+        (show (X.curve.baseChange g₁).Point (𝟙 T) from v.1.1)
+        (show (X.curve.baseChange g₁).Point (𝟙 T) from v.1.2)
+        (((X.curve.baseChange g₁).smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+          v.2.1.1)
+        (((X.curve.baseChange g₁).smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+          v.2.1.2)).1 := by
+  subst hg
+  have hEQ : (gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+      (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t))
+        (rfl : g₁ = g₁))) v = v :=
+    FunctorToTypes.map_id_apply _ v
+  exact weilPairingEval_congr_raw rfl (congrArg (fun w => w.1.1.1) hEQ)
+    (congrArg (fun w => w.1.2.1) hEQ) _ _ _ _
+
+/-- [T-CV-3b-iii-v] The `γ`-transported first universal point (the functorial pull of
+`univP` along the `σZ γ`-translation), typed uniformly at `𝟙 dE.Z`. -/
+noncomputable def univPzx {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (X.curve.baseChange (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).Point
+      (𝟙 dE.Z) :=
+  ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+      (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).op
+      (univLevel dE)).1.1
+
+/-- [T-CV-3b-iii-v] The `γ`-transported second universal point, typed uniformly at
+`𝟙 dE.Z`. -/
+noncomputable def univQzx {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (X.curve.baseChange (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).Point
+      (𝟙 dE.Z) :=
+  ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+      (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).op
+      (univLevel dE)).1.2
+
+/-- [T-CV-3b-iii-v] The transported first universal point is raw-killed by `N`. -/
+theorem univPzx_killed {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (univPzx dE γ).1 ≫
+        (X.curve.baseChange
+          (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).mulByHom N =
+      𝟙 dE.Z ≫
+        (X.curve.baseChange (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).zero :=
+  ((X.curve.baseChange
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).smul_eq_zero_iff_comp_mulByHom
+    (𝟙 dE.Z) N (univPzx dE γ)).mp
+    ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+      (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).op
+      (univLevel dE)).2.1.1
+
+/-- [T-CV-3b-iii-v] The transported second universal point is raw-killed by `N`. -/
+theorem univQzx_killed {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (univQzx dE γ).1 ≫
+        (X.curve.baseChange
+          (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).mulByHom N =
+      𝟙 dE.Z ≫
+        (X.curve.baseChange (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).zero :=
+  ((X.curve.baseChange
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f)).smul_eq_zero_iff_comp_mulByHom
+    (𝟙 dE.Z) N (univQzx dE γ)).mp
+    ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+      (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).op
+      (univLevel dE)).2.1.2
+
+/-- **[T-CV-3b-iii-v(H3)]** Restriction of the universal pairing value along the
+`γ`-translation of the representing scheme is the `det γ`-power: the Γ-read of the
+`σZ γ`-pullback of `e_N(univP, univQ)` (the value-chain through the equivariance of
+the relative datum, crossed to the pairing side by the DS4 registers). -/
+theorem univLevel_eval_restrict {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (Scheme.Γ.map (dE.σZ.hom (Subgroup.topEquiv.symm γ)).op).hom
+      ((X.curve.baseChange dE.f).weilPairingEval (univP dE) (univQ dE)
+        (univLevel_fst_killed dE) (univLevel_snd_killed dE)).1 =
+      ((X.curve.baseChange dE.f).weilPairingEval (univP dE) (univQ dE)
+        (univLevel_fst_killed dE) (univLevel_snd_killed dE)).1 ^
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
+  have hover : dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f = dE.f := dE.over_base _
+  -- the value chain: the transported universal structure is the `glSmul`-acted one
+  have h1 := dE.nat dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))
+    ⟨𝟙 dE.Z, Category.id_comp dE.f⟩
+  have h2 := ModuliProblem.RelRepData.eqv_congr dE.toRelRepData hover
+    (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ 𝟙 dE.Z) (by rw [Category.comp_id])
+  have h3 := relRep_eqv_congr dE.toRelRepData dE.f
+    (Category.comp_id (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+    ((by rw [Category.comp_id] :
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ 𝟙 dE.Z) ≫ dE.f =
+        dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ dE.f).trans hover)
+  have h4 := univLevel_zx dE γ
+  have hVAL : (X.pullbackAlong dE.f).curve.glSmul γ (univLevel dE) =
+      (gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+        (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hover))
+        ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+          (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).op
+          (univLevel dE)) :=
+    h4.symm.trans (h3.symm.trans (h2.trans (congrArg
+      (fun z => (gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+        (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hover)) z)
+      h1)))
+  -- the restricted points' kill facts
+  have kres₁ : (EllipticCurve.Point.restrict (X.curve.baseChange dE.f)
+        (dE.σZ.hom (Subgroup.topEquiv.symm γ)) (univP dE)).1 ≫
+        (X.curve.baseChange dE.f).mulByHom N =
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ 𝟙 dE.Z) ≫
+        (X.curve.baseChange dE.f).zero := by
+    show (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ (univP dE).1) ≫ _ = _
+    rw [Category.assoc, univLevel_fst_killed dE, ← Category.assoc]
+  have kres₂ : (EllipticCurve.Point.restrict (X.curve.baseChange dE.f)
+        (dE.σZ.hom (Subgroup.topEquiv.symm γ)) (univQ dE)).1 ≫
+        (X.curve.baseChange dE.f).mulByHom N =
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ 𝟙 dE.Z) ≫
+        (X.curve.baseChange dE.f).zero := by
+    show (dE.σZ.hom (Subgroup.topEquiv.symm γ) ≫ (univQ dE).1) ≫ _ = _
+    rw [Category.assoc, univLevel_snd_killed dE, ← Category.assoc]
+  -- raw identification: restricting = pushing the transported point forward
+  have hlift₁ : (EllHom.pullSection (CommRingCat.of ℚ)
+        (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+        (univP dE)).1 ≫
+        (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).top =
+      (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).baseHom ≫
+        (univP dE).1 :=
+    (X.pullbackAlongMap dE.f
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ))).isPullback.lift_fst _ _ _
+  have hlift₂ : (EllHom.pullSection (CommRingCat.of ℚ)
+        (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+        (univQ dE)).1 ≫
+        (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).top =
+      (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ))).baseHom ≫
+        (univQ dE).1 :=
+    (X.pullbackAlongMap dE.f
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ))).isPullback.lift_fst _ _ _
+  have hraw₁ : (EllipticCurve.Point.restrict (X.curve.baseChange dE.f)
+        (dE.σZ.hom (Subgroup.topEquiv.symm γ)) (univP dE)).1 =
+      (EllHom.mapPoint
+        (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+        (𝟙 dE.Z) (univPzx dE γ)).1 :=
+    hlift₁.symm.trans (EllHom.mapPoint_coe _ _ _).symm
+  have hraw₂ : (EllipticCurve.Point.restrict (X.curve.baseChange dE.f)
+        (dE.σZ.hom (Subgroup.topEquiv.symm γ)) (univQ dE)).1 =
+      (EllHom.mapPoint
+        (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+        (𝟙 dE.Z) (univQzx dE γ)).1 :=
+    hlift₂.symm.trans (EllHom.mapPoint_coe _ _ _).symm
+  exact ((X.curve.baseChange dE.f).weilPairingEval_restrict
+      (dE.σZ.hom (Subgroup.topEquiv.symm γ)) (univP dE) (univQ dE)
+      (univLevel_fst_killed dE) (univLevel_snd_killed dE)
+      kres₁ kres₂).symm.trans
+    ((weilPairingEval_congr_raw
+        ((Category.comp_id _).trans (Category.id_comp _).symm) hraw₁ hraw₂
+        kres₁ kres₂
+        (EllHom.mapPoint_torsion
+          (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+          (univPzx dE γ) (univPzx_killed dE γ))
+        (EllHom.mapPoint_torsion
+          (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+          (univQzx dE γ) (univQzx_killed dE γ))).trans
+      ((weilPairingEval_mapPoint
+          (X.pullbackAlongMap dE.f (dE.σZ.hom (Subgroup.topEquiv.symm γ)))
+          (𝟙 dE.Z) (univPzx dE γ) (univQzx dE γ)
+          (univPzx_killed dE γ) (univQzx_killed dE γ)).trans
+        ((fullLevel_eval_eqToHom hover
+            ((gammaFullNaiveProblem (CommRingCat.of ℚ) N).map
+              (X.pullbackAlongMap dE.f
+                (dE.σZ.hom (Subgroup.topEquiv.symm γ))).op
+              (univLevel dE))).symm.trans
+          ((weilPairingEval_congr_raw rfl
+              (congrArg (fun z => z.1.1.1) hVAL.symm)
+              (congrArg (fun z => z.1.2.1) hVAL.symm) _ _ _ _).trans
+            (univLevel_glSmul_eval dE γ)))))
+
+open scoped FintypeCatDiscrete in
+/-- [T-CV-3b-iii] `muNRootsRead` is congruent in the map and the base point
+(proofs transport). -/
+theorem muNRootsRead_congr (D : GaloisRepData N) [Fact (1 < N)] {W : Scheme.{0}}
+    {b b' : W ⟶ Spec (CommRingCat.of ℚ)} (hb : b = b')
+    {φ φ' : W ⟶ muNRootsScheme D} (hf : φ = φ')
+    (hφ : φ ≫ muNRootsSchemeπ D = b) :
+    muNRootsRead D b φ hφ = muNRootsRead D b' φ' ((hf ▸ hφ).trans hb) := by
+  subst hb; subst hf; rfl
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b]** The pairing-side comparison twists by the same power endo under the
+diagonal action: the `Γ`-read of `zx γ ≫ eZMap` is the `σZ γ`-restriction of the
+universal pairing value ([H3] `univLevel_eval_restrict`), which is its
+`det γ`-power — the read of `eZMap ≫ pow`. -/
+theorem eZMap_zxAction (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    zxAction D dE γ ≫ eZMap D dE =
+      eZMap D dE ≫ muNRootsPowScheme D
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
+  have hπφ : (zxAction D dE γ ≫ eZMap D dE) ≫ muNRootsSchemeπ D =
+      pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        dE.f ≫ X.structMap := by
+    rw [Category.assoc, eZMap_π, reassoc_of% (zxAction_fst D dE γ),
+      reassoc_of% (dE.over_base (Subgroup.topEquiv.symm γ))]
+  have hπψ : (eZMap D dE ≫ muNRootsPowScheme D
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val) ≫
+        muNRootsSchemeπ D =
+      pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        dE.f ≫ X.structMap := by
+    rw [Category.assoc, muNRootsPowScheme_π, eZMap_π]
+  have hbL : pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+      dE.f ≫ X.structMap =
+    (zxAction D dE γ ≫
+        pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+      (dE.f ≫ X.structMap) := by
+    rw [zxAction_fst, Category.assoc,
+      reassoc_of% (dE.over_base (Subgroup.topEquiv.symm γ))]
+  refine muNRoots_hom_ext D hπφ hπψ ?_
+  refine Eq.trans (muNRootsRead_congr D hbL rfl hπφ) ?_
+  refine Eq.trans (eZMap_read D dE (zxAction D dE γ)) ?_
+  refine Eq.trans (congrArg
+    (fun m : pullback dE.f (pullback.fst X.structMap (wFramesπ D)) ⟶ dE.Z =>
+      (Scheme.Γ.map m.op).hom
+        ((X.curve.baseChange dE.f).weilPairingEval (univP dE) (univQ dE)
+          (univLevel_fst_killed dE) (univLevel_snd_killed dE)).1)
+    (zxAction_fst D dE γ)) ?_
+  rw [op_comp, CategoryTheory.Functor.map_comp, CommRingCat.hom_comp,
+    RingHom.comp_apply, univLevel_eval_restrict dE γ]
+  refine Eq.trans (map_pow _ _ _) ?_
+  refine Eq.symm ?_
+  refine Eq.trans (muNRootsRead_pow D _ (eZMap D dE) (eZMap_π D dE) _) ?_
+  refine congrArg
+    (· ^ (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val) ?_
+  refine Eq.trans (muNRootsRead_congr D
+    (show pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        dE.f ≫ X.structMap =
+      (𝟙 (pullback dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+        pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+        (dE.f ≫ X.structMap) from by rw [Category.id_comp])
+    ((Category.id_comp (eZMap D dE)).symm) (eZMap_π D dE)) ?_
+  refine Eq.trans (eZMap_read D dE (𝟙 _)) ?_
+  exact congrArg
+    (fun m : pullback dE.f (pullback.fst X.structMap (wFramesπ D)) ⟶ dE.Z =>
+      (Scheme.Γ.map m.op).hom
+        ((X.curve.baseChange dE.f).weilPairingEval (univP dE) (univQ dE)
+          (univLevel_fst_killed dE) (univLevel_snd_killed dE)).1)
+    (Category.id_comp _)
+
+/-- **[T-CV-3b-iv]** The locus inclusion equalises the two comparisons (the factoring
+criterion at the identity witness). -/
+theorem sympLocusι_agree (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    sympLocusι D dE ≫ eZMap D dE = sympLocusι D dE ≫ dZMap D dE :=
+  (sympLocus_factor_iff D dE (sympLocusι D dE)).mp ⟨𝟙 _, Category.id_comp _⟩
+
+/-- **[T-CV-3b-iv]** The diagonal action preserves the agreement locus: both
+comparisons twist by the *same* power endo (`eZMap_zxAction` + `dZMap_zxAction`), so
+the translated inclusion still equalises them. -/
+theorem sympLocus_zxAction_stable (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    ∃ w : sympLocus D dE ⟶ sympLocus D dE,
+      w ≫ sympLocusι D dE = sympLocusι D dE ≫ zxAction D dE γ :=
+  (sympLocus_factor_iff D dE (sympLocusι D dE ≫ zxAction D dE γ)).mpr (by
+    simp only [Category.assoc]
+    rw [eZMap_zxAction D dE γ, dZMap_zxAction D dE γ,
+      reassoc_of% (sympLocusι_agree D dE)])
+
+/-- **[T-CV-3b-iv]** The restricted diagonal action on the symplectic locus. -/
+noncomputable def zxSympAction (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    sympLocus D dE ⟶ sympLocus D dE :=
+  (sympLocus_zxAction_stable D dE γ).choose
+
+/-- **[T-CV-3b-iv]** The restricted action lies over the ambient action. -/
+theorem zxSympAction_ι (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    zxSympAction D dE γ ≫ sympLocusι D dE =
+      sympLocusι D dE ≫ zxAction D dE γ :=
+  (sympLocus_zxAction_stable D dE γ).choose_spec
+
+/-- **[T-CV-3b-iv]** The restricted action at the identity. -/
+theorem zxSympAction_one (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    zxSympAction D dE 1 = 𝟙 (sympLocus D dE) := by
+  haveI := sympLocusι_isOpenImmersion D dE
+  rw [← cancel_mono (sympLocusι D dE), zxSympAction_ι, zxAction_one,
+    Category.comp_id, Category.id_comp]
+
+/-- **[T-CV-3b-iv]** The restricted action is multiplicative. -/
+theorem zxSympAction_mul (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ₁ γ₂ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    zxSympAction D dE (γ₁ * γ₂) =
+      zxSympAction D dE γ₁ ≫ zxSympAction D dE γ₂ := by
+  haveI := sympLocusι_isOpenImmersion D dE
+  rw [← cancel_mono (sympLocusι D dE), zxSympAction_ι, zxAction_mul,
+    Category.assoc, zxSympAction_ι, reassoc_of% (zxSympAction_ι D dE γ₁)]
+
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
 frames factor, carrying the diagonal action. -/
