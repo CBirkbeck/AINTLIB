@@ -3502,6 +3502,208 @@ theorem constVecIndexRead_const (N : ℕ) [NeZero N] (u : Fin 2 → ZMod N)
       (Pi.single u (1 : ℚ)) = 1 from Pi.single_eq_same u 1]
   rw [map_one, map_one]
 
+/-- **[T-EQ-2 P0]** The scheme-action equiv is the vector `smul`. -/
+theorem glEquiv_eq_smul (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N) :
+    EllipticCurve.glEquiv γ v = γ • v := rfl
+
+/-- **[T-EQ-2 P1]** The `γ`-coordinate change on the split `Pi`-algebra:
+precomposition with the `smul` (`f ↦ f ∘ (γ • ·)`). -/
+noncomputable def piGLAlgHom (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    ((Fin 2 → ZMod N) → ℚ) →ₐ[ℚ] ((Fin 2 → ZMod N) → ℚ) where
+  toFun f := fun v => f (γ • v)
+  map_one' := rfl
+  map_mul' _ _ := rfl
+  map_zero' := rfl
+  map_add' _ _ := rfl
+  commutes' _ := rfl
+
+@[simp] theorem piGLAlgHom_apply (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (f : (Fin 2 → ZMod N) → ℚ) (v : Fin 2 → ZMod N) :
+    piGLAlgHom N γ f v = f (γ • v) := rfl
+
+/-- **[T-EQ-2 P1]** The evaluation index of a `γ`-precomposed `AlgHom` is the
+`γ`-translate of its index. -/
+theorem piAlgHomIndex_piGL (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (φ : ((Fin 2 → ZMod N) → ℚ) →ₐ[ℚ] SeparableClosure ℚ) :
+    piAlgHomIndex (φ.comp (piGLAlgHom N γ)) = γ • piAlgHomIndex φ := by
+  classical
+  refine (piAlgHomIndex_unique _ ?_).symm
+  show φ (piGLAlgHom N γ (Pi.single (γ • piAlgHomIndex φ) 1)) = 1
+  rw [show piGLAlgHom N γ (Pi.single (γ • piAlgHomIndex φ) 1) =
+      Pi.single (piAlgHomIndex φ) 1 from funext fun v => by
+    rw [piGLAlgHom_apply]
+    by_cases hv : v = piAlgHomIndex φ
+    · subst hv
+      rw [Pi.single_eq_same, Pi.single_eq_same]
+    · rw [Pi.single_eq_of_ne hv, Pi.single_eq_of_ne
+        (fun hc => hv (MulAction.injective γ hc))]]
+  exact piAlgHomIndex_spec φ
+
+/-- **[T-EQ-2 P1-a]** The correspondence square for the coordinate change: the
+functor-image of the `Pi`-precomposition matches the set-level `γ`-action through
+the split identification (`muNRootsCorrespondence_pow` technique). -/
+theorem constVecCorrespondence_GL (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+          CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+            CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ))) ≫
+        (constVecCorrespondenceIso N).hom =
+      (constVecCorrespondenceIso N).hom ≫ constVecGLMor N γ := by
+  ext φ : 3
+  rw [show ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+          CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+            CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ))) ≫
+        (constVecCorrespondenceIso N).hom).hom.hom =
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+          CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+            CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)))).hom.hom ≫
+        (constVecCorrespondenceIso N).hom.hom.hom from rfl,
+    show ((constVecCorrespondenceIso N).hom ≫ constVecGLMor N γ).hom.hom =
+      (constVecCorrespondenceIso N).hom.hom.hom ≫
+        (constVecGLMor N γ).hom.hom from rfl,
+    ConcreteCategory.comp_apply, ConcreteCategory.comp_apply,
+    FiniteEtaleGalois.finiteEtaleEquivContAction_functor_map_hom]
+  exact piAlgHomIndex_piGL N γ
+    (show ((Fin 2 → ZMod N) → ℚ) →ₐ[ℚ] SeparableClosure ℚ from φ)
+
+section GeneralConjugate
+
+/-- Conjugating an endomorphism square through the unit of an equivalence
+(abstract, so the heavy instantiations stay out of the defeq paths). -/
+theorem equivalence_unit_conjugate_square {C : Type*} [CategoryTheory.Category C]
+    {E : Type*} [CategoryTheory.Category E] (e : CategoryTheory.Equivalence C E)
+    {X : C} {A : E} (c : e.functor.obj X ≅ A) (f : X ⟶ X) (m : A ⟶ A)
+    (hsq : e.functor.map f ≫ c.hom = c.hom ≫ m) :
+    f ≫ (e.unitIso.hom.app X ≫ e.inverse.map c.hom) =
+      (e.unitIso.hom.app X ≫ e.inverse.map c.hom) ≫ e.inverse.map m := by
+  have hnat := e.unitIso.hom.naturality f
+  simp only [CategoryTheory.Functor.id_map, CategoryTheory.Functor.comp_map] at hnat
+  calc f ≫ (e.unitIso.hom.app X ≫ e.inverse.map c.hom)
+      = (f ≫ e.unitIso.hom.app X) ≫ e.inverse.map c.hom :=
+        (Category.assoc _ _ _).symm
+    _ = (e.unitIso.hom.app X ≫ e.inverse.map (e.functor.map f)) ≫
+          e.inverse.map c.hom := congrArg (· ≫ e.inverse.map c.hom) hnat
+    _ = e.unitIso.hom.app X ≫ e.inverse.map (e.functor.map f ≫ c.hom) :=
+        (Category.assoc _ _ _).trans
+          (congrArg (e.unitIso.hom.app X ≫ ·) (e.inverse.map_comp _ _).symm)
+    _ = e.unitIso.hom.app X ≫ e.inverse.map (c.hom ≫ m) :=
+        congrArg (fun q => e.unitIso.hom.app X ≫ e.inverse.map q) hsq
+    _ = (e.unitIso.hom.app X ≫ e.inverse.map c.hom) ≫ e.inverse.map m :=
+        (congrArg (e.unitIso.hom.app X ≫ ·) (e.inverse.map_comp _ _)).trans
+          (Category.assoc _ _ _).symm
+
+end GeneralConjugate
+
+/-- [T-EQ-2 b-5 helper] `Spec` of the ring image of a finite-étale-algebra composite
+splits. -/
+theorem specMap_finiteEtale_comp {A B C : CommAlgCat.FiniteEtale.{0} ℚ}
+    (x : A ⟶ B) (y : B ⟶ C) :
+    Spec.map (CommRingCat.ofHom ((x ≫ y).hom.hom.toRingHom)) =
+      Spec.map (CommRingCat.ofHom y.hom.hom.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom x.hom.hom.toRingHom) := by
+  rw [show (x ≫ y).hom.hom.toRingHom =
+    (y.hom.hom.toRingHom).comp (x.hom.hom.toRingHom) from rfl,
+    CommRingCat.ofHom_comp, Spec.map_comp]
+
+/-- **[T-EQ-2 P1-b]** The transported split identification in composite form
+(definitional). -/
+theorem constVecAlgebraIso_hom_eq (N : ℕ) [NeZero N] :
+    (constVecAlgebraIso N).hom =
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (constVecCorrespondenceIso N).hom).unop ≫
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+        (Opposite.op (CommAlgCat.FiniteEtale.of ℚ
+          ((Fin 2 → ZMod N) → ℚ)))).unop := rfl
+
+/-- **[T-EQ-2 P1-b]** The algebra-side coordinate-change square, composite form. -/
+theorem constVecGLAlg_square' (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    constVecGLAlg N γ ≫
+        (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (constVecCorrespondenceIso N).hom).unop ≫
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+          (Opposite.op (CommAlgCat.FiniteEtale.of ℚ
+            ((Fin 2 → ZMod N) → ℚ)))).unop) =
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (constVecCorrespondenceIso N).hom).unop ≫
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+          (Opposite.op (CommAlgCat.FiniteEtale.of ℚ
+            ((Fin 2 → ZMod N) → ℚ)))).unop) ≫
+        (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+          CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+            CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) := by
+  have hop := equivalence_unit_conjugate_square
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ)
+    (constVecCorrespondenceIso N)
+    (Quiver.Hom.op (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+      CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+        CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)))
+    (constVecGLMor N γ) (constVecCorrespondence_GL N γ)
+  have h2 := congrArg Quiver.Hom.unop hop
+  simp only [unop_comp, Quiver.Hom.unop_op, Category.assoc] at h2
+  simp only [Category.assoc]
+  exact h2.symm
+
+/-- **[T-EQ-2 P1-b]** The algebra-side coordinate-change square, iso form. -/
+theorem constVecGLAlg_square (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    constVecGLAlg N γ ≫ (constVecAlgebraIso N).hom =
+      (constVecAlgebraIso N).hom ≫
+        (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+          CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+            CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) := by
+  rw [constVecAlgebraIso_hom_eq]
+  exact constVecGLAlg_square' N γ
+
+/-- **[T-EQ-2 P1-b]** The algebra-side coordinate-change square, inverse form. -/
+theorem constVecGLAlg_square_inv (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (constVecAlgebraIso N).inv ≫ constVecGLAlg N γ =
+      (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+        CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+          CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) ≫
+        (constVecAlgebraIso N).inv := by
+  rw [Iso.inv_comp_eq]
+  calc constVecGLAlg N γ
+      = (constVecGLAlg N γ ≫ (constVecAlgebraIso N).hom) ≫
+          (constVecAlgebraIso N).inv := by
+        rw [Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    _ = ((constVecAlgebraIso N).hom ≫
+          (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+            CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+              CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ))) ≫
+          (constVecAlgebraIso N).inv :=
+        congrArg (· ≫ (constVecAlgebraIso N).inv) (constVecGLAlg_square N γ)
+    _ = (constVecAlgebraIso N).hom ≫
+          (ObjectProperty.homMk (CommAlgCat.ofHom (piGLAlgHom N γ)) :
+            CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+              CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) ≫
+          (constVecAlgebraIso N).inv := Category.assoc _ _ _
+
+/-- **[T-EQ-2 P1-c]** The Spec-side coordinate-change square against the split
+identification. -/
+theorem constVecGLScheme_specIso (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    Spec.map (CommRingCat.ofHom (piGLAlgHom N γ).toRingHom) ≫
+        Spec.map (CommRingCat.ofHom
+          (constVecAlgebraIso N).hom.hom.hom.toRingHom) =
+      Spec.map (CommRingCat.ofHom
+          (constVecAlgebraIso N).hom.hom.hom.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom) := by
+  rw [← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp,
+    ← CommRingCat.ofHom_comp]
+  exact congrArg Spec.map (congrArg CommRingCat.ofHom
+    ((congrArg (fun (m : constVecAlgebra N ⟶
+        CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) =>
+      m.hom.hom.toRingHom) (constVecGLAlg_square N γ)).symm))
+
 /-- [asm-2a helper] The bridge is compatible with the left cofan-injection: the
 correspondence of the first projection composed with the bridge-inverse is the
 tensor inclusion (the `conePointUniqueUpToIso` compatibility, extracted by
@@ -3681,16 +3883,7 @@ theorem tensorFrameTwistAlg_includeRight (D : GaloisRepData N)
   refine Eq.trans (congrArg Quiver.Hom.unop hE) ?_
   exact congrArg (wFramesRightMulAlg D γ ≫ ·) (frameProdAlgebraIso_inv_right D)
 
-/-- [T-EQ-2 b-5 helper] `Spec` of the ring image of a finite-étale-algebra composite
-splits. -/
-theorem specMap_finiteEtale_comp {A B C : CommAlgCat.FiniteEtale.{0} ℚ}
-    (x : A ⟶ B) (y : B ⟶ C) :
-    Spec.map (CommRingCat.ofHom ((x ≫ y).hom.hom.toRingHom)) =
-      Spec.map (CommRingCat.ofHom y.hom.hom.toRingHom) ≫
-        Spec.map (CommRingCat.ofHom x.hom.hom.toRingHom) := by
-  rw [show (x ≫ y).hom.hom.toRingHom =
-    (y.hom.hom.toRingHom).comp (x.hom.hom.toRingHom) from rfl,
-    CommRingCat.ofHom_comp, Spec.map_comp]
+
 
 /-- **[T-EQ-2 b-5]** The vector twist through the `Spec`-tensor identification. -/
 theorem pullbackSpecIso_vecTwist (D : GaloisRepData N)
@@ -6179,33 +6372,8 @@ theorem muNRootsCorrespondence_pow (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ
   exact congrArg (fun w : rootsOfUnity N (AlgebraicClosure ℚ) =>
     ((w : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) h1
 
-section GeneralConjugate
-
-/-- Conjugating an endomorphism square through the unit of an equivalence
-(abstract, so the heavy instantiations stay out of the defeq paths). -/
-theorem equivalence_unit_conjugate_square {C : Type*} [CategoryTheory.Category C]
-    {E : Type*} [CategoryTheory.Category E] (e : CategoryTheory.Equivalence C E)
-    {X : C} {A : E} (c : e.functor.obj X ≅ A) (f : X ⟶ X) (m : A ⟶ A)
-    (hsq : e.functor.map f ≫ c.hom = c.hom ≫ m) :
-    f ≫ (e.unitIso.hom.app X ≫ e.inverse.map c.hom) =
-      (e.unitIso.hom.app X ≫ e.inverse.map c.hom) ≫ e.inverse.map m := by
-  have hnat := e.unitIso.hom.naturality f
-  simp only [CategoryTheory.Functor.id_map, CategoryTheory.Functor.comp_map] at hnat
-  calc f ≫ (e.unitIso.hom.app X ≫ e.inverse.map c.hom)
-      = (f ≫ e.unitIso.hom.app X) ≫ e.inverse.map c.hom :=
-        (Category.assoc _ _ _).symm
-    _ = (e.unitIso.hom.app X ≫ e.inverse.map (e.functor.map f)) ≫
-          e.inverse.map c.hom := congrArg (· ≫ e.inverse.map c.hom) hnat
-    _ = e.unitIso.hom.app X ≫ e.inverse.map (e.functor.map f ≫ c.hom) :=
-        (Category.assoc _ _ _).trans
-          (congrArg (e.unitIso.hom.app X ≫ ·) (e.inverse.map_comp _ _).symm)
-    _ = e.unitIso.hom.app X ≫ e.inverse.map (c.hom ≫ m) :=
-        congrArg (fun q => e.unitIso.hom.app X ≫ e.inverse.map q) hsq
-    _ = (e.unitIso.hom.app X ≫ e.inverse.map c.hom) ≫ e.inverse.map m :=
-        (congrArg (e.unitIso.hom.app X ≫ ·) (e.inverse.map_comp _ _)).trans
-          (Category.assoc _ _ _).symm
-
-end GeneralConjugate
+section GeneralConjugateMoved
+end GeneralConjugateMoved
 
 open scoped FintypeCatDiscrete in
 /-- **[T-CV-3b-iii-v-c]** The algebra-side power square, in the composite form of the
