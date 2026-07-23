@@ -474,6 +474,27 @@ private lemma constIndex_mapAlong {T W : Scheme.{u}} (k : T ⟶ S)
   rw [← hy, ← Scheme.Hom.comp_apply, ι_constSchemeMapAlong, Scheme.Hom.comp_apply]
   exact Set.mem_range_self _
 
+/-- The points-read of a coproduct inclusion is the constant function. -/
+lemma constSchemePointsEquiv_sigmaι (a : A) :
+    constSchemePointsEquiv S A (𝟙 S)
+      ⟨Sigma.ι (fun _ : A ↦ S) a, Sigma.ι_desc _ _⟩ =
+    LocallyConstant.const S a := by
+  ext t
+  show constIndex (Sigma.ι (fun _ : A ↦ S) a) t = a
+  rw [constIndex_eq_iff]
+  exact Set.mem_range_self _
+
+/-- The points-read is unchanged by the base-change comparison map. -/
+lemma constSchemePointsEquiv_mapAlong {T W : Scheme.{u}} (k : T ⟶ S) (g : W ⟶ T)
+    (h : { h : W ⟶ constScheme T A // h ≫ constSchemeπ T A = g }) :
+    constSchemePointsEquiv S A (g ≫ k)
+      ⟨h.1 ≫ constSchemeMapAlong k A, by
+        rw [Category.assoc, constSchemeMapAlong_π, ← Category.assoc, h.2]⟩ =
+    constSchemePointsEquiv T A g h := by
+  ext t
+  show constIndex (h.1 ≫ constSchemeMapAlong k A) t = constIndex h.1 t
+  exact constIndex_mapAlong k h.1 t
+
 /-- **Constant schemes are stable under base change**: the comparison square
 
     `∐_A T ⟶ ∐_A S`, verticals the structure maps, bottom `k : T ⟶ S`
