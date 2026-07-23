@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.PoleSheafMonomialBasis
+import ModularCurves.EllipticCurve.PoleSheafPowerOneSection
 
 /-!
 # The Weierstrass relation from the pole filtration
@@ -310,6 +311,138 @@ theorem sectionPoleSheafPower_six_baseSectionsBases_exists_weierstrass_relation_
     simpa using hb6x3
   refine ⟨a₁, a₂, a₃, a₄, a₆, ?_⟩
   rw [hb6_4, hb6_2, hb6_5, hb6_3, hb6_1, hb6_0] at hrel
+  exact hrel
+
+/-- The generalized Weierstrass relation in the sixth pole module, written
+only in terms of the canonical constant section and the monomials in `x` and
+`y`. -/
+theorem sectionPoleSheafPower_six_baseSectionsBases_exists_monomial_weierstrass_relation_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (b1 : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 1)))
+    (hb1 : b1 0 = sectionPoleSheafPowerOneSection π z hz)
+    (b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 2)))
+    (hb2 : ∀ i : Fin 1,
+      b2 (Fin.castAdd 1 i) =
+        Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 1) (b1 i))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (hb2x : b2 (Fin.last 1) = x)
+    (b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 3)))
+    (hb3 : ∀ i : Fin 2,
+      b3 (Fin.castAdd 1 i) =
+        Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 2) (b2 i))
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1)
+    (hb3y : b3 (Fin.last 2) = y)
+    (b4 : Module.Basis (Fin 4) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 4)))
+    (hb4 : ∀ i : Fin 3,
+      b4 (Fin.castAdd 1 i) =
+        Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 3) (b3 i))
+    (b5 : Module.Basis (Fin 5) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 5)))
+    (hb5 : ∀ i : Fin 4,
+      b5 (Fin.castAdd 1 i) =
+        Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 4) (b4 i))
+    (b6 : Module.Basis (Fin 6) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 6)))
+    (hb6 : ∀ i : Fin 5,
+      b6 (Fin.castAdd 1 i) =
+        Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 5) (b5 i))
+    (hb4x2 : b4 (Fin.last 3) =
+      sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))
+    (hb5xy : b5 (Fin.last 4) =
+      sectionPoleSheafPower_baseSectionsMul z hz 2 3 (x ⊗ₜ y))
+    (hb6x3 : b6 (Fin.last 5) =
+      sectionPoleSheafPower_baseSectionsMul z hz 2 4
+        (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))) :
+    ∃ a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)),
+      sectionPoleSheafPower_baseSectionsMul z hz 3 3 (y ⊗ₜ y) +
+          a₁ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (sectionPoleSheafPower_baseSectionsMul z hz 2 3 (x ⊗ₜ y)) +
+          a₃ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3) y)) =
+        sectionPoleSheafPower_baseSectionsMul z hz 2 4
+            (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)) +
+          a₂ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))) +
+          a₄ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2) x))) +
+          a₆ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2)
+                          (Scheme.Modules.baseSectionsMap π
+                            (sectionPoleSheafSuccHom π z hz 1)
+                              (sectionPoleSheafPowerOneSection π z hz))))) := by
+  obtain ⟨a₁, a₂, a₃, a₄, a₆, hrel⟩ :=
+    sectionPoleSheafPower_six_baseSectionsBases_exists_weierstrass_relation_of_CartierGenerator
+      hsm z hz U hU r hspan hnzd b3 b4 hb4 b5 hb5 b6 hb6 x hx y hy hb4x2 hb5xy hb6x3
+  have hb3_2 : b3 2 = y := by
+    simpa using hb3y
+  have hb3_1 : b3 1 = Scheme.Modules.baseSectionsMap π
+      (sectionPoleSheafSuccHom π z hz 2) x := by
+    calc
+      b3 1 = Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 2) (b2 1) := by
+        simpa using hb3 (1 : Fin 2)
+      _ = _ := congrArg _ (by simpa using hb2x)
+  have hb3_0 : b3 0 = Scheme.Modules.baseSectionsMap π
+      (sectionPoleSheafSuccHom π z hz 2)
+        (Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 1)
+            (sectionPoleSheafPowerOneSection π z hz)) := by
+    calc
+      b3 0 = Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 2) (b2 0) := by
+        simpa using hb3 (0 : Fin 2)
+      _ = Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 2)
+            (Scheme.Modules.baseSectionsMap π
+              (sectionPoleSheafSuccHom π z hz 1) (b1 0)) :=
+        congrArg _ (by simpa using hb2 (0 : Fin 1))
+      _ = _ := congrArg
+        (fun q => Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 2)
+            (Scheme.Modules.baseSectionsMap π
+              (sectionPoleSheafSuccHom π z hz 1) q)) hb1
+  refine ⟨a₁, a₂, a₃, a₄, a₆, ?_⟩
+  rw [hb3_2, hb3_1, hb3_0] at hrel
   exact hrel
 
 end ModularCurves
