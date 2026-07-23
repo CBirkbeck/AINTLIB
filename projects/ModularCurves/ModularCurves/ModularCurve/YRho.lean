@@ -1989,6 +1989,39 @@ def PairingCompatAt {N : ℕ} [NeZero N] (D : GaloisRepData N) {T : Scheme.{0}}
           coord D sT torsionIso hOver t ht y hy 0)) :
       (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
 
+/-- **[T-F3b]** The coordinate-pair read of a pair of raw `N`-torsion points through a
+`ρ`-level isomorphism, as a `W`-point of the fibre square of `V_ρ`. -/
+noncomputable def coordPairLift {N : ℕ} [NeZero N] (D : GaloisRepData N)
+    {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
+    (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N)
+    {W : Scheme.{0}} (t : W ⟶ T) (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    W ⟶ pullback (vRhoπ D) (vRhoπ D) :=
+  pullback.lift
+    (E.pointToTorsion x hx ≫ torsionIso.hom ≫ pullback.fst (vRhoπ D) sT)
+    (E.pointToTorsion y hy ≫ torsionIso.hom ≫ pullback.fst (vRhoπ D) sT)
+    (by
+      have hside : ∀ (z : E.Point t) (hz : z.1 ≫ E.mulByHom N = t ≫ E.zero),
+          (E.pointToTorsion z hz ≫ torsionIso.hom ≫ pullback.fst (vRhoπ D) sT) ≫
+            vRhoπ D = t ≫ sT := fun z hz => by
+        simp only [Category.assoc]
+        rw [pullback.condition, reassoc_of% hOver,
+          reassoc_of% (E.pointToTorsion_torsionπ z hz)]
+      rw [hside x hx, hside y hy])
+
+/-- **[T-F3b]** The Weil-pairing read of a pair of raw `N`-torsion points, as a
+`W`-point of the roots scheme (through the `μ_N`-basechange and the DS3 bridge). -/
+noncomputable def torsionPairEval {N : ℕ} [NeZero N] (D : GaloisRepData N)
+    [Fact (1 < N)] {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ)) {E : EllipticCurve T}
+    {W : Scheme.{0}} (t : W ⟶ T) (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    W ⟶ muNRootsScheme D :=
+  pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+    E.weilPairing N ≫ muNMapAlong sT N ≫ (muNSpecQIso D).hom
+
 /-- A **ρ-level structure** on an elliptic curve `E` over a `ℚ`-scheme `T`: an
 isomorphism of group schemes over `T` between `E[N]` and the pullback of `V_ρ`, carrying
 the Weil pairing `e_N` to the pairing `p` of the datum.
@@ -2024,6 +2057,18 @@ structure RhoLevelStructure {N : ℕ} [NeZero N] (D : GaloisRepData N)
     (x y : E.Point t)
     (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
     PairingCompatAt D sT torsionIso over_T t ht x y hx hy
+  /-- **[T-F3b, board v3]** Morphism-level pairing compatibility: for every scheme
+  `W` and every pair of raw `N`-torsion `W`-points, the Weil-pairing read in the
+  roots scheme equals the coordinate-pair read through `torsionIso` composed with the
+  `V_ρ`-pairing map. Quantified over scheme-valued points, so the condition has
+  content over bases with no `ℚ̄`-points (where the pointwise fields are vacuous) and
+  transports along base change through the registered naturalities. -/
+  pairing_scheme : ∀ [Fact (1 < N)] {W : Scheme.{0}} (t : W ⟶ T)
+    (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
+    torsionPairEval D sT t x y hx hy =
+      coordPairLift D sT torsionIso over_T t x y hx hy ≫ vRhoPairingMap D
 
 section RhoProblem
 
@@ -2320,6 +2365,77 @@ noncomputable def RhoLevelStructure.pull (D : GaloisRepData N)
     rw [← weilPairingEval_mapPoint g t x y hx hy,
       coord_pull D g α t ht x hx, coord_pull D g α t ht y hy]
     exact hB
+  pairing_scheme := by
+    intro _ W t x y hx hy
+    have hB := α.pairing_scheme (t ≫ g.baseHom)
+      (EllHom.mapPoint g t x) (EllHom.mapPoint g t y)
+      (EllHom.mapPoint_torsion g x hx) (EllHom.mapPoint_torsion g y hy)
+    have hoverA : (pullback.lift (A.curve.pointToTorsion x hx)
+        (A.curve.pointToTorsion y hy) (by simp) ≫ A.curve.weilPairing N) ≫
+        muNπ A.base N = t := by
+      rw [Category.assoc, A.curve.weilPairing_over N, ← Category.assoc,
+        pullback.lift_fst, A.curve.pointToTorsion_torsionπ]
+    have h1 : ((muNPointsEquiv B.base N (t ≫ g.baseHom))
+        ⟨(pullback.lift (A.curve.pointToTorsion x hx)
+            (A.curve.pointToTorsion y hy) (by simp) ≫ A.curve.weilPairing N) ≫
+          muNMapAlong g.baseHom N, by
+            rw [Category.assoc, muNMapAlong_π, ← Category.assoc, hoverA]⟩ :
+          Γ(W, ⊤)) =
+        ((muNPointsEquiv B.base N (t ≫ g.baseHom))
+          ⟨pullback.lift (B.curve.pointToTorsion (EllHom.mapPoint g t x)
+                (EllHom.mapPoint_torsion g x hx))
+              (B.curve.pointToTorsion (EllHom.mapPoint g t y)
+                (EllHom.mapPoint_torsion g y hy)) (by simp) ≫
+            B.curve.weilPairing N, by
+              rw [Category.assoc, B.curve.weilPairing_over N, ← Category.assoc,
+                pullback.lift_fst, B.curve.pointToTorsion_torsionπ]⟩ : Γ(W, ⊤)) := by
+      rw [muNPointsEquiv_mapAlong g.baseHom N t
+        ⟨pullback.lift (A.curve.pointToTorsion x hx)
+            (A.curve.pointToTorsion y hy) (by simp) ≫ A.curve.weilPairing N,
+          hoverA⟩]
+      exact (weilPairingEval_mapPoint g t x y hx hy).symm
+    have h3 := congrArg Subtype.val
+      ((muNPointsEquiv B.base N (t ≫ g.baseHom)).injective (Subtype.ext h1))
+    have hcoordleg : ∀ (z : A.curve.Point t)
+        (hz : z.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero),
+        A.curve.pointToTorsion z hz ≫ (pullTorsionIso D g α).hom ≫
+            pullback.fst (vRhoπ D) A.structMap =
+          B.curve.pointToTorsion (EllHom.mapPoint g t z)
+              (EllHom.mapPoint_torsion g z hz) ≫ α.torsionIso.hom ≫
+            pullback.fst (vRhoπ D) B.structMap := fun z hz => by
+      rw [← Category.assoc, ← pointToTorsion_mapPoint g z hz, Category.assoc,
+        pullTorsionIso_fst]
+      simp only [Category.assoc]
+    have hcoord : coordPairLift D A.structMap (pullTorsionIso D g α)
+          (pullTorsionIso_over D g α) t x y hx hy =
+        coordPairLift D B.structMap α.torsionIso α.over_T (t ≫ g.baseHom)
+          (EllHom.mapPoint g t x) (EllHom.mapPoint g t y)
+          (EllHom.mapPoint_torsion g x hx) (EllHom.mapPoint_torsion g y hy) := by
+      apply pullback.hom_ext
+      · show pullback.lift _ _ _ ≫ pullback.fst (vRhoπ D) (vRhoπ D) =
+          pullback.lift _ _ _ ≫ pullback.fst (vRhoπ D) (vRhoπ D)
+        rw [pullback.lift_fst, pullback.lift_fst]
+        exact hcoordleg x hx
+      · show pullback.lift _ _ _ ≫ pullback.snd (vRhoπ D) (vRhoπ D) =
+          pullback.lift _ _ _ ≫ pullback.snd (vRhoπ D) (vRhoπ D)
+        rw [pullback.lift_snd, pullback.lift_snd]
+        exact hcoordleg y hy
+    refine Eq.trans ?_ (Eq.trans hB (congrArg (· ≫ vRhoPairingMap D) hcoord.symm))
+    show pullback.lift (A.curve.pointToTorsion x hx) (A.curve.pointToTorsion y hy)
+        (by simp) ≫ A.curve.weilPairing N ≫ muNMapAlong A.structMap N ≫
+        (muNSpecQIso D).hom =
+      pullback.lift (B.curve.pointToTorsion (EllHom.mapPoint g t x)
+          (EllHom.mapPoint_torsion g x hx))
+        (B.curve.pointToTorsion (EllHom.mapPoint g t y)
+          (EllHom.mapPoint_torsion g y hy)) (by simp) ≫
+        B.curve.weilPairing N ≫ muNMapAlong B.structMap N ≫ (muNSpecQIso D).hom
+    have hstruct : muNMapAlong A.structMap N =
+        muNMapAlong g.baseHom N ≫ muNMapAlong B.structMap N :=
+      (congrArg (fun m => muNMapAlong m N) g.base_w.symm).trans
+        (muNMapAlong_comp g.baseHom B.structMap N)
+    rw [hstruct]
+    simp only [Category.assoc]
+    rw [reassoc_of% h3]
 
 /-- [T-YR-2f helper] A ρ-level structure is determined by its torsion trivialization
 (the other fields are `Prop`s). -/
@@ -4751,7 +4867,15 @@ noncomputable def rhoLevelStructureOfFramed (D : GaloisRepData N) {T : Scheme.{0
     (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
     (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
     (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
-    (hsymp : FramedSymp D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 h hover) :
+    (hsymp : FramedSymp D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 h hover)
+    (hsymp_scheme : ∀ [Fact (1 < N)] {W : Scheme.{0}} (t : W ⟶ T)
+      (x y : E.Point t)
+      (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+      (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
+      torsionPairEval D sT t x y hx hy =
+        coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+          (framedTorsionIsoPinned_π D sT E hinv L h hover) t x y hx hy ≫
+          vRhoPairingMap D) :
     RhoLevelStructure D sT E where
   torsionIso := framedTorsionIsoPinned D sT E hinv L h hover
   over_T := framedTorsionIsoPinned_π D sT E hinv L h hover
@@ -4759,6 +4883,7 @@ noncomputable def rhoLevelStructureOfFramed (D : GaloisRepData N) {T : Scheme.{0
     coord_framedPinned_additive D sT E hinv L h hover t ht x y hx hy hxy
   pairing_compat := fun t ht x y hx hy =>
     pairingCompat_framedPinned D sT E hinv L h hover hsymp t ht x y hx hy
+  pairing_scheme := hsymp_scheme
 
 /-- **[CARVE-1a]** The cyclotomically twisted units set: `(ℤ/N)ˣ` with `σ` acting by
 multiplication by the mod-`N` cyclotomic character. -/

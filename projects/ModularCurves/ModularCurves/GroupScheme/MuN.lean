@@ -80,6 +80,23 @@ theorem muNMapAlong_π {S' S : Scheme.{u}} (g : S' ⟶ S) (N : ℕ) :
     muNMapAlong g N ≫ muNπ S N = muNπ S' N ≫ g := by
   rw [muNMapAlong, muNπ, muNπ]; exact pullback.lift_fst _ _ _
 
+/-- Base-change comparisons compose. -/
+theorem muNMapAlong_comp {S₁ S₂ S₃ : Scheme.{u}} (g₁ : S₁ ⟶ S₂) (g₂ : S₂ ⟶ S₃)
+    (N : ℕ) :
+    muNMapAlong (g₁ ≫ g₂) N = muNMapAlong g₁ N ≫ muNMapAlong g₂ N := by
+  apply pullback.hom_ext
+  · exact (pullback.lift_fst _ _ _).trans
+      (((Category.assoc _ _ _).trans
+        ((congrArg (muNMapAlong g₁ N ≫ ·) (pullback.lift_fst _ _ _)).trans
+          ((Category.assoc _ _ _).symm.trans
+            ((congrArg (· ≫ g₂) (pullback.lift_fst _ _ _)).trans
+              (Category.assoc _ _ _))))).symm)
+  · exact (pullback.lift_snd _ _ _).trans
+      (((Category.assoc _ _ _).trans
+        ((congrArg (muNMapAlong g₁ N ≫ ·) ((pullback.lift_snd _ _ _).trans
+            (Category.comp_id _))).trans
+          (pullback.lift_snd _ _ _))).symm)
+
 /-- The constant `S`-scheme on a finite type `A`: the disjoint union of copies of `S`
 indexed by `A`. For `A = ZMod N` this is the constant group scheme `(ℤ/N)_S` of
 KM 1.4.4(5). -/
@@ -575,6 +592,22 @@ noncomputable def muNPointsEquiv (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Sche
     (g : T ⟶ S) :
     { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } :=
   muNPointsEquivAux S N g
+
+/-- The points dictionary is natural in the base: reading a point after the
+base-change comparison gives the same `Γ`-value (the read factors through the
+absolute leg, which `muNMapAlong` preserves). -/
+lemma muNPointsEquiv_mapAlong {S' S : Scheme.{u}} (g : S' ⟶ S) (N : ℕ) [NeZero N]
+    {W : Scheme.{u}} (t : W ⟶ S')
+    (v : { h : W ⟶ muN S' N // h ≫ muNπ S' N = t }) :
+    (muNPointsEquiv S N (t ≫ g) ⟨v.1 ≫ muNMapAlong g N, by
+        rw [Category.assoc, muNMapAlong_π, ← Category.assoc, v.2]⟩ : Γ(W, ⊤)) =
+      (muNPointsEquiv S' N t v : Γ(W, ⊤)) := by
+  rw [muNPointsEquiv, muNPointsEquiv, muNPointsEquivAux_coe, muNPointsEquivAux_coe]
+  refine congrArg (fun (m : W ⟶ muNAbs N) => m.appTop
+    ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N))) ?_
+  rw [Category.assoc]
+  exact congrArg (Subtype.val v ≫ ·)
+    ((pullback.lift_snd _ _ _).trans (Category.comp_id _))
 
 section RankAndEtale
 
