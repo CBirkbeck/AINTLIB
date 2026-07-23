@@ -5258,23 +5258,36 @@ noncomputable def univLevel {X : EllObj (CommRingCat.of ℚ)}
       (Opposite.op (X.pullbackAlong dE.f)) :=
   dE.eqv dE.f ⟨𝟙 dE.Z, Category.id_comp dE.f⟩
 
+/-- **[T-CV-2b]** The first universal point, typed at `𝟙 dE.Z` (uniform spelling —
+the `Section` carrier's `pullbackAlong`-typing is definitionally the same). -/
+noncomputable def univP {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    (X.curve.baseChange dE.f).Point (𝟙 dE.Z) := (univLevel dE).1.1
+
+/-- **[T-CV-2b]** The second universal point, typed at `𝟙 dE.Z`. -/
+noncomputable def univQ {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    (X.curve.baseChange dE.f).Point (𝟙 dE.Z) := (univLevel dE).1.2
+
 /-- **[T-CV-2b]** The first universal point is raw-killed by `N`. -/
 theorem univLevel_fst_killed {X : EllObj (CommRingCat.of ℚ)}
     (dE : ModuliProblem.EquivariantRelRepData
       (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
-    ((univLevel dE).1.1).1 ≫ (X.curve.baseChange dE.f).mulByHom N =
+    (univP dE).1 ≫ (X.curve.baseChange dE.f).mulByHom N =
       𝟙 dE.Z ≫ (X.curve.baseChange dE.f).zero :=
   ((X.curve.baseChange dE.f).smul_eq_zero_iff_comp_mulByHom (𝟙 dE.Z) N
-    (univLevel dE).1.1).mp (univLevel dE).2.1.1
+    (univP dE)).mp (univLevel dE).2.1.1
 
 /-- **[T-CV-2b]** The second universal point is raw-killed by `N`. -/
 theorem univLevel_snd_killed {X : EllObj (CommRingCat.of ℚ)}
     (dE : ModuliProblem.EquivariantRelRepData
       (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
-    ((univLevel dE).1.2).1 ≫ (X.curve.baseChange dE.f).mulByHom N =
+    (univQ dE).1 ≫ (X.curve.baseChange dE.f).mulByHom N =
       𝟙 dE.Z ≫ (X.curve.baseChange dE.f).zero :=
   ((X.curve.baseChange dE.f).smul_eq_zero_iff_comp_mulByHom (𝟙 dE.Z) N
-    (univLevel dE).1.2).mp (univLevel dE).2.1.2
+    (univQ dE)).mp (univLevel dE).2.1.2
 
 /-- **[T-CV-2b]** The pairing-side comparison map on the framed test space
 `Z = dE.Z ×_{X.base} (X.base ×_ℚ wFrames)`: evaluate the Weil pairing on the
@@ -5286,9 +5299,9 @@ noncomputable def eZMap (D : GaloisRepData N) [Fact (1 < N)]
     pullback dE.f (pullback.fst X.structMap (wFramesπ D)) ⟶ muNRootsScheme D :=
   pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
     pullback.lift
-      ((X.curve.baseChange dE.f).pointToTorsion (univLevel dE).1.1
+      ((X.curve.baseChange dE.f).pointToTorsion (univP dE)
         (univLevel_fst_killed dE))
-      ((X.curve.baseChange dE.f).pointToTorsion (univLevel dE).1.2
+      ((X.curve.baseChange dE.f).pointToTorsion (univQ dE)
         (univLevel_snd_killed dE))
       (((X.curve.baseChange dE.f).pointToTorsion_torsionπ _ _).trans
         ((X.curve.baseChange dE.f).pointToTorsion_torsionπ _ _).symm) ≫
@@ -5308,7 +5321,7 @@ theorem eZMap_π (D : GaloisRepData N) [Fact (1 < N)]
   rw [muNSpecQIso_π, muNMapAlong_π,
     reassoc_of% ((X.curve.baseChange dE.f).weilPairing_over N),
     pullback.lift_fst_assoc]
-  have htail : (X.curve.baseChange dE.f).pointToTorsion (univLevel dE).1.1
+  have htail : (X.curve.baseChange dE.f).pointToTorsion (univP dE)
       (univLevel_fst_killed dE) ≫ (X.curve.baseChange dE.f).torsionπ N ≫
       dE.f ≫ X.structMap = dE.f ≫ X.structMap :=
     (Category.assoc _ _ _).symm.trans
@@ -5863,6 +5876,107 @@ theorem sympLocus_factor_iff (D : GaloisRepData N) [Fact (1 < N)]
     · rw [Category.assoc, Category.assoc, pullback.diagonal_snd, Category.comp_id,
         sympPair, Category.assoc, pullback.lift_snd]
       exact he
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-ii]** The `Γ`-read of the pairing-side comparison at a test map is
+the Weil-pairing evaluation of the universal pair, restricted along the test
+(all identity-morphisms spelled at `(X.pullbackAlong dE.f).base`, the typing forced
+by the `Section` carrier). -/
+theorem eZMap_read (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}}
+    (h : T ⟶ pullback dE.f (pullback.fst X.structMap (wFramesπ D))) :
+    muNRootsRead D
+        ((h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+          (dE.f ≫ X.structMap))
+        (h ≫ eZMap D dE) (by
+          rw [Category.assoc, eZMap_π]
+          simp only [Category.assoc]) =
+      (Scheme.Γ.map (h ≫ pullback.fst dE.f
+          (pullback.fst X.structMap (wFramesπ D))).op).hom
+        ((X.curve.baseChange dE.f).weilPairingEval (univP dE)
+          (univQ dE) (univLevel_fst_killed dE)
+          (univLevel_snd_killed dE)).1 := by
+  have hw : (X.curve.baseChange dE.f).pointToTorsion (univP dE)
+      (univLevel_fst_killed dE) ≫ (X.curve.baseChange dE.f).torsionπ N =
+    (X.curve.baseChange dE.f).pointToTorsion (univQ dE)
+      (univLevel_snd_killed dE) ≫ (X.curve.baseChange dE.f).torsionπ N := by simp
+  have hover : pullback.lift ((X.curve.baseChange dE.f).pointToTorsion
+        (univP dE) (univLevel_fst_killed dE))
+      ((X.curve.baseChange dE.f).pointToTorsion
+        (univQ dE) (univLevel_snd_killed dE)) hw ≫
+      (X.curve.baseChange dE.f).weilPairing N ≫ muNπ dE.Z N =
+      𝟙 dE.Z := by
+    rw [(X.curve.baseChange dE.f).weilPairing_over N, ← Category.assoc,
+      pullback.lift_fst, (X.curve.baseChange dE.f).pointToTorsion_torsionπ]
+  have hcancel : (h ≫ eZMap D dE) ≫ (muNSpecQIso D).inv =
+      (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+        ((pullback.lift ((X.curve.baseChange dE.f).pointToTorsion
+              (univLevel dE).1.1 (univLevel_fst_killed dE))
+            ((X.curve.baseChange dE.f).pointToTorsion
+              (univLevel dE).1.2 (univLevel_snd_killed dE)) hw ≫
+          (X.curve.baseChange dE.f).weilPairing N) ≫
+          muNMapAlong (dE.f ≫ X.structMap) N) := by
+    rw [eZMap]
+    simp only [Category.assoc]
+    rw [Iso.hom_inv_id, Category.comp_id]
+    try simp only [Category.assoc]
+    try rfl
+  have hsub1 : (⟨(h ≫ eZMap D dE) ≫ (muNSpecQIso D).inv, by
+      rw [Category.assoc, muNSpecQIso_π_inv, Category.assoc, eZMap_π]
+      simp only [Category.assoc]⟩ :
+      { m : T ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        m ≫ muNπ (Spec (CommRingCat.of ℚ)) N =
+          (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            (dE.f ≫ X.structMap) }) =
+    ⟨((h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+        (pullback.lift ((X.curve.baseChange dE.f).pointToTorsion
+            (univP dE) (univLevel_fst_killed dE))
+          ((X.curve.baseChange dE.f).pointToTorsion
+            (univQ dE) (univLevel_snd_killed dE)) hw ≫
+        (X.curve.baseChange dE.f).weilPairing N)) ≫
+        muNMapAlong (dE.f ≫ X.structMap) N, by
+      try simp only [Category.assoc]
+      rw [muNMapAlong_π]
+      try simp only [Category.assoc]
+      rw [reassoc_of% hover]
+      try simp only [Category.id_comp]⟩ :=
+    Subtype.ext (hcancel.trans (Category.assoc _ _ _).symm)
+  refine Eq.trans (congrArg
+    (fun v : { m : T ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        m ≫ muNπ (Spec (CommRingCat.of ℚ)) N =
+          (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            (dE.f ≫ X.structMap) } =>
+      (muNPointsEquiv (Spec (CommRingCat.of ℚ)) N _ v : Γ(T, ⊤))) hsub1) ?_
+  refine Eq.trans (muNPointsEquiv_mapAlong (dE.f ≫ X.structMap) N
+    (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)))
+    ⟨(h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+        (pullback.lift ((X.curve.baseChange dE.f).pointToTorsion
+            (univP dE) (univLevel_fst_killed dE))
+          ((X.curve.baseChange dE.f).pointToTorsion
+            (univQ dE) (univLevel_snd_killed dE)) hw ≫
+        (X.curve.baseChange dE.f).weilPairing N), by
+      try simp only [Category.assoc]
+      rw [hover]
+      exact congrArg (h ≫ ·) (Category.comp_id _)⟩) ?_
+  have hnat := muNPointsEquiv_natural dE.Z N
+    (𝟙 dE.Z)
+    (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)))
+    ⟨pullback.lift ((X.curve.baseChange dE.f).pointToTorsion
+        (univP dE) (univLevel_fst_killed dE))
+      ((X.curve.baseChange dE.f).pointToTorsion
+        (univQ dE) (univLevel_snd_killed dE)) hw ≫
+      (X.curve.baseChange dE.f).weilPairing N, hover⟩
+  refine Eq.trans ?_ hnat
+  refine congrArg
+    (fun v : { m : T ⟶ muN dE.Z N //
+        m ≫ muNπ dE.Z N =
+          (h ≫ pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+            𝟙 dE.Z } =>
+      (muNPointsEquiv dE.Z N _ v : Γ(T, ⊤))) ?_
+  exact Subtype.ext rfl
 
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
