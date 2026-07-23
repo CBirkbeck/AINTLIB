@@ -10,8 +10,9 @@ import ModularCurves.ForMathlib.PrescribedLocalizedBasis
 /-!
 # The prescribed first basis vector for projective pole sections
 
-On a principal neighbourhood of every base prime, the canonical first-pole section is
-the unique vector of a basis of the rank-one first pole-section module.
+The canonical first-pole section is the unique vector of a global basis of the
+rank-one first pole-section module. In particular, this remains true on every
+principal neighbourhood of a base prime.
 -/
 
 open AlgebraicGeometry CategoryTheory TopologicalSpace
@@ -23,10 +24,8 @@ namespace ModularCurves
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-/-- Around every prime of the affine base, the canonical section of `O([0])` is the unique
-vector of a basis of its projectively presented base-section module on a principal
-neighbourhood. -/
-theorem FibrewiseElliptic.exists_sectionPoleSheafPowerOne_projectiveClosed_away_basis
+private theorem
+    FibrewiseElliptic.sectionPoleSheafPowerOne_projectiveClosed_fiber_ne_zero
     {R : Type u} {σ : Type} [CommRing R]
     [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
     {E : Scheme.{u}}
@@ -44,11 +43,9 @@ theorem FibrewiseElliptic.exists_sectionPoleSheafPowerOne_projectiveClosed_away_
     let M := sectionPoleSheafPower π z hz 1
     let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
     let P := Scheme.Modules.baseSections π M
-    ∃ a : B, a ∉ p ∧
-      ∃ b : Module.Basis (Fin 1) (Localization.Away a)
-          (LocalizedModule.Away a P),
-        b 0 = LocalizedModule.mkLinearMap (.powers a) P
-          (sectionPoleSheafPowerOneSection π z hz) := by
+    (1 : p.ResidueField) ⊗ₜ[B]
+        (sectionPoleSheafPowerOneSection π z hz : P) ≠
+      (0 : p.Fiber P) := by
   dsimp only
   let S := Spec (.of R)
   let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
@@ -56,16 +53,6 @@ theorem FibrewiseElliptic.exists_sectionPoleSheafPowerOne_projectiveClosed_away_
   let B := Γ(S, (⊤ : S.Opens))
   let P := Scheme.Modules.baseSections π M
   let x : P := sectionPoleSheafPowerOneSection π z hz
-  obtain ⟨hfinite, hprojective, hrank⟩ :=
-    h.sectionPoleSheafPower_projectiveClosed_baseSections_data
-      f hsm z hz (n := 1) (by simp)
-  letI : Module.Finite B P := hfinite
-  letI : Module.Projective B P := hprojective
-  letI : Module.FinitePresentation B P :=
-    Module.finitePresentation_of_projective B P
-  letI : Module.Flat B P := inferInstance
-  have hrankp : Module.rankAtStalk (R := B) P ⟨p, inferInstance⟩ = 1 := by
-    rw [hrank]
   let T := Spec (.of p.ResidueField)
   let t : T ⟶ S :=
     Spec.map (CommRingCat.ofHom (algebraMap B p.ResidueField)) ≫ S.isoSpec.inv
@@ -116,7 +103,97 @@ theorem FibrewiseElliptic.exists_sectionPoleSheafPowerOne_projectiveClosed_away_
     intro hxzero
     apply hgeom
     rw [hxzero, map_zero]
-  exact Module.FinitePresentation.exists_notMem_basis_singleton_of_field_ne_zero
-    p x hrankp hker hxK
+  exact Module.one_tmul_fiber_ne_zero_of_field_ne_zero
+    p x hker hxK
+
+/-- The canonical section of `O([0])` is the unique vector of a global basis
+of its projectively presented base-section module. -/
+theorem
+    FibrewiseElliptic.exists_sectionPoleSheafPowerOne_projectiveClosed_basis
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R))
+    [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let M := sectionPoleSheafPower π z hz 1
+    let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+    let P := Scheme.Modules.baseSections π M
+    ∃ b : Module.Basis (Fin 1) B P,
+      b 0 = sectionPoleSheafPowerOneSection π z hz := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz 1
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  let P := Scheme.Modules.baseSections π M
+  let x : P := sectionPoleSheafPowerOneSection π z hz
+  obtain ⟨hfinite, hprojective, hrank⟩ :=
+    h.sectionPoleSheafPower_projectiveClosed_baseSections_data
+      f hsm z hz (n := 1) (by simp)
+  letI : Module.Finite B P := hfinite
+  letI : Module.Projective B P := hprojective
+  letI : Module.Flat B P := inferInstance
+  exact Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero x
+    (fun p _ => by rw [hrank])
+    (fun p _ =>
+      h.sectionPoleSheafPowerOne_projectiveClosed_fiber_ne_zero
+        f hsm z hz p)
+
+/-- Around every prime of the affine base, the canonical section of `O([0])` is the unique
+vector of a basis of its projectively presented base-section module on a principal
+neighbourhood. -/
+theorem FibrewiseElliptic.exists_sectionPoleSheafPowerOne_projectiveClosed_away_basis
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R))
+    [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    (p : Ideal Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))) [p.IsPrime] :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let M := sectionPoleSheafPower π z hz 1
+    let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+    let P := Scheme.Modules.baseSections π M
+    ∃ a : B, a ∉ p ∧
+      ∃ b : Module.Basis (Fin 1) (Localization.Away a)
+          (LocalizedModule.Away a P),
+        b 0 = LocalizedModule.mkLinearMap (.powers a) P
+          (sectionPoleSheafPowerOneSection π z hz) := by
+  dsimp only
+  let S := Spec (.of R)
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz 1
+  let B := Γ(S, (⊤ : S.Opens))
+  let P := Scheme.Modules.baseSections π M
+  let x : P := sectionPoleSheafPowerOneSection π z hz
+  obtain ⟨hfinite, hprojective, hrank⟩ :=
+    h.sectionPoleSheafPower_projectiveClosed_baseSections_data
+      f hsm z hz (n := 1) (by simp)
+  letI : Module.Finite B P := hfinite
+  letI : Module.Projective B P := hprojective
+  letI : Module.FinitePresentation B P :=
+    Module.finitePresentation_of_projective B P
+  letI : Module.Flat B P := inferInstance
+  have hrankp : Module.rankAtStalk (R := B) P ⟨p, inferInstance⟩ = 1 := by
+    rw [hrank]
+  have hxFiber :
+      (1 : p.ResidueField) ⊗ₜ[B] x ≠ (0 : p.Fiber P) :=
+    h.sectionPoleSheafPowerOne_projectiveClosed_fiber_ne_zero
+      f hsm z hz p
+  exact Module.FinitePresentation.exists_notMem_basis_singleton_of_fiber_ne_zero
+    p x hrankp hxFiber
 
 end ModularCurves
