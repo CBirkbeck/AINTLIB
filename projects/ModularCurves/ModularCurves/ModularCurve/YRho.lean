@@ -4242,6 +4242,38 @@ noncomputable def detFrameMor (D : GaloisRepData N) :
             Matrix.GeneralLinearGroup.det A
         rw [map_mul, D.det_cyclo] }
 
+/-- **[CARVE-1c]** The finite étale algebra of the twisted units set. -/
+noncomputable def cycloUnitsAlgebra (D : GaloisRepData N) :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
+    (cycloUnitsContAction D)).unop
+
+/-- The twisted units scheme. -/
+noncomputable def cycloUnitsScheme (D : GaloisRepData N) : Scheme.{0} :=
+  Spec (.of (cycloUnitsAlgebra D : Type 0))
+
+noncomputable def cycloUnitsSchemeπ (D : GaloisRepData N) :
+    cycloUnitsScheme D ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (cycloUnitsAlgebra D : Type 0)))
+
+/-- **[CARVE-1c]** The determinant comultiplication and its scheme map. -/
+noncomputable def detFrameAlgHom (D : GaloisRepData N) :
+    cycloUnitsAlgebra D ⟶ wFramesAlgebra D :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+    (detFrameMor D)).unop
+
+noncomputable def detFrameScheme (D : GaloisRepData N) :
+    wFrames D ⟶ cycloUnitsScheme D :=
+  Spec.map (CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom)
+
+/-- **[CARVE-1c]** The determinant scheme map lies over `ℚ`. -/
+theorem detFrameScheme_π (D : GaloisRepData N) :
+    detFrameScheme D ≫ cycloUnitsSchemeπ D = wFramesπ D := by
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  exact congrArg AlgebraicGeometry.Spec.map (by
+    ext r
+    exact (detFrameAlgHom D).hom.hom.commutes r)
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
