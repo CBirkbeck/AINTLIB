@@ -4569,6 +4569,116 @@ theorem rhoPairSchemeMap_π (D : GaloisRepData N) [Fact (1 < N)] :
     ext r
     exact (rhoPairAlgHom D).hom.hom.commutes r)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The abstract fiber of `V_ρ`'s algebra is the `ρ`-set (the counit of
+the Galois correspondence at the `ρ`-set; `op (unop _)` is definitionally the original).
+-/
+noncomputable def vRhoFiberIso (D : GaloisRepData N) :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+        (Opposite.op (vRhoAlgebra D)) ≅ rhoContAction D :=
+  (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).counitIso.app (rhoContAction D)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** First projection of the paired `ρ`-set. -/
+noncomputable def rhoPairFst (D : GaloisRepData N) :
+    rhoPairContAction D ⟶ rhoContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.fst
+      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => rfl }
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** Second projection of the paired `ρ`-set. -/
+noncomputable def rhoPairSnd (D : GaloisRepData N) :
+    rhoPairContAction D ⟶ rhoContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk Prod.snd
+      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => rfl }
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The paired `ρ`-set with its projections is a binary product fan. -/
+noncomputable def rhoPairBinaryFan (D : GaloisRepData N) :
+    Limits.BinaryFan (rhoContAction D) (rhoContAction D) :=
+  Limits.BinaryFan.mk (rhoPairFst D) (rhoPairSnd D)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The paired `ρ`-set is the binary product of the `ρ`-set with
+itself. -/
+noncomputable def rhoPairBinaryFanIsLimit (D : GaloisRepData N) :
+    Limits.IsLimit (rhoPairBinaryFan D) := by
+  refine Limits.BinaryFan.isLimitMk
+    (fun s => ObjectProperty.homMk
+      { hom := FintypeCat.homMk (fun x => (s.fst.hom.hom x, s.snd.hom.hom x))
+        comm := fun σ => FintypeCat.hom_ext _ _ fun x => ?_ })
+    (fun s => ?_) (fun s => ?_) (fun s m h₁ h₂ => ?_)
+  · have hf := congrArg (fun (h : s.pt.obj.V ⟶ (rhoAction D).V) => h x)
+      (s.fst.hom.comm σ)
+    have hg := congrArg (fun (h : s.pt.obj.V ⟶ (rhoAction D).V) => h x)
+      (s.snd.hom.comm σ)
+    exact Prod.ext hf hg
+  · ext x
+    rfl
+  · ext x
+    rfl
+  · ext x
+    exacts [congrFun (congrArg (fun (q : s.pt ⟶ rhoContAction D) =>
+        q.hom.hom x) h₁) _,
+      congrFun (congrArg (fun (q : s.pt ⟶ rhoContAction D) =>
+        q.hom.hom x) h₂) _]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The correspondence image of the tensor square of `V_ρ`'s algebra is
+the paired `ρ`-set: both are binary products (the op-tensor cofan through the
+limit-preserving equivalence, and the explicit pair fan), matched leg-wise by the
+counit. -/
+noncomputable def pairCorrespondenceIso (D : GaloisRepData N) :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+        (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D))) ≅
+      rhoPairContAction D :=
+  Limits.IsLimit.conePointsIsoOfNatIso
+    (Limits.isLimitOfPreserves
+      (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor
+      (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D) (vRhoAlgebra D)))
+    (rhoPairBinaryFanIsLimit D)
+    (Limits.pairComp _ _ _ ≪≫ Limits.mapPairIso (vRhoFiberIso D) (vRhoFiberIso D))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-iv]** The abstract paired algebra is the tensor square (transport through
+the correspondence's inverse and unit — `muNRootsAlgebraIso` mirror). -/
+noncomputable def vRhoPairTensorIso (D : GaloisRepData N) :
+    vRhoPairAlgebra D ≅
+      FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D) :=
+  (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mapIso
+      (pairCorrespondenceIso D).symm ≪≫
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.app
+      (Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+        (vRhoAlgebra D)))).symm).unop).symm
+
+open scoped TensorProduct in
+/-- **[T-F3a-iv]** `Spec` of the tensor identification (`muNRootsSpecIso` mirror). -/
+noncomputable def vRhoPairSpecIso (D : GaloisRepData N) :
+    Spec (CommRingCat.of ((vRhoAlgebra D : Type 0) ⊗[ℚ] (vRhoAlgebra D : Type 0))) ≅
+      Spec (CommRingCat.of (vRhoPairAlgebra D : Type 0)) where
+  hom := Spec.map (CommRingCat.ofHom
+    (vRhoPairTensorIso D).hom.hom.hom.toRingHom)
+  inv := Spec.map (CommRingCat.ofHom
+    (vRhoPairTensorIso D).inv.hom.hom.toRingHom)
+  hom_inv_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+            (vRhoAlgebra D) ⟶ FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+            (vRhoAlgebra D)) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((vRhoPairTensorIso D).inv_hom_id))).trans
+        (Spec.map_id _))
+  inv_hom_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : vRhoPairAlgebra D ⟶ vRhoPairAlgebra D) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((vRhoPairTensorIso D).hom_inv_id))).trans
+        (Spec.map_id _))
+
 /-- **[T-CV-1b]** The root of the cyclotomic quotient is an `N`-th root of unity. -/
 theorem cycloRoot_pow (N : ℕ) [NeZero N] :
     (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ N = 1 := by
