@@ -5675,6 +5675,22 @@ theorem muNRootsPowAlg_square_inv (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ)
     _ = (muNRootsAlgebraIso D).hom ≫ cycloQuotPow N k ≫
           (muNRootsAlgebraIso D).inv := Category.assoc _ _ _
 
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-e]** The Spec-side pow intertwine against the roots
+identification. -/
+theorem muNRootsPowScheme_specIso (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsPowScheme D k ≫ (muNRootsSpecIso D).inv =
+      (muNRootsSpecIso D).inv ≫
+        Spec.map (CommRingCat.ofHom (cycloQuotPowAlgHom N k).toRingHom) := by
+  show Spec.map (CommRingCat.ofHom (muNRootsPowAlg D k).hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (muNRootsAlgebraIso D).inv.hom.hom.toRingHom) =
+    Spec.map (CommRingCat.ofHom (muNRootsAlgebraIso D).inv.hom.hom.toRingHom) ≫
+      Spec.map (CommRingCat.ofHom (cycloQuotPowAlgHom N k).toRingHom)
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  exact congrArg Spec.map (congrArg
+    (fun (m : cycloQuotAlgebra N ⟶ muNRootsAlgebra D) =>
+      CommRingCat.ofHom m.hom.hom.toRingHom) (muNRootsPowAlg_square_inv D k))
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :
