@@ -5529,6 +5529,28 @@ theorem muNRoots_hom_ext (D : GaloisRepData N) [Fact (1 < N)] {W : Scheme.{0}}
         congrArg (· ≫ (muNSpecQIso D).hom) h4
     _ = ψ := by rw [Category.assoc, Iso.inv_hom_id, Category.comp_id]
 
+/-- **[T-CV-3b-iii-v-b]** The model-side power endomorphism of the cyclotomic
+quotient (`root ↦ root^k`). -/
+noncomputable def cycloQuotPowAlgHom (N : ℕ) [NeZero N] (k : ℕ) :
+    (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ]
+      (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) :=
+  AdjoinRoot.liftAlgHom _ (Algebra.ofId ℚ _)
+    ((AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ k) (by
+      rw [Polynomial.eval₂_sub, Polynomial.eval₂_pow, Polynomial.eval₂_X,
+        Polynomial.eval₂_one, ← pow_mul, mul_comm k N, pow_mul, cycloRoot_pow,
+        one_pow]
+      exact sub_self 1)
+
+theorem cycloQuotPowAlgHom_root (N : ℕ) [NeZero N] (k : ℕ) :
+    cycloQuotPowAlgHom N k (AdjoinRoot.root _) =
+      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ k :=
+  AdjoinRoot.liftAlgHom_root _ _ _ _
+
+/-- **[T-CV-3b-iii-v-b]** As a finite étale hom. -/
+noncomputable def cycloQuotPow (N : ℕ) [NeZero N] (k : ℕ) :
+    cycloQuotAlgebra N ⟶ cycloQuotAlgebra N :=
+  ObjectProperty.homMk (CommAlgCat.ofHom (cycloQuotPowAlgHom N k))
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :

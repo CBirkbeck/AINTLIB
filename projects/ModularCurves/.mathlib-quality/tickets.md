@@ -25378,6 +25378,23 @@ eqv' := bareFramedEqv ∘ ι-composition restricted by factor_iff + the value-le
 symp-condition-bridge (the (c-i)-VALUE half: needs (b-iii)-ii/v reads at ℚ̄-points
 against FramedSymp/pairing_scheme)); freeness sub of bareFramedAut_freeAction.
 
+#### [PARKED A2: T-CV-3b-iii-v-b] the correspondence pow-square — status: parked (2026-07-23)
+`muNRootsCorrespondence_pow : functor.map (cycloQuotPow N k).op ≫ corrIso.hom =
+corrIso.hom ≫ muNRootsPowMor D k` — the elementwise content is PROVEN-shape (h1: the
+mkOfPowEq-read raises to the k-th power; the model pow cycloQuotPowAlgHom/root/
+cycloQuotPow are LANDED GREEN), but the final step needs
+`((finiteEtaleEquivContAction ℚ).functor.map f).hom.hom φ ≡ φ.comp f.unop-alg` which
+is NOT rfl (probe failed: the resEquiv/functorToContAction layers block β). ROUTES:
+(α) prove an elementwise functor-map lemma ONCE in ForMathlib/
+FiniteEtaleFundamentalGroup.lean (where pointsEquivOfContAction_smul lives — same
+comp_apply technique, may need per-layer map-lemmas for functorToContAction +
+ContAction.resEquiv); (β) avoid the ContAction pow entirely — conjugate-define the
+roots pow via muNSpecQIso + muNPow and re-prove detCompScheme_mul against it (needs a
+detComp-read pin instead — same class of gate). CONSUMERS BLOCKED: the pow-read
+lemma (muNRootsRead-of-pow = read^k), hence eZMap_zxAction assembly route via reads.
+NOT blocked: leaves ii (eZMap-read), iii (univLevel action), iv (symplectic eval) —
+independent; the (c)-datum's non-equivariant parts.
+
 #### [T-CV-4] The carved quotient — status: open, deps: T-CV-3
 Statement: `sympFramed_quotientProblemData D : Nonempty (QuotientProblemData
 (sympFramedAut D))` := exists_quotientProblemData _ (carved-freeness) (carved-rel-rep)
