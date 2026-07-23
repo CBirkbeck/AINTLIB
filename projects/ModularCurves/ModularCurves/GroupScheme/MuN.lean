@@ -436,6 +436,58 @@ lemma constSchemePointsEquiv_natural (S : Scheme.{u}) (A : Type) [Finite A]
   rw [constIndex_eq_iff, Scheme.Hom.comp_apply]
   exact constIndex_mem h.1 (k t)
 
+/-- **[T-EQ-3c-PIN-3]** The clopen piece of `T` where a locally constant function
+takes a given value (public face of the fiber decomposition behind
+`constSchemePointsEquiv`). -/
+def locConstPiece {T : Scheme.{u}} (c : LocallyConstant T A) (a : A) : T.Opens :=
+  constFiber c a
+
+/-- **[T-EQ-3c-PIN-3]** Morphisms out of `T` agree as soon as they agree on the
+clopen pieces of a locally constant function (the fiber cofan is a colimit). -/
+lemma locConst_hom_ext {T Y : Scheme.{u}} (c : LocallyConstant T A) {F G : T ⟶ Y}
+    (h : ∀ a : A, (locConstPiece c a).ι ≫ F = (locConstPiece c a).ι ≫ G) :
+    F = G :=
+  (constFiberCofanIsColimit c).hom_ext fun ⟨a⟩ => h a
+
+omit [Finite A] in
+/-- **[T-EQ-3c-PIN-3]** Membership in a locally-constant piece is the value
+condition. -/
+lemma mem_locConstPiece {T : Scheme.{u}} {c : LocallyConstant T A} {a : A}
+    {t : T} : t ∈ locConstPiece c a ↔ c t = a := Iff.rfl
+
+/-- **[T-EQ-3c-PIN-3]** On any open contained in the piece where its index reads
+`a`, a constant-scheme map is the `a`-component inclusion after the base map. -/
+lemma constMap_factor_of_le {T : Scheme.{u}} {g : T ⟶ S} (h : T ⟶ constScheme S A)
+    (hπ : h ≫ constSchemeπ S A = g) (a : A) {U : T.Opens}
+    (hU : U ≤ locConstPiece (constSchemePointsEquiv S A g ⟨h, hπ⟩) a) :
+    U.ι ≫ h = (U.ι ≫ g) ≫ Sigma.ι (fun _ : A => S) a := by
+  have hrange : Set.range (U.ι ≫ h) ⊆
+      Set.range (Sigma.ι (fun _ : A ↦ S) a) := by
+    rintro _ ⟨⟨t, ht⟩, rfl⟩
+    rw [Scheme.Hom.comp_apply, Scheme.Opens.ι_apply]
+    exact (constIndex_eq_iff h t a).mp (hU ht)
+  have hfac := IsOpenImmersion.lift_fac (Sigma.ι (fun _ : A ↦ S) a)
+    (U.ι ≫ h) hrange
+  have hπι : Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A = 𝟙 S := Sigma.ι_desc _ _
+  have hlift : IsOpenImmersion.lift (Sigma.ι (fun _ : A ↦ S) a)
+      (U.ι ≫ h) hrange = U.ι ≫ g := by
+    calc IsOpenImmersion.lift _ _ hrange
+        = IsOpenImmersion.lift _ _ hrange ≫
+            Sigma.ι (fun _ : A ↦ S) a ≫ constSchemeπ S A := by
+          rw [hπι, Category.comp_id]
+      _ = (U.ι ≫ h) ≫ constSchemeπ S A := by rw [← Category.assoc, hfac]
+      _ = U.ι ≫ g := by rw [Category.assoc, hπ]
+  rw [← hlift, hfac]
+
+/-- **[T-EQ-3c-PIN-3]** On the piece where its index reads `a`, a constant-scheme
+map is the `a`-component inclusion after the base map. -/
+lemma locConstPiece_factor {T : Scheme.{u}} {g : T ⟶ S} (h : T ⟶ constScheme S A)
+    (hπ : h ≫ constSchemeπ S A = g) (a : A) :
+    (locConstPiece (constSchemePointsEquiv S A g ⟨h, hπ⟩) a).ι ≫ h =
+      ((locConstPiece (constSchemePointsEquiv S A g ⟨h, hπ⟩) a).ι ≫ g) ≫
+        Sigma.ι (fun _ : A => S) a :=
+  constMap_factor_of_le h hπ a le_rfl
+
 /-- The presheaf of groups on `Over S` represented by the constant scheme `(ℤ/N)_S`:
 locally constant `ℤ/N`-valued functions under pointwise addition (written
 multiplicatively for mathlib's `GrpObj`). -/
