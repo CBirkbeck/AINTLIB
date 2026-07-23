@@ -113,4 +113,53 @@ theorem sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator
   rw [appendBasisOfSplit_castAdd,
     sectionPoleSheafPower_succ_baseSectionsSplitEquiv_symm_apply_inl]
 
+/-- Normalized pole-order-two and pole-order-three sections successively extend
+a basis of the first pole module to compatible bases of the next two modules. -/
+theorem sectionPoleSheafPower_two_three_baseSectionsBasesOfCartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hH1 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    (hH2 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 2).sheaf 1))
+    (b1 : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 1)))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd 1).hom
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz 1)) x) = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : (sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator
+        hsm z hz U hU r hspan hnzd 2).hom
+      (Scheme.Modules.baseSectionsMap π
+        (cokernel.π (sectionPoleSheafSuccHom π z hz 2)) y) = 1) :
+    ∃ b2 : Module.Basis (Fin 2) Γ(S, (⊤ : S.Opens))
+        (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 2)),
+      (∀ i : Fin 1,
+        b2 (Fin.castAdd 1 i) =
+          Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 1) (b1 i)) ∧
+        b2 (Fin.last 1) = x ∧
+          ∃ b3 : Module.Basis (Fin 3) Γ(S, (⊤ : S.Opens))
+              (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 3)),
+            (∀ i : Fin 2,
+              b3 (Fin.castAdd 1 i) =
+                Scheme.Modules.baseSectionsMap π
+                  (sectionPoleSheafSuccHom π z hz 2) (b2 i)) ∧
+              b3 (Fin.last 2) = y := by
+  obtain ⟨b2, hb2, hb2x⟩ :=
+    sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 hH1 b1 x hx
+  obtain ⟨b3, hb3, hb3y⟩ :=
+    sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 hH2 b2 y hy
+  exact ⟨b2, hb2, hb2x, b3, hb3, hb3y⟩
+
 end ModularCurves
