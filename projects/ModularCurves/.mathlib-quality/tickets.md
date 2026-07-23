@@ -25349,6 +25349,35 @@ isOpenImmersion_diagonal (mathlib FormallyUnramified.lean:124 ✓ verified);
 the landed frameEval_points/PIN-machinery for (c-i). RISK: (c-i) is the biggest leaf
 here — mirror of frameEval_points-style chasing at the muN-target.
 
+#### [T-CV-3 PROGRESS + (b-iii) decomposition] (2026-07-23, beastmode)
+LANDED (a): muNRootsSchemeπ_finite_etale, sympPair, sympLocus (diagonal-pullback),
+sympLocusι clopen (both immersion lemmas), sympLocus_factor_iff (map-level (c-i) CORE:
+factoring ⟺ eZMap/dZMap agreement — carve-native, no exotic-base issue).
+LANDED (b-i/ii): cycloUnitsMulMor/Alg/Scheme, muNRootsPowMor/Alg/Scheme (the
+equivariant POWER endo — the twist-insight: both e/d-side twists are the SAME power
+endo, dodging the non-equivariance of constant-multiplication on roots),
+detFrameScheme_rightMul + detCompScheme_mul squares, dZMap_zxAction (d-side square).
+REMAINING (b-iii) — the e-side square `eZMap_zxAction : zxAction γ ≫ eZMap =
+eZMap ≫ muNRootsPowScheme (det γ).val`, 5 leaves:
+i. muNRoots_hom_ext (maps into muNRootsScheme over a common base are determined by
+   their Γ-reads: muNSpecQIso.inv-composition + muNPointsEquiv (Spec ℚ) injectivity).
+ii. eZMap-read: Γ-read of h ≫ eZMap = weilPairingEval of the h-pulled universal pair
+   (muNPointsEquiv_mapAlong + weilPairingEval_restrict register + eval-def).
+iii. univLevel γ-action: dE.equivariant at the tautological section identifies
+   univLevel-of-(σZ γ-precomp) with the (gammaHAut γ⁻¹)-acted value = the glSmul
+   matrix-combination (unfold gammaHAut's app).
+iv. eval-of-combined = eval^{det γ} (weilPairingEval_symplectic register,
+   framedSymp_glSmul pattern).
+v. pow-read: Γ-read of φ ≫ muNRootsPowScheme k = (Γ-read φ)^k (the pow endo through
+   the muNSpecQIso correspondence — either the muN-side group-power intertwine or a
+   direct correspondence-read pin; constVecPointsEquiv_corrScheme technology).
+THEN (b-iv): carve-stability assembly ((ι≫zxγ)≫e = (ι≫e)≫pow = (ι≫d)≫pow =
+(ι≫zxγ)≫d via factor_iff ⟹ the restricted action zxSympAction on sympLocus).
+THEN (c): carved EquivariantRelRepData (Z' := sympLocus, f' := ι ≫ zStruct-to-base,
+eqv' := bareFramedEqv ∘ ι-composition restricted by factor_iff + the value-level
+symp-condition-bridge (the (c-i)-VALUE half: needs (b-iii)-ii/v reads at ℚ̄-points
+against FramedSymp/pairing_scheme)); freeness sub of bareFramedAut_freeAction.
+
 #### [T-CV-4] The carved quotient — status: open, deps: T-CV-3
 Statement: `sympFramed_quotientProblemData D : Nonempty (QuotientProblemData
 (sympFramedAut D))` := exists_quotientProblemData _ (carved-freeness) (carved-rel-rep)
