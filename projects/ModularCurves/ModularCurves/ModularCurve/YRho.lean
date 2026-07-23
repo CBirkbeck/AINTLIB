@@ -2514,6 +2514,29 @@ noncomputable def framePairCoeval (D : GaloisRepData N) :
   pullback.lift (frameCoeval D) (pullback.snd _ _)
     (by rw [frameCoeval_π, pullback.condition])
 
+@[reassoc]
+theorem framePairEval_fst (D : GaloisRepData N) :
+    framePairEval D ≫ pullback.fst (vRhoπ D) (wFramesπ D) = frameEval D :=
+  pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem framePairEval_snd (D : GaloisRepData N) :
+    framePairEval D ≫ pullback.snd (vRhoπ D) (wFramesπ D) =
+      pullback.snd (constVecSchemeπ N) (wFramesπ D) :=
+  pullback.lift_snd _ _ _
+
+@[reassoc]
+theorem framePairCoeval_fst (D : GaloisRepData N) :
+    framePairCoeval D ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) =
+      frameCoeval D :=
+  pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem framePairCoeval_snd (D : GaloisRepData N) :
+    framePairCoeval D ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D) =
+      pullback.snd (vRhoπ D) (wFramesπ D) :=
+  pullback.lift_snd _ _ _
+
 /-- **[asm-2b-v]** The shear comultiplication eats the left injection to the
 evaluation comultiplication. -/
 theorem frameShearAlgHom_inl (D : GaloisRepData N) :
@@ -2863,6 +2886,7 @@ theorem framePairCoeval_eval (D : GaloisRepData N) :
   ext x
   exact congrArg (fun m => m.hom.hom x) (frameCoshearAlgHom_eval D)
 
+
 /-- **[asm-2a]** The universal-frame evaluation on `ℚ̄`-points: the `V_ρ`-reading of
 the evaluated point is the classified frame acting on the vector (scaffold; the
 proof is the counit-naturality assembly through the tensor pair-split). -/
@@ -3083,6 +3107,112 @@ noncomputable def frameEvalSlice (D : GaloisRepData N) {T : Scheme.{0}}
     (pullback.fst sT (constVecSchemeπ N))
     (by rw [Category.assoc, frameEval_π, ← Category.assoc, pullback.lift_fst,
       ← pullback.condition])
+
+/-- **[asm-2b-vi]** The inverse of the evaluation slice: pair the `ρ`-point with the
+`h`-frame and co-evaluate. -/
+noncomputable def frameEvalSliceInv (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT) :
+    pullback (vRhoπ D) sT ⟶ pullback sT (constVecSchemeπ N) :=
+  pullback.lift (pullback.snd (vRhoπ D) sT)
+    (pullback.lift (pullback.fst (vRhoπ D) sT)
+        (pullback.snd (vRhoπ D) sT ≫ h)
+        (by rw [Category.assoc, hover, pullback.condition]) ≫ frameCoeval D)
+    (by rw [Category.assoc, frameCoeval_π, ← Category.assoc, pullback.lift_fst,
+      pullback.condition])
+
+@[reassoc]
+theorem frameEvalSlice_fst (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT) :
+    frameEvalSlice D sT h hover ≫ pullback.fst (vRhoπ D) sT =
+      pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ h)
+        (by rw [Category.assoc, hover, ← pullback.condition]) ≫ frameEval D :=
+  pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem frameEvalSlice_snd (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT) :
+    frameEvalSlice D sT h hover ≫ pullback.snd (vRhoπ D) sT =
+      pullback.fst sT (constVecSchemeπ N) :=
+  pullback.lift_snd _ _ _
+
+@[reassoc]
+theorem frameEvalSliceInv_fst (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT) :
+    frameEvalSliceInv D sT h hover ≫ pullback.fst sT (constVecSchemeπ N) =
+      pullback.snd (vRhoπ D) sT :=
+  pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem frameEvalSliceInv_snd (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT) :
+    frameEvalSliceInv D sT h hover ≫ pullback.snd sT (constVecSchemeπ N) =
+      pullback.lift (pullback.fst (vRhoπ D) sT) (pullback.snd (vRhoπ D) sT ≫ h)
+        (by rw [Category.assoc, hover, pullback.condition]) ≫ frameCoeval D :=
+  pullback.lift_snd _ _ _
+
+/-- **[asm-2b]** The evaluation slice along a frame is an isomorphism: a
+trivialization `h` of the frames over `T` identifies the constant vector scheme
+over `T` with the pulled-back `V_ρ` (the moduli heart of the contracted-product
+route — CORE-A/B transported along the `h`-graph). -/
+theorem frameEvalSlice_isIso (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (h : T ⟶ wFrames D)
+    (hover : h ≫ wFramesπ D = sT) :
+    IsIso (frameEvalSlice D sT h hover) := by
+  have hsub1 : frameEvalSlice D sT h hover ≫
+      pullback.lift (pullback.fst (vRhoπ D) sT) (pullback.snd (vRhoπ D) sT ≫ h)
+        (by rw [Category.assoc, hover, pullback.condition]) =
+      pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ h)
+        (by rw [Category.assoc, hover, ← pullback.condition]) ≫
+        framePairEval D := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd,
+        pullback.lift_fst_assoc, pullback.lift_snd_assoc, frameEvalSlice_fst,
+        frameEvalSlice_snd, frameEvalSlice_fst_assoc, frameEvalSlice_snd_assoc,
+        framePairEval_fst, framePairEval_snd, framePairEval_fst_assoc,
+        framePairEval_snd_assoc]
+    · simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd,
+        pullback.lift_fst_assoc, pullback.lift_snd_assoc, frameEvalSlice_fst,
+        frameEvalSlice_snd, frameEvalSlice_fst_assoc, frameEvalSlice_snd_assoc,
+        framePairEval_fst, framePairEval_snd, framePairEval_fst_assoc,
+        framePairEval_snd_assoc]
+  have hsub2 : frameEvalSliceInv D sT h hover ≫
+      pullback.lift (pullback.snd sT (constVecSchemeπ N))
+        (pullback.fst sT (constVecSchemeπ N) ≫ h)
+        (by rw [Category.assoc, hover, ← pullback.condition]) =
+      pullback.lift (pullback.fst (vRhoπ D) sT) (pullback.snd (vRhoπ D) sT ≫ h)
+        (by rw [Category.assoc, hover, pullback.condition]) ≫
+        framePairCoeval D := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd,
+        pullback.lift_fst_assoc, pullback.lift_snd_assoc, frameEvalSliceInv_fst,
+        frameEvalSliceInv_snd, frameEvalSliceInv_fst_assoc,
+        frameEvalSliceInv_snd_assoc, framePairCoeval_fst, framePairCoeval_snd,
+        framePairCoeval_fst_assoc, framePairCoeval_snd_assoc]
+    · simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd,
+        pullback.lift_fst_assoc, pullback.lift_snd_assoc, frameEvalSliceInv_fst,
+        frameEvalSliceInv_snd, frameEvalSliceInv_fst_assoc,
+        frameEvalSliceInv_snd_assoc, framePairCoeval_fst, framePairCoeval_snd,
+        framePairCoeval_fst_assoc, framePairCoeval_snd_assoc]
+  refine ⟨frameEvalSliceInv D sT h hover, ?_, ?_⟩
+  · apply pullback.hom_ext
+    · simp only [Category.assoc, Category.id_comp, frameEvalSliceInv_fst,
+        frameEvalSlice_snd, frameEvalSlice_snd_assoc]
+    · rw [Category.assoc, Category.id_comp, frameEvalSliceInv_snd,
+        ← Category.assoc, hsub1, Category.assoc, framePairEval_coeval,
+        pullback.lift_fst]
+  · apply pullback.hom_ext
+    · rw [Category.assoc, Category.id_comp, frameEvalSlice_fst,
+        ← Category.assoc, hsub2, Category.assoc, framePairCoeval_eval,
+        pullback.lift_fst]
+    · simp only [Category.assoc, Category.id_comp, frameEvalSlice_snd,
+        frameEvalSliceInv_fst, frameEvalSliceInv_fst_assoc]
 
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
