@@ -25428,7 +25428,7 @@ identity pair on `pullback (E.torsionπ N) (E.torsionπ N)`, `pairTorsionIso` th
 `vRhoPairingMap` the `p(u∧v)`-map (new layer below). Conditional-instance field ⟹
 NO signature change anywhere outside the structure.
 
-#### [T-F3a] The V_ρ pairing layer — status: open, deps: T-CV-1 (pattern+muNRoots)
+#### [T-F3a] The V_ρ pairing layer — status: done i–v (2026-07-23; vi pin deferred to first consumer per A2), deps: T-CV-1
 Leaves (mirror the CARVE/CV-1 patterns exactly):
 i. `rhoPairAction/ContAction D`: explicit product Galois set on
    `(Fin 2 → ZMod N) × (Fin 2 → ZMod N)`, `σ·(u,v) = (ρσ u, ρσ v)`; continuity via
@@ -25461,7 +25461,7 @@ RISK: (iv) liftEquiv-vs-fiber-carrier plumbing (same class as CV-1c/d, solved th
 (vi) is the deep pin — состав the landed pin-discipline (standalone comp-lemmas,
 term-chains, no keyed-rw on InducedCategory).
 
-#### [T-F3b] The morphism-level pairing field — status: open, deps: T-F3a
+#### [T-F3b] The morphism-level pairing field — status: in_progress (field landed; coordPairLift/torsionPairEval defs; PairingLayer hoisted before the structure), deps: T-F3a
 Add to `RhoLevelStructure` the field `pairing_scheme` (statement above; the
 `pairTorsionIso`-exchange-lift: `pullback.lift (fst ≫ torsionIso.hom)
 (snd ≫ torsionIso.hom) (π-square via over_T + pullback.condition)`). Keep both
@@ -25469,7 +25469,7 @@ pointwise fields. All existing consumers compile unchanged (new field only ADDS
 obligations at constructor sites: exactly rhoLevelStructureOfFramed (T-F3c) and any
 future construction).
 
-#### [T-F3c] Dictionary refit — status: open, deps: T-F3b
+#### [T-F3c] Dictionary refit — status: in_progress (hsymp_scheme hypothesis added, field := hypothesis; PLUS the unplanned pull-transport: RhoLevelStructure.pull's pairing_scheme via weilPairingEval_mapPoint register + muNMapAlong_comp + muNPointsEquiv_mapAlong (both landed in MuN.lean) + pullTorsionIso_fst + pointToTorsion_mapPoint), deps: T-F3b
 `rhoLevelStructureOfFramed` gains hypothesis `hsymp_scheme` (the map-level framed
 condition: the T-level carve-read equation through the PIN-machinery) and proves
 `pairing_scheme` from it. The pointwise `FramedSymp`-input stays for the pointwise
