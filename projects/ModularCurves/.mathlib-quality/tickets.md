@@ -25259,6 +25259,58 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### THE FINAL ARC — 3d-2/carve/3e decomposition (2026-07-27, plan-of-record)
+Target chain: rhoLevel_relativelyRepresentable (:4432-region sorry) → T-YR-5 →
+yRho_representable (:4461). The I-candidate: X := the EllObj (T, sT, E);
+dE := gammaFullNaive_equivariantRelRepData (CommRingCat.of ℚ) N ⊤ hinvQ X (LANDED);
+Z := (bareFramedRelRepData D dE.toRelRepData).Z = pullback dE.f (fst X.structMap
+wFramesπ); I := the SYMPLECTIC CLOPEN CARVE of Z; sections(I/k) ≃ symp-framed pairs
+≃ [DICTIONARY] RhoLevelStructures. Leaves:
+- [CARVE-1] the comparison maps: on Z the universal pair (L,h) gives TWO maps to
+  μ_N-flavored finite étale targets — e_N(L₁,L₂) (Weil pairing of the universal
+  sections, DS4-register vocabulary) and p(det ∘ frame-read) (the frames-side
+  composite through wFrames' det-map — needs detMap : wFrames D ⟶ constScheme-of-
+  (ZMod N)ˣ-ish or the μ_N-comparison directly). Alternative cheaper carve: the
+  frames-scheme decomposes clopen-ly by det (wFrames = ∐ over det-values via the
+  correspondence — det : frameContAction ⟶ trivial-(ZMod N)ˣ-set is equivariant
+  (det∘ρ = cyclo ✓ D.det_cyclo — CHECK equivariance direction), transport → clopen
+  det-fibers); the symp-condition at a framed point is det-frame = the e_N-ratio —
+  hmm the e_N-side varies over the fullLevel-factor. KEEP the two-maps-agree route:
+  agreement-locus of two maps into a SEPARATED ÉTALE ℚ-scheme is clopen
+  (mathlib-hunt: equalizer of maps to unramified/étale separated is open+closed;
+  fallback: both maps to μ_N-const-scheme, pointwise-locally-constant argument via
+  the coproduct-structure).
+- [CARVE-2] I := the clopen sublocus; f-restriction finite étale (clopen immersion
+  ∘ finite-étale; IsFinite/Etale stability — mathlib instances).
+- [INV-DICT] the inverse dictionary: from α : RhoLevelStructure D (k≫sT)
+  (E.baseChange k) construct (L, h, hsymp): L := α.torsionIso.inv-transport of the
+  standard V_ρ-pullback sections (the e₁/e₂-const-sections of constVec composed
+  through corrSchemeIso.inv ≫ cvIso.inv?? — NO: through the vRho-side: the standard
+  sections of pullback (vRhoπ) sT?? V_ρ has no standard sections — THE FRAME IS THE
+  DATA: reconstruct h from α's ℚ̄-points via the coordinate-comparison with SOME
+  fullLevel L₀... the clean route: the sections of I over k are BY CONSTRUCTION
+  (L, h)-pairs; the dictionary-map I-sections → RhoLevelStructures is
+  rhoLevelStructureOfFramed; BIJECTIVITY: injective (different (L,h) give different
+  coord-reads at some ℚ̄-point — via the pinned coord-formula + frame/index
+  injectivity) + surjective (given α, the ℚ̄-fiber-analysis: at each geometric point
+  the α-coords determine a frame-matrix + the L-basis = α⁻¹ of the A-twisted
+  standard basis... then DESCENT of the pointwise data to a scheme-map h — the
+  hard leaf; route: α induces a map T ⟶ wFrames by the correspondence (the
+  comparison α-vs-fullLevelIso over the étale-local trivializations — OR the
+  torsor-argument: Z-symp → T is a GL₂-sub-torsor?? no — the ISOM-scheme
+  Isom(E[N], V_ρ-pullback)-as-a-scheme IS what I represents — its sections ARE
+  α-data — i.e. PROVE I represents the Isom-FUNCTOR directly: sections(I/k) ≃
+  {torsion-iso + compat} — this reframes surjectivity as the Isom-representability
+  of the carved framed space — the KM 4.7-style argument; needs the α ↦ h-descent
+  regardless).
+- [3e] assemble rhoLevel_relativelyRepresentable from CARVE+INV-DICT; then
+  rho_affineOverEll; then T-YR-5's representable_of_affineOverEll_of_rigidNoeth +
+  rho_rigidNoeth; then T-YR-7 assembly = yRho_representable.
+- PARKED-NOTE: if INV-DICT's descent-leaf exceeds the window, the honest
+  fallback per /develop: restate rhoLevel_relativelyRepresentable's proof through
+  the ISOM-functor form and consume the framed-space directly (avoid constructing
+  h from α; instead show the two FUNCTORS agree by the ℚ̄-points + rigidity).
+
 ### asm-3 COMPLETE (2026-07-27) — THE ρ-DICTIONARY IS DONE
 **rhoLevelStructureOfFramed LANDED + PUSHED (2ef096941)**: (E, L, h, hsymp) ↦
 RhoLevelStructure D sT E with all four fields:
