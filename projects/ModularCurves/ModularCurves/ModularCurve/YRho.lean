@@ -1041,6 +1041,79 @@ noncomputable def frameEvalAlgHom (D : GaloisRepData N) :
   ((frameProdAlgebraIso D).inv ≫
     (finiteEtaleEquivContAction ℚ).inverse.map (frameEvalMor D)).unop
 
+/-- **[asm-2b-ii]** Transport of the `ρ`-mixed product through the Galois
+correspondence: the algebra of the `ρ`-mixed product is the tensor product
+(mirror of `frameProdAlgebraIso`). -/
+noncomputable def rhoFrameProdAlgebraIso (D : GaloisRepData N) :
+    (finiteEtaleEquivContAction ℚ).inverse.obj (rhoFrameProdContAction D) ≅
+      Opposite.op (FiniteEtaleGalois.tensorObj (vRhoAlgebra D)
+        (wFramesAlgebra D)) := by
+  have h1 : Limits.IsLimit ((finiteEtaleEquivContAction ℚ).inverse.mapCone
+      (Limits.BinaryFan.mk (rhoFrameProdFst D) (rhoFrameProdSnd D))) :=
+    Limits.isLimitOfPreserves _ (rhoFrameProdIsProduct D)
+  have h1' := (Limits.IsLimit.postcomposeHomEquiv
+    (Limits.pairComp (rhoContAction D) (frameContAction D)
+      (finiteEtaleEquivContAction ℚ).inverse) _).symm h1
+  exact h1'.conePointUniqueUpToIso
+    (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D)
+      (wFramesAlgebra D))
+
+/-- **[asm-2b-ii]** The `ρ`-mixed tensor-splitting bridge is compatible with the left
+cofan-injection (mirror of `frameProdAlgebraIso_inv_left`). -/
+theorem rhoFrameProdAlgebraIso_inv_left (D : GaloisRepData N) :
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (rhoFrameProdFst D)).unop ≫ (rhoFrameProdAlgebraIso D).inv.unop =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeLeft (R := ℚ) (S := ℚ) :
+          (vRhoAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (vRhoAlgebra D : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  have hcomp := Limits.IsLimit.conePointUniqueUpToIso_hom_comp
+    ((Limits.IsLimit.postcomposeHomEquiv
+        (Limits.pairComp (rhoContAction D) (frameContAction D)
+          (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse) _).symm
+      (Limits.isLimitOfPreserves _ (rhoFrameProdIsProduct D)))
+    (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D)
+      (wFramesAlgebra D))
+    ⟨Limits.WalkingPair.left⟩
+  have hop : ((FiniteEtaleGalois.tensorBinaryCofan (vRhoAlgebra D)
+        (wFramesAlgebra D)).op).π.app ⟨Limits.WalkingPair.left⟩
+      = (rhoFrameProdAlgebraIso D).inv
+          ≫ (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+              (rhoFrameProdFst D) :=
+    ((Iso.inv_hom_id_assoc (rhoFrameProdAlgebraIso D) _).symm.trans
+      (congrArg ((rhoFrameProdAlgebraIso D).inv ≫ ·) hcomp)).trans
+      (congrArg ((rhoFrameProdAlgebraIso D).inv ≫ ·) (Category.comp_id _))
+  exact (congrArg Quiver.Hom.unop hop.symm).trans rfl
+
+/-- **[asm-2b-ii]** The `ρ`-mixed tensor-splitting bridge is compatible with the right
+cofan-injection (mirror of `frameProdAlgebraIso_inv_right`). -/
+theorem rhoFrameProdAlgebraIso_inv_right (D : GaloisRepData N) :
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (rhoFrameProdSnd D)).unop ≫ (rhoFrameProdAlgebraIso D).inv.unop =
+      ObjectProperty.homMk (CommAlgCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := ℚ) :
+          (wFramesAlgebra D : Type 0) →ₐ[ℚ]
+            TensorProduct ℚ (vRhoAlgebra D : Type 0)
+              (wFramesAlgebra D : Type 0))) := by
+  have hcomp := Limits.IsLimit.conePointUniqueUpToIso_hom_comp
+    ((Limits.IsLimit.postcomposeHomEquiv
+        (Limits.pairComp (rhoContAction D) (frameContAction D)
+          (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse) _).symm
+      (Limits.isLimitOfPreserves _ (rhoFrameProdIsProduct D)))
+    (FiniteEtaleGalois.tensorBinaryFanOpIsLimit (vRhoAlgebra D)
+      (wFramesAlgebra D))
+    ⟨Limits.WalkingPair.right⟩
+  have hop : ((FiniteEtaleGalois.tensorBinaryCofan (vRhoAlgebra D)
+        (wFramesAlgebra D)).op).π.app ⟨Limits.WalkingPair.right⟩
+      = (rhoFrameProdAlgebraIso D).inv
+          ≫ (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+              (rhoFrameProdSnd D) :=
+    ((Iso.inv_hom_id_assoc (rhoFrameProdAlgebraIso D) _).symm.trans
+      (congrArg ((rhoFrameProdAlgebraIso D).inv ≫ ·) hcomp)).trans
+      (congrArg ((rhoFrameProdAlgebraIso D).inv ≫ ·) (Category.comp_id _))
+  exact (congrArg Quiver.Hom.unop hop.symm).trans rfl
+
 /-- **[asm-1]** `Spec` of the split-vs-constVec algebra identification. -/
 noncomputable def constVecSpecIso (N : ℕ) [NeZero N] :
     Spec (CommRingCat.of ((Fin 2 → ZMod N) → ℚ)) ≅
