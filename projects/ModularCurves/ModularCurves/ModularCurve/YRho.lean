@@ -4171,6 +4171,77 @@ noncomputable abbrev cycloUnitsAction (N : ℕ) [NeZero N] :
         rw [mul_assoc]
         rfl }
 
+open scoped Pointwise FintypeCatDiscrete in
+/-- **[CARVE-1a]** Continuity of the twisted units set: the cyclotomic character
+kills the (open) kernel of `ρ` since it is `det ∘ ρ`. -/
+lemma cycloUnitsAction_isContinuous (D : GaloisRepData N) :
+    (cycloUnitsAction N).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
+          (cycloUnitsAction N) : Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (cycloUnitsAction N) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (cycloUnitsAction N),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hcy : modularCyclotomicCharacter (AlgebraicClosure ℚ)
+      (card_rootsOfUnity_algClosureQ N) (galSepMulEquivGalQ τ).toRingEquiv = 1 := by
+    rw [show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+        (card_rootsOfUnity_algClosureQ N)
+        (galSepMulEquivGalQ τ).toRingEquiv =
+      Matrix.GeneralLinearGroup.det (D.ρ (galSepMulEquivGalQ τ)) from
+      (D.det_cyclo (galSepMulEquivGalQ τ)).symm]
+    rw [hτ1, map_one]
+  have hAct : (cycloUnitsAction N).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun u => ?_
+    show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+      (card_rootsOfUnity_algClosureQ N)
+      (galSepMulEquivGalQ τ).toRingEquiv * u = u
+    rw [hcy, one_mul]
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((cycloUnitsAction N).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
+
+open scoped FintypeCatDiscrete in
+/-- The twisted units set as a continuous Galois set. -/
+noncomputable abbrev cycloUnitsContAction (D : GaloisRepData N) :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨cycloUnitsAction N, cycloUnitsAction_isContinuous D⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[CARVE-1b]** The determinant reading of frames: equivariant into the twisted
+units set by `det_cyclo`. -/
+noncomputable def detFrameMor (D : GaloisRepData N) :
+    frameContAction D ⟶ cycloUnitsContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun A => Matrix.GeneralLinearGroup.det A)
+      comm := fun σ => FintypeCat.hom_ext _ _ fun A => by
+        show Matrix.GeneralLinearGroup.det (D.ρ (galSepMulEquivGalQ σ) * A) =
+          modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv *
+            Matrix.GeneralLinearGroup.det A
+        rw [map_mul, D.det_cyclo] }
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
