@@ -25259,6 +25259,40 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### 3c REPLAN (2026-07-26) — THE READ-PINNING CORRECTION (plan-of-record update)
+**Obstruction found**: `pointsEquivOfContAction` (hence constVecPointsEquiv /
+vRhoPointsEquiv / the `coord`-reads) is the asEquivalence-COUNIT — Classical.choice-
+opaque (essSurj-witness choice). On the TRIVIAL Galois set constVec, equivariance
+pins nothing (every bijection is equivariant), so the raw framedTorsionIso's
+coordinate-read is r = g ∘ s for an unknowable bijection g — coords_additive would
+be UNPROVABLE as-is (g need not be additive). NOT a B2: the fix is a construction
+change, statements untouched.
+
+**The fix (pin-by-correction)**: both r (the abstract counit-read) and s (the
+CONCRETE index-read: piAlgHomIndex of the point's AlgHom transported through
+constVecAlgebraIso — all landed asm-1 vocabulary) are terms; define g := r ∘ s⁻¹
+(a V-bijection, a term), realize g⁻¹ as a ContAction-automorphism of the TRIVIAL
+set (any function is equivariant there), transport through the correspondence to a
+constVecScheme-automorphism (mirror of the frameCoeval Spec-transport pattern), and
+insert its base-change into the dictionary iso BEFORE the slice:
+`framedTorsionIsoPinned := fullLevelIso.symm ≪≫ bridge ≪≫ map ≪≫ corr-bc ≪≫ slice`.
+Then by counit-NATURALITY (pointsEquivOfContAction_map, landed):
+r(corr-applied-pt) = g⁻¹(r(pt)) = s(pt) — the corrected read IS the concrete index.
+coords_additive then reduces (via frameEval_points) to A•s-additivity =
+matrix-linearity ∘ s-additivity-on-torsion-sections, provable by the ι-factorization
+characterization + Point-arithmetic — counit-free.
+
+Leaves:
+- [3c-A] `constVecIndexRead` (the s-Equiv: 2-layer specPoints/arrowCongr +
+  cvIso-precompose + piAlgHomEquiv), `corrMor` (g⁻¹ on the trivial set) +
+  `corrScheme` (Spec-transport) + `framedTorsionIsoPinned` + `_π`.
+- [3c-B] the ι-factorization characterization ((C)/(D) of the previous plan):
+  ℚ̄-torsion-point ↔ index ↔ combination (fullLevelHom's ι_desc-component +
+  pointToTorsion-pull + IsOpenImmersion.lift existence + constIndex-disjointness).
+- [3c-C] the pinned coord-formula: coord(pinned)(x) = A_h(t) • s(fullLevel-pt-x).
+- [3c-D] additivity + coords_additive; then [3d] pairing_compat via
+  weilPairingEval_symplectic at A_h(t) with the det-twist.
+
 ### asm-3a/3b COMPLETE (2026-07-26) + 3c ANALYSIS
 **LANDED + PUSHED**: `constVecSchemeIso_π` (Sigma.hom_ext component: ι-eval-ring
 composite collapses to 𝟙 — NOTE Sigma.ι_desc/hom_ext need (f := …)-pins in YRho
