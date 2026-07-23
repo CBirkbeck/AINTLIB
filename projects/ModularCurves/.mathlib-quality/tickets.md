@@ -25626,6 +25626,32 @@ REMAINING = PIN-6 (hcore): forall v w, coordPairLift(framedTorsionIsoPinned)(1 T
     p(det(frame) * sympl(v,w))), transported by the landed functorial-transport technique
     (finiteEtaleEquivContAction_functor_map_hom rfl-gate, muNRootsCorrespondence_pow pattern);
     scheme-side det-lemmas detFrameScheme_rightMul/detCompScheme_mul supply the exponent-shape.
+(a)+(b) ★★ DONE (2026-07-23, 843ff099d): constVecCorrPt/+_π (congrArg-chain discipline — kabstract
+    dies on constVecScheme-vs-Spec spellings), frameSlotEval/+_π, framedPinned_leg_comb (5-factor
+    unwind; fullLevelIso-cancel; hkey-hom_ext with simp-normalized legs + exact-rfl closures over
+    instance-mixtures), coordPairLift_comb_framedPinned, framedPinned_hcore_of_abs. hcore <= habs.
+(c)=PIN-6c REFINED (the last leaf; habs : lift(frameSlotEval v, frameSlotEval w) >> vRhoPairingMap
+    = detFrameScheme >> detCompScheme >> powScheme K(v,w) on wFrames D). Sub-leaves (mimic the
+    twist-era pattern pullbackSpecIso_vecTwist:4242 — iso-conjugated Spec.map-conversions via
+    includeLeft/Right ring-checks):
+    6c-ii-a. GENERIC helper: pullback.lift (Spec.map f) (Spec.map g) h >> (pullbackSpecIso R A B).hom
+       = Spec.map (tensor-lift ring-map) — prove by iso-cancel (X >> inv = lift via hom_ext +
+       pullbackSpecIso_inv_fst/inv_snd + Spec.map_comp ring-triangles).
+    6c-i. cPt-conversion: constVecCorrPt N v = Spec.map (cPtRing v) (i v >> constSchemeSpecIso.hom
+       = Spec.map(v-projection) — grep constSchemeSpecIso's i-lemma; corr/constVec-iso are Spec-maps).
+    6c-ii. slot-conversion: frameSlotEval D v = Spec.map (slotRing v) (6c-ii-a + Spec.map_comp;
+       wFramesπ = Spec.map(algebraMap)).
+    6c-iii. pair-conversion: lift(slot v, slot w) >> pullbackVRhoIso.hom = Spec.map(pairRing v w)
+       (6c-ii-a + the vRhoPairSpecIso/vRhoPairTensorIso factor — read pullbackVRhoIso's def).
+    6c-iv. RING-IDENTITY: pairRing-composite-with-rhoPairAlgHom = pow-detComp-detFrame-composite —
+       via correspondence-FAITHFULNESS (both sides inverse-functor-images of ContAction-morphisms;
+       FintypeCat elementwise at a frame-element: pairing of corrected slot-reads =
+       p(ofAdd(sympl(f-corr-v, f-corr-w))) = p(ofAdd(det f * sympl(v,w))) = det-side^K — the
+       landed sympl_glSmul ZMod-arithmetic + the corrScheme index-effect
+       (constVecPointsEquiv_corrScheme pin family); pow-side via cycloQuotPowAlgHom/
+       muNRootsPowScheme correspondence-shape).
+    THEN: framedPinned_pairing_scheme (UNCONDITIONAL) := _of_core with hcore := hcore_of_abs habs;
+    THEN 3c dictionary-application.
 
 #### [T-EQ-3] Value-equivalence (the KM 4.7 content) — status: open, deps: T-CV-4,T-EQ-2
 Statement: per (T', k): {sections of the carved-quotient I over k} ≃
