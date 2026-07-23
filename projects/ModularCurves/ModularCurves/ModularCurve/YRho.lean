@@ -6620,6 +6620,200 @@ theorem frameDetMap_baseHom (D : GaloisRepData N) [Fact (1 < N)]
     frameDetMap D (k ≫ h) = k ≫ frameDetMap D h := by
   rw [frameDetMap, frameDetMap, Category.assoc]
 
+/-- **[T-CV-3c-4]** The Weil pairing of a `glSmul`-combined full-level pair is the
+`det`-power of the pairing (the generic form of `univLevel_glSmul_eval` — the
+registered symplectic formula at an arbitrary value). -/
+theorem fullLevel_glSmul_eval {T : Scheme.{0}} (E : EllipticCurve T)
+    (L : E.FullLevelPt N) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (E.weilPairingEval
+        ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ) • L.1.1 +
+          (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) • L.1.2)
+        ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ) • L.1.1 +
+          (((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) • L.1.2)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N
+            _).mp (comb_kill L.2.1.1 L.2.1.2 _ _))
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N
+            _).mp (comb_kill L.2.1.1 L.2.1.2 _ _))).1 =
+      (E.weilPairingEval L.1.1 L.1.2
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1)
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.2).mp L.2.1.2)).1 ^
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
+  set m : Matrix (Fin 2) (Fin 2) (ZMod N) := (γ : Matrix (Fin 2) (Fin 2) (ZMod N))
+    with hm
+  have hW := E.weilPairingEval_symplectic L.1.1 L.1.2
+    (((m 0 0).val : ℤ)) (((m 1 0).val : ℤ)) (((m 0 1).val : ℤ))
+    (((m 1 1).val : ℤ))
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1)
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.2).mp L.2.1.2)
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N
+        _).mp (comb_kill L.2.1.1 L.2.1.2 _ _))
+    ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N
+        _).mp (comb_kill L.2.1.1 L.2.1.2 _ _))
+  refine hW.trans ?_
+  congr 1
+  have hcoedet : ((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N) =
+      ((((m 0 0).val : ℤ) * ((m 1 1).val : ℤ) -
+        ((m 1 0).val : ℤ) * ((m 0 1).val : ℤ) : ℤ) : ZMod N) := by
+    rw [show ((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N) =
+      (γ : Matrix (Fin 2) (Fin 2) (ZMod N)).det from rfl, Matrix.det_fin_two]
+    push_cast [ZMod.natCast_val, ZMod.cast_id]
+    ring
+  rw [hcoedet]
+  exact ((congrArg Int.toNat (ZMod.val_intCast _)).symm.trans
+    (Int.toNat_natCast _))
+
+/-- **[T-CV-3c-4]** The value-level pairing comparison twists by the power endo under
+the diagonal `glSmul`-translation. -/
+theorem pairEZMap_glSmul (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (L : E.FullLevelPt N) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    pairEZMap D sT E (E.glSmul γ L).1.1 (E.glSmul γ L).1.2
+        (E.glSmul γ L).2.1.1 (E.glSmul γ L).2.1.2 =
+      pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 ≫
+        muNRootsPowScheme D
+          (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
+  have hπψ : (pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 ≫
+      muNRootsPowScheme D
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val) ≫
+      muNRootsSchemeπ D = sT := by
+    rw [Category.assoc, muNRootsPowScheme_π, pairEZMap_π]
+  refine muNRoots_hom_ext D (pairEZMap_π D _ _ _ _ _ _) hπψ ?_
+  refine Eq.trans (pairEZMap_read_self D _ _ _ _ _ _) ?_
+  refine Eq.trans (fullLevel_glSmul_eval E L γ) ?_
+  refine Eq.symm ?_
+  refine Eq.trans (muNRootsRead_pow D _
+    (pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2)
+    (pairEZMap_π D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2) _) ?_
+  exact congrArg
+    (· ^ (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val)
+    (pairEZMap_read_self D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2)
+
+/-- **[T-CV-3c-4]** The value-level determinant comparison twists by the same power
+endo under the right frame translation. -/
+theorem frameDetMap_rightMul (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    (h : T ⟶ wFrames D) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameDetMap D (h ≫ wFramesRightMul D γ) =
+      frameDetMap D h ≫ muNRootsPowScheme D
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val := by
+  rw [frameDetMap, frameDetMap]
+  simp only [Category.assoc]
+  rw [reassoc_of% (detFrameScheme_rightMul D γ),
+    detCompScheme_mul D (Matrix.GeneralLinearGroup.det γ)]
+
+/-- **[T-CV-3c-5]** The MAP-LEVEL symplectically framed problem: bare framed values
+whose value-level pairing comparison equals the value-level determinant comparison
+(an equality of morphisms into the roots scheme — contentful over every base; the
+`ℚ̄`-pointwise `FramedSymp` follows by composing with points, and agrees on reduced
+finite-type bases). Functorial by `pairEZMap_pullSection`/`frameDetMap_baseHom`. -/
+noncomputable def sympFramedProblem (D : GaloisRepData N) [Fact (1 < N)] :
+    ModularCurves.ModuliProblem (CommRingCat.of ℚ) where
+  obj X := { Lh : (bareFramedProblem D).obj X //
+    pairEZMap D X.unop.structMap X.unop.curve Lh.1.1.1 Lh.1.1.2
+        Lh.1.2.1.1 Lh.1.2.1.2 = frameDetMap D Lh.2.1 }
+  map f := ↾fun Lh => ⟨(bareFramedProblem D).map f Lh.val, by
+    exact (pairEZMap_pullSection D f.unop Lh.val.1.1.1 Lh.val.1.1.2
+        Lh.val.1.2.1.1 Lh.val.1.2.1.2).trans
+      ((congrArg (f.unop.baseHom ≫ ·) Lh.property).trans
+        (frameDetMap_baseHom D f.unop.baseHom Lh.val.2.val).symm)⟩
+  map_id X := by
+    ext Lh
+    exact Subtype.ext (FunctorToTypes.map_id_apply (bareFramedProblem D) Lh.val)
+  map_comp f g := by
+    ext Lh
+    exact Subtype.ext
+      (FunctorToTypes.map_comp_apply (bareFramedProblem D) f g Lh.val)
+
+/-- **[T-CV-3c-5]** The diagonal translation of the symplectically framed problem
+(the condition twists by the same power endo on both sides). -/
+noncomputable def sympFramedSmulNat (D : GaloisRepData N) [Fact (1 < N)]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    sympFramedProblem D ⟶ sympFramedProblem D where
+  app X := ↾fun Lh => ⟨⟨X.unop.curve.glSmul γ Lh.val.1,
+    ⟨Lh.val.2.val ≫ wFramesRightMul D γ, by
+      rw [Category.assoc, wFramesRightMul_π, Lh.val.2.property]⟩⟩, by
+    refine Eq.trans (pairEZMap_glSmul D X.unop.structMap X.unop.curve
+      Lh.val.1 γ) ?_
+    refine Eq.trans (congrArg
+      (· ≫ muNRootsPowScheme D
+        (((Matrix.GeneralLinearGroup.det γ : (ZMod N)ˣ) : ZMod N)).val)
+      Lh.property) ?_
+    exact (frameDetMap_rightMul D Lh.val.2.val γ).symm⟩
+  naturality X Y f := by
+    ext Lh
+    exact Subtype.ext (Prod.ext
+      (EllHom.pullSection_glSmul (CommRingCat.of ℚ) f.unop γ Lh.val.1)
+      (Subtype.ext (Category.assoc _ _ _)))
+
+/-- **[T-CV-3c-5]** The `GL₂(ℤ/N)`-action on the symplectically framed problem
+(the `γ⁻¹`-hom convention, mirroring `bareFramedAut`). -/
+noncomputable def sympFramedAut (D : GaloisRepData N) [Fact (1 < N)] :
+    Matrix.GeneralLinearGroup (Fin 2) (ZMod N) →* Aut (sympFramedProblem D) where
+  toFun γ :=
+    { hom := sympFramedSmulNat D γ⁻¹
+      inv := sympFramedSmulNat D γ
+      hom_inv_id := by
+        ext X Lh
+        exact Subtype.ext (Prod.ext
+          (by
+            show X.unop.curve.glSmul γ (X.unop.curve.glSmul γ⁻¹ Lh.val.1) =
+              Lh.val.1
+            rw [← EllipticCurve.glSmul_mul, inv_mul_cancel,
+              EllipticCurve.glSmul_one])
+          (Subtype.ext (by
+            show (Lh.val.2.val ≫ wFramesRightMul D γ⁻¹) ≫ wFramesRightMul D γ =
+              Lh.val.2.val
+            rw [Category.assoc, ← wFramesRightMul_mul, inv_mul_cancel,
+              wFramesRightMul_one, Category.comp_id])))
+      inv_hom_id := by
+        ext X Lh
+        exact Subtype.ext (Prod.ext
+          (by
+            show X.unop.curve.glSmul γ⁻¹ (X.unop.curve.glSmul γ Lh.val.1) =
+              Lh.val.1
+            rw [← EllipticCurve.glSmul_mul, mul_inv_cancel,
+              EllipticCurve.glSmul_one])
+          (Subtype.ext (by
+            show (Lh.val.2.val ≫ wFramesRightMul D γ) ≫ wFramesRightMul D γ⁻¹ =
+              Lh.val.2.val
+            rw [Category.assoc, ← wFramesRightMul_mul, mul_inv_cancel,
+              wFramesRightMul_one, Category.comp_id]))) }
+  map_one' := by
+    ext X Lh
+    exact Subtype.ext (Prod.ext
+      (by
+        show X.unop.curve.glSmul
+          ((1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹ Lh.val.1 = Lh.val.1
+        rw [inv_one, EllipticCurve.glSmul_one])
+      (Subtype.ext (by
+        show Lh.val.2.val ≫ wFramesRightMul D
+          ((1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹ = Lh.val.2.val
+        rw [inv_one, wFramesRightMul_one, Category.comp_id])))
+  map_mul' γ δ := by
+    ext X Lh
+    exact Subtype.ext (Prod.ext
+      (by
+        show X.unop.curve.glSmul (γ * δ)⁻¹ Lh.val.1 =
+          X.unop.curve.glSmul γ⁻¹ (X.unop.curve.glSmul δ⁻¹ Lh.val.1)
+        rw [mul_inv_rev, EllipticCurve.glSmul_mul])
+      (Subtype.ext (by
+        show Lh.val.2.val ≫ wFramesRightMul D (γ * δ)⁻¹ =
+          (Lh.val.2.val ≫ wFramesRightMul D δ⁻¹) ≫ wFramesRightMul D γ⁻¹
+        rw [mul_inv_rev, wFramesRightMul_mul, Category.assoc])))
+
+/-- **[T-CV-3c-5]** The diagonal action on the symplectically framed problem is free
+over nonempty bases (the full-level component already is). -/
+theorem sympFramedAut_freeAction (D : GaloisRepData N) [Fact (1 < N)] :
+    ModuliProblem.FreeAction (sympFramedAut D) := by
+  intro X hne γ hγ a hfix
+  apply hγ
+  have hinvQ : IsUnit ((N : ℕ) : ℚ) :=
+    isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N))
+  have hL : X.curve.glSmul γ⁻¹ a.val.1 = a.val.1 :=
+    congrArg (fun z => z.val.1) hfix
+  have hg1 : (γ⁻¹ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 1 :=
+    glSmul_eq_one_of_eq_self N hinvQ X hne γ⁻¹ a.val.1 hL
+  rwa [inv_eq_one] at hg1
+
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
 frames factor, carrying the diagonal action. -/
