@@ -4427,6 +4427,169 @@ theorem detCompScheme_π (D : GaloisRepData N) [Fact (1 < N)] :
     ext r
     exact (detCompAlgHom D).hom.hom.commutes r)
 
+/-- **[T-CV-1b]** The root of the cyclotomic quotient is an `N`-th root of unity. -/
+theorem cycloRoot_pow (N : ℕ) [NeZero N] :
+    (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ N = 1 := by
+  have h := AdjoinRoot.mk_self (f := (Polynomial.X : Polynomial ℚ) ^ N - 1)
+  rw [map_sub, map_pow, map_one, AdjoinRoot.mk_X, sub_eq_zero] at h
+  exact h
+
+/-- **[T-CV-1b]** The cyclotomic quotient `ℚ[X]/(Xᴺ − 1)` as a finite étale
+`ℚ`-algebra. -/
+noncomputable def cycloQuotAlgebra (N : ℕ) [NeZero N] :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  haveI := muNModel_finite ℚ N
+  haveI := muNModel_algebra_etale_of_isUnit ℚ N
+    (isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N)))
+  CommAlgCat.FiniteEtale.of ℚ (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1))
+
+/-- **[T-CV-1c]** Algebra maps out of the cyclotomic quotient into a field are the
+`N`-th roots of unity (evaluation at the root). -/
+noncomputable def cycloAlgHomEquivRoots (N : ℕ) [NeZero N] (L : Type) [Field L]
+    [Algebra ℚ L] :
+    ((AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ] L) ≃
+      rootsOfUnity N L where
+  toFun φ := rootsOfUnity.mkOfPowEq (φ (AdjoinRoot.root _)) (by
+    rw [← map_pow, cycloRoot_pow, map_one])
+  invFun ζ := AdjoinRoot.liftAlgHom _ (Algebra.ofId ℚ L) ((ζ : Lˣ) : L) (by
+    rw [Polynomial.eval₂_sub, Polynomial.eval₂_pow, Polynomial.eval₂_X,
+      Polynomial.eval₂_one]
+    rw [show (((ζ : Lˣ) : L)) ^ N = 1 from (mem_rootsOfUnity' N _).mp ζ.2]
+    exact sub_self 1)
+  left_inv φ := AdjoinRoot.algHom_ext (by
+    rw [AdjoinRoot.liftAlgHom_root]
+    exact rootsOfUnity.coe_mkOfPowEq _)
+  right_inv ζ := Subtype.ext (Units.ext (by
+    rw [rootsOfUnity.coe_mkOfPowEq, AdjoinRoot.liftAlgHom_root]))
+
+/-- **[T-CV-1c]** Roots of unity transport along the separable-vs-algebraic closure
+identification. -/
+noncomputable def rootsSepQbarEquiv (N : ℕ) [NeZero N] :
+    rootsOfUnity N (SeparableClosure ℚ) ≃ rootsOfUnity N (AlgebraicClosure ℚ) where
+  toFun ζ := rootsOfUnity.mkOfPowEq
+    (sepClosureQAlgEquiv (((ζ : (SeparableClosure ℚ)ˣ) : SeparableClosure ℚ)))
+    (by
+      rw [← map_pow]
+      rw [show (((ζ : (SeparableClosure ℚ)ˣ) : SeparableClosure ℚ)) ^ N = 1 from
+        (mem_rootsOfUnity' N _).mp ζ.2]
+      rw [map_one])
+  invFun ζ := rootsOfUnity.mkOfPowEq
+    (sepClosureQAlgEquiv.symm
+      (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)))
+    (by
+      rw [← map_pow]
+      rw [show (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) ^ N = 1 from
+        (mem_rootsOfUnity' N _).mp ζ.2]
+      rw [map_one])
+  left_inv ζ := Subtype.ext (Units.ext (by
+    rw [rootsOfUnity.coe_mkOfPowEq, rootsOfUnity.coe_mkOfPowEq,
+      AlgEquiv.symm_apply_apply]))
+  right_inv ζ := Subtype.ext (Units.ext (by
+    rw [rootsOfUnity.coe_mkOfPowEq, rootsOfUnity.coe_mkOfPowEq,
+      AlgEquiv.apply_symm_apply]))
+
+/-- **[T-CV-1c]** The Galois transport compatibility of the closure identification. -/
+theorem galSep_sepQ_compat (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
+    (x : SeparableClosure ℚ) :
+    (galSepMulEquivGalQ σ) (sepClosureQAlgEquiv x) = sepClosureQAlgEquiv (σ x) := by
+  show (AlgEquiv.autCongr sepClosureQAlgEquiv σ) (sepClosureQAlgEquiv x) = _
+  simp [AlgEquiv.autCongr]
+
+/-- **[T-CV-1d]** The forward read intertwines the Galois actions. -/
+theorem cycloRead_comp (N : ℕ) [NeZero N]
+    (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
+    (φ : (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ]
+      SeparableClosure ℚ) :
+    rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
+        ((σ : SeparableClosure ℚ →ₐ[ℚ] SeparableClosure ℚ).comp φ)) =
+      ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom
+        (rootsSepQbarEquiv N
+          (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).1, by
+        rw [mem_rootsOfUnity]
+        rw [← map_pow]
+        rw [show ((rootsSepQbarEquiv N
+            (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).1 :
+            (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
+          (mem_rootsOfUnity N _).mp (rootsSepQbarEquiv N
+            (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ)).2]
+        exact map_one _⟩ := by
+  refine Subtype.ext (Units.ext ?_)
+  show sepClosureQAlgEquiv (((σ : SeparableClosure ℚ →ₐ[ℚ]
+      SeparableClosure ℚ).comp φ) (AdjoinRoot.root _)) =
+    (galSepMulEquivGalQ σ) (sepClosureQAlgEquiv (φ (AdjoinRoot.root _)))
+  rw [galSep_sepQ_compat]
+  rfl
+
+/-- **[T-CV-1d]** The inverse read intertwines the Galois actions. -/
+theorem cycloReadInv_comp (N : ℕ) [NeZero N]
+    (σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)
+    (ζ : rootsOfUnity N (AlgebraicClosure ℚ)) :
+    (σ : SeparableClosure ℚ →ₐ[ℚ] SeparableClosure ℚ).comp
+        ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+          ((rootsSepQbarEquiv N).symm ζ)) =
+      (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+        ((rootsSepQbarEquiv N).symm
+          ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
+            rw [mem_rootsOfUnity]
+            rw [← map_pow]
+            rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
+              (mem_rootsOfUnity N _).mp ζ.2]
+            exact map_one _⟩) := by
+  refine AdjoinRoot.algHom_ext ?_
+  rw [AlgHom.comp_apply]
+  show σ ((AdjoinRoot.liftAlgHom _ (Algebra.ofId ℚ (SeparableClosure ℚ))
+      (sepClosureQAlgEquiv.symm
+        (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))) _)
+      (AdjoinRoot.root _)) = _
+  rw [AdjoinRoot.liftAlgHom_root]
+  rw [show ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+      ((rootsSepQbarEquiv N).symm
+        (⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
+          rw [mem_rootsOfUnity]
+          rw [← map_pow]
+          rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ N = 1 from
+            (mem_rootsOfUnity N _).mp ζ.2]
+          exact map_one _⟩ : rootsOfUnity N (AlgebraicClosure ℚ))))
+      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) =
+    sepClosureQAlgEquiv.symm ((galSepMulEquivGalQ σ)
+      (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ))) from
+    AdjoinRoot.liftAlgHom_root _ _ _ _]
+  have hc := galSep_sepQ_compat σ (sepClosureQAlgEquiv.symm
+    (((ζ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)))
+  rw [AlgEquiv.apply_symm_apply] at hc
+  rw [hc, AlgEquiv.symm_apply_apply]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-1d]** The correspondence image of the cyclotomic quotient is the roots
+Galois set. -/
+noncomputable def muNRootsCorrespondenceIso (D : GaloisRepData N) [Fact (1 < N)] :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.obj
+        (Opposite.op (cycloQuotAlgebra N)) ≅ muNRootsContAction D where
+  hom := ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun φ => rootsSepQbarEquiv N
+        (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun φ => cycloRead_comp N σ φ }
+  inv := ObjectProperty.homMk
+    { hom := FintypeCat.homMk (fun ζ =>
+        (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+          ((rootsSepQbarEquiv N).symm ζ))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun ζ =>
+        (cycloReadInv_comp N σ ζ).symm }
+  hom_inv_id := by
+    ext φ
+    show (cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+      ((rootsSepQbarEquiv N).symm (rootsSepQbarEquiv N
+        (cycloAlgHomEquivRoots N (SeparableClosure ℚ) φ))) = φ
+    rw [Equiv.symm_apply_apply, Equiv.symm_apply_apply]
+  inv_hom_id := by
+    ext ζ
+    have h1 : rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
+        ((cycloAlgHomEquivRoots N (SeparableClosure ℚ)).symm
+          ((rootsSepQbarEquiv N).symm ζ))) = ζ := by
+      rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply]
+    exact congrArg (fun w : rootsOfUnity N (AlgebraicClosure ℚ) =>
+      ((w : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) h1
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
