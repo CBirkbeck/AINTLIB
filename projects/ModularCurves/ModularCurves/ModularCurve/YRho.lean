@@ -5978,6 +5978,27 @@ theorem eZMap_read (D : GaloisRepData N) [Fact (1 < N)]
       (muNPointsEquiv dE.Z N _ v : Γ(T, ⊤))) ?_
   exact Subtype.ext rfl
 
+/-- **[T-CV-3b-iii-iii]** The `γ`-translated tautological section classifies the
+`glSmul`-acted universal level structure (the equivariance of the relative datum at
+the tautological section, with the `gammaHAut` double inverse collapsed). -/
+theorem univLevel_zx {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    dE.eqv dE.f ⟨dE.σZ.hom (Subgroup.topEquiv.symm γ), dE.over_base _⟩ =
+      (X.pullbackAlong dE.f).curve.glSmul γ (univLevel dE) := by
+  have h := dE.equivariant dE.f ⟨𝟙 dE.Z, Category.id_comp dE.f⟩
+    (Subgroup.topEquiv.symm γ)
+  refine Eq.trans (congrArg (dE.eqv dE.f)
+    (Subtype.ext (Category.id_comp _).symm)) (h.trans ?_)
+  show ((X.pullbackAlong dE.f).curve.glSmul
+    ((((Subgroup.topEquiv.symm γ)⁻¹ : (⊤ : Subgroup
+        (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))))⁻¹ :
+      (⊤ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) :
+      Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (univLevel dE)) = _
+  rw [inv_inv]
+  rfl
+
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
 frames factor, carrying the diagonal action. -/
