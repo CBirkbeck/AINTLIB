@@ -48,4 +48,37 @@ theorem sectionPoleSheafPower_four_baseSectionsBasisOfCartierGenerator
     sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator_mul
       hsm z hz U hU r hspan hnzd 1 1 hH3 b3 x hx x hx
 
+/-- Normalized pole-order-two and pole-order-three sections adjoin their product
+to a basis of the fourth pole module, producing a compatible fifth-pole basis. -/
+theorem sectionPoleSheafPower_five_baseSectionsBasisOfCartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hH4 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 4).sheaf 1))
+    (b4 : Module.Basis (Fin 4) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 4)))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1) :
+    ∃ b5 : Module.Basis (Fin 5) Γ(S, (⊤ : S.Opens))
+        (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 5)),
+      (∀ i : Fin 4,
+        b5 (Fin.castAdd 1 i) =
+          Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 4) (b4 i)) ∧
+        b5 (Fin.last 4) =
+          sectionPoleSheafPower_baseSectionsMul z hz 2 3 (x ⊗ₜ y) := by
+  simpa using
+    sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator_mul
+      hsm z hz U hU r hspan hnzd 1 2 hH4 b4 x hx y hy
+
 end ModularCurves
