@@ -4351,6 +4351,52 @@ lemma muNRootsAction_isContinuous (D : GaloisRepData N) [Fact (1 < N)] :
         rfl
     _ = w := hσ₀
 
+open scoped FintypeCatDiscrete in
+/-- The roots set as a continuous Galois set. -/
+noncomputable abbrev muNRootsContAction (D : GaloisRepData N) [Fact (1 < N)] :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨muNRootsAction N, muNRootsAction_isContinuous D⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[CARVE-1d-i]** The pairing-normalisation comparison: `u ↦ p(ofAdd u)` is
+equivariant from the twisted units into the roots (by `p_equivariant`). -/
+noncomputable def detCompMor (D : GaloisRepData N) [Fact (1 < N)] :
+    cycloUnitsContAction D ⟶ muNRootsContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk
+        (fun u => D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun u => Subtype.ext (Units.ext (by
+        show ((D.p (Multiplicative.ofAdd
+            (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+              (card_rootsOfUnity_algClosureQ N)
+              (galSepMulEquivGalQ σ).toRingEquiv * u : (ZMod N)ˣ) :
+              ZMod N))) : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) =
+          (galSepMulEquivGalQ σ)
+            ((D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) :
+              (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
+        rw [D.p_equivariant (galSepMulEquivGalQ σ)
+          (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N))]
+        congr 2
+        rw [show (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) ^
+            ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+              (card_rootsOfUnity_algClosureQ N)
+              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val =
+          Multiplicative.ofAdd
+            (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+              (card_rootsOfUnity_algClosureQ N)
+              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val •
+            ((u : (ZMod N)ˣ) : ZMod N)) from rfl]
+        rw [Units.val_mul, nsmul_eq_mul]
+        congr 1
+        rw [show (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val :
+            ZMod N) =
+          ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N) from by
+          simp only [ZMod.natCast_val, ZMod.cast_id]])) }
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
