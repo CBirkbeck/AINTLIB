@@ -130,6 +130,59 @@ private theorem
       hsm z hz t
   exact hprojective.trans hliteral
 
+/-- After every affine base change, the canonical first pole section is the
+sole vector of a basis of the base-changed first pole module. -/
+theorem
+    FibrewiseElliptic.exists_sectionPoleSheafPowerOne_projectiveClosed_baseChange_basis
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R))
+    [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {T : Scheme.{u}} [IsAffine T] (t : T ⟶ Spec (.of R)) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let πT := pullback.snd π t
+    let zT := sectionBaseChange z hz t
+    let hzT := sectionBaseChange_snd z hz t
+    ∃ b : Module.Basis (Fin 1) Γ(T, (⊤ : T.Opens))
+        (Scheme.Modules.baseSections πT
+          (sectionPoleSheafPower πT zT hzT 1)),
+      b 0 = sectionPoleSheafPowerOneSection πT zT hzT := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz 1
+  let πT := pullback.snd π t
+  let zT := sectionBaseChange z hz t
+  let hzT := sectionBaseChange_snd z hz t
+  let MT := sectionPoleSheafPower πT zT hzT 1
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  let A := Γ(T, (⊤ : T.Opens))
+  let P := Scheme.Modules.baseSections π M
+  letI : Algebra B A := t.appTop.hom.toAlgebra
+  obtain ⟨b, hb⟩ :=
+    h.exists_sectionPoleSheafPowerOne_projectiveClosed_basis
+      f hsm z hz
+  let eBC : A ⊗[B] P ≃ₗ[A]
+      Scheme.Modules.baseSections πT MT :=
+    h.sectionPoleSheafPower_projectiveClosed_baseSectionsBaseChangeLinearEquiv
+      f hsm z hz (n := 1) (by simp) t
+  let bT : Module.Basis (Fin 1) A
+      (Scheme.Modules.baseSections πT MT) :=
+    (b.baseChange A).map eBC
+  refine ⟨bT, ?_⟩
+  rw [show bT 0 = eBC ((b.baseChange A) 0) by
+    exact Module.Basis.map_apply (b.baseChange A) eBC 0]
+  rw [Module.Basis.baseChange_apply, hb]
+  exact h.sectionPoleSheafPowerOne_projectiveClosed_baseSectionsBaseChange_eq
+    f hsm z hz t
+
 /-- Around every base prime, the geometric first pole-section module admits a
 singleton basis whose vector is the literal constant section after the
 corresponding principal affine base change. -/
