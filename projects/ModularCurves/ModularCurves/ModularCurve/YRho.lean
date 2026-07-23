@@ -3667,6 +3667,170 @@ theorem sigmaι_fullLevelHom {T : Scheme.{0}} {E : EllipticCurve T}
             smul_zero, add_zero])) :=
   Limits.Sigma.ι_desc _ _
 
+/-- **[3c-C]** The pinned coordinate formula: the coordinate of a `ℚ̄`-torsion point
+through the pinned dictionary is the frame matrix acting on the full-level index. -/
+theorem coord_framedPinned (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (x : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    {u : Fin 2 → ZMod N}
+    (hfac : E.pointToTorsion x hx ≫ (E.fullLevelIso hinv L).inv =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u) :
+    coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+      (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht x hx =
+    wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩ • u := by
+  haveI := frameEvalSlice_isIso D sT h hover
+  set R1 := (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom
+    with hR1
+  set R2 := pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+      (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+      (by rw [Category.comp_id, Category.id_comp])
+      (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) with hR2
+  set R3 := pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+      (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+      (by rw [Category.comp_id, Category.id_comp])
+      (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) with hR3
+  set SL := frameEvalSlice D sT h hover with hSL
+  set IN := pullback.lift (pullback.snd sT (constVecSchemeπ N))
+      (pullback.fst sT (constVecSchemeπ N) ≫ h)
+      (by rw [Category.assoc, hover, ← pullback.condition]) with hIN
+  -- atomic projection facts
+  have hR1fst : R1 ≫ pullback.fst sT (constSchemeπ (Spec (.of ℚ))
+      (Fin 2 → ZMod N)) = constSchemeπ T (Fin 2 → ZMod N) :=
+    IsPullback.isoPullback_hom_fst _
+  have hR1snd : R1 ≫ pullback.snd sT (constSchemeπ (Spec (.of ℚ))
+      (Fin 2 → ZMod N)) = constSchemeMapAlong sT (Fin 2 → ZMod N) :=
+    IsPullback.isoPullback_hom_snd _
+  have hR2fst : R2 ≫ pullback.fst sT (constVecSchemeπ N) =
+      pullback.fst sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) :=
+    (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+  have hR2snd : R2 ≫ pullback.snd sT (constVecSchemeπ N) =
+      pullback.snd sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) ≫
+        (constVecSchemeIso N).hom :=
+    pullback.lift_snd _ _ _
+  have hR3fst : R3 ≫ pullback.fst sT (constVecSchemeπ N) =
+      pullback.fst sT (constVecSchemeπ N) :=
+    (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+  have hR3snd : R3 ≫ pullback.snd sT (constVecSchemeπ N) =
+      pullback.snd sT (constVecSchemeπ N) ≫ (corrSchemeIso N).hom :=
+    pullback.lift_snd _ _ _
+  have hSLfst : SL ≫ pullback.fst (vRhoπ D) sT = IN ≫ frameEval D :=
+    frameEvalSlice_fst D sT h hover
+  have hINfst : IN ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) =
+      pullback.snd sT (constVecSchemeπ N) :=
+    pullback.lift_fst _ _ _
+  have hINsnd : IN ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D) =
+      pullback.fst sT (constVecSchemeπ N) ≫ h :=
+    pullback.lift_snd _ _ _
+  have hhom : (framedTorsionIsoPinned D sT E hinv L h hover).hom =
+      (E.fullLevelIso hinv L).inv ≫ R1 ≫ R2 ≫ R3 ≫ SL := rfl
+  -- the sliced value of the coordinate point
+  set q : Spec (.of (AlgebraicClosure ℚ)) ⟶ pullback sT (constVecSchemeπ N) :=
+    t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u ≫ R1 ≫ R2 ≫ R3 with hq
+  have hval : E.pointToTorsion x hx ≫
+      (framedTorsionIsoPinned D sT E hinv L h hover).hom ≫
+      pullback.fst (vRhoπ D) sT = (q ≫ IN) ≫ frameEval D := by
+    rw [hhom]
+    simp only [Category.assoc]
+    rw [← Category.assoc (E.pointToTorsion x hx) (E.fullLevelIso hinv L).inv,
+      hfac, hSLfst, hq]
+    simp only [Category.assoc]
+  -- projections of the composite point
+  have hqfst : q ≫ pullback.fst sT (constVecSchemeπ N) = t := by
+    rw [hq]
+    simp only [Category.assoc]
+    rw [hR3fst, hR2fst, hR1fst]
+    rw [show Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u ≫
+        constSchemeπ T (Fin 2 → ZMod N) = 𝟙 T from Limits.Sigma.ι_desc _ _,
+      Category.comp_id]
+  have hqsnd : q ≫ pullback.snd sT (constVecSchemeπ N) =
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+        Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u ≫
+        (constVecSchemeIso N).hom) ≫ (corrSchemeIso N).hom := by
+    rw [hq]
+    simp only [Category.assoc]
+    refine Eq.trans (congrArg (fun v => t ≫
+      Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u ≫ R1 ≫ R2 ≫ v) hR3snd) ?_
+    refine Eq.trans (congrArg (fun v => t ≫
+      Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u ≫ R1 ≫ v)
+      ((Category.assoc R2 _ _).symm.trans
+        (congrArg (· ≫ (corrSchemeIso N).hom) hR2snd))) ?_
+    refine Eq.trans (congrArg (fun v => t ≫
+      Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) u ≫ v)
+      ((congrArg (R1 ≫ ·) (Category.assoc _ _ _)).trans
+        ((Category.assoc R1 _ _).symm.trans
+          (congrArg (· ≫ ((constVecSchemeIso N).hom ≫ (corrSchemeIso N).hom))
+            hR1snd)))) ?_
+    refine Eq.trans (congrArg (t ≫ ·)
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ ((constVecSchemeIso N).hom ≫ (corrSchemeIso N).hom))
+          (ι_constSchemeMapAlong sT (Fin 2 → ZMod N) u)))) ?_
+    refine Eq.trans ((Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ ((constVecSchemeIso N).hom ≫ (corrSchemeIso N).hom))
+        ((Category.assoc _ _ _).symm.trans (congrArg (· ≫
+          Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u)
+          ht))))) ?_
+    simp only [Category.assoc]
+  -- the over-ℚ̄ base fact for the constant point
+  have hPTov : (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+      Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u ≫
+      (constVecSchemeIso N).hom) ≫ constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) := by
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ ·) (Category.assoc _ _ _)) ?_
+    refine Eq.trans (congrArg (fun v => Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+        Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u ≫ v)
+      (constVecSchemeIso_π N)) ?_
+    refine Eq.trans (congrArg (Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ ·)
+      (Limits.Sigma.ι_desc (f := fun _ : (Fin 2 → ZMod N) =>
+        Spec (CommRingCat.of ℚ)) (fun _ => 𝟙 _) u)) ?_
+    exact Category.comp_id _
+  -- projections of the sliced point
+  have hfst2 : (q ≫ IN) ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) =
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+        Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u ≫
+        (constVecSchemeIso N).hom) ≫ (corrSchemeIso N).hom := by
+    rw [Category.assoc, hINfst]
+    exact hqsnd
+  have hsnd2 : (q ≫ IN) ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D) =
+      t ≫ h := by
+    rw [Category.assoc, hINsnd, ← Category.assoc, hqfst]
+  have hp : (q ≫ IN) ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) ≫
+      constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    (Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ constVecSchemeπ N) hfst2).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg ((Spec.map (CommRingCat.ofHom
+              (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+            Sigma.ι (fun _ : (Fin 2 → ZMod N) => Spec (CommRingCat.of ℚ)) u ≫
+            (constVecSchemeIso N).hom) ≫ ·) (corrSchemeIso_π N)).trans hPTov)))
+  have hfe := frameEval_points D (q ≫ IN) hp
+  have hwr : wFramesPointsEquiv D
+      ⟨(q ≫ IN) ≫ pullback.snd (constVecSchemeπ N) (wFramesπ D), by
+        rw [Category.assoc, ← pullback.condition]; exact hp⟩ =
+      wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩ :=
+    congrArg (wFramesPointsEquiv D) (Subtype.ext hsnd2)
+  have hcv : constVecPointsEquiv N
+      ⟨(q ≫ IN) ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D), by
+        rw [Category.assoc]; exact hp⟩ = u :=
+    (congrArg (constVecPointsEquiv N) (Subtype.ext hfst2)).trans
+      ((constVecPointsEquiv_corrScheme N _ hPTov).trans
+        (constVecIndexRead_const N u hPTov))
+  refine Eq.trans (congrArg (vRhoPointsEquiv D) (Subtype.ext hval)) (hfe.trans ?_)
+  refine Eq.trans (congrArg
+    (fun A : Matrix.GeneralLinearGroup (Fin 2) (ZMod N) =>
+      A • constVecPointsEquiv N ⟨(q ≫ IN) ≫ pullback.fst (constVecSchemeπ N)
+        (wFramesπ D), by rw [Category.assoc]; exact hp⟩) hwr) ?_
+  exact congrArg (fun v => wFramesPointsEquiv D ⟨t ≫ h, by
+    rw [Category.assoc, hover, ht]⟩ • v) hcv
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
