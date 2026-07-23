@@ -25259,6 +25259,51 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### asm-2b COMPLETE (2026-07-26) — asm-2 FULLY DONE
+**frameEvalSlice_isIso PROVEN + PUSHED.** The whole 2b-i..vi chain landed in ~5 build
+cycles, all zero-bump term-chains:
+- 2b-i rhoFrameProd substrate (action σ(w,A)=(ρσw,ρσA) + continuity + Fst/Snd +
+  IsProduct) — pure line-mirrors.
+- 2b-ii rhoFrameProdAlgebraIso + inv_left/right cofan-compats — mirrors; the
+  inline-P/Q + conePointUniqueUpToIso_hom_comp template held.
+- 2b-iii frameShearMor/frameCoshearMor/frameCoevalMor + 6 composite identities
+  (`ext x : 3` + rfl / inv_smul_smul / smul_inv_smul).
+- 2b-iv frameCoevalAlgHom/frameShearAlgHom/frameCoshearAlgHom + frameCoeval +
+  frameCoeval_π (frameEval_π-mirror) + framePairEval/framePairCoeval.
+- 2b-v THE SHEAR-TRANSPORT CORE (all first-build green): 6 FE-compat lemmas
+  (hop-in-ᵒᵖ: simp[assoc, hom_inv_id_assoc] + map_comp-FIELD-congrArg + the
+  finite-set identity, then congrArg-unop + the cofan-compats), 2 Spec-conjugations
+  (framePairEval/Coeval ARE Spec of the shear comultiplications — pullback.hom_ext,
+  refine-trans chains, projection lemmas as TERMS never rw), CORE-A/B
+  (pair-then-(co)evaluate = fst — hom_inv-insert + conj + map_comp-merge + ring-eq
+  + hom_fst').
+- 2b-vi frameEvalSliceInv + frameEvalSlice_isIso — slice laws reduce to CORE-A/B
+  precomposed with the h-graph-lift. LESSON: defs are OPAQUE to lift-simp-lemmas —
+  every pullback.lift-def needs its own @[reassoc] projection lemmas
+  (frameEvalSlice_fst/snd, frameEvalSliceInv_fst/snd, framePairEval_fst/snd,
+  framePairCoeval_fst/snd all added); with those in the simp-set the hom_ext
+  components close.
+AXIOM CENSUS: pending-verify (buj69fkc8) — expect [propext, Classical.choice, Quot.sound].
+
+**NEXT: asm-3 (the ρ-dictionary), decomposed:**
+- [asm-3a] `constSchemeBaseChangeIso (k : T ⟶ S) (A) : constScheme T A ≅
+  pullback k (constSchemeπ S A)` — NEW public API in GroupScheme/MuN.lean (needs the
+  private constDesc/constIndex machinery): hom := pullback.lift (constSchemeπ T A)
+  (constSchemeMapAlong k A) (constSchemeMapAlong_π); inv := constDesc
+  (pullback.fst …) (read-of-snd via constSchemePointsEquiv at pullback.condition.symm);
+  inv_hom_snd via constDesc-MapAlong-compat (new private lemma) +
+  Equiv.symm_apply_apply-val; hom_inv via Sigma.hom_ext + equiv-injectivity +
+  a mapAlong-read-compat (read_S(x ≫ MapAlong) = read_T(x), constIndex-level).
+  Plus `constVecSchemeIso_π` in YRho ((constVecSchemeIso N).hom ≫ constVecSchemeπ N =
+  constSchemeπ (Spec ℚ) V — ext-r commutes-chase).
+- [asm-3b] torsionIso := (fullLevelIso hinv L).symm ≪≫ constSchemeBaseChangeIso ≪≫
+  (congrHom-right along constVecSchemeIso with the π-compat) ≪≫
+  asIso (frameEvalSlice D sT h hover); over_T from the projection-compats.
+- [asm-3c] coords_additive — the coordinate-read through torsionIso on ℚ̄-points:
+  frameEval_points + fullLevelHom points-additivity (GLSchemeAction reads) +
+  constSchemePointsEquiv-naturality.
+- [asm-3d] pairing_compat — same read + weilPairingEval_symplectic (T-C2c register).
+
 ### asm-2a COMPLETE + 2b plan (2026-07-26)
 **asm-2a LANDED**: `frameEval_points` PROVEN + AXIOM-CLEAN [propext, Classical.choice,
 Quot.sound] (census verified, pushed 428ed655f): the ℚ̄-points of the evaluation read
