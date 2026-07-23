@@ -7054,6 +7054,228 @@ theorem bareFramed_quotient_affineOverEll (D : GaloisRepData N)
     pkg.prob.AffineOverEll :=
   pkg.affineOverEll
 
+/-- **[T-CV-3c-6]** A classified bare framed value is map-level symplectic iff its
+classifying map equalises the two comparisons (the [B1]-bridge packaged as an iff:
+`pairEZMap_classified` on the pairing side, associativity on the determinant
+side). -/
+theorem sympLocus_agree_iff_symp (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}} (g : T ⟶ X.base)
+    (h₀ : T ⟶ pullback dE.f (pullback.fst X.structMap (wFramesπ D)))
+    (p₀ : h₀ ≫ (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+      dE.f) = g) :
+    (h₀ ≫ eZMap D dE = h₀ ≫ dZMap D dE) ↔
+      pairEZMap D (X.pullbackAlong g).structMap (X.pullbackAlong g).curve
+          ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.1.1
+          ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.1.2
+          ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.2.1.1
+          ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.2.1.2 =
+        frameDetMap D
+          ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).2.1 := by
+  have he : pairEZMap D (X.pullbackAlong g).structMap (X.pullbackAlong g).curve
+      ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.1.1
+      ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.1.2
+      ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.2.1.1
+      ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).1.2.1.2 =
+      h₀ ≫ eZMap D dE :=
+    pairEZMap_classified D dE h₀ (by simp only [Category.assoc]; exact p₀)
+  have hd : h₀ ≫ dZMap D dE = frameDetMap D
+      ((bareFramedRelRepData D dE.toRelRepData).eqv g ⟨h₀, p₀⟩).2.1 := by
+    show h₀ ≫ dZMap D dE = frameDetMap D
+      ((h₀ ≫ pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D))) ≫
+        pullback.snd X.structMap (wFramesπ D))
+    rw [dZMap, frameDetMap]
+    simp only [Category.assoc]
+  exact ⟨fun hag => he.trans (hag.trans hd),
+    fun hs => he.symm.trans (hs.trans hd.symm)⟩
+
+/-- **[T-CV-3c-6]** A map-level symplectic value's classifying map factors through
+the symplectic locus. -/
+theorem sympLocusSection_exists (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}} {g : T ⟶ X.base}
+    (v : (sympFramedProblem D).obj (Opposite.op (X.pullbackAlong g))) :
+    ∃ w : T ⟶ sympLocus D dE, w ≫ sympLocusι D dE =
+      (((bareFramedRelRepData D dE.toRelRepData).eqv g).symm v.val).1 :=
+  (sympLocus_factor_iff D dE
+    (((bareFramedRelRepData D dE.toRelRepData).eqv g).symm v.val).1).mpr
+    ((sympLocus_agree_iff_symp D dE g
+        (((bareFramedRelRepData D dE.toRelRepData).eqv g).symm v.val).1
+        (((bareFramedRelRepData D dE.toRelRepData).eqv g).symm v.val).2).mpr
+      ((congrArg (fun w : (bareFramedProblem D).obj
+          (Opposite.op (X.pullbackAlong g)) =>
+        pairEZMap D (X.pullbackAlong g).structMap (X.pullbackAlong g).curve
+          w.1.1.1 w.1.1.2 w.1.2.1.1 w.1.2.1.2)
+        (Equiv.apply_symm_apply
+          ((bareFramedRelRepData D dE.toRelRepData).eqv g) v.val)).trans
+        (v.property.trans (congrArg (fun w : (bareFramedProblem D).obj
+            (Opposite.op (X.pullbackAlong g)) => frameDetMap D w.2.1)
+          (Equiv.apply_symm_apply
+            ((bareFramedRelRepData D dE.toRelRepData).eqv g) v.val).symm))))
+
+/-- **[T-CV-3c-6]** The locus-section classifying a map-level symplectic value. -/
+noncomputable def sympLocusSection (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}} {g : T ⟶ X.base}
+    (v : (sympFramedProblem D).obj (Opposite.op (X.pullbackAlong g))) :
+    T ⟶ sympLocus D dE :=
+  (sympLocusSection_exists D dE v).choose
+
+/-- **[T-CV-3c-6]** Its defining property. -/
+theorem sympLocusSection_ι (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X)
+    {T : Scheme.{0}} {g : T ⟶ X.base}
+    (v : (sympFramedProblem D).obj (Opposite.op (X.pullbackAlong g))) :
+    sympLocusSection D dE v ≫ sympLocusι D dE =
+      (((bareFramedRelRepData D dE.toRelRepData).eqv g).symm v.val).1 :=
+  (sympLocusSection_exists D dE v).choose_spec
+
+/-- **[T-CV-3c-6]** The symplectically framed problem has equivariant relative data
+at every `X`: the symplectic locus of the framed test space carrying the restricted
+diagonal action; the classifying bijection is the bare one conjugated by the clopen
+locus inclusion, with the symplectic condition matched by the [B1]-bridge and the
+factoring criterion. -/
+theorem sympFramed_equivariantRelRepData (D : GaloisRepData N) [Fact (1 < N)]
+    (X : EllObj (CommRingCat.of ℚ)) :
+    Nonempty (ModuliProblem.EquivariantRelRepData (sympFramedAut D) X) := by
+  have hinvQ : IsUnit ((N : ℕ) : ℚ) :=
+    isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (NeZero.ne N))
+  obtain ⟨dE⟩ := gammaFullNaive_equivariantRelRepData (CommRingCat.of ℚ) N ⊤ hinvQ X
+  haveI hOI : IsOpenImmersion (sympLocusι D dE) := sympLocusι_isOpenImmersion D dE
+  haveI hCI : IsClosedImmersion (sympLocusι D dE) :=
+    sympLocusι_isClosedImmersion D dE
+  refine ⟨{
+    Z := sympLocus D dE
+    f := sympLocusι D dE ≫
+      (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f)
+    eqv := fun {T} g =>
+      { toFun := fun u => ⟨(bareFramedRelRepData D dE.toRelRepData).eqv g
+            ⟨u.1 ≫ sympLocusι D dE, by
+              show (u.1 ≫ sympLocusι D dE) ≫
+                (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+                  dE.f) = g
+              simpa only [Category.assoc] using u.2⟩,
+          (sympLocus_agree_iff_symp D dE g (u.1 ≫ sympLocusι D dE) _).mp
+            ((sympLocus_factor_iff D dE (u.1 ≫ sympLocusι D dE)).mp
+              ⟨u.1, rfl⟩)⟩
+        invFun := fun v => ⟨sympLocusSection D dE v, by
+          show sympLocusSection D dE v ≫ (sympLocusι D dE ≫
+            (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+              dE.f)) = g
+          refine (Category.assoc _ _ _).symm.trans ?_
+          refine (congrArg (· ≫ (pullback.fst dE.f
+            (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f))
+            (sympLocusSection_ι D dE v)).trans ?_
+          exact (((bareFramedRelRepData D dE.toRelRepData).eqv g).symm v.val).2⟩
+        left_inv := fun u => Subtype.ext (by
+          rw [← cancel_mono (sympLocusι D dE)]
+          refine (sympLocusSection_ι D dE _).trans ?_
+          exact congrArg Subtype.val (Equiv.symm_apply_apply
+            ((bareFramedRelRepData D dE.toRelRepData).eqv g)
+            ⟨u.1 ≫ sympLocusι D dE, by
+              show (u.1 ≫ sympLocusι D dE) ≫
+                (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+                  dE.f) = g
+              simpa only [Category.assoc] using u.2⟩))
+        right_inv := fun v => Subtype.ext ((congrArg
+            ((bareFramedRelRepData D dE.toRelRepData).eqv g)
+            (Subtype.ext (sympLocusSection_ι D dE v))).trans
+          (Equiv.apply_symm_apply
+            ((bareFramedRelRepData D dE.toRelRepData).eqv g) v.val)) }
+    nat := ?_
+    σZ := ⟨fun γ => zxSympAction D dE γ, zxSympAction_one D dE,
+      zxSympAction_mul D dE⟩
+    over_base := ?_
+    equivariant := ?_
+    finite := ?_
+    etale := ?_ }⟩
+  · intro T T' g k u
+    refine Subtype.ext (Eq.trans
+      (relRep_eqv_congr (bareFramedRelRepData D dE.toRelRepData) (k ≫ g)
+        (Category.assoc k u.1 (sympLocusι D dE)) (by
+          show ((k ≫ u.1) ≫ sympLocusι D dE) ≫
+            (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+              dE.f) = k ≫ g
+          simp only [Category.assoc]
+          exact congrArg (k ≫ ·) (by
+            simpa only [Category.assoc] using u.2))) ?_)
+    exact (bareFramedRelRepData D dE.toRelRepData).nat g k
+      ⟨u.1 ≫ sympLocusι D dE, by
+        show (u.1 ≫ sympLocusι D dE) ≫
+          (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+            dE.f) = g
+        simpa only [Category.assoc] using u.2⟩
+  · intro γ
+    show zxSympAction D dE γ ≫ (sympLocusι D dE ≫
+      (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f)) =
+      sympLocusι D dE ≫
+        (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f)
+    rw [← Category.assoc, zxSympAction_ι, Category.assoc,
+      reassoc_of% (zxAction_fst D dE γ), dE.over_base]
+  · intro T g u γ
+    refine Subtype.ext (Eq.trans
+      (relRep_eqv_congr (bareFramedRelRepData D dE.toRelRepData) g
+        (show (u.1 ≫ zxSympAction D dE γ) ≫ sympLocusι D dE =
+            (u.1 ≫ sympLocusι D dE) ≫ zxAction D dE γ from by
+          rw [Category.assoc, zxSympAction_ι, ← Category.assoc]) (by
+          show ((u.1 ≫ zxSympAction D dE γ) ≫ sympLocusι D dE) ≫
+            (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+              dE.f) = g
+          simp only [Category.assoc]
+          rw [reassoc_of% (zxSympAction_ι D dE γ),
+            reassoc_of% (zxAction_fst D dE γ), dE.over_base]
+          simpa only [Category.assoc] using u.2)) ?_)
+    exact bareFramed_zxAction_eqv D dE g
+      ⟨u.1 ≫ sympLocusι D dE, by
+        show (u.1 ≫ sympLocusι D dE) ≫
+          (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+            dE.f) = g
+        simpa only [Category.assoc] using u.2⟩ γ
+  · haveI h1 : IsFinite (wFramesπ D) := (wFramesπ_finite_etale D).1
+    haveI h2 : IsFinite (pullback.fst X.structMap (wFramesπ D)) :=
+      MorphismProperty.pullback_fst _ _ h1
+    haveI h3 : IsFinite (pullback.fst dE.f
+        (pullback.fst X.structMap (wFramesπ D))) :=
+      MorphismProperty.pullback_fst _ _ h2
+    haveI h4 : IsFinite dE.f := dE.finite
+    haveI h5 : IsFinite (sympLocusι D dE) := inferInstance
+    show IsFinite (sympLocusι D dE ≫
+      (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f))
+    exact inferInstance
+  · haveI h1 : Etale (wFramesπ D) := (wFramesπ_finite_etale D).2
+    haveI h2 : Etale (pullback.fst X.structMap (wFramesπ D)) :=
+      MorphismProperty.pullback_fst _ _ h1
+    haveI h3 : Etale (pullback.fst dE.f
+        (pullback.fst X.structMap (wFramesπ D))) :=
+      MorphismProperty.pullback_fst _ _ h2
+    haveI h4 : Etale dE.f := dE.etale
+    haveI h5 : Etale (sympLocusι D dE) := inferInstance
+    show Etale (sympLocusι D dE ≫
+      (pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫ dE.f))
+    exact inferInstance
+
+/-- **[T-CV-4]** The free `GL₂`-quotient of the symplectically framed problem exists
+as a quotient-problem package (the carved mirror of
+`bareFramed_quotientProblemData`). -/
+theorem sympFramed_quotientProblemData (D : GaloisRepData N) [Fact (1 < N)] :
+    Nonempty (ModuliProblem.QuotientProblemData (sympFramedAut D)) :=
+  ModuliProblem.exists_quotientProblemData (sympFramedAut D)
+    (sympFramedAut_freeAction D) (sympFramed_equivariantRelRepData D)
+
+/-- **[T-CV-4]** The carved quotient is affine over `Ell/ℚ`. -/
+theorem sympFramed_quotient_affineOverEll (D : GaloisRepData N) [Fact (1 < N)]
+    (pkg : ModuliProblem.QuotientProblemData (sympFramedAut D)) :
+    pkg.prob.AffineOverEll :=
+  pkg.affineOverEll
+
 end FramedProblemFunctor
 
 
