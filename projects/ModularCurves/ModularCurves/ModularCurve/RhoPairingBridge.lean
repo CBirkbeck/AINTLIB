@@ -585,6 +585,36 @@ theorem framedPinned_hcore_of_abs (D : GaloisRepData N) [Fact (1 < N)]
   rw [Category.assoc, habs v w, frameDetMap]
   simp only [Category.assoc]
 
+open TensorProduct in
+/-- **[PIN-6c]** A pair of `Spec`-maps into a `Spec`-fibre square is the `Spec`-map
+of the tensor product map. -/
+theorem lift_pullbackSpecIso_hom (R A B C : Type) [CommRing R] [CommRing A]
+    [CommRing B] [CommRing C] [Algebra R A] [Algebra R B] [Algebra R C]
+    (f : A →ₐ[R] C) (g : B →ₐ[R] C)
+    (h : Spec.map (CommRingCat.ofHom f.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap R A)) =
+      Spec.map (CommRingCat.ofHom g.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap R B))) :
+    pullback.lift (Spec.map (CommRingCat.ofHom f.toRingHom))
+        (Spec.map (CommRingCat.ofHom g.toRingHom)) h ≫
+      (AlgebraicGeometry.pullbackSpecIso R A B).hom =
+    Spec.map (CommRingCat.ofHom
+      (Algebra.TensorProduct.productMap f g).toRingHom) := by
+  rw [← Iso.eq_comp_inv]
+  apply pullback.hom_ext
+  · rw [pullback.lift_fst, Category.assoc,
+      AlgebraicGeometry.pullbackSpecIso_inv_fst, ← AlgebraicGeometry.Spec.map_comp]
+    refine congrArg AlgebraicGeometry.Spec.map ?_
+    ext a
+    show f a = (Algebra.TensorProduct.productMap f g) (a ⊗ₜ[R] 1)
+    rw [Algebra.TensorProduct.productMap_apply_tmul, map_one, mul_one]
+  · rw [pullback.lift_snd, Category.assoc,
+      AlgebraicGeometry.pullbackSpecIso_inv_snd, ← AlgebraicGeometry.Spec.map_comp]
+    refine congrArg AlgebraicGeometry.Spec.map ?_
+    ext b
+    show g b = (Algebra.TensorProduct.productMap f g) (1 ⊗ₜ[R] b)
+    rw [Algebra.TensorProduct.productMap_apply_tmul, map_one, one_mul]
+
 end
 
 end ModularCurves
