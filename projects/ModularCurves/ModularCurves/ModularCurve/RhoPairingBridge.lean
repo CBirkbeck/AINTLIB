@@ -91,6 +91,55 @@ theorem torsionPairEval_read (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0
     ⟨pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy)
       (by simp) ≫ E.weilPairing N, hover⟩
 
+/-- **[PIN-2]** The `V_ρ`-leg of a `ρ`-trivialization is compatible with the
+structure maps. -/
+theorem torsionLeg_vRhoπ (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N) :
+    (torsionIso.hom ≫ pullback.fst (vRhoπ D) sT) ≫ vRhoπ D =
+      E.torsionπ N ≫ sT := by
+  rw [Category.assoc, pullback.condition, ← Category.assoc, hOver]
+
+/-- **[PIN-2]** The universal-pair reduction: the all-pairs morphism-level pairing
+identity follows from its instance at the tautological pair over the torsion fibre
+square (stated as an identity of maps out of the square). -/
+theorem pairing_scheme_of_universal (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) {E : EllipticCurve T}
+    (torsionIso : E.torsion N ≅ pullback (vRhoπ D) sT)
+    (hOver : torsionIso.hom ≫ pullback.snd (vRhoπ D) sT = E.torsionπ N)
+    (huniv : E.weilPairing N ≫ muNMapAlong sT N ≫ (muNSpecQIso D).hom =
+      pullback.map (E.torsionπ N) (E.torsionπ N) (vRhoπ D) (vRhoπ D)
+        (torsionIso.hom ≫ pullback.fst (vRhoπ D) sT)
+        (torsionIso.hom ≫ pullback.fst (vRhoπ D) sT) sT
+        (torsionLeg_vRhoπ D sT torsionIso hOver).symm
+        (torsionLeg_vRhoπ D sT torsionIso hOver).symm ≫ vRhoPairingMap D)
+    {W : Scheme.{0}} (t : W ⟶ T) (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    torsionPairEval D sT t x y hx hy =
+      coordPairLift D sT torsionIso hOver t x y hx hy ≫ vRhoPairingMap D := by
+  have hfactor : coordPairLift D sT torsionIso hOver t x y hx hy =
+      pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) (by simp) ≫
+        pullback.map (E.torsionπ N) (E.torsionπ N) (vRhoπ D) (vRhoπ D)
+          (torsionIso.hom ≫ pullback.fst (vRhoπ D) sT)
+          (torsionIso.hom ≫ pullback.fst (vRhoπ D) sT) sT
+          (torsionLeg_vRhoπ D sT torsionIso hOver).symm
+          (torsionLeg_vRhoπ D sT torsionIso hOver).symm := by
+    apply pullback.hom_ext
+    · show pullback.lift _ _ _ ≫ pullback.fst (vRhoπ D) (vRhoπ D) =
+        (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) _ ≫
+          pullback.map _ _ _ _ _ _ _ _ _) ≫ pullback.fst (vRhoπ D) (vRhoπ D)
+      rw [pullback.lift_fst, Category.assoc, pullback.lift_fst,
+        pullback.lift_fst_assoc, ← Category.assoc]
+    · show pullback.lift _ _ _ ≫ pullback.snd (vRhoπ D) (vRhoπ D) =
+        (pullback.lift (E.pointToTorsion x hx) (E.pointToTorsion y hy) _ ≫
+          pullback.map _ _ _ _ _ _ _ _ _) ≫ pullback.snd (vRhoπ D) (vRhoπ D)
+      rw [pullback.lift_snd, Category.assoc, pullback.lift_snd,
+        pullback.lift_snd_assoc, ← Category.assoc]
+  rw [torsionPairEval, huniv, hfactor]
+  simp only [Category.assoc]
+
 end
 
 end ModularCurves
