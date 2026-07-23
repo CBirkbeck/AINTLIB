@@ -1,5 +1,6 @@
 import ModularCurves.ForMathlib.AffineModulePatchBaseChangeNaturality
 import ModularCurves.ForMathlib.SheafCechCochains
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCech
 
 /-!
 # Base change for affine Cech complexes of scheme modules
@@ -786,5 +787,281 @@ theorem baseCechXBaseChangeIso_zero_one_tmul_of_projection_eq
   rw [hFactor]
   rw [hAffineTransport]
   exact hUnit
+
+/-- In each degree, extension of scalars on the ordered base-linear Cech complex is
+identified with the corresponding ordered term for the pulled-back module and cover. -/
+noncomputable def orderedBaseCechXBaseChangeIso
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (n : ℕ) :
+    (ModuleCat.extendScalars t.appTop.hom).obj
+        ((orderedBaseCechComplex f M U).X n) ≅
+      (orderedBaseCechComplex (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M)
+          (fun i => pullback.fst f t ⁻¹ᵁ U i)).X n := by
+  letI : Finite (OrderedCechIndex ι n) :=
+    Finite.of_injective Subtype.val Subtype.val_injective
+  letI : Fintype (OrderedCechIndex ι n) := Fintype.ofFinite _
+  exact extendScalarsProductIso t.appTop.hom
+      (fun i : OrderedCechIndex ι n =>
+        baseCechFactor f M U n i.1) ≪≫
+    Pi.mapIso (fun i : OrderedCechIndex ι n =>
+      baseCechFactorBaseChangeIso f t M U hU n i.1)
+
+/-- The ordered degreewise base-change comparison is componentwise the affine-patch
+comparison for the corresponding increasing Cech intersection. -/
+@[reassoc]
+theorem orderedBaseCechXBaseChangeIso_hom_π
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (n : ℕ) (i : OrderedCechIndex ι n) :
+    (orderedBaseCechXBaseChangeIso f t M U hU n).hom ≫
+        Pi.π (fun j : OrderedCechIndex ι n =>
+          baseCechFactor (pullback.snd f t)
+            ((pullback (pullback.fst f t)).obj M)
+              (fun a => pullback.fst f t ⁻¹ᵁ U a) n j.1) i =
+      (ModuleCat.extendScalars t.appTop.hom).map
+          (Pi.π (fun j : OrderedCechIndex ι n =>
+            baseCechFactor f M U n j.1) i) ≫
+        (baseCechFactorBaseChangeIso f t M U hU n i.1).hom := by
+  letI : Finite (OrderedCechIndex ι n) :=
+    Finite.of_injective Subtype.val Subtype.val_injective
+  letI : Fintype (OrderedCechIndex ι n) := Fintype.ofFinite _
+  dsimp only [orderedBaseCechXBaseChangeIso]
+  let productIso := extendScalarsProductIso t.appTop.hom
+    (fun j : OrderedCechIndex ι n => baseCechFactor f M U n j.1)
+  let factorIso := Pi.mapIso (fun j : OrderedCechIndex ι n =>
+    baseCechFactorBaseChangeIso f t M U hU n j.1)
+  let targetProjection := Pi.π (fun j : OrderedCechIndex ι n =>
+    baseCechFactor (pullback.snd f t)
+      ((pullback (pullback.fst f t)).obj M)
+        (fun a => pullback.fst f t ⁻¹ᵁ U a) n j.1) i
+  have hTrans :
+      (productIso ≪≫ factorIso).hom ≫ targetProjection =
+        productIso.hom ≫ (factorIso.hom ≫ targetProjection) :=
+    (congrArg (fun q => q ≫ targetProjection)
+      (Iso.trans_hom productIso factorIso)).trans (Category.assoc _ _ _)
+  have hPi := Pi.mapIso_hom_π
+    (fun j : OrderedCechIndex ι n =>
+      baseCechFactorBaseChangeIso f t M U hU n j.1) i
+  have hPiLift := congrArg
+    (fun q => productIso.hom ≫ q) hPi
+  have hProduct := extendScalarsProductIso_hom_π_assoc t.appTop.hom
+    (fun j : OrderedCechIndex ι n => baseCechFactor f M U n j.1) i
+    (baseCechFactorBaseChangeIso f t M U hU n i.1).hom
+  exact hTrans.trans <| hPiLift.trans hProduct
+
+private theorem orderedBaseCechXBaseChangeIso_comm_coface
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (n : ℕ) (k : Fin (n + 2)) :
+    (ModuleCat.extendScalars t.appTop.hom).map
+          (orderedBaseCechCoface f M U n k) ≫
+        (orderedBaseCechXBaseChangeIso f t M U hU (n + 1)).hom =
+      (orderedBaseCechXBaseChangeIso f t M U hU n).hom ≫
+        orderedBaseCechCoface (pullback.snd f t)
+          ((pullback (pullback.fst f t)).obj M)
+            (fun i => pullback.fst f t ⁻¹ᵁ U i) n k := by
+  apply Pi.hom_ext
+  intro i
+  let E := ModuleCat.extendScalars t.appTop.hom
+  let P := baseModulePresheaf f M
+  let Q := baseModulePresheaf (pullback.snd f t)
+    ((pullback (pullback.fst f t)).obj M)
+  let Uf := fun a => pullback.fst f t ⁻¹ᵁ U a
+  let sourceProjectionFull :=
+    Pi.π (fun a : OrderedCechIndex ι (n + 1) =>
+      baseCechFactor f M U (n + 1) a.1) i
+  let sourceProjectionDeleted :=
+    Pi.π (fun a : OrderedCechIndex ι n =>
+      baseCechFactor f M U n a.1) (i.delete k)
+  let targetProjectionFull :=
+    Pi.π (fun a : OrderedCechIndex ι (n + 1) =>
+      baseCechFactor (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M) Uf (n + 1) a.1) i
+  let targetProjectionDeleted :=
+    Pi.π (fun a : OrderedCechIndex ι n =>
+      baseCechFactor (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M) Uf n a.1) (i.delete k)
+  let degreeFull :=
+    (orderedBaseCechXBaseChangeIso f t M U hU (n + 1)).hom
+  let degreeDeleted :=
+    (orderedBaseCechXBaseChangeIso f t M U hU n).hom
+  let factorFull :=
+    (baseCechFactorBaseChangeIso f t M U hU (n + 1) i.1).hom
+  let factorDeleted :=
+    (baseCechFactorBaseChangeIso f t M U hU n (i.delete k).1).hom
+  let sourceRestriction := P.map
+    (((FormalCoproduct.mk _ U).mapPower
+      (SimplexCategory.δ k).toOrderHom.toFun).φ i.1).op
+  let targetRestriction := Q.map
+    (((FormalCoproduct.mk _ Uf).mapPower
+      (SimplexCategory.δ k).toOrderHom.toFun).φ i.1).op
+  have hDegreeFull :
+      degreeFull ≫ targetProjectionFull =
+        E.map sourceProjectionFull ≫ factorFull := by
+    dsimp only [degreeFull, targetProjectionFull, E,
+      sourceProjectionFull, factorFull, Uf]
+    exact orderedBaseCechXBaseChangeIso_hom_π
+      f t M U hU (n + 1) i
+  have hDegreeDeleted :
+      degreeDeleted ≫ targetProjectionDeleted =
+        E.map sourceProjectionDeleted ≫ factorDeleted := by
+    dsimp only [degreeDeleted, targetProjectionDeleted, E,
+      sourceProjectionDeleted, factorDeleted, Uf]
+    exact orderedBaseCechXBaseChangeIso_hom_π
+      f t M U hU n (i.delete k)
+  have hSourceCoface :
+      orderedBaseCechCoface f M U n k ≫ sourceProjectionFull =
+        sourceProjectionDeleted ≫ sourceRestriction := by
+    dsimp only [sourceProjectionFull, sourceProjectionDeleted,
+      sourceRestriction, P]
+    exact orderedBaseCechCoface_comp_π f M U n k i
+  have hSourceMapped :
+      E.map (orderedBaseCechCoface f M U n k) ≫
+          E.map sourceProjectionFull =
+        E.map sourceProjectionDeleted ≫ E.map sourceRestriction :=
+    (E.map_comp _ _).symm |>.trans
+      (congrArg E.map hSourceCoface) |>.trans (E.map_comp _ _)
+  have hFactor :
+      E.map sourceRestriction ≫ factorFull =
+        factorDeleted ≫ targetRestriction := by
+    dsimp only [E, sourceRestriction, factorFull, factorDeleted,
+      targetRestriction, P, Q, Uf]
+    exact baseCechFactorBaseChangeIso_naturality
+      f t M U hU n k i.1
+  have hTargetCoface :
+      orderedBaseCechCoface (pullback.snd f t)
+          ((pullback (pullback.fst f t)).obj M) Uf n k ≫
+          targetProjectionFull =
+        targetProjectionDeleted ≫ targetRestriction := by
+    dsimp only [targetProjectionFull, targetProjectionDeleted,
+      targetRestriction, Q]
+    exact orderedBaseCechCoface_comp_π (pullback.snd f t)
+      ((pullback (pullback.fst f t)).obj M) Uf n k i
+  change
+    (E.map (orderedBaseCechCoface f M U n k) ≫ degreeFull) ≫
+        targetProjectionFull =
+      (degreeDeleted ≫ orderedBaseCechCoface (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M) Uf n k) ≫
+          targetProjectionFull
+  have hLeft :
+      (E.map (orderedBaseCechCoface f M U n k) ≫ degreeFull) ≫
+          targetProjectionFull =
+        E.map sourceProjectionDeleted ≫
+          (factorDeleted ≫ targetRestriction) :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (fun q => E.map
+          (orderedBaseCechCoface f M U n k) ≫ q) hDegreeFull).trans
+        ((Category.assoc _ _ _).symm.trans
+          ((congrArg (fun q => q ≫ factorFull) hSourceMapped).trans
+            ((Category.assoc _ _ _).trans
+              (congrArg
+                (fun q => E.map sourceProjectionDeleted ≫ q) hFactor)))))
+  have hRight :
+      (degreeDeleted ≫ orderedBaseCechCoface (pullback.snd f t)
+          ((pullback (pullback.fst f t)).obj M) Uf n k) ≫
+          targetProjectionFull =
+        E.map sourceProjectionDeleted ≫
+          (factorDeleted ≫ targetRestriction) :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (fun q => degreeDeleted ≫ q) hTargetCoface).trans
+        ((Category.assoc _ _ _).symm.trans
+          ((congrArg (fun q => q ≫ targetRestriction)
+            hDegreeDeleted).trans (Category.assoc _ _ _))))
+  exact hLeft.trans hRight.symm
+
+private theorem orderedBaseCechXBaseChangeIso_comm_d
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (n : ℕ) :
+    (ModuleCat.extendScalars t.appTop.hom).map
+          (orderedBaseCechDifferential f M U n) ≫
+        (orderedBaseCechXBaseChangeIso f t M U hU (n + 1)).hom =
+      (orderedBaseCechXBaseChangeIso f t M U hU n).hom ≫
+        orderedBaseCechDifferential (pullback.snd f t)
+          ((pullback (pullback.fst f t)).obj M)
+            (fun i => pullback.fst f t ⁻¹ᵁ U i) n := by
+  let E := ModuleCat.extendScalars t.appTop.hom
+  let P := (pullback (pullback.fst f t)).obj M
+  let Uf := fun i => pullback.fst f t ⁻¹ᵁ U i
+  let degreeSource :
+      E.obj (orderedBaseCechObject f M U n) ⟶
+        orderedBaseCechObject (pullback.snd f t) P Uf n :=
+    (orderedBaseCechXBaseChangeIso f t M U hU n).hom
+  let degreeTarget :
+      E.obj (orderedBaseCechObject f M U (n + 1)) ⟶
+        orderedBaseCechObject (pullback.snd f t) P Uf (n + 1) :=
+    (orderedBaseCechXBaseChangeIso f t M U hU (n + 1)).hom
+  have hLeft :
+      E.map (orderedBaseCechDifferential f M U n) ≫ degreeTarget =
+        ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+          (E.map (orderedBaseCechCoface f M U n k) ≫ degreeTarget) := by
+    simp only [orderedBaseCechDifferential, Functor.map_sum,
+      Functor.map_zsmul, Preadditive.sum_comp,
+      Preadditive.zsmul_comp]
+  have hTerms :
+      (∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+          (E.map (orderedBaseCechCoface f M U n k) ≫ degreeTarget)) =
+        ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+          (degreeSource ≫ orderedBaseCechCoface (pullback.snd f t)
+            ((pullback (pullback.fst f t)).obj M)
+              (fun i => pullback.fst f t ⁻¹ᵁ U i) n k) := by
+    apply Finset.sum_congr rfl
+    intro k _
+    exact congrArg ((-1 : ℤ) ^ (k : ℕ) • ·)
+      (orderedBaseCechXBaseChangeIso_comm_coface f t M U hU n k)
+  have hRight :
+      degreeSource ≫ orderedBaseCechDifferential (pullback.snd f t)
+          ((pullback (pullback.fst f t)).obj M)
+            (fun i => pullback.fst f t ⁻¹ᵁ U i) n =
+        ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+          (degreeSource ≫ orderedBaseCechCoface (pullback.snd f t)
+            ((pullback (pullback.fst f t)).obj M)
+              (fun i => pullback.fst f t ⁻¹ᵁ U i) n k) := by
+    simp only [orderedBaseCechDifferential, Preadditive.comp_sum,
+      Preadditive.comp_zsmul]
+  exact hLeft.trans <| hTerms.trans hRight.symm
+
+/-- Extension of scalars identifies the bounded ordered Cech complex of a
+quasicoherent module on a finite affine cover with the ordered complex after
+affine base change. -/
+noncomputable def orderedBaseCechComplexBaseChangeIso
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent] :
+    ((ModuleCat.extendScalars t.appTop.hom).mapHomologicalComplex
+        (.up ℕ)).obj (orderedBaseCechComplex f M U) ≅
+      orderedBaseCechComplex (pullback.snd f t)
+        ((pullback (pullback.fst f t)).obj M)
+          (fun i => pullback.fst f t ⁻¹ᵁ U i) :=
+  HomologicalComplex.Hom.isoOfComponents
+    (fun n => orderedBaseCechXBaseChangeIso f t M U hU n) (by
+      intro i j hij
+      simp only [ComplexShape.up_Rel] at hij
+      subst j
+      rw [Functor.mapHomologicalComplex_obj_d]
+      rw [orderedBaseCechComplex_d, orderedBaseCechComplex_d]
+      exact (orderedBaseCechXBaseChangeIso_comm_d f t M U hU i).symm)
+
+@[simp]
+theorem orderedBaseCechComplexBaseChangeIso_hom_f
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
+    {ι : Type u} [Fintype ι] [LinearOrder ι] (U : ι → X.Opens)
+    (hU : ∀ i, IsAffineOpen (U i))
+    [X.IsSeparated] [IsAffine S] [IsAffine T] [M.IsQuasicoherent]
+    (n : ℕ) :
+    (orderedBaseCechComplexBaseChangeIso f t M U hU).hom.f n =
+      (orderedBaseCechXBaseChangeIso f t M U hU n).hom :=
+  rfl
 
 end AlgebraicGeometry.Scheme.Modules
