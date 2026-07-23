@@ -5641,6 +5641,40 @@ theorem muNRootsPowAlg_square' (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
   simp only [Category.assoc]
   exact h2.symm
 
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-d]** The transported identification in composite form
+(definitional: every layer is a record projection). -/
+theorem muNRootsAlgebraIso_hom_eq (D : GaloisRepData N) [Fact (1 < N)] :
+    (muNRootsAlgebraIso D).hom =
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (muNRootsCorrespondenceIso D).hom).unop ≫
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+        (Opposite.op (cycloQuotAlgebra N))).unop := rfl
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-d]** The algebra-side pow square, iso form. -/
+theorem muNRootsPowAlg_square (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsPowAlg D k ≫ (muNRootsAlgebraIso D).hom =
+      (muNRootsAlgebraIso D).hom ≫ cycloQuotPow N k := by
+  rw [muNRootsAlgebraIso_hom_eq]
+  exact muNRootsPowAlg_square' D k
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-d]** The algebra-side pow square, inverse form. -/
+theorem muNRootsPowAlg_square_inv (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    (muNRootsAlgebraIso D).inv ≫ muNRootsPowAlg D k =
+      cycloQuotPow N k ≫ (muNRootsAlgebraIso D).inv := by
+  rw [Iso.inv_comp_eq]
+  calc muNRootsPowAlg D k
+      = (muNRootsPowAlg D k ≫ (muNRootsAlgebraIso D).hom) ≫
+          (muNRootsAlgebraIso D).inv := by
+        rw [Category.assoc, Iso.hom_inv_id, Category.comp_id]
+    _ = ((muNRootsAlgebraIso D).hom ≫ cycloQuotPow N k) ≫
+          (muNRootsAlgebraIso D).inv :=
+        congrArg (· ≫ (muNRootsAlgebraIso D).inv) (muNRootsPowAlg_square D k)
+    _ = (muNRootsAlgebraIso D).hom ≫ cycloQuotPow N k ≫
+          (muNRootsAlgebraIso D).inv := Category.assoc _ _ _
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :
