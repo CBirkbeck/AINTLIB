@@ -4427,6 +4427,148 @@ theorem detCompScheme_π (D : GaloisRepData N) [Fact (1 < N)] :
     ext r
     exact (detCompAlgHom D).hom.hom.commutes r)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-i]** The paired `ρ`-set: the diagonal Galois action on ordered pairs of
+`(ℤ/N)²`-vectors. -/
+noncomputable abbrev rhoPairAction (D : GaloisRepData N) :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk (fun uv =>
+        (D.ρ (galSepMulEquivGalQ σ) • uv.1, D.ρ (galSepMulEquivGalQ σ) • uv.2))
+      map_one' := FintypeCat.hom_ext _ _ fun uv => by
+        show (D.ρ (galSepMulEquivGalQ 1) • uv.1,
+          D.ρ (galSepMulEquivGalQ 1) • uv.2) = uv
+        rw [map_one, map_one, one_smul, one_smul]
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun uv => by
+        show (D.ρ (galSepMulEquivGalQ (σ * τ)) • uv.1,
+          D.ρ (galSepMulEquivGalQ (σ * τ)) • uv.2) = _
+        rw [map_mul, map_mul, mul_smul, mul_smul]
+        rfl }
+
+open scoped Pointwise FintypeCatDiscrete in
+/-- **[T-F3a-i]** Continuity of the paired `ρ`-action (same open kernel). -/
+lemma rhoPairAction_isContinuous (D : GaloisRepData N) :
+    (rhoPairAction D).IsContinuous := by
+  constructor
+  haveI : DiscreteTopology
+      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj
+          (rhoPairAction D) : Type 0) := ⟨rfl⟩
+  refine continuous_discrete_rng.mpr fun w => ?_
+  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
+        (CategoryTheory.forget₂ _ TopCat).obj (rhoPairAction D) => p.1 • p.2) ⁻¹'
+        ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (rhoPairAction D),
+        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+    ext ⟨σ, v⟩
+    simp
+  rw [hdecomp]
+  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
+  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
+  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
+      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
+    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
+    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
+  refine Filter.mem_of_superset hnb ?_
+  rintro σ ⟨τ, hτ, rfl⟩
+  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
+  have hAct : (rhoPairAction D).ρ τ = 𝟙 _ := by
+    refine FintypeCat.hom_ext _ _ fun uv => ?_
+    show (D.ρ (galSepMulEquivGalQ τ) • uv.1,
+      D.ρ (galSepMulEquivGalQ τ) • uv.2) = uv
+    rw [hτ1, one_smul, one_smul]
+  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
+    _ = σ₀ • v := by
+        congr 1
+        show ((CategoryTheory.forget₂ _ TopCat).map ((rhoPairAction D).ρ τ)) v = v
+        rw [hAct, CategoryTheory.Functor.map_id]
+        rfl
+    _ = w := hσ₀
+
+open scoped FintypeCatDiscrete in
+/-- The paired `ρ`-set as a continuous Galois set. -/
+noncomputable abbrev rhoPairContAction (D : GaloisRepData N) :
+    ContAction FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) :=
+  ⟨rhoPairAction D, rhoPairAction_isContinuous D⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[T-F3a-ii]** The symplectic-pairing comparison: `(u,v) ↦ p(ofAdd (u∧v))` is
+equivariant from the paired `ρ`-set into the roots (`sympl_glSmul` + `det_cyclo` +
+`p_equivariant`). -/
+noncomputable def rhoPairMor (D : GaloisRepData N) [Fact (1 < N)] :
+    rhoPairContAction D ⟶ muNRootsContAction D :=
+  ObjectProperty.homMk
+    { hom := FintypeCat.homMk
+        (fun uv => D.p (Multiplicative.ofAdd
+          (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)))
+      comm := fun σ => FintypeCat.hom_ext _ _ fun uv => Subtype.ext (Units.ext (by
+        show ((D.p (Multiplicative.ofAdd
+            ((D.ρ (galSepMulEquivGalQ σ) • uv.1) 0 *
+                (D.ρ (galSepMulEquivGalQ σ) • uv.2) 1 -
+              (D.ρ (galSepMulEquivGalQ σ) • uv.1) 1 *
+                (D.ρ (galSepMulEquivGalQ σ) • uv.2) 0)) :
+            (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) =
+          (galSepMulEquivGalQ σ)
+            ((D.p (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) :
+              (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
+        rw [sympl_glSmul, D.det_cyclo (galSepMulEquivGalQ σ)]
+        rw [D.p_equivariant (galSepMulEquivGalQ σ)
+          (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0))]
+        congr 2
+        rw [show (Multiplicative.ofAdd (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) ^
+            ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+              (card_rootsOfUnity_algClosureQ N)
+              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val =
+          Multiplicative.ofAdd
+            (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+              (card_rootsOfUnity_algClosureQ N)
+              (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val •
+            (uv.1 0 * uv.2 1 - uv.1 1 * uv.2 0)) from rfl]
+        rw [nsmul_eq_mul]
+        congr 1
+        rw [show (((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N).val :
+            ZMod N) =
+          ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+            (card_rootsOfUnity_algClosureQ N)
+            (galSepMulEquivGalQ σ).toRingEquiv : (ZMod N)ˣ) : ZMod N) from by
+          simp only [ZMod.natCast_val, ZMod.cast_id]])) }
+
+/-- **[T-F3a-iii]** The finite étale algebra of the paired `ρ`-set. -/
+noncomputable def vRhoPairAlgebra (D : GaloisRepData N) :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
+    (rhoPairContAction D)).unop
+
+/-- **[T-F3a-iii]** Its spectrum. -/
+noncomputable def vRhoPairScheme (D : GaloisRepData N) : Scheme.{0} :=
+  Spec (.of (vRhoPairAlgebra D : Type 0))
+
+/-- **[T-F3a-iii]** The structure morphism. -/
+noncomputable def vRhoPairSchemeπ (D : GaloisRepData N) :
+    vRhoPairScheme D ⟶ Spec (.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (vRhoPairAlgebra D : Type 0)))
+
+/-- **[T-F3a-iii]** The pairing comparison, algebra side. -/
+noncomputable def rhoPairAlgHom (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsAlgebra D ⟶ vRhoPairAlgebra D :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map (rhoPairMor D)).unop
+
+/-- **[T-F3a-iii]** The pairing comparison, scheme side. -/
+noncomputable def rhoPairSchemeMap (D : GaloisRepData N) [Fact (1 < N)] :
+    vRhoPairScheme D ⟶ muNRootsScheme D :=
+  Spec.map (CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom)
+
+/-- **[T-F3a-iii]** The pairing comparison lies over `ℚ`. -/
+theorem rhoPairSchemeMap_π (D : GaloisRepData N) [Fact (1 < N)] :
+    rhoPairSchemeMap D ≫ muNRootsSchemeπ D = vRhoPairSchemeπ D := by
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  exact congrArg AlgebraicGeometry.Spec.map (by
+    ext r
+    exact (rhoPairAlgHom D).hom.hom.commutes r)
+
 /-- **[T-CV-1b]** The root of the cyclotomic quotient is an `N`-th root of unity. -/
 theorem cycloRoot_pow (N : ℕ) [NeZero N] :
     (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ N = 1 := by
