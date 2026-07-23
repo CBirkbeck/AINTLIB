@@ -4014,6 +4014,115 @@ theorem torsion_factor_point_eq {T : Scheme.{0}} {E : EllipticCurve T}
   rw [E.pointToTorsion_torsionι, E.pointToTorsion_torsionι] at h1
   exact h1
 
+/-- **[3d]** Pairing compatibility of the pinned dictionary: given the symplectic
+compatibility of the full-level pair with the frame, the Weil pairing of two
+`ℚ̄`-torsion points is `p` of the standard symplectic pairing of their pinned
+coordinates. -/
+theorem pairingCompat_framedPinned (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (hsymp : FramedSymp D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 h hover)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    PairingCompatAt D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+      (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht x y hx hy := by
+  obtain ⟨ux, hfx⟩ := torsion_qbar_factor hinv L t (E.pointToTorsion x hx)
+    (E.pointToTorsion_torsionπ x hx)
+  obtain ⟨uy, hfy⟩ := torsion_qbar_factor hinv L t (E.pointToTorsion y hy)
+    (E.pointToTorsion_torsionπ y hy)
+  have hxc2 : x = ((ux 0).val : ℤ) • EllipticCurve.Point.pull E t L.1.1 +
+      ((ux 1).val : ℤ) • EllipticCurve.Point.pull E t L.1.2 :=
+    (torsion_factor_point_eq hinv L t x hx hfx).trans (by
+      rw [EllipticCurve.Point.pull_add, EllipticCurve.Point.pull_zsmul,
+        EllipticCurve.Point.pull_zsmul])
+  have hyc2 : y = ((uy 0).val : ℤ) • EllipticCurve.Point.pull E t L.1.1 +
+      ((uy 1).val : ℤ) • EllipticCurve.Point.pull E t L.1.2 :=
+    (torsion_factor_point_eq hinv L t y hy hfy).trans (by
+      rw [EllipticCurve.Point.pull_add, EllipticCurve.Point.pull_zsmul,
+        EllipticCurve.Point.pull_zsmul])
+  show (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+      (E.weilPairingEval x y hx hy).1 =
+    ((D.p (Multiplicative.ofAdd
+      (coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+          (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht x hx 0 *
+        coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+          (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht y hy 1 -
+        coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+          (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht x hx 1 *
+        coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+          (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht y hy 0)) :
+      (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
+  rw [coord_framedPinned D sT E hinv L h hover t ht x hx hfx,
+    coord_framedPinned D sT E hinv L h hover t ht y hy hfy]
+  rw [show (wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩ • ux)
+        0 *
+      (wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩ • uy) 1 -
+      (wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩ • ux) 1 *
+      (wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩ • uy) 0 =
+      ((Matrix.GeneralLinearGroup.det
+        (wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩) :
+        (ZMod N)ˣ) : ZMod N) * (ux 0 * uy 1 - ux 1 * uy 0) from
+    sympl_glSmul _ ux uy]
+  clear hfx hfy
+  revert hx hy
+  rw [hxc2, hyc2]
+  intro hx hy
+  rw [show (E.weilPairingEval
+      (((ux 0).val : ℤ) • EllipticCurve.Point.pull E t L.1.1 +
+        ((ux 1).val : ℤ) • EllipticCurve.Point.pull E t L.1.2)
+      (((uy 0).val : ℤ) • EllipticCurve.Point.pull E t L.1.1 +
+        ((uy 1).val : ℤ) • EllipticCurve.Point.pull E t L.1.2) hx hy :
+      Γ(Spec (.of (AlgebraicClosure ℚ)), ⊤)) =
+    (E.weilPairingEval (EllipticCurve.Point.pull E t L.1.1)
+      (EllipticCurve.Point.pull E t L.1.2)
+      (sectionPull_raw_kill t L.2.1.1) (sectionPull_raw_kill t L.2.1.2) :
+      Γ(Spec (.of (AlgebraicClosure ℚ)), ⊤)) ^
+      ((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+        ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ)).toNat from
+    E.weilPairingEval_symplectic _ _ _ _ _ _ _ _ hx hy]
+  rw [map_pow, hsymp t ht]
+  -- the exponent arithmetic: (p z)^K = p (z^K), and the cast of K is the pairing
+  rw [← Units.val_pow_eq_pow_val, ← SubmonoidClass.coe_pow, ← map_pow]
+  congr 2
+  rw [show (Multiplicative.ofAdd ((Matrix.GeneralLinearGroup.det
+      (wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩) :
+      (ZMod N)ˣ) : ZMod N)) ^
+      ((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+        ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ)).toNat =
+    Multiplicative.ofAdd
+      (((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+        ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ)).toNat •
+      ((Matrix.GeneralLinearGroup.det
+        (wFramesPointsEquiv D ⟨t ≫ h, by rw [Category.assoc, hover, ht]⟩) :
+        (ZMod N)ˣ) : ZMod N)) from rfl]
+  congr 1
+  rw [nsmul_eq_mul, mul_comm]
+  congr 1
+  have hnneg : (0 : ℤ) ≤ (((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+      ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ) :=
+    Int.emod_nonneg _ (by exact_mod_cast (NeZero.ne N))
+  have h3 : (((((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+      ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ)).toNat : ℕ)) : ZMod N) =
+      (((((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+      ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ)).toNat : ℤ)) : ZMod N) := by
+    push_cast
+    rfl
+  have h2 : (((((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+      ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) % (N : ℤ)).toNat : ℤ)) : ZMod N) =
+      (((((ux 0).val : ℤ) * ((uy 1).val : ℤ) -
+      ((ux 1).val : ℤ) * ((uy 0).val : ℤ)) : ℤ) : ZMod N) := by
+    rw [Int.toNat_of_nonneg hnneg, Int.emod_def]
+    push_cast
+    rw [ZMod.natCast_self]
+    ring
+  rw [h3, h2]
+  push_cast
+  simp only [ZMod.natCast_val, ZMod.cast_id]
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
