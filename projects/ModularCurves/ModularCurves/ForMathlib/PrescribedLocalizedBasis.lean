@@ -137,3 +137,52 @@ theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_fiber_ne_zero
   change eM (eR.symm 1) = LocalizedModule.mk x 1
   rw [heR_one, heM_apply, LocalizedModule.map_mk]
   simp [l, LinearMap.toSpanSingleton_apply]
+
+/-- If an element of a finitely presented flat module is nonzero after base change to a field
+whose structure-map kernel is `p`, then it is the unique vector of a basis on a principal
+neighbourhood of `p`. -/
+theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_field_ne_zero
+    {R M K : Type u} [CommRing R] [AddCommGroup M] [Module R M]
+    [Module.FinitePresentation R M] [Module.Flat R M]
+    [Field K] [Algebra R K]
+    (p : Ideal R) [p.IsPrime] (x : M)
+    (hrank : Module.rankAtStalk M ⟨p, inferInstance⟩ = 1)
+    (hker : RingHom.ker (algebraMap R K) = p)
+    (hx : (1 : K) ⊗ₜ[R] x ≠ (0 : K ⊗[R] M)) :
+    ∃ g : R, g ∉ p ∧
+      ∃ b : Module.Basis (Fin 1) (Localization.Away g)
+          (LocalizedModule.Away g M),
+        b 0 = LocalizedModule.mkLinearMap (.powers g) M x := by
+  have hp_le : p ≤ RingHom.ker (algebraMap R K) := hker.symm.le
+  have hp_unit : p.primeCompl ≤
+      (IsUnit.submonoid K).comap (algebraMap R K) := by
+    intro r hr
+    apply isUnit_iff_ne_zero.mpr
+    intro hr_zero
+    apply hr
+    rw [← hker]
+    exact hr_zero
+  let φ : p.ResidueField →+* K :=
+    Ideal.ResidueField.lift p (algebraMap R K) hp_le hp_unit
+  letI : Algebra p.ResidueField K := φ.toAlgebra
+  letI : IsScalarTower R p.ResidueField K :=
+    IsScalarTower.of_algebraMap_eq fun r ↦ by
+      exact (Ideal.ResidueField.lift_algebraMap
+        p (algebraMap R K) hp_le hp_unit r).symm
+  have hresidue :
+      (1 : p.ResidueField) ⊗ₜ[R] x ≠ (0 : p.Fiber M) := by
+    intro hzero
+    apply hx
+    calc
+      (1 : K) ⊗ₜ[R] x =
+          (TensorProduct.AlgebraTensorModule.cancelBaseChange
+            R p.ResidueField K K M)
+            ((1 : K) ⊗ₜ[p.ResidueField]
+              ((1 : p.ResidueField) ⊗ₜ[R] x)) := by simp
+      _ = (TensorProduct.AlgebraTensorModule.cancelBaseChange
+            R p.ResidueField K K M)
+            ((1 : K) ⊗ₜ[p.ResidueField] (0 : p.Fiber M)) := by
+              rw [hzero]
+      _ = 0 := by simp
+  exact exists_notMem_basis_singleton_of_fiber_ne_zero
+    p x hrank hresidue
