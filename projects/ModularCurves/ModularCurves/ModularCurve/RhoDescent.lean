@@ -259,6 +259,18 @@ theorem coord_descTorsionIso (Hhom) (Hinv)
 
 end Descend
 
+/-- **[T-EQ-3b-v]** The point transport along an `Ell`-morphism, packaged as an
+additive equivalence (its forward map is `EllHom.mapPoint`). -/
+noncomputable def mapPointEquiv {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T : Scheme.{0}} (t : T ⟶ A.base) :
+    A.curve.Point t ≃+ B.curve.Point (t ≫ g.baseHom) :=
+  (EllHom.pointTransportEquiv (CommRingCat.of ℚ) g t).trans
+    (EllipticCurve.Point.baseChangeEquiv B.curve g.baseHom t)
+
+theorem mapPointEquiv_apply {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    {T : Scheme.{0}} (t : T ⟶ A.base) (x : A.curve.Point t) :
+    mapPointEquiv g t x = EllHom.mapPoint g t x := rfl
+
 /-- **[T-EQ-3b-iv]** Geometric points lift through a finite étale surjective cover
 (the section-counting argument of `QuotPkg.projQ_geom_surjective`). -/
 theorem exists_lift_of_finite_etale_surjective {T' T'' : Scheme.{0}}
@@ -281,6 +293,74 @@ theorem exists_lift_of_finite_etale_surjective {T' T'' : Scheme.{0}}
   refine ⟨s ≫ pullback.fst c t, ?_⟩
   rw [Category.assoc, pullback.condition, ← Category.assoc, hs,
     Category.id_comp]
+
+section Fields
+
+variable {D : GaloisRepData N} {X : EllObj (CommRingCat.of ℚ)}
+variable {T'' : Scheme.{0}} {c : T'' ⟶ X.base}
+variable [Flat c] [Surjective c] [QuasiCompact c]
+variable {α : RhoLevelStructure D (X.pullbackAlong c).structMap
+  (X.pullbackAlong c).curve}
+
+/-- Kill transfer along the point transport (backwards). -/
+theorem point_kill_of_mapPoint_kill {t'' : Spec (.of (AlgebraicClosure ℚ)) ⟶ T''}
+    (x'' : (X.pullbackAlong c).curve.Point t'')
+    (hx : (EllHom.mapPoint (X.pullbackAlongπ c) t'' x'').1 ≫
+      X.curve.mulByHom N = (t'' ≫ (X.pullbackAlongπ c).baseHom) ≫ X.curve.zero) :
+    x''.1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      t'' ≫ (X.pullbackAlong c).curve.zero := by
+  refine ((X.pullbackAlong c).curve.smul_eq_zero_iff_comp_mulByHom t'' N
+    x'').mp ?_
+  refine (mapPointEquiv (X.pullbackAlongπ c) t'').injective ?_
+  show EllHom.mapPoint (X.pullbackAlongπ c) t'' ((N : ℤ) • x'') =
+    EllHom.mapPoint (X.pullbackAlongπ c) t'' 0
+  rw [map_zsmul, map_zero]
+  exact (X.curve.smul_eq_zero_iff_comp_mulByHom
+    (t'' ≫ (X.pullbackAlongπ c).baseHom) N _).mpr hx
+
+/-- **[T-EQ-3b-v]** Additivity of the descended coordinates (lift the geometric
+point through the cover, transport, and use the original additivity). -/
+theorem descTorsion_coords_additive [IsFinite c] [Etale c] (Hhom) (Hinv)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ X.base)
+    (ht : t ≫ X.structMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (x y : X.curve.Point t)
+    (hx : x.1 ≫ X.curve.mulByHom N = t ≫ X.curve.zero)
+    (hy : y.1 ≫ X.curve.mulByHom N = t ≫ X.curve.zero)
+    (hxy : (x + y).1 ≫ X.curve.mulByHom N = t ≫ X.curve.zero) :
+    coord D X.structMap (descTorsionIso D X c α Hhom Hinv)
+      (descTorsionHom_over D X c α Hhom) t ht (x + y) hxy =
+    coord D X.structMap (descTorsionIso D X c α Hhom Hinv)
+      (descTorsionHom_over D X c α Hhom) t ht x hx +
+    coord D X.structMap (descTorsionIso D X c α Hhom Hinv)
+      (descTorsionHom_over D X c α Hhom) t ht y hy := by
+  obtain ⟨t'', rfl⟩ := exists_lift_of_finite_etale_surjective c t
+  obtain ⟨x'', rfl⟩ : ∃ x'', EllHom.mapPoint (X.pullbackAlongπ c) t'' x'' = x :=
+    ⟨(mapPointEquiv (X.pullbackAlongπ c) t'').symm x,
+      (mapPointEquiv (X.pullbackAlongπ c) t'').apply_symm_apply x⟩
+  obtain ⟨y'', rfl⟩ : ∃ y'', EllHom.mapPoint (X.pullbackAlongπ c) t'' y'' = y :=
+    ⟨(mapPointEquiv (X.pullbackAlongπ c) t'').symm y,
+      (mapPointEquiv (X.pullbackAlongπ c) t'').apply_symm_apply y⟩
+  have hx'' := point_kill_of_mapPoint_kill x'' hx
+  have hy'' := point_kill_of_mapPoint_kill y'' hy
+  have hxy'' : (x'' + y'').1 ≫ (X.pullbackAlong c).curve.mulByHom N =
+      t'' ≫ (X.pullbackAlong c).curve.zero := by
+    refine point_kill_of_mapPoint_kill (x'' + y'') ?_
+    rw [map_add]
+    exact hxy
+  refine Eq.trans (coord_congr D X.structMap _ _ _ ht
+    (show EllHom.mapPoint (X.pullbackAlongπ c) t'' x'' +
+        EllHom.mapPoint (X.pullbackAlongπ c) t'' y'' =
+      EllHom.mapPoint (X.pullbackAlongπ c) t'' (x'' + y'') from
+      (map_add _ _ _).symm) hxy) ?_
+  refine Eq.trans (coord_descTorsionIso D X c α Hhom Hinv t'' ht (x'' + y'')
+    hxy'') ?_
+  refine Eq.trans (α.coords_additive t'' _ x'' y'' hx'' hy'' hxy'') ?_
+  exact congrArg₂ (· + ·)
+    (coord_descTorsionIso D X c α Hhom Hinv t'' ht x'' hx'').symm
+    (coord_descTorsionIso D X c α Hhom Hinv t'' ht y'' hy'').symm
+
+end Fields
 
 end
 
