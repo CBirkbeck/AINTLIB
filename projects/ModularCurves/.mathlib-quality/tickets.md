@@ -25412,7 +25412,7 @@ re-read the eZMap-def-elaboration (lean_goal/hover on the def) FIRST to fix ever
 spelling, then transcribe. All support-lemmas (muNRootsRead_pow, hom_ext,
 muNPointsEquiv_mapAlong/natural/pow) are landed and spelling-agnostic.
 
-#### [T-CV-3(c) DECOMPOSITION] map-level carve problem — status: in_progress (2026-07-23 beastmode)
+#### [T-CV-3(c) DECOMPOSITION] map-level carve problem — status: DONE (2026-07-23 beastmode; c-1..c-6 ALL LANDED; see per-commit trail ee074f1f2..HEAD. Delivered: pairEZMap/frameDetMap + read/read_self + pullSection-naturality + glSmul/rightMul twist squares + sympFramedProblem/SmulNat/Aut/freeAction + pairEZMap_classified + bareFramed_zxAction_eqv + sympLocus_agree_iff_symp + sympLocusSection + sympFramed_equivariantRelRepData. T-CV-4 DONE same push: sympFramed_quotientProblemData + affineOverEll)
 (b-iii) COMPLETE (eZMap_zxAction landed, ee074f1f2: H3 univLevel_eval_restrict via the
 9-ingredient chain; whnf-discipline: show-ascribed fullLevel_eval_eqToHom +
 weilPairingEval_congr_raw + binder-annotated congrArg-lambdas + univPzx/univQzx
@@ -25444,7 +25444,7 @@ c-6. bridge (B1) `bareEqv-value-of-h has pairEZMap = h ≫ eZMap` (dL.nat at the
    ⟹ `sympFramed_equivariantRelRepData` (Z := sympLocus, σZ := zxSympAction,
    finite/etale := clopen ∘ bare-legs) ⟹ T-CV-4 one-liner.
 
-#### [T-CV-4] The carved quotient — status: open, deps: T-CV-3
+#### [T-CV-4] The carved quotient — status: DONE (2026-07-23: sympFramed_quotientProblemData + sympFramed_quotient_affineOverEll landed; axiom-state: DS4-register sorryAx inheritance only), deps: T-CV-3
 Statement: `sympFramed_quotientProblemData D : Nonempty (QuotientProblemData
 (sympFramedAut D))` := exists_quotientProblemData _ (carved-freeness) (carved-rel-rep)
 — one-liner mirror of bareFramed_quotientProblemData (:4692). + affineOverEll via
