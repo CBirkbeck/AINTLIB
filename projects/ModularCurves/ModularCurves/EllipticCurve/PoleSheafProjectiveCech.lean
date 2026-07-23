@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.EllipticCurve.PoleSheafBaseCechHigher
 import ModularCurves.EllipticCurve.ProjectiveSpaceTwistCechFinite
 import ModularCurves.ForMathlib.CochainComplexBoundedFlat
+import ModularCurves.ForMathlib.SchemeModuleOrderedBaseCechHOne
 
 /-!
 # Projective Cech data for pole sheaves
@@ -116,6 +117,89 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_orderedBaseCech
   · intro K _ _
     exact h.sectionPoleSheafPower_field_orderedBaseCech_kernel_finrank
       hsm z hz U hU hUaff K hn
+
+/-- For a projectively presented fibrewise elliptic family over a Noetherian ring, the
+ordered coordinate-cover Cech complex of `O(n[0])` is exact in degree one. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_exactAt_one
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R)) [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {n : ℕ} (hn : 1 ≤ n) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    let M := sectionPoleSheafPower π z hz n
+    let U := fun j => f ⁻¹ᵁ MvPolynomial.coordinateOpenCover
+      (R := R) (σ := σ) j
+    (Scheme.Modules.orderedBaseCechComplex π M U).ExactAt 1 := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz n
+  let U := fun j => f ⁻¹ᵁ MvPolynomial.coordinateOpenCover
+    (R := R) (σ := σ) j
+  let C := Scheme.Modules.orderedBaseCechComplex π M U
+  let B := Γ(Spec (.of R), (⊤ : (Spec (.of R)).Opens))
+  obtain ⟨hflat, hfinite, hbounded, hfield, _⟩ :=
+    h.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_data
+      f hsm z hz hn
+  letI (q : ℕ) : Module.Flat B (C.X q) := hflat q
+  letI (q : ℕ) : Module.Finite B (C.homology q) := hfinite q
+  let N := Fintype.card (ULift.{u} σ)
+  letI : Subsingleton (C.X (N + 1)) :=
+    hbounded (N + 1) (Nat.le_succ N)
+  have hN : 0 < N := Fintype.card_pos_iff.mpr inferInstance
+  have hexact :=
+    HomologicalComplex.functionExact_of_bounded_flat_forall_field_baseChange_exact_of_finite_homology
+      C N (fun i _ K _ _ ↦ hfield K i) 0 hN
+  rw [HomologicalComplex.exactAt_iff' C 0 1 2 (by simp) (by simp)]
+  rw [ShortComplex.moduleCat_exact_iff]
+  intro x hx
+  change (C.d 1 2).hom x = 0 at hx
+  change ∃ y, (C.d 0 1).hom y = x
+  exact (hexact x).mp hx
+
+/-- Positive pole sheaves on a projectively presented fibrewise elliptic family over a
+Noetherian ring have vanishing first sheaf cohomology. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_projectiveClosed_subsingleton_H_one
+    {R : Type u} {σ : Type} [CommRing R]
+    [Fintype σ] [LinearOrder σ] [Nontrivial σ] [IsNoetherianRing R]
+    {E : Scheme.{u}}
+    (f : E ⟶ Proj (MvPolynomial.homogeneousSubmodule σ R)) [IsClosedImmersion f]
+    (hsm : SmoothOfRelativeDimension 1
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)))
+    (z : Spec (.of R) ⟶ E)
+    (hz : z ≫ (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) =
+      𝟙 (Spec (.of R)))
+    (h : FibrewiseElliptic
+      (f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)) z hz)
+    {n : ℕ} (hn : 1 ≤ n) :
+    let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+    Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz n).sheaf 1) := by
+  dsimp only
+  let π := f ≫ MvPolynomial.homogeneousProjπ (R := R) (σ := σ)
+  let M := sectionPoleSheafPower π z hz n
+  let U := fun j => f ⁻¹ᵁ MvPolynomial.coordinateOpenCover
+    (R := R) (σ := σ) j
+  letI : M.IsQuasicoherent :=
+    sectionPoleSheafPower_isQuasicoherent hsm z hz n
+  have hU : IsOpenCover U := by
+    exact f.iSup_preimage_eq_top
+      (MvPolynomial.iSup_coordinateOpenCover_eq_top (R := R) (σ := σ))
+  have hUaff : ∀ j, IsAffineOpen (U j) := by
+    intro j
+    exact (MvPolynomial.coordinateOpenCover_isAffineOpen (R := R) j).preimage f
+  apply (Scheme.Modules.baseCechComplex_exactAt_one_iff_subsingleton_H
+    π M U hU hUaff).mp
+  apply Scheme.Modules.baseCechComplex_exactAt_one_of_orderedBaseCechComplex_exactAt_one
+  exact h.sectionPoleSheafPower_projectiveClosed_orderedBaseCech_exactAt_one
+    f hsm z hz hn
 
 /-- For a projectively presented fibrewise elliptic family over a Noetherian ring, the
 degree-zero kernel in the common pole-sheaf Cech complex is finite projective, commutes with
