@@ -21,18 +21,15 @@ noncomputable section
 
 universe u
 
-/-- If an element of a finitely presented flat module is nonzero in a rank-one residue fibre,
-then it is the unique vector of a basis after localizing away from an element outside the prime. -/
-theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_fiber_ne_zero
+private theorem localized_toSpanSingleton_bijective_of_fiber_ne_zero
     {R M : Type u} [CommRing R] [AddCommGroup M] [Module R M]
-    [Module.FinitePresentation R M] [Module.Flat R M]
+    [Module.Finite R M] [Module.Flat R M]
     (p : Ideal R) [p.IsPrime] (x : M)
     (hrank : Module.rankAtStalk M ⟨p, inferInstance⟩ = 1)
     (hx : (1 : p.ResidueField) ⊗ₜ[R] x ≠ (0 : p.Fiber M)) :
-    ∃ g : R, g ∉ p ∧
-      ∃ b : Module.Basis (Fin 1) (Localization.Away g)
-          (LocalizedModule.Away g M),
-        b 0 = LocalizedModule.mkLinearMap (.powers g) M x := by
+    Function.Bijective
+      (LocalizedModule.map p.primeCompl
+        (LinearMap.toSpanSingleton R M x)) := by
   let Rp := Localization.AtPrime p
   let Mp := LocalizedModule.AtPrime p M
   let k := p.ResidueField
@@ -80,7 +77,7 @@ theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_fiber_ne_zero
     rw [hbk]
     exact bk.linearIndependent
   have hliRp : LinearIndependent Rp (fun _ : Fin 1 => v) :=
-    IsLocalRing.linearIndependent_of_flat _ hliK
+    Module.IsLocalRing.linearIndependent_of_flat _ hliK
   let bp : Module.Basis (Fin 1) Rp Mp := Module.Basis.mk hliRp hspan.ge
   have hbp : bp 0 = v := by simp [bp]
   let ep : Rp ≃ₗ[Rp] Mp :=
@@ -109,6 +106,32 @@ theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_fiber_ne_zero
       (IsLocalizedModule.map p.primeCompl fR fM l) := by
     rw [hlocalMap, ← hep]
     exact ep.bijective
+  exact (IsLocalizedModule.map_bijective_iff_localizedModuleMap_bijective
+    fR fM).mp hlocalBijective
+
+/-- If an element of a finitely presented flat module is nonzero in a rank-one residue fibre,
+then it is the unique vector of a basis after localizing away from an element outside the prime. -/
+theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_fiber_ne_zero
+    {R M : Type u} [CommRing R] [AddCommGroup M] [Module R M]
+    [Module.FinitePresentation R M] [Module.Flat R M]
+    (p : Ideal R) [p.IsPrime] (x : M)
+    (hrank : Module.rankAtStalk M ⟨p, inferInstance⟩ = 1)
+    (hx : (1 : p.ResidueField) ⊗ₜ[R] x ≠ (0 : p.Fiber M)) :
+    ∃ g : R, g ∉ p ∧
+      ∃ b : Module.Basis (Fin 1) (Localization.Away g)
+          (LocalizedModule.Away g M),
+        b 0 = LocalizedModule.mkLinearMap (.powers g) M x := by
+  let Rp := Localization.AtPrime p
+  let Mp := LocalizedModule.AtPrime p M
+  let l := LinearMap.toSpanSingleton R M x
+  let fR := Algebra.linearMap R Rp
+  let fM := LocalizedModule.mkLinearMap p.primeCompl M
+  have hlocalBijective : Function.Bijective
+      (IsLocalizedModule.map p.primeCompl fR fM l) := by
+    apply (IsLocalizedModule.map_bijective_iff_localizedModuleMap_bijective
+      fR fM).mpr
+    exact localized_toSpanSingleton_bijective_of_fiber_ne_zero
+      p x hrank hx
   obtain ⟨g, hg, hgmap⟩ :=
     Module.FinitePresentation.exists_notMem_bijective
       l p fR fM hlocalBijective
@@ -136,6 +159,30 @@ theorem Module.FinitePresentation.exists_notMem_basis_singleton_of_fiber_ne_zero
   change eAway 1 = LocalizedModule.mk x 1
   change eM (eR.symm 1) = LocalizedModule.mk x 1
   rw [heR_one, heM_apply, LocalizedModule.map_mk]
+  simp [l, LinearMap.toSpanSingleton_apply]
+
+/-- A prescribed element of a finite flat rank-one module that is nonzero in
+every maximal residue fibre is the unique vector of a global singleton basis. -/
+theorem Module.exists_basis_singleton_of_forall_maximal_fiber_ne_zero
+    {R M : Type u} [CommRing R] [AddCommGroup M] [Module R M]
+    [Module.Finite R M] [Module.Flat R M]
+    (x : M)
+    (hrank : ∀ (p : Ideal R) [p.IsMaximal],
+      Module.rankAtStalk M ⟨p, inferInstance⟩ = 1)
+    (hx : ∀ (p : Ideal R) [p.IsMaximal],
+      (1 : p.ResidueField) ⊗ₜ[R] x ≠ (0 : p.Fiber M)) :
+    ∃ b : Module.Basis (Fin 1) R M, b 0 = x := by
+  let l := LinearMap.toSpanSingleton R M x
+  have hl : Function.Bijective l :=
+    bijective_of_localized_maximal l fun p _ =>
+      localized_toSpanSingleton_bijective_of_fiber_ne_zero
+        p x (hrank p) (hx p)
+  let e : R ≃ₗ[R] M := LinearEquiv.ofBijective l hl
+  let b : Module.Basis (Fin 1) R M :=
+    (Module.Basis.singleton (Fin 1) R).map e
+  refine ⟨b, ?_⟩
+  simp only [b, Module.Basis.map_apply, Module.Basis.singleton_apply]
+  change l 1 = x
   simp [l, LinearMap.toSpanSingleton_apply]
 
 /-- If an element of a finitely presented flat module is nonzero after base change to a field
