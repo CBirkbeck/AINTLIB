@@ -445,4 +445,88 @@ theorem sectionPoleSheafPower_six_baseSectionsBases_exists_monomial_weierstrass_
   rw [hb3_2, hb3_1, hb3_0] at hrel
   exact hrel
 
+/-- Normalized pole sections and the vanishing of the first cohomology of the
+first five pole sheaves produce a generalized Weierstrass relation. -/
+theorem sectionPoleSheafPower_exists_monomial_weierstrass_relation_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hH1 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    (hH2 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 2).sheaf 1))
+    (hH3 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 3).sheaf 1))
+    (hH4 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 4).sheaf 1))
+    (hH5 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 5).sheaf 1))
+    (b1 : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 1)))
+    (hb1 : b1 0 = sectionPoleSheafPowerOneSection π z hz)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1) :
+    ∃ a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)),
+      sectionPoleSheafPower_baseSectionsMul z hz 3 3 (y ⊗ₜ y) +
+          a₁ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (sectionPoleSheafPower_baseSectionsMul z hz 2 3 (x ⊗ₜ y)) +
+          a₃ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3) y)) =
+        sectionPoleSheafPower_baseSectionsMul z hz 2 4
+            (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)) +
+          a₂ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))) +
+          a₄ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2) x))) +
+          a₆ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2)
+                          (Scheme.Modules.baseSectionsMap π
+                            (sectionPoleSheafSuccHom π z hz 1)
+                              (sectionPoleSheafPowerOneSection π z hz))))) := by
+  obtain ⟨b2, hb2, hb2x, b3, hb3, hb3y⟩ :=
+    sectionPoleSheafPower_two_three_baseSectionsBasesOfCartierGenerator
+      hsm z hz U hU r hspan hnzd hH1 hH2 b1 x hx y hy
+  obtain ⟨b4, hb4, hb4x2⟩ :=
+    sectionPoleSheafPower_four_baseSectionsBasisOfCartierGenerator
+      hsm z hz U hU r hspan hnzd hH3 b3 x hx
+  obtain ⟨b5, hb5, hb5xy⟩ :=
+    sectionPoleSheafPower_five_baseSectionsBasisOfCartierGenerator
+      hsm z hz U hU r hspan hnzd hH4 b4 x hx y hy
+  obtain ⟨b6, hb6, hb6x3⟩ :=
+    sectionPoleSheafPower_six_baseSectionsBasisOfCartierGenerator
+      hsm z hz U hU r hspan hnzd hH5 b5 x hx
+  exact
+    sectionPoleSheafPower_six_baseSectionsBases_exists_monomial_weierstrass_relation_of_CartierGenerator
+      hsm z hz U hU r hspan hnzd b1 hb1 b2 hb2 x hx hb2x b3 hb3 y hy hb3y
+        b4 hb4 b5 hb5 b6 hb6 hb4x2 hb5xy hb6x3
+
 end ModularCurves
