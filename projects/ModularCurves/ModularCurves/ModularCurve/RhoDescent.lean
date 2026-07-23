@@ -360,6 +360,42 @@ theorem descTorsion_coords_additive [IsFinite c] [Etale c] (Hhom) (Hinv)
     (coord_descTorsionIso D X c α Hhom Hinv t'' ht x'' hx'').symm
     (coord_descTorsionIso D X c α Hhom Hinv t'' ht y'' hy'').symm
 
+/-- **[T-EQ-3b-v]** Pairing compatibility of the descended trivialization (lift the
+geometric point, cross the evaluation by the mapPoint register, and use the original
+compatibility). -/
+theorem descTorsion_pairing_compat [IsFinite c] [Etale c] (Hhom) (Hinv)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ X.base)
+    (ht : t ≫ X.structMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (x y : X.curve.Point t)
+    (hx : x.1 ≫ X.curve.mulByHom N = t ≫ X.curve.zero)
+    (hy : y.1 ≫ X.curve.mulByHom N = t ≫ X.curve.zero) :
+    PairingCompatAt D X.structMap (descTorsionIso D X c α Hhom Hinv)
+      (descTorsionHom_over D X c α Hhom) t ht x y hx hy := by
+  obtain ⟨t'', rfl⟩ := exists_lift_of_finite_etale_surjective c t
+  obtain ⟨x'', rfl⟩ : ∃ x'', EllHom.mapPoint (X.pullbackAlongπ c) t'' x'' = x :=
+    ⟨(mapPointEquiv (X.pullbackAlongπ c) t'').symm x,
+      (mapPointEquiv (X.pullbackAlongπ c) t'').apply_symm_apply x⟩
+  obtain ⟨y'', rfl⟩ : ∃ y'', EllHom.mapPoint (X.pullbackAlongπ c) t'' y'' = y :=
+    ⟨(mapPointEquiv (X.pullbackAlongπ c) t'').symm y,
+      (mapPointEquiv (X.pullbackAlongπ c) t'').apply_symm_apply y⟩
+  have hx'' := point_kill_of_mapPoint_kill x'' hx
+  have hy'' := point_kill_of_mapPoint_kill y'' hy
+  have hα := α.pairing_compat t'' (by
+      show t'' ≫ (X.pullbackAlong c).structMap = _
+      rw [show (X.pullbackAlong c).structMap = c ≫ X.structMap from rfl,
+        ← Category.assoc]
+      exact ht) x'' y'' hx'' hy''
+  show (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+      (X.curve.weilPairingEval (EllHom.mapPoint (X.pullbackAlongπ c) t'' x'')
+        (EllHom.mapPoint (X.pullbackAlongπ c) t'' y'') hx hy).1 = _
+  refine Eq.trans (congrArg
+    (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+    (weilPairingEval_mapPoint (X.pullbackAlongπ c) t'' x'' y'' hx'' hy'')) ?_
+  rw [coord_descTorsionIso D X c α Hhom Hinv t'' ht x'' hx'',
+    coord_descTorsionIso D X c α Hhom Hinv t'' ht y'' hy'']
+  exact hα
+
 end Fields
 
 end
