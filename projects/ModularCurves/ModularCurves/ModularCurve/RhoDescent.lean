@@ -203,7 +203,49 @@ theorem descTorsionHom_over (Hhom) :
   rw [Category.assoc, vRhoCoverPrj_snd, ← Category.assoc, α.over_T]
   exact ((isPullback_torsionMapOfEllHom (X.pullbackAlongπ c) N).w).symm
 
+/-- **[T-EQ-3b-iv]** The descended trivialization, packaged. -/
+def descTorsionIso
+    (Hhom : ∀ {Z : Scheme.{0}}
+      (g₁ g₂ : Z ⟶ (X.pullbackAlong c).curve.torsion N),
+      g₁ ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N =
+        g₂ ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N →
+      g₁ ≫ α.torsionIso.hom ≫ vRhoCoverPrj D X c =
+        g₂ ≫ α.torsionIso.hom ≫ vRhoCoverPrj D X c)
+    (Hinv : ∀ {Z : Scheme.{0}}
+      (g₁ g₂ : Z ⟶ pullback (vRhoπ D) (X.pullbackAlong c).structMap),
+      g₁ ≫ vRhoCoverPrj D X c = g₂ ≫ vRhoCoverPrj D X c →
+      g₁ ≫ α.torsionIso.inv ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N =
+        g₂ ≫ α.torsionIso.inv ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N) :
+    X.curve.torsion N ≅ pullback (vRhoπ D) X.structMap where
+  hom := descTorsionHom D X c α Hhom
+  inv := descTorsionInv D X c α Hinv
+  hom_inv_id := descTorsion_hom_inv_id D X c α Hhom Hinv
+  inv_hom_id := descTorsion_inv_hom_id D X c α Hhom Hinv
+
 end Descend
+
+/-- **[T-EQ-3b-iv]** Geometric points lift through a finite étale surjective cover
+(the section-counting argument of `QuotPkg.projQ_geom_surjective`). -/
+theorem exists_lift_of_finite_etale_surjective {T' T'' : Scheme.{0}}
+    (c : T'' ⟶ T') [IsFinite c] [Etale c] [Surjective c]
+    (t : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶ T') :
+    ∃ t'' : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶ T'', t'' ≫ c = t := by
+  haveI : IsFinite (pullback.snd c t) :=
+    MorphismProperty.pullback_snd _ _ ‹IsFinite c›
+  haveI : Etale (pullback.snd c t) :=
+    MorphismProperty.pullback_snd _ _ ‹Etale c›
+  have hne : Nonempty ↑(Spec (CommRingCat.of (AlgebraicClosure ℚ))) :=
+    ⟨⟨⊥, Ideal.isPrime_bot⟩⟩
+  obtain ⟨x₀⟩ := hne
+  have hcard := natCard_sections_eq_finrank (k := AlgebraicClosure ℚ)
+    (pullback.snd c t) x₀
+  have hpos : 1 ≤ (pullback.snd c t).finrank x₀ := by
+    rw [Scheme.Hom.finrank_pullback_snd]
+    exact (Scheme.Hom.one_le_finrank_iff_surjective c).mpr ‹Surjective c› _
+  obtain ⟨⟨s, hs⟩⟩ := Nat.card_pos_iff.mp (hcard ▸ hpos) |>.1
+  refine ⟨s ≫ pullback.fst c t, ?_⟩
+  rw [Category.assoc, pullback.condition, ← Category.assoc, hs,
+    Category.id_comp]
 
 end
 
