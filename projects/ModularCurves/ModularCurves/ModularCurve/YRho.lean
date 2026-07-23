@@ -5551,6 +5551,46 @@ noncomputable def cycloQuotPow (N : ℕ) [NeZero N] (k : ℕ) :
     cycloQuotAlgebra N ⟶ cycloQuotAlgebra N :=
   ObjectProperty.homMk (CommAlgCat.ofHom (cycloQuotPowAlgHom N k))
 
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-b]** The correspondence intertwines the model power with the
+roots power (elementwise: `mkOfPowEq`-reads raise to the `k`-th power; the functor
+acts by the fiber via `finiteEtaleEquivContAction_functor_map_hom`). -/
+theorem muNRootsCorrespondence_pow (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (cycloQuotPow N k)) ≫ (muNRootsCorrespondenceIso D).hom =
+      (muNRootsCorrespondenceIso D).hom ≫ muNRootsPowMor D k := by
+  ext φ
+  have h1 : rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
+      ((show (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ]
+          SeparableClosure ℚ from φ).comp (cycloQuotPowAlgHom N k))) =
+      (rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ)
+        (show (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ]
+          SeparableClosure ℚ from φ))) ^ k := by
+    refine Subtype.ext (Units.ext ?_)
+    show sepClosureQAlgEquiv (((show (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^
+        N - 1)) →ₐ[ℚ] SeparableClosure ℚ from φ).comp (cycloQuotPowAlgHom N k))
+        (AdjoinRoot.root _)) = _
+    rw [AlgHom.comp_apply]
+    refine Eq.trans (congrArg (fun z => sepClosureQAlgEquiv
+        ((show (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) →ₐ[ℚ]
+          SeparableClosure ℚ from φ) z))
+      (cycloQuotPowAlgHom_root N k)) ?_
+    rw [map_pow, map_pow]
+    rfl
+  rw [show ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (cycloQuotPow N k)) ≫
+        (muNRootsCorrespondenceIso D).hom).hom.hom =
+      ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).functor.map
+        (Quiver.Hom.op (cycloQuotPow N k))).hom.hom ≫
+        (muNRootsCorrespondenceIso D).hom.hom.hom from rfl,
+    show ((muNRootsCorrespondenceIso D).hom ≫ muNRootsPowMor D k).hom.hom =
+      (muNRootsCorrespondenceIso D).hom.hom.hom ≫
+        (muNRootsPowMor D k).hom.hom from rfl,
+    ConcreteCategory.comp_apply, ConcreteCategory.comp_apply,
+    FiniteEtaleGalois.finiteEtaleEquivContAction_functor_map_hom]
+  exact congrArg (fun w : rootsOfUnity N (AlgebraicClosure ℚ) =>
+    ((w : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) h1
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :

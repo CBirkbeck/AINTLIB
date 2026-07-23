@@ -403,6 +403,13 @@ lemma pointsEquivOfContAction_smul
   rw [ConcreteCategory.comp_apply, ConcreteCategory.comp_apply] at h2
   exact h2
 
+/-- The functor of the Galois correspondence acts on morphisms by the fiber functor
+(the `resEquiv`/`functorToContAction` layers only re-index the group side). -/
+lemma finiteEtaleEquivContAction_functor_map_hom
+    {X Y : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ} (f : X ⟶ Y) :
+    ((finiteEtaleEquivContAction k).functor.map f).hom.hom =
+      (CommAlgCat.FiniteEtale.fiber k (SeparableClosure k)).map f := rfl
+
 end Correspondence
 
 end FiniteEtaleGalois
