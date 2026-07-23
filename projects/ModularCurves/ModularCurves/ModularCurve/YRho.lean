@@ -4590,6 +4590,59 @@ noncomputable def muNRootsCorrespondenceIso (D : GaloisRepData N) [Fact (1 < N)]
     exact congrArg (fun w : rootsOfUnity N (AlgebraicClosure ℚ) =>
       ((w : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) h1
 
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-1e]** The roots algebra is the cyclotomic quotient (transport through the
+correspondence's inverse and unit — mirror of `constVecAlgebraIso`). -/
+noncomputable def muNRootsAlgebraIso (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsAlgebra D ≅ cycloQuotAlgebra N :=
+  (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mapIso
+      (muNRootsCorrespondenceIso D).symm ≪≫
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.app
+      (Opposite.op (cycloQuotAlgebra N))).symm).unop).symm
+
+/-- **[T-CV-1e]** `Spec` of the roots-algebra identification (mirror of
+`constVecSpecIso`). -/
+noncomputable def muNRootsSpecIso (D : GaloisRepData N) [Fact (1 < N)] :
+    Spec (CommRingCat.of (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ≅
+      Spec (CommRingCat.of (muNRootsAlgebra D : Type 0)) where
+  hom := Spec.map (CommRingCat.ofHom
+    (muNRootsAlgebraIso D).hom.hom.hom.toRingHom)
+  inv := Spec.map (CommRingCat.ofHom
+    (muNRootsAlgebraIso D).inv.hom.hom.toRingHom)
+  hom_inv_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : cycloQuotAlgebra N ⟶ cycloQuotAlgebra N) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((muNRootsAlgebraIso D).inv_hom_id))).trans
+        (Spec.map_id _))
+  inv_hom_id :=
+    (Spec.map_comp _ _).symm.trans
+      ((congrArg Spec.map
+        (congrArg (fun (f : muNRootsAlgebra D ⟶ muNRootsAlgebra D) =>
+          CommRingCat.ofHom f.hom.hom.toRingHom)
+          ((muNRootsAlgebraIso D).hom_inv_id))).trans
+        (Spec.map_id _))
+
+/-- **[T-CV-1 CLOSE]** The DS3 bridge: `μ_N` over `Spec ℚ` is the roots scheme. -/
+noncomputable def muNSpecQIso (D : GaloisRepData N) [Fact (1 < N)] :
+    muN (Spec (CommRingCat.of ℚ)) N ≅ muNRootsScheme D :=
+  muNSpecFieldIso ℚ N ≪≫ muNRootsSpecIso D
+
+/-- **[T-CV-1 CLOSE]** The bridge lies over the base. -/
+theorem muNSpecQIso_π (D : GaloisRepData N) [Fact (1 < N)] :
+    (muNSpecQIso D).hom ≫ muNRootsSchemeπ D =
+      muNπ (Spec (CommRingCat.of ℚ)) N := by
+  have hinner : (muNRootsSpecIso D).hom ≫ muNRootsSchemeπ D =
+      Spec.map (CommRingCat.ofHom
+        (AdjoinRoot.of ((Polynomial.X : Polynomial ℚ) ^ N - 1))) :=
+    (Spec.map_comp _ _).symm.trans (congrArg Spec.map (by
+      ext r
+      exact ((muNRootsAlgebraIso D).hom.hom.hom.commutes r)))
+  exact (Category.assoc _ _ _).trans
+    ((congrArg ((muNSpecFieldIso ℚ N).hom ≫ ·) hinner).trans
+      (muNSpecFieldIso_struct ℚ N))
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
