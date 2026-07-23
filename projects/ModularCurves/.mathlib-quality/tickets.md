@@ -25259,6 +25259,27 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   T-YR-5 (representable_of_affineOverEll_of_rigidNoeth at rhoProblem); T-YR-6
   (smoothness, /develop --continue); T-YR-7 (yRho_representable assembly).
 
+### asm-3 COMPLETE (2026-07-27) — THE ρ-DICTIONARY IS DONE
+**rhoLevelStructureOfFramed LANDED + PUSHED (2ef096941)**: (E, L, h, hsymp) ↦
+RhoLevelStructure D sT E with all four fields:
+- torsionIso := framedTorsionIsoPinned; over_T := framedTorsionIsoPinned_π
+- coords_additive := coord_framedPinned_additive
+- pairing_compat := pairingCompat_framedPinned (3d: coord-rws + sympl_glSmul
+  (det-twist by mulVec-defeq-show + det_fin_two + ring) + clear-hfx/hfy-BEFORE-revert
+  (dependent hyps ride along otherwise) + weilPairingEval_symplectic +
+  FramedSymp-input + map_pow + the ℤ/ℕ/ZMod cast-endgame
+  (Int.emod_def+push_cast+natCast_self+ring; ZMod.natCast_val + ZMod.cast_id)).
+AXIOM CENSUS (DS4-honesty clause): coord_framedPinned + coord_framedPinned_additive
+are FULLY CLEAN [propext, Classical.choice, Quot.sound]; pairingCompat_framedPinned
+and hence rhoLevelStructureOfFramed carry sorryAx FROM THE DS4 WEIL-REGISTER ONLY
+(weilPairingEval_* are stream-C's by-sorry registers) — expected + accepted.
+
+NEXT on the chain: [3d-2] per-X equivalence (rhoProblem-value ≃ carved
+quotient-fibers via QuotPkg + [GHB4]-torsor + morphism-descent — needs the
+dictionary's INVERSE direction too: RhoLevelStructure → (L, h) up to the carve),
+[carve] the symplectic locus (T-C2c clopen), [3e] rho_affineOverEll +
+rhoLevel_relativelyRepresentable fill, T-Y1F-3, T-YR-5/6/7.
+
 ### 3c COMPLETE (2026-07-27) — THE PINNED DICTIONARY'S ADDITIVITY LANDED
 All of the replan executed and pushed, axiom-clean pattern maintained:
 - [3c-A] precompCvIsoEquiv, constVecIndexRead (concrete piAlgHomIndex-read),
