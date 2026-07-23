@@ -890,6 +890,50 @@ theorem finiteEtale_hom_ext_of_fiber
       ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map g)) x
   rw [h]
 
+/-- **[PIN-6c-iv-γ]** The paired-slot comparison as a finite étale algebra map. -/
+noncomputable def pairSlotFE (D : GaloisRepData N) [Fact (1 < N)]
+    (v w : Fin 2 → ZMod N) :
+    FiniteEtaleGalois.tensorObj (vRhoAlgebra D) (vRhoAlgebra D) ⟶
+      wFramesAlgebra D :=
+  ObjectProperty.homMk (CommAlgCat.ofHom
+    (Algebra.TensorProduct.productMap (frameSlotAlg D v) (frameSlotAlg D w)))
+
+/-- **[PIN-6c-iv-γ, layered]** The ring identity follows from its finite-étale
+form. -/
+theorem hring_of_finiteEtale (D : GaloisRepData N) [Fact (1 < N)]
+    (hFE : ∀ v w : Fin 2 → ZMod N,
+      rhoPairAlgHom D ≫ (vRhoPairTensorIso D).hom ≫ pairSlotFE D v w =
+      muNRootsPowAlg D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) ≫
+        detCompAlgHom D ≫ detFrameAlgHom D)
+    (v w : Fin 2 → ZMod N) :
+    CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (vRhoPairTensorIso D).hom.hom.hom.toRingHom ≫
+      CommRingCat.ofHom (Algebra.TensorProduct.productMap (frameSlotAlg D v)
+        (frameSlotAlg D w)).toRingHom =
+    CommRingCat.ofHom (muNRootsPowAlg D
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+          ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom := by
+  have h := hFE v w
+  calc CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (vRhoPairTensorIso D).hom.hom.hom.toRingHom ≫
+        CommRingCat.ofHom (Algebra.TensorProduct.productMap (frameSlotAlg D v)
+          (frameSlotAlg D w)).toRingHom
+      = CommRingCat.ofHom (rhoPairAlgHom D ≫ (vRhoPairTensorIso D).hom ≫
+          pairSlotFE D v w).hom.hom.toRingHom := rfl
+    _ = CommRingCat.ofHom (muNRootsPowAlg D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) ≫
+          detCompAlgHom D ≫ detFrameAlgHom D).hom.hom.toRingHom := by rw [h]
+    _ = CommRingCat.ofHom (muNRootsPowAlg D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom := rfl
+
 end
 
 end ModularCurves
