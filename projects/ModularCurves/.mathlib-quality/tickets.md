@@ -25450,6 +25450,31 @@ Statement: `sympFramed_quotientProblemData D : Nonempty (QuotientProblemData
 — one-liner mirror of bareFramed_quotientProblemData (:4692). + affineOverEll via
 pkg.affineOverEll.
 
+#### [T-EQ REPLAN v2 (2026-07-23 beastmode, post-carve)] map-level descent supersedes pointwise rigidity
+FINDING: T-EQ-1's sketched `torsionIso_ext` (pointwise-at-Qbar-points => iso-equality)
+has the SAME exotic-base vacuity shape as the board-v3 finding (over Spec C the
+hypothesis is vacuous, so the implication cannot hold unconditionally) — do NOT state
+it as sketched. REPLAN (replan-and-continue, no B2 — no Lean statement existed):
+T-EQ-2 goes MAP-LEVEL: the dictionary's only data field is
+`framedTorsionIsoPinned D sT E hinv L h hover` (rhoLevelStructureOfFramed at :4866 —
+all other fields are Props), so the descent statement is
+`framedTorsionIsoPinned_glSmul : framedTorsionIsoPinned D sT E hinv
+  ((E.glSmul γ L)) (h ≫ wFramesRightMul D γ) _ = framedTorsionIsoPinned … L h hover`
+(gamma-cancellation through the pinned contracted-product construction — read
+framedTorsionIsoPinned's def to transcribe the cancellation route) + a small
+`RhoLevelStructure`-ext lemma (torsionIso-equality => structure-equality by
+proof-irrelevance). T-EQ-1 is then CONSUMED NOWHERE on the critical path — mark
+superseded unless T-EQ-3's glueing surfaces a genuine rigidity need (if it does,
+state rigidity CLOPEN-locus-form as data, never the pointwise-ext form).
+T-EQ-3 interface (pinned): pkg := sympFramed_quotientProblemData (LANDED);
+pkg.relRep : forall X, exists d : RelRepData pkg.prob X, IsFinite d.f /\ Etale d.f;
+T-3E consumes (I,f) := (d.Z, d.f) at X := (T,sT,E) + the k-slice equivalence
+{h // h ≫ d.f = k} ≃[d.eqv] pkg.prob.obj (op (X.pullbackAlong k)) ≃[T-EQ-3]
+RhoLevelStructure D (k ≫ sT) (E.baseChange k). T-EQ-3's two directions per the
+original sketch (etale-local torsor lifts + descent; the (vi)-pin feeds the
+symp-condition transfer). Remaining deps for T-EQ-3: T-F3a(vi) pin (parked),
+framedTorsionIsoPinned_glSmul (new T-EQ-2), EngineDescent exports audit.
+
 #### [T-EQ-1] Torsion-iso rigidity — status: open, deps: none (parallel)
 Statement: two isos φ ψ : E.torsion N ≅ pullback (vRhoπ D) sT over T (both π-compat)
 with equal vRhoPointsEquiv-reads at every ℚ̄-point of E.torsion over every ℚ̄-point of
