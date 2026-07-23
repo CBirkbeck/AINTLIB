@@ -4274,6 +4274,29 @@ theorem detFrameScheme_π (D : GaloisRepData N) :
     ext r
     exact (detFrameAlgHom D).hom.hom.commutes r)
 
+/-- **[CARVE-1d-i]** The `μ_N`-roots Galois set (natural action on roots of unity in
+`ℚ̄`, transported along `galSepMulEquivGalQ`). -/
+noncomputable abbrev muNRootsAction (N : ℕ) [NeZero N] :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of (rootsOfUnity N (AlgebraicClosure ℚ))
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk
+        (fun ζ => ⟨Units.map (galSepMulEquivGalQ σ).toAlgHom.toMonoidHom ζ.1, by
+          rw [mem_rootsOfUnity]
+          rw [← map_pow]
+          rw [show (ζ.1 : (AlgebraicClosure ℚ)ˣ) ^ (N : ℕ) = 1 from
+            (mem_rootsOfUnity _ _).mp ζ.2]
+          exact map_one _⟩)
+      map_one' := FintypeCat.hom_ext _ _ fun ζ => Subtype.ext (Units.ext (by
+        show (galSepMulEquivGalQ 1) (ζ.1 : (AlgebraicClosure ℚ)ˣ).val = _
+        rw [map_one]
+        rfl))
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun ζ => Subtype.ext
+        (Units.ext (by
+          show (galSepMulEquivGalQ (σ * τ)) (ζ.1 : (AlgebraicClosure ℚ)ˣ).val = _
+          rw [map_mul]
+          rfl)) }
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
