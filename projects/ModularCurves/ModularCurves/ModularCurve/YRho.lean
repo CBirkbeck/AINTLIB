@@ -3831,6 +3831,151 @@ theorem coord_framedPinned (D : GaloisRepData N) {T : Scheme.{0}}
   exact congrArg (fun v => wFramesPointsEquiv D ⟨t ≫ h, by
     rw [Category.assoc, hover, ht]⟩ • v) hcv
 
+/-- **[3c-D]** Integer-lift arithmetic on `N`-killed points: the `ZMod`-value of a sum
+scales as the sum of values. -/
+theorem zmodVal_add_smul {A : Type} [AddCommGroup A] {P : A}
+    (hP : (N : ℤ) • P = 0) (a b : ZMod N) :
+    (((a + b : ZMod N)).val : ℤ) • P = ((a.val : ℤ)) • P + ((b.val : ℤ)) • P := by
+  rw [← add_smul]
+  have hmod2 : (((a + b : ZMod N)).val : ℤ) =
+      ((a.val : ℤ) + (b.val : ℤ)) % (N : ℤ) := by
+    rw [ZMod.val_add]
+    push_cast
+    rfl
+  refine Eq.symm ?_
+  calc ((a.val : ℤ) + (b.val : ℤ)) • P
+      = (((a.val : ℤ) + (b.val : ℤ)) % (N : ℤ) +
+          (N : ℤ) * (((a.val : ℤ) + (b.val : ℤ)) / (N : ℤ))) • P := by
+        congr 1
+        rw [Int.emod_def]
+        ring
+    _ = (((a.val : ℤ) + (b.val : ℤ)) % (N : ℤ)) • P +
+          ((N : ℤ) * (((a.val : ℤ) + (b.val : ℤ)) / (N : ℤ))) • P :=
+        add_smul _ _ _
+    _ = (((a + b : ZMod N)).val : ℤ) • P + 0 := by
+        rw [← hmod2, mul_comm, mul_smul, hP, smul_zero]
+    _ = (((a + b : ZMod N)).val : ℤ) • P := add_zero _
+
+/-- **[3c-D]** The standard combinations are additive in the index. -/
+theorem comb_add {T : Scheme.{0}} {E : EllipticCurve T} (L : E.FullLevelPt N)
+    (u v : Fin 2 → ZMod N) :
+    ((((u 0).val : ℤ) • L.1.1 + ((u 1).val : ℤ) • L.1.2) +
+      (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)) =
+    ((((u + v) 0).val : ℤ) • L.1.1 + (((u + v) 1).val : ℤ) • L.1.2) := by
+  rw [add_add_add_comm]
+  rw [show ((u + v) 0) = u 0 + v 0 from rfl, show ((u + v) 1) = u 1 + v 1 from rfl]
+  rw [zmodVal_add_smul L.2.1.1 (u 0) (v 0), zmodVal_add_smul L.2.1.2 (u 1) (v 1)]
+
+/-- **[3c-D]** The full-level factorization index is additive. -/
+theorem torsion_factor_index_add {T : Scheme.{0}} {E : EllipticCurve T}
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hxy : (x + y).1 ≫ E.mulByHom N = t ≫ E.zero)
+    {ux uy w : Fin 2 → ZMod N}
+    (hfx : E.pointToTorsion x hx ≫ (E.fullLevelIso hinv L).inv =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) ux)
+    (hfy : E.pointToTorsion y hy ≫ (E.fullLevelIso hinv L).inv =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) uy)
+    (hfw : E.pointToTorsion (x + y) hxy ≫ (E.fullLevelIso hinv L).inv =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) w) :
+    w = ux + uy := by
+  -- point-level characterizations from the factorizations
+  have hxc : x = EllipticCurve.Point.pull E t
+      (((ux 0).val : ℤ) • L.1.1 + ((ux 1).val : ℤ) • L.1.2) := by
+    refine Subtype.ext ?_
+    have h1 := congrArg (· ≫ E.torsionι N)
+      ((torsion_qbar_factor_eq hinv L t (E.pointToTorsion x hx) hfx).trans
+        (congrArg (t ≫ ·) (sigmaι_fullLevelHom L ux)))
+    simp only [Category.assoc] at h1
+    rw [E.pointToTorsion_torsionι, E.pointToTorsion_torsionι] at h1
+    exact h1
+  have hyc : y = EllipticCurve.Point.pull E t
+      (((uy 0).val : ℤ) • L.1.1 + ((uy 1).val : ℤ) • L.1.2) := by
+    refine Subtype.ext ?_
+    have h1 := congrArg (· ≫ E.torsionι N)
+      ((torsion_qbar_factor_eq hinv L t (E.pointToTorsion y hy) hfy).trans
+        (congrArg (t ≫ ·) (sigmaι_fullLevelHom L uy)))
+    simp only [Category.assoc] at h1
+    rw [E.pointToTorsion_torsionι, E.pointToTorsion_torsionι] at h1
+    exact h1
+  -- the sum is the pulled combination at the sum index
+  have hsum : x + y = EllipticCurve.Point.pull E t
+      ((((ux + uy) 0).val : ℤ) • L.1.1 + (((ux + uy) 1).val : ℤ) • L.1.2) := by
+    rw [hxc, hyc, ← EllipticCurve.Point.pull_add]
+    exact congrArg (EllipticCurve.Point.pull E t) (comb_add L ux uy)
+  -- hence its torsion point is the inclusion-composite at the sum index
+  have hzw : E.pointToTorsion (x + y) hxy =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (ux + uy) ≫
+        E.fullLevelHom L := by
+    apply pullback.hom_ext
+    · show E.pointToTorsion (x + y) hxy ≫ E.torsionι N =
+        (t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (ux + uy) ≫
+          E.fullLevelHom L) ≫ E.torsionι N
+      rw [E.pointToTorsion_torsionι]
+      rw [show Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (ux + uy) ≫
+          E.fullLevelHom L = E.pointToTorsion
+            ((((ux + uy) 0).val : ℤ) • L.1.1 + (((ux + uy) 1).val : ℤ) • L.1.2)
+            ((E.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+              rw [smul_add, smul_comm (N : ℤ) (((ux + uy) 0).val : ℤ),
+                smul_comm (N : ℤ) (((ux + uy) 1).val : ℤ), L.2.1.1, L.2.1.2,
+                smul_zero, smul_zero, add_zero])) from sigmaι_fullLevelHom L _]
+      rw [Category.assoc, E.pointToTorsion_torsionι]
+      exact congrArg Subtype.val hsum
+    · show E.pointToTorsion (x + y) hxy ≫ E.torsionπ N =
+        (t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (ux + uy) ≫
+          E.fullLevelHom L) ≫ E.torsionπ N
+      rw [E.pointToTorsion_torsionπ]
+      rw [show Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (ux + uy) ≫
+          E.fullLevelHom L = E.pointToTorsion
+            ((((ux + uy) 0).val : ℤ) • L.1.1 + (((ux + uy) 1).val : ℤ) • L.1.2)
+            ((E.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+              rw [smul_add, smul_comm (N : ℤ) (((ux + uy) 0).val : ℤ),
+                smul_comm (N : ℤ) (((ux + uy) 1).val : ℤ), L.2.1.1, L.2.1.2,
+                smul_zero, smul_zero, add_zero])) from sigmaι_fullLevelHom L _]
+      rw [Category.assoc, E.pointToTorsion_torsionπ]
+      exact (Category.comp_id t).symm
+  -- compare the two factorizations of the sum
+  have hcomp : t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) w =
+      t ≫ Sigma.ι (fun _ : (Fin 2 → ZMod N) => T) (ux + uy) := by
+    rw [← hfw, hzw]
+    simp only [Category.assoc]
+    rw [show E.fullLevelHom L ≫ (E.fullLevelIso hinv L).inv =
+      𝟙 (constScheme T (Fin 2 → ZMod N)) from
+      (E.fullLevelIso hinv L).hom_inv_id, Category.comp_id]
+  exact sigmaι_qbar_index_injective t hcomp
+
+/-- **[3c-D]** The pinned-dictionary coordinate is additive — the `coords_additive`
+field of `RhoLevelStructure` for the framed construction. -/
+theorem coord_framedPinned_additive (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
+    (ht : t ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hxy : (x + y).1 ≫ E.mulByHom N = t ≫ E.zero) :
+    coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+      (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht (x + y) hxy =
+    coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+      (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht x hx +
+    coord D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+      (framedTorsionIsoPinned_π D sT E hinv L h hover) t ht y hy := by
+  obtain ⟨ux, hfx⟩ := torsion_qbar_factor hinv L t (E.pointToTorsion x hx)
+    (E.pointToTorsion_torsionπ x hx)
+  obtain ⟨uy, hfy⟩ := torsion_qbar_factor hinv L t (E.pointToTorsion y hy)
+    (E.pointToTorsion_torsionπ y hy)
+  obtain ⟨w, hfw⟩ := torsion_qbar_factor hinv L t (E.pointToTorsion (x + y) hxy)
+    (E.pointToTorsion_torsionπ (x + y) hxy)
+  rw [coord_framedPinned D sT E hinv L h hover t ht x hx hfx,
+    coord_framedPinned D sT E hinv L h hover t ht y hy hfy,
+    coord_framedPinned D sT E hinv L h hover t ht (x + y) hxy hfw,
+    torsion_factor_index_add hinv L t x y hx hy hxy hfx hfy hfw, smul_add]
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
