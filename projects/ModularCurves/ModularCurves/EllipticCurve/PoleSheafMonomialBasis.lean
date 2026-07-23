@@ -81,4 +81,45 @@ theorem sectionPoleSheafPower_five_baseSectionsBasisOfCartierGenerator
     sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator_mul
       hsm z hz U hU r hspan hnzd 1 2 hH4 b4 x hx y hy
 
+/-- A normalized pole-order-two section adjoins its cube to a basis of the
+fifth pole module, producing a compatible rank-six pole basis. -/
+theorem sectionPoleSheafPower_six_baseSectionsBasisOfCartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hH5 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 5).sheaf 1))
+    (b5 : Module.Basis (Fin 5) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 5)))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1) :
+    ∃ b6 : Module.Basis (Fin 6) Γ(S, (⊤ : S.Opens))
+        (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 6)),
+      (∀ i : Fin 5,
+        b6 (Fin.castAdd 1 i) =
+          Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5) (b5 i)) ∧
+        b6 (Fin.last 5) =
+          sectionPoleSheafPower_baseSectionsMul z hz 2 4
+            (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)) := by
+  let x2 := sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)
+  have hx2 : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 3 x2 = 1 := by
+    calc
+      _ = sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 1 x *
+          sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 1 x :=
+        sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_mul
+          hsm z hz U hU r hspan hnzd 1 1 x x
+      _ = 1 := by rw [hx, one_mul]
+  simpa only [x2] using
+    sectionPoleSheafPower_succ_baseSectionsBasisOfCartierGenerator_mul
+      hsm z hz U hU r hspan hnzd 1 3 hH5 b5 x hx x2 hx2
+
 end ModularCurves
