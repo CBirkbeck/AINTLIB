@@ -4139,6 +4139,38 @@ noncomputable def rhoLevelStructureOfFramed (D : GaloisRepData N) {T : Scheme.{0
   pairing_compat := fun t ht x y hx hy =>
     pairingCompat_framedPinned D sT E hinv L h hover hsymp t ht x y hx hy
 
+/-- **[CARVE-1a]** The cyclotomically twisted units set: `(ℤ/N)ˣ` with `σ` acting by
+multiplication by the mod-`N` cyclotomic character. -/
+noncomputable abbrev cycloUnitsAction (N : ℕ) [NeZero N] :
+    Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) where
+  V := FintypeCat.of (ZMod N)ˣ
+  ρ :=
+    { toFun := fun σ => FintypeCat.homMk
+        (fun u => modularCyclotomicCharacter (AlgebraicClosure ℚ)
+          (card_rootsOfUnity_algClosureQ N) (galSepMulEquivGalQ σ).toRingEquiv * u)
+      map_one' := FintypeCat.hom_ext _ _ fun u => by
+        show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+          (card_rootsOfUnity_algClosureQ N)
+          (galSepMulEquivGalQ 1).toRingEquiv * u = u
+        rw [map_one]
+        show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+          (card_rootsOfUnity_algClosureQ N) (1 : GalQ).toRingEquiv * u = u
+        rw [show ((1 : GalQ)).toRingEquiv = RingEquiv.refl _ from rfl]
+        rw [show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+          (card_rootsOfUnity_algClosureQ N) (RingEquiv.refl _) = 1 from map_one _]
+        rw [one_mul]
+      map_mul' := fun σ τ => FintypeCat.hom_ext _ _ fun u => by
+        show modularCyclotomicCharacter (AlgebraicClosure ℚ)
+          (card_rootsOfUnity_algClosureQ N)
+          (galSepMulEquivGalQ (σ * τ)).toRingEquiv * u = _
+        rw [map_mul]
+        rw [show ((galSepMulEquivGalQ σ * galSepMulEquivGalQ τ)).toRingEquiv =
+          (galSepMulEquivGalQ σ).toRingEquiv *
+            (galSepMulEquivGalQ τ).toRingEquiv from rfl]
+        rw [map_mul]
+        rw [mul_assoc]
+        rfl }
+
 /-- **[T-YR-3b-v]** The right `GL₂`-translations as a `SchemeAction` on the frame
 scheme (covariant laws are `wFramesRightMul_one/_mul`). -/
 noncomputable def wFramesAction (D : GaloisRepData N) :
