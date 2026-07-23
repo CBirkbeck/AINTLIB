@@ -25529,7 +25529,19 @@ RhoLevelStructure D (k ≫ sT) (E.baseChange k) decomposes:
    QuasiCompact (affine-homs qc), Etale ⟹ Flat, Surjective ✓. The hand-rolled
    Amitsur file (ForMathlib/AmitsurDescent.lean, written 2026-07-24) is bonus
    ForMathlib-material — keep if green, not on the critical path.
-3b. RHO-STRUCTURE DESCENT: torsionIso-descent via 3a on both directions of the iso
+3b. ★★ DONE (2026-07-22→23 beastmode, RhoDescent.lean ALL GREEN, commits 800215615/e88605164/+assembly):
+   covers cT:=torsionMapOfEllHom (cartesian isPullback_torsionMapOfEllHom) + cV:=vRhoCoverPrj
+   (pasting isPullback_vRhoCoverPrj), classes by MorphismProperty.of_isPullback .flip, effective
+   epis by mathlib Fpqc; descTorsionHom/Inv/Iso via EffectiveEpi.desc (Hhom/Hinv matching binders),
+   laws by cancel_epi; coord_descTorsionIso bridge; F1 coords_additive + F2 pairing_compat by
+   qbar-lift (exists_lift_of_finite_etale_surjective section-counting) + mapPointEquiv-obtain
+   (OPAQUE-fvar discipline — let-bound equiv.symm values whnf-explode) + kill-transfer
+   (point_kill_of_mapPoint_kill — W-GENERIC binder; Spec-qbar-restricted binder made cancel_epi
+   covers unify-explode); F3 pairing_scheme W-generic by cancel_epi (pullback.snd c t) + toolkit
+   (pointToTorsion_comp, torsionPairEval/coordPairLift _comp/_congr, torsionPairEval_mapPoint
+   standalone crossing, descTorsionIso_fst_leg, coordPairLift_descTorsionIso); assembly
+   RhoLevelStructure.descend + descend_torsionIso + pull_descend (ext_torsionIso + hom_ext).
+   [was:] torsionIso-descent via 3a on both directions of the iso
    (E.torsion N and pullback (vRhoπ D) sT are both affine-over-T'; iso-ness +
    over_T-fields glue; prop-fields (coords_additive/pairing_compat/pairing_scheme)
    descend by composing with the cover (pointwise fields) resp. the W-quantified

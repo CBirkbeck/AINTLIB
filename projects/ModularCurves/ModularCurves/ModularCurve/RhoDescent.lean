@@ -666,6 +666,57 @@ theorem descTorsion_pairing_scheme [Fact (1 < N)] (Hhom) (Hinv)
     (descTorsionHom_over D X c α Hhom) (pullback.snd c t)
     x y px py rfl rfl hx hy hpx hpy
 
+/-- **[T-EQ-3b]** The descended ρ-level structure: a ρ-structure on the total space
+of a finite étale (qc flat surjective) cover whose trivialization matches on the
+double fibre product descends to the base. -/
+noncomputable def RhoLevelStructure.descend [IsFinite c] [Etale c]
+    (Hhom : ∀ {Z : Scheme.{0}}
+      (g₁ g₂ : Z ⟶ (X.pullbackAlong c).curve.torsion N),
+      g₁ ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N =
+        g₂ ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N →
+      g₁ ≫ α.torsionIso.hom ≫ vRhoCoverPrj D X c =
+        g₂ ≫ α.torsionIso.hom ≫ vRhoCoverPrj D X c)
+    (Hinv : ∀ {Z : Scheme.{0}}
+      (g₁ g₂ : Z ⟶ pullback (vRhoπ D) (X.pullbackAlong c).structMap),
+      g₁ ≫ vRhoCoverPrj D X c = g₂ ≫ vRhoCoverPrj D X c →
+      g₁ ≫ α.torsionIso.inv ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N =
+        g₂ ≫ α.torsionIso.inv ≫ torsionMapOfEllHom (X.pullbackAlongπ c) N) :
+    RhoLevelStructure D X.structMap X.curve where
+  torsionIso := descTorsionIso D X c α Hhom Hinv
+  over_T := descTorsionHom_over D X c α Hhom
+  coords_additive := descTorsion_coords_additive Hhom Hinv
+  pairing_compat := descTorsion_pairing_compat Hhom Hinv
+  pairing_scheme := by
+    intro _ W t x y hx hy
+    exact descTorsion_pairing_scheme Hhom Hinv t x y hx hy
+
+@[simp]
+theorem descend_torsionIso [IsFinite c] [Etale c] (Hhom) (Hinv) :
+    (RhoLevelStructure.descend (α := α) Hhom Hinv).torsionIso =
+      descTorsionIso D X c α Hhom Hinv := rfl
+
+/-- **[T-EQ-3b]** Pulling the descended structure back along the cover recovers the
+original structure on the total space. -/
+theorem pull_descend [IsFinite c] [Etale c] (Hhom) (Hinv) :
+    RhoLevelStructure.pull D (X.pullbackAlongπ c)
+      (RhoLevelStructure.descend (α := α) Hhom Hinv) = α := by
+  refine RhoLevelStructure.ext_torsionIso ?_
+  refine Iso.ext ?_
+  apply pullback.hom_ext
+  · rw [show (RhoLevelStructure.pull D (X.pullbackAlongπ c)
+        (RhoLevelStructure.descend (α := α) Hhom Hinv)).torsionIso =
+      pullTorsionIso D (X.pullbackAlongπ c)
+        (RhoLevelStructure.descend (α := α) Hhom Hinv) from rfl]
+    rw [pullTorsionIso_fst, descend_torsionIso]
+    rw [show (descTorsionIso D X c α Hhom Hinv).hom =
+      descTorsionHom D X c α Hhom from rfl]
+    rw [← Category.assoc, descTorsionHom_fac, Category.assoc, vRhoCoverPrj_fst]
+  · rw [show (RhoLevelStructure.pull D (X.pullbackAlongπ c)
+        (RhoLevelStructure.descend (α := α) Hhom Hinv)).torsionIso =
+      pullTorsionIso D (X.pullbackAlongπ c)
+        (RhoLevelStructure.descend (α := α) Hhom Hinv) from rfl]
+    rw [pullTorsionIso_over, ← α.over_T]
+
 end Fields
 
 end
