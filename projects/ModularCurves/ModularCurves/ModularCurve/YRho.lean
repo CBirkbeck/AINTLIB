@@ -5397,6 +5397,129 @@ noncomputable def framedTorsionIsoPinned (D : GaloisRepData N) {T : Scheme.{0}}
       (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) ≪≫
     asIso (frameEvalSlice D sT h hover)
 
+/-- **[T-EQ-2 e]** The pinned framed trivialization descends the diagonal action:
+the `γ`-translated framed pair pins to the SAME trivialization (the coordinate
+change through every leg cancels against the frame translation — KM 4.7's
+well-definedness on `GL₂`-orbits, morphism-level). -/
+theorem framedTorsionIsoPinned_glSmul (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    framedTorsionIsoPinned D sT E hinv (E.glSmul γ L)
+        (h ≫ wFramesRightMul D γ)
+        (by rw [Category.assoc, wFramesRightMul_π, hover]) =
+      framedTorsionIsoPinned D sT E hinv L h hover := by
+  haveI := frameEvalSlice_isIso D sT h hover
+  have hoverRm : (h ≫ wFramesRightMul D γ) ≫ wFramesπ D = sT := by
+    rw [Category.assoc, wFramesRightMul_π, hover]
+  haveI := frameEvalSlice_isIso D sT (h ≫ wFramesRightMul D γ) hoverRm
+  have hcore : (EllipticCurve.constGL (S := T) γ).hom ≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+      pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+      pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) ≫
+      frameEvalSlice D sT h hover =
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+      pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+      pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) ≫
+      frameEvalSlice D sT (h ≫ wFramesRightMul D γ) hoverRm := by
+    refine Eq.trans ((Category.assoc _ _ _).symm.trans (Eq.trans
+      (congrArg (· ≫ (pullback.map sT (constSchemeπ (Spec (.of ℚ))
+          (Fin 2 → ZMod N)) sT (constVecSchemeπ N) (𝟙 T)
+          (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+        pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+          (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) ≫
+        frameEvalSlice D sT h hover))
+        (constGL_isoPullback sT N γ)) (Category.assoc _ _ _))) ?_
+    refine congrArg ((isPullback_constSchemeMapAlong sT
+      (Fin 2 → ZMod N)).flip.isoPullback.hom ≫ ·) ?_
+    refine Eq.trans ((Category.assoc _ _ _).symm.trans (Eq.trans
+      (congrArg (· ≫ (pullback.map sT (constVecSchemeπ N) sT
+          (constVecSchemeπ N) (𝟙 T) (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm) ≫
+        frameEvalSlice D sT h hover))
+        (pullback_map_snd_square sT
+          (EllipticCurve.constGL (S := Spec (CommRingCat.of ℚ)) γ).hom
+          (constVecSchemeIso N).hom
+          (Spec.map (CommRingCat.ofHom
+            (constVecGLAlg N γ).hom.hom.toRingHom))
+          (constGL_constSchemeπ (Spec (CommRingCat.of ℚ)) N γ)
+          (constVecSchemeIso_π N) (constVecGLScheme_π N γ)
+          (constGL_constVecSchemeIso N γ)))
+      (Category.assoc _ _ _))) ?_
+    refine congrArg ((pullback.map sT (constSchemeπ (Spec (.of ℚ))
+        (Fin 2 → ZMod N)) sT (constVecSchemeπ N) (𝟙 T)
+        (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm)) ≫ ·) ?_
+    refine Eq.trans ((Category.assoc _ _ _).symm.trans (Eq.trans
+      (congrArg (· ≫ frameEvalSlice D sT h hover)
+        (pullback_map_snd_square sT
+          (Spec.map (CommRingCat.ofHom
+            (constVecGLAlg N γ).hom.hom.toRingHom))
+          (corrSchemeIso N).hom
+          (Spec.map (CommRingCat.ofHom
+            (constVecGLAlg N γ).hom.hom.toRingHom))
+          (constVecGLScheme_π N γ) (corrSchemeIso_π N)
+          (constVecGLScheme_π N γ) (corrSchemeIso_constVecGL N γ)))
+      (Category.assoc _ _ _))) ?_
+    refine congrArg ((pullback.map sT (constVecSchemeπ N) sT
+        (constVecSchemeπ N) (𝟙 T) (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) ≫ ·) ?_
+    exact frameEvalSlice_rightMul D sT h hover γ
+  ext1
+  rw [show framedTorsionIsoPinned D sT E hinv (E.glSmul γ L)
+      (h ≫ wFramesRightMul D γ)
+      (by rw [Category.assoc, wFramesRightMul_π, hover]) =
+    (E.fullLevelIso hinv (E.glSmul γ L)).symm ≪≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback ≪≫
+      asIso (pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm)) ≪≫
+      asIso (pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) ≪≫
+      asIso (frameEvalSlice D sT (h ≫ wFramesRightMul D γ) hoverRm) from rfl]
+  rw [show framedTorsionIsoPinned D sT E hinv L h hover =
+    (E.fullLevelIso hinv L).symm ≪≫
+      (isPullback_constSchemeMapAlong sT (Fin 2 → ZMod N)).flip.isoPullback ≪≫
+      asIso (pullback.map sT (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) sT
+        (constVecSchemeπ N) (𝟙 T) (constVecSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm)) ≪≫
+      asIso (pullback.map sT (constVecSchemeπ N) sT (constVecSchemeπ N) (𝟙 T)
+        (corrSchemeIso N).hom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) ≪≫
+      asIso (frameEvalSlice D sT h hover) from rfl]
+  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom]
+  rw [E.fullLevelIso_glSmul hinv γ L]
+  simp only [Iso.trans_inv, Category.assoc]
+  refine congrArg ((E.fullLevelIso hinv L).inv ≫ ·) ?_
+  refine Eq.trans (congrArg ((EllipticCurve.constGL (S := T) γ).inv ≫ ·)
+    hcore.symm) ?_
+  exact Iso.inv_hom_id_assoc _ _
+
 /-- **[3c-A]** The pinned framed torsion trivialization lies over `T`. -/
 theorem framedTorsionIsoPinned_π (D : GaloisRepData N) {T : Scheme.{0}}
     (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
@@ -6005,6 +6128,45 @@ noncomputable def rhoLevelStructureOfFramed (D : GaloisRepData N) {T : Scheme.{0
   pairing_compat := fun t ht x y hx hy =>
     pairingCompat_framedPinned D sT E hinv L h hover hsymp t ht x y hx hy
   pairing_scheme := hsymp_scheme
+
+/-- **[T-EQ-2 COMPLETE]** The dictionary descends the diagonal `GL₂`-action: the
+`γ`-translated framed pair (`glSmul` on the level, right translation on the frame)
+yields the SAME `ρ`-level structure — KM 4.7's well-definedness on orbits, at the
+morphism level (no geometric points). This is the descent-hypothesis feeding the
+quotient couniversal property in T-EQ-3. -/
+theorem rhoLevelStructureOfFramed_glSmul (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hoverRm : (h ≫ wFramesRightMul D γ) ≫ wFramesπ D = sT)
+    (hsymp' : FramedSymp D sT E (E.glSmul γ L).1.1 (E.glSmul γ L).1.2
+      (E.glSmul γ L).2.1.1 (E.glSmul γ L).2.1.2
+      (h ≫ wFramesRightMul D γ) hoverRm)
+    (hsymp_scheme' : ∀ [Fact (1 < N)] {W : Scheme.{0}} (t : W ⟶ T)
+      (x y : E.Point t)
+      (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+      (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
+      torsionPairEval D sT t x y hx hy =
+        coordPairLift D sT (framedTorsionIsoPinned D sT E hinv (E.glSmul γ L)
+            (h ≫ wFramesRightMul D γ) hoverRm)
+          (framedTorsionIsoPinned_π D sT E hinv (E.glSmul γ L)
+            (h ≫ wFramesRightMul D γ) hoverRm) t x y hx hy ≫
+          vRhoPairingMap D)
+    (hsymp : FramedSymp D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 h hover)
+    (hsymp_scheme : ∀ [Fact (1 < N)] {W : Scheme.{0}} (t : W ⟶ T)
+      (x y : E.Point t)
+      (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+      (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero),
+      torsionPairEval D sT t x y hx hy =
+        coordPairLift D sT (framedTorsionIsoPinned D sT E hinv L h hover)
+          (framedTorsionIsoPinned_π D sT E hinv L h hover) t x y hx hy ≫
+          vRhoPairingMap D) :
+    rhoLevelStructureOfFramed D sT E hinv (E.glSmul γ L)
+        (h ≫ wFramesRightMul D γ) hoverRm hsymp' hsymp_scheme' =
+      rhoLevelStructureOfFramed D sT E hinv L h hover hsymp hsymp_scheme :=
+  RhoLevelStructure.ext_torsionIso
+    (framedTorsionIsoPinned_glSmul D sT E hinv L h hover γ)
 
 /-- **[CARVE-1a]** The cyclotomically twisted units set: `(ℤ/N)ˣ` with `σ` acting by
 multiplication by the mod-`N` cyclotomic character. -/
