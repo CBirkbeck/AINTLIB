@@ -781,6 +781,52 @@ theorem pairSlot_vRhoPairingMap_eq_Spec (D : GaloisRepData N) [Fact (1 < N)]
   refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
   rfl
 
+/-- **[PIN-6c-iv]** The determinant-power composite is a single `Spec` map. -/
+theorem detPow_eq_Spec (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    detFrameScheme D ≫ detCompScheme D ≫ muNRootsPowScheme D k =
+    Spec.map (CommRingCat.ofHom (muNRootsPowAlg D k).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom) := by
+  rw [show detFrameScheme D = Spec.map (CommRingCat.ofHom
+    (detFrameAlgHom D).hom.hom.toRingHom) from rfl]
+  rw [show detCompScheme D = Spec.map (CommRingCat.ofHom
+    (detCompAlgHom D).hom.hom.toRingHom) from rfl]
+  rw [show muNRootsPowScheme D k = Spec.map (CommRingCat.ofHom
+    (muNRootsPowAlg D k).hom.hom.toRingHom) from rfl]
+  refine Eq.trans (congrArg (Spec.map (CommRingCat.ofHom
+      (detFrameAlgHom D).hom.hom.toRingHom) ≫ ·)
+    (AlgebraicGeometry.Spec.map_comp
+      (CommRingCat.ofHom (muNRootsPowAlg D k).hom.hom.toRingHom)
+      (CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom)).symm) ?_
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp
+    (CommRingCat.ofHom (muNRootsPowAlg D k).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom)
+    (CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom)).symm ?_
+  rfl
+
+/-- **[PIN-6c-iv, layered]** The absolute pairing-determinant identity follows from
+its ring-side form. -/
+theorem habs_of_ring (D : GaloisRepData N) [Fact (1 < N)]
+    (hring : ∀ v w : Fin 2 → ZMod N,
+      CommRingCat.ofHom (rhoPairAlgHom D).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (vRhoPairTensorIso D).hom.hom.hom.toRingHom ≫
+        CommRingCat.ofHom (Algebra.TensorProduct.productMap (frameSlotAlg D v)
+          (frameSlotAlg D w)).toRingHom =
+      CommRingCat.ofHom (muNRootsPowAlg D
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat)).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (detFrameAlgHom D).hom.hom.toRingHom)
+    (v w : Fin 2 → ZMod N) :
+    pullback.lift (frameSlotEval D v) (frameSlotEval D w)
+        ((frameSlotEval_π D v).trans (frameSlotEval_π D w).symm) ≫
+      vRhoPairingMap D =
+    detFrameScheme D ≫ detCompScheme D ≫ muNRootsPowScheme D
+      (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+        ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) := by
+  rw [pairSlot_vRhoPairingMap_eq_Spec D v w, detPow_eq_Spec D]
+  exact congrArg Spec.map (hring v w)
+
 end
 
 end ModularCurves
