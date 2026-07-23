@@ -6400,6 +6400,139 @@ theorem zxSympAction_mul (D : GaloisRepData N) [Fact (1 < N)]
   rw [← cancel_mono (sympLocusι D dE), zxSympAction_ι, zxAction_mul,
     Category.assoc, zxSympAction_ι, reassoc_of% (zxSympAction_ι D dE γ₁)]
 
+/-- **[T-CV-3c-1]** The value-level pairing-side comparison at an arbitrary framed
+value: evaluate the Weil pairing on the pair and read the value in the roots scheme
+(the `eZMap`-tail with the universal pair replaced by `(P, Q)`). This is the
+MAP-LEVEL symplectic datum — contentful over every base, no pointwise vacuity. -/
+noncomputable def pairEZMap (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T) (P Q : E.Section)
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) : T ⟶ muNRootsScheme D :=
+  pullback.lift
+      (E.pointToTorsion P ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP))
+      (E.pointToTorsion Q ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ))
+      ((E.pointToTorsion_torsionπ _ _).trans
+        (E.pointToTorsion_torsionπ _ _).symm) ≫
+    E.weilPairing N ≫ muNMapAlong sT N ≫ (muNSpecQIso D).hom
+
+/-- **[T-CV-3c-1]** The value-level pairing comparison lies over the base. -/
+theorem pairEZMap_π (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T) (P Q : E.Section)
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) :
+    pairEZMap D sT E P Q hP hQ ≫ muNRootsSchemeπ D = sT := by
+  rw [pairEZMap]
+  simp only [Category.assoc]
+  rw [muNSpecQIso_π, muNMapAlong_π, reassoc_of% (E.weilPairing_over N),
+    pullback.lift_fst_assoc, ← Category.assoc, E.pointToTorsion_torsionπ,
+    Category.id_comp]
+
+/-- **[T-CV-3c-1]** The value-level determinant-side comparison at an arbitrary
+frame. -/
+noncomputable def frameDetMap (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    (h : T ⟶ wFrames D) : T ⟶ muNRootsScheme D :=
+  h ≫ detFrameScheme D ≫ detCompScheme D
+
+/-- **[T-CV-3c-1]** The value-level determinant comparison lies over the base. -/
+theorem frameDetMap_π (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    {sT : T ⟶ Spec (CommRingCat.of ℚ)} {h : T ⟶ wFrames D}
+    (hover : h ≫ wFramesπ D = sT) :
+    frameDetMap D h ≫ muNRootsSchemeπ D = sT := by
+  rw [frameDetMap]
+  simp only [Category.assoc]
+  rw [detCompScheme_π, detFrameScheme_π, hover]
+
+/-- **[T-CV-3c-1]** The universal pairing comparison factors through the value-level
+one at the universal pair. -/
+theorem eZMap_eq_pairEZMap (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    eZMap D dE =
+      pullback.fst dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        pairEZMap D (dE.f ≫ X.structMap) (X.curve.baseChange dE.f)
+          (univP dE) (univQ dE) (univLevel dE).2.1.1 (univLevel dE).2.1.2 := rfl
+
+/-- **[T-CV-3c-1]** The universal determinant comparison factors through the
+value-level one at the universal frame. -/
+theorem dZMap_eq_frameDetMap (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (dE : ModuliProblem.EquivariantRelRepData
+      (gammaHAut (CommRingCat.of ℚ) N ⊤) X) :
+    dZMap D dE =
+      (pullback.snd dE.f (pullback.fst X.structMap (wFramesπ D)) ≫
+        pullback.snd X.structMap (wFramesπ D)) ≫
+        frameDetMap D (𝟙 (wFrames D)) ≫ 𝟙 _ := by
+  rw [dZMap, frameDetMap, Category.id_comp, Category.comp_id, Category.assoc]
+
+/-- **[T-CV-3c-2]** The `Γ`-read of the value-level pairing comparison along a test
+map is the restriction of the pairing evaluation (the generic form of `eZMap_read` —
+no representing-scheme spelling in sight). -/
+theorem pairEZMap_read (D : GaloisRepData N) [Fact (1 < N)] {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T) (P Q : E.Section)
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    {W : Scheme.{0}} (k : W ⟶ T) :
+    muNRootsRead D (k ≫ sT) (k ≫ pairEZMap D sT E P Q hP hQ)
+        (by rw [Category.assoc, pairEZMap_π]) =
+      (Scheme.Γ.map k.op).hom
+        (E.weilPairingEval P Q
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP)
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ)).1 := by
+  have hw : E.pointToTorsion P
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP) ≫ E.torsionπ N =
+      E.pointToTorsion Q
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ) ≫ E.torsionπ N := by
+    simp
+  have hover : pullback.lift
+        (E.pointToTorsion P ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP))
+        (E.pointToTorsion Q ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ))
+        hw ≫ E.weilPairing N ≫ muNπ T N = 𝟙 T := by
+    rw [E.weilPairing_over N, ← Category.assoc, pullback.lift_fst,
+      E.pointToTorsion_torsionπ]
+  have hcancel : (k ≫ pairEZMap D sT E P Q hP hQ) ≫ (muNSpecQIso D).inv =
+      k ≫ ((pullback.lift
+          (E.pointToTorsion P ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP))
+          (E.pointToTorsion Q ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ))
+          hw ≫ E.weilPairing N) ≫ muNMapAlong sT N) := by
+    rw [pairEZMap]
+    simp only [Category.assoc]
+    rw [Iso.hom_inv_id, Category.comp_id]
+    try simp only [Category.assoc]
+    try rfl
+  have hsub1 : (⟨(k ≫ pairEZMap D sT E P Q hP hQ) ≫ (muNSpecQIso D).inv, by
+      rw [Category.assoc, muNSpecQIso_π_inv, Category.assoc, pairEZMap_π]⟩ :
+      { m : W ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        m ≫ muNπ (Spec (CommRingCat.of ℚ)) N = k ≫ sT }) =
+    ⟨(k ≫ (pullback.lift
+        (E.pointToTorsion P ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP))
+        (E.pointToTorsion Q ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ))
+        hw ≫ E.weilPairing N)) ≫ muNMapAlong sT N, by
+      try simp only [Category.assoc]
+      rw [muNMapAlong_π]
+      try simp only [Category.assoc]
+      rw [reassoc_of% hover]⟩ :=
+    Subtype.ext (hcancel.trans (Category.assoc _ _ _).symm)
+  refine Eq.trans (congrArg
+    (fun v : { m : W ⟶ muN (Spec (CommRingCat.of ℚ)) N //
+        m ≫ muNπ (Spec (CommRingCat.of ℚ)) N = k ≫ sT } =>
+      (muNPointsEquiv (Spec (CommRingCat.of ℚ)) N _ v : Γ(W, ⊤))) hsub1) ?_
+  refine Eq.trans (muNPointsEquiv_mapAlong sT N k
+    ⟨k ≫ (pullback.lift
+        (E.pointToTorsion P ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP))
+        (E.pointToTorsion Q ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ))
+        hw ≫ E.weilPairing N), by
+      try simp only [Category.assoc]
+      rw [hover]
+      exact Category.comp_id k⟩) ?_
+  have hnat := muNPointsEquiv_natural T N (𝟙 T) k
+    ⟨pullback.lift
+        (E.pointToTorsion P ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N P).mp hP))
+        (E.pointToTorsion Q ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N Q).mp hQ))
+        hw ≫ E.weilPairing N, hover⟩
+  refine Eq.trans ?_ hnat
+  refine congrArg
+    (fun v : { m : W ⟶ muN T N // m ≫ muNπ T N = k ≫ 𝟙 T } =>
+      (muNPointsEquiv T N _ v : Γ(W, ⊤))) ?_
+  exact Subtype.ext rfl
+
 /-- **[T-YR-3b-v(c)]** The bare framed problem has equivariant relative data at every
 `X`: the full-level equivariant datum at `H = ⊤` ([GHA5]) fibre-multiplied with the
 frames factor, carrying the diagonal action. -/
