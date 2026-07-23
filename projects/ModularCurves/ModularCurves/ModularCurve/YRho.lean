@@ -5591,6 +5591,56 @@ theorem muNRootsCorrespondence_pow (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ
   exact congrArg (fun w : rootsOfUnity N (AlgebraicClosure ℚ) =>
     ((w : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) h1
 
+section GeneralConjugate
+
+/-- Conjugating an endomorphism square through the unit of an equivalence
+(abstract, so the heavy instantiations stay out of the defeq paths). -/
+theorem equivalence_unit_conjugate_square {C : Type*} [CategoryTheory.Category C]
+    {E : Type*} [CategoryTheory.Category E] (e : CategoryTheory.Equivalence C E)
+    {X : C} {A : E} (c : e.functor.obj X ≅ A) (f : X ⟶ X) (m : A ⟶ A)
+    (hsq : e.functor.map f ≫ c.hom = c.hom ≫ m) :
+    f ≫ (e.unitIso.hom.app X ≫ e.inverse.map c.hom) =
+      (e.unitIso.hom.app X ≫ e.inverse.map c.hom) ≫ e.inverse.map m := by
+  have hnat := e.unitIso.hom.naturality f
+  simp only [CategoryTheory.Functor.id_map, CategoryTheory.Functor.comp_map] at hnat
+  calc f ≫ (e.unitIso.hom.app X ≫ e.inverse.map c.hom)
+      = (f ≫ e.unitIso.hom.app X) ≫ e.inverse.map c.hom :=
+        (Category.assoc _ _ _).symm
+    _ = (e.unitIso.hom.app X ≫ e.inverse.map (e.functor.map f)) ≫
+          e.inverse.map c.hom := congrArg (· ≫ e.inverse.map c.hom) hnat
+    _ = e.unitIso.hom.app X ≫ e.inverse.map (e.functor.map f ≫ c.hom) :=
+        (Category.assoc _ _ _).trans
+          (congrArg (e.unitIso.hom.app X ≫ ·) (e.inverse.map_comp _ _).symm)
+    _ = e.unitIso.hom.app X ≫ e.inverse.map (c.hom ≫ m) :=
+        congrArg (fun q => e.unitIso.hom.app X ≫ e.inverse.map q) hsq
+    _ = (e.unitIso.hom.app X ≫ e.inverse.map c.hom) ≫ e.inverse.map m :=
+        (congrArg (e.unitIso.hom.app X ≫ ·) (e.inverse.map_comp _ _)).trans
+          (Category.assoc _ _ _).symm
+
+end GeneralConjugate
+
+open scoped FintypeCatDiscrete in
+/-- **[T-CV-3b-iii-v-c]** The algebra-side power square, in the composite form of the
+transported identification (`unit ≫ inverse.map corr`, unopped). -/
+theorem muNRootsPowAlg_square' (D : GaloisRepData N) [Fact (1 < N)] (k : ℕ) :
+    muNRootsPowAlg D k ≫
+        (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (muNRootsCorrespondenceIso D).hom).unop ≫
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+          (Opposite.op (cycloQuotAlgebra N))).unop) =
+      ((((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (muNRootsCorrespondenceIso D).hom).unop ≫
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+          (Opposite.op (cycloQuotAlgebra N))).unop)) ≫ cycloQuotPow N k := by
+  have hop := equivalence_unit_conjugate_square
+    (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ)
+    (muNRootsCorrespondenceIso D) (Quiver.Hom.op (cycloQuotPow N k))
+    (muNRootsPowMor D k) (muNRootsCorrespondence_pow D k)
+  have h2 := congrArg Quiver.Hom.unop hop
+  simp only [unop_comp, Quiver.Hom.unop_op, Category.assoc] at h2
+  simp only [Category.assoc]
+  exact h2.symm
+
 /-- **[T-CV-3a]** The roots-scheme structure map is finite étale
 (`vRhoπ_finite_etale` mirror). -/
 theorem muNRootsSchemeπ_finite_etale (D : GaloisRepData N) [Fact (1 < N)] :
