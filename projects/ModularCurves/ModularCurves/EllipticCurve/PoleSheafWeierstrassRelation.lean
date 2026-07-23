@@ -31,3 +31,82 @@ theorem exists_fin_six_weierstrass_relation
   fin_cases i <;> simp [c, hq5]
 
 end Module.Basis
+
+open AlgebraicGeometry CategoryTheory Limits Opposite TopologicalSpace
+open TensorProduct
+
+universe u
+
+namespace ModularCurves
+
+/-- In a compatible sixth-pole basis ending in `x³`, the final coordinate of
+`y²` is one when `x` and `y` have normalized leading pole coordinates. -/
+theorem sectionPoleSheafPower_six_baseSectionsBasis_repr_y_sq_last_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (b5 : Module.Basis (Fin 5) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 5)))
+    (b6 : Module.Basis (Fin 6) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 6)))
+    (hb6 : ∀ i : Fin 5,
+      b6 (Fin.castAdd 1 i) =
+        Scheme.Modules.baseSectionsMap π
+          (sectionPoleSheafSuccHom π z hz 5) (b5 i))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1)
+    (hb6x3 : b6 (Fin.last 5) =
+      sectionPoleSheafPower_baseSectionsMul z hz 2 4
+        (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))) :
+    b6.repr (sectionPoleSheafPower_baseSectionsMul z hz 3 3 (y ⊗ₜ y))
+        (Fin.last 5) = 1 := by
+  let x2 := sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)
+  let x3 := sectionPoleSheafPower_baseSectionsMul z hz 2 4 (x ⊗ₜ x2)
+  let y2 := sectionPoleSheafPower_baseSectionsMul z hz 3 3 (y ⊗ₜ y)
+  have hx2 : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 3 x2 = 1 := by
+    calc
+      _ = sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 1 x *
+          sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 1 x :=
+        sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_mul
+          hsm z hz U hU r hspan hnzd 1 1 x x
+      _ = 1 := by rw [hx, one_mul]
+  have hx3 : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 5 x3 = 1 := by
+    calc
+      _ = sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 1 x *
+          sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 3 x2 :=
+        sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_mul
+          hsm z hz U hU r hspan hnzd 1 3 x x2
+      _ = 1 := by rw [hx, hx2, one_mul]
+  have hy2 : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 5 y2 = 1 := by
+    calc
+      _ = sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 2 y *
+          sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+            hsm z hz U hU r hspan hnzd 2 y :=
+        sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_mul
+          hsm z hz U hU r hspan hnzd 2 2 y y
+      _ = 1 := by rw [hy, one_mul]
+  change b6.repr y2 (Fin.last 5) = 1
+  rw [sectionPoleSheafPower_succ_baseSectionsBasis_repr_last_of_CartierGenerator
+    hsm z hz U hU r hspan hnzd 5 b5 b6 x3 hb6]
+  · exact hy2
+  · simpa only [x3, x2] using hb6x3
+  · exact hx3
+
+end ModularCurves
