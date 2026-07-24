@@ -377,6 +377,69 @@ theorem pullbackAlongAssocHom_π (X : EllObj (CommRingCat.of ℚ))
       (X.pullbackAlong k).pullbackAlongπ c ≫ X.pullbackAlongπ k :=
   EllObj.toPullbackAlong_pullbackAlongπ _
 
+/-- **[T-EQ-3c-L3c1]** Naturality of a relative representation datum's classifying
+bijection along any intertwining morphism (the `MapOf`-generalization of
+`RelRepData.nat`; at `hu := rfl` it is `nat` itself). -/
+theorem RelRepData.eqv_mapOf {Q : ModularCurves.ModuliProblem (CommRingCat.of ℚ)}
+    {X : EllObj (CommRingCat.of ℚ)} (d : ModuliProblem.RelRepData Q X)
+    {T₁ T₂ : Scheme.{0}} {g₁ : T₁ ⟶ X.base} {g₂ : T₂ ⟶ X.base}
+    (u : T₁ ⟶ T₂) (hu : u ≫ g₂ = g₁)
+    (h : { m : T₂ ⟶ d.Z // m ≫ d.f = g₂ }) :
+    d.eqv g₁ ⟨u ≫ h.1, by rw [Category.assoc, h.2, hu]⟩ =
+      Q.map (pullbackAlongMapOf X u hu).op (d.eqv g₂ h) := by
+  subst hu
+  exact d.nat g₂ u h
+
+/-- **[T-EQ-3c-L3c3]** The exchange law between a base-endomorphism comparison and
+the reassociation comparison: translating downstairs then reassociating equals
+reassociating then translating upstairs. -/
+theorem pullbackAlongMapOf_assocHom (X : EllObj (CommRingCat.of ℚ))
+    {T' T'' : Scheme.{0}} (k : T' ⟶ X.base) (c : T'' ⟶ T')
+    (u : T'' ⟶ T'') (hu : u ≫ c = c) :
+    pullbackAlongMapOf (X.pullbackAlong k) u hu ≫ pullbackAlongAssocHom X k c =
+      pullbackAlongAssocHom X k c ≫
+        pullbackAlongMapOf X u (by
+          rw [← Category.assoc, hu]) := by
+  refine EllHom.ext ?_ ?_
+  · show u ≫ 𝟙 T'' = 𝟙 T'' ≫ u
+    rw [Category.comp_id, Category.id_comp]
+  · show (pullbackAlongMapOf (X.pullbackAlong k) u hu).top ≫
+        (pullbackAlongAssocHom X k c).top =
+      (pullbackAlongAssocHom X k c).top ≫
+        (pullbackAlongMapOf X u (by rw [← Category.assoc, hu])).top
+    apply pullback.hom_ext
+    · have hLfst : (pullbackAlongAssocHom X k c).top ≫
+          pullback.fst X.curve.π (c ≫ k) =
+          pullback.fst (X.curve.baseChange k).π c ≫ pullback.fst X.curve.π k :=
+        ((X.pullbackAlong k).pullbackAlongπ c ≫
+          X.pullbackAlongπ k).isPullback.isoPullback_hom_fst
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg
+        ((pullbackAlongMapOf (X.pullbackAlong k) u hu).top ≫ ·) hLfst) ?_
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      refine Eq.trans (congrArg (· ≫ pullback.fst X.curve.π k)
+        ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg ((pullbackAlongAssocHom X k c).top ≫ ·)
+        ((pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+      exact hLfst
+    · have hLsnd : (pullbackAlongAssocHom X k c).top ≫
+          pullback.snd X.curve.π (c ≫ k) =
+          pullback.snd (X.curve.baseChange k).π c :=
+        ((X.pullbackAlong k).pullbackAlongπ c ≫
+          X.pullbackAlongπ k).isPullback.isoPullback_hom_snd
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg
+        ((pullbackAlongMapOf (X.pullbackAlong k) u hu).top ≫ ·) hLsnd) ?_
+      refine Eq.trans (pullback.lift_snd _ _ _) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg ((pullbackAlongAssocHom X k c).top ≫ ·)
+        (pullback.lift_snd _ _ _)) ?_
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      exact congrArg (· ≫ u) hLsnd
+
 open scoped FintypeCatDiscrete in
 /-- **[T-EQ-3c-i COMPLETE]** The ρ-dictionary from the carve alone: a full-level
 structure and a frame satisfying the single map-level condition
