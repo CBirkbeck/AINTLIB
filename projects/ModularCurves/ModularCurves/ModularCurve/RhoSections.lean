@@ -3473,6 +3473,29 @@ theorem exists_frameGraph_rel {Ω : Type} [Field Ω]
 
 end FrameGraphs2
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 prep]** The frames algebra is nontrivial (the frames set is
+nonempty — it contains the identity frame). -/
+theorem wFramesAlgebra_nontrivial (D : GaloisRepData N) :
+    Nontrivial (wFramesAlgebra D : Type 0) := by
+  refine ⟨1, 0, fun h10 => ?_⟩
+  have h1 := congrArg (specPointsEquivAlgHom ℚ (wFramesAlgebra D : Type 0)
+    (AlgebraicClosure ℚ) ((wFramesPointsEquiv D).symm 1)) h10
+  exact one_ne_zero ((map_one _).symm.trans (h1.trans (map_zero _)))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 prep]** The frames structure morphism is surjective
+(integral lying-over for the injective structure map of a nontrivial finite
+algebra). -/
+theorem wFramesπ_surjective (D : GaloisRepData N) :
+    Surjective (wFramesπ D) := by
+  haveI := wFramesAlgebra_nontrivial D
+  constructor
+  refine RingHom.IsIntegral.comap_surjective ?_ ?_
+  · exact RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr
+      (wFramesAlgebra D).property.left)
+  · exact RingHom.injective _
+
 end StructuresToSections
 
 end
