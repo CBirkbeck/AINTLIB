@@ -548,6 +548,103 @@ noncomputable def rhoLevelStructureOfCarve (D : GaloisRepData N) [Fact (1 < N)]
     (fun t x y hx hy =>
       framedPinned_pairing_scheme D sT hinv L h hover hcond t x y hx hy)
 
+section AgreeLocus
+
+/-- **[T-EQ-3d-L1]** The tautological frame over a frames-product base lies over
+the base (`pullback.condition`). -/
+theorem tautFrame_over (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) :
+    pullback.snd sT (wFramesπ D) ≫ wFramesπ D =
+      pullback.fst sT (wFramesπ D) ≫ sT :=
+  pullback.condition.symm
+
+variable (D : GaloisRepData N) [Fact (1 < N)] {Tt : Scheme.{0}}
+variable (f g : Tt ⟶ muNRootsScheme D)
+variable (hfg : f ≫ muNRootsSchemeπ D = g ≫ muNRootsSchemeπ D)
+
+/-- **[T-EQ-3d-L2]** The paired comparison of two roots-scheme maps over a
+common base. -/
+noncomputable def agreePair :
+    Tt ⟶ pullback (muNRootsSchemeπ D) (muNRootsSchemeπ D) :=
+  pullback.lift f g hfg
+
+/-- **[T-EQ-3d-L2]** The agreement locus of two roots-scheme maps (value-level
+`sympLocus`): the pullback of the diagonal along the paired comparison. -/
+noncomputable def agreeLocus : Scheme.{0} :=
+  pullback (pullback.diagonal (muNRootsSchemeπ D)) (agreePair D f g hfg)
+
+/-- Its inclusion into the base. -/
+noncomputable def agreeLocusι : agreeLocus D f g hfg ⟶ Tt :=
+  pullback.snd _ _
+
+/-- The inclusion is an open immersion (unramified + finite-type diagonal). -/
+theorem agreeLocusι_isOpenImmersion :
+    IsOpenImmersion (agreeLocusι D f g hfg) := by
+  haveI : Etale (muNRootsSchemeπ D) := (muNRootsSchemeπ_finite_etale D).2
+  haveI : IsFinite (muNRootsSchemeπ D) := (muNRootsSchemeπ_finite_etale D).1
+  show IsOpenImmersion
+    (pullback.snd (pullback.diagonal (muNRootsSchemeπ D))
+      (agreePair D f g hfg))
+  infer_instance
+
+/-- The inclusion is a closed immersion (separated diagonal). -/
+theorem agreeLocusι_isClosedImmersion :
+    IsClosedImmersion (agreeLocusι D f g hfg) := by
+  haveI : IsSeparated (muNRootsSchemeπ D) :=
+    inferInstanceAs (IsSeparated (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (muNRootsAlgebra D : Type 0)))))
+  show IsClosedImmersion
+    (pullback.snd (pullback.diagonal (muNRootsSchemeπ D))
+      (agreePair D f g hfg))
+  exact MorphismProperty.pullback_snd (P := @IsClosedImmersion) _ _
+    inferInstance
+
+/-- **[T-EQ-3d-L2]** Factoring through the agreement locus is exactly the
+agreement of the two maps. -/
+theorem agreeLocus_factor_iff {W : Scheme.{0}} (h : W ⟶ Tt) :
+    (∃ w : W ⟶ agreeLocus D f g hfg, w ≫ agreeLocusι D f g hfg = h) ↔
+      h ≫ f = h ≫ g := by
+  have hcond : agreeLocusι D f g hfg ≫ agreePair D f g hfg =
+      pullback.fst (pullback.diagonal (muNRootsSchemeπ D))
+          (agreePair D f g hfg) ≫
+        pullback.diagonal (muNRootsSchemeπ D) :=
+    pullback.condition.symm
+  have hιe : agreeLocusι D f g hfg ≫ f =
+      pullback.fst (pullback.diagonal (muNRootsSchemeπ D))
+        (agreePair D f g hfg) :=
+    (congrArg (agreeLocusι D f g hfg ≫ ·) (pullback.lift_fst f g hfg).symm).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ pullback.fst (muNRootsSchemeπ D) (muNRootsSchemeπ D))
+            hcond).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (pullback.fst (pullback.diagonal (muNRootsSchemeπ D))
+                (agreePair D f g hfg) ≫ ·) (pullback.diagonal_fst _)).trans
+              (Category.comp_id _)))))
+  have hιd : agreeLocusι D f g hfg ≫ g =
+      pullback.fst (pullback.diagonal (muNRootsSchemeπ D))
+        (agreePair D f g hfg) :=
+    (congrArg (agreeLocusι D f g hfg ≫ ·) (pullback.lift_snd f g hfg).symm).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ pullback.snd (muNRootsSchemeπ D) (muNRootsSchemeπ D))
+            hcond).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (pullback.fst (pullback.diagonal (muNRootsSchemeπ D))
+                (agreePair D f g hfg) ≫ ·) (pullback.diagonal_snd _)).trans
+              (Category.comp_id _)))))
+  constructor
+  · rintro ⟨w, rfl⟩
+    rw [Category.assoc, Category.assoc, hιe, hιd]
+  · intro he
+    refine ⟨pullback.lift (h ≫ f) h ?_, pullback.lift_snd _ _ _⟩
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc, pullback.diagonal_fst,
+        Category.comp_id, agreePair, Category.assoc, pullback.lift_fst]
+    · rw [Category.assoc, Category.assoc, pullback.diagonal_snd,
+        Category.comp_id, agreePair, Category.assoc, pullback.lift_snd]
+      exact he
+
+end AgreeLocus
+
 section SectionsToStructures
 
 open scoped FintypeCatDiscrete
