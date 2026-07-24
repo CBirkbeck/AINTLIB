@@ -31,7 +31,13 @@ not weaken or strengthen hypotheses).
 ---
 
 ### [T101] O_F: domain, char p, perfect (L1.1–L1.5)
-- **Status**: open | **File**: FarguesFontaine/PerfectoidFieldCharP.lean | **Depends**: none | **Parallel**: yes
+- **Status**: done (beastmode, 2026-07-24T14:00Z → 2026-07-24T14:55Z) | **File**: FarguesFontaine/PerfectoidFieldCharP.lean | **Depends**: none | **Parallel**: yes
+- **Progress**:
+  - 14:05: all five sorries filled first-strike except CharP (semi-out-param + wrong-direction `charP_of_injective_ringHom` — it pushes char domain→codomain; wrote the `cast_eq_zero_iff` instance directly instead; added `Mathlib.Algebra.CharP.Algebra` import).
+  - 14:20: zero errors; `lean_verify` on all substantive decls → `[propext, Classical.choice, Quot.sound]`; module `lake build` green.
+  - 14:45: Phase 6.5 cleanup on `frobenius_surjective_OF`: 8→3-line proof (`obtain ⟨y, hy, z, -, hxyz⟩` + `Subtype.ext (by simp [frobenius_def, hxyz])`), docstring tightened (+"semiperfect" gloss, Bhatt citation kept), all gates pass, no renames queued. Flag-only note: proof works at `IsPerfectoidRing` generality (field-ness unused) — future `/generalise` candidate, statement frozen this campaign.
+  - 14:55: Phase 6.6 buzz: FAST-BOARD (decl < 100ms profiler threshold; no maxHeartbeats anywhere; no scaffolding). DONE — L1.1–L1.5 discharged.
+- Post-proof cleanup: ✓ ran (gates pass, simplify-equivalent golf ran in worker, buzz FAST-BOARD, no flags; four ≤2-line term/instance proofs below cleanup action threshold — recorded per Mode-A judgment)
 - **Statements**: `instIsDomainOF`-anon (`IsDomain (OF F)`), `instCharPOF`
   (`CharP (OF F) p`), `frobenius_surjective_OF`
   (`Function.Surjective (frobenius (OF F) p)`), `instPerfectRingOF`
@@ -54,7 +60,17 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L1.1–L1.5 ([Bhatt §3.1 Ex. 3.1.2(3)] verbatim quote there).
 
 ### [T102] O_F: the ϖ-adic neighbourhood basis (L1.6)
-- **Status**: open | **File**: PerfectoidFieldCharP.lean | **Depends**: T101 | **Parallel**: with T2xx after T101
+- **Status**: BLOCKED — B2 SCOPE/DEFINITION ERROR (2026-07-25, beastmode; see b2_log.jsonl
+  entries of 2026-07-25 and the session's B2 report). The campaign variable block inherits
+  `[IsLinearTopology F F]` from the `IsPerfectoidRing`/`IsPerfectoidField` class signatures
+  (PerfectoidRing.lean:66-68/106-108), and that hypothesis set is UNSATISFIABLE for a
+  nontrivial Tate field (mathlib `IsLinearTopology F F` = nbhd basis of F-submodules =
+  {⊥, ⊤} for a field; ⊥-case kills Tate, ⊤-case kills t0). Every perfectoid-parameterized
+  statement in the project is currently vacuous. OWNER DECISION REQUIRED on the class
+  repair (swap to `[NonarchimedeanRing F]` + re-prove the PerfectoidRing.lean engine, or
+  refound on mathlib `Valued`); then `/develop --continue` re-opens T102–T205. The window
+  and quotient layers (T30x–T50x) are mathematically unaffected — same statements under
+  the repaired block. | **File**: PerfectoidFieldCharP.lean | **Depends**: T101 + class repair | **Parallel**: with T2xx after repair
 - **Statements**: `span_toOF_pow_mem_nhds_zero`, `exists_span_toOF_pow_subset_nhds`.
 - **Sketch**: (1) identify `((span {ϖof})^n : Set)` with `ϖ^n • (O_F)` via
   `Ideal.span_singleton_pow` + `Ideal.mem_span_singleton'`. (2) membership in 𝓝 0: O_F

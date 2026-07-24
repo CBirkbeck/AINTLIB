@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».PerfectoidRing
 import «Adic spaces».PseudoUniformizer
+import Mathlib.Algebra.CharP.Algebra
 import Mathlib.FieldTheory.Perfect
 
 /-!
@@ -60,25 +61,27 @@ def PseudoUniformizer.toOF (ϖ : PseudoUniformizer F) : OF F :=
   ⟨((ϖ.val : Fˣ) : F), (PseudoUniformizer.isTopologicallyNilpotent ϖ).isPowerBounded⟩
 
 /-- `O_F` is an integral domain (a subring of a field). -/
-instance : IsDomain (OF F) := by sorry
+instance : IsDomain (OF F) := by infer_instance
 
 /-- `O_F` has characteristic `p` (a subring of a field of characteristic `p`).
 
 Source: immediate from the setting of [BFHHLWY, Def 2.1.1]. -/
-instance instCharPOF : CharP (OF F) p := by
-  have := ‹CharP F p›
-  sorry
+instance instCharPOF : CharP (OF F) p where
+  cast_eq_zero_iff n := by
+    rw [← CharP.cast_eq_zero_iff F p n]
+    exact ⟨fun h => by simpa using congrArg (fun x : OF F => (x : F)) h,
+      fun h => Subtype.ext (by push_cast; exact h)⟩
 
-/-- The Frobenius `x ↦ x^p` is surjective on `O_F`.
-
-This is the characteristic-`p` content of the perfectoid condition: the class field
-`frobenius_surj` gives, for every power-bounded `x`, power-bounded `y, z` with
-`x = y^p + p·z`, and `p = 0` in `F`.
+/-- The Frobenius `x ↦ x^p` is surjective on `O_F` (`O_F` is semiperfect): the
+characteristic-`p` content of the perfectoid condition.
 
 Source: [Bhatt, §3.1, Example 3.1.2(3)]: "Let K be a NA field of characteristic p. Then
 K is perfectoid if and only if K is perfect. In this case, semiperfectness of K° implies
 its perfectness". -/
-theorem frobenius_surjective_OF : Function.Surjective (frobenius (OF F) p) := by sorry
+theorem frobenius_surjective_OF : Function.Surjective (frobenius (OF F) p) := by
+  intro x
+  obtain ⟨y, hy, z, -, hxyz⟩ := IsPerfectoidRing.frobenius_surj (p := p) (x : F) x.2
+  exact ⟨⟨y, hy⟩, Subtype.ext (by simp [frobenius_def, hxyz])⟩
 
 /-- `O_F` is a perfect ring: the Frobenius is bijective.
 
@@ -86,11 +89,14 @@ Injectivity holds because `O_F` is a domain of characteristic `p`; surjectivity 
 `frobenius_surjective_OF`.
 
 Source: [Bhatt, §3.1, Example 3.1.2(3)], as above. -/
-instance instPerfectRingOF : PerfectRing (OF F) p := by sorry
+instance instPerfectRingOF : PerfectRing (OF F) p :=
+  PerfectRing.ofSurjective _ p (frobenius_surjective_OF p F)
 
 /-- The pseudo-uniformizer is nonzero in `O_F`. -/
 theorem PseudoUniformizer.toOF_ne_zero (ϖ : PseudoUniformizer F) :
-    PseudoUniformizer.toOF F ϖ ≠ 0 := by sorry
+    PseudoUniformizer.toOF F ϖ ≠ 0 := by
+  intro h
+  exact ((ϖ.val : Fˣ)).ne_zero (by simpa [PseudoUniformizer.toOF] using congrArg Subtype.val h)
 
 /-- Each `ϖ^n O_F` is a neighbourhood of `0` in `O_F` (subspace topology from `F`).
 
