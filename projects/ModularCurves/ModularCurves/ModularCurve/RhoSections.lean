@@ -440,6 +440,97 @@ theorem pullbackAlongMapOf_assocHom (X : EllObj (CommRingCat.of ℚ))
       refine Eq.trans (Category.assoc _ _ _).symm ?_
       exact congrArg (· ≫ u) hLsnd
 
+/-- **[T-EQ-3c-L2 congr]** The coordinate map is congruent in the frame (proofs
+transport). -/
+theorem framedCoordMap_congr_frame (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    {h₁ h₂ : T ⟶ wFrames D} (hh : h₁ = h₂) (hover : h₁ ≫ wFramesπ D = sT) :
+    framedCoordMap D sT E hinv L h₁ hover =
+      framedCoordMap D sT E hinv L h₂ (hh ▸ hover) := by
+  subst hh; rfl
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-L3c2]** The classified value translates under a `σZ`-intertwining
+base endomorphism by the diagonal `γ`-translation of the symplectically framed
+problem (the value-level equivariance of the correspondence). -/
+theorem eqv_smul_translate (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    {T₀ : Scheme.{0}} {g : T₀ ⟶ X.base}
+    (m : { m : T₀ ⟶ d.Z // m ≫ d.f = g })
+    (uT : T₀ ⟶ T₀) (huT : uT ≫ g = g)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hcomm : uT ≫ m.1 = m.1 ≫ d.σZ.hom γ) :
+    (sympFramedProblem D).map (pullbackAlongMapOf X uT huT).op (d.eqv g m) =
+      (sympFramedSmulNat D γ).app (Opposite.op (X.pullbackAlong g))
+        (d.eqv g m) := by
+  have hsub : (⟨uT ≫ m.1, by rw [Category.assoc, m.2, huT]⟩ :
+      { m' : T₀ ⟶ d.Z // m' ≫ d.f = g }) =
+      ⟨m.1 ≫ d.σZ.hom γ, by rw [Category.assoc, d.over_base, m.2]⟩ :=
+    Subtype.ext hcomm
+  refine Eq.trans (RelRepData.eqv_mapOf d.toRelRepData uT huT m).symm ?_
+  refine Eq.trans (congrArg (d.eqv g) hsub) ?_
+  refine Eq.trans (d.equivariant g m γ) ?_
+  exact congrArg (fun γ' => (sympFramedSmulNat D γ').app
+    (Opposite.op (X.pullbackAlong g)) (d.eqv g m)) (inv_inv γ)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-L3c4]** The transported value on the double base change translates
+under the `σZ`-intertwining endomorphism by the `γ`-translation (the `w`-level
+equivariance: conjugate the base-change comparison through the exchange law, use
+the value-level equivariance, and push through by naturality of the diagonal
+translation). -/
+theorem w_smul_translate (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    {T' T'' : Scheme.{0}} (k : T' ⟶ X.base) (c : T'' ⟶ T')
+    (m : { m : T'' ⟶ d.Z // m ≫ d.f = c ≫ k })
+    (uT : T'' ⟶ T'') (huT : uT ≫ c = c)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hcomm : uT ≫ m.1 = m.1 ≫ d.σZ.hom γ) :
+    (sympFramedProblem D).map
+        (pullbackAlongMapOf (X.pullbackAlong k) uT huT).op
+        ((sympFramedProblem D).map (pullbackAlongAssocHom X k c).op
+          (d.eqv (c ≫ k) m)) =
+      (sympFramedSmulNat D γ).app
+        (Opposite.op ((X.pullbackAlong k).pullbackAlong c))
+        ((sympFramedProblem D).map (pullbackAlongAssocHom X k c).op
+          (d.eqv (c ≫ k) m)) := by
+  have h1 := (congrArg
+    (fun (F : (sympFramedProblem D).obj
+        (Opposite.op (X.pullbackAlong (c ≫ k))) ⟶
+      (sympFramedProblem D).obj
+        (Opposite.op ((X.pullbackAlong k).pullbackAlong c))) =>
+      F (d.eqv (c ≫ k) m))
+    ((sympFramedProblem D).map_comp (pullbackAlongAssocHom X k c).op
+      (pullbackAlongMapOf (X.pullbackAlong k) uT huT).op)).symm
+  have h2 := congrArg
+    (fun (q : (X.pullbackAlong k).pullbackAlong c ⟶ X.pullbackAlong (c ≫ k)) =>
+      (sympFramedProblem D).map q.op (d.eqv (c ≫ k) m))
+    (pullbackAlongMapOf_assocHom X k c uT huT)
+  have h3 := congrArg
+    (fun (F : (sympFramedProblem D).obj
+        (Opposite.op (X.pullbackAlong (c ≫ k))) ⟶
+      (sympFramedProblem D).obj
+        (Opposite.op ((X.pullbackAlong k).pullbackAlong c))) =>
+      F (d.eqv (c ≫ k) m))
+    ((sympFramedProblem D).map_comp
+      (pullbackAlongMapOf X uT (by rw [← Category.assoc, huT])).op
+      (pullbackAlongAssocHom X k c).op)
+  have h4 := congrArg
+    ((sympFramedProblem D).map (pullbackAlongAssocHom X k c).op)
+    (eqv_smul_translate D d m uT (by rw [← Category.assoc, huT]) γ hcomm)
+  have h5 := (congrArg
+    (fun (F : (sympFramedProblem D).obj
+        (Opposite.op (X.pullbackAlong (c ≫ k))) ⟶
+      (sympFramedProblem D).obj
+        (Opposite.op ((X.pullbackAlong k).pullbackAlong c))) =>
+      F (d.eqv (c ≫ k) m))
+    ((sympFramedSmulNat D γ).naturality
+      (pullbackAlongAssocHom X k c).op)).symm
+  exact (((h1.trans h2).trans h3).trans h4).trans h5
+
 open scoped FintypeCatDiscrete in
 /-- **[T-EQ-3c-i COMPLETE]** The ρ-dictionary from the carve alone: a full-level
 structure and a frame satisfying the single map-level condition
