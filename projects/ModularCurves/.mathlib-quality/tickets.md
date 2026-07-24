@@ -26399,7 +26399,7 @@ Prefer (i). NOTE: 2a is exactly the morphism-level form of T-E4a; if it resists,
 with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 
 ### [T-EQ-3d-L1] The tautological frame over the frames-product
-- **Status**: open
+- **Status**: done (2026-07-24, tautFrame_over in RhoSections)
 - **Title**: Tautological frame section over `T ×_ℚ wFrames` and its base compatibility
 - **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
 - **Depends on**: (RhoSections 3c block — landed)
@@ -26411,7 +26411,7 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 - **Generality decision**: minimal, matches 3d use site.
 
 ### [T-EQ-3d-L2] The carve locus of a framed pair over an arbitrary base
-- **Status**: open
+- **Status**: done (2026-07-24, agreeLocus/agreeLocusι/factor_iff + open/closed immersion in RhoSections)
 - **Title**: Clopen agreement locus of `pairEZMap` vs `frameDetMap` (value-level `sympLocus`)
 - **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
 - **Depends on**: T-EQ-3d-L1
@@ -26459,7 +26459,7 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 - **Generality decision**: statement fixed by the YRho-tail target (theorem_statement_protected).
 
 ### [T-EQ-3d-L3a] corrSpecMap surjectivity from set-surjectivity
-- **Status**: open
+- **Status**: done (2026-07-24: qbarAlgHom_factors + corrAlgebra_exists_eval_ne + corrSpecMap_surjective)
 - **Title**: A correspondence morphism with surjective set-map has surjective Spec-map
 - **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
 - **Depends on**: —
@@ -26471,7 +26471,7 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 - **Generality decision**: correspondence-level (all Galois sets), reusable.
 
 ### [T-EQ-3d-L3b] detComp∘detFrame is surjective + the T4-as-pullback presentation
-- **Status**: open
+- **Status**: in_progress (detFrameScheme_surjective ✓; composite-form REVISED OUT — see [T-EQ-3d-L3 REVISED]; T4-presentation pending L3c)
 - **Title**: The determinant read hits every root; the carve locus is the pullback of it along the pairing section
 - **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
 - **Depends on**: T-EQ-3d-L3a
@@ -26482,7 +26482,7 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 - **Generality decision**: in-situ.
 
 ### [T-EQ-3d-L3c] Primitivity: the full-level pairing factors through the units component
-- **Status**: open
+- **Status**: in_progress (2026-07-24: corrInverse_mono_of_injective ✓ detCompMor_injective ✓ detComp_splitting ✓ detCompAlgHom_surjective ✓ detCompScheme_isOpenImmersion ✓ factors_detComp_of_range ✓ muNRootsRead_classify_field ✓; REMAINING: the k-order register argument + kernel-transfer + per-point range assembly — full design in beastmode sentinel-history commit 9d73f281d+)
 - **Title**: `pairEZMap` of a full level factors through `detCompScheme` (the Weil pairing of a basis has exact order N)
 - **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
 - **Depends on**: T-EQ-3d-L3a
