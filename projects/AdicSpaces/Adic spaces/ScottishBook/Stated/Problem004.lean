@@ -49,7 +49,7 @@ This is a stronger version of Problem 2. -/
 theorem problem4
     (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A]
+    [UniformSpace A] [NonarchimedeanRing A]
     [PlusSubring A] [IsHuberRing A]
     [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]

@@ -41,11 +41,13 @@ open TopologicalRing ValuationSpectrum
 
 universe u
 
--- `A°` (`powerBoundedSubring.toSubring`) and the power-bounded `A°`-subring API are now stated
--- with `[NonarchimedeanAddGroup A]`. For the genuine linear-topology setting used in this file,
--- that follows from `[IsLinearTopology A A]` (open ideals are open additive subgroups). Kept
--- file-`local` so it does not affect typeclass search in other modules.
-attribute [local instance] IsLinearTopology.nonarchimedeanAddGroup
+-- The perfectoid classes are stated over `[NonarchimedeanRing A]` (basis of open additive
+-- subgroups at 0). NOTE (2026-07-25 repair): the previous hypothesis `IsLinearTopology A A`
+-- (basis of open A-SUBMODULES) is unsatisfiable for a nontrivial Tate ring — any open ideal
+-- absorbs a topologically nilpotent unit's power and hence is the whole ring — which made the
+-- perfectoid layer vacuous; see `.mathlib-quality/b2_log.jsonl` (2026-07-25).
+-- `NonarchimedeanAddGroup A` (needed by `powerBoundedSubring.toSubring`) now flows from the
+-- global instance `NonarchimedeanRing.to_nonarchimedeanAddGroup`.
 
 /-! ### Perfectoid rings -/
 
@@ -65,7 +67,7 @@ is a consequence; see `perfectoidPseudoUniformizer_frobenius_surj_varpi`.
 (Scholze, *Perfectoid Spaces*, Definition 3.5) -/
 class IsPerfectoidRing (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] : Prop
+    [UniformSpace A] [NonarchimedeanRing A] : Prop
     extends IsTateRing A where
   /-- The uniform space is compatible with the additive group structure, and its
   topology agrees with `[TopologicalSpace A]`. -/
@@ -105,7 +107,7 @@ from the topological data each time.
 (Scholze, *Perfectoid Spaces*, Definition 3.5; Wedhorn, *Adic Spaces*, Prop 6.1) -/
 class IsPerfectoidField (p : ℕ) [Fact (Nat.Prime p)]
     (K : Type u) [Field K] [TopologicalSpace K] [IsTopologicalRing K]
-    [UniformSpace K] [IsLinearTopology K K] : Prop
+    [UniformSpace K] [NonarchimedeanRing K] : Prop
     extends IsPerfectoidRing p K where
   /-- The topology on a perfectoid field is induced by a rank-1 valuation whose
   integer ring is the power-bounded subring `K°`. -/
@@ -118,21 +120,21 @@ namespace IsPerfectoidRing
 /-- Extract a pseudo-uniformizer with the perfectoid property from a perfectoid ring. -/
 noncomputable def perfectoidPseudoUniformizer (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] :
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] :
     PseudoUniformizer A :=
   (IsPerfectoidRing.exists_pseudoUniformizer (p := p) (A := A)).choose
 
 /-- The perfectoid pseudo-uniformizer is power-bounded. -/
 theorem perfectoidPseudoUniformizer_isPowerBounded (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] :
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] :
     IsPowerBounded ((perfectoidPseudoUniformizer p A).val : A) :=
   (IsPerfectoidRing.exists_pseudoUniformizer (p := p) (A := A)).choose_spec.1
 
 /-- The perfectoid pseudo-uniformizer satisfies ϖ^p | p. -/
 theorem perfectoidPseudoUniformizer_divides_p (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] :
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] :
     ∃ c : A, IsPowerBounded c ∧
       (p : A) = c * (((perfectoidPseudoUniformizer p A).val : A) ^ p) :=
   (IsPerfectoidRing.exists_pseudoUniformizer (p := p) (A := A)).choose_spec.2
@@ -143,7 +145,7 @@ together with `p = c · ϖ^p`: if `x = y^p + p·z = y^p + c·ϖ^p·z = y^p + ϖ�
 then `z' := c · ϖ^{p-1} · z` is power-bounded. -/
 theorem perfectoidPseudoUniformizer_frobenius_surj_varpi (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] :
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] :
     ∀ x : A, IsPowerBounded x →
       ∃ y : A, IsPowerBounded y ∧
         ∃ z : A, IsPowerBounded z ∧
@@ -184,10 +186,10 @@ in the subspace topology (by the cofinality above), hence converges in `A°`.
 
 (Scholze, *Perfectoid Spaces*, implicit in §3) -/
 private abbrev PBSubring (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [IsLinearTopology A A] := ↥(powerBoundedSubring.toSubring A)
+    [NonarchimedeanRing A] := ↥(powerBoundedSubring.toSubring A)
 
 private abbrev pIdeal (p : ℕ) (A : Type u) [CommRing A] [TopologicalSpace A]
-    [IsTopologicalRing A] [IsLinearTopology A A] :=
+    [IsTopologicalRing A] [NonarchimedeanRing A] :=
   Ideal.span {(p : PBSubring A)}
 
 /-- **IsHausdorff**: `⋂_n p^n A° = {0}`.
@@ -197,7 +199,7 @@ If `x ∈ p^n A°` for all `n`, then `(x : A) = (c·ϖ^p)^n · yₙ` for power-b
 every neighborhood of 0, hence `(x : A) = 0` by T₀. -/
 private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A] :
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A] :
     IsHausdorff (pIdeal p A) (PBSubring A) := by
   constructor
   intro x hx
@@ -258,59 +260,26 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
 elements (in the topology of A) is power-bounded, provided A° is bounded. -/
 private theorem isPowerBounded_of_tendsto_of_powerBounded
     {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [IsLinearTopology A A] [IsUniform A] {f : ℕ → A} {L : A}
+    [NonarchimedeanRing A] [IsUniform A] {f : ℕ → A} {L : A}
     (hf : ∀ n, IsPowerBounded (f n)) (hL : Filter.Tendsto f Filter.atTop (nhds L)) :
     IsPowerBounded L := by
-  intro U hU
-  -- Pick open ideal J ⊆ U
-  obtain ⟨J, hJopen, hJU⟩ :=
-    (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hU
-  -- Pick V ∈ nhds 0 with A° * V ⊆ J (using A° bounded)
-  obtain ⟨V, hV, hAV⟩ :=
-    IsUniform.isBounded_powerBounded (A := A) (J : Set A) (hJopen.mem_nhds J.zero_mem)
-  -- Pick open ideal J' ⊆ V ∩ J
-  obtain ⟨J', hJ'open, hJ'VJ⟩ :=
-    (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp
-      (Filter.inter_mem hV (hJopen.mem_nhds J.zero_mem))
-  have hJ'V : (J' : Set A) ⊆ V := fun x hx ↦ (hJ'VJ hx).1
-  have hJ'J : (J' : Set A) ⊆ (J : Set A) := fun x hx ↦ (hJ'VJ hx).2
-  -- Pick N such that f N - L ∈ J'
-  have hJ'nhds : {x | x - L ∈ (J' : Set A)} ∈ nhds L :=
-    (continuous_sub_right L).continuousAt.preimage_mem_nhds
-      (by simpa using hJ'open.mem_nhds J'.zero_mem)
-  obtain ⟨N, hN⟩ := Filter.mem_atTop_sets.mp (hL hJ'nhds)
-  have hLfN : L - f N ∈ (J' : Set A) := by
-    have h := hN N le_rfl
-    simp only [Set.mem_preimage, Set.mem_setOf_eq] at h
-    rw [show L - f N = -(f N - L) from by ring]; exact J'.neg_mem h
-  -- For all k: L^k - (f N)^k ∈ J' (J' is an ideal, L - f N ∈ J')
-  have hLk : ∀ k : ℕ, L ^ k - (f N) ^ k ∈ (J' : Set A) := by
-    intro k; induction k with
-    | zero => simp [J'.zero_mem]
-    | succ k ih =>
-      have : L ^ (k + 1) - (f N) ^ (k + 1) =
-          L ^ k * (L - f N) + (L ^ k - (f N) ^ k) * f N := by ring
-      rw [this]; exact J'.add_mem (J'.mul_mem_left _ hLfN) (J'.mul_mem_right _ ih)
-  -- Witness: V' = J' works for {L^k | k} * J' ⊆ J ⊆ U
-  refine ⟨(J' : Set A), hJ'open.mem_nhds J'.zero_mem, ?_⟩
-  rintro _ ⟨_, ⟨k, rfl⟩, v, hv, rfl⟩
-  apply hJU
-  change L ^ k * v ∈ (J : Set A)
-  have hsplit : L ^ k * v = (f N) ^ k * v + (L ^ k - (f N) ^ k) * v := by ring
-  rw [hsplit]; apply J.add_mem
-  · -- (f N)^k * v ∈ A° * V ⊆ J
-    have hfNk : IsPowerBounded ((f N) ^ k) := by
-      apply (hf N).subset; rintro _ ⟨m, rfl⟩
-      exact ⟨k * m, show f N ^ (k * m) = (f N ^ k) ^ m from pow_mul _ _ _⟩
-    exact hAV (Set.mul_mem_mul hfNk (hJ'V hv))
-  · -- (L^k - (f N)^k) * v ∈ J' ⊆ J
-    exact hJ'J (J'.mul_mem_right _ (hLk k))
+  -- `L` lies in the topological closure of `A°`, which is a bounded subring:
+  -- bounded because the closure of a bounded set is bounded (`IsBounded.closure`),
+  -- a subring because closures of subrings are subrings (`Subring.topologicalClosure`).
+  -- Every element of a bounded subring is power-bounded.
+  have hLcl : L ∈ (powerBoundedSubring.toSubring A).topologicalClosure :=
+    show L ∈ closure (powerBoundedSubring A) from
+      mem_closure_of_tendsto hL (Filter.Eventually.of_forall hf)
+  have hBcl : IsBounded ((powerBoundedSubring.toSubring A).topologicalClosure : Set A) :=
+    show IsBounded (closure (powerBoundedSubring A)) from
+      (IsUniform.isBounded_powerBounded (A := A)).closure
+  exact hBcl.isPowerBounded_of_mem hLcl
 
 /-- `(p : A) ^ m` is power-bounded, using the perfectoid factorization `p = c · ϖ^p`
 with `c` and `ϖ` power-bounded. -/
 private theorem isPowerBounded_p_pow {p : ℕ}
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [IsLinearTopology A A] {ϖ c : A} (hϖ_pb : IsPowerBounded ϖ) (hc_pb : IsPowerBounded c)
+    [NonarchimedeanRing A] {ϖ c : A} (hϖ_pb : IsPowerBounded ϖ) (hc_pb : IsPowerBounded c)
     (hpc : (p : A) = c * ϖ ^ p) (m : ℕ) : IsPowerBounded ((p : A) ^ m) := by
   rw [hpc, mul_pow]
   exact isPowerBounded_mul ((powerBoundedSubring.toSubring A).pow_mem hc_pb m)
@@ -324,26 +293,25 @@ then for every neighborhood `W` of `0` there is a threshold `M` past which `(p :
 for both the original sequence and its telescoping partial sums. -/
 private theorem mul_p_pow_eventually_mem_nhds {p : ℕ} (hp_pos : 0 < p)
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsUniform A] {ϖ c : A}
+    [UniformSpace A] [NonarchimedeanRing A] [IsUniform A] {ϖ c : A}
     (hϖ_tn : IsTopologicallyNilpotent ϖ) (hc_pb : IsPowerBounded c)
     (hpc : (p : A) = c * ϖ ^ p) {W : Set A} (hW : W ∈ nhds (0 : A)) :
     ∃ M, ∀ a : A, IsPowerBounded a → ∀ j, M ≤ j → (p : A) ^ j * a ∈ W := by
   obtain ⟨V, hV, hAV⟩ := IsUniform.isBounded_powerBounded (A := A) W hW
-  obtain ⟨J, hJopen, hJV⟩ :=
-    (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hV
   obtain ⟨M, hM⟩ :=
-    (isTopologicallyNilpotent_pow hϖ_tn hp_pos).exists_pow_mem_of_mem_nhds
-      (hJopen.mem_nhds J.zero_mem)
+    (isTopologicallyNilpotent_pow hϖ_tn hp_pos).exists_pow_mem_of_mem_nhds hV
   refine ⟨M, fun a ha j hj ↦ ?_⟩
-  have hϖpj : (ϖ ^ p) ^ j ∈ V := by
-    apply hJV
-    rw [show (ϖ ^ p) ^ j = (ϖ ^ p) ^ (j - M) * (ϖ ^ p) ^ M by
-      rw [← pow_add, Nat.sub_add_cancel hj]]
-    exact J.mul_mem_left _ hM
-  have hcj_pb : IsPowerBounded (c ^ j * a) :=
-    isPowerBounded_mul ((powerBoundedSubring.toSubring A).pow_mem hc_pb j) ha
-  rw [show (p : A) ^ j * a = c ^ j * a * (ϖ ^ p) ^ j by rw [hpc]; ring]
-  exact hAV (Set.mul_mem_mul hcj_pb hϖpj)
+  -- Split `(ϖ^p)^j = (ϖ^p)^(j-M) · (ϖ^p)^M`: the excess power joins the power-bounded
+  -- factor, and `(ϖ^p)^M ∈ V` lands the product in `A° · V ⊆ W` (no ideal needed).
+  have hcja_pb : IsPowerBounded (c ^ j * a * (ϖ ^ p) ^ (j - M)) :=
+    isPowerBounded_mul
+      (isPowerBounded_mul ((powerBoundedSubring.toSubring A).pow_mem hc_pb j) ha)
+      ((powerBoundedSubring.toSubring A).pow_mem
+        ((powerBoundedSubring.toSubring A).pow_mem hϖ_tn.isPowerBounded p) (j - M))
+  rw [show (p : A) ^ j * a = c ^ j * a * (ϖ ^ p) ^ (j - M) * (ϖ ^ p) ^ M by
+    rw [hpc, mul_pow, show (ϖ ^ p) ^ j = (ϖ ^ p) ^ (j - M) * (ϖ ^ p) ^ M by
+      rw [← pow_add, Nat.sub_add_cancel hj]]; ring]
+  exact hAV (Set.mul_mem_mul hcja_pb hM)
 
 /-- **Cauchy from eventually-small symmetric differences.** A sequence `g` whose differences
 `g m - g n` lie in any neighborhood of `0` once both indices pass a threshold (uniformly) is
@@ -351,7 +319,7 @@ Cauchy in the uniform-space structure on `A`. The smallness is phrased in the gi
 topology and transported across `htop`. -/
 private theorem cauchySeq_of_sub_eventually_mem_nhds
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsUniformAddGroup A] {g : ℕ → A}
+    [UniformSpace A] [NonarchimedeanRing A] [IsUniformAddGroup A] {g : ℕ → A}
     (htop : ‹UniformSpace A›.toTopologicalSpace = ‹TopologicalSpace A›)
     (hsym : ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → N ≤ n → g m - g n ∈ W) :
     CauchySeq g := by
@@ -374,20 +342,19 @@ interval whose indices all exceed the smallness threshold, hence lands in an ope
 `cauchySeq_of_sub_eventually_mem_nhds`. -/
 private theorem cauchySeq_partialSum_of_term_eventually_mem_nhds
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsUniformAddGroup A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsUniformAddGroup A]
     {S : ℕ → ℕ → A} {t : ℕ → ℕ → A}
     (hS : ∀ n N, S n N = ∑ j ∈ Finset.range N, t n j)
     (htop : ‹UniformSpace A›.toTopologicalSpace = ‹TopologicalSpace A›)
     (hsmall : ∀ W ∈ nhds (0 : A), ∃ M, ∀ n j, M ≤ j → t n j ∈ W) (n : ℕ) :
     CauchySeq (S n) := by
   refine cauchySeq_of_sub_eventually_mem_nhds A htop (fun W hW ↦ ?_)
-  -- Pick an open ideal K ⊆ W (K is closed under finite sums and negation).
-  obtain ⟨K, hKopen, hKW⟩ :=
-    (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hW
-  obtain ⟨M, hM⟩ := hsmall (K : Set A) (hKopen.mem_nhds K.zero_mem)
+  -- Pick an open additive subgroup K ⊆ W (closed under finite sums and negation).
+  obtain ⟨K, hKW⟩ := NonarchimedeanAddGroup.is_nonarchimedean W hW
+  obtain ⟨M, hM⟩ := hsmall (K : Set A) (K.isOpen.mem_nhds K.zero_mem')
   -- Every `Finset.Ico` sum above the threshold lands in `K ⊆ W`.
   have hsub : ∀ a b, M ≤ a → a ≤ b → ∑ j ∈ Finset.Ico a b, t n j ∈ (K : Set A) :=
-    fun a b ha _ ↦ Submodule.sum_mem _ fun j hj ↦ hM n j (le_trans ha (Finset.mem_Ico.mp hj).1)
+    fun a b ha _ ↦ sum_mem fun j hj ↦ hM n j (le_trans ha (Finset.mem_Ico.mp hj).1)
   refine ⟨M, fun N₂ N₁ hN₂ hN₁ ↦ ?_⟩
   rcases le_total N₂ N₁ with h | h
   · -- S n N₂ - S n N₁ = -(Σ Ico N₂ N₁)
@@ -395,7 +362,7 @@ private theorem cauchySeq_partialSum_of_term_eventually_mem_nhds
     have hS_diff : S n N₁ - S n N₂ = ∑ j ∈ Finset.Ico N₂ N₁, t n j := by
       simp only [hS]; rw [← heq]; ring
     rw [show S n N₂ - S n N₁ = -(S n N₁ - S n N₂) from by ring, hS_diff]
-    exact hKW (K.neg_mem (hsub N₂ N₁ hN₂ h))
+    exact hKW (neg_mem (hsub N₂ N₁ hN₂ h))
   · -- S n N₂ - S n N₁ = Σ Ico N₁ N₂
     have heq := Finset.sum_range_add_sum_Ico (fun j ↦ t n j) h
     have hS_diff : S n N₂ - S n N₁ = ∑ j ∈ Finset.Ico N₁ N₂, t n j := by
@@ -440,7 +407,7 @@ The proof proceeds in four steps:
 4. Verify the `SModEq` condition: `p^n | (f n - L)` in `A°`. -/
 private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A] :
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A] :
     IsPrecomplete (pIdeal p A) (PBSubring A) := by
   haveI := IsPerfectoidRing.complete (p := p) (A := A)
   haveI := IsPerfectoidRing.t0 (p := p) (A := A)
@@ -483,14 +450,13 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   have hf_sym : ∀ W ∈ nhds (0 : A), ∃ N, ∀ m n, N ≤ m → N ≤ n →
       (f m : A) - (f n : A) ∈ W := by
     intro W hW
-    obtain ⟨J, hJopen, hJW⟩ :=
-      (IsLinearTopology.hasBasis_open_ideal (R := A)).mem_iff.mp hW
-    obtain ⟨N, hN⟩ := hf_small (J : Set A) (hJopen.mem_nhds J.zero_mem)
+    obtain ⟨J, hJW⟩ := NonarchimedeanAddGroup.is_nonarchimedean W hW
+    obtain ⟨N, hN⟩ := hf_small (J : Set A) (J.isOpen.mem_nhds J.zero_mem')
     exact ⟨N, fun m n hm hn ↦ by
       rcases le_total m n with hmn | hmn
       · exact hJW (hN m n hm hmn)
       · rw [show (f m : A) - (f n : A) = -((f n : A) - (f m : A)) from by ring]
-        exact hJW (J.neg_mem (hN n m hn hmn))⟩
+        exact hJW (neg_mem (hN n m hn hmn))⟩
   -- The coerced sequence is Cauchy in A.
   have hCauchy : CauchySeq (fun n ↦ (f n : A)) :=
     cauchySeq_of_sub_eventually_mem_nhds A htop hf_sym
@@ -562,7 +528,7 @@ private theorem isPrecomplete_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
 
 instance instIsAdicComplete (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A] :
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A] :
     IsAdicComplete (pIdeal p A) (PBSubring A) :=
   { toIsHausdorff := isHausdorff_pIdeal p A
     toIsPrecomplete := isPrecomplete_pIdeal p A }
@@ -576,7 +542,7 @@ This is a deep result: the key step is to show that for any rational localizatio
 proof goes through almost mathematics and tilting. -/
 theorem toIsStablyUniform (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A]
     [PlusSubring A] [IsHuberRing A] :
     IsStablyUniform A := sorry
 
@@ -586,7 +552,7 @@ This follows from stable uniformity: Buzzard--Verberkmoes showed that stably
 uniform Tate rings are sheafy. -/
 theorem toIsSheafy (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A]
     [PlusSubring A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)] :

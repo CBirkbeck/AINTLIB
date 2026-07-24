@@ -60,17 +60,22 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L1.1–L1.5 ([Bhatt §3.1 Ex. 3.1.2(3)] verbatim quote there).
 
 ### [T102] O_F: the ϖ-adic neighbourhood basis (L1.6)
-- **Status**: BLOCKED — B2 SCOPE/DEFINITION ERROR (2026-07-25, beastmode; see b2_log.jsonl
-  entries of 2026-07-25 and the session's B2 report). The campaign variable block inherits
-  `[IsLinearTopology F F]` from the `IsPerfectoidRing`/`IsPerfectoidField` class signatures
-  (PerfectoidRing.lean:66-68/106-108), and that hypothesis set is UNSATISFIABLE for a
-  nontrivial Tate field (mathlib `IsLinearTopology F F` = nbhd basis of F-submodules =
-  {⊥, ⊤} for a field; ⊥-case kills Tate, ⊤-case kills t0). Every perfectoid-parameterized
-  statement in the project is currently vacuous. OWNER DECISION REQUIRED on the class
-  repair (swap to `[NonarchimedeanRing F]` + re-prove the PerfectoidRing.lean engine, or
-  refound on mathlib `Valued`); then `/develop --continue` re-opens T102–T205. The window
-  and quotient layers (T30x–T50x) are mathematically unaffected — same statements under
-  the repaired block. | **File**: PerfectoidFieldCharP.lean | **Depends**: T101 + class repair | **Parallel**: with T2xx after repair
+- **Status**: done (beastmode, 2026-07-25; B2-blocked 2026-07-25 00:35Z → class repair
+  executed same day per owner's option 1 → both theorems proven and axiom-clean)
+  | **File**: PerfectoidFieldCharP.lean | **Depends**: T101 | **Parallel**: —
+- **Progress**:
+  - B2 interlude: the inherited `[IsLinearTopology F F]` hypothesis was unsatisfiable for
+    Tate fields (b2_log.jsonl 2026-07-25; decomposition §6.5). Owner approved repair
+    option 1; classes + engine + all consumers now ride `[NonarchimedeanRing _]`; the
+    two T102/T103 statement signatures gained an explicit `[IsPerfectoidField p F]`
+    binder (the pinned `OF`/`toOF` signatures no longer auto-include it).
+  - `span_toOF_pow_mem_nhds_zero`: proven — `ϖ^n·F°` is the image of the open `F°`
+    (`P.isOpen_powerBoundedSubring`) under the unit-multiplication homeomorphism
+    (`Homeomorph.mulLeft₀`), pulled back along `nhds_subtype_eq_comap`.
+  - `exists_span_toOF_pow_subset_nhds`: proven — boundedness of `F°`
+    (`IsUniform.isBounded_powerBounded`) + topological nilpotence
+    (`exists_pow_mem_of_mem_nhds`) land `c·ϖ^n` in `F°·V ⊆ U'`.
+  - Both `#print axioms` = `[propext, Classical.choice, Quot.sound]` (probe-verified).
 - **Statements**: `span_toOF_pow_mem_nhds_zero`, `exists_span_toOF_pow_subset_nhds`.
 - **Sketch**: (1) identify `((span {ϖof})^n : Set)` with `ϖ^n • (O_F)` via
   `Ideal.span_singleton_pow` + `Ideal.mem_span_singleton'`. (2) membership in 𝓝 0: O_F

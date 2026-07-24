@@ -35,7 +35,6 @@ open TopologicalRing ValuationSpectrum
 
 universe u
 
-attribute [local instance] IsLinearTopology.nonarchimedeanAddGroup
 
 noncomputable section
 
@@ -43,13 +42,16 @@ namespace FarguesFontaine
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
-  [UniformSpace F] [IsLinearTopology F F] [IsPerfectoidField p F] [CharP F p]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 
 /-- The ring of integers `O_F = F°` of a perfectoid field, as a type.
 
 This is the subtype of the power-bounded subring; it is a commutative ring via the
-`Subring` instance. -/
-abbrev OF : Type u := ↥(powerBoundedSubring.toSubring F)
+`Subring` instance. (Binders are explicit and minimal — in particular `p`-free — so the
+signature is immune to instance-search-path drift in the section variables.) -/
+abbrev OF (F : Type u) [CommRing F] [TopologicalSpace F] [IsTopologicalRing F]
+    [NonarchimedeanRing F] : Type u :=
+  ↥(powerBoundedSubring.toSubring F)
 
 /-- A pseudo-uniformizer `ϖ : Fˣ`, viewed as an element of `O_F`.
 
@@ -57,7 +59,8 @@ A pseudo-uniformizer is a topologically nilpotent unit; topologically nilpotent 
 are power-bounded, so `ϖ` lies in `F° = O_F`.
 
 Source: [BFHHLWY, Def 2.1.1] ("pseudouniformizer ϖ", an element of `F°`). -/
-def PseudoUniformizer.toOF (ϖ : PseudoUniformizer F) : OF F :=
+def PseudoUniformizer.toOF (F : Type u) [CommRing F] [TopologicalSpace F]
+    [IsTopologicalRing F] [NonarchimedeanRing F] (ϖ : PseudoUniformizer F) : OF F :=
   ⟨((ϖ.val : Fˣ) : F), (PseudoUniformizer.isTopologicallyNilpotent ϖ).isPowerBounded⟩
 
 /-- `O_F` is an integral domain (a subring of a field). -/
@@ -105,9 +108,21 @@ pseudo-uniformizer `ϖ`, the sets `ϖ^n F°` form a neighbourhood basis of `0`.
 
 Source: [Wedhorn, *Adic Spaces*, §5.30/6.11-style standard facts on Tate rings]; used
 implicitly in [Kedlaya-AWS, Hyp. 3.1.1 and Rem. 3.1.9]. -/
-theorem span_toOF_pow_mem_nhds_zero (ϖ : PseudoUniformizer F) (n : ℕ) :
+theorem span_toOF_pow_mem_nhds_zero [IsPerfectoidField p F] (ϖ : PseudoUniformizer F) (n : ℕ) :
     ((Ideal.span {PseudoUniformizer.toOF F ϖ} ^ n : Ideal (OF F)) : Set (OF F)) ∈
-      nhds (0 : OF F) := by sorry
+      nhds (0 : OF F) := by
+  obtain ⟨P⟩ := IsHuberRing.exists_pairOfDefinition (A := F)
+  have hunit : ((ϖ.val : Fˣ) : F) ^ n ≠ 0 := pow_ne_zero n (Units.ne_zero _)
+  -- `U := ϖ^n · F°` is open in `F` (unit multiplication is a homeomorphism) and contains 0.
+  have hUopen : IsOpen ((((ϖ.val : Fˣ) : F) ^ n * ·) '' powerBoundedSubring F) :=
+    (Homeomorph.mulLeft₀ _ hunit).isOpenMap _ (P.isOpen_powerBoundedSubring)
+  have hU0 : (0 : F) ∈ (((ϖ.val : Fˣ) : F) ^ n * ·) '' powerBoundedSubring F :=
+    ⟨0, isPowerBounded_zero, mul_zero _⟩
+  rw [nhds_subtype_eq_comap]
+  refine Filter.mem_comap.mpr ⟨_, hUopen.mem_nhds hU0, ?_⟩
+  rintro y ⟨b, hb, hby⟩
+  rw [SetLike.mem_coe, Ideal.span_singleton_pow, Ideal.mem_span_singleton']
+  exact ⟨⟨b, hb⟩, Subtype.ext (by simpa [PseudoUniformizer.toOF, mul_comm] using hby)⟩
 
 /-- Every neighbourhood of `0` in `O_F` contains some `ϖ^n O_F`.
 
@@ -115,11 +130,24 @@ This is topological nilpotence of `ϖ` plus boundedness of `O_F` (uniformity of 
 `ϖ^n · F° → 0` uniformly.
 
 Source: standard Tate-ring fact, as for `span_toOF_pow_mem_nhds_zero`. -/
-theorem exists_span_toOF_pow_subset_nhds (ϖ : PseudoUniformizer F) {U : Set (OF F)}
+theorem exists_span_toOF_pow_subset_nhds [IsPerfectoidField p F] (ϖ : PseudoUniformizer F) {U : Set (OF F)}
     (hU : U ∈ nhds (0 : OF F)) :
     ∃ n : ℕ,
       ((Ideal.span {PseudoUniformizer.toOF F ϖ} ^ n : Ideal (OF F)) : Set (OF F)) ⊆ U := by
-  sorry
+  haveI := IsPerfectoidRing.uniform (p := p) (A := F)
+  rw [nhds_subtype_eq_comap] at hU
+  obtain ⟨U', hU', hU'sub⟩ := Filter.mem_comap.mp hU
+  obtain ⟨V, hV, hFV⟩ := IsUniform.isBounded_powerBounded (A := F) U' hU'
+  obtain ⟨n, hn⟩ := ϖ.isTopologicallyNilpotent.exists_pow_mem_of_mem_nhds hV
+  refine ⟨n, fun y hy ↦ ?_⟩
+  rw [SetLike.mem_coe, Ideal.span_singleton_pow, Ideal.mem_span_singleton'] at hy
+  obtain ⟨c, rfl⟩ := hy
+  refine hU'sub ?_
+  show ((c * PseudoUniformizer.toOF F ϖ ^ n : OF F) : F) ∈ U'
+  have : ((c * PseudoUniformizer.toOF F ϖ ^ n : OF F) : F) =
+      (c : F) * ((ϖ.val : Fˣ) : F) ^ n := by push_cast [PseudoUniformizer.toOF]; ring
+  rw [this]
+  exact hFV (Set.mul_mem_mul c.2 hn)
 
 /-- `O_F` is `ϖ`-adically separated: `⋂ n, ϖ^n O_F = 0`.
 
@@ -128,7 +156,7 @@ topological group, the intersection of the `ϖ^n O_F` is contained in every neig
 of `0`, hence is `0`.
 
 Source: [Bhatt, Cor. 3.2.3] pattern (t-adic topology on `K°` is separated and complete). -/
-theorem isHausdorff_span_toOF (ϖ : PseudoUniformizer F) :
+theorem isHausdorff_span_toOF [IsPerfectoidField p F] (ϖ : PseudoUniformizer F) :
     IsHausdorff (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by sorry
 
 /-- `O_F` is `ϖ`-adically complete.
@@ -141,7 +169,7 @@ the convergence is `ϖ`-adic by `exists_span_toOF_pow_subset_nhds`.
 Source: [Bhatt, Cor. 3.2.3]: "K°♭ is t-adically complete, and the t-adic topology
 coincides with the given topology" — the same statement for a char-p perfectoid field
 directly. -/
-theorem isAdicComplete_span_toOF (ϖ : PseudoUniformizer F) :
+theorem isAdicComplete_span_toOF [IsPerfectoidField p F] (ϖ : PseudoUniformizer F) :
     IsAdicComplete (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by sorry
 
 end FarguesFontaine

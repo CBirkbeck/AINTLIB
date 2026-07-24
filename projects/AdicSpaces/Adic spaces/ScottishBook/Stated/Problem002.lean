@@ -48,7 +48,7 @@ the (false) general statement; see `problem2_counterexample` for the negation an
 `problem2_stablyUniform` for the open stably uniform case. -/
 theorem problem2
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [PlusSubring A]
+    [UniformSpace A] [NonarchimedeanRing A] [PlusSubring A]
     [IsTateRing A]
     (X : AdicSpacePresentation.{u}) (hX : IsPerfectoidSpacePresentation p X) :
     IsPerfectoidRing p A := by
@@ -58,7 +58,7 @@ theorem problem2
 is a perfectoid space but whose ring is not perfectoid. -/
 theorem problem2_counterexample :
     ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A) (_ : IsTopologicalRing A)
-      (_ : UniformSpace A) (_ : IsLinearTopology A A) (_ : PlusSubring A)
+      (_ : UniformSpace A) (_ : NonarchimedeanRing A) (_ : PlusSubring A)
       (_ : IsTateRing A),
       (∃ (X : AdicSpacePresentation.{u}), IsPerfectoidSpacePresentation p X) ∧
       ¬ ∃ (_ : IsHuberRing A), IsPerfectoidRing p A := by
@@ -68,7 +68,7 @@ theorem problem2_counterexample :
 *If `(A, A⁺)` is a stably uniform Tate pair and `Spa(A, A⁺)` is perfectoid, is `A` perfectoid?* -/
 theorem problem2_stablyUniform
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [PlusSubring A]
+    [UniformSpace A] [NonarchimedeanRing A] [PlusSubring A]
     [IsTateRing A] [IsStablyUniform A]
     (X : AdicSpacePresentation.{u}) (hX : IsPerfectoidSpacePresentation p X) :
     IsPerfectoidRing p A := by

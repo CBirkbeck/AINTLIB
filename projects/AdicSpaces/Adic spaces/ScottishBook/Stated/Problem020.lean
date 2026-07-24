@@ -48,10 +48,10 @@ completion of `B` admits a perfectoid ring structure. -/
 theorem problem20
     (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A]
     (B : Type u) [CommRing B] [Algebra A B] [Module.Finite A B]
     [IsSeminormalRing B] [TopologicalSpace B] [IsTopologicalRing B]
-    [UniformSpace B] [IsLinearTopology B B] [CompleteSpace B] [T0Space B] :
+    [UniformSpace B] [NonarchimedeanRing B] [CompleteSpace B] [T0Space B] :
     ∃ (_ : IsPerfectoidRing p B), True := by
   sorry
 

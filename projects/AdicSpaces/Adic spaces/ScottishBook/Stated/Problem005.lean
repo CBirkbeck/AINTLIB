@@ -55,10 +55,10 @@ representing the completed tensor product construction. The `Ainf` construction 
 theorem problem5
     (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [PlusSubring A]
+    [UniformSpace A] [NonarchimedeanRing A] [PlusSubring A]
     [IsTateRing A] [IsStablyUniform A]
     (R : Type u) [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
-    [UniformSpace R] [IsLinearTopology R R]
+    [UniformSpace R] [NonarchimedeanRing R]
     [CharP R p] [IsPerfectoidRing p R] :
     -- There exists a ring C = (W(R+) ⊗̂ A°)[1/p] with stably uniform structure
     ∃ (C : Type u) (_ : CommRing C) (_ : TopologicalSpace C) (_ : IsTopologicalRing C)

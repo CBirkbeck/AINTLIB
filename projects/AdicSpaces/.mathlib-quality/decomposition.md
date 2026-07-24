@@ -951,6 +951,37 @@ campaign section).
   checklist now embedded in the tickets. Reply archived verbatim:
   `chatgpt-reply-fargues-fontaine-2026-07-24.md`.
 
+## §6.5 Post-planning repair record (2026-07-25, owner-approved)
+
+**RR4 (found by beastmode during T102, B2-stopped, repaired same day).** The perfectoid
+classes `IsPerfectoidRing`/`IsPerfectoidField` (pre-campaign corpus) were parameterized
+over `[IsLinearTopology A A]`, which is **unsatisfiable** for a nontrivial Tate ring
+(mathlib's class demands a neighbourhood basis of A-submodules; an open ideal of a Tate
+ring absorbs a topologically-nilpotent unit's power, hence is the whole ring; the ⊥-case
+contradicts Tate, the ⊤-only case contradicts `t0`). Every perfectoid-parameterized
+statement — including this campaign's skeleton and PerfectoidRing.lean's completeness
+engine — was vacuous. The proven non-perfectoid core was NOT affected and already knew
+(ValuationContinuity.lean:256 calls the hypothesis "in any case unsatisfiable for Tate").
+Owner selected repair option 1 (not `Valued`): swap the class parameter to
+`[NonarchimedeanRing A]` (satisfiable for every intended model; instance-flows to
+`NonarchimedeanAddGroup` for `powerBoundedSubring.toSubring`). Executed:
+- both class signatures + all helper/theorem signatures in PerfectoidRing.lean;
+- engine re-proofs where open-IDEAL extraction was load-bearing:
+  `isPowerBounded_of_tendsto_of_powerBounded` rewritten via the **pre-existing**
+  `IsBounded.closure` + `IsBounded.isPowerBounded_of_mem` (Bounded.lean — found by the
+  owner-prompted reuse sweep; my duplicate draft deleted);
+  `mul_p_pow_eventually_mem_nhds` restructured ideal-free (excess `(ϖ^p)^{j-M}` joins the
+  power-bounded factor); two additive-only sites swapped to `OpenAddSubgroup` extraction
+  (`NonarchimedeanAddGroup.is_nonarchimedean`);
+- Tilting.lean, PerfectoidSpace-adjacent files, ScottishBook stated problems
+  (002/003/005/006/013/014/020/032/033/034), and the five FF skeleton blocks swapped;
+  local `IsLinearTopology.nonarchimedeanAddGroup` attributes removed;
+- `OF`/`PseudoUniformizer.toOF` given explicit minimal binders (CommRing +
+  IsTopologicalRing + NonarchimedeanRing; `p`-free) after an instance-search-path drift
+  changed their variable capture — skeleton call sites unchanged.
+The b2_log entries of 2026-07-25 remain as history; future decompose passes consult them.
+T101's proofs were unaffected (never used linearity). T102 resumed after the repair.
+
 ## §7. Confidence-gate summary (Step 5)
 
 1. Every leaf discharged from mathlib/project or explicitly sub-planned: ✓ (L7.6

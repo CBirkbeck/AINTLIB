@@ -37,7 +37,6 @@ open TopologicalRing ValuationSpectrum WittVector Pointwise
 
 universe u
 
-attribute [local instance] IsLinearTopology.nonarchimedeanAddGroup
 
 noncomputable section
 
@@ -45,7 +44,7 @@ namespace FarguesFontaine
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
-  [UniformSpace F] [IsLinearTopology F F] [IsPerfectoidField p F] [CharP F p]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 variable (ϖ : PseudoUniformizer F)
 
 /-- Strict comparison of values: `v(a) < v(b)`, i.e. `v(a) ≤ v(b)` and not conversely. -/

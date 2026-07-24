@@ -50,7 +50,6 @@ open TopologicalRing ValuationSpectrum WittVector
 
 universe u
 
-attribute [local instance] IsLinearTopology.nonarchimedeanAddGroup
 
 noncomputable section
 
@@ -58,7 +57,7 @@ namespace FarguesFontaine
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
-  [UniformSpace F] [IsLinearTopology F F] [IsPerfectoidField p F] [CharP F p]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 
 /-- `A_inf = W(O_F)`, the ring of `p`-typical Witt vectors of the ring of integers of a
 perfectoid field `F` of characteristic `p`.

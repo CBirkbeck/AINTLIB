@@ -110,7 +110,11 @@ quasicompactness discharge) — open but descopable; sharpened by sol's warning 
 bare basic-open traces are NOT qc (𝒴 itself is the counterexample). RR3 (external
 review) — **RESOLVED/DELIVERED**; verdicts: windows/covering/freeness SOUND as
 designed, quotient layer SOUND ("the underlying topological orbit space of the adic
-Fargues–Fontaine curve"). Details: decomposition §0.3, §6.
+Fargues–Fontaine curve"). RR4 (2026-07-25) — the perfectoid classes' inherited
+`[IsLinearTopology A A]` hypothesis was unsatisfiable for Tate rings (vacuity bug,
+pre-campaign; caught by beastmode at T102, B2-logged) — **REPAIRED** per the owner's
+option 1: classes and all consumers now ride `[NonarchimedeanRing A]`, engine lemmas
+re-proved ideal-free (decomposition §6.5). Details: decomposition §0.3, §6, §6.5.
 
 ## Campaign hygiene
 

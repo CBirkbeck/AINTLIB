@@ -47,14 +47,14 @@ is perfectoid but does not arise as the tilt of any perfectoid subfield of `K`. 
 theorem problem38 :
     ∃ (p : ℕ) (_ : Fact (Nat.Prime p))
       (K : Type u) (_ : Field K) (τ : TopologicalSpace K) (_ : IsTopologicalRing K)
-      (u : UniformSpace K) (_ : IsLinearTopology K K) (_ : IsPerfectoidField p K),
+      (u : UniformSpace K) (_ : NonarchimedeanRing K) (_ : IsPerfectoidField p K),
     -- There exists a perfectoid subfield of K♭ that is not the tilt of any
     -- perfectoid subfield of K
     ∃ (E : Type u) (_ : Field E) (_ : TopologicalSpace E) (_ : IsTopologicalRing E)
-        (_ : UniformSpace E) (_ : IsLinearTopology E E) (_ : IsPerfectoidField p E)
+        (_ : UniformSpace E) (_ : NonarchimedeanRing E) (_ : IsPerfectoidField p E)
         (_ : E →+* PerfectoidRing.tilt p K),
       ¬ ∃ (L : Type u) (_ : Field L) (_ : TopologicalSpace L) (_ : IsTopologicalRing L)
-          (_ : UniformSpace L) (_ : IsLinearTopology L L) (_ : IsPerfectoidField p L)
+          (_ : UniformSpace L) (_ : NonarchimedeanRing L) (_ : IsPerfectoidField p L)
           (_ : L →+* K),
         Nonempty (E ≃+* PerfectoidRing.tilt p L) := by
   sorry

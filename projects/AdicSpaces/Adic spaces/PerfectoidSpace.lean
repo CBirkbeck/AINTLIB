@@ -53,7 +53,7 @@ structure AffinoidPerfectoidSpace (p : ℕ) [Fact (Nat.Prime p)] where
   [instTopologicalSpace : TopologicalSpace Ring]
   [instIsTopologicalRing : IsTopologicalRing Ring]
   [instUniformSpace : UniformSpace Ring]
-  [instIsLinearTopology : IsLinearTopology Ring Ring]
+  [instNonarchimedeanRing : NonarchimedeanRing Ring]
   [instPlusSubring : PlusSubring Ring]
   [instPerfectoidRing : IsPerfectoidRing p Ring]
 
@@ -61,7 +61,7 @@ attribute [instance] AffinoidPerfectoidSpace.instCommRing
   AffinoidPerfectoidSpace.instTopologicalSpace
   AffinoidPerfectoidSpace.instIsTopologicalRing
   AffinoidPerfectoidSpace.instUniformSpace
-  AffinoidPerfectoidSpace.instIsLinearTopology
+  AffinoidPerfectoidSpace.instNonarchimedeanRing
   AffinoidPerfectoidSpace.instPlusSubring
   AffinoidPerfectoidSpace.instPerfectoidRing
 

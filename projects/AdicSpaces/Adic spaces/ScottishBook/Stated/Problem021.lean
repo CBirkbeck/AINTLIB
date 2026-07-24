@@ -50,14 +50,13 @@ is perfectoid. -/
 theorem problem21
     (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A]
+    [UniformSpace A] [NonarchimedeanRing A]
     [PlusSubring A] [IsTateRing A]
     (hresfields : ∀ (x : ↥(Spa A A⁺)),
       ∃ (τ : TopologicalSpace (completedResidueField A x))
         (h₁ : @IsTopologicalRing (completedResidueField A x) τ _)
         (u : UniformSpace (completedResidueField A x))
-        (_ : @IsLinearTopology (completedResidueField A x) (completedResidueField A x)
-          _ _ _ τ),
+        (_ : @NonarchimedeanRing (completedResidueField A x) _ τ),
       @IsPerfectoidRing p _ (completedResidueField A x) _ τ h₁ u _) :
     IsPerfectoidRing p A := by
   sorry

@@ -30,7 +30,6 @@ open TopologicalRing ValuationSpectrum WittVector
 
 universe u
 
-attribute [local instance] IsLinearTopology.nonarchimedeanAddGroup
 
 noncomputable section
 
@@ -38,7 +37,7 @@ namespace FarguesFontaine
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
-  [UniformSpace F] [IsLinearTopology F F] [IsPerfectoidField p F] [CharP F p]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 
 /-- The Witt-vector Frobenius of `A_inf = W(O_F)`, an automorphism since `O_F` is
 perfect.

@@ -50,13 +50,13 @@ theorem problem3
     (p : ℕ) [Fact (Nat.Prime p)]
     (G : Type*) [Group G] [Finite G]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A]
     [MulSemiringAction G A] :
     ∃ (_ : CommRing (MulAction.fixedPoints G A))
       (_ : TopologicalSpace (MulAction.fixedPoints G A))
       (_ : IsTopologicalRing (MulAction.fixedPoints G A))
       (_ : UniformSpace (MulAction.fixedPoints G A))
-      (_ : IsLinearTopology (MulAction.fixedPoints G A) (MulAction.fixedPoints G A)),
+      (_ : NonarchimedeanRing (MulAction.fixedPoints G A)),
     IsPerfectoidRing p (MulAction.fixedPoints G A) := by
   sorry
 

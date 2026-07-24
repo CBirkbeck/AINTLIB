@@ -55,15 +55,15 @@ fiber functors are not yet available. -/
 theorem problem34
     (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A]
     (B : Type u) [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
-    [UniformSpace B] [IsLinearTopology B B] [IsUniform B]
+    [UniformSpace B] [NonarchimedeanRing B] [IsUniform B]
     (f : A →+* B) (_ : Continuous f)
     -- Abstract fiber perfectoid condition:
     -- for each prime ideal of A, the "fiber" admits a perfectoid structure
     (hfibers : ∀ (𝔭 : Ideal A), 𝔭.IsPrime →
       ∃ (C : Type u) (_ : CommRing C) (τ : TopologicalSpace C) (_ : IsTopologicalRing C)
-        (u : UniformSpace C) (_ : IsLinearTopology C C),
+        (u : UniformSpace C) (_ : NonarchimedeanRing C),
       IsPerfectoidRing p C) :
     IsPerfectoidRing p B := by
   sorry

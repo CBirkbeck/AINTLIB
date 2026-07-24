@@ -47,8 +47,8 @@ power-bounded subring of a perfectoid ring requires substantial infrastructure.
 The sorry can be filled by proving `IsAdicComplete` and applying `fontaineTheta`.
 
 The tilt being perfectoid requires a topology on `PreTilt`, which Lean's typeclass
-system cannot synthesize automatically (due to a `Module R R` diamond for
-`IsLinearTopology`). We state the result existentially.
+system cannot synthesize automatically (a topology-instance synthesis gap on
+`PreTilt`; historically a linear-topology diamond). We state the result existentially.
 
 ## References
 
@@ -63,10 +63,9 @@ open TopologicalRing ValuationSpectrum
 universe u
 
 -- `A°` (`powerBoundedSubring.toSubring`) is now stated with `[NonarchimedeanAddGroup A]`. For the
--- genuine linear-topology setting of this file that follows from `[IsLinearTopology A A]` (open
+-- genuine linear-topology setting of this file that follows from `[NonarchimedeanRing A]` (open
 -- ideals are open additive subgroups). Kept file-`local` so it does not affect typeclass search
 -- elsewhere.
-attribute [local instance] IsLinearTopology.nonarchimedeanAddGroup
 
 noncomputable section
 
@@ -76,7 +75,7 @@ section TiltDef
 
 variable (p : ℕ)
 variable (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsLinearTopology A A]
+  [NonarchimedeanRing A]
 
 /-- The **tilt** of a topological ring `A` is `A♭ := lim_{x ↦ x^p} A°/(p)`,
 the (inverse limit) perfection of the reduction modulo `p` of the ring of
@@ -112,7 +111,7 @@ section TiltInstances
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [IsLinearTopology A A]
+  [NonarchimedeanRing A]
 variable [Fact (¬ IsUnit (p : ↥(powerBoundedSubring.toSubring A)))]
 
 instance PerfectoidRing.tilt.instCommRing : CommRing (PerfectoidRing.tilt p A) :=
@@ -132,7 +131,7 @@ namespace IsPerfectoidRing
 
 variable {p : ℕ} [Fact (Nat.Prime p)]
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A]
+  [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A]
 
 /-- In a perfectoid ring, `p` is not a unit in `A°`.
 
@@ -196,7 +195,7 @@ section Theta
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A]
+  [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A]
 
 /-- Fontaine's **theta map** `θ : W(A♭) →+* A°` for a perfectoid ring `A`.
 
@@ -223,7 +222,7 @@ namespace PerfectoidRing
 
 variable {p : ℕ} [Fact (Nat.Prime p)]
 variable {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-  [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A]
+  [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A]
 
 /-- The tilt `A♭` of a perfectoid ring is a **perfect ring** of characteristic `p`.
 
@@ -275,7 +274,7 @@ where
      `IsPerfectoidRing.instIsAdicComplete`). -/
   frobenius_modP_surjective (p : ℕ) [Fact (Nat.Prime p)]
       (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-      [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A] :
+      [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A] :
       Function.Surjective (frobenius (ModP ↥(powerBoundedSubring.toSubring A) p) p) := by
     -- frobenius sends x ↦ x^p. Need: ∀ x, ∃ y, y^p = x.
     intro x
@@ -327,7 +326,7 @@ ideal. Set `q = [y.coeff 0 / α]`, `r = y' - ξ' * [y.coeff 0 / α]` where
 (Scholze--Weinstein, *Berkeley Lectures on p-adic Geometry*, Lemma 6.2.8, pp.46--47) -/
 private theorem berkeley_6_2_8 (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A]
     [IsAdicComplete (Ideal.span {(p : ↥(powerBoundedSubring.toSubring A))})
       ↥(powerBoundedSubring.toSubring A)]
     (hker : RingHom.ker (PerfectoidRing.theta p A) ≠ ⊥) :
@@ -453,7 +452,7 @@ where
   (Scholze--Weinstein, *Berkeley Lectures on p-adic Geometry*, Lemma 6.2.8) -/
   ker_theta_principal_aux (p : ℕ) [Fact (Nat.Prime p)]
       (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-      [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A] :
+      [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A] :
       (RingHom.ker (PerfectoidRing.theta p A)).IsPrincipal := by
     letI := IsPerfectoidRing.instIsAdicComplete (p := p) (A := A)
     -- Case split: trivial kernel vs nontrivial kernel.
@@ -486,7 +485,7 @@ topology makes `A♭` into a complete, separated, uniform topological ring with
 Frobenius surjective modulo `ϖ♭`.
 
 The existential formulation avoids a `Module R R` diamond that prevents
-`IsLinearTopology` from being synthesized on `PreTilt`.
+a suitable topology instance from being synthesized on `PreTilt`.
 
 (Scholze, *Perfectoid Spaces*, Proposition 3.4) -/
 theorem tilt_admits_perfectoid_structure :
@@ -510,7 +509,7 @@ namespace PerfectoidField
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (K : Type u) [Field K] [TopologicalSpace K] [IsTopologicalRing K]
-  [UniformSpace K] [IsLinearTopology K K] [IsPerfectoidField p K] [Nontrivial K]
+  [UniformSpace K] [NonarchimedeanRing K] [IsPerfectoidField p K] [Nontrivial K]
 
 /-- The tilt `O_{K♭} = PreTilt O_K p` of a perfectoid field `K` is an **integral domain**.
 
@@ -522,7 +521,7 @@ and shows it has no zero divisors via the multiplicative valuation.
 The one sorry'd step is `exists_valuation_with_integers`: for a perfectoid field, the
 topology is induced by a rank-1 valuation `v`, and `K° = {x | v(x) ≤ 1}`. This is
 standard (Wedhorn, Proposition 6.1) but requires connecting the topological
-characterization (`IsLinearTopology`, `IsTateRing`) with the valuation-theoretic one.
+characterization (`NonarchimedeanRing`, `IsTateRing`) with the valuation-theoretic one.
 To fill the sorry, one should construct the valuation from the topologically nilpotent
 unit (which gives a Tate ring structure), show it induces the given topology, and
 verify `v.Integers = K°`.

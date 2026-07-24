@@ -45,9 +45,9 @@ This notion was introduced by Hansen in the context of Problem 6 of the Nonarchi
 Scottish Book. -/
 def IsSousperfectoid (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] : Prop :=
+    [UniformSpace A] [NonarchimedeanRing A] : Prop :=
   ∃ (B : Type u) (_ : CommRing B) (_ : TopologicalSpace B) (_ : IsTopologicalRing B)
-    (_ : UniformSpace B) (_ : IsLinearTopology B B) (_ : IsPerfectoidRing p B)
+    (_ : UniformSpace B) (_ : NonarchimedeanRing B) (_ : IsPerfectoidRing p B)
     (f : A →+* B),
     Continuous f ∧
     ∃ (g : B → A), Continuous g ∧ ∀ a : A, g (f a) = a
@@ -60,7 +60,7 @@ The problem asks for a counterexample to the claim that all stably uniform rings
 are sousperfectoid. -/
 theorem problem6 (p : ℕ) [Fact (Nat.Prime p)] :
     ∃ (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A) (_ : IsTopologicalRing A)
-      (_ : UniformSpace A) (_ : IsLinearTopology A A) (_ : PlusSubring A)
+      (_ : UniformSpace A) (_ : NonarchimedeanRing A) (_ : PlusSubring A)
       (_ : IsHuberRing A) (_ : IsStablyUniform A),
     ¬ IsSousperfectoid p A := by
   sorry

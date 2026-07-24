@@ -109,7 +109,7 @@ theorem IsTrivialValuation.supp_isOpen_of_isHuberRing [IsHuberRing A]
 /-- In a Tate ring, `Spa(A, A⁺)` is analytic (Proposition 8.36 of Wedhorn).
 This is one direction of the relationship explored in Problem 10. -/
 theorem ValuationSpectrum.IsTateRing.spaIsAnalytic [IsTopologicalRing A] [PlusSubring A]
-    [IsLinearTopology A A] [IsTateRing A] : SpaIsAnalytic A := by
+    [NonarchimedeanRing A] [IsTateRing A] : SpaIsAnalytic A := by
   intro v hv htv
   exact (ValuationSpectrum.IsTateRing.isAnalytic v) (by
     -- Show supp(v) is open using continuity of v and triviality

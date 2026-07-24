@@ -52,9 +52,9 @@ the induced morphism on tilts makes `B♭` a finite `A♭`-algebra, and converse
 theorem problem22
     (p : ℕ) [Fact (Nat.Prime p)]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A] [Nontrivial A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A] [Nontrivial A]
     (B : Type u) [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
-    [UniformSpace B] [IsLinearTopology B B] [IsPerfectoidRing p B] [Nontrivial B]
+    [UniformSpace B] [NonarchimedeanRing B] [IsPerfectoidRing p B] [Nontrivial B]
     (f : A →+* B) (_ : Continuous f) [Algebra A B] :
     -- Forward: f finite implies tilt finite
     (Module.Finite A B →

@@ -60,7 +60,7 @@ this way? -/
 theorem problem14_forward
     (p : ℕ) [Fact (Nat.Prime p)]
     (K : Type u) [Field K] [TopologicalSpace K] [IsTopologicalRing K]
-    [UniformSpace K] [IsLinearTopology K K]
+    [UniformSpace K] [NonarchimedeanRing K]
     [CompleteSpace K] [T0Space K]
     (harith : IsArithmeticallyProfinite K) :
     IsPerfectoidField p K := by
@@ -71,7 +71,7 @@ of an arithmetically profinite extension. -/
 theorem problem14_converse
     (p : ℕ) [Fact (Nat.Prime p)]
     (K : Type u) [Field K] [TopologicalSpace K] [IsTopologicalRing K]
-    [UniformSpace K] [IsLinearTopology K K]
+    [UniformSpace K] [NonarchimedeanRing K]
     [IsPerfectoidField p K] :
     IsArithmeticallyProfinite K := by
   sorry

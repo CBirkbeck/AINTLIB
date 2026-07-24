@@ -49,12 +49,12 @@ tensor product `A ⊗̂_K B`) that is sheafy. -/
 theorem problem32
     (p : ℕ) [Fact (Nat.Prime p)]
     (K : Type u) [Field K] [TopologicalSpace K] [IsTopologicalRing K]
-    [UniformSpace K] [IsLinearTopology K K] [IsPerfectoidField p K]
+    [UniformSpace K] [NonarchimedeanRing K] [IsPerfectoidField p K]
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
-    [UniformSpace A] [IsLinearTopology A A] [IsPerfectoidRing p A]
+    [UniformSpace A] [NonarchimedeanRing A] [IsPerfectoidRing p A]
     [Algebra K A]
     (B : Type u) [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
-    [UniformSpace B] [IsLinearTopology B B] [IsTateRing B]
+    [UniformSpace B] [NonarchimedeanRing B] [IsTateRing B]
     [Algebra K B] :
     -- The completed tensor product A ⊗̂_K B is sheafy
     ∃ (C : Type u) (_ : CommRing C) (τ : TopologicalSpace C) (ps : @PlusSubring C _)

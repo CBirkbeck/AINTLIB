@@ -46,9 +46,9 @@ no subfield `K ⊆ A` that is perfectoid. -/
 theorem problem13 :
     ∃ (p : ℕ) (_ : Fact (Nat.Prime p))
       (A : Type u) (_ : CommRing A) (_ : TopologicalSpace A) (_ : IsTopologicalRing A)
-      (_ : UniformSpace A) (_ : IsLinearTopology A A) (_ : IsPerfectoidRing p A),
+      (_ : UniformSpace A) (_ : NonarchimedeanRing A) (_ : IsPerfectoidRing p A),
     ¬ ∃ (K : Type u) (_ : Field K) (_ : TopologicalSpace K) (_ : IsTopologicalRing K)
-        (_ : UniformSpace K) (_ : IsLinearTopology K K) (_ : IsPerfectoidField p K)
+        (_ : UniformSpace K) (_ : NonarchimedeanRing K) (_ : IsPerfectoidField p K)
         (_ : K →+* A),
       True := by
   sorry
