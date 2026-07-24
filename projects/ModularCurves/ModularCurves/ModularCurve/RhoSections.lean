@@ -4855,6 +4855,24 @@ theorem smul_single_apply (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
   rw [Matrix.mulVec_single]
   exact mul_one _
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6b)]** The tautological section at a translated basis vector
+is the matrix-column combination of the basis sections. -/
+theorem strSec_col (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (j : Fin 2) :
+    EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (γ • Pi.single j 1)) =
+    ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 j).val : ℤ)) •
+      EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)) +
+    ((((γ : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 j).val : ℤ)) •
+      EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1)) := by
+  refine (strSec_comb D str (γ • Pi.single j 1)).trans ?_
+  rw [smul_single_apply γ j 0, smul_single_apply γ j 1]
+
 end StructuresToSections
 
 end
