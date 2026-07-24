@@ -2859,6 +2859,213 @@ theorem strCond (D : GaloisRepData N) [Fact (1 < N)]
   refine Eq.trans (Category.assoc _ _ _) ?_
   exact congrArg (strTaut D X' ≫ ·) (pairSlot_basis_det D)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-A2]** The tautological pair is a naive full level: kills are
+inherited, and on every geometric fibre the pair generates — its pairing is the
+determinant read of the tautological frame (strCond), which is primitive
+(detComp_point_read_pow_ne_one), so the counting engine applies. -/
+theorem strLevel_isNaiveFullLevel (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve) :
+    (X'.curve.baseChange (strPr D X')).IsNaiveFullLevel N
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)))
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1))) := by
+  classical
+  refine ⟨⟨((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      (𝟙 (strCover D X')) N _).mpr
+      (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _)),
+    ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      (𝟙 (strCover D X')) N _).mpr
+      (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _))⟩, ?_⟩
+  intro kk _ _ t z hz
+  letI : Algebra ℚ kk :=
+    ((Spec.preimage (t ≫ strPr D X' ≫ X'.structMap)).hom).toAlgebra
+  have hqk : t ≫ strPr D X' ≫ X'.structMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)) := by
+    rw [show CommRingCat.ofHom (algebraMap ℚ kk) =
+      Spec.preimage (t ≫ strPr D X' ≫ X'.structMap) from rfl, Spec.map_preimage]
+  haveI : CharZero kk := charZero_of_injective_algebraMap
+    (RingHom.injective (algebraMap ℚ kk))
+  have hNK : ((N : ℕ) : kk) ≠ 0 := Nat.cast_ne_zero.mpr (NeZero.ne N)
+  -- section kills
+  have hkP : ((N : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 0 1)) : (X'.curve.baseChange
+        (strPr D X')).Point (𝟙 (strCover D X'))) = 0 :=
+    ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      (𝟙 (strCover D X')) N _).mpr
+      (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _))
+  have hkQ : ((N : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 1 1)) : (X'.curve.baseChange
+        (strPr D X')).Point (𝟙 (strCover D X'))) = 0 :=
+    ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      (𝟙 (strCover D X')) N _).mpr
+      (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _))
+  -- pulled raw kills
+  have hpullP : (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)))).1 ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N =
+      t ≫ (X'.curve.baseChange (strPr D X')).zero := by
+    show (t ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 0 1))).1) ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N = _
+    rw [Category.assoc, asSection_raw_kill (strPr D X') _
+      (strPt_raw_kill D str _), ← Category.assoc, Category.comp_id]
+  have hpullQ : (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1)))).1 ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N =
+      t ≫ (X'.curve.baseChange (strPr D X')).zero := by
+    show (t ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 1 1))).1) ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N = _
+    rw [Category.assoc, asSection_raw_kill (strPr D X') _
+      (strPt_raw_kill D str _), ← Category.assoc, Category.comp_id]
+  -- restricted raw kills
+  have hres1 : (EllipticCurve.Point.restrict (X'.curve.baseChange (strPr D X'))
+      t (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)))).1 ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N =
+      (t ≫ 𝟙 (strCover D X')) ≫ (X'.curve.baseChange (strPr D X')).zero := by
+    show (t ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 0 1))).1) ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N = _
+    rw [Category.assoc, asSection_raw_kill (strPr D X') _
+      (strPt_raw_kill D str _), ← Category.assoc]
+  have hres2 : (EllipticCurve.Point.restrict (X'.curve.baseChange (strPr D X'))
+      t (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1)))).1 ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N =
+      (t ≫ 𝟙 (strCover D X')) ≫ (X'.curve.baseChange (strPr D X')).zero := by
+    show (t ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 1 1))).1) ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N = _
+    rw [Category.assoc, asSection_raw_kill (strPr D X') _
+      (strPt_raw_kill D str _), ← Category.assoc]
+  -- the order hypothesis at the fibre
+  have hord : ∀ d : ℕ, 0 < d → d < N →
+      ((X'.curve.baseChange (strPr D X')).weilPairingEval
+        (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))))
+        (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1))))
+        (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+          t N _).mp
+          (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+            t N _).mpr hpullP))
+        (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+          t N _).mp
+          (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+            t N _).mpr hpullQ))).1 ^ d ≠ 1 := by
+    intro d hdpos hdlt hcon
+    -- restrict = pull (values agree)
+    have hraw := weilPairingEval_congr_raw
+      (E := X'.curve.baseChange (strPr D X')) (Category.comp_id t) rfl rfl
+      hres1 hres2
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        t N _).mp
+        (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+          t N _).mpr hpullP))
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        t N _).mp
+        (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+          t N _).mpr hpullQ))
+    have h1 : ((X'.curve.baseChange (strPr D X')).weilPairingEval
+        (EllipticCurve.Point.restrict (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))))
+        (EllipticCurve.Point.restrict (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))) hres1 hres2).1 ^ d = 1 :=
+      (congrArg (· ^ d) hraw).trans hcon
+    have hres := (X'.curve.baseChange (strPr D X')).weilPairingEval_restrict t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)))
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1)))
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        (𝟙 (strCover D X')) N _).mp hkP)
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        (𝟙 (strCover D X')) N _).mp hkQ)
+      hres1 hres2
+    have h2 : ((Scheme.Γ.map t.op).hom
+        ((X'.curve.baseChange (strPr D X')).weilPairingEval
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1)))
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))
+          (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+            (𝟙 (strCover D X')) N _).mp hkP)
+          (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+            (𝟙 (strCover D X')) N _).mp hkQ)).1) ^ d = 1 :=
+      (congrArg (· ^ d) hres.symm).trans h1
+    -- the read of the composed point
+    have h3 := pairEZMap_read D (X'.pullbackAlong (strPr D X')).structMap
+      (X'.curve.baseChange (strPr D X'))
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)))
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1))) hkP hkQ t
+    have h4 : muNRootsRead D
+        (t ≫ (X'.pullbackAlong (strPr D X')).structMap)
+        (t ≫ pairEZMap D (X'.pullbackAlong (strPr D X')).structMap
+          (X'.curve.baseChange (strPr D X'))
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1)))
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1))) hkP hkQ)
+        (by rw [Category.assoc, pairEZMap_π]) ^ d = 1 :=
+      (congrArg (· ^ d) h3).trans h2
+    -- transport the point across the tautological carve
+    have hφeq : t ≫ pairEZMap D (X'.pullbackAlong (strPr D X')).structMap
+        (X'.curve.baseChange (strPr D X'))
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1)))
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))) hkP hkQ =
+        ((t ≫ strTaut D X') ≫ detFrameScheme D) ≫ detCompScheme D :=
+      (congrArg (CategoryStruct.comp t) (strCond D str)).trans
+        ((Category.assoc t (strTaut D X')
+          (detFrameScheme D ≫ detCompScheme D)).symm.trans
+          (Category.assoc (t ≫ strTaut D X') (detFrameScheme D)
+            (detCompScheme D)).symm)
+    have hφ2 : (((t ≫ strTaut D X') ≫ detFrameScheme D) ≫ detCompScheme D) ≫
+        corrSpecπ (muNRootsContAction D) =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)) := by
+      rw [Category.assoc]
+      rw [show detCompScheme D ≫ corrSpecπ (muNRootsContAction D) =
+        cycloUnitsSchemeπ D from detCompScheme_π D]
+      rw [Category.assoc, detFrameScheme_π, Category.assoc, strTaut_π]
+      rw [show strPr D X' ≫ X'.structMap = strPr D X' ≫ X'.structMap from rfl]
+      exact hqk
+    have h5 : muNRootsRead D
+        (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)))
+        (((t ≫ strTaut D X') ≫ detFrameScheme D) ≫ detCompScheme D) hφ2 ^ d
+        = 1 := by
+      have hcongr := muNRootsRead_congr D
+        (show t ≫ (X'.pullbackAlong (strPr D X')).structMap =
+          Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)) from hqk) hφeq
+        (by rw [Category.assoc, pairEZMap_π])
+      exact (congrArg (· ^ d) hcongr.symm).trans h4
+    have h6 : (Scheme.ΓSpecIso (CommRingCat.of kk)).hom.hom
+        (muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)))
+          (((t ≫ strTaut D X') ≫ detFrameScheme D) ≫ detCompScheme D) hφ2) ^ d
+        = 1 :=
+      (map_pow _ _ d).symm.trans
+        ((congrArg (Scheme.ΓSpecIso (CommRingCat.of kk)).hom.hom h5).trans
+          (map_one _))
+    exact detComp_point_read_pow_ne_one D
+      ((t ≫ strTaut D X') ≫ detFrameScheme D) hφ2 d hdpos hdlt h6
+  exact full_of_weilPairing_order kk t _ _
+    (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      t N _).mpr hpullP)
+    (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      t N _).mpr hpullQ) hNK hord z hz
+
 end StructuresToSections
 
 end
