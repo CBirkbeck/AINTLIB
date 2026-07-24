@@ -2664,6 +2664,59 @@ theorem detComp_point_read_pow_ne_one (D : GaloisRepData N) [Fact (1 < N)]
   exact ((detComp_root_pow_sub_one_isUnit D d hdpos hdlt).map
     (Spec.preimage ψ).hom).ne_zero hkill
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-A3 prep]** The roots power morphism at exponent 1 is the identity. -/
+theorem muNRootsPowMor_one (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsPowMor D 1 = 𝟙 (muNRootsContAction D) := by
+  ext ζ
+  exact congrArg (fun z : rootsOfUnity N (AlgebraicClosure ℚ) =>
+    ((z : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) (pow_one ζ)
+
+open scoped FintypeCatDiscrete in
+theorem muNRootsPowScheme_one (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsPowScheme D 1 = 𝟙 (muNRootsScheme D) := by
+  have h1 : muNRootsPowAlg D 1 = 𝟙 (muNRootsAlgebra D) := by
+    show ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (muNRootsPowMor D 1)).unop = 𝟙 (muNRootsAlgebra D)
+    exact congrArg Quiver.Hom.unop
+      ((congrArg (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (muNRootsPowMor_one D)).trans (CategoryTheory.Functor.map_id _ _))
+  rw [muNRootsPowScheme, h1]
+  show Spec.map (𝟙 (CommRingCat.of (muNRootsAlgebra D : Type 0))) =
+    𝟙 (muNRootsScheme D)
+  exact Spec.map_id _
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-A3]** The standard-basis slot pair evaluates the pairing to the
+determinant composite on the nose (the symplectic exponent of the standard
+basis is `1`). -/
+theorem pairSlot_basis_det (D : GaloisRepData N) [Fact (1 < N)] :
+    pullback.lift (frameSlotEval D (Pi.single 0 1))
+        (frameSlotEval D (Pi.single 1 1))
+        ((frameSlotEval_π D _).trans (frameSlotEval_π D _).symm) ≫
+      vRhoPairingMap D =
+    detFrameScheme D ≫ detCompScheme D := by
+  have habs := habs_of_ring D
+    (fun v w => hring_of_finiteEtale D (fun v' w' => pairSlot_hFE D v' w') v w)
+    (Pi.single 0 1) (Pi.single 1 1)
+  have h1N : (1 : ℕ) < N := Fact.out
+  have hexp : (((((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ) *
+      (((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ) -
+      (((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ) *
+      (((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat
+      = 1 := by
+    rw [show (Pi.single 0 1 : Fin 2 → ZMod N) 0 = 1 from Pi.single_eq_same _ _,
+      show (Pi.single 0 1 : Fin 2 → ZMod N) 1 = 0 from
+        Pi.single_eq_of_ne (by decide) _,
+      show (Pi.single 1 1 : Fin 2 → ZMod N) 0 = 0 from
+        Pi.single_eq_of_ne (by decide) _,
+      show (Pi.single 1 1 : Fin 2 → ZMod N) 1 = 1 from Pi.single_eq_same _ _,
+      ZMod.val_one, ZMod.val_zero]
+    norm_num
+    rw [Int.emod_eq_of_lt (by norm_num) (by exact_mod_cast h1N)]
+    rfl
+  rw [habs, hexp, muNRootsPowScheme_one, Category.comp_id]
+
 end StructuresToSections
 
 end
