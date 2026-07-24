@@ -1708,6 +1708,19 @@ theorem pairEZ_base_mem_range (D : GaloisRepData N) [Fact (1 < N)]
   rw [← hpt]
   exact hmem
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c]** THE FACTORING: the value-level pairing comparison of a
+full level structure factors through the determinant clopen piece (pointwise
+primitivity + the open-immersion lift). -/
+theorem pairEZMap_factors_detComp (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (L : E.FullLevelPt N) :
+    ∃ w : T ⟶ cycloUnitsScheme D,
+      w ≫ detCompScheme D = pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 := by
+  refine factors_detComp_of_range D _ ?_
+  rintro _ ⟨x, rfl⟩
+  exact pairEZ_base_mem_range D sT E L x
+
 end CorrSurjective
 
 section SectionsToStructures
