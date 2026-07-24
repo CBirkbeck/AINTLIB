@@ -4949,6 +4949,59 @@ noncomputable def strActHom (D : GaloisRepData N)
         (Limits.pullback.lift_snd _ _ _)).trans ?_
       exact Category.comp_id _
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6d)]** Pulling the tautological section along the cover
+translation yields the tautological section at the translated vector. -/
+theorem strActHom_pullSection (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N) :
+    EllHom.pullSection (CommRingCat.of ℚ) (strActHom D X' γ)
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str v)) =
+    EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (γ • v)) := by
+  refine section_ext_fst X'.curve (strPr D X') _ _ ?_
+  -- LHS-fst: through the top and the map's fst law
+  have h1 : (EllHom.pullSection (CommRingCat.of ℚ) (strActHom D X' γ)
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str v))).1 ≫ (strActHom D X' γ).top =
+      strAct D X' γ ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str v)).1 :=
+    (strActHom D X' γ).isPullback.lift_fst _ _ _
+  have h2 : (strActHom D X' γ).top ≫ pullback.fst X'.curve.π (strPr D X') =
+      pullback.fst X'.curve.π (strPr D X') := by
+    refine (Limits.pullback.lift_fst _ _ _).trans ?_
+    exact Category.comp_id _
+  calc (EllHom.pullSection (CommRingCat.of ℚ) (strActHom D X' γ)
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v))).1 ≫ pullback.fst X'.curve.π (strPr D X')
+      = (EllHom.pullSection (CommRingCat.of ℚ) (strActHom D X' γ)
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str v))).1 ≫ (strActHom D X' γ).top ≫
+          pullback.fst X'.curve.π (strPr D X') :=
+        (congrArg (CategoryStruct.comp _) h2).symm
+    _ = ((EllHom.pullSection (CommRingCat.of ℚ) (strActHom D X' γ)
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str v))).1 ≫ (strActHom D X' γ).top) ≫
+          pullback.fst X'.curve.π (strPr D X') :=
+        (Category.assoc _ _ _).symm
+    _ = (strAct D X' γ ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)).1) ≫ pullback.fst X'.curve.π (strPr D X') :=
+        congrArg (· ≫ pullback.fst X'.curve.π (strPr D X')) h1
+    _ = strAct D X' γ ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)).1 ≫ pullback.fst X'.curve.π (strPr D X') :=
+        Category.assoc _ _ _
+    _ = strAct D X' γ ≫ (strPt D str v).1 :=
+        congrArg (CategoryStruct.comp (strAct D X' γ))
+          (EllipticCurve.Point.asSection_val_fst X'.curve (strPr D X')
+            (strPt D str v))
+    _ = (strPt D str (γ • v)).1 := strAct_strPt D str γ v
+    _ = (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (γ • v))).1 ≫ pullback.fst X'.curve.π (strPr D X') :=
+        (EllipticCurve.Point.asSection_val_fst X'.curve (strPr D X')
+          (strPt D str (γ • v))).symm
+
 end StructuresToSections
 
 end
