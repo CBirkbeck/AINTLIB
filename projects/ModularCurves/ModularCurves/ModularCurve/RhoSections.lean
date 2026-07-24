@@ -692,6 +692,87 @@ theorem qbarAlgHom_factors
   exact congrArg (fun q : CommRingCat.of (corrAlgebra Y : Type 0) ⟶
     CommRingCat.of (AlgebraicClosure ℚ) => q.hom a) hpre
 
+/-- **[T-EQ-3d-L3a piece 2]** `ℚ̄`-evaluations separate elements of a finite
+étale `ℚ`-algebra (split into a finite product of finite separable field
+extensions and evaluate the nonvanishing component). -/
+theorem corrAlgebra_exists_eval_ne
+    (Y : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ))
+    {b : (corrAlgebra Y : Type 0)} (hb : b ≠ 0) :
+    ∃ χ : (corrAlgebra Y : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ, χ b ≠ 0 := by
+  classical
+  obtain ⟨I, hIfin, Ai, hFld, hAlgI, e, hsep⟩ :=
+    (Algebra.FormallyEtale.iff_exists_algEquiv_prod ℚ
+      (corrAlgebra Y : Type 0)).mp inferInstance
+  have heb : e b ≠ 0 := fun h => hb (e.injective (h.trans (map_zero e).symm))
+  have hcomp : ∃ i : I, e b i ≠ 0 := by
+    by_contra hall
+    exact heb (funext fun i => by
+      by_contra h
+      exact hall ⟨i, h⟩)
+  obtain ⟨i, hi⟩ := hcomp
+  letI := hFld i
+  letI := hAlgI i
+  haveI : Module.Finite ℚ (Ai i) := by
+    refine Module.Finite.of_surjective
+      ((Pi.evalAlgHom ℚ Ai i).comp e.toAlgHom).toLinearMap ?_
+    have hsurj : Function.Surjective
+        (fun z : (corrAlgebra Y : Type 0) => e z i) :=
+      fun y => by
+        obtain ⟨w, hw⟩ := e.surjective (Function.update 0 i y)
+        exact ⟨w, (congrFun hw i).trans (Function.update_self _ _ _)⟩
+    exact hsurj
+  haveI : Algebra.IsAlgebraic ℚ (Ai i) := Algebra.IsAlgebraic.of_finite ℚ _
+  let χ₀ : Ai i →ₐ[ℚ] AlgebraicClosure ℚ := IsAlgClosed.lift
+  refine ⟨χ₀.comp ((Pi.evalAlgHom ℚ Ai i).comp e.toAlgHom), ?_⟩
+  show χ₀ (e b i) ≠ 0
+  intro h0
+  exact hi (by
+    have := congrArg (fun z => z) h0
+    rw [show (0 : AlgebraicClosure ℚ) = χ₀ 0 from (map_zero χ₀).symm] at this
+    exact RingHom.injective (χ₀.toRingHom) this)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3a]** A correspondence morphism with surjective set-map has a
+surjective spectrum map (injectivity of the algebra map by evaluation
+separation + the factoring, then integral lying-over). -/
+theorem corrSpecMap_surjective
+    {X Y : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)}
+    (m : X ⟶ Y) (hm : Function.Surjective m.hom.hom) :
+    Surjective (corrSpecMap m) := by
+  have hinj : Function.Injective
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        m).unop.hom.hom.toRingHom) := by
+    rw [injective_iff_map_eq_zero]
+    intro b hb0
+    by_contra hne
+    obtain ⟨χ, hχne⟩ := corrAlgebra_exists_eval_ne Y hne
+    obtain ⟨χ', hfac⟩ := qbarAlgHom_factors m hm χ
+    refine hχne ?_
+    rw [hfac]
+    show χ' (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      m).unop.hom.hom b) = 0
+    rw [show ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      m).unop.hom.hom b = 0 from hb0]
+    exact map_zero χ'
+  have hint : (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      m).unop.hom.hom.toRingHom).IsIntegral := by
+    refine RingHom.IsIntegral.tower_top
+      (algebraMap ℚ (corrAlgebra Y : Type 0)) _ ?_
+    have hcomp : (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        m).unop.hom.hom.toRingHom).comp
+          (algebraMap ℚ (corrAlgebra Y : Type 0)) =
+        algebraMap ℚ (corrAlgebra X : Type 0) :=
+      RingHom.ext fun r =>
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          m).unop.hom.hom.commutes r
+    exact cast (congrArg RingHom.IsIntegral hcomp).symm
+      (RingHom.Finite.to_isIntegral (RingHom.finite_algebraMap.mpr
+        (corrAlgebra X).property.left))
+  constructor
+  exact RingHom.IsIntegral.comap_surjective hint hinj
+
 end CorrSurjective
 
 section SectionsToStructures
