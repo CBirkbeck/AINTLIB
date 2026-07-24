@@ -1151,6 +1151,52 @@ theorem ker_detCompAlgHom_isCompl (D : GaloisRepData N) [Fact (1 < N)] :
     IsArtinianRing.isSemisimpleRing_of_isReduced _
   exact exists_isCompl _
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c ix]** The read-power is kernel-determined: the `K`-read of a
+roots-scheme point has `r^d = 1` iff its classifier kills the model element
+`root^d − 1` (through the cyclotomic identification). -/
+theorem classify_read_pow_eq_one_iff (D : GaloisRepData N) [Fact (1 < N)]
+    (K : Type) [Field K] [Algebra ℚ K]
+    (φ : Spec (.of K) ⟶ corrSpec (muNRootsContAction D))
+    (hφ : φ ≫ corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ K)))
+    (d : ℕ) :
+    (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+        (muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ K))) φ hφ)
+        ^ d = 1 ↔
+      (muNRootsAlgebraIso D).inv.hom.hom
+          ((AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d - 1) ∈
+        RingHom.ker (specPointsEquivAlgHom ℚ
+          (corrAlgebra (muNRootsContAction D) : Type 0) K
+          ⟨φ, hφ⟩).toRingHom := by
+  have hread := muNRootsRead_classify_field D K φ hφ
+  rw [hread]
+  have hcomp : ∀ z : AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1),
+      (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0) K
+        ⟨φ, hφ⟩) ((muNRootsAlgebraIso D).inv.hom.hom z) =
+      ((specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0) K
+        ⟨φ, hφ⟩).comp (muNRootsAlgebraIso D).inv.hom.hom) z := fun _ => rfl
+  constructor
+  · intro h1
+    refine RingHom.mem_ker.mpr ?_
+    refine (hcomp _).trans ?_
+    refine (map_sub _ _ _).trans ?_
+    refine sub_eq_zero.mpr ?_
+    refine (map_pow _ _ _).trans ?_
+    refine Eq.trans ?_ (map_one _).symm
+    exact (congrArg (· ^ d) (hcomp _)).symm.trans h1
+  · intro h0
+    have h0' := RingHom.mem_ker.mp h0
+    have h1 := ((hcomp _).symm.trans h0')
+    have h2 := (map_sub ((specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K
+        ⟨φ, hφ⟩).comp (muNRootsAlgebraIso D).inv.hom.hom) _ _).symm.trans
+      ((hcomp _).symm.trans h0')
+    have h3 := sub_eq_zero.mp h2
+    refine Eq.trans (congrArg (· ^ d) (hcomp _)) ?_
+    refine Eq.trans (map_pow _ _ _).symm ?_
+    exact h3.trans (map_one _)
+
 end CorrSurjective
 
 section SectionsToStructures
