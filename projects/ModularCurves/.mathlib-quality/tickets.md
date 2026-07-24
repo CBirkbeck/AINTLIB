@@ -26495,3 +26495,33 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 
 ### [T-EQ-3d-L3 REVISED] surjectivity assembly
 Revision note: Ψ (the base-changed detFrame≫detComp) is NOT surjective onto the full roots scheme for composite N (det-image = units ⊊ ℤ/N). The correct assembly: factor σ_p through cycloUnitsScheme via L3c; then T4 ≅ pullback (T''-base-change of detFrameScheme) (σ'_p) with detFrameScheme SURJECTIVE (det : GL₂(ℤ/N) ↠ (ℤ/N)ˣ via Matrix.GeneralLinearGroup.det_surjective + corrSpecMap_surjective at detFrameMor) ⟹ Surjective (T4 → T'') by base-change stability ×2.
+
+### [T-EQ-3d-A] Tautological level from a structure ✕ the tautological frame
+- **Status**: open
+- **Parent**: T-EQ-3 (3d, REVISED-SIMPLE route)
+- **Statement**: Over `T3 := pullback sT′ (wFramesπ D)` with `pr1/taut` the legs and `str : RhoLevelStructure D sT′ E′`: (A1) the two torsion-points `tautPt i : E′.Point pr1` — the standard `constVec`-basis through `frameEvalSlice(taut)` and `str.torsionIso.inv` — with `(N:ℤ)•tautPt i = 0`; (A2) the induced `FullLevelPt N` on the pulled curve `E3` (IsNaiveFullLevel: geometric closure via the point-bijections of the isos + free_on_points-enumeration); (A3) `hcond3 : pairEZMap D sT3 E3 L3… = frameDetMap D taut` — chain pairEZMap = torsionPairEval = coordPairLift ≫ vRhoPairingMap [str.pairing_scheme] = frame-slot-pair ≫ vRhoPairingMap = frameDetMap taut.
+
+### [T-EQ-3d-M1] Generalized agreement locus (étale finite separated targets)
+- **Status**: open
+- **Parent**: T-EQ-3 (3d)
+- **Statement**: Transplant agreeLocus/ι/clopen/factor_iff from `muNRootsSchemeπ` to arbitrary `π : Y ⟶ B` with `[IsFinite π] [Etale π] [IsSeparated π]`.
+
+### [T-EQ-3d-M2] Nonempty clopens of finite étale ℚ-schemes have ℚ̄-points
+- **Status**: open
+- **Parent**: T-EQ-3 (3d)
+- **Statement**: (i) `finiteEtale_exists_eval_ne` — corrAlgebra_exists_eval_ne for any nonzero finite étale ℚ-algebra; (ii) the eval-point lies in a prescribed clopen when its idempotent evaluates to 1.
+
+### [T-EQ-3d-M3] The frame graphs: clopen and jointly covering on ℚ̄-points
+- **Status**: open
+- **Parent**: T-EQ-3 (3d)
+- **Statement**: `frameGraph γ : wFrames D ⟶ pullback (wFramesπ D) (wFramesπ D)` clopen immersion; every ℚ̄-point of the frames square factors through some graph (torsor transitivity + qbar-naturality); corollary: two Ω-frames over a common base point differ by a constant γ (Ω alg. closed).
+
+### [T-EQ-3d-M5] Equivariance of the tautological Z-point
+- **Status**: open
+- **Parent**: T-EQ-3 (3d); depends on T-EQ-3d-A
+- **Statement**: `act3 γ ≫ z3.1 = z3.1 ≫ d.σZ.hom γ`-form equivariance, hence the relQuotientπ-composite is act3-invariant.
+
+### [T-EQ-3d-M6] The descent assembly
+- **Status**: open
+- **Parent**: T-EQ-3 (3d); depends on A, M1-M5
+- **Statement**: `EffectiveEpi pr1` (fpqc instance) + h-condition via geometric-point reduction (M1+M2) + pointwise γ (M3) + per-γ invariance (M5) ⟹ `s : T′ ⟶ relQuotient`, `s ≫ relQuotientStruct = k`.
