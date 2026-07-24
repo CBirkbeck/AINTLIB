@@ -5002,6 +5002,37 @@ theorem strActHom_pullSection (D : GaloisRepData N) [Fact (1 < N)]
         (EllipticCurve.Point.asSection_val_fst X'.curve (strPr D X')
           (strPt D str (γ • v))).symm
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6e)]** THE VALUE EQUIVARIANCE: transporting the tautological
+value along the cover translation is the `γ`-translation of the framed problem
+(level components by the section additivity at the matrix columns; frame by the
+tautological frame law). -/
+theorem strValue_equivariant (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (sympFramedProblem D).map (strActHom D X' γ).op (strValue D str) =
+    (sympFramedSmulNat D γ).app
+      (Opposite.op (X'.pullbackAlong (strPr D X'))) (strValue D str) := by
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · -- the level components
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show EllHom.pullSection (CommRingCat.of ℚ) (strActHom D X' γ)
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) = _
+      refine (strActHom_pullSection D str γ (Pi.single 0 1)).trans ?_
+      exact strSec_col D str γ 0
+    · show EllHom.pullSection (CommRingCat.of ℚ) (strActHom D X' γ)
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))) = _
+      refine (strActHom_pullSection D str γ (Pi.single 1 1)).trans ?_
+      exact strSec_col D str γ 1
+  · -- the frame component
+    refine Subtype.ext ?_
+    show (strActHom D X' γ).baseHom ≫ strTaut D X' =
+      strTaut D X' ≫ wFramesRightMul D γ
+    exact strAct_taut D X' γ
+
 end StructuresToSections
 
 end
