@@ -4131,6 +4131,27 @@ theorem muNRootsRead_pow_N (D : GaloisRepData N) [Fact (1 < N)]
     ⟨φ ≫ (muNSpecQIso D).inv, by
       rw [Category.assoc, muNSpecQIso_π_inv, hφ]⟩).2
 
+/-- **[T-EQ-3d-M5 (5c) prep]** The negative-exponent cancellation for `N`-th
+roots: `x^((-a) mod N) · x^a = 1`. -/
+theorem pow_neg_emod_cancel {R : Type} [CommMonoid R] {x : R}
+    (hx : x ^ N = 1) (a : ℕ) :
+    x ^ ((((-(a : ℤ))) % (N : ℤ)).toNat) * x ^ a = 1 := by
+  have hNz : (N : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (NeZero.ne N)
+  have hnn : (0 : ℤ) ≤ (-(a : ℤ)) % (N : ℤ) := Int.emod_nonneg _ hNz
+  have hdvd : (N : ℤ) ∣ ((-(a : ℤ)) % (N : ℤ) + a) := by
+    rw [Int.emod_def]
+    exact ⟨-((-(a : ℤ)) / N), by ring⟩
+  have hcast : (((((-(a : ℤ))) % (N : ℤ)).toNat + a : ℕ) : ℤ) =
+      (-(a : ℤ)) % (N : ℤ) + a := by
+    push_cast [Int.toNat_of_nonneg hnn]
+    ring
+  have hdvdN : N ∣ ((((-(a : ℤ))) % (N : ℤ)).toNat + a) := by
+    refine Int.natCast_dvd_natCast.mp ?_
+    rw [hcast]
+    exact hdvd
+  obtain ⟨k, hk⟩ := hdvdN
+  rw [← pow_add, hk, pow_mul, hx, one_pow]
+
 end StructuresToSections
 
 end
