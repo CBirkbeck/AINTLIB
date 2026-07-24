@@ -5033,6 +5033,36 @@ theorem strValue_equivariant (D : GaloisRepData N) [Fact (1 < N)]
       strTaut D X' ≫ wFramesRightMul D γ
     exact strAct_taut D X' γ
 
+/-- **[T-EQ-3d-M5 (6f) prep]** The base morphism of an `eqToHom` in `Ell/ℚ`. -/
+theorem eqToHom_baseHom {A B : EllObj (CommRingCat.of ℚ)} (h : A = B) :
+    (eqToHom h : A ⟶ B).baseHom =
+      eqToHom (congrArg ModularCurves.EllObj.base h) := by
+  subst h
+  rfl
+
+/-- **[T-EQ-3d-M5 (6f) prep]** The top morphism of an `eqToHom` in `Ell/ℚ`. -/
+theorem eqToHom_top {A B : EllObj (CommRingCat.of ℚ)} (h : A = B) :
+    (eqToHom h : A ⟶ B).top =
+      eqToHom (congrArg (fun O : EllObj (CommRingCat.of ℚ) => O.curve.E) h) := by
+  subst h
+  rfl
+
+/-- **[T-EQ-3d-M5 (6f) prep]** `eqToHom`-legs of pullback comparisons along an
+equality of base maps. -/
+theorem eqToHom_pullback_fst {Y W : Scheme.{0}} (π : Y ⟶ W)
+    {T : Scheme.{0}} {a b : T ⟶ W} (hab : a = b) :
+    eqToHom (congrArg (fun m : T ⟶ W => pullback π m) hab) ≫
+      pullback.fst π b = pullback.fst π a := by
+  subst hab
+  simp
+
+theorem eqToHom_pullback_snd {Y W : Scheme.{0}} (π : Y ⟶ W)
+    {T : Scheme.{0}} {a b : T ⟶ W} (hab : a = b) :
+    eqToHom (congrArg (fun m : T ⟶ W => pullback π m) hab) ≫
+      pullback.snd π b = pullback.snd π a := by
+  subst hab
+  simp
+
 end StructuresToSections
 
 end
