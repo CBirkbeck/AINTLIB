@@ -1097,6 +1097,45 @@ theorem weilPairing_pair_order (K : Type) [Field K] [IsAlgClosed K]
   refine dvd_of_closure_pair_torsion P' Q' d hd hdpos hP' hzero hfull ?_
   exact E.torsion_geometricFibre_rank_two N K t hNK
 
+/-- **[T-EQ-3d-L3c viii]** A field-valued ring hom kills one side of any
+complemented ideal pair (the idempotent dichotomy: `e + f = 1`, `e·f = 0`, a
+field has no nontrivial idempotent products). -/
+theorem field_hom_ker_dichotomy {B : Type} [CommRing B] {K' : Type} [Field K']
+    (I J : Ideal B) (hIJ : IsCompl I J) (χ : B →+* K') :
+    I ≤ RingHom.ker χ ∨ J ≤ RingHom.ker χ := by
+  obtain ⟨e, he, f, hf, hef⟩ := Submodule.mem_sup.mp
+    (show (1 : B) ∈ I ⊔ J from hIJ.sup_eq_top ▸ Submodule.mem_top)
+  have hprod : χ e * χ f = 0 := by
+    have hmem : e * f ∈ I ⊓ J := ⟨I.mul_mem_right f he, J.mul_mem_left e hf⟩
+    rw [hIJ.inf_eq_bot] at hmem
+    rw [← map_mul, (Submodule.mem_bot B).mp hmem, map_zero]
+  rcases mul_eq_zero.mp hprod with h0 | h0
+  · -- `χ e = 0`: every `i ∈ I` satisfies `i = i·e + i·f` with `i·f ∈ I ⊓ J = 0`
+    refine Or.inl fun i hi => ?_
+    have hif : i * f = 0 := by
+      have hmem : i * f ∈ I ⊓ J := ⟨I.mul_mem_right f hi, J.mul_mem_left i hf⟩
+      rw [hIJ.inf_eq_bot] at hmem
+      exact (Submodule.mem_bot B).mp hmem
+    have hi_eq : i = i * e := by
+      have h1 : i * (e + f) = i := by rw [hef, mul_one]
+      calc i = i * (e + f) := h1.symm
+        _ = i * e + i * f := by ring
+        _ = i * e := by rw [hif, add_zero]
+    show χ i = 0
+    rw [hi_eq, map_mul, h0, mul_zero]
+  · refine Or.inr fun j hj => ?_
+    have hje : j * e = 0 := by
+      have hmem : j * e ∈ I ⊓ J := ⟨I.mul_mem_left j he, J.mul_mem_right e hj⟩
+      rw [hIJ.inf_eq_bot] at hmem
+      exact (Submodule.mem_bot B).mp hmem
+    have hj_eq : j = j * f := by
+      have h1 : j * (e + f) = j := by rw [hef, mul_one]
+      calc j = j * (e + f) := h1.symm
+        _ = j * e + j * f := by ring
+        _ = j * f := by rw [hje, zero_add]
+    show χ j = 0
+    rw [hj_eq, map_mul, h0, mul_zero]
+
 end CorrSurjective
 
 section SectionsToStructures
