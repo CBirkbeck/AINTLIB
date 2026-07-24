@@ -729,6 +729,195 @@ theorem secTorsion_smul_conj
     refine Eq.trans (Category.assoc _ _ _).symm ?_
     exact congrArg (· ≫ secSmul D d s γ) (secStruct D d k s hs hinv).over_T
 
+/-- The `V_ρ`-side translation is killed by the cover projection. -/
+theorem secVSmul_prj (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    secVSmul D d k s γ ≫ vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) =
+      vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (secVSmul D d k s γ ≫ ·)
+      (vRhoCoverPrj_fst D (X.pullbackAlong k) (secCover D d s))) ?_
+    refine Eq.trans ((pullback.lift_fst _ _ _).trans (Category.comp_id _)) ?_
+    exact (vRhoCoverPrj_fst D (X.pullbackAlong k) (secCover D d s)).symm
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (secVSmul D d k s γ ≫ ·)
+      (vRhoCoverPrj_snd D (X.pullbackAlong k) (secCover D d s))) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ secCover D d s)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (pullback.snd (vRhoπ D) _ ≫ ·)
+      (secSmul_secCover D d s γ)) ?_
+    exact (vRhoCoverPrj_snd D (X.pullbackAlong k) (secCover D d s)).symm
+
+/-- **[T-EQ-3c main]** `γ`-invariance of the coordinate-projection composite
+(the map the descent factors). -/
+theorem secFleg_smul
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    torsionMapOfEllHom (secGSmul D d k s γ) N ≫
+        (secStruct D d k s hs hinv).torsionIso.hom ≫
+        vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) =
+      (secStruct D d k s hs hinv).torsionIso.hom ≫
+        vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) := by
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg
+    (· ≫ vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s))
+    (secTorsion_smul_conj D d k s hs hinv γ)) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact congrArg ((secStruct D d k s hs hinv).torsionIso.hom ≫ ·)
+    (secVSmul_prj D d k s γ)
+
+/-- The `γ`-translation is killed by the projection to the middle base
+change. -/
+theorem secGSmul_π (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    secGSmul D d k s γ ≫
+        (X.pullbackAlong k).pullbackAlongπ (secCover D d s) =
+      (X.pullbackAlong k).pullbackAlongπ (secCover D d s) := by
+  refine EllHom.ext ?_ ?_
+  · show secSmul D d s γ ≫ secCover D d s = secCover D d s
+    exact secSmul_secCover D d s γ
+  · show (secGSmul D d k s γ).top ≫
+        pullback.fst (X.pullbackAlong k).curve.π (secCover D d s) =
+      pullback.fst (X.pullbackAlong k).curve.π (secCover D d s)
+    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+/-- The torsion-level `γ`-translation is killed by the torsion cover map. -/
+theorem secTorsionSmul_cover
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    torsionMapOfEllHom (secGSmul D d k s γ) N ≫
+        torsionMapOfEllHom
+          ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N =
+      torsionMapOfEllHom
+        ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N := by
+  refine Eq.trans (torsionMapOfEllHom_comp (secGSmul D d k s γ)
+    ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N).symm ?_
+  exact congrArg (torsionMapOfEllHom · N) (secGSmul_π D d k s γ)
+
+/-- **[T-EQ-3c main]** The torsion cover is the base change of the quotient
+projection along the torsion-level section composite (pasting the cartesian
+torsion square with the section-cover square). -/
+theorem secTorsionPB :
+    IsPullback
+      (((X.pullbackAlong k).pullbackAlong
+        (secCover D d s)).curve.torsionπ N ≫ secLift D d s)
+      (torsionMapOfEllHom
+        ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N)
+      (d.σZ.relQuotientπ d.f d.over_base)
+      ((X.pullbackAlong k).curve.torsionπ N ≫ s) :=
+  (isPullback_torsionMapOfEllHom
+    ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N).flip.paste_horiz
+    (IsPullback.of_hasPullback (d.σZ.relQuotientπ d.f d.over_base) s)
+
+/-- The torsion-level `γ`-translation is conjugate, under the pasting
+identification, to the pulled quotient action. -/
+theorem secTorsionSmul_u (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    torsionMapOfEllHom (secGSmul D d k s γ) N ≫
+        (secTorsionPB D d k s).isoPullback.hom =
+      (secTorsionPB D d k s).isoPullback.hom ≫
+        d.σZ.pullbackRelQSMul d.f d.over_base
+          ((X.pullbackAlong k).curve.torsionπ N ≫ s) γ := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (torsionMapOfEllHom (secGSmul D d k s γ) N ≫ ·)
+      (secTorsionPB D d k s).isoPullback_hom_fst) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ secLift D d s)
+      (torsionMapOfEllHom_π (secGSmul D d k s γ) N)) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg
+      (((X.pullbackAlong k).pullbackAlong
+        (secCover D d s)).curve.torsionπ N ≫ ·)
+      (secSmul_secLift D d s γ)) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg
+      ((secTorsionPB D d k s).isoPullback.hom ≫ ·)
+      (d.σZ.pullbackRelQSMul_fst d.f d.over_base
+        ((X.pullbackAlong k).curve.torsionπ N ≫ s) γ)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ d.σZ.hom γ)
+      (secTorsionPB D d k s).isoPullback_hom_fst) ?_
+    exact Category.assoc _ _ _
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (torsionMapOfEllHom (secGSmul D d k s γ) N ≫ ·)
+      (secTorsionPB D d k s).isoPullback_hom_snd) ?_
+    refine Eq.trans (secTorsionSmul_cover D d k s γ) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg
+      ((secTorsionPB D d k s).isoPullback.hom ≫ ·)
+      (d.σZ.pullbackRelQSMul_snd d.f d.over_base
+        ((X.pullbackAlong k).curve.torsionπ N ≫ s) γ)) ?_
+    exact (secTorsionPB D d k s).isoPullback_hom_snd
+
+/-- **[T-EQ-3c main]** The coordinate-projection composite descends through the
+torsion cover: the `γ`-invariance (`secFleg_smul`) discharges the invariant-lift
+criterion of the free quotient. -/
+theorem secFleg_factors
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N) :
+    ∃ q : (X.pullbackAlong k).curve.torsion N ⟶
+        pullback (vRhoπ D) (X.pullbackAlong k).structMap,
+      torsionMapOfEllHom
+          ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N ≫ q =
+        (secStruct D d k s hs hinv).torsionIso.hom ≫
+          vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) := by
+  have hswap : ∀ γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N),
+      d.σZ.pullbackRelQSMul d.f d.over_base
+          ((X.pullbackAlong k).curve.torsionπ N ≫ s) γ ≫
+        (secTorsionPB D d k s).isoPullback.inv =
+      (secTorsionPB D d k s).isoPullback.inv ≫
+        torsionMapOfEllHom (secGSmul D d k s γ) N := by
+    intro γ
+    rw [Iso.comp_inv_eq, Category.assoc, secTorsionSmul_u,
+      Iso.inv_hom_id_assoc]
+  obtain ⟨q, hq⟩ := d.σZ.exists_relQuotientπ_lift_baseChange d.f d.over_base
+    (d.free_on_points (sympFramedAut_freeAction D))
+    ((X.pullbackAlong k).curve.torsionπ N ≫ s)
+    ((secTorsionPB D d k s).isoPullback.inv ≫
+      (secStruct D d k s hs hinv).torsionIso.hom ≫
+      vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s))
+    (fun γ => by
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      refine Eq.trans (congrArg
+        (· ≫ (secStruct D d k s hs hinv).torsionIso.hom ≫
+          vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s))
+        (hswap γ)) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      exact congrArg ((secTorsionPB D d k s).isoPullback.inv ≫ ·)
+        (secFleg_smul D d k s hs hinv γ))
+  refine ⟨q, ?_⟩
+  refine Eq.trans (congrArg (· ≫ q)
+    (secTorsionPB D d k s).isoPullback_hom_snd.symm) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg ((secTorsionPB D d k s).isoPullback.hom ≫ ·) hq) ?_
+  exact Iso.hom_inv_id_assoc _ _
+
+/-- **[T-EQ-3c main]** The `Hhom`-descent hypothesis: maps coequalized by the
+torsion cover are coequalized by the coordinate-projection composite. -/
+theorem secHhom
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N)
+    {Z : Scheme.{0}}
+    (g₁ g₂ : Z ⟶ ((X.pullbackAlong k).pullbackAlong
+      (secCover D d s)).curve.torsion N)
+    (hg : g₁ ≫ torsionMapOfEllHom
+        ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N =
+      g₂ ≫ torsionMapOfEllHom
+        ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N) :
+    g₁ ≫ (secStruct D d k s hs hinv).torsionIso.hom ≫
+        vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) =
+      g₂ ≫ (secStruct D d k s hs hinv).torsionIso.hom ≫
+        vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) := by
+  obtain ⟨q, hq⟩ := secFleg_factors D d k s hs hinv
+  refine Eq.trans (congrArg (g₁ ≫ ·) hq.symm) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ q) hg) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact congrArg (g₂ ≫ ·) hq
+
 end SectionsToStructures
 
 end
