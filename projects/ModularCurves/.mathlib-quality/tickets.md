@@ -26480,3 +26480,18 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 - **Statement**: (i) `Surjective (detFrameScheme D ≫ detCompScheme D)` — set-map `A ↦ D.p (ofAdd (det A))` surjective from `Matrix.GeneralLinearGroup.det_surjective` (mathlib, FOUND) + `D.p` a MulEquiv + `Multiplicative.ofAdd` equiv; apply L3a at `detFrameMor ≫ detCompMor` (composite corrSpecMap via Spec.map_comp). (ii) T4-presentation: `agreeLocus (pulled pairEZ) (tautDet)` over `T''` is iso to `pullback Ψ σ_p` where `Ψ := T''-base-change of (detFrame ≫ detComp)` and `σ_p := the pairEZMap-of-L'' section` — then `Surjective (T4 → T'')` from (i) + Surjective-stable-under-base-change ×2 (MorphismProperty.pullback_snd/fst). The iso: both are limits of the same diagram — pullback-comparison hom_ext chase.
 - **Sources**: KM 7.1.3(3); det: standard.
 - **Generality decision**: in-situ.
+
+### [T-EQ-3d-L3c] Primitivity: the full-level pairing factors through the units component
+- **Status**: open
+- **Title**: `pairEZMap` of a full level factors through `detCompScheme` (the Weil pairing of a basis has exact order N)
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: T-EQ-3d-L3a
+- **Parent**: T-EQ-3d-L3
+- **Type**: lemmas
+- **Statement**: For a full level `L : E.FullLevelPt N` over any `(T, sT)`: `∃ w : T ⟶ cycloUnitsScheme D, w ≫ detCompScheme D = pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2`.
+- **Proof sketch**: (i) `corrSpecMap_clopen_of_injective` (mirror of corrSpecMap_surjective): detCompMor set-injective (D.p equiv + units-coe inj) ⟹ detCompScheme is a clopen immersion; the complement Galois-subset (non-exact-order roots) gives the splitting muNRootsScheme = image ⊔ complement. (ii) The factoring ⟺ the pullback locus of the complement along pairEZMap is empty. (iii) Emptiness: a nonempty clopen has a point x; take k := algebraic closure of κ(x) (Scheme.residueField + IsAlgClosed.lift plumbing) — a geometric point of the complement-locus over k. (iv) At k: the register kills it — r := weilPairingEval(L₁ₖ,L₂ₖ): if r^d = 1 for a proper divisor d ∣ N then eval(L₁, d•L₂) = eval(L₂, d•L₂) = 1 (symplectic/pow registers), and every N-torsion k-point is a comb of the basis (fullLevelIso is an iso ⟹ bijective on k-points), so d•L₂ pairs trivially with everything ⟹ d•L₂ = 0 (weilPairingEval_nondegenerate — REGISTER IS k-GENERIC over any IsAlgClosed k ✓) ⟹ N ∣ d (exact order from IsNaiveFullLevel) ⟹ contradiction; hence r has exact order N ⟹ the classified root lies in the exact-order-N piece = detComp-image-fiber. (v) The membership-bridge at the k-point via the fiber of the clopen splitting.
+- **Sources**: KM 2.8.7; Silverman III.8; the register `WeilPairing/Basic` (nondegenerate/symplectic/mul are k-generic).
+- **Generality decision**: stated at arbitrary (T,sT); the geometric-point argument is the content.
+
+### [T-EQ-3d-L3 REVISED] surjectivity assembly
+Revision note: Ψ (the base-changed detFrame≫detComp) is NOT surjective onto the full roots scheme for composite N (det-image = units ⊊ ℤ/N). The correct assembly: factor σ_p through cycloUnitsScheme via L3c; then T4 ≅ pullback (T''-base-change of detFrameScheme) (σ'_p) with detFrameScheme SURJECTIVE (det : GL₂(ℤ/N) ↠ (ℤ/N)ˣ via Matrix.GeneralLinearGroup.det_surjective + corrSpecMap_surjective at detFrameMor) ⟹ Surjective (T4 → T'') by base-change stability ×2.
