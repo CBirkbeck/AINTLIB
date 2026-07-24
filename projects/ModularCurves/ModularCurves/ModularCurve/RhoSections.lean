@@ -5195,6 +5195,81 @@ theorem strActX_square (D : GaloisRepData N) [Fact (1 < N)]
     rw [Category.comp_id, Category.id_comp]
     rfl
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6f) DONE]** THE Z-POINT EQUIVARIANCE: the classified point of
+the tautological value intertwines the cover translation with the quotient
+action. -/
+theorem strZ_equivariant (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strAct D (X.pullbackAlong k) γ ≫ (strZ D d k str).1 =
+      (strZ D d k str).1 ≫ d.σZ.hom γ := by
+  have hg : strAct D (X.pullbackAlong k) γ ≫
+      (strPr D (X.pullbackAlong k) ≫ k) = strPr D (X.pullbackAlong k) ≫ k := by
+    rw [← Category.assoc, strAct_pr]
+  -- the classified value of strZ
+  have hVAL : d.eqv (strPr D (X.pullbackAlong k) ≫ k) (strZ D d k str) =
+      (sympFramedProblem D).map
+        (EllObj.toPullbackAlong
+          (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))).op
+        (strValue D str) := by
+    show d.eqv _ ((d.eqv _).symm _) = _
+    exact (d.eqv (strPr D (X.pullbackAlong k) ≫ k)).apply_symm_apply _
+  -- the left side through the presentation-independent naturality
+  have hnat := rhoMap_eqv d.toRelRepData (strActX D k γ)
+    (strAct D (X.pullbackAlong k) γ) rfl hg (strActX_π D k γ)
+    (strZ D d k str)
+  -- the value computation
+  have hval2 : (sympFramedProblem D).map (strActX D k γ).op
+      (d.eqv (strPr D (X.pullbackAlong k) ≫ k) (strZ D d k str)) =
+      ((sympFramedAut D) γ⁻¹).hom.app
+        (Opposite.op (X.pullbackAlong (strPr D (X.pullbackAlong k) ≫ k)))
+        (d.eqv (strPr D (X.pullbackAlong k) ≫ k) (strZ D d k str)) := by
+    rw [hVAL]
+    refine Eq.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+      (EllObj.toPullbackAlong (X.pullbackAlongMap k
+        (strPr D (X.pullbackAlong k)))).op (strActX D k γ).op
+      (strValue D str)).symm ?_
+    rw [show (EllObj.toPullbackAlong (X.pullbackAlongMap k
+        (strPr D (X.pullbackAlong k)))).op ≫ (strActX D k γ).op =
+      (strActX D k γ ≫ EllObj.toPullbackAlong (X.pullbackAlongMap k
+        (strPr D (X.pullbackAlong k)))).op from rfl]
+    rw [strActX_square D k γ]
+    refine Eq.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+      (strActHom D (X.pullbackAlong k) γ).op
+      (EllObj.toPullbackAlong (X.pullbackAlongMap k
+        (strPr D (X.pullbackAlong k)))).op (strValue D str)) ?_
+    rw [strValue_equivariant D str γ]
+    -- naturality of the translation
+    have hφ : ((sympFramedAut D) γ⁻¹).hom = sympFramedSmulNat D γ := by
+      rw [show ((sympFramedAut D) γ⁻¹).hom =
+        sympFramedSmulNat D ((γ⁻¹)⁻¹) from rfl, inv_inv]
+    have hn := (sympFramedSmulNat D γ).naturality
+      (EllObj.toPullbackAlong (X.pullbackAlongMap k
+        (strPr D (X.pullbackAlong k)))).op
+    have hnat2 := congrArg
+      (fun (F : (sympFramedProblem D).obj (Opposite.op
+          ((X.pullbackAlong k).pullbackAlong (strPr D (X.pullbackAlong k)))) ⟶
+        (sympFramedProblem D).obj (Opposite.op
+          (X.pullbackAlong (strPr D (X.pullbackAlong k) ≫ k)))) =>
+        F (strValue D str)) hn
+    refine Eq.trans hnat2.symm ?_
+    exact congrArg (fun (m : sympFramedProblem D ⟶ sympFramedProblem D) =>
+      m.app (Opposite.op (X.pullbackAlong
+        (strPr D (X.pullbackAlong k) ≫ k)))
+      ((sympFramedProblem D).map (EllObj.toPullbackAlong
+        (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))).op
+        (strValue D str))) hφ.symm
+  -- assemble via the equivariance and injectivity
+  have hfinal := hnat.symm.trans (hval2.trans (d.equivariant
+    (strPr D (X.pullbackAlong k) ≫ k) (strZ D d k str) γ).symm)
+  have hsub := (d.eqv (strPr D (X.pullbackAlong k) ≫ k)).injective hfinal
+  exact congrArg Subtype.val hsub
+
 end StructuresToSections
 
 end
