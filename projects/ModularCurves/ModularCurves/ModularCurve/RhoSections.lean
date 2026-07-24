@@ -645,6 +645,55 @@ theorem agreeLocus_factor_iff {W : Scheme.{0}} (h : W ⟶ Tt) :
 
 end AgreeLocus
 
+section CorrSurjective
+
+open scoped FintypeCatDiscrete
+
+/-- **[T-EQ-3d-L3a piece 1]** Every `ℚ̄`-algebra evaluation of the target algebra
+of a set-surjective correspondence morphism factors through the morphism's
+algebra map (lift the classified point through the set-map). -/
+theorem qbarAlgHom_factors
+    {X Y : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)}
+    (m : X ⟶ Y) (hm : Function.Surjective m.hom.hom)
+    (χ : (corrAlgebra Y : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ) :
+    ∃ χ' : (corrAlgebra X : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ,
+      χ = χ'.comp
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          m).unop.hom.hom := by
+  obtain ⟨xv, hxv⟩ := hm (qbarPointsRead Y
+    ((specPointsEquivAlgHom ℚ (corrAlgebra Y : Type 0)
+      (AlgebraicClosure ℚ)).symm χ))
+  set ptX := (qbarPointsRead X).symm xv with hptX
+  have hpt : (⟨ptX.1 ≫ corrSpecMap m, by
+      rw [Category.assoc, corrSpecMap_π, ptX.2]⟩ :
+      { h : Spec (.of (AlgebraicClosure ℚ)) ⟶ corrSpec Y //
+        h ≫ corrSpecπ Y =
+          Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }) =
+      (specPointsEquivAlgHom ℚ (corrAlgebra Y : Type 0)
+        (AlgebraicClosure ℚ)).symm χ := by
+    refine (qbarPointsRead Y).injective ?_
+    refine Eq.trans (qbarPointsRead_map m ptX) ?_
+    rw [hptX, Equiv.apply_symm_apply, hxv]
+  refine ⟨specPointsEquivAlgHom ℚ (corrAlgebra X : Type 0)
+    (AlgebraicClosure ℚ) ptX, ?_⟩
+  have hχ : χ = specPointsEquivAlgHom ℚ (corrAlgebra Y : Type 0)
+      (AlgebraicClosure ℚ) ⟨ptX.1 ≫ corrSpecMap m,
+        (Category.assoc _ _ _).trans
+          ((congrArg (ptX.1 ≫ ·) (corrSpecMap_π m)).trans ptX.2)⟩ :=
+    ((congrArg (specPointsEquivAlgHom ℚ (corrAlgebra Y : Type 0)
+      (AlgebraicClosure ℚ)) hpt).trans
+      (Equiv.apply_symm_apply _ χ)).symm
+  refine hχ.trans ?_
+  have hpre := spec_preimage_comp ptX.1 (CommRingCat.ofHom
+    (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      m).unop.hom.hom.toRingHom))
+  refine AlgHom.ext fun a => ?_
+  exact congrArg (fun q : CommRingCat.of (corrAlgebra Y : Type 0) ⟶
+    CommRingCat.of (AlgebraicClosure ℚ) => q.hom a) hpre
+
+end CorrSurjective
+
 section SectionsToStructures
 
 open scoped FintypeCatDiscrete
