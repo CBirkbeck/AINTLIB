@@ -3693,6 +3693,75 @@ theorem readCorrection_GL (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
       exact (constVecIndexRead N).apply_symm_apply _)]
   rw [hpts, ← hptdef]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (3b-ii)]** The corrected component point intertwines the
+`GL₂`-translations: the correction morphism commutes with the coordinate
+change (readCorrection_GL), so the evaluation chain transports. -/
+theorem constVecCorrPt_GL (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (v : Fin 2 → ZMod N) :
+    constVecCorrPt N v ≫ constVecGLScheme N γ = constVecCorrPt N (γ • v) := by
+  -- set-level commutation of the correction with the coordinate change
+  have hset : corrMor N ≫ constVecGLMor N γ =
+      constVecGLMor N γ ≫ corrMor N := by
+    ext w x
+    refine congrArg (fun z : Fin 2 → ZMod N => z x) (show
+      γ • (readCorrection N).symm w = (readCorrection N).symm (γ • w) from ?_)
+    refine ((readCorrection N).injective ?_).symm
+    rw [Equiv.apply_symm_apply]
+    rw [readCorrection_GL γ ((readCorrection N).symm w)]
+    rw [Equiv.apply_symm_apply]
+  -- algebra-level commutation through the correspondence
+  have halg : constVecGLAlg N γ ≫ corrAlgHom N =
+      corrAlgHom N ≫ constVecGLAlg N γ := by
+    have h1 := congrArg
+      (fun m => ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        m).unop) hset
+    refine Eq.trans ?_ (Eq.trans h1 ?_)
+    · exact (congrArg Quiver.Hom.unop
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          (corrMor N) (constVecGLMor N γ))).symm
+    · exact congrArg Quiver.Hom.unop
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map_comp
+          (constVecGLMor N γ) (corrMor N))
+  -- ring-level chain
+  have hring : CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom ≫
+      constVecCorrPtRing N v = constVecCorrPtRing N (γ • v) := by
+    show CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom ≫
+      CommRingCat.ofHom (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ) v) =
+      CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom ≫
+      CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom ≫
+      CommRingCat.ofHom (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ)
+        (γ • v))
+    have h2 : CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom =
+        CommRingCat.ofHom (corrAlgHom N).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom :=
+      congrArg (fun (m : constVecAlgebra N ⟶ constVecAlgebra N) =>
+        CommRingCat.ofHom m.hom.hom.toRingHom) halg
+    have h3 : CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom ≫
+        CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom =
+        CommRingCat.ofHom (constVecAlgebraIso N).hom.hom.hom.toRingHom ≫
+        CommRingCat.ofHom (piGLAlgHom N γ).toRingHom :=
+      congrArg (fun (m : constVecAlgebra N ⟶
+        CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ)) =>
+        CommRingCat.ofHom m.hom.hom.toRingHom) (constVecGLAlg_square N γ)
+    have h4 : CommRingCat.ofHom (piGLAlgHom N γ).toRingHom ≫
+        CommRingCat.ofHom (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ) v) =
+        CommRingCat.ofHom (Pi.evalRingHom (fun _ : (Fin 2 → ZMod N) => ℚ)
+          (γ • v)) :=
+      CommRingCat.hom_ext (RingHom.ext fun f => rfl)
+    rw [← Category.assoc, h2, Category.assoc,
+      ← Category.assoc (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom), h3, Category.assoc, h4]
+  refine Eq.trans (congrArg (· ≫ constVecGLScheme N γ)
+    (constVecCorrPt_eq_Spec N v)) ?_
+  refine Eq.trans ((AlgebraicGeometry.Spec.map_comp
+    (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom)
+    (constVecCorrPtRing N v)).symm) ?_
+  exact (congrArg Spec.map hring).trans (constVecCorrPt_eq_Spec N (γ • v)).symm
+
 end StructuresToSections
 
 end
