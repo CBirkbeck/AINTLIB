@@ -938,6 +938,25 @@ theorem muNRootsRead_classify_field (D : GaloisRepData N) [Fact (1 < N)]
     (spec_preimage_comp φ (CommRingCat.ofHom
       (muNRootsAlgebraIso D).inv.hom.hom.toRingHom))
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c v]** The `K`-read of the value-level pairing comparison is the
+`Γ`-restriction of the Weil-pairing evaluation (base-transported
+`pairEZMap_read`). -/
+theorem pairEZ_read_eval (D : GaloisRepData N) [Fact (1 < N)]
+    (K : Type) [Field K] [Algebra ℚ K]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (L : E.FullLevelPt N) (tk : Spec (.of K) ⟶ T)
+    (htk : tk ≫ sT = Spec.map (CommRingCat.ofHom (algebraMap ℚ K))) :
+    muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ K)))
+        (tk ≫ pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2)
+        (by rw [Category.assoc, pairEZMap_π, htk]) =
+      (Scheme.Γ.map tk.op).hom
+        (E.weilPairingEval L.1.1 L.1.2
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1)
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.2).mp L.2.1.2)).1 := by
+  refine Eq.trans ?_ (pairEZMap_read D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 tk)
+  exact (muNRootsRead_congr D htk rfl _).symm
+
 end CorrSurjective
 
 section SectionsToStructures
