@@ -548,6 +548,189 @@ noncomputable def rhoLevelStructureOfCarve (D : GaloisRepData N) [Fact (1 < N)]
     (fun t x y hx hy =>
       framedPinned_pairing_scheme D sT hinv L h hover hcond t x y hx hy)
 
+section SectionsToStructures
+
+open scoped FintypeCatDiscrete
+
+variable (D : GaloisRepData N) [Fact (1 < N)] {X : EllObj (CommRingCat.of ℚ)}
+variable (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+variable [IsAffineHom d.f]
+variable {T' : Scheme.{0}} (k : T' ⟶ X.base)
+variable (s : T' ⟶ d.σZ.relQuotient d.f d.over_base)
+
+/-- **[T-EQ-3c main]** The section cover: the base change of the quotient
+projection along a section of the quotient. -/
+noncomputable def secCover :
+    pullback (d.σZ.relQuotientπ d.f d.over_base) s ⟶ T' :=
+  pullback.snd _ s
+
+/-- **[T-EQ-3c main]** The tautological lift of the section cover into the
+framed total space. -/
+noncomputable def secLift :
+    pullback (d.σZ.relQuotientπ d.f d.over_base) s ⟶ d.Z :=
+  pullback.fst _ s
+
+/-- The lift classifies over the covered base. -/
+theorem secLift_f (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k) :
+    secLift D d s ≫ d.f = secCover D d s ≫ k := by
+  refine Eq.trans (congrArg (secLift D d s ≫ ·)
+    (d.σZ.relQuotientπ_comp_relQuotientStruct d.f d.over_base).symm) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ d.σZ.relQuotientStruct d.f d.over_base)
+    pullback.condition) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact congrArg (secCover D d s ≫ ·) hs
+
+/-- **[T-EQ-3c main]** The symplectically framed value classified by the lifted
+section. -/
+noncomputable def secValue
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k) :
+    (sympFramedProblem D).obj
+      (Opposite.op (X.pullbackAlong (secCover D d s ≫ k))) :=
+  d.eqv (secCover D d s ≫ k) ⟨secLift D d s, secLift_f D d k s hs⟩
+
+/-- **[T-EQ-3c main]** The classified value transported to the double base
+change (the descent-input presentation). -/
+noncomputable def secW
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k) :
+    (sympFramedProblem D).obj
+      (Opposite.op ((X.pullbackAlong k).pullbackAlong (secCover D d s))) :=
+  (sympFramedProblem D).map (pullbackAlongAssocHom X k (secCover D d s)).op
+    (secValue D d k s hs)
+
+/-- **[T-EQ-3c main]** The local ρ-level structure on the section cover, from
+the carve condition of the transported value. -/
+noncomputable def secStruct
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N) :
+    RhoLevelStructure D
+      ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap
+      ((X.pullbackAlong k).pullbackAlong (secCover D d s)).curve :=
+  rhoLevelStructureOfCarve D
+    ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap
+    ((X.pullbackAlong k).pullbackAlong (secCover D d s)).curve hinv
+    (secW D d k s hs).val.1 (secW D d k s hs).val.2.val
+    (secW D d k s hs).val.2.property (secW D d k s hs).property
+
+/-- **[T-EQ-3c main]** The `γ`-translation of the section cover (the pulled
+`σZ`-action). -/
+noncomputable def secSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    pullback (d.σZ.relQuotientπ d.f d.over_base) s ⟶
+      pullback (d.σZ.relQuotientπ d.f d.over_base) s :=
+  d.σZ.pullbackRelQSMul d.f d.over_base s γ
+
+theorem secSmul_secCover (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    secSmul D d s γ ≫ secCover D d s = secCover D d s :=
+  d.σZ.pullbackRelQSMul_snd d.f d.over_base s γ
+
+theorem secSmul_secLift (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    secSmul D d s γ ≫ secLift D d s = secLift D d s ≫ d.σZ.hom γ :=
+  d.σZ.pullbackRelQSMul_fst d.f d.over_base s γ
+
+/-- **[T-EQ-3c main]** The `γ`-translation as an `Ell/ℚ`-endomorphism of the
+double base change. -/
+noncomputable def secGSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (X.pullbackAlong k).pullbackAlong (secCover D d s) ⟶
+      (X.pullbackAlong k).pullbackAlong (secCover D d s) :=
+  pullbackAlongMapOf (X.pullbackAlong k) (secSmul D d s γ)
+    (secSmul_secCover D d s γ)
+
+/-- **[T-EQ-3c main]** The `γ`-translation on the `V_ρ`-side pullback (trivial
+on the `V_ρ`-coordinate). -/
+noncomputable def secVSmul (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    pullback (vRhoπ D)
+        ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap ⟶
+      pullback (vRhoπ D)
+        ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap :=
+  pullback.map _ _ _ _ (𝟙 (vRho D)) (secSmul D d s γ)
+    (𝟙 (Spec (CommRingCat.of ℚ)))
+    (by rw [Category.comp_id, Category.id_comp])
+    (by
+      show ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap ≫
+          𝟙 _ = secSmul D d s γ ≫
+        ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap
+      rw [Category.comp_id]
+      show ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap =
+        secSmul D d s γ ≫ secCover D d s ≫ (X.pullbackAlong k).structMap
+      rw [← Category.assoc, secSmul_secCover]
+      rfl)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c main, THE CONJUGATION]** The torsion-level `γ`-translation
+intertwines the local trivialization with the `V_ρ`-side `γ`-translation: the
+coordinate leg is `γ`-invariant (the `w`-level equivariance turns the pulled
+data into the `γ`-translated data, and the pinned iso is translation-invariant),
+and the base leg twists by `secSmul γ`. -/
+theorem secTorsion_smul_conj
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    torsionMapOfEllHom (secGSmul D d k s γ) N ≫
+        (secStruct D d k s hs hinv).torsionIso.hom =
+      (secStruct D d k s hs hinv).torsionIso.hom ≫ secVSmul D d k s γ := by
+  have hw := w_smul_translate D d k (secCover D d s)
+    ⟨secLift D d s, secLift_f D d k s hs⟩ (secSmul D d s γ)
+    (secSmul_secCover D d s γ) γ (secSmul_secLift D d s γ)
+  have hP : ((((X.pullbackAlong k).pullbackAlong
+      (secCover D d s)).curve.glSmul γ (secW D d k s hs).val.1)).1.1 =
+      EllHom.pullSection (CommRingCat.of ℚ) (secGSmul D d k s γ)
+        (secW D d k s hs).val.1.1.1 :=
+    (congrArg (fun z => z.val.1.1.1) hw).symm
+  have hQ : ((((X.pullbackAlong k).pullbackAlong
+      (secCover D d s)).curve.glSmul γ (secW D d k s hs).val.1)).1.2 =
+      EllHom.pullSection (CommRingCat.of ℚ) (secGSmul D d k s γ)
+        (secW D d k s hs).val.1.1.2 :=
+    (congrArg (fun z => z.val.1.1.2) hw).symm
+  have hframe : secSmul D d s γ ≫ (secW D d k s hs).val.2.val =
+      (secW D d k s hs).val.2.val ≫ wFramesRightMul D γ :=
+    congrArg (fun z => z.val.2.val) hw
+  apply pullback.hom_ext
+  · show torsionMapOfEllHom (secGSmul D d k s γ) N ≫
+        (secStruct D d k s hs hinv).torsionIso.hom ≫
+        pullback.fst (vRhoπ D) _ =
+      (secStruct D d k s hs hinv).torsionIso.hom ≫ secVSmul D d k s γ ≫
+        pullback.fst (vRhoπ D) _
+    rw [show secVSmul D d k s γ ≫ pullback.fst (vRhoπ D)
+        ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap =
+        pullback.fst (vRhoπ D) _ ≫ 𝟙 (vRho D) from pullback.lift_fst _ _ _,
+      Category.comp_id]
+    show torsionMapOfEllHom (secGSmul D d k s γ) N ≫
+        framedCoordMap D _ _ hinv (secW D d k s hs).val.1
+          (secW D d k s hs).val.2.val (secW D d k s hs).val.2.property =
+      framedCoordMap D _ _ hinv (secW D d k s hs).val.1
+        (secW D d k s hs).val.2.val (secW D d k s hs).val.2.property
+    refine Eq.trans (framedCoordMap_mapAlong D (secGSmul D d k s γ) hinv hinv
+      (secW D d k s hs).val.1
+      (((X.pullbackAlong k).pullbackAlong
+        (secCover D d s)).curve.glSmul γ (secW D d k s hs).val.1)
+      hP hQ (secW D d k s hs).val.2.val
+      (secW D d k s hs).val.2.property) ?_
+    refine Eq.trans (framedCoordMap_congr_frame D _ _ hinv
+      (((X.pullbackAlong k).pullbackAlong
+        (secCover D d s)).curve.glSmul γ (secW D d k s hs).val.1)
+      hframe _) ?_
+    exact framedCoordMap_glSmul D _ _ hinv (secW D d k s hs).val.1
+      (secW D d k s hs).val.2.val (secW D d k s hs).val.2.property γ
+  · show torsionMapOfEllHom (secGSmul D d k s γ) N ≫
+        (secStruct D d k s hs hinv).torsionIso.hom ≫
+        pullback.snd (vRhoπ D) _ =
+      (secStruct D d k s hs hinv).torsionIso.hom ≫ secVSmul D d k s γ ≫
+        pullback.snd (vRhoπ D) _
+    rw [show secVSmul D d k s γ ≫ pullback.snd (vRhoπ D)
+        ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap =
+        pullback.snd (vRhoπ D) _ ≫ secSmul D d s γ from pullback.lift_snd _ _ _]
+    rw [show (secStruct D d k s hs hinv).torsionIso.hom ≫
+        pullback.snd (vRhoπ D) _ =
+        ((X.pullbackAlong k).pullbackAlong
+          (secCover D d s)).curve.torsionπ N from
+      (secStruct D d k s hs hinv).over_T]
+    refine Eq.trans (torsionMapOfEllHom_π (secGSmul D d k s γ) N) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    exact congrArg (· ≫ secSmul D d s γ) (secStruct D d k s hs hinv).over_T
+
+end SectionsToStructures
+
 end
 
 end ModularCurves
