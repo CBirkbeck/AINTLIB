@@ -813,6 +813,20 @@ theorem detCompMor_injective (D : GaloisRepData N) [Fact (1 < N)] :
     Multiplicative.ofAdd.injective (D.p.injective h1)
   exact Units.ext h2
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c ii]** The direct-summand splitting of the roots algebra along
+the determinant-side comparison (the mono splits off a binary cofactor by the
+Chinese remainder engine of the Galois correspondence). -/
+theorem detComp_splitting (D : GaloisRepData N) [Fact (1 < N)] :
+    ∃ (Z : (CommAlgCat.FiniteEtale.{0} ℚ)ᵒᵖ)
+      (u : Z ⟶ (FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj
+        (muNRootsContAction D)),
+      Nonempty (CategoryTheory.Limits.IsColimit (BinaryCofan.mk
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (detCompMor D)) u)) := by
+  haveI := corrInverse_mono_of_injective (detCompMor D) (detCompMor_injective D)
+  exact FiniteEtaleGalois.monoInducesIsoOnDirectSummand_op _
+
 end CorrSurjective
 
 section SectionsToStructures
