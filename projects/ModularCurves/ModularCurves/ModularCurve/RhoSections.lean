@@ -2796,6 +2796,69 @@ theorem pairEZMap_asSection (D : GaloisRepData N) [Fact (1 < N)]
       (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mpr
         (asSection_raw_kill c y hyr)))
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-A3]** THE TAUTOLOGICAL CARVE: the pairing comparison of the
+tautological level equals the determinant read of the tautological frame — the
+structure's morphism-level pairing compatibility instantiated at the
+standard-basis slots. -/
+theorem strCond (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve) :
+    pairEZMap D (X'.pullbackAlong (strPr D X')).structMap
+      (X'.pullbackAlong (strPr D X')).curve
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)))
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1)))
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        (𝟙 (strCover D X')) N _).mpr
+        (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _)))
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        (𝟙 (strCover D X')) N _).mpr
+        (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _))) =
+    frameDetMap D (strTaut D X') := by
+  refine (pairEZMap_asSection D (strPr D X')
+    (strPt D str (Pi.single 0 1)) (strPt D str (Pi.single 1 1))
+    (strPt_raw_kill D str _) (strPt_raw_kill D str _)).trans ?_
+  refine (str.pairing_scheme (strPr D X')
+    (strPt D str (Pi.single 0 1)) (strPt D str (Pi.single 1 1))
+    (strPt_raw_kill D str _) (strPt_raw_kill D str _)).trans ?_
+  have hcpl : coordPairLift D X'.structMap str.torsionIso str.over_T
+      (strPr D X') (strPt D str (Pi.single 0 1)) (strPt D str (Pi.single 1 1))
+      (strPt_raw_kill D str _) (strPt_raw_kill D str _) =
+      strTaut D X' ≫ pullback.lift (frameSlotEval D (Pi.single 0 1))
+        (frameSlotEval D (Pi.single 1 1))
+        ((frameSlotEval_π D _).trans (frameSlotEval_π D _).symm) := by
+    have hleg : ∀ v : Fin 2 → ZMod N,
+        X'.curve.pointToTorsion (strPt D str v) (strPt_raw_kill D str v) ≫
+          str.torsionIso.hom ≫ pullback.fst (vRhoπ D) X'.structMap =
+        strTaut D X' ≫ frameSlotEval D v := by
+      intro v
+      refine Eq.trans (congrArg (· ≫ str.torsionIso.hom ≫
+        pullback.fst (vRhoπ D) X'.structMap) (strPt_pointToTorsion D str v)) ?_
+      refine Eq.trans (congrArg (· ≫ str.torsionIso.hom ≫
+        pullback.fst (vRhoπ D) X'.structMap) (rfl :
+          strTor D str v = strVPt D X' v ≫ str.torsionIso.inv)) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (strVPt D X' v ≫ ·)
+        (Iso.inv_hom_id_assoc str.torsionIso
+          (pullback.fst (vRhoπ D) X'.structMap))) ?_
+      exact strVPt_fst D X' v
+    apply pullback.hom_ext
+    · refine Eq.trans (pullback.lift_fst _ _ _) ?_
+      refine Eq.trans (hleg (Pi.single 0 1)) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      exact congrArg (strTaut D X' ≫ ·) (pullback.lift_fst _ _ _)
+    · refine Eq.trans (pullback.lift_snd _ _ _) ?_
+      refine Eq.trans (hleg (Pi.single 1 1)) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      exact congrArg (strTaut D X' ≫ ·) (pullback.lift_snd _ _ _)
+  refine Eq.trans (congrArg (· ≫ vRhoPairingMap D) hcpl) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact congrArg (strTaut D X' ≫ ·) (pairSlot_basis_det D)
+
 end StructuresToSections
 
 end
