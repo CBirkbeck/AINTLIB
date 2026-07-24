@@ -4675,6 +4675,176 @@ theorem strPt_pull_comb (D : GaloisRepData N) [Fact (1 < N)]
     exact ((X'.curve.baseChange (strPr D X')).point_zero_val t).symm
   exact sub_eq_zero.mp hzero
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (5c-iii)]** THE SECTION ADDITIVITY: the tautological section
+at any vector is the integer combination of the tautological basis sections
+(the fibre additivity densified through the torsion). -/
+theorem strSec_comb (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (v : Fin 2 → ZMod N) :
+    EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str v) =
+    ((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 0 1)) +
+    ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str (Pi.single 1 1)) := by
+  classical
+  -- N is invertible over ℚ, hence on the cover
+  have hinvQ : NIsInvertible (Spec (CommRingCat.of ℚ)) N := by
+    have hq : IsUnit ((N : ℚ)) := isUnit_iff_ne_zero.mpr
+      (Nat.cast_ne_zero.mpr (NeZero.ne N))
+    have h2 := hq.map (Scheme.ΓSpecIso (CommRingCat.of ℚ)).inv.hom
+    rwa [map_natCast] at h2
+  have hinv : NIsInvertible (strCover D X') N :=
+    NIsInvertible.of_hom (strPr D X' ≫ X'.structMap) hinvQ
+  haveI hFin : IsFinite ((X'.curve.baseChange (strPr D X')).torsionπ N) :=
+    (X'.curve.baseChange (strPr D X')).torsionπ_isFinite N
+  haveI hEt : Etale ((X'.curve.baseChange (strPr D X')).torsionπ N) :=
+    (X'.curve.baseChange (strPr D X')).torsionπ_etale N hinv
+  haveI hSep : IsSeparated ((X'.curve.baseChange (strPr D X')).torsionπ N) :=
+    inferInstance
+  -- the two classifiers and their kills
+  have hkL : (EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str v)).1 ≫ (X'.curve.baseChange (strPr D X')).mulByHom N =
+      𝟙 (strCover D X') ≫ (X'.curve.baseChange (strPr D X')).zero :=
+    asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _)
+  have hkR : (((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve
+      (strPr D X') (strPt D str (Pi.single 0 1)) +
+      ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1))).1 ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N =
+      𝟙 (strCover D X') ≫ (X'.curve.baseChange (strPr D X')).zero :=
+    ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      (𝟙 (strCover D X')) N _).mp (by
+      rw [smul_add, smul_comm ((N : ℤ)) (((v 0).val : ℤ)),
+        smul_comm ((N : ℤ)) (((v 1).val : ℤ))]
+      rw [show ((N : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1)) :
+          (X'.curve.baseChange (strPr D X')).Point (𝟙 (strCover D X'))) = 0
+        from ((X'.curve.baseChange
+          (strPr D X')).smul_eq_zero_iff_comp_mulByHom _ N _).mpr
+          (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _))]
+      rw [show ((N : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)) :
+          (X'.curve.baseChange (strPr D X')).Point (𝟙 (strCover D X'))) = 0
+        from ((X'.curve.baseChange
+          (strPr D X')).smul_eq_zero_iff_comp_mulByHom _ N _).mpr
+          (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _))]
+      rw [smul_zero, smul_zero, add_zero])
+  -- the torsion classifiers agree at every geometric point
+  have hfg : (X'.curve.baseChange (strPr D X')).pointToTorsion
+      (EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str v))
+      hkL ≫ (X'.curve.baseChange (strPr D X')).torsionπ N =
+      (X'.curve.baseChange (strPr D X')).pointToTorsion
+      (((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))) hkR ≫
+      (X'.curve.baseChange (strPr D X')).torsionπ N := by
+    rw [EllipticCurve.pointToTorsion_torsionπ,
+      EllipticCurve.pointToTorsion_torsionπ]
+  have heq := eq_of_forall_geomPt_agree
+    ((X'.curve.baseChange (strPr D X')).torsionπ N)
+    ((X'.curve.baseChange (strPr D X')).pointToTorsion
+      (EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str v))
+      hkL)
+    ((X'.curve.baseChange (strPr D X')).pointToTorsion
+      (((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))) hkR) hfg ?_
+  · -- carriers agree
+    refine Subtype.ext ?_
+    calc (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)).1
+        = (X'.curve.baseChange (strPr D X')).pointToTorsion
+            (EllipticCurve.Point.asSection X'.curve (strPr D X')
+              (strPt D str v)) hkL ≫
+            (X'.curve.baseChange (strPr D X')).torsionι N :=
+          (EllipticCurve.pointToTorsion_torsionι _ _ _).symm
+      _ = (X'.curve.baseChange (strPr D X')).pointToTorsion
+            (((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve
+              (strPr D X') (strPt D str (Pi.single 0 1)) +
+              ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve
+                (strPr D X') (strPt D str (Pi.single 1 1))) hkR ≫
+            (X'.curve.baseChange (strPr D X')).torsionι N :=
+          congrArg (· ≫ (X'.curve.baseChange (strPr D X')).torsionι N) heq
+      _ = _ := EllipticCurve.pointToTorsion_torsionι _ _ _
+  · -- the geometric-point check
+    intro ω
+    letI : Algebra ℚ (geomResidue (strCover D X') ω) :=
+      ((Spec.preimage (geomPt (strCover D X') ω ≫ strPr D X' ≫
+        X'.structMap)).hom).toAlgebra
+    have hqk : geomPt (strCover D X') ω ≫ strPr D X' ≫ X'.structMap =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ
+          (geomResidue (strCover D X') ω))) := by
+      rw [show CommRingCat.ofHom (algebraMap ℚ
+          (geomResidue (strCover D X') ω)) =
+        Spec.preimage (geomPt (strCover D X') ω ≫ strPr D X' ≫
+          X'.structMap) from rfl, Spec.map_preimage]
+    -- the pulled points and the fibre additivity
+    have hcomb := strPt_pull_comb D str (geomResidue (strCover D X') ω)
+      (geomPt (strCover D X') ω) hqk v
+    -- transport through pointToTorsion
+    have hL := pointToTorsion_comp (E := X'.curve.baseChange (strPr D X'))
+      (geomPt (strCover D X') ω)
+      (EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str v))
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X'))
+        (geomPt (strCover D X') ω)
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v))) rfl hkL
+      (by
+        show (geomPt (strCover D X') ω ≫ (EllipticCurve.Point.asSection
+          X'.curve (strPr D X') (strPt D str v)).1) ≫
+          (X'.curve.baseChange (strPr D X')).mulByHom N = _
+        rw [Category.assoc, hkL, ← Category.assoc, Category.comp_id])
+    have hR := pointToTorsion_comp (E := X'.curve.baseChange (strPr D X'))
+      (geomPt (strCover D X') ω)
+      (((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X'))
+        (geomPt (strCover D X') ω)
+        (((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1)) +
+          ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve
+            (strPr D X') (strPt D str (Pi.single 1 1)))) rfl hkR
+      (by
+        show (geomPt (strCover D X') ω ≫ (((v 0).val : ℤ) •
+          EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1)) +
+          ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve
+            (strPr D X') (strPt D str (Pi.single 1 1))).1) ≫
+          (X'.curve.baseChange (strPr D X')).mulByHom N = _
+        rw [Category.assoc, hkR, ← Category.assoc, Category.comp_id])
+    rw [← hL, ← hR]
+    -- reduce to the pulled-point equality
+    have hpulleq : EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X'))
+        (geomPt (strCover D X') ω)
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)) =
+        EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X'))
+        (geomPt (strCover D X') ω)
+        (((v 0).val : ℤ) • EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1)) +
+          ((v 1).val : ℤ) • EllipticCurve.Point.asSection X'.curve
+            (strPr D X') (strPt D str (Pi.single 1 1))) := by
+      rw [EllipticCurve.Point.pull_add, EllipticCurve.Point.pull_zsmul,
+        EllipticCurve.Point.pull_zsmul]
+      exact hcomb
+    have hcongr : ∀ (z₁ z₂ : (X'.curve.baseChange (strPr D X')).Point
+        (geomPt (strCover D X') ω)) (h12 : z₁ = z₂)
+        (h1 : z₁.1 ≫ (X'.curve.baseChange (strPr D X')).mulByHom N =
+          geomPt (strCover D X') ω ≫
+            (X'.curve.baseChange (strPr D X')).zero),
+        (X'.curve.baseChange (strPr D X')).pointToTorsion z₁ h1 =
+        (X'.curve.baseChange (strPr D X')).pointToTorsion z₂ (h12 ▸ h1) := by
+      intro z₁ z₂ h12 h1
+      subst h12
+      rfl
+    exact hcongr _ _ hpulleq _
+
 end StructuresToSections
 
 end
