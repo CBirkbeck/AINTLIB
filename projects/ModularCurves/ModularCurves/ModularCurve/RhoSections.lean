@@ -301,6 +301,82 @@ theorem framedCoordMap_glSmul (D : GaloisRepData N) {T : Scheme.{0}}
     m.hom ≫ pullback.fst (vRhoπ D) sT)
     (framedTorsionIsoPinned_glSmul D sT E hinv L h hover γ)
 
+/-- **[T-EQ-3c-L3a]** The `Ell/ℚ` comparison between base changes of `X` along any
+morphism intertwining the base maps (generalizes `EllObj.pullbackAlongMap`, which
+is the case `g₁ = u ≫ g₂` definitionally; this form takes the intertwining as a
+propositional hypothesis, so `γ`-actions on covers apply). -/
+noncomputable def pullbackAlongMapOf (X : EllObj (CommRingCat.of ℚ))
+    {T₁ T₂ : Scheme.{0}} {g₁ : T₁ ⟶ X.base} {g₂ : T₂ ⟶ X.base}
+    (u : T₁ ⟶ T₂) (hu : u ≫ g₂ = g₁) :
+    X.pullbackAlong g₁ ⟶ X.pullbackAlong g₂ where
+  baseHom := u
+  base_w := by
+    show u ≫ g₂ ≫ X.structMap = g₁ ≫ X.structMap
+    rw [← Category.assoc, hu]
+  top := pullback.map X.curve.π g₁ X.curve.π g₂ (𝟙 _) u (𝟙 _)
+    (by rw [Category.comp_id, Category.id_comp])
+    (by rw [Category.comp_id, hu])
+  isPullback := by
+    subst hu
+    have hbig := IsPullback.of_hasPullback X.curve.π (u ≫ g₂)
+    have hfst : pullback.map X.curve.π (u ≫ g₂) X.curve.π g₂ (𝟙 _) u (𝟙 _)
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]) ≫
+          pullback.fst X.curve.π g₂ =
+        pullback.fst X.curve.π (u ≫ g₂) := by
+      rw [pullback.lift_fst, Category.comp_id]
+    rw [← hfst] at hbig
+    refine IsPullback.of_right hbig ?_ (IsPullback.of_hasPullback X.curve.π g₂)
+    show pullback.map X.curve.π (u ≫ g₂) X.curve.π g₂ (𝟙 _) u (𝟙 _)
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]) ≫
+        pullback.snd X.curve.π g₂ =
+      pullback.snd X.curve.π (u ≫ g₂) ≫ u
+    rw [pullback.lift_snd]
+  zero_w := by
+    show pullback.lift (g₁ ≫ X.curve.zero) (𝟙 T₁)
+        (by rw [Category.assoc, X.curve.zero_π, Category.comp_id,
+          Category.id_comp]) ≫
+      pullback.map X.curve.π g₁ X.curve.π g₂ (𝟙 _) u (𝟙 _)
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, hu]) =
+      u ≫ pullback.lift (g₂ ≫ X.curve.zero) (𝟙 T₂)
+        (by rw [Category.assoc, X.curve.zero_π, Category.comp_id,
+          Category.id_comp])
+    apply pullback.hom_ext
+    · simp only [Category.assoc, pullback.lift_fst, Category.comp_id]
+      rw [← Category.assoc, hu]
+    · simp only [Category.assoc, pullback.lift_snd, pullback.lift_snd_assoc,
+        Category.comp_id, Category.id_comp]
+
+@[simp]
+theorem pullbackAlongMapOf_baseHom (X : EllObj (CommRingCat.of ℚ))
+    {T₁ T₂ : Scheme.{0}} {g₁ : T₁ ⟶ X.base} {g₂ : T₂ ⟶ X.base}
+    (u : T₁ ⟶ T₂) (hu : u ≫ g₂ = g₁) :
+    (pullbackAlongMapOf X u hu).baseHom = u := rfl
+
+/-- **[T-EQ-3c-L3b]** The base-change reassociation comparison in `Ell/ℚ`: the
+double base change along `c` then `k` maps to the base change along `c ≫ k`, over
+the identity of the inner base (the canonical comparison of the composite
+projection). -/
+noncomputable def pullbackAlongAssocHom (X : EllObj (CommRingCat.of ℚ))
+    {T' T'' : Scheme.{0}} (k : T' ⟶ X.base) (c : T'' ⟶ T') :
+    (X.pullbackAlong k).pullbackAlong c ⟶ X.pullbackAlong (c ≫ k) :=
+  EllObj.toPullbackAlong
+    ((X.pullbackAlong k).pullbackAlongπ c ≫ X.pullbackAlongπ k)
+
+@[simp]
+theorem pullbackAlongAssocHom_baseHom (X : EllObj (CommRingCat.of ℚ))
+    {T' T'' : Scheme.{0}} (k : T' ⟶ X.base) (c : T'' ⟶ T') :
+    (pullbackAlongAssocHom X k c).baseHom = 𝟙 T'' := rfl
+
+/-- The reassociation comparison recovers the composite projection. -/
+theorem pullbackAlongAssocHom_π (X : EllObj (CommRingCat.of ℚ))
+    {T' T'' : Scheme.{0}} (k : T' ⟶ X.base) (c : T'' ⟶ T') :
+    pullbackAlongAssocHom X k c ≫ X.pullbackAlongπ (c ≫ k) =
+      (X.pullbackAlong k).pullbackAlongπ c ≫ X.pullbackAlongπ k :=
+  EllObj.toPullbackAlong_pullbackAlongπ _
+
 open scoped FintypeCatDiscrete in
 /-- **[T-EQ-3c-i COMPLETE]** The ρ-dictionary from the carve alone: a full-level
 structure and a frame satisfying the single map-level condition
