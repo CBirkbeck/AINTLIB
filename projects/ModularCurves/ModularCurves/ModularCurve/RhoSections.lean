@@ -3939,6 +3939,73 @@ theorem strAct_strPt (D : GaloisRepData N) [Fact (1 < N)]
   refine Eq.trans (Category.assoc _ _ _).symm ?_
   exact congrArg (· ≫ X'.curve.torsionι N) (strAct_strTor D str γ v)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (5a)]** The general tautological pairing: the pairing
+comparison of two tautological points reads as the determinant composite
+raised to the symplectic pairing of the slots. -/
+theorem strCondVW (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (v w : Fin 2 → ZMod N) :
+    pairEZMap D (X'.pullbackAlong (strPr D X')).structMap
+      (X'.pullbackAlong (strPr D X')).curve
+      (EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str v))
+      (EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str w))
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        (𝟙 (strCover D X')) N _).mpr
+        (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _)))
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        (𝟙 (strCover D X')) N _).mpr
+        (asSection_raw_kill (strPr D X') _ (strPt_raw_kill D str _))) =
+    strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D ≫
+      muNRootsPowScheme D
+        (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+          ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) := by
+  refine (pairEZMap_asSection D (strPr D X')
+    (strPt D str v) (strPt D str w)
+    (strPt_raw_kill D str _) (strPt_raw_kill D str _)).trans ?_
+  refine (str.pairing_scheme (strPr D X')
+    (strPt D str v) (strPt D str w)
+    (strPt_raw_kill D str _) (strPt_raw_kill D str _)).trans ?_
+  have hcpl : coordPairLift D X'.structMap str.torsionIso str.over_T
+      (strPr D X') (strPt D str v) (strPt D str w)
+      (strPt_raw_kill D str _) (strPt_raw_kill D str _) =
+      strTaut D X' ≫ pullback.lift (frameSlotEval D v)
+        (frameSlotEval D w)
+        ((frameSlotEval_π D _).trans (frameSlotEval_π D _).symm) := by
+    have hleg : ∀ u : Fin 2 → ZMod N,
+        X'.curve.pointToTorsion (strPt D str u) (strPt_raw_kill D str u) ≫
+          str.torsionIso.hom ≫ pullback.fst (vRhoπ D) X'.structMap =
+        strTaut D X' ≫ frameSlotEval D u := by
+      intro u
+      refine Eq.trans (congrArg (· ≫ str.torsionIso.hom ≫
+        pullback.fst (vRhoπ D) X'.structMap) (strPt_pointToTorsion D str u)) ?_
+      refine Eq.trans (congrArg (· ≫ str.torsionIso.hom ≫
+        pullback.fst (vRhoπ D) X'.structMap) (rfl :
+          strTor D str u = strVPt D X' u ≫ str.torsionIso.inv)) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (strVPt D X' u ≫ ·)
+        (Iso.inv_hom_id_assoc str.torsionIso
+          (pullback.fst (vRhoπ D) X'.structMap))) ?_
+      exact strVPt_fst D X' u
+    apply pullback.hom_ext
+    · refine Eq.trans (pullback.lift_fst _ _ _) ?_
+      refine Eq.trans (hleg v) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      exact congrArg (strTaut D X' ≫ ·) (pullback.lift_fst _ _ _)
+    · refine Eq.trans (pullback.lift_snd _ _ _) ?_
+      refine Eq.trans (hleg w) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      exact congrArg (strTaut D X' ≫ ·) (pullback.lift_snd _ _ _)
+  refine Eq.trans (congrArg (· ≫ vRhoPairingMap D) hcpl) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine congrArg (strTaut D X' ≫ ·) ?_
+  exact habs_of_ring D
+    (fun v' w' => hring_of_finiteEtale D
+      (fun v'' w'' => pairSlot_hFE D v'' w'') v' w') v w
+
 end StructuresToSections
 
 end
