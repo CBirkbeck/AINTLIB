@@ -4152,6 +4152,529 @@ theorem pow_neg_emod_cancel {R : Type} [CommMonoid R] {x : R}
   obtain ⟨k, hk⟩ := hdvdN
   rw [← pow_add, hk, pow_mul, hx, one_pow]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (5c-ii)]** THE FIBRE ADDITIVITY: over a geometric point of the
+cover, the pulled tautological point at any vector is the integer combination
+of the pulled tautological basis. Nondegeneracy of the Weil pairing: the
+difference pairs trivially against the pulled basis (the reads agree by the
+general tautological pairing), hence against every torsion point (closure +
+the second-slot bilinearity registers). -/
+theorem strPt_pull_comb (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (kk : Type) [Field kk] [IsAlgClosed kk] [Algebra ℚ kk]
+    (t : Spec (CommRingCat.of kk) ⟶ strCover D X')
+    (hqk : t ≫ strPr D X' ≫ X'.structMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)))
+    (v : Fin 2 → ZMod N) :
+    EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str v)) =
+    ((v 0).val : ℤ) • EllipticCurve.Point.pull
+      (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1))) +
+    ((v 1).val : ℤ) • EllipticCurve.Point.pull
+      (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1))) := by
+  classical
+  -- raw kills of pulled tautological points
+  have hpull : ∀ u : Fin 2 → ZMod N,
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str u))).1 ≫
+        (X'.curve.baseChange (strPr D X')).mulByHom N =
+        t ≫ (X'.curve.baseChange (strPr D X')).zero := by
+    intro u
+    show (t ≫ (EllipticCurve.Point.asSection X'.curve (strPr D X')
+      (strPt D str u)).1) ≫
+      (X'.curve.baseChange (strPr D X')).mulByHom N = _
+    rw [Category.assoc, asSection_raw_kill (strPr D X') _
+      (strPt_raw_kill D str _), ← Category.assoc, Category.comp_id]
+  have hkill : ∀ u : Fin 2 → ZMod N,
+      ((N : ℤ) • EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str u)) : (X'.curve.baseChange
+            (strPr D X')).Point t) = 0 := fun u =>
+    ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+      t N _).mpr (hpull u)
+  -- the combination and its kill
+  have hcombkill : ∀ a b : ℤ,
+      ((N : ℤ) • (a • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) +
+        b • EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))) :
+        (X'.curve.baseChange (strPr D X')).Point t) = 0 := by
+    intro a b
+    rw [smul_add, smul_comm (N : ℤ) a, smul_comm (N : ℤ) b,
+      hkill (Pi.single 0 1), hkill (Pi.single 1 1), smul_zero, smul_zero,
+      add_zero]
+  -- the base read and the general pairing value
+  have hζπ : (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) ≫
+      muNRootsSchemeπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)) := by
+    rw [Category.assoc]
+    rw [show (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D) ≫
+        muNRootsSchemeπ D = strPr D X' ≫ X'.structMap from by
+      simp only [Category.assoc]
+      rw [show detCompScheme D ≫ muNRootsSchemeπ D = cycloUnitsSchemeπ D from
+        detCompScheme_π D]
+      rw [detFrameScheme_π]
+      exact strTaut_π D X']
+    exact hqk
+  have hζN : muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)))
+      (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^ N = 1 :=
+    muNRootsRead_pow_N D _ _ _
+  have hVW : ∀ v' w' : Fin 2 → ZMod N,
+      ((X'.curve.baseChange (strPr D X')).weilPairingEval
+        (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str v')))
+        (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str w'))) (hpull v') (hpull w')).1 =
+      muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)))
+        (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^
+        (((((v' 0).val : ℤ) * ((w' 1).val : ℤ) -
+          ((v' 1).val : ℤ) * ((w' 0).val : ℤ)) % (N : ℤ)).toNat) := by
+    intro v' w'
+    refine (strVW_pull_read D str kk t hqk v' w' (hpull v') (hpull w')).trans ?_
+    refine Eq.trans (muNRootsRead_congr D rfl
+      (show t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D ≫
+          muNRootsPowScheme D
+            (((((v' 0).val : ℤ) * ((w' 1).val : ℤ) -
+              ((v' 1).val : ℤ) * ((w' 0).val : ℤ)) % (N : ℤ)).toNat)) =
+        (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) ≫
+          muNRootsPowScheme D
+            (((((v' 0).val : ℤ) * ((w' 1).val : ℤ) -
+              ((v' 1).val : ℤ) * ((w' 0).val : ℤ)) % (N : ℤ)).toNat) from by
+        simp only [Category.assoc])
+      (by
+        refine Eq.trans (congrArg (· ≫ muNRootsSchemeπ D)
+          (show t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D ≫
+              muNRootsPowScheme D
+                (((((v' 0).val : ℤ) * ((w' 1).val : ℤ) -
+                  ((v' 1).val : ℤ) * ((w' 0).val : ℤ)) % (N : ℤ)).toNat)) =
+            (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) ≫
+              muNRootsPowScheme D
+                (((((v' 0).val : ℤ) * ((w' 1).val : ℤ) -
+                  ((v' 1).val : ℤ) * ((w' 0).val : ℤ)) % (N : ℤ)).toNat)
+            from by simp only [Category.assoc])) ?_
+        rw [Category.assoc, muNRootsPowScheme_π]
+        exact hζπ)) ?_
+    exact muNRootsRead_pow D _ _ hζπ _
+  -- exponent computations at the basis
+  have h1N : (1 : ℕ) < N := Fact.out
+  have hs11 : (((((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ) *
+      (((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ) -
+      (((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ) *
+      (((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat = 1 := by
+    rw [show (Pi.single 0 1 : Fin 2 → ZMod N) 0 = 1 from Pi.single_eq_same _ _,
+      show (Pi.single 0 1 : Fin 2 → ZMod N) 1 = 0 from
+        Pi.single_eq_of_ne (by decide) _,
+      show (Pi.single 1 1 : Fin 2 → ZMod N) 0 = 0 from
+        Pi.single_eq_of_ne (by decide) _,
+      show (Pi.single 1 1 : Fin 2 → ZMod N) 1 = 1 from Pi.single_eq_same _ _,
+      ZMod.val_one, ZMod.val_zero]
+    norm_num
+    rw [Int.emod_eq_of_lt (by norm_num) (by exact_mod_cast h1N)]
+    rfl
+  have hsv1 : ∀ u : Fin 2 → ZMod N,
+      ((((u 0).val : ℤ) * (((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ) -
+        ((u 1).val : ℤ) * (((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ)) %
+        (N : ℤ)).toNat =
+      (((-(((u 1).val : ℤ)))) % (N : ℤ)).toNat := by
+    intro u
+    rw [show (Pi.single 0 1 : Fin 2 → ZMod N) 0 = 1 from Pi.single_eq_same _ _,
+      show (Pi.single 0 1 : Fin 2 → ZMod N) 1 = 0 from
+        Pi.single_eq_of_ne (by decide) _, ZMod.val_one, ZMod.val_zero]
+    norm_num
+  have hsv2 : ∀ u : Fin 2 → ZMod N,
+      ((((u 0).val : ℤ) * (((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ) -
+        ((u 1).val : ℤ) * (((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) %
+        (N : ℤ)).toNat = ((((u 0).val : ℤ)) % (N : ℤ)).toNat := by
+    intro u
+    rw [show (Pi.single 1 1 : Fin 2 → ZMod N) 0 = 0 from
+        Pi.single_eq_of_ne (by decide) _,
+      show (Pi.single 1 1 : Fin 2 → ZMod N) 1 = 1 from Pi.single_eq_same _ _,
+      ZMod.val_one, ZMod.val_zero]
+    norm_num
+  -- the difference and its kill
+  have hδkill : ((N : ℤ) • (EllipticCurve.Point.pull
+      (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str v)) -
+      (((v 0).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) +
+      ((v 1).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))))) :
+      (X'.curve.baseChange (strPr D X')).Point t) = 0 := by
+    rw [smul_sub, hkill v, hcombkill, sub_zero]
+  have hδraw := ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+    t N _).mp hδkill
+  -- the difference pairs trivially against each basis point
+  have hbasis : ∀ (w : Fin 2 → ZMod N),
+      (((-(((v 0).val : ℤ))) * ((w 1).val : ℤ) -
+        (-(((v 1).val : ℤ))) * ((w 0).val : ℤ)) % (N : ℤ)).toNat =
+        ((((-(((v 0).val : ℤ))) * ((w 1).val : ℤ) -
+          (-(((v 1).val : ℤ))) * ((w 0).val : ℤ))) % (N : ℤ)).toNat →
+      ∀ (hbj : (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str w))).1 ≫
+        (X'.curve.baseChange (strPr D X')).mulByHom N =
+        t ≫ (X'.curve.baseChange (strPr D X')).zero)
+      (hb2 : (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str w))).1 =
+        ((((w 0).val : ℤ)) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        (((w 1).val : ℤ)) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))).1)
+      (hcancel : muNRootsRead D (Spec.map (CommRingCat.ofHom
+          (algebraMap ℚ kk)))
+          (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^
+          (((((v 0).val : ℤ) * ((w 1).val : ℤ) -
+            ((v 1).val : ℤ) * ((w 0).val : ℤ)) % (N : ℤ)).toNat) *
+        muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)))
+          (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^
+          (((((-(((v 0).val : ℤ))) * ((w 1).val : ℤ) -
+            (-(((v 1).val : ℤ))) * ((w 0).val : ℤ))) % (N : ℤ)).toNat) = 1),
+      ((X'.curve.baseChange (strPr D X')).weilPairingEval
+        (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str v)) -
+        (((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))))
+        (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str w))) hδraw hbj).1 = 1 := by
+    intro w _ hbj hb2 hcancel
+    -- kills
+    have hknegcomb : ((N : ℤ) •
+        (-(((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+          ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1))))) :
+        (X'.curve.baseChange (strPr D X')).Point t) = 0 := by
+      rw [smul_neg, hcombkill, neg_zero]
+    have hnegraw := ((X'.curve.baseChange
+      (strPr D X')).smul_eq_zero_iff_comp_mulByHom t N _).mp hknegcomb
+    have hsumkill : ((N : ℤ) • (EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)) +
+        -(((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+          ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1))))) :
+        (X'.curve.baseChange (strPr D X')).Point t) = 0 := by
+      rw [smul_add, hkill v, hknegcomb, add_zero]
+    have hsumraw := ((X'.curve.baseChange
+      (strPr D X')).smul_eq_zero_iff_comp_mulByHom t N _).mp hsumkill
+    -- δ = y₁ + (-comb) on values, then expand the first slot
+    have hδeval := weilPairingEval_congr_raw
+      (E := X'.curve.baseChange (strPr D X')) (rfl :
+        (t : Spec (CommRingCat.of kk) ⟶ strCover D X') = t)
+      (congrArg Subtype.val (sub_eq_add_neg _ _)) rfl
+      hδraw hbj hsumraw hbj
+    refine hδeval.trans ?_
+    have hadd := (X'.curve.baseChange (strPr D X')).weilPairingEval_add_left
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)))
+      (-(((v 0).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))))
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str w)))
+      (hpull v) hnegraw hbj hsumraw
+    refine hadd.trans ?_
+    -- the neg-comb evaluated against the basis point via the register
+    have hcombkillraw : ∀ cd : ℤ × ℤ,
+        (cd.1 • EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        cd.2 • EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))).1 ≫
+          (X'.curve.baseChange (strPr D X')).mulByHom N =
+        t ≫ (X'.curve.baseChange (strPr D X')).zero := fun cd =>
+      ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        t N _).mp (hcombkill cd.1 cd.2)
+    have hneg := weilPairingEval_congr_raw
+      (E := X'.curve.baseChange (strPr D X')) (rfl :
+        (t : Spec (CommRingCat.of kk) ⟶ strCover D X') = t)
+      (congrArg Subtype.val (by
+        rw [neg_add, ← neg_smul, ← neg_smul] :
+        (-(((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+          ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))) :
+          (X'.curve.baseChange (strPr D X')).Point t) =
+        (-(((v 0).val : ℤ))) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        (-(((v 1).val : ℤ))) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))))
+      hb2 hnegraw hbj
+      (hcombkillraw ((-(((v 0).val : ℤ))), (-(((v 1).val : ℤ)))))
+      (hcombkillraw ((((w 0).val : ℤ)), (((w 1).val : ℤ))))
+    have hsymp := (X'.curve.baseChange (strPr D X')).weilPairingEval_symplectic
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))))
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))))
+      (-(((v 0).val : ℤ))) (-(((v 1).val : ℤ)))
+      (((w 0).val : ℤ)) (((w 1).val : ℤ))
+      (hpull (Pi.single 0 1)) (hpull (Pi.single 1 1))
+      (hcombkillraw ((-(((v 0).val : ℤ))), (-(((v 1).val : ℤ)))))
+      (hcombkillraw ((((w 0).val : ℤ)), (((w 1).val : ℤ))))
+    have hPQ := hVW (Pi.single 0 1) (Pi.single 1 1)
+    rw [hs11, pow_one] at hPQ
+    refine Eq.trans (congrArg₂ (· * ·) (hVW v w)
+      (hneg.trans (hsymp.trans (congrArg
+        (· ^ ((((-(((v 0).val : ℤ))) * ((w 1).val : ℤ) -
+          (-(((v 1).val : ℤ))) * ((w 0).val : ℤ))) % (N : ℤ)).toNat)
+        hPQ)))) ?_
+    exact hcancel
+  -- basis-as-combination values
+  have hb2P : (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)))).1 =
+      (((((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ)) •
+        EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) +
+      ((((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ)) •
+        EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))).1 :=
+    congrArg Subtype.val (by
+      rw [show (Pi.single 0 1 : Fin 2 → ZMod N) 0 = 1 from
+          Pi.single_eq_same _ _,
+        show (Pi.single 0 1 : Fin 2 → ZMod N) 1 = 0 from
+          Pi.single_eq_of_ne (by decide) _, ZMod.val_one, ZMod.val_zero]
+      norm_num)
+  have hb2Q : (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1)))).1 =
+      (((((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) •
+        EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) +
+      ((((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ)) •
+        EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))).1 :=
+    congrArg Subtype.val (by
+      rw [show (Pi.single 1 1 : Fin 2 → ZMod N) 0 = 0 from
+          Pi.single_eq_of_ne (by decide) _,
+        show (Pi.single 1 1 : Fin 2 → ZMod N) 1 = 1 from
+          Pi.single_eq_same _ _, ZMod.val_one, ZMod.val_zero]
+      norm_num)
+  -- exponent cancellations at the two basis points
+  have hval : ∀ a : ℕ, a < N → ((((a : ℤ)) % (N : ℤ))).toNat = a := by
+    intro a ha
+    rw [Int.emod_eq_of_lt (Int.natCast_nonneg _) (Nat.cast_lt.mpr ha),
+      Int.toNat_natCast]
+  have hcancel0 : muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk))) (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^ (((((v 0).val : ℤ) * (((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ) - ((v 1).val : ℤ) * (((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat) * muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk))) (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^ ((((-((v 0).val : ℤ)) * (((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ) - (-((v 1).val : ℤ)) * (((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat) = 1 := by
+    rw [hsv1 v]
+    rw [show ((((-((v 0).val : ℤ)) * (((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ) - (-((v 1).val : ℤ)) * (((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat) = (((((v 1).val : ℤ)) % (N : ℤ)).toNat) from by
+      rw [show (Pi.single 0 1 : Fin 2 → ZMod N) 0 = 1 from
+          Pi.single_eq_same _ _,
+        show (Pi.single 0 1 : Fin 2 → ZMod N) 1 = 0 from
+          Pi.single_eq_of_ne (by decide) _,
+        ZMod.val_one, ZMod.val_zero]
+      norm_num]
+    rw [hval ((v 1).val) (ZMod.val_lt _)]
+    exact pow_neg_emod_cancel hζN ((v 1).val)
+  have hcancel1 : muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk))) (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^ (((((v 0).val : ℤ) * (((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ) - ((v 1).val : ℤ) * (((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat) * muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ kk))) (t ≫ (strTaut D X' ≫ detFrameScheme D ≫ detCompScheme D)) hζπ ^ ((((-((v 0).val : ℤ)) * (((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ) - (-((v 1).val : ℤ)) * (((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat) = 1 := by
+    rw [hsv2 v]
+    rw [show ((((-((v 0).val : ℤ)) * (((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ) - (-((v 1).val : ℤ)) * (((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) % (N : ℤ)).toNat) = (((-((v 0).val : ℤ)) % (N : ℤ)).toNat) from by
+      rw [show (Pi.single 1 1 : Fin 2 → ZMod N) 0 = 0 from
+          Pi.single_eq_of_ne (by decide) _,
+        show (Pi.single 1 1 : Fin 2 → ZMod N) 1 = 1 from
+          Pi.single_eq_same _ _,
+        ZMod.val_one, ZMod.val_zero]
+      norm_num]
+    rw [hval ((v 0).val) (ZMod.val_lt _), mul_comm]
+    exact pow_neg_emod_cancel hζN ((v 0).val)
+  have hb0 := hbasis (Pi.single 0 1) rfl (hpull _) hb2P hcancel0
+  have hb1 := hbasis (Pi.single 1 1) rfl (hpull _) hb2Q hcancel1
+  -- every torsion point pairs trivially with the difference
+  have hker : ∀ (y : (X'.curve.baseChange (strPr D X')).Point t)
+      (hy : y.1 ≫ (X'.curve.baseChange (strPr D X')).mulByHom N =
+        t ≫ (X'.curve.baseChange (strPr D X')).zero),
+      ((X'.curve.baseChange (strPr D X')).weilPairingEval
+        (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str v)) -
+        (((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1))))) y hδraw hy).1 = 1 := by
+    intro y hy
+    have hyk : ((N : ℤ) • y :
+        (X'.curve.baseChange (strPr D X')).Point t) = 0 :=
+      ((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        t N y).mpr hy
+    obtain ⟨c, d, hcd⟩ := AddSubgroup.mem_closure_pair.mp
+      ((strLevel_isNaiveFullLevel D str).2 kk t y hyk)
+    -- kills of the scalar pieces
+    have hkc : ((N : ℤ) • (c • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1)))) :
+        (X'.curve.baseChange (strPr D X')).Point t) = 0 := by
+      rw [smul_comm, hkill (Pi.single 0 1), smul_zero]
+    have hkd : ((N : ℤ) • (d • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))) :
+        (X'.curve.baseChange (strPr D X')).Point t) = 0 := by
+      rw [smul_comm, hkill (Pi.single 1 1), smul_zero]
+    have hkcraw := ((X'.curve.baseChange
+      (strPr D X')).smul_eq_zero_iff_comp_mulByHom t N _).mp hkc
+    have hkdraw := ((X'.curve.baseChange
+      (strPr D X')).smul_eq_zero_iff_comp_mulByHom t N _).mp hkd
+    -- substitute the combination for y
+    have hsubst := weilPairingEval_congr_raw
+      (E := X'.curve.baseChange (strPr D X')) (rfl :
+        (t : Spec (CommRingCat.of kk) ⟶ strCover D X') = t) rfl
+      (congrArg Subtype.val hcd.symm) hδraw hy hδraw
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        t N _).mp (by
+          rw [smul_add, hkc, hkd, add_zero]))
+    refine hsubst.trans ?_
+    -- expand the second slot
+    have haddr := (X'.curve.baseChange (strPr D X')).weilPairingEval_add_right
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)) -
+        (((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))))
+      (c • EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))))
+      (d • EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))))
+      hδraw hkcraw hkdraw
+      (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
+        t N _).mp (by rw [smul_add, hkc, hkd, add_zero]))
+    refine haddr.trans ?_
+    -- collapse the scalars
+    have hzc := (X'.curve.baseChange (strPr D X')).weilPairingEval_zsmul_right
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)) -
+        (((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))))
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1)))) c hδraw (hpull _) hkcraw
+    have hzd := (X'.curve.baseChange (strPr D X')).weilPairingEval_zsmul_right
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str v)) -
+        (((v 0).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 0 1))) +
+        ((v 1).val : ℤ) • EllipticCurve.Point.pull
+          (X'.curve.baseChange (strPr D X')) t
+          (EllipticCurve.Point.asSection X'.curve (strPr D X')
+            (strPt D str (Pi.single 1 1)))))
+      (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))) d hδraw (hpull _) hkdraw
+    refine Eq.trans (congrArg₂ (· * ·) hzc hzd) ?_
+    rw [hb0, hb1, one_pow, one_pow, mul_one]
+  -- nondegeneracy
+  have hzp := (X'.curve.baseChange (strPr D X')).weilPairingEval_nondegenerate
+    kk t
+    (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str v)) -
+      (((v 0).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) +
+      ((v 1).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1))))) hδraw hker
+  have hzero : (EllipticCurve.Point.pull (X'.curve.baseChange (strPr D X')) t
+      (EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str v)) -
+      (((v 0).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 0 1))) +
+      ((v 1).val : ℤ) • EllipticCurve.Point.pull
+        (X'.curve.baseChange (strPr D X')) t
+        (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str (Pi.single 1 1)))) :
+      (X'.curve.baseChange (strPr D X')).Point t) = 0 := by
+    refine hzp.trans (Subtype.ext ?_)
+    exact ((X'.curve.baseChange (strPr D X')).point_zero_val t).symm
+  exact sub_eq_zero.mp hzero
+
 end StructuresToSections
 
 end
