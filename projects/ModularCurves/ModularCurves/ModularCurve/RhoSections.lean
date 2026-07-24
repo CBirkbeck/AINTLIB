@@ -784,6 +784,23 @@ theorem detFrameScheme_surjective (D : GaloisRepData N) :
     (n := Fin 2) (R := ZMod N) u
   exact ⟨A, hA⟩
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c i]** A set-injective correspondence morphism has a monic
+algebra-side image (the mono-chain through the faithful forgetful functors and
+the equivalence). -/
+theorem corrInverse_mono_of_injective
+    {X Y : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)}
+    (m : X ⟶ Y) (hm : Function.Injective m.hom.hom) :
+    Mono ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map m) := by
+  haveI h3 : Mono m := by
+    constructor
+    intro W g₁ g₂ hg
+    ext x : 3
+    exact hm (congrArg (fun q => q.hom.hom x) hg)
+  exact ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mono_map_iff_mono
+    m).mpr h3
+
 end CorrSurjective
 
 section SectionsToStructures
