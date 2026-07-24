@@ -26497,7 +26497,7 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 Revision note: Ψ (the base-changed detFrame≫detComp) is NOT surjective onto the full roots scheme for composite N (det-image = units ⊊ ℤ/N). The correct assembly: factor σ_p through cycloUnitsScheme via L3c; then T4 ≅ pullback (T''-base-change of detFrameScheme) (σ'_p) with detFrameScheme SURJECTIVE (det : GL₂(ℤ/N) ↠ (ℤ/N)ˣ via Matrix.GeneralLinearGroup.det_surjective + corrSpecMap_surjective at detFrameMor) ⟹ Surjective (T4 → T'') by base-change stability ×2.
 
 ### [T-EQ-3d-A] Tautological level from a structure ✕ the tautological frame
-- **Status**: open
+- **Status**: done (2026-07-24: A1 strCover/strPr/strTaut/strVPt/strTor/strPt+kills+roundtrip; A2 full_of_weilPairing_order + pUnit_read_pow_ne_one + detComp_root_pow_sub_one_isUnit + detComp_point_read_pow_ne_one + strLevel_isNaiveFullLevel; A3 pairSlot_basis_det + asSection_raw_kill + pairEZMap_asSection + strCond; B strValue + strZ — ALL GREEN, in RhoSections)
 - **Parent**: T-EQ-3 (3d, REVISED-SIMPLE route)
 - **Statement**: Over `T3 := pullback sT′ (wFramesπ D)` with `pr1/taut` the legs and `str : RhoLevelStructure D sT′ E′`: (A1) the two torsion-points `tautPt i : E′.Point pr1` — the standard `constVec`-basis through `frameEvalSlice(taut)` and `str.torsionIso.inv` — with `(N:ℤ)•tautPt i = 0`; (A2) the induced `FullLevelPt N` on the pulled curve `E3` (IsNaiveFullLevel: geometric closure via the point-bijections of the isos + free_on_points-enumeration); (A3) `hcond3 : pairEZMap D sT3 E3 L3… = frameDetMap D taut` — chain pairEZMap = torsionPairEval = coordPairLift ≫ vRhoPairingMap [str.pairing_scheme] = frame-slot-pair ≫ vRhoPairingMap = frameDetMap taut.
 
