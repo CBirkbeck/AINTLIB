@@ -154,6 +154,153 @@ theorem fullLevelHom_mapAlong {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
   refine Eq.trans ?_ (pointToTorsion_mapPoint g _ _).symm
   exact (pointToTorsion_comp g.baseHom _ _ hval _ _).symm
 
+/-- **[T-EQ-3c-L2f]** Functoriality of the constant-scheme comparison. -/
+@[reassoc]
+theorem constSchemeMapAlong_comp {T₁ T₂ T₃ : Scheme.{0}} (k₁ : T₁ ⟶ T₂)
+    (k₂ : T₂ ⟶ T₃) (A : Type) [Finite A] :
+    constSchemeMapAlong k₁ A ≫ constSchemeMapAlong k₂ A =
+      constSchemeMapAlong (k₁ ≫ k₂) A := by
+  refine Sigma.hom_ext _ _ fun a => ?_
+  rw [← Category.assoc, ι_constSchemeMapAlong, Category.assoc,
+    ι_constSchemeMapAlong, ι_constSchemeMapAlong, ← Category.assoc]
+
+/-- **[T-EQ-3c-L2]** The coordinate map of a pinned framed trivialization: the
+`V_ρ`-component of the pinned iso. All the `3c` invariance and descent arguments
+run through this composite (the `snd`-leg is just `torsionπ`). -/
+noncomputable def framedCoordMap (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT) :
+    E.torsion N ⟶ vRho D :=
+  (framedTorsionIsoPinned D sT E hinv L h hover).hom ≫ pullback.fst (vRhoπ D) sT
+
+/-- **[T-EQ-3c-L2 mid]** The constant-side chain of the pinned iso is natural in
+the base. -/
+theorem pinnedMidChain_mapAlong {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B) :
+    constSchemeMapAlong g.baseHom (Fin 2 → ZMod N) ≫
+      ((isPullback_constSchemeMapAlong B.structMap
+          (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+        pullback.map B.structMap
+          (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) B.structMap
+          (constVecSchemeπ N) (𝟙 B.base) (constVecSchemeIso N).hom
+          (𝟙 (Spec (.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+        pullback.map B.structMap (constVecSchemeπ N) B.structMap
+          (constVecSchemeπ N) (𝟙 B.base) (corrSchemeIso N).hom
+          (𝟙 (Spec (.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) =
+      ((isPullback_constSchemeMapAlong A.structMap
+          (Fin 2 → ZMod N)).flip.isoPullback.hom ≫
+        pullback.map A.structMap
+          (constSchemeπ (Spec (.of ℚ)) (Fin 2 → ZMod N)) A.structMap
+          (constVecSchemeπ N) (𝟙 A.base) (constVecSchemeIso N).hom
+          (𝟙 (Spec (.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]; exact (constVecSchemeIso_π N).symm) ≫
+        pullback.map A.structMap (constVecSchemeπ N) A.structMap
+          (constVecSchemeπ N) (𝟙 A.base) (corrSchemeIso N).hom
+          (𝟙 (Spec (.of ℚ)))
+          (by rw [Category.comp_id, Category.id_comp])
+          (by rw [Category.comp_id]; exact (corrSchemeIso_π N).symm)) ≫
+      pullback.map A.structMap (constVecSchemeπ N) B.structMap
+        (constVecSchemeπ N) g.baseHom (𝟙 _) (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id]; exact g.base_w.symm)
+        (by rw [Category.comp_id, Category.id_comp]) := by
+  apply pullback.hom_ext
+  · simp only [Category.assoc, pullback.lift_fst, pullback.lift_fst_assoc,
+      Category.comp_id, IsPullback.isoPullback_hom_fst,
+      IsPullback.isoPullback_hom_fst_assoc, constSchemeMapAlong_π]
+  · simp only [Category.assoc, pullback.lift_snd, pullback.lift_snd_assoc,
+      Category.comp_id, IsPullback.isoPullback_hom_snd_assoc]
+    rw [constSchemeMapAlong_comp_assoc, g.base_w]
+
+/-- **[T-EQ-3c-L2 slice]** The frame-evaluation slice is natural in the base. -/
+theorem frameEvalSlice_mapAlong (D : GaloisRepData N)
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (hB : B.base ⟶ wFrames D) (hoverB : hB ≫ wFramesπ D = B.structMap) :
+    pullback.map A.structMap (constVecSchemeπ N) B.structMap
+        (constVecSchemeπ N) g.baseHom (𝟙 _) (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id]; exact g.base_w.symm)
+        (by rw [Category.comp_id, Category.id_comp]) ≫
+      frameEvalSlice D B.structMap hB hoverB =
+    frameEvalSlice D A.structMap (g.baseHom ≫ hB)
+        (by rw [Category.assoc, hoverB, g.base_w]) ≫
+      pullback.map (vRhoπ D) A.structMap (vRhoπ D) B.structMap
+        (𝟙 (vRho D)) g.baseHom (𝟙 (Spec (.of ℚ)))
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id]; exact g.base_w.symm) := by
+  have hinner : pullback.map A.structMap (constVecSchemeπ N) B.structMap
+      (constVecSchemeπ N) g.baseHom (𝟙 _) (𝟙 (Spec (.of ℚ)))
+      (by rw [Category.comp_id]; exact g.base_w.symm)
+      (by rw [Category.comp_id, Category.id_comp]) ≫
+      pullback.lift (pullback.snd B.structMap (constVecSchemeπ N))
+        (pullback.fst B.structMap (constVecSchemeπ N) ≫ hB)
+        (by rw [Category.assoc, hoverB, ← pullback.condition]) =
+      pullback.lift (pullback.snd A.structMap (constVecSchemeπ N))
+        (pullback.fst A.structMap (constVecSchemeπ N) ≫ g.baseHom ≫ hB)
+        (by
+          simp only [Category.assoc]
+          rw [hoverB, show g.baseHom ≫ B.structMap = A.structMap from g.base_w,
+            pullback.condition]) := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd,
+        Category.comp_id]
+    · simp only [Category.assoc, pullback.lift_snd, pullback.lift_fst_assoc]
+  apply pullback.hom_ext
+  · simp only [Category.assoc, frameEvalSlice_fst, pullback.lift_fst,
+      Category.comp_id]
+    rw [← Category.assoc]
+    exact congrArg (· ≫ frameEval D) hinner
+  · simp only [Category.assoc, frameEvalSlice_snd, frameEvalSlice_snd_assoc,
+      pullback.lift_fst, pullback.lift_snd]
+
+/-- **[T-EQ-3c-L2]** Base-change naturality of the coordinate map: the torsion
+comparison followed by the coordinate map upstairs is the coordinate map of the
+pulled data. -/
+theorem framedCoordMap_mapAlong (D : GaloisRepData N)
+    {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (hinvA : NIsInvertible A.base N) (hinvB : NIsInvertible B.base N)
+    (L : B.curve.FullLevelPt N) (L' : A.curve.FullLevelPt N)
+    (hP : L'.1.1 = EllHom.pullSection (CommRingCat.of ℚ) g L.1.1)
+    (hQ : L'.1.2 = EllHom.pullSection (CommRingCat.of ℚ) g L.1.2)
+    (hB : B.base ⟶ wFrames D) (hoverB : hB ≫ wFramesπ D = B.structMap) :
+    torsionMapOfEllHom g N ≫
+        framedCoordMap D B.structMap B.curve hinvB L hB hoverB =
+      framedCoordMap D A.structMap A.curve hinvA L' (g.baseHom ≫ hB)
+        (by rw [Category.assoc, hoverB, g.base_w]) := by
+  rw [← cancel_epi (A.curve.fullLevelIso hinvA L').hom]
+  rw [framedCoordMap, framedCoordMap, framedTorsionIsoPinned,
+    framedTorsionIsoPinned]
+  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+  rw [Iso.hom_inv_id_assoc]
+  rw [← Category.assoc (A.curve.fullLevelIso hinvA L').hom
+    (torsionMapOfEllHom g N)]
+  rw [show (A.curve.fullLevelIso hinvA L').hom ≫ torsionMapOfEllHom g N =
+    constSchemeMapAlong g.baseHom (Fin 2 → ZMod N) ≫
+      (B.curve.fullLevelIso hinvB L).hom from
+    (fullLevelHom_mapAlong g L L' hP hQ).symm]
+  simp only [Category.assoc]
+  rw [Iso.hom_inv_id_assoc]
+  rw [reassoc_of% (pinnedMidChain_mapAlong g)]
+  rw [reassoc_of% (frameEvalSlice_mapAlong D g hB hoverB)]
+  simp only [pullback.lift_fst, Category.comp_id]
+
+/-- **[T-EQ-3c-L2]** `γ`-invariance of the coordinate map (the `fst`-leg shadow of
+`framedTorsionIsoPinned_glSmul`). -/
+theorem framedCoordMap_glSmul (D : GaloisRepData N) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    framedCoordMap D sT E hinv (E.glSmul γ L) (h ≫ wFramesRightMul D γ)
+        (by rw [Category.assoc, wFramesRightMul_π, hover]) =
+      framedCoordMap D sT E hinv L h hover :=
+  congrArg (fun (m : E.torsion N ≅ pullback (vRhoπ D) sT) =>
+    m.hom ≫ pullback.fst (vRhoπ D) sT)
+    (framedTorsionIsoPinned_glSmul D sT E hinv L h hover γ)
+
 open scoped FintypeCatDiscrete in
 /-- **[T-EQ-3c-i COMPLETE]** The ρ-dictionary from the carve alone: a full-level
 structure and a frame satisfying the single map-level condition
