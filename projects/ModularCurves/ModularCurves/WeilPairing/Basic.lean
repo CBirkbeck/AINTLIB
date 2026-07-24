@@ -71,6 +71,29 @@ theorem weilPairingEval_add_left {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T �
     (E.weilPairingEval (x + x') y hxx' hy : Γ(T, ⊤)) =
       E.weilPairingEval x y hx hy * E.weilPairingEval x' y hx' hy := by sorry
 
+/-- **(T-C2-R = KM 2.8.2, bilinearity in the second slot)** The mirror of
+`weilPairingEval_add_left`: `e_N(x, y + y') = e_N(x, y) · e_N(x, y')` on
+`T`-points. Same source and status as the left law — the DS4 bilinearity
+covers both slots (KM 2.8.2; Silverman III.8.1(a)). -/
+theorem weilPairingEval_add_right {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
+    (x y y' : E.Point g) (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero) (hy' : y'.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hyy' : (y + y').1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x (y + y') hx hyy' : Γ(T, ⊤)) =
+      E.weilPairingEval x y hx hy * E.weilPairingEval x y' hx hy' := by sorry
+
+/-- **(T-C2-R′ = KM 2.8.2, integer scalars in the second slot)** The power law
+`e_N(x, a • y) = e_N(x, y)^(a mod N)` (exponent taken as the canonical
+non-negative representative), the iterated form of the right bilinearity.
+Source: KM 2.8.2; Silverman III.8.1(a). -/
+theorem weilPairingEval_zsmul_right {N : ℕ} [NeZero N] {T : Scheme.{u}}
+    {g : T ⟶ S} (x y : E.Point g) (a : ℤ)
+    (hx : x.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = g ≫ E.zero)
+    (hay : (a • y).1 ≫ E.mulByHom N = g ≫ E.zero) :
+    (E.weilPairingEval x (a • y) hx hay : Γ(T, ⊤)) =
+      (E.weilPairingEval x y hx hy : Γ(T, ⊤)) ^ ((a % (N : ℤ)).toNat) := by sorry
+
 /-- **(T-C2′ = KM 2.8, alternating)** `e_N(x, x) = 1`.
 Source: KM 2.8; Silverman III.8.1(b). -/
 theorem weilPairingEval_self {N : ℕ} [NeZero N] {T : Scheme.{u}} {g : T ⟶ S}
