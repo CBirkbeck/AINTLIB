@@ -918,6 +918,194 @@ theorem secHhom
   refine Eq.trans (Category.assoc _ _ _) ?_
   exact congrArg (g₂ ≫ ·) hq
 
+/-- **[T-EQ-3c main]** The `V_ρ`-side cover is the base change of the quotient
+projection along the `V_ρ`-side section composite. -/
+theorem secVRhoPB :
+    IsPullback
+      (pullback.snd (vRhoπ D)
+        ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap ≫
+        secLift D d s)
+      (vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s))
+      (d.σZ.relQuotientπ d.f d.over_base)
+      (pullback.snd (vRhoπ D) (X.pullbackAlong k).structMap ≫ s) :=
+  (isPullback_vRhoCoverPrj D (X.pullbackAlong k)
+    (secCover D d s)).flip.paste_horiz
+    (IsPullback.of_hasPullback (d.σZ.relQuotientπ d.f d.over_base) s)
+
+/-- The `V_ρ`-side `γ`-translation is conjugate, under the pasting
+identification, to the pulled quotient action. -/
+theorem secVSmul_u (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    secVSmul D d k s γ ≫ (secVRhoPB D d k s).isoPullback.hom =
+      (secVRhoPB D d k s).isoPullback.hom ≫
+        d.σZ.pullbackRelQSMul d.f d.over_base
+          (pullback.snd (vRhoπ D) (X.pullbackAlong k).structMap ≫ s) γ := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (secVSmul D d k s γ ≫ ·)
+      (secVRhoPB D d k s).isoPullback_hom_fst) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ secLift D d s)
+      (pullback.lift_snd _ _ _)) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg
+      (pullback.snd (vRhoπ D) _ ≫ ·) (secSmul_secLift D d s γ)) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg
+      ((secVRhoPB D d k s).isoPullback.hom ≫ ·)
+      (d.σZ.pullbackRelQSMul_fst d.f d.over_base
+        (pullback.snd (vRhoπ D) (X.pullbackAlong k).structMap ≫ s) γ)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ d.σZ.hom γ)
+      (secVRhoPB D d k s).isoPullback_hom_fst) ?_
+    exact Category.assoc _ _ _
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (secVSmul D d k s γ ≫ ·)
+      (secVRhoPB D d k s).isoPullback_hom_snd) ?_
+    refine Eq.trans (secVSmul_prj D d k s γ) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg
+      ((secVRhoPB D d k s).isoPullback.hom ≫ ·)
+      (d.σZ.pullbackRelQSMul_snd d.f d.over_base
+        (pullback.snd (vRhoπ D) (X.pullbackAlong k).structMap ≫ s) γ)) ?_
+    exact (secVRhoPB D d k s).isoPullback_hom_snd
+
+/-- **[T-EQ-3c main]** `γ`-invariance of the inverse-leg composite. -/
+theorem secFinv_smul
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    secVSmul D d k s γ ≫ (secStruct D d k s hs hinv).torsionIso.inv ≫
+        torsionMapOfEllHom
+          ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N =
+      (secStruct D d k s hs hinv).torsionIso.inv ≫
+        torsionMapOfEllHom
+          ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N := by
+  have hswap : secVSmul D d k s γ ≫
+      (secStruct D d k s hs hinv).torsionIso.inv =
+      (secStruct D d k s hs hinv).torsionIso.inv ≫
+        torsionMapOfEllHom (secGSmul D d k s γ) N := by
+    rw [Iso.comp_inv_eq, Category.assoc, secTorsion_smul_conj,
+      Iso.inv_hom_id_assoc]
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg
+    (· ≫ torsionMapOfEllHom
+      ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N) hswap) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact congrArg ((secStruct D d k s hs hinv).torsionIso.inv ≫ ·)
+    (secTorsionSmul_cover D d k s γ)
+
+/-- **[T-EQ-3c main]** The inverse-leg composite descends through the
+`V_ρ`-side cover. -/
+theorem secFinv_factors
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N) :
+    ∃ q : pullback (vRhoπ D) (X.pullbackAlong k).structMap ⟶
+        (X.pullbackAlong k).curve.torsion N,
+      vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) ≫ q =
+        (secStruct D d k s hs hinv).torsionIso.inv ≫
+          torsionMapOfEllHom
+            ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N := by
+  have hswap : ∀ γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N),
+      d.σZ.pullbackRelQSMul d.f d.over_base
+          (pullback.snd (vRhoπ D) (X.pullbackAlong k).structMap ≫ s) γ ≫
+        (secVRhoPB D d k s).isoPullback.inv =
+      (secVRhoPB D d k s).isoPullback.inv ≫ secVSmul D d k s γ := by
+    intro γ
+    rw [Iso.comp_inv_eq, Category.assoc, secVSmul_u, Iso.inv_hom_id_assoc]
+  obtain ⟨q, hq⟩ := d.σZ.exists_relQuotientπ_lift_baseChange d.f d.over_base
+    (d.free_on_points (sympFramedAut_freeAction D))
+    (pullback.snd (vRhoπ D) (X.pullbackAlong k).structMap ≫ s)
+    ((secVRhoPB D d k s).isoPullback.inv ≫
+      (secStruct D d k s hs hinv).torsionIso.inv ≫
+      torsionMapOfEllHom
+        ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N)
+    (fun γ => by
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      refine Eq.trans (congrArg
+        (· ≫ (secStruct D d k s hs hinv).torsionIso.inv ≫
+          torsionMapOfEllHom
+            ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N)
+        (hswap γ)) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      exact congrArg ((secVRhoPB D d k s).isoPullback.inv ≫ ·)
+        (secFinv_smul D d k s hs hinv γ))
+  refine ⟨q, ?_⟩
+  refine Eq.trans (congrArg (· ≫ q)
+    (secVRhoPB D d k s).isoPullback_hom_snd.symm) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg ((secVRhoPB D d k s).isoPullback.hom ≫ ·) hq) ?_
+  exact Iso.hom_inv_id_assoc _ _
+
+/-- **[T-EQ-3c main]** The `Hinv`-descent hypothesis. -/
+theorem secHinv
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N)
+    {Z : Scheme.{0}}
+    (g₁ g₂ : Z ⟶ pullback (vRhoπ D)
+      ((X.pullbackAlong k).pullbackAlong (secCover D d s)).structMap)
+    (hg : g₁ ≫ vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s) =
+      g₂ ≫ vRhoCoverPrj D (X.pullbackAlong k) (secCover D d s)) :
+    g₁ ≫ (secStruct D d k s hs hinv).torsionIso.inv ≫
+        torsionMapOfEllHom
+          ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N =
+      g₂ ≫ (secStruct D d k s hs hinv).torsionIso.inv ≫
+        torsionMapOfEllHom
+          ((X.pullbackAlong k).pullbackAlongπ (secCover D d s)) N := by
+  obtain ⟨q, hq⟩ := secFinv_factors D d k s hs hinv
+  refine Eq.trans (congrArg (g₁ ≫ ·) hq.symm) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ q) hg) ?_
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  exact congrArg (g₂ ≫ ·) hq
+
+/-- **[T-EQ-3c FORWARD MAP]** A section of the free quotient of the
+symplectically framed moduli yields a ρ-level structure on the base: lift along
+the torsor pullback, read the classified carve value, apply the dictionary, and
+descend along the finite étale cover (the `γ`-invariance discharged by the
+quotient's invariant-lift property). -/
+noncomputable def rhoOfSection
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = k)
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N) :
+    RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve := by
+  haveI hFin : IsFinite (d.σZ.relQuotientπ d.f d.over_base) :=
+    d.σZ.isFinite_relQuotientπ_of_free d.f d.over_base
+      (d.free_on_points (sympFramedAut_freeAction D))
+  haveI hEt : Etale (d.σZ.relQuotientπ d.f d.over_base) :=
+    d.σZ.etale_relQuotientπ_of_free d.f d.over_base
+      (d.free_on_points (sympFramedAut_freeAction D))
+  haveI hFl : Flat (d.σZ.relQuotientπ d.f d.over_base) :=
+    d.σZ.flat_relQuotientπ_of_free d.f d.over_base
+      (d.free_on_points (sympFramedAut_freeAction D))
+  haveI hSu : Surjective (d.σZ.relQuotientπ d.f d.over_base) :=
+    d.σZ.surjective_relQuotientπ_of_free d.f d.over_base
+  haveI hQC : QuasiCompact (d.σZ.relQuotientπ d.f d.over_base) := inferInstance
+  haveI : IsFinite (secCover D d s) :=
+    MorphismProperty.pullback_snd _ _ hFin
+  haveI : Etale (secCover D d s) :=
+    MorphismProperty.pullback_snd _ _ hEt
+  haveI : Flat (secCover D d s) :=
+    MorphismProperty.pullback_snd _ _ hFl
+  haveI : Surjective (secCover D d s) :=
+    MorphismProperty.pullback_snd _ _ hSu
+  haveI : QuasiCompact (secCover D d s) :=
+    MorphismProperty.pullback_snd _ _ hQC
+  haveI : IsFinite (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) s) :=
+    MorphismProperty.pullback_snd _ _ hFin
+  haveI : Etale (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) s) :=
+    MorphismProperty.pullback_snd _ _ hEt
+  haveI : Flat (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) s) :=
+    MorphismProperty.pullback_snd _ _ hFl
+  haveI : Surjective (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) s) :=
+    MorphismProperty.pullback_snd _ _ hSu
+  haveI : QuasiCompact (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) s) :=
+    MorphismProperty.pullback_snd _ _ hQC
+  exact @RhoLevelStructure.descend N ‹_› D (X.pullbackAlong k) _
+    (secCover D d s) ‹_› ‹_› ‹_› (secStruct D d k s hs hinv) ‹_› ‹_›
+    (secHhom D d k s hs hinv) (secHinv D d k s hs hinv)
+
 end SectionsToStructures
 
 end
