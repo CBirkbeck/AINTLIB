@@ -1197,6 +1197,228 @@ theorem classify_read_pow_eq_one_iff (D : GaloisRepData N) [Fact (1 < N)]
     refine Eq.trans (map_pow _ _ _).symm ?_
     exact h3.trans (map_one _)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c x]** A root of unity none of whose proper-divisor powers is
+trivial lies in the range of the determinant comparison: its discrete logarithm
+along the pinning `p` is a unit (otherwise the `N/gcd` power would already be
+trivial). -/
+theorem roots_mem_range_detComp_of_pow_ne_one (D : GaloisRepData N)
+    [Fact (1 < N)] (ρ : rootsOfUnity N (AlgebraicClosure ℚ))
+    (hne : ∀ d ∈ N.properDivisors,
+      ((ρ : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) ^ d ≠ 1) :
+    ρ ∈ Set.range (detCompMor D).hom.hom := by
+  set a : ZMod N := (D.p.symm ρ).toAdd with ha
+  have hρ : D.p (Multiplicative.ofAdd a) = ρ := by
+    rw [ha, ofAdd_toAdd]
+    exact D.p.apply_symm_apply ρ
+  have hNpos : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+  have hunit : IsUnit a := by
+    by_contra hnu
+    have hg : ¬ Nat.Coprime a.val N := by
+      intro hcop
+      refine hnu ?_
+      rw [show a = ((a.val : ℕ) : ZMod N) from by
+        rw [ZMod.natCast_val, ZMod.cast_id]]
+      exact (ZMod.isUnit_iff_coprime a.val N).mpr hcop
+    set g := Nat.gcd a.val N with hgdef
+    have hg1 : g ≠ 1 := fun h => hg h
+    have hgdvdN : g ∣ N := Nat.gcd_dvd_right a.val N
+    have hgdvda : g ∣ a.val := Nat.gcd_dvd_left a.val N
+    have hgpos : 0 < g := Nat.gcd_pos_of_pos_right a.val hNpos
+    have h1g : 1 < g := by omega
+    set d := N / g with hddef
+    have hd : d ∣ N := Nat.div_dvd_of_dvd hgdvdN
+    have hdlt : d < N := Nat.div_lt_self hNpos h1g
+    have hdproper : d ∈ N.properDivisors := Nat.mem_properDivisors.mpr ⟨hd, hdlt⟩
+    have hmul : d * a.val = N * (a.val / g) := by
+      have h2 : a.val = g * (a.val / g) := (Nat.mul_div_cancel' hgdvda).symm
+      calc d * a.val = d * (g * (a.val / g)) := by rw [← h2]
+        _ = (d * g) * (a.val / g) := by ring
+        _ = N * (a.val / g) := by rw [hddef, Nat.div_mul_cancel hgdvdN]
+    have h1 : d • a = 0 := by
+      rw [nsmul_eq_mul, show a = ((a.val : ℕ) : ZMod N) from by
+        rw [ZMod.natCast_val, ZMod.cast_id], ← Nat.cast_mul, hmul,
+        Nat.cast_mul, ZMod.natCast_self, zero_mul]
+    have hρd : ρ ^ d = 1 := by
+      rw [← hρ, ← map_pow,
+        show (Multiplicative.ofAdd a) ^ d = Multiplicative.ofAdd (d • a) from
+          (ofAdd_nsmul d a).symm,
+        h1, ofAdd_zero, map_one]
+    refine hne d hdproper ?_
+    have hcoe := congrArg
+      (fun z : rootsOfUnity N (AlgebraicClosure ℚ) =>
+        ((z : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) hρd
+    simpa using hcoe
+  obtain ⟨u, hu⟩ := hunit
+  refine ⟨u, ?_⟩
+  show D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) = ρ
+  rw [hu]
+  exact hρ
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c xi]** A `ℚ̄`-point whose set-read lies in the determinant
+range kills the kernel of the determinant comultiplication (lift the read
+across the points equivalence, identify the point as a pushforward, and factor
+its classifier through the comultiplication). -/
+theorem eval_kills_ker_of_read_mem_range (D : GaloisRepData N) [Fact (1 < N)]
+    (pt : { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+        corrSpec (muNRootsContAction D) //
+      h ≫ corrSpecπ (muNRootsContAction D) =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) })
+    (hmem : qbarPointsRead (muNRootsContAction D) pt ∈
+      Set.range (detCompMor D).hom.hom) :
+    RingHom.ker (detCompAlgHom D).hom.hom.toRingHom ≤
+      RingHom.ker (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0)
+        (AlgebraicClosure ℚ) pt).toRingHom := by
+  obtain ⟨u₀, hu₀⟩ := hmem
+  set ψ₀ := (qbarPointsRead (cycloUnitsContAction D)).symm u₀ with hψ₀
+  have hread : qbarPointsRead (muNRootsContAction D)
+      ⟨ψ₀.1 ≫ corrSpecMap (detCompMor D), by
+        rw [Category.assoc, corrSpecMap_π, ψ₀.2]⟩ =
+      qbarPointsRead (muNRootsContAction D) pt := by
+    refine (qbarPointsRead_map (detCompMor D) ψ₀).trans ?_
+    rw [hψ₀, Equiv.apply_symm_apply]
+    exact hu₀
+  have hpt : (⟨ψ₀.1 ≫ corrSpecMap (detCompMor D), by
+      rw [Category.assoc, corrSpecMap_π, ψ₀.2]⟩ :
+      { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+          corrSpec (muNRootsContAction D) //
+        h ≫ corrSpecπ (muNRootsContAction D) =
+          Spec.map (CommRingCat.ofHom
+            (algebraMap ℚ (AlgebraicClosure ℚ))) }) = pt :=
+    (qbarPointsRead (muNRootsContAction D)).injective hread
+  have hA : specPointsEquivAlgHom ℚ
+      (corrAlgebra (muNRootsContAction D) : Type 0)
+      (AlgebraicClosure ℚ) pt =
+      (specPointsEquivAlgHom ℚ
+        (corrAlgebra (cycloUnitsContAction D) : Type 0)
+        (AlgebraicClosure ℚ) ψ₀).comp
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (detCompMor D)).unop.hom.hom := by
+    rw [← hpt]
+    have hpre := spec_preimage_comp ψ₀.1 (CommRingCat.ofHom
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (detCompMor D)).unop.hom.hom.toRingHom))
+    refine AlgHom.ext fun b => ?_
+    exact congrArg (fun q : CommRingCat.of
+      (corrAlgebra (muNRootsContAction D) : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom b) hpre
+  intro i hi
+  refine RingHom.mem_ker.mpr ?_
+  have h0 : ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (detCompMor D)).unop.hom.hom i = 0 := RingHom.mem_ker.mp hi
+  have happ : (specPointsEquivAlgHom ℚ
+      (corrAlgebra (muNRootsContAction D) : Type 0)
+      (AlgebraicClosure ℚ) pt) i =
+      (specPointsEquivAlgHom ℚ
+        (corrAlgebra (cycloUnitsContAction D) : Type 0)
+        (AlgebraicClosure ℚ) ψ₀)
+        (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (detCompMor D)).unop.hom.hom i) :=
+    congrArg (fun (F : (corrAlgebra (muNRootsContAction D) : Type 0) →ₐ[ℚ]
+      AlgebraicClosure ℚ) => F i) hA
+  refine happ.trans ?_
+  exact (congrArg _ h0).trans (map_zero _)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c xii]** The classifier's value at the cyclotomic model root
+is the set-read of the point (the field-generic classification glued to the
+keystone). -/
+theorem eval_root_eq_read (D : GaloisRepData N) [Fact (1 < N)]
+    (pt : { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+        corrSpec (muNRootsContAction D) //
+      h ≫ corrSpecπ (muNRootsContAction D) =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }) :
+    (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0)
+        (AlgebraicClosure ℚ) pt)
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) =
+    (((qbarPointsRead (muNRootsContAction D) pt :
+      rootsOfUnity N (AlgebraicClosure ℚ)) : (AlgebraicClosure ℚ)ˣ) :
+      AlgebraicClosure ℚ) := by
+  refine Eq.trans (muNRootsRead_classify_field D (AlgebraicClosure ℚ)
+    pt.1 pt.2).symm ?_
+  exact muNRoots_correspondence_read D pt.1 pt.2
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c xiii]** The non-primitivity product annihilates any
+determinant-kernel part of a complement decomposition: every `ℚ̄`-evaluation
+kills `(∏ (root^d − 1)) · e` — an evaluation either kills the determinant
+kernel (so kills `e`), or kills the complement, in which case its read cannot
+be primitive (else it would kill both sides), so a product factor vanishes —
+and evaluations separate points of the reduced algebra. -/
+theorem prod_mul_e_eq_zero (D : GaloisRepData N) [Fact (1 < N)]
+    (J : Ideal (muNRootsAlgebra D : Type 0))
+    (hIJ : IsCompl (RingHom.ker (detCompAlgHom D).hom.hom.toRingHom) J)
+    (e f : (muNRootsAlgebra D : Type 0))
+    (he : e ∈ RingHom.ker (detCompAlgHom D).hom.hom.toRingHom) (hf : f ∈ J)
+    (hef : e + f = 1) :
+    (∏ d ∈ N.properDivisors,
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d - 1))
+      * e = 0 := by
+  by_contra hne
+  obtain ⟨χ, hχ⟩ := corrAlgebra_exists_eval_ne (muNRootsContAction D) hne
+  rcases field_hom_ker_dichotomy
+    (RingHom.ker (detCompAlgHom D).hom.hom.toRingHom) J hIJ χ.toRingHom
+    with hkI | hkJ
+  · exact hχ ((map_mul χ _ _).trans
+      (mul_eq_zero_of_right _ (RingHom.mem_ker.mp (hkI he))))
+  · have hχf : χ f = 0 := RingHom.mem_ker.mp (hkJ hf)
+    have hχe : χ e = 1 :=
+      ((add_zero (χ e)).symm.trans
+        (congrArg (HAdd.hAdd (χ e)) hχf.symm)).trans
+        (((map_add χ e f).symm.trans (congrArg χ hef)).trans (map_one χ))
+    set pt := (specPointsEquivAlgHom ℚ
+      (corrAlgebra (muNRootsContAction D) : Type 0)
+      (AlgebraicClosure ℚ)).symm χ with hptdef
+    have hχpt : specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0)
+        (AlgebraicClosure ℚ) pt = χ := by
+      rw [hptdef]
+      exact Equiv.apply_symm_apply _ χ
+    have hroot : χ ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) =
+        (((qbarPointsRead (muNRootsContAction D) pt :
+          rootsOfUnity N (AlgebraicClosure ℚ)) : (AlgebraicClosure ℚ)ˣ) :
+          AlgebraicClosure ℚ) := by
+      rw [← hχpt]
+      exact eval_root_eq_read D pt
+    by_cases hprim : ∃ d₀ ∈ N.properDivisors,
+        (((qbarPointsRead (muNRootsContAction D) pt :
+          rootsOfUnity N (AlgebraicClosure ℚ)) : (AlgebraicClosure ℚ)ˣ) :
+          AlgebraicClosure ℚ) ^ d₀ = 1
+    · obtain ⟨d₀, hd₀mem, hd₀⟩ := hprim
+      have hfac : χ (((muNRootsAlgebraIso D).inv.hom.hom
+          (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d₀ - 1 :
+            (muNRootsAlgebra D : Type 0)))
+          = 0 :=
+        (map_sub χ _ _).trans
+          ((congrArg (· - χ 1) (map_pow χ _ d₀)).trans
+            ((congrArg (fun z => z ^ d₀ - χ 1) hroot).trans
+              ((congrArg (· - χ 1) hd₀).trans
+                ((congrArg (HSub.hSub (1 : AlgebraicClosure ℚ))
+                  (map_one χ)).trans (sub_self 1)))))
+      refine hχ ?_
+      refine (map_mul χ _ _).trans ?_
+      refine ((congrArg (HMul.hMul _) hχe).trans (mul_one _)).trans ?_
+      refine (map_prod χ _ _).trans ?_
+      exact Finset.prod_eq_zero hd₀mem hfac
+    · have hall : ∀ d ∈ N.properDivisors,
+          (((qbarPointsRead (muNRootsContAction D) pt :
+            rootsOfUnity N (AlgebraicClosure ℚ)) : (AlgebraicClosure ℚ)ˣ) :
+            AlgebraicClosure ℚ) ^ d ≠ 1 :=
+        fun d hd hcontra => hprim ⟨d, hd, hcontra⟩
+      have hmem := roots_mem_range_detComp_of_pow_ne_one D
+        (qbarPointsRead (muNRootsContAction D) pt) hall
+      have hkills := eval_kills_ker_of_read_mem_range D pt hmem
+      have hχe0 : χ e = 0 := by
+        rw [← hχpt]
+        exact RingHom.mem_ker.mp (hkills he)
+      rw [hχe0] at hχe
+      exact zero_ne_one hχe
+
 end CorrSurjective
 
 section SectionsToStructures
