@@ -26457,3 +26457,26 @@ with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
 - **Proof sketch**: section→structure→section by descend-uniqueness/epi-cancellation; structure→section→structure by pull_descend + ext_torsionIso; assemble with NIsInvertible.of_hom + the Spec-ℚ criterion.
 - **Sources**: KM 7.1.3; T-F6.
 - **Generality decision**: statement fixed by the YRho-tail target (theorem_statement_protected).
+
+### [T-EQ-3d-L3a] corrSpecMap surjectivity from set-surjectivity
+- **Status**: open
+- **Title**: A correspondence morphism with surjective set-map has surjective Spec-map
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: —
+- **Parent**: T-EQ-3d-L3
+- **Type**: lemma
+- **Statement**: `corrSpecMap_surjective (m : X ⟶ Y) (hm : Function.Surjective m.hom.hom) : Surjective (corrSpecMap m)`.
+- **Proof sketch**: 1. INJECTIVITY of the algebra map ψ := ((inverse.map m).unop).hom.hom: candidate route (i) evaluation-embedding: kernel-element b has all ℚ̄-evaluations zero — every χ : B →ₐ ℚ̄ factors as χ' ∘ ψ by set-surjectivity (χ ↔ Y-set-element via qbarPointsRead; lift along m.hom.hom; χ' := the lift's alg-hom) — then b = 0 by injectivity of B → ∏_{χ} ℚ̄ for reduced finite ℚ-algebras (NEEDS: the evaluation-embedding lemma — search mathlib: reduced Artinian/finite over field embeds in product of residue fields; or build from IsArtinianRing.equivPi / Jacobson). Route (ii) categorical: surjective ⟹ FintypeCat-epi ⟹ Action-epi (faithful reflects) ⟹ ContAction-epi ⟹ inverse.map epi-in-op = mono ⟹ CommAlgCat-mono ⟹ injective (CommAlgCat mono_iff_injective — verify subcat-mono transfers: use that the correspondence composed with the FiniteEtale-inclusion is still fully faithful into CommAlgCat and reflects... CAREFUL: subcat-mono need not be ambient-mono; prefer route (i)). 2. INTEGRALITY: the algebras are finite over ℚ hence ψ is IsIntegral (finite ⟹ integral: RingHom.IsIntegral.of_finite; finiteness of ψ from module-finiteness over ℚ). 3. `RingHom.IsIntegral.comap_surjective hf hinj : Surjective (PrimeSpectrum.comap ψ)` (mathlib, FOUND). 4. Bridge to AlgebraicGeometry.Surjective (Spec.map ...): the base map of Spec.map is comap (find the simp: Spec.map-base / Scheme.Spec_map-val-base).
+- **Sources**: SGA1 V; lying-over.
+- **Generality decision**: correspondence-level (all Galois sets), reusable.
+
+### [T-EQ-3d-L3b] detComp∘detFrame is surjective + the T4-as-pullback presentation
+- **Status**: open
+- **Title**: The determinant read hits every root; the carve locus is the pullback of it along the pairing section
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: T-EQ-3d-L3a
+- **Parent**: T-EQ-3d-L3
+- **Type**: lemmas
+- **Statement**: (i) `Surjective (detFrameScheme D ≫ detCompScheme D)` — set-map `A ↦ D.p (ofAdd (det A))` surjective from `Matrix.GeneralLinearGroup.det_surjective` (mathlib, FOUND) + `D.p` a MulEquiv + `Multiplicative.ofAdd` equiv; apply L3a at `detFrameMor ≫ detCompMor` (composite corrSpecMap via Spec.map_comp). (ii) T4-presentation: `agreeLocus (pulled pairEZ) (tautDet)` over `T''` is iso to `pullback Ψ σ_p` where `Ψ := T''-base-change of (detFrame ≫ detComp)` and `σ_p := the pairEZMap-of-L'' section` — then `Surjective (T4 → T'')` from (i) + Surjective-stable-under-base-change ×2 (MorphismProperty.pullback_snd/fst). The iso: both are limits of the same diagram — pullback-comparison hom_ext chase.
+- **Sources**: KM 7.1.3(3); det: standard.
+- **Generality decision**: in-situ.
