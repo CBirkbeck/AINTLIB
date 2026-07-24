@@ -112,6 +112,48 @@ theorem framedSymp_of_pairEZMap (D : GaloisRepData N) [Fact (1 < N)]
   exact congrArg (fun z : rootsOfUnity N (AlgebraicClosure ℚ) =>
     ((z : (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)) hdet
 
+/-- **[T-EQ-3c-L1]** The trivialisation map is natural in the curve: the
+constant-scheme base-change comparison followed by the level map upstairs is the
+pulled level map followed by the torsion comparison. Stated against an arbitrary
+level `L'` downstairs whose sections are the pulled sections, so any spelling of
+the transported value applies. -/
+theorem fullLevelHom_mapAlong {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (L : B.curve.FullLevelPt N) (L' : A.curve.FullLevelPt N)
+    (hP : L'.1.1 = EllHom.pullSection (CommRingCat.of ℚ) g L.1.1)
+    (hQ : L'.1.2 = EllHom.pullSection (CommRingCat.of ℚ) g L.1.2) :
+    constSchemeMapAlong g.baseHom (Fin 2 → ZMod N) ≫ B.curve.fullLevelHom L =
+      A.curve.fullLevelHom L' ≫ torsionMapOfEllHom g N := by
+  refine Sigma.hom_ext _ _ fun v => ?_
+  have hcomb : ((v 0).val : ℤ) • L'.1.1 + ((v 1).val : ℤ) • L'.1.2 =
+      EllHom.pullSection (CommRingCat.of ℚ) g
+        (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2) := by
+    rw [hP, hQ, EllHom.pullSection_add, EllHom.pullSection_zsmul,
+      EllHom.pullSection_zsmul]
+  have hval : (EllHom.mapPoint g (𝟙 A.base)
+      (((v 0).val : ℤ) • L'.1.1 + ((v 1).val : ℤ) • L'.1.2)).1 =
+      g.baseHom ≫ (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2).1 := by
+    refine (EllHom.mapPoint_coe g _ _).trans ?_
+    rw [hcomb]
+    exact g.isPullback.lift_fst _ _ _
+  rw [← Category.assoc, ι_constSchemeMapAlong, Category.assoc]
+  rw [show B.curve.fullLevelHom L = Limits.Sigma.desc fun w : Fin 2 → ZMod N =>
+      B.curve.pointToTorsion
+        (((w 0).val : ℤ) • L.1.1 + ((w 1).val : ℤ) • L.1.2)
+        ((B.curve.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+          rw [smul_add, smul_comm (N : ℤ) ((w 0).val : ℤ),
+            smul_comm (N : ℤ) ((w 1).val : ℤ), L.2.1.1, L.2.1.2, smul_zero,
+            smul_zero, add_zero])) from rfl]
+  rw [show A.curve.fullLevelHom L' = Limits.Sigma.desc fun w : Fin 2 → ZMod N =>
+      A.curve.pointToTorsion
+        (((w 0).val : ℤ) • L'.1.1 + ((w 1).val : ℤ) • L'.1.2)
+        ((A.curve.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+          rw [smul_add, smul_comm (N : ℤ) ((w 0).val : ℤ),
+            smul_comm (N : ℤ) ((w 1).val : ℤ), L'.2.1.1, L'.2.1.2, smul_zero,
+            smul_zero, add_zero])) from rfl]
+  rw [Limits.Sigma.ι_desc, ← Category.assoc, Limits.Sigma.ι_desc]
+  refine Eq.trans ?_ (pointToTorsion_mapPoint g _ _).symm
+  exact (pointToTorsion_comp g.baseHom _ _ hval _ _).symm
+
 open scoped FintypeCatDiscrete in
 /-- **[T-EQ-3c-i COMPLETE]** The ρ-dictionary from the carve alone: a full-level
 structure and a frame satisfying the single map-level condition
