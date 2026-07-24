@@ -2375,6 +2375,131 @@ theorem strPt_pointToTorsion (v : Fin 2 → ZMod N) :
   · exact pullback.lift_fst _ _ _
   · exact (pullback.lift_snd _ _ _).trans (strTor_π D str v).symm
 
+/-- **[T-EQ-3d-A2 heart]** If the Weil pairing of a killed pair has no trivial
+power below `N`, the pair generates the `N`-torsion of the geometric fibre: the
+symplectic register makes the combination map injective, and the rank-two count
+makes it surjective. -/
+theorem full_of_weilPairing_order (K : Type) [Field K] [IsAlgClosed K]
+    {T : Scheme.{0}} {E : EllipticCurve T}
+    (t : Spec (.of K) ⟶ T) (P' Q' : E.Point t)
+    (hP' : (N : ℤ) • P' = 0) (hQ' : (N : ℤ) • Q' = 0)
+    (hNK : (N : K) ≠ 0)
+    (hord : ∀ d : ℕ, 0 < d → d < N →
+      (E.weilPairingEval P' Q'
+        ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
+        ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')).1 ^ d ≠ 1)
+    (z : E.Point t) (hz : (N : ℤ) • z = 0) :
+    z ∈ AddSubgroup.closure {P', Q'} := by
+  classical
+  have hNpos : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+  -- killing of integer combinations
+  have hcomb_kill : ∀ a b : ℤ, (N : ℤ) • (a • P' + b • Q') = 0 := by
+    intro a b
+    rw [smul_add, smul_comm (N : ℤ) a, smul_comm (N : ℤ) b, hP', hQ',
+      smul_zero, smul_zero, add_zero]
+  have hcomb_raw : ∀ a b : ℤ,
+      (a • P' + b • Q').1 ≫ E.mulByHom N = t ≫ E.zero := fun a b =>
+    (E.smul_eq_zero_iff_comp_mulByHom t N _).mp (hcomb_kill a b)
+  -- the zero-combination pairing is trivial
+  have hzero_pair : ∀ c d : ℤ,
+      (E.weilPairingEval ((0 : ℤ) • P' + (0 : ℤ) • Q') (c • P' + d • Q')
+        (hcomb_raw 0 0) (hcomb_raw c d)).1 = 1 := by
+    intro c d
+    have hs := E.weilPairingEval_symplectic P' Q' 0 0 c d
+      ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
+      ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')
+      (hcomb_raw 0 0) (hcomb_raw c d)
+    rw [hs]
+    norm_num
+  -- injectivity of the combination map
+  have hinj : ∀ a b : ZMod N,
+      (a.val : ℤ) • P' + (b.val : ℤ) • Q' = 0 → a = 0 ∧ b = 0 := by
+    intro a b hab
+    have hpow : ∀ c d : ℤ,
+        (E.weilPairingEval P' Q'
+            ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
+            ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')).1 ^
+          ((((a.val : ℤ) * d - (b.val : ℤ) * c) % (N : ℤ)).toNat) = 1 := by
+      intro c d
+      have hs := E.weilPairingEval_symplectic P' Q' (a.val : ℤ) (b.val : ℤ) c d
+        ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
+        ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')
+        (hcomb_raw _ _) (hcomb_raw c d)
+      have hcongr := weilPairingEval_congr_raw (E := E) (rfl : t = t)
+        (congrArg Subtype.val (hab.trans (by
+          rw [zero_smul, zero_smul, add_zero] :
+          ((0 : ℤ) • P' + (0 : ℤ) • Q' : E.Point t) = 0).symm))
+        rfl (hcomb_raw _ _) (hcomb_raw c d) (hcomb_raw 0 0) (hcomb_raw c d)
+      rw [← hs, hcongr]
+      exact hzero_pair c d
+    constructor
+    · -- (c,d) = (0,1): exponent a.val
+      have h1 := hpow 0 1
+      have h2 : (((a.val : ℤ) * 1 - (b.val : ℤ) * 0) % (N : ℤ)).toNat = a.val := by
+        have : ((a.val : ℤ) * 1 - (b.val : ℤ) * 0) = (a.val : ℤ) := by ring
+        rw [this, Int.emod_eq_of_lt (Int.natCast_nonneg _)
+          (Nat.cast_lt.mpr (ZMod.val_lt a)), Int.toNat_natCast]
+      rw [h2] at h1
+      by_contra ha
+      exact hord a.val (Nat.pos_of_ne_zero fun h0 =>
+        ha ((ZMod.val_eq_zero _).mp h0)) (ZMod.val_lt a) h1
+    · -- (c,d) = (-1,0): exponent b.val
+      have h1 := hpow (-1) 0
+      have h2 : (((a.val : ℤ) * 0 - (b.val : ℤ) * (-1)) % (N : ℤ)).toNat =
+          b.val := by
+        have : ((a.val : ℤ) * 0 - (b.val : ℤ) * (-1)) = (b.val : ℤ) := by ring
+        rw [this, Int.emod_eq_of_lt (Int.natCast_nonneg _)
+          (Nat.cast_lt.mpr (ZMod.val_lt b)), Int.toNat_natCast]
+      rw [h2] at h1
+      by_contra hb
+      exact hord b.val (Nat.pos_of_ne_zero fun h0 =>
+        hb ((ZMod.val_eq_zero _).mp h0)) (ZMod.val_lt b) h1
+  -- the combination map into the torsion submodule
+  set f : ZMod N × ZMod N → Submodule.torsionBy ℤ (E.Point t) (N : ℤ) :=
+    fun ab => ⟨(ab.1.val : ℤ) • P' + (ab.2.val : ℤ) • Q', by
+      rw [Submodule.mem_torsionBy_iff]
+      exact hcomb_kill _ _⟩ with hf
+  have hfinj : Function.Injective f := by
+    intro ab₁ ab₂ hab
+    have hdiff : ((ab₁.1 - ab₂.1).val : ℤ) • P' +
+        ((ab₁.2 - ab₂.2).val : ℤ) • Q' = 0 := by
+      have h1 : (ab₁.1.val : ℤ) • P' + (ab₁.2.val : ℤ) • Q' =
+          (ab₂.1.val : ℤ) • P' + (ab₂.2.val : ℤ) • Q' :=
+        congrArg Subtype.val hab
+      have h2 : ((ab₁.1 - ab₂.1).val : ℤ) • P' =
+          ((ab₁.1.val : ℤ) - (ab₂.1.val : ℤ)) • P' :=
+        EllipticCurve.zsmul_eq_of_intCast_eq P' hP'
+          (by push_cast [ZMod.natCast_val, ZMod.cast_id]; ring)
+      have h3 : ((ab₁.2 - ab₂.2).val : ℤ) • Q' =
+          ((ab₁.2.val : ℤ) - (ab₂.2.val : ℤ)) • Q' :=
+        EllipticCurve.zsmul_eq_of_intCast_eq Q' hQ'
+          (by push_cast [ZMod.natCast_val, ZMod.cast_id]; ring)
+      rw [h2, h3, sub_smul, sub_smul]
+      rw [show (ab₁.1.val : ℤ) • P' - (ab₂.1.val : ℤ) • P' +
+          ((ab₁.2.val : ℤ) • Q' - (ab₂.2.val : ℤ) • Q') =
+          ((ab₁.1.val : ℤ) • P' + (ab₁.2.val : ℤ) • Q') -
+          ((ab₂.1.val : ℤ) • P' + (ab₂.2.val : ℤ) • Q') from by abel]
+      rw [h1, sub_self]
+    obtain ⟨hA, hB⟩ := hinj _ _ hdiff
+    exact Prod.ext (sub_eq_zero.mp hA) (sub_eq_zero.mp hB)
+  -- surjectivity by the rank-two count
+  obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two N K t hNK
+  have hcards : Nat.card (Submodule.torsionBy ℤ (E.Point t) (N : ℤ)) = N * N := by
+    rw [Nat.card_congr e.toEquiv, Nat.card_fun]
+    simp [Nat.card_eq_fintype_card, ZMod.card, sq]
+  haveI : Finite (Submodule.torsionBy ℤ (E.Point t) (N : ℤ)) :=
+    Finite.of_equiv _ e.toEquiv.symm
+  have hfsurj : Function.Surjective f := by
+    refine ((Nat.bijective_iff_injective_and_card f).mpr ⟨hfinj, ?_⟩).2
+    rw [hcards, Nat.card_prod]
+    simp [Nat.card_eq_fintype_card, ZMod.card]
+  obtain ⟨⟨a, b⟩, hab⟩ := hfsurj ⟨z, (Submodule.mem_torsionBy_iff _ _).mpr hz⟩
+  have hz' : (a.val : ℤ) • P' + (b.val : ℤ) • Q' = z := congrArg Subtype.val hab
+  rw [← hz']
+  exact AddSubgroup.add_mem _
+    (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
+    (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
+
 end StructuresToSections
 
 end
