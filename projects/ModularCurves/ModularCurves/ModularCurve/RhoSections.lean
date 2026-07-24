@@ -1015,6 +1015,88 @@ theorem dvd_of_closure_pair_torsion {G : Type} [AddCommGroup G]
     (Nat.le_of_dvd (Nat.pos_of_ne_zero (NeZero.ne N)) hdN) hNd
   rw [hdd]
 
+/-- **[T-EQ-3d-L3c vii]** The order-forcing at a geometric point: if the Weil
+pairing of a generating torsion pair satisfies `e^d = 1` for `d ∣ N`, then
+`N ∣ d` (pair everything against `d•Q'` via the symplectic register, kill it by
+nondegeneracy, and force the order by the rank-two count). -/
+theorem weilPairing_pair_order (K : Type) [Field K] [IsAlgClosed K]
+    {T : Scheme.{0}} {E : EllipticCurve T}
+    (t : Spec (.of K) ⟶ T) (P' Q' : E.Point t)
+    (hP' : (N : ℤ) • P' = 0) (hQ' : (N : ℤ) • Q' = 0)
+    (hfull : ∀ z : E.Point t, (N : ℤ) • z = 0 →
+      z ∈ AddSubgroup.closure {P', Q'})
+    (hNK : (N : K) ≠ 0)
+    (d : ℕ) (hd : d ∣ N) (hdpos : 0 < d)
+    (hpow : (E.weilPairingEval P' Q'
+        ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
+        ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')).1 ^ d = 1) :
+    N ∣ d := by
+  have hkill_dQ : (N : ℤ) • ((d : ℤ) • Q') = 0 := by
+    rw [smul_comm, hQ', smul_zero]
+  have hpair : ∀ (z : E.Point t) (hz : (N : ℤ) • z = 0),
+      (E.weilPairingEval ((d : ℤ) • Q') z
+        ((E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ)
+        ((E.smul_eq_zero_iff_comp_mulByHom t N z).mp hz)).1 = 1 := by
+    intro z hz
+    obtain ⟨m, n, hmn⟩ := AddSubgroup.mem_closure_pair.mp (hfull z hz)
+    have h0d : (0 : ℤ) • P' + (d : ℤ) • Q' = (d : ℤ) • Q' := by
+      rw [zero_smul, zero_add]
+    have hsymp := E.weilPairingEval_symplectic P' Q' 0 (d : ℤ) m n
+      ((E.smul_eq_zero_iff_comp_mulByHom t N P').mp hP')
+      ((E.smul_eq_zero_iff_comp_mulByHom t N Q').mp hQ')
+      (by
+        rw [h0d]
+        exact (E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ)
+      (by
+        rw [hmn]
+        exact (E.smul_eq_zero_iff_comp_mulByHom t N z).mp hz)
+    have hEcongr := weilPairingEval_congr_raw (E := E) rfl
+      (congrArg Subtype.val h0d) (congrArg Subtype.val hmn)
+      (by
+        rw [h0d]
+        exact (E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ)
+      (by
+        rw [hmn]
+        exact (E.smul_eq_zero_iff_comp_mulByHom t N z).mp hz)
+      ((E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ)
+      ((E.smul_eq_zero_iff_comp_mulByHom t N z).mp hz)
+    rw [← hEcongr, hsymp]
+    have hdvd : (d : ℤ) ∣ ((0 * n - (d : ℤ) * m) % (N : ℤ)) := by
+      have h1 : (d : ℤ) ∣ (0 * n - (d : ℤ) * m) := ⟨-m, by ring⟩
+      have h2 : (d : ℤ) ∣ (N : ℤ) := Int.natCast_dvd_natCast.mpr hd
+      rw [Int.emod_def]
+      exact dvd_sub h1 (h2.mul_right _)
+    obtain ⟨e', he'⟩ := hdvd
+    have hNz : (N : ℤ) ≠ 0 := Int.natCast_ne_zero.mpr (NeZero.ne N)
+    have hnn : (0 : ℤ) ≤ (0 * n - (d : ℤ) * m) % (N : ℤ) :=
+      Int.emod_nonneg _ hNz
+    have hto : ((0 * n - (d : ℤ) * m) % (N : ℤ)).toNat = d * e'.toNat := by
+      have he'' : (0 * n - (d : ℤ) * m) % (N : ℤ) = (d : ℤ) * e' := he'
+      have hepos : (0 : ℤ) ≤ e' := by
+        by_contra hneg
+        rw [not_le] at hneg
+        have : (d : ℤ) * e' < 0 :=
+          mul_neg_of_pos_of_neg (by exact_mod_cast hdpos) hneg
+        omega
+      have he3 : (0 * n - (d : ℤ) * m) % (N : ℤ) = ((d * e'.toNat : ℕ) : ℤ) := by
+        rw [he'']
+        push_cast
+        rw [Int.toNat_of_nonneg hepos]
+      rw [he3, Int.toNat_natCast]
+    rw [hto, pow_mul, hpow, one_pow]
+  have hzero : (d : ℤ) • Q' = 0 := by
+    have hzp : (d : ℤ) • Q' = E.zeroPoint t := by
+      refine E.weilPairingEval_nondegenerate K t ((d : ℤ) • Q')
+        ((E.smul_eq_zero_iff_comp_mulByHom t N _).mp hkill_dQ) ?_
+      intro y hy
+      have hyz : (N : ℤ) • y = 0 :=
+        (E.smul_eq_zero_iff_comp_mulByHom t N y).mpr hy
+      exact hpair y hyz
+    refine hzp.trans (Subtype.ext ?_)
+    exact (E.point_zero_val t).symm
+  refine dvd_of_closure_pair_torsion P' Q' d hd hdpos hP' hzero hfull ?_
+  exact E.torsion_geometricFibre_rank_two N K t hNK
+
 end CorrSurjective
 
 section SectionsToStructures
