@@ -645,6 +645,18 @@ noncomputable def muNPointsEquiv (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Sche
     { h : T ⟶ muN S N // h ≫ muNπ S N = g } ≃ { a : Γ(T, ⊤) // a ^ N = 1 } :=
   muNPointsEquivAux S N g
 
+/-- **[T-EQ-3c-i]** The canonical generator of the absolute `μ_N`-ring (public face
+of the points engine's generator). -/
+noncomputable def muNAbsGen (N : ℕ) : muNRing N := muNRingGen N
+
+/-- **[T-EQ-3c-i]** The points description evaluates a point at the absolute
+generator (public face of the engine's coercion computation). -/
+lemma muNPointsEquiv_coe (S : Scheme.{u}) (N : ℕ) [NeZero N] {T : Scheme.{u}}
+    (g : T ⟶ S) (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
+    (muNPointsEquiv S N g h : Γ(T, ⊤)) =
+      (h.1 ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))).appTop
+        ((Scheme.ΓSpecIso (muNRing N)).inv (muNAbsGen N)) := rfl
+
 /-- The `k`-th power endomorphism of the absolute `μ_N`-ring (`T ↦ Tᵏ`). -/
 private noncomputable def muNRingPowHom (N : ℕ) (k : ℕ) : muNRing N ⟶ muNRing N :=
   muNRingLift ((muNRingGen N) ^ k) (by
@@ -1285,6 +1297,22 @@ theorem muNSpecFieldIso_inv_snd (K : Type u) [Field K] (N : ℕ) [NeZero N] :
     hmid1.symm]
   rw [← hhom]
   exact Iso.inv_hom_id_assoc _ _
+
+/-- **[T-EQ-3c-i]** The field-model comparison leg of the field identification,
+evaluated at the absolute generator: it reads to the root of the model
+(`muNSpecFieldIso_inv_snd`'s ring map tracks the generator to the root). -/
+lemma muNSpecFieldIso_inv_snd_gen (K : Type u) [Field K] (N : ℕ) [NeZero N] :
+    (Spec.preimage ((muNSpecFieldIso K N).inv ≫
+        pullback.snd (terminal.from (Spec (CommRingCat.of K)))
+          (terminal.from (muNAbs N)))).hom (muNAbsGen N) =
+      AdjoinRoot.root ((X : Polynomial K) ^ N - 1) := by
+  rw [show Spec.preimage ((muNSpecFieldIso K N).inv ≫
+      pullback.snd (terminal.from (Spec (CommRingCat.of K)))
+        (terminal.from (muNAbs N))) = muNModelCompare K N from by
+    apply Spec.map_injective
+    rw [Spec.map_preimage]
+    exact muNSpecFieldIso_inv_snd K N]
+  exact muNRingLift_gen _ _
 
 /-- The field-model identification intertwines the model power with `muNPow`. -/
 theorem muNSpecFieldIso_pow (K : Type u) [Field K] (N : ℕ) [NeZero N] (k : ℕ) :
