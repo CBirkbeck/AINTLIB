@@ -3526,6 +3526,50 @@ theorem strAct_taut (X' : EllObj (CommRingCat.of ℚ))
 
 end StrAct
 
+/-- **[T-EQ-3d-M5 (1)]** Every point of the spectrum of a finite `ℚ`-algebra
+has a `ℚ̄`-point through it (maximal residue + embedding into the closure). -/
+theorem finiteQ_exists_qbarPt_through (A : Type) [CommRing A] [Algebra ℚ A]
+    [Module.Finite ℚ A] (ω : Spec (CommRingCat.of A)) :
+    ∃ pt : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶
+      Spec (CommRingCat.of A),
+      ∀ s : Spec (CommRingCat.of (AlgebraicClosure ℚ)), pt.base s = ω := by
+  classical
+  haveI : IsArtinianRing A := isArtinian_of_tower ℚ inferInstance
+  haveI hqmax : ω.asIdeal.IsMaximal :=
+    IsArtinianRing.isMaximal_of_isPrime ω.asIdeal
+  haveI := Ideal.Quotient.field ω.asIdeal
+  haveI : Module.Finite ℚ (A ⧸ ω.asIdeal) :=
+    Module.Finite.of_surjective (Ideal.Quotient.mkₐ ℚ ω.asIdeal).toLinearMap
+      Ideal.Quotient.mk_surjective
+  haveI : Algebra.IsAlgebraic ℚ (A ⧸ ω.asIdeal) :=
+    Algebra.IsAlgebraic.of_finite ℚ _
+  set χκ : A →ₐ[ℚ] AlgebraicClosure ℚ :=
+    (IsAlgClosed.lift (M := AlgebraicClosure ℚ)).comp
+      (Ideal.Quotient.mkₐ ℚ ω.asIdeal) with hχκ
+  have hsub : ω.asIdeal ≤ RingHom.ker χκ.toRingHom := fun x hx =>
+    RingHom.mem_ker.mpr (by
+      show (IsAlgClosed.lift (M := AlgebraicClosure ℚ))
+        ((Ideal.Quotient.mkₐ ℚ ω.asIdeal) x) = 0
+      rw [show (Ideal.Quotient.mkₐ ℚ ω.asIdeal) x = 0 from
+        Ideal.Quotient.eq_zero_iff_mem.mpr hx]
+      exact map_zero _)
+  have hnetop : RingHom.ker χκ.toRingHom ≠ ⊤ := by
+    intro htop
+    have h1 : (1 : A) ∈ RingHom.ker χκ.toRingHom := htop ▸ Submodule.mem_top
+    have h2 := RingHom.mem_ker.mp h1
+    rw [map_one] at h2
+    exact one_ne_zero h2
+  have hker : RingHom.ker χκ.toRingHom = ω.asIdeal :=
+    (hqmax.eq_of_le hnetop hsub).symm
+  refine ⟨Spec.map (CommRingCat.ofHom χκ.toRingHom), fun s => ?_⟩
+  have hsq : s.asIdeal = ⊥ :=
+    congrArg PrimeSpectrum.asIdeal
+      (Subsingleton.elim s ⟨⊥, Ideal.isPrime_bot⟩)
+  refine PrimeSpectrum.ext ?_
+  show Ideal.comap χκ.toRingHom s.asIdeal = ω.asIdeal
+  rw [hsq]
+  exact hker
+
 end StructuresToSections
 
 end
