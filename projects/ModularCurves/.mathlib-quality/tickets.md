@@ -26397,3 +26397,63 @@ mulByHom_baseChange_fst; needs "pointed cartesian iso is a group iso" (GroupLawD
 pointedIso_exists_variableChange territory) — likely heavier.
 Prefer (i). NOTE: 2a is exactly the morphism-level form of T-E4a; if it resists, check
 with OMEGA's banked T-E4a notes (inbox/STREAM-OMEGA.md) before re-deriving.
+
+### [T-EQ-3d-L1] The tautological frame over the frames-product
+- **Status**: open
+- **Title**: Tautological frame section over `T ×_ℚ wFrames` and its base compatibility
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: (RhoSections 3c block — landed)
+- **Parent**: T-EQ-3 (3d)
+- **Type**: def + lemma
+- **Statement**: For `sT : T ⟶ Spec ℚ`, `tautFrame := pullback.snd sT (wFramesπ D)` with `hover` for the product base (`pullback.condition`-transport).
+- **Proof sketch**: pullback.condition. Trivial.
+- **Sources**: KM 7.1.3 (torsor pullback trivialises).
+- **Generality decision**: minimal, matches 3d use site.
+
+### [T-EQ-3d-L2] The carve locus of a framed pair over an arbitrary base
+- **Status**: open
+- **Title**: Clopen agreement locus of `pairEZMap` vs `frameDetMap` (value-level `sympLocus`)
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: T-EQ-3d-L1
+- **Parent**: T-EQ-3 (3d)
+- **Type**: def + lemmas
+- **Statement**: For `f g : Tt ⟶ muNRootsScheme D` over a common base: `agreeLocus f g` clopen in `Tt` with factor-iff (mirror sympLocus/sympLocus_factor_iff/sympLocusι_isOpenImmersion+isClosedImmersion, YRho ~8250-8330).
+- **Proof sketch**: transcribe the sympLocus equalizer-clopen engine at (f,g); factor-iff by the equalizer UP.
+- **Sources**: KM 7.1; project sympLocus.
+- **Generality decision**: value-level (arbitrary base).
+
+### [T-EQ-3d-L3] Fibrewise carve surjectivity (THE deep 3d leaf)
+- **Status**: open
+- **Title**: The carve locus of the tautological frame covers the trivialising cover
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: T-EQ-3d-L1, T-EQ-3d-L2
+- **Parent**: T-EQ-3 (3d)
+- **Type**: lemma
+- **Statement**: With `T''` a trivialising cover of `α` (level `L''`), `T3 := pullback sT'' (wFramesπ D)`, `taut`: `Surjective ((agreeLocus (pairEZMap L''3) (frameDetMap taut)) ⟶ T'')`.
+- **Proof sketch**: route (a): geometric-fibre count via the abstract finite-étale fibre functor (fiber of equalizer = equalizer of fibers; frames-fibre enumerates GL2; p∘det hits every root; the pairing read is one root) — no new κ̄-read stack, only FiniteEtale.fiber set-combinatorics + sympl arithmetic mirroring pairSlot_hFE. route (b): γ-translates + frameDetMap_rightMul pow-twist + piece machinery on a splitting cover.
+- **Sources**: KM 7.1.3(3).
+- **Generality decision**: specific to the 3d cover.
+
+### [T-EQ-3d-L4] Local sections and the glue
+- **Status**: open
+- **Title**: Local `Z0`-sections from the carve locus and descent along the cover
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: T-EQ-3d-L3
+- **Parent**: T-EQ-3 (3d)
+- **Type**: def + lemmas
+- **Statement**: d.eqv.symm classifies `T4 ⟶ d.Z`; π-compose to `relQuotient`; two pullback-lifts differ by the free action (orbit-uniqueness) so π-invariance kills γ; descend along the étale surjective qc `T4 ⟶ T'` (effective-epi; target affine over T') to `s : T' ⟶ relQuotient` with `s ≫ relQuotientStruct = k`.
+- **Proof sketch**: classify; π-compose; double-pullback agreement via hom_comp_relQuotientπ; EffectiveEpi.desc/fac + epi-uniqueness.
+- **Sources**: KM 7.1.3.
+- **Generality decision**: in-situ.
+
+### [T-EQ-3e] Mutual inverse laws + T-3E assembly
+- **Status**: open
+- **Title**: rhoOfSection and the 3d construction are mutually inverse; assemble rhoLevel_relativelyRepresentable
+- **File**: projects/ModularCurves/ModularCurves/ModularCurve/RhoSections.lean
+- **Depends on**: T-EQ-3d-L4
+- **Parent**: T-EQ-3
+- **Type**: theorem
+- **Statement**: `{h // h ≫ relQuotientStruct = k} ≃ RhoLevelStructure D (k ≫ X.structMap) (X.curve.baseChange k)`; with `I := relQuotient`, `f0 := relQuotientStruct` (finite étale by relQuotientStruct_finite_etale_of_free) close rhoLevel_relativelyRepresentable; move the four YRho-tail targets (8540-8597) into RhoSections.
+- **Proof sketch**: section→structure→section by descend-uniqueness/epi-cancellation; structure→section→structure by pull_descend + ext_torsionIso; assemble with NIsInvertible.of_hom + the Spec-ℚ criterion.
+- **Sources**: KM 7.1.3; T-F6.
+- **Generality decision**: statement fixed by the YRho-tail target (theorem_statement_protected).
