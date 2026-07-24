@@ -5111,6 +5111,90 @@ theorem strActX_π (D : GaloisRepData N) [Fact (1 < N)]
       X.pullbackAlongπ (strPr D (X.pullbackAlong k) ≫ k) :=
   EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6f)]** The cover translation commutes with the tautological
+projection of the pulled object. -/
+theorem strActHom_π (D : GaloisRepData N) [Fact (1 < N)]
+    (X' : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strActHom D X' γ ≫ X'.pullbackAlongπ (strPr D X') =
+      X'.pullbackAlongπ (strPr D X') := by
+  refine EllHom.ext ?_ ?_
+  · show strAct D X' γ ≫ strPr D X' = strPr D X'
+    exact strAct_pr D X' γ
+  · show (strActHom D X' γ).top ≫ pullback.fst X'.curve.π (strPr D X') =
+      pullback.fst X'.curve.π (strPr D X')
+    refine (Limits.pullback.lift_fst _ _ _).trans ?_
+    exact Category.comp_id _
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6f)]** The anchor-side translation commutes with the chart
+comparison. -/
+theorem strActX_pullbackAlongMap (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)} {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strActX D k γ ≫ X.pullbackAlongMap k (strPr D (X.pullbackAlong k)) =
+      X.pullbackAlongMap k (strPr D (X.pullbackAlong k)) := by
+  refine EllHom.ext ?_ ?_
+  · show strAct D (X.pullbackAlong k) γ ≫ strPr D (X.pullbackAlong k) =
+      strPr D (X.pullbackAlong k)
+    exact strAct_pr D (X.pullbackAlong k) γ
+  · apply Limits.pullback.hom_ext
+    · refine (Category.assoc _ _ _).trans ?_
+      refine Eq.trans (congrArg (CategoryStruct.comp (strActX D k γ).top)
+        ((Limits.pullback.lift_fst _ _ _).trans (Category.comp_id _))) ?_
+      refine Eq.trans (Limits.pullback.lift_fst _ _ _) ?_
+      exact ((Limits.pullback.lift_fst _ _ _).trans (Category.comp_id _)).symm
+    · refine (Category.assoc _ _ _).trans ?_
+      refine Eq.trans (congrArg (CategoryStruct.comp (strActX D k γ).top)
+        (Limits.pullback.lift_snd _ _ _)) ?_
+      refine Eq.trans (Category.assoc _ _ _).symm ?_
+      refine Eq.trans (congrArg
+        (· ≫ strPr D (X.pullbackAlong k))
+        (Limits.pullback.lift_snd _ _ _)) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (CategoryStruct.comp (Limits.pullback.snd
+        X.curve.π (strPr D (X.pullbackAlong k) ≫ k)))
+        (strAct_pr D (X.pullbackAlong k) γ)) ?_
+      exact (Limits.pullback.lift_snd _ _ _).symm
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6f)]** THE TRANSLATION SQUARE: the anchor-side translation
+conjugates to the cover-side translation across the associativity comparison. -/
+theorem strActX_square (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)} {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strActX D k γ ≫ EllObj.toPullbackAlong
+      (X.pullbackAlongMap k (strPr D (X.pullbackAlong k))) =
+    EllObj.toPullbackAlong
+      (X.pullbackAlongMap k (strPr D (X.pullbackAlong k))) ≫
+      strActHom D (X.pullbackAlong k) γ := by
+  apply (EllObj.homPullbackAlongEquiv (X.pullbackAlong k)
+    (strPr D (X.pullbackAlong k)) _).injective
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · show (strActX D k γ ≫ EllObj.toPullbackAlong
+        (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))) ≫
+        (X.pullbackAlong k).pullbackAlongπ (strPr D (X.pullbackAlong k)) =
+      (EllObj.toPullbackAlong
+        (X.pullbackAlongMap k (strPr D (X.pullbackAlong k))) ≫
+        strActHom D (X.pullbackAlong k) γ) ≫
+        (X.pullbackAlong k).pullbackAlongπ (strPr D (X.pullbackAlong k))
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (CategoryStruct.comp (strActX D k γ))
+      (EllObj.toPullbackAlong_pullbackAlongπ
+        (X.pullbackAlongMap k (strPr D (X.pullbackAlong k))))) ?_
+    refine Eq.trans (strActX_pullbackAlongMap D k γ) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (CategoryStruct.comp (EllObj.toPullbackAlong
+      (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))))
+      (strActHom_π D (X.pullbackAlong k) γ)) ?_
+    exact EllObj.toPullbackAlong_pullbackAlongπ
+      (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))
+  · show (strActX D k γ).baseHom ≫ 𝟙 _ = 𝟙 _ ≫ strAct D (X.pullbackAlong k) γ
+    rw [Category.comp_id, Category.id_comp]
+    rfl
+
 end StructuresToSections
 
 end
