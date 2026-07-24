@@ -3618,6 +3618,81 @@ theorem rightMul_frameSlotEval (D : GaloisRepData N) [Fact (1 < N)]
   refine wFrames_hom_ext_of_qbar D (pi := vRhoπ D) ?_ hpt
   rw [Category.assoc, frameSlotEval_π, wFramesRightMul_π, frameSlotEval_π]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (3b-i)]** The read correction is `GL₂`-equivariant: both the
+abstract counit read and the concrete index read intertwine the `γ`-translation
+of points with the vector action. -/
+theorem readCorrection_GL (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (v : Fin 2 → ZMod N) :
+    readCorrection N (γ • v) = γ • readCorrection N v := by
+  classical
+  -- realize v as an index read
+  set pt := (constVecIndexRead N).symm v with hptdef
+  have hv : constVecIndexRead N pt = v := by
+    rw [hptdef]
+    exact (constVecIndexRead N).apply_symm_apply v
+  -- the γ-translated point
+  have hπγ : (pt.1 ≫ Spec.map (CommRingCat.ofHom
+      (constVecGLAlg N γ).hom.hom.toRingHom)) ≫ constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (CategoryStruct.comp pt.1) (constVecGLScheme_π N γ)).trans
+        pt.2)
+  -- index read of the translated point is the γ-translate
+  have hidx : constVecIndexRead N
+      ⟨pt.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom), hπγ⟩ =
+      γ • constVecIndexRead N pt := by
+    have hpre := spec_preimage_comp pt.1 (CommRingCat.ofHom
+      (constVecGLAlg N γ).hom.hom.toRingHom)
+    have hA : specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+        (AlgebraicClosure ℚ)
+        ⟨pt.1 ≫ Spec.map (CommRingCat.ofHom
+          (constVecGLAlg N γ).hom.hom.toRingHom), hπγ⟩ =
+        (specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+          (AlgebraicClosure ℚ) pt).comp (constVecGLAlg N γ).hom.hom := by
+      refine AlgHom.ext fun b => ?_
+      exact congrArg (fun q : CommRingCat.of (constVecAlgebra N : Type 0) ⟶
+        CommRingCat.of (AlgebraicClosure ℚ) => q.hom b) hpre
+    have h1 := congrArg (fun (ψ : (constVecAlgebra N : Type 0) →ₐ[ℚ]
+        AlgebraicClosure ℚ) =>
+      piAlgHomEquiv ℚ (Fin 2 → ZMod N) (SeparableClosure ℚ)
+        (precompCvIsoEquiv N ((AlgEquiv.arrowCongr AlgEquiv.refl
+          sepClosureQAlgEquiv.symm) ψ))) hA
+    have hsq : (constVecGLAlg N γ).hom.hom.comp
+        ((constVecAlgebraIso N).inv.hom.hom) =
+        ((constVecAlgebraIso N).inv.hom.hom).comp (piGLAlgHom N γ) :=
+      congrArg (fun (m : CommAlgCat.FiniteEtale.of ℚ ((Fin 2 → ZMod N) → ℚ) ⟶
+        constVecAlgebra N) => m.hom.hom) (constVecGLAlg_square_inv N γ)
+    have h2 := congrArg (fun (g : ((Fin 2 → ZMod N) → ℚ) →ₐ[ℚ]
+        (constVecAlgebra N : Type 0)) =>
+      piAlgHomEquiv ℚ (Fin 2 → ZMod N) (SeparableClosure ℚ)
+        (((AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)
+          (specPointsEquivAlgHom ℚ (constVecAlgebra N : Type 0)
+            (AlgebraicClosure ℚ) pt)).comp g)) hsq
+    refine (h1.trans h2).trans ?_
+    show piAlgHomIndex ((((AlgEquiv.arrowCongr AlgEquiv.refl
+        sepClosureQAlgEquiv.symm) (specPointsEquivAlgHom ℚ
+        (constVecAlgebra N : Type 0) (AlgebraicClosure ℚ) pt)).comp
+        ((constVecAlgebraIso N).inv.hom.hom)).comp (piGLAlgHom N γ)) =
+      γ • constVecIndexRead N pt
+    exact piAlgHomIndex_piGL N γ _
+  -- points read of the translated point is the γ-translate
+  have hpts : constVecPointsEquiv N
+      ⟨pt.1 ≫ Spec.map (CommRingCat.ofHom
+        (constVecGLAlg N γ).hom.hom.toRingHom), hπγ⟩ =
+      γ • constVecPointsEquiv N pt := constVecPointsEquiv_GL N γ pt
+  -- assemble
+  show constVecPointsEquiv N ((constVecIndexRead N).symm (γ • v)) =
+    γ • constVecPointsEquiv N ((constVecIndexRead N).symm v)
+  rw [show (constVecIndexRead N).symm (γ • v) =
+    ⟨pt.1 ≫ Spec.map (CommRingCat.ofHom
+      (constVecGLAlg N γ).hom.hom.toRingHom), hπγ⟩ from
+    (constVecIndexRead N).injective (by
+      rw [hidx, hv]
+      exact (constVecIndexRead N).apply_symm_apply _)]
+  rw [hpts, ← hptdef]
+
 end StructuresToSections
 
 end
