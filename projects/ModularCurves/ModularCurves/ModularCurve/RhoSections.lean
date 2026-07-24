@@ -3199,6 +3199,46 @@ theorem eq_of_forall_geomPt_agree [IsFinite pi] [Etale pi] [IsSeparated pi]
 
 end GenAgreeLocus
 
+section FiniteEtaleEval
+
+/-- **[T-EQ-3d-M2]** Every nonzero element of a finite étale `ℚ`-algebra has a
+nonvanishing `ℚ̄`-evaluation (the product-of-fields decomposition; the generic
+form of `corrAlgebra_exists_eval_ne`). -/
+theorem finiteEtale_exists_eval_ne (A : CommAlgCat.FiniteEtale.{0} ℚ)
+    {b : (A : Type 0)} (hb : b ≠ 0) :
+    ∃ χ : (A : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ, χ b ≠ 0 := by
+  classical
+  obtain ⟨I, hIfin, Ai, hFld, hAlgI, e, hsep⟩ :=
+    (Algebra.FormallyEtale.iff_exists_algEquiv_prod ℚ (A : Type 0)).mp
+      inferInstance
+  have heb : e b ≠ 0 := fun h => hb (e.injective (h.trans (map_zero e).symm))
+  have hcomp : ∃ i : I, e b i ≠ 0 := by
+    by_contra hall
+    exact heb (funext fun i => by
+      by_contra h
+      exact hall ⟨i, h⟩)
+  obtain ⟨i, hi⟩ := hcomp
+  letI := hFld i
+  letI := hAlgI i
+  haveI : Module.Finite ℚ (Ai i) := by
+    refine Module.Finite.of_surjective
+      ((Pi.evalAlgHom ℚ Ai i).comp e.toAlgHom).toLinearMap ?_
+    have hsurj : Function.Surjective (fun z : (A : Type 0) => e z i) :=
+      fun y => by
+        obtain ⟨w, hw⟩ := e.surjective (Function.update 0 i y)
+        exact ⟨w, (congrFun hw i).trans (Function.update_self _ _ _)⟩
+    exact hsurj
+  haveI : Algebra.IsAlgebraic ℚ (Ai i) := Algebra.IsAlgebraic.of_finite ℚ _
+  let χ₀ : Ai i →ₐ[ℚ] AlgebraicClosure ℚ := IsAlgClosed.lift
+  refine ⟨χ₀.comp ((Pi.evalAlgHom ℚ Ai i).comp e.toAlgHom), ?_⟩
+  show χ₀ (e b i) ≠ 0
+  intro h0
+  exact hi (by
+    rw [show (0 : AlgebraicClosure ℚ) = χ₀ 0 from (map_zero χ₀).symm] at h0
+    exact RingHom.injective (χ₀.toRingHom) h0)
+
+end FiniteEtaleEval
+
 end StructuresToSections
 
 end
