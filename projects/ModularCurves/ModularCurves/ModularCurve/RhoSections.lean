@@ -3325,6 +3325,154 @@ theorem qbar_frames_rel (F₁ F₂ : Spec (.of (AlgebraicClosure ℚ)) ⟶ wFram
 
 end FrameGraphs
 
+/-- **[T-EQ-3d-M4 prep]** Any two morphisms from a `Spec` into `Spec ℚ` agree
+(ring maps out of `ℚ` are unique). -/
+theorem specQhom_eq {K : Type} [CommRing K]
+    (g h : Spec (CommRingCat.of K) ⟶ Spec (CommRingCat.of ℚ)) : g = h := by
+  rw [← Spec.map_preimage g, ← Spec.map_preimage h]
+  exact congrArg Spec.map (CommRingCat.hom_ext (Subsingleton.elim _ _))
+
+section FrameGraphs2
+
+open scoped FintypeCatDiscrete
+
+variable (D : GaloisRepData N)
+
+/-- **[T-EQ-3d-M4]** Two `Ω`-frames over a common base point differ by a
+constant right translation: the pair-point of the frames square lies on some
+graph (its residue field embeds in `ℚ̄`, where the torsor relation holds), and
+the graph is a clopen immersion, so the pair factors. -/
+theorem exists_frameGraph_rel {Ω : Type} [Field Ω]
+    (F₁ F₂ : Spec (CommRingCat.of Ω) ⟶ wFrames D)
+    (hover : F₁ ≫ wFramesπ D = F₂ ≫ wFramesπ D) :
+    ∃ γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N),
+      F₂ = F₁ ≫ wFramesRightMul D γ := by
+  classical
+  set p : Spec (CommRingCat.of Ω) ⟶ pullback (wFramesπ D) (wFramesπ D) :=
+    pullback.lift F₁ F₂ hover with hp
+  obtain ⟨s₀⟩ : Nonempty (Spec (CommRingCat.of Ω)) := inferInstance
+  -- the ℚ̄-point through the image point, via the tensor presentation
+  set q₀ : PrimeSpectrum (TensorProduct ℚ (wFramesAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0)) :=
+    (AlgebraicGeometry.pullbackSpecIso ℚ (wFramesAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0)).hom.base (p.base s₀) with hq₀
+  haveI : Module.Finite ℚ (TensorProduct ℚ (wFramesAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0)) :=
+    Module.Finite.tensorProduct ℚ _ _
+  haveI : IsArtinianRing (TensorProduct ℚ (wFramesAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0)) :=
+    isArtinian_of_tower ℚ inferInstance
+  haveI hqmax : q₀.asIdeal.IsMaximal :=
+    IsArtinianRing.isMaximal_of_isPrime q₀.asIdeal
+  haveI := Ideal.Quotient.field q₀.asIdeal
+  haveI : Module.Finite ℚ ((TensorProduct ℚ (wFramesAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0)) ⧸ q₀.asIdeal) :=
+    Module.Finite.of_surjective (Ideal.Quotient.mkₐ ℚ q₀.asIdeal).toLinearMap
+      Ideal.Quotient.mk_surjective
+  haveI : Algebra.IsAlgebraic ℚ ((TensorProduct ℚ (wFramesAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0)) ⧸ q₀.asIdeal) :=
+    Algebra.IsAlgebraic.of_finite ℚ _
+  set χκ : (TensorProduct ℚ (wFramesAlgebra D : Type 0)
+      (wFramesAlgebra D : Type 0))
+      →ₐ[ℚ] AlgebraicClosure ℚ :=
+    (IsAlgClosed.lift (M := AlgebraicClosure ℚ)).comp
+      (Ideal.Quotient.mkₐ ℚ q₀.asIdeal) with hχκ
+  set pt₀ : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶
+      pullback (wFramesπ D) (wFramesπ D) :=
+    Spec.map (CommRingCat.ofHom χκ.toRingHom) ≫
+      (AlgebraicGeometry.pullbackSpecIso ℚ (wFramesAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)).inv with hpt₀
+  -- the two ℚ̄-frames and the torsor relation
+  have hG₁ : (pt₀ ≫ pullback.fst (wFramesπ D) (wFramesπ D)) ≫ wFramesπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    specQhom_eq _ _
+  have hG₂ : (pt₀ ≫ pullback.snd (wFramesπ D) (wFramesπ D)) ≫ wFramesπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    specQhom_eq _ _
+  obtain ⟨γ, hγ⟩ := qbar_frames_rel D
+    (pt₀ ≫ pullback.fst (wFramesπ D) (wFramesπ D))
+    (pt₀ ≫ pullback.snd (wFramesπ D) (wFramesπ D)) hG₁ hG₂
+  -- the ℚ̄-pair factors through the γ-graph
+  have hfac : pt₀ = (pt₀ ≫ pullback.fst (wFramesπ D) (wFramesπ D)) ≫
+      frameGraph D γ := by
+    apply pullback.hom_ext
+    · refine Eq.symm ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (CategoryStruct.comp
+        (pt₀ ≫ pullback.fst (wFramesπ D) (wFramesπ D)))
+        (frameGraph_fst D γ)).trans ?_
+      exact Category.comp_id _
+    · refine Eq.symm ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (CategoryStruct.comp
+        (pt₀ ≫ pullback.fst (wFramesπ D) (wFramesπ D)))
+        (frameGraph_snd D γ)).trans ?_
+      exact hγ.symm
+  -- hence the image point lies in the graph's range
+  have hsub : q₀.asIdeal ≤ RingHom.ker χκ.toRingHom := fun x hx =>
+    RingHom.mem_ker.mpr (by
+      show (IsAlgClosed.lift (M := AlgebraicClosure ℚ))
+        ((Ideal.Quotient.mkₐ ℚ q₀.asIdeal) x) = 0
+      rw [show (Ideal.Quotient.mkₐ ℚ q₀.asIdeal) x = 0 from
+        Ideal.Quotient.eq_zero_iff_mem.mpr hx]
+      exact map_zero _)
+  have hnetop : RingHom.ker χκ.toRingHom ≠ ⊤ := by
+    intro htop
+    have h1 : (1 : TensorProduct ℚ (wFramesAlgebra D : Type 0)
+        (wFramesAlgebra D : Type 0)) ∈ RingHom.ker χκ.toRingHom :=
+      htop ▸ Submodule.mem_top
+    have h2 := RingHom.mem_ker.mp h1
+    rw [map_one] at h2
+    exact one_ne_zero h2
+  have hker : RingHom.ker χκ.toRingHom = q₀.asIdeal :=
+    (hqmax.eq_of_le hnetop hsub).symm
+  obtain ⟨sq⟩ : Nonempty (Spec (CommRingCat.of (AlgebraicClosure ℚ))) :=
+    inferInstance
+  have hsq : sq.asIdeal = ⊥ :=
+    congrArg PrimeSpectrum.asIdeal
+      (Subsingleton.elim sq ⟨⊥, Ideal.isPrime_bot⟩)
+  have hbase : (Spec.map (CommRingCat.ofHom χκ.toRingHom)).base sq = q₀ := by
+    refine PrimeSpectrum.ext ?_
+    show Ideal.comap χκ.toRingHom sq.asIdeal = q₀.asIdeal
+    rw [hsq]
+    exact hker
+  have hp₀mem : p.base s₀ ∈ Set.range (frameGraph D γ).base := by
+    have h1 : pt₀.base sq = p.base s₀ := by
+      have h2 : pt₀.base sq =
+          (AlgebraicGeometry.pullbackSpecIso ℚ (wFramesAlgebra D : Type 0)
+            (wFramesAlgebra D : Type 0)).inv.base
+            ((Spec.map (CommRingCat.ofHom χκ.toRingHom)).base sq) := rfl
+      rw [h2, hbase, hq₀]
+      have h3 := congrArg (fun (m : pullback (wFramesπ D) (wFramesπ D) ⟶
+          pullback (wFramesπ D) (wFramesπ D)) => m.base (p.base s₀))
+        (AlgebraicGeometry.pullbackSpecIso ℚ (wFramesAlgebra D : Type 0)
+          (wFramesAlgebra D : Type 0)).hom_inv_id
+      exact h3
+    rw [← h1, hfac]
+    exact ⟨((pt₀ ≫ pullback.fst (wFramesπ D) (wFramesπ D))).base sq, rfl⟩
+  haveI := frameGraph_isOpenImmersion D γ
+  have hrange : Set.range p.base ⊆ Set.range (frameGraph D γ).base := by
+    rintro _ ⟨s, rfl⟩
+    rw [Subsingleton.elim s s₀]
+    exact hp₀mem
+  have hlift := IsOpenImmersion.lift_fac (frameGraph D γ) p hrange
+  refine ⟨γ, ?_⟩
+  have hpf : p ≫ pullback.fst (wFramesπ D) (wFramesπ D) = F₁ :=
+    pullback.lift_fst _ _ _
+  have hps : p ≫ pullback.snd (wFramesπ D) (wFramesπ D) = F₂ :=
+    pullback.lift_snd _ _ _
+  have hF₁ : IsOpenImmersion.lift (frameGraph D γ) p hrange = F₁ := by
+    have h5 := congrArg (· ≫ pullback.fst (wFramesπ D) (wFramesπ D)) hlift
+    simp only [Category.assoc, frameGraph_fst, Category.comp_id] at h5
+    exact h5.trans hpf
+  have h6 := congrArg (· ≫ pullback.snd (wFramesπ D) (wFramesπ D)) hlift
+  simp only [Category.assoc, frameGraph_snd] at h6
+  refine Eq.symm ?_
+  refine Eq.trans (congrArg (· ≫ wFramesRightMul D γ) hF₁.symm) ?_
+  exact h6.trans hps
+
+end FrameGraphs2
+
 end StructuresToSections
 
 end
