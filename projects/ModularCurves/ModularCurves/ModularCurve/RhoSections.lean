@@ -4114,6 +4114,23 @@ theorem strVW_pull_read (D : GaloisRepData N) [Fact (1 < N)]
       Spec.map (CommRingCat.ofHom (algebraMap ℚ kk)) from hqk) ?_ _
   exact congrArg (CategoryStruct.comp t) (strCondVW D str v w)
 
+omit [NeZero N] in
+/-- **[T-EQ-3d-M5 (5c) prep]** Powers collapse modulo `N` for `N`-th roots. -/
+theorem pow_mod_of_pow_N_eq_one {R : Type} [CommMonoid R] {x : R}
+    (hx : x ^ N = 1) (a : ℕ) : x ^ a = x ^ (a % N) := by
+  conv_lhs => rw [← Nat.div_add_mod a N]
+  rw [pow_add, pow_mul, hx, one_pow, one_mul]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (5c) prep]** The roots read is an `N`-th root of unity. -/
+theorem muNRootsRead_pow_N (D : GaloisRepData N) [Fact (1 < N)]
+    {W : Scheme.{0}} (b : W ⟶ Spec (CommRingCat.of ℚ))
+    (φ : W ⟶ muNRootsScheme D) (hφ : φ ≫ muNRootsSchemeπ D = b) :
+    muNRootsRead D b φ hφ ^ N = 1 :=
+  (muNPointsEquiv (Spec (CommRingCat.of ℚ)) N b
+    ⟨φ ≫ (muNSpecQIso D).inv, by
+      rw [Category.assoc, muNSpecQIso_π_inv, hφ]⟩).2
+
 end StructuresToSections
 
 end
