@@ -840,6 +840,26 @@ theorem detCompAlgHom_surjective (D : GaloisRepData N) [Fact (1 < N)] :
     ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
       (detCompMor D)).unop
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c ii]** The determinant-side comparison is a clopen immersion:
+closed from the surjective comultiplication, open from flat + mono
+(`IsOpenImmersion.of_flat_of_mono`, with étaleness by cancellation along the
+finite étale structure maps). -/
+theorem detCompScheme_isOpenImmersion (D : GaloisRepData N) [Fact (1 < N)] :
+    IsOpenImmersion (detCompScheme D) := by
+  haveI hCI : IsClosedImmersion (detCompScheme D) :=
+    IsClosedImmersion.spec_of_surjective _ (detCompAlgHom_surjective D)
+  haveI hEt2 : Etale (muNRootsSchemeπ D) := (muNRootsSchemeπ_finite_etale D).2
+  haveI hEtComp : Etale (detCompScheme D ≫ muNRootsSchemeπ D) := by
+    rw [detCompScheme_π]
+    show Etale (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (cycloUnitsAlgebra D : Type 0))))
+    rw [HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Etale)]
+    exact RingHom.etale_algebraMap.mpr inferInstance
+  haveI : Etale (detCompScheme D) :=
+    Etale.of_comp (detCompScheme D) (muNRootsSchemeπ D)
+  exact IsOpenImmersion.of_flat_of_mono _
+
 end CorrSurjective
 
 section SectionsToStructures
