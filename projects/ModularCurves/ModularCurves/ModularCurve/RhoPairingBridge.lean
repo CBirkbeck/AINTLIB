@@ -1778,6 +1778,50 @@ theorem specMap_appTop_gammaInv {R S : CommRingCat.{0}} (f : R ⟶ S) (a : R) :
     (Scheme.ΓSpecIso_inv_naturality f)
   exact hnat.symm
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i-3]** The correspondence read of a `ℚ̄`-point of the roots scheme is
+the classifying map evaluated at the root (through the roots-algebra
+identification). -/
+theorem qbarRootsRead_classify (D : GaloisRepData N) [Fact (1 < N)]
+    (φ : Spec (.of (AlgebraicClosure ℚ)) ⟶ corrSpec (muNRootsContAction D))
+    (hφ : φ ≫ corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    (((qbarPointsRead (muNRootsContAction D) ⟨φ, hφ⟩ :
+        rootsOfUnity N (AlgebraicClosure ℚ)) : (AlgebraicClosure ℚ)ˣ) :
+      AlgebraicClosure ℚ) =
+    (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0)
+        (AlgebraicClosure ℚ) ⟨φ, hφ⟩)
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) := by
+  set θ := specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0)
+    (AlgebraicClosure ℚ) ⟨φ, hφ⟩ with hθ
+  set χ := ((AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm) θ).comp
+    (muNRootsAlgebraIso D).inv.hom.hom with hχ
+  have hfactor : (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm) θ =
+      χ.comp (muNRootsAlgebraIso D).hom.hom.hom := by
+    rw [hχ, AlgHom.comp_assoc]
+    refine (AlgHom.comp_id _).symm.trans ?_
+    refine congrArg ((AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)
+      θ |>.comp) ?_
+    exact (congrArg (fun (m : muNRootsAlgebra D ⟶ muNRootsAlgebra D) => m.hom.hom)
+      (muNRootsAlgebraIso D).hom_inv_id).symm
+  have hpe : qbarPointsRead (muNRootsContAction D) ⟨φ, hφ⟩ =
+      rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ) χ) :=
+    (show qbarPointsRead (muNRootsContAction D) ⟨φ, hφ⟩ =
+      FiniteEtaleGalois.pointsEquivOfContAction ℚ (muNRootsContAction D)
+        ((AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm) θ) from rfl).trans
+      ((congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ
+        (muNRootsContAction D)) hfactor).trans (counit_read_comp_rootsIso D χ))
+  rw [hpe]
+  show sepClosureQAlgEquiv
+    (χ (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) =
+    θ ((muNRootsAlgebraIso D).inv.hom.hom
+      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)))
+  show sepClosureQAlgEquiv (sepClosureQAlgEquiv.symm
+    (θ ((muNRootsAlgebraIso D).inv.hom.hom
+      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))))) = _
+  rw [AlgEquiv.apply_symm_apply]
+
 end
 
 end ModularCurves
