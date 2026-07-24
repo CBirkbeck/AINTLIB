@@ -871,6 +871,73 @@ theorem factors_detComp_of_range (D : GaloisRepData N) [Fact (1 < N)]
   exact ⟨IsOpenImmersion.lift (detCompScheme D) φ hr,
     IsOpenImmersion.lift_fac (detCompScheme D) φ hr⟩
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c iv]** The field-generic classify lemma: the
+`μ_N`-group-scheme read of a `K`-point of the roots scheme is the classifying
+map evaluated at the cyclotomic root (the `ℚ̄`-statement's proof verbatim — every
+ingredient is field-generic). -/
+theorem muNRootsRead_classify_field (D : GaloisRepData N) [Fact (1 < N)]
+    (K : Type) [Field K] [Algebra ℚ K]
+    (φ : Spec (.of K) ⟶ corrSpec (muNRootsContAction D))
+    (hφ : φ ≫ corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ K))) :
+    (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+        (muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ K))) φ hφ) =
+    (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0) K
+        ⟨φ, hφ⟩)
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) := by
+  have h1 : muNRootsRead D
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ K))) φ hφ =
+      ((φ ≫ (muNSpecQIso D).inv) ≫
+        pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+          (terminal.from (muNAbs N))).appTop.hom
+        ((Scheme.ΓSpecIso (muNRing N)).inv.hom (muNAbsGen N)) :=
+    muNPointsEquiv_coe (Spec (CommRingCat.of ℚ)) N _ _
+  have h2 : (φ ≫ (muNSpecQIso D).inv) ≫
+      pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+        (terminal.from (muNAbs N)) =
+      (φ ≫ Spec.map (CommRingCat.ofHom
+        (muNRootsAlgebraIso D).inv.hom.hom.toRingHom)) ≫
+        Spec.map (Spec.preimage ((muNSpecFieldIso ℚ N).inv ≫
+          pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+            (terminal.from (muNAbs N)))) := by
+    rw [Spec.map_preimage]
+    show (φ ≫ (Spec.map (CommRingCat.ofHom
+        (muNRootsAlgebraIso D).inv.hom.hom.toRingHom) ≫
+        (muNSpecFieldIso ℚ N).inv)) ≫
+      pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+        (terminal.from (muNAbs N)) = _
+    simp only [Category.assoc]
+    rfl
+  refine Eq.trans (congrArg
+    (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+    (h1.trans (congrArg
+      (fun (m : Spec (.of K) ⟶ muNAbs N) =>
+        m.appTop.hom ((Scheme.ΓSpecIso (muNRing N)).inv.hom (muNAbsGen N)))
+      h2))) ?_
+  refine Eq.trans (gammaSpec_read _ (muNAbsGen N)) ?_
+  refine Eq.trans (congrArg
+    (fun (q : muNRing N ⟶ CommRingCat.of K) =>
+      q.hom (muNAbsGen N))
+    (spec_preimage_comp
+      (φ ≫ Spec.map (CommRingCat.ofHom
+        (muNRootsAlgebraIso D).inv.hom.hom.toRingHom))
+      (Spec.preimage ((muNSpecFieldIso ℚ N).inv ≫
+        pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+          (terminal.from (muNAbs N)))))) ?_
+  refine Eq.trans (congrArg
+    (Spec.preimage (φ ≫ Spec.map (CommRingCat.ofHom
+      (muNRootsAlgebraIso D).inv.hom.hom.toRingHom))).hom
+    (muNSpecFieldIso_inv_snd_gen ℚ N)) ?_
+  exact congrArg
+    (fun (q : CommRingCat.of
+        (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ⟶
+      CommRingCat.of K) =>
+      q.hom (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)))
+    (spec_preimage_comp φ (CommRingCat.ofHom
+      (muNRootsAlgebraIso D).inv.hom.hom.toRingHom))
+
 end CorrSurjective
 
 section SectionsToStructures
