@@ -4873,6 +4873,82 @@ theorem strSec_col (D : GaloisRepData N) [Fact (1 < N)]
   refine (strSec_comb D str (γ • Pi.single j 1)).trans ?_
   rw [smul_single_apply γ j 0, smul_single_apply γ j 1]
 
+/-- **[T-EQ-3d-M5 (6c) prep]** Sections of a base change are determined by
+their first legs. -/
+theorem section_ext_fst {S T : Scheme.{0}} (E : EllipticCurve S) (g : T ⟶ S)
+    (s₁ s₂ : (E.baseChange g).Point (𝟙 T))
+    (h : s₁.1 ≫ pullback.fst E.π g = s₂.1 ≫ pullback.fst E.π g) : s₁ = s₂ :=
+  Subtype.ext (pullback.hom_ext h (s₁.2.trans s₂.2.symm))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6c)]** The cover translation as an endomorphism of the
+pulled object in `Ell/ℚ`. -/
+noncomputable def strActHom (D : GaloisRepData N)
+    (X' : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    X'.pullbackAlong (strPr D X') ⟶ X'.pullbackAlong (strPr D X') where
+  baseHom := strAct D X' γ
+  base_w := by
+    show strAct D X' γ ≫ strPr D X' ≫ X'.structMap = strPr D X' ≫ X'.structMap
+    rw [← Category.assoc, strAct_pr]
+  top := pullback.map X'.curve.π (strPr D X') X'.curve.π (strPr D X')
+    (𝟙 X'.curve.E) (strAct D X' γ) (𝟙 X'.base)
+    (by rw [Category.comp_id, Category.id_comp])
+    (by rw [Category.comp_id, strAct_pr])
+  isPullback := by
+    have hfst : pullback.map X'.curve.π (strPr D X') X'.curve.π (strPr D X')
+        (𝟙 X'.curve.E) (strAct D X' γ) (𝟙 X'.base)
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, strAct_pr]) ≫
+        pullback.fst X'.curve.π (strPr D X') =
+        pullback.fst X'.curve.π (strPr D X') := by
+      rw [Limits.pullback.lift_fst, Category.comp_id]
+    have hbig : IsPullback (pullback.map X'.curve.π (strPr D X') X'.curve.π
+        (strPr D X') (𝟙 X'.curve.E) (strAct D X' γ) (𝟙 X'.base)
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, strAct_pr]) ≫
+        pullback.fst X'.curve.π (strPr D X'))
+        (pullback.snd X'.curve.π (strPr D X')) X'.curve.π
+        (strAct D X' γ ≫ strPr D X') := by
+      rw [hfst, strAct_pr]
+      exact IsPullback.of_hasPullback _ _
+    exact IsPullback.of_right hbig (Limits.pullback.lift_snd _ _ _)
+      (IsPullback.of_hasPullback X'.curve.π (strPr D X'))
+  zero_w := by
+    show Limits.pullback.lift (strPr D X' ≫ X'.curve.zero) (𝟙 (strCover D X'))
+        (by rw [Category.assoc, X'.curve.zero_π, Category.comp_id,
+          Category.id_comp]) ≫
+      pullback.map X'.curve.π (strPr D X') X'.curve.π (strPr D X')
+        (𝟙 X'.curve.E) (strAct D X' γ) (𝟙 X'.base)
+        (by rw [Category.comp_id, Category.id_comp])
+        (by rw [Category.comp_id, strAct_pr]) =
+      strAct D X' γ ≫ Limits.pullback.lift (strPr D X' ≫ X'.curve.zero)
+        (𝟙 (strCover D X'))
+        (by rw [Category.assoc, X'.curve.zero_π, Category.comp_id,
+          Category.id_comp])
+    apply Limits.pullback.hom_ext
+    · refine ((Category.assoc _ _ _).trans ((congrArg (CategoryStruct.comp _)
+        (Limits.pullback.lift_fst _ _ _)).trans
+        ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ 𝟙 X'.curve.E) (Limits.pullback.lift_fst _ _ _)).trans
+        (Category.comp_id _))))).trans ?_
+      refine Eq.symm ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (CategoryStruct.comp (strAct D X' γ))
+        (Limits.pullback.lift_fst _ _ _)).trans ?_
+      refine (Category.assoc _ _ _).symm.trans ?_
+      exact congrArg (· ≫ X'.curve.zero) (strAct_pr D X' γ)
+    · refine ((Category.assoc _ _ _).trans ((congrArg (CategoryStruct.comp _)
+        (Limits.pullback.lift_snd _ _ _)).trans
+        ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ strAct D X' γ) (Limits.pullback.lift_snd _ _ _)).trans
+        (Category.id_comp _))))).trans ?_
+      refine Eq.symm ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (CategoryStruct.comp (strAct D X' γ))
+        (Limits.pullback.lift_snd _ _ _)).trans ?_
+      exact Category.comp_id _
+
 end StructuresToSections
 
 end
