@@ -1727,6 +1727,31 @@ theorem qbarPointsRead_map
       (specPointsEquivAlgHom ℚ (corrAlgebra X : Type 0)
         (AlgebraicClosure ℚ) pt))
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i-3]** The counit read of a precomposition with the roots-algebra
+identification is the concrete root read (roots mirror of
+`counit_read_comp_cvsIso`). -/
+theorem counit_read_comp_rootsIso (D : GaloisRepData N) [Fact (1 < N)]
+    (ψ : (cycloQuotAlgebra N : Type 0) →ₐ[ℚ] SeparableClosure ℚ) :
+    FiniteEtaleGalois.pointsEquivOfContAction ℚ (muNRootsContAction D)
+      (ψ.comp (muNRootsAlgebraIso D).hom.hom.hom) =
+    rootsSepQbarEquiv N (cycloAlgHomEquivRoots N (SeparableClosure ℚ) ψ) := by
+  show FiniteEtaleGalois.pointsEquivOfContAction ℚ (muNRootsContAction D)
+    ((ConcreteCategory.hom
+      ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          (muNRootsCorrespondenceIso D).hom)))
+      ((ConcreteCategory.hom
+        ((CommAlgCat.FiniteEtale.fiber ℚ (SeparableClosure ℚ)).map
+          ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).unitIso.hom.app
+            (Opposite.op (cycloQuotAlgebra N))))) ψ)) = _
+  refine Eq.trans (pointsEquivOfContAction_map
+    ((muNRootsCorrespondenceIso D).hom) _) ?_
+  refine Eq.trans (congrArg (fun z =>
+      (muNRootsCorrespondenceIso D).hom.hom.hom z)
+    (pointsEquiv_fiber_unit _ _)) ?_
+  rfl
+
 end
 
 end ModularCurves
