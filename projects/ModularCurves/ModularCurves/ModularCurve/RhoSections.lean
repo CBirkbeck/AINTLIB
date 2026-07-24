@@ -773,6 +773,17 @@ theorem corrSpecMap_surjective
   constructor
   exact RingHom.IsIntegral.comap_surjective hint hinj
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3b]** The determinant read of frames is surjective (every unit is
+a determinant: `Matrix.GeneralLinearGroup.det_surjective`). -/
+theorem detFrameScheme_surjective (D : GaloisRepData N) :
+    Surjective (detFrameScheme D) := by
+  refine corrSpecMap_surjective (detFrameMor D) ?_
+  intro u
+  obtain ⟨A, hA⟩ := Matrix.GeneralLinearGroup.det_surjective
+    (n := Fin 2) (R := ZMod N) u
+  exact ⟨A, hA⟩
+
 end CorrSurjective
 
 section SectionsToStructures
