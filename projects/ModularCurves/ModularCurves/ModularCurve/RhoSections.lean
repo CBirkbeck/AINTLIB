@@ -3496,6 +3496,36 @@ theorem wFramesπ_surjective (D : GaloisRepData N) :
       (wFramesAlgebra D).property.left)
   · exact RingHom.injective _
 
+section StrAct
+
+open scoped FintypeCatDiscrete
+
+variable (D : GaloisRepData N)
+
+/-- **[T-EQ-3d-M5]** The right `γ`-translation of the frames cover. -/
+noncomputable def strAct (X' : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strCover D X' ⟶ strCover D X' :=
+  pullback.map X'.structMap (wFramesπ D) X'.structMap (wFramesπ D)
+    (𝟙 X'.base) (wFramesRightMul D γ) (𝟙 (Spec (CommRingCat.of ℚ)))
+    (by rw [Category.comp_id, Category.id_comp])
+    (by rw [Category.comp_id, wFramesRightMul_π])
+
+@[reassoc]
+theorem strAct_pr (X' : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strAct D X' γ ≫ strPr D X' = strPr D X' := by
+  refine (pullback.lift_fst _ _ _).trans ?_
+  exact Category.comp_id _
+
+@[reassoc]
+theorem strAct_taut (X' : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strAct D X' γ ≫ strTaut D X' = strTaut D X' ≫ wFramesRightMul D γ :=
+  pullback.lift_snd _ _ _
+
+end StrAct
+
 end StructuresToSections
 
 end
