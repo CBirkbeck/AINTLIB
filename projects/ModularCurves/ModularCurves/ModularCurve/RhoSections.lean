@@ -827,6 +827,19 @@ theorem detComp_splitting (D : GaloisRepData N) [Fact (1 < N)] :
   haveI := corrInverse_mono_of_injective (detCompMor D) (detCompMor_injective D)
   exact FiniteEtaleGalois.monoInducesIsoOnDirectSummand_op _
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c ii]** The determinant-side comultiplication is a surjective
+algebra map (epi of finite étale algebras, from the op-mono). -/
+theorem detCompAlgHom_surjective (D : GaloisRepData N) [Fact (1 < N)] :
+    Function.Surjective (detCompAlgHom D).hom.hom := by
+  haveI hmono := corrInverse_mono_of_injective (detCompMor D)
+    (detCompMor_injective D)
+  haveI : Epi ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (detCompMor D)).unop := unop_epi_of_mono _
+  exact FiniteEtaleGalois.surjective_of_epi
+    ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (detCompMor D)).unop
+
 end CorrSurjective
 
 section SectionsToStructures
