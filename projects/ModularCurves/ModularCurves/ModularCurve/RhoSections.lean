@@ -2717,6 +2717,85 @@ theorem pairSlot_basis_det (D : GaloisRepData N) [Fact (1 < N)] :
     rfl
   rw [habs, hexp, muNRootsPowScheme_one, Category.comp_id]
 
+omit [NeZero N] in
+/-- **[T-EQ-3d-A3 prep]** The raw kill of an `asSection`-transported point. -/
+theorem asSection_raw_kill {B : EllObj (CommRingCat.of ℚ)} {W : Scheme.{0}}
+    (c : W ⟶ B.base) (x : B.curve.Point c)
+    (hx : x.1 ≫ B.curve.mulByHom N = c ≫ B.curve.zero) :
+    (EllipticCurve.Point.asSection B.curve c x).1 ≫
+      (B.curve.baseChange c).mulByHom N = 𝟙 W ≫ (B.curve.baseChange c).zero := by
+  refine Eq.trans (pullback.hom_ext ?_ ?_) (Category.id_comp _).symm
+  · refine Eq.trans ((Category.assoc _ _ _).trans
+      ((congrArg ((EllipticCurve.Point.asSection B.curve c x).1 ≫ ·)
+        (B.curve.mulByHom_baseChange_fst c N)).trans
+        ((Category.assoc _ _ _).symm.trans
+          ((congrArg (· ≫ B.curve.mulByHom N)
+            (EllipticCurve.Point.asSection_val_fst B.curve c x)).trans hx)))) ?_
+    exact (pullback.lift_fst _ _ _).symm
+  · refine Eq.trans ((Category.assoc _ _ _).trans
+      ((congrArg ((EllipticCurve.Point.asSection B.curve c x).1 ≫ ·)
+        (B.curve.mulByHom_baseChange_snd c N)).trans
+        (EllipticCurve.Point.asSection_val_snd B.curve c x))) ?_
+    exact (pullback.lift_snd _ _ _).symm
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-A3]** The value-level pairing of `asSection`-transported points is
+the scheme-level pairing read of the points over the base map (the two
+presentations of the same Weil-pairing read agree, through the projection and
+the registered naturalities). -/
+theorem pairEZMap_asSection (D : GaloisRepData N) [Fact (1 < N)]
+    {B : EllObj (CommRingCat.of ℚ)} {W : Scheme.{0}} (c : W ⟶ B.base)
+    (x y : B.curve.Point c)
+    (hxr : x.1 ≫ B.curve.mulByHom N = c ≫ B.curve.zero)
+    (hyr : y.1 ≫ B.curve.mulByHom N = c ≫ B.curve.zero) :
+    pairEZMap D (B.pullbackAlong c).structMap (B.pullbackAlong c).curve
+      (EllipticCurve.Point.asSection B.curve c x)
+      (EllipticCurve.Point.asSection B.curve c y)
+      (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mpr
+        (asSection_raw_kill c x hxr))
+      (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mpr
+        (asSection_raw_kill c y hyr)) =
+    torsionPairEval D B.structMap c x y hxr hyr := by
+  have hπ2 : torsionPairEval D B.structMap c x y hxr hyr ≫
+      muNRootsSchemeπ D = (B.pullbackAlong c).structMap :=
+    torsionPairEval_π D B.structMap c x y hxr hyr
+  refine muNRoots_hom_ext D
+    (pairEZMap_π D (B.pullbackAlong c).structMap (B.pullbackAlong c).curve
+      _ _ _ _) hπ2 ?_
+  refine Eq.trans (pairEZMap_read_self D _ _ _ _ _ _) ?_
+  refine Eq.symm ?_
+  refine Eq.trans (torsionPairEval_read D B.structMap c x y hxr hyr) ?_
+  -- (eval-B x y).1 = (eval-A asSec-x asSec-y).1
+  have hvx : x.1 = (EllHom.mapPoint (B.pullbackAlongπ c) (𝟙 W)
+      (EllipticCurve.Point.asSection B.curve c x)).1 :=
+    ((EllipticCurve.Point.asSection_val_fst B.curve c x).symm).trans
+      (EllHom.mapPoint_coe (B.pullbackAlongπ c) (𝟙 W)
+        (EllipticCurve.Point.asSection B.curve c x)).symm
+  have hvy : y.1 = (EllHom.mapPoint (B.pullbackAlongπ c) (𝟙 W)
+      (EllipticCurve.Point.asSection B.curve c y)).1 :=
+    ((EllipticCurve.Point.asSection_val_fst B.curve c y).symm).trans
+      (EllHom.mapPoint_coe (B.pullbackAlongπ c) (𝟙 W)
+        (EllipticCurve.Point.asSection B.curve c y)).symm
+  refine Eq.trans (weilPairingEval_congr_raw (E := B.curve)
+    ((Category.id_comp c).symm : c = 𝟙 W ≫ c) hvx hvy hxr hyr
+    (EllHom.mapPoint_torsion (B.pullbackAlongπ c) _
+      (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mp
+        (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mpr
+          (asSection_raw_kill c x hxr))))
+    (EllHom.mapPoint_torsion (B.pullbackAlongπ c) _
+      (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mp
+        (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mpr
+          (asSection_raw_kill c y hyr))))) ?_
+  exact weilPairingEval_mapPoint (B.pullbackAlongπ c) (𝟙 W)
+    (EllipticCurve.Point.asSection B.curve c x)
+    (EllipticCurve.Point.asSection B.curve c y)
+    (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mp
+      (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mpr
+        (asSection_raw_kill c x hxr)))
+    (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mp
+      (((B.curve.baseChange c).smul_eq_zero_iff_comp_mulByHom (𝟙 W) N _).mpr
+        (asSection_raw_kill c y hyr)))
+
 end StructuresToSections
 
 end
