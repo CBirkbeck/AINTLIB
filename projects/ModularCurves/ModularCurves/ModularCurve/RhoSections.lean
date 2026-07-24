@@ -3601,6 +3601,23 @@ theorem wFrames_hom_ext_of_qbar (D : GaloisRepData N)
   rw [Category.id_comp, Category.id_comp] at h2
   exact h2
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (3) frame]** The slot-twist statement, reduced to `ℚ̄`-points
+by the density engine (the per-point computation is the next step). -/
+theorem rightMul_frameSlotEval (D : GaloisRepData N) [Fact (1 < N)]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N)
+    (hpt : ∀ pt : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶ wFrames D,
+      pt ≫ wFramesRightMul D γ ≫ frameSlotEval D v =
+      pt ≫ frameSlotEval D (γ • v)) :
+    wFramesRightMul D γ ≫ frameSlotEval D v = frameSlotEval D (γ • v) := by
+  haveI hFin : IsFinite (vRhoπ D) := (vRhoπ_finite_etale D).1
+  haveI hEt : Etale (vRhoπ D) := (vRhoπ_finite_etale D).2
+  haveI hSep : IsSeparated (vRhoπ D) :=
+    inferInstanceAs (IsSeparated (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (vRhoAlgebra D : Type 0)))))
+  refine wFrames_hom_ext_of_qbar D (pi := vRhoπ D) ?_ hpt
+  rw [Category.assoc, frameSlotEval_π, wFramesRightMul_π, frameSlotEval_π]
+
 end StructuresToSections
 
 end
