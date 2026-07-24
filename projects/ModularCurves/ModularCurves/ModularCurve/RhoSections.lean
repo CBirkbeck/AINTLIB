@@ -3570,6 +3570,37 @@ theorem finiteQ_exists_qbarPt_through (A : Type) [CommRing A] [Algebra ℚ A]
   rw [hsq]
   exact hker
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (2)]** Morphisms out of the frames scheme into a finite
+étale separated target over `ℚ` are determined by their `ℚ̄`-points. -/
+theorem wFrames_hom_ext_of_qbar (D : GaloisRepData N)
+    {Y : Scheme.{0}} {pi : Y ⟶ Spec (CommRingCat.of ℚ)}
+    [IsFinite pi] [Etale pi] [IsSeparated pi]
+    {f g : wFrames D ⟶ Y} (hfg : f ≫ pi = g ≫ pi)
+    (hpt : ∀ pt : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶ wFrames D,
+      pt ≫ f = pt ≫ g) : f = g := by
+  haveI hoi := genAgreeLocusι_isOpenImmersion pi f g hfg
+  have hsurj : Function.Surjective (genAgreeLocusι pi f g hfg).base := by
+    intro ω
+    obtain ⟨pt, hptω⟩ := finiteQ_exists_qbarPt_through
+      (wFramesAlgebra D : Type 0) ω
+    obtain ⟨w, hw⟩ := (genAgreeLocus_factor_iff pi f g hfg pt).mpr (hpt pt)
+    obtain ⟨s₀⟩ : Nonempty (Spec (CommRingCat.of (AlgebraicClosure ℚ))) :=
+      inferInstance
+    refine ⟨w.base s₀, ?_⟩
+    have h1 : (genAgreeLocusι pi f g hfg).base (w.base s₀) =
+        (w ≫ genAgreeLocusι pi f g hfg).base s₀ := rfl
+    rw [h1, hw]
+    exact hptω s₀
+  haveI : Epi (genAgreeLocusι pi f g hfg).base :=
+    (TopCat.epi_iff_surjective _).mpr hsurj
+  haveI : IsIso (genAgreeLocusι pi f g hfg) :=
+    AlgebraicGeometry.IsOpenImmersion.isIso (genAgreeLocusι pi f g hfg)
+  have h2 := (genAgreeLocus_factor_iff pi f g hfg (𝟙 _)).mp
+    ⟨inv (genAgreeLocusι pi f g hfg), IsIso.inv_hom_id _⟩
+  rw [Category.id_comp, Category.id_comp] at h2
+  exact h2
+
 end StructuresToSections
 
 end
