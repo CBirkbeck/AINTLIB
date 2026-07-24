@@ -3762,6 +3762,138 @@ theorem constVecCorrPt_GL (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
     (constVecCorrPtRing N v)).symm) ?_
   exact (congrArg Spec.map hring).trans (constVecCorrPt_eq_Spec N (γ • v)).symm
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (3b)]** THE SLOT TWIST: right translation followed by slot
+evaluation is slot evaluation at the translated vector. -/
+theorem rightMul_frameSlotEval_eq (D : GaloisRepData N) [Fact (1 < N)]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N) :
+    wFramesRightMul D γ ≫ frameSlotEval D v = frameSlotEval D (γ • v) := by
+  classical
+  have hcond : ∀ w : Fin 2 → ZMod N,
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+        constVecCorrPt N w) ≫ constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    fun w => (Category.assoc _ _ _).trans
+      ((congrArg (CategoryStruct.comp (Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))))) (constVecCorrPt_π N w)).trans
+        (Category.comp_id _))
+  refine rightMul_frameSlotEval D γ v ?_
+  intro pt
+  have hpair : ∀ (q : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶ wFrames D)
+      (w : Fin 2 → ZMod N),
+      q ≫ frameSlotEval D w =
+      pullback.lift (Spec.map (CommRingCat.ofHom
+          (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ constVecCorrPt N w) q
+        ((hcond w).trans (specQhom_eq _ _).symm) ≫ frameEval D := by
+    intro q w
+    rw [frameSlotEval, ← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst,
+        ← Category.assoc]
+      exact congrArg (· ≫ constVecCorrPt N w) (specQhom_eq _ _)
+    · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd,
+        Category.comp_id]
+  have hLHS := hpair (pt ≫ wFramesRightMul D γ) v
+  have hRHS := hpair pt (γ • v)
+  refine Eq.trans (Category.assoc _ _ _).symm (hLHS.trans (Eq.trans ?_
+    hRHS.symm))
+  set P₁ := pullback.lift (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ constVecCorrPt N v)
+      (pt ≫ wFramesRightMul D γ)
+      ((hcond v).trans (specQhom_eq _ _).symm) with hP₁
+  set P₂ := pullback.lift (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ constVecCorrPt N (γ • v)) pt
+      ((hcond (γ • v)).trans (specQhom_eq _ _).symm) with hP₂
+  have hp₁ : P₁ ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) ≫
+      constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    (Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ constVecSchemeπ N) (pullback.lift_fst _ _ _)).trans
+        (hcond v))
+  have hp₂ : P₂ ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D) ≫
+      constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    (Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ constVecSchemeπ N) (pullback.lift_fst _ _ _)).trans
+        (hcond (γ • v)))
+  have hread₁ := frameEval_points D P₁ hp₁
+  have hread₂ := frameEval_points D P₂ hp₂
+  refine congrArg Subtype.val ((vRhoPointsEquiv D).injective
+    (hread₁.trans (Eq.trans ?_ hread₂.symm)))
+  -- (A*γ) • c v = A • c (γ•v)
+  have hm1 : (wFramesPointsEquiv D ⟨P₁ ≫ pullback.snd (constVecSchemeπ N)
+      (wFramesπ D), by rw [Category.assoc, ← pullback.condition]; exact hp₁⟩)
+      = wFramesPointsEquiv D ⟨pt ≫ wFramesRightMul D γ, specQhom_eq _ _⟩ :=
+    congrArg (wFramesPointsEquiv D) (Subtype.ext (pullback.lift_snd _ _ _))
+  have hm1' : (constVecPointsEquiv N ⟨P₁ ≫ pullback.fst (constVecSchemeπ N)
+      (wFramesπ D), by rw [Category.assoc]; exact hp₁⟩) =
+      constVecPointsEquiv N ⟨Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ constVecCorrPt N v,
+        hcond v⟩ :=
+    congrArg (constVecPointsEquiv N) (Subtype.ext (pullback.lift_fst _ _ _))
+  have hm5 : (wFramesPointsEquiv D ⟨P₂ ≫ pullback.snd (constVecSchemeπ N)
+      (wFramesπ D), by rw [Category.assoc, ← pullback.condition]; exact hp₂⟩)
+      = wFramesPointsEquiv D ⟨pt, specQhom_eq _ _⟩ :=
+    congrArg (wFramesPointsEquiv D) (Subtype.ext (pullback.lift_snd _ _ _))
+  have hm5' : (constVecPointsEquiv N ⟨P₂ ≫ pullback.fst (constVecSchemeπ N)
+      (wFramesπ D), by rw [Category.assoc]; exact hp₂⟩) =
+      constVecPointsEquiv N ⟨Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ constVecCorrPt N (γ • v),
+        hcond (γ • v)⟩ :=
+    congrArg (constVecPointsEquiv N) (Subtype.ext (pullback.lift_fst _ _ _))
+  -- the frames read of the translated point
+  have hframes : wFramesPointsEquiv D ⟨pt ≫ wFramesRightMul D γ,
+      specQhom_eq _ _⟩ =
+      wFramesPointsEquiv D ⟨pt, specQhom_eq _ _⟩ * γ :=
+    qbarPointsRead_map (frameRightMulMor D γ) ⟨pt, specQhom_eq _ _⟩
+  -- the constVec γ-law through the corrected point
+  have hGLπ : (Spec.map (CommRingCat.ofHom (algebraMap ℚ
+      (AlgebraicClosure ℚ))) ≫ constVecCorrPt N v) ≫
+      Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom) ≫
+      constVecSchemeπ N =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    (congrArg (CategoryStruct.comp _) (constVecGLScheme_π N γ)).trans
+      (hcond v)
+  have hGL := constVecPointsEquiv_GL N γ
+    ⟨Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+      constVecCorrPt N v, hcond v⟩
+  have htrans : (⟨(Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (AlgebraicClosure ℚ))) ≫ constVecCorrPt N v) ≫
+      Spec.map (CommRingCat.ofHom (constVecGLAlg N γ).hom.hom.toRingHom),
+        (Category.assoc _ _ _).trans hGLπ⟩ :
+      { h : Spec (.of (AlgebraicClosure ℚ)) ⟶
+          Spec (CommRingCat.of (constVecAlgebra N : Type 0)) //
+        h ≫ constVecSchemeπ N = Spec.map (CommRingCat.ofHom
+          (algebraMap ℚ (AlgebraicClosure ℚ))) }) =
+      ⟨Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+        constVecCorrPt N (γ • v), hcond (γ • v)⟩ := by
+    refine Subtype.ext ?_
+    refine (Category.assoc _ _ _).trans ?_
+    exact congrArg (CategoryStruct.comp (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (AlgebraicClosure ℚ))))) (constVecCorrPt_GL γ v)
+  have hcγ : constVecPointsEquiv N
+      ⟨Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+        constVecCorrPt N (γ • v), hcond (γ • v)⟩ =
+      γ • constVecPointsEquiv N
+        ⟨Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) ≫
+          constVecCorrPt N v, hcond v⟩ :=
+    (congrArg (constVecPointsEquiv N) htrans).symm.trans hGL
+  -- assemble
+  refine Eq.trans (congrArg (· • constVecPointsEquiv N
+      ⟨P₁ ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D), by
+        rw [Category.assoc]; exact hp₁⟩) (hm1.trans hframes)) ?_
+  refine Eq.trans (congrArg ((wFramesPointsEquiv D ⟨pt, specQhom_eq _ _⟩ *
+    γ) • ·) hm1') ?_
+  refine Eq.trans (mul_smul _ _ _) ?_
+  refine Eq.trans (congrArg (wFramesPointsEquiv D ⟨pt, specQhom_eq _ _⟩ • ·)
+    hcγ.symm) ?_
+  refine Eq.symm ?_
+  refine Eq.trans (congrArg (· • constVecPointsEquiv N
+      ⟨P₂ ≫ pullback.fst (constVecSchemeπ N) (wFramesπ D), by
+        rw [Category.assoc]; exact hp₂⟩) hm5) ?_
+  exact congrArg (wFramesPointsEquiv D ⟨pt, specQhom_eq _ _⟩ • ·) hm5'
+
 end StructuresToSections
 
 end
