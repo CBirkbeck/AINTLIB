@@ -25702,6 +25702,30 @@ REMAINING = PIN-6 (hcore): forall v w, coordPairLift(framedTorsionIsoPinned)(1 T
     plumbing (frameProdAlgebraIso, tensorObj-map-lemmas from the T-EQ-2 era — grep
     FiniteEtaleGalois.tensor lemmas before hand-rolling).
 
+#### [T-EQ-3c-i] Pointwise FramedSymp from the carve condition (2026-07-24 beastmode)
+The dictionary still needs hsymp (pointwise FramedSymp) besides the now-discharged
+hsymp_scheme. Derive from hcond (pairEZMap = frameDetMap) by ℚ̄-point reads. LEAVES:
+i-1. qbarPointsRead (generic): for X : ContAction, the ℚ̄-over-points of
+  Spec((inverse.obj X).unop-ring) ≃ X-set := (specPointsEquivAlgHom trans
+  arrowCongr-sepClosure).trans (pointsEquivOfContAction ℚ X) — generalize the
+  wFramesPointsEquiv-def (YRho ~2980/5684 usage shape); bridge-lemmas:
+  wFramesPointsEquiv = qbarPointsRead (frameContAction) (rfl-check),
+  constVecPointsEquiv = qbarPointsRead (constVecContAction) (rfl-check vs :3281 def ✓ same shape).
+i-2. qbarPointsRead_inverse_map (generic naturality): read(pt ≫ Spec.map(ofHom
+  ((inverse.map m).unop).ring)) = m-set (read pt) — generalize
+  wFramesPointsEquiv_rightMul's hA/hB/hC-pattern (Spec.preimage-extraction +
+  arrowCongr-transport + pointsEquivOfContAction_map).
+i-3. det-read: muNRootsRead-vs-counit-read bridge at muNRootsContAction (via the
+  landed muNRootsCorrespondence-pin family — check cycloAlgHomEquivRoots /
+  muNRootsCorrespondenceIso exact shapes; if the bridge is heavy, express FramedSymp's
+  RHS p(det(wFramesPointsEquiv…)) directly through qbarPointsRead-naturality on
+  detFrameMor ≫ detCompMor and the ΓSpecIso-coercion of the muN-read — align the two
+  Γ(Spec ℚ̄)-values through muNPointsEquiv's ℚ̄-instance).
+i-4. eval-side: pairEZMap_read at k := t (LANDED) + weilPairingEval_restrict register +
+  pull-vs-restrict index-congr (weilPairingEval_congr_raw LANDED) + the
+  ΓSpecIso/Γ.map-at-ℚ̄ plumbing => FramedSymp-LHS.
+i-5. assemble framedSymp_of_pairEZMap : hcond → FramedSymp.
+
 #### [T-EQ-3] Value-equivalence (the KM 4.7 content) — status: open, deps: T-CV-4,T-EQ-2
 Statement: per (T', k): {sections of the carved-quotient I over k} ≃
 RhoLevelStructure D (k≫sT) (E.baseChange k).
