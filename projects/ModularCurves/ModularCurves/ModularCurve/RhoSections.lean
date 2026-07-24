@@ -3066,6 +3066,37 @@ theorem strLevel_isNaiveFullLevel (D : GaloisRepData N) [Fact (1 < N)]
     (((X'.curve.baseChange (strPr D X')).smul_eq_zero_iff_comp_mulByHom
       t N _).mpr hpullQ) hNK hord z hz
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-B]** The tautological symplectically-framed value over the
+cover. -/
+noncomputable def strValue (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve) :
+    (sympFramedProblem D).obj (Opposite.op (X'.pullbackAlong (strPr D X'))) :=
+  ⟨⟨⟨⟨EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 0 1)),
+      EllipticCurve.Point.asSection X'.curve (strPr D X')
+        (strPt D str (Pi.single 1 1))⟩,
+    strLevel_isNaiveFullLevel D str⟩,
+    ⟨strTaut D X', strTaut_π D X'⟩⟩,
+  strCond D str⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-B]** The classified `Z`-point of the tautological value. -/
+noncomputable def strZ (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve) :
+    { h : strCover D (X.pullbackAlong k) ⟶ d.Z //
+      h ≫ d.f = strPr D (X.pullbackAlong k) ≫ k } :=
+  (d.eqv (strPr D (X.pullbackAlong k) ≫ k)).symm
+    ((sympFramedProblem D).map
+      (EllObj.toPullbackAlong
+        (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))).op
+      (strValue D str))
+
 end StructuresToSections
 
 end
