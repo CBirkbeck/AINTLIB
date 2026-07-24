@@ -1822,6 +1822,113 @@ theorem qbarRootsRead_classify (D : GaloisRepData N) [Fact (1 < N)]
       (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))))) = _
   rw [AlgEquiv.apply_symm_apply]
 
+section DefeqProbes
+open scoped FintypeCatDiscrete
+
+example (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsAlgebra D = corrAlgebra (muNRootsContAction D) := rfl
+example (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsScheme D = corrSpec (muNRootsContAction D) := rfl
+example (D : GaloisRepData N) [Fact (1 < N)] :
+    muNRootsSchemeπ D = corrSpecπ (muNRootsContAction D) := rfl
+example (D : GaloisRepData N) : wFrames D = corrSpec (frameContAction D) := rfl
+example (D : GaloisRepData N) : wFramesπ D = corrSpecπ (frameContAction D) := rfl
+example (D : GaloisRepData N) :
+    wFramesPointsEquiv D = qbarPointsRead (frameContAction D) := rfl
+example (D : GaloisRepData N) :
+    detFrameScheme D = corrSpecMap (detFrameMor D) := rfl
+example (D : GaloisRepData N) [Fact (1 < N)] :
+    detCompScheme D = corrSpecMap (detCompMor D) := rfl
+
+end DefeqProbes
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i-3]** The `μ_N`-group-scheme read of a `ℚ̄`-point of the roots
+scheme is the classifying map evaluated at the root (LHS half of the DS3 keystone:
+`muNRootsRead` through `muNSpecQIso` collapses to the classifying value of the
+point at the root of the cyclotomic model). -/
+theorem muNRootsRead_classify (D : GaloisRepData N) [Fact (1 < N)]
+    (φ : Spec (.of (AlgebraicClosure ℚ)) ⟶ corrSpec (muNRootsContAction D))
+    (hφ : φ ≫ corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+        (muNRootsRead D
+          (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) φ hφ) =
+    (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0)
+        (AlgebraicClosure ℚ) ⟨φ, hφ⟩)
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) := by
+  have h1 : muNRootsRead D
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) φ hφ =
+      ((φ ≫ (muNSpecQIso D).inv) ≫
+        pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+          (terminal.from (muNAbs N))).appTop.hom
+        ((Scheme.ΓSpecIso (muNRing N)).inv.hom (muNAbsGen N)) :=
+    muNPointsEquiv_coe (Spec (CommRingCat.of ℚ)) N _ _
+  have h2 : (φ ≫ (muNSpecQIso D).inv) ≫
+      pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+        (terminal.from (muNAbs N)) =
+      (φ ≫ Spec.map (CommRingCat.ofHom
+        (muNRootsAlgebraIso D).inv.hom.hom.toRingHom)) ≫
+        Spec.map (Spec.preimage ((muNSpecFieldIso ℚ N).inv ≫
+          pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+            (terminal.from (muNAbs N)))) := by
+    rw [Spec.map_preimage]
+    show (φ ≫ (Spec.map (CommRingCat.ofHom
+        (muNRootsAlgebraIso D).inv.hom.hom.toRingHom) ≫
+        (muNSpecFieldIso ℚ N).inv)) ≫
+      pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+        (terminal.from (muNAbs N)) = _
+    simp only [Category.assoc]
+    rfl
+  refine Eq.trans (congrArg
+    (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+    (h1.trans (congrArg
+      (fun (m : Spec (.of (AlgebraicClosure ℚ)) ⟶ muNAbs N) =>
+        m.appTop.hom ((Scheme.ΓSpecIso (muNRing N)).inv.hom (muNAbsGen N)))
+      h2))) ?_
+  refine Eq.trans (gammaSpec_read _ (muNAbsGen N)) ?_
+  refine Eq.trans (congrArg
+    (fun (q : muNRing N ⟶ CommRingCat.of (AlgebraicClosure ℚ)) =>
+      q.hom (muNAbsGen N))
+    (spec_preimage_comp
+      (φ ≫ Spec.map (CommRingCat.ofHom
+        (muNRootsAlgebraIso D).inv.hom.hom.toRingHom))
+      (Spec.preimage ((muNSpecFieldIso ℚ N).inv ≫
+        pullback.snd (terminal.from (Spec (CommRingCat.of ℚ)))
+          (terminal.from (muNAbs N)))))) ?_
+  refine Eq.trans (congrArg
+    (Spec.preimage (φ ≫ Spec.map (CommRingCat.ofHom
+      (muNRootsAlgebraIso D).inv.hom.hom.toRingHom))).hom
+    (muNSpecFieldIso_inv_snd_gen ℚ N)) ?_
+  exact congrArg
+    (fun (q : CommRingCat.of
+        (AdjoinRoot ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ)) =>
+      q.hom (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)))
+    (spec_preimage_comp φ (CommRingCat.ofHom
+      (muNRootsAlgebraIso D).inv.hom.hom.toRingHom))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i-3] THE DS3 KEYSTONE** — the `μ_N`-group-scheme read of a `ℚ̄`-point
+of the roots scheme equals the correspondence read (`qbarPointsRead`): the
+group-scheme points dictionary and the Galois-set points dictionary classify a
+point by the same root of unity. (The binders are stated on the correspondence
+spelling; `muNRootsScheme D ≡ corrSpec (muNRootsContAction D)` and
+`muNRootsSchemeπ D ≡ corrSpecπ (muNRootsContAction D)` hold definitionally, so
+group-scheme-side points can be passed directly.) -/
+theorem muNRoots_correspondence_read (D : GaloisRepData N) [Fact (1 < N)]
+    (φ : Spec (.of (AlgebraicClosure ℚ)) ⟶ corrSpec (muNRootsContAction D))
+    (hφ : φ ≫ corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    (Scheme.ΓSpecIso (CommRingCat.of (AlgebraicClosure ℚ))).hom.hom
+        (muNRootsRead D
+          (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) φ hφ) =
+    (((qbarPointsRead (muNRootsContAction D) ⟨φ, hφ⟩ :
+        rootsOfUnity N (AlgebraicClosure ℚ)) : (AlgebraicClosure ℚ)ˣ) :
+      AlgebraicClosure ℚ) :=
+  (muNRootsRead_classify D φ hφ).trans (qbarRootsRead_classify D φ hφ).symm
+
 end
 
 end ModularCurves
