@@ -5270,6 +5270,49 @@ theorem strZ_equivariant (D : GaloisRepData N) [Fact (1 < N)]
   have hsub := (d.eqv (strPr D (X.pullbackAlong k) ≫ k)).injective hfinal
   exact congrArg Subtype.val hsub
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6]** The descent-ready invariant map over the cover: the
+classified `Z`-point followed by the quotient projection. -/
+noncomputable def strSigmaP (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve) :
+    strCover D (X.pullbackAlong k) ⟶ d.σZ.relQuotient d.f d.over_base :=
+  (strZ D d k str).1 ≫ d.σZ.relQuotientπ d.f d.over_base
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 (6g)]** σP is invariant under the cover translation. -/
+theorem strAct_strSigmaP (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strAct D (X.pullbackAlong k) γ ≫ strSigmaP D d k str =
+      strSigmaP D d k str := by
+  rw [strSigmaP, ← Category.assoc, strZ_equivariant, Category.assoc,
+    d.σZ.hom_comp_relQuotientπ d.f d.over_base γ]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6]** σP lies over the base leg `strPr ≫ k`. -/
+theorem strSigmaP_struct (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve) :
+    strSigmaP D d k str ≫ d.σZ.relQuotientStruct d.f d.over_base =
+      strPr D (X.pullbackAlong k) ≫ k := by
+  rw [strSigmaP, Category.assoc,
+    d.σZ.relQuotientπ_comp_relQuotientStruct d.f d.over_base,
+    (strZ D d k str).2]
+
 end StructuresToSections
 
 end
