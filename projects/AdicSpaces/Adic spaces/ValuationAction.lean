@@ -36,7 +36,7 @@ namespace ValuationSpectrum
 
 section GroupAction
 
-variable (G : Type*) [Group G] [Finite G]
+variable (G : Type*) [Group G]
 variable (A : Type*) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
 variable [MulSemiringAction G A] [ContinuousConstSMul G A]
 

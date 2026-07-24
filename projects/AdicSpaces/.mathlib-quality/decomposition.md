@@ -1,658 +1,931 @@
-# Decomposition — Finite-jet pinching (Campaign 4, 2026-07-16)
+# Decomposition — Campaign 5: the adic Fargues–Fontaine curve (definition layer)
 
-Source: **[FJP]** *Finite-jet pinching: a uniform strongly sheafy domain which is not stably
-uniform*, Anonymous, 16 July 2026, 27 pp. Local copy: `refs/AdicSpaces/sheafyring.pdf`
-(local-only, never committed). All quotes below are verbatim from that PDF; page numbers refer
-to it. §7 (derived) is out of scope by owner instruction.
+**Status: APPROVED 2026-07-24 (owner sign-off; skeleton build-verified green).**
+Written 2026-07-24 by `/develop`. Companion files: `plan.md`, `tickets.md`,
+`chatgpt-packet-fargues-fontaine-plan-2026-07-24.md` (external-review packet; see §0.3).
 
-## §0 Source-verification provenance (the owner's "check very carefully" mandate)
+## §0. Provenance, priors, external review
 
-The paper was verified in **three independent passes** before this decomposition was accepted:
+### §0.1 Primary source and the faithfulness anchor
 
-1. **Planner pass** (inline, twice over §§1–6 during reading): checked every proof step,
-   including the support-monoid closure cases of (1.8), the quotient-norm = max computations,
-   `KJ = Q³𝒞` both inclusions, the (3.3) collapse `y = ϖⁿXⁿ(W⁻ⁿy)`, all constant-chases of
-   §4, and the §5 gluing chain. **No errors found.**
-2. **Hostile referee pass on §4** (the sheafiness-critical strict-localization machinery):
-   attacked Lemmas 4.1–4.6 and Prop 4.5 with mandated kill-shots. Highlights: the m = 1
-   degeneration (⋀² = 0) was attacked with explicit candidate zero-divisor data — the
-   candidate `gT−f` is always monic-after-localization or a unit, `ann = 0`; the
-   flat-base-change step was attacked — completion is flat but **not faithfully flat**, and
-   `H₀` genuinely collapses (at the 𝒞-vertex with datum `(W; ϖ)`, `r = ϖT − W` becomes a unit
-   with inverse `−W⁻¹∑(ϖW⁻¹)ⁿTⁿ`, so `C_α = 0` — exactly [FJP] Remark 3.3); the paper claims
-   only positive degrees transfer, which is all it uses. Koszul unit-scaling needs the
-   wedge-scaling isomorphism `e_{i₁}∧…∧e_{i_j} ↦ (∏ u_{i_t})·e_{i₁}∧…∧e_{i_j}` (recorded for
-   the implementer). **Verdict: all of §4 SOUND, no bugs, no gaps.**
-3. **Hostile referee pass on §§1–3, 5, 6**: attacked all eleven flagged claims by explicit
-   computation (support additivity subcases; `(f+Qg)ⁿ = fⁿ + nf^{n−1}Qg` both directions;
-   `𝒜° = 𝒜₀` via the restriction-of-multiplicative-norm; the `1 = 0` evaluation happening
-   inside `k⟨W⟩`, never on `L`; embedding-cancellation and the OMT upgrade; `S_d` additivity
-   for §6). **Verdict: all SOUND.** Two presentational nits only (multiplicativity of the
-   evaluation map in Lemma 1.1 asserted-not-derived — routine density argument; the
-   finite-covers reduction feeding the sheaf-on-basis argument left tacit) — both are
-   handled explicitly in our leaves.
+Primary source: **[BFHHLWY]** C. Birkbeck, T. Feng, D. Hansen, S. Hong, Q. Li, A. Wang,
+L. Ye, *Extensions of vector bundles on the Fargues–Fontaine curve*, arXiv:1705.00710v3
+(local: `refs/AdicSpaces/1705.00710-BFHHLWY-extensions-ff-curve.pdf`), **Definition
+2.1.1, p. 6** (verbatim):
 
-**V0 gate (consumed-theorem check), run 2026-07-16**: `lean_verify` on
-`ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b` returns axioms
-`[propext, Classical.choice, Quot.sound]` — **axiom-clean, no sorryAx**. The 828b input to
-this campaign is genuinely proven. (File-level sorries in `WedhornCechAcyclicity.lean`/
-`Cor832.lean`/`FaithfulLocLift.lean` are off its dependency cone.)
+> Let E be a finite extension of **Q**_p, with uniformizer π, ring of integers E°, and
+> residue field **F**_q where q = p^f, and let F/**F**_q be an algebraically closed
+> perfectoid field, with ring of integers F° and pseudouniformizer ϖ.
+> Let W_{E°}(F°) = W(F°) ⊗_{W(**F**_q)} E° be the ramified Witt vectors of F° with
+> coefficients in E°. Define
+>     𝒴_{E,F} = Spa(W_{E°}(F°)) \ {|p[ϖ]| = 0},
+> and let φ : 𝒴_{E,F} → 𝒴_{E,F} be the Frobenius automorphism of 𝒴_{E,F} induced by the
+> natural q-Frobenius φ_q = φ^f ⊗ 1 on W_{E°}(F°). The (mixed-characteristic) *adic
+> Fargues-Fontaine curve* 𝒳_{E,F} is
+>     𝒳_{E,F} = 𝒴_{E,F}/φ^**Z**.
 
-## Skeleton location
+And **Proposition 2.1.2** (p. 6): "**(Kedlaya).** For any pair (E,F) as above, 𝒳_{E,F}
+is a Noetherian adic space over Spa E. *Proof.* This is one of the main results of
+[Ked16]. □"
 
-Every leaf below exists as a `:= by sorry` declaration. `lake build «Adic spaces».FiniteJetMain`
-**passes (3084 jobs, sorries only, no type errors)** — verified 2026-07-16. Files (all under
-`projects/AdicSpaces/Adic spaces/`):
+**Scope anchor.** The paper itself splits "the definition" (Def 2.1.1: a quotient of a
+subspace of an adic spectrum by a group action) from "the quotient is a Noetherian adic
+space" (Prop 2.1.2, delegated wholesale to Kedlaya). This campaign formalises the
+content of **Def 2.1.1** — the spaces, the action, and every point-set fact needed for
+the quotient to be honest (covering, proper discontinuity, freeness, open quotient map,
+chart embeddings, quasicompactness). The analogue of Prop 2.1.2 (structure
+presheaf/sheafiness on 𝒳) is explicitly a **follow-on campaign**, mirroring the paper's
+own division of labour.
 
-| File | Leaves (sorry count) | [FJP] |
-|---|---|---|
-| `RestrictedLaurent.lean` | 63 | §1, Prop 2.3 (L-layer) |
-| `JetDualNumberNorm.lean` | 20 | §1.4, (5.2) power formula |
-| `FiniteJetRings.lean` | 58 | Def 1.2, Prop 2.1, Lemma 2.2, (2.1a–d) |
-| `FiniteJetUniformDomain.lean` | 14 | Prop 2.3, Prop 2.4, (5.2) |
-| `FiniteJetNoetherianVertices.lean` | 12 | Prop 2.1 (strong noeth), Thm 5.3 input |
-| `FiniteJetGraphKoszul.lean` | 15 | Lemma 4.2 |
-| `FiniteJetStrictLocalization.lean` | 25 | Lemmas 4.1, 4.3, 4.4, Prop 4.5 |
-| `FiniteJetFunctoriality.lean` | 53 | Lemma 1.1, 4.6, 5.1 |
-| `FiniteJetSheafTransfer.lean` | 3 | Lemma 5.2, Thm 5.3 |
-| `FiniteJetChart.lean` | 10 | Prop 3.1, Cor 3.2 |
-| `FiniteJetMain.lean` | **0** | Thm 1.3 (assembly compiles from the leaves) |
+Secondary sources (construction detail the paper deliberately omits — §2.1 opens "we
+content ourselves with giving just a cursory introduction to the construction", so per
+the source-gap fallback chain the proofs are drawn from):
 
-Naming: `𝓐 = FiniteJet.JetA F`, `𝓑 = JetB F = DualNumber (K⟨W⟩)`, `𝓒 = JetC F = (L F)⟨Q⟩`,
-`𝓓 = JetD F = DualNumber (L F)`, `L F = RestrictedLaurent K`, `K = LaurentSeries F`.
+- **[Ked-AWS]** Kedlaya, *Sheaves, stacks, and shtukas*, AWS 2017 notes (local:
+  `refs/AdicSpaces/kedlaya-aws-sheaves-stacks-shtukas.pdf`), §3.1 — Definition 3.1.2,
+  Definition 3.1.5, **Remark 3.1.9** (the covering; quoted at R3 below), Remark 3.1.10,
+  Remark 3.1.11.
+- **[SW]** Scholze–Weinstein, *Berkeley Lectures on p-adic Geometry* (local:
+  `refs/AdicSpaces/scholze-weinstein-berkeley-lectures.pdf`), §12.2 (κ, κ∘φ = pκ,
+  the four special points), §13.1 ("(p,[p♭])-adic topology"), Definition 13.5.1.
+- **[Bhatt]** Bhatt, *Lecture notes for a class on perfectoid spaces* (local:
+  `refs/AdicSpaces/bhatt-679-perfectoid-lectures.pdf`), §3.1–3.2 (perfectoid fields of
+  char p; Corollary 3.2.3 completeness pattern).
+- **[KL15]** Kedlaya–Liu, *Relative p-adic Hodge theory: Foundations* (local:
+  `refs/AdicSpaces/kedlaya-liu-relative-padic-hodge-1301.0792.pdf`), §8.7 (corroboration;
+  their construction is via extended Robba rings, not mirrored here).
+- **[Ked16]** Kedlaya, *Noetherian properties of Fargues–Fontaine curves* (local:
+  `refs/AdicSpaces/kedlaya-noetherian-ff-curves-1602.06899.pdf`) — reserved for the
+  follow-on campaign (Prop 2.1.2 layer); not load-bearing here.
+- **[FF]** Fargues–Fontaine, *Courbes et fibrés vectoriels en théorie de Hodge p-adique*
+  (local: `refs/AdicSpaces/fargues-fontaine-courbe.pdf`) — reserved for the stretch
+  nonemptiness leaf (§1.4, multiplicative Gauss norms).
+
+### §0.2 Scope decisions (deliberate deviations from Def 2.1.1, each justified)
+
+- **D1 (E = Q_p).** Def 2.1.1 is stated for general E/Q_p via ramified Witt vectors
+  W_{E°}(F°) = W(F°) ⊗_{W(F_q)} E°. Mathlib has no ramified Witt vectors and no
+  canonical W(F_q)-algebra structure on E°; building them is a separate project. We
+  formalise the case **E = Q_p** (q = p, f = 1, W_{E°}(F°) = W(F°), φ_q = the Witt
+  Frobenius), which is the definition verbatim at that specialisation. File layout keeps
+  a `FarguesFontaine/` namespace so general E slots in beside it later.
+- **D2 (F generalised).** Def 2.1.1 takes F algebraically closed. Algebraic closedness
+  is not used anywhere in the construction of 𝒴, φ, 𝒳 — [Ked-AWS, Hyp. 3.1.1 +
+  Rem. 3.1.9] runs for any perfectoid Tate R (a fortiori any perfectoid field) of char
+  p, and [KL15 §8.7] for perfectoid Banach algebras. We state everything for
+  `IsPerfectoidField p F` + `CharP F p` (maximal-generality rule); the alg. closed case
+  is an instance.
+- **D3 (topological layer now, presheaf later).** See §0.1 scope anchor.
+- **D4 (windows in cleared-integer form).** [Ked-AWS, Rem. 3.1.9] writes rational
+  exponents (`v(p)^{cp^n} ≤ v(ϖ)`). Rational powers of values are not literal objects in
+  a general value group; the standard reading (and the only one that type-checks) clears
+  denominators using multiplicativity and `[ϖ]^m = [ϖ^m]`. Our `KGE`/`KLE` predicates
+  are exactly that reading; the Lean ↔ source match paragraphs at R3 record it.
+- **D5 (action convention).** The project's `ValuationSpectrum` action is
+  `g • v = comap (g⁻¹) v = v ∘ φ^{-g}`, under which κ(g•v) = κ(v)/p^g and windows shift
+  **down**: `φ^k(U_n) = U_{n-k}`. [SW §12.2] uses the pushforward convention (κ∘φ = pκ,
+  windows shift up). Same orbits, same quotient; the sign is recorded in
+  `zsmul_windowU`'s docstring.
+- **D6 (ϖ-independence).** Def 2.1.1 fixes one ϖ. We add `Y_indep` (the space is
+  unchanged under a different pseudo-uniformizer) as sanity API mirroring [Ked-AWS
+  §11.2]'s independence remark, but do NOT formalise "the curve is independent of ϖ up
+  to canonical homeomorphism" in this campaign (a `Quotient`-transport statement of no
+  mathematical content beyond `Y_indep`; deferred).
+
+### §0.3 External review status (owner-requested: gpt-5.6-sol)
+
+The plan-validation packet (`chatgpt-packet-fargues-fontaine-plan-2026-07-24.md`) was
+prepared and sent to gpt-5.6-sol via the chatgpt-math MCP **five times on 2026-07-24**;
+every attempt failed at the Codex layer, not on content:
+- attempts on account `.codex2`: `codex_models_manager … timeout waiting for child
+  process to exit` (three times, at both `max` and `xhigh` reasoning);
+- attempts on account `.codex`: `Codex rate-limited` (twice, incl. the gpt-5.4
+  fallback).
+**Consequence:** the decomposition below is validated by the internal adversarial pass
+only. The packet is saved and should be re-run (or pasted into the ChatGPT app manually)
+before or during early ticket execution; any flaw it surfaces triggers a
+`/develop --continue` revision. Residual-risk register: §6.
+
+### §0.4 Prior-B2 log consultation (Step 4.6 — binding)
+
+`b2_log.jsonl` read in full: 74 entries. Zero matches — by name or by shape — for any
+leaf below (searched: witt, perfectoid, frobenius, fargues, teichmuller; all entries
+concern the Wedhorn-8.28/FJP campaigns' Tate-algebra and sheafiness statements, none
+touching Witt vectors, perfectoid fields, group actions, or quotients). **Every leaf:
+clean of prior B2 history.** (Recorded once here; per-leaf blocks omit the field.)
+
+### §0.5 Skeleton location
+
+The Lean skeleton (every leaf stated, `:= by sorry`) lives in
+`projects/AdicSpaces/Adic spaces/FarguesFontaine/`:
+- `PerfectoidFieldCharP.lean` (R1 leaves L1.*)
+- `AinfHuber.lean` (R1 leaves L2.*)
+- `FrobeniusAction.lean` (R2 leaves L3.*)
+- `YSpace.lean` (R3 leaves L4.*, L5.*)
+- `Curve.lean` (R4–R5 leaves L6.*, L7.*)
+plus: legacy `Adic spaces/FarguesFontaine.lean` **deleted** (see §5 takeover verdict),
+root `Adic spaces.lean` imports swapped, and `ValuationAction.lean` generalised (unused
+`[Finite G]` dropped from the `GroupAction` section — L3.6).
+`lake build '«Adic spaces»'` status: **GREEN, verified 2026-07-24** — zero errors
+across the full library (so the ValuationAction generalisation broke no consumer);
+sorry-token inventory in the five skeleton files: PerfectoidFieldCharP 9, AinfHuber 10,
+FrobeniusAction 9, YSpace 23, Curve 15. `instMulSemiringActionAinf` and
+`instPlusSubringAinf` compiled sorry-FREE (real data, as required for downstream
+definitional transparency).
 
 ---
 
-## Result R1 (PRIORITY): `FiniteJet.finiteJet_isSheafy : IsSheafy (JetA F)`
+## §1. R1 — A_inf = W(O_F) is a complete Huber ring, its own ring of integral elements
 
-### Plain-English proof ([FJP] structure preserved)
+### Plain-English proof (Step 1; sources: [Ked-AWS Def 3.1.2], [SW §13.1], [Bhatt §3.1–3.2])
 
-[FJP] Thm 5.3 via Lemma 5.2: the square `𝓐 → 𝓑, 𝓒 → 𝓓` is a strict Milnor square of Huber
-pairs (Prop 2.1 + (5.2)); every rational localization of 𝓐 preserves the square strictly
-(Prop 4.5, built from Lemma 4.1 Tate-extension, Lemma 4.2 graph–Koszul at the affinoid
-vertices, Lemma 4.3 controlled ideal pullback, Lemma 4.4 strict quotient); the three vertices
-are strongly noetherian (Prop 2.1) hence sheafy (Huber Thm 2.2 = our `828b`); the gluing and
-embedding conditions for 𝓐's rational coverings transfer through the localized rows (Lemma
-5.2's chain: push matching family → glue at 𝓑, 𝓒 → 𝓓-separatedness matches the images →
-row-exactness produces the section → per-piece injectivity recovers restrictions; embedding
-via closed equalizer + Tate OMT).
+Let F be a perfectoid field of characteristic p, O_F = F° its power-bounded subring, ϖ a
+pseudo-uniformizer (a topologically nilpotent unit; it is power-bounded, so ϖ ∈ O_F).
+O_F is a domain (subring of a field) of characteristic p. It is perfect: Frobenius is
+injective on any domain of characteristic p, and surjective because the perfectoid
+axiom supplies for each power-bounded x a power-bounded y with x = y^p + p·z = y^p
+(char p). Since F is Tate and uniform with O_F bounded and open, the sets ϖ^n·O_F form
+a neighbourhood basis of 0 in O_F; F is complete, O_F ⊆ F is closed, so O_F is
+ϖ-adically separated and complete ([Bhatt, Cor. 3.2.3] pattern).
 
-Layered as M1 (construction) → M2 (vertices sheafy) → M3 (graph–Koszul) → M4 (strict
-localization) → M5 (functoriality/bridges/loc-lift) → M6 (transfer).
+Now A := W(O_F). Give it the (p,[ϖ])-adic topology ([SW §13.1]: "A_inf = W(O_{C♭}),
+with its (p,[p♭])-adic topology"). The ideal I = (p,[ϖ]) is finitely generated, so A is
+a Huber ring with pair of definition (A, I); A is its own ring of integral elements
+(⊤ is integrally closed, open, and every element of an adic ring is power-bounded). For
+completeness ([Ked-AWS Def 3.1.2]: "It is complete for the adic topology defined by the
+inverse image of some ideal of definition of R⁺"), sandwich the I-adic filtration
+between the "product" filtrations: I^{2n} ⊆ (p)^n + ([ϖ])^n ⊆ I^n. A Cauchy sequence
+for the product filtration is, in each Witt coordinate, a ϖ-adically Cauchy sequence of
+elements of O_F (Teichmüller multiplication acts coordinatewise: ([ϖ]·y).coeff i =
+ϖ^{p^i}·y.coeff i), and W(O_F) is p-adically complete (mathlib,
+`WittVector.isAdicCompleteIdealSpanP`, O_F perfect); combining the two directions
+produces the limit, and separatedness follows from ⋂ (p^n) = 0 levelwise plus ϖ-adic
+separatedness of O_F.
 
-### M1 — construction layer
+Pointers into the source: [Ked-AWS] p. 66, Definition 3.1.2 (one sentence — the
+completeness assertion); [SW] p. 108, §13.1 first paragraph (the topology); [Bhatt]
+p. 12, Corollary 3.2.3 (the O_F-level completeness, for the tilt — same argument);
+mathlib `Mathlib/RingTheory/WittVector/Complete.lean` (the p-direction, fully proven).
+The fine structure of the completeness proof is genuinely terse in all sources (each
+asserts it in a sentence); the coefficientwise expansion above is our own, per the
+source-gap rule, and is the single largest residual risk of the campaign (§6, RR1).
 
-- **L1.1** (cluster, `RestrictedLaurent.lean`, decls `instOne/instAdd/instNeg/instMul`,
-  `summable_mul_coeff`, `instCommRing`, `single`, `single_mul_single`, `C`, `W/Wu`):
-  the ring `L = k⟨W,W⁻¹⟩`.
-  - Source: [FJP] p. 5 (1.4) "`L = k⟨W,W⁻¹⟩` … Thus `L` is the radius-one Laurent algebra; in
-    particular both `W` and `W⁻¹` are power-bounded", and p. 5 (1.8) "An element is a series
-    `∑_{(a,b)∈S} c_{a,b}W^aQ^b` such that, for every ε > 0, only finitely many coefficients
-    have `|c_{a,b}| ≥ ε`; its norm is `sup |c_{a,b}|`."
-  - Lean ↔ source: `RestrictedLaurent R` = coefficient functions `ℤ → R` with cofinite decay;
-    convolution `(f*g) m = ∑' a, f a · g (m−a)`; the `Q`-free specialisation of (1.8).
-  - Discharge: convolution summability from `CompleteSpace K` + ultrametric summability
-    (mathlib `Summable` nonarch criteria; cf. vendored stack's analogous sums); ring axioms
-    by `tsum` manipulation (mathlib `tsum_add`, Fubini `Summable.tsum_comm`-style over ℤ×ℤ).
-  - Attacks: (1) counterexample search — convolution of two-sided-infinite series without
-    decay diverges; decay hypothesis present on both factors; termwise product family is
-    null on the antidiagonal filter — verified by hand estimate `‖f_a g_{m−a}‖ ≤ ‖f_a‖·‖g‖`
-    with `f_a → 0`, cofinally small. (2) edge cases: `m = 0` index, `f = 0`, monomials —
-    `single_mul_single` gives `W^a·W^b = W^{a+b}` ✓. (3) hypothesis strength — completeness
-    of the base genuinely needed for `tsum` (drop it and `Mul` is junk): recorded on the
-    instance. Verdict: SURVIVED.
-- **L1.2** (`gaussNorm`, `exists_gaussNorm_eq`, `isRingNorm`, `NormedCommRing`,
-  `IsUltrametricDist`, `norm_single`, `norm_W`, `norm_W_mul`, `CompleteSpace`):
-  the Gauss norm package.
-  - Source: p. 7 Prop 2.3 "the coefficient family of a restricted Laurent series tends to
-    zero, so its nonzero coefficient supremum is attained"; p. 1 "All Banach direct sums
-    carry the maximum norm."
-  - Discharge: mirrors vendored `CoramRestrictedNorm` (`RingNorm.toNormedRing` pattern —
-    already used in the skeleton); completeness mirrors `Restricted.isCompleteSpace`
-    (coefficientwise Cauchy).
-  - Attacks: (1) sup attained requires decay — non-restricted series attain no max; decay in
-    the type. (2) `‖W·f‖ = ‖f‖` fails for non-shift-invariant norms — here coefficients
-    shift, sup invariant ✓. (3) `eq_zero_of_map_eq_zero'` needs norm-faithfulness — sup of
-    norms = 0 forces all coefficients 0 ✓. Verdict: SURVIVED.
-- **L1.3** (`norm_mul_eq`, `mul_ne_zero_of_ne_zero`; consumed by
-  `FiniteJetUniformDomain.norm_L_mul`, `norm_JetC_mul`):
-  multiplicativity over discretely valued K.
-  - Source: p. 7 Prop 2.3, quoted in §0 pass 3; full passage: "Since every nonzero
-    coefficient norm belongs to `|k^×|`, so does every nonzero Gauss norm. We may therefore
-    scale two nonzero elements to norm one. Their reductions are nonzero Laurent polynomials
-    in `k̃[W,W⁻¹,Q]` … restrictedness leaves only finitely many coefficients of norm one.
-    Their product remains nonzero because this Laurent polynomial ring is a domain. Reduction
-    commutes with the Laurent convolution here: coefficients of norm less than one have norm
-    at most `|ϖ|` … Consequently the product in 𝒞 again has norm one."
-  - Discharge (two admissible routes, worker chooses): (a) residue-reduction as in source —
-    reduction to `AddMonoidAlgebra F ℤ` resp. `F[ℤ×ℕ]`, domain via mathlib
-    `AddMonoidAlgebra` `IsDomain` (`UniqueProds` for ℤ, ℤ×ℕ ✓); needs
-    `FiniteJetRings.norm_K_discrete` (leaf: `∃ n, ‖x‖ = 2^n`, from the `RankOne`
-    normalisation `WithZeroMulInt.toNNReal 2` in `ExampleUnitDisc.lean`); (b) lex-achiever
-    argument mirroring vendored `MvRestricted.isAbsoluteValue` with index ℤ (min-index
-    achiever; discreteness gives attained max cleanly).
-  - Attacks: (1) discreteness genuinely used — over ℂ_p-like base the "norm < 1 ⟹ ≤ |ϖ|"
-    step fails; our `K` is discrete ✓ (recorded as the reason for DD1). (2) the ℤ×ℕ support
-    version: finitely many norm-one coefficients — needs two-sided decay ✓ (referee pass 3
-    verified). (3) `𝒞`-case via base-`L` multiplicativity + vendored univariate mult lemma:
-    the vendored `Restricted.gaussNorm_mul_eq_mul` hypothesis shape must be checked at
-    implementation (risk item 2, plan.md); fallback route (b) stated. Verdict: SURVIVED
-    (with recorded fallback).
-- **L1.4** (`nonnegSubring`, `isClosed_nonnegSubring`, `nonnegEquiv`, `ofRestricted`,
-  `evalHom`, `evalHom_surjective`): `k⟨W⟩ ⊂ L` and the affinoid presentation surjection.
-  - Source: p. 6 Lemma 2.2 "In the Laurent expansion of `L`, the subspace `k⟨W⟩` is the
-    intersection of the kernels of the continuous negative-coefficient maps `[W^a] : L → k`
-    for `a < 0`; it is therefore closed." and p. 5 Prop 2.1 "Each of ℬ, 𝒞, 𝒟 is a quotient
-    of a finite Tate algebra over k".
-  - Lean ↔ source: `evalHom : K⟨W,V⟩ → L` (`W ↦ Wu, V ↦ Wu⁻¹`) is *our* realisation of the
-    quotient presentation; we keep only **surjectivity** (norm-preserving monomial section
-    `W^a ↦ W^a (a ≥ 0), V^{-a} ↦ W^a (a < 0)`), because noetherianity transfers along
-    surjections — the kernel is never needed (planner simplification, recorded; the source's
-    "quotient of" is implied by surjectivity).
-  - Attacks: (1) coefficient functionals continuous — norm-decreasing ✓. (2) `nonnegEquiv`
-    multiplicative — supports in ℕ closed under addition ✓. (3) `evalHom` well-defined on
-    *restricted* two-variable series: image coefficients regroup along `a = i − j`; decay
-    preserved (max over the fibre) — checked by hand; the section makes surjectivity
-    constructive. Verdict: SURVIVED.
-- **L1.5** (`JetDualNumberNorm.lean` cluster: `isRingNorm`, instances, `pow_eq`, `mapHom`,
-  `norm_mapHom`, `aeval_eps_surjective`, `isNoetherianRing`): the jet-vertex norm layer.
-  - Source: p. 6 Lemma 2.2 "`‖b‖_ℬ = max{‖f₀‖, ‖f₁‖}`"; p. 17 (5.2) "(f + Qg)ⁿ = fⁿ +
-    nf^{n−1}Qg is bounded independently of `n` (recall that `|n| ≤ 1`)".
-  - Discharge: max-norm submultiplicativity via ultrametric on the cross term (planner
-    verified: `‖ad+bc‖ ≤ max ≤ ‖x‖‖y‖`); noetherianity via `Polynomial.aeval ε` surjective
-    (mathlib `isNoetherianRing_of_surjective`).
-  - Attacks: (1) `pow_eq` at `n = 0,1` (edge): `n·a^{n−1}` term — `n=0` gives `0·a^{-1}` —
-    in ℕ-subtraction `a^(0−1) = a^0 = 1`, coefficient `(0:R)` kills it ✓ statement checked
-    at `n = 0` by hand. (2) norm well-defined vs `TrivSqZeroExt` topology diamond — mathlib
-    pin has **no** `TopologicalSpace (TrivSqZeroExt ..)` instance (checked); our norm is the
-    only topology. (3) `eq_zero_of_map_eq_zero'` ✓ max = 0 forces both components 0.
-    Verdict: SURVIVED.
-- **L1.6** (`FiniteJetRings.lean` cluster: `rhoC`, `rhoB`, `sectionD` + its four lemmas,
-  `jetSupport`, `isClosed_jetSupport`, `jB`, `square_commutes`,
-  `mem_jetSupport_iff_jet_in_range`, `milnorRow_exact`, `max_norm_eq`,
-  `difference_strict_surjective`): the square and the strict row, constants 1.
-  - Source: p. 5 Prop 2.1 (verbatim): "Reduction modulo `Q²` has the norm-preserving linear
-    section `f₀+Qf₁ ↦ f₀+Qf₁`, so `𝒞 → 𝒟` is a strict surjection. The difference map in
-    (2.1) is therefore a strict surjection of Banach spaces. Its kernel is the algebraic
-    pullback (1.6); since 𝒟 is Hausdorff, this kernel is closed. This proves completeness of
-    𝒜 and strict exactness." p. 6 Lemma 2.2 (verbatim): "Projection to 𝒞 is an isometric
-    embedding of 𝒜 with image (1.7)." p. 6 (2.1b): "the Milnor row is already exact
-    integrally … Thus the two denominator losses in the defining square are zero."
-  - Lean ↔ source: our 𝓐 *is* the image (1.7) (subring model), so Lemma 2.2's isometry is
-    definitional; `milnorRow_exact` is (1.6)-cartesianness; all constants 1 = (2.1b).
-  - Attacks: (1) support additivity `b+b' ≤ 1` subcases (pass 3 verified exhaustively —
-    `(−5,2)+(3,0)` lands in `b = 2`, unconstrained; no leak into jets). (2) `sectionD`
-    multiplicativity is NOT claimed (it is linear only — [FJP] "linear section"); statement
-    set records only `sectionD_add` + `rhoC_sectionD` + norm ✓ (a multiplicative-section
-    claim would be FALSE: `(1+Q)·(1+Q)` jets ≠ section product — attack found this would be
-    an over-claim; statements avoid it). (3) `mem_jetSupport_iff_jet_in_range` — range of
-    `ρB` = pairs with both components in `nonneg` ✓ needs injectivity of `ofRestricted` ✓
-    leaf present. Verdict: SURVIVED (one over-claim avoided by design).
-- **L1.7** (instance stack: `IsHuberRing/IsTateRing ×4`, `PlusSubring ×4` (maximal),
-  `IsRingOfIntegralElements ×4`, `IsUniformAddGroup ×4`, right-uniformity
-  `CompleteSpace ×4`, `unitBall`, `isOpen_unitBall`, `constC/constA/tA` cluster):
-  - Source: p. 17 before (5.2): "Give every ring its maximal plus ring of power-bounded
-    elements." (5.2) computations; p. 17: "the rings in (5.2) are valid maximal plus rings. A
-    bounded homomorphism sends power-bounded elements to power-bounded elements; hence every
-    map in (5.1) is a morphism of Huber pairs. The plus rings of ℬ and 𝒟 are unbounded,
-    which is permitted for a ring of integral elements."
-  - Discharge: `ExampleUnitDisc.lean` pattern (`podD`, `IsHuberRing`, `IsTateRing`,
-    right-uniformity bridge `SeminormedAddCommGroup.to_isUniformAddGroup` — already realised
-    in the skeleton as term-level instances where possible). `IsRingOfIntegralElements` for
-    the maximal plus ring: open (⊇ unit ball), integrally closed ([FJP] §5's monic-equation
-    argument, p. 17, quoted in §0 pass 3), `subset_powerBounded` = refl.
-  - Attacks: (1) **B2-log echo** (`IsPowerBounded.map` false in general): all our maps are
-    norm-≤ 1 ring homs of normed rings — power-bounded transfer is via norm bounds, never via
-    bare continuity ✓ statements phrased with norms. (2) unit-ball-as-plus-ring for 𝓑 would
-    be WRONG (not integrally closed: `λQ` with `|λ|>1` is integral, `x² = 0`) — maximal plus
-    ring chosen instead; recorded as the reason. (3) `AffinoidRings.IsRingOfIntegralElements`
-    has no boundedness field (checked at `AffinoidRings.lean:47`) — unbounded plus rings
-    admissible ✓ (risk item 5 closed). Verdict: SURVIVED.
+### Leaves (Lean names in `PerfectoidFieldCharP.lean` unless said otherwise)
 
-### M2 — vertices strongly noetherian and sheafy (`FiniteJetNoetherianVertices.lean`)
-
-- **L2.1** `isNoetherianRing_restricted_L (m)`:
-  - Source: p. 5 Prop 2.1 "Each of ℬ, 𝒞, 𝒟 is a quotient of a finite Tate algebra over `k`,
-    so each is strongly noetherian." (`L` case: `L⟨Z₁..Zₘ⟩` is the image of `K⟨W,V,Z₁..Zₘ⟩`.)
-  - Discharge: `evalHom`-style surjection extended by `Z`-variables (compose vendored
-    `restrictedGaussEquiv` bridge + `mapRestricted (evalHom)` + flattening
-    `exists_flatten'`-pattern) + `isNoetherianRing_of_surjective` +
-    `IsStronglyNoetherian K` (`ExampleLaurentSeries.lean`, proven).
-  - Attacks: (1) **B2 echo T-SUM-6/T-Q4**: never argue "noetherian ⟹ strongly noetherian";
-    each arity gets its own surjection ✓ statement is per-`m`. (2) surjectivity of the
-    extended map — coefficientwise lift via the monomial section, decay preserved ✓ (same
-    computation as L1.4 attack 3). (3) the topological-vs-Gauss restricted bridge at base `L`
-    — `restrictedGaussEquiv` requires radius-1 and `NormedCommRing L` ✓ available. Verdict:
+- **L1.1** (leaf, mathlib): `instance : IsDomain (OF F)`
+  - Source claim: implicit in [BFHHLWY Def 2.1.1] ("ring of integers F°" of a field).
+  - Discharge: `Subring.instIsDomain` (subring of a field is a domain).
+  - Attacks: [1] counterexample: none possible — subring of a field; [2] edge: F = F_p
+    is excluded (not Tate: no topologically nilpotent unit ≠ 0? F_p discrete IS
+    excluded by `IsPerfectoidField`'s Tate axiom — consistent); [3] discharge check:
+    mathlib instance exists for subrings of division rings. SURVIVED.
+- **L1.2** (leaf, mathlib): `instance : CharP (OF F) p`
+  - Source: setting of [BFHHLWY Def 2.1.1] (F/F_q).
+  - Discharge: char of subring = char of field (`CharP.subring`-shape; verify exact name
+    at fill time — if absent, `charP_of_injective_ringHom` on `Subring.subtype`).
+  - Attacks: [1] no counterexample (injection reflects char); [2] edge p = 2 fine;
+    [3] hypothesis: needs only `CharP F p` ✓. SURVIVED.
+- **L1.3** (leaf, project): `frobenius_surjective_OF`
+  - Source claim (verbatim, [Bhatt] p. 9–10, Example 3.1.2(3)):
+    > "Let K be a NA field of characteristic p. Then K is perfectoid if and only if K is
+    > perfect. In this case, semiperfectness of K° implies its perfectness…"
+  - Lean ↔ source: our statement is the "semiperfectness of K°" direction made explicit:
+    surjectivity of `frobenius (OF F) p`. The project class field
+    `IsPerfectoidRing.frobenius_surj` gives x = y^p + p·z with y,z power-bounded;
+    `CharP F p` kills p·z. Match is exact.
+  - Discharge: project `IsPerfectoidRing.frobenius_surj` (PerfectoidRing.lean:66–92
+    class field, verified present by audit) + `CharP.cast_eq_zero`.
+  - Attacks: [1] counterexample: a NON-uniform Tate field of char p with non-perfect F°?
+    Excluded — the class bundles uniformity; [2] hypothesis-strength: does surjectivity
+    on F° need the ϖ^p ∣ p field? No — only frobenius_surj + char p; [3] source-drift:
+    Bhatt says semiperfect ⟹ perfect for K° — we only re-prove semiperfectness here;
+    injectivity is L1.4's business. SURVIVED.
+- **L1.4** (leaf, mathlib+L1.3): `instance instPerfectRingOF : PerfectRing (OF F) p`
+  - Source: [Bhatt, Ex. 3.1.2(3)] as above ("implies its perfectness").
+  - Discharge: `PerfectRing.ofSurjective`-shape from L1.3 + injectivity of Frobenius on
+    reduced rings (`frobenius_inj` for domains/reduced; verify exact mathlib name).
+  - Attacks: [1] injectivity could fail for non-reduced — O_F is a domain (L1.1);
+    [2] discharge: `PerfectRing` in mathlib is stated as `Bijective (frobenius R p)` via
+    a class with `bijective_frobenius`; constructor from bijectivity exists
+    (`PerfectRing.ofBijective`? verify); [3] edge: trivial ring excluded (field ≠ 0).
     SURVIVED.
-- **L2.2** `IsStronglyNoetherian (JetC F)`; **L2.3** `isNoetherianRing_restricted_dualNumber`
-  + `IsStronglyNoetherian (JetB F)`, `(JetD F)`; **L2.4** unit-ball noetherianity ×4
-  (`isNoetherianRing_unitBall_*`).
-  - Source: same Prop 2.1 sentence; for L2.4, p. 11 Lemma 4.2's construction "Put
-    `A₀ = k°⟨Y₁,…,Y_s⟩` … The ring `A₀` is noetherian and ϖ-adically complete" — our unit
-    balls are the concrete such rings (`DualNumber (k°⟨W⟩)`, `L₀⟨Q⟩`, `DualNumber L₀`).
-  - Discharge: L2.2 = disc-example flattening verbatim over base `L`; L2.3 = jet flattening
-    `(DualNumber S)⟨Z⟩ ≅ DualNumber (S⟨Z⟩)` (coefficientwise) + `JetNorm.isNoetherianRing`;
-    L2.4 via `k° = F⟦X⟧` noetherian + integral restricted rings as ϖ-adic completions
-    (mathlib `AdicCompletion` noetherianity; project `AdicCompletionBridge.lean` has the
-    bridge pattern) + quotient/surjection closure.
-  - Attacks: (1) **B2 echo L16**: "strongly noeth ⟹ noeth A₀" is FALSE generically — we
-    never use it; each unit ball gets its own concrete proof ✓. (2) `DualNumber S` noeth
-    needs `S` noeth only ✓ (S[X] surjection, Hilbert basis). (3) completeness of `k°⟨W⟩` vs
-    `AdicCompletion` identification — the classical bridge; if the project bridge doesn't
-    fit, fallback: direct Hilbert-basis-for-restricted-series argument (BGR 5.2.6 style;
-    or transport along `Psi`-style transpose as in `ExampleLaurentSeries`'s
-    `IsStronglyNoetherian K` proof, which already handles exactly this shape). Verdict:
-    SURVIVED with recorded fallback.
-- **L2.5** `isSheafy_JetB/C/D`:
-  - Source: p. 21 Thm 5.3 proof (verbatim): "The three comparison rings are strongly
-    noetherian. Huber's direct sheaf theorem [4, Theorem 2.2] gives the rational-cover sheaf
-    condition for their structure presheaves."
-  - Discharge: `isSheafy_of_stronglyNoetherian_828b` (V0-verified axiom-clean). The full
-    hypothesis bundle is supplied by M1 instances + L2.2/L2.3. Non-reducedness of 𝓑, 𝓓 is
-    admissible (bundle has no domain hypothesis — checked; [FJP] Lemma 4.2 "possibly
-    nonreduced" mirrored).
-  - Attacks: (1) instance-resolution: the `letI` right-uniformity binder shape matches our
-    declared `@CompleteSpace _ (rightUniformSpace _)` instances (disc pattern) ✓.
-    (2) `T2Space` from metric ✓ automatic. (3) `hasLocLiftPowerBounded_faithful` requires
-    `IsNoetherianRing` — vertices are noetherian ✓ (it is 𝓐 that needs the bespoke route,
-    L5.6). Verdict: SURVIVED.
+- **L1.5** (leaf, project): `PseudoUniformizer.toOF` (definition, sorry-free) and
+  `PseudoUniformizer.toOF_ne_zero`
+  - Source: [BFHHLWY Def 2.1.1] ("pseudouniformizer ϖ", an element of F°).
+  - Discharge: definition assembled from `PseudoUniformizer.isTopologicallyNilpotent` +
+    `IsTopologicallyNilpotent.isPowerBounded` (both in project, audit-verified);
+    nonzeroness: ϖ is a unit of the field F, units are nonzero, `Subtype.ext`.
+  - Attacks: [1] is a topologically nilpotent UNIT automatically power-bounded? Yes —
+    project lemma, audit-verified at Bounded.lean:208; [2] degenerate F: a field with
+    the discrete topology has no pseudo-uniformizer (0 is not a unit) — consistent with
+    Tate; [3] drift: none, mechanical. SURVIVED.
+- **L1.6** (leaf, project+mathlib): `span_toOF_pow_mem_nhds_zero`,
+  `exists_span_toOF_pow_subset_nhds`
+  - Source claim ([SW] p. 92, §11.2, for the analogous R⁺): the topology of a perfectoid
+    Tate ring restricted to R⁺ is the ϖ-adic one; standard Tate-ring fact ([Wedhorn]
+    §5.30-shape: for a Tate ring with ring of definition A₀ ∋ ϖ, {ϖ^n A₀} is a basis).
+    Project-side: `IsPerfectoidRing` bundles uniformity, so O_F = F° is bounded and
+    open; ϖ^n·O_F ∈ 𝓝 0 because ϖ^n is a unit times an open subgroup… precise route:
+    O_F open (power-bounded subring of uniform Tate ring is open — project has the
+    uniformity class exactly for this) and multiplication by the unit ϖ^n is a
+    homeomorphism of F carrying O_F to ϖ^n O_F; conversely boundedness of O_F +
+    topological nilpotence of ϖ gives ϖ^n O_F ⊆ U eventually.
+  - Discharge: project `IsBounded` (Bounded.lean:83), `IsTopologicallyNilpotent`
+    definitional unfolding (`tendsto`), `Homeomorph.mulLeft₀`-shape from mathlib for
+    unit multiplication, openness of `powerBoundedSubring` from `IsUniform` — the
+    precise openness lemma must be located in Uniform.lean at fill time; if the project
+    lacks "O_F is open", it is a genuine sub-leaf: openness of F° for a uniform Tate
+    ring, one paragraph from `IsUniform.isBounded_powerBounded` + ring-of-definition
+    membership. Flagged as the only L1-family sub-risk.
+  - Attacks: [1] counterexample: non-uniform Tate ring where F° is NOT open — excluded
+    by the uniformity field; [2] direction check: both directions stated separately
+    (∈ 𝓝 0, and ⊆ U eventually) — no circularity; [3] hypothesis: does L1.6 need
+    perfectoid, or just uniform Tate? Just uniform Tate + pseudo-uniformizer — the
+    statements are placed with the perfectoid variable block for campaign locality but
+    generalise; noted for the `/generalise` lane later. SURVIVED (with the sub-risk
+    note).
+- **L1.7** (leaf, project): `isHausdorff_span_toOF`
+  - Source: [Bhatt, Cor. 3.2.3] (verbatim):
+    > "With t as above, K°♭ is t-adically complete, and that the t-adic topology
+    > coincides with the given topology."
+    (Bhatt states it for the tilt's integer ring K°♭ = lim K°/π; for our F of
+    characteristic p the same statement reads off for O_F itself; completeness of a
+    char-p perfectoid field's O_F is the degenerate case of his diagram where the limit
+    is along x ↦ x^p on K° itself. The match paragraph for L1.8 covers both.)
+  - Lean ↔ source: `IsHausdorff (span {ϖ}) (OF F)` = "t-adic topology separated", the
+    separatedness half of "complete" in Bhatt's convention (his "complete" includes
+    separated, cf. [Ked-AWS Convention 0.0.1]).
+  - Discharge: from L1.6 + `T0Space F` (class field `t0`) via: x ∈ ⋂ ϖ^n O_F ⟹ x in
+    every neighbourhood of 0 ⟹ x = 0 by T0 for topological groups. Mathlib bridge:
+    `IsHausdorff` is `∀ x, (∀ n, x ≡ 0 [SMOD I^n]) → x = 0` — direct.
+  - Attacks: [1] SMOD vs set-membership mismatch — `Ideal.span {ϖ}^n • ⊤` vs `ϖ^n O_F`:
+    `smul_eq_mul` + `Ideal.span_singleton_pow`; mechanical but listed; [2] T0 vs T2:
+    only T0 needed for groups (T0 group ⟹ T2, but we don't even need that); [3] edge:
+    ϖ nilpotent? ϖ is a unit-image, nonzero in a domain, and topologically nilpotent —
+    no contradiction (F is not discrete). SURVIVED.
+- **L1.8** (leaf, project): `isAdicComplete_span_toOF`
+  - Source: [Bhatt, Cor. 3.2.3] verbatim as in L1.7.
+  - Lean ↔ source: Bhatt's proof compares inverse systems K°♭/(t^{p^n}) ≅ K°/π-towers;
+    for char-p F the content is: O_F closed in complete F, and the ϖ-adic and subspace
+    topologies agree (L1.6), so ϖ-adic Cauchy ⟹ converges in F, limit power-bounded,
+    convergence is ϖ-adic. Our statement `IsAdicComplete (span {ϖ}) (OF F)` is precisely
+    "t-adically complete".
+  - Discharge: L1.6 + `CompleteSpace F` (class field) + closedness of O_F
+    (power-bounded subring is closed in a uniform T0 Tate ring — check project; if
+    absent, sub-leaf: limits of power-bounded sequences are power-bounded, which the
+    audit found as `isPowerBounded_of_tendsto_of_powerBounded` in PerfectoidRing.lean —
+    verified present) + `IsAdicComplete` constructor from sequential limits
+    (`IsPrecomplete` via project `AdicConvergence` API).
+  - Attacks: [1] trap: IsAdicComplete over non-noetherian rings — no pathology here
+    since we verify the limit directly, not via completion functors; [2] uniform-space
+    vs adic mismatch: both directions of L1.6 are exactly what is needed; [3] discharge
+    names: `isPowerBounded_of_tendsto_of_powerBounded` audit-verified. SURVIVED.
+- **L2.1** (leaf, mathlib): `teichPi` (def) + `teichPi_pow` + `teichPi_ne_zero`
+  - Source: [BFHHLWY Def 2.1.1] (the element [ϖ]); [Ked-AWS Rem. 3.1.9 footnote-level]:
+    rational exponents cleared "via [ϖ^n] = [ϖ]^n" (our gloss D4).
+  - Discharge: `WittVector.teichmuller` is a `MonoidHom` (mathlib): `map_pow` gives
+    `teichPi_pow`; `teichmuller_ne_zero`-shape via coeff 0 (project
+    WittVectorPrimitive.lean has `coeff_zero_ne_zero_of`-adjacent API; or
+    `WittVector.teichmuller_coeff_zero` + L1.5).
+  - Attacks: [1] [x]·[y] = [xy] needs commutativity of coefficients ✓; [2] ne_zero needs
+    O_F nontrivial ✓ (domain with 1 ≠ 0); [3] drift: none. SURVIVED.
+- **L2.2** (leaf, mathlib): `instTopologicalSpaceAinf` (def, sorry-free) +
+  `instIsTopologicalRingAinf`
+  - Source: [SW §13.1] (verbatim): "let A_inf = W(O_{C♭}), with its (p, [p♭])-adic
+    topology."
+  - Lean ↔ source: `Ideal.adicTopology (Iinf … canonical-ϖ)`. The instance fixes the
+    canonical Tate pseudo-uniformizer; L2.3 restores ϖ-freedom. SW's [p♭] is one choice
+    of ϖ; D6 covers the discrepancy.
+  - Discharge: `Ideal.adicTopology` (mathlib); ring-topology via the
+    `RingSubgroupsBasis.toRingFilterBasis` route used inside
+    `Mathlib/Topology/Algebra/Nonarchimedean/AdicTopology.lean` (the `isAdic_iff` proof
+    at :177–178 shows the pattern; exact instance-producing spelling to be fixed at fill
+    time — possibly `RingSubgroupsBasis.instTopologicalRing`-shape).
+  - Attacks: [1] a DIFFERENT topology on `WittVector` from elsewhere could clash — grep:
+    the only other instance lived in the deleted legacy file (p-adic; §5); mathlib has
+    none; [2] diamond with `OF`'s topology: `WittVector p (OF F)` carries no inherited
+    topology (WittVector is a structure wrapper) — no diamond; [3] the instance picks
+    canonical ϖ — independence is L2.3, and no lemma below ever needs definitional
+    equality with a specific ϖ's ideal. SURVIVED.
+- **L2.3** (leaf, project): `isAdic_Iinf`
+  - Source ([Ked-AWS] p. 92, §11.2, verbatim, for the analogous independence):
+    > "Note that this is independent of the choice of ϖ, as for any other choice ϖ',
+    > there is some n such that ϖ|(ϖ')^n and ϖ'|ϖ^n."
+  - Lean ↔ source: `IsAdic (Iinf ϖ)` for every ϖ, against the canonical-ϖ instance
+    topology, is exactly "the (p,[ϖ])-adic and (p,[ϖ'])-adic topologies coincide",
+    reformulated via mathlib's `isAdic_iff` (two inclusions of filtrations). The
+    divisibility: ϖ'^n ∈ ϖ·O_F for some n (both topologically nilpotent units; L1.6's
+    basis + unit trick), then [ϖ']^n = [ϖ'^n] = [ϖ]·[ϖ'^n/ϖ] ∈ ([ϖ]).
+  - Discharge: L2.1 (`teichPi_pow`), `Ideal.pow_le_pow_right`-style monotonicity,
+    `isAdic_iff` (mathlib, AdicTopology.lean:161).
+  - Attacks: [1] does ϖ | ϖ'^n really hold in O_F for ANY two pseudo-uniformizers of a
+    perfectoid field? Yes: ϖ'^n → 0 topologically, so ϖ'^n ∈ ϖ·O_F for n large since
+    ϖ·O_F ∈ 𝓝 0 (L1.6) — no valuation-ring input needed; [2] the ideals (p,[ϖ]) and
+    (p,[ϖ']) need MUTUAL cofinality of powers, with the p-generator shared — the
+    monomial expansion needs (p,[ϖ])^{2n} ⊆ (p,[ϖ'])^n-type bounds: each monomial
+    p^a[ϖ]^b with a+b ≥ 2n has a ≥ n or b ≥ n, and [ϖ]^n ∈ ([ϖ']^m…) — routine but the
+    exponent bookkeeping is a real 20-line proof, sized accordingly; [3] drift: source
+    speaks of the LOCUS independence; the topology independence is the same divisibility
+    (recorded as our gloss). SURVIVED.
+- **L2.4** (leaf, project): `instIsHuberRingAinf`
+  - Source: [Ked-AWS Def 3.1.2] (A_inf topologised adically by a f.g. ideal) +
+    [SW §13.1].
+  - Discharge: project `IsHuberRing` via `PairOfDefinition` with A₀ = ⊤, I = Iinf
+    (transport along `Subring.topEquiv` for the ideal-of-⊤ friction), `fg` = span of a
+    2-element set (`Set.Finite.toFinset`-shape), `isAdic` = L2.3 at canonical ϖ,
+    `isOpen` = ⊤.
+  - Attacks: [1] A₀ = ⊤ admissible? `PairOfDefinition` (HuberRings.lean:57) requires
+    `A₀ : Subring A` open with I : Ideal A₀ f.g. adic — ⊤ qualifies; the ⊤-transport is
+    bookkeeping; [2] completeness NOT required by the class (audit-verified) ✓;
+    [3] discharge: all fields verified to exist by the API survey. SURVIVED.
+- **L2.5** (leaf, project): `instPlusSubringAinf` (sorry-free), `isPowerBounded_Ainf`,
+  `isAffinoidRing_Ainf`
+  - Source: [Ked-AWS Def 3.1.5 / Rem. 3.1.9] — the pair is Spa(A_inf, A_inf); [BFHHLWY
+    Def 2.1.1] writes Spa(W_{E°}(F°)) (self-pair, standard reading — W_{E°}(F°) is its
+    own ring of integral elements, as in [SW §13.1] Spa A_inf).
+  - Lean ↔ source: `PlusSubring := ⊤` and `IsAffinoidRing` (= ⊤ open, integrally closed,
+    ⊆ power-bounded) formalise "Spa(A_inf, A_inf)" with A_inf⁺ = A_inf legitimate.
+  - Discharge: openness/integral-closedness of ⊤ trivial; `isPowerBounded_Ainf`: in an
+    adic ring every element is power-bounded — from `Iinf`-adic basis: x·I^n ⊆ I^n?? No:
+    power-boundedness of x = boundedness of {x^k} — for adic rings: {x^k}·I^n ⊆ I^n
+    since I^n is an ideal ✓ one line via `IsBounded` unfolding on the ideal basis.
+  - Attacks: [1] is ⊤ ⊆ powerBounded genuinely true here (A_inf is NOT Tate!)? Yes —
+    the ideal-basis argument above never needs a unit; [2] edge: the trivial ring — F
+    field excludes; [3] class-shape: `IsRingOfIntegralElements` fields audit-verified
+    (AffinoidRings.lean:47). SURVIVED.
+- **L2.6** (internal): `Iinf_pow_two_mul_le` + **L2.7** `isHausdorff_Iinf` + **L2.8**
+  `isAdicComplete_Iinf` — the completeness summit
+  - Source: [Ked-AWS Def 3.1.2] (verbatim):
+    > "Define the ring A_inf := W(R⁺). It is complete for the adic topology defined by
+    > the inverse image of some ideal of definition of R⁺."
+    plus [SW §13.1] ("(p,[p♭])-adic topology") for the presentation of that topology by
+    the two-generator ideal.
+  - Lean ↔ source: [Ked-AWS] presents the topology as "preimage-adic", [SW] as
+    (p,[ϖ])-adic; these agree (both are the standard weak topology of A_inf), and we
+    commit to the [SW] form (D4 of plan). Kedlaya's one-sentence completeness assertion
+    is expanded by our own proof (source-gap rule), structured as:
+    - L2.6 (leaf, elementary): I^{2n} ≤ (p)^n ⊔ ([ϖ])^n — monomial split (a+b = 2n ⟹
+      a ≥ n ∨ b ≥ n). Pure `Ideal.span`/`Finset` algebra.
+    - L2.7 (leaf): separatedness. x ∈ ⋂ I^n ⟹ x ∈ ⋂ ((p)^n ⊔ ([ϖ])^n) (L2.6) ⟹ each
+      Witt coordinate of x lies in ⋂_m ϖ^{…}O_F = 0 (L1.7) once coordinates of
+      (p)^n ⊔ ([ϖ])^n-elements are described: p^n·A has coordinates 0 below index n
+      (mathlib `WittVector` V-filtration: p^n·A ⊆ image of V^n — `WittVector`
+      Verschiebung API), and [ϖ]^n·y has coeff i = ϖ^{n·p^i}·(y.coeff i) (mathlib
+      `teichmuller_mul_pow_coeff`-shape, TeichmullerSeries.lean:73 — verify exact form).
+    - L2.8 (leaf): completeness. Given a coherent sequence mod I^n: by L2.6 it is
+      coherent mod (p)^n ⊔ ([ϖ])^n; extract per-coordinate ϖ-adic Cauchy sequences,
+      converge by L1.8, assemble the limit Witt vector, verify I-adic convergence using
+      the reverse inclusion (p,[ϖ])^{?} ⊇ … wait — the needed direction is: the
+      candidate limit x satisfies x ≡ x_n mod I^n; obtained from mod-(p)^m and
+      mod-([ϖ])^m congruences via I^n ⊇ (p)^n·A + ([ϖ])^n·A ∩ … in fact
+      (p)^n ⊔ ([ϖ])^n ≥ I^{2n} AND I^n ≥ (p·[ϖ])-mixed terms — both inclusions
+      I^{2n} ≤ (p)^n ⊔ ([ϖ])^n ≤ I^n hold ((p)^n ≤ I^n and ([ϖ])^n ≤ I^n trivially), so
+      the two filtrations are MUTUALLY COFINAL and IsAdicComplete transfers along
+      cofinal filtrations. The transfer principle "IsAdicComplete is invariant under
+      mutually-cofinal filtrations of ideals" may itself need proving (small reusable
+      lemma; check mathlib for `IsAdicComplete` congruence lemmas at fill time).
+  - Attacks (family): [1] TRAP CHECK (p,[ϖ])^n = p^n A + [ϖ]^n A? FALSE in general and
+    never claimed — only the ⊔-sandwich L2.6, which is exact; [2] TRAP CHECK
+    non-noetherian completion pathologies (completion not complete): avoided — we prove
+    IsAdicComplete for A itself by exhibiting limits, no completion functor appears;
+    [3] the "coordinates of p^n·A" claim: in W(O_F) with O_F perfect and p-torsion-free
+    coefficients?? p^n·A = V^n(F^n(A))·(unit adjustments) — precise statement: for
+    perfect O_F, p = V(1)·… mathlib `WittVector.Complete` proves exactly the needed
+    `le_coeff_eq_iff_le_sub_coeff_eq_zero` + span-p characterisations (file read: has
+    "x falls in ideal generated by p iff …" lemma around :60) — verified traction;
+    [4] higher subtlety: is the product/weak topology genuinely = (p,[ϖ])-adic (RR1)?
+    We never need the FULL equivalence — only the sandwich L2.6 and per-coordinate
+    extraction, both of which are filtration-level facts; the plan does NOT assert the
+    weak-topology equivalence anywhere. VERDICT: SURVIVED, with RR1 logged (§6) because
+    the per-coordinate extraction in L2.8 is the one place where an inequality could
+    have been mis-transcribed — it will be re-derived on paper at ticket time before
+    coding.
 
-### M3 — graph–Koszul (`FiniteJetGraphKoszul.lean`) — [FJP] Lemma 4.2 in degrees ≤ 2
+### R1 sizing
+[Ked-AWS] spends one sentence; [Bhatt Cor 3.2.3] one diagram + paragraph at the O_F
+level; mathlib's p-direction file is ~200 lines. Estimate: L1.* ≈ 150–250 LOC total;
+L2.1–L2.5 ≈ 150 LOC; L2.6–L2.8 ≈ 250–400 LOC (the campaign's largest single item),
+anchored to the ~200-line mathlib Complete.lean as the nearest formal analogue.
 
-- **L3.1** `d1_d2` — trivial sign computation (source p. 10 sign convention displayed).
-- **L3.2** `syzygy_coordinate`:
-  - Source: p. 11 "The coordinate sequence is regular over an arbitrary coefficient ring:
-    successive quotients are polynomial rings in the remaining variables, in which
-    multiplication by the next variable is injective."
-  - Discharge: elementary induction on `m` (planner wrote the full induction by hand:
-    reduce mod `T_m`, apply IH over the smaller polynomial ring, correct with
-    `T_m e_j − T_j e_m` relations; ~all-tactic). No mathlib Koszul needed.
-  - Attacks: (1) `m = 0,1` edges — `m=1`: `u₁T₁ = 0 ⟹ u₁ = 0` (poly ring over any base,
-    mul-by-variable injective) ✓ `Pairs 1 = ∅` so conclusion is `u = 0` — consistent ✓.
-    (2) arbitrary base ring (nonreduced!) — the induction never divides ✓. (3) mathlib
-    negation search: no contradicting lemma. Verdict: SURVIVED.
-- **L3.3** `syzygy_graph_polynomial`:
-  - Source: p. 11 (quoted in full in the file docstring — the two-case prime argument,
-    (4.3), translation, unit scaling).
-  - Discharge: localization at primes (`Submodule.eq_top_of_localization_maximal`,
-    mathlib, verified present), two cases: `r_i` unit (explicit Koszul expression of any
-    syzygy when one entry is a unit — planner verified the formula
-    `u = ∑_{j≠i} (u_j/r_i)(r_i e_j − r_j e_i)` reproduces `u` using `∑ u_j r_j = 0`);
-    `g` unit + translation automorphism (`MvPolynomial.aeval` substitution
-    `T_i ↦ T_i + f_i/g`) + unit scaling of syzygies + L3.2.
-  - Attacks: (1) the referee's m=1 kill shot — defeated (see §0 pass 2). (2) unit-scaling
-    correctness — the wedge-scaling form recorded; in degrees ≤ 2 it is
-    `v_{ij} ↦ u_i u_j v_{ij}` — planner checked commutation by hand. (3) localization of the
-    quotient module Syz/Koszul commutes (localization exact, finite presentation not needed
-    for eq_top-detection over maximal ideals ✓ mathlib lemma is for arbitrary submodules).
-    Verdict: SURVIVED.
-- **L3.4** `mapRestricted` + `norm_mapRestricted_le` — coefficientwise functoriality
-  (elementary; decay via `‖φ x‖ ≤ ‖x‖`).
-- **L3.5** `polyToP`, `flat_polyToP`:
-  - Source: p. 11–12, (4.4) and "Noetherian adic completion is flat [8, Lemma 10.97.2, Tag
-    00MB], and localization preserves flatness."
-  - Discharge: `polyToP` via vendored `MvPolynomial.toMvRestricted`;
-    (4.4) `P_E ≅ (E₀[T])^∧_ϖ[1/ϖ]` with `E₀ = unitBall E` noetherian (L2.4);
-    `AdicCompletion.flat_of_isNoetherian` (mathlib, verified present at
-    `Mathlib/RingTheory/AdicCompletion/AsTensorProduct.lean:379`) + localization flat +
-    `Module.Flat.comp/baseChange`.
-  - Attacks: (1) faithful-flatness NOT claimed (would be FALSE — §0 pass 2's `C_α = 0`
-    example); only positive-degree transport stated ✓. (2) the (4.4) identification is the
-    heaviest sub-leaf — sub-decomposed in the ticket into: integral restricted series =
-    ϖ-adic completion of `E₀[T]` (coefficientwise; `AdicCompletionBridge.lean` pattern) and
-    the `[1/ϖ]` comparison; referee pass 2 verified the mathematical content (e). Verdict:
+---
+
+## §2. R2 — the Frobenius φ^ℤ-action on Spa(A_inf, A_inf)
+
+### Plain-English proof (Step 1; sources: [BFHHLWY Def 2.1.1], [SW §12.2])
+
+O_F is perfect (L1.4), so the Witt Frobenius is a ring automorphism φ of A_inf (mathlib
+`frobeniusEquiv`). φ fixes p (a natural-number cast) and sends [x] to [x^p] = [x]^p
+(char p: Frobenius = map of the coefficient Frobenius, and Teichmüller is natural). φ
+maps I^n into I^n (its two generators go to p and [ϖ]^p ∈ I), so φ is continuous;
+φ⁻¹ sends [ϖ] to [ϖ^{1/p}] whose p-th power is [ϖ], giving I^{2n} ⊆ φ(I^n) and
+continuity of φ⁻¹. Thus k ↦ φ^k is an action of ℤ by topological ring automorphisms;
+functoriality of Spv/Cont/Spa under continuous ring maps (project ValuationAction) plus
+stability of A⁺ = A_inf under any automorphism gives the action on Spa(A_inf, A_inf).
+[SW §12.2]: "The Frobenius automorphism of O_{C♭} induces an automorphism φ of
+Spa A_inf, which preserves 𝒴."
+
+### Leaves (`FrobeniusAction.lean`)
+
+- **L3.1** (leaf, mathlib): `frob` (def, sorry-free) + `frob_natCast`
+  - Source: [BFHHLWY Def 2.1.1] ("the natural q-Frobenius", q = p).
+  - Discharge: `WittVector.frobeniusEquiv p (OF F)` (needs L1.4 instance ✓);
+    `map_natCast`.
+  - Attacks: [1] frobeniusEquiv's underlying forward map = `WittVector.frobenius`?
+    mathlib Frobenius.lean:286 defines it so (toFun := frobenius) — verified by read;
+    [2] n/a; [3] n/a. SURVIVED.
+- **L3.2** (leaf, mathlib): `frob_teichPi : φ([ϖ]) = [ϖ]^p`
+  - Source: [SW §12.2] (κ∘φ = pκ is the log-shadow); mechanism:
+    `WittVector.frobenius_eq_map_frobenius` (Frobenius.lean:273, char p) +
+    `WittVector.map_teichmuller` (Teichmuller.lean:19 header) + L2.1 `teichPi_pow` at
+    exponent… precisely: φ([ϖ]) = map(x↦x^p)([ϖ]) = [ϖ^p] = [ϖ]^p.
+  - Attacks: [1] frobenius vs map-frobenius requires `CharP (OF F) p` ✓ L1.2;
+    [2] direction: φ([ϖ]) = [ϖ]^p, NOT [ϖ^{1/p}] — φ = forward Frobenius; the INVERSE
+    does the root — convention pinned here and consumed with the opposite sign by D5's
+    action convention in L5.3; [3] discharge names verified by grep. SURVIVED.
+- **L3.3** (leaf, project): `map_frob_Iinf_pow_le`, `Iinf_pow_two_mul_le_map_frob`,
+  `continuous_frob`, `continuous_frob_symm`
+  - Source: [SW §12.2] "induces an automorphism φ of Spa A_inf" presupposes topological;
+    the ε-management is ours (source-gap): φ(I) ⊆ I from generators; φ⁻¹: [ϖ] =
+    φ([ϖ^{1/p}]) = ([ϖ^{1/p}])^p-image ⟹ I^{2n} ⊆ φ(I^n) via monomial split (p-exponent
+    untouched, [ϖ]-exponent: [ϖ]^b = φ([ϖ^{1/p}]^b) and [ϖ^{1/p}]^{2b'} ∈ … careful
+    bookkeeping recorded in the ticket sketch).
+  - Discharge: `Ideal.map` monotonicity + `Ideal.span` generators + continuity from
+    filtration bounds via `Ideal.adicTopology` basis lemmas
+    (`Ideal.hasBasis_nhds_zero_adic`-shape, AdicTopology.lean:97) +
+    `continuous_of_continuousAt_zero`-shape for additive group homs (mathlib).
+  - Attacks: [1] the 2n bound: is I^{2n} ⊆ φ(I^n) actually right? φ(I^n) =
+    (p, [ϖ]^p)^n·(φ-image ring = whole ring since φ surjective — CAREFUL: φ(I^n) as an
+    IDEAL: φ is an automorphism so φ(I^n) = ideal generated by φ-generators =
+    (p, [ϖ]^p)^n. Monomials of I^{2n}: p^a[ϖ]^b, a+b = 2n. Is p^a[ϖ]^b ∈ (p,[ϖ]^p)^n
+    when a ≥ n? yes (p^n divides). When b ≥ n: need [ϖ]^b ∈ ([ϖ]^p)^{?}·…: [ϖ]^b with
+    b ≥ n gives ⌊b/p⌋ ≥ … NOT ENOUGH for n when p > b/… — RECOMPUTE: want p^a[ϖ]^b ∈
+    (p,[ϖ]^p)^n, have a + b = 2n. If a ≥ n done. Else b > n: (p,[ϖ]^p)^n ∋ monomials
+    p^i([ϖ]^p)^j, i+j = n: match i = a, j = n - a, need [ϖ]^b divisible by [ϖ]^{p(n-a)}:
+    b ≥ p(n-a)? Have b = 2n - a, n > a: b - p(n-a) = 2n - a - pn + pa = n(2-p) +
+    a(p-1) — for p = 2: = a ≥ 0 ✓; for p ≥ 3: n(2-p) + a(p-1) can be NEGATIVE (a
+    small): e.g. p = 3, a = 0, b = 2n: need 2n ≥ 3n FALSE. **ATTACK SUCCEEDS: the
+    exponent 2n is WRONG for p ≥ 3.** FIX: use I^{(p+1)n} or simply exponent p·n +
+    n: monomial p^a[ϖ]^b, a + b = (p+1)n: if a ≥ n done; else b ≥ (p+1)n - n = pn ⟹
+    [ϖ]^b ∈ ([ϖ]^p)^n ✓. **Corrected statement: `Iinf^((p+1)*n) ≤ map frob (Iinf^n)`.**
+    Skeleton updated accordingly (see §5 changelog). This is exactly the class of error
+    the adversarial pass exists to catch. Re-ran attack on corrected exponent: monomial
+    split now clean for all p ✓. [2] continuity from the corrected bound: unchanged
+    (any polynomial exponent works); [3] symm-continuity mirrors with roles swapped
+    (φ⁻¹ fixes p, sends [ϖ] to [ϖ^{1/p}]: φ⁻¹(I^n) ⊇-bookkeeping identical). SURVIVED
+    AFTER FIX.
+- **L3.4** (leaf, mathlib): `instMulSemiringActionAinf` (sorry-free candidate)
+  - Source: [BFHHLWY Def 2.1.1] (the group φ^ℤ).
+  - Discharge: `MulSemiringAction.compHom` + `zpowersHom (RingAut _) frob` (both
+    mathlib; names verified by memory of API — if `zpowersHom` has moved, fall back to
+    a direct `MonoidHom` from `Multiplicative ℤ`).
+  - Attacks: [1] RingAut group law composes in the right order for zpow — mathlib's
+    zpowersHom is canonical; [2] smul data must be DEFINITIONALLY transparent for later
+    lemmas — compHom keeps smul = (zpowersHom … g) • x reducible; an unfolding lemma
+    L3.5 is stated regardless; [3] n/a. SURVIVED.
+- **L3.5** (leaf, project): `ofAdd_zsmul_def`
+  - unfolding lemma `k • x = (frob^k) x`; discharge: `rfl`-adjacent after L3.4's
+    definitional shape; if compHom obstructs, prove by `Int.induction_on`. Attacks:
+    none beyond definitional-transparency (covered in L3.4[2]). SURVIVED.
+- **L3.6** (leaf, project — file edit, done): generalise
+  `ValuationSpectrum.GroupAction` section by dropping the unused `[Finite G]`
+  (ValuationAction.lean:39). Statement-preserving weakening; verified by inspection
+  that no declaration in the section uses finiteness; policed by the build.
+  - Attacks: [1] downstream users pass Finite groups — weakening cannot break them;
+    [2] semantic: the definition never sums/enumerates G ✓. SURVIVED.
+- **L3.7** (leaf, project): `instContinuousConstSMulAinf` + `smul_mem_spa_Ainf`
+  - Source: [SW §12.2] quote above.
+  - Discharge: `ContinuousConstSMul` from L3.3 continuity + zpow induction
+    (`Int.induction_on`); `smul_mem_spa_Ainf` = project
+    `ValuationSpectrum.smul_mem_spa` (audit: AdicSpectrum/ValuationAction, takes
+    stability hypothesis — trivial for A⁺ = ⊤).
+  - Attacks: [1] smul continuity for NEGATIVE k needs φ⁻¹ continuity ✓ L3.3;
+    [2] Spa-stability needs CONTINUITY of the acting maps (smul_mem_cont uses
+    `continuous_const_smul`) — provided by the instance being proven first — no
+    circularity: instContinuousConstSMul is independent of Spa; [3] n/a. SURVIVED.
+
+### R2 sizing
+[SW] one paragraph. Estimate 120–200 LOC. (L3.3's corrected bookkeeping ≈ 60 LOC.)
+
+---
+
+## §3. R3 — 𝒴, the window predicates, covering / translation / disjointness
+
+### Plain-English proof (Step 1)
+
+**Definition of 𝒴** ([BFHHLWY Def 2.1.1]: 𝒴 = Spa(W_{E°}(F°)) \ {|p[ϖ]| = 0};
+[Ked-AWS Rem. 3.1.9]: "Y_S is the subspace of v ∈ Spa(A_inf, A_inf) for which
+v(p[ϖ]) ≠ 0"). In the project's vocabulary {v : ¬ v.vle (p·[ϖ]) 0} is the trace on Spa
+of `basicOpen (p[ϖ]) (p[ϖ])`, hence open. φ(p[ϖ]) = p·[ϖ]^p divides (p[ϖ])^p up to the
+unit-free monomial p^{p-1}: concretely v(φ(p[ϖ])) = 0 would force v(p[ϖ]) = 0 by
+primality of the support — 𝒴 is φ-stable both ways.
+
+**Element facts.** For v ∈ 𝒴 continuous: {a : v(a) < γ} is open for every nonzero value
+γ, contains 0, hence contains I^N. With γ = v(p) ≠ 0: p^N ∈ I^N gives v(p)^N < v(p), so
+v(p) < 1 (were v(p) ≥ 1, all powers would be ≥ 1... in a linearly ordered group γ ≥ 1
+⟹ γ^N ≥ γ ≥ … contradiction chain). Likewise v([ϖ]) < 1, and for every nonzero γ some
+v(p)^n < γ and v([ϖ])^n < γ (cofinality).
+
+**The windows** ([Ked-AWS Rem. 3.1.9], verbatim):
+
+> "Suppose that R is Tate, and let ϖ ∈ R be a pseudouniformizer. We can then make the
+> description of X_S somewhat more explicit. To begin with, Y_S is the subspace of
+> v ∈ Spa(A_inf, A_inf) for which v(p[ϖ]) ≠ 0. This space can be covered by the
+> subspaces
+>   U_n := {v ∈ Y_S : v(p)^{cp^n} ≤ v(ϖ) ≤ v(p)^{p^n}},
+>   V_n := {v ∈ Y_S : v(p)^{p^{n+1}} ≤ v(ϖ) ≤ v(p)^{cp^n}}   (n ∈ Z),
+> where c ∈ (1, p) ∩ Q is arbitrary. The action of φ permutes the U_n (among
+> themselves) and the V_n (among themselves), and hence is properly discontinuous. The
+> spaces U_0 and V_0 map isomorphically to their images in X_S and cover the latter. In
+> particular, X_S can be covered by two affinoid subspaces…"
+
+Reading (D4): "v(ϖ)" is v([ϖ]); "v(p)^{cp^n} ≤ v([ϖ])" with cp^n = a/b ∈ ℚ_{>0} means
+v(p^a) ≤ v([ϖ]^b) after clearing (legitimate: multiplicativity, [ϖ]^b = [ϖ^b]). Fix
+c := (p+1)/2 ∈ (1,p) ∩ ℚ (valid for every prime including p = 2: c = 3/2).
+
+- *Covering*: for v ∈ 𝒴 write KGE q := "v([ϖ]^b) ≤ v(p^a)" (κ ≥ q), KLE q the reverse.
+  Cofinality gives N with KLE(p^N) and KGE(p^{-N}) (i.e. v(p^{…}) < v([ϖ]) and
+  v([ϖ]^{…}) < v(p) suitably cleared). Hence {n ∈ ℤ : KGE(p^n)} is nonempty (contains
+  −N) and bounded above (fails at N+1), so has a largest element n₀; ¬KGE(p^{n₀+1}) ⟹
+  KLE(p^{n₀+1}) by totality of the valuative order. Split on the middle point: KGE(c·p^{n₀})
+  puts v ∈ V_{n₀}? — orientation: KGE(cp^{n₀}) ∧ KLE(p^{n₀+1}) = V_{n₀}; else
+  KLE(c·p^{n₀}) ∧ KGE(p^{n₀}) = U_{n₀}. Either way v is covered.
+- *Translation*: with the project convention g•v = v∘φ^{-g} (D5), (ofAdd k)•v evaluates
+  [ϖ] at φ^{-k}[ϖ] = [ϖ^{p^{-k}}], so KGE q (g•v) ⟺ KGE (q/p^k) v and windows shift
+  down: (ofAdd k)•U_n = U_{n-k}, likewise V.
+- *Disjointness*: if v ∈ U_n ∩ U_m, n < m, then KLE(cp^n) and KGE(p^m) with
+  cp^n < p^{n+1} ≤ p^m, and KLE(q') ∧ KGE(q) with q' < q is impossible on 𝒴: clearing
+  to a common comparison v(p^{A}) ≤ v([ϖ]^{B}) ≤ v(p^{A'}) with A'/B > A/B ⟹
+  v(p)^{AB'-ish} ≤ v(p)^{…} and the exponent-flip rule (0 < v(p) < 1) yields a false
+  rational inequality. V-family: consecutive right-end cp^{n} vs left-end p^{n+1}… V_n
+  windows [cp^n, p^{n+1}] and V_m, m > n: p^{n+1} ≤ cp^m needs c > p^{n+1-m}·… — the
+  separation is 1 < c (strict) at m = n+1: cp^{n+1} > p^{n+1} ✓.
+- *Openness*: each window = 𝒴 ∩ {two basicOpen conditions} — with the nonvanishing
+  facts on 𝒴, KGE q is the basicOpen pair (v([ϖ]^b) ≤ v(p^a), v(p^a) ≠ 0) and dually,
+  so windows are open in Spa.
+
+### Leaves (`YSpace.lean`)
+
+- **L4.1** (leaf, project): `Y` (def), `Y_subset_spa`, `Y_eq_spa_inter_basicOpen`,
+  `isOpen_Y`
+  - Source claim (verbatim): [BFHHLWY Def 2.1.1] "𝒴_{E,F} = Spa(W_{E°}(F°)) \
+    {|p[ϖ]| = 0}"; [Ked-AWS Rem 3.1.9] "Y_S is the subspace of v ∈ Spa(A_inf, A_inf)
+    for which v(p[ϖ]) ≠ 0".
+  - Lean ↔ source: `{v ∈ Spa (Ainf) (ringPlus _) | ¬ v.vle (p * teichPi …) 0}` — the
+    condition ¬(v(p[ϖ]) ≤ v(0)) IS v(p[ϖ]) ≠ 0 in the valuative-relation encoding
+    (v(0) is the bottom). `basicOpen f f = {v(f) ≤ v(f) ∧ ¬ v(f) ≤ 0}`, and the first
+    conjunct is reflexivity — exact trace equality.
+  - Discharge: `basicOpen`, `isOpen_basicOpen` (RationalSubsets.lean:148),
+    `spa_subtypeVal_isEmbedding` for the subspace-openness bookkeeping (pattern proven
+    in the deleted legacy file's `Y_FF_isOpen`, reusable line-for-line).
+  - Attacks: [1] vle-reflexivity: `v.vle f f` holds (preorder axiom of ValuativeRel) ✓;
+    [2] EDGE: is 𝒴 ⊆ analytic locus (no support-open points)? v(p[ϖ]) ≠ 0 with supp
+    open ⟹ I^n ⊆ supp ∋ (p[ϖ])^n ⟹ v((p[ϖ])^n) = 0 ⟹ contradiction via primality —
+    recorded as a remark-level lemma if needed later, not load-bearing in this campaign;
+    [3] drift: none — the two sources agree letter-for-letter with the trace reading.
     SURVIVED.
-- **L3.6** `syzygy_graph_restricted`:
-  - Source: p. 12 "Hence flat base change preserves the positive-degree exactness."
-  - Discharge: L3.3 + L3.5 + "kernel of a matrix map commutes with flat base change"
-    (mathlib `Module.Flat` exactness API: flat ⟹ `lTensor` preserves kernels; the syzygy
-    module of `(r_i)` over `P` = `P ⊗ Syz_{E[T]}` and the Koszul span is generated by the
-    same elements).
-  - Attacks: (1) base-change identification of `Fin m → ·` with tensors — finite free ✓.
-    (2) the span generation transfers by `Submodule.span` image lemmas ✓. Verdict: SURVIVED.
-- **L3.7** `isClosed_graphIdeal`, **L3.8** `exists_d1_lift`, **L3.9** `exists_d2_lift`:
-  - Source: p. 12 (verbatim): "Finally, `P_D` is a complete noetherian Tate ring. Every
-    term, kernel, and image in the Koszul complex is a finite `P_D`-module … Huber's
-    finite-module theorem [4, Lemma 2.4(ii)] makes `K_{j+1} ↠ B_j` and `B_j ↪ K_j` strict.
-    … A complete subspace of the Hausdorff Banach space `K_j` is closed."
-  - Discharge: `NoetherianTateModules.lean` (module topology = Banach topology on finite
-    frees via `IsModuleTopology` Pi instances; surjections open; finite modules complete)
-    + `IdealClosedness.lean` Krull closedness where convenient + OMT-with-constants
-    (`ContinuousLinearMap.exists_preimage_norm_le`, needs the `NormedSpace K`-structure on
-    `P` and closed-range corestriction — a small `NormedSpace K (P E m)` instance leaf is
-    folded into the ticket).
-  - Attacks: (1) circularity check ([FJP] referee (h)): the canonical topology on `P^m` IS
-    the max-norm topology — via `IsModuleTopology` uniqueness over the Tate `P` ✓ project
-    has exactly this machinery (Wedhorn 6.18). (2) `P` noetherian required — supplied by
-    vertex strong noetherianity (M2), never by a generic principle ✓. (3) OMT over `K`
-    (nonarch complete) — mathlib's Banach OMT is field-agnostic ✓. Verdict: SURVIVED.
+- **L4.2** (leaf, project): `Y_indep`
+  - Source: [Ked-AWS §11.2] independence quote (see L2.3).
+  - Discharge: divisibility ϖ'^n ∈ ϖ·O_F (as L2.3) + supp primality: v([ϖ']) ≠ 0 ⟸
+    v([ϖ'^n]) ≠ 0 ⟸ v([ϖ]·u) ≠ 0-chains.
+  - Attacks: [1] both directions needed — symmetric ✓; [2] n/a; [3] the quote concerns
+    the locus {[ϖ] ≠ 0} not {p[ϖ] ≠ 0} — same argument applies to the product since the
+    p-factor is choice-independent; gloss recorded. SURVIVED.
+- **L4.3** (leaf, project): `smul_mem_Y`
+  - Source: [SW §12.2] "which preserves 𝒴".
+  - Discharge: L3.2 + supp primality: v(φ^{-k}(p[ϖ])) = v(p·[ϖ^{p^{-k}}]) ≠ 0 ⟸
+    v(p) ≠ 0 ∧ v([ϖ^{p^{-k}}]) ≠ 0, and v([ϖ^{p^{-k}}])^{p^k} = v([ϖ]) via L2.1.
+  - Attacks: [1] both signs of k ✓ symmetric; [2] needs product-splitting
+    v(ab) ≠ 0 ⟺ v(a) ≠ 0 ∧ v(b) ≠ 0 — supp is prime (mathlib ValuativeRel/project
+    `supp` API, audit-verified `supp` exists with prime instance — verify name at
+    fill); [3] n/a. SURVIVED.
+- **L4.4** (leaf, project): `v_p_ne_zero`, `v_teichPi_ne_zero`, `vlt_p_one`,
+  `vlt_teichPi_one`
+  - Source: continuity manipulation — our expansion (source-gap; the sources treat κ's
+    well-definedness on 𝒴 as read, [SW §12.2]).
+  - Discharge: continuity definition (`Valuation.IsContinuous`,
+    ContinuousValuations.lean:34: ∀ γ, IsOpen {a | v a < γ}) + `Iinf`-basis
+    (`Ideal.hasBasis_nhds_zero`) + linear-order chains in the value group via the
+    `ValuativeRel.valuation` bridge (project `ofValuation`-family, audit-verified).
+  - Attacks: [1] the strictness derivation v(p)^N < v(p) ⟹ v(p) < 1: in a linearly
+    ordered group with γ ≠ 0: if γ ≥ 1 then γ^N ≥ γ (induction, needs N ≥ 1: N = 0
+    edge gives v(1) < v(p) ≤ 1 — also fine, contradiction differently; case handled);
+    [2] TRAP: {a | v a < γ} for γ = v(p) requires v(p) as a VALUE-GROUP element —
+    the project's IsContinuous quantifies over Γ; instantiating needs the
+    element-to-value bridge — mechanical via `ValuativeRel.valuation v p`; [3] trivial
+    valuation: v trivial with v(p[ϖ]) = 1 would need {v < 1} = supp open — 𝒴 avoids it
+    exactly by this argument; no extra hypothesis needed. SURVIVED.
+- **L4.5** (leaf, project): `exists_pow_p_vlt`, `exists_pow_teichPi_vlt` (cofinality)
+  - Source: as L4.4 (continuity, our expansion; implicit in [Ked-AWS Rem 3.1.9]'s
+    covering claim).
+  - Discharge: same continuity route with γ = v(g).
+  - Attacks: [1] g arbitrary with v(g) ≠ 0 — quantifier order fine; [2] n ≥ 1 vs n = 0:
+    p^0 = 1, v(1) < v(g) possible only if v(g) > 1 — FALSE on Spa (v ≤ 1 everywhere,
+    A⁺ = ⊤)! So conclusions must allow n ≥ 1 — statement says ∃ n, fine (n = 0 never
+    forced); noted for the prover; [3] IMPORTANT: v(g) ≤ 1 is imposed by A⁺ = A_inf
+    membership (Spa def) — NOT automatic for continuous valuations on non-Tate rings;
+    our Spa-based 𝒴 has it by definition — consistency between sources' Spa(A_inf,
+    A_inf) and ours confirmed (all sources use the self-pair). SURVIVED.
+- **L4.6** (leaf, project): `KGE`/`KLE` (defs) + `KGE_iff`/`KLE_iff`
+  (representation-independence) + `KGE_or_KLE` (totality) +
+  `not_KGE_of_KLE_of_lt` (order-incompatibility)
+  - Source: [Ked-AWS Rem 3.1.9] inequalities + D4 clearing gloss; [SW §12.2] κ.
+  - Lean ↔ source: KGE (a/b) v := v.vle ([ϖ]^b) (p^a) renders v(p)^{a/b} ≥ v([ϖ]) i.e.
+    κ(v) ≥ a/b. Note the DIRECTION: bigger κ ⟺ [ϖ] smaller relative to p — matches
+    [SW §12.2] κ(x_{C♭}) = 0 (p-vanishing end has κ = 0: there v(p) = 0… consistency
+    spot-check: at κ→∞ end [p♭] = 0 [SW Fig 12.1 x_L axis "[p♭] = 0"] ⟹ v([ϖ]) = 0 ⟺
+    KGE q for ALL q ⟺ κ = ∞ ✓ orientation confirmed against the figure).
+  - Discharge: cross-multiplication inside the value monoid via `vle`-calculus
+    (mul-compat axioms of ValuativeRel), `Rat.num/den` arithmetic (`Rat.num_div_den`,
+    positivity), exponent-flip: δ^a ≤ δ^b ⟹ a ≥ b for δ < 1 — a small ordered-monoid
+    lemma likely NOT in mathlib in vle form: planned as a private helper on
+    `ValuativeRel.valuation` values (`pow_le_pow_iff_right_of_lt_one`-shape DOES exist
+    in mathlib for ordered semirings/groups — `pow_le_pow_iff_right_of_lt_one` /
+    `one_lt_pow_iff`-family; verify against `LinearOrderedCommGroupWithZero` instances
+    at fill).
+  - Attacks: [1] q ≤ 0 degenerate: definitions use `q.num.toNat` — junk-value semantics
+    documented; every consumer passes 0 < q; [2] normalisation: ℚ is always
+    reduced in mathlib, and `KGE_iff` handles arbitrary representations — the iff needs
+    v(p) < 1?? NO wait: representation-independence v([ϖ]^{b}) ≤ v(p^{a}) ⟺
+    v([ϖ]^{b'}) ≤ v(p^{a'}) for a/b = a'/b' needs raising both sides to powers b', b —
+    uses ONLY multiplicativity + order-compat + CANCELLATION: γ^k ≤ δ^k ⟹ γ ≤ δ —
+    true in linearly ordered groups-with-zero (k ≥ 1) via strict-mono of pow — fine
+    without v(p) < 1; hypothesis (hv : v ∈ Y) kept anyway for the nonvanishing corner
+    (0-cases of γ,δ) — re-examined: if v(p) = 0 the flip/cancellation arguments have
+    0-edge-cases; keeping hv is the safe, honest signature ✓; [3] totality: ValuativeRel
+    order is total on values (axiom) ✓; [4] `not_KGE_of_KLE_of_lt` recomputed
+    independently in §3 prose (disjointness) ✓ consistent. SURVIVED.
+- **L5.1** (leaf, project): `cFF`, `one_lt_cFF`, `cFF_lt_p`
+  - Source: [Ked-AWS Rem 3.1.9] "c ∈ (1,p) ∩ Q is arbitrary" — we fix c = (p+1)/2.
+  - Attacks: [1] p = 2: c = 3/2 ∈ (1,2) ✓; p = 3: 2 ∈ (1,3) ✓; general: 1 < (p+1)/2 ⟺
+    p > 1 ✓; (p+1)/2 < p ⟺ p > 1 ✓; [2] "arbitrary" hides nothing: c only enters via
+    1 < c < p in disjointness and the U/V-interface — fixing it loses no theorem in this
+    campaign (the charts change, the curve does not); [3] rational-arithmetic
+    discharge: `norm_num`-level. SURVIVED.
+- **L5.2** (leaf, project): `windowU`, `windowV` (defs) + `isOpen_windowU/V`
+  - Source: [Ked-AWS Rem 3.1.9] verbatim (above).
+  - Lean ↔ source: windowU n = {v ∈ Y | KGE(p^n) ∧ KLE(c·p^n)} — matches U_n exactly
+    under D4/D5 readings; openness via the basicOpen decomposition of each cleared
+    inequality plus the nonvanishing facts L4.4 (the ≠0 side-conditions of `basicOpen`
+    hold automatically on 𝒴).
+  - Attacks: [1] zpow of ℚ at negative n: `(p:ℚ)^n` for n : ℤ is `zpow` ✓ positive ✓;
+    num/den extraction of c·p^n: via `KGE_iff` any representation works — the DEFS use
+    the normalised form, the PROOFS use the iff — no fragility; [2] windows ⊆ 𝒴 by
+    definition ✓; [3] openness: intersection of TWO basicOpens + open 𝒴 ✓ finite ✓.
+    SURVIVED.
+- **L5.3** (leaf, project): `zsmul_windowU`, `zsmul_windowV` (translation)
+  - Source: [Ked-AWS Rem 3.1.9] "The action of φ permutes the U_n (among themselves)
+    and the V_n (among themselves)"; [SW §12.2] "φ sends 𝒴_{[a,b]} isomorphically to
+    𝒴_{[ap,bp]}".
+  - Lean ↔ source: our g•v = v∘φ^{-g} (D5) makes the shift n ↦ n - k; SW's pushforward
+    makes it up — same orbit partition. The set-level equality with `Set.smul_set` is
+    the cleanest transport form for the quotient arguments.
+  - Discharge: L3.2/L3.5 + `KGE`-transformation lemma: KGE q (g•v) ⟺ KGE (q·p^{-k}) v —
+    via [ϖ]-evaluation: (g•v)([ϖ]^b) = v(φ^{-k}([ϖ])^b) = v([ϖ^{p^{-k}}]^b) and
+    ([ϖ^{p^{-k}}])^{b·p^k} = [ϖ]^b — clearing p^k into the rational index. Careful
+    ℚ-arithmetic: (p^n)·p^{-k} = p^{n-k} ✓ zpow_add.
+  - Attacks: [1] SIGN recomputed twice (here and D5) — consistent; the skeleton
+    statement `= windowU (n - k)` matches; [2] set-image vs preimage: `g • S` as
+    pointwise image; equality (not just ⊆) needs both directions — action by bijections
+    ✓; [3] q·p^{-k} positivity ✓. SURVIVED.
+- **L5.4** (leaf, project): `windowU_disjoint`, `windowV_disjoint`
+  - Source: [Ked-AWS Rem 3.1.9] (implicit in "hence is properly discontinuous"; the
+    interval arithmetic is ours per D4).
+  - Discharge: `not_KGE_of_KLE_of_lt` (L4.6) + rational inequalities cp^n < p^{n+1}
+    (c < p) and p^{n+1} < cp^{n+1} (1 < c) — `norm_num`/`gcongr`-level with zpow.
+  - Attacks: [1] U-U at distance 1 recomputed: U_n right end cp^n < U_{n+1} left end
+    p^{n+1} ⟺ c < p ✓ STRICT; V-V: V_n right end p^{n+1} < V_{n+1} left end cp^{n+1}
+    ⟺ 1 < c ✓ STRICT; [2] U_n ∩ V_n ≠ ∅ is EXPECTED (shared boundary cp^n) — only
+    within-family disjointness claimed, and the quotient argument only uses
+    within-family ✓ (Kedlaya's "permutes the U_n among themselves" line is exactly
+    this); [3] boundary points κ = exactly cp^n live in both U_n and V_n — harmless.
+    SURVIVED.
+- **L5.5** (leaf, project): `Y_eq_iUnion_windows` (covering)
+  - Source: [Ked-AWS Rem 3.1.9] "This space can be covered by the subspaces U_n … V_n".
+  - Discharge: L4.5 (both cofinalities, cleared into KLE(p^N)/KGE(p^{-N})), classical
+    largest-element extraction on the finite range {-N, …, N} (Int induction /
+    `Finset.max'`), totality L4.6, split on c·p^{n₀}.
+  - Attacks: [1] existence of the largest n with KGE(p^n): the set is nonempty
+    (KGE(p^{-N}) from clearing v([ϖ]^{…}) < v(p): CHECK the clearing — v([ϖ])^M < v(p)
+    ⟹ KGE(1/M) ⟹ KGE(p^{-N}) for p^{-N} ≤ 1/M by monotonicity — needs KGE.mono
+    (downward monotone in q) — INCLUDED in L4.6's iff/mono family; bounded above (else
+    KGE(p^m) ∀m ⟹ v([ϖ]^{…}) ≤ v(p^{…}) contradicting KLE(p^N) + incompatibility
+    L4.6) ✓ so `Int` interval finite, max exists classically ✓; [2] HIGHER-RANK CHECK
+    (the adversarial question): the argument never compares v([ϖ]) to real numbers —
+    only finitely many vle-facts + totality — rank-free ✓ no Archimedean assumption
+    smuggled: the "κ ∈ [p^{-N}, p^N]" is shorthand for two vle-facts, and the max is
+    over INTEGERS, not group elements ✓; [3] n₀ vs n₀+1 fencepost recomputed in §3
+    prose ✓. SURVIVED.
 
-### M4 — strict localization (`FiniteJetStrictLocalization.lean`)
+### R3 sizing
+[Ked-AWS Rem 3.1.9] is 10 lines of source for the full window system; our expansion
+(clearing + rank-free order theory) is the campaign's second-largest item. Estimate:
+L4.* ≈ 200–300 LOC; L5.* ≈ 250–350 LOC.
 
-- **L4.1** cluster (`ext_square_commutes`, `extRhoC_strict_surjective`,
-  `ext_milnorRow_exact`, `ext_max_norm_eq`, `ext_pair_injective`):
-  - Source: p. 10 Lemma 4.1 (verbatim in file docstring): coefficientwise lifting; "If
-    `b = ∑ b_ν T^ν` and `c = ∑ c_ν T^ν` have the same image, each coefficient pair comes
-    from a unique `a_ν ∈ R`, with `‖a_ν‖ ≤ ρ max{‖b_ν‖, ‖c_ν‖}`."
-  - Discharge: coefficientwise application of L1.6's row (constants 1 make the decay
-    bookkeeping trivial: `‖a_ν‖ = max` ✓).
-  - Attacks: (1) referee pass 2 attack 1–2 verified the uniform-constant necessity — ours
-    are 1 ✓. (2) `MvPowerSeries.map` coefficient formula (`map_coeff`) drives everything ✓.
-    Verdict: SURVIVED.
-- **L4.2** `span_pushed_B/C/D`:
-  - Source: p. 12 "After mapping to each of the k-algebras B, C, D, the tuple `(g, f₁,…,f_m)`
-    therefore generates the unit ideal."
-  - Discharge: `Ideal.span` image lemmas: `1 = a₀g + ∑ aᵢfᵢ` pushes through ring homs.
-  - Attacks: trivial; edge `m = 0` — datum `{g}` with `g` generating ⊤ ✓ pushes. SURVIVED.
-- **L4.3** `ideal_row_surjective`, **L4.4** `ideal_pullback_controlled`, **L4.5**
-  `isClosed_IA`:
-  - Source: pp. 12–13 Lemma 4.3 (verbatim statement in file docstring; the full
-    constant-chase (4.11)–(4.16) re-derived independently by referee pass 2 and the planner
-    — every displayed bound matches).
-  - Discharge: L3.7/L3.8 at 𝓑, 𝓒, 𝓓 (via L4.2's unit-ideal push) + L3.9 at 𝓓 + L4.1's
-    lifting; closedness: `I_𝓐` = preimage of the closed
-    `(I_𝓑 × I_𝓒) ∩ ker(difference)` under the L4.1-embedding.
-  - Attacks: (1) m = 1 degeneration — `Pairs 1 = ∅` forces `ker d₁ = 0` at 𝓓, which L3.9
-    delivers (referee-verified); the chase degenerates gracefully (planner re-checked:
-    `s = 0` forced). (2) sign consistency `d₁∘d₂ = 0` in the correction step — L3.1.
-    (3) the "canonical map injective" needs `P_𝓐 ↪ P_𝓑 ⊕ P_𝓒` — L4.1 `ext_pair_injective` ✓.
-    Verdict: SURVIVED.
-- **L4.6** `quotient_row_exact` (Lemma 4.4, gluing form):
-  - Source: p. 14 Lemma 4.4 (verbatim in docstring). Our statement is the middle-exactness
-    workhorse (`ψ y ∈ H₂ → y ∈ φ(G₀) + H₁`), the form consumed by Prop 4.5; the norm
-    bookkeeping of the source's left-arrow bound is absorbed into L4.7/L4.8's topological
-    conclusions (openness of group-quotient maps replaces explicit η-chases — planner
-    decision, recorded; the source's constants remain available via L4.3/L4.1 if the
-    quantitative form is ever needed).
-  - Attacks: (1) needs `I₁ ↠ I₂` from the TOP row — hypothesis `hHsurj` present (referee
-    pass 2 flagged this as the load-bearing input ✓). (2) algebraic 3×3 chase — standard.
-    Verdict: SURVIVED.
-- **L4.7** cluster (`locJB/locIotaC/locRhoB/locRhoC` + `_mk` lemmas +
-  `loc_square_commutes`, `loc_row_exact`, `loc_pair_injective`, `locRhoC_surjective`):
-  - Source: pp. 14–15 Prop 4.5 (verbatim in docstring) + (4.21) "the completed graph
-    quotient is already the Banach quotient `E_α = P_E/I_E`."
-  - Discharge: `Ideal.Quotient.lift` along `ext*` (ideals map into ideals ✓ by construction
-    of `rB/rC/rD`); exactness by diagram chase from L4.3 + L4.6 + L4.1.
-  - Attacks: (1) **B2 echo #6/P3**: the quotient here is of the *restricted* ring `P_E`,
-    never of `MvPolynomial` — the completed localization is only identified with it because
-    the ideal is CLOSED (L4.5/L3.7); the false algebraic-localization shortcut is
-    structurally excluded ✓. (2) middle-exactness needs the ideal row's surjectivity — L4.3
-    ✓. (3) inf-max isometry (referee pass 2, item 5.2) — needed only for the normed reading;
-    topological form avoids it. Verdict: SURVIVED.
-- **L4.8** cluster (`loc_pair_isEmbedding`, `locRhoC_isOpenMap`, `locA_t2`,
-  `locA_completeSpace`):
-  - Source: Prop 4.5's strictness + (4.21).
-  - Discharge: quotient maps of topological groups are open (mathlib); embedding via
-    L4.6-style chase + closedness (L4.5) ⟹ Hausdorff ⟹ complete (closed image of Banach
-    quotient; `QuotientAddGroup` normed-quotient instances).
-  - Attacks: (1) `T2` requires closed ideal — supplied; (2) completeness of normed-group
-    quotient by closed subgroup — mathlib `Quotient` completeness ✓. Verdict: SURVIVED.
+---
 
-### M5 — functoriality, bridges, loc-lift (`FiniteJetFunctoriality.lean`)
+## §4. R4–R5 — freeness, wandering, and the curve 𝒳
 
-- **L5.1** pods (`podA/B/C/D`): concrete `PairOfDefinition`s on unit balls with the
-  `t`-ideal. Source: p. 6 (2.1a) "choose the bounded rings of definition …". Discharge:
-  `podD`-pattern (`ExampleUnitDisc.lean:448`), `isAdic` by the same metric argument.
-  Attacks: (1) **B2 echo L14_L2** — completeness of the ball needs ambient completeness ✓
-  M1 instances; (2) `Ideal.span {t}` f.g. ✓ trivial. SURVIVED.
-- **L5.2** `pushDatumB/C/D` + `IsRational` transfer:
-  - Source: p. 18 Lemma 5.1 (verbatim): "its inverse image `U_E = p_E⁻¹(U)` is the rational
-    domain in `Y_E` defined by the image of the same datum."
-  - Discharge: image datum; `hopen` via the generic span-⊤/principal-pod computation
-    (planner-verified: `b ∈ (t^N)` ⟹ `b/s = ∑ (t^N aᵢ b')(tᵢ/s)` with `t^N aᵢ ∈ A₀` for
-    `N` large — the finitely many `aᵢ` from `1 = ∑ aᵢtᵢ` are absorbed by topological
-    nilpotence). `IsRational` via `RationalLocData.isRational_of_span_eq_top` + L4.2.
-  - Attacks: (1) risk item 3 (plan.md): if the generic `hopen` lemma resists, per-vertex
-    concrete proofs are possible (norm estimates); recorded fallback. (2) `Finset.image`
-    needs `DecidableEq` — `Classical` opened ✓. SURVIVED.
-- **L5.3** `presheafValueMap*` + continuity + `canonicalMap` compatibility + restriction
-  naturality (`presheafValueMap*_restriction`):
-  - Source: p. 15–16 Lemma 4.6 (verbatim): "The isomorphism (4.20) is canonical and natural
-    in the strict Milnor square and in the rational datum. In particular, for rational
-    domains `V ⊆ U`, the kernel descriptions commute with the restriction map
-    `𝒪(U) → 𝒪(V)`." (Iteration clause NOT formalised — not needed for Thm 5.3; scope note.)
-  - Discharge: `IsLocalization.Away.map` + `locTopology` lattice comparison (images of
-    `locSubring` generators are generators) + `UniformSpace.Completion.extensionHom`;
-    naturality by `IsLocalization.ringHom_ext` + completion-extension uniqueness on the
-    dense localization (planner note: density of the *localization* in the completion is
-    automatic; density of `A` in the localization is NOT claimed — B2-adjacent trap
-    avoided).
-  - Attacks: (1) continuity of the localization map for `locTopology` — the lattice
-    inclusion is concrete for our pods; (2) uniqueness arguments need `T2` targets ✓
-    completions are T0+group ⟹ T2 ✓. SURVIVED.
-- **L5.4** `DatumEnum` + `graphBridgeA` + continuity both ways:
-  - Source: p. 3–4 Lemma 1.1 (verbatim): "The separated completion
-    `(E⟨T₁,…,T_m⟩/(gT_i−f_i)_{i=1}^m)^∧` represents bounded k-algebra homomorphisms
-    `φ : E → F` … for which `φ(g)` is invertible and every `φ(f_i)/φ(g)` is power-bounded.
-    It is therefore canonically the underlying Tate algebra of Huber's rational localization
-    `E_α`. In particular, it is independent of the presentation of the rational subset and
-    is transitive under rational refinement." Plus (4.21) closedness (`I_𝓐` closed, L4.5,
-    so the quotient is already complete).
-  - Lean ↔ source: `presheafValue D` = Huber's completed localization in the project's
-    model (`Completion (Localization.Away s)` with `locTopology`); `locA` = the graph
-    quotient; the bridge is Lemma 1.1's canonicity. Forward direction: `s` is invertible in
-    `locA` (from `span T = ⊤`: `1 = ∑aᵢtᵢ ⟹ 1 = s·∑aᵢT̄ᵢ` — the (4.3) computation);
-    `Localization.Away`-lift; continuity (lattice); completion-extend (target complete by
-    L4.8). Reverse: evaluation `P_𝓐 → presheafValue D` at `Tᵢ ↦ canonicalMap tᵢ ·
-    (canonicalMap s)⁻¹` — the needed `IsUnit (canonicalMap s)` is the **D′ = D case**, which
-    holds because `s` is already invertible in `Localization.Away s` (no loc-lift class
-    needed — circularity break, recorded); kills `I_𝓐` (graph relations ↦ 0); factors
-    through the quotient; round-trips agree on dense images.
-  - Attacks: (1) **the M5 keystone risk (plan.md item 4)**: the density and continuity
-    arguments were re-derived by the planner in the project's exact vocabulary — the
-    referee-verified Lemma 1.1 convergence argument ((1.3), §0 pass 3) is the mathematical
-    core; the `TopologyComparison.lean` singleton-T bridge is the in-project precedent
-    (generalising it is the ticket's job, with its hypothesis bundle replaced by our
-    concrete closedness). (2) presentation-independence is NOT baked into `graphBridgeA`
-    (it takes an explicit `DatumEnum`); consumers fix one enumeration per datum — no
-    hidden canonicity claim ✓. (3) `graphBridge_natural_C` placeholder statement (True) is a
-    **skeleton stub**: the real statement (bridge intertwines `presheafValueMapC` with the
-    coefficientwise `locIotaC`) is fixed in ticket T-M5-4 — flagged, not hidden. SURVIVED
-    with explicit stub-flag.
-- **L5.5** `HasLocLiftPowerBounded (JetB/C/D)`: via `hasLocLiftPowerBounded_faithful`
-  (vertices noetherian ✓; bundle available ✓). Attacks: instance-shape (the letI binder) —
-  same as L2.5 ✓. SURVIVED.
-- **L5.6** `hasLocLiftPowerBounded_JetA`:
-  - Source: [FJP] has no such statement (it is a project-vocabulary obligation — the class
-    gates `restrictionMap`); mathematically it is Lemma 1.1's universal-property data for 𝓐,
-    obtained componentwise: p. 13 (4.9)-pullback + p. 4 Lemma 1.1's "power-bounded"
-    condition, componentwise in the max norm.
-  - Discharge: through `graphBridgeA` + `loc_row_exact`: a unit in both vertex-charts with
-    matching inverses is a unit in the pullback (`(b⁻¹, c⁻¹)` matches in 𝓓 by uniqueness of
-    inverses); power-boundedness in the max norm is componentwise; vertices supply their
-    fields via L5.5.
-  - Attacks: (1) circularity — resolved by the D′=D observation (L5.4); dependency order
-    checked: bridges (L5.4) need no loc-lift; L5.6 consumes bridges; `restrictionMap`-based
-    statements come after ✓ (file order enforces). (2) the `D ⊆ D'` inclusion-induced maps
-    exist at graph level via Lemma 1.1's universal property — the ticket routes through
-    graph quotients only. SURVIVED.
-- **L5.7** coverage (`mem_rationalOpen_pushDatum*_iff`, `pushCovering*`, `*_isRational`):
-  - Source: p. 19 (verbatim): "Inverse images preserve the defining valuation inequalities
-    and unions. Hence, for `E = B, C, D`, `U_E = ⋃ᵢ (Uᵢ)_E` is a rational covering of the
-    inverse-image domain."
-  - Discharge: pointwise valuation comparison via `ValuationSpectrum.comap` +
-    `comap_mem_spa` (project, sorry-free); coverage from `C.hcover` composed with comap.
-  - Attacks: (1) `comap` needs `Continuous ι` + `A⁺ ≤ comap E⁺` — our maps are bounded
-    norm-≤1 homs; power-bounded preservation is the norm argument (B2 `IsPowerBounded.map`
-    trap avoided again) ✓. (2) empty pieces allowed (zero ring convention, [FJP] p. 3) —
-    `RationalCovering` fields don't require nonemptiness ✓. SURVIVED.
-- **L5.8** `interDatum` + `rationalOpen_interDatum` + `IsRational`:
-  - Source: p. 19 "Put `U_{ij} = U_i ∩ U_j`, which is again rational."
-  - Discharge: the standard product-datum computation (pointwise, both inclusions; uses
-    `v(s₁s₂) ≠ 0 ↔ v(s₁) ≠ 0 ∧ v(s₂) ≠ 0` and the `T·`-product comparisons; span-⊤ of the
-    product set from span-⊤ of the factors).
-  - Attacks: (1) the classical pitfall — the product formula needs `sᵢ ∈ Tᵢ` or span-⊤
-    normalisation; our data are span-⊤ (`IsRational` hypotheses threaded) and the planner
-    verified the two inclusions pointwise under them; if a corner case resists, normalise
-    data by `insert s T` first (recorded fallback — same rationalOpen). SURVIVED.
+### Plain-English proof (Step 1)
 
-### M6 — transfer (`FiniteJetSheafTransfer.lean`)
+**Freeness** (corollary route — no independent value-group argument): let v ∈ 𝒴 with
+φ^k·v = v, k ≠ 0. By covering, v ∈ U_n (or V_n) for some n; by translation
+φ^k·v ∈ U_{n-k} (resp. V_{n-k}); so v ∈ U_n ∩ U_{n-k} = ∅ (within-family disjointness,
+k ≠ 0). Contradiction. **Wandering**: v's own window W is an open neighbourhood inside
+𝒴, and φ^k·W ∩ W = ∅ for k ≠ 0 (translation + disjointness). This is the precise
+content behind [Ked-AWS §3.1] "The action of φ on Y_S is properly discontinuous" and
+[SW Def 13.5.1] "As φ acts properly discontinuously on 𝒴_(0,∞) (as follows from
+κ∘φ = pκ), it makes sense to form the quotient."
 
-- **L6.1** `productRestrictionSub_injective_JetA`:
-  - Source: p. 19–20 (the injectivity part of the embedding chain: `J ∘ r_R` injective).
-  - Discharge: chase — `x` with all restrictions 0 has all chart-images 0 (naturality L5.3),
-    vertex separatedness (`IsSheafy.separationSub`, L2.5) gives vanishing of the pushed
-    global sections, and the base Milnor row (bridge + `loc_pair_injective` at the base
-    datum) forces `x = 0`.
-  - Attacks: (1) needs the BASE datum's row too, not just pieces — statement quantifies over
-    all coverings of any rational base; base bridge available for any datum ✓. SURVIVED.
-- **L6.2** `gluing_JetA`:
-  - Source: p. 19–20 Lemma 5.2 proof (verbatim key steps): "Compatibility gives
-    `x_i|_{U_{ij}} = x_j|_{U_{ij}}` … For the images `b_i ∈ B_{U_i}` and `c_i ∈ C_{U_i}`
-    this gives `b_i|_{(U_{ij})_B} = b_j|_{(U_{ij})_B}` … sheafiness of B and C glues them
-    uniquely to `b ∈ B_U` and `c ∈ C_U`. The two images of `(b,c)` in `D_U` agree after
-    restriction to every `D_{U_i}`, because each `x_i` belongs to the local fiber product.
-    The restriction `D_U → ∏_i D_{U_i}` is injective by separatedness for `D` … Exactness of
-    (5.7) gives a unique `x ∈ R_U` mapping to `(b, c)`. For each `i`, the elements `x|_{U_i}`
-    and `x_i` have the same images under the injective map `j_{U_i}`, and hence are equal."
-  - Discharge: the ten-step chain, each step a named prior leaf: push family (L5.3), pairwise
-    compat on `interDatum` (L5.8 + hypothesis instantiated at `D₃ := interDatum`), vertex
-    compat quantified over arbitrary `D₃` in the vertex (obtained by restricting through the
-    pushed intersection — transitivity of `restrictionMap` = project `restrictionMap_comp`),
-    glue (L2.5), 𝓓-match (L2.5 separation + L5.3), pull back (L5.4 bridge + L4.7
-    `loc_row_exact`), identify restrictions (L4.7 `loc_pair_injective` + naturality).
-  - Attacks: (1) **the planner's hardest transfer attack** — the project's gluing
-    compatibility quantifies over ALL rational `D₃` inside two pieces of the *vertex*, not
-    only pushed ones; resolution (recorded in the ticket): for vertex-side `D₃` inside
-    `(Uᵢ)_E ∩ (Uⱼ)_E = (U_{ij})_E` (L5.8 pushed-intersection identity), restrict the pushed
-    sections first to `(U_{ij})_E` (equal there by pushed 𝓐-compatibility at `U_{ij}`), then
-    to `D₃` by `restrictionMap_comp` — so FULL vertex-compatibility follows from
-    𝓐-compatibility at intersections. Verified step-by-step by the planner; this is the
-    place a lazy formalisation would stall, hence spelled out. (2) uniqueness of the glued
-    `b, c` not needed (only existence + the matching). (3) zero-ring pieces — all steps are
-    vacuous there ✓. SURVIVED.
-- **L6.3** `productRestrictionSub_isEmbedding_JetA`:
-  - Source: p. 19 (5.8)-cancellation + p. 21 Thm 5.3 "the Banach open mapping theorem makes
-    the continuous bijection onto that image a homeomorphism"; p. 20 "That subring is closed
-    in the finite product."
-  - Discharge: mirror of the 828b assembly (WCA:13388): range ⊆ `sectionEqualizer` (project
-    generic, sorry-free), equality of range and equalizer from L6.2 + L6.1, closedness
-    (`sectionEqualizer_isClosed`, project, sorry-free), then
-    `isInducing_of_closedRange_of_topNilpUnit` (project σ-compact-free Tate OMT, sorry-free)
-    + injectivity L6.1.
-  - Attacks: (1) the project OMT lemma's hypothesis shape (Tate unit) — 𝓐 is Tate ✓ M1.
-    (2) `presheafValue`s complete/first-countable — project instances ✓. SURVIVED.
-- **L6.4** assembly `isSheafy_JetA` — **already term-level in the skeleton** (no sorry):
-  `{ embedding := L6.3, gluing := L6.2 }`. Type-checked ✓.
+**The curve** ([BFHHLWY Def 2.1.1]: 𝒳 = 𝒴/φ^ℤ): the orbit-relation quotient of the
+subtype ↥𝒴, with the quotient topology. The quotient map is an open quotient map
+(mathlib: orbit maps of continuous actions). On each window it is injective: two window
+points in one orbit contradict wandering. Hence each window maps homeomorphically onto
+an open subset ([Ked-AWS Rem 3.1.9]: "The spaces U_0 and V_0 map isomorphically to
+their images in X_S"), and the images of U_0, V_0 cover 𝒳 ("and cover the latter"):
+every orbit meets U_0 ∪ V_0 by covering + translation (shift the witnessing window
+index to 0). T0: orbits are separated because distinct orbits either differ inside one
+window-chart (T0 there, inherited from Spv) or lie over different κ-data; formally: the
+quotient of a T0 space by an open equivalence relation with discrete-fibre-like
+(wandering) structure is T0 — proven via the chart embeddings. Quasicompactness: 𝒳 =
+q(U_0) ∪ q(V_0) with each q(U_i) a continuous image of the quasicompact window-closure
+data ([Ked-AWS Rem 3.1.9]: "In particular, X_S can be covered by two affinoid
+subspaces"); in our layer, window quasicompactness comes from the project's Boolean
+product-embedding compactness machinery (SpaCompact/ValuationSpectrumCompact: Spa is
+compact; the window adds finitely many coordinate conditions — two vle-closed and two
+clopen-style nonvanishing — the resulting subset is compact by the closed-image
+criterion `isCompact_spa_of_isClosed_image`-family).
 
-### Composition attacks (internal nodes, R1)
+### Leaves (`Curve.lean`)
 
-- Could M1–M5 all hold and M6 fail? The transfer chain was re-derived twice (planner +
-  referee pass 3 item 10) with every silently-used property enumerated (12 items, all
-  present as leaves or project lemmas — list in §0 pass 3). The single non-source-explicit
-  step (vertex-side arbitrary `D₃`) is L6.2 attack 1, resolved.
-- Could the skeleton's statements drift from [FJP]? Every leaf carries its quote; the two
-  deliberate deviations are RECORDED: (i) evalHom-surjectivity replaces the kernel-exact
-  presentation (noetherianity only needs surjections); (ii) Lemma 4.4/Prop 4.5 stated
-  topologically instead of with explicit quotient-norm constants (the constants exist at
-  P-level; the transfer consumes only the topological form). Neither weakens the headline.
-- m = 0 datum edge (empty T): excluded by `m ≥ 1` convention ([FJP] p. 3 "an empty tuple may
-  be padded by `f₁ = 0`"); our `DatumEnum` allows padding the enumeration; recorded in
-  ticket T-M5-4.
+- **L6.1** (leaf, project): `smul_ne_of_ne_zero` (freeness)
+  - Source: [Ked-AWS Rem 3.1.9]/[SW Def 13.5.1] as quoted; the corollary-route is our
+    arrangement (gloss recorded; mathematically it is exactly "φ permutes the U_n among
+    themselves ⟹ properly discontinuous ⟹ free on the covered set").
+  - Discharge: L5.5 + L5.3 + L5.4, pure set logic.
+  - Attacks: [1] k < 0 handled by symmetry (n - k ≠ n ⟺ k ≠ 0 for both signs) ✓;
+    [2] boundary points in U_n ∩ V_n: the argument uses whichever family contains v —
+    both work ✓; [3] no hidden use of Hausdorffness ✓. SURVIVED.
+- **L6.2** (leaf, project): `exists_nhd_smul_disjoint` (wandering)
+  - Source: as L6.1.
+  - Discharge: L5.2 (openness) + L5.3 + L5.4; the existential witnesses v's window.
+  - Attacks: [1] the neighbourhood must be a subset of 𝒴 ✓ windows are; [2] `Set.smul`
+    disjointness vs pointwise: `Disjoint (g • W) W` unfolds pointwise ✓; [3] the
+    "for all k ≠ 0 simultaneously" is exactly within-family disjointness at all
+    distances ✓. SURVIVED.
+- **L6.3** (leaf, project): `instMulActionYSub` (data real, laws one-line) +
+  `instContinuousConstSMulYSub`
+  - Discharge: pattern of project `instMulActionCont` (ValuationAction.lean:71) —
+    Subtype.ext + parent laws; continuity: restriction of continuous maps to
+    subtypes (`Continuous.subtype_mk` + `continuous_subtype_val` composition), from
+    L3.7 through the Spv-level action.
+  - Attacks: [1] CAREFUL: the Spv-level continuity of g•(-) — comap-continuity is
+    project `comap_continuous` (audit-verified, ValuationSpectrum.lean:107) — the
+    ContinuousConstSMul on Spv-subsets follows; the subtle point is which topology ↥𝒴
+    carries (subspace of Spv ✓ unambiguous); [2] n/a; [3] n/a. SURVIVED.
+- **L7.1** (leaf, mathlib): `Curve` (def), `toCurve`, `toCurve_surjective`,
+  `isOpenQuotientMap_toCurve`
+  - Source (verbatim): [BFHHLWY Def 2.1.1] "𝒳_{E,F} = 𝒴_{E,F}/φ^**Z**"; [SW Def
+    13.5.1] "The adic Fargues-Fontaine curve is the quotient 𝒳_FF = 𝒴_(0,∞)/φ^**Z**."
+  - Lean ↔ source: `Quotient (MulAction.orbitRel (Multiplicative ℤ) ↥Y)` with the
+    quotient topology is the literal 𝒴/φ^ℤ as a topological space; the adic-structure
+    layer is D3-deferred (the sources' own Prop 2.1.2 delegation).
+  - Discharge: `Quotient.mk_surjective`;
+    `MulAction.isOpenQuotientMap_quotientMk` (mathlib, ConstMulAction.lean:574, needs
+    `[ContinuousConstSMul]` = L6.3).
+  - Attacks: [1] orbitRel vs "∃ k, φ^k x = y": definitional match of `MulAction.orbitRel`
+    ✓; [2] which quotient topology: `instTopologicalSpaceQuotient` = coinduced ✓ the
+    open-quotient-map theorem is against exactly this instance ✓; [3] n/a. SURVIVED.
+- **L7.2** (leaf, project): `injOn_toCurve_windowU/V`
+  - Source: [Ked-AWS Rem 3.1.9] "map isomorphically to their images".
+  - Discharge: wandering L6.2 specialised to window-mates: if q(x) = q(y), x = φ^k·y;
+    if both in U_n and k ≠ 0 then x ∈ U_n ∩ U_{n-k} = ∅ — so k = 0.
+  - Attacks: [1] the InjOn set lives in ↥𝒴 with a coercion to Spv — statement uses the
+    coercion consistently ✓; [2] n/a; [3] n/a. SURVIVED.
+- **L7.3** (leaf, project): `curve_eq_image_window_zero`
+  - Source: [Ked-AWS Rem 3.1.9] "U_0 and V_0 … cover the latter".
+  - Discharge: covering L5.5 + translation L5.3: v ∈ U_n ⟹ (ofAdd n)•v ∈ U_0 with the
+    same orbit ⟹ q(v) ∈ q(U_0).
+  - Attacks: [1] sign of the shift: v ∈ U_n, want image in U_0 = U_{n - n} ⟹ act by
+    ofAdd n ✓ (D5 convention: shifts DOWN by k) ✓ recomputed; [2] n/a; [3] n/a.
+    SURVIVED.
+- **L7.4** (leaf, project): `instT0SpaceCurve`
+  - Source: implicit in the sources treating 𝒳 as an adic space (adic spaces are T0);
+    our proof is chart-wise (gloss: no source proves T0 separately — it follows from
+    their sheaf-level structure; at our layer the chart embeddings + Spv's T0 give it;
+    this is an honest ADDITION, low risk).
+  - Discharge: L7.1 (open quotient) + L7.2 (chart injectivity) + T0 of Spv (project:
+    Spv points are extensionally the relations — T0 via `basicOpen` separation;
+    verify the project's exact T0 lemma for Spa-subspaces at fill time; if missing, a
+    small sub-leaf: distinct valuative relations are separated by a `basicOpen`, which
+    is essentially `Spv.ext` + definition of the topology).
+  - Attacks: [1] two points in ONE chart: separated by chart-open sets ✓; two points
+    with disjoint κ-windows: preimages saturate to disjoint unions of translated
+    windows?? — careful: T0 needs only SOME open containing one not the other; the
+    image of the window of x is open (L7.1+L7.2) and misses y's orbit unless y's orbit
+    meets x's window — in which case reduce to the one-chart case ✓ argument closes;
+    [2] no Hausdorff claim is made (𝒳 is NOT Hausdorff — adic spectra aren't; only T0)
+    ✓ scope-correct; [3] n/a. SURVIVED.
+- **L7.5** (leaf, project): `isCompact_windowU_zero`, `isCompact_windowV_zero`,
+  `instCompactSpaceCurve`
+  - Source: [Ked-AWS Rem 3.1.9] "In particular, X_S can be covered by two affinoid
+    subspaces" (affinoid ⟹ quasicompact; our layer proves the quasicompactness
+    directly).
+  - Discharge: project Boolean-embedding compactness machinery
+    (`isCompact_spa_of_isClosed_image` criterion family, SpaCompact.lean:47) — the
+    window adds four coordinate conditions to the closed image; each `{v : v.vle a b}`
+    is a closed coordinate condition and each nonvanishing `{¬ v.vle s 0}` is also a
+    coordinate condition (the Boolean-product trick handles arbitrary Boolean
+    combinations of FINITELY many vle-coordinates, since a clopen modification of a
+    closed set within a compact product stays closed when the conditions are
+    coordinate-determined — TO VERIFY against the project's exact criterion; if the
+    criterion only handles closed conditions, fall back to spectral-space style:
+    window = intersection of a closed set with two quasicompact basicOpens, and
+    finite intersections of qc opens in a spectral-like space are qc — the project's
+    SpaQCviaSpvAI may already provide the needed "qc basicOpen" statement).
+    **Honesty flag: this is the least-pinned discharge of the campaign** — compactness
+    of rational-style subsets is morally in the project's wheelhouse (SpaCompact,
+    SpaQCviaSpvAI) but the exact citable lemma was not located during planning; the
+    ticket carries both candidate routes and a hard-stop instruction if neither lands
+    (downgrade `instCompactSpaceCurve` to a stated-not-proved stretch WITHOUT changing
+    any other statement — it is a leaf with no dependents in this campaign).
+  - Attacks: [1] window is NOT closed in Spa (nonvanishing is open-ish in the spectral
+    sense) — the discharge routes above are chosen precisely to avoid "closed subset of
+    compact" naivety; [2] CompactSpace of the quotient: continuous image of
+    qc ∪ qc ✓ via L7.3 + `IsCompact.image` + `isCompact_union`; [3] the sources' word
+    "affinoid" is STRONGER than qc — we claim only qc ✓ under-claiming is safe.
+    SURVIVED (with the honesty flag).
+- **L7.6** (leaf, STRETCH, project): `Y_nonempty`
+  - Source: [FF §1.4]-family (multiplicative Gauss norms |·|_ρ on A_inf) — reserved;
+    not decomposed in this campaign beyond the statement. Explicitly ticketed as
+    stretch with its own future sub-decomposition; NO other leaf depends on it.
+  - Attacks: [1] the statement is true for every perfectoid F (Gauss norms exist in
+    complete generality — [FF] work over any perfectoid F, alg. closedness enters
+    later), so the skeleton statement is safe to keep; [2] risk isolated: no dependent
+    ✓; [3] n/a. SURVIVED (as a stretch marker).
 
-## Result R2: `finiteJet_isUniform` + `finiteJet_isDomain` ([FJP] Prop 2.3)
+### R4–R5 sizing
+[Ked-AWS §3.1 + Rem 3.1.9]: ~15 lines of source. Estimate: L6.* ≈ 80–140 LOC; L7.1–7.4
+≈ 150–250 LOC; L7.5 ≈ 100–200 LOC (or descoped); L7.6 stretch unbounded (own future
+campaign section).
 
-Leaves: `norm_L_mul`, `norm_JetC_mul` (L1.3), `IsDomain (JetC F)`, `IsDomain (JetA F)`,
-`isPowerBounded_JetA_iff`, `isUniform_JetA` (`FiniteJetUniformDomain.lean`).
-- Source (verbatim, p. 7): "If `v_{𝒞₀}(a) < 0`, then `v_{𝒞₀}(aⁿ) = n v_{𝒞₀}(a)` tends to
-  `−∞`, so `a` is not power-bounded. If `v_{𝒞₀}(a) ≥ 0`, all powers of `a` lie in 𝒜₀. Thus
-  the valuation formulation gives directly `𝒜° = 𝒜₀`." "Finally, 𝒜 is a domain because it
-  is a subring of 𝒞."
-- Lean ↔ source: `IsPowerBounded a ↔ ‖a‖ ≤ 1` (the norm is the restriction of 𝒞's
-  multiplicative norm — definitional in the subring model); `IsUniform` = project class
-  (`Uniform.lean:43`, `IsBounded (powerBoundedSubring A)`); ball bounded in a normed ring ✓.
-- Attacks: referee pass 3 item 4 (the "restriction still power-multiplicative" trap —
-  defeated: powers computed in 𝒞 ✓); `IsBounded` is the project's Huber-boundedness — for
-  the metric ball, absorption by `t^n`-scaling (same as disc `isBounded_OD`) ✓. SURVIVED.
+---
 
-## Result R3: `finiteJet_not_noetherian` ([FJP] Prop 2.4)
+## §5. Takeover verdict on pre-existing files (audit 2026-07-24)
 
-Leaves: `winv_not_integral`, `not_moduleFinite_L`, `moduleFinite_of_ker_jB_fg`,
-`ker_jB_not_fg`, `not_isNoetherianRing_JetA` (`FiniteJetUniformDomain.lean`).
-- Source (verbatim, pp. 7–8): "Let `J = Q²𝒞 ⊂ 𝒜` … `K = ker(𝒜 → R_W) = QR_W + Q²𝒞` …
-  `KJ = Q³𝒞, J/KJ = Q²𝒞/Q³𝒞 ≅ 𝒞/Q𝒞 = L` … If `J` were generated as an 𝒜-ideal by
-  `x₁,…,x_r`, their classes would generate `J/KJ` over `𝒜/K` … It would follow that `L` is a
-  finite `R_W`-module. A module-finite algebra is integral, so `W⁻¹` would satisfy a monic
-  equation … Multiplication by `Wⁿ` gives `1 + a_{n−1}(W)W + ⋯ + a₀(W)Wⁿ = 0`. The inclusion
-  `R_W ↪ L` is injective, so evaluation at `W = 0` would give `1 = 0`."
-- Lean ↔ source: `J = ker(jB)` (the 2-jet kernel = `Q²𝒞` — support form); the `𝒜/K ≅ R_W`
-  module structure enters through `Algebra (K⟨W⟩) L` via `ofRestricted`; the evaluation at
-  `W = 0` is `PowerSeries.constantCoeff` on `K⟨W⟩` (never on `L` — referee-checked).
-- Attacks: pass 3 item 5 (all five sub-attacks defeated — `Q ∈ 𝒜` support (0,1); `KJ = Q³𝒞`
-  both inclusions; the decomposition of zero-jet elements). `Module.Finite → IsIntegral`:
-  mathlib `Algebra.IsIntegral.of_finite` ✓. B2-log: no name/shape match. SURVIVED.
+- **`Adic spaces/FarguesFontaine.lean` (legacy, DELETED by this campaign).** Verdict
+  from the read + audit: (i) its `Y_FF` removed the SIMULTANEOUS vanishing locus
+  V(p,[π]) = {v(p) = 0 ∧ v([π]) = 0}, not the paper's V(p·[ϖ]) = {v(p[ϖ]) = 0} — the
+  quotient of that space by φ^ℤ is NOT the Fargues–Fontaine curve (Frobenius fixes the
+  char-p locus V(p) pointwise: v∘φ = v^p there, an equivalent valuation, so the action
+  on the extra locus is trivial and the quotient is not even T0-reasonable there);
+  (ii) its Witt topology instance was p-adic (`span {p}`), not (p,[ϖ])-adic — the wrong
+  Spa; (iii) its four "key property" theorems were vacuous (`∀ _, True`); (iv) 10 code
+  sorries including a sorry'd `Setoid` DATA instance. Nothing mathematically load-
+  bearing was lost; the two reusable idioms (the `teichmullerPi` construction and the
+  basicOpen-union openness proof pattern) were carried into `PseudoUniformizer.toOF` /
+  `isOpen_Y`'s planned proof. History remains in git.
+- **Kept and consumed as-is:** PseudoUniformizer.lean, PerfectoidRing.lean (classes +
+  the p-adic completeness engine), WittVectorPrimitive.lean (future untilt campaigns),
+  Tilting.lean (future: F = C♭ instances for L7.6 route (ii)).
+- **Edited:** ValuationAction.lean (L3.6, `[Finite G]` dropped); root
+  `Adic spaces.lean` import swap (legacy → five new modules).
+- **Skeleton changelog during the pass:** (a) `OF`/`toOF` signatures corrected (variable
+  capture: `p` is not a parameter of either); (b) ϖ-parametrised completeness
+  statements demoted from `instance` to `theorem` (unsynthesisable parameter);
+  (c) **L3.3's φ⁻¹-continuity bound corrected from `I^{2n} ⊆ φ(I^n)` to
+  `I^{(p+1)n} ⊆ φ(I^n)`** — caught by the adversarial pass (attack log at L3.3), the
+  2n-bound is false for p ≥ 3.
 
-## Result R4: `finiteJet_not_stablyUniform` ([FJP] Prop 3.1 + Cor 3.2)
+## §6. Residual-risk register (what the confidence gate could NOT fully close)
 
-Leaves: `Wa`, `chartDatum`, `chartDatum_isRational`, `chartEquiv` (+2 continuity),
-`isUniform_of_ringEquiv`, `not_isUniform_chart`, `not_isStablyUniform_JetA`
-(`FiniteJetChart.lean`); `isPowerBounded_JetB_iff`, `not_isUniform_JetB`
-(`FiniteJetUniformDomain.lean`).
-- Source (verbatim, p. 8, Prop 3.1 proof): "For any `y ∈ Q²𝒞 ⊂ 𝒜` and `n ≥ 0`, one has
-  `W⁻ⁿy ∈ Q²𝒞 ⊂ 𝒜` and `‖W⁻ⁿy‖ = ‖y‖`. In G, `y = Wⁿ(W⁻ⁿy) = ϖⁿXⁿ(W⁻ⁿy)`,
-  `‖y‖_G ≤ |ϖ|ⁿ‖y‖`. Letting `n → ∞` shows directly that the image of the entire closed
-  subspace `Q²𝒞` is zero in the separated completion." Then the two-map argument (ψ, φ,
-  dense agreement). Cor 3.2 (verbatim, p. 9): "It is not uniform: `Q ≠ 0`, `Q² = 0`, and
-  every element of the unbounded line `kQ` is power-bounded, while `‖λQ‖ = |λ|` … Thus a
-  rational localization of the uniform ring 𝒜 is nonuniform."
-- Lean ↔ source: the chart target `k⟨X,Q⟩/(Q²)` **is** `JetB F` (planner observation —
-  double reuse); `chartEquiv` is Prop 3.1 stated against `presheafValue chartDatum`;
-  the identity `y − ϖⁿXⁿ(W⁻ⁿy) = (Wⁿ − (ϖX)ⁿ)(W⁻ⁿy) ∈ (ϖX − W)` (referee-supplied
-  factorisation) drives the collapse; `IsStablyUniform` negated at `chartDatum`
-  (the project class quantifies over ALL `RationalLocData`, so one witness suffices).
-- Attacks: pass 3 items 6–7 (all defeated, including the `{1, λQ, 0, 0, …}` full power-set
-  check and `T ≠ 0`); `isUniform_of_ringEquiv` transport — power-bounded and bounded are
-  topological-ring invariants under bi-continuous ring isos (planner-verified; no bare
-  `IsPowerBounded.map` use — B2 respected: both directions of the iso are continuous ring
-  homs and boundedness transports through open images). SURVIVED.
+- **RR1 (completeness fine structure, L2.6–L2.8).** All sources assert A_inf
+  completeness in one sentence; the coefficientwise expansion is ours. Mitigations:
+  mathlib's Complete.lean gives the p-direction formally; the sandwich L2.6 is
+  elementary; the per-coordinate description of ([ϖ]^n)-membership has direct mathlib
+  traction (`teichmuller_mul_pow_coeff`-family). Failure mode if the expansion has a
+  gap: fall back to the inverse-limit presentation W(O_F) = lim_m W(O_F/ϖ^m)-route
+  (Bhatt's diagram pattern), a plan-level revision confined to L2.7/L2.8's tickets.
+- **RR2 (window-compactness discharge, L7.5).** Two candidate routes named; hard-stop +
+  descope instruction embedded in the ticket; no dependents.
+- **RR3 (external review not yet obtained).** §0.3: the owner-requested gpt-5.6-sol
+  consult could not be delivered (Codex infra down on both accounts after 5 attempts).
+  The packet is saved; re-run before/alongside the first M2 ticket. Highest-value
+  questions for it: RR1's cleanest route; any window-arithmetic slip the internal pass
+  missed (one WAS found and fixed at L3.3 — evidence the pass has teeth, not proof it
+  is complete).
 
-## Prior-B2 consultation (Step 4.6)
+## §7. Confidence-gate summary (Step 5)
 
-`b2_log.jsonl` (79 entries) was read in full. Matches and how they are addressed:
-- `IsPowerBounded.map` (FALSE generically) → all transfer statements use norm-≤ homs or
-  bi-continuous isos (L1.7, L5.7, R4).
-- `presheafValue_eq_quotient_AlangleX_iterated` / P3 (algebraic-localization confusion) →
-  bridges only ever target the **restricted-ring** quotient with **closed** ideal (L5.4).
-- `restrictionMapHom_injective` (FALSE) → never assumed; separation always routed through
-  vertex `IsSheafy.separationSub` (L6.1).
-- `aplus_le_pod` / CompatiblePlusSubring (unsatisfiable for nondiscrete Tate) → not used;
-  828b bundle avoids it (L2.5).
-- `isStronglyNoetherian_of_isNoetherianRing_isTateRing` (FALSE) and
-  `_aux_noeth_A0_generic_…` (FALSE) → per-arity surjections and concrete unit-ball proofs
-  (L2.1–L2.4).
-- `principalPair_A0_completeSpace` (needs ambient completeness) → M1 completeness instances
-  precede pods (L5.1).
-- No name or shape matches against any new leaf (checked by grep over the new decl names).
-
-## Provability check summary (Step 4)
-
-Every leaf is (i) discharged from mathlib (verified names: `AdicCompletion.flat_of_isNoetherian`,
-`Submodule.eq_top_of_localization_maximal`, `ContinuousLinearMap.exists_preimage_norm_le`,
-`SubringClass.toNormedCommRing`, `AddMonoidAlgebra` domain instances, `Polynomial.aeval`,
-`isNoetherianRing_of_surjective`, quotient-group norm instances), (ii) discharged from
-project code (verified: `isSheafy_of_stronglyNoetherian_828b` [axiom-clean],
-`sectionEqualizer_isClosed`, `isInducing_of_closedRange_of_topNilpUnit`,
-`IsSheafy.separationSub`, `restrictionMap_comp`, `spaComap`/`comap_mem_spa`,
-`hasLocLiftPowerBounded_faithful`, the vendored Coram/Xia stack, `ExampleUnitDisc` engines
-`exists_flatten'`/`restrictedGaussEquiv`, `IsTateRing.quotient`, `NoetherianTateModules`,
-`IdealClosedness`), or (iii) an intra-campaign leaf listed above with its own discharge plan.
-**No REVIEW-PENDING leaves. No unresolved API gaps**: the three survey gaps (ℤ-indexed
-Laurent ring; quotient norms; fiber product) are closed by DD2/DD3/DD4 designs whose leaves
-are all in category (i)/(iii).
-
-## Confidence gate (Step 5) — assessment
-
-1. Every leaf discharged or planned (above) ✓  2. Skeleton compiles, sorries only
-(3084 jobs) ✓  3. Verbatim quotes per leaf-cluster ✓ (this file)  4. Adversarial pass run
-(three passes + per-leaf attack logs) ✓  5. B2 log consulted, matches addressed ✓
-6. Tree mirrors [FJP]'s own lemma structure (Lemma-for-lemma; two recorded deviations with
-justification) ✓  7. Single-conclusion statements throughout (Thm 1.3 split into five;
-Prop 2.1 into its four claims; (5.2) into per-ring lemmas) ✓
-
-**Feasibility**: feasible. The genuinely new mathematics is concentrated in three places —
-the ℤ-indexed restricted ring (L1.1–L1.4, vendored-stack-shaped), the degree-≤2 graph–Koszul
-package (L3.2–L3.9, elementary commutative algebra + existing noetherian-module machinery),
-and the bridge/transfer glue (L5.4, L6.2) whose every step was hand-verified. The
-highest-risk single leaf is the graph bridge L5.4 (isolated in M5; two in-project precedents;
-does not block the R2/R3 track). Stretch M7 (strong sheafiness) is deferred to a follow-up
-board section and blocked on M6.
+1. Every leaf discharged from mathlib/project or explicitly sub-planned: ✓ (L7.6
+   stretch-marked, no dependents; RR1/RR2 carry named fallback routes).
+2. Skeleton compiles, sorries only: ✓ **GREEN 2026-07-24** (full-library build; §0.5).
+3. Verbatim source quote per leaf-family + Lean↔source paragraphs: ✓ (grouped where
+   the mathematics is shared; every group carries its quote).
+4. Adversarial pass with ≥3 attack categories per leaf-family, all outcomes recorded:
+   ✓ — one successful attack (L3.3) found and FIXED during the pass.
+5. Prior-B2 consultation: ✓ (§0.4, clean).
+6. Tree mirrors the sources' structure ([BFHHLWY Def 2.1.1] for the statements,
+   [Ked-AWS 3.1.2/3.1.5/3.1.9] for the construction, expansions marked as ours per the
+   source-gap rule); LOC estimates anchored to source line counts per §-sizing blocks.
+7. Single-conclusion statements throughout (no ∧-bundles; window pair-lemmas split
+   U/V; assembly nodes absent by design).

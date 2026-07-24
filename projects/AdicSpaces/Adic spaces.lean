@@ -32,7 +32,11 @@ import «Adic spaces».Cor832
 import «Adic spaces».EmbeddingTopo
 import «Adic spaces».ExcellentRing
 import «Adic spaces».FaithfulLocLift
-import «Adic spaces».FarguesFontaine
+import «Adic spaces».FarguesFontaine.PerfectoidFieldCharP
+import «Adic spaces».FarguesFontaine.AinfHuber
+import «Adic spaces».FarguesFontaine.FrobeniusAction
+import «Adic spaces».FarguesFontaine.YSpace
+import «Adic spaces».FarguesFontaine.Curve
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
