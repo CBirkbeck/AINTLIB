@@ -3097,6 +3097,108 @@ noncomputable def strZ (D : GaloisRepData N) [Fact (1 < N)]
         (X.pullbackAlongMap k (strPr D (X.pullbackAlong k)))).op
       (strValue D str))
 
+section GenAgreeLocus
+
+variable {Y Bs : Scheme.{0}} (pi : Y ⟶ Bs)
+variable {Tt : Scheme.{0}} (f g : Tt ⟶ Y) (hfg : f ≫ pi = g ≫ pi)
+
+/-- **[T-EQ-3d-M1]** The paired comparison of two maps into a common target
+over a common base (the generic form of `agreePair`). -/
+noncomputable def genAgreePair : Tt ⟶ pullback pi pi :=
+  pullback.lift f g hfg
+
+/-- **[T-EQ-3d-M1]** The agreement locus of two maps into a finite étale
+separated target (generic `agreeLocus`). -/
+noncomputable def genAgreeLocus : Scheme.{0} :=
+  pullback (pullback.diagonal pi) (genAgreePair pi f g hfg)
+
+/-- Its inclusion into the source. -/
+noncomputable def genAgreeLocusι : genAgreeLocus pi f g hfg ⟶ Tt :=
+  pullback.snd _ _
+
+theorem genAgreeLocusι_isOpenImmersion [IsFinite pi] [Etale pi] :
+    IsOpenImmersion (genAgreeLocusι pi f g hfg) := by
+  show IsOpenImmersion
+    (pullback.snd (pullback.diagonal pi) (genAgreePair pi f g hfg))
+  infer_instance
+
+theorem genAgreeLocusι_isClosedImmersion [IsSeparated pi] :
+    IsClosedImmersion (genAgreeLocusι pi f g hfg) := by
+  show IsClosedImmersion
+    (pullback.snd (pullback.diagonal pi) (genAgreePair pi f g hfg))
+  exact MorphismProperty.pullback_snd (P := @IsClosedImmersion) _ _
+    inferInstance
+
+/-- **[T-EQ-3d-M1]** Factoring through the agreement locus is exactly the
+agreement of the two maps. -/
+theorem genAgreeLocus_factor_iff {W : Scheme.{0}} (h : W ⟶ Tt) :
+    (∃ w : W ⟶ genAgreeLocus pi f g hfg,
+      w ≫ genAgreeLocusι pi f g hfg = h) ↔ h ≫ f = h ≫ g := by
+  have hcond : genAgreeLocusι pi f g hfg ≫ genAgreePair pi f g hfg =
+      pullback.fst (pullback.diagonal pi) (genAgreePair pi f g hfg) ≫
+        pullback.diagonal pi :=
+    pullback.condition.symm
+  have hιe : genAgreeLocusι pi f g hfg ≫ f =
+      pullback.fst (pullback.diagonal pi) (genAgreePair pi f g hfg) :=
+    (congrArg (genAgreeLocusι pi f g hfg ≫ ·)
+        (pullback.lift_fst f g hfg).symm).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ pullback.fst pi pi) hcond).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (pullback.fst (pullback.diagonal pi)
+                (genAgreePair pi f g hfg) ≫ ·) (pullback.diagonal_fst _)).trans
+              (Category.comp_id _)))))
+  have hιd : genAgreeLocusι pi f g hfg ≫ g =
+      pullback.fst (pullback.diagonal pi) (genAgreePair pi f g hfg) :=
+    (congrArg (genAgreeLocusι pi f g hfg ≫ ·)
+        (pullback.lift_snd f g hfg).symm).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ pullback.snd pi pi) hcond).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (pullback.fst (pullback.diagonal pi)
+                (genAgreePair pi f g hfg) ≫ ·) (pullback.diagonal_snd _)).trans
+              (Category.comp_id _)))))
+  constructor
+  · rintro ⟨w, rfl⟩
+    rw [Category.assoc, Category.assoc, hιe, hιd]
+  · intro he
+    refine ⟨pullback.lift (h ≫ f) h ?_, pullback.lift_snd _ _ _⟩
+    apply pullback.hom_ext
+    · rw [Category.assoc, Category.assoc, pullback.diagonal_fst,
+        Category.comp_id, genAgreePair, Category.assoc, pullback.lift_fst]
+    · rw [Category.assoc, Category.assoc, pullback.diagonal_snd,
+        Category.comp_id, genAgreePair, Category.assoc, pullback.lift_snd]
+      exact he
+
+include hfg in
+/-- **[T-EQ-3d-M1/M6 engine]** Two maps into a finite étale separated target
+that agree at the geometric point through every point are equal: the agreement
+locus is clopen and hits every point, hence is an isomorphism. -/
+theorem eq_of_forall_geomPt_agree [IsFinite pi] [Etale pi] [IsSeparated pi]
+    (hpt : ∀ ω : Tt, geomPt Tt ω ≫ f = geomPt Tt ω ≫ g) : f = g := by
+  haveI hoi := genAgreeLocusι_isOpenImmersion pi f g hfg
+  have hsurj : Function.Surjective (genAgreeLocusι pi f g hfg).base := by
+    intro ω
+    obtain ⟨w, hw⟩ := (genAgreeLocus_factor_iff pi f g hfg
+      (geomPt Tt ω)).mpr (hpt ω)
+    obtain ⟨s₀⟩ : Nonempty (Spec (CommRingCat.of (geomResidue Tt ω))) :=
+      inferInstance
+    refine ⟨w.base s₀, ?_⟩
+    have h1 : (genAgreeLocusι pi f g hfg).base (w.base s₀) =
+        (w ≫ genAgreeLocusι pi f g hfg).base s₀ := rfl
+    rw [h1, hw]
+    exact geomPt_base Tt ω s₀
+  haveI : Epi (genAgreeLocusι pi f g hfg).base :=
+    (TopCat.epi_iff_surjective _).mpr hsurj
+  haveI : IsIso (genAgreeLocusι pi f g hfg) :=
+    AlgebraicGeometry.IsOpenImmersion.isIso (genAgreeLocusι pi f g hfg)
+  have h2 := (genAgreeLocus_factor_iff pi f g hfg (𝟙 Tt)).mp
+    ⟨inv (genAgreeLocusι pi f g hfg), IsIso.inv_hom_id _⟩
+  rw [Category.id_comp, Category.id_comp] at h2
+  exact h2
+
+end GenAgreeLocus
+
 end StructuresToSections
 
 end
