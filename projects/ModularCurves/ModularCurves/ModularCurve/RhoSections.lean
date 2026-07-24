@@ -801,6 +801,18 @@ theorem corrInverse_mono_of_injective
   exact ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.mono_map_iff_mono
     m).mpr h3
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c i]** The determinant-side comparison is set-injective (the
+pairing normalisation is an equivalence on the units). -/
+theorem detCompMor_injective (D : GaloisRepData N) [Fact (1 < N)] :
+    Function.Injective (detCompMor D).hom.hom := by
+  intro u v huv
+  have h1 : D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) =
+      D.p (Multiplicative.ofAdd ((v : (ZMod N)ˣ) : ZMod N)) := huv
+  have h2 : ((u : (ZMod N)ˣ) : ZMod N) = ((v : (ZMod N)ˣ) : ZMod N) :=
+    Multiplicative.ofAdd.injective (D.p.injective h1)
+  exact Units.ext h2
+
 end CorrSurjective
 
 section SectionsToStructures
