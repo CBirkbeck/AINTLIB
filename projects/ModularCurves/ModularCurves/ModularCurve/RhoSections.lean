@@ -3894,6 +3894,51 @@ theorem rightMul_frameSlotEval_eq (D : GaloisRepData N) [Fact (1 < N)]
         rw [Category.assoc]; exact hp₂⟩) hm5) ?_
   exact congrArg (wFramesPointsEquiv D ⟨pt, specQhom_eq _ _⟩ • ·) hm5'
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (4a)]** The tautological `V_ρ`-point twists along the cover
+translation. -/
+theorem strAct_strVPt (D : GaloisRepData N) [Fact (1 < N)]
+    (X' : EllObj (CommRingCat.of ℚ))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N) :
+    strAct D X' γ ≫ strVPt D X' v = strVPt D X' (γ • v) := by
+  apply pullback.hom_ext
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (CategoryStruct.comp (strAct D X' γ))
+      (strVPt_fst D X' v)) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    refine Eq.trans (congrArg (· ≫ frameSlotEval D v) (strAct_taut D X' γ)) ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (CategoryStruct.comp (strTaut D X'))
+      (rightMul_frameSlotEval_eq D γ v)) ?_
+    exact (strVPt_fst D X' (γ • v)).symm
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (CategoryStruct.comp (strAct D X' γ))
+      (strVPt_snd D X' v)) ?_
+    refine Eq.trans (strAct_pr D X' γ) ?_
+    exact (strVPt_snd D X' (γ • v)).symm
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (4b)]** The tautological torsion point twists along the
+cover translation. -/
+theorem strAct_strTor (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N) :
+    strAct D X' γ ≫ strTor D str v = strTor D str (γ • v) := by
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  exact congrArg (· ≫ str.torsionIso.inv) (strAct_strVPt D X' γ v)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (4c)]** The tautological point's carrier twists along the
+cover translation. -/
+theorem strAct_strPt (D : GaloisRepData N) [Fact (1 < N)]
+    {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (v : Fin 2 → ZMod N) :
+    strAct D X' γ ≫ (strPt D str v).1 = (strPt D str (γ • v)).1 := by
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  exact congrArg (· ≫ X'.curve.torsionι N) (strAct_strTor D str γ v)
+
 end StructuresToSections
 
 end
