@@ -1136,6 +1136,21 @@ theorem field_hom_ker_dichotomy {B : Type} [CommRing B] {K' : Type} [Field K']
     show χ j = 0
     rw [hj_eq, map_mul, h0, mul_zero]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c viii]** The kernel of the determinant comultiplication is a
+complemented ideal (the roots algebra is semisimple: reduced Artinian over a
+field). -/
+theorem ker_detCompAlgHom_isCompl (D : GaloisRepData N) [Fact (1 < N)] :
+    ∃ J : Ideal (muNRootsAlgebra D : Type 0),
+      IsCompl (RingHom.ker (detCompAlgHom D).hom.hom.toRingHom) J := by
+  haveI : IsReduced (muNRootsAlgebra D : Type 0) :=
+    Algebra.FormallyUnramified.isReduced_of_field ℚ _
+  haveI : IsArtinianRing (muNRootsAlgebra D : Type 0) :=
+    isArtinian_of_tower ℚ inferInstance
+  haveI : IsSemisimpleRing (muNRootsAlgebra D : Type 0) :=
+    IsArtinianRing.isSemisimpleRing_of_isReduced _
+  exact exists_isCompl _
+
 end CorrSurjective
 
 section SectionsToStructures
