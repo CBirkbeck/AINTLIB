@@ -2500,6 +2500,133 @@ theorem full_of_weilPairing_order (K : Type) [Field K] [IsAlgClosed K]
     (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
     (AddSubgroup.zsmul_mem _ (AddSubgroup.subset_closure (by simp)) _)
 
+/-- **[T-EQ-3d-α1]** The pinned read of a unit has no trivial power below `N`. -/
+theorem pUnit_read_pow_ne_one (D : GaloisRepData N)
+    (u : (ZMod N)ˣ) (d : ℕ) (hdpos : 0 < d) (hdlt : d < N) :
+    (((D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N))) :
+      (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) ^ d ≠ 1 := by
+  intro h
+  have h2 : D.p (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) ^ d = 1 := by
+    refine Subtype.ext (Units.ext ?_)
+    simpa using h
+  have h3 : (Multiplicative.ofAdd ((u : (ZMod N)ˣ) : ZMod N)) ^ d = 1 :=
+    D.p.injective (by rw [map_pow, h2, map_one])
+  have h4 : d • ((u : (ZMod N)ˣ) : ZMod N) = 0 := by
+    have h5 := (ofAdd_nsmul d ((u : (ZMod N)ˣ) : ZMod N)).trans h3
+    have h6 := congrArg Multiplicative.toAdd h5
+    simpa using h6
+  have h5 : ((d : ℕ) : ZMod N) * ((u : (ZMod N)ˣ) : ZMod N) = 0 := by
+    rw [← nsmul_eq_mul]
+    exact h4
+  have h6 : ((d : ℕ) : ZMod N) = 0 := by
+    have h7 := congrArg (· * ((u⁻¹ : (ZMod N)ˣ) : ZMod N)) h5
+    simpa [mul_assoc] using h7
+  have h7 : (N : ℕ) ∣ d := (CharP.cast_eq_zero_iff (ZMod N) N d).mp h6
+  have h8 : N ≤ d := Nat.le_of_dvd hdpos h7
+  omega
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-α3]** The determinant-side power element is a unit: every `ℚ̄`-
+evaluation reads a unit root (exact order `N`), so no proper power of the
+transported root meets `1` anywhere on the units component. -/
+theorem detComp_root_pow_sub_one_isUnit (D : GaloisRepData N) [Fact (1 < N)]
+    (d : ℕ) (hdpos : 0 < d) (hdlt : d < N) :
+    IsUnit ((detCompAlgHom D).hom.hom
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d - 1) := by
+  classical
+  by_contra hnu
+  obtain ⟨m, hmax, hmem⟩ := exists_max_ideal_of_mem_nonunits hnu
+  haveI := hmax
+  haveI hfield := Ideal.Quotient.field m
+  haveI : Module.Finite ℚ ((cycloUnitsAlgebra D : Type 0) ⧸ m) := by
+    haveI : Module.Finite ℚ (cycloUnitsAlgebra D : Type 0) :=
+      (cycloUnitsAlgebra D).property.left
+    exact Module.Finite.of_surjective
+      (Ideal.Quotient.mkₐ ℚ m).toLinearMap (Ideal.Quotient.mk_surjective)
+  haveI : Algebra.IsAlgebraic ℚ ((cycloUnitsAlgebra D : Type 0) ⧸ m) :=
+    Algebra.IsAlgebraic.of_finite ℚ _
+  set χ' : (cycloUnitsAlgebra D : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ :=
+    (IsAlgClosed.lift (M := AlgebraicClosure ℚ)).comp
+      (Ideal.Quotient.mkₐ ℚ m) with hχ'
+  have hzero : χ' ((detCompAlgHom D).hom.hom
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d - 1)
+      = 0 := by
+    rw [hχ']
+    show (IsAlgClosed.lift (M := AlgebraicClosure ℚ))
+      ((Ideal.Quotient.mkₐ ℚ m) _) = 0
+    rw [show (Ideal.Quotient.mkₐ ℚ m) ((detCompAlgHom D).hom.hom
+        ((muNRootsAlgebraIso D).inv.hom.hom
+          (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d - 1) =
+      0 from (Ideal.Quotient.eq_zero_iff_mem).mpr hmem]
+    exact map_zero _
+  -- the composite evaluation of the roots algebra
+  set χ'' : (muNRootsAlgebra D : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ :=
+    χ'.comp ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      (detCompMor D)).unop.hom.hom with hχ''
+  -- its point and read
+  set ptc := (specPointsEquivAlgHom ℚ
+    (corrAlgebra (cycloUnitsContAction D) : Type 0)
+    (AlgebraicClosure ℚ)).symm χ' with hptc
+  have hχ'pt : specPointsEquivAlgHom ℚ
+      (corrAlgebra (cycloUnitsContAction D) : Type 0)
+      (AlgebraicClosure ℚ) ptc = χ' := by
+    rw [hptc]
+    exact Equiv.apply_symm_apply _ χ'
+  have hπc : (ptc.1 ≫ corrSpecMap (detCompMor D)) ≫
+      corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (CategoryStruct.comp ptc.1)
+        (corrSpecMap_π (detCompMor D))).trans ptc.2)
+  have hA : specPointsEquivAlgHom ℚ
+      (corrAlgebra (muNRootsContAction D) : Type 0) (AlgebraicClosure ℚ)
+      ⟨ptc.1 ≫ corrSpecMap (detCompMor D), hπc⟩ = χ'' := by
+    have hpre := spec_preimage_comp ptc.1 (CommRingCat.ofHom
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        (detCompMor D)).unop.hom.hom.toRingHom))
+    refine AlgHom.ext fun b => ?_
+    refine Eq.trans (congrArg (fun q : CommRingCat.of
+      (corrAlgebra (muNRootsContAction D) : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom b) hpre) ?_
+    rw [hχ'']
+    exact congrArg (fun (F : (corrAlgebra (cycloUnitsContAction D) : Type 0)
+      →ₐ[ℚ] AlgebraicClosure ℚ) =>
+      F ((((FiniteEtaleGalois.finiteEtaleEquivContAction
+        ℚ).inverse.map (detCompMor D)).unop.hom.hom) b)) hχ'pt
+  -- the read of the pushed point is a unit read
+  have hread := eval_root_eq_read D ⟨ptc.1 ≫ corrSpecMap (detCompMor D), hπc⟩
+  have hnat := qbarPointsRead_map (detCompMor D) ptc
+  have hζ : χ'' ((muNRootsAlgebraIso D).inv.hom.hom
+      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) =
+      (((D.p (Multiplicative.ofAdd
+        (((qbarPointsRead (cycloUnitsContAction D) ptc : (ZMod N)ˣ) :
+          (ZMod N)ˣ) : ZMod N))) : (AlgebraicClosure ℚ)ˣ) :
+        AlgebraicClosure ℚ) := by
+    refine Eq.trans (congrArg (fun (F : (corrAlgebra (muNRootsContAction D) :
+      Type 0) →ₐ[ℚ] AlgebraicClosure ℚ) => F ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)))) hA.symm) ?_
+    refine hread.trans ?_
+    exact congrArg (fun (z : rootsOfUnity N (AlgebraicClosure ℚ)) =>
+      (((z : (AlgebraicClosure ℚ)ˣ)) : AlgebraicClosure ℚ)) hnat
+  -- contradiction: the evaluation kills a nonvanishing element
+  have hker : χ'' ((muNRootsAlgebraIso D).inv.hom.hom
+      (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d - 1 = 0 := by
+    have h1 : χ' ((detCompAlgHom D).hom.hom
+        ((muNRootsAlgebraIso D).inv.hom.hom
+          (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d - 1) =
+        χ'' ((muNRootsAlgebraIso D).inv.hom.hom
+          (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d - 1 :=
+      (map_sub χ' _ _).trans
+        ((congrArg (· - χ' 1) (map_pow χ' _ d)).trans
+          (congrArg (HSub.hSub _) (map_one χ')))
+    exact h1.symm.trans hzero
+  refine pUnit_read_pow_ne_one D
+    (qbarPointsRead (cycloUnitsContAction D) ptc) d hdpos hdlt ?_
+  rw [← hζ]
+  exact sub_eq_zero.mp hker
+
 end StructuresToSections
 
 end
