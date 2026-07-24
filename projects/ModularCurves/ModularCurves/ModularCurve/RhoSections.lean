@@ -957,6 +957,64 @@ theorem pairEZ_read_eval (D : GaloisRepData N) [Fact (1 < N)]
   refine Eq.trans ?_ (pairEZMap_read D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 tk)
   exact (muNRootsRead_congr D htk rfl _).symm
 
+/-- **[T-EQ-3d-L3c vi]** Order forcing in a rank-two torsion group: if a pair
+with annihilators `N` and `d ∣ N` generates all the `N`-torsion, and the
+`N`-torsion is `(ℤ/N)²`, then `N ∣ d` (cardinality of the generated subgroup). -/
+theorem dvd_of_closure_pair_torsion {G : Type} [AddCommGroup G]
+    (a b : G) (d : ℕ) (hdN : d ∣ N) (hdpos : 0 < d)
+    (hNa : (N : ℤ) • a = 0) (hdb : (d : ℤ) • b = 0)
+    (hfull : ∀ g : G, (N : ℤ) • g = 0 → g ∈ AddSubgroup.closure {a, b})
+    (hiso : Nonempty
+      ((Submodule.torsionBy ℤ G (N : ℤ)) ≃+ (Fin 2 → ZMod N))) :
+    N ∣ d := by
+  obtain ⟨e⟩ := hiso
+  haveI : NeZero d := ⟨hdpos.ne'⟩
+  have hNb : (N : ℤ) • b = 0 := by
+    obtain ⟨c, hc⟩ := hdN
+    rw [hc, mul_comm]
+    push_cast
+    rw [mul_smul, hdb, smul_zero]
+  set f : ZMod N × ZMod d → Submodule.torsionBy ℤ G (N : ℤ) :=
+    fun ij => ⟨(ij.1.val : ℤ) • a + (ij.2.val : ℤ) • b, by
+      rw [Submodule.mem_torsionBy_iff]
+      show (N : ℤ) • ((ij.1.val : ℤ) • a + (ij.2.val : ℤ) • b) = 0
+      rw [smul_add, smul_comm (N : ℤ) ((ij.1.val : ℤ)),
+        smul_comm (N : ℤ) ((ij.2.val : ℤ)), hNa, hNb, smul_zero, smul_zero,
+        add_zero]⟩ with hf
+  have hsurj : Function.Surjective f := by
+    rintro ⟨z, hz⟩
+    have hz' : (N : ℤ) • z = 0 := (Submodule.mem_torsionBy_iff _ _).mp hz
+    have hcl := hfull z hz'
+    rw [AddSubgroup.mem_closure_pair] at hcl
+    obtain ⟨m, n, hmn⟩ := hcl
+    refine ⟨((m : ZMod N), (n : ZMod d)), ?_⟩
+    refine Subtype.ext ?_
+    show ((((m : ZMod N)).val : ℤ)) • a + ((((n : ZMod d)).val : ℤ)) • b = z
+    have ha' : (((m : ZMod N)).val : ℤ) • a = m • a := by
+      refine EllipticCurve.zsmul_eq_of_intCast_eq a hNa ?_
+      simp [ZMod.natCast_val]
+    have hb' : (((n : ZMod d)).val : ℤ) • b = n • b := by
+      refine EllipticCurve.zsmul_eq_of_intCast_eq b hdb ?_
+      simp [ZMod.natCast_val]
+    rw [ha', hb', hmn]
+  have hcard : (N : ℕ) * N ≤ N * d := by
+    have h1 : Nat.card (Submodule.torsionBy ℤ G (N : ℤ)) =
+        Nat.card (Fin 2 → ZMod N) := Nat.card_congr e.toEquiv
+    have h2 : Nat.card (Fin 2 → ZMod N) = N * N := by
+      rw [Nat.card_fun]
+      simp [Nat.card_eq_fintype_card, ZMod.card, sq]
+    have h3 : Nat.card (Submodule.torsionBy ℤ G (N : ℤ)) ≤
+        Nat.card (ZMod N × ZMod d) := Nat.card_le_card_of_surjective f hsurj
+    have h4 : Nat.card (ZMod N × ZMod d) = N * d := by
+      rw [Nat.card_prod]
+      simp [Nat.card_eq_fintype_card, ZMod.card]
+    omega
+  have hNd : N ≤ d := Nat.le_of_mul_le_mul_left hcard (Nat.pos_of_ne_zero
+    (NeZero.ne N))
+  have hdd : d = N := Nat.le_antisymm
+    (Nat.le_of_dvd (Nat.pos_of_ne_zero (NeZero.ne N)) hdN) hNd
+  rw [hdd]
+
 end CorrSurjective
 
 section SectionsToStructures
