@@ -1610,6 +1610,123 @@ theorem framedPinned_pairing_scheme (D : GaloisRepData N) [Fact (1 < N)]
     (fun v w => hring_of_finiteEtale D (fun v' w' => pairSlot_hFE D v' w') v w)
     t x y hx hy
 
+/-- **[T-EQ-3c-i]** `Spec.preimage` of a `Spec.map`-postcomposition. -/
+theorem spec_preimage_comp {K R S : CommRingCat.{0}} (pt : Spec K ⟶ Spec R)
+    (f : S ⟶ R) :
+    Spec.preimage (pt ≫ Spec.map f) = f ≫ Spec.preimage pt := by
+  apply Spec.map_injective
+  rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i]** The algebra of a continuous Galois set. -/
+noncomputable def corrAlgebra
+    (X : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) :
+    CommAlgCat.FiniteEtale.{0} ℚ :=
+  ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.obj X).unop
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i]** Its spectrum. -/
+noncomputable def corrSpec
+    (X : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) : Scheme.{0} :=
+  Spec (CommRingCat.of (corrAlgebra X : Type 0))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i]** Its structure morphism. -/
+noncomputable def corrSpecπ
+    (X : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) :
+    corrSpec X ⟶ Spec (CommRingCat.of ℚ) :=
+  Spec.map (CommRingCat.ofHom (algebraMap ℚ (corrAlgebra X : Type 0)))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i]** The `ℚ̄`-points read of the spectrum of a correspondence
+algebra (generic form of `wFramesPointsEquiv` / `constVecPointsEquiv`). -/
+noncomputable def qbarPointsRead
+    (X : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) :
+    { h : Spec (.of (AlgebraicClosure ℚ)) ⟶ corrSpec X //
+      h ≫ corrSpecπ X =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }
+      ≃ (X.obj.V : Type 0) :=
+  ((specPointsEquivAlgHom ℚ (corrAlgebra X : Type 0)
+      (AlgebraicClosure ℚ)).trans
+    (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
+    (FiniteEtaleGalois.pointsEquivOfContAction ℚ X)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i]** The correspondence-image morphism between the spectra. -/
+noncomputable def corrSpecMap
+    {X Y : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)} (m : X ⟶ Y) :
+    corrSpec X ⟶ corrSpec Y :=
+  Spec.map (CommRingCat.ofHom
+    (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      m).unop.hom.hom.toRingHom))
+
+open scoped FintypeCatDiscrete in
+theorem corrSpecMap_π
+    {X Y : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)} (m : X ⟶ Y) :
+    corrSpecMap m ≫ corrSpecπ Y = corrSpecπ X := by
+  refine Eq.trans (AlgebraicGeometry.Spec.map_comp _ _).symm ?_
+  exact congrArg AlgebraicGeometry.Spec.map (by
+    ext r
+    exact (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+      m).unop.hom.hom.commutes r))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3c-i]** Naturality of the `ℚ̄`-points read (generic form of
+`wFramesPointsEquiv_rightMul`). -/
+theorem qbarPointsRead_map
+    {X Y : ContAction FintypeCat.{0}
+      (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)}
+    (m : X ⟶ Y)
+    (pt : { h : Spec (.of (AlgebraicClosure ℚ)) ⟶ corrSpec X //
+      h ≫ corrSpecπ X =
+        Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) }) :
+    qbarPointsRead Y ⟨pt.1 ≫ corrSpecMap m, by
+      rw [Category.assoc, corrSpecMap_π, pt.2]⟩ =
+    m.hom.hom (qbarPointsRead X pt) := by
+  have hA : ∀ hp, specPointsEquivAlgHom ℚ (corrAlgebra Y : Type 0)
+      (AlgebraicClosure ℚ) ⟨pt.1 ≫ corrSpecMap m, hp⟩ =
+      (specPointsEquivAlgHom ℚ (corrAlgebra X : Type 0)
+        (AlgebraicClosure ℚ) pt).comp
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          m).unop.hom.hom := by
+    intro hp
+    have hpre := spec_preimage_comp pt.1 (CommRingCat.ofHom
+      (((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+        m).unop.hom.hom.toRingHom))
+    refine AlgHom.ext fun a => ?_
+    exact congrArg (fun q : CommRingCat.of (corrAlgebra Y : Type 0) ⟶
+      CommRingCat.of (AlgebraicClosure ℚ) => q.hom a) hpre
+  have hB : ∀ φ : (corrAlgebra X : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ,
+      (AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)
+        (A₁ := (corrAlgebra Y : Type 0))) sepClosureQAlgEquiv.symm)
+        (φ.comp ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          m).unop.hom.hom) =
+      ((AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)
+        (A₁ := (corrAlgebra X : Type 0))) sepClosureQAlgEquiv.symm) φ).comp
+        ((FiniteEtaleGalois.finiteEtaleEquivContAction ℚ).inverse.map
+          m).unop.hom.hom := by
+    intro φ
+    exact AlgHom.ext fun a => rfl
+  refine Eq.trans (congrArg (fun y =>
+      FiniteEtaleGalois.pointsEquivOfContAction ℚ Y
+        ((AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)
+          (A₁ := (corrAlgebra Y : Type 0))) sepClosureQAlgEquiv.symm) y))
+    (hA _)) ?_
+  refine Eq.trans (congrArg (FiniteEtaleGalois.pointsEquivOfContAction ℚ Y)
+    (hB (specPointsEquivAlgHom ℚ (corrAlgebra X : Type 0)
+      (AlgebraicClosure ℚ) pt))) ?_
+  exact pointsEquivOfContAction_map m
+    ((AlgEquiv.arrowCongr (AlgEquiv.refl (R := ℚ)
+      (A₁ := (corrAlgebra X : Type 0))) sepClosureQAlgEquiv.symm)
+      (specPointsEquivAlgHom ℚ (corrAlgebra X : Type 0)
+        (AlgebraicClosure ℚ) pt))
+
 end
 
 end ModularCurves
