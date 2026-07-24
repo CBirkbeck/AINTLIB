@@ -1419,6 +1419,295 @@ theorem prod_mul_e_eq_zero (D : GaloisRepData N) [Fact (1 < N)]
       rw [hχe0] at hχe
       exact zero_ne_one hχe
 
+/-- **[T-EQ-3d-L3c xiv-prep]** The geometric field at a point: the algebraic
+closure of the residue field. -/
+noncomputable abbrev geomResidue (T : Scheme.{0}) (x : T) : Type 0 :=
+  AlgebraicClosure ↑(T.residueField x)
+
+/-- **[T-EQ-3d-L3c xiv-prep]** The geometric point through `x`. -/
+noncomputable def geomPt (T : Scheme.{0}) (x : T) :
+    Spec (CommRingCat.of (geomResidue T x)) ⟶ T :=
+  Spec.map (CommRingCat.ofHom
+    (algebraMap ↑(T.residueField x) (geomResidue T x))) ≫
+    T.fromSpecResidueField x
+
+theorem geomPt_base (T : Scheme.{0}) (x : T)
+    (s : Spec (CommRingCat.of (geomResidue T x))) :
+    (geomPt T x).base s = x := by
+  show (T.fromSpecResidueField x).base ((Spec.map (CommRingCat.ofHom
+    (algebraMap ↑(T.residueField x) (geomResidue T x)))).base s) = x
+  exact Scheme.fromSpecResidueField_apply x _
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c xiv]** A `K`-point whose read has no trivial proper-divisor
+power kills the determinant kernel: the kernel dichotomy's right case is
+refuted by the annihilation identity `P₀·e = 0` (each factor of the
+non-primitivity product evaluates away from zero). -/
+theorem eval_kills_ker_of_pow_ne_one (D : GaloisRepData N) [Fact (1 < N)]
+    {K : Type} [Field K] [Algebra ℚ K]
+    (φ : Spec (.of K) ⟶ corrSpec (muNRootsContAction D))
+    (hφ : φ ≫ corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ K)))
+    (hpow : ∀ d ∈ N.properDivisors,
+      (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0) K
+          ⟨φ, hφ⟩)
+        ((muNRootsAlgebraIso D).inv.hom.hom
+          (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d ≠ 1) :
+    RingHom.ker (detCompAlgHom D).hom.hom.toRingHom ≤
+      RingHom.ker (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩).toRingHom := by
+  obtain ⟨J, hIJ⟩ := ker_detCompAlgHom_isCompl D
+  obtain ⟨e, he, f, hf, hef⟩ := Submodule.mem_sup.mp
+    (show (1 : (muNRootsAlgebra D : Type 0)) ∈
+      RingHom.ker (detCompAlgHom D).hom.hom.toRingHom ⊔ J from
+      hIJ.sup_eq_top ▸ Submodule.mem_top)
+  rcases field_hom_ker_dichotomy
+    (RingHom.ker (detCompAlgHom D).hom.hom.toRingHom) J hIJ
+    (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0) K
+      ⟨φ, hφ⟩).toRingHom with hkI | hkJ
+  · exact hkI
+  · exfalso
+    have hχf : (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩) f = 0 :=
+      RingHom.mem_ker.mp (hkJ hf)
+    have hχe : (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩) e = 1 := by
+      refine Eq.trans ?_
+        (((map_add (specPointsEquivAlgHom ℚ
+          (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩) e f).symm.trans
+          (congrArg (specPointsEquivAlgHom ℚ
+            (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩)
+            hef)).trans (map_one _))
+      exact (add_zero _).symm.trans (congrArg (HAdd.hAdd _) hχf.symm)
+    have hP₀e := prod_mul_e_eq_zero D J hIJ e f he hf hef
+    have h0 : (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩)
+        ((∏ d ∈ N.properDivisors,
+          ((muNRootsAlgebraIso D).inv.hom.hom
+            (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d - 1))
+          * e) = 0 :=
+      (congrArg _ hP₀e).trans (map_zero _)
+    have h1 : (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩)
+        (∏ d ∈ N.properDivisors,
+          (((muNRootsAlgebraIso D).inv.hom.hom
+            (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d - 1 :
+            (muNRootsAlgebra D : Type 0)))) *
+        (specPointsEquivAlgHom ℚ
+          (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩) e = 0 :=
+      (map_mul _ _ _).symm.trans h0
+    have h2 : (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩)
+        (∏ d ∈ N.properDivisors,
+          (((muNRootsAlgebraIso D).inv.hom.hom
+            (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d - 1 :
+            (muNRootsAlgebra D : Type 0))))
+        = 0 :=
+      (mul_one _).symm.trans ((congrArg (HMul.hMul _) hχe.symm).trans h1)
+    have h4 : ∏ d ∈ N.properDivisors,
+        (specPointsEquivAlgHom ℚ
+          (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩)
+          (((muNRootsAlgebraIso D).inv.hom.hom
+            (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d - 1 :
+            (muNRootsAlgebra D : Type 0))) = 0 :=
+      (map_prod _ _ _).symm.trans h2
+    obtain ⟨d₁, hd₁mem, hd₁⟩ := Finset.prod_eq_zero_iff.mp h4
+    have hfac : (specPointsEquivAlgHom ℚ
+        (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩)
+        (((muNRootsAlgebraIso D).inv.hom.hom
+          (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)) ^ d₁ - 1 :
+          (muNRootsAlgebra D : Type 0))) =
+        (specPointsEquivAlgHom ℚ
+          (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩)
+          ((muNRootsAlgebraIso D).inv.hom.hom
+            (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d₁ - 1 :=
+      (map_sub _ _ _).trans
+        ((congrArg (· - (specPointsEquivAlgHom ℚ
+          (corrAlgebra (muNRootsContAction D) : Type 0) K ⟨φ, hφ⟩) 1)
+          (map_pow _ _ d₁)).trans
+          (congrArg (HSub.hSub _) (map_one _)))
+    exact hpow d₁ hd₁mem (sub_eq_zero.mp (hfac.symm.trans hd₁))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c xv]** A `K`-point of the roots spectrum whose classifier kills
+the determinant kernel lands in the range of the clopen determinant piece: lift
+the classifier along the surjective comultiplication and take the spectrum. -/
+theorem base_mem_range_detComp_of_ker_le (D : GaloisRepData N) [Fact (1 < N)]
+    {K : Type} [Field K]
+    (φ : Spec (.of K) ⟶ corrSpec (muNRootsContAction D))
+    (hker : RingHom.ker (detCompAlgHom D).hom.hom.toRingHom ≤
+      RingHom.ker (Spec.preimage φ).hom)
+    (s₀ : Spec (CommRingCat.of K)) :
+    φ.base s₀ ∈ Set.range (detCompScheme D).base := by
+  obtain ⟨sec, hsec⟩ := (detCompAlgHom_surjective D).hasRightInverse
+  have hcomp : ((detCompAlgHom D).hom.hom.toRingHom.liftOfRightInverse sec hsec
+      ⟨(Spec.preimage φ).hom, hker⟩).comp
+      (detCompAlgHom D).hom.hom.toRingHom = (Spec.preimage φ).hom :=
+    RingHom.liftOfRightInverse_comp _ sec hsec _
+  have h5 : CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom ≫
+      CommRingCat.ofHom ((detCompAlgHom D).hom.hom.toRingHom.liftOfRightInverse
+        sec hsec ⟨(Spec.preimage φ).hom, hker⟩) = Spec.preimage φ :=
+    CommRingCat.hom_ext hcomp
+  have hfact : Spec.map (CommRingCat.ofHom
+      ((detCompAlgHom D).hom.hom.toRingHom.liftOfRightInverse sec hsec
+        ⟨(Spec.preimage φ).hom, hker⟩)) ≫ detCompScheme D = φ :=
+    (Spec.map_comp (CommRingCat.ofHom (detCompAlgHom D).hom.hom.toRingHom)
+      (CommRingCat.ofHom
+        ((detCompAlgHom D).hom.hom.toRingHom.liftOfRightInverse sec hsec
+          ⟨(Spec.preimage φ).hom, hker⟩))).symm.trans
+      ((congrArg Spec.map h5).trans (Spec.map_preimage φ))
+  refine ⟨(Spec.map (CommRingCat.ofHom
+    ((detCompAlgHom D).hom.hom.toRingHom.liftOfRightInverse sec hsec
+      ⟨(Spec.preimage φ).hom, hker⟩))).base s₀, ?_⟩
+  exact congrArg (fun (m : Spec (CommRingCat.of K) ⟶
+    corrSpec (muNRootsContAction D)) => m.base s₀) hfact
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c xvi]** PRIMITIVITY per point: the value-level pairing
+comparison of a full level structure lands in the determinant range at every
+point. Localise at the algebraic closure of the residue field: there the read
+is the Weil pairing of a generating torsion pair (base-change naturality), whose
+proper-divisor powers are nontrivial (nondegeneracy through the symplectic
+register plus the rank-two count), so the classifier kills the determinant
+kernel and the point factors through the clopen piece. -/
+theorem pairEZ_base_mem_range (D : GaloisRepData N) [Fact (1 < N)]
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (L : E.FullLevelPt N) (x : T) :
+    (pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2).base x ∈
+      Set.range (detCompScheme D).base := by
+  classical
+  letI : Algebra ℚ ↑(T.residueField x) :=
+    ((Spec.preimage (T.fromSpecResidueField x ≫ sT)).hom).toAlgebra
+  letI : Algebra ℚ (geomResidue T x) :=
+    ((algebraMap ↑(T.residueField x) (geomResidue T x)).comp
+      (algebraMap ℚ ↑(T.residueField x))).toAlgebra
+  haveI : CharZero (geomResidue T x) :=
+    charZero_of_injective_algebraMap
+      (RingHom.injective (algebraMap ℚ (geomResidue T x)))
+  have hcompatL : T.fromSpecResidueField x ≫ sT =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ ↑(T.residueField x))) := by
+    rw [show CommRingCat.ofHom (algebraMap ℚ ↑(T.residueField x)) =
+      Spec.preimage (T.fromSpecResidueField x ≫ sT) from rfl, Spec.map_preimage]
+  have hqK : geomPt T x ≫ sT =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (geomResidue T x))) := by
+    show (Spec.map (CommRingCat.ofHom
+      (algebraMap ↑(T.residueField x) (geomResidue T x))) ≫
+      T.fromSpecResidueField x) ≫ sT = _
+    rw [Category.assoc, hcompatL, ← Spec.map_comp]
+    rfl
+  have hφKπ : (geomPt T x ≫ pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2) ≫
+      corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (geomResidue T x))) := by
+    rw [Category.assoc]
+    rw [show pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2 ≫
+        corrSpecπ (muNRootsContAction D) = sT from
+      pairEZMap_π D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2]
+    exact hqK
+  have hpow_ne : ∀ d ∈ N.properDivisors,
+      (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0)
+          (geomResidue T x)
+          ⟨geomPt T x ≫ pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2, hφKπ⟩)
+        ((muNRootsAlgebraIso D).inv.hom.hom
+          (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d ≠ 1 := by
+    intro d hd hcon
+    rw [Nat.mem_properDivisors] at hd
+    have hζ := muNRootsRead_classify_field D (geomResidue T x)
+      (geomPt T x ≫ pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2) hφKπ
+    have hii : ∀ z : Γ(Spec (CommRingCat.of (geomResidue T x)), ⊤),
+        (Scheme.ΓSpecIso (CommRingCat.of (geomResidue T x))).inv.hom
+          ((Scheme.ΓSpecIso (CommRingCat.of (geomResidue T x))).hom.hom z) =
+          z := fun z =>
+      congrArg (fun (q : Γ(Spec (CommRingCat.of (geomResidue T x)), ⊤) ⟶
+        Γ(Spec (CommRingCat.of (geomResidue T x)), ⊤)) => q.hom z)
+        (Scheme.ΓSpecIso (CommRingCat.of (geomResidue T x))).hom_inv_id
+    have hΓ : muNRootsRead D (Spec.map (CommRingCat.ofHom
+        (algebraMap ℚ (geomResidue T x))))
+        (geomPt T x ≫ pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2) hφKπ ^ d
+        = 1 :=
+      ((hii _).symm.trans (congrArg
+        (Scheme.ΓSpecIso (CommRingCat.of (geomResidue T x))).inv.hom
+        ((map_pow (Scheme.ΓSpecIso
+          (CommRingCat.of (geomResidue T x))).hom.hom _ d).trans
+          ((congrArg (· ^ d) hζ).trans hcon)))).trans
+        (map_one (Scheme.ΓSpecIso (CommRingCat.of (geomResidue T x))).inv.hom)
+    have hread := pairEZ_read_eval D (geomResidue T x) sT E L (geomPt T x) hqK
+    have hΓ2 : ((Scheme.Γ.map (geomPt T x).op).hom
+        (E.weilPairingEval L.1.1 L.1.2
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1)
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.2).mp L.2.1.2)).1) ^ d
+        = 1 :=
+      (congrArg (· ^ d) hread.symm).trans hΓ
+    have hres1 : (EllipticCurve.Point.restrict E (geomPt T x) L.1.1).1 ≫ E.mulByHom N =
+        (geomPt T x ≫ 𝟙 T) ≫ E.zero := by
+      show (geomPt T x ≫ (L.1.1).1) ≫ E.mulByHom N =
+        (geomPt T x ≫ 𝟙 T) ≫ E.zero
+      rw [Category.assoc,
+        (E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1,
+        ← Category.assoc]
+    have hres2 : (EllipticCurve.Point.restrict E (geomPt T x) L.1.2).1 ≫ E.mulByHom N =
+        (geomPt T x ≫ 𝟙 T) ≫ E.zero := by
+      show (geomPt T x ≫ (L.1.2).1) ≫ E.mulByHom N =
+        (geomPt T x ≫ 𝟙 T) ≫ E.zero
+      rw [Category.assoc,
+        (E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.2).mp L.2.1.2,
+        ← Category.assoc]
+    have hres := E.weilPairingEval_restrict (geomPt T x) L.1.1 L.1.2
+      ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1)
+      ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.2).mp L.2.1.2)
+      hres1 hres2
+    have hΓ3 : (E.weilPairingEval (EllipticCurve.Point.restrict E (geomPt T x) L.1.1)
+        (EllipticCurve.Point.restrict E (geomPt T x) L.1.2) hres1 hres2).1 ^ d = 1 :=
+      (congrArg (· ^ d) hres).trans hΓ2
+    have hpull1 : (EllipticCurve.Point.pull E (geomPt T x) L.1.1).1 ≫ E.mulByHom N =
+        geomPt T x ≫ E.zero := by
+      show (geomPt T x ≫ (L.1.1).1) ≫ E.mulByHom N = geomPt T x ≫ E.zero
+      rw [Category.assoc,
+        (E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.1).mp L.2.1.1,
+        ← Category.assoc, Category.comp_id]
+    have hpull2 : (EllipticCurve.Point.pull E (geomPt T x) L.1.2).1 ≫ E.mulByHom N =
+        geomPt T x ≫ E.zero := by
+      show (geomPt T x ≫ (L.1.2).1) ≫ E.mulByHom N = geomPt T x ≫ E.zero
+      rw [Category.assoc,
+        (E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N L.1.2).mp L.2.1.2,
+        ← Category.assoc, Category.comp_id]
+    have hraw := weilPairingEval_congr_raw (E := E)
+      (Category.comp_id (geomPt T x)) rfl rfl hres1 hres2 hpull1 hpull2
+    have hΓ4 : (E.weilPairingEval (EllipticCurve.Point.pull E (geomPt T x) L.1.1)
+        (EllipticCurve.Point.pull E (geomPt T x) L.1.2) hpull1 hpull2).1 ^ d = 1 :=
+      (congrArg (· ^ d) hraw.symm).trans hΓ3
+    have hNpos : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+    have hNK : ((N : ℕ) : geomResidue T x) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (NeZero.ne N)
+    have horder := weilPairing_pair_order (geomResidue T x) (geomPt T x)
+      (EllipticCurve.Point.pull E (geomPt T x) L.1.1) (EllipticCurve.Point.pull E (geomPt T x) L.1.2)
+      ((E.smul_eq_zero_iff_comp_mulByHom (geomPt T x) N _).mpr hpull1)
+      ((E.smul_eq_zero_iff_comp_mulByHom (geomPt T x) N _).mpr hpull2)
+      (L.2.2 (geomResidue T x) (geomPt T x)) hNK d hd.1
+      (Nat.pos_of_dvd_of_pos hd.1 hNpos) hΓ4
+    have hled : N ≤ d :=
+      Nat.le_of_dvd (Nat.pos_of_dvd_of_pos hd.1 hNpos) horder
+    omega
+  have hker0 := eval_kills_ker_of_pow_ne_one D
+    (geomPt T x ≫ pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2) hφKπ hpow_ne
+  have hker : RingHom.ker (detCompAlgHom D).hom.hom.toRingHom ≤
+      RingHom.ker (Spec.preimage (geomPt T x ≫
+        pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2)).hom := by
+    intro i hi
+    exact RingHom.mem_ker.mpr (RingHom.mem_ker.mp (hker0 hi))
+  obtain ⟨s₀⟩ : Nonempty (Spec (CommRingCat.of (geomResidue T x))) :=
+    inferInstance
+  have hmem := base_mem_range_detComp_of_ker_le D
+    (geomPt T x ≫ pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2) hker s₀
+  have hpt : (geomPt T x ≫
+      pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2).base s₀ =
+      (pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2).base x := by
+    show (pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2).base
+      ((geomPt T x).base s₀) =
+      (pairEZMap D sT E L.1.1 L.1.2 L.2.1.1 L.2.1.2).base x
+    rw [geomPt_base]
+  rw [← hpt]
+  exact hmem
+
 end CorrSurjective
 
 section SectionsToStructures
