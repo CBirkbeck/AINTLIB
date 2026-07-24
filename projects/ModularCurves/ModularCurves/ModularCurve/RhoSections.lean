@@ -3239,6 +3239,92 @@ theorem finiteEtale_exists_eval_ne (A : CommAlgCat.FiniteEtale.{0} ℚ)
 
 end FiniteEtaleEval
 
+section FrameGraphs
+
+open scoped FintypeCatDiscrete
+
+variable (D : GaloisRepData N)
+
+/-- **[T-EQ-3d-M3]** The graph of the right `γ`-translation in the frames
+square. -/
+noncomputable def frameGraph (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    wFrames D ⟶ pullback (wFramesπ D) (wFramesπ D) :=
+  pullback.lift (𝟙 (wFrames D)) (wFramesRightMul D γ)
+    (by rw [Category.id_comp, wFramesRightMul_π])
+
+@[reassoc]
+theorem frameGraph_fst (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameGraph D γ ≫ pullback.fst (wFramesπ D) (wFramesπ D) = 𝟙 (wFrames D) :=
+  pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem frameGraph_snd (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    frameGraph D γ ≫ pullback.snd (wFramesπ D) (wFramesπ D) =
+      wFramesRightMul D γ :=
+  pullback.lift_snd _ _ _
+
+theorem frameGraph_isClosedImmersion
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    IsClosedImmersion (frameGraph D γ) := by
+  haveI h1 : IsFinite (pullback.fst (wFramesπ D) (wFramesπ D)) :=
+    MorphismProperty.pullback_fst _ _ (wFramesπ_finite_etale D).1
+  have h2 : IsClosedImmersion (frameGraph D γ ≫
+      pullback.fst (wFramesπ D) (wFramesπ D)) := by
+    rw [frameGraph_fst]
+    infer_instance
+  exact IsClosedImmersion.of_comp (frameGraph D γ)
+    (pullback.fst (wFramesπ D) (wFramesπ D))
+
+theorem frameGraph_isOpenImmersion
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    IsOpenImmersion (frameGraph D γ) := by
+  haveI h1 : Etale (pullback.fst (wFramesπ D) (wFramesπ D)) :=
+    MorphismProperty.pullback_fst _ _ (wFramesπ_finite_etale D).2
+  haveI h2 : Etale (frameGraph D γ ≫
+      pullback.fst (wFramesπ D) (wFramesπ D)) := by
+    rw [frameGraph_fst]
+    infer_instance
+  haveI h3 : Etale (frameGraph D γ) :=
+    Etale.of_comp (frameGraph D γ) (pullback.fst (wFramesπ D) (wFramesπ D))
+  haveI h4 : IsSplitMono (frameGraph D γ) :=
+    ⟨⟨⟨pullback.fst (wFramesπ D) (wFramesπ D), frameGraph_fst D γ⟩⟩⟩
+  exact IsOpenImmersion.of_flat_of_mono _
+
+/-- **[T-EQ-3d-M3]** Two `ℚ̄`-frames over `ℚ` differ by a right translation
+(the frames form a `GL₂`-torsor set). -/
+theorem qbar_frames_rel (F₁ F₂ : Spec (.of (AlgebraicClosure ℚ)) ⟶ wFrames D)
+    (h₁ : F₁ ≫ wFramesπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
+    (h₂ : F₂ ≫ wFramesπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))) :
+    ∃ γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N),
+      F₂ = F₁ ≫ wFramesRightMul D γ := by
+  refine ⟨(wFramesPointsEquiv D ⟨F₁, h₁⟩)⁻¹ * wFramesPointsEquiv D ⟨F₂, h₂⟩, ?_⟩
+  have hnat := qbarPointsRead_map
+    (frameRightMulMor D ((wFramesPointsEquiv D ⟨F₁, h₁⟩)⁻¹ *
+      wFramesPointsEquiv D ⟨F₂, h₂⟩)) ⟨F₁, h₁⟩
+  have hread : qbarPointsRead (frameContAction D)
+      ⟨F₁ ≫ wFramesRightMul D ((wFramesPointsEquiv D ⟨F₁, h₁⟩)⁻¹ *
+        wFramesPointsEquiv D ⟨F₂, h₂⟩),
+        (Category.assoc _ _ _).trans
+          ((congrArg (CategoryStruct.comp F₁)
+            (wFramesRightMul_π D ((wFramesPointsEquiv D ⟨F₁, h₁⟩)⁻¹ *
+              wFramesPointsEquiv D ⟨F₂, h₂⟩))).trans h₁)⟩ =
+      qbarPointsRead (frameContAction D) ⟨F₂, h₂⟩ := by
+    refine hnat.trans ?_
+    show (qbarPointsRead (frameContAction D) ⟨F₁, h₁⟩ :
+        Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) *
+      ((wFramesPointsEquiv D ⟨F₁, h₁⟩)⁻¹ * wFramesPointsEquiv D ⟨F₂, h₂⟩) =
+      qbarPointsRead (frameContAction D) ⟨F₂, h₂⟩
+    show (wFramesPointsEquiv D ⟨F₁, h₁⟩) *
+      ((wFramesPointsEquiv D ⟨F₁, h₁⟩)⁻¹ * wFramesPointsEquiv D ⟨F₂, h₂⟩) =
+      wFramesPointsEquiv D ⟨F₂, h₂⟩
+    rw [← mul_assoc, mul_inv_cancel, one_mul]
+  have hinj := (qbarPointsRead (frameContAction D)).injective hread
+  exact (congrArg Subtype.val hinj).symm
+
+end FrameGraphs
+
 end StructuresToSections
 
 end
