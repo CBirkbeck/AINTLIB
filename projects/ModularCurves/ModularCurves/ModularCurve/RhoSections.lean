@@ -2627,6 +2627,43 @@ theorem detComp_root_pow_sub_one_isUnit (D : GaloisRepData N) [Fact (1 < N)]
   rw [← hζ]
   exact sub_eq_zero.mp hker
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-α2]** The read of a `K`-point factoring through the determinant
+component has no trivial power below `N` (its classifier factors through the
+comultiplication, which sends the power element to a unit). -/
+theorem detComp_point_read_pow_ne_one (D : GaloisRepData N) [Fact (1 < N)]
+    {K : Type} [Field K] [Algebra ℚ K]
+    (ψ : Spec (CommRingCat.of K) ⟶ cycloUnitsScheme D)
+    (hφ : (ψ ≫ detCompScheme D) ≫ corrSpecπ (muNRootsContAction D) =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ K)))
+    (d : ℕ) (hdpos : 0 < d) (hdlt : d < N) :
+    (Scheme.ΓSpecIso (CommRingCat.of K)).hom.hom
+      (muNRootsRead D (Spec.map (CommRingCat.ofHom (algebraMap ℚ K)))
+        (ψ ≫ detCompScheme D) hφ) ^ d ≠ 1 := by
+  intro hcon
+  have hζ := muNRootsRead_classify_field D K (ψ ≫ detCompScheme D) hφ
+  have hpre := spec_preimage_comp ψ (CommRingCat.ofHom
+    (detCompAlgHom D).hom.hom.toRingHom)
+  have hfac : ∀ z : (muNRootsAlgebra D : Type 0),
+      (specPointsEquivAlgHom ℚ (corrAlgebra (muNRootsContAction D) : Type 0) K
+        ⟨ψ ≫ detCompScheme D, hφ⟩) z =
+      (Spec.preimage ψ).hom ((detCompAlgHom D).hom.hom z) := fun z =>
+    congrArg (fun q : CommRingCat.of (corrAlgebra (muNRootsContAction D) :
+      Type 0) ⟶ CommRingCat.of K => q.hom z) hpre
+  have h1 : (Spec.preimage ψ).hom ((detCompAlgHom D).hom.hom
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1)))) ^ d = 1 :=
+    (congrArg (· ^ d) (hfac _).symm).trans
+      ((congrArg (· ^ d) hζ.symm).trans hcon)
+  have hkill : (Spec.preimage ψ).hom ((detCompAlgHom D).hom.hom
+      ((muNRootsAlgebraIso D).inv.hom.hom
+        (AdjoinRoot.root ((Polynomial.X : Polynomial ℚ) ^ N - 1))) ^ d - 1)
+      = 0 :=
+    (map_sub _ _ _).trans (sub_eq_zero.mpr ((map_pow _ _ d).trans
+      (h1.trans (map_one _).symm)))
+  exact ((detComp_root_pow_sub_one_isUnit D d hdpos hdlt).map
+    (Spec.preimage ψ).hom).ne_zero hkill
+
 end StructuresToSections
 
 end
