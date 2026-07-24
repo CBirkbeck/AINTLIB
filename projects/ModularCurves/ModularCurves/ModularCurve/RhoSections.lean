@@ -2283,6 +2283,100 @@ noncomputable def rhoOfSection
 
 end SectionsToStructures
 
+section StructuresToSections
+
+open scoped FintypeCatDiscrete
+
+variable (D : GaloisRepData N)
+
+/-- **[T-EQ-3d-A1]** The frames product over a structure's base — the intrinsic
+trivialising cover of the 3d direction. -/
+noncomputable def strCover (X' : EllObj (CommRingCat.of ℚ)) : Scheme.{0} :=
+  pullback X'.structMap (wFramesπ D)
+
+/-- Its projection to the base. -/
+noncomputable def strPr (X' : EllObj (CommRingCat.of ℚ)) :
+    strCover D X' ⟶ X'.base :=
+  pullback.fst _ _
+
+/-- The tautological frame over the cover. -/
+noncomputable def strTaut (X' : EllObj (CommRingCat.of ℚ)) :
+    strCover D X' ⟶ wFrames D :=
+  pullback.snd _ _
+
+@[reassoc]
+theorem strTaut_π (X' : EllObj (CommRingCat.of ℚ)) :
+    strTaut D X' ≫ wFramesπ D = strPr D X' ≫ X'.structMap :=
+  pullback.condition.symm
+
+/-- **[T-EQ-3d-A1]** The tautological `V_ρ`-point at a constant vector `v`:
+evaluate the tautological frame at `v`. -/
+noncomputable def strVPt (X' : EllObj (CommRingCat.of ℚ)) (v : Fin 2 → ZMod N) :
+    strCover D X' ⟶ pullback (vRhoπ D) X'.structMap :=
+  pullback.lift (strTaut D X' ≫ frameSlotEval D v) (strPr D X') (by
+    rw [Category.assoc, frameSlotEval_π]
+    exact strTaut_π D X')
+
+@[reassoc]
+theorem strVPt_fst (X' : EllObj (CommRingCat.of ℚ)) (v : Fin 2 → ZMod N) :
+    strVPt D X' v ≫ pullback.fst (vRhoπ D) X'.structMap =
+      strTaut D X' ≫ frameSlotEval D v :=
+  pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem strVPt_snd (X' : EllObj (CommRingCat.of ℚ)) (v : Fin 2 → ZMod N) :
+    strVPt D X' v ≫ pullback.snd (vRhoπ D) X'.structMap = strPr D X' :=
+  pullback.lift_snd _ _ _
+
+variable {X' : EllObj (CommRingCat.of ℚ)}
+variable (str : RhoLevelStructure D X'.structMap X'.curve)
+
+/-- **[T-EQ-3d-A1]** The tautological torsion point at `v` (through the
+structure's trivialisation). -/
+noncomputable def strTor (v : Fin 2 → ZMod N) :
+    strCover D X' ⟶ X'.curve.torsion N :=
+  strVPt D X' v ≫ str.torsionIso.inv
+
+@[reassoc]
+theorem strTor_π (v : Fin 2 → ZMod N) :
+    strTor D str v ≫ X'.curve.torsionπ N = strPr D X' := by
+  rw [strTor, Category.assoc]
+  rw [show str.torsionIso.inv ≫ X'.curve.torsionπ N =
+      pullback.snd (vRhoπ D) X'.structMap from by
+    rw [← str.over_T, Iso.inv_hom_id_assoc]]
+  exact strVPt_snd D X' v
+
+/-- **[T-EQ-3d-A1]** The tautological `E`-point over the cover at `v`. -/
+noncomputable def strPt (v : Fin 2 → ZMod N) :
+    X'.curve.Point (strPr D X') :=
+  ⟨strTor D str v ≫ X'.curve.torsionι N, by
+    rw [Category.assoc, EllipticCurve.torsionι_π]
+    exact strTor_π D str v⟩
+
+theorem strPt_raw_kill (v : Fin 2 → ZMod N) :
+    (strPt D str v).1 ≫ X'.curve.mulByHom N = strPr D X' ≫ X'.curve.zero := by
+  show (strTor D str v ≫ X'.curve.torsionι N) ≫ X'.curve.mulByHom N =
+    strPr D X' ≫ X'.curve.zero
+  rw [Category.assoc]
+  rw [show X'.curve.torsionι N ≫ X'.curve.mulByHom N =
+    X'.curve.torsionπ N ≫ X'.curve.zero from pullback.condition]
+  rw [← Category.assoc, strTor_π]
+
+theorem strPt_kill (v : Fin 2 → ZMod N) : (N : ℤ) • strPt D str v = 0 :=
+  (X'.curve.smul_eq_zero_iff_comp_mulByHom (strPr D X') N _).mpr
+    (strPt_raw_kill D str v)
+
+/-- **[T-EQ-3d-A1]** `pointToTorsion` round-trips the tautological point back to
+the tautological torsion map. -/
+theorem strPt_pointToTorsion (v : Fin 2 → ZMod N) :
+    X'.curve.pointToTorsion (strPt D str v) (strPt_raw_kill D str v) =
+      strTor D str v := by
+  apply pullback.hom_ext
+  · exact pullback.lift_fst _ _ _
+  · exact (pullback.lift_snd _ _ _).trans (strTor_π D str v).symm
+
+end StructuresToSections
+
 end
 
 end ModularCurves
