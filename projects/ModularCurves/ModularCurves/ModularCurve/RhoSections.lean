@@ -4845,6 +4845,16 @@ theorem strSec_comb (D : GaloisRepData N) [Fact (1 < N)]
       rfl
     exact hcongr _ _ hpulleq _
 
+/-- **[T-EQ-3d-M5 (6a)]** The translated basis vector reads the matrix column. -/
+theorem smul_single_apply (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (j i : Fin 2) :
+    (γ • (Pi.single j 1 : Fin 2 → ZMod N)) i =
+      (γ : Matrix (Fin 2) (Fin 2) (ZMod N)) i j := by
+  show ((γ : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec
+    (Pi.single j 1 : Fin 2 → ZMod N)) i = _
+  rw [Matrix.mulVec_single]
+  exact mul_one _
+
 end StructuresToSections
 
 end
