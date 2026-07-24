@@ -5063,6 +5063,54 @@ theorem eqToHom_pullback_snd {Y W : Scheme.{0}} (π : Y ⟶ W)
   subst hab
   simp
 
+/-- **[T-EQ-3d-M5 (6f) prep]** Presentation-independent naturality of a relative
+representation datum (public form of the engine-side `map_eqv`). -/
+theorem rhoMap_eqv {P : ModularCurves.ModuliProblem (CommRingCat.of ℚ)}
+    {X₀ : EllObj (CommRingCat.of ℚ)}
+    (d₀ : ModuliProblem.RelRepData P X₀) {T T' : Scheme.{0}}
+    {g : T ⟶ X₀.base} {g' : T' ⟶ X₀.base}
+    (w : X₀.pullbackAlong g' ⟶ X₀.pullbackAlong g) (kk : T' ⟶ T)
+    (hbk : w.baseHom = kk) (hk : kk ≫ g = g')
+    (hwπ : w ≫ X₀.pullbackAlongπ g = X₀.pullbackAlongπ g')
+    (h : { h : T ⟶ d₀.Z // h ≫ d₀.f = g }) :
+    P.map w.op (d₀.eqv g h) =
+      d₀.eqv g' ⟨kk ≫ h.1, by rw [Category.assoc, h.2, hk]⟩ := by
+  subst hk
+  have hw : w = X₀.pullbackAlongMap g kk := by
+    apply (EllObj.homPullbackAlongEquiv X₀ g
+      (X₀.pullbackAlong (kk ≫ g))).injective
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show w ≫ X₀.pullbackAlongπ g =
+        X₀.pullbackAlongMap g kk ≫ X₀.pullbackAlongπ g
+      rw [hwπ, ModuliProblem.pullbackAlongMap_pullbackAlongπ]
+    · exact hbk
+  rw [hw]
+  exact (d₀.nat g kk h).symm
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M5 (6f)]** The cover translation as an endomorphism of the
+`g₃`-pullback of the anchor object. -/
+noncomputable def strActX (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)} {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    X.pullbackAlong (strPr D (X.pullbackAlong k) ≫ k) ⟶
+      X.pullbackAlong (strPr D (X.pullbackAlong k) ≫ k) :=
+  EllObj.homToPullbackAlong
+    (X.pullbackAlongπ (strPr D (X.pullbackAlong k) ≫ k))
+    (strAct D (X.pullbackAlong k) γ)
+    (by
+      show strAct D (X.pullbackAlong k) γ ≫ strPr D (X.pullbackAlong k) ≫ k =
+        strPr D (X.pullbackAlong k) ≫ k
+      rw [← Category.assoc, strAct_pr])
+
+open scoped FintypeCatDiscrete in
+theorem strActX_π (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)} {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    strActX D k γ ≫ X.pullbackAlongπ (strPr D (X.pullbackAlong k) ≫ k) =
+      X.pullbackAlongπ (strPr D (X.pullbackAlong k) ≫ k) :=
+  EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
+
 end StructuresToSections
 
 end
