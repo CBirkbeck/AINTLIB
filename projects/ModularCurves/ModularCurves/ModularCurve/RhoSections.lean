@@ -860,6 +860,17 @@ theorem detCompScheme_isOpenImmersion (D : GaloisRepData N) [Fact (1 < N)] :
     Etale.of_comp (detCompScheme D) (muNRootsSchemeπ D)
   exact IsOpenImmersion.of_flat_of_mono _
 
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-L3c iii]** Factoring through the determinant clopen immersion
+from the range condition. -/
+theorem factors_detComp_of_range (D : GaloisRepData N) [Fact (1 < N)]
+    {W : Scheme.{0}} (φ : W ⟶ muNRootsScheme D)
+    (hr : Set.range φ.base ⊆ Set.range (detCompScheme D).base) :
+    ∃ w : W ⟶ cycloUnitsScheme D, w ≫ detCompScheme D = φ := by
+  haveI := detCompScheme_isOpenImmersion D
+  exact ⟨IsOpenImmersion.lift (detCompScheme D) φ hr,
+    IsOpenImmersion.lift_fac (detCompScheme D) φ hr⟩
+
 end CorrSurjective
 
 section SectionsToStructures
