@@ -1752,6 +1752,32 @@ theorem counit_read_comp_rootsIso (D : GaloisRepData N) [Fact (1 < N)]
     (pointsEquiv_fiber_unit _ _)) ?_
   rfl
 
+/-- **[T-EQ-3c-i-3]** The `Γ`–`Spec` read dictionary: evaluating a `Spec`-point's
+`Γ`-pullback of an algebra element through the section isomorphisms is applying the
+classifying ring map. -/
+theorem gammaSpec_read {K R : CommRingCat.{0}} (pt : Spec K ⟶ Spec R) (a : R) :
+    (Scheme.ΓSpecIso K).hom.hom (pt.appTop.hom
+      ((Scheme.ΓSpecIso R).inv.hom a)) = (Spec.preimage pt).hom a := by
+  refine Eq.trans (congrArg (fun (m : Spec K ⟶ Spec R) =>
+    (Scheme.ΓSpecIso K).hom.hom (m.appTop.hom ((Scheme.ΓSpecIso R).inv.hom a)))
+    (Spec.map_preimage pt).symm) ?_
+  refine Eq.trans (congrArg (fun (q : Γ(Spec R, ⊤) ⟶ K) =>
+      q.hom ((Scheme.ΓSpecIso R).inv.hom a))
+    (Scheme.ΓSpecIso_naturality (Spec.preimage pt))) ?_
+  show (Spec.preimage pt).hom ((Scheme.ΓSpecIso R).hom.hom
+    ((Scheme.ΓSpecIso R).inv.hom a)) = (Spec.preimage pt).hom a
+  refine congrArg (Spec.preimage pt).hom ?_
+  exact congrArg (fun (q : R ⟶ R) => q.hom a) (Scheme.ΓSpecIso R).inv_hom_id
+
+/-- **[T-EQ-3c-i-3]** `Spec.map`-pullback of a `Γ`-section element is the ring image
+(inverse-naturality, elementwise). -/
+theorem specMap_appTop_gammaInv {R S : CommRingCat.{0}} (f : R ⟶ S) (a : R) :
+    (Spec.map f).appTop.hom ((Scheme.ΓSpecIso R).inv.hom a) =
+    (Scheme.ΓSpecIso S).inv.hom (f.hom a) := by
+  have hnat := congrArg (fun (q : R ⟶ Γ(Spec S, ⊤)) => q.hom a)
+    (Scheme.ΓSpecIso_inv_naturality f)
+  exact hnat.symm
+
 end
 
 end ModularCurves
