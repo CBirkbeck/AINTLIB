@@ -149,24 +149,32 @@ theorem Iinf_pow_two_mul_le (ϖ : PseudoUniformizer F) (n : ℕ) :
 
 /-- `A_inf` is `(p,[ϖ])`-adically separated.
 
+Route (externally reviewed, decomposition L2.7a–d): via the truncated-Witt layer —
+`A/p^r A ≅ W_r(O_F)` (O_F perfect), the digit sandwich
+`(ϖ^{m·p^{r-1}} O_F)^r ⊆ [ϖ]^m·W_r(O_F) ⊆ (ϖ^m O_F)^r`, `ϖ`-adic separatedness of
+`O_F` per digit, and `p`-adic separatedness of `W(O_F)`
+(mathlib `WittVector.isAdicCompleteIdealSpanP`).
+
 Source: [Kedlaya-AWS, Def 3.1.2] (completeness includes separatedness in the convention
-of those notes, Convention 0.0.1); levelwise from `ϖ`-adic separatedness of `O_F` and
-`p`-adic separatedness of `W(O_F)` (mathlib `WittVector.isAdicCompleteIdealSpanP`). -/
+of those notes, Convention 0.0.1). -/
 theorem isHausdorff_Iinf (ϖ : PseudoUniformizer F) :
     IsHausdorff (Iinf p F ϖ) (Ainf p F) := by sorry
 
 /-- **`A_inf` is `(p,[ϖ])`-adically complete.** The summit of the ring-theoretic layer.
 
-Proof plan (to be refined in the decomposition): reduce along `Iinf_pow_two_mul_le` to
-completeness for the filtration `(p)^n ⊔ ([ϖ])^n`; a Cauchy sequence for this filtration
-has, in each Witt coordinate `i`, a `ϖ`-adically Cauchy sequence in `O_F` (Teichmüller
-multiplication acts coordinatewise: `([ϖ]·y).coeff i = ϖ^{p^i}·y.coeff i`), which
-converges by `isAdicComplete_span_toOF`; the coordinatewise limit is the `(p,[ϖ])`-adic limit,
-using mathlib's `p`-adic completeness `WittVector.isAdicCompleteIdealSpanP` to control the
-`p`-direction.
+Proof plan (ROUTE FIXED after external review — decomposition L2.7a–d; do NOT attempt
+the naive "per-digit Cauchy extraction" from the product filtration, it is a
+non-theorem): (1) `A/p^r A ≅ W_r(O_F)` for perfect `O_F` (`p^r·A = V^r(A)`);
+(2) each `W_r(O_F)` is `[ϖ]`-adically complete, via the digit sandwich
+`(ϖ^{m·p^{r-1}} O_F)^r ⊆ [ϖ]^m·W_r(O_F) ⊆ (ϖ^m O_F)^r` and `isAdicComplete_span_toOF`
+per digit; (3) assemble
+`A ≅ lim_r A/p^r ≅ lim_r lim_s A/(p^r + [ϖ]^s) ≅ lim_n A/(p^n + [ϖ]^n)` (diagonal
+cofinality in ℕ²), using mathlib's `WittVector.isAdicCompleteIdealSpanP` for the
+`p`-direction; (4) transfer along `Iinf_pow_two_mul_le` to the `I`-adic filtration.
 
 Source: [Kedlaya-AWS, Def 3.1.2]: "It is complete for the adic topology defined by the
-inverse image of some ideal of definition of R⁺"; [SW, §13.1]. -/
+inverse image of some ideal of definition of R⁺"; [SW, §13.1]; route per the gpt-5.6-sol
+review (`.mathlib-quality/chatgpt-reply-fargues-fontaine-2026-07-24.md`). -/
 theorem isAdicComplete_Iinf (ϖ : PseudoUniformizer F) :
     IsAdicComplete (Iinf p F ϖ) (Ainf p F) := by sorry
 

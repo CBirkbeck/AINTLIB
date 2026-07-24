@@ -92,19 +92,46 @@ the source-gap fallback chain the proofs are drawn from):
   to canonical homeomorphism" in this campaign (a `Quotient`-transport statement of no
   mathematical content beyond `Y_indep`; deferred).
 
-### §0.3 External review status (owner-requested: gpt-5.6-sol)
+### §0.3 External review status (owner-requested: gpt-5.6-sol) — **DELIVERED**
 
-The plan-validation packet (`chatgpt-packet-fargues-fontaine-plan-2026-07-24.md`) was
-prepared and sent to gpt-5.6-sol via the chatgpt-math MCP **five times on 2026-07-24**;
-every attempt failed at the Codex layer, not on content:
-- attempts on account `.codex2`: `codex_models_manager … timeout waiting for child
-  process to exit` (three times, at both `max` and `xhigh` reasoning);
-- attempts on account `.codex`: `Codex rate-limited` (twice, incl. the gpt-5.4
-  fallback).
-**Consequence:** the decomposition below is validated by the internal adversarial pass
-only. The packet is saved and should be re-run (or pasted into the ChatGPT app manually)
-before or during early ticket execution; any flaw it surfaces triggers a
-`/develop --continue` revision. Residual-risk register: §6.
+After seven failed MCP attempts (root cause diagnosed: the MCP server's 5-minute
+`execFile` timeout killed every max-effort run; the "models-manager" stderr line was a
+red herring; server patched to 40 min on 2026-07-24), the as-built packet was delivered
+by DIRECT codex invocation (`CODEX_HOME=~/.codex2`, gpt-5.6-sol, max reasoning).
+**Full verbatim reply: `chatgpt-reply-fargues-fontaine-2026-07-24.md`.** Verdicts:
+
+- Q1 (window arithmetic incl. higher-rank, boundaries, k<0): **SOUND** — recomputed
+  independently; only discreteness of ℤ is used, no Archimedean property.
+- Q2 (A_inf completeness): **GAP — accepted and repaired.** "Separate p-adic and
+  ϖ-adic completeness ⟹ completeness for pⁿA+[ϖ]ⁿA" does not follow (a J-Cauchy
+  sequence need not be Cauchy in either direction; Witt addition is not digit-wise);
+  moreover the previously-documented fallback `W(R) = lim_m W(R/ϖ^m)` is ALSO
+  insufficient (not cofinal: pⁿA leaves high digits uncontrolled). The repaired route
+  (now binding, see L2.7/L2.8): truncate in the p-direction first.
+- Q3 (O_F ϖ-adic + complete, no valuation-ring input): **SOUND** — works for any
+  complete uniform Tate ring; F° is an open, hence closed, subgroup.
+- Q4 (strictness): **SOUND** — force N ≥ 2 in the proof; NOTE: `v ≤ 1` on all of
+  A_inf is not needed anywhere in the window arguments (only continuity +
+  nonvanishing + topological nilpotence of p, [ϖ]).
+- Q5 (silent assumptions): **GAP — explicitness checklist**, integrated into tickets:
+  supp-primality product-splitting; power-cancellation/strict-mono on NONZERO values;
+  two-sided pseudouniformizer comparison (ϖ^r = ϖ'a AND ϖ'^s = ϖb); φ-stability of 𝒴
+  in BOTH directions; Spa-functoriality of automorphisms as homeomorphisms;
+  q⁻¹(q(O)) = ⋃ gO for the open quotient; T0 is subspace-hereditary and local for
+  open covers. **Compactness warning:** a bare basic-open trace is NOT quasicompact —
+  𝒴 itself is such a trace and is not qc — so T505 must use the genuine
+  Boolean-embedding criterion (windows are affinoid in the classical picture, 𝒴 is
+  not; cf. [Ked-AWS Rem. 3.1.9 vs 3.1.11]).
+- Q6 (c = (p+1)/2): **SOUND**, loses nothing for this campaign.
+- Q7 (quotient pathologies): **SOUND** — no point-set obstruction; sol's naming
+  guidance: this layer is "the underlying topological orbit space of the adic
+  Fargues–Fontaine curve"; adic-space-hood, spectrality, sobriety, Noetherianity are
+  NOT to be inferred from the orbit quotient (they are the follow-on campaign, as
+  planned per D3).
+
+Sol's bottom line, verbatim: "proof-filling can proceed after repairing item 2 and
+making the item 5 dependencies explicit; the window statements themselves do not need
+redesign."
 
 ### §0.4 Prior-B2 log consultation (Step 4.6 — binding)
 
@@ -366,24 +393,34 @@ source-gap rule, and is the single largest residual risk of the campaign (§6, R
     is expanded by our own proof (source-gap rule), structured as:
     - L2.6 (leaf, elementary): I^{2n} ≤ (p)^n ⊔ ([ϖ])^n — monomial split (a+b = 2n ⟹
       a ≥ n ∨ b ≥ n). Pure `Ideal.span`/`Finset` algebra.
-    - L2.7 (leaf): separatedness. x ∈ ⋂ I^n ⟹ x ∈ ⋂ ((p)^n ⊔ ([ϖ])^n) (L2.6) ⟹ each
-      Witt coordinate of x lies in ⋂_m ϖ^{…}O_F = 0 (L1.7) once coordinates of
-      (p)^n ⊔ ([ϖ])^n-elements are described: p^n·A has coordinates 0 below index n
-      (mathlib `WittVector` V-filtration: p^n·A ⊆ image of V^n — `WittVector`
-      Verschiebung API), and [ϖ]^n·y has coeff i = ϖ^{n·p^i}·(y.coeff i) (mathlib
-      `teichmuller_mul_pow_coeff`-shape, TeichmullerSeries.lean:73 — verify exact form).
-    - L2.8 (leaf): completeness. Given a coherent sequence mod I^n: by L2.6 it is
-      coherent mod (p)^n ⊔ ([ϖ])^n; extract per-coordinate ϖ-adic Cauchy sequences,
-      converge by L1.8, assemble the limit Witt vector, verify I-adic convergence using
-      the reverse inclusion (p,[ϖ])^{?} ⊇ … wait — the needed direction is: the
-      candidate limit x satisfies x ≡ x_n mod I^n; obtained from mod-(p)^m and
-      mod-([ϖ])^m congruences via I^n ⊇ (p)^n·A + ([ϖ])^n·A ∩ … in fact
-      (p)^n ⊔ ([ϖ])^n ≥ I^{2n} AND I^n ≥ (p·[ϖ])-mixed terms — both inclusions
-      I^{2n} ≤ (p)^n ⊔ ([ϖ])^n ≤ I^n hold ((p)^n ≤ I^n and ([ϖ])^n ≤ I^n trivially), so
-      the two filtrations are MUTUALLY COFINAL and IsAdicComplete transfers along
-      cofinal filtrations. The transfer principle "IsAdicComplete is invariant under
-      mutually-cofinal filtrations of ideals" may itself need proving (small reusable
-      lemma; check mathlib for `IsAdicComplete` congruence lemmas at fill time).
+    - **[ROUTE REPLACED 2026-07-24 after the gpt-5.6-sol review found the original
+      composition flawed (Q2 GAP: "separate p-adic + digit-wise ϖ-adic completeness ⟹
+      product-filtration completeness" does not follow — J-Cauchy sequences need not be
+      Cauchy in either direction separately, and Witt addition is not digit-wise; the
+      old fallback `W(R) = lim_m W(R/ϖ^m)` is also non-cofinal hence insufficient).
+      The binding route is now sol's two-parameter truncated-Witt argument:]**
+    - L2.7a (leaf, mathlib): for perfect O_F, `A/p^r A ≅ W_r(O_F)` (truncated Witt
+      vectors), because `p^r A = V^r(A)`; mathlib traction: Complete.lean's
+      truncate-kernel machinery (`mem_ker_truncate`, span-p characterisations).
+    - L2.7b (leaf, project): digit sandwich at each truncated level r: with
+      `C_s := (ϖ^s O_F)^r` (digit-wise product filtration on W_r),
+      `C_{m·p^{r-1}} ⊆ [ϖ]^m·W_r(O_F) ⊆ C_m` — via Teichmüller digit calculus
+      (`[ϖ]^m·[z]·p^i = [ϖ^m z]·p^i` and the expansion machinery of
+      TeichmullerSeries.lean; the general diagonal product formula is NOT in mathlib,
+      per the 2026-07-24 name-verification, but the sandwich needs only the digit
+      lemmas, not the general formula).
+    - L2.7c (leaf, project): each `W_r(O_F)` is `[ϖ]`-adically separated and complete
+      (finite product of the ϖ-adically complete O_F via L2.7b's sandwich + L1.7/L1.8).
+    - L2.7d (internal): assembly:
+      `A ≅ lim_r A/p^r ≅ lim_r lim_s A/(p^r + [ϖ]^s) ≅ lim_{(r,s)} A/(p^r + [ϖ]^s)
+      ≅ lim_n A/(p^n + [ϖ]^n)` (double limit; the diagonal is cofinal in ℕ²), giving
+      separatedness AND completeness for the product filtration J_n = (p)^n ⊔ ([ϖ])^n;
+      then the sandwich L2.6 (mutual cofinality J_{2n} ≤ … ≤ J-shape with I-powers)
+      transfers both to the I-adic filtration. L2.7 (`isHausdorff_Iinf`) and L2.8
+      (`isAdicComplete_Iinf`) are the two public faces of L2.7d; the truncated-level
+      sub-lemmas L2.7a–c enter the skeleton as named private lemmas at T204 start
+      (their prose statements above are frozen; elaborating them needs
+      TruncatedWittVector API iteration, deliberately deferred to the ticket).
   - Attacks (family): [1] TRAP CHECK (p,[ϖ])^n = p^n A + [ϖ]^n A? FALSE in general and
     never claimed — only the ⊔-sandwich L2.6, which is exact; [2] TRAP CHECK
     non-noetherian completion pathologies (completion not complete): avoided — we prove
@@ -394,12 +431,14 @@ source-gap rule, and is the single largest residual risk of the campaign (§6, R
     `le_coeff_eq_iff_le_sub_coeff_eq_zero` + span-p characterisations (file read: has
     "x falls in ideal generated by p iff …" lemma around :60) — verified traction;
     [4] higher subtlety: is the product/weak topology genuinely = (p,[ϖ])-adic (RR1)?
-    We never need the FULL equivalence — only the sandwich L2.6 and per-coordinate
-    extraction, both of which are filtration-level facts; the plan does NOT assert the
-    weak-topology equivalence anywhere. VERDICT: SURVIVED, with RR1 logged (§6) because
-    the per-coordinate extraction in L2.8 is the one place where an inequality could
-    have been mis-transcribed — it will be re-derived on paper at ticket time before
-    coding.
+    We never need the FULL equivalence — only the sandwich L2.6 plus the
+    product-filtration completeness. VERDICT (updated 2026-07-24): the ORIGINAL
+    composition (per-digit extraction) was ATTACKED SUCCESSFULLY by the external
+    gpt-5.6-sol review (§0.3 Q2): coherence mod J_n does not decompose into separate
+    p- and ϖ-direction Cauchy data. The route was REPLACED by the truncated-Witt
+    argument (L2.7a–d above), whose composition sol supplied and endorsed. This is the
+    second successful adversarial catch of the pass (after L3.3), both fixed at
+    planning time.
 
 ### R1 sizing
 [Ked-AWS] spends one sentence; [Bhatt Cor 3.2.3] one diagram + paragraph at the O_F
@@ -898,21 +937,19 @@ campaign section).
 
 ## §6. Residual-risk register (what the confidence gate could NOT fully close)
 
-- **RR1 (completeness fine structure, L2.6–L2.8).** All sources assert A_inf
-  completeness in one sentence; the coefficientwise expansion is ours. Mitigations:
-  mathlib's Complete.lean gives the p-direction formally; the sandwich L2.6 is
-  elementary; the per-coordinate description of ([ϖ]^n)-membership has direct mathlib
-  traction (`teichmuller_mul_pow_coeff`-family). Failure mode if the expansion has a
-  gap: fall back to the inverse-limit presentation W(O_F) = lim_m W(O_F/ϖ^m)-route
-  (Bhatt's diagram pattern), a plan-level revision confined to L2.7/L2.8's tickets.
+- **RR1 (completeness fine structure) — RESOLVED 2026-07-24.** The external review
+  (§0.3 Q2) confirmed the risk was real: the coefficientwise expansion had a genuine
+  gap, and the old fallback (lim_m W(O_F/ϖ^m)) was itself non-cofinal. Both replaced
+  by the validated truncated-Witt route (L2.7a–d), which needs no noetherian input and
+  has direct mathlib traction at each step. Residual exposure is now ordinary
+  formalisation effort, not route risk.
 - **RR2 (window-compactness discharge, L7.5).** Two candidate routes named; hard-stop +
   descope instruction embedded in the ticket; no dependents.
-- **RR3 (external review not yet obtained).** §0.3: the owner-requested gpt-5.6-sol
-  consult could not be delivered (Codex infra down on both accounts after 5 attempts).
-  The packet is saved; re-run before/alongside the first M2 ticket. Highest-value
-  questions for it: RR1's cleanest route; any window-arithmetic slip the internal pass
-  missed (one WAS found and fixed at L3.3 — evidence the pass has teeth, not proof it
-  is complete).
+- **RR3 (external review) — RESOLVED 2026-07-24.** Delivered (§0.3); verdicts
+  integrated. The review confirmed the window machinery outright (Q1/Q4/Q6/Q7),
+  repaired the completeness route (Q2 → L2.7a–d), and supplied the Q5 explicitness
+  checklist now embedded in the tickets. Reply archived verbatim:
+  `chatgpt-reply-fargues-fontaine-2026-07-24.md`.
 
 ## §7. Confidence-gate summary (Step 5)
 

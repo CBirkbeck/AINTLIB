@@ -102,12 +102,15 @@ Parallel capacity ≈ 3 workers at peak (M2-summit ∥ M4-windows ∥ M5-after-M
 
 ## Known risks
 
-RR1 (M2 completeness fine structure — sources one-line; our coefficientwise expansion,
-with an inverse-limit fallback), RR2 (window quasicompactness discharge — two candidate
-routes, descope instruction embedded), RR3 (external gpt-5.6-sol review undelivered —
-Codex infra down 2026-07-24; packet saved at
-`chatgpt-packet-fargues-fontaine-plan-2026-07-24.md`; re-run before M2). Details:
-decomposition §6.
+RR1 (M2 completeness route) — **RESOLVED**: the gpt-5.6-sol review (delivered
+2026-07-24, verbatim in `chatgpt-reply-fargues-fontaine-2026-07-24.md`) found the
+original coordinatewise route unsound and supplied the truncated-Witt repair, now
+binding (decomposition L2.7a–d; tickets T204/T205 re-sketched). RR2 (window
+quasicompactness discharge) — open but descopable; sharpened by sol's warning that
+bare basic-open traces are NOT qc (𝒴 itself is the counterexample). RR3 (external
+review) — **RESOLVED/DELIVERED**; verdicts: windows/covering/freeness SOUND as
+designed, quotient layer SOUND ("the underlying topological orbit space of the adic
+Fargues–Fontaine curve"). Details: decomposition §0.3, §6.
 
 ## Campaign hygiene
 
