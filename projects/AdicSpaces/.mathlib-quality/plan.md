@@ -123,3 +123,46 @@ re-proved ideal-free (decomposition §6.5). Details: decomposition §0.3, §6, �
 - The bar per ticket: `lake build` green, zero new `sorry` outside the skeleton's own
   contract, `#print axioms` ∈ {propext, Classical.choice, Quot.sound}.
 - Workers: `/beastmode` per ticket; statements frozen (B2-stop on statement bugs).
+
+---
+
+# Campaign 8 (planned 2026-07-26): 𝒳 is an adic space + 𝒴 ≠ ∅
+
+## Goal
+(1) `Y_nonempty` (T601): 𝒴 ≠ ∅ via the weighted Gauss valuation.
+(2) The Fargues–Fontaine curve is an adic space, via the USER-SPECIFIED reference
+    route: Kedlaya, *Noetherian properties of Fargues–Fontaine curves* (IMRN 2015;
+    arXiv:1410.5160, now local at `refs/AdicSpaces/kedlaya-noetherian-ff-1410.5160.pdf`):
+    the chart rings are strongly noetherian Tate rings; sheafiness then comes from the
+    REPO'S EXISTING Wedhorn 8.28(b) theorem.
+
+## Repo-asset map (reuse mandate — audited 2026-07-26)
+| Need | Repo asset | Status |
+|---|---|---|
+| strongly noetherian ⟹ sheafy | `ValuationSpectrum.isSheafy_ofStronglyNoetherianTate_proof` (AuditCleanWrappers.lean:176; Wedhorn 8.28(b)) with bundle `[IsTateRing][IsNoetherianRing][IsStronglyNoetherian][T2Space][NonarchimedeanRing][CompatiblePlusSubring][CompleteSpace]` | reduction complete; still depends on the sheafy-transport lane's open sorries (Wedhorn828 ×17, Cor832 ×18, LaurentRefinement ×8, PresheafTateStructure ×19) — that lane is its own workstream; Campaign 8 TARGETS this interface and does not duplicate it |
+| `IsStronglyNoetherian` | RestrictedPowerSeries.lean:243 (A⟨X₁..Xₖ⟩ noetherian ∀k) + StronglyNoetherianTransport.lean | sorry-free |
+| A⟨X⟩ machinery | RestrictedPowerSeries / TateAlgebraTopology | mature (reused in T202) |
+| rational-open section rings | Presheaf.lean `presheafValue` + HuberLocLift (3 sorries) + PresheafTateStructure (19, TODO-stage) | in progress (L-C dependency) |
+| adic-space bundling | `AdicSpacePresentation` (StructurePresheafBundled.lean:743) | exists (1 sorry in file) |
+| windows as rational subsets | FF campaign T705 (`windowU_zero_trace_eq` etc.) | done |
+| rank-1 valuation on F | `IsPerfectoidField.exists_valuation` | class field |
+| Teichmüller expansion | mathlib `WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff` (used in T205) | done |
+
+## Lanes
+- **L-A (T801–T805 + CLEANUP-11)**: weighted Gauss valuation `w_ρ` on `A_inf`
+  (Kedlaya 1410.5160 formula (2.2.1) + Lemma 2.3; AWS Rem 2.6.3) → `Y_nonempty`.
+  Executable now. Also the substrate for L-B (the rings `A^r` are λ_r-completions).
+- **L-B (PLAN-GATE-1)**: chart rings `A^r_{L,E}`-forms are Euclidean/PID
+  (paper Cor 2.10) and strongly noetherian (paper Thm 3.2, Newton-polygon +
+  leading-term Gröbner argument §3). GATED: requires a dedicated
+  `/develop --decompose` pass transcribing §2–§3 (10 pages) once L-A's norms exist.
+- **L-C (PLAN-GATE-2)**: identify chart rings with the windows' `presheafValue`
+  pairs, discharge the Wedhorn-8.28(b) instance bundle for them, bundle 𝒳 via
+  `AdicSpacePresentation`. GATED on L-B + the existing sheafy-transport lane +
+  PresheafTateStructure plumbing.
+
+## Generality decisions
+- `w_ρ` is developed for `Ainf p F` (the campaign's fixed `E = ℚ_p`, `ϖ_E = p`
+  specialization; Kedlaya's `W(o_L)_E`-generality is a flagged /generalise candidate).
+- Norm values in `ℝ≥0` (rank 1; `ρ ∈ (0,1)` a real parameter; rpow for the
+  Teichmüller-coordinate twist).

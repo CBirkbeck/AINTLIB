@@ -1112,3 +1112,68 @@ no name or shape overlap with any leaf above.
 All leaves are (a) in-place hypothesis weakenings verified against the actual proof
 text, (b) mirrors of fully-read proven proofs with a bounded delta, or (c) assembly
 from this session's own verified lemmas. Skeleton to be written with the tickets.
+
+---
+
+# Decomposition: Campaign 8, Lane A — weighted Gauss valuation + Y_nonempty (2026-07-26)
+
+## Sources (all local)
+- Kedlaya, *Noetherian properties of Fargues–Fontaine curves*, arXiv:1410.5160v3
+  (`refs/AdicSpaces/kedlaya-noetherian-ff.txt`). Formula (2.2.1) (verbatim):
+  > "For t ∈ [0, +∞), define the "Gauss norm" function λt : BL,E → R by the formula
+  > λt(Σ ϖ^n [xn]) = max{p^{-n}|xn|^t}"
+  and Lemma 2.3 (verbatim):
+  > "For t ∈ [0, +∞), the function λt defines a multiplicative norm on BL,E.
+  > Proof. This is a straightforward consequence of the homogeneity properties of Witt
+  > vector arithmetic. See for instance [12, §4]."
+  NOTE the deferred proof: [12] = Kedlaya, *New methods for (Γ,φ)-modules* §4 — the
+  worker MUST crossread [12, §4] (or Fargues–Fontaine, *Courbes*, §1.4, local PDF)
+  before freezing the T802/T803 proof routes (source-gap fallback chain step 1).
+- AWS notes Rem 2.6.3 (verbatim): weighted Gauss norms "|Σ p^n[x_n]|_ρ =
+  max{ρ^{[±]n}|x_n|}" with "the supremum becomes a maximum as soon as ρ < 1";
+  pdftotext superscript loss — CONVENTION CHECK against the typeset PDF is step 0
+  of T801 (Read tool on the PDF page; our convention: value of p is ρ).
+
+## Specialization dictionary
+Paper: E = ℚ_p, ϖ_E = p, L = F, o_L = O_F; A_{L,E} ⊆ W(O_F)_E = Ainf p F.
+λ_t on Ainf: with |·| the rank-1 valuation of F (from `IsPerfectoidField.exists_valuation`,
+extended to Witt coefficients via Teichmüller coordinates x = Σ p^n [a_n],
+a_n = θ^{-n}-twisted coefficients as in the T205 TeichmullerSeries machinery):
+w_ρ(x) = max_n ρ^n · |a_n| = max_n ρ^n · |x.coeff n|^{p^{-n}} (rpow).
+
+## Leaves (L-A)
+- **A1** (T801): `gaussianValue ρ hv x : ℝ≥0` definition + basic evaluations:
+  w(0)=0, w(1)=1, w(teichmuller a) = |a|, w(p·x) = ρ·w(x), w on p^n[a]-monomials;
+  boundedness (all values ≤ 1 on Ainf since |a_n| ≤ 1). Discharge: iSup-manipulation +
+  `Rat`-free real arithmetic; Teichmüller coefficients via mathlib coeff-API.
+  Max-attained for ρ < 1 (AWS Rem 2.6.3): values ρ^n·|a_n| ≤ ρ^n → 0.
+- **A2** (T802): ultrametric additivity w(x+y) ≤ max(w x, w y). Route (to freeze after
+  the [12,§4]/FF-Courbe crossread): the homogeneity/isobaric property of Witt addition;
+  candidate transcription substrate: p-adic approximation by Teichmüller partial sums
+  (mathlib `dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff`) + w(p^N·z) ≤ ρ^N.
+- **A3** (T803): multiplicativity w(xy) = w(x)·w(y) (paper Lemma 2.3; field case).
+  Route candidates (freeze at crossread): leading-Teichmüller-coefficient argument
+  (unique max index for generic ρ + ultrametric strictness), as in FF-Courbe §1.4.
+- **A4** (T804): packaging: `gaussSpv ρ : Spv (Ainf p F)` via `ofValuation`;
+  continuity (adic basis: w ≤ max(ρ,|ϖ|)^n on Iinf^n → 0); Spa-membership
+  (w ≤ 1 on A_inf = W(O_F) and on A⁺ = ⊤).
+- **A5** (T805): `Y_nonempty`: w(p·[ϖ]) = ρ·|ϖ| ≠ 0 ⟹ gaussSpv ∈ Y. Closes T601.
+
+## Prior-B2: no name/shape matches (log checked).
+
+## Gate status: A1/A4/A5 leaf-verified against in-hand sources; A2/A3 routes are
+REVIEW-PENDING-lite on the [12,§4] crossread (mandated as step 1 of their tickets;
+truth of the statements is multi-source certain — Lemma 2.3 verbatim above).
+
+# Milestone map: Lanes B and C (NOT leaf-decomposed — gated)
+
+- **L-B**: `A^r`-ring construction (λ_r-completion of Ainf[[ϖ]⁻¹]-localization;
+  chart dictionary per AWS 3.1.3(a)/(b)); Newton polygons (paper Def 2.5);
+  multiplicativity of slopes (Lemma 2.6); division (Lemma 2.8 + the iteration at
+  paper line ~202); **Cor 2.10: A^r is a Euclidean domain, hence PID**;
+  **Theorem 3.2: A^r{T₁,…,Tₙ} noetherian** (§3 leading-term/Gröbner argument,
+  Hypothesis 3.3 onward). GATE: `/develop --decompose` transcribing §2–§3 after L-A.
+- **L-C**: instance-bundle discharge for the chart rings
+  (`isSheafy_ofStronglyNoetherianTate_proof`); presheafValue-identification
+  (PresheafTateStructure lane); `AdicSpacePresentation` for the two charts of 𝒳.
+  GATE: L-B + sheafy-transport lane completion (external board).

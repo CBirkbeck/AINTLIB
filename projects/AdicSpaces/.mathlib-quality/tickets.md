@@ -552,3 +552,47 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 
 ### [CLEANUP-10] /cleanup on Curve.lean (final; supersedes CLEANUP-8's scope)
 - **Status**: open | **Depends**: T706.
+
+---
+
+## Campaign 8 lane A (planned 2026-07-26): Gauss valuation + Y_nonempty
+
+### [T801] Weighted Gauss value on A_inf: definition + basic evaluations
+- **Status**: open | **File**: FarguesFontaine/GaussNorm.lean (new) | **Depends**: none
+- **Statement sketch**: fix `hv : Valuation F ℝ≥0` with `hv.Integers (O_F)`
+  (from `IsPerfectoidField.exists_valuation`, extracted once as a `def`), `ρ : ℝ≥0`,
+  `hρ : 0 < ρ` `hρ1 : ρ < 1`. Define
+  `gaussValue ρ x := ⨆ n, ρ^n * (hv (θ^{-n} (x.coeff n)))` (θ = frobeniusEquiv of O_F;
+  equivalently `(hv x.coeff n)^(p^{-n})` — STEP 0: fix the convention against the
+  typeset PDF of (2.2.1)/AWS 2.6.3). Prove: value at 0/1/[a]/p·x; ≤ 1 globally;
+  iSup attained (ρ<1); monotone tail bounds.
+- **Sources**: Kedlaya 1410.5160 (2.2.1); AWS Rem 2.6.3.
+
+### [T802] Ultrametric additivity of the Gauss value
+- **Status**: open | **Depends**: T801
+- **Step 1 (binding)**: crossread Kedlaya *New methods for (φ,Γ)-modules* §4 (fetch to
+  refs) and/or FF *Courbes* §1.4 (local) per the decomposition note; freeze the route.
+- **Statement**: `gaussValue ρ (x+y) ≤ max (gaussValue ρ x) (gaussValue ρ y)`.
+
+### [T803] Multiplicativity (paper Lemma 2.3)
+- **Status**: open | **Depends**: T802 (+same crossread)
+- **Statement**: `gaussValue ρ (x*y) = gaussValue ρ x * gaussValue ρ y`.
+
+### [CLEANUP-11] /cleanup on GaussNorm.lean
+- **Status**: open | **Depends**: T803.
+
+### [T804] The Gauss point: Valuation package, continuity, Spa-membership
+- **Status**: open | **Depends**: T803, CLEANUP-11
+- **Statement**: `gaussValuation ρ : Valuation (Ainf p F) ℝ≥0`; `gaussSpv ρ : Spv _`;
+  `gaussSpv_isContinuous`; `gaussSpv_mem_spa`.
+
+### [T805] ★ Y_nonempty (closes T601)
+- **Status**: open | **Depends**: T804
+- **Statement**: fill `Y_nonempty` in Curve.lean: `⟨gaussSpv ρ, mem_spa, w(p[ϖ]) ≠ 0⟩`.
+
+### [PLAN-GATE-1] /develop --decompose: Kedlaya §2–§3 (Euclidean/PID + strongly noetherian)
+- **Status**: blocked (planning gate) | **Depends**: T805
+- NOT executable by /beastmode: this is a planning action producing lane-B tickets.
+
+### [PLAN-GATE-2] Lane C assembly planning (sheafy instances + AdicSpacePresentation)
+- **Status**: blocked (planning gate) | **Depends**: PLAN-GATE-1, sheafy-transport lane.
