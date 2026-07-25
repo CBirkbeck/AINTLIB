@@ -6033,6 +6033,94 @@ theorem rhoLevelStructureOfCarve_strValue {X' : EllObj (CommRingCat.of ℚ)}
       RhoLevelStructure.pull D (X'.pullbackAlongπ (strPr D X')) str :=
   RhoLevelStructure.ext_torsionIso (strPinned_eq_pullTorsionIso D str hinv)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-REC]** The pinned trivialization determines the level: two full
+levels pinning to the same iso through one frame are equal (read the basis
+slots back through the iso). -/
+theorem fullLevelPt_eq_of_pinned_eq {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L L' : E.FullLevelPt N)
+    (h : T ⟶ wFrames D) (hover : h ≫ wFramesπ D = sT)
+    (heq : framedTorsionIsoPinned D sT E hinv L h hover =
+      framedTorsionIsoPinned D sT E hinv L' h hover) : L = L' := by
+  classical
+  -- the basis combinations classify equally
+  have hcombeq : ∀ v : Fin 2 → ZMod N,
+      (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2) =
+      (((v 0).val : ℤ) • L'.1.1 + ((v 1).val : ℤ) • L'.1.2) := by
+    intro v
+    have h1 := framedPinned_leg_comb D sT hinv L h hover v
+    have h2 := framedPinned_leg_comb D sT hinv L' h hover v
+    rw [heq] at h1
+    have hfst : E.pointToTorsion _
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v)) ≫
+        (framedTorsionIsoPinned D sT E hinv L' h hover).hom ≫
+          pullback.fst (vRhoπ D) sT =
+        E.pointToTorsion _
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+          (levelComb_kill L' v)) ≫
+        (framedTorsionIsoPinned D sT E hinv L' h hover).hom ≫
+          pullback.fst (vRhoπ D) sT :=
+      h1.trans h2.symm
+    have hsnd : E.pointToTorsion _
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v)) ≫
+        (framedTorsionIsoPinned D sT E hinv L' h hover).hom ≫
+          pullback.snd (vRhoπ D) sT =
+        E.pointToTorsion _
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+          (levelComb_kill L' v)) ≫
+        (framedTorsionIsoPinned D sT E hinv L' h hover).hom ≫
+          pullback.snd (vRhoπ D) sT := by
+      rw [framedTorsionIsoPinned_π, EllipticCurve.pointToTorsion_torsionπ,
+        EllipticCurve.pointToTorsion_torsionπ]
+    have hcls : E.pointToTorsion _
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp (levelComb_kill L v)) =
+        E.pointToTorsion _
+        ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+          (levelComb_kill L' v)) := by
+      have hh : E.pointToTorsion _
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+            (levelComb_kill L v)) ≫
+          (framedTorsionIsoPinned D sT E hinv L' h hover).hom =
+          E.pointToTorsion _
+          ((E.smul_eq_zero_iff_comp_mulByHom (𝟙 T) N _).mp
+            (levelComb_kill L' v)) ≫
+          (framedTorsionIsoPinned D sT E hinv L' h hover).hom := by
+        apply pullback.hom_ext
+        · exact (Category.assoc _ _ _).trans
+            (hfst.trans (Category.assoc _ _ _).symm)
+        · exact (Category.assoc _ _ _).trans
+            (hsnd.trans (Category.assoc _ _ _).symm)
+      exact (cancel_mono
+        (framedTorsionIsoPinned D sT E hinv L' h hover).hom).mp hh
+    have hcar := congrArg (· ≫ E.torsionι N) hcls
+    simp only [EllipticCurve.pointToTorsion_torsionι] at hcar
+    exact Subtype.ext hcar
+  -- read off the two basis points
+  have hone : ((((Pi.single 0 1 : Fin 2 → ZMod N) 0).val : ℤ)) = 1 := by
+    rw [Pi.single_eq_same, ZMod.val_one]
+    exact Nat.cast_one
+  have hzero01 : ((((Pi.single 0 1 : Fin 2 → ZMod N) 1).val : ℤ)) = 0 := by
+    rw [show (Pi.single 0 1 : Fin 2 → ZMod N) 1 = 0 from
+      Pi.single_eq_of_ne (by decide) 1, ZMod.val_zero]
+    rfl
+  have hzero10 : ((((Pi.single 1 1 : Fin 2 → ZMod N) 0).val : ℤ)) = 0 := by
+    rw [show (Pi.single 1 1 : Fin 2 → ZMod N) 0 = 0 from
+      Pi.single_eq_of_ne (by decide) 1, ZMod.val_zero]
+    rfl
+  have hone1 : ((((Pi.single 1 1 : Fin 2 → ZMod N) 1).val : ℤ)) = 1 := by
+    rw [Pi.single_eq_same, ZMod.val_one]
+    exact Nat.cast_one
+  have hP : L.1.1 = L'.1.1 := by
+    have hc := hcombeq (Pi.single 0 1)
+    rwa [hone, hzero01, one_smul, zero_smul, add_zero, one_smul, zero_smul,
+      add_zero] at hc
+  have hQ : L.1.2 = L'.1.2 := by
+    have hc := hcombeq (Pi.single 1 1)
+    rwa [hone1, hzero10, one_smul, zero_smul, zero_add, one_smul, zero_smul,
+      zero_add] at hc
+  exact Subtype.ext (Prod.ext hP hQ)
+
 end MutualInverses
 
 end
