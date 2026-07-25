@@ -278,7 +278,20 @@ New file `ForMathlib/RegularLocalDomain.lean` (sorry-free). Landed:
   half of the `R/xR` step.
 * **T-REG-4** `isDomain_of_isPrime_span_singleton` — the closing Nakayama step.
 
-**Remaining brick — T-REG-3b** (`spanFinrank (maximalIdeal (R ⧸ span{x})) ≤ dim R − 1` for
+**T-REG-3b LANDED** (`spanFinrank_map_maximalIdeal_succ_le`), by an elementary generator
+count rather than the cotangent space: write `x = ∑ c_g g` over a minimal generating set
+`G` of `𝔪`; some `c_{g₀}` is a unit (else `x ∈ 𝔪²`), so `𝔪 = span (x ∷ G \ {g₀})` and the
+image of `G \ {g₀}` generates modulo `x`.
+
+**T-REG COMPLETE**: `ModularCurves.IsRegularLocalRing.isDomain` (axioms
+propext/choice/Quot.sound only) — the full Matsumura 14.3 induction, assembled from
+T-REG-1/2/3a/3b/4 via the sandwich `d − 1 ≤ dim (R/xR) ≤ spanFinrank 𝔪̄ ≤ d − 1`.
+
+**Remaining for T-G4a**: the other half — *smooth over a field ⟹ the local rings are
+regular* (Jacobian criterion from `IsStandardSmoothOfRelativeDimension`), then
+`IsRegularLocalRing.isDomain` gives unique minimal primes, hence disjoint irreducible
+components (`hdisj`) and — with local noetherianity — `hlf`, discharging
+`irreducibleSpace_of_connectedSpace_of_smooth`. Superseded plan (kept for reference): (`spanFinrank (maximalIdeal (R ⧸ span{x})) ≤ dim R − 1` for
 `x ∈ 𝔪 \ 𝔪²`), i.e. *x is part of a minimal generating set of `𝔪`*: choose a `k`-basis of
 `𝔪/𝔪²` containing `x̄ ≠ 0` (`Basis.extend`), lift it (Nakayama: spanning mod `𝔪` ⟹
 spanning), and drop `x`; the images of the other `d − 1` generate `𝔪̄`. Then the sandwich
