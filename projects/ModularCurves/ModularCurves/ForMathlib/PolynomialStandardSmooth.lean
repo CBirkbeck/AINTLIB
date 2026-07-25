@@ -65,4 +65,21 @@ theorem IsStandardSmoothOfRelativeDimension.polynomial :
     (e := (MvPolynomial.pUnitAlgEquiv R :
       MvPolynomial PUnit.{1} R ≃ₐ[R] Polynomial R))
 
+/-- A localization of the one-variable polynomial algebra away from an element
+is standard smooth of relative dimension one over the base (the λ-line chart
+shape: `R[λ][1/p(λ)]`). -/
+theorem IsStandardSmoothOfRelativeDimension.localizationAway_mvPolynomialFinOne
+    (p : MvPolynomial (Fin 1) R) :
+    IsStandardSmoothOfRelativeDimension 1 R (Localization.Away p) := by
+  haveI h1 : IsStandardSmoothOfRelativeDimension 1 R (MvPolynomial (Fin 1) R) := by
+    have h0 := IsStandardSmoothOfRelativeDimension.mvPolynomial R (Fin 1)
+    simpa using h0
+  haveI h2 : IsStandardSmoothOfRelativeDimension 0 (MvPolynomial (Fin 1) R)
+      (Localization.Away p) :=
+    IsStandardSmoothOfRelativeDimension.localization_away p
+  have h3 := IsStandardSmoothOfRelativeDimension.trans
+    (n := 1) (m := 0) (R := R) (S := MvPolynomial (Fin 1) R)
+    (T := Localization.Away p)
+  simpa using h3
+
 end Algebra
