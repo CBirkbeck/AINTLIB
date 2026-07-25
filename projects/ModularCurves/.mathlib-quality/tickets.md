@@ -25289,7 +25289,22 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
   étale ⟹ α lifts uniquely along square-zero). Audit mathlib SmoothOfRelativeDimension +
   formal-smoothness API at pickup; EXPECT sub-tickets (this is the deepest leaf; may consume
   its own /develop --continue). Deps: T-YR-5. Status: open.
-- **[T-YR-7] ASSEMBLY `yRho_representable`** — Y := X.base, sY := X.structMap for a
+- **[T-YR-7] CLOSED 2026-07-25** — `ModularCurves.yRho_representable'`
+  (`ModularCurve/RhoPoints.lean`): *for `N ≥ 3` the twisted modular curve exists*, i.e.
+  `∃ Y sY, RepresentsYRho D Y sY`, in the DEF-17-corrected form of the predicate.
+  Chain: `rhoProblem_exists_representableBy_isAffine` (T-YR-5 + the away-iso transport)
+  → affineness clause; `pointsEquivQuot` (7a–7d) → points clause;
+  `rhoProblem_smoothOfRelativeDimension_one` → smoothness clause, via the product-problem
+  identification (`Moduli/ProductProblem.lean`) of the Legendre cover with the
+  Legendre-anchored ρ-total-space, the carrier bridge, and the (c1) étale-descent
+  machinery. Remaining `sorryAx` in the final theorem comes **only** from the repo's
+  pre-existing quarantined registers: DS4 (Weil pairing), [T-E14-NAT]
+  (`legendreDelta_exists_naturalFamily`), and `legendreDelta_surjective_of` /
+  `legendreDeltaGAction` (T-E14-ACT'). Statement note: the upstream sorried
+  `yRho_representable` in `YRho.lean` cannot import the proof (it is upstream of
+  `RhoSections`); the proven form lives downstream, as with
+  `rhoLevel_relativelyRepresentable'`.
+- **[T-YR-7 original ticket] ASSEMBLY `yRho_representable`** — Y := X.base, sY := X.structMap for a
   representing `X : EllObj (CommRingCat.of ℚ)` of `rhoProblem D`.
   - clause 2 (`IsAffineHom sY`): **DONE** — `rhoProblem_isAffineHom_structMap` (RhoSmooth).
   - clause 1 (`SmoothOfRelativeDimension 1 sY`): machinery **DONE** (T-YR-6); remaining =
