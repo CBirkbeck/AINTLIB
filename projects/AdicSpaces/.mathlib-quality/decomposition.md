@@ -1173,7 +1173,11 @@ truth of the statements is multi-source certain — Lemma 2.3 verbatim above).
   paper line ~202); **Cor 2.10: A^r is a Euclidean domain, hence PID**;
   **Theorem 3.2: A^r{T₁,…,Tₙ} noetherian** (§3 leading-term/Gröbner argument,
   Hypothesis 3.3 onward). GATE: `/develop --decompose` transcribing §2–§3 after L-A.
-- **L-C**: instance-bundle discharge for the chart rings
-  (`isSheafy_ofStronglyNoetherianTate_proof`); presheafValue-identification
-  (PresheafTateStructure lane); `AdicSpacePresentation` for the two charts of 𝒳.
-  GATE: L-B + sheafy-transport lane completion (external board).
+- **L-C**: instance-bundle discharge for the chart rings via the SORRY-FREE
+  `isSheafy_of_stronglyNoetherian_828b` (bundle: IsTateRing + IsStronglyNoetherian +
+  T2Space + IsRingOfIntegralElements (A⁺) + CompleteSpace; usage pattern: FJP
+  FiniteJetNoetherianVertices → FiniteJetMain, and ExampleUnitDisc); then
+  presheafValue-identification (PresheafTateStructure lane, still open) and
+  `AdicSpacePresentation` for the two charts of 𝒳.
+  GATE: L-B only, for the sheafiness core; the presheafValue-identification part
+  additionally waits on the PresheafTateStructure plumbing.

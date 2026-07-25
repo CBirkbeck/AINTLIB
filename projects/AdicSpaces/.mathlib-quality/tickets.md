@@ -595,4 +595,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - NOT executable by /beastmode: this is a planning action producing lane-B tickets.
 
 ### [PLAN-GATE-2] Lane C assembly planning (sheafy instances + AdicSpacePresentation)
-- **Status**: blocked (planning gate) | **Depends**: PLAN-GATE-1, sheafy-transport lane.
+- **Status**: blocked (planning gate) | **Depends**: PLAN-GATE-1 only for the
+  sheafiness core (the repo's `isSheafy_of_stronglyNoetherian_828b` is sorry-free —
+  correction 2026-07-26); presheafValue-identification additionally depends on the
+  PresheafTateStructure plumbing.
