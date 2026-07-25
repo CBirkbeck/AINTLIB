@@ -294,22 +294,63 @@ def KLE (q : ℚ) (v : Spv (Ainf p F)) : Prop :=
 
 variable {p F ϖ}
 
+private theorem pow_le_pow_iff_cross {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+    {x y : Γ₀} {a b c d : ℕ} (hcross : a * d = c * b) (hb : b ≠ 0) (hd : d ≠ 0) :
+    x ^ d ≤ y ^ c ↔ x ^ b ≤ y ^ a := by
+  rw [← pow_le_pow_iff_left₀ (zero_le') (zero_le') hb (a := x ^ d) (b := y ^ c),
+    ← pow_le_pow_iff_left₀ (zero_le') (zero_le') hd (a := x ^ b) (b := y ^ a),
+    ← pow_mul, ← pow_mul, ← pow_mul, ← pow_mul, mul_comm d b, ← hcross]
+
+/-- The cross-multiplication identity behind representation-independence: for `0 < q`
+and `q = a/b` with `0 < b`, one has `a·q.den = q.num.toNat·b` in `ℕ`. -/
+private theorem cross_eq {q : ℚ} (hq : 0 < q) {a b : ℕ} (hb : 0 < b)
+    (hab : q = (a : ℚ) / b) : a * q.den = q.num.toNat * b := by
+  have h1 : (a : ℚ) / b = (q.num : ℚ) / q.den := by rw [← hab, Rat.num_div_den]
+  rw [div_eq_div_iff (by exact_mod_cast hb.ne' : (b : ℚ) ≠ 0)
+    (by exact_mod_cast q.den_pos.ne' : (q.den : ℚ) ≠ 0)] at h1
+  have h2 : ((q.num.toNat : ℤ) : ℚ) = (q.num : ℚ) := by
+    rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq).le]
+  exact_mod_cast h2 ▸ h1
+
 /-- Representation-independence of `KGE`: for any fraction `a/b = q` with `b > 0`,
 `KGE q v ↔ v([ϖ]^b) ≤ v(p^a)`. This is the denominator-clearing workhorse
 (cross-multiplication inside the value monoid). -/
 theorem KGE_iff {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q)
     {a b : ℕ} (hb : 0 < b) (hab : q = (a : ℚ) / b) :
-    KGE p F ϖ q v ↔ v.vle (teichPi p F ϖ ^ b) ((p : Ainf p F) ^ a) := by sorry
+    KGE p F ϖ q v ↔ v.vle (teichPi p F ϖ ^ b) ((p : Ainf p F) ^ a) := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  rw [KGE, hbridge, hbridge, map_pow, map_pow, map_pow, map_pow]
+  exact pow_le_pow_iff_cross (cross_eq hq hb hab) hb.ne' q.den_nz
 
 /-- Representation-independence of `KLE`, as for `KGE_iff`. -/
 theorem KLE_iff {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q)
     {a b : ℕ} (hb : 0 < b) (hab : q = (a : ℚ) / b) :
-    KLE p F ϖ q v ↔ v.vle ((p : Ainf p F) ^ a) (teichPi p F ϖ ^ b) := by sorry
+    KLE p F ϖ q v ↔ v.vle ((p : Ainf p F) ^ a) (teichPi p F ϖ ^ b) := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  have hcross := cross_eq hq hb hab
+  have hnum : q.num.toNat ≠ 0 :=
+    fun h0 => absurd (Rat.num_pos.mpr hq) (Int.toNat_eq_zero.mp h0).not_gt
+  have ha : a ≠ 0 := by
+    intro rfl
+    simp only [zero_mul] at hcross
+    have hne : q.num.toNat * b ≠ 0 := Nat.mul_ne_zero hnum hb.ne'
+    omega
+  rw [KLE, hbridge, hbridge, map_pow, map_pow, map_pow, map_pow]
+  exact pow_le_pow_iff_cross
+    (show b * q.num.toNat = q.den * a from by rw [mul_comm b, mul_comm q.den]; exact hcross.symm)
+    ha hnum
 
 /-- Totality: at every positive rational `q`, either `κ(v) ≥ q` or `κ(v) ≤ q`
 (linearity of the valuative order). -/
 theorem KGE_or_KLE {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 < q) :
-    KGE p F ϖ q v ∨ KLE p F ϖ q v := by sorry
+    KGE p F ϖ q v ∨ KLE p F ϖ q v :=
+  v.vle_total _ _
 
 /-- Order-incompatibility: `κ(v) ≤ q'` and `κ(v) ≥ q` cannot both hold when `q' < q`
 (on `𝒴`, where `0 < v(p) < 1`). Cross-multiply and use the exponent-flip rule
@@ -318,7 +359,52 @@ theorem KGE_or_KLE {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q : ℚ} (hq : 0 
 This single lemma drives all window disjointness. -/
 theorem not_KGE_of_KLE_of_lt {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
     (hq' : 0 < q') (hlt : q' < q) (hle : KLE p F ϖ q' v) :
-    ¬ KGE p F ϖ q v := by sorry
+    ¬ KGE p F ϖ q v := by
+  intro hge
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  set X := ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) with hX
+  set Ypv := ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) with hYpv
+  have hy0 : (0 : _) < Ypv := by
+    refine zero_lt_iff.mpr (fun h0 => v_p_ne_zero hv ?_)
+    rw [hbridge]
+    simp only [map_zero, le_zero_iff]
+    exact h0
+  have hy1 : Ypv < 1 := by
+    obtain ⟨h1, h2⟩ := vlt_p_one hv
+    rw [hbridge] at h1 h2
+    rw [map_one] at h1 h2
+    exact lt_of_le_not_ge h1 h2
+  have hKLE : Ypv ^ q'.num.toNat ≤ X ^ q'.den := by
+    have := hle
+    rw [KLE, hbridge, map_pow, map_pow] at this
+    exact this
+  have hKGE : X ^ q.den ≤ Ypv ^ q.num.toNat := by
+    have := hge
+    rw [KGE, hbridge, map_pow, map_pow] at this
+    exact this
+  have hchain : Ypv ^ (q'.num.toNat * q.den) ≤ Ypv ^ (q.num.toNat * q'.den) := by
+    calc Ypv ^ (q'.num.toNat * q.den) = (Ypv ^ q'.num.toNat) ^ q.den := pow_mul _ _ _
+      _ ≤ (X ^ q'.den) ^ q.den :=
+        pow_le_pow_left' hKLE q.den
+      _ = (X ^ q.den) ^ q'.den := by rw [← pow_mul, mul_comm, pow_mul]
+      _ ≤ (Ypv ^ q.num.toNat) ^ q'.den :=
+        pow_le_pow_left' hKGE q'.den
+      _ = Ypv ^ (q.num.toNat * q'.den) := (pow_mul _ _ _).symm
+  have hflip : q.num.toNat * q'.den ≤ q'.num.toNat * q.den :=
+    (pow_le_pow_iff_right_of_lt_one₀ hy0 hy1).mp hchain
+  have hqlt : q'.num.toNat * q.den < q.num.toNat * q'.den := by
+    have h1 : (q'.num : ℚ) / q'.den < (q.num : ℚ) / q.den := by
+      rw [Rat.num_div_den, Rat.num_div_den]; exact hlt
+    rw [div_lt_div_iff₀ (by exact_mod_cast q'.den_pos) (by exact_mod_cast q.den_pos)] at h1
+    have h2 : ((q'.num.toNat : ℤ) : ℚ) = (q'.num : ℚ) := by
+      rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq').le]
+    have h3 : ((q.num.toNat : ℤ) : ℚ) = (q.num : ℚ) := by
+      rw [Int.toNat_of_nonneg (Rat.num_pos.mpr (hq'.trans hlt)).le]
+    exact_mod_cast h2 ▸ h3 ▸ h1
+  omega
 
 /-! ### The windows U_n, V_n (Kedlaya, AWS Remark 3.1.9) -/
 
@@ -328,9 +414,15 @@ in `(1,p)` works; we fix this one). Valid for every prime, including `p = 2`
 variables). -/
 def cFF (p : ℕ) : ℚ := ((p : ℚ) + 1) / 2
 
-theorem one_lt_cFF {p : ℕ} (hp : 1 < p) : 1 < cFF p := by sorry
+theorem one_lt_cFF {p : ℕ} (hp : 1 < p) : 1 < cFF p := by
+  have : (1 : ℚ) < p := by exact_mod_cast hp
+  rw [cFF, lt_div_iff₀ (by norm_num)]
+  linarith
 
-theorem cFF_lt_p {p : ℕ} (hp : 1 < p) : cFF p < (p : ℚ) := by sorry
+theorem cFF_lt_p {p : ℕ} (hp : 1 < p) : cFF p < (p : ℚ) := by
+  have : (1 : ℚ) < p := by exact_mod_cast hp
+  rw [cFF, div_lt_iff₀ (by norm_num)]
+  linarith
 
 variable (p F ϖ)
 
