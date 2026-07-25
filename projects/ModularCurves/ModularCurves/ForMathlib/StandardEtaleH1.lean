@@ -80,22 +80,6 @@ namespace Algebra
 
 open TensorProduct Polynomial
 
-/-- (Implementation) An extension hom into `Extension.ofSurjective`, from a ring
-map on presentation rings commuting with the structure maps. Top-level so the
-structure literal is checked against the instantiated extension. -/
-noncomputable def Extension.homToOfSurjective
-    {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
-    [Algebra R S] [Algebra R T] [Algebra S T]
-    (P : Extension R S) {B : Type*} [CommRing B] [Algebra R B]
-    (g : P.Ring →+* B)
-    (hg : ∀ x, g (algebraMap R P.Ring x) = algebraMap R B x)
-    (fQ : B →ₐ[R] T) (hsurj : Function.Surjective fQ)
-    (hcomm : ∀ x, fQ (g x) = algebraMap S T (algebraMap P.Ring S x)) :
-    P.Hom (Extension.ofSurjective fQ hsurj) where
-  toRingHom := g
-  toRingHom_algebraMap := fun x => hg x
-  algebraMap_toRingHom := hcomm
-
 section LiftedPair
 
 variable {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
@@ -221,32 +205,27 @@ lemma liftedCoverHom_algebraMap (x : P.Ring) :
       (S ⊗[P.Ring] (liftedPair P F G hFm).Ring)]
   exact (liftedTensorEquivT P pres F G hFm hF hG).commutes _
 
-/-- (Implementation) The lifted extension of `T`. -/
-noncomputable def liftedExtension
-    (hπ : Function.Surjective (algebraMap P.Ring S)) : Extension R T :=
-  .ofSurjective (liftedCoverHom P pres F G hFm hF hG)
-    (liftedCoverHom_surjective P pres F G hFm hF hG hπ)
-
-/-- (Implementation) The presentation-ring algebra structure on the lifted
-extension's ring. -/
-@[reducible] noncomputable def liftedExtensionRingAlgebra
-    (hπ : Function.Surjective (algebraMap P.Ring S)) :
-    Algebra P.Ring (liftedExtension P pres F G hFm hF hG hπ).Ring :=
-  inferInstanceAs (Algebra P.Ring (liftedPair P F G hFm).Ring)
-
-attribute [local instance] liftedExtensionRingAlgebra
+/-- (Implementation) The lifted extension of `T`. Reducible so that its `Ring`
+projection unfolds to the lifted pair ring at instance transparency. -/
+@[reducible] noncomputable def liftedExtension
+    (hπ : Function.Surjective (algebraMap P.Ring S)) : Extension R T where
+  Ring := (liftedPair P F G hFm).Ring
+  algebra₂ := (liftedCoverHom P pres F G hFm hF hG).toAlgebra
+  isScalarTower := letI := (liftedCoverHom P pres F G hFm hF hG).toAlgebra
+    IsScalarTower.of_algebraMap_eq'
+      (liftedCoverHom P pres F G hFm hF hG).comp_algebraMap.symm
+  σ x := ((liftedCoverHom_surjective P pres F G hFm hF hG hπ) x).choose
+  algebraMap_σ x := ((liftedCoverHom_surjective P pres F G hFm hF hG hπ) x).choose_spec
 
 /-- (Implementation) The extension hom into the lifted extension. -/
 noncomputable def liftedExtensionHom
     (hπ : Function.Surjective (algebraMap P.Ring S)) :
-    P.Hom (liftedExtension P pres F G hFm hF hG hπ) :=
-  Extension.homToOfSurjective P
-    (algebraMap P.Ring (liftedPair P F G hFm).Ring)
-    (fun x => (IsScalarTower.algebraMap_apply R P.Ring
-      (liftedPair P F G hFm).Ring x).symm)
-    (liftedCoverHom P pres F G hFm hF hG)
-    (liftedCoverHom_surjective P pres F G hFm hF hG hπ)
-    (liftedCoverHom_algebraMap P pres F G hFm hF hG)
+    P.Hom (liftedExtension P pres F G hFm hF hG hπ) where
+  toRingHom := algebraMap P.Ring (liftedPair P F G hFm).Ring
+  toRingHom_algebraMap x := by
+    simpa using (IsScalarTower.algebraMap_apply R P.Ring
+      (liftedPair P F G hFm).Ring x).symm
+  algebraMap_toRingHom x := liftedCoverHom_algebraMap P pres F G hFm hF hG x
 
 lemma liftedExtensionHom_mapKer_bijective
     (hπ : Function.Surjective (algebraMap P.Ring S)) :
@@ -255,7 +234,84 @@ lemma liftedExtensionHom_mapKer_bijective
         (show algebraMap P.Ring (liftedExtension P pres F G hFm hF hG hπ).Ring =
           (liftedExtensionHom P pres F G hFm hF hG hπ).toRingHom from rfl)
         ).liftBaseChange (liftedExtension P pres F G hFm hF hG hπ).Ring) := by
-  sorry
+  haveI : Module.Flat P.Ring (liftedPair P F G hFm).Ring := by
+    haveI : Module.Free P.Ring (AdjoinRoot (liftedPair P F G hFm).f) :=
+      Module.Free.of_basis
+        (AdjoinRoot.powerBasis' (liftedPair P F G hFm).monic_f).basis
+    haveI : Module.Flat (AdjoinRoot (liftedPair P F G hFm).f)
+        (Localization.Away
+          (AdjoinRoot.mk (liftedPair P F G hFm).f (liftedPair P F G hFm).g)) :=
+      IsLocalization.flat _ (Submonoid.powers
+        (AdjoinRoot.mk (liftedPair P F G hFm).f (liftedPair P F G hFm).g))
+    haveI : Module.Flat P.Ring (Localization.Away
+        (AdjoinRoot.mk (liftedPair P F G hFm).f (liftedPair P F G hFm).g)) :=
+      Module.Flat.trans P.Ring (AdjoinRoot (liftedPair P F G hFm).f) _
+    exact Module.Flat.of_linearEquiv
+      (liftedPair P F G hFm).equivAwayAdjoinRoot.toLinearEquiv
+  have hval : ∀ z : (liftedPair P F G hFm).Ring ⊗[P.Ring] P.ker,
+      ((((liftedExtensionHom P pres F G hFm hF hG hπ).mapKer rfl).liftBaseChange
+        (liftedExtension P pres F G hFm hF hG hπ).Ring) z :
+          (liftedPair P F G hFm).Ring) =
+      (TensorProduct.rid P.Ring P.Ring (liftedPair P F G hFm).Ring)
+        ((LinearMap.lTensor (liftedPair P F G hFm).Ring
+          (Submodule.subtype (P.ker : Submodule P.Ring P.Ring))) z) := by
+    intro z
+    induction z using TensorProduct.induction_on with
+    | zero => simp
+    | add x y hx hy =>
+      simp only [map_add, Submodule.coe_add, hx, hy]
+    | tmul b k =>
+      simp only [LinearMap.liftBaseChange_tmul, LinearMap.lTensor_tmul,
+        Submodule.coe_subtype, TensorProduct.rid_tmul, SetLike.val_smul,
+        Extension.Hom.mapKer_apply_coe]
+      show b • (algebraMap P.Ring (liftedPair P F G hFm).Ring) (k : P.Ring) = _
+      rw [Algebra.smul_def, Algebra.smul_def]
+      exact mul_comm _ _
+  constructor
+  · intro z₁ z₂ h12
+    have h' : ((TensorProduct.rid P.Ring P.Ring (liftedPair P F G hFm).Ring)
+        ((LinearMap.lTensor (liftedPair P F G hFm).Ring
+          (Submodule.subtype (P.ker : Submodule P.Ring P.Ring))) z₁)) =
+        ((TensorProduct.rid P.Ring P.Ring (liftedPair P F G hFm).Ring)
+        ((LinearMap.lTensor (liftedPair P F G hFm).Ring
+          (Submodule.subtype (P.ker : Submodule P.Ring P.Ring))) z₂)) := by
+      rw [← hval z₁, ← hval z₂, h12]
+    exact Module.Flat.lTensor_preserves_injective_linearMap
+      (M := (liftedPair P F G hFm).Ring) _ (Submodule.injective_subtype _)
+      ((TensorProduct.rid P.Ring P.Ring (liftedPair P F G hFm).Ring).injective h')
+  · rintro ⟨z, hz⟩
+    have hz0 : liftedCoverHom P pres F G hFm hF hG z = 0 := RingHom.mem_ker.mp hz
+    have hinc : (Algebra.TensorProduct.includeRight (R := P.Ring) (A := S)
+        (B := (liftedPair P F G hFm).Ring)) z = 0 := by
+      apply (liftedTensorEquivT P pres F G hFm hF hG).injective
+      rw [map_zero]
+      exact hz0
+    have htens : z ⊗ₜ[P.Ring] (1 : S) =
+        (0 : (liftedPair P F G hFm).Ring ⊗[P.Ring] S) := by
+      have hc := congrArg (TensorProduct.comm P.Ring S (liftedPair P F G hFm).Ring)
+        hinc
+      simpa using hc
+    have hexact0 : Function.Exact
+        (Submodule.subtype (P.ker : Submodule P.Ring P.Ring))
+        (Algebra.linearMap P.Ring S) := by
+      intro y
+      constructor
+      · intro hy0
+        exact ⟨⟨y, RingHom.mem_ker.mpr hy0⟩, rfl⟩
+      · rintro ⟨⟨k, hk⟩, rfl⟩
+        exact hk
+    have hex := Module.Flat.lTensor_exact (liftedPair P F G hFm).Ring hexact0
+    have hz1 : (LinearMap.lTensor (liftedPair P F G hFm).Ring
+        (Algebra.linearMap P.Ring S))
+        ((TensorProduct.rid P.Ring P.Ring (liftedPair P F G hFm).Ring).symm z) = 0 := by
+      rw [TensorProduct.rid_symm_apply, LinearMap.lTensor_tmul,
+        Algebra.linearMap_apply, map_one]
+      exact htens
+    obtain ⟨w, hw⟩ := (hex ((TensorProduct.rid P.Ring P.Ring (liftedPair P F G hFm).Ring).symm z)).mp hz1
+    refine ⟨w, ?_⟩
+    apply Subtype.ext
+    rw [hval w, hw]
+    exact (TensorProduct.rid P.Ring P.Ring (liftedPair P F G hFm).Ring).apply_symm_apply z
 
 end LiftedPair
 
@@ -307,8 +363,6 @@ def tensorH1CotangentOfIsStandardEtale (R S T : Type*) [CommRing R] [CommRing S]
       Module.Flat.trans S (AdjoinRoot pres.P.f) _
     exact Module.Flat.of_linearEquiv
       ((pres.equivRing.trans pres.P.equivAwayAdjoinRoot).toLinearEquiv)
-  letI : Algebra P.Ring (liftedExtension P pres F G hFm hF hG hπ).Ring :=
-    inferInstanceAs (Algebra P.Ring (liftedPair P F G hFm).Ring)
   refine Extension.tensorH1CotangentOfFormallyEtale
     (liftedExtensionHom P pres F G hFm hF hG hπ)
     rfl ?_ (liftedExtensionHom_mapKer_bijective P pres F G hFm hF hG hπ) ≪≫ₗ
