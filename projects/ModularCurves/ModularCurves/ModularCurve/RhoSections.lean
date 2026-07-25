@@ -5522,6 +5522,85 @@ theorem descend_eq_of_pull {X' : EllObj (CommRingCat.of ℚ)}
   refine RhoLevelStructure.pull_injective D c _ _ ?_
   rw [pull_descend, hpull]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-V] THE VALUE–STRUCTURE COMPATIBILITY (iso level)**: the pinned framed
+trivialization reconstructed from the tautological value is exactly the pulled
+trivialization of the structure. Componentwise over the constant scheme: both
+sides read the `w`-slot as the frame evaluation (`framedPinned_leg_comb` on the
+pinned side; the section additivity + the tautological reads on the pulled
+side). -/
+theorem strPinned_eq_pullTorsionIso {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (hinv : NIsInvertible (strCover D X') N) :
+    framedTorsionIsoPinned D (X'.pullbackAlong (strPr D X')).structMap
+        (X'.pullbackAlong (strPr D X')).curve hinv
+        (strValue D str).val.1 (strValue D str).val.2.val
+        (strValue D str).val.2.property =
+      pullTorsionIso D (X'.pullbackAlongπ (strPr D X')) str := by
+  refine Iso.ext ?_
+  rw [← cancel_epi ((X'.pullbackAlong (strPr D X')).curve.fullLevelIso hinv
+    (strValue D str).val.1).hom]
+  refine Sigma.hom_ext _ _ fun w => ?_
+  have hι : Sigma.ι (fun _ : (Fin 2 → ZMod N) =>
+      (X'.pullbackAlong (strPr D X')).base) w ≫
+      ((X'.pullbackAlong (strPr D X')).curve.fullLevelIso hinv
+        (strValue D str).val.1).hom =
+      (X'.pullbackAlong (strPr D X')).curve.pointToTorsion
+        (((w 0).val : ℤ) • (strValue D str).val.1.1.1 +
+          ((w 1).val : ℤ) • (strValue D str).val.1.1.2)
+        (((X'.pullbackAlong (strPr D X')).curve.smul_eq_zero_iff_comp_mulByHom
+          (𝟙 (strCover D X')) N _).mp (levelComb_kill (strValue D str).val.1 w)) := by
+    exact Limits.Sigma.ι_desc _ _
+  rw [← Category.assoc, ← Category.assoc, hι]
+  refine pullback.hom_ext ?_ ?_
+  · -- fst legs: both are the tautological slot evaluation
+    rw [Category.assoc, Category.assoc]
+    refine Eq.trans (framedPinned_leg_comb D
+      (X'.pullbackAlong (strPr D X')).structMap hinv (strValue D str).val.1
+      (strValue D str).val.2.val (strValue D str).val.2.property w) ?_
+    -- now the pulled side
+    rw [pullTorsionIso_fst]
+    -- rewrite the combination as the tautological section
+    have hcomb : ((w 0).val : ℤ) • (strValue D str).val.1.1.1 +
+        ((w 1).val : ℤ) • (strValue D str).val.1.1.2 =
+        EllipticCurve.Point.asSection X'.curve (strPr D X') (strPt D str w) :=
+      (strSec_comb D str w).symm
+    have hclassify : (X'.pullbackAlong (strPr D X')).curve.pointToTorsion
+        (((w 0).val : ℤ) • (strValue D str).val.1.1.1 +
+          ((w 1).val : ℤ) • (strValue D str).val.1.1.2)
+        (((X'.pullbackAlong (strPr D X')).curve.smul_eq_zero_iff_comp_mulByHom
+          (𝟙 (strCover D X')) N _).mp (levelComb_kill (strValue D str).val.1 w)) ≫
+        torsionMapOfEllHom (X'.pullbackAlongπ (strPr D X')) N =
+        strTor D str w := by
+      rw [pointToTorsion_mapPoint (X'.pullbackAlongπ (strPr D X'))]
+      rw [← strPt_pointToTorsion D str w]
+      refine (pointToTorsion_comp (𝟙 (strCover D X')) (strPt D str w) _ ?_ _ _).trans
+        (Category.id_comp _)
+      -- carrier: the mapped combination is the tautological point
+      show (EllHom.mapPoint (X'.pullbackAlongπ (strPr D X')) (𝟙 _) _).1 =
+        𝟙 (strCover D X') ≫ (strPt D str w).1
+      refine Eq.trans ?_ (Category.id_comp _).symm
+      refine Eq.trans (EllHom.mapPoint_coe (X'.pullbackAlongπ (strPr D X'))
+        (𝟙 _) _) ?_
+      refine Eq.trans (congrArg (· ≫ (X'.pullbackAlongπ (strPr D X')).top)
+        (congrArg Subtype.val hcomb)) ?_
+      show (EllipticCurve.Point.asSection X'.curve (strPr D X')
+          (strPt D str w)).1 ≫ pullback.fst X'.curve.π (strPr D X') =
+        (strPt D str w).1
+      exact EllipticCurve.Point.asSection_val_fst X'.curve (strPr D X')
+        (strPt D str w)
+    rw [← Category.assoc, hclassify]
+    have h2 : strTor D str w ≫ str.torsionIso.hom = strVPt D X' w :=
+      (Category.assoc _ _ _).trans
+        ((congrArg (strVPt D X' w ≫ ·) str.torsionIso.inv_hom_id).trans
+          (Category.comp_id _))
+    refine Eq.trans ?_ (Category.assoc _ _ _)
+    exact (strVPt_fst D X' w).symm.trans
+      (congrArg (· ≫ pullback.fst (vRhoπ D) X'.structMap) h2.symm)
+  · -- snd legs: both are the structure map to the cover
+    rw [Category.assoc, Category.assoc, framedTorsionIsoPinned_π,
+      pullTorsionIso_over, EllipticCurve.pointToTorsion_torsionπ]
+
 end MutualInverses
 
 end
