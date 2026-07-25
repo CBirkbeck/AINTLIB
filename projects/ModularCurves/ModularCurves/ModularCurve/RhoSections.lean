@@ -5665,6 +5665,214 @@ theorem wFramesRightMul_cancel (D : GaloisRepData N) {Ω : Type} [Field Ω]
     (hnatγ.symm.trans (hrdeq.trans hnatγ'))
   exact mul_left_cancel hfin
 
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-L2 prep]** The pulled quotient action as a `SchemeAction` on the
+π-fibre along any quotient point. -/
+noncomputable def relQFibreAction (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f] {W : Scheme.{0}}
+    (p : W ⟶ d.σZ.relQuotient d.f d.over_base) :
+    AlgebraicGeometry.SchemeAction
+      (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+      (pullback (d.σZ.relQuotientπ d.f d.over_base) p) where
+  hom γ := d.σZ.pullbackRelQSMul d.f d.over_base p γ
+  hom_one := by
+    apply pullback.hom_ext
+    · rw [Category.id_comp]
+      refine (d.σZ.pullbackRelQSMul_fst d.f d.over_base p 1).trans ?_
+      rw [d.σZ.hom_one, Category.comp_id]
+    · rw [Category.id_comp]
+      exact d.σZ.pullbackRelQSMul_snd d.f d.over_base p 1
+  hom_mul γ δ := by
+    apply pullback.hom_ext
+    · rw [Category.assoc,
+        d.σZ.pullbackRelQSMul_fst d.f d.over_base p (γ * δ),
+        d.σZ.pullbackRelQSMul_fst d.f d.over_base p δ,
+        ← Category.assoc, d.σZ.pullbackRelQSMul_fst d.f d.over_base p γ,
+        Category.assoc, d.σZ.hom_mul]
+    · rw [Category.assoc,
+        d.σZ.pullbackRelQSMul_snd d.f d.over_base p (γ * δ),
+        d.σZ.pullbackRelQSMul_snd d.f d.over_base p δ,
+        d.σZ.pullbackRelQSMul_snd d.f d.over_base p γ]
+
+@[simp]
+theorem relQFibreAction_hom (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f] {W : Scheme.{0}}
+    (p : W ⟶ d.σZ.relQuotient d.f d.over_base)
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    (relQFibreAction D d p).hom γ =
+      d.σZ.pullbackRelQSMul d.f d.over_base p γ := rfl
+
+/-- **[T-3E-L2 core] THE AFFINE SECTION-ORBIT LEMMA**: for a finite group acting
+on an affine scheme over an algebraically-closed-field point, two sections whose
+invariant maps descend lie in one orbit. All section-algebra reasoning happens
+at the abstract affine `Q`, so instances stay small. -/
+theorem exists_smul_of_sections_of_affine {G : Type} [Group G] [Finite G]
+    {Q : Scheme.{0}} [IsAffine Q] (σQ : AlgebraicGeometry.SchemeAction G Q)
+    {Ω : Type} [Field Ω] [IsAlgClosed Ω]
+    (t : Q ⟶ Spec (CommRingCat.of Ω))
+    (htinv : ∀ γ : G, σQ.hom γ ≫ t = t)
+    (hdesc : ∀ {Y : Scheme.{0}} (F : Q ⟶ Y), (∀ γ : G, σQ.hom γ ≫ F = F) →
+      ∃ q0 : Spec (CommRingCat.of Ω) ⟶ Y, t ≫ q0 = F)
+    (s₁ s₂ : Spec (CommRingCat.of Ω) ⟶ Q)
+    (hs₁ : s₁ ≫ t = 𝟙 _) (hs₂ : s₂ ≫ t = 𝟙 _) :
+    ∃ γ : G, s₂ = s₁ ≫ σQ.hom γ := by
+  classical
+  have htop : σQ.IsStableOpen ⊤ := fun γ => by
+    show (σQ.hom γ) ⁻¹ᵁ ⊤ = ⊤
+    simp
+  letI := σQ.gammaMulSemiringAction htop
+  set ψ : CommRingCat.of Ω ⟶ Γ(Q, ⊤) :=
+    Spec.preimage (Q.isoSpec.inv ≫ t) with hψdef
+  have hψ : Spec.map ψ = Q.isoSpec.inv ≫ t := Spec.map_preimage _
+  letI : Algebra Ω ↑Γ(Q, ⊤) := ψ.hom.toAlgebra
+  have hAlg : algebraMap Ω ↑Γ(Q, ⊤) = ψ.hom := rfl
+  have hofHom : ∀ γ : G,
+      CommRingCat.ofHom (MulSemiringAction.toRingHom _ ↑Γ(Q, ⊤) γ) =
+      (σQ.hom γ).appTop := by
+    intro γ
+    ext b
+    show ((σQ.hom γ).appLE ⊤ ⊤ (htop γ).ge).hom b = ((σQ.hom γ).appTop).hom b
+    simp [Scheme.Hom.appLE]
+  have hbridge : ∀ γ : G,
+      Q.isoSpec.hom ≫ AlgebraicGeometry.specSMul γ =
+      σQ.hom γ ≫ Q.isoSpec.hom := by
+    intro γ
+    rw [AlgebraicGeometry.specSMul, hofHom]
+    exact Scheme.isoSpec_hom_naturality (σQ.hom γ)
+  have hψinv : ∀ (γ : G) (c : Ω), γ • (ψ.hom c) = ψ.hom c := by
+    intro γ c
+    have hmapeq : Spec.map (ψ ≫ (σQ.hom γ).appTop) = Spec.map ψ := by
+      rw [Spec.map_comp, hψ,
+        show Spec.map ((σQ.hom γ).appTop) =
+          Q.isoSpec.inv ≫ σQ.hom γ ≫ Q.isoSpec.hom from by
+          rw [← Scheme.isoSpec_hom_naturality, Iso.inv_hom_id_assoc]]
+      simp only [Category.assoc, Iso.hom_inv_id_assoc]
+      rw [htinv γ]
+    have hcomp : ψ ≫ (σQ.hom γ).appTop = ψ := Spec.map_injective hmapeq
+    have h := congrArg (fun (m : CommRingCat.of Ω ⟶ Γ(Q, ⊤)) => m.hom c) hcomp
+    simpa [← hofHom] using h
+  have hcommlaw : ∀ (γ : G) (c : Ω) (s : ↑Γ(Q, ⊤)),
+      γ • (c • s) = c • (γ • s) := fun γ c s =>
+    (congrArg (γ • ·) (Algebra.smul_def c s)).trans
+      ((smul_mul' γ (ψ.hom c) s).trans
+        ((congrArg (· * (γ • s)) (hψinv γ c)).trans
+          (Algebra.smul_def c (γ • s)).symm))
+  haveI : SMulCommClass G Ω ↑Γ(Q, ⊤) := ⟨hcommlaw⟩
+  obtain ⟨φ₁, hφ₁⟩ : ∃ φ : Γ(Q, ⊤) ⟶ CommRingCat.of Ω,
+      Spec.map φ = s₁ ≫ Q.isoSpec.hom :=
+    ⟨Spec.preimage _, Spec.map_preimage _⟩
+  obtain ⟨φ₂, hφ₂⟩ : ∃ φ : Γ(Q, ⊤) ⟶ CommRingCat.of Ω,
+      Spec.map φ = s₂ ≫ Q.isoSpec.hom :=
+    ⟨Spec.preimage _, Spec.map_preimage _⟩
+  have hcommutes : ∀ (ss : Spec (CommRingCat.of Ω) ⟶ Q)
+      (_ : ss ≫ t = 𝟙 _)
+      (φ : Γ(Q, ⊤) ⟶ CommRingCat.of Ω)
+      (_ : Spec.map φ = ss ≫ Q.isoSpec.hom),
+      ψ ≫ φ = 𝟙 (CommRingCat.of Ω) := by
+    intro ss hss φ hφ
+    apply Spec.map_injective
+    rw [Spec.map_comp, hφ, hψ, Spec.map_id]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact hss
+  have hc₁ := hcommutes s₁ hs₁ φ₁ hφ₁
+  have hc₂ := hcommutes s₂ hs₂ φ₂ hφ₂
+  obtain ⟨q0, hq0⟩ := hdesc
+    (Q.isoSpec.hom ≫ AlgebraicGeometry.invariantsπ G ↑Γ(Q, ⊤) ℤ)
+    (fun γ => by
+      rw [← Category.assoc, ← hbridge γ, Category.assoc,
+        AlgebraicGeometry.specSMul_invariantsπ])
+  have hFeq : s₁ ≫ (Q.isoSpec.hom ≫
+      AlgebraicGeometry.invariantsπ G ↑Γ(Q, ⊤) ℤ) =
+      s₂ ≫ (Q.isoSpec.hom ≫
+        AlgebraicGeometry.invariantsπ G ↑Γ(Q, ⊤) ℤ) := by
+    rw [← hq0, ← Category.assoc, hs₁, ← Category.assoc, hs₂]
+  obtain ⟨γ₀, hγ₀⟩ := AlgebraicGeometry.exists_smul_algHom_eq
+    (k := Ω) (B := ↑Γ(Q, ⊤))
+    ⟨φ₁.hom, fun c => congrArg
+      (fun (m : CommRingCat.of Ω ⟶ CommRingCat.of Ω) => m.hom c) hc₁⟩
+    ⟨φ₂.hom, fun c => congrArg
+      (fun (m : CommRingCat.of Ω ⟶ CommRingCat.of Ω) => m.hom c) hc₂⟩
+    (by
+      intro b hbfix
+      have hmem : b ∈ FixedPoints.subalgebra ℤ ↑Γ(Q, ⊤) G := hbfix
+      have hSpec : Spec.map (CommRingCat.ofHom
+          (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(Q, ⊤) G) ↑Γ(Q, ⊤)) ≫ φ₁) =
+          Spec.map (CommRingCat.ofHom
+          (algebraMap (FixedPoints.subalgebra ℤ ↑Γ(Q, ⊤) G) ↑Γ(Q, ⊤)) ≫ φ₂) := by
+        rw [Spec.map_comp, Spec.map_comp, hφ₁, hφ₂]
+        show _ ≫ AlgebraicGeometry.invariantsπ G ↑Γ(Q, ⊤) ℤ =
+          _ ≫ AlgebraicGeometry.invariantsπ G ↑Γ(Q, ⊤) ℤ
+        simpa only [Category.assoc] using hFeq
+      have hh := Spec.map_injective hSpec
+      exact congrArg (fun (m : CommRingCat.of
+        (FixedPoints.subalgebra ℤ ↑Γ(Q, ⊤) G) ⟶
+        CommRingCat.of Ω) => m.hom ⟨b, hmem⟩) hh)
+  refine ⟨γ₀, ?_⟩
+  have hφeq : φ₂ = CommRingCat.ofHom
+      (MulSemiringAction.toRingHom _ ↑Γ(Q, ⊤) γ₀) ≫ φ₁ := by
+    ext b
+    exact hγ₀ b
+  have hSpec2 : Spec.map φ₂ = Spec.map φ₁ ≫
+      AlgebraicGeometry.specSMul (G := G) γ₀ := by
+    rw [hφeq, Spec.map_comp]
+    rfl
+  rw [hφ₁, hφ₂] at hSpec2
+  have hσ : s₂ ≫ Q.isoSpec.hom = (s₁ ≫ σQ.hom γ₀) ≫ Q.isoSpec.hom := by
+    rw [hSpec2]
+    simp only [Category.assoc]
+    rw [← hbridge γ₀]
+  exact (cancel_mono Q.isoSpec.hom).mp hσ
+
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-L2] THE POINTWISE ORBIT LEMMA**: two field-valued points of the
+framed total space over one quotient point differ by the group action. -/
+theorem exists_smul_of_relQuotientπ_eq (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {Ω : Type} [Field Ω] [IsAlgClosed Ω]
+    (z₁ z₂ : Spec (CommRingCat.of Ω) ⟶ d.Z)
+    (hπ : z₁ ≫ d.σZ.relQuotientπ d.f d.over_base =
+      z₂ ≫ d.σZ.relQuotientπ d.f d.over_base) :
+    ∃ γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N),
+      z₂ = z₁ ≫ d.σZ.hom γ := by
+  classical
+  set p := z₁ ≫ d.σZ.relQuotientπ d.f d.over_base with hpdef
+  haveI hFinπ : IsFinite (d.σZ.relQuotientπ d.f d.over_base) :=
+    d.σZ.isFinite_relQuotientπ_of_free d.f d.over_base
+      (d.free_on_points (sympFramedAut_freeAction D))
+  haveI : IsFinite (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) p) :=
+    MorphismProperty.pullback_snd _ _ hFinπ
+  haveI : IsAffineHom (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) p) :=
+    inferInstance
+  haveI : IsAffine (pullback (d.σZ.relQuotientπ d.f d.over_base) p) :=
+    isAffine_of_isAffineHom
+      (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) p)
+  obtain ⟨γ, hγ⟩ := exists_smul_of_sections_of_affine
+    (relQFibreAction D d p)
+    (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) p)
+    (fun γ => d.σZ.pullbackRelQSMul_snd d.f d.over_base p γ)
+    (fun {Y} F hF => d.σZ.exists_relQuotientπ_lift_baseChange d.f d.over_base
+      (d.free_on_points (sympFramedAut_freeAction D)) p F hF)
+    (pullback.lift z₁ (𝟙 _) (by rw [Category.id_comp]))
+    (pullback.lift z₂ (𝟙 _) (by rw [Category.id_comp]; exact hπ.symm))
+    (pullback.lift_snd _ _ _) (pullback.lift_snd _ _ _)
+  refine ⟨γ, ?_⟩
+  have h2 := congrArg
+    (· ≫ pullback.fst (d.σZ.relQuotientπ d.f d.over_base) p) hγ
+  simp only [Category.assoc] at h2
+  rw [pullback.lift_fst] at h2
+  rw [show (relQFibreAction D d p).hom γ ≫
+      pullback.fst (d.σZ.relQuotientπ d.f d.over_base) p =
+      pullback.fst (d.σZ.relQuotientπ d.f d.over_base) p ≫ d.σZ.hom γ from
+      d.σZ.pullbackRelQSMul_fst d.f d.over_base p γ] at h2
+  rw [← Category.assoc, pullback.lift_fst] at h2
+  exact h2
+
 end PointLifting
 
 section MutualInverses
