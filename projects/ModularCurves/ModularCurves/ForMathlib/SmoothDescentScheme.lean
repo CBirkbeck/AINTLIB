@@ -67,6 +67,45 @@ theorem smoothOfRelativeDimension_one_of_finite_etale_surjective_cover
     (Algebra.locally_isStandardSmoothOfRelativeDimension_one_of_etale_faithfullyFlat
       Γ(S, ⊤) Γ(Y, ⊤) Γ(Z, ⊤))
 
+
+section Carrier
+
+/-- (Implementation) The global-sections map of `Spec φ` is `φ` up to the `Γ ∘ Spec`
+identification, so it inherits `φ`'s standard smoothness. -/
+theorem isStandardSmoothOfRelativeDimension_specMap_appTop {n : ℕ}
+    {k R : CommRingCat.{u}} (φ : k ⟶ R)
+    (hφ : RingHom.IsStandardSmoothOfRelativeDimension n φ.hom) :
+    RingHom.IsStandardSmoothOfRelativeDimension n ((Spec.map φ).appTop).hom := by
+  have he : (Spec.map φ).appTop =
+      (Scheme.ΓSpecIso k).hom ≫ φ ≫ (Scheme.ΓSpecIso R).inv := by
+    rw [← Category.assoc, ← Scheme.ΓSpecIso_naturality, Category.assoc, Iso.hom_inv_id,
+      Category.comp_id]
+  rw [he]
+  exact RingHom.isStandardSmoothOfRelativeDimension_respectsIso.right _
+    (Scheme.ΓSpecIso k).commRingCatIsoToRingEquiv
+    (RingHom.isStandardSmoothOfRelativeDimension_respectsIso.left _
+      (Scheme.ΓSpecIso R).symm.commRingCatIsoToRingEquiv hφ)
+
+/-- **[T-YR-6 carrier, ring form]** If `Z` is affine and étale over `Spec R`, and `R` is
+standard smooth of relative dimension `n` over `k`, then the global-sections map of
+`Z ⟶ Spec k` is standard smooth of relative dimension `n`. -/
+theorem isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec {n : ℕ}
+    {k R : CommRingCat.{u}} (φ : k ⟶ R) {Z : Scheme.{u}} (q : Z ⟶ Spec R)
+    [IsAffine Z] [Etale q]
+    (hφ : RingHom.IsStandardSmoothOfRelativeDimension n φ.hom) :
+    RingHom.IsStandardSmoothOfRelativeDimension n ((q ≫ Spec.map φ).appTop).hom := by
+  have het : RingHom.Etale (q.appTop).hom :=
+    (HasRingHomProperty.iff_of_isAffine (P := @Etale) (f := q)).mp ‹Etale q›
+  letI : Algebra Γ(Spec R, ⊤) Γ(Z, ⊤) := (q.appTop).hom.toAlgebra
+  haveI : Algebra.Etale Γ(Spec R, ⊤) Γ(Z, ⊤) := het
+  have h0 : RingHom.IsStandardSmoothOfRelativeDimension 0 (q.appTop).hom :=
+    Algebra.Etale.iff_isStandardSmoothOfRelativeDimension_zero.mp inferInstance
+  have := h0.comp (isStandardSmoothOfRelativeDimension_specMap_appTop φ hφ)
+  rw [Scheme.Hom.comp_appTop]
+  simpa using this
+
+end Carrier
+
 end AlgebraicGeometry
 
 end
