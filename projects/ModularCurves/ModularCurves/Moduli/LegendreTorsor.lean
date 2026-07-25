@@ -6,6 +6,7 @@ Authors: AINTLIB ModularCurves project
 import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.Moduli.Bootstrap
 import ModularCurves.Moduli.LegendreDatumSymmetry
+import ModularCurves.Moduli.LegendreChart
 
 /-! ## ⚠ QUARANTINED SUBTREE (B2-DECISION, board v10.342/v10.343, 2026-07-20)
 
@@ -304,17 +305,40 @@ section Quarantine
 
 variable {R}
 
-/-- **QUARANTINED (geometric, TRUE)** — surjectivity of the Legendre structure map (the
-covering half of KM 4.6.2's axiom 2; honest content since `2` is invertible, KM's torsor
-over `S[1/2]`). Discharge: a Legendre datum over `k̄` (Legendre form exists over an
-algebraically closed field with `2` invertible) converted through the [T-E14-NAT] natural
-family — the `N = 2` analogue of `levelThree_surjective`. Stated for any equivariant datum
-of `δ` (the carrier `f` is the same underlying map). -/
-theorem legendreDelta_surjective_of {G : Type*} [Group G] [Finite G]
+/-- **PROVEN (T-G3a)** — surjectivity of the Legendre structure map (the covering half of
+KM 4.6.2's axiom 2, KM's torsor over `S[1/2]`): the `N = 2` analogue of
+`levelThree_surjective`. Over a point `y` of the base, take the anchored geometric point
+`t : Spec k̄ ⟶ X.base` above it (`EllObj.exists_geometricPoint_at`), produce a Legendre
+datum on the fibre (`exists_isLegendreDatum_of_isAlgClosed`, T-G3a-SUB2) and classify it
+through `E.eqv t` to a `Z`-point over `t`; its image is `y`.
+
+⚠ **B2 (statement fix, 2026-07-25).** The register as previously stated — without
+`hR : IsUnit (2 : R)` — is FALSE: over `R = 𝔽₂` the Legendre problem has no objects over
+any nonempty base (a Legendre chart forces `Δ = 16·λ²(λ−1)²` to be a unit), so the empty
+scheme is an equivariant relative representing datum and its structure map `∅ ⟶ X.base`
+is not surjective. The hypothesis is available at every call site (`2` invertible is the
+standing hypothesis of the whole Legendre leg). -/
+theorem legendreDelta_surjective_of (hR : IsUnit (2 : R)) {G : Type*} [Group G] [Finite G]
     {φ : G →* Aut (legendreDeltaProblem R)} {X : EllObj R}
     (E : ModuliProblem.EquivariantRelRepData φ X) :
-    AlgebraicGeometry.Surjective E.toRelRepData.f :=
-  sorry
+    AlgebraicGeometry.Surjective E.toRelRepData.f := by
+  constructor
+  intro y
+  have hR' : IsUnit ((2 : ℕ) : R) := by rwa [Nat.cast_ofNat]
+  obtain ⟨k, hfk, hak, t, hk, hrange⟩ := EllObj.exists_geometricPoint_at R X y 2 hR'
+  letI := hfk
+  letI := hak
+  obtain ⟨L, b, hLb⟩ := exists_isLegendreDatum_of_isAlgClosed X k (by exact_mod_cast hk) t
+  obtain ⟨z, hz⟩ := (E.eqv t).symm ⟨⟨L, b⟩, hLb⟩
+  obtain ⟨pt⟩ : Nonempty ↥(Spec (CommRingCat.of k)) := inferInstance
+  refine ⟨z.base pt, ?_⟩
+  have h1 : E.toRelRepData.f.base (z.base pt) = t.base pt := by
+    have h0 : (z ≫ E.toRelRepData.f).base pt = t.base pt := congrArg (fun m => m.base pt) hz
+    rwa [Scheme.Hom.comp_apply] at h0
+  rw [h1]
+  have hmem : t.base pt ∈ Set.range t.base := ⟨pt, rfl⟩
+  rw [hrange] at hmem
+  exact hmem
 
 /-- **QUARANTINED (geometric, TRUE)** — the torsor comparison
 `(γ, z) ↦ (γ·z, z) : ∐_G E.Z ≅ E.Z ×_S E.Z` is an isomorphism: fibrewise simple
@@ -357,7 +381,7 @@ theorem exists_legendreTorsorData (R : CommRingCat.{0}) (hR : IsUnit (2 : R))
      equivariant := (legendreDeltaGEquiv R hR X).equivariant
      finite := (legendreDeltaGEquiv R hR X).finite
      etale := (legendreDeltaGEquiv R hR X).etale
-     surjective := legendreDelta_surjective_of (legendreDeltaGEquiv R hR X)
+     surjective := legendreDelta_surjective_of hR (legendreDeltaGEquiv R hR X)
      torsor := legendreDelta_torsor_of (legendreDeltaGEquiv R hR X) }⟩
 
 /-- **T-E14, the `u`-generic consumer form**: at `CommRingCat.{u}`, over the `ULift`ed
@@ -383,7 +407,7 @@ theorem exists_legendreTorsorData_ulift (R : CommRingCat.{u}) (hR : IsUnit (2 : 
      equivariant := E.equivariant
      finite := E.finite
      etale := E.etale
-     surjective := legendreDelta_surjective_of E
+     surjective := legendreDelta_surjective_of hR E
      torsor := legendreDelta_torsor_of E }⟩
 
 end ModularCurves
