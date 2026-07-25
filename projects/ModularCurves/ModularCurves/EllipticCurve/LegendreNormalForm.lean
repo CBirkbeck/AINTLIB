@@ -312,4 +312,33 @@ theorem exists_roots_vieta_cubic {k : Type u} [Field k] [IsAlgClosed k] (a₂ a�
   obtain ⟨h₂, h₄, h₆⟩ := cubic_coeff_eq (hp ▸ hprod.symm)
   exact ⟨e₁, e₂, e₃, h₂, h₄, h₆⟩
 
+/-- **(T-G3a-SUB2, field level — Silverman AEC III.1 Prop 1.7(b))** Over an
+algebraically closed field with `2 ≠ 0`, every Weierstrass curve whose completed-square
+cubic has two distinct roots is variable-change equivalent to a Legendre curve. (The
+distinctness hypothesis is what `Δ ≠ 0` supplies for an elliptic curve.) -/
+theorem exists_variableChange_eq_legendreCurve_of_isAlgClosed {k : Type u} [Field k]
+    [IsAlgClosed k] (h2 : IsUnit (2 : k)) (W : WeierstrassCurve k)
+    (hne : ∀ e₁ e₂ e₃ : k,
+      ((⟨1, 0, -(h2.unit⁻¹ : kˣ) * W.a₁, -(h2.unit⁻¹ : kˣ) * W.a₃⟩ :
+        VariableChange k) • W).a₂ = -(e₁ + e₂ + e₃) →
+      ((⟨1, 0, -(h2.unit⁻¹ : kˣ) * W.a₁, -(h2.unit⁻¹ : kˣ) * W.a₃⟩ :
+        VariableChange k) • W).a₄ = e₁ * e₂ + e₁ * e₃ + e₂ * e₃ →
+      ((⟨1, 0, -(h2.unit⁻¹ : kˣ) * W.a₁, -(h2.unit⁻¹ : kˣ) * W.a₃⟩ :
+        VariableChange k) • W).a₆ = -(e₁ * e₂ * e₃) → e₁ ≠ e₂) :
+    ∃ (C : VariableChange k) (lam : k), C • W = legendreCurve lam := by
+  classical
+  set W' := (⟨1, 0, -(h2.unit⁻¹ : kˣ) * W.a₁, -(h2.unit⁻¹ : kˣ) * W.a₃⟩ :
+    VariableChange k) • W with hW'
+  obtain ⟨e₁, e₂, e₃, h₂, h₄, h₆⟩ := exists_roots_vieta_cubic W'.a₂ W'.a₄ W'.a₆
+  have hne' : e₁ ≠ e₂ := hne e₁ e₂ e₃ h₂ h₄ h₆
+  have hsub : e₂ - e₁ ≠ 0 := sub_ne_zero.mpr (Ne.symm hne')
+  obtain ⟨v, hv⟩ := IsAlgClosed.exists_pow_nat_eq (e₂ - e₁) (n := 2) (by norm_num)
+  have hvne : v ≠ 0 := by
+    intro h
+    apply hsub
+    rw [← hv, h]
+    ring
+  refine exists_variableChange_eq_legendreCurve h2 (Units.mk0 v hvne) h₂ h₄ h₆ ?_
+  simpa using hv
+
 end ModularCurves
