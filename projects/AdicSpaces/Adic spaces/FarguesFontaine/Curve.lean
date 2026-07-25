@@ -64,7 +64,21 @@ covering, `v` lies in some `U_n` (or `V_n`); the translation lemma puts `φ^k·v
 Source: [Kedlaya-AWS, Rem. 3.1.9] ("The action of φ permutes the U_n ... hence is
 properly discontinuous"); [SW, Def. 13.5.1] (the quotient is legitimate). -/
 theorem smul_ne_of_ne_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {k : ℤ}
-    (hk : k ≠ 0) : (Multiplicative.ofAdd k) • v ≠ v := by sorry
+    (hk : k ≠ 0) : (Multiplicative.ofAdd k) • v ≠ v := by
+  intro heq
+  have hv' := hv
+  rw [Y_eq_iUnion_windows] at hv'
+  rcases hv' with hU | hV
+  · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hU
+    have h2 : v ∈ windowU p F ϖ (n - k) := by
+      rw [← zsmul_windowU p F ϖ k n]
+      exact heq ▸ Set.smul_mem_smul_set hn
+    exact Set.disjoint_left.mp (windowU_disjoint p F ϖ (by omega : n ≠ n - k)) hn h2
+  · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hV
+    have h2 : v ∈ windowV p F ϖ (n - k) := by
+      rw [← zsmul_windowV p F ϖ k n]
+      exact heq ▸ Set.smul_mem_smul_set hn
+    exact Set.disjoint_left.mp (windowV_disjoint p F ϖ (by omega : n ≠ n - k)) hn h2
 
 /-- **The wandering property** ("properly discontinuous" in the sources): every point of
 `𝒴` has an open neighbourhood `W ⊆ 𝒴` with `φ^k·W ∩ W = ∅` for all `k ≠ 0` — namely its
@@ -75,22 +89,46 @@ theorem exists_nhd_smul_disjoint {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) :
     ∃ W : Set (Spv (Ainf p F)),
       v ∈ W ∧ W ⊆ Y p F ϖ ∧
       IsOpen (Subtype.val ⁻¹' W : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) ∧
-      ∀ k : ℤ, k ≠ 0 → Disjoint ((Multiplicative.ofAdd k) • W) W := by sorry
+      ∀ k : ℤ, k ≠ 0 → Disjoint ((Multiplicative.ofAdd k) • W) W := by
+  have hv' := hv
+  rw [Y_eq_iUnion_windows] at hv'
+  rcases hv' with hU | hV
+  · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hU
+    refine ⟨windowU p F ϖ n, hn, fun w hw => hw.1, isOpen_windowU p F ϖ n,
+      fun k hk => ?_⟩
+    rw [zsmul_windowU]
+    exact windowU_disjoint p F ϖ (by omega)
+  · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hV
+    refine ⟨windowV p F ϖ n, hn, fun w hw => hw.1, isOpen_windowV p F ϖ n,
+      fun k hk => ?_⟩
+    rw [zsmul_windowV]
+    exact windowV_disjoint p F ϖ (by omega)
 
 /-! ### The action on the subtype ↥𝒴 -/
 
 variable (p F ϖ)
 
+/-- The `φ^ℤ`-action on `Spv(A_inf)` is by homeomorphisms: `g • v = comap (φ^{-g}) v`
+and `comap` of a ring homomorphism is continuous. -/
+instance instContinuousConstSMulSpv :
+    ContinuousConstSMul (Multiplicative ℤ) (Spv (Ainf p F)) := by
+  refine ⟨fun g => ?_⟩
+  show Continuous fun v : Spv (Ainf p F) =>
+    comap (MulSemiringAction.toRingHom _ _ g⁻¹) v
+  exact comap_continuous _
+
 /-- The `φ^ℤ`-action restricted to the subtype `↥𝒴` (well-defined by `smul_mem_Y`). -/
 instance instMulActionYSub : MulAction (Multiplicative ℤ) ↥(Y p F ϖ) where
   smul g v := ⟨g • v.1, smul_mem_Y p F ϖ g v.2⟩
-  one_smul v := by sorry
-  mul_smul g h v := by sorry
+  one_smul v := Subtype.ext (one_smul _ v.1)
+  mul_smul g h v := Subtype.ext (mul_smul g h v.1)
 
 /-- The restricted action is by homeomorphisms of `↥𝒴` (subspace topology from
 `Spv(A_inf)`). -/
 instance instContinuousConstSMulYSub :
-    ContinuousConstSMul (Multiplicative ℤ) ↥(Y p F ϖ) := by sorry
+    ContinuousConstSMul (Multiplicative ℤ) ↥(Y p F ϖ) :=
+  ⟨fun g => Continuous.subtype_mk
+    ((continuous_const_smul g).comp continuous_subtype_val) _⟩
 
 /-! ### The curve -/
 
@@ -109,11 +147,13 @@ instance instTopologicalSpaceCurve : TopologicalSpace (Curve p F ϖ) :=
 def toCurve : ↥(Y p F ϖ) → Curve p F ϖ :=
   Quotient.mk (MulAction.orbitRel (Multiplicative ℤ) ↥(Y p F ϖ))
 
-theorem toCurve_surjective : Function.Surjective (toCurve p F ϖ) := by sorry
+theorem toCurve_surjective : Function.Surjective (toCurve p F ϖ) :=
+  fun c => ⟨c.out, Quotient.out_eq c⟩
 
 /-- The quotient map `𝒴 → 𝒳` is an open quotient map (orbit maps of continuous group
 actions are open quotient maps). -/
-theorem isOpenQuotientMap_toCurve : IsOpenQuotientMap (toCurve p F ϖ) := by sorry
+theorem isOpenQuotientMap_toCurve : IsOpenQuotientMap (toCurve p F ϖ) :=
+  MulAction.isOpenQuotientMap_quotientMk
 
 /-- The quotient map is injective on each window `U_n`: two points of a window in the
 same `φ^ℤ`-orbit are equal (wandering + freeness).
@@ -122,12 +162,42 @@ Source: [Kedlaya-AWS, Rem. 3.1.9]: "The spaces U_0 and V_0 map isomorphically to
 images in X_S". -/
 theorem injOn_toCurve_windowU (n : ℤ) :
     Set.InjOn (toCurve p F ϖ)
-      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} := by sorry
+      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} := by
+  intro y₁ h₁ y₂ h₂ heq
+  have hrel : y₁ ∈ MulAction.orbit (Multiplicative ℤ) y₂ :=
+    MulAction.orbitRel_apply.mp (Quotient.eq''.mp heq)
+  obtain ⟨g, hg⟩ := MulAction.mem_orbit_iff.mp hrel
+  by_cases hk : Multiplicative.toAdd g = 0
+  · have hg1 : g = 1 := by
+      rw [← ofAdd_toAdd g, hk]
+      rfl
+    rw [hg1, one_smul] at hg
+    exact hg.symm
+  · exfalso
+    have h3 : (y₁.1 : Spv (Ainf p F)) ∈ windowU p F ϖ (n - Multiplicative.toAdd g) := by
+      rw [← zsmul_windowU p F ϖ (Multiplicative.toAdd g) n]
+      exact ⟨y₂.1, h₂, by rw [ofAdd_toAdd]; exact congrArg Subtype.val hg⟩
+    exact Set.disjoint_left.mp (windowU_disjoint p F ϖ (by omega)) h₁ h3
 
 /-- The quotient map is injective on each window `V_n`. -/
 theorem injOn_toCurve_windowV (n : ℤ) :
     Set.InjOn (toCurve p F ϖ)
-      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} := by sorry
+      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} := by
+  intro y₁ h₁ y₂ h₂ heq
+  have hrel : y₁ ∈ MulAction.orbit (Multiplicative ℤ) y₂ :=
+    MulAction.orbitRel_apply.mp (Quotient.eq''.mp heq)
+  obtain ⟨g, hg⟩ := MulAction.mem_orbit_iff.mp hrel
+  by_cases hk : Multiplicative.toAdd g = 0
+  · have hg1 : g = 1 := by
+      rw [← ofAdd_toAdd g, hk]
+      rfl
+    rw [hg1, one_smul] at hg
+    exact hg.symm
+  · exfalso
+    have h3 : (y₁.1 : Spv (Ainf p F)) ∈ windowV p F ϖ (n - Multiplicative.toAdd g) := by
+      rw [← zsmul_windowV p F ϖ (Multiplicative.toAdd g) n]
+      exact ⟨y₂.1, h₂, by rw [ofAdd_toAdd]; exact congrArg Subtype.val hg⟩
+    exact Set.disjoint_left.mp (windowV_disjoint p F ϖ (by omega)) h₁ h3
 
 /-- **Two charts cover the curve**: `𝒳 = im(U_0) ∪ im(V_0)`. Every `φ^ℤ`-orbit meets
 `U_0 ∪ V_0`, by the covering and the translation lemmas.
@@ -137,7 +207,34 @@ images in X_S and cover the latter." -/
 theorem curve_eq_image_window_zero :
     toCurve p F ϖ '' {y | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0} ∪
       toCurve p F ϖ '' {y | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ 0} =
-      Set.univ := by sorry
+      Set.univ := by
+  refine Set.eq_univ_of_forall (fun c => ?_)
+  obtain ⟨y, rfl⟩ := toCurve_surjective p F ϖ c
+  have hy : (y.1 : Spv (Ainf p F)) ∈
+      (⋃ n : ℤ, windowU p F ϖ n) ∪ ⋃ n : ℤ, windowV p F ϖ n := by
+    rw [← Y_eq_iUnion_windows]
+    exact y.2
+  have horbit : ∀ (n : ℤ) (z : ↥(Y p F ϖ)),
+      toCurve p F ϖ ((Multiplicative.ofAdd n) • z) = toCurve p F ϖ z := by
+    intro n z
+    exact Quotient.sound (MulAction.orbitRel_apply.mpr (MulAction.mem_orbit z _))
+  rcases hy with hU | hV
+  · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hU
+    refine Or.inl ⟨(Multiplicative.ofAdd n) • y, ?_, horbit n y⟩
+    show (((Multiplicative.ofAdd n) • y).1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0
+    have : (((Multiplicative.ofAdd n) • y).1 : Spv (Ainf p F))
+        ∈ windowU p F ϖ (n - n) := by
+      rw [← zsmul_windowU p F ϖ n n]
+      exact ⟨y.1, hn, rfl⟩
+    simpa using this
+  · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hV
+    refine Or.inr ⟨(Multiplicative.ofAdd n) • y, ?_, horbit n y⟩
+    show (((Multiplicative.ofAdd n) • y).1 : Spv (Ainf p F)) ∈ windowV p F ϖ 0
+    have : (((Multiplicative.ofAdd n) • y).1 : Spv (Ainf p F))
+        ∈ windowV p F ϖ (n - n) := by
+      rw [← zsmul_windowV p F ϖ n n]
+      exact ⟨y.1, hn, rfl⟩
+    simpa using this
 
 /-- The curve is T0 (as the sources' adic spaces are; here proved directly from the
 quotient structure and T0-ness of `Spa`). -/
