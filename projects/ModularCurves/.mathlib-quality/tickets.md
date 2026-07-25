@@ -26808,7 +26808,14 @@ matches the mathematics (the identification `Λ²ρ̄ ≅ μ_N` depends on a cho
   one-hypothesis theorem.**
 
 ### [T-G3c] `legendreDeltaGAction` (T-E14-ACT')
-- **Status**: open · **File**: `Moduli/LegendreTorsor.lean:290` · **Type**: def(data)
+- **Status**: B2 — NOT CONSTRUCTIBLE AS STATED (logged 2026-07-25 to `b2_log.jsonl`).
+  The repo's own T-E14 adjudication (LegendreTorsor module docstring, discovery 2)
+  shows the `GL₂(𝔽₂)`-factor needs `√(x(Q')−x(P'))`, available only étale-locally, so
+  there is no automorphism of `δ` over a general base. **Retired from the critical
+  path**: `yRho_representable'` now consumes the genuine `{±1}` package
+  `legendreDeltaSignEquivariantData` instead (commit 746f0f781). What KM 4.6.2 really
+  needs is the *torsor* statement over the sqrt-cover, which is `legendreDelta_torsor_of`
+  — a separate ticket. OLD status: open · **File**: `Moduli/LegendreTorsor.lean:290` · **Type**: def(data)
 - The coupled `GL₂(𝔽₂) × {±1}`-action on the Legendre datum: the `GL₂`-factor re-marks
   the 2-torsion pair and rescales `ω` accordingly. Source: KM 4.6.2 (`|G| = 12`).
 
