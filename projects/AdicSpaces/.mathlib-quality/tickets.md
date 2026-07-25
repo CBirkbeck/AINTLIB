@@ -574,7 +574,19 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Sources**: Kedlaya 1410.5160 (2.2.1); AWS Rem 2.6.3.
 
 ### [T802] Ultrametric additivity of the Gauss value
-- **Status**: open | **Depends**: T801 | route FROZEN by sol review 2026-07-26:
+- **Status**: done (beastmode 2026-07-26; gaussValue_add_le axiom-clean)
+- **Progress**: Route as frozen (1004.0466 Lemma 4.1) but with a formalization
+  simplification found during implementation: the pair-case `[a]+[b]` needs NO
+  Witt-polynomial homogeneity — over the perfectoid FIELD F one writes
+  `[a]+[b] = [a]·(1+[u])`, `u = b/a ∈ O_F` (Integers.exists_of_le_one), and uses the
+  new scaling lemma `teichCoeff_teichmuller_mul` (coordinates of `[w]·s` are `w·coords(s)`),
+  itself a consequence of expansion uniqueness `teichCoeff_sum_range_add` (CORE-1, via
+  le_coeff_eq_iff_le_sub_coeff_eq_zero + sum_coeff_eq_coeff_sum + teichmuller_mul_pow_coeff).
+  Kedlaya's (4.1.1)/(4.1.2) multiset induction became `exists_level_rep` (digit-prefix +
+  p^n·List.sum invariant) with two list-engines: `exists_list_head_split` (op. 1: head-split
+  every member via `exists_head_split`, tails controlled by `mul_gaussValue_le_of_tail`)
+  and `exists_fold_teichmuller_heads` (op. 2 iterated: fold Teichmüller heads pairwise,
+  re-splitting after each merge). All axiom-clean.
   Kedlaya 1004.0466 Lemma 4.1 (paper in refs). Core input: `[a] ± [b] =
   Σ_j p^j [P_j^±(a,b)^{p^{-j}}]`, P_j^± ∈ 𝔽_p[X,Y] homogeneous of degree p^j ⟹
   |c_j| ≤ max(|a|,|b|); digit-carry induction; ρ^N tail bound; density extends.

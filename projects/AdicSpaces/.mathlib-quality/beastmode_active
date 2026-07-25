@@ -1,1 +1,1 @@
-FOCUS: T801 (Gauss value on A_inf: def + basics) — PHASE 3: writing GaussNorm.lean
+FOCUS: T802 — PHASE 3 chunk-3: fold + level-induction + gaussValue_add_le into GaussNorm.lean
