@@ -25341,7 +25341,19 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
       coords-invariance bridge; ingredients: T-YR-4's rigidity (`rho_rigidNoeth`), the
       `coord` dictionary and the geometric-point detection used there.
     * **[T-YR-7d] the two roundtrips**, from `r.homEquiv`'s naturality plus 7c.
-  Deps: T-YR-5 (done), T-YR-6 (machinery done). Status: open.
+  **STATUS 2026-07-25 (evening): clauses 2 and 3 are PROVED.** DEF-17 corrected the
+  relation (see above); `ModularCurve/RhoPoints.lean` now contains `pullbackπOf`,
+  `pointToPair`, `pairToPoint`, `curveIsoOfPullback`, `pairToPoint_pointToPair`,
+  `pairToPoint_congr`, `rel_pointToPair_pairToPoint`, `pointsEquivQuot` (clause 3),
+  and the assemblies `representsYRho_of_smooth` /
+  `exists_representsYRho_of_exists_smooth`. **The only remaining input is clause 1**
+  (`SmoothOfRelativeDimension 1 X.structMap`) = T-YR-6-APP. Route decided: the
+  product-problem identification — `ModuliProblem.prod` + `representableByProd`, then
+  both the Legendre cover of `Y` and the Legendre-anchored ρ-quotient represent the same
+  product problem, so their bases are isomorphic over `ℚ`; smoothness transports and the
+  scheme-level descent interface finishes the clause (surjectivity of the cover from
+  geometric-fibre nonemptiness of the Legendre datum).
+  Deps: T-YR-5 (done), T-YR-6 (machinery done). Status: open (clause 1 only).
 - NOT in scope: yRho_geometricallyIrreducible (BB-IRR), the D8 twist-comparison, closing DS4
   (stream-C). CLEANUP-Y1F/YR: DEFERRED-TO-MAIN (producer rule).
 
