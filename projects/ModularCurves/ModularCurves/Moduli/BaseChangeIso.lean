@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.ProblemBaseChange
 import Mathlib.CategoryTheory.Whiskering
+import ModularCurves.Moduli.EngineWiring
 
 /-!
 # Base change along an isomorphism of base rings
@@ -108,6 +109,23 @@ theorem ModuliProblem.isAffine_base_of_representableBy {P : ModuliProblem R}
   haveI : IsIso e.hom.baseHom := ⟨e.inv.baseHom,
     congrArg EllHom.baseHom e.hom_inv_id, congrArg EllHom.baseHom e.inv_hom_id⟩
   exact IsAffine.of_isIso e.hom.baseHom
+
+section AwayWire
+
+open ModularCurves.ModuliProblem in
+
+/-- Localizing away from a unit is an isomorphism of rings. -/
+theorem isIso_awayHomWire_of_isUnit (R : CommRingCat.{u}) (a : R) (ha : IsUnit a) :
+    IsIso (ModuliProblem.awayHomWire R a) := by
+  have hle : Submonoid.powers a ≤ IsUnit.submonoid R := by
+    rintro _ ⟨n, rfl⟩
+    exact (IsUnit.mem_submonoid_iff _).mpr (ha.pow n)
+  have hbij : Function.Bijective (algebraMap R (Localization.Away a)) :=
+    (IsLocalization.atUnits R (Submonoid.powers a) hle).bijective
+  exact (ConcreteCategory.isIso_iff_bijective
+    (ModuliProblem.awayHomWire R a)).mpr hbij
+
+end AwayWire
 
 end ModularCurves
 
