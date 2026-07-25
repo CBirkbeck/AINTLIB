@@ -25170,7 +25170,12 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
   automorphism over 𝟙 fixing a ρ-level structure fixes the induced torsion trivialization
   étale-locally; the landed KVC keystone (`pointedAuto_eq_id_of_fixes_point_kvc`) closes as in
   the full-level case (geometric-fibre detection ✓ RigidNoeth form). Deps: T-YR-2. Status: open.
-- **[T-YR-5] Representable + affine structure** — engine call:
+- **[T-YR-5] Representable + affine structure** — **2026-07-25 CLOSED**:
+  `rhoProblem_representable` (RhoSections, EngineForm) via
+  `representable_of_affineOverEll_of_rigidNoeth` on `rhoProblem_affineOverEll`
+  (E1-E3 chain: strCoverMap/vMapOf plumbing, strZ_pull_pointwise (VC at γ=1),
+  strZ_pull/strSigmaP_pull/strSection_pull, rhoOfSection_pull) + `rho_rigidNoeth`.
+  Original plan — engine call:
   `(rhoProblem D).Representable` via `representable_of_affineOverEll_of_rigidNoeth` + the
   ∃-affineHom mirror chain AT P := rhoProblem (the v10.351 cascade is GENERIC in P — direct
   reuse of exists_representableBy_isAffineHom_of_baseChange_cover at (2,3)). Deps: T-YR-3,
