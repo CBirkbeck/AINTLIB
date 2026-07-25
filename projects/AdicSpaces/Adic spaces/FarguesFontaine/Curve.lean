@@ -2,6 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import «Adic spaces».FarguesFontaine.GaussPoint
 import «Adic spaces».FarguesFontaine.YSpace
 import «Adic spaces».SpaQCviaSpvAI
 
@@ -568,12 +569,11 @@ instance instCompactSpaceCurve : CompactSpace (Curve p F ϖ) := by
   exact (hSU.image (isOpenQuotientMap_toCurve p F ϖ).continuous).union
     (hSV.image (isOpenQuotientMap_toCurve p F ϖ).continuous)
 
-/-- STRETCH GOAL — **the curve is nonempty** (equivalently `𝒴 ≠ ∅`). Planned route: the
-ρ-Gauss norm `v(Σ p^n [a_n]) = max_n |a_n|·ρ^n` (for `|·|` the rank-1 valuation of `F`
-and any `ρ ∈ (0,1)`) is a continuous multiplicative valuation on `A_inf` with
-`v(p) = ρ ≠ 0` and `v([ϖ]) = |ϖ| ≠ 0`; multiplicativity is the real content
-(Fargues–Fontaine, *Courbes et fibrés vectoriels*, §1.4). -/
-theorem Y_nonempty : (Y p F ϖ).Nonempty := by sorry
+/-- **The curve is nonempty** (equivalently `𝒴 ≠ ∅`): the `ρ = 1/2` Gauss point
+`w_ρ(Σ pⁿ[aₙ]) = sup ρⁿ|aₙ|` is a continuous multiplicative valuation on `A_inf`
+with `w(p·[ϖ]) = ρ·|ϖ| ≠ 0` (Fargues–Fontaine, *Courbes et fibrés vectoriels*,
+§1.4; Kedlaya 1004.0466, Lemma 4.1 for multiplicativity — see `GaussPoint.lean`). -/
+theorem Y_nonempty : (Y p F ϖ).Nonempty := Y_nonempty' p F ϖ
 
 end FarguesFontaine
 

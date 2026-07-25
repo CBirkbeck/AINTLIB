@@ -1,1 +1,1 @@
-FOCUS: T803 — PHASE 3 chunk-B: gaussValue_mul equality
+FOCUS: T804+T805 — writing GaussPoint.lean (valuation bundle + continuity + Y_nonempty)

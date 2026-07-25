@@ -474,7 +474,7 @@ not weaken or strengthen hypotheses).
   pass per cadence rule).
 
 ### [T601] STRETCH (blocked-on-plan): 𝒴 is nonempty (L7.6)
-- **Status**: blocked | **File**: Curve.lean | **Depends**: fresh `/develop --continue`
+- **Status**: done (2026-07-26 via T805: Gauss point in GaussPoint.lean)
   sub-decomposition (Gauss norms, [FF §1.4]); do NOT start from this board.
 - **Statement**: `Y_nonempty`.
 
@@ -602,12 +602,12 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Status**: open | **Depends**: T803.
 
 ### [T804] The Gauss point: Valuation package, continuity, Spa-membership
-- **Status**: open | **Depends**: T803, CLEANUP-11
+- **Status**: done (beastmode 2026-07-26; GaussPoint.lean: gaussVal bundle, v(pseudo-uniformizer)<1 via not_isUnit_toOF, Iinf^n-estimate by Submodule.mul_induction_on, Wedhorn-7.7 continuity via isAdic_Iinf + map_add_left_nhds_zero; all axiom-clean)
 - **Statement**: `gaussValuation ρ : Valuation (Ainf p F) ℝ≥0`; `gaussSpv ρ : Spv _`;
   `gaussSpv_isContinuous`; `gaussSpv_mem_spa`.
 
 ### [T805] ★ Y_nonempty (closes T601)
-- **Status**: open | **Depends**: T804
+- **Status**: done (beastmode 2026-07-26; Curve.lean Y_nonempty := Y_nonempty' — the rho=1/2 Gauss point; AXIOM-CLEAN; closes T601; FarguesFontaine/ is sorry-free; full library green 6141 jobs)
 - **Statement**: fill `Y_nonempty` in Curve.lean: `⟨gaussSpv ρ, mem_spa, w(p[ϖ]) ≠ 0⟩`.
 
 ### [PLAN-GATE-1] /develop --decompose: Kedlaya §2–§4 (Euclidean/PID + strongly noetherian + B^I)
