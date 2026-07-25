@@ -217,4 +217,29 @@ theorem scale_translate_smul_eq_legendreCurve {W : WeierstrassCurve R}
   · rw [WeierstrassCurve.variableChange_a₆, h1, h3, legendreCurve_a₆, ha₂, ha₄, ha₆]
     ring
 
+/-- **(T-G3a-SUB2b, complete the square)** With `2` invertible, every Weierstrass curve
+is carried to char-≠2 normal form (`a₁ = a₃ = 0`) by the variable change
+`⟨1, 0, −a₁/2, −a₃/2⟩`. (Silverman AEC III.1: "if char K ≠ 2 we may complete the
+square".) -/
+theorem completeSquareVC_a₁ {W : WeierstrassCurve R} (h2 : IsUnit (2 : R)) :
+    ((⟨1, 0, -(h2.unit⁻¹ : Rˣ) * W.a₁, -(h2.unit⁻¹ : Rˣ) * W.a₃⟩ :
+      VariableChange R) • W).a₁ = 0 := by
+  rw [WeierstrassCurve.variableChange_a₁]
+  show (((1 : Rˣ)⁻¹ : Rˣ) : R) * (W.a₁ + 2 * (-((h2.unit⁻¹ : Rˣ) : R) * W.a₁)) = 0
+  have h : (2 : R) * ((h2.unit⁻¹ : Rˣ) : R) = 1 := by
+    simpa [mul_comm] using congrArg (Units.val) (h2.unit.inv_mul)
+  simp only [inv_one, Units.val_one, one_mul]
+  linear_combination (-W.a₁) * h
+
+theorem completeSquareVC_a₃ {W : WeierstrassCurve R} (h2 : IsUnit (2 : R)) :
+    ((⟨1, 0, -(h2.unit⁻¹ : Rˣ) * W.a₁, -(h2.unit⁻¹ : Rˣ) * W.a₃⟩ :
+      VariableChange R) • W).a₃ = 0 := by
+  rw [WeierstrassCurve.variableChange_a₃]
+  show ((((1 : Rˣ)⁻¹ : Rˣ) : R)) ^ 3 *
+    (W.a₃ + 0 * W.a₁ + 2 * (-((h2.unit⁻¹ : Rˣ) : R) * W.a₃)) = 0
+  have h : (2 : R) * ((h2.unit⁻¹ : Rˣ) : R) = 1 := by
+    simpa [mul_comm] using congrArg (Units.val) (h2.unit.inv_mul)
+  simp only [inv_one, Units.val_one, one_pow, one_mul, zero_mul, add_zero]
+  linear_combination (-W.a₃) * h
+
 end ModularCurves
