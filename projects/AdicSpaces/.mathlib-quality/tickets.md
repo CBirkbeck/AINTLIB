@@ -192,7 +192,13 @@ not weaken or strengthen hypotheses).
   the file is sorry-free) | **Depends**: T203.
 
 ### [T204] A_inf is (p,[ϖ])-adically separated (L2.7)
-- **Status**: open | **File**: AinfHuber.lean | **Depends**: T103, T203, CLEANUP-2
+- **Status**: done (beastmode 2026-07-25; axiom-clean). Route as validated but LEANER
+  than the L2.7a–d skeleton: no truncated-Witt ring theory needed — the joint ideal
+  `(p^r, [ϖ]^s)` engine (private helpers in AinfHuber.lean) converts joint-ideal
+  congruence into coefficientwise ϖ-power congruence via the RING HOM
+  `truncate r ∘ map (Quotient.mk (ϖ^s))` (kernel framing kills every
+  coeff-of-difference/Witt-addition issue), with `mul_pow_charP_coeff_zero` for the
+  p-direction; separatedness = T103 Hausdorff per coefficient + `WittVector.ext`. | **File**: AinfHuber.lean | **Depends**: T103, T203, CLEANUP-2
 - **Statement**: `isHausdorff_Iinf`.
 - **Sketch** (ROUTE REPLACED per the gpt-5.6-sol review, decomposition L2.7a–d; the
   old digit-extraction sketch is void): begin the truncated-Witt layer. (1) State as
@@ -208,7 +214,19 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L2.7 (+[Ked-AWS Def 3.1.2] quote), RR1 register.
 
 ### [T205] ★ SUMMIT: A_inf is (p,[ϖ])-adically complete (L2.8)
-- **Status**: open | **File**: AinfHuber.lean | **Depends**: T204
+- **Status**: DONE (beastmode 2026-07-25; axiom-clean; AinfHuber.lean SORRY-FREE).
+  Assembly avoided lim-of-lims entirely: direct `IsPrecomplete` construction — coefficient
+  sequences (shifted reindex `f (2(m+j+1))`) are ϖ-adically coherent via the joint-ideal
+  coefficient lemma, T103 completeness gives per-digit limits ℓ_j, the limit is
+  `WittVector.mk p ℓ`, and the final congruence transfers back through
+  `sub_mem_jointIdeal_of_coeff_sub_mem` (whose reverse inclusion
+  `ker(truncate∘map) ⊆ (p^r,[ϖ]^s)` rides on mathlib
+  `WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff` + perfectness —
+  replacing the planned digit-sandwich/(★)-formula: [θ^{-i} x_i] factors give the
+  [ϖ^s]-divisibility of the Teichmüller tail directly). Rates: `M := n·p^{n-1} + n + 1`.
+  New helpers: `jointIdeal`, cofinality bridges, `charP_quotient_span_pow` (uses new
+  `PseudoUniformizer.not_isUnit_toOF` in PerfectoidFieldCharP.lean + Bezout),
+  `frobeniusEquiv_symm_pow_apply_pow_mul`, the two coefficient-congruence lemmas. | **File**: AinfHuber.lean | **Depends**: T204
 - **Statement**: `isAdicComplete_Iinf`.
 - **Sketch** (ROUTE REPLACED per the gpt-5.6-sol review, decomposition L2.7a–d —
   externally validated; the old coordinatewise plan is VOID (Q2 GAP: J-Cauchy data

@@ -101,6 +101,29 @@ theorem PseudoUniformizer.toOF_ne_zero (ϖ : PseudoUniformizer F) :
   intro h
   exact ((ϖ.val : Fˣ)).ne_zero (by simpa [PseudoUniformizer.toOF] using congrArg Subtype.val h)
 
+/-- The pseudo-uniformizer is not a unit of `O_F`: a power-bounded inverse `c` would give
+`1 = c^n·ϖ^n → 0`, contradicting `T0` (and `0 ≠ 1`). -/
+theorem PseudoUniformizer.not_isUnit_toOF [UniformSpace F] [IsPerfectoidField p F]
+    (ϖ : PseudoUniformizer F) : ¬IsUnit (PseudoUniformizer.toOF F ϖ) := by
+  have : T0Space F := IsPerfectoidRing.t0 (p := p) (A := F)
+  intro h
+  obtain ⟨c, hc⟩ := h.exists_right_inv
+  have hone : ∀ U ∈ nhds (0 : F), (1 : F) ∈ U := by
+    intro U hU
+    obtain ⟨V, hV, hprod⟩ := (c.2 : IsPowerBounded (c : F)) U hU
+    obtain ⟨n, hn⟩ := ϖ.isTopologicallyNilpotent.exists_pow_mem_of_mem_nhds hV
+    have h2 : ((ϖ.val : Fˣ) : F) * (c : F) = 1 := by
+      have h3 := congrArg Subtype.val hc
+      push_cast [PseudoUniformizer.toOF] at h3
+      exact h3
+    have h1 : (1 : F) = (c : F) ^ n * ((ϖ.val : Fˣ) : F) ^ n := by
+      rw [← mul_pow, mul_comm ((c : F)) _, h2, one_pow]
+    exact h1 ▸ hprod (Set.mul_mem_mul ⟨n, rfl⟩ hn)
+  have h0 : (0 : F) ∈ closure ({1} : Set F) :=
+    mem_closure_iff_nhds.mpr fun U hU => ⟨1, hone U hU, rfl⟩
+  rw [IsClosed.closure_eq isClosed_singleton, Set.mem_singleton_iff] at h0
+  exact zero_ne_one h0
+
 /-- Each `ϖ^n O_F` is a neighbourhood of `0` in `O_F` (subspace topology from `F`).
 
 This is the standard fact that for a Tate ring with ring of definition `F°` and
