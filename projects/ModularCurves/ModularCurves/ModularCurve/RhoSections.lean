@@ -5587,6 +5587,84 @@ theorem ringHomPair_factor_qbar {B : Type} [CommRing B] [Algebra ℚ B]
   · exact AlgHom.ext fun b => rfl
   · exact AlgHom.ext fun b => rfl
 
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-W1]** Right-translation cancellation at arbitrary field points: the
+frames form a torsor, so a translated point determines the translator
+(image-field factoring + the ℚ̄-reads). -/
+theorem wFramesRightMul_cancel (D : GaloisRepData N) {Ω : Type} [Field Ω]
+    (F : Spec (CommRingCat.of Ω) ⟶ wFrames D)
+    {γ γ' : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)}
+    (h : F ≫ wFramesRightMul D γ = F ≫ wFramesRightMul D γ') : γ = γ' := by
+  classical
+  set c := Spec.preimage F with hc
+  have hF : Spec.map c = F := Spec.map_preimage F
+  have halg : CommRingCat.ofHom (wFramesRightMulAlg D γ).hom.hom.toRingHom ≫ c =
+      CommRingCat.ofHom (wFramesRightMulAlg D γ').hom.hom.toRingHom ≫ c := by
+    apply Spec.map_injective
+    rw [Spec.map_comp, Spec.map_comp, hF]
+    exact h
+  -- ℚ-algebra structure on Ω through the base point
+  letI : Algebra ℚ Ω := (Spec.preimage (F ≫ wFramesπ D)).hom.toAlgebra
+  haveI hMF : Module.Finite ℚ (wFramesAlgebra D : Type 0) :=
+    (wFramesAlgebra D).property.left
+  set χ : (wFramesAlgebra D : Type 0) →ₐ[ℚ] Ω := c.hom.toRatAlgHom with hχ
+  -- the image field and its ℚ̄-embedding
+  haveI hκfin : Module.Finite ℚ ↥χ.range :=
+    Module.Finite.of_surjective χ.rangeRestrict.toLinearMap
+      χ.rangeRestrict_surjective
+  haveI hκint : Algebra.IsIntegral ℚ ↥χ.range :=
+    Algebra.IsIntegral.of_finite ℚ _
+  have hfield : IsField ↥χ.range :=
+    isField_of_isIntegral_of_isField' (Field.toIsField ℚ)
+  letI : Field ↥χ.range := hfield.toField
+  haveI : Algebra.IsAlgebraic ℚ ↥χ.range := Algebra.IsAlgebraic.of_finite ℚ _
+  set ν : (wFramesAlgebra D : Type 0) →ₐ[ℚ] AlgebraicClosure ℚ :=
+    (IsAlgClosed.lift (M := AlgebraicClosure ℚ)).comp χ.rangeRestrict with hν
+  -- the translated algebra maps agree into the image field, hence into ℚ̄
+  have hmkeq : χ.rangeRestrict.comp (wFramesRightMulAlg D γ).hom.hom =
+      χ.rangeRestrict.comp (wFramesRightMulAlg D γ').hom.hom := by
+    refine AlgHom.ext fun b => Subtype.ext ?_
+    show χ ((wFramesRightMulAlg D γ).hom.hom b) =
+      χ ((wFramesRightMulAlg D γ').hom.hom b)
+    exact RingHom.congr_fun (congrArg (fun (m : CommRingCat.of
+      (wFramesAlgebra D : Type 0) ⟶ CommRingCat.of Ω) => m.hom) halg) b
+  have hνeq : ν.comp (wFramesRightMulAlg D γ).hom.hom =
+      ν.comp (wFramesRightMulAlg D γ').hom.hom := by
+    rw [hν, AlgHom.comp_assoc, AlgHom.comp_assoc, hmkeq]
+  -- the ℚ̄-point and the translated-point equality
+  set Ft : Spec (CommRingCat.of (AlgebraicClosure ℚ)) ⟶ wFrames D :=
+    Spec.map (CommRingCat.ofHom ν.toRingHom) with hFt
+  have hpts : Ft ≫ wFramesRightMul D γ = Ft ≫ wFramesRightMul D γ' := by
+    show Spec.map (CommRingCat.ofHom ν.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom (wFramesRightMulAlg D γ).hom.hom.toRingHom) =
+      Spec.map (CommRingCat.ofHom ν.toRingHom) ≫
+        Spec.map (CommRingCat.ofHom (wFramesRightMulAlg D γ').hom.hom.toRingHom)
+    rw [← Spec.map_comp, ← Spec.map_comp]
+    refine congrArg Spec.map (CommRingCat.hom_ext ?_)
+    show ν.toRingHom.comp (wFramesRightMulAlg D γ).hom.hom.toRingHom =
+      ν.toRingHom.comp (wFramesRightMulAlg D γ').hom.hom.toRingHom
+    have h1 : ν.toRingHom.comp (wFramesRightMulAlg D γ).hom.hom.toRingHom =
+        (ν.comp (wFramesRightMulAlg D γ).hom.hom).toRingHom := rfl
+    have h2 : ν.toRingHom.comp (wFramesRightMulAlg D γ').hom.hom.toRingHom =
+        (ν.comp (wFramesRightMulAlg D γ').hom.hom).toRingHom := rfl
+    rw [h1, h2, hνeq]
+  -- read the equality at ℚ̄ through the torsor structure
+  have h₁ : Ft ≫ wFramesπ D =
+      Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))) :=
+    specQhom_eq _ _
+  have hnatγ := qbarPointsRead_map (frameRightMulMor D γ) ⟨Ft, h₁⟩
+  have hnatγ' := qbarPointsRead_map (frameRightMulMor D γ') ⟨Ft, h₁⟩
+  have hrdeq : qbarPointsRead (frameContAction D)
+      ⟨Ft ≫ wFramesRightMul D γ, specQhom_eq _ _⟩ =
+      qbarPointsRead (frameContAction D)
+      ⟨Ft ≫ wFramesRightMul D γ', specQhom_eq _ _⟩ :=
+    congrArg (qbarPointsRead (frameContAction D)) (Subtype.ext hpts)
+  have hfin : (qbarPointsRead (frameContAction D) ⟨Ft, h₁⟩ :
+      Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) * γ =
+      qbarPointsRead (frameContAction D) ⟨Ft, h₁⟩ * γ' :=
+    (hnatγ.symm.trans (hrdeq.trans hnatγ'))
+  exact mul_left_cancel hfin
+
 end PointLifting
 
 section MutualInverses
