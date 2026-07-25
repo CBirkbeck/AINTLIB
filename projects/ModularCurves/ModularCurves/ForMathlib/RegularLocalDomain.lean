@@ -31,8 +31,8 @@ This file develops the pieces, bottom-up. The argument is the classical inductio
   `xR` is prime; a minimal prime `𝔭 ⊆ xR` satisfies `𝔭 = x𝔭` (as `x ∉ 𝔭`), so `𝔭 = ⊥` by
   Nakayama and `R` is a domain.
 
-Landed so far: the `dim 0` base case and the prime-avoidance choice of the regular
-parameter `x`.
+Landed so far: the `dim 0` base case, the prime-avoidance choice of the regular parameter
+`x`, and the closing Nakayama step (`xR` prime + `x` off the minimal primes => domain).
 -/
 
 universe u
@@ -61,7 +61,7 @@ theorem isDomain_of_isRegularLocalRing_of_ringKrullDim_eq_zero (R : Type u) [Com
 
 /-- **(T-REG-2)** The regular-parameter choice. In a Noetherian local ring of positive
 Krull dimension there is `x ∈ 𝔪` lying outside `𝔪²` **and** outside every minimal prime:
-`𝔪 ⊄ 𝔪²` (`IsLocalRing.maximalIdeal_sq_lt`), `𝔪 ⊄ 𝔭` for `𝔭` minimal (else `𝔪` itself is
+`𝔪 ⊄ 𝔪²` (`IsLocalRing.maximalIdeal_sq_lt_of_ringKrullDim_ne_zero`), `𝔪 ⊄ 𝔭` for `𝔭` minimal (else `𝔪` itself is
 minimal, i.e. `height 𝔪 = 0 = dim R`), the minimal primes are finitely many
 (`Ideal.finite_minimalPrimes_of_isNoetherianRing`), so prime avoidance
 (`Ideal.subset_union_prime`, with `𝔪²` as the one allowed non-prime member) applies. -/
@@ -82,7 +82,7 @@ theorem exists_mem_maximalIdeal_notMem_sq_notMem_minimalPrimes (R : Type u) [Com
   have hnotle : ¬ ∃ i ∈ s, maximalIdeal R ≤ i := by
     rintro ⟨i, hi, hle⟩
     rcases Finset.mem_insert.mp hi with rfl | hi'
-    · exact absurd hle (not_le_of_gt (IsLocalRing.maximalIdeal_sq_lt h))
+    · exact absurd hle (not_le_of_gt (IsLocalRing.maximalIdeal_sq_lt_of_ringKrullDim_ne_zero (ne_of_gt h)))
     · -- `𝔪 ≤ 𝔭` with `𝔭` minimal forces `𝔪 = 𝔭`, hence `dim R = height 𝔪 = 0`
       have hmem : i ∈ minimalPrimes R := hfin.mem_toFinset.mp hi'
       have hile : i ≤ maximalIdeal R := by
@@ -108,5 +108,34 @@ theorem exists_mem_maximalIdeal_notMem_sq_notMem_minimalPrimes (R : Type u) [Com
   · intro p hpmin hxp
     exact hxni (Set.mem_biUnion
       (Finset.mem_insert_of_mem (hfin.mem_toFinset.mpr hpmin)) hxp)
+
+/-- **(T-REG-4, the closing step)** If some `x ∈ 𝔪` generates a **prime** ideal and lies
+outside every minimal prime, then `R` is a domain: a minimal prime `𝔭 ≤ xR` satisfies
+`𝔭 ≤ xR • 𝔭` (write `a = x·b` for `a ∈ 𝔭`; `x ∉ 𝔭` forces `b ∈ 𝔭`), so `𝔭 = ⊥` by
+Nakayama, and `⊥` prime means `R` is a domain. -/
+theorem isDomain_of_isPrime_span_singleton (R : Type u) [CommRing R] [IsNoetherianRing R]
+    [IsLocalRing R] {x : R} (hx : x ∈ maximalIdeal R)
+    (hprime : (Ideal.span {x} : Ideal R).IsPrime)
+    (hmin : ∀ p ∈ minimalPrimes R, x ∉ p) : IsDomain R := by
+  classical
+  obtain ⟨p, hpmin, hple⟩ :=
+    Ideal.exists_minimalPrimes_le (I := (⊥ : Ideal R)) (J := Ideal.span {x}) bot_le
+  haveI : p.IsPrime := hpmin.1.1
+  have hxp : x ∉ p := hmin p (by simpa [minimalPrimes] using hpmin)
+  have hstep : p ≤ (Ideal.span {x} : Ideal R) • p := by
+    intro a ha
+    obtain ⟨b, rfl⟩ := Ideal.mem_span_singleton'.mp (hple ha)
+    have hb : b ∈ p := (hpmin.1.1.mem_or_mem ha).resolve_right hxp
+    rw [Ideal.smul_eq_mul, mul_comm b x]
+    exact Ideal.mul_mem_mul (Ideal.mem_span_singleton_self x) hb
+  have hfg : p.FG := IsNoetherian.noetherian _
+  have hjac : (Ideal.span {x} : Ideal R) ≤ Ideal.jacobson (⊥ : Ideal R) := by
+    rw [IsLocalRing.jacobson_eq_maximalIdeal (⊥ : Ideal R) bot_ne_top]
+    exact (Ideal.span_singleton_le_iff_mem _).mpr hx
+  have hbot : p = ⊥ :=
+    Submodule.eq_bot_of_le_smul_of_le_jacobson_bot _ p hfg hstep hjac
+  haveI hbp : (⊥ : Ideal R).IsPrime := hbot ▸ hpmin.1.1
+  haveI : IsDomain (R ⧸ (⊥ : Ideal R)) := (Ideal.Quotient.isDomain_iff_prime ⊥).mpr hbp
+  exact (RingEquiv.quotientBot R).symm.isDomain
 
 end ModularCurves
