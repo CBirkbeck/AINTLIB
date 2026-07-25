@@ -7446,6 +7446,58 @@ theorem strSection_pull {X : EllObj (CommRingCat.of ℚ)}
     (congrArg (strCoverMap D g' k' ≫ ·) (strPr_strSection D d g' str0))).trans
     (strSigmaP_pull D d g' k' str0).symm
 
+/-- **[T-YR-3E (E2)]** THE rhoOfSection-NATURALITY: descending the restricted
+section is the pull of the descended structure (via the section bijection and
+the strSection pull-naturality). -/
+theorem rhoOfSection_pull {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (s : T' ⟶ d.σZ.relQuotient d.f d.over_base)
+    (hs : s ≫ d.σZ.relQuotientStruct d.f d.over_base = g')
+    (hinv : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base) s) N)
+    (hs' : (k' ≫ s) ≫ d.σZ.relQuotientStruct d.f d.over_base = k' ≫ g')
+    (hinv' : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base)
+      (k' ≫ s)) N) :
+    RhoLevelStructure.pull D (X.pullbackAlongMap g' k')
+        (rhoOfSection D d g' s hs hinv) =
+      rhoOfSection D d (k' ≫ g') (k' ≫ s) hs' hinv' := by
+  -- strSection is injective (roundtrip B), so compare the sections
+  have hinj := rhoOfSection_strSection D d (k' ≫ g')
+    (RhoLevelStructure.pull D (X.pullbackAlongMap g' k')
+      (rhoOfSection D d g' s hs hinv))
+  have hsec : strSection D d (k' ≫ g')
+      (RhoLevelStructure.pull D (X.pullbackAlongMap g' k')
+        (rhoOfSection D d g' s hs hinv)) = k' ≫ s := by
+    rw [strSection_pull, strSection_rhoOfSection D d g' s hs hinv]
+  -- transport the roundtrip along hsec
+  have hinvSpec : NIsInvertible (Spec (CommRingCat.of ℚ)) N := by
+    have hq : IsUnit ((N : ℚ)) := isUnit_iff_ne_zero.mpr
+      (Nat.cast_ne_zero.mpr (NeZero.ne N))
+    have := hq.map (Scheme.ΓSpecIso (CommRingCat.of ℚ)).inv.hom
+    rwa [map_natCast] at this
+  have hB := rhoOfSection_strSection D d (k' ≫ g')
+    (RhoLevelStructure.pull D (X.pullbackAlongMap g' k')
+      (rhoOfSection D d g' s hs hinv))
+    (NIsInvertible.of_hom
+      (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) _ ≫
+        (k' ≫ g') ≫ X.structMap) hinvSpec)
+  -- rewrite the strSection inside hB by hsec (proof-irrelevant hinv-slots)
+  refine Eq.trans hB.symm ?_
+  -- now: rhoOfSection (k'≫g') (strSection (pull …)) hinv₀ = rhoOfSection (k'≫g') (k'≫s) hs' hinv'
+  -- congruence in the section argument
+  have hcongr : ∀ (s₁ s₂ : T'' ⟶ d.σZ.relQuotient d.f d.over_base)
+      (h12 : s₁ = s₂) (hs₁ : s₁ ≫ d.σZ.relQuotientStruct d.f d.over_base =
+        k' ≫ g')
+      (hinv₁ : NIsInvertible (pullback
+        (d.σZ.relQuotientπ d.f d.over_base) s₁) N),
+      rhoOfSection D d (k' ≫ g') s₁ hs₁ hinv₁ =
+        rhoOfSection D d (k' ≫ g') s₂ (h12 ▸ hs₁) (h12 ▸ hinv₁) := by
+    intro s₁ s₂ h12 hs₁ hinv₁
+    subst h12
+    rfl
+  exact (hcongr _ _ hsec _ _).trans rfl
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
