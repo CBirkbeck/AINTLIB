@@ -25209,7 +25209,15 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
     the formal-smoothness bridge; (b)-route needs rel-dim-1 charts for the λ-line-Legendre
     scheme (standard-smooth: 𝔸¹-minus-points over ℚ is IsStandardSmoothOfRelativeDimension 1
     — likely CHEAP via mathlib StandardSmooth on localization-of-polynomial presentations) +
-    the engine-output étale-glue. RECOMMENDED START (next session): (b1) the λ-line chart
+    the engine-output étale-glue. (b1)-API FOUND 2026-07-25:
+    IsStandardSmoothOfRelativeDimension.trans (m+n) + .localization_away (rel-dim 0) +
+    .of_algEquiv + Etale.iff_isStandardSmoothOfRelativeDimension_zero (RING-level,
+    StandardSmoothOfFree:89 — THE (b3)-étale-piece) +
+    IsStandardSmooth.of_basis_kaehlerDifferential (free-Kähler constructor :49; rel-dim-refined
+    version to check/add). MISSING: a Polynomial-R rel-dim-1 base instance (no
+    Presentation.polynomial in mathlib) — build via one-variable SubmersivePresentation or
+    of_basis + rank-1 Kähler (Polynomial-Kähler free basis exists in mathlib).
+    RECOMMENDED START (next session): (b1) the λ-line chart
     lemma (bounded, pure StandardSmooth-algebra); (b2) excavate the engine glue
     (representable_of_baseChange_cover output-structure, EngineWiring/EngineDescentCore) for
     the étale-over-rigidified presentation; (b3) SmoothOfRelativeDimension-composition +
