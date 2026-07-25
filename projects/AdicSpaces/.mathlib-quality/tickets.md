@@ -339,7 +339,7 @@ not weaken or strengthen hypotheses).
 - **Status**: open | **Depends**: T403.
 
 ### [T404] The κ-predicate core (L4.6, L5.1)
-- **Status**: open | **File**: YSpace.lean | **Depends**: T403, CLEANUP-5
+- **Status**: done (beastmode 2026-07-25; axiom-clean; committed cf7ef820f) | **File**: YSpace.lean | **Depends**: T403, CLEANUP-5
 - **Statements**: `KGE_iff`, `KLE_iff`, `KGE_or_KLE`, `not_KGE_of_KLE_of_lt`,
   `one_lt_cFF`, `cFF_lt_p`.
 - **Sketch**: (1) iffs: cross-multiplication: from q = a/b = num/den derive
@@ -358,7 +358,10 @@ not weaken or strengthen hypotheses).
   cross-checked against [SW Fig. 12.1] in the decomposition).
 
 ### [T405] The covering 𝒴 = ⋃ (U_n ∪ V_n) (L5.5)
-- **Status**: open | **File**: YSpace.lean | **Depends**: T404
+- **Status**: done (beastmode 2026-07-25; axiom-clean; YSpace.lean SORRY-FREE, M4+M5
+  complete) — new KGE_mono/KLE_mono (Γ₀ pow-cancel + exponent-flip chains); κ pinned by
+  cofinality with n+1-bumps through vlt_p_one/vlt_teichPi_one (kills the m=0 edges);
+  greatest KGE-index via Int.exists_greatest_of_bdd; split at cFF·p^{n₀} by totality. | **File**: YSpace.lean | **Depends**: T404
 - **Statement**: `Y_eq_iUnion_windows`.
 - **Sketch**: per decomposition L5.5: cofinality → KLE(p^N), KGE(p^{-N}); the set
   {n : ℤ | KGE(p^n)} ∩ [-N, N] is nonempty-bounded; take max (Int/Finset.max');
@@ -369,7 +372,12 @@ not weaken or strengthen hypotheses).
   attack log).
 
 ### [T406] Window translation, disjointness, openness (L5.2–L5.4)
-- **Status**: open | **File**: YSpace.lean | **Depends**: T404, T402
+- **Status**: done (beastmode 2026-07-25; axiom-clean; commits efb7b6888 + a77dd0f71) —
+  translation via the two procedural transport cores vle_theta_iff_ge/le (three
+  vle_pow_iff_cross steps through the Teichmüller collapse; exponent identities by
+  pow_add-normalization + omega, uniform in signs); disjointness via
+  not_KGE_of_KLE_of_lt at endpoints; openness = Y ∩ two basicOpens with supp-prime
+  side conditions. | **File**: YSpace.lean | **Depends**: T404, T402
 - **Statements**: `zsmul_windowU`, `zsmul_windowV`, `windowU_disjoint`,
   `windowV_disjoint`, `isOpen_windowU`, `isOpen_windowV`.
 - **Sketch**: (1) translation: KGE-transformation under the action (evaluate at

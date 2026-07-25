@@ -448,8 +448,157 @@ interval `[p^{-N}, p^N]`; among the finitely many `n` in range, take the largest
 
 Source: [Kedlaya-AWS, Rem. 3.1.9]: "This space can be covered by the subspaces U_n ...
 V_n". -/
+private theorem KGE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
+    (hq' : 0 < q') (hle : q' ≤ q) (h : KGE p F ϖ q v) : KGE p F ϖ q' v := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hq : 0 < q := hq'.trans_le hle
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  have hy0 : (0 : _) < ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) := by
+    refine zero_lt_iff.mpr (fun h0 => v_p_ne_zero hv ?_)
+    rw [hbridge]
+    simp only [map_zero, le_zero_iff]
+    exact h0
+  have hy1 : ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) < 1 := by
+    obtain ⟨h1, h2⟩ := vlt_p_one hv
+    rw [hbridge] at h1 h2
+    rw [map_one] at h1 h2
+    exact lt_of_le_not_ge h1 h2
+  have hcross : q'.num.toNat * q.den ≤ q.num.toNat * q'.den := by
+    have h1 : (q'.num : ℚ) / q'.den ≤ (q.num : ℚ) / q.den := by
+      rw [Rat.num_div_den, Rat.num_div_den]; exact hle
+    rw [div_le_div_iff₀ (by exact_mod_cast q'.den_pos) (by exact_mod_cast q.den_pos)] at h1
+    have h2 : ((q'.num.toNat : ℤ) : ℚ) = (q'.num : ℚ) := by
+      rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq').le]
+    have h3 : ((q.num.toNat : ℤ) : ℚ) = (q.num : ℚ) := by
+      rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq).le]
+    exact_mod_cast h2 ▸ h3 ▸ h1
+  rw [KGE, hbridge, map_pow, map_pow] at h ⊢
+  rw [← pow_le_pow_iff_left₀ (zero_le') (zero_le') q.den_nz
+    (a := ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den)
+    (b := ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat)]
+  calc (ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den) ^ q.den
+      = (ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q.den) ^ q'.den := by
+        rw [← pow_mul, mul_comm, pow_mul]
+    _ ≤ (ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q.num.toNat) ^ q'.den :=
+        pow_le_pow_left' h q'.den
+    _ = ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ (q.num.toNat * q'.den) :=
+        (pow_mul _ _ _).symm
+    _ ≤ ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ (q'.num.toNat * q.den) :=
+        (pow_le_pow_iff_right_of_lt_one₀ hy0 hy1).mpr hcross
+    _ = (ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat) ^ q.den :=
+        pow_mul _ _ _
+
+private theorem KLE_mono {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) {q q' : ℚ}
+    (hq : 0 < q) (hle : q ≤ q') (h : KLE p F ϖ q v) : KLE p F ϖ q' v := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hq' : 0 < q' := hq.trans_le hle
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  have hy0 : (0 : _) < ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) := by
+    refine zero_lt_iff.mpr (fun h0 => v_p_ne_zero hv ?_)
+    rw [hbridge]
+    simp only [map_zero, le_zero_iff]
+    exact h0
+  have hy1 : ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) < 1 := by
+    obtain ⟨h1, h2⟩ := vlt_p_one hv
+    rw [hbridge] at h1 h2
+    rw [map_one] at h1 h2
+    exact lt_of_le_not_ge h1 h2
+  have hcross : q.num.toNat * q'.den ≤ q'.num.toNat * q.den := by
+    have h1 : (q.num : ℚ) / q.den ≤ (q'.num : ℚ) / q'.den := by
+      rw [Rat.num_div_den, Rat.num_div_den]; exact hle
+    rw [div_le_div_iff₀ (by exact_mod_cast q.den_pos) (by exact_mod_cast q'.den_pos)] at h1
+    have h2 : ((q'.num.toNat : ℤ) : ℚ) = (q'.num : ℚ) := by
+      rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq').le]
+    have h3 : ((q.num.toNat : ℤ) : ℚ) = (q.num : ℚ) := by
+      rw [Int.toNat_of_nonneg (Rat.num_pos.mpr hq).le]
+    exact_mod_cast h2 ▸ h3 ▸ h1
+  rw [KLE, hbridge, map_pow, map_pow] at h ⊢
+  rw [← pow_le_pow_iff_left₀ (zero_le') (zero_le') q.den_nz
+    (a := ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat)
+    (b := ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den)]
+  calc (ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q'.num.toNat) ^ q.den
+      = ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ (q'.num.toNat * q.den) :=
+        (pow_mul _ _ _).symm
+    _ ≤ ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ (q.num.toNat * q'.den) :=
+        (pow_le_pow_iff_right_of_lt_one₀ hy0 hy1).mpr hcross
+    _ = (ValuativeRel.valuation (Ainf p F) ((p : Ainf p F)) ^ q.num.toNat) ^ q'.den :=
+        pow_mul _ _ _
+    _ ≤ (ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q.den) ^ q'.den :=
+        pow_le_pow_left' h q'.den
+    _ = (ValuativeRel.valuation (Ainf p F) (teichPi p F ϖ) ^ q'.den) ^ q.den := by
+        rw [← pow_mul, mul_comm, pow_mul]
+
 theorem Y_eq_iUnion_windows :
-    Y p F ϖ = (⋃ n : ℤ, windowU p F ϖ n) ∪ ⋃ n : ℤ, windowV p F ϖ n := by sorry
+    Y p F ϖ = (⋃ n : ℤ, windowU p F ϖ n) ∪ ⋃ n : ℤ, windowV p F ϖ n := by
+  have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
+  have hpQ : (1 : ℚ) < p := by exact_mod_cast hp1
+  have hp0 : (0 : ℚ) < p := zero_lt_one.trans hpQ
+  apply Set.Subset.antisymm
+  · intro v hv
+    obtain ⟨m₁, hm₁⟩ := exists_pow_p_vlt hv (v_teichPi_ne_zero hv)
+    have hMle : v.vle ((p : Ainf p F) ^ (m₁ + 1)) (teichPi p F ϖ) := by
+      refine v.vle_trans ?_ hm₁.1
+      have hstep := v.mul_vle_mul_left (vlt_p_one hv).1 ((p : Ainf p F) ^ m₁)
+      rwa [one_mul, ← pow_succ'] at hstep
+    have hKLE_M : KLE p F ϖ ((m₁ + 1 : ℕ) : ℚ) v := by
+      rw [KLE_iff hv (by positivity) one_pos
+        (show ((m₁ + 1 : ℕ) : ℚ) = ((m₁ + 1 : ℕ) : ℚ) / ((1 : ℕ) : ℚ) from by norm_num),
+        pow_one]
+      exact hMle
+    obtain ⟨m₂, hm₂⟩ := exists_pow_teichPi_vlt hv (v_p_ne_zero hv)
+    have hGle : v.vle (teichPi p F ϖ ^ (m₂ + 1)) ((p : Ainf p F)) := by
+      refine v.vle_trans ?_ hm₂.1
+      have hstep := v.mul_vle_mul_left (vlt_teichPi_one hv).1 (teichPi p F ϖ ^ m₂)
+      rwa [one_mul, ← pow_succ'] at hstep
+    have hKGE_m : KGE p F ϖ (((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ)) v := by
+      rw [KGE_iff hv (by positivity) (by omega) rfl, pow_one]
+      exact hGle
+    set N : ℕ := max (m₁ + 2) (m₂ + 1) with hN
+    have hMltpN : ((m₁ + 1 : ℕ) : ℚ) < (p : ℚ) ^ (N : ℤ) := by
+      rw [zpow_natCast]
+      calc ((m₁ + 1 : ℕ) : ℚ) < ((p ^ (m₁ + 1) : ℕ) : ℚ) := by
+            exact_mod_cast Nat.lt_pow_self hp1
+        _ ≤ ((p ^ N : ℕ) : ℚ) := by
+            exact_mod_cast Nat.pow_le_pow_right (by omega) (by omega)
+        _ = (p : ℚ) ^ N := by push_cast; ring
+    have hpNle : (p : ℚ) ^ (-(N : ℤ)) ≤ ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) := by
+      rw [zpow_neg, zpow_natCast]
+      rw [show ((1 : ℕ) : ℚ) / ((m₂ + 1 : ℕ) : ℚ) = (((m₂ + 1 : ℕ) : ℚ))⁻¹ from by
+        norm_num [one_div]]
+      refine inv_anti₀ (by positivity) ?_
+      calc ((m₂ + 1 : ℕ) : ℚ) ≤ ((p ^ (m₂ + 1) : ℕ) : ℚ) := by
+            exact_mod_cast (Nat.lt_pow_self hp1 (n := m₂ + 1)).le
+        _ ≤ ((p ^ N : ℕ) : ℚ) := by
+            exact_mod_cast Nat.pow_le_pow_right (by omega) (by omega)
+        _ = (p : ℚ) ^ N := by push_cast; ring
+    have hSne : KGE p F ϖ ((p : ℚ) ^ (-(N : ℤ))) v :=
+      KGE_mono p F ϖ hv (zpow_pos hp0 _) hpNle hKGE_m
+    have hSbdd : ∀ z : ℤ, KGE p F ϖ ((p : ℚ) ^ z) v → z ≤ (N : ℤ) := by
+      intro z hz
+      by_contra hzN
+      refine not_KGE_of_KLE_of_lt hv (by positivity) ?_ hKLE_M hz
+      calc ((m₁ + 1 : ℕ) : ℚ) < (p : ℚ) ^ (N : ℤ) := hMltpN
+        _ ≤ (p : ℚ) ^ z := by
+            refine zpow_le_zpow_right₀ hpQ.le (by omega)
+    obtain ⟨n₀, hn₀S, hn₀max⟩ := Int.exists_greatest_of_bdd
+      ⟨(N : ℤ), fun z hz => hSbdd z hz⟩ ⟨-(N : ℤ), hSne⟩
+    have hKLEn₀ : KLE p F ϖ ((p : ℚ) ^ (n₀ + 1)) v := by
+      refine (KGE_or_KLE hv (zpow_pos hp0 _)).resolve_left (fun hge => ?_)
+      have := hn₀max _ hge
+      omega
+    rcases KGE_or_KLE hv (mul_pos (zero_lt_one.trans (one_lt_cFF hp1)) (zpow_pos hp0 n₀))
+      with hgeC | hleC
+    · exact Or.inr (Set.mem_iUnion.mpr ⟨n₀, hv, hgeC, hKLEn₀⟩)
+    · exact Or.inl (Set.mem_iUnion.mpr ⟨n₀, hv, hn₀S, hleC⟩)
+  · rintro v (hv | hv)
+    · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hv
+      exact hn.1
+    · obtain ⟨n, hn⟩ := Set.mem_iUnion.mp hv
+      exact hn.1
 
 /-- **Translation**: the action shifts windows, `φ^k(U_n) = U_{n-k}` in the convention
 `g • v = v ∘ φ^{-g}` (so κ(g • v) = κ(v)/p^g).
