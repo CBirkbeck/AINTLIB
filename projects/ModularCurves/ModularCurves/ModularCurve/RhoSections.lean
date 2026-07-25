@@ -6931,6 +6931,42 @@ theorem rhoOfSection_strSection
 
 end MutualInverses
 
+section EngineForm
+
+open scoped FintypeCatDiscrete
+
+variable (D : GaloisRepData N) [Fact (1 < N)]
+
+/-- **[T-YR-3E plumbing]** The frames-cover comparison over a base map: the
+covers of the two pullback presentations compare over `k'`. -/
+noncomputable def strCoverMap {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    strCover D (X.pullbackAlong (k' ≫ g')) ⟶ strCover D (X.pullbackAlong g') :=
+  pullback.map (X.pullbackAlong (k' ≫ g')).structMap (wFramesπ D)
+    (X.pullbackAlong g').structMap (wFramesπ D) k' (𝟙 (wFrames D))
+    (𝟙 (Spec (CommRingCat.of ℚ)))
+    (by
+      show (k' ≫ g') ≫ X.structMap ≫ 𝟙 _ = k' ≫ g' ≫ X.structMap
+      rw [Category.comp_id, Category.assoc])
+    (by rw [Category.comp_id, Category.id_comp])
+
+@[reassoc]
+theorem strCoverMap_pr {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    strCoverMap D g' k' ≫ strPr D (X.pullbackAlong g') =
+      strPr D (X.pullbackAlong (k' ≫ g')) ≫ k' :=
+  pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem strCoverMap_taut {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    strCoverMap D g' k' ≫ strTaut D (X.pullbackAlong g') =
+      strTaut D (X.pullbackAlong (k' ≫ g')) := by
+  refine (pullback.lift_snd _ _ _).trans ?_
+  exact Category.comp_id _
+
+end EngineForm
+
 open scoped FintypeCatDiscrete in
 /-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route) — THE 3d/3e
 CLOSURE.** Relative representability of the ρ-level problem: for every elliptic
