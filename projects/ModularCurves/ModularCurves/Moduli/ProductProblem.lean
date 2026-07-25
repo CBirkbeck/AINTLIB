@@ -57,10 +57,25 @@ variable {P Q : ModuliProblem R} {X : EllObj R} (r : P.RepresentableBy X)
   (eqv : ∀ {T : Scheme.{u}} (g : T ⟶ X.base),
     { h : T ⟶ Z // h ≫ f = g } ≃ Q.obj (op (X.pullbackAlong g)))
 
+/-- (Implementation) The `Q`-datum attached to a classifying morphism together with a
+factorization of its base map through `Z`. -/
+def prodSndOf {W : EllObj R} (v : W ⟶ X) (h : W.base ⟶ Z) (hh : h ≫ f = v.baseHom) :
+    Q.obj (op W) :=
+  Q.map (EllObj.toPullbackAlong v).op (eqv v.baseHom ⟨h, hh⟩)
+
+theorem prodSndOf_congr {W : EllObj R} {v v' : W ⟶ X} (e : v = v') (h : W.base ⟶ Z)
+    (hh : h ≫ f = v.baseHom) (hh' : h ≫ f = v'.baseHom) :
+    prodSndOf f eqv v h hh = prodSndOf f eqv v' h hh' := by
+  subst e; rfl
+
+theorem prodSndOf_congr_hom {W : EllObj R} (v : W ⟶ X) {h h' : W.base ⟶ Z}
+    (e : h = h') (hh : h ≫ f = v.baseHom) (hh' : h' ≫ f = v.baseHom) :
+    prodSndOf f eqv v h hh = prodSndOf f eqv v h' hh' := by
+  subst e; rfl
+
 /-- (Implementation) The `Q`-datum attached to a morphism into the total space. -/
 def prodSnd {W : EllObj R} (u : W ⟶ X.pullbackAlong f) : Q.obj (op W) :=
-  Q.map (EllObj.toPullbackAlong (u ≫ X.pullbackAlongπ f)).op
-    (eqv (u.baseHom ≫ f) ⟨u.baseHom, rfl⟩)
+  prodSndOf f eqv (u ≫ X.pullbackAlongπ f) u.baseHom rfl
 
 /-- (Implementation) The morphism into the total space attached to a classifying
 morphism together with a `Q`-datum. -/
@@ -99,8 +114,9 @@ theorem homToPullbackAlong_self {W : EllObj R} (u : W ⟶ X.pullbackAlong f) :
 theorem prodHom_pair {W : EllObj R} (u : W ⟶ X.pullbackAlong f) :
     prodHom r f eqv (r.homEquiv (u ≫ X.pullbackAlongπ f), prodSnd f eqv u) = u := by
   have hq : Q.map (EllObj.isoPullbackAlong (u ≫ X.pullbackAlongπ f)).inv.op
-      (prodSnd f eqv u) = eqv (u.baseHom ≫ f) ⟨u.baseHom, rfl⟩ := by
-    rw [prodSnd, ← FunctorToTypes.map_comp_apply, ← op_comp]
+      (prodSnd f eqv u) =
+        eqv (u ≫ X.pullbackAlongπ f).baseHom ⟨u.baseHom, rfl⟩ := by
+    rw [prodSnd, prodSndOf, ← FunctorToTypes.map_comp_apply, ← op_comp]
     rw [show (EllObj.isoPullbackAlong (u ≫ X.pullbackAlongπ f)).inv ≫
       EllObj.toPullbackAlong (u ≫ X.pullbackAlongπ f) = 𝟙 _ from
       (EllObj.isoPullbackAlong (u ≫ X.pullbackAlongπ f)).inv_hom_id]
@@ -141,6 +157,17 @@ The proof is the mirror of `prodHom_pair`: rewrite the tautological projection t
 `isoPullbackAlong`. -/
 theorem prodSnd_prodHomOf {W : EllObj R} (v : W ⟶ X) (q : Q.obj (op W)) :
     prodSnd f eqv (prodHomOf f eqv v q) = q := by
-  sorry
+  set w := (eqv v.baseHom).symm (Q.map (EllObj.isoPullbackAlong v).inv.op q) with hw
+  have hb : (prodHomOf f eqv v q).baseHom = w.1 :=
+    EllObj.homToPullbackAlong_baseHom _ _ _
+  have hπ : prodHomOf f eqv v q ≫ X.pullbackAlongπ f = v := by
+    rw [prodHomOf]
+    exact EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
+  rw [prodSnd, prodSndOf_congr f eqv hπ _ rfl (hb ▸ w.2),
+    prodSndOf_congr_hom f eqv v hb (hb ▸ w.2) w.2, prodSndOf, hw,
+    Equiv.apply_symm_apply, ← FunctorToTypes.map_comp_apply, ← op_comp,
+    show EllObj.toPullbackAlong v ≫ (EllObj.isoPullbackAlong v).inv = 𝟙 _ from
+      (EllObj.isoPullbackAlong v).hom_inv_id]
+  simp
 
 end Prod
