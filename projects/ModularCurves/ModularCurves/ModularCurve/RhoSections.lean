@@ -6931,6 +6931,56 @@ theorem rhoOfSection_strSection
 
 end MutualInverses
 
+open scoped FintypeCatDiscrete in
+/-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route) — THE 3d/3e
+CLOSURE.** Relative representability of the ρ-level problem: for every elliptic
+curve `E` over a `ℚ`-scheme `T`, the functor `T' ↦ {ρ-level structures on
+E ×_T T'}` is representable by a finite étale `T`-scheme — the free `GL₂`
+quotient of the symplectically framed moduli. Same statement as
+`rhoLevel_relativelyRepresentable` (YRho.lean); proven here downstream of the
+section dictionary (3c/3d) and the mutual inverses (3e). -/
+theorem rhoLevel_relativelyRepresentable' (hN : 3 ≤ N)
+    (D : GaloisRepData N) {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ))
+    (E : EllipticCurve T) :
+    ∃ (I : Scheme.{0}) (f : I ⟶ T), IsFinite f ∧ Etale f ∧
+      ∀ {T' : Scheme.{0}} (k : T' ⟶ T),
+        Nonempty ({ h : T' ⟶ I // h ≫ f = k } ≃
+          RhoLevelStructure D (k ≫ sT) (E.baseChange k)) := by
+  classical
+  haveI hFact : Fact (1 < N) := ⟨by omega⟩
+  obtain ⟨d⟩ := sympFramed_equivariantRelRepData D
+    (⟨T, sT, E⟩ : EllObj (CommRingCat.of ℚ))
+  haveI hAf : IsAffineHom d.f := by
+    haveI := d.finite
+    infer_instance
+  have hfe := d.σZ.relQuotientStruct_finite_etale_of_free d.f d.over_base
+    (d.free_on_points (sympFramedAut_freeAction D)) d.finite d.etale
+  refine ⟨d.σZ.relQuotient d.f d.over_base,
+    d.σZ.relQuotientStruct d.f d.over_base, hfe.1, hfe.2, ?_⟩
+  intro T' k
+  have hinvSpec : NIsInvertible (Spec (CommRingCat.of ℚ)) N := by
+    have hq : IsUnit ((N : ℚ)) := isUnit_iff_ne_zero.mpr
+      (Nat.cast_ne_zero.mpr (NeZero.ne N))
+    have := hq.map (Scheme.ΓSpecIso (CommRingCat.of ℚ)).inv.hom
+    rwa [map_natCast] at this
+  refine ⟨{
+    toFun := fun h => rhoOfSection D d k h.1 h.2
+      (NIsInvertible.of_hom
+        (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) h.1 ≫ k ≫ sT)
+        hinvSpec)
+    invFun := fun str =>
+      ⟨strSection D d k str, strSection_struct D d k str⟩
+    left_inv := fun h => Subtype.ext
+      (strSection_rhoOfSection D d k h.1 h.2
+        (NIsInvertible.of_hom
+          (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) h.1 ≫ k ≫ sT)
+          hinvSpec))
+    right_inv := fun str => rhoOfSection_strSection D d k str
+      (NIsInvertible.of_hom
+        (pullback.snd (d.σZ.relQuotientπ d.f d.over_base)
+          (strSection D d k str) ≫ k ≫ sT)
+        hinvSpec) }⟩
+
 end
 
 end ModularCurves
