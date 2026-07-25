@@ -58,10 +58,12 @@ variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
 def perfectoidValuation : Valuation F NNReal :=
   (IsPerfectoidField.exists_valuation (p := p) (K := F)).choose
 
+omit [CharP F p] in
 theorem perfectoidValuation_integers :
     (perfectoidValuation p F).Integers ↥(powerBoundedSubring.toSubring F) :=
   (IsPerfectoidField.exists_valuation (p := p) (K := F)).choose_spec
 
+omit [CharP F p] in
 /-- The valuation is `≤ 1` on `O_F`. -/
 theorem perfectoidValuation_le_one (a : OF F) :
     perfectoidValuation p F (a : F) ≤ 1 :=
@@ -215,6 +217,7 @@ Expansion-uniqueness layer (toolkit for the ultrametric inequality, after
 have unique `p`-adic Teichmüller expansions, read off by `teichCoeff`.
 -/
 
+omit [IsTopologicalRing F] [UniformSpace F] [IsPerfectoidField p F] in
 theorem coe_p_ne_zero : (p : Ainf p F) ≠ 0 := by
   intro h
   have h1 : ((p : Ainf p F)).coeff 1 = 1 := by
@@ -245,7 +248,7 @@ theorem exists_eq_sum_teichCoeff_add (x : Ainf p F) (N : ℕ) :
   · obtain ⟨w, hw⟩ := WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff x n
     refine ⟨w, ?_⟩
     have hIic : Finset.Iic n = Finset.range (n + 1) := by
-      ext m; simp [Nat.lt_succ_iff]
+      ext m; simp
     have hsum : (∑ i ∈ Finset.range (n + 1),
         WittVector.teichmuller p (teichCoeff p F x i) * (p : Ainf p F) ^ i)
         = ∑ i ≤ n, WittVector.teichmuller p

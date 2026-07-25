@@ -133,7 +133,7 @@ theorem gaussVal_isContinuous {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
   · convert isOpen_empty
     refine Set.eq_empty_iff_forall_notMem.mpr fun a ha => ?_
     simp only [Set.mem_setOf_eq] at ha
-    exact not_lt_zero' ha
+    exact not_lt_zero ha
   have hq1 : max ρ (perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ₀ : OF F) : F))
       < 1 := max_lt hρ1 (perfectoidValuation_toOF_lt_one p F ϖ₀)
   rw [isOpen_iff_mem_nhds]

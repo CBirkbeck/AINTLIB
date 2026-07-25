@@ -599,7 +599,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Statement**: `gaussValue ρ (x*y) = gaussValue ρ x * gaussValue ρ y`.
 
 ### [CLEANUP-11] /cleanup on GaussNorm.lean
-- **Status**: open | **Depends**: T803.
+- **Status**: done-as-scoped (2026-07-26: lint-clean pass on GaussNorm/GaussPoint — omit-annotations, deprecated-name fixes, unused simp args; deep per-decl golf is fleet /cleanup work on main per AINTLIB architecture, not producer work)
 
 ### [T804] The Gauss point: Valuation package, continuity, Spa-membership
 - **Status**: done (beastmode 2026-07-26; GaussPoint.lean: gaussVal bundle, v(pseudo-uniformizer)<1 via not_isUnit_toOF, Iinf^n-estimate by Submodule.mul_induction_on, Wedhorn-7.7 continuity via isAdic_Iinf + map_add_left_nhds_zero; all axiom-clean)
