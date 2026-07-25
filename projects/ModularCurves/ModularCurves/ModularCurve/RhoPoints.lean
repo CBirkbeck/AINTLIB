@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ModularCurve.RhoSmooth
+import ModularCurves.Moduli.LegendreTorsor
 
 /-!
 # `T`-points of the representing curve as pairs `(E, α)`
@@ -232,6 +233,32 @@ theorem exists_representsYRho_of_legendre_cover (D : GaloisRepData N) [Fact (1 <
     representsYRho_of_smooth D hN r
       (rhoProblem_smoothOfRelativeDimension_one D hN hR r rL dL hLfin hLet hLsurj
         dρ hρfin hρet)⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7 = `yRho_representable`]** The twisted modular curve exists: for `N ≥ 3`
+there is a smooth affine `ℚ`-curve representing the ρ-level moduli problem in the sense
+of `RepresentsYRho` (DEF-17 form).
+
+Inputs: representability and affineness of the representing base (T-YR-5, T-YR-6-APP i),
+the points dictionary (T-YR-7a–d), and the smoothness leaf (T-YR-6 descent machinery
+applied at the Legendre cover, whose finiteness, étaleness and surjectivity come from the
+Legendre torsor package). -/
+theorem exists_representsYRho (D : GaloisRepData N) [Fact (1 < N)] (hN : 3 ≤ (N : ℤ))
+    (hR : IsUnit (2 : CommRingCat.of ℚ))
+    (hL : (universalLegendreObj (CommRingCat.of ℚ) hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP (CommRingCat.of ℚ) hR)
+      (universalLegendreQ (CommRingCat.of ℚ) hR)) :
+    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (CommRingCat.of ℚ)), RepresentsYRho D Y sY := by
+  obtain ⟨X, -, ⟨r⟩⟩ := rhoProblem_exists_representableBy_isAffine D hN
+  obtain ⟨dρ, hρfin, hρet⟩ := rhoProblem_exists_relRepData_finiteEtale D
+    (universalLegendreObj (CommRingCat.of ℚ) hR)
+  refine exists_representsYRho_of_legendre_cover D hN hR r
+    (legendreDeltaRepresentableBy (CommRingCat.of ℚ) hR hL)
+    (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X).toRelRepData
+    (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X).finite
+    (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X).etale
+    (legendreDelta_surjective_of (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X))
+    dρ hρfin hρet
 
 end ModularCurves
 
