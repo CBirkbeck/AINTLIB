@@ -131,6 +131,40 @@ structure GaloisRepData (N : ℕ) [NeZero N] where
         (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv : (ZMod N)ˣ) : ZMod N).val) :
           (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ)
 
+/-- **(T-G1 MAIN)** A mod-`N` Galois representation with cyclotomic determinant *is* a
+`GaloisRepData`: the pairing normalisation `p` and its equivariance are derived, not
+assumed. (`det ρ̄ = χ` is what makes the resulting `(ρ̄, p)` symplectically coherent
+downstream; `p` itself exists for any choice of primitive root — see
+`pairingNormalisation_equivariant`.) -/
+noncomputable def GaloisRepData.ofDetCyclo {N : ℕ} [NeZero N]
+    (ρ : GalQ →* Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (ker_open : IsOpen (X := GalQ) (MonoidHom.ker ρ : Set GalQ))
+    (det_cyclo : ∀ σ : GalQ, Matrix.GeneralLinearGroup.det (ρ σ) =
+      modularCyclotomicCharacter (AlgebraicClosure ℚ)
+        (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv) :
+    GaloisRepData N :=
+  { ρ := ρ
+    ker_open := ker_open
+    det_cyclo := det_cyclo
+    p := pairingNormalisationOfPrimitiveRoot
+      (exists_isPrimitiveRoot_algClosureQ N).choose_spec
+    p_equivariant := pairingNormalisation_equivariant
+      (exists_isPrimitiveRoot_algClosureQ N).choose_spec }
+
+@[simp] theorem GaloisRepData.ofDetCyclo_ρ {N : ℕ} [NeZero N]
+    (ρ : GalQ →* Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (h₁ h₂) :
+    (GaloisRepData.ofDetCyclo ρ h₁ h₂).ρ = ρ := rfl
+
+/-- **(T-G1 MAIN, `∃`-form)** Existence: the pairing datum never obstructs. -/
+theorem exists_galoisRepData_of_detCyclo {N : ℕ} [NeZero N]
+    (ρ : GalQ →* Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (ker_open : IsOpen (X := GalQ) (MonoidHom.ker ρ : Set GalQ))
+    (det_cyclo : ∀ σ : GalQ, Matrix.GeneralLinearGroup.det (ρ σ) =
+      modularCyclotomicCharacter (AlgebraicClosure ℚ)
+        (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv) :
+    ∃ D : GaloisRepData N, D.ρ = ρ :=
+  ⟨GaloisRepData.ofDetCyclo ρ ker_open det_cyclo, rfl⟩
+
 /-! ### The Grothendieck–Galois construction of `V_ρ` (T-F1, discharging DS5)
 
 The AG-GG development (`ForMathlib/FiniteEtaleGalois`, `FiniteEtaleFiberFunctor`,
