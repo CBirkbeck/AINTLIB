@@ -260,6 +260,19 @@ noncomputable def RelRepData.representableByProd {P Q : ModuliProblem R} {X : El
   ModuliProblem.representableByProd r d.f (fun {_} g => d.eqv g)
     (fun {_ _} g k h => d.nat g k h)
 
+/-- The relative representation datum extracted from `AffineOverEll` (whose data is
+exactly a `RelRepData` together with affineness of the structure map). -/
+noncomputable def AffineOverEll.relRepData {P : ModuliProblem R} (hP : P.AffineOverEll)
+    (X : EllObj R) : RelRepData P X where
+  Z := (hP X).choose
+  f := (hP X).choose_spec.choose
+  eqv := (hP X).choose_spec.choose_spec.2.choose
+  nat := (hP X).choose_spec.choose_spec.2.choose_spec
+
+theorem AffineOverEll.isAffineHom_relRepData_f {P : ModuliProblem R}
+    (hP : P.AffineOverEll) (X : EllObj R) : IsAffineHom (hP.relRepData X).f :=
+  (hP X).choose_spec.choose_spec.1
+
 /-- **[T-YR-6-APP P3]** The two orders of "add a `P`-datum" and "add a `Q`-datum"
 produce isomorphic total spaces. -/
 noncomputable def prodUniqueUpToIso {P Q : ModuliProblem R} {X X' : EllObj R}
