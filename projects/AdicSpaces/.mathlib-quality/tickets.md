@@ -300,7 +300,7 @@ not weaken or strengthen hypotheses).
 - **Status**: open | **Depends**: T303.
 
 ### [T401] 𝒴: basic-open description and element facts (L4.1 + part of L4.4)
-- **Status**: open | **File**: FarguesFontaine/YSpace.lean | **Depends**: T201 | **Parallel**: with T30x
+- **Status**: done (board reconciliation 2026-07-26: content shipped in YSpace.lean during the M4/M5 waves; file is sorry-free and green) | **File**: FarguesFontaine/YSpace.lean | **Depends**: T201 | **Parallel**: with T30x
 - **Statements**: `Y_eq_spa_inter_basicOpen`, `isOpen_Y`, `v_p_ne_zero`,
   `v_teichPi_ne_zero`.
 - **Sketch**: (1) set-extensionality: `basicOpen f f` membership is (refl ∧ ¬ v f ≤ 0);
@@ -313,7 +313,7 @@ not weaken or strengthen hypotheses).
   quotes).
 
 ### [T402] 𝒴: φ-stability and ϖ-independence (L4.2–L4.3)
-- **Status**: open | **File**: YSpace.lean | **Depends**: T401, T301, T102
+- **Status**: done (board reconciliation 2026-07-26: content shipped in YSpace.lean during the M4/M5 waves; file is sorry-free and green) | **File**: YSpace.lean | **Depends**: T401, T301, T102
 - **Statements**: `smul_mem_Y`, `Y_indep`.
 - **Sketch**: per decomposition L4.2/L4.3: Teichmüller-power divisibility + supp
   primality; for smul: (g•v)(p·[ϖ]) ≠ 0 ⟺ v(p) ≠ 0 ∧ v([ϖ^{p^{-k}}]) ≠ 0, and the
@@ -321,7 +321,7 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L4.2–L4.3 ([Ked-AWS §11.2] quote; [SW §12.2] quote).
 
 ### [T403] 𝒴: strictness and cofinality from continuity (L4.4–L4.5)
-- **Status**: open | **File**: YSpace.lean | **Depends**: T401
+- **Status**: done (board reconciliation 2026-07-26: content shipped in YSpace.lean during the M4/M5 waves; file is sorry-free and green) | **File**: YSpace.lean | **Depends**: T401
 - **Statements**: `vlt_p_one`, `vlt_teichPi_one`, `exists_pow_p_vlt`,
   `exists_pow_teichPi_vlt`.
 - **Sketch**: unfold `Valuation.IsContinuous` at γ = value of the target element via
