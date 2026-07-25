@@ -25151,7 +25151,14 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
   `coord`-naturality is pullback-plumbing + vRhoPointsEquiv naturality). Deps: T-YR-1.
   Status: open.
 - **[T-YR-3 = T-F6] AffineOverEll (rhoProblem D)** (⟹ also `rhoLevel_relativelyRepresentable`
-  :421 as a corollary in its stated ∃-form). Route (Q9): the symplectic Isom-scheme. PRIMARY
+  :421 as a corollary in its stated ∃-form). **2026-07-25: ∃-FORM CLOSED** —
+  `rhoLevel_relativelyRepresentable'` (RhoSections.lean, end) PROVEN sorry-free-modulo-registers
+  via the full 3c/3d/3e chain (strSection/rhoOfSection mutual inverses; T-3E-A/B roundtrips;
+  supports L1/L2/W0/W1/REC/VC/N; axiom profile: propext/sorryAx(registers)/Classical.choice/
+  Quot.sound). REMAINING for the AffineOverEll-ENGINE-form: the eqv-NATURALITY clause =
+  rhoOfSection-naturality in the base, reducible via the roundtrip-bijection to
+  strSection-pull-naturality (strSection (k≫g) (pull (pullbackAlongMap g k) str) =
+  k ≫ strSection g str — via EffectiveEpi.uniq + strValue-naturality of pulled structures). Route (Q9): the symplectic Isom-scheme. PRIMARY
   construction: étale-locally on T the finite étale `V_ρ` trivializes to (ℤ/N)²-const and the
   problem reduces to the LANDED untwisted relRepData ([GHA4] `gammaFullNaive_relRepData`, read
   its construction at pickup: GammaHRepresentability ~:3400-3460) carved by the symplectic
