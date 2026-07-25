@@ -2456,20 +2456,71 @@ theorem pointToTorsion_mapPoint {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B
     rw [Category.assoc, torsionMapOfEllHom_π g N, ← Category.assoc,
       A.curve.pointToTorsion_torsionπ, B.curve.pointToTorsion_torsionπ]
 
-/-- **[T-YR-2e-W, DS4-register]** Naturality of the Weil-pairing evaluation along an
-`Ell/ℚ`-morphism: `e_N` of the pushed-forward points agrees with `e_N` upstairs (the
-cartesian square identifies `A[N]` with the base change of `B[N]`, and `e_N` is
-base-change compatible, KM 2.8.4.2). BLOCKED on DS4: `weilPairing` is
-register-`sorry`-defined (WeilPairing/Basic.lean DS4) with no naturality spec, and the
-two sides consume the two curves' *independent* registered pairings; discharged by
-stream-C together with DS4's closure. -/
+/-- **(T-C1c, DS4 REGISTER SPEC: compatibility with base change of the CURVE)** The
+Weil pairing commutes with the cartesian torsion square of an `Ell/ℚ`-morphism: pushing a
+pair of `A[N]`-points forward to `B[N]` and pairing there is the same as pairing in
+`A[N]` and mapping the value along `μ_{N,A.base} ⟶ μ_{N,B.base}`.
+
+This is the *curve*-direction companion of the registered base-change spec
+`weilPairingEval_restrict` (which is the `T`-direction), and is the exact content of
+KM 2.8.4.2 ("the pairing commutes with base change"). It is stated here as a DS4 register
+entry — the pairings of `A.curve` and of `B.curve` are two independent register data, so
+no relation between them is derivable; the point-level naturality
+`weilPairingEval_mapPoint` below IS derived from it. -/
+theorem weilPairing_torsionMapOfEllHom {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
+    (N : ℕ) [NeZero N] :
+    pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+        (B.curve.torsionπ N) (B.curve.torsionπ N)
+        (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+        (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm ≫
+      B.curve.weilPairing N =
+        A.curve.weilPairing N ≫ muNMapAlong g.baseHom N := by sorry
+
+/-- **[T-YR-2e-W]** Naturality of the Weil-pairing evaluation along an `Ell/ℚ`-morphism:
+`e_N` of the pushed-forward points agrees with `e_N` upstairs. **PROVED** from the DS4
+register spec `weilPairing_torsionMapOfEllHom` (curve base change) together with
+`pointToTorsion_mapPoint` (the torsion lift is natural in the curve) and
+`muNPointsEquiv_mapAlong` (the `μ_N`-points dictionary is natural in the base). -/
 theorem weilPairingEval_mapPoint {A B : EllObj (CommRingCat.of ℚ)} (g : A ⟶ B)
     {T : Scheme.{0}} (t : T ⟶ A.base) (x y : A.curve.Point t)
     (hx : x.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero)
     (hy : y.1 ≫ A.curve.mulByHom N = t ≫ A.curve.zero) :
     (B.curve.weilPairingEval (EllHom.mapPoint g t x) (EllHom.mapPoint g t y)
         (EllHom.mapPoint_torsion g x hx) (EllHom.mapPoint_torsion g y hy)).1 =
-      (A.curve.weilPairingEval x y hx hy).1 := by sorry
+      (A.curve.weilPairingEval x y hx hy).1 := by
+  -- the two torsion lifts are related by the cartesian torsion square
+  have hlift : pullback.lift
+        (B.curve.pointToTorsion (EllHom.mapPoint g t x) (EllHom.mapPoint_torsion g x hx))
+        (B.curve.pointToTorsion (EllHom.mapPoint g t y) (EllHom.mapPoint_torsion g y hy))
+        (by simp) =
+      pullback.lift (A.curve.pointToTorsion x hx) (A.curve.pointToTorsion y hy) (by simp) ≫
+        pullback.map (A.curve.torsionπ N) (A.curve.torsionπ N)
+          (B.curve.torsionπ N) (B.curve.torsionπ N)
+          (torsionMapOfEllHom g N) (torsionMapOfEllHom g N) g.baseHom
+          (torsionMapOfEllHom_π g N).symm (torsionMapOfEllHom_π g N).symm := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [pullback.lift_fst, Category.assoc, pullback.lift_fst, ← Category.assoc,
+        pullback.lift_fst]
+      exact (pointToTorsion_mapPoint g x hx).symm
+    · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd, ← Category.assoc,
+        pullback.lift_snd]
+      exact (pointToTorsion_mapPoint g y hy).symm
+  have hover : (pullback.lift (A.curve.pointToTorsion x hx) (A.curve.pointToTorsion y hy)
+        (by simp) ≫ A.curve.weilPairing N) ≫ muNπ A.base N = t := by
+    rw [Category.assoc, A.curve.weilPairing_over N, ← Category.assoc,
+      pullback.lift_fst, A.curve.pointToTorsion_torsionπ]
+  refine Eq.trans ?_ (muNPointsEquiv_mapAlong g.baseHom N t
+    ⟨pullback.lift (A.curve.pointToTorsion x hx) (A.curve.pointToTorsion y hy) (by simp) ≫
+      A.curve.weilPairing N, hover⟩)
+  refine congrArg Subtype.val (congrArg (muNPointsEquiv B.base N (t ≫ g.baseHom))
+    (Subtype.ext ?_))
+  show pullback.lift
+      (B.curve.pointToTorsion (EllHom.mapPoint g t x) (EllHom.mapPoint_torsion g x hx))
+      (B.curve.pointToTorsion (EllHom.mapPoint g t y) (EllHom.mapPoint_torsion g y hy))
+      (by simp) ≫ B.curve.weilPairing N =
+    (pullback.lift (A.curve.pointToTorsion x hx) (A.curve.pointToTorsion y hy)
+      (by simp) ≫ A.curve.weilPairing N) ≫ muNMapAlong g.baseHom N
+  rw [hlift, Category.assoc, weilPairing_torsionMapOfEllHom g N, Category.assoc]
 
 /-- [T-YR-2e] The pulled-back ρ-torsion trivialization square: the cartesian torsion
 square of `g` (T-YR-2c) pasted with `α`'s trivialization square is cartesian over
