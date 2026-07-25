@@ -1122,6 +1122,13 @@ from this session's own verified lemmas. Skeleton to be written with the tickets
   (`refs/AdicSpaces/kedlaya-noetherian-ff.txt`). Formula (2.2.1) (verbatim):
   > "For t ∈ [0, +∞), define the "Gauss norm" function λt : BL,E → R by the formula
   > λt(Σ ϖ^n [xn]) = max{p^{-n}|xn|^t}"
+  CONVENTION RESOLUTION (2026-07-26, from the typeset formula): (2.2.1) is
+  λ_t(Σ ϖ^n[x_n]) = max_n p^{-n}·|x_n|^t (weight p^{-n}, exponent t on the F-norm).
+  The plan's untwisted w_ρ(Σ p^n[a_n]) = max_n ρ^n·|a_n| equals (λ_t)^{1/t} for
+  ρ = p^{-1/t}; since y ↦ y^{1/t} is a multiplicative order-isomorphism of ℝ≥0,
+  w_ρ is a multiplicative ultrametric norm iff λ_t is — so Lemma 2.3 transfers
+  verbatim and the untwisted form is safe to formalize. (Cross-check requested
+  from gpt-5.6-sol, pending.)
   and Lemma 2.3 (verbatim):
   > "For t ∈ [0, +∞), the function λt defines a multiplicative norm on BL,E.
   > Proof. This is a straightforward consequence of the homogeneity properties of Witt
