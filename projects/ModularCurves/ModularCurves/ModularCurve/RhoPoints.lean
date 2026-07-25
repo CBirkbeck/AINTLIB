@@ -254,10 +254,10 @@ theorem exists_representsYRho (D : GaloisRepData N) [Fact (1 < N)] (hN : 3 ≤ (
     (universalLegendreObj (CommRingCat.of ℚ) hR)
   refine exists_representsYRho_of_legendre_cover D hN hR r
     (legendreDeltaRepresentableBy (CommRingCat.of ℚ) hR hL)
-    (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X).toRelRepData
-    (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X).finite
-    (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X).etale
-    (legendreDelta_surjective_of (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X))
+    (legendreDeltaSignEquivariantData (CommRingCat.of ℚ) hR X).toRelRepData
+    (legendreDeltaSignEquivariantData (CommRingCat.of ℚ) hR X).finite
+    (legendreDeltaSignEquivariantData (CommRingCat.of ℚ) hR X).etale
+    (legendreDelta_surjective_of (legendreDeltaSignEquivariantData (CommRingCat.of ℚ) hR X))
     dρ hρfin hρet
 
 open scoped FintypeCatDiscrete in
