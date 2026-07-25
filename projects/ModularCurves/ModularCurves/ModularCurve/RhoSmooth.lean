@@ -75,6 +75,17 @@ theorem rhoProblem_isAffine_base (D : GaloisRepData N) [Fact (1 < N)] (hN : 3 �
   ModuliProblem.isAffine_base_of_representableBy
     (rhoProblem_exists_representableBy_isAffine D hN) r
 
+
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7, affine conjunct]** The structure map of a representing object of the
+ρ-level problem is affine (both source and target are affine schemes). -/
+theorem rhoProblem_isAffineHom_structMap (D : GaloisRepData N) [Fact (1 < N)]
+    (hN : 3 ≤ (N : ℤ)) {X : EllObj (CommRingCat.of ℚ)}
+    (r : (rhoProblem D).RepresentableBy X) :
+    IsAffineHom X.structMap := by
+  haveI := rhoProblem_isAffine_base D hN r
+  infer_instance
+
 end ModularCurves
 
 end
