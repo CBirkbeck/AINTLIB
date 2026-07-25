@@ -25416,7 +25416,7 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   (free finite action on an affine-over-X.base scheme; engine gives scheme + affine +
   UP); Z_X^symp := the clopen locus where the universal Weil pairing matches p through
   the frame (weilPairingCharZero + D.det_cyclo select components; char-0 base). Clopen
-  immersion ≫ affine = affine over X.base. Status: open.
+  immersion ≫ affine = affine over X.base. **Status: CLOSED** (RhoSections).
 - **[T-YR-3d] Points identification** — {h : T → Z_X^symp over X.base} ≃
   RhoLevelStructure D (pullbackAlong-structMap) (E ×_X T): the ρ-structure at a
   T-point = (full-level structure, frame) mod GL₂ with pairing-match — surjectivity of
@@ -25424,10 +25424,12 @@ KM-4.7.0-engine is NOT usable here (it CONSUMES relative representability — ci
   argument (the qpd/TorsorData vocabulary [W5]-adjacent, NOT the full engine); étale-
   locally on T both E[N] and V_ρ trivialize, a frame + full-level pair exists, and two
   lifts differ by unique γ. THE HEAVY LEAF — expect further splitting (surjectivity /
-  injectivity / naturality). Status: open.
+  injectivity / naturality). **Status: CLOSED 2026-07-25** — done in `RhoSections.lean`
+  (sections dictionary 3c/3d + mutual inverses 3e).
 - **[T-YR-3e] Assembly** — `rho_affineOverEll : (rhoProblem D).AffineOverEll` from
   3b-3d; corollary fills `rhoLevel_relativelyRepresentable` (the sorried ∃-form).
-  Status: open.
+  **Status: CLOSED** — `rhoProblem_affineOverEll` + `rhoLevel_relativelyRepresentable'`
+  (RhoSections.lean); also `rhoProblem_exists_relRepData_finiteEtale` (T-YR-6-APP S2).
 
 ### DS4-register addition (2026-07-23, session B)
 - **[T-YR-2e-W] `weilPairingEval_mapPoint` (YRho.lean)** — naturality of the Weil-pairing
