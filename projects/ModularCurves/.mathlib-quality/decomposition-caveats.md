@@ -266,3 +266,25 @@ algebraic leaf `irreducibleSpace_of_connectedSpace_of_smooth` needs
 `dim R/xR = dim R − 1`, then `xR` prime + Nakayama on `𝔭 = x𝔭`) and "smooth over a field ⟹
 regular local" are both from-scratch developments here. Ticket them as their own stream
 (`T-REG-*`) — they are the honest prerequisite, not a leaf.
+
+## T-REG — the regular-local stream (started this session)
+
+New file `ForMathlib/RegularLocalDomain.lean` (sorry-free). Landed:
+* **T-REG-1** `isField_of_isRegularLocalRing_of_ringKrullDim_eq_zero` (+ the `IsDomain`
+  corollary) — the base case.
+* **T-REG-2** `exists_mem_maximalIdeal_notMem_sq_notMem_minimalPrimes` — the regular
+  parameter, by prime avoidance against `𝔪²` and the (finitely many) minimal primes.
+* **T-REG-3a** `ringKrullDim_le_ringKrullDim_quotient_span_singleton_succ` — the dimension
+  half of the `R/xR` step.
+* **T-REG-4** `isDomain_of_isPrime_span_singleton` — the closing Nakayama step.
+
+**Remaining brick — T-REG-3b** (`spanFinrank (maximalIdeal (R ⧸ span{x})) ≤ dim R − 1` for
+`x ∈ 𝔪 \ 𝔪²`), i.e. *x is part of a minimal generating set of `𝔪`*: choose a `k`-basis of
+`𝔪/𝔪²` containing `x̄ ≠ 0` (`Basis.extend`), lift it (Nakayama: spanning mod `𝔪` ⟹
+spanning), and drop `x`; the images of the other `d − 1` generate `𝔪̄`. Then the sandwich
+`d − 1 ≤ dim (R/xR) ≤ spanFinrank 𝔪̄ ≤ d − 1` (T-REG-3a +
+`ringKrullDim_le_spanFinrank_maximalIdeal`) gives both `IsRegularLocalRing (R/xR)` and
+`dim (R/xR) = d − 1`, and T-REG-1/2/4 close the induction:
+`IsRegularLocalRing R → IsDomain R`. After that, T-G4a needs the second half
+(smooth over a field ⟹ the local rings are regular — Jacobian criterion via
+`IsStandardSmoothOfRelativeDimension`), which is a separate stream.
