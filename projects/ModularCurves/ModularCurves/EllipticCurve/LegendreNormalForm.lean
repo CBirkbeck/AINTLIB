@@ -183,4 +183,38 @@ theorem legendreCurve_vc_marked (h2 : IsUnit (2 : R)) {C : VariableChange R}
     ring
   exact ⟨hr, hs, ht, huu, hlam⟩
 
+/-- **(T-G3a-SUB2a, the existence direction — Silverman AEC III.1 Prop 1.7(b))** A
+char-≠2-normal-form curve (`a₁ = a₃ = 0`) whose cubic **splits** with roots `e₁, e₂, e₃`
+is carried to Legendre form by the variable change `⟨u, e₁, 0, 0⟩`, for any unit `u`
+with `u² = e₂ − e₁`: the roots become `0`, `1` and `λ = u⁻²(e₃ − e₁)`.
+
+The splitting hypothesis is given by the three coefficient identities (Vieta); over an
+algebraically closed field they hold for the roots of the cubic, and the square root `u`
+exists there, which is Silverman's hypothesis "char ≠ 2 and `K` algebraically closed".
+No division is used, so the statement holds over an arbitrary commutative ring. -/
+theorem scale_translate_smul_eq_legendreCurve {W : WeierstrassCurve R}
+    (h1 : W.a₁ = 0) (h3 : W.a₃ = 0) {e₁ e₂ e₃ : R} (u : Rˣ)
+    (ha₂ : W.a₂ = -(e₁ + e₂ + e₃))
+    (ha₄ : W.a₄ = e₁ * e₂ + e₁ * e₃ + e₂ * e₃)
+    (ha₆ : W.a₆ = -(e₁ * e₂ * e₃))
+    (hu : ((u : R)) ^ 2 = e₂ - e₁) :
+    (⟨u, e₁, 0, 0⟩ : VariableChange R) • W =
+      legendreCurve (((u⁻¹ : Rˣ) : R) ^ 2 * (e₃ - e₁)) := by
+  have huinv : ((u⁻¹ : Rˣ) : R) * (u : R) = 1 := u.inv_mul
+  have hsq : ((u⁻¹ : Rˣ) : R) ^ 2 * (e₂ - e₁) = 1 := by
+    rw [← hu, ← mul_pow, huinv, one_pow]
+  ext
+  · rw [WeierstrassCurve.variableChange_a₁, h1, legendreCurve_a₁]
+    simp
+  · rw [WeierstrassCurve.variableChange_a₂, h1, legendreCurve_a₂, ha₂]
+    simp only [mul_zero, sub_zero, zero_mul]
+    linear_combination -hsq
+  · rw [WeierstrassCurve.variableChange_a₃, h1, h3, legendreCurve_a₃]
+    simp
+  · rw [WeierstrassCurve.variableChange_a₄, h1, h3, legendreCurve_a₄, ha₂, ha₄]
+    simp only [mul_zero, sub_zero, zero_mul, add_zero]
+    linear_combination (((u⁻¹ : Rˣ) : R) ^ 2 * (e₃ - e₁)) * hsq
+  · rw [WeierstrassCurve.variableChange_a₆, h1, h3, legendreCurve_a₆, ha₂, ha₄, ha₆]
+    ring
+
 end ModularCurves
