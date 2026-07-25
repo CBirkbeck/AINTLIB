@@ -25289,11 +25289,29 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
   étale ⟹ α lifts uniquely along square-zero). Audit mathlib SmoothOfRelativeDimension +
   formal-smoothness API at pickup; EXPECT sub-tickets (this is the deepest leaf; may consume
   its own /develop --continue). Deps: T-YR-5. Status: open.
-- **[T-YR-7] ASSEMBLY `yRho_representable` (:455)** — Y := reprX.base, sY := structMap;
-  clauses: smooth = T-YR-6; affine = T-YR-5; Quot-points ≃ = RepresentableBy.homEquiv
-  composed with "iso-classes collapse under rigidity" (each Quot-class has a canonical
-  functor-value; bridge lemma from T-YR-4's rigidity + coords-invariance defining the Quot
-  relation). Deps: T-YR-5, T-YR-6. Status: open.
+- **[T-YR-7] ASSEMBLY `yRho_representable`** — Y := X.base, sY := X.structMap for a
+  representing `X : EllObj (CommRingCat.of ℚ)` of `rhoProblem D`.
+  - clause 2 (`IsAffineHom sY`): **DONE** — `rhoProblem_isAffineHom_structMap` (RhoSmooth).
+  - clause 1 (`SmoothOfRelativeDimension 1 sY`): machinery **DONE** (T-YR-6); remaining =
+    T-YR-6-APP (A1) surjectivity of the Legendre cover + (A2) the fibre-product commutation.
+  - clause 3 (Quot-points `≃`): SUB-DECOMPOSITION (2026-07-25):
+    * **[T-YR-7a] forward map.** For `h : T ⟶ X.base` with `h ≫ X.structMap = sT`, the
+      object `X.pullbackAlong h : EllObj ℚ` has base `T` and curve the pullback; the
+      canonical `EllHom (X.pullbackAlong h) ⟶ X` transports the universal structure
+      `r.homEquiv (𝟙 X)` to `RhoLevelStructure D sT (X.pullbackAlong h).curve`
+      (`(rhoProblem D).obj (op ·)` **is** `RhoLevelStructure D ·.structMap ·.curve`, YRho:2655).
+      Send `h ↦ Quot.mk _ ⟨curve, structure⟩`.
+    * **[T-YR-7b] backward map.** For `(E, α)` over `T` with structure map `sT`, put
+      `X'' := ⟨T, sT, E⟩` and `h := (r.homEquiv.symm α).baseHom`; `base_w` gives
+      `h ≫ X.structMap = sT`.
+    * **[T-YR-7c] well-definedness on Quot-classes (the mathematical crux).** If
+      `f : E ≅ E'` satisfies the coordinate condition of the Quot relation, then
+      `α = RhoLevelStructure.pull` of `α'` along the induced `EllHom`; i.e. **the coord
+      condition is equivalent to compatibility of the ρ-structures**. This is the
+      coords-invariance bridge; ingredients: T-YR-4's rigidity (`rho_rigidNoeth`), the
+      `coord` dictionary and the geometric-point detection used there.
+    * **[T-YR-7d] the two roundtrips**, from `r.homEquiv`'s naturality plus 7c.
+  Deps: T-YR-5 (done), T-YR-6 (machinery done). Status: open.
 - NOT in scope: yRho_geometricallyIrreducible (BB-IRR), the D8 twist-comparison, closing DS4
   (stream-C). CLEANUP-Y1F/YR: DEFERRED-TO-MAIN (producer rule).
 
