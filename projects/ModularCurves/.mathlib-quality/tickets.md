@@ -25180,7 +25180,33 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
   ∃-affineHom mirror chain AT P := rhoProblem (the v10.351 cascade is GENERIC in P — direct
   reuse of exists_representableBy_isAffineHom_of_baseChange_cover at (2,3)). Deps: T-YR-3,
   T-YR-4. Status: open.
-- **[T-YR-6] SmoothOfRelativeDimension 1** — the parked conjunct, now sourced: Loeffler Thm
+- **[T-YR-6] SmoothOfRelativeDimension 1** — SUB-TICKETS (2026-07-25, source read: Loeffler
+  3.4.3/3.4.4 pp. 14-15 = the formal-smoothness criterion (Stacks 36.9) + coefficient-lifting
+  + [N]-étale point-lifting; ρ-case: α : E[N] ≅ V_ρ lifts uniquely along square-zero since
+  both sides finite étale):
+  - **[T-YR-6a] mathlib/repo audit**: SmoothOfRelativeDimension-criteria
+    (IsZariskiLocalAtTarget — EngineDescent:595-note), formally-smooth API for Scheme-morphisms
+    (Mathlib.AlgebraicGeometry.Morphisms.Smooth + RingHom.Smooth/FormallySmooth bridges),
+    smooth ⟺ (locally-finite-presentation ∧ formally-smooth) form; fibre-dimension API.
+    Output: the exact criterion-lemma names + the statement-shape for 6c. Status: open.
+  - **[T-YR-6b] square-zero value-lifting**: for A₀ = A/I (A local noeth, I nilpotent/sq-zero)
+    over ℚ: every (rhoProblem D)-value over Spec A₀ lifts to Spec A — E-part: Weierstrass
+    coefficient lifting (WeierstrassModel/EngineMouth chart machinery; Δ-unit persists as I
+    nilpotent + A local); α-part: E[N], V_ρ-pullback both finite étale over the base ⟹ maps
+    between them lift UNIQUELY along square-zero (étale = formally-étale; mathlib
+    FormallyEtale.comp/lifting) ⟹ the iso + the ρ-conditions (coords_additive/pairing:
+    props transport by uniqueness). Status: open.
+  - **[T-YR-6c] representing-scheme smoothness**: Yoneda-transfer — hom-lifting along
+    Spec A₀ ⟶ Spec A ⟸ value-lifting (6b) through the RepresentableBy-equiv of
+    `rhoProblem_representable`; conclude formal smoothness of reprX.structMap; with lfp
+    (finite-type over ℚ from the affine-over-Ell construction: relQuotient of finite-type)
+    conclude Smooth. Status: open.
+  - **[T-YR-6d] relative dimension 1**: fibre-dim of reprX.structMap — route: the
+    forget-to-(Ell)-composite is finite étale (AffineOverEll at the terminal-ish anchors) over
+    the j-line-direction... CONCRETE route at pickup: reprX-fibres = Y(ρ̄)_k̄ étale over
+    Y(N)_k̄-ish via the (V) framed-comparison, or direct: dim = dim of the framed cover
+    (strCover-charts: wFrames ×  Weierstrass-slice) — decide after 6a/6c. Status: open.
+  ORIGINAL: the parked conjunct, now sourced: Loeffler Thm
   3.4.4 (p. 15 verbatim: lift Weierstrass coefficients; "Can we lift P₀ … Yes, since
   [N] : E → E is smooth" — étale ⟹ unique lifting) adapted to α : E[N] ≅ V_ρ (both sides
   étale ⟹ α lifts uniquely along square-zero). Audit mathlib SmoothOfRelativeDimension +
