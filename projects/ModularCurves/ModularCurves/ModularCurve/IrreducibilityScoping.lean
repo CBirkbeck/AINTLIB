@@ -69,7 +69,8 @@ connectedness of `ℍ/Γ̃`. Tractable directly from mathlib. -/
 theorem connectedSpace_quotient_orbitRel
     {X : Type*} [TopologicalSpace X] [ConnectedSpace X]
     {G : Type*} [Group G] [MulAction G X] :
-    ConnectedSpace (Quotient (MulAction.orbitRel G X)) := by sorry
+    ConnectedSpace (Quotient (MulAction.orbitRel G X)) :=
+  Quotient.instConnectedSpace
 
 /-- **(T-IRR0, MASTER — the algebraic reduction)** Geometric irreducibility of a curve representing
 the `ρ`-level moduli problem follows from geometric **connectedness** of its base change to `ℚ̄`
