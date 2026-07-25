@@ -96,6 +96,20 @@ theorem legendreDelta_relRep_finiteEtale_of_scaleTorsor
   exact (Equiv.sigmaCongrLeft (X.curve.fullLevelLocusPointsEquiv 2 h2 g)).trans
     (sigmaSubtypePairEquiv (fun L b => IsLegendreDatum (X.pullbackAlong g) L b))
 
+/-! ### Computation lemmas for the two problem functors (keep `whnf` out of the proofs) -/
+
+/-- The `Γ(N)`-problem's transport, computed. -/
+theorem gammaFullNaiveProblem_map_apply {N : ℕ} [NeZero N] {A B : EllObj R} (φ : A ⟶ B)
+    (PQ : (gammaFullNaiveProblem R N).obj (Opposite.op B)) :
+    ((gammaFullNaiveProblem R N).map φ.op PQ).1 =
+      (EllHom.pullSection R φ PQ.1.1, EllHom.pullSection R φ PQ.1.2) := rfl
+
+/-- The Legendre `δ`-problem's transport, computed. -/
+theorem legendreDeltaProblem_map_apply {A B : EllObj R} (φ : A ⟶ B)
+    (x : (legendreDeltaProblem R).obj (Opposite.op B)) :
+    ((legendreDeltaProblem R).map φ.op x).1 =
+      ((gammaFullNaiveProblem R 2).map φ.op x.1.1, omegaBasisMap φ x.1.2) := rfl
+
 section NaturalFunnel
 
 variable (X : EllObj R) (h2 : NIsInvertible X.base 2)
@@ -136,6 +150,22 @@ theorem legendreFunnelEquiv_apply
           ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩,
         (spec g ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩ ⟨h.1, rfl⟩).1) :=
   rfl
+
+/-! **(T-G3b brick 5 — IN PROGRESS.)** The naturality of `legendreFunnelEquiv` reduces,
+by `legendreFunnelEquiv_apply` + `legendreDeltaProblem_map_apply` +
+`gammaFullNaiveProblem_map_apply` (all `rfl`), to exactly two component squares:
+
+* the **level** square — `fullLevelLocusPointsEquiv_pullSection_fst/snd`
+  (`Moduli/LevelLocusNatural.lean`, PROVED), and
+* the **ω** square — the `spec_nat` hypothesis of the strengthened `ScaleTorsorData`.
+
+⚠ Elaboration blocker (2026-07-25): assembling the two squares with
+`Subtype.ext`/`Prod.ext` after those rewrites overflows `whnf` (200000 heartbeats) on the
+`(FullLevelPt 2) × OmegaBasis` pair, and heartbeat bumps are forbidden in this project.
+The fix follows the stall playbook: state each component equality as its own top-level
+lemma with a **fully explicit** statement (no metavariables against
+`(gammaFullNaiveProblem R 2).obj (op (X.pullbackAlong (k ≫ g)))`), then combine with
+`Prod.ext`. -/
 
 end NaturalFunnel
 
