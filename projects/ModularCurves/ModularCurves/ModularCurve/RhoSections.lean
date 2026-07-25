@@ -5456,6 +5456,74 @@ theorem strSection_struct (D : GaloisRepData N) [Fact (1 < N)]
 
 end StructuresToSections
 
+section MutualInverses
+
+open scoped FintypeCatDiscrete
+
+variable (D : GaloisRepData N) [Fact (1 < N)]
+
+/-- **[T-3E-1]** Pulling structures along a surjective flat quasi-compact cover
+is injective: the coordinate leg is recovered by epi-cancellation through the
+torsion base change. -/
+theorem RhoLevelStructure.pull_injective {X' : EllObj (CommRingCat.of ℚ)}
+    {T'' : Scheme.{0}} (c : T'' ⟶ X'.base)
+    [Flat c] [Surjective c] [QuasiCompact c]
+    (str₁ str₂ : RhoLevelStructure D X'.structMap X'.curve)
+    (h : RhoLevelStructure.pull D (X'.pullbackAlongπ c) str₁ =
+      RhoLevelStructure.pull D (X'.pullbackAlongπ c) str₂) :
+    str₁ = str₂ := by
+  have hpb := isPullback_torsionMapOfEllHom (X'.pullbackAlongπ c) N
+  haveI hFl : Flat (torsionMapOfEllHom (X'.pullbackAlongπ c) N) :=
+    MorphismProperty.IsStableUnderBaseChange.of_isPullback hpb.flip
+      (inferInstance : Flat c)
+  haveI hSur : Surjective (torsionMapOfEllHom (X'.pullbackAlongπ c) N) :=
+    MorphismProperty.IsStableUnderBaseChange.of_isPullback hpb.flip
+      (inferInstance : Surjective c)
+  haveI hEpi : Epi (torsionMapOfEllHom (X'.pullbackAlongπ c) N) :=
+    Flat.epi_of_flat_of_surjective _
+  -- the pulled coordinate legs agree
+  have hfst := congrArg (fun (β : RhoLevelStructure D
+      (X'.pullbackAlong c).structMap (X'.pullbackAlong c).curve) =>
+    β.torsionIso.hom ≫ pullback.fst (vRhoπ D)
+      (X'.pullbackAlong c).structMap) h
+  rw [show (RhoLevelStructure.pull D (X'.pullbackAlongπ c) str₁).torsionIso =
+        pullTorsionIso D (X'.pullbackAlongπ c) str₁ from rfl,
+      show (RhoLevelStructure.pull D (X'.pullbackAlongπ c) str₂).torsionIso =
+        pullTorsionIso D (X'.pullbackAlongπ c) str₂ from rfl,
+      pullTorsionIso_fst, pullTorsionIso_fst] at hfst
+  have hcoord := (cancel_epi
+    (torsionMapOfEllHom (X'.pullbackAlongπ c) N)).mp hfst
+  -- assemble the iso equality
+  refine RhoLevelStructure.ext_torsionIso (Iso.ext (pullback.hom_ext ?_ ?_))
+  · exact hcoord
+  · exact str₁.over_T.trans str₂.over_T.symm
+
+/-- **[T-3E-1b]** Descent uniqueness: the descended structure is the unique one
+pulling back to the given local structure. -/
+theorem descend_eq_of_pull {X' : EllObj (CommRingCat.of ℚ)}
+    {T'' : Scheme.{0}} {c : T'' ⟶ X'.base}
+    [IsFinite c] [Etale c] [Flat c] [Surjective c] [QuasiCompact c]
+    {α : RhoLevelStructure D (X'.pullbackAlong c).structMap
+      (X'.pullbackAlong c).curve}
+    (Hhom : ∀ {Z : Scheme.{0}}
+      (g₁ g₂ : Z ⟶ (X'.pullbackAlong c).curve.torsion N),
+      g₁ ≫ torsionMapOfEllHom (X'.pullbackAlongπ c) N =
+        g₂ ≫ torsionMapOfEllHom (X'.pullbackAlongπ c) N →
+      g₁ ≫ α.torsionIso.hom ≫ vRhoCoverPrj D X' c =
+        g₂ ≫ α.torsionIso.hom ≫ vRhoCoverPrj D X' c)
+    (Hinv : ∀ {Z : Scheme.{0}}
+      (g₁ g₂ : Z ⟶ pullback (vRhoπ D) (X'.pullbackAlong c).structMap),
+      g₁ ≫ vRhoCoverPrj D X' c = g₂ ≫ vRhoCoverPrj D X' c →
+      g₁ ≫ α.torsionIso.inv ≫ torsionMapOfEllHom (X'.pullbackAlongπ c) N =
+        g₂ ≫ α.torsionIso.inv ≫ torsionMapOfEllHom (X'.pullbackAlongπ c) N)
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (hpull : RhoLevelStructure.pull D (X'.pullbackAlongπ c) str = α) :
+    RhoLevelStructure.descend (α := α) Hhom Hinv = str := by
+  refine RhoLevelStructure.pull_injective D c _ _ ?_
+  rw [pull_descend, hpull]
+
+end MutualInverses
+
 end
 
 end ModularCurves
