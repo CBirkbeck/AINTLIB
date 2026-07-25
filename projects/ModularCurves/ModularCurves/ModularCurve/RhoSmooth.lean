@@ -117,6 +117,50 @@ theorem rhoLegendre_total_isStandardSmooth (D : GaloisRepData N) [Fact (1 < N)]
     (CommRingCat.ofHom (algebraMap (CommRingCat.of ℚ)
       (LegendreModuliRing (CommRingCat.of ℚ)))) d.f hφ
 
+/-- **[T-YR-6-APP S5]** Standard smoothness of the global-sections structure map is
+invariant under isomorphism of `Ell`-objects. -/
+theorem isStandardSmoothOfRelativeDimension_appTop_of_ellIso {n : ℕ}
+    {R : CommRingCat.{0}} {A B : EllObj R} (e : A ≅ B)
+    (h : RingHom.IsStandardSmoothOfRelativeDimension n (B.structMap.appTop).hom) :
+    RingHom.IsStandardSmoothOfRelativeDimension n (A.structMap.appTop).hom := by
+  haveI : IsIso e.hom.baseHom :=
+    ⟨e.inv.baseHom, congrArg EllHom.baseHom e.hom_inv_id,
+      congrArg EllHom.baseHom e.inv_hom_id⟩
+  have hA : A.structMap = e.hom.baseHom ≫ B.structMap := e.hom.base_w.symm
+  haveI : IsIso (e.hom.baseHom.appTop) := by
+    refine ⟨e.inv.baseHom.appTop, ?_, ?_⟩
+    · rw [← Scheme.Hom.comp_appTop,
+        show e.inv.baseHom ≫ e.hom.baseHom = 𝟙 _ from
+          congrArg EllHom.baseHom e.inv_hom_id]
+      simp
+    · rw [← Scheme.Hom.comp_appTop,
+        show e.hom.baseHom ≫ e.inv.baseHom = 𝟙 _ from
+          congrArg EllHom.baseHom e.hom_inv_id]
+      simp
+  rw [hA, Scheme.Hom.comp_appTop, CommRingCat.hom_comp]
+  exact RingHom.isStandardSmoothOfRelativeDimension_respectsIso.1
+    (B.structMap.appTop).hom
+    (asIso (e.hom.baseHom.appTop)).commRingCatIsoToRingEquiv h
+
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-6-APP S3+S5]** The Legendre cover of the representing curve has
+standard-smooth-of-relative-dimension-one global sections over `ℚ`: it is isomorphic,
+as an `Ell/ℚ`-object, to the Legendre-anchored ρ-total-space. -/
+theorem legendreCover_isStandardSmooth (D : GaloisRepData N) [Fact (1 < N)]
+    (hR : IsUnit (2 : CommRingCat.of ℚ)) {X : EllObj (CommRingCat.of ℚ)}
+    (r : (rhoProblem D).RepresentableBy X)
+    (rL : (legendreDeltaProblem (CommRingCat.of ℚ)).RepresentableBy
+      (universalLegendreObj (CommRingCat.of ℚ) hR))
+    (dL : ModuliProblem.RelRepData (legendreDeltaProblem (CommRingCat.of ℚ)) X)
+    (dρ : ModuliProblem.RelRepData (rhoProblem D)
+      (universalLegendreObj (CommRingCat.of ℚ) hR))
+    (hfin : IsFinite dρ.f) (het : Etale dρ.f) :
+    RingHom.IsStandardSmoothOfRelativeDimension 1
+      (((X.pullbackAlong dL.f).structMap).appTop).hom :=
+  isStandardSmoothOfRelativeDimension_appTop_of_ellIso
+    (ModuliProblem.prodUniqueUpToIso r dL rL dρ)
+    (rhoLegendre_total_isStandardSmooth D hR dρ hfin het)
+
 end ModularCurves
 
 end
