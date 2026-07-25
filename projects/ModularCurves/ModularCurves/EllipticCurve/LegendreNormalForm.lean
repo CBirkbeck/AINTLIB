@@ -373,21 +373,21 @@ theorem two_torsion_abscissa_injective (h2 : IsUnit (2 : R)) {W : WeierstrassCur
   obtain ⟨hq', -⟩ := two_torsion_coords_of_charNeTwoNF h2 h1 h3 heq' hneg'
   rw [hp, hq, hq']
 
-/-- **(T-G3a-SUB2h input)** A monic cubic over a field with two known distinct roots
-`p ≠ p'` splits with Vieta's identities **in that order**: the third root is
+/-- **(T-G3a-SUB2h input)** A monic cubic with two known roots whose difference is a
+unit
+splits with Vieta's identities **in that order**: the third root is
 `e₃ = −(a₂ + p + p')`. This is the ordered form consumed by
 `exists_variableChange_eq_legendreCurve` (whose `e₁, e₂` are the two *marked*
 `2`-torsion abscissae). -/
-theorem exists_third_root_vieta {k : Type u} [Field k] {a₂ a₄ a₆ p p' : k}
+theorem exists_third_root_vieta {a₂ a₄ a₆ p p' : R}
     (hp : p ^ 3 + a₂ * p ^ 2 + a₄ * p + a₆ = 0)
-    (hp' : p' ^ 3 + a₂ * p' ^ 2 + a₄ * p' + a₆ = 0) (hne : p ≠ p') :
-    ∃ e₃ : k, a₂ = -(p + p' + e₃) ∧
+    (hp' : p' ^ 3 + a₂ * p' ^ 2 + a₄ * p' + a₆ = 0) (hne : IsUnit (p - p')) :
+    ∃ e₃ : R, a₂ = -(p + p' + e₃) ∧
       a₄ = p * p' + p * e₃ + p' * e₃ ∧ a₆ = -(p * p' * e₃) := by
-  have hsub : p - p' ≠ 0 := sub_ne_zero.mpr hne
   have hdiff : (p - p') * (p ^ 2 + p * p' + p' ^ 2 + a₂ * (p + p') + a₄) = 0 := by
     linear_combination hp - hp'
   have ha₄ : a₄ = -(p ^ 2 + p * p' + p' ^ 2) - a₂ * (p + p') := by
-    have h := (mul_eq_zero.mp hdiff).resolve_left hsub
+    have h := (hne.mul_right_eq_zero).mp hdiff
     linear_combination h
   refine ⟨-(a₂ + p + p'), by ring, ?_, ?_⟩
   · rw [ha₄]; ring
@@ -415,7 +415,8 @@ theorem exists_legendre_variableChange_of_two_torsion {k : Type u} [Field k]
       ((u⁻¹ : kˣ) : k) ^ 2 * (p' - p) = 1 := by
   obtain ⟨-, hcub⟩ := two_torsion_coords_of_charNeTwoNF h2 h1 h3 heq hneg
   obtain ⟨-, hcub'⟩ := two_torsion_coords_of_charNeTwoNF h2 h1 h3 heq' hneg'
-  obtain ⟨e₃, ha₂, ha₄, ha₆⟩ := exists_third_root_vieta hcub hcub' hne
+  obtain ⟨e₃, ha₂, ha₄, ha₆⟩ := exists_third_root_vieta hcub hcub'
+    (isUnit_iff_ne_zero.mpr (sub_ne_zero.mpr hne))
   have hsub : p' - p ≠ 0 := sub_ne_zero.mpr (Ne.symm hne)
   obtain ⟨v, hv⟩ := IsAlgClosed.exists_pow_nat_eq (p' - p) (n := 2) (by norm_num)
   have hvne : v ≠ 0 := fun h => hsub (by rw [← hv, h]; ring)
