@@ -593,7 +593,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Statement**: `gaussValue ρ (x+y) ≤ max (gaussValue ρ x) (gaussValue ρ y)`.
 
 ### [T803] Multiplicativity (paper Lemma 2.3 / 1004.0466 Lemma 4.1)
-- **Status**: open | **Depends**: T802 | route frozen: submult from
+- **Status**: done (beastmode 2026-07-26; gaussValue_mul + gaussValue_mul_le + neg/sub/isosceles/positivity all axiom-clean)
   p^i[a]·p^j[b] = p^{i+j}[ab] + T802; equality via least max-attaining indices +
   strictly-smaller discarded parts (sol Q2).
 - **Statement**: `gaussValue ρ (x*y) = gaussValue ρ x * gaussValue ρ y`.
