@@ -47,6 +47,20 @@ def pairToPoint (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
   ⟨(r.homEquiv.symm (show (rhoProblem D).obj (op ⟨T, sT, a.1⟩) from a.2)).baseHom,
     (r.homEquiv.symm (show (rhoProblem D).obj (op ⟨T, sT, a.1⟩) from a.2)).base_w⟩
 
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7d, first roundtrip]** Classifying the pair attached to a point returns
+the point. -/
+theorem pairToPoint_pointToPair (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
+    (r : (rhoProblem D).RepresentableBy X) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ))
+    (h : { h : T ⟶ X.base // h ≫ X.structMap = sT }) :
+    pairToPoint D r sT (pointToPair D r sT h) = h := by
+  obtain ⟨h, rfl⟩ := h
+  apply Subtype.ext
+  show (r.homEquiv.symm (r.homEquiv (X.pullbackAlongπ h))).baseHom = h
+  rw [Equiv.symm_apply_apply]
+  rfl
+
 end ModularCurves
 
 end
