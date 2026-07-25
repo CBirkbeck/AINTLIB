@@ -1,0 +1,187 @@
+# Decomposition — the four Y(ρ̄) caveats (2026-07-25)
+
+Planning pass for the four gaps that remain after `yRho_representable'` landed:
+
+| # | Gap | Scale | Status of source |
+|---|-----|-------|------------------|
+| G1 | derive `p` from `det_cyclo` | small (≈150–250 LOC) | mathlib `toFun_spec` + in-repo `card_rootsOfUnity_algClosureQ` |
+| G2 | DS4 Weil pairing over `S` | MAJOR (stream C) | GME 2.6.4 pp. 152–153, transcribed in `decomposition-gme2.md` §Chain C |
+| G3 | Legendre registers (3) | medium ×3 | KM 4.6.2 + Silverman III.1.7(b); in-repo `SqrtCoverGlue`/`LegendreTorsor` |
+| G4 | geometric irreducibility | shell small + core MAJOR-INFRA | KM 10.9.2 p. 303, transcribed in `decomposition-km10.md` |
+
+---
+
+## G1 — `p` from `det_cyclo` (the Λ²ρ̄ ≅ μ_N normalisation)
+
+### Plain-English proof
+
+`V_ρ̄` is `(ℤ/N)²` with `G_ℚ` acting through `ρ̄`, so `Λ²V_ρ̄` is free of rank one over
+`ℤ/N` with `G_ℚ` acting through `det ρ̄`. The hypothesis `det ρ̄ = χ_N` says this action
+is the mod-`N` cyclotomic one, which is exactly the action on `μ_N(ℚ̄)`. Hence
+`Λ²V_ρ̄ ≅ μ_N` equivariantly. Concretely: choose a primitive `N`-th root of unity
+`ζ ∈ ℚ̄` (exists: `ℚ̄` is algebraically closed of characteristic zero, and the repo's
+`card_rootsOfUnity_algClosureQ` already extracts one from `Polynomial.cyclotomic N`).
+Define `p : Multiplicative (ℤ/N) ≃* μ_N(ℚ̄)` by `a ↦ ζ^a`. This is a group isomorphism
+because `ζ` is primitive (so `Subgroup.zpowers ζ = rootsOfUnity N ℚ̄` and the order is
+`N`). Equivariance is then *automatic*, not an extra condition: for `σ ∈ G_ℚ`,
+`σ(ζ^a) = (σζ)^a = (ζ^{χ(σ)})^a = ζ^{χ(σ)a} = p(a^{χ(σ)})`, where the middle equality
+is the defining property of the modular cyclotomic character. Note `det_cyclo` is **not
+used** in this step: any `ζ` works, and equivariance holds for the cyclotomic action by
+definition. `det_cyclo` is what makes `p` the *right* normalisation downstream — it is
+the hypothesis that the `Λ²ρ̄`-action agrees with the `μ_N`-action, so that a symplectic
+level structure can exist at all.
+
+### Lemmas (in order)
+
+- **G1.L1** (leaf, mathlib + project): `exists_isPrimitiveRoot_algClosureQ`
+  - Statement: `∃ ζ : AlgebraicClosure ℚ, IsPrimitiveRoot ζ N`
+  - Source: standard; the repo already performs this extraction inside
+    `card_rootsOfUnity_algClosureQ` (YRho.lean:56–66) using
+    `IsAlgClosed.exists_root` on `Polynomial.cyclotomic N` and
+    `Polynomial.isRoot_cyclotomic_iff`.
+  - Discharged by: the same three-line chain, factored out.
+
+- **G1.L2** (leaf, mathlib): `mulEquiv_of_isPrimitiveRoot`
+  - Statement: for `ζ` a primitive `N`-th root in a field `K`,
+    `Multiplicative (ZMod N) ≃* rootsOfUnity N K`.
+  - Discharged by: `IsPrimitiveRoot.zmodEquivZPowers` (`ZMod k ≃+ Additive (zpowers ζ)`)
+    composed with `IsPrimitiveRoot.zpowers_eq` (`zpowers ζ = rootsOfUnity N K`), then
+    `Multiplicative`/`Additive` transport. Verified present in
+    `Mathlib/RingTheory/RootsOfUnity/Basic.lean`.
+
+- **G1.L3** (leaf, mathlib): `pow_val_eq_galois_action`
+  - Statement: for `g : L ≃+* L` and `t : rootsOfUnity n L`,
+    `g t = t ^ (modularCyclotomicCharacter … g).val`.
+  - Source claim (verbatim, `Mathlib/NumberTheory/Cyclotomic/CyclotomicCharacter.lean:130`):
+    > "/-- The formula which characterises the output of `modularCyclotomicCharacter g n`. -/
+    > theorem toFun_spec (g : L ≃+* L) {n : ℕ} [NeZero n] (t : rootsOfUnity n L) :
+    >     g (t : Lˣ) = (t ^ (χ₀ n g).val : Lˣ)"
+  - Lean ↔ source match: this *is* the equivariance clause of `GaloisRepData.p_equivariant`,
+    after transporting `χ₀` along `card_rootsOfUnity_algClosureQ`.
+
+- **G1.MAIN** (assembly): `GaloisRepData.ofDetCyclo`
+  - Statement: given `ρ`, `ker_open`, `det_cyclo`, produce a `GaloisRepData N` whose
+    `ρ`/`ker_open`/`det_cyclo` are the given ones.
+  - Plus `exists_galoisRepData_of_detCyclo`: the `∃`-form, and simp lemmas pinning the
+    three transported fields.
+
+### Attacks attempted (G1)
+
+1. *Counterexample search*: is there an obstruction to `Λ²ρ̄ ≅ μ_N` when `N` is composite?
+   No — both sides are free rank-one `ℤ/N`-modules with the same action; the iso is a
+   choice of generator. Searched for `rootsOfUnity` non-cyclic in char 0: cyclic by
+   `IsCyclic` instance for finite subgroups of a field's units.
+2. *Edge cases*: `N = 1` (both sides trivial ✓), `N = 2` (`ζ = -1` ✓), `N` composite
+   (the `zmodEquivZPowers` route is stated for arbitrary `k`, no primality ✓).
+3. *Hypothesis test*: is `det_cyclo` needed for `p` to exist? **No** — this is the
+   substantive finding: `p` exists unconditionally; `det_cyclo` is what makes the pair
+   `(ρ̄, p)` symplectically coherent. So the corrected design is: `p` is derived, and
+   `det_cyclo` stays a hypothesis (it is used at YRho:1476/1840/6237/6272 in the
+   equivariance of the pairing map on `V_ρ`).
+4. *Source-drift*: `toFun_spec` is about `g (t) = t ^ χ.val` for `t` in `rootsOfUnity`;
+   the repo's `p_equivariant` says `σ (p x) = p (x ^ χ.val)`. These match after
+   `MulEquiv.map_pow`. No drift.
+5. *Discharge*: `IsPrimitiveRoot.zmodEquivZPowers` and `IsPrimitiveRoot.zpowers_eq`
+   both verified present; `card_rootsOfUnity_algClosureQ` is in-repo and sorry-free.
+
+Verdict: SURVIVED. G1 is READY.
+
+---
+
+## G2 — DS4: the Weil pairing over a base (stream C)
+
+**Source of record (already transcribed):** Hida, *Geometric Modular Forms and Elliptic
+Curves*, §2.6.4 pp. 152–153 — see `decomposition-gme2.md` §"Chain C", steps C.1–C.5,
+where the proof was read and transcribed by an earlier `/develop --decompose` pass. The
+KM 2.8 gate was lifted there ("T-C1's construction of record; KM-gate LIFTED").
+
+**What already exists (verified this pass):**
+- The descent engine is **complete and gate-free**: `weilPairingCharZero` +
+  `weilPairingCharZero_restrict/_over/_unique` (`WeilPairing/CharZeroDescent.lean:193–255`)
+  descend a local pairing along any fppf cover.
+- The constant symplectic model is complete: `detFun`, `detConstMor`,
+  `detConstMor_gl2Both`, `detConstMor_sl2` (same file, lines 57–160).
+- A **sorry-free field-level Weil pairing** exists in the monorepo:
+  `projects/HasseWeil/HasseWeil/HasseBound/WeilPairing/Pairing.lean` (Silverman III.8
+  route: `weilFunction`, `weilPairing`, `weilPairing_mul_left`, `weilPairing_ne_zero`,
+  `weilPairing_translate`, …; `grep -c sorry` = 0). CLAUDE.md's one-workspace rule makes
+  this importable.
+
+**The gap.** `weilPairingCharZero` needs `(p, ζ', hcocyc)`. The naive choice — trivialise
+`E[N]` by the full-level cover and take the constant determinant pairing — **fails the
+cocycle condition**: two trivialisations differ by `g ∈ GL₂(ℤ/N)` and `detFun` transforms
+by `det g` (`detConstMor_gl2Both`), so the local pairings do not agree on the double
+overlap unless the transitions are symplectic — which presupposes the pairing. This is a
+genuine obstruction, not a technicality: the Weil pairing is geometric data (divisors /
+autoduality), not something readable off a trivialisation.
+
+**Consequences for the plan.** Two milestones, in order:
+
+- **G2.M1 (field base, tractable):** `E/K` over a char-0 field. `E[N]×E[N]` and `μ_N` are
+  finite étale over `K`; HasseWeil's pairing gives the values on `K̄`-points and the
+  Galois-equivariance of those values; the repo's
+  `exists_finiteEtaleHom_of_galoisEquivariant` (WeilPairing/EtaleDescent.lean) converts a
+  Galois-equivariant map of geometric points into a `K`-morphism. This discharges DS4 and
+  the T-C2/T-C3/T-C4 specs **over field bases**, and pins the normalisation (T-C4).
+- **G2.M2 (general `ℚ`-scheme, MAJOR):** the GME 2.6.4 construction C.1–C.5 — relative
+  `Pic`, the isogeny transpose, the gluing-units computation. Prerequisites: the repo's
+  `Picard/RelativePic.lean` plus the A6/A7 chains. Multi-session; the honest estimate from
+  the transcription is that C.1–C.5 is a chapter-scale development.
+
+Neither milestone is skippable if "no shortcuts" is to be honoured; M1 is the first
+increment and is what the `RhoLevelStructure` fibre clauses actually consume.
+
+---
+
+## G3 — the three Legendre registers
+
+- **G3.a `legendreDelta_surjective_of`** (LegendreTorsor.lean:316). Content: every
+  elliptic curve over an algebraically closed field with `2` invertible admits a Legendre
+  datum. Source: Silverman AEC III.1 Prop 1.7(b) (Legendre form after adjoining the
+  2-torsion abscissae and a square root); KM 4.6.2 for the moduli formulation. In-repo
+  ingredients: `universalLegendre_generation`, `exists_projModelIso_of_field`
+  (KeystoneGeometricPoint), the `fullLevelLocus 2` machinery.
+- **G3.b `legendreDelta_exists_naturalFamily`** ([T-E14-NAT], LegendreTorsor.lean:230–239).
+  Content: naturality in `T` of the Legendre representing bijections. The bijections
+  themselves are built in `SqrtCoverGlue.lean:848`; naturality must be threaded through
+  that construction (the same shape as the ρ-side `rhoOfSection_pull`, which is proven).
+- **G3.c `legendreDeltaGAction`** ([T-E14-ACT'], LegendreTorsor.lean:290). Content: the
+  coupled `GL₂(𝔽₂) × {±1}`-action on `δ` (re-mark the pair *and* rescale `ω`).
+  Source: KM 4.6.2 ("|G| = 12"). Independent of G3.a/G3.b.
+
+Each is medium (in-repo geometry, no absent mathlib infrastructure identified).
+
+---
+
+## G4 — geometric irreducibility
+
+Already decomposed in `decomposition-km10.md` (2026-07-08). Verbatim finding recorded
+there: **KM's "algebraic route" is not analytic-free** — KM 10.9.2 p. 303 reduces to the
+transcendental description "the underlying complex manifold to `M(𝒫)⊗ℂ` is isomorphic to
+the quotient of the upper half plane by `Γ̃ ⊂ SL(2,ℤ)`".
+
+- **Shell (buildable now)**: `T-IRR1` `irreducibleSpace_of_connectedSpace_of_smooth`,
+  `T-IRR2` `connectedSpace_quotient_orbitRel`, `T-IRR3`
+  `yRho_geometricallyIrreducible_of_connected` — the reduction of the target to geometric
+  *connectedness*, plus the two general topology/geometry leaves. Skeleton file already
+  exists: `ModularCurve/IrreducibilityScoping.lean`.
+- **Core (MAJOR-INFRA)**: `T-IRR-L3` `(Y⊗ℂ)^an ≅ ℍ/Γ̃` needs a scheme-analytification
+  functor and a LeanModularForms bridge; `T-IRR-L5` needs GAGA-connectedness. Both are
+  absent from mathlib *and* AINTLIB. The prior pass's recommendation stands: land the
+  shell, keep the analytic input as a labelled hypothesis (`hconn`) until the
+  analytification stream exists.
+
+With the shell landed, `yRho_geometricallyIrreducible` becomes: "conditional on geometric
+connectedness of `Y ⊗ ℚ̄`" — a one-hypothesis theorem rather than a `sorry`.
+
+---
+
+## Execution order (tickets in `tickets.md`)
+
+1. **G1** — READY, no dependencies. Land `ofDetCyclo`, then thread it (the datum keeps
+   `det_cyclo`; `p` stops being user-supplied).
+2. **G4 shell** — READY (T-IRR1/2/3 already stated in `IrreducibilityScoping.lean`).
+3. **G3.c → G3.a → G3.b** — in-repo geometry.
+4. **G2.M1** — field-base DS4 + T-C4 normalisation pin.
+5. **G2.M2**, **G4 core** — the two chapter-scale streams; ticketed, sourced, not
+   promised on a short horizon.

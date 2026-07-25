@@ -26727,3 +26727,134 @@ Revision note: Ψ (the base-changed detFrame≫detComp) is NOT surjective onto t
 - **Status**: open
 - **Parent**: T-EQ-3 (3d); depends on A, M1-M5
 - **Statement**: `EffectiveEpi pr1` (fpqc instance) + h-condition via geometric-point reduction (M1+M2) + pointwise γ (M3) + per-γ invariance (M5) ⟹ `s : T′ ⟶ relQuotient`, `s ≫ relQuotientStruct = k`.
+
+
+## Amendments v5 (2026-07-25): the four post-`yRho_representable` caveats
+
+Companion: `.mathlib-quality/decomposition-caveats.md` (sources, attacks, scale per gap).
+Order of execution: G1 → G4-shell → G3 → G2.M1 → {G2.M2, G4-core}.
+
+### [T-G1] Derive the pairing normalisation `p` from the datum
+- **Status**: open · **File**: `ModularCurve/YRho.lean` (new section after
+  `card_rootsOfUnity_algClosureQ`) · **Depends on**: none · **Type**: def + theorems
+#### Statement
+```lean
+theorem exists_isPrimitiveRoot_algClosureQ (N : ℕ) [NeZero N] :
+    ∃ ζ : AlgebraicClosure ℚ, IsPrimitiveRoot ζ N
+
+noncomputable def pairingNormalisationOfPrimitiveRoot {N : ℕ} [NeZero N]
+    {ζ : AlgebraicClosure ℚ} (hζ : IsPrimitiveRoot ζ N) :
+    Multiplicative (ZMod N) ≃* rootsOfUnity N (AlgebraicClosure ℚ)
+
+theorem pairingNormalisation_equivariant {N : ℕ} [NeZero N]
+    {ζ : AlgebraicClosure ℚ} (hζ : IsPrimitiveRoot ζ N) (σ : GalQ)
+    (x : Multiplicative (ZMod N)) :
+    σ ((pairingNormalisationOfPrimitiveRoot hζ x : (AlgebraicClosure ℚ)ˣ) :
+        AlgebraicClosure ℚ) = …   -- the `p_equivariant` shape, verbatim from the structure
+
+noncomputable def GaloisRepData.ofDetCyclo {N : ℕ} [NeZero N]
+    (ρ : GalQ →* Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (ker_open : IsOpen (X := GalQ) (MonoidHom.ker ρ : Set GalQ))
+    (det_cyclo : ∀ σ : GalQ, Matrix.GeneralLinearGroup.det (ρ σ) =
+      modularCyclotomicCharacter (AlgebraicClosure ℚ)
+        (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv) :
+    GaloisRepData N
+```
+plus `@[simp]` field lemmas (`ofDetCyclo_ρ`, `ofDetCyclo_det_cyclo` by `rfl`).
+#### Proof sketch
+1. `exists_isPrimitiveRoot_algClosureQ`: factor the extraction already inlined in
+   `card_rootsOfUnity_algClosureQ` (YRho:56–66) — `IsAlgClosed.exists_root` on
+   `Polynomial.cyclotomic N (AlgebraicClosure ℚ)` (degree ≠ 0 by `degree_cyclotomic` +
+   `Nat.totient_pos`), then `Polynomial.isRoot_cyclotomic_iff`.
+2. `pairingNormalisationOfPrimitiveRoot`: `IsPrimitiveRoot.zmodEquivZPowers hζ`
+   (`ZMod N ≃+ Additive (Subgroup.zpowers hζ.toRootsOfUnity)`) transported by
+   `IsPrimitiveRoot.zpowers_eq` (`zpowers ζ = rootsOfUnity N K`) and
+   `Multiplicative`/`Additive` shuffling.
+3. `pairingNormalisation_equivariant`: the value `p x` lies in `rootsOfUnity N ℚ̄`, so
+   `modularCyclotomicCharacter.toFun_spec` gives `σ (p x) = (p x) ^ χ(σ).val`; conclude
+   with `map_pow` for the `MulEquiv` and `zpow`/`val` bookkeeping.
+4. `ofDetCyclo`: assemble, taking `p` from 2 and `p_equivariant` from 3.
+#### Mathlib lemmas needed
+`IsAlgClosed.exists_root`, `Polynomial.degree_cyclotomic`, `Polynomial.isRoot_cyclotomic_iff`,
+`IsPrimitiveRoot.zmodEquivZPowers`, `IsPrimitiveRoot.zpowers_eq`,
+`modularCyclotomicCharacter.toFun_spec` (verified at
+`Mathlib/NumberTheory/Cyclotomic/CyclotomicCharacter.lean:131`).
+#### Sources
+Standard; the equivariance formula is mathlib's `toFun_spec` (quoted verbatim in
+`decomposition-caveats.md` §G1.L3).
+#### Generality decision
+Stated for arbitrary `N` with `[NeZero N]` (no primality); the primitive root is chosen
+by `Classical.choice` inside `ofDetCyclo` — the resulting datum is not canonical, which
+matches the mathematics (the identification `Λ²ρ̄ ≅ μ_N` depends on a choice of `ζ`).
+
+### [T-G4a] Irreducibility shell — leaf 1
+- **Status**: open · **File**: `ModularCurve/IrreducibilityScoping.lean` ·
+  **Type**: theorem · **Source**: `decomposition-km10.md` §L1
+- `irreducibleSpace_of_connectedSpace_of_smooth`: a nonempty connected smooth curve over
+  `ℚ̄` is irreducible (regular ⟹ irreducible components = connected components).
+
+### [T-G4b] Irreducibility shell — leaf 2
+- **Status**: open · **File**: `ModularCurve/IrreducibilityScoping.lean` ·
+  **Type**: theorem · **Source**: `decomposition-km10.md` §L4
+- `connectedSpace_quotient_orbitRel`: the quotient of a connected space by a group action
+  is connected (`IsPreconnected.image` + continuity/surjectivity of `Quotient.mk`).
+
+### [T-G4c] Irreducibility shell — MASTER reduction
+- **Status**: open · **File**: `ModularCurve/IrreducibilityScoping.lean` ·
+  **Depends on**: T-G4a · **Type**: theorem · **Source**: `decomposition-km10.md` §MASTER
+- `yRho_geometricallyIrreducible_of_connected`: from `RepresentsYRho` + geometric
+  connectedness of `Y ⊗ ℚ̄`, conclude `IrreducibleSpace (Y ×_ℚ ℚ̄)`. Base-change
+  smoothness + T-G4a. **This turns the sorried `yRho_geometricallyIrreducible` into a
+  one-hypothesis theorem.**
+
+### [T-G3c] `legendreDeltaGAction` (T-E14-ACT')
+- **Status**: open · **File**: `Moduli/LegendreTorsor.lean:290` · **Type**: def(data)
+- The coupled `GL₂(𝔽₂) × {±1}`-action on the Legendre datum: the `GL₂`-factor re-marks
+  the 2-torsion pair and rescales `ω` accordingly. Source: KM 4.6.2 (`|G| = 12`).
+
+### [T-G3a] `legendreDelta_surjective_of`
+- **Status**: open · **File**: `Moduli/LegendreTorsor.lean:316` · **Type**: theorem ·
+  **Depends on**: T-G3b (the natural family is what converts the geometric datum)
+- Every elliptic curve over an algebraically closed field with `2` invertible admits a
+  Legendre datum ⟹ the structure map of the Legendre carrier is surjective.
+  Source: Silverman AEC III.1 Prop 1.7(b); KM 4.6.2. In-repo: `universalLegendre_generation`,
+  `exists_projModelIso_of_field`, the `fullLevelLocus 2` machinery.
+  **Consumer note:** this is the last input to `exists_representsYRho`'s smoothness clause.
+
+### [T-G3b] `legendreDelta_exists_naturalFamily` (T-E14-NAT)
+- **Status**: open · **File**: `Moduli/LegendreTorsor.lean:230` · **Type**: theorem
+- Naturality in `T` of the Legendre representing bijections built in
+  `SqrtCoverGlue.lean:848`. Mirror of the ρ-side `rhoOfSection_pull` (proven), threaded
+  through the sqrt-cover glue.
+
+### [T-G2-M1] DS4 over field bases (first Weil-pairing milestone)
+- **Status**: open · **File**: `WeilPairing/FibreComparison.lean` (new) + `Basic.lean` ·
+  **Depends on**: none (all inputs in-repo) · **Type**: def(data) + specs
+- Construct `weilPairing` for `E/K`, `K` a char-0 field, from the **sorry-free**
+  HasseWeil field-level pairing (`projects/HasseWeil/.../WeilPairing/Pairing.lean`) via
+  the Galois-equivariant-points bridge `exists_finiteEtaleHom_of_galoisEquivariant`
+  (`WeilPairing/EtaleDescent.lean`), and prove T-C2 (bilinear/alternating), T-C3
+  (nondegenerate), T-C4 (normalisation pin = Silverman convention).
+- Sources: Silverman AEC III.8; GME 2.6.4 C.3 (the classical formula, transcribed in
+  `decomposition-gme2.md`).
+
+### [T-G2-M2] DS4 over general `ℚ`-schemes (GME 2.6.4 chain C) — MAJOR
+- **Status**: open (chapter-scale) · **File**: `WeilPairing/` · **Depends on**: T-G2-M1,
+  relative-`Pic` chain · **Type**: def(data) + specs
+- Follow GME 2.6.4 pp. 152–153 steps C.1–C.5 verbatim (`decomposition-gme2.md` §Chain C):
+  Pic splitting via `0^*`; the gluing-units pairing on `Ker(π) × Ker(ᵗπ)`; the classical
+  formula; nondegeneracy; antisymmetry/adjointness. **Recorded finding (this pass): the
+  "trivialise + constant determinant" shortcut is not available** — `detConstMor`
+  transforms by `det g` under `GL₂` transitions (`detConstMor_gl2Both`), so the cocycle
+  condition of `weilPairingCharZero` fails for non-symplectic trivialisations.
+
+### [T-G4-CORE] `(Y⊗ℂ)^an ≅ ℍ/Γ̃` — MAJOR-INFRA
+- **Status**: blocked (absent from mathlib and AINTLIB) · **Source**: KM 10.9.2 p. 303 ·
+  See `decomposition-km10.md` T-IRR-L3/L5. Needs a scheme-analytification functor and a
+  LeanModularForms bridge; keep `hconn` labelled until that stream exists.
+
+### Cadence (v5)
+New work tickets: 9. Cleanups: **[CLEANUP-17]** `YRho.lean` after T-G1 ·
+**[CLEANUP-18]** `IrreducibilityScoping.lean` after T-G4a+b+c ·
+**[CLEANUP-19]** `LegendreTorsor.lean` after T-G3c+a+b ·
+**[CLEANUP-20]** `WeilPairing/` after T-G2-M1. ⌈9/3⌉ = 3 ≤ 4 ✓.
