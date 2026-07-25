@@ -143,7 +143,20 @@ of `0`, hence is `0`.
 
 Source: [Bhatt, Cor. 3.2.3] pattern (t-adic topology on `K°` is separated and complete). -/
 theorem isHausdorff_span_toOF [IsPerfectoidField p F] (ϖ : PseudoUniformizer F) :
-    IsHausdorff (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by sorry
+    IsHausdorff (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by
+  haveI := IsPerfectoidRing.t0 (p := p) (A := F)
+  constructor
+  intro x hx
+  have hmem : ∀ U ∈ nhds (0 : OF F), x ∈ U := by
+    intro U hU
+    obtain ⟨n, hn⟩ := exists_span_toOF_pow_subset_of_mem_nhds p F ϖ hU
+    have := SModEq.sub_mem.mp (hx n)
+    rw [sub_zero, Ideal.smul_eq_mul, Ideal.mul_top] at this
+    exact hn this
+  have h0 : (0 : OF F) ∈ closure ({x} : Set (OF F)) :=
+    mem_closure_iff_nhds.mpr fun U hU ↦ ⟨x, hmem U hU, rfl⟩
+  rw [IsClosed.closure_eq isClosed_singleton, Set.mem_singleton_iff] at h0
+  exact h0.symm
 
 /-- `O_F` is `ϖ`-adically complete.
 
@@ -156,7 +169,79 @@ Source: [Bhatt, Cor. 3.2.3]: "K°♭ is t-adically complete, and the t-adic topo
 coincides with the given topology" — the same statement for a char-p perfectoid field
 directly. -/
 theorem isAdicComplete_span_toOF [IsPerfectoidField p F] (ϖ : PseudoUniformizer F) :
-    IsAdicComplete (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by sorry
+    IsAdicComplete (Ideal.span {PseudoUniformizer.toOF F ϖ}) (OF F) := by
+  haveI := IsPerfectoidRing.complete (p := p) (A := F)
+  haveI := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
+  haveI := IsPerfectoidRing.t0 (p := p) (A := F)
+  haveI := IsPerfectoidRing.uniform (p := p) (A := F)
+  have htop := IsPerfectoidRing.topologyEq (p := p) (A := F)
+  set I : Ideal (OF F) := Ideal.span {PseudoUniformizer.toOF F ϖ} with hI
+  have hprec : IsPrecomplete I (OF F) := by
+    constructor
+    intro f hf
+    -- Membership form of the coherence hypothesis: `f m - f n ∈ I^m` for `m ≤ n`.
+    have hf' : ∀ {m n : ℕ}, m ≤ n → f m - f n ∈ I ^ m := by
+      intro m n h
+      have := SModEq.sub_mem.mp (hf h)
+      rwa [Ideal.smul_eq_mul, Ideal.mul_top] at this
+    -- The coerced sequence is Cauchy in `F`: differences eventually land in any
+    -- `W ∈ 𝓝 0`, symmetrized through an open additive subgroup `G ⊆ W`.
+    have hsmall : ∀ W ∈ nhds (0 : F), ∃ N, ∀ m n, N ≤ m → N ≤ n →
+        (f m : F) - (f n : F) ∈ W := by
+      intro W hW
+      obtain ⟨G, hGW⟩ := NonarchimedeanAddGroup.is_nonarchimedean W hW
+      obtain ⟨V, hV, hFV⟩ := IsUniform.isBounded_powerBounded (A := F) (G : Set F)
+        (G.isOpen.mem_nhds G.zero_mem')
+      obtain ⟨N, hN⟩ := ϖ.isTopologicallyNilpotent.exists_pow_mem_of_mem_nhds hV
+      have key : ∀ {m n : ℕ}, N ≤ m → m ≤ n → (f m : F) - (f n : F) ∈ (G : Set F) := by
+        intro m n hNm hmn
+        have hmem : f m - f n ∈ I ^ N := Ideal.pow_le_pow_right hNm (hf' hmn)
+        rw [hI, Ideal.span_singleton_pow, Ideal.mem_span_singleton'] at hmem
+        obtain ⟨c, hc⟩ := hmem
+        have hval : (f m : F) - (f n : F) = (c : F) * ((ϖ.val : Fˣ) : F) ^ N := by
+          have h := congrArg Subtype.val hc
+          push_cast [PseudoUniformizer.toOF] at h
+          exact h.symm
+        rw [hval]
+        exact hFV (Set.mul_mem_mul c.2 hN)
+      refine ⟨N, fun m n hm hn ↦ ?_⟩
+      rcases le_total m n with h | h
+      · exact hGW (key hm h)
+      · rw [show (f m : F) - (f n : F) = -((f n : F) - (f m : F)) from by ring]
+        exact hGW (neg_mem (key hn h))
+    -- Convergence in `F` (complete for its uniform structure), limit power-bounded.
+    have hCauchy : CauchySeq (fun n ↦ (f n : F)) := by
+      rw [CauchySeq, IsUniformAddGroup.cauchy_map_iff_tendsto_swapped]
+      refine ⟨Filter.atTop_neBot, ?_⟩
+      rw [Filter.Tendsto, Filter.map_le_iff_le_comap]
+      intro U hU
+      obtain ⟨W, hW, hWU⟩ := Filter.mem_comap.mp hU
+      rw [htop] at hW
+      obtain ⟨N, hN⟩ := hsmall W hW
+      rw [Filter.prod_atTop_atTop_eq, Filter.mem_atTop_sets]
+      exact ⟨(N, N), fun ⟨m, n⟩ ⟨hm, hn⟩ ↦ hWU (hN n m hn hm)⟩
+    obtain ⟨L₀, hL₀⟩ := cauchySeq_tendsto_of_complete hCauchy
+    have hL₀' : Filter.Tendsto (fun n ↦ (f n : F)) Filter.atTop
+        (@nhds F ‹TopologicalSpace F› L₀) := by rwa [htop] at hL₀
+    have hL₀pb : IsPowerBounded L₀ :=
+      IsPerfectoidRing.isPowerBounded_of_tendsto_of_powerBounded (fun n ↦ (f n).2) hL₀'
+    -- The limit works: `f n - L ∈ I^n` because `I^n` is an open, hence closed, subgroup.
+    refine ⟨⟨L₀, hL₀pb⟩, fun n ↦ ?_⟩
+    have hSopen : IsOpen ((I ^ n : Ideal (OF F)) : Set (OF F)) :=
+      AddSubgroup.isOpen_of_mem_nhds (I ^ n).toAddSubgroup
+        (span_toOF_pow_mem_nhds_zero p F ϖ n)
+    have hSclosed : IsClosed ((I ^ n : Ideal (OF F)) : Set (OF F)) :=
+      AddSubgroup.isClosed_of_isOpen (I ^ n).toAddSubgroup hSopen
+    have htend : Filter.Tendsto (fun m ↦ f n - f m) Filter.atTop
+        (nhds (f n - ⟨L₀, hL₀pb⟩)) :=
+      tendsto_const_nhds.sub (tendsto_subtype_rng.mpr hL₀')
+    have hev : ∀ᶠ m in Filter.atTop, f n - f m ∈ ((I ^ n : Ideal (OF F)) : Set (OF F)) :=
+      Filter.eventually_atTop.mpr ⟨n, fun m hm ↦ hf' hm⟩
+    have hlim : f n - ⟨L₀, hL₀pb⟩ ∈ ((I ^ n : Ideal (OF F)) : Set (OF F)) :=
+      hSclosed.mem_of_tendsto htend hev
+    rw [SModEq.sub_mem, Ideal.smul_eq_mul, Ideal.mul_top]
+    exact hlim
+  exact { toIsHausdorff := isHausdorff_span_toOF p F ϖ, toIsPrecomplete := hprec }
 
 end FarguesFontaine
 

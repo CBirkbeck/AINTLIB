@@ -103,7 +103,20 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L1.6 (standard Tate-ring facts; [SW §11.2] pattern).
 
 ### [T103] O_F is ϖ-adically separated and complete (L1.7–L1.8)
-- **Status**: open | **File**: PerfectoidFieldCharP.lean | **Depends**: T102
+- **Status**: done (beastmode, 2026-07-25; both theorems axiom-clean
+  `[propext, Classical.choice, Quot.sound]`, probe-verified) | **File**: PerfectoidFieldCharP.lean | **Depends**: T102
+- **Progress**:
+  - `isHausdorff_span_toOF`: 13-line proof — SMOD membership → x in every ϖ-power ideal →
+    (T102 exists-lemma) x in every neighbourhood of 0 → `0 ∈ closure {x}` →
+    `isClosed_singleton` (T0 from the class field + subtype + add-group chain) → x = 0.
+  - `isAdicComplete_span_toOF`: IsPrecomplete engine — coherence → membership form;
+    Cauchy in F via open-subgroup symmetrization (`NonarchimedeanAddGroup.is_nonarchimedean`,
+    boundedness of F°, `exists_pow_mem_of_mem_nhds`, `Ideal.pow_le_pow_right`);
+    `cauchySeq_tendsto_of_complete` + topologyEq transport; limit power-bounded via the
+    REPAIRED (now public) `IsPerfectoidRing.isPowerBounded_of_tendsto_of_powerBounded`;
+    `f n − L ∈ I^n` by the open-hence-closed subgroup `I^n`
+    (`AddSubgroup.isOpen_of_mem_nhds` from T102 + `isClosed_of_isOpen` +
+    `IsClosed.mem_of_tendsto`). M1 (O_F layer) COMPLETE.
 - **Statements**: `isHausdorff_span_toOF`, `isAdicComplete_span_toOF`.
 - **Sketch**: (1) Hausdorff: `IsHausdorff` unfolds to SMOD-congruences; an element in
   all `ϖ^n O_F` lies in every neighbourhood of 0 (T102 converse) hence = 0 by the

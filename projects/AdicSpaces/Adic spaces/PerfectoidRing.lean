@@ -258,7 +258,7 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
 
 /-- In a uniform ring with linear topology, the limit of a sequence of power-bounded
 elements (in the topology of A) is power-bounded, provided A° is bounded. -/
-private theorem isPowerBounded_of_tendsto_of_powerBounded
+theorem isPowerBounded_of_tendsto_of_powerBounded
     {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [NonarchimedeanRing A] [IsUniform A] {f : ℕ → A} {L : A}
     (hf : ∀ n, IsPowerBounded (f n)) (hL : Filter.Tendsto f Filter.atTop (nhds L)) :
