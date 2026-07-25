@@ -151,21 +151,133 @@ theorem legendreFunnelEquiv_apply
         (spec g ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩ ⟨h.1, rfl⟩).1) :=
   rfl
 
-/-! **(T-G3b brick 5 — IN PROGRESS.)** The naturality of `legendreFunnelEquiv` reduces,
-by `legendreFunnelEquiv_apply` + `legendreDeltaProblem_map_apply` +
-`gammaFullNaiveProblem_map_apply` (all `rfl`), to exactly two component squares:
+section Brick5
 
-* the **level** square — `fullLevelLocusPointsEquiv_pullSection_fst/snd`
-  (`Moduli/LevelLocusNatural.lean`, PROVED), and
-* the **ω** square — the `spec_nat` hypothesis of the strengthened `ScaleTorsorData`.
+variable (spec : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
+    (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+      w ≫ X.curve.fullLevelLocusπ 2 h2 = g }),
+    { s : T ⟶ Z₂ // s ≫ q = w.1 } ≃
+      { b : OmegaBasis (X.pullbackAlong g).curve.toEllipticCurveGeom //
+        IsLegendreDatum (X.pullbackAlong g)
+          (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b })
 
-⚠ Elaboration blocker (2026-07-25): assembling the two squares with
-`Subtype.ext`/`Prod.ext` after those rewrites overflows `whnf` (200000 heartbeats) on the
-`(FullLevelPt 2) × OmegaBasis` pair, and heartbeat bumps are forbidden in this project.
-The fix follows the stall playbook: state each component equality as its own top-level
-lemma with a **fully explicit** statement (no metavariables against
-`(gammaFullNaiveProblem R 2).obj (op (X.pullbackAlong (k ≫ g)))`), then combine with
-`Prod.ext`. -/
+/-- Pinning, level component. -/
+theorem legendreFunnelEquiv_apply_fst {T : Scheme.{u}} (g : T ⟶ X.base)
+    (h : { h : T ⟶ Z₂ // h ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = g }) :
+    (legendreFunnelEquiv R X h2 Z₂ q spec g h).1.1 =
+      X.curve.fullLevelLocusPointsEquiv 2 h2 g
+        ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩ := rfl
+
+/-- Pinning, `ω` component. -/
+theorem legendreFunnelEquiv_apply_snd {T : Scheme.{u}} (g : T ⟶ X.base)
+    (h : { h : T ⟶ Z₂ // h ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = g }) :
+    (legendreFunnelEquiv R X h2 Z₂ q spec g h).1.2 =
+      (spec g ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩ ⟨h.1, rfl⟩).1 := rfl
+
+/-- **(brick 5a)** The level component of the funnel naturality square. -/
+theorem legendreFunnelEquiv_nat_level {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+    (h : { h : T ⟶ Z₂ // h ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = g })
+    (hkh : (k ≫ h.1) ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = k ≫ g) :
+    (legendreFunnelEquiv R X h2 Z₂ q spec (k ≫ g) ⟨k ≫ h.1, hkh⟩).1.1 =
+      (gammaFullNaiveProblem R 2).map (X.pullbackAlongMap g k).op
+        ((legendreFunnelEquiv R X h2 Z₂ q spec g h).1.1) := by
+  have hassoc : (⟨(k ≫ h.1) ≫ q, by rw [Category.assoc]; exact hkh⟩ :
+      { w : T' ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = k ≫ g }) =
+      ⟨k ≫ (h.1 ≫ q), by
+        rw [Category.assoc]
+        exact congrArg (k ≫ ·) h.2⟩ :=
+    Subtype.ext (Category.assoc _ _ _)
+  rw [legendreFunnelEquiv_apply_fst, legendreFunnelEquiv_apply_fst,
+    congrArg (X.curve.fullLevelLocusPointsEquiv 2 h2 (k ≫ g)) hassoc]
+  refine Subtype.ext ?_
+  rw [gammaFullNaiveProblem_map_apply]
+  exact Prod.ext
+    (fullLevelLocusPointsEquiv_pullSection_fst X 2 h2 g k
+      ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩)
+    (fullLevelLocusPointsEquiv_pullSection_snd X 2 h2 g k
+      ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩)
+
+/-- **(brick 5b)** The `ω` component of the funnel naturality square, from a
+congr-friendly naturality hypothesis on `spec` (the locus point and the section at level
+`k ≫ g` are supplied together with equations identifying them with the restricted ones —
+this avoids a dependent rewrite across `(k ≫ h) ≫ q = k ≫ (h ≫ q)`). -/
+theorem legendreFunnelEquiv_nat_omega
+    (spec_nat : ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+      (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = g })
+      (s : { s : T ⟶ Z₂ // s ≫ q = w.1 })
+      (w' : { w : T' ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = k ≫ g })
+      (_ : w'.1 = k ≫ w.1)
+      (s' : { s : T' ⟶ Z₂ // s ≫ q = w'.1 })
+      (_ : s'.1 = k ≫ s.1),
+      (spec (k ≫ g) w' s').1 =
+        omegaBasisMap (X.pullbackAlongMap g k) (spec g w s).1)
+    {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+    (h : { h : T ⟶ Z₂ // h ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = g })
+    (hkh : (k ≫ h.1) ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = k ≫ g) :
+    (legendreFunnelEquiv R X h2 Z₂ q spec (k ≫ g) ⟨k ≫ h.1, hkh⟩).1.2 =
+      omegaBasisMap (X.pullbackAlongMap g k)
+        ((legendreFunnelEquiv R X h2 Z₂ q spec g h).1.2) := by
+  rw [legendreFunnelEquiv_apply_snd, legendreFunnelEquiv_apply_snd]
+  exact spec_nat g k ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩ ⟨h.1, rfl⟩
+    ⟨(k ≫ h.1) ≫ q, by rw [Category.assoc]; exact hkh⟩ (Category.assoc _ _ _)
+    ⟨k ≫ h.1, rfl⟩ rfl
+
+/-- **(T-G3b brick 5 ★)** The funnel family is **natural** in `T`: level square (brick 5a,
+from the locus dictionary) + `ω` square (brick 5b, from `spec_nat`). -/
+theorem legendreFunnelEquiv_nat
+    (spec_nat : ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+      (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = g })
+      (s : { s : T ⟶ Z₂ // s ≫ q = w.1 })
+      (w' : { w : T' ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = k ≫ g })
+      (_ : w'.1 = k ≫ w.1)
+      (s' : { s : T' ⟶ Z₂ // s ≫ q = w'.1 })
+      (_ : s'.1 = k ≫ s.1),
+      (spec (k ≫ g) w' s').1 =
+        omegaBasisMap (X.pullbackAlongMap g k) (spec g w s).1)
+    {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+    (h : { h : T ⟶ Z₂ // h ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = g })
+    (hkh : (k ≫ h.1) ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = k ≫ g) :
+    legendreFunnelEquiv R X h2 Z₂ q spec (k ≫ g) ⟨k ≫ h.1, hkh⟩ =
+      (legendreDeltaProblem R).map (X.pullbackAlongMap g k).op
+        (legendreFunnelEquiv R X h2 Z₂ q spec g h) := by
+  refine Subtype.ext ?_
+  rw [legendreDeltaProblem_map_apply]
+  exact Prod.ext (legendreFunnelEquiv_nat_level R X h2 Z₂ q spec g k h hkh)
+    (legendreFunnelEquiv_nat_omega R X h2 Z₂ q spec spec_nat g k h hkh)
+
+/-- **(T-G3b brick 6 ★ — the natural funnel)** With a natural classifying family, the
+Legendre `δ` is relatively representable by a genuine `RelRepData` (i.e. **including** the
+`nat` field that `legendreDelta_exists_naturalFamily` was quarantining), finite étale over
+the base. -/
+theorem legendreDelta_relRepData_of_scaleTorsor
+    (spec_nat : ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+      (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = g })
+      (s : { s : T ⟶ Z₂ // s ≫ q = w.1 })
+      (w' : { w : T' ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = k ≫ g })
+      (_ : w'.1 = k ≫ w.1)
+      (s' : { s : T' ⟶ Z₂ // s ≫ q = w'.1 })
+      (_ : s'.1 = k ≫ s.1),
+      (spec (k ≫ g) w' s').1 =
+        omegaBasisMap (X.pullbackAlongMap g k) (spec g w s).1)
+    (hqF : IsFinite q) (hqE : Etale q) :
+    ∃ D : ModuliProblem.RelRepData (legendreDeltaProblem R) X,
+      IsFinite D.f ∧ Etale D.f :=
+  ⟨{ Z := Z₂
+     f := q ≫ X.curve.fullLevelLocusπ 2 h2
+     eqv := fun {T} g => legendreFunnelEquiv R X h2 Z₂ q spec g
+     nat := fun {T T'} g k h =>
+       legendreFunnelEquiv_nat R X h2 Z₂ q spec spec_nat g k h _ },
+   MorphismProperty.comp_mem _ _ _ hqF (X.curve.fullLevelLocusπ_isFinite 2 h2),
+   MorphismProperty.comp_mem _ _ _ hqE (X.curve.fullLevelLocusπ_etale 2 h2)⟩
+
+end Brick5
 
 end NaturalFunnel
 
