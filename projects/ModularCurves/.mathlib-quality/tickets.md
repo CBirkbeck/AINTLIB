@@ -25203,6 +25203,17 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
     + smooth-rel-dim étale-local-on-source descent for the glued engine output. Route (b)
     preferred (no new commutative algebra); needs the engine-output's étale-over-rigidified
     presentation excavated from representable_of_baseChange_cover. Status: open→6b.
+    FURTHER 2026-07-25: NO smoothness landed on LegendreTorsor/LevelFourTorsor/LegendreDelta
+    (grep empty) and NO scheme-level FormallyEtale in mathlib (ring-level only:
+    Algebra.FormallyEtale) — so BOTH routes need one new substrate piece: (a)-route needs
+    the formal-smoothness bridge; (b)-route needs rel-dim-1 charts for the λ-line-Legendre
+    scheme (standard-smooth: 𝔸¹-minus-points over ℚ is IsStandardSmoothOfRelativeDimension 1
+    — likely CHEAP via mathlib StandardSmooth on localization-of-polynomial presentations) +
+    the engine-output étale-glue. RECOMMENDED START (next session): (b1) the λ-line chart
+    lemma (bounded, pure StandardSmooth-algebra); (b2) excavate the engine glue
+    (representable_of_baseChange_cover output-structure, EngineWiring/EngineDescentCore) for
+    the étale-over-rigidified presentation; (b3) SmoothOfRelativeDimension-composition +
+    local-on-source assembly.
   - **[T-YR-6b] square-zero value-lifting**: for A₀ = A/I (A local noeth, I nilpotent/sq-zero)
     over ℚ: every (rhoProblem D)-value over Spec A₀ lifts to Spec A — E-part: Weierstrass
     coefficient lifting (WeierstrassModel/EngineMouth chart machinery; Δ-unit persists as I
