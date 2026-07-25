@@ -7061,6 +7061,29 @@ theorem pullTorsionIso_vMapOf {X : EllObj (CommRingCat.of ℚ)}
     refine Eq.trans (Category.assoc _ _ _).symm ?_
     exact congrArg (· ≫ k') (pullTorsionIso_over D _ str0)
 
+/-- **[T-YR-3E]** Naturality of the tautological torsion points: the torsion
+base change carries the pulled tautological point to the original one. -/
+@[reassoc]
+theorem strTor_pull {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (str0 : RhoLevelStructure D (X.pullbackAlong g').structMap
+      (X.pullbackAlong g').curve) (v : Fin 2 → ZMod N) :
+    strTor D (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0) v ≫
+        torsionMapOfEllHom (X.pullbackAlongMap g' k') N =
+      strCoverMap D g' k' ≫ strTor D str0 v := by
+  have hinv2 : (pullTorsionIso D (X.pullbackAlongMap g' k') str0).inv ≫
+      torsionMapOfEllHom (X.pullbackAlongMap g' k') N =
+      vMapOf D g' k' ≫ str0.torsionIso.inv := by
+    rw [Iso.inv_comp_eq, ← Category.assoc, ← pullTorsionIso_vMapOf,
+      Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  refine Eq.trans (Category.assoc _ _ _) ?_
+  refine Eq.trans (congrArg (strVPt D (X.pullbackAlong (k' ≫ g')) v ≫ ·)
+    hinv2) ?_
+  refine Eq.trans (Category.assoc _ _ _).symm ?_
+  refine Eq.trans (congrArg (· ≫ str0.torsionIso.inv)
+    (strCoverMap_strVPt D g' k' v).symm) ?_
+  exact Category.assoc _ _ _
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
