@@ -393,7 +393,8 @@ not weaken or strengthen hypotheses).
 - **Status**: open | **Depends**: T406.
 
 ### [T501] Freeness and wandering (L6.1–L6.2)
-- **Status**: open | **File**: FarguesFontaine/Curve.lean | **Depends**: T405, T406
+- **Status**: done (beastmode 2026-07-25; pure set-logic over T405/T406 as planned;
+  commit 0b076eda6) | **File**: FarguesFontaine/Curve.lean | **Depends**: T405, T406
 - **Statements**: `smul_ne_of_ne_zero`, `exists_nhd_smul_disjoint`.
 - **Sketch**: pure set logic over T405/T406 per decomposition §4 prose: membership in
   some window; translated window is the (n-k)-window; within-family disjointness
@@ -401,7 +402,8 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L6.1–L6.2 ([Ked-AWS §3.1] and [SW Def 13.5.1] quotes).
 
 ### [T502] The quotient map is an open quotient map (L6.3, L7.1)
-- **Status**: open | **File**: Curve.lean | **Depends**: T402, T303
+- **Status**: done (beastmode 2026-07-25; + new Spv-level ContinuousConstSMul via
+  comap_continuous; commit 0b076eda6) | **File**: Curve.lean | **Depends**: T402, T303
 - **Statements**: `instMulActionYSub` laws, `instContinuousConstSMulYSub`,
   `toCurve_surjective`, `isOpenQuotientMap_toCurve`.
 - **Sketch**: subtype-action laws by `Subtype.ext` + parent action laws (pattern:
@@ -412,7 +414,9 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L6.3, L7.1 ([BFHHLWY Def 2.1.1] verbatim).
 
 ### [T503] ★ MILESTONE: Kedlaya's two charts (L7.2–L7.3)
-- **Status**: open | **File**: Curve.lean | **Depends**: T501, T502, CLEANUP-ALL-1
+- **Status**: DONE (beastmode 2026-07-25; commit 0b076eda6). NOTE: dispatched before
+  CLEANUP-ALL-1 per the user's 2026-07-25 redirection to constructions-first; the
+  cleanup backlog remains queued. | **File**: Curve.lean | **Depends**: T501, T502, CLEANUP-ALL-1
 - **Statements**: `injOn_toCurve_windowU`, `injOn_toCurve_windowV`,
   `curve_eq_image_window_zero`.
 - **Sketch**: injectivity: orbit-mates in one window contradict wandering unless k = 0
@@ -425,7 +429,10 @@ not weaken or strengthen hypotheses).
 - **Status**: open | **Depends**: T503.
 
 ### [T504] The curve is T0 (L7.4)
-- **Status**: open | **File**: Curve.lean | **Depends**: T503, CLEANUP-7
+- **Status**: done (beastmode 2026-07-25; commit 3d870f8d5) — chart-separation engine
+  sep_of_chart (T0 inside a chart via Spv-T0 + open-quotient pushforward + chart
+  injectivity; across charts the open chart-image separates); windows re-opened at the
+  ↥Y level. | **File**: Curve.lean | **Depends**: T503, CLEANUP-7
 - **Statement**: `instT0SpaceCurve`.
 - **Sketch**: distinct orbits: if some window meets both, separate inside the chart
   (chart is an open embedding by T502+T503; Spv/Spa T0 — locate or prove the small
@@ -434,7 +441,16 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L7.4.
 
 ### [T505] The curve is quasicompact (L7.5 — RR2, descopable)
-- **Status**: open | **File**: Curve.lean | **Depends**: T503
+- **Status**: BLOCKED (beastmode 2026-07-25, per this ticket's hard-stop rule; three
+  sorries remain by design, statements untouched). Evidence: route A's closed-image
+  hypothesis (`isCompact_rationalOpen_of_isClosed_image`) is discharged in-project only
+  for `[DiscreteTopology A]`; for the non-discrete non-Tate adic `A_inf` the
+  Spa-continuity conditions are ∃-shaped (cofinality) = countable unions of cylinders,
+  not closed — instantiating `S` needs new spectral theory (SpaCompact's own preamble
+  only sketches the TATE extension, also not done). Route B: SpaQCviaSpvAI is
+  incomplete (1 sorry) and exports no citable two-sided-window qc lemma. Matches the
+  sol-Q5 warning that no basicOpen shortcut exists. Unblock = a dedicated dev ticket
+  for the adic closed-image instantiation. | **File**: Curve.lean | **Depends**: T503
 - **Statements**: `isCompact_windowU_zero`, `isCompact_windowV_zero`,
   `instCompactSpaceCurve`.
 - **Sketch**: route A: Boolean-embedding closed-image criterion
