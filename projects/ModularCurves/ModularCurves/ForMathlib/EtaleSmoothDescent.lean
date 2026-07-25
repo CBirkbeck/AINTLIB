@@ -24,6 +24,31 @@ open TensorProduct
 
 namespace Algebra
 
+section Dimension
+
+variable {R C : Type*} [CommRing R] [CommRing C] [Algebra R C]
+
+/-- The relative dimension of a standard smooth algebra is unique. -/
+theorem IsStandardSmoothOfRelativeDimension.eq_of_nontrivial [Nontrivial C] {m n : ℕ}
+    [IsStandardSmoothOfRelativeDimension m R C]
+    [IsStandardSmoothOfRelativeDimension n R C] : m = n := by
+  have h1 : Module.rank C Ω[C⁄R] = m :=
+    IsStandardSmoothOfRelativeDimension.rank_kaehlerDifferential m
+  have h2 : Module.rank C Ω[C⁄R] = n :=
+    IsStandardSmoothOfRelativeDimension.rank_kaehlerDifferential n
+  exact_mod_cast h1.symm.trans h2
+
+/-- A standard smooth algebra is standard smooth of relative dimension the rank of
+its module of differentials. -/
+theorem IsStandardSmoothOfRelativeDimension.of_isStandardSmooth [Nontrivial C]
+    [Algebra.FinitePresentation R C] [IsStandardSmooth R C] :
+    IsStandardSmoothOfRelativeDimension (Module.finrank C Ω[C⁄R]) R C := by
+  rw [IsStandardSmoothOfRelativeDimension.iff_of_isStandardSmooth]
+  exact (Module.finrank_eq_rank C Ω[C⁄R]).symm
+
+end Dimension
+
+
 variable (k A B : Type*) [CommRing k] [CommRing A] [CommRing B]
   [Algebra k A] [Algebra k B] [Algebra A B] [IsScalarTower k A B]
 
@@ -53,5 +78,98 @@ theorem smooth_of_etale_faithfullyFlat [IsNoetherianRing k]
     Algebra.FinitePresentation.of_finiteType.mp inferInstance
   exact ⟨⟨projective_kaehlerDifferential_of_formallyEtale_faithfullyFlat k A B,
     subsingleton_h1Cotangent_of_etale_faithfullyFlat k A B⟩, inferInstance⟩
+
+section RelativeDimension
+
+variable [IsNoetherianRing k] [Algebra.Etale A B] [Module.Finite A B]
+  [Module.FaithfullyFlat A B]
+
+/-- (Implementation) On a standard smooth basic open `A[1/f]` of `A`, the relative
+dimension over `k` is forced to be `1` by comparison with the étale cover. -/
+theorem isStandardSmoothOfRelativeDimension_one_localizationAway
+    [IsStandardSmoothOfRelativeDimension 1 k B]
+    (p : Ideal A) [p.IsPrime] (f : A) (hf : f ∉ p)
+    [IsStandardSmooth k (Localization.Away f)] :
+    IsStandardSmoothOfRelativeDimension 1 k (Localization.Away f) := by
+  -- `A[1/f]` is nontrivial, being a localization away from a prime's complement
+  haveI hprime : (Ideal.map (algebraMap A (Localization.Away f)) p).IsPrime := by
+    apply IsLocalization.isPrime_of_isPrime_disjoint (.powers f) _ _ ‹_›
+    rwa [Ideal.disjoint_powers_iff_notMem_of_isPrime]
+  haveI hntA : Nontrivial (Localization.Away f) := by
+    rcases subsingleton_or_nontrivial (Localization.Away f) with h | h
+    · refine absurd (Ideal.eq_top_iff_one _ |>.mpr ?_) hprime.ne_top
+      rw [Subsingleton.elim (1 : Localization.Away f) 0]
+      exact Submodule.zero_mem _
+    · exact h
+  -- a prime of `B` over `p`, so `B[1/f]` is nontrivial too
+  obtain ⟨P, hP, hPo⟩ := Ideal.exists_isPrime_liesOver_of_faithfullyFlat (B := B) p
+  haveI := hP
+  have hfP : algebraMap A B f ∉ P := by
+    intro h
+    exact hf (by rw [hPo.over]; exact h)
+  haveI hprimeB : (Ideal.map (algebraMap B (Localization.Away (algebraMap A B f))) P).IsPrime := by
+    apply IsLocalization.isPrime_of_isPrime_disjoint (.powers (algebraMap A B f)) _ _ ‹_›
+    rwa [Ideal.disjoint_powers_iff_notMem_of_isPrime]
+  haveI hntB : Nontrivial (Localization.Away (algebraMap A B f)) := by
+    rcases subsingleton_or_nontrivial (Localization.Away (algebraMap A B f)) with h | h
+    · refine absurd (Ideal.eq_top_iff_one _ |>.mpr ?_) hprimeB.ne_top
+      rw [Subsingleton.elim (1 : Localization.Away (algebraMap A B f)) 0]
+      exact Submodule.zero_mem _
+    · exact h
+  -- the localized cover `A[1/f] → B[1/f]`
+  letI : Algebra (Localization.Away f) (Localization.Away (algebraMap A B f)) :=
+    (Localization.awayMap (algebraMap A B) f).toAlgebra
+  haveI : IsScalarTower A (Localization.Away f)
+      (Localization.Away (algebraMap A B f)) :=
+    IsScalarTower.of_algebraMap_eq' (by
+      show (algebraMap B (Localization.Away (algebraMap A B f))).comp (algebraMap A B) =
+        (Localization.awayMap (algebraMap A B) f).comp (algebraMap A (Localization.Away f))
+      exact (IsLocalization.map_comp
+        (M := Submonoid.powers f) (S := Localization.Away f)
+        (T := Submonoid.powers (algebraMap A B f))
+        (Q := Localization.Away (algebraMap A B f)) _).symm)
+  haveI : IsScalarTower k (Localization.Away f)
+      (Localization.Away (algebraMap A B f)) := by
+    refine IsScalarTower.of_algebraMap_eq fun x => ?_
+    rw [IsScalarTower.algebraMap_apply k A (Localization.Away f),
+      ← IsScalarTower.algebraMap_apply A (Localization.Away f)
+        (Localization.Away (algebraMap A B f)),
+      IsScalarTower.algebraMap_apply A B (Localization.Away (algebraMap A B f)),
+      ← IsScalarTower.algebraMap_apply k A B,
+      ← IsScalarTower.algebraMap_apply k B (Localization.Away (algebraMap A B f))]
+  haveI : Algebra.Etale (Localization.Away f) (Localization.Away (algebraMap A B f)) :=
+    Algebra.Etale.of_restrictScalars A (Localization.Away f)
+      (Localization.Away (algebraMap A B f))
+  haveI hssB : IsStandardSmooth k B :=
+    IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
+  haveI hsmB : Algebra.Smooth k B := inferInstance
+  haveI hsmA : Algebra.Smooth k A := smooth_of_etale_faithfullyFlat k A B
+  haveI : Algebra.FinitePresentation k A := hsmA.finitePresentation
+  haveI : Algebra.FinitePresentation k (Localization.Away f) :=
+    Algebra.FinitePresentation.trans (R := k) (A := A) (B := Localization.Away f)
+  -- both relative dimensions land on `B[1/f]`
+  haveI h0 : IsStandardSmoothOfRelativeDimension 0 (Localization.Away f)
+      (Localization.Away (algebraMap A B f)) :=
+    Algebra.Etale.iff_isStandardSmoothOfRelativeDimension_zero.mp inferInstance
+  haveI hn : IsStandardSmoothOfRelativeDimension
+      (Module.finrank (Localization.Away f) Ω[Localization.Away f⁄k]) k
+      (Localization.Away f) :=
+    IsStandardSmoothOfRelativeDimension.of_isStandardSmooth
+  haveI hcomp1 := IsStandardSmoothOfRelativeDimension.trans
+    (n := Module.finrank (Localization.Away f) Ω[Localization.Away f⁄k]) (m := 0)
+    (R := k) (S := Localization.Away f) (T := Localization.Away (algebraMap A B f))
+  haveI hloc0 : IsStandardSmoothOfRelativeDimension 0 B
+      (Localization.Away (algebraMap A B f)) :=
+    IsStandardSmoothOfRelativeDimension.localization_away (algebraMap A B f)
+  haveI hcomp2 := IsStandardSmoothOfRelativeDimension.trans (n := 1) (m := 0)
+    (R := k) (S := B) (T := Localization.Away (algebraMap A B f))
+  have hone : Module.finrank (Localization.Away f) Ω[Localization.Away f⁄k] = 1 := by
+    have := IsStandardSmoothOfRelativeDimension.eq_of_nontrivial
+      (R := k) (C := Localization.Away (algebraMap A B f))
+      (m := 0 + Module.finrank (Localization.Away f) Ω[Localization.Away f⁄k]) (n := 0 + 1)
+    omega
+  exact hone ▸ hn
+
+end RelativeDimension
 
 end Algebra
