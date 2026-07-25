@@ -63,6 +63,50 @@ theorem card_rootsOfUnity_algClosureQ (N : ℕ) [NeZero N] :
   have hprim : IsPrimitiveRoot ζ N := Polynomial.isRoot_cyclotomic_iff.mp hζ
   exact hprim.card_rootsOfUnity
 
+/-- **(T-G1.L1)** `ℚ̄` contains a primitive `N`-th root of unity. -/
+theorem exists_isPrimitiveRoot_algClosureQ (N : ℕ) [NeZero N] :
+    ∃ ζ : AlgebraicClosure ℚ, IsPrimitiveRoot ζ N := by
+  haveI : NeZero ((N : AlgebraicClosure ℚ)) := ⟨Nat.cast_ne_zero.mpr (NeZero.ne N)⟩
+  have hdeg : (Polynomial.cyclotomic N (AlgebraicClosure ℚ)).degree ≠ 0 := by
+    rw [Polynomial.degree_cyclotomic]
+    exact_mod_cast (Nat.totient_pos.mpr (Nat.pos_of_ne_zero (NeZero.ne N))).ne'
+  obtain ⟨ζ, hζ⟩ := IsAlgClosed.exists_root _ hdeg
+  exact ⟨ζ, Polynomial.isRoot_cyclotomic_iff.mp hζ⟩
+
+/-- **(T-G1.L2)** A primitive `N`-th root of unity identifies `ℤ/N` (written
+multiplicatively) with `μ_N(ℚ̄)`. This is the pairing normalisation `p`: no choice beyond
+`ζ` is involved, and *any* choice is Galois-equivariant for the cyclotomic action — see
+`pairingNormalisation_equivariant`. -/
+noncomputable def pairingNormalisationOfPrimitiveRoot {N : ℕ} [NeZero N]
+    {ζ : AlgebraicClosure ℚ} (hζ : IsPrimitiveRoot ζ N) :
+    Multiplicative (ZMod N) ≃* rootsOfUnity N (AlgebraicClosure ℚ) :=
+  haveI hζu : IsPrimitiveRoot (hζ.isUnit (NeZero.ne N)).unit' N :=
+    hζ.isUnit_unit' (NeZero.ne N)
+  (AddEquiv.toMultiplicativeLeft hζu.zmodEquivZPowers).trans
+    (MulEquiv.subgroupCongr hζu.zpowers_eq)
+
+/-- **(T-G1.L3)** The normalisation is Galois-equivariant through the mod-`N` cyclotomic
+character: `σ (p x) = p (x ^ χ(σ))`. This is mathlib's `modularCyclotomicCharacter.spec`
+read through the identification. -/
+theorem pairingNormalisation_equivariant {N : ℕ} [NeZero N]
+    {ζ : AlgebraicClosure ℚ} (hζ : IsPrimitiveRoot ζ N) (σ : GalQ)
+    (x : Multiplicative (ZMod N)) :
+    σ ((pairingNormalisationOfPrimitiveRoot hζ x : (AlgebraicClosure ℚ)ˣ) :
+        AlgebraicClosure ℚ) =
+      ((pairingNormalisationOfPrimitiveRoot hζ
+        (x ^ ((modularCyclotomicCharacter (AlgebraicClosure ℚ)
+          (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv : (ZMod N)ˣ) : ZMod N).val) :
+            (AlgebraicClosure ℚ)ˣ) : AlgebraicClosure ℚ) := by
+  have hmem : ((pairingNormalisationOfPrimitiveRoot hζ x :
+      rootsOfUnity N (AlgebraicClosure ℚ)) : (AlgebraicClosure ℚ)ˣ) ∈
+      rootsOfUnity N (AlgebraicClosure ℚ) :=
+    (pairingNormalisationOfPrimitiveRoot hζ x).2
+  have hspec := modularCyclotomicCharacter.spec (AlgebraicClosure ℚ)
+    (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv hmem
+  refine hspec.trans ?_
+  rw [map_pow]
+  rfl
+
 /-- A mod-`N` Galois representation datum for the twisted modular curve: a continuous
 action of `Gal(ℚ̄/ℚ)` on `(ℤ/N)²` with cyclotomic determinant, together with the pairing
 normalisation `p`. Buzzard p. 33: `ρ̄_N` "equipped with an alternating Gal-equivariant
