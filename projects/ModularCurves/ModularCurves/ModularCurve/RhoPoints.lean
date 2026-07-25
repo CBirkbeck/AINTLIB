@@ -260,6 +260,25 @@ theorem exists_representsYRho (D : GaloisRepData N) [Fact (1 < N)] (hN : 3 ≤ (
     (legendreDelta_surjective_of (legendreDeltaGEquiv (CommRingCat.of ℚ) hR X))
     dρ hρfin hρet
 
+open scoped FintypeCatDiscrete in
+/-- **(T-F4 = Buzzard p. 33, the main statement — `yRho_representable`)** The twisted
+modular curve exists: for `N ≥ 3` some `(Y, sY)` represents the ρ-level moduli problem.
+This is the hypothesis-free form of `exists_representsYRho`. -/
+theorem yRho_representable' (D : GaloisRepData N) (hN : 3 ≤ (N : ℤ)) :
+    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (CommRingCat.of ℚ)), RepresentsYRho D Y sY := by
+  haveI : Fact (1 < N) := by
+    refine ⟨?_⟩
+    have h1 : (1 : ℤ) < (N : ℤ) := lt_of_lt_of_le (by norm_num) hN
+    exact_mod_cast h1
+  have hR : IsUnit (2 : CommRingCat.of ℚ) := by
+    show IsUnit (2 : ℚ)
+    exact isUnit_iff_ne_zero.mpr (by norm_num)
+  exact exists_representsYRho D hN hR
+    ⟨⟨two_zsmul_universalLegendreP (CommRingCat.of ℚ) hR,
+      two_zsmul_universalLegendreQ (CommRingCat.of ℚ) hR⟩,
+      fun k _ _ t x hx =>
+        universalLegendre_generation (CommRingCat.of ℚ) hR k t x hx⟩
+
 end ModularCurves
 
 end
