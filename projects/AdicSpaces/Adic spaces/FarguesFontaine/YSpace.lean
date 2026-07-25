@@ -457,12 +457,263 @@ theorem Y_eq_iUnion_windows :
 Source: [Kedlaya-AWS, Rem. 3.1.9]: "The action of φ permutes the U_n (among
 themselves)"; [SW, §12.2]: "κ∘φ = pκ", "φ sends 𝒴_{[a,b]} isomorphically to
 𝒴_{[ap,bp]}". -/
+private theorem vle_pow_iff_cross {v : Spv (Ainf p F)} {x y : Ainf p F} {a b c d : ℕ}
+    (h : a * d = c * b) (hb : b ≠ 0) (hd : d ≠ 0) :
+    v.vle (x ^ d) (y ^ c) ↔ v.vle (x ^ b) (y ^ a) := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  rw [hbridge, hbridge, map_pow, map_pow, map_pow, map_pow]
+  exact pow_le_pow_iff_cross h hb hd
+
+private theorem teichmuller_frobeniusEquiv_zpow_pow (j : ℤ) (x : OF F) :
+    WittVector.teichmuller p ((_root_.frobeniusEquiv (OF F) p ^ j : RingAut (OF F)) x)
+        ^ p ^ (-j).toNat
+      = WittVector.teichmuller p x ^ p ^ j.toNat := by
+  have h1 : ((_root_.frobeniusEquiv (OF F) p ^ j : RingAut (OF F)) x) ^ p ^ (-j).toNat
+      = x ^ p ^ j.toNat := by
+    rw [← frobeniusEquiv_pow_apply p F ((-j).toNat), ← RingAut.mul_apply,
+      ← zpow_natCast (_root_.frobeniusEquiv (OF F) p) ((-j).toNat), ← zpow_add,
+      show ((-j).toNat : ℤ) + j = (j.toNat : ℤ) from by omega, zpow_natCast,
+      frobeniusEquiv_pow_apply]
+  rw [← map_pow, h1, map_pow]
+
+private theorem smul_vle_iff (g : Multiplicative ℤ) (w : Spv (Ainf p F))
+    (a b : Ainf p F) : (g • w).vle a b ↔ w.vle (g⁻¹ • a) (g⁻¹ • b) := by
+  change (comap (MulSemiringAction.toRingHom _ _ g⁻¹) w).vle a b ↔ _
+  rw [comap_vle]
+  rfl
+
+private theorem smul_teichPi (g : Multiplicative ℤ) :
+    g • teichPi p F ϖ = WittVector.teichmuller p
+      ((_root_.frobeniusEquiv (OF F) p ^ (Multiplicative.toAdd g) : RingAut (OF F))
+        (PseudoUniformizer.toOF F ϖ)) := by
+  rw [← ofAdd_toAdd g, ofAdd_zsmul_def, teichPi, frob_zpow_teichmuller, ofAdd_toAdd]
+
+private theorem smul_natCast_p (g : Multiplicative ℤ) :
+    g • ((p : ℕ) : Ainf p F) = ((p : ℕ) : Ainf p F) := by
+  rw [← ofAdd_toAdd g, ofAdd_zsmul_def]
+  exact map_natCast _ p
+
+private theorem zpow_eq_natCast_div (n : ℤ) :
+    ((p : ℚ)) ^ n = ((p ^ n.toNat : ℕ) : ℚ) / ((p ^ (-n).toNat : ℕ) : ℚ) := by
+  obtain ⟨m, rfl | rfl⟩ := Int.eq_nat_or_neg n
+  · simp [zpow_natCast]
+  · rw [show ((-(m : ℤ)).toNat) = 0 from by omega,
+      show ((-(-(m : ℤ))).toNat) = m from by omega]
+    push_cast
+    rw [zpow_neg, zpow_natCast]
+    simp
+
+private theorem cFF_mul_zpow_eq (n : ℤ) :
+    cFF p * (p : ℚ) ^ n
+      = (((p + 1) * p ^ n.toNat : ℕ) : ℚ) / ((2 * p ^ (-n).toNat : ℕ) : ℚ) := by
+  rw [cFF, zpow_eq_natCast_div p n]
+  push_cast
+  rw [div_mul_div_comm]
+
+/-- Core `KGE`-shape transport: comparing against the `θ^k`-twisted Teichmüller lift is
+the same as comparing against the plain one, with exponents shifted by `p^{±k}`. -/
+private theorem vle_theta_iff_ge {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' : ℕ}
+    (hβ : β ≠ 0) (hβ' : β' ≠ 0)
+    (hcross : α' * (p ^ k.toNat * β) = (α * p ^ (-k).toNat) * β') :
+    w.vle (WittVector.teichmuller p
+        ((_root_.frobeniusEquiv (OF F) p ^ k : RingAut (OF F))
+          (PseudoUniformizer.toOF F ϖ)) ^ β) ((p : Ainf p F) ^ α) ↔
+      w.vle (teichPi p F ϖ ^ β') ((p : Ainf p F) ^ α') := by
+  have hp0 : 0 < p := (Fact.out : Nat.Prime p).pos
+  have hPne : p ^ (-k).toNat ≠ 0 := (pow_pos hp0 _).ne'
+  set Tθ : Ainf p F := WittVector.teichmuller p
+    ((_root_.frobeniusEquiv (OF F) p ^ k : RingAut (OF F)) (PseudoUniformizer.toOF F ϖ))
+    with hTθ
+  have hcoll : Tθ ^ (β * p ^ (-k).toNat) = teichPi p F ϖ ^ (p ^ k.toNat * β) := by
+    rw [mul_comm β, pow_mul, hTθ, teichPi, teichmuller_frobeniusEquiv_zpow_pow,
+      ← pow_mul]
+  constructor
+  · intro h
+    have h1 : w.vle (Tθ ^ (β * p ^ (-k).toNat)) ((p : Ainf p F) ^ (α * p ^ (-k).toNat)) :=
+      (vle_pow_iff_cross p F (x := Tθ) (y := (p : Ainf p F))
+        (show α * (β * p ^ (-k).toNat) = (α * p ^ (-k).toNat) * β from by ring)
+        hβ (Nat.mul_ne_zero hβ hPne)).mpr h
+    rw [hcoll] at h1
+    exact (vle_pow_iff_cross p F (x := teichPi p F ϖ) (y := (p : Ainf p F))
+      hcross hβ' (Nat.mul_ne_zero (pow_pos hp0 _).ne' hβ)).mp h1
+  · intro h
+    have h1 : w.vle (teichPi p F ϖ ^ (p ^ k.toNat * β))
+        ((p : Ainf p F) ^ (α * p ^ (-k).toNat)) :=
+      (vle_pow_iff_cross p F (x := teichPi p F ϖ) (y := (p : Ainf p F))
+        hcross hβ' (Nat.mul_ne_zero (pow_pos hp0 _).ne' hβ)).mpr h
+    rw [← hcoll] at h1
+    exact (vle_pow_iff_cross p F (x := Tθ) (y := (p : Ainf p F))
+      (show α * (β * p ^ (-k).toNat) = (α * p ^ (-k).toNat) * β from by ring)
+      hβ (Nat.mul_ne_zero hβ hPne)).mp h1
+
+/-- Core `KLE`-shape transport, mirror of `vle_theta_iff_ge`. -/
+private theorem vle_theta_iff_le {w : Spv (Ainf p F)} (k : ℤ) {α β α' β' : ℕ}
+    (hα : α ≠ 0) (hα' : α' ≠ 0) (hβ : β ≠ 0)
+    (hcross : α' * (p ^ k.toNat * β) = (α * p ^ (-k).toNat) * β') :
+    w.vle ((p : Ainf p F) ^ α) (WittVector.teichmuller p
+        ((_root_.frobeniusEquiv (OF F) p ^ k : RingAut (OF F))
+          (PseudoUniformizer.toOF F ϖ)) ^ β) ↔
+      w.vle ((p : Ainf p F) ^ α') (teichPi p F ϖ ^ β') := by
+  have hp0 : 0 < p := (Fact.out : Nat.Prime p).pos
+  have hPne : p ^ (-k).toNat ≠ 0 := (pow_pos hp0 _).ne'
+  set Tθ : Ainf p F := WittVector.teichmuller p
+    ((_root_.frobeniusEquiv (OF F) p ^ k : RingAut (OF F)) (PseudoUniformizer.toOF F ϖ))
+    with hTθ
+  have hcoll : Tθ ^ (β * p ^ (-k).toNat) = teichPi p F ϖ ^ (p ^ k.toNat * β) := by
+    rw [mul_comm β, pow_mul, hTθ, teichPi, teichmuller_frobeniusEquiv_zpow_pow,
+      ← pow_mul]
+  have hQβcross : (p ^ k.toNat * β) * (α * p ^ (-k).toNat)
+      = (α * p ^ (-k).toNat) * (p ^ k.toNat * β) := by ring
+  constructor
+  · intro h
+    have h1 : w.vle ((p : Ainf p F) ^ (α * p ^ (-k).toNat)) (Tθ ^ (β * p ^ (-k).toNat)) :=
+      (vle_pow_iff_cross p F (x := (p : Ainf p F)) (y := Tθ)
+        (show β * (α * p ^ (-k).toNat) = (β * p ^ (-k).toNat) * α from by ring)
+        hα (Nat.mul_ne_zero hα hPne)).mpr h
+    rw [hcoll] at h1
+    refine (vle_pow_iff_cross p F (x := (p : Ainf p F)) (y := teichPi p F ϖ)
+      ?_ hα' (Nat.mul_ne_zero hα hPne)).mp h1
+    rw [mul_comm β' (α * p ^ (-k).toNat), mul_comm (p ^ k.toNat * β) α']
+    exact hcross.symm
+  · intro h
+    have h1 : w.vle ((p : Ainf p F) ^ (α * p ^ (-k).toNat))
+        (teichPi p F ϖ ^ (p ^ k.toNat * β)) := by
+      refine (vle_pow_iff_cross p F (x := (p : Ainf p F)) (y := teichPi p F ϖ)
+        ?_ hα' (Nat.mul_ne_zero hα hPne)).mpr h
+      rw [mul_comm β' (α * p ^ (-k).toNat), mul_comm (p ^ k.toNat * β) α']
+      exact hcross.symm
+    rw [← hcoll] at h1
+    exact (vle_pow_iff_cross p F (x := (p : Ainf p F)) (y := Tθ)
+      (show β * (α * p ^ (-k).toNat) = (β * p ^ (-k).toNat) * α from by ring)
+      hα (Nat.mul_ne_zero hα hPne)).mp h1
+
+private theorem KGE_smul_iff {w : Spv (Ainf p F)} (hw : w ∈ Y p F ϖ) (k n : ℤ) :
+    KGE p F ϖ ((p : ℚ) ^ n) ((Multiplicative.ofAdd k)⁻¹ • w) ↔
+      KGE p F ϖ ((p : ℚ) ^ (n - k)) w := by
+  have hp0 : 0 < p := (Fact.out : Nat.Prime p).pos
+  have hpQ : (0 : ℚ) < p := by exact_mod_cast hp0
+  have hu : (Multiplicative.ofAdd k)⁻¹ • w ∈ Y p F ϖ := smul_mem_Y p F ϖ _ hw
+  rw [KGE_iff hu (zpow_pos hpQ n) (pow_pos hp0 _) (zpow_eq_natCast_div p n),
+    KGE_iff hw (zpow_pos hpQ (n - k)) (pow_pos hp0 _) (zpow_eq_natCast_div p (n - k)),
+    smul_vle_iff, inv_inv, smul_pow', smul_pow', smul_teichPi, smul_natCast_p,
+    show Multiplicative.toAdd (Multiplicative.ofAdd k) = k from rfl]
+  refine vle_theta_iff_ge p F ϖ k (pow_pos hp0 _).ne' (pow_pos hp0 _).ne' ?_
+  rw [← pow_add, ← pow_add, ← pow_add, ← pow_add]
+  exact congrArg (p ^ ·) (by omega)
+
+private theorem KLE_smul_iff {w : Spv (Ainf p F)} (hw : w ∈ Y p F ϖ) (k n : ℤ) :
+    KLE p F ϖ (cFF p * (p : ℚ) ^ n) ((Multiplicative.ofAdd k)⁻¹ • w) ↔
+      KLE p F ϖ (cFF p * (p : ℚ) ^ (n - k)) w := by
+  have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
+  have hp0 : 0 < p := (Fact.out : Nat.Prime p).pos
+  have hpQ : (0 : ℚ) < p := by exact_mod_cast hp0
+  have hcpos : ∀ m : ℤ, 0 < cFF p * (p : ℚ) ^ m := fun m =>
+    mul_pos (zero_lt_one.trans (one_lt_cFF hp1)) (zpow_pos hpQ m)
+  have hu : (Multiplicative.ofAdd k)⁻¹ • w ∈ Y p F ϖ := smul_mem_Y p F ϖ _ hw
+  have hbne : ∀ m : ℤ, 0 < 2 * p ^ (-m).toNat := fun m =>
+    Nat.mul_pos (by omega) (pow_pos hp0 _)
+  have hane : ∀ m : ℤ, (p + 1) * p ^ m.toNat ≠ 0 :=
+    fun m => Nat.mul_ne_zero (by omega) (pow_pos hp0 _).ne'
+  rw [KLE_iff hu (hcpos n) (hbne n) (cFF_mul_zpow_eq p n),
+    KLE_iff hw (hcpos (n - k)) (hbne (n - k)) (cFF_mul_zpow_eq p (n - k)),
+    smul_vle_iff, inv_inv, smul_pow', smul_pow', smul_teichPi, smul_natCast_p,
+    show Multiplicative.toAdd (Multiplicative.ofAdd k) = k from rfl]
+  refine vle_theta_iff_le p F ϖ k (hane n) (hane (n - k)) (hbne n).ne' ?_
+  have hnorm1 : ∀ x y z : ℕ,
+      ((p + 1) * p ^ x) * (p ^ y * (2 * p ^ z)) = ((p + 1) * 2) * p ^ (x + y + z) := by
+    intro x y z
+    rw [pow_add, pow_add]
+    ring
+  have hnorm2 : ∀ x y z : ℕ,
+      (((p + 1) * p ^ x) * p ^ y) * (2 * p ^ z) = ((p + 1) * 2) * p ^ (x + y + z) := by
+    intro x y z
+    rw [pow_add, pow_add]
+    ring
+  rw [hnorm1, hnorm2]
+  exact congrArg (((p + 1) * 2) * p ^ ·) (by omega)
+
+/-- **Translation**: the action shifts windows, `φ^k(U_n) = U_{n-k}` in the convention
+`g • v = v ∘ φ^{-g}` (so κ(g • v) = κ(v)/p^g).
+
+Source: [Kedlaya-AWS, Rem. 3.1.9]: "The action of φ permutes the U_n (among
+themselves)"; [SW, §12.2]: "κ∘φ = pκ", "φ sends 𝒴_{[a,b]} isomorphically to
+𝒴_{[ap,bp]}". -/
 theorem zsmul_windowU (k n : ℤ) :
-    (Multiplicative.ofAdd k) • windowU p F ϖ n = windowU p F ϖ (n - k) := by sorry
+    (Multiplicative.ofAdd k) • windowU p F ϖ n = windowU p F ϖ (n - k) := by
+  ext w
+  rw [Set.mem_smul_set_iff_inv_smul_mem]
+  constructor
+  · rintro ⟨huY, hge, hle⟩
+    have hwY : w ∈ Y p F ϖ := by
+      have := smul_mem_Y p F ϖ (Multiplicative.ofAdd k) huY
+      rwa [smul_inv_smul] at this
+    exact ⟨hwY, (KGE_smul_iff p F ϖ hwY k n).mp hge, (KLE_smul_iff p F ϖ hwY k n).mp hle⟩
+  · rintro ⟨hwY, hge, hle⟩
+    exact ⟨smul_mem_Y p F ϖ _ hwY, (KGE_smul_iff p F ϖ hwY k n).mpr hge,
+      (KLE_smul_iff p F ϖ hwY k n).mpr hle⟩
+
+private theorem KGE_cFF_smul_iff {w : Spv (Ainf p F)} (hw : w ∈ Y p F ϖ) (k n : ℤ) :
+    KGE p F ϖ (cFF p * (p : ℚ) ^ n) ((Multiplicative.ofAdd k)⁻¹ • w) ↔
+      KGE p F ϖ (cFF p * (p : ℚ) ^ (n - k)) w := by
+  have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
+  have hp0 : 0 < p := (Fact.out : Nat.Prime p).pos
+  have hpQ : (0 : ℚ) < p := by exact_mod_cast hp0
+  have hcpos : ∀ m : ℤ, 0 < cFF p * (p : ℚ) ^ m := fun m =>
+    mul_pos (zero_lt_one.trans (one_lt_cFF hp1)) (zpow_pos hpQ m)
+  have hu : (Multiplicative.ofAdd k)⁻¹ • w ∈ Y p F ϖ := smul_mem_Y p F ϖ _ hw
+  have hbne : ∀ m : ℤ, 0 < 2 * p ^ (-m).toNat := fun m =>
+    Nat.mul_pos (by omega) (pow_pos hp0 _)
+  rw [KGE_iff hu (hcpos n) (hbne n) (cFF_mul_zpow_eq p n),
+    KGE_iff hw (hcpos (n - k)) (hbne (n - k)) (cFF_mul_zpow_eq p (n - k)),
+    smul_vle_iff, inv_inv, smul_pow', smul_pow', smul_teichPi, smul_natCast_p,
+    show Multiplicative.toAdd (Multiplicative.ofAdd k) = k from rfl]
+  refine vle_theta_iff_ge p F ϖ k (hbne n).ne' (hbne (n - k)).ne' ?_
+  have hnorm1 : ∀ x y z : ℕ,
+      ((p + 1) * p ^ x) * (p ^ y * (2 * p ^ z)) = ((p + 1) * 2) * p ^ (x + y + z) := by
+    intro x y z
+    rw [pow_add, pow_add]
+    ring
+  have hnorm2 : ∀ x y z : ℕ,
+      (((p + 1) * p ^ x) * p ^ y) * (2 * p ^ z) = ((p + 1) * 2) * p ^ (x + y + z) := by
+    intro x y z
+    rw [pow_add, pow_add]
+    ring
+  rw [hnorm1, hnorm2]
+  exact congrArg (((p + 1) * 2) * p ^ ·) (by omega)
+
+private theorem KLE_zpow_smul_iff {w : Spv (Ainf p F)} (hw : w ∈ Y p F ϖ) (k n : ℤ) :
+    KLE p F ϖ ((p : ℚ) ^ n) ((Multiplicative.ofAdd k)⁻¹ • w) ↔
+      KLE p F ϖ ((p : ℚ) ^ (n - k)) w := by
+  have hp0 : 0 < p := (Fact.out : Nat.Prime p).pos
+  have hpQ : (0 : ℚ) < p := by exact_mod_cast hp0
+  have hu : (Multiplicative.ofAdd k)⁻¹ • w ∈ Y p F ϖ := smul_mem_Y p F ϖ _ hw
+  rw [KLE_iff hu (zpow_pos hpQ n) (pow_pos hp0 _) (zpow_eq_natCast_div p n),
+    KLE_iff hw (zpow_pos hpQ (n - k)) (pow_pos hp0 _) (zpow_eq_natCast_div p (n - k)),
+    smul_vle_iff, inv_inv, smul_pow', smul_pow', smul_teichPi, smul_natCast_p,
+    show Multiplicative.toAdd (Multiplicative.ofAdd k) = k from rfl]
+  refine vle_theta_iff_le p F ϖ k (pow_pos hp0 _).ne' (pow_pos hp0 _).ne' (pow_pos hp0 _).ne' ?_
+  rw [← pow_add, ← pow_add, ← pow_add, ← pow_add]
+  exact congrArg (p ^ ·) (by omega)
 
 /-- Translation for the `V`-family: `φ^k(V_n) = V_{n-k}`. -/
 theorem zsmul_windowV (k n : ℤ) :
-    (Multiplicative.ofAdd k) • windowV p F ϖ n = windowV p F ϖ (n - k) := by sorry
+    (Multiplicative.ofAdd k) • windowV p F ϖ n = windowV p F ϖ (n - k) := by
+  ext w
+  rw [Set.mem_smul_set_iff_inv_smul_mem]
+  have harith : ∀ m : ℤ, m + 1 - k = m - k + 1 := fun m => by omega
+  constructor
+  · rintro ⟨huY, hge, hle⟩
+    have hwY : w ∈ Y p F ϖ := by
+      have := smul_mem_Y p F ϖ (Multiplicative.ofAdd k) huY
+      rwa [smul_inv_smul] at this
+    exact ⟨hwY, (KGE_cFF_smul_iff p F ϖ hwY k n).mp hge,
+      harith n ▸ (KLE_zpow_smul_iff p F ϖ hwY k (n + 1)).mp hle⟩
+  · rintro ⟨hwY, hge, hle⟩
+    exact ⟨smul_mem_Y p F ϖ _ hwY, (KGE_cFF_smul_iff p F ϖ hwY k n).mpr hge,
+      (KLE_zpow_smul_iff p F ϖ hwY k (n + 1)).mpr (harith n ▸ hle)⟩
 
 /-- **Within-family disjointness** for the `U`-family: `U_n ∩ U_m = ∅` for `n ≠ m`.
 Uses `1 < c < p` strictly, via `not_KGE_of_KLE_of_lt` (the κ-intervals `[p^n, c·p^n]` are
