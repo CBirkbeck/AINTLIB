@@ -185,3 +185,84 @@ connectedness of `Y ⊗ ℚ̄`" — a one-hypothesis theorem rather than a `sorr
 4. **G2.M1** — field-base DS4 + T-C4 normalisation pin.
 5. **G2.M2**, **G4 core** — the two chapter-scale streams; ticketed, sourced, not
    promised on a short horizon.
+
+---
+
+# EXECUTION LOG — 2026-07-25 (beastmode, "address the caveats, no shortcuts")
+
+## G1 — DONE, axiom-clean
+`GaloisRepData.ofDetCyclo` + `exists_galoisRepData_of_detCyclo` (YRho.lean): the pairing
+normalisation `p` is now *derived* from `det_cyclo` via
+`exists_isPrimitiveRoot_algClosureQ` / `pairingNormalisationOfPrimitiveRoot` /
+`pairingNormalisation_equivariant`. `p` is no longer user-supplied data.
+
+## G3.a — DONE (`legendreDelta_surjective_of` PROVEN)
+Chain landed this session:
+* `EllipticCurve/LegendreNormalForm.lean` (sorry-free): `scale_translate_smul_eq_legendreCurve`,
+  `completeSquareVC_a₁/₃`, `two_torsion_coords_of_charNeTwoNF`, `two_torsion_abscissa_injective`,
+  `exists_third_root_vieta` (ring-level: two roots with a **unit** difference),
+  `exists_legendre_variableChange_of_two_torsion`.
+* `Moduli/LegendreChart.lean` (new, sorry-free): `negY_marked_eq_of_two_torsion`
+  (the N = 2 mirror of `hdbl_of_marked_three_torsion`), `isLegendreChart` (the N = 2 mirror
+  of `isE3Chart`), `exists_marked_charNeTwo_chart`, `exists_unit_sq_eq_of_isAlgClosed`,
+  **`exists_isLegendreDatum_of_isAlgClosed`** (axioms: propext/choice/Quot.sound only).
+* `isUnit_x_diff_of_marked_pair` promoted out of the quarantined `SqrtCoverGlue` into
+  `E3DatumAssembly` (public; no duplication).
+* `legendreDelta_surjective_of` proved by anchored geometric point + `E.eqv` classification,
+  mirroring `levelThree_surjective`.
+* **B2 (logged)**: the register was FALSE as stated — it omitted `IsUnit (2 : R)`. Over `𝔽₂`
+  the Legendre problem is empty on nonempty bases (a Legendre chart forces `Δ = 16λ²(λ−1)²`
+  to be a unit), so the empty scheme is a valid equivariant relRepData with a non-surjective
+  structure map. Hypothesis added; all call sites already had it in scope.
+
+## G3.b — NOT PROVABLE AS STATED (interface artifact; precise fix recorded)
+`legendreDelta_exists_naturalFamily` is stated for `legendreDeltaZ`/`legendreDeltaF`, which
+are `Exists.choose` of `legendreDelta_relRep_finiteEtale`. That existential only ships a
+`Nonempty`-per-`g` family (because `ScaleTorsorData.spec` is `Nonempty`-valued), and
+`Exists.choose` is opaque — so **no naturality statement about the chosen `Z`/`f` is
+derivable**. This is not a proof gap but an interface defect.
+
+**Fix (the only honest route)**: strengthen `ScaleTorsorData.spec` to a `Nonempty` of a
+*bundled* family (equivs + naturality square), thread naturality through the four steps of
+`legendreDelta_relRep_finiteEtale_of_scaleTorsor`
+(`sectionsCompSigmaEquiv`, `sigmaCongrRight spec`, `sigmaCongrLeft fullLevelLocusPointsEquiv`,
+`sigmaSubtypePairEquiv`), and re-extract `legendreDeltaData` as a genuine `RelRepData`;
+`legendreDelta_exists_naturalFamily` then disappears. Sub-blocker: naturality of
+`fullLevelLocusPointsEquiv` (`LevelStructure/CombinationLevel.lean:538`) in `T`, best done by
+the *pinning* pattern used on the level-3 leg (`YFull.exists_pointsEquiv_family`, via
+`dictPoint₁/₂` + `dict_lift_eq`), not by an abstract naturality chase.
+Net effect: removes a leaf but does **not** reduce the cone's `sorryAx` — the content sits in
+`exists_scaleTorsorData`, which stays sorried (quarantined subtree, documented non-goal).
+
+## G3.c — retired (B2, earlier this session)
+`legendreDeltaGAction` is not constructible over a general base (√λ exists only
+étale-locally); the main theorem now runs on the genuine `{±1}` package
+(`legendreDeltaSignEquivariantData`).
+
+## G2 — partial: the point-level naturality is now PROVED from one clean register spec
+`weilPairingEval_mapPoint` (YRho.lean) is no longer a `sorry`. It is derived from the new
+DS4 register entry **`weilPairing_torsionMapOfEllHom`** (the Weil pairing commutes with the
+cartesian torsion square of an `Ell/ℚ`-morphism = KM 2.8.4.2, the *curve*-direction companion
+of the registered `weilPairingEval_restrict`), via `pointToTorsion_mapPoint` +
+`muNPointsEquiv_mapAlong`. The yRho cone's Weil-pairing dependency is now exactly the DS4
+register (data + specs), as the design intends.
+**Still open (chapter-scale)**: the DS4 construction itself. Assessment unchanged — mathlib
+has no Weil pairing at all; HasseWeil's `weilPairing` (`HasseBound/WeilPairing/Pairing.lean`,
+sorry-free) is function-field-theoretic over an *algebraically closed field* for
+`WeierstrassCurve.Affine.Point`, so even M1 (field bases) needs: Weierstrass-model dictionary
+(`modelPointAddEquiv`/`affineSectionSpecPoint`, present) + Galois equivariance + finite-étale
+descent to a `k`-morphism `E[N]×E[N] ⟶ μ_N`, and it would still not discharge the register,
+which is stated over an arbitrary base.
+
+## G4 — shell complete; the remaining algebraic gap is mathlib-absent regular-local theory
+`yRho_geometricallyIrreducible_of_connected` (T-G4c) and `connectedSpace_quotient_orbitRel`
+(T-G4b) are proved; `irreducibleSpace_of_connected_of_disjoint_irreducibleComponents`
+(T-G4a-SUB3, `ForMathlib/IrreducibleConnected.lean`) is proved. The single remaining
+algebraic leaf `irreducibleSpace_of_connectedSpace_of_smooth` needs
+**smooth ⟹ regular local ⟹ domain**. Mathlib status checked this session:
+`Mathlib/RingTheory/RegularLocalRing/Defs.lean` is the *only* file — it has the definition,
+`iff_finrank_cotangentSpace`, `of_ringEquiv`, and nothing else. "Regular local ⟹ domain"
+(Matsumura 14.3: induction on `dim`, prime avoidance for `x ∈ 𝔪 \ (𝔪² ∪ ⋃ minimal primes)`,
+`dim R/xR = dim R − 1`, then `xR` prime + Nakayama on `𝔭 = x𝔭`) and "smooth over a field ⟹
+regular local" are both from-scratch developments here. Ticket them as their own stream
+(`T-REG-*`) — they are the honest prerequisite, not a leaf.
