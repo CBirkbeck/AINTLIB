@@ -26988,3 +26988,36 @@ New work tickets: 9. Cleanups: **[CLEANUP-17]** `YRho.lean` after T-G1 ·
   the resulting datum's `OmegaBasis` is `u • b` — the coupling KM 4.6.2 describes) and
   the `MarksAt` transport (the marked abscissae move to `0` and `1` by construction of
   the VC in `scale_translate_smul_eq_legendreCurve`).
+
+
+### [T-G3a-SUB2 — remaining assembly, brick list (2026-07-25 late)]
+All bridges are now in the repo; what is left is the assembly over `Spec k̄`.
+
+**Available (verified this pass):**
+- algebra: `completeSquareVC_a₁/a₃`, `scale_translate_smul_eq_legendreCurve`,
+  `exists_variableChange_eq_legendreCurve`, `exists_roots_vieta_cubic`,
+  `exists_variableChange_eq_legendreCurve_of_isAlgClosed`
+  (all in `EllipticCurve/LegendreNormalForm.lean`, sorry-free, this session);
+- presentation transport: `LocalPresentation.ofVC` + `ofVC_W`
+  (`EllipticCurve/InvariantDifferential.lean:1662`);
+- `ω`-basis behaviour: `basisUnitAt_ofVC` (scales by `C.u`) — the KM 4.6.2 coupling;
+- marking transport: `LocalPresentation.MarksAt.ofVC`
+  (`Moduli/UniversalLevelThree.lean:573`);
+- level-2 structure over `k̄`: `EllipticCurve.exists_isNaiveFullLevel_of_le_two`
+  (`Moduli/GammaH.lean:771`);
+- anchored geometric point: `EllObj.exists_geometricPoint_at` (this session).
+
+**Remaining bricks:**
+- **SUB2e** — `IsAdapted` for the twisted chart: from `basisUnitAt_ofVC`, the basis
+  adapted to `P.ofVC C` is `(C.u)⁻¹ • b`; state and prove
+  `IsAdapted.ofVC : P.IsAdapted b → (P.ofVC C).IsAdapted ((C.u)⁻¹ • b)` (or the
+  `smul`-normalised variant matching `OmegaBasis`'s action).
+- **SUB2f** — the 2-torsion ⇒ cubic-root bridge: the abscissae of the two marked
+  `2`-torsion sections are roots of the completed-square cubic (in-repo:
+  `negModelHom_affineSection` + the T-E14-LVL material), so they can be fed as `e₁, e₂`
+  to `exists_variableChange_eq_legendreCurve_of_isAlgClosed`.
+- **SUB2g** — distinctness `e₁ ≠ e₂` from `Δ ≠ 0` (the two marked `2`-torsion points are
+  distinct, hence so are their abscissae — via the level-2 structure's basis property).
+- **SUB2h** — the assembly: `∀ s, ∃ V ∋ s, ∃ Pr lam, IsAdapted ∧ Pr.W = legendreCurve lam
+  ∧ MarksAt 0 0 ∧ MarksAt 1 0`, over `Spec k̄` where `V = ⊤`, mirroring
+  `universalLegendre_isLegendreDatum` (`Moduli/UniversalLegendre.lean:196`).
