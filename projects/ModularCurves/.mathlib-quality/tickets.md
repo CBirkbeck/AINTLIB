@@ -25188,7 +25188,21 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
     (IsZariskiLocalAtTarget — EngineDescent:595-note), formally-smooth API for Scheme-morphisms
     (Mathlib.AlgebraicGeometry.Morphisms.Smooth + RingHom.Smooth/FormallySmooth bridges),
     smooth ⟺ (locally-finite-presentation ∧ formally-smooth) form; fibre-dimension API.
-    Output: the exact criterion-lemma names + the statement-shape for 6c. Status: open.
+    Output: the exact criterion-lemma names + the statement-shape for 6c. Status: **AUDIT
+    2026-07-25**: mathlib `Smooth` = HasRingHomProperty @Smooth RingHom.Smooth with
+    `Smooth.iff_forall_exists_isStandardSmooth`; `SmoothOfRelativeDimension n` :=
+    CHARTWISE `IsStandardSmoothOfRelativeDimension n (f.appLE …)` (Smooth.lean:135-138);
+    one-way bridge `SmoothOfRelativeDimension.smooth` (:143); NO smooth+fibre-dim ⟹
+    rel-dim-n converse in mathlib. TWO ROUTES for 6c/6d: (a) Smooth via formal-smoothness
+    (6b/6c) + a NEW ForMathlib bridge (smooth-at-x + fibre-dim-n ⟹ standard-smooth-charts —
+    real algebra); (b) STRUCTURAL: reprX.base is finite-ÉTALE over the rigidified moduli
+    (engine simul-glue; étale = rel-dim-0) composed with rel-dim-1 of the EXPLICIT
+    Legendre/level-4 rigidified schemes (LegendreTorsor/LevelFourTorsor λ-line-charts —
+    check landed smoothness there) via a SmoothOfRelativeDimension-COMPOSITION instance
+    (0+1; grep mathlib comp-instance — Etale gives SmoothOfRelativeDimension 0 (Etale.lean:107))
+    + smooth-rel-dim étale-local-on-source descent for the glued engine output. Route (b)
+    preferred (no new commutative algebra); needs the engine-output's étale-over-rigidified
+    presentation excavated from representable_of_baseChange_cover. Status: open→6b.
   - **[T-YR-6b] square-zero value-lifting**: for A₀ = A/I (A local noeth, I nilpotent/sq-zero)
     over ℚ: every (rhoProblem D)-value over Spec A₀ lifts to Spec A — E-part: Weierstrass
     coefficient lifting (WeierstrassModel/EngineMouth chart machinery; Δ-unit persists as I
