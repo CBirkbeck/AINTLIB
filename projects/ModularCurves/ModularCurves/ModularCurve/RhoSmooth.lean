@@ -161,6 +161,35 @@ theorem legendreCover_isStandardSmooth (D : GaloisRepData N) [Fact (1 < N)]
     (ModuliProblem.prodUniqueUpToIso r dL rL dρ)
     (rhoLegendre_total_isStandardSmooth D hR dρ hfin het)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-6-APP S7]** The smoothness clause of `RepresentsYRho`, granted
+surjectivity of the Legendre cover: the representing curve of the ρ-level problem is
+smooth of relative dimension one over `ℚ`. -/
+theorem rhoProblem_smoothOfRelativeDimension_one (D : GaloisRepData N) [Fact (1 < N)]
+    (hN : 3 ≤ (N : ℤ)) (hR : IsUnit (2 : CommRingCat.of ℚ))
+    {X : EllObj (CommRingCat.of ℚ)} (r : (rhoProblem D).RepresentableBy X)
+    (rL : (legendreDeltaProblem (CommRingCat.of ℚ)).RepresentableBy
+      (universalLegendreObj (CommRingCat.of ℚ) hR))
+    (dL : ModuliProblem.RelRepData (legendreDeltaProblem (CommRingCat.of ℚ)) X)
+    (hLfin : IsFinite dL.f) (hLet : Etale dL.f) (hLsurj : Surjective dL.f)
+    (dρ : ModuliProblem.RelRepData (rhoProblem D)
+      (universalLegendreObj (CommRingCat.of ℚ) hR))
+    (hρfin : IsFinite dρ.f) (hρet : Etale dρ.f) :
+    SmoothOfRelativeDimension 1 X.structMap := by
+  haveI : IsAffine X.base := rhoProblem_isAffine_base D hN r
+  haveI : IsAffine (Spec (CommRingCat.of ℚ)) := inferInstance
+  haveI : IsNoetherianRing Γ(Spec (CommRingCat.of ℚ), ⊤) := by
+    haveI : IsNoetherianRing (CommRingCat.of ℚ) :=
+      inferInstanceAs (IsNoetherianRing ℚ)
+    exact isNoetherianRing_of_ringEquiv (CommRingCat.of ℚ)
+      (Scheme.ΓSpecIso (CommRingCat.of ℚ)).commRingCatIsoToRingEquiv.symm
+  haveI : IsFinite dL.f := hLfin
+  haveI : Etale dL.f := hLet
+  haveI : Surjective dL.f := hLsurj
+  exact smoothOfRelativeDimension_one_of_finite_etale_surjective_cover
+    X.structMap dL.f
+    (legendreCover_isStandardSmooth D hR r rL dL dρ hρfin hρet)
+
 end ModularCurves
 
 end
