@@ -843,6 +843,19 @@ theorem isCharNeTwoNF_adaptCharNeTwoNF {V : S.affineOpens}
       VariableChange Γ(S, V.1)) • (P.ofVC P.W.toCharNeTwoNF).W from rfl]
   exact isCharNeTwoNF_smul_units h0 _
 
+open Scheme WeierstrassCurve in
+/-- **(T-G3a-SUB2e)** Adaptedness transports along a variable change, with the
+`ω`-basis rescaled by the `u`-component: this is exactly KM 4.6.2's coupling of the
+marking change with the differential. If `P` is adapted to `b` and the global unit `v`
+restricts to `C.u` on `V`, then `P.ofVC C` is adapted to `v⁻¹ • b`. -/
+theorem IsAdapted.ofVC {V : S.affineOpens} {P : LocalPresentation G V}
+    {b : OmegaBasis G} (hP : P.IsAdapted b) (C : VariableChange Γ(S, V.1))
+    (v : Γ(S, ⊤)ˣ) (hv : Scheme.resUnit (le_top : V.1 ≤ ⊤) v = C.u) :
+    (P.ofVC C).IsAdapted (v⁻¹ • b) := by
+  show ((P.ofVC C).basisUnitAt (v⁻¹ • b)).1 = 1
+  rw [basisUnitAt_smul, basisUnitAt_ofVC, hP, mul_one, map_inv, hv]
+  exact inv_mul_cancel C.u
+
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-E14b ★, KM 2.2.9 uniqueness: the translation torsor)** Over a base with `2`
