@@ -1,5 +1,6 @@
 import ModularCurves.ModularCurve.RhoDescent
 import ModularCurves.ModularCurve.RhoPairingBridge
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
 /-!
 # [T-EQ-3c] Sections ↔ ρ-structures: the quotient dictionary
@@ -5312,6 +5313,146 @@ theorem strSigmaP_struct (D : GaloisRepData N) [Fact (1 < N)]
   rw [strSigmaP, Category.assoc,
     d.σZ.relQuotientπ_comp_relQuotientStruct d.f d.over_base,
     (strZ D d k str).2]
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 (7a)]** THE H-CONDITION: any two maps into the cover with equal
+base legs have equal `σP`-composites — at each geometric point the two lifts
+differ by a frame translation (M4), which `σP` absorbs (6g); conclude by the
+clopen-agreement engine at the finite étale quotient structure map. -/
+theorem strSigmaP_coequalizes (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve)
+    {Z : Scheme.{0}} (g₁ g₂ : Z ⟶ strCover D (X.pullbackAlong k))
+    (hbase : g₁ ≫ strPr D (X.pullbackAlong k) =
+      g₂ ≫ strPr D (X.pullbackAlong k)) :
+    g₁ ≫ strSigmaP D d k str = g₂ ≫ strSigmaP D d k str := by
+  have hfe := d.σZ.relQuotientStruct_finite_etale_of_free d.f d.over_base
+    (d.free_on_points (sympFramedAut_freeAction D)) d.finite d.etale
+  haveI hFin : IsFinite (d.σZ.relQuotientStruct d.f d.over_base) := hfe.1
+  haveI hEt : Etale (d.σZ.relQuotientStruct d.f d.over_base) := hfe.2
+  haveI hSep : IsSeparated (d.σZ.relQuotientStruct d.f d.over_base) :=
+    inferInstance
+  have hfg : (g₁ ≫ strSigmaP D d k str) ≫
+      d.σZ.relQuotientStruct d.f d.over_base =
+      (g₂ ≫ strSigmaP D d k str) ≫
+      d.σZ.relQuotientStruct d.f d.over_base := by
+    rw [Category.assoc, Category.assoc, strSigmaP_struct,
+      ← Category.assoc, ← Category.assoc, hbase]
+  refine eq_of_forall_geomPt_agree
+    (d.σZ.relQuotientStruct d.f d.over_base) _ _ hfg ?_
+  intro ω
+  -- the two tautological frames over the geometric point lie over one base point
+  have hover : (geomPt Z ω ≫ g₁ ≫ strTaut D (X.pullbackAlong k)) ≫
+      wFramesπ D =
+      (geomPt Z ω ≫ g₂ ≫ strTaut D (X.pullbackAlong k)) ≫ wFramesπ D := by
+    simp only [Category.assoc, strTaut_π]
+    rw [← Category.assoc g₁, ← Category.assoc g₂, hbase]
+  -- the frame-graph relation: they differ by a right translation
+  obtain ⟨γ, hγ⟩ := exists_frameGraph_rel D
+    (geomPt Z ω ≫ g₁ ≫ strTaut D (X.pullbackAlong k))
+    (geomPt Z ω ≫ g₂ ≫ strTaut D (X.pullbackAlong k)) hover
+  -- hence the cover points differ by the cover translation
+  have hcov : geomPt Z ω ≫ g₂ =
+      (geomPt Z ω ≫ g₁) ≫ strAct D (X.pullbackAlong k) γ := by
+    apply pullback.hom_ext
+    · show (geomPt Z ω ≫ g₂) ≫ strPr D (X.pullbackAlong k) =
+        ((geomPt Z ω ≫ g₁) ≫ strAct D (X.pullbackAlong k) γ) ≫
+          strPr D (X.pullbackAlong k)
+      rw [Category.assoc _ (strAct D (X.pullbackAlong k) γ), strAct_pr,
+        Category.assoc, Category.assoc, hbase]
+    · show (geomPt Z ω ≫ g₂) ≫ strTaut D (X.pullbackAlong k) =
+        ((geomPt Z ω ≫ g₁) ≫ strAct D (X.pullbackAlong k) γ) ≫
+          strTaut D (X.pullbackAlong k)
+      simp only [Category.assoc, strAct_taut]
+      simpa only [Category.assoc] using hγ
+  -- σP absorbs the translation
+  calc geomPt Z ω ≫ g₁ ≫ strSigmaP D d k str
+      = (geomPt Z ω ≫ g₁) ≫ strSigmaP D d k str :=
+        (Category.assoc _ _ _).symm
+    _ = (geomPt Z ω ≫ g₁) ≫ strAct D (X.pullbackAlong k) γ ≫
+          strSigmaP D d k str := by rw [strAct_strSigmaP]
+    _ = ((geomPt Z ω ≫ g₁) ≫ strAct D (X.pullbackAlong k) γ) ≫
+          strSigmaP D d k str := (Category.assoc _ _ _).symm
+    _ = (geomPt Z ω ≫ g₂) ≫ strSigmaP D d k str := by rw [← hcov]
+    _ = geomPt Z ω ≫ g₂ ≫ strSigmaP D d k str := Category.assoc _ _ _
+
+open scoped FintypeCatDiscrete in
+/-- The cover projection is (fpqc-)surjective: base change of the surjective
+frames structure map. -/
+instance strPr_surjective (X' : EllObj (CommRingCat.of ℚ)) :
+    Surjective (strPr D X') :=
+  MorphismProperty.pullback_fst _ _ (wFramesπ_surjective D)
+
+open scoped FintypeCatDiscrete in
+/-- The cover projection is flat (base change of the finite étale frames map). -/
+instance strPr_flat (X' : EllObj (CommRingCat.of ℚ)) : Flat (strPr D X') :=
+  haveI : Etale (wFramesπ D) := (wFramesπ_finite_etale D).2
+  MorphismProperty.pullback_fst _ _ (inferInstance : Flat (wFramesπ D))
+
+open scoped FintypeCatDiscrete in
+/-- The cover projection is quasi-compact (base change of a finite morphism). -/
+instance strPr_quasiCompact (X' : EllObj (CommRingCat.of ℚ)) :
+    QuasiCompact (strPr D X') :=
+  haveI : IsFinite (wFramesπ D) := (wFramesπ_finite_etale D).1
+  MorphismProperty.pullback_fst _ _ (inferInstance : QuasiCompact (wFramesπ D))
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 (7b)]** The cover projection is an fpqc effective epimorphism. -/
+instance strPr_effectiveEpi (X' : EllObj (CommRingCat.of ℚ)) :
+    EffectiveEpi (strPr D X') :=
+  AlgebraicGeometry.Scheme.instEffectiveEpiOfQuasiCompactOfSurjectiveOfFlat _
+
+open scoped FintypeCatDiscrete in
+instance strPr_epi (X' : EllObj (CommRingCat.of ℚ)) : Epi (strPr D X') :=
+  Flat.epi_of_flat_of_surjective _
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 (7b)] THE 3d DESCENT MAP** — the invariant map descends through
+the fpqc effective-epi cover projection to a section of the quotient (typed at
+the pullback base, which is definitionally `T'`). -/
+noncomputable def strSection (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve) :
+    (X.pullbackAlong k).base ⟶ d.σZ.relQuotient d.f d.over_base :=
+  EffectiveEpi.desc (strPr D (X.pullbackAlong k)) (strSigmaP D d k str)
+    (fun g₁ g₂ h => strSigmaP_coequalizes D d k str g₁ g₂ h)
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 (7b)]** The descent factorisation: the section pulls back to
+the invariant map. -/
+theorem strPr_strSection (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve) :
+    strPr D (X.pullbackAlong k) ≫ strSection D d k str = strSigmaP D d k str :=
+  EffectiveEpi.fac _ _ _
+
+open scoped FintypeCatDiscrete in
+/-- **[T-EQ-3d-M6 (7b)]** The descended section lies over `k`. -/
+theorem strSection_struct (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve) :
+    strSection D d k str ≫ d.σZ.relQuotientStruct d.f d.over_base = k := by
+  have h1 := congrArg (· ≫ d.σZ.relQuotientStruct d.f d.over_base)
+    (strPr_strSection D d k str)
+  simp only [Category.assoc] at h1
+  rw [strSigmaP_struct] at h1
+  exact (cancel_epi (strPr D (X.pullbackAlong k))).mp h1
 
 end StructuresToSections
 
