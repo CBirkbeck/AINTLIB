@@ -68,26 +68,18 @@ theorem Y_eq_spa_inter_basicOpen :
     Y p F ϖ =
       Spa (Ainf p F) (ringPlus (Ainf p F)) ∩
         basicOpen ((p : Ainf p F) * teichPi p F ϖ) ((p : Ainf p F) * teichPi p F ϖ) := by
-  sorry
+  rw [basicOpen_self]
+  rfl
 
 /-- `𝒴` is open in `Spa(A_inf, A_inf)` (subspace topology). -/
 theorem isOpen_Y :
     IsOpen (Subtype.val ⁻¹' Y p F ϖ :
       Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
-  sorry
-
-/-- `𝒴` does not depend on the choice of pseudo-uniformizer: any two pseudo-uniformizers
-divide powers of each other in `O_F`, and Teichmüller is multiplicative.
-
-Source: [Kedlaya-AWS §11.2-style]: "this is independent of the choice of ϖ, as for any
-other choice ϖ', there is some n such that ϖ | (ϖ')^n and ϖ' | ϖ^n". -/
-theorem Y_indep (ϖ' : PseudoUniformizer F) : Y p F ϖ = Y p F ϖ' := by sorry
-
-/-- `𝒴` is stable under the `φ^ℤ`-action.
-
-Source: [SW, §12.2]: "The Frobenius automorphism ... preserves 𝒴". -/
-theorem smul_mem_Y (g : Multiplicative ℤ) {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) :
-    g • v ∈ Y p F ϖ := by sorry
+  convert continuous_subtype_val.isOpen_preimage _
+    (isOpen_basicOpen ((p : Ainf p F) * teichPi p F ϖ)
+      ((p : Ainf p F) * teichPi p F ϖ)) using 1
+  ext v
+  simp only [Set.mem_preimage, Y, basicOpen_self, Set.mem_setOf_eq, v.2, true_and]
 
 section ElementFacts
 
@@ -95,10 +87,14 @@ variable {p F ϖ}
 variable {v : Spv (Ainf p F)}
 
 /-- On `𝒴`, `v(p) ≠ 0`. -/
-theorem v_p_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (p : Ainf p F) 0 := by sorry
+theorem v_p_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (p : Ainf p F) 0 := fun h =>
+  hv.2 (by have := v.mul_vle_mul_left h (teichPi p F ϖ); rwa [zero_mul] at this)
 
 /-- On `𝒴`, `v([ϖ]) ≠ 0`. -/
-theorem v_teichPi_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (teichPi p F ϖ) 0 := by sorry
+theorem v_teichPi_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (teichPi p F ϖ) 0 := fun h =>
+  hv.2 (by
+    have := v.mul_vle_mul_left h ((p : Ainf p F))
+    rwa [zero_mul, mul_comm] at this)
 
 /-- On `𝒴`, `v(p) < 1` strictly. From continuity of `v` and `p ∈ I`: the open set
 `{a : v(a) < v(p)}` contains some `I^N ∋ p^N`, so `v(p)^N < v(p)`, forcing `v(p) < 1`.
@@ -125,6 +121,102 @@ theorem exists_pow_teichPi_vlt (hv : v ∈ Y p F ϖ) {g : Ainf p F} (hg : ¬ v.v
     ∃ n : ℕ, vlt p F v (teichPi p F ϖ ^ n) g := by sorry
 
 end ElementFacts
+
+/-- `𝒴` does not depend on the choice of pseudo-uniformizer: any two pseudo-uniformizers
+divide powers of each other in `O_F`, and Teichmüller is multiplicative.
+
+Source: [Kedlaya-AWS §11.2-style]: "this is independent of the choice of ϖ, as for any
+other choice ϖ', there is some n such that ϖ | (ϖ')^n and ϖ' | ϖ^n". -/
+theorem Y_indep (ϖ' : PseudoUniformizer F) : Y p F ϖ = Y p F ϖ' := by
+  have key : ∀ (α β : PseudoUniformizer F) (v : Spv (Ainf p F)), v ∈ Y p F α →
+      ¬ v.vle ((p : Ainf p F) * teichPi p F β) 0 := by
+    intro α β v hv hle
+    have hprime : (v.supp).IsPrime := inferInstance
+    rcases hprime.mem_or_mem ((v.mem_supp_iff _).mpr hle) with hp' | hβ
+    · exact v_p_ne_zero hv ((v.mem_supp_iff _).mp hp')
+    · obtain ⟨k, hk⟩ := exists_teichPi_pow_mem_span_teichPi p F β α
+      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hk
+      have hpow : teichPi p F α ^ k ∈ v.supp := hc ▸ Ideal.mul_mem_left _ c hβ
+      exact v_teichPi_ne_zero hv
+        ((v.mem_supp_iff _).mp (hprime.mem_of_pow_mem _ hpow))
+  ext v
+  exact ⟨fun hv => ⟨hv.1, key ϖ ϖ' v hv⟩, fun hv => ⟨hv.1, key ϖ' ϖ v hv⟩⟩
+
+private theorem frob_teichmuller (x : OF F) :
+    frob p F (WittVector.teichmuller p x) = WittVector.teichmuller p (x ^ p) := by
+  show WittVector.frobenius _ = _
+  rw [frobenius_eq_map_frobenius, WittVector.map_teichmuller, frobenius_def]
+
+private theorem frobeniusEquiv_pow_apply (m : ℕ) (x : OF F) :
+    ((_root_.frobeniusEquiv (OF F) p) ^ m : RingAut (OF F)) x = x ^ p ^ m := by
+  induction m generalizing x with
+  | zero => simp
+  | succ m ih =>
+      rw [pow_succ', RingAut.mul_apply, ih,
+        show _root_.frobeniusEquiv (OF F) p (x ^ p ^ m) = (x ^ p ^ m) ^ p from rfl,
+        ← pow_mul, ← pow_succ]
+
+private theorem frob_zpow_teichmuller (j : ℤ) (x : OF F) :
+    (frob p F ^ j : RingAut (Ainf p F)) (WittVector.teichmuller p x)
+      = WittVector.teichmuller p
+        ((_root_.frobeniusEquiv (OF F) p ^ j : RingAut (OF F)) x) := by
+  induction j using Int.induction_on generalizing x with
+  | zero => simp
+  | succ j ih =>
+      rw [zpow_add_one, zpow_add_one, RingAut.mul_apply, RingAut.mul_apply,
+        show frob p F (WittVector.teichmuller p x)
+          = WittVector.teichmuller p (_root_.frobeniusEquiv (OF F) p x) from
+            frob_teichmuller p F x,
+        ih]
+  | pred j ih =>
+      have hφinv : (frob p F).symm (WittVector.teichmuller p x)
+          = WittVector.teichmuller p ((_root_.frobeniusEquiv (OF F) p).symm x) := by
+        apply (frob p F).injective
+        rw [RingEquiv.apply_symm_apply, frob_teichmuller]
+        congr 1
+        rw [show ((_root_.frobeniusEquiv (OF F) p).symm x) ^ p
+            = _root_.frobeniusEquiv (OF F) p ((_root_.frobeniusEquiv (OF F) p).symm x)
+          from rfl, RingEquiv.apply_symm_apply]
+      rw [zpow_sub_one, zpow_sub_one, RingAut.mul_apply, RingAut.mul_apply,
+        show ((frob p F : RingAut (Ainf p F))⁻¹) (WittVector.teichmuller p x)
+          = (frob p F).symm (WittVector.teichmuller p x) from rfl, hφinv, ih,
+        show ((_root_.frobeniusEquiv (OF F) p : RingAut (OF F))⁻¹) x
+          = (_root_.frobeniusEquiv (OF F) p).symm x from rfl]
+
+/-- `𝒴` is stable under the `φ^ℤ`-action.
+
+Source: [SW, §12.2]: "The Frobenius automorphism ... preserves 𝒴". -/
+theorem smul_mem_Y (g : Multiplicative ℤ) {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) :
+    g • v ∈ Y p F ϖ := by
+  refine ⟨smul_mem_spa_Ainf p F g hv.1, fun hle => ?_⟩
+  have hsmul_vle : ∀ a b : Ainf p F, (g • v).vle a b ↔ v.vle (g⁻¹ • a) (g⁻¹ • b) := by
+    intro a b
+    change (comap (MulSemiringAction.toRingHom _ _ g⁻¹) v).vle a b ↔ _
+    rw [comap_vle]
+    rfl
+  rw [hsmul_vle, smul_zero, smul_mul'] at hle
+  set j : ℤ := Multiplicative.toAdd g⁻¹ with hj
+  have hsmul : ∀ a : Ainf p F, g⁻¹ • a = (frob p F ^ j : RingAut (Ainf p F)) a := by
+    intro a
+    rw [← ofAdd_toAdd g⁻¹, ofAdd_zsmul_def]
+  have hprime : (v.supp).IsPrime := inferInstance
+  rcases hprime.mem_or_mem ((v.mem_supp_iff _).mpr hle) with hp' | hϖ'
+  · refine v_p_ne_zero hv ((v.mem_supp_iff _).mp ?_)
+    rwa [hsmul, map_natCast] at hp'
+  · rw [hsmul, teichPi, frob_zpow_teichmuller] at hϖ'
+    set b : OF F := (_root_.frobeniusEquiv (OF F) p ^ j : RingAut (OF F))
+      (PseudoUniformizer.toOF F ϖ) with hb
+    have hbpow : b ^ p ^ (-j).toNat = PseudoUniformizer.toOF F ϖ ^ p ^ j.toNat := by
+      rw [hb, ← frobeniusEquiv_pow_apply p F ((-j).toNat), ← RingAut.mul_apply,
+        ← zpow_natCast (_root_.frobeniusEquiv (OF F) p) ((-j).toNat), ← zpow_add,
+        show ((-j).toNat : ℤ) + j = (j.toNat : ℤ) from by omega,
+        zpow_natCast, frobeniusEquiv_pow_apply]
+    have hmem : teichPi p F ϖ ^ p ^ j.toNat ∈ v.supp := by
+      have h1 : WittVector.teichmuller p b ^ p ^ (-j).toNat ∈ v.supp :=
+        Ideal.pow_mem_of_mem _ hϖ' _ (pow_pos (Fact.out : Nat.Prime p).pos _)
+      rwa [← map_pow, hbpow, map_pow, ← teichPi] at h1
+    exact v_teichPi_ne_zero hv
+      ((v.mem_supp_iff _).mp (hprime.mem_of_pow_mem _ hmem))
 
 /-! ### The rank-free κ-comparison predicates -/
 

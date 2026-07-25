@@ -1,1 +1,1 @@
-FOCUS: T301 (Frobenius identities on Ainf) — PHASE 2: reading ticket + FrobeniusAction.lean state
+FOCUS: T401 (Y = Spa minus V(p[phi]) locus: definitions + basic opens) — PHASE 2: reading YSpace.lean + ticket
