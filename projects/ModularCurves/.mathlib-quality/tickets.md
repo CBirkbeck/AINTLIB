@@ -26858,3 +26858,42 @@ New work tickets: 9. Cleanups: **[CLEANUP-17]** `YRho.lean` after T-G1 ·
 **[CLEANUP-18]** `IrreducibilityScoping.lean` after T-G4a+b+c ·
 **[CLEANUP-19]** `LegendreTorsor.lean` after T-G3c+a+b ·
 **[CLEANUP-20]** `WeilPairing/` after T-G2-M1. ⌈9/3⌉ = 3 ≤ 4 ✓.
+
+
+### [T-G4a-SUB1] Smooth over a field ⟹ local rings are regular
+- **Status**: open · **Parent**: T-G4a · **File**: `ForMathlib/SmoothRegular.lean` (new) ·
+  **Type**: theorem · **Depends on**: none
+- **Statement**: for `X ⟶ Spec k` smooth (`k` a field) and `x : X`,
+  `IsRegularLocalRing (X.presheaf.stalk x)`.
+- **Search evidence (Gate G2)**: `lean_leansearch "smooth algebra over a field is regular
+  local ring"` → nothing; `grep IsRegularLocalRing Mathlib/RingTheory/Smooth/` → empty;
+  mathlib's `RingTheory/RegularLocalRing/` contains **only** `Defs.lean`.
+- **Sketch**: standard-smooth charts ⟹ étale over `𝔸ⁿ_k` ⟹ the stalk is a localization of
+  an étale extension of a polynomial ring; regularity transfers along étale maps
+  (flat + unramified + regular fibre). Needs: regularity of polynomial-ring localizations
+  (absent), étale-transfer of regularity (absent).
+
+### [T-G4a-SUB2] Regular local ring is a domain
+- **Status**: open (MAJOR — mathlib-scale) · **Parent**: T-G4a ·
+  **File**: `ForMathlib/RegularLocalDomain.lean` (new) · **Type**: theorem
+- **Statement**: `[IsLocalRing R] [IsNoetherianRing R] [IsRegularLocalRing R] : IsDomain R`.
+- **Search evidence (Gate G2)**: `lean_leansearch "regular local ring is an integral
+  domain"` → only unrelated `IsDomain` results; `grep IsDomain
+  Mathlib/RingTheory/RegularLocalRing/*` → only the *converse-flavoured* instance
+  (`IsLocalRing + IsDomain + IsPrincipalIdealRing → IsRegularLocalRing`).
+- **Sketch (Atiyah–Macdonald 11.23 / Matsumura 14.3)**: induct on `dim R`; use
+  `gr_m(R) ≅ k[x₁..x_d]` (a domain) and the fact that a filtered ring whose associated
+  graded is a domain is a domain. Requires the associated-graded machinery
+  (`RingTheory/Filtration.lean`) plus dimension theory. This is the genuine
+  mathlib-infrastructure item behind T-G4a.
+
+### [T-G4a-SUB3] Locally-finite disjoint closed cover ⟹ clopen components
+- **Status**: open · **Parent**: T-G4a · **File**: `ForMathlib/IrreducibleConnected.lean`
+  (new) · **Type**: theorem · **Depends on**: none
+- **Statement**: for a topological space whose irreducible components are pairwise
+  disjoint and locally finite, each component is clopen; hence a nonempty connected such
+  space is irreducible.
+- **Sketch**: the union of the other components is closed (locally finite union of
+  closed sets), so each component is open; a clopen nonempty proper subset contradicts
+  connectedness. Pure topology; mathlib has `LocallyFinite.isClosed_iUnion` and
+  `isClosed_of_mem_irreducibleComponents`. **Buildable now, independent of SUB1/SUB2.**
