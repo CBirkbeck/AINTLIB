@@ -485,3 +485,61 @@ not weaken or strengthen hypotheses).
 Cadence audit: 22 core proof tickets → ⌈22/3⌉ = 8 in-flow cleanups (CLEANUP-1..8 ✓,
 noting files with exactly 3 tickets merge the in-flow and final roles), plus final
 per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-FINAL ✓.
+
+---
+
+## T505-unblock lane (planned 2026-07-26, /develop --continue; decomposition.md §T505-unblock)
+
+### [T701] Pair-retraction substrate: W1 generalization + CofinalValue.of_le
+- **Status**: open | **Files**: SpaQCviaSpvAI.lean, SpvAI.lean | **Depends**: none
+- **Statements**: (1) weaken `ιSpvR_retractionSingle_eq`'s `(hIg : I = Ideal.span {g})`
+  to `(hgI : g ∈ I)` (patch the one caller in `image_ιSpvR_spa_eq` with
+  `hIeq ▸ Ideal.mem_span_singleton_self π`); (2) new
+  `theorem Valuation.CofinalValue.of_le {v : Valuation A Γ₀} {a b : A}
+  (h : CofinalValue v a) (hba : v b ≤ v a) : CofinalValue v b`.
+- **Sketch**: (1) single-site edit, proof body unchanged. (2) intro γ hγ; obtain n;
+  exact ⟨n, lt_of_le_of_lt (pow_le_pow_left' hba n) hn⟩.
+- **Sources**: Wedhorn 7.1 p. 56 (quote in decomposition).
+
+### [T702] The pair retraction and its two properties (W3+W4+W5)
+- **Status**: open | **File**: SpaQCviaSpvAI.lean (new section R5) | **Depends**: T701
+- **Statements**: `restrictIdealSingleSpv_vle_of_vle`,
+  `mem_SpvAI_span_pair_left`, `restrictIdealPairSpv` (def),
+  `restrictIdealPairSpv_mem_SpvAI`, `ιSpvR_retractionPair_eq`.
+- **Sketch**: per decomposition W3–W5 (branch split; dominance transfer by
+  monotonicity; membership by W3 + span-pair-comm on the other branch; profile-eq by
+  W1 at the branch generator).
+
+### [T703] Pair image identification (W6+W7)
+- **Status**: open | **File**: SpaQCviaSpvAI.lean | **Depends**: T702
+- **Statements**: `spaProfileConditions₂` + `isClosed_spaProfileConditions₂` +
+  `image_ιSpvR_spa_eq₂`.
+- **Sketch**: mirror of `image_ιSpvR_spa_eq` per decomposition W7.
+
+### [T704] Pair compactness plumbing (W8)
+- **Status**: open | **File**: SpaQCviaSpvAI.lean | **Depends**: T703
+- **Statements**: `isCompact_image_ιSpvR_spa₂`, `isCompact_subtype_rationalOpen₂`.
+- **Sketch**: mirrors; embedding layer already general (`hIeq'` from `hpair` via
+  `Ideal.map_span` + image-of-pair).
+
+### [CLEANUP-9] /cleanup on SpaQCviaSpvAI.lean (new R5 section)
+- **Status**: open | **Depends**: T704.
+
+### [T705] Windows as rational subsets (F1)
+- **Status**: open | **File**: FarguesFontaine/Curve.lean | **Depends**: none (parallel with T70x)
+- **Statements**: private `windowU_zero_trace_eq` / `windowV_zero_trace_eq`
+  (val-preimages of `windowU/V p F ϖ 0` = val-preimages of explicit `rationalOpen T s`).
+- **Sketch**: per decomposition F1 (Wedhorn 7.30(5) product presentation;
+  `vle_mul_cancel` backward, `mul_vle_mul_left` forward; supp-prime nonvanishing
+  bridges; opaque `(cFF p).num.toNat`/`.den` exponents).
+
+### [T706] ★ Window quasicompactness + CompactSpace Curve (F2+F3, closes T505)
+- **Status**: open | **File**: FarguesFontaine/Curve.lean | **Depends**: T704, T705
+- **Statements**: fill `isCompact_windowU_zero`, `isCompact_windowV_zero`,
+  `instCompactSpaceCurve`.
+- **Sketch**: per decomposition F2 (instantiate `isCompact_subtype_rationalOpen₂` at
+  the A_inf pair; `hTI` via pure powers + `exists_teichPi_pow_mem_span_teichPi`) and
+  F3 (compact transfer to ↥Y, toCurve-images, T503 covering).
+
+### [CLEANUP-10] /cleanup on Curve.lean (final; supersedes CLEANUP-8's scope)
+- **Status**: open | **Depends**: T706.

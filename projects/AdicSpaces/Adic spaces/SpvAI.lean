@@ -67,6 +67,14 @@ theorem CofinalValue.le_one {v : Valuation A Γ₀} {a : A} (h : CofinalValue v 
   obtain ⟨n, hn⟩ := h 1 zero_lt_one
   exact absurd hn (not_lt_of_ge (h_pow_ge n))
 
+/-- Cofinality is downward closed in the value: if `v b ≤ v a` and `v(a)`-powers are
+cofinal, so are `v(b)`-powers. (Wedhorn 7.1: "If a ∈ c and b ∈ A with v(b) < v(a),
+then b ∈ c".) -/
+theorem CofinalValue.of_le {v : Valuation A Γ₀} {a b : A} (h : CofinalValue v a)
+    (hba : v b ≤ v a) : CofinalValue v b := fun γ hγ =>
+  let ⟨n, hn⟩ := h γ hγ
+  ⟨n, lt_of_le_of_lt (pow_le_pow_left' hba n) hn⟩
+
 end Valuation
 
 namespace ValuationSpectrum

@@ -325,7 +325,7 @@ theorem restrictIdealSingleSpv_eq_self_of_mem {v : Spv A} {g : A}
 /-- **Wedhorn 7.5(iii), principal profile form** (`wedhorn.txt:2862-2872`): for every
 side-condition coordinate `p` and every `v : Spv A`, the `p`-profile coordinate of `v`
 agrees with that of the principal retraction. -/
-theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hIg : I = Ideal.span {g})
+theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hgI : g ∈ I)
     (v : Spv A) (p : RCoord A I) :
     ιSpvR I (restrictIdealSingleSpv v g) p = ιSpvR I v p := by
   by_cases hg0 : v.vle g 0
@@ -381,7 +381,7 @@ theorem ιSpvR_retractionSingle_eq (g : A) (I : Ideal A) (hIg : I = Ideal.span {
         have hspan : Ideal.span (T : Set A) ≤ w'.supp :=
           Ideal.span_le.mpr fun t ht => hTz t ht
         have hg_rad : g ∈ (Ideal.span (T : Set A)).radical :=
-          hTI (hIg ▸ Ideal.mem_span_singleton_self g)
+          hTI hgI
         obtain ⟨n, hn⟩ := hg_rad
         have hprime : (w'.supp).IsPrime := inferInstance
         have hg_supp : g ∈ w'.supp := hprime.mem_of_pow_mem n (hspan hn)
@@ -499,7 +499,8 @@ theorem image_ιSpvR_spa_eq [IsTopologicalRing A] (P : PairOfDefinition A) {π :
   · rintro y ⟨⟨x, ⟨v, rfl⟩, rfl⟩, hone, hplus⟩
     set w := restrictIdealSingleSpv v ((π : A)) with hw_def
     have hprofile : ιSpvR I w = ιSpvR I v :=
-      funext fun p => ιSpvR_retractionSingle_eq ((π : A)) I hIeq v p
+      funext fun p => ιSpvR_retractionSingle_eq ((π : A)) I
+        (hIeq.symm ▸ Ideal.mem_span_singleton_self ((π : A))) v p
     have hw_mem : w ∈ SpvAI A I := by
       rw [hIeq]
       exact restrictIdealSingleSpv_mem_SpvAI v _
@@ -843,6 +844,282 @@ theorem isCompact_subtype_rationalOpen [IsTopologicalRing A] (P : PairOfDefiniti
   rw [h1]
   refine IsCompact.image ?_ (continuous_toProp_rcoord I)
   refine (isCompact_image_ιSpvR_spa P hπ hA₀le I hIeq).inter_right ?_
+  have hcl : {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true} =
+      (fun y : RCoord A I → Bool => y ⟨(T, s), hTI⟩) ⁻¹' {true} := rfl
+  rw [hcl]
+  exact IsClosed.preimage (continuous_apply _) (isClosed_discrete _)
+
+
+/-! ### R5 — the pair-generator retraction (Wedhorn 7.2's `h = max{v(t)}` for
+`I = (g₁, g₂)`: pointwise, the retraction is the single-generator retraction at the
+dominant generator) -/
+
+/-- The single-generator retraction is monotone for `vle`. -/
+theorem restrictIdealSingleSpv_vle_of_vle {v : Spv A} (g : A) {x y : A}
+    (hxy : v.vle x y) : (restrictIdealSingleSpv v g).vle x y := by
+  by_cases hg0 : v.vle g 0
+  · rwa [restrictIdealSingleSpv_of_zero hg0]
+  · rw [restrictIdealSingleSpv_of_ne hg0]
+    letI : ValuativeRel A := v.toValuativeRel
+    show (ValuativeRel.valuation A).restrictIdealSingle g _ x ≤
+      (ValuativeRel.valuation A).restrictIdealSingle g _ y
+    rw [Valuation.restrictIdealSingle]
+    exact restrictToConvexBounded_le_of_le _ _ _ ((vle_iff_canonical v x y).mp hxy)
+
+/-- `Spv(A, (g₁))`-membership upgrades to `Spv(A, (g₁, g₂))`-membership when `g₂` is
+dominated by `g₁`: with the whole-group cofinality predicate, every
+`a = c₁g₁ + c₂g₂` has value bounded by `max(v(c₁g₁), v(c₂g₁))`, both cofinal. -/
+theorem mem_SpvAI_span_pair_left {v : Spv A} {g₁ g₂ : A}
+    (hv : v ∈ SpvAI A (Ideal.span {g₁})) (hle : v.vle g₂ g₁) :
+    v ∈ SpvAI A (Ideal.span ({g₁, g₂} : Set A)) := by
+  have hv' : Spv.IsInSpvAI v (Ideal.span {g₁}) := hv
+  letI : ValuativeRel A := v.toValuativeRel
+  have hle' : (ValuativeRel.valuation A) g₂ ≤ (ValuativeRel.valuation A) g₁ :=
+    (vle_iff_canonical v g₂ g₁).mp hle
+  show Spv.IsInSpvAI v (Ideal.span ({g₁, g₂} : Set A))
+  rcases hv' with hcof | hmic
+  · left
+    intro a ha
+    obtain ⟨c₁, c₂, hc⟩ := Ideal.mem_span_pair.mp ha
+    have h1 : Valuation.CofinalValue (ValuativeRel.valuation A) (c₁ * g₁) :=
+      hcof _ (Ideal.mem_span_singleton'.mpr ⟨c₁, rfl⟩)
+    have h2 : Valuation.CofinalValue (ValuativeRel.valuation A) (c₂ * g₁) :=
+      hcof _ (Ideal.mem_span_singleton'.mpr ⟨c₂, rfl⟩)
+    have hbound : (ValuativeRel.valuation A) a ≤
+        max ((ValuativeRel.valuation A) (c₁ * g₁))
+          ((ValuativeRel.valuation A) (c₂ * g₁)) := by
+      calc (ValuativeRel.valuation A) a
+          = (ValuativeRel.valuation A) (c₁ * g₁ + c₂ * g₂) := by rw [hc]
+        _ ≤ max ((ValuativeRel.valuation A) (c₁ * g₁))
+              ((ValuativeRel.valuation A) (c₂ * g₂)) := Valuation.map_add _ _ _
+        _ ≤ max ((ValuativeRel.valuation A) (c₁ * g₁))
+              ((ValuativeRel.valuation A) (c₂ * g₁)) := by
+            refine max_le_max le_rfl ?_
+            rw [map_mul, map_mul]
+            exact mul_le_mul' le_rfl hle'
+    rcases le_total ((ValuativeRel.valuation A) (c₁ * g₁))
+        ((ValuativeRel.valuation A) (c₂ * g₁)) with hm | hm
+    · exact h2.of_le (hbound.trans_eq (max_eq_right hm))
+    · exact h1.of_le (hbound.trans_eq (max_eq_left hm))
+  · right
+    exact hmic
+
+open Classical in
+/-- The **pair retraction**: restrict at the dominant generator
+(Wedhorn Lemma 7.2: `H` is generated by `h = max{v(g₁), v(g₂)}`). -/
+noncomputable def restrictIdealPairSpv (v : Spv A) (g₁ g₂ : A) : Spv A :=
+  if v.vle g₂ g₁ then restrictIdealSingleSpv v g₁ else restrictIdealSingleSpv v g₂
+
+/-- The pair retraction lands in `Spv(A, (g₁, g₂))`. -/
+theorem restrictIdealPairSpv_mem_SpvAI (v : Spv A) (g₁ g₂ : A) :
+    restrictIdealPairSpv v g₁ g₂ ∈ SpvAI A (Ideal.span ({g₁, g₂} : Set A)) := by
+  rw [restrictIdealPairSpv]
+  split_ifs with h
+  · exact mem_SpvAI_span_pair_left (restrictIdealSingleSpv_mem_SpvAI v g₁)
+      (restrictIdealSingleSpv_vle_of_vle g₁ h)
+  · have h' : v.vle g₁ g₂ := (v.vle_total g₁ g₂).resolve_right h
+    have hmem := mem_SpvAI_span_pair_left (restrictIdealSingleSpv_mem_SpvAI v g₂)
+      (restrictIdealSingleSpv_vle_of_vle g₂ h')
+    rwa [show ({g₂, g₁} : Set A) = ({g₁, g₂} : Set A) from Set.pair_comm g₂ g₁] at hmem
+
+/-- Wedhorn 7.5(iii) for the pair retraction: the `R`-profile is unchanged. -/
+theorem ιSpvR_retractionPair_eq (g₁ g₂ : A) (I : Ideal A) (h₁ : g₁ ∈ I) (h₂ : g₂ ∈ I)
+    (v : Spv A) (p : RCoord A I) :
+    ιSpvR I (restrictIdealPairSpv v g₁ g₂) p = ιSpvR I v p := by
+  rw [restrictIdealPairSpv]
+  split_ifs with h
+  · exact ιSpvR_retractionSingle_eq g₁ I h₁ v p
+  · exact ιSpvR_retractionSingle_eq g₂ I h₂ v p
+
+
+/-- Pair version of `spaProfileConditions`: both generators' `oneOver`-coordinates are
+`false`, and the `leOne`-coordinates hold on `A⁺`. -/
+def spaProfileConditions₂ (I : Ideal A) (g₁ g₂ : A) : Set (RCoord A I → Bool) :=
+  { y | y (RCoord.oneOver I g₁) = false ∧ y (RCoord.oneOver I g₂) = false ∧
+        ∀ f ∈ (A⁺ : Subring A), y (RCoord.leOne I f) = true }
+
+theorem isClosed_spaProfileConditions₂ (I : Ideal A) (g₁ g₂ : A) :
+    IsClosed (spaProfileConditions₂ I g₁ g₂) := by
+  have heq : spaProfileConditions₂ I g₁ g₂ =
+      spaProfileConditions I g₁ ∩
+        ((fun y : RCoord A I → Bool => y (RCoord.oneOver I g₂)) ⁻¹' {false}) := by
+    ext y
+    simp only [spaProfileConditions₂, spaProfileConditions, Set.mem_setOf_eq,
+      Set.mem_inter_iff, Set.mem_preimage, Set.mem_singleton_iff]
+    tauto
+  rw [heq]
+  exact (isClosed_spaProfileConditions I g₁).inter
+    (IsClosed.preimage (continuous_apply _) (isClosed_discrete _))
+
+/-- Pair version of `image_ιSpvR_spa_eq` (Wedhorn 7.10 both ways, two generators):
+the `Spa`-profile image is cut out of the carrier by the two `v(gᵢ) < 1` cylinders and
+the `A⁺`-boundedness cylinders. -/
+theorem image_ιSpvR_spa_eq₂ [IsTopologicalRing A] (P : PairOfDefinition A)
+    {g₁ g₂ : P.A₀} (hpair : P.I = Ideal.span ({g₁, g₂} : Set P.A₀))
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span ({(g₁ : A), (g₂ : A)} : Set A)) :
+    ιSpvR I '' (Spa A A⁺) =
+      profileCarrier A I ∩ spaProfileConditions₂ I (g₁ : A) (g₂ : A) := by
+  have hg₁I : (g₁ : A) ∈ I := hIeq.symm ▸ Ideal.subset_span (Set.mem_insert _ _)
+  have hg₂I : (g₂ : A) ∈ I :=
+    hIeq.symm ▸ Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+  have hg₁_tn : IsTopologicallyNilpotent ((g₁ : A)) :=
+    P.isTopologicallyNilpotent_of_mem (hpair ▸ Ideal.subset_span (Set.mem_insert _ _))
+  have hg₂_tn : IsTopologicallyNilpotent ((g₂ : A)) :=
+    P.isTopologicallyNilpotent_of_mem
+      (hpair ▸ Ideal.subset_span (Set.mem_insert_of_mem _ rfl))
+  apply Set.Subset.antisymm
+  · rintro y ⟨v, hv, rfl⟩
+    refine ⟨⟨ιSpv_bool v, ⟨v, rfl⟩, rfl⟩, ?_, ?_, ?_⟩
+    · rw [Bool.eq_false_iff]
+      intro htrue
+      rw [ιSpvR_eq_true_iff] at htrue
+      have h1 : v.vle 1 ((g₁ : A)) := htrue.1 1 (by simp [RCoord.oneOver])
+      exact not_vle_one_of_mem_spa_of_topologicallyNilpotent hv hg₁_tn h1
+    · rw [Bool.eq_false_iff]
+      intro htrue
+      rw [ιSpvR_eq_true_iff] at htrue
+      have h1 : v.vle 1 ((g₂ : A)) := htrue.1 1 (by simp [RCoord.oneOver])
+      exact not_vle_one_of_mem_spa_of_topologicallyNilpotent hv hg₂_tn h1
+    · intro f hf
+      rw [ιSpvR_eq_true_iff]
+      refine ⟨fun t ht => ?_, v.not_vle_one_zero⟩
+      simp only [RCoord.leOne, Finset.mem_insert, Finset.mem_singleton] at ht
+      rcases ht with rfl | rfl
+      · exact hv.2 _ hf
+      · exact (v.vle_total 1 1).elim id id
+  · rintro y ⟨⟨x, ⟨v, rfl⟩, rfl⟩, hone₁, hone₂, hplus⟩
+    set w := restrictIdealPairSpv v ((g₁ : A)) ((g₂ : A)) with hw_def
+    have hprofile : ιSpvR I w = ιSpvR I v :=
+      funext fun p => ιSpvR_retractionPair_eq _ _ I hg₁I hg₂I v p
+    have hw_mem : w ∈ SpvAI A I := by
+      rw [hIeq]
+      exact restrictIdealPairSpv_mem_SpvAI v _ _
+    have hone₁_w : ιSpvR I w (RCoord.oneOver I ((g₁ : A))) = false := by
+      rw [hprofile]; exact hone₁
+    have hone₂_w : ιSpvR I w (RCoord.oneOver I ((g₂ : A))) = false := by
+      rw [hprofile]; exact hone₂
+    have hplus_w : ∀ f ∈ (A⁺ : Subring A), ιSpvR I w (RCoord.leOne I f) = true := by
+      intro f hf
+      rw [hprofile]; exact hplus f hf
+    letI : ValuativeRel A := w.toValuativeRel
+    set wv := ValuativeRel.valuation A with hwv_def
+    have h_le_one : ∀ a : P.A₀, wv ((a : A)) ≤ 1 := by
+      intro a
+      have hcoord := hplus_w (a : A) (hA₀le a)
+      rw [ιSpvR_eq_true_iff] at hcoord
+      have hle : w.vle ((a : A)) 1 :=
+        hcoord.1 (a : A) (by simp [RCoord.leOne])
+      have h2 := (vle_iff_canonical w ((a : A)) 1).mp hle
+      simpa using h2
+    have h_lt_g : ∀ g : A, ιSpvR I w (RCoord.oneOver I g) = false → wv g < 1 := by
+      intro g hone_w
+      by_contra hge
+      push Not at hge
+      have hge' : wv 1 ≤ wv g := by
+        rw [map_one]
+        exact hge
+      have hne : wv g ≠ 0 := by
+        intro h0
+        rw [map_one, h0] at hge'
+        simp at hge'
+      have htrue : ιSpvR I w (RCoord.oneOver I g) = true := by
+        rw [ιSpvR_eq_true_iff]
+        refine ⟨fun t ht => ?_, fun hcon => hne ((vle_zero_iff_canonical w _).mp hcon)⟩
+        simp only [RCoord.oneOver, Finset.mem_singleton] at ht
+        subst ht
+        exact (vle_iff_canonical w 1 g).mpr hge'
+      rw [hone_w] at htrue
+      exact Bool.false_ne_true htrue
+    have h_lt_g₁ : wv ((g₁ : A)) < 1 := h_lt_g _ hone₁_w
+    have h_lt_g₂ : wv ((g₂ : A)) < 1 := h_lt_g _ hone₂_w
+    have h_lt_one : ∀ a ∈ P.I, wv ((P.A₀.subtype a)) < 1 := by
+      intro a ha
+      rw [hpair] at ha
+      obtain ⟨c₁, c₂, hc⟩ := Ideal.mem_span_pair.mp ha
+      have hval : wv ((P.A₀.subtype a)) ≤
+          max (wv ((c₁ : A)) * wv ((g₁ : A))) (wv ((c₂ : A)) * wv ((g₂ : A))) := by
+        calc wv ((P.A₀.subtype a))
+            = wv ((c₁ : A) * (g₁ : A) + (c₂ : A) * (g₂ : A)) := by
+              rw [← hc]
+              push_cast
+              rfl
+          _ ≤ max (wv ((c₁ : A) * (g₁ : A))) (wv ((c₂ : A) * (g₂ : A))) :=
+              Valuation.map_add _ _ _
+          _ = max (wv ((c₁ : A)) * wv ((g₁ : A))) (wv ((c₂ : A)) * wv ((g₂ : A))) := by
+              rw [map_mul, map_mul]
+      refine lt_of_le_of_lt hval (max_lt ?_ ?_)
+      · calc wv ((c₁ : A)) * wv ((g₁ : A)) ≤ 1 * wv ((g₁ : A)) := by
+              gcongr
+              exact h_le_one c₁
+          _ = wv ((g₁ : A)) := one_mul _
+          _ < 1 := h_lt_g₁
+      · calc wv ((c₂ : A)) * wv ((g₂ : A)) ≤ 1 * wv ((g₂ : A)) := by
+              gcongr
+              exact h_le_one c₂
+          _ = wv ((g₂ : A)) := one_mul _
+          _ < 1 := h_lt_g₂
+    have hmap : Ideal.map P.A₀.subtype P.I = I := by
+      rw [hpair, Ideal.map_span, Set.image_insert_eq, Set.image_singleton, hIeq]
+      rfl
+    have h_in : Spv.IsInSpvAI w (Ideal.map P.A₀.subtype P.I) := by
+      rw [hmap]
+      exact hw_mem
+    have hcont : w.IsContinuous :=
+      Spv.isContinuous_of_isInSpvAI_of_lt_one P w h_in (fun a => h_le_one a) h_lt_one
+    have hbdd : ∀ f ∈ (A⁺ : Subring A), w.vle f 1 := by
+      intro f hf
+      have hcoord := hplus_w f hf
+      rw [ιSpvR_eq_true_iff] at hcoord
+      exact hcoord.1 f (by simp [RCoord.leOne])
+    exact ⟨w, ⟨hcont, hbdd⟩, hprofile⟩
+
+
+/-- The `Spa`-profile image is compact (pair version). -/
+theorem isCompact_image_ιSpvR_spa₂ [IsTopologicalRing A] (P : PairOfDefinition A)
+    {g₁ g₂ : P.A₀} (hpair : P.I = Ideal.span ({g₁, g₂} : Set P.A₀))
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span ({(g₁ : A), (g₂ : A)} : Set A)) :
+    IsCompact (ιSpvR I '' (Spa A A⁺)) := by
+  rw [image_ιSpvR_spa_eq₂ P hpair hA₀le I hIeq]
+  exact (isCompact_profileCarrier I).inter_right
+    (isClosed_spaProfileConditions₂ I (g₁ : A) (g₂ : A))
+
+/-- **Rational subsets are quasi-compact, pair-generator version** (Wedhorn 7.35(2)
+for a two-generator ideal of definition). -/
+theorem isCompact_subtype_rationalOpen₂ [IsTopologicalRing A] (P : PairOfDefinition A)
+    {g₁ g₂ : P.A₀} (hpair : P.I = Ideal.span ({g₁, g₂} : Set P.A₀))
+    (hA₀le : ∀ x : P.A₀, (x : A) ∈ (A⁺ : Subring A))
+    (I : Ideal A) (hIeq : I = Ideal.span ({(g₁ : A), (g₂ : A)} : Set A))
+    (T : Finset A) (s : A)
+    (hTI : I ≤ (Ideal.span (T : Set A)).radical) :
+    IsCompact (Subtype.val ⁻¹' (rationalOpen T s) : Set ↥(Spa A A⁺)) := by
+  have hIeq' : I = Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)) := by
+    rw [show Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀)) =
+        Ideal.map P.A₀.subtype P.I from rfl, hpair, Ideal.map_span,
+      Set.image_insert_eq, Set.image_singleton, hIeq]
+    rfl
+  have hEmb : Topology.IsEmbedding (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) :=
+    ⟨isInducing_ιSpvPropR_spa P I hIeq', injective_ιSpvPropR_spa P I hIeq'⟩
+  refine (hEmb.isCompact_iff (s := Subtype.val ⁻¹' rationalOpen T s)).mpr ?_
+  have h1 : (fun v : ↥(Spa A A⁺) => ιSpvPropR I (v : Spv A)) ''
+      (Subtype.val ⁻¹' rationalOpen T s) =
+      (fun (y : RCoord A I → Bool) (p : RCoord A I) => y p = true) ''
+        ((ιSpvR I '' (Spa A A⁺)) ∩
+          {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true}) := by
+    ext r
+    constructor
+    · rintro ⟨v, hv, rfl⟩
+      rw [Set.mem_preimage] at hv
+      obtain ⟨hvSpa, h1, h2⟩ := hv
+      exact ⟨ιSpvR I (v : Spv A), ⟨⟨(v : Spv A), v.2, rfl⟩,
+        (ιSpvR_eq_true_iff I _ _).mpr ⟨h1, h2⟩⟩, rfl⟩
+    · rintro ⟨y, ⟨⟨v, hvSpa, rfl⟩, hq⟩, rfl⟩
+      obtain ⟨h1, h2⟩ := (ιSpvR_eq_true_iff I _ _).mp hq
+      exact ⟨⟨v, hvSpa⟩, Set.mem_preimage.mpr ⟨hvSpa, h1, h2⟩, rfl⟩
+  rw [h1]
+  refine IsCompact.image ?_ (continuous_toProp_rcoord I)
+  refine (isCompact_image_ιSpvR_spa₂ P hpair hA₀le I hIeq).inter_right ?_
   have hcl : {y : RCoord A I → Bool | y ⟨(T, s), hTI⟩ = true} =
       (fun y : RCoord A I → Bool => y ⟨(T, s), hTI⟩) ⁻¹' {true} := rfl
   rw [hcl]
