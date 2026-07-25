@@ -569,13 +569,16 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Sources**: Kedlaya 1410.5160 (2.2.1); AWS Rem 2.6.3.
 
 ### [T802] Ultrametric additivity of the Gauss value
-- **Status**: open | **Depends**: T801
-- **Step 1 (binding)**: crossread Kedlaya *New methods for (φ,Γ)-modules* §4 (fetch to
-  refs) and/or FF *Courbes* §1.4 (local) per the decomposition note; freeze the route.
+- **Status**: open | **Depends**: T801 | route FROZEN by sol review 2026-07-26:
+  Kedlaya 1004.0466 Lemma 4.1 (paper in refs). Core input: `[a] ± [b] =
+  Σ_j p^j [P_j^±(a,b)^{p^{-j}}]`, P_j^± ∈ 𝔽_p[X,Y] homogeneous of degree p^j ⟹
+  |c_j| ≤ max(|a|,|b|); digit-carry induction; ρ^N tail bound; density extends.
 - **Statement**: `gaussValue ρ (x+y) ≤ max (gaussValue ρ x) (gaussValue ρ y)`.
 
-### [T803] Multiplicativity (paper Lemma 2.3)
-- **Status**: open | **Depends**: T802 (+same crossread)
+### [T803] Multiplicativity (paper Lemma 2.3 / 1004.0466 Lemma 4.1)
+- **Status**: open | **Depends**: T802 | route frozen: submult from
+  p^i[a]·p^j[b] = p^{i+j}[ab] + T802; equality via least max-attaining indices +
+  strictly-smaller discarded parts (sol Q2).
 - **Statement**: `gaussValue ρ (x*y) = gaussValue ρ x * gaussValue ρ y`.
 
 ### [CLEANUP-11] /cleanup on GaussNorm.lean
@@ -590,12 +593,26 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Status**: open | **Depends**: T804
 - **Statement**: fill `Y_nonempty` in Curve.lean: `⟨gaussSpv ρ, mem_spa, w(p[ϖ]) ≠ 0⟩`.
 
-### [PLAN-GATE-1] /develop --decompose: Kedlaya §2–§3 (Euclidean/PID + strongly noetherian)
+### [PLAN-GATE-1] /develop --decompose: Kedlaya §2–§4 (Euclidean/PID + strongly noetherian + B^I)
 - **Status**: blocked (planning gate) | **Depends**: T805
+- Scope PER SOL REVIEW: §2–§3 PLUS Definition 4.2, Lemma 4.9, Theorem 4.10 (the
+  two-sided interval rings B^{[1,c]} (U₀) and B^{[c,p]} (V₀), normalization
+  |ϖ| = p^{-1}); include the Banach-vs-Huber Tate-algebra topological agreement.
 - NOT executable by /beastmode: this is a planning action producing lane-B tickets.
 
-### [PLAN-GATE-2] Lane C assembly planning (sheafy instances + AdicSpacePresentation)
+### [PLAN-GATE-2] Lane C assembly planning (identification theorem + sheafy instances)
 - **Status**: blocked (planning gate) | **Depends**: PLAN-GATE-1 only for the
-  sheafiness core (the repo's `isSheafy_of_stronglyNoetherian_828b` is sorry-free —
-  correction 2026-07-26); presheafValue-identification additionally depends on the
-  PresheafTateStructure plumbing.
+  sheafiness core (the repo's `isSheafy_of_stronglyNoetherian_828b` is sorry-free);
+  presheafValue-identification additionally depends on the PresheafTateStructure
+  plumbing. SOL CORRECTIONS (binding): 𝒪(U₀) ≅ B^I is a genuine theorem (dense
+  subalgebra + topology comparison, or Lemma 4.9); the rational PLUS ring is the
+  integral closure of A⁺[T/s] (NOT of the image of A⁺) and is what gets
+  transported — equality with B^{I,+} not required.
+
+### [PLAN-GATE-3] Lane D: 𝒳 as a locally v-ringed quotient (NEW per sol Q6)
+- **Status**: blocked (planning gate) | **Depends**: PLAN-GATE-2
+- Content: 𝒴 pre-adic structure + chart identifications respecting restrictions
+  (Wedhorn Rem 8.27); then EITHER 𝒪_X(W) := 𝒪_Y(q⁻¹W)^{φ^ℤ} descent (with plus
+  sheaf and stalk valuations) OR two-chart gluing along the Frobenius transitions
+  (overlap pieces: κ = c identity; κ = 1 ↔φ↔ κ = p), cocycle condition, and the
+  local-isomorphism property of q — only then is 𝒳 an adic space.

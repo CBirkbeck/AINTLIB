@@ -1168,9 +1168,56 @@ w_ρ(x) = max_n ρ^n · |a_n| = max_n ρ^n · |x.coeff n|^{p^{-n}} (rpow).
 
 ## Prior-B2: no name/shape matches (log checked).
 
-## Gate status: A1/A4/A5 leaf-verified against in-hand sources; A2/A3 routes are
-REVIEW-PENDING-lite on the [12,§4] crossread (mandated as step 1 of their tickets;
-truth of the statements is multi-source certain — Lemma 2.3 verbatim above).
+## Gate status (UPDATED after gpt-5.6-sol review 2026-07-26, archived at
+`.mathlib-quality/chatgpt-reply-campaign8-adic-space-2026-07-26.md`): ALL Lane-A
+leaves CONFIRMED; A2/A3 routes FROZEN per sol:
+- Transcription target: Kedlaya, *New methods for (φ,Γ)-modules* (arXiv:1004.0466,
+  fetched to refs), **Lemma 4.1** — N_t(Σ p^i[a_i]) := max p^{-i}α(a_i) is
+  multiplicative for α = |·|^t; w_ρ = N_t^{1/t}.
+- The ONE Witt-arithmetic input (A2): for a, b in a perfect 𝔽_p-algebra,
+  `[a] ± [b] = Σ_j p^j [P_j^±(a,b)^{p^{-j}}]` with P_j^± ∈ 𝔽_p[X,Y] HOMOGENEOUS of
+  ordinary degree p^j; hence |c_j| ≤ max(|a|,|b|). Then the digit-carry induction
+  (combine Teichmüller terms level by level; carries never increase the bound);
+  tails satisfy w_ρ(Σ_{i≥N} p^i[a_i]) ≤ ρ^N and density extends to infinite sums.
+  Density CANNOT replace the finite-level fact (circularity warning from sol).
+- A3: submultiplicativity from p^i[a]·p^j[b] = p^{i+j}[ab] + A2; equality via least
+  max-attaining indices (i,j): the p^{i+j}-Teichmüller coefficient of the tail
+  product is a_i·b_j and all discarded parts have strictly smaller norm.
+- A4 phrasing must be UNIFORM: w_ρ(I^n) ≤ q^n with q = max(ρ,|ϖ|) < 1, i.e.
+  I^n ⊆ {w_ρ < ε} eventually (pointwise convergence on generators is not the
+  criterion); ≤1-on-A⁺ suffices for the plus-condition only after continuity.
+
+## Sol corrections to Lanes B/C/D (binding for the next /develop round)
+1. Lane B must include **Definition 4.2 (B^I), Lemma 4.9 (interval changes as
+   rational localizations + integral closures), Theorem 4.10 (B^I{T₁..Tₙ}
+   noetherian for closed I ⊂ (0,∞))** — Thm 3.2 alone only covers one-sided A^r.
+   Intervals (normalization |ϖ| = p^{-1}, κ(λ_t) = t): U₀ ↔ B^{[1,c]},
+   V₀ ↔ B^{[c,p]}; general: τ = log(p^{-1})/log|ϖ|, I_U = [τ, cτ], I_V = [cτ, pτ].
+2. **Plus-ring correction (my Lane-C claim was WRONG)**: the rational plus ring is
+   the integral closure of A⁺[t/s : t ∈ T] in the localization (contains [ϖ]/p and
+   p^a/[ϖ]^b for U₀) — NOT the integral closure of the image of A⁺ alone. Equality
+   with Kedlaya's unit ball B^{I,+} is NOT needed: transport the actual rational
+   plus ring across the topological-ring isomorphism and apply 8.28(b).
+3. **The identification 𝒪(U₀) ≅ B^{I_U} is a genuine theorem** (not bookkeeping):
+   universal property gives only a map (after power-boundedness of the fractions);
+   the isomorphism needs (i) common dense subalgebra B = W(O_F)[1/p, 1/[ϖ]] and
+   (ii) equivalence of the rational-localization topology with the λ_I-Banach
+   topology — via the explicit fractions or Lemma 4.9. Also record: Kedlaya's
+   Banach Tate algebra B^I{T} = the repo's Huber Tate algebra, topologically.
+   Note: no global Tate-localization needed first; the localized ring IS Tate
+   (p becomes a topologically nilpotent unit). Sol's leaner single-denominator
+   presentations (c = a/b lowest terms): U₀ = R({p^{a+1}, [ϖ]^{b+1}} / p[ϖ]^b),
+   V₀ = R({[ϖ]^{b+1}, p^{p+a}} / p^a[ϖ]).
+4. **NEW LANE D (𝒳-descent, previously missing)**: per-chart sheafiness suffices
+   for 𝒴 (restrict the pre-adic structure; identify U_n, V_n as pre-adic open
+   subspaces RESPECTING RESTRICTION MAPS; Wedhorn Rem 8.27 local criterion). For
+   𝒳 the topological quotient + chart homeomorphisms do NOT yet define a locally
+   v-ringed space: need either 𝒪_X(W) := 𝒪_Y(q⁻¹W)^{φ^ℤ} descent (plus-sheaf and
+   stalk valuations too) or genuine two-chart gluing with Frobenius transition
+   maps satisfying the cocycle condition. The overlap has TWO pieces: the common
+   boundary κ = c (identity transition) and the boundary κ = 1 in U₀ identified by
+   φ with κ = p in V₀. Corrected chain: Gauss norms → B^I → (𝒪(U_n) ≅ B^{I_n}) →
+   𝒴 pre-adic + sheafy → φ-equivariant locally-ringed descent → 𝒳 adic.
 
 # Milestone map: Lanes B and C (NOT leaf-decomposed — gated)
 
