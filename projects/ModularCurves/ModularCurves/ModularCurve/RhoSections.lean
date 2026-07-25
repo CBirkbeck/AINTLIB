@@ -5601,6 +5601,19 @@ theorem strPinned_eq_pullTorsionIso {X' : EllObj (CommRingCat.of ℚ)}
     rw [Category.assoc, Category.assoc, framedTorsionIsoPinned_π,
       pullTorsionIso_over, EllipticCurve.pointToTorsion_torsionπ]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-V structure level]** The dictionary applied to the tautological value
+recovers the pulled structure. -/
+theorem rhoLevelStructureOfCarve_strValue {X' : EllObj (CommRingCat.of ℚ)}
+    (str : RhoLevelStructure D X'.structMap X'.curve)
+    (hinv : NIsInvertible (strCover D X') N) :
+    rhoLevelStructureOfCarve D (X'.pullbackAlong (strPr D X')).structMap
+        (X'.pullbackAlong (strPr D X')).curve hinv
+        (strValue D str).val.1 (strValue D str).val.2.val
+        (strValue D str).val.2.property (strValue D str).property =
+      RhoLevelStructure.pull D (X'.pullbackAlongπ (strPr D X')) str :=
+  RhoLevelStructure.ext_torsionIso (strPinned_eq_pullTorsionIso D str hinv)
+
 end MutualInverses
 
 end
