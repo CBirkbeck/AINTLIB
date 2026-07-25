@@ -5553,6 +5553,40 @@ theorem exists_specPoint_lift_of_finite_surjective {Y Z : Scheme.{0}}
   rw [Category.assoc, pullback.condition, ← Category.assoc, secpair.2,
     Category.id_comp]
 
+/-- **[T-3E-W0]** Two `Ω`-points of a finite `ℚ`-algebra factor jointly through
+a common finite subfield `κ ≤ Ω`, which embeds into `ℚ̄`: transport of point
+comparisons from arbitrary field bases to the algebraic closure. -/
+theorem ringHomPair_factor_qbar {B : Type} [CommRing B] [Algebra ℚ B]
+    [Module.Finite ℚ B] {Ω : Type} [Field Ω] [Algebra ℚ Ω]
+    (χ₁ χ₂ : B →ₐ[ℚ] Ω) :
+    ∃ (κ : Subalgebra ℚ Ω) (mk₁ mk₂ : B →ₐ[ℚ] κ)
+      (lam : ↥κ →ₐ[ℚ] AlgebraicClosure ℚ),
+      Function.Injective lam ∧
+      κ.val.comp mk₁ = χ₁ ∧ κ.val.comp mk₂ = χ₂ := by
+  classical
+  haveI h1 : Module.Finite ℚ ↥χ₁.range :=
+    Module.Finite.of_surjective χ₁.rangeRestrict.toLinearMap
+      χ₁.rangeRestrict_surjective
+  haveI h2 : Module.Finite ℚ ↥χ₂.range :=
+    Module.Finite.of_surjective χ₂.rangeRestrict.toLinearMap
+      χ₂.rangeRestrict_surjective
+  haveI hκfin : Module.Finite ℚ ↥(χ₁.range ⊔ χ₂.range) :=
+    Subalgebra.finite_sup _ _
+  haveI hκint : Algebra.IsIntegral ℚ ↥(χ₁.range ⊔ χ₂.range) :=
+    Algebra.IsIntegral.of_finite ℚ _
+  have hfield : IsField ↥(χ₁.range ⊔ χ₂.range) :=
+    isField_of_isIntegral_of_isField' (Field.toIsField ℚ)
+  letI : Field ↥(χ₁.range ⊔ χ₂.range) := hfield.toField
+  haveI : Algebra.IsAlgebraic ℚ ↥(χ₁.range ⊔ χ₂.range) :=
+    Algebra.IsAlgebraic.of_finite ℚ _
+  refine ⟨χ₁.range ⊔ χ₂.range,
+    (Subalgebra.inclusion le_sup_left).comp χ₁.rangeRestrict,
+    (Subalgebra.inclusion le_sup_right).comp χ₂.rangeRestrict,
+    IsAlgClosed.lift, ?_, ?_, ?_⟩
+  · exact RingHom.injective _
+  · exact AlgHom.ext fun b => rfl
+  · exact AlgHom.ext fun b => rfl
+
 end PointLifting
 
 section MutualInverses
