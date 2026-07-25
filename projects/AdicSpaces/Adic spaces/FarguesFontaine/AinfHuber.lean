@@ -6,6 +6,7 @@ import «Adic spaces».FarguesFontaine.PerfectoidFieldCharP
 import «Adic spaces».HuberRings
 import «Adic spaces».AffinoidRings
 import «Adic spaces».AdicConvergence
+import «Adic spaces».TateAlgebraTopology
 import Mathlib.RingTheory.WittVector.Complete
 import Mathlib.RingTheory.WittVector.Teichmuller
 import Mathlib.Topology.Algebra.Nonarchimedean.AdicTopology
@@ -75,17 +76,55 @@ def teichPi (ϖ : PseudoUniformizer F) : Ainf p F :=
 /-- Teichmüller lifts of powers: `[ϖ]^n = [ϖ^n]`. This is what makes rational exponents
 in the window inequalities (Kedlaya-AWS, Rem. 3.1.9) clearable to integer powers. -/
 theorem teichPi_pow (ϖ : PseudoUniformizer F) (n : ℕ) :
-    teichPi p F ϖ ^ n = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ ^ n) := by
-  sorry
+    teichPi p F ϖ ^ n = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ ^ n) :=
+  (map_pow (WittVector.teichmuller p) (PseudoUniformizer.toOF F ϖ) n).symm
 
 /-- `[ϖ] ≠ 0` in `A_inf`. -/
-theorem teichPi_ne_zero (ϖ : PseudoUniformizer F) : teichPi p F ϖ ≠ 0 := by sorry
+theorem teichPi_ne_zero (ϖ : PseudoUniformizer F) : teichPi p F ϖ ≠ 0 := fun h =>
+  PseudoUniformizer.toOF_ne_zero F ϖ (by
+    simpa [teichPi, WittVector.teichmuller_coeff_zero] using
+      congrArg (fun x : Ainf p F => x.coeff 0) h)
+
+/-- Mutual divisibility of Teichmüller lifts: for pseudo-uniformizers `ϖ, ϖ'` some power
+of `[ϖ']` lies in the ideal `([ϖ])`. In `F` the set `ϖ·F°` is a neighbourhood of `0` and
+`ϖ'` is topologically nilpotent, so `ϖ'^k ∈ ϖ·F°`; apply the multiplicative Teichmüller
+lift.
+
+Source: [Kedlaya-AWS, §11.2-style remark]: "for any other choice ϖ', there is some n such
+that ϖ | (ϖ')^n". -/
+theorem exists_teichPi_pow_mem_span_teichPi (ϖ ϖ' : PseudoUniformizer F) :
+    ∃ k : ℕ, teichPi p F ϖ' ^ k ∈ Ideal.span {teichPi p F ϖ} := by
+  obtain ⟨P⟩ := IsHuberRing.exists_pairOfDefinition (A := F)
+  obtain ⟨k, hk⟩ := ϖ'.isTopologicallyNilpotent.exists_pow_mem_of_mem_nhds
+    ((ϖ.val.isUnit.isOpenMap_smul _ P.isOpen_powerBoundedSubring).mem_nhds
+      ⟨0, isPowerBounded_zero, smul_zero _⟩)
+  obtain ⟨b, hb, hbeq⟩ := hk
+  refine ⟨k, ?_⟩
+  rw [teichPi_pow, Ideal.mem_span_singleton']
+  refine ⟨WittVector.teichmuller p ⟨b, hb⟩, ?_⟩
+  rw [teichPi, ← map_mul]
+  congr 1
+  exact Subtype.ext (by simpa [PseudoUniformizer.toOF, mul_comm] using hbeq)
 
 /-- The ideal `I = (p, [ϖ]) ⊆ A_inf` defining the topology.
 
 Source: [SW, §13.1] "(p, [p♭])-adic topology". -/
 def Iinf (ϖ : PseudoUniformizer F) : Ideal (Ainf p F) :=
   Ideal.span {(p : Ainf p F), teichPi p F ϖ}
+
+/-- If `[ϖ']^k ∈ ([ϖ])` then the `(p,[ϖ'])`-filtration refines the `(p,[ϖ])`-filtration:
+`(p,[ϖ'])^((k+1)·m) ⊆ (p,[ϖ])^m`. Monomial bookkeeping: in each monomial `p^a·[ϖ']^b`
+with `a + b = (k+1)m`, either `a ≥ m` or `b ≥ km`. -/
+theorem Iinf_pow_le_of_teichPi_pow_mem {ϖ ϖ' : PseudoUniformizer F} {k : ℕ}
+    (h : teichPi p F ϖ' ^ k ∈ Ideal.span {teichPi p F ϖ}) (m : ℕ) :
+    Iinf p F ϖ' ^ ((k + 1) * m) ≤ Iinf p F ϖ ^ m := by
+  have hexp : (k + 1) * m = m + k * m := by ring
+  rw [hexp, Iinf, Iinf, Ideal.span_insert, Ideal.span_insert]
+  refine Ideal.sup_pow_add_le_pow_sup_pow.trans (sup_le ?_ ?_)
+  · exact Ideal.pow_right_mono le_sup_left m
+  · rw [Ideal.span_singleton_pow, pow_mul]
+    exact ((Ideal.span_singleton_le_iff_mem _).mpr (Ideal.pow_mem_pow h m)).trans
+      (Ideal.pow_right_mono le_sup_right m)
 
 /-- The `(p,[ϖ])`-adic topology on `A_inf`, using the canonical pseudo-uniformizer of the
 Tate ring `F`. By `isAdic_Iinf` below, the topology does not depend on this choice.
@@ -94,8 +133,11 @@ Source: [SW, §13.1]; [Kedlaya-AWS, Def 3.1.2]. -/
 instance instTopologicalSpaceAinf : TopologicalSpace (Ainf p F) :=
   (Iinf p F (IsTateRing.pseudoUniformizer (A := F))).adicTopology
 
-/-- `A_inf` is a topological ring for the `(p,[ϖ])`-adic topology. -/
-instance instIsTopologicalRingAinf : IsTopologicalRing (Ainf p F) := by sorry
+/-- `A_inf` is a nonarchimedean ring — hence in particular a topological ring — for the
+`(p,[ϖ])`-adic topology: the ideal powers form a neighbourhood basis of `0` consisting of
+open additive subgroups. -/
+instance instNonarchimedeanRingAinf : NonarchimedeanRing (Ainf p F) :=
+  Ideal.nonarchimedean _
 
 /-- The topology on `A_inf` is `(p,[ϖ])`-adic for EVERY pseudo-uniformizer `ϖ` (not just
 the canonical one used to define the instance). In particular the construction is
@@ -108,14 +150,29 @@ generate mutually cofinal filtrations.
 Source: [Kedlaya-AWS, §11.2-style remark]: "this is independent of the choice of ϖ, as
 for any other choice ϖ', there is some n such that ϖ | (ϖ')^n and ϖ' | ϖ^n" (stated there
 for the analogous locus; the same divisibility argument applies to the filtration). -/
-theorem isAdic_Iinf (ϖ : PseudoUniformizer F) : IsAdic (Iinf p F ϖ) := by sorry
+theorem isAdic_Iinf (ϖ : PseudoUniformizer F) : IsAdic (Iinf p F ϖ) := by
+  have h₀ : IsAdic (Iinf p F (IsTateRing.pseudoUniformizer (A := F))) := rfl
+  obtain ⟨k, hk⟩ := exists_teichPi_pow_mem_span_teichPi p F
+    (IsTateRing.pseudoUniformizer (A := F)) ϖ
+  obtain ⟨l, hl⟩ := exists_teichPi_pow_mem_span_teichPi p F ϖ
+    (IsTateRing.pseudoUniformizer (A := F))
+  rw [isAdic_iff]
+  refine ⟨fun n => ?_, fun s hs => ?_⟩
+  · exact AddSubgroup.isOpen_mono
+      (H₁ := (Iinf p F (IsTateRing.pseudoUniformizer (A := F)) ^ ((l + 1) * n)).toAddSubgroup)
+      (H₂ := (Iinf p F ϖ ^ n).toAddSubgroup)
+      (fun x hx => Iinf_pow_le_of_teichPi_pow_mem p F hl n hx)
+      ((isAdic_iff.mp h₀).1 ((l + 1) * n))
+  · obtain ⟨n, hn⟩ := (isAdic_iff.mp h₀).2 s hs
+    exact ⟨(k + 1) * n, fun x hx => hn (Iinf_pow_le_of_teichPi_pow_mem p F hk n hx)⟩
 
 /-- `A_inf` is a Huber ring: `(A_inf, (p,[ϖ]))` is a pair of definition — the ring itself
 is open, and the ideal is finitely generated (two generators) with adic topology.
 
 Source: [Kedlaya-AWS, Def 3.1.2] (A_inf with an adic topology defined by a finitely
 generated ideal); [SW, §13.1]. -/
-instance instIsHuberRingAinf : IsHuberRing (Ainf p F) := by sorry
+instance instIsHuberRingAinf : IsHuberRing (Ainf p F) :=
+  isHuberRing_ofAdic _ (Submodule.fg_span (Set.toFinite _))
 
 /-- `A_inf⁺ = A_inf`: the plus-subring is the whole ring.
 
@@ -125,14 +182,23 @@ instance instPlusSubringAinf : PlusSubring (Ainf p F) where
   toSubring := ⊤
 
 /-- Every element of `A_inf` is power-bounded (an adic ring is bounded in itself). -/
-theorem isPowerBounded_Ainf (x : Ainf p F) : IsPowerBounded x := by sorry
+theorem isPowerBounded_Ainf (x : Ainf p F) : IsPowerBounded x := by
+  intro U hU
+  obtain ⟨n, -, hn⟩ := (Ideal.hasBasis_nhds_zero_adic
+    (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))).mem_iff.mp hU
+  refine ⟨_, (Ideal.hasBasis_nhds_zero_adic _).mem_of_mem (i := n) trivial, ?_⟩
+  rintro z ⟨s, -, v, hv, rfl⟩
+  exact hn (Ideal.mul_mem_left _ s hv)
 
 /-- `A_inf⁺ = A_inf` is a ring of integral elements: open, integrally closed, and
 contained in the power-bounded subring (here: equal to it).
 
 Source: standard for adic rings; matches the pair `Spa(A_inf, A_inf)` in
 [Kedlaya-AWS, Def 3.1.5]. -/
-theorem isAffinoidRing_Ainf : IsAffinoidRing (Ainf p F) := by sorry
+theorem isAffinoidRing_Ainf : IsAffinoidRing (Ainf p F) := by
+  refine ⟨?_, fun a _ => trivial, fun x _ => isPowerBounded_Ainf p F x⟩
+  show IsOpen ((⊤ : Subring (Ainf p F)) : Set (Ainf p F))
+  simpa using isOpen_univ
 
 /-- Elementary comparison: `(p,[ϖ])^(2n) ⊆ (p)^n ⊔ ([ϖ])^n`. Each monomial `p^a [ϖ]^b`
 with `a + b = 2n` has `a ≥ n` or `b ≥ n`. Together with the reverse inclusion
@@ -144,7 +210,8 @@ topology", e.g. [Kedlaya-AWS, Def 3.1.2] vs [SW, §13.1]. -/
 theorem Iinf_pow_two_mul_le (ϖ : PseudoUniformizer F) (n : ℕ) :
     Iinf p F ϖ ^ (2 * n) ≤
       Ideal.span {(p : Ainf p F)} ^ n ⊔ Ideal.span {teichPi p F ϖ} ^ n := by
-  sorry
+  rw [Iinf, Ideal.span_insert, two_mul]
+  exact Ideal.sup_pow_add_le_pow_sup_pow
 
 /-- `A_inf` is `(p,[ϖ])`-adically separated.
 
