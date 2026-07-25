@@ -251,7 +251,9 @@ not weaken or strengthen hypotheses).
 - **Status**: open | **Depends**: T205.
 
 ### [T301] Frobenius identities (L3.1–L3.2, L3.5)
-- **Status**: open | **File**: FarguesFontaine/FrobeniusAction.lean | **Depends**: T201
+- **Status**: done (beastmode 2026-07-25; axiom-clean) — `frob_natCast` = `map_natCast`;
+  `frob_teichPi` via `show`-defeq to `WittVector.frobenius` + `frobenius_eq_map_frobenius`
+  + `map_teichmuller` + T201 `teichPi_pow`; `ofAdd_zsmul_def` is `rfl`. | **File**: FarguesFontaine/FrobeniusAction.lean | **Depends**: T201
 - **Statements**: `frob_natCast`, `frob_teichPi`, `ofAdd_zsmul_def`.
 - **Sketch**: (1) `map_natCast (frob p F)`. (2) `frobenius_eq_map_frobenius` (CharP) +
   `map_teichmuller` + `teichPi_pow`: φ([ϖ]) = [ϖ^p] = [ϖ]^p — mind that
@@ -261,7 +263,12 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L3.1–L3.2 ([SW §12.2]).
 
 ### [T302] Frobenius is a homeomorphism (L3.3 — corrected bound)
-- **Status**: open | **File**: FrobeniusAction.lean | **Depends**: T301, T202
+- **Status**: done (beastmode 2026-07-25; axiom-clean) — private `map_frob_Iinf`:
+  `φ(I) = (p, [ϖ]^p)` by `Ideal.map_span` + the two T301 identities; forward bound by
+  `pow_right_mono`; reverse `(p+1)n` bound by the same
+  `Ideal.sup_pow_add_le_pow_sup_pow` monomial engine as T202; continuity both ways via
+  `continuous_of_continuousAt_zero` + `hasBasis_nhds_zero_adic.tendsto_iff`
+  (reverse uses `Ideal.mem_map_iff_of_surjective`). | **File**: FrobeniusAction.lean | **Depends**: T301, T202
 - **Statements**: `map_frob_Iinf_pow_le`, `Iinf_pow_succ_mul_le_map_frob` (exponent
   `(p+1)*n` — the 2n version is FALSE for p ≥ 3, see decomposition L3.3 attack log),
   `continuous_frob`, `continuous_frob_symm`.
@@ -274,7 +281,12 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L3.3 (attack log documents the corrected exponent).
 
 ### [T303] The φ^ℤ-action reaches Spa (L3.4, L3.6–L3.7)
-- **Status**: open | **File**: FrobeniusAction.lean | **Depends**: T302
+- **Status**: done (beastmode 2026-07-25; axiom-clean; FrobeniusAction.lean SORRY-FREE,
+  M3 COMPLETE) — private `continuous_frob_zpow` by `Int.induction_on`
+  (zpow_add_one/zpow_sub_one + `RingAut.mul_apply`; inverse-apply is defeq to `.symm`);
+  `instContinuousConstSMulAinf := ⟨fun g => continuous_frob_zpow p F g.toAdd⟩`;
+  `smul_mem_spa_Ainf` = direct application of ValuationSpectrum.smul_mem_spa with the
+  trivial ⊤-stability witness (the [Finite G] drop in ValuationAction paying off). | **File**: FrobeniusAction.lean | **Depends**: T302
 - **Statements**: `instContinuousConstSMulAinf`, `smul_mem_spa_Ainf`
   (+ regression: `instMulSemiringActionAinf` is already sorry-free; ValuationAction's
   `[Finite G]` drop is already in the tree — keep both green).
