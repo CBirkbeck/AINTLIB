@@ -359,4 +359,18 @@ theorem two_torsion_coords_of_charNeTwoNF (h2 : IsUnit (2 : R)) {W : Weierstrass
   simp only [mul_zero, zero_mul, add_zero, zero_add, ne_eq] at h
   linear_combination -h
 
+/-- **(T-G3a-SUB2g)** On a char-≠2 normal-form chart, two `2`-torsion points with the
+same abscissa coincide: both have `y = 0` by
+`two_torsion_coords_of_charNeTwoNF`. Contrapositive: **distinct** marked `2`-torsion
+points have **distinct** abscissae — the input `e₁ ≠ e₂` of the Legendre variable
+change. -/
+theorem two_torsion_abscissa_injective (h2 : IsUnit (2 : R)) {W : WeierstrassCurve R}
+    (h1 : W.a₁ = 0) (h3 : W.a₃ = 0) {p p' q q' : R}
+    (heq : W.toAffine.Equation p q) (hneg : -q - W.a₁ * p - W.a₃ = q)
+    (heq' : W.toAffine.Equation p' q') (hneg' : -q' - W.a₁ * p' - W.a₃ = q')
+    (hp : p = p') : (p, q) = (p', q') := by
+  obtain ⟨hq, -⟩ := two_torsion_coords_of_charNeTwoNF h2 h1 h3 heq hneg
+  obtain ⟨hq', -⟩ := two_torsion_coords_of_charNeTwoNF h2 h1 h3 heq' hneg'
+  rw [hp, hq, hq']
+
 end ModularCurves
