@@ -7498,6 +7498,39 @@ theorem rhoOfSection_pull {X : EllObj (CommRingCat.of ℚ)}
     rfl
   exact (hcongr _ _ hsec _ _).trans rfl
 
+/-- **[T-YR-3 ENGINE FORM] AffineOverEll (rhoProblem D)** — the ρ-level moduli
+problem is affine over `Ell/ℚ`: relatively representable by the finite étale
+free `GL₂`-quotients, functorially in the base (KM 4.7.0 for `Y(ρ̄)`). -/
+theorem rhoProblem_affineOverEll :
+    ModuliProblem.AffineOverEll (rhoProblem D) := by
+  classical
+  intro X
+  obtain ⟨d⟩ := sympFramed_equivariantRelRepData D X
+  haveI hAf : IsAffineHom d.f := by
+    haveI := d.finite
+    infer_instance
+  have hfe := d.σZ.relQuotientStruct_finite_etale_of_free d.f d.over_base
+    (d.free_on_points (sympFramedAut_freeAction D)) d.finite d.etale
+  haveI hFinStruct : IsFinite (d.σZ.relQuotientStruct d.f d.over_base) := hfe.1
+  have hinvSpec : NIsInvertible (Spec (CommRingCat.of ℚ)) N := by
+    have hq : IsUnit ((N : ℚ)) := isUnit_iff_ne_zero.mpr
+      (Nat.cast_ne_zero.mpr (NeZero.ne N))
+    have := hq.map (Scheme.ΓSpecIso (CommRingCat.of ℚ)).inv.hom
+    rwa [map_natCast] at this
+  refine ⟨d.σZ.relQuotient d.f d.over_base,
+    d.σZ.relQuotientStruct d.f d.over_base, inferInstance, ?_⟩
+  refine ⟨fun {T} g => {
+    toFun := fun h => rhoOfSection D d g h.1 h.2
+      (NIsInvertible.of_hom
+        (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) h.1 ≫
+          g ≫ X.structMap) hinvSpec)
+    invFun := fun str => ⟨strSection D d g str, strSection_struct D d g str⟩
+    left_inv := fun h => Subtype.ext
+      (strSection_rhoOfSection D d g h.1 h.2 _)
+    right_inv := fun str => rhoOfSection_strSection D d g str _ }, ?_⟩
+  intro T T' g k h
+  exact (rhoOfSection_pull D d g k h.1 h.2 _ _ _).symm
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
