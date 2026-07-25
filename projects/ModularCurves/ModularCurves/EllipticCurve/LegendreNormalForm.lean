@@ -341,4 +341,22 @@ theorem exists_variableChange_eq_legendreCurve_of_isAlgClosed {k : Type u} [Fiel
   refine exists_variableChange_eq_legendreCurve h2 (Units.mk0 v hvne) h₂ h₄ h₆ ?_
   simpa using hv
 
+/-- **(T-G3a-SUB2f)** On a char-≠2 normal-form chart (`a₁ = a₃ = 0`), a point fixed by
+the negation (i.e. a `2`-torsion point) has `y = 0`, and its abscissa is a root of the
+cubic. This is the bridge from a level-`2` structure to the roots `e₁, e₂` consumed by
+`exists_variableChange_eq_legendreCurve`. -/
+theorem two_torsion_coords_of_charNeTwoNF (h2 : IsUnit (2 : R)) {W : WeierstrassCurve R}
+    (h1 : W.a₁ = 0) (h3 : W.a₃ = 0) {p q : R}
+    (heq : W.toAffine.Equation p q) (hneg : -q - W.a₁ * p - W.a₃ = q) :
+    q = 0 ∧ p ^ 3 + W.a₂ * p ^ 2 + W.a₄ * p + W.a₆ = 0 := by
+  have hq : q = 0 := by
+    rw [h1, h3, zero_mul, sub_zero, sub_zero] at hneg
+    have h2q : (2 : R) * q = 0 := by linear_combination -hneg
+    exact (h2.mul_right_eq_zero).mp h2q
+  refine ⟨hq, ?_⟩
+  have h := (WeierstrassCurve.Affine.equation_iff (W := W.toAffine) p q).mp heq
+  rw [hq, h1, h3] at h
+  simp only [mul_zero, zero_mul, add_zero, zero_add, ne_eq] at h
+  linear_combination -h
+
 end ModularCurves
