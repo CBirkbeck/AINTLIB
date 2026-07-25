@@ -121,10 +121,26 @@ theorem prodHom_pair {W : EllObj R} (u : W ⟶ X.pullbackAlong f) :
   refine (homToPullbackAlong_congr_hom (u ≫ X.pullbackAlongπ f) _ rfl hfst).trans ?_
   exact homToPullbackAlong_self f u
 
+/-- (Implementation) The second roundtrip, first component: the classifying morphism
+of the assembled point is the one we started from. -/
+theorem prodHom_fst {W : EllObj R} (a : P.obj (op W) × Q.obj (op W)) :
+    prodHom r f eqv a ≫ X.pullbackAlongπ f = r.homEquiv.symm a.1 := by
+  rw [prodHom, prodHomOf]
+  exact EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
+
+/-- (Implementation) The base map of the assembled point is the chosen factorization. -/
+theorem prodHom_baseHom {W : EllObj R} (v : W ⟶ X) (q : Q.obj (op W)) :
+    (prodHomOf f eqv v q).baseHom =
+      ((eqv v.baseHom).symm (Q.map (EllObj.isoPullbackAlong v).inv.op q)).1 := by
+  rw [prodHomOf]
+  exact EllObj.homToPullbackAlong_baseHom _ _ _
+
+/-- **[T-YR-6-APP P1, remaining step]** The second roundtrip's `Q`-component.
+The proof is the mirror of `prodHom_pair`: rewrite the tautological projection through
+`prodHom_fst`, identify the `eqv`-index via `prodHom_baseHom`, and cancel
+`isoPullbackAlong`. -/
+theorem prodSnd_prodHomOf {W : EllObj R} (v : W ⟶ X) (q : Q.obj (op W)) :
+    prodSnd f eqv (prodHomOf f eqv v q) = q := by
+  sorry
+
 end Prod
-
-end ModuliProblem
-
-end ModularCurves
-
-end
