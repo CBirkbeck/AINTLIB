@@ -242,4 +242,25 @@ theorem completeSquareVC_a₃ {W : WeierstrassCurve R} (h2 : IsUnit (2 : R)) :
   simp only [inv_one, Units.val_one, one_pow, one_mul, zero_mul, add_zero]
   linear_combination (-W.a₃) * h
 
+/-- **(T-G3a-SUB2, algebra level)** Composite of the two steps: complete the square,
+then scale-and-translate. If, after completing the square, the cubic splits with roots
+`e₁, e₂, e₃` and `e₂ − e₁` is the square of a unit, the curve is variable-change
+equivalent to a Legendre curve. -/
+theorem exists_variableChange_eq_legendreCurve {W : WeierstrassCurve R}
+    (h2 : IsUnit (2 : R)) {e₁ e₂ e₃ : R} (u : Rˣ)
+    (ha₂ : ((⟨1, 0, -(h2.unit⁻¹ : Rˣ) * W.a₁, -(h2.unit⁻¹ : Rˣ) * W.a₃⟩ :
+      VariableChange R) • W).a₂ = -(e₁ + e₂ + e₃))
+    (ha₄ : ((⟨1, 0, -(h2.unit⁻¹ : Rˣ) * W.a₁, -(h2.unit⁻¹ : Rˣ) * W.a₃⟩ :
+      VariableChange R) • W).a₄ = e₁ * e₂ + e₁ * e₃ + e₂ * e₃)
+    (ha₆ : ((⟨1, 0, -(h2.unit⁻¹ : Rˣ) * W.a₁, -(h2.unit⁻¹ : Rˣ) * W.a₃⟩ :
+      VariableChange R) • W).a₆ = -(e₁ * e₂ * e₃))
+    (hu : ((u : R)) ^ 2 = e₂ - e₁) :
+    ∃ (C : VariableChange R) (lam : R), C • W = legendreCurve lam := by
+  refine ⟨(⟨u, e₁, 0, 0⟩ : VariableChange R) *
+    ⟨1, 0, -(h2.unit⁻¹ : Rˣ) * W.a₁, -(h2.unit⁻¹ : Rˣ) * W.a₃⟩,
+    ((u⁻¹ : Rˣ) : R) ^ 2 * (e₃ - e₁), ?_⟩
+  rw [mul_smul]
+  exact scale_translate_smul_eq_legendreCurve (completeSquareVC_a₁ h2)
+    (completeSquareVC_a₃ h2) u ha₂ ha₄ ha₆ hu
+
 end ModularCurves
