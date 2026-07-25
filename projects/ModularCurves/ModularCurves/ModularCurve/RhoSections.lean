@@ -7531,6 +7531,39 @@ theorem rhoProblem_affineOverEll :
   intro T T' g k h
   exact (rhoOfSection_pull D d g k h.1 h.2 _ _ _).symm
 
+/-- **[T-YR-6-APP S2]** The same relative representation, packaged as a
+`RelRepData` and *retaining* finiteness and étaleness of its structure map (which
+`AffineOverEll` forgets). This is the ρ-side input to the product-problem
+identification. -/
+theorem rhoProblem_exists_relRepData_finiteEtale (X : EllObj (CommRingCat.of ℚ)) :
+    ∃ d : ModuliProblem.RelRepData (rhoProblem D) X, IsFinite d.f ∧ Etale d.f := by
+  classical
+  obtain ⟨d⟩ := sympFramed_equivariantRelRepData D X
+  haveI hAf : IsAffineHom d.f := by
+    haveI := d.finite
+    infer_instance
+  have hfe := d.σZ.relQuotientStruct_finite_etale_of_free d.f d.over_base
+    (d.free_on_points (sympFramedAut_freeAction D)) d.finite d.etale
+  haveI hFinStruct : IsFinite (d.σZ.relQuotientStruct d.f d.over_base) := hfe.1
+  have hinvSpec : NIsInvertible (Spec (CommRingCat.of ℚ)) N := by
+    have hq : IsUnit ((N : ℚ)) := isUnit_iff_ne_zero.mpr
+      (Nat.cast_ne_zero.mpr (NeZero.ne N))
+    have := hq.map (Scheme.ΓSpecIso (CommRingCat.of ℚ)).inv.hom
+    rwa [map_natCast] at this
+  refine ⟨{ Z := d.σZ.relQuotient d.f d.over_base
+            f := d.σZ.relQuotientStruct d.f d.over_base
+            eqv := fun {T} g => {
+              toFun := fun h => rhoOfSection D d g h.1 h.2
+                (NIsInvertible.of_hom
+                  (pullback.snd (d.σZ.relQuotientπ d.f d.over_base) h.1 ≫
+                    g ≫ X.structMap) hinvSpec)
+              invFun := fun str => ⟨strSection D d g str, strSection_struct D d g str⟩
+              left_inv := fun h => Subtype.ext
+                (strSection_rhoOfSection D d g h.1 h.2 _)
+              right_inv := fun str => rhoOfSection_strSection D d g str _ }
+            nat := fun {T T'} g k h =>
+              (rhoOfSection_pull D d g k h.1 h.2 _ _ _).symm }, hfe.1, hfe.2⟩
+
 /-- **[T-YR-5] THE ρ-LEVEL MODULI PROBLEM IS REPRESENTABLE** (`N ≥ 3`): the
 KM 4.7.0 engine applied to the affine-over-`Ell` and rigidity inputs. `Y(ρ̄)`
 exists as a fine moduli scheme. -/
