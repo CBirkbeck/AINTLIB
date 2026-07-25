@@ -170,4 +170,85 @@ theorem prodSnd_prodHomOf {W : EllObj R} (v : W ⟶ X) (q : Q.obj (op W)) :
       (EllObj.isoPullbackAlong v).hom_inv_id]
   simp
 
+/-- (Implementation) Naturality of the comparison morphism in the source. -/
+theorem toPullbackAlong_comp_pullbackAlongMap {W W' : EllObj R} (k : W ⟶ W')
+    (v : W' ⟶ X) :
+    EllObj.toPullbackAlong (k ≫ v) ≫ X.pullbackAlongMap v.baseHom k.baseHom =
+      k ≫ EllObj.toPullbackAlong v := by
+  refine EllHom.ext ?_ ?_
+  · show 𝟙 W.base ≫ k.baseHom = k.baseHom ≫ 𝟙 W'.base
+    rw [Category.id_comp, Category.comp_id]
+  · apply Limits.pullback.hom_ext
+    · show ((k ≫ v).isPullback.isoPullback.hom ≫
+        Limits.pullback.map X.curve.π (k.baseHom ≫ v.baseHom) X.curve.π v.baseHom
+          (𝟙 X.curve.E) k.baseHom (𝟙 X.base) (by simp) (by simp)) ≫
+          Limits.pullback.fst X.curve.π v.baseHom =
+        (k.top ≫ v.isPullback.isoPullback.hom) ≫
+          Limits.pullback.fst X.curve.π v.baseHom
+      rw [Category.assoc, Limits.pullback.lift_fst, Category.comp_id,
+        Category.assoc, v.isPullback.isoPullback_hom_fst]
+      exact (k ≫ v).isPullback.isoPullback_hom_fst
+    · show ((k ≫ v).isPullback.isoPullback.hom ≫
+        Limits.pullback.map X.curve.π (k.baseHom ≫ v.baseHom) X.curve.π v.baseHom
+          (𝟙 X.curve.E) k.baseHom (𝟙 X.base) (by simp) (by simp)) ≫
+          Limits.pullback.snd X.curve.π v.baseHom =
+        (k.top ≫ v.isPullback.isoPullback.hom) ≫
+          Limits.pullback.snd X.curve.π v.baseHom
+      have h1 : (k ≫ v).isPullback.isoPullback.hom ≫
+          Limits.pullback.snd X.curve.π (k.baseHom ≫ v.baseHom) = W.curve.π :=
+        (k ≫ v).isPullback.isoPullback_hom_snd
+      rw [Category.assoc, Limits.pullback.lift_snd, ← Category.assoc, h1,
+        Category.assoc, v.isPullback.isoPullback_hom_snd]
+      exact k.isPullback.w.symm
+
+variable (nat : ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+  (h : { h : T ⟶ Z // h ≫ f = g }),
+  eqv (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
+    Q.map (X.pullbackAlongMap g k).op (eqv g h))
+
+/-- **[T-YR-6-APP P1]** The total space of a relative representation of `Q` over a
+representing object of `P` represents the product problem `P.prod Q`. -/
+noncomputable def representableByProd :
+    (P.prod Q).RepresentableBy (X.pullbackAlong f) where
+  homEquiv {W} :=
+    { toFun := fun u => (r.homEquiv (u ≫ X.pullbackAlongπ f), prodSnd f eqv u)
+      invFun := fun a => prodHom r f eqv a
+      left_inv := fun u => prodHom_pair r f eqv u
+      right_inv := fun a => by
+        refine Prod.ext ?_ ?_
+        · show r.homEquiv (prodHom r f eqv a ≫ X.pullbackAlongπ f) = a.1
+          rw [prodHom_fst, Equiv.apply_symm_apply]
+        · show prodSnd f eqv (prodHom r f eqv a) = a.2
+          rw [prodHom]
+          exact prodSnd_prodHomOf f eqv _ _ }
+  homEquiv_comp {W W'} k u := by
+    refine Prod.ext ?_ ?_
+    · show r.homEquiv ((k ≫ u) ≫ X.pullbackAlongπ f) =
+        P.map k.op (r.homEquiv (u ≫ X.pullbackAlongπ f))
+      rw [Category.assoc, r.homEquiv_comp]
+    · show prodSnd f eqv (k ≫ u) = Q.map k.op (prodSnd f eqv u)
+      have h2 : (k ≫ u).baseHom ≫ f = (k ≫ u ≫ X.pullbackAlongπ f).baseHom :=
+        Category.assoc k.baseHom u.baseHom f
+      have hnat := nat (u ≫ X.pullbackAlongπ f).baseHom k.baseHom
+        (⟨u.baseHom, rfl⟩ : { h : W'.base ⟶ Z // h ≫ f = u.baseHom ≫ f })
+      conv_lhs =>
+        rw [prodSnd, prodSndOf_congr f eqv (Category.assoc k u (X.pullbackAlongπ f))
+          (k ≫ u).baseHom rfl h2]
+      rw [prodSndOf, prodSnd, prodSndOf]
+      show Q.map (EllObj.toPullbackAlong (k ≫ u ≫ X.pullbackAlongπ f)).op
+          (eqv (k.baseHom ≫ (u ≫ X.pullbackAlongπ f).baseHom)
+            ⟨k.baseHom ≫ u.baseHom, _⟩) =
+        Q.map k.op (Q.map (EllObj.toPullbackAlong (u ≫ X.pullbackAlongπ f)).op
+          (eqv (u ≫ X.pullbackAlongπ f).baseHom ⟨u.baseHom, rfl⟩))
+      rw [hnat, ← FunctorToTypes.map_comp_apply, ← FunctorToTypes.map_comp_apply,
+        ← op_comp, ← op_comp,
+        toPullbackAlong_comp_pullbackAlongMap k (u ≫ X.pullbackAlongπ f)]
+      rfl
+
 end Prod
+
+end ModuliProblem
+
+end ModularCurves
+
+end
