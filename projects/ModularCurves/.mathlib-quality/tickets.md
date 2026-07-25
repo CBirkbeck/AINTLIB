@@ -25304,7 +25304,23 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
     * **[T-YR-7b] backward map.** For `(E, α)` over `T` with structure map `sT`, put
       `X'' := ⟨T, sT, E⟩` and `h := (r.homEquiv.symm α).baseHom`; `base_w` gives
       `h ≫ X.structMap = sT`.
-    * **[T-YR-7c] well-definedness on Quot-classes (the mathematical crux).** If
+    * **[T-YR-7a/7b/7d] LANDED 2026-07-25** (`ModularCurve/RhoPoints.lean`, pushed):
+      `pointToPair`, `pairToPoint`, `pairToPoint_pointToPair` (roundtrip 1, definitional
+      after `obtain ⟨h, rfl⟩`), `pull_homEquiv_pullbackAlongπ` (roundtrip 2's structure
+      part, from `r.homEquiv_comp` + `EllObj.toPullbackAlong_pullbackAlongπ`).
+    * **[T-YR-7c] ROUTE FIXED 2026-07-25.** The Quot relation's coordinate condition is,
+      by `coord_pull` (YRho:2437) applied to the `EllHom` induced by the curve iso `f`
+      (`baseHom = 𝟙`, `top = f.hom`), exactly the statement that `α` and
+      `RhoLevelStructure.pull D g α'` have the **same coordinates at every `ℚ̄`-point**.
+      So 7c reduces to the single lemma
+      **`coord`-separation: two ρ-level structures on the same curve with equal
+      coordinates at all geometric points are equal** — i.e. the `torsionIso`s agree.
+      Tooling: `Moduli/KeystoneGeometricPoint.lean` (geometric-point detection),
+      `fullLevelPt_eq_of_pinned_eq` and the `pinned`/`carve` dictionary in
+      `RhoSections.lean`, plus `coord_congr` (YRho:2470). With it, well-definedness is
+      `r.comp_homEquiv_symm` (mathlib): `homEquiv.symm (P.map g.op x) = g ≫ homEquiv.symm x`,
+      whose `baseHom` is `𝟙 ≫ h' = h'`.
+    * **[T-YR-7c-OLD] well-definedness on Quot-classes (the mathematical crux).** If
       `f : E ≅ E'` satisfies the coordinate condition of the Quot relation, then
       `α = RhoLevelStructure.pull` of `α'` along the induced `EllHom`; i.e. **the coord
       condition is equivalent to compatibility of the ρ-structures**. This is the
