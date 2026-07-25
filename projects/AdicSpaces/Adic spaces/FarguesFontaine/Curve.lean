@@ -236,9 +236,92 @@ theorem curve_eq_image_window_zero :
       exact ⟨y.1, hn, rfl⟩
     simpa using this
 
+private theorem not_vle_pow_p_zero' {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
+    ¬ v.vle ((p : Ainf p F) ^ k) 0 := fun h =>
+  v_p_ne_zero hv ((v.mem_supp_iff _).mp
+    ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
+
+private theorem not_vle_pow_teichPi_zero' {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ)
+    (k : ℕ) : ¬ v.vle (teichPi p F ϖ ^ k) 0 := fun h =>
+  v_teichPi_ne_zero hv ((v.mem_supp_iff _).mp
+    ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
+
+private theorem isOpen_windowU_Y (n : ℤ) :
+    IsOpen {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} := by
+  have heq : {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ n} =
+      (Subtype.val ⁻¹' basicOpen (teichPi p F ϖ ^ ((p : ℚ) ^ n : ℚ).den)
+          ((p : Ainf p F) ^ ((p : ℚ) ^ n : ℚ).num.toNat)) ∩
+        (Subtype.val ⁻¹' basicOpen ((p : Ainf p F) ^ (cFF p * (p : ℚ) ^ n).num.toNat)
+          (teichPi p F ϖ ^ (cFF p * (p : ℚ) ^ n).den)) := by
+    ext y
+    simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage, windowU,
+      basicOpen, KGE, KLE]
+    exact ⟨fun ⟨_, h1, h2⟩ =>
+        ⟨⟨h1, not_vle_pow_p_zero' p F ϖ y.2 _⟩, ⟨h2, not_vle_pow_teichPi_zero' p F ϖ y.2 _⟩⟩,
+      fun ⟨⟨h1, _⟩, ⟨h2, _⟩⟩ => ⟨y.2, h1, h2⟩⟩
+  rw [heq]
+  exact (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _)).inter
+    (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _))
+
+private theorem isOpen_windowV_Y (n : ℤ) :
+    IsOpen {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} := by
+  have heq : {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ n} =
+      (Subtype.val ⁻¹' basicOpen (teichPi p F ϖ ^ (cFF p * (p : ℚ) ^ n).den)
+          ((p : Ainf p F) ^ (cFF p * (p : ℚ) ^ n).num.toNat)) ∩
+        (Subtype.val ⁻¹' basicOpen ((p : Ainf p F) ^ ((p : ℚ) ^ (n + 1) : ℚ).num.toNat)
+          (teichPi p F ϖ ^ ((p : ℚ) ^ (n + 1) : ℚ).den)) := by
+    ext y
+    simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage, windowV,
+      basicOpen, KGE, KLE]
+    exact ⟨fun ⟨_, h1, h2⟩ =>
+        ⟨⟨h1, not_vle_pow_p_zero' p F ϖ y.2 _⟩, ⟨h2, not_vle_pow_teichPi_zero' p F ϖ y.2 _⟩⟩,
+      fun ⟨⟨h1, _⟩, ⟨h2, _⟩⟩ => ⟨y.2, h1, h2⟩⟩
+  rw [heq]
+  exact (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _)).inter
+    (continuous_subtype_val.isOpen_preimage _ (isOpen_basicOpen _ _))
+
+private theorem sep_of_chart {S : Set ↥(Y p F ϖ)} (hSopen : IsOpen S)
+    (hinj : Set.InjOn (toCurve p F ϖ) S) {z₁ z₂ : ↥(Y p F ϖ)} (h₁ : z₁ ∈ S)
+    (h₂ : z₂ ∈ S) (hne : toCurve p F ϖ z₁ ≠ toCurve p F ϖ z₂) :
+    ∃ C : Set (Curve p F ϖ), IsOpen C ∧
+      Xor (toCurve p F ϖ z₁ ∈ C) (toCurve p F ϖ z₂ ∈ C) := by
+  have hzne : z₁ ≠ z₂ := fun h => hne (congrArg _ h)
+  obtain ⟨O, hOopen, hxor⟩ :=
+    ((t0Space_iff_exists_isOpen_xor_mem _).mp inferInstance) hzne
+  rcases hxor with ⟨hz₁O, hz₂O⟩ | ⟨hz₂O, hz₁O⟩
+  · refine ⟨toCurve p F ϖ '' (S ∩ O),
+      (isOpenQuotientMap_toCurve p F ϖ).isOpenMap _ (hSopen.inter hOopen),
+      Or.inl ⟨⟨z₁, ⟨h₁, hz₁O⟩, rfl⟩, ?_⟩⟩
+    rintro ⟨w, ⟨hwS, hwO⟩, hweq⟩
+    exact hz₂O ((hinj hwS h₂ hweq) ▸ hwO)
+  · refine ⟨toCurve p F ϖ '' (S ∩ O),
+      (isOpenQuotientMap_toCurve p F ϖ).isOpenMap _ (hSopen.inter hOopen),
+      Or.inr ⟨⟨z₂, ⟨h₂, hz₂O⟩, rfl⟩, ?_⟩⟩
+    rintro ⟨w, ⟨hwS, hwO⟩, hweq⟩
+    exact hz₁O ((hinj hwS h₁ hweq) ▸ hwO)
+
 /-- The curve is T0 (as the sources' adic spaces are; here proved directly from the
 quotient structure and T0-ness of `Spa`). -/
-instance instT0SpaceCurve : T0Space (Curve p F ϖ) := by sorry
+instance instT0SpaceCurve : T0Space (Curve p F ϖ) := by
+  rw [t0Space_iff_exists_isOpen_xor_mem]
+  intro c₁ c₂ hne
+  have h1 := Set.eq_univ_iff_forall.mp (curve_eq_image_window_zero p F ϖ) c₁
+  have h2 := Set.eq_univ_iff_forall.mp (curve_eq_image_window_zero p F ϖ) c₂
+  have hUopen : IsOpen (toCurve p F ϖ '' {y | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0}) :=
+    (isOpenQuotientMap_toCurve p F ϖ).isOpenMap _ (isOpen_windowU_Y p F ϖ 0)
+  by_cases hU₁ : c₁ ∈ toCurve p F ϖ '' {y | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0}
+  · by_cases hU₂ : c₂ ∈ toCurve p F ϖ '' {y | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0}
+    · obtain ⟨z₁, hz₁, rfl⟩ := hU₁
+      obtain ⟨z₂, hz₂, rfl⟩ := hU₂
+      exact sep_of_chart p F ϖ (isOpen_windowU_Y p F ϖ 0)
+        (injOn_toCurve_windowU p F ϖ 0) hz₁ hz₂ hne
+    · exact ⟨_, hUopen, Or.inl ⟨hU₁, hU₂⟩⟩
+  · by_cases hU₂ : c₂ ∈ toCurve p F ϖ '' {y | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0}
+    · exact ⟨_, hUopen, Or.inr ⟨hU₂, hU₁⟩⟩
+    · obtain ⟨z₁, hz₁, rfl⟩ := h1.resolve_left hU₁
+      obtain ⟨z₂, hz₂, rfl⟩ := h2.resolve_left hU₂
+      exact sep_of_chart p F ϖ (isOpen_windowV_Y p F ϖ 0)
+        (injOn_toCurve_windowV p F ϖ 0) hz₁ hz₂ hne
 
 /-- Quasicompactness of the closed-window hull: each window is contained in a
 quasicompact subset of `Spa(A_inf, A_inf)` cut out by the two `vle`-inequalities and the
