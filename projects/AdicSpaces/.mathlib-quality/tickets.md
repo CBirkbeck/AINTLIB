@@ -558,7 +558,12 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 ## Campaign 8 lane A (planned 2026-07-26): Gauss valuation + Y_nonempty
 
 ### [T801] Weighted Gauss value on A_inf: definition + basic evaluations
-- **Status**: open | **File**: FarguesFontaine/GaussNorm.lean (new) | **Depends**: none
+- **Status**: done (beastmode 2026-07-26; GaussNorm.lean created; all axiom-clean) —
+  perfectoidValuation extraction, teichCoeff (θ^{-n}-twist), gaussTerm/gaussValue,
+  le_one, zero/one/teichmuller evaluations, p-shift w(p·x) = ρ·w(x) (via
+  mul_charP_coeff and the θ-inverse cancellation), and max-attainment for ρ < 1.
+  NOTE: bddAbove/evaluations thread (hρ1 : ρ ≤ 1) — for ρ > 1 the term family is
+  genuinely unbounded, caught during implementation. | **File**: FarguesFontaine/GaussNorm.lean (new) | **Depends**: none
 - **Statement sketch**: fix `hv : Valuation F ℝ≥0` with `hv.Integers (O_F)`
   (from `IsPerfectoidField.exists_valuation`, extracted once as a `def`), `ρ : ℝ≥0`,
   `hρ : 0 < ρ` `hρ1 : ρ < 1`. Define
