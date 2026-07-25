@@ -470,24 +470,93 @@ pairwise disjoint because `c < p`).
 
 Source: [Kedlaya-AWS, Rem. 3.1.9] (implicit in "hence is properly discontinuous"). -/
 theorem windowU_disjoint {n m : ℤ} (h : n ≠ m) :
-    Disjoint (windowU p F ϖ n) (windowU p F ϖ m) := by sorry
+    Disjoint (windowU p F ϖ n) (windowU p F ϖ m) := by
+  have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
+  have hpQ : (1 : ℚ) < p := by exact_mod_cast hp1
+  have hp0 : (0 : ℚ) < p := zero_lt_one.trans hpQ
+  wlog hnm : n < m generalizing n m
+  · exact (this h.symm (by omega)).symm
+  rw [Set.disjoint_left]
+  rintro v ⟨hvY, -, hKLEn⟩ ⟨-, hKGEm, -⟩
+  refine not_KGE_of_KLE_of_lt hvY ?_ ?_ hKLEn hKGEm
+  · exact mul_pos (zero_lt_one.trans (one_lt_cFF hp1)) (zpow_pos hp0 n)
+  · calc cFF p * (p : ℚ) ^ n < p * (p : ℚ) ^ n :=
+        mul_lt_mul_of_pos_right (cFF_lt_p hp1) (zpow_pos hp0 n)
+      _ = (p : ℚ) ^ (n + 1) := by rw [zpow_add_one₀ hp0.ne']; ring
+      _ ≤ (p : ℚ) ^ m := zpow_le_zpow_right₀ hpQ.le (by omega)
 
 /-- Within-family disjointness for the `V`-family (κ-intervals `[c·p^n, p^{n+1}]`,
 disjoint because `1 < c`). -/
 theorem windowV_disjoint {n m : ℤ} (h : n ≠ m) :
-    Disjoint (windowV p F ϖ n) (windowV p F ϖ m) := by sorry
+    Disjoint (windowV p F ϖ n) (windowV p F ϖ m) := by
+  have hp1 : 1 < p := (Fact.out : Nat.Prime p).one_lt
+  have hpQ : (1 : ℚ) < p := by exact_mod_cast hp1
+  have hp0 : (0 : ℚ) < p := zero_lt_one.trans hpQ
+  wlog hnm : n < m generalizing n m
+  · exact (this h.symm (by omega)).symm
+  rw [Set.disjoint_left]
+  rintro v ⟨hvY, -, hKLEn⟩ ⟨-, hKGEm, -⟩
+  refine not_KGE_of_KLE_of_lt hvY (zpow_pos hp0 (n + 1)) ?_ hKLEn hKGEm
+  calc (p : ℚ) ^ (n + 1) ≤ (p : ℚ) ^ m := zpow_le_zpow_right₀ hpQ.le (by omega)
+    _ = 1 * (p : ℚ) ^ m := (one_mul _).symm
+    _ < cFF p * (p : ℚ) ^ m :=
+        mul_lt_mul_of_pos_right (one_lt_cFF hp1) (zpow_pos hp0 m)
+
+private theorem not_vle_pow_p_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
+    ¬ v.vle ((p : Ainf p F) ^ k) 0 := fun h =>
+  v_p_ne_zero hv ((v.mem_supp_iff _).mp
+    ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
+
+private theorem not_vle_pow_teichPi_zero {v : Spv (Ainf p F)} (hv : v ∈ Y p F ϖ) (k : ℕ) :
+    ¬ v.vle (teichPi p F ϖ ^ k) 0 := fun h =>
+  v_teichPi_ne_zero hv ((v.mem_supp_iff _).mp
+    ((inferInstance : (v.supp).IsPrime).mem_of_pow_mem _ ((v.mem_supp_iff _).mpr h)))
 
 /-- Windows are open: `U_n` is the intersection of `𝒴` with two `basicOpen` conditions
 (each `KGE`/`KLE` inequality together with the nonvanishing from `𝒴` is a rational-open
 condition). -/
 theorem isOpen_windowU (n : ℤ) :
     IsOpen (Subtype.val ⁻¹' windowU p F ϖ n :
-      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by sorry
+      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
+  have heq : (Subtype.val ⁻¹' windowU p F ϖ n :
+      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) =
+      (Subtype.val ⁻¹' Y p F ϖ) ∩
+        ((Subtype.val ⁻¹' basicOpen (teichPi p F ϖ ^ ((p : ℚ) ^ n : ℚ).den)
+            ((p : Ainf p F) ^ ((p : ℚ) ^ n : ℚ).num.toNat)) ∩
+          (Subtype.val ⁻¹' basicOpen ((p : Ainf p F) ^ (cFF p * (p : ℚ) ^ n).num.toNat)
+            (teichPi p F ϖ ^ (cFF p * (p : ℚ) ^ n).den))) := by
+    ext v
+    simp only [Set.mem_preimage, Set.mem_inter_iff, windowU, Set.mem_setOf_eq, basicOpen,
+      KGE, KLE]
+    exact ⟨fun ⟨hY, h1, h2⟩ =>
+        ⟨hY, ⟨h1, not_vle_pow_p_zero p F ϖ hY _⟩, ⟨h2, not_vle_pow_teichPi_zero p F ϖ hY _⟩⟩,
+      fun ⟨hY, ⟨h1, _⟩, ⟨h2, _⟩⟩ => ⟨hY, h1, h2⟩⟩
+  rw [heq]
+  exact (isOpen_Y p F ϖ).inter ((continuous_subtype_val.isOpen_preimage _
+    (isOpen_basicOpen _ _)).inter (continuous_subtype_val.isOpen_preimage _
+      (isOpen_basicOpen _ _)))
 
 /-- Windows are open (`V`-family). -/
 theorem isOpen_windowV (n : ℤ) :
     IsOpen (Subtype.val ⁻¹' windowV p F ϖ n :
-      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by sorry
+      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
+  have heq : (Subtype.val ⁻¹' windowV p F ϖ n :
+      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) =
+      (Subtype.val ⁻¹' Y p F ϖ) ∩
+        ((Subtype.val ⁻¹' basicOpen (teichPi p F ϖ ^ (cFF p * (p : ℚ) ^ n).den)
+            ((p : Ainf p F) ^ (cFF p * (p : ℚ) ^ n).num.toNat)) ∩
+          (Subtype.val ⁻¹' basicOpen ((p : Ainf p F) ^ ((p : ℚ) ^ (n + 1) : ℚ).num.toNat)
+            (teichPi p F ϖ ^ ((p : ℚ) ^ (n + 1) : ℚ).den))) := by
+    ext v
+    simp only [Set.mem_preimage, Set.mem_inter_iff, windowV, Set.mem_setOf_eq, basicOpen,
+      KGE, KLE]
+    exact ⟨fun ⟨hY, h1, h2⟩ =>
+        ⟨hY, ⟨h1, not_vle_pow_p_zero p F ϖ hY _⟩, ⟨h2, not_vle_pow_teichPi_zero p F ϖ hY _⟩⟩,
+      fun ⟨hY, ⟨h1, _⟩, ⟨h2, _⟩⟩ => ⟨hY, h1, h2⟩⟩
+  rw [heq]
+  exact (isOpen_Y p F ϖ).inter ((continuous_subtype_val.isOpen_preimage _
+    (isOpen_basicOpen _ _)).inter (continuous_subtype_val.isOpen_preimage _
+      (isOpen_basicOpen _ _)))
 
 end FarguesFontaine
 
