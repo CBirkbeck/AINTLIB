@@ -6179,6 +6179,28 @@ theorem value_eq_smulNat_of_carve_eq {A : EllObj (CommRingCat.of ℚ)}
   · show v₂.val.2.val = v₁.val.2.val ≫ wFramesRightMul D γ
     exact hframe
 
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-N]** Naturality of the carve dictionary: the structure carved from a
+mapped value is the pull of the carved structure. -/
+theorem rhoLevelStructureOfCarve_map {A B : EllObj (CommRingCat.of ℚ)}
+    (g : A ⟶ B) (hinvA : NIsInvertible A.base N)
+    (hinvB : NIsInvertible B.base N)
+    (v : (sympFramedProblem D).obj (Opposite.op B)) :
+    rhoLevelStructureOfCarve D A.structMap A.curve hinvA
+        ((sympFramedProblem D).map g.op v).val.1
+        ((sympFramedProblem D).map g.op v).val.2.val
+        ((sympFramedProblem D).map g.op v).val.2.property
+        ((sympFramedProblem D).map g.op v).property =
+      RhoLevelStructure.pull D g
+        (rhoLevelStructureOfCarve D B.structMap B.curve hinvB
+          v.val.1 v.val.2.val v.val.2.property v.property) := by
+  refine RhoLevelStructure.ext_torsionIso (Iso.ext (pullback.hom_ext ?_ ?_))
+  · refine Eq.trans ?_ (pullTorsionIso_fst D g _).symm
+    exact (framedCoordMap_mapAlong D g hinvA hinvB v.val.1 _ rfl rfl
+      v.val.2.val v.val.2.property).symm
+  · exact (framedTorsionIsoPinned_π D A.structMap A.curve hinvA _ _ _).trans
+      (pullTorsionIso_over D g _).symm
+
 end MutualInverses
 
 end
