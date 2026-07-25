@@ -25180,6 +25180,40 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
   ∃-affineHom mirror chain AT P := rhoProblem (the v10.351 cascade is GENERIC in P — direct
   reuse of exists_representableBy_isAffineHom_of_baseChange_cover at (2,3)). Deps: T-YR-3,
   T-YR-4. Status: open.
+- **[T-YR-6] STATUS 2026-07-25 (evening): ABSTRACT MACHINERY COMPLETE, all green +
+  axiom-clean (propext/choice/Quot.sound), pushed on `dev/modular-curves`.** The chosen
+  route was (c1) étale-source descent, and the whole chain is now formalised:
+  - `ForMathlib/SplitInjectiveLocalization.lean` — `LinearMap.split_injective_of_localization_maximal`
+    (mono-mirror of mathlib's split_surjective local-global).
+  - `ForMathlib/UnitRetraction.lean` — `IsLocalRing.exists_linearMap_one_eq_one` +
+    `Algebra.exists_retraction_of_faithfullyFlat` (unit retraction of ff fp algebras).
+  - `ForMathlib/StandardEtaleH1.lean` — `Algebra.tensorH1CotangentOfIsStandardEtale`:
+    `T ⊗[S] H¹(L_{S/R}) ≃ H¹(L_{T/R})` for `T` standard étale over `S`. Pair-lift `(F, G·F′)`
+    over `Generators.self` (invertibility condition trivialised by construction), reducible
+    manual `Extension`, H₂ from flatness of the standard étale cover.
+  - `ForMathlib/EtaleH1Descent.lean` — `subsingleton_h1Cotangent_of_etale_faithfullyFlat`
+    (Zariski standard-étale cover of `B` via `IsEtaleAt.exists_isStandardEtale` + annihilator
+    escapes every maximal ideal + faithful flatness).
+  - `ForMathlib/EtaleSmoothDescent.lean` — Ω-half (étale base change + flat descent +
+    fp-projectivity), `smooth_of_etale_faithfullyFlat` (fp of the base by Artin–Tate),
+    relative-dimension uniqueness, the rel-dim-1 pin on basic opens, and
+    `locally_isStandardSmoothOfRelativeDimension_one_of_etale_faithfullyFlat` + its Spec form.
+  - `ForMathlib/SmoothDescentScheme.lean` — the scheme interface
+    `smoothOfRelativeDimension_one_of_finite_etale_surjective_cover` (finite étale surjective
+    cover of an affine `Y` over an affine noetherian base) and the carrier bridge
+    `isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec`.
+  **REMAINING (application only, [T-YR-6-APP]):** (i) `IsAffine Y` for the representing base
+  (engine `exists_representableBy_isAffine_baseChange_three`, EngineWiring:124, over `R = ℚ`
+  where `ℚ[1/3] ≅ ℚ` — needs a transport of `EllObj`/`RepresentableBy` along a base ring iso;
+  this ALSO discharges the `IsAffineHom sY` conjunct of `RepresentsYRho`); (ii) the finite
+  étale **surjective** cover `p : Z ⟶ Y` from `legendreDelta_relativelyRepresentable_finiteEtale`
+  (Bootstrap:217) at `X := reprX (rhoProblem D)`, with surjectivity from geometric-fibre
+  nonemptiness of the Legendre datum; (iii) the identification of that `Z` with the
+  Legendre-anchored ρ-quotient (`RhoSmooth.rhoLegendre_carrier_smooth`) — a fibre-product
+  commutation ("add ρ-structure" ∘ "add Legendre datum" in either order); tool candidate:
+  `QuotientProblem.simulRepresentableBy`. Then `hZ` comes from the carrier bridge with
+  `R := LegendreModuliRing ℚ`.
+
 - **[T-YR-6] SmoothOfRelativeDimension 1** — SUB-TICKETS (2026-07-25, source read: Loeffler
   3.4.3/3.4.4 pp. 14-15 = the formal-smoothness criterion (Stacks 36.9) + coefficient-lifting
   + [N]-étale point-lifting; ρ-case: α : E[N] ≅ V_ρ lifts uniquely along square-zero since
