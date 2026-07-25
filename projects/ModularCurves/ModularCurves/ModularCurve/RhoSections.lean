@@ -7531,6 +7531,16 @@ theorem rhoProblem_affineOverEll :
   intro T T' g k h
   exact (rhoOfSection_pull D d g k h.1 h.2 _ _ _).symm
 
+/-- **[T-YR-5] THE ρ-LEVEL MODULI PROBLEM IS REPRESENTABLE** (`N ≥ 3`): the
+KM 4.7.0 engine applied to the affine-over-`Ell` and rigidity inputs. `Y(ρ̄)`
+exists as a fine moduli scheme. -/
+theorem rhoProblem_representable (hN : 3 ≤ (N : ℤ)) :
+    (rhoProblem D).Representable :=
+  ModuliProblem.representable_of_affineOverEll_of_rigidNoeth _
+    (rhoProblem_affineOverEll D)
+    (rhoProblem_affineOverEll D).relativelyRepresentable
+    (rho_rigidNoeth D hN)
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
