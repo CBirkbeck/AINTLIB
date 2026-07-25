@@ -7,6 +7,9 @@ import ModularCurves.ForMathlib.EtaleH1Descent
 import Mathlib.RingTheory.Smooth.StandardSmoothOfFree
 import Mathlib.RingTheory.Adjoin.Tower
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+import Mathlib.RingTheory.RingHom.StandardSmooth
+import Mathlib.RingTheory.RingHom.Locally
+import Mathlib.RingTheory.Smooth.Locus
 
 /-!
 # Smoothness descends along finite étale faithfully flat covers
@@ -171,5 +174,46 @@ theorem isStandardSmoothOfRelativeDimension_one_localizationAway
   exact hone ▸ hn
 
 end RelativeDimension
+
+universe u
+
+/-- **[T-YR-6 (c1)]** Smoothness of relative dimension one descends along finite
+étale faithfully flat covers: if `B` is finite étale and faithfully flat over `A`
+and standard smooth of relative dimension one over the noetherian base `k`, then
+`A` is locally standard smooth of relative dimension one over `k`. -/
+theorem locally_isStandardSmoothOfRelativeDimension_one_of_etale_faithfullyFlat
+    (k A B : Type u) [CommRing k] [CommRing A] [CommRing B]
+    [Algebra k A] [Algebra k B] [Algebra A B] [IsScalarTower k A B]
+    [IsNoetherianRing k] [Algebra.Etale A B] [Module.Finite A B]
+    [Module.FaithfullyFlat A B] [IsStandardSmoothOfRelativeDimension 1 k B] :
+    RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension 1)
+      (algebraMap k A) := by
+  haveI hssB : IsStandardSmooth k B :=
+    IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
+  haveI hsmA : Algebra.Smooth k A := smooth_of_etale_faithfullyFlat k A B
+  haveI : Algebra.FinitePresentation k A := hsmA.finitePresentation
+  -- at every prime of `A`, a standard smooth basic open neighbourhood
+  have hsm : ∀ p : PrimeSpectrum A, IsSmoothAt k p.asIdeal := fun p => by
+    have h := Algebra.smoothLocus_eq_univ (R := k) (A := A)
+    have : p ∈ Algebra.smoothLocus k A := by rw [h]; trivial
+    exact this
+  choose f hf hstd using fun p : PrimeSpectrum A =>
+    @IsSmoothAt.exists_notMem_isStandardSmooth k A _ _ _ _ p.asIdeal p.isPrime (hsm p)
+  refine RingHom.locally_of_exists
+    (RingHom.isStandardSmoothOfRelativeDimension_respectsIso) _ f ?_
+    (fun p => Localization.Away (f p)) (fun p => ?_)
+  · -- the `f p` generate the unit ideal: none of them lies in its own prime
+    by_contra hne
+    obtain ⟨m, hm, hle⟩ := Ideal.exists_le_maximal _ hne
+    haveI : m.IsPrime := hm.isPrime
+    exact hf ⟨m, inferInstance⟩ (hle (Ideal.subset_span ⟨⟨m, inferInstance⟩, rfl⟩))
+  · haveI := hstd p
+    haveI : IsStandardSmoothOfRelativeDimension 1 k (Localization.Away (f p)) :=
+      isStandardSmoothOfRelativeDimension_one_localizationAway k A B
+        p.asIdeal (f p) (hf p)
+    rw [show (algebraMap A (Localization.Away (f p))).comp (algebraMap k A) =
+      algebraMap k (Localization.Away (f p)) from
+      (IsScalarTower.algebraMap_eq k A (Localization.Away (f p))).symm]
+    exact (RingHom.isStandardSmoothOfRelativeDimension_algebraMap (n := 1)).mpr inferInstance
 
 end Algebra
