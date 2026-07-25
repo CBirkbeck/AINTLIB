@@ -50,6 +50,11 @@ def prod (P Q : ModuliProblem R) : ModuliProblem R where
     (a : P.obj X × Q.obj X) :
     (P.prod Q).map f a = (P.map f a.1, Q.map f a.2) := rfl
 
+/-- The product of moduli problems is symmetric. -/
+def prodComm (P Q : ModuliProblem R) : P.prod Q ≅ Q.prod P where
+  hom := { app := fun _ => ↾fun a => (a.2, a.1) }
+  inv := { app := fun _ => ↾fun a => (a.2, a.1) }
+
 section Prod
 
 variable {P Q : ModuliProblem R} {X : EllObj R} (r : P.RepresentableBy X)
