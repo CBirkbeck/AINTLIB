@@ -190,6 +190,49 @@ def pointsEquivQuot (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
     show Quot.mk _ (pointToPair D r sT (pairToPoint D r sT a)) = Quot.mk _ a
     exact (Quot.sound (rel_pointToPair_pairToPoint D r sT a)).symm
 
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7 assembly]** A representing object of `rhoProblem D` whose structure map
+is smooth of relative dimension one represents the ρ-moduli problem in the sense of
+`RepresentsYRho`. (Affineness is automatic; the points clause is `pointsEquivQuot`.) -/
+theorem representsYRho_of_smooth (D : GaloisRepData N) [Fact (1 < N)]
+    (hN : 3 ≤ (N : ℤ)) {X : EllObj (CommRingCat.of ℚ)}
+    (r : (rhoProblem D).RepresentableBy X)
+    (hsm : SmoothOfRelativeDimension 1 X.structMap) :
+    RepresentsYRho D X.base X.structMap :=
+  ⟨hsm, rhoProblem_isAffineHom_structMap D hN r,
+    fun T sT => ⟨pointsEquivQuot D r sT⟩⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7 assembly, `∃`-form]** `yRho_representable` modulo the smoothness leaf
+(T-YR-6-APP): once some representing object has a smooth-of-relative-dimension-one
+structure map, the twisted modular curve exists. -/
+theorem exists_representsYRho_of_exists_smooth (D : GaloisRepData N) [Fact (1 < N)]
+    (hN : 3 ≤ (N : ℤ))
+    (hsm : ∃ (X : EllObj (CommRingCat.of ℚ)) (_ : (rhoProblem D).RepresentableBy X),
+      SmoothOfRelativeDimension 1 X.structMap) :
+    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (CommRingCat.of ℚ)), RepresentsYRho D Y sY := by
+  obtain ⟨X, r, h⟩ := hsm
+  exact ⟨X.base, X.structMap, representsYRho_of_smooth D hN r h⟩
+
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7, `∃`-form modulo the Legendre-cover surjectivity]** Assembling the three
+clauses: with the smoothness input supplied, the twisted modular curve exists. -/
+theorem exists_representsYRho_of_legendre_cover (D : GaloisRepData N) [Fact (1 < N)]
+    (hN : 3 ≤ (N : ℤ)) (hR : IsUnit (2 : CommRingCat.of ℚ))
+    {X : EllObj (CommRingCat.of ℚ)} (r : (rhoProblem D).RepresentableBy X)
+    (rL : (legendreDeltaProblem (CommRingCat.of ℚ)).RepresentableBy
+      (universalLegendreObj (CommRingCat.of ℚ) hR))
+    (dL : ModuliProblem.RelRepData (legendreDeltaProblem (CommRingCat.of ℚ)) X)
+    (hLfin : IsFinite dL.f) (hLet : Etale dL.f) (hLsurj : Surjective dL.f)
+    (dρ : ModuliProblem.RelRepData (rhoProblem D)
+      (universalLegendreObj (CommRingCat.of ℚ) hR))
+    (hρfin : IsFinite dρ.f) (hρet : Etale dρ.f) :
+    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (CommRingCat.of ℚ)), RepresentsYRho D Y sY :=
+  ⟨X.base, X.structMap,
+    representsYRho_of_smooth D hN r
+      (rhoProblem_smoothOfRelativeDimension_one D hN hR r rL dL hLfin hLet hLsurj
+        dρ hρfin hρet)⟩
+
 end ModularCurves
 
 end
