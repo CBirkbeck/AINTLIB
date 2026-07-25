@@ -5,6 +5,8 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.CombinationLevel
 import ModularCurves.Moduli.LegendreDelta
+import ModularCurves.Moduli.LevelLocusNatural
+import ModularCurves.Moduli.QuotientProblem
 
 /-!
 # Relative representability of the Legendre `δ`: the scale-torsor funnel
@@ -93,5 +95,48 @@ theorem legendreDelta_relRep_finiteEtale_of_scaleTorsor
   refine (Equiv.sigmaCongrRight (fun w => spec g w)).trans ?_
   exact (Equiv.sigmaCongrLeft (X.curve.fullLevelLocusPointsEquiv 2 h2 g)).trans
     (sigmaSubtypePairEquiv (fun L b => IsLegendreDatum (X.pullbackAlong g) L b))
+
+section NaturalFunnel
+
+variable (X : EllObj R) (h2 : NIsInvertible X.base 2)
+  (Z₂ : Scheme.{u}) (q : Z₂ ⟶ X.curve.fullLevelLocus 2 h2)
+
+/-- The classifying family of the funnel, as a standalone definition (elaborating it
+inside the `RelRepData` literal overflows `whnf`). -/
+noncomputable def legendreFunnelEquiv
+    (spec : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
+      (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = g }),
+      { s : T ⟶ Z₂ // s ≫ q = w.1 } ≃
+        { b : OmegaBasis (X.pullbackAlong g).curve.toEllipticCurveGeom //
+          IsLegendreDatum (X.pullbackAlong g)
+            (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b })
+    {T : Scheme.{u}} (g : T ⟶ X.base) :
+    { h : T ⟶ Z₂ // h ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = g } ≃
+      (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g)) :=
+  (sectionsCompSigmaEquiv q (X.curve.fullLevelLocusπ 2 h2) g).trans
+    ((Equiv.sigmaCongrRight (fun w => spec g w)).trans
+      ((Equiv.sigmaCongrLeft (X.curve.fullLevelLocusPointsEquiv 2 h2 g)).trans
+        (sigmaSubtypePairEquiv (fun L b => IsLegendreDatum (X.pullbackAlong g) L b))))
+
+/-- **(pinning of the funnel)** The value of `legendreFunnelEquiv` is, on the nose, the
+locus dictionary on the level component and `spec` on the `ω` component. -/
+theorem legendreFunnelEquiv_apply
+    (spec : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
+      (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+        w ≫ X.curve.fullLevelLocusπ 2 h2 = g }),
+      { s : T ⟶ Z₂ // s ≫ q = w.1 } ≃
+        { b : OmegaBasis (X.pullbackAlong g).curve.toEllipticCurveGeom //
+          IsLegendreDatum (X.pullbackAlong g)
+            (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b })
+    {T : Scheme.{u}} (g : T ⟶ X.base)
+    (h : { h : T ⟶ Z₂ // h ≫ (q ≫ X.curve.fullLevelLocusπ 2 h2) = g }) :
+    (legendreFunnelEquiv R X h2 Z₂ q spec g h).1 =
+      (X.curve.fullLevelLocusPointsEquiv 2 h2 g
+          ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩,
+        (spec g ⟨h.1 ≫ q, by rw [Category.assoc]; exact h.2⟩ ⟨h.1, rfl⟩).1) :=
+  rfl
+
+end NaturalFunnel
 
 end ModularCurves
