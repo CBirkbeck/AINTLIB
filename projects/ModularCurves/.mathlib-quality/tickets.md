@@ -26966,7 +26966,11 @@ New work tickets: 9. Cleanups: **[CLEANUP-17]** `YRho.lean` after T-G1 ·
 
 
 ### [T-G3a-SUB2d] Transport a `LocalPresentation` along a variable change
-- **Status**: open · **Parent**: T-G3a-SUB2 · **File**: `Moduli/AdaptedModel.lean`
+- **Status**: ALREADY IN REPO — `LocalPresentation.ofVC`
+  (`EllipticCurve/InvariantDifferential.lean:1662`) with `ofVC_W`, plus
+  `basisUnitAt_ofVC` (`Moduli/AdaptedModel.lean`: the `ω`-basis unit scales by `C.u`,
+  which is exactly the KM 4.6.2 coupling) and `transVC_ofVC`. A duplicate `vc` written
+  during this pass was **deleted** on discovery. OLD status: open · **Parent**: T-G3a-SUB2 · **File**: `Moduli/AdaptedModel.lean`
   (or `EllipticCurve/InvariantDifferential.lean`) · **Type**: def + specs
 - **Statement**: given `P : LocalPresentation G V` and `C : VariableChange Γ(S, V)`,
   a presentation `P.vc C : LocalPresentation G V` with `(P.vc C).W = C • P.W`, obtained

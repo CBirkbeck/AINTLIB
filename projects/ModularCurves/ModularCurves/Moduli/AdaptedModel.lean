@@ -844,33 +844,6 @@ theorem isCharNeTwoNF_adaptCharNeTwoNF {V : S.affineOpens}
   exact isCharNeTwoNF_smul_units h0 _
 
 open WeierstrassCurve in
-/-- **(T-G3a-SUB2d)** Transport of a local presentation along a variable change: the
-chart curve becomes `C • P.W`, via the model comparison isomorphism
-`projModelVCIso` (`EllipticCurve/ModelVariableChange.lean`). -/
-noncomputable def vc {V : S.affineOpens} (P : LocalPresentation G V)
-    (C : VariableChange Γ(S, V.1)) : LocalPresentation G V where
-  W := C • P.W
-  elliptic := by
-    haveI := P.elliptic
-    infer_instance
-  e := P.e ≪≫ (projModelVCIso C P.W).symm
-  compat_π := by
-    have h : (projModelVCIso C P.W).inv ≫ projModelπ (C • P.W) = projModelπ P.W := by
-      rw [← projModelVCIso_π C P.W, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
-    show (P.e.hom ≫ (projModelVCIso C P.W).inv) ≫ projModelπ (C • P.W) = _
-    rw [Category.assoc, h]
-    exact P.compat_π
-  compat_zero := by
-    have h : projModelZero P.W ≫ (projModelVCIso C P.W).inv = projModelZero (C • P.W) := by
-      rw [← projModelVCIso_zero C P.W, Category.assoc, Iso.hom_inv_id, Category.comp_id]
-    show _ ≫ (P.e.hom ≫ (projModelVCIso C P.W).inv) = projModelZero (C • P.W)
-    rw [← Category.assoc, P.compat_zero, h]
-
-open WeierstrassCurve in
-@[simp] theorem vc_W {V : S.affineOpens} (P : LocalPresentation G V)
-    (C : VariableChange Γ(S, V.1)) : (P.vc C).W = C • P.W := rfl
-
-open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-E14b ★, KM 2.2.9 uniqueness: the translation torsor)** Over a base with `2`
 invertible, two `b`-adapted char-≠2-normal-form presentations over the same affine
