@@ -323,3 +323,27 @@ spanning), and drop `x`; the images of the other `d − 1` generate `𝔪̄`. Th
   `spec_nat`), keep `scaleTorsor_spec`'s Prop-`sorry` with the stronger shape, re-found
   `legendreDeltaData` on the resulting `RelRepData`, and delete
   `legendreDelta_exists_naturalFamily`.
+
+### T-G3b RESOLVED (2026-07-25, same session)
+
+`legendreDelta_exists_naturalFamily` **no longer exists**. The interface fix was carried
+out in full:
+
+* `ScaleTorsorSpec` (new, `Moduli/SqrtCoverGlue.lean`) bundles the classifying family with
+  its naturality square (congr-friendly form: the restricted locus point and section are
+  passed with the equations identifying them, so no dependent rewrite across
+  `(k ≫ h) ≫ q = k ≫ (h ≫ q)` is ever needed);
+  `ScaleTorsorData.spec : Nonempty (ScaleTorsorSpec …)`; `scaleTorsor_spec` keeps its
+  Prop-`sorry` in the stronger shape (still the single geometric residual of this leg).
+* `legendreFunnelEquiv` + `legendreFunnelEquiv_apply/_apply_fst/_apply_snd` (all `rfl`),
+  `legendreFunnelEquiv_nat_level` (from `Moduli/LevelLocusNatural`),
+  `legendreFunnelEquiv_nat_omega` (from `ScaleTorsorSpec.nat`), and
+  `legendreFunnelEquiv_nat` — all sorry-free, no heartbeat bumps.
+* `legendreDelta_relRepData_of_scaleTorsor` / `legendreDelta_relRepData_finiteEtale`
+  produce a genuine `RelRepData` (with `nat`); `legendreDeltaData` is its `.choose`, and
+  `legendreDeltaZ/F/isFinite/etale/eqv` are re-founded on it.
+* Bootstrap's `legendreDelta_relativelyRepresentable_finiteEtale` re-derived.
+
+Remaining sorries on the Legendre leg: `exists_scaleTorsorData` (the honest geometric
+input, quarantined subtree) and the two documented non-goals `legendreDeltaGAction`,
+`legendreDelta_torsor_of`.
