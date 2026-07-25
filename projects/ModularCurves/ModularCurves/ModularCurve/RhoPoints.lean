@@ -170,6 +170,26 @@ theorem rel_pointToPair_pairToPoint (D : GaloisRepData N)
     exact u.isPullback.isoPullback_hom_fst
   rw [hcomp, hu, Equiv.apply_symm_apply]
 
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7, clause 3]** The `T`-points of the representing curve over `ℚ` are the
+pairs `(E, α)` modulo pointed isomorphisms carrying the level structure — the
+`Quot`-points clause of `RepresentsYRho` (DEF-17 form). -/
+def pointsEquivQuot (D : GaloisRepData N) {X : EllObj (CommRingCat.of ℚ)}
+    (r : (rhoProblem D).RepresentableBy X) {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) :
+    { h : T ⟶ X.base // h ≫ X.structMap = sT } ≃
+      Quot (fun (a b : Σ E : EllipticCurve T, RhoLevelStructure D sT E) =>
+        ∃ f : a.1 ≅ b.1,
+          a.2 = RhoLevelStructure.pull D (ellHomOfCurveIso sT f) b.2) where
+  toFun h := Quot.mk _ (pointToPair D r sT h)
+  invFun := Quot.lift (pairToPoint D r sT)
+    (fun a b hab => pairToPoint_congr D r sT a b hab.choose hab.choose_spec)
+  left_inv h := pairToPoint_pointToPair D r sT h
+  right_inv := by
+    refine Quot.ind fun a => ?_
+    show Quot.mk _ (pointToPair D r sT (pairToPoint D r sT a)) = Quot.mk _ a
+    exact (Quot.sound (rel_pointToPair_pairToPoint D r sT a)).symm
+
 end ModularCurves
 
 end
