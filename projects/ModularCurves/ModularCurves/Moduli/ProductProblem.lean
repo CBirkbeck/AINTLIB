@@ -260,6 +260,32 @@ noncomputable def RelRepData.representableByProd {P Q : ModuliProblem R} {X : El
   ModuliProblem.representableByProd r d.f (fun {_} g => d.eqv g)
     (fun {_ _} g k h => d.nat g k h)
 
+/-- **[T-YR-6-APP P3]** The two orders of "add a `P`-datum" and "add a `Q`-datum"
+produce isomorphic total spaces. -/
+noncomputable def prodUniqueUpToIso {P Q : ModuliProblem R} {X X' : EllObj R}
+    (r : P.RepresentableBy X) (d : RelRepData Q X)
+    (r' : Q.RepresentableBy X') (d' : RelRepData P X') :
+    X.pullbackAlong d.f ≅ X'.pullbackAlong d'.f :=
+  (RelRepData.representableByProd r d).uniqueUpToIso
+    ((RelRepData.representableByProd r' d').ofIso (prodComm Q P))
+
+/-- The induced isomorphism of base schemes, compatible with the structure maps. -/
+theorem prodUniqueUpToIso_base_w {P Q : ModuliProblem R} {X X' : EllObj R}
+    (r : P.RepresentableBy X) (d : RelRepData Q X)
+    (r' : Q.RepresentableBy X') (d' : RelRepData P X') :
+    (prodUniqueUpToIso r d r' d').hom.baseHom ≫ (X'.pullbackAlong d'.f).structMap =
+      (X.pullbackAlong d.f).structMap :=
+  (prodUniqueUpToIso r d r' d').hom.base_w
+
+/-- The base component of the comparison isomorphism is an isomorphism of schemes. -/
+instance prodUniqueUpToIso_isIso_baseHom {P Q : ModuliProblem R} {X X' : EllObj R}
+    (r : P.RepresentableBy X) (d : RelRepData Q X)
+    (r' : Q.RepresentableBy X') (d' : RelRepData P X') :
+    IsIso (prodUniqueUpToIso r d r' d').hom.baseHom :=
+  ⟨(prodUniqueUpToIso r d r' d').inv.baseHom,
+    congrArg EllHom.baseHom (prodUniqueUpToIso r d r' d').hom_inv_id,
+    congrArg EllHom.baseHom (prodUniqueUpToIso r d r' d').inv_hom_id⟩
+
 end ModuliProblem
 
 end ModularCurves
