@@ -7388,6 +7388,64 @@ theorem strZ_pull_pointwise {X : EllObj (CommRingCat.of ℚ)}
   refine Eq.trans ?_ (Category.assoc _ _ _)
   exact hz.symm
 
+/-- **[T-YR-3E (E1iii)]** THE strZ-PULL NATURALITY (global): the classified
+point of the pulled structure is the comparison-transport of the original. -/
+theorem strZ_pull {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (str0 : RhoLevelStructure D (X.pullbackAlong g').structMap
+      (X.pullbackAlong g').curve) :
+    (strZ D d (k' ≫ g')
+        (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1 =
+      strCoverMap D g' k' ≫ (strZ D d g' str0).1 := by
+  haveI hFinf : IsFinite d.f := d.finite
+  haveI hEtf : Etale d.f := d.etale
+  haveI hSepf : IsSeparated d.f := inferInstance
+  have hfg : (strZ D d (k' ≫ g')
+      (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1 ≫ d.f =
+      (strCoverMap D g' k' ≫ (strZ D d g' str0).1) ≫ d.f := by
+    rw [(strZ D d (k' ≫ g') _).2, Category.assoc, (strZ D d g' str0).2,
+      ← Category.assoc, strCoverMap_pr]
+    exact (Category.assoc _ _ _).symm
+  refine eq_of_forall_geomPt_agree d.f _ _ hfg ?_
+  intro ω
+  refine Eq.trans (strZ_pull_pointwise D d g' k' str0 (geomPt _ ω)) ?_
+  exact (Category.assoc _ _ _).symm
+
+/-- **[T-YR-3E (E1iv)]** σP-naturality. -/
+theorem strSigmaP_pull {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (str0 : RhoLevelStructure D (X.pullbackAlong g').structMap
+      (X.pullbackAlong g').curve) :
+    strSigmaP D d (k' ≫ g')
+        (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0) =
+      strCoverMap D g' k' ≫ strSigmaP D d g' str0 := by
+  rw [strSigmaP, strSigmaP, strZ_pull, Category.assoc]
+
+/-- **[T-YR-3E (E1v)] THE strSection-PULL NATURALITY**: the descended section of
+a pulled structure is the restricted section. -/
+theorem strSection_pull {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (str0 : RhoLevelStructure D (X.pullbackAlong g').structMap
+      (X.pullbackAlong g').curve) :
+    strSection D d (k' ≫ g')
+        (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0) =
+      k' ≫ strSection D d g' str0 := by
+  refine (EffectiveEpi.uniq (strPr D (X.pullbackAlong (k' ≫ g')))
+    (strSigmaP D d (k' ≫ g')
+      (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0))
+    (fun g₁ g₂ h => strSigmaP_coequalizes D d (k' ≫ g') _ g₁ g₂ h)
+    (k' ≫ strSection D d g' str0) ?_).symm
+  rw [← Category.assoc, ← strCoverMap_pr]
+  exact ((Category.assoc _ _ _).trans
+    (congrArg (strCoverMap D g' k' ≫ ·) (strPr_strSection D d g' str0))).trans
+    (strSigmaP_pull D d g' k' str0).symm
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
