@@ -394,4 +394,39 @@ theorem exists_third_root_vieta {k : Type u} [Field k] {a₂ a₄ a₆ p p' : k}
   · have : a₆ = -(p ^ 3 + a₂ * p ^ 2 + a₄ * p) := by linear_combination hp
     rw [this, ha₄]; ring
 
+/-- **(T-G3a-SUB2, the packaged algebra statement)** Over an algebraically closed field
+with `2` invertible: a char-≠2 normal-form curve with two **distinct marked `2`-torsion
+points** is carried to Legendre form by a variable change taking the first marked
+abscissa to `0` and the second to `1`.
+
+This is the complete algebraic content of Silverman AEC III.1 Prop 1.7(b); the scheme-
+level `IsLegendreDatum` statement (SUB2h) is obtained from it by transporting the chart
+along `LocalPresentation.ofVC`, its markings along `MarksAt.ofVC` and its `ω`-basis
+along `IsAdapted.ofVC`. -/
+theorem exists_legendre_variableChange_of_two_torsion {k : Type u} [Field k]
+    [IsAlgClosed k] (h2 : IsUnit (2 : k)) {W : WeierstrassCurve k}
+    (h1 : W.a₁ = 0) (h3 : W.a₃ = 0) {p p' q q' : k}
+    (heq : W.toAffine.Equation p q) (hneg : -q - W.a₁ * p - W.a₃ = q)
+    (heq' : W.toAffine.Equation p' q') (hneg' : -q' - W.a₁ * p' - W.a₃ = q')
+    (hne : p ≠ p') :
+    ∃ (u : kˣ) (lam : k),
+      (⟨u, p, 0, 0⟩ : VariableChange k) • W = legendreCurve lam ∧
+      ((u⁻¹ : kˣ) : k) ^ 2 * (p - p) = 0 ∧
+      ((u⁻¹ : kˣ) : k) ^ 2 * (p' - p) = 1 := by
+  obtain ⟨-, hcub⟩ := two_torsion_coords_of_charNeTwoNF h2 h1 h3 heq hneg
+  obtain ⟨-, hcub'⟩ := two_torsion_coords_of_charNeTwoNF h2 h1 h3 heq' hneg'
+  obtain ⟨e₃, ha₂, ha₄, ha₆⟩ := exists_third_root_vieta hcub hcub' hne
+  have hsub : p' - p ≠ 0 := sub_ne_zero.mpr (Ne.symm hne)
+  obtain ⟨v, hv⟩ := IsAlgClosed.exists_pow_nat_eq (p' - p) (n := 2) (by norm_num)
+  have hvne : v ≠ 0 := fun h => hsub (by rw [← hv, h]; ring)
+  refine ⟨Units.mk0 v hvne, ((Units.mk0 v hvne)⁻¹ : kˣ) ^ 2 * (e₃ - p), ?_, by ring, ?_⟩
+  · exact scale_translate_smul_eq_legendreCurve h1 h3 (Units.mk0 v hvne) ha₂ ha₄ ha₆
+      (by simpa using hv)
+  · have hunit : (((Units.mk0 v hvne)⁻¹ : kˣ) : k) * v = 1 := by
+      simpa using (Units.mk0 v hvne).inv_mul
+    calc (((Units.mk0 v hvne)⁻¹ : kˣ) : k) ^ 2 * (p' - p)
+        = (((Units.mk0 v hvne)⁻¹ : kˣ) : k) ^ 2 * v ^ 2 := by rw [hv]
+      _ = ((((Units.mk0 v hvne)⁻¹ : kˣ) : k) * v) ^ 2 := by ring
+      _ = 1 := by rw [hunit, one_pow]
+
 end ModularCurves
