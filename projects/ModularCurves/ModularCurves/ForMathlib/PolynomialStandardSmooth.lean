@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.RingTheory.Smooth.StandardSmooth
 import Mathlib.Algebra.MvPolynomial.Equiv
+import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 
 /-!
 # Polynomial algebras are standard smooth of their rank
@@ -83,3 +84,25 @@ theorem IsStandardSmoothOfRelativeDimension.localizationAway_mvPolynomialFinOne
   simpa using h3
 
 end Algebra
+
+namespace AlgebraicGeometry
+
+open Algebra
+
+universe u
+
+/-- **[T-YR-6 (b2a)]** The `Spec` of a standard-smooth algebra map is smooth of
+the same relative dimension. -/
+theorem smoothOfRelativeDimension_spec_map_algebraMap
+    {R S : Type u} [CommRing R] [CommRing S] [Algebra R S] (n : ℕ)
+    [Algebra.IsStandardSmoothOfRelativeDimension n R S] :
+    SmoothOfRelativeDimension n
+      (Spec.map (CommRingCat.ofHom (algebraMap R S))) := by
+  rw [HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension n)]
+  exact RingHom.locally_of
+    (RingHom.isStandardSmoothOfRelativeDimension_respectsIso)
+    (algebraMap R S)
+    ((RingHom.isStandardSmoothOfRelativeDimension_algebraMap (n := n)).mpr
+      ‹Algebra.IsStandardSmoothOfRelativeDimension n R S›)
+
+end AlgebraicGeometry
