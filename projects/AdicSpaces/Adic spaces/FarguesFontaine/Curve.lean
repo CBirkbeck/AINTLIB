@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FarguesFontaine.YSpace
+import «Adic spaces».SpaQCviaSpvAI
 
 /-!
 # The adic Fargues--Fontaine curve 𝒳 = 𝒴/φ^ℤ
@@ -323,25 +324,249 @@ instance instT0SpaceCurve : T0Space (Curve p F ϖ) := by
       exact sep_of_chart p F ϖ (isOpen_windowV_Y p F ϖ 0)
         (injOn_toCurve_windowV p F ϖ 0) hz₁ hz₂ hne
 
+open Classical in
+/-- The generic two-condition-to-rational-subset engine (Wedhorn Rem. 7.30(5)): on
+`Spa`, the conjunction `v(t₁) ≤ v(s₁) ≠ 0 ∧ v(t₂) ≤ v(s₂) ≠ 0` equals membership in
+`rationalOpen {t₁t₂, t₁s₂, s₁t₂, s₁s₂} (s₁s₂)`. -/
+private theorem mem_rationalOpen_pair_iff {v : Spv (Ainf p F)}
+    (hv : v ∈ Spa (Ainf p F) (ringPlus (Ainf p F))) {t₁ s₁ t₂ s₂ : Ainf p F} :
+    v ∈ rationalOpen {t₁ * t₂, t₁ * s₂, s₁ * t₂, s₁ * s₂} (s₁ * s₂) ↔
+      (v.vle t₁ s₁ ∧ ¬ v.vle s₁ 0) ∧ (v.vle t₂ s₂ ∧ ¬ v.vle s₂ 0) := by
+  have hprime : (v.supp).IsPrime := inferInstance
+  constructor
+  · rintro ⟨-, hT, hs⟩
+    have hs₁ : ¬ v.vle s₁ 0 := fun h0 => hs (by
+      have := v.mul_vle_mul_left h0 s₂
+      rwa [zero_mul] at this)
+    have hs₂ : ¬ v.vle s₂ 0 := fun h0 => hs (by
+      have := v.mul_vle_mul_left h0 s₁
+      rwa [zero_mul, mul_comm] at this)
+    refine ⟨⟨?_, hs₁⟩, ⟨?_, hs₂⟩⟩
+    · have h12 : v.vle (t₁ * s₂) (s₁ * s₂) := hT _ (by simp)
+      exact v.vle_mul_cancel hs₂ h12
+    · have h12 : v.vle (s₁ * t₂) (s₁ * s₂) := hT _ (by simp)
+      have h12' : v.vle (t₂ * s₁) (s₂ * s₁) := by
+        rwa [mul_comm t₂ s₁, mul_comm s₂ s₁]
+      exact v.vle_mul_cancel hs₁ h12'
+  · rintro ⟨⟨h₁, hs₁⟩, ⟨h₂, hs₂⟩⟩
+    have hmul : ∀ {x y : Ainf p F}, v.vle x s₁ → v.vle y s₂ →
+        v.vle (x * y) (s₁ * s₂) := by
+      intro x y hx hy
+      refine v.vle_trans (v.mul_vle_mul_left hx y) ?_
+      have := v.mul_vle_mul_left hy s₁
+      rwa [mul_comm y s₁, mul_comm s₂ s₁] at this
+    have hrefl₁ : v.vle s₁ s₁ := (v.vle_total s₁ s₁).elim id id
+    have hrefl₂ : v.vle s₂ s₂ := (v.vle_total s₂ s₂).elim id id
+    refine ⟨hv, fun t ht => ?_, fun h0 => ?_⟩
+    · simp only [Finset.mem_insert, Finset.mem_singleton] at ht
+      rcases ht with rfl | rfl | rfl | rfl
+      · exact hmul h₁ h₂
+      · exact hmul h₁ hrefl₂
+      · exact hmul hrefl₁ h₂
+      · exact hmul hrefl₁ hrefl₂
+    · rcases hprime.mem_or_mem ((v.mem_supp_iff _).mpr h0) with hm | hm
+      · exact hs₁ ((v.mem_supp_iff _).mp hm)
+      · exact hs₂ ((v.mem_supp_iff _).mp hm)
+
+private theorem cFF_num_toNat_pos : 0 < (cFF p).num.toNat := by
+  have h1 : 0 < cFF p :=
+    zero_lt_one.trans (one_lt_cFF (Fact.out : Nat.Prime p).one_lt)
+  have h2 : 0 < (cFF p).num := Rat.num_pos.mpr h1
+  omega
+
+open Classical in
+private theorem windowU_zero_trace_eq :
+    (Subtype.val ⁻¹' windowU p F ϖ 0 :
+        Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) =
+      Subtype.val ⁻¹' rationalOpen
+        {teichPi p F ϖ * (p : Ainf p F) ^ (cFF p).num.toNat,
+         teichPi p F ϖ * teichPi p F ϖ ^ (cFF p).den,
+         (p : Ainf p F) * (p : Ainf p F) ^ (cFF p).num.toNat,
+         (p : Ainf p F) * teichPi p F ϖ ^ (cFF p).den}
+        ((p : Ainf p F) * teichPi p F ϖ ^ (cFF p).den) := by
+  ext v
+  simp only [Set.mem_preimage]
+  rw [mem_rationalOpen_pair_iff p F v.2]
+  have hKGE : KGE p F ϖ ((p : ℚ) ^ (0 : ℤ)) (v : Spv (Ainf p F)) ↔
+      (v : Spv (Ainf p F)).vle (teichPi p F ϖ) ((p : Ainf p F)) := by
+    rw [show ((p : ℚ) ^ (0 : ℤ)) = 1 from zpow_zero _, KGE, Rat.den_one, Rat.num_one,
+      Int.toNat_one, pow_one, pow_one]
+  have hKLE : KLE p F ϖ (cFF p * (p : ℚ) ^ (0 : ℤ)) (v : Spv (Ainf p F)) ↔
+      (v : Spv (Ainf p F)).vle ((p : Ainf p F) ^ (cFF p).num.toNat)
+        (teichPi p F ϖ ^ (cFF p).den) := by
+    rw [show cFF p * (p : ℚ) ^ (0 : ℤ) = cFF p from by rw [zpow_zero, mul_one], KLE]
+  constructor
+  · rintro ⟨hY, hge, hle⟩
+    exact ⟨⟨hKGE.mp hge, fun h0 => v_p_ne_zero hY h0⟩,
+      ⟨hKLE.mp hle, fun h0 => not_vle_pow_teichPi_zero' p F ϖ hY _ h0⟩⟩
+  · rintro ⟨⟨h₁, hs₁⟩, ⟨h₂, hs₂⟩⟩
+    have hprime : ((v : Spv (Ainf p F)).supp).IsPrime := inferInstance
+    have hY : (v : Spv (Ainf p F)) ∈ Y p F ϖ := by
+      refine ⟨v.2, fun h0 => ?_⟩
+      rcases hprime.mem_or_mem
+          (((v : Spv (Ainf p F)).mem_supp_iff _).mpr h0) with hm | hm
+      · exact hs₁ (((v : Spv (Ainf p F)).mem_supp_iff _).mp hm)
+      · exact hs₂ (((v : Spv (Ainf p F)).mem_supp_iff _).mp
+          (Ideal.pow_mem_of_mem _ hm _ (cFF p).den_pos))
+    exact ⟨hY, hKGE.mpr h₁, hKLE.mpr h₂⟩
+
+open Classical in
+private theorem windowV_zero_trace_eq :
+    (Subtype.val ⁻¹' windowV p F ϖ 0 :
+        Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) =
+      Subtype.val ⁻¹' rationalOpen
+        {teichPi p F ϖ ^ (cFF p).den * (p : Ainf p F) ^ ((p : ℚ)).num.toNat,
+         teichPi p F ϖ ^ (cFF p).den * teichPi p F ϖ ^ ((p : ℚ)).den,
+         (p : Ainf p F) ^ (cFF p).num.toNat * (p : Ainf p F) ^ ((p : ℚ)).num.toNat,
+         (p : Ainf p F) ^ (cFF p).num.toNat * teichPi p F ϖ ^ ((p : ℚ)).den}
+        ((p : Ainf p F) ^ (cFF p).num.toNat * teichPi p F ϖ ^ ((p : ℚ)).den) := by
+  ext v
+  simp only [Set.mem_preimage]
+  rw [mem_rationalOpen_pair_iff p F v.2]
+  have hKGE : KGE p F ϖ (cFF p * (p : ℚ) ^ (0 : ℤ)) (v : Spv (Ainf p F)) ↔
+      (v : Spv (Ainf p F)).vle (teichPi p F ϖ ^ (cFF p).den)
+        ((p : Ainf p F) ^ (cFF p).num.toNat) := by
+    rw [show cFF p * (p : ℚ) ^ (0 : ℤ) = cFF p from by rw [zpow_zero, mul_one], KGE]
+  have hKLE : KLE p F ϖ ((p : ℚ) ^ ((0 : ℤ) + 1)) (v : Spv (Ainf p F)) ↔
+      (v : Spv (Ainf p F)).vle ((p : Ainf p F) ^ ((p : ℚ)).num.toNat)
+        (teichPi p F ϖ ^ ((p : ℚ)).den) := by
+    rw [show ((p : ℚ) ^ ((0 : ℤ) + 1)) = (p : ℚ) from by rw [zero_add, zpow_one], KLE]
+  constructor
+  · rintro ⟨hY, hge, hle⟩
+    exact ⟨⟨hKGE.mp hge, fun h0 => not_vle_pow_p_zero' p F ϖ hY _ h0⟩,
+      ⟨hKLE.mp hle, fun h0 => not_vle_pow_teichPi_zero' p F ϖ hY _ h0⟩⟩
+  · rintro ⟨⟨h₁, hs₁⟩, ⟨h₂, hs₂⟩⟩
+    have hprime : ((v : Spv (Ainf p F)).supp).IsPrime := inferInstance
+    have hY : (v : Spv (Ainf p F)) ∈ Y p F ϖ := by
+      refine ⟨v.2, fun h0 => ?_⟩
+      rcases hprime.mem_or_mem
+          (((v : Spv (Ainf p F)).mem_supp_iff _).mpr h0) with hm | hm
+      · exact hs₁ (((v : Spv (Ainf p F)).mem_supp_iff _).mp
+          (Ideal.pow_mem_of_mem _ hm _ (cFF_num_toNat_pos p)))
+      · exact hs₂ (((v : Spv (Ainf p F)).mem_supp_iff _).mp
+          (Ideal.pow_mem_of_mem _ hm _ (by
+            rw [Rat.den_natCast]
+            omega)))
+    exact ⟨hY, hKGE.mpr h₁, hKLE.mpr h₂⟩
+
 /-- Quasicompactness of the closed-window hull: each window is contained in a
 quasicompact subset of `Spa(A_inf, A_inf)` cut out by the two `vle`-inequalities and the
 nonvanishing conditions (a rational-subset-shaped set, quasicompact by the Boolean
 product-embedding machinery of `SpaCompact`/`ValuationSpectrumCompact`). -/
+private theorem ainf_pair_spec :
+    ∃ P : PairOfDefinition (Ainf p F), ∃ g₁ g₂ : P.A₀,
+      P.I = Ideal.span ({g₁, g₂} : Set P.A₀) ∧
+      (∀ x : P.A₀, (x : Ainf p F) ∈ (ringPlus (Ainf p F) : Subring (Ainf p F))) ∧
+      Iinf p F (IsTateRing.pseudoUniformizer (A := F)) =
+        Ideal.span ({(g₁ : Ainf p F), (g₂ : Ainf p F)} : Set (Ainf p F)) := by
+  refine ⟨pairOfDefinition_ofAdic (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
+      (Submodule.fg_span (Set.toFinite _)),
+    ⟨(p : Ainf p F), trivial⟩, ⟨teichPi p F (IsTateRing.pseudoUniformizer (A := F)),
+      trivial⟩, ?_, fun _ => trivial, ?_⟩
+  · show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F))) = _
+    rw [show idealToTop (Iinf p F (IsTateRing.pseudoUniformizer (A := F)))
+        = Ideal.map (Subring.topEquiv (R := Ainf p F)).symm.toRingHom
+          (Ideal.span {(p : Ainf p F),
+            teichPi p F (IsTateRing.pseudoUniformizer (A := F))}) from rfl,
+      Ideal.map_span, Set.image_insert_eq, Set.image_singleton]
+    rfl
+  · rfl
+
+private theorem iinf_le_radical_of_pure_powers {T : Finset (Ainf p F)}
+    (hp : ∃ n : ℕ, (p : Ainf p F) ^ n ∈ T)
+    (hϖ : ∃ m : ℕ, 0 < m ∧ teichPi p F ϖ ^ m ∈ T) :
+    Iinf p F (IsTateRing.pseudoUniformizer (A := F)) ≤
+      (Ideal.span (T : Set (Ainf p F))).radical := by
+  rw [Iinf, Ideal.span_le]
+  rintro x (rfl | rfl)
+  · obtain ⟨n, hn⟩ := hp
+    exact ⟨n, Ideal.subset_span hn⟩
+  · obtain ⟨m, hm, hmem⟩ := hϖ
+    obtain ⟨k, hk⟩ := exists_teichPi_pow_mem_span_teichPi p F ϖ
+      (IsTateRing.pseudoUniformizer (A := F))
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hk
+    refine ⟨k * m, ?_⟩
+    have hxm : teichPi p F (IsTateRing.pseudoUniformizer (A := F)) ^ (k * m)
+        = c ^ m * teichPi p F ϖ ^ m := by
+      rw [pow_mul, ← hc, mul_pow]
+    rw [hxm]
+    exact Ideal.mul_mem_left _ _ (Ideal.subset_span hmem)
+
 theorem isCompact_windowU_zero :
     IsCompact (Subtype.val ⁻¹' windowU p F ϖ 0 :
-      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by sorry
+      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
+  classical
+  rw [windowU_zero_trace_eq]
+  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := ainf_pair_spec p F
+  refine isCompact_subtype_rationalOpen₂ P hpair hA₀le _ hIeq _ _ ?_
+  refine iinf_le_radical_of_pure_powers p F ϖ ⟨1 + (cFF p).num.toNat, ?_⟩
+    ⟨1 + (cFF p).den, by omega, ?_⟩
+  · rw [pow_add, pow_one]
+    simp
+  · rw [pow_add, pow_one]
+    simp
 
 /-- Quasicompactness for `V_0`, as for `U_0`. -/
 theorem isCompact_windowV_zero :
     IsCompact (Subtype.val ⁻¹' windowV p F ϖ 0 :
-      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by sorry
+      Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
+  classical
+  rw [windowV_zero_trace_eq]
+  obtain ⟨P, g₁, g₂, hpair, hA₀le, hIeq⟩ := ainf_pair_spec p F
+  refine isCompact_subtype_rationalOpen₂ P hpair hA₀le _ hIeq _ _ ?_
+  refine iinf_le_radical_of_pure_powers p F ϖ
+    ⟨(cFF p).num.toNat + ((p : ℚ)).num.toNat, ?_⟩
+    ⟨(cFF p).den + ((p : ℚ)).den, by positivity, ?_⟩
+  · rw [pow_add]
+    simp
+  · rw [pow_add]
+    simp
 
 /-- **The curve is quasicompact**: it is the union of the images of the two
 quasicompact charts `U_0`, `V_0`.
 
 Source: [Kedlaya-AWS, Rem. 3.1.9]: "In particular, X_S can be covered by two affinoid
 subspaces". -/
-instance instCompactSpaceCurve : CompactSpace (Curve p F ϖ) := by sorry
+instance instCompactSpaceCurve : CompactSpace (Curve p F ϖ) := by
+  have hWU : IsCompact (windowU p F ϖ 0) := by
+    have h2 : Subtype.val '' (Subtype.val ⁻¹' windowU p F ϖ 0 :
+        Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) = windowU p F ϖ 0 := by
+      rw [Subtype.image_preimage_coe]
+      exact Set.inter_eq_right.mpr (fun v hv => hv.1.1)
+    exact h2 ▸ (isCompact_windowU_zero p F ϖ).image continuous_subtype_val
+  have hWV : IsCompact (windowV p F ϖ 0) := by
+    have h2 : Subtype.val '' (Subtype.val ⁻¹' windowV p F ϖ 0 :
+        Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) = windowV p F ϖ 0 := by
+      rw [Subtype.image_preimage_coe]
+      exact Set.inter_eq_right.mpr (fun v hv => hv.1.1)
+    exact h2 ▸ (isCompact_windowV_zero p F ϖ).image continuous_subtype_val
+  have hSU : IsCompact
+      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0} := by
+    refine Topology.IsEmbedding.subtypeVal.isCompact_iff.mpr ?_
+    have hset : (Subtype.val ''
+        {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0}
+          : Set (Spv (Ainf p F))) = windowU p F ϖ 0 := by
+      rw [show {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowU p F ϖ 0}
+          = (Subtype.val ⁻¹' windowU p F ϖ 0 : Set ↥(Y p F ϖ)) from rfl,
+        Subtype.image_preimage_coe]
+      exact Set.inter_eq_right.mpr (fun v hv => hv.1)
+    rw [hset]
+    exact hWU
+  have hSV : IsCompact
+      {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ 0} := by
+    refine Topology.IsEmbedding.subtypeVal.isCompact_iff.mpr ?_
+    have hset : (Subtype.val ''
+        {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ 0}
+          : Set (Spv (Ainf p F))) = windowV p F ϖ 0 := by
+      rw [show {y : ↥(Y p F ϖ) | (y.1 : Spv (Ainf p F)) ∈ windowV p F ϖ 0}
+          = (Subtype.val ⁻¹' windowV p F ϖ 0 : Set ↥(Y p F ϖ)) from rfl,
+        Subtype.image_preimage_coe]
+      exact Set.inter_eq_right.mpr (fun v hv => hv.1)
+    rw [hset]
+    exact hWV
+  rw [← isCompact_univ_iff, ← curve_eq_image_window_zero p F ϖ]
+  exact (hSU.image (isOpenQuotientMap_toCurve p F ϖ).continuous).union
+    (hSV.image (isOpenQuotientMap_toCurve p F ϖ).continuous)
 
 /-- STRETCH GOAL — **the curve is nonempty** (equivalently `𝒴 ≠ ∅`). Planned route: the
 ρ-Gauss norm `v(Σ p^n [a_n]) = max_n |a_n|·ρ^n` (for `|·|` the rank-1 valuation of `F`

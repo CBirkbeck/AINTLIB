@@ -441,7 +441,8 @@ not weaken or strengthen hypotheses).
 - **Sources**: decomposition L7.4.
 
 ### [T505] The curve is quasicompact (L7.5 — RR2, descopable)
-- **Status**: BLOCKED (beastmode 2026-07-25, per this ticket's hard-stop rule; three
+- **Status**: done (2026-07-26 via the T701–T706 unblock lane — see those tickets;
+  formerly BLOCKED (beastmode 2026-07-25, per this ticket's hard-stop rule; three
   sorries remain by design, statements untouched). Evidence: route A's closed-image
   hypothesis (`isCompact_rationalOpen_of_isClosed_image`) is discharged in-project only
   for `[DiscreteTopology A]`; for the non-discrete non-Tate adic `A_inf` the
@@ -491,7 +492,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 ## T505-unblock lane (planned 2026-07-26, /develop --continue; decomposition.md §T505-unblock)
 
 ### [T701] Pair-retraction substrate: W1 generalization + CofinalValue.of_le
-- **Status**: open | **Files**: SpaQCviaSpvAI.lean, SpvAI.lean | **Depends**: none
+- **Status**: done (2026-07-26, first-build green; axiom-clean) | **Files**: SpaQCviaSpvAI.lean, SpvAI.lean | **Depends**: none
 - **Statements**: (1) weaken `ιSpvR_retractionSingle_eq`'s `(hIg : I = Ideal.span {g})`
   to `(hgI : g ∈ I)` (patch the one caller in `image_ιSpvR_spa_eq` with
   `hIeq ▸ Ideal.mem_span_singleton_self π`); (2) new
@@ -502,7 +503,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Sources**: Wedhorn 7.1 p. 56 (quote in decomposition).
 
 ### [T702] The pair retraction and its two properties (W3+W4+W5)
-- **Status**: open | **File**: SpaQCviaSpvAI.lean (new section R5) | **Depends**: T701
+- **Status**: done (2026-07-26; classical-decidable branch split; axiom-clean) | **File**: SpaQCviaSpvAI.lean (new section R5) | **Depends**: T701
 - **Statements**: `restrictIdealSingleSpv_vle_of_vle`,
   `mem_SpvAI_span_pair_left`, `restrictIdealPairSpv` (def),
   `restrictIdealPairSpv_mem_SpvAI`, `ιSpvR_retractionPair_eq`.
@@ -511,13 +512,14 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
   W1 at the branch generator).
 
 ### [T703] Pair image identification (W6+W7)
-- **Status**: open | **File**: SpaQCviaSpvAI.lean | **Depends**: T702
+- **Status**: done (2026-07-26; mirror of the principal proof; axiom-clean) | **File**: SpaQCviaSpvAI.lean | **Depends**: T702
 - **Statements**: `spaProfileConditions₂` + `isClosed_spaProfileConditions₂` +
   `image_ιSpvR_spa_eq₂`.
 - **Sketch**: mirror of `image_ιSpvR_spa_eq` per decomposition W7.
 
 ### [T704] Pair compactness plumbing (W8)
-- **Status**: open | **File**: SpaQCviaSpvAI.lean | **Depends**: T703
+- **Status**: done (2026-07-26; Wedhorn 7.35(2) for I = (g₁,g₂) landed as
+  isCompact_subtype_rationalOpen₂; axiom-clean) | **File**: SpaQCviaSpvAI.lean | **Depends**: T703
 - **Statements**: `isCompact_image_ιSpvR_spa₂`, `isCompact_subtype_rationalOpen₂`.
 - **Sketch**: mirrors; embedding layer already general (`hIeq'` from `hpair` via
   `Ideal.map_span` + image-of-pair).
@@ -526,7 +528,8 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Status**: open | **Depends**: T704.
 
 ### [T705] Windows as rational subsets (F1)
-- **Status**: open | **File**: FarguesFontaine/Curve.lean | **Depends**: none (parallel with T70x)
+- **Status**: done (2026-07-26; mem_rationalOpen_pair_iff engine per Wedhorn 7.30(5) +
+  two trace identities with opaque cFF num/den exponents; axiom-clean) | **File**: FarguesFontaine/Curve.lean | **Depends**: none (parallel with T70x)
 - **Statements**: private `windowU_zero_trace_eq` / `windowV_zero_trace_eq`
   (val-preimages of `windowU/V p F ϖ 0` = val-preimages of explicit `rationalOpen T s`).
 - **Sketch**: per decomposition F1 (Wedhorn 7.30(5) product presentation;
@@ -534,7 +537,13 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
   bridges; opaque `(cFF p).num.toNat`/`.den` exponents).
 
 ### [T706] ★ Window quasicompactness + CompactSpace Curve (F2+F3, closes T505)
-- **Status**: open | **File**: FarguesFontaine/Curve.lean | **Depends**: T704, T705
+- **Status**: DONE (2026-07-26) — **T505 CLOSED**: `isCompact_windowU_zero`,
+  `isCompact_windowV_zero`, `instCompactSpaceCurve` all proven, axiom-clean;
+  Curve.lean's only remaining sorry is T601 (`Y_nonempty`, stretch, blocked-on-plan).
+  A_inf pair via `ainf_pair_spec` (pairOfDefinition_ofAdic reuse; hpair/hIeq by rfl-level
+  idealToTop identifications); radical side conditions by the pure-power T-elements +
+  `exists_teichPi_pow_mem_span_teichPi`; CompactSpace by embedding-transfer of the
+  window traces into ↥Y and the T503 two-chart covering. | **File**: FarguesFontaine/Curve.lean | **Depends**: T704, T705
 - **Statements**: fill `isCompact_windowU_zero`, `isCompact_windowV_zero`,
   `instCompactSpaceCurve`.
 - **Sketch**: per decomposition F2 (instantiate `isCompact_subtype_rationalOpen₂` at
