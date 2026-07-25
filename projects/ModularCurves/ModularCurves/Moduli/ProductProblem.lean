@@ -252,6 +252,14 @@ noncomputable def representableByProd :
 
 end Prod
 
+/-- **[T-YR-6-APP P1, packaged]** The total space of a `RelRepData` for `Q` over a
+representing object of `P` represents `P.prod Q`. -/
+noncomputable def RelRepData.representableByProd {P Q : ModuliProblem R} {X : EllObj R}
+    (r : P.RepresentableBy X) (d : RelRepData Q X) :
+    (P.prod Q).RepresentableBy (X.pullbackAlong d.f) :=
+  ModuliProblem.representableByProd r d.f (fun {_} g => d.eqv g)
+    (fun {_ _} g k h => d.nat g k h)
+
 end ModuliProblem
 
 end ModularCurves
