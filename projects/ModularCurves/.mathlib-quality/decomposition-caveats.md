@@ -301,3 +301,25 @@ spanning), and drop `x`; the images of the other `d − 1` generate `𝔪̄`. Th
 `IsRegularLocalRing R → IsDomain R`. After that, T-G4a needs the second half
 (smooth over a field ⟹ the local rings are regular — Jacobian criterion via
 `IsStandardSmoothOfRelativeDimension`), which is a separate stream.
+
+## T-G3b — progress this session (bricks 1–4 landed; 5 blocked on elaboration, not on math)
+
+* **Brick 1–2** (`Moduli/LevelLocusNatural.lean`, sorry-free): pinning of
+  `fullLevelLocusPointsEquiv` (`_fst/_snd_comp_fst`), its naturality in `T`
+  (`_natural_fst/_snd`), `section_ext_comp_fst`, `pullSection_pullbackAlongMap_comp_fst`,
+  and the **level component of the funnel naturality square**
+  (`fullLevelLocusPointsEquiv_pullSection_fst/snd`).
+* **Brick 3** (`Moduli/LegendreDeltaRelRep.lean`): `legendreFunnelEquiv` — the classifying
+  family as a standalone `def` (inside a `RelRepData` literal it overflows `whnf`) — with
+  its pinning lemma `legendreFunnelEquiv_apply` (`rfl`).
+* **Brick 4**: `gammaFullNaiveProblem_map_apply`, `legendreDeltaProblem_map_apply` (both
+  `rfl`) so the naturality proof never has to `whnf` through the `↾`-coerced functor maps.
+* **Brick 5 (open)**: with the above, funnel naturality is *exactly* the level square
+  (proved) plus the `ω` square (`spec_nat`, the strengthened `ScaleTorsorData` field).
+  Assembling them via `Subtype.ext`/`Prod.ext` currently overflows `whnf` at 200k
+  heartbeats; heartbeat bumps are forbidden here, so the fix is the stall-playbook route:
+  one fully-explicit top-level lemma per component, then `Prod.ext`.
+* **Brick 6 (open)**: change `ScaleTorsorData.spec` to `Nonempty (bundled family)` (equiv +
+  `spec_nat`), keep `scaleTorsor_spec`'s Prop-`sorry` with the stronger shape, re-found
+  `legendreDeltaData` on the resulting `RelRepData`, and delete
+  `legendreDelta_exists_naturalFamily`.
