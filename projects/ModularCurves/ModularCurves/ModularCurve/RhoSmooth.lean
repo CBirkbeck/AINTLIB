@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.ModularCurve.RhoSections
 import ModularCurves.Moduli.LegendreSmooth
+import ModularCurves.Moduli.BaseChangeIso
 
 /-!
 # The Legendre-anchored ρ-cover is smooth of relative dimension one
@@ -49,6 +50,30 @@ theorem rhoLegendre_carrier_smooth (D : GaloisRepData N) [Fact (1 < N)]
   exact inferInstanceAs (SmoothOfRelativeDimension (0 + 1)
     (d.σZ.relQuotientStruct d.f d.over_base ≫
       (universalLegendreObj (CommRingCat.of ℚ) hR).structMap))
+
+
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-6-APP (i)]** The ρ-level problem over `ℚ` is represented by an object with
+**affine** base: the engine's `D(3)` leg produces one over `ℚ[1/3]`, and `3` is a unit
+in `ℚ`, so the base-change isomorphism transports it back. -/
+theorem rhoProblem_exists_representableBy_isAffine (D : GaloisRepData N) [Fact (1 < N)]
+    (hN : 3 ≤ (N : ℤ)) :
+    ∃ Y : EllObj (CommRingCat.of ℚ), IsAffine Y.base ∧
+      Nonempty ((rhoProblem D).RepresentableBy Y) := by
+  haveI : IsIso (ModuliProblem.awayHomWire (CommRingCat.of ℚ) (3 : CommRingCat.of ℚ)) :=
+    isIso_awayHomWire_of_isUnit _ _ (by
+      refine isUnit_iff_ne_zero.mpr ?_
+      norm_num)
+  exact ModuliProblem.exists_representableBy_isAffine_of_isIso _
+    (ModuliProblem.exists_representableBy_isAffine_baseChange_three
+      (CommRingCat.of ℚ) (rhoProblem D) (rhoProblem_affineOverEll D) (rho_rigidNoeth D hN))
+
+/-- **[T-YR-6-APP (i)]** Every representing object of the ρ-level problem has affine base. -/
+theorem rhoProblem_isAffine_base (D : GaloisRepData N) [Fact (1 < N)] (hN : 3 ≤ (N : ℤ))
+    {X : EllObj (CommRingCat.of ℚ)} (r : (rhoProblem D).RepresentableBy X) :
+    IsAffine X.base :=
+  ModuliProblem.isAffine_base_of_representableBy
+    (rhoProblem_exists_representableBy_isAffine D hN) r
 
 end ModularCurves
 
