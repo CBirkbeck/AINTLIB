@@ -9,6 +9,7 @@ import Mathlib.RingTheory.Nakayama
 import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
 import Mathlib.RingTheory.LocalRing.MaximalIdeal.Square
 import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.KrullDimension.Regular
 
 /-!
 # Regular local rings are domains (T-REG)
@@ -37,7 +38,7 @@ Landed so far: the `dim 0` base case, the prime-avoidance choice of the regular 
 
 universe u
 
-open IsLocalRing
+open IsLocalRing Pointwise
 
 namespace ModularCurves
 
@@ -137,5 +138,16 @@ theorem isDomain_of_isPrime_span_singleton (R : Type u) [CommRing R] [IsNoetheri
   haveI hbp : (⊥ : Ideal R).IsPrime := hbot ▸ hpmin.1.1
   haveI : IsDomain (R ⧸ (⊥ : Ideal R)) := (Ideal.Quotient.isDomain_iff_prime ⊥).mpr hbp
   exact (RingEquiv.quotientBot R).symm.isDomain
+
+/-- **(T-REG-3a, the dimension half)** Cutting a Noetherian local ring by one element of
+the maximal ideal drops the Krull dimension by at most one. (Mathlib's
+`ringKrullDim_le_ringKrullDim_quotSMulTop_succ` phrased for `Ideal.span {x}`.) -/
+theorem ringKrullDim_le_ringKrullDim_quotient_span_singleton_succ (R : Type u) [CommRing R]
+    [IsNoetherianRing R] [IsLocalRing R] {x : R} (hx : x ∈ maximalIdeal R) :
+    ringKrullDim R ≤ ringKrullDim (R ⧸ Ideal.span {x}) + 1 := by
+  have h := ringKrullDim_le_ringKrullDim_quotSMulTop_succ (R := R) hx
+  have hspan : (x • (⊤ : Ideal R) : Ideal R) = Ideal.span {x} := by
+    rw [← Submodule.singleton_set_smul (⊤ : Ideal R) x, Submodule.set_smul_top_eq_span]
+  rwa [hspan] at h
 
 end ModularCurves
