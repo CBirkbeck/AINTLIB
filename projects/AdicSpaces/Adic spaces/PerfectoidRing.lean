@@ -256,8 +256,9 @@ private theorem isHausdorff_pIdeal (p : ℕ) [Fact (Nat.Prime p)]
   -- Conclude x = 0 in A°
   exact Subtype.val_injective hx_zero
 
-/-- In a uniform ring with linear topology, the limit of a sequence of power-bounded
-elements (in the topology of A) is power-bounded, provided A° is bounded. -/
+/-- In a uniform nonarchimedean ring (`A°` bounded), the limit of a sequence of
+power-bounded elements is power-bounded: the limit lies in the closure of `A°`, which is
+still bounded. -/
 theorem isPowerBounded_of_tendsto_of_powerBounded
     {A : Type u} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [NonarchimedeanRing A] [IsUniform A] {f : ℕ → A} {L : A}
