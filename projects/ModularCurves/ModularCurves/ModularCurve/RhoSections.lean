@@ -7084,6 +7084,17 @@ theorem strTor_pull {X : EllObj (CommRingCat.of ℚ)}
     (strCoverMap_strVPt D g' k' v).symm) ?_
   exact Category.assoc _ _ _
 
+/-- **[T-YR-3E]** The identity translation acts trivially on framed values. -/
+theorem sympFramedSmulNat_one_app {A : EllObj (CommRingCat.of ℚ)}
+    (v : (sympFramedProblem D).obj (Opposite.op A)) :
+    (sympFramedSmulNat D (1 : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app
+      (Opposite.op A) v = v := by
+  refine Subtype.ext (Prod.ext ?_ (Subtype.ext ?_))
+  · show A.curve.glSmul 1 v.val.1 = v.val.1
+    rw [EllipticCurve.glSmul_one]
+  · show v.val.2.val ≫ wFramesRightMul D 1 = v.val.2.val
+    rw [wFramesRightMul_one, Category.comp_id]
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
