@@ -81,6 +81,53 @@ theorem isOpen_Y :
   ext v
   simp only [Set.mem_preimage, Y, basicOpen_self, Set.mem_setOf_eq, v.2, true_and]
 
+private theorem p_mem_Iinf : (p : Ainf p F) ∈ Iinf p F ϖ := by
+  rw [Iinf]
+  exact Ideal.subset_span (Set.mem_insert _ _)
+
+private theorem teichPi_mem_Iinf : teichPi p F ϖ ∈ Iinf p F ϖ := by
+  rw [Iinf]
+  exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
+
+private theorem exists_pow_succ_vlt {v : Spv (Ainf p F)}
+    (hv : v ∈ Spa (Ainf p F) (ringPlus (Ainf p F))) {a b : Ainf p F}
+    (ha : a ∈ Iinf p F ϖ) (hb : ¬ v.vle b 0) :
+    ∃ n : ℕ, vlt p F v (a ^ (n + 1)) b := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hUopen : IsOpen {x : Ainf p F | vlt p F v x b} := by
+    have hopen := hv.1 (ValuativeRel.valuation (Ainf p F) b)
+    convert hopen using 1
+    ext x
+    simp only [Set.mem_setOf_eq]
+    constructor
+    · rintro ⟨h1, h2⟩
+      exact lt_iff_le_not_ge.mpr
+        ⟨((ValuativeRel.valuation (Ainf p F)).vle_iff_le).mp h1,
+          fun hge => h2 (((ValuativeRel.valuation (Ainf p F)).vle_iff_le).mpr hge)⟩
+    · intro hlt
+      exact ⟨((ValuativeRel.valuation (Ainf p F)).vle_iff_le).mpr hlt.le,
+        fun h => hlt.not_ge (((ValuativeRel.valuation (Ainf p F)).vle_iff_le).mp h)⟩
+  have hU0 : {x : Ainf p F | vlt p F v x b} ∈ nhds (0 : Ainf p F) :=
+    hUopen.mem_nhds ⟨v.zero_vle b, hb⟩
+  obtain ⟨N, hN⟩ := (isAdic_iff.mp (isAdic_Iinf p F ϖ)).2 _ hU0
+  refine ⟨N, hN ?_⟩
+  exact SetLike.mem_coe.mpr
+    (Ideal.pow_le_pow_right (Nat.le_succ N) (Ideal.pow_mem_pow ha (N + 1)))
+
+private theorem vlt_one_of_not_vle_pow {v : Spv (Ainf p F)} {a : Ainf p F} {n : ℕ}
+    (h2 : ¬ v.vle a (a ^ (n + 1))) : vlt p F v a 1 := by
+  have hnot : ¬ v.vle 1 a := fun h1a => h2 (by
+    have hchain : ∀ k : ℕ, v.vle a (a ^ (k + 1)) := by
+      intro k
+      induction k with
+      | zero => simpa using (v.vle_total a a).elim id id
+      | succ m ih =>
+          refine v.vle_trans ih ?_
+          have hmul := v.mul_vle_mul_left h1a (a ^ (m + 1))
+          rwa [one_mul, ← pow_succ'] at hmul
+    exact hchain n)
+  exact ⟨(v.vle_total _ _).resolve_right hnot, hnot⟩
+
 section ElementFacts
 
 variable {p F ϖ}
@@ -102,10 +149,16 @@ theorem v_teichPi_ne_zero (hv : v ∈ Y p F ϖ) : ¬ v.vle (teichPi p F ϖ) 0 :=
 Source: this is the standard argument that on the analytic locus the ideal of definition
 has value < 1; cf. [SW, §12.2] (κ well-defined on 𝒴) and [Wedhorn, §7]-style continuity
 manipulations. -/
-theorem vlt_p_one (hv : v ∈ Y p F ϖ) : vlt p F v (p : Ainf p F) 1 := by sorry
+theorem vlt_p_one (hv : v ∈ Y p F ϖ) : vlt p F v (p : Ainf p F) 1 := by
+  obtain ⟨n, -, h2⟩ :=
+    exists_pow_succ_vlt p F ϖ hv.1 (p_mem_Iinf p F ϖ) (v_p_ne_zero hv)
+  exact vlt_one_of_not_vle_pow p F h2
 
 /-- On `𝒴`, `v([ϖ]) < 1` strictly. Same continuity argument as `vlt_p_one`. -/
-theorem vlt_teichPi_one (hv : v ∈ Y p F ϖ) : vlt p F v (teichPi p F ϖ) 1 := by sorry
+theorem vlt_teichPi_one (hv : v ∈ Y p F ϖ) : vlt p F v (teichPi p F ϖ) 1 := by
+  obtain ⟨n, -, h2⟩ :=
+    exists_pow_succ_vlt p F ϖ hv.1 (teichPi_mem_Iinf p F ϖ) (v_teichPi_ne_zero hv)
+  exact vlt_one_of_not_vle_pow p F h2
 
 /-- Cofinality of `p`-powers: for `v ∈ 𝒴` and any `g` with `v(g) ≠ 0`, some `v(p^n)` lies
 strictly below `v(g)`. From continuity: `{a : v(a) < v(g)}` is an open neighbourhood of
@@ -114,11 +167,15 @@ strictly below `v(g)`. From continuity: `{a : v(a) < v(g)}` is an open neighbour
 Source: continuity of valuations, [Wedhorn, Def. 7.7]-style; used implicitly for the
 covering in [Kedlaya-AWS, Rem. 3.1.9]. -/
 theorem exists_pow_p_vlt (hv : v ∈ Y p F ϖ) {g : Ainf p F} (hg : ¬ v.vle g 0) :
-    ∃ n : ℕ, vlt p F v ((p : Ainf p F) ^ n) g := by sorry
+    ∃ n : ℕ, vlt p F v ((p : Ainf p F) ^ n) g := by
+  obtain ⟨n, h⟩ := exists_pow_succ_vlt p F ϖ hv.1 (p_mem_Iinf p F ϖ) hg
+  exact ⟨n + 1, h⟩
 
 /-- Cofinality of `[ϖ]`-powers, as for `exists_pow_p_vlt`. -/
 theorem exists_pow_teichPi_vlt (hv : v ∈ Y p F ϖ) {g : Ainf p F} (hg : ¬ v.vle g 0) :
-    ∃ n : ℕ, vlt p F v (teichPi p F ϖ ^ n) g := by sorry
+    ∃ n : ℕ, vlt p F v (teichPi p F ϖ ^ n) g := by
+  obtain ⟨n, h⟩ := exists_pow_succ_vlt p F ϖ hv.1 (teichPi_mem_Iinf p F ϖ) hg
+  exact ⟨n + 1, h⟩
 
 end ElementFacts
 

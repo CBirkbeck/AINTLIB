@@ -1,1 +1,1 @@
-FOCUS: T401 (Y = Spa minus V(p[phi]) locus: definitions + basic opens) — PHASE 2: reading YSpace.lean + ticket
+FOCUS: T403 (Y element facts from continuity: vlt_p_one etc) — PHASE 2: reading Cont/continuity API
