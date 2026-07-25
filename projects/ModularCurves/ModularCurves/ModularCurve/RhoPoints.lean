@@ -61,6 +61,27 @@ theorem pairToPoint_pointToPair (D : GaloisRepData N) {X : EllObj (CommRingCat.o
   rw [Equiv.symm_apply_apply]
   rfl
 
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-7d, second roundtrip, structure part]** The universal structure pulled
+back along the classifying morphism of `(E, α)` is `α` itself: the canonical
+comparison `E ≅ (X.pullbackAlong h).curve` (where `h` is the classifying point)
+carries the point's structure to `α`. This is the `Quot`-relation witness for the
+reverse roundtrip. -/
+theorem pull_homEquiv_pullbackAlongπ (D : GaloisRepData N)
+    {X : EllObj (CommRingCat.of ℚ)} (r : (rhoProblem D).RepresentableBy X)
+    {T : Scheme.{0}} (sT : T ⟶ Spec (CommRingCat.of ℚ))
+    (E : EllipticCurve T) (α : RhoLevelStructure D sT E) :
+    RhoLevelStructure.pull D
+        (EllObj.toPullbackAlong
+          (r.homEquiv.symm (show (rhoProblem D).obj (op ⟨T, sT, E⟩) from α)))
+        (r.homEquiv (X.pullbackAlongπ
+          (r.homEquiv.symm
+            (show (rhoProblem D).obj (op ⟨T, sT, E⟩) from α)).baseHom)) = α := by
+  set u := r.homEquiv.symm (show (rhoProblem D).obj (op ⟨T, sT, E⟩) from α) with hu
+  have h := r.homEquiv_comp (EllObj.toPullbackAlong u) (X.pullbackAlongπ u.baseHom)
+  rw [EllObj.toPullbackAlong_pullbackAlongπ u, hu, Equiv.apply_symm_apply] at h
+  exact h.symm
+
 end ModularCurves
 
 end
