@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ModularCurve.YRho
+import ModularCurves.ForMathlib.IrreducibleConnected
 
 /-!
 # Scoping skeleton for `yRho_geometricallyIrreducible` (T-IRR0, stream IRR)
@@ -82,8 +83,23 @@ theorem yRho_geometricallyIrreducible_of_connected {N : ℕ} [NeZero N] (hN : 3 
     (D : GaloisRepData N) (Y : Scheme.{0}) (sY : Y ⟶ Spec (.of ℚ))
     (hY : RepresentsYRho D Y sY)
     (hconn : ConnectedSpace ↥(pullback sY
-      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))))) :
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))))
+    (hlf : LocallyFinite ((↑) : irreducibleComponents
+      ↥(pullback sY (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) →
+        Set ↥(pullback sY
+          (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))))))
+    (hdisj : ∀ Z ∈ irreducibleComponents
+        ↥(pullback sY (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))),
+      ∀ W ∈ irreducibleComponents
+        ↥(pullback sY (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))),
+      Z ≠ W → Disjoint Z W) :
     IrreducibleSpace ↥(pullback sY
-      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) := by sorry
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) := by
+  haveI : ConnectedSpace ↥(pullback sY
+    (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) := hconn
+  haveI : Nonempty ↥(pullback sY
+    (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) :=
+    ConnectedSpace.toNonempty
+  exact irreducibleSpace_of_connected_of_disjoint_irreducibleComponents hlf hdisj
 
 end ModularCurves
