@@ -5456,6 +5456,105 @@ theorem strSection_struct (D : GaloisRepData N) [Fact (1 < N)]
 
 end StructuresToSections
 
+section PointLifting
+
+/-- **[T-3E-L1]** Every algebraically-closed-field point lifts through a finite
+surjective morphism: the fibre is a nonzero finite algebra over the field, whose
+residue at any maximal ideal is the field itself. -/
+theorem exists_specPoint_lift_of_finite_surjective {Y Z : Scheme.{0}}
+    (f : Y ⟶ Z) [IsFinite f] [Surjective f]
+    {Ω : Type} [Field Ω] [IsAlgClosed Ω]
+    (z : Spec (CommRingCat.of Ω) ⟶ Z) :
+    ∃ y : Spec (CommRingCat.of Ω) ⟶ Y, y ≫ f = z := by
+  classical
+  haveI hFinP : IsFinite (pullback.snd f z) :=
+    MorphismProperty.pullback_snd _ _ ‹IsFinite f›
+  haveI hSurP : Surjective (pullback.snd f z) :=
+    MorphismProperty.pullback_snd _ _ ‹Surjective f›
+  haveI : IsAffineHom (pullback.snd f z) := inferInstance
+  haveI : IsAffine (pullback f z) :=
+    isAffine_of_isAffineHom (pullback.snd f z)
+  set φ : CommRingCat.of Ω ⟶ Γ(pullback f z, ⊤) :=
+    Spec.preimage ((pullback f z).isoSpec.inv ≫ pullback.snd f z) with hφdef
+  have hφ : Spec.map φ = (pullback f z).isoSpec.inv ≫ pullback.snd f z :=
+    Spec.map_preimage _
+  -- finiteness of the fibre algebra
+  have hφfin : φ.hom.Finite := by
+    have hcomp : pullback.snd f z = (pullback f z).isoSpec.hom ≫ Spec.map φ := by
+      rw [hφ, Iso.hom_inv_id_assoc]
+    have h1 : (pullback.snd f z).appTop.hom.Finite := Scheme.Hom.finite_appTop _
+    rw [hcomp, Scheme.Hom.comp_appTop] at h1
+    haveI : IsIso ((pullback f z).isoSpec.hom.appTop) :=
+      ⟨⟨(pullback f z).isoSpec.inv.appTop,
+        by rw [← Scheme.Hom.comp_appTop, Iso.inv_hom_id, Scheme.Hom.id_appTop],
+        by rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id, Scheme.Hom.id_appTop]⟩⟩
+    have h2 : (Spec.map φ).appTop.hom.Finite := by
+      have h3 : (Spec.map φ).appTop =
+          ((Spec.map φ).appTop ≫ (pullback f z).isoSpec.hom.appTop) ≫
+            inv ((pullback f z).isoSpec.hom.appTop) := by
+        rw [Category.assoc, IsIso.hom_inv_id, Category.comp_id]
+      rw [h3]
+      exact RingHom.Finite.comp
+        (RingHom.Finite.of_surjective _
+          ((ConcreteCategory.bijective_of_isIso
+            (inv ((pullback f z).isoSpec.hom.appTop))).2)) h1
+    have hφeq : φ = (Scheme.ΓSpecIso (CommRingCat.of Ω)).inv ≫
+        (Spec.map φ).appTop ≫ (Scheme.ΓSpecIso Γ(pullback f z, ⊤)).hom := by
+      rw [Scheme.ΓSpecIso_naturality, Iso.inv_hom_id_assoc]
+    rw [hφeq]
+    exact RingHom.Finite.comp
+      (RingHom.Finite.comp
+        (RingHom.Finite.of_surjective _
+          ((ConcreteCategory.bijective_of_isIso
+            (Scheme.ΓSpecIso Γ(pullback f z, ⊤)).hom).2)) h2)
+      (RingHom.Finite.of_surjective _
+        ((ConcreteCategory.bijective_of_isIso
+          (Scheme.ΓSpecIso (CommRingCat.of Ω)).inv).2))
+  letI : Algebra Ω ↑Γ(pullback f z, ⊤) := φ.hom.toAlgebra
+  haveI hMF : Module.Finite Ω ↑Γ(pullback f z, ⊤) := hφfin
+  -- the fibre is nonempty, so its algebra is nontrivial
+  have hne : Nonempty ↥(pullback f z) := by
+    obtain ⟨s₀⟩ : Nonempty ↥(Spec (CommRingCat.of Ω)) := inferInstance
+    obtain ⟨p₀, _⟩ := hSurP.1 s₀
+    exact ⟨p₀⟩
+  haveI hnt : Nontrivial ↑Γ(pullback f z, ⊤) := by
+    obtain ⟨p⟩ := hne
+    set q := (pullback f z).isoSpec.hom.base p with hq
+    exact ⟨0, 1, fun h01 => q.asIdeal.ne_top_iff_one.mp q.isPrime.ne_top
+      (h01 ▸ q.asIdeal.zero_mem)⟩
+  -- a maximal ideal with residue field Ω
+  obtain ⟨m, hm⟩ := Ideal.exists_maximal ↑Γ(pullback f z, ⊤)
+  haveI := hm
+  haveI : Field (↑Γ(pullback f z, ⊤) ⧸ m) := Ideal.Quotient.field m
+  haveI : Module.Finite Ω (↑Γ(pullback f z, ⊤) ⧸ m) :=
+    Module.Finite.of_surjective (Ideal.Quotient.mkₐ Ω m).toLinearMap
+      Ideal.Quotient.mk_surjective
+  haveI : Algebra.IsIntegral Ω (↑Γ(pullback f z, ⊤) ⧸ m) :=
+    Algebra.IsIntegral.of_finite Ω _
+  have hbij : Function.Bijective (algebraMap Ω (↑Γ(pullback f z, ⊤) ⧸ m)) :=
+    IsAlgClosed.algebraMap_bijective_of_isIntegral
+  set e := RingEquiv.ofBijective _ hbij with he
+  set χ : Γ(pullback f z, ⊤) ⟶ CommRingCat.of Ω :=
+    CommRingCat.ofHom (e.symm.toRingHom.comp (Ideal.Quotient.mk m)) with hχ
+  have hχφ : φ ≫ χ = 𝟙 (CommRingCat.of Ω) := by
+    refine CommRingCat.hom_ext (RingHom.ext fun ω => ?_)
+    show e.symm (Ideal.Quotient.mk m (φ.hom ω)) = ω
+    have hmk : Ideal.Quotient.mk m (φ.hom ω) =
+        algebraMap Ω (↑Γ(pullback f z, ⊤) ⧸ m) ω := rfl
+    rw [hmk]
+    exact e.symm_apply_apply ω
+  have hpre : Spec.preimage (𝟙 (Spec (CommRingCat.of Ω))) =
+      𝟙 (CommRingCat.of Ω) :=
+    Spec.map_injective (by rw [Spec.map_preimage, Spec.map_id])
+  set secpair := (EllipticCurve.sectionsEquivRingHomUnder
+    (pullback.snd f z) φ hφ (𝟙 (Spec (CommRingCat.of Ω)))).symm
+    ⟨χ, by rw [hχφ, hpre]⟩ with hsp
+  refine ⟨secpair.1 ≫ pullback.fst f z, ?_⟩
+  rw [Category.assoc, pullback.condition, ← Category.assoc, secpair.2,
+    Category.id_comp]
+
+end PointLifting
+
 section MutualInverses
 
 open scoped FintypeCatDiscrete
