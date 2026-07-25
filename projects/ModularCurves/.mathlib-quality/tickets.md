@@ -25308,7 +25308,21 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
       `pointToPair`, `pairToPoint`, `pairToPoint_pointToPair` (roundtrip 1, definitional
       after `obtain ⟨h, rfl⟩`), `pull_homEquiv_pullbackAlongπ` (roundtrip 2's structure
       part, from `r.homEquiv_comp` + `EllObj.toPullbackAlong_pullbackAlongπ`).
-    * **[T-YR-7c] ROUTE FIXED 2026-07-25.** The Quot relation's coordinate condition is,
+    * **[T-YR-7-B2] STATEMENT DEFECT FOUND 2026-07-25 (logged to
+      `.mathlib-quality/b2_log.jsonl`) — clause 3 is NOT provable as written.** The
+      `Quot` relation's coordinate condition is quantified over `ℚ̄`-points
+      `t : Spec ℚ̄ ⟶ T`; over a base with **no** such points (e.g. `T = Spec K` for
+      `K` of positive transcendence degree over `ℚ`, or `K = ℝ`) it is **vacuous**, so
+      the relation degenerates to "the underlying curves are isomorphic" — the residual
+      form of the very DEF-4 defect ("relation far too coarse"). Counterexample sketch:
+      `D` trivial, `N ≥ 3`, `K` the function field of `Y`: the generic point gives a
+      pair `(E, α)`, and `α ∘ g` for `g ∈ GL₂(ℤ/N)` gives `|GL₂(ℤ/N)|/2 > 1` distinct
+      `K`-points of `Y` inside a single `Quot`-class. **Proposed fix (user decision):**
+      state the relation scheme-theoretically —
+      `b.2 = RhoLevelStructure.pull D (EllHom-induced-by-f) a.2` — which by `coord_pull`
+      (YRho:2437) implies the present coordinate condition and agrees with it over bases
+      with enough geometric points. Everything else in T-YR-7 is unaffected.
+    * **[T-YR-7c] ROUTE FIXED 2026-07-25** (valid for the corrected relation)**.** The Quot relation's coordinate condition is,
       by `coord_pull` (YRho:2437) applied to the `EllHom` induced by the curve iso `f`
       (`baseHom = 𝟙`, `top = f.hom`), exactly the statement that `α` and
       `RhoLevelStructure.pull D g α'` have the **same coordinates at every `ℚ̄`-point**.
