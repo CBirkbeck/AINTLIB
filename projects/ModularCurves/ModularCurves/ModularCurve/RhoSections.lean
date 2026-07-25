@@ -6121,6 +6121,64 @@ theorem fullLevelPt_eq_of_pinned_eq {T : Scheme.{0}}
       zero_add] at hc
   exact Subtype.ext (Prod.ext hP hQ)
 
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-VC prep]** The pinned trivialization is congruent in the frame. -/
+theorem framedTorsionIsoPinned_congr_frame {T : Scheme.{0}}
+    (sT : T ⟶ Spec (CommRingCat.of ℚ)) (E : EllipticCurve T)
+    (hinv : NIsInvertible T N) (L : E.FullLevelPt N)
+    {h₁ h₂ : T ⟶ wFrames D} (hh : h₁ = h₂)
+    (hover : h₁ ≫ wFramesπ D = sT) :
+    framedTorsionIsoPinned D sT E hinv L h₁ hover =
+      framedTorsionIsoPinned D sT E hinv L h₂ (hh ▸ hover) := by
+  subst hh; rfl
+
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-VC] THE VALUE COMPARISON**: two framed values with `γ`-related
+frames and equal carve structures are `γ`-translates — the common structure
+pins both levels through the common frame (T-EQ-2 + the recovery lemma). -/
+theorem value_eq_smulNat_of_carve_eq {A : EllObj (CommRingCat.of ℚ)}
+    (hinv : NIsInvertible A.base N)
+    (v₁ v₂ : (sympFramedProblem D).obj (Opposite.op A))
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hframe : v₂.val.2.val = v₁.val.2.val ≫ wFramesRightMul D γ)
+    (hstr : rhoLevelStructureOfCarve D A.structMap A.curve hinv
+        v₁.val.1 v₁.val.2.val v₁.val.2.property v₁.property =
+      rhoLevelStructureOfCarve D A.structMap A.curve hinv
+        v₂.val.1 v₂.val.2.val v₂.val.2.property v₂.property) :
+    v₂ = (sympFramedSmulNat D γ).app (Opposite.op A) v₁ := by
+  classical
+  -- the pinned isos agree
+  have hiso := congrArg RhoLevelStructure.torsionIso hstr
+  have hiso' : framedTorsionIsoPinned D A.structMap A.curve hinv
+      v₁.val.1 v₁.val.2.val v₁.val.2.property =
+      framedTorsionIsoPinned D A.structMap A.curve hinv
+      v₂.val.1 v₂.val.2.val v₂.val.2.property := hiso
+  -- translate the first through γ (T-EQ-2 iso level)
+  have hgl := framedTorsionIsoPinned_glSmul D A.structMap A.curve hinv
+    v₁.val.1 v₁.val.2.val v₁.val.2.property γ
+  -- transport the frame equality
+  have hovRm : (v₁.val.2.val ≫ wFramesRightMul D γ) ≫ wFramesπ D =
+      A.structMap := by
+    rw [Category.assoc, wFramesRightMul_π]
+    exact v₁.val.2.property
+  have hcongr : framedTorsionIsoPinned D A.structMap A.curve hinv
+      v₂.val.1 v₂.val.2.val v₂.val.2.property =
+      framedTorsionIsoPinned D A.structMap A.curve hinv
+      v₂.val.1 (v₁.val.2.val ≫ wFramesRightMul D γ) hovRm :=
+    framedTorsionIsoPinned_congr_frame D A.structMap A.curve hinv
+      v₂.val.1 hframe v₂.val.2.property
+  -- the recovered level identity
+  have hlevel : (v₂.val.1 : A.curve.FullLevelPt N) =
+      A.curve.glSmul γ (v₁.val.1 : A.curve.FullLevelPt N) :=
+    fullLevelPt_eq_of_pinned_eq D A.structMap A.curve hinv _ _
+      (v₁.val.2.val ≫ wFramesRightMul D γ) hovRm
+      ((hcongr.symm.trans hiso'.symm).trans hgl.symm)
+  -- assemble
+  refine Subtype.ext (Prod.ext ?_ (Subtype.ext ?_))
+  · exact hlevel
+  · show v₂.val.2.val = v₁.val.2.val ≫ wFramesRightMul D γ
+    exact hframe
+
 end MutualInverses
 
 end
