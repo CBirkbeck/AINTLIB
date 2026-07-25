@@ -3,7 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.UniversalLevelThree
+import ModularCurves.Moduli.E3DatumAssembly
+import ModularCurves.ForMathlib.NegModelAffineSection
 
 /-!
 # The Legendre chart: normalising a marked char-≠2 presentation (T-G3a-SUB2)
@@ -34,6 +35,53 @@ namespace ModularCurves
 open LocalPresentation
 
 variable {S : Scheme.{u}} {G : EllipticCurveGeom S} {V : S.affineOpens}
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-G3a-SUB2, the `2`-torsion negation bridge ★)** A chart-marked `2`-torsion
+section is negation-symmetric in its chart coordinates: `negY p q = q`, i.e.
+`−q − a₁p − a₃ = q`. The `N = 2` mirror of `hdbl_of_marked_three_torsion`, but with no
+doubling needed — `2 • Z = 0` gives `−Z = Z` directly, and the negation coordinate is
+`negModelHom_affineSection_general`. -/
+theorem negY_marked_eq_of_two_torsion {S : Scheme.{u}} {E : EllipticCurve S}
+    {V : S.affineOpens} (Pr : LocalPresentation E.toEllipticCurveGeom V)
+    {σ : S ⟶ E.toEllipticCurveGeom.E} {hσ : σ ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    {p q : Γ(S, V.1)} (heq : Pr.W.toAffine.Equation p q)
+    (hMeq : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσ V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W p q heq)
+    (hkill : (2 : ℤ) • (⟨σ, hσ⟩ : E.Section) = 0) :
+    Pr.W.toAffine.negY p q = q := by
+  letI := Pr.elliptic
+  set σm := chartPointsEquiv Pr (𝟙 (Spec Γ(S, V.1)))
+    (EllipticCurve.Point.pull E (𝟙 (Spec Γ(S, V.1)) ≫ chartρ V) ⟨σ, hσ⟩) with hσm
+  have hσmval : σm = ⟨projModelAffineSection Pr.W p q heq,
+      projModelAffineSection_projModelπ _ _ _ _⟩ := by
+    refine Subtype.ext ?_
+    rw [hσm, chartPointsEquiv_pull_marked Pr (𝟙 _) heq hMeq]
+    exact Category.id_comp _
+  have hkillE : (2 : ℤ) • EllipticCurve.Point.pull E
+      (𝟙 (Spec Γ(S, V.1)) ≫ chartρ V) ⟨σ, hσ⟩ = 0 := by
+    rw [← EllipticCurve.Point.pull_zsmul, hkill, EllipticCurve.Point.pull_zero]
+  have h2 : (2 : ℤ) • σm = 0 := by
+    rw [hσm, ← map_zsmul, hkillE, map_zero]
+  have hneg : -σm = σm := by
+    refine neg_eq_of_add_eq_zero_left ?_
+    rw [← two_zsmul]
+    exact h2
+  have hnegval : -σm = (⟨projModelAffineSection Pr.W p (Pr.W.toAffine.negY p q)
+      ((Pr.W.toAffine.equation_neg p q).mpr heq),
+      projModelAffineSection_projModelπ _ _ _ _⟩ :
+    (modelEllipticCurve Pr.W).Section) := by
+    refine Subtype.ext ?_
+    have hv : (-σm).1 = σm.1 ≫ (modelEllipticCurve Pr.W).mulByHom (-1) := by
+      rw [show -σm = (-1 : ℤ) • σm from (neg_one_zsmul σm).symm]
+      exact (modelEllipticCurve Pr.W).point_smul_eq_comp_mulBy _ (-1) σm
+    rw [hv, modelEllipticCurve_mulByHom_neg_one, hσmval]
+    exact negModelHom_affineSection_general Pr.W p q heq
+  have hvals : projModelAffineSection Pr.W p (Pr.W.toAffine.negY p q)
+      ((Pr.W.toAffine.equation_neg p q).mpr heq)
+      = projModelAffineSection Pr.W p q heq :=
+    congrArg Subtype.val (hnegval.symm.trans (hneg.trans hσmval))
+  exact (projModelAffineSection_injective Pr.W (heq := hvals)).2
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-G3a-SUB2, the Legendre chart ★)** A char-≠2 chart marking two sections at
