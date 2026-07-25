@@ -27007,6 +27007,10 @@ All bridges are now in the repo; what is left is the assembly over `Spec k̄`.
   (`Moduli/GammaH.lean:771`);
 - anchored geometric point: `EllObj.exists_geometricPoint_at` (this session).
 
+**Status 2026-07-25 (late): SUB2a–SUB2g are ALL LANDED and sorry-free**
+(`EllipticCurve/LegendreNormalForm.lean` + `IsAdapted.ofVC` in `Moduli/AdaptedModel.lean`).
+Only **SUB2h** (the scheme-level assembly) remains of SUB2.
+
 **Remaining bricks:**
 - **SUB2e** — `IsAdapted` for the twisted chart: from `basisUnitAt_ofVC`, the basis
   adapted to `P.ofVC C` is `(C.u)⁻¹ • b`; state and prove
