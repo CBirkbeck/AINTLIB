@@ -8552,11 +8552,38 @@ theorem rhoLevel_relativelyRepresentable {N : ℕ} [NeZero N] (hN : 3 ≤ N)
         Nonempty ({ h : T' ⟶ I // h ≫ f = k } ≃
           RhoLevelStructure D (k ≫ sT) (E.baseChange k)) := by sorry
 
+/-- The `Ell/ℚ`-morphism induced by a pointed isomorphism of elliptic curves over the
+same base `T` (identity on the base). -/
+noncomputable def ellHomOfCurveIso {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ))
+    {E E' : EllipticCurve T} (f : E ≅ E') :
+    (⟨T, sT, E⟩ : EllObj (CommRingCat.of ℚ)) ⟶ ⟨T, sT, E'⟩ where
+  baseHom := 𝟙 T
+  base_w := Category.id_comp sT
+  top := f.hom.hom
+  isPullback := by
+    haveI : IsIso f.hom.hom :=
+      ⟨f.inv.hom, congrArg EllipticCurve.HomOver.hom f.hom_inv_id,
+        congrArg EllipticCurve.HomOver.hom f.inv_hom_id⟩
+    exact IsPullback.of_horiz_isIso ⟨by rw [f.hom.over_w, Category.comp_id]⟩
+  zero_w := by
+    show E.zero ≫ f.hom.hom = 𝟙 T ≫ E'.zero
+    rw [f.hom.zero_w, Category.id_comp]
+
 /-- The representing property for the twisted modular curve: `(Y, sY)` is a smooth
 affine `ℚ`-curve whose `T`-points over `ℚ` are naturally the isomorphism classes of
-pairs `(E, α)` — the quotient by pointed over-`T` isomorphisms carrying coordinates to
-coordinates (DEF-4). Extracted as a predicate so that geometric irreducibility (T-F5)
-can be asserted OF THE REPRESENTING CURVE, not of arbitrary smooth curves (DEF-6). -/
+pairs `(E, α)` — the quotient by pointed over-`T` isomorphisms **carrying the level
+structure to the level structure** (DEF-4). Extracted as a predicate so that geometric
+irreducibility (T-F5) can be asserted OF THE REPRESENTING CURVE, not of arbitrary
+smooth curves (DEF-6).
+
+**DEF-17 (2026-07-25, adversarial pass).** The relation was previously stated by
+*equality of coordinates at `ℚ̄`-points*; that clause is **vacuous** over a base with
+no `ℚ̄`-points (e.g. `Spec K` for `K/ℚ` of positive transcendence degree, or `Spec ℝ`),
+where it degenerates into "the underlying curves are isomorphic" — the residual form of
+the DEF-4 defect, and refutable (for trivial `ρ̄` the fibre over one curve class has
+`|GL₂(ℤ/N)|/2 > 1` points). The relation is therefore stated scheme-theoretically:
+`f` carries `b`'s structure to `a`'s, i.e. `a.2 = RhoLevelStructure.pull D _ b.2`.
+The old coordinate identity is a **consequence**, by `coord_pull`. -/
 def RepresentsYRho {N : ℕ} [NeZero N] (D : GaloisRepData N) (Y : Scheme.{0})
     (sY : Y ⟶ Spec (.of ℚ)) : Prop :=
   SmoothOfRelativeDimension 1 sY ∧ IsAffineHom sY ∧
@@ -8564,14 +8591,7 @@ def RepresentsYRho {N : ℕ} [NeZero N] (D : GaloisRepData N) (Y : Scheme.{0})
       Nonempty ({ h : T ⟶ Y // h ≫ sY = sT } ≃
         Quot (fun (a b : Σ E : EllipticCurve T, RhoLevelStructure D sT E) =>
           ∃ f : a.1 ≅ b.1,
-            ∀ (t : Spec (.of (AlgebraicClosure ℚ)) ⟶ T)
-              (ht : t ≫ sT =
-                Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))
-              (x : a.1.Point t)
-              (hx : x.1 ≫ a.1.mulByHom N = t ≫ a.1.zero)
-              (hx' : (f.hom.mapPoint x).1 ≫ b.1.mulByHom N = t ≫ b.1.zero),
-              coord D sT b.2.torsionIso b.2.over_T t ht (f.hom.mapPoint x) hx' =
-                coord D sT a.2.torsionIso a.2.over_T t ht x hx))
+            a.2 = RhoLevelStructure.pull D (ellHomOfCurveIso sT f) b.2))
 
 /-- **(T-F4 = Buzzard p. 33, the main statement)** The twisted modular curve exists:
 some `(Y, sY)` represents the ρ-level moduli problem in the sense of
