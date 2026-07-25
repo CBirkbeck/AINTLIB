@@ -120,6 +120,36 @@ noncomputable def univAbscissaDiff (X : EllObj R) (h2 : NIsInvertible X.base 2) 
 
 /-! ## The scale-torsor package and the funnel assembly -/
 
+/-- **(T-G3b)** The **natural** sections-classification family of a scale-torsor: for each
+`g` and each locus point `w` over `g`, a bijection between the `T`-sections of `Z₂` over
+`w` and the `ω`-bases completing the corresponding level structure to a Legendre datum,
+*compatible with restriction along `k : T' ⟶ T`*. The naturality clause is stated in
+congr-friendly form (the restricted locus point and section are supplied together with the
+equations identifying them) so that no dependent rewrite across
+`(k ≫ h) ≫ q = k ≫ (h ≫ q)` is needed downstream. -/
+structure ScaleTorsorSpec (X : EllObj R) (h2 : NIsInvertible X.base 2)
+    (Z₂ : Scheme.{u}) (q : Z₂ ⟶ X.curve.fullLevelLocus 2 h2) where
+  /-- The classifying bijections. -/
+  toFun : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
+    (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+      w ≫ X.curve.fullLevelLocusπ 2 h2 = g }),
+    { s : T ⟶ Z₂ // s ≫ q = w.1 } ≃
+      { b : OmegaBasis (X.pullbackAlong g).curve.toEllipticCurveGeom //
+        IsLegendreDatum (X.pullbackAlong g)
+          (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b }
+  /-- Naturality in `T`. -/
+  nat : ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
+    (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
+      w ≫ X.curve.fullLevelLocusπ 2 h2 = g })
+    (s : { s : T ⟶ Z₂ // s ≫ q = w.1 })
+    (w' : { w : T' ⟶ X.curve.fullLevelLocus 2 h2 //
+      w ≫ X.curve.fullLevelLocusπ 2 h2 = k ≫ g })
+    (_ : w'.1 = k ≫ w.1)
+    (s' : { s : T' ⟶ Z₂ // s ≫ q = w'.1 })
+    (_ : s'.1 = k ≫ s.1),
+    (toFun (k ≫ g) w' s').1 =
+      omegaBasisMap (X.pullbackAlongMap g k) (toFun g w s).1
+
 /-- **The scale-torsor package** feeding the funnel `legendreDelta_relRep_finiteEtale_of_scaleTorsor`:
 a finite étale cover `Z₂ → fullLevelLocus 2` whose `T`-sections over a locus point `w`
 (lying over `g : T ⟶ X.base`) classify the `ω`-bases completing the corresponding level
@@ -136,15 +166,12 @@ structure ScaleTorsorData (X : EllObj R) (h2 : NIsInvertible X.base 2) where
   isFinite : IsFinite q
   /-- Étaleness of the cover. -/
   etale : Etale q
-  /-- The per-fibre sections classification: sections of `Z₂` over a locus point `w`
-  correspond to the `ω`-bases making `(L_w, b)` a Legendre datum. -/
-  spec : ∀ {T : Scheme.{u}} (g : T ⟶ X.base)
-    (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
-      w ≫ X.curve.fullLevelLocusπ 2 h2 = g }),
-    Nonempty ({ s : T ⟶ Z₂ // s ≫ q = w.1 } ≃
-      { b : OmegaBasis (X.pullbackAlong g).curve.toEllipticCurveGeom //
-        IsLegendreDatum (X.pullbackAlong g)
-          (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b })
+  /-- The per-fibre sections classification, as a **natural** family: sections of `Z₂` over
+  a locus point `w` correspond to the `ω`-bases making `(L_w, b)` a Legendre datum, and the
+  correspondence commutes with restriction along `k : T' ⟶ T` (T-G3b: without this the
+  funnel produces only a `Nonempty`-per-`g` family, which cannot be assembled into a
+  `RelRepData`). -/
+  spec : Nonempty (ScaleTorsorSpec R X h2 Z₂ q)
 
 /-! ## Step-(iv) assembly infrastructure (banked)
 
@@ -681,13 +708,11 @@ condition;
 (iv) the resulting map is a bijection, the two sheets of the double cover matching the
 `±ω` pair (`IsLegendreDatum.neg`) and pinned by `IsLegendreDatum.unit_sq_eq_one`
 (`Moduli/LegendreDatumSymmetry`). -/
-private theorem scaleTorsor_spec {T : Scheme.{u}} (g : T ⟶ X.base)
-    (w : { w : T ⟶ X.curve.fullLevelLocus 2 h2 //
-      w ≫ X.curve.fullLevelLocusπ 2 h2 = g }) :
-    Nonempty ({ s : T ⟶ (glueData R X h2).glued // s ≫ (glueData R X h2).toBase = w.1 } ≃
-      { b : OmegaBasis (X.pullbackAlong g).curve.toEllipticCurveGeom //
-        IsLegendreDatum (X.pullbackAlong g)
-          (X.curve.fullLevelLocusPointsEquiv 2 h2 g w) b }) := by
+private theorem scaleTorsor_spec :
+    Nonempty (ScaleTorsorSpec R X h2 (glueData R X h2).glued (glueData R X h2).toBase) := by
+  -- (T-G3b) The family must be produced **naturally in `T`** (the `nat` field), which is
+  -- how the funnel assembles it into a `RelRepData`; the plan below produces the
+  -- bijections uniformly in `w`, so naturality comes from the same construction.
   -- **Assembly plan (via `nonempty_equiv_of_pseudotorsor`, `M := {ε : Γ(T,⊤)ˣ // ε² = 1}`).**
   -- Write `L_w := X.curve.fullLevelLocusPointsEquiv 2 h2 g w` and
   -- `h2T : IsUnit (2 : Γ(T,⊤))` (from `NIsInvertible.of_hom g h2`, `Nat.cast_ofNat`).
@@ -732,7 +757,7 @@ theorem exists_scaleTorsorData (X : EllObj R) (h2 : NIsInvertible X.base 2) :
      q := (glueData R X h2).toBase
      isFinite := toBase_isFinite R X h2
      etale := toBase_etale R X h2
-     spec := fun {T} g w => scaleTorsor_spec R X h2 g w }⟩
+     spec := scaleTorsor_spec R X h2 }⟩
 
 /-- **(T-E14-AX2, KM engine axiom 2 for the Legendre `δ` — the funnel assembly.)** For
 every elliptic curve `E/S` over a base in which `2` is invertible, the `S`-scheme
@@ -740,15 +765,14 @@ relatively representing the Legendre-marked problem is finite étale over `S`. T
 `Bootstrap`'s `legendreDelta_relativelyRepresentable_finiteEtale`, proved by feeding the
 scale-torsor package (`exists_scaleTorsorData`) through the funnel
 `legendreDelta_relRep_finiteEtale_of_scaleTorsor`. -/
-theorem legendreDelta_relRep_finiteEtale (hR : IsUnit (2 : R)) (X : EllObj R) :
-    ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsFinite f ∧ Etale f ∧
-      ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
-        ({ h : T ⟶ Z // h ≫ f = g } ≃
-          (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g))) := by
+theorem legendreDelta_relRepData_finiteEtale (hR : IsUnit (2 : R)) (X : EllObj R) :
+    ∃ D : ModuliProblem.RelRepData (legendreDeltaProblem R) X,
+      IsFinite D.f ∧ Etale D.f := by
   have h2 : NIsInvertible X.base 2 :=
     nIsInvertible_base_of_isUnit R (by simpa using hR) X
   obtain ⟨D⟩ := exists_scaleTorsorData R X h2
-  exact legendreDelta_relRep_finiteEtale_of_scaleTorsor R X h2 D.Z₂ D.q D.isFinite D.etale
-    (fun g w => (D.spec g w).some)
+  obtain ⟨sp⟩ := D.spec
+  exact legendreDelta_relRepData_of_scaleTorsor R X h2 D.Z₂ D.q sp.toFun sp.nat
+    D.isFinite D.etale
 
 end ModularCurves

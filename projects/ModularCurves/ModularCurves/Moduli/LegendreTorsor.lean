@@ -54,7 +54,7 @@ entry point so this file is decoupled from concurrent edits to `LevelThreeTorsor
   package `legendreDeltaSignEquivariantData :
   EquivariantRelRepData (legendreDeltaSignAction R) X` over the `{±1}`-factor.
 * **The full-`G` target** `exists_legendreTorsorData` + `exists_legendreTorsorData_ulift`.
-* **Quarantined residuals**: `legendreDelta_exists_naturalFamily` ([T-E14-NAT]),
+* **Quarantined residuals** (T-E14-NAT is now GONE — see below):
   `legendreDeltaGAction` ([T-E14-ACT']), `legendreDelta_surjective_of`,
   `legendreDelta_torsor_of`.
 
@@ -98,7 +98,8 @@ entry point so this file is decoupled from concurrent edits to `LevelThreeTorsor
    and a **`Nonempty`-per-`g`** family of bijections (`ScaleTorsorData.spec` is
    `Nonempty`-valued); a `Classical.choice` per `g` gives independent equivalences whose
    `RelRepData.nat` is genuinely unprovable (false for arbitrary choices). Packaging a
-   NATURAL family is the leaf `legendreDelta_exists_naturalFamily` (TRUE — the funnel
+   NATURAL family was the leaf `legendreDelta_exists_naturalFamily`; it is now PROVED
+   and inlined (T-G3b: `legendreFunnelEquiv_nat`) (the funnel
    `sectionsCompSigmaEquiv`/`sigmaCongr…` IS natural, once the naturality of the
    scale-torsor `spec` + `fullLevelLocusPointsEquiv` is threaded). `Z`/`f`/finite/étale
    are GENUINE (carry only the `exists_scaleTorsorData` `sorryAx`, the expected
@@ -193,61 +194,43 @@ noncomputable def legendreDeltaSignAction : ℤˣ →* Aut (legendreDeltaProblem
 `Z`/`f` and their finiteness/étaleness are extracted GENUINELY from the carrier
 `legendreDelta_relRep_finiteEtale` (they carry only the `exists_scaleTorsorData`
 `sorryAx`). The classifying-bijection *natural family* is the quarantined leaf
-`legendreDelta_exists_naturalFamily` (discovery 3). -/
+the natural funnel `legendreDelta_relRepData_finiteEtale` (T-G3b). -/
+
+/-- **The Legendre relative representation datum** (T-G3b): extracted directly from the
+**natural** funnel `legendreDelta_relRepData_finiteEtale`. The quarantined leaf
+`legendreDelta_exists_naturalFamily` ([T-E14-NAT]) is GONE: the naturality now comes from
+`legendreFunnelEquiv_nat` (level square: the locus dictionary, `Moduli/LevelLocusNatural`;
+`ω` square: the `ScaleTorsorSpec.nat` field), so the only unproven input on this leg is the
+geometric `exists_scaleTorsorData`. -/
+noncomputable def legendreDeltaData (hR : IsUnit (2 : R)) (X : EllObj R) :
+    ModuliProblem.RelRepData (legendreDeltaProblem R) X :=
+  (legendreDelta_relRepData_finiteEtale R hR X).choose
 
 /-- The relative representing scheme of the Legendre `δ` (from the carrier). -/
 noncomputable def legendreDeltaZ (hR : IsUnit (2 : R)) (X : EllObj R) : Scheme.{u} :=
-  (legendreDelta_relRep_finiteEtale R hR X).choose
+  (legendreDeltaData R hR X).Z
 
 /-- Its structure morphism to the base (from the carrier). -/
 noncomputable def legendreDeltaF (hR : IsUnit (2 : R)) (X : EllObj R) :
     legendreDeltaZ R hR X ⟶ X.base :=
-  (legendreDelta_relRep_finiteEtale R hR X).choose_spec.choose
+  (legendreDeltaData R hR X).f
 
 /-- The structure map is finite (GENUINE, carrier). -/
 theorem legendreDeltaF_isFinite (hR : IsUnit (2 : R)) (X : EllObj R) :
     IsFinite (legendreDeltaF R hR X) :=
-  (legendreDelta_relRep_finiteEtale R hR X).choose_spec.choose_spec.1
+  (legendreDelta_relRepData_finiteEtale R hR X).choose_spec.1
 
 /-- The structure map is étale (GENUINE, carrier). -/
 theorem legendreDeltaF_etale (hR : IsUnit (2 : R)) (X : EllObj R) :
     Etale (legendreDeltaF R hR X) :=
-  (legendreDelta_relRep_finiteEtale R hR X).choose_spec.choose_spec.2.1
+  (legendreDelta_relRepData_finiteEtale R hR X).choose_spec.2
 
-/-- The carrier's per-`g` (`Nonempty`) classifying bijections. -/
+/-- The carrier's per-`g` classifying bijections (now genuinely natural). -/
 theorem legendreDeltaF_nonempty_eqv (hR : IsUnit (2 : R)) (X : EllObj R)
     {T : Scheme.{u}} (g : T ⟶ X.base) :
     Nonempty ({ h : T ⟶ legendreDeltaZ R hR X // h ≫ legendreDeltaF R hR X = g } ≃
       (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g))) :=
-  (legendreDelta_relRep_finiteEtale R hR X).choose_spec.choose_spec.2.2 g
-
-/-- **QUARANTINED [T-E14-NAT] (TRUE)** — a NATURAL family of classifying bijections for
-the Legendre carrier. The carrier `legendreDelta_relRep_finiteEtale` only ships a
-`Nonempty`-per-`g` family (`ScaleTorsorData.spec` is `Nonempty`-valued), so `RelRepData`'s
-`nat` field has no witness yet (module docstring, discovery 3). TRUE: the funnel
-`legendreDelta_relRep_finiteEtale_of_scaleTorsor` (`sectionsCompSigmaEquiv` ∘
-`sigmaCongrRight spec` ∘ `sigmaCongrLeft (fullLevelLocusPointsEquiv)` ∘
-`sigmaSubtypePairEquiv`) IS natural in `T`, once the naturality of `spec` and of
-`fullLevelLocusPointsEquiv` is threaded. -/
-theorem legendreDelta_exists_naturalFamily (hR : IsUnit (2 : R)) (X : EllObj R) :
-    ∃ eqv : ∀ {T : Scheme.{u}} (g : T ⟶ X.base),
-        { h : T ⟶ legendreDeltaZ R hR X // h ≫ legendreDeltaF R hR X = g } ≃
-          (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g)),
-      ∀ {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T)
-        (h : { h : T ⟶ legendreDeltaZ R hR X // h ≫ legendreDeltaF R hR X = g }),
-        eqv (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ =
-          (legendreDeltaProblem R).map (X.pullbackAlongMap g k).op (eqv g h) := by
-  sorry
-
-/-- **The Legendre relative representation datum** on the carrier: `Z`/`f` GENUINE from
-`legendreDelta_relRep_finiteEtale`; the classifying natural family from
-`legendreDelta_exists_naturalFamily` ([T-E14-NAT]). Mirror of `levelThreeData`. -/
-noncomputable def legendreDeltaData (hR : IsUnit (2 : R)) (X : EllObj R) :
-    ModuliProblem.RelRepData (legendreDeltaProblem R) X where
-  Z := legendreDeltaZ R hR X
-  f := legendreDeltaF R hR X
-  eqv := (legendreDelta_exists_naturalFamily R hR X).choose
-  nat := (legendreDelta_exists_naturalFamily R hR X).choose_spec
+  ⟨(legendreDeltaData R hR X).eqv g⟩
 
 @[simp]
 theorem legendreDeltaData_Z (hR : IsUnit (2 : R)) (X : EllObj R) :

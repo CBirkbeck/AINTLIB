@@ -219,8 +219,9 @@ theorem legendreDelta_relativelyRepresentable_finiteEtale (hR : IsUnit (2 : R))
     ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsFinite f ∧ Etale f ∧
       ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
         ({ h : T ⟶ Z // h ≫ f = g } ≃
-          (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g))) :=
-  legendreDelta_relRep_finiteEtale R hR X
+          (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g))) := by
+  obtain ⟨D, hfin, het⟩ := legendreDelta_relRepData_finiteEtale R hR X
+  exact ⟨D.Z, D.f, hfin, het, fun {T} g => ⟨D.eqv g⟩⟩
 
 /-! #### T-E14 statement-layer correction (2026-07-14, OMEGA — adversarial source check)
 
