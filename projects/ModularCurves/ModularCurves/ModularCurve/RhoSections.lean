@@ -6218,7 +6218,7 @@ open scoped FintypeCatDiscrete in
 /-- **[T-3E-A core]** The pointwise translation relation: at a field point, the
 classified lift of the descended structure and the section lift differ by the
 group action (both carve to the same pulled structure). -/
-theorem rhoOfSection_zrel (D : GaloisRepData N) [Fact (1 < N)]
+theorem rhoOfSection_zrel
     {X : EllObj (CommRingCat.of ℚ)}
     (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
     [IsAffineHom d.f]
@@ -6386,7 +6386,7 @@ theorem rhoOfSection_zrel (D : GaloisRepData N) [Fact (1 < N)]
 open scoped FintypeCatDiscrete in
 /-- **[T-3E-A] ROUNDTRIP A**: descending the structure of a section recovers the
 section (clopen-agreement engine + the pointwise translation relation). -/
-theorem strSection_rhoOfSection (D : GaloisRepData N) [Fact (1 < N)]
+theorem strSection_rhoOfSection
     {X : EllObj (CommRingCat.of ℚ)}
     (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
     [IsAffineHom d.f]
@@ -6465,7 +6465,7 @@ open scoped FintypeCatDiscrete in
 point of the section cover of `strSection str`, the section structure and the
 pulled structure agree (both classified lifts lie in one orbit by the pointwise
 orbit lemma, and the carve is orbit-invariant). -/
-theorem strSection_pull_pointwise (D : GaloisRepData N) [Fact (1 < N)]
+theorem strSection_pull_pointwise
     {X : EllObj (CommRingCat.of ℚ)}
     (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
     [IsAffineHom d.f]
@@ -6705,6 +6705,229 @@ theorem strSection_pull_pointwise (D : GaloisRepData N) [Fact (1 < N)]
   refine Eq.trans
     (congrArg (fun m => RhoLevelStructure.pull D m str) hMAPEQ) ?_
   exact RhoLevelStructure.pull_comp D _ _ _
+
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-B fst-pointwise]** The coordinate legs of the pulled structure and
+the section structure agree at every field-valued torsion point. -/
+theorem strSection_pull_fst_pointwise
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve)
+    (hinv₀ : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base)
+      (strSection D d k str)) N)
+    {Ω : Type} [Field Ω] [IsAlgClosed Ω]
+    (ζ₀ : Spec (CommRingCat.of Ω) ⟶
+      pullback (d.σZ.relQuotientπ d.f d.over_base) (strSection D d k str))
+    (ξt : Spec (CommRingCat.of Ω) ⟶ strCover D (X.pullbackAlong k))
+    (hξt : ξt ≫ strPr D (X.pullbackAlong k) =
+      ζ₀ ≫ pullback.snd (d.σZ.relQuotientπ d.f d.over_base)
+        (strSection D d k str))
+    (ξv : Spec (CommRingCat.of Ω) ⟶
+      ((X.pullbackAlong k).pullbackAlong
+        (secCover D d (strSection D d k str))).curve.torsion N)
+    (hξv : ξv ≫ ((X.pullbackAlong k).pullbackAlong
+      (secCover D d (strSection D d k str))).curve.torsionπ N = ζ₀) :
+    ξv ≫ ((RhoLevelStructure.pull D
+      ((X.pullbackAlong k).pullbackAlongπ
+        (secCover D d (strSection D d k str))) str).torsionIso.hom ≫
+      pullback.fst (vRhoπ D) _) =
+    ξv ≫ ((secStruct D d k (strSection D d k str)
+      (strSection_struct D d k str) hinv₀).torsionIso.hom ≫
+      pullback.fst (vRhoπ D) _) := by
+  classical
+  have hBP := strSection_pull_pointwise D d k str hinv₀ ζ₀ ξt hξt
+  -- lift the torsion point along the point base change
+  have hpb := isPullback_torsionMapOfEllHom
+    (EllObj.homToPullbackAlong
+      (X.pullbackAlongMap k ((ζ₀) ≫
+        pullback.snd (d.σZ.relQuotientπ d.f d.over_base)
+          (strSection D d k str)))
+      (ζ₀) rfl) N
+  have hcone : ξv ≫ ((X.pullbackAlong k).pullbackAlong
+      (secCover D d (strSection D d k str))).curve.torsionπ N =
+      𝟙 _ ≫ ζ₀ := by
+    rw [Category.id_comp]
+    exact hξv
+  -- the lifted torsion point
+  have hfac := hpb.lift_fst (ξv) (𝟙 _) hcone
+  -- read both structures through the lift
+  have h₁ := pullTorsionIso_fst D
+    (EllObj.homToPullbackAlong
+      (X.pullbackAlongMap k ((ζ₀) ≫
+        pullback.snd (d.σZ.relQuotientπ d.f d.over_base)
+          (strSection D d k str)))
+      (ζ₀) rfl)
+    (RhoLevelStructure.pull D
+      ((X.pullbackAlong k).pullbackAlongπ
+        (secCover D d (strSection D d k str))) str)
+  have h₂ := pullTorsionIso_fst D
+    (EllObj.homToPullbackAlong
+      (X.pullbackAlongMap k ((ζ₀) ≫
+        pullback.snd (d.σZ.relQuotientπ d.f d.over_base)
+          (strSection D d k str)))
+      (ζ₀) rfl)
+    (secStruct D d k (strSection D d k str)
+      (strSection_struct D d k str) hinv₀)
+  -- assemble: precompose with the lifted point and transport through hBP
+  calc ξv ≫ ((RhoLevelStructure.pull D
+        ((X.pullbackAlong k).pullbackAlongπ
+          (secCover D d (strSection D d k str))) str).torsionIso.hom ≫
+        pullback.fst (vRhoπ D) _)
+      = (hpb.lift (ξv) (𝟙 _) hcone ≫
+          torsionMapOfEllHom _ N) ≫
+          ((RhoLevelStructure.pull D
+            ((X.pullbackAlong k).pullbackAlongπ
+              (secCover D d (strSection D d k str))) str).torsionIso.hom ≫
+            pullback.fst (vRhoπ D) _) :=
+        (congrArg (· ≫ ((RhoLevelStructure.pull D
+          ((X.pullbackAlong k).pullbackAlongπ
+            (secCover D d (strSection D d k str))) str).torsionIso.hom ≫
+          pullback.fst (vRhoπ D) _)) hfac).symm
+    _ = hpb.lift (ξv) (𝟙 _) hcone ≫
+          ((RhoLevelStructure.pull D _ (RhoLevelStructure.pull D
+            ((X.pullbackAlong k).pullbackAlongπ
+              (secCover D d (strSection D d k str))) str)).torsionIso.hom ≫
+            pullback.fst (vRhoπ D) _) :=
+        (Category.assoc _ _ _).trans
+          (congrArg (hpb.lift (ξv) (𝟙 _) hcone ≫ ·) h₁.symm)
+    _ = hpb.lift (ξv) (𝟙 _) hcone ≫
+          ((RhoLevelStructure.pull D _ (secStruct D d k
+            (strSection D d k str) (strSection_struct D d k str)
+            hinv₀)).torsionIso.hom ≫ pullback.fst (vRhoπ D) _) := by
+        exact congrArg (fun (β : RhoLevelStructure D
+            (X.pullbackAlong (((ζ₀) ≫ pullback.snd
+              (d.σZ.relQuotientπ d.f d.over_base)
+              (strSection D d k str)) ≫ k)).structMap
+            (X.pullbackAlong (((ζ₀) ≫ pullback.snd
+              (d.σZ.relQuotientπ d.f d.over_base)
+              (strSection D d k str)) ≫ k)).curve) =>
+          hpb.lift (ξv) (𝟙 _) hcone ≫
+            (β.torsionIso.hom ≫ pullback.fst (vRhoπ D) _)) hBP.symm
+    _ = (hpb.lift (ξv) (𝟙 _) hcone ≫
+          torsionMapOfEllHom _ N) ≫
+          ((secStruct D d k (strSection D d k str)
+            (strSection_struct D d k str) hinv₀).torsionIso.hom ≫
+            pullback.fst (vRhoπ D) _) :=
+        (congrArg (hpb.lift (ξv) (𝟙 _) hcone ≫ ·) h₂).trans
+          (Category.assoc _ _ _).symm
+    _ = ξv ≫ ((secStruct D d k (strSection D d k str)
+          (strSection_struct D d k str) hinv₀).torsionIso.hom ≫
+          pullback.fst (vRhoπ D) _) :=
+        congrArg (· ≫ ((secStruct D d k (strSection D d k str)
+          (strSection_struct D d k str) hinv₀).torsionIso.hom ≫
+          pullback.fst (vRhoπ D) _)) hfac
+
+
+
+
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-B glue]** THE SECTION-COVER COMPARISON: the pull of a structure
+along its own section cover is the section structure (geometric-point engine at
+the ρ-scheme + the pointwise comparison). -/
+theorem strSection_pull_eq_secStruct
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve)
+    (hinv₀ : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base)
+      (strSection D d k str)) N) :
+    RhoLevelStructure.pull D
+      ((X.pullbackAlong k).pullbackAlongπ
+        (secCover D d (strSection D d k str))) str =
+      secStruct D d k (strSection D d k str)
+        (strSection_struct D d k str) hinv₀ := by
+  classical
+  refine RhoLevelStructure.ext_torsionIso (Iso.ext (pullback.hom_ext ?_ ?_))
+  swap
+  · -- snd legs
+    exact (pullTorsionIso_over D _ str).trans
+      (secStruct D d k (strSection D d k str)
+        (strSection_struct D d k str) hinv₀).over_T.symm
+  -- fst legs via the geometric-point engine at the ρ-scheme
+  haveI hFinV : IsFinite (vRhoπ D) := (vRhoπ_finite_etale D).1
+  haveI hEtV : Etale (vRhoπ D) := (vRhoπ_finite_etale D).2
+  haveI hSepV : IsSeparated (vRhoπ D) :=
+    inferInstanceAs (IsSeparated (Spec.map (CommRingCat.ofHom
+      (algebraMap ℚ (vRhoAlgebra D : Type 0)))))
+  have hfg : ((RhoLevelStructure.pull D
+      ((X.pullbackAlong k).pullbackAlongπ
+        (secCover D d (strSection D d k str))) str).torsionIso.hom ≫
+      pullback.fst (vRhoπ D) _) ≫ vRhoπ D =
+      ((secStruct D d k (strSection D d k str)
+        (strSection_struct D d k str) hinv₀).torsionIso.hom ≫
+      pullback.fst (vRhoπ D) _) ≫ vRhoπ D := by
+    rw [Category.assoc, pullback.condition, Category.assoc,
+      pullback.condition, ← Category.assoc, ← Category.assoc]
+    refine congrArg (· ≫ _) ?_
+    exact (RhoLevelStructure.pull D
+      ((X.pullbackAlong k).pullbackAlongπ
+        (secCover D d (strSection D d k str))) str).over_T.trans
+      (secStruct D d k (strSection D d k str)
+        (strSection_struct D d k str) hinv₀).over_T.symm
+  refine eq_of_forall_geomPt_agree (vRhoπ D) _ _ hfg ?_
+  intro ω
+  haveI hFinPr : IsFinite (strPr D (X.pullbackAlong k)) :=
+    MorphismProperty.pullback_fst _ _ (wFramesπ_finite_etale D).1
+  obtain ⟨ξt, hξt⟩ := exists_specPoint_lift_of_finite_surjective
+    (strPr D (X.pullbackAlong k))
+    ((geomPt _ ω ≫ ((X.pullbackAlong k).pullbackAlong
+      (secCover D d (strSection D d k str))).curve.torsionπ N) ≫
+      pullback.snd (d.σZ.relQuotientπ d.f d.over_base)
+        (strSection D d k str))
+  exact strSection_pull_fst_pointwise D d k str hinv₀
+    (geomPt _ ω ≫ ((X.pullbackAlong k).pullbackAlong
+      (secCover D d (strSection D d k str))).curve.torsionπ N) ξt hξt
+    (geomPt _ ω) rfl
+open scoped FintypeCatDiscrete in
+/-- **[T-3E-B] ROUNDTRIP B**: the structure descended from the section of a
+structure is the structure itself. -/
+theorem rhoOfSection_strSection
+    {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' : Scheme.{0}} (k : T' ⟶ X.base)
+    (str : RhoLevelStructure D (X.pullbackAlong k).structMap
+      (X.pullbackAlong k).curve)
+    (hinv₀ : NIsInvertible (pullback (d.σZ.relQuotientπ d.f d.over_base)
+      (strSection D d k str)) N) :
+    rhoOfSection D d k (strSection D d k str)
+      (strSection_struct D d k str) hinv₀ = str := by
+  classical
+  haveI hFinsc : IsFinite (secCover D d (strSection D d k str)) :=
+    MorphismProperty.pullback_snd _ _
+      (d.σZ.isFinite_relQuotientπ_of_free d.f d.over_base
+        (d.free_on_points (sympFramedAut_freeAction D)))
+  haveI hEtsc : Etale (secCover D d (strSection D d k str)) :=
+    MorphismProperty.pullback_snd _ _
+      (d.σZ.etale_relQuotientπ_of_free d.f d.over_base
+        (d.free_on_points (sympFramedAut_freeAction D)))
+  haveI hFlsc : Flat (secCover D d (strSection D d k str)) :=
+    MorphismProperty.pullback_snd _ _
+      (d.σZ.flat_relQuotientπ_of_free d.f d.over_base
+        (d.free_on_points (sympFramedAut_freeAction D)))
+  haveI hSusc : Surjective (secCover D d (strSection D d k str)) :=
+    MorphismProperty.pullback_snd _ _
+      (d.σZ.surjective_relQuotientπ_of_free d.f d.over_base)
+  haveI hQCsc : QuasiCompact (secCover D d (strSection D d k str)) := by
+    haveI : IsAffineHom (secCover D d (strSection D d k str)) := inferInstance
+    infer_instance
+  exact (@rhoOfSection_eq_descend N ‹_› D ‹_› X d ‹_› T' k
+    (strSection D d k str)
+    (strSection_struct D d k str) hinv₀ hFinsc hEtsc hFlsc hSusc hQCsc).trans
+    (descend_eq_of_pull D
+      (c := secCover D d (strSection D d k str))
+      (α := secStruct D d k (strSection D d k str)
+        (strSection_struct D d k str) hinv₀)
+      (secHhom D d k (strSection D d k str)
+        (strSection_struct D d k str) hinv₀)
+      (secHinv D d k (strSection D d k str)
+        (strSection_struct D d k str) hinv₀)
+      str (strSection_pull_eq_secStruct D d k str hinv₀))
 
 end MutualInverses
 
