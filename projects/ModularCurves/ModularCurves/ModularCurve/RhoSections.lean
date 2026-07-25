@@ -6992,6 +6992,75 @@ theorem strCoverMapEll_baseHom {X : EllObj (CommRingCat.of ℚ)}
     {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
     (strCoverMapEll D g' k').baseHom = strCoverMap D g' k' := rfl
 
+/-- **[T-YR-3E plumbing]** The `V_ρ`-side comparison over the two pullback
+presentations. -/
+noncomputable def vMapOf {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    pullback (vRhoπ D) (X.pullbackAlong (k' ≫ g')).structMap ⟶
+      pullback (vRhoπ D) (X.pullbackAlong g').structMap :=
+  pullback.map _ _ _ _ (𝟙 (vRho D)) k' (𝟙 (Spec (CommRingCat.of ℚ)))
+    (by rw [Category.comp_id, Category.id_comp])
+    (by
+      show (X.pullbackAlong (k' ≫ g')).structMap ≫ 𝟙 _ =
+        k' ≫ (X.pullbackAlong g').structMap
+      show ((k' ≫ g') ≫ X.structMap) ≫ 𝟙 _ = k' ≫ g' ≫ X.structMap
+      rw [Category.comp_id, Category.assoc])
+
+@[reassoc]
+theorem vMapOf_fst {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    vMapOf D g' k' ≫
+        pullback.fst (vRhoπ D) (X.pullbackAlong g').structMap =
+      pullback.fst (vRhoπ D) (X.pullbackAlong (k' ≫ g')).structMap := by
+  refine (pullback.lift_fst _ _ _).trans ?_
+  exact Category.comp_id _
+
+@[reassoc]
+theorem vMapOf_snd {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    vMapOf D g' k' ≫
+        pullback.snd (vRhoπ D) (X.pullbackAlong g').structMap =
+      pullback.snd (vRhoπ D) (X.pullbackAlong (k' ≫ g')).structMap ≫ k' :=
+  pullback.lift_snd _ _ _
+
+/-- **[T-YR-3E]** Naturality of the tautological `V_ρ`-points. -/
+@[reassoc]
+theorem strCoverMap_strVPt {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (v : Fin 2 → ZMod N) :
+    strCoverMap D g' k' ≫ strVPt D (X.pullbackAlong g') v =
+      strVPt D (X.pullbackAlong (k' ≫ g')) v ≫ vMapOf D g' k' := by
+  apply pullback.hom_ext
+  · rw [Category.assoc, strVPt_fst, Category.assoc, vMapOf_fst, strVPt_fst,
+      ← Category.assoc, strCoverMap_taut]
+  · rw [Category.assoc, strVPt_snd, Category.assoc, vMapOf_snd]
+    exact (strCoverMap_pr D g' k').trans
+      (((congrArg (· ≫ k') (strVPt_snd D (X.pullbackAlong (k' ≫ g')) v)).symm).trans
+        (Category.assoc _ _ _))
+
+/-- **[T-YR-3E]** The pulled trivialization square: the torsion base change
+intertwines the structure's iso with the `V_ρ`-side comparison. -/
+@[reassoc]
+theorem pullTorsionIso_vMapOf {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (str0 : RhoLevelStructure D (X.pullbackAlong g').structMap
+      (X.pullbackAlong g').curve) :
+    torsionMapOfEllHom (X.pullbackAlongMap g' k') N ≫ str0.torsionIso.hom =
+      (pullTorsionIso D (X.pullbackAlongMap g' k') str0).hom ≫
+        vMapOf D g' k' := by
+  apply pullback.hom_ext
+  · rw [Category.assoc, Category.assoc, vMapOf_fst]
+    exact (pullTorsionIso_fst D (X.pullbackAlongMap g' k') str0).symm
+  · refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg (torsionMapOfEllHom _ N ≫ ·) str0.over_T) ?_
+    refine Eq.trans (torsionMapOfEllHom_π _ N) ?_
+    refine Eq.symm ?_
+    refine Eq.trans (Category.assoc _ _ _) ?_
+    refine Eq.trans (congrArg ((pullTorsionIso D _ str0).hom ≫ ·)
+      (vMapOf_snd D g' k')) ?_
+    refine Eq.trans (Category.assoc _ _ _).symm ?_
+    exact congrArg (· ≫ k') (pullTorsionIso_over D _ str0)
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
