@@ -7095,6 +7095,299 @@ theorem sympFramedSmulNat_one_app {A : EllObj (CommRingCat.of ℚ)}
   · show v.val.2.val ≫ wFramesRightMul D 1 = v.val.2.val
     rw [wFramesRightMul_one, Category.comp_id]
 
+/-- **[T-YR-3E (E1ii)]** THE POINTWISE strZ-PULL COMPARISON: at every field
+point of the composite cover, the classified point of the pulled structure and
+the comparison-transported classified point of the original agree (equal frames
+and equal carve structures force the trivial translation). -/
+theorem strZ_pull_pointwise {X : EllObj (CommRingCat.of ℚ)}
+    (d : ModuliProblem.EquivariantRelRepData (sympFramedAut D) X)
+    [IsAffineHom d.f]
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T')
+    (str0 : RhoLevelStructure D (X.pullbackAlong g').structMap
+      (X.pullbackAlong g').curve)
+    {Ω : Type} [Field Ω] [IsAlgClosed Ω]
+    (ξt : Spec (CommRingCat.of Ω) ⟶ strCover D (X.pullbackAlong (k' ≫ g'))) :
+    ξt ≫ (strZ D d (k' ≫ g')
+        (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1 =
+      ξt ≫ strCoverMap D g' k' ≫ (strZ D d g' str0).1 := by
+  classical
+  -- transports of the two classified values to the point object
+  have hh₁ : ξt ≫ (strPr D (X.pullbackAlong (k' ≫ g')) ≫ (k' ≫ g')) =
+      (X.pullbackAlongπ ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+        (k' ≫ g'))).baseHom := rfl
+  have hVAL'' : d.eqv (strPr D (X.pullbackAlong (k' ≫ g')) ≫ (k' ≫ g'))
+      (strZ D d (k' ≫ g')
+        (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)) =
+      (sympFramedProblem D).map (EllObj.toPullbackAlong
+        (X.pullbackAlongMap (k' ≫ g')
+          (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+        (strValue D (RhoLevelStructure.pull D
+          (X.pullbackAlongMap g' k') str0)) :=
+    (d.eqv (strPr D (X.pullbackAlong (k' ≫ g')) ≫ (k' ≫ g'))).apply_symm_apply _
+  have hVAL' : d.eqv (strPr D (X.pullbackAlong g') ≫ g') (strZ D d g' str0) =
+      (sympFramedProblem D).map (EllObj.toPullbackAlong
+        (X.pullbackAlongMap g' (strPr D (X.pullbackAlong g')))).op
+        (strValue D str0) :=
+    (d.eqv (strPr D (X.pullbackAlong g') ≫ g')).apply_symm_apply _
+  have pf₁ : (ξt ≫ (strZ D d (k' ≫ g')
+      (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1) ≫ d.f =
+      ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')) := by
+    rw [Category.assoc, (strZ D d (k' ≫ g') _).2, ← Category.assoc]
+    exact rfl
+  have heqv₁ : d.eqv ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))
+      ⟨ξt ≫ (strZ D d (k' ≫ g')
+        (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)).1, pf₁⟩ =
+      (sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+            (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+        (strValue D (RhoLevelStructure.pull D
+          (X.pullbackAlongMap g' k') str0)) := by
+    have hnat := rhoMap_eqv d.toRelRepData
+      (EllObj.homToPullbackAlong (X.pullbackAlongπ
+        ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁)
+      ξt rfl rfl
+      (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _)
+      (strZ D d (k' ≫ g')
+        (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0))
+    rw [hVAL''] at hnat
+    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+      (EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+        (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+      (EllObj.homToPullbackAlong (X.pullbackAlongπ
+        ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁).op
+      (strValue D (RhoLevelStructure.pull D
+        (X.pullbackAlongMap g' k') str0))).symm
+  have hh₂ : (ξt ≫ strCoverMap D g' k') ≫
+      (strPr D (X.pullbackAlong g') ≫ g') =
+      (X.pullbackAlongπ ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+        (k' ≫ g'))).baseHom := by
+    show (ξt ≫ strCoverMap D g' k') ≫ strPr D (X.pullbackAlong g') ≫ g' =
+      (ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ k' ≫ g'
+    rw [Category.assoc, ← Category.assoc (strCoverMap D g' k'),
+      strCoverMap_pr]
+    simp only [Category.assoc]
+    exact rfl
+  have pf₂ : ((ξt ≫ strCoverMap D g' k') ≫ (strZ D d g' str0).1) ≫ d.f =
+      ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')) := by
+    rw [Category.assoc, (strZ D d g' str0).2, ← Category.assoc]
+    exact hh₂.trans rfl
+  have heqv₂ : d.eqv ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))
+      ⟨(ξt ≫ strCoverMap D g' k') ≫ (strZ D d g' str0).1, pf₂⟩ =
+      (sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+          (ξt ≫ strCoverMap D g' k') hh₂) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap g'
+            (strPr D (X.pullbackAlong g')))).op
+        (strValue D str0) := by
+    have hnat := rhoMap_eqv d.toRelRepData
+      (EllObj.homToPullbackAlong (X.pullbackAlongπ
+        ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+        (ξt ≫ strCoverMap D g' k') hh₂)
+      (ξt ≫ strCoverMap D g' k') rfl hh₂
+      (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _)
+      (strZ D d g' str0)
+    rw [hVAL'] at hnat
+    exact hnat.symm.trans (FunctorToTypes.map_comp_apply (sympFramedProblem D)
+      (EllObj.toPullbackAlong (X.pullbackAlongMap g'
+        (strPr D (X.pullbackAlong g')))).op
+      (EllObj.homToPullbackAlong (X.pullbackAlongπ
+        ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+        (ξt ≫ strCoverMap D g' k') hh₂).op
+      (strValue D str0)).symm
+  -- frames agree (trivial translation)
+  have hframe : ((sympFramedProblem D).map
+      ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+        ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+        (ξt ≫ strCoverMap D g' k') hh₂) ≫
+        EllObj.toPullbackAlong (X.pullbackAlongMap g'
+          (strPr D (X.pullbackAlong g')))).op
+      (strValue D str0)).val.2.val =
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+            (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+        (strValue D (RhoLevelStructure.pull D
+          (X.pullbackAlongMap g' k') str0))).val.2.val ≫
+      wFramesRightMul D 1 := by
+    show ((ξt ≫ strCoverMap D g' k') ≫ 𝟙 _) ≫
+        strTaut D (X.pullbackAlong g') =
+      ((ξt ≫ 𝟙 _) ≫ strTaut D (X.pullbackAlong (k' ≫ g'))) ≫
+        wFramesRightMul D 1
+    rw [wFramesRightMul_one, Category.comp_id, Category.comp_id,
+      Category.comp_id, Category.assoc, strCoverMap_taut]
+  -- invertibility discharges
+  have hinvSpec : NIsInvertible (Spec (CommRingCat.of ℚ)) N := by
+    have hq : IsUnit ((N : ℚ)) := isUnit_iff_ne_zero.mpr
+      (Nat.cast_ne_zero.mpr (NeZero.ne N))
+    have := hq.map (Scheme.ΓSpecIso (CommRingCat.of ℚ)).inv.hom
+    rwa [map_natCast] at this
+  have hinvΩob : NIsInvertible (X.pullbackAlong
+      ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))).base N :=
+    NIsInvertible.of_hom
+      (((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')) ≫
+        X.structMap) hinvSpec
+  have hinvCover'' : NIsInvertible (strCover D (X.pullbackAlong (k' ≫ g'))) N :=
+    NIsInvertible.of_hom (strPr D (X.pullbackAlong (k' ≫ g')) ≫
+      (X.pullbackAlong (k' ≫ g')).structMap) hinvSpec
+  have hinvCover' : NIsInvertible (strCover D (X.pullbackAlong g')) N :=
+    NIsInvertible.of_hom (strPr D (X.pullbackAlong g') ≫
+      (X.pullbackAlong g').structMap) hinvSpec
+  -- carve structures agree
+  have hN₁ := rhoLevelStructureOfCarve_map D
+    ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+      ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁) ≫
+      EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+        (strPr D (X.pullbackAlong (k' ≫ g')))))
+    hinvΩob hinvCover''
+    (strValue D (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0))
+  have hV'' := rhoLevelStructureOfCarve_strValue D
+    (RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0) hinvCover''
+  have hN₂ := rhoLevelStructureOfCarve_map D
+    ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+      ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+      (ξt ≫ strCoverMap D g' k') hh₂) ≫
+      EllObj.toPullbackAlong (X.pullbackAlongMap g'
+        (strPr D (X.pullbackAlong g'))))
+    hinvΩob hinvCover' (strValue D str0)
+  have hV' := rhoLevelStructureOfCarve_strValue D str0 hinvCover'
+  have hMAPEQ : (((EllObj.homToPullbackAlong (X.pullbackAlongπ
+      ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁ ≫
+      EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+        (strPr D (X.pullbackAlong (k' ≫ g'))))) ≫
+      (X.pullbackAlong (k' ≫ g')).pullbackAlongπ
+        (strPr D (X.pullbackAlong (k' ≫ g')))) ≫
+      X.pullbackAlongMap g' k') =
+      ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+        ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+        (ξt ≫ strCoverMap D g' k') hh₂ ≫
+        EllObj.toPullbackAlong (X.pullbackAlongMap g'
+          (strPr D (X.pullbackAlong g')))) ≫
+        (X.pullbackAlong g').pullbackAlongπ
+          (strPr D (X.pullbackAlong g'))) := by
+    apply (EllObj.homPullbackAlongEquiv X g' _).injective
+    refine Subtype.ext (Prod.ext ?_ ?_)
+    · show _ ≫ X.pullbackAlongπ g' = _ ≫ X.pullbackAlongπ g'
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (_ ≫ ·)
+        (ModuliProblem.pullbackAlongMap_pullbackAlongπ X g' k')) ?_
+      refine Eq.trans (congrArg (· ≫ X.pullbackAlongπ (k' ≫ g'))
+        ((Category.assoc _ _ _).trans (congrArg (_ ≫ ·)
+          (EllObj.toPullbackAlong_pullbackAlongπ
+            (X.pullbackAlongMap (k' ≫ g')
+              (strPr D (X.pullbackAlong (k' ≫ g')))))))) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (_ ≫ ·)
+        (ModuliProblem.pullbackAlongMap_pullbackAlongπ X (k' ≫ g')
+          (strPr D (X.pullbackAlong (k' ≫ g'))))) ?_
+      refine Eq.trans (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _) ?_
+      refine Eq.symm ?_
+      refine Eq.trans (congrArg (· ≫ X.pullbackAlongπ g')
+        ((Category.assoc _ _ _).trans (congrArg (_ ≫ ·)
+          (EllObj.toPullbackAlong_pullbackAlongπ
+            (X.pullbackAlongMap g' (strPr D (X.pullbackAlong g'))))))) ?_
+      refine Eq.trans (Category.assoc _ _ _) ?_
+      refine Eq.trans (congrArg (_ ≫ ·)
+        (ModuliProblem.pullbackAlongMap_pullbackAlongπ X g'
+          (strPr D (X.pullbackAlong g')))) ?_
+      exact EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
+    · show (((ξt ≫ 𝟙 _) ≫ 𝟙 _) ≫
+          strPr D (X.pullbackAlong (k' ≫ g'))) ≫ k' =
+        ((ξt ≫ strCoverMap D g' k') ≫ 𝟙 _) ≫
+          strPr D (X.pullbackAlong g')
+      rw [Category.comp_id, Category.comp_id, Category.comp_id,
+        Category.assoc, Category.assoc, strCoverMap_pr]
+      exact rfl
+  have hcarve : rhoLevelStructureOfCarve D
+      (X.pullbackAlong ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+        (k' ≫ g'))).structMap
+      (X.pullbackAlong ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+        (k' ≫ g'))).curve hinvΩob
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+            (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+        (strValue D (RhoLevelStructure.pull D
+          (X.pullbackAlongMap g' k') str0))).val.1
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+            (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+        (strValue D (RhoLevelStructure.pull D
+          (X.pullbackAlongMap g' k') str0))).val.2.val
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+            (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+        (strValue D (RhoLevelStructure.pull D
+          (X.pullbackAlongMap g' k') str0))).val.2.property
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))) ξt hh₁) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap (k' ≫ g')
+            (strPr D (X.pullbackAlong (k' ≫ g'))))).op
+        (strValue D (RhoLevelStructure.pull D
+          (X.pullbackAlongMap g' k') str0))).property =
+      rhoLevelStructureOfCarve D
+      (X.pullbackAlong ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+        (k' ≫ g'))).structMap
+      (X.pullbackAlong ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+        (k' ≫ g'))).curve hinvΩob
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+          (ξt ≫ strCoverMap D g' k') hh₂) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap g'
+            (strPr D (X.pullbackAlong g')))).op
+        (strValue D str0)).val.1
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+          (ξt ≫ strCoverMap D g' k') hh₂) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap g'
+            (strPr D (X.pullbackAlong g')))).op
+        (strValue D str0)).val.2.val
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+          (ξt ≫ strCoverMap D g' k') hh₂) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap g'
+            (strPr D (X.pullbackAlong g')))).op
+        (strValue D str0)).val.2.property
+      ((sympFramedProblem D).map
+        ((EllObj.homToPullbackAlong (X.pullbackAlongπ
+          ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g')))
+          (ξt ≫ strCoverMap D g' k') hh₂) ≫
+          EllObj.toPullbackAlong (X.pullbackAlongMap g'
+            (strPr D (X.pullbackAlong g')))).op
+        (strValue D str0)).property := by
+    refine hN₁.trans (Eq.trans ?_ hN₂.symm)
+    refine Eq.trans (congrArg (RhoLevelStructure.pull D _) hV'') ?_
+    refine Eq.trans (congrArg (fun β => RhoLevelStructure.pull D _
+      (RhoLevelStructure.pull D _ β))
+      (rfl : RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0 =
+        RhoLevelStructure.pull D (X.pullbackAlongMap g' k') str0)) ?_
+    refine Eq.trans (RhoLevelStructure.pull_comp D _ _ _).symm ?_
+    refine Eq.trans (RhoLevelStructure.pull_comp D _ _ _).symm ?_
+    refine Eq.trans (congrArg (fun m => RhoLevelStructure.pull D m str0)
+      hMAPEQ) ?_
+    refine Eq.trans (RhoLevelStructure.pull_comp D _ _ _) ?_
+    exact congrArg (RhoLevelStructure.pull D _) hV'.symm
+  -- the value comparison at the trivial translation
+  have hvc := value_eq_smulNat_of_carve_eq D hinvΩob _ _ 1 hframe hcarve
+  rw [sympFramedSmulNat_one_app] at hvc
+  have hz := congrArg Subtype.val
+    ((d.eqv ((ξt ≫ strPr D (X.pullbackAlong (k' ≫ g'))) ≫ (k' ≫ g'))).injective
+      (heqv₂.trans (hvc.trans heqv₁.symm)))
+  refine Eq.trans ?_ (Category.assoc _ _ _)
+  exact hz.symm
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
