@@ -26904,3 +26904,39 @@ New work tickets: 9. Cleanups: **[CLEANUP-17]** `YRho.lean` after T-G1 ·
   closed sets), so each component is open; a clopen nonempty proper subset contradicts
   connectedness. Pure topology; mathlib has `LocallyFinite.isClosed_iUnion` and
   `isClosed_of_mem_irreducibleComponents`. **Buildable now, independent of SUB1/SUB2.**
+
+
+### [T-G3a-SUB1] Point-anchored geometric point
+- **Status**: open · **Parent**: T-G3a · **File**: `Moduli/GammaH.lean` (next to
+  `EllObj.exists_geometricPoint`, :896) · **Type**: theorem
+- **Statement**: for `s : X.base` and `N` invertible in `R`, there are `k` algebraically
+  closed and `t : Spec k ⟶ X.base` with `(N : k) ≠ 0` **and `t.base` hitting `s`**
+  (`Set.range t.base = {s}`, or at least `s ∈ Set.range t.base`).
+- **Sketch**: the existing proof already builds `t` as
+  `Spec.map (algebraMap κ(s) κ(s)‾) ≫ X.base.fromSpecResidueField s`; only the statement
+  forgets the anchoring. `X.base.range_fromSpecResidueField : Set.range (…).base = {s}`
+  (mathlib) plus surjectivity of `Spec.map` of a field extension gives the range claim.
+- **Why it is needed**: `legendreDelta_surjective_of` (and `levelThree_surjective`)
+  must produce, *at a prescribed point `s` of the base*, a `Z`-point over it.
+
+### [T-G3a-SUB2] A Legendre datum exists over an algebraically closed field with `2` invertible
+- **Status**: open · **Parent**: T-G3a · **File**: `Moduli/LegendreDelta.lean` ·
+  **Type**: theorem
+- **Statement**: for `k` algebraically closed with `(2 : k) ≠ 0` and `E` an elliptic
+  curve over `Spec k`, there exist `L : E.FullLevelPt 2` and `b : OmegaBasis E` with
+  `IsLegendreDatum ⟨Spec k, _, E⟩ L b`.
+- **Sources**: Silverman AEC III.1 Prop 1.7(b) (Legendre form over an algebraically
+  closed field of characteristic ≠ 2); KM 4.6.2 for the moduli phrasing.
+- **Sketch**: (i) `E[2](k) ≅ (ℤ/2)²` (in-repo `torsion_geometricFibre_rank_two` at
+  `N = 2`) gives the ordered pair `(P, Q)`; (ii) a Weierstrass model adapted to a chosen
+  `ω` exists (`exists_projModelIso_of_field`, KeystoneGeometricPoint); (iii) translate so
+  `x(P) = 0` and scale by `u² = x(Q) − x(P)` (a square in `k`, algebraically closed) so
+  `x(Q) = 1`: this is exactly `Pr.MarksAt … 0 0` and `Pr.MarksAt … 1 0` with
+  `Pr.W = legendreCurve λ`; the scaling is the `transVC_of_isAdapted_charNeTwo` move.
+- **Why it is needed**: fibre-nonemptiness — the geometric content of T-G3a.
+
+### [T-G3a-SUB3] Surjectivity assembly
+- **Status**: open · **Parent**: T-G3a · **Depends on**: T-G3a-SUB1, T-G3a-SUB2,
+  T-G3b · **File**: `Moduli/LegendreTorsor.lean` · **Type**: theorem
+- Convert the fibre datum of SUB2 through `E.toRelRepData.eqv` at the geometric point of
+  SUB1 to get a `Z`-point over `s`, for every `s`; conclude `Surjective E.toRelRepData.f`.

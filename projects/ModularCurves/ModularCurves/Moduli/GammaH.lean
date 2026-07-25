@@ -910,6 +910,35 @@ theorem EllObj.exists_geometricPoint (X : EllObj R) (hne : Nonempty X.base)
     rwa [map_natCast] at h
   exact hu.ne_zero
 
+/-- **(T-G3a-SUB1)** The point-anchored refinement of `EllObj.exists_geometricPoint`:
+at any prescribed point `s` of the base there is a geometric point lying over `s`
+(with `N` still invertible in the residue-closure). The witness is the same one the
+unanchored version builds; only the anchoring conclusion is new. -/
+theorem EllObj.exists_geometricPoint_at (X : EllObj R) (s : X.base)
+    (N : ℕ) (hinv : IsUnit ((N : ℕ) : R)) :
+    ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
+      (t : Spec (CommRingCat.of k) ⟶ X.base),
+      (N : k) ≠ 0 ∧ Set.range t.base = {s} := by
+  refine ⟨AlgebraicClosure (X.base.residueField s), inferInstance, inferInstance,
+    Spec.map (CommRingCat.ofHom (algebraMap (X.base.residueField s)
+      (AlgebraicClosure (X.base.residueField s)))) ≫ X.base.fromSpecResidueField s,
+    ?_, ?_⟩
+  · have hu : IsUnit ((N : ℕ) : AlgebraicClosure (X.base.residueField s)) := by
+      have φ := Spec.preimage
+        ((Spec.map (CommRingCat.ofHom (algebraMap (X.base.residueField s)
+            (AlgebraicClosure (X.base.residueField s)))) ≫
+          X.base.fromSpecResidueField s) ≫ X.structMap)
+      have h := hinv.map φ.hom
+      rwa [map_natCast] at h
+    exact hu.ne_zero
+  · apply Set.eq_singleton_iff_unique_mem.mpr
+    refine ⟨⟨Nonempty.some inferInstance, ?_⟩, ?_⟩
+    · show (X.base.fromSpecResidueField s).base _ = s
+      simp
+    · rintro y ⟨z, rfl⟩
+      show (X.base.fromSpecResidueField s).base _ = s
+      simp
+
 private theorem neg_eq_self_of_zsmul_eq_zero_of_le_two {G : Type*} [AddGroup G] {N : ℕ} [NeZero N]
     (hN : N ≤ 2) {Z : G} (hZ : (N : ℤ) • Z = 0) : -Z = Z := by
   rw [neg_eq_iff_add_eq_zero, ← two_zsmul]
