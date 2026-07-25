@@ -25354,6 +25354,16 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
   scheme-level descent interface finishes the clause (surjectivity of the cover from
   geometric-fibre nonemptiness of the Legendre datum).
   Deps: T-YR-5 (done), T-YR-6 (machinery done). Status: open (clause 1 only).
+  **[T-YR-6-APP] progress 2026-07-25 (late):** `Moduli/ProductProblem.lean` is complete and
+  sorry-free — `ModuliProblem.prod`, `prodComm`, `representableByProd` (both roundtrips +
+  naturality), `RelRepData.representableByProd`, `AffineOverEll.relRepData`, and
+  `prodUniqueUpToIso` (the two orders of adding a ρ-structure and a Legendre datum give
+  isomorphic total spaces, with the base iso and its structure-map compatibility).
+  What is left is the concrete chain S1–S7 recorded in the beastmode sentinel: instantiate at
+  `legendreDeltaData` and at `(rhoProblem_affineOverEll D).relRepData L`, transport the
+  standard-smoothness through the comparison isomorphism, and supply the **only remaining
+  geometric input**: surjectivity of the Legendre cover (existence of a Legendre datum at every
+  `ℚ̄`-point).
 - NOT in scope: yRho_geometricallyIrreducible (BB-IRR), the D8 twist-comparison, closing DS4
   (stream-C). CLEANUP-Y1F/YR: DEFERRED-TO-MAIN (producer rule).
 

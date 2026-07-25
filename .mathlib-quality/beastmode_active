@@ -1,7 +1,34 @@
-FOCUS: T-YR-7 clauses 2+3 DONE & PUSHED (35568a3b3+): DEF-17 statement fix in YRho (ellHomOfCurveIso + scheme-theoretic Quot relation), RhoPoints.lean = pullbackπOf/pointToPair/pairToPoint/curveIsoOfPullback/roundtrips/pairToPoint_congr/pointsEquivQuot/representsYRho_of_smooth/exists_representsYRho_of_exists_smooth (only remaining axiom beyond propext/choice/Quot.sound is the PRE-EXISTING upstream DS4 Weil-pairing register sorry at YRho:2394 — out of scope by the ticket board).
-ONLY REMAINING for yRho_representable: clause 1 = SmoothOfRelativeDimension 1 X.structMap, i.e. T-YR-6-APP. All abstract machinery is landed (ForMathlib/SmoothDescentScheme: smoothOfRelativeDimension_one_of_finite_etale_surjective_cover + isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec). PLAN (product-problem route, decided 2026-07-25):
- (P1) Moduli/ProductProblem.lean: `ModuliProblem.prod P Q` (pointwise product presheaf) + `representableByProd`: if r : P.RepresentableBy X and (Z, f : Z ⟶ X.base, eqv, nat) relatively represents Q at X, then ⟨Z, f ≫ X.structMap, X.curve.baseChange f⟩ represents P.prod Q. Forward map: u ↦ (P-value of u ≫ pullbackπOf-style projection, Q-value from eqv at u.baseHom transported by curveIsoOfPullback).
- (P2) Apply (P1) twice: Z := Legendre cover of Y (Bootstrap:217 legendreDelta_relativelyRepresentable_finiteEtale at X) represents rhoProblem.prod legendreDeltaProblem; Z_L := the ρ-quotient over universalLegendreObj (RhoSmooth carrier, relQuotientStruct finite étale over Spec (LegendreModuliRing ℚ)) represents legendreDeltaProblem.prod rhoProblem (≅ same up to prod-commutativity).
- (P3) uniqueUpToIso ⟹ Z.base ≅ Z_L.base over Spec ℚ ⟹ transport: Γ(Z) standard-smooth-rel-1 over ℚ (carrier bridge at R := LegendreModuliRing ℚ).
- (P4) A1 surjectivity of p : Z ⟶ Y: geometric-fibre nonemptiness (every elliptic curve over an alg closed field with 2 invertible admits a Legendre datum — repo: universalLegendre_generation / legendreDelta machinery); then apply the scheme interface and finish clause 1, then `exists_representsYRho_of_exists_smooth` closes T-YR-7.
+FOCUS: T-YR-6-APP — P1 + P3 COMPLETE & PUSHED (b5284f698), Moduli/ProductProblem.lean sorry-free:
+  ModuliProblem.prod / prodComm / prodSndOf(+2 congr lemmas) / prodSnd / prodHomOf / prodHom /
+  homToPullbackAlong_congr_hom / homToPullbackAlong_self / prodHom_pair / prodHom_fst /
+  prodHom_baseHom / prodSnd_prodHomOf / toPullbackAlong_comp_pullbackAlongMap /
+  representableByProd / RelRepData.representableByProd / AffineOverEll.relRepData (+isAffineHom) /
+  prodUniqueUpToIso (+ base_w + IsIso baseHom instance).
+REMAINING CHAIN for clause 1 (SmoothOfRelativeDimension 1 X.structMap, then T-YR-7 closes via
+exists_representsYRho_of_exists_smooth in ModularCurve/RhoPoints.lean):
+ (S1) d_L := legendreDeltaData (CommRingCat.of ℚ) hR X : RelRepData (legendreDeltaProblem ℚ) X
+      [LegendreTorsor.lean:244; finite/étale: legendreDeltaData_finite/_etale]. Its total space is
+      X.pullbackAlong d_L.f, whose structMap is literally d_L.f ≫ X.structMap.
+ (S2) L + rL := legendreDelta_representable_by_affine (Bootstrap:193) [∃ affine-based representing
+      object of legendreDeltaProblem]; d_ρ := (rhoProblem_affineOverEll D).relRepData L
+      [naturality ✓]. Its total space is L.pullbackAlong d_ρ.f.
+ (S3) prodUniqueUpToIso rX d_L rL d_ρ : X.pullbackAlong d_L.f ≅ L.pullbackAlong d_ρ.f (EllObj iso,
+      so base iso over Spec ℚ via base_w + the IsIso instance).
+ (S4) Right-hand smoothness: d_ρ.f is finite étale (ρ-side quotient: relQuotientStruct_finite_etale_of_free
+      via sympFramed_equivariantRelRepData — or read it off the AffineOverEll construction) and
+      L.base ≅ Spec (LegendreModuliRing ℚ) over Spec ℚ (uniqueness of representing objects vs
+      universalLegendreObj, whose structMap is Spec.map (algebraMap ℚ (LegendreModuliRing ℚ)) and is
+      IsStandardSmoothOfRelativeDimension 1 — LegendreSmooth.lean) ⟹ apply
+      isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec (ForMathlib/SmoothDescentScheme).
+ (S5) Transport that ring-level statement along the (S3) iso to X.pullbackAlong d_L.f
+      (RingHom.isStandardSmoothOfRelativeDimension_respectsIso + Γ of an iso).
+ (S6) SURJECTIVITY of d_L.f — THE LAST GEOMETRIC INPUT: every elliptic curve over a ℚ̄-point of Y
+      admits a Legendre datum (E[2] ≅ (ℤ/2)² over an algebraically closed field with 2 invertible +
+      a square root for the ω-normalisation). Repo leads: universalLegendre_generation,
+      exists_projModelIso_of_field (KeystoneGeometricPoint), the fullLevelLocus machinery.
+ (S7) smoothOfRelativeDimension_one_of_finite_etale_surjective_cover X.structMap d_L.f + (S5) + (S6)
+      ⟹ clause 1 ⟹ exists_representsYRho_of_exists_smooth ⟹ yRho_representable.
 RULES: lake from repo root; NO maxHeartbeats; LEAN4_GUARDRAILS_BYPASS=1 git push origin dev/modular-curves; commit per green; sentinel per step.
+GOTCHAS: dependent rewrites over morphism args ⟹ factor into function arguments + congr lemmas;
+`rw` needs syntactic index spellings (introduce `have` with the target spelling); conv_lhs for one-sided rewrites;
+`↾` for Type-valued functor maps; data instances need letI (haveI is opaque).
