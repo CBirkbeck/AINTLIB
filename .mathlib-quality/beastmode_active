@@ -9,6 +9,13 @@ exists_representsYRho_of_exists_smooth in ModularCurve/RhoPoints.lean):
  (S1) d_L := legendreDeltaData (CommRingCat.of ℚ) hR X : RelRepData (legendreDeltaProblem ℚ) X
       [LegendreTorsor.lean:244; finite/étale: legendreDeltaData_finite/_etale]. Its total space is
       X.pullbackAlong d_L.f, whose structMap is literally d_L.f ≫ X.structMap.
+ (S2-CAVEAT, IMPORTANT) `AffineOverEll.relRepData` only carries IsAffineHom, NOT finite/étale, but
+      (S4) needs d_ρ.f ÉTALE. FIX: add a finite-étale-carrying variant next to
+      `rhoProblem_affineOverEll` (RhoSections.lean, EngineForm section ~7505): its proof already
+      obtains `hfe := d.σZ.relQuotientStruct_finite_etale_of_free d.f d.over_base …` — expose it as
+      `theorem rhoProblem_exists_relRepData_finiteEtale (D) (X) :
+         ∃ d : ModuliProblem.RelRepData (rhoProblem D) X, IsFinite d.f ∧ Etale d.f`
+      by packaging the SAME data into a RelRepData (Z, f, eqv, nat all already constructed there).
  (S2) L + rL := legendreDelta_representable_by_affine (Bootstrap:193) [∃ affine-based representing
       object of legendreDeltaProblem]; d_ρ := (rhoProblem_affineOverEll D).relRepData L
       [naturality ✓]. Its total space is L.pullbackAlong d_ρ.f.
