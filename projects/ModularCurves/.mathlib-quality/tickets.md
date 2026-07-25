@@ -26940,3 +26940,26 @@ New work tickets: 9. Cleanups: **[CLEANUP-17]** `YRho.lean` after T-G1 ·
   T-G3b · **File**: `Moduli/LegendreTorsor.lean` · **Type**: theorem
 - Convert the fibre datum of SUB2 through `E.toRelRepData.eqv` at the geometric point of
   SUB1 to get a `Z`-point over `s`, for every `s`; conclude `Surjective E.toRelRepData.f`.
+
+
+### [T-G3a-SUB2a] Legendre normal form: the existence direction (algebra level)
+- **Status**: open · **Parent**: T-G3a-SUB2 ·
+  **File**: `EllipticCurve/LegendreNormalForm.lean` · **Type**: theorem
+- **Statement** (target shape): for `k` a field with `2` invertible in which the relevant
+  abscissa difference is a square (in particular any algebraically closed `k`), and `W`
+  a Weierstrass curve over `k` with marked distinct `2`-torsion abscissae `e₁ ≠ e₂`,
+  there exist `C : VariableChange k` and `lam : k` with `C • W = legendreCurve lam`,
+  `C` sending `(e₁, ·) ↦ (0, 0)` and `(e₂, ·) ↦ (1, 0)`.
+- **Sources**: Silverman AEC III.1 Prop 1.7(b) (p. 49): "assume char K ≠ 2 … E can be
+  put in Legendre form `y² = x(x−1)(x−λ)`", the proof being: complete the square, so
+  `y² = 4x³ + b₂x² + 2b₄x + b₆` factors with roots `e₁,e₂,e₃`; the substitution
+  `x = (e₂−e₁)x' + e₁`, `y = (e₂−e₁)^{3/2} y'` gives Legendre form with
+  `λ = (e₃−e₁)/(e₂−e₁)`.
+- **Existing in-repo**: `legendreCurve` + its `a_i`/Δ/equation lemmas; the *rigidity*
+  direction `legendreCurve_vc_marked` (:140). **The existence direction is what is
+  missing** — this ticket. `WeierstrassCurve.VariableChange` and `variableChange_a_i`
+  are mathlib.
+- **Note**: no complete-the-square normal form was found in the project or in mathlib
+  under `charNeTwo`/`completeSquare`/`shortForm` (grep, 2026-07-25); the substitution
+  must be written out explicitly as a `VariableChange` and verified by `ring` on the
+  five `a_i` components — the same style as `legendreCurve_vc_marked`'s computation.
