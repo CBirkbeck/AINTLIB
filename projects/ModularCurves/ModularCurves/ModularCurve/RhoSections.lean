@@ -6965,6 +6965,33 @@ theorem strCoverMap_taut {X : EllObj (CommRingCat.of ℚ)}
   refine (pullback.lift_snd _ _ _).trans ?_
   exact Category.comp_id _
 
+/-- **[T-YR-3E plumbing]** The `Ell`-level lift of the cover comparison. -/
+noncomputable def strCoverMapEll {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    (X.pullbackAlong (k' ≫ g')).pullbackAlong
+        (strPr D (X.pullbackAlong (k' ≫ g'))) ⟶
+      (X.pullbackAlong g').pullbackAlong (strPr D (X.pullbackAlong g')) :=
+  EllObj.homToPullbackAlong
+    ((X.pullbackAlong (k' ≫ g')).pullbackAlongπ
+        (strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+      X.pullbackAlongMap g' k')
+    (strCoverMap D g' k') (strCoverMap_pr D g' k')
+
+@[reassoc]
+theorem strCoverMapEll_π {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    strCoverMapEll D g' k' ≫
+        (X.pullbackAlong g').pullbackAlongπ (strPr D (X.pullbackAlong g')) =
+      (X.pullbackAlong (k' ≫ g')).pullbackAlongπ
+          (strPr D (X.pullbackAlong (k' ≫ g'))) ≫
+        X.pullbackAlongMap g' k' :=
+  EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
+
+@[simp]
+theorem strCoverMapEll_baseHom {X : EllObj (CommRingCat.of ℚ)}
+    {T' T'' : Scheme.{0}} (g' : T' ⟶ X.base) (k' : T'' ⟶ T') :
+    (strCoverMapEll D g' k').baseHom = strCoverMap D g' k' := rfl
+
 end EngineForm
 
 open scoped FintypeCatDiscrete in
