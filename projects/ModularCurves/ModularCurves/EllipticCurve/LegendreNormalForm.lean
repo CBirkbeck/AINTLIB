@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 
@@ -262,5 +263,53 @@ theorem exists_variableChange_eq_legendreCurve {W : WeierstrassCurve R}
   rw [mul_smul]
   exact scale_translate_smul_eq_legendreCurve (completeSquareVC_a₁ h2)
     (completeSquareVC_a₃ h2) u ha₂ ha₄ ha₆ hu
+
+/-- (Implementation) Two monic cubics in standard form are equal iff their coefficients
+agree. -/
+private theorem cubic_coeff_eq {a₂ a₄ a₆ b₂ b₄ b₆ : R}
+    (h : (Polynomial.X ^ 3 + Polynomial.C a₂ * Polynomial.X ^ 2 +
+        Polynomial.C a₄ * Polynomial.X + Polynomial.C a₆ : Polynomial R) =
+      Polynomial.X ^ 3 + Polynomial.C b₂ * Polynomial.X ^ 2 +
+        Polynomial.C b₄ * Polynomial.X + Polynomial.C b₆) :
+    a₂ = b₂ ∧ a₄ = b₄ ∧ a₆ = b₆ := by
+  refine ⟨?_, ?_, ?_⟩
+  · simpa using congrArg (fun q => Polynomial.coeff q 2) h
+  · simpa using congrArg (fun q => Polynomial.coeff q 1) h
+  · simpa using congrArg (fun q => Polynomial.coeff q 0) h
+
+/-- **(T-G3a-SUB2c)** Over an algebraically closed field a monic cubic splits, with
+Vieta's identities: there are roots `e₁ e₂ e₃` with `a₂ = −(e₁+e₂+e₃)`,
+`a₄ = e₁e₂+e₁e₃+e₂e₃` and `a₆ = −e₁e₂e₃`. -/
+theorem exists_roots_vieta_cubic {k : Type u} [Field k] [IsAlgClosed k] (a₂ a₄ a₆ : k) :
+    ∃ e₁ e₂ e₃ : k, a₂ = -(e₁ + e₂ + e₃) ∧
+      a₄ = e₁ * e₂ + e₁ * e₃ + e₂ * e₃ ∧ a₆ = -(e₁ * e₂ * e₃) := by
+  classical
+  set p : Polynomial k := Polynomial.X ^ 3 + Polynomial.C a₂ * Polynomial.X ^ 2 +
+    Polynomial.C a₄ * Polynomial.X + Polynomial.C a₆ with hp
+  have hdeg : p.natDegree = 3 := by
+    rw [hp]; compute_degree!
+  have hmonic : p.Monic := by
+    unfold Polynomial.Monic Polynomial.leadingCoeff
+    rw [hdeg, hp]
+    simp
+  have hcard : p.roots.card = 3 := by
+    have := (Polynomial.splits_iff_card_roots (f := p)).mp (IsAlgClosed.splits p)
+    rwa [hdeg] at this
+  obtain ⟨e₁, e₂, e₃, hroots⟩ := Multiset.card_eq_three.mp hcard
+  have hprod := Polynomial.prod_multiset_X_sub_C_of_monic_of_roots_card_eq hmonic
+    (by rw [hcard, hdeg])
+  rw [hroots] at hprod
+  have hexp : (Multiset.map (fun a => Polynomial.X - Polynomial.C a)
+      ({e₁, e₂, e₃} : Multiset k)).prod =
+      Polynomial.X ^ 3 + Polynomial.C (-(e₁ + e₂ + e₃)) * Polynomial.X ^ 2 +
+        Polynomial.C (e₁ * e₂ + e₁ * e₃ + e₂ * e₃) * Polynomial.X +
+        Polynomial.C (-(e₁ * e₂ * e₃)) := by
+    simp only [Multiset.insert_eq_cons, Multiset.map_cons, Multiset.map_singleton,
+      Multiset.prod_cons, Multiset.prod_singleton, Polynomial.C_neg, Polynomial.C_add,
+      Polynomial.C_mul]
+    ring
+  rw [hexp] at hprod
+  obtain ⟨h₂, h₄, h₆⟩ := cubic_coeff_eq (hp ▸ hprod.symm)
+  exact ⟨e₁, e₂, e₃, h₂, h₄, h₆⟩
 
 end ModularCurves
