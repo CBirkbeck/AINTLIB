@@ -25202,6 +25202,16 @@ SMOOTH conjunct is the project-wide parked leaf; Loeffler Thm 3.4.4 (p. 15, page
     `smoothOfRelativeDimension_one_of_finite_etale_surjective_cover` (finite étale surjective
     cover of an affine `Y` over an affine noetherian base) and the carrier bridge
     `isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec`.
+  **[T-YR-6-APP (i)] DONE 2026-07-25 (pushed):** `Moduli/BaseChangeIso.lean` —
+  `EllObj.restrictScalars` along a base-ring **isomorphism** is an equivalence
+  (full + essentially surjective, via `EllObj.unrestrict`), so
+  `ModuliProblem.representableByRestrictScalars` transports representability back, and
+  `exists_representableBy_isAffine_of_isIso` / `isAffine_base_of_representableBy` transport
+  affineness; `isIso_awayHomWire_of_isUnit` makes the engine's `D(3)` leg applicable over `ℚ`.
+  Consequences in `ModularCurve/RhoSmooth.lean`: `rhoProblem_exists_representableBy_isAffine`,
+  `rhoProblem_isAffine_base`, and `rhoProblem_isAffineHom_structMap` —
+  **the `IsAffineHom sY` conjunct of `RepresentsYRho` is proved.**
+
   **REMAINING (application only, [T-YR-6-APP]):** (i) `IsAffine Y` for the representing base
   (engine `exists_representableBy_isAffine_baseChange_three`, EngineWiring:124, over `R = ℚ`
   where `ℚ[1/3] ≅ ℚ` — needs a transport of `EllObj`/`RepresentableBy` along a base ring iso;
