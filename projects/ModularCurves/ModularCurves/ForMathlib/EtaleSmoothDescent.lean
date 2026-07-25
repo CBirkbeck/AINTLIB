@@ -10,6 +10,7 @@ import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Mathlib.RingTheory.RingHom.StandardSmooth
 import Mathlib.RingTheory.RingHom.Locally
 import Mathlib.RingTheory.Smooth.Locus
+import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 
 /-!
 # Smoothness descends along finite étale faithfully flat covers
@@ -217,3 +218,24 @@ theorem locally_isStandardSmoothOfRelativeDimension_one_of_etale_faithfullyFlat
     exact (RingHom.isStandardSmoothOfRelativeDimension_algebraMap (n := 1)).mpr inferInstance
 
 end Algebra
+
+namespace AlgebraicGeometry
+
+open Algebra
+
+universe u
+
+/-- **[T-YR-6 (c1), scheme level]** If `Spec B ⟶ Spec A` is a finite étale
+faithfully flat cover and `Spec B ⟶ Spec k` is smooth of relative dimension one,
+then so is `Spec A ⟶ Spec k`. -/
+theorem smoothOfRelativeDimension_one_spec_map_of_etale_faithfullyFlat
+    (k A B : Type u) [CommRing k] [CommRing A] [CommRing B]
+    [Algebra k A] [Algebra k B] [Algebra A B] [IsScalarTower k A B]
+    [IsNoetherianRing k] [Algebra.Etale A B] [Module.Finite A B]
+    [Module.FaithfullyFlat A B] [IsStandardSmoothOfRelativeDimension 1 k B] :
+    SmoothOfRelativeDimension 1
+      (Spec.map (CommRingCat.ofHom (algebraMap k A))) := by
+  rw [HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension 1)]
+  exact locally_isStandardSmoothOfRelativeDimension_one_of_etale_faithfullyFlat k A B
+
+end AlgebraicGeometry
