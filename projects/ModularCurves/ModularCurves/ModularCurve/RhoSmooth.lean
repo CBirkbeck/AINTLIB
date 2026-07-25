@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import ModularCurves.ModularCurve.RhoSections
 import ModularCurves.Moduli.LegendreSmooth
 import ModularCurves.Moduli.BaseChangeIso
+import ModularCurves.Moduli.ProductProblem
+import ModularCurves.ForMathlib.SmoothDescentScheme
 
 /-!
 # The Legendre-anchored ρ-cover is smooth of relative dimension one
@@ -85,6 +87,35 @@ theorem rhoProblem_isAffineHom_structMap (D : GaloisRepData N) [Fact (1 < N)]
     IsAffineHom X.structMap := by
   haveI := rhoProblem_isAffine_base D hN r
   infer_instance
+
+open scoped FintypeCatDiscrete in
+/-- **[T-YR-6-APP S4]** The Legendre-anchored total space (the ρ-relative
+representation over the universal Legendre object) has standard-smooth-of-relative-
+dimension-one global sections over `ℚ`: it is finite étale over the λ-line, which is
+standard smooth of relative dimension one. -/
+theorem rhoLegendre_total_isStandardSmooth (D : GaloisRepData N) [Fact (1 < N)]
+    (hR : IsUnit (2 : CommRingCat.of ℚ))
+    (d : ModuliProblem.RelRepData (rhoProblem D)
+      (universalLegendreObj (CommRingCat.of ℚ) hR))
+    (hfin : IsFinite d.f) (het : Etale d.f) :
+    RingHom.IsStandardSmoothOfRelativeDimension 1
+      ((((universalLegendreObj (CommRingCat.of ℚ) hR).pullbackAlong d.f).structMap).appTop).hom := by
+  haveI : IsFinite d.f := hfin
+  haveI : Etale d.f := het
+  haveI : Etale (show d.Z ⟶
+      Spec (CommRingCat.of (LegendreModuliRing (CommRingCat.of ℚ))) from d.f) := het
+  haveI : IsAffine (universalLegendreObj (CommRingCat.of ℚ) hR).base :=
+    inferInstanceAs (IsAffine (Spec (CommRingCat.of
+      (LegendreModuliRing (CommRingCat.of ℚ)))))
+  haveI : IsAffine d.Z := isAffine_of_isAffineHom d.f
+  have hφ : RingHom.IsStandardSmoothOfRelativeDimension 1
+      (CommRingCat.ofHom (algebraMap (CommRingCat.of ℚ)
+        (LegendreModuliRing (CommRingCat.of ℚ)))).hom :=
+    (RingHom.isStandardSmoothOfRelativeDimension_algebraMap (n := 1)).mpr
+      (legendreModuliRing_isStandardSmoothOfRelativeDimension (CommRingCat.of ℚ))
+  exact isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec
+    (CommRingCat.ofHom (algebraMap (CommRingCat.of ℚ)
+      (LegendreModuliRing (CommRingCat.of ℚ)))) d.f hφ
 
 end ModularCurves
 
