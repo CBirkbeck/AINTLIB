@@ -26963,3 +26963,24 @@ New work tickets: 9. Cleanups: **[CLEANUP-17]** `YRho.lean` after T-G1 ·
   under `charNeTwo`/`completeSquare`/`shortForm` (grep, 2026-07-25); the substitution
   must be written out explicitly as a `VariableChange` and verified by `ring` on the
   five `a_i` components — the same style as `legendreCurve_vc_marked`'s computation.
+
+
+### [T-G3a-SUB2d] Transport a `LocalPresentation` along a variable change
+- **Status**: open · **Parent**: T-G3a-SUB2 · **File**: `Moduli/AdaptedModel.lean`
+  (or `EllipticCurve/InvariantDifferential.lean`) · **Type**: def + specs
+- **Statement**: given `P : LocalPresentation G V` and `C : VariableChange Γ(S, V)`,
+  a presentation `P.vc C : LocalPresentation G V` with `(P.vc C).W = C • P.W`, obtained
+  by composing `P.e` with `projModelVCIso C P.W`
+  (`EllipticCurve/ModelVariableChange.lean:261`, `projModel (C • W) ≅ projModel W`),
+  plus the two compatibility fields (`compat_π`, `compat_zero`) transported through the
+  known `projModelVCIso` naturality (`projModelVCIso_projModelπ`,
+  `projModelVCIso_projModelZero` — verify names) and the `IsElliptic` transport
+  (`WeierstrassCurve.IsElliptic` is VC-stable in mathlib).
+- **Why**: the scheme-level half of T-G3a-SUB2 (`IsLegendreDatum` over `Spec k̄`) needs a
+  presentation whose `W` is *literally* `legendreCurve λ`; the field-level algebra result
+  `exists_variableChange_eq_legendreCurve_of_isAlgClosed` supplies the variable change,
+  and this ticket turns it into the presentation the `IsLegendreDatum` fields want.
+- **Also needed for SUB2**: the `IsAdapted` transport (a VC with `u ≠ 1` rescales `ω`, so
+  the resulting datum's `OmegaBasis` is `u • b` — the coupling KM 4.6.2 describes) and
+  the `MarksAt` transport (the marked abscissae move to `0` and `1` by construction of
+  the VC in `scale_translate_smul_eq_legendreCurve`).
