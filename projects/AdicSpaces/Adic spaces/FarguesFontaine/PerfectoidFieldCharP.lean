@@ -112,17 +112,11 @@ theorem span_toOF_pow_mem_nhds_zero [IsPerfectoidField p F] (ϖ : PseudoUniformi
     ((Ideal.span {PseudoUniformizer.toOF F ϖ} ^ n : Ideal (OF F)) : Set (OF F)) ∈
       nhds (0 : OF F) := by
   obtain ⟨P⟩ := IsHuberRing.exists_pairOfDefinition (A := F)
-  have hunit : ((ϖ.val : Fˣ) : F) ^ n ≠ 0 := pow_ne_zero n (Units.ne_zero _)
-  -- `U := ϖ^n · F°` is open in `F` (unit multiplication is a homeomorphism) and contains 0.
-  have hUopen : IsOpen ((((ϖ.val : Fˣ) : F) ^ n * ·) '' powerBoundedSubring F) :=
-    (Homeomorph.mulLeft₀ _ hunit).isOpenMap _ (P.isOpen_powerBoundedSubring)
-  have hU0 : (0 : F) ∈ (((ϖ.val : Fˣ) : F) ^ n * ·) '' powerBoundedSubring F :=
-    ⟨0, isPowerBounded_zero, mul_zero _⟩
-  rw [nhds_subtype_eq_comap]
-  refine Filter.mem_comap.mpr ⟨_, hUopen.mem_nhds hU0, ?_⟩
+  refine (mem_nhds_subtype _ _ _).mpr ⟨_, ((ϖ.val.isUnit.pow n).isOpenMap_smul _
+    P.isOpen_powerBoundedSubring).mem_nhds ⟨0, isPowerBounded_zero, smul_zero _⟩, ?_⟩
   rintro y ⟨b, hb, hby⟩
   rw [SetLike.mem_coe, Ideal.span_singleton_pow, Ideal.mem_span_singleton']
-  exact ⟨⟨b, hb⟩, Subtype.ext (by simpa [PseudoUniformizer.toOF, mul_comm] using hby)⟩
+  exact ⟨⟨b, hb⟩, Subtype.ext <| by simpa [PseudoUniformizer.toOF, mul_comm] using hby⟩
 
 /-- Every neighbourhood of `0` in `O_F` contains some `ϖ^n O_F`.
 
@@ -130,28 +124,20 @@ This is topological nilpotence of `ϖ` plus boundedness of `O_F` (uniformity of 
 `ϖ^n · F° → 0` uniformly.
 
 Source: standard Tate-ring fact, as for `span_toOF_pow_mem_nhds_zero`. -/
-theorem exists_span_toOF_pow_subset_nhds [IsPerfectoidField p F] (ϖ : PseudoUniformizer F) {U : Set (OF F)}
-    (hU : U ∈ nhds (0 : OF F)) :
-    ∃ n : ℕ,
-      ((Ideal.span {PseudoUniformizer.toOF F ϖ} ^ n : Ideal (OF F)) : Set (OF F)) ⊆ U := by
-  haveI := IsPerfectoidRing.uniform (p := p) (A := F)
-  rw [nhds_subtype_eq_comap] at hU
-  obtain ⟨U', hU', hU'sub⟩ := Filter.mem_comap.mp hU
-  obtain ⟨V, hV, hFV⟩ := IsUniform.isBounded_powerBounded (A := F) U' hU'
+theorem exists_span_toOF_pow_subset_of_mem_nhds [IsPerfectoidField p F] (ϖ : PseudoUniformizer F)
+    {U : Set (OF F)} (hU : U ∈ nhds (0 : OF F)) :
+    ∃ n : ℕ, ((Ideal.span {PseudoUniformizer.toOF F ϖ} ^ n : Ideal (OF F)) : Set (OF F)) ⊆ U := by
+  obtain ⟨U', hU', hU'sub⟩ := (mem_nhds_subtype _ _ _).mp hU
+  obtain ⟨V, hV, hFV⟩ := (IsPerfectoidRing.uniform (p := p) (A := F)).isBounded_powerBounded U' hU'
   obtain ⟨n, hn⟩ := ϖ.isTopologicallyNilpotent.exists_pow_mem_of_mem_nhds hV
   refine ⟨n, fun y hy ↦ ?_⟩
   rw [SetLike.mem_coe, Ideal.span_singleton_pow, Ideal.mem_span_singleton'] at hy
   obtain ⟨c, rfl⟩ := hy
-  refine hU'sub ?_
-  show ((c * PseudoUniformizer.toOF F ϖ ^ n : OF F) : F) ∈ U'
-  have : ((c * PseudoUniformizer.toOF F ϖ ^ n : OF F) : F) =
-      (c : F) * ((ϖ.val : Fˣ) : F) ^ n := by push_cast [PseudoUniformizer.toOF]; ring
-  rw [this]
-  exact hFV (Set.mul_mem_mul c.2 hn)
+  exact hU'sub <| by simpa [PseudoUniformizer.toOF] using hFV (Set.mul_mem_mul c.2 hn)
 
 /-- `O_F` is `ϖ`-adically separated: `⋂ n, ϖ^n O_F = 0`.
 
-From `exists_span_toOF_pow_subset_nhds` and the fact that `F` (hence `O_F`) is T0 as a
+From `exists_span_toOF_pow_subset_of_mem_nhds` and the fact that `F` (hence `O_F`) is T0 as a
 topological group, the intersection of the `ϖ^n O_F` is contained in every neighbourhood
 of `0`, hence is `0`.
 
@@ -164,7 +150,7 @@ theorem isHausdorff_span_toOF [IsPerfectoidField p F] (ϖ : PseudoUniformizer F)
 A `ϖ`-adic Cauchy sequence is Cauchy for the subspace uniformity (by
 `span_toOF_pow_mem_nhds_zero`), hence converges in `F` by completeness; the limit is
 power-bounded (a limit of a bounded set in a uniform Tate ring), i.e. lies in `O_F`, and
-the convergence is `ϖ`-adic by `exists_span_toOF_pow_subset_nhds`.
+the convergence is `ϖ`-adic by `exists_span_toOF_pow_subset_of_mem_nhds`.
 
 Source: [Bhatt, Cor. 3.2.3]: "K°♭ is t-adically complete, and the t-adic topology
 coincides with the given topology" — the same statement for a char-p perfectoid field

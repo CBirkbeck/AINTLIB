@@ -72,11 +72,23 @@ not weaken or strengthen hypotheses).
   - `span_toOF_pow_mem_nhds_zero`: proven — `ϖ^n·F°` is the image of the open `F°`
     (`P.isOpen_powerBoundedSubring`) under the unit-multiplication homeomorphism
     (`Homeomorph.mulLeft₀`), pulled back along `nhds_subtype_eq_comap`.
-  - `exists_span_toOF_pow_subset_nhds`: proven — boundedness of `F°`
+  - `exists_span_toOF_pow_subset_of_mem_nhds`: proven — boundedness of `F°`
     (`IsUniform.isBounded_powerBounded`) + topological nilpotence
     (`exists_pow_mem_of_mem_nhds`) land `c·ϖ^n` in `F°·V ⊆ U'`.
   - Both `#print axioms` = `[propext, Classical.choice, Quot.sound]` (probe-verified).
-- **Statements**: `span_toOF_pow_mem_nhds_zero`, `exists_span_toOF_pow_subset_nhds`.
+  - Phase 6.5 cleanup (two Phase-4 workers, all gates pass): `span_toOF_pow_mem_nhds_zero`
+    12→6 lines (`IsUnit.isOpenMap_smul` + `mem_nhds_subtype` replace the hand-rolled
+    Homeomorph/comap plumbing); `exists_span_toOF_pow_subset_of_mem_nhds` 14→7 lines
+    (haveI eliminated — `IsUniform F` genuinely not synthesizable, now an explicit
+    projection; tail collapsed to one simpa). Phase 5b rename applied:
+    `…_subset_nhds` → `…_subset_of_mem_nhds` (mathlib `exists_*_subset_of_mem_nhds`
+    precedent); queue truncated. Phase 6.6 buzz: FAST-BOARD. Flag-only notes: Tate-ring
+    generalisation candidate (both proofs use only uniformity + the Huber pair);
+    file-wide unusedSectionVars (duplicate perfectoid binder + unused CharP) is a
+    campaign-level variable-block decision; the two lemmas form the halves of mathlib's
+    `isAdic_iff` — bundling corollary possible once T103 lands.
+- Post-proof cleanup: ✓ ran (both workers pass, rename applied, buzz FAST-BOARD)
+- **Statements**: `span_toOF_pow_mem_nhds_zero`, `exists_span_toOF_pow_subset_of_mem_nhds`.
 - **Sketch**: (1) identify `((span {ϖof})^n : Set)` with `ϖ^n • (O_F)` via
   `Ideal.span_singleton_pow` + `Ideal.mem_span_singleton'`. (2) membership in 𝓝 0: O_F
   is open in F (uniformity: `IsUniform` gives `IsBounded (powerBoundedSubring F)`; the

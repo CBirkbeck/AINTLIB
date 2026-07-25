@@ -247,7 +247,7 @@ source-gap rule, and is the single largest residual risk of the campaign (§6, R
     the discrete topology has no pseudo-uniformizer (0 is not a unit) — consistent with
     Tate; [3] drift: none, mechanical. SURVIVED.
 - **L1.6** (leaf, project+mathlib): `span_toOF_pow_mem_nhds_zero`,
-  `exists_span_toOF_pow_subset_nhds`
+  `exists_span_toOF_pow_subset_of_mem_nhds`
   - Source claim ([SW] p. 92, §11.2, for the analogous R⁺): the topology of a perfectoid
     Tate ring restricted to R⁺ is the ϖ-adic one; standard Tate-ring fact ([Wedhorn]
     §5.30-shape: for a Tate ring with ring of definition A₀ ∋ ϖ, {ϖ^n A₀} is a basis).
