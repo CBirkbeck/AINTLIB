@@ -741,10 +741,22 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       `gaussValueF_p_mul`, transport (`gaussValueF_map`), boundedness lemmas for
       tails/sums/Teichmüller-differences. The [-1]-question was DODGED entirely: the
       only negation needed was digit-0 (additive, exact).
-      (4) coordinates on ArSub := extend along density (DenseInducing/UniformContinuous.extend
-      or sequential: every x ∈ ArSub is a limit of Aloc-images; coords of the
-      approximants are Cauchy in F by (3); define teichCoeffAr x n := lim);
-  (5) reconstruction + attainment (wAr x = max ρⁿ|xₙ|, attained) on ArSub; then
+      (4) IN PROGRESS: `wAloc` defined (mirror extendToLocalization);
+      `gaussTermF_alocToWittF_le` DONE (dense-layer term bound: every Aloc-image is
+      boundedly termed with terms ≤ wAloc-value; via IsLocalization.surj +
+      teichmuller-scaling + c^k-cancellation; note the teichPi-rw-in-type trap: use
+      compound-pattern haves (hteich) since teichPi occurs in Aloc's TYPE index).
+      NEXT within (4): (4b) attainment equality `gaussValueF (alocToWittF u) = wAloc u`
+      (≥ via exists_gaussValue_eq_gaussTerm on the numerator, scaled); (4c) coordinate
+      filters: for x ∈ ArSub define teichCoeffAr x n := lim of coords along
+      comap AlocToHatK (𝓝 x) (NeBot from closure-membership; Cauchy via
+      exists_delta_teichCoeffF_sub applied to differences of approximants — approximants
+      are boundedly-termed (4a) with values eventually ≤ v(x)+ball-const, i.e. pick m
+      with (c⁻¹)^m ≥ that; differences are Aloc-images hence boundedly termed);
+      F complete (IsPerfectoidRing.complete) gives the limit; characterize by
+      `Tendsto`. (4d) also relate Valued.v x to the coordinate data (attainment on the
+      completion) — that is step (5).
+      (5) reconstruction + attainment (wAr x = max ρⁿ|xₙ|, attained) on ArSub; then
       deg := largest attaining index, deg_mul (T803-mirror), Rem-2.7, summability —
       unlocking T904 (Euclidean). Br-vs-Ar[1/p] deferred until needed | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
 - **REVISED per AD-3-revision**: `Aloc := Localization.Away (teichPi p F ϖ)`; wAloc :=

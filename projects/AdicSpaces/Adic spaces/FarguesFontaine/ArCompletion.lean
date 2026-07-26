@@ -182,6 +182,86 @@ theorem alocToWittF_algebraMap (x : Ainf p F) :
       = WittVector.map ((powerBoundedSubring.toSubring F).subtype) x :=
   IsLocalization.lift_eq _ x
 
+/-- The powers of `[ϖ]` avoid the support of the Gauss valuation. -/
+theorem gaussVal_powers_teichPi_le_primeCompl {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
+    Submonoid.powers (teichPi p F ϖ)
+      ≤ (gaussVal p F hρ0 hρ1).supp.primeCompl := by
+  rintro x ⟨k, rfl⟩
+  intro hx
+  simp only [SetLike.mem_coe, Valuation.mem_supp_iff, map_pow] at hx
+  refine absurd hx (pow_ne_zero k ?_)
+  rw [show gaussVal p F hρ0 hρ1 (teichPi p F ϖ)
+    = gaussValue p F ρ (teichPi p F ϖ) from rfl, teichPi,
+    gaussValue_teichmuller p F hρ1.le]
+  exact fun hz => PseudoUniformizer.toOF_ne_zero F ϖ
+    (Subtype.ext ((Valuation.zero_iff (perfectoidValuation p F)).mp hz))
+
+/-- The extended Gauss valuation on `Aloc` (mirror of `wLoc`). -/
+def wAloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) : Valuation (Aloc p F ϖ) NNReal :=
+  (gaussVal p F hρ0 hρ1).extendToLocalization
+    (gaussVal_powers_teichPi_le_primeCompl p F ϖ hρ0 hρ1) _
+
+@[simp]
+theorem wAloc_algebraMap {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x : Ainf p F) :
+    wAloc p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Aloc p F ϖ) x)
+      = gaussValue p F ρ x :=
+  Valuation.extendToLocalization_apply_map_apply _ _ _ _
+
+/-- **Realization on the dense layer**: term values of `Aloc`-elements in `W(F)` are
+bounded by (and their sup equals) the extended Gauss valuation. -/
+theorem gaussTermF_alocToWittF_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (u : Aloc p F ϖ) (n : ℕ) :
+    gaussTermF p F ρ (alocToWittF p F ϖ u) n ≤ wAloc p F ϖ hρ0 hρ1 u := by
+  obtain ⟨⟨a, y⟩, hu⟩ := IsLocalization.surj (M := Submonoid.powers (teichPi p F ϖ)) u
+  change u * algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F)
+    = algebraMap (Ainf p F) (Aloc p F ϖ) a at hu
+  obtain ⟨k, hk⟩ := y.2
+  have hk' : teichPi p F ϖ ^ k = (y : Ainf p F) := hk
+  set ϖF : F := ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hϖF
+  set c : NNReal := perfectoidValuation p F ϖF with hc
+  have hϖne : ϖF ≠ 0 := fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  -- image side
+  have hy : alocToWittF p F ϖ (algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F))
+      = WittVector.teichmuller p (ϖF ^ k) := by
+    rw [alocToWittF_algebraMap, ← hk', map_pow]
+    have hone : WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+        (teichPi p F ϖ) = WittVector.teichmuller p ϖF := by
+      rw [show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+        from rfl, WittVector.map_teichmuller]
+      rfl
+    rw [hone, ← map_pow]
+  have himg : alocToWittF p F ϖ u * WittVector.teichmuller p (ϖF ^ k)
+      = WittVector.map ((powerBoundedSubring.toSubring F).subtype) a := by
+    have happ := congrArg (alocToWittF p F ϖ) hu
+    rw [map_mul, hy, alocToWittF_algebraMap] at happ
+    exact happ
+  -- value side
+  have hteich : gaussValue p F ρ (teichPi p F ϖ) = c := by
+    rw [show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+      from rfl, gaussValue_teichmuller p F hρ1.le]
+  have hval : wAloc p F ϖ hρ0 hρ1 u * c ^ k = gaussValue p F ρ a := by
+    have happ := congrArg (wAloc p F ϖ hρ0 hρ1) hu
+    rw [map_mul, wAloc_algebraMap, wAloc_algebraMap, ← hk'] at happ
+    rw [show gaussValue p F ρ (teichPi p F ϖ ^ k)
+      = (gaussValue p F ρ (teichPi p F ϖ)) ^ k from map_pow (gaussVal p F hρ0 hρ1) _ k,
+      hteich] at happ
+    exact happ
+  -- term side
+  have hterm : gaussTermF p F ρ (alocToWittF p F ϖ u) n * c ^ k
+      = gaussTerm p F ρ a n := by
+    have h1 := gaussTermF_teichmuller_mul p F (ρ := ρ) (w := ϖF ^ k)
+      (s := alocToWittF p F ϖ u) n
+    rw [mul_comm (WittVector.teichmuller p (ϖF ^ k)) _] at h1
+    rw [himg, gaussTermF_map, map_pow] at h1
+    rw [h1]
+    ring
+  have hle : gaussTermF p F ρ (alocToWittF p F ϖ u) n * c ^ k
+      ≤ wAloc p F ϖ hρ0 hρ1 u * c ^ k := by
+    rw [hterm, hval]
+    exact gaussTerm_le_gaussValue p F hρ1.le a n
+  exact le_of_mul_le_mul_right hle (pow_pos hc0 k)
+
 end FarguesFontaine
 
 end
