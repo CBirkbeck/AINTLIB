@@ -795,6 +795,68 @@ theorem map_locSubring_le_blocUnitBall (a b : ℕ) (hb : 0 < b)
   rw [map_locSubring_chartData p F ϖ a b hb]
   exact closure_chart_le_blocUnitBall p F ϖ a b hπ1 hπ2 hr1 hr2
 
+/-- **Elements of `I_inf^n` have Gauss value at most `max(ρ, |ϖ|)^n`** (each
+degree-`n` monomial does, and the bound-set is an ideal). -/
+theorem gaussValue_le_of_mem_Iinf_pow {ρ : NNReal} (hρ1 : ρ < 1) (n : ℕ)
+    {w : Ainf p F} (hw : w ∈ Iinf p F ϖ ^ n) :
+    gaussValue p F ρ w
+      ≤ (max ρ (perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F))) ^ n := by
+  set q : NNReal := max ρ (perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F)) with hqdef
+  -- the bound-set is an ideal
+  set BdIdeal : Ideal (Ainf p F) :=
+    { carrier := {w : Ainf p F | gaussValue p F ρ w ≤ q ^ n}
+      zero_mem' := by
+        show gaussValue p F ρ 0 ≤ q ^ n
+        rw [gaussValue_zero p F]
+        exact zero_le
+      add_mem' := by
+        intro x y hx hy
+        show gaussValue p F ρ (x + y) ≤ q ^ n
+        exact le_trans (gaussValue_add_le p F hρ1.le x y) (max_le hx hy)
+      smul_mem' := by
+        intro c x hx
+        show gaussValue p F ρ (c * x) ≤ q ^ n
+        calc gaussValue p F ρ (c * x)
+            ≤ gaussValue p F ρ c * gaussValue p F ρ x :=
+              gaussValue_mul_le p F hρ1 c x
+          _ ≤ 1 * (q ^ n) := mul_le_mul (gaussValue_le_one p F hρ1.le c) hx
+              zero_le zero_le
+          _ = q ^ n := one_mul _ } with hBd
+  have hmono : Ideal.span (chartMonomials p F ϖ n : Set (Ainf p F)) ≤ BdIdeal := by
+    rw [Ideal.span_le]
+    rintro x hx
+    rw [chartMonomials, Finset.coe_image] at hx
+    obtain ⟨i, hi, rfl⟩ := hx
+    rw [Finset.mem_coe, Finset.mem_range] at hi
+    show gaussValue p F ρ ((p : Ainf p F) ^ i * teichPi p F ϖ ^ (n - i)) ≤ q ^ n
+    have hval : gaussValue p F ρ ((p : Ainf p F) ^ i * teichPi p F ϖ ^ (n - i))
+        = ρ ^ i * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (n - i) := by
+      rw [show (p : Ainf p F) ^ i * teichPi p F ϖ ^ (n - i)
+          = (p : Ainf p F) ^ i * (teichPi p F ϖ ^ (n - i) * 1) from by ring,
+        gaussValue_p_pow_mul p F hρ1.le i, mul_one]
+      congr 1
+      rw [show teichPi p F ϖ ^ (n - i)
+          = WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ) ^ (n - i))
+          from by rw [map_pow]; rfl,
+        gaussValue_teichmuller p F hρ1.le]
+      rw [show (((PseudoUniformizer.toOF F ϖ) ^ (n - i) : OF F) : F)
+          = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (n - i) from by
+        push_cast; rfl, map_pow]
+    rw [hval]
+    calc ρ ^ i * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (n - i)
+        ≤ q ^ i * q ^ (n - i) := by
+          refine mul_le_mul (pow_le_pow_left₀ zero_le (le_max_left _ _) i)
+            (pow_le_pow_left₀ zero_le (le_max_right _ _) (n - i)) zero_le zero_le
+      _ = q ^ n := by
+          rw [← pow_add]
+          congr 1
+          omega
+  exact hmono (Iinf_pow_le_span_chartMonomials p F ϖ n hw)
+
 end FarguesFontaine
 
 end
