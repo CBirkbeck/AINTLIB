@@ -1987,6 +1987,38 @@ theorem tendsto_gaussTermF_of_w_approx {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ 
     · exact lt_trans (hN₂ n hN₂n) hba
     · exact lt_trans hj₀ hba
 
+/-- Coordinate shifts preserve bounded terms. -/
+theorem bddAbove_gaussTermF_of_coords_shift {σ : NNReal} (hσ0 : 0 < σ)
+    {x X : WittVector p F} {N : ℕ}
+    (hc : ∀ k, teichCoeffF p F X k = teichCoeffF p F x (N + k))
+    (hB : BddAbove (Set.range (gaussTermF p F σ x))) :
+    BddAbove (Set.range (gaussTermF p F σ X)) := by
+  obtain ⟨M, hM⟩ := hB
+  refine ⟨(σ ^ N)⁻¹ * M, ?_⟩
+  rintro s ⟨k, rfl⟩
+  have h1 : σ ^ N * gaussTermF p F σ X k = gaussTermF p F σ x (N + k) := by
+    rw [gaussTermF, gaussTermF, hc k, pow_add]
+    ring
+  have h2 : σ ^ N * gaussTermF p F σ X k ≤ M := h1.le.trans (hM ⟨N + k, rfl⟩)
+  rw [← one_mul (gaussTermF p F σ X k), ← inv_mul_cancel₀ (pow_pos hσ0 N).ne',
+    mul_assoc]
+  exact mul_le_mul_of_nonneg_left h2 zero_le
+
+/-- **The tail-of-prefix identity**: the value of `x` minus its `N`-th Teichmüller
+prefix is exactly the tail value `T_N(x)`. -/
+theorem gaussValueF_sub_prefix {σ : NNReal} (hσ0 : 0 < σ) {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F σ x))) (N : ℕ) :
+    gaussValueF p F σ (x - ∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
+      = tailValueF p F σ x N := by
+  obtain ⟨X, hX, hXc⟩ := exists_iter_splitF p F x N
+  have hsub : x - (∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
+      = (p : WittVector p F) ^ N * X := sub_eq_iff_eq_add'.mpr hX
+  rw [hsub, gaussValueF_p_pow_mul p F
+    (bddAbove_gaussTermF_of_coords_shift p F hσ0 hXc hB) N,
+    ← tailValueF_eq_of_coords p F hXc]
+
 end FarguesFontaine
 
 end
