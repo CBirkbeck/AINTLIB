@@ -1,0 +1,10 @@
+FOCUS: [DS4 Gap A] two authorised tasks:
+ (1) add [NIsInvertible S N] to the DS4 register (WeilPairing/Basic.lean) + fix fallout;
+ (2) scope (star-prime): Q in E[N](T) => Pic.map [N] (sectionToPicRel .. Q) = 1.
+     READ HasseWeil/Pic0/ FIRST (TheoremOfSquareDivisorForm, PicDualPullbackTheoremOfSquare,
+     PicDualAdditivityReduction) — closest existing material, field-level.
+TRAPS (gpt-5.6-sol): Pic goes through Skeleton so class equality gives only Nonempty iso —
+ build on RIGIDIFIED sheaves (L |-> L (x) f^*(0^*L)^-1) then descend. Prove mu_N-valuedness
+ BEFORE fibre rigidity. universallyOConnected (Rigidity.lean:57, PROVEN) is the H^0(E_T,O^x)={1}
+ uniqueness for the normalized trivialisation.
+DISCIPLINE: no maxHeartbeats; split proofs; explicit implicit args; hypotheses on underlying morphisms.
