@@ -973,7 +973,10 @@ non-Tate bases are supported.
   hexact2 : ρ₂^p = v(ϖ_n) via rhoRight). NO u>1-denominator generalization and
   NO rational-endpoint generalization needed. V₀ alone is NOT a chart of this
   family — it is covered by BigW_0; that suffices for sheafiness/locality.
-- **ID3a** (open): pseudo-uniformizer twisting. `PseudoUniformizer.pow (m>0)`
+- **ID3a** DONE (2026-07-27, FarguesFontaine/UniformizerTwist.lean:
+  isTopologicallyNilpotent_of_pow, PseudoUniformizer.pPow/frobRoot with
+  toOF_pPow/toOF_frobRoot + perfectoidValuation_pPow/frobRoot_pow; the
+  teichPi-power relations deferred to ID3b where the statements live): `PseudoUniformizer.pow (m>0)`
   (nilpotency of ϖ^m: multiples are cofinal) and `PseudoUniformizer.frobRoot s`
   (unit-level (frobeniusEquiv F p).symm^s; nilpotency: r^m = ϖ^k·r^j with
   {r^j : j < p^s} ⊆ O_F bounded and nonarch subgroup-nbhds absorb
