@@ -241,6 +241,68 @@ theorem idealModuleCokerIsoPushforwardUnit_π_hom
   exact IsColimit.comp_coconePointUniqueUpToIso_hom
     (cokernelIsCokernel (kernel.ι q)) hq WalkingParallelPair.one
 
+/-- The ideal module of a closed immersion is the structure sheaf away from
+the closed subscheme. -/
+theorem restrictIdealModuleToUnit_isIso_of_preimage_eq_bot
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsClosedImmersion f]
+    (U : Y.Opens) (hU : f ⁻¹ᵁ U = ⊥) :
+    IsIso (restrictIdealModuleToUnit f U.ι) := by
+  have htarget : IsZero
+      ((Scheme.Modules.restrictFunctor U.ι).obj
+        ((Scheme.Modules.pushforward f).obj (Scheme.Modules.unitObj X))) := by
+    apply Scheme.Modules.restrictPushforward_isZero_of_preimage_opensRange_eq_bot
+    simpa only [Scheme.Opens.opensRange_ι] using hU
+  have hrestrictedCokernel : IsZero
+      ((Scheme.Modules.restrictFunctor U.ι).obj
+        (cokernel (idealModuleToUnit f))) :=
+    htarget.of_iso ((Scheme.Modules.restrictFunctor U.ι).mapIso
+      (idealModuleCokerIsoPushforwardUnit f))
+  have hcokernel : IsZero
+      (cokernel ((Scheme.Modules.restrictFunctor U.ι).map
+        (idealModuleToUnit f))) :=
+    hrestrictedCokernel.of_iso
+      (Scheme.Modules.restrictCokernelIso (idealModuleToUnit f) U)
+  have hleft : Epi ((Scheme.Modules.restrictFunctor U.ι).map
+      (idealModuleToUnit f)) :=
+    Preadditive.epi_of_isZero_cokernel _ hcokernel
+  have hright : Epi (Scheme.Modules.restrictUnitIso U.ι).hom := by
+    letI : IsIso (Scheme.Modules.restrictUnitIso U.ι).hom :=
+      Iso.isIso_hom (Scheme.Modules.restrictUnitIso U.ι)
+    exact IsIso.epi_of_iso _
+  haveI : Epi (restrictIdealModuleToUnit f U.ι) := by
+    change Epi ((Scheme.Modules.restrictFunctor U.ι).map
+      (idealModuleToUnit f) ≫ (Scheme.Modules.restrictUnitIso U.ι).hom)
+    exact epi_comp' hleft hright
+  haveI : Mono (restrictIdealModuleToUnit f U.ι) :=
+    restrictIdealModuleToUnit_mono f U.ι
+  exact isIso_of_mono_of_epi _
+
+/-- The pole sheaf of a section is canonically trivial on every open disjoint
+from the section. -/
+noncomputable def sectionPoleSheafTrivializationOfSectionPreimageEqBot
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (hU : z ⁻¹ᵁ U = ⊥) :
+    (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  let hIso : IsIso (restrictIdealModuleToUnit z U.ι) :=
+    restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z U hU
+  let e := @asIso _ _ _ _ (restrictIdealModuleToUnit z U.ι) hIso
+  exact Scheme.Modules.dualRestrictIsoOfRestrictIso
+    (sectionIdealModule π z hz) U e
+
+/-- Every nonnegative pole-sheaf power is canonically trivial on an open
+disjoint from the section. -/
+noncomputable def sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (hU : z ⁻¹ᵁ U = ⊥) (n : ℕ) :
+    (sectionPoleSheafPower π z hz n).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme :=
+  sectionPoleSheafPowerTrivialization z hz U
+    (sectionPoleSheafTrivializationOfSectionPreimageEqBot z hz U hU) n
+
 /-- The quotient between two consecutive pole sheaves. -/
 noncomputable def sectionPoleSheafSuccCoker
     {C S : Scheme.{u}} (π : C ⟶ S) [IsSeparated π]
