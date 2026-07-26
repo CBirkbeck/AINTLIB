@@ -836,6 +836,55 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Sketch**: `isSheafy_of_stronglyNoetherian_828b` with `letI`-assembled instances
   (TC1 + `isTateRing_BISub` + `isStronglyNoetherian_BISub`).
 
+#### Lane C identification block (spawned 2026-07-26, beastmode; consult §5)
+
+The chart windows are rational subsets of the non-Tate pair `(A_inf, A_inf)` with
+single-denominator presentations (write `c = cFF p = (p+1)/2 = a/b` in lowest terms,
+so `a = (p+1)/2, b = 1` for odd `p` and `a = 3, b = 2` for `p = 2`):
+`U₀ = R({p^{a+1}, [ϖ]^{b+1}} / p[ϖ]^b)`, `V₀ = R({[ϖ]^{b+1}, p^{p+a}} / p^a[ϖ])`.
+The repo's `RationalLocData.IsRational` is Wedhorn's faithful open-ideal condition —
+non-Tate bases are supported.
+
+### [ID1a] The chart datum `chartDataU : RationalLocData (Ainf p F)`
+- **Status**: done (2026-07-26, beastmode) — generalized: `chartData u v a b` in new
+  FarguesFontaine/ChartData.lean (s = pᵘ[ϖ]ᵛ, T = {p^{a+1},[ϖ]^{b+1}}) covers both
+  charts and every AD-9 window; `podAinf`, divByS calculus, monomial-span lemma | **Parent**: PLAN-GATE-2 | **Type**: def + lemma
+- **Sketch**: `P` := the `(p,[ϖ])`-adic pair of definition from AinfHuber;
+  `T := {p^{a+1}, [ϖ]^{b+1}}`, `s := p·[ϖ]^b`; `hopen`: for `N` large the monomials
+  `p^i[ϖ]^{N-i}/s` are `A`-multiples of products of the two generating fractions
+  (elementary exponent bookkeeping in `locSubring`).
+- Mirror `chartDataV`.
+
+### [ID1b] `chartDataU.IsRational`
+- **Status**: done (2026-07-26, beastmode) — `isRational_chartData` | **Parent**: PLAN-GATE-2 | **Type**: lemma
+- **Sketch**: `I^{a+b+2} ⊆ span T` monomial-by-monomial (`i ≥ a+1` or
+  `N-i ≥ b+1`); `I^M` is open (adic) and a subset of an ideal makes it open.
+
+### [ID1c] The window is the rational subset
+- **Status**: open | **Parent**: PLAN-GATE-2 | **Type**: theorem
+- **Statement**: `windowU 0 = Y ∩ (Spa-trace of rationalOpens T_U s_U)` (and V).
+- **Sketch**: unfold `KGE 1`/`KLE c`/`rationalOpens`; cancellation of `v([ϖ])^b`
+  and `v(p)` via the `pow_le_pow_iff_cross` tools in YSpace; the `v(s) ≠ 0`
+  condition ⟺ the `Y`-condition `v(p[ϖ]) ≠ 0`.
+
+### [ID2] ★ The comparison theorem `presheafValue chartDataU ≅ B^{I_U}`
+- **Status**: open (needs its own /develop decomposition when reached) |
+  **Parent**: PLAN-GATE-2 | **Type**: theorem block
+- **Sketch** (consult §5): (a) universal-property map into `B^I` (the fractions
+  `[ϖ]/p`, `p^a/[ϖ]^b` are power-bounded in `B^{I_U}` — endpoint value
+  computations); (b) both sides contain the dense `Bloc`; (c) the rational-
+  localization topology equals the `λ_I`-topology (via Lemma 4.9/T911 machinery:
+  the localization is Tate with `p` a topologically nilpotent unit); assemble as a
+  topological-ring iso. Plus-ring: transport the integral closure of
+  `A⁺[T/s]` (NOT `B^{I,+}` equality — unnecessary per consult).
+- **Depends**: ID1a-c, T911, TC2.
+
+### [ID3] Y is pre-adic and sheafy on the charts
+- **Status**: open | **Parent**: PLAN-GATE-2/PLAN-GATE-3 | **Type**: theorem block
+- **Sketch**: restrict the standard pre-adic structure of `Spa(A_inf, A_inf)` to
+  `Y`; each `U_n, V_n` is affinoid pre-adic ≅ `Spa(B^I, C⁺)` (ID2 + Frobenius
+  translates); restrictions respected; Wedhorn Rem 8.27 locality + TC2.
+
 ### [PLAN-GATE-2] Lane C assembly planning (identification theorem + sheafy instances)
 - **Status**: blocked (planning gate; first block TC1-TC2 spawned 2026-07-26 —
   remaining: the chart-identification theorems 𝒪(U₀) ≅ B^{[τ,cτ]} per the consult
