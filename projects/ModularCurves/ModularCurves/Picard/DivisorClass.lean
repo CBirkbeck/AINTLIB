@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.CartierDivisor
+import ModularCurves.Picard.GlueTrivialization
 import ModularCurves.Picard.IdealModule
 import ModularCurves.Picard.RelativePic
 
@@ -53,6 +54,22 @@ noncomputable def picClass [IsSeparated π] (D : RelEffCartierDiv π)
     (h : IsOfficialCartier π D.ideal) : Pic C :=
   letI := Modules.monoidalCategory C
   ((D.isInvertible_idealModule h).isUnit_toSkeleton).unit⁻¹
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Divisors with isomorphic ideal modules have the same Picard class. This is the form in
+which the descent theorems (`Picard/GlueTrivialization.lean`,
+`Picard/RigidDescent.lean`) are consumed: they produce an isomorphism of modules, and what
+is needed downstream is an equality in the group `Pic C`. -/
+theorem picClass_eq_of_nonempty_iso [IsSeparated π] {D D' : RelEffCartierDiv π}
+    (h : IsOfficialCartier π D.ideal) (h' : IsOfficialCartier π D'.ideal)
+    (e : Nonempty (idealModule D.ideal ≅ idealModule D'.ideal)) :
+    D.picClass h = D'.picClass h' := by
+  letI := Modules.monoidalCategory C
+  letI := Modules.symmetricCategory C
+  exact congrArg Inv.inv
+    (Modules.IsInvertible.unit_eq_unit_of_iso (D.isInvertible_idealModule h)
+      (D'.isInvertible_idealModule h') e)
 
 end RelEffCartierDiv
 

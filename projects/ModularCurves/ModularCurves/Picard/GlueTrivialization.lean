@@ -114,4 +114,35 @@ theorem nonempty_unitObj_iso_of_glue {ι : Type u} (U : ι → X.Opens) (hU : iS
   rw [heq] at hb
   exact hb
 
+/-! ## Passing to `Pic`
+
+The descent theorems above produce a `Nonempty (𝒪ₓ ≅ M)`. Every consumer needs the
+consequence *in the group* `Pic X = (Skeleton X.Modules)ˣ`, which is what these two lemmas
+supply. -/
+
+/-- A trivial module has trivial class: `Skeleton` identifies isomorphic objects. -/
+theorem IsInvertible.unit_eq_one {M : X.Modules} (hM : IsInvertible M)
+    (h : Nonempty (unitObj X ≅ M)) :
+    letI := Modules.monoidalCategory X
+    letI := Modules.symmetricCategory X
+    hM.isUnit_toSkeleton.unit = 1 := by
+  letI := Modules.monoidalCategory X
+  letI := Modules.symmetricCategory X
+  obtain ⟨e⟩ := h
+  obtain ⟨eU⟩ := nonempty_unitObj_iso_unit (X := X)
+  refine Units.ext ?_
+  show toSkeleton M = (1 : Skeleton X.Modules)
+  rw [Skeleton.one_eq]
+  exact toSkeleton_eq_toSkeleton_iff.mpr ⟨e.symm ≪≫ eU⟩
+
+/-- Isomorphic invertible modules have the same class in `Pic`. -/
+theorem IsInvertible.unit_eq_unit_of_iso {M N : X.Modules} (hM : IsInvertible M)
+    (hN : IsInvertible N) (h : Nonempty (M ≅ N)) :
+    letI := Modules.monoidalCategory X
+    letI := Modules.symmetricCategory X
+    hM.isUnit_toSkeleton.unit = hN.isUnit_toSkeleton.unit := by
+  letI := Modules.monoidalCategory X
+  letI := Modules.symmetricCategory X
+  exact Units.ext (toSkeleton_eq_toSkeleton_iff.mpr h)
+
 end AlgebraicGeometry.Scheme.Modules

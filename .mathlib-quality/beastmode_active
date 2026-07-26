@@ -1,21 +1,18 @@
-FOCUS: Gap A. INFRASTRUCTURE COMPLETE (all axiom-clean). Remaining = ONE mathematical
-input, needed by both leaves:
-
-  (LOCAL-SQUARE) On a chart of the base where E_T has a Weierstrass model, the function
-  l/v (line through Q,Q' over vertical through Q+Q') is a generating section of
-     I(D_Q) (x) I(D_Q') (x) I(D_{Q+Q'})^-1 (x) I(D_0)^-1,
-  normalized along the zero section. Field template (proved, any characteristic):
-  HasseWeil.Pic0.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv (Silverman III.3.5).
-
-Feed it to ModularCurves.nonempty_unitObj_iso_of_normalized_glue (Picard/RigidDescent.lean)
-to get leaf (i) kappa_add; the same mechanism with [N]^* gives leaf (ii)
-picMap_mulByHom_kappa_pow.
-
-DONE + AXIOM-CLEAN this session:
-  officialAux_exists_finite_chart (was sorried; needed the fibrewise weakening)
-  picClass/sectionToPicRel/kappa_zero  (rerouted off the noetherian box)
-  SectionRigidity: sectionRigidity, eq_one_of_pullback_eq_one('), unitsEquiv
-  PicComparison.isIso_of_bijective_app_on_cover (factored out)
-  GlueTrivialization: globalSectionHom, exists_globalSection_restrict,
-                      nonempty_unitObj_iso_of_glue
-  RigidDescent: nonempty_unitObj_iso_of_normalized_glue
+FOCUS: Gap A. Pic-level bridge DONE + axiom-clean:
+  Modules.IsInvertible.unit_eq_one / unit_eq_unit_of_iso   (GlueTrivialization.lean)
+  RelEffCartierDiv.picClass_eq_of_nonempty_iso              (DivisorClass.lean)
+CHAIN NOW COMPLETE FROM MODULE-ISO TO kappa:
+  cover-local generating sections normalized on 0-section
+    -> nonempty_unitObj_iso_of_normalized_glue (RigidDescent)
+    -> Nonempty (idealModule D =~ idealModule D')
+    -> picClass_eq_of_nonempty_iso
+    -> equal picClass -> equal kappa.
+NEXT STEP: build the tensor-level version needed by kappa_add, i.e.
+  picClass D_Q * picClass D_Q' = picClass D_{Q+Q'} * picClass D_0  (mod ker picRelProj),
+which needs Skeleton.toSkeleton_tensorObj (already used in PicComparison
+.IsInvertible.isUnit_toSkeleton) to turn a product of classes into the class of a tensor.
+Then the ONLY remaining input is (LOCAL-SQUARE): the relative Miller/line function.
+NOTE: HasseWeil field proof (Foundation/Curves/Divisor/MillerAllChar.lean, 726 lines) is
+valuation-theoretic and does NOT transport to a base ring — the relative statement must be
+the IDEAL identity I(D_P).I(D_Q).I(D_{-(P+Q)}) = (line) and I(D_{P+Q}).I(D_{-(P+Q)}) = (vert)
+on a chart where the sections are in general position.
