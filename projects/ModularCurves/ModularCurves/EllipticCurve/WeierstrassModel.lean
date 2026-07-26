@@ -811,6 +811,26 @@ lemma chartHomEquiv_eq_of_specMap (W : WeierstrassCurve R) (i : Fin 3)
   exact (Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).symm_apply_apply φ
 
 
+/-- **(converse value-characterisation)** The chart hom attached to a chart-factoring
+point does factor it. This is `chartHomEquiv_eq_of_specMap` read the other way, and it is
+what lets consumers *produce* the factorisation from `InZChart` alone. -/
+lemma chartHomEquiv_specMap_factors (W : WeierstrassCurve R) (i : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K]
+    (g : { g : SpecPoints (projModel W) (projModelπ W) K //
+      ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W i) one_pos = g.1 }) :
+    Spec.map (CommRingCat.ofHom (chartHomEquiv W i K g).1) ≫
+        Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W i) one_pos = g.1.1 :=
+  congrArg (fun z => (z : { g : SpecPoints (projModel W) (projModelπ W) K //
+      ∃ h : Spec (.of K) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)))),
+        h ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W i) one_pos = g.1 }).1.1)
+    ((Equiv.ofBijective _ (chartPointOfHom_bijective W i (K := K))).apply_symm_apply g)
+
 /-- The chart coordinate `Xⱼ/Xᵢ` is mathlib's localization element for the pair
 `(Xᵢ, Xⱼ)`. -/
 lemma chartCoordEquiv_mk_X (W : WeierstrassCurve R) (i : Fin 3)
@@ -1325,6 +1345,22 @@ lemma projModelPointsEquivEll_some (W : WeierstrassCurve R) (hell : W.IsElliptic
   simp only [Equiv.trans_apply, Equiv.sumCompl_symm_apply_of_pos hZ, Equiv.sumCongr_apply,
     Sum.map_inl]
   rfl
+
+/-- **(readout nonsingularity)** For an elliptic `W`, the `Z`-chart readout coordinates of
+a chart-factoring `K`-point are nonsingular. `projModelPointsEquivEll_some` asks its caller
+to supply this witness; this lemma produces the canonical one. -/
+lemma nonsingular_chartSolution (W : WeierstrassCurve R) (hell : W.IsElliptic)
+    {K : Type u} [Field K] [Algebra R K]
+    (g : SpecPoints (projModel W) (projModelπ W) K) (hZ : InZChart W g) :
+    (W.baseChange K).toAffine.Nonsingular
+      ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨0, by decide⟩)
+      ((chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩)).1 ⟨1, by decide⟩) := by
+  haveI := hell
+  haveI : ((W.baseChange K).toAffine).IsElliptic :=
+    inferInstanceAs ((W.map (algebraMap R K)).IsElliptic)
+  exact WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+    (zSolutionsToAffine W K
+      (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨g, hZ⟩))).2
 
 private lemma aeval_pderiv_dehomog_two_u (W : WeierstrassCurve R) {K : Type u}
     [CommRing K] [Algebra R K] (v : {j : Fin 3 // j ≠ 2} → K) :
