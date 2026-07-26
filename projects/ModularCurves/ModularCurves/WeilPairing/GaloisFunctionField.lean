@@ -920,4 +920,27 @@ theorem weilPairing_galois_of_conj {L : Type v} [Field L] [DecidableEq L] [IsAlg
     (galoisFunctionFieldEquiv W σ) S T (galoisPointEquiv W σ S) (galoisPointEquiv W σ T)
     hS hT hσS hσT hconj hc hcval (galoisFunctionFieldEquiv_algebraMap W σ)
 
+/-- **(M1b-3b leaf, brick 1)** Ring-hom extensionality on the function field: two ring
+homomorphisms agreeing on the base constants and on the two generic coordinates are equal.
+
+This is the semilinear analogue of HasseWeil's `algHom_ext_x_y_gen` — needed because the
+Galois automorphism `Φ_σ` is only a *ring* equivalence (it moves the `L`-coefficients), so
+the `L`-algebra extensionality does not apply to composites involving it. -/
+theorem ringHom_ext_const_x_y_gen {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    [(W.baseChange L).toAffine.IsElliptic]
+    {ψ₁ ψ₂ : (W.baseChange L).toAffine.FunctionField →+*
+      (W.baseChange L).toAffine.FunctionField}
+    (hconst : ∀ a : L, ψ₁ (algebraMap L _ a) = ψ₂ (algebraMap L _ a))
+    (hx : ψ₁ (HasseWeil.x_gen (W.baseChange L)) = ψ₂ (HasseWeil.x_gen (W.baseChange L)))
+    (hy : ψ₁ (HasseWeil.y_gen (W.baseChange L)) = ψ₂ (HasseWeil.y_gen (W.baseChange L))) :
+    ψ₁ = ψ₂ := by
+  refine IsLocalization.ringHom_ext
+    (nonZeroDivisors (W.baseChange L).toAffine.CoordinateRing) ?_
+  refine AdjoinRoot.ringHom_ext ?_ ?_
+  · refine Polynomial.ringHom_ext ?_ ?_
+    · intro a
+      exact hconst a
+    · exact hx
+  · exact hy
+
 end ModularCurves
