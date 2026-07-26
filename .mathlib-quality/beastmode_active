@@ -1,4 +1,10 @@
-FOCUS: DS4 M1b leaf (translation conjugation). Landed bricks: ringHom_ext_const_x_y_gen (semilinear extensionality), galoisFractionLift_x_gen, galoisFractionLift_y_gen (the raw lift fixes the generic coordinates, modulo the curve-equality cast).
-NEXT: cast them through ffGalCast to get galoisFunctionFieldEquiv_x_gen / _y_gen : Phi_sigma (x_gen) = x_gen and Phi_sigma (y_gen) = y_gen. Pattern: use the `key : forall V (h : V = W.baseChange L) ...; subst h; rfl` trick already used in galoisFunctionFieldEquiv_algebraMap, but with a HEq bridge for the generators (x_gen V vs x_gen (W.baseChange L)) — or prove a cast lemma `RingEquiv.cast h (x_gen V) = x_gen (W.baseChange L)` by subst.
-THEN the conjugation itself via ringHom_ext_const_x_y_gen: compare Phi o tau_S and tau_{sigma S} o Phi on constants (galoisFunctionFieldEquiv_algebraMap + AlgEquiv.commutes) and on x_gen,y_gen (translateAlgEquivOfPoint_*_x_gen/_y_gen give tau_S on the generators as rational functions in the coefficients; Phi applies sigma to those coefficients, which is exactly tau_{sigma S} on the generators).
-THEN weilPairing_galois (unconditional), fieldWeilPairing_galois, and M1c.
+FOCUS: DS4 M1b LEAF (translation conjugation) — bricks 1-3 landed, sorry-free, pushed:
+  1. ringHom_ext_const_x_y_gen (semilinear extensionality: constants + x_gen + y_gen determine a ring hom)
+  2. galoisFunctionFieldEquiv_x_gen / _y_gen (Phi_sigma fixes the generic coordinates; via galoisFractionLift_x_gen/_y_gen + cast_x_gen/cast_y_gen)
+  3. galoisFunctionFieldEquiv_algebraMap_base and _a1/_a2/_a3/_a4/_a6 (Phi_sigma fixes base constants and the curve coefficients)
+NEXT (brick 4): push Phi_sigma through the translation formulas.
+  translateAlgHom_apply_x_gen/_y_gen (TranslationOrd 1852/2009) give tau_S(x_gen) = translateX_xy W xk yk and tau_S(y_gen) = translateY_xy W xk yk, where (Translation.lean:59-70)
+    translateSlope_xy = (W_KE).toAffine.slope x_gen (algebraMap xk) y_gen (algebraMap yk)
+    translateX_xy = (W_KE).toAffine.addX x_gen (algebraMap xk) slope ; translateY_xy = addY ... .
+  So: Phi_sigma (translateX_xy W xk yk) = translateX_xy W (sigma xk) (sigma yk) — push Phi through addX/addY/slope (they are rational expressions in x_gen, y_gen, the two constants and the a_i) using bricks 2+3 and galoisFunctionFieldEquiv_algebraMap for the constants. Watch the 2-torsion branch (translateAlgEquiv_of_2tor) separately.
+  THEN conclude the conjugation by ringHom_ext_const_x_y_gen and finish weilPairing_galois (unconditional), then fieldWeilPairing_galois, then M1c (EtaleDescent:440).
