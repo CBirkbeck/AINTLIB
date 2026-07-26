@@ -694,6 +694,54 @@ theorem exists_mem_groebnerSet_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       _ = dIdx p F ϖ hρ0 hρ1 H J := hdcoe
   · exact dIdx_antitone p F ϖ hIJ
 
+/-- `d_I` is a lower bound for the leading-coefficient degrees at index `I`. -/
+theorem dIdx_le_of_mem {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {x : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    (hxH : x ∈ H) (hx0 : (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0)
+    {I : Fin k →₀ ℕ}
+    (hxlead : leadIdxRPS p F ϖ hρ0 hρ1
+      (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = I) :
+    dIdx p F ϖ hρ0 hρ1 H I
+      ≤ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)) :=
+  sInf_le ⟨_, ⟨x, hxH, hx0, hxlead, rfl⟩, rfl⟩
+
+/-- A finite `d_I` is realized by an ideal element. -/
+theorem degSetIdx_nonempty {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {I : Fin k →₀ ℕ} (hI : dIdx p F ϖ hρ0 hρ1 H I ≠ ⊤) :
+    (degSetIdx p F ϖ hρ0 hρ1 H I).Nonempty := by
+  rw [Set.nonempty_iff_ne_empty]
+  intro hemp
+  refine hI ?_
+  rw [dIdx, hemp, Set.image_empty, sInf_empty]
+
+/-- **The Gröbner generators** (Kedlaya Definition 3.7): for every index with finite
+degree datum there is an ideal element with that leading index whose leading
+coefficient realizes `d_I` exactly. -/
+theorem exists_leadIdx_degAr_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {I : Fin k →₀ ℕ} (hI : dIdx p F ϖ hρ0 hρ1 H I ≠ ⊤) :
+    ∃ x : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)),
+      x ∈ H ∧ (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0
+        ∧ leadIdxRPS p F ϖ hρ0 hρ1
+            (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = I
+        ∧ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+            (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞))
+          = dIdx p F ϖ hρ0 hρ1 H I := by
+  have hne := degSetIdx_nonempty p F ϖ hI
+  obtain ⟨x, hxH, hx0, hxlead, hxdeg⟩ := Nat.sInf_mem hne
+  refine ⟨x, hxH, hx0, hxlead, le_antisymm ?_ ?_⟩
+  · rw [hxdeg, dIdx]
+    refine le_sInf ?_
+    rintro y ⟨d, hd, rfl⟩
+    show ((sInf (degSetIdx p F ϖ hρ0 hρ1 H I) : ℕ) : ℕ∞) ≤ ((d : ℕ) : ℕ∞)
+    exact_mod_cast Nat.sInf_le hd
+  · exact dIdx_le_of_mem p F ϖ hxH hx0 hxlead
+
 end FarguesFontaine
 
 end

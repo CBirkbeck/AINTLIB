@@ -943,7 +943,22 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   summability from T903. EuclideanDomain: mathlib structure on the subtype.
 
 ### [T905] Gröbner data on Ar⟨X₁..Xₖ⟩
-- **Status**: in_progress (beastmode 2026-07-26) | **File**: FarguesFontaine/Groebner.lean | **Depends**: T903, T904 (both done); repo A⟨X⟩
+- **Status**: done (beastmode 2026-07-26) — ALL Gröbner data built in
+  FarguesFontaine/Groebner.lean, axiom-clean and pushed: the restricted-series bridge
+  (`valued_ball_mem_nhds_zero`, `exists_valued_ball_subset`, `isRestricted_iff_valued`),
+  `NonarchimedeanRing` instances for `hatK` and the `ArSub` subring, the radius-1 Gauss
+  norm (`gaussNormRPS`, `exists_iSup_eq_of_finite_above`, `exists_gaussNormRPS_eq`,
+  `gaussNormRPS_ne_zero`, `bddAbove_coeff_valued`), attainment sets
+  (`attainSetRPS` + finite + nonempty), **Def 3.6** (`leadIdxRPS` via
+  `MonomialOrder.degLex`, `leadIdxRPS_spec`, `leadCoeffRPS`), the monomial-shift trio
+  (`coeff_monomialShift`, `isRestricted_monomialShift`, `gaussNormRPS_monomialShift`,
+  `monomialShift_ne_zero`, `attainSetRPS_monomialShift`, `leadIdxRPS_monomialShift`,
+  `leadCoeffRPS_monomialShift`), **Def 3.7** (`degSetIdx`, `degSetIdx_subset`, `dIdx`,
+  `dIdx_antitone`, `dIdx_le_of_mem`, `degSetIdx_nonempty`, `exists_leadIdx_degAr_eq`),
+  and **the Gröbner set S** (`finite_minimal`, `exists_minimal_le`, `groebnerPairs`,
+  `groebnerSet`, `groebnerSet_finite` by Dickson, `exists_mem_groebnerSet_le`).
+  NB the product-order trick (minimal pairs in `(Fin k →₀ ℕ) × ℕ`) replaces Kedlaya's
+  two-step "finitely many minimals, hence bounded degrees" bookkeeping. | **File**: FarguesFontaine/Groebner.lean | **Depends**: T903, T904 (both done); repo A⟨X⟩
 - **DESIGN (banked 2026-07-26 after full §3 re-read, ln 217-330)**: work over
   `Ar := ↥(ArSub p F ϖ hρ0 hρ1)` with the REPO predicate
   `restrictedMvPowerSeriesSubring k Ar` (RestrictedPowerSeries.lean; coefficients → 0
