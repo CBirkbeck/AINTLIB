@@ -698,7 +698,15 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   (b4) Extend to `Aloc/Bloc` by clearing `[ϖ]`/`p[ϖ]`-denominators (scaling lemma).
 
 ### [T903] Ar as Valued completion; realization; wAr; deg
-- **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
+- **Status**: in_progress (beastmode 2026-07-26). DONE (ArCompletion.lean, axiom-clean):
+  wK (Gauss valuation on Frac(Ainf) via nonZeroDivisors-extendToLocalization, using
+  gaussValue_pos_of_ne_zero), hatK := (wK).Completion (mathlib field machinery),
+  toHatK with valued_toHatK (Valued.v ∘ toHatK = gaussValue, via valuedCompletion_apply),
+  Aloc (abbrev, finally defined here), AlocToHatK/BlocToHatK (IsLocalization.lift,
+  unit-values via map_pow through the gaussVal bundle), ArSub/BrSub :=
+  range.topologicalClosure. REMAINING: extended coordinates on hatK-balls via T902(b3)
+  moduli + reconstruction/attainment + deg + deg_mul + summability (the realization
+  theorems per AD-3-revised); note Br-vs-Ar[1/p] identification deferred until needed | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
 - **REVISED per AD-3-revision**: `Aloc := Localization.Away (teichPi p F ϖ)`; wAloc :=
   extendToLocalization of gaussVal (mirror of T901 for the ϖ-only localization);
   `Ar ρ := UniformSpace.Completion (WithVal (wAloc ρ))` with mathlib `Valued`-instance
