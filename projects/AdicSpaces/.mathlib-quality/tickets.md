@@ -611,7 +611,7 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
 - **Statement**: fill `Y_nonempty` in Curve.lean: `⟨gaussSpv ρ, mem_spa, w(p[ϖ]) ≠ 0⟩`.
 
 ### [PLAN-GATE-1] /develop --decompose: Kedlaya §2–§4 (Euclidean/PID + strongly noetherian + B^I)
-- **Status**: blocked (planning gate) | **Depends**: T805
+- **Status**: done (2026-07-26: decomposition-laneB.md written; Lane-B tickets T901–T912 filed; AD-1..AD-7 frozen) | **Depends**: T805
 - Scope PER SOL REVIEW: §2–§3 PLUS Definition 4.2, Lemma 4.9, Theorem 4.10 (the
   two-sided interval rings B^{[1,c]} (U₀) and B^{[c,p]} (V₀), normalization
   |ϖ| = p^{-1}); include the Banach-vs-Huber Tate-algebra topological agreement.
@@ -633,3 +633,142 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
   sheaf and stalk valuations) OR two-chart gluing along the Frobenius transitions
   (overlap pieces: κ = c identity; κ = 1 ↔φ↔ κ = p), cocycle condition, and the
   local-isomorphism property of q — only then is 𝒳 an adic space.
+
+---
+
+## Campaign 8 Lane B (PLAN-GATE-1 output, 2026-07-26): Kedlaya 1410.5160 §2–§4
+Architecture decisions AD-1..AD-7 in `.mathlib-quality/decomposition-laneB.md` are BINDING.
+File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` (T902–T903),
+`FarguesFontaine/Euclidean.lean` (T904), `FarguesFontaine/Groebner.lean` (T905–T907),
+`FarguesFontaine/IntervalRing.lean` (T908–T911), `FarguesFontaine/StronglyNoetherianB.lean` (T912).
+
+### [T901] Bloc + the extended Gauss-valuation family
+- **Status**: open | **File**: FarguesFontaine/RobbaLoc.lean | **Depends**: T803/T804 (done)
+- **Statement**: `Bloc p F := Localization.Away ((p : Ainf p F) * teichPi p F ϖ)`;
+  `wLoc ρ hρ0 hρ1 : Valuation (Bloc p F ϖ) ℝ≥0 := (gaussVal p F hρ0 hρ1).extendToLocalization hS _`
+  with `hS : Submonoid.powers (p·[ϖ]) ≤ (gaussVal).supp.primeCompl` from
+  `gaussValue_p_teichPi_ne_zero`; evaluation lemmas `wLoc_mk'` (from
+  `Valuation.extendToLocalization_mk'`), `wLoc_coe` (on `Ainf`-images), values on
+  `p⁻¹`, `[ϖ]⁻¹`; `wLoc_teichmullerFrac : wLoc ([a]/[ϖ^k]) = |a|/c^k`.
+- **Sketch**: pure API assembly; mathlib `extendToLocalization` verified present with
+  `extendToLocalization_mk'`. Source: Kedlaya Def 2.2 (ln 85–95) + AD-1/AD-2.
+
+### [T902] W(F)-generalized Gauss engines (the GaussNorm port)
+- **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T901 (parallel OK)
+- **Statement**: for `x : WittVector p F` define `wCoeff ρ x n := ρⁿ·|θ^{-n}(xₙ)|` and,
+  on the decaying carrier, `wF ρ x := ⨆ n, wCoeff ρ x n`. Port from GaussNorm.lean:
+  expansion uniqueness (CORE-1/2), head split, Teichmüller scaling, the pair bound
+  (u-trick — needs only `v(b) ≤ v(a) ⟹ ∃u ∈ O_F, b = a·u`, valid for a,b ∈ F via
+  `Integers.exists_of_le_one`), n-ary (2.8.1): `w([z₁]±…±[zₙ] − [z₁±…±zₙ]) ≤
+  ε·max wᵢ` with `ε := max(ρ, sup-cross-terms)`... precise form: Kedlaya ln 148–151:
+  "λ_r(p) ≤ ε ensures λ_r([z₁]±···±[zₙ]−[z₁±···±zₙ]) ≤ ε·max{λ_r([zᵢ])}" — the
+  perturbation is p-divisible, so `w(p·junk) = ρ·w(junk) ≤ ρ·max` by level-rep: ε = ρ
+  works for the untwisted normalization. Level-rep + ultrametric + multiplicativity on
+  the carrier (statements now with attained maxima, no ≤1 hypotheses).
+- **Sketch**: mechanical port; every GaussNorm proof was factored through teichCoeff and
+  the list engines. The `≤ 1`-instances (`gaussTerm_le_one` etc.) become decay-attainment.
+
+### [T903] The ring Ar: carrier, closure, wAr, deg
+- **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
+- **Statement**: `Ar ρ : Subring (WittVector p F)` with carrier
+  `{x | Tendsto (wCoeff ρ x) atTop (𝓝 0)}` (closure under +,*,neg from T902 engines:
+  coordinates of sums/products bounded by max/product patterns); `wAr` multiplicative
+  on `Ar` (T902 mirror of T803); **attainment** `∃ n, wAr x = wCoeff ρ x n` for x ≠ 0;
+  `deg x := largest attaining n` (well-def: finitely many indices above any threshold);
+  `deg_mul : deg (xy) = deg x + deg y` (T803-MIRROR: largest attaining index of a
+  product; per AD-6 replaces Kedlaya's omitted convex-duality proof of Lemma 2.6);
+  `deg_eq_of_lt : wAr (x−y) < wAr x → deg x = deg y` (Rem 2.7, ln 137–139);
+  summability lemma: a series `Σ zₗ` with `wAr zₗ → 0` converges coefficientwise into
+  `Ar` (the convergence used by Prop 2.9/Lemma 3.9; concrete, no abstract completion).
+- **Source quotes**: Def 2.4 ln 100–106 ("x ∈ A^r iff p^{-n}|xₙ|^r → 0"); Def 2.5
+  ln 115–118 ("degree ... the largest n realizing λ_r(x) = max"); Lemma 2.6 ln 122–127.
+
+### [T904] Euclidean division on Ar; Ar is a PID
+- **Status**: open | **File**: FarguesFontaine/Euclidean.lean | **Depends**: T903
+- **Statement**: Lemma 2.8 (approximate division): for x ≠ 0 ∃ ε ∈ (0,1) s.t. ∀ y ∃ z w:
+  `y = z*x + w ∧ wAr w ≤ wAr y ∧ (wAr w > ε·wAr y → deg w < deg x)`. Prop 2.9 (exact):
+  `∀ x ≠ 0, ∀ y, ∃ z w, y = z*x + w ∧ wAr w ≤ wAr y ∧ deg w < deg x`. Cor 2.10:
+  `EuclideanDomain (Ar ρ)` (deg into ℕ; mul_left_not_lt from deg_mul) + PID instance.
+- **Sketch** (transcribe ln 141–216 faithfully): ε with `ρ ≤ ε` and
+  `wCoeff x n ≤ ε·wAr x` for n > m := deg x. Iteration: `zₗ := Σ pⁿ[y_{l,n+m}/x_m]`
+  (coefficientwise quotient by the leading coefficient — legal in F), `y_{l+1} = yₗ − zₗx`;
+  the (2.8.2) T-polynomial bookkeeping bounds the ε-support top index Nₗ strictly down —
+  well-founded. Prop 2.9: geometric iteration of 2.8, `wAr zₗ ≤ ε^l·wAr y/wAr x → 0`,
+  summability from T903. EuclideanDomain: mathlib structure on the subtype.
+
+### [T905] Gröbner data on Ar⟨X₁..Xₖ⟩
+- **Status**: open | **File**: FarguesFontaine/Groebner.lean | **Depends**: T903; repo A⟨X⟩
+- **Statement**: for the repo's `RestrictedPowerSeries` over `Ar` (Gauss norm, radius 1
+  per AD-5): leading index (graded-lex-maximal norm-attaining multi-index, Def 3.6
+  ln 267–270 — attainment from coefficient decay), leading coefficient; `d_I`-function
+  and the finite Gröbner set S (Def 3.7 ln 273–283; Dickson: `(Fin k →₀ ℕ, ≤)` is a WQO —
+  use mathlib `MonomialOrder`/`Finsupp` WQO machinery, else prove Dickson by induction);
+  monotonicity `I₁ ≤ I₂ → d_{I₂} ≤ d_{I₁}` (multiply by the monomial `T^{I₂−I₁}`,
+  norm-multiplicativity of monomial scaling).
+- **Quote** (ln 273–283): "the set of I for which d_I < +∞ contains only finitely many
+  minimal elements ... For each I ∈ S, choose x_I ∈ H∖{0} with leading index I and
+  leading coefficient of degree d_I."
+
+### [T906] Lemma 3.8: approximate ideal generation
+- **Status**: open | **File**: FarguesFontaine/Groebner.lean | **Depends**: T904, T905
+- **Statement**: ∃ ε ∈ (0,1): ∀ y ∈ H ∃ (a_I)_{I∈S}: `|a_I|·|x_I| ≤ |y|` and
+  `|y − Σ a_I x_I| ≤ ε|y|`.
+- **Sketch** (transcribe ln 285–320): ε := max over I ∈ S, J ≻ I of |x_{I,J}T^J|/|c_I T^I|
+  (or any ε if that set is empty). Iteration: leading index Jₗ of yₗ, pick Iₗ ∈ S with
+  Iₗ ≤ Jₗ, d_{Iₗ} = d_{Jₗ}; divide leading coefficients by Prop 2.9; the ε-support
+  argument (El sets, J₊ bound, the largest infinitely-recurring index J, Rem-2.7 finish)
+  gives the contradiction. Strictly-decreasing/finitely-bounded ≺-data: well-founded.
+
+### [T907] Lemma 3.9 + Theorem 3.2: Ar is strongly noetherian
+- **Status**: open | **File**: FarguesFontaine/Groebner.lean | **Depends**: T906
+- **Statement**: every ideal H of `Ar⟨X₁..Xₖ⟩` is generated by the finite set
+  {x_I : I ∈ S}; hence `IsStronglyNoetherian (Ar ρ)` (repo predicate; radius-1 per AD-5).
+- **Sketch** (ln 322–330): geometric iteration of T906, `|yₗ| ≤ ε^l|y|`, sums converge
+  (Tate-algebra completeness — repo RestrictedPowerSeries API), `y = Σ_I a_I x_I`.
+
+### [T908] λ_I, BI, three circles, coordinate continuity
+- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T901; T902
+- **Statement**: for `I = [ρ₁,ρ₂] ⊂ (0,1)` (endpoints in c^ℚ per AD-4):
+  `wI := fun x => max (wLoc ρ₁ x) (wLoc ρ₂ x)` (power-multiplicative ring norm);
+  `BI := UniformSpace.Completion (Bloc, wI-uniformity)` as a NormedRing (AD-7);
+  three-circles (Lemma 4.4 ln 344–352: reduce to single terms `pⁿ[xₙ]` where equality;
+  in ρ-form: `wLoc ρ^θ... ≤ wLoc ρ₁ ^θ · wLoc ρ₂ ^{1−θ}` for the geometric interpolation)
+  ⟹ `wI = sup {wLoc ρ, ρ ∈ I}` (Cor 4.5); coordinate-continuity on wI-balls
+  (Hölder: source Kedlaya 1004.0466 Thm 4.5, transcribe) ⟹ extended coefficient
+  functionals `teichCoeffI : BI → F` and the series realization of BI-elements
+  (two-sided decay description).
+- **NOTE**: this is the hardest *infrastructure* ticket; sequence AFTER T907 unless
+  parallel capacity exists.
+
+### [T909] Restriction maps BI → BI'
+- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T908
+- **Statement**: for I' ⊆ I: continuous ring hom `res : BI → BI'` (Completion-functorial
+  from `wI' ≤ wI` on Bloc via Cor 4.5), injective (Cor 4.6 ln 361–368: λ_t = 0 on I'
+  propagates by three-circles + continuity).
+
+### [T910] Lemma 4.9, first two presentations
+- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T907, T908
+- **Statement** (untwisted form; z := ϖF^{a/b}-powers, radii in c^ℚ, rescale per AD-5):
+  `BI⟨T⟩/(T − [z]·unit-rescaled) ≅ B^{I∩[...]}` and the `[z⁻¹]`-variant — the exact
+  endpoint arithmetic per Kedlaya ln 380–392, transported through ρ = p^{-1/t}.
+  Strictness, closed ideal, injectivity, surjectivity with (4.9.1)-norm control, and the
+  ρ ∈ p^ℚ (here c^ℚ) plus-ring statement (integral closures of images).
+- **Sketch**: transcribe ln 394–460 (the four-paragraph proof) with the T908 coefficient
+  realization; the geometric-series unit case for empty intersections (ln 396–399).
+
+### [T911] Lemma 4.9, third presentation (Ar → BI bridge)
+- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T907, T908
+- **Statement**: `Ar⟨T⟩/(p·T − [zⁿ]) ≅ B^{I'''}` (ln 384–386: I''' = [−n⁻¹log_c p, r]
+  in t-coordinates; transport to ρ) — THE bridge that makes BI-algebras quotients of
+  Ar-Tate algebras.
+
+### [T912] Theorem 4.10: BI is strongly noetherian
+- **Status**: open | **File**: FarguesFontaine/StronglyNoetherianB.lean | **Depends**: T907, T910, T911
+- **Statement**: `IsStronglyNoetherian (BI)` for every c^ℚ-endpoint closed
+  `I ⊂ (0,1)` — in particular for the two FF window intervals (U₀ and V₀ charts).
+- **Sketch** (ln 462–470): `BI⟨X₁..Xₖ⟩` is, by T911 + T910 applied with extra Tate
+  variables carried along, a quotient of `Ar⟨T, X₁..Xₖ⟩` (noetherian by T907); quotients
+  of noetherian rings are noetherian. Endpoint bookkeeping per Rem 4.11 uses the AD-5
+  rescalings.
+
+### [PLAN-GATE-1] — CLOSED 2026-07-26 by this decomposition (see decomposition-laneB.md).
