@@ -453,4 +453,49 @@ noncomputable def galoisProjPointEquiv {L : Type v} [Field L] [Algebra k L]
           (C := (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L))) =
       HasseWeil.Curves.ProjectiveSmoothPoint.infinity := rfl
 
+/-- **(M1b-3b, Lemma A)** Relabelling commutes with the affine-to-projective inclusion. -/
+theorem toProjective_equivMapDomain {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (D : HasseWeil.Curves.Divisor
+      (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L)) :
+    HasseWeil.Curves.Divisor.toProjective
+        (Finsupp.equivMapDomain (galoisSmoothPointEquiv W σ) D) =
+      Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        (HasseWeil.Curves.Divisor.toProjective D) := by
+  classical
+  refine Finsupp.ext fun v => ?_
+  rw [Finsupp.equivMapDomain_apply]
+  show Finsupp.mapDomain HasseWeil.Curves.ProjectiveSmoothPoint.affine
+      (Finsupp.equivMapDomain (galoisSmoothPointEquiv W σ) D) v =
+    Finsupp.mapDomain HasseWeil.Curves.ProjectiveSmoothPoint.affine D
+      ((galoisProjPointEquiv W σ).symm v)
+  rw [Finsupp.equivMapDomain_eq_mapDomain, ← Finsupp.mapDomain_comp]
+  cases v with
+  | affine P =>
+    rw [show ((galoisProjPointEquiv W σ).symm
+        (HasseWeil.Curves.ProjectiveSmoothPoint.affine P)) =
+      HasseWeil.Curves.ProjectiveSmoothPoint.affine
+        ((galoisSmoothPointEquiv W σ).symm P) from rfl]
+    have hinj : Function.Injective (HasseWeil.Curves.ProjectiveSmoothPoint.affine ∘
+        (galoisSmoothPointEquiv W σ)) := fun A B h =>
+      (galoisSmoothPointEquiv W σ).injective
+        (HasseWeil.Curves.ProjectiveSmoothPoint.affine_injective h)
+    have hval := Finsupp.mapDomain_apply hinj D ((galoisSmoothPointEquiv W σ).symm P)
+    rw [show (HasseWeil.Curves.ProjectiveSmoothPoint.affine ∘
+        (galoisSmoothPointEquiv W σ)) ((galoisSmoothPointEquiv W σ).symm P) =
+      HasseWeil.Curves.ProjectiveSmoothPoint.affine P from by
+        simp only [Function.comp_apply, Equiv.apply_symm_apply]] at hval
+    rw [hval, Finsupp.mapDomain_apply
+      (fun _ _ h => HasseWeil.Curves.ProjectiveSmoothPoint.affine_injective h)]
+  | infinity =>
+    rw [show ((galoisProjPointEquiv W σ).symm
+        (HasseWeil.Curves.ProjectiveSmoothPoint.infinity
+          (C := (⟨(W.baseChange L).toAffine⟩ :
+            HasseWeil.Curves.SmoothPlaneCurve L)))) =
+      HasseWeil.Curves.ProjectiveSmoothPoint.infinity from rfl]
+    rw [Finsupp.mapDomain_notin_range, Finsupp.mapDomain_notin_range]
+    · rintro ⟨P, hP⟩
+      exact absurd hP (by simp)
+    · rintro ⟨P, hP⟩
+      exact absurd hP (by simp)
+
 end ModularCurves
