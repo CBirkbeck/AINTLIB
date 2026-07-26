@@ -347,3 +347,45 @@ out in full:
 Remaining sorries on the Legendre leg: `exists_scaleTorsorData` (the honest geometric
 input, quarantined subtree) and the two documented non-goals `legendreDeltaGAction`,
 `legendreDelta_torsor_of`.
+
+## ★ DISCOVERY (2026-07-26): the yRho cone can be re-plumbed off the quarantined Legendre leg
+
+`#print axioms` checks run this session:
+
+* `exists_levelThreeTorsorData` — **axiom-clean** (propext/choice/Quot.sound only).
+* `exists_levelFourTorsorData` — **axiom-clean**.
+
+So both the level-3 and the level-4 rigidifiers are *fully proved*, while the Legendre
+rigidifier still rests on `exists_scaleTorsorData` (quarantined subtree). The smoothness
+leaf `rhoProblem_smoothOfRelativeDimension_one` consumes the cover only through
+
+* `rL : (cover problem).RepresentableBy (universal object)`,
+* `dL : RelRepData (cover problem) X` + finite + étale + **surjective**,
+* `dρ : RelRepData (rhoProblem D) (universal object)` + finite + étale
+  (`rhoProblem_exists_relRepData_finiteEtale`, generic in the object), and
+* `ModuliProblem.prodUniqueUpToIso` (generic), plus the ONE base-specific input
+  `<base> is standard smooth of relative dimension 1 over ℚ`
+  (`legendreModuliRing_isStandardSmoothOfRelativeDimension`).
+
+**Therefore**: swapping the Legendre cover for the level-3 cover removes
+`exists_scaleTorsorData` — and the whole quarantined subtree — from the `yRho_representable'`
+cone, leaving **DS4 as the only register**. The single missing brick is
+
+> `Algebra.IsStandardSmoothOfRelativeDimension 1 R (E3ModuliRing R)` (for `3` invertible).
+
+`E3ModuliRing R = Localization.Away (e3Delta) of R[β,γ]/(β³ − (β+γ)³)` — a **hypersurface**,
+which is exactly the shape of `ForMathlib/StandardSmoothHypersurface.lean`
+(`isStandardSmoothOfRelativeDimension_away_pderiv`). The Jacobian computation:
+
+* `f = β³ − (β+γ)³`, so `∂f/∂γ = −3(β+γ)²`;
+* the flex relation gives `γ·(3β² + 3βγ + γ²) = 0`, i.e. with `s := β + γ`,
+  `γ² = s·(3γ − 3s)`, so **`s ∣ γ²`**; since `γ ∣ e3Delta`, `s ∣ e3Delta²`, hence `s` — and
+  therefore `∂f/∂γ = −3s²` — is a **unit** in `E3ModuliRing` (`3` invertible).
+
+Assembly: `IsLocalization.Away (e3Delta · ∂f/∂γ) (E3ModuliRing)` (by
+`IsLocalization.Away.mk`, using that `∂f/∂γ` is a unit there), hence `E3ModuliRing` is
+`IsLocalization.Away (algebraMap _ _ e3Delta)` over `Localization.Away (∂f/∂γ)` up to a
+canonical `A`-algebra iso (`IsLocalization.algEquiv` + `IsLocalization.Away.mul`), and
+`IsStandardSmoothOfRelativeDimension.trans` (`0 + 1`) with
+`isStandardSmoothOfRelativeDimension_away_pderiv` finishes it. Then mirror
+`rhoLegendre_total_isStandardSmooth` at level 3 and re-point `exists_representsYRho`.
