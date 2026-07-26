@@ -312,6 +312,118 @@ theorem gaussValue_rpow_interpolate {ρ₁ ρ₂ : NNReal} (hρ₁1 : ρ₁ ≤ 
     (NNReal.rpow_le_rpow (gaussTerm_le_gaussValue p F hρ₂1 x n) (by linarith))
     zero_le zero_le
 
+/-- Interpolated radii are again admissible. -/
+theorem rpow_interpolate_lt_one {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1)
+    (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1) :
+    0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ) ∧ ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1 := by
+  constructor
+  · exact mul_pos (NNReal.rpow_pos hρ₁0) (NNReal.rpow_pos hρ₂0)
+  · rcases eq_or_lt_of_le hθ0 with hθ | hθ
+    · rw [← hθ]
+      simp only [NNReal.rpow_zero, one_mul, sub_zero, NNReal.rpow_one]
+      exact hρ₂1
+    · have h1 : (ρ₁ : NNReal) ^ θ < 1 := by
+        rw [show (1 : NNReal) = 1 ^ θ from (NNReal.one_rpow θ).symm]
+        exact NNReal.rpow_lt_rpow hρ₁1 hθ
+      have h2 : (ρ₂ : NNReal) ^ (1 - θ) ≤ 1 := by
+        simpa using NNReal.rpow_le_rpow hρ₂1.le (by linarith)
+      calc (ρ₁ : NNReal) ^ θ * ρ₂ ^ (1 - θ) ≤ ρ₁ ^ θ * 1 :=
+            mul_le_mul_of_nonneg_left h2 zero_le
+        _ = ρ₁ ^ θ := mul_one _
+        _ < 1 := h1
+
+/-- **Three circles on `Bloc`** (Kedlaya Lemma 4.4): the extended Gauss valuation at
+an interpolated radius is bounded by the interpolated endpoint values. -/
+theorem wLoc_rpow_interpolate {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (x : Bloc p F ϖ) :
+    wLoc p F ϖ hmid0 hmid1 x
+      ≤ (wLoc p F ϖ hρ₁0 hρ₁1 x) ^ θ * (wLoc p F ϖ hρ₂0 hρ₂1 x) ^ (1 - θ) := by
+  obtain ⟨⟨a, y⟩, hx⟩ := IsLocalization.surj
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x
+  change x * algebraMap (Ainf p F) (Bloc p F ϖ) (y : Ainf p F)
+    = algebraMap (Ainf p F) (Bloc p F ϖ) a at hx
+  obtain ⟨k, hk⟩ := y.2
+  have hk' : ((p : Ainf p F) * teichPi p F ϖ) ^ k = (y : Ainf p F) := hk
+  set c : NNReal := perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hc
+  have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+    fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  -- the denominator values
+  have hden : ∀ {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1),
+      gaussValue p F σ (y : Ainf p F) = (σ * c) ^ k := by
+    intro σ hσ0 hσ1
+    rw [← hk', show gaussValue p F σ (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = (gaussValue p F σ ((p : Ainf p F) * teichPi p F ϖ)) ^ k from
+        map_pow (gaussVal p F hσ0 hσ1) _ k, gaussValue_p_teichPi p F ϖ hσ1]
+  -- the value equations
+  have hval : ∀ {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1),
+      wLoc p F ϖ hσ0 hσ1 x * (σ * c) ^ k = gaussValue p F σ a := by
+    intro σ hσ0 hσ1
+    have happ := congrArg (wLoc p F ϖ hσ0 hσ1) hx
+    rw [map_mul, wLoc_algebraMap, wLoc_algebraMap, hden hσ0 hσ1] at happ
+    exact happ
+  -- the denominator interpolates exactly
+  have hdenint : ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c) ^ k
+      = ((ρ₁ * c) ^ k) ^ θ * ((ρ₂ * c) ^ k) ^ (1 - θ) := by
+    have hcsplit : c = c ^ θ * c ^ (1 - θ) := by
+      rw [← NNReal.rpow_add hc0.ne']
+      simp
+    have hbase : (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c
+        = (ρ₁ * c) ^ θ * (ρ₂ * c) ^ (1 - θ) := by
+      rw [NNReal.mul_rpow, NNReal.mul_rpow]
+      calc (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c
+          = (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * (c ^ θ * c ^ (1 - θ)) := by rw [← hcsplit]
+        _ = ρ₁ ^ θ * c ^ θ * (ρ₂ ^ (1 - θ) * c ^ (1 - θ)) := by ring
+    rw [hbase, mul_pow, ← NNReal.rpow_natCast ((ρ₁ * c) ^ θ) k,
+      ← NNReal.rpow_natCast ((ρ₂ * c) ^ (1 - θ)) k,
+      ← NNReal.rpow_natCast ((ρ₁ * c)) k, ← NNReal.rpow_natCast ((ρ₂ * c)) k,
+      ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul]
+    ring_nf
+  -- combine
+  have hdenne : ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c) ^ k ≠ 0 :=
+    pow_ne_zero k (mul_pos hmid0 hc0).ne'
+  refine le_of_mul_le_mul_right ?_ (pos_iff_ne_zero.mpr hdenne)
+  rw [hval hmid0 hmid1]
+  calc gaussValue p F (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) a
+      ≤ (gaussValue p F ρ₁ a) ^ θ * (gaussValue p F ρ₂ a) ^ (1 - θ) :=
+        gaussValue_rpow_interpolate p F hρ₁1.le hρ₂1.le hθ0 hθ1 a
+    _ = (wLoc p F ϖ hρ₁0 hρ₁1 x * (ρ₁ * c) ^ k) ^ θ
+        * (wLoc p F ϖ hρ₂0 hρ₂1 x * (ρ₂ * c) ^ k) ^ (1 - θ) := by
+        rw [hval hρ₁0 hρ₁1, hval hρ₂0 hρ₂1]
+    _ = ((wLoc p F ϖ hρ₁0 hρ₁1 x) ^ θ * (wLoc p F ϖ hρ₂0 hρ₂1 x) ^ (1 - θ))
+        * (((ρ₁ * c) ^ k) ^ θ * ((ρ₂ * c) ^ k) ^ (1 - θ)) := by
+        rw [NNReal.mul_rpow, NNReal.mul_rpow]
+        ring
+    _ = ((wLoc p F ϖ hρ₁0 hρ₁1 x) ^ θ * (wLoc p F ϖ hρ₂0 hρ₂1 x) ^ (1 - θ))
+        * ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) * c) ^ k := by rw [hdenint]
+
+/-- **Corollary 4.5, usable form**: the interval norm dominates every intermediate
+radius. -/
+theorem wLoc_le_max_of_interpolate {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (x : Bloc p F ϖ) :
+    wLoc p F ϖ hmid0 hmid1 x
+      ≤ max (wLoc p F ϖ hρ₁0 hρ₁1 x) (wLoc p F ϖ hρ₂0 hρ₂1 x) := by
+  refine le_trans (wLoc_rpow_interpolate p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 x) ?_
+  set M := max (wLoc p F ϖ hρ₁0 hρ₁1 x) (wLoc p F ϖ hρ₂0 hρ₂1 x) with hM
+  calc (wLoc p F ϖ hρ₁0 hρ₁1 x) ^ θ * (wLoc p F ϖ hρ₂0 hρ₂1 x) ^ (1 - θ)
+      ≤ M ^ θ * M ^ (1 - θ) :=
+        mul_le_mul (NNReal.rpow_le_rpow (le_max_left _ _) hθ0)
+          (NNReal.rpow_le_rpow (le_max_right _ _) (by linarith)) zero_le zero_le
+    _ = M := by
+        rcases eq_or_ne M 0 with h0 | h0
+        · rw [h0]
+          rcases eq_or_ne θ 0 with rfl | hθne
+          · simp
+          · rw [NNReal.zero_rpow hθne, zero_mul]
+        · rw [← NNReal.rpow_add h0]
+          simp
+
 end FarguesFontaine
 
 end
