@@ -223,6 +223,47 @@ theorem rhoProblem_smoothOfRelativeDimension_one (D : GaloisRepData N) [Fact (1 
     X.structMap dL.f
     (legendreCover_isStandardSmooth D hR r rL dL dρ hρfin hρet)
 
+open scoped FintypeCatDiscrete in
+/-- **[re-plumb brick 3a]** The level-3 analogue of `legendreCover_isStandardSmooth`. -/
+theorem levelThreeCover_isStandardSmooth (D : GaloisRepData N) [Fact (1 < N)]
+    {X : EllObj (CommRingCat.of ℚ)} (r : (rhoProblem D).RepresentableBy X)
+    (rL : (gammaFullNaiveProblem (CommRingCat.of ℚ) 3).RepresentableBy
+      (universalE3Obj (CommRingCat.of ℚ)))
+    (dL : ModuliProblem.RelRepData (gammaFullNaiveProblem (CommRingCat.of ℚ) 3) X)
+    (dρ : ModuliProblem.RelRepData (rhoProblem D) (universalE3Obj (CommRingCat.of ℚ)))
+    (hfin : IsFinite dρ.f) (het : Etale dρ.f) :
+    RingHom.IsStandardSmoothOfRelativeDimension 1
+      (((X.pullbackAlong dL.f).structMap).appTop).hom :=
+  isStandardSmoothOfRelativeDimension_appTop_of_ellIso
+    (ModuliProblem.prodUniqueUpToIso r dL rL dρ)
+    (rhoLevelThree_total_isStandardSmooth D dρ hfin het)
+
+open scoped FintypeCatDiscrete in
+/-- **[re-plumb brick 3b]** The smoothness clause of `RepresentsYRho`, obtained from the
+**axiom-clean level-3 rigidifier** (no Legendre input, hence no `exists_scaleTorsorData`). -/
+theorem rhoProblem_smoothOfRelativeDimension_one_levelThree (D : GaloisRepData N)
+    [Fact (1 < N)] (hN : 3 ≤ (N : ℤ))
+    {X : EllObj (CommRingCat.of ℚ)} (r : (rhoProblem D).RepresentableBy X)
+    (rL : (gammaFullNaiveProblem (CommRingCat.of ℚ) 3).RepresentableBy
+      (universalE3Obj (CommRingCat.of ℚ)))
+    (dL : ModuliProblem.RelRepData (gammaFullNaiveProblem (CommRingCat.of ℚ) 3) X)
+    (hLfin : IsFinite dL.f) (hLet : Etale dL.f) (hLsurj : Surjective dL.f)
+    (dρ : ModuliProblem.RelRepData (rhoProblem D) (universalE3Obj (CommRingCat.of ℚ)))
+    (hρfin : IsFinite dρ.f) (hρet : Etale dρ.f) :
+    SmoothOfRelativeDimension 1 X.structMap := by
+  haveI : IsAffine X.base := rhoProblem_isAffine_base D hN r
+  haveI : IsAffine (Spec (CommRingCat.of ℚ)) := inferInstance
+  haveI : IsNoetherianRing Γ(Spec (CommRingCat.of ℚ), ⊤) := by
+    haveI : IsNoetherianRing (CommRingCat.of ℚ) :=
+      inferInstanceAs (IsNoetherianRing ℚ)
+    exact isNoetherianRing_of_ringEquiv (CommRingCat.of ℚ)
+      (Scheme.ΓSpecIso (CommRingCat.of ℚ)).commRingCatIsoToRingEquiv.symm
+  haveI : IsFinite dL.f := hLfin
+  haveI : Etale dL.f := hLet
+  haveI : Surjective dL.f := hLsurj
+  exact smoothOfRelativeDimension_one_of_finite_etale_surjective_cover
+    X.structMap dL.f (levelThreeCover_isStandardSmooth D r rL dL dρ hρfin hρet)
+
 end ModularCurves
 
 end
