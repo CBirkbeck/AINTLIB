@@ -65,6 +65,14 @@ radius is required** — Groebner.lean stands as proven.
   product of two coefficientwise-null families). Concretely here: `wI (ArToBI a · bⁿ) ≤
   v_{ρ₂}(a)` by `wI_ArToBI` + `wI_mul_le` + `wI_teichPowOverP_le_one`, so the partial sums
   are Cauchy and `exists_BI_series_limit` (already proven) provides the value.
+**T911 progress (2026-07-26)** — the **density half is done**: `evalRange` (the image as a
+subring of the product), `mem_evalRange_iff`, `BIProd_AlocToBloc_mem_evalRange` (constants),
+`exists_evalAr_eq_pInv` (`1/p`, via the monomial `[ϖ]^{-jn}·T` — this is where the AD-9
+choice `z̄ = ϖʲ` pays off), `BIProd_mem_evalRange` (hence all of `Bloc`, by splitting the
+inverse of `p[ϖ]`), and `BISub_le_topologicalClosure_evalRange`. **What remains is exactly
+the strictness half**: a norm-controlled lift (Kedlaya's `|z|_ρ ≤ c^{t₀-t} λ_{I'}(x)`),
+which makes the image closed and hence — with density — everything.
+
 - **T911** — surjectivity + strictness of that map (Kedlaya's explicit lift: for `x =
   pⁿ[x̄ₙ]` take `j` minimal with `c^{-j}|x̄ₙ| ≥ 1` and `z = pⁿ[x̄ₙ z̄^{-j}]T^j`, giving
   `|z|_1 ≤ λ_I(x)`), then the same with `k` extra radius-1 variables.

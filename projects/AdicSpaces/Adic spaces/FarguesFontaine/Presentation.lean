@@ -46,6 +46,8 @@ and `z ↦ (resAr z, z)` is a ring map `A^{ρ₂} → B^{[ρ₁,ρ₂]}`.
   `(k+1)`-variable series into one-variable slices turns a product into the finite Cauchy
   product of slices — the reduction of the `k`-variable evaluation to the one-variable one
   (route (a) of AD-10).
+* `FarguesFontaine.BISub_le_topologicalClosure_evalRange` : the image of the presentation
+  map is **dense** in `B^I` (it contains the whole of `Bloc`).
 * `FarguesFontaine.evalArMvHom` : **the `k`-variable presentation map**
   `A^r⟨T, T₁,…,T_k⟩ →+* B^I⟨T₁,…,T_k⟩`, whose surjectivity is what will make `B^I`
   strongly noetherian.
@@ -1417,6 +1419,112 @@ theorem exists_evalAr_eq_pInv (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
       = teichPi p F ϖ ^ (j * n) := by
     rw [map_pow, ← pow_mul, teichPi]
   rw [teichPowOverP, hteich, ← mul_assoc, AlocToBloc_teichPiInv_mul, one_mul]
+
+/-- The image of the presentation map, as a subring of the ambient product. -/
+def evalRange (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) :
+    Subring ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) :=
+  ((BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).subtype.comp
+    (evalArHom p F ϖ h12 hbmem hb)).range
+
+theorem mem_evalRange_iff (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)} :
+    z ∈ evalRange p F ϖ h12 hbmem hb ↔ ∃ f, evalAr p F ϖ h12 hbmem hb f = z :=
+  Iff.rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- Constants are in the image. -/
+theorem BIProd_AlocToBloc_mem_evalRange (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) (u : Aloc p F ϖ) :
+    BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (AlocToBloc p F ϖ u)
+      ∈ evalRange p F ϖ h12 hbmem hb := by
+  rw [mem_evalRange_iff]
+  refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 0)
+      (⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 u, AlocToHatK_mem_ArSub p F ϖ u⟩
+        : ↥(ArSub p F ϖ hρ₂0 hρ₂1)), isRestricted_monomial p F ϖ _⟩, ?_⟩
+  rw [evalAr_monomial p F ϖ h12 hbmem hb 0 _, ArToBI_AlocToHatK p F ϖ h12, pow_zero,
+    mul_one]
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The dense subring `Bloc` lies in the image of the presentation map.** -/
+theorem BIProd_mem_evalRange (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (x : Bloc p F ϖ) :
+    BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x ∈ evalRange p F ϖ h12 hbmem hb := by
+  -- the inverse of `p·[ϖ]` splits as `p⁻¹ · [ϖ]⁻¹`
+  set vp : Bloc p F ϖ := ↑(isUnit_p_image p F ϖ).unit⁻¹ with hvp
+  set vt : Bloc p F ϖ := AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) with hvt
+  have hvpmul : algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) * vp = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.mul_inv
+    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
+  have hvtmul : algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt = 1 := by
+    have h := congrArg (AlocToBloc p F ϖ) (teichPiInvAloc_mul p F ϖ)
+    rwa [map_mul, AlocToBloc_algebraMap, map_one] at h
+  have hsplit : ∀ k : ℕ, algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ k) * (vp * vt) ^ k = 1 := by
+    intro k
+    rw [map_pow, map_mul, ← mul_pow]
+    rw [show algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * (vp * vt)
+        = (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) * vp)
+          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt) from by ring,
+      hvpmul, hvtmul, mul_one, one_pow]
+  obtain ⟨⟨a, y⟩, hxy⟩ := IsLocalization.surj
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x
+  obtain ⟨k, hk⟩ := y.2
+  have hx : x = algebraMap (Ainf p F) (Bloc p F ϖ) a * (vp * vt) ^ k := by
+    have hxy' : x * algebraMap (Ainf p F) (Bloc p F ϖ)
+        (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) a := by
+      have hyk : ((p : Ainf p F) * teichPi p F ϖ) ^ k = (y : Ainf p F) := hk
+      rw [hyk]
+      exact hxy
+    calc x = x * (algebraMap (Ainf p F) (Bloc p F ϖ)
+            (((p : Ainf p F) * teichPi p F ϖ) ^ k) * (vp * vt) ^ k) := by
+          rw [hsplit k, mul_one]
+      _ = (x * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (((p : Ainf p F) * teichPi p F ϖ) ^ k)) * (vp * vt) ^ k := by ring
+      _ = algebraMap (Ainf p F) (Bloc p F ϖ) a * (vp * vt) ^ k := by rw [hxy']
+  rw [hx, map_mul, map_pow, map_mul]
+  refine mul_mem ?_ (pow_mem (mul_mem ?_ ?_) k)
+  · have := BIProd_AlocToBloc_mem_evalRange p F ϖ h12 hbmem hb
+      (algebraMap (Ainf p F) (Aloc p F ϖ) a)
+    rwa [AlocToBloc_algebraMap] at this
+  · rw [hvp, mem_evalRange_iff]
+    exact exists_evalAr_eq_pInv p F ϖ h12 j n hbmem hb
+  · exact BIProd_AlocToBloc_mem_evalRange p F ϖ h12 hbmem hb (teichPiInvAloc p F ϖ)
+
+
+/-- **The image of the presentation map is dense in `B^I`**: its closure contains the whole
+interval ring. (Kedlaya's surjectivity statement is this together with the strictness
+estimate, which gives closedness of the image.) -/
+theorem BISub_le_topologicalClosure_evalRange (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1) :
+    BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ≤ (evalRange p F ϖ h12 hbmem hb).topologicalClosure := by
+  intro z hz
+  have hz' : z ∈ closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+    : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := hz
+  refine closure_mono ?_ hz'
+  rintro w ⟨x, rfl⟩
+  exact BIProd_mem_evalRange p F ϖ h12 j n hbmem hb x
 
 end FarguesFontaine
 

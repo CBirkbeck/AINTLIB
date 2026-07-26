@@ -1,1 +1,1 @@
-FOCUS: T911 — surjectivity of evalArMvHom (Kedlaya lift: for x = p^n[x_n] take j minimal with c^-j|x_n| >= 1 and z = p^n[x_n z^-j] T^j)
+FOCUS: T911 strictness — norm-controlled lift: every z in B^I with wI z <= 1 has a preimage in A^r<T> of Gauss norm <= 1 (Kedlaya term-by-term lift)
