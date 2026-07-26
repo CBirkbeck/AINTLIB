@@ -1150,6 +1150,51 @@ noncomputable def chartCompletionToBIProd (a b : ℕ) (hb : 0 < b)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
     (continuous_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2)
 
+/-- The chart uniformity is (definitionally) the rational-datum uniformity. -/
+theorem chartUniformity_eq (a b : ℕ) :
+    chartUniformity p F ϖ a b = (chartData p F ϖ 1 b a b).uniformSpace := rfl
+
+/-- **The presheaf value of the chart datum maps to the product of completed
+fields**: the canonical continuous ring homomorphism
+`𝒪(R(T/s)) = A_inf⟨T/s⟩ →+* hatK ρ₁ × hatK ρ₂` extending the chart map. -/
+noncomputable def presheafChartToBIProd (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    presheafValue (chartData p F ϖ 1 b a b) →+*
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+  chartCompletionToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2
+
+/-- The presheaf-value chart map extends the chart map along the completion
+coercion. -/
+theorem presheafChartToBIProd_coe (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (z : Localization.Away (chartS p F ϖ 1 b)) :
+    presheafChartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2
+        ((chartData p F ϖ 1 b a b).coeRingHom z)
+      = chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb z := by
+  letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartUniformity p F ϖ a b
+  letI : IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartTopologicalRing p F ϖ a b
+  letI : IsUniformAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartIsUniformAddGroup p F ϖ a b
+  exact UniformSpace.Completion.extensionHom_coe
+    (chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
+    (continuous_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2) z
+
 end FarguesFontaine
 
 end
