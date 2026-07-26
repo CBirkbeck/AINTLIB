@@ -1069,6 +1069,26 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   Build order: (a) `BIProd`/`BISub` + subring/complete/closed facts; (b) the two
   coordinate valuations and `wI` with its norm axioms; (c) the coordinate realization
   transported from T903 (each factor lands in `BrSub`); then T909-T912.
+- **PROGRESS (beastmode 2026-07-26, all axiom-clean, pushed, library green)**:
+  (a) DONE — `BIProd`, `BIProd_fst/_snd`, **`BISub`**, `isClosed_BISub`,
+  `BIProd_mem_BISub`, **`isComplete_BISub`**, `cauchySeq_of_wI_le`,
+  **`exists_BI_series_limit`**;
+  (b) DONE — **`wI`** with `wI_zero/_one/_add_le/_mul_le/_neg/_eq_zero_iff/_BIProd`;
+  plus `BISub_fst_mem`/`BISub_snd_mem` (coordinates land in the endpoint rings),
+  `valued_ball_mem_nhds`, **`exists_BIProd_wI_le`** (quantitative density);
+  **Lemma 4.4 (three circles)** at both levels: `gaussTerm_rpow_interpolate`,
+  `gaussValue_rpow_interpolate`, `rpow_interpolate_lt_one`, `wLoc_rpow_interpolate`,
+  and **`wLoc_le_max_of_interpolate`** = Corollary 4.5 in usable form.
+  (c) REMAINING, and it carries an OPEN DESIGN QUESTION: the B^I coordinate
+  realization needs coordinates on `BrSub`, and Kedlaya's `B^r := A^r[1/ϖ_E] = A^r[1/p]`
+  (Def 2.4) is a LOCALIZATION, whereas our `BrSub` is the closure of the `Bloc`-image.
+  Decide (and record as AD-8) whether to (i) prove `BrSub = A^r[1/p]` — i.e. that the
+  closure is already the localization, which needs a bounded-denominator argument that
+  the p^m[ϖ^{-m/2}] demon makes delicate — or (ii) define the coordinates on `BrSub`
+  directly by the same limit construction as `teichCoeffAr` (comap along `BlocToHatK`),
+  reusing T903 verbatim with `Bloc`/`wLoc` in place of `Aloc`/`wAloc`. Option (ii)
+  looks strictly easier and avoids the demon; prefer it unless a downstream proof needs
+  the algebraic description.
 - **Statement**: for `I = [ρ₁,ρ₂] ⊂ (0,1)` (endpoints in c^ℚ per AD-4):
   `wI := fun x => max (wLoc ρ₁ x) (wLoc ρ₂ x)` (power-multiplicative ring norm);
   `BI := UniformSpace.Completion (Bloc, wI-uniformity)` as a NormedRing (AD-7);
