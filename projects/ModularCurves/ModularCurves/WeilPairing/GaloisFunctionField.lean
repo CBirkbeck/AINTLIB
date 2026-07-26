@@ -1115,6 +1115,42 @@ theorem map_galoisFunctionFieldEquiv_WKE :
   · rw [WeierstrassCurve.map_a₆, HasseWeil.W_KE, WeierstrassCurve.map_a₆]
     exact galoisFunctionFieldEquiv_a₆ W σ
 
+/-- **(M1b-3b leaf, brick 4b)** `Φ_σ` commutes with the `addX` formula of `W_KE`. -/
+theorem galoisFunctionFieldEquiv_addX (u v w : (W.baseChange L).toAffine.FunctionField) :
+    galoisFunctionFieldEquiv W σ
+        ((HasseWeil.W_KE (W.baseChange L)).toAffine.addX u v w) =
+      (HasseWeil.W_KE (W.baseChange L)).toAffine.addX
+        (galoisFunctionFieldEquiv W σ u) (galoisFunctionFieldEquiv W σ v)
+        (galoisFunctionFieldEquiv W σ w) := by
+  have h := WeierstrassCurve.Affine.map_addX
+    (W' := (HasseWeil.W_KE (W.baseChange L)))
+    (f := (galoisFunctionFieldEquiv W σ : (W.baseChange L).toAffine.FunctionField →+*
+      (W.baseChange L).toAffine.FunctionField)) (x₁ := u) (x₂ := v) (ℓ := w)
+  rw [show WeierstrassCurve.Affine.map (HasseWeil.W_KE (W.baseChange L))
+      (galoisFunctionFieldEquiv W σ : (W.baseChange L).toAffine.FunctionField →+*
+        (W.baseChange L).toAffine.FunctionField) =
+      (HasseWeil.W_KE (W.baseChange L)).toAffine from
+    congrArg WeierstrassCurve.toAffine (map_galoisFunctionFieldEquiv_WKE W σ)] at h
+  exact h.symm
+
+/-- **(M1b-3b leaf, brick 4b)** `Φ_σ` commutes with the `addY` formula of `W_KE`. -/
+theorem galoisFunctionFieldEquiv_addY (u v y w : (W.baseChange L).toAffine.FunctionField) :
+    galoisFunctionFieldEquiv W σ
+        ((HasseWeil.W_KE (W.baseChange L)).toAffine.addY u v y w) =
+      (HasseWeil.W_KE (W.baseChange L)).toAffine.addY
+        (galoisFunctionFieldEquiv W σ u) (galoisFunctionFieldEquiv W σ v)
+        (galoisFunctionFieldEquiv W σ y) (galoisFunctionFieldEquiv W σ w) := by
+  have h := WeierstrassCurve.Affine.map_addY
+    (W' := (HasseWeil.W_KE (W.baseChange L)))
+    (f := (galoisFunctionFieldEquiv W σ : (W.baseChange L).toAffine.FunctionField →+*
+      (W.baseChange L).toAffine.FunctionField)) (x₁ := u) (x₂ := v) (y₁ := y) (ℓ := w)
+  rw [show WeierstrassCurve.Affine.map (HasseWeil.W_KE (W.baseChange L))
+      (galoisFunctionFieldEquiv W σ : (W.baseChange L).toAffine.FunctionField →+*
+        (W.baseChange L).toAffine.FunctionField) =
+      (HasseWeil.W_KE (W.baseChange L)).toAffine from
+    congrArg WeierstrassCurve.toAffine (map_galoisFunctionFieldEquiv_WKE W σ)] at h
+  exact h.symm
+
 end TranslationTransport
 
 end ModularCurves
