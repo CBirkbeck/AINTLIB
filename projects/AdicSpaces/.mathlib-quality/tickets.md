@@ -879,7 +879,7 @@ non-Tate bases are supported.
   needed). V₀: κ ∈ [a/b, p] ↔ `I_V` — mirror with the endpoints swapped (left
   endpoint |ϖ|^{b/a}: NOT nat-power AD-9 — use the AD-9 density argument or the
   Frobenius translate of U₀; decide at ID2e).
-- **ID2a** `Localization.Away (chartS 1 b) ≃+* Bloc` — same localization (both
+- **ID2a** DONE (2026-07-26: isLocalization_chartS_Bloc + blocEquivAwayChartS in ChartData.lean) — same localization (both
   invert the p·[ϖ]-saturation); IsLocalization.ringEquivOfRingEquiv transport.
 - **ID2b** ★ THE TOPOLOGY COMPARISON: under ID2a the `chartData`-canonical topology
   (locSubring-adic, `RationalLocData.uniformSpace`) on `Bloc` equals the

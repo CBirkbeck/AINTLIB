@@ -444,6 +444,72 @@ theorem windowV_zero_eq_rationalOpen (hp : 1 < p) :
         (by simp; omega) (a := p) (b := 1) (by omega) (by simp)).mpr ?_
       simpa using h2
 
+/-- The chart denominator decomposes off the standard `Bloc`-denominator:
+`(p·[ϖ]^b)^k = (p·[ϖ])^k · [ϖ]^{k(b-1)}`. -/
+theorem chartS_pow_eq (b k : ℕ) (hb : 0 < b) :
+    chartS p F ϖ 1 b ^ k
+      = ((p : Ainf p F) * teichPi p F ϖ) ^ k * teichPi p F ϖ ^ (k * (b - 1)) := by
+  rw [chartS, pow_one, mul_pow, mul_pow, mul_assoc, ← pow_mul, ← pow_add]
+  congr 2
+  have : b = 1 + (b - 1) := by omega
+  calc b * k = (1 + (b - 1)) * k := by rw [← this]
+    _ = k + k * (b - 1) := by ring
+
+/-- **`Bloc` is also the localization away from the chart denominator `p·[ϖ]^b`**
+(the two multiplicative sets have the same saturation). -/
+theorem isLocalization_chartS_Bloc (b : ℕ) (hb : 0 < b) :
+    IsLocalization (Submonoid.powers (chartS p F ϖ 1 b)) (Bloc p F ϖ) where
+  map_units := by
+    rintro ⟨y, m, rfl⟩
+    have hunit : IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ) (chartS p F ϖ 1 b)) := by
+      rw [chartS, pow_one, map_mul, map_pow]
+      exact (isUnit_p_image p F ϖ).mul ((isUnit_teichPi_image p F ϖ).pow b)
+    show IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ) (chartS p F ϖ 1 b ^ m))
+    rw [map_pow]
+    exact hunit.pow m
+  surj := by
+    intro z
+    obtain ⟨⟨a, y⟩, hz⟩ := IsLocalization.surj
+      (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) z
+    obtain ⟨k, hk⟩ := y.2
+    refine ⟨⟨a * teichPi p F ϖ ^ (k * (b - 1)),
+      ⟨chartS p F ϖ 1 b ^ k, k, rfl⟩⟩, ?_⟩
+    show z * algebraMap (Ainf p F) (Bloc p F ϖ) (chartS p F ϖ 1 b ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (a * teichPi p F ϖ ^ (k * (b - 1)))
+    rw [chartS_pow_eq p F ϖ b k hb, map_mul, map_mul, ← mul_assoc]
+    have hz' : z * algebraMap (Ainf p F) (Bloc p F ϖ)
+        (((p : Ainf p F) * teichPi p F ϖ) ^ k) = algebraMap (Ainf p F) (Bloc p F ϖ) a := by
+      rw [show ((p : Ainf p F) * teichPi p F ϖ) ^ k = (y : Ainf p F) from hk]
+      exact hz
+    rw [hz']
+  exists_of_eq := by
+    intro x y h
+    obtain ⟨c, hc⟩ := IsLocalization.exists_of_eq
+      (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) (S := Bloc p F ϖ) h
+    obtain ⟨k, hk⟩ := c.2
+    refine ⟨⟨chartS p F ϖ 1 b ^ k, k, rfl⟩, ?_⟩
+    show chartS p F ϖ 1 b ^ k * x = chartS p F ϖ 1 b ^ k * y
+    rw [chartS_pow_eq p F ϖ b k hb]
+    have hc' : ((p : Ainf p F) * teichPi p F ϖ) ^ k * x
+        = ((p : Ainf p F) * teichPi p F ϖ) ^ k * y := by
+      rw [show ((p : Ainf p F) * teichPi p F ϖ) ^ k = (c : Ainf p F) from hk]
+      exact hc
+    calc ((p : Ainf p F) * teichPi p F ϖ) ^ k * teichPi p F ϖ ^ (k * (b - 1)) * x
+        = teichPi p F ϖ ^ (k * (b - 1)) * (((p : Ainf p F) * teichPi p F ϖ) ^ k * x) := by
+          ring
+      _ = teichPi p F ϖ ^ (k * (b - 1)) * (((p : Ainf p F) * teichPi p F ϖ) ^ k * y) := by
+          rw [hc']
+      _ = ((p : Ainf p F) * teichPi p F ϖ) ^ k * teichPi p F ϖ ^ (k * (b - 1)) * y := by
+          ring
+
+/-- **ID2a: the chart localization is `Bloc`** — the canonical ring isomorphism
+`A_inf[1/(p[ϖ]^b)] ≃+* A_inf[1/(p[ϖ])]`. -/
+def blocEquivAwayChartS (b : ℕ) (hb : 0 < b) :
+    Localization.Away (chartS p F ϖ 1 b) ≃+* Bloc p F ϖ :=
+  letI := isLocalization_chartS_Bloc p F ϖ b hb
+  (IsLocalization.algEquiv (Submonoid.powers (chartS p F ϖ 1 b))
+    (Localization.Away (chartS p F ϖ 1 b)) (Bloc p F ϖ)).toRingEquiv
+
 end FarguesFontaine
 
 end
