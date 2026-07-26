@@ -1049,6 +1049,32 @@ theorem exists_delta_teichCoeffF_sub (ϖ : PseudoUniformizer F) (n : ℕ) {ρ : 
       (hscaleup x' x hx'c hBx hVx) (hscaleup y' y hy'c hBy hVy) hxy'
     rwa [hx'c n, hy'c n] at hres
 
+/-- Ultrametric bound for finite sums over `W(F)`, with boundedness threaded. -/
+theorem gaussValueF_finset_sum_le {ι : Type*} {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (B : NNReal) (s : Finset ι) (f : ι → WittVector p F)
+    (hf : ∀ i ∈ s, BddAbove (Set.range (gaussTermF p F ρ (f i)))
+      ∧ gaussValueF p F ρ (f i) ≤ B) :
+    BddAbove (Set.range (gaussTermF p F ρ (∑ i ∈ s, f i)))
+      ∧ gaussValueF p F ρ (∑ i ∈ s, f i) ≤ B := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    constructor
+    · refine ⟨0, ?_⟩
+      rintro y ⟨n, rfl⟩
+      simp [gaussTermF, teichCoeffF]
+    · simp only [Finset.sum_empty]
+      rw [gaussValueF]
+      refine ciSup_le fun n => ?_
+      simp [gaussTermF, teichCoeffF]
+  | insert a s ha ih =>
+    obtain ⟨ihB, ihv⟩ := ih fun i hi => hf i (by simp [hi])
+    obtain ⟨haB, hav⟩ := hf a (by simp)
+    rw [Finset.sum_insert ha]
+    constructor
+    · exact bddAbove_gaussTermF_add p F hρ0 hρ1 haB ihB
+    · exact (gaussValueF_add_le p F hρ0 hρ1 haB ihB).trans (max_le hav ihv)
+
 end FarguesFontaine
 
 end
