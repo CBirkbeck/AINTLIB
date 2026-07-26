@@ -412,6 +412,93 @@ theorem isRestricted_monomial {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact hne (by rw [h]; exact Set.mem_singleton J))]
   exact mem_of_mem_nhds hU
 
+/-- The valued field `hatK` is nonarchimedean: value balls are open subgroups. -/
+instance {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
+    NonarchimedeanRing (hatK p F hρ0 hρ1) where
+  is_nonarchimedean := by
+    intro U hU
+    rw [Valued.mem_nhds] at hU
+    obtain ⟨γ, hγ⟩ := hU
+    set B : AddSubgroup (hatK p F hρ0 hρ1) :=
+      { carrier := {z | (Valued.v).restrict z < γ.1}
+        zero_mem' := by
+          simp only [Set.mem_setOf_eq, map_zero]
+          exact Units.zero_lt γ
+        add_mem' := fun {a b} ha hb => by
+          simp only [Set.mem_setOf_eq] at ha hb ⊢
+          exact lt_of_le_of_lt (Valuation.map_add _ a b) (max_lt ha hb)
+        neg_mem' := fun {a} ha => by
+          simpa only [Set.mem_setOf_eq, Valuation.map_neg] using ha } with hB
+    have hBnhds : (B : Set (hatK p F hρ0 hρ1)) ∈ nhds (0 : hatK p F hρ0 hρ1) := by
+      rw [Valued.mem_nhds]
+      refine ⟨γ, fun z hz => ?_⟩
+      rw [Set.mem_setOf_eq, sub_zero] at hz
+      exact hz
+    refine ⟨⟨B, AddSubgroup.isOpen_of_mem_nhds B hBnhds⟩, fun z hz => ?_⟩
+    refine hγ ?_
+    rw [Set.mem_setOf_eq, sub_zero]
+    exact hz
+
+/-- Subrings of nonarchimedean rings are nonarchimedean (pull the open subgroup
+back along the inclusion). -/
+instance {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
+    NonarchimedeanRing ↥(ArSub p F ϖ hρ0 hρ1) where
+  is_nonarchimedean := by
+    intro U hU
+    rw [nhds_subtype_eq_comap] at hU
+    obtain ⟨V, hV, hVU⟩ := Filter.mem_comap.mp hU
+    obtain ⟨W, hW⟩ := NonarchimedeanRing.is_nonarchimedean V hV
+    refine ⟨⟨W.1.comap ((ArSub p F ϖ hρ0 hρ1).subtype.toAddMonoidHom), ?_⟩,
+      fun z hz => ?_⟩
+    · exact W.isOpen.preimage continuous_subtype_val
+    · exact hVU (hW hz)
+
+/-- Coefficients of a monomial shift. -/
+theorem coeff_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (J : Fin k →₀ ℕ) (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+    (s : Fin k →₀ ℕ) :
+    MvPowerSeries.coeff s
+        ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
+      = if J ≤ s then MvPowerSeries.coeff (s - J) f else 0 := by
+  rw [MvPowerSeries.coeff_monomial_mul]
+  split_ifs with h
+  · rw [one_mul]
+  · rfl
+
+/-- Monomial shifts are restricted. -/
+theorem isRestricted_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (J : Fin k →₀ ℕ) :
+    MvPowerSeries.IsRestricted
+      ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f) :=
+  Subring.mul_mem (restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))
+    (isRestricted_monomial p F ϖ (1 : ↥(ArSub p F ϖ hρ0 hρ1)) (J := J)) hf
+
+/-- **Norm invariance of monomial shifts** (radius 1). -/
+theorem gaussNormRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (J : Fin k →₀ ℕ) :
+    gaussNormRPS p F ϖ hρ0 hρ1
+        ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
+      = gaussNormRPS p F ϖ hρ0 hρ1 f := by
+  have hprod := isRestricted_monomialShift p F ϖ hf J
+  refine le_antisymm (ciSup_le fun s => ?_) (ciSup_le fun s => ?_)
+  · rw [coeff_monomialShift]
+    split_ifs with h
+    · exact le_ciSup (bddAbove_coeff_valued p F ϖ hf) (s - J)
+    · rw [ZeroMemClass.coe_zero, Valuation.map_zero]
+      exact zero_le
+  · have h1 : MvPowerSeries.coeff (s + J)
+        ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
+        = MvPowerSeries.coeff s f := by
+      rw [coeff_monomialShift, if_pos le_add_self, add_tsub_cancel_right]
+    calc Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        = Valued.v ((MvPowerSeries.coeff (s + J)
+            ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f) :
+            ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by rw [h1]
+      _ ≤ _ := le_ciSup (bddAbove_coeff_valued p F ϖ hprod) (s + J)
+
 end FarguesFontaine
 
 end
