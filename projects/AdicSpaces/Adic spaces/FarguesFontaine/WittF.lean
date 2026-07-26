@@ -1882,6 +1882,111 @@ theorem tendsto_gaussTermF_add_of_tendsto {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : 
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hall
     (fun n => zero_le) hbound
 
+/-- A term is at most the tail value at its own index. -/
+theorem gaussTermF_le_tailValueF {σ : NNReal} {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F σ x))) (n : ℕ) :
+    gaussTermF p F σ x n ≤ tailValueF p F σ x n := by
+  have hBtail : BddAbove (Set.range (fun k => gaussTermF p F σ x (n + k))) := by
+    obtain ⟨B, hB'⟩ := hB
+    exact ⟨B, by rintro s ⟨k, rfl⟩; exact hB' ⟨n + k, rfl⟩⟩
+  rw [tailValueF]
+  have h0 : gaussTermF p F σ x n = gaussTermF p F σ x (n + 0) := by rw [add_zero]
+  conv_lhs => rw [h0]
+  exact le_ciSup hBtail 0
+
+/-- The tail value is at most the full Gauss value. -/
+theorem tailValueF_le_gaussValueF {σ : NNReal} {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F σ x))) (N : ℕ) :
+    tailValueF p F σ x N ≤ gaussValueF p F σ x :=
+  ciSup_le fun k => le_ciSup hB (N + k)
+
+/-- **The perturbation estimate** (sol (9)): the tail of `u + e` is controlled by
+the tail and head of `u` and the full Gauss value of the perturbation `e`. -/
+theorem tailValueF_add_le_gaussValueF {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+    {u e : WittVector p F}
+    (hBu : BddAbove (Set.range (gaussTermF p F σ u)))
+    (hBe : BddAbove (Set.range (gaussTermF p F σ e))) (N : ℕ) :
+    tailValueF p F σ (u + e) N
+      ≤ max (max (tailValueF p F σ u N) (headBoundF p F σ u N))
+          (gaussValueF p F σ e) := by
+  refine (tailValueF_add_le p F hσ0 hσ1 hBu hBe N).trans ?_
+  have hTe : tailValueF p F σ e N ≤ gaussValueF p F σ e :=
+    tailValueF_le_gaussValueF p F hBe N
+  have hM : σ ^ N * (Finset.range N).sup (fun i => max
+      (perfectoidValuation p F (teichCoeffF p F u i))
+      (perfectoidValuation p F (teichCoeffF p F e i)))
+      ≤ max (headBoundF p F σ u N) (gaussValueF p F σ e) := by
+    rcases Finset.eq_empty_or_nonempty (Finset.range N) with hemp | hne
+    · rw [hemp, Finset.sup_empty, bot_eq_zero, mul_zero]
+      exact zero_le
+    · obtain ⟨i₀, hi₀mem, hi₀⟩ := Finset.exists_mem_eq_sup _ hne
+        (fun i => max (perfectoidValuation p F (teichCoeffF p F u i))
+          (perfectoidValuation p F (teichCoeffF p F e i)))
+      rw [hi₀]
+      have hi₀N : i₀ < N := Finset.mem_range.mp hi₀mem
+      rw [nnreal_mul_max]
+      refine max_le ?_ ?_
+      · refine le_max_of_le_left ?_
+        rw [headBoundF]
+        exact mul_le_mul_of_nonneg_left
+          (Finset.le_sup (f := fun i => perfectoidValuation p F (teichCoeffF p F u i))
+            hi₀mem) zero_le
+      · refine le_max_of_le_right ?_
+        have h1 : σ ^ N * perfectoidValuation p F (teichCoeffF p F e i₀)
+            ≤ gaussTermF p F σ e i₀ := by
+          rw [gaussTermF]
+          exact mul_le_mul_of_nonneg_right
+            (pow_le_pow_of_le_one zero_le hσ1.le hi₀N.le) zero_le
+        exact h1.trans (le_ciSup hBe i₀)
+  refine max_le ?_ (hM.trans (max_le_max (le_max_right _ _) le_rfl))
+  refine max_le ?_ ?_
+  · exact le_max_of_le_left (le_max_of_le_left le_rfl)
+  · exact le_max_of_le_right hTe
+
+/-- **`w`-closedness of decay** (sol (10)): a `w`-limit of decaying elements is
+decaying. -/
+theorem tendsto_gaussTermF_of_w_approx {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+    {u : WittVector p F} {S : ℕ → WittVector p F}
+    (hBu : BddAbove (Set.range (gaussTermF p F σ u)))
+    (hdec : ∀ j, Filter.Tendsto (gaussTermF p F σ (S j)) Filter.atTop (nhds 0))
+    (happrox : Filter.Tendsto (fun j => gaussValueF p F σ (u - S j))
+      Filter.atTop (nhds 0)) :
+    Filter.Tendsto (gaussTermF p F σ u) Filter.atTop (nhds 0) := by
+  rw [tendsto_order]
+  constructor
+  · intro a ha
+    simp at ha
+  · intro a ha
+    obtain ⟨b, hb0, hba⟩ := exists_between ha
+    obtain ⟨j₀, hj₀⟩ := (Filter.eventually_atTop.mp
+      (happrox.eventually_lt_const hb0)).imp (fun j h => h j le_rfl)
+    have hBSj := bddAbove_of_tendsto_gaussTermF p F (hdec j₀)
+    have hBdiff : BddAbove (Set.range (gaussTermF p F σ (u - S j₀))) := by
+      have h1 : u - S j₀ = u + -(S j₀) := by ring
+      rw [h1]
+      exact bddAbove_gaussTermF_add p F hσ0 hσ1 hBu
+        (bddAbove_gaussTermF_neg p F hσ0 hσ1 hBSj)
+    have hTS := tendsto_tailValueF_of_tendsto p F (hdec j₀)
+    have hHS := tendsto_headBoundF_of_tendsto p F hσ0 hσ1 (hdec j₀)
+    obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp (hTS.eventually_lt_const hb0)
+    obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp (hHS.eventually_lt_const hb0)
+    refine Filter.eventually_atTop.mpr ⟨max N₁ N₂, fun n hn => ?_⟩
+    have hN₁n : N₁ ≤ n := le_trans (le_max_left _ _) hn
+    have hN₂n : N₂ ≤ n := le_trans (le_max_right _ _) hn
+    have hu : u = S j₀ + (u - S j₀) := by ring
+    have hterm : gaussTermF p F σ u n ≤ tailValueF p F σ u n :=
+      gaussTermF_le_tailValueF p F hBu n
+    have htail : tailValueF p F σ u n
+        ≤ max (max (tailValueF p F σ (S j₀) n) (headBoundF p F σ (S j₀) n))
+            (gaussValueF p F σ (u - S j₀)) := by
+      conv_lhs => rw [hu]
+      exact tailValueF_add_le_gaussValueF p F hσ0 hσ1 hBSj hBdiff n
+    refine lt_of_le_of_lt (hterm.trans htail) ?_
+    refine max_lt (max_lt ?_ ?_) ?_
+    · exact lt_trans (hN₁ n hN₁n) hba
+    · exact lt_trans (hN₂ n hN₂n) hba
+    · exact lt_trans hj₀ hba
+
 end FarguesFontaine
 
 end
