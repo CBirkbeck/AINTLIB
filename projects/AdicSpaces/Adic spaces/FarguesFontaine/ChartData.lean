@@ -989,6 +989,38 @@ theorem gaussTerm_le_of_wI_le {ε : NNReal} (k : ℕ) (A : Ainf p F)
         ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k :=
         mul_le_mul_of_nonneg_right hwLoc zero_le
 
+/-- The chart-to-`B^I` ring homomorphism on the localization (before completion). -/
+noncomputable def chartToBIProd (b : ℕ) (hb : 0 < b) :
+    Localization.Away (chartS p F ϖ 1 b) →+*
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+  (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).comp
+    (blocEquivAwayChartS p F ϖ b hb).toRingHom
+
+/-- **The forward ball inclusion, basis form**: for every `ε > 0` some
+`locNhd`-basic set maps into the `ε`-ball of `B^I` — the topology-free core of the
+continuity of the chart map (packaged into `Tendsto` at the assembly stage). -/
+theorem exists_locNhd_le_ball (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    {ε : NNReal} (hε : 0 < ε) :
+    ∃ n : ℕ, ∀ z ∈ locNhd (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b) n,
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (blocEquivAwayChartS p F ϖ b hb z)) ≤ ε := by
+  set q : NNReal := max (max ρ₁ ρ₂) (perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F)) with hqdef
+  have hq1 : q < 1 := by
+    rw [hqdef]
+    exact max_lt (max_lt hρ₁1 hρ₂1) (perfectoidValuation_toOF_lt_one p F ϖ)
+  obtain ⟨n, hn⟩ := ((tendsto_pow_atTop_nhds_zero_of_lt_one
+    hq1).eventually_le_const hε).exists
+  refine ⟨n, ?_⟩
+  rintro z ⟨y, hy, rfl⟩
+  exact le_trans (wI_le_of_mem_locIdeal_pow p F ϖ a b hb hπ1 hπ2 hr1 hr2 n hy) hn
+
 end FarguesFontaine
 
 end
