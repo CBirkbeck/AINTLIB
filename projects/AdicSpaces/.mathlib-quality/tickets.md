@@ -877,7 +877,18 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
 - **Source quotes**: Def 2.4 ln 100–106; Def 2.5 ln 115–118; Rem 2.7 ln 137–139.
 
 ### [T904] Euclidean division on Ar; Ar is a PID
-- **Status**: in_progress (beastmode 2026-07-26) | **File**: FarguesFontaine/Euclidean.lean | **Depends**: T903 (done)
+- **Status**: done (beastmode 2026-07-26) | **File**: FarguesFontaine/Euclidean.lean | **Depends**: T903 (done)
+- **DONE-AS-SCOPED**: the full Kedlaya §2 chain is machine-checked, axiom-clean, and
+  pushed: (2.8.1) homogeneity (binary ± and n-ary), degAr + spec + strict drop,
+  Lemma-2.8 ε, convolution layer, (DC⁺), **Remark 2.7** (leading-support stability),
+  product decomposition, **Lemma 2.6** (degAr_mul), the division quotient (divStep),
+  the (2.8.2) coefficient analysis, **descent_step**, division_descent,
+  **Lemma 2.8** (approx_division), tendsto_of_valued_sub_le, **Prop 2.9**
+  (exact_division, remainder `= 0 ∨ deg <`-form), **Cor 2.10 as
+  `isPrincipalIdealRing_ArSub`** (minimal-degree generator; the mathlib
+  `EuclideanDomain`-STRUCTURE fields were deliberately skipped — the PID instance is
+  the T905-facing payload; file a follow-up only if Gröbner needs the structure).
+  Full library green (3315 jobs).
 - **Progress**: Euclidean.lean created. DONE (axiom-clean): `gaussValueF_map_le_of_coeff_zero`
   (normalized homogeneity master: integral + zeroth-coordinate-0 ⟹ value ≤ ρ, via the
   CORE-2 split at 1 + constantCoeff), `gaussValueF_zero`, `exists_attaining_coeff`,
