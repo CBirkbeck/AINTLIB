@@ -1,8 +1,8 @@
-FOCUS: DS4 M1b LEAF brick 4b — Phi_sigma vs the addX/addY formulas.
-LANDED sorry-free + pushed: bricks 1,2,3,4a (extensionality; Phi fixes x_gen,y_gen; Phi fixes base constants and a_i; slope transport).
-ATTEMPTS (both reverted, file green): (1) `unfold Affine.addX; congr` => whnf timeout; (2) `simp only [Affine.addX, ..., HasseWeil.W_KE, map_a1, map_a2, brick3]` => KERNEL deterministic timeout. CAUSE: unfolding HasseWeil.W_KE (= (W.baseChange L).map (algebraMap L KE)) inside the big expression explodes, because W.baseChange L is itself a record of algebraMap k L (W.a_i).
-FIX TO TRY NEXT (do NOT unfold W_KE inside the expression): first prove five tiny lemmas
-  galoisFunctionFieldEquiv_WKE_a1 : Phi ((W_KE (W.baseChange L)).a1) = (W_KE (W.baseChange L)).a1
-  (proof: `rw [HasseWeil.W_KE, WeierstrassCurve.map_a1]; exact galoisFunctionFieldEquiv_a1 W sigma`) and likewise a2,a3,a4,a6;
-then `simp only [WeierstrassCurve.Affine.addX, map_sub, map_add, map_mul, map_pow, galoisFunctionFieldEquiv_WKE_a1, galoisFunctionFieldEquiv_WKE_a2]` with NO W_KE in the simp set.
-THEN: addY likewise (a1,a3), translateX/translateY transport, the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch separately), weilPairing_galois unconditional, fieldWeilPairing_galois, M1c.
+FOCUS: DS4 M1b LEAF brick 4b — Phi_sigma vs addX/addY on the generic curve W_KE.
+LANDED sorry-free + pushed: bricks 1,2,3 (extensionality; Phi fixes x_gen,y_gen; Phi fixes base constants, the a_i and the W_KE coefficients a1,a2,a3), 4a (slope transport).
+THREE ATTEMPTS at brick 4b, ALL reverted (file green, 0 sorries):
+  (i) unfold Affine.addX + congr  -> whnf timeout (200k)
+  (ii) simp only [Affine.addX, map_*, per-coefficient lemmas] -> KERNEL deterministic timeout
+  (iii) mathlib functoriality WeierstrassCurve.Affine.map_addX (Formula.lean:411) + congr on the curve -> whnf timeout at the theorem header.
+ROOT CAUSE: the ambient terms (function field of W_KE = (W.baseChange L).map (algebraMap L KE), over the base-changed curve) are huge; ANY tactic that forces whnf on the curve record explodes. Heartbeat bumps are FORBIDDEN.
+NEXT IDEA (untried): work with a LOCAL OPAQUE curve. Introduce `set V : WeierstrassCurve KE := HasseWeil.W_KE (W.baseChange L) with hV` (or a private irreducible def) so that the curve is an atom, prove the transport at V using map_addX with the hypothesis `V.map Phi = V` (provable once, from the three coefficient lemmas via WeierstrassCurve.ext), and only then specialise. Alternatively reformulate the conjugation to avoid addX entirely by transporting the DEFINING property of translateAlgHom (its action on x_gen/y_gen characterises it via ringHom_ext_const_x_y_gen).
