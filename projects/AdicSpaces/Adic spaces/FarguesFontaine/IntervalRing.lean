@@ -26,6 +26,7 @@ the `max`-of-two-valuations uniformity, and its closure is therefore the complet
 * `FarguesFontaine.BIProd` : the diagonal map `Bloc → hatK ρ₁ × hatK ρ₂`.
 * `FarguesFontaine.BISub` : the interval ring `B^I` as a closed subring of the product.
 * `FarguesFontaine.wI` : the interval norm `max {λ_{ρ₁}, λ_{ρ₂}}`.
+* `FarguesFontaine.BIPlus` : the integral subring `B^{I,+}` of norm-`≤ 1` elements.
 
 ## Sources
 
@@ -582,6 +583,64 @@ theorem BIProd_injective {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 :
     Function.Injective (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) := by
   intro x y hxy
   exact BlocToHatK_injective p F ϖ (congrArg Prod.fst hxy)
+
+/-- **The integral interval ring `B^{I,+}`** (Kedlaya Definition 4.2): the elements of
+`B^I` of interval norm at most `1`. -/
+def BIPlus {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) :
+    Subring ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) where
+  carrier := {z | z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+    ∧ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ 1}
+  zero_mem' := by
+    refine ⟨zero_mem _, ?_⟩
+    rw [wI_zero p F]
+    exact zero_le_one
+  one_mem' := by
+    refine ⟨one_mem _, ?_⟩
+    rw [wI_one p F]
+  add_mem' := fun {a b} ha hb => by
+    refine ⟨add_mem ha.1 hb.1, ?_⟩
+    exact le_trans (wI_add_le p F a b) (max_le ha.2 hb.2)
+  neg_mem' := fun {a} ha => by
+    refine ⟨neg_mem ha.1, ?_⟩
+    rw [wI_neg p F]
+    exact ha.2
+  mul_mem' := fun {a b} ha hb => by
+    refine ⟨mul_mem ha.1 hb.1, ?_⟩
+    refine le_trans (wI_mul_le p F a b) ?_
+    calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 a * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b
+        ≤ 1 * 1 := mul_le_mul ha.2 hb.2 zero_le zero_le
+      _ = 1 := one_mul 1
+
+/-- Membership in `B^{I,+}` unfolds to the two conditions. -/
+theorem mem_BIPlus_iff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)} :
+    z ∈ BIPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ↔ z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ∧ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ 1 := Iff.rfl
+
+/-- `B^{I,+}` sits inside `B^I`. -/
+theorem BIPlus_le_BISub {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    BIPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ≤ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 :=
+  fun _ hz => hz.1
+
+/-- Power-boundedness: elements of `B^{I,+}` have bounded powers. -/
+theorem wI_pow_le_one {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ 1) (n : ℕ) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z ^ n) ≤ 1 := by
+  induction n with
+  | zero =>
+    rw [pow_zero, wI_one p F]
+  | succ m ih =>
+    rw [pow_succ]
+    refine le_trans (wI_mul_le p F _ _) ?_
+    calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z ^ m) * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z
+        ≤ 1 * 1 := mul_le_mul ih hz zero_le zero_le
+      _ = 1 := one_mul 1
 
 end FarguesFontaine
 
