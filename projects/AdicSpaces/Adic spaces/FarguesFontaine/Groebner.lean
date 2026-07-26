@@ -1251,19 +1251,30 @@ theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNRe
     {y : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
     (hyH : y ∈ H)
     (hy0 : ((y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0)) :
-    ∃ (y' : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-      (J : Fin k →₀ ℕ), y' ∈ H
+    ∃ (g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+      (m : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+      (J : Fin k →₀ ℕ), g ∈ G
+      ∧ gaussNormRPS p F ϖ hρ0 hρ1
+          (m : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        * gaussNormRPS p F ϖ hρ0 hρ1
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        ≤ gaussNormRPS p F ϖ hρ0 hρ1
+          (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
       ∧ leadIdxRPS p F ϖ hρ0 hρ1
           (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = J
       ∧ gaussNormRPS p F ϖ hρ0 hρ1
-          (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          ((y - m * g : ↥(restrictedMvPowerSeriesSubring k
+            ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k)
+            ↥(ArSub p F ϖ hρ0 hρ1))
         ≤ gaussNormRPS p F ϖ hρ0 hρ1
           (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
       ∧ (∀ K : Fin k →₀ ℕ,
           (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
             < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
           Valued.v (((MvPowerSeries.coeff K
-              (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              ((y - m * g : ↥(restrictedMvPowerSeriesSubring k
+                ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k)
+                ↥(ArSub p F ϖ hρ0 hρ1))
               : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
             - ((MvPowerSeries.coeff K
               (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
@@ -1271,10 +1282,14 @@ theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNRe
             ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1
               (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
       ∧ (((MvPowerSeries.coeff J
-            (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            ((y - m * g : ↥(restrictedMvPowerSeriesSubring k
+              ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k)
+              ↥(ArSub p F ϖ hρ0 hρ1))
             : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) = 0
         ∨ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
-              (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              ((y - m * g : ↥(restrictedMvPowerSeriesSubring k
+                ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k)
+                ↥(ArSub p F ϖ hρ0 hρ1))
               : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
             < degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
               (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
@@ -1314,9 +1329,10 @@ theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNRe
       (hGtail g hgG)
   have hcoe := coe_sub_monomialMul p F ϖ y g (MvPowerSeries.monomial (J - I) z)
     (isRestricted_monomial p F ϖ z)
-  refine ⟨y - ⟨MvPowerSeries.monomial (J - I) z,
-      isRestricted_monomial p F ϖ z⟩ * g, J,
-    Ideal.sub_mem H hyH (Ideal.mul_mem_left H _ (hGH g hgG)), rfl, ?_, ?_, ?_⟩
+  refine ⟨g, ⟨MvPowerSeries.monomial (J - I) z,
+      isRestricted_monomial p F ϖ z⟩, J, hgG, ?_, rfl, ?_, ?_, ?_⟩
+  · rw [gaussNormRPS_monomial]
+    exact hznorm
   · rw [hcoe]
     exact hzsub
   · intro K hK
