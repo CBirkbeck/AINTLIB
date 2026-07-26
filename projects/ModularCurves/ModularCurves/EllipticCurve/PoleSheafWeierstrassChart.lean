@@ -90,6 +90,84 @@ theorem sectionPoleSheafPower_succ_preimage_basicOpen_coefficient_eq_top
   rw [← Scheme.basicOpen_res_eq (X := S) (f := z.app U.1 X) (eqToHom hU.symm).op]
   rw [hrestrict, Scheme.basicOpen_one]
 
+/-- The Cartier-chart coefficient of a normalized successor pole section is
+coprime to the generator of the marked section. -/
+theorem sectionPoleSheafPower_succ_isCoprime_coefficient_generator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1)))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n x = 1) :
+    let hr : r ∈ z.ker.ideal U :=
+      hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+    let X := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz (n + 1)) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd (n + 1)) x
+    IsCoprime X r := by
+  dsimp only
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  have hr : r ∈ z.ker.ideal U := by
+    rw [hspan]
+    exact Ideal.subset_span (Set.mem_singleton r)
+  let X := localTrivializationCoefficient
+    (sectionPoleSheafPower π z hz (n + 1)) U
+    (sectionPoleSheafPowerTrivializationOfCartierGenerator
+      z hz U r hr hspan hnzd (n + 1)) x
+  have hcoordinate :=
+    sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator_hom_baseSectionsMap
+      hsm z hz U hU r hspan hnzd n x
+  have hcoordinate' :
+      sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+          hsm z hz U hU r hspan hnzd n x =
+        S.presheaf.map (eqToHom hU.symm).op (z.app U.1 X) := by
+    rw [sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_apply]
+    simpa only [X, sectionPoleSheafPowerTrivializationOfCartierGenerator,
+      sectionPoleSheafTrivializationOfCartierGenerator] using hcoordinate
+  have hrestrict :
+      S.presheaf.map (eqToHom hU.symm).op (z.app U.1 X) = 1 := by
+    rw [← hcoordinate']
+    exact hx
+  have hX : z.app U.1 X = 1 := by
+    apply (ConcreteCategory.bijective_of_isIso
+      (S.presheaf.map (eqToHom hU.symm).op)).1
+    simpa using hrestrict
+  have hker : X - 1 ∈ z.ker.ideal U := by
+    rw [Scheme.Hom.ker_apply, RingHom.mem_ker, map_sub, hX, map_one, sub_self]
+  obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp (hspan ▸ hker)
+  refine ⟨1, -c, ?_⟩
+  rw [one_mul, neg_mul, hc]
+  ring
+
+/-- A normalized successor coefficient remains coprime to every power of the
+Cartier generator. -/
+theorem sectionPoleSheafPower_succ_isCoprime_coefficient_generator_pow
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n m : ℕ)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1)))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n x = 1) :
+    let hr : r ∈ z.ker.ideal U :=
+      hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+    let X := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz (n + 1)) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd (n + 1)) x
+    IsCoprime X (r ^ m) := by
+  exact (sectionPoleSheafPower_succ_isCoprime_coefficient_generator
+    hsm z hz U hU r hspan hnzd n x hx).pow_right
+
 private theorem localTrivializationCoefficient_baseSections_add
     {C S : Scheme.{u}} (π : C ⟶ S) (M : C.Modules)
     (U : C.affineOpens)
