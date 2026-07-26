@@ -2,6 +2,8 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
+
 import «Adic spaces».FarguesFontaine.Groebner
 
 /-!
@@ -31,7 +33,7 @@ the `max`-of-two-valuations uniformity, and its closure is therefore the complet
   Definition 4.2, Lemma 4.4, Corollary 4.5.
 -/
 
-open TopologicalRing ValuationSpectrum WittVector
+open TopologicalRing ValuationSpectrum WittVector NNReal
 
 universe u
 
@@ -249,6 +251,66 @@ theorem exists_BIProd_wI_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁
   obtain ⟨w, hwball, hwrange⟩ := mem_closure_iff_nhds.mp hz' _ hball
   obtain ⟨x, rfl⟩ := hwrange
   exact ⟨x, hwball⟩
+
+/-- **Three circles, termwise** (Kedlaya Lemma 4.4, the single-term equality). -/
+theorem gaussTerm_rpow_interpolate {ρ₁ ρ₂ : NNReal} {θ : ℝ} (hθ0 : 0 ≤ θ)
+    (hθ1 : θ ≤ 1) (x : Ainf p F) (n : ℕ) :
+    gaussTerm p F (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) x n
+      = (gaussTerm p F ρ₁ x n) ^ θ * (gaussTerm p F ρ₂ x n) ^ (1 - θ) := by
+  rw [gaussTerm, gaussTerm, gaussTerm, NNReal.mul_rpow, NNReal.mul_rpow]
+  rcases eq_or_ne (perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)) 0
+    with hz | hz
+  · rw [hz]
+    rcases eq_or_ne θ 0 with rfl | hθne
+    · simp
+    · rcases eq_or_ne (1 - θ) 0 with h1 | h1ne
+      · rw [h1]
+        simp [NNReal.zero_rpow hθne]
+      · rw [NNReal.zero_rpow hθne, NNReal.zero_rpow h1ne]
+        simp
+  · have hsplit : perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)
+        = (perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)) ^ θ
+          * (perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)) ^ (1 - θ) := by
+      rw [← NNReal.rpow_add hz]
+      simp
+    have hpow : ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) : NNReal) ^ n
+        = (ρ₁ ^ n) ^ θ * (ρ₂ ^ n) ^ (1 - θ) := by
+      rw [mul_pow, ← NNReal.rpow_natCast (ρ₁ ^ θ) n, ← NNReal.rpow_natCast (ρ₂ ^ (1 - θ)) n,
+        ← NNReal.rpow_natCast ρ₁ n, ← NNReal.rpow_natCast ρ₂ n,
+        ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul, ← NNReal.rpow_mul]
+      ring_nf
+    calc ((ρ₁ ^ θ * ρ₂ ^ (1 - θ)) : NNReal) ^ n
+          * perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)
+        = ((ρ₁ ^ n) ^ θ * (ρ₂ ^ n) ^ (1 - θ))
+          * ((perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)) ^ θ
+            * (perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)) ^ (1 - θ)) := by
+          rw [← hpow, ← hsplit]
+      _ = ((ρ₁ ^ n) ^ θ
+            * (perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)) ^ θ)
+          * ((ρ₂ ^ n) ^ (1 - θ)
+            * (perfectoidValuation p F ((teichCoeff p F x n : OF F) : F)) ^ (1 - θ)) := by
+          ring
+
+/-- **Three circles** (Kedlaya Lemma 4.4): the Gauss value at an interpolated radius
+is bounded by the interpolated product of the endpoint values. -/
+theorem gaussValue_rpow_interpolate {ρ₁ ρ₂ : NNReal} (hρ₁1 : ρ₁ ≤ 1) (hρ₂1 : ρ₂ ≤ 1)
+    {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1) (x : Ainf p F) :
+    gaussValue p F (ρ₁ ^ θ * ρ₂ ^ (1 - θ)) x
+      ≤ (gaussValue p F ρ₁ x) ^ θ * (gaussValue p F ρ₂ x) ^ (1 - θ) := by
+  have hmid : (ρ₁ ^ θ * ρ₂ ^ (1 - θ) : NNReal) ≤ 1 := by
+    have h1 : (ρ₁ : NNReal) ^ θ ≤ 1 := by
+      simpa using NNReal.rpow_le_rpow hρ₁1 hθ0
+    have h2 : (ρ₂ : NNReal) ^ (1 - θ) ≤ 1 := by
+      simpa using NNReal.rpow_le_rpow hρ₂1 (by linarith)
+    calc (ρ₁ : NNReal) ^ θ * ρ₂ ^ (1 - θ) ≤ 1 * 1 :=
+          mul_le_mul h1 h2 zero_le zero_le
+      _ = 1 := one_mul 1
+  refine ciSup_le fun n => ?_
+  rw [gaussTerm_rpow_interpolate p F hθ0 hθ1 x n]
+  exact mul_le_mul
+    (NNReal.rpow_le_rpow (gaussTerm_le_gaussValue p F hρ₁1 x n) hθ0)
+    (NNReal.rpow_le_rpow (gaussTerm_le_gaussValue p F hρ₂1 x n) (by linarith))
+    zero_le zero_le
 
 end FarguesFontaine
 
