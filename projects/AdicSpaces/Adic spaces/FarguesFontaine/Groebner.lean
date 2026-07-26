@@ -1064,7 +1064,7 @@ bounding every generator's tail. -/
 theorem exists_groebner_family {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
     ∃ (G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
-      (ε : NNReal), ε < 1
+      (ε : NNReal), 0 < ε ∧ ε < 1
       ∧ (∀ g ∈ G, g ∈ H)
       ∧ (∀ g ∈ G, ((g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0))
       ∧ (∀ g ∈ G, ∀ K : Fin k →₀ ℕ,
@@ -1124,8 +1124,11 @@ theorem exists_groebner_family {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     rw [hlead]
     exact hK
   choose X E hXH hX0 hXlead hXdeg hElt hEtail using hex
-  refine ⟨T.attach.image X, T.attach.sup E, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · refine (Finset.sup_lt_iff (by rw [bot_eq_zero]; exact zero_lt_one)).mpr ?_
+  refine ⟨T.attach.image X, max (T.attach.sup E) (1 / 2), ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · refine lt_of_lt_of_le ?_ (le_max_right _ _)
+    norm_num
+  · refine max_lt ?_ (by norm_num)
+    refine (Finset.sup_lt_iff (by rw [bot_eq_zero]; exact zero_lt_one)).mpr ?_
     intro I _
     exact hElt I
   · intro g hg
@@ -1139,7 +1142,8 @@ theorem exists_groebner_family {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     refine le_trans (hEtail I K ?_) ?_
     · rw [← hXlead I]
       exact hK
-    · exact mul_le_mul_of_nonneg_right (Finset.le_sup hI) zero_le
+    · exact mul_le_mul_of_nonneg_right
+        (le_trans (Finset.le_sup hI) (le_max_left _ _)) zero_le
   · intro g hg
     obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
     rw [hXlead I]
@@ -1509,6 +1513,98 @@ theorem support_step_subset {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {c : N
       rw [hsplit]
       exact le_trans (Valuation.map_add _ _ _) (max_le (hdiff K hKJ) hcon)
     exact absurd hK (not_lt.mpr hy'small)
+
+@[simp]
+theorem gaussNormRPS_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
+    gaussNormRPS p F ϖ hρ0 hρ1
+      (0 : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = 0 := by
+  refine le_antisymm (ciSup_le fun s => ?_) zero_le
+  rw [map_zero, ZeroMemClass.coe_zero, Valuation.map_zero]
+
+theorem gaussNormRPS_eq_zero_iff {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    gaussNormRPS p F ϖ hρ0 hρ1 f = 0 ↔ f = 0 := by
+  constructor
+  · intro h
+    by_contra hne
+    exact gaussNormRPS_ne_zero p F ϖ hf hne h
+  · rintro rfl
+    exact gaussNormRPS_zero p F ϖ
+
+/-- Finite nonempty sets of monomials have a graded-lex maximum. -/
+theorem exists_degLex_max {S : Set (Fin k →₀ ℕ)} (hfin : S.Finite)
+    (hne : S.Nonempty) :
+    ∃ M ∈ S, ∀ K ∈ S,
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K
+        ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn M := by
+  classical
+  set m : MonomialOrder (Fin k) := MonomialOrder.degLex with hm
+  set A := hfin.toFinset with hA
+  have hAne : A.Nonempty := by
+    rw [hA, Set.Finite.toFinset_nonempty]
+    exact hne
+  set Mx := (A.image m.toSyn).max' (hAne.image _) with hMx
+  have hmem : Mx ∈ A.image m.toSyn := Finset.max'_mem _ _
+  obtain ⟨M, hMA, hMeq⟩ := Finset.mem_image.mp hmem
+  refine ⟨M, ?_, fun K hK => ?_⟩
+  · rw [hA, Set.Finite.mem_toFinset] at hMA
+    exact hMA
+  · rw [hMeq]
+    refine Finset.le_max' _ _ (Finset.mem_image_of_mem _ ?_)
+    rw [hA, Set.Finite.mem_toFinset]
+    exact hK
+
+/-- The graded-lex initial segment below `M`. -/
+def degLexSeg (M : Fin k →₀ ℕ) : Type :=
+  {K : Fin k →₀ ℕ // (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K
+    ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn M}
+
+instance instFintypeDegLexSeg (M : Fin k →₀ ℕ) : Fintype (degLexSeg M) :=
+  (finite_degLex_le M).fintype
+
+instance instLinearOrderDegLexSeg (M : Fin k →₀ ℕ) : LinearOrder (degLexSeg M) :=
+  LinearOrder.lift'
+    (fun K : degLexSeg M => (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K.1)
+    (fun a b h => Subtype.ext
+      ((MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn.injective h))
+
+theorem degLexSeg_lt_iff {M : Fin k →₀ ℕ} {a b : degLexSeg M} :
+    a < b ↔ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn a.1
+      < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn b.1 := Iff.rfl
+
+/-- **The descent measure** (Kedlaya Lemma 3.8): the colexicographic vector of
+coefficient ranks over the graded-lex segment below `M`. -/
+def muMeasure {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (c : NNReal)
+    (M : Fin k →₀ ℕ) (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :
+    Colex (degLexSeg M → ℕ) :=
+  toColex (fun K : degLexSeg M => coeffRank p F ϖ hρ0 hρ1 c y K.1)
+
+/-- **The measure strictly decreases** at a reduction step. -/
+theorem muMeasure_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {c : NNReal}
+    {M : Fin k →₀ ℕ} {y y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    {J : Fin k →₀ ℕ}
+    (hJM : (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
+      ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn M)
+    (hJhigh : c < Valued.v ((MvPowerSeries.coeff J y : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1))
+    (hfrozen : ∀ K : Fin k →₀ ℕ,
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
+        < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+      Valued.v (((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        - ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)) ≤ c)
+    (hdrop : ((MvPowerSeries.coeff J y' : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) = 0
+      ∨ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J y'
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        < degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J y
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) :
+    muMeasure p F ϖ hρ0 hρ1 c M y' < muMeasure p F ϖ hρ0 hρ1 c M y := by
+  refine ⟨⟨J, hJM⟩, fun Kj hKj => ?_, ?_⟩
+  · exact coeffRank_eq_of_diff_le p F ϖ (hfrozen Kj.1 (degLexSeg_lt_iff.mp hKj))
+  · exact coeffRank_lt_of_drop p F ϖ hJhigh hdrop
 
 end FarguesFontaine
 
