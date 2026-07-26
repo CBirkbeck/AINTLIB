@@ -903,6 +903,100 @@ theorem gaussValueF_convPartial_sub_prefix_le {ρ : NNReal} (hρ0 : 0 < ρ)
   calc ρ ^ n * (ρ * Bn) = ρ * (ρ ^ n * Bn) := by ring
     _ ≤ ρ * (A * B) := mul_le_mul_of_nonneg_left hscaled zero_le
 
+/-- **The prefix-product tail** (sol step 2, identity (10)): a prefix product
+differs from the convolution partial only in antidiagonal terms of total index at
+least `N`, so any uniform tail bound controls the difference. -/
+theorem gaussValueF_prefix_mul_sub_convPartial_le {ρ : NNReal} (hρ0 : 0 < ρ)
+    (hρ1 : ρ < 1) (a b : ℕ → F) {T : NNReal} (N : ℕ)
+    (hT : ∀ i j : ℕ, N ≤ i + j →
+      (ρ ^ i * perfectoidValuation p F (a i))
+        * (ρ ^ j * perfectoidValuation p F (b j)) ≤ T) :
+    gaussValueF p F ρ
+      (alocToWittF p F ϖ (prefixAloc p F ϖ a N)
+          * alocToWittF p F ϖ (prefixAloc p F ϖ b N)
+        - alocToWittF p F ϖ (convPartialAloc p F ϖ a b N)) ≤ T := by
+  classical
+  rw [alocToWittF_prefixAloc, alocToWittF_prefixAloc, alocToWittF_convPartialAloc]
+  set box : Finset (ℕ × ℕ) := Finset.range N ×ˢ Finset.range N with hbox
+  set TRI : Finset (ℕ × ℕ) := (Finset.range N).biUnion
+    (fun n => Finset.antidiagonal n) with hTRI
+  have hdisj : (↑(Finset.range N) : Set ℕ).PairwiseDisjoint
+      (fun n => (Finset.antidiagonal n : Finset (ℕ × ℕ))) := by
+    intro m _ n _ hmn
+    simp only [Function.onFun, Finset.disjoint_left]
+    intro q hqm hqn
+    exact hmn (by rw [← Finset.mem_antidiagonal.mp hqm,
+      ← Finset.mem_antidiagonal.mp hqn])
+  have hprod : (∑ i ∈ Finset.range N,
+        WittVector.teichmuller p (a i) * (p : WittVector p F) ^ i)
+      * (∑ j ∈ Finset.range N,
+        WittVector.teichmuller p (b j) * (p : WittVector p F) ^ j)
+      = ∑ q ∈ box, (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2) := by
+    have hnested : (∑ q ∈ box, (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2))
+        = ∑ i ∈ Finset.range N, ∑ j ∈ Finset.range N,
+          (p : WittVector p F) ^ (i + j)
+            * WittVector.teichmuller p (a i * b j) :=
+      Finset.sum_product' (Finset.range N) (Finset.range N)
+        (fun i j => (p : WittVector p F) ^ (i + j)
+          * WittVector.teichmuller p (a i * b j))
+    rw [hnested, Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+    rw [map_mul, pow_add]
+    ring
+  have hanti : ∀ n : ℕ, (∑ q ∈ Finset.antidiagonal n,
+      WittVector.teichmuller p (a q.1 * b q.2))
+      = ∑ k ∈ Finset.range (n + 1), WittVector.teichmuller p (a k * b (n - k)) :=
+    fun n => Finset.Nat.sum_antidiagonal_eq_sum_range_succ_mk _ n
+  have hpartial : (∑ n ∈ Finset.range N, (p : WittVector p F) ^ n
+      * ∑ k ∈ Finset.range (n + 1), WittVector.teichmuller p (a k * b (n - k)))
+      = ∑ q ∈ TRI, (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2) := by
+    rw [hTRI, Finset.sum_biUnion hdisj]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    rw [← hanti n, Finset.mul_sum]
+    refine Finset.sum_congr rfl fun q hq => ?_
+    rw [Finset.mem_antidiagonal.mp hq]
+  have hsub : TRI ⊆ box := by
+    intro q hq
+    rw [hTRI, Finset.mem_biUnion] at hq
+    obtain ⟨n, hn, hqn⟩ := hq
+    have hq' : q.1 + q.2 = n := Finset.mem_antidiagonal.mp hqn
+    have hnN : n < N := Finset.mem_range.mp hn
+    rw [hbox, Finset.mem_product]
+    constructor
+    · exact Finset.mem_range.mpr (lt_of_le_of_lt
+        (le_trans (Nat.le_add_right _ _) hq'.le) hnN)
+    · exact Finset.mem_range.mpr (lt_of_le_of_lt
+        (le_trans (Nat.le_add_left _ _) hq'.le) hnN)
+  have hdiff : (∑ q ∈ box, (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2))
+      - (∑ q ∈ TRI, (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2))
+      = ∑ q ∈ box \ TRI, (p : WittVector p F) ^ (q.1 + q.2)
+        * WittVector.teichmuller p (a q.1 * b q.2) :=
+    (eq_sub_of_add_eq (Finset.sum_sdiff hsub)).symm
+  rw [hprod, hpartial, hdiff]
+  refine (gaussValueF_finset_sum_le p F hρ0 hρ1 T (box \ TRI) _ fun q hq => ?_).2
+  have hqmem := Finset.mem_sdiff.mp hq
+  have hqN : N ≤ q.1 + q.2 := by
+    by_contra hcon
+    push Not at hcon
+    refine hqmem.2 ?_
+    rw [hTRI, Finset.mem_biUnion]
+    exact ⟨q.1 + q.2, Finset.mem_range.mpr hcon, Finset.mem_antidiagonal.mpr rfl⟩
+  refine ⟨bddAbove_gaussTermF_p_pow_mul p F
+    (bddAbove_gaussTermF_teichmuller p F _) _, ?_⟩
+  rw [gaussValueF_p_pow_mul p F (bddAbove_gaussTermF_teichmuller p F _) _,
+    gaussValueF_teichmuller]
+  calc ρ ^ (q.1 + q.2) * perfectoidValuation p F (a q.1 * b q.2)
+      = (ρ ^ q.1 * perfectoidValuation p F (a q.1))
+        * (ρ ^ q.2 * perfectoidValuation p F (b q.2)) := by
+        rw [Valuation.map_mul, pow_add]
+        ring
+    _ ≤ T := hT q.1 q.2 hqN
+
 end FarguesFontaine
 
 end
