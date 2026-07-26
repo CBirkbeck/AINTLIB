@@ -8,6 +8,7 @@ import ModularCurves.Moduli.LegendreSmooth
 import ModularCurves.Moduli.BaseChangeIso
 import ModularCurves.Moduli.ProductProblem
 import ModularCurves.ForMathlib.SmoothDescentScheme
+import ModularCurves.Moduli.LevelThreeSmooth
 
 /-!
 # The Legendre-anchored ρ-cover is smooth of relative dimension one
@@ -116,6 +117,38 @@ theorem rhoLegendre_total_isStandardSmooth (D : GaloisRepData N) [Fact (1 < N)]
   exact isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec
     (CommRingCat.ofHom (algebraMap (CommRingCat.of ℚ)
       (LegendreModuliRing (CommRingCat.of ℚ)))) d.f hφ
+
+open scoped FintypeCatDiscrete in
+/-- **[re-plumb brick 2]** The level-3-anchored total space (the ρ-relative representation
+over the universal `ℰ₃` object) has standard-smooth-of-relative-dimension-one global
+sections over `ℚ`: it is finite étale over the `ℰ₃`-base, which is standard smooth of
+relative dimension one (`e3ModuliRing_isStandardSmoothOfRelativeDimension`).
+
+Mirror of `rhoLegendre_total_isStandardSmooth`, but anchored at the **axiom-clean**
+level-3 rigidifier instead of the Legendre one. -/
+theorem rhoLevelThree_total_isStandardSmooth (D : GaloisRepData N) [Fact (1 < N)]
+    (d : ModuliProblem.RelRepData (rhoProblem D) (universalE3Obj (CommRingCat.of ℚ)))
+    (hfin : IsFinite d.f) (het : Etale d.f) :
+    RingHom.IsStandardSmoothOfRelativeDimension 1
+      ((((universalE3Obj (CommRingCat.of ℚ)).pullbackAlong d.f).structMap).appTop).hom := by
+  haveI : IsFinite d.f := hfin
+  haveI : Etale d.f := het
+  haveI : Etale (show d.Z ⟶
+      Spec (CommRingCat.of (E3ModuliRing (CommRingCat.of ℚ))) from d.f) := het
+  haveI : IsAffine (universalE3Obj (CommRingCat.of ℚ)).base :=
+    inferInstanceAs (IsAffine (Spec (CommRingCat.of (E3ModuliRing (CommRingCat.of ℚ)))))
+  haveI : IsAffine d.Z := isAffine_of_isAffineHom d.f
+  have h3 : IsUnit (3 : CommRingCat.of ℚ) := by
+    show IsUnit (3 : ℚ)
+    exact isUnit_iff_ne_zero.mpr (by norm_num)
+  have hφ : RingHom.IsStandardSmoothOfRelativeDimension 1
+      (CommRingCat.ofHom (algebraMap (CommRingCat.of ℚ)
+        (E3ModuliRing (CommRingCat.of ℚ)))).hom :=
+    (RingHom.isStandardSmoothOfRelativeDimension_algebraMap (n := 1)).mpr
+      (e3ModuliRing_isStandardSmoothOfRelativeDimension (CommRingCat.of ℚ) h3)
+  exact isStandardSmoothOfRelativeDimension_appTop_of_etale_over_spec
+    (CommRingCat.ofHom (algebraMap (CommRingCat.of ℚ)
+      (E3ModuliRing (CommRingCat.of ℚ)))) d.f hφ
 
 /-- **[T-YR-6-APP S5]** Standard smoothness of the global-sections structure map is
 invariant under isomorphism of `Ell`-objects. -/
