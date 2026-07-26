@@ -763,7 +763,21 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       valued_AlocToHatK converts to wAloc. tendsto_teichCoeffAr GREEN (the step-4 capstone: coordinates of A^r-elements
       converge along approximants; two-topology diamonds bridged by
       IsPerfectoidRing.topologyEq rewrites both at the W-neighborhood and at the
-      completeness output). NEXT = STEP (5): reconstruction + attainment
+      completeness output). STEP-5 ROUTE REVISION (2026-07-26, after Lemma A `gaussTerm_teichCoeffAr_le` went
+      green): the (≥)-direction CANNOT go through approximant-attainment transfer —
+      attaining indices are NOT uniformly bounded over the filter (the p^m[ϖ^{-m/2}]
+      denominator demon again), and per-index limits control only finitely many terms.
+      CORRECT ORDER: (5b-i) **finite-Teichmüller-sum density**: the subring of finite
+      sums Σ_{n<N} pⁿ·[cₙ] (cₙ ∈ F) is dense in Aloc for every wAloc (CORE-2 on the
+      Ainf-numerator + [ϖ]^{-k}-scaling — tails of prefixes are ρᴺ-small), hence its
+      image is dense in ArSub; define `alocTeich : F → Aloc` (choice: Tate absorption
+      → O_F-numerator/[ϖ]^k) with `alocToWittF (alocTeich c) = teichmuller p c` and
+      `wAloc (alocTeich c) = |c|`. (5b-ii) reconstruction against FINITE-sum
+      approximants t (no tails!): coords(t) → coordAr per-index; for N > deg t the
+      prefix issue vanishes; conclude v(x − image(Σ_{n<N} pⁿ·alocTeich(coordAr n))) → 0.
+      (5b-iii) THEN (≥): v x = v(prefix) eventually (isosceles, since
+      v(x − prefix) → 0 < v x) and v(prefix) ≤ max prefix-terms = max ρⁿ|coordAr n| ≤
+      sup ✓. Combined with Lemma A: the realization equality. THEN attainment
       (wAr x = sup ρⁿ|teichCoeffAr x n|, attained — via the eventual bounds +
       coordinate limits + gaussValueF_alocToWittF), then deg/deg_mul/Rem-2.7/summability,
       unlocking T904 (Euclidean division). Historical assembly notes:
