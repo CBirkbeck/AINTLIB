@@ -1230,6 +1230,82 @@ theorem galois_conj_translateAlgHom_2tor (xk yk : L)
       HasseWeil.translateAlgHom_of_2tor_apply_y_gen, galoisFunctionFieldEquiv_translateY,
       galoisFunctionFieldEquiv_y_gen]
 
+/-- **(M1b-3b leaf, brick 6)** The conjugation identity at an affine point, **uniformly**
+in the 2-torsion / non-2-torsion split: both branches act the same way on the generators
+(`translateAlgEquivOfPoint_apply_x_gen_of_some`), so a single `ringHom_ext_const_x_y_gen`
+call handles them at once. -/
+theorem galois_conj_translateAlgEquivOfPoint_some_ringHom (xk yk : L)
+    (hns : (W.baseChange L).toAffine.Nonsingular xk yk)
+    (hns' : (W.baseChange L).toAffine.Nonsingular (σ xk) (σ yk)) :
+    ((galoisFunctionFieldEquiv W σ :
+        (W.baseChange L).toAffine.FunctionField →+*
+          (W.baseChange L).toAffine.FunctionField).comp
+      (HasseWeil.translateAlgEquivOfPoint (W.baseChange L)
+        (WeierstrassCurve.Affine.Point.some xk yk hns)).toAlgHom.toRingHom) =
+      ((HasseWeil.translateAlgEquivOfPoint (W.baseChange L)
+          (WeierstrassCurve.Affine.Point.some (σ xk) (σ yk) hns')).toAlgHom.toRingHom.comp
+        (galoisFunctionFieldEquiv W σ :
+          (W.baseChange L).toAffine.FunctionField →+*
+            (W.baseChange L).toAffine.FunctionField)) := by
+  refine ringHom_ext_const_x_y_gen W ?_ ?_ ?_
+  · intro a
+    simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      AlgHom.coe_coe, AlgEquiv.coe_algHom, AlgEquiv.commutes,
+      galoisFunctionFieldEquiv_algebraMap]
+  · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      AlgHom.coe_coe, AlgEquiv.coe_algHom,
+      HasseWeil.translateAlgEquivOfPoint_apply_x_gen_of_some,
+      galoisFunctionFieldEquiv_translateX, galoisFunctionFieldEquiv_x_gen]
+  · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      AlgHom.coe_coe, AlgEquiv.coe_algHom,
+      HasseWeil.translateAlgEquivOfPoint_apply_y_gen_of_some,
+      galoisFunctionFieldEquiv_translateY, galoisFunctionFieldEquiv_y_gen]
+
+/-- **(M1b-3b leaf ★★★)** The point-level conjugation
+`Φ_σ ∘ τ_S = τ_{σ·S} ∘ Φ_σ`, for every point `S`. -/
+theorem galois_conj_translateAlgEquivOfPoint (S : (W.baseChange L).toAffine.Point)
+    (f : (W.baseChange L).toAffine.FunctionField) :
+    galoisFunctionFieldEquiv W σ
+        (HasseWeil.translateAlgEquivOfPoint (W.baseChange L) S f) =
+      HasseWeil.translateAlgEquivOfPoint (W.baseChange L) (galoisPointEquiv W σ S)
+        (galoisFunctionFieldEquiv W σ f) := by
+  cases S with
+  | zero =>
+    rw [show (galoisPointEquiv W σ) (WeierstrassCurve.Affine.Point.zero :
+          (W.baseChange L).toAffine.Point) =
+        (WeierstrassCurve.Affine.Point.zero : (W.baseChange L).toAffine.Point) from
+      map_zero (galoisPointEquiv W σ),
+      HasseWeil.translateAlgEquivOfPoint_zero_apply,
+      HasseWeil.translateAlgEquivOfPoint_zero_apply]
+  | some xk yk hns =>
+    have hns' : (W.baseChange L).toAffine.Nonsingular (σ xk) (σ yk) :=
+      (galoisSmoothPoint W σ ⟨xk, yk, hns⟩).nonsingular
+    have himg : galoisPointEquiv W σ (WeierstrassCurve.Affine.Point.some xk yk hns) =
+        WeierstrassCurve.Affine.Point.some (σ xk) (σ yk) hns' := rfl
+    rw [himg]
+    have happ := DFunLike.congr_fun
+      (galois_conj_translateAlgEquivOfPoint_some_ringHom W σ xk yk hns hns') f
+    simpa only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      AlgHom.coe_coe, AlgEquiv.coe_algHom] using happ
+
+/-- **(M1b-3b ★★★★★ — the DS4 Galois-equivariance of the Weil pairing)**
+`e_N(σP, σQ) = σ(e_N(P, Q))` for every `σ ∈ Gal(L/k)` and every pair of `N`-torsion
+points, over an arbitrary algebraically closed extension `L` of the base field `k`.
+
+This is `weilPairing_galois_of_conj` with its last hypothesis discharged by
+`galois_conj_translateAlgEquivOfPoint`. -/
+theorem weilPairing_galois [IsAlgClosed L]
+    (hic : IsIntegrallyClosed (⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing)
+    (N : ℤ) (hN : (N : L) ≠ 0)
+    (S T : (W.baseChange L).toAffine.Point) (hS : N • S = 0) (hT : N • T = 0)
+    (hσS : N • galoisPointEquiv W σ S = 0) (hσT : N • galoisPointEquiv W σ T = 0) :
+    HasseWeil.WeilPairing.weilPairing (W.baseChange L) N hN
+        (galoisPointEquiv W σ S) (galoisPointEquiv W σ T) hσS hσT =
+      σ (HasseWeil.WeilPairing.weilPairing (W.baseChange L) N hN S T hS hT) :=
+  weilPairing_galois_of_conj W hic σ N hN S T hS hT hσS hσT
+    (galois_conj_translateAlgEquivOfPoint W σ S _)
+
 end TranslationTransport
 
 end ModularCurves

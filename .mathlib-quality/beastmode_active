@@ -1,7 +1,14 @@
-FOCUS: DS4 M1b LEAF — brick 5 non-2-torsion branch is DONE and axiom-clean (galois_conj_translateAlgHom_nonTor). Bricks 1-4 all landed.
-REMAINING for the full conjugation:
-  (a) the 2-TORSION branch: same statement for translateAlgEquiv_of_2tor (find its action on x_gen/y_gen — search TranslationOrd for translateAlgEquiv_of_2tor / translateAlgHom_of_2tor apply lemmas; the same extensionality + brick-4 transports should work);
-  (b) package into the point-level conjugation for translateAlgEquivOfPoint (case split: _zero => refl; _some_nonTor => (a); _some_2tor => 2-torsion branch), with the sigma-image point given by galoisPointEquiv (its coordinates are sigma xk, sigma yk by definition);
-  (c) feed it to weilPairing_galois_of_conj to get the UNCONDITIONAL sigma-equivariance;
-  (d) package fieldWeilPairing_galois (bundled mu_N form) and then M1c: exists_pairingAlgebraHom_of_galoisEquivariant (WeilPairing/EtaleDescent.lean:440) plus the torsionAlgebraPointsEquiv equivariance.
-TECHNIQUE NOTES that made brick 5 work: use simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, <apply-lemmas>] and NEVER `show` on composites of these heavy ring homs; keep the curve opaque (map_galoisFunctionFieldEquiv_WKE + congrArg toAffine) instead of unfolding.
+FOCUS: [DS4 M1b] weilPairing_galois is UNCONDITIONAL and axiom-clean (landed).
+NEXT STEP (M1b-4): package the bundled mu_N form `fieldWeilPairing_galois` in
+WeilPairing/FieldPairing.lean-style: sigma-equivariance of `fieldWeilPairing`
+(N : Nat version), i.e. sigma (fieldWeilPairing W N hN P Q .. : L) =
+fieldWeilPairing W N hN (galoisPointEquiv W sigma P) (galoisPointEquiv W sigma Q) .. .
+Note the direction in weilPairing_galois: e(sigma S, sigma T) = sigma (e(S,T)).
+NEEDS: hic (IsIntegrallyClosed of the coordinate ring) -- find how HasseWeil supplies it
+(grep for IsIntegrallyClosed instances on SmoothPlaneCurve.CoordinateRing; the
+nonsingular curve coordinate ring is a Dedekind domain there).
+THEN M1c: exists_pairingAlgebraHom_of_galoisEquivariant (WeilPairing/EtaleDescent.lean:440)
+and the torsionAlgebraPointsEquiv equivariance.
+TECHNIQUE: simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+AlgHom.coe_coe, AlgEquiv.coe_algHom, <apply-lemmas>]; NEVER `show` on heavy composites;
+keep curve opaque (map_galoisFunctionFieldEquiv_WKE + congrArg toAffine).
