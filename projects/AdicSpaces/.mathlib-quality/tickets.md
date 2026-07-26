@@ -1316,7 +1316,12 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   realization; the geometric-series unit case for empty intersections (ln 396–399).
 
 ### [T911] Lemma 4.9, third presentation (Ar → BI bridge)
-- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T907, T908
+- **Status**: done (2026-07-26, beastmode; commit da830e1a9) — density half (evalRange,
+  BIProd_mem_evalRange, BISub_le_topologicalClosure_evalRange) + strictness half
+  (exists_evalAr_eq_of_mem_BISub: every element of B^I lifts with gaussNormRPS ≤ wI,
+  Kedlaya (4.9.1) with constant 1 in the AD-9 exact case), hence surjective_evalArHom
+  and surjective_evalArMvHom. All axiom-clean; see sub-tickets T911a–T911h.
+  | **File**: FarguesFontaine/Presentation.lean | **Depends**: T907, T908
 - **Statement**: `Ar⟨T⟩/(p·T − [zⁿ]) ≅ B^{I'''}` (ln 384–386: I''' = [−n⁻¹log_c p, r]
   in t-coordinates; transport to ρ) — THE bridge that makes BI-algebras quotients of
   Ar-Tate algebras.
@@ -1399,7 +1404,12 @@ nose, so every estimate is exact with constant 1). Generality: minimal, match us
   `Subtype.ext` + `MvPowerSeries.ext` + `evalArMvFun_apply`.
 
 ### [T912] Theorem 4.10: BI is strongly noetherian
-- **Status**: open | **File**: FarguesFontaine/StronglyNoetherianB.lean | **Depends**: T907, T910, T911
+- **Status**: done (2026-07-26, beastmode) — `isStronglyNoetherian_BISub` (+ per-k
+  `isNoetherianRing_restrictedMvPowerSeries_BISub`) in the new
+  FarguesFontaine/StronglyNoetherianB.lean, for the AD-9 intervals (left endpoint
+  exactly |ϖ|^{jn}); B^I⟨T⃗⟩ = quotient of A^r⟨T,T⃗⟩ via surjective_evalArMvHom +
+  Theorem 3.2. Axiom-clean.
+  | **File**: FarguesFontaine/StronglyNoetherianB.lean | **Depends**: T907, T910, T911
 - **Statement**: `IsStronglyNoetherian (BI)` for every c^ℚ-endpoint closed
   `I ⊂ (0,1)` — in particular for the two FF window intervals (U₀ and V₀ charts).
 - **Sketch** (ln 462–470): `BI⟨X₁..Xₖ⟩` is, by T911 + T910 applied with extra Tate
