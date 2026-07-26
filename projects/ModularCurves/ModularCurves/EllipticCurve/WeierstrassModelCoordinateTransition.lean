@@ -301,4 +301,29 @@ theorem projModelFromOfGlobalSections_naturality
       ext x
       exact DFunLike.congr_fun hchartRing x]
 
+/-- Proportional on-curve triples with invertible coordinates define the same
+projective morphism, even when the invertible coordinates have different
+indices. The proportionality factor need not be a unit. -/
+theorem projModelFromOfGlobalSections_congr_of_smul
+    {X : Scheme.{u}} (W : WeierstrassCurve R)
+    [Algebra R Γ(X, (⊤ : X.Opens))]
+    (k l : Fin 3)
+    (P P' : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (e : Γ(X, (⊤ : X.Opens)))
+    (hsmul : ∀ m, P' m = e * P m)
+    (hP : (W.map
+      (algebraMap R Γ(X, (⊤ : X.Opens)))).toProjective.Equation P)
+    (hP' : (W.map
+      (algebraMap R Γ(X, (⊤ : X.Opens)))).toProjective.Equation P')
+    (hk : IsUnit (P k)) (hl : IsUnit (P' l)) :
+    projModelFromOfGlobalSections W
+        (algebraMap R Γ(X, (⊤ : X.Opens))) P' hP' l hl =
+      projModelFromOfGlobalSections W
+        (algebraMap R Γ(X, (⊤ : X.Opens))) P hP k hk := by
+  rw [projModelFromOfGlobalSections_eq_chart W P' hP' l hl]
+  rw [projModelFromOfGlobalSections_eq_chart W P hP k hk]
+  rw [chartι_comp_specMap_chartAwayHom_smul_eq W k l P P'
+    (↑hk.unit⁻¹) (↑hl.unit⁻¹) e hsmul
+    hk.mul_val_inv hl.mul_val_inv hP hP']
+
 end ModularCurves
