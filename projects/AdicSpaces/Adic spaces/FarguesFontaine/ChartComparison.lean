@@ -1,0 +1,217 @@
+/-
+Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: AINTLIB AI workers
+-/
+import «Adic spaces».FarguesFontaine.SheafyBI
+import «Adic spaces».FarguesFontaine.ChartData
+
+/-!
+# The chart comparison map into `B^I` (ID2d, Kedlaya §4 / Wedhorn §8.1)
+
+The finite-level comparison between the chart localization
+`A_inf[1/(p[ϖ]^b)]` (with the Wedhorn rational-localization topology of the
+chart datum) and the interval ring `B^I` at the exact chart interval
+`I = [|ϖ|, |ϖ|^{b/a}]`:
+
+* `FarguesFontaine.chartToBI` : the chart map corestricted to `B^I`;
+* `FarguesFontaine.denseRange_chartToBI` : it has dense range (the closure of
+  the image of `Bloc` is the definition of `B^I`);
+* `FarguesFontaine.comap_nhds_zero_chartToBI` : the chart neighborhood filter
+  is the comap of the `wI`-neighborhood filter (two-sided basis comparison:
+  `exists_locNhd_le_ball` forward, `ball_le_locNhd` backward);
+* `FarguesFontaine.isUniformInducing_chartToBI` : the chart map is uniformly
+  inducing for the chart uniformity — the uniform-space heart of the
+  identification `𝒪_Y(U) ≅ B^I`.
+-/
+
+open TopologicalRing ValuationSpectrum WittVector NNReal
+
+set_option linter.overlappingInstances false
+
+noncomputable section
+
+namespace FarguesFontaine
+
+variable (p : ℕ) [Fact (Nat.Prime p)]
+variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
+variable (ϖ : PseudoUniformizer F)
+variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+
+noncomputable local instance : DecidableEq (Ainf p F) := Classical.decEq _
+
+/-- The chart map lands in `B^I`. -/
+theorem chartToBIProd_mem_BISub (b : ℕ) (hb : 0 < b)
+    (z : Localization.Away (chartS p F ϖ 1 b)) :
+    chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) b hb z
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 :=
+  (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range.le_topologicalClosure
+    ⟨blocEquivAwayChartS p F ϖ b hb z, rfl⟩
+
+/-- **The chart map corestricted to `B^I`** (the finite-level comparison map). -/
+noncomputable def chartToBI (b : ℕ) (hb : 0 < b) :
+    Localization.Away (chartS p F ϖ 1 b)
+      →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  (chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+    (hρ₂1 := hρ₂1) b hb).codRestrict _
+    (chartToBIProd_mem_BISub p F ϖ b hb)
+
+@[simp]
+theorem chartToBI_coe (b : ℕ) (hb : 0 < b)
+    (z : Localization.Away (chartS p F ϖ 1 b)) :
+    (↑(chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) b hb z)
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) b hb z := rfl
+
+/-- **The chart map has dense range in `B^I`** (its closure is the definition of
+`B^I`). -/
+theorem denseRange_chartToBI (b : ℕ) (hb : 0 < b) :
+    DenseRange (chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) b hb) := by
+  rw [DenseRange, dense_iff_closure_eq,
+    Topology.IsEmbedding.subtypeVal.closure_eq_preimage_closure_image]
+  have himg : (Subtype.val '' Set.range (chartToBI p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb))
+      = Set.range (⇑(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+    ext w
+    constructor
+    · rintro ⟨-, ⟨z, rfl⟩, rfl⟩
+      exact ⟨blocEquivAwayChartS p F ϖ b hb z, rfl⟩
+    · rintro ⟨y, rfl⟩
+      exact ⟨chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) b hb ((blocEquivAwayChartS p F ϖ b hb).symm y),
+        ⟨(blocEquivAwayChartS p F ϖ b hb).symm y, rfl⟩, by
+          rw [chartToBI_coe]
+          show BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (blocEquivAwayChartS p F ϖ b hb
+              ((blocEquivAwayChartS p F ϖ b hb).symm y)) = _
+          rw [RingEquiv.apply_symm_apply]⟩
+  rw [himg]
+  have hclos : closure (Set.range (⇑(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      = (BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := rfl
+  rw [hclos]
+  ext w
+  simp [w.2]
+
+
+/-- The corestricted chart map is continuous at zero for the chart topology. -/
+theorem tendsto_chartToBI (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    Filter.Tendsto (chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
+      (@nhds _ (chartTopology p F ϖ a b) 0) (nhds 0) := by
+  rw [tendsto_subtype_rng]
+  exact (tendsto_chartToBIProd_coe p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2).congr fun z => rfl
+
+/-- The comap of the `B^I`-neighborhood filter along the chart map is at most the
+chart-topology neighborhood filter (the reverse basis inclusion, filter form). -/
+theorem comap_nhds_zero_chartToBI_le (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    Filter.comap (chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) (nhds 0)
+      ≤ @nhds _ (chartTopology p F ϖ a b) 0 := by
+  have hbasis : (@nhds _ (chartTopology p F ϖ a b) 0).HasBasis (fun _ : ℕ => True)
+      (fun n => ((locNhd (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b) n
+        : AddSubgroup (Localization.Away (chartS p F ϖ 1 b)))
+        : Set (Localization.Away (chartS p F ϖ 1 b)))) := by
+    show (@nhds _ ((chartData p F ϖ 1 b a b).topology) 0).HasBasis _ _
+    exact (locBasis (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b)
+      (chartData p F ϖ 1 b a b).hopen).hasBasis_nhds_zero
+  refine hbasis.ge_iff.mpr fun n _ => ?_
+  have hε : (0 : NNReal) < min ρ₁ ρ₂ ^ n * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+    have hπ0 : (0 : NNReal) < perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F) := hexact1 ▸ hρ₁0
+    exact mul_pos (pow_pos (lt_min hρ₁0 hρ₂0) n) (pow_pos hπ0 b)
+  refine Filter.mem_comap.mpr ⟨_, wI_ball_mem_nhds_BISub p F ϖ
+    (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hε, ?_⟩
+  intro z hz
+  exact ball_le_locNhd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b n ha hb hexact1 hexact2 hz
+
+/-- **The chart neighborhood filter is the comap of the `B^I` one** (two-sided
+basis comparison, packaged). -/
+theorem comap_nhds_zero_chartToBI (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    Filter.comap (chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) (nhds 0)
+      = @nhds _ (chartTopology p F ϖ a b) 0 := by
+  set vπ : NNReal :=
+    perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hvπ
+  have hπ1 : vπ ≤ ρ₁ := le_of_eq hexact1
+  have hπ2 : vπ ≤ ρ₂ := by
+    have hne : a * b ≠ 0 := by positivity
+    refine le_of_pow_le_pow_left₀ hne zero_le ?_
+    calc vπ ^ (a * b) ≤ vπ ^ (b * b) :=
+          pow_le_pow_of_le_one zero_le (hexact1 ▸ hρ₁1.le)
+            (Nat.mul_le_mul_right b hab)
+      _ = (vπ ^ b) ^ b := by rw [← pow_mul]
+      _ = (ρ₂ ^ a) ^ b := by rw [hexact2]
+      _ = ρ₂ ^ (a * b) := by rw [← pow_mul]
+  have hr1 : ρ₁ ^ a ≤ vπ ^ b := by
+    rw [← hexact1]
+    exact pow_le_pow_of_le_one zero_le (hexact1 ▸ hρ₁1.le) hab
+  have hr2 : ρ₂ ^ a ≤ vπ ^ b := le_of_eq hexact2
+  exact le_antisymm
+    (comap_nhds_zero_chartToBI_le p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hexact1 hexact2)
+    (Filter.tendsto_iff_comap.mp (tendsto_chartToBI p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2))
+
+/-- **The chart map is (topologically) inducing** for the chart topology. -/
+theorem isInducing_chartToBI (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    @Topology.IsInducing _ _ (chartTopology p F ϖ a b) _
+      (chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) := by
+  letI : TopologicalSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartTopology p F ϖ a b
+  refine ⟨IsTopologicalAddGroup.ext ?_ ?_ ?_⟩
+  · exact @IsTopologicalRing.to_topologicalAddGroup _ _ (chartTopology p F ϖ a b)
+      (chartTopologicalRing p F ϖ a b)
+  · exact topologicalAddGroup_induced
+      (chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
+  · rw [@nhds_induced, map_zero,
+      comap_nhds_zero_chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2]
+
+/-- **The chart map is uniformly inducing** for the chart uniformity. -/
+theorem isUniformInducing_chartToBI (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    @IsUniformInducing _ _ (chartUniformity p F ϖ a b) _
+      (chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) := by
+  letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartUniformity p F ϖ a b
+  haveI : IsUniformAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartIsUniformAddGroup p F ϖ a b
+  haveI : IsUniformAddGroup ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    isUniformAddGroup_BISub p F ϖ
+  exact AddMonoidHom.isUniformInducing_of_isInducing
+    (isInducing_chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2)
+
+end FarguesFontaine
+
+end

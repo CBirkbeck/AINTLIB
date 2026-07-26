@@ -45,6 +45,7 @@ import «Adic spaces».FarguesFontaine.StronglyNoetherianB
 import «Adic spaces».FarguesFontaine.RestrictionInjective
 import «Adic spaces».FarguesFontaine.SheafyBI
 import «Adic spaces».FarguesFontaine.ChartData
+import «Adic spaces».FarguesFontaine.ChartComparison
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
