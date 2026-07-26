@@ -643,7 +643,7 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
 `FarguesFontaine/IntervalRing.lean` (T908–T911), `FarguesFontaine/StronglyNoetherianB.lean` (T912).
 
 ### [T901] Bloc + the extended Gauss-valuation family
-- **Status**: open | **File**: FarguesFontaine/RobbaLoc.lean | **Depends**: T803/T804 (done)
+- **Status**: done (beastmode 2026-07-26; RobbaLoc.lean — Bloc, wLoc via extendToLocalization, mk'/algebraMap/unit-inverse evaluations; axiom-clean) | **File**: FarguesFontaine/RobbaLoc.lean | **Depends**: T803/T804 (done)
 - **Statement**: `Bloc p F := Localization.Away ((p : Ainf p F) * teichPi p F ϖ)`;
   `wLoc ρ hρ0 hρ1 : Valuation (Bloc p F ϖ) ℝ≥0 := (gaussVal p F hρ0 hρ1).extendToLocalization hS _`
   with `hS : Submonoid.powers (p·[ϖ]) ≤ (gaussVal).supp.primeCompl` from
