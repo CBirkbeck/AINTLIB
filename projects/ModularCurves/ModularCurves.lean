@@ -89,3 +89,5 @@ import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.WeilPairing.Basic
+import ModularCurves.WeilPairing.FibrePointDict
+import ModularCurves.WeilPairing.GaloisFieldPairing
