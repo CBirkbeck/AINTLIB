@@ -1,4 +1,5 @@
-FOCUS: DS4 M1b-3b-viii (div(Phi_sigma g_T) = div(g_{sigma T})).
-DONE steps a,b: galoisProjPointEquiv_toProjectiveSmoothPoint (relabelling = mathlib Affine.Point.map sigma) and equivMapDomain_kappaDivisor (kappa(P) relabels to kappa(sigma P)). Both sorry-free, pushed.
-NEXT step c: transport pullbackDivisor — HasseWeil weilFunction_divisor_eq_pullbackDivisor_kappaDivisor (HfactLemma:134) says div(g_T) = pullbackDivisor [N] (kappaDivisor T). Need: equivMapDomain (galoisProjPointEquiv) commutes with pullbackDivisor [N], i.e. relabelling a pullbackDiv of v is the pullbackDiv of the relabelled v — via pullbackDiv over the fibre [N]^{-1}(v) and the fact that sigma permutes that fibre (sigma is additive on points and commutes with [N]).
-THEN step d: combine to get div(Phi_sigma g_T) = div(g_{sigma T}); THEN the pairing equivariance; THEN M1c.
+FOCUS: DS4 M1b-3b-viii — div(Phi_sigma g_T) = div(g_{sigma T}).
+DONE (sorry-free, pushed): galoisProjPointEquiv_toProjectiveSmoothPoint (a), equivMapDomain_kappaDivisor (b), galoisPointEquiv (c: sigma as AddEquiv on points via mathlib Point.map + map_map/AlgHom.id), galoisFiberEquiv (d: sigma permutes the [N]-fibres).
+NEXT step e: equivMapDomain (galoisProjPointEquiv) (pullbackDiv f h Q) = pullbackDiv f h (galoisPointEquiv Q), where pullbackDiv f h Q = sum over {P // f P = Q} of single P.toProjectiveSmoothPoint 1 (Pullback.lean:34). Proof: push equivMapDomain through the Finset.sum (equivMapDomain_eq_mapDomain + mapDomain_finset_sum), rewrite each single by step (a), then reindex the sum along galoisFiberEquiv (Fintype.sum_equiv / Equiv.sum_comp). NOTE f = (mulByInt _ N).toAddMonoidHom and mulByInt_apply : f P = N smul P (Foundation/Basic.lean:226).
+THEN step f: pullbackDivisor transport (Finsupp.sum over places) + weilFunction_divisor_eq_pullbackDivisor_kappaDivisor (HfactLemma:134) => div(Phi_sigma g_T) = div(g_{sigma T}).
+THEN the pairing equivariance; THEN M1c.
