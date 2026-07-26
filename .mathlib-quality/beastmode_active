@@ -1,5 +1,7 @@
-FOCUS: DS4 M1b — the Galois divisor transport is COMPLETE and sorry-free (WeilPairing/GaloisFunctionField.lean, 20+ decls; headline: projectiveDivisorOf_galoisFunctionFieldEquiv — div(sigma.g) = sigma-relabelling of div(g), arbitrary base field and sigma).
-NEXT (3b-viii): div(Phi_sigma g_T) = div(g_{sigma T}).
-  Inputs: weilFunction_divisor (HasseWeil WeilFunction.lean) expresses div(g_T) = pullbackDiv [N] T - pullbackDiv [N] 0; the relabelling by galoisProjPointEquiv sends pullbackDiv [N] T to pullbackDiv [N] (sigma T) — needs: sigma acts on affine points compatibly with the group law (galoisSmoothPoint vs Affine.Point.map sigma) and commutes with multiplication by N.
-THEN (3b-ix): pairing equivariance e(sigma S, sigma T) = sigma e(S,T) — Phi_sigma g_T = c * g_{sigma T} (Constancy.pairing_const_of_transport with div ratio 0), then apply Phi_sigma to tau_S g_T = e(S,T) g_T using Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma, and conclude by uniqueness of the constant.
-THEN M1c: exists_pairingAlgebraHom_of_galoisEquivariant (WeilPairing/EtaleDescent.lean:440) — remember torsionAlgebraPointsEquiv is Nonempty-valued, so expose its equivariance there.
+FOCUS: DS4 M1b — divisor transport COMPLETE (WeilPairing/GaloisFunctionField.lean, sorry-free: projectiveDivisorOf_galoisFunctionFieldEquiv).
+NEXT BRICK (3b-viii): div(Phi_sigma g_T) = div(g_{sigma T}).
+  KEY POINTER (found): mathlib has WeierstrassCurve.Affine.Point.map (Affine/Point.lean:785) as an ADDITIVE hom (W-base-changed points), so for sigma : L =a[k] L it is the sigma-action on points and commutes with [N] for free via map_zsmul. So:
+   (a) prove galoisSmoothPoint agrees with Point.map sigma on smooth points (coordinates are sigma x, sigma y on both sides);
+   (b) transport kappaDivisor / pullbackDiv along galoisProjPointEquiv using (a) + weilFunction_divisor (Pairing.lean:187: div(g_T) = pullbackDiv [N] T - pullbackDiv [N] 0);
+   (c) conclude div(Phi_sigma g_T) = div(g_{sigma T}).
+THEN (3b-ix) pairing equivariance via Constancy.pairing_const_of_transport + uniqueness of the constant; THEN M1c descent (EtaleDescent:440).
