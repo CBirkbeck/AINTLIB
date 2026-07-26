@@ -340,6 +340,46 @@ theorem gaussValueF_alocToWittF {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
   rw [heq]
   exact le_ciSup (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u) n₀
 
+/-- The completed-field valuation restricts to `wAloc` on `Aloc`-images. -/
+theorem valued_AlocToHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (u : Aloc p F ϖ) :
+    Valued.v (AlocToHatK p F ϖ hρ0 hρ1 u) = wAloc p F ϖ hρ0 hρ1 u := by
+  obtain ⟨⟨a, y⟩, hu⟩ := IsLocalization.surj (M := Submonoid.powers (teichPi p F ϖ)) u
+  change u * algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F)
+    = algebraMap (Ainf p F) (Aloc p F ϖ) a at hu
+  have hyne : gaussValue p F ρ (y : Ainf p F) ≠ 0 := by
+    obtain ⟨k, hk⟩ := y.2
+    have hk' : teichPi p F ϖ ^ k = (y : Ainf p F) := hk
+    rw [← hk', show gaussValue p F ρ (teichPi p F ϖ ^ k)
+      = (gaussValue p F ρ (teichPi p F ϖ)) ^ k from map_pow (gaussVal p F hρ0 hρ1) _ k]
+    refine pow_ne_zero _ ?_
+    rw [show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+      from rfl, gaussValue_teichmuller p F hρ1.le]
+    exact fun hz => PseudoUniformizer.toOF_ne_zero F ϖ
+      (Subtype.ext ((Valuation.zero_iff (perfectoidValuation p F)).mp hz))
+  have hAloc : AlocToHatK p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Aloc p F ϖ)
+      (y : Ainf p F)) = toHatK p F hρ0 hρ1 (y : Ainf p F) := IsLocalization.lift_eq _ _
+  have hAloc' : AlocToHatK p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Aloc p F ϖ) a)
+      = toHatK p F hρ0 hρ1 a := IsLocalization.lift_eq _ _
+  have h1 : Valued.v (AlocToHatK p F ϖ hρ0 hρ1 u) * gaussValue p F ρ (y : Ainf p F)
+      = gaussValue p F ρ a := by
+    have happ := congrArg (fun z => Valued.v (AlocToHatK p F ϖ hρ0 hρ1 z)) hu
+    simp only [map_mul, hAloc, hAloc'] at happ
+    rw [valued_toHatK, valued_toHatK] at happ
+    exact happ
+  have h2 : wAloc p F ϖ hρ0 hρ1 u * gaussValue p F ρ (y : Ainf p F)
+      = gaussValue p F ρ a := by
+    have happ := congrArg (wAloc p F ϖ hρ0 hρ1) hu
+    rw [map_mul, wAloc_algebraMap, wAloc_algebraMap] at happ
+    exact happ
+  exact mul_right_cancel₀ hyne (h1.trans h2.symm)
+
+/-- The coordinate functionals on the ambient completion, as filter limits along
+`Aloc`-approximants (junk value off the closure). -/
+def teichCoeffAr {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x : hatK p F hρ0 hρ1)
+    (n : ℕ) : F :=
+  Filter.limUnder (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x))
+    (fun u => teichCoeffF p F (alocToWittF p F ϖ u) n)
+
 end FarguesFontaine
 
 end
