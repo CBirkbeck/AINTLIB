@@ -961,10 +961,37 @@ non-Tate bases are supported.
 - **Depends**: ID1a-c, T911, TC2.
 
 ### [ID3] Y is pre-adic and sheafy on the charts
-- **Status**: open | **Parent**: PLAN-GATE-2/PLAN-GATE-3 | **Type**: theorem block
-- **Sketch**: restrict the standard pre-adic structure of `Spa(A_inf, A_inf)` to
-  `Y`; each `U_n, V_n` is affinoid pre-adic ≅ `Spa(B^I, C⁺)` (ID2 + Frobenius
-  translates); restrictions respected; Wedhorn Rem 8.27 locality + TC2.
+- **Status**: open — DECOMPOSED 2026-07-27 into ID3a–ID3d | **Parent**: PLAN-GATE-2/PLAN-GATE-3 | **Type**: theorem block
+- **PLAN (2026-07-27, replaces the U_n/V_n-chart route)**: cover Y by the BIG
+  windows `BigW_n := {κ ∈ [p^n, p^(n+1)]}` (n : ℤ). Since c = (p+1)/2 ∈ (1,p),
+  `BigW_n = U_n ∪ V_n` EXACTLY, so the T405 covering gives `Y = ⋃ BigW_n`. Each
+  `BigW_n` is the `chartS 1 1`-type datum `chartData 1 1 p 1` (window κ' ∈ [1,p],
+  a = p, b = 1) taken IN THE TWISTED PSEUDO-UNIFORMIZER `ϖ_n` with
+  `v([ϖ_n]) = v([ϖ])^{p^{-n}}` (p^n-th Frobenius root for n > 0, p^|n|-th power
+  for n < 0) — this stays entirely inside the proven chartS-1-b machinery
+  (isSheafy_presheafChart at a := p, b := 1, hexact1 : v(ϖ_n) = ρ₁ NAT-EXACT,
+  hexact2 : ρ₂^p = v(ϖ_n) via rhoRight). NO u>1-denominator generalization and
+  NO rational-endpoint generalization needed. V₀ alone is NOT a chart of this
+  family — it is covered by BigW_0; that suffices for sheafiness/locality.
+- **ID3a** (open): pseudo-uniformizer twisting. `PseudoUniformizer.pow (m>0)`
+  (nilpotency of ϖ^m: multiples are cofinal) and `PseudoUniformizer.frobRoot s`
+  (unit-level (frobeniusEquiv F p).symm^s; nilpotency: r^m = ϖ^k·r^j with
+  {r^j : j < p^s} ⊆ O_F bounded and nonarch subgroup-nbhds absorb
+  bounded·nilpotent); value lemmas `v(toOF (frobRoot ϖ s))^(p^s) = v(toOF ϖ)`,
+  `toOF (pow ϖ m) = toOF ϖ ^ m`, and the Ainf-side `teichPi (frobRoot/pow)`
+  power relations.
+- **ID3b** (open): window identification. `Y p F ϖ = Y p F ϖ_n` (powers detect
+  the same vanishing) and `BigW_n(ϖ) = rationalOpen (chartT-in-ϖ_n p 1)
+  (chartS-in-ϖ_n 1 1)` via mem_rationalOpen_chartData_iff at ϖ_n + the
+  KGE/KLE cross-multiplication bridges ([ϖ_n]^{p^n} = [ϖ] as teichPi-powers).
+- **ID3c** (open): sheafiness per window. `IsSheafy (presheafValue
+  (chartData-in-ϖ_n 1 1 p 1))` := isSheafy_presheafChart at ϖ_n, a := p,
+  b := 1, hab : 1 ≤ p, ρ₂ := rhoRight-in-ϖ_n p 1 (apply DIRECTLY — do not
+  restate the letI chain; see the isDefEq-trap note under PLAN-GATE-2).
+- **ID3d** (open): assembly — Y pre-adic + adic via covering locality (consult
+  the repo's Spa/8.27 framework for the exact statement shape; Wedhorn Rem 8.27;
+  TC2). Needs T405 (the covering, Lane A) for `Y = ⋃ BigW_n`.
+- **Depends**: ID2 (done), ID3a-c mutually ordered, T405 for ID3d.
 
 ### [PLAN-GATE-2] Lane C assembly planning (identification theorem + sheafy instances)
 - **Status**: mostly DISCHARGED 2026-07-27 — the chart-identification theorem is
