@@ -1094,6 +1094,49 @@ theorem cauchySeq_of_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact hlt
   exact hres
 
+/-- Segments of prefix sums factor as `p^N`-shifts of shifted prefixes. -/
+theorem prefixAloc_sub (b : ℕ → F) {N M : ℕ} (hNM : N ≤ M) :
+    prefixAloc p F ϖ b M - prefixAloc p F ϖ b N
+      = (p : Aloc p F ϖ) ^ N * prefixAloc p F ϖ (fun j => b (N + j)) (M - N) := by
+  rw [prefixAloc, prefixAloc, prefixAloc, ← Finset.sum_Ico_eq_sub _ hNM,
+    Finset.sum_Ico_eq_sum_range, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun j _ => ?_
+  rw [pow_add]
+  ring
+
+/-- **Prefix images are Cauchy** for decaying coefficient sequences. -/
+theorem cauchySeq_prefix_image {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F}
+    (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
+      Filter.atTop (nhds 0)) :
+    CauchySeq (fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N)) := by
+  refine cauchySeq_of_valued_le p F _ fun ε hε => ?_
+  have hev : ∀ᶠ n in Filter.atTop, ρ ^ n * perfectoidValuation p F (b n) < ε :=
+    hb.eventually_lt_const hε
+  obtain ⟨N₀, hN₀'⟩ := Filter.eventually_atTop.mp hev
+  have hN₀ : ∀ n, N₀ ≤ n → ρ ^ n * perfectoidValuation p F (b n) ≤ ε :=
+    fun n hn => (hN₀' n hn).le
+  refine ⟨N₀, fun m n hm hn => ?_⟩
+  -- by symmetry reduce to n ≤ m
+  have key : ∀ {a c : ℕ}, N₀ ≤ a → N₀ ≤ c → c ≤ a →
+      Valued.v (AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b a)
+        - AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b c)) ≤ ε := by
+    intro a c _ hc hca
+    rw [← map_sub, valued_AlocToHatK, prefixAloc_sub p F ϖ b hca,
+      wAloc_p_pow_mul p F ϖ hρ0 hρ1, wAloc_prefixAloc p F ϖ hρ0 hρ1]
+    rcases Nat.eq_zero_or_pos (a - c) with hz | hpos
+    · rw [hz]
+      simp
+    · obtain ⟨j, hjmem, hjeq⟩ := Finset.exists_mem_eq_sup (Finset.range (a - c))
+        (Finset.nonempty_range_iff.mpr hpos.ne')
+        (fun j => ρ ^ j * perfectoidValuation p F (b (c + j)))
+      rw [hjeq, ← mul_assoc, ← pow_add]
+      exact hN₀ (c + j) (le_trans hc (Nat.le_add_right c j))
+  rcases le_total n m with hnm | hmn
+  · exact key hm hn hnm
+  · have h := key hn hm hmn
+    rw [← Valuation.map_neg, neg_sub] at h
+    exact h
+
 end FarguesFontaine
 
 end
