@@ -91,6 +91,7 @@ import ModularCurves.Picard.GlueTrivialization
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
+import ModularCurves.Picard.RigidDescent
 import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.FibrePointDict

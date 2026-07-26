@@ -88,6 +88,16 @@ theorem eq_one_of_pullback_eq_one (hp : UniversallyOConnected p) {z : T ⟶ pull
     u = 1 :=
   sectionRigidity g hp hz U e (by rw [h, map_one])
 
+/-- Variant of `eq_one_of_pullback_eq_one` for an open that is only *equal* to a preimage
+`f ⁻¹ᵁ U`, not syntactically one — e.g. `f ⁻¹ᵁ U ⊓ f ⁻¹ᵁ V`, which is the shape overlaps
+take in a gluing argument. -/
+theorem eq_one_of_pullback_eq_one' (hp : UniversallyOConnected p) {z : T ⟶ pullback p g}
+    (hz : z ≫ pullback.snd p g = 𝟙 T) (U : T.Opens) (V : (pullback p g).Opens)
+    (hV : V = pullback.snd p g ⁻¹ᵁ U) (e : U ≤ z ⁻¹ᵁ V)
+    {w : Γ(pullback p g, V)} (h : (z.appLE V U e).hom w = 1) : w = 1 := by
+  subst hV
+  exact eq_one_of_pullback_eq_one g hp hz U e h
+
 /-- Units on `X ×_S T` over `f ⁻¹ᵁ U` are exactly units pulled back from `U`. -/
 noncomputable def unitsEquiv (hp : UniversallyOConnected p) (U : T.Opens) :
     Γ(T, U)ˣ ≃* Γ(pullback p g, pullback.snd p g ⁻¹ᵁ U)ˣ :=

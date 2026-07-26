@@ -1,15 +1,16 @@
-FOCUS: Gap A. (DESCENT, module form) DONE — Picard/GlueTrivialization.lean:
-  globalSectionHom / globalSectionHom_app(_one)
-  exists_globalSection_restrict        (sheaf axiom, via TopCat.Sheaf.existsUnique_gluing)
-  nonempty_unitObj_iso_of_globalSection
-  nonempty_unitObj_iso_of_glue         <-- THE WORKHORSE, axiom-clean
-  (+ isIso_of_bijective_app_on_cover factored out of PicComparison.isIso_of_isIso_restrict)
-NEXT: the ELLIPTIC-CURVE wrapper. Turn nonempty_unitObj_iso_of_glue into:
-  L invertible on E_T, 0^*L trivial, L trivial Zariski-locally on T  =>  L trivial.
-Mechanism: local generating sections s_i on f^-1(U_i); normalize so 0^*s_i = 1; overlaps
-s_i = u_ij s_j with 0^*u_ij = 1 so u_ij = 1 by the PROVED eq_one_of_pullback_eq_one
-(EllipticCurve/SectionRigidity.lean) => hcompat holds. Then the two leaves
-(kappa_add, picMap_mulByHom_kappa_pow) become LOCAL on T, where the Weierstrass line
-function gives (Q)+(Q')-(Q+Q')-(0) = div(line/vertical).
-NOTE the hbij hypothesis is stated as bijectivity of r |-> r . (m i)|_W — supply it from a
-local trivialization iso via Hom.isIso_iff_isIso_app + Hom.app_smul.
+FOCUS: Gap A. RIGIDIFIED DESCENT COMPLETE + AXIOM-CLEAN:
+  Picard/GlueTrivialization.lean : nonempty_unitObj_iso_of_glue (glue sections, sheaf axiom)
+  Picard/RigidDescent.lean       : nonempty_unitObj_iso_of_normalized_glue
+    -- L with generating sections over f^-1(U i) for a cover U of the BASE, whose overlap
+       comparison units restrict to 1 on the zero section, is TRIVIAL.
+The workhorse is done. Both remaining leaves are now LOCAL ON THE BASE.
+NEXT: leaf (i) kappa_add. Plan:
+  A. Identify the difference module D = O(D_Q) (x) O(D_Q') (x) O(D_{Q+Q'})^-1 (x) O(D_0)^-1
+     as an object of (pullback E.pi t).Modules built from PoleSheaf idealModule.
+  B. Locally on T (Weierstrass chart): the line through Q,Q' and the vertical through Q+Q'
+     give an explicit generating section of D (Silverman III.3.5 / HasseWeil
+     Pic0.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv).
+  C. Normalize each local section along the zero section, apply
+     nonempty_unitObj_iso_of_normalized_glue, then push to Pic / picRelProj.
+START WITH A — survey what O(D) as a Modules object looks like: PoleSheaf.idealModule +
+Picard/IdealModule.lean, and how picClass turns it into a Pic element (DivisorClass.lean).
