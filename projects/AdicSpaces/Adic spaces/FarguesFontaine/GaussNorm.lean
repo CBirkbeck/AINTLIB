@@ -408,7 +408,7 @@ theorem mul_gaussValue_le_of_tail {ρ : NNReal} (hρ1 : ρ ≤ 1) {x x' : Ainf p
   rw [heq]
   exact gaussTerm_le_gaussValue p F hρ1 x (k + 1)
 
-private theorem nnreal_mul_max (s a b : NNReal) : s * max a b = max (s * a) (s * b) := by
+theorem nnreal_mul_max (s a b : NNReal) : s * max a b = max (s * a) (s * b) := by
   rcases le_total a b with h | h
   · rw [max_eq_right h, max_eq_right (mul_le_mul_of_nonneg_left h zero_le)]
   · rw [max_eq_left h, max_eq_left (mul_le_mul_of_nonneg_left h zero_le)]

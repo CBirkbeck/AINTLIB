@@ -492,6 +492,202 @@ theorem valuation_teichCoeffF_teichmuller_add_le (a b : F) (j : ℕ) :
   · rw [add_comm]
     exact le_max_of_le_right (valuation_teichCoeffF_teichmuller_add_le_left p F h j)
 
+/-- Boundedness propagates to head-split tails (coordinates shift). -/
+theorem bddAbove_gaussTermF_of_tail {ρ : NNReal} (hρ0 : 0 < ρ) {x x' : WittVector p F}
+    (hcoords : ∀ k, teichCoeffF p F x' k = teichCoeffF p F x (k + 1))
+    (hB : BddAbove (Set.range (gaussTermF p F ρ x))) :
+    BddAbove (Set.range (gaussTermF p F ρ x')) := by
+  obtain ⟨M, hM⟩ := hB
+  refine ⟨M / ρ, ?_⟩
+  rintro y ⟨k, rfl⟩
+  have heq : ρ * gaussTermF p F ρ x' k = gaussTermF p F ρ x (k + 1) := by
+    rw [gaussTermF, gaussTermF, hcoords k, pow_succ]
+    ring
+  have hle : ρ * gaussTermF p F ρ x' k ≤ M := heq.le.trans (hM ⟨k + 1, rfl⟩)
+  rw [le_div_iff₀ hρ0, mul_comm]
+  exact hle
+
+/-- Tail bound (F-version): `ρ·wF(x') ≤ wF(x)` for a head-split tail. -/
+theorem mul_gaussValueF_le_of_tail {ρ : NNReal} {x x' : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F ρ x)))
+    (hcoords : ∀ k, teichCoeffF p F x' k = teichCoeffF p F x (k + 1)) :
+    ρ * gaussValueF p F ρ x' ≤ gaussValueF p F ρ x := by
+  rw [gaussValueF, NNReal.mul_iSup]
+  refine ciSup_le fun k => ?_
+  have heq : ρ * gaussTermF p F ρ x' k = gaussTermF p F ρ x (k + 1) := by
+    rw [gaussTermF, gaussTermF, hcoords k, pow_succ]
+    ring
+  rw [heq]
+  exact gaussTermF_le_gaussValueF p F hB (k + 1)
+
+/-- The Gauss value of a two-Teichmüller sum (F-version). -/
+theorem gaussValueF_teichmuller_add_le {ρ : NNReal} (hρ1 : ρ < 1) (a b : F) :
+    gaussValueF p F ρ (WittVector.teichmuller p a + WittVector.teichmuller p b)
+      ≤ max (perfectoidValuation p F a) (perfectoidValuation p F b) := by
+  rw [gaussValueF]
+  refine ciSup_le fun j => ?_
+  rw [gaussTermF]
+  exact (mul_le_of_le_one_left zero_le (pow_le_one₀ zero_le hρ1.le)).trans
+    (valuation_teichCoeffF_teichmuller_add_le p F a b j)
+
+/-- Boundedness for two-Teichmüller sums. -/
+theorem bddAbove_gaussTermF_teichmuller_add {ρ : NNReal} (hρ1 : ρ < 1) (a b : F) :
+    BddAbove (Set.range (gaussTermF p F ρ
+      (WittVector.teichmuller p a + WittVector.teichmuller p b))) := by
+  refine ⟨max (perfectoidValuation p F a) (perfectoidValuation p F b), ?_⟩
+  rintro y ⟨j, rfl⟩
+  rw [gaussTermF]
+  exact (mul_le_of_le_one_left zero_le (pow_le_one₀ zero_le hρ1.le)).trans
+    (valuation_teichCoeffF_teichmuller_add_le p F a b j)
+
+/-- List head-split (F-version), with boundedness threaded through the pools. -/
+private theorem exists_list_head_splitF {ρ : NNReal} (hρ0 : 0 < ρ) (s B : NNReal)
+    (L : List (WittVector p F))
+    (hL : ∀ w ∈ L, BddAbove (Set.range (gaussTermF p F ρ w)) ∧
+      s * gaussValueF p F ρ w ≤ B) :
+    ∃ (hl : List F) (tl : List (WittVector p F)),
+      L.sum = (hl.map fun h => WittVector.teichmuller p h).sum
+        + (p : WittVector p F) * tl.sum
+      ∧ (∀ h ∈ hl, s * perfectoidValuation p F h ≤ B)
+      ∧ ∀ t ∈ tl, BddAbove (Set.range (gaussTermF p F ρ t)) ∧
+          s * (ρ * gaussValueF p F ρ t) ≤ B := by
+  induction L with
+  | nil => exact ⟨[], [], by simp, by simp, by simp⟩
+  | cons w rest ih =>
+    obtain ⟨hl, tl, hsum, hhl, htl⟩ := ih fun w' hw' => hL w' (by simp [hw'])
+    obtain ⟨w', hw', hw'coords⟩ := exists_head_splitF p F w
+    obtain ⟨hBw, hVw⟩ := hL w (by simp)
+    refine ⟨teichCoeffF p F w 0 :: hl, w' :: tl, ?_, ?_, ?_⟩
+    · rw [List.sum_cons, hsum, List.map_cons, List.sum_cons, List.sum_cons]
+      conv_lhs => rw [hw']
+      ring
+    · intro h hh
+      rcases List.mem_cons.mp hh with rfl | hh'
+      · have hv : perfectoidValuation p F (teichCoeffF p F w 0)
+            ≤ gaussValueF p F ρ w := by
+          have h0 := gaussTermF_le_gaussValueF p F hBw 0
+          rwa [gaussTermF, pow_zero, one_mul] at h0
+        exact le_trans (mul_le_mul_of_nonneg_left hv zero_le) hVw
+      · exact hhl h hh'
+    · intro t ht
+      rcases List.mem_cons.mp ht with rfl | ht'
+      · refine ⟨bddAbove_gaussTermF_of_tail p F hρ0 hw'coords hBw, ?_⟩
+        have htail := mul_gaussValueF_le_of_tail p F hBw hw'coords
+        exact le_trans (mul_le_mul_of_nonneg_left htail zero_le) hVw
+      · exact htl t ht'
+
+/-- Fold of Teichmüller heads (F-version). -/
+private theorem exists_fold_teichmuller_headsF {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (s B : NNReal) (l : List F)
+    (hl : ∀ h ∈ l, s * perfectoidValuation p F h ≤ B) :
+    ∃ (c : F) (P : List (WittVector p F)),
+      (l.map fun h => WittVector.teichmuller p h).sum
+        = WittVector.teichmuller p c + (p : WittVector p F) * P.sum
+      ∧ s * perfectoidValuation p F c ≤ B
+      ∧ ∀ w ∈ P, BddAbove (Set.range (gaussTermF p F ρ w)) ∧
+          s * (ρ * gaussValueF p F ρ w) ≤ B := by
+  induction l with
+  | nil =>
+    refine ⟨0, [], by simp [WittVector.teichmuller_zero], ?_, by simp⟩
+    simp
+  | cons h t ih =>
+    obtain ⟨c, P, hsum, hc, hP⟩ := ih fun h' hh' => hl h' (by simp [hh'])
+    obtain ⟨G', hG', hG'coords⟩ := exists_head_splitF p F
+      (WittVector.teichmuller p h + WittVector.teichmuller p c)
+    have hmax : s * max (perfectoidValuation p F h) (perfectoidValuation p F c) ≤ B := by
+      rw [nnreal_mul_max]
+      exact max_le (hl h (by simp)) hc
+    have hBpair := bddAbove_gaussTermF_teichmuller_add p F hρ1 h c
+    have hpairval := gaussValueF_teichmuller_add_le p F hρ1 h c
+    refine ⟨teichCoeffF p F (WittVector.teichmuller p h + WittVector.teichmuller p c) 0,
+      G' :: P, ?_, ?_, ?_⟩
+    · rw [List.map_cons, List.sum_cons, hsum, List.sum_cons]
+      conv_lhs => rw [show WittVector.teichmuller p h + (WittVector.teichmuller p c
+        + (p : WittVector p F) * P.sum)
+        = (WittVector.teichmuller p h + WittVector.teichmuller p c)
+          + (p : WittVector p F) * P.sum from by ring, hG']
+      ring
+    · refine le_trans (mul_le_mul_of_nonneg_left ?_ zero_le) hmax
+      exact valuation_teichCoeffF_teichmuller_add_le p F h c 0
+    · intro w hw
+      rcases List.mem_cons.mp hw with rfl | hw'
+      · refine ⟨bddAbove_gaussTermF_of_tail p F hρ0 hG'coords hBpair, ?_⟩
+        have h1 := (mul_gaussValueF_le_of_tail p F hBpair hG'coords).trans hpairval
+        exact le_trans (mul_le_mul_of_nonneg_left h1 zero_le) hmax
+      · exact hP w hw'
+
+/-- Level representation (F-version). -/
+private theorem exists_level_repF {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    {x y : WittVector p F}
+    (hBx : BddAbove (Set.range (gaussTermF p F ρ x)))
+    (hBy : BddAbove (Set.range (gaussTermF p F ρ y))) (n : ℕ) :
+    ∃ (b : ℕ → F) (L : List (WittVector p F)),
+      x + y = (∑ i ∈ Finset.range n,
+          WittVector.teichmuller p (b i) * (p : WittVector p F) ^ i)
+        + (p : WittVector p F) ^ n * L.sum
+      ∧ (∀ i < n, ρ ^ i * perfectoidValuation p F (b i)
+          ≤ max (gaussValueF p F ρ x) (gaussValueF p F ρ y))
+      ∧ ∀ w ∈ L, BddAbove (Set.range (gaussTermF p F ρ w)) ∧
+          ρ ^ n * gaussValueF p F ρ w
+            ≤ max (gaussValueF p F ρ x) (gaussValueF p F ρ y) := by
+  induction n with
+  | zero =>
+    refine ⟨fun _ => 0, [x, y], by simp, fun i hi => absurd hi (Nat.not_lt_zero i), ?_⟩
+    intro w hw
+    rw [pow_zero, one_mul]
+    rcases List.mem_cons.mp hw with rfl | hw'
+    · exact ⟨hBx, le_max_left _ _⟩
+    · rcases List.mem_cons.mp hw' with rfl | hw''
+      · exact ⟨hBy, le_max_right _ _⟩
+      · exact absurd hw'' (List.not_mem_nil)
+  | succ n ihn =>
+    obtain ⟨b, L, hrep, hb, hL⟩ := ihn
+    obtain ⟨hl, tl, hsplit, hhl, htl⟩ := exists_list_head_splitF p F hρ0 (ρ ^ n)
+      (max (gaussValueF p F ρ x) (gaussValueF p F ρ y)) L hL
+    obtain ⟨c, P, hfold, hcbound, hPbound⟩ := exists_fold_teichmuller_headsF p F hρ0 hρ1
+      (ρ ^ n) (max (gaussValueF p F ρ x) (gaussValueF p F ρ y)) hl hhl
+    refine ⟨Function.update b n c, P ++ tl, ?_, ?_, ?_⟩
+    · have hpre : (∑ i ∈ Finset.range (n + 1),
+          WittVector.teichmuller p (Function.update b n c i) * (p : WittVector p F) ^ i)
+          = (∑ i ∈ Finset.range n,
+              WittVector.teichmuller p (b i) * (p : WittVector p F) ^ i)
+            + WittVector.teichmuller p c * (p : WittVector p F) ^ n := by
+        rw [Finset.sum_range_succ]
+        refine congrArg₂ (· + ·) (Finset.sum_congr rfl fun i hi => ?_) ?_
+        · rw [Function.update_of_ne (Finset.mem_range.mp hi).ne]
+        · rw [Function.update_self]
+      rw [hpre, List.sum_append]
+      conv_lhs => rw [hrep]
+      rw [hsplit, hfold]
+      ring
+    · intro i hi
+      rcases Nat.lt_succ_iff_lt_or_eq.mp hi with hi' | rfl
+      · rw [Function.update_of_ne hi'.ne]
+        exact hb i hi'
+      · rw [Function.update_self]
+        exact hcbound
+    · intro w hw
+      rcases List.mem_append.mp hw with hw' | hw'
+      · obtain ⟨hBw, hVw⟩ := hPbound w hw'
+        exact ⟨hBw, by rw [pow_succ, mul_assoc]; exact hVw⟩
+      · obtain ⟨hBw, hVw⟩ := htl w hw'
+        exact ⟨hBw, by rw [pow_succ, mul_assoc]; exact hVw⟩
+
+/-- **Ultrametric inequality over `W(F)`** (boundedness-threaded). -/
+theorem gaussValueF_add_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    {x y : WittVector p F}
+    (hBx : BddAbove (Set.range (gaussTermF p F ρ x)))
+    (hBy : BddAbove (Set.range (gaussTermF p F ρ y))) :
+    gaussValueF p F ρ (x + y)
+      ≤ max (gaussValueF p F ρ x) (gaussValueF p F ρ y) := by
+  rw [gaussValueF]
+  refine ciSup_le fun j => ?_
+  obtain ⟨b, L, hrep, hb, -⟩ := exists_level_repF p F hρ0 hρ1 hBx hBy (j + 1)
+  have hcoeff : teichCoeffF p F (x + y) j = b j := by
+    rw [hrep, teichCoeffF_sum_range_add p F (N := j + 1) b _ (Nat.lt_succ_self j)]
+  rw [gaussTermF, hcoeff]
+  exact hb j (Nat.lt_succ_self j)
+
 end FarguesFontaine
 
 end
