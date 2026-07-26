@@ -1744,6 +1744,155 @@ theorem gaussTerm_sub_convF_divStep_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ 
       exact hbound
     exact le_of_mul_le_mul_right hfinal hvxpos
 
+/-- **The descent step of Kedlaya Lemma 2.8**: one division step pushes every
+coordinate term from index `N` on below the threshold `c` — including index `N`
+itself, which drives the strict descent of the top `ε`-index. -/
+theorem descent_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) {ε c : NNReal} {N : ℕ}
+    (hρε : ρ ≤ ε)
+    (hεx : ∀ j, degAr p F ϖ hρ0 hρ1 x < j
+      → ρ ^ j * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x j)
+        ≤ ε * Valued.v x)
+    (hw1 : ε * Valued.v y ≤ c)
+    (hmN : degAr p F ϖ hρ0 hρ1 x ≤ N)
+    (hw2 : ∀ n, N < n → ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 y n) ≤ c) :
+    ∀ n, N ≤ n → ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1
+      (y - divStep p F ϖ hρ0 hρ1 x y * x) n) ≤ c := by
+  intro n hn
+  set m := degAr p F ϖ hρ0 hρ1 x with hm
+  set z := divStep p F ϖ hρ0 hρ1 x y with hz
+  set zc : ℕ → F := fun k => teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+    / teichCoeffAr p F ϖ hρ0 hρ1 x m with hzc
+  have hzcdec := tendsto_div_shift p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) hy m
+    (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+  have hzmem : z ∈ ArSub p F ϖ hρ0 hρ1 := divStep_mem p F ϖ hx hy
+  have hzxmem : z * x ∈ ArSub p F ϖ hρ0 hρ1 := mul_mem hzmem hx
+  have hyzxmem : y - z * x ∈ ArSub p F ϖ hρ0 hρ1 := sub_mem hy hzxmem
+  have hfun : teichCoeffAr p F ϖ hρ0 hρ1 z = zc :=
+    funext fun k => teichCoeffAr_PhiHatK p F ϖ hρ0 hρ1 hzcdec k
+  have hxdec := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
+  have hydec := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
+  have hcseqdec : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F
+      (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x) k)) Filter.atTop (nhds 0) :=
+    tendsto_convF p F hzcdec hxdec
+  have hΦcmem := PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 hcseqdec
+  have hΦccoords : ∀ k, teichCoeffAr p F ϖ hρ0 hρ1
+      (PhiHatK p F ϖ hρ0 hρ1 (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x))) k
+      = convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x) k :=
+    fun k => teichCoeffAr_PhiHatK p F ϖ hρ0 hρ1 hcseqdec k
+  -- value ladders
+  have hvzvx : Valued.v z * Valued.v x ≤ Valued.v y :=
+    valued_divStep_le p F ϖ hx hy hx0
+  have hchainc : ρ * (Valued.v z * Valued.v x) ≤ c :=
+    le_trans (mul_le_mul_of_nonneg_left hvzvx zero_le)
+      (le_trans (mul_le_mul_of_nonneg_right hρε zero_le) hw1)
+  have hρvyc : ρ * Valued.v y ≤ c :=
+    le_trans (mul_le_mul_of_nonneg_right hρε zero_le) hw1
+  -- the E-error
+  have hE := valued_mul_sub_PhiHatK_convF_le p F ϖ hzmem hx
+  rw [hfun] at hE
+  have hEc : Valued.v (z * x - PhiHatK p F ϖ hρ0 hρ1
+      (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x))) ≤ c := le_trans hE hchainc
+  -- value of Φc
+  have hzterms : ∀ k, ρ ^ k * perfectoidValuation p F (zc k) ≤ Valued.v z := by
+    intro k
+    have h1 := gaussTerm_teichCoeffAr_le' p F ϖ hzmem k
+    rwa [hfun] at h1
+  have hxterms : ∀ k, ρ ^ k * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 x k) ≤ Valued.v x :=
+    fun k => gaussTerm_teichCoeffAr_le' p F ϖ hx k
+  have hvΦc : Valued.v (PhiHatK p F ϖ hρ0 hρ1
+      (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x))) ≤ Valued.v y := by
+    rw [valued_PhiHatK p F ϖ hρ0 hρ1 hcseqdec]
+    refine le_trans (ciSup_le fun k =>
+      gaussTerm_convF_le p F zc _ hzterms hxterms k) hvzvx
+  -- piece 1: (y − Φc) vs Φ of the pointwise difference
+  set w : ℕ → F := fun k => teichCoeffAr p F ϖ hρ0 hρ1 y k
+    - convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x) k with hw
+  have hP1 := valued_sub_sub_PhiHatK_le p F ϖ hy hΦcmem
+  have hfun2 : (fun k => teichCoeffAr p F ϖ hρ0 hρ1 y k
+      - teichCoeffAr p F ϖ hρ0 hρ1
+        (PhiHatK p F ϖ hρ0 hρ1 (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x))) k)
+      = w := by
+    funext k
+    rw [hw, hΦccoords k]
+  rw [hfun2] at hP1
+  have hP1c : Valued.v ((y - PhiHatK p F ϖ hρ0 hρ1
+      (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x)))
+      - PhiHatK p F ϖ hρ0 hρ1 w) ≤ c := by
+    refine le_trans hP1 (le_trans ?_ hρvyc)
+    exact mul_le_mul_of_nonneg_left (max_le le_rfl hvΦc) zero_le
+  -- w decays and Φw is admissible
+  have hwdec : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (w k))
+      Filter.atTop (nhds 0) := by
+    have hbound : ∀ k, ρ ^ k * perfectoidValuation p F (w k)
+        ≤ max (ρ ^ k * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y k))
+          (ρ ^ k * perfectoidValuation p F
+            (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x) k)) := by
+      intro k
+      refine le_trans (mul_le_mul_of_nonneg_left
+        (Valuation.map_sub (perfectoidValuation p F) _ _) zero_le) ?_
+      exact (nnreal_mul_max _ _ _).le
+    have hmax' : Filter.Tendsto (fun k => max
+        (ρ ^ k * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y k))
+        (ρ ^ k * perfectoidValuation p F
+          (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x) k)))
+        Filter.atTop (nhds 0) := by
+      simpa using hydec.max hcseqdec
+    exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hmax'
+      (fun k => zero_le) hbound
+  have hΦwmem := PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 hwdec
+  have hΦwcoords : ∀ k, teichCoeffAr p F ϖ hρ0 hρ1
+      (PhiHatK p F ϖ hρ0 hρ1 w) k = w k :=
+    fun k => teichCoeffAr_PhiHatK p F ϖ hρ0 hρ1 hwdec k
+  have hvΦw : Valued.v (PhiHatK p F ϖ hρ0 hρ1 w) ≤ Valued.v y := by
+    rw [valued_PhiHatK p F ϖ hρ0 hρ1 hwdec]
+    refine ciSup_le fun k => ?_
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (Valuation.map_sub (perfectoidValuation p F) _ _) zero_le) ?_
+    refine le_trans (nnreal_mul_max _ _ _).le (max_le ?_ ?_)
+    · exact gaussTerm_teichCoeffAr_le' p F ϖ hy k
+    · exact le_trans (gaussTerm_convF_le p F zc _ hzterms hxterms k) hvzvx
+  -- v((y − zx) − Φw) ≤ c
+  have hkey : Valued.v ((y - z * x) - PhiHatK p F ϖ hρ0 hρ1 w) ≤ c := by
+    have hsplit : (y - z * x) - PhiHatK p F ϖ hρ0 hρ1 w
+        = ((y - PhiHatK p F ϖ hρ0 hρ1
+            (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x)))
+          - PhiHatK p F ϖ hρ0 hρ1 w)
+          + (PhiHatK p F ϖ hρ0 hρ1 (convF F zc (teichCoeffAr p F ϖ hρ0 hρ1 x))
+            - z * x) := by
+      ring
+    rw [hsplit]
+    refine le_trans (Valuation.map_add _ _ _) (max_le hP1c ?_)
+    rw [Valuation.map_sub_swap]
+    exact hEc
+  -- DC⁺ transfer to the coordinates of y − zx
+  have hDC := digit_sub_le p F ϖ hyzxmem hΦwmem n
+  have hDCc : ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 (y - z * x) n
+        - teichCoeffAr p F ϖ hρ0 hρ1 (PhiHatK p F ϖ hρ0 hρ1 w) n) ≤ c := by
+    refine le_trans hDC (max_le hkey ?_)
+    refine le_trans ?_ hρvyc
+    refine mul_le_mul_of_nonneg_left (max_le ?_ hvΦw) zero_le
+    exact valued_sub_divStep_mul_le p F ϖ hx hy hx0
+  -- R3 bounds the Φw coordinate itself
+  have hR3 := gaussTerm_sub_convF_divStep_le p F ϖ hx hy hx0
+    (ε := ε) (c := c) (N := N) hεx hw1 hmN hw2 n hn
+  -- assemble
+  have hsplit2 : teichCoeffAr p F ϖ hρ0 hρ1 (y - z * x) n
+      = (teichCoeffAr p F ϖ hρ0 hρ1 (y - z * x) n
+          - teichCoeffAr p F ϖ hρ0 hρ1 (PhiHatK p F ϖ hρ0 hρ1 w) n)
+        + w n := by
+    rw [hΦwcoords n]
+    ring
+  rw [hsplit2]
+  refine le_trans (mul_le_mul_of_nonneg_left
+    (Valuation.map_add (perfectoidValuation p F) _ _) zero_le) ?_
+  refine le_trans (nnreal_mul_max _ _ _).le (max_le hDCc ?_)
+  exact hR3
+
 end FarguesFontaine
 
 end
