@@ -839,4 +839,15 @@ theorem galoisFunctionFieldEquiv_algebraMap {L : Type v} [Field L] [Algebra k L]
     rfl
   exact key _ (map_algEquiv_baseChange_eq W σ)
 
+/-- **(M1b-3b-x, helper)** `div(f/g) = div f − div g` for nonzero `f, g` (HasseWeil has
+the `mul` and `inv` forms but not the quotient one). -/
+theorem projectiveDivisorOf_div {F : Type v} [Field F] [DecidableEq F]
+    {C : HasseWeil.Curves.SmoothPlaneCurve F} [C.toAffine.IsElliptic]
+    [IsIntegrallyClosed C.CoordinateRing]
+    {f g : C.FunctionField} (hf : f ≠ 0) (hg : g ≠ 0) :
+    C.projectiveDivisorOf (f / g) = C.projectiveDivisorOf f - C.projectiveDivisorOf g := by
+  rw [div_eq_mul_inv, HasseWeil.Curves.SmoothPlaneCurve.projectiveDivisorOf_mul hf
+      (inv_ne_zero hg),
+    HasseWeil.Curves.SmoothPlaneCurve.projectiveDivisorOf_inv hg, sub_eq_add_neg]
+
 end ModularCurves
