@@ -1112,6 +1112,57 @@ theorem gaussValueF_finset_sum_le {ι : Type*} {ρ : NNReal} (hρ0 : 0 < ρ) (h�
     · exact bddAbove_gaussTermF_add p F hρ0 hρ1 haB ihB
     · exact (gaussValueF_add_le p F hρ0 hρ1 haB ihB).trans (max_le hav ihv)
 
+/-- Iterated head split (F-version): `x = (length-n prefix of its coordinates) + pⁿ·X`
+with `X` carrying the shifted coordinates. -/
+theorem exists_iter_splitF (x : WittVector p F) (n : ℕ) :
+    ∃ X : WittVector p F, x = (∑ i ∈ Finset.range n,
+      WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i) +
+      (p : WittVector p F) ^ n * X
+      ∧ ∀ k, teichCoeffF p F X k = teichCoeffF p F x (n + k) := by
+  obtain ⟨X, hX⟩ := exists_eq_sum_teichCoeffF_add p F x n
+  refine ⟨X, hX, fun k => ?_⟩
+  have h2 : x = (∑ i ∈ Finset.range (n + (k + 1)),
+      WittVector.teichmuller p
+        (if h : i < n then teichCoeffF p F x i else teichCoeffF p F X (i - n)) *
+      (p : WittVector p F) ^ i) + (p : WittVector p F) ^ (n + (k + 1)) *
+      (exists_eq_sum_teichCoeffF_add p F X (k + 1)).choose := by
+    obtain hXk := (exists_eq_sum_teichCoeffF_add p F X (k + 1)).choose_spec
+    set W := (exists_eq_sum_teichCoeffF_add p F X (k + 1)).choose
+    have hbig : (∑ i ∈ Finset.range (n + (k + 1)),
+        WittVector.teichmuller p
+          (if h : i < n then teichCoeffF p F x i else teichCoeffF p F X (i - n)) *
+        (p : WittVector p F) ^ i)
+        = (∑ i ∈ Finset.range n,
+            WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
+          + (p : WittVector p F) ^ n * (∑ i ∈ Finset.range (k + 1),
+            WittVector.teichmuller p (teichCoeffF p F X i) * (p : WittVector p F) ^ i) := by
+      rw [Finset.sum_range_add, Finset.mul_sum]
+      refine congrArg₂ (· + ·) (Finset.sum_congr rfl fun i hi => ?_)
+        (Finset.sum_congr rfl fun i _ => ?_)
+      · rw [dif_pos (Finset.mem_range.mp hi)]
+      · rw [dif_neg (by omega)]
+        have harith : n + i - n = i := by omega
+        rw [harith, pow_add]
+        ring
+    rw [hbig]
+    conv_lhs => rw [hX]
+    conv_lhs => rw [show X = (∑ i ∈ Finset.range (k + 1),
+      WittVector.teichmuller p (teichCoeffF p F X i) * (p : WittVector p F) ^ i) +
+      (p : WittVector p F) ^ (k + 1) * W from hXk]
+    rw [pow_add]
+    ring
+  have hj := teichCoeffF_sum_range_add p F (N := n + (k + 1))
+    (fun i => if h : i < n then teichCoeffF p F x i else teichCoeffF p F X (i - n))
+    ((exists_eq_sum_teichCoeffF_add p F X (k + 1)).choose) (j := n + k) (by omega)
+  rw [← h2] at hj
+  have hred : (if h : n + k < n then teichCoeffF p F x (n + k)
+      else teichCoeffF p F X (n + k - n)) = teichCoeffF p F X k := by
+    rw [dif_neg (by omega)]
+    congr 1
+    omega
+  rw [hj]
+  simp only [hred]
+
 end FarguesFontaine
 
 end
