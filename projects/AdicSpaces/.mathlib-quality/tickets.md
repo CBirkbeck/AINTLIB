@@ -861,7 +861,9 @@ non-Tate bases are supported.
   `N-i ≥ b+1`); `I^M` is open (adic) and a subset of an ideal makes it open.
 
 ### [ID1c] The window is the rational subset
-- **Status**: open | **Parent**: PLAN-GATE-2 | **Type**: theorem
+- **Status**: done (2026-07-26, beastmode) — `mem_rationalOpen_chartData_iff`
+  (raw-exponent two-sided window) + `windowU_zero_eq_rationalOpen` /
+  `windowV_zero_eq_rationalOpen` (both charts as explicit rational subsets) | **Parent**: PLAN-GATE-2 | **Type**: theorem
 - **Statement**: `windowU 0 = Y ∩ (Spa-trace of rationalOpens T_U s_U)` (and V).
 - **Sketch**: unfold `KGE 1`/`KLE c`/`rationalOpens`; cancellation of `v([ϖ])^b`
   and `v(p)` via the `pow_le_pow_iff_cross` tools in YSpace; the `v(s) ≠ 0`

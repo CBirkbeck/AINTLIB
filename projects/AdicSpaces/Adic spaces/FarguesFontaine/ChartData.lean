@@ -290,6 +290,160 @@ theorem isRational_chartData (u v a b : ℕ) :
   exact AddSubgroup.isOpen_of_mem_nhds _
     (Filter.mem_of_superset (hIopen.mem_nhds (zero_mem _)) hsub)
 
+/-- **The chart datum presents the two-sided window** (raw-exponent form): a
+valuation lies in `R({p^{a₁+a₂}, [ϖ]^{b₁+b₂}}/p^{a₁}[ϖ]^{b₂})` iff it lies in `𝒴`
+with `v([ϖ])^{b₁} ≤ v(p)^{a₁}` (κ ≥ a₁/b₁) and `v(p)^{a₂} ≤ v([ϖ])^{b₂}`
+(κ ≤ a₂/b₂). -/
+theorem mem_rationalOpen_chartData_iff (a₁ b₁ a₂ b₂ : ℕ)
+    (ha₁ : 0 < a₁) (hb₁ : 0 < b₁) (ha₂ : 0 < a₂) (hb₂ : 0 < b₂)
+    (v : Spv (Ainf p F)) :
+    v ∈ rationalOpen (chartT p F ϖ (a₁ + a₂ - 1) (b₁ + b₂ - 1))
+        (chartS p F ϖ a₁ b₂)
+      ↔ v ∈ Y p F ϖ
+          ∧ v.vle (teichPi p F ϖ ^ b₁) ((p : Ainf p F) ^ a₁)
+          ∧ v.vle ((p : Ainf p F) ^ a₂) (teichPi p F ϖ ^ b₂) := by
+  letI : ValuativeRel (Ainf p F) := v.toValuativeRel
+  have hbridge : ∀ s t : Ainf p F, v.vle s t ↔
+      ValuativeRel.valuation (Ainf p F) s ≤ ValuativeRel.valuation (Ainf p F) t :=
+    fun s t => (ValuativeRel.valuation (Ainf p F)).vle_iff_le
+  set w := ValuativeRel.valuation (Ainf p F) with hw
+  have hexpa : (a₁ + a₂ - 1) + 1 = a₁ + a₂ := by omega
+  have hexpb : (b₁ + b₂ - 1) + 1 = b₁ + b₂ := by omega
+  constructor
+  · rintro ⟨hspa, hT, hs⟩
+    have h1 : v.vle ((p : Ainf p F) ^ ((a₁ + a₂ - 1) + 1))
+        (chartS p F ϖ a₁ b₂) := hT _ (by rw [chartT]; simp)
+    have h2 : v.vle (teichPi p F ϖ ^ ((b₁ + b₂ - 1) + 1))
+        (chartS p F ϖ a₁ b₂) := hT _ (by rw [chartT]; simp)
+    rw [hexpa] at h1
+    rw [hexpb] at h2
+    have hsval : w (chartS p F ϖ a₁ b₂) ≠ 0 := by
+      intro h0
+      refine hs ?_
+      rw [hbridge, map_zero, h0]
+    have hpϖ : w ((p : Ainf p F)) ≠ 0 ∧ w (teichPi p F ϖ) ≠ 0 := by
+      rw [chartS, map_mul, map_pow, map_pow] at hsval
+      constructor
+      · intro h
+        exact hsval (by rw [h, zero_pow ha₁.ne', zero_mul])
+      · intro h
+        exact hsval (by rw [h, zero_pow hb₂.ne', mul_zero])
+    have hY2 : ¬ v.vle ((p : Ainf p F) * teichPi p F ϖ) 0 := by
+      rw [hbridge, map_mul, map_zero]
+      intro hle
+      rcases mul_eq_zero.mp (le_zero_iff.mp hle) with h | h
+      · exact hpϖ.1 h
+      · exact hpϖ.2 h
+    have hc1 : v.vle (teichPi p F ϖ ^ b₁) ((p : Ainf p F) ^ a₁) := by
+      rw [hbridge, map_pow, map_pow]
+      rw [hbridge, chartS, map_mul, map_pow, map_pow, map_pow] at h2
+      rw [pow_add] at h2
+      have hcinv := mul_le_mul_right h2 ((w (teichPi p F ϖ) ^ b₂)⁻¹)
+      rwa [mul_comm (w (teichPi p F ϖ) ^ b₁) (w (teichPi p F ϖ) ^ b₂),
+        mul_comm (w ((p : Ainf p F)) ^ a₁) (w (teichPi p F ϖ) ^ b₂),
+        ← mul_assoc, ← mul_assoc, inv_mul_cancel₀ (pow_ne_zero _ hpϖ.2),
+        one_mul, one_mul] at hcinv
+    have hc2 : v.vle ((p : Ainf p F) ^ a₂) (teichPi p F ϖ ^ b₂) := by
+      rw [hbridge, map_pow, map_pow]
+      rw [hbridge, chartS, map_mul, map_pow, map_pow, map_pow] at h1
+      rw [pow_add] at h1
+      have h1' : w ((p : Ainf p F)) ^ a₁ * w ((p : Ainf p F)) ^ a₂
+          ≤ w ((p : Ainf p F)) ^ a₁ * w (teichPi p F ϖ) ^ b₂ := h1
+      have hcinv := mul_le_mul_left h1' ((w ((p : Ainf p F)) ^ a₁)⁻¹)
+      rwa [mul_comm (w ((p : Ainf p F)) ^ a₁) (w ((p : Ainf p F)) ^ a₂),
+        mul_comm (w ((p : Ainf p F)) ^ a₁) (w (teichPi p F ϖ) ^ b₂),
+        mul_assoc, mul_assoc, mul_inv_cancel₀ (pow_ne_zero _ hpϖ.1),
+        mul_one, mul_one] at hcinv
+    exact ⟨⟨hspa, hY2⟩, hc1, hc2⟩
+  · rintro ⟨⟨hspa, hY2⟩, hc1, hc2⟩
+    have hpϖ : w ((p : Ainf p F)) ≠ 0 ∧ w (teichPi p F ϖ) ≠ 0 := by
+      constructor
+      · intro h
+        refine hY2 ?_
+        rw [hbridge, map_mul, map_zero, h, zero_mul]
+      · intro h
+        refine hY2 ?_
+        rw [hbridge, map_mul, map_zero, h, mul_zero]
+    refine ⟨hspa, ?_, ?_⟩
+    · intro t ht
+      rw [chartT] at ht
+      rcases Finset.mem_insert.mp ht with rfl | ht'
+      · -- t = p^{(a₁+a₂-1)+1}
+        rw [hbridge, hexpa, map_pow, chartS, map_mul, map_pow, map_pow, pow_add]
+        rw [hbridge, map_pow, map_pow] at hc2
+        exact mul_le_mul' le_rfl hc2
+      · -- t = [ϖ]^{(b₁+b₂-1)+1}
+        rw [Finset.mem_singleton.mp ht']
+        rw [hbridge, hexpb, map_pow, chartS, map_mul, map_pow, map_pow, pow_add]
+        rw [hbridge, map_pow, map_pow] at hc1
+        exact mul_le_mul' hc1 le_rfl
+    · intro hle
+      rw [hbridge, map_zero, chartS, map_mul, map_pow, map_pow] at hle
+      rcases mul_eq_zero.mp (le_zero_iff.mp hle) with h | h
+      · exact hpϖ.1 (pow_eq_zero_iff ha₁.ne' |>.mp h)
+      · exact hpϖ.2 (pow_eq_zero_iff hb₂.ne' |>.mp h)
+
+/-- **The chart `U₀` is a rational subset**: the window `κ ∈ [1, c]`
+(`c = (p+1)/2`) is `R({p^{p+2}, [ϖ]³} / p·[ϖ]²)`. -/
+theorem windowU_zero_eq_rationalOpen (hp : 1 < p) :
+    windowU p F ϖ 0
+      = rationalOpen (chartT p F ϖ (1 + (p + 1) - 1) (1 + 2 - 1))
+          (chartS p F ϖ 1 2) := by
+  ext v
+  rw [mem_rationalOpen_chartData_iff p F ϖ 1 1 (p + 1) 2 one_pos one_pos
+    (by omega) (by norm_num)]
+  rw [windowU, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hY, hKGE, hKLE⟩
+    refine ⟨hY, ?_, ?_⟩
+    · have h := (KGE_iff hY (q := (p : ℚ) ^ (0 : ℤ)) (by simp)
+        (a := 1) (b := 1) one_pos (by simp)).mp hKGE
+      simpa using h
+    · have h := (KLE_iff hY (q := cFF p * (p : ℚ) ^ (0 : ℤ))
+        (by simp; exact lt_trans one_pos (one_lt_cFF hp))
+        (a := p + 1) (b := 2) (by norm_num)
+        (by rw [zpow_zero, mul_one, cFF]; push_cast; ring)).mp hKLE
+      exact h
+  · rintro ⟨hY, h1, h2⟩
+    refine ⟨hY, ?_, ?_⟩
+    · refine (KGE_iff hY (q := (p : ℚ) ^ (0 : ℤ)) (by simp)
+        (a := 1) (b := 1) one_pos (by simp)).mpr ?_
+      simpa using h1
+    · exact (KLE_iff hY (q := cFF p * (p : ℚ) ^ (0 : ℤ))
+        (by simp; exact lt_trans one_pos (one_lt_cFF hp))
+        (a := p + 1) (b := 2) (by norm_num)
+        (by rw [zpow_zero, mul_one, cFF]; push_cast; ring)).mpr h2
+
+/-- **The chart `V₀` is a rational subset**: the window `κ ∈ [c, p]` is
+`R({p^{2p+1}, [ϖ]³} / p^{p+1}·[ϖ])`. -/
+theorem windowV_zero_eq_rationalOpen (hp : 1 < p) :
+    windowV p F ϖ 0
+      = rationalOpen (chartT p F ϖ ((p + 1) + p - 1) (2 + 1 - 1))
+          (chartS p F ϖ (p + 1) 1) := by
+  ext v
+  rw [mem_rationalOpen_chartData_iff p F ϖ (p + 1) 2 p 1 (by omega) (by norm_num)
+    (by omega) one_pos]
+  rw [windowV, Set.mem_setOf_eq]
+  constructor
+  · rintro ⟨hY, hKGE, hKLE⟩
+    refine ⟨hY, ?_, ?_⟩
+    · exact (KGE_iff hY (q := cFF p * (p : ℚ) ^ (0 : ℤ))
+        (by simp; exact lt_trans one_pos (one_lt_cFF hp))
+        (a := p + 1) (b := 2) (by norm_num)
+        (by rw [zpow_zero, mul_one, cFF]; push_cast; ring)).mp hKGE
+    · have h := (KLE_iff hY (q := (p : ℚ) ^ ((0 : ℤ) + 1))
+        (by simp; omega) (a := p) (b := 1) (by omega) (by simp)).mp hKLE
+      simpa using h
+  · rintro ⟨hY, h1, h2⟩
+    refine ⟨hY, ?_, ?_⟩
+    · exact (KGE_iff hY (q := cFF p * (p : ℚ) ^ (0 : ℤ))
+        (by simp; exact lt_trans one_pos (one_lt_cFF hp))
+        (a := p + 1) (b := 2) (by norm_num)
+        (by rw [zpow_zero, mul_one, cFF]; push_cast; ring)).mpr h1
+    · refine (KLE_iff hY (q := (p : ℚ) ^ ((0 : ℤ) + 1))
+        (by simp; omega) (a := p) (b := 1) (by omega) (by simp)).mpr ?_
+      simpa using h2
+
 end FarguesFontaine
 
 end
