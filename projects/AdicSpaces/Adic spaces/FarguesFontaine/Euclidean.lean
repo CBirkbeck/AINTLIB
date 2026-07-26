@@ -537,6 +537,183 @@ theorem tendsto_convF {ρ : NNReal} {a b : ℕ → F}
         Finset.le_sup (f := fun i => (ρ ^ i * perfectoidValuation p F (a i))
           * (ρ ^ (n - i) * perfectoidValuation p F (b (n - i)))) hi₀mem
 
+/-- Vanishing `NNReal` sequences have bounded range. -/
+theorem bddAbove_range_of_tendsto_zero {f : ℕ → NNReal}
+    (hf : Filter.Tendsto f Filter.atTop (nhds 0)) :
+    BddAbove (Set.range f) := by
+  obtain ⟨K₀, hK₀⟩ := Filter.eventually_atTop.mp (hf.eventually_lt_const one_pos)
+  refine ⟨max 1 ((Finset.range (K₀ + 1)).sup f), ?_⟩
+  rintro s ⟨n, rfl⟩
+  rcases lt_or_ge n (K₀ + 1) with hn | hn
+  · exact le_max_of_le_right (Finset.le_sup (Finset.mem_range.mpr hn))
+  · exact le_max_of_le_left (hK₀ n (by omega)).le
+
+/-- Total form of the `A^r` term bound (no nonvanishing hypothesis). -/
+theorem gaussTerm_teichCoeffAr_le' {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (n : ℕ) :
+    ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+      ≤ Valued.v x := by
+  rcases eq_or_ne (Valued.v x) 0 with h0 | h0
+  · have hx0 : x = 0 := (Valuation.zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mp h0
+    rw [hx0, teichCoeffAr_zero, Valuation.map_zero, mul_zero]
+    exact zero_le
+  · exact gaussTerm_teichCoeffAr_le p F ϖ hx h0 n
+
+/-- **Digit comparison (DC⁺)**: coordinate differences on `A^r` are controlled by
+the value of the difference plus one `ρ`-damped term. The engine of Kedlaya's
+Remark 2.7 at a single radius. -/
+theorem digit_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (n : ℕ) :
+    ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+        - teichCoeffAr p F ϖ hρ0 hρ1 y n)
+      ≤ max (Valued.v (x - y)) (ρ * max (Valued.v x) (Valued.v y)) := by
+  set a : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 x with ha
+  set b : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 y with hb
+  set e : ℕ → F := fun k => a k - b k with he
+  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
+  rw [← ha] at hdx
+  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
+  rw [← hb] at hdy
+  have hde : Filter.Tendsto (fun k => ρ ^ k * perfectoidValuation p F (e k))
+      Filter.atTop (nhds 0) := by
+    have hbound : ∀ k, ρ ^ k * perfectoidValuation p F (e k)
+        ≤ max (ρ ^ k * perfectoidValuation p F (a k))
+            (ρ ^ k * perfectoidValuation p F (b k)) := by
+      intro k
+      refine le_trans (mul_le_mul_of_nonneg_left
+        (Valuation.map_sub (perfectoidValuation p F) (a k) (b k)) zero_le) ?_
+      exact (nnreal_mul_max _ _ _).le
+    have hmax := hdx.max hdy
+    have hmax' : Filter.Tendsto (fun k => max
+        (ρ ^ k * perfectoidValuation p F (a k))
+        (ρ ^ k * perfectoidValuation p F (b k))) Filter.atTop (nhds 0) := by
+      simpa using hmax
+    exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hmax'
+      (fun k => zero_le) hbound
+  set M := max (Valued.v x) (Valued.v y) with hM
+  have hΦe := valued_PhiHatK p F ϖ hρ0 hρ1 hde
+  have hrx : PhiHatK p F ϖ hρ0 hρ1 a = x := by
+    rw [ha]
+    exact PhiHatK_teichCoeffAr p F ϖ hx
+  have hry : PhiHatK p F ϖ hρ0 hρ1 b = y := by
+    rw [hb]
+    exact PhiHatK_teichCoeffAr p F ϖ hy
+  have hSx : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
+      (prefixAloc p F ϖ a N)) Filter.atTop (nhds x) := by
+    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdx
+    rwa [hrx] at h1
+  have hSy : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
+      (prefixAloc p F ϖ b N)) Filter.atTop (nhds y) := by
+    have h1 := tendsto_PhiHatK p F ϖ hρ0 hρ1 hdy
+    rwa [hry] at h1
+  have hSe := tendsto_PhiHatK p F ϖ hρ0 hρ1 hde
+  have hPNval : ∀ N : ℕ, Valued.v (AlocToHatK p F ϖ hρ0 hρ1
+      (prefixAloc p F ϖ a N - prefixAloc p F ϖ b N - prefixAloc p F ϖ e N))
+      ≤ ρ * M := by
+    intro N
+    rw [valued_AlocToHatK, ← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_sub,
+      map_sub, alocToWittF_prefixAloc, alocToWittF_prefixAloc,
+      alocToWittF_prefixAloc]
+    have hdistrib : (∑ k ∈ Finset.range N,
+          WittVector.teichmuller p (a k) * (p : WittVector p F) ^ k)
+        - (∑ k ∈ Finset.range N,
+          WittVector.teichmuller p (b k) * (p : WittVector p F) ^ k)
+        - (∑ k ∈ Finset.range N,
+          WittVector.teichmuller p (e k) * (p : WittVector p F) ^ k)
+        = ∑ k ∈ Finset.range N, (p : WittVector p F) ^ k
+          * (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
+            - WittVector.teichmuller p (a k - b k)) := by
+      rw [← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl fun k _ => ?_
+      have hek : WittVector.teichmuller p (e k)
+          = WittVector.teichmuller p (a k - b k) := rfl
+      rw [hek]
+      ring
+    rw [hdistrib]
+    refine (gaussValueF_finset_sum_le p F hρ0 hρ1 (ρ * M) (Finset.range N)
+      _ fun k _ => ?_).2
+    have hBtriple : BddAbove (Set.range (gaussTermF p F ρ
+        (WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
+          - WittVector.teichmuller p (a k - b k)))) := by
+      have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1
+        (bddAbove_gaussTermF_add p F hρ0 hρ1
+          (bddAbove_gaussTermF_teichmuller p F (a k))
+          (bddAbove_gaussTermF_neg p F hρ0 hρ1
+            (bddAbove_gaussTermF_teichmuller p F (b k))))
+        (bddAbove_gaussTermF_neg p F hρ0 hρ1
+          (bddAbove_gaussTermF_teichmuller p F (a k - b k)))
+      have h2 : WittVector.teichmuller p (a k) + -WittVector.teichmuller p (b k)
+          + -WittVector.teichmuller p (a k - b k)
+          = WittVector.teichmuller p (a k) - WittVector.teichmuller p (b k)
+            - WittVector.teichmuller p (a k - b k) := by
+        ring
+      rwa [h2] at h1
+    refine ⟨bddAbove_gaussTermF_p_pow_mul p F hBtriple k, ?_⟩
+    rw [gaussValueF_p_pow_mul p F hBtriple k]
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (gaussValueF_teichmuller_sub_sub_le p F hρ1.le (a k) (b k)) zero_le) ?_
+    have h3 : ρ ^ k * (ρ * max (perfectoidValuation p F (a k))
+        (perfectoidValuation p F (b k)))
+        = ρ * max (ρ ^ k * perfectoidValuation p F (a k))
+          (ρ ^ k * perfectoidValuation p F (b k)) := by
+      rw [← mul_assoc, mul_comm (ρ ^ k) ρ, mul_assoc, nnreal_mul_max]
+    rw [h3]
+    refine mul_le_mul_of_nonneg_left (max_le ?_ ?_) zero_le
+    · exact le_trans (gaussTerm_teichCoeffAr_le' p F ϖ hx k) (le_max_left _ _)
+    · exact le_trans (gaussTerm_teichCoeffAr_le' p F ϖ hy k) (le_max_right _ _)
+  rcases eq_or_ne M 0 with hM0 | hM0
+  · have hvx : Valued.v x = 0 :=
+      le_antisymm (le_trans (le_max_left _ _) hM0.le) zero_le
+    have hvy : Valued.v y = 0 :=
+      le_antisymm (le_trans (le_max_right _ _) hM0.le) zero_le
+    have hx0 : x = 0 := (Valuation.zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mp hvx
+    have hy0 : y = 0 := (Valuation.zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mp hvy
+    have hgoal : a n - b n = 0 := by
+      rw [ha, hb, hx0, hy0, teichCoeffAr_zero, sub_zero]
+    rw [hgoal, Valuation.map_zero, mul_zero]
+    exact zero_le
+  · have hρM : 0 < ρ * M := mul_pos hρ0 (pos_iff_ne_zero.mpr hM0)
+    have hlim : Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1
+        (prefixAloc p F ϖ a N - prefixAloc p F ϖ b N - prefixAloc p F ϖ e N))
+        Filter.atTop (nhds ((x - y) - PhiHatK p F ϖ hρ0 hρ1 e)) := by
+      have h1 := (hSx.sub hSy).sub hSe
+      refine h1.congr fun N => ?_
+      rw [map_sub, map_sub]
+    have hH : Valued.v ((x - y) - PhiHatK p F ϖ hρ0 hρ1 e) ≤ ρ * M := by
+      obtain ⟨N₀, hN₀⟩ := (eventually_valued_sub_le_of_tendsto p F
+        (hρ0 := hρ0) (hρ1 := hρ1) hlim hρM).exists
+      have h2 : (x - y) - PhiHatK p F ϖ hρ0 hρ1 e
+          = (((x - y) - PhiHatK p F ϖ hρ0 hρ1 e)
+              - AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N₀
+                - prefixAloc p F ϖ b N₀ - prefixAloc p F ϖ e N₀))
+            + AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ a N₀
+                - prefixAloc p F ϖ b N₀ - prefixAloc p F ϖ e N₀) := by
+        ring
+      rw [h2]
+      refine le_trans (Valuation.map_add _ _ _) (max_le ?_ (hPNval N₀))
+      rw [Valuation.map_sub_swap]
+      exact hN₀
+    have hΦval : Valued.v (PhiHatK p F ϖ hρ0 hρ1 e)
+        ≤ max (Valued.v (x - y)) (ρ * M) := by
+      have h3 : PhiHatK p F ϖ hρ0 hρ1 e
+          = (x - y) - ((x - y) - PhiHatK p F ϖ hρ0 hρ1 e) := by
+        ring
+      rw [h3]
+      exact le_trans (Valuation.map_sub _ _ _)
+        (max_le (le_max_left _ _) (le_max_of_le_right hH))
+    have hBe := bddAbove_range_of_tendsto_zero hde
+    have h4 : ρ ^ n * perfectoidValuation p F (e n)
+        ≤ ⨆ k, ρ ^ k * perfectoidValuation p F (e k) := le_ciSup hBe n
+    calc ρ ^ n * perfectoidValuation p F (a n - b n)
+        = ρ ^ n * perfectoidValuation p F (e n) := rfl
+      _ ≤ ⨆ k, ρ ^ k * perfectoidValuation p F (e k) := h4
+      _ = Valued.v (PhiHatK p F ϖ hρ0 hρ1 e) := hΦe.symm
+      _ ≤ max (Valued.v (x - y)) (ρ * M) := hΦval
+
 end FarguesFontaine
 
 end
