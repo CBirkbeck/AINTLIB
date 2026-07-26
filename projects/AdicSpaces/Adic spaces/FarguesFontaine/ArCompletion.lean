@@ -678,6 +678,35 @@ theorem eventually_wAloc_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [← valued_AlocToHatK p F ϖ hρ0 hρ1 u, hu]
   exact hveq
 
+include ϖ in
+/-- Closed valuation balls are closed in `F` (they are subgroups with nonempty
+interior, hence open, hence closed). -/
+theorem isClosed_ball {r : NNReal} (hr : 0 < r) :
+    IsClosed {y : F | perfectoidValuation p F y ≤ r} := by
+  set G : AddSubgroup F :=
+    { carrier := {y : F | perfectoidValuation p F y ≤ r}
+      zero_mem' := by simp
+      add_mem' := fun {a b} ha hb => by
+        have h1 : perfectoidValuation p F (a + b)
+            ≤ max (perfectoidValuation p F a) (perfectoidValuation p F b) :=
+          Valuation.map_add _ a b
+        exact le_trans h1 (max_le ha hb)
+      neg_mem' := fun {a} ha => by
+        simpa only [Set.mem_setOf_eq, Valuation.map_neg] using ha } with hG
+  have hopen : IsOpen (G : Set F) := by
+    set c : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+      with hc
+    have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+      fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+    have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+    have hclt : c < 1 := perfectoidValuation_toOF_lt_one p F ϖ
+    obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hr hclt
+    refine AddSubgroup.isOpen_of_mem_nhds G (g := 0) ?_
+    refine Filter.mem_of_superset (ball_mem_nhds_zero p F ϖ m) ?_
+    intro z hz
+    exact le_trans hz (le_of_lt hm)
+  exact (AddSubgroup.isClosed_of_isOpen G hopen)
+
 end FarguesFontaine
 
 end
