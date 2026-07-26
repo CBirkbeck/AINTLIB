@@ -311,4 +311,57 @@ theorem ordAtInfty_algebraMap_galoisCoordRingEquiv {L : Type v} [Field L] [Decid
       Polynomial.natDegree_map_eq_of_injective
         (RingHom.injective (σ : L →+* L))]
 
+/-- **(M1b-3b-v-b)** `ord_∞` transport for the raw fraction-field lift: extend
+`ordAtInfty_algebraMap_galoisCoordRingEquiv` to quotients. Port of HasseWeil's
+`ordAtInfty_ffFrobEquivRaw`. -/
+theorem ordAtInfty_galoisFractionLift {L : Type v} [Field L] [DecidableEq L]
+    [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (z : (W.baseChange L).toAffine.FunctionField) :
+    (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty
+        (IsFractionRing.ringEquivOfRingEquiv (galoisCoordRingEquiv W σ) z) =
+      (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty z := by
+  haveI hMell : ((W.baseChange L).map (σ : L →+* L)).toAffine.IsElliptic := by
+    rw [map_algEquiv_baseChange_eq W σ]; infer_instance
+  by_cases hz : z = 0
+  · subst hz
+    rw [map_zero, HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero,
+      HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero]
+  obtain ⟨u, v, hv_nzd, heq⟩ :=
+    IsFractionRing.div_surjective (A := (W.baseChange L).toAffine.CoordinateRing) z
+  have hv_ne : v ≠ 0 := nonZeroDivisors.ne_zero hv_nzd
+  have hv_map_ne :
+      algebraMap _ (W.baseChange L).toAffine.FunctionField v ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr hv_ne
+  have hu_ne : u ≠ 0 := by
+    intro h
+    exact hz (by rw [← heq, h, map_zero, zero_div])
+  have hu_map_ne :
+      algebraMap _ (W.baseChange L).toAffine.FunctionField u ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr hu_ne
+  have hcu_map_ne :
+      algebraMap _ ((W.baseChange L).map (σ : L →+* L)).toAffine.FunctionField
+        (galoisCoordRingEquiv W σ u) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
+      (fun h => hu_ne ((EquivLike.injective (galoisCoordRingEquiv W σ))
+        (by rw [h, map_zero])))
+  have hcv_map_ne :
+      algebraMap _ ((W.baseChange L).map (σ : L →+* L)).toAffine.FunctionField
+        (galoisCoordRingEquiv W σ v) ≠ 0 :=
+    (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
+      (fun h => hv_ne ((EquivLike.injective (galoisCoordRingEquiv W σ))
+        (by rw [h, map_zero])))
+  rw [← heq, (⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty_div_eq_mul_inv _ hu_map_ne hv_map_ne,
+    (⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty_inv]
+  rw [map_div₀, IsFractionRing.ringEquivOfRingEquiv_algebraMap,
+    IsFractionRing.ringEquivOfRingEquiv_algebraMap]
+  rw [(⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty_div_eq_mul_inv _ hcu_map_ne hcv_map_ne,
+    (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty_inv,
+    ordAtInfty_algebraMap_galoisCoordRingEquiv, ordAtInfty_algebraMap_galoisCoordRingEquiv]
+
 end ModularCurves
