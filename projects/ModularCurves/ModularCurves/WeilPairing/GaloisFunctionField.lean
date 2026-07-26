@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.WeilPairing.FieldPairing
 import HasseWeil.HasseBound.WeilPairing.DivisorGalois
 import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
+import HasseWeil.HasseBound.WeilPairing.HfactLemma
 
 /-!
 # The Galois action on the function field of a base-changed curve (DS4 M1b-3a)
@@ -726,5 +727,31 @@ theorem equivMapDomain_pullbackDivisor {L : Type v} [Field L] [DecidableEq L] [I
       (HasseWeil.WeilPairing.pullbackDiv
         (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
         (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v)))).symm
+
+/-- **(M1b-3b ★★★)** The Weil-function divisor comparison:
+`div(σ·g_T) = div(g_{σ·T})`. This is the σ-analogue (arbitrary base field, arbitrary
+automorphism) of HasseWeil's Frobenius divisor descent, and the last geometric input to
+the Galois equivariance of the Weil pairing. -/
+theorem projectiveDivisorOf_galois_weilFunction {L : Type v} [Field L] [DecidableEq L]
+    [IsAlgClosed L] [Algebra k L] [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L)
+    (N : ℤ) (hN : (N : L) ≠ 0) (T : (W.baseChange L).toAffine.Point) (hT : N • T = 0)
+    (hσT : N • (galoisPointEquiv W σ T) = 0) :
+    (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).projectiveDivisorOf
+        (galoisFunctionFieldEquiv W σ
+          (HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN T hT)) =
+      (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).projectiveDivisorOf
+        (HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN
+          (galoisPointEquiv W σ T) hσT) := by
+  rw [projectiveDivisorOf_galoisFunctionFieldEquiv W σ,
+    HasseWeil.WeilPairing.weilFunction_divisor_eq_pullbackDivisor_kappaDivisor
+      (W.baseChange L) N hN T hT,
+    HasseWeil.WeilPairing.weilFunction_divisor_eq_pullbackDivisor_kappaDivisor
+      (W.baseChange L) N hN (galoisPointEquiv W σ T) hσT,
+    equivMapDomain_pullbackDivisor W σ N
+      (HasseWeil.WeilPairing.mulByInt_ker_finite (W.baseChange L) N hN),
+    equivMapDomain_kappaDivisor W σ T]
+  rfl
 
 end ModularCurves
