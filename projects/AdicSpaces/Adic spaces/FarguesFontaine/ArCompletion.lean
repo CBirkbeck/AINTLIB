@@ -988,27 +988,6 @@ theorem teichCoeffF_prefixAloc (b : ℕ → F) {N j : ℕ} (hj : j < N) :
   rw [h0]
   exact teichCoeffF_sum_range_add p F b 0 hj
 
-/-- The Gauss value of a single Teichmüller lift over `F`. -/
-theorem gaussValueF_teichmuller (ρ : NNReal) (c : F) :
-    gaussValueF p F ρ (WittVector.teichmuller p c) = perfectoidValuation p F c := by
-  rw [gaussValueF]
-  refine le_antisymm (ciSup_le fun n => ?_) ?_
-  · rcases Nat.eq_zero_or_pos n with rfl | hn
-    · rw [gaussTermF, pow_zero, one_mul, teichCoeffF]
-      simp [WittVector.teichmuller_coeff_zero]
-    · rw [gaussTermF, teichCoeffF, WittVector.teichmuller_coeff_pos p c n hn]
-      simp
-  · refine le_trans ?_ (le_ciSup (⟨perfectoidValuation p F c, ?_⟩ :
-      BddAbove (Set.range (gaussTermF p F ρ (WittVector.teichmuller p c)))) 0)
-    · rw [gaussTermF, pow_zero, one_mul, teichCoeffF]
-      simp [WittVector.teichmuller_coeff_zero]
-    · rintro s ⟨n, rfl⟩
-      rcases Nat.eq_zero_or_pos n with rfl | hn
-      · rw [gaussTermF, pow_zero, one_mul, teichCoeffF]
-        simp [WittVector.teichmuller_coeff_zero]
-      · rw [gaussTermF, teichCoeffF, WittVector.teichmuller_coeff_pos p c n hn]
-        simp
-
 /-- **Prefix values are exact finite maxima** — the isometry identity on the dense
 layer of the c₀ architecture. -/
 theorem wAloc_prefixAloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : ℕ → F) (N : ℕ) :
