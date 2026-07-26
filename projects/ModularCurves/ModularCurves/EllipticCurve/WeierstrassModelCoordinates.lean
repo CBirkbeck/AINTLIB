@@ -14,7 +14,7 @@ this map sends the irrelevant ideal onto the unit ideal, which is the algebraic
 input required by `Proj.fromOfGlobalSections`.
 -/
 
-open AlgebraicGeometry CategoryTheory
+open AlgebraicGeometry CategoryTheory TopologicalSpace
 
 universe u
 
@@ -155,5 +155,80 @@ lemma projModelFromOfGlobalSections_preimage_basicOpen
     Proj.fromOfGlobalSections_preimage_basicOpen _ _ _ one_pos
       (mk_X_mem_quotientGrading_one W j)]
   exact congr_arg X.basicOpen (projModelEval_X W f P hP j)
+
+/-- Restriction of global sections to the top open of a basic-open
+subscheme. -/
+noncomputable def basicOpenTopRestriction
+    (X : Scheme.{u}) (r : Γ(X, (⊤ : X.Opens))) :
+    Γ(X, (⊤ : X.Opens)) →+*
+      Γ((X.basicOpen r).toScheme, (⊤ : (X.basicOpen r).toScheme.Opens)) :=
+  (X.basicOpen r).topIso.inv.hom.comp
+    (X.presheaf.map (homOfLE (X.basicOpen_le r)).op).hom
+
+/-- The section defining a basic open becomes a unit after restriction to that
+basic open. -/
+lemma basicOpenTopRestriction_isUnit
+    (X : Scheme.{u}) (r : Γ(X, (⊤ : X.Opens))) :
+    IsUnit (basicOpenTopRestriction X r r) := by
+  exact (AlgebraicGeometry.RingedSpace.isUnit_res_basicOpen X.toRingedSpace r).map
+    (X.basicOpen r).topIso.inv.hom
+
+/-- Restrict homogeneous coordinates to the basic open of one coordinate and
+use that unit coordinate to define a morphism to the projective model. -/
+noncomputable def projModelFromBasicOpen
+    (X : Scheme.{u}) (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens))) (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P) (i : Fin 3) :
+    (X.basicOpen (P i)).toScheme ⟶ projModel W := by
+  let ρ := basicOpenTopRestriction X (P i)
+  have hP' : (W.map (ρ.comp f)).toProjective.Equation (ρ ∘ P) := by
+    simpa only [WeierstrassCurve.map_map] using hP.map ρ
+  exact projModelFromOfGlobalSections W (ρ.comp f) (ρ ∘ P) hP' i
+    (basicOpenTopRestriction_isUnit X (P i))
+
+/-- The basic-open coordinate morphism lies over the restricted coefficient
+homomorphism. -/
+@[reassoc]
+theorem projModelFromBasicOpen_projModelπ
+    (X : Scheme.{u}) (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens))) (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P) (i : Fin 3) :
+    projModelFromBasicOpen X W f P hP i ≫ projModelπ W =
+      (X.basicOpen (P i)).toScheme.toSpecΓ ≫
+        Spec.map (CommRingCat.ofHom ((basicOpenTopRestriction X (P i)).comp f)) := by
+  let ρ := basicOpenTopRestriction X (P i)
+  have hP' : (W.map (ρ.comp f)).toProjective.Equation (ρ ∘ P) := by
+    simpa only [WeierstrassCurve.map_map] using hP.map ρ
+  have hbase := projModelFromOfGlobalSections_projModelπ W
+    (ρ.comp f) (ρ ∘ P) hP' i
+      (basicOpenTopRestriction_isUnit X (P i))
+  rw [show projModelFromBasicOpen X W f P hP i =
+    projModelFromOfGlobalSections W (ρ.comp f) (ρ ∘ P) hP' i
+      (basicOpenTopRestriction_isUnit X (P i)) by
+        rfl]
+  exact hbase
+
+/-- The image of the basic-open coordinate morphism lies in the corresponding
+standard projective chart. -/
+lemma projModelFromBasicOpen_preimage_basicOpen
+    (X : Scheme.{u}) (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens))) (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P) (i : Fin 3) :
+    projModelFromBasicOpen X W f P hP i ⁻¹ᵁ
+        Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i)) = ⊤ := by
+  let ρ := basicOpenTopRestriction X (P i)
+  have hP' : (W.map (ρ.comp f)).toProjective.Equation (ρ ∘ P) := by
+    simpa only [WeierstrassCurve.map_map] using hP.map ρ
+  have hpre := projModelFromOfGlobalSections_preimage_basicOpen
+    W (ρ.comp f) (ρ ∘ P) hP' i
+      (basicOpenTopRestriction_isUnit X (P i)) i
+  rw [show projModelFromBasicOpen X W f P hP i =
+    projModelFromOfGlobalSections W (ρ.comp f) (ρ ∘ P) hP' i
+      (basicOpenTopRestriction_isUnit X (P i)) by
+        rfl,
+    hpre]
+  exact Scheme.basicOpen_of_isUnit _
+    (basicOpenTopRestriction_isUnit X (P i))
 
 end ModularCurves
