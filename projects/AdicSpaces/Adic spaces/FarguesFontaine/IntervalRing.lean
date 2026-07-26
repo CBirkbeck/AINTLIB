@@ -1139,6 +1139,73 @@ theorem tendsto_wI_p_pow {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 :
   refine Filter.Tendsto.congr (fun n => (hval n).symm) ?_
   exact tendsto_pow_atTop_nhds_zero_of_lt_one zero_le hmax1
 
+/-- **Closed value balls are closed** in the completed field. -/
+theorem isClosed_valued_ball {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {c : NNReal}
+    (hc : 0 < c) : IsClosed {w : hatK p F hρ0 hρ1 | Valued.v w ≤ c} := by
+  set G : AddSubgroup (hatK p F hρ0 hρ1) :=
+    { carrier := {w : hatK p F hρ0 hρ1 | Valued.v w ≤ c}
+      zero_mem' := by
+        simp only [Set.mem_setOf_eq, Valuation.map_zero]
+        exact zero_le
+      add_mem' := fun {a b} ha hb => by
+        have h1 : Valued.v a ≤ c := ha
+        have h2 : Valued.v b ≤ c := hb
+        show Valued.v (a + b) ≤ c
+        exact le_trans (Valuation.map_add _ a b) (max_le h1 h2)
+      neg_mem' := fun {a} ha => by
+        simpa only [Set.mem_setOf_eq, Valuation.map_neg] using ha } with hG
+  have hopen : IsOpen (G : Set (hatK p F hρ0 hρ1)) := by
+    refine AddSubgroup.isOpen_of_mem_nhds G (g := 0) ?_
+    exact valued_ball_mem_nhds_zero p F (hρ0 := hρ0) (hρ1 := hρ1) hc
+  exact AddSubgroup.isClosed_of_isOpen G hopen
+
+/-- **Interval-norm balls are closed** in the product. -/
+theorem isClosed_wI_ball {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {c : NNReal} (hc : 0 < c) :
+    IsClosed {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c} := by
+  have hset : {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+        wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c}
+      = ((fun z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => z.1)
+          ⁻¹' {w : hatK p F hρ₁0 hρ₁1 | Valued.v w ≤ c})
+        ∩ ((fun z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => z.2)
+          ⁻¹' {w : hatK p F hρ₂0 hρ₂1 | Valued.v w ≤ c}) := by
+    ext z
+    constructor
+    · intro hz
+      have hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c := hz
+      refine ⟨?_, ?_⟩
+      · show Valued.v z.1 ≤ c
+        exact le_trans (le_max_left _ _) hb
+      · show Valued.v z.2 ≤ c
+        exact le_trans (le_max_right _ _) hb
+    · rintro ⟨h1, h2⟩
+      have hb1 : Valued.v z.1 ≤ c := h1
+      have hb2 : Valued.v z.2 ≤ c := h2
+      show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c
+      exact max_le hb1 hb2
+  rw [hset]
+  exact IsClosed.inter (isClosed_valued_ball p F hc |>.preimage continuous_fst)
+    (isClosed_valued_ball p F hc |>.preimage continuous_snd)
+
+/-- **Norm bounds pass to limits**: an element approximated by `Bloc`-elements of
+interval norm at most `c` has interval norm at most `c`. -/
+theorem wI_le_of_approx {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) {c : NNReal} (hc : 0 < c)
+    (hall : ∀ x : Bloc p F ϖ,
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ c) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c := by
+  have hz' : z ∈ closure (Set.range (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := hz
+  have hsub : (Set.range (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ⊆ {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+        wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ c} := by
+    rintro w ⟨x, rfl⟩
+    exact hall x
+  have hcl := closure_mono hsub hz'
+  rwa [(isClosed_wI_ball p F hc).closure_eq] at hcl
+
 end FarguesFontaine
 
 end
