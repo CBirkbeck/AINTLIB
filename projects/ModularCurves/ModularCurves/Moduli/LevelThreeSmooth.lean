@@ -128,6 +128,48 @@ theorem isLocalization_away_e3Delta_mul_pderiv (hR : IsUnit (3 : R)) :
       _ = p ^ n * ((e3Delta R) ^ n * b) := by rw [hn]
       _ = (e3Delta R * p) ^ n * b := by rw [mul_pow]; ring
 
+/-- **(brick 1 ★ — the level-3 base is standard smooth of relative dimension one)**
+`E3ModuliRing R` is standard smooth of relative dimension `1` over `R` whenever `3` is
+invertible: it is the localized hypersurface `R[β,γ]/(β³−(β+γ)³)` with the Jacobian entry
+`∂/∂γ` inverted (bricks 1a–1d), so
+`isStandardSmoothOfRelativeDimension_away_pderiv` applies after the two localizations are
+identified (`IsLocalization.Away.mul` + `IsLocalization.algEquiv`). -/
+theorem e3ModuliRing_isStandardSmoothOfRelativeDimension (hR : IsUnit (3 : R)) :
+    Algebra.IsStandardSmoothOfRelativeDimension 1 R (E3ModuliRing R) := by
+  classical
+  set f : MvPolynomial (Fin 2) R := e3Rel R with hf
+  set p : E3Quotient R := Ideal.Quotient.mk (Ideal.span {f}) (pderiv 1 f) with hp
+  set d : E3Quotient R := e3Delta R with hd
+  -- the standard-smooth localized hypersurface
+  haveI hss : Algebra.IsStandardSmoothOfRelativeDimension 1 R
+      (Localization.Away p) := by
+    have := isStandardSmoothOfRelativeDimension_away_pderiv (R := R) (σ := Fin 2) f 1
+    simpa using this
+  -- the further localization away from `d`
+  haveI : Algebra.IsStandardSmoothOfRelativeDimension 0 (Localization.Away p)
+      (Localization.Away (algebraMap (E3Quotient R) (Localization.Away p) d)) :=
+    Algebra.IsStandardSmoothOfRelativeDimension.localization_away
+      (algebraMap (E3Quotient R) (Localization.Away p) d)
+  haveI : Algebra.IsStandardSmoothOfRelativeDimension (0 + 1) R
+      (Localization.Away (algebraMap (E3Quotient R) (Localization.Away p) d)) :=
+    Algebra.IsStandardSmoothOfRelativeDimension.trans
+      (R := (R : Type u)) (S := Localization.Away p)
+      (T := Localization.Away (algebraMap (E3Quotient R) (Localization.Away p) d)) 1 0
+  -- both rings localize `E3Quotient R` at the powers of `d * p`
+  haveI : IsLocalization.Away (d * p) (E3ModuliRing R) :=
+    isLocalization_away_e3Delta_mul_pderiv R hR
+  haveI : IsLocalization.Away (d * p)
+      (Localization.Away (algebraMap (E3Quotient R) (Localization.Away p) d)) :=
+    IsLocalization.Away.mul (R := E3Quotient R) (Localization.Away p)
+      (Localization.Away (algebraMap (E3Quotient R) (Localization.Away p) d)) p d
+  -- transport along the canonical comparison
+  have e : Localization.Away (algebraMap (E3Quotient R) (Localization.Away p) d) ≃ₐ[R]
+      E3ModuliRing R :=
+    (IsLocalization.algEquiv (Submonoid.powers (d * p))
+      (Localization.Away (algebraMap (E3Quotient R) (Localization.Away p) d))
+      (E3ModuliRing R)).restrictScalars R
+  exact Algebra.IsStandardSmoothOfRelativeDimension.of_algEquiv (n := 0 + 1) e
+
 end ModularCurves
 
 end
