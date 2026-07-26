@@ -1286,6 +1286,61 @@ theorem gaussValueF_mul_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
       exact gaussTermF_mul_le p F hρ0 hρ1 hBx hBy n⟩
   · exact ciSup_le fun n => gaussTermF_mul_le p F hρ0 hρ1 hBx hBy n
 
+/-- `-1` in `W(F)` comes from `W(O_F)`, so its terms are bounded by `1`. -/
+theorem bddAbove_gaussTermF_neg_one {ρ : NNReal} (hρ1 : ρ < 1) :
+    BddAbove (Set.range (gaussTermF p F ρ (-1 : WittVector p F))) := by
+  have hmap : (-1 : WittVector p F)
+      = WittVector.map ((powerBoundedSubring.toSubring F).subtype) (-1 : Ainf p F) := by
+    rw [map_neg, map_one]
+  refine ⟨1, ?_⟩
+  rintro s ⟨n, rfl⟩
+  rw [hmap, gaussTermF_map]
+  exact gaussTerm_le_one p F hρ1.le _ n
+
+/-- Negation preserves term-boundedness (via `-x = (-1)·x` and submultiplicativity). -/
+theorem bddAbove_gaussTermF_neg {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    {x : WittVector p F} (hB : BddAbove (Set.range (gaussTermF p F ρ x))) :
+    BddAbove (Set.range (gaussTermF p F ρ (-x))) := by
+  have hx : -x = (-1 : WittVector p F) * x := by ring
+  rw [hx]
+  exact (gaussValueF_mul_le p F hρ0 hρ1 (bddAbove_gaussTermF_neg_one p F hρ1) hB).1
+
+/-- **The two-radius bounded carrier** — the integral model of the interval rings
+`B^I` (Kedlaya Def 4.2 with `I = [ρ₂-side, ρ-side]`): elements of `W(F)` with terms
+bounded at both radii. This subring is where the Euclidean/Gröbner development can
+run with all boundedness hypotheses available for free. -/
+def twoBddSubring {ρ ρ₂ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : Subring (WittVector p F) where
+  carrier := {x | BddAbove (Set.range (gaussTermF p F ρ x))
+    ∧ BddAbove (Set.range (gaussTermF p F ρ₂ x))}
+  zero_mem' := by
+    constructor <;>
+    · refine ⟨0, ?_⟩
+      rintro s ⟨n, rfl⟩
+      simp [gaussTermF, teichCoeffF]
+  one_mem' := by
+    have hmap : (1 : WittVector p F)
+        = WittVector.map ((powerBoundedSubring.toSubring F).subtype) (1 : Ainf p F) :=
+      (map_one _).symm
+    constructor
+    · refine ⟨1, ?_⟩
+      rintro s ⟨n, rfl⟩
+      rw [hmap, gaussTermF_map]
+      exact gaussTerm_le_one p F hρ1.le _ n
+    · refine ⟨1, ?_⟩
+      rintro s ⟨n, rfl⟩
+      rw [hmap, gaussTermF_map]
+      exact gaussTerm_le_one p F hρ₂1.le _ n
+  add_mem' := fun {a b} ha hb =>
+    ⟨bddAbove_gaussTermF_add p F hρ0 hρ1 ha.1 hb.1,
+     bddAbove_gaussTermF_add p F hρ₂0 hρ₂1 ha.2 hb.2⟩
+  mul_mem' := fun {a b} ha hb =>
+    ⟨(gaussValueF_mul_le p F hρ0 hρ1 ha.1 hb.1).1,
+     (gaussValueF_mul_le p F hρ₂0 hρ₂1 ha.2 hb.2).1⟩
+  neg_mem' := fun {a} ha =>
+    ⟨bddAbove_gaussTermF_neg p F hρ0 hρ1 ha.1,
+     bddAbove_gaussTermF_neg p F hρ₂0 hρ₂1 ha.2⟩
+
 end FarguesFontaine
 
 end
