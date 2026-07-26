@@ -1206,6 +1206,75 @@ theorem wI_le_of_approx {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : 
   have hcl := closure_mono hsub hz'
   rwa [(isClosed_wI_ball p F hc).closure_eq] at hcl
 
+/-- **`B^{I,+}` is closed**, hence complete. -/
+theorem isClosed_BIPlus {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsClosed (BIPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := by
+  have hcarrier : (BIPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      = (BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        ∩ {z | wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ 1} := rfl
+  rw [hcarrier]
+  exact IsClosed.inter (isClosed_BISub p F ϖ) (isClosed_wI_ball p F zero_lt_one)
+
+/-- `B^{I,+}` is complete. -/
+theorem isComplete_BIPlus {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsComplete (BIPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) :=
+  (isClosed_BIPlus p F ϖ).isComplete
+
+set_option maxHeartbeats 1000000 in
+/-- **The restriction map is norm-nonincreasing** (Kedlaya Corollary 4.5 at the level
+of the completion). -/
+theorem valued_resI_le_wI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z)
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z := by
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have hlim := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz
+  -- for every ε, the approximant images sit in the (wI z ⊔ ε)-ball
+  have hstep : ∀ ε : NNReal, 0 < ε →
+      Valued.v (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z)
+        ≤ max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ε := by
+    intro ε hε
+    set c : NNReal := max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ε with hcdef
+    have hc0 : 0 < c := lt_of_lt_of_le hε (le_max_right _ _)
+    refine (isClosed_valued_ball p F hc0).mem_of_tendsto hlim ?_
+    have hcomap : ∀ᶠ x in Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z),
+        wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z) ≤ ε := by
+      refine Filter.eventually_comap.mpr
+        (Filter.Eventually.mono (wI_ball_mem_nhds p F z hε) ?_)
+      intro w hw x hx
+      rw [hx]
+      exact hw
+    refine Filter.Eventually.mono hcomap ?_
+    intro x hx
+    have hball : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z) ≤ ε := hx
+    have hxnorm : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ c := by
+      have hsplit : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+          = (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z) + z := by ring
+      rw [hsplit]
+      refine le_trans (wI_add_le p F _ _) ?_
+      exact max_le (le_trans hball (le_max_right _ _)) (le_max_left _ _)
+    exact le_trans (valued_BlocToHatK_le_wI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 x) hxnorm
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨d, hd1, hd2⟩ := exists_between hcon
+  have hdpos : 0 < d := lt_of_le_of_lt zero_le hd1
+  have hle := hstep d hdpos
+  rw [max_eq_right hd1.le] at hle
+  exact absurd (lt_of_le_of_lt hle hd2) (lt_irrefl _)
+
 end FarguesFontaine
 
 end
