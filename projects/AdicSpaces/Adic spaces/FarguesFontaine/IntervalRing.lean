@@ -424,6 +424,87 @@ theorem wLoc_le_max_of_interpolate {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} 
         · rw [← NNReal.rpow_add h0]
           simp
 
+/-- **`B^I` is complete**: it is closed in a product of complete valued fields. -/
+theorem isComplete_BISub {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsComplete (BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) :=
+  (isClosed_BISub p F ϖ).isComplete
+
+/-- A `wI`-Cauchy criterion in the ambient product. -/
+theorem cauchySeq_of_wI_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (s : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    (h : ∀ ε : NNReal, 0 < ε → ∃ N₀ : ℕ, ∀ m n : ℕ, N₀ ≤ m → N₀ ≤ n →
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (s m - s n) ≤ ε) :
+    CauchySeq s := by
+  have h1 : CauchySeq (fun n => (s n).1) := by
+    refine cauchySeq_of_valued_le p F (hρ0 := hρ₁0) (hρ1 := hρ₁1)
+      (fun n => (s n).1) fun ε hε => ?_
+    obtain ⟨N₀, hN₀⟩ := h ε hε
+    exact ⟨N₀, fun m n hm hn => le_trans (le_max_left _ _) (hN₀ m n hm hn)⟩
+  have h2 : CauchySeq (fun n => (s n).2) := by
+    refine cauchySeq_of_valued_le p F (hρ0 := hρ₂0) (hρ1 := hρ₂1)
+      (fun n => (s n).2) fun ε hε => ?_
+    obtain ⟨N₀, hN₀⟩ := h ε hε
+    exact ⟨N₀, fun m n hm hn => le_trans (le_max_right _ _) (hN₀ m n hm hn)⟩
+  exact CauchySeq.prodMk h1 h2
+
+set_option maxHeartbeats 1000000 in
+/-- **Series converge in `B^I`**: a sequence of interval-ring elements with vanishing
+norm bounds has a limit in `B^I`, with the expected tail estimates. -/
+theorem exists_BI_series_limit {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {u : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hu : ∀ l, u l ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    {C : ℕ → NNReal} (hC : ∀ l, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (u l) ≤ C l)
+    (hC0 : Filter.Tendsto C Filter.atTop (nhds 0)) :
+    ∃ S : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1),
+      S ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ∧ Filter.Tendsto (fun n => ∑ l ∈ Finset.range n, u l)
+        Filter.atTop (nhds S) := by
+  set s : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+    fun n => ∑ l ∈ Finset.range n, u l with hs
+  have hsmem : ∀ n, s n ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := by
+    intro n
+    exact Subring.sum_mem _ fun l _ => hu l
+  have hdiff : ∀ m n : ℕ, n ≤ m → ∀ b : NNReal, (∀ l, n ≤ l → C l ≤ b) →
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (s m - s n) ≤ b := by
+    intro m n hnm b hb
+    have hIco : s m - s n = ∑ l ∈ Finset.Ico n m, u l := by
+      rw [hs, Finset.sum_Ico_eq_sub _ hnm]
+    rw [hIco, wI]
+    have hfst : (∑ l ∈ Finset.Ico n m, u l).1
+        = ∑ l ∈ Finset.Ico n m, (u l).1 := Prod.fst_sum
+    have hsnd : (∑ l ∈ Finset.Ico n m, u l).2
+        = ∑ l ∈ Finset.Ico n m, (u l).2 := Prod.snd_sum
+    rw [hfst, hsnd]
+    refine max_le ?_ ?_
+    · refine Valuation.map_sum_le (Valued.v : Valuation (hatK p F hρ₁0 hρ₁1) NNReal) ?_
+      intro l hl
+      exact le_trans (le_trans (le_max_left _ _) (hC l))
+        (hb l (Finset.mem_Ico.mp hl).1)
+    · refine Valuation.map_sum_le (Valued.v : Valuation (hatK p F hρ₂0 hρ₂1) NNReal) ?_
+      intro l hl
+      exact le_trans (le_trans (le_max_right _ _) (hC l))
+        (hb l (Finset.mem_Ico.mp hl).1)
+  have hcauchy : CauchySeq s := by
+    refine cauchySeq_of_wI_le p F s fun ε hε => ?_
+    obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp (hC0.eventually_lt_const hε)
+    refine ⟨N, fun m n hm hn => ?_⟩
+    rcases le_total n m with hle | hle
+    · exact hdiff m n hle ε fun l hl => (hN l (le_trans hn hl)).le
+    · have hswap : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (s m - s n)
+          = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (s n - s m) := by
+        rw [← wI_neg p F (s m - s n)]
+        congr 1
+        ring
+      rw [hswap]
+      exact hdiff n m hle ε fun l hl => (hN l (le_trans hm hl)).le
+  obtain ⟨S, hSmem, hS⟩ := cauchySeq_tendsto_of_isComplete
+    (isComplete_BISub p F ϖ) hsmem hcauchy
+  exact ⟨S, hSmem, hS⟩
+
 end FarguesFontaine
 
 end
