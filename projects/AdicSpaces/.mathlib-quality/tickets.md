@@ -1127,7 +1127,19 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   parallel capacity exists.
 
 ### [T909] Restriction maps BI → BI'
-- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T908
+- **Status**: in_progress (beastmode 2026-07-26) — the intermediate-radius restriction
+  map is BUILT and is a ring map on `B^I`; what remains is packaging it as a bundled
+  `RingHom` into the target interval ring and the Cor-4.6 injectivity.
+  DONE (axiom-clean, pushed): `valued_BlocToHatK_le_wI`, `valued_BlocToHatK_sub_le_wI`
+  (the wI-Lipschitz bounds from Cor 4.5), `neBot_comap_of_mem_BISub`,
+  `eventually_pair_wI_le`, `exists_nnreal_lt_gamma`, `wI_ball_mem_nhds`, **`resI`** and
+  **`tendsto_resI`** (the map exists as the limit of approximant images),
+  `resI_BIProd` (it extends the endpoint map), `map_add_comap_le`, `map_mul_comap_le`,
+  **`resI_add`**, **`resI_mul`**.
+  NEXT: `resI` lands in `B^{[σ,σ]}`-style targets (or directly: the pair
+  `(resI σ₁ z, resI σ₂ z)` lands in `BISub σ₁ σ₂`), then bundle as a `RingHom`
+  `B^I → B^{I'}` and prove injectivity via three circles (Cor 4.6).
+  | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T908
 - **Statement**: for I' ⊆ I: continuous ring hom `res : BI → BI'` (Completion-functorial
   from `wI' ≤ wI` on Bloc via Cor 4.5), injective (Cor 4.6 ln 361–368: λ_t = 0 on I'
   propagates by three-circles + continuity).
