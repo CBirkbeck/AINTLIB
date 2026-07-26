@@ -559,3 +559,41 @@ structure GaloisFibreChart (k : Type u) [Field k]
 
 With E′/G′ done, R holds **conditionally on a `GaloisFibreChart`**; F′ makes it
 unconditional.
+
+* **Nodes E′, G′, F′ COMPLETE — DS4 M1c IS DONE** (2026-07-26), all axiom-clean.
+
+  `WeilPairing/FibreGalois.lean`: `GaloisFibreChart`, `.pairing`, `.pairing_galois` (E′);
+  `natCast_ne_zero_of_algebra`, `muNAlgebraFibreEquiv_symm_algEquiv`,
+  `weilPairingFibreMap`, `weilPairingFibreMap_galoisEquivariant`,
+  `exists_weilPairingHom_of_galoisFibreChart` (G′).
+
+  `WeilPairing/GlobalFibreChart.lean`: `chartρ_topAffineOpen` (F1 — `chartρ` at `⊤` is
+  literally `IsAffineOpen.fromSpec`, so this is `fromSpec_top` + `isoSpec_Spec_inv`),
+  `gammaTopAlgebra`, `geomPt_eq_chart` (F2), `gammaTopAlgEquiv`,
+  `globalGaloisFibreChart` (F′), and
+
+  > **`exists_weilPairingHom_of_field`** — for `E` over a field `k` of characteristic zero
+  > with `N` invertible, the Weil pairing exists as a morphism of finite étale
+  > `k`-algebras `μ_N ⟶ 𝒪(E[N]) ⊗_k 𝒪(E[N])`, i.e. a `k`-scheme morphism
+  > `E[N] ×_{Spec k} E[N] ⟶ μ_{N, Spec k}`, inducing Silverman III.8 on geometric fibres.
+
+  Two design points worth keeping:
+  * `gammaTopAlgebra` is deliberately defined as the *composite* ring hom
+    `(algebraMap k L) ∘ ΓSpecIso.hom`, which makes `(Pr.W.map ΓSpecIso.hom).baseChange L`
+    and `Pr.W.baseChange L` **definitionally the same curve** — that is what lets the
+    `dict` field typecheck with no transport at all.
+  * The last mismatch was `Affine.Point.map` at two different base rings
+    (`L →ₐ[k] L` vs `L →ₐ[Γ(Spec k,⊤)] L`). The types are defeq but the maps are not;
+    `cases Z with | zero | some` closes it in two `rfl`s, because `Point.map` depends on
+    the `AlgHom` only through its underlying function.
+
+## Status of the goal R
+
+**Achieved**, in the form `exists_weilPairingHom_of_field`. The only difference from the
+statement drafted at the top of this file is that the fibre map is spelled
+`weilPairingFibreMap … (globalGaloisFibreChart …)` rather than an abstract
+`weilPairingFibreMap`; that is the chart-dependence recorded as deferred leaf **H**
+(chart-independence), which is not needed for an existential statement.
+
+Remaining in the DS4 stream: **M2** — the relative pairing over an arbitrary base
+(KM 2.8), still chapter-scale, and untouched by this work.

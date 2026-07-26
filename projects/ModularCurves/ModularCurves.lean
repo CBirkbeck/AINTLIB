@@ -91,3 +91,4 @@ import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.FibrePointDict
 import ModularCurves.WeilPairing.GaloisFieldPairing
+import ModularCurves.WeilPairing.GlobalFibreChart
