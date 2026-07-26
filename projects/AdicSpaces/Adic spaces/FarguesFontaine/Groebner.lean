@@ -1155,6 +1155,55 @@ theorem exists_groebner_family {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     · rw [hXlead ⟨I, hIT⟩]
       exact hdeq
 
+/-- **Dominated perturbations preserve value and degree** (Remark 2.7, packaged). -/
+theorem valued_degAr_eq_of_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {u v : hatK p F hρ0 hρ1} (hu : u ∈ ArSub p F ϖ hρ0 hρ1)
+    (hv : v ∈ ArSub p F ϖ hρ0 hρ1) (h : Valued.v (u - v) < Valued.v u) :
+    Valued.v v = Valued.v u ∧ degAr p F ϖ hρ0 hρ1 v = degAr p F ϖ hρ0 hρ1 u :=
+  ⟨valued_eq_of_valued_sub_lt p F h,
+    (degAr_eq_of_valued_sub_lt p F ϖ hu hv h).symm⟩
+
+/-- Coefficientwise form of a single subtraction. -/
+theorem coeff_sub_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (y w : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) (K : Fin k →₀ ℕ) :
+    ((MvPowerSeries.coeff K (y - w) : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1)
+      = ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        - ((MvPowerSeries.coeff K w : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) :=
+  congrArg (fun t : ↥(ArSub p F ϖ hρ0 hρ1) => (t : hatK p F hρ0 hρ1))
+    (map_sub (MvPowerSeries.coeff K) y w)
+
+/-- **The frozen zone**: above the working index, a correction of value below the
+coefficient's own value changes neither the value nor the degree. -/
+theorem coeff_frozen {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {y w : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)} {K : Fin k →₀ ℕ}
+    (hsmall : Valued.v ((MvPowerSeries.coeff K w : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)
+      < Valued.v ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)) :
+    Valued.v ((MvPowerSeries.coeff K (y - w) : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)
+      = Valued.v ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)
+    ∧ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff K (y - w)
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+      = degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff K y
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
+  have hdiff : ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)
+      - ((MvPowerSeries.coeff K (y - w) : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)
+      = ((MvPowerSeries.coeff K w : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) := by
+    rw [coeff_sub_eq p F ϖ y w K]
+    ring
+  refine valued_degAr_eq_of_sub_lt p F ϖ
+    (MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1)).2
+    (MvPowerSeries.coeff K (y - w) : ↥(ArSub p F ϖ hρ0 hρ1)).2 ?_
+  rw [hdiff]
+  exact hsmall
+
 end FarguesFontaine
 
 end
