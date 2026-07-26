@@ -35,6 +35,11 @@ of `B^I`) is open; `pIdeal = (p)` is f.g.; `mem_pIdeal_pow_iff` shows `y ∈ (p)
 ρ₁ⁿ ∧ v(y₂) ≤ ρ₂ⁿ`, so `isAdic_pIdeal` identifies the subspace topology on `B^{I,+}` with
 the `p`-adic one; hence `BIPairOfDefinition`, `isHuberRing_BISub`, `isTateRing_BISub`.
 
+**HANDOVER 2026-07-26**: a new worker is taking over. Read
+`.mathlib-quality/handover-2026-07-26-campaign8.md` first — it has the state of the
+mathematics, the next task (T911 strictness) worked out, the binding working rules
+(PERF-1 in particular), the file map and the API inventory.
+
 #### PERF-1 (2026-07-26) — **no heartbeat raises** (owner instruction)
 
 `set_option maxHeartbeats` / `synthInstance.maxHeartbeats` are not to be added; a timeout is

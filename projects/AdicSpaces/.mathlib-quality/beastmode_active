@@ -1,1 +1,1 @@
-FOCUS: PERF-1 — Groebner.lean decomposition to drop its 6 remaining heartbeat raises; then back to T911 strictness
+FOCUS: HANDOVER — see .mathlib-quality/handover-2026-07-26-campaign8.md; next task is T911 strictness (term-by-term lift)
