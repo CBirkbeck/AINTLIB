@@ -17,10 +17,12 @@ namespace ModularCurves
 
 noncomputable section
 
-noncomputable local instance (X : Scheme.{u}) : MonoidalCategory X.Modules :=
+noncomputable local instance sectionContractionLocalMonoidalCategory
+    (X : Scheme.{u}) : MonoidalCategory X.Modules :=
   Scheme.Modules.monoidalCategory X
 
-noncomputable local instance (X : Scheme.{u}) : SymmetricCategory X.Modules :=
+noncomputable local instance sectionContractionLocalSymmetricCategory
+    (X : Scheme.{u}) : SymmetricCategory X.Modules :=
   Scheme.Modules.symmetricCategory X
 
 private noncomputable def tensorUnitStructureIso {X : Scheme.{u}} (M : X.Modules) :
