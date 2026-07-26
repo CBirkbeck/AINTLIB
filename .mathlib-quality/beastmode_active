@@ -1,10 +1,4 @@
-FOCUS: DS4 M1b LEAF (translation conjugation) — bricks 1-3 landed, sorry-free, pushed:
-  1. ringHom_ext_const_x_y_gen (semilinear extensionality: constants + x_gen + y_gen determine a ring hom)
-  2. galoisFunctionFieldEquiv_x_gen / _y_gen (Phi_sigma fixes the generic coordinates; via galoisFractionLift_x_gen/_y_gen + cast_x_gen/cast_y_gen)
-  3. galoisFunctionFieldEquiv_algebraMap_base and _a1/_a2/_a3/_a4/_a6 (Phi_sigma fixes base constants and the curve coefficients)
-NEXT (brick 4): push Phi_sigma through the translation formulas.
-  translateAlgHom_apply_x_gen/_y_gen (TranslationOrd 1852/2009) give tau_S(x_gen) = translateX_xy W xk yk and tau_S(y_gen) = translateY_xy W xk yk, where (Translation.lean:59-70)
-    translateSlope_xy = (W_KE).toAffine.slope x_gen (algebraMap xk) y_gen (algebraMap yk)
-    translateX_xy = (W_KE).toAffine.addX x_gen (algebraMap xk) slope ; translateY_xy = addY ... .
-  So: Phi_sigma (translateX_xy W xk yk) = translateX_xy W (sigma xk) (sigma yk) — push Phi through addX/addY/slope (they are rational expressions in x_gen, y_gen, the two constants and the a_i) using bricks 2+3 and galoisFunctionFieldEquiv_algebraMap for the constants. Watch the 2-torsion branch (translateAlgEquiv_of_2tor) separately.
-  THEN conclude the conjugation by ringHom_ext_const_x_y_gen and finish weilPairing_galois (unconditional), then fieldWeilPairing_galois, then M1c (EtaleDescent:440).
+FOCUS: DS4 M1b LEAF brick 4 — push Phi_sigma through the translation formulas.
+Bricks 1-3 landed sorry-free (semilinear extensionality; Phi fixes x_gen,y_gen; Phi fixes base constants and the a_i).
+FINDING (scaffold attempt, reverted; file green and sorry-free): WeierstrassCurve.Affine.slope is defined BY CASES (if x1 = x2 then tangent-formula else secant-formula), so `unfold slope; simp only [map_*]` does not fire. Push Phi through with `rw [apply_ite]`-style handling first: sigma preserves equality/inequality of the constants, so the branch condition matches (x_gen = algebraMap xk iff x_gen = algebraMap (sigma xk) is FALSE in general — note the condition compares x_gen with the CONSTANT, and x_gen is transcendental over L, so the branch is always the secant one: use HasseWeil x_gen_sub_const_ne_zero to discharge the if to the else-branch on BOTH sides, then push Phi through the rational expression with map_div0/map_sub/map_add/map_mul + bricks 2 and 3).
+THEN: translateX_xy/translateY_xy transport (addX/addY are polynomial in slope, x_gen, constants and a_i), then the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch handled separately via translateAlgEquiv_of_2tor), then weilPairing_galois unconditional, fieldWeilPairing_galois, and M1c (EtaleDescent:440).
