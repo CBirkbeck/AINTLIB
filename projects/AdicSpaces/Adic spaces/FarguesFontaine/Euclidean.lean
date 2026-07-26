@@ -808,6 +808,101 @@ theorem degAr_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         exact absurd (lt_of_le_of_lt (le_trans h5 (hδ n)) hBA) (lt_irrefl _)
   rw [degAr, degAr, hsets]
 
+/-- The `Aloc` partial sums of the double series `Σₙ pⁿ·Σ_{i+j=n}[aᵢbⱼ]` (Kedlaya's
+`T_N`, the antidiagonal regrouping of a prefix product). -/
+def convPartialAloc (a b : ℕ → F) (N : ℕ) : Aloc p F ϖ :=
+  ∑ n ∈ Finset.range N, (p : Aloc p F ϖ) ^ n
+    * ∑ k ∈ Finset.range (n + 1), alocTeich p F ϖ (a k * b (n - k))
+
+/-- `alocToWittF` sends the convolution partial to the Witt-side double sum. -/
+theorem alocToWittF_convPartialAloc (a b : ℕ → F) (N : ℕ) :
+    alocToWittF p F ϖ (convPartialAloc p F ϖ a b N)
+      = ∑ n ∈ Finset.range N, (p : WittVector p F) ^ n
+        * ∑ k ∈ Finset.range (n + 1),
+          WittVector.teichmuller p (a k * b (n - k)) := by
+  rw [convPartialAloc, map_sum]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  rw [map_mul, map_pow, map_natCast, map_sum]
+  refine congrArg _ (Finset.sum_congr rfl fun k _ => ?_)
+  rw [alocToWittF_alocTeich]
+
+/-- **The Witt-addition error of the convolution partials** (sol step 3): the
+partials differ from the convolution prefixes by at most `ρ·v(x)v(y)` — uniformly
+in `N`. -/
+theorem gaussValueF_convPartial_sub_prefix_le {ρ : NNReal} (hρ0 : 0 < ρ)
+    (hρ1 : ρ < 1) (a b : ℕ → F) {A B : NNReal}
+    (hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ A)
+    (hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ B) (N : ℕ) :
+    gaussValueF p F ρ (alocToWittF p F ϖ (convPartialAloc p F ϖ a b N)
+        - alocToWittF p F ϖ (prefixAloc p F ϖ (convF F a b) N))
+      ≤ ρ * (A * B) := by
+  rw [alocToWittF_convPartialAloc, alocToWittF_prefixAloc]
+  have hdistrib : (∑ n ∈ Finset.range N, (p : WittVector p F) ^ n
+        * ∑ k ∈ Finset.range (n + 1),
+          WittVector.teichmuller p (a k * b (n - k)))
+      - (∑ n ∈ Finset.range N,
+          WittVector.teichmuller p (convF F a b n) * (p : WittVector p F) ^ n)
+      = ∑ n ∈ Finset.range N, (p : WittVector p F) ^ n
+        * ((∑ k ∈ Finset.range (n + 1),
+            WittVector.teichmuller p (a k * b (n - k)))
+          - WittVector.teichmuller p (convF F a b n)) := by
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    ring
+  rw [hdistrib]
+  refine (gaussValueF_finset_sum_le p F hρ0 hρ1 (ρ * (A * B)) (Finset.range N)
+    _ fun n _ => ?_).2
+  set Bn : NNReal := (Finset.range (n + 1)).sup
+    (fun k => perfectoidValuation p F (a k * b (n - k))) with hBn
+  have hf : ∀ k ∈ Finset.range (n + 1),
+      perfectoidValuation p F (a k * b (n - k)) ≤ Bn :=
+    fun k hk => Finset.le_sup
+      (f := fun k => perfectoidValuation p F (a k * b (n - k))) hk
+  have hq := gaussValueF_teichmuller_sum_sub_le p F hρ0 hρ1
+    (Finset.range (n + 1)) (fun k => a k * b (n - k)) hf
+  have hBq : BddAbove (Set.range (gaussTermF p F ρ
+      ((∑ k ∈ Finset.range (n + 1),
+        WittVector.teichmuller p (a k * b (n - k)))
+        - WittVector.teichmuller p (convF F a b n)))) := by
+    have hBsum : BddAbove (Set.range (gaussTermF p F ρ
+        (∑ k ∈ Finset.range (n + 1),
+          WittVector.teichmuller p (a k * b (n - k))))) :=
+      (gaussValueF_finset_sum_le p F hρ0 hρ1 Bn (Finset.range (n + 1))
+        (fun k => WittVector.teichmuller p (a k * b (n - k)))
+        (fun k hk => ⟨bddAbove_gaussTermF_teichmuller p F _, by
+          rw [gaussValueF_teichmuller]
+          exact hf k hk⟩)).1
+    have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1 hBsum
+      (bddAbove_gaussTermF_neg p F hρ0 hρ1
+        (bddAbove_gaussTermF_teichmuller p F (convF F a b n)))
+    rwa [← sub_eq_add_neg] at h1
+  refine ⟨bddAbove_gaussTermF_p_pow_mul p F hBq n, ?_⟩
+  rw [gaussValueF_p_pow_mul p F hBq n]
+  have hqconv : gaussValueF p F ρ
+      ((∑ k ∈ Finset.range (n + 1),
+        WittVector.teichmuller p (a k * b (n - k)))
+        - WittVector.teichmuller p (convF F a b n)) ≤ ρ * Bn := hq
+  refine le_trans (mul_le_mul_of_nonneg_left hqconv zero_le) ?_
+  -- ρⁿ·(ρ·Bₙ) ≤ ρ·(A·B): reduces to ρⁿ·Bₙ ≤ A·B via the attained index
+  have hscaled : ρ ^ n * Bn ≤ A * B := by
+    rw [hBn]
+    rcases Finset.eq_empty_or_nonempty (Finset.range (n + 1)) with hemp | hne
+    · exact absurd hemp (Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero n)).ne_empty
+    · obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
+        (fun k => perfectoidValuation p F (a k * b (n - k)))
+      rw [hk₀]
+      have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk₀mem)
+      calc ρ ^ n * perfectoidValuation p F (a k₀ * b (n - k₀))
+          = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
+            * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
+            rw [Valuation.map_mul,
+              show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+                rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
+            ring
+        _ ≤ A * B := mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
+  calc ρ ^ n * (ρ * Bn) = ρ * (ρ ^ n * Bn) := by ring
+    _ ≤ ρ * (A * B) := mul_le_mul_of_nonneg_left hscaled zero_le
+
 end FarguesFontaine
 
 end
