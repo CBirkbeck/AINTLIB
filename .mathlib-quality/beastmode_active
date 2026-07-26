@@ -1,4 +1,5 @@
-FOCUS: DS4 M1b-3b — Weil FUNCTION Galois transport, then the pairing equivariance.
-HAVE (all sorry-free, pushed): fieldWeilPairing (M1a), fibreWeilPairing on scheme points (M1b-1/2), galoisFunctionFieldEquiv for arbitrary base field (M1b-3a, WeilPairing/GaloisFunctionField.lean).
-NEXT STEP: prove sigma-equivariance of the HasseWeil pairing: e(sigma S, sigma T) = sigma (e(S,T)). Route (mirrors HasseWeil FrobeniusDivisorGalois.projectiveDivisorOf_frobeniusFunctionFieldEquiv_weilFunction): (1) div(Phi_sigma g_T) = div(g_{sigma T}) so Phi_sigma g_T = c * g_{sigma T}; (2) apply Phi_sigma to tau_S g_T = e(S,T) g_T and use Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma; (3) uniqueness of the constant (pairing_const_of_transport / weilPairing_spec) gives the result.
-THEN: M1c = feed into exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent:440) via torsionAlgebraPointsEquiv.
+FOCUS: DS4 M1b-3b — porting the Galois transport chain to arbitrary base field/sigma in WeilPairing/GaloisFunctionField.lean.
+DONE (sorry-free, pushed): coordRingMap_surjective/bijective_of_ringEquiv, map_algEquiv_baseChange_eq, galoisCoordRingEquiv, galoisFunctionFieldEquiv, map_maximalIdealAt_galoisCoordRingEquiv (3b-i), pointOnMappedGal, pointValuation_galoisFunctionFieldEquiv (3b-ii).
+NEXT (3b-iii): ordAtInfty transport — port HasseWeil ordAtInfty_frobeniusFunctionFieldEquiv (FrobeniusDivisorGalois:260) which uses ordAtInfty_ringEquivCast (DivisorGalois, general) + ordAtInfty_ffFrobEquivRaw (needs the general-sigma analogue).
+THEN 3b-iv: ord_P transport; 3b-v: projectiveDivisorOf transport => div(Phi_sigma g_T) = div(g_{sigma T}); 3b-vi: pairing equivariance e(sigma S, sigma T) = sigma e(S,T) via Constancy.pairing_const_of_transport + uniqueness.
+THEN M1c: feed into exists_pairingAlgebraHom_of_galoisEquivariant.

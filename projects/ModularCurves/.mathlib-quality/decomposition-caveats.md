@@ -444,3 +444,36 @@ descent packaging `exists_pairingAlgebraHom_of_galoisEquivariant` (input: a
 through **`torsionAlgebra`**. So feeding `fieldWeilPairing` into it needs, first, the
 `torsionAlgebra` ↔ affine-Weierstrass-points dictionary at `k̄`-fibres — that (not the
 pairing) is the next real leaf of the field-level DS4 construction.
+
+### DS4 M1b progress (2026-07-26, later)
+
+Landed, all sorry-free and axiom-clean:
+
+* `WeilPairing/FieldPairing.lean` — `fieldWeilPairing` + the DS4-shaped specs (M1a) and
+  `fieldWeilPairing_congr`.
+* `WeilPairing/FibrePointDict.lean` — `chartAffinePointEquiv` (scheme points at a
+  geometric fibre ↔ affine Weierstrass points, via `chartPointsEquiv` ∘
+  `modelPointAddEquiv`) and `fibreWeilPairing` with bilinearity / alternation /
+  nondegeneracy (M1b-1/2).
+* `WeilPairing/GaloisFunctionField.lean` — the Galois transport chain for an **arbitrary**
+  base field and an **arbitrary** `σ : L ≃ₐ[k] L` (HasseWeil proves only the Frobenius case
+  and only over finite fields): `coordRingMap_surjective/bijective_of_ringEquiv`,
+  `map_algEquiv_baseChange_eq`, `galoisCoordRingEquiv`, `galoisFunctionFieldEquiv`,
+  `map_maximalIdealAt_galoisCoordRingEquiv` (3b-i), `pointOnMappedGal`,
+  `pointValuation_galoisFunctionFieldEquiv` (3b-ii).
+
+Remaining chain to the field-level DS4 pairing:
+
+* **3b-iii** `ordAtInfty` transport — port `ordAtInfty_ffFrobEquivRaw` /
+  `ordAtInfty_frobeniusFunctionFieldEquiv`. *Shortcut worth trying first*: principal
+  divisors have degree `0`, so once the affine part of `div(Φ_σ g)` matches
+  `div(g_{σ·})`, the `∞`-order is forced — this avoids porting the ~60-line
+  `ordAtInfty` computation.
+* **3b-iv/v** `ord_P` and `projectiveDivisorOf` transport ⟹ `div(Φ_σ g_T) = div(g_{σT})`.
+* **3b-vi** the pairing equivariance `e(σS, σT) = σ(e(S,T))`, from
+  `Constancy.pairing_const_of_transport` (`Φ_σ g_T = c·g_{σT}`), `Φ_σ ∘ τ_S = τ_{σS} ∘ Φ_σ`,
+  and uniqueness of the pairing constant.
+* **M1c** — feed the result into `exists_pairingAlgebraHom_of_galoisEquivariant`
+  (`WeilPairing/EtaleDescent.lean:440`) through `torsionAlgebraPointsEquiv`; note that
+  equivalence is currently only `Nonempty`-valued, so its Galois equivariance has to be
+  exposed as part of this step.
