@@ -594,3 +594,51 @@ been strengthened to `yRho_geometricallyIrreducible_of_connected'`, which needs 
 `hconn`: the local-finiteness and disjointness hypotheses are gone. The entire remaining
 content of `yRho_geometricallyIrreducible` is therefore the analytic input
 (`(Y⊗ℂ)^an ≅ ℍ/Γ̃` + GAGA), unchanged as MAJOR-INFRA.
+
+## DS4 M1c — steps 1–4a landed; the remaining leaf is CHART-DICTIONARY NATURALITY (4b)
+
+`WeilPairing/GaloisFibre.lean` (new, sorry-free, axiom-clean):
+
+* `algHomEquivSpecOver_comp_algEquiv` — the algebra-side Galois action (postcomposition
+  `f ↦ σ ∘ f`) is **precomposition with `Spec σ`** on `Spec R`-points (contravariance of
+  `Spec`; every later comparison factors through this);
+* `specMap_algEquiv_comp_specMap_algebraMap` — `Spec σ` fixes the geometric point;
+* `ΓSpecIso_hom_appTop_specMap_comp` — global sections along `Spec φ` act on
+  `Γ(Spec R, ⊤) ≅ R` by `φ`;
+* `EllipticCurve.torsionAlgebraFibreEquiv` (+ `_coe`, `_comp_algEquiv`) — the fibre-functor
+  value of `torsionAlgebra` as a **named** equivalence (the shipped
+  `torsionAlgebraPointsEquiv` is `Nonempty`-valued, so no equivariance could be stated about
+  it), for an arbitrary target `R`, together with its Galois equivariance;
+* `muNAlgebraFibreEquiv` (+ `_val`, `_comp_algEquiv`) — the same for `μ_N`, where the action
+  on the root of unity is literally `σ`.
+
+**The remaining leaf, T-DS4-M1c-4b.** To transport `fieldWeilPairing_galois` to the scheme
+points one needs
+
+> `chartAffinePointEquiv` intertwines `P ↦ Spec σ ≫ P` with mathlib's `Affine.Point.map σ`.
+
+`chartAffinePointEquiv = chartPointsEquiv ∘ modelPointAddEquiv`
+(`WeilPairing/FibrePointDict.lean`), and
+
+* `chartPointsEquiv` (`Moduli/E3DatumAssembly.lean:166`) is
+  `Point.baseChangeEquiv⁻¹ ∘ pointAddEquiv (chartRecordIso Pr)` — both natural in the test
+  scheme, so this factor should be routine;
+* `modelPointAddEquiv` (`EllipticCurve/AffineSectionSpecPoints.lean:204`) is
+  `subtypeEquivProp ∘ projModelPointsEquiv`, and **this** is the content: one must show that
+  under `g ↦ Spec σ ≫ g`, `InZChart` is preserved and the dehomogenised coordinates
+  transform by `σ`, so that `projModelPointsEquiv_zero`/`_some` give
+  `projModelPointsEquiv (Spec σ ≫ g) = Affine.Point.map σ (projModelPointsEquiv g)`.
+  I.e. naturality in `K` of `chartSolutionsEquiv ∘ chartHomEquiv`
+  (`EllipticCurve/WeierstrassModel.lean`).
+
+With 4b done, step 5 is mechanical: set
+`p := (torsionAlgebraFibreEquiv)² → fibreWeilPairing → (muNAlgebraFibreEquiv)⁻¹`
+(the chart supplied by `EllipticCurve/GlobalChartOverField.lean`) and call
+`exists_pairingAlgebraHom_of_galoisEquivariant` (`WeilPairing/EtaleDescent.lean:440`), giving
+the DS4 pairing `E[N] ×_k E[N] ⟶ μ_N` **over a field**. The general base (KM 2.8) is M2 and
+remains chapter-scale.
+
+**Elaboration warning for 4b**: this is the region that historically needed
+`set_option maxHeartbeats 1600000` (`E3DatumAssembly.lean:177`). Heartbeat bumps are
+forbidden by the owner, so 4b must be decomposed into small per-coordinate lemmas rather
+than attacked as one goal.
