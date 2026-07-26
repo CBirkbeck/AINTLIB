@@ -2011,6 +2011,169 @@ theorem approx_division {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact division_descent p F ϖ hx hx0 hρε hε1 hεx K y hy le_rfl
       (fun n hn => (hKw n (by omega)).le)
 
+/-- Vanishing value bounds force convergence (Cauchy + limit identification). -/
+theorem tendsto_of_valued_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {g : ℕ → hatK p F hρ0 hρ1} {y : hatK p F hρ0 hρ1}
+    {f : ℕ → NNReal} (hle : ∀ i, Valued.v (g i - y) ≤ f i)
+    (hf : Filter.Tendsto f Filter.atTop (nhds 0)) :
+    Filter.Tendsto g Filter.atTop (nhds y) := by
+  have hcauchy : CauchySeq g := by
+    refine cauchySeq_of_valued_le p F (hρ0 := hρ0) (hρ1 := hρ1) g fun ε hε => ?_
+    obtain ⟨N₀, hN₀⟩ := Filter.eventually_atTop.mp (hf.eventually_lt_const hε)
+    refine ⟨N₀, fun m n hm hn => ?_⟩
+    have h1 : g m - g n = (g m - y) - (g n - y) := by ring
+    rw [h1]
+    refine le_trans (Valuation.map_sub _ _ _) (max_le ?_ ?_)
+    · exact le_trans (hle m) (hN₀ m hm).le
+    · exact le_trans (hle n) (hN₀ n hn).le
+  obtain ⟨L, hL⟩ := cauchySeq_tendsto_of_complete hcauchy
+  have hLy : L = y := by
+    have hzero : Valued.v (L - y) = 0 := by
+      by_contra hne
+      have hpos : 0 < Valued.v (L - y) := pos_iff_ne_zero.mpr hne
+      have hhalfpos : 0 < Valued.v (L - y) / 2 := div_pos hpos two_pos
+      obtain ⟨i, hi1, hi2⟩ := ((eventually_valued_sub_le_of_tendsto p F
+        (hρ0 := hρ0) (hρ1 := hρ1) hL hhalfpos).and
+        (Filter.eventually_atTop.mpr
+          (Filter.eventually_atTop.mp (hf.eventually_lt_const hhalfpos)))).exists
+      have hsplit : L - y = (L - g i) + (g i - y) := by ring
+      have h2 : Valued.v (L - y) ≤ Valued.v (L - y) / 2 := by
+        conv_lhs => rw [hsplit]
+        refine le_trans (Valuation.map_add _ _ _) (max_le ?_ ?_)
+        · rw [Valuation.map_sub_swap]
+          exact hi1
+        · exact le_trans (hle i) hi2.le
+      exact absurd (lt_of_le_of_lt h2 (NNReal.half_lt_self hne)) (lt_irrefl _)
+    exact sub_eq_zero.mp ((Valuation.zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mp hzero)
+  rwa [hLy] at hL
+
+/-- **Kedlaya Proposition 2.9 (exact division)**: division on `A^r` by a nonzero
+element leaves a remainder that vanishes or has degree strictly below the divisor.
+The quotient sequence from Lemma 2.8 either drops the degree in finitely many
+steps or shrinks geometrically, and `A^r` is closed. -/
+theorem exact_division {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0)
+    {y : hatK p F hρ0 hρ1} (hy : y ∈ ArSub p F ϖ hρ0 hρ1) :
+    ∃ z : hatK p F hρ0 hρ1, z ∈ ArSub p F ϖ hρ0 hρ1
+      ∧ Valued.v (y - z * x) ≤ Valued.v y
+      ∧ (y - z * x = 0
+        ∨ degAr p F ϖ hρ0 hρ1 (y - z * x) < degAr p F ϖ hρ0 hρ1 x) := by
+  obtain ⟨ε, hρε, hε1, hdiv⟩ := approx_division p F ϖ hx hx0
+  set step : {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1}
+      → {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1} := fun u =>
+    if degAr p F ϖ hρ0 hρ1 u.1 < degAr p F ϖ hρ0 hρ1 x then u
+    else ⟨u.1 - (hdiv u.1 u.2).choose * x,
+      sub_mem u.2 (mul_mem (hdiv u.1 u.2).choose_spec.1 hx)⟩ with hstep
+  set seq : ℕ → {u : hatK p F hρ0 hρ1 // u ∈ ArSub p F ϖ hρ0 hρ1} :=
+    fun l => step^[l] ⟨y, hy⟩ with hseq
+  have hsucc : ∀ l, seq (l + 1) = step (seq l) :=
+    fun l => Function.iterate_succ_apply' step l ⟨y, hy⟩
+  have hval : ∀ l, Valued.v (seq l).1 ≤ Valued.v y := by
+    intro l
+    induction l with
+    | zero => exact le_rfl
+    | succ n ih =>
+      rw [hsucc n]
+      simp only [hstep]
+      by_cases h : degAr p F ϖ hρ0 hρ1 (seq n).1 < degAr p F ϖ hρ0 hρ1 x
+      · rw [if_pos h]
+        exact ih
+      · rw [if_neg h]
+        exact le_trans (hdiv (seq n).1 (seq n).2).choose_spec.2.1 ih
+  have hZmem : ∀ l, (y - (seq l).1) / x ∈ ArSub p F ϖ hρ0 hρ1 := by
+    intro l
+    induction l with
+    | zero =>
+      have h0 : (y - (seq 0).1) / x = 0 := by
+        rw [show (seq 0).1 = y from rfl, sub_self, zero_div]
+      rw [h0]
+      exact zero_mem _
+    | succ n ih =>
+      rw [hsucc n]
+      simp only [hstep]
+      by_cases h : degAr p F ϖ hρ0 hρ1 (seq n).1 < degAr p F ϖ hρ0 hρ1 x
+      · rw [if_pos h]
+        exact ih
+      · rw [if_neg h]
+        have halg : (y - ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)) / x
+            = (y - (seq n).1) / x + (hdiv (seq n).1 (seq n).2).choose := by
+          field_simp
+          ring
+        rw [halg]
+        exact add_mem ih (hdiv (seq n).1 (seq n).2).choose_spec.1
+  by_cases hdrop : ∃ l, degAr p F ϖ hρ0 hρ1 (seq l).1 < degAr p F ϖ hρ0 hρ1 x
+  · obtain ⟨l, hl⟩ := hdrop
+    have hid : y - (y - (seq l).1) / x * x = (seq l).1 := by
+      rw [div_mul_cancel₀ _ hx0]
+      ring
+    refine ⟨(y - (seq l).1) / x, hZmem l, ?_, Or.inr ?_⟩
+    · rw [hid]
+      exact hval l
+    · rw [hid]
+      exact hl
+  · push Not at hdrop
+    have hgeo : ∀ l, Valued.v (seq l).1 ≤ ε ^ l * Valued.v y := by
+      intro l
+      induction l with
+      | zero =>
+        rw [pow_zero, one_mul]
+        exact hval 0
+      | succ n ih =>
+        have hnodrop : ¬ degAr p F ϖ hρ0 hρ1
+            ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)
+            < degAr p F ϖ hρ0 hρ1 x := by
+          have h2 := hdrop (n + 1)
+          rw [hsucc n] at h2
+          simp only [hstep] at h2
+          rw [if_neg (not_lt.mpr (hdrop n))] at h2
+          exact not_lt.mpr h2
+        have hle2 : Valued.v ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)
+            ≤ ε * Valued.v (seq n).1 := by
+          by_contra hcon
+          push Not at hcon
+          exact hnodrop ((hdiv (seq n).1 (seq n).2).choose_spec.2.2 hcon)
+        rw [hsucc n]
+        simp only [hstep]
+        rw [if_neg (not_lt.mpr (hdrop n))]
+        calc Valued.v ((seq n).1 - (hdiv (seq n).1 (seq n).2).choose * x)
+            ≤ ε * Valued.v (seq n).1 := hle2
+          _ ≤ ε * (ε ^ n * Valued.v y) := mul_le_mul_of_nonneg_left ih zero_le
+          _ = ε ^ (n + 1) * Valued.v y := by ring
+    set Z : ℕ → hatK p F hρ0 hρ1 := fun l => (y - (seq l).1) / x with hZdef
+    have hZx : ∀ l, Valued.v (Z l * x - y) ≤ ε ^ l * Valued.v y := by
+      intro l
+      have h1 : Z l * x - y = -((seq l).1) := by
+        rw [hZdef, div_mul_cancel₀ _ hx0]
+        ring
+      rw [h1, Valuation.map_neg]
+      exact hgeo l
+    have hεgeo : Filter.Tendsto (fun l => ε ^ l * Valued.v y)
+        Filter.atTop (nhds 0) := by
+      have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
+        (zero_le : (0 : NNReal) ≤ ε) hε1).mul_const (Valued.v y)
+      rwa [zero_mul] at h1
+    have hZxlim : Filter.Tendsto (fun l => Z l * x) Filter.atTop (nhds y) :=
+      tendsto_of_valued_sub_le p F (hρ0 := hρ0) (hρ1 := hρ1) hZx hεgeo
+    have hZlim : Filter.Tendsto Z Filter.atTop (nhds (y / x)) := by
+      have h1 := hZxlim.mul_const x⁻¹
+      have h2 : ∀ l, Z l * x * x⁻¹ = Z l := fun l => by
+        rw [mul_assoc, mul_inv_cancel₀ hx0, mul_one]
+      rw [show y / x = y * x⁻¹ from div_eq_mul_inv y x]
+      exact h1.congr h2
+    have hclosed : IsClosed (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1)) := by
+      have hcarrier : (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1))
+          = closure ((AlocToHatK p F ϖ hρ0 hρ1).range :
+            Set (hatK p F hρ0 hρ1)) := rfl
+      rw [hcarrier]
+      exact isClosed_closure
+    have hyxmem : y / x ∈ ArSub p F ϖ hρ0 hρ1 :=
+      hclosed.mem_of_tendsto hZlim (Filter.Eventually.of_forall fun l => hZmem l)
+    refine ⟨y / x, hyxmem, ?_, Or.inl ?_⟩
+    · rw [div_mul_cancel₀ _ hx0, sub_self, Valuation.map_zero]
+      exact zero_le
+    · rw [div_mul_cancel₀ _ hx0, sub_self]
+
 end FarguesFontaine
 
 end
