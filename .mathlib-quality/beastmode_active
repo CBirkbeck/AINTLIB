@@ -1,14 +1,15 @@
-FOCUS: Gap A. BOTH LEAVES NOW REDUCED to their descent-compatible form, and everything
-else in SelfAdjointN.lean is PROVED:
-  exists_pic_map_snd_kappa_add                    <-- LEAF (i), the only sorry left for kappa_add
-  exists_pic_map_snd_picMap_mulByHom_kappa        <-- LEAF (ii)
-Derived (no longer sorried): kappa_add, picMap_mulByHom_kappa_pow, picMap_mulByHom_kappa_eq_one.
-Mechanism: eq_of_mul_inv_eq_picMap_snd — Ker(0^*) cap Im(f^*) = 1 (GME p.109 splitting), so
-"the discrepancy comes from the base" upgrades to an equality. That is EXACTLY what
-nonempty_unitObj_iso_of_normalized_glue (Picard/RigidDescent.lean) produces.
-NEXT AND ONLY REMAINING MATH: (LOCAL-SQUARE). On a chart of the base with a Weierstrass
-model, exhibit the generating section l/v of the difference bundle, normalized on the zero
-section; feed to nonempty_unitObj_iso_of_normalized_glue; convert with
-picClass_mul_eq_of_nonempty_tensor_iso / picClass_eq_of_nonempty_iso.
-NOTE: mulByN E t N was introduced because Pic-valued products need
-(E.baseChange t).E and pullback E.pi t SYNTACTICALLY equal, not just defeq.
+FOCUS: Gap A. LEAF (i) is now at the DIVISOR-CLASS level (no kappa), which is the right
+interface for the Weierstrass work:
+  exists_pic_map_snd_sectionCls_add        SelfAdjointN.lean:~182
+  exists_pic_map_snd_picMap_mulByHom_kappa SelfAdjointN.lean:~275
+Those are the ONLY two sorries in the file; kappa_add / picMap_mulByHom_kappa_pow /
+picMap_mulByHom_kappa_eq_one (star-prime) are all PROVED from them.
+NEW helpers: sectionCls, zeroCls, kappa_eq_picRelProj (rfl), picRelProj_eq_of_mul_inv_eq_map_snd.
+GOTCHA RECORDED: never AC-normalise (simp [mul_comm,...] / ac_rfl / group) on unfolded
+sectionCls terms — it times out. Pre-arrange the STATEMENT so the derivation is `exact hM`.
+NEXT AND ONLY REMAINING MATH: (LOCAL-SQUARE). Produce, locally on the base (Weierstrass
+chart), the generating section l/v of the difference bundle, normalised on the zero section;
+feed nonempty_unitObj_iso_of_normalized_glue (Picard/RigidDescent.lean); convert with
+picClass_mul_eq_of_nonempty_tensor_iso / picClass_eq_of_nonempty_iso (Picard/DivisorClass.lean).
+Survey next: EllipticCurve/WeierstrassModel.lean + LocallyWeierstrass for what a base chart
+supplies (coordinates x,y and the section coordinates).

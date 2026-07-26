@@ -120,30 +120,65 @@ theorem sectionToPicRel_congr {P P' : T ⟶ pullback E.π t}
   have hz := sectionToPicRel_zero E.π E.zero E.zero_π hsm t
   exact congrArg Subtype.val (hcongr.trans hz)
 
+/-- The Picard class of the divisor of a section of the base-changed curve — the building
+block of `κ`, and the level at which the theorem of the square is actually proved. -/
+noncomputable def sectionCls (P : T ⟶ pullback E.π t)
+    (hP : P ≫ pullback.snd E.π t = 𝟙 T) : Scheme.Pic (pullback E.π t) :=
+  haveI hsep : IsSeparated (pullback.snd E.π t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) E.π t ‹_›
+  have hsm' : SmoothOfRelativeDimension 1 (pullback.snd E.π t) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) E.π t hsm
+  (RelEffCartierDiv.sectionDivisor (pullback.snd E.π t) P hP).picClass
+    (RelEffCartierDiv.sectionDivisor_isOfficial hsm' P hP)
+
+/-- The class of the zero-section divisor. -/
+noncomputable def zeroCls : Scheme.Pic (pullback E.π t) :=
+  sectionCls E hsm t (baseChangeZero E.π E.zero E.zero_π t)
+    (baseChangeZero_snd E.π E.zero E.zero_π t)
+
+/-- Unfolding `κ`: it is the relative-Picard projection of `[𝒪(Q)] ⊗ [𝒪(0)]⁻¹`. -/
+theorem kappa_eq_picRelProj (Q : (E.baseChange t).Point (𝟙 T)) :
+    kappa E hsm t Q =
+      ((picRelProj E.π E.zero E.zero_π t
+        (sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹) :
+        picRel E.π E.zero E.zero_π t) : Scheme.Pic (pullback E.π t)) := rfl
+
 /-- `κ` lands in the relative Picard group, i.e. it is killed by the zero-section
 pullback. Immediate from the codomain of `sectionToPicRel`. -/
 theorem kappa_mem_ker (Q : (E.baseChange t).Point (𝟙 T)) :
     Scheme.Pic.map (baseChangeZero E.π E.zero E.zero_π t) (kappa E hsm t Q) = 1 :=
   MonoidHom.mem_ker.mp (sectionToPicRel E.π E.zero E.zero_π hsm t Q.1 Q.2).2
 
-/-- **(LEAF (i) — relative theorem of the square, "comes from the base" form)** The
-discrepancy in the additivity of `κ` is a class pulled back from the base.
+/-- **(LEAF (i) — the relative theorem of the square)** At the level of divisor classes:
+`[𝒪(Q+Q′)] · [𝒪(0)]` and `[𝒪(Q)] · [𝒪(Q′)]` differ by a class pulled back from the base.
 
-This is the exact shape the descent machinery produces. `Picard/RigidDescent.lean`'s
-`nonempty_unitObj_iso_of_normalized_glue` says: a module with generating sections over the
-`f`-preimages of a cover of the base, normalized along the zero section, is trivial — i.e.
-the difference bundle, after rigidification, is `f^*` of something. Only that is needed;
-the *exact* tensor isomorphism `I(D_Q) ⊗ I(D_{Q′}) ≅ I(D_{Q+Q′}) ⊗ I(D_0)` is **false** in
-general, because `I(D_0)` restricted to the zero section is the conormal bundle.
+This is the honest content of Silverman III.3.5 `(Q) + (Q′) ∼ (Q+Q′) + (0)` in the relative
+setting. The *exact* equality of classes is false — `𝒪(0)` restricted to the zero section is
+the conormal bundle — and "differs by `f^*`" is both true and all that is needed, because
+`Ker(0^*) ∩ Im(f^*) = 1`.
+
+It is also exactly what `Picard/RigidDescent.lean` produces: locally on the base the
+difference bundle is trivialized by the line-over-vertical function `ℓ/v`, and normalizing
+those local trivializations along the zero section glues them
+(`nonempty_unitObj_iso_of_normalized_glue`).
 
 Field-level template, proved unconditionally in any characteristic:
-`HasseWeil.Pic0.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv` (Silverman III.3.5).
-Its proof is valuation-theoretic and does not transport to a base ring; the relative
-statement is the ideal identity `I(D_P)·I(D_Q)·I(D_{−(P+Q)}) = (ℓ)` together with
-`I(D_{P+Q})·I(D_{−(P+Q)}) = (v)` on a chart where the sections are in general position. -/
-theorem exists_pic_map_snd_kappa_add (Q Q' : (E.baseChange t).Point (𝟙 T)) :
-    ∃ M : Scheme.Pic T, kappa E hsm t (Q + Q') * (kappa E hsm t Q * kappa E hsm t Q')⁻¹
-      = Scheme.Pic.map (pullback.snd E.π t) M := by
+`HasseWeil.Pic0.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv`. That proof is
+valuation-theoretic and does not transport to a base ring; the relative statement is the
+ideal identity `I(D_P)·I(D_Q)·I(D_{−(P+Q)}) = (ℓ)` together with
+`I(D_{P+Q})·I(D_{−(P+Q)}) = (v)` on a chart where the sections are in general position.
+
+The left-hand side is written pre-arranged as `κ`'s numerator over the product of `κ`'s
+numerators — in a commutative group it equals the readable
+`[𝒪(Q+Q′)]·[𝒪(0)]·([𝒪(Q)]·[𝒪(Q′)])⁻¹`, but keeping it in this shape means `kappa_add`
+needs no rearrangement of these (very large) terms. -/
+theorem exists_pic_map_snd_sectionCls_add (Q Q' : (E.baseChange t).Point (𝟙 T)) :
+    ∃ M : Scheme.Pic T,
+      (sectionCls E hsm t (Q + Q').1 (Q + Q').2 * (zeroCls E hsm t)⁻¹) *
+          ((sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹) *
+            (sectionCls E hsm t Q'.1 Q'.2 * (zeroCls E hsm t)⁻¹))⁻¹
+        = Scheme.Pic.map (pullback.snd E.π t) M := by
   sorry
 
 /-- `0^*` undoes `f^*`, so a class pulled back from the base is detected by the zero
@@ -174,13 +209,19 @@ theorem eq_of_mul_inv_eq_picMap_snd {x y : Scheme.Pic (pullback E.π t)}
 
 /-- **(PROVED from LEAF (i))** `κ` is a homomorphism.
 
-Both sides lie in `Ker(0^*)`, and their ratio comes from the base by
-`exists_pic_map_snd_kappa_add`; `eq_of_mul_inv_eq_picMap_snd` then closes it. -/
+`κ` is the relative-Picard projection of `[𝒪(Q)]·[𝒪(0)]⁻¹`, and the projection kills
+`f^* Pic(T)` — so the leaf's "differs by a class from the base" is exactly enough. -/
 theorem kappa_add (Q Q' : (E.baseChange t).Point (𝟙 T)) :
     kappa E hsm t (Q + Q') = kappa E hsm t Q * kappa E hsm t Q' := by
-  obtain ⟨M, hM⟩ := exists_pic_map_snd_kappa_add E hsm t Q Q'
-  refine eq_of_mul_inv_eq_picMap_snd E t (kappa_mem_ker E hsm t (Q + Q')) ?_ hM
-  rw [map_mul, kappa_mem_ker, kappa_mem_ker, one_mul]
+  obtain ⟨M, hM⟩ := exists_pic_map_snd_sectionCls_add E hsm t Q Q'
+  have key := picRelProj_eq_of_mul_inv_eq_map_snd E.π E.zero E.zero_π t
+    (x := sectionCls E hsm t (Q + Q').1 (Q + Q').2 * (zeroCls E hsm t)⁻¹)
+    (y := (sectionCls E hsm t Q.1 Q.2 * (zeroCls E hsm t)⁻¹) *
+      (sectionCls E hsm t Q'.1 Q'.2 * (zeroCls E hsm t)⁻¹))
+    (M := M) hM
+  rw [kappa_eq_picRelProj, kappa_eq_picRelProj, kappa_eq_picRelProj, ← Subgroup.coe_mul,
+    ← map_mul]
+  exact congrArg Subtype.val key
 
 /-- `κ` carries `ℕ`-multiples to powers. Derived from `kappa_add` and `kappa_zero`. -/
 theorem kappa_nsmul (Q : (E.baseChange t).Point (𝟙 T)) (n : ℕ) :
