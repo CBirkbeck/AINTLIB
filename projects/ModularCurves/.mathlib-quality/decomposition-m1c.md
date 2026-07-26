@@ -497,3 +497,65 @@ Noted; `k = ℚ` for the application, so no action. If ever generalised, the rou
   `projModelPointsEquiv_eq_some_chartSolution`, `..._eq_zero_of_notInZChart` and
   `affinePoint_some_congr` (and letting unification supply the nonsingularity witness
   instead of naming it) made every step cheap. No heartbeat bump.
+
+* **Nodes B, C, D COMPLETE** (2026-07-26), axiom-clean:
+  `Moduli/ChartPointsGalois.lean` (B, C, `chartPointsEquiv_coe`,
+  `chartPointsEquiv_congr_base`) and `WeilPairing/FibreGalois.lean` (D).
+  ChatGPT's Correction 1 was right and load-bearing: C needed `pullback.hom_ext` +
+  `lift_fst`/`lift_snd`, not associativity. Two `rw` motive failures (dependent on the
+  base point inside `Q`'s type) were sidestepped by the morphism-level formulation, also
+  as advised.
+
+## NEW FINDING (surfaced entering node E) — the base-ring mismatch
+
+`fieldWeilPairing_galois` is stated for a Weierstrass curve over a **field** `F` with
+`σ : L ≃ₐ[F] L`. But `LocalPresentation` fixes `Pr.W : WeierstrassCurve Γ(S, V.1)`, and
+`Γ(S, V.1)` is a general commutative ring. Over `S = Spec k` it *is* a field — but only
+through `Scheme.ΓSpecIso`, and hypothesising `[Field Γ(S, ⊤)]` alongside the ambient
+`CommRing Γ(S, ⊤)` instance creates a genuine instance diamond. So node E cannot be
+stated at the `Γ(S, V.1)`-level.
+
+This is exactly ChatGPT's hazard 6: *"you must handle the canonical isomorphism
+`Γ(Spec k, ⊤) ≃ k`, install the resulting field/algebra structures, prove that `σ` is
+linear over this global-sections field, and identify the composite geometric point."*
+
+### Revised plan for E / F / G (supersedes nodes E–G above)
+
+Decouple, so that F is the only remaining obligation and E/G do not wait on it. Introduce
+the chart as **labelled data** (the pattern `weilPairingCharZero` already uses):
+
+```lean
+/-- A `k`-rational Weierstrass chart for `E` at the geometric point, with its Galois
+equivariance. -/
+structure GaloisFibreChart (k : Type u) [Field k]
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (L : Type u) [Field L] [DecidableEq L] [IsAlgClosed L] [Algebra k L] where
+  W : WeierstrassCurve k
+  elliptic : (W.baseChange L).toAffine.IsElliptic
+  dict : E.Point (Spec.map (CommRingCat.ofHom (algebraMap k L))) ≃+
+    (W.baseChange L).toAffine.Point
+  equivariant : ∀ (σ : L ≃ₐ[k] L) (P Q : _),
+    (Q.1 : _ ⟶ E.E) = Spec.map (CommRingCat.ofHom (σ : L →+* L)) ≫ (P.1 : _ ⟶ E.E) →
+      dict Q = galoisPointEquiv W σ (dict P)
+```
+
+* **E′** — from a `GaloisFibreChart`, transport `fieldWeilPairing_galois`: the pairing on
+  scheme points is `σ`-equivariant. Short; no chart internals.
+* **G′** — assemble `p` from E′ + the two landed fibre dictionaries
+  (`torsionAlgebraFibreEquiv_comp_algEquiv`, `muNAlgebraFibreEquiv_comp_algEquiv`) and
+  call `exists_pairingAlgebraHom_of_galoisEquivariant`. Per the review, check the three
+  named items: diagonal equivariance on the pair fibre, equivariance of the pair
+  dictionary, and the variance `O(μ_N) → O(E[N]) ⊗ O(E[N])`.
+* **F′** (the remaining obligation) — construct a `GaloisFibreChart` over `Spec k` from
+  `localPresentationTop` (`EllipticCurve/GlobalChartOverField.lean`) + nodes A–D. This is
+  where `Γ(Spec k, ⊤) ≅ k` is installed: set `W := Pr.W.map (ΓSpecIso (of k)).hom.hom`,
+  give `L` the induced `Γ(Spec k, ⊤)`-algebra structure through the iso, check `σ` is
+  `Γ(Spec k, ⊤)`-linear (it is, since the iso is over `k`), and identify
+  `Spec.map (ofHom (algebraMap Γ(Spec k,⊤) L)) ≫ chartρ ⊤` with
+  `Spec.map (ofHom (algebraMap k L))`. **Node D is exactly the `equivariant` field**, so
+  F′ is transport only — no new mathematics — but it is the fiddly leaf, and it must not
+  be attacked as one goal (split: `chartρ_top`, the algebra-structure transport, the
+  curve-map comparison, then the assembly).
+
+With E′/G′ done, R holds **conditionally on a `GaloisFibreChart`**; F′ makes it
+unconditional.
