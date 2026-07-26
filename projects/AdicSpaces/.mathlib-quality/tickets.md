@@ -741,7 +741,7 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       `gaussValueF_p_mul`, transport (`gaussValueF_map`), boundedness lemmas for
       tails/sums/Teichmüller-differences. The [-1]-question was DODGED entirely: the
       only negation needed was digit-0 (additive, exact).
-      (4) IN PROGRESS — (4a) done, (4b) done (`gaussValueF_alocToWittF` attainment
+      (4) COMPLETE (2026-07-26): (4a) done, (4b) done (`gaussValueF_alocToWittF` attainment
       equality), (4c-i) done (`valued_AlocToHatK` bridge + `teichCoeffAr :=
       limUnder(comap AlocToHatK (𝓝 x)) coords` definition). (4c-ii) PARTIAL: `ball_mem_nhds_zero` +
       `exists_ball_subset_nhds` DONE (valuation balls are a neighborhood basis of 0 in
@@ -760,7 +760,13 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       Units.mk0 (v.restrict z₀) for z₀ := toHatK(p^N), ρ^N < ε; the pair condition
       transfers via Valuation.restrict_lt_iff (SAME-valuation comparisons only — no
       value-group computation); prod_comap_comap_eq aligns the filters;
-      valued_AlocToHatK converts to wAloc. REMAINING for tendsto_teichCoeffAr:
+      valued_AlocToHatK converts to wAloc. tendsto_teichCoeffAr GREEN (the step-4 capstone: coordinates of A^r-elements
+      converge along approximants; two-topology diamonds bridged by
+      IsPerfectoidRing.topologyEq rewrites both at the W-neighborhood and at the
+      completeness output). NEXT = STEP (5): reconstruction + attainment
+      (wAr x = sup ρⁿ|teichCoeffAr x n|, attained — via the eventual bounds +
+      coordinate limits + gaussValueF_alocToWittF), then deg/deg_mul/Rem-2.7/summability,
+      unlocking T904 (Euclidean division). Historical assembly notes:
       (i) eventual value-bound B via one small set from eventually_pair_wAloc_le at
       ε := 1 + a base point u₀ (NeBot), B := max (wAloc u₀) 1... wAloc u ≤
       max(wAloc(u−u₀), wAloc u₀)-ultrametric; pick M with (c⁻¹)^M ≥ B;

@@ -548,6 +548,89 @@ theorem exists_eventually_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         · rw [heq]
           exact le_max_left _ _
 
+/-- **Coordinates converge along approximants** (the T903 step-4 capstone): for
+`x ∈ A^r`, the `n`-th Teichmüller coordinates of `Aloc`-approximants converge in `F`,
+to `teichCoeffAr x n`. -/
+theorem tendsto_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (n : ℕ) :
+    Filter.Tendsto (fun u => teichCoeffF p F (alocToWittF p F ϖ u) n)
+      (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x))
+      (nhds (teichCoeffAr p F ϖ hρ0 hρ1 x n)) := by
+  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hx
+  haveI hcompl : CompleteSpace F := IsPerfectoidRing.complete (p := p) (A := F)
+  haveI ht0 : T0Space F := IsPerfectoidRing.t0 (p := p) (A := F)
+  haveI huag : IsUniformAddGroup F := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
+  set L := Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x) with hL
+  set coords : Aloc p F ϖ → F := fun u => teichCoeffF p F (alocToWittF p F ϖ u) n
+    with hcoords
+  -- value scale
+  obtain ⟨B, hB⟩ := exists_eventually_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) hx
+  set c : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+    with hc
+  have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+    fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  have hclt : c < 1 := perfectoidValuation_toOF_lt_one p F ϖ
+  obtain ⟨M, hM⟩ : ∃ M : ℕ, B ≤ (c⁻¹) ^ M := by
+    rcases eq_or_ne B 0 with rfl | hBne
+    · exact ⟨0, zero_le⟩
+    · obtain ⟨M, hM⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr
+        (pos_iff_ne_zero.mpr hBne)) hclt
+      refine ⟨M, ?_⟩
+      rw [inv_pow]
+      have h1 : B * c ^ M < 1 := by
+        have h2 := mul_lt_mul_of_pos_left hM (pos_iff_ne_zero.mpr hBne)
+        rwa [mul_inv_cancel₀ hBne] at h2
+      exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero M hc0.ne')).mpr h1)
+  -- Cauchy of the coordinate filter
+  have hcauchy : Cauchy (Filter.map coords L) := by
+    refine ⟨hne.map _, ?_⟩
+    rw [Filter.prod_map_map_eq]
+    intro V hV
+    rw [uniformity_eq_comap_nhds_zero F] at hV
+    obtain ⟨W, hW, hWV⟩ := Filter.mem_comap.mp hV
+    have htop := IsPerfectoidRing.topologyEq (p := p) (A := F)
+    rw [htop] at hW
+    obtain ⟨m, hmW⟩ := exists_ball_subset_nhds p F ϖ hW
+    have hε0 : (0 : NNReal) < c ^ m := pow_pos hc0 m
+    have hε1 : c ^ m ≤ 1 := pow_le_one₀ zero_le hclt.le
+    obtain ⟨δ, hδ0, hδ⟩ := exists_delta_teichCoeffF_sub p F ϖ n hρ0 hρ1 M
+      (ε := c ^ m) hε0 hε1
+    have hpairs := eventually_pair_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) x
+      (ε := δ) hδ0
+    have hbounds : ∀ᶠ q in L ×ˢ L, wAloc p F ϖ hρ0 hρ1 q.1 ≤ B
+        ∧ wAloc p F ϖ hρ0 hρ1 q.2 ≤ B := by
+      exact Filter.Eventually.and (hB.prod_inl _) (hB.prod_inr _)
+    refine Filter.mem_of_superset ((hpairs.and hbounds).mono ?_) hWV
+    rintro ⟨u, u'⟩ ⟨hdiff, hbu, hbu'⟩
+    refine hmW ?_
+    have hkey := hδ (alocToWittF p F ϖ u') (alocToWittF p F ϖ u)
+      (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u')
+      (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u)
+      (by
+        rw [← map_sub]
+        exact bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 (u' - u))
+      (by
+        rw [gaussValueF_alocToWittF p F ϖ hρ0 hρ1 u']
+        exact hbu'.trans hM)
+      (by
+        rw [gaussValueF_alocToWittF p F ϖ hρ0 hρ1 u]
+        exact hbu.trans hM)
+      (by
+        rw [← map_sub, gaussValueF_alocToWittF p F ϖ hρ0 hρ1 (u' - u)]
+        exact hdiff)
+    exact hkey
+  -- conclude via completeness
+  obtain ⟨y, hy⟩ := CompleteSpace.complete hcauchy
+  have htop2 := IsPerfectoidRing.topologyEq (p := p) (A := F)
+  rw [htop2] at hy
+  have hty : Filter.Tendsto coords L (nhds y) := hy
+  have heq : teichCoeffAr p F ϖ hρ0 hρ1 x n = y := by
+    rw [teichCoeffAr]
+    exact hty.limUnder_eq
+  rw [heq]
+  exact hty
+
 end FarguesFontaine
 
 end
