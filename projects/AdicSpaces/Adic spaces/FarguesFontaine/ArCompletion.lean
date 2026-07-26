@@ -963,6 +963,94 @@ theorem exists_finite_teichmuller_sum_close {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 
     hval.trans hεc.le
   exact le_of_mul_le_mul_right hfinal (pow_pos hcϖ0 k)
 
+/-- Finite Teichmüller prefix sums in `Aloc` (the c₀-architecture's building blocks). -/
+def prefixAloc (b : ℕ → F) (N : ℕ) : Aloc p F ϖ :=
+  ∑ n ∈ Finset.range N, (p : Aloc p F ϖ) ^ n * alocTeich p F ϖ (b n)
+
+theorem alocToWittF_prefixAloc (b : ℕ → F) (N : ℕ) :
+    alocToWittF p F ϖ (prefixAloc p F ϖ b N)
+      = ∑ n ∈ Finset.range N,
+          WittVector.teichmuller p (b n) * (p : WittVector p F) ^ n := by
+  rw [prefixAloc, map_sum]
+  refine Finset.sum_congr rfl fun n _ => ?_
+  rw [map_mul, map_pow, map_natCast, alocToWittF_alocTeich, mul_comm]
+
+/-- Coordinates of prefix sums are the given coefficients. -/
+theorem teichCoeffF_prefixAloc (b : ℕ → F) {N j : ℕ} (hj : j < N) :
+    teichCoeffF p F (alocToWittF p F ϖ (prefixAloc p F ϖ b N)) j = b j := by
+  rw [alocToWittF_prefixAloc]
+  have h0 : (∑ n ∈ Finset.range N,
+      WittVector.teichmuller p (b n) * (p : WittVector p F) ^ n)
+      = (∑ n ∈ Finset.range N,
+          WittVector.teichmuller p (b n) * (p : WittVector p F) ^ n)
+        + (p : WittVector p F) ^ N * 0 := by
+    rw [mul_zero, add_zero]
+  rw [h0]
+  exact teichCoeffF_sum_range_add p F b 0 hj
+
+/-- The Gauss value of a single Teichmüller lift over `F`. -/
+theorem gaussValueF_teichmuller (ρ : NNReal) (c : F) :
+    gaussValueF p F ρ (WittVector.teichmuller p c) = perfectoidValuation p F c := by
+  rw [gaussValueF]
+  refine le_antisymm (ciSup_le fun n => ?_) ?_
+  · rcases Nat.eq_zero_or_pos n with rfl | hn
+    · rw [gaussTermF, pow_zero, one_mul, teichCoeffF]
+      simp [WittVector.teichmuller_coeff_zero]
+    · rw [gaussTermF, teichCoeffF, WittVector.teichmuller_coeff_pos p c n hn]
+      simp
+  · refine le_trans ?_ (le_ciSup (⟨perfectoidValuation p F c, ?_⟩ :
+      BddAbove (Set.range (gaussTermF p F ρ (WittVector.teichmuller p c)))) 0)
+    · rw [gaussTermF, pow_zero, one_mul, teichCoeffF]
+      simp [WittVector.teichmuller_coeff_zero]
+    · rintro s ⟨n, rfl⟩
+      rcases Nat.eq_zero_or_pos n with rfl | hn
+      · rw [gaussTermF, pow_zero, one_mul, teichCoeffF]
+        simp [WittVector.teichmuller_coeff_zero]
+      · rw [gaussTermF, teichCoeffF, WittVector.teichmuller_coeff_pos p c n hn]
+        simp
+
+/-- **Prefix values are exact finite maxima** — the isometry identity on the dense
+layer of the c₀ architecture. -/
+theorem wAloc_prefixAloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : ℕ → F) (N : ℕ) :
+    wAloc p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N)
+      = (Finset.range N).sup (fun n => ρ ^ n * perfectoidValuation p F (b n)) := by
+  rw [← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, alocToWittF_prefixAloc]
+  have hpiece : ∀ n : ℕ,
+      BddAbove (Set.range (gaussTermF p F ρ
+        (WittVector.teichmuller p (b n) * (p : WittVector p F) ^ n)))
+      ∧ gaussValueF p F ρ (WittVector.teichmuller p (b n) * (p : WittVector p F) ^ n)
+        = ρ ^ n * perfectoidValuation p F (b n) := by
+    intro n
+    constructor
+    · rw [mul_comm]
+      exact bddAbove_gaussTermF_p_pow_mul p F
+        (bddAbove_gaussTermF_teichmuller p F (b n)) n
+    · rw [mul_comm, gaussValueF_p_pow_mul p F
+        (bddAbove_gaussTermF_teichmuller p F (b n)) n, gaussValueF_teichmuller]
+  have hsum := gaussValueF_finset_sum_le p F hρ0 hρ1
+    ((Finset.range N).sup (fun n => ρ ^ n * perfectoidValuation p F (b n)))
+    (Finset.range N)
+    (fun n => WittVector.teichmuller p (b n) * (p : WittVector p F) ^ n)
+    (fun n hn => ⟨(hpiece n).1, by
+      rw [(hpiece n).2]
+      exact Finset.le_sup (f := fun m => ρ ^ m * perfectoidValuation p F (b m)) hn⟩)
+  refine le_antisymm hsum.2 ?_
+  refine Finset.sup_le fun n hn => ?_
+  have hterm : gaussTermF p F ρ (∑ m ∈ Finset.range N,
+      WittVector.teichmuller p (b m) * (p : WittVector p F) ^ m) n
+      = ρ ^ n * perfectoidValuation p F (b n) := by
+    rw [gaussTermF]
+    congr 1
+    have h0 : (∑ m ∈ Finset.range N,
+        WittVector.teichmuller p (b m) * (p : WittVector p F) ^ m)
+        = (∑ m ∈ Finset.range N,
+            WittVector.teichmuller p (b m) * (p : WittVector p F) ^ m)
+          + (p : WittVector p F) ^ N * 0 := by
+      rw [mul_zero, add_zero]
+    rw [h0, teichCoeffF_sum_range_add p F b 0 (Finset.mem_range.mp hn)]
+  rw [← hterm]
+  exact gaussTermF_le_gaussValueF p F hsum.1 n
+
 end FarguesFontaine
 
 end

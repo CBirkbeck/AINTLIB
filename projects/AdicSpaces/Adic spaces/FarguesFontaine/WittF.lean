@@ -1049,6 +1049,43 @@ theorem exists_delta_teichCoeffF_sub (ϖ : PseudoUniformizer F) (n : ℕ) {ρ : 
       (hscaleup x' x hx'c hBx hVx) (hscaleup y' y hy'c hBy hVy) hxy'
     rwa [hx'c n, hy'c n] at hres
 
+/-- Boundedness for `p`-power multiples (iterated). -/
+theorem bddAbove_gaussTermF_p_pow_mul {ρ : NNReal} {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F ρ x))) (n : ℕ) :
+    BddAbove (Set.range (gaussTermF p F ρ ((p : WittVector p F) ^ n * x))) := by
+  induction n with
+  | zero => simpa using hB
+  | succ m ih =>
+    have hsplit : (p : WittVector p F) ^ (m + 1) * x
+        = (p : WittVector p F) * ((p : WittVector p F) ^ m * x) := by ring
+    rw [hsplit]
+    exact bddAbove_gaussTermF_p_mul p F ih
+
+/-- The iterated `p`-shift for the F-value. -/
+theorem gaussValueF_p_pow_mul {ρ : NNReal} {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F ρ x))) (n : ℕ) :
+    gaussValueF p F ρ ((p : WittVector p F) ^ n * x)
+      = ρ ^ n * gaussValueF p F ρ x := by
+  induction n with
+  | zero => simp
+  | succ m ih =>
+    have hsplit : (p : WittVector p F) ^ (m + 1) * x
+        = (p : WittVector p F) * ((p : WittVector p F) ^ m * x) := by ring
+    rw [hsplit, gaussValueF_p_mul p F (bddAbove_gaussTermF_p_pow_mul p F hB m), ih,
+      pow_succ]
+    ring
+
+/-- Boundedness for single Teichmüller lifts. -/
+theorem bddAbove_gaussTermF_teichmuller {ρ : NNReal} (c : F) :
+    BddAbove (Set.range (gaussTermF p F ρ (WittVector.teichmuller p c))) := by
+  refine ⟨perfectoidValuation p F c, ?_⟩
+  rintro s ⟨n, rfl⟩
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · rw [gaussTermF, pow_zero, one_mul, teichCoeffF]
+    simp [WittVector.teichmuller_coeff_zero]
+  · rw [gaussTermF, teichCoeffF, WittVector.teichmuller_coeff_pos p c n hn]
+    simp
+
 /-- Ultrametric bound for finite sums over `W(F)`, with boundedness threaded. -/
 theorem gaussValueF_finset_sum_le {ι : Type*} {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     (B : NNReal) (s : Finset ι) (f : ι → WittVector p F)
