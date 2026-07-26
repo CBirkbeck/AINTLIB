@@ -28,6 +28,7 @@ the `max`-of-two-valuations uniformity, and its closure is therefore the complet
 * `FarguesFontaine.wI` : the interval norm `max {λ_{ρ₁}, λ_{ρ₂}}`.
 * `FarguesFontaine.BIPlus` : the integral subring `B^{I,+}` of norm-`≤ 1` elements.
 * `FarguesFontaine.resI` : the restriction map to an intermediate radius.
+* `FarguesFontaine.resIHom` : the restriction ring homomorphism `B^I → B^{I'}`.
 
 ## Sources
 
@@ -1003,6 +1004,63 @@ theorem resI_pair_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ
         ∈ (Set.range (BIProd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)) :=
     Filter.Eventually.of_forall fun x => ⟨x, rfl⟩
   exact mem_closure_of_tendsto hpair hmem
+
+set_option maxHeartbeats 1000000 in
+/-- **The restriction ring homomorphism** `B^I → B^{I'}` (Kedlaya Corollary 4.6): the
+unique continuous ring map extending the identity on `Bloc`. -/
+def resIHom {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ η : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hη0 : 0 ≤ η) (hη1 : η ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ η * ρ₂ ^ (1 - η)) (hσ₂1 : ρ₁ ^ η * ρ₂ ^ (1 - η) < 1) :
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) where
+  toFun z := ⟨(resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 (z : _),
+      resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1 (z : _)),
+    resI_pair_mem p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1 z.2⟩
+  map_one' := by
+    have hone : ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 1 := by
+      rw [map_one]
+      rfl
+    have e1 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+        ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 1 := by
+      rw [hone, resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1, map_one]
+    have e2 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1
+        ((1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 1 := by
+      rw [hone, resI_BIProd p F ϖ hη0 hη1 hσ₂0 hσ₂1, map_one]
+    refine Subtype.ext ?_
+    rw [show ((1 : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) = (1, 1) from rfl]
+    exact Prod.ext e1 e2
+  map_mul' := fun z z' => by
+    have hcoe : ((z * z' : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * (z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := rfl
+    have e1 := resI_mul p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 z'.2
+    have e2 := resI_mul p F ϖ hη0 hη1 hσ₂0 hσ₂1 z.2 z'.2
+    refine Subtype.ext ?_
+    exact Prod.ext e1 e2
+  map_zero' := by
+    have hzero : ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 0 := by
+      rw [map_zero]
+      rfl
+    have e1 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+        ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 := by
+      rw [hzero, resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1, map_zero]
+    have e2 : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1
+        ((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 := by
+      rw [hzero, resI_BIProd p F ϖ hη0 hη1 hσ₂0 hσ₂1, map_zero]
+    refine Subtype.ext ?_
+    rw [show ((0 : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) = (0, 0) from rfl]
+    exact Prod.ext e1 e2
+  map_add' := fun z z' => by
+    have hcoe : ((z + z' : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) + (z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := rfl
+    have e1 := resI_add p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2 z'.2
+    have e2 := resI_add p F ϖ hη0 hη1 hσ₂0 hσ₂1 z.2 z'.2
+    refine Subtype.ext ?_
+    exact Prod.ext e1 e2
 
 end FarguesFontaine
 
