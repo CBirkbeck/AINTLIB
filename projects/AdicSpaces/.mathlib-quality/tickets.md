@@ -713,14 +713,36 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
       (frobenius commutes with ring homs; symm-version by injectivity), hence
       `teichCoeffAloc := teichCoeffF ∘ alocToWittF` extends teichCoeff with
       [ϖ]-denominator scaling (scaling lemma teichCoeff_teichmuller_mul, F-version);
-  (3) per-coordinate ε-δ on Aloc-pairs with common denominator (clear [ϖ]^k, apply
-      exists_delta_teichCoeff_sub, pay c^{-k}; modulus uniform on fixed-denominator sets
-      — sufficient for Cauchy-sequence coordinates since a w-Cauchy sequence in Aloc can
-      be written with... CAUTION: re-derive; may need the denominator-bounded-on-Cauchy
-      argument or the direct W(F)-version of (b3), which is the same head-split recursion
-      run in W(F) using teichCoeffF and F-versions of head-split — F-head-split :=
-      exists_eq_sum_teichCoeffF_add at N=1 + tail-coords via the F-CORE-1 (mirror of
-      exists_head_split; port when needed);
+  (3) DECIDED (2026-07-26): common-denominator shortcuts are DEAD — counterexample
+      sₘ = p^m·[ϖ^{-m/2}] is wAloc-small with unbounded denominators when ρ < √c. The
+      honest route is the full W(F) value-port with BddAbove-threading:
+      `gaussTermF ρ x n := ρⁿ·|teichCoeffF x n|`, `gaussValueF := ⨆` (with explicit
+      `BddAbove (Set.range (gaussTermF ρ x))` hypotheses on every lemma — no global ≤1),
+      ports of: term_le_value, add_le (level-rep machinery re-run over F: list engines
+      port verbatim, pair bound via u-trick over F using Integers.exists_of_le_one on
+      b/a), p_mul, sub_le (needs mul_le for neg — port submult too OR use -1 = [-1]…
+      CAREFUL: over F use -x = (-1)·x and w((-1)x) via... port gaussValue_neg's argument
+      needs submult; alternatively prove neg-invariance coordinatewise: teichCoeffF(-x) n
+      = -teichCoeffF(x) n?? FALSE in general for p=2? no: -1 = [u]-Teichmüller in char p:
+      (-1)^p = -1 so -1 = [-1] in W(F) for ALL p (p=2: -1=1 ✓ consistent): -x = [-1]·x:
+      coords scale by -1 via teichCoeffF_teichmuller_mul-port: |coords| UNCHANGED ⟹
+      w(-x) = w(x) COORDINATEWISE, no submult needed!! — ALSO backport this trick to
+      simplify GaussNorm's gaussValue_neg in a later cleanup), boundedness-propagation
+      through head-splits (tail-coords are shifted coords), then the (b3)-recursion
+      verbatim. Deliverable: `exists_delta_teichCoeffF_sub` for W(F)-pairs with
+      BddAbove-hyps — applied to Aloc-images (which are bounded: their w-values are
+      wAloc-values via the embedding, bounded on Cauchy sequences).
+      NOTE: [-1]-trick statement: teichmuller p (-1 : F) = -1, provable via
+      map-naturality or: (teichmuller p (-1))² = [1] = 1 and ≠ 1 unless p = 2… simplest:
+      frobenius-fixed: use CharP.neg_one_pow… implement as: -[x] = [-x] ⟸ [-1]·[x] =
+      [-x] (map_mul) + [-1] = -1: for p odd: (-1)ᵖ = -1: Teichmüller-of-root-of-unity…
+      PROOF: -1 ∈ 𝔽_p ⊂ F: Teichmüller of 𝔽_p-elements = ℤ_p-roots-of-unity-lift:
+      cleanest formal route: `WittVector.teichmuller_neg_one`? if absent: verify
+      (teichmuller p (-1) + 1)·(teichmuller p (-1) - ?)… fallback: prove
+      teichCoeffF (-x) n = -(teichCoeffF x n) directly by the DIAGONAL-DIVISIBILITY
+      pattern: coeffs of (-[T]) − [-T] in F[T] vanish at T=0 AND… hmm; TIME-BOX this:
+      if [-1] resists 20 min, thread neg through sub-free statements (state add_le only,
+      derive sub-versions later from T904-context where Euclidean gives more).
   (4) coordinates on ArSub := extend along density (DenseInducing/UniformContinuous.extend
       or sequential: every x ∈ ArSub is a limit of Aloc-images; coords of the
       approximants are Cauchy in F by (3); define teichCoeffAr x n := lim);
