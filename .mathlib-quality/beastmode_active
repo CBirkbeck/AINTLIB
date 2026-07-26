@@ -1,8 +1,7 @@
-FOCUS: DS4 M1b LEAF brick 4b — Phi_sigma vs addX/addY on the generic curve W_KE.
-LANDED sorry-free + pushed: bricks 1,2,3 (extensionality; Phi fixes x_gen,y_gen; Phi fixes base constants, the a_i and the W_KE coefficients a1,a2,a3), 4a (slope transport).
-THREE ATTEMPTS at brick 4b, ALL reverted (file green, 0 sorries):
-  (i) unfold Affine.addX + congr  -> whnf timeout (200k)
-  (ii) simp only [Affine.addX, map_*, per-coefficient lemmas] -> KERNEL deterministic timeout
-  (iii) mathlib functoriality WeierstrassCurve.Affine.map_addX (Formula.lean:411) + congr on the curve -> whnf timeout at the theorem header.
-ROOT CAUSE: the ambient terms (function field of W_KE = (W.baseChange L).map (algebraMap L KE), over the base-changed curve) are huge; ANY tactic that forces whnf on the curve record explodes. Heartbeat bumps are FORBIDDEN.
-NEXT IDEA (untried): work with a LOCAL OPAQUE curve. Introduce `set V : WeierstrassCurve KE := HasseWeil.W_KE (W.baseChange L) with hV` (or a private irreducible def) so that the curve is an atom, prove the transport at V using map_addX with the hypothesis `V.map Phi = V` (provable once, from the three coefficient lemmas via WeierstrassCurve.ext), and only then specialise. Alternatively reformulate the conjugation to avoid addX entirely by transporting the DEFINING property of translateAlgHom (its action on x_gen/y_gen characterises it via ringHom_ext_const_x_y_gen).
+FOCUS: DS4 M1b LEAF — brick 4b now has its clean handle: map_galoisFunctionFieldEquiv_WKE (W_KE is FIXED by Phi_sigma, proved coefficientwise, no record unfolding). All of bricks 1,2,3,4a,4b-key are landed sorry-free and pushed.
+NEXT: with hfix := map_galoisFunctionFieldEquiv_WKE, transport the formulas:
+  Phi (W_KE.addX u v w) = W_KE.addX (Phi u) (Phi v) (Phi w)
+  by `have := WeierstrassCurve.Affine.map_addX (W := (W_KE ...).toAffine) (f := Phi) ...` and rewriting the mapped curve by hfix. IMPORTANT: earlier attempts died on whnf when the mapped curve had to be identified; now do it as `conv` / `simp only [hfix]` on the STATEMENT of map_addX (a small term) BEFORE combining, e.g.
+    have h := WeierstrassCurve.Affine.map_addX (W := ...) (f := ...) ; rw [show ((W_KE ...).map Phi) = W_KE ... from hfix] at h ; exact h.symm
+  Same for addY (map_addY) and slope (map_slope) if they exist in Formula.lean.
+THEN: translateX_xy/translateY_xy transport (4a + 4b), the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch via translateAlgEquiv_of_2tor), weilPairing_galois unconditional, fieldWeilPairing_galois, M1c (EtaleDescent:440).
