@@ -631,6 +631,53 @@ theorem tendsto_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [heq]
   exact hty
 
+/-- For `Valued.v x ≠ 0`, approximants eventually have value exactly `Valued.v x`
+(ultrametric ball constancy, through the same value-group-free γ-mechanics as the
+Cauchy core). -/
+theorem eventually_wAloc_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : Valued.v x ≠ 0) :
+    ∀ᶠ u in Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x),
+      wAloc p F ϖ hρ0 hρ1 u = Valued.v x := by
+  have hrne : (Valued.v).restrict x ≠ 0 := by
+    refine fun h0 => hx ?_
+    rcases eq_or_ne (Valued.v x) 0 with h | h
+    · exact h
+    · have hpos := (Valuation.restrict_pos_iff (v := (Valued.v :
+        Valuation (hatK p F hρ0 hρ1) NNReal)) x).mpr (pos_iff_ne_zero.mpr h)
+      exact absurd hpos (by rw [h0]; exact lt_irrefl 0)
+  set γ : (MonoidWithZeroHom.ValueGroup₀ (.ofClass (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ := Units.mk0 _ hrne with hγ
+  have hball : {z : hatK p F hρ0 hρ1 |
+      (Valued.v).restrict (z - x) < γ.1} ∈ nhds x := by
+    rw [Valued.mem_nhds]
+    exact ⟨γ, fun z hz => hz⟩
+  refine Filter.eventually_comap.mpr (Filter.Eventually.mono hball ?_)
+  intro z hz u hu
+  have hlt : Valued.v (z - x) < Valued.v x := by
+    have h1 : (Valued.v).restrict (z - x) < (Valued.v).restrict x := hz
+    exact (Valuation.restrict_lt_iff (v := (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal))).mp h1
+  have hveq : Valued.v z = Valued.v x := by
+    refine le_antisymm ?_ ?_
+    · calc Valued.v z = Valued.v ((z - x) + x) := by rw [sub_add_cancel]
+        _ ≤ max (Valued.v (z - x)) (Valued.v x) := Valuation.map_add _ _ _
+        _ ≤ Valued.v x := max_le hlt.le le_rfl
+    · by_contra hcon
+      push Not at hcon
+      have h2 : Valued.v x = Valued.v ((x - z) + z) := by rw [sub_add_cancel]
+      have h3 : Valued.v (x - z) = Valued.v (z - x) := by
+        rw [show x - z = -(z - x) from by ring, Valuation.map_neg]
+      have h4 : Valued.v x ≤ max (Valued.v (x - z)) (Valued.v z) :=
+        h2.le.trans (Valuation.map_add _ _ _)
+      rw [h3] at h4
+      rcases max_cases (Valued.v (z - x)) (Valued.v z) with ⟨heq, -⟩ | ⟨heq, -⟩
+      · rw [heq] at h4
+        exact absurd (lt_of_le_of_lt h4 hlt) (lt_irrefl _)
+      · rw [heq] at h4
+        exact absurd (lt_of_le_of_lt h4 hcon) (lt_irrefl _)
+  rw [← valued_AlocToHatK p F ϖ hρ0 hρ1 u, hu]
+  exact hveq
+
 end FarguesFontaine
 
 end
