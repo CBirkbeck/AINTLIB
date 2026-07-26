@@ -982,4 +982,42 @@ theorem galoisFractionLift_y_gen {L : Type v} [Field L] [DecidableEq L] [Algebra
     WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_X]
   rfl
 
+/-- The curve-equality cast sends the generic `x`-coordinate to the generic
+`x`-coordinate. -/
+theorem cast_x_gen {L : Type v} [Field L] [DecidableEq L] (V₁ V₂ : WeierstrassCurve L)
+    [V₁.toAffine.IsElliptic] [V₂.toAffine.IsElliptic] (h : V₁ = V₂) :
+    (RingEquiv.cast (R := fun (U : WeierstrassCurve L) => U.toAffine.FunctionField) h)
+        (HasseWeil.x_gen V₁) = HasseWeil.x_gen V₂ := by
+  subst h
+  rfl
+
+/-- The curve-equality cast sends the generic `y`-coordinate to the generic
+`y`-coordinate. -/
+theorem cast_y_gen {L : Type v} [Field L] [DecidableEq L] (V₁ V₂ : WeierstrassCurve L)
+    [V₁.toAffine.IsElliptic] [V₂.toAffine.IsElliptic] (h : V₁ = V₂) :
+    (RingEquiv.cast (R := fun (U : WeierstrassCurve L) => U.toAffine.FunctionField) h)
+        (HasseWeil.y_gen V₁) = HasseWeil.y_gen V₂ := by
+  subst h
+  rfl
+
+/-- **(M1b-3b leaf, brick 2)** `Φ_σ` fixes the generic `x`-coordinate. -/
+theorem galoisFunctionFieldEquiv_x_gen {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) :
+    galoisFunctionFieldEquiv W σ (HasseWeil.x_gen (W.baseChange L)) =
+      HasseWeil.x_gen (W.baseChange L) := by
+  haveI : ((W.baseChange L).map (σ : L →+* L)).toAffine.IsElliptic := by
+    rw [map_algEquiv_baseChange_eq W σ]; infer_instance
+  rw [galoisFunctionFieldEquiv, RingEquiv.trans_apply, galoisFractionLift_x_gen,
+    cast_x_gen _ _ (map_algEquiv_baseChange_eq W σ)]
+
+/-- **(M1b-3b leaf, brick 2)** `Φ_σ` fixes the generic `y`-coordinate. -/
+theorem galoisFunctionFieldEquiv_y_gen {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) :
+    galoisFunctionFieldEquiv W σ (HasseWeil.y_gen (W.baseChange L)) =
+      HasseWeil.y_gen (W.baseChange L) := by
+  haveI : ((W.baseChange L).map (σ : L →+* L)).toAffine.IsElliptic := by
+    rw [map_algEquiv_baseChange_eq W σ]; infer_instance
+  rw [galoisFunctionFieldEquiv, RingEquiv.trans_apply, galoisFractionLift_y_gen,
+    cast_y_gen _ _ (map_algEquiv_baseChange_eq W σ)]
+
 end ModularCurves
