@@ -39,20 +39,20 @@ set_option backward.isDefEq.respectTransparency false in
 /-- **The ideal sheaf of a relative effective Cartier divisor is an invertible module**
 (KM 1.1.1: "the ideal sheaf `I(D) ⊂ O_X` is an invertible `O_X`-module"; the AG-LB
 interface applied to the engine's `isOfficial`). -/
-theorem isInvertible_idealModule [IsSeparated π]
-    (hsm : SmoothOfRelativeDimension 1 π) (D : RelEffCartierDiv π) :
+theorem isInvertible_idealModule [IsSeparated π] (D : RelEffCartierDiv π)
+    (h : IsOfficialCartier π D.ideal) :
     IsInvertible (idealModule D.ideal) :=
-  Modules.isInvertible_idealModule D.ideal (D.isOfficial π hsm).locallyPrincipal
+  Modules.isInvertible_idealModule D.ideal h.locallyPrincipal
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- The Picard class of a relative effective Cartier divisor: `[I(D)]⁻¹` (GME p. 107:
 "`I(P)` is invertible, and `P` gives rise to a relative effective Cartier divisor";
 p. 109: "`L = I(P)⁻¹`"). -/
-noncomputable def picClass [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
-    (D : RelEffCartierDiv π) : Pic C :=
+noncomputable def picClass [IsSeparated π] (D : RelEffCartierDiv π)
+    (h : IsOfficialCartier π D.ideal) : Pic C :=
   letI := Modules.monoidalCategory C
-  ((D.isInvertible_idealModule hsm).isUnit_toSkeleton).unit⁻¹
+  ((D.isInvertible_idealModule h).isUnit_toSkeleton).unit⁻¹
 
 end RelEffCartierDiv
 
@@ -79,9 +79,12 @@ noncomputable def sectionToPicRel [IsSeparated p]
     haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
     MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) p t hsm
   picRelProj p z hz t
-    ((RelEffCartierDiv.sectionDivisor (Limits.pullback.snd p t) P hP).picClass hsm' *
+    ((RelEffCartierDiv.sectionDivisor (Limits.pullback.snd p t) P hP).picClass
+        (RelEffCartierDiv.sectionDivisor_isOfficial hsm' P hP) *
       ((RelEffCartierDiv.sectionDivisor (Limits.pullback.snd p t)
-        (baseChangeZero p z hz t) (baseChangeZero_snd p z hz t)).picClass hsm')⁻¹)
+        (baseChangeZero p z hz t) (baseChangeZero_snd p z hz t)).picClass
+          (RelEffCartierDiv.sectionDivisor_isOfficial hsm'
+            (baseChangeZero p z hz t) (baseChangeZero_snd p z hz t)))⁻¹)
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
