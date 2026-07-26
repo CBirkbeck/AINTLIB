@@ -1,1 +1,1 @@
-FOCUS: T910a — universal property of restricted power series: partial sums of a restricted series over A^r evaluated at the power-bounded Tate variable are Cauchy in B^I
+FOCUS: T910a packaging — bundle evaluation as a RingHom A^r<T> -> B^I (transport along Fin 1 ->o N, MvPowerSeries.coeff_mul)

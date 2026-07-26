@@ -75,6 +75,17 @@ radius is required** — Groebner.lean stands as proven.
 - **T912** — `IsStronglyNoetherian ↥(BISub …)`: quotient of the noetherian
   `A^r{T, T₁,…,T_k}` (T911 + T911b + Theorem 3.2).
 
+**T910a progress (2026-07-26)** — the analytic core is **done** in `Presentation.lean`:
+`wI_sum_le` (ultrametric finite-sum bound), `exists_eval_series` (a restricted series over
+`A^r` evaluated at a power-bounded element of `B^I` converges — via `wI_ArToBI` and
+`exists_BI_series_limit`), `biUnion_antidiagonal_eq`, `wI_partial_cauchy_diff` (the missing
+index pairs of `P_N - C_N` all have `max i j ≥ N₀`, so the difference has norm `≤ ε·M`),
+`tendsto_zero_of_wI_tendsto_zero`, `exists_bound_of_wI_tendsto_zero`, and
+**`tendsto_cauchy_product`** (the partial sums of the Cauchy product converge to the product
+of the limits = multiplicativity of evaluation). Remaining for T910a: *packaging* — transport
+along `ℕ ≃ (Fin 1 →₀ ℕ)`, `MvPowerSeries.coeff_mul`, and bundle as a `RingHom`
+`A^r⟨T⟩ →+* B^I`; then the `k`-variable version.
+
 **T910 progress (2026-07-26)** — `Presentation.lean` (~470 lines): the `A^r`-algebra
 structure on `B^I` is **done** (`ArToBI`, injective, `wI_ArToBI`), and Kedlaya's Tate
 variable is **done** (`teichPowOverP`, `wLoc_teichPowOverP`, `wI_teichPowOverP`,

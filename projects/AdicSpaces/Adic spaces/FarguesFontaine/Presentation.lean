@@ -36,6 +36,10 @@ and `z ↦ (resAr z, z)` is a ring map `A^{ρ₂} → B^{[ρ₁,ρ₂]}`.
 * `FarguesFontaine.wI_ArToBI` : on `A^r` the interval norm is the `ρ₂`-value.
 * `FarguesFontaine.wI_teichPowOverP_le_one` : the Tate variable `[z̄ⁿ]/p` is
   power-bounded exactly under Kedlaya's left-endpoint condition `|z̄|ⁿ ≤ ρ₁`.
+* `FarguesFontaine.exists_eval_series` : a restricted series over `A^r` evaluated at a
+  power-bounded element of `B^I` converges.
+* `FarguesFontaine.tendsto_cauchy_product` : the partial sums of the Cauchy product
+  converge to the product of the limits — multiplicativity of evaluation.
 
 ## Sources
 
@@ -469,6 +473,262 @@ def teichPowOverPElt {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ�
     (hρ₂1 : ρ₂ < 1) (zb : OF F) (n : ℕ) : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
   ⟨BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (teichPowOverP p F ϖ zb n),
     BIProd_mem_BISub p F ϖ _⟩
+
+/-- **The interval norm of a finite sum** is at most the largest term norm. -/
+theorem wI_sum_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} {ι : Type*} (s : Finset ι)
+    (f : ι → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) {c : NNReal}
+    (hf : ∀ i ∈ s, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (f i) ≤ c) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (∑ i ∈ s, f i) ≤ c := by
+  classical
+  induction s using Finset.induction with
+  | empty =>
+      rw [Finset.sum_empty, wI_zero p F]
+      exact zero_le
+  | insert a s ha ih =>
+      rw [Finset.sum_insert ha]
+      refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
+      · exact hf a (Finset.mem_insert_self a s)
+      · exact ih fun i hi => hf i (Finset.mem_insert_of_mem hi)
+
+/-- **Evaluation of a restricted series over `A^r` at a power-bounded element of `B^I`
+converges.** The bound is `wI(a_l · bˡ) ≤ v_{ρ₂}(a_l)`, which tends to `0` precisely
+because the series is restricted. -/
+theorem exists_eval_series {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (h12 : ρ₁ ≤ ρ₂)
+    (a : ℕ → ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+    (ha : Filter.Tendsto (fun l => Valued.v (a l : hatK p F hρ₂0 hρ₂1))
+      Filter.atTop (nhds 0))
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) :
+    ∃ S : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1),
+      S ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ∧ Filter.Tendsto (fun n => ∑ l ∈ Finset.range n,
+          ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (a l) :
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l)
+        Filter.atTop (nhds S) := by
+  refine exists_BI_series_limit p F ϖ (u := fun l =>
+    ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (a l) :
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l)
+    (fun l => mul_mem (ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (a l)).2
+      (pow_mem hbmem l))
+    (C := fun l => Valued.v (a l : hatK p F hρ₂0 hρ₂1)) (fun l => ?_) ha
+  refine le_trans (wI_mul_le p F _ _) ?_
+  rw [wI_ArToBI p F ϖ h12]
+  calc Valued.v (a l : hatK p F hρ₂0 hρ₂1)
+        * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (b ^ l)
+      ≤ Valued.v (a l : hatK p F hρ₂0 hρ₂1) * 1 := by
+        refine mul_le_mul_of_nonneg_left ?_ zero_le
+        rw [wI_pow p F]
+        exact pow_le_one₀ zero_le hb
+    _ = Valued.v (a l : hatK p F hρ₂0 hρ₂1) := mul_one _
+
+
+/-- The antidiagonals below `N` tile the sub-`N` triangle of the square. -/
+theorem biUnion_antidiagonal_eq (N : ℕ) :
+    ((Finset.range N).biUnion (fun l => Finset.antidiagonal l))
+      = (Finset.range N ×ˢ Finset.range N).filter (fun q : ℕ × ℕ => q.1 + q.2 < N) := by
+  ext q
+  simp only [Finset.mem_biUnion, Finset.mem_range, Finset.mem_antidiagonal,
+    Finset.mem_filter, Finset.mem_product]
+  constructor
+  · rintro ⟨l, hl, rfl⟩
+    exact ⟨⟨lt_of_le_of_lt (Nat.le_add_right _ _) hl,
+      lt_of_le_of_lt (Nat.le_add_left _ _) hl⟩, hl⟩
+  · rintro ⟨-, hlt⟩
+    exact ⟨q.1 + q.2, hlt, rfl⟩
+
+set_option maxHeartbeats 1000000 in
+/-- **The Cauchy-product estimate**: the product of two partial sums differs from the
+partial sum of the Cauchy product by a term of interval norm at most `ε·M`, provided the
+two coefficient families are bounded by `M` and are `≤ ε` beyond `N₀`, and `N ≥ 2N₀`.
+(Every missing index pair `(i,j)` has `i + j ≥ N`, hence `max i j ≥ N₀`.) -/
+theorem wI_partial_cauchy_diff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (A A' : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    {N₀ N : ℕ} (hN : 2 * N₀ ≤ N) {ε M : NNReal}
+    (hA : ∀ i, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i) ≤ M)
+    (hA' : ∀ j, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A' j) ≤ M)
+    (hAε : ∀ i, N₀ ≤ i → wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i) ≤ ε)
+    (hA'ε : ∀ j, N₀ ≤ j → wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A' j) ≤ ε) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((∑ i ∈ Finset.range N, A i * b ^ i) * (∑ j ∈ Finset.range N, A' j * b ^ j)
+          - ∑ l ∈ Finset.range N,
+            (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
+      ≤ ε * M := by
+  classical
+  set g : ℕ × ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+    fun q => A q.1 * A' q.2 * b ^ (q.1 + q.2) with hg
+  have hprod : (∑ i ∈ Finset.range N, A i * b ^ i)
+      * (∑ j ∈ Finset.range N, A' j * b ^ j)
+      = ∑ q ∈ Finset.range N ×ˢ Finset.range N, g q := by
+    rw [Finset.sum_product, Finset.sum_mul_sum]
+    refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
+    rw [hg]
+    simp only
+    rw [pow_add]
+    ring
+  have hcauchy : (∑ l ∈ Finset.range N,
+        (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
+      = ∑ q ∈ (Finset.range N ×ˢ Finset.range N).filter
+          (fun q : ℕ × ℕ => q.1 + q.2 < N), g q := by
+    rw [← biUnion_antidiagonal_eq]
+    rw [Finset.sum_biUnion]
+    · refine Finset.sum_congr rfl fun l _ => ?_
+      rw [Finset.sum_mul]
+      refine Finset.sum_congr rfl fun q hq => ?_
+      have hql : q.1 + q.2 = l := Finset.mem_antidiagonal.mp hq
+      rw [hg]
+      simp only
+      rw [hql]
+    · intro x hx y hy hxy
+      simp only [Finset.disjoint_left, Finset.mem_antidiagonal]
+      intro q hq hq'
+      exact hxy (hq.symm.trans hq')
+  have hsub : (Finset.range N ×ˢ Finset.range N).filter
+      (fun q : ℕ × ℕ => q.1 + q.2 < N) ⊆ Finset.range N ×ˢ Finset.range N :=
+    Finset.filter_subset _ _
+  rw [hprod, hcauchy, ← Finset.sum_sdiff_eq_sub hsub]
+  refine wI_sum_le p F _ g ?_
+  intro q hq
+  rw [Finset.mem_sdiff, Finset.mem_filter, Finset.mem_product, Finset.mem_range,
+    Finset.mem_range] at hq
+  obtain ⟨⟨hq1, hq2⟩, hqbig⟩ := hq
+  have hge : N ≤ q.1 + q.2 := by
+    by_contra hlt
+    exact hqbig ⟨⟨hq1, hq2⟩, Nat.not_le.mp hlt⟩
+  have hmax : N₀ ≤ q.1 ∨ N₀ ≤ q.2 := by
+    by_contra hcon
+    push Not at hcon
+    obtain ⟨h1, h2⟩ := hcon
+    omega
+  have hterm : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (g q)
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A q.1) * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A' q.2) := by
+    rw [hg]
+    simp only
+    refine le_trans (wI_mul_le p F _ _) ?_
+    calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A q.1 * A' q.2)
+          * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (b ^ (q.1 + q.2))
+        ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A q.1 * A' q.2) * 1 := by
+          refine mul_le_mul_of_nonneg_left ?_ zero_le
+          rw [wI_pow p F]
+          exact pow_le_one₀ zero_le hb
+      _ = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A q.1 * A' q.2) := mul_one _
+      _ ≤ _ := wI_mul_le p F _ _
+  refine le_trans hterm ?_
+  rcases hmax with h | h
+  · exact mul_le_mul (hAε q.1 h) (hA' q.2) zero_le zero_le
+  · rw [mul_comm ε M]
+    exact mul_le_mul (hA q.1) (hA'ε q.2 h) zero_le zero_le
+
+
+/-- Interval-norm convergence to `0` is convergence to `0`. -/
+theorem tendsto_zero_of_wI_tendsto_zero {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {x : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (h : Filter.Tendsto (fun n => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (x n))
+      Filter.atTop (nhds 0)) :
+    Filter.Tendsto x Filter.atTop (nhds 0) := by
+  rw [Filter.tendsto_def]
+  intro U hU
+  obtain ⟨ε, hε, hεU⟩ := exists_wI_ball_subset p F (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hU
+  have hev : ∀ᶠ n in Filter.atTop, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (x n) ≤ ε :=
+    h.eventually_le_const hε
+  exact Filter.mem_of_superset hev fun n hn => hεU hn
+
+/-- A null family is bounded. -/
+theorem exists_bound_of_wI_tendsto_zero {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {A : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (h : Filter.Tendsto (fun i => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i))
+      Filter.atTop (nhds 0)) :
+    ∃ M : NNReal, ∀ i, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i) ≤ M := by
+  obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp (h.eventually_le_const zero_lt_one)
+  refine ⟨max 1 ((Finset.range N₁).sup
+    (fun i => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i))), fun i => ?_⟩
+  rcases le_or_gt N₁ i with hi | hi
+  · exact le_trans (hN₁ i hi) (le_max_left _ _)
+  · exact le_trans (Finset.le_sup (f := fun i => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i))
+      (Finset.mem_range.mpr hi)) (le_max_right _ _)
+
+set_option maxHeartbeats 1000000 in
+/-- **The Cauchy product converges to the product of the limits** — multiplicativity of
+evaluation, in the form used to build the presentation map `A^r{T} → B^I`. -/
+theorem tendsto_cauchy_product {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (A A' : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    (hA0 : Filter.Tendsto (fun i => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i))
+      Filter.atTop (nhds 0))
+    (hA'0 : Filter.Tendsto (fun j => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A' j))
+      Filter.atTop (nhds 0))
+    {S S' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hS : Filter.Tendsto (fun n => ∑ i ∈ Finset.range n, A i * b ^ i)
+      Filter.atTop (nhds S))
+    (hS' : Filter.Tendsto (fun n => ∑ j ∈ Finset.range n, A' j * b ^ j)
+      Filter.atTop (nhds S')) :
+    Filter.Tendsto (fun n => ∑ l ∈ Finset.range n,
+        (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
+      Filter.atTop (nhds (S * S')) := by
+  obtain ⟨M, hM⟩ := exists_bound_of_wI_tendsto_zero p F hA0
+  obtain ⟨M', hM'⟩ := exists_bound_of_wI_tendsto_zero p F hA'0
+  set MM : NNReal := max M M' with hMM
+  have hMA : ∀ i, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i) ≤ MM :=
+    fun i => le_trans (hM i) (le_max_left _ _)
+  have hMA' : ∀ j, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A' j) ≤ MM :=
+    fun j => le_trans (hM' j) (le_max_right _ _)
+  have hdiff : Filter.Tendsto (fun n =>
+      (∑ i ∈ Finset.range n, A i * b ^ i) * (∑ j ∈ Finset.range n, A' j * b ^ j)
+        - ∑ l ∈ Finset.range n,
+          (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l)
+      Filter.atTop (nhds 0) := by
+    refine tendsto_zero_of_wI_tendsto_zero p F ?_
+    refine tendsto_order.mpr ⟨fun c hc => absurd hc (not_lt.mpr zero_le), fun δ hδ => ?_⟩
+    rw [Filter.eventually_atTop]
+    rcases eq_or_lt_of_le (zero_le : (0 : NNReal) ≤ MM) with hMM0 | hMM0
+    · refine ⟨0, fun n _ => ?_⟩
+      have hAz : ∀ i, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A i) ≤ 0 := by
+        intro i
+        rw [hMM0]
+        exact hMA i
+      have hA'z : ∀ j, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (A' j) ≤ 0 := by
+        intro j
+        rw [hMM0]
+        exact hMA' j
+      refine lt_of_le_of_lt (wI_partial_cauchy_diff p F hb A A' (N₀ := 0) (N := n)
+        (by omega) hMA hMA' (fun i _ => hAz i) (fun j _ => hA'z j)) ?_
+      rw [zero_mul]
+      exact hδ
+    · have hδ2 : (0 : NNReal) < δ / 2 := half_pos hδ
+      obtain ⟨N₁, hN₁⟩ := Filter.eventually_atTop.mp
+        (hA0.eventually_le_const (div_pos hδ2 hMM0))
+      obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp
+        (hA'0.eventually_le_const (div_pos hδ2 hMM0))
+      refine ⟨2 * max N₁ N₂, fun n hn => ?_⟩
+      refine lt_of_le_of_lt (wI_partial_cauchy_diff p F hb A A' (N₀ := max N₁ N₂)
+        (N := n) hn hMA hMA'
+        (fun i hi => hN₁ i (le_trans (le_max_left _ _) hi))
+        (fun j hj => hN₂ j (le_trans (le_max_right _ _) hj))) ?_
+      calc δ / 2 / MM * MM = δ / 2 := div_mul_cancel₀ _ hMM0.ne'
+        _ < δ := NNReal.half_lt_self hδ.ne'
+
+  have hPS := hS.mul hS'
+  have hkey : Filter.Tendsto (fun n => ((∑ i ∈ Finset.range n, A i * b ^ i)
+        * (∑ j ∈ Finset.range n, A' j * b ^ j))
+      - ((∑ i ∈ Finset.range n, A i * b ^ i) * (∑ j ∈ Finset.range n, A' j * b ^ j)
+        - ∑ l ∈ Finset.range n,
+          (∑ q ∈ Finset.antidiagonal l, A q.1 * A' q.2) * b ^ l))
+      Filter.atTop (nhds (S * S' - 0)) := hPS.sub hdiff
+  rw [sub_zero] at hkey
+  refine hkey.congr fun n => ?_
+  exact sub_sub_cancel _ _
 
 end FarguesFontaine
 
