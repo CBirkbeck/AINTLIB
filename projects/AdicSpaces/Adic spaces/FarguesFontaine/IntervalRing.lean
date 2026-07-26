@@ -505,6 +505,84 @@ theorem exists_BI_series_limit {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
     (isComplete_BISub p F ϖ) hsmem hcauchy
   exact ⟨S, hSmem, hS⟩
 
+/-- The extended Gauss valuation is nonzero off zero. -/
+theorem wLoc_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {x : Bloc p F ϖ}
+    (hx : x ≠ 0) : wLoc p F ϖ hρ0 hρ1 x ≠ 0 := by
+  obtain ⟨⟨a, y⟩, hxy⟩ := IsLocalization.surj
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x
+  change x * algebraMap (Ainf p F) (Bloc p F ϖ) (y : Ainf p F)
+    = algebraMap (Ainf p F) (Bloc p F ϖ) a at hxy
+  intro h0
+  have hval : gaussValue p F ρ a = 0 := by
+    have happ := congrArg (wLoc p F ϖ hρ0 hρ1) hxy
+    rw [map_mul, wLoc_algebraMap, wLoc_algebraMap, h0, zero_mul] at happ
+    exact happ.symm
+  have ha0 : a = 0 := by
+    by_contra hane
+    exact absurd hval (gaussValue_pos_of_ne_zero p F hρ0 hρ1.le hane).ne'
+  have hxzero : x * algebraMap (Ainf p F) (Bloc p F ϖ) (y : Ainf p F) = 0 := by
+    rw [hxy, ha0, map_zero]
+  have hyunit : IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ) (y : Ainf p F)) := by
+    obtain ⟨k, hk⟩ := y.2
+    have hk' : ((p : Ainf p F) * teichPi p F ϖ) ^ k = (y : Ainf p F) := hk
+    rw [← hk', map_pow]
+    exact (isUnit_p_teichPi_image p F ϖ).pow k
+  obtain ⟨u, hu⟩ := hyunit
+  refine hx ?_
+  have : x * (u : Bloc p F ϖ) = 0 := by rw [hu]; exact hxzero
+  calc x = x * (u : Bloc p F ϖ) * ((u⁻¹ : (Bloc p F ϖ)ˣ) : Bloc p F ϖ) := by
+        rw [mul_assoc, Units.mul_inv, mul_one]
+    _ = 0 := by rw [this, zero_mul]
+
+/-- The completed-field valuation restricts to `wLoc` on `Bloc`-images. -/
+theorem valued_BlocToHatK {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (x : Bloc p F ϖ) :
+    Valued.v (BlocToHatK p F ϖ hρ0 hρ1 x) = wLoc p F ϖ hρ0 hρ1 x := by
+  obtain ⟨⟨a, y⟩, hx⟩ := IsLocalization.surj
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x
+  change x * algebraMap (Ainf p F) (Bloc p F ϖ) (y : Ainf p F)
+    = algebraMap (Ainf p F) (Bloc p F ϖ) a at hx
+  have hyne : gaussValue p F ρ (y : Ainf p F) ≠ 0 := by
+    obtain ⟨k, hk⟩ := y.2
+    have hk' : ((p : Ainf p F) * teichPi p F ϖ) ^ k = (y : Ainf p F) := hk
+    rw [← hk', show gaussValue p F ρ (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = (gaussValue p F ρ ((p : Ainf p F) * teichPi p F ϖ)) ^ k from
+        map_pow (gaussVal p F hρ0 hρ1) _ k]
+    exact pow_ne_zero k (gaussValue_p_teichPi_ne_zero p F ϖ hρ0 hρ1)
+  have hB : BlocToHatK p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Bloc p F ϖ)
+      (y : Ainf p F)) = toHatK p F hρ0 hρ1 (y : Ainf p F) :=
+    IsLocalization.lift_eq _ _
+  have hB' : BlocToHatK p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Bloc p F ϖ) a)
+      = toHatK p F hρ0 hρ1 a := IsLocalization.lift_eq _ _
+  have h1 : Valued.v (BlocToHatK p F ϖ hρ0 hρ1 x) * gaussValue p F ρ (y : Ainf p F)
+      = gaussValue p F ρ a := by
+    have happ := congrArg (fun z => Valued.v (BlocToHatK p F ϖ hρ0 hρ1 z)) hx
+    simp only [map_mul, hB, hB'] at happ
+    rw [valued_toHatK, valued_toHatK] at happ
+    exact happ
+  have h2 : wLoc p F ϖ hρ0 hρ1 x * gaussValue p F ρ (y : Ainf p F)
+      = gaussValue p F ρ a := by
+    have happ := congrArg (wLoc p F ϖ hρ0 hρ1) hx
+    rw [map_mul, wLoc_algebraMap, wLoc_algebraMap] at happ
+    exact happ
+  exact mul_right_cancel₀ hyne (h1.trans h2.symm)
+
+/-- **Injectivity of the endpoint map** (the engine of Kedlaya Corollary 4.6). -/
+theorem BlocToHatK_injective {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
+    Function.Injective (BlocToHatK p F ϖ hρ0 hρ1) := by
+  refine (injective_iff_map_eq_zero _).mpr fun x hx => ?_
+  by_contra hne
+  refine absurd (valued_BlocToHatK p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) x) ?_
+  rw [hx, Valuation.map_zero]
+  exact fun heq => (wLoc_ne_zero p F ϖ hne) heq.symm
+
+/-- The diagonal map into the product is injective. -/
+theorem BIProd_injective {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    Function.Injective (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) := by
+  intro x y hxy
+  exact BlocToHatK_injective p F ϖ (congrArg Prod.fst hxy)
+
 end FarguesFontaine
 
 end
