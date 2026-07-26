@@ -1097,6 +1097,48 @@ theorem wI_pow_eq_one_iff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 
           pow_le_pow_left₀ zero_le h n
       _ = 1 := one_pow n
 
+/-- The Gauss value of `p` is the radius. -/
+theorem gaussValue_p {ρ : NNReal} (hρ1 : ρ ≤ 1) :
+    gaussValue p F ρ ((p : Ainf p F)) = ρ := by
+  calc gaussValue p F ρ ((p : Ainf p F))
+      = gaussValue p F ρ ((p : Ainf p F) * 1) := by rw [mul_one]
+    _ = ρ * gaussValue p F ρ 1 := gaussValue_p_mul p F hρ1 1
+    _ = ρ := by rw [gaussValue_one p F hρ1, mul_one]
+
+/-- **The interval norm of `p`** is the larger endpoint radius. -/
+theorem wI_p_image {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)))
+      = max ρ₁ ρ₂ := by
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK, wLoc_algebraMap,
+    wLoc_algebraMap, gaussValue_p p F hρ₁1.le, gaussValue_p p F hρ₂1.le]
+
+/-- **`p` is a unit in the interval ring.** -/
+theorem isUnit_p_BIProd {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsUnit (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F))) :=
+  (isUnit_p_image p F ϖ).map (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+
+/-- **`p` is topologically nilpotent in the interval ring**: its powers have vanishing
+interval norm. -/
+theorem tendsto_wI_p_pow {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    Filter.Tendsto (fun n : ℕ => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F))) ^ n))
+      Filter.atTop (nhds 0) := by
+  have hval : ∀ n : ℕ, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F))) ^ n)
+      = (max ρ₁ ρ₂) ^ n := by
+    intro n
+    rw [wI_pow, wI_p_image]
+  have hmax1 : max ρ₁ ρ₂ < 1 := max_lt hρ₁1 hρ₂1
+  refine Filter.Tendsto.congr (fun n => (hval n).symm) ?_
+  exact tendsto_pow_atTop_nhds_zero_of_lt_one zero_le hmax1
+
 end FarguesFontaine
 
 end
