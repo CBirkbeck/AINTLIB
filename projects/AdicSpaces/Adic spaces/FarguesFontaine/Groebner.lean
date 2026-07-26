@@ -2,6 +2,8 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import Mathlib.Data.Finsupp.MonomialOrder.DegLex
+
 import «Adic spaces».FarguesFontaine.Euclidean
 import «Adic spaces».RestrictedPowerSeries
 
@@ -255,6 +257,121 @@ theorem exists_gaussNormRPS_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact Subtype.ext h3
   obtain ⟨s₀, hs₀, hdom⟩ := exists_iSup_eq_of_finite_above hfin hne
   exact ⟨s₀, hs₀, hdom⟩
+
+/-- Nonzero restricted series have nonzero Gauss norm. -/
+theorem gaussNormRPS_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    gaussNormRPS p F ϖ hρ0 hρ1 f ≠ 0 := by
+  intro h0
+  refine hf0 (MvPowerSeries.ext fun s => ?_)
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf
+  have hB : BddAbove (Set.range (fun s : Fin k →₀ ℕ =>
+      Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1))) := by
+    refine ⟨max 1 (((hfin 1 one_pos).toFinset).sup (fun s =>
+      Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1))), ?_⟩
+    rintro t ⟨s, rfl⟩
+    rcases le_or_gt (Valued.v ((MvPowerSeries.coeff s f :
+        ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) 1 with h1 | h1
+    · exact le_max_of_le_left h1
+    · refine le_max_of_le_right (Finset.le_sup
+        (f := fun s => Valued.v ((MvPowerSeries.coeff s f :
+          ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) ?_)
+      rw [Set.Finite.mem_toFinset]
+      exact h1
+  have h2 := le_ciSup hB s
+  rw [show (⨆ s : Fin k →₀ ℕ, Valued.v ((MvPowerSeries.coeff s f :
+      ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1))
+    = gaussNormRPS p F ϖ hρ0 hρ1 f from rfl, h0] at h2
+  have h3 : ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1) = 0 :=
+    (Valuation.zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mp (le_antisymm h2 zero_le)
+  rw [map_zero]
+  exact Subtype.ext h3
+
+/-- **The attainment set** of a series: the multi-indices realizing the Gauss norm. -/
+def attainSetRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : Set (Fin k →₀ ℕ) :=
+  {s | Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+    : hatK p F hρ0 hρ1) = gaussNormRPS p F ϖ hρ0 hρ1 f}
+
+theorem attainSetRPS_finite {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (attainSetRPS p F ϖ hρ0 hρ1 f).Finite := by
+  have hne := gaussNormRPS_ne_zero p F ϖ hf hf0
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf
+  refine (hfin (gaussNormRPS p F ϖ hρ0 hρ1 f / 2)
+    (div_pos (pos_iff_ne_zero.mpr hne) two_pos)).subset ?_
+  intro s hs
+  rw [attainSetRPS, Set.mem_setOf_eq] at hs
+  rw [Set.mem_setOf_eq, hs]
+  exact NNReal.half_lt_self hne
+
+theorem attainSetRPS_nonempty {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    (attainSetRPS p F ϖ hρ0 hρ1 f).Nonempty := by
+  obtain ⟨s₀, hs₀, -⟩ := exists_gaussNormRPS_eq p F ϖ hf hf0
+  exact ⟨s₀, hs₀.symm⟩
+
+open scoped Classical in
+/-- **The leading index** (Kedlaya Definition 3.6): the graded-lex-maximal
+norm-attaining multi-index (junk `0` off the restricted-nonzero locus). -/
+noncomputable def leadIdxRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : Fin k →₀ ℕ :=
+  if h : MvPowerSeries.IsRestricted f ∧ f ≠ 0 then
+    (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn.symm
+      ((((attainSetRPS_finite p F ϖ h.1 h.2).toFinset).image
+        (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn).max'
+        (by
+          refine Finset.Nonempty.image ?_ _
+          rw [Set.Finite.toFinset_nonempty]
+          exact attainSetRPS_nonempty p F ϖ h.1 h.2))
+  else 0
+
+/-- The leading index attains the norm and degLex-dominates all attaining indices. -/
+theorem leadIdxRPS_spec {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    leadIdxRPS p F ϖ hρ0 hρ1 f ∈ attainSetRPS p F ϖ hρ0 hρ1 f
+      ∧ ∀ s ∈ attainSetRPS p F ϖ hρ0 hρ1 f,
+        (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn s
+          ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+            (leadIdxRPS p F ϖ hρ0 hρ1 f) := by
+  classical
+  rw [leadIdxRPS, dif_pos ⟨hf, hf0⟩]
+  set m : MonomialOrder (Fin k) := MonomialOrder.degLex with hm
+  set At := (attainSetRPS_finite p F ϖ hf hf0).toFinset with hAt
+  have hAtne : At.Nonempty := by
+    rw [hAt, Set.Finite.toFinset_nonempty]
+    exact attainSetRPS_nonempty p F ϖ hf hf0
+  set M := ((At.image m.toSyn).max' (hAtne.image _)) with hM
+  constructor
+  · have hmem : M ∈ At.image m.toSyn := Finset.max'_mem _ _
+    obtain ⟨s₁, hs₁mem, hs₁eq⟩ := Finset.mem_image.mp hmem
+    have h1 : m.toSyn.symm M = s₁ := by
+      rw [← hs₁eq]
+      exact m.toSyn.symm_apply_apply s₁
+    rw [h1]
+    rw [hAt, Set.Finite.mem_toFinset] at hs₁mem
+    exact hs₁mem
+  · intro s hs
+    have hsmem : s ∈ At := by
+      rw [hAt, Set.Finite.mem_toFinset]
+      exact hs
+    have h2 : m.toSyn s ≤ M :=
+      Finset.le_max' _ _ (Finset.mem_image_of_mem _ hsmem)
+    rw [m.toSyn.apply_symm_apply]
+    exact h2
+
+/-- **The leading coefficient** (Kedlaya Definition 3.6). -/
+noncomputable def leadCoeffRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1) :=
+  MvPowerSeries.coeff (leadIdxRPS p F ϖ hρ0 hρ1 f) f
 
 end FarguesFontaine
 
