@@ -389,3 +389,28 @@ canonical `A`-algebra iso (`IsLocalization.algEquiv` + `IsLocalization.Away.mul`
 `IsStandardSmoothOfRelativeDimension.trans` (`0 + 1`) with
 `isStandardSmoothOfRelativeDimension_away_pderiv` finishes it. Then mirror
 `rhoLegendre_total_isStandardSmooth` at level 3 and re-point `exists_representsYRho`.
+
+### RE-PLUMBING DONE (2026-07-26)
+
+`yRho_representable'` now runs on the **level-3** rigidifier:
+
+* `Moduli/LevelThreeSmooth.lean` (new, sorry-free, axiom-clean):
+  `e3S_mul_eq_gamma_cube`, `e3S_dvd_e3Delta_pow`, `isUnit_e3S_map`, `pderiv_one_e3Rel`,
+  `isUnit_pderiv_e3Rel_map`, `isLocalization_away_e3Delta_mul_pderiv`, and
+  **`e3ModuliRing_isStandardSmoothOfRelativeDimension`**.
+* `ModularCurve/RhoSmooth.lean`: `rhoLevelThree_total_isStandardSmooth`,
+  `levelThreeCover_isStandardSmooth`,
+  `rhoProblem_smoothOfRelativeDimension_one_levelThree`.
+* `ModularCurve/RhoPoints.lean`: `exists_representsYRho_levelThree`, and
+  `yRho_representable'` re-pointed at it.
+
+Consequence: **the quarantined Legendre subtree (`exists_scaleTorsorData`) is no longer in
+the cone of the main theorem.** The Legendre route (`exists_representsYRho`) is kept as an
+alternative. The remaining `sorryAx` in `yRho_representable'` comes from the **DS4
+Weil-pairing register**, which is inherent to the *definition* of `rhoProblem` (its
+`RhoLevelStructure` objects carry the pairing clauses) — i.e. the only unproven input is
+now the deliberate construction-of-record.
+
+Board after this session: DS4 construction (chapter-scale), T-SMOOTH-REG (blocked behind
+dimension theory of f.g. algebras — its reusable core
+`isRegularLocalRing_of_flat_of_map_maximalIdeal` is landed), and T-G4-CORE (MAJOR-INFRA).
