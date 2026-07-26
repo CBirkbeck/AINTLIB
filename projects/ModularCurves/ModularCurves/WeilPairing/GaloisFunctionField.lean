@@ -250,4 +250,38 @@ theorem divisorOf_galoisFunctionFieldEquiv_apply {L : Type v} [Field L] [Decidab
   rw [ord_P_galoisFunctionFieldEquiv W σ P g]
   rfl
 
+/-- **(M1b-3b-v-a)** `galoisCoordRingEquiv` on the standard basis presentation. Port of
+HasseWeil's `crFrobEquiv_smul_basis`. -/
+theorem galoisCoordRingEquiv_smul_basis {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) (p q : Polynomial L) :
+    galoisCoordRingEquiv W σ
+        (p • (1 : (W.baseChange L).toAffine.CoordinateRing) +
+          q • WeierstrassCurve.Affine.CoordinateRing.mk (W.baseChange L).toAffine
+            Polynomial.X) =
+      (p.map (σ : L →+* L)) •
+          (1 : ((W.baseChange L).map (σ : L →+* L)).toAffine.CoordinateRing) +
+        (q.map (σ : L →+* L)) •
+          WeierstrassCurve.Affine.CoordinateRing.mk
+            ((W.baseChange L).map (σ : L →+* L)).toAffine Polynomial.X := by
+  have hcr : ∀ z, galoisCoordRingEquiv W σ z =
+      WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine (σ : L →+* L) z :=
+    fun _ => rfl
+  rw [hcr, map_add, WeierstrassCurve.Affine.CoordinateRing.map_smul,
+    WeierstrassCurve.Affine.CoordinateRing.map_smul, map_one]
+  congr 2
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_X]
+
+/-- **(M1b-3b-v-a)** Norm transport: `N(σ·u) = σ·(N u)`. Port of HasseWeil's
+`norm_crFrobEquiv`. -/
+theorem norm_galoisCoordRingEquiv {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (u : (W.baseChange L).toAffine.CoordinateRing) :
+    Algebra.norm (Polynomial L) (galoisCoordRingEquiv W σ u) =
+      (Algebra.norm (Polynomial L) u).map (σ : L →+* L) := by
+  obtain ⟨p, q, rfl⟩ := WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq u
+  rw [galoisCoordRingEquiv_smul_basis, WeierstrassCurve.Affine.CoordinateRing.norm_smul_basis,
+    WeierstrassCurve.Affine.CoordinateRing.norm_smul_basis]
+  simp only [Polynomial.map_sub, Polynomial.map_mul, Polynomial.map_pow, Polynomial.map_add,
+    Polynomial.map_C, Polynomial.map_X, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
+
 end ModularCurves
