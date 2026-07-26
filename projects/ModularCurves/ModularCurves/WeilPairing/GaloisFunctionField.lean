@@ -187,4 +187,42 @@ theorem pointValuation_galoisFunctionFieldEquiv {L : Type v} [Field L] [Decidabl
       exact (map_maximalIdealAt_galoisCoordRingEquiv W σ Q (pointOnMappedGal W σ P)
         (by rw [pointOnMappedGal_x, hPx]) (by rw [pointOnMappedGal_y, hPy])).symm) g
 
+/-- **(M1b-3b-iii)** The `σ`-image of a smooth point of `W ⊗ L` (nonsingularity moves by
+`map_nonsingular` along the injective `σ`, then back along `map_algEquiv_baseChange_eq`). -/
+noncomputable def galoisSmoothPoint {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint where
+  x := σ P.x
+  y := σ P.y
+  nonsingular := by
+    have hmap := (WeierstrassCurve.Affine.map_nonsingular
+      (W := (W.baseChange L).toAffine) (f := (σ : L →+* L)) (EquivLike.injective σ)
+      P.x P.y).mpr P.nonsingular
+    rwa [show ((W.baseChange L).toAffine.map (σ : L →+* L)) =
+      (W.baseChange L).toAffine from by
+        rw [show (W.baseChange L).toAffine.map (σ : L →+* L) =
+          ((W.baseChange L).map (σ : L →+* L)).toAffine from rfl,
+          map_algEquiv_baseChange_eq W σ]] at hmap
+
+@[simp] theorem galoisSmoothPoint_x {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    (galoisSmoothPoint W σ P).x = σ P.x := rfl
+
+@[simp] theorem galoisSmoothPoint_y {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    (galoisSmoothPoint W σ P).y = σ P.y := rfl
+
+/-- **(M1b-3b-iii)** Affine order transport in the form the divisor comparison consumes:
+the order of `σ·g` at `σ·P` is the order of `g` at `P`. -/
+theorem ord_P_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq L] [IsAlgClosed L]
+    [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint)
+    (g : (W.baseChange L).toAffine.FunctionField) :
+    (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ord_P (galoisSmoothPoint W σ P)
+        (galoisFunctionFieldEquiv W σ g) =
+      (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).ord_P P g := by
+  unfold HasseWeil.Curves.SmoothPlaneCurve.ord_P
+  rw [pointValuation_galoisFunctionFieldEquiv W σ (galoisSmoothPoint W σ P) P rfl rfl g]
+
 end ModularCurves
