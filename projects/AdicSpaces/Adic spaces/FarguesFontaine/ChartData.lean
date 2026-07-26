@@ -989,12 +989,17 @@ theorem gaussTerm_le_of_wI_le {ε : NNReal} (k : ℕ) (A : Ainf p F)
         ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k :=
         mul_le_mul_of_nonneg_right hwLoc zero_le
 
-/-- The chart-to-`B^I` ring homomorphism on the localization (before completion). -/
+/-- The chart-to-`B^I` ring homomorphism on the localization (before completion).
+Defined with an explicit `toFun` so that its coercion is definitionally the plain
+composite (PERF: keeps the localization equivalence's body out of coe-unfolds). -/
 noncomputable def chartToBIProd (b : ℕ) (hb : 0 < b) :
     Localization.Away (chartS p F ϖ 1 b) →+*
-      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
-  (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).comp
-    (blocEquivAwayChartS p F ϖ b hb).toRingHom
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) where
+  toFun z := BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (blocEquivAwayChartS p F ϖ b hb z)
+  map_one' := by rw [map_one, map_one]
+  map_mul' x y := by rw [map_mul, map_mul]
+  map_zero' := by rw [map_zero, map_zero]
+  map_add' x y := by rw [map_add, map_add]
 
 /-- **The forward ball inclusion, basis form**: for every `ε > 0` some
 `locNhd`-basic set maps into the `ε`-ball of `B^I` — the topology-free core of the
@@ -1056,6 +1061,43 @@ theorem tendsto_chartToBIProd (a b : ℕ) (hb : 0 < b)
   intro z hz
   refine hball ?_
   exact hn z hz
+
+/-- The coe-form of `tendsto_chartToBIProd` (isolated so the coercion-vs-lambda
+defeq check happens once). -/
+theorem tendsto_chartToBIProd_coe (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    Filter.Tendsto ⇑(chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
+      (@nhds _ (chartTopology p F ϖ a b) 0) (nhds 0) := by
+  refine (tendsto_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2).congr fun z => ?_
+  rfl
+
+/-- The chart map is continuous for the chart topology. -/
+theorem continuous_chartToBIProd (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    @Continuous _ _ (chartTopology p F ϖ a b) _
+      (chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) := by
+  letI : TopologicalSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartTopology p F ϖ a b
+  haveI : IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartTopologicalRing p F ϖ a b
+  haveI : IsTopologicalAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
+    (chartTopologicalRing p F ϖ a b).to_topologicalAddGroup
+  refine continuous_of_tendsto_nhds_zero
+    (chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) ?_
+  exact tendsto_chartToBIProd_coe p F ϖ a b hb hπ1 hπ2 hr1 hr2
 
 end FarguesFontaine
 
