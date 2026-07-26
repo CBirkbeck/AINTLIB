@@ -212,6 +212,257 @@ theorem isUniformInducing_chartToBI (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
     (isInducing_chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2)
 
+/-- The range of the chart map is the range of the diagonal `Bloc`-map. -/
+theorem range_chartToBIProd (b : ℕ) (hb : 0 < b) :
+    Set.range (⇑(chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb))
+      = Set.range (⇑(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  ext w
+  constructor
+  · rintro ⟨z, rfl⟩
+    exact ⟨blocEquivAwayChartS p F ϖ b hb z, rfl⟩
+  · rintro ⟨y, rfl⟩
+    refine ⟨(blocEquivAwayChartS p F ϖ b hb).symm y, ?_⟩
+    show BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (blocEquivAwayChartS p F ϖ b hb
+        ((blocEquivAwayChartS p F ϖ b hb).symm y)) = _
+    rw [RingEquiv.apply_symm_apply]
+
+/-- The completion-level chart map lands in `B^I`. -/
+theorem presheafChartToBIProd_mem_BISub (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (x : presheafValue (chartData p F ϖ 1 b a b)) :
+    presheafChartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2 x
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := by
+  letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartUniformity p F ϖ a b
+  have hx : x ∈ closure (Set.range (⇑((chartData p F ϖ 1 b a b).coeRingHom))) := by
+    have hdense : DenseRange (⇑((chartData p F ϖ 1 b a b).coeRingHom)) :=
+      @UniformSpace.Completion.denseRange_coe _ (chartData p F ϖ 1 b a b).uniformSpace
+    rw [hdense.closure_range]
+    trivial
+  have hcont : Continuous (presheafChartToBIProd p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2) :=
+    UniformSpace.Completion.continuous_extension
+  have himg := image_closure_subset_closure_image
+    (f := ⇑(presheafChartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2))
+    (s := Set.range (⇑((chartData p F ϖ 1 b a b).coeRingHom))) hcont
+  have hmem := himg ⟨x, hx, rfl⟩
+  have hcomp : (⇑(presheafChartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2))
+        '' (Set.range (⇑((chartData p F ϖ 1 b a b).coeRingHom)))
+      = Set.range (⇑(chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)) := by
+    rw [← Set.range_comp]
+    ext w
+    constructor
+    · rintro ⟨z, rfl⟩
+      exact ⟨z, (presheafChartToBIProd_coe p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2 z).symm⟩
+    · rintro ⟨z, rfl⟩
+      exact ⟨z, (presheafChartToBIProd_coe p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2 z)⟩
+  rw [hcomp, range_chartToBIProd p F ϖ b hb] at hmem
+  exact hmem
+
+
+include hρ₁0 hρ₁1 hρ₂0 hρ₂1 in
+/-- **`B^I` as an abstract completion of the chart localization** (at the exact
+chart interval). -/
+noncomputable def chartBIPkg (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    @AbstractCompletion (Localization.Away (chartS p F ϖ 1 b))
+      (chartUniformity p F ϖ a b) :=
+  letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartUniformity p F ϖ a b
+  { space := ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    coe := chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) b hb
+    uniformStruct := inferInstance
+    complete := (isComplete_BISub p F ϖ).completeSpace_coe
+    separation := inferInstance
+    isUniformInducing := isUniformInducing_chartToBI p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
+    dense := denseRange_chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb }
+
+/-- **The uniform equivalence** `A_inf⟨T/s⟩ ≃ᵤ B^I` from the two abstract
+completions of the chart localization. -/
+noncomputable def chartCompletionUniformEquiv (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    presheafValue (chartData p F ϖ 1 b a b)
+      ≃ᵤ ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  @AbstractCompletion.compareEquiv _ (chartUniformity p F ϖ a b)
+    (@UniformSpace.Completion.cPkg _ (chartUniformity p F ϖ a b))
+    (chartBIPkg p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2)
+
+
+include hρ₁1 in
+/-- At the exact chart interval, `|ϖ| ≤ ρ₂`. -/
+theorem vpi_le_rho2_of_exact (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂ := by
+  set vπ : NNReal :=
+    perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hvπ
+  have hne : a * b ≠ 0 := by positivity
+  refine le_of_pow_le_pow_left₀ hne zero_le ?_
+  calc vπ ^ (a * b) ≤ vπ ^ (b * b) :=
+        pow_le_pow_of_le_one zero_le (hexact1 ▸ hρ₁1.le)
+          (Nat.mul_le_mul_right b hab)
+    _ = (vπ ^ b) ^ b := by rw [← pow_mul]
+    _ = (ρ₂ ^ a) ^ b := by rw [hexact2]
+    _ = ρ₂ ^ (a * b) := by rw [← pow_mul]
+
+include hρ₁1 in
+/-- At the exact chart interval, `ρ₁^a ≤ |ϖ|^b`. -/
+theorem rho1_pow_le_of_exact (a b : ℕ) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁) :
+    ρ₁ ^ a ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+  rw [← hexact1]
+  exact pow_le_pow_of_le_one zero_le (hexact1 ▸ hρ₁1.le) hab
+
+/-- **The completion-level chart map corestricted to `B^I`.** -/
+noncomputable def presheafChartToBI (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    presheafValue (chartData p F ϖ 1 b a b)
+      →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  (presheafChartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+    (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2).codRestrict _
+    (presheafChartToBIProd_mem_BISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2)
+
+/-- The corestricted completion-level chart map agrees with the abstract
+comparison equivalence. -/
+theorem presheafChartToBI_eq_compare (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    ⇑(presheafChartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) a b hb (le_of_eq hexact1)
+        (vpi_le_rho2_of_exact p F ϖ (hρ₁1 := hρ₁1) a b ha hb hab hexact1 hexact2)
+        (rho1_pow_le_of_exact p F ϖ (hρ₁1 := hρ₁1) a b hab hexact1)
+        (le_of_eq hexact2))
+      = ⇑(chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2) := by
+  have hdense : DenseRange (⇑((chartData p F ϖ 1 b a b).coeRingHom)) :=
+    @UniformSpace.Completion.denseRange_coe _ (chartData p F ϖ 1 b a b).uniformSpace
+  refine hdense.equalizer ?_ ?_ (funext fun z => ?_)
+  · exact Continuous.subtype_mk
+      (@UniformSpace.Completion.continuous_extension _
+        (chartData p F ϖ 1 b a b).uniformSpace _ _ _ _) _
+  · exact (chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).continuous
+  · apply Subtype.ext
+    show presheafChartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb _ _ _ _
+        ((chartData p F ϖ 1 b a b).coeRingHom z)
+      = ↑((chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2)
+        ((chartData p F ϖ 1 b a b).coeRingHom z))
+    have hL := presheafChartToBIProd_coe p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb (le_of_eq hexact1)
+      (vpi_le_rho2_of_exact p F ϖ (hρ₁1 := hρ₁1) a b ha hb hab hexact1 hexact2)
+      (rho1_pow_le_of_exact p F ϖ (hρ₁1 := hρ₁1) a b hab hexact1)
+      (le_of_eq hexact2) z
+    have hcmp : (chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2)
+        ((chartData p F ϖ 1 b a b).coeRingHom z)
+        = chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+            (hρ₂1 := hρ₂1) b hb z :=
+      @AbstractCompletion.compare_coe _ (chartUniformity p F ϖ a b)
+        (@UniformSpace.Completion.cPkg _ (chartUniformity p F ϖ a b))
+        (chartBIPkg p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2) z
+    rw [hL, hcmp]
+    exact (chartToBI_coe p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) b hb z).symm
+
+
+include hρ₁0 hρ₂0 in
+/-- **ID2d — the comparison theorem**: the presheaf value of the chart datum is
+canonically ring-isomorphic to `B^I` at the exact chart interval
+(`𝒪_Y(U) ≅ B^I`, Kedlaya Lemma 4.9 case 3 over the `A_inf`-base). -/
+noncomputable def presheafChartRingEquivBISub (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    presheafValue (chartData p F ϖ 1 b a b)
+      ≃+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) where
+  toFun := presheafChartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+    (hρ₂1 := hρ₂1) a b hb (le_of_eq hexact1)
+    (vpi_le_rho2_of_exact p F ϖ (hρ₁1 := hρ₁1) a b ha hb hab hexact1 hexact2)
+    (rho1_pow_le_of_exact p F ϖ (hρ₁1 := hρ₁1) a b hab hexact1)
+    (le_of_eq hexact2)
+  invFun := ⇑(chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm
+  left_inv x := by
+    have h := congrFun (presheafChartToBI_eq_compare p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+      hexact1 hexact2) x
+    show (chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm _ = x
+    rw [h]
+    exact UniformEquiv.symm_apply_apply _ x
+  right_inv y := by
+    have h := congrFun (presheafChartToBI_eq_compare p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+      hexact1 hexact2)
+      ((chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm y)
+    show presheafChartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) a b hb _ _ _ _ _ = y
+    rw [h]
+    exact UniformEquiv.apply_symm_apply _ y
+  map_mul' x y := map_mul (presheafChartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb _ _ _ _) x y
+  map_add' x y := map_add (presheafChartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb _ _ _ _) x y
+
+/-- The comparison equivalence is continuous. -/
+theorem presheafChartRingEquivBISub_continuous (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    Continuous (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2) :=
+  Continuous.subtype_mk
+    (@UniformSpace.Completion.continuous_extension _
+      (chartData p F ϖ 1 b a b).uniformSpace _ _ _ _) _
+
+/-- The inverse of the comparison equivalence is continuous. -/
+theorem presheafChartRingEquivBISub_symm_continuous (a b : ℕ) (ha : 0 < a)
+    (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    Continuous (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm :=
+  (chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm.continuous
+
 end FarguesFontaine
 
 end
