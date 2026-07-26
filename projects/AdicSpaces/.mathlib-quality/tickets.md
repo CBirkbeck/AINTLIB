@@ -1288,9 +1288,15 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   parallel capacity exists.
 
 ### [T909] Restriction maps BI → BI'
-- **Status**: in_progress (beastmode 2026-07-26) — the intermediate-radius restriction
-  map is BUILT and is a ring map on `B^I`; what remains is packaging it as a bundled
-  `RingHom` into the target interval ring and the Cor-4.6 injectivity.
+- **Status**: done (2026-07-26, beastmode) — `resIHom : B^I →+* B^{I'}` bundled
+  (IntervalRing.lean, was already built) and **Cor 4.6 injectivity proven**:
+  `resIHom_injective` in the new FarguesFontaine/RestrictionInjective.lean, via
+  `valued_resI_rpow_interpolate` (three circles for resI-values, by approximant
+  limits with ε-padding — no valuation-continuity needed),
+  `resI_eq_zero_of_interior` (weight-on-the-vanishing-point propagation), and
+  `wLoc_le_of_interior_bound` (endpoint continuity, per Teichmüller term). All
+  axiom-clean. Interior-parameter targets (0 < θ < 1), which per AD-9 covers every
+  strict sub-interval the curve needs.
   DONE (axiom-clean, pushed): `valued_BlocToHatK_le_wI`, `valued_BlocToHatK_sub_le_wI`
   (the wI-Lipschitz bounds from Cor 4.5), `neBot_comap_of_mem_BISub`,
   `eventually_pair_wI_le`, `exists_nnreal_lt_gamma`, `wI_ball_mem_nhds`, **`resI`** and
@@ -1304,6 +1310,44 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
 - **Statement**: for I' ⊆ I: continuous ring hom `res : BI → BI'` (Completion-functorial
   from `wI' ≤ wI` on Bloc via Cor 4.5), injective (Cor 4.6 ln 361–368: λ_t = 0 on I'
   propagates by three-circles + continuity).
+
+#### T909 injectivity sub-tickets (spawned 2026-07-26, beastmode; parent T909)
+
+All in new `FarguesFontaine/RestrictionInjective.lean` (imports Presentation for
+`exists_BIProd_approx`). Source: Kedlaya Cor 4.6 proof (three circles with the weight
+on the vanishing point + endpoint continuity). Generality: interior-parameter
+sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval needed.
+
+### [T909a] Three circles for the intermediate values of B^I
+- **Status**: done (2026-07-26) | **Parent**: T909 | **Type**: lemma
+- **Statement**: for `z ∈ BISub`, parameters `α', α'' ∈ [0,1]`, weight `c ∈ [0,1]`:
+  `v (resI τ(c·α'+(1−c)·α'') z) ≤ v (resI τ(α') z) ^ c * v (resI τ(α'') z) ^ (1−c)`.
+- **Sketch**: limit of `wLoc_rpow_interpolate` along the approximant filter
+  (`tendsto_resI` at the three radii + `Valued.continuous_valuation` +
+  `le_of_tendsto` with NNReal rpow/mul continuity); radius identification by rpow
+  algebra (`τ(α')^c·τ(α'')^{1−c} = τ(c·α'+(1−c)·α'')`).
+
+### [T909b] Endpoint value from interior bounds (Bloc-level continuity)
+- **Status**: done (2026-07-26) | **Parent**: T909 | **Type**: lemma ×2
+- **Statement**: for `x : Bloc`, `ε`: if `wLoc (τ(α)) x ≤ ε` for all `α ∈ (0,1)`,
+  then `wLoc ρ₂ x ≤ ε` (and the mirror `wLoc ρ₁ x ≤ ε`).
+- **Sketch**: write `x·(p[ϖ])ᵏ = a`; per Teichmüller term `n`:
+  `τ(α)ⁿ·|aₙ| ≤ gaussValue τ(α) a = wLoc x·(τ(α)|ϖ|)ᵏ ≤ ε·(τ(α)|ϖ|)ᵏ`; take a
+  sequence `α_m → 0` (resp. `→ 1`), so `τ(α_m) → ρ₂` (resp. `ρ₁`) by rpow
+  continuity in the exponent, and pass each term inequality to the limit
+  (`le_of_tendsto`, continuity of `t ↦ tⁿ|aₙ|` and `t ↦ ε(t|ϖ|)ᵏ`); then `ciSup_le`.
+
+### [T909c] Cor 4.6: injectivity of the restriction hom
+- **Status**: done (2026-07-26) | **Parent**: T909 | **Type**: theorem
+- **Statement**: `Function.Injective (resIHom …)` when the first target parameter is
+  interior (`0 < θ < 1`).
+- **Sketch**: kernel-trivial (`injective_iff_map_eq_zero`). From `resI τ(θ) z = 0`:
+  every interior `α` has `v(resI τ(α) z) = 0` by T909a with the weight on the
+  vanishing point (`α ≤ θ`: interpolate with `τ(0)`, `c = α/θ`; `α ≥ θ`: with
+  `τ(1)`, `c = (1−α)/(1−θ)`; `0^c = 0` for `c > 0`). Then for each `ε`: approximate
+  `z` by `BIProd x` within `ε` (`exists_BIProd_approx`); `wLoc τ(α) x ≤ ε` for all
+  interior `α` (resI additivity + `valued_resI_le_wI` + the vanishing); T909b gives
+  the endpoint values `≤ ε`; ultrametric max gives `v(z.i) ≤ ε`; conclude `z = 0`.
 
 ### [T910] Lemma 4.9, first two presentations
 - **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T907, T908
