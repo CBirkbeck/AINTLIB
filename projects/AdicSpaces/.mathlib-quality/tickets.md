@@ -803,8 +803,37 @@ per-file covered (1,3,4,6,8), CLEANUP-ALL-1 before milestone T503 ✓, CLEANUP-F
   |ϖ| = p^{-1}); include the Banach-vs-Huber Tate-algebra topological agreement.
 - NOT executable by /beastmode: this is a planning action producing lane-B tickets.
 
+#### Lane C first block (spawned 2026-07-26, beastmode; from PLAN-GATE-2 + the
+#### chatgpt-reply-campaign8-adic-space consult §5-6)
+
+### [TC1] The affinoid-ring instances for B^I
+- **Status**: done (2026-07-26, beastmode) | **Parent**: PLAN-GATE-2 | **Type**: instances + lemmas
+- **File**: FarguesFontaine/SheafyBI.lean (new; imports StronglyNoetherianB +
+  WedhornCechAcyclicity)
+- **Statement**: `IsBounded (BIPlusIn …)`, `wI_le_one_of_isPowerBounded`,
+  `BIPlusIn`-integral-closedness, `subset_powerBounded`, hence
+  `IsRingOfIntegralElements (BIPlusIn …)`; plus `T2Space ↥BISub` and
+  `CompleteSpace ↥BISub` (right uniformity).
+- **Sketch**: mirror ExampleUnitDisc.lean:384-500 with `wI` for the norm and the
+  `p`-image for the Tate element: boundedness from `wI_mul_le` + wI-ball basis;
+  power-bounded ⟹ unit ball via `wI_pow` (power-multiplicativity) +
+  `pow_unbounded_of_one_lt`; integral closedness via
+  `IsBounded.isPowerBounded_of_isIntegral`; completeness from `isComplete_BISub`.
+
+### [TC2] B^I is sheafy (Kedlaya's rings satisfy Wedhorn 8.28(b))
+- **Status**: done (2026-07-26, beastmode) — `isSheafy_BISub` in SheafyBI.lean | **Parent**: PLAN-GATE-2 | **Type**: theorem
+- **Statement**: under the AD-9 data (h12, j, n, hbmem, hb, hexact):
+  `IsSheafy ↥(BISub …)` with `PlusSubring := BIPlusIn`.
+- **Sketch**: `isSheafy_of_stronglyNoetherian_828b` with `letI`-assembled instances
+  (TC1 + `isTateRing_BISub` + `isStronglyNoetherian_BISub`).
+
 ### [PLAN-GATE-2] Lane C assembly planning (identification theorem + sheafy instances)
-- **Status**: blocked (planning gate) | **Depends**: PLAN-GATE-1 only for the
+- **Status**: blocked (planning gate; first block TC1-TC2 spawned 2026-07-26 —
+  remaining: the chart-identification theorems 𝒪(U₀) ≅ B^{[τ,cτ]} per the consult
+  (rational subsets R(T_U/s_U) of (A_inf,A_inf) with s_U = p[w]^b,
+  T_U = {p^{a+1},[w]^{b+1}}; genuine comparison: same dense algebra + topology
+  equivalence), the AD-9 instantiation for the two charts, and Y-locality via
+  Wedhorn Rem 8.27) | **Depends**: PLAN-GATE-1 only for the
   sheafiness core (the repo's `isSheafy_of_stronglyNoetherian_828b` is sorry-free);
   presheafValue-identification additionally depends on the PresheafTateStructure
   plumbing. SOL CORRECTIONS (binding): 𝒪(U₀) ≅ B^I is a genuine theorem (dense

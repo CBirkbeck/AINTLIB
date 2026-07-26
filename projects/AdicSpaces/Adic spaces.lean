@@ -43,6 +43,7 @@ import «Adic spaces».FarguesFontaine.IntervalRing
 import «Adic spaces».FarguesFontaine.Presentation
 import «Adic spaces».FarguesFontaine.StronglyNoetherianB
 import «Adic spaces».FarguesFontaine.RestrictionInjective
+import «Adic spaces».FarguesFontaine.SheafyBI
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
