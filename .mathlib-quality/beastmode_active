@@ -1,8 +1,8 @@
-FOCUS: DS4 M1b-3b-ix — the PAIRING equivariance e(sigma S, sigma T) = sigma(e(S,T)).
-ALL geometric inputs are DONE and axiom-clean (WeilPairing/GaloisFunctionField.lean): projectiveDivisorOf_galois_weilFunction : div(sigma.g_T) = div(g_{sigma T}).
-ROUTE:
- 1. From the divisor equality: div( (sigma.g_T) / g_{sigma T} ) = 0, so by HasseWeil Constancy.const_unit_of_projectiveDivisorOf_eq_zero there is c != 0 with sigma.g_T = c * g_{sigma T}. (Use projectiveDivisorOf_div = div f - div g if available, else divisorOf_div / map_div.)
- 2. Phi_sigma intertwines translations: Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma (translateAlgEquivOfPoint; needs a small lemma: the translation by S transported by sigma is the translation by sigma S — mirror of HasseWeil translate lemmas).
- 3. Apply Phi_sigma to weilPairing_translate (tau_S g_T = e(S,T) g_T), substitute 1 and 2, cancel c, and use uniqueness of the constant (algebraMap injective) to get e(sigma S, sigma T) = sigma (e(S,T)).
- 4. Package as fieldWeilPairing_galois : (fieldWeilPairing (sigma S) (sigma T)).1 = sigma ((fieldWeilPairing S T).1).
-THEN M1c: exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent:440) + the torsionAlgebraPointsEquiv equivariance.
+FOCUS: DS4 M1b-3b-ix — the Weil-pairing Galois equivariance. ALL pieces except ONE are landed and axiom-clean in WeilPairing/GaloisFunctionField.lean:
+  * projectiveDivisorOf_galois_weilFunction : div(sigma.g_T) = div(g_{sigma T})  [gives the sigma-naturality input via Constancy.const_unit_of_projectiveDivisorOf_eq_zero applied to (sigma.g_T)/g_{sigma T}]
+  * weilPairing_galois_core_of_algEquiv : conj + naturality + constants law => e(S,T) is sigma0-equivariant
+  * galoisFunctionFieldEquiv and the whole transport chain.
+REMAINING TWO BRICKS:
+  (i) CONSTANTS LAW for galoisFunctionFieldEquiv: Phi_sigma (algebraMap a) = algebraMap (sigma a) — port HasseWeil frobeniusFunctionFieldEquiv_algebraMap (FrobeniusFunctionFieldEquiv.lean:257) = ffFrobEquivRaw_algebraMap (uses IsFractionRing.ringEquivOfRingEquiv_algebraMap + coordRingMap_algebraMap_base, both general) + ffFrobCast_algebraMap (RingEquiv.cast fixes constants).
+  (ii) CONJUGATION: Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma at g_T. Use the extensionality principle algHom_ext_x_y_gen (TranslationOrd.lean ~3261) — two alg homs agreeing on x_gen and y_gen are equal — with the computations translateAlgEquivOfPoint_*_x_gen/_y_gen (TranslationOrd 3613/3731/3773/3859) and Phi_sigma on x_gen/y_gen (Phi fixes the generators, acts by sigma on coefficients).
+THEN: assemble fieldWeilPairing_galois; THEN M1c (EtaleDescent:440 + torsionAlgebraPointsEquiv equivariance).

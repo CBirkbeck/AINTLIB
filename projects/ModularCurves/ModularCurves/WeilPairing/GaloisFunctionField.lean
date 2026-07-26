@@ -804,4 +804,39 @@ theorem weilPairing_galois_core_of_algEquiv {F : Type v} [Field F] [DecidableEq 
     rw [← hrel]; ring
   exact (algebraMap F _).injective (mul_right_cancel₀ (mul_ne_zero hc_ne hgT'_ne) hcancel)
 
+/-- **(M1b-3b-ix, brick i-raw)** The raw fraction-field lift acts on constants by `σ`. -/
+theorem galoisFractionLift_algebraMap {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (a : L) :
+    IsFractionRing.ringEquivOfRingEquiv (galoisCoordRingEquiv W σ)
+        (algebraMap L (W.baseChange L).toAffine.FunctionField a) =
+      algebraMap L ((W.baseChange L).map (σ : L →+* L)).toAffine.FunctionField (σ a) := by
+  rw [show (algebraMap L (W.baseChange L).toAffine.FunctionField a) =
+      algebraMap (W.baseChange L).toAffine.CoordinateRing
+        (W.baseChange L).toAffine.FunctionField
+        (algebraMap L (W.baseChange L).toAffine.CoordinateRing a) from by
+    rw [← IsScalarTower.algebraMap_apply]]
+  rw [IsFractionRing.ringEquivOfRingEquiv_algebraMap,
+    show galoisCoordRingEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.CoordinateRing a) =
+      WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine (σ : L →+* L)
+        (algebraMap L (W.baseChange L).toAffine.CoordinateRing a) from rfl,
+    HasseWeil.WeilPairing.coordRingMap_algebraMap_base, ← IsScalarTower.algebraMap_apply]
+  rfl
+
+/-- **(M1b-3b-ix, brick i)** The constants law: `Φ_σ (algebraMap a) = algebraMap (σ a)`. -/
+theorem galoisFunctionFieldEquiv_algebraMap {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) (a : L) :
+    galoisFunctionFieldEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.FunctionField a) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (σ a) := by
+  rw [galoisFunctionFieldEquiv, RingEquiv.trans_apply, galoisFractionLift_algebraMap]
+  have key : ∀ (V : WeierstrassCurve L) (h : V = W.baseChange L),
+      (RingEquiv.cast (R := fun (U : WeierstrassCurve L) => U.toAffine.FunctionField) h)
+        (algebraMap L V.toAffine.FunctionField (σ a)) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (σ a) := by
+    intro V h
+    subst h
+    rfl
+  exact key _ (map_algEquiv_baseChange_eq W σ)
+
 end ModularCurves
