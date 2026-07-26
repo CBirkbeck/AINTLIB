@@ -27,6 +27,19 @@ universe u
 
 variable {R : Type u} [CommRing R]
 
+/-- The coprime-coordinate and unit-coordinate constructors give the same
+projective morphism when applied to the same homogeneous triple. -/
+theorem projModelFromOfGlobalSectionsOfIsCoprime_eq_of_isUnit
+    {X : Scheme.{u}} (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens)))
+    (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P)
+    (i j k : Fin 3) (hij : IsCoprime (P i) (P j))
+    (hk : IsUnit (P k)) :
+    projModelFromOfGlobalSectionsOfIsCoprime W f P hP i j hij =
+      projModelFromOfGlobalSections W f P hP k hk := by
+  rfl
+
 /-- A homogeneous coordinate morphism with a unit coordinate is the morphism
 defined by the corresponding affine-chart coordinate ratios. -/
 theorem projModelFromOfGlobalSections_eq_chart
