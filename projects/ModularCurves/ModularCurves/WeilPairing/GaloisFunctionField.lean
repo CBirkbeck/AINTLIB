@@ -965,4 +965,21 @@ theorem galoisFractionLift_x_gen {L : Type v} [Field L] [DecidableEq L] [Algebra
       exact congrArg Polynomial.C (Polynomial.map_X _)]
   rfl
 
+/-- **(M1b-3b leaf, brick 2-raw)** The raw σ-lift sends the generic `y`-coordinate of the
+curve to that of the mapped curve (the coordinate-ring map sends the adjoined root to the
+adjoined root). -/
+theorem galoisFractionLift_y_gen {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) :
+    IsFractionRing.ringEquivOfRingEquiv (galoisCoordRingEquiv W σ)
+        (HasseWeil.y_gen (W.baseChange L)) =
+      HasseWeil.y_gen ((W.baseChange L).map (σ : L →+* L)) := by
+  rw [HasseWeil.y_gen, IsFractionRing.ringEquivOfRingEquiv_algebraMap]
+  refine congrArg (algebraMap _ _) ?_
+  show WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine (σ : L →+* L)
+      (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) = _
+  rw [show (AdjoinRoot.root (W.baseChange L).toAffine.polynomial) =
+      WeierstrassCurve.Affine.CoordinateRing.mk (W.baseChange L).toAffine Polynomial.X from rfl,
+    WeierstrassCurve.Affine.CoordinateRing.map_mk, Polynomial.map_X]
+  rfl
+
 end ModularCurves
