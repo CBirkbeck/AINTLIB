@@ -40,6 +40,8 @@ and `z ↦ (resAr z, z)` is a ring map `A^{ρ₂} → B^{[ρ₁,ρ₂]}`.
   power-bounded element of `B^I` converges.
 * `FarguesFontaine.tendsto_cauchy_product` : the partial sums of the Cauchy product
   converge to the product of the limits — multiplicativity of evaluation.
+* `FarguesFontaine.evalArHom` : **evaluation as a ring homomorphism** `A^r⟨T⟩ →+* B^I`
+  at any power-bounded element of `B^I` — Kedlaya's case-3 presentation map.
 
 ## Sources
 
@@ -729,6 +731,226 @@ theorem tendsto_cauchy_product {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ
   rw [sub_zero] at hkey
   refine hkey.congr fun n => ?_
   exact sub_sub_cancel _ _
+
+/-- The coefficient sequence of a one-variable power series. -/
+def coeffSeq {A : Type*} [CommRing A] (f : MvPowerSeries (Fin 1) A) (n : ℕ) : A :=
+  MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n) f
+
+@[simp]
+theorem coeffSeq_zero {A : Type*} [CommRing A] (n : ℕ) :
+    coeffSeq (0 : MvPowerSeries (Fin 1) A) n = 0 := by
+  rw [coeffSeq, map_zero]
+
+theorem coeffSeq_add {A : Type*} [CommRing A] (f g : MvPowerSeries (Fin 1) A) (n : ℕ) :
+    coeffSeq (f + g) n = coeffSeq f n + coeffSeq g n := by
+  rw [coeffSeq, coeffSeq, coeffSeq, map_add]
+
+theorem coeffSeq_one {A : Type*} [CommRing A] (n : ℕ) :
+    coeffSeq (1 : MvPowerSeries (Fin 1) A) n = if n = 0 then 1 else 0 := by
+  rw [coeffSeq, MvPowerSeries.coeff_one]
+  by_cases h : n = 0
+  · subst h
+    simp
+  · rw [if_neg h, if_neg]
+    intro hcon
+    exact h (Finsupp.single_eq_zero.mp hcon)
+
+theorem coeffSeq_mul {A : Type*} [CommRing A] (f g : MvPowerSeries (Fin 1) A) (n : ℕ) :
+    coeffSeq (f * g) n
+      = ∑ q ∈ Finset.antidiagonal n, coeffSeq f q.1 * coeffSeq g q.2 := by
+  classical
+  rw [coeffSeq, MvPowerSeries.coeff_mul, Finsupp.antidiagonal_single, Finset.sum_map]
+  rfl
+
+/-- A restricted one-variable series over `A^r` has null coefficient values. -/
+theorem tendsto_valued_coeffSeq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    Filter.Tendsto (fun n => Valued.v ((coeffSeq f n : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1)) Filter.atTop (nhds 0) := by
+  refine tendsto_order.mpr ⟨fun c hc => absurd hc (not_lt.mpr zero_le), fun δ hδ => ?_⟩
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf (δ / 2) (half_pos hδ)
+  have hpre : ((fun n : ℕ => (Finsupp.single (0 : Fin 1) n)) ⁻¹'
+      {s : Fin 1 →₀ ℕ | δ / 2 < Valued.v ((MvPowerSeries.coeff s f
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)}).Finite :=
+    hfin.preimage ((Finsupp.single_injective (0 : Fin 1)).injOn)
+  obtain ⟨N, hN⟩ := hpre.bddAbove
+  rw [Filter.eventually_atTop]
+  refine ⟨N + 1, fun n hn => ?_⟩
+  have hnot : n ∉ ((fun n : ℕ => (Finsupp.single (0 : Fin 1) n)) ⁻¹'
+      {s : Fin 1 →₀ ℕ | δ / 2 < Valued.v ((MvPowerSeries.coeff s f
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)}) := by
+    intro hmem
+    have := hN hmem
+    omega
+  exact lt_of_le_of_lt (not_lt.mp hnot) (NNReal.half_lt_self hδ.ne')
+
+
+variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+
+/-- The term of the evaluation series. -/
+def evalTerm (h12 : ρ₁ ≤ ρ₂) (b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) (l : ℕ) :
+    (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+  ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (coeffSeq f l) :
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l
+
+/-- **The value of a restricted series over `A^r` at a power-bounded element of `B^I`.** -/
+def evalAr (h12 : ρ₁ ≤ ρ₂) {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
+    (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+  (exists_eval_series p F ϖ h12 (coeffSeq (f : MvPowerSeries (Fin 1)
+    ↥(ArSub p F ϖ hρ₂0 hρ₂1))) (tendsto_valued_coeffSeq p F ϖ f.2) hbmem hb).choose
+
+theorem evalAr_mem (h12 : ρ₁ ≤ ρ₂) {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
+    evalAr p F ϖ h12 hbmem hb f ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 :=
+  (exists_eval_series p F ϖ h12 (coeffSeq (f : MvPowerSeries (Fin 1)
+    ↥(ArSub p F ϖ hρ₂0 hρ₂1))) (tendsto_valued_coeffSeq p F ϖ f.2) hbmem hb).choose_spec.1
+
+theorem tendsto_evalAr (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
+    Filter.Tendsto (fun n => ∑ l ∈ Finset.range n,
+        evalTerm p F ϖ h12 b (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l)
+      Filter.atTop (nhds (evalAr p F ϖ h12 hbmem hb f)) :=
+  (exists_eval_series p F ϖ h12 (coeffSeq (f : MvPowerSeries (Fin 1)
+    ↥(ArSub p F ϖ hρ₂0 hρ₂1))) (tendsto_valued_coeffSeq p F ϖ f.2) hbmem hb).choose_spec.2
+
+/-- The evaluation terms have null interval norm. -/
+theorem tendsto_wI_evalTerm (h12 : ρ₁ ≤ ρ₂)
+    {f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    Filter.Tendsto (fun l => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 (coeffSeq f l) :
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+          (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      Filter.atTop (nhds 0) := by
+  refine (tendsto_valued_coeffSeq p F ϖ hf).congr fun l => ?_
+  exact (wI_ArToBI p F ϖ h12 (coeffSeq f l)).symm
+
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- Evaluation is additive. -/
+theorem evalAr_add (h12 : ρ₁ ≤ ρ₂) {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (f g : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
+    evalAr p F ϖ h12 hbmem hb (f + g)
+      = evalAr p F ϖ h12 hbmem hb f + evalAr p F ϖ h12 hbmem hb g := by
+  refine tendsto_nhds_unique (tendsto_evalAr p F ϖ h12 hbmem hb (f + g)) ?_
+  refine ((tendsto_evalAr p F ϖ h12 hbmem hb f).add
+    (tendsto_evalAr p F ϖ h12 hbmem hb g)).congr fun n => ?_
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun l _ => ?_
+  rw [evalTerm, evalTerm, evalTerm, ← add_mul]
+  congr 1
+  have hc : coeffSeq ((f + g : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+      = coeffSeq (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+        + coeffSeq (g : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l :=
+    coeffSeq_add _ _ _
+  rw [hc, map_add (ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) h12)]
+  rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Evaluation is multiplicative** — the Cauchy-product estimate in action. -/
+theorem evalAr_mul (h12 : ρ₁ ≤ ρ₂) {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (f g : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
+    evalAr p F ϖ h12 hbmem hb (f * g)
+      = evalAr p F ϖ h12 hbmem hb f * evalAr p F ϖ h12 hbmem hb g := by
+  refine tendsto_nhds_unique (tendsto_evalAr p F ϖ h12 hbmem hb (f * g)) ?_
+  have hcp := tendsto_cauchy_product p F hb
+    (fun i => ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12
+      (coeffSeq (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) i) :
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (fun j => ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12
+      (coeffSeq (g : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) j) :
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (tendsto_wI_evalTerm p F ϖ h12 f.2) (tendsto_wI_evalTerm p F ϖ h12 g.2)
+    (tendsto_evalAr p F ϖ h12 hbmem hb f) (tendsto_evalAr p F ϖ h12 hbmem hb g)
+  refine hcp.congr fun n => ?_
+  refine Finset.sum_congr rfl fun l _ => ?_
+  rw [evalTerm]
+  congr 1
+  have hc : coeffSeq ((f * g : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+      = ∑ q ∈ Finset.antidiagonal l,
+          coeffSeq (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) q.1
+          * coeffSeq (g : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) q.2 :=
+    coeffSeq_mul _ _ _
+  rw [hc, map_sum (ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) h12)]
+  rw [AddSubmonoidClass.coe_finset_sum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [map_mul (ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) h12)]
+  rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- Evaluation sends `1` to `1`. -/
+theorem evalAr_one (h12 : ρ₁ ≤ ρ₂) {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) :
+    evalAr p F ϖ h12 hbmem hb 1 = 1 := by
+  refine tendsto_nhds_unique (tendsto_evalAr p F ϖ h12 hbmem hb 1) ?_
+  refine tendsto_const_nhds.congr' ?_
+  rw [Filter.EventuallyEq, Filter.eventually_atTop]
+  refine ⟨1, fun n hn => ?_⟩
+  have hterms : ∀ l ∈ Finset.range n,
+      evalTerm p F ϖ h12 b (1 : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+        = if l = 0 then 1 else 0 := by
+    intro l _
+    rw [evalTerm, coeffSeq_one]
+    by_cases hl : l = 0
+    · subst hl
+      rw [if_pos rfl, if_pos rfl, map_one, pow_zero, mul_one]
+      rfl
+    · rw [if_neg hl, if_neg hl, map_zero]
+      show (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l = 0
+      rw [zero_mul]
+  show (1 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = ∑ l ∈ Finset.range n,
+        evalTerm p F ϖ h12 b (1 : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+  rw [Finset.sum_congr rfl hterms, Finset.sum_ite_eq' (Finset.range n) 0
+    (fun _ => (1 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))]
+  rw [if_pos (Finset.mem_range.mpr hn)]
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Evaluation at a power-bounded element of `B^I`, as a ring homomorphism**
+`A^r⟨T⟩ →+* B^I` — Kedlaya's case-3 presentation map. -/
+def evalArHom (h12 : ρ₁ ≤ ρ₂) {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) :
+    ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) where
+  toFun f := ⟨evalAr p F ϖ h12 hbmem hb f, evalAr_mem p F ϖ h12 hbmem hb f⟩
+  map_one' := Subtype.ext (evalAr_one p F ϖ h12 hbmem hb)
+  map_mul' := fun f g => Subtype.ext (evalAr_mul p F ϖ h12 hbmem hb f g)
+  map_zero' := Subtype.ext (by
+    refine tendsto_nhds_unique (tendsto_evalAr p F ϖ h12 hbmem hb 0) ?_
+    refine tendsto_const_nhds.congr fun n => ?_
+    refine (Finset.sum_eq_zero fun l _ => ?_).symm
+    rw [evalTerm]
+    rw [show coeffSeq ((0 : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+        = 0 from coeffSeq_zero l, map_zero]
+    show (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l = 0
+    rw [zero_mul])
+  map_add' := fun f g => Subtype.ext (evalAr_add p F ϖ h12 hbmem hb f g)
 
 end FarguesFontaine
 

@@ -82,9 +82,20 @@ radius is required** — Groebner.lean stands as proven.
 index pairs of `P_N - C_N` all have `max i j ≥ N₀`, so the difference has norm `≤ ε·M`),
 `tendsto_zero_of_wI_tendsto_zero`, `exists_bound_of_wI_tendsto_zero`, and
 **`tendsto_cauchy_product`** (the partial sums of the Cauchy product converge to the product
-of the limits = multiplicativity of evaluation). Remaining for T910a: *packaging* — transport
-along `ℕ ≃ (Fin 1 →₀ ℕ)`, `MvPowerSeries.coeff_mul`, and bundle as a `RingHom`
-`A^r⟨T⟩ →+* B^I`; then the `k`-variable version.
+of the limits = multiplicativity of evaluation). **T910a (univariate) is DONE**: `coeffSeq`
+(+`_add`/`_mul`/`_one`/`_zero`), `tendsto_valued_coeffSeq`, `evalAr`, `evalAr_mem`,
+`tendsto_evalAr`, `evalAr_add`, `evalAr_mul`, `evalAr_one` and the bundled
+**`evalArHom : A^r⟨T⟩ →+* B^I`** — Kedlaya's case-3 presentation map exists as a ring
+homomorphism (evaluation at *any* power-bounded element of `B^I`; for case 3 take
+`teichPowOverPElt`, power-bounded by `wI_teichPowOverP_le_one`).
+
+**Open architecture question AD-10** (for the next planning pass): T911/T912 need the
+`k`-variable version `A^r⟨T,T₁,…,T_k⟩ → B^I⟨T₁,…,T_k⟩`. Two routes: (a) redo the above
+multivariately (the estimates are the same, the index bookkeeping is over `Fin k →₀ ℕ`);
+or (b) iterate the univariate map over the base `A^r⟨T₁,…,T_k⟩`, which needs its Gauss-norm
+topology (`gaussNormRPS` exists in Groebner.lean) plus the iso `A⟨T,T⃗⟩ ≅ (A⟨T⃗⟩)⟨T⟩`, and a
+*general* (rather than `B^I`-specific) univariate evaluation theorem — i.e. the normed-ring
+framework AD-7 deliberately avoided. Decide before starting T911.
 
 **T910 progress (2026-07-26)** — `Presentation.lean` (~470 lines): the `A^r`-algebra
 structure on `B^I` is **done** (`ArToBI`, injective, `wI_ArToBI`), and Kedlaya's Tate
