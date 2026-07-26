@@ -1051,6 +1051,49 @@ theorem wAloc_prefixAloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : ℕ 
   rw [← hterm]
   exact gaussTermF_le_gaussValueF p F hsum.1 n
 
+/-- `wAloc` scales by `ρ` under multiplication by `p` (through the `W(F)`-side). -/
+theorem wAloc_p_pow_mul {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (n : ℕ)
+    (u : Aloc p F ϖ) :
+    wAloc p F ϖ hρ0 hρ1 ((p : Aloc p F ϖ) ^ n * u)
+      = ρ ^ n * wAloc p F ϖ hρ0 hρ1 u := by
+  rw [← gaussValueF_alocToWittF p F ϖ hρ0 hρ1, map_mul, map_pow, map_natCast,
+    gaussValueF_p_pow_mul p F (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u) n,
+    gaussValueF_alocToWittF p F ϖ hρ0 hρ1]
+
+/-- Cauchy criterion for sequences in the completed field, in plain `NNReal` terms
+(the value-group γ-balls are reached through the strict-mono embedding). -/
+theorem cauchySeq_of_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (s : ℕ → hatK p F hρ0 hρ1)
+    (h : ∀ ε : NNReal, 0 < ε → ∃ N₀ : ℕ, ∀ m n : ℕ, N₀ ≤ m → N₀ ≤ n →
+      Valued.v (s m - s n) ≤ ε) :
+    CauchySeq s := by
+  rw [(Valued.hasBasis_uniformity (hatK p F hρ0 hρ1) NNReal).cauchySeq_iff]
+  rintro γ -
+  have hγpos : (0 : NNReal) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 := by
+    refine pos_iff_ne_zero.mpr fun h0 => ?_
+    have hinj := (MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
+      (f := MonoidWithZeroHom.ofClass (Valued.v :
+        Valuation (hatK p F hρ0 hρ1) NNReal))).injective
+    have h00 : MonoidWithZeroHom.ValueGroup₀.embedding (0 :
+        MonoidWithZeroHom.ValueGroup₀ (MonoidWithZeroHom.ofClass (Valued.v :
+          Valuation (hatK p F hρ0 hρ1) NNReal))) = 0 := map_zero _
+    have := hinj (h0.trans h00.symm)
+    exact γ.ne_zero this
+  obtain ⟨K, hK⟩ := exists_pow_lt_of_lt_one hγpos hρ1
+  obtain ⟨N₀, hN₀⟩ := h (ρ ^ K) (pow_pos hρ0 K)
+  refine ⟨N₀, fun m hm n hn => ?_⟩
+  have hle := hN₀ n m hn hm
+  have hlt : Valued.v (s n - s m) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 :=
+    lt_of_le_of_lt hle hK
+  have hres : (Valued.v).restrict (s n - s m) < γ.1 := by
+    have hsm := MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
+      (f := MonoidWithZeroHom.ofClass (Valued.v :
+        Valuation (hatK p F hρ0 hρ1) NNReal))
+    refine hsm.lt_iff_lt.mp ?_
+    rw [Valuation.embedding_restrict]
+    exact hlt
+  exact hres
+
 end FarguesFontaine
 
 end
