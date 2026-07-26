@@ -1,7 +1,6 @@
-FOCUS: DS4 M1b LEAF — brick 4b now has its clean handle: map_galoisFunctionFieldEquiv_WKE (W_KE is FIXED by Phi_sigma, proved coefficientwise, no record unfolding). All of bricks 1,2,3,4a,4b-key are landed sorry-free and pushed.
-NEXT: with hfix := map_galoisFunctionFieldEquiv_WKE, transport the formulas:
-  Phi (W_KE.addX u v w) = W_KE.addX (Phi u) (Phi v) (Phi w)
-  by `have := WeierstrassCurve.Affine.map_addX (W := (W_KE ...).toAffine) (f := Phi) ...` and rewriting the mapped curve by hfix. IMPORTANT: earlier attempts died on whnf when the mapped curve had to be identified; now do it as `conv` / `simp only [hfix]` on the STATEMENT of map_addX (a small term) BEFORE combining, e.g.
-    have h := WeierstrassCurve.Affine.map_addX (W := ...) (f := ...) ; rw [show ((W_KE ...).map Phi) = W_KE ... from hfix] at h ; exact h.symm
-  Same for addY (map_addY) and slope (map_slope) if they exist in Formula.lean.
-THEN: translateX_xy/translateY_xy transport (4a + 4b), the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch via translateAlgEquiv_of_2tor), weilPairing_galois unconditional, fieldWeilPairing_galois, M1c (EtaleDescent:440).
+FOCUS: DS4 M1b LEAF — bricks 1,2,3,4a,4b,4c ALL LANDED sorry-free (extensionality; Phi fixes x_gen,y_gen, constants, coefficients, W_KE; addX/addY transport; translateX/translateY transport).
+NEXT (brick 5, the conjugation itself): for S = some xk yk (non-2-torsion branch),
+  Phi o (translateAlgHom_of_nonTorsion W xk yk) = (translateAlgHom_of_nonTorsion W (sigma xk) (sigma yk)) o Phi
+by ringHom_ext_const_x_y_gen: on constants use galoisFunctionFieldEquiv_algebraMap + AlgHom.commutes; on x_gen use translateAlgHom_apply_x_gen (TranslationOrd:1852) then brick 4c; on y_gen use translateAlgHom_apply_y_gen (:2009) then brick 4c.
+  2-TORSION branch: translateAlgEquiv_of_2tor — find its action on x_gen/y_gen (search translateAlgEquiv_of_2tor_apply_x_gen) and repeat.
+  Then package as translateAlgEquivOfPoint conjugation (case split via translateAlgEquivOfPoint_some_nonTor / _some_2tor / _zero), feed to weilPairing_galois_of_conj, and finish: weilPairing_galois (unconditional), fieldWeilPairing_galois, M1c.
