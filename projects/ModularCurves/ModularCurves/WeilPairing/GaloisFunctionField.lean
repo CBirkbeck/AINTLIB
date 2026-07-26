@@ -378,4 +378,39 @@ theorem ordAtInfty_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq 
     HasseWeil.WeilPairing.ordAtInfty_ringEquivCast _ _ (map_algEquiv_baseChange_eq W σ),
     ordAtInfty_galoisFractionLift]
 
+/-- **(M1b-3b-vi)** The `σ`-action on smooth points as an equivalence (inverse given by
+`σ⁻¹`). -/
+noncomputable def galoisSmoothPointEquiv {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) :
+    (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint ≃
+      (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint where
+  toFun := galoisSmoothPoint W σ
+  invFun := galoisSmoothPoint W σ.symm
+  left_inv P := HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.ext
+    (by simp [galoisSmoothPoint]) (by simp [galoisSmoothPoint])
+  right_inv P := HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.ext
+    (by simp [galoisSmoothPoint]) (by simp [galoisSmoothPoint])
+
+@[simp] theorem galoisSmoothPointEquiv_apply {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    galoisSmoothPointEquiv W σ P = galoisSmoothPoint W σ P := rfl
+
+/-- **(M1b-3b-vi ★)** The affine divisor of `σ·g` is the `σ`-relabelling of the affine
+divisor of `g`. -/
+theorem divisorOf_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq L]
+    [IsAlgClosed L] [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (g : (W.baseChange L).toAffine.FunctionField) :
+    (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).divisorOf (galoisFunctionFieldEquiv W σ g) =
+      Finsupp.equivMapDomain (galoisSmoothPointEquiv W σ)
+        ((⟨(W.baseChange L).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).divisorOf g) := by
+  refine Finsupp.ext fun P => ?_
+  rw [Finsupp.equivMapDomain_apply]
+  have hP : galoisSmoothPoint W σ ((galoisSmoothPointEquiv W σ).symm P) = P :=
+    (galoisSmoothPointEquiv W σ).apply_symm_apply P
+  conv_lhs => rw [← hP]
+  rw [divisorOf_galoisFunctionFieldEquiv_apply W σ g]
+
 end ModularCurves
