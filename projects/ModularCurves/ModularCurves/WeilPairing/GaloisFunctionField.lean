@@ -943,4 +943,26 @@ theorem ringHom_ext_const_x_y_gen {L : Type v} [Field L] [DecidableEq L] [Algebr
     · exact hx
   · exact hy
 
+/-- **(M1b-3b leaf, brick 2-raw)** The raw fraction-field lift fixes the generic
+`x`-coordinate (the coordinate-ring map sends `X ↦ X`). -/
+theorem galoisFractionLift_x_gen {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) :
+    IsFractionRing.ringEquivOfRingEquiv (galoisCoordRingEquiv W σ)
+        (HasseWeil.x_gen (W.baseChange L)) =
+      HasseWeil.x_gen ((W.baseChange L).map (σ : L →+* L)) := by
+  rw [HasseWeil.x_gen, IsFractionRing.ringEquivOfRingEquiv_algebraMap]
+  refine congrArg (algebraMap _ _) ?_
+  show WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine (σ : L →+* L)
+      (algebraMap (Polynomial L) _ Polynomial.X) = _
+  rw [show (algebraMap (Polynomial L) (W.baseChange L).toAffine.CoordinateRing Polynomial.X) =
+      WeierstrassCurve.Affine.CoordinateRing.mk (W.baseChange L).toAffine
+        (Polynomial.C Polynomial.X) from rfl,
+    WeierstrassCurve.Affine.CoordinateRing.map_mk]
+  rw [show Polynomial.map (Polynomial.mapRingHom (σ : L →+* L))
+      (Polynomial.C (Polynomial.X : Polynomial L)) =
+    Polynomial.C (Polynomial.X : Polynomial L) from by
+      rw [Polynomial.map_C]
+      exact congrArg Polynomial.C (Polynomial.map_X _)]
+  rfl
+
 end ModularCurves
