@@ -743,7 +743,11 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       only negation needed was digit-0 (additive, exact).
       (4) IN PROGRESS — (4a) done, (4b) done (`gaussValueF_alocToWittF` attainment
       equality), (4c-i) done (`valued_AlocToHatK` bridge + `teichCoeffAr :=
-      limUnder(comap AlocToHatK (𝓝 x)) coords` definition). NEXT (4c-ii): the
+      limUnder(comap AlocToHatK (𝓝 x)) coords` definition). (4c-ii) PARTIAL: `ball_mem_nhds_zero` +
+      `exists_ball_subset_nhds` DONE (valuation balls are a neighborhood basis of 0 in
+      F — ϖ^m·O_F-scaling one way, boundedness of O_F + top-nilpotent scaling the other;
+      note `haveI := IsPerfectoidRing.uniform (p := p) (A := F)` needed for
+      IsUniform.isBounded_powerBounded). STILL TO DO in (4c-ii): the
       Tendsto-characterization for x ∈ ArSub — NeBot from closure-membership
       (mem_closure_iff_nhds_neBot + comap-transfer), Cauchy of the pushed filter via
       exists_delta_teichCoeffF_sub (hyps: approximant-terms bounded (4a), differences

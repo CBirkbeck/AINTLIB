@@ -380,6 +380,62 @@ def teichCoeffAr {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x : hatK p F hρ
   Filter.limUnder (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x))
     (fun u => teichCoeffF p F (alocToWittF p F ϖ u) n)
 
+/-- Valuation balls are neighborhoods of `0` in `F`: `ϖ^m·O_F ⊆ {v ≤ c^m}` and the
+left side is open. -/
+theorem ball_mem_nhds_zero (m : ℕ) :
+    {z : F | perfectoidValuation p F z ≤ (perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m} ∈ nhds (0 : F) := by
+  obtain ⟨P⟩ := IsHuberRing.exists_pairOfDefinition (A := F)
+  have hopen : IsOpen ((fun z : F => ((ϖ.val : Fˣ) : F) ^ m * z) ''
+      (powerBoundedSubring F : Set F)) := by
+    have hunit : IsUnit (((ϖ.val : Fˣ) : F) ^ m) := ((ϖ.val : Fˣ).isUnit).pow m
+    exact hunit.isOpenMap_smul _ P.isOpen_powerBoundedSubring
+  refine Filter.mem_of_superset (hopen.mem_nhds ⟨0, isPowerBounded_zero, mul_zero _⟩) ?_
+  rintro z ⟨u, hu, rfl⟩
+  have hu1 : perfectoidValuation p F u ≤ 1 := by
+    obtain ⟨û, hû⟩ := (⟨u, hu⟩ : powerBoundedSubring F)
+    exact perfectoidValuation_le_one p F ⟨u, hu⟩
+  calc perfectoidValuation p F (((ϖ.val : Fˣ) : F) ^ m * u)
+      = (perfectoidValuation p F (((ϖ.val : Fˣ) : F))) ^ m * perfectoidValuation p F u := by
+        rw [Valuation.map_mul, map_pow]
+    _ ≤ (perfectoidValuation p F (((ϖ.val : Fˣ) : F))) ^ m * 1 :=
+        mul_le_mul_of_nonneg_left hu1 zero_le
+    _ = (perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m := by
+        rw [mul_one]
+        rfl
+
+/-- Every neighborhood of `0` in `F` contains a valuation ball (the power-bounded
+subring is bounded; scale by `ϖ^N`). -/
+theorem exists_ball_subset_nhds {V : Set F} (hV : V ∈ nhds (0 : F)) :
+    ∃ m : ℕ, {z : F | perfectoidValuation p F z ≤ (perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m} ⊆ V := by
+  haveI := IsPerfectoidRing.uniform (p := p) (A := F)
+  obtain ⟨G, hGV⟩ := NonarchimedeanAddGroup.is_nonarchimedean V hV
+  obtain ⟨W, hW, hFW⟩ := IsUniform.isBounded_powerBounded (A := F) (G : Set F)
+    (G.isOpen.mem_nhds G.zero_mem')
+  obtain ⟨N, hN⟩ := ϖ.isTopologicallyNilpotent.exists_pow_mem_of_mem_nhds hW
+  refine ⟨N, fun z hz => hGV ?_⟩
+  -- v(z) ≤ c^N means z/ϖ^N ∈ O_F, so z = ϖ^N·(power-bounded) ∈ W·O_F ⊆ G… we use
+  -- z = (z·ϖ^{-N})·ϖ^N with the first factor of valuation ≤ 1.
+  set ϖF : F := ((ϖ.val : Fˣ) : F) with hϖF
+  have hϖne : ϖF ≠ 0 := (ϖ.val : Fˣ).ne_zero
+  have hzu : perfectoidValuation p F (z * (ϖF ^ N)⁻¹) ≤ 1 := by
+    rw [Valuation.map_mul, map_inv₀, map_pow]
+    rcases eq_or_ne (perfectoidValuation p F ϖF) 0 with hc0 | hc0
+    · exact absurd ((Valuation.zero_iff _).mp hc0) hϖne
+    calc perfectoidValuation p F z * ((perfectoidValuation p F ϖF) ^ N)⁻¹
+        ≤ (perfectoidValuation p F ϖF) ^ N * ((perfectoidValuation p F ϖF) ^ N)⁻¹ := by
+          refine mul_le_mul_of_nonneg_right ?_ zero_le
+          exact hz
+      _ = 1 := mul_inv_cancel₀ (pow_ne_zero N hc0)
+  obtain ⟨u, hu⟩ := (perfectoidValuation_integers p F).exists_of_le_one hzu
+  have hu' : ((u : OF F) : F) = z * (ϖF ^ N)⁻¹ := hu
+  have hzeq : z = ((u : OF F) : F) * ϖF ^ N := by
+    rw [hu']
+    field_simp
+  rw [hzeq]
+  exact hFW (Set.mul_mem_mul u.2 hN)
+
 end FarguesFontaine
 
 end
