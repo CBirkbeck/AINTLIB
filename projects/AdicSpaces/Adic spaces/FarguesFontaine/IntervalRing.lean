@@ -168,6 +168,49 @@ theorem wI_BIProd {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ 
       = max (Valued.v (BlocToHatK p F ϖ hρ₁0 hρ₁1 x))
         (Valued.v (BlocToHatK p F ϖ hρ₂0 hρ₂1 x)) := rfl
 
+/-- **The first coordinate of an interval-ring element lies in the endpoint ring**. -/
+theorem BISub_fst_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    z.1 ∈ BrSub p F ϖ hρ₁0 hρ₁1 := by
+  have hz' : z ∈ closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := hz
+  have himg : Prod.fst '' (closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))))
+      ⊆ closure (Prod.fst '' ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))) :=
+    image_closure_subset_closure_image continuous_fst
+  have hsub : Prod.fst '' ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      ⊆ ((BlocToHatK p F ϖ hρ₁0 hρ₁1).range : Set (hatK p F hρ₁0 hρ₁1)) := by
+    rintro w ⟨q, ⟨x, rfl⟩, rfl⟩
+    exact ⟨x, rfl⟩
+  have hmem : z.1 ∈ closure ((BlocToHatK p F ϖ hρ₁0 hρ₁1).range
+      : Set (hatK p F hρ₁0 hρ₁1)) :=
+    closure_mono hsub (himg ⟨z, hz', rfl⟩)
+  exact hmem
+
+/-- **The second coordinate of an interval-ring element lies in the endpoint ring**. -/
+theorem BISub_snd_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    z.2 ∈ BrSub p F ϖ hρ₂0 hρ₂1 := by
+  have hz' : z ∈ closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := hz
+  have himg : Prod.snd '' (closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))))
+      ⊆ closure (Prod.snd '' ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))) :=
+    image_closure_subset_closure_image continuous_snd
+  have hsub : Prod.snd '' ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      ⊆ ((BlocToHatK p F ϖ hρ₂0 hρ₂1).range : Set (hatK p F hρ₂0 hρ₂1)) := by
+    rintro w ⟨q, ⟨x, rfl⟩, rfl⟩
+    exact ⟨x, rfl⟩
+  exact closure_mono hsub (himg ⟨z, hz', rfl⟩)
+
 end FarguesFontaine
 
 end
