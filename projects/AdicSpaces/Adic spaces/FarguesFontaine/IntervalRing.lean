@@ -811,6 +811,56 @@ theorem tendsto_resI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ�
   rw [heq]
   exact hty
 
+/-- Interval-norm balls are neighborhoods in the product. -/
+theorem wI_ball_mem_nhds {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) {ε : NNReal} (hε : 0 < ε) :
+    {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (w - z) ≤ ε} ∈ nhds z := by
+  have h1 : ((fun w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => w.1)
+      ⁻¹' {w : hatK p F hρ₁0 hρ₁1 | Valued.v (w - z.1) ≤ ε}) ∈ nhds z :=
+    continuous_fst.continuousAt (valued_ball_mem_nhds p F z.1 hε)
+  have h2 : ((fun w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => w.2)
+      ⁻¹' {w : hatK p F hρ₂0 hρ₂1 | Valued.v (w - z.2) ≤ ε}) ∈ nhds z :=
+    continuous_snd.continuousAt (valued_ball_mem_nhds p F z.2 hε)
+  refine Filter.mem_of_superset (Filter.inter_mem h1 h2) ?_
+  rintro w ⟨hw1, hw2⟩
+  have hb1 : Valued.v (w.1 - z.1) ≤ ε := hw1
+  have hb2 : Valued.v (w.2 - z.2) ≤ ε := hw2
+  exact max_le hb1 hb2
+
+set_option maxHeartbeats 1000000 in
+/-- **The restriction map extends the endpoint map**: on `Bloc`-images it is the
+endpoint map itself. -/
+theorem resI_BIProd {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (x : Bloc p F ϖ) :
+    resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+      = BlocToHatK p F ϖ hmid0 hmid1 x := by
+  have hmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := BIProd_mem_BISub p F ϖ x
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hmem
+  have hlim := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hmem
+  have hlim2 : Filter.Tendsto (fun y => BlocToHatK p F ϖ hmid0 hmid1 y)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+        (nhds (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)))
+      (nhds (BlocToHatK p F ϖ hmid0 hmid1 x)) := by
+    rw [Filter.tendsto_def]
+    intro U hU
+    obtain ⟨γ, hγ⟩ := (Valued.mem_nhds (R := hatK p F hmid0 hmid1)).mp hU
+    obtain ⟨ε, hε0, hεγ⟩ := exists_nnreal_lt_gamma p F γ
+    refine Filter.mem_of_superset
+      (Filter.preimage_mem_comap (wI_ball_mem_nhds p F
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) hε0)) ?_
+    intro y hy
+    refine hγ ?_
+    refine hεγ _ ?_
+    exact le_trans (valued_BlocToHatK_sub_le_wI p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 y x) hy
+  exact tendsto_nhds_unique hlim hlim2
+
 end FarguesFontaine
 
 end
