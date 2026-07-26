@@ -10,6 +10,31 @@ statement is wrong — report, don't bend). Each ticket cites its decomposition 
 (`decomposition.md`, e.g. L4.6), which carry the verbatim source
 quotes, discharge plans, and attack logs. Sources local under `refs/AdicSpaces/`.
 
+## CAMPAIGN 8 STATUS (beastmode session, 2026-07-26)
+
+**Kedlaya §2 and §3 are COMPLETE and axiom-clean; §4 is well under way.** All nine
+`FarguesFontaine/` files are sorry-free (10 777 lines); the full library builds green
+(3318 jobs); everything is pushed to `origin/dev/adic-spaces`.
+
+| Ticket | Content | State |
+|---|---|---|
+| Lane A | `Y_nonempty` (Gauss point at ρ = 1/2) | done |
+| T901 | `Bloc`, `wLoc` and its evaluations | done |
+| T902 | W(F) value engine (`gaussValueF`, ε-δ coordinates) | done-as-scoped |
+| T903 | `A^r` as a valued completion; the c₀-architecture; **coordinate realization** and the value formula (Kedlaya (2.2.1)); `wAr`; attainment | done |
+| T904 | Witt homogeneity (2.8.1); `degAr`; **Lemma 2.6** (`degAr_mul`); **Remark 2.7**; **Lemma 2.8**; **Prop 2.9**; **Cor 2.10** — `A^r` is a PID | done |
+| T905 | Gröbner data: leading index/coefficient (Def 3.6), `dIdx` (Def 3.7), the finite Gröbner set (Dickson), the chosen generators | done |
+| T906 | **Lemma 3.8** (approximate ideal generation) with the Colex well-founded descent | done |
+| T907 | **Lemma 3.9** and **Theorem 3.2** — `A^r` is strongly noetherian | done |
+| T908 | `B^I` (Def 4.2): construction, norm, completeness, series, density, injectivity, **Lemma 4.4 (three circles)**, **Cor 4.5**, `B^{I,+}` | (a)+(b) done, (c) open |
+| T909–T912 | restriction maps; Lemma 4.9 presentations; Theorem 4.10 | open |
+
+Two external consults are archived alongside this board:
+`chatgpt-reply-decay-closure-2026-07-26.md` (the moving-prefix estimate that unlocked
+the coordinate realization), `chatgpt-reply-degmul-2026-07-26.md` (single-radius
+Lemma 2.6/Remark 2.7) and `chatgpt-reply-termination-2026-07-26.md` (the Colex
+descent measure for Lemma 3.8).
+
 ## Summary
 - Core proof tickets: 22 (T101–T505) + 1 stretch (T601, blocked-on-plan)
 - Cleanup tickets: 10 (CLEANUP-1…8, CLEANUP-ALL-1, CLEANUP-FINAL)
