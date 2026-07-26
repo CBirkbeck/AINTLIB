@@ -1,4 +1,8 @@
-FOCUS: DS4 M1b-3b — Galois transport chain, WeilPairing/GaloisFunctionField.lean (all sorry-free, pushed).
-DONE: galoisCoordRingEquiv, galoisFunctionFieldEquiv, map_maximalIdealAt_galoisCoordRingEquiv, pointOnMappedGal, pointValuation_galoisFunctionFieldEquiv, galoisSmoothPoint(+_injective,+Equiv), ord_P_galoisFunctionFieldEquiv, divisorOf_galoisFunctionFieldEquiv(_apply), galoisCoordRingEquiv_smul_basis, norm_galoisCoordRingEquiv, ordAtInfty_algebraMap_galoisCoordRingEquiv, ordAtInfty_galoisFractionLift, ordAtInfty_galoisFunctionFieldEquiv.
-NEXT BRICK: projectiveDivisorOf_galoisFunctionFieldEquiv — projectiveDivisorOf f = (divisorOf f).toProjective + single infinity (ordAtInfty f).untopD 0 (ProjectiveDivisor.lean:206); combine divisorOf_galoisFunctionFieldEquiv (relabel by galoisSmoothPointEquiv, then mapDomain affine) with ordAtInfty_galoisFunctionFieldEquiv; target shape: projectiveDivisorOf (sigma.g) = equivMapDomain (projective sigma-equiv fixing infinity) (projectiveDivisorOf g).
-THEN: div(Phi_sigma g_T) = div(g_{sigma T}) (needs: sigma permutes N-torsion + pullbackDiv commutes with the relabelling), then pairing equivariance via Constancy.pairing_const_of_transport, then M1c descent.
+FOCUS: DS4 M1b-3b — next brick: projectiveDivisorOf_galoisFunctionFieldEquiv.
+CLEANER ROUTE (a first Finsupp.ext + case-split attempt got stuck on metavariables in Finsupp.single_eq_of_ne; reverted, file is green):
+  projectiveDivisorOf f = (divisorOf f).toProjective + single infinity ((ordAtInfty f).untopD 0)   [ProjectiveDivisor.lean:206]
+  1. LEMMA A: (Finsupp.equivMapDomain e D).toProjective = Finsupp.equivMapDomain (galoisProjPointEquiv) (D.toProjective)
+     — toProjective = mapDomain affine; use Finsupp.mapDomain_comp / equivMapDomain_eq_mapDomain and that galoisProjPointEquiv o affine = affine o galoisSmoothPointEquiv.
+  2. LEMMA B: Finsupp.equivMapDomain (galoisProjPointEquiv) (single infinity c) = single infinity c  — via Finsupp.equivMapDomain_single + galoisProjPointEquiv_infinity.
+  3. Combine with divisorOf_galoisFunctionFieldEquiv (affine part), ordAtInfty_galoisFunctionFieldEquiv (infinity part) and additivity of equivMapDomain (Finsupp.equivMapDomain_add? else mapDomain_add).
+THEN: div(Phi_sigma g_T) = div(g_{sigma T}); pairing equivariance (Constancy.pairing_const_of_transport + uniqueness); M1c descent (exists_pairingAlgebraHom_of_galoisEquivariant).
