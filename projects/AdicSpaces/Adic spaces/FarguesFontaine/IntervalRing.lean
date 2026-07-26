@@ -27,6 +27,7 @@ the `max`-of-two-valuations uniformity, and its closure is therefore the complet
 * `FarguesFontaine.BISub` : the interval ring `B^I` as a closed subring of the product.
 * `FarguesFontaine.wI` : the interval norm `max {λ_{ρ₁}, λ_{ρ₂}}`.
 * `FarguesFontaine.BIPlus` : the integral subring `B^{I,+}` of norm-`≤ 1` elements.
+* `FarguesFontaine.resI` : the restriction map to an intermediate radius.
 
 ## Sources
 
@@ -735,6 +736,80 @@ theorem eventually_pair_wI_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ�
   · exact le_trans hy hhalfle
   · rw [wI_neg p F]
     exact le_trans hx hhalfle
+
+/-- Every value-group unit dominates a positive `NNReal` threshold. -/
+theorem exists_nnreal_lt_gamma {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (γ : (MonoidWithZeroHom.ValueGroup₀ (.ofClass (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)))ˣ) :
+    ∃ ε : NNReal, 0 < ε ∧ ∀ w : hatK p F hρ0 hρ1,
+      Valued.v w ≤ ε → (Valued.v).restrict w < γ.1 := by
+  have hγpos : (0 : NNReal) < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 := by
+    refine pos_iff_ne_zero.mpr fun h0 => ?_
+    have hinj := (MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
+      (f := MonoidWithZeroHom.ofClass (Valued.v :
+        Valuation (hatK p F hρ0 hρ1) NNReal))).injective
+    have h00 : MonoidWithZeroHom.ValueGroup₀.embedding (0 :
+        MonoidWithZeroHom.ValueGroup₀ (MonoidWithZeroHom.ofClass (Valued.v :
+          Valuation (hatK p F hρ0 hρ1) NNReal))) = 0 := map_zero _
+    exact γ.ne_zero (hinj (h0.trans h00.symm))
+  obtain ⟨N, hN⟩ := _root_.exists_pow_lt_of_lt_one hγpos hρ1
+  refine ⟨ρ ^ (N + 1), pow_pos hρ0 (N + 1), fun w hw => ?_⟩
+  have hlt : Valued.v w < MonoidWithZeroHom.ValueGroup₀.embedding γ.1 := by
+    refine lt_of_le_of_lt hw (lt_of_lt_of_le ?_ hN.le)
+    exact pow_lt_pow_right_of_lt_one₀ hρ0 hρ1 (Nat.lt_succ_self N)
+  have hsm := MonoidWithZeroHom.ValueGroup₀.embedding_strictMono
+    (f := MonoidWithZeroHom.ofClass (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal))
+  refine hsm.lt_iff_lt.mp ?_
+  rw [Valuation.embedding_restrict]
+  exact hlt
+
+/-- **The restriction map to an intermediate radius**, defined as the limit of the
+endpoint images along the approximant filter. -/
+def resI {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) : hatK p F hσ0 hσ1 :=
+  Filter.limUnder (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+    (fun x => BlocToHatK p F ϖ hσ0 hσ1 x)
+
+set_option maxHeartbeats 1000000 in
+/-- **The restriction map is the limit of the approximants** (Kedlaya Cor 4.5 made
+into a map): for `z ∈ B^I` and an intermediate radius, the endpoint images of the
+approximants converge to `resI z`. -/
+theorem tendsto_resI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    Filter.Tendsto (fun x => BlocToHatK p F ϖ hmid0 hmid1 x)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z)) := by
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  set L := Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z) with hL
+  set g : Bloc p F ϖ → hatK p F hmid0 hmid1 :=
+    fun x => BlocToHatK p F ϖ hmid0 hmid1 x with hg
+  have hcauchy : Cauchy (Filter.map g L) := by
+    refine ⟨hne.map _, ?_⟩
+    rw [Filter.prod_map_map_eq]
+    intro V hV
+    obtain ⟨γ, -, hγV⟩ :=
+      (Valued.hasBasis_uniformity (hatK p F hmid0 hmid1) NNReal).mem_iff.mp hV
+    obtain ⟨ε, hε0, hεγ⟩ := exists_nnreal_lt_gamma p F γ
+    have hpairs := eventually_pair_wI_le p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) z hε0
+    rw [← hL] at hpairs
+    rw [Filter.mem_map]
+    refine Filter.mem_of_superset hpairs ?_
+    rintro ⟨x, y⟩ hxy
+    refine hγV ?_
+    refine hεγ (g y - g x) ?_
+    exact le_trans (valued_BlocToHatK_sub_le_wI p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 y x) hxy
+  obtain ⟨w, hw⟩ := CompleteSpace.complete hcauchy
+  have hty : Filter.Tendsto g L (nhds w) := hw
+  have heq : resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z = w := hty.limUnder_eq
+  rw [heq]
+  exact hty
 
 end FarguesFontaine
 
