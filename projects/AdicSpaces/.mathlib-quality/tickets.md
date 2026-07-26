@@ -73,6 +73,29 @@ inverse of `p[ϖ]`), and `BISub_le_topologicalClosure_evalRange`. **What remains
 the strictness half**: a norm-controlled lift (Kedlaya's `|z|_ρ ≤ c^{t₀-t} λ_{I'}(x)`),
 which makes the image closed and hence — with density — everything.
 
+**The strictness lift, worked out (2026-07-26).** It is *term-by-term*, and in the AD-9
+special case (`z̄ = ϖʲ`, so `ρ₁ = |ϖ|^{jn}` exactly) it is clean:
+
+* a Witt term `pᵐ[x̄]` with `m ≥ 0` lifts to itself (`T`-degree 0), and its Gauss norm on
+  `A^r` is `w_{ρ₂}(pᵐ[x̄]) ≤ λ_I(x) `;
+* a term with `m < 0` lifts to `[x̄]·[ϖ]^{-jn|m|}·T^{|m|}`, whose Gauss norm is
+  `|x̄|·ρ₁^{-|m|} = w_{ρ₁}(pᵐ[x̄]) ≤ λ_I(x)`.
+
+So each term lifts with **no norm loss** — this is exactly Kedlaya's estimate, with the
+constant `1` because our left endpoint is on the nose. A *crude* lift (write `x = a/(p[ϖ])^k`
+and use one `T^k`) does **not** work: its norm exceeds `λ_I(x)` by `(ρ₂/ρ₁)^k`.
+
+For the dense layer this needs no new theory: for `x ∈ Bloc`, `x = a·(p[ϖ])^{-k}` with
+`a ∈ A_inf`, and splitting `a = prefix_k(a) + tail` (coordinates below `k`, then the rest,
+which is divisible by `pᵏ`) makes the lift a **polynomial** in `T` — the negative-`p`-power
+terms are the finitely many `n < k`. Then closedness follows by successive approximation
+(each round gains a factor `ε`), using `wI_evalAr_le` for continuity of `eval` and
+coefficientwise completeness of `A^r` for the limit.
+
+Note the dependency this *removes*: only `Bloc`-elements need lifting, so **T908(c)
+(coordinates on all of `B^I`) is not required for T911** — the prefix/tail machinery on
+`A_inf` suffices.
+
 - **T911** — surjectivity + strictness of that map (Kedlaya's explicit lift: for `x =
   pⁿ[x̄ₙ]` take `j` minimal with `c^{-j}|x̄ₙ| ≥ 1` and `z = pⁿ[x̄ₙ z̄^{-j}]T^j`, giving
   `|z|_1 ≤ λ_I(x)`), then the same with `k` extra radius-1 variables.
