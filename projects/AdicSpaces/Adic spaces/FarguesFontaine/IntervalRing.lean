@@ -211,6 +211,45 @@ theorem BISub_snd_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ
     exact ⟨x, rfl⟩
   exact closure_mono hsub (himg ⟨z, hz', rfl⟩)
 
+/-- Value balls around a point are neighborhoods. -/
+theorem valued_ball_mem_nhds {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (z : hatK p F hρ0 hρ1) {ε : NNReal} (hε : 0 < ε) :
+    {w : hatK p F hρ0 hρ1 | Valued.v (w - z) ≤ ε} ∈ nhds z := by
+  have hcont : ContinuousAt (fun w : hatK p F hρ0 hρ1 => w - z) z :=
+    (continuous_id.sub continuous_const).continuousAt
+  have h0 : {y : hatK p F hρ0 hρ1 | Valued.v y ≤ ε}
+      ∈ nhds ((fun w : hatK p F hρ0 hρ1 => w - z) z) := by
+    rw [show (fun w : hatK p F hρ0 hρ1 => w - z) z = 0 from sub_self z]
+    exact valued_ball_mem_nhds_zero p F (hρ0 := hρ0) (hρ1 := hρ1) hε
+  exact hcont h0
+
+/-- **Quantitative density**: every element of `B^I` is `wI`-approximated by the image
+of `Bloc`. -/
+theorem exists_BIProd_wI_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) {ε : NNReal} (hε : 0 < ε) :
+    ∃ x : Bloc p F ϖ,
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z) ≤ ε := by
+  have hz' : z ∈ closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := hz
+  have hball : {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (w - z) ≤ ε} ∈ nhds z := by
+    have h1 : ((fun w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => w.1)
+        ⁻¹' {w : hatK p F hρ₁0 hρ₁1 | Valued.v (w - z.1) ≤ ε}) ∈ nhds z :=
+      continuous_fst.continuousAt (valued_ball_mem_nhds p F z.1 hε)
+    have h2 : ((fun w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => w.2)
+        ⁻¹' {w : hatK p F hρ₂0 hρ₂1 | Valued.v (w - z.2) ≤ ε}) ∈ nhds z :=
+      continuous_snd.continuousAt (valued_ball_mem_nhds p F z.2 hε)
+    refine Filter.mem_of_superset (Filter.inter_mem h1 h2) ?_
+    rintro w ⟨hw1, hw2⟩
+    have hb1 : Valued.v (w.1 - z.1) ≤ ε := hw1
+    have hb2 : Valued.v (w.2 - z.2) ≤ ε := hw2
+    exact max_le hb1 hb2
+  obtain ⟨w, hwball, hwrange⟩ := mem_closure_iff_nhds.mp hz' _ hball
+  obtain ⟨x, rfl⟩ := hwrange
+  exact ⟨x, hwball⟩
+
 end FarguesFontaine
 
 end
