@@ -673,6 +673,69 @@ theorem valued_BlocToHatK_sub_le_wI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁}
   exact valued_BlocToHatK_le_wI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
     (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 (x - y)
 
+/-- The approximant filter of a point of `B^I` is nontrivial. -/
+theorem neBot_comap_of_mem_BISub {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)).NeBot := by
+  rw [Filter.comap_neBot_iff]
+  intro t ht
+  have hz' : z ∈ closure (Set.range (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := hz
+  obtain ⟨y, hyt, hyr⟩ := mem_closure_iff_nhds.mp hz' t ht
+  obtain ⟨x, rfl⟩ := hyr
+  exact ⟨x, hyt⟩
+
+/-- **Pairs of approximants are eventually `wI`-close.** -/
+theorem eventually_pair_wI_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) {ε : NNReal} (hε : 0 < ε) :
+    ∀ᶠ q in (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)) ×ˢ
+        (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)),
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.2
+        - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.1) ≤ ε := by
+  -- the ball around `z` in the product
+  have hball : {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (w - z) ≤ ε / 2} ∈ nhds z := by
+    have hhalf : (0 : NNReal) < ε / 2 := by
+      simpa using div_pos hε (by norm_num : (0 : NNReal) < 2)
+    have h1 : ((fun w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => w.1)
+        ⁻¹' {w : hatK p F hρ₁0 hρ₁1 | Valued.v (w - z.1) ≤ ε / 2}) ∈ nhds z :=
+      continuous_fst.continuousAt (valued_ball_mem_nhds p F z.1 hhalf)
+    have h2 : ((fun w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => w.2)
+        ⁻¹' {w : hatK p F hρ₂0 hρ₂1 | Valued.v (w - z.2) ≤ ε / 2}) ∈ nhds z :=
+      continuous_snd.continuousAt (valued_ball_mem_nhds p F z.2 hhalf)
+    refine Filter.mem_of_superset (Filter.inter_mem h1 h2) ?_
+    rintro w ⟨hw1, hw2⟩
+    have hb1 : Valued.v (w.1 - z.1) ≤ ε / 2 := hw1
+    have hb2 : Valued.v (w.2 - z.2) ≤ ε / 2 := hw2
+    exact max_le hb1 hb2
+  have hhalfle : (ε : NNReal) / 2 ≤ ε := by
+    exact div_le_self zero_le (by norm_num)
+  have hcomap : ∀ᶠ x in Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z),
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z) ≤ ε / 2 := by
+    refine Filter.eventually_comap.mpr (Filter.Eventually.mono hball ?_)
+    intro w hw x hx
+    rw [hx]
+    exact hw
+  refine Filter.Eventually.mono (Filter.prod_mem_prod hcomap hcomap) ?_
+  rintro ⟨x, y⟩ ⟨hx, hy⟩
+  have hsplit : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 y
+      - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+      = (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 y - z)
+        - (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z) := by ring
+  rw [hsplit]
+  have hneg : (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 y - z)
+      - (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z)
+      = (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 y - z)
+        + (-(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x - z)) := by ring
+  rw [hneg]
+  refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
+  · exact le_trans hy hhalfle
+  · rw [wI_neg p F]
+    exact le_trans hx hhalfle
+
 end FarguesFontaine
 
 end
