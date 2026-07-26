@@ -855,4 +855,183 @@ theorem overTrivializationSection_tensor_one
   rw [overTrivializationSection_coefficient]
   exact (overTrivialization_tensor_one_coefficient M N U eM eN).symm
 
+/-- Scalar multiplication in the first factor becomes scalar multiplication
+of the canonical pure tensor section. -/
+theorem tensorSection_smul_left
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (a : Γ(X, U)) (x : Γ(M, U)) (y : Γ(N, U)) :
+    tensorSection M N U (a • x) y =
+      a • tensorSection M N U x y := by
+  unfold tensorSection
+  let R :=
+    (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (.op U)
+  let MM : ModuleCat R := M.val.obj (.op U)
+  let NN : ModuleCat R := N.val.obj (.op U)
+  let TT : ModuleCat R := (M.val ⊗ N.val).obj (.op U)
+  let LL : ModuleCat R :=
+    (Scheme.Modules.tensorObj M N).val.obj (.op U)
+  let OO : ModuleCat R := (M ⊗ N).val.obj (.op U)
+  let aa : R := a
+  let xx : MM := x
+  let yy : NN := y
+  let η := ((PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).unit.app (M.val ⊗ N.val)).app (.op U)
+  let e := (monoidalTensorObjIso M N).inv.val.app (.op U)
+  let η' : TT ⟶ LL := η
+  let e' : LL ⟶ OO := e
+  let t : TT := xx ⊗ₜ yy
+  have h :
+      ((aa • xx) ⊗ₜ yy : TT) = aa • t := by
+    exact (TensorProduct.smul_tmul' aa xx yy).symm
+  change e'.hom (η'.hom ((aa • xx) ⊗ₜ yy)) =
+    aa • e'.hom (η'.hom (xx ⊗ₜ yy))
+  calc
+    e'.hom (η'.hom ((aa • xx) ⊗ₜ yy)) =
+        e'.hom (η'.hom (aa • t)) :=
+      congrArg (fun q ↦ e'.hom (η'.hom q)) h
+    _ = e'.hom (aa • η'.hom t) :=
+      congrArg e'.hom (η'.hom.map_smul aa t)
+    _ = aa • e'.hom (η'.hom t) :=
+      e'.hom.map_smul aa (η'.hom t)
+
+/-- Scalar multiplication in the second factor becomes scalar multiplication
+of the canonical pure tensor section. -/
+theorem tensorSection_smul_right
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (a : Γ(X, U)) (x : Γ(M, U)) (y : Γ(N, U)) :
+    tensorSection M N U x (a • y) =
+      a • tensorSection M N U x y := by
+  rw [← tensorSection_smul]
+  exact tensorSection_smul_left M N U a x y
+
+/-- A section is recovered by applying its over-site frame to its coefficient. -/
+theorem overTrivializationSection_coefficient_self
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (x : Γ(M, U)) :
+    overTrivializationSection M U e
+        (e.hom.val.app (.op (Over.mk (𝟙 U))) x) = x := by
+  have hcomp := congrArg
+    (fun q ↦ q.val.app (.op (Over.mk (𝟙 U)))) e.hom_inv_id
+  exact ConcreteCategory.congr_hom hcomp x
+
+/-- In tensor-product frames on an arbitrary open, the coefficient of a pure
+tensor section is the product of its two coefficients. -/
+theorem overTrivializationOfRestrictIso_tensorSection_coefficient
+    {X : Scheme.{u}} (M N : X.Modules) (U : X.Opens)
+    (eM : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (eN : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (x : Γ(M, U)) (y : Γ(N, U)) :
+    let eMO := Scheme.Modules.overTrivializationOfRestrictIso M U eM
+    let eNO := Scheme.Modules.overTrivializationOfRestrictIso N U eN
+    let eT := Scheme.Modules.overTrivializationOfRestrictIso (M ⊗ N) U
+      (restrictMonoidalTensorIso U.ι M N ≪≫
+        (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme)
+    eT.hom.val.app (.op (Over.mk (𝟙 U)))
+        (tensorSection M N U x y) =
+      (show Γ(X, U) from
+        eMO.hom.val.app (.op (Over.mk (𝟙 U))) x) *
+        (show Γ(X, U) from
+          eNO.hom.val.app (.op (Over.mk (𝟙 U))) y) := by
+  dsimp only
+  let eMO := Scheme.Modules.overTrivializationOfRestrictIso M U eM
+  let eNO := Scheme.Modules.overTrivializationOfRestrictIso N U eN
+  let eT := Scheme.Modules.overTrivializationOfRestrictIso (M ⊗ N) U
+    (restrictMonoidalTensorIso U.ι M N ≪≫
+      (eM ⊗ᵢ eN) ≪≫ unitObjTensorIso U.toScheme)
+  let cM : Γ(X, U) := eMO.hom.val.app (.op (Over.mk (𝟙 U))) x
+  let cN : Γ(X, U) := eNO.hom.val.app (.op (Over.mk (𝟙 U))) y
+  change eT.hom.val.app (.op (Over.mk (𝟙 U)))
+      (tensorSection M N U x y) = cM * cN
+  have hx : x = overTrivializationSection M U eMO cM :=
+    (overTrivializationSection_coefficient_self M U eMO x).symm
+  have hy : y = overTrivializationSection N U eNO cN :=
+    (overTrivializationSection_coefficient_self N U eNO y).symm
+  have hM :
+      overTrivializationSection M U eMO cM =
+        cM • overTrivializationSection M U eMO 1 := by
+    rw [overTrivializationSection_smul, mul_one]
+  have hN :
+      overTrivializationSection N U eNO cN =
+        cN • overTrivializationSection N U eNO 1 := by
+    rw [overTrivializationSection_smul, mul_one]
+  rw [hx, hy, hM, hN]
+  rw [tensorSection_smul_left, tensorSection_smul_right, smul_smul]
+  rw [← overTrivializationSection_tensor_one M N U eM eN]
+  rw [overTrivializationSection_smul]
+  simpa only [mul_one] using
+    overTrivializationSection_coefficient (M ⊗ N) U eT (cM * cN)
+
+/-- A morphism compatible with trivializations after restriction is compatible
+with the corresponding over-site trivializations. -/
+theorem over_comp_overTrivializationOfRestrictIso_hom
+    {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N) (U : X.Opens)
+    (eM : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (eN : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (h : (Scheme.Modules.restrictFunctor U.ι).map f ≫ eN.hom =
+      eM.hom) :
+    f.over U ≫
+        (Scheme.Modules.overTrivializationOfRestrictIso N U eN).hom =
+      (Scheme.Modules.overTrivializationOfRestrictIso M U eM).hom := by
+  let G := (Scheme.Modules.overEquiv U).functor
+  let F := Scheme.Modules.overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  let q := (Scheme.Modules.restrictFunctor U.ι).map f
+  apply G.map_injective
+  rw [G.map_comp]
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom]
+  change G.map (f.over U) ≫
+      (F.hom.app N ≫ eN.hom ≫ C.inv) =
+    F.hom.app M ≫ eM.hom ≫ C.inv
+  have hnat := F.hom.naturality f
+  change G.map (f.over U) ≫ F.hom.app N =
+    F.hom.app M ≫ q at hnat
+  rw [← Category.assoc (G.map (f.over U)) (F.hom.app N)
+    (eN.hom ≫ C.inv)]
+  rw [hnat]
+  rw [Category.assoc (F.hom.app M) q (eN.hom ≫ C.inv)]
+  rw [← Category.assoc q eN.hom C.inv]
+  rw [h]
+
+/-- A morphism compatible with local frames preserves the coefficients of
+global sections in those frames. -/
+theorem overTrivializationCoefficient_map
+    {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N) (U : X.Opens)
+    (eM : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (eN : N.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (h : (Scheme.Modules.restrictFunctor U.ι).map f ≫ eN.hom =
+      eM.hom)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient N U
+        (Scheme.Modules.overTrivializationOfRestrictIso N U eN)
+        (f.val.app (.op ⊤) m) =
+      overTrivializationCoefficient M U
+        (Scheme.Modules.overTrivializationOfRestrictIso M U eM) m := by
+  let eMO := Scheme.Modules.overTrivializationOfRestrictIso M U eM
+  let eNO := Scheme.Modules.overTrivializationOfRestrictIso N U eN
+  let mU := M.presheaf.map
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m
+  have hnat := PresheafOfModules.naturality_apply f.val
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m
+  have hover :=
+    over_comp_overTrivializationOfRestrictIso_hom f U eM eN h
+  have happ := congrArg
+    (fun k ↦ k.val.app (.op (Over.mk (𝟙 U)))) hover
+  have happly := ConcreteCategory.congr_hom happ mU
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at happly
+  change f.val.app (.op U) mU =
+    N.presheaf.map (homOfLE le_top).op
+      (f.val.app (.op ⊤) m) at hnat
+  have hrestrict := congrArg
+    (fun x ↦ eNO.hom.val.app (.op (Over.mk (𝟙 U))) x) hnat.symm
+  unfold overTrivializationCoefficient
+  change eNO.hom.val.app (.op (Over.mk (𝟙 U)))
+      (N.presheaf.map (homOfLE le_top).op
+        (f.val.app (.op ⊤) m)) =
+    eMO.hom.val.app (.op (Over.mk (𝟙 U))) mU
+  exact hrestrict.trans happly
+
 end ModularCurves

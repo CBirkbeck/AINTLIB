@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.EllipticCurve.PullbackTensorSection
 import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 
 /-!
@@ -453,6 +454,85 @@ theorem localTrivializationCoefficient_sectionPoleSheafPower_baseSectionsMul_tmu
     sectionPoleSheafPowerMulTrivialization_localTrivializationRestriction_tmul
       z hz U e m n x y
 
+/-- On an arbitrary open, the coefficient of a pure-tensor pole product in
+compatible tensor-power frames is the product of the two coefficients. -/
+theorem
+    overTrivializationCoefficient_sectionPoleSheafPower_baseSectionsMul_tmul
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) (m n : ℕ)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz m))
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz n)) :
+    overTrivializationCoefficient
+        (sectionPoleSheafPower π z hz (m + n)) U
+        (Scheme.Modules.overTrivializationOfRestrictIso
+          (sectionPoleSheafPower π z hz (m + n)) U
+          (sectionPoleSheafPowerTrivialization z hz U e (m + n)))
+        (sectionPoleSheafPower_baseSectionsMul z hz m n (x ⊗ₜ y)) =
+      overTrivializationCoefficient
+          (sectionPoleSheafPower π z hz m) U
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (sectionPoleSheafPower π z hz m) U
+            (sectionPoleSheafPowerTrivialization z hz U e m)) x *
+        overTrivializationCoefficient
+          (sectionPoleSheafPower π z hz n) U
+          (Scheme.Modules.overTrivializationOfRestrictIso
+            (sectionPoleSheafPower π z hz n) U
+            (sectionPoleSheafPowerTrivialization z hz U e n)) y := by
+  let P := sectionPoleSheafPower π z hz m
+  let Q := sectionPoleSheafPower π z hz n
+  let R := sectionPoleSheafPower π z hz (m + n)
+  let eP := sectionPoleSheafPowerTrivialization z hz U e m
+  let eQ := sectionPoleSheafPowerTrivialization z hz U e n
+  let eR := sectionPoleSheafPowerTrivialization z hz U e (m + n)
+  let eT := sectionPoleSheafPowerMulTrivialization z hz U e m n
+  let f := sectionPoleSheafMulHom π z hz m n
+  let q : Γ(P ⊗ Q, (⊤ : C.Opens)) :=
+    tensorSection P Q ⊤ x y
+  have hcoord :
+      (Scheme.Modules.restrictFunctor U.ι).map f ≫ eR.hom =
+        eT.hom :=
+    sectionPoleSheafMulHom_restrict_comp_powerTrivialization
+      z hz U e m n
+  have hmap := overTrivializationCoefficient_map
+    f U eT eR hcoord q
+  rw [sectionPoleSheafPower_baseSectionsMul_tmul]
+  change
+    overTrivializationCoefficient R U
+        (Scheme.Modules.overTrivializationOfRestrictIso R U eR)
+        (f.val.app (.op ⊤) q) =
+      overTrivializationCoefficient P U
+          (Scheme.Modules.overTrivializationOfRestrictIso P U eP) x *
+        overTrivializationCoefficient Q U
+          (Scheme.Modules.overTrivializationOfRestrictIso Q U eQ) y
+  refine hmap.trans ?_
+  have hq :
+      (P ⊗ Q).val.map (homOfLE (le_top : U ≤ (⊤ : C.Opens))).op q =
+        tensorSection P Q U
+          (P.val.map (homOfLE le_top).op x)
+          (Q.val.map (homOfLE le_top).op y) :=
+    tensorSection_restrict P Q (le_top : U ≤ (⊤ : C.Opens)) x y
+  let ePO := Scheme.Modules.overTrivializationOfRestrictIso P U eP
+  let eQO := Scheme.Modules.overTrivializationOfRestrictIso Q U eQ
+  let eTO := Scheme.Modules.overTrivializationOfRestrictIso (P ⊗ Q) U eT
+  unfold overTrivializationCoefficient
+  change eTO.hom.val.app (.op (Over.mk (𝟙 U)))
+      ((P ⊗ Q).val.map (homOfLE le_top).op q) =
+    (show Γ(C, U) from
+      ePO.hom.val.app (.op (Over.mk (𝟙 U)))
+        (P.val.map (homOfLE le_top).op x)) *
+      (show Γ(C, U) from
+        eQO.hom.val.app (.op (Over.mk (𝟙 U)))
+          (Q.val.map (homOfLE le_top).op y))
+  refine (congrArg
+    (fun t ↦ eTO.hom.val.app (.op (Over.mk (𝟙 U))) t) hq).trans ?_
+  exact overTrivializationOfRestrictIso_tensorSection_coefficient
+    P Q U eP eQ
+      (P.val.map (homOfLE le_top).op x)
+      (Q.val.map (homOfLE le_top).op y)
 
 end
 
