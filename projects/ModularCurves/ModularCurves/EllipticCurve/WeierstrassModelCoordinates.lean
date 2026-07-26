@@ -225,6 +225,42 @@ lemma projModelFromOfGlobalSectionsOfIsCoprime_preimage_basicOpen
       (mk_X_mem_quotientGrading_one W k)]
   exact congr_arg X.basicOpen (projModelEval_X W f P hP k)
 
+/-- The inverse images of the two projective charts selected by the coprime
+coordinates cover the source scheme. -/
+lemma projModelFromOfGlobalSectionsOfIsCoprime_basicOpen_sup_eq_top
+    {X : Scheme.{u}} (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens))) (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P) (i j : Fin 3)
+    (hij : IsCoprime (P i) (P j)) :
+    (projModelFromOfGlobalSectionsOfIsCoprime W f P hP i j hij ⁻¹ᵁ
+        Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X i))) ⊔
+      (projModelFromOfGlobalSectionsOfIsCoprime W f P hP i j hij ⁻¹ᵁ
+        Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j))) = ⊤ := by
+  rw [projModelFromOfGlobalSectionsOfIsCoprime_preimage_basicOpen,
+    projModelFromOfGlobalSectionsOfIsCoprime_preimage_basicOpen]
+  have hs : Ideal.span ({P i, P j} : Set Γ(X, (⊤ : X.Opens))) = ⊤ := by
+    rw [Ideal.span_insert]
+    exact (Ideal.sup_eq_top_iff_isCoprime (P i) (P j)).mpr hij
+  have hcover := iSup_basicOpen_of_span_eq_top
+    (X := X) (⊤ : X.Opens) ({P i, P j} : Set _) hs
+  calc
+    X.basicOpen (P i) ⊔ X.basicOpen (P j) =
+        (⨆ r ∈ ({P i, P j} : Set Γ(X, (⊤ : X.Opens))), X.basicOpen r) := by
+      apply le_antisymm
+      · exact sup_le
+          (le_iSup_of_le (P i) (le_iSup_of_le (by simp) le_rfl))
+          (le_iSup_of_le (P j) (le_iSup_of_le (by simp) le_rfl))
+      · refine iSup_le fun r => iSup_le fun hr => ?_
+        rcases hr with hr | hr
+        · subst r
+          exact le_sup_left
+        · have : r = P j := hr
+          subst r
+          exact le_sup_right
+    _ = ⊤ := hcover
+
 /-- Restriction of global sections to the top open of a basic-open
 subscheme. -/
 noncomputable def basicOpenTopRestriction
