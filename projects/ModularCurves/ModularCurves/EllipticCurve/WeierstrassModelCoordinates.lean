@@ -94,6 +94,29 @@ lemma projModelEval_irrelevant_map_top_of_isUnit
     (HomogeneousIdeal.mem_irrelevant_of_mem _ one_pos
       (mk_X_mem_quotientGrading_one W i))
 
+/-- Two coprime homogeneous coordinates make the image of the irrelevant
+ideal the unit ideal. -/
+lemma projModelEval_irrelevant_map_top_of_isCoprime
+    (W : WeierstrassCurve R) (f : R →+* A) (P : Fin 3 → A)
+    (hP : (W.map f).toProjective.Equation P) (i j : Fin 3)
+    (hij : IsCoprime (P i) (P j)) :
+    (HomogeneousIdeal.irrelevant (quotientGrading (projIdeal W))).toIdeal.map
+        (projModelEval W f P hP) = ⊤ := by
+  rw [Ideal.eq_top_iff_one]
+  obtain ⟨a, b, hab⟩ := hij
+  rw [← hab]
+  apply Ideal.add_mem
+  · apply Ideal.mul_mem_left
+    rw [← projModelEval_X W f P hP i]
+    exact Ideal.mem_map_of_mem _
+      (HomogeneousIdeal.mem_irrelevant_of_mem _ one_pos
+        (mk_X_mem_quotientGrading_one W i))
+  · apply Ideal.mul_mem_left
+    rw [← projModelEval_X W f P hP j]
+    exact Ideal.mem_map_of_mem _
+      (HomogeneousIdeal.mem_irrelevant_of_mem _ one_pos
+        (mk_X_mem_quotientGrading_one W j))
+
 @[simp]
 lemma projModelEval_algebraMapGradeZero
     (W : WeierstrassCurve R) (f : R →+* A) (P : Fin 3 → A)
