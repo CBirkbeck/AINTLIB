@@ -754,7 +754,25 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       raw NNReal comparisons — the translation layer is
       `Valuation.restrict_lt_iff_lt_embedding` / `embedding_strictMono` /
       `restrict₀_apply` (see Mathlib/Topology/Algebra/Valued/ValuedField.lean ~520-566
-      for worked patterns). NEXT SESSION: write a small bridge lemma
+      for worked patterns). RESOLVED (2026-07-26):
+      `eventually_pair_wAloc_le` GREEN — approximant pairs of any x are eventually
+      wAloc-close: cauchy_nhds.2 into hasBasis_uniformity's γ-ball with γ :=
+      Units.mk0 (v.restrict z₀) for z₀ := toHatK(p^N), ρ^N < ε; the pair condition
+      transfers via Valuation.restrict_lt_iff (SAME-valuation comparisons only — no
+      value-group computation); prod_comap_comap_eq aligns the filters;
+      valued_AlocToHatK converts to wAloc. REMAINING for tendsto_teichCoeffAr:
+      (i) eventual value-bound B via one small set from eventually_pair_wAloc_le at
+      ε := 1 + a base point u₀ (NeBot), B := max (wAloc u₀) 1... wAloc u ≤
+      max(wAloc(u−u₀), wAloc u₀)-ultrametric; pick M with (c⁻¹)^M ≥ B;
+      (ii) Cauchy (map coords L): for V ∈ 𝓝(0:F)-entourage-side use
+      uniformity_eq_comap_nhds_zero F + exists_ball_subset_nhds → c^m-ball;
+      exists_delta_teichCoeffF_sub p F ϖ n hρ0 hρ1 M (ε := min (c^m) 1) → δ;
+      eventually_pair_wAloc_le at δ + hyps (bddAbove via bddAbove_gaussTermF_alocToWittF,
+      differences boundedly-termed since u−u' ∈ Aloc, values via gaussValueF_alocToWittF
+      + (i)) give coord-pairs in the ball ⊆ V;
+      (iii) CompleteSpace F (haveI := IsPerfectoidRing.complete p F) → limit;
+      Tendsto.limUnder_eq needs T2 F (haveI t0 + IsTopologicalAddGroup.t2Space-chain);
+      unfold teichCoeffAr. OLD notes (superseded):
       `valued_ball_mem_nhds : {z : hatK | Valued.v (z − x) < (δ : NNReal)} ∈ 𝓝 x` for
       δ ≠ 0 (via mem_nhds + the embedding-strictMono translation, choosing γ :=
       the image of δ under the valueGroup₀-equiv — OR dodge entirely: prove the
