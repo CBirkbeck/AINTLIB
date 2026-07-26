@@ -522,6 +522,32 @@ theorem eventually_pair_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [hsub, valued_AlocToHatK, hvz₀] at hlt
   exact le_of_lt (lt_of_lt_of_le hlt hN.le)
 
+/-- Approximants of a point of `A^r` have eventually bounded values. -/
+theorem exists_eventually_wAloc_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) :
+    ∃ B : NNReal, ∀ᶠ u in Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x),
+      wAloc p F ϖ hρ0 hρ1 u ≤ B := by
+  haveI := neBot_comap_of_mem_ArSub p F ϖ hx
+  have hpair := eventually_pair_wAloc_le p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) x
+    (ε := 1) one_pos
+  rw [Filter.eventually_prod_iff] at hpair
+  obtain ⟨Pa, hPa, Pb, hPb, hPab⟩ := hpair
+  obtain ⟨u₀, hu₀⟩ := (Filter.eventually_and.mpr ⟨hPa, hPb⟩).exists
+  refine ⟨max (wAloc p F ϖ hρ0 hρ1 u₀) 1, ?_⟩
+  refine Filter.Eventually.mono hPb fun u hu => ?_
+  have hdiff : wAloc p F ϖ hρ0 hρ1 (u - u₀) ≤ 1 := hPab hu₀.1 hu
+  calc wAloc p F ϖ hρ0 hρ1 u
+      = wAloc p F ϖ hρ0 hρ1 ((u - u₀) + u₀) := by rw [sub_add_cancel]
+    _ ≤ max (wAloc p F ϖ hρ0 hρ1 (u - u₀)) (wAloc p F ϖ hρ0 hρ1 u₀) :=
+        Valuation.map_add _ _ _
+    _ ≤ max (wAloc p F ϖ hρ0 hρ1 u₀) 1 := by
+        rcases max_cases (wAloc p F ϖ hρ0 hρ1 (u - u₀)) (wAloc p F ϖ hρ0 hρ1 u₀)
+          with ⟨heq, -⟩ | ⟨heq, -⟩
+        · rw [heq]
+          exact le_max_of_le_right hdiff
+        · rw [heq]
+          exact le_max_left _ _
+
 end FarguesFontaine
 
 end
