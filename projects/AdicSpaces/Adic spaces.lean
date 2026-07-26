@@ -38,6 +38,7 @@ import «Adic spaces».FarguesFontaine.FrobeniusAction
 import «Adic spaces».FarguesFontaine.YSpace
 import «Adic spaces».FarguesFontaine.Curve
 import «Adic spaces».FarguesFontaine.Euclidean
+import «Adic spaces».FarguesFontaine.Groebner
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
