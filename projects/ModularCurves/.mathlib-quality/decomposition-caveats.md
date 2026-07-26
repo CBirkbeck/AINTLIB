@@ -414,3 +414,24 @@ now the deliberate construction-of-record.
 Board after this session: DS4 construction (chapter-scale), T-SMOOTH-REG (blocked behind
 dimension theory of f.g. algebras — its reusable core
 `isRegularLocalRing_of_flat_of_map_maximalIdeal` is landed), and T-G4-CORE (MAJOR-INFRA).
+
+### DS4 M1a DONE (2026-07-26)
+
+`ModularCurves/WeilPairing/FieldPairing.lean` (new, sorry-free, **axiom-clean**) exposes
+AINTLIB's own HasseWeil pairing in the DS4 specification shape:
+
+* `fieldWeilPairing W N hN P Q hP hQ : {u : F // u ^ N = 1}` for `F` algebraically closed,
+* `fieldWeilPairing_mul_left` / `_mul_right` (T-C2 shape), `_self` / `_antisymm` (T-C3
+  shape), `_eq_zero_of_forall` (nondegeneracy).
+
+So **over algebraically closed fields the Weil pairing is not a register at all** — the
+DS4 gap is exactly the passage from geometric fibres to a morphism of schemes over a
+general base. Remaining M1 bricks:
+
+* **M1b** — Galois equivariance of `fieldWeilPairing` under `Gal(k̄/k)` (transport of the
+  construction along field automorphisms; the HasseWeil side has
+  `FrobeniusDivisorGalois`/`DivisorGalois` material to reuse).
+* **M1c** — descend to a `k`-morphism `E[N] ×_k E[N] ⟶ μ_{N,k}` (finite étale descent;
+  the project has `exists_finiteEtaleHom_of_galoisEquivariant`), then compare with the
+  register (`T-C4`, `WeilPairing/FibreComparison.lean`).
+* **M2** — the general base (KM 2.8 / GME 2.6.4 chain).
