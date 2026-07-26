@@ -1,1 +1,1 @@
-FOCUS: T911 k-variable hom — restrictedness of I |-> evalArHom (sliceSeries f I), then bundle the multivariate presentation map
+FOCUS: T911 — surjectivity of evalArMvHom (Kedlaya lift: for x = p^n[x_n] take j minimal with c^-j|x_n| >= 1 and z = p^n[x_n z^-j] T^j)

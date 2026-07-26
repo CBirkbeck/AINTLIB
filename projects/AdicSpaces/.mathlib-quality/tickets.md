@@ -106,9 +106,17 @@ antidiagonals). Since `evalArHom` is *already* a ring hom on one-variable series
 `k`-variable map is `I ↦ evalArHom (sliceSeries f I)` and its multiplicativity is the finite
 sum above — no new analysis. Landed: `cons_add`, `tail_add`, `antidiagonal_cons`,
 `coeffSeq_ext`, `sliceSeries`, `coeffSeq_sliceSeries`, `sliceSeries_add`, `sliceSeries_mul`.
-Remaining for the `k`-variable hom: restrictedness of `I ↦ evalArHom (sliceSeries f I)`
-(uniform decay: for each `ε`, all but finitely many `I` have *every* `T`-coefficient
-`≤ ε`), then bundle.
+**The `k`-variable hom is DONE** (2026-07-26): `wI_evalAr_le` (evaluation is
+norm-decreasing), `isRestricted_sliceSeries`, `isRestricted_of_wI`, `evalArMvFun`,
+`isRestricted_evalArMvFun` (uniform decay: an `I` with a large value must be the `tail` of
+one of the finitely many large multi-indices of `f`), `sliceSeries_one`/`_zero`, and the
+bundled
+
+    evalArMvHom : A^r⟨T, T₁,…,T_k⟩ →+* B^I⟨T₁,…,T_k⟩
+
+for any power-bounded `b ∈ B^I` (take `b = teichPowOverPElt` for case 3). **T910/T910a are
+closed.** T911 is now exactly Kedlaya's surjectivity + strictness statement for this map,
+and T912 follows from it plus Theorem 3.2.
 
 **T910 progress (2026-07-26)** — `Presentation.lean` (~470 lines): the `A^r`-algebra
 structure on `B^I` is **done** (`ArToBI`, injective, `wI_ArToBI`), and Kedlaya's Tate

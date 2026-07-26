@@ -46,6 +46,9 @@ and `z ↦ (resAr z, z)` is a ring map `A^{ρ₂} → B^{[ρ₁,ρ₂]}`.
   `(k+1)`-variable series into one-variable slices turns a product into the finite Cauchy
   product of slices — the reduction of the `k`-variable evaluation to the one-variable one
   (route (a) of AD-10).
+* `FarguesFontaine.evalArMvHom` : **the `k`-variable presentation map**
+  `A^r⟨T, T₁,…,T_k⟩ →+* B^I⟨T₁,…,T_k⟩`, whose surjectivity is what will make `B^I`
+  strongly noetherian.
 
 ## Sources
 
@@ -1061,6 +1064,240 @@ theorem sliceSeries_mul {k : ℕ} {A : Type*} [CommRing A]
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [coeffSeq_sliceSeries, coeffSeq_sliceSeries]
   rfl
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Evaluation is norm-decreasing**: if every coefficient has value at most `ε`, so does
+the value of the series. -/
+theorem wI_evalAr_le (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+    {ε : NNReal} (hε : 0 < ε)
+    (hf : ∀ l, Valued.v ((coeffSeq (f : MvPowerSeries (Fin 1)
+      ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l : ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      : hatK p F hρ₂0 hρ₂1) ≤ ε) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (evalAr p F ϖ h12 hbmem hb f) ≤ ε := by
+  refine (isClosed_wI_ball p F hε).mem_of_tendsto (tendsto_evalAr p F ϖ h12 hbmem hb f)
+    (Filter.Eventually.of_forall fun n => ?_)
+  refine wI_sum_le p F _ _ (fun l _ => ?_)
+  rw [evalTerm]
+  refine le_trans (wI_mul_le p F _ _) ?_
+  rw [wI_ArToBI p F ϖ h12]
+  calc Valued.v ((coeffSeq (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+        : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)
+        * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (b ^ l)
+      ≤ ε * 1 := by
+        refine mul_le_mul (hf l) ?_ zero_le zero_le
+        rw [wI_pow p F]
+        exact pow_le_one₀ zero_le hb
+    _ = ε := mul_one ε
+
+/-- Each slice of a restricted `(k+1)`-variable series is restricted. -/
+theorem isRestricted_sliceSeries {k : ℕ}
+    {f : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) (I : Fin k →₀ ℕ) :
+    MvPowerSeries.IsRestricted (sliceSeries f I) := by
+  rw [isRestricted_iff_valued]
+  intro ε hε
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf ε hε
+  have hmap : {s : Fin 1 →₀ ℕ | ε < Valued.v ((MvPowerSeries.coeff s (sliceSeries f I)
+      : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)}
+      ⊆ (fun s : Fin 1 →₀ ℕ => Finsupp.cons (s 0) I) ⁻¹'
+        {m : Fin (k + 1) →₀ ℕ | ε < Valued.v ((MvPowerSeries.coeff m f
+          : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)} := by
+    intro s hs
+    exact hs
+  refine Set.Finite.subset ?_ hmap
+  refine hfin.preimage ?_
+  intro s _ t _ hst
+  refine Finsupp.ext fun i => ?_
+  rw [Subsingleton.elim i (0 : Fin 1)]
+  exact (Finsupp.cons_injective2 hst).1
+
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- The interval-norm criterion for restrictedness over `B^I`. -/
+theorem isRestricted_of_wI {k : ℕ}
+    {c : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (h : ∀ ε : NNReal, 0 < ε → {I : Fin k →₀ ℕ | ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((MvPowerSeries.coeff I c : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}.Finite) :
+    MvPowerSeries.IsRestricted c := by
+  intro U hU
+  obtain ⟨V, hV, hVU⟩ := (mem_nhds_subtype
+    (BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) U).mp hU
+  obtain ⟨ε, hε, hεV⟩ := exists_wI_ball_subset p F (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hV
+  rw [Filter.mem_map, Filter.mem_cofinite]
+  refine Set.Finite.subset (h ε hε) fun I hI => ?_
+  by_contra hcon
+  refine hI ?_
+  have hle : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((MvPowerSeries.coeff I c : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ ε := not_lt.mp hcon
+  exact hVU (hεV hle)
+
+/-- **The `k`-variable presentation map**, coefficientwise: slice, then evaluate. -/
+def evalArMvFun (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) {k : ℕ}
+    (f : ↥(restrictedMvPowerSeriesSubring (k + 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
+    MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  fun I => evalArHom p F ϖ h12 hbmem hb
+    ⟨sliceSeries (f : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I,
+      isRestricted_sliceSeries p F ϖ f.2 I⟩
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- The `k`-variable presentation map lands in the restricted series over `B^I`. -/
+theorem isRestricted_evalArMvFun (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) {k : ℕ}
+    (f : ↥(restrictedMvPowerSeriesSubring (k + 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))) :
+    MvPowerSeries.IsRestricted (evalArMvFun p F ϖ h12 hbmem hb f) := by
+  refine isRestricted_of_wI p F ϖ fun ε hε => ?_
+  have hfin := (isRestricted_iff_valued p F ϖ
+    (f : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1))).mp f.2 ε hε
+  refine Set.Finite.subset (hfin.image Finsupp.tail) fun I hI => ?_
+  have hIlt : ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((evalArMvFun p F ϖ h12 hbmem hb f I :
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := hI
+  by_contra hcon
+  refine absurd hIlt (not_lt.mpr ?_)
+  refine wI_evalAr_le p F ϖ h12 hbmem hb _ hε fun l => ?_
+  by_contra hcoefflt
+  refine hcon ⟨Finsupp.cons l I, ?_, Finsupp.tail_cons l I⟩
+  show ε < Valued.v ((MvPowerSeries.coeff (Finsupp.cons l I)
+    (f : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)
+  have := not_le.mp hcoefflt
+  rwa [coeffSeq_sliceSeries] at this
+
+
+theorem sliceSeries_one {k : ℕ} {A : Type*} [CommRing A] (I : Fin k →₀ ℕ) :
+    sliceSeries (1 : MvPowerSeries (Fin (k + 1)) A) I
+      = if I = 0 then 1 else 0 := by
+  refine coeffSeq_ext fun n => ?_
+  rw [coeffSeq_sliceSeries, MvPowerSeries.coeff_one]
+  by_cases hI : I = 0
+  · subst hI
+    rw [if_pos rfl, coeffSeq_one]
+    by_cases hn : n = 0
+    · subst hn
+      rw [if_pos rfl, if_pos (Finsupp.cons_zero_zero)]
+    · rw [if_neg hn, if_neg]
+      exact Finsupp.cons_ne_zero_of_left (by simpa using hn)
+  · rw [if_neg hI, coeffSeq_zero, if_neg]
+    exact Finsupp.cons_ne_zero_of_right hI
+
+theorem sliceSeries_zero {k : ℕ} {A : Type*} [CommRing A] (I : Fin k →₀ ℕ) :
+    sliceSeries (0 : MvPowerSeries (Fin (k + 1)) A) I = 0 := by
+  refine coeffSeq_ext fun n => ?_
+  rw [coeffSeq_sliceSeries, map_zero, coeffSeq_zero]
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The `k`-variable presentation map** `A^r⟨T, T₁,…,T_k⟩ →+* B^I⟨T₁,…,T_k⟩`: slice in
+the `T`-direction, evaluate each slice at the power-bounded element `b`. Multiplicativity
+is `sliceSeries_mul` plus the ring-hom property of the one-variable `evalArHom`. -/
+def evalArMvHom (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) {k : ℕ} :
+    ↥(restrictedMvPowerSeriesSubring (k + 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      →+* ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) where
+  toFun f := ⟨evalArMvFun p F ϖ h12 hbmem hb f,
+    isRestricted_evalArMvFun p F ϖ h12 hbmem hb f⟩
+  map_add' := fun f g => by
+    refine Subtype.ext (funext fun I => ?_)
+    show evalArHom p F ϖ h12 hbmem hb ⟨sliceSeries _ I, _⟩
+        = evalArHom p F ϖ h12 hbmem hb ⟨sliceSeries _ I, _⟩
+          + evalArHom p F ϖ h12 hbmem hb ⟨sliceSeries _ I, _⟩
+    rw [← map_add (evalArHom p F ϖ h12 hbmem hb)]
+    congr 1
+  map_zero' := by
+    refine Subtype.ext (funext fun I => ?_)
+    show evalArHom p F ϖ h12 hbmem hb ⟨sliceSeries _ I, _⟩ = 0
+    rw [show (⟨sliceSeries ((0 : ↥(restrictedMvPowerSeriesSubring (k + 1)
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin (k + 1))
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I, isRestricted_sliceSeries p F ϖ
+          (0 : ↥(restrictedMvPowerSeriesSubring (k + 1)
+            ↥(ArSub p F ϖ hρ₂0 hρ₂1))).2 I⟩
+        : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) = 0 from
+      Subtype.ext (sliceSeries_zero I), map_zero]
+  map_one' := by
+    refine Subtype.ext (funext fun I => ?_)
+    show evalArHom p F ϖ h12 hbmem hb ⟨sliceSeries _ I, _⟩
+      = MvPowerSeries.coeff I (1 : MvPowerSeries (Fin k)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    rw [MvPowerSeries.coeff_one]
+    have harg : ∀ (hres : MvPowerSeries.IsRestricted
+        (sliceSeries ((1 : ↥(restrictedMvPowerSeriesSubring (k + 1)
+          ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin (k + 1))
+          ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I)),
+        evalArHom p F ϖ h12 hbmem hb ⟨_, hres⟩ = if I = 0 then 1 else 0 := by
+      intro hres
+      by_cases hI : I = 0
+      · rw [if_pos hI]
+        rw [show (⟨sliceSeries ((1 : ↥(restrictedMvPowerSeriesSubring (k + 1)
+              ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin (k + 1))
+              ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I, hres⟩
+            : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) = 1 from
+          Subtype.ext (by
+            show sliceSeries ((1 : ↥(restrictedMvPowerSeriesSubring (k + 1)
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin (k + 1))
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I
+              = ((1 : ↥(restrictedMvPowerSeriesSubring 1
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin 1)
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+            rw [OneMemClass.coe_one, OneMemClass.coe_one, sliceSeries_one, if_pos hI]),
+          map_one]
+      · rw [if_neg hI]
+        rw [show (⟨sliceSeries ((1 : ↥(restrictedMvPowerSeriesSubring (k + 1)
+              ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin (k + 1))
+              ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I, hres⟩
+            : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1))) = 0 from
+          Subtype.ext (by
+            show sliceSeries ((1 : ↥(restrictedMvPowerSeriesSubring (k + 1)
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin (k + 1))
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I
+              = ((0 : ↥(restrictedMvPowerSeriesSubring 1
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin 1)
+                ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+            rw [OneMemClass.coe_one, ZeroMemClass.coe_zero, sliceSeries_one, if_neg hI]),
+          map_zero]
+    exact harg _
+  map_mul' := fun f g => by
+    refine Subtype.ext (funext fun I => ?_)
+    show evalArHom p F ϖ h12 hbmem hb ⟨sliceSeries _ I, _⟩
+      = MvPowerSeries.coeff I ((evalArMvFun p F ϖ h12 hbmem hb f)
+        * (evalArMvFun p F ϖ h12 hbmem hb g))
+    classical
+    rw [MvPowerSeries.coeff_mul]
+    rw [show (⟨sliceSeries ((f * g : ↥(restrictedMvPowerSeriesSubring (k + 1)
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1))) : MvPowerSeries (Fin (k + 1))
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1)) I, isRestricted_sliceSeries p F ϖ (f * g).2 I⟩
+        : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+      = ∑ q ∈ Finset.antidiagonal I,
+        (⟨sliceSeries (f : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) q.1,
+          isRestricted_sliceSeries p F ϖ f.2 q.1⟩
+          : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        * ⟨sliceSeries (g : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) q.2,
+          isRestricted_sliceSeries p F ϖ g.2 q.2⟩ from
+      Subtype.ext (by
+        rw [AddSubmonoidClass.coe_finset_sum]
+        exact sliceSeries_mul _ _ I), map_sum]
+    refine Finset.sum_congr rfl fun q _ => ?_
+    rw [map_mul]
+    rfl
 
 end FarguesFontaine
 
