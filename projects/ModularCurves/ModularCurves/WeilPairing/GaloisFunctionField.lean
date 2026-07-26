@@ -840,14 +840,58 @@ theorem galoisFunctionFieldEquiv_algebraMap {L : Type v} [Field L] [Algebra k L]
   exact key _ (map_algEquiv_baseChange_eq W σ)
 
 /-- **(M1b-3b-x, helper)** `div(f/g) = div f − div g` for nonzero `f, g` (HasseWeil has
-the `mul` and `inv` forms but not the quotient one). -/
+the `mul` and `inv` forms but not the quotient one).
+
+The two structural hypotheses are taken **explicitly**: at a base-changed curve the
+elaborator unfolds `⟨(W ⊗ L).toAffine⟩` into a record literal and instance search then
+fails, so callers pass the instances directly. -/
 theorem projectiveDivisorOf_div {F : Type v} [Field F] [DecidableEq F]
-    {C : HasseWeil.Curves.SmoothPlaneCurve F} [C.toAffine.IsElliptic]
-    [IsIntegrallyClosed C.CoordinateRing]
+    {C : HasseWeil.Curves.SmoothPlaneCurve F} (hell : C.toAffine.IsElliptic)
+    (hic : IsIntegrallyClosed C.CoordinateRing)
     {f g : C.FunctionField} (hf : f ≠ 0) (hg : g ≠ 0) :
     C.projectiveDivisorOf (f / g) = C.projectiveDivisorOf f - C.projectiveDivisorOf g := by
+  letI := hell
+  letI := hic
   rw [div_eq_mul_inv, HasseWeil.Curves.SmoothPlaneCurve.projectiveDivisorOf_mul hf
       (inv_ne_zero hg),
     HasseWeil.Curves.SmoothPlaneCurve.projectiveDivisorOf_inv hg, sub_eq_add_neg]
+
+/-- **(M1b-3b-x ★)** From the divisor comparison, `Φ_σ g_T` and `g_{σT}` differ by a
+nonzero constant — the σ-naturality input of `weilPairing_galois_core_of_algEquiv`. -/
+theorem exists_const_galois_weilFunction {L : Type v} [Field L] [DecidableEq L]
+    [IsAlgClosed L] [Algebra k L] [(W.baseChange L).toAffine.IsElliptic]
+    (hic : IsIntegrallyClosed (⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing)
+    (σ : L ≃ₐ[k] L) (N : ℤ) (hN : (N : L) ≠ 0)
+    (T : (W.baseChange L).toAffine.Point) (hT : N • T = 0)
+    (hσT : N • galoisPointEquiv W σ T = 0) :
+    ∃ c : L, c ≠ 0 ∧
+      galoisFunctionFieldEquiv W σ
+          (HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN T hT) =
+        algebraMap L (W.baseChange L).toAffine.FunctionField c *
+          HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN
+            (galoisPointEquiv W σ T) hσT := by
+  letI := hic
+  have hgσT_ne : HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN
+      (galoisPointEquiv W σ T) hσT ≠ 0 :=
+    HasseWeil.WeilPairing.weilFunction_ne_zero (W.baseChange L) N hN _ hσT
+  have hΦg_ne : galoisFunctionFieldEquiv W σ
+      (HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN T hT) ≠ 0 :=
+    (map_ne_zero_iff _ (galoisFunctionFieldEquiv W σ).injective).mpr
+      (HasseWeil.WeilPairing.weilFunction_ne_zero (W.baseChange L) N hN T hT)
+  have hratio : (⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).projectiveDivisorOf
+      (galoisFunctionFieldEquiv W σ
+        (HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN T hT) /
+        HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN
+          (galoisPointEquiv W σ T) hσT) = 0 := by
+    rw [projectiveDivisorOf_div (C := (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L))
+        (inferInstanceAs (W.baseChange L).toAffine.IsElliptic) hic hΦg_ne hgσT_ne,
+      projectiveDivisorOf_galois_weilFunction W σ N hN T hT hσT, sub_self]
+  obtain ⟨c, hc, hcval⟩ :=
+    HasseWeil.WeilPairing.const_unit_of_projectiveDivisorOf_eq_zero
+      (W := (W.baseChange L).toAffine) _ (div_ne_zero hΦg_ne hgσT_ne) hratio
+  exact ⟨c, hc, (div_eq_iff hgσT_ne).mp hcval⟩
 
 end ModularCurves
