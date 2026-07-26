@@ -798,6 +798,39 @@ theorem exists_tail_bound_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       rw [hG, Finset.mem_filter, Set.Finite.mem_toFinset]
       exact ⟨hgt, hJ⟩
 
+/-- The Gauss norm is the value of the leading coefficient. -/
+theorem valued_leadCoeffRPS {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    Valued.v ((leadCoeffRPS p F ϖ hρ0 hρ1 f : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1) = gaussNormRPS p F ϖ hρ0 hρ1 f :=
+  (leadIdxRPS_spec p F ϖ hf hf0).1
+
+/-- Monomials of bounded total degree form a finite set. -/
+theorem finite_degree_le (D : ℕ) :
+    {J : Fin k →₀ ℕ | Finsupp.degree J ≤ D}.Finite := by
+  refine Set.Finite.of_finite_image (f := Finsupp.equivFunOnFinite) ?_
+    (Finsupp.equivFunOnFinite.injective.injOn)
+  refine Set.Finite.subset (Set.Finite.pi (fun _ : Fin k => Set.finite_Iic D)) ?_
+  rintro g ⟨J, hJ, rfl⟩
+  intro i _
+  have h1 : J i ≤ Finsupp.degree J := by
+    rw [Finsupp.degree_eq_sum]
+    exact Finset.single_le_sum (f := fun i => J i) (fun j _ => Nat.zero_le _)
+      (Finset.mem_univ i)
+  exact le_trans h1 hJ
+
+/-- **Graded-lex lower sets are finite** (Kedlaya Remark 3.5). -/
+theorem finite_degLex_le (Jtop : Fin k →₀ ℕ) :
+    {J : Fin k →₀ ℕ | (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
+      ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn Jtop}.Finite := by
+  refine Set.Finite.subset (finite_degree_le (Finsupp.degree Jtop)) ?_
+  intro J hJ
+  rw [Set.mem_setOf_eq, MonomialOrder.degLex_le_iff, Finsupp.DegLex.le_iff] at hJ
+  rcases hJ with h | ⟨h, -⟩
+  · exact h.le
+  · exact h.le
+
 end FarguesFontaine
 
 end
