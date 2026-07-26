@@ -445,6 +445,40 @@ theorem sectionPoleUnitHom_over_comp_trivializationOfSectionPreimageEqBot
     (SheafOfModules.overUnitScalarEndRingHom C.ringCatSheaf U).map_one.symm
   exact hcomp.trans (hid.trans hone)
 
+/-- Away from the section, every consecutive pole-filtration map is the
+identity under the canonical power trivializations. -/
+theorem sectionPoleSheafSuccHom_restrict_comp_trivializationOfSectionPreimageEqBot
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (hU : z ⁻¹ᵁ U = ⊥) (n : ℕ) :
+    (Scheme.Modules.restrictFunctor U.ι).map
+          (sectionPoleSheafSuccHom π z hz n) ≫
+        (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+          z hz U hU (n + 1)).hom =
+      (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+        z hz U hU n).hom := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  let hIso : IsIso (restrictIdealModuleToUnit z U.ι) :=
+    restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z U hU
+  let eRestrict := @asIso _ _ _ _ (restrictIdealModuleToUnit z U.ι) hIso
+  let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+    (sectionIdealModule π z hz) U eRestrict
+  let ePoleOver := SheafOfModules.dualOverIsoOfIso C.ringCatSheaf
+    (sectionIdealModule π z hz) U eIdeal
+  have h := sectionPoleSheafSuccHom_restrict_comp_powerTrivialization
+    z hz U ePoleOver 1
+      (sectionPoleUnitHom_over_comp_trivializationOfSectionPreimageEqBot
+        z hz U hU) n
+  have hePole :
+      restrictTrivializationOfOverIso (sectionPoleSheaf π z hz) U ePoleOver =
+        sectionPoleSheafTrivializationOfSectionPreimageEqBot z hz U hU := by
+    apply Iso.ext
+    rfl
+  rw [hePole] at h
+  simpa only [sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot,
+    Scheme.Modules.openTopSection, map_one, unitEndomorphismOfTopSection_one,
+    Category.comp_id] using h
+
 private theorem eq_comp_iso_inv_of_comp_eq
     {D : Type*} [Category* D] {A B T : D}
     (a : A ⟶ B) (e : B ≅ T) (b : A ⟶ T) (h : a ≫ e.hom = b) :

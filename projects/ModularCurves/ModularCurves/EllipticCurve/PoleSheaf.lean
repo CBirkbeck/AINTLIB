@@ -4579,6 +4579,153 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj V)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
+/-- A scalar coordinate for the simple-pole inclusion propagates to every
+consecutive map between the compatible pole-power trivializations. -/
+theorem sectionPoleSheafSuccHom_restrict_comp_powerTrivialization
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (ePoleOver : (sectionPoleSheaf π z hz).over U ≅
+      SheafOfModules.unit (C.ringCatSheaf.over U))
+    (r : Γ(C, U))
+    (hsimpleOver :
+      (sectionPoleUnitHom π z hz).over U ≫ ePoleOver.hom =
+        SheafOfModules.overUnitScalarEnd C.ringCatSheaf U r)
+    (n : ℕ) :
+    let ePole := restrictTrivializationOfOverIso
+      (sectionPoleSheaf π z hz) U ePoleOver
+    (Scheme.Modules.restrictFunctor U.ι).map
+          (sectionPoleSheafSuccHom π z hz n) ≫
+        (sectionPoleSheafPowerTrivialization z hz U ePole (n + 1)).hom =
+      (sectionPoleSheafPowerTrivialization z hz U ePole n).hom ≫
+        unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection U r) := by
+  let ePole := restrictTrivializationOfOverIso
+    (sectionPoleSheaf π z hz) U ePoleOver
+  let F := Scheme.Modules.restrictFunctor U.ι
+  letI : (Scheme.Modules.pullback U.ι).Monoidal :=
+    Scheme.Modules.pullbackMonoidal U.ι
+  letI : F.Monoidal := Functor.Monoidal.transport
+    (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm
+  let d := unitEndomorphismOfTopSection
+    (Scheme.Modules.openTopSection U r)
+  let eUnitOver :
+      (Scheme.Modules.unitObj C).over U ≅
+        SheafOfModules.unit (C.ringCatSheaf.over U) := Iso.refl _
+  let eUnit := restrictTrivializationOfOverIso
+    (Scheme.Modules.unitObj C) U eUnitOver
+  have hsimple :
+      F.map (sectionPoleUnitHom π z hz) ≫ ePole.hom =
+        eUnit.hom ≫ d := by
+    apply restrictFunctor_map_comp_restrictTrivializationOfOverIso_hom_eq_comp_scalar
+      (sectionPoleUnitHom π z hz) U eUnitOver ePoleOver r
+    exact hsimpleOver.trans (by
+      dsimp only [eUnitOver, Iso.refl_hom]
+      exact (Category.id_comp _).symm)
+  let g : 𝟙_ C.Modules ⟶ sectionPoleSheaf π z hz :=
+    (monoidalUnitObjIso C).hom ≫ sectionPoleUnitHom π z hz
+  let eZero : F.obj (𝟙_ C.Modules) ≅ Scheme.Modules.unitObj U.toScheme :=
+    sectionPoleSheafPowerTrivialization z hz U ePole 0
+  have hzero : F.map (monoidalUnitObjIso C).hom ≫ eUnit.hom = eZero.hom := by
+    exact restrictFunctor_map_monoidalUnitObjIso_hom_comp_unitTrivialization U
+  have hg : F.map g ≫ ePole.hom = eZero.hom ≫ d := by
+    dsimp only [g]
+    rw [F.map_comp]
+    rw [Category.assoc]
+    rw [hsimple]
+    rw [← Category.assoc]
+    exact congrArg (fun k ↦ k ≫ d) hzero
+  let P := sectionPoleSheafPower π z hz n
+  let eP := sectionPoleSheafPowerTrivialization z hz U ePole n
+  have htensor :
+      (𝟙 (F.obj P) ⊗ₘ F.map g) ≫ (eP.hom ⊗ₘ ePole.hom) =
+        (eP.hom ⊗ₘ eZero.hom) ≫ (𝟙 _ ⊗ₘ d) := by
+    calc
+      _ = (𝟙 (F.obj P) ≫ eP.hom) ⊗ₘ
+          (F.map g ≫ ePole.hom) :=
+        tensorHom_comp_tensorHom (𝟙 (F.obj P)) (F.map g)
+          eP.hom ePole.hom
+      _ = eP.hom ⊗ₘ (eZero.hom ≫ d) := by
+        rw [Category.id_comp, hg]
+      _ = (eP.hom ⊗ₘ eZero.hom) ≫
+          (𝟙 (Scheme.Modules.unitObj U.toScheme) ⊗ₘ d) :=
+        (tensorHom_comp_tensorHom eP.hom eZero.hom
+          (𝟙 (Scheme.Modules.unitObj U.toScheme)) d).symm
+  have hsource :
+      (ρ_ (F.obj P)).inv ≫ (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
+          (eP.hom ⊗ₘ eZero.hom) ≫ (unitObjTensorIso U.toScheme).hom =
+        eP.hom := by
+    let eU := monoidalUnitObjIso U.toScheme
+    have heZero : eZero.hom =
+        Functor.OplaxMonoidal.η F ≫ eU.hom := by
+      rfl
+    have hfirst :
+        (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
+            (eP.hom ⊗ₘ eZero.hom) =
+          eP.hom ⊗ₘ eU.hom := by
+      rw [heZero]
+      rw [← id_tensorHom]
+      rw [tensorHom_comp_tensorHom]
+      rw [Category.id_comp]
+      rw [← Category.assoc]
+      rw [Functor.Monoidal.ε_η]
+      rw [Category.id_comp]
+    have hsecond :
+        (eP.hom ⊗ₘ eU.hom) ≫ (unitObjTensorIso U.toScheme).hom =
+          (ρ_ (F.obj P)).hom ≫ eP.hom := by
+      simpa only [eU, P, F, unitObjTensorIso, Iso.trans_hom,
+        MonoidalCategory.tensorIso_hom, Iso.symm_hom] using
+        tensorUnitIso_hom_naturality_left eU eP.hom
+    have htail :
+        (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
+            (eP.hom ⊗ₘ eZero.hom) ≫ (unitObjTensorIso U.toScheme).hom =
+          (ρ_ (F.obj P)).hom ≫ eP.hom := by
+      calc
+        _ = ((F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
+              (eP.hom ⊗ₘ eZero.hom)) ≫
+                (unitObjTensorIso U.toScheme).hom :=
+          (Category.assoc _ _ _).symm
+        _ = (eP.hom ⊗ₘ eU.hom) ≫
+              (unitObjTensorIso U.toScheme).hom :=
+          congrArg (fun k ↦ k ≫ (unitObjTensorIso U.toScheme).hom) hfirst
+        _ = _ := hsecond
+    rw [htail]
+    simp
+  change F.map ((ρ_ P).inv ≫ (𝟙 P ⊗ₘ g)) ≫
+      (restrictMonoidalTensorIso U.ι P (sectionPoleSheaf π z hz)).hom ≫
+      (eP.hom ⊗ₘ ePole.hom) ≫ (unitObjTensorIso U.toScheme).hom =
+    eP.hom ≫ d
+  rw [F.map_comp]
+  rw [Functor.Monoidal.map_rightUnitor_inv]
+  rw [Functor.Monoidal.map_tensor]
+  rw [F.map_id]
+  change
+    ((ρ_ (F.obj P)).inv ≫ (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
+        Functor.LaxMonoidal.μ F P (𝟙_ C.Modules)) ≫
+      (Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) ≫
+        (𝟙 (F.obj P) ⊗ₘ F.map g) ≫
+        Functor.LaxMonoidal.μ F P (sectionPoleSheaf π z hz)) ≫
+      Functor.OplaxMonoidal.δ F P (sectionPoleSheaf π z hz) ≫
+      (eP.hom ⊗ₘ ePole.hom) ≫ (unitObjTensorIso U.toScheme).hom =
+    eP.hom ≫ d
+  simp only [Category.assoc, Functor.Monoidal.μ_δ_assoc]
+  rw [← Category.assoc
+    (𝟙 (F.obj P) ⊗ₘ F.map g) (eP.hom ⊗ₘ ePole.hom)]
+  rw [htensor]
+  have hunitD :
+      (𝟙 (Scheme.Modules.unitObj U.toScheme) ⊗ₘ d) ≫
+          (unitObjTensorIso U.toScheme).hom =
+        (unitObjTensorIso U.toScheme).hom ≫ d := by
+    simpa only [unitObjTensorIso, Iso.trans_hom,
+      MonoidalCategory.tensorIso_hom, Iso.symm_hom, Category.id_comp,
+      Category.assoc] using
+      tensorUnitIso_hom_naturality (monoidalUnitObjIso U.toScheme)
+        (𝟙 (Scheme.Modules.unitObj U.toScheme)) d
+  rw [Category.assoc (eP.hom ⊗ₘ eZero.hom)
+    (𝟙 (Scheme.Modules.unitObj U.toScheme) ⊗ₘ d)
+    (unitObjTensorIso U.toScheme).hom]
+  rw [hunitD]
+  simpa only [Category.assoc] using congrArg (fun k ↦ k ≫ d) hsource
+
 /-- On a Cartier-generator chart, every consecutive pole-filtration map is
 multiplication by the same generator under the compatible power
 trivializations. -/
@@ -4610,139 +4757,11 @@ theorem sectionPoleSheafSuccHom_restrict_comp_generatorTrivialization
     (sectionIdealModule π z hz) U.1 eGen.symm
   let ePoleOver := SheafOfModules.dualOverIsoOfIso
     C.ringCatSheaf (sectionIdealModule π z hz) U.1 eIdeal
-  let ePole := restrictTrivializationOfOverIso
-    (sectionPoleSheaf π z hz) U.1 ePoleOver
-  let F := Scheme.Modules.restrictFunctor U.1.ι
-  letI : (Scheme.Modules.pullback U.1.ι).Monoidal :=
-    Scheme.Modules.pullbackMonoidal U.1.ι
-  letI : F.Monoidal := Functor.Monoidal.transport
-    (Scheme.Modules.restrictFunctorIsoPullback U.1.ι).symm
-  let d := unitEndomorphismOfTopSection
-    (Scheme.Modules.openTopSection U.1 r)
-  let eUnitOver :
-      (Scheme.Modules.unitObj C).over U.1 ≅
-        SheafOfModules.unit (C.ringCatSheaf.over U.1) := Iso.refl _
-  let eUnit := restrictTrivializationOfOverIso
-    (Scheme.Modules.unitObj C) U.1 eUnitOver
-  have hsimpleOver :
-      (sectionPoleUnitHom π z hz).over U.1 ≫ ePoleOver.hom =
-        SheafOfModules.overUnitScalarEnd C.ringCatSheaf U.1 r :=
-    by
-      simpa only [ePoleOver, eIdeal, eGen] using
-        sectionPoleUnitHom_over_comp_dualGeneratorTrivialization
-          z hz U r hr hspan hnzd
-  have hsimple :
-      F.map (sectionPoleUnitHom π z hz) ≫ ePole.hom =
-        eUnit.hom ≫ d := by
-    apply restrictFunctor_map_comp_restrictTrivializationOfOverIso_hom_eq_comp_scalar
-      (sectionPoleUnitHom π z hz) U.1 eUnitOver ePoleOver r
-    exact hsimpleOver.trans (by
-      dsimp only [eUnitOver, Iso.refl_hom]
-      exact (Category.id_comp _).symm)
-  let g : 𝟙_ C.Modules ⟶ sectionPoleSheaf π z hz :=
-    (monoidalUnitObjIso C).hom ≫ sectionPoleUnitHom π z hz
-  let eZero : F.obj (𝟙_ C.Modules) ≅ Scheme.Modules.unitObj U.1.toScheme :=
-    sectionPoleSheafPowerTrivialization z hz U.1 ePole 0
-  have hzero : F.map (monoidalUnitObjIso C).hom ≫ eUnit.hom = eZero.hom := by
-    exact restrictFunctor_map_monoidalUnitObjIso_hom_comp_unitTrivialization U.1
-  have hg : F.map g ≫ ePole.hom = eZero.hom ≫ d := by
-    dsimp only [g]
-    rw [F.map_comp]
-    rw [Category.assoc]
-    rw [hsimple]
-    rw [← Category.assoc]
-    exact congrArg (fun k ↦ k ≫ d) hzero
-  let P := sectionPoleSheafPower π z hz n
-  let eP := sectionPoleSheafPowerTrivialization z hz U.1 ePole n
-  have htensor :
-      (𝟙 (F.obj P) ⊗ₘ F.map g) ≫ (eP.hom ⊗ₘ ePole.hom) =
-        (eP.hom ⊗ₘ eZero.hom) ≫ (𝟙 _ ⊗ₘ d) := by
-    calc
-      _ = (𝟙 (F.obj P) ≫ eP.hom) ⊗ₘ
-          (F.map g ≫ ePole.hom) :=
-        tensorHom_comp_tensorHom (𝟙 (F.obj P)) (F.map g)
-          eP.hom ePole.hom
-      _ = eP.hom ⊗ₘ (eZero.hom ≫ d) := by
-        rw [Category.id_comp, hg]
-      _ = (eP.hom ⊗ₘ eZero.hom) ≫
-          (𝟙 (Scheme.Modules.unitObj U.1.toScheme) ⊗ₘ d) :=
-        (tensorHom_comp_tensorHom eP.hom eZero.hom
-          (𝟙 (Scheme.Modules.unitObj U.1.toScheme)) d).symm
-  have hsource :
-      (ρ_ (F.obj P)).inv ≫ (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
-          (eP.hom ⊗ₘ eZero.hom) ≫ (unitObjTensorIso U.1.toScheme).hom =
-        eP.hom := by
-    let eU := monoidalUnitObjIso U.1.toScheme
-    have heZero : eZero.hom =
-        Functor.OplaxMonoidal.η F ≫ eU.hom := by
-      rfl
-    have hfirst :
-        (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
-            (eP.hom ⊗ₘ eZero.hom) =
-          eP.hom ⊗ₘ eU.hom := by
-      rw [heZero]
-      rw [← id_tensorHom]
-      rw [tensorHom_comp_tensorHom]
-      rw [Category.id_comp]
-      rw [← Category.assoc]
-      rw [Functor.Monoidal.ε_η]
-      rw [Category.id_comp]
-    have hsecond :
-        (eP.hom ⊗ₘ eU.hom) ≫ (unitObjTensorIso U.1.toScheme).hom =
-          (ρ_ (F.obj P)).hom ≫ eP.hom := by
-      simpa only [eU, P, F, unitObjTensorIso, Iso.trans_hom,
-        MonoidalCategory.tensorIso_hom, Iso.symm_hom] using
-        tensorUnitIso_hom_naturality_left eU eP.hom
-    have htail :
-        (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
-            (eP.hom ⊗ₘ eZero.hom) ≫ (unitObjTensorIso U.1.toScheme).hom =
-          (ρ_ (F.obj P)).hom ≫ eP.hom := by
-      calc
-        _ = ((F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
-              (eP.hom ⊗ₘ eZero.hom)) ≫
-                (unitObjTensorIso U.1.toScheme).hom :=
-          (Category.assoc _ _ _).symm
-        _ = (eP.hom ⊗ₘ eU.hom) ≫
-              (unitObjTensorIso U.1.toScheme).hom :=
-          congrArg (fun k ↦ k ≫ (unitObjTensorIso U.1.toScheme).hom) hfirst
-        _ = _ := hsecond
-    rw [htail]
-    simp
-  change F.map ((ρ_ P).inv ≫ (𝟙 P ⊗ₘ g)) ≫
-      (restrictMonoidalTensorIso U.1.ι P (sectionPoleSheaf π z hz)).hom ≫
-      (eP.hom ⊗ₘ ePole.hom) ≫ (unitObjTensorIso U.1.toScheme).hom =
-    eP.hom ≫ d
-  rw [F.map_comp]
-  rw [Functor.Monoidal.map_rightUnitor_inv]
-  rw [Functor.Monoidal.map_tensor]
-  rw [F.map_id]
-  change
-    ((ρ_ (F.obj P)).inv ≫ (F.obj P ◁ Functor.LaxMonoidal.ε F) ≫
-        Functor.LaxMonoidal.μ F P (𝟙_ C.Modules)) ≫
-      (Functor.OplaxMonoidal.δ F P (𝟙_ C.Modules) ≫
-        (𝟙 (F.obj P) ⊗ₘ F.map g) ≫
-        Functor.LaxMonoidal.μ F P (sectionPoleSheaf π z hz)) ≫
-      Functor.OplaxMonoidal.δ F P (sectionPoleSheaf π z hz) ≫
-      (eP.hom ⊗ₘ ePole.hom) ≫ (unitObjTensorIso U.1.toScheme).hom =
-    eP.hom ≫ d
-  simp only [Category.assoc, Functor.Monoidal.μ_δ_assoc]
-  rw [← Category.assoc
-    (𝟙 (F.obj P) ⊗ₘ F.map g) (eP.hom ⊗ₘ ePole.hom)]
-  rw [htensor]
-  have hunitD :
-      (𝟙 (Scheme.Modules.unitObj U.1.toScheme) ⊗ₘ d) ≫
-          (unitObjTensorIso U.1.toScheme).hom =
-        (unitObjTensorIso U.1.toScheme).hom ≫ d := by
-    simpa only [unitObjTensorIso, Iso.trans_hom,
-      MonoidalCategory.tensorIso_hom, Iso.symm_hom, Category.id_comp,
-      Category.assoc] using
-      tensorUnitIso_hom_naturality (monoidalUnitObjIso U.1.toScheme)
-        (𝟙 (Scheme.Modules.unitObj U.1.toScheme)) d
-  rw [Category.assoc (eP.hom ⊗ₘ eZero.hom)
-    (𝟙 (Scheme.Modules.unitObj U.1.toScheme) ⊗ₘ d)
-    (unitObjTensorIso U.1.toScheme).hom]
-  rw [hunitD]
-  simpa only [Category.assoc] using congrArg (fun k ↦ k ≫ d) hsource
+  apply sectionPoleSheafSuccHom_restrict_comp_powerTrivialization
+    z hz U.1 ePoleOver r
+  simpa only [ePoleOver, eIdeal, eGen] using
+    sectionPoleUnitHom_over_comp_dualGeneratorTrivialization
+      z hz U r hr hspan hnzd
 
 /-- On a Cartier-generator chart, passing to the next pole power multiplies
 the local coefficient by the generator. -/
