@@ -707,6 +707,40 @@ theorem isClosed_ball {r : NNReal} (hr : 0 < r) :
     exact le_trans hz (le_of_lt hm)
   exact (AddSubgroup.isClosed_of_isOpen G hopen)
 
+/-- **Term bound on `A^r`** (half of Kedlaya's (2.2.1) on the completion): every
+Gauss term of the limit coordinates is at most the completed-field value. -/
+theorem gaussTerm_teichCoeffAr_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : Valued.v x ≠ 0)
+    (n : ℕ) :
+    ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n) ≤ Valued.v x := by
+  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hx
+  set r : NNReal := Valued.v x * (ρ ^ n)⁻¹ with hr
+  have hρn : (0 : NNReal) < ρ ^ n := pow_pos hρ0 n
+  have hr0 : 0 < r := mul_pos (pos_iff_ne_zero.mpr hx0) (inv_pos.mpr hρn)
+  have hρnr : ρ ^ n * r = Valued.v x := by
+    rw [hr, mul_comm (Valued.v x) _, ← mul_assoc, mul_inv_cancel₀ hρn.ne', one_mul]
+  have hev : ∀ᶠ u in Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x),
+      perfectoidValuation p F (teichCoeffF p F (alocToWittF p F ϖ u) n)
+        ∈ {s : NNReal | s ≤ r} := by
+    refine (eventually_wAloc_eq p F ϖ (hρ0 := hρ0) (hρ1 := hρ1) hx0).mono fun u hu => ?_
+    have h2 := gaussTermF_alocToWittF_le p F ϖ hρ0 hρ1 u n
+    rw [hu] at h2
+    rw [gaussTermF] at h2
+    have h3 : ρ ^ n * perfectoidValuation p F (teichCoeffF p F (alocToWittF p F ϖ u) n)
+        ≤ ρ ^ n * r := by
+      rw [hρnr]
+      exact h2
+    exact le_of_mul_le_mul_left h3 hρn
+  have hball : teichCoeffAr p F ϖ hρ0 hρ1 x n
+      ∈ {y : F | perfectoidValuation p F y ≤ r} := by
+    refine (isClosed_ball p F ϖ hr0).mem_of_tendsto
+      (tendsto_teichCoeffAr p F ϖ hx n) ?_
+    exact hev
+  have h4 : perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n) ≤ r := hball
+  calc ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+      ≤ ρ ^ n * r := mul_le_mul_of_nonneg_left h4 zero_le
+    _ = Valued.v x := hρnr
+
 end FarguesFontaine
 
 end
