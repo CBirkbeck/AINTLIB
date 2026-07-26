@@ -152,6 +152,68 @@ theorem gaussValue_teichmuller_sub_le_of_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 
     exact le_of_lt (lt_of_le_of_lt
       (pow_le_pow_of_le_one zero_le hρ1.le (by omega)) hK)
 
+/-- **Per-coordinate uniform continuity** on `A_inf`: for each level `n` and `ε > 0`
+there is `δ > 0` with `w_ρ(a−b) ≤ δ → v(aₙ − bₙ) ≤ ε`. Level 0 is exact
+(`constantCoeff` is additive); level `n+1` recurses through head splits, feeding the
+Teichmüller-difference continuity `gaussValue_teichmuller_sub_le_of_le`. -/
+theorem exists_delta_teichCoeff_sub (n : ℕ) {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    {ε : NNReal} (hε0 : 0 < ε) (hε1 : ε ≤ 1) :
+    ∃ δ : NNReal, 0 < δ ∧ ∀ a b : Ainf p F, gaussValue p F ρ (a - b) ≤ δ →
+      perfectoidValuation p F ((teichCoeff p F a n - teichCoeff p F b n : OF F) : F) ≤ ε := by
+  induction n generalizing ε with
+  | zero =>
+    refine ⟨ε, hε0, fun a b hab => ?_⟩
+    have h00 : teichCoeff p F a 0 - teichCoeff p F b 0 = teichCoeff p F (a - b) 0 := by
+      rw [teichCoeff_zero_eq, teichCoeff_zero_eq, teichCoeff_zero_eq]
+      exact (RingHom.map_sub WittVector.constantCoeff a b).symm
+    rw [h00]
+    have hterm : perfectoidValuation p F ((teichCoeff p F (a - b) 0 : OF F) : F)
+        = gaussTerm p F ρ (a - b) 0 := by
+      rw [gaussTerm, pow_zero, one_mul]
+    rw [hterm]
+    exact (gaussTerm_le_gaussValue p F hρ1.le (a - b) 0).trans hab
+  | succ n ih =>
+    obtain ⟨δn, hδn0, hδn⟩ := ih hε0 hε1
+    obtain ⟨δT, hδT0, hδT⟩ := gaussValue_teichmuller_sub_le_of_le p F hρ0 hρ1
+      (ε := min (ρ * δn) 1) (lt_min (mul_pos hρ0 hδn0) one_pos) (min_le_right _ _)
+    refine ⟨min (min (ρ * δn) δT) 1, lt_min (lt_min (mul_pos hρ0 hδn0) hδT0) one_pos,
+      fun a b hab => ?_⟩
+    obtain ⟨x', hx'eq, hx'c⟩ := exists_head_split p F a
+    obtain ⟨y', hy'eq, hy'c⟩ := exists_head_split p F b
+    have hpx : (p : Ainf p F) * x' = a - WittVector.teichmuller p (teichCoeff p F a 0) :=
+      eq_sub_of_add_eq (by rw [add_comm]; exact hx'eq.symm)
+    have hpy : (p : Ainf p F) * y' = b - WittVector.teichmuller p (teichCoeff p F b 0) :=
+      eq_sub_of_add_eq (by rw [add_comm]; exact hy'eq.symm)
+    have hsub : (p : Ainf p F) * (x' - y')
+        = (a - b) - (WittVector.teichmuller p (teichCoeff p F a 0)
+          - WittVector.teichmuller p (teichCoeff p F b 0)) := by
+      rw [mul_sub, hpx, hpy]
+      ring
+    have h0 : perfectoidValuation p F
+        ((teichCoeff p F a 0 - teichCoeff p F b 0 : OF F) : F) ≤ δT := by
+      have h00 : teichCoeff p F a 0 - teichCoeff p F b 0 = teichCoeff p F (a - b) 0 := by
+        rw [teichCoeff_zero_eq, teichCoeff_zero_eq, teichCoeff_zero_eq]
+        exact (RingHom.map_sub WittVector.constantCoeff a b).symm
+      rw [h00]
+      have hterm : perfectoidValuation p F ((teichCoeff p F (a - b) 0 : OF F) : F)
+          = gaussTerm p F ρ (a - b) 0 := by
+        rw [gaussTerm, pow_zero, one_mul]
+      rw [hterm]
+      exact (gaussTerm_le_gaussValue p F hρ1.le (a - b) 0).trans
+        (hab.trans ((min_le_left _ _).trans (min_le_right _ _)))
+    have hT : gaussValue p F ρ (WittVector.teichmuller p (teichCoeff p F a 0)
+        - WittVector.teichmuller p (teichCoeff p F b 0)) ≤ min (ρ * δn) 1 :=
+      hδT _ _ h0
+    have hw : ρ * gaussValue p F ρ (x' - y') ≤ ρ * δn := by
+      rw [← gaussValue_p_mul p F hρ1.le, hsub]
+      exact (gaussValue_sub_le p F hρ1 _ _).trans (max_le
+        (hab.trans ((min_le_left _ _).trans (min_le_left _ _)))
+        (hT.trans (min_le_left _ _)))
+    have hxy' : gaussValue p F ρ (x' - y') ≤ δn :=
+      le_of_mul_le_mul_left hw hρ0
+    have hres := hδn x' y' hxy'
+    rwa [hx'c n, hy'c n] at hres
+
 end FarguesFontaine
 
 end

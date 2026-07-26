@@ -662,10 +662,11 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   now de-privatized in GaussNorm.lean);
   (b2) `gaussValue_teichmuller_sub_le_of_le` — ε-δ continuity of a ↦ [a] with
   δ = ε^(p^K), K from exists_pow_lt_of_lt_one; pow_le_pow_iff_left₀ for root-taking.
-  REMAINING: (b3) per-coordinate modulus on Ainf (head-split recursion:
-  digit-0 exact by constantCoeff-additivity, then w(x'−y') ≤ ρ⁻¹·max(w(a−b), w([a₀]−[b₀]))
-  with (b2) feeding the second term); (b4) clearing denominators to Aloc/Bloc;
-  (a) the W(F) engine ports (needed only from T903 on — may defer into T903) | **File**: FarguesFontaine/WittF.lean | **Depends**: T901
+  (b3) DONE: `exists_delta_teichCoeff_sub` — per-coordinate ε-δ on Ainf by head-split
+  recursion (eq_sub_of_add_eq to avoid rewriting under teichCoeff; δ = min (min (ρδₙ) δT) 1);
+  axiom-clean. REMAINING: (b4) clearing denominators to Aloc/Bloc (coords of x/(p[ϖ])^k);
+  (a) the W(F) engine ports — DECISION: defer both into T903 where the completion
+  context fixes the right statement shapes | **File**: FarguesFontaine/WittF.lean | **Depends**: T901
 - **REVISED per AD-3-revision**: two deliverables. (a) Port the GaussNorm engines
   (CORE-1/2, head split, scaling, pair bound via u-trick + `WittVector.map`-naturality
   from `W(O_F)`, level-rep) to `W(F)`-elements with attained-sup statements under
