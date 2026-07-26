@@ -106,6 +106,28 @@ theorem isUnit_pderiv_e3Rel_map (hR : IsUnit (3 : R)) :
   rw [hval, map_mul, map_neg, map_pow]
   exact ((h3.neg).mul ((isUnit_e3S_map R).pow 2))
 
+/-- **(brick 1d)** `E3ModuliRing R` is *also* the localization away from
+`e3Delta · ∂f/∂γ` (the extra factor is already a unit there). -/
+theorem isLocalization_away_e3Delta_mul_pderiv (hR : IsUnit (3 : R)) :
+    IsLocalization.Away (e3Delta R *
+      Ideal.Quotient.mk (Ideal.span {e3Rel R}) (pderiv 1 (e3Rel R))) (E3ModuliRing R) := by
+  set p : E3Quotient R := Ideal.Quotient.mk (Ideal.span {e3Rel R}) (pderiv 1 (e3Rel R)) with hp
+  have hpu : IsUnit (algebraMap (E3Quotient R) (E3ModuliRing R) p) :=
+    isUnit_pderiv_e3Rel_map R hR
+  refine IsLocalization.Away.mk _ ?_ (fun z => ?_) (fun a b h => ?_)
+  · rw [map_mul]
+    exact (IsLocalization.Away.algebraMap_isUnit (S := E3ModuliRing R) (e3Delta R)).mul hpu
+  · obtain ⟨n, a, ha⟩ := IsLocalization.Away.surj (S := E3ModuliRing R) (e3Delta R) z
+    refine ⟨n, a * p ^ n, ?_⟩
+    simp only [map_mul, map_pow]
+    rw [mul_pow, ← mul_assoc, ha]
+  · obtain ⟨n, hn⟩ := IsLocalization.Away.exists_of_eq (S := E3ModuliRing R)
+      (x := e3Delta R) h
+    refine ⟨n, ?_⟩
+    calc (e3Delta R * p) ^ n * a = p ^ n * ((e3Delta R) ^ n * a) := by rw [mul_pow]; ring
+      _ = p ^ n * ((e3Delta R) ^ n * b) := by rw [hn]
+      _ = (e3Delta R * p) ^ n * b := by rw [mul_pow]; ring
+
 end ModularCurves
 
 end
