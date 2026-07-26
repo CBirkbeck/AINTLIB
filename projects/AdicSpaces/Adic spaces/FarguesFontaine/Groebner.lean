@@ -831,6 +831,64 @@ theorem finite_degLex_le (Jtop : Fin k →₀ ℕ) :
   · exact h.le
   · exact h.le
 
+/-- The Gauss norm is ultrametric on sums. -/
+theorem gaussNormRPS_add_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    gaussNormRPS p F ϖ hρ0 hρ1 (f + g)
+      ≤ max (gaussNormRPS p F ϖ hρ0 hρ1 f) (gaussNormRPS p F ϖ hρ0 hρ1 g) := by
+  refine ciSup_le fun s => ?_
+  have hc : ((MvPowerSeries.coeff s (f + g) : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1)
+      = ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        + ((MvPowerSeries.coeff s g : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) := by
+    rw [map_add, AddMemClass.coe_add]
+  rw [hc]
+  exact le_trans (Valuation.map_add _ _ _)
+    (max_le_max (valued_coeff_le_gaussNormRPS p F ϖ hf s)
+      (valued_coeff_le_gaussNormRPS p F ϖ hg s))
+
+/-- The Gauss norm of a negation. -/
+theorem gaussNormRPS_neg {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :
+    gaussNormRPS p F ϖ hρ0 hρ1 (-f) = gaussNormRPS p F ϖ hρ0 hρ1 f := by
+  rw [gaussNormRPS, gaussNormRPS]
+  refine iSup_congr fun s => ?_
+  have hc : ((MvPowerSeries.coeff s (-f) : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1)
+      = -((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) := by
+    rw [map_neg, NegMemClass.coe_neg]
+  rw [hc, Valuation.map_neg]
+
+/-- The Gauss norm is ultrametric on differences. -/
+theorem gaussNormRPS_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    gaussNormRPS p F ϖ hρ0 hρ1 (f - g)
+      ≤ max (gaussNormRPS p F ϖ hρ0 hρ1 f) (gaussNormRPS p F ϖ hρ0 hρ1 g) := by
+  have hneg : MvPowerSeries.IsRestricted (-g) :=
+    Subring.neg_mem (restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) hg
+  have h1 := gaussNormRPS_add_le p F ϖ hf hneg
+  rw [← sub_eq_add_neg, gaussNormRPS_neg] at h1
+  exact h1
+
+/-- The Gauss norm of a monomial. -/
+theorem gaussNormRPS_monomial {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (J : Fin k →₀ ℕ) (a : ↥(ArSub p F ϖ hρ0 hρ1)) :
+    gaussNormRPS p F ϖ hρ0 hρ1 (MvPowerSeries.monomial J a)
+      = Valued.v ((a : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
+  have hmono := isRestricted_monomial p F ϖ a (J := J)
+  refine le_antisymm (ciSup_le fun s => ?_) ?_
+  · rw [MvPowerSeries.coeff_monomial]
+    split_ifs with h
+    · exact le_rfl
+    · rw [ZeroMemClass.coe_zero, Valuation.map_zero]
+      exact zero_le
+  · have h1 := valued_coeff_le_gaussNormRPS p F ϖ hmono J
+    rwa [MvPowerSeries.coeff_monomial, if_pos rfl] at h1
+
 end FarguesFontaine
 
 end
