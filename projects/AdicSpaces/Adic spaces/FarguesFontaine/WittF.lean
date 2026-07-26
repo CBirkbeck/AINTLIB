@@ -1602,6 +1602,153 @@ theorem valuation_teichCoeffF_prefix_add_le (x y : WittVector p F) (N : ℕ) (j 
     rw [hfactor, teichCoeffF_teichmuller_mul, Valuation.map_mul, teichCoeffF_map, hvc]
     exact mul_le_of_le_one_right zero_le (perfectoidValuation_le_one p F _)
 
+theorem coe_p_ne_zero_wittF : (p : WittVector p F) ≠ 0 := by
+  intro h
+  have h1 : ((p : WittVector p F)).coeff 1 = 1 := by
+    have h2 := WittVector.teichmuller_mul_pow_coeff (p := p) (R := F) 1 1
+    simpa using h2
+  rw [h] at h1
+  simp at h1
+
+/-- Bridge: the tail value is the `σᴺ`-scaled value of the iter-split witness. -/
+theorem tailValueF_eq_of_coords {σ : NNReal} {x X : WittVector p F} {N : ℕ}
+    (hc : ∀ k, teichCoeffF p F X k = teichCoeffF p F x (N + k)) :
+    tailValueF p F σ x N = σ ^ N * gaussValueF p F σ X := by
+  rw [tailValueF, gaussValueF, NNReal.mul_iSup]
+  refine iSup_congr fun k => ?_
+  rw [gaussTermF, gaussTermF, hc k, pow_add]
+  ring
+
+/-- **The moving-prefix tail estimate** (sol-consult (1)): the tail of a sum is
+controlled by the tails and the scaled head bound. -/
+theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+    {x y : WittVector p F}
+    (hBx : BddAbove (Set.range (gaussTermF p F σ x)))
+    (hBy : BddAbove (Set.range (gaussTermF p F σ y))) (N : ℕ) :
+    tailValueF p F σ (x + y) N
+      ≤ max (max (tailValueF p F σ x N) (tailValueF p F σ y N))
+          (σ ^ N * (Finset.range N).sup (fun i => max
+            (perfectoidValuation p F (teichCoeffF p F x i))
+            (perfectoidValuation p F (teichCoeffF p F y i)))) := by
+  obtain ⟨X, hX, hXc⟩ := exists_iter_splitF p F x N
+  obtain ⟨Y, hY, hYc⟩ := exists_iter_splitF p F y N
+  set Px := ∑ i ∈ Finset.range N,
+    WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i with hPx
+  set Py := ∑ i ∈ Finset.range N,
+    WittVector.teichmuller p (teichCoeffF p F y i) * (p : WittVector p F) ^ i with hPy
+  set A := Px + Py with hA
+  obtain ⟨C, hC, hCc⟩ := exists_iter_splitF p F A N
+  obtain ⟨Z, hZ, hZc⟩ := exists_iter_splitF p F (x + y) N
+  set M : NNReal := (Finset.range N).sup (fun i => max
+    (perfectoidValuation p F (teichCoeffF p F x i))
+    (perfectoidValuation p F (teichCoeffF p F y i))) with hM
+  -- digits of A are bounded by M; so are C's
+  have hAdig : ∀ j, perfectoidValuation p F (teichCoeffF p F A j) ≤ M :=
+    fun j => valuation_teichCoeffF_prefix_add_le p F x y N j
+  have hCdig : ∀ k, perfectoidValuation p F (teichCoeffF p F C k) ≤ M := by
+    intro k
+    rw [hCc k]
+    exact hAdig (N + k)
+  have hBC : BddAbove (Set.range (gaussTermF p F σ C)) := by
+    refine ⟨M, ?_⟩
+    rintro s ⟨k, rfl⟩
+    rw [gaussTermF]
+    calc σ ^ k * perfectoidValuation p F (teichCoeffF p F C k)
+        ≤ 1 * M := mul_le_mul (pow_le_one₀ zero_le hσ1.le) (hCdig k) zero_le zero_le
+      _ = M := one_mul M
+  have hvC : gaussValueF p F σ C ≤ M := by
+    refine ciSup_le fun k => ?_
+    rw [gaussTermF]
+    calc σ ^ k * perfectoidValuation p F (teichCoeffF p F C k)
+        ≤ 1 * M := mul_le_mul (pow_le_one₀ zero_le hσ1.le) (hCdig k) zero_le zero_le
+      _ = M := one_mul M
+  -- boundedness of the tail witnesses
+  have hBX : BddAbove (Set.range (gaussTermF p F σ X)) := by
+    obtain ⟨Mx, hMx⟩ := hBx
+    refine ⟨(σ ^ N)⁻¹ * Mx, ?_⟩
+    rintro s ⟨k, rfl⟩
+    have h1 : σ ^ N * gaussTermF p F σ X k = gaussTermF p F σ x (N + k) := by
+      rw [gaussTermF, gaussTermF, hXc k, pow_add]
+      ring
+    have h2 : σ ^ N * gaussTermF p F σ X k ≤ Mx := h1.le.trans (hMx ⟨N + k, rfl⟩)
+    rw [← one_mul (gaussTermF p F σ X k),
+      ← inv_mul_cancel₀ (pow_pos hσ0 N).ne', mul_assoc]
+    exact mul_le_mul_of_nonneg_left h2 zero_le
+  have hBY : BddAbove (Set.range (gaussTermF p F σ Y)) := by
+    obtain ⟨My, hMy⟩ := hBy
+    refine ⟨(σ ^ N)⁻¹ * My, ?_⟩
+    rintro s ⟨k, rfl⟩
+    have h1 : σ ^ N * gaussTermF p F σ Y k = gaussTermF p F σ y (N + k) := by
+      rw [gaussTermF, gaussTermF, hYc k, pow_add]
+      ring
+    have h2 : σ ^ N * gaussTermF p F σ Y k ≤ My := h1.le.trans (hMy ⟨N + k, rfl⟩)
+    rw [← one_mul (gaussTermF p F σ Y k),
+      ← inv_mul_cancel₀ (pow_pos hσ0 N).ne', mul_assoc]
+    exact mul_le_mul_of_nonneg_left h2 zero_le
+  -- the exact tail identity Z = C + X + Y
+  have hcongr : ∀ i < N, teichCoeffF p F (x + y) i = teichCoeffF p F A i := by
+    intro i hi
+    refine teichCoeffF_eq_of_sub_eq_pow_mul p F hi (K := X + Y) ?_
+    conv_lhs => rw [hX, hY]
+    rw [hA]
+    ring
+  have hPeq : (∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (teichCoeffF p F (x + y) i) * (p : WittVector p F) ^ i)
+      = ∑ i ∈ Finset.range N,
+        WittVector.teichmuller p (teichCoeffF p F A i) * (p : WittVector p F) ^ i :=
+    Finset.sum_congr rfl fun i hi => by rw [hcongr i (Finset.mem_range.mp hi)]
+  have hZeq : Z = C + X + Y := by
+    have hmul : (p : WittVector p F) ^ N * Z = (p : WittVector p F) ^ N * (C + X + Y) := by
+      have h1 : (p : WittVector p F) ^ N * Z = (x + y)
+          - (∑ i ∈ Finset.range N, WittVector.teichmuller p
+              (teichCoeffF p F (x + y) i) * (p : WittVector p F) ^ i) :=
+        (eq_sub_of_add_eq (by rw [add_comm]; exact hZ.symm))
+      have h2 : (p : WittVector p F) ^ N * C = A
+          - (∑ i ∈ Finset.range N, WittVector.teichmuller p
+              (teichCoeffF p F A i) * (p : WittVector p F) ^ i) :=
+        (eq_sub_of_add_eq (by rw [add_comm]; exact hC.symm))
+      have h3 : x + y = A + (p : WittVector p F) ^ N * (X + Y) := by
+        conv_lhs => rw [hX, hY]
+        rw [hA]
+        ring
+      rw [h1, hPeq, h3]
+      have h4 : A + (p : WittVector p F) ^ N * (X + Y)
+          - (∑ i ∈ Finset.range N, WittVector.teichmuller p
+              (teichCoeffF p F A i) * (p : WittVector p F) ^ i)
+          = (A - (∑ i ∈ Finset.range N, WittVector.teichmuller p
+              (teichCoeffF p F A i) * (p : WittVector p F) ^ i))
+            + (p : WittVector p F) ^ N * (X + Y) := by ring
+      rw [h4, ← h2]
+      ring
+    have hpn : ((p : WittVector p F) ^ N) ≠ 0 :=
+      pow_ne_zero N (coe_p_ne_zero_wittF p F)
+    exact mul_left_cancel₀ hpn hmul
+  -- assemble
+  have hbridge := tailValueF_eq_of_coords p F (σ := σ) hZc
+  have hBXY : BddAbove (Set.range (gaussTermF p F σ (X + Y))) :=
+    bddAbove_gaussTermF_add p F hσ0 hσ1 hBX hBY
+  have hvZ : gaussValueF p F σ Z
+      ≤ max (gaussValueF p F σ C) (max (gaussValueF p F σ X) (gaussValueF p F σ Y)) := by
+    rw [hZeq, add_assoc]
+    exact (gaussValueF_add_le p F hσ0 hσ1 hBC hBXY).trans
+      (max_le_max le_rfl (gaussValueF_add_le p F hσ0 hσ1 hBX hBY))
+  rw [hbridge]
+  have hTx := tailValueF_eq_of_coords p F (σ := σ) hXc
+  have hTy := tailValueF_eq_of_coords p F (σ := σ) hYc
+  calc σ ^ N * gaussValueF p F σ Z
+      ≤ σ ^ N * max (gaussValueF p F σ C)
+          (max (gaussValueF p F σ X) (gaussValueF p F σ Y)) :=
+        mul_le_mul_of_nonneg_left hvZ zero_le
+    _ = max (σ ^ N * gaussValueF p F σ C)
+          (max (σ ^ N * gaussValueF p F σ X) (σ ^ N * gaussValueF p F σ Y)) := by
+        rw [nnreal_mul_max, nnreal_mul_max]
+    _ ≤ max (σ ^ N * M)
+          (max (tailValueF p F σ x N) (tailValueF p F σ y N)) := by
+        refine max_le_max (mul_le_mul_of_nonneg_left hvC zero_le) ?_
+        rw [← hTx, ← hTy]
+    _ = max (max (tailValueF p F σ x N) (tailValueF p F σ y N)) (σ ^ N * M) :=
+        max_comm _ _
+
 end FarguesFontaine
 
 end
