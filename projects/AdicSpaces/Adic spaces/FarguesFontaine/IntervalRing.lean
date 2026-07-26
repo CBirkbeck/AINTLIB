@@ -1062,6 +1062,41 @@ def resIHom {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
     refine Subtype.ext ?_
     exact Prod.ext e1 e2
 
+/-- **The interval norm is power-multiplicative** (Kedlaya Definition 4.2): it is the
+maximum of two multiplicative valuations, and taking maxima commutes with powers. -/
+theorem wI_pow {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) (n : ℕ) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z ^ n) = (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ^ n := by
+  rw [wI, wI]
+  have h1 : (z ^ n).1 = z.1 ^ n := rfl
+  have h2 : (z ^ n).2 = z.2 ^ n := rfl
+  rw [h1, h2, Valuation.map_pow, Valuation.map_pow]
+  rcases le_total (Valued.v z.1) (Valued.v z.2) with h | h
+  · rw [max_eq_right h, max_eq_right (pow_le_pow_left₀ zero_le h n)]
+  · rw [max_eq_left h, max_eq_left (pow_le_pow_left₀ zero_le h n)]
+
+/-- The interval norm of a natural power of a `B^{I,+}` element stays bounded by one
+(restated through `wI_pow`). -/
+theorem wI_pow_eq_one_iff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) {n : ℕ} (hn : n ≠ 0) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z ^ n) ≤ 1
+      ↔ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ 1 := by
+  rw [wI_pow]
+  constructor
+  · intro h
+    by_contra hcon
+    push Not at hcon
+    have hlt : (1 : NNReal) < (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ^ n := by
+      calc (1 : NNReal) = 1 ^ n := (one_pow n).symm
+        _ < (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ^ n :=
+            pow_lt_pow_left₀ hcon zero_le hn
+    exact absurd (lt_of_lt_of_le hlt h) (lt_irrefl _)
+  · intro h
+    calc (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ^ n ≤ 1 ^ n :=
+          pow_le_pow_left₀ zero_le h n
+      _ = 1 := one_pow n
+
 end FarguesFontaine
 
 end
