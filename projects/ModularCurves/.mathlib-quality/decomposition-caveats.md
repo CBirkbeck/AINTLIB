@@ -435,3 +435,12 @@ general base. Remaining M1 bricks:
   the project has `exists_finiteEtaleHom_of_galoisEquivariant`), then compare with the
   register (`T-C4`, `WeilPairing/FibreComparison.lean`).
 * **M2** — the general base (KM 2.8 / GME 2.6.4 chain).
+
+**M1b/M1c gating (checked 2026-07-26)**: `WeilPairing/EtaleDescent.lean` already contains the
+descent packaging `exists_pairingAlgebraHom_of_galoisEquivariant` (input: a
+`Gal(k̄/k)`-equivariant map on fibre-functor values; output: the scheme morphism
+`E[N] ×_k E[N] ⟶ μ_N`), and its own note records that `tensorAlgHomPairEquiv` and
+`exists_finiteEtaleHom_of_galoisEquivariant` are axiom-clean while `sorryAx` enters only
+through **`torsionAlgebra`**. So feeding `fieldWeilPairing` into it needs, first, the
+`torsionAlgebra` ↔ affine-Weierstrass-points dictionary at `k̄`-fibres — that (not the
+pairing) is the next real leaf of the field-level DS4 construction.
