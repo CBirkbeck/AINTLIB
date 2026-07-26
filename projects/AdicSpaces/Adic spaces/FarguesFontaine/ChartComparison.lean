@@ -5,6 +5,7 @@ Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.SheafyBI
 import «Adic spaces».FarguesFontaine.ChartData
+import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 import «Adic spaces».RingEquivPresheafTransport
 import «Adic spaces».SheafyRingEquivTransport
 
@@ -588,6 +589,43 @@ theorem isSheafy_presheafChart (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b �
     (isRingOfIntegralElements_BIPlusIn p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)).map e he he'
   exact ValuationSpectrum.isSheafy_mapRingEquiv e he he' rfl
+
+/-- The right endpoint of the `U₀`-chart interval: `|ϖ|^{b/a}` as an `NNReal`
+power. -/
+noncomputable def rhoRight (a b : ℕ) : NNReal :=
+  perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+    ^ ((b : ℝ) / (a : ℝ))
+
+theorem vpi_pos :
+    0 < perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) := by
+  refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
+  exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+
+theorem rhoRight_pos (a b : ℕ) : 0 < rhoRight p F ϖ a b := by
+  rw [rhoRight]
+  exact NNReal.rpow_pos (vpi_pos p F ϖ)
+
+theorem rhoRight_lt_one (a b : ℕ) (ha : 0 < a) (hb : 0 < b) :
+    rhoRight p F ϖ a b < 1 := by
+  rw [rhoRight]
+  refine NNReal.rpow_lt_one (perfectoidValuation_toOF_lt_one p F ϖ) ?_
+  have hb' : (0 : ℝ) < (b : ℝ) := by exact_mod_cast hb
+  have ha' : (0 : ℝ) < (a : ℝ) := by exact_mod_cast ha
+  positivity
+
+/-- The exactness equation `ρ₂^a = |ϖ|^b` for the rpow right endpoint. -/
+theorem rhoRight_pow_exact (a b : ℕ) (ha : 0 < a) :
+    rhoRight p F ϖ a b ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+  rw [rhoRight, ← NNReal.rpow_natCast (_ ^ ((b : ℝ) / (a : ℝ))) a,
+    ← NNReal.rpow_mul, div_mul_cancel₀, NNReal.rpow_natCast]
+  exact_mod_cast ha.ne'
+
+
+/-- Two is at most `p + 1` for a prime `p`. -/
+theorem two_le_p_add_one : 2 ≤ p + 1 := by
+  have := Nat.Prime.two_le (Fact.out : Nat.Prime p)
+  omega
 
 end FarguesFontaine
 

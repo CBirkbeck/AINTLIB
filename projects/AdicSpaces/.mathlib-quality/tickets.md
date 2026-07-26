@@ -967,12 +967,16 @@ non-Tate bases are supported.
   translates); restrictions respected; Wedhorn Rem 8.27 locality + TC2.
 
 ### [PLAN-GATE-2] Lane C assembly planning (identification theorem + sheafy instances)
-- **Status**: blocked (planning gate; first block TC1-TC2 spawned 2026-07-26 —
-  remaining: the chart-identification theorems 𝒪(U₀) ≅ B^{[τ,cτ]} per the consult
-  (rational subsets R(T_U/s_U) of (A_inf,A_inf) with s_U = p[w]^b,
-  T_U = {p^{a+1},[w]^{b+1}}; genuine comparison: same dense algebra + topology
-  equivalence), the AD-9 instantiation for the two charts, and Y-locality via
-  Wedhorn Rem 8.27) | **Depends**: PLAN-GATE-1 only for the
+- **Status**: mostly DISCHARGED 2026-07-27 — the chart-identification theorem is
+  ID2 (DONE: presheafChartRingEquivBISub + isSheafy_presheafChart, any (a,b) with
+  0<b≤a at the exact interval ρ₁=|ϖ|, ρ₂^a=|ϖ|^b); U₀-instantiation endpoints
+  proven (rhoRight/rhoRight_pos/rhoRight_lt_one/rhoRight_pow_exact +
+  two_le_p_add_one in ChartComparison.lean — U₀ = chartData 1 2 (p+1) 2 at
+  ρ₂ := rhoRight (p+1) 2; apply isSheafy_presheafChart DIRECTLY at the point of
+  use, do NOT restate the letI-chain (isDefEq-timeout trap, 2026-07-27)).
+  REMAINING for ID3: (i) V₀ has u = p+1 > 1 denominator — NOT covered by the
+  chartS 1 b machinery; route per AD-9 density (cover V₀ by nat-power-left-endpoint
+  special intervals) or a Frobenius translate; (ii) Y-locality via Wedhorn Rem 8.27 | **Depends**: PLAN-GATE-1 only for the
   sheafiness core (the repo's `isSheafy_of_stronglyNoetherian_828b` is sorry-free);
   presheafValue-identification additionally depends on the PresheafTateStructure
   plumbing. SOL CORRECTIONS (binding): 𝒪(U₀) ≅ B^I is a genuine theorem (dense
