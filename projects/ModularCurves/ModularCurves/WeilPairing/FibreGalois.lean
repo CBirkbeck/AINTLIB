@@ -220,8 +220,8 @@ theorem weilPairingFibreMap_galoisEquivariant
     (by rw [← hgal]; exact (C.pairing N (natCast_ne_zero_of_algebra k N hk) _ _ _ _).2))
   exact congrArg (muNAlgebraFibreEquiv k N hk (AlgebraicClosure k)).symm (Subtype.ext hgal)
 
-/-- **(DS4 M1c ★★★ — the field-level Weil pairing as a scheme morphism)** Over a field of
-characteristic zero, given a Galois-equivariant Weierstrass chart at the geometric point,
+/-- **(DS4 M1c ★★★ — the field-level Weil pairing as a scheme morphism)** Over a **perfect**
+field, given a Galois-equivariant Weierstrass chart at the geometric point,
 the Weil pairing descends to an honest morphism of finite étale `k`-algebras
 
 `μ_N ⟶ E[N] ⊗ E[N]`,
@@ -233,7 +233,7 @@ The descent is `exists_pairingAlgebraHom_of_galoisEquivariant` (fullness of the 
 functor of the Galois category of finite étale `k`-algebras); the equivariance it consumes
 is `weilPairingFibreMap_galoisEquivariant`, which is `weilPairing_galois` transported
 along the chart. -/
-theorem exists_weilPairingHom_of_galoisFibreChart [CharZero k]
+theorem exists_weilPairingHom_of_galoisFibreChart [PerfectField k]
     (C : GaloisFibreChart k E (AlgebraicClosure k)) :
     ∃ w : muNAlgebra k N hk ⟶ EllipticCurve.torsionPairAlgebra k E N hk,
       ∀ f : ((EllipticCurve.torsionPairAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k),

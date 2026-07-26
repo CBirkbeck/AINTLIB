@@ -117,9 +117,9 @@ end GlobalChart
 
 /-! ## The unconditional field-level DS4 Weil pairing -/
 
-/-- **(DS4 M1c ★★★★ — unconditional)** For an elliptic curve over a field `k` of
-characteristic zero and `N` invertible in `k`, the Weil pairing exists as a morphism of
-finite étale `k`-algebras
+/-- **(DS4 M1c ★★★★ — unconditional)** For an elliptic curve over a **perfect** field `k`
+with `N` invertible in `k`, the Weil pairing exists as a morphism of finite étale
+`k`-algebras
 
 `μ_N ⟶ 𝒪(E[N]) ⊗_k 𝒪(E[N])`,
 
@@ -131,7 +131,7 @@ dictionaries are Galois-natural) → `globalGaloisFibreChart` (every elliptic cu
 field has a global `k`-rational chart, since `Spec k` is a point) →
 `exists_pairingAlgebraHom_of_galoisEquivariant` (fullness of the fibre functor of the
 Galois category of finite étale `k`-algebras). -/
-theorem exists_weilPairingHom_of_field (k : Type u) [Field k] [CharZero k]
+theorem exists_weilPairingHom_of_field (k : Type u) [Field k] [PerfectField k]
     [DecidableEq (AlgebraicClosure k)]
     (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N] (hk : (N : k) ≠ 0) :
     ∃ w : muNAlgebra k N hk ⟶ EllipticCurve.torsionPairAlgebra k E N hk,

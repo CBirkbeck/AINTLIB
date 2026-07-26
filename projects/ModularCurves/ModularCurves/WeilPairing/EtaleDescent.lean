@@ -432,13 +432,18 @@ pairing: any map `p` from pairs of `k̄`-points of `E[N]` to `k̄`-points of `μ
 equivariant for the natural `Gal(k̄/k)`-actions (postcomposition on each side) is
 induced, under the fibre identification `torsionPairAlgebraPointsEquiv`, by an actual
 morphism `w : muNAlgebra ⟶ torsionPairAlgebra` of finite étale `k`-algebras — i.e. by a
-scheme morphism `E[N] ×_{Spec k} E[N] ⟶ μ_N` over `Spec k`. In characteristic zero the
-algebraic closure is a separable closure, so the `AlgebraicClosure k`-fibres transport
-to the `SeparableClosure k`-fibre functor of the Galois machinery along
-`IsSepClosure.equiv`; T-C0d feeds the equivariant field-level Weil pairing
-(T-C0b/T-C0c) into this. -/
+scheme morphism `E[N] ×_{Spec k} E[N] ⟶ μ_N` over `Spec k`. Over a **perfect** field the
+algebraic closure is a separable closure (`IsSepClosure.of_isAlgClosure_of_perfectField`),
+so the `AlgebraicClosure k`-fibres transport to the `SeparableClosure k`-fibre functor of
+the Galois machinery along `IsSepClosure.equiv`; T-C0d feeds the equivariant field-level
+Weil pairing (T-C0b/T-C0c) into this.
+
+(Perfectness is used *only* for that transport. The statement is true over any field —
+one would compare `Hom_k(A, k^sep)` with `Hom_k(A, k̄)` fibrewise instead of identifying
+the two closures — but it genuinely fails when `char k ∣ N`, where `μ_N` has
+infinitesimal structure invisible on geometric points.) -/
 theorem exists_pairingAlgebraHom_of_galoisEquivariant (k : Type u) [Field k]
-    [CharZero k] (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
+    [PerfectField k] (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
     (hk : (N : k) ≠ 0)
     (p : ((torsionAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k) ×
           ((torsionAlgebra k E N hk).obj →ₐ[k] AlgebraicClosure k) →
