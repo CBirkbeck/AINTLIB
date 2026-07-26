@@ -894,4 +894,30 @@ theorem exists_const_galois_weilFunction {L : Type v} [Field L] [DecidableEq L]
       (W := (W.baseChange L).toAffine) _ (div_ne_zero hΦg_ne hgσT_ne) hratio
   exact ⟨c, hc, (div_eq_iff hgσT_ne).mp hcval⟩
 
+/-- **(M1b-3b ★★★★)** The Weil pairing is `σ`-equivariant, **conditional only on the
+translation conjugation** `Φ_σ ∘ τ_S = τ_{σS} ∘ Φ_σ` at `g_T`. Every other input is
+supplied: the σ-naturality of the Weil function (`exists_const_galois_weilFunction`, from
+the divisor transport) and the constants law (`galoisFunctionFieldEquiv_algebraMap`). -/
+theorem weilPairing_galois_of_conj {L : Type v} [Field L] [DecidableEq L] [IsAlgClosed L]
+    [Algebra k L] [(W.baseChange L).toAffine.IsElliptic]
+    (hic : IsIntegrallyClosed (⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing)
+    (σ : L ≃ₐ[k] L) (N : ℤ) (hN : (N : L) ≠ 0)
+    (S T : (W.baseChange L).toAffine.Point) (hS : N • S = 0) (hT : N • T = 0)
+    (hσS : N • galoisPointEquiv W σ S = 0) (hσT : N • galoisPointEquiv W σ T = 0)
+    (hconj : galoisFunctionFieldEquiv W σ
+        (HasseWeil.translateAlgEquivOfPoint (W.baseChange L) S
+          (HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN T hT)) =
+      HasseWeil.translateAlgEquivOfPoint (W.baseChange L) (galoisPointEquiv W σ S)
+        (galoisFunctionFieldEquiv W σ
+          (HasseWeil.WeilPairing.weilFunction (W.baseChange L) N hN T hT))) :
+    HasseWeil.WeilPairing.weilPairing (W.baseChange L) N hN
+        (galoisPointEquiv W σ S) (galoisPointEquiv W σ T) hσS hσT =
+      σ (HasseWeil.WeilPairing.weilPairing (W.baseChange L) N hN S T hS hT) := by
+  letI := hic
+  obtain ⟨c, hc, hcval⟩ := exists_const_galois_weilFunction W hic σ N hN T hT hσT
+  exact weilPairing_galois_core_of_algEquiv (W.baseChange L) N hN (σ : L →+* L)
+    (galoisFunctionFieldEquiv W σ) S T (galoisPointEquiv W σ S) (galoisPointEquiv W σ T)
+    hS hT hσS hσT hconj hc hcval (galoisFunctionFieldEquiv_algebraMap W σ)
+
 end ModularCurves
