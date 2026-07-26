@@ -705,11 +705,11 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   Aloc (abbrev, finally defined here), AlocToHatK/BlocToHatK (IsLocalization.lift,
   unit-values via map_pow through the gaussVal bundle), ArSub/BrSub :=
   range.topologicalClosure. REMAINING (exact next steps, in order):
-  (1) `alocToWittF : Aloc →+* WittVector p F` := IsLocalization.lift of
+  (1) DONE (`alocToWittF`, `isUnit_map_teichPi`, `alocToWittF_algebraMap`) — was: IsLocalization.lift of
       `WittVector.map (powerBoundedSubring.toSubring F).subtype` ([ϖ]-image is a unit:
       inverse `teichmuller p (ϖ⁻¹ : F)`, via map_teichmuller + teichmuller-mult +
       mul_inv_cancel₀ + teichmuller_one); injectivity (denominators map to nonzerodivisors);
-  (2) coordinate transport: `teichCoeffF (WittVector.map ι a) n = ι (teichCoeff a n)`
+  (2) DONE (`teichCoeffF_map` via `frobeniusEquivF_symm_subtype`/`_pow_subtype`) — was:
       (frobenius commutes with ring homs; symm-version by injectivity), hence
       `teichCoeffAloc := teichCoeffF ∘ alocToWittF` extends teichCoeff with
       [ϖ]-denominator scaling (scaling lemma teichCoeff_teichmuller_mul, F-version);

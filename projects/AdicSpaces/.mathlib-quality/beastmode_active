@@ -1,1 +1,1 @@
-FOCUS: T903 realization — W(F) engine port (teichCoeffF, CORE-1/2, head-split over F) into WittF.lean
+FOCUS: T903 step (1) — alocToWittF embedding + unit-proof; appending to ArCompletion.lean

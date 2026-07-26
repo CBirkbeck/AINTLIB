@@ -147,6 +147,73 @@ def BlocToHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
 def BrSub {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) : Subring (hatK p F hρ0 hρ1) :=
   (BlocToHatK p F ϖ hρ0 hρ1).range.topologicalClosure
 
+/-- `[ϖ]` becomes a unit in `W(F)`: its inverse is `[ϖ⁻¹]`. -/
+theorem isUnit_map_teichPi :
+    IsUnit (WittVector.map ((powerBoundedSubring.toSubring F).subtype) (teichPi p F ϖ)) := by
+  have hne : (((ϖ.val : Fˣ) : F)) ≠ 0 := (ϖ.val : Fˣ).ne_zero
+  have hmul : WittVector.map ((powerBoundedSubring.toSubring F).subtype) (teichPi p F ϖ)
+      * WittVector.teichmuller p ((((ϖ.val : Fˣ) : F))⁻¹) = 1 := by
+    rw [teichPi, WittVector.map_teichmuller, ← map_mul]
+    have hval : ((PseudoUniformizer.toOF F ϖ : OF F) : F) * ((((ϖ.val : Fˣ) : F))⁻¹)
+        = 1 := by
+      rw [show ((PseudoUniformizer.toOF F ϖ : OF F) : F) = (((ϖ.val : Fˣ) : F)) from rfl,
+        mul_inv_cancel₀ hne]
+    rw [show ((powerBoundedSubring.toSubring F).subtype) (PseudoUniformizer.toOF F ϖ)
+        * ((((ϖ.val : Fˣ) : F))⁻¹)
+      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) * ((((ϖ.val : Fˣ) : F))⁻¹) from rfl, hval,
+      map_one]
+  exact ⟨Units.mkOfMulEqOne _ _ hmul, rfl⟩
+
+/-- **The concrete embedding** `Aloc → W(F)` (Kedlaya's `A_{L,E} ⊆ W(L)_E`, Def 2.2/2.4):
+lift the coefficient-wise inclusion `W(O_F) → W(F)` through the `[ϖ]`-localization. -/
+def alocToWittF : Aloc p F ϖ →+* WittVector p F :=
+  IsLocalization.lift (M := Submonoid.powers (teichPi p F ϖ))
+    (g := WittVector.map ((powerBoundedSubring.toSubring F).subtype))
+    (by
+      intro y
+      obtain ⟨k, hk⟩ := y.2
+      have hk' : teichPi p F ϖ ^ k = (y : Ainf p F) := hk
+      rw [← hk', map_pow]
+      exact (isUnit_map_teichPi p F ϖ).pow k)
+
+@[simp]
+theorem alocToWittF_algebraMap (x : Ainf p F) :
+    alocToWittF p F ϖ (algebraMap (Ainf p F) (Aloc p F ϖ) x)
+      = WittVector.map ((powerBoundedSubring.toSubring F).subtype) x :=
+  IsLocalization.lift_eq _ x
+
+/-- One-step commutation of the inverse Frobenius with the inclusion `O_F → F`. -/
+theorem frobeniusEquivF_symm_subtype (z : OF F) :
+    (_root_.frobeniusEquiv F p).symm ((z : OF F) : F)
+      = (((_root_.frobeniusEquiv (OF F) p).symm z : OF F) : F) := by
+  refine ((_root_.frobeniusEquiv F p).symm_apply_eq).mpr ?_
+  rw [_root_.frobeniusEquiv_apply, frobenius_def]
+  have h2 : ((((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) : F)
+      = ((z : OF F) : F) := by
+    have h4 : (((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) = z := by
+      rw [← frobenius_def, ← _root_.frobeniusEquiv_apply, RingEquiv.apply_symm_apply]
+    rw [h4]
+  rw [show ((((_root_.frobeniusEquiv (OF F) p).symm z : OF F) : F)) ^ p
+    = ((((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) : F) from rfl, h2]
+
+/-- Iterated commutation of the inverse Frobenius with the inclusion `O_F → F`. -/
+theorem frobeniusEquivF_symm_pow_subtype (z : OF F) (k : ℕ) :
+    ((_root_.frobeniusEquiv F p).symm ^ k : RingAut F) ((z : OF F) : F)
+      = ((((_root_.frobeniusEquiv (OF F) p).symm ^ k : RingAut (OF F)) z : OF F) : F) := by
+  induction k generalizing z with
+  | zero => simp
+  | succ m ih =>
+    rw [pow_succ, pow_succ, RingAut.mul_apply, RingAut.mul_apply,
+      frobeniusEquivF_symm_subtype p F z, ih]
+
+/-- Coordinate transport along the inclusion: coordinates of `W(O_F)`-elements viewed
+in `W(F)` are the coercions of their `O_F`-coordinates. -/
+theorem teichCoeffF_map (a : Ainf p F) (n : ℕ) :
+    teichCoeffF p F (WittVector.map ((powerBoundedSubring.toSubring F).subtype) a) n
+      = ((teichCoeff p F a n : OF F) : F) := by
+  rw [teichCoeffF, teichCoeff, WittVector.map_coeff]
+  exact frobeniusEquivF_symm_pow_subtype p F (a.coeff n) n
+
 end FarguesFontaine
 
 end
