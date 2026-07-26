@@ -1204,6 +1204,163 @@ theorem coeff_frozen {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [hdiff]
   exact hsmall
 
+/-- Coercion of a subring difference-of-product (stated in a small context so the
+elaborator does not re-derive it under large goals). -/
+theorem coe_sub_monomialMul {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (y g : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+    (m : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+    (hm : MvPowerSeries.IsRestricted m) :
+    ((y - (⟨m, hm⟩ : ↥(restrictedMvPowerSeriesSubring k
+        ↥(ArSub p F ϖ hρ0 hρ1))) * g : ↥(restrictedMvPowerSeriesSubring k
+        ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+      = (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        - m * (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := rfl
+
+set_option maxHeartbeats 2000000 in
+/-- **One Gröbner reduction** (Kedlaya Lemma 3.8, inner move at the ideal level):
+a nonzero ideal element can be moved by a generator multiple so that the norm does
+not grow, coefficients above the leading index move by at most `ε·|y|`, and the
+leading coefficient's degree strictly drops. -/
+theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNReal}
+    {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    (hGH : ∀ g ∈ G, g ∈ H)
+    (hG0 : ∀ g ∈ G, ((g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0))
+    (hGtail : ∀ g ∈ G, ∀ K : Fin k →₀ ℕ,
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+          (leadIdxRPS p F ϖ hρ0 hρ1
+            (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+        < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+      Valued.v ((MvPowerSeries.coeff K
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+    (hGdeg : ∀ g ∈ G, ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)
+        = dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1
+            (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))))
+    (hGdom : ∀ J : Fin k →₀ ℕ, dIdx p F ϖ hρ0 hρ1 H J ≠ ⊤ →
+      ∃ g ∈ G, leadIdxRPS p F ϖ hρ0 hρ1
+          (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ J
+        ∧ dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1
+            (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+          = dIdx p F ϖ hρ0 hρ1 H J)
+    {y : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    (hyH : y ∈ H)
+    (hy0 : ((y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0)) :
+    ∃ (y' : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+      (J : Fin k →₀ ℕ), y' ∈ H
+      ∧ leadIdxRPS p F ϖ hρ0 hρ1
+          (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = J
+      ∧ gaussNormRPS p F ϖ hρ0 hρ1
+          (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        ≤ gaussNormRPS p F ϖ hρ0 hρ1
+          (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+      ∧ (∀ K : Fin k →₀ ℕ,
+          (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
+            < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+          Valued.v (((MvPowerSeries.coeff K
+              (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+            - ((MvPowerSeries.coeff K
+              (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1))
+            ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1
+              (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+      ∧ (((MvPowerSeries.coeff J
+            (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) = 0
+        ∨ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
+              (y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+            < degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
+              (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) := by
+  classical
+  set J := leadIdxRPS p F ϖ hρ0 hρ1
+    (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) with hJdef
+  -- `d_J` is finite because `y` realizes it
+  have hyres : MvPowerSeries.IsRestricted
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := y.2
+  have hdJ : dIdx p F ϖ hρ0 hρ1 H J
+      ≤ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)) :=
+    dIdx_le_of_mem p F ϖ hyH hy0 rfl
+  have hdJtop : dIdx p F ϖ hρ0 hρ1 H J ≠ ⊤ :=
+    ne_top_of_le_ne_top (WithTop.natCast_ne_top _) hdJ
+  obtain ⟨g, hgG, hIJ, hdeq⟩ := hGdom J hdJtop
+  set I := leadIdxRPS p F ϖ hρ0 hρ1
+    (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) with hIdef
+  set c := leadCoeffRPS p F ϖ hρ0 hρ1
+    (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) with hcdef
+  have hgres : MvPowerSeries.IsRestricted
+      (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := g.2
+  have hg0 := hG0 g hgG
+  have hcnorm : Valued.v ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+      = gaussNormRPS p F ϖ hρ0 hρ1
+        (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
+    valued_leadCoeffRPS p F ϖ hgres hg0
+  have hc0 : ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) ≠ 0 := by
+    refine (Valuation.ne_zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mp ?_
+    rw [hcnorm]
+    exact gaussNormRPS_ne_zero p F ϖ hgres hg0
+  obtain ⟨z, hznorm, hzabove, hzsub, hzdeg⟩ :=
+    groebner_step p F ϖ hgres hyres (I := I) (J := J) (c := c) rfl hc0 hcnorm hIJ
+      (hGtail g hgG)
+  have hcoe := coe_sub_monomialMul p F ϖ y g (MvPowerSeries.monomial (J - I) z)
+    (isRestricted_monomial p F ϖ z)
+  refine ⟨y - ⟨MvPowerSeries.monomial (J - I) z,
+      isRestricted_monomial p F ϖ z⟩ * g, J,
+    Ideal.sub_mem H hyH (Ideal.mul_mem_left H _ (hGH g hgG)), rfl, ?_, ?_, ?_⟩
+  · rw [hcoe]
+    exact hzsub
+  · intro K hK
+    rw [hcoe]
+    have hdiff : ((MvPowerSeries.coeff K
+          ((y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            - (MvPowerSeries.monomial (J - I) z)
+              * (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        - ((MvPowerSeries.coeff K
+          (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        = -((MvPowerSeries.coeff K ((MvPowerSeries.monomial (J - I) z)
+              * (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
+      rw [coeff_sub_eq p F ϖ]
+      ring
+    rw [hdiff, Valuation.map_neg]
+    exact hzabove K hK
+  · rw [hcoe]
+    have hlc : leadCoeffRPS p F ϖ hρ0 hρ1
+        (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        = MvPowerSeries.coeff J (y : MvPowerSeries (Fin k)
+          ↥(ArSub p F ϖ hρ0 hρ1)) := by
+      rw [hJdef, leadCoeffRPS]
+    have hdegle : degAr p F ϖ hρ0 hρ1 ((c : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        ≤ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
+          (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
+      have h1 := hGdeg g hgG
+      rw [← hIdef, ← hcdef] at h1
+      rw [hlc] at hdJ
+      have h2 : ((degAr p F ϖ hρ0 hρ1 ((c : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1) : ℕ) : ℕ∞)
+          ≤ ((degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
+            (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ) : ℕ∞) := by
+        rw [h1, hdeq]
+        exact hdJ
+      exact_mod_cast h2
+    rcases hzdeg with h | h
+    · exact Or.inl h
+    · exact Or.inr (lt_of_lt_of_le h hdegle)
+
 end FarguesFontaine
 
 end
