@@ -165,3 +165,15 @@ Ticket statements + full sketches are on the board (tickets.md, T901–T912).
 - The B3-bar (published-theorem scale) does not apply: the user explicitly directed the
   campaign at this paper ("the reference is kedlayas paper: Noetherian properties of
   Fargues-Fontaine curves which is what we need to prove").
+
+## AD-3 refinement (2026-07-26, implementation): the fraction-field ambient
+
+mathlib's `Valued`-completion machinery (`Valuation.Completion`, `valuedCompletion_apply`)
+is FIELD-only (ValuedField.lean §166). Since `Ainf` is a domain and `gaussValue` is
+positive off zero (T803 layer), the family extends to `K := FractionRing (Ainf)` via
+`extendToLocalization` at `nonZeroDivisors`. REFINED ARCHITECTURE: one ambient completed
+field `hatK ρ := (wK ρ).Completion` per weight; `Ar ρ` := topological closure of the
+image subring of `Aloc` in `hatK ρ` (closed subring of a complete Hausdorff group =
+complete ✓); `Br ρ` := closure of the `Bloc`-image (or `Ar[1/p]` — equality proved
+later). Coordinates extend from `Ainf`-density by the T902 moduli. This matches
+Kedlaya's own "A^r maps into W(L)_E" ambient-embedding style (Def 2.4).

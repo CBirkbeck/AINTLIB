@@ -654,7 +654,8 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   `extendToLocalization_mk'`. Source: Kedlaya Def 2.2 (ln 85–95) + AD-1/AD-2.
 
 ### [T902] W(F) engines + the Hölder coordinate-continuity lemma
-- **Status**: in_progress (beastmode 2026-07-26). DONE so far in WittF.lean (all axiom-clean):
+- **Status**: done-as-scoped (beastmode 2026-07-26; b1/b1'/b2/b3 all in WittF.lean,
+  axiom-clean; b4 + engine ports (a) explicitly moved into T903). DONE so far in WittF.lean (all axiom-clean):
   (b1) `exists_teichmuller_sub_coeff_eq` — diagonal divisibility via W(O_F[T])-naturality
   (evalRingHom x/y through map_coeff + map_teichmuller + Polynomial.dvd_iff_isRoot);
   (b1') `valuation_teichCoeff_teichmuller_sub_pow_le` — the pow-form twist bound
