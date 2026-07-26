@@ -554,4 +554,23 @@ theorem galoisProjPointEquiv_toProjectiveSmoothPoint {L : Type v} [Field L] [Dec
     refine congrArg HasseWeil.Curves.ProjectiveSmoothPoint.affine ?_
     exact HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.ext rfl rfl
 
+/-- **(M1b-3b-viii, step b)** The `κ`-divisor transports: relabelling `κ(P)` by `σ` gives
+`κ(σ·P)`. -/
+theorem equivMapDomain_kappaDivisor {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (P : (W.baseChange L).toAffine.Point) :
+    Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        (HasseWeil.Curves.kappaDivisor (W.baseChange L).toAffine P) =
+      HasseWeil.Curves.kappaDivisor (W.baseChange L).toAffine
+        (WeierstrassCurve.Affine.Point.map (W' := W) (F := L) (K := L)
+          (σ.toAlgHom : L →ₐ[k] L) P) := by
+  classical
+  show Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+      (Finsupp.single (WeierstrassCurve.Affine.Point.toProjectiveSmoothPoint P) 1 -
+        Finsupp.single HasseWeil.Curves.ProjectiveSmoothPoint.infinity 1) = _
+  rw [Finsupp.equivMapDomain_eq_mapDomain, Finsupp.mapDomain_sub,
+    Finsupp.mapDomain_single, Finsupp.mapDomain_single,
+    galoisProjPointEquiv_toProjectiveSmoothPoint W σ P]
+  rfl
+
 end ModularCurves
