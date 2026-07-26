@@ -895,6 +895,14 @@ non-Tate bases are supported.
   `Bloc ∩ {wI ≤ 1} ⊆ locSubring-image` (Kedlaya's plus-ring arithmetic on the
   dense layer — spawn as ID2b-ii when reached; the Teichmüller-prefix machinery
   from T911 is the expected tool).
+- **ID2b progress (2026-07-26)**: forward half's core DONE in ChartData.lean —
+  chartFracPi/chartFracP with wI-bounds, blocUnitBall, the transport lemmas
+  (blocEquivAwayChartS_algebraMap, blocEquiv_divByS_teichPi/_p),
+  map_locSubring_chartData (the locSubring image IS the chart closure), and
+  map_locSubring_le_blocUnitBall. REMAINING for ID2b: (i) J^n-image-balls inside
+  wI-balls (locIdeal generators have wI < 1 — cofinality estimate), (ii) the hard
+  ⊇-half (wI-balls inside J^n-images: exists_eq_p_pow_mul + the dense-layer
+  plus-ring inclusion ID2b-ii), (iii) package as topology/uniformity equality.
 - **ID2b** ★ THE TOPOLOGY COMPARISON: under ID2a the `chartData`-canonical topology
   (locSubring-adic, `RationalLocData.uniformSpace`) on `Bloc` equals the
   `wI`-topology for `I_U`. Two inclusions: `I_D^n`-balls inside `wI`-balls (each
