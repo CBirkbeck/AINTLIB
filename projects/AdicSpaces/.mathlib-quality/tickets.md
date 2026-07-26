@@ -28,7 +28,47 @@ quotes, discharge plans, and attack logs. Sources local under `refs/AdicSpaces/`
 | T907 | **Lemma 3.9** and **Theorem 3.2** — `A^r` is strongly noetherian | done |
 | T908 | `B^I` (Def 4.2): construction, norm, completeness, series, density, injectivity, **Lemma 4.4 (three circles)**, **Cor 4.5**, `B^{I,+}` | (a)+(b) done, (c) open |
 | T909 | restriction maps: `resI`, `tendsto_resI`, extension property, additivity, multiplicativity, target membership, the bundled **`resIHom : B^I →+* B^{I'}`** | map done; Cor 4.6 injectivity open |
-| T910–T912 | Lemma 4.9 presentations; Theorem 4.10 | open |
+| T910–T912 | Lemma 4.9 presentations; Theorem 4.10 | open — route fixed 2026-07-26 from the arXiv source (see AD-9) |
+
+**T908 closed 2026-07-26**: `B^I` is a **Tate ring**. `BIPlusIn` (= `B^{I,+}` as a subring
+of `B^I`) is open; `pIdeal = (p)` is f.g.; `mem_pIdeal_pow_iff` shows `y ∈ (p)ⁿ ⇔ v(y₁) ≤
+ρ₁ⁿ ∧ v(y₂) ≤ ρ₂ⁿ`, so `isAdic_pIdeal` identifies the subspace topology on `B^{I,+}` with
+the `p`-adic one; hence `BIPairOfDefinition`, `isHuberRing_BISub`, `isTateRing_BISub`.
+
+#### AD-9 (2026-07-26) — **special intervals suffice; no general-radius Gröbner theory needed**
+
+Read from the arXiv source (`refs/paper.tex`, Kedlaya §4 = "Some additional rings"):
+Lemma `L:Robba localizations` (the board's "4.9") has three cases; the third is
+
+    A^r_{L,E}{T}/(pT - [z̄ⁿ]) ≅ B^{I'''},   I''' = [-n⁻¹ log_c p, r],  c = |z̄| ∈ (0,1),
+
+and its Tate algebra is at **radius 1** — exactly what our Theorem 3.2
+(`isStronglyNoetherian_ArSub`) provides. Kedlaya's remark after `T:strongly noetherian
+Robba2` warns that *general* radii ρ over `A^r` are needed to reach an **arbitrary**
+interval (cases 1–2 cut the interval down and use `B^I{T/ρ}`). We avoid that entirely:
+the left endpoints reachable by case 3 are `t₀ = τ/(n·m)` (taking `z̄ = w^m`), which are
+**dense** in `(0,∞)`, and the fundamental domain `[t, p·t]` of the Frobenius may be split
+at any interior point. So the curve's two charts can be chosen with **both** endpoints of
+the special form, and every chart ring is a case-3 quotient of a radius-1 Tate algebra
+over some `A^r`. Consequence: **no re-parametrisation of the §3 Gröbner development by a
+radius is required** — Groebner.lean stands as proven.
+
+- **T910** — the case-3 map: `A^r{T} → B^I`, `T ↦ [z̄ⁿ]/p`. Needs (a) the restriction
+  `A^{ρ₂} → hatK ρ₁` for `ρ₁ ≤ ρ₂` and hence the ring map `A^{ρ₂} → B^I`, (b) `λ_I([z̄ⁿ]/p)
+  ≤ 1` ⇔ the left-endpoint condition `ρᵢ ≥ |z̄|ⁿ`, (c) evaluation of restricted series at a
+  power-bounded element of the complete ring `B^I`.
+- **T911** — surjectivity + strictness of that map (Kedlaya's explicit lift: for `x =
+  pⁿ[x̄ₙ]` take `j` minimal with `c^{-j}|x̄ₙ| ≥ 1` and `z = pⁿ[x̄ₙ z̄^{-j}]T^j`, giving
+  `|z|_1 ≤ λ_I(x)`), then the same with `k` extra radius-1 variables.
+- **T912** — `IsStronglyNoetherian ↥(BISub …)`: quotient of the noetherian
+  `A^r{T, T₁,…,T_k}` (T911 + Theorem 3.2).
+
+**Cor 4.6 (`resIHom` injectivity, T909)** — source proof re-read: vanishing of `λ_{t₀}(x)`
+at one `t₀ ∈ I` forces `λ_t(x) = 0` for every `t` strictly between `t₀` and any other point
+of `I` (three circles with the *weight on `t₀`*: `λ_t ≤ λ_{t₀}^c λ_{t''}^{1-c}`), and the
+endpoints then follow *by continuity of `t ↦ λ_t(x)`*. So the missing ingredient is exactly
+that continuity — a sub-development (uniform approximation by `Bloc`-elements), not a gap
+in the plan.
 
 Two external consults are archived alongside this board:
 `chatgpt-reply-decay-closure-2026-07-26.md` (the moving-prefix estimate that unlocked
