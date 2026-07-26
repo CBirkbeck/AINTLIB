@@ -552,6 +552,111 @@ theorem sectionPoleSheafPower_six_exists_projModelMap_on_Y_basicOpen_of_CartierG
   · exact projModelFromBasicOpen_preimage_basicOpen
       U.1.toScheme W f P hP 1
 
+/-- The homogeneous Cartier coordinates define one morphism from the entire
+Cartier chart to the projective Weierstrass model. -/
+theorem sectionPoleSheafPower_six_exists_projModelMap_on_CartierChart_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hH1 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    (hH2 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 2).sheaf 1))
+    (hH3 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 3).sheaf 1))
+    (hH4 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 4).sheaf 1))
+    (hH5 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 5).sheaf 1))
+    (b1 : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 1)))
+    (hb1 : b1 0 = sectionPoleSheafPowerOneSection π z hz)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1) :
+    ∃ a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)),
+      let hr : r ∈ z.ker.ideal U :=
+        hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+      let X := localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz 2) U
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd 2) x
+      let Y := localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz 3) U
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd 3) y
+      let A : Γ(S, (⊤ : S.Opens)) →+* Γ(C, U.1) :=
+        (C.presheaf.map (homOfLE le_top).op).hom.comp π.appTop.hom
+      let W : WeierstrassCurve Γ(S, (⊤ : S.Opens)) := ⟨a₁, a₂, a₃, a₄, a₆⟩
+      let τ : Γ(C, U.1) →+*
+          Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+        U.1.topIso.inv.hom
+      let f := τ.comp A
+      let P : Fin 3 → Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+        τ ∘ ![X * r, Y, r ^ 3]
+      ∃ hP : (W.map f).toProjective.Equation P,
+        ∃ hcop : IsCoprime (P 1) (P 2),
+          projModelFromOfGlobalSectionsOfIsCoprime W f P hP 1 2 hcop ≫
+              projModelπ W =
+            U.1.toScheme.toSpecΓ ≫ Spec.map (CommRingCat.ofHom f) ∧
+          projModelFromOfGlobalSectionsOfIsCoprime W f P hP 1 2 hcop ⁻¹ᵁ
+              Proj.basicOpen (quotientGrading (projIdeal W))
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)) =
+            U.1.toScheme.basicOpen (P 1) ∧
+          projModelFromOfGlobalSectionsOfIsCoprime W f P hP 1 2 hcop ⁻¹ᵁ
+              Proj.basicOpen (quotientGrading (projIdeal W))
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) =
+            U.1.toScheme.basicOpen (P 2) := by
+  obtain ⟨a₁, a₂, a₃, a₄, a₆, hPU⟩ :=
+    sectionPoleSheafPower_six_local_homogeneous_weierstrass_equation_of_CartierGenerator
+      hsm z hz U hU r hspan hnzd hH1 hH2 hH3 hH4 hH5 b1 hb1 x hx y hy
+  refine ⟨a₁, a₂, a₃, a₄, a₆, ?_⟩
+  dsimp only
+  let A : Γ(S, (⊤ : S.Opens)) →+* Γ(C, U.1) :=
+    (C.presheaf.map (homOfLE le_top).op).hom.comp π.appTop.hom
+  let W : WeierstrassCurve Γ(S, (⊤ : S.Opens)) := ⟨a₁, a₂, a₃, a₄, a₆⟩
+  let τ : Γ(C, U.1) →+* Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+    U.1.topIso.inv.hom
+  let f := τ.comp A
+  let P : Fin 3 → Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+    τ ∘ ![
+      localTrivializationCoefficient
+          (sectionPoleSheafPower π z hz 2) U
+          (sectionPoleSheafPowerTrivializationOfCartierGenerator
+            z hz U r
+              (hspan ▸ Ideal.subset_span (Set.mem_singleton r))
+              hspan hnzd 2) x * r,
+      localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz 3) U
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r
+            (hspan ▸ Ideal.subset_span (Set.mem_singleton r))
+            hspan hnzd 3) y,
+      r ^ 3]
+  have hP : (W.map f).toProjective.Equation P := by
+    simpa only [W, f, P, WeierstrassCurve.map_map] using hPU.map τ
+  have hcopU :=
+    sectionPoleSheafPower_succ_isCoprime_coefficient_generator_pow
+      hsm z hz U hU r hspan hnzd 2 3 y hy
+  have hcop : IsCoprime (P 1) (P 2) := by
+    simpa only [P, Function.comp_apply,
+      WeierstrassCurve.Projective.fin3_def_ext] using hcopU.map τ
+  refine ⟨hP, hcop, ?_, ?_, ?_⟩
+  · exact projModelFromOfGlobalSectionsOfIsCoprime_projModelπ
+      W f P hP 1 2 hcop
+  · exact projModelFromOfGlobalSectionsOfIsCoprime_preimage_basicOpen
+      W f P hP 1 2 hcop 1
+  · exact projModelFromOfGlobalSectionsOfIsCoprime_preimage_basicOpen
+      W f P hP 1 2 hcop 2
+
 end
 
 end ModularCurves
