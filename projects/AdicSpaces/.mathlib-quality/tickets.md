@@ -881,6 +881,20 @@ non-Tate bases are supported.
   Frobenius translate of U₀; decide at ID2e).
 - **ID2a** DONE (2026-07-26: isLocalization_chartS_Bloc + blocEquivAwayChartS in ChartData.lean) — same localization (both
   invert the p·[ϖ]-saturation); IsLocalization.ringEquivOfRingEquiv transport.
+- **ID2b routing (2026-07-26)**: the repo's Wedhorn-6.38 comparison
+  (`presheafValueCanonicalQuotientEquiv_faithful : presheafValue D ≃+* A⟨X⟩/(1−sX)`)
+  requires `[IsStronglyNoetherian A]` on the BASE — unavailable over `A_inf`
+  (Kedlaya deliberately avoids it). So ID2b must be proven ball-by-ball. The
+  ⊆-half (`J^n`-balls inside `wI`-balls) is elementary: the locSubring-image lies
+  in the unit ball ({wI ≤ 1} is a subring; generators: A_inf-images have wI ≤ 1,
+  the fractions [ϖ]/p and p^a/[ϖ]^b have wI ≤ 1 exactly by the interval-endpoint
+  arithmetic ρ₁ = |ϖ|, ρ₂ = |ϖ|^{b/a}), and the locIdeal generators have wI < 1.
+  The ⊇-half (wI-balls inside `J^n`-image-balls) is the hard half — needs the
+  factorization `wI z ≤ min(ρ₁,ρ₂)^n → z = pⁿ·(unit ball)` (`exists_eq_p_pow_mul`,
+  IntervalRing, proven) PLUS the dense-layer plus-ring inclusion
+  `Bloc ∩ {wI ≤ 1} ⊆ locSubring-image` (Kedlaya's plus-ring arithmetic on the
+  dense layer — spawn as ID2b-ii when reached; the Teichmüller-prefix machinery
+  from T911 is the expected tool).
 - **ID2b** ★ THE TOPOLOGY COMPARISON: under ID2a the `chartData`-canonical topology
   (locSubring-adic, `RationalLocData.uniformSpace`) on `Bloc` equals the
   `wI`-topology for `I_U`. Two inclusions: `I_D^n`-balls inside `wI`-balls (each
