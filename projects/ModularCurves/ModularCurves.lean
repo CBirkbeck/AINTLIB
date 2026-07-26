@@ -27,6 +27,7 @@ import ModularCurves.EllipticCurve.ModelGroupUniq
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.NegModelBaseChange
 import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.SectionRigidity
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.MulByHomFlatFibre
@@ -85,9 +86,11 @@ import ModularCurves.Moduli.Representability
 import ModularCurves.ForMathlib.QuotientTorsor
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.Moduli.Stack
+import ModularCurves.Picard.DivisorClass
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
+import ModularCurves.Picard.SelfAdjointN
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.WeilPairing.FibrePointDict
 import ModularCurves.WeilPairing.GaloisFieldPairing

@@ -1,14 +1,16 @@
-FOCUS: Gap A. UPSTREAM BLOCKER CLEARED — sectionToPicRel / picClass / kappa_zero are now
-AXIOM-CLEAN (propext/choice/Quot.sound only). Two fixes:
- (1) officialAux_exists_finite_chart PROVED (fibrewise finiteness + basic-open chart).
- (2) picClass now TAKES the IsOfficialCartier proof instead of deriving it from hsm, and
-     sectionToPicRel feeds it the axiom-clean sectionDivisor_isOfficial. The general
-     isOfficial (finite-flat => Cartier) still carries sliceAux_exists_noetherianStage,
-     but it is NO LONGER on the Gap A critical path.
-REMAINING Gap A leaves, both in Picard/SelfAdjointN.lean:
- (i) kappa_add                  -- relative Abel / divisor-additivity
- (ii) picMap_mulByHom_kappa_pow -- relative theorem of the square
-WORKING (i) NEXT. Field template: HasseWeil.Pic0.TheoremOfSquareDivisorForm
-.kappaDivisor_add_linEquiv (any characteristic). Look FIRST for existing relative machinery:
-grep for translation/mulByHom pullback of sectionDivisor, and for PoleSheaf.lean which already
-uses sectionDivisor_isOfficial and may carry O(D) comparison lemmas.
+FOCUS: Gap A. DONE this session: (a) officialAux_exists_finite_chart PROVED; (b) picClass
+rerouted -> sectionToPicRel/kappa_zero AXIOM-CLEAN; (c) SectionRigidity.lean PROVED
+(sectionRigidity / eq_one_of_pullback_eq_one / unitsEquiv) = the UNIQUENESS half of the
+rigidification.
+ARCHITECTURE for the two remaining leaves (both reduce to one workhorse):
+  (DESCENT) L in Pic(E_T) with 0^*L = O_T and L trivial Zariski-LOCALLY ON T  =>  L = O.
+  Proof: trivialize on a cover T_i, normalize each trivialization along the zero section
+  (unique by eq_one_of_pullback_eq_one, JUST PROVED); normalized trivializations agree on
+  overlaps, hence glue. Needs: gluing of isomorphisms of sheaves of modules.
+With (DESCENT), leaf (i) kappa_add and leaf (ii) picMap_mulByHom_kappa_pow become LOCAL on T,
+where the explicit Weierstrass line function gives the divisor identity
+(Q)+(Q')-(Q+Q')-(0) = div(line/vertical)  [field template: HasseWeil.Pic0
+.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv].
+NEXT CANDIDATE (check if on the critical path first): the 2 sorries in
+Picard/IdealModulePullback.lean (comap_ideal_eq_span_appLE, sheafificationW_idealPullHom) —
+flat pullback of an effective Cartier divisor, needed for [N]^* of a divisor class.
