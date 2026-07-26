@@ -1,17 +1,5 @@
-FOCUS: DS4 M1b-3b — Galois transport chain (WeilPairing/GaloisFunctionField.lean), all landed pieces sorry-free + pushed:
-  galoisCoordRingEquiv, galoisFunctionFieldEquiv, map_maximalIdealAt_galoisCoordRingEquiv,
-  pointOnMappedGal, pointValuation_galoisFunctionFieldEquiv, galoisSmoothPoint(+_injective),
-  ord_P_galoisFunctionFieldEquiv, divisorOf_galoisFunctionFieldEquiv_apply.
-NEXT BRICK (3b-v-a): the infinity-order transport ordAtInfty (sigma.g) = ordAtInfty g.
-  IMPORTANT finding: the degree-zero shortcut is NOT available — HasseWeil has only
-  projectiveDivisorOf_degree (a split, deg = deg_affine + ord_infty), NOT deg = 0 for principal
-  divisors (its docstring says closure needs an extra identity). So port HasseWeil
-  ordAtInfty_ffFrobEquivRaw (FrobeniusDivisorGalois:216, ~60 lines: IsFractionRing.div_surjective,
-  ordAtInfty_div_eq_mul_inv, ordAtInfty_inv, ringEquivOfRingEquiv_algebraMap, then a
-  coordinate-ring degree comparison) + ordAtInfty_ringEquivCast (DivisorGalois, already general).
-THEN 3b-v-b: projectiveDivisorOf transport (affine part = divisorOf_galoisFunctionFieldEquiv_apply,
-  infinity part = 3b-v-a) => div(Phi_sigma g_T) = div(g_{sigma T}) using that sigma permutes the
-  N-torsion and commutes with pullbackDiv.
-THEN 3b-vi: e(sigma S, sigma T) = sigma(e(S,T)) via Constancy.pairing_const_of_transport + uniqueness.
-THEN M1c: exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent:440) — note torsionAlgebraPointsEquiv
-  is only Nonempty-valued, so its Galois equivariance must be exposed there too.
+FOCUS: DS4 M1b-3b-v-a (ord-at-infinity transport) — DONE for integral elements: ordAtInfty_algebraMap_galoisCoordRingEquiv (plus galoisCoordRingEquiv_smul_basis, norm_galoisCoordRingEquiv).
+NEXT: (1) ordAtInfty_ffGalEquivRaw — extend to the fraction field by the div-surjective argument (port FrobeniusDivisorGalois:216: IsFractionRing.div_surjective, ordAtInfty_div_eq_mul_inv, ordAtInfty_inv, IsFractionRing.ringEquivOfRingEquiv_algebraMap, then ordAtInfty_algebraMap_galoisCoordRingEquiv twice);
+(2) ordAtInfty_galoisFunctionFieldEquiv = (1) + ordAtInfty_ringEquivCast (DivisorGalois, general);
+(3) projectiveDivisorOf transport (affine: divisorOf_galoisFunctionFieldEquiv_apply; infinity: (2));
+(4) div(Phi_sigma g_T) = div(g_{sigma T}); (5) pairing equivariance; (6) M1c descent call.
