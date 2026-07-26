@@ -177,3 +177,46 @@ image subring of `Aloc` in `hatK ρ` (closed subring of a complete Hausdorff gro
 complete ✓); `Br ρ` := closure of the `Bloc`-image (or `Ar[1/p]` — equality proved
 later). Coordinates extend from `Ainf`-density by the T902 moduli. This matches
 Kedlaya's own "A^r maps into W(L)_E" ambient-embedding style (Def 2.4).
+
+## The T903-(D) crux (identified 2026-07-26 after a six-route exploration)
+
+Everything in step 5 reduces to ONE quantitative lemma; all soft routes provably
+circle back to it. Routes tried and their walls (recorded so nobody re-walks them):
+sup-metric-contractivity of Φ (FALSE: Teichmüller differences are Hölder, not
+Lipschitz); damped pointwise perturbation ρⁿ|Δdigitₙ| ≤ w(Δ) (FALSE: [1] vs [1+u]
+at n=1 gives ρ|u|^{1/2} ≫ |u|); attaining-index pigeonhole (indices unbounded: the
+p^m[ϖ^{-m/2}] demon); denominator-bounding on Cauchy sequences (same demon);
+tail-sup Lipschitzness via distance-to-prefix-subgroups (digit nonadditivity);
+Hölder-modulus tail-summation δ^{p^{-n}} (degrades to 1 in the deep tail).
+
+**The crux lemma (♣)** — weighted homogeneity of Witt-addition digits, value form:
+for a, b : W(F) and n : ℕ,
+  |digitₙ(a + b)| ≤ max_{j ≤ n} max( |digitⱼ(a)|^{p^{j−n}}·Bⁱˣ, |digitⱼ(b)|^{...} )
+in the precise shape to be extracted from the universal expansion
+`digitₙ(a+b) = Sₙ(a₀,…,aₙ,b₀,…,bₙ)` with Sₙ ∈ ℤ[Xⱼ,Yⱼ] **isobaric of weight pⁿ**
+(deg-weight p^j on Xⱼ, Yⱼ). Proof route WITHOUT computing Witt polynomials: the
+multi-variable version of the (b1)-naturality trick — work in
+`W(O_F[X₀,…,Xₙ,Y₀,…,Yₙ])`, get the digit as a polynomial, and obtain the isobaric
+weight bound from SCALING naturality: map along `Xⱼ ↦ t^{p^j}·Xⱼ, Yⱼ ↦ t^{p^j}Yⱼ`
+(a ring hom F[t]-base) and compare with the Teichmüller scaling
+`teichCoeffF_teichmuller_mul`: digits of `[t]·(a+b) = [t]a + [t]b` scale by t while
+the inputs scale by t^{p^j}-at-level-j… (work out: [t]·x has digits t·xⱼ ✓ HAVE; so
+Sₙ(t·a₀, …, t·aₙ, t·b₀…) = t·Sₙ(a…) — that gives ORDINARY degree-1 homogeneity in
+the DIGIT variables, i.e. Sₙ(ta,tb) = tSₙ(a,b) ✓ ALREADY KNOWN via scaling. The
+ISOBARIC grading needs the OTHER scaling: a ↦ φ-twist… use FROBENIUS naturality:
+digits of φ(x) are xⱼᵖ… compose: Sₙ(a₀ᵖ,…) = Sₙ(a,b)ᵖ-shape ⟹ weight-compatibility.
+Both scalings together pin the two-variable weighted bound.)
+**Consequences of (♣)**: decay-closure of the coordinate carrier under + (tail
+estimate: paths through j ≤ N contribute ≤ ρⁿ·(M·ρ^{-N})^{p^{j-n}} → ρⁿ·1 geometric
+for n ≥ 2N; paths j > N are ε-small), hence the decay carrier is a subring of W(F)
+(mult via scaling + existing machinery), Φ-image = ArSub, reconstruction, and the
+full realization — i.e. the ORIGINAL AD-3 concrete carrier is resurrected WITH proof.
+ALSO NOTE the cheap partial: ρ'-boundedness for any ρ' ∈ (ρ,1) implies ρ-decay
+(geometric domination), and ρ'-boundedness IS closed under + (have the ultrametric);
+this handles all "non-boundary" elements and may suffice for the FF charts if their
+rings are stable-under-shrinking-ρ (they are: intervals are closed in (0,1)) —
+CHECK whether Lane B can run entirely on the ρ'-uniform subring
+`⋂-over-interval-values` (= B^I-style two-radius boundedness!) — this may make (♣)
+UNNECESSARY for T904–T912: Kedlaya §2–§3 for A^r at radius ρ could be replaced by
+working with the pair (ρ, ρ') from the start, matching the B^I-two-norm structure
+that T908+ needs anyway. EVALUATE FIRST next session — it could save weeks.
