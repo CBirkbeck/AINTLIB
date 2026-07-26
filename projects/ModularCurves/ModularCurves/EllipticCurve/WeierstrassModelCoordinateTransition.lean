@@ -202,4 +202,103 @@ theorem projModelFromOfGlobalSections_eq_chart
           dsimp only [D, q]
           slice_lhs 4 5 => rw [Proj.basicOpenIsoSpec_inv_ι]
 
+/-- The projective morphism defined by a unit-coordinate triple commutes with
+precomposition on the source scheme. -/
+theorem projModelFromOfGlobalSections_naturality
+    {X Y : Scheme.{u}} (g : Y ⟶ X) (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens)))
+    (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P)
+    (i : Fin 3) (hi : IsUnit (P i)) :
+    let P' : Fin 3 → Γ(Y, (⊤ : Y.Opens)) := g.appTop.hom ∘ P
+    let hP' : (W.map (g.appTop.hom.comp f)).toProjective.Equation P' := by
+      simpa only [WeierstrassCurve.map_map] using hP.map g.appTop.hom
+    g ≫ projModelFromOfGlobalSections W f P hP i hi =
+      projModelFromOfGlobalSections W (g.appTop.hom.comp f)
+        P' hP' i (hi.map g.appTop.hom) := by
+  dsimp only
+  letI : Algebra R Γ(X, (⊤ : X.Opens)) := f.toAlgebra
+  let f' : R →+* Γ(Y, (⊤ : Y.Opens)) := g.appTop.hom.comp f
+  letI : Algebra R Γ(Y, (⊤ : Y.Opens)) := f'.toAlgebra
+  let ρ : Γ(X, (⊤ : X.Opens)) →ₐ[R] Γ(Y, (⊤ : Y.Opens)) :=
+    { __ := g.appTop.hom
+      commutes' := fun r => rfl }
+  have hf : algebraMap R Γ(X, (⊤ : X.Opens)) = f :=
+    RingHom.algebraMap_toAlgebra f
+  have hf' : algebraMap R Γ(Y, (⊤ : Y.Opens)) = f' :=
+    RingHom.algebraMap_toAlgebra f'
+  have hPsource :
+      (W.map (algebraMap R Γ(X, (⊤ : X.Opens)))).toProjective.Equation P := by
+    rwa [hf]
+  have hPtarget :
+      (W.map (algebraMap R Γ(Y, (⊤ : Y.Opens)))).toProjective.Equation
+        (g.appTop.hom ∘ P) := by
+    rw [hf']
+    simpa only [f', WeierstrassCurve.map_map] using hP.map g.appTop.hom
+  rw [show projModelFromOfGlobalSections W f P hP i hi =
+      projModelFromOfGlobalSections W
+        (algebraMap R Γ(X, (⊤ : X.Opens)))
+        P hPsource i hi by rfl]
+  rw [projModelFromOfGlobalSections_eq_chart W P hPsource i hi]
+  rw [show projModelFromOfGlobalSections W
+      (g.appTop.hom.comp f) (g.appTop.hom ∘ P)
+      (by
+        simpa only [WeierstrassCurve.map_map] using hP.map g.appTop.hom)
+      i (hi.map g.appTop.hom) =
+      projModelFromOfGlobalSections W
+        (algebraMap R Γ(Y, (⊤ : Y.Opens)))
+        (g.appTop.hom ∘ P) hPtarget i
+        (hi.map g.appTop.hom) by rfl]
+  rw [projModelFromOfGlobalSections_eq_chart W
+    (g.appTop.hom ∘ P) hPtarget i (hi.map g.appTop.hom)]
+  rw [Scheme.toSpecΓ_naturality_assoc]
+  slice_lhs 2 3 =>
+    rw [← Spec.map_comp]
+  have hmappedUnit :
+      (g.appTop.hom ∘ P) i * g.appTop.hom (↑hi.unit⁻¹) = 1 := by
+    change g.appTop.hom (P i) * g.appTop.hom (↑hi.unit⁻¹) = 1
+    rw [← map_mul, hi.mul_val_inv, map_one]
+  have hchart := chartAwayHomOfTriple_naturality W ρ i P
+    (↑hi.unit⁻¹) hi.mul_val_inv hPsource hmappedUnit hPtarget
+  have hcanonical :
+      chartAwayHomOfTriple W i (g.appTop.hom ∘ P)
+          (↑(hi.map g.appTop.hom).unit⁻¹)
+          (hi.map g.appTop.hom).mul_val_inv hPtarget =
+        chartAwayHomOfTriple W i (g.appTop.hom ∘ P)
+          (g.appTop.hom (↑hi.unit⁻¹)) hmappedUnit hPtarget :=
+    chartAwayHomOfTriple_congr_of_smul W i
+      (g.appTop.hom ∘ P) (g.appTop.hom ∘ P)
+      (g.appTop.hom (↑hi.unit⁻¹))
+      (↑(hi.map g.appTop.hom).unit⁻¹) 1
+      (fun m => (one_mul _).symm) hmappedUnit
+      (hi.map g.appTop.hom).mul_val_inv hPtarget hPtarget
+  have hchartRing :
+      g.appTop.hom.comp
+          (chartAwayHomOfTriple W i P
+            (↑hi.unit⁻¹) hi.mul_val_inv hPsource).toRingHom =
+        (chartAwayHomOfTriple W i (g.appTop.hom ∘ P)
+          (↑(hi.map g.appTop.hom).unit⁻¹)
+          (hi.map g.appTop.hom).mul_val_inv hPtarget).toRingHom := by
+    calc
+      _ = (ρ.comp (chartAwayHomOfTriple W i P
+          (↑hi.unit⁻¹) hi.mul_val_inv hPsource)).toRingHom := by
+        rfl
+      _ = (chartAwayHomOfTriple W i (fun m => ρ (P m))
+          (ρ (↑hi.unit⁻¹)) hmappedUnit hPtarget).toRingHom :=
+        congrArg AlgHom.toRingHom hchart.symm
+      _ = (chartAwayHomOfTriple W i (g.appTop.hom ∘ P)
+          (g.appTop.hom (↑hi.unit⁻¹)) hmappedUnit hPtarget).toRingHom := by
+        rfl
+      _ = _ := congrArg AlgHom.toRingHom hcanonical.symm
+  rw [show
+    CommRingCat.ofHom
+        (chartAwayHomOfTriple W i P
+          (↑hi.unit⁻¹) hi.mul_val_inv hPsource).toRingHom ≫ g.appTop =
+      CommRingCat.ofHom
+        (chartAwayHomOfTriple W i (g.appTop.hom ∘ P)
+          (↑(hi.map g.appTop.hom).unit⁻¹)
+          (hi.map g.appTop.hom).mul_val_inv hPtarget).toRingHom by
+      ext x
+      exact DFunLike.congr_fun hchartRing x]
+
 end ModularCurves
