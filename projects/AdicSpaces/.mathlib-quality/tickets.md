@@ -775,12 +775,29 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       Ainf-numerator + [ϖ]^{-k}-scaling — tails of prefixes are ρᴺ-small), hence its
       image is dense in ArSub; define `alocTeich : F → Aloc` (choice: Tate absorption
       → O_F-numerator/[ϖ]^k) with `alocToWittF (alocTeich c) = teichmuller p c` and
-      `wAloc (alocTeich c) = |c|`. (5b-ii) reconstruction against FINITE-sum
-      approximants t (no tails!): coords(t) → coordAr per-index; for N > deg t the
-      prefix issue vanishes; conclude v(x − image(Σ_{n<N} pⁿ·alocTeich(coordAr n))) → 0.
-      (5b-iii) THEN (≥): v x = v(prefix) eventually (isosceles, since
-      v(x − prefix) → 0 < v x) and v(prefix) ≤ max prefix-terms = max ρⁿ|coordAr n| ≤
-      sup ✓. Combined with Lemma A: the realization equality. THEN attainment
+      `wAloc (alocTeich c) = |c|`. (5b-ii/iii) ROUTE SUPERSEDED (2026-07-26 second revision): direct reconstruction
+      hits the coordinate-decay knot — Hölder moduli degrade in n, so no finite-δ
+      controls infinitely many coordinates, and digit-nonadditivity blocks transfer
+      through differences. THE C₀-ARCHITECTURE instead (classical, no perturbation
+      analysis): (A) SeqSpace := {b : ℕ → F // Tendsto (fun n => ρⁿ·|bₙ|) atTop (𝓝 0)};
+      (B) Φ b := limit in hatK of images of prefixes Σ_{n<N} pⁿ·alocTeich(bₙ)
+      (Cauchy: consecutive differences have value ρᴺ|b_N| → 0; Valued-completeness of
+      hatK); (C) ISOMETRY: Valued.v (Φ b) = ⨆ n, ρⁿ|bₙ| — prefix values are exact
+      finite maxima (wAloc of finite sums = max of terms: compute via
+      gaussValueF_alocToWittF + F-CORE-1 coords of finite sums + attained finite sup),
+      pass to the limit by isosceles; (D) Φ-image is complete (isometric image of the
+      complete SeqSpace — prove SeqSpace-Cauchy ⟹ coordinatewise-Cauchy + uniform
+      tail control, c₀-style) hence closed, contains the Aloc-image densely
+      (exists_finite_teichmuller_sum_close!) ⟹ image = ArSub; (E) uniqueness of the
+      preimage sequence + consistency with tendsto_teichCoeffAr gives teichCoeffAr-
+      decay, reconstruction, AND the realization equality (with Lemma A already green)
+      all at once. IMPLEMENT (B)+(C) for FIXED b first (no SeqSpace-topology needed:
+      state Φ as a def + its value; completeness of SeqSpace can be replaced by:
+      every ArSub-element is hit — prove surjectivity directly: given x, the
+      coordAr-sequence… NO that needs decay again. Honest order: SeqSpace-completeness
+      IS needed; alternatively dodge once more: ArSub ⊆ Φ-image ⟸ Φ-image closed ∧
+      ⊇ dense subset; closedness ⟸ completeness of SeqSpace + isometry. So: (A)(B)(C),
+      then SeqSpace-complete, then (D)(E).) THEN attainment
       (wAr x = sup ρⁿ|teichCoeffAr x n|, attained — via the eventual bounds +
       coordinate limits + gaussValueF_alocToWittF), then deg/deg_mul/Rem-2.7/summability,
       unlocking T904 (Euclidean division). Historical assembly notes:
