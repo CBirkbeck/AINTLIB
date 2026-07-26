@@ -1,5 +1,17 @@
-FOCUS: DS4 M1b-3b — porting the Galois transport chain to arbitrary base field/sigma in WeilPairing/GaloisFunctionField.lean.
-DONE (sorry-free, pushed): coordRingMap_surjective/bijective_of_ringEquiv, map_algEquiv_baseChange_eq, galoisCoordRingEquiv, galoisFunctionFieldEquiv, map_maximalIdealAt_galoisCoordRingEquiv (3b-i), pointOnMappedGal, pointValuation_galoisFunctionFieldEquiv (3b-ii).
-NEXT (3b-iii): ordAtInfty transport — port HasseWeil ordAtInfty_frobeniusFunctionFieldEquiv (FrobeniusDivisorGalois:260) which uses ordAtInfty_ringEquivCast (DivisorGalois, general) + ordAtInfty_ffFrobEquivRaw (needs the general-sigma analogue).
-THEN 3b-iv: ord_P transport; 3b-v: projectiveDivisorOf transport => div(Phi_sigma g_T) = div(g_{sigma T}); 3b-vi: pairing equivariance e(sigma S, sigma T) = sigma e(S,T) via Constancy.pairing_const_of_transport + uniqueness.
-THEN M1c: feed into exists_pairingAlgebraHom_of_galoisEquivariant.
+FOCUS: DS4 M1b-3b — Galois transport chain (WeilPairing/GaloisFunctionField.lean), all landed pieces sorry-free + pushed:
+  galoisCoordRingEquiv, galoisFunctionFieldEquiv, map_maximalIdealAt_galoisCoordRingEquiv,
+  pointOnMappedGal, pointValuation_galoisFunctionFieldEquiv, galoisSmoothPoint(+_injective),
+  ord_P_galoisFunctionFieldEquiv, divisorOf_galoisFunctionFieldEquiv_apply.
+NEXT BRICK (3b-v-a): the infinity-order transport ordAtInfty (sigma.g) = ordAtInfty g.
+  IMPORTANT finding: the degree-zero shortcut is NOT available — HasseWeil has only
+  projectiveDivisorOf_degree (a split, deg = deg_affine + ord_infty), NOT deg = 0 for principal
+  divisors (its docstring says closure needs an extra identity). So port HasseWeil
+  ordAtInfty_ffFrobEquivRaw (FrobeniusDivisorGalois:216, ~60 lines: IsFractionRing.div_surjective,
+  ordAtInfty_div_eq_mul_inv, ordAtInfty_inv, ringEquivOfRingEquiv_algebraMap, then a
+  coordinate-ring degree comparison) + ordAtInfty_ringEquivCast (DivisorGalois, already general).
+THEN 3b-v-b: projectiveDivisorOf transport (affine part = divisorOf_galoisFunctionFieldEquiv_apply,
+  infinity part = 3b-v-a) => div(Phi_sigma g_T) = div(g_{sigma T}) using that sigma permutes the
+  N-torsion and commutes with pullbackDiv.
+THEN 3b-vi: e(sigma S, sigma T) = sigma(e(S,T)) via Constancy.pairing_const_of_transport + uniqueness.
+THEN M1c: exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent:440) — note torsionAlgebraPointsEquiv
+  is only Nonempty-valued, so its Galois equivariance must be exposed there too.
