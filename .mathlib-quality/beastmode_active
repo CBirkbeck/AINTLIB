@@ -1,8 +1,10 @@
-FOCUS: DS4 M1b-3b-ix — the Weil-pairing Galois equivariance. ALL pieces except ONE are landed and axiom-clean in WeilPairing/GaloisFunctionField.lean:
-  * projectiveDivisorOf_galois_weilFunction : div(sigma.g_T) = div(g_{sigma T})  [gives the sigma-naturality input via Constancy.const_unit_of_projectiveDivisorOf_eq_zero applied to (sigma.g_T)/g_{sigma T}]
-  * weilPairing_galois_core_of_algEquiv : conj + naturality + constants law => e(S,T) is sigma0-equivariant
-  * galoisFunctionFieldEquiv and the whole transport chain.
-REMAINING TWO BRICKS:
-  (i) CONSTANTS LAW for galoisFunctionFieldEquiv: Phi_sigma (algebraMap a) = algebraMap (sigma a) — port HasseWeil frobeniusFunctionFieldEquiv_algebraMap (FrobeniusFunctionFieldEquiv.lean:257) = ffFrobEquivRaw_algebraMap (uses IsFractionRing.ringEquivOfRingEquiv_algebraMap + coordRingMap_algebraMap_base, both general) + ffFrobCast_algebraMap (RingEquiv.cast fixes constants).
-  (ii) CONJUGATION: Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma at g_T. Use the extensionality principle algHom_ext_x_y_gen (TranslationOrd.lean ~3261) — two alg homs agreeing on x_gen and y_gen are equal — with the computations translateAlgEquivOfPoint_*_x_gen/_y_gen (TranslationOrd 3613/3731/3773/3859) and Phi_sigma on x_gen/y_gen (Phi fixes the generators, acts by sigma on coefficients).
-THEN: assemble fieldWeilPairing_galois; THEN M1c (EtaleDescent:440 + torsionAlgebraPointsEquiv equivariance).
+FOCUS: DS4 M1b-3b-x — assemble the sigma-equivariance of the Weil pairing.
+LANDED and axiom-clean (WeilPairing/GaloisFunctionField.lean, sorry-free):
+  projectiveDivisorOf_galois_weilFunction (div(sigma.g_T) = div(g_{sigma T})),
+  weilPairing_galois_core_of_algEquiv (conj + naturality + constants law => equivariance),
+  galoisFunctionFieldEquiv_algebraMap (+ raw version) = the constants law.
+REMAINING for the assembly theorem weilPairing_galois_of_conj (attempted, reverted; file green):
+  (1) the sigma-naturality constant: need div(Phi g_T / g_{sigma T}) = 0. HasseWeil has projectiveDivisorOf_mul (ProjectiveDivisor.lean:285) and projectiveDivisorOf_inv (:305) but NO _div; the rewrite of div_eq_mul_inv failed because the curve is displayed in unfolded record form — introduce `set C := (<W-baseChange-L>.toAffine)`-style abbreviations or state a tiny local lemma projectiveDivisorOf_div first.
+  (2) The statement elaboration hit a whnf timeout at the theorem header (200000) — heartbeat bumps are FORBIDDEN, so split: state a local abbreviation for the curve/function field, and make the hypotheses smaller (e.g. take the conj hypothesis as a standalone Prop def).
+  (3) The remaining genuine leaf is the CONJUGATION Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma (use algHom_ext_x_y_gen + translateAlgEquivOfPoint_*_x_gen/_y_gen).
+THEN M1c (EtaleDescent:440 + torsionAlgebraPointsEquiv equivariance).
