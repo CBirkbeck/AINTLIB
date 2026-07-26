@@ -1137,6 +1137,39 @@ theorem cauchySeq_prefix_image {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b 
     rw [← Valuation.map_neg, neg_sub] at h
     exact h
 
+/-- **The c₀-parametrization** `Φ`: the limit in `hatK` of the prefix images of a
+decaying coefficient sequence. -/
+def PhiHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : ℕ → F) :
+    hatK p F hρ0 hρ1 :=
+  Filter.limUnder Filter.atTop
+    (fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N))
+
+/-- The prefix images converge to `Φ b`. -/
+theorem tendsto_PhiHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F}
+    (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
+      Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun N => AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N))
+      Filter.atTop (nhds (PhiHatK p F ϖ hρ0 hρ1 b)) := by
+  obtain ⟨y, hy⟩ := cauchySeq_tendsto_of_complete
+    (cauchySeq_prefix_image p F ϖ hρ0 hρ1 hb)
+  have heq : PhiHatK p F ϖ hρ0 hρ1 b = y := by
+    rw [PhiHatK]
+    exact hy.limUnder_eq
+  rw [heq]
+  exact hy
+
+/-- `Φ b` lies in `A^r`. -/
+theorem PhiHatK_mem_ArSub {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F}
+    (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
+      Filter.atTop (nhds 0)) :
+    PhiHatK p F ϖ hρ0 hρ1 b ∈ ArSub p F ϖ hρ0 hρ1 := by
+  have hmem : ∀ N, AlocToHatK p F ϖ hρ0 hρ1 (prefixAloc p F ϖ b N)
+      ∈ (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1)) := fun N =>
+    (AlocToHatK p F ϖ hρ0 hρ1).range.le_topologicalClosure ⟨prefixAloc p F ϖ b N, rfl⟩
+  exact (Subring.isClosed_topologicalClosure
+    (AlocToHatK p F ϖ hρ0 hρ1).range).mem_of_tendsto
+    (tendsto_PhiHatK p F ϖ hρ0 hρ1 hb) (Filter.Eventually.of_forall hmem)
+
 end FarguesFontaine
 
 end
