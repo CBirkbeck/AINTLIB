@@ -7,6 +7,7 @@ import ModularCurves.WeilPairing.FieldPairing
 import HasseWeil.HasseBound.WeilPairing.DivisorGalois
 import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
 import HasseWeil.HasseBound.WeilPairing.HfactLemma
+import HasseWeil.HasseBound.WeilPairing.Scaling.FrobeniusGalois
 
 /-!
 # The Galois action on the function field of a base-changed curve (DS4 M1b-3a)
@@ -753,5 +754,54 @@ theorem projectiveDivisorOf_galois_weilFunction {L : Type v} [Field L] [Decidabl
       (HasseWeil.WeilPairing.mulByInt_ker_finite (W.baseChange L) N hN),
     equivMapDomain_kappaDivisor W σ T]
   rfl
+
+/-- **(M1b-3b-ix, the general-automorphism core)** The `σ₀`-analogue of HasseWeil's
+`weilPairing_galois_core`: with the same three hypotheses but the constants law
+`Φ(algebraMap a) = algebraMap (σ₀ a)` for a field automorphism `σ₀` (instead of the
+`q`-power), the pairing is `σ₀`-equivariant.
+
+The proof is the same constant-ratio computation: apply `Φ` to `τ_S g_T = e(S,T)·g_T`,
+rewrite the left side by the conjugation and the right by the constants law, substitute
+`Φ g_T = c·g_{T'}`, and cancel the nonzero factor `c·g_{T'}`. -/
+theorem weilPairing_galois_core_of_algEquiv {F : Type v} [Field F] [DecidableEq F]
+    [IsAlgClosed F] (V : WeierstrassCurve F) [V.toAffine.IsElliptic]
+    [IsIntegrallyClosed (⟨V.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve F).CoordinateRing]
+    (N : ℤ) (hN : (N : F) ≠ 0) (σ₀ : F →+* F)
+    (Φ : (⟨V.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve F).FunctionField ≃+*
+      (⟨V.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve F).FunctionField)
+    (S T S' T' : V.toAffine.Point)
+    (hS : N • S = 0) (hT : N • T = 0) (hS' : N • S' = 0) (hT' : N • T' = 0)
+    (hconj : Φ (HasseWeil.translateAlgEquivOfPoint V S
+        (HasseWeil.WeilPairing.weilFunction V N hN T hT)) =
+      HasseWeil.translateAlgEquivOfPoint V S'
+        (Φ (HasseWeil.WeilPairing.weilFunction V N hN T hT)))
+    {c : F} (hc : c ≠ 0)
+    (hnat : Φ (HasseWeil.WeilPairing.weilFunction V N hN T hT) =
+      algebraMap F _ c * HasseWeil.WeilPairing.weilFunction V N hN T' hT')
+    (hconst : ∀ a : F, Φ (algebraMap F _ a) = algebraMap F _ (σ₀ a)) :
+    HasseWeil.WeilPairing.weilPairing V N hN S' T' hS' hT' =
+      σ₀ (HasseWeil.WeilPairing.weilPairing V N hN S T hS hT) := by
+  set e := HasseWeil.WeilPairing.weilPairing V N hN S T hS hT
+  set e' := HasseWeil.WeilPairing.weilPairing V N hN S' T' hS' hT'
+  set gT := HasseWeil.WeilPairing.weilFunction V N hN T hT
+  set gT' := HasseWeil.WeilPairing.weilFunction V N hN T' hT'
+  have hgT'_ne : gT' ≠ 0 := HasseWeil.WeilPairing.weilFunction_ne_zero V N hN T' hT'
+  have hc_ne : algebraMap F
+      (⟨V.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve F).FunctionField c ≠ 0 :=
+    (map_ne_zero_iff (algebraMap F
+      (⟨V.toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve F).FunctionField)
+      (algebraMap F _).injective).mpr hc
+  have hrel : Φ (HasseWeil.translateAlgEquivOfPoint V S gT) =
+      Φ (algebraMap F _ e * gT) := by
+    rw [HasseWeil.WeilPairing.weilPairing_translate V N hN S T hS hT]
+  rw [hconj] at hrel
+  rw [map_mul, hconst] at hrel
+  rw [hnat] at hrel
+  rw [map_mul, (HasseWeil.translateAlgEquivOfPoint V S').commutes,
+    HasseWeil.WeilPairing.weilPairing_translate V N hN S' T' hS' hT'] at hrel
+  have hcancel : algebraMap F _ e' * (algebraMap F _ c * gT') =
+      algebraMap F _ (σ₀ e) * (algebraMap F _ c * gT') := by
+    rw [← hrel]; ring
+  exact (algebraMap F _).injective (mul_right_cancel₀ (mul_ne_zero hc_ne hgT'_ne) hcancel)
 
 end ModularCurves
