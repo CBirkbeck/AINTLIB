@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FarguesFontaine.StronglyNoetherianB
+import «Adic spaces».FarguesFontaine.GaussPoint
 import «Adic spaces».WedhornCechAcyclicity
 
 /-!
@@ -274,6 +275,81 @@ theorem isSheafy_BISub (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
   letI : IsStronglyNoetherian ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
     isStronglyNoetherian_BISub p F ϖ h12 j n hbmem hb hexact
   exact ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
+
+
+/-! ### The AD-9 data is satisfiable
+
+For every `j, n` with `j·n ≥ 1` and every `ρ₂ ∈ [|ϖ|^{jn}, 1)`, taking
+`ρ₁ := |ϖ|^{jn}` satisfies all hypotheses of the case-3 presentation — so the
+sheafiness theorem applies to a nonempty (and, by AD-9, chart-covering) family
+of intervals. -/
+
+/-- `|ϖ|^{jn}` is a valid left endpoint. -/
+theorem rho1_AD9_pos (j n : ℕ) :
+    0 < perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) := by
+  refine pow_pos ?_ _
+  refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
+  exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+
+/-- `|ϖ|^{jn} < 1` whenever `j·n ≥ 1`. -/
+theorem rho1_AD9_lt_one (j n : ℕ) (hjn : 0 < j * n) :
+    perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) < 1 :=
+  pow_lt_one₀ zero_le (perfectoidValuation_toOF_lt_one p F ϖ) (Nat.pos_iff_ne_zero.mp hjn)
+
+/-- The valuation of the Tate-variable base: `|ϖʲ|ⁿ = |ϖ|^{jn}`. -/
+theorem perfectoidValuation_pow_toOF (j n : ℕ) :
+    perfectoidValuation p F (((PseudoUniformizer.toOF F ϖ) ^ j : OF F) : F) ^ n
+      = perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) := by
+  rw [show (((PseudoUniformizer.toOF F ϖ) ^ j : OF F) : F)
+      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j from by push_cast; rfl,
+    Valuation.map_pow, ← pow_mul]
+
+/-- **Power-boundedness of the Tate variable at the AD-9 left endpoint.** -/
+theorem hb_AD9 (j n : ℕ) {ρ₂ : NNReal} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (h12 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) ≤ ρ₂)
+    (hρ₁0 : 0 < perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n))
+    (hρ₁1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) < 1) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1 := by
+  refine wI_teichPowOverP_le_one p F ϖ h12 ?_
+  rw [perfectoidValuation_pow_toOF p F ϖ]
+
+/-- **The sheafiness theorem, instantiated**: for every `j·n ≥ 1` and
+`ρ₂ ∈ [|ϖ|^{jn}, 1)` the interval ring `B^{[|ϖ|^{jn}, ρ₂]}` is sheafy. The AD-9
+density argument makes such intervals cover both charts of the curve. -/
+theorem isSheafy_BISub_AD9 (j n : ℕ) (hjn : 0 < j * n) {ρ₂ : NNReal}
+    (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1)
+    (h12 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) ≤ ρ₂) :
+    letI : ValuationSpectrum.PlusSubring ↥(BISub p F ϖ (rho1_AD9_pos p F ϖ j n)
+        (rho1_AD9_lt_one p F ϖ j n hjn) hρ₂0 hρ₂1) :=
+      ⟨BIPlusIn p F ϖ (rho1_AD9_pos p F ϖ j n)
+        (rho1_AD9_lt_one p F ϖ j n hjn) hρ₂0 hρ₂1⟩
+    letI : @CompleteSpace ↥(BISub p F ϖ (rho1_AD9_pos p F ϖ j n)
+        (rho1_AD9_lt_one p F ϖ j n hjn) hρ₂0 hρ₂1)
+        (IsTopologicalAddGroup.rightUniformSpace
+          ↥(BISub p F ϖ (rho1_AD9_pos p F ϖ j n)
+            (rho1_AD9_lt_one p F ϖ j n hjn) hρ₂0 hρ₂1)) :=
+      completeSpace_right_BISub p F ϖ
+    letI : IsRingOfIntegralElements
+        (ValuationSpectrum.ringPlus ↥(BISub p F ϖ (rho1_AD9_pos p F ϖ j n)
+          (rho1_AD9_lt_one p F ϖ j n hjn) hρ₂0 hρ₂1)
+          : Subring ↥(BISub p F ϖ (rho1_AD9_pos p F ϖ j n)
+            (rho1_AD9_lt_one p F ϖ j n hjn) hρ₂0 hρ₂1)) :=
+      isRingOfIntegralElements_BIPlusIn p F ϖ
+    ValuationSpectrum.IsSheafy ↥(BISub p F ϖ (rho1_AD9_pos p F ϖ j n)
+      (rho1_AD9_lt_one p F ϖ j n hjn) hρ₂0 hρ₂1) :=
+  isSheafy_BISub p F ϖ h12 j n
+    (BIProd_mem_BISub p F ϖ _)
+    (hb_AD9 p F ϖ j n h12 (rho1_AD9_pos p F ϖ j n)
+      (rho1_AD9_lt_one p F ϖ j n hjn))
+    rfl
 
 end FarguesFontaine
 
