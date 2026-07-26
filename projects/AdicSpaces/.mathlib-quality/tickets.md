@@ -654,7 +654,18 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   `extendToLocalization_mk'`. Source: Kedlaya Def 2.2 (ln 85–95) + AD-1/AD-2.
 
 ### [T902] W(F) engines + the Hölder coordinate-continuity lemma
-- **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T901
+- **Status**: in_progress (beastmode 2026-07-26). DONE so far in WittF.lean (all axiom-clean):
+  (b1) `exists_teichmuller_sub_coeff_eq` — diagonal divisibility via W(O_F[T])-naturality
+  (evalRingHom x/y through map_coeff + map_teichmuller + Polynomial.dvd_iff_isRoot);
+  (b1') `valuation_teichCoeff_teichmuller_sub_pow_le` — the pow-form twist bound
+  v(teichCoeff([x]−[y]) k)^(p^k) ≤ v(x−y) (via frobeniusEquiv_symm_pow_pow_cancel,
+  now de-privatized in GaussNorm.lean);
+  (b2) `gaussValue_teichmuller_sub_le_of_le` — ε-δ continuity of a ↦ [a] with
+  δ = ε^(p^K), K from exists_pow_lt_of_lt_one; pow_le_pow_iff_left₀ for root-taking.
+  REMAINING: (b3) per-coordinate modulus on Ainf (head-split recursion:
+  digit-0 exact by constantCoeff-additivity, then w(x'−y') ≤ ρ⁻¹·max(w(a−b), w([a₀]−[b₀]))
+  with (b2) feeding the second term); (b4) clearing denominators to Aloc/Bloc;
+  (a) the W(F) engine ports (needed only from T903 on — may defer into T903) | **File**: FarguesFontaine/WittF.lean | **Depends**: T901
 - **REVISED per AD-3-revision**: two deliverables. (a) Port the GaussNorm engines
   (CORE-1/2, head split, scaling, pair bound via u-trick + `WittVector.map`-naturality
   from `W(O_F)`, level-rep) to `W(F)`-elements with attained-sup statements under

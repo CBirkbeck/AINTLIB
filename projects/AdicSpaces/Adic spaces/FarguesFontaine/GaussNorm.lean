@@ -226,7 +226,7 @@ theorem coe_p_ne_zero : (p : Ainf p F) ≠ 0 := by
   rw [h] at h1
   simp at h1
 
-private theorem frobeniusEquiv_symm_pow_pow_cancel (b : OF F) (j : ℕ) :
+theorem frobeniusEquiv_symm_pow_pow_cancel (b : OF F) (j : ℕ) :
     ((_root_.frobeniusEquiv (OF F) p).symm ^ j : RingAut (OF F)) (b ^ p ^ j) = b := by
   induction j with
   | zero => simp

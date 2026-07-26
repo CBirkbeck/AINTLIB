@@ -1,1 +1,1 @@
-FOCUS: T902 (W(F)-generalized Gauss engines) — PHASE 3: writing WittF.lean carrier + wCoeff basics
+FOCUS: T902(b1) — diagonal divisibility of Teichmuller-difference digits, via W(O_F[X,Y]) map-naturality; writing WittF.lean
