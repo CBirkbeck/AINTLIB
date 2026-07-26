@@ -413,4 +413,44 @@ theorem divisorOf_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq L
   conv_lhs => rw [← hP]
   rw [divisorOf_galoisFunctionFieldEquiv_apply W σ g]
 
+/-- **(M1b-3b-vii)** The `σ`-action on projective smooth points: `σ` on the affine part,
+fixing the point at infinity. -/
+noncomputable def galoisProjPointEquiv {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) :
+    HasseWeil.Curves.ProjectiveSmoothPoint
+        (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L) ≃
+      HasseWeil.Curves.ProjectiveSmoothPoint
+        (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L) where
+  toFun v := match v with
+    | .affine P => .affine (galoisSmoothPoint W σ P)
+    | .infinity => .infinity
+  invFun v := match v with
+    | .affine P => .affine (galoisSmoothPoint W σ.symm P)
+    | .infinity => .infinity
+  left_inv v := by
+    cases v with
+    | affine P =>
+      exact congrArg HasseWeil.Curves.ProjectiveSmoothPoint.affine
+        ((galoisSmoothPointEquiv W σ).left_inv P)
+    | infinity => rfl
+  right_inv v := by
+    cases v with
+    | affine P =>
+      exact congrArg HasseWeil.Curves.ProjectiveSmoothPoint.affine
+        ((galoisSmoothPointEquiv W σ).right_inv P)
+    | infinity => rfl
+
+@[simp] theorem galoisProjPointEquiv_affine {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    galoisProjPointEquiv W σ (HasseWeil.Curves.ProjectiveSmoothPoint.affine P) =
+      HasseWeil.Curves.ProjectiveSmoothPoint.affine (galoisSmoothPoint W σ P) := rfl
+
+@[simp] theorem galoisProjPointEquiv_infinity {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) :
+    galoisProjPointEquiv W σ
+        (HasseWeil.Curves.ProjectiveSmoothPoint.infinity
+          (C := (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L))) =
+      HasseWeil.Curves.ProjectiveSmoothPoint.infinity := rfl
+
 end ModularCurves
