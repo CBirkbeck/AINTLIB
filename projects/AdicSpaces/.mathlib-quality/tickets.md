@@ -653,35 +653,33 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
 - **Sketch**: pure API assembly; mathlib `extendToLocalization` verified present with
   `extendToLocalization_mk'`. Source: Kedlaya Def 2.2 (ln 85–95) + AD-1/AD-2.
 
-### [T902] W(F)-generalized Gauss engines (the GaussNorm port)
-- **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T901 (parallel OK)
-- **Statement**: for `x : WittVector p F` define `wCoeff ρ x n := ρⁿ·|θ^{-n}(xₙ)|` and,
-  on the decaying carrier, `wF ρ x := ⨆ n, wCoeff ρ x n`. Port from GaussNorm.lean:
-  expansion uniqueness (CORE-1/2), head split, Teichmüller scaling, the pair bound
-  (u-trick — needs only `v(b) ≤ v(a) ⟹ ∃u ∈ O_F, b = a·u`, valid for a,b ∈ F via
-  `Integers.exists_of_le_one`), n-ary (2.8.1): `w([z₁]±…±[zₙ] − [z₁±…±zₙ]) ≤
-  ε·max wᵢ` with `ε := max(ρ, sup-cross-terms)`... precise form: Kedlaya ln 148–151:
-  "λ_r(p) ≤ ε ensures λ_r([z₁]±···±[zₙ]−[z₁±···±zₙ]) ≤ ε·max{λ_r([zᵢ])}" — the
-  perturbation is p-divisible, so `w(p·junk) = ρ·w(junk) ≤ ρ·max` by level-rep: ε = ρ
-  works for the untwisted normalization. Level-rep + ultrametric + multiplicativity on
-  the carrier (statements now with attained maxima, no ≤1 hypotheses).
-- **Sketch**: mechanical port; every GaussNorm proof was factored through teichCoeff and
-  the list engines. The `≤ 1`-instances (`gaussTerm_le_one` etc.) become decay-attainment.
+### [T902] W(F) engines + the Hölder coordinate-continuity lemma
+- **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T901
+- **REVISED per AD-3-revision**: two deliverables. (a) Port the GaussNorm engines
+  (CORE-1/2, head split, scaling, pair bound via u-trick + `WittVector.map`-naturality
+  from `W(O_F)`, level-rep) to `W(F)`-elements with attained-sup statements under
+  explicit BddAbove hypotheses (no global ≤1). (b) **Coordinate continuity** (the
+  load-bearing new lemma, source Kedlaya 1004.0466 Thm 4.5): quantitative Hölder bound
+  on `Ainf` first — if `gaussValue ρ (a−b) ≤ ρⁿ·δ^{p^n}` with `δ ≤ 1` then
+  `|teichCoeff a n − teichCoeff b n| ≤ δ` (exact constant shape to be fixed against the
+  1004.0466 proof) — then the same on `Bloc` by clearing denominators.
+- **Sketch**: (b) from the level-rep of `a = b + (a−b)`: the level-n digit of the sum
+  differs from `bₙ` by fold-carries, each valuation-controlled by pair bounds; the p^n
+  root enters through `frobeniusEquiv_symm` twisting. Transcribe 1004.0466 Thm 4.5.
 
-### [T903] The ring Ar: carrier, closure, wAr, deg
+### [T903] Ar as Valued completion; realization; wAr; deg
 - **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
-- **Statement**: `Ar ρ : Subring (WittVector p F)` with carrier
-  `{x | Tendsto (wCoeff ρ x) atTop (𝓝 0)}` (closure under +,*,neg from T902 engines:
-  coordinates of sums/products bounded by max/product patterns); `wAr` multiplicative
-  on `Ar` (T902 mirror of T803); **attainment** `∃ n, wAr x = wCoeff ρ x n` for x ≠ 0;
-  `deg x := largest attaining n` (well-def: finitely many indices above any threshold);
-  `deg_mul : deg (xy) = deg x + deg y` (T803-MIRROR: largest attaining index of a
-  product; per AD-6 replaces Kedlaya's omitted convex-duality proof of Lemma 2.6);
-  `deg_eq_of_lt : wAr (x−y) < wAr x → deg x = deg y` (Rem 2.7, ln 137–139);
-  summability lemma: a series `Σ zₗ` with `wAr zₗ → 0` converges coefficientwise into
-  `Ar` (the convergence used by Prop 2.9/Lemma 3.9; concrete, no abstract completion).
-- **Source quotes**: Def 2.4 ln 100–106 ("x ∈ A^r iff p^{-n}|xₙ|^r → 0"); Def 2.5
-  ln 115–118 ("degree ... the largest n realizing λ_r(x) = max"); Lemma 2.6 ln 122–127.
+- **REVISED per AD-3-revision**: `Aloc := Localization.Away (teichPi p F ϖ)`; wAloc :=
+  extendToLocalization of gaussVal (mirror of T901 for the ϖ-only localization);
+  `Ar ρ := UniformSpace.Completion (WithVal (wAloc ρ))` with mathlib `Valued`-instance
+  and `Valued.extension`; **realization theorems**: extended coordinates
+  `teichCoeffAr : Ar → F` (n-indexed ℤ after p-clearing — for Ar the index is ℕ on the
+  Aloc-side times [ϖ]-denominators; precise indexing fixed in implementation) via T902(b)
+  + Completion.denseInducing; reconstruction + attainment `wAr x = max ρⁿ|xₙ|`;
+  `deg x := largest attaining index` for x ≠ 0; `deg_mul` (T803-mirror on the
+  realization), `deg_eq_of_lt` (Rem 2.7); summability of `Σ zₗ` with `wAr zₗ → 0`
+  (completion: Cauchy prefix sums — now FREE).
+- **Source quotes**: Def 2.4 ln 100–106; Def 2.5 ln 115–118; Rem 2.7 ln 137–139.
 
 ### [T904] Euclidean division on Ar; Ar is a PID
 - **Status**: open | **File**: FarguesFontaine/Euclidean.lean | **Depends**: T903

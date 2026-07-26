@@ -32,7 +32,31 @@ value; since `gaussVal` is multiplicative (T803) and nonvanishing on `p·[ϖ]`-p
 `extendToLocalization_mk'` gives `w(x/(p[ϖ])^k) = w(x)/(ρ|ϖ|)^k`. The family
 `{wLoc ρ : Valuation Bloc ℝ≥0, ρ ∈ (0,1)}` replaces Kedlaya's `{λ_t}`.
 
-**(AD-3) `A^r` is a CONCRETE subring of `W(F)`, not an abstract completion.** Kedlaya
+**(AD-3, REVISED 2026-07-26 after adversarial pre-implementation review) `A^r` is the
+`Valued`-completion of `Aloc`, with the series realization as THEOREMS.** The first
+version of AD-3 (concrete decay-carrier subring of `W(F)`) is REJECTED: ring-closure of
+the decay carrier under `+` is not elementarily provable by digit tracking (the
+level-rep digit bound is global, not tail-refined), and Kedlaya never proves it — his
+`A^r` is a completion BY DEFINITION, the series description being the observation that
+the completion embeds into `W(L)_E` coordinatewise (Def 2.4, ln 100–106). Accordingly:
+`Ar ρ := UniformSpace.Completion` of `Aloc := Localization.Away (teichPi)` under the
+`Valued`-structure of the extended `w_ρ` (same `WithVal`-pattern the repo already uses
+in SpaRationalOpenComparison). The two realization theorems replace the old carrier
+definition:
+  - **coordinate continuity (Hölder)**: coordinate functionals are uniformly continuous
+    on `w_ρ`-balls (values at level n are p^n-homogeneous: `|aₙ − bₙ| ≤
+    (ρ^{-n}·w(a−b))^{p^{-n}}`-shape); source: Kedlaya 1004.0466 Theorem 4.5 (transcribe
+    its proof); hence coordinates extend to `Ar` and limits of Cauchy sequences have
+    coordinates = limits of coordinates;
+  - **reconstruction**: prefix sums `Σ_{n<N} pⁿ[aₙ]` of any decaying coordinate family
+    are `w_ρ`-Cauchy and converge to the element with those coordinates; every `x ∈ Ar`
+    satisfies `x = lim prefix_N(x)` and `w_ρ(x) = sup ρⁿ|xₙ|` (attained).
+  All Euclidean/Gröbner coefficientwise surgery (Lemma 2.8's `z_l`, etc.) is performed
+  through these two theorems (build the surgery element from its coordinate data by
+  reconstruction).
+
+**(AD-3-old, kept for the engine port)** The GaussNorm engines still generalize from
+**(old text follows, superseded where in conflict)**  Kedlaya
 himself works with the series realization (Def 2.4, ln 100–106): "A^r_{L,E} maps into
 W(L)_E; more precisely, if we write an arbitrary element x ∈ W(L)_E as a p-adically
 convergent sum Σ ϖⁿ[xₙ], then x ∈ A^r iff p^{-n}|xₙ|^r → 0 as n → ∞. Moreover, the
