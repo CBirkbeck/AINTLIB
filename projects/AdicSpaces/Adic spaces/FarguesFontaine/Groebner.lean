@@ -1034,6 +1034,127 @@ theorem groebner_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNReal
     rw [hcJ]
     exact hzdeg
 
+/-- **The normalized strict tail bound**: past the leading index, coefficients are
+uniformly `ε`-small relative to the Gauss norm, for some `ε < 1`. -/
+theorem exists_normalized_tail_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hx : MvPowerSeries.IsRestricted x) (hx0 : x ≠ 0) :
+    ∃ ε : NNReal, ε < 1 ∧ ∀ K : Fin k →₀ ℕ,
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+          (leadIdxRPS p F ϖ hρ0 hρ1 x)
+        < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+      Valued.v ((MvPowerSeries.coeff K x : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 x := by
+  obtain ⟨ε₀, hlt, htail⟩ := exists_tail_bound_lt p F ϖ hx hx0
+  have hne : gaussNormRPS p F ϖ hρ0 hρ1 x ≠ 0 :=
+    gaussNormRPS_ne_zero p F ϖ hx hx0
+  refine ⟨ε₀ / gaussNormRPS p F ϖ hρ0 hρ1 x, ?_, fun K hK => ?_⟩
+  · rw [div_lt_one (pos_iff_ne_zero.mpr hne)]
+    exact hlt
+  · rw [div_mul_cancel₀ _ hne]
+    exact htail K hK
+
+set_option maxHeartbeats 2000000 in
+open scoped Classical in
+/-- **The Gröbner data package** (Kedlaya Definition 3.7 + the `ε` of Lemma 3.8):
+a finite set of ideal generators, each with its leading data, and one `ε < 1`
+bounding every generator's tail. -/
+theorem exists_groebner_family {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
+    ∃ (G : Finset ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+      (ε : NNReal), ε < 1
+      ∧ (∀ g ∈ G, g ∈ H)
+      ∧ (∀ g ∈ G, ((g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0))
+      ∧ (∀ g ∈ G, ∀ K : Fin k →₀ ℕ,
+          (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+              (leadIdxRPS p F ϖ hρ0 hρ1
+                (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+            < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+          Valued.v ((MvPowerSeries.coeff K
+              (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+            ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1
+              (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+      ∧ (∀ g ∈ G, ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+              (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)
+          = dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1
+              (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))))
+      ∧ (∀ J : Fin k →₀ ℕ, dIdx p F ϖ hρ0 hρ1 H J ≠ ⊤ →
+          ∃ g ∈ G, leadIdxRPS p F ϖ hρ0 hρ1
+              (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ J
+            ∧ dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1
+                (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+              = dIdx p F ϖ hρ0 hρ1 H J) := by
+  classical
+  set T : Finset (Fin k →₀ ℕ) := (groebnerSet_finite p F ϖ H).toFinset with hT
+  have hdIT : ∀ I ∈ T, dIdx p F ϖ hρ0 hρ1 H I ≠ ⊤ := by
+    intro I hI
+    rw [hT, Set.Finite.mem_toFinset] at hI
+    obtain ⟨q, hqmin, hqfst⟩ := hI
+    have hIe : dIdx p F ϖ hρ0 hρ1 H q.1 ≤ ((q.2 : ℕ) : ℕ∞) := hqmin.1
+    rw [← hqfst]
+    exact ne_top_of_le_ne_top (WithTop.natCast_ne_top q.2) hIe
+  have hex : ∀ I : {I : Fin k →₀ ℕ // I ∈ T},
+      ∃ (x : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+        (e : NNReal),
+        x ∈ H ∧ ((x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0)
+          ∧ leadIdxRPS p F ϖ hρ0 hρ1
+              (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = I.1
+          ∧ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+                (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+                : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)
+              = dIdx p F ϖ hρ0 hρ1 H I.1)
+          ∧ e < 1
+          ∧ (∀ K : Fin k →₀ ℕ,
+              (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn I.1
+                < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+              Valued.v ((MvPowerSeries.coeff K
+                  (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+                  : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+                ≤ e * gaussNormRPS p F ϖ hρ0 hρ1
+                  (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) := by
+    rintro ⟨I, hI⟩
+    obtain ⟨x, hxH, hx0, hlead, hdeg⟩ :=
+      exists_leadIdx_degAr_eq p F ϖ (hdIT I hI)
+    obtain ⟨e, helt, hetail⟩ := exists_normalized_tail_bound p F ϖ x.2 hx0
+    refine ⟨x, e, hxH, hx0, hlead, hdeg, helt, fun K hK => hetail K ?_⟩
+    rw [hlead]
+    exact hK
+  choose X E hXH hX0 hXlead hXdeg hElt hEtail using hex
+  refine ⟨T.attach.image X, T.attach.sup E, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  · refine (Finset.sup_lt_iff (by rw [bot_eq_zero]; exact zero_lt_one)).mpr ?_
+    intro I _
+    exact hElt I
+  · intro g hg
+    obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
+    exact hXH I
+  · intro g hg
+    obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
+    exact hX0 I
+  · intro g hg K hK
+    obtain ⟨I, hI, rfl⟩ := Finset.mem_image.mp hg
+    refine le_trans (hEtail I K ?_) ?_
+    · rw [← hXlead I]
+      exact hK
+    · exact mul_le_mul_of_nonneg_right (Finset.le_sup hI) zero_le
+  · intro g hg
+    obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
+    rw [hXlead I]
+    exact hXdeg I
+  · intro J hJ
+    obtain ⟨I, hImem, hIJ, hdeq⟩ := exists_mem_groebnerSet_le p F ϖ hJ
+    have hIT : I ∈ T := by
+      rw [hT, Set.Finite.mem_toFinset]
+      exact hImem
+    refine ⟨X ⟨I, hIT⟩, Finset.mem_image.mpr ⟨⟨I, hIT⟩, Finset.mem_attach _ _, rfl⟩,
+      ?_, ?_⟩
+    · rw [hXlead ⟨I, hIT⟩]
+      exact hIJ
+    · rw [hXlead ⟨I, hIT⟩]
+      exact hdeq
+
 end FarguesFontaine
 
 end
