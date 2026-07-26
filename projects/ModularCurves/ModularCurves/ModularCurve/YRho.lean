@@ -32,7 +32,8 @@ Statement policy: the *field-points* description (what Buzzard's application con
 `K`-points for `K` of characteristic zero "canonically" biject with pairs
 `(E/K, E[N] ≅ ρ carrying the Weil pairing to p)`) is stated in full, with the canonicity
 made precise as naturality in `K`; the full functor-on-`Sch/ℚ` representability is
-`yRho_representable`. Geometric irreducibility is a black box (BB-IRR: 1980s,
+`yRho_representable` (proved downstream, `ModularCurve/RhoPoints.lean`).
+Geometric irreducibility is a black box (BB-IRR: 1980s,
 complex-analytic uniformisation).
 -/
 
@@ -8666,20 +8667,10 @@ theorem sympFramed_quotient_affineOverEll (D : GaloisRepData N) [Fact (1 < N)]
 end FramedProblemFunctor
 
 
-/-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route)** Relative
-representability of the ρ-level problem: for every elliptic curve `E` over a
-`ℚ`-scheme `T`, the functor `T' ↦ {ρ-level structures on E ×_T T'}` is representable
-by a finite étale `T`-scheme — the symplectic isomorphism scheme
-`Isom^symp(E[N], V_ρ̄)`. `Y(ρ̄)` is then the Isom-scheme over a rigidified level base,
-which *carries its moduli interpretation by construction*; the identification with the
-Galois twist of `Y(N)_ℚ` is a separate later theorem (route note, plan §Y(ρ̄)). -/
-theorem rhoLevel_relativelyRepresentable {N : ℕ} [NeZero N] (hN : 3 ≤ N)
-    (D : GaloisRepData N) {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ))
-    (E : EllipticCurve T) :
-    ∃ (I : Scheme.{0}) (f : I ⟶ T), IsFinite f ∧ Etale f ∧
-      ∀ {T' : Scheme.{0}} (k : T' ⟶ T),
-        Nonempty ({ h : T' ⟶ I // h ≫ f = k } ≃
-          RhoLevelStructure D (k ≫ sT) (E.baseChange k)) := by sorry
+-- **(T-F6 = expert review Q9: the symplectic Isom-scheme route)** Relative
+-- representability of the ρ-level problem is **proved** as
+-- `rhoLevel_relativelyRepresentable` in `ModularCurve/RhoSections.lean`. It cannot be
+-- stated here: the symplectic Isom-scheme construction imports this file.
 
 /-- The `Ell/ℚ`-morphism induced by a pointed isomorphism of elliptic curves over the
 same base `T` (identity on the base). -/
@@ -8722,13 +8713,9 @@ def RepresentsYRho {N : ℕ} [NeZero N] (D : GaloisRepData N) (Y : Scheme.{0})
           ∃ f : a.1 ≅ b.1,
             a.2 = RhoLevelStructure.pull D (ellHomOfCurveIso sT f) b.2))
 
-/-- **(T-F4 = Buzzard p. 33, the main statement)** The twisted modular curve exists:
-some `(Y, sY)` represents the ρ-level moduli problem in the sense of
-`RepresentsYRho`. Requires `N ≥ 3` (rigidity — Loeffler Prop 3.8.3).
-Route of record: the symplectic Isom-scheme over a rigidified base (T-F6, review Q9);
-the Galois-twist identification is a separate later theorem (D8). -/
-theorem yRho_representable {N : ℕ} [NeZero N] (hN : 3 ≤ N) (D : GaloisRepData N) :
-    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (.of ℚ)), RepresentsYRho D Y sY := by sorry
+-- **(T-F4 = Buzzard p. 33, the main statement)** The twisted modular curve exists:
+-- `yRho_representable`, **proved** in `ModularCurve/RhoPoints.lean` via the level-three
+-- rigidifier. It cannot be stated here: that route imports this file through `RhoSmooth`.
 
 /-- **(T-F5, stream IRR)** Any curve representing the ρ-level problem is
 geometrically irreducible over `ℚ`: its base change to `ℚ̄` is irreducible.

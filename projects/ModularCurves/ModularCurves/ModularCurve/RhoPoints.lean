@@ -305,14 +305,14 @@ theorem yRho_representable' (D : GaloisRepData N) (hN : 3 ≤ (N : ℤ)) :
     exact_mod_cast h1
   exact exists_representsYRho_levelThree D hN
 
-/-- **(T-F4, in the exact shape of `yRho_representable`)** The same statement as the
-`sorry`-ed `yRho_representable` (`ModularCurve/YRho.lean`), with the hypothesis in `ℕ`.
+/-- **(T-F4 = Buzzard p. 33, the main statement)** The twisted modular curve exists: for
+`N ≥ 3` some `(Y, sY)` represents the ρ-level moduli problem in the sense of
+`RepresentsYRho`. Requires `N ≥ 3` (rigidity — Loeffler Prop 3.8.3); the route of record
+is the level-three rigidifier.
 
-`yRho_representable` cannot be discharged in place: it lives *upstream* of this file (the
-level-three route imports `YRho` through `RhoSmooth`), so its `sorry` is a redundant
-duplicate of a proved theorem rather than an open goal. Recorded here so that the
-duplication is provable rather than asserted. -/
-theorem yRho_representable_of_three_le (hN : 3 ≤ N) (D : GaloisRepData N) :
+This is the home of the theorem: it cannot live in `ModularCurve/YRho.lean` beside
+`RepresentsYRho`, because the level-three route imports that file through `RhoSmooth`. -/
+theorem yRho_representable (hN : 3 ≤ N) (D : GaloisRepData N) :
     ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (CommRingCat.of ℚ)), RepresentsYRho D Y sY :=
   yRho_representable' D (by exact_mod_cast hN)
 

@@ -7582,9 +7582,10 @@ CLOSURE.** Relative representability of the ρ-level problem: for every elliptic
 curve `E` over a `ℚ`-scheme `T`, the functor `T' ↦ {ρ-level structures on
 E ×_T T'}` is representable by a finite étale `T`-scheme — the free `GL₂`
 quotient of the symplectically framed moduli. Same statement as
-`rhoLevel_relativelyRepresentable` (YRho.lean); proven here downstream of the
+**(T-F6)** Relative representability of the ρ-level problem. This is the home of the
+theorem — it cannot live beside `RhoLevelStructure` in `YRho.lean`, being downstream of the
 section dictionary (3c/3d) and the mutual inverses (3e). -/
-theorem rhoLevel_relativelyRepresentable' (hN : 3 ≤ N)
+theorem rhoLevel_relativelyRepresentable (hN : 3 ≤ N)
     (D : GaloisRepData N) {T : Scheme.{0}} (sT : T ⟶ Spec (.of ℚ))
     (E : EllipticCurve T) :
     ∃ (I : Scheme.{0}) (f : I ⟶ T), IsFinite f ∧ Etale f ∧
