@@ -1749,6 +1749,139 @@ theorem tailValueF_add_le {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
     _ = max (max (tailValueF p F σ x N) (tailValueF p F σ y N)) (σ ^ N * M) :=
         max_comm _ _
 
+/-- Decay in tail-sup form: `T_N(x) → 0` iff the terms tend to `0`. -/
+theorem tendsto_tailValueF_of_tendsto {σ : NNReal} {x : WittVector p F}
+    (hdecay : Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun N => tailValueF p F σ x N) Filter.atTop (nhds 0) := by
+  rw [tendsto_order]
+  constructor
+  · intro a ha
+    simp at ha
+  · intro a ha
+    obtain ⟨b, hb0, hba⟩ := exists_between ha
+    obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp (hdecay.eventually_lt_const hb0)
+    refine Filter.eventually_atTop.mpr ⟨K, fun N hN => ?_⟩
+    have hsup : tailValueF p F σ x N ≤ b :=
+      ciSup_le fun k => (hK (N + k) (by omega)).le
+    exact lt_of_le_of_lt hsup hba
+
+/-- Decaying elements are boundedly termed. -/
+theorem bddAbove_of_tendsto_gaussTermF {σ : NNReal} {x : WittVector p F}
+    (hdecay : Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0)) :
+    BddAbove (Set.range (gaussTermF p F σ x)) := by
+  have hev : ∀ᶠ n in Filter.atTop, gaussTermF p F σ x n < 1 :=
+    hdecay.eventually_lt_const one_pos
+  obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp hev
+  refine ⟨max 1 ((Finset.range (K + 1)).sup (gaussTermF p F σ x)), ?_⟩
+  rintro s ⟨n, rfl⟩
+  rcases lt_or_ge n (K + 1) with hn | hn
+  · exact le_max_of_le_right (Finset.le_sup (Finset.mem_range.mpr hn))
+  · exact le_max_of_le_left (hK n (by omega)).le
+
+/-- **Head-bound decay** (sol (8), the split-max argument): for decaying `x`,
+`H_N(x) → 0`. -/
+theorem tendsto_headBoundF_of_tendsto {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+    {x : WittVector p F}
+    (hdecay : Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun N => headBoundF p F σ x N) Filter.atTop (nhds 0) := by
+  rw [tendsto_order]
+  constructor
+  · intro a ha
+    simp at ha
+  · intro a ha
+    obtain ⟨b, hb0, hba⟩ := exists_between ha
+    obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp (hdecay.eventually_lt_const hb0)
+    have hgeo : Filter.Tendsto
+        (fun N => σ ^ N * (Finset.range K).sup
+          (fun i => perfectoidValuation p F (teichCoeffF p F x i)))
+        Filter.atTop (nhds 0) := by
+      have h1 := (tendsto_pow_atTop_nhds_zero_of_lt_one
+        (zero_le : (0 : NNReal) ≤ σ) hσ1).mul_const
+        ((Finset.range K).sup (fun i => perfectoidValuation p F (teichCoeffF p F x i)))
+      rwa [zero_mul] at h1
+    obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp (hgeo.eventually_lt_const hb0)
+    refine Filter.eventually_atTop.mpr ⟨N₂, fun N hN₂N => ?_⟩
+    rw [headBoundF]
+    rcases Finset.eq_empty_or_nonempty (Finset.range N) with hemp | hne
+    · rw [hemp, Finset.sup_empty, bot_eq_zero, mul_zero]
+      exact ha
+    · obtain ⟨i₀, hi₀mem, hi₀⟩ := Finset.exists_mem_eq_sup _ hne
+        (fun i => perfectoidValuation p F (teichCoeffF p F x i))
+      rw [hi₀]
+      have hi₀N : i₀ < N := Finset.mem_range.mp hi₀mem
+      rcases lt_or_ge i₀ K with hiK | hiK
+      · have h1 : perfectoidValuation p F (teichCoeffF p F x i₀)
+            ≤ (Finset.range K).sup
+              (fun i => perfectoidValuation p F (teichCoeffF p F x i)) :=
+          Finset.le_sup (f := fun i => perfectoidValuation p F (teichCoeffF p F x i))
+            (Finset.mem_range.mpr hiK)
+        exact lt_of_le_of_lt (mul_le_mul_of_nonneg_left h1 zero_le)
+          (lt_trans (hN₂ N hN₂N) hba)
+      · have hstep : σ ^ N * perfectoidValuation p F (teichCoeffF p F x i₀)
+            ≤ gaussTermF p F σ x i₀ := by
+          rw [gaussTermF]
+          exact mul_le_mul_of_nonneg_right
+            (pow_le_pow_of_le_one zero_le hσ1.le hi₀N.le) zero_le
+        exact lt_of_le_of_lt hstep (lt_trans (hK i₀ hiK) hba)
+
+/-- **Decay closure under addition** — the crux inequality assembled: if the
+coordinates of `x` and `y` decay, so do those of `x + y`. -/
+theorem tendsto_gaussTermF_add_of_tendsto {σ : NNReal} (hσ0 : 0 < σ) (hσ1 : σ < 1)
+    {x y : WittVector p F}
+    (hdx : Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0))
+    (hdy : Filter.Tendsto (gaussTermF p F σ y) Filter.atTop (nhds 0)) :
+    Filter.Tendsto (gaussTermF p F σ (x + y)) Filter.atTop (nhds 0) := by
+  have hBx := bddAbove_of_tendsto_gaussTermF p F hdx
+  have hBy := bddAbove_of_tendsto_gaussTermF p F hdy
+  have hBxy := bddAbove_gaussTermF_add p F hσ0 hσ1 hBx hBy
+  have hsupsplit : ∀ n : ℕ, (Finset.range n).sup (fun i => max
+      (perfectoidValuation p F (teichCoeffF p F x i))
+      (perfectoidValuation p F (teichCoeffF p F y i)))
+      = max ((Finset.range n).sup (fun i => perfectoidValuation p F (teichCoeffF p F x i)))
+          ((Finset.range n).sup (fun i => perfectoidValuation p F (teichCoeffF p F y i))) := by
+    intro n
+    refine le_antisymm
+      (Finset.sup_le fun i hi => max_le_max
+        (Finset.le_sup (f := fun i => perfectoidValuation p F (teichCoeffF p F x i)) hi)
+        (Finset.le_sup (f := fun i => perfectoidValuation p F (teichCoeffF p F y i)) hi))
+      (max_le (Finset.sup_mono_fun fun i _ => le_max_left _ _)
+        (Finset.sup_mono_fun fun i _ => le_max_right _ _))
+  have hbound : ∀ n, gaussTermF p F σ (x + y) n
+      ≤ max (max (tailValueF p F σ x n) (tailValueF p F σ y n))
+          (max (headBoundF p F σ x n) (headBoundF p F σ y n)) := by
+    intro n
+    have hBtail : BddAbove (Set.range (fun k => gaussTermF p F σ (x + y) (n + k))) := by
+      obtain ⟨B, hB⟩ := hBxy
+      exact ⟨B, by rintro s ⟨k, rfl⟩; exact hB ⟨n + k, rfl⟩⟩
+    have h1 : gaussTermF p F σ (x + y) n ≤ tailValueF p F σ (x + y) n := by
+      rw [tailValueF]
+      have h0 : gaussTermF p F σ (x + y) n = gaussTermF p F σ (x + y) (n + 0) := by
+        rw [add_zero]
+      conv_lhs => rw [h0]
+      exact le_ciSup hBtail 0
+    have h2 := tailValueF_add_le p F hσ0 hσ1 hBx hBy n
+    have h3 : σ ^ n * (Finset.range n).sup (fun i => max
+        (perfectoidValuation p F (teichCoeffF p F x i))
+        (perfectoidValuation p F (teichCoeffF p F y i)))
+        = max (headBoundF p F σ x n) (headBoundF p F σ y n) := by
+      rw [hsupsplit n, nnreal_mul_max, headBoundF, headBoundF]
+    calc gaussTermF p F σ (x + y) n ≤ tailValueF p F σ (x + y) n := h1
+      _ ≤ _ := h2
+      _ = max (max (tailValueF p F σ x n) (tailValueF p F σ y n))
+            (max (headBoundF p F σ x n) (headBoundF p F σ y n)) := by rw [h3]
+  have hTx := tendsto_tailValueF_of_tendsto p F hdx
+  have hTy := tendsto_tailValueF_of_tendsto p F hdy
+  have hHx := tendsto_headBoundF_of_tendsto p F hσ0 hσ1 hdx
+  have hHy := tendsto_headBoundF_of_tendsto p F hσ0 hσ1 hdy
+  have hall : Filter.Tendsto
+      (fun n => max (max (tailValueF p F σ x n) (tailValueF p F σ y n))
+        (max (headBoundF p F σ x n) (headBoundF p F σ y n)))
+      Filter.atTop (nhds 0) := by
+    have h := (hTx.max hTy).max (hHx.max hHy)
+    simpa using h
+  exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hall
+    (fun n => zero_le) hbound
+
 end FarguesFontaine
 
 end
