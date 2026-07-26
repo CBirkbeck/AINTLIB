@@ -2019,6 +2019,40 @@ theorem gaussValueF_sub_prefix {σ : NNReal} (hσ0 : 0 < σ) {x : WittVector p F
     (bddAbove_gaussTermF_of_coords_shift p F hσ0 hXc hB) N,
     ← tailValueF_eq_of_coords p F hXc]
 
+/-- A vanishing `NNReal` sequence with nonzero sup attains it. -/
+theorem exists_iSup_eq_of_tendsto_zero {f : ℕ → NNReal}
+    (hf : Filter.Tendsto f Filter.atTop (nhds 0)) (hne : (⨆ n, f n) ≠ 0) :
+    ∃ n₀, (⨆ n, f n) = f n₀ ∧ ∀ m, f m ≤ f n₀ := by
+  have hBf : BddAbove (Set.range f) := by
+    have hev : ∀ᶠ n in Filter.atTop, f n < 1 := hf.eventually_lt_const one_pos
+    obtain ⟨K₀, hK₀⟩ := Filter.eventually_atTop.mp hev
+    refine ⟨max 1 ((Finset.range (K₀ + 1)).sup f), ?_⟩
+    rintro s ⟨n, rfl⟩
+    rcases lt_or_ge n (K₀ + 1) with hn | hn
+    · exact le_max_of_le_right (Finset.le_sup (Finset.mem_range.mpr hn))
+    · exact le_max_of_le_left (hK₀ n (by omega)).le
+  have hpos : 0 < ⨆ n, f n := pos_iff_ne_zero.mpr hne
+  obtain ⟨b, hb0, hbs⟩ := exists_between hpos
+  obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp (hf.eventually_lt_const hb0)
+  have hne' : (Finset.range (K + 1)).Nonempty :=
+    Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero K)
+  obtain ⟨n₀, hn₀mem, hn₀⟩ := Finset.exists_mem_eq_sup _ hne' f
+  have hall : ∀ m, f m ≤ max ((Finset.range (K + 1)).sup f) b := by
+    intro m
+    rcases lt_or_ge m (K + 1) with hm | hm
+    · exact le_max_of_le_left (Finset.le_sup (Finset.mem_range.mpr hm))
+    · exact le_max_of_le_right (hK m (by omega)).le
+  have hsup_le : (⨆ n, f n) ≤ max ((Finset.range (K + 1)).sup f) b :=
+    ciSup_le hall
+  have hfin : (⨆ n, f n) ≤ (Finset.range (K + 1)).sup f := by
+    rcases max_cases ((Finset.range (K + 1)).sup f) b with ⟨heq, -⟩ | ⟨heq, -⟩
+    · rwa [heq] at hsup_le
+    · rw [heq] at hsup_le
+      exact absurd (lt_of_le_of_lt hsup_le hbs) (lt_irrefl _)
+  rw [hn₀] at hfin
+  exact ⟨n₀, le_antisymm hfin (le_ciSup hBf n₀),
+    fun m => le_trans (le_ciSup hBf m) hfin⟩
+
 end FarguesFontaine
 
 end

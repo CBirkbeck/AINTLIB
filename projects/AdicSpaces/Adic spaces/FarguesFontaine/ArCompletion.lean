@@ -1689,6 +1689,45 @@ theorem PhiHatK_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   exact sub_eq_zero.mp ((Valuation.zero_iff (Valued.v :
     Valuation (hatK p F hρ0 hρ1) NNReal)).mp hzero)
 
+/-- **The value formula on `A^r`** (Kedlaya (2.2.1) on the completion): the value of
+any element of `A^r` is the sup of its scaled coordinate values. -/
+theorem valued_eq_iSup_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) :
+    Valued.v x = ⨆ n, ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 x n) := by
+  conv_lhs => rw [← PhiHatK_teichCoeffAr p F ϖ hx]
+  exact valued_PhiHatK p F ϖ hρ0 hρ1 (tendsto_gaussTerm_teichCoeffAr p F ϖ hx)
+
+/-- **`wAr`** — the Gauss valuation on the completed ring `A^r`, the restriction of
+the completed-field valuation to the closure subring (Kedlaya Definition 2.4 on the
+completion). -/
+def wAr {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
+    Valuation (ArSub p F ϖ hρ0 hρ1) NNReal :=
+  (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal).comap
+    ((ArSub p F ϖ hρ0 hρ1).subtype)
+
+@[simp]
+theorem wAr_apply {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (z : ArSub p F ϖ hρ0 hρ1) :
+    wAr p F ϖ hρ0 hρ1 z = Valued.v (z : hatK p F hρ0 hρ1) :=
+  rfl
+
+/-- **Attainment on `A^r`** (the degree exists, Kedlaya Definition 2.4): a nonzero
+element attains its value at some coordinate, and that coordinate dominates all
+others. -/
+theorem exists_valued_eq_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) :
+    ∃ n₀, Valued.v x = ρ ^ n₀ * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 x n₀)
+      ∧ ∀ m, ρ ^ m * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+        ≤ ρ ^ n₀ * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n₀) := by
+  have hv := valued_eq_iSup_teichCoeffAr p F ϖ hx
+  have hvne : Valued.v x ≠ 0 :=
+    (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0
+  obtain ⟨n₀, hn₀, hmax⟩ := exists_iSup_eq_of_tendsto_zero
+    (tendsto_gaussTerm_teichCoeffAr p F ϖ hx) (by rw [← hv]; exact hvne)
+  exact ⟨n₀, by rw [hv, hn₀], hmax⟩
+
 end FarguesFontaine
 
 end
