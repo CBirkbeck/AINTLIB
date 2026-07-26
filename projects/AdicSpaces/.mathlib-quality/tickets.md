@@ -903,6 +903,20 @@ non-Tate bases are supported.
   wI-balls (locIdeal generators have wI < 1 — cofinality estimate), (ii) the hard
   ⊇-half (wI-balls inside J^n-images: exists_eq_p_pow_mul + the dense-layer
   plus-ring inclusion ID2b-ii), (iii) package as topology/uniformity equality.
+- **ID2b-ii route (2026-07-26, worked out — dischargeable with existing tools)**:
+  for the ⊇-half it SUFFICES to show `Bloc ∩ {wI ≤ |ϖ|^{c₀}} ⊆ locSubring-image`
+  for one fixed exponent `c₀` (an ε₀-weakened inclusion; the plus-ring EQUALITY is
+  not needed — consult §5). Proof route: `x = A/(p[ϖ])^k` (localization rep), so
+  `x = Σ_m p^{m-k}[a_m·ϖ̄^{-k}]` with `a_m ∈ O_F` — non-integrality uniformly
+  bounded by `k`. Split off the length-`N` prefix (`exists_eq_sum_teichCoeff_add`):
+  the tail is `(p^a/[ϖ]^b)^{⌈k/b⌉}·algebraMap(p^{N-k-a⌈k/b⌉}[ϖ]^{b⌈k/b⌉-k}·Z)`
+  for `N` large — in the subring. Each prefix term `p^i[c]` splits as
+  `([ϖ]/p)^{-i}·[c·ϖ̄^{-i}]` (i < 0, integral by ρ₁ = |ϖ| on the nose) or
+  `(p^a/[ϖ]^b)^{⌊i/a⌋}·p^{i mod a}·[c·ϖ̄^{b⌊i/a⌋}]` (i ≥ 0, integral by the
+  `wI ≤ |ϖ|^{c₀}`-slack with `c₀ ≥ b`, using the nat-pow endpoint hypothesis
+  `ρ₂^a ≤ |ϖ|^b` — avoid rpow throughout). Then the reverse ball-inclusion:
+  `wI z ≤ min(ρ₁,ρ₂)^n·|ϖ|^{c₀} → z ∈ J^n-image` via `exists_eq_p_pow_mul`
+  (factor `pⁿ`) + the ε₀-inclusion for the cofactor + `J ⊇ p·locSubring`.
 - **ID2b** ★ THE TOPOLOGY COMPARISON: under ID2a the `chartData`-canonical topology
   (locSubring-adic, `RationalLocData.uniformSpace`) on `Bloc` equals the
   `wI`-topology for `I_U`. Two inclusions: `I_D^n`-balls inside `wI`-balls (each
