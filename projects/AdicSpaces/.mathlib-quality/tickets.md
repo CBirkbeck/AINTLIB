@@ -997,7 +997,27 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   leading coefficient of degree d_I."
 
 ### [T906] Lemma 3.8: approximate ideal generation
-- **Status**: open | **File**: FarguesFontaine/Groebner.lean | **Depends**: T904, T905
+- **Status**: done (beastmode 2026-07-26) | **File**: FarguesFontaine/Groebner.lean | **Depends**: T904, T905 (both done)
+- **DONE**: `approx_generation` is Kedlaya Lemma 3.8, axiom-clean. Chain built:
+  `exists_tail_bound_lt` → `exists_normalized_tail_bound` → **`exists_groebner_family`**
+  (finite generator set + one 0 < ε < 1 + leading data + domination);
+  `gaussNormRPS_add_le/_neg/_sub_le/_monomial/_zero`, `valued_coeff_le_gaussNormRPS`;
+  the step layer `coeff_monomialMul_pos/_neg`, `isRestricted_monomialMul`,
+  `coeff_sub_monomialMul_lead`, **`groebner_step`** and its ideal-level wrapper
+  **`groebner_reduce`**; the frozen-zone lemmas `valued_degAr_eq_of_sub_lt`,
+  `coeff_sub_eq`, `coeff_frozen`; and the TERMINATION (sol-validated, archived at
+  `.mathlib-quality/chatgpt-reply-termination-2026-07-26.md`): `coeffRank`,
+  `coeffRank_eq_of_diff_le`, `coeffRank_lt_of_drop`, `support_step_subset`,
+  `finite_degree_le`, `finite_degLex_le`, `degLexSeg` (+Fintype/LinearOrder),
+  **`muMeasure`** (Colex rank vector) and `muMeasure_lt`, `exists_degLex_max`.
+  KEY correction from the consult: the fixed finite index set is the graded-lex
+  INITIAL SEGMENT below M := max of the ε-support of y₀, NOT a componentwise box.
+  PERFORMANCE NOTES for the cleanup pass: several declarations carry
+  `set_option maxHeartbeats 2000000` — the `ArSub`/`hatK` abbrevs are reducible so
+  unification is deep-but-fast; the fixes that mattered were (i) abstract
+  index/coefficient parameters instead of `leadIdxRPS` in statements, (ii) if-free
+  wrapper lemmas for `coeff_monomial_mul`, (iii) small-context coercion bridges
+  (`coe_sub_monomialMul`) instead of `MulMemClass.coe_mul` rewriting.
 - **Statement**: ∃ ε ∈ (0,1): ∀ y ∈ H ∃ (a_I)_{I∈S}: `|a_I|·|x_I| ≤ |y|` and
   `|y − Σ a_I x_I| ≤ ε|y|`.
 - **Sketch** (transcribe ln 285–320): ε := max over I ∈ S, J ≻ I of |x_{I,J}T^J|/|c_I T^I|
