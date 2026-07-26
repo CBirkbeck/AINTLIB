@@ -1405,6 +1405,52 @@ theorem exists_gaussValueF_eq_gaussTermF {σ : NNReal} (hσ0 : 0 < σ)
   rintro s ⟨m, rfl⟩
   exact hmax m
 
+/-- **The degree** of a Witt vector at radius `σ`: the largest index attaining the
+Gauss value (Kedlaya, Def 2.5: "the largest n realizing λ_r(x) = max"; decision AD-6 —
+no Newton polygons). Junk value `0` off the decaying-nonzero locus. -/
+noncomputable def degF (σ : NNReal) (x : WittVector p F) : ℕ :=
+  sSup {n | gaussTermF p F σ x n = gaussValueF p F σ x}
+
+/-- The degree specification on the decaying-nonzero locus: the degree attains the
+value, and everything strictly beyond is strictly below the value. -/
+theorem degF_spec {σ : NNReal} (hσ0 : 0 < σ) {x : WittVector p F}
+    (hdecay : Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0))
+    (hx : x ≠ 0) :
+    gaussTermF p F σ x (degF p F σ x) = gaussValueF p F σ x
+      ∧ ∀ m, degF p F σ x < m → gaussTermF p F σ x m < gaussValueF p F σ x := by
+  obtain ⟨n₀, hn₀, hmax⟩ := exists_gaussValueF_eq_gaussTermF p F hσ0 hdecay hx
+  set A : Set ℕ := {n | gaussTermF p F σ x n = gaussValueF p F σ x} with hA
+  have hApos : 0 < gaussValueF p F σ x := by
+    rw [hn₀, gaussTermF]
+    obtain ⟨m₀, hm₀⟩ : ∃ m : ℕ, x.coeff m ≠ 0 := by
+      by_contra hall
+      push Not at hall
+      exact hx (WittVector.ext fun n => by rw [hall n, WittVector.zero_coeff])
+    -- the max dominates the positive m₀-term
+    have hposm₀ : 0 < gaussTermF p F σ x m₀ := by
+      rw [gaussTermF]
+      refine mul_pos (pow_pos hσ0 m₀) (pos_iff_ne_zero.mpr fun h0 => hm₀ ?_)
+      have hz : teichCoeffF p F x m₀ = 0 := (Valuation.zero_iff _).mp h0
+      rw [teichCoeffF] at hz
+      exact (map_eq_zero_iff _ (RingEquiv.injective _)).mp hz
+    have := lt_of_lt_of_le hposm₀ (hmax m₀)
+    rwa [gaussTermF] at this
+  have hne : A.Nonempty := ⟨n₀, hn₀.symm⟩
+  have hbdd : BddAbove A := by
+    have hev := hdecay.eventually_lt_const hApos
+    obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp hev
+    refine ⟨N, fun m hm => ?_⟩
+    by_contra hmN
+    push Not at hmN
+    have hlt := hN m (by omega)
+    rw [hm] at hlt
+    exact absurd hlt (lt_irrefl _)
+  have hmem : degF p F σ x ∈ A := Nat.sSup_mem hne hbdd
+  refine ⟨hmem, fun m hm => ?_⟩
+  refine lt_of_le_of_ne (hmax m |>.trans hn₀.symm.le) fun heq => ?_
+  have hmA : m ∈ A := heq
+  exact absurd (le_csSup hbdd hmA) (not_le.mpr hm)
+
 end FarguesFontaine
 
 end
