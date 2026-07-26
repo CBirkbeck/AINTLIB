@@ -40,7 +40,7 @@ namespace FarguesFontaine
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type u) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
-  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
+  [UniformSpace F] [NonarchimedeanRing F] [hPF : IsPerfectoidField p F] [CharP F p]
 
 /-- **Diagonal divisibility**: every Witt coefficient of `[x] − [y]` is divisible by
 `x − y`. (For `k = 0` this is the identity `x − y = (x−y)·1` since `constantCoeff` is
@@ -213,6 +213,125 @@ theorem exists_delta_teichCoeff_sub (n : ℕ) {ρ : NNReal} (hρ0 : 0 < ρ) (hρ
       le_of_mul_le_mul_left hw hρ0
     have hres := hδn x' y' hxy'
     rwa [hx'c n, hy'c n] at hres
+
+include hPF in
+/-- **Tate absorption**: every element of `F` lands in `O_F` after enough `ϖ`-scaling. -/
+theorem exists_mul_pow_isPowerBounded (ϖ : PseudoUniformizer F) (x : F) :
+    ∃ k : ℕ, IsPowerBounded (x * ((ϖ.val : Fˣ) : F) ^ k) := by
+  obtain ⟨P⟩ := IsHuberRing.exists_pairOfDefinition (A := F)
+  have hnil : Filter.Tendsto (fun k => ((ϖ.val : Fˣ) : F) ^ k) Filter.atTop (nhds 0) :=
+    ϖ.isTopologicallyNilpotent
+  have hcont : Filter.Tendsto (fun k => x * ((ϖ.val : Fˣ) : F) ^ k) Filter.atTop (nhds 0) := by
+    have h := hnil.const_mul x
+    rwa [mul_zero] at h
+  have hmem : (powerBoundedSubring F : Set F) ∈ nhds (0 : F) :=
+    P.isOpen_powerBoundedSubring.mem_nhds isPowerBounded_zero
+  obtain ⟨k, hk⟩ := (hcont.eventually_mem hmem).exists
+  exact ⟨k, hk⟩
+
+/-- `F` itself is a perfect ring: Frobenius is surjective after Tate absorption
+(clear `ϖ^{pk}`, take a `p`-th root in `O_F`, divide by `ϖ^k`). -/
+instance instPerfectRingF : PerfectRing F p := by
+  refine PerfectRing.ofSurjective _ p fun x => ?_
+  set ϖ : PseudoUniformizer F := IsTateRing.pseudoUniformizer (A := F) with hϖ
+  obtain ⟨k, hk⟩ := exists_mul_pow_isPowerBounded p F ϖ (x)
+  have hϖpb : IsPowerBounded (((ϖ.val : Fˣ) : F)) :=
+    ϖ.isTopologicallyNilpotent.isPowerBounded
+  have hϖpow : ∀ m : ℕ, IsPowerBounded (((ϖ.val : Fˣ) : F) ^ m) := by
+    intro m
+    induction m with
+    | zero => simpa using isPowerBounded_one
+    | succ m' ihm => rw [pow_succ]; exact isPowerBounded_mul ihm hϖpb
+  have hkp : IsPowerBounded (x * ((ϖ.val : Fˣ) : F) ^ (p * k)) := by
+    have hp1 : 1 ≤ p := (Nat.Prime.one_lt (Fact.out : Nat.Prime p)).le
+    have hsplit : x * ((ϖ.val : Fˣ) : F) ^ (p * k)
+        = (x * ((ϖ.val : Fˣ) : F) ^ k) * ((ϖ.val : Fˣ) : F) ^ ((p - 1) * k) := by
+      rw [mul_assoc, ← pow_add]
+      have hcancel : k + (p - 1) * k = p * k := by
+        calc k + (p - 1) * k = (1 + (p - 1)) * k := by ring
+          _ = p * k := by rw [show 1 + (p - 1) = p from by omega]
+      rw [hcancel]
+    rw [hsplit]
+    exact isPowerBounded_mul hk (hϖpow _)
+  obtain ⟨b, hb⟩ := frobenius_surjective_OF p F ⟨_, hkp⟩
+  refine ⟨(b : F) * (((ϖ.val : Fˣ) : F) ^ k)⁻¹, ?_⟩
+  have hbF : ((b : OF F) : F) ^ p = x * ((ϖ.val : Fˣ) : F) ^ (p * k) := by
+    have h := congrArg (fun z : OF F => (z : F)) hb
+    simpa [frobenius_def] using h
+  have hϖne : ((ϖ.val : Fˣ) : F) ≠ 0 := (ϖ.val : Fˣ).ne_zero
+  rw [frobenius_def, mul_pow, ← inv_pow, ← pow_mul, hbF, mul_assoc,
+    show k * p = p * k from Nat.mul_comm k p, ← mul_pow,
+    mul_inv_cancel₀ hϖne, one_pow, mul_one]
+
+/-- The `n`-th Teichmüller coordinate of a Witt vector over the field `F`. -/
+def teichCoeffF (x : WittVector p F) (n : ℕ) : F :=
+  (((_root_.frobeniusEquiv F p).symm ^ n : RingAut F)) (x.coeff n)
+
+theorem frobeniusEquivF_symm_pow_pow_cancel (b : F) (j : ℕ) :
+    ((_root_.frobeniusEquiv F p).symm ^ j : RingAut F) (b ^ p ^ j) = b := by
+  induction j with
+  | zero => simp
+  | succ k ih =>
+    have hσ : (_root_.frobeniusEquiv F p).symm ((b ^ p ^ k) ^ p) = b ^ p ^ k := by
+      have hfe : _root_.frobeniusEquiv F p (b ^ p ^ k) = (b ^ p ^ k) ^ p := by
+        rw [_root_.frobeniusEquiv_apply, frobenius_def]
+      rw [← hfe, RingEquiv.symm_apply_apply]
+    rw [pow_succ ((_root_.frobeniusEquiv F p).symm) k, RingAut.mul_apply,
+      show (p : ℕ) ^ (k + 1) = p ^ k * p from pow_succ p k, pow_mul, hσ, ih]
+
+/-- CORE-2 over `F`: every Witt vector over `F` is its length-`N` Teichmüller prefix
+plus a `p^N`-tail. -/
+theorem exists_eq_sum_teichCoeffF_add (x : WittVector p F) (N : ℕ) :
+    ∃ z : WittVector p F, x = (∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i) +
+      (p : WittVector p F) ^ N * z := by
+  rcases N with - | n
+  · exact ⟨x, by simp⟩
+  · obtain ⟨w, hw⟩ := WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff x n
+    refine ⟨w, ?_⟩
+    have hIic : Finset.Iic n = Finset.range (n + 1) := by
+      ext m; simp [Nat.lt_succ_iff]
+    have hsum : (∑ i ∈ Finset.range (n + 1),
+        WittVector.teichmuller p (teichCoeffF p F x i) * (p : WittVector p F) ^ i)
+        = ∑ i ≤ n, WittVector.teichmuller p
+            (((_root_.frobeniusEquiv F p).symm ^ i) (x.coeff i)) * (p : WittVector p F) ^ i := by
+      rw [← hIic]
+      exact Finset.sum_congr rfl fun i _ => by rw [teichCoeffF]
+    rw [hsum]
+    exact sub_eq_iff_eq_add'.mp hw
+
+/-- CORE-1 over `F`: uniqueness of Teichmüller expansions. -/
+theorem teichCoeffF_sum_range_add {N : ℕ} (b : ℕ → F) (z : WittVector p F) {j : ℕ}
+    (hj : j < N) :
+    teichCoeffF p F ((∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (b i) * (p : WittVector p F) ^ i)
+      + (p : WittVector p F) ^ N * z) j = b j := by
+  have hcoeff_eq : ∀ i < N, ((∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (b i) * (p : WittVector p F) ^ i)
+        + (p : WittVector p F) ^ N * z).coeff i
+      = (∑ i ∈ Finset.range N,
+          WittVector.teichmuller p (b i) * (p : WittVector p F) ^ i).coeff i := by
+    rw [WittVector.le_coeff_eq_iff_le_sub_coeff_eq_zero]
+    intro i hi
+    rw [add_sub_cancel_left, mul_comm]
+    exact WittVector.mul_pow_charP_coeff_zero z hi
+  have hsumcoeff : (∑ i ∈ Finset.range N,
+      WittVector.teichmuller p (b i) * (p : WittVector p F) ^ i).coeff j
+      = (b j) ^ p ^ j := by
+    rw [WittVector.sum_coeff_eq_coeff_sum]
+    · rw [Finset.sum_eq_single j]
+      · exact WittVector.teichmuller_mul_pow_coeff j (b j)
+      · intro i _ hne
+        exact WittVector.teichmuller_mul_pow_coeff_of_ne _ hne.symm
+      · intro hj'
+        exact absurd (Finset.mem_range.mpr hj) hj'
+    · refine fun m ↦ ⟨fun ⟨a, _, ha⟩ ⟨a', _, ha'⟩ ↦ ?_⟩
+      ext
+      dsimp only [ne_eq, Set.mem_setOf_eq]
+      rw [← Not.imp_symm (WittVector.teichmuller_mul_pow_coeff_of_ne _) ha]
+      exact Not.imp_symm (WittVector.teichmuller_mul_pow_coeff_of_ne _) ha'
+  rw [teichCoeffF, hcoeff_eq j hj, hsumcoeff]
+  exact frobeniusEquivF_symm_pow_pow_cancel p F (b j) j
 
 end FarguesFontaine
 

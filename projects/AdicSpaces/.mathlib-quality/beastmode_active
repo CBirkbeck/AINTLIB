@@ -1,1 +1,1 @@
-FOCUS: T903 chunk-1 — wK on FractionRing(Ainf) + hatK + Ar/Br closures; writing ArCompletion.lean
+FOCUS: T903 realization — W(F) engine port (teichCoeffF, CORE-1/2, head-split over F) into WittF.lean
