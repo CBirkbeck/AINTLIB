@@ -1195,6 +1195,377 @@ theorem presheafChartToBIProd_coe (a b : ℕ) (hb : 0 < b)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
     (continuous_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2) z
 
+/-- **Division by a pseudo-uniformizer power in `O_F`**: an element of value at
+most `|ϖ|^e` factors as `c'·ϖ^e`. -/
+theorem exists_factor_toOF (e : ℕ) (c : OF F)
+    (h : perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ e) :
+    ∃ c' : OF F, c = c' * PseudoUniformizer.toOF F ϖ ^ e := by
+  have hπne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+    fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+  have hπ0 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 := by
+    rw [Ne, Valuation.zero_iff]
+    exact hπne
+  have hle1 : perfectoidValuation p F ((c : F)
+      * ((((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e)⁻¹) ≤ 1 := by
+    rw [Valuation.map_mul, map_inv₀, Valuation.map_pow]
+    calc perfectoidValuation p F (c : F)
+          * (perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ e)⁻¹
+        ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ e
+          * (perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ e)⁻¹ :=
+          mul_le_mul_of_nonneg_right h zero_le
+      _ = 1 := mul_inv_cancel₀ (pow_ne_zero e hπ0)
+  obtain ⟨u, hu⟩ := (perfectoidValuation_integers p F).exists_of_le_one hle1
+  refine ⟨u, Subtype.ext ?_⟩
+  have hu' : ((u : OF F) : F) = (c : F)
+      * ((((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e)⁻¹ := hu
+  have hcoe : ((↑(u * PseudoUniformizer.toOF F ϖ ^ e) : OF F) : F)
+      = ((u : OF F) : F) * (((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e := by
+    push_cast
+    ring
+  rw [hcoe, hu', mul_assoc, inv_mul_cancel₀ (pow_ne_zero e hπne), mul_one]
+
+/-- `([ϖ]/p)^e · p^e = [ϖ]^e` in `Bloc`. -/
+theorem chartFracPi_pow_mul_p_pow (e : ℕ) :
+    chartFracPi p F ϖ ^ e
+        * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ e)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ e) := by
+  have hone : chartFracPi p F ϖ * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) := by
+    rw [chartFracPi, mul_assoc, IsUnit.val_inv_mul, mul_one]
+  rw [map_pow, map_pow, ← mul_pow, hone]
+
+/-- `(p^a/[ϖ]^b)^t · [ϖ]^{bt} = p^{at}` in `Bloc`. -/
+theorem chartFracP_pow_mul_teichPi_pow (a b t : ℕ) :
+    chartFracP p F ϖ a b ^ t
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ (b * t))
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ (a * t)) := by
+  have hw : (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)) ^ (b * t)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ (b * t)) = 1 := by
+    have h := AlocToBloc_teichPiInv_mul p F ϖ (b * t)
+    rwa [map_pow] at h
+  rw [chartFracP, mul_pow, ← pow_mul, mul_assoc, hw, mul_one, ← map_pow,
+    ← pow_mul]
+
+
+/-- The `A_inf`-side of the low-term split: `[ϖ]^{k-m}·([c']·(p^m·[ϖ]^k)) = [c]·p^m`
+when `c = c'·ϖ^{2k-m}`. -/
+theorem teich_shift_low (k m : ℕ) (hm : m ≤ k) (c c' : OF F)
+    (hc : c = c' * PseudoUniformizer.toOF F ϖ ^ (2 * k - m)) :
+    teichPi p F ϖ ^ (k - m) * (WittVector.teichmuller p c'
+        * ((p : Ainf p F) ^ m * teichPi p F ϖ ^ k))
+      = WittVector.teichmuller p c * (p : Ainf p F) ^ m := by
+  rw [hc, show PseudoUniformizer.toOF F ϖ ^ (2 * k - m)
+      = PseudoUniformizer.toOF F ϖ ^ (k - m) * PseudoUniformizer.toOF F ϖ ^ k from by
+        rw [← pow_add]; congr 1; omega,
+    map_mul (WittVector.teichmuller p), map_mul (WittVector.teichmuller p),
+    teichPi_pow, teichPi_pow]
+  ring
+
+/-- The `A_inf`-side of the high-term cross identity: `[c']·[ϖ]^k = [c]·[ϖ]^e`
+when `c·ϖ^e = c'·ϖ^k`. -/
+theorem teich_cross (e f : ℕ) (c c' : OF F)
+    (hc : c * PseudoUniformizer.toOF F ϖ ^ e = c' * PseudoUniformizer.toOF F ϖ ^ f) :
+    WittVector.teichmuller p c' * teichPi p F ϖ ^ f
+      = WittVector.teichmuller p c * teichPi p F ϖ ^ e := by
+  rw [teichPi_pow, teichPi_pow, ← map_mul (WittVector.teichmuller p),
+    ← map_mul (WittVector.teichmuller p), ← hc]
+
+/-- **The low-term identity**: for `m ≤ k` and `c = c'·ϖ^{2k-m}`, the subring
+element `([ϖ]/p)^{k-m}·[c']` multiplies with the denominator to `[c]·p^m`. -/
+theorem chart_term_low_eq (k m : ℕ) (hm : m ≤ k) (c c' : OF F)
+    (hc : c = c' * PseudoUniformizer.toOF F ϖ ^ (2 * k - m)) :
+    chartFracPi p F ϖ ^ (k - m)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c * (p : Ainf p F) ^ m) := by
+  rw [mul_assoc, ← map_mul,
+    show WittVector.teichmuller p c' * ((p : Ainf p F) * teichPi p F ϖ) ^ k
+        = (p : Ainf p F) ^ (k - m) * (WittVector.teichmuller p c'
+            * ((p : Ainf p F) ^ m * teichPi p F ϖ ^ k)) from by
+      rw [mul_pow, show (p : Ainf p F) ^ k
+          = (p : Ainf p F) ^ (k - m) * (p : Ainf p F) ^ m from by
+        rw [← pow_add]; congr 1; omega]
+      ring,
+    map_mul, ← mul_assoc, chartFracPi_pow_mul_p_pow, ← map_mul,
+    teich_shift_low p F ϖ k m hm c c' hc]
+
+/-- The `A_inf`-side regrouping for the high terms. -/
+theorem high_arg_split (b k t j : ℕ) (c c' : OF F)
+    (hc : c * PseudoUniformizer.toOF F ϖ ^ (b * t)
+      = c' * PseudoUniformizer.toOF F ϖ ^ k) :
+    (p : Ainf p F) ^ j * WittVector.teichmuller p c'
+        * ((p : Ainf p F) * teichPi p F ϖ) ^ k
+      = teichPi p F ϖ ^ (b * t)
+          * (WittVector.teichmuller p c * (p : Ainf p F) ^ (k + j)) := by
+  rw [mul_pow]
+  calc (p : Ainf p F) ^ j * WittVector.teichmuller p c'
+        * ((p : Ainf p F) ^ k * teichPi p F ϖ ^ k)
+      = WittVector.teichmuller p c' * teichPi p F ϖ ^ k
+          * (p : Ainf p F) ^ (k + j) := by
+        rw [pow_add]; ring
+    _ = WittVector.teichmuller p c * teichPi p F ϖ ^ (b * t)
+          * (p : Ainf p F) ^ (k + j) := by
+        rw [teich_cross p F ϖ (b * t) k c c' hc]
+    _ = teichPi p F ϖ ^ (b * t)
+          * (WittVector.teichmuller p c * (p : Ainf p F) ^ (k + j)) := by
+        ring
+
+/-- The `A_inf`-side final power collection for the high terms. -/
+theorem high_arg_final (a k t j : ℕ) (c : OF F) :
+    (p : Ainf p F) ^ (a * t) * (WittVector.teichmuller p c * (p : Ainf p F) ^ (k + j))
+      = WittVector.teichmuller p c * (p : Ainf p F) ^ (k + a * t + j) := by
+  rw [show k + a * t + j = a * t + (k + j) from by omega, pow_add]
+  ring
+
+/-- **The high-term identity**: for `c·ϖ^{bt} = c'·ϖ^k`, the subring element
+`(p^a/[ϖ]^b)^t·(p^j·[c'])` multiplies with the denominator to `[c]·p^{k+at+j}`. -/
+theorem chart_term_high_eq (a b k t j : ℕ) (c c' : OF F)
+    (hc : c * PseudoUniformizer.toOF F ϖ ^ (b * t)
+      = c' * PseudoUniformizer.toOF F ϖ ^ k) :
+    chartFracP p F ϖ a b ^ t
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F) ^ j * WittVector.teichmuller p c')
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ)
+          (WittVector.teichmuller p c * (p : Ainf p F) ^ (k + a * t + j)) := by
+  rw [mul_assoc, ← map_mul, high_arg_split p F ϖ b k t j c c' hc, map_mul,
+    ← mul_assoc, chartFracP_pow_mul_teichPi_pow, ← map_mul,
+    high_arg_final p F a k t j c]
+
+/-- The `A_inf`-side regrouping for the tail. -/
+theorem tail_arg_split (b k : ℕ) (hb : 0 < b) (z : Ainf p F) :
+    teichPi p F ϖ ^ (b * k - k) * z * ((p : Ainf p F) * teichPi p F ϖ) ^ k
+      = teichPi p F ϖ ^ (b * k) * ((p : Ainf p F) ^ k * z) := by
+  rw [mul_pow, show teichPi p F ϖ ^ (b * k)
+      = teichPi p F ϖ ^ (b * k - k) * teichPi p F ϖ ^ k from by
+    rw [← pow_add]; congr 1
+    have := Nat.le_mul_of_pos_left k hb
+    omega]
+  ring
+
+/-- The `A_inf`-side final power collection for the tail. -/
+theorem tail_arg_final (a k : ℕ) (z : Ainf p F) :
+    (p : Ainf p F) ^ (a * k) * ((p : Ainf p F) ^ k * z)
+      = (p : Ainf p F) ^ (k + a * k) * z := by
+  rw [show k + a * k = a * k + k from Nat.add_comm k (a * k), pow_add]
+  ring
+
+/-- **The tail identity**: the `p^N`-tail of the prefix decomposition
+(`N = k + ak`) multiplies with the denominator to `p^N·z` through
+`(p^a/[ϖ]^b)^k·[ϖ]^{bk-k}`. -/
+theorem chart_tail_eq (a b k : ℕ) (hb : 0 < b) (z : Ainf p F) :
+    chartFracP p F ϖ a b ^ k
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ (b * k - k) * z)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ (k + a * k) * z) := by
+  rw [mul_assoc, ← map_mul, tail_arg_split p F ϖ b k hb z, map_mul, ← mul_assoc,
+    chartFracP_pow_mul_teichPi_pow, ← map_mul, tail_arg_final p F a k z]
+
+
+/-- **Existence of the low-term factor**: at the exact left endpoint
+`ρ₁ = |ϖ|`, the `m ≤ k` Teichmüller coordinates of a numerator of an element in
+the `|ϖ|^b`-ball divide by `ϖ^{2k-m}`. -/
+theorem exists_teichCoeff_factor_low (b k m : ℕ) (hm : m ≤ k)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (A : Ainf p F) {x : Bloc p F ϖ}
+    (hx : x * algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ k) = algebraMap (Ainf p F) (Bloc p F ϖ) A)
+    (hwI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    ∃ c' : OF F, teichCoeff p F A m
+      = c' * PseudoUniformizer.toOF F ϖ ^ (2 * k - m) := by
+  set vπ : NNReal :=
+    perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hvπ
+  have hπ0 : 0 < vπ := hexact1 ▸ hρ₁0
+  have hπ1 : vπ < 1 := hexact1 ▸ hρ₁1
+  have hterm := gaussTerm_le_of_wI_le p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) k A hx hwI hρ₁0 hρ₁1 (Or.inl rfl) m
+  rw [gaussTerm, ← hexact1, ← hvπ] at hterm
+  refine exists_factor_toOF p F ϖ (2 * k - m) _ ?_
+  rw [← hvπ]
+  have hcollect : vπ ^ b * (vπ * vπ) ^ k = vπ ^ m * vπ ^ (2 * k - m + b) := by
+    rw [← pow_two, ← pow_mul, ← pow_add, ← pow_add]
+    congr 1
+    omega
+  rw [hcollect] at hterm
+  have hcancel : perfectoidValuation p F ((teichCoeff p F A m : OF F) : F)
+      ≤ vπ ^ (2 * k - m + b) :=
+    le_of_mul_le_mul_left hterm (pow_pos hπ0 m)
+  exact le_trans hcancel (pow_le_pow_of_le_one zero_le hπ1.le (by omega))
+
+/-- **Existence of the high-term factor**: at the exact right endpoint
+`ρ₂^a = |ϖ|^b`, the `m > k` Teichmüller coordinates satisfy
+`a_m·ϖ^{bt} ∈ ϖ^k·O_F` for `t = (m-k)/a`. -/
+theorem exists_teichCoeff_factor_high (a b k m : ℕ) (ha : 0 < a) (hm : k < m)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (A : Ainf p F) {x : Bloc p F ϖ}
+    (hx : x * algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ k) = algebraMap (Ainf p F) (Bloc p F ϖ) A)
+    (hwI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    ∃ c' : OF F, teichCoeff p F A m
+        * PseudoUniformizer.toOF F ϖ ^ (b * ((m - k) / a))
+      = c' * PseudoUniformizer.toOF F ϖ ^ k := by
+  set vπ : NNReal :=
+    perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hvπ
+  have hπ0 : 0 < vπ := by
+    have hπne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+      fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+    rw [hvπ, pos_iff_ne_zero, Ne, Valuation.zero_iff]
+    exact hπne
+  have hπ1 : vπ < 1 := by
+    have hb : 0 < b := by
+      rcases Nat.eq_zero_or_pos b with hb0 | hb0
+      · exfalso
+        have h1 : ρ₂ ^ a < 1 := pow_lt_one₀ zero_le hρ₂1 ha.ne'
+        rw [hexact2, hb0, pow_zero] at h1
+        exact absurd h1 (lt_irrefl 1)
+      · exact hb0
+    have h1 : vπ ^ b < 1 := by
+      rw [hvπ, ← hexact2]
+      exact pow_lt_one₀ zero_le hρ₂1 ha.ne'
+    by_contra hcon
+    rw [not_lt] at hcon
+    exact absurd (one_le_pow₀ hcon) (not_le.mpr h1)
+  set i : ℕ := m - k with hidef
+  have hik : m = k + i := by omega
+  set t : ℕ := i / a with htdef
+  have hterm := gaussTerm_le_of_wI_le p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) k A hx hwI hρ₂0 hρ₂1 (Or.inr rfl) m
+  rw [gaussTerm, ← hvπ] at hterm
+  set X : NNReal := perfectoidValuation p F ((teichCoeff p F A m : OF F) : F)
+    with hXdef
+  have h2 : ρ₂ ^ i * X ≤ vπ ^ (b + k) := by
+    refine le_of_mul_le_mul_left ?_ (pow_pos hρ₂0 k)
+    calc ρ₂ ^ k * (ρ₂ ^ i * X) = ρ₂ ^ m * X := by rw [hik, pow_add]; ring
+      _ ≤ vπ ^ b * (ρ₂ * vπ) ^ k := hterm
+      _ = ρ₂ ^ k * (vπ ^ (b + k)) := by rw [mul_pow, pow_add]; ring
+  have h4 : vπ ^ (b * i) * X ^ a ≤ vπ ^ (a * b + a * k) := by
+    have h3 := pow_le_pow_left₀ zero_le h2 a
+    calc vπ ^ (b * i) * X ^ a
+        = (ρ₂ ^ a) ^ i * X ^ a := by rw [hexact2, ← pow_mul]
+      _ = (ρ₂ ^ i * X) ^ a := by rw [mul_pow, ← pow_mul, ← pow_mul]; ring_nf
+      _ ≤ (vπ ^ (b + k)) ^ a := h3
+      _ = vπ ^ (a * b + a * k) := by rw [← pow_mul]; congr 1; ring
+  have key : k * a + b * i ≤ a * b + a * k + b * t * a := by
+    have hmod := Nat.div_add_mod i a
+    have hlt : i % a < a := Nat.mod_lt i ha
+    calc k * a + b * i = k * a + b * (a * (i / a) + i % a) := by rw [hmod]
+      _ = k * a + (b * t * a + b * (i % a)) := by rw [← htdef]; ring
+      _ ≤ k * a + (b * t * a + b * a) := by
+          exact Nat.add_le_add_left (Nat.add_le_add_left
+            (Nat.mul_le_mul_left b (le_of_lt hlt)) _) _
+      _ = a * b + a * k + b * t * a := by ring
+  have h6 : X ^ a * vπ ^ (b * t * a) ≤ (vπ ^ k) ^ a := by
+    refine le_of_mul_le_mul_right ?_ (pow_pos hπ0 (b * i))
+    calc X ^ a * vπ ^ (b * t * a) * vπ ^ (b * i)
+        = vπ ^ (b * i) * X ^ a * vπ ^ (b * t * a) := by ring
+      _ ≤ vπ ^ (a * b + a * k) * vπ ^ (b * t * a) :=
+          mul_le_mul_of_nonneg_right h4 zero_le
+      _ = vπ ^ (a * b + a * k + b * t * a) := by rw [← pow_add]
+      _ ≤ vπ ^ (k * a + b * i) := pow_le_pow_of_le_one zero_le hπ1.le key
+      _ = (vπ ^ k) ^ a * vπ ^ (b * i) := by rw [← pow_mul, ← pow_add]
+  have h7 : X * vπ ^ (b * t) ≤ vπ ^ k := by
+    refine le_of_pow_le_pow_left₀ ha.ne' zero_le ?_
+    calc (X * vπ ^ (b * t)) ^ a = X ^ a * vπ ^ (b * t * a) := by
+          rw [mul_pow, ← pow_mul]
+      _ ≤ (vπ ^ k) ^ a := h6
+  refine exists_factor_toOF p F ϖ k _ ?_
+  rw [← hvπ]
+  calc perfectoidValuation p F
+        ((↑(teichCoeff p F A m * PseudoUniformizer.toOF F ϖ ^ (b * t)) : OF F) : F)
+      = X * vπ ^ (b * t) := by
+        rw [hXdef, hvπ]
+        push_cast
+        rw [Valuation.map_mul, Valuation.map_pow]
+    _ ≤ vπ ^ k := h7
+
+
+/-- **The reverse inclusion at the exact chart interval (Kedlaya's plus-ring
+arithmetic on the dense layer)**: at the exact endpoints `ρ₁ = |ϖ|`,
+`ρ₂^a = |ϖ|^b`, every element of `Bloc` in the `|ϖ|^b`-ball lies in the subring
+generated by `A_inf` and the two chart fractions. -/
+theorem mem_chartSubring_of_wI_le (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    {x : Bloc p F ϖ}
+    (hwI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    x ∈ Subring.closure
+      (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+        ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) := by
+  set S : Subring (Bloc p F ϖ) := Subring.closure
+    (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+      ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}) with hSdef
+  have hmemAm : ∀ y : Ainf p F, algebraMap (Ainf p F) (Bloc p F ϖ) y ∈ S :=
+    fun y => Subring.subset_closure (Or.inl ⟨y, rfl⟩)
+  have hmemU : chartFracPi p F ϖ ∈ S :=
+    Subring.subset_closure (Or.inr (Set.mem_insert _ _))
+  have hmemV : chartFracP p F ϖ a b ∈ S :=
+    Subring.subset_closure (Or.inr (Set.mem_insert_of_mem _ rfl))
+  obtain ⟨⟨A, s⟩, hs⟩ := IsLocalization.surj
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x
+  obtain ⟨k, hk⟩ := s.2
+  have hx : x * algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) A := by
+    rw [show ((p : Ainf p F) * teichPi p F ϖ) ^ k = (s : Ainf p F) from hk]
+    exact hs
+  set N : ℕ := k + a * k with hNdef
+  obtain ⟨z, hzA⟩ := exists_eq_sum_teichCoeff_add p F A N
+  have key : ∀ m, m < N → ∃ y, y ∈ S ∧
+      y * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+        = algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p (teichCoeff p F A m) * (p : Ainf p F) ^ m) := by
+    intro m hmN
+    by_cases hmk : m ≤ k
+    · obtain ⟨c', hc'⟩ := exists_teichCoeff_factor_low p F ϖ
+        (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+        b k m hmk hexact1 A hx hwI
+      exact ⟨chartFracPi p F ϖ ^ (k - m)
+          * algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c'),
+        mul_mem (pow_mem hmemU _) (hmemAm _),
+        chart_term_low_eq p F ϖ k m hmk _ c' hc'⟩
+    · push_neg at hmk
+      obtain ⟨c', hc'⟩ := exists_teichCoeff_factor_high p F ϖ
+        (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+        a b k m ha hmk hexact2 A hx hwI
+      have hexp : k + a * ((m - k) / a) + (m - k) % a = m := by
+        have := Nat.div_add_mod (m - k) a
+        omega
+      have h := chart_term_high_eq p F ϖ a b k ((m - k) / a) ((m - k) % a) _ c' hc'
+      rw [hexp] at h
+      exact ⟨_, mul_mem (pow_mem hmemV _) (hmemAm _), h⟩
+  choose! y hyS hyEq using key
+  have htail := chart_tail_eq p F ϖ a b k hb z
+  have htotal : ((∑ m ∈ Finset.range N, y m)
+        + chartFracP p F ϖ a b ^ k * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (teichPi p F ϖ ^ (b * k - k) * z))
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) A := by
+    rw [add_mul, Finset.sum_mul]
+    have hsum : (∑ m ∈ Finset.range N, y m * algebraMap (Ainf p F) (Bloc p F ϖ)
+        (((p : Ainf p F) * teichPi p F ϖ) ^ k))
+        = ∑ m ∈ Finset.range N, algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p (teichCoeff p F A m) * (p : Ainf p F) ^ m) :=
+      Finset.sum_congr rfl fun m hm => hyEq m (Finset.mem_range.mp hm)
+    rw [hsum, ← map_sum, htail, ← map_add, ← hzA]
+  have hunit : IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ k)) := by
+    rw [map_pow]
+    exact (isUnit_p_teichPi_image p F ϖ).pow k
+  have hxeq : x = (∑ m ∈ Finset.range N, y m)
+      + chartFracP p F ϖ a b ^ k * algebraMap (Ainf p F) (Bloc p F ϖ)
+          (teichPi p F ϖ ^ (b * k - k) * z) :=
+    hunit.mul_right_cancel (hx.trans htotal.symm)
+  rw [hxeq]
+  exact add_mem (sum_mem fun m hm => hyS m (Finset.mem_range.mp hm))
+    (mul_mem (pow_mem hmemV _) (hmemAm _))
+
 end FarguesFontaine
 
 end
