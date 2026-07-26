@@ -1,4 +1,7 @@
-FOCUS: DS4 M1b-3b-viii step e — equivMapDomain (galoisProjPointEquiv) (pullbackDiv f h Q) = pullbackDiv f h (galoisPointEquiv Q).
-Steps (a)-(d) are DONE and pushed (galoisProjPointEquiv_toProjectiveSmoothPoint, equivMapDomain_kappaDivisor, galoisPointEquiv, galoisFiberEquiv). File is green.
-ATTEMPT NOTE: a show-based unfolding of pullbackDiv (Pullback.lean:34 = sum over {P // f P = Q} of single P.toProjectiveSmoothPoint 1) got stuck on elaboration (Fintype instance spelling f P = Q vs N smul P = Q, then an AddCommMonoid metavariable in the big show). NEXT ATTEMPT: avoid show — use `unfold HasseWeil.WeilPairing.pullbackDiv` (or simp only [HasseWeil.WeilPairing.pullbackDiv]) on both sides first, then push equivMapDomain through with Finsupp.equivMapDomain_eq_mapDomain + Finsupp.mapDomain_finset_sum, rewrite singles with step (a), and finish with Fintype.sum_equiv (galoisFiberEquiv W sigma N Q). Provide the Fintype instances via letI in BOTH spellings before unfolding.
-THEN step f: pullbackDivisor (Finsupp.sum) transport + weilFunction_divisor_eq_pullbackDivisor_kappaDivisor => div(Phi_sigma g_T) = div(g_{sigma T}); THEN pairing equivariance; THEN M1c.
+FOCUS: DS4 M1b-3b-viii — div(Phi_sigma g_T) = div(g_{sigma T}).
+DONE steps a-e (sorry-free, pushed): galoisProjPointEquiv_toProjectiveSmoothPoint, equivMapDomain_kappaDivisor, galoisPointEquiv, galoisFiberEquiv, equivMapDomain_pullbackDiv.
+NEXT step f: equivMapDomain (galoisProjPointEquiv) (pullbackDivisor f h D) = pullbackDivisor f h (equivMapDomain (galoisProjPointEquiv) D).
+  pullbackDivisor f h D = D.sum (fun v n => n smul pullbackDiv f h v.toAffinePoint)  [DivisorPullback.lean:113]
+  Route: Finsupp.sum over the relabelled D reindexes by galoisProjPointEquiv (Finsupp.sum_equivMapDomain or sum_mapDomain_index), each term uses equivMapDomain_pullbackDiv (step e) plus the compatibility v.toAffinePoint under the relabelling (ProjectiveSmoothPoint.toAffinePoint vs galoisPointEquiv — a small case lemma like step (a), needed as step f-0).
+THEN step g: combine with weilFunction_divisor_eq_pullbackDivisor_kappaDivisor (HfactLemma:134) and equivMapDomain_kappaDivisor to conclude div(Phi_sigma g_T) = div(g_{sigma T}).
+THEN the pairing equivariance (Constancy.pairing_const_of_transport + uniqueness); THEN M1c (EtaleDescent:440).

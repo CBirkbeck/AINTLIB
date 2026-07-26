@@ -659,4 +659,17 @@ theorem equivMapDomain_pullbackDiv {L : Type v} [Field L] [DecidableEq L] [IsAlg
     rw [Finsupp.mapDomain_single, galoisProjPointEquiv_toProjectiveSmoothPoint]
     rfl
 
+/-- **(M1b-3b-viii, step f-0)** The relabelling commutes with `toAffinePoint`. -/
+theorem toAffinePoint_galoisProjPointEquiv {L : Type v} [Field L] [DecidableEq L]
+    [Algebra k L] [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L)
+    (v : HasseWeil.Curves.ProjectiveSmoothPoint
+      (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L)) :
+    HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint
+        (galoisProjPointEquiv W σ v) =
+      galoisPointEquiv W σ
+        (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v) := by
+  cases v with
+  | affine P => rfl
+  | infinity => rfl
+
 end ModularCurves
