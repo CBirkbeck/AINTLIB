@@ -784,6 +784,138 @@ theorem gaussValueF_teichmuller_sub_le_of_le_scaled {ρ : NNReal} (hρ0 : 0 < ρ
         rw [mul_comm ε (c ^ m), ← mul_assoc, ← mul_pow, inv_mul_cancel₀ hc0.ne',
           one_pow, one_mul]
 
+/-- Coordinates shift under multiplication by `p` (F-version). -/
+theorem teichCoeffF_p_mul (x : WittVector p F) (n : ℕ) :
+    teichCoeffF p F ((p : WittVector p F) * x) (n + 1) = teichCoeffF p F x n := by
+  rw [teichCoeffF, teichCoeffF, show (p : WittVector p F) * x = x * (p : WittVector p F)
+    from mul_comm _ _, show ((x * (p : WittVector p F)).coeff (n + 1)) = x.coeff n ^ p from
+    WittVector.mul_charP_coeff_succ x n, pow_succ ((_root_.frobeniusEquiv F p).symm),
+    RingAut.mul_apply]
+  congr 1
+  rw [show x.coeff n ^ p = _root_.frobenius F p (x.coeff n) from rfl,
+    ← _root_.frobeniusEquiv_apply, RingEquiv.symm_apply_apply]
+
+theorem teichCoeffF_p_mul_zero (x : WittVector p F) :
+    teichCoeffF p F ((p : WittVector p F) * x) 0 = 0 := by
+  rw [teichCoeffF]
+  have h0 : ((p : WittVector p F) * x).coeff 0 = 0 := by
+    rw [mul_comm]
+    exact WittVector.mul_charP_coeff_zero x
+  simp [h0]
+
+/-- Term identities for the `p`-shift. -/
+theorem gaussTermF_p_mul {ρ : NNReal} (x : WittVector p F) (n : ℕ) :
+    gaussTermF p F ρ ((p : WittVector p F) * x) (n + 1) = ρ * gaussTermF p F ρ x n := by
+  rw [gaussTermF, gaussTermF, teichCoeffF_p_mul, pow_succ]
+  ring
+
+theorem gaussTermF_p_mul_zero {ρ : NNReal} (x : WittVector p F) :
+    gaussTermF p F ρ ((p : WittVector p F) * x) 0 = 0 := by
+  rw [gaussTermF, teichCoeffF_p_mul_zero]
+  simp
+
+theorem bddAbove_gaussTermF_p_mul {ρ : NNReal} {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F ρ x))) :
+    BddAbove (Set.range (gaussTermF p F ρ ((p : WittVector p F) * x))) := by
+  obtain ⟨M, hM⟩ := hB
+  refine ⟨ρ * M, ?_⟩
+  rintro y ⟨k, rfl⟩
+  rcases k with - | n
+  · rw [gaussTermF_p_mul_zero]
+    exact zero_le
+  · rw [gaussTermF_p_mul]
+    exact mul_le_mul_of_nonneg_left (hM ⟨n, rfl⟩) zero_le
+
+/-- The `p`-shift for the F-value (boundedness-threaded). -/
+theorem gaussValueF_p_mul {ρ : NNReal} {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F ρ x))) :
+    gaussValueF p F ρ ((p : WittVector p F) * x) = ρ * gaussValueF p F ρ x := by
+  rw [gaussValueF, gaussValueF, NNReal.mul_iSup]
+  refine le_antisymm (ciSup_le fun n => ?_) (ciSup_le fun n => ?_)
+  · rcases n with - | n
+    · rw [gaussTermF_p_mul_zero]
+      exact zero_le
+    · rw [gaussTermF_p_mul]
+      refine le_ciSup (⟨ρ * (gaussValueF p F ρ x), ?_⟩ :
+        BddAbove (Set.range fun m => ρ * gaussTermF p F ρ x m)) n
+      rintro y ⟨k, rfl⟩
+      exact mul_le_mul_of_nonneg_left (gaussTermF_le_gaussValueF p F hB k) zero_le
+  · rw [← gaussTermF_p_mul]
+    exact le_ciSup (bddAbove_gaussTermF_p_mul p F hB) (n + 1)
+
+/-- Sums of boundedly-termed vectors are boundedly termed (digits of the level
+representation are uniformly controlled). -/
+theorem bddAbove_gaussTermF_add {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    {x y : WittVector p F}
+    (hBx : BddAbove (Set.range (gaussTermF p F ρ x)))
+    (hBy : BddAbove (Set.range (gaussTermF p F ρ y))) :
+    BddAbove (Set.range (gaussTermF p F ρ (x + y))) := by
+  refine ⟨max (gaussValueF p F ρ x) (gaussValueF p F ρ y), ?_⟩
+  rintro z ⟨j, rfl⟩
+  obtain ⟨b, L, hrep, hb, -⟩ := exists_level_repF p F hρ0 hρ1 hBx hBy (j + 1)
+  have hcoeff : teichCoeffF p F (x + y) j = b j := by
+    rw [hrep, teichCoeffF_sum_range_add p F (N := j + 1) b _ (Nat.lt_succ_self j)]
+  rw [gaussTermF, hcoeff]
+  exact hb j (Nat.lt_succ_self j)
+
+/-- Boundedness for Teichmüller differences (any pair, via `ϖ`-power scaling). -/
+theorem bddAbove_gaussTermF_teichmuller_sub {ρ : NNReal} (hρ1 : ρ < 1)
+    (ϖ : PseudoUniformizer F) (a b : F) :
+    BddAbove (Set.range (gaussTermF p F ρ
+      (WittVector.teichmuller p a - WittVector.teichmuller p b))) := by
+  set ϖF : F := ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hϖF
+  set c : NNReal := perfectoidValuation p F ϖF with hc
+  have hϖne : ϖF ≠ 0 := fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  have hclt : c < 1 := perfectoidValuation_toOF_lt_one p F ϖ
+  obtain ⟨m, hm⟩ : ∃ m : ℕ, max (perfectoidValuation p F a) (perfectoidValuation p F b)
+      ≤ (c⁻¹) ^ m := by
+    rcases eq_or_ne (max (perfectoidValuation p F a) (perfectoidValuation p F b)) 0
+      with h0 | hpos
+    · exact ⟨0, by rw [h0, pow_zero]; exact zero_le⟩
+    · have hmaxpos : 0 < (max (perfectoidValuation p F a)
+          (perfectoidValuation p F b))⁻¹ :=
+        inv_pos.mpr (pos_iff_ne_zero.mpr hpos)
+      obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hmaxpos hclt
+      refine ⟨m, ?_⟩
+      rw [inv_pow]
+      have h1 : max (perfectoidValuation p F a) (perfectoidValuation p F b) * c ^ m
+          < 1 := by
+        have h2 := mul_lt_mul_of_pos_left hm (pos_iff_ne_zero.mpr hpos)
+        rwa [mul_inv_cancel₀ hpos] at h2
+      exact le_of_lt ((NNReal.lt_inv_iff_mul_lt (pow_ne_zero m hc0.ne')).mpr h1)
+  have hscale : ∀ x : F, perfectoidValuation p F x ≤ (c⁻¹) ^ m →
+      perfectoidValuation p F (x * ϖF ^ m) ≤ 1 := by
+    intro x hx
+    rw [Valuation.map_mul, map_pow]
+    calc perfectoidValuation p F x * c ^ m
+        ≤ (c⁻¹) ^ m * c ^ m := mul_le_mul_of_nonneg_right hx zero_le
+      _ = 1 := by rw [← mul_pow, inv_mul_cancel₀ hc0.ne', one_pow]
+  obtain ⟨ahat, hahat⟩ := (perfectoidValuation_integers p F).exists_of_le_one
+    (hscale a ((le_max_left _ _).trans hm))
+  obtain ⟨bhat, hbhat⟩ := (perfectoidValuation_integers p F).exists_of_le_one
+    (hscale b ((le_max_right _ _).trans hm))
+  have hahat' : ((ahat : OF F) : F) = a * ϖF ^ m := hahat
+  have hbhat' : ((bhat : OF F) : F) = b * ϖF ^ m := hbhat
+  have hsplit : WittVector.teichmuller p a - WittVector.teichmuller p b
+      = WittVector.teichmuller p ((ϖF ^ m)⁻¹) *
+        (WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+          (WittVector.teichmuller p ahat - WittVector.teichmuller p bhat)) := by
+    rw [map_sub, WittVector.map_teichmuller, WittVector.map_teichmuller]
+    rw [show ((powerBoundedSubring.toSubring F).subtype) ahat = ((ahat : OF F) : F) from rfl,
+      show ((powerBoundedSubring.toSubring F).subtype) bhat = ((bhat : OF F) : F) from rfl,
+      hahat', hbhat', mul_sub, ← map_mul, ← map_mul]
+    have hϖpm : (ϖF ^ m) ≠ 0 := pow_ne_zero m hϖne
+    rw [show (ϖF ^ m)⁻¹ * (a * ϖF ^ m) = a from by field_simp,
+      show (ϖF ^ m)⁻¹ * (b * ϖF ^ m) = b from by field_simp]
+  refine ⟨(c⁻¹) ^ m, ?_⟩
+  rintro z ⟨n, rfl⟩
+  rw [hsplit, gaussTermF_teichmuller_mul, gaussTermF_map]
+  have hvinv : perfectoidValuation p F ((ϖF ^ m)⁻¹) = (c⁻¹) ^ m := by
+    rw [map_inv₀, map_pow, inv_pow]
+  rw [hvinv]
+  exact mul_le_of_le_one_right zero_le (gaussTerm_le_one p F hρ1.le _ n)
+
 end FarguesFontaine
 
 end
