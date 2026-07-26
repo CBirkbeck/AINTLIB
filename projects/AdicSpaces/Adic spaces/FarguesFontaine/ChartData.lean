@@ -1077,6 +1077,12 @@ theorem tendsto_chartToBIProd_coe (a b : ℕ) (hb : 0 < b)
   refine (tendsto_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2).congr fun z => ?_
   rfl
 
+/-- The ring-topology instance at the opaque chart topology (elaborated once). -/
+theorem chartTopologicalRing (a b : ℕ) :
+    @IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b))
+      (chartTopology p F ϖ a b) _ :=
+  (chartData p F ϖ 1 b a b).isTopologicalRing
+
 /-- The chart map is continuous for the chart topology. -/
 theorem continuous_chartToBIProd (a b : ℕ) (hb : 0 < b)
     (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
