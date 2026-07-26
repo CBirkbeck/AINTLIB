@@ -1049,7 +1049,26 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   (Tate-algebra completeness — repo RestrictedPowerSeries API), `y = Σ_I a_I x_I`.
 
 ### [T908] λ_I, BI, three circles, coordinate continuity
-- **Status**: open | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T901; T902
+- **Status**: in_progress (beastmode 2026-07-26) | **File**: FarguesFontaine/IntervalRing.lean | **Depends**: T901, T902 (done)
+- **DESIGN REVISION (2026-07-26, after §2+§3 completed)** — AD-7 is *implemented* by the
+  product-of-completions trick rather than by SeminormedRing plumbing (mathlib has no
+  `RingSeminorm → SeminormedRing` constructor, and our norms are NNReal-valued):
+  * `BIProd ρ₁ ρ₂ : Bloc →+* hatK ρ₁ × hatK ρ₂ := (BlocToHatK ρ₁).prod (BlocToHatK ρ₂)`;
+  * **`BISub := (BIProd).range.topologicalClosure`** — a closed subring of a complete
+    product, i.e. exactly the completion of `Bloc` for the max-of-two-valuations
+    uniformity (mirrors `ArSub`/`BrSub` from T903, so all the T903 machinery —
+    `cauchySeq_of_valued_le`, `eventually_valued_sub_le`, closedness, coordinate
+    limits — ports coordinatewise);
+  * `wI z := max (Valued.v z.1) (Valued.v z.2)` on the product, restricted to `BISub`:
+    submultiplicative + ultrametric, and multiplicative on each factor;
+  * Cor 4.5 (`wI = sup over the interval`) is only needed through its CONSEQUENCES
+    (restriction maps + injectivity), so state those directly (T909);
+  * three circles (Lemma 4.4) needs NNReal.rpow interpolation — postpone until a
+    downstream proof actually consumes it; the campaign path to Thm 4.10 goes through
+    Lemma 4.9's presentations, which use only the two endpoint norms.
+  Build order: (a) `BIProd`/`BISub` + subring/complete/closed facts; (b) the two
+  coordinate valuations and `wI` with its norm axioms; (c) the coordinate realization
+  transported from T903 (each factor lands in `BrSub`); then T909-T912.
 - **Statement**: for `I = [ρ₁,ρ₂] ⊂ (0,1)` (endpoints in c^ℚ per AD-4):
   `wI := fun x => max (wLoc ρ₁ x) (wLoc ρ₂ x)` (power-multiplicative ring norm);
   `BI := UniformSpace.Completion (Bloc, wI-uniformity)` as a NormedRing (AD-7);
