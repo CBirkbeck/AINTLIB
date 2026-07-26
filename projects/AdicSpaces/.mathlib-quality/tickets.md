@@ -895,6 +895,21 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   (v) Lemma 2.8 (approximate division; the (2.8.2) T-polynomial bookkeeping);
   (vi) Prop 2.9 (geometric iteration, summability via PhiHatK-machinery);
   (vii) Cor 2.10 EuclideanDomain + IsPrincipalIdealRing instances on ArSub.
+- **Progress 2 (2026-07-26, sol-validated deg-layer COMPLETE, all axiom-clean)**:
+  the full gpt-5.6-sol plan (archived `chatgpt-reply-degmul-2026-07-26.md`) landed:
+  n-ary (2.8.1) `gaussValueF_teichmuller_sum_sub_le`; degAr + `degAr_spec` +
+  `gaussTerm_lt_of_degAr_lt`; Lemma-2.8 ε `exists_eps_terms_le`; convolution layer
+  (`convF`, `tendsto_antidiagonal_sup_zero`, `tendsto_convF`, `gaussTerm_convF_le`);
+  Φ-coordinate recovery `teichCoeffAr_PhiHatK` + `teichCoeffAr_zero` (ArCompletion);
+  **(DC⁺)** `digit_sub_le`; **Remark 2.7** `valued_eq_of_valued_sub_lt` +
+  `degAr_eq_of_valued_sub_lt` (leading-support stability); product decomposition
+  `convPartialAloc`/`alocToWittF_convPartialAloc`/(I₂)`gaussValueF_convPartial_sub_prefix_le`/
+  (I₁)`gaussValueF_prefix_mul_sub_convPartial_le`/`valued_mul_sub_PhiHatK_convF_le`;
+  `valued_degAr_PhiHatK_convF` (unique dominant antidiagonal term); **`degAr_mul`**
+  (Kedlaya Lemma 2.6 at the single radius — honest proof of what the source leaves
+  to "convex duality"). NEXT: Lemma 2.8 (the division iteration — quotient-candidate
+  z₀ := Φ(shifted-coords/x_m) via alocTeich-division; the (2.8.2) N_l-descent), then
+  Prop 2.9, Cor 2.10.
 - **Statement**: Lemma 2.8 (approximate division): for x ≠ 0 ∃ ε ∈ (0,1) s.t. ∀ y ∃ z w:
   `y = z*x + w ∧ wAr w ≤ wAr y ∧ (wAr w > ε·wAr y → deg w < deg x)`. Prop 2.9 (exact):
   `∀ x ≠ 0, ∀ y, ∃ z w, y = z*x + w ∧ wAr w ≤ wAr y ∧ deg w < deg x`. Cor 2.10:

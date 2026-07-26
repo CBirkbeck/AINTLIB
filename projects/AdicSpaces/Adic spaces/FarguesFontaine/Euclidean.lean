@@ -1141,6 +1141,227 @@ theorem valued_mul_sub_PhiHatK_convF_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ
       exact gaussValueF_convPartial_sub_prefix_le p F ϖ hρ0 hρ1 a b hA hB N
     · exact hN2
 
+/-- Scaled convolution terms are bounded by the product of the input bounds. -/
+theorem gaussTerm_convF_le {ρ : NNReal} (a b : ℕ → F) {A B : NNReal}
+    (hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ A)
+    (hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ B) (n : ℕ) :
+    ρ ^ n * perfectoidValuation p F (convF F a b n) ≤ A * B := by
+  have h1 : perfectoidValuation p F (convF F a b n)
+      ≤ (Finset.range (n + 1)).sup
+        (fun k => perfectoidValuation p F (a k * b (n - k))) := by
+    rw [convF]
+    exact Valuation.map_sum_le _ fun k hk => Finset.le_sup
+      (f := fun k => perfectoidValuation p F (a k * b (n - k))) hk
+  refine le_trans (mul_le_mul_of_nonneg_left h1 zero_le) ?_
+  have hne : (Finset.range (n + 1)).Nonempty :=
+    Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero n)
+  obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
+    (fun k => perfectoidValuation p F (a k * b (n - k)))
+  rw [hk₀]
+  have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk₀mem)
+  calc ρ ^ n * perfectoidValuation p F (a k₀ * b (n - k₀))
+      = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
+        * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
+        rw [Valuation.map_mul,
+          show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+            rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
+        ring
+    _ ≤ A * B := mul_le_mul (hA k₀) (hB (n - k₀)) zero_le zero_le
+
+/-- **Degree of the convolution series** (sol step 4): the unique dominant
+antidiagonal term at `deg x + deg y` makes `Φ(conv)` attain `v(x)v(y)` there and
+drop strictly above. -/
+theorem valued_degAr_PhiHatK_convF {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) (hy0 : y ≠ 0) :
+    Valued.v (PhiHatK p F ϖ hρ0 hρ1 (convF F (teichCoeffAr p F ϖ hρ0 hρ1 x)
+        (teichCoeffAr p F ϖ hρ0 hρ1 y))) = Valued.v x * Valued.v y
+      ∧ degAr p F ϖ hρ0 hρ1 (PhiHatK p F ϖ hρ0 hρ1
+          (convF F (teichCoeffAr p F ϖ hρ0 hρ1 x) (teichCoeffAr p F ϖ hρ0 hρ1 y)))
+        = degAr p F ϖ hρ0 hρ1 x + degAr p F ϖ hρ0 hρ1 y := by
+  set a : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 x with ha
+  set b : ℕ → F := teichCoeffAr p F ϖ hρ0 hρ1 y with hb
+  set m := degAr p F ϖ hρ0 hρ1 x with hm
+  set l := degAr p F ϖ hρ0 hρ1 y with hl
+  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
+  rw [← ha] at hdx
+  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
+  rw [← hb] at hdy
+  have hdc := tendsto_convF p F hdx hdy
+  have hA : ∀ n, ρ ^ n * perfectoidValuation p F (a n) ≤ Valued.v x :=
+    fun n => gaussTerm_teichCoeffAr_le' p F ϖ hx n
+  have hB : ∀ n, ρ ^ n * perfectoidValuation p F (b n) ≤ Valued.v y :=
+    fun n => gaussTerm_teichCoeffAr_le' p F ϖ hy n
+  have hvx0 : Valued.v x ≠ 0 :=
+    (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0
+  have hvy0 : Valued.v y ≠ 0 :=
+    (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hy0
+  have hvxpos : 0 < Valued.v x := pos_iff_ne_zero.mpr hvx0
+  have hvypos : 0 < Valued.v y := pos_iff_ne_zero.mpr hvy0
+  obtain ⟨hxattain, hxdom⟩ := degAr_spec p F ϖ hx hx0
+  obtain ⟨hyattain, hydom⟩ := degAr_spec p F ϖ hy hy0
+  -- the strict antidiagonal bound off (m, l), for every n and k ≤ n with the
+  -- pair (k, n-k) ≠ (m, l) forced by n > m + l or k ≠ m at n = m + l
+  have hstrict : ∀ n k : ℕ, k ≤ n → (m < k ∨ l < n - k) →
+      (ρ ^ k * perfectoidValuation p F (a k))
+        * (ρ ^ (n - k) * perfectoidValuation p F (b (n - k)))
+      < Valued.v x * Valued.v y := by
+    intro n k _ hcase
+    rcases hcase with hcase | hcase
+    · refine lt_of_le_of_lt (mul_le_mul_of_nonneg_left (hB (n - k)) zero_le) ?_
+      exact mul_lt_mul_of_pos_right
+        (gaussTerm_lt_of_degAr_lt p F ϖ hx hx0 hcase) hvypos
+    · refine lt_of_le_of_lt (mul_le_mul_of_nonneg_right (hA k) zero_le) ?_
+      exact mul_lt_mul_of_pos_left
+        (gaussTerm_lt_of_degAr_lt p F ϖ hy hy0 hcase) hvxpos
+  -- attainment at m + l: the unique dominant term
+  have hcsplit : convF F a b (m + l)
+      = a m * b l + ∑ k ∈ (Finset.range (m + l + 1)).erase m,
+        a k * b (m + l - k) := by
+    have hmem : m ∈ Finset.range (m + l + 1) :=
+      Finset.mem_range.mpr (by omega)
+    have hidx : m + l - m = l := by omega
+    rw [convF, ← Finset.add_sum_erase _ _ hmem, hidx]
+  have hrest : ρ ^ (m + l) * perfectoidValuation p F
+      (∑ k ∈ (Finset.range (m + l + 1)).erase m, a k * b (m + l - k))
+      < Valued.v x * Valued.v y := by
+    rcases Finset.eq_empty_or_nonempty ((Finset.range (m + l + 1)).erase m)
+      with hemp | hne
+    · rw [hemp, Finset.sum_empty, Valuation.map_zero, mul_zero]
+      exact mul_pos hvxpos hvypos
+    · have h1 : perfectoidValuation p F
+          (∑ k ∈ (Finset.range (m + l + 1)).erase m, a k * b (m + l - k))
+          ≤ ((Finset.range (m + l + 1)).erase m).sup
+            (fun k => perfectoidValuation p F (a k * b (m + l - k))) :=
+        Valuation.map_sum_le _ fun k hk => Finset.le_sup
+          (f := fun k => perfectoidValuation p F (a k * b (m + l - k))) hk
+      refine lt_of_le_of_lt (mul_le_mul_of_nonneg_left h1 zero_le) ?_
+      obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
+        (fun k => perfectoidValuation p F (a k * b (m + l - k)))
+      rw [hk₀]
+      have hk₀ne : k₀ ≠ m := Finset.ne_of_mem_erase hk₀mem
+      have hk₀n : k₀ ≤ m + l := Nat.lt_succ_iff.mp
+        (Finset.mem_range.mp (Finset.mem_of_mem_erase hk₀mem))
+      have hsplitcase : m < k₀ ∨ l < m + l - k₀ := by omega
+      calc ρ ^ (m + l) * perfectoidValuation p F (a k₀ * b (m + l - k₀))
+          = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
+            * (ρ ^ (m + l - k₀) * perfectoidValuation p F (b (m + l - k₀))) := by
+            rw [Valuation.map_mul,
+              show ρ ^ (m + l) = ρ ^ k₀ * ρ ^ (m + l - k₀) from by
+                rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
+            ring
+        _ < Valued.v x * Valued.v y := hstrict (m + l) k₀ hk₀n hsplitcase
+  have hlead : ρ ^ (m + l) * perfectoidValuation p F (a m * b l)
+      = Valued.v x * Valued.v y := by
+    calc ρ ^ (m + l) * perfectoidValuation p F (a m * b l)
+        = (ρ ^ m * perfectoidValuation p F (a m))
+          * (ρ ^ l * perfectoidValuation p F (b l)) := by
+          rw [Valuation.map_mul, pow_add]
+          ring
+      _ = Valued.v x * Valued.v y := by
+          rw [← hxattain, ← hyattain]
+  have hattain : ρ ^ (m + l) * perfectoidValuation p F (convF F a b (m + l))
+      = Valued.v x * Valued.v y := by
+    rw [hcsplit]
+    have hlt : perfectoidValuation p F
+        (∑ k ∈ (Finset.range (m + l + 1)).erase m, a k * b (m + l - k))
+        < perfectoidValuation p F (a m * b l) := by
+      have hρpos : (0 : NNReal) < ρ ^ (m + l) := pow_pos hρ0 (m + l)
+      have h2 : ρ ^ (m + l) * perfectoidValuation p F
+          (∑ k ∈ (Finset.range (m + l + 1)).erase m, a k * b (m + l - k))
+          < ρ ^ (m + l) * perfectoidValuation p F (a m * b l) := by
+        rw [hlead]
+        exact hrest
+      exact lt_of_mul_lt_mul_left h2 zero_le
+    rw [Valuation.map_add_eq_of_lt_left _ hlt]
+    exact hlead
+  -- strict drop above m + l
+  have hdrop : ∀ n, m + l < n →
+      ρ ^ n * perfectoidValuation p F (convF F a b n)
+        < Valued.v x * Valued.v y := by
+    intro n hn
+    have h1 : perfectoidValuation p F (convF F a b n)
+        ≤ (Finset.range (n + 1)).sup
+          (fun k => perfectoidValuation p F (a k * b (n - k))) := by
+      rw [convF]
+      exact Valuation.map_sum_le _ fun k hk => Finset.le_sup
+        (f := fun k => perfectoidValuation p F (a k * b (n - k))) hk
+    refine lt_of_le_of_lt (mul_le_mul_of_nonneg_left h1 zero_le) ?_
+    have hne : (Finset.range (n + 1)).Nonempty :=
+      Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero n)
+    obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
+      (fun k => perfectoidValuation p F (a k * b (n - k)))
+    rw [hk₀]
+    have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hk₀mem)
+    have hsplitcase : m < k₀ ∨ l < n - k₀ := by omega
+    calc ρ ^ n * perfectoidValuation p F (a k₀ * b (n - k₀))
+        = (ρ ^ k₀ * perfectoidValuation p F (a k₀))
+          * (ρ ^ (n - k₀) * perfectoidValuation p F (b (n - k₀))) := by
+          rw [Valuation.map_mul,
+            show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+              rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
+          ring
+      _ < Valued.v x * Valued.v y := hstrict n k₀ hk₀n hsplitcase
+  -- value of Φ(conv)
+  have hΦval : Valued.v (PhiHatK p F ϖ hρ0 hρ1 (convF F a b))
+      = Valued.v x * Valued.v y := by
+    rw [valued_PhiHatK p F ϖ hρ0 hρ1 hdc]
+    refine le_antisymm (ciSup_le fun n => gaussTerm_convF_le p F a b hA hB n) ?_
+    have hBc := bddAbove_range_of_tendsto_zero hdc
+    have h1 := le_ciSup hBc (m + l)
+    rw [hattain] at h1
+    exact h1
+  refine ⟨hΦval, ?_⟩
+  -- the attainment set of Φ(conv) is exactly bounded by m + l and contains it
+  have hcoords : ∀ n, teichCoeffAr p F ϖ hρ0 hρ1
+      (PhiHatK p F ϖ hρ0 hρ1 (convF F a b)) n = convF F a b n :=
+    fun n => teichCoeffAr_PhiHatK p F ϖ hρ0 hρ1 hdc n
+  have hset : {n | Valued.v (PhiHatK p F ϖ hρ0 hρ1 (convF F a b))
+      = ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1
+        (PhiHatK p F ϖ hρ0 hρ1 (convF F a b)) n)}
+      = {n | Valued.v x * Valued.v y
+        = ρ ^ n * perfectoidValuation p F (convF F a b n)} := by
+    ext n
+    simp only [Set.mem_setOf_eq, hcoords n, hΦval]
+  rw [degAr, hset]
+  have hub : ∀ n ∈ {n | Valued.v x * Valued.v y
+      = ρ ^ n * perfectoidValuation p F (convF F a b n)}, n ≤ m + l := by
+    intro n hn
+    by_contra hcon
+    push Not at hcon
+    have h2 := hdrop n hcon
+    rw [← hn] at h2
+    exact absurd h2 (lt_irrefl _)
+  refine le_antisymm (csSup_le ⟨m + l, hattain.symm⟩ hub)
+    (le_csSup ⟨m + l, hub⟩ hattain.symm)
+
+/-- **The degree is additive** (Kedlaya Lemma 2.6, specialized to the single
+radius): `deg(xy) = deg x + deg y` on `A^r`. -/
+theorem degAr_mul {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) (hy0 : y ≠ 0) :
+    degAr p F ϖ hρ0 hρ1 (x * y)
+      = degAr p F ϖ hρ0 hρ1 x + degAr p F ϖ hρ0 hρ1 y := by
+  obtain ⟨hΦval, hΦdeg⟩ := valued_degAr_PhiHatK_convF p F ϖ hx hy hx0 hy0
+  have hdx := tendsto_gaussTerm_teichCoeffAr p F ϖ hx
+  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
+  have hdc := tendsto_convF p F hdx hdy
+  have hvx0 : Valued.v x ≠ 0 :=
+    (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0
+  have hvy0 : Valued.v y ≠ 0 :=
+    (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hy0
+  have hvv : 0 < Valued.v x * Valued.v y :=
+    mul_pos (pos_iff_ne_zero.mpr hvx0) (pos_iff_ne_zero.mpr hvy0)
+  have hE := valued_mul_sub_PhiHatK_convF_le p F ϖ hx hy
+  have hlt : Valued.v (x * y - PhiHatK p F ϖ hρ0 hρ1
+      (convF F (teichCoeffAr p F ϖ hρ0 hρ1 x) (teichCoeffAr p F ϖ hρ0 hρ1 y)))
+      < Valued.v (x * y) := by
+    rw [Valuation.map_mul]
+    exact lt_of_le_of_lt hE (mul_lt_of_lt_one_left hvv hρ1)
+  rw [degAr_eq_of_valued_sub_lt p F ϖ (mul_mem hx hy)
+    (PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 hdc) hlt]
+  exact hΦdeg
+
 end FarguesFontaine
 
 end
