@@ -1174,6 +1174,34 @@ theorem galoisFunctionFieldEquiv_translateY (xk yk : L) :
     galoisFunctionFieldEquiv_translateSlope]
   rfl
 
+/-- **(M1b-3b leaf, brick 5, non-2-torsion branch)** The conjugation identity at a
+non-2-torsion point: `Φ_σ ∘ τ_{(xk,yk)} = τ_{(σxk,σyk)} ∘ Φ_σ`, checked on constants and
+the two generic coordinates via `ringHom_ext_const_x_y_gen`. -/
+theorem galois_conj_translateAlgHom_nonTor (xk yk : L)
+    (hns : (W.baseChange L).toAffine.Nonsingular xk yk)
+    (hnt : yk ≠ (W.baseChange L).toAffine.negY xk yk)
+    (hns' : (W.baseChange L).toAffine.Nonsingular (σ xk) (σ yk))
+    (hnt' : σ yk ≠ (W.baseChange L).toAffine.negY (σ xk) (σ yk)) :
+    ((galoisFunctionFieldEquiv W σ :
+        (W.baseChange L).toAffine.FunctionField →+*
+          (W.baseChange L).toAffine.FunctionField).comp
+      (HasseWeil.translateAlgHom_of_nonTorsion (W.baseChange L) xk yk hns hnt).toRingHom) =
+      ((HasseWeil.translateAlgHom_of_nonTorsion (W.baseChange L) (σ xk) (σ yk)
+          hns' hnt').toRingHom.comp
+        (galoisFunctionFieldEquiv W σ :
+          (W.baseChange L).toAffine.FunctionField →+*
+            (W.baseChange L).toAffine.FunctionField)) := by
+  refine ringHom_ext_const_x_y_gen W ?_ ?_ ?_
+  · intro a
+    simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      AlgHom.commutes, galoisFunctionFieldEquiv_algebraMap]
+  · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      HasseWeil.translateAlgHom_apply_x_gen, galoisFunctionFieldEquiv_translateX,
+      galoisFunctionFieldEquiv_x_gen]
+  · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+      HasseWeil.translateAlgHom_apply_y_gen, galoisFunctionFieldEquiv_translateY,
+      galoisFunctionFieldEquiv_y_gen]
+
 end TranslationTransport
 
 end ModularCurves
