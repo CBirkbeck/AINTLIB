@@ -373,6 +373,45 @@ noncomputable def leadCoeffRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : ↥(ArSub p F ϖ hρ0 hρ1) :=
   MvPowerSeries.coeff (leadIdxRPS p F ϖ hρ0 hρ1 f) f
 
+/-- Bounded coefficient values for restricted series (the recurring bound). -/
+theorem bddAbove_coeff_valued {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    BddAbove (Set.range (fun s : Fin k →₀ ℕ =>
+      Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1))) := by
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf
+  refine ⟨max 1 (((hfin 1 one_pos).toFinset).sup (fun s =>
+    Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1))), ?_⟩
+  rintro t ⟨s, rfl⟩
+  rcases le_or_gt (Valued.v ((MvPowerSeries.coeff s f :
+      ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) 1 with h1 | h1
+  · exact le_max_of_le_left h1
+  · refine le_max_of_le_right (Finset.le_sup
+      (f := fun s => Valued.v ((MvPowerSeries.coeff s f :
+        ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) ?_)
+    rw [Set.Finite.mem_toFinset]
+    exact h1
+
+/-- Monomials are restricted. -/
+theorem isRestricted_monomial {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {J : Fin k →₀ ℕ} (a : ↥(ArSub p F ϖ hρ0 hρ1)) :
+    MvPowerSeries.IsRestricted
+      (MvPowerSeries.monomial J a : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := by
+  rw [MvPowerSeries.IsRestricted, Filter.tendsto_def]
+  intro U hU
+  rw [Filter.mem_cofinite]
+  refine (Set.finite_singleton J).subset ?_
+  intro s hs
+  simp only [Set.mem_compl_iff, Set.mem_preimage] at hs
+  by_contra hne
+  refine hs ?_
+  rw [MvPowerSeries.coeff_monomial, if_neg (by
+    intro h
+    exact hne (by rw [h]; exact Set.mem_singleton J))]
+  exact mem_of_mem_nhds hU
+
 end FarguesFontaine
 
 end
