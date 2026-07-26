@@ -1105,6 +1105,51 @@ theorem continuous_chartToBIProd (a b : ℕ) (hb : 0 < b)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb) ?_
   exact tendsto_chartToBIProd_coe p F ϖ a b hb hπ1 hπ2 hr1 hr2
 
+set_option warn.classDefReducibility false in
+/-- The chart uniformity (right uniformity of the chart topology), opaque. -/
+noncomputable def chartUniformity (a b : ℕ) :
+    UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+  @IsTopologicalAddGroup.rightUniformSpace _ _ (chartTopology p F ϖ a b)
+    (@IsTopologicalRing.to_topologicalAddGroup _ _ (chartTopology p F ϖ a b)
+      (chartTopologicalRing p F ϖ a b))
+
+/-- The uniform-add-group property at the chart uniformity. -/
+theorem chartIsUniformAddGroup (a b : ℕ) :
+    @IsUniformAddGroup (Localization.Away (chartS p F ϖ 1 b))
+      (chartUniformity p F ϖ a b) _ :=
+  @isUniformAddGroup_of_addCommGroup _ _ (chartTopology p F ϖ a b)
+    (@IsTopologicalRing.to_topologicalAddGroup _ _ (chartTopology p F ϖ a b)
+      (chartTopologicalRing p F ϖ a b))
+
+/-- **The chart map extended to the completion**: the canonical continuous ring
+homomorphism from the completed chart localization to the product of completed
+fields (landing, by density, in `B^I`). -/
+noncomputable def chartCompletionToBIProd (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+      chartUniformity p F ϖ a b
+    letI : IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b)) :=
+      chartTopologicalRing p F ϖ a b
+    letI : IsUniformAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
+      chartIsUniformAddGroup p F ϖ a b
+    (UniformSpace.Completion (Localization.Away (chartS p F ϖ 1 b))) →+*
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+  letI : UniformSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartUniformity p F ϖ a b
+  letI : IsTopologicalRing (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartTopologicalRing p F ϖ a b
+  letI : IsUniformAddGroup (Localization.Away (chartS p F ϖ 1 b)) :=
+    chartIsUniformAddGroup p F ϖ a b
+  UniformSpace.Completion.extensionHom
+    (chartToBIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) b hb)
+    (continuous_chartToBIProd p F ϖ a b hb hπ1 hπ2 hr1 hr2)
+
 end FarguesFontaine
 
 end
