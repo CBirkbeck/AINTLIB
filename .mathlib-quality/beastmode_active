@@ -1,10 +1,5 @@
-FOCUS: DS4 M1b-3b-x — assemble the sigma-equivariance of the Weil pairing.
-LANDED and axiom-clean (WeilPairing/GaloisFunctionField.lean, sorry-free):
-  projectiveDivisorOf_galois_weilFunction (div(sigma.g_T) = div(g_{sigma T})),
-  weilPairing_galois_core_of_algEquiv (conj + naturality + constants law => equivariance),
-  galoisFunctionFieldEquiv_algebraMap (+ raw version) = the constants law.
-REMAINING for the assembly theorem weilPairing_galois_of_conj (attempted, reverted; file green):
-  (1) the sigma-naturality constant: need div(Phi g_T / g_{sigma T}) = 0. HasseWeil has projectiveDivisorOf_mul (ProjectiveDivisor.lean:285) and projectiveDivisorOf_inv (:305) but NO _div; the rewrite of div_eq_mul_inv failed because the curve is displayed in unfolded record form — introduce `set C := (<W-baseChange-L>.toAffine)`-style abbreviations or state a tiny local lemma projectiveDivisorOf_div first.
-  (2) The statement elaboration hit a whnf timeout at the theorem header (200000) — heartbeat bumps are FORBIDDEN, so split: state a local abbreviation for the curve/function field, and make the hypotheses smaller (e.g. take the conj hypothesis as a standalone Prop def).
-  (3) The remaining genuine leaf is the CONJUGATION Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma (use algHom_ext_x_y_gen + translateAlgEquivOfPoint_*_x_gen/_y_gen).
-THEN M1c (EtaleDescent:440 + torsionAlgebraPointsEquiv equivariance).
+FOCUS: DS4 M1b-3b-x — extract the sigma-naturality constant, then assemble the pairing equivariance.
+GREEN + PUSHED (sorry-free, axiom-clean): the whole transport chain, projectiveDivisorOf_galois_weilFunction, weilPairing_galois_core_of_algEquiv, galoisFunctionFieldEquiv_algebraMap, projectiveDivisorOf_div.
+OBSTACLE HIT TWICE (both attempts reverted, file green): inside a `have` about ((<W baseChange L>.toAffine) : SmoothPlaneCurve L).projectiveDivisorOf, Lean unfolds the curve to a record literal and then fails to find WeierstrassCurve.IsElliptic / IsIntegrallyClosed for it (a folded `inferInstanceAs` haveI does not match).
+FIX TO TRY NEXT: introduce `set C : HasseWeil.Curves.SmoothPlaneCurve L := ⟨(W.baseChange L).toAffine⟩ with hC` at the START of the proof (before any `have`), and add `haveI : C.toAffine.IsElliptic := ...; haveI : IsIntegrallyClosed C.CoordinateRing := ...` right after, so every later statement mentions the LOCAL C (no unfolding). Then: hratio := projectiveDivisorOf_div ... ; obtain c from const_unit_of_projectiveDivisorOf_eq_zero; finish with (div_eq_iff _).mp.
+THEN: weilPairing_galois_of_conj (conditional on the conjugation), then the conjugation leaf itself (algHom_ext_x_y_gen + translateAlgEquivOfPoint_*_x_gen/_y_gen), then M1c.
