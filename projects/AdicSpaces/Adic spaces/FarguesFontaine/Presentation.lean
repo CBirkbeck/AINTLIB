@@ -1299,6 +1299,56 @@ def evalArMvHom (h12 : ρ₁ ≤ ρ₂)
     rw [map_mul]
     rfl
 
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **Evaluation of a monomial**: `a·Tˡ ↦ a·bˡ`. -/
+theorem evalAr_monomial (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1) (l : ℕ)
+    (a : ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+    (hres : MvPowerSeries.IsRestricted
+      (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) l) a)) :
+    evalAr p F ϖ h12 hbmem hb ⟨_, hres⟩
+      = ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 a :
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l := by
+  classical
+  refine tendsto_nhds_unique (tendsto_evalAr p F ϖ h12 hbmem hb ⟨_, hres⟩) ?_
+  refine tendsto_const_nhds.congr' ?_
+  rw [Filter.EventuallyEq, Filter.eventually_atTop]
+  refine ⟨l + 1, fun n hn => ?_⟩
+  have hterm : ∀ m ∈ Finset.range n,
+      evalTerm p F ϖ h12 b
+          (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) l)
+            (a : ↥(ArSub p F ϖ hρ₂0 hρ₂1))) m
+        = if m = l then ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 a :
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l else 0 := by
+    intro m _
+    rw [evalTerm]
+    have hcoeff : coeffSeq (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) l)
+        (a : ↥(ArSub p F ϖ hρ₂0 hρ₂1))) m = if m = l then a else 0 := by
+      rw [coeffSeq, MvPowerSeries.coeff_monomial]
+      by_cases hm : m = l
+      · subst hm
+        rw [if_pos rfl, if_pos rfl]
+      · rw [if_neg hm, if_neg]
+        intro hcon
+        exact hm ((Finsupp.single_injective (0 : Fin 1)) hcon)
+    rw [hcoeff]
+    by_cases hm : m = l
+    · subst hm
+      rw [if_pos rfl, if_pos rfl]
+    · rw [if_neg hm, if_neg hm, map_zero]
+      show (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ m = 0
+      rw [zero_mul]
+  rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' (Finset.range n) l
+    (fun _ => ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 a :
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+      (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l),
+    if_pos (Finset.mem_range.mpr (by omega))]
+
 end FarguesFontaine
 
 end
