@@ -958,6 +958,37 @@ theorem wI_le_of_mem_locIdeal_pow (a b : ℕ) (hb : 0 < b)
           refine pow_le_pow_left₀ zero_le (max_le ?_ (le_max_right _ _)) n
           exact le_trans (le_max_right _ _) (le_max_left _ _)
 
+/-- **Coefficient bounds from an interval-norm bound**: if
+`x = A/(p[ϖ])^k ∈ Bloc` has `wI(x) ≤ ε`, then every Teichmüller coordinate of `A`
+satisfies `ρ^m·|a_m| ≤ ε·(ρ·|ϖ|)^k` at both radii. -/
+theorem gaussTerm_le_of_wI_le {ε : NNReal} (k : ℕ) (A : Ainf p F)
+    {x : Bloc p F ϖ}
+    (hx : x * algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ k) = algebraMap (Ainf p F) (Bloc p F ϖ) A)
+    (hwI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ ε)
+    {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hρmem : ρ = ρ₁ ∨ ρ = ρ₂) (m : ℕ) :
+    gaussTerm p F ρ A m
+      ≤ ε * (ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
+  have hval : wLoc p F ϖ hρ0 hρ1 x * (ρ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k = gaussValue p F ρ A := by
+    have h2 := congrArg (wLoc p F ϖ hρ0 hρ1) hx
+    rw [Valuation.map_mul, map_pow, Valuation.map_pow, wLoc_algebraMap,
+      wLoc_algebraMap, gaussValue_p_teichPi p F ϖ hρ1] at h2
+    exact h2
+  have hwLoc : wLoc p F ϖ hρ0 hρ1 x ≤ ε := by
+    rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK] at hwI
+    rcases hρmem with rfl | rfl
+    · exact le_trans (le_max_left _ _) hwI
+    · exact le_trans (le_max_right _ _) hwI
+  calc gaussTerm p F ρ A m
+      ≤ gaussValue p F ρ A := gaussTerm_le_gaussValue p F hρ1.le A m
+    _ = wLoc p F ϖ hρ0 hρ1 x * (ρ * perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := hval.symm
+    _ ≤ ε * (ρ * perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k :=
+        mul_le_mul_of_nonneg_right hwLoc zero_le
+
 end FarguesFontaine
 
 end
