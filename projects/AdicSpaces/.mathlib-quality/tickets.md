@@ -903,25 +903,20 @@ non-Tate bases are supported.
   wI-balls (locIdeal generators have wI < 1 — cofinality estimate), (ii) the hard
   ⊇-half (wI-balls inside J^n-images: exists_eq_p_pow_mul + the dense-layer
   plus-ring inclusion ID2b-ii), (iii) package as topology/uniformity equality.
-- **ID2b-ii OBSTRUCTION (2026-07-26, later analysis — read before implementing)**:
-  the ε₀-ball inclusion `Bloc ∩ {wI ≤ ε₀} ⊆ locSubring-image` with UNIFORM ε₀ has
-  a gap: for x = A/(p[ϖ])^k with large k, the middle-range coefficients
-  (k + c₀ < m < k + (a-b)⌈k/b⌉-ish) satisfy the norm bounds but their termwise
-  monomial-splitting into the fraction-monoid fails (exponent-lattice analysis:
-  the required divisibility degrades with k while the available slack c₀ is
-  fixed). This is exactly why Kedlaya's plus-ring statement passes to POWERS
-  (integral closure) in Lemma 4.9's last paragraph. The termwise route below is
-  therefore NOT sufficient as stated; the topology comparison should instead go
-  through the completed/quotient presentation (compare BOTH `presheafValue` and
-  `B^I` to Tate-algebra quotients: `B^I ≅ A^r⟨T⟩/ker` carries the quotient
-  topology by T911's open/strict surjectivity, and the rational localization has
-  Wedhorn's `A⟨X⟩/(1-sX)`-style presentation — build the A_inf-version of the
-  6.38 comparison WITHOUT the strongly-noetherian base, using T911's
-  norm-controlled lifts in place of noetherian closedness). Re-read Kedlaya
-  Lemma 4.9 case 3's topology claim + Wedhorn §8.1's topology characterization
-  before implementing. The pieces already proven (fraction bounds, unit-ball
-  closure, J^n-cofinality, coefficient bounds) remain valid inputs to either
-  route — the forward inclusion is DONE regardless.
+- **ID2b-ii OBSTRUCTION — RETRACTED (2026-07-27, proven wrong in Lean)**: the
+  claimed middle-range divisibility degradation does NOT occur at the exact
+  chart endpoints. Corrected analysis: for the `m > k` term with `i = m-k`,
+  `t = ⌊i/a⌋`, the integrality requirement is `t ≥ i/a − c₀/b`, a slack
+  interval of k-INDEPENDENT length `c₀/b ≥ 1` (for `c₀ = b`), which always
+  contains `⌊i/a⌋`. The termwise route CLOSES: `mem_chartSubring_of_wI_le`
+  (ChartData.lean, commit c33e85b14) proves `Bloc ∩ {wI ≤ |ϖ|^b} ⊆
+  A_inf[[ϖ]/p, p^a/[ϖ]^b]` at the exact endpoints `ρ₁ = |ϖ|`, `ρ₂^a = |ϖ|^b`
+  (which is all ID2 needs — the chart intervals are exactly of this form).
+  Scaled/basis forms: `exists_p_pow_mul_mem_chartSubring`, `ball_le_locNhd`
+  (the min(ρ₁,ρ₂)^n·|ϖ|^b-ball lies in `locNhd n`). Together with
+  `exists_locNhd_le_ball` the two-sided basis comparison is COMPLETE, so the
+  chart topology = the wI-topology on the localization. The quotient-
+  presentation detour is NOT needed.
 - **ID2b-ii superseded sketch (kept for the salvageable per-term identities)**:
   for the ⊇-half it SUFFICES to show `Bloc ∩ {wI ≤ |ϖ|^{c₀}} ⊆ locSubring-image`
   for one fixed exponent `c₀` (an ε₀-weakened inclusion; the plus-ring EQUALITY is

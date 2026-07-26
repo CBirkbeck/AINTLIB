@@ -1566,6 +1566,109 @@ theorem mem_chartSubring_of_wI_le (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
   exact add_mem (sum_mem fun m hm => hyS m (Finset.mem_range.mp hm))
     (mul_mem (pow_mem hmemV _) (hmemAm _))
 
+/-- **The scaled reverse inclusion**: an element of the `min(ρ₁,ρ₂)^n·|ϖ|^b`-ball
+of `Bloc` is `p^n` times an element of the chart subring. -/
+theorem exists_p_pow_mul_mem_chartSubring (a b n : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    {x : Bloc p F ϖ}
+    (hwI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+      ≤ min ρ₁ ρ₂ ^ n * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    ∃ x' ∈ Subring.closure
+        (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+          ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b}),
+      x = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ n) * x' := by
+  set u := (isUnit_p_image p F ϖ).unit with hudef
+  set x' : Bloc p F ϖ := (↑u⁻¹ : Bloc p F ϖ) ^ n * x with hx'def
+  have hxeq : x = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ n) * x' := by
+    rw [hx'def, map_pow, ← mul_assoc, ← mul_pow, IsUnit.mul_val_inv, one_pow,
+      one_mul]
+  have hloc : ∀ (ρ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1), ρ = ρ₁ ∨ ρ = ρ₂ →
+      wLoc p F ϖ hρ0 hρ1 x' ≤ perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+    intro ρ hρ0 hρ1 hρmem
+    have hwx : wLoc p F ϖ hρ0 hρ1 x ≤ min ρ₁ ρ₂ ^ n * perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+      rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK] at hwI
+      rcases hρmem with rfl | rfl
+      · exact le_trans (le_max_left _ _) hwI
+      · exact le_trans (le_max_right _ _) hwI
+    have hmin : min ρ₁ ρ₂ ≤ ρ := by
+      rcases hρmem with rfl | rfl
+      · exact min_le_left _ _
+      · exact min_le_right _ _
+    calc wLoc p F ϖ hρ0 hρ1 x'
+        = (ρ⁻¹) ^ n * wLoc p F ϖ hρ0 hρ1 x := by
+          rw [hx'def, Valuation.map_mul, Valuation.map_pow,
+            wLoc_p_inv p F ϖ hρ0 hρ1]
+      _ ≤ (ρ⁻¹) ^ n * (min ρ₁ ρ₂ ^ n * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :=
+          mul_le_mul_of_nonneg_left hwx zero_le
+      _ ≤ (ρ⁻¹) ^ n * (ρ ^ n * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :=
+          mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_right
+            (pow_le_pow_left₀ zero_le hmin n) zero_le) zero_le
+      _ = (ρ⁻¹ * ρ) ^ n * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+          rw [mul_pow, mul_assoc]
+      _ = perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+          rw [inv_mul_cancel₀ hρ0.ne', one_pow, one_mul]
+  have hwI' : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x')
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+    rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
+    exact max_le (hloc ρ₁ hρ₁0 hρ₁1 (Or.inl rfl)) (hloc ρ₂ hρ₂0 hρ₂1 (Or.inr rfl))
+  exact ⟨x', mem_chartSubring_of_wI_le p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hexact1 hexact2 hwI', hxeq⟩
+
+
+/-- **The reverse basis inclusion**: the `min(ρ₁,ρ₂)^n·|ϖ|^b`-ball of the chart
+localization is contained in the `n`-th chart neighborhood of zero. -/
+theorem ball_le_locNhd (a b n : ℕ) (ha : 0 < a) (hb : 0 < b)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    {z : Localization.Away (chartS p F ϖ 1 b)}
+    (hz : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (blocEquivAwayChartS p F ϖ b hb z))
+      ≤ min ρ₁ ρ₂ ^ n * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    z ∈ locNhd (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b) n := by
+  obtain ⟨x', hx'S, hxeq⟩ := exists_p_pow_mul_mem_chartSubring p F ϖ
+    (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+    a b n ha hb hexact1 hexact2 hz
+  rw [← map_locSubring_chartData p F ϖ a b hb] at hx'S
+  obtain ⟨y, hymem, hyeq⟩ := hx'S
+  have hyeq' : blocEquivAwayChartS p F ϖ b hb y = x' := hyeq
+  have hzeq : z = algebraMap (Ainf p F) (Localization.Away (chartS p F ϖ 1 b))
+      ((p : Ainf p F) ^ n) * y := by
+    refine (blocEquivAwayChartS p F ϖ b hb).injective ?_
+    rw [map_mul, blocEquivAwayChartS_algebraMap, hyeq']
+    exact hxeq
+  have hpMem : algebraMapD (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b)
+      ⟨(p : Ainf p F), trivial⟩
+      ∈ locIdeal (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b) := by
+    refine Ideal.mem_map_of_mem _ ?_
+    show (⟨(p : Ainf p F), trivial⟩ : ↥(⊤ : Subring (Ainf p F))) ∈ (podAinf p F ϖ).I
+    have hp : (p : Ainf p F) ∈ Iinf p F ϖ :=
+      Ideal.subset_span (Set.mem_insert _ _)
+    exact Ideal.mem_map_of_mem _ hp
+  set w : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b)) :=
+    algebraMapD (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b)
+        ⟨(p : Ainf p F), trivial⟩ ^ n
+      * ⟨y, hymem⟩ with hwdef
+  have hwmem : w ∈ locIdeal (podAinf p F ϖ) (chartT p F ϖ a b)
+      (chartS p F ϖ 1 b) ^ n :=
+    Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow hpMem n)
+  refine ⟨w, hwmem, ?_⟩
+  show (↑w : Localization.Away (chartS p F ϖ 1 b)) = z
+  have hcoe : (↑w : Localization.Away (chartS p F ϖ 1 b))
+      = (algebraMap (Ainf p F) (Localization.Away (chartS p F ϖ 1 b))
+          (p : Ainf p F)) ^ n * y := rfl
+  rw [hcoe, ← map_pow, ← hzeq]
+
 end FarguesFontaine
 
 end
