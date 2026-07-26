@@ -364,4 +364,18 @@ theorem ordAtInfty_galoisFractionLift {L : Type v} [Field L] [DecidableEq L]
       HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty_inv,
     ordAtInfty_algebraMap_galoisCoordRingEquiv, ordAtInfty_algebraMap_galoisCoordRingEquiv]
 
+/-- **(M1b-3b-v ★)** The order at infinity is `σ`-invariant:
+`ord_∞(σ·g) = ord_∞(g)`. Port of HasseWeil's `ordAtInfty_frobeniusFunctionFieldEquiv`. -/
+theorem ordAtInfty_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq L]
+    [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (g : (W.baseChange L).toAffine.FunctionField) :
+    (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty
+        (galoisFunctionFieldEquiv W σ g) =
+      (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty g := by
+  rw [galoisFunctionFieldEquiv, RingEquiv.trans_apply,
+    HasseWeil.WeilPairing.ordAtInfty_ringEquivCast _ _ (map_algEquiv_baseChange_eq W σ),
+    ordAtInfty_galoisFractionLift]
+
 end ModularCurves
