@@ -714,6 +714,100 @@ theorem digit_sub_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       _ = Valued.v (PhiHatK p F ϖ hρ0 hρ1 e) := hΦe.symm
       _ ≤ max (Valued.v (x - y)) (ρ * M) := hΦval
 
+/-- Values are stable under dominated perturbation (ultrametric isosceles). -/
+theorem valued_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hxy : Valued.v (x - y) < Valued.v x) :
+    Valued.v y = Valued.v x := by
+  have h1 : Valued.v (-(x - y)) < Valued.v x := by
+    rw [Valuation.map_neg]
+    exact hxy
+  have h2 : y = x + -(x - y) := by ring
+  rw [h2, Valuation.map_add_eq_of_lt_left _ h1]
+
+/-- **Remark 2.7 (leading-support stability)**: a perturbation strictly below the
+value changes no radius-`ρ` attaining index — the degrees agree. -/
+theorem degAr_eq_of_valued_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (hxy : Valued.v (x - y) < Valued.v x) :
+    degAr p F ϖ hρ0 hρ1 x = degAr p F ϖ hρ0 hρ1 y := by
+  have hvy : Valued.v y = Valued.v x := valued_eq_of_valued_sub_lt p F hxy
+  have hApos : 0 < Valued.v x := lt_of_le_of_lt zero_le hxy
+  have hBA : max (Valued.v (x - y)) (ρ * Valued.v x) < Valued.v x :=
+    max_lt hxy (mul_lt_of_lt_one_left hApos hρ1)
+  have hδ : ∀ n, ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+      - teichCoeffAr p F ϖ hρ0 hρ1 y n)
+      ≤ max (Valued.v (x - y)) (ρ * Valued.v x) := by
+    intro n
+    have h3 := digit_sub_le p F ϖ hx hy n
+    rwa [hvy, max_self] at h3
+  have hsets : {n | Valued.v x = ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 x n)}
+      = {n | Valued.v y = ρ ^ n * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 y n)} := by
+    ext n
+    simp only [Set.mem_setOf_eq]
+    constructor
+    · intro hax
+      have hxle : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+          ≤ max (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
+            (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+              - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
+        have h4 : teichCoeffAr p F ϖ hρ0 hρ1 x n
+            = teichCoeffAr p F ϖ hρ0 hρ1 y n + (teichCoeffAr p F ϖ hρ0 hρ1 x n
+              - teichCoeffAr p F ϖ hρ0 hρ1 y n) := by
+          ring
+        conv_lhs => rw [h4]
+        refine le_trans (mul_le_mul_of_nonneg_left
+          (Valuation.map_add _ _ _) zero_le) ?_
+        exact (nnreal_mul_max _ _ _).le
+      have h5 : Valued.v x ≤ max
+          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
+          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+            - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := hax ▸ hxle
+      have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)
+          ≤ Valued.v x := by
+        rw [← hvy]
+        exact gaussTerm_teichCoeffAr_le' p F ϖ hy n
+      rcases max_cases
+        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n))
+        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+          - teichCoeffAr p F ϖ hρ0 hρ1 y n)) with ⟨heq, -⟩ | ⟨heq, -⟩
+      · rw [heq] at h5
+        rw [hvy]
+        exact (le_antisymm h6 h5).symm
+      · rw [heq] at h5
+        exact absurd (lt_of_le_of_lt (le_trans h5 (hδ n)) hBA) (lt_irrefl _)
+    · intro hay
+      have hyle : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y n)
+          ≤ max (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
+            (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+              - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
+        have h4 : teichCoeffAr p F ϖ hρ0 hρ1 y n
+            = teichCoeffAr p F ϖ hρ0 hρ1 x n - (teichCoeffAr p F ϖ hρ0 hρ1 x n
+              - teichCoeffAr p F ϖ hρ0 hρ1 y n) := by
+          ring
+        conv_lhs => rw [h4]
+        refine le_trans (mul_le_mul_of_nonneg_left
+          (Valuation.map_sub _ _ _) zero_le) ?_
+        exact (nnreal_mul_max _ _ _).le
+      have h5 : Valued.v x ≤ max
+          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
+          (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+            - teichCoeffAr p F ϖ hρ0 hρ1 y n)) := by
+        rw [← hvy]
+        exact hay ▸ hyle
+      have h6 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+          ≤ Valued.v x := gaussTerm_teichCoeffAr_le' p F ϖ hx n
+      rcases max_cases
+        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n))
+        (ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n
+          - teichCoeffAr p F ϖ hρ0 hρ1 y n)) with ⟨heq, -⟩ | ⟨heq, -⟩
+      · rw [heq] at h5
+        exact (le_antisymm h6 h5).symm
+      · rw [heq] at h5
+        exact absurd (lt_of_le_of_lt (le_trans h5 (hδ n)) hBA) (lt_irrefl _)
+  rw [degAr, degAr, hsets]
+
 end FarguesFontaine
 
 end
