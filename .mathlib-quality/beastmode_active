@@ -1,18 +1,18 @@
-FOCUS: G4 ALGEBRAIC HALF DONE. `irreducibleSpace_of_connectedSpace_of_smooth` is PROVED
-(IrreducibilityScoping.lean now sorry-free) and the master reduction is strengthened to
-`yRho_geometricallyIrreducible_of_connected` (only hconn needed).
-NEXT: back to DS4 M1c (the only remaining dispatchable non-MAJOR-INFRA work).
-STEP 1: turn `torsionAlgebraPointsEquiv` (WeilPairing/EtaleDescent.lean:122, currently a
-  Nonempty-valued THEOREM) into a named `noncomputable def` built from `algHomEquivSpecOver`
-  (same file, ~line 241) composed with `E.torsionPointsEquiv`; keep a Nonempty wrapper.
-STEP 2: Galois equivariance of `algHomEquivSpecOver`: for sigma : R ~alg[k] R,
-  (algHomEquivSpecOver R pi halg (sigma.toAlgHom.comp f)).1
-    = Spec.map (ofHom sigma) >> (algHomEquivSpecOver R pi halg f).1
-  (because ofHom (sigma . f) = ofHom f >> ofHom sigma and Spec.map is contravariant).
-STEP 3: the point-side action is P |-> Spec.map (ofHom sigma) >> P = Point.restrict along
-  Spec.map sigma, transported by Point.base_congr along
-  Spec.map (ofHom sigma) >> t = t (sigma is a k-algebra map). Point.restrict_add is in
-  GroupScheme/DeligneOrder.lean:69.
-STEP 4: compare with galoisPointEquiv through chartAffinePointEquiv (FibrePointDict.lean),
-  using EllipticCurve/GlobalChartOverField.lean for the chart over Spec k.
-STEP 5: feed to exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent.lean:440).
+FOCUS: DS4 M1c. LANDED: WeilPairing/GaloisFibre.lean —
+  algHomEquivSpecOver_comp_algEquiv (algebra-side sigma-action = precomposition with Spec sigma),
+  specMap_algEquiv_comp_specMap_algebraMap, GammaSpecIso_hom_appTop_specMap_comp,
+  EllipticCurve.torsionAlgebraFibreEquiv (+_coe, +_comp_algEquiv),
+  muNAlgebraFibreEquiv (+_val, +_comp_algEquiv)  — all axiom-clean.
+REMAINING for M1c:
+ (4b) compare the SCHEME point action P |-> Spec.map (ofHom sigma) >> P on
+      E.Point (Spec.map (ofHom (algebraMap k R))) with mathlib Affine.Point.map sigma
+      through chartAffinePointEquiv (WeilPairing/FibrePointDict.lean), using
+      EllipticCurve/GlobalChartOverField.lean for the global chart over Spec k.  <-- the hard leaf
+ (5)  assemble p := (torsionAlgebraFibreEquiv)^2 -> fibreWeilPairing -> (muNAlgebraFibreEquiv)^-1
+      and call exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent.lean:440).
+TECHNIQUE NOTE (cost me several iterations): `rw` will NOT match a lemma whose statement
+mentions Gamma(X,top) against a goal whose term has the defeq-but-not-syntactic
+(muNAlgebra k N hk).obj; state the instance as a `have` with EXPLICIT type ascriptions and
+then close by `Eq.trans (congrArg F h) ?_` instead of `rw`.
+Also: put the Algebra k Gamma(...) structure in a SECTION-LEVEL `instance` so the def and its
+lemmas share one instance term.
