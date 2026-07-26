@@ -1349,6 +1349,75 @@ theorem evalAr_monomial (h12 : ρ₁ ≤ ρ₂)
       (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l),
     if_pos (Finset.mem_range.mpr (by omega))]
 
+set_option maxHeartbeats 1000000 in
+/-- **On the dense layer the inclusion `A^r ↪ B^I` is the diagonal map**: for `u ∈ Aloc`,
+the pair `(resAr, id)` of its `A^r`-image is the `Bloc`-image of `u`. -/
+theorem ArToBI_AlocToHatK (h12 : ρ₁ ≤ ρ₂) (u : Aloc p F ϖ) :
+    ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12
+        ⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 u, AlocToHatK_mem_ArSub p F ϖ u⟩ :
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (AlocToBloc p F ϖ u) := by
+  refine Prod.ext ?_ ?_
+  · show resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (AlocToHatK p F ϖ hρ₂0 hρ₂1 u)
+      = BlocToHatK p F ϖ hρ₁0 hρ₁1 (AlocToBloc p F ϖ u)
+    rw [resAr_AlocToHatK p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12,
+      BlocToHatK_AlocToBloc p F ϖ hρ₁0 hρ₁1]
+  · show AlocToHatK p F ϖ hρ₂0 hρ₂1 u
+      = BlocToHatK p F ϖ hρ₂0 hρ₂1 (AlocToBloc p F ϖ u)
+    rw [BlocToHatK_AlocToBloc p F ϖ hρ₂0 hρ₂1]
+
+/-- The inverse of `[ϖ]` inside `Aloc = A_inf[1/[ϖ]]`. -/
+def teichPiInvAloc : Aloc p F ϖ :=
+  ↑(IsLocalization.map_units (M := Submonoid.powers (teichPi p F ϖ)) (Aloc p F ϖ)
+    (⟨teichPi p F ϖ, Submonoid.mem_powers _⟩)).unit⁻¹
+
+theorem teichPiInvAloc_mul :
+    algebraMap (Ainf p F) (Aloc p F ϖ) (teichPi p F ϖ) * teichPiInvAloc p F ϖ = 1 := by
+  have h := (IsLocalization.map_units (M := Submonoid.powers (teichPi p F ϖ))
+    (Aloc p F ϖ) (⟨teichPi p F ϖ, Submonoid.mem_powers _⟩)).unit.mul_inv
+  rwa [(IsLocalization.map_units (M := Submonoid.powers (teichPi p F ϖ))
+    (Aloc p F ϖ) (⟨teichPi p F ϖ, Submonoid.mem_powers _⟩)).unit_spec] at h
+
+
+theorem AlocToBloc_teichPiInv_mul (k : ℕ) :
+    AlocToBloc p F ϖ (teichPiInvAloc p F ϖ ^ k)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ k) = 1 := by
+  have hone : AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) = 1 := by
+    have h := congrArg (AlocToBloc p F ϖ) (teichPiInvAloc_mul p F ϖ)
+    rw [map_mul, AlocToBloc_algebraMap, map_one] at h
+    rw [mul_comm]
+    exact h
+  rw [map_pow, map_pow, ← mul_pow, hone, one_pow]
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The presentation map hits `1/p`**: with Kedlaya's Tate variable taken at a power of
+the pseudo-uniformizer (`z̄ = ϖʲ`, which is the case AD-9 selects), the monomial
+`[ϖ]^{-jn}·T` evaluates to the image of `p⁻¹`. Together with the constants (the image of
+`Aloc`, which already inverts `[ϖ]`) this puts the whole dense subring `Bloc` in the image
+of `evalAr`. -/
+theorem exists_evalAr_eq_pInv (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1) :
+    ∃ f, evalAr p F ϖ h12 hbmem hb f
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ↑(isUnit_p_image p F ϖ).unit⁻¹ := by
+  refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 1)
+      (⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 (teichPiInvAloc p F ϖ ^ (j * n)),
+        AlocToHatK_mem_ArSub p F ϖ _⟩ : ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      isRestricted_monomial p F ϖ _⟩, ?_⟩
+  rw [evalAr_monomial p F ϖ h12 hbmem hb 1 _, ArToBI_AlocToHatK p F ϖ h12, pow_one,
+    ← map_mul]
+  congr 1
+  have hteich : WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ) ^ j) ^ n
+      = teichPi p F ϖ ^ (j * n) := by
+    rw [map_pow, ← pow_mul, teichPi]
+  rw [teichPowOverP, hteich, ← mul_assoc, AlocToBloc_teichPiInv_mul, one_mul]
+
 end FarguesFontaine
 
 end
