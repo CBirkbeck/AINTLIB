@@ -335,6 +335,116 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj V)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
+/-- The over-site trivialization induced by an invertible restricted map to the
+structure module has hom equal to the original map on the over-site. -/
+theorem overTrivializationOfRestrictMapIso_hom
+    {X : Scheme.{u}} {M : X.Modules}
+    (i : M ⟶ Scheme.Modules.unitObj X) (U : X.Opens)
+    (hIso : IsIso ((Scheme.Modules.restrictFunctor U.ι).map i ≫
+      (Scheme.Modules.restrictUnitIso U.ι).hom)) :
+    let e := @asIso _ _ _ _
+      ((Scheme.Modules.restrictFunctor U.ι).map i ≫
+        (Scheme.Modules.restrictUnitIso U.ι).hom) hIso
+    (Scheme.Modules.overTrivializationOfRestrictIso M U e).hom = i.over U := by
+  let H := (Scheme.Modules.restrictFunctor U.ι).map i ≫
+    (Scheme.Modules.restrictUnitIso U.ι).hom
+  let e := @asIso _ _ _ _ H hIso
+  let eOver := Scheme.Modules.overTrivializationOfRestrictIso M U e
+  let G := (Scheme.Modules.overEquiv U).functor
+  let F := Scheme.Modules.overFunctorEquiv U
+  let E := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  let C := E.hom
+  let FI := F.app M
+  let FO := F.app (Scheme.Modules.unitObj X)
+  let q := (Scheme.Modules.restrictFunctor U.ι).map i
+  let eO := (Scheme.Modules.restrictUnitIso U.ι).hom
+  let B := G.map (i.over U)
+  have hC : FO.hom ≫ eO = C := by
+    dsimp only [FO, F, eO, C]
+    rw [Scheme.Modules.overFunctorEquiv_unitP]
+    exact (Scheme.Modules.restrictUnitIso U.ι).inv_hom_id
+  have hnat := F.hom.naturality i
+  change B ≫ FO.hom = FI.hom ≫ q at hnat
+  have hnatComp := congrArg (fun p ↦ p ≫ eO) hnat
+  have hleft : B ≫ (FO.hom ≫ eO) = (B ≫ FO.hom) ≫ eO :=
+    (Category.assoc _ _ _).symm
+  have hright : (FI.hom ≫ q) ≫ eO = FI.hom ≫ (q ≫ eO) :=
+    Category.assoc _ _ _
+  have hbase : B ≫ (FO.hom ≫ eO) = FI.hom ≫ (q ≫ eO) :=
+    hleft.trans (hnatComp.trans hright)
+  have hBC : B ≫ C = FI.hom ≫ (q ≫ eO) :=
+    (congrArg (fun p ↦ B ≫ p) hC.symm).trans hbase
+  have hinner : FI.hom ≫ (q ≫ eO) = B ≫ C := hBC.symm
+  apply G.map_injective
+  change G.map eOver.hom = B
+  simp only [eOver, Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom]
+  change FI.hom ≫ H ≫ E.inv = B
+  change FI.hom ≫ (q ≫ eO) ≫ E.inv = B
+  have houter := congrArg (fun p ↦ p ≫ E.inv) hinner
+  have hassoc : (B ≫ C) ≫ E.inv = B ≫ (C ≫ E.inv) :=
+    Category.assoc _ _ _
+  have hcancel : B ≫ (C ≫ E.inv) = B ≫ 𝟙 _ :=
+    congrArg (fun p ↦ B ≫ p) E.hom_inv_id
+  exact houter.trans (hassoc.trans (hcancel.trans (Category.comp_id _)))
+
+/-- Away from the section, the ideal inclusion is the hom of its canonical
+over-site trivialization. -/
+theorem sectionIdealToUnit_over_eq_trivializationOfSectionPreimageEqBot
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (hU : z ⁻¹ᵁ U = ⊥) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    let hIso : IsIso (restrictIdealModuleToUnit z U.ι) :=
+      restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z U hU
+    let eRestrict := @asIso _ _ _ _ (restrictIdealModuleToUnit z U.ι) hIso
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U eRestrict
+    eIdeal.hom = (sectionIdealToUnit π z hz).over U := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  let hIso : IsIso (restrictIdealModuleToUnit z U.ι) :=
+    restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z U hU
+  dsimp only
+  exact overTrivializationOfRestrictMapIso_hom
+    (sectionIdealToUnit π z hz) U hIso
+
+/-- In the canonical frame away from the section, the inclusion into the
+simple-pole sheaf has scalar coordinate one. -/
+theorem sectionPoleUnitHom_over_comp_trivializationOfSectionPreimageEqBot
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (hU : z ⁻¹ᵁ U = ⊥) :
+    letI : IsClosedImmersion z := isClosedImmersion_section z hz
+    let hIso : IsIso (restrictIdealModuleToUnit z U.ι) :=
+      restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z U hU
+    let eRestrict := @asIso _ _ _ _ (restrictIdealModuleToUnit z U.ι) hIso
+    let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionIdealModule π z hz) U eRestrict
+    ((sectionPoleUnitHom π z hz).over U) ≫
+        (SheafOfModules.dualOverIsoOfIso C.ringCatSheaf
+          (sectionIdealModule π z hz) U eIdeal).hom =
+      SheafOfModules.overUnitScalarEnd C.ringCatSheaf U 1 := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  let hIso : IsIso (restrictIdealModuleToUnit z U.ι) :=
+    restrictIdealModuleToUnit_isIso_of_preimage_eq_bot z U hU
+  let eRestrict := @asIso _ _ _ _ (restrictIdealModuleToUnit z U.ι) hIso
+  let eIdeal := Scheme.Modules.overTrivializationOfRestrictIso
+    (sectionIdealModule π z hz) U eRestrict
+  apply dualMap_over_comp_dualOverIsoOfIso_hom_eq_scalar
+    (sectionIdealToUnit π z hz) U eIdeal 1
+  have he : eIdeal.hom = (sectionIdealToUnit π z hz).over U :=
+    sectionIdealToUnit_over_eq_trivializationOfSectionPreimageEqBot
+      z hz U hU
+  have hcomp : eIdeal.inv ≫ (sectionIdealToUnit π z hz).over U =
+      eIdeal.inv ≫ eIdeal.hom :=
+    congrArg (fun p ↦ eIdeal.inv ≫ p) he.symm
+  have hid : eIdeal.inv ≫ eIdeal.hom = 𝟙 _ := eIdeal.inv_hom_id
+  have hone : (𝟙 _) = SheafOfModules.overUnitScalarEnd
+      C.ringCatSheaf U 1 :=
+    (SheafOfModules.overUnitScalarEndRingHom C.ringCatSheaf U).map_one.symm
+  exact hcomp.trans (hid.trans hone)
+
 private theorem eq_comp_iso_inv_of_comp_eq
     {D : Type*} [Category* D] {A B T : D}
     (a : A ⟶ B) (e : B ≅ T) (b : A ⟶ T) (h : a ≫ e.hom = b) :
