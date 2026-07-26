@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.ModularCurve.YRho
 import ModularCurves.ForMathlib.IrreducibleConnected
+import ModularCurves.ForMathlib.SmoothSchemeIrreducible
 
 /-!
 # Scoping skeleton for `yRho_geometricallyIrreducible` (T-IRR0, stream IRR)
@@ -60,7 +61,9 @@ enters only through the `ConnectedSpace` hypothesis. -/
 theorem irreducibleSpace_of_connectedSpace_of_smooth
     {X : Scheme.{0}} (sX : X ⟶ Spec (CommRingCat.of (AlgebraicClosure ℚ)))
     (hsm : SmoothOfRelativeDimension 1 sX) [Nonempty ↥X] [ConnectedSpace ↥X] :
-    IrreducibleSpace ↥X := by sorry
+    IrreducibleSpace ↥X :=
+  haveI := hsm
+  irreducibleSpace_of_connectedSpace_of_smooth_curve sX
 
 /-- **(T-IRR0, L4 — the only property of `ℍ/Γ̃` we need)** The quotient of a connected space by a
 group action is connected, because the quotient map is a continuous surjection and the continuous
