@@ -1341,6 +1341,70 @@ def twoBddSubring {ρ ρ₂ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hρ₂0 :
     ⟨bddAbove_gaussTermF_neg p F hρ0 hρ1 ha.1,
      bddAbove_gaussTermF_neg p F hρ₂0 hρ₂1 ha.2⟩
 
+/-- Boundedness at a larger radius forces decay at any strictly smaller radius
+(geometric domination — the ρ′-principle). -/
+theorem tendsto_gaussTermF_of_bddAbove_gt {ρ σ : NNReal} (hσ0 : 0 < σ) (hσρ : σ < ρ)
+    {x : WittVector p F} (hB : BddAbove (Set.range (gaussTermF p F ρ x))) :
+    Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0) := by
+  obtain ⟨M, hM⟩ := hB
+  have hρ0 : (0 : NNReal) < ρ := lt_trans hσ0 hσρ
+  have hratio : σ / ρ < 1 := by
+    rw [div_lt_one hρ0]
+    exact hσρ
+  have hbound : ∀ n, gaussTermF p F σ x n ≤ (σ / ρ) ^ n * M := by
+    intro n
+    have hterm : gaussTermF p F σ x n = (σ / ρ) ^ n * gaussTermF p F ρ x n := by
+      rw [gaussTermF, gaussTermF, ← mul_assoc, ← mul_pow, div_mul_cancel₀ _ hρ0.ne']
+    rw [hterm]
+    exact mul_le_mul_of_nonneg_left (hM ⟨n, rfl⟩) zero_le
+  have hgeo : Filter.Tendsto (fun n => (σ / ρ) ^ n * M) Filter.atTop (nhds 0) := by
+    have h1 : Filter.Tendsto (fun n => (σ / ρ) ^ n) Filter.atTop (nhds 0) :=
+      tendsto_pow_atTop_nhds_zero_of_lt_one zero_le hratio
+    have h2 := h1.mul_const M
+    rwa [zero_mul] at h2
+  exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hgeo
+    (fun n => zero_le) hbound
+
+/-- Max attainment for decaying nonzero elements (F-version of the `A_inf` fact). -/
+theorem exists_gaussValueF_eq_gaussTermF {σ : NNReal} (hσ0 : 0 < σ)
+    {x : WittVector p F}
+    (hdecay : Filter.Tendsto (gaussTermF p F σ x) Filter.atTop (nhds 0))
+    (hx : x ≠ 0) :
+    ∃ n : ℕ, gaussValueF p F σ x = gaussTermF p F σ x n
+      ∧ ∀ m, gaussTermF p F σ x m ≤ gaussTermF p F σ x n := by
+  obtain ⟨m₀, hm₀⟩ : ∃ m : ℕ, x.coeff m ≠ 0 := by
+    by_contra hall
+    push Not at hall
+    exact hx (WittVector.ext fun n => by rw [hall n, WittVector.zero_coeff])
+  have hpos : 0 < gaussTermF p F σ x m₀ := by
+    rw [gaussTermF]
+    refine mul_pos (pow_pos hσ0 m₀) (pos_iff_ne_zero.mpr fun h0 => hm₀ ?_)
+    have hz : teichCoeffF p F x m₀ = 0 := (Valuation.zero_iff _).mp h0
+    rw [teichCoeffF] at hz
+    exact (map_eq_zero_iff _ (RingEquiv.injective _)).mp hz
+  have hev : ∀ᶠ n in Filter.atTop, gaussTermF p F σ x n < gaussTermF p F σ x m₀ :=
+    hdecay.eventually_lt_const hpos
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp hev
+  obtain ⟨n₀, hn₀mem, hn₀max⟩ := (Finset.range (N + 1)).exists_max_image
+    (gaussTermF p F σ x) ⟨m₀, Finset.mem_range.mpr (by
+      by_contra hmN
+      push Not at hmN
+      exact absurd (hN m₀ (by omega)) (lt_irrefl _))⟩
+  have hmax : ∀ m, gaussTermF p F σ x m ≤ gaussTermF p F σ x n₀ := by
+    intro m
+    rcases lt_or_ge m (N + 1) with hm | hm
+    · exact hn₀max m (Finset.mem_range.mpr hm)
+    · refine le_trans (hN m (by omega)).le ?_
+      exact hn₀max m₀ (Finset.mem_range.mpr (by
+        by_contra hmN
+        push Not at hmN
+        exact absurd (hN m₀ (by omega)) (lt_irrefl _)))
+  refine ⟨n₀, ?_, hmax⟩
+  refine le_antisymm (ciSup_le hmax) (le_ciSup (⟨gaussTermF p F σ x n₀, ?_⟩ :
+    BddAbove (Set.range (gaussTermF p F σ x))) n₀)
+  rintro s ⟨m, rfl⟩
+  exact hmax m
+
 end FarguesFontaine
 
 end
