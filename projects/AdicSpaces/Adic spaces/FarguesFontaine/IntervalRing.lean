@@ -1431,6 +1431,299 @@ theorem p_pow_smul_ball_eq {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1
   · rintro ⟨h1, h2⟩
     exact exists_eq_p_pow_mul p F ϖ n h1 h2
 
+/-- **`B^{I,+}` as a subring of `B^I`** — the ring of definition. -/
+def BIPlusIn {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : Subring ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  Subring.comap (BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).subtype
+    (BIPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+
+theorem mem_BIPlusIn_iff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)} :
+    z ∈ BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ↔ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ 1 :=
+  ⟨fun h => h.2, fun h => ⟨z.2, h⟩⟩
+
+/-- **The ring of definition is open**: `B^{I,+}` is the unit ball of `λ_I`, hence open. -/
+theorem isOpen_BIPlusIn {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsOpen (BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      : Set ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  have hset : (BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        : Set ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = (fun z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
+          (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        ⁻¹' {z | wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ 1} := by
+    ext z
+    exact mem_BIPlusIn_iff p F ϖ
+  rw [hset]
+  exact (isOpen_wI_ball p F zero_lt_one).preimage continuous_subtype_val
+
+/-- The inverse of `p` in the interval ring. -/
+def pInvImage {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+  BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ↑(isUnit_p_image p F ϖ).unit⁻¹
+
+theorem pImage_mul_pInvImage {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 * pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 = 1 := by
+  rw [pImage, pInvImage, ← map_mul]
+  have hmul : algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)
+      * ↑(isUnit_p_image p F ϖ).unit⁻¹ = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.mul_inv
+    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
+  rw [hmul]
+  exact map_one _
+
+theorem valued_pInvImage_fst {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    Valued.v (pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 = ρ₁⁻¹ := by
+  rw [pInvImage, BIProd_fst, valued_BlocToHatK]
+  exact wLoc_p_inv p F ϖ hρ₁0 hρ₁1
+
+theorem valued_pInvImage_snd {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    Valued.v (pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 = ρ₂⁻¹ := by
+  rw [pInvImage, BIProd_snd, valued_BlocToHatK]
+  exact wLoc_p_inv p F ϖ hρ₂0 hρ₂1
+
+theorem pInvImage_mem_BISub {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 :=
+  BIProd_mem_BISub p F ϖ _
+
+
+/-- `p`, as an element of `B^I`. -/
+def pEltB {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  ⟨pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1, BIProd_mem_BISub p F ϖ _⟩
+
+theorem pEltB_mem_BIPlusIn {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ∈ BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := by
+  rw [mem_BIPlusIn_iff]
+  show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ≤ 1
+  rw [pImage, wI_p_image]
+  exact max_le hρ₁1.le hρ₂1.le
+
+/-- `p`, as an element of the ring of definition `B^{I,+}`. -/
+def pEltPlus {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  ⟨pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1, pEltB_mem_BIPlusIn p F ϖ⟩
+
+/-- **The ideal of definition** `(p) ⊆ B^{I,+}`. -/
+def pIdeal {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : Ideal ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  Ideal.span {pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1}
+
+theorem pIdeal_fg {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    (pIdeal p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).FG :=
+  ⟨{pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1}, by rw [pIdeal, Finset.coe_singleton]⟩
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The powers of the ideal of definition are exactly the balls**: `y ∈ (p)ⁿ` iff both
+coordinates of `y` have value at most `ρᵢⁿ`. This is the identification of the `p`-adic
+topology on `B^{I,+}` with its subspace topology. -/
+theorem mem_pIdeal_pow_iff {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (n : ℕ)
+    (y : ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    y ∈ (pIdeal p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+      ↔ Valued.v ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ≤ ρ₁ ^ n
+        ∧ Valued.v ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 ≤ ρ₂ ^ n := by
+  have hspan : (pIdeal p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+      = Ideal.span {pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ n} := by
+    rw [pIdeal, Ideal.span_singleton_pow]
+  rw [hspan, Ideal.mem_span_singleton']
+  constructor
+  · rintro ⟨b, rfl⟩
+    have hcoe : (((b * pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ n :
+          ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+          (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n := by
+      push_cast
+      rfl
+    have hb1 : Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ≤ 1 :=
+      le_trans (le_max_left _ _) ((mem_BIPlusIn_iff p F ϖ).mp b.2)
+    have hb2 : Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 ≤ 1 :=
+      le_trans (le_max_right _ _) ((mem_BIPlusIn_iff p F ϖ).mp b.2)
+    rw [hcoe]
+    constructor
+    · show Valued.v (_ * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 ^ n) ≤ ρ₁ ^ n
+      rw [Valuation.map_mul, Valuation.map_pow, valued_pImage_fst]
+      calc Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 * ρ₁ ^ n
+          ≤ 1 * ρ₁ ^ n := mul_le_mul_of_nonneg_right hb1 zero_le
+        _ = ρ₁ ^ n := one_mul _
+    · show Valued.v (_ * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 ^ n) ≤ ρ₂ ^ n
+      rw [Valuation.map_mul, Valuation.map_pow, valued_pImage_snd]
+      calc Valued.v ((b : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 * ρ₂ ^ n
+          ≤ 1 * ρ₂ ^ n := mul_le_mul_of_nonneg_right hb2 zero_le
+        _ = ρ₂ ^ n := one_mul _
+  · rintro ⟨h1, h2⟩
+    have hmemS : (pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+        * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 :=
+      mul_mem (pow_mem (pInvImage_mem_BISub p F ϖ) n)
+        (y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)).2
+    have hw1 : Valued.v (((pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+        * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).1) ≤ 1 := by
+      show Valued.v ((pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 ^ n * _) ≤ 1
+      rw [Valuation.map_mul, Valuation.map_pow, valued_pInvImage_fst]
+      calc (ρ₁⁻¹) ^ n * Valued.v ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+          ≤ (ρ₁⁻¹) ^ n * ρ₁ ^ n := mul_le_mul_of_nonneg_left h1 zero_le
+        _ = 1 := by
+            rw [inv_pow, inv_mul_cancel₀ (pow_ne_zero n hρ₁0.ne')]
+    have hw2 : Valued.v (((pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+        * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+            (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).2) ≤ 1 := by
+      show Valued.v ((pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 ^ n * _) ≤ 1
+      rw [Valuation.map_mul, Valuation.map_pow, valued_pInvImage_snd]
+      calc (ρ₂⁻¹) ^ n * Valued.v ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+          ≤ (ρ₂⁻¹) ^ n * ρ₂ ^ n := mul_le_mul_of_nonneg_left h2 zero_le
+        _ = 1 := by
+            rw [inv_pow, inv_mul_cancel₀ (pow_ne_zero n hρ₂0.ne')]
+    refine ⟨⟨⟨_, hmemS⟩, ?_⟩, ?_⟩
+    · rw [mem_BIPlusIn_iff]
+      exact max_le hw1 hw2
+    · refine Subtype.ext (Subtype.ext ?_)
+      show (pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+          * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n = _
+      calc (pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+                (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+            * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n
+          = ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+              * (pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ^ n
+            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+                (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+            rw [mul_pow]; ring
+        _ = _ := by rw [pImage_mul_pInvImage, one_pow, one_mul]
+
+
+/-- Every neighbourhood of `0` in the product contains an interval-norm ball. -/
+theorem exists_wI_ball_subset {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {s : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}
+    (hs : s ∈ nhds (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) :
+    ∃ ε : NNReal, 0 < ε ∧ {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ ε} ⊆ s := by
+  rw [show (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = (0, 0) from rfl,
+    nhds_prod_eq] at hs
+  obtain ⟨t₁, ht₁, t₂, ht₂, hsub⟩ := Filter.mem_prod_iff.mp hs
+  obtain ⟨ε₁, hε₁, hball₁⟩ := exists_valued_ball_subset p F ht₁
+  obtain ⟨ε₂, hε₂, hball₂⟩ := exists_valued_ball_subset p F ht₂
+  refine ⟨min ε₁ ε₂, lt_min hε₁ hε₂, fun z hz => ?_⟩
+  have hz' : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ min ε₁ ε₂ := hz
+  refine hsub ⟨hball₁ ?_, hball₂ ?_⟩
+  · exact le_trans (le_trans (le_max_left _ _) hz') (min_le_left _ _)
+  · exact le_trans (le_trans (le_max_right _ _) hz') (min_le_right _ _)
+
+/-- The two-coordinate closed ball is open in the product. -/
+theorem isOpen_coord_ball {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {c₁ c₂ : NNReal} (hc₁ : 0 < c₁) (hc₂ : 0 < c₂) :
+    IsOpen {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      Valued.v z.1 ≤ c₁ ∧ Valued.v z.2 ≤ c₂} := by
+  have hset : {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+        Valued.v z.1 ≤ c₁ ∧ Valued.v z.2 ≤ c₂}
+      = ((fun z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => z.1)
+          ⁻¹' {w : hatK p F hρ₁0 hρ₁1 | Valued.v w ≤ c₁})
+        ∩ ((fun z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => z.2)
+          ⁻¹' {w : hatK p F hρ₂0 hρ₂1 | Valued.v w ≤ c₂}) := rfl
+  rw [hset]
+  exact IsOpen.inter ((isOpen_valued_ball p F hc₁).preimage continuous_fst)
+    ((isOpen_valued_ball p F hc₂).preimage continuous_snd)
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The subspace topology on `B^{I,+}` is the `p`-adic topology** — the key property
+of the pair of definition `(B^{I,+}, (p))`. -/
+theorem isAdic_pIdeal {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsAdic (pIdeal p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) := by
+  rw [isAdic_iff]
+  constructor
+  · intro n
+    have hset : ((pIdeal p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ n :
+          Ideal ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : Set ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        = (fun y : ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
+            ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+              (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+          ⁻¹' {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+            Valued.v z.1 ≤ ρ₁ ^ n ∧ Valued.v z.2 ≤ ρ₂ ^ n} := by
+      ext y
+      exact mem_pIdeal_pow_iff p F ϖ n y
+    rw [hset]
+    exact (isOpen_coord_ball p F (pow_pos hρ₁0 n) (pow_pos hρ₂0 n)).preimage
+      (continuous_subtype_val.comp continuous_subtype_val)
+  · intro s hs
+    obtain ⟨u, hu, husub⟩ := mem_nhds_subtype _
+      (0 : ↥(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) s |>.mp hs
+    obtain ⟨w, hw, hwsub⟩ := mem_nhds_subtype _
+      (0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) u |>.mp hu
+    obtain ⟨ε, hε, hεsub⟩ := exists_wI_ball_subset p F (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hw
+    obtain ⟨N, hN⟩ := _root_.exists_pow_lt_of_lt_one hε (max_lt hρ₁1 hρ₂1)
+    refine ⟨N, fun y hy => ?_⟩
+    obtain ⟨hy1, hy2⟩ := (mem_pIdeal_pow_iff p F ϖ N y).mp hy
+    have hball : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+          (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ ε := by
+      refine max_le (le_trans hy1 ?_) (le_trans hy2 ?_)
+      · exact le_trans (pow_le_pow_left₀ zero_le (le_max_left _ _) N) hN.le
+      · exact le_trans (pow_le_pow_left₀ zero_le (le_max_right _ _) N) hN.le
+    exact husub (hwsub (hεsub hball))
+
+/-- **The pair of definition `(B^{I,+}, (p))` for the interval ring `B^I`**
+(Kedlaya Definition 4.2 / Lemma 4.4). -/
+def BIPairOfDefinition {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : PairOfDefinition ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) where
+  A₀ := BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  I := pIdeal p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  isOpen := isOpen_BIPlusIn p F ϖ
+  fg := pIdeal_fg p F ϖ
+  isAdic := isAdic_pIdeal p F ϖ
+
+/-- **`B^I` is a Huber ring.** -/
+instance isHuberRing_BISub {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsHuberRing ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) where
+  exists_pairOfDefinition := ⟨BIPairOfDefinition p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1⟩
+
+/-- `p` is a unit of `B^I`. -/
+def pUnit {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ where
+  val := pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  inv := ⟨pInvImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1, pInvImage_mem_BISub p F ϖ⟩
+  val_inv := Subtype.ext (pImage_mul_pInvImage p F ϖ)
+  inv_val := Subtype.ext (by
+    rw [mul_comm]
+    exact pImage_mul_pInvImage p F ϖ)
+
+/-- **`B^I` is a Tate ring**: `p` is a topologically nilpotent unit. -/
+instance isTateRing_BISub {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    IsTateRing ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) where
+  exists_topologicallyNilpotent_unit := by
+    refine ⟨pUnit p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1, ?_⟩
+    exact (BIPairOfDefinition p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).isTopologicallyNilpotent_of_mem
+      (a := pEltPlus p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (Ideal.mem_span_singleton_self _)
+
 end FarguesFontaine
 
 end

@@ -1,1 +1,1 @@
-FOCUS: next up — (1) Cor 4.6 injectivity of resIHom (needs three circles on B^I limits: v(resI z) <= wI z and a nonvanishing argument), or (2) T908(c) coordinates on B^r via W(F)[1/p], or (3) T910/T911 Lemma 4.9 presentations. Prefer (1) then (3). 149 commits pushed; library green (3318 jobs); all FF files sorry-free.
+FOCUS: T908/T913 — B^I Huber/Tate packaging ported; next: Cor 4.6 injectivity (T909) or Lemma 4.9 presentations (T910)
