@@ -78,6 +78,34 @@ theorem isUnit_e3S_map :
   rw [map_pow]
   exact (IsLocalization.Away.algebraMap_isUnit (S := E3ModuliRing R) (e3Delta R)).pow 3
 
+/-- **(brick 1c)** The Jacobian entry: `∂/∂γ (β³ − (β+γ)³) = −3(β+γ)²`. -/
+theorem pderiv_one_e3Rel :
+    pderiv 1 (e3Rel R) = -3 * (X 0 + X 1) ^ 2 := by
+  simp only [e3Rel, map_sub, pderiv_pow, pderiv_X, map_add, Pi.single_apply]
+  norm_num
+
+/-- **(brick 1c)** Hence the Jacobian entry is a **unit** in `E3ModuliRing` once `3` is
+invertible. -/
+theorem isUnit_pderiv_e3Rel_map (hR : IsUnit (3 : R)) :
+    IsUnit (algebraMap (E3Quotient R) (E3ModuliRing R)
+      (Ideal.Quotient.mk _ (pderiv 1 (e3Rel R)))) := by
+  have h3 : IsUnit (algebraMap (E3Quotient R) (E3ModuliRing R)
+      (Ideal.Quotient.mk (Ideal.span {e3Rel R}) (3 : MvPolynomial (Fin 2) R))) := by
+    have := ((hR.map (algebraMap R (MvPolynomial (Fin 2) R))).map
+      (Ideal.Quotient.mk (Ideal.span {e3Rel R}))).map
+      (algebraMap (E3Quotient R) (E3ModuliRing R))
+    rwa [show (algebraMap R (MvPolynomial (Fin 2) R)) 3 = 3 from map_ofNat _ 3] at this
+  rw [pderiv_one_e3Rel]
+  have hval : (Ideal.Quotient.mk (Ideal.span {e3Rel R})
+      (-3 * (X 0 + X 1) ^ 2 : MvPolynomial (Fin 2) R)) =
+      -(Ideal.Quotient.mk (Ideal.span {e3Rel R}) (3 : MvPolynomial (Fin 2) R)) *
+        (e3S R) ^ 2 := by
+    rw [e3S]
+    push_cast
+    simp only [map_mul, map_neg, map_pow, map_add]
+  rw [hval, map_mul, map_neg, map_pow]
+  exact ((h3.neg).mul ((isUnit_e3S_map R).pow 2))
+
 end ModularCurves
 
 end
