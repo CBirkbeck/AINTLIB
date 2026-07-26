@@ -1734,6 +1734,665 @@ theorem exists_evalAr_eq_pInv_pow (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
       AlocToBloc_teichPiInv_mul, one_mul]
   · rw [gaussNormRPS_monomial, valued_teichPiInv_pow]
 
+/-- Multiplying the `[ϖ]`-power image by the inverse power gives `1`. -/
+theorem teichPiInvAloc_pow_mul (m : ℕ) :
+    algebraMap (Ainf p F) (Aloc p F ϖ) (teichPi p F ϖ ^ m)
+      * teichPiInvAloc p F ϖ ^ m = 1 := by
+  rw [map_pow, ← mul_pow, teichPiInvAloc_mul, one_pow]
+
+/-- **The `Aloc` head split**: every `u ∈ Aloc` is a head `t` plus `p` times another
+element of `Aloc`, where the head's Gauss value is radius-independent and bounded by
+`u`'s value at every radius. -/
+theorem exists_aloc_head_split (u : Aloc p F ϖ) :
+    ∃ t w : Aloc p F ϖ, u = t + (p : Aloc p F ϖ) * w
+      ∧ ∀ (ρ σ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (hσ0 : 0 < σ) (hσ1 : σ < 1),
+          wAloc p F ϖ hρ0 hρ1 t ≤ wAloc p F ϖ hσ0 hσ1 u := by
+  obtain ⟨⟨D, y⟩, hDy⟩ := IsLocalization.surj (M := Submonoid.powers (teichPi p F ϖ)) u
+  obtain ⟨m, hm⟩ := y.2
+  obtain ⟨D', hD', -⟩ := exists_head_split p F D
+  have hu : u = algebraMap (Ainf p F) (Aloc p F ϖ) D * teichPiInvAloc p F ϖ ^ m := by
+    have h1 : u * algebraMap (Ainf p F) (Aloc p F ϖ) (teichPi p F ϖ ^ m)
+        = algebraMap (Ainf p F) (Aloc p F ϖ) D := by
+      rw [show teichPi p F ϖ ^ m = (y : Ainf p F) from hm]; exact hDy
+    calc u = u * (algebraMap (Ainf p F) (Aloc p F ϖ) (teichPi p F ϖ ^ m)
+          * teichPiInvAloc p F ϖ ^ m) := by
+          rw [teichPiInvAloc_pow_mul, mul_one]
+      _ = (u * algebraMap (Ainf p F) (Aloc p F ϖ) (teichPi p F ϖ ^ m))
+          * teichPiInvAloc p F ϖ ^ m := by ring
+      _ = algebraMap (Ainf p F) (Aloc p F ϖ) D * teichPiInvAloc p F ϖ ^ m := by rw [h1]
+  refine ⟨algebraMap (Ainf p F) (Aloc p F ϖ)
+      (WittVector.teichmuller p (teichCoeff p F D 0)) * teichPiInvAloc p F ϖ ^ m,
+    algebraMap (Ainf p F) (Aloc p F ϖ) D' * teichPiInvAloc p F ϖ ^ m, ?_, ?_⟩
+  · rw [hu]
+    conv_lhs => rw [hD']
+    rw [map_add, map_mul, map_natCast]
+    ring
+  · intro ρ σ hρ0 hρ1 hσ0 hσ1
+    have ht : wAloc p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Aloc p F ϖ)
+        (WittVector.teichmuller p (teichCoeff p F D 0)) * teichPiInvAloc p F ϖ ^ m)
+        = perfectoidValuation p F ((teichCoeff p F D 0 : OF F) : F)
+          * ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ m := by
+      rw [Valuation.map_mul, Valuation.map_pow, wAloc_algebraMap,
+        gaussValue_teichmuller p F hρ1.le, wAloc_teichPiInvAloc p F ϖ hρ0 hρ1]
+    have hus : wAloc p F ϖ hσ0 hσ1 u
+        = gaussValue p F σ D
+          * ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ m := by
+      rw [hu, Valuation.map_mul, Valuation.map_pow, wAloc_algebraMap,
+        wAloc_teichPiInvAloc p F ϖ hσ0 hσ1]
+    rw [ht, hus]
+    refine mul_le_mul_of_nonneg_right ?_ zero_le
+    have h0 := gaussTerm_le_gaussValue p F hσ1.le D 0
+    rwa [gaussTerm, pow_zero, one_mul] at h0
+
+
+/-- The `Bloc`-side Gauss value restricts to `wAloc` on `Aloc`-images. -/
+theorem wLoc_AlocToBloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (u : Aloc p F ϖ) :
+    wLoc p F ϖ hρ0 hρ1 (AlocToBloc p F ϖ u) = wAloc p F ϖ hρ0 hρ1 u := by
+  rw [← valued_BlocToHatK, BlocToHatK_AlocToBloc p F ϖ hρ0 hρ1, valued_AlocToHatK]
+
+/-- The interval norm of `u·p⁻ᵏ` for `u ∈ Aloc`: the max of the two rescaled values. -/
+theorem wI_BIProd_aloc_pInv_pow (k : ℕ) (u : Aloc p F ϖ) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (AlocToBloc p F ϖ u * ↑(isUnit_p_image p F ϖ).unit⁻¹ ^ k))
+      = max (wAloc p F ϖ hρ₁0 hρ₁1 u * (ρ₁⁻¹) ^ k)
+        (wAloc p F ϖ hρ₂0 hρ₂1 u * (ρ₂⁻¹) ^ k) := by
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK, Valuation.map_mul,
+    Valuation.map_mul, Valuation.map_pow, Valuation.map_pow,
+    wLoc_p_inv p F ϖ hρ₁0 hρ₁1, wLoc_p_inv p F ϖ hρ₂0 hρ₂1,
+    wLoc_AlocToBloc p F ϖ hρ₁0 hρ₁1, wLoc_AlocToBloc p F ϖ hρ₂0 hρ₂1]
+
+/-- **Evaluation of the exact monomial lift**: `t·[ϖ]^{-jni}·Tⁱ` evaluates to
+`t·p^{-i}` (the `AD-9` cancellation `[ϖ]^{jn}/p = ` Tate variable). -/
+theorem evalAr_teichMonomial (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (t : Aloc p F ϖ) (i : ℕ) :
+    evalAr p F ϖ h12 hbmem hb
+        ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) i)
+          (⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 (t * teichPiInvAloc p F ϖ ^ (j * n * i)),
+            AlocToHatK_mem_ArSub p F ϖ _⟩ : ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+          isRestricted_monomial p F ϖ _⟩
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (AlocToBloc p F ϖ t * ↑(isUnit_p_image p F ϖ).unit⁻¹ ^ i) := by
+  rw [evalAr_monomial p F ϖ h12 hbmem hb i _, ArToBI_AlocToHatK p F ϖ h12,
+    ← map_pow, ← map_mul]
+  congr 1
+  have hteich : WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ) ^ j) ^ n
+      = teichPi p F ϖ ^ (j * n) := by
+    rw [map_pow, ← pow_mul]
+    rfl
+  rw [teichPowOverP, hteich, mul_pow, ← map_pow, ← pow_mul, map_mul]
+  calc AlocToBloc p F ϖ t * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ ^ (j * n * i))
+      * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ (j * n * i))
+        * ↑(isUnit_p_image p F ϖ).unit⁻¹ ^ i)
+      = AlocToBloc p F ϖ t
+        * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ ^ (j * n * i))
+          * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ (j * n * i)))
+        * ↑(isUnit_p_image p F ϖ).unit⁻¹ ^ i := by ring
+    _ = AlocToBloc p F ϖ t * ↑(isUnit_p_image p F ϖ).unit⁻¹ ^ i := by
+        rw [AlocToBloc_teichPiInv_mul, mul_one]
+
+/-- **The Gauss norm of the exact monomial lift** is the value of its coefficient. -/
+theorem gaussNormRPS_teichMonomial (t : Aloc p F ϖ) (i l : ℕ) :
+    gaussNormRPS p F ϖ hρ₂0 hρ₂1
+        (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) i)
+          (⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 (t * teichPiInvAloc p F ϖ ^ l),
+            AlocToHatK_mem_ArSub p F ϖ _⟩ : ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+      = wAloc p F ϖ hρ₂0 hρ₂1 t
+        * ((perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ l := by
+  rw [gaussNormRPS_monomial, valued_AlocToHatK, Valuation.map_mul, Valuation.map_pow,
+    wAloc_teichPiInvAloc p F ϖ hρ₂0 hρ₂1]
+
+/-- **The norm-controlled lift on the dense layer** (Kedlaya's strictness estimate,
+AD-9 exact form): every `u·p⁻ᵏ` with `u ∈ Aloc` has an `evalAr`-preimage whose Gauss
+norm is at most its interval norm. -/
+theorem exists_evalAr_lift_aloc (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (hexact : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁)
+    (k : ℕ) (u : Aloc p F ϖ) :
+    ∃ f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      evalAr p F ϖ h12 hbmem hb f
+          = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (AlocToBloc p F ϖ u * ↑(isUnit_p_image p F ϖ).unit⁻¹ ^ k)
+        ∧ gaussNormRPS p F ϖ hρ₂0 hρ₂1
+            (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+          ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+              (AlocToBloc p F ϖ u * ↑(isUnit_p_image p F ϖ).unit⁻¹ ^ k)) := by
+  induction k generalizing u with
+  | zero =>
+    refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 0)
+        (⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 (u * teichPiInvAloc p F ϖ ^ (j * n * 0)),
+          AlocToHatK_mem_ArSub p F ϖ _⟩ : ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+        isRestricted_monomial p F ϖ _⟩,
+      evalAr_teichMonomial p F ϖ h12 j n hbmem hb u 0, ?_⟩
+    rw [gaussNormRPS_teichMonomial p F ϖ u 0 (j * n * 0),
+      wI_BIProd_aloc_pInv_pow p F ϖ 0 u]
+    simp only [Nat.mul_zero, pow_zero, mul_one]
+    exact le_max_right _ _
+  | succ k ih =>
+    obtain ⟨t, w, hsplit, hbound⟩ := exists_aloc_head_split p F ϖ u
+    obtain ⟨g, hg_eval, hg_norm⟩ := ih w
+    refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k + 1))
+        (⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 (t * teichPiInvAloc p F ϖ ^ (j * n * (k + 1))),
+          AlocToHatK_mem_ArSub p F ϖ _⟩ : ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+        isRestricted_monomial p F ϖ _⟩ + g, ?_, ?_⟩
+    · rw [evalAr_add p F ϖ h12 hbmem hb,
+        evalAr_teichMonomial p F ϖ h12 j n hbmem hb t (k + 1), hg_eval, ← map_add]
+      congr 1
+      have hvp := (isUnit_p_image p F ϖ).unit.mul_inv
+      have hcoe : (↑(isUnit_p_image p F ϖ).unit : Bloc p F ϖ)
+          = AlocToBloc p F ϖ ((p : Aloc p F ϖ)) := by
+        rw [(isUnit_p_image p F ϖ).unit_spec, map_natCast, map_natCast]
+      rw [hcoe] at hvp
+      rw [hsplit, map_add, map_mul, pow_succ]
+      linear_combination (-(AlocToBloc p F ϖ w
+        * (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ) ^ k)) * hvp
+    · refine le_trans (gaussNormRPS_add_le p F ϖ (isRestricted_monomial p F ϖ _) g.2)
+        (max_le ?_ ?_)
+      · rw [gaussNormRPS_teichMonomial p F ϖ t (k + 1) (j * n * (k + 1)),
+          wI_BIProd_aloc_pInv_pow p F ϖ (k + 1) u]
+        refine le_max_of_le_left ?_
+        have hpow : ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ (j * n * (k + 1))
+            = (ρ₁⁻¹) ^ (k + 1) := by
+          rw [← hexact, ← inv_pow, ← pow_mul]
+        rw [hpow]
+        exact mul_le_mul_of_nonneg_right (hbound ρ₂ ρ₁ hρ₂0 hρ₂1 hρ₁0 hρ₁1) zero_le
+      · refine le_trans hg_norm ?_
+        rw [wI_BIProd_aloc_pInv_pow p F ϖ k w,
+          wI_BIProd_aloc_pInv_pow p F ϖ (k + 1) u]
+        have key : ∀ (ρ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1),
+            wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k
+              ≤ wAloc p F ϖ hρ0 hρ1 u * (ρ⁻¹) ^ (k + 1) := by
+          intro ρ hρ0 hρ1
+          have hpw : ρ * wAloc p F ϖ hρ0 hρ1 w ≤ wAloc p F ϖ hρ0 hρ1 u := by
+            have h1 : wAloc p F ϖ hρ0 hρ1 ((p : Aloc p F ϖ) * w)
+                = ρ * wAloc p F ϖ hρ0 hρ1 w := by
+              have h2 := wAloc_p_pow_mul p F ϖ hρ0 hρ1 1 w
+              rwa [pow_one, pow_one] at h2
+            have h3 : (p : Aloc p F ϖ) * w = u - t := by rw [hsplit]; ring
+            rw [h3] at h1
+            rw [← h1]
+            calc wAloc p F ϖ hρ0 hρ1 (u - t)
+                ≤ max (wAloc p F ϖ hρ0 hρ1 u) (wAloc p F ϖ hρ0 hρ1 t) :=
+                  Valuation.map_sub _ _ _
+              _ ≤ wAloc p F ϖ hρ0 hρ1 u :=
+                  max_le le_rfl (hbound ρ ρ hρ0 hρ1 hρ0 hρ1)
+          have hcancel : ρ * ρ⁻¹ = 1 := mul_inv_cancel₀ hρ0.ne'
+          calc wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k
+              = (ρ * ρ⁻¹) * (wAloc p F ϖ hρ0 hρ1 w * (ρ⁻¹) ^ k) := by
+                rw [hcancel, one_mul]
+            _ = (ρ * wAloc p F ϖ hρ0 hρ1 w) * ((ρ⁻¹) ^ k * ρ⁻¹) := by ring
+            _ = (ρ * wAloc p F ϖ hρ0 hρ1 w) * (ρ⁻¹) ^ (k + 1) := by rw [pow_succ]
+            _ ≤ wAloc p F ϖ hρ0 hρ1 u * (ρ⁻¹) ^ (k + 1) :=
+                mul_le_mul_of_nonneg_right hpw zero_le
+        exact max_le_max (key ρ₁ hρ₁0 hρ₁1) (key ρ₂ hρ₂0 hρ₂1)
+
+/-- **The norm-controlled lift of every `Bloc` element** — Kedlaya's estimate
+(4.9.1) with constant `1` (the AD-9 exact case). -/
+theorem exists_evalAr_lift_bloc (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (hexact : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁)
+    (x : Bloc p F ϖ) :
+    ∃ f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      evalAr p F ϖ h12 hbmem hb f = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        ∧ gaussNormRPS p F ϖ hρ₂0 hρ₂1
+            (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+          ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+              (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) := by
+  set vp : Bloc p F ϖ := ↑(isUnit_p_image p F ϖ).unit⁻¹ with hvp
+  set vt : Bloc p F ϖ := AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) with hvt
+  have hvpmul : algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) * vp = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.mul_inv
+    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
+  have hvtmul : algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt = 1 := by
+    have h := congrArg (AlocToBloc p F ϖ) (teichPiInvAloc_mul p F ϖ)
+    rwa [map_mul, AlocToBloc_algebraMap, map_one] at h
+  have hsplit : ∀ k : ℕ, algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ k) * (vp * vt) ^ k = 1 := by
+    intro k
+    rw [map_pow, map_mul, ← mul_pow]
+    rw [show algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * (vp * vt)
+        = (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) * vp)
+          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) * vt) from by ring,
+      hvpmul, hvtmul, mul_one, one_pow]
+  obtain ⟨⟨a, y⟩, hxy⟩ := IsLocalization.surj
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) x
+  obtain ⟨k, hk⟩ := y.2
+  have hx0 : x = algebraMap (Ainf p F) (Bloc p F ϖ) a * (vp * vt) ^ k := by
+    have hxy' : x * algebraMap (Ainf p F) (Bloc p F ϖ)
+        (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) a := by
+      have hyk : ((p : Ainf p F) * teichPi p F ϖ) ^ k = (y : Ainf p F) := hk
+      rw [hyk]
+      exact hxy
+    calc x = x * (algebraMap (Ainf p F) (Bloc p F ϖ)
+            (((p : Ainf p F) * teichPi p F ϖ) ^ k) * (vp * vt) ^ k) := by
+          rw [hsplit k, mul_one]
+      _ = (x * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (((p : Ainf p F) * teichPi p F ϖ) ^ k)) * (vp * vt) ^ k := by ring
+      _ = algebraMap (Ainf p F) (Bloc p F ϖ) a * (vp * vt) ^ k := by rw [hxy']
+  have hx : x = AlocToBloc p F ϖ (algebraMap (Ainf p F) (Aloc p F ϖ) a
+      * teichPiInvAloc p F ϖ ^ k) * vp ^ k := by
+    calc x = algebraMap (Ainf p F) (Bloc p F ϖ) a * (vp * vt) ^ k := hx0
+      _ = algebraMap (Ainf p F) (Bloc p F ϖ) a * vt ^ k * vp ^ k := by
+          rw [mul_pow]; ring
+      _ = AlocToBloc p F ϖ (algebraMap (Ainf p F) (Aloc p F ϖ) a
+            * teichPiInvAloc p F ϖ ^ k) * vp ^ k := by
+          rw [map_mul, AlocToBloc_algebraMap, map_pow]
+  rw [hx]
+  exact exists_evalAr_lift_aloc p F ϖ h12 j n hbmem hb hexact k _
+
+/-- **Density extraction**: every element of `B^I` is within `ε` of a `Bloc`-image. -/
+theorem exists_BIProd_approx {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) {ε : NNReal} (hε : 0 < ε) :
+    ∃ x : Bloc p F ϖ, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (z - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ ε := by
+  have hz' : z ∈ closure ((BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+      : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := hz
+  rw [mem_closure_iff_nhds] at hz'
+  obtain ⟨w, hwball, x, hwx⟩ := hz' _ (wI_ball_mem_nhds p F z hε)
+  refine ⟨x, ?_⟩
+  rw [hwx]
+  have hswap : z - w = -(w - z) := by ring
+  rw [hswap, wI_neg]
+  exact hwball
+
+/-- **Abstract successive-approximation chain**: from a one-step improvement engine,
+a full correction sequence with its residual sequence. Stated over opaque types so
+the recursion never unfolds against heavy concrete types (PERF-1). -/
+theorem exists_chain {α : Type*} {β : Type*} (S : α → Prop) (ν : α → NNReal)
+    (μ : β → NNReal) (sub : α → β → α) (c : ℕ → NNReal) (z : α)
+    (hz : S z) (hzc : ν z ≤ c 0)
+    (hstep : ∀ m r, S r → ν r ≤ c m →
+      ∃ f : β, μ f ≤ c m ∧ S (sub r f) ∧ ν (sub r f) ≤ c (m + 1)) :
+    ∃ (u : ℕ → β) (r : ℕ → α), r 0 = z ∧ (∀ m, r (m + 1) = sub (r m) (u m))
+      ∧ (∀ m, μ (u m) ≤ c m) ∧ (∀ m, S (r m)) ∧ (∀ m, ν (r m) ≤ c m) := by
+  choose F hμ hS hν using hstep
+  let R : ∀ m : ℕ, {r : α // S r ∧ ν r ≤ c m} :=
+    fun m => Nat.rec (motive := fun k => {r : α // S r ∧ ν r ≤ c k})
+      ⟨z, hz, hzc⟩
+      (fun k rk => ⟨sub rk.1 (F k rk.1 rk.2.1 rk.2.2),
+        hS k rk.1 rk.2.1 rk.2.2, hν k rk.1 rk.2.1 rk.2.2⟩) m
+  exact ⟨fun m => F m (R m).1 (R m).2.1 (R m).2.2, fun m => (R m).1, rfl,
+    fun m => rfl, fun m => hμ m (R m).1 (R m).2.1 (R m).2.2,
+    fun m => (R m).2.1, fun m => (R m).2.2⟩
+
+/-- One step of the residual estimate: if the residual after partial sum `SS` is at
+most `ε` and the correction `V` has Gauss norm at most `ε`, the residual after
+`SS + V` is at most `ε`. -/
+theorem wI_z_sub_evalAr_add_le (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    (SS V : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+    {ε : NNReal} (hε : 0 < ε)
+    (h1 : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z - evalAr p F ϖ h12 hbmem hb SS) ≤ ε)
+    (h2 : gaussNormRPS p F ϖ hρ₂0 hρ₂1
+      (V : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) ≤ ε) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z - evalAr p F ϖ h12 hbmem hb (SS + V)) ≤ ε := by
+  have hVle : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (evalAr p F ϖ h12 hbmem hb V) ≤ ε := by
+    refine wI_evalAr_le p F ϖ h12 hbmem hb V hε (fun l => ?_)
+    exact le_trans (valued_coeff_le_gaussNormRPS p F ϖ V.2 _) h2
+  have hsplit : z - evalAr p F ϖ h12 hbmem hb (SS + V)
+      = (z - evalAr p F ϖ h12 hbmem hb SS)
+        + -(evalAr p F ϖ h12 hbmem hb V) := by
+    rw [evalAr_add p F ϖ h12 hbmem hb]
+    ring
+  calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z - evalAr p F ϖ h12 hbmem hb (SS + V))
+      = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 ((z - evalAr p F ϖ h12 hbmem hb SS)
+          + -(evalAr p F ϖ h12 hbmem hb V)) := by rw [hsplit]
+    _ ≤ max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z - evalAr p F ϖ h12 hbmem hb SS))
+        (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (-(evalAr p F ϖ h12 hbmem hb V))) :=
+      wI_add_le p F _ _
+    _ = max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z - evalAr p F ϖ h12 hbmem hb SS))
+        (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (evalAr p F ϖ h12 hbmem hb V)) := by
+      rw [wI_neg]
+    _ ≤ ε := max_le h1 hVle
+
+/-- From a geometric correction sequence, the limit series is an exact
+`evalAr`-preimage with Gauss norm at most `W`. -/
+theorem exists_evalAr_eq_of_correction (h12 : ρ₁ ≤ ρ₂)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) {W : NNReal} (hW : 0 < W)
+    (u : ℕ → ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+    (hCbnd : ∀ l, gaussNormRPS p F ϖ hρ₂0 hρ₂1
+      ((u l : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) ≤ W * (2⁻¹ : NNReal) ^ l)
+    (hres : ∀ m, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (z - evalAr p F ϖ h12 hbmem hb (∑ l ∈ Finset.range m, u l))
+        ≤ W * (2⁻¹ : NNReal) ^ m) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      evalAr p F ϖ h12 hbmem hb U = z
+        ∧ gaussNormRPS p F ϖ hρ₂0 hρ₂1
+            (U : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) ≤ W := by
+  have hhalf1 : ((2 : NNReal)⁻¹) ≤ 1 := by norm_num
+  have hhalf0 : (0 : NNReal) < 2⁻¹ := by norm_num
+  have hC0 : Filter.Tendsto (fun l : ℕ => W * (2⁻¹ : NNReal) ^ l)
+      Filter.atTop (nhds 0) := by
+    have h1 : Filter.Tendsto (fun l : ℕ => ((2 : NNReal)⁻¹) ^ l)
+        Filter.atTop (nhds 0) :=
+      tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)
+    have h2 := h1.const_mul W
+    rwa [mul_zero] at h2
+  obtain ⟨U, hU⟩ := exists_rps_series_limit p F ϖ hCbnd hC0
+  have hcancel : ∀ a c : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(ArSub p F ϖ hρ₂0 hρ₂1)), c + (a - c) = a := fun a c => by abel
+  have hUnorm : gaussNormRPS p F ϖ hρ₂0 hρ₂1
+      ((U : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) ≤ W := by
+    have h0 := hU 0 W hW (fun l _ => by
+      calc W * (2⁻¹ : NNReal) ^ l ≤ W * 1 :=
+          mul_le_mul_of_nonneg_left (pow_le_one₀ zero_le hhalf1) zero_le
+        _ = W := mul_one W)
+    rwa [Finset.sum_range_zero, sub_zero] at h0
+  have hdiff : ∀ m : ℕ, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (z - evalAr p F ϖ h12 hbmem hb U) ≤ W * (2⁻¹ : NNReal) ^ m := by
+    intro m
+    have hε : (0 : NNReal) < W * (2⁻¹ : NNReal) ^ m :=
+      mul_pos hW (pow_pos hhalf0 _)
+    have htail := hU m (W * (2⁻¹ : NNReal) ^ m) hε (fun l hl =>
+      mul_le_mul_of_nonneg_left
+        (pow_le_pow_of_le_one zero_le hhalf1 hl) zero_le)
+    have h := wI_z_sub_evalAr_add_le p F ϖ h12 hbmem hb z
+      (∑ l ∈ Finset.range m, u l) (U - ∑ l ∈ Finset.range m, u l) hε
+      (hres m) htail
+    rwa [hcancel] at h
+  have hle0 : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (z - evalAr p F ϖ h12 hbmem hb U) ≤ 0 :=
+    ge_of_tendsto hC0 (Filter.Eventually.of_forall hdiff)
+  have h0 : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (z - evalAr p F ϖ h12 hbmem hb U) = 0 := le_antisymm hle0 zero_le
+  exact ⟨U, (sub_eq_zero.mp ((wI_eq_zero_iff p F _).mp h0)).symm, hUnorm⟩
+
+/-- **The correction sequence**: successive approximation of an element of `B^I` by
+values of the presentation map, each round shrinking the residual by `2⁻¹` with
+Gauss-norm control (the engine behind closedness of the image). -/
+theorem exists_correction_sequence (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (hexact : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    {W : NNReal} (hW : 0 < W)
+    (hzW : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ W) :
+    ∃ u : ℕ → ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      (∀ l, gaussNormRPS p F ϖ hρ₂0 hρ₂1
+        ((u l : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) ≤ W * (2⁻¹ : NNReal) ^ l)
+      ∧ ∀ m, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (z - evalAr p F ϖ h12 hbmem hb (∑ l ∈ Finset.range m, u l))
+            ≤ W * (2⁻¹ : NNReal) ^ m := by
+  have hhalf1 : ((2 : NNReal)⁻¹) ≤ 1 := by norm_num
+  have hhalf0 : (0 : NNReal) < 2⁻¹ := by norm_num
+  have hstep : ∀ (m : ℕ) (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)),
+      r ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 →
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
+      ∃ f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+        gaussNormRPS p F ϖ hρ₂0 hρ₂1
+            (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+          ≤ W * (2⁻¹ : NNReal) ^ m
+        ∧ (r - evalAr p F ϖ h12 hbmem hb f) ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ∧ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (r - evalAr p F ϖ h12 hbmem hb f)
+          ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
+    intro m r hrmem hrbnd
+    have hε : (0 : NNReal) < W * (2⁻¹ : NNReal) ^ (m + 1) :=
+      mul_pos hW (pow_pos hhalf0 _)
+    obtain ⟨x, hxapp⟩ := exists_BIProd_approx p F ϖ hrmem hε
+    obtain ⟨f, hfeval, hfnorm⟩ :=
+      exists_evalAr_lift_bloc p F ϖ h12 j n hbmem hb hexact x
+    have hxle : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ m := by
+      have hrw : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+          = r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) := by ring
+      calc wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+          = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)) := by rw [← hrw]
+        _ ≤ max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
+            (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+              (-(r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x))) := wI_add_le p F _ _
+        _ = max (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 r)
+            (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+              (r - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)) := by rw [wI_neg]
+        _ ≤ W * (2⁻¹ : NNReal) ^ m := by
+            refine max_le hrbnd (le_trans hxapp ?_)
+            exact mul_le_mul_of_nonneg_left
+              (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ m)) zero_le
+    refine ⟨f, le_trans hfnorm hxle, ?_, ?_⟩
+    · rw [hfeval]
+      exact sub_mem hrmem (BIProd_mem_BISub p F ϖ x)
+    · rw [hfeval]
+      exact hxapp
+  obtain ⟨u, r, hr0, hrrec, hCbnd, hrmem, hrbnd⟩ :=
+    exists_chain (fun w => w ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      (fun f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)) =>
+        gaussNormRPS p F ϖ hρ₂0 hρ₂1
+          (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+      (fun w f => w - evalAr p F ϖ h12 hbmem hb f)
+      (fun m => W * (2⁻¹ : NNReal) ^ m) z hz
+      (by rw [pow_zero, mul_one]; exact hzW) hstep
+  have hpartial : ∀ m, r m
+      = z - evalAr p F ϖ h12 hbmem hb (∑ l ∈ Finset.range m, u l) := by
+    intro m
+    induction m with
+    | zero =>
+      rw [hr0, Finset.sum_range_zero, evalAr_zero p F ϖ h12 hbmem hb, sub_zero]
+    | succ m ih =>
+      rw [hrrec m, ih, Finset.sum_range_succ, evalAr_add p F ϖ h12 hbmem hb,
+        sub_sub]
+  refine ⟨u, hCbnd, fun m => ?_⟩
+  rw [← hpartial m]
+  exact hrbnd m
+
+/-- **Strict surjectivity onto `B^I`** (Kedlaya, Lemma "Robba localizations", case 3,
+surjectivity): every element of the interval ring is the value of a restricted series
+over `A^r` whose Gauss norm is at most its interval norm. -/
+theorem exists_evalAr_eq_of_mem_BISub (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (hexact : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    ∃ f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      evalAr p F ϖ h12 hbmem hb f = z
+        ∧ gaussNormRPS p F ϖ hρ₂0 hρ₂1
+            (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+          ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z := by
+  rcases eq_or_ne (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) 0 with hW0 | hWne
+  · refine ⟨0, ?_, ?_⟩
+    · rw [evalAr_zero p F ϖ h12 hbmem hb]
+      exact ((wI_eq_zero_iff p F z).mp hW0).symm
+    · have hgz : gaussNormRPS p F ϖ hρ₂0 hρ₂1
+          ((0 : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) = 0 := by
+        rw [gaussNormRPS]
+        refine le_antisymm (ciSup_le fun s => ?_) zero_le
+        rw [ZeroMemClass.coe_zero, map_zero, ZeroMemClass.coe_zero,
+          Valuation.map_zero]
+      rw [hgz]
+      exact zero_le
+  · have hW : 0 < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z := pos_iff_ne_zero.mpr hWne
+    obtain ⟨u, hCbnd, hres⟩ := exists_correction_sequence p F ϖ h12 j n hbmem hb
+      hexact hz hW le_rfl
+    exact exists_evalAr_eq_of_correction p F ϖ h12 hbmem hb z hW u hCbnd hres
+
+/-- **The univariate presentation map is surjective** (T911, one-variable case). -/
+theorem surjective_evalArHom (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (hexact : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁) :
+    Function.Surjective (evalArHom p F ϖ h12 hbmem hb) := by
+  rintro ⟨z, hz⟩
+  obtain ⟨f, hfeval, -⟩ :=
+    exists_evalAr_eq_of_mem_BISub p F ϖ h12 j n hbmem hb hexact hz
+  exact ⟨f, Subtype.ext hfeval⟩
+
+/-- Restrictedness over `B^I` forces the interval norms of the coefficients to be
+cofinitely small (the converse of `isRestricted_of_wI`). -/
+theorem wI_finite_of_isRestricted {k : ℕ}
+    {c : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hc : MvPowerSeries.IsRestricted c) {ε : NNReal} (hε : 0 < ε) :
+    {I : Fin k →₀ ℕ | ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((MvPowerSeries.coeff I c : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}.Finite := by
+  have hball : {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ ε} ∈ nhds
+        (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+    have h := wI_ball_mem_nhds p F
+      (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) hε
+    simpa using h
+  have hU : (Subtype.val ⁻¹' {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ ε})
+      ∈ nhds (0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+    continuous_subtype_val.continuousAt.preimage_mem_nhds hball
+  have hUev : ∀ᶠ y in nhds (0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ ε := hU
+  have hev := hc.eventually hUev
+  have hfin := Filter.eventually_cofinite.mp hev
+  simpa only [not_le] using hfin
+
+/-- The coefficientwise-lifted series is restricted (the assembly step of the
+`k`-variable surjectivity, hoisted to its own lemma per PERF-1). -/
+theorem isRestricted_liftAssembly {k : ℕ}
+    (fI : (Fin k →₀ ℕ) → ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+    (g : ↥(restrictedMvPowerSeriesSubring k ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hfInorm : ∀ I, gaussNormRPS p F ϖ hρ₂0 hρ₂1
+      ((fI I : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff I (g : MvPowerSeries (Fin k)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) :
+    MvPowerSeries.IsRestricted (fun s => coeffSeq
+      ((fI (Finsupp.tail s) : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) (s 0)
+      : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) := by
+  set G : MvPowerSeries (Fin (k + 1)) ↥(ArSub p F ϖ hρ₂0 hρ₂1) :=
+    fun s => coeffSeq ((fI (Finsupp.tail s)
+      : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) (s 0) with hGdef
+  rw [isRestricted_iff_valued]
+  intro ε hε
+  have hT : {I : Fin k →₀ ℕ | ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((MvPowerSeries.coeff I (g : MvPowerSeries (Fin k)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}.Finite :=
+    wI_finite_of_isRestricted p F ϖ g.2 hε
+  have hL : ∀ I : Fin k →₀ ℕ, {l : ℕ | ε < Valued.v
+      ((coeffSeq ((fI I : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+        : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)}.Finite := by
+    intro I
+    have hfin := (isRestricted_iff_valued p F ϖ
+      ((fI I : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))).mp (fI I).2 ε hε
+    have hpre : {l : ℕ | ε < Valued.v
+        ((coeffSeq ((fI I : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+          : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)}
+        = (fun l : ℕ => Finsupp.single (0 : Fin 1) l) ⁻¹'
+          {s : Fin 1 →₀ ℕ | ε < Valued.v ((MvPowerSeries.coeff s
+            ((fI I : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+            : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)} := rfl
+    rw [hpre]
+    exact Set.Finite.preimage
+      (Set.injOn_of_injective (Finsupp.single_injective (0 : Fin 1))) hfin
+  refine Set.Finite.subset ((hT.biUnion (fun I _ => (hL I).image
+    (fun l => Finsupp.cons l I)))) fun s hs => ?_
+  have hsv : ε < Valued.v ((G s : ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+      : hatK p F hρ₂0 hρ₂1) := hs
+  have hGle : Valued.v ((G s : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) : hatK p F hρ₂0 hρ₂1)
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff (Finsupp.tail s) (g : MvPowerSeries (Fin k)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) :=
+    le_trans (valued_coeff_le_gaussNormRPS p F ϖ (fI (Finsupp.tail s)).2 _)
+      (hfInorm (Finsupp.tail s))
+  refine Set.mem_biUnion (lt_of_lt_of_le hsv hGle) ?_
+  refine ⟨s 0, hsv, ?_⟩
+  exact Finsupp.cons_tail s
+
+/-- **The `k`-variable presentation map is surjective** — the restricted-series
+functor applied to the strict surjection (T911b's instance): lift each coefficient
+with Gauss-norm control and reassemble. -/
+theorem surjective_evalArMvHom (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1)
+    (hexact : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (j * n) = ρ₁) {k : ℕ} :
+    Function.Surjective (evalArMvHom p F ϖ h12 hbmem hb (k := k)) := by
+  intro g
+  choose fI hfIeval hfInorm using fun I : Fin k →₀ ℕ =>
+    exists_evalAr_eq_of_mem_BISub p F ϖ h12 j n hbmem hb hexact
+      (MvPowerSeries.coeff I (g : MvPowerSeries (Fin k)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))).2
+  have hGres := isRestricted_liftAssembly p F ϖ fI g hfInorm
+  refine ⟨⟨_, hGres⟩, ?_⟩
+  apply Subtype.ext
+  funext I
+  have hslice : sliceElt p F ϖ ⟨_, hGres⟩ I = fI I := by
+    apply Subtype.ext
+    apply coeffSeq_ext
+    intro l
+    rw [coeffSeq_sliceElt]
+    show coeffSeq ((fI (Finsupp.tail (Finsupp.cons l I))
+        : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) ((Finsupp.cons l I) 0)
+      = coeffSeq ((fI I : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(ArSub p F ϖ hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1)) l
+    rw [Finsupp.tail_cons, Finsupp.cons_zero]
+  show evalArMvFun p F ϖ h12 hbmem hb ⟨_, hGres⟩ I
+    = (g : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) I
+  rw [evalArMvFun_apply, hslice]
+  exact Subtype.ext (hfIeval I)
+
 end FarguesFontaine
 
 end

@@ -1321,6 +1321,83 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   in t-coordinates; transport to ρ) — THE bridge that makes BI-algebras quotients of
   Ar-Tate algebras.
 
+#### T911 strictness sub-tickets (spawned 2026-07-26, beastmode; parent T911)
+
+All in `FarguesFontaine/Presentation.lean` unless noted; all depend on the existing
+T910/T910a API; source = Kedlaya `L:Robba localizations` proof (lift paragraph +
+strict-surjectivity paragraph), specialised per AD-9 (`z̄ = ϖʲ`, left endpoint on the
+nose, so every estimate is exact with constant 1). Generality: minimal, match use site.
+`vp := ↑(isUnit_p_image p F ϖ).unit⁻¹`, `hexact : |ϖ|^(j·n) = ρ₁`.
+
+### [T911a] Aloc head split with radius-uniform head bound
+- **Status**: done (2026-07-26) | **Parent**: T911 | **Type**: lemma
+- **Statement**: `∀ u : Aloc, ∃ t w : Aloc, u = t + p·w ∧ ∀ ρ σ, wAloc ρ t ≤ wAloc σ u`
+  (the head's value is radius-independent and bounded by u's value at every radius).
+- **Sketch**: `IsLocalization.surj` on powers of `teichPi` writes `u = algebraMap D ·
+  teichPiInvAloc^m`; `exists_head_split` (GaussNorm) splits `D = [D₀] + p·D'`;
+  `t := algebraMap [D₀] · tPI^m`, `w := algebraMap D' · tPI^m`; `wAloc ρ t =
+  |D₀|·|ϖ|⁻ᵐ` by `wAloc_algebraMap`+`gaussValue_teichmuller`+`wAloc_teichPiInvAloc`,
+  and `|D₀|·|ϖ|⁻ᵐ = gaussTerm σ D 0 · |ϖ|⁻ᵐ ≤ gaussValue σ D · |ϖ|⁻ᵐ = wAloc σ u`.
+- **Mathlib**: IsLocalization.surj; rest is project API.
+
+### [T911c] The exact monomial lift (evaluation identity + Gauss norm)
+- **Status**: done (2026-07-26) | **Parent**: T911 | **Type**: lemma ×2
+- **Statement**: for `t : Aloc`, `i : ℕ`, the monomial `M := monomial i
+  (AlocToHatK (t · teichPiInvAloc^(j·n·i)))` satisfies (1) `evalAr M = BIProd
+  (AlocToBloc t · vp^i)`; (2) `gaussNormRPS M = wAloc ρ₂ t · (|ϖ|⁻¹)^(j·n·i)`.
+- **Sketch**: (1) `evalAr_monomial` + `ArToBI_AlocToHatK` + `AlocToBloc_teichPiInv_mul`
+  (the `[ϖ]^{jni}` inside `teichPowOverP^i` cancels `tPI^{jni}`), exactly the
+  `exists_evalAr_eq_pInv_pow` computation with an extra `t` factor. (2)
+  `gaussNormRPS_monomial` + `valued_AlocToHatK` + `wAloc` multiplicativity.
+
+### [T911d] The norm-controlled lift on the dense layer, induction form
+- **Status**: done (2026-07-26) | **Parent**: T911 | **Type**: theorem
+- **Statement**: under `hexact`, `∀ k u, ∃ f, evalAr f = BIProd (AlocToBloc u · vp^k)
+  ∧ gaussNormRPS f ≤ wI (BIProd (AlocToBloc u · vp^k))`.
+- **Sketch**: induction on `k`. Base: constant monomial, norm `wAloc ρ₂ u =` the
+  `ρ₂`-side of `wI`. Step: split `u = t + p·w` (T911a); `f := M(t, k+1) + g(w, k)`;
+  `‖M‖ = wAloc ρ₂ t · ρ₁^{-(k+1)} ≤ wAloc ρ₁ u · ρ₁^{-(k+1)} =` the `ρ₁`-side of
+  `wI` (uses hexact + cross-radius bound); `‖g‖ ≤ wI(w-elt) ≤ wI(u-elt)` since
+  `wAloc ρ (p·w) = ρ·wAloc ρ w ≤ wAloc ρ u` (valuation sub-additivity + head bound);
+  `gaussNormRPS_add_le`. Evaluation adds by `evalAr_add` + `p·vp = 1`.
+
+### [T911e] The norm-controlled lift of every Bloc element
+- **Status**: done (2026-07-26) | **Parent**: T911 | **Type**: theorem
+- **Statement**: under `hexact`, `∀ x : Bloc, ∃ f, evalAr f = BIProd x ∧
+  gaussNormRPS f ≤ wI (BIProd x)` — Kedlaya (4.9.1) with constant 1.
+- **Sketch**: `IsLocalization.surj` on powers of `p[ϖ]` (the `BIProd_mem_evalRange`
+  opening): `x = AlocToBloc (algebraMap a · tPI^k) · vp^k`; apply T911d.
+
+### [T911f] Strict surjectivity: every element of B^I is a value
+- **Status**: done (2026-07-26) | **Parent**: T911 | **Type**: theorem
+- **Statement**: under `hexact`, `∀ z ∈ BISub, ∃ f, evalAr f = z ∧ gaussNormRPS f ≤
+  wI z` (closedness of the image by successive approximation; with density = Kedlaya's
+  strict surjectivity).
+- **Sketch**: WLOG `wI z = W > 0` (`wI_eq_zero_iff` else). Recursively build
+  correction terms `u_l` with `‖u_l‖ ≤ W·2⁻ˡ` and `wI (z − evalAr (∑_{l<n} u_l)) ≤
+  W·2⁻ⁿ`: approximate the residual by `BIProd x` within `W·2⁻⁽ⁿ⁺¹⁾` (density of Bloc
+  in BISub = closure def + `wI_ball_mem_nhds`), lift `x` by T911e, ultrametric max.
+  Then `exists_rps_series_limit` (Groebner, k=1) gives `U = ∑ u_l` with tails ≤
+  `W·2⁻ⁿ`; `wI_evalAr_le` + `valued_coeff_le_gaussNormRPS` transfer tail bounds
+  through evaluation; `wI (z − evalAr U) ≤ W·2⁻ⁿ ∀n ⟹ = 0`; `‖U‖ ≤ W` from the
+  `n = 0` tail bound.
+- **Depends**: T911a–e, exists_rps_series_limit.
+
+### [T911g] The bundled univariate surjectivity
+- **Status**: done (2026-07-26) | **Parent**: T911 | **Type**: theorem
+- **Statement**: under `hexact`, `Function.Surjective (evalArHom p F ϖ h12 hbmem hb)`.
+- **Sketch**: unwrap T911f through `Subtype.ext`.
+
+### [T911h] The k-variable surjectivity (restricted-series functor, T911b's instance)
+- **Status**: done (2026-07-26) | **Parent**: T911/T911b | **Type**: theorem
+- **Statement**: under `hexact`, `Function.Surjective (evalArMvHom … (k := k))`.
+- **Sketch**: coefficientwise: lift each `coeff I g` by T911f with `‖f_I‖ ≤
+  wI (coeff I g)`; assemble `G s := coeff (s 0) (f_{tail s})`; `sliceSeries G I = f_I`
+  by `coeffSeq_ext` (+ `Finsupp.tail_cons`/`cons_zero`); `G` restricted by the finite-
+  union argument (mirror `isRestricted_evalArMvFun`), using that `g` restricted gives
+  cofinitely-small `wI (coeff I g)` (subtype-nhds + `wI_ball_mem_nhds`); conclude by
+  `Subtype.ext` + `MvPowerSeries.ext` + `evalArMvFun_apply`.
+
 ### [T912] Theorem 4.10: BI is strongly noetherian
 - **Status**: open | **File**: FarguesFontaine/StronglyNoetherianB.lean | **Depends**: T907, T910, T911
 - **Statement**: `IsStronglyNoetherian (BI)` for every c^ℚ-endpoint closed
