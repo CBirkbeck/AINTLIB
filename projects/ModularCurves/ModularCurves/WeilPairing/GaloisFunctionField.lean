@@ -573,4 +573,25 @@ theorem equivMapDomain_kappaDivisor {L : Type v} [Field L] [DecidableEq L] [Alge
     galoisProjPointEquiv_toProjectiveSmoothPoint W σ P]
   rfl
 
+/-- The `σ`-action on points as an additive equivalence (mathlib's `Affine.Point.map`
+in both directions). -/
+noncomputable def galoisPointEquiv {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) :
+    (W.baseChange L).toAffine.Point ≃+ (W.baseChange L).toAffine.Point where
+  toFun := WeierstrassCurve.Affine.Point.map (W' := W) (F := L) (K := L)
+    (σ.toAlgHom : L →ₐ[k] L)
+  invFun := WeierstrassCurve.Affine.Point.map (W' := W) (F := L) (K := L)
+    (σ.symm.toAlgHom : L →ₐ[k] L)
+  left_inv P := by
+    rw [WeierstrassCurve.Affine.Point.map_map]
+    rw [show (σ.symm.toAlgHom : L →ₐ[k] L).comp (σ.toAlgHom : L →ₐ[k] L) =
+        (AlgHom.id k L) from AlgHom.ext fun a => by simp]
+    cases P <;> rfl
+  right_inv P := by
+    rw [WeierstrassCurve.Affine.Point.map_map]
+    rw [show (σ.toAlgHom : L →ₐ[k] L).comp (σ.symm.toAlgHom : L →ₐ[k] L) =
+        (AlgHom.id k L) from AlgHom.ext fun a => by simp]
+    cases P <;> rfl
+  map_add' P Q := map_add _ P Q
+
 end ModularCurves
