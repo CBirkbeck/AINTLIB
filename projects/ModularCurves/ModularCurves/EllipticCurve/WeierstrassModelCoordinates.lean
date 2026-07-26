@@ -179,6 +179,52 @@ lemma projModelFromOfGlobalSections_preimage_basicOpen
       (mk_X_mem_quotientGrading_one W j)]
   exact congr_arg X.basicOpen (projModelEval_X W f P hP j)
 
+/-- The morphism to the projective Weierstrass model defined by a homogeneous
+coordinate triple with two coprime values. -/
+noncomputable def projModelFromOfGlobalSectionsOfIsCoprime
+    {X : Scheme.{u}} (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens))) (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P) (i j : Fin 3)
+    (hij : IsCoprime (P i) (P j)) : X ⟶ projModel W :=
+  Proj.fromOfGlobalSections _ (projModelEval W f P hP)
+    (projModelEval_irrelevant_map_top_of_isCoprime W f P hP i j hij)
+
+/-- The morphism defined by coprime homogeneous coordinates lies over the base
+map induced by its coefficient homomorphism. -/
+@[reassoc]
+theorem projModelFromOfGlobalSectionsOfIsCoprime_projModelπ
+    {X : Scheme.{u}} (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens))) (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P) (i j : Fin 3)
+    (hij : IsCoprime (P i) (P j)) :
+    projModelFromOfGlobalSectionsOfIsCoprime W f P hP i j hij ≫ projModelπ W =
+      X.toSpecΓ ≫ Spec.map (CommRingCat.ofHom f) := by
+  have key :
+      ((projModelEval W f P hP).comp
+        (algebraMap (↥(quotientGrading (projIdeal W) 0)) (projCoordRing W))).comp
+          (algebraMapGradeZero (projIdeal W)) = f := by
+    ext r
+    exact projModelEval_algebraMapGradeZero W f P hP r
+  rw [projModelFromOfGlobalSectionsOfIsCoprime, projModelπ]
+  simp only [Proj.fromOfGlobalSections_toSpecZero_assoc]
+  rw [← Spec.map_comp, ← CommRingCat.ofHom_comp, key]
+
+/-- The inverse image of a standard projective chart under the coprime
+coordinate morphism is the basic open of the corresponding coordinate. -/
+lemma projModelFromOfGlobalSectionsOfIsCoprime_preimage_basicOpen
+    {X : Scheme.{u}} (W : WeierstrassCurve R)
+    (f : R →+* Γ(X, (⊤ : X.Opens))) (P : Fin 3 → Γ(X, (⊤ : X.Opens)))
+    (hP : (W.map f).toProjective.Equation P) (i j : Fin 3)
+    (hij : IsCoprime (P i) (P j)) (k : Fin 3) :
+    projModelFromOfGlobalSectionsOfIsCoprime W f P hP i j hij ⁻¹ᵁ
+        Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X k)) =
+      X.basicOpen (P k) := by
+  rw [projModelFromOfGlobalSectionsOfIsCoprime,
+    Proj.fromOfGlobalSections_preimage_basicOpen _ _ _ one_pos
+      (mk_X_mem_quotientGrading_one W k)]
+  exact congr_arg X.basicOpen (projModelEval_X W f P hP k)
+
 /-- Restriction of global sections to the top open of a basic-open
 subscheme. -/
 noncomputable def basicOpenTopRestriction
