@@ -1151,6 +1151,29 @@ theorem galoisFunctionFieldEquiv_addY (u v y w : (W.baseChange L).toAffine.Funct
     congrArg WeierstrassCurve.toAffine (map_galoisFunctionFieldEquiv_WKE W σ)] at h
   exact h.symm
 
+/-- **(M1b-3b leaf, brick 4c)** `Φ_σ` transports the translated `x`-coordinate:
+`Φ_σ (x(P_gen + (xk,yk))) = x(P_gen + (σxk, σyk))`. -/
+theorem galoisFunctionFieldEquiv_translateX (xk yk : L) :
+    galoisFunctionFieldEquiv W σ (HasseWeil.translateX_xy (W.baseChange L) xk yk) =
+      HasseWeil.translateX_xy (W.baseChange L) (σ xk) (σ yk) := by
+  rw [HasseWeil.translateX_xy_eq_addX, HasseWeil.translateX_xy_eq_addX,
+    galoisFunctionFieldEquiv_addX, galoisFunctionFieldEquiv_x_gen,
+    galoisFunctionFieldEquiv_algebraMap, galoisFunctionFieldEquiv_translateSlope]
+
+/-- **(M1b-3b leaf, brick 4c)** `Φ_σ` transports the translated `y`-coordinate. -/
+theorem galoisFunctionFieldEquiv_translateY (xk yk : L) :
+    galoisFunctionFieldEquiv W σ (HasseWeil.translateY_xy (W.baseChange L) xk yk) =
+      HasseWeil.translateY_xy (W.baseChange L) (σ xk) (σ yk) := by
+  show galoisFunctionFieldEquiv W σ
+      ((HasseWeil.W_KE (W.baseChange L)).toAffine.addY
+        (HasseWeil.x_gen (W.baseChange L))
+        (algebraMap L _ xk) (HasseWeil.y_gen (W.baseChange L))
+        (HasseWeil.translateSlope_xy (W.baseChange L) xk yk)) = _
+  rw [galoisFunctionFieldEquiv_addY, galoisFunctionFieldEquiv_x_gen,
+    galoisFunctionFieldEquiv_y_gen, galoisFunctionFieldEquiv_algebraMap,
+    galoisFunctionFieldEquiv_translateSlope]
+  rfl
+
 end TranslationTransport
 
 end ModularCurves
