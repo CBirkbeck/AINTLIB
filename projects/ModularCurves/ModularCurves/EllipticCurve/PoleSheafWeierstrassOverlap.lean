@@ -341,6 +341,52 @@ theorem sectionPoleSheaf_cartier_away_overlap_transition
   exact sectionPoleSheaf_cartier_away_subopen_transition
     z hz U r hr hspan hnzd V hV (U.1 ⊓ V) inf_le_left inf_le_right
 
+/-- The Cartier generator restricts to a unit on the overlap with an open
+disjoint from the marked section. -/
+theorem sectionPoleSheaf_cartier_away_overlap_generator_isUnit
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (V : C.Opens) (hV : z ⁻¹ᵁ V = ⊥) :
+    IsUnit (C.presheaf.map
+      (homOfLE (inf_le_left : U.1 ⊓ V ≤ U.1)).op r) := by
+  let W := U.1 ⊓ V
+  let eCartier :=
+    Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionPoleSheaf π z hz) W
+      (Scheme.Modules.restrictOpenTrivialization inf_le_left
+        (sectionPoleSheafTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd))
+  let eAway :=
+    Scheme.Modules.overTrivializationOfRestrictIso
+      (sectionPoleSheaf π z hz) W
+      (Scheme.Modules.restrictOpenTrivialization inf_le_right
+        (sectionPoleSheafTrivializationOfSectionPreimageEqBot z hz V hV))
+  let rW := C.presheaf.map
+    (homOfLE (inf_le_left : W ≤ U.1)).op r
+  have htransition :=
+    sectionPoleSheaf_cartier_away_overlap_transition
+      z hz U r hr hspan hnzd V hV
+  dsimp only at htransition
+  have hscalar :
+      SheafOfModules.overUnitScalarEnd C.ringCatSheaf W rW =
+        eAway.inv ≫ eCartier.hom := by
+    rw [← cancel_epi eAway.hom]
+    simpa only [← Category.assoc, eAway.hom_inv_id, Category.id_comp] using
+      htransition.symm
+  have hEnd :
+      IsUnit (SheafOfModules.overUnitScalarEnd C.ringCatSheaf W rW) := by
+    rw [CategoryTheory.isUnit_iff_isIso, hscalar]
+    infer_instance
+  let E := SheafOfModules.overUnitScalarEndRingEquiv C.ringCatSheaf W
+  change IsUnit (E rW) at hEnd
+  have hrW : IsUnit rW := by
+    have hmap := hEnd.map E.symm
+    exact (E.symm_apply_apply rW) ▸ hmap
+  simpa only [rW, W] using hrW
+
 private theorem sectionPoleSheafPower_cartier_away_subopen_transition
     {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
     (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
