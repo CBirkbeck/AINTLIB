@@ -747,8 +747,26 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       `exists_ball_subset_nhds` DONE (valuation balls are a neighborhood basis of 0 in
       F — ϖ^m·O_F-scaling one way, boundedness of O_F + top-nilpotent scaling the other;
       note `haveI := IsPerfectoidRing.uniform (p := p) (A := F)` needed for
-      IsUniform.isBounded_powerBounded). STILL TO DO in (4c-ii): the
-      Tendsto-characterization for x ∈ ArSub — NeBot from closure-membership
+      IsUniform.isBounded_powerBounded). NeBot done (`neBot_comap_of_mem_ArSub`,
+      topologicalClosure-carrier is closure by rfl). BLOCKER FOUND for the ball/Cauchy
+      steps: mathlib's Valued-lemmas (`Valued.mem_nhds`, `hasBasis_uniformity`) are
+      stated via `v.restrict` into `(MonoidWithZeroHom.ValueGroup₀ (.ofClass v))ˣ`, NOT
+      raw NNReal comparisons — the translation layer is
+      `Valuation.restrict_lt_iff_lt_embedding` / `embedding_strictMono` /
+      `restrict₀_apply` (see Mathlib/Topology/Algebra/Valued/ValuedField.lean ~520-566
+      for worked patterns). NEXT SESSION: write a small bridge lemma
+      `valued_ball_mem_nhds : {z : hatK | Valued.v (z − x) < (δ : NNReal)} ∈ 𝓝 x` for
+      δ ≠ 0 (via mem_nhds + the embedding-strictMono translation, choosing γ :=
+      the image of δ under the valueGroup₀-equiv — OR dodge entirely: prove the
+      Cauchy-condition using `Valued.hasBasis_uniformity`'s γ-balls directly and
+      TRANSLATE only the pair-condition v.restrict(f u' − f u) < γ into
+      wAloc(u'−u)-smallness via restrict-monotonicity: since only ≤-COMPARISONS between
+      values of the SAME valuation are needed, the strictMono embedding transfers them
+      without computing γ). Then: eventual value-bound from ONE small-set (Cauchy ⟹
+      ∃ S ∈ L small: all u,u' ∈ S have wAloc(u−u') ≤ 1, fix u₀ ∈ S: wAloc u ≤
+      max(wAloc u₀, 1) =: B, pick M with (c⁻¹)^M ≥ B — NO x-ball needed!), then
+      exists_delta_teichCoeffF_sub-application, F-complete limit, Tendsto.limUnder_eq
+      (T2 F from t0 + group instances). The Tendsto-characterization for x ∈ ArSub — NeBot from closure-membership
       (mem_closure_iff_nhds_neBot + comap-transfer), Cauchy of the pushed filter via
       exists_delta_teichCoeffF_sub (hyps: approximant-terms bounded (4a), differences
       are Aloc-images with wAloc = Valued.v-difference by the bridge, value-bounds
