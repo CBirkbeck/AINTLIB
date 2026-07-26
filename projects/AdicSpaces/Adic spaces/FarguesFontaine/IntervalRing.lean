@@ -1309,7 +1309,7 @@ element of the unit ball — the second half of the adic sandwich. -/
 theorem exists_eq_p_pow_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
     {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (n : ℕ)
     {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
-    (hz : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ (min ρ₁ ρ₂) ^ n) :
+    (hz1 : Valued.v z.1 ≤ ρ₁ ^ n) (hz2 : Valued.v z.2 ≤ ρ₂ ^ n) :
     ∃ w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1),
       wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ 1
         ∧ z = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * w := by
@@ -1345,15 +1345,9 @@ theorem exists_eq_p_pow_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁
   refine ⟨W * z, ?_, ?_⟩
   · refine max_le ?_ ?_
     · rw [show (W * z).1 = W.1 * z.1 from rfl, Valuation.map_mul, hW1]
-      have hz1 : Valued.v z.1 ≤ ρ₁ ^ n :=
-        le_trans (le_trans (le_max_left _ _) hz)
-          (pow_le_pow_left₀ zero_le (min_le_left _ _) n)
       rw [inv_mul_le_iff₀ (pow_pos hρ₁0 n), mul_one]
       exact hz1
     · rw [show (W * z).2 = W.2 * z.2 from rfl, Valuation.map_mul, hW2]
-      have hz2 : Valued.v z.2 ≤ ρ₂ ^ n :=
-        le_trans (le_trans (le_max_right _ _) hz)
-          (pow_le_pow_left₀ zero_le (min_le_right _ _) n)
       rw [inv_mul_le_iff₀ (pow_pos hρ₂0 n), mul_one]
       exact hz2
   · have h : (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * W = 1 := by
@@ -1362,6 +1356,80 @@ theorem exists_eq_p_pow_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁
     calc z = 1 * z := (one_mul z).symm
       _ = ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * W) * z := by rw [h]
       _ = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * (W * z) := by rw [mul_assoc]
+
+/-- **Closed value balls are open** in the completed field (they are additive
+subgroups containing a neighborhood of `0`). -/
+theorem isOpen_valued_ball {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {c : NNReal}
+    (hc : 0 < c) : IsOpen {w : hatK p F hρ0 hρ1 | Valued.v w ≤ c} := by
+  set G : AddSubgroup (hatK p F hρ0 hρ1) :=
+    { carrier := {w : hatK p F hρ0 hρ1 | Valued.v w ≤ c}
+      zero_mem' := by
+        simp only [Set.mem_setOf_eq, Valuation.map_zero]
+        exact zero_le
+      add_mem' := fun {a b} ha hb => by
+        have h1 : Valued.v a ≤ c := ha
+        have h2 : Valued.v b ≤ c := hb
+        show Valued.v (a + b) ≤ c
+        exact le_trans (Valuation.map_add _ a b) (max_le h1 h2)
+      neg_mem' := fun {a} ha => by
+        simpa only [Set.mem_setOf_eq, Valuation.map_neg] using ha } with hG
+  refine AddSubgroup.isOpen_of_mem_nhds G (g := 0) ?_
+  exact valued_ball_mem_nhds_zero p F (hρ0 := hρ0) (hρ1 := hρ1) hc
+
+/-- **Interval-norm balls are open** in the product. -/
+theorem isOpen_wI_ball {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {c : NNReal} (hc : 0 < c) :
+    IsOpen {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c} := by
+  have hset : {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+        wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c}
+      = ((fun z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => z.1)
+          ⁻¹' {w : hatK p F hρ₁0 hρ₁1 | Valued.v w ≤ c})
+        ∩ ((fun z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) => z.2)
+          ⁻¹' {w : hatK p F hρ₂0 hρ₂1 | Valued.v w ≤ c}) := by
+    ext z
+    constructor
+    · intro hz
+      have hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c := hz
+      exact ⟨le_trans (le_max_left _ _) hb, le_trans (le_max_right _ _) hb⟩
+    · rintro ⟨h1, h2⟩
+      have hb1 : Valued.v z.1 ≤ c := h1
+      have hb2 : Valued.v z.2 ≤ c := h2
+      show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ c
+      exact max_le hb1 hb2
+  rw [hset]
+  exact IsOpen.inter ((isOpen_valued_ball p F hc).preimage continuous_fst)
+    ((isOpen_valued_ball p F hc).preimage continuous_snd)
+
+/-- **The `pⁿ`-multiples of the unit ball are exactly the two-coordinate ball**
+(the set-level heart of the adic sandwich). -/
+theorem p_pow_smul_ball_eq {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (n : ℕ) :
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+        ∃ w, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ 1
+          ∧ z = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * w}
+      = {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+        Valued.v z.1 ≤ ρ₁ ^ n ∧ Valued.v z.2 ≤ ρ₂ ^ n} := by
+  ext z
+  constructor
+  · rintro ⟨w, hw, rfl⟩
+    have h1 : Valued.v w.1 ≤ 1 := le_trans (le_max_left _ _) hw
+    have h2 : Valued.v w.2 ≤ 1 := le_trans (le_max_right _ _) hw
+    constructor
+    · rw [show ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * w).1
+        = ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1) ^ n * w.1 from rfl,
+        Valuation.map_mul, Valuation.map_pow, valued_pImage_fst]
+      calc ρ₁ ^ n * Valued.v w.1 ≤ ρ₁ ^ n * 1 :=
+            mul_le_mul_of_nonneg_left h1 zero_le
+        _ = ρ₁ ^ n := mul_one _
+    · rw [show ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * w).2
+        = ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2) ^ n * w.2 from rfl,
+        Valuation.map_mul, Valuation.map_pow, valued_pImage_snd]
+      calc ρ₂ ^ n * Valued.v w.2 ≤ ρ₂ ^ n * 1 :=
+            mul_le_mul_of_nonneg_left h2 zero_le
+        _ = ρ₂ ^ n := mul_one _
+  · rintro ⟨h1, h2⟩
+    exact exists_eq_p_pow_mul p F ϖ n h1 h2
 
 end FarguesFontaine
 
