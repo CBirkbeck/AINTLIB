@@ -907,9 +907,19 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   (I₁)`gaussValueF_prefix_mul_sub_convPartial_le`/`valued_mul_sub_PhiHatK_convF_le`;
   `valued_degAr_PhiHatK_convF` (unique dominant antidiagonal term); **`degAr_mul`**
   (Kedlaya Lemma 2.6 at the single radius — honest proof of what the source leaves
-  to "convex duality"). NEXT: Lemma 2.8 (the division iteration — quotient-candidate
-  z₀ := Φ(shifted-coords/x_m) via alocTeich-division; the (2.8.2) N_l-descent), then
-  Prop 2.9, Cor 2.10.
+  to "convex duality"). **LEMMA 2.8 COMPLETE** (2026-07-26,
+  axiom-clean): divStep (the Φ-series quotient) + tendsto_div_shift + divStep_mem +
+  valued_divStep_le + valued_sub_divStep_mul_le; valued_sub_sub_PhiHatK_le (the H∞
+  block standalone); gaussTerm_sub_convF_divStep_le (the (2.8.2) coefficient
+  analysis: exact j = m cancellation, ε-damped j > m, c-damped j < m, multiplied-out
+  denominators); **descent_step** (coordinate terms from N on pushed below c);
+  division_descent (strong induction on the window K; K = 0 closes by the value
+  formula); **approx_division** = Lemma 2.8. NEXT: Prop 2.9 (exact division — the
+  geometric iteration: recursive (y_l, z_l), partial z-sums Cauchy by ε^l-decay,
+  ArSub closed so z lands inside, stabilization-vs-vanishing dichotomy; NB state the
+  remainder condition as `w = 0 ∨ degAr w < degAr x` — deg 0 = -∞ convention needs
+  the disjunction with our ℕ-junk degAr 0 = 0), then Cor 2.10 (EuclideanDomain +
+  IsPrincipalIdealRing on the ArSub subring — mathlib structure on the subtype).
 - **Statement**: Lemma 2.8 (approximate division): for x ≠ 0 ∃ ε ∈ (0,1) s.t. ∀ y ∃ z w:
   `y = z*x + w ∧ wAr w ≤ wAr y ∧ (wAr w > ε·wAr y → deg w < deg x)`. Prop 2.9 (exact):
   `∀ x ≠ 0, ∀ y, ∃ z w, y = z*x + w ∧ wAr w ≤ wAr y ∧ deg w < deg x`. Cor 2.10:
