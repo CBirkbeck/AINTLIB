@@ -9,6 +9,8 @@ import Mathlib.RingTheory.Nakayama
 import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
 import Mathlib.RingTheory.LocalRing.MaximalIdeal.Square
 import Mathlib.RingTheory.Ideal.KrullsHeightTheorem
+import Mathlib.RingTheory.RingHom.Flat
+import Mathlib.RingTheory.Ideal.Quotient.Operations
 import Mathlib.RingTheory.KrullDimension.Regular
 
 /-!
@@ -315,5 +317,59 @@ theorem isDomain_of_isRegularLocalRing : ∀ (n : ℕ) (R : Type u) [CommRing R]
 theorem IsRegularLocalRing.isDomain (R : Type u) [CommRing R] [IsRegularLocalRing R] :
     IsDomain R :=
   isDomain_of_isRegularLocalRing _ R rfl
+
+/-! ## Regularity ascends along unramified flat local extensions (T-SMOOTH-REG core) -/
+
+/-- **(T-SMOOTH-REG core ★)** Let `A → B` be a **flat** local homomorphism of Noetherian
+local rings with `𝔪_A · B = 𝔪_B` (i.e. unramified — the situation of an étale extension).
+If `A` is regular, so is `B`.
+
+Two inputs: `Ideal.height_eq_height_add_of_liesOver_of_hasGoingDown` (Matsumura 13.B
+Th. 19(2), via going-down for flat maps) makes the dimensions agree, because the fibre
+ring `B ⧸ 𝔪_A B = B ⧸ 𝔪_B` is a field; and `Ideal.spanFinrank_map_le_of_fg` says `𝔪_B`
+needs no more generators than `𝔪_A`. Regularity is then the sandwich
+`dim B = dim A = spanFinrank 𝔪_A ≥ spanFinrank 𝔪_B ≥ dim B`. -/
+theorem isRegularLocalRing_of_flat_of_map_maximalIdeal (A B : Type u) [CommRing A]
+    [CommRing B] [Algebra A B] [IsRegularLocalRing A] [IsLocalRing B] [IsNoetherianRing B]
+    [Module.Flat A B]
+    (hlo : (maximalIdeal A).map (algebraMap A B) = maximalIdeal B) :
+    IsRegularLocalRing B := by
+  haveI : Algebra.HasGoingDown A B := Algebra.HasGoingDown.of_flat
+  -- `𝔪_B` lies over `𝔪_A`
+  haveI hover : (maximalIdeal B).LiesOver (maximalIdeal A) := by
+    refine ⟨le_antisymm ?_ ?_⟩
+    · rw [Ideal.under_def]
+      intro a ha
+      exact Ideal.mem_comap.mpr (hlo ▸ Ideal.mem_map_of_mem _ ha)
+    · exact IsLocalRing.le_maximalIdeal (fun hc => by
+        have h1 : (1 : B) ∈ maximalIdeal B := by
+          have : (1 : A) ∈ (maximalIdeal B).under A := hc ▸ Submodule.mem_top
+          simpa using this
+        exact (maximalIdeal.isMaximal B).ne_top (Ideal.eq_top_of_isUnit_mem _ h1 isUnit_one))
+  -- the fibre term of the height formula vanishes
+  have hfib : ((maximalIdeal B).map
+      (Ideal.Quotient.mk ((maximalIdeal A).map (algebraMap A B)))).height = 0 := by
+    rw [congrArg (fun I : Ideal B => I.map
+      (Ideal.Quotient.mk ((maximalIdeal A).map (algebraMap A B)))) hlo.symm,
+      Ideal.map_quotient_self]
+    haveI : Nontrivial (B ⧸ (maximalIdeal A).map (algebraMap A B)) :=
+      Ideal.Quotient.nontrivial_iff.mpr (by
+        rw [hlo]; exact (maximalIdeal.isMaximal B).ne_top)
+    exact Ideal.height_bot
+  -- hence the dimensions agree
+  have hheight : (maximalIdeal B).height = (maximalIdeal A).height := by
+    rw [Ideal.height_eq_height_add_of_liesOver_of_hasGoingDown (maximalIdeal A)
+      (maximalIdeal B), hfib, add_zero]
+  -- and `𝔪_B` needs no more generators than `𝔪_A`
+  have hgen : (maximalIdeal B).spanFinrank ≤ (maximalIdeal A).spanFinrank := by
+    have h := Ideal.spanFinrank_map_le_of_fg (algebraMap A B)
+      (I := maximalIdeal A) (IsNoetherian.noetherian _)
+    rwa [hlo] at h
+  -- the sandwich
+  refine IsRegularLocalRing.of_spanFinrank_maximalIdeal_le B ?_
+  rw [← IsLocalRing.maximalIdeal_height_eq_ringKrullDim, hheight,
+    IsLocalRing.maximalIdeal_height_eq_ringKrullDim,
+    ← IsRegularLocalRing.spanFinrank_maximalIdeal (R := A)]
+  exact_mod_cast Nat.cast_le.mpr hgen
 
 end ModularCurves
