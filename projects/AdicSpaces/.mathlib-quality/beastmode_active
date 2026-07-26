@@ -1,1 +1,1 @@
-FOCUS: T903 step (4) — coordinates on ArSub via filter limits; checking F-completeness
+FOCUS: T903 (4b) — attainment equality gaussValueF(alocToWittF u) = wAloc u; appending to ArCompletion.lean

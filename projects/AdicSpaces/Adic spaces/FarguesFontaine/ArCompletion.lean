@@ -262,6 +262,84 @@ theorem gaussTermF_alocToWittF_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     exact gaussTerm_le_gaussValue p F hρ1.le a n
   exact le_of_mul_le_mul_right hle (pow_pos hc0 k)
 
+/-- Aloc-images are boundedly termed. -/
+theorem bddAbove_gaussTermF_alocToWittF {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (u : Aloc p F ϖ) :
+    BddAbove (Set.range (gaussTermF p F ρ (alocToWittF p F ϖ u))) :=
+  ⟨wAloc p F ϖ hρ0 hρ1 u, by
+    rintro z ⟨n, rfl⟩
+    exact gaussTermF_alocToWittF_le p F ϖ hρ0 hρ1 u n⟩
+
+/-- **Realization equality on the dense layer**: the `W(F)`-Gauss value of an
+`Aloc`-image equals the extended Gauss valuation (the sup is attained, being a
+`c^{-k}`-scaling of the attained `A_inf`-sup). -/
+theorem gaussValueF_alocToWittF {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (u : Aloc p F ϖ) :
+    gaussValueF p F ρ (alocToWittF p F ϖ u) = wAloc p F ϖ hρ0 hρ1 u := by
+  refine le_antisymm
+    (ciSup_le fun n => gaussTermF_alocToWittF_le p F ϖ hρ0 hρ1 u n) ?_
+  obtain ⟨⟨a, y⟩, hu⟩ := IsLocalization.surj (M := Submonoid.powers (teichPi p F ϖ)) u
+  change u * algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F)
+    = algebraMap (Ainf p F) (Aloc p F ϖ) a at hu
+  obtain ⟨k, hk⟩ := y.2
+  have hk' : teichPi p F ϖ ^ k = (y : Ainf p F) := hk
+  set ϖF : F := ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hϖF
+  set c : NNReal := perfectoidValuation p F ϖF with hc
+  have hϖne : ϖF ≠ 0 := fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hc0 : 0 < c := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  have hteich : gaussValue p F ρ (teichPi p F ϖ) = c := by
+    rw [show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+      from rfl, gaussValue_teichmuller p F hρ1.le]
+  have hval : wAloc p F ϖ hρ0 hρ1 u * c ^ k = gaussValue p F ρ a := by
+    have happ := congrArg (wAloc p F ϖ hρ0 hρ1) hu
+    rw [map_mul, wAloc_algebraMap, wAloc_algebraMap, ← hk'] at happ
+    rw [show gaussValue p F ρ (teichPi p F ϖ ^ k)
+      = (gaussValue p F ρ (teichPi p F ϖ)) ^ k from map_pow (gaussVal p F hρ0 hρ1) _ k,
+      hteich] at happ
+    exact happ
+  have hy : alocToWittF p F ϖ (algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F))
+      = WittVector.teichmuller p (ϖF ^ k) := by
+    rw [alocToWittF_algebraMap, ← hk', map_pow]
+    have hone : WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+        (teichPi p F ϖ) = WittVector.teichmuller p ϖF := by
+      rw [show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+        from rfl, WittVector.map_teichmuller]
+      rfl
+    rw [hone, ← map_pow]
+  have himg : alocToWittF p F ϖ u * WittVector.teichmuller p (ϖF ^ k)
+      = WittVector.map ((powerBoundedSubring.toSubring F).subtype) a := by
+    have happ := congrArg (alocToWittF p F ϖ) hu
+    rw [map_mul, hy, alocToWittF_algebraMap] at happ
+    exact happ
+  -- attain the Ainf-sup at n₀ and transfer
+  rcases eq_or_ne (wAloc p F ϖ hρ0 hρ1 u) 0 with h0 | hne0
+  · rw [h0]
+    exact zero_le
+  have hane : a ≠ 0 := by
+    intro h0a
+    rw [h0a, gaussValue_zero] at hval
+    exact hne0 (by
+      have := hval
+      have hck : (0 : NNReal) < c ^ k := pow_pos hc0 k
+      exact (mul_eq_zero.mp this).resolve_right hck.ne')
+  obtain ⟨n₀, hn₀⟩ := exists_gaussValue_eq_gaussTerm p F hρ0 hρ1 (x := a) hane
+  have hterm : gaussTermF p F ρ (alocToWittF p F ϖ u) n₀ * c ^ k
+      = gaussTerm p F ρ a n₀ := by
+    have h1 := gaussTermF_teichmuller_mul p F (ρ := ρ) (w := ϖF ^ k)
+      (s := alocToWittF p F ϖ u) n₀
+    rw [mul_comm (WittVector.teichmuller p (ϖF ^ k)) _] at h1
+    rw [himg, gaussTermF_map, map_pow] at h1
+    rw [h1]
+    ring
+  have hgoal : wAloc p F ϖ hρ0 hρ1 u * c ^ k
+      = gaussTermF p F ρ (alocToWittF p F ϖ u) n₀ * c ^ k := by
+    rw [hterm, hval, hn₀]
+  have heq : wAloc p F ϖ hρ0 hρ1 u
+      = gaussTermF p F ρ (alocToWittF p F ϖ u) n₀ :=
+    mul_right_cancel₀ (pow_pos hc0 k).ne' hgoal
+  rw [heq]
+  exact le_ciSup (bddAbove_gaussTermF_alocToWittF p F ϖ hρ0 hρ1 u) n₀
+
 end FarguesFontaine
 
 end
