@@ -392,6 +392,53 @@ theorem gaussTerm_lt_of_degAr_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   · exact hlt
   · exact absurd ((degAr_spec p F ϖ hx hx0).2 n heq.symm) (Nat.not_le.mpr hn)
 
+/-- **The `ε` of Kedlaya Lemma 2.8**: past the degree, all terms are uniformly
+`ε`-below the value, for some `ε ∈ [ρ, 1)`. -/
+theorem exists_eps_terms_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) :
+    ∃ ε : NNReal, ρ ≤ ε ∧ ε < 1
+      ∧ ∀ n, degAr p F ϖ hρ0 hρ1 x < n
+        → ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+          ≤ ε * Valued.v x := by
+  set m := degAr p F ϖ hρ0 hρ1 x with hm
+  have hvpos : 0 < Valued.v x := pos_iff_ne_zero.mpr
+    ((Valuation.ne_zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0)
+  have hρv : 0 < ρ * Valued.v x := mul_pos hρ0 hvpos
+  obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp
+    ((tendsto_gaussTerm_teichCoeffAr p F ϖ hx).eventually_lt_const hρv)
+  set R : NNReal := (Finset.Ioc m K).sup (fun n => ρ ^ n * perfectoidValuation p F
+    (teichCoeffAr p F ϖ hρ0 hρ1 x n) * (Valued.v x)⁻¹) with hR
+  refine ⟨max ρ R, le_max_left _ _, ?_, ?_⟩
+  · refine max_lt hρ1 ?_
+    rw [hR]
+    rcases Finset.eq_empty_or_nonempty (Finset.Ioc m K) with hemp | hne
+    · rw [hemp, Finset.sup_empty, bot_eq_zero]
+      exact zero_lt_one
+    · refine (Finset.sup_lt_iff (by rw [bot_eq_zero]; exact zero_lt_one)).mpr
+        fun n hn => ?_
+      have hlt := gaussTerm_lt_of_degAr_lt p F ϖ hx hx0 (Finset.mem_Ioc.mp hn).1
+      calc ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+            * (Valued.v x)⁻¹
+          < Valued.v x * (Valued.v x)⁻¹ :=
+            mul_lt_mul_of_pos_right hlt (inv_pos.mpr hvpos)
+        _ = 1 := mul_inv_cancel₀ hvpos.ne'
+  · intro n hn
+    rcases le_or_gt n K with hnK | hnK
+    · have hmem : n ∈ Finset.Ioc m K := Finset.mem_Ioc.mpr ⟨hn, hnK⟩
+      have h1 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+          * (Valued.v x)⁻¹ ≤ R :=
+        Finset.le_sup (f := fun n => ρ ^ n * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 x n) * (Valued.v x)⁻¹) hmem
+      have h2 : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+          = ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+            * (Valued.v x)⁻¹ * Valued.v x := by
+        rw [mul_assoc, inv_mul_cancel₀ hvpos.ne', mul_one]
+      rw [h2]
+      exact mul_le_mul_of_nonneg_right (le_trans h1 (le_max_right ρ R)) zero_le
+    · refine le_trans (hK n hnK.le).le ?_
+      exact mul_le_mul_of_nonneg_right (le_max_left ρ R) zero_le
+
 end FarguesFontaine
 
 end
