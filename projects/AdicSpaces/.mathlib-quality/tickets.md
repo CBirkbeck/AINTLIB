@@ -741,7 +741,15 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       `gaussValueF_p_mul`, transport (`gaussValueF_map`), boundedness lemmas for
       tails/sums/Teichmüller-differences. The [-1]-question was DODGED entirely: the
       only negation needed was digit-0 (additive, exact).
-      (4) IN PROGRESS: `wAloc` defined (mirror extendToLocalization);
+      (4) IN PROGRESS — (4a) done, (4b) done (`gaussValueF_alocToWittF` attainment
+      equality), (4c-i) done (`valued_AlocToHatK` bridge + `teichCoeffAr :=
+      limUnder(comap AlocToHatK (𝓝 x)) coords` definition). NEXT (4c-ii): the
+      Tendsto-characterization for x ∈ ArSub — NeBot from closure-membership
+      (mem_closure_iff_nhds_neBot + comap-transfer), Cauchy of the pushed filter via
+      exists_delta_teichCoeffF_sub (hyps: approximant-terms bounded (4a), differences
+      are Aloc-images with wAloc = Valued.v-difference by the bridge, value-bounds
+      (c⁻¹)^m ≥ max(v x, 1) by ultrametric ball-constancy near x), F complete
+      (IsPerfectoidRing.complete), Tendsto.limUnder_eq. `wAloc` defined (mirror);
       `gaussTermF_alocToWittF_le` DONE (dense-layer term bound: every Aloc-image is
       boundedly termed with terms ≤ wAloc-value; via IsLocalization.surj +
       teichmuller-scaling + c^k-cancellation; note the teichPi-rw-in-type trap: use

@@ -1,1 +1,1 @@
-FOCUS: T903 (4c) — coordinate filters on ArSub: NeBot + Cauchy + limits; appending to ArCompletion.lean
+FOCUS: T903 (4c-ii) — Tendsto-characterization of teichCoeffAr on ArSub: NeBot (closure) + Cauchy (via exists_delta_teichCoeffF_sub with m from max(v x,1)) + F-complete limit. All prerequisites green: valued_AlocToHatK, gaussValueF_alocToWittF, bddAbove_gaussTermF_alocToWittF, exists_delta_teichCoeffF_sub.
