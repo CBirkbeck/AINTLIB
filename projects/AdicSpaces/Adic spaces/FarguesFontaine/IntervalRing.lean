@@ -861,6 +861,120 @@ theorem resI_BIProd {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ�
       (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 y x) hy
   exact tendsto_nhds_unique hlim hlim2
 
+/-- Approximants of a sum are sums of approximants (filter form). -/
+theorem map_add_comap_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (z z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) :
+    Filter.map (fun q : Bloc p F ϖ × Bloc p F ϖ => q.1 + q.2)
+        ((Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)) ×ˢ
+          (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z')))
+      ≤ Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds (z + z')) := by
+  rw [← Filter.map_le_iff_le_comap, Filter.map_map]
+  have h1 : Filter.Tendsto (fun q : Bloc p F ϖ × Bloc p F ϖ =>
+      BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.1)
+      ((Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)) ×ˢ
+        (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z'))) (nhds z) :=
+    Filter.tendsto_comap.comp Filter.tendsto_fst
+  have h2 : Filter.Tendsto (fun q : Bloc p F ϖ × Bloc p F ϖ =>
+      BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.2)
+      ((Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)) ×ˢ
+        (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z'))) (nhds z') :=
+    Filter.tendsto_comap.comp Filter.tendsto_snd
+  have hsum := h1.add h2
+  have hcongr : (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+        ∘ (fun q : Bloc p F ϖ × Bloc p F ϖ => q.1 + q.2)
+      = fun q : Bloc p F ϖ × Bloc p F ϖ =>
+        BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.1
+          + BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.2 := by
+    funext q
+    exact map_add _ _ _
+  rw [hcongr]
+  exact hsum
+
+/-- Approximants of a product are products of approximants (filter form). -/
+theorem map_mul_comap_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    (z z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) :
+    Filter.map (fun q : Bloc p F ϖ × Bloc p F ϖ => q.1 * q.2)
+        ((Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)) ×ˢ
+          (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z')))
+      ≤ Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds (z * z')) := by
+  rw [← Filter.map_le_iff_le_comap, Filter.map_map]
+  have h1 : Filter.Tendsto (fun q : Bloc p F ϖ × Bloc p F ϖ =>
+      BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.1)
+      ((Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)) ×ˢ
+        (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z'))) (nhds z) :=
+    Filter.tendsto_comap.comp Filter.tendsto_fst
+  have h2 : Filter.Tendsto (fun q : Bloc p F ϖ × Bloc p F ϖ =>
+      BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.2)
+      ((Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z)) ×ˢ
+        (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z'))) (nhds z') :=
+    Filter.tendsto_comap.comp Filter.tendsto_snd
+  have hmul := h1.mul h2
+  have hcongr : (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+        ∘ (fun q : Bloc p F ϖ × Bloc p F ϖ => q.1 * q.2)
+      = fun q : Bloc p F ϖ × Bloc p F ϖ =>
+        BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.1
+          * BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 q.2 := by
+    funext q
+    exact map_mul _ _ _
+  rw [hcongr]
+  exact hmul
+
+set_option maxHeartbeats 1000000 in
+/-- **The restriction map is additive.** -/
+theorem resI_add {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    {z z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hz' : z' ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 (z + z')
+      = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z
+        + resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z' := by
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  haveI hne' := neBot_comap_of_mem_BISub p F ϖ hz'
+  have h1 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz
+  have h2 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz'
+  have hsum := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 (add_mem hz hz')
+  have ha := (h1.comp Filter.tendsto_fst).add (h2.comp Filter.tendsto_snd)
+  have hb := hsum.comp (map_add_comap_le p F ϖ z z')
+  have hcongr : (fun y => BlocToHatK p F ϖ hmid0 hmid1 y)
+        ∘ (fun q : Bloc p F ϖ × Bloc p F ϖ => q.1 + q.2)
+      = fun q : Bloc p F ϖ × Bloc p F ϖ =>
+        BlocToHatK p F ϖ hmid0 hmid1 q.1 + BlocToHatK p F ϖ hmid0 hmid1 q.2 := by
+    funext q
+    exact map_add _ _ _
+  rw [hcongr] at hb
+  exact tendsto_nhds_unique hb ha
+
+set_option maxHeartbeats 1000000 in
+/-- **The restriction map is multiplicative.** -/
+theorem resI_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    {z z' : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hz' : z' ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 (z * z')
+      = resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z
+        * resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hmid0 hmid1 z' := by
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  haveI hne' := neBot_comap_of_mem_BISub p F ϖ hz'
+  have h1 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz
+  have h2 := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 hz'
+  have hprod := tendsto_resI p F ϖ hθ0 hθ1 hmid0 hmid1 (mul_mem hz hz')
+  have ha := (h1.comp Filter.tendsto_fst).mul (h2.comp Filter.tendsto_snd)
+  have hb := hprod.comp (map_mul_comap_le p F ϖ z z')
+  have hcongr : (fun y => BlocToHatK p F ϖ hmid0 hmid1 y)
+        ∘ (fun q : Bloc p F ϖ × Bloc p F ϖ => q.1 * q.2)
+      = fun q : Bloc p F ϖ × Bloc p F ϖ =>
+        BlocToHatK p F ϖ hmid0 hmid1 q.1 * BlocToHatK p F ϖ hmid0 hmid1 q.2 := by
+    funext q
+    exact map_mul _ _ _
+  rw [hcongr] at hb
+  exact tendsto_nhds_unique hb ha
+
 end FarguesFontaine
 
 end
