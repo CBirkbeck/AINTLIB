@@ -532,3 +532,65 @@ Elaboration note recorded for future work: at a base-changed curve the elaborato
 `⟨(W ⊗ L).toAffine⟩` to a record literal and instance search fails — pass
 `IsElliptic`/`IsIntegrallyClosed` **explicitly** (as `projectiveDivisorOf_div` and
 `exists_const_galois_weilFunction` now do).
+
+---
+
+# EXECUTION LOG — 2026-07-26 (beastmode, continued)
+
+## G2 / DS4 M1 — the field-level Weil pairing is GALOIS-EQUIVARIANT (unconditional)
+
+`WeilPairing/GaloisFunctionField.lean` (sorry-free, axiom-clean) is now complete:
+
+* `galois_conj_translateAlgEquivOfPoint_some_ringHom` — the conjugation identity
+  `Φ_σ ∘ τ_S = τ_{σS} ∘ Φ_σ` at an affine point, proved **uniformly** across the
+  2-torsion / non-2-torsion split (both branches of `translateAlgEquivOfPoint` act the same
+  way on the generic coordinates, `translateAlgEquivOfPoint_apply_x_gen_of_some`), so one
+  `ringHom_ext_const_x_y_gen` call suffices;
+* `galois_conj_translateAlgEquivOfPoint` — the point-level conjugation for every `S`;
+* **`weilPairing_galois`** — `e_N(σS, σT) = σ(e_N(S,T))`, unconditional, for an arbitrary
+  base field `k`, an arbitrary algebraically closed extension `L`, and an arbitrary
+  `σ ∈ Gal(L/k)`.
+
+`WeilPairing/GaloisFieldPairing.lean` repackages it in the `μ_N`-bundled `ℕ`-indexed shape
+(`fieldWeilPairing_galois` / `_galois'`), and
+`EllipticCurve/GlobalChartOverField.lean` supplies the *global* Weierstrass chart over a
+field (`Spec k` is a one-point space, so the `LocallyWeierstrass` open is forced to be `⊤`)
+that the M1c descent will need.
+
+**Remaining for M1c**: make `torsionAlgebraPointsEquiv` (`WeilPairing/EtaleDescent.lean:122`)
+a named `def` rather than `Nonempty`-valued, prove its Galois equivariance (the algebra-side
+action is postcomposition, the point-side action is precomposition with `Spec.map σ` —
+`algHomEquivSpecOver` makes this a one-line computation), compare the scheme-point action
+with `galoisPointEquiv` through `chartAffinePointEquiv`, and feed the result to
+`exists_pairingAlgebraHom_of_galoisEquivariant`.
+
+## G4 — the ALGEBRAIC half is COMPLETE (`irreducibleSpace_of_connectedSpace_of_smooth` proved)
+
+The `T-SMOOTH-REG` stream closed the last algebraic leaf. Chain (all axiom-clean):
+
+| brick | file | statement |
+|---|---|---|
+| 1 | `ForMathlib/KrullDimQuotientSpan.lean` | `ringKrullDim R ≤ ringKrullDim (R ⧸ span s) + #s` |
+| 3 | same | `height (𝔪 ∩ P) ≤ height 𝔪 + #s` (quotient and surjection forms) |
+| 2 | `ForMathlib/MvPolynomialMaximalHeight.lean` | maximal ideals of `k[x_ι]` (`k` alg. closed) have height `≥ #ι` |
+| 4 | `ForMathlib/SmoothCotangentPrincipal.lean` | at a `k`-point of a formally smooth algebra with `rank Ω ≤ 1`, `𝔪 ≤ (x) + 𝔪²` |
+| 5 | `ForMathlib/SmoothRegularLocal.lean` | `A_𝔪` is a **regular local domain** |
+| 6 | same | every point of `Spec A` has an **irreducible basic-open** neighbourhood |
+| 7 | `ForMathlib/SmoothSchemeIrreducible.lean` | the scheme-level version + `irreducibleSpace_of_connectedSpace_of_smooth_curve` |
+| top | `ForMathlib/IrreducibleConnected.lean` | connected + locally irreducible ⟹ irreducible |
+
+The **key mathlib lemma** for brick 4 is
+`Algebra.FormallySmooth.kerCotangentToTensor_injective_iff`: applied to the *split*
+surjection `A ↠ k` (split by the structure map, so `H¹` of `k` over `k` vanishes) it gives
+the **injectivity** of `𝔪/𝔪² → k ⊗_A Ω[A⁄k]`, which is exactly the direction the naive
+second fundamental exact sequence does not provide.
+
+Two mathlib facts that made brick 2/5a possible and did not exist a year ago:
+`MvPolynomial.ringKrullDim_of_isNoetherianRing` and
+`IsLocalization.AtPrime.ringKrullDim_eq_height`.
+
+`ModularCurve/IrreducibilityScoping.lean` is now **sorry-free**, and the master reduction has
+been strengthened to `yRho_geometricallyIrreducible_of_connected'`, which needs **only**
+`hconn`: the local-finiteness and disjointness hypotheses are gone. The entire remaining
+content of `yRho_geometricallyIrreducible` is therefore the analytic input
+(`(Y⊗ℂ)^an ≅ ℍ/Γ̃` + GAGA), unchanged as MAJOR-INFRA.

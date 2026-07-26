@@ -1,25 +1,18 @@
-FOCUS: [T-SMOOTH-REG] closing `irreducibleSpace_of_connectedSpace_of_smooth`
-(ModularCurve/IrreducibilityScoping.lean:63 — the only sorry in that file; caveat G4).
-LANDED SO FAR (all axiom-clean):
-  brick 1  ForMathlib/KrullDimQuotientSpan.lean  ringKrullDim_le_ringKrullDim_quotient_span_add_card
-  brick 3  same file: height_comap_le_height_add_card (quotient form, via the
-           IsLocalization (algebraMapSubmonoid ...) (S / I.map ...) instance)
-  brick 3 same file: height_comap_ringEquiv + height_comap_le_height_add_card_of_surjective
-  brick 2  ForMathlib/MvPolynomialMaximalHeight.lean card_le_height_of_isMaximal
-  brick 4  ForMathlib/SmoothCotangentPrincipal.lean exists_le_span_singleton_sup_sq
-           (KEY mathlib lemma: Algebra.FormallySmooth.kerCotangentToTensor_injective_iff
-            + Subsingleton (Algebra.H1Cotangent k k) => m/m^2 injects into k (x)_A Omega)
-  brick 5a ForMathlib/SmoothRegularLocal.lean one_le_height_of_isMaximal
-NEXT (brick 5b): the k-point at a maximal ideal.
-  A f.g. over k alg closed, m maximal => A/m = k:
-  finite_of_finite_type_of_isJacobsonRing k (A/m) (Zariski) +
-  IsAlgClosed.algebraMap_bijective_of_isIntegral => (A/m) ~alg[k] k;
-  produce instances [Algebra A k] [IsScalarTower k A k] with RingHom.ker (algebraMap A k) = m.
-THEN (brick 5c): brick 4 => m <= (x) + m^2; push to A_m (Ideal.map_sup / Ideal.map_pow /
-  IsLocalization.AtPrime.map_eq_maximalIdeal); Nakayama
-  (Submodule.le_of_le_smul_of_le_jacobson_bot + IsLocalRing.jacobson_eq_maximalIdeal)
-  => maximalIdeal = span {x} => spanFinrank <= 1; with brick 5a (dim >= 1) apply
-  IsRegularLocalRing.of_spanFinrank_le then ModularCurves.IsRegularLocalRing.isDomain.
-THEN (brick 6): scheme level — local rings of X are localizations at primes of the
-  standard-smooth Gamma(V); domain => unique minimal prime => irreducible components
-  disjoint => (ForMathlib/IrreducibleConnected.lean) connected+nonempty => irreducible.
+FOCUS: G4 ALGEBRAIC HALF DONE. `irreducibleSpace_of_connectedSpace_of_smooth` is PROVED
+(IrreducibilityScoping.lean now sorry-free) and the master reduction is strengthened to
+`yRho_geometricallyIrreducible_of_connected` (only hconn needed).
+NEXT: back to DS4 M1c (the only remaining dispatchable non-MAJOR-INFRA work).
+STEP 1: turn `torsionAlgebraPointsEquiv` (WeilPairing/EtaleDescent.lean:122, currently a
+  Nonempty-valued THEOREM) into a named `noncomputable def` built from `algHomEquivSpecOver`
+  (same file, ~line 241) composed with `E.torsionPointsEquiv`; keep a Nonempty wrapper.
+STEP 2: Galois equivariance of `algHomEquivSpecOver`: for sigma : R ~alg[k] R,
+  (algHomEquivSpecOver R pi halg (sigma.toAlgHom.comp f)).1
+    = Spec.map (ofHom sigma) >> (algHomEquivSpecOver R pi halg f).1
+  (because ofHom (sigma . f) = ofHom f >> ofHom sigma and Spec.map is contravariant).
+STEP 3: the point-side action is P |-> Spec.map (ofHom sigma) >> P = Point.restrict along
+  Spec.map sigma, transported by Point.base_congr along
+  Spec.map (ofHom sigma) >> t = t (sigma is a k-algebra map). Point.restrict_add is in
+  GroupScheme/DeligneOrder.lean:69.
+STEP 4: compare with galoisPointEquiv through chartAffinePointEquiv (FibrePointDict.lean),
+  using EllipticCurve/GlobalChartOverField.lean for the chart over Spec k.
+STEP 5: feed to exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent.lean:440).

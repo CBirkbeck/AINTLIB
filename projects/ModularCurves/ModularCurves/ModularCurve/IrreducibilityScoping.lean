@@ -105,4 +105,27 @@ theorem yRho_geometricallyIrreducible_of_connected {N : ℕ} [NeZero N] (hN : 3 
     ConnectedSpace.toNonempty
   exact irreducibleSpace_of_connected_of_disjoint_irreducibleComponents hlf hdisj
 
+/-- **(T-IRR0, MASTER′ — the algebraic reduction, now hypothesis-free apart from `hconn`)**
+With `irreducibleSpace_of_connectedSpace_of_smooth` proved (T-G4a), the local finiteness and
+disjointness of the irreducible components are no longer needed as inputs: geometric
+irreducibility of a curve representing the `ρ`-level moduli problem follows from geometric
+**connectedness** alone. The entire remaining content of `yRho_geometricallyIrreducible` is
+the analytic input `hconn` (uniformisation `(Y⊗ℂ)^an ≅ ℍ/Γ̃` + GAGA). -/
+theorem yRho_geometricallyIrreducible_of_connected' {N : ℕ} [NeZero N] (hN : 3 ≤ N)
+    (D : GaloisRepData N) (Y : Scheme.{0}) (sY : Y ⟶ Spec (.of ℚ))
+    (hY : RepresentsYRho D Y sY)
+    (hconn : ConnectedSpace ↥(pullback sY
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ)))))) :
+    IrreducibleSpace ↥(pullback sY
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) := by
+  haveI := hconn
+  haveI : Nonempty ↥(pullback sY
+    (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) :=
+    ConnectedSpace.toNonempty
+  haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+  haveI hsm : SmoothOfRelativeDimension 1 (pullback.snd sY
+      (Spec.map (CommRingCat.ofHom (algebraMap ℚ (AlgebraicClosure ℚ))))) :=
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) _ _ hY.1
+  exact irreducibleSpace_of_connectedSpace_of_smooth _ hsm
+
 end ModularCurves
