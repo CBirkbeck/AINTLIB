@@ -228,3 +228,33 @@ the F-port of `exists_iter_split`. Both are mechanical replays of the Ainf-proof
 (double-prefix + archimedean tail; the le_one-bounds become the boundedness
 hypotheses, tails via `mul_gaussValueF_le_of_tail`). Port these first when evaluating
 the dodge. Addition-closure at both radii is already free (`gaussValueF_add_le`).
+
+## CRUX RESOLVED (2026-07-26, gpt-5.6-sol consult; archived reply:
+## chatgpt-reply-decay-closure-2026-07-26.md)
+
+The missing ingredient is the **moving-prefix tail estimate** (not any coordinatewise
+bound): with T_N(x) := sup_{n≥N} ρⁿ|xₙ| and H_N(x) := ρᴺ·max_{i<N}|xᵢ|:
+  (1)  T_N(x+y) ≤ max{T_N(x), T_N(y), H_N(x), H_N(y)}   (bounded x,y).
+Proof skeleton (all ingredients already formalized): A_N := P_N(x)+P_N(y) has ALL
+digits ≤ M_N := max_{i<N}max(|xᵢ|,|yᵢ|) (scaling proof: A_N = [c]·(W(O_F)-elt) for c a
+max-attaining coefficient — teichCoeffF_teichmuller_mul + teichCoeffF_map); its tail
+C_N := σ_N(A_N) has w(C_N) ≤ M_N (shifted digits, sup ρᵏM = M); prefix-of-sum =
+prefix-of-A_N (truncation congruence teichCoeffF_eq_of_sub_eq_pow_mul, since
+x+y − A_N = pᴺ(X+Y)); cancel pᴺ (W(F) domain + p ≠ 0) to get the EXACT tail identity
+σ_N(x+y) = C_N + σ_N(x) + σ_N(y); 3-way ultrametric finishes. Then:
+  - H_N(a) → 0 for decaying a by the SPLIT-MAX: i < K-part ≤ ρᴺ·C(K) → 0;
+    K ≤ i < N-part = ρ^{N−i}·(ρⁱ|aᵢ|) ≤ tᵢ < ε.  (My dead-end #7 used the crude
+    uniform bound — the split at K is the fix.)
+  - +-closure of D_ρ; perturbation (9): T_N(u+e) ≤ max{T_N(u), H_N(u), w(e)}
+    (T_N(e), H_N(e) ≤ w(e) for merely-bounded e!);
+  - **w-closedness of D_ρ among bounded vectors** (the tail-sup semicontinuity);
+  - ×-closure: q_N := P_N(x)·P_N(y) ∈ D_ρ (finite sums), w(xy − q_N) ≤
+    max(T_N(x)·w(y), w(x)·T_N(y)) → 0 by SUBMULT (have), so xy ∈ D_ρ by closedness;
+  - ArSub-application (13): every Aloc-image has decaying coords (|uₙ| ≤ |ϖ|^{-k});
+    (9) uniformly over approximants + closed-ball coordinate limits give
+    T_N(coordAr z) ≤ max{T_N(u), H_N(u), η} for any approximant u with w-distance ≤ η
+    ⟹ limsup T_N(coordAr z) ≤ v(z−u) → 0 ⟹ ALL ArSub-elements have decaying limit
+    coordinates. Reconstruction + realization equality then follow with valued_PhiHatK.
+Implementation order: tailValueF/headBoundF defs → digit bound for prefix-pair-sums
+(scaling) → tail identity → (1) → H-decay (split-max) → +-closure → (9) →
+w-closedness → ×-closure → decaySubring → ArCompletion application (13).
