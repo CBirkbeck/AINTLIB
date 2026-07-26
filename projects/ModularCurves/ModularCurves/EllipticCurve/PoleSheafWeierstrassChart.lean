@@ -192,59 +192,70 @@ private theorem localTrivializationCoefficient_baseSectionsIso_hom
       localTrivializationCoefficient M U e x := by
   rfl
 
-/-- On a Cartier-generator chart, the global pole relation is the homogeneous
-generalized Weierstrass equation in the local coefficients of `x` and `y`. -/
-theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_CartierGenerator
-    {C S : Scheme.{u}} {π : C ⟶ S}
-    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+/-- A fixed global pole relation becomes the homogeneous generalized
+Weierstrass equation in the Cartier-frame coefficients of `x` and `y`. -/
+theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_relation
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
     (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
-    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
-    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (U : C.affineOpens) (r : Γ(C, U.1))
+    (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
     (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
-    (hH1 : Subsingleton (CategoryTheory.Sheaf.H
-      (sectionPoleSheafPower π z hz 1).sheaf 1))
-    (hH2 : Subsingleton (CategoryTheory.Sheaf.H
-      (sectionPoleSheafPower π z hz 2).sheaf 1))
-    (hH3 : Subsingleton (CategoryTheory.Sheaf.H
-      (sectionPoleSheafPower π z hz 3).sheaf 1))
-    (hH4 : Subsingleton (CategoryTheory.Sheaf.H
-      (sectionPoleSheafPower π z hz 4).sheaf 1))
-    (hH5 : Subsingleton (CategoryTheory.Sheaf.H
-      (sectionPoleSheafPower π z hz 5).sheaf 1))
-    (b1 : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
-      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 1)))
-    (hb1 : b1 0 = sectionPoleSheafPowerOneSection π z hz)
     (x : Scheme.Modules.baseSections π
       (sectionPoleSheafPower π z hz 2))
-    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
-      hsm z hz U hU r hspan hnzd 1 x = 1)
     (y : Scheme.Modules.baseSections π
       (sectionPoleSheafPower π z hz 3))
-    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
-      hsm z hz U hU r hspan hnzd 2 y = 1) :
-    ∃ a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)),
-      let hr : r ∈ z.ker.ideal U :=
-        hspan ▸ Ideal.subset_span (Set.mem_singleton r)
-      let X := localTrivializationCoefficient
-        (sectionPoleSheafPower π z hz 2) U
-        (sectionPoleSheafPowerTrivializationOfCartierGenerator
-          z hz U r hr hspan hnzd 2) x
-      let Y := localTrivializationCoefficient
-        (sectionPoleSheafPower π z hz 3) U
-        (sectionPoleSheafPowerTrivializationOfCartierGenerator
-          z hz U r hr hspan hnzd 3) y
-      let A : Γ(S, (⊤ : S.Opens)) → Γ(C, U.1) := fun a ↦
-        C.presheaf.map (homOfLE le_top).op (π.appTop.hom a)
-      Y ^ 2 + A a₁ * X * Y * r + A a₃ * Y * r ^ 3 =
-        X ^ 3 + A a₂ * X ^ 2 * r ^ 2 + A a₄ * X * r ^ 4 + A a₆ * r ^ 6 := by
-  obtain ⟨a₁, a₂, a₃, a₄, a₆, hrel⟩ :=
-    sectionPoleSheafPower_exists_monomial_weierstrass_relation_of_CartierGenerator
-      hsm z hz U hU r hspan hnzd hH1 hH2 hH3 hH4 hH5 b1 hb1 x hx y hy
-  refine ⟨a₁, a₂, a₃, a₄, a₆, ?_⟩
+    (a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)))
+    (hrel :
+      sectionPoleSheafPower_baseSectionsMul z hz 3 3 (y ⊗ₜ y) +
+          a₁ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (sectionPoleSheafPower_baseSectionsMul z hz 2 3 (x ⊗ₜ y)) +
+          a₃ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3) y)) =
+        sectionPoleSheafPower_baseSectionsMul z hz 2 4
+            (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)) +
+          a₂ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))) +
+          a₄ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2) x))) +
+          a₆ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2)
+                          (Scheme.Modules.baseSectionsMap π
+                            (sectionPoleSheafSuccHom π z hz 1)
+                              (sectionPoleSheafPowerOneSection π z hz)))))) :
+    let X := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 2) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 2) x
+    let Y := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 3) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 3) y
+    let A : Γ(S, (⊤ : S.Opens)) → Γ(C, U.1) := fun a ↦
+      C.presheaf.map (homOfLE le_top).op (π.appTop.hom a)
+    Y ^ 2 + A a₁ * X * Y * r + A a₃ * Y * r ^ 3 =
+      X ^ 3 + A a₂ * X ^ 2 * r ^ 2 + A a₄ * X * r ^ 4 + A a₆ * r ^ 6 := by
   dsimp only
-  have hr : r ∈ z.ker.ideal U := by
-    rw [hspan]
-    exact Ideal.subset_span (Set.mem_singleton r)
   have hsucc1 (q : Scheme.Modules.baseSections π
       (sectionPoleSheafPower π z hz 1)) :
       localTrivializationCoefficient (sectionPoleSheafPower π z hz 2) U
@@ -400,6 +411,131 @@ theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_Cart
   ring_nf at hcoeff ⊢
   exact hcoeff
 
+/-- On a Cartier-generator chart, the global pole relation is the homogeneous
+generalized Weierstrass equation in the local coefficients of `x` and `y`. -/
+theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hH1 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    (hH2 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 2).sheaf 1))
+    (hH3 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 3).sheaf 1))
+    (hH4 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 4).sheaf 1))
+    (hH5 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 5).sheaf 1))
+    (b1 : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 1)))
+    (hb1 : b1 0 = sectionPoleSheafPowerOneSection π z hz)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1) :
+    ∃ a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)),
+      let hr : r ∈ z.ker.ideal U :=
+        hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+      let X := localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz 2) U
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd 2) x
+      let Y := localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz 3) U
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd 3) y
+      let A : Γ(S, (⊤ : S.Opens)) → Γ(C, U.1) := fun a ↦
+        C.presheaf.map (homOfLE le_top).op (π.appTop.hom a)
+      Y ^ 2 + A a₁ * X * Y * r + A a₃ * Y * r ^ 3 =
+        X ^ 3 + A a₂ * X ^ 2 * r ^ 2 + A a₄ * X * r ^ 4 + A a₆ * r ^ 6 := by
+  obtain ⟨a₁, a₂, a₃, a₄, a₆, hrel⟩ :=
+    sectionPoleSheafPower_exists_monomial_weierstrass_relation_of_CartierGenerator
+      hsm z hz U hU r hspan hnzd hH1 hH2 hH3 hH4 hH5 b1 hb1 x hx y hy
+  refine ⟨a₁, a₂, a₃, a₄, a₆, ?_⟩
+  exact
+    sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_relation
+      z hz U r (hspan ▸ Ideal.subset_span (Set.mem_singleton r))
+      hspan hnzd x y a₁ a₂ a₃ a₄ a₆ hrel
+
+/-- A fixed global pole relation gives homogeneous coordinates on the
+projective Weierstrass cubic in a Cartier-generator frame. -/
+theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_equation_of_relation
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1))
+    (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)))
+    (hrel :
+      sectionPoleSheafPower_baseSectionsMul z hz 3 3 (y ⊗ₜ y) +
+          a₁ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (sectionPoleSheafPower_baseSectionsMul z hz 2 3 (x ⊗ₜ y)) +
+          a₃ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3) y)) =
+        sectionPoleSheafPower_baseSectionsMul z hz 2 4
+            (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)) +
+          a₂ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))) +
+          a₄ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2) x))) +
+          a₆ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2)
+                          (Scheme.Modules.baseSectionsMap π
+                            (sectionPoleSheafSuccHom π z hz 1)
+                              (sectionPoleSheafPowerOneSection π z hz)))))) :
+    let X := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 2) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 2) x
+    let Y := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 3) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 3) y
+    let A : Γ(S, (⊤ : S.Opens)) →+* Γ(C, U.1) :=
+      (C.presheaf.map (homOfLE le_top).op).hom.comp π.appTop.hom
+    let W : WeierstrassCurve Γ(S, (⊤ : S.Opens)) :=
+      ⟨a₁, a₂, a₃, a₄, a₆⟩
+    (W.map A).toProjective.Equation ![X * r, Y, r ^ 3] := by
+  have hlocal :=
+    sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_relation
+      z hz U r hr hspan hnzd x y a₁ a₂ a₃ a₄ a₆ hrel
+  dsimp only
+  apply WeierstrassCurve.Projective.equation_X_mul_r_Y_r_pow_three
+  simpa only [WeierstrassCurve.map, RingHom.comp_apply] using hlocal
+
 /-- The Cartier-frame pole relation gives homogeneous coordinates on the
 corresponding projective Weierstrass cubic. -/
 theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_equation_of_CartierGenerator
@@ -446,12 +582,13 @@ theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_equation_of_Cart
       let W : WeierstrassCurve Γ(S, (⊤ : S.Opens)) := ⟨a₁, a₂, a₃, a₄, a₆⟩
       (W.map A).toProjective.Equation ![X * r, Y, r ^ 3] := by
   obtain ⟨a₁, a₂, a₃, a₄, a₆, hrel⟩ :=
-    sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_CartierGenerator
+    sectionPoleSheafPower_exists_monomial_weierstrass_relation_of_CartierGenerator
       hsm z hz U hU r hspan hnzd hH1 hH2 hH3 hH4 hH5 b1 hb1 x hx y hy
   refine ⟨a₁, a₂, a₃, a₄, a₆, ?_⟩
-  dsimp only
-  apply WeierstrassCurve.Projective.equation_X_mul_r_Y_r_pow_three
-  simpa only [WeierstrassCurve.map, RingHom.comp_apply] using hrel
+  exact
+    sectionPoleSheafPower_six_local_homogeneous_weierstrass_equation_of_relation
+      z hz U r (hspan ▸ Ideal.subset_span (Set.mem_singleton r))
+      hspan hnzd x y a₁ a₂ a₃ a₄ a₆ hrel
 
 /-- The homogeneous Cartier coordinates define a morphism from the
 section-containing `Y`-basic open to the projective Weierstrass model. -/
