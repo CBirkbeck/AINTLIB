@@ -698,7 +698,24 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   (b4) Extend to `Aloc/Bloc` by clearing `[ϖ]`/`p[ϖ]`-denominators (scaling lemma).
 
 ### [T903] Ar as Valued completion; realization; wAr; deg
-- **Status**: in_progress (beastmode 2026-07-26). DONE (ArCompletion.lean, axiom-clean):
+- **Status**: done (beastmode 2026-07-26) — COMPLETE: the c0-architecture landed end-to-end.
+  Final deliverables (all axiom-clean, pushed): the DECAY-CLOSURE CRUX in WittF.lean
+  (tailValueF/headBoundF; prefix-pair digit bound `valuation_teichCoeffF_prefix_add_le`;
+  the moving-prefix tail estimate `tailValueF_add_le` via the exact tail identity
+  Z = C + X + Y with p^N-cancellation; head-decay split-max
+  `tendsto_headBoundF_of_tendsto`; add-closure `tendsto_gaussTermF_add_of_tendsto`;
+  perturbation (9) `tailValueF_add_le_gaussValueF`; w-closedness
+  `tendsto_gaussTermF_of_w_approx`; tail-of-prefix identity `gaussValueF_sub_prefix`;
+  `exists_iSup_eq_of_tendsto_zero`), and on ArCompletion.lean: Aloc-images decay
+  (`tendsto_gaussTermF_alocToWittF`), `eventually_valued_sub_le`(+`_of_tendsto` generic),
+  **`tendsto_gaussTerm_teichCoeffAr`** (limit coordinates decay — the crux application),
+  **`PhiHatK_teichCoeffAr`** (the series realization x = Φ(coords x)),
+  **`valued_eq_iSup_teichCoeffAr`** (Kedlaya (2.2.1) value formula on A^r), `wAr` +
+  `wAr_apply`, `exists_valued_eq_teichCoeffAr` (attainment/degree existence).
+  deg-def + deg_mul moved to T904's opening block (they live with the division
+  algorithm per Kedlaya §2). Coordinate-UNIQUENESS (Φ-injectivity / teichCoeffAr∘Φ = id)
+  deferred — file it into T904 only if the division bookkeeping needs it.
+  ORIGINAL LOG (for archaeology): DONE (ArCompletion.lean, axiom-clean):
   wK (Gauss valuation on Frac(Ainf) via nonZeroDivisors-extendToLocalization, using
   gaussValue_pos_of_ne_zero), hatK := (wK).Completion (mathlib field machinery),
   toHatK with valued_toHatK (Valued.v ∘ toHatK = gaussValue, via valuedCompletion_apply),
@@ -860,7 +877,24 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
 - **Source quotes**: Def 2.4 ln 100–106; Def 2.5 ln 115–118; Rem 2.7 ln 137–139.
 
 ### [T904] Euclidean division on Ar; Ar is a PID
-- **Status**: open | **File**: FarguesFontaine/Euclidean.lean | **Depends**: T903
+- **Status**: in_progress (beastmode 2026-07-26) | **File**: FarguesFontaine/Euclidean.lean | **Depends**: T903 (done)
+- **Progress**: Euclidean.lean created. DONE (axiom-clean): `gaussValueF_map_le_of_coeff_zero`
+  (normalized homogeneity master: integral + zeroth-coordinate-0 ⟹ value ≤ ρ, via the
+  CORE-2 split at 1 + constantCoeff), `gaussValueF_zero`, `exists_attaining_coeff`,
+  **(2.8.1) binary forms** `gaussValueF_teichmuller_add_sub_le` and
+  `gaussValueF_teichmuller_sub_sub_le` (scaling proofs — divide by the max-attaining
+  coefficient, land in W(O_F), constantCoeff kills digit 0 regardless of signs; NB
+  `[-1] = -1` is FALSE at p = 2, so sign-handling MUST go through constantCoeff, never
+  through Teichmüller-negation). NEXT (in order): (i) n-ary/list (2.8.1)
+  `gaussValueF_teichmuller_list_sum_sub_le` by induction on the binary form (+ F-side
+  ultrametric |L.sum| ≤ max); (ii) Remark 2.7 (v(x−y) < v x ⟹ same value and same
+  degAr — isosceles first); (iii) degAr def (largest attaining index via
+  Nat-sSup of the attainment set, bounded by decay) + degAr_spec upper/attain;
+  (iv) deg_mul (Lemma 2.6 specialization) via leading-coefficient dominance:
+  strict domination off (d₁,d₂) on the antidiagonal + (2.8.1)-error ρ-shrink;
+  (v) Lemma 2.8 (approximate division; the (2.8.2) T-polynomial bookkeeping);
+  (vi) Prop 2.9 (geometric iteration, summability via PhiHatK-machinery);
+  (vii) Cor 2.10 EuclideanDomain + IsPrincipalIdealRing instances on ArSub.
 - **Statement**: Lemma 2.8 (approximate division): for x ≠ 0 ∃ ε ∈ (0,1) s.t. ∀ y ∃ z w:
   `y = z*x + w ∧ wAr w ≤ wAr y ∧ (wAr w > ε·wAr y → deg w < deg x)`. Prop 2.9 (exact):
   `∀ x ≠ 0, ∀ y, ∃ z w, y = z*x + w ∧ wAr w ≤ wAr y ∧ deg w < deg x`. Cor 2.10:
