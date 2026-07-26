@@ -1526,6 +1526,62 @@ theorem BISub_le_topologicalClosure_evalRange (h12 : ρ₁ ≤ ρ₂) (j n : ℕ
   rintro w ⟨x, rfl⟩
   exact BIProd_mem_evalRange p F ϖ h12 j n hbmem hb x
 
+/-- The Gauss value of `[ϖ]⁻¹` is `|ϖ|⁻¹`. -/
+theorem wAloc_teichPiInvAloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
+    wAloc p F ϖ hρ0 hρ1 (teichPiInvAloc p F ϖ)
+      = (perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹ := by
+  have hmul := congrArg (wAloc p F ϖ hρ0 hρ1) (teichPiInvAloc_mul p F ϖ)
+  have hteich : gaussValue p F ρ (teichPi p F ϖ)
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) :=
+    gaussValue_teichmuller p F hρ1.le (PseudoUniformizer.toOF F ϖ)
+  rw [Valuation.map_mul, wAloc_algebraMap, map_one, hteich] at hmul
+  have hne : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 := by
+    intro h0
+    rw [h0, zero_mul] at hmul
+    exact zero_ne_one hmul
+  field_simp at hmul ⊢
+  exact hmul
+
+/-- The value of `[ϖ]^{-k}` in `A^r`. -/
+theorem valued_teichPiInv_pow {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} (k : ℕ) :
+    Valued.v (AlocToHatK p F ϖ hρ0 hρ1 (teichPiInvAloc p F ϖ ^ k))
+      = ((perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ k := by
+  rw [valued_AlocToHatK, map_pow, wAloc_teichPiInvAloc]
+
+
+set_option maxHeartbeats 1000000 in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **The norm-exact lift of `p^{-i}`** (the heart of Kedlaya's strictness estimate in the
+AD-9 case): the monomial `[ϖ]^{-jni}·Tⁱ` evaluates to the image of `p^{-i}` and has Gauss
+norm `|ϖ|^{-jni}`, which is `ρ₁^{-i}` exactly when the left endpoint is on the nose. -/
+theorem exists_evalAr_eq_pInv_pow (h12 : ρ₁ ≤ ρ₂) (j n : ℕ)
+    (hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ j) n)) ≤ 1) (i : ℕ) :
+    ∃ f : ↥(restrictedMvPowerSeriesSubring 1 ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      evalAr p F ϖ h12 hbmem hb f
+          = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (↑(isUnit_p_image p F ϖ).unit⁻¹ ^ i)
+        ∧ gaussNormRPS p F ϖ hρ₂0 hρ₂1
+            (f : MvPowerSeries (Fin 1) ↥(ArSub p F ϖ hρ₂0 hρ₂1))
+          = ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ (j * n * i) := by
+  refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) i)
+      (⟨AlocToHatK p F ϖ hρ₂0 hρ₂1 (teichPiInvAloc p F ϖ ^ (j * n * i)),
+        AlocToHatK_mem_ArSub p F ϖ _⟩ : ↥(ArSub p F ϖ hρ₂0 hρ₂1)),
+      isRestricted_monomial p F ϖ _⟩, ?_, ?_⟩
+  · rw [evalAr_monomial p F ϖ h12 hbmem hb i _, ArToBI_AlocToHatK p F ϖ h12,
+      ← map_pow, ← map_mul]
+    congr 1
+    have hteich : WittVector.teichmuller p ((PseudoUniformizer.toOF F ϖ) ^ j) ^ n
+        = teichPi p F ϖ ^ (j * n) := by
+      rw [map_pow, ← pow_mul]
+      rfl
+    rw [teichPowOverP, hteich, mul_pow, ← map_pow, ← pow_mul, ← mul_assoc,
+      AlocToBloc_teichPiInv_mul, one_mul]
+  · rw [gaussNormRPS_monomial, valued_teichPiInv_pow]
+
 end FarguesFontaine
 
 end
