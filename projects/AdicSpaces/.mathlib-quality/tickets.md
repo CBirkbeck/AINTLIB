@@ -27,7 +27,8 @@ quotes, discharge plans, and attack logs. Sources local under `refs/AdicSpaces/`
 | T906 | **Lemma 3.8** (approximate ideal generation) with the Colex well-founded descent | done |
 | T907 | **Lemma 3.9** and **Theorem 3.2** — `A^r` is strongly noetherian | done |
 | T908 | `B^I` (Def 4.2): construction, norm, completeness, series, density, injectivity, **Lemma 4.4 (three circles)**, **Cor 4.5**, `B^{I,+}` | (a)+(b) done, (c) open |
-| T909–T912 | restriction maps; Lemma 4.9 presentations; Theorem 4.10 | open |
+| T909 | restriction maps: `resI`, `tendsto_resI`, extension property, additivity, multiplicativity, target membership, the bundled **`resIHom : B^I →+* B^{I'}`** | map done; Cor 4.6 injectivity open |
+| T910–T912 | Lemma 4.9 presentations; Theorem 4.10 | open |
 
 Two external consults are archived alongside this board:
 `chatgpt-reply-decay-closure-2026-07-26.md` (the moving-prefix estimate that unlocked
