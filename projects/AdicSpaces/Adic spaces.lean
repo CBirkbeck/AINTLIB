@@ -40,6 +40,7 @@ import «Adic spaces».FarguesFontaine.Curve
 import «Adic spaces».FarguesFontaine.Euclidean
 import «Adic spaces».FarguesFontaine.Groebner
 import «Adic spaces».FarguesFontaine.IntervalRing
+import «Adic spaces».FarguesFontaine.Presentation
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
