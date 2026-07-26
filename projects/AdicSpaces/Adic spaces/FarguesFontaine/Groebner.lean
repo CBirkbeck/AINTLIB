@@ -742,6 +742,62 @@ theorem exists_leadIdx_degAr_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact_mod_cast Nat.sInf_le hd
   · exact dIdx_le_of_mem p F ϖ hxH hx0 hxlead
 
+/-- Every coefficient value is at most the Gauss norm. -/
+theorem valued_coeff_le_gaussNormRPS {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (s : Fin k →₀ ℕ) :
+    Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1) ≤ gaussNormRPS p F ϖ hρ0 hρ1 f :=
+  le_ciSup (bddAbove_coeff_valued p F ϖ hf) s
+
+open scoped Classical in
+/-- **The strict tail bound** (the source of Kedlaya's `ε` in Lemma 3.8): past the
+leading index, coefficient values are uniformly below the Gauss norm. -/
+theorem exists_tail_bound_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    ∃ ε : NNReal, ε < gaussNormRPS p F ϖ hρ0 hρ1 f
+      ∧ ∀ J : Fin k →₀ ℕ,
+        (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+            (leadIdxRPS p F ϖ hρ0 hρ1 f)
+          < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J →
+        Valued.v ((MvPowerSeries.coeff J f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) ≤ ε := by
+  set m : MonomialOrder (Fin k) := MonomialOrder.degLex with hm
+  set A := gaussNormRPS p F ϖ hρ0 hρ1 f with hA
+  have hA0 : 0 < A := pos_iff_ne_zero.mpr (gaussNormRPS_ne_zero p F ϖ hf hf0)
+  obtain ⟨-, hdom⟩ := leadIdxRPS_spec p F ϖ hf hf0
+  obtain ⟨b, hb0, hbA⟩ := exists_between hA0
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf b hb0
+  set G : Finset (Fin k →₀ ℕ) := hfin.toFinset.filter
+    (fun J => m.toSyn (leadIdxRPS p F ϖ hρ0 hρ1 f) < m.toSyn J) with hG
+  set ε : NNReal := max b (G.sup (fun J =>
+    Valued.v ((MvPowerSeries.coeff J f : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1))) with hε
+  have hstrict : ∀ J : Fin k →₀ ℕ,
+      m.toSyn (leadIdxRPS p F ϖ hρ0 hρ1 f) < m.toSyn J →
+      Valued.v ((MvPowerSeries.coeff J f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) < A := by
+    intro J hJ
+    rcases lt_or_eq_of_le (valued_coeff_le_gaussNormRPS p F ϖ hf J) with h | h
+    · exact h
+    · exact absurd (hdom J h) (not_le.mpr hJ)
+  refine ⟨ε, ?_, fun J hJ => ?_⟩
+  · refine max_lt hbA ?_
+    rcases Finset.eq_empty_or_nonempty G with hemp | hne
+    · rw [hemp, Finset.sup_empty, bot_eq_zero]
+      exact hA0
+    · refine (Finset.sup_lt_iff (by rw [bot_eq_zero]; exact hA0)).mpr fun J hJG => ?_
+      exact hstrict J (Finset.mem_filter.mp hJG).2
+  · rcases le_or_gt (Valued.v ((MvPowerSeries.coeff J f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)) b with hle | hgt
+    · exact le_max_of_le_left hle
+    · refine le_max_of_le_right (Finset.le_sup
+        (f := fun J => Valued.v ((MvPowerSeries.coeff J f
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) ?_)
+      rw [hG, Finset.mem_filter, Set.Finite.mem_toFinset]
+      exact ⟨hgt, hJ⟩
+
 end FarguesFontaine
 
 end
