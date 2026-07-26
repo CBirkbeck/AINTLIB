@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import Mathlib.Data.Finsupp.MonomialOrder.DegLex
 import Mathlib.Data.Finsupp.PWO
 import Mathlib.Order.WellQuasiOrder
+import Mathlib.Data.DFinsupp.WellFounded
 
 import «Adic spaces».FarguesFontaine.Euclidean
 import «Adic spaces».RestrictedPowerSeries
@@ -1360,6 +1361,138 @@ theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNRe
     rcases hzdeg with h | h
     · exact Or.inl h
     · exact Or.inr (lt_of_lt_of_le h hdegle)
+
+/-- The rank of a coefficient relative to a threshold `c`: the shifted degree if the
+coefficient is `c`-large, and `0` otherwise (Kedlaya's `ε`-support with its degree
+data). -/
+def coeffRank {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (c : NNReal)
+    (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) (K : Fin k →₀ ℕ) : ℕ :=
+  if c < Valued.v ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1) then
+    degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1) + 1
+  else 0
+
+/-- **Frozen ranks**: a `c`-small correction changes no rank. -/
+theorem coeffRank_eq_of_diff_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {c : NNReal}
+    {y y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)} {K : Fin k →₀ ℕ}
+    (hd : Valued.v (((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)
+      - ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1)) ≤ c) :
+    coeffRank p F ϖ hρ0 hρ1 c y' K = coeffRank p F ϖ hρ0 hρ1 c y K := by
+  by_cases hhigh : c < Valued.v ((MvPowerSeries.coeff K y
+      : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+  · have hlt : Valued.v (((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        - ((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1))
+        < Valued.v ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) := by
+      have hswap : ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1)
+          - ((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1)
+          = -(((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1)
+            - ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1)) := by ring
+      rw [hswap, Valuation.map_neg]
+      exact lt_of_le_of_lt hd hhigh
+    obtain ⟨hval, hdeg⟩ := valued_degAr_eq_of_sub_lt p F ϖ
+      (MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1)).2
+      (MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1)).2 hlt
+    rw [coeffRank, coeffRank, if_pos hhigh, if_pos (by rw [hval]; exact hhigh), hdeg]
+  · push Not at hhigh
+    have hy' : Valued.v ((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) ≤ c := by
+      have hsplit : ((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1)
+          = (((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1)
+            - ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1))
+            + ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1) := by ring
+      rw [hsplit]
+      exact le_trans (Valuation.map_add _ _ _) (max_le hd hhigh)
+    rw [coeffRank, coeffRank, if_neg (not_lt.mpr hy'), if_neg (not_lt.mpr hhigh)]
+
+/-- **The rank drops** where the degree drops. -/
+theorem coeffRank_lt_of_drop {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {c : NNReal}
+    {y y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)} {J : Fin k →₀ ℕ}
+    (hJhigh : c < Valued.v ((MvPowerSeries.coeff J y : ↥(ArSub p F ϖ hρ0 hρ1))
+      : hatK p F hρ0 hρ1))
+    (hdrop : ((MvPowerSeries.coeff J y' : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) = 0
+      ∨ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J y'
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        < degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J y
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) :
+    coeffRank p F ϖ hρ0 hρ1 c y' J < coeffRank p F ϖ hρ0 hρ1 c y J := by
+  have hy : coeffRank p F ϖ hρ0 hρ1 c y J
+      = degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J y
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) + 1 := by
+    rw [coeffRank, if_pos hJhigh]
+  rcases hdrop with hzero | hdeg
+  · have hnot : ¬ (c < Valued.v ((MvPowerSeries.coeff J y'
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) := by
+      rw [hzero, Valuation.map_zero]
+      exact not_lt.mpr zero_le
+    have hy' : coeffRank p F ϖ hρ0 hρ1 c y' J = 0 := by
+      rw [coeffRank, if_neg hnot]
+    rw [hy, hy']
+    exact Nat.succ_pos _
+  · rw [hy, coeffRank]
+    split_ifs with h
+    · exact Nat.succ_lt_succ hdeg
+    · exact Nat.succ_pos _
+
+/-- **The support invariant**: a step at `J` keeps the `c`-support inside the
+graded-lex segment below `M`. -/
+theorem support_step_subset {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {c : NNReal}
+    {y y' : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)} {J M : Fin k →₀ ℕ}
+    (hJM : (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
+      ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn M)
+    (hsub : ∀ K : Fin k →₀ ℕ,
+      c < Valued.v ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) →
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K
+        ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn M)
+    (hdiff : ∀ K : Fin k →₀ ℕ,
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
+        < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+      Valued.v (((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        - ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)) ≤ c) :
+    ∀ K : Fin k →₀ ℕ,
+      c < Valued.v ((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) →
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K
+        ≤ (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn M := by
+  intro K hK
+  rcases le_or_gt ((MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K)
+    ((MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J) with hKJ | hKJ
+  · exact le_trans hKJ hJM
+  · refine hsub K ?_
+    by_contra hcon
+    push Not at hcon
+    have hrank := coeffRank_eq_of_diff_le p F ϖ (c := c) (y := y) (y' := y')
+      (K := K) (hdiff K hKJ)
+    have hy'small : Valued.v ((MvPowerSeries.coeff K y'
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) ≤ c := by
+      have hsplit : ((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1)
+          = (((MvPowerSeries.coeff K y' : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1)
+            - ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1))
+            + ((MvPowerSeries.coeff K y : ↥(ArSub p F ϖ hρ0 hρ1))
+              : hatK p F hρ0 hρ1) := by ring
+      rw [hsplit]
+      exact le_trans (Valuation.map_add _ _ _) (max_le (hdiff K hKJ) hcon)
+    exact absurd hK (not_lt.mpr hy'small)
 
 end FarguesFontaine
 
