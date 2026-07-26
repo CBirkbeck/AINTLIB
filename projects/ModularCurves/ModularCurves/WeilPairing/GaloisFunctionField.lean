@@ -672,4 +672,59 @@ theorem toAffinePoint_galoisProjPointEquiv {L : Type v} [Field L] [DecidableEq L
   | affine P => rfl
   | infinity => rfl
 
+/-- **(M1b-3b-viii, step f)** The full pullback of a projective divisor transports:
+`σ·(f*(D)) = f*(σ·D)`. -/
+theorem equivMapDomain_pullbackDivisor {L : Type v} [Field L] [DecidableEq L] [IsAlgClosed L]
+    [Algebra k L] [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) (N : ℤ)
+    (hN : Finite (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom.ker)
+    (D : HasseWeil.Curves.ProjectiveDivisor
+      (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L)) :
+    Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        (HasseWeil.WeilPairing.DivisorPullback.pullbackDivisor
+          (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN D) =
+      HasseWeil.WeilPairing.DivisorPullback.pullbackDivisor
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+        (Finsupp.equivMapDomain (galoisProjPointEquiv W σ) D) := by
+  classical
+  show Finsupp.domCongr (M := ℤ) (galoisProjPointEquiv W σ)
+      (D.sum fun v n => n • HasseWeil.WeilPairing.pullbackDiv
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+        (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v)) = _
+  rw [map_finsuppSum]
+  show (D.sum fun v n => Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+      (n • HasseWeil.WeilPairing.pullbackDiv
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+        (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v))) = _
+  have hterm : ∀ (v : HasseWeil.Curves.ProjectiveSmoothPoint
+        (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L)) (n : ℤ),
+      Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        (n • HasseWeil.WeilPairing.pullbackDiv
+          (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+          (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v)) =
+      n • HasseWeil.WeilPairing.pullbackDiv
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+        (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint
+          (galoisProjPointEquiv W σ v)) := by
+    intro v n
+    rw [show Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        (n • HasseWeil.WeilPairing.pullbackDiv
+          (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+          (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v)) =
+      Finsupp.domCongr (M := ℤ) (galoisProjPointEquiv W σ)
+        (n • HasseWeil.WeilPairing.pullbackDiv
+          (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+          (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v)) from rfl,
+      map_zsmul, toAffinePoint_galoisProjPointEquiv W σ v]
+    exact congrArg (n • ·) (equivMapDomain_pullbackDiv W σ N hN _)
+  simp only [hterm]
+  rw [show Finsupp.equivMapDomain (galoisProjPointEquiv W σ) D =
+      Finsupp.mapDomain (galoisProjPointEquiv W σ) D from
+    Finsupp.equivMapDomain_eq_mapDomain _ _]
+  exact (Finsupp.sum_mapDomain_index_addMonoidHom (f := galoisProjPointEquiv W σ) (s := D)
+    (h := fun v => (smulAddHom ℤ (HasseWeil.Curves.ProjectiveDivisor
+        (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L))).flip
+      (HasseWeil.WeilPairing.pullbackDiv
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+        (HasseWeil.Curves.ProjectiveSmoothPoint.toAffinePoint v)))).symm
+
 end ModularCurves
