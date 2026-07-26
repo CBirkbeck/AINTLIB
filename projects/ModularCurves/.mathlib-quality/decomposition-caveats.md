@@ -477,3 +477,30 @@ Remaining chain to the field-level DS4 pairing:
   (`WeilPairing/EtaleDescent.lean:440`) through `torsionAlgebraPointsEquiv`; note that
   equivalence is currently only `Nonempty`-valued, so its Galois equivariance has to be
   exposed as part of this step.
+
+### DS4 M1b — the Galois divisor transport is COMPLETE (2026-07-26)
+
+`WeilPairing/GaloisFunctionField.lean` (sorry-free, ~20 declarations) now carries the full
+σ-transport for an **arbitrary base field** and an **arbitrary** `σ : L ≃ₐ[k] L`, i.e. the
+general-automorphism analogue of HasseWeil's Frobenius-only, finite-field-only chain:
+
+`galoisCoordRingEquiv` → `galoisFunctionFieldEquiv` → `map_maximalIdealAt_galoisCoordRingEquiv`
+→ `pointValuation_galoisFunctionFieldEquiv` → `ord_P_galoisFunctionFieldEquiv` →
+`divisorOf_galoisFunctionFieldEquiv`; and on the other side
+`galoisCoordRingEquiv_smul_basis` → `norm_galoisCoordRingEquiv` →
+`ordAtInfty_algebraMap_galoisCoordRingEquiv` → `ordAtInfty_galoisFractionLift` →
+`ordAtInfty_galoisFunctionFieldEquiv`; assembled by Lemmas A/B into
+
+> **`projectiveDivisorOf_galoisFunctionFieldEquiv`** : `div(σ·g)` is the σ-relabelling of
+> `div(g)`.
+
+Remaining to the field-level DS4 pairing:
+
+1. `div(Φ_σ g_T) = div(g_{σT})` — combine the above with `weilFunction_divisor`
+   (`div(g_T) = pullbackDiv [N] T − pullbackDiv [N] 0`); needs σ's compatibility with the
+   group law on `Affine.Point` (`Point.map`) and with `[N]`.
+2. The pairing equivariance `e(σS, σT) = σ(e(S,T))` — `Φ_σ g_T = c·g_{σT}` by
+   `Constancy.pairing_const_of_transport`, then apply `Φ_σ` to `τ_S g_T = e(S,T)·g_T` and
+   use uniqueness of the constant.
+3. M1c — `exists_pairingAlgebraHom_of_galoisEquivariant`, exposing the equivariance of
+   `torsionAlgebraPointsEquiv` (currently `Nonempty`-valued) on the way.
