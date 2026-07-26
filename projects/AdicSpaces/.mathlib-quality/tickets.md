@@ -732,18 +732,16 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
       verbatim. Deliverable: `exists_delta_teichCoeffF_sub` for W(F)-pairs with
       BddAbove-hyps — applied to Aloc-images (which are bounded: their w-values are
       wAloc-values via the embedding, bounded on Cauchy sequences).
-      NOTE: [-1]-trick statement: teichmuller p (-1 : F) = -1, provable via
-      map-naturality or: (teichmuller p (-1))² = [1] = 1 and ≠ 1 unless p = 2… simplest:
-      frobenius-fixed: use CharP.neg_one_pow… implement as: -[x] = [-x] ⟸ [-1]·[x] =
-      [-x] (map_mul) + [-1] = -1: for p odd: (-1)ᵖ = -1: Teichmüller-of-root-of-unity…
-      PROOF: -1 ∈ 𝔽_p ⊂ F: Teichmüller of 𝔽_p-elements = ℤ_p-roots-of-unity-lift:
-      cleanest formal route: `WittVector.teichmuller_neg_one`? if absent: verify
-      (teichmuller p (-1) + 1)·(teichmuller p (-1) - ?)… fallback: prove
-      teichCoeffF (-x) n = -(teichCoeffF x n) directly by the DIAGONAL-DIVISIBILITY
-      pattern: coeffs of (-[T]) − [-T] in F[T] vanish at T=0 AND… hmm; TIME-BOX this:
-      if [-1] resists 20 min, thread neg through sub-free statements (state add_le only,
-      derive sub-versions later from T904-context where Euclidean gives more).
-  (4) coordinates on ArSub := extend along density (DenseInducing/UniformContinuous.extend
+STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
+      `exists_delta_teichCoeffF_sub` — per-coordinate ε-δ over W(F) on value-bounded
+      boundedly-termed sets (m-generalized induction; heads via the scaled Teichmüller
+      continuity `gaussValueF_teichmuller_sub_le_of_le_scaled`; tails via p-shift +
+      m→m+K rescaling with c^K < ρ). Supporting F-layer all green: gaussTermF/ValueF,
+      scaling, head split, pair bound, list engines + level rep + `gaussValueF_add_le`,
+      `gaussValueF_p_mul`, transport (`gaussValueF_map`), boundedness lemmas for
+      tails/sums/Teichmüller-differences. The [-1]-question was DODGED entirely: the
+      only negation needed was digit-0 (additive, exact).
+      (4) coordinates on ArSub := extend along density (DenseInducing/UniformContinuous.extend
       or sequential: every x ∈ ArSub is a limit of Aloc-images; coords of the
       approximants are Cauchy in F by (3); define teichCoeffAr x n := lim);
   (5) reconstruction + attainment (wAr x = max ρⁿ|xₙ|, attained) on ArSub; then
