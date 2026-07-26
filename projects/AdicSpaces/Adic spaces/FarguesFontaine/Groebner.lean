@@ -3,6 +3,8 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import Mathlib.Data.Finsupp.MonomialOrder.DegLex
+import Mathlib.Data.Finsupp.PWO
+import Mathlib.Order.WellQuasiOrder
 
 import «Adic spaces».FarguesFontaine.Euclidean
 import «Adic spaces».RestrictedPowerSeries
@@ -630,6 +632,67 @@ theorem dIdx_antitone {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     {I₁ I₂ : Fin k →₀ ℕ} (hI : I₁ ≤ I₂) :
     dIdx p F ϖ hρ0 hρ1 H I₂ ≤ dIdx p F ϖ hρ0 hρ1 H I₁ :=
   sInf_le_sInf (Set.image_mono (degSetIdx_subset p F ϖ hI))
+
+/-- **Dickson, minimal-element form**: a well-quasi-ordered set has finitely many
+minimal elements. -/
+theorem finite_minimal {α : Type*} [PartialOrder α] [WellQuasiOrderedLE α]
+    (T : Set α) : {I | I ∈ T ∧ ∀ I' ∈ T, I' ≤ I → I = I'}.Finite := by
+  refine WellQuasiOrderedLE.finite_of_isAntichain ?_
+  intro a ha b hb hab hle
+  exact hab (hb.2 a ha.1 hle).symm
+
+/-- Every element of a well-quasi-ordered set dominates a minimal element. -/
+theorem exists_minimal_le {α : Type*} [PartialOrder α] [WellQuasiOrderedLE α]
+    {T : Set α} {J : α} (hJ : J ∈ T) :
+    ∃ I, (I ∈ T ∧ ∀ I' ∈ T, I' ≤ I → I = I') ∧ I ≤ J := by
+  obtain ⟨I, ⟨hIT, hIJ⟩, hmin⟩ :=
+    wellFounded_lt.has_min {I | I ∈ T ∧ I ≤ J} ⟨J, hJ, le_rfl⟩
+  refine ⟨I, ⟨hIT, fun I' hI' hle => ?_⟩, hIJ⟩
+  by_contra hne
+  exact hmin I' ⟨hI', le_trans hle hIJ⟩ (lt_of_le_of_ne hle (Ne.symm hne))
+
+/-- The index/degree pairs realized by an ideal (the graph of `d_I` as an up-set). -/
+def groebnerPairs {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
+    Set ((Fin k →₀ ℕ) × ℕ) :=
+  {q | dIdx p F ϖ hρ0 hρ1 H q.1 ≤ (q.2 : ℕ∞)}
+
+/-- **The Gröbner index set `S`** (Kedlaya Definition 3.7): the first coordinates of
+the minimal index/degree pairs. -/
+def groebnerSet {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
+    Set (Fin k →₀ ℕ) :=
+  Prod.fst '' {q | q ∈ groebnerPairs p F ϖ hρ0 hρ1 H
+    ∧ ∀ q' ∈ groebnerPairs p F ϖ hρ0 hρ1 H, q' ≤ q → q = q'}
+
+/-- **`S` is finite** (Dickson's lemma). -/
+theorem groebnerSet_finite {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))) :
+    (groebnerSet p F ϖ hρ0 hρ1 H).Finite :=
+  Set.Finite.image _ (finite_minimal (groebnerPairs p F ϖ hρ0 hρ1 H))
+
+/-- **`S` dominates from below at equal degree** (the property Kedlaya's Lemma 3.8
+consumes): every realized leading index has an element of `S` beneath it with the
+same degree datum. -/
+theorem exists_mem_groebnerSet_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {J : Fin k →₀ ℕ} (hJ : dIdx p F ϖ hρ0 hρ1 H J ≠ ⊤) :
+    ∃ I ∈ groebnerSet p F ϖ hρ0 hρ1 H, I ≤ J
+      ∧ dIdx p F ϖ hρ0 hρ1 H I = dIdx p F ϖ hρ0 hρ1 H J := by
+  set d : ℕ := (dIdx p F ϖ hρ0 hρ1 H J).untop hJ with hd
+  have hdcoe : ((d : ℕ∞)) = dIdx p F ϖ hρ0 hρ1 H J := by
+    rw [hd]
+    exact_mod_cast WithTop.coe_untop _ hJ
+  have hmem : (J, d) ∈ groebnerPairs p F ϖ hρ0 hρ1 H := by
+    rw [groebnerPairs, Set.mem_setOf_eq, hdcoe]
+  obtain ⟨⟨I, e⟩, hqmin, hqle⟩ := exists_minimal_le hmem
+  obtain ⟨hIJ, hed⟩ := Prod.mk_le_mk.mp hqle
+  have hIe : dIdx p F ϖ hρ0 hρ1 H I ≤ (e : ℕ∞) := hqmin.1
+  refine ⟨I, ⟨(I, e), hqmin, rfl⟩, hIJ, le_antisymm ?_ ?_⟩
+  · calc dIdx p F ϖ hρ0 hρ1 H I ≤ (e : ℕ∞) := hIe
+      _ ≤ (d : ℕ∞) := by exact_mod_cast hed
+      _ = dIdx p F ϖ hρ0 hρ1 H J := hdcoe
+  · exact dIdx_antitone p F ϖ hIJ
 
 end FarguesFontaine
 
