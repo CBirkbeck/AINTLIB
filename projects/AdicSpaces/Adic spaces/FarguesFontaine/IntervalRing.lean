@@ -642,6 +642,37 @@ theorem wI_pow_le_one {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ
         ≤ 1 * 1 := mul_le_mul ih hz zero_le zero_le
       _ = 1 := one_mul 1
 
+/-- **The interval norm dominates every intermediate endpoint map** (Corollary 4.5,
+in the form the restriction maps consume): for an interpolated radius, the value of
+the endpoint image of a `Bloc`-element is at most its interval norm. -/
+theorem valued_BlocToHatK_le_wI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (x : Bloc p F ϖ) :
+    Valued.v (BlocToHatK p F ϖ hmid0 hmid1 x)
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x) := by
+  rw [valued_BlocToHatK, wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
+  exact wLoc_le_max_of_interpolate p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 x
+
+/-- The endpoint maps are `wI`-Lipschitz on differences, hence uniformly continuous
+for the interval uniformity. -/
+theorem valued_BlocToHatK_sub_le_wI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hmid0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hmid1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (x y : Bloc p F ϖ) :
+    Valued.v (BlocToHatK p F ϖ hmid0 hmid1 x - BlocToHatK p F ϖ hmid0 hmid1 y)
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 y) := by
+  have hsub : BlocToHatK p F ϖ hmid0 hmid1 x - BlocToHatK p F ϖ hmid0 hmid1 y
+      = BlocToHatK p F ϖ hmid0 hmid1 (x - y) := (map_sub _ _ _).symm
+  have hsub2 : BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+      - BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 y
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (x - y) := (map_sub _ _ _).symm
+  rw [hsub, hsub2]
+  exact valued_BlocToHatK_le_wI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ0 hθ1 hmid0 hmid1 (x - y)
+
 end FarguesFontaine
 
 end
