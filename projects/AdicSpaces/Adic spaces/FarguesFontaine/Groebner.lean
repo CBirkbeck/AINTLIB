@@ -499,6 +499,76 @@ theorem gaussNormRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
             ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by rw [h1]
       _ ≤ _ := le_ciSup (bddAbove_coeff_valued p F ϖ hprod) (s + J)
 
+/-- Monomial shifts of nonzero series are nonzero. -/
+theorem monomialShift_ne_zero {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)} (hf0 : f ≠ 0)
+    (J : Fin k →₀ ℕ) :
+    (MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f ≠ 0 := by
+  intro h0
+  refine hf0 (MvPowerSeries.ext fun t => ?_)
+  have h1 : MvPowerSeries.coeff (t + J)
+      ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
+      = MvPowerSeries.coeff t f := by
+    rw [coeff_monomialShift, if_pos le_add_self, add_tsub_cancel_right]
+  rw [h0, map_zero] at h1
+  rw [map_zero, ← h1]
+
+/-- **Attainment sets shift**: the attainers of a monomial shift are the translates. -/
+theorem attainSetRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
+    attainSetRPS p F ϖ hρ0 hρ1
+        ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
+      = (fun t => J + t) '' attainSetRPS p F ϖ hρ0 hρ1 f := by
+  have hnorm := gaussNormRPS_monomialShift p F ϖ hf J
+  have hnne := gaussNormRPS_ne_zero p F ϖ hf hf0
+  ext s
+  simp only [attainSetRPS, Set.mem_setOf_eq, Set.mem_image]
+  constructor
+  · intro hs
+    rw [coeff_monomialShift, hnorm] at hs
+    by_cases hJs : J ≤ s
+    · rw [if_pos hJs] at hs
+      refine ⟨s - J, hs, ?_⟩
+      rw [add_tsub_cancel_of_le hJs]
+    · rw [if_neg hJs] at hs
+      rw [ZeroMemClass.coe_zero, Valuation.map_zero] at hs
+      exact absurd hs.symm hnne
+  · rintro ⟨t, ht, rfl⟩
+    rw [coeff_monomialShift, hnorm, if_pos le_self_add, add_tsub_cancel_left]
+    exact ht
+
+/-- **The leading index shifts additively** (Kedlaya's monomial multiplication). -/
+theorem leadIdxRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
+    leadIdxRPS p F ϖ hρ0 hρ1
+        ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
+      = J + leadIdxRPS p F ϖ hρ0 hρ1 f := by
+  set m : MonomialOrder (Fin k) := MonomialOrder.degLex with hm
+  have hprod := isRestricted_monomialShift p F ϖ hf J
+  have hprod0 := monomialShift_ne_zero p F ϖ hf0 J
+  obtain ⟨hmemS, hdomS⟩ := leadIdxRPS_spec p F ϖ hprod hprod0
+  obtain ⟨hmemf, hdomf⟩ := leadIdxRPS_spec p F ϖ hf hf0
+  have hshift := attainSetRPS_monomialShift p F ϖ hf hf0 J
+  -- the shifted leading index is an attainer of the shift
+  have hJlead : J + leadIdxRPS p F ϖ hρ0 hρ1 f ∈ attainSetRPS p F ϖ hρ0 hρ1
+      ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f) := by
+    rw [hshift]
+    exact ⟨leadIdxRPS p F ϖ hρ0 hρ1 f, hmemf, rfl⟩
+  -- compare through the linear syn order and pull back by injectivity
+  refine m.toSyn.injective (le_antisymm ?_ ?_)
+  · have h1 := (subset_of_eq hshift) hmemS
+    obtain ⟨t, ht, heq⟩ := h1
+    rw [← heq]
+    have h2 : m.toSyn t ≤ m.toSyn (leadIdxRPS p F ϖ hρ0 hρ1 f) := hdomf t ht
+    have h3 := add_le_add_left h2 (m.toSyn J)
+    rw [← map_add, ← map_add] at h3
+    show m.toSyn (J + t) ≤ m.toSyn (J + leadIdxRPS p F ϖ hρ0 hρ1 f)
+    rw [add_comm J t, add_comm J (leadIdxRPS p F ϖ hρ0 hρ1 f)]
+    exact h3
+  · exact hdomS _ hJlead
+
 end FarguesFontaine
 
 end
