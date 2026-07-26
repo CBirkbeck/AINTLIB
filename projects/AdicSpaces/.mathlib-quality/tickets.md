@@ -663,9 +663,26 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   on `Ainf` first — if `gaussValue ρ (a−b) ≤ ρⁿ·δ^{p^n}` with `δ ≤ 1` then
   `|teichCoeff a n − teichCoeff b n| ≤ δ` (exact constant shape to be fixed against the
   1004.0466 proof) — then the same on `Bloc` by clearing denominators.
-- **Sketch**: (b) from the level-rep of `a = b + (a−b)`: the level-n digit of the sum
-  differs from `bₙ` by fold-carries, each valuation-controlled by pair bounds; the p^n
-  root enters through `frobeniusEquiv_symm` twisting. Transcribe 1004.0466 Thm 4.5.
+- **Sketch REVISED (route derived 2026-07-26, replaces the 1004.0466-transcription —
+  that theorem is Gelfand-spectra continuity, not the coordinate estimate)**:
+  (b1) **Diagonal divisibility**: for k ≥ 1, `(teichmuller x − teichmuller y).coeff k`
+  is divisible by `x − y` in `O_F`. Proof WITHOUT polynomial computations: work in
+  `W((O_F)[X,Y])`; the element `E_k := ([X] − [Y]).coeff k ∈ O_F[X,Y]` vanishes under
+  the diagonal evaluation `Y ↦ X` (since `[x]−[x] = 0`), by `WittVector.map`-naturality
+  (map (evalHom) commutes with coeff and with teichmuller); hence `(X−Y) ∣ E_k`;
+  specialize by `WittVector.map (eval (x,y))`. Corollary (pow form, no rpow):
+  `v(teichCoeff ([x]−[y]) k)^(p^k) ≤ v (x−y)` (the twist θ^{-k} takes p^k-th roots;
+  the cofactor is in O_F so v ≤ 1). Same for `[x]+[y]` against `[x+y]` if needed.
+  (b2) **Teichmüller-difference modulus**: `w_ρ([a]−[b]) ≤ max(v(a−b),
+  sup_{k≥1} ρ^k·v(a−b)^{p^{-k}})` — an explicit modulus ω(ε) → 0 (NOT Lipschitz;
+  choose the K-balanced bound `ω(ε) = max(ε^{p^{-K}}, ρ^K)`-style to stay in pow-form).
+  (b3) **Per-coordinate modulus on Ainf**: digit-0 differences are exact
+  (constantCoeff is additive): `v(a₀−b₀) ≤ w(a−b)`; recurse via head-split:
+  `a = [a₀]+p·x'`, `b = [b₀]+p·y'`, `w(x'−y') ≤ ρ⁻¹·max(w(a−b), w([a₀]−[b₀]))` (using
+  (b2)), and `aₙ₊₁ − bₙ₊₁ = x'ₙ − y'ₙ`. Gives: ∀ n ∃ modulus ωₙ with
+  `|teichCoeff a n − teichCoeff b n| ≤ ωₙ(w(a−b))`, `ωₙ(ε) → 0` as `ε → 0` — exactly
+  the uniform continuity needed for coordinates on the completion (T903).
+  (b4) Extend to `Aloc/Bloc` by clearing `[ϖ]`/`p[ϖ]`-denominators (scaling lemma).
 
 ### [T903] Ar as Valued completion; realization; wAr; deg
 - **Status**: open | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
