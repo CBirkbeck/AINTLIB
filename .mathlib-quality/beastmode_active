@@ -1,4 +1,7 @@
-FOCUS: DS4 M1b LEAF brick 4 — push Phi_sigma through the translation formulas.
-Bricks 1-3 landed sorry-free (semilinear extensionality; Phi fixes x_gen,y_gen; Phi fixes base constants and the a_i).
-FINDING (scaffold attempt, reverted; file green and sorry-free): WeierstrassCurve.Affine.slope is defined BY CASES (if x1 = x2 then tangent-formula else secant-formula), so `unfold slope; simp only [map_*]` does not fire. Push Phi through with `rw [apply_ite]`-style handling first: sigma preserves equality/inequality of the constants, so the branch condition matches (x_gen = algebraMap xk iff x_gen = algebraMap (sigma xk) is FALSE in general — note the condition compares x_gen with the CONSTANT, and x_gen is transcendental over L, so the branch is always the secant one: use HasseWeil x_gen_sub_const_ne_zero to discharge the if to the else-branch on BOTH sides, then push Phi through the rational expression with map_div0/map_sub/map_add/map_mul + bricks 2 and 3).
-THEN: translateX_xy/translateY_xy transport (addX/addY are polynomial in slope, x_gen, constants and a_i), then the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch handled separately via translateAlgEquiv_of_2tor), then weilPairing_galois unconditional, fieldWeilPairing_galois, and M1c (EtaleDescent:440).
+FOCUS: DS4 M1b LEAF brick 4b — transport of translateX_xy/translateY_xy under Phi_sigma.
+LANDED (sorry-free, pushed): bricks 1,2,3 and 4a (galoisFunctionFieldEquiv_translateSlope).
+ATTEMPT NOTE (reverted; file green): `rw [translateX_xy_eq_addX]; unfold Affine.addX; simp only [...]; congr 1` hits a whnf TIMEOUT (200k) because W_KE unfolds into the base-changed record. Heartbeat bumps are FORBIDDEN.
+FIX TO TRY: prove a tiny standalone helper first, e.g.
+  private theorem map_addX (u v w : KE) : Phi (addX u v w) = addX (Phi u) (Phi v) (Phi w)
+  by `simp only [WeierstrassCurve.Affine.addX, map_sub, map_add, map_mul, map_pow, galoisFunctionFieldEquiv_a1, galoisFunctionFieldEquiv_a2]` (NO unfold of W_KE, NO congr), and similarly map_addY with a3/a4 as needed; then brick 4b is a two-line rw using 4a and these helpers.
+THEN: the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch separately), then weilPairing_galois unconditional, fieldWeilPairing_galois, M1c.
