@@ -741,6 +741,62 @@ theorem gaussTerm_teichCoeffAr_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       ≤ ρ ^ n * r := mul_le_mul_of_nonneg_left h4 zero_le
     _ = Valued.v x := hρnr
 
+/-- Teichmüller lifts of arbitrary `F`-elements inside `Aloc` (choose a Tate
+absorption `c·ϖ^k ∈ O_F` and divide the Teichmüller lift back by `[ϖ]^k`). -/
+def alocTeich (c : F) : Aloc p F ϖ :=
+  IsLocalization.mk' (Aloc p F ϖ)
+    (WittVector.teichmuller p
+      (⟨c * ((ϖ.val : Fˣ) : F) ^ (exists_mul_pow_isPowerBounded p F ϖ c).choose,
+        (exists_mul_pow_isPowerBounded p F ϖ c).choose_spec⟩ : OF F))
+    (⟨teichPi p F ϖ ^ (exists_mul_pow_isPowerBounded p F ϖ c).choose,
+      (exists_mul_pow_isPowerBounded p F ϖ c).choose, rfl⟩ :
+        Submonoid.powers (teichPi p F ϖ))
+
+/-- In `W(F)`, `alocTeich c` really is the Teichmüller lift of `c`. -/
+theorem alocToWittF_alocTeich (c : F) :
+    alocToWittF p F ϖ (alocTeich p F ϖ c) = WittVector.teichmuller p c := by
+  set k := (exists_mul_pow_isPowerBounded p F ϖ c).choose with hk
+  set a : OF F := ⟨c * ((ϖ.val : Fˣ) : F) ^ k,
+    (exists_mul_pow_isPowerBounded p F ϖ c).choose_spec⟩ with ha
+  set y : Submonoid.powers (teichPi p F ϖ) :=
+    ⟨teichPi p F ϖ ^ k, k, rfl⟩ with hy
+  have hϖne : (((ϖ.val : Fˣ) : F)) ≠ 0 := (ϖ.val : Fˣ).ne_zero
+  -- multiply through by the denominator and compare in W(F)
+  have hspec : alocTeich p F ϖ c * algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F)
+      = algebraMap (Ainf p F) (Aloc p F ϖ) (WittVector.teichmuller p a) := by
+    rw [alocTeich]
+    exact IsLocalization.mk'_spec (Aloc p F ϖ) _ _
+  have happ := congrArg (alocToWittF p F ϖ) hspec
+  rw [map_mul, alocToWittF_algebraMap, alocToWittF_algebraMap] at happ
+  have hyW : WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+      ((y : Ainf p F)) = WittVector.teichmuller p (((ϖ.val : Fˣ) : F) ^ k) := by
+    have hy' : (y : Ainf p F) = teichPi p F ϖ ^ k := rfl
+    rw [hy', map_pow]
+    have hone : WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+        (teichPi p F ϖ) = WittVector.teichmuller p (((ϖ.val : Fˣ) : F)) := by
+      rw [show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+        from rfl, WittVector.map_teichmuller]
+      rfl
+    rw [hone, ← map_pow]
+  have haW : WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+      (WittVector.teichmuller p a) = WittVector.teichmuller p
+        (c * ((ϖ.val : Fˣ) : F) ^ k) := by
+    rw [WittVector.map_teichmuller]
+    rfl
+  rw [hyW, haW] at happ
+  -- cancel the Teichmüller unit [ϖ^k]
+  have hunit : IsUnit (WittVector.teichmuller p (((ϖ.val : Fˣ) : F) ^ k)) := by
+    have hne2 : ((ϖ.val : Fˣ) : F) ^ k ≠ 0 := pow_ne_zero _ hϖne
+    refine ⟨Units.mkOfMulEqOne _ (WittVector.teichmuller p ((((ϖ.val : Fˣ) : F) ^ k)⁻¹))
+      ?_, rfl⟩
+    rw [← map_mul, mul_inv_cancel₀ hne2, map_one]
+  have hgoal : alocToWittF p F ϖ (alocTeich p F ϖ c) *
+      WittVector.teichmuller p (((ϖ.val : Fˣ) : F) ^ k)
+      = WittVector.teichmuller p c *
+        WittVector.teichmuller p (((ϖ.val : Fˣ) : F) ^ k) := by
+    rw [happ, ← map_mul]
+  exact hunit.mul_right_cancel hgoal
+
 end FarguesFontaine
 
 end
