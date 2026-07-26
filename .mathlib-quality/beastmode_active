@@ -1,5 +1,8 @@
-FOCUS: DS4 M1b — ONE leaf left: the translation conjugation Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma at g_T.
-Everything else is DONE, sorry-free and axiom-clean in WeilPairing/GaloisFunctionField.lean, culminating in weilPairing_galois_of_conj (e(sigma S, sigma T) = sigma e(S,T) given the conjugation).
-ROUTE for the leaf: algHom_ext_x_y_gen (TranslationOrd ~3261) reduces equality of alg homs to x_gen and y_gen; compute both sides with translateAlgEquivOfPoint_*_x_gen/_y_gen (TranslationOrd 3613/3731/3773/3859) and the action of Phi_sigma on the generators (Phi fixes x_gen,y_gen and applies sigma to coefficients — use galoisFunctionFieldEquiv_algebraMap for constants plus the coordinate-ring description crGalEquiv = CoordinateRing.map sigma).
-AFTER THAT: package fieldWeilPairing_galois (bundled {u // u^N = 1} form) and do M1c: exists_pairingAlgebraHom_of_galoisEquivariant (WeilPairing/EtaleDescent.lean:440) with the torsionAlgebraPointsEquiv equivariance.
-ELABORATION NOTE: at base-changed curves pass IsElliptic/IsIntegrallyClosed EXPLICITLY (record-unfolding breaks instance search).
+FOCUS: DS4 M1b — ONE leaf: the translation conjugation Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma at g_T.
+Everything else is DONE, sorry-free, axiom-clean (WeilPairing/GaloisFunctionField.lean -> weilPairing_galois_of_conj).
+IMPORTANT FINDING (checked): HasseWeil algHom_ext_x_y_gen (TranslationOrd:2252) is for F-ALGEBRA maps, but Phi_sigma is only a RING equiv (sigma-semilinear over L), so it does NOT apply directly.
+NEW FIRST BRICK: prove a ring-hom extensionality
+  ringHom_ext_const_x_y_gen : for psi1 psi2 : KE -> KE ring homs, if they agree on algebraMap L (constants), on x_gen and on y_gen, then psi1 = psi2.
+  Mirror the proof of algHom_ext_x_y_gen: IsLocalization.ringHom_ext (nonZeroDivisors CoordinateRing) then AdjoinRoot.ringHom_ext-style argument then Polynomial ext with the constants clause.
+THEN the conjugation itself: compute both sides on constants (galoisFunctionFieldEquiv_algebraMap + translate fixes constants via .commutes), on x_gen and y_gen (translateAlgEquivOfPoint_*_x_gen/_y_gen at 3613/3731/3773/3859, and Phi_sigma on generators = the generators with sigma applied to coefficients).
+THEN: fieldWeilPairing_galois (bundled form) and M1c (EtaleDescent:440 + torsionAlgebraPointsEquiv equivariance).
