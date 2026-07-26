@@ -151,6 +151,111 @@ theorem isRestricted_iff_valued {k : ℕ} {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : 
     push Not at hcon
     exact hs (hVU (hεV hcon))
 
+/-- Attainment for `NNReal` families with finitely many terms above every positive
+threshold (the index-free generalization of the sequence attainment lemma). -/
+theorem exists_iSup_eq_of_finite_above {ι : Type*} [Nonempty ι] {g : ι → NNReal}
+    (hfin : ∀ ε : NNReal, 0 < ε → {i | ε < g i}.Finite)
+    (hne : (⨆ i, g i) ≠ 0) :
+    ∃ i₀, (⨆ i, g i) = g i₀ ∧ ∀ i, g i ≤ g i₀ := by
+  have hB : BddAbove (Set.range g) := by
+    refine ⟨max 1 (((hfin 1 one_pos).toFinset).sup g), ?_⟩
+    rintro t ⟨i, rfl⟩
+    rcases le_or_gt (g i) 1 with h1 | h1
+    · exact le_max_of_le_left h1
+    · refine le_max_of_le_right (Finset.le_sup ?_)
+      rw [Set.Finite.mem_toFinset]
+      exact h1
+  have hpos : 0 < ⨆ i, g i := pos_iff_ne_zero.mpr hne
+  obtain ⟨b, hb0, hbs⟩ := exists_between hpos
+  have hSne : {i | b < g i}.Nonempty := by
+    by_contra hcon
+    rw [Set.not_nonempty_iff_eq_empty] at hcon
+    have hall : ∀ i, g i ≤ b := by
+      intro i
+      by_contra hcon2
+      push Not at hcon2
+      have h2 : i ∈ {i | b < g i} := hcon2
+      rw [hcon] at h2
+      exact h2
+    exact absurd (lt_of_le_of_lt (ciSup_le hall) hbs) (lt_irrefl _)
+  have hfinb := hfin b hb0
+  set Sfin := hfinb.toFinset with hSfin
+  have hSfinne : Sfin.Nonempty := by
+    obtain ⟨i, hi⟩ := hSne
+    exact ⟨i, by rw [hSfin, Set.Finite.mem_toFinset]; exact hi⟩
+  obtain ⟨i₀, hi₀mem, hi₀⟩ := Finset.exists_mem_eq_sup Sfin hSfinne g
+  have hdom : ∀ i, g i ≤ g i₀ := by
+    intro i
+    rcases le_or_gt (g i) b with h1 | h1
+    · refine le_trans h1 ?_
+      have hi₀b : b < g i₀ := by
+        rw [hSfin, Set.Finite.mem_toFinset] at hi₀mem
+        exact hi₀mem
+      exact hi₀b.le
+    · have himem : i ∈ Sfin := by
+        rw [hSfin, Set.Finite.mem_toFinset]
+        exact h1
+      have := Finset.le_sup (f := g) himem
+      rw [← hi₀]
+      exact this
+  exact ⟨i₀, le_antisymm (ciSup_le hdom) (le_ciSup hB i₀), hdom⟩
+
+variable {k : ℕ}
+
+/-- **The radius-1 Gauss norm** on multivariate power series over `A^r`
+(Kedlaya (3.1.1) with all `ρᵢ = 1`). -/
+def gaussNormRPS {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) : NNReal :=
+  ⨆ s : Fin k →₀ ℕ, Valued.v ((MvPowerSeries.coeff s f :
+    ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+
+/-- Restricted series have attained Gauss norm (at some coefficient), provided they
+are nonzero. -/
+theorem exists_gaussNormRPS_eq {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) :
+    ∃ s₀ : Fin k →₀ ℕ, gaussNormRPS p F ϖ hρ0 hρ1 f
+        = Valued.v ((MvPowerSeries.coeff s₀ f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+      ∧ ∀ s, Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        ≤ Valued.v ((MvPowerSeries.coeff s₀ f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) := by
+  have hfin := (isRestricted_iff_valued p F ϖ f).mp hf
+  have hne : gaussNormRPS p F ϖ hρ0 hρ1 f ≠ 0 := by
+    intro h0
+    refine hf0 (MvPowerSeries.ext fun s => ?_)
+    have h1 : Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) = 0 := by
+      have hB : BddAbove (Set.range (fun s : Fin k →₀ ℕ =>
+          Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1))) := by
+        refine ⟨max 1 (((hfin 1 one_pos).toFinset).sup (fun s =>
+          Valued.v ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1))), ?_⟩
+        rintro t ⟨s, rfl⟩
+        rcases le_or_gt (Valued.v ((MvPowerSeries.coeff s f :
+            ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) 1 with h1 | h1
+        · exact le_max_of_le_left h1
+        · refine le_max_of_le_right (Finset.le_sup
+            (f := fun s => Valued.v ((MvPowerSeries.coeff s f :
+              ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) ?_)
+          rw [Set.Finite.mem_toFinset]
+          exact h1
+      have h2 := le_ciSup hB s
+      rw [show (⨆ s : Fin k →₀ ℕ, Valued.v ((MvPowerSeries.coeff s f :
+          ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1))
+        = gaussNormRPS p F ϖ hρ0 hρ1 f from rfl, h0] at h2
+      exact le_antisymm h2 zero_le
+    have h3 : ((MvPowerSeries.coeff s f : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) = 0 :=
+      (Valuation.zero_iff (Valued.v :
+        Valuation (hatK p F hρ0 hρ1) NNReal)).mp h1
+    rw [map_zero]
+    exact Subtype.ext h3
+  obtain ⟨s₀, hs₀, hdom⟩ := exists_iSup_eq_of_finite_above hfin hne
+  exact ⟨s₀, hs₀, hdom⟩
+
 end FarguesFontaine
 
 end
