@@ -1587,6 +1587,163 @@ theorem valued_sub_sub_PhiHatK_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     rw [Valuation.map_sub_swap]
     exact hN₀
 
+/-- **The (2.8.2) coefficient analysis**: past the working index `N`, the pointwise
+difference between the coordinates of `y` and the quotient convolution is
+`c`-small — the exact cancellation at `j = m` removes `yₙ`, the `j > m` terms are
+`ε`-damped by `x`, and the `j < m` terms are `c`-damped by the `N`-property of `y`. -/
+theorem gaussTerm_sub_convF_divStep_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) {ε c : NNReal} {N : ℕ}
+    (hεx : ∀ j, degAr p F ϖ hρ0 hρ1 x < j
+      → ρ ^ j * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x j)
+        ≤ ε * Valued.v x)
+    (hw1 : ε * Valued.v y ≤ c)
+    (hmN : degAr p F ϖ hρ0 hρ1 x ≤ N)
+    (hw2 : ∀ n, N < n → ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 y n) ≤ c) :
+    ∀ n, N ≤ n → ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 y n
+        - convF F (fun k => teichCoeffAr p F ϖ hρ0 hρ1 y
+            (k + degAr p F ϖ hρ0 hρ1 x)
+          / teichCoeffAr p F ϖ hρ0 hρ1 x (degAr p F ϖ hρ0 hρ1 x))
+          (teichCoeffAr p F ϖ hρ0 hρ1 x) n) ≤ c := by
+  intro n hn
+  set m := degAr p F ϖ hρ0 hρ1 x with hm
+  obtain ⟨hxattain, -⟩ := degAr_spec p F ϖ hx hx0
+  rw [← hm] at hxattain
+  have hvx0 : Valued.v x ≠ 0 :=
+    (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0
+  have hvxpos : 0 < Valued.v x := pos_iff_ne_zero.mpr hvx0
+  have hxm0 : perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m) ≠ 0 := by
+    intro h0
+    exact hvx0 (hxattain.trans (by rw [h0, mul_zero]))
+  have hmn : m ≤ n := le_trans hmN hn
+  -- the exact cancellation: the k = n - m term of the convolution is yₙ
+  have hsplit : convF F (fun k => teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+      / teichCoeffAr p F ϖ hρ0 hρ1 x m) (teichCoeffAr p F ϖ hρ0 hρ1 x) n
+      = teichCoeffAr p F ϖ hρ0 hρ1 y n
+        + ∑ k ∈ (Finset.range (n + 1)).erase (n - m),
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k) := by
+    have hmem : n - m ∈ Finset.range (n + 1) :=
+      Finset.mem_range.mpr (by omega)
+    rw [convF, ← Finset.add_sum_erase _ _ hmem]
+    congr 1
+    have hidx1 : n - m + m = n := by omega
+    have hidx2 : n - (n - m) = m := by omega
+    rw [hidx1, hidx2, div_mul_cancel₀ _ (fun h0 => hxm0 (by rw [h0, map_zero]))]
+  rw [hsplit]
+  have hcancel : teichCoeffAr p F ϖ hρ0 hρ1 y n
+      - (teichCoeffAr p F ϖ hρ0 hρ1 y n
+        + ∑ k ∈ (Finset.range (n + 1)).erase (n - m),
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))
+      = -(∑ k ∈ (Finset.range (n + 1)).erase (n - m),
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k)) := by
+    ring
+  rw [hcancel, Valuation.map_neg]
+  -- bound the erased sum termwise
+  rcases Finset.eq_empty_or_nonempty ((Finset.range (n + 1)).erase (n - m))
+    with hemp | hne
+  · rw [hemp, Finset.sum_empty, Valuation.map_zero, mul_zero]
+    exact zero_le
+  · have h1 : perfectoidValuation p F
+        (∑ k ∈ (Finset.range (n + 1)).erase (n - m),
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))
+        ≤ ((Finset.range (n + 1)).erase (n - m)).sup
+          (fun k => perfectoidValuation p F
+            ((teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+              / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+            * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))) :=
+      Valuation.map_sum_le _ fun k hk => Finset.le_sup
+        (f := fun k => perfectoidValuation p F
+          ((teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+            / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k))) hk
+    refine le_trans (mul_le_mul_of_nonneg_left h1 zero_le) ?_
+    obtain ⟨k₀, hk₀mem, hk₀⟩ := Finset.exists_mem_eq_sup _ hne
+      (fun k => perfectoidValuation p F
+        ((teichCoeffAr p F ϖ hρ0 hρ1 y (k + m)
+          / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+        * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k)))
+    rw [hk₀]
+    have hk₀ne : k₀ ≠ n - m := Finset.ne_of_mem_erase hk₀mem
+    have hk₀n : k₀ ≤ n := Nat.lt_succ_iff.mp
+      (Finset.mem_range.mp (Finset.mem_of_mem_erase hk₀mem))
+    -- multiply out the leading denominator: the two-sided bound at scale v(x)
+    have hstep : ρ ^ n * perfectoidValuation p F
+        ((teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)
+          / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+        * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)) * Valued.v x
+        = (ρ ^ (k₀ + m) * perfectoidValuation p F
+            (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+          * (ρ ^ (n - k₀) * perfectoidValuation p F
+            (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀))) := by
+      rw [Valuation.map_mul, map_div₀, hxattain]
+      rw [show ρ ^ (k₀ + m) = ρ ^ k₀ * ρ ^ m from by rw [pow_add]]
+      rw [show ρ ^ n = ρ ^ k₀ * ρ ^ (n - k₀) from by
+        rw [← pow_add, Nat.add_sub_cancel' hk₀n]]
+      rw [div_eq_mul_inv]
+      have hcancel2 : perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹ = 1 :=
+        mul_inv_cancel₀ hxm0
+      calc ρ ^ k₀ * ρ ^ (n - k₀) * (perfectoidValuation p F
+            (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m))
+            * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹
+            * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+          * (ρ ^ m * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))
+          = (ρ ^ k₀ * ρ ^ m * perfectoidValuation p F
+              (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+            * (ρ ^ (n - k₀) * perfectoidValuation p F
+              (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+            * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+              * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹) := by
+            ring
+        _ = (ρ ^ k₀ * ρ ^ m * perfectoidValuation p F
+              (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+            * (ρ ^ (n - k₀) * perfectoidValuation p F
+              (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀))) := by
+            rw [hcancel2, mul_one]
+    -- the two cases, both at scale c·v(x)
+    have hbound : (ρ ^ (k₀ + m) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+        * (ρ ^ (n - k₀) * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+        ≤ c * Valued.v x := by
+      rcases lt_or_gt_of_ne hk₀ne with hcase | hcase
+      · -- k₀ < n - m, so n - k₀ > m: the x-term is ε-damped
+        have hj : m < n - k₀ := by omega
+        have h1 : (ρ ^ (k₀ + m) * perfectoidValuation p F
+              (teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)))
+            * (ρ ^ (n - k₀) * perfectoidValuation p F
+              (teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)))
+            ≤ Valued.v y * (ε * Valued.v x) :=
+          mul_le_mul (gaussTerm_teichCoeffAr_le' p F ϖ hy (k₀ + m))
+            (hεx (n - k₀) hj) zero_le zero_le
+        have h2 : Valued.v y * (ε * Valued.v x)
+            = (ε * Valued.v y) * Valued.v x := by
+          ring
+        rw [h2] at h1
+        exact le_trans h1 (mul_le_mul_of_nonneg_right hw1 zero_le)
+      · -- k₀ > n - m, so k₀ + m > n ≥ N: the y-term is c-damped
+        have hk : N < k₀ + m := by omega
+        exact mul_le_mul (hw2 (k₀ + m) hk)
+          (gaussTerm_teichCoeffAr_le' p F ϖ hx (n - k₀)) zero_le zero_le
+    have hfinal : ρ ^ n * perfectoidValuation p F
+        ((teichCoeffAr p F ϖ hρ0 hρ1 y (k₀ + m)
+          / teichCoeffAr p F ϖ hρ0 hρ1 x m)
+        * teichCoeffAr p F ϖ hρ0 hρ1 x (n - k₀)) * Valued.v x
+        ≤ c * Valued.v x := by
+      rw [hstep]
+      exact hbound
+    exact le_of_mul_le_mul_right hfinal hvxpos
+
 end FarguesFontaine
 
 end
