@@ -261,6 +261,39 @@ theorem exists_representsYRho (D : GaloisRepData N) [Fact (1 < N)] (hN : 3 ≤ (
     dρ hρfin hρet
 
 open scoped FintypeCatDiscrete in
+/-- **[re-plumb brick 3c]** `exists_representsYRho`, run on the **level-3** rigidifier: the
+same construction with the (axiom-clean) `GL₂(𝔽₃)`-cover in place of the Legendre cover, so
+that nothing in the cone depends on the quarantined `exists_scaleTorsorData`. -/
+theorem exists_representsYRho_levelThree (D : GaloisRepData N) [Fact (1 < N)]
+    (hN : 3 ≤ (N : ℤ)) :
+    ∃ (Y : Scheme.{0}) (sY : Y ⟶ Spec (CommRingCat.of ℚ)), RepresentsYRho D Y sY := by
+  have h3 : IsUnit (3 : CommRingCat.of ℚ) := by
+    show IsUnit (3 : ℚ)
+    exact isUnit_iff_ne_zero.mpr (by norm_num)
+  -- the universal `ℰ₃` object represents the naive level-3 problem
+  have hL3 : (universalE3Obj (CommRingCat.of ℚ)).curve.IsNaiveFullLevel 3
+      (universalE3P (CommRingCat.of ℚ)) (universalE3Q (CommRingCat.of ℚ)) :=
+    ⟨⟨by exact_mod_cast three_zsmul_universalE3P_of_isUnit (CommRingCat.of ℚ) h3,
+      by exact_mod_cast three_zsmul_universalE3Q_of_isUnit (CommRingCat.of ℚ) h3⟩,
+      fun k _ _ t x hx => universalE3_generation (CommRingCat.of ℚ) h3 k t x hx⟩
+  have hArb3 : ∀ (X : EllObj (CommRingCat.of ℚ)) (L : X.curve.FullLevelPt 3),
+      IsE3Datum X L := fun X L =>
+    isE3Datum_of_bridges X h3 L
+      (fun V Pr hM => bridgeP_holds X h3 L V Pr hM)
+      (fun V Pr ha₂ ha₄ ha₆ hMP p q hMQ =>
+        bridgeQ_holds X h3 L V Pr ha₂ ha₄ ha₆ hMP p q hMQ)
+  have hinv' : IsUnit ((3 : ℕ) : CommRingCat.of ℚ) := by rwa [Nat.cast_ofNat]
+  obtain ⟨X, -, ⟨r⟩⟩ := rhoProblem_exists_representableBy_isAffine D hN
+  obtain ⟨dρ, hρfin, hρet⟩ := rhoProblem_exists_relRepData_finiteEtale D
+    (universalE3Obj (CommRingCat.of ℚ))
+  obtain ⟨T3⟩ := exists_levelThreeTorsorData (CommRingCat.of ℚ) h3 X
+  exact ⟨X.base, X.structMap,
+    representsYRho_of_smooth D hN r
+      (rhoProblem_smoothOfRelativeDimension_one_levelThree D hN r
+        (naiveLevelThreeRepresentableBy (CommRingCat.of ℚ) h3 hL3 hArb3)
+        T3.toRelRepData T3.finite T3.etale T3.surjective dρ hρfin hρet)⟩
+
+open scoped FintypeCatDiscrete in
 /-- **(T-F4 = Buzzard p. 33, the main statement — `yRho_representable`)** The twisted
 modular curve exists: for `N ≥ 3` some `(Y, sY)` represents the ρ-level moduli problem.
 This is the hypothesis-free form of `exists_representsYRho`. -/
@@ -270,14 +303,7 @@ theorem yRho_representable' (D : GaloisRepData N) (hN : 3 ≤ (N : ℤ)) :
     refine ⟨?_⟩
     have h1 : (1 : ℤ) < (N : ℤ) := lt_of_lt_of_le (by norm_num) hN
     exact_mod_cast h1
-  have hR : IsUnit (2 : CommRingCat.of ℚ) := by
-    show IsUnit (2 : ℚ)
-    exact isUnit_iff_ne_zero.mpr (by norm_num)
-  exact exists_representsYRho D hN hR
-    ⟨⟨two_zsmul_universalLegendreP (CommRingCat.of ℚ) hR,
-      two_zsmul_universalLegendreQ (CommRingCat.of ℚ) hR⟩,
-      fun k _ _ t x hx =>
-        universalLegendre_generation (CommRingCat.of ℚ) hR k t x hx⟩
+  exact exists_representsYRho_levelThree D hN
 
 end ModularCurves
 
