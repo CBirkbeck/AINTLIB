@@ -767,7 +767,10 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
       green): the (≥)-direction CANNOT go through approximant-attainment transfer —
       attaining indices are NOT uniformly bounded over the filter (the p^m[ϖ^{-m/2}]
       denominator demon again), and per-index limits control only finitely many terms.
-      CORRECT ORDER: (5b-i) **finite-Teichmüller-sum density**: the subring of finite
+      CORRECT ORDER: (5b-i) DONE (alocTeich + alocToWittF_alocTeich + wAloc_alocTeich +
+      exists_finite_teichmuller_sum_close, all axiom-clean; the h2gen-pattern:
+      generalize auxiliary inductions over a FRESH variable, never over an index the
+      context mentions). Was: **finite-Teichmüller-sum density**: the subring of finite
       sums Σ_{n<N} pⁿ·[cₙ] (cₙ ∈ F) is dense in Aloc for every wAloc (CORE-2 on the
       Ainf-numerator + [ϖ]^{-k}-scaling — tails of prefixes are ρᴺ-small), hence its
       image is dense in ArSub; define `alocTeich : F → Aloc` (choice: Tate absorption

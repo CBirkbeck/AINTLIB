@@ -797,6 +797,172 @@ theorem alocToWittF_alocTeich (c : F) :
     rw [happ, ← map_mul]
   exact hunit.mul_right_cancel hgoal
 
+/-- The value of `alocTeich c` is `|c|`. -/
+theorem wAloc_alocTeich {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (c : F) :
+    wAloc p F ϖ hρ0 hρ1 (alocTeich p F ϖ c) = perfectoidValuation p F c := by
+  set k := (exists_mul_pow_isPowerBounded p F ϖ c).choose with hkdef
+  set a : OF F := ⟨c * ((ϖ.val : Fˣ) : F) ^ k,
+    (exists_mul_pow_isPowerBounded p F ϖ c).choose_spec⟩ with hadef
+  set y : Submonoid.powers (teichPi p F ϖ) :=
+    ⟨teichPi p F ϖ ^ k, k, rfl⟩ with hydef
+  set cϖ : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+    with hcϖ
+  have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+    fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hcϖ0 : 0 < cϖ := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  have hspec : alocTeich p F ϖ c * algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F)
+      = algebraMap (Ainf p F) (Aloc p F ϖ) (WittVector.teichmuller p a) := by
+    rw [alocTeich]
+    exact IsLocalization.mk'_spec (Aloc p F ϖ) _ _
+  have happ := congrArg (wAloc p F ϖ hρ0 hρ1) hspec
+  rw [map_mul, wAloc_algebraMap, wAloc_algebraMap] at happ
+  have hyval : gaussValue p F ρ (y : Ainf p F) = cϖ ^ k := by
+    have hy' : (y : Ainf p F) = teichPi p F ϖ ^ k := rfl
+    rw [hy', show gaussValue p F ρ (teichPi p F ϖ ^ k)
+      = (gaussValue p F ρ (teichPi p F ϖ)) ^ k from map_pow (gaussVal p F hρ0 hρ1) _ k,
+      show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+        from rfl, gaussValue_teichmuller p F hρ1.le]
+  have haval : gaussValue p F ρ (WittVector.teichmuller p a)
+      = perfectoidValuation p F c * cϖ ^ k := by
+    rw [gaussValue_teichmuller p F hρ1.le]
+    have hacoe : ((a : OF F) : F) = c * ((ϖ.val : Fˣ) : F) ^ k := rfl
+    rw [hacoe, Valuation.map_mul, map_pow]
+    rfl
+  rw [hyval, haval] at happ
+  exact mul_right_cancel₀ (pow_pos hcϖ0 k).ne' happ
+
+/-- **Finite-Teichmüller-sum density**: every `Aloc`-element is `wAloc`-approximated
+by finite sums `Σ_{n<N} pⁿ·alocTeich(bₙ)` — the tails of the numerator's Teichmüller
+expansion are `ρᴺ`-small, uniformly scaled by the denominator. -/
+theorem exists_finite_teichmuller_sum_close {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (u : Aloc p F ϖ) {ε : NNReal} (hε : 0 < ε) :
+    ∃ (N : ℕ) (b : ℕ → F),
+      wAloc p F ϖ hρ0 hρ1 (u - ∑ n ∈ Finset.range N,
+        (p : Aloc p F ϖ) ^ n * alocTeich p F ϖ (b n)) ≤ ε := by
+  obtain ⟨⟨A, y⟩, hu⟩ := IsLocalization.surj (M := Submonoid.powers (teichPi p F ϖ)) u
+  change u * algebraMap (Ainf p F) (Aloc p F ϖ) (y : Ainf p F)
+    = algebraMap (Ainf p F) (Aloc p F ϖ) A at hu
+  obtain ⟨k, hk⟩ := y.2
+  have hk' : teichPi p F ϖ ^ k = (y : Ainf p F) := hk
+  set cϖ : NNReal := perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+    with hcϖ
+  have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+    fun h => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext h)
+  have hcϖ0 : 0 < cϖ := pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  -- choose N with (cϖ⁻¹)^k · ρ^N ≤ ε
+  obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one
+    (mul_pos hε (pow_pos hcϖ0 k)) hρ1
+  set b : ℕ → F := fun n =>
+    ((teichCoeff p F A n : OF F) : F) * ((((ϖ.val : Fˣ) : F)) ^ k)⁻¹ with hb
+  refine ⟨N, b, ?_⟩
+  set t : Aloc p F ϖ := ∑ n ∈ Finset.range N,
+    (p : Aloc p F ϖ) ^ n * alocTeich p F ϖ (b n) with ht
+  set ϖFk : F := (((ϖ.val : Fˣ) : F)) ^ k with hϖFk
+  have hϖFkne : ϖFk ≠ 0 := pow_ne_zero _ (ϖ.val : Fˣ).ne_zero
+  -- the W(F)-image of the difference, multiplied by [ϖF^k], is the p^N-tail of A
+  obtain ⟨z, hz⟩ := exists_eq_sum_teichCoeff_add p F A N
+  have himgu : alocToWittF p F ϖ u *
+      WittVector.teichmuller p ϖFk
+      = WittVector.map ((powerBoundedSubring.toSubring F).subtype) A := by
+    have happ := congrArg (alocToWittF p F ϖ) hu
+    rw [map_mul, alocToWittF_algebraMap, alocToWittF_algebraMap] at happ
+    have hyW : WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+        ((y : Ainf p F)) = WittVector.teichmuller p ϖFk := by
+      have hy' : (y : Ainf p F) = teichPi p F ϖ ^ k := hk'.symm
+      rw [hy', map_pow]
+      have hone : WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+          (teichPi p F ϖ) = WittVector.teichmuller p (((ϖ.val : Fˣ) : F)) := by
+        rw [show teichPi p F ϖ = WittVector.teichmuller p (PseudoUniformizer.toOF F ϖ)
+          from rfl, WittVector.map_teichmuller]
+        rfl
+      rw [hone, ← map_pow]
+    rw [hyW] at happ
+    exact happ
+  have himgt : alocToWittF p F ϖ t * WittVector.teichmuller p ϖFk
+      = ∑ n ∈ Finset.range N, (p : WittVector p F) ^ n *
+          WittVector.teichmuller p (((teichCoeff p F A n : OF F) : F)) := by
+    rw [ht, map_sum, Finset.sum_mul]
+    refine Finset.sum_congr rfl fun n _ => ?_
+    rw [map_mul, map_pow, alocToWittF_alocTeich, map_natCast]
+    rw [mul_assoc, ← map_mul]
+    congr 2
+    rw [hb]
+    field_simp
+  have hdiffW : (alocToWittF p F ϖ (u - t)) * WittVector.teichmuller p ϖFk
+      = (p : WittVector p F) ^ N *
+        WittVector.map ((powerBoundedSubring.toSubring F).subtype) z := by
+    rw [map_sub, sub_mul, himgu, himgt]
+    have hmapA : WittVector.map ((powerBoundedSubring.toSubring F).subtype) A
+        = (∑ n ∈ Finset.range N, (p : WittVector p F) ^ n *
+            WittVector.teichmuller p (((teichCoeff p F A n : OF F) : F)))
+          + (p : WittVector p F) ^ N *
+            WittVector.map ((powerBoundedSubring.toSubring F).subtype) z := by
+      conv_lhs => rw [hz]
+      rw [map_add, map_sum, map_mul, map_pow, map_natCast]
+      refine congrArg₂ (· + ·) (Finset.sum_congr rfl fun n _ => ?_) rfl
+      rw [map_mul, WittVector.map_teichmuller, map_pow, map_natCast]
+      rw [mul_comm]
+      rfl
+    rw [hmapA]
+    ring
+  -- values: cancel cϖ^k and bound the tail
+  have hval : wAloc p F ϖ hρ0 hρ1 (u - t) * cϖ ^ k ≤ ρ ^ N := by
+    have h1 : gaussValueF p F ρ ((alocToWittF p F ϖ (u - t)) *
+        WittVector.teichmuller p ϖFk)
+        = cϖ ^ k * gaussValueF p F ρ (alocToWittF p F ϖ (u - t)) := by
+      rw [mul_comm (alocToWittF p F ϖ (u - t)) _, gaussValueF_teichmuller_mul]
+      congr 1
+      rw [hϖFk, map_pow]
+      rfl
+    have h2 : gaussValueF p F ρ ((p : WittVector p F) ^ N *
+        WittVector.map ((powerBoundedSubring.toSubring F).subtype) z) ≤ ρ ^ N := by
+      have hBz : BddAbove (Set.range (gaussTermF p F ρ
+          (WittVector.map ((powerBoundedSubring.toSubring F).subtype) z))) := by
+        refine ⟨1, ?_⟩
+        rintro s ⟨m, rfl⟩
+        rw [gaussTermF_map]
+        exact gaussTerm_le_one p F hρ1.le z m
+      have hzval : gaussValueF p F ρ
+          (WittVector.map ((powerBoundedSubring.toSubring F).subtype) z) ≤ 1 := by
+        rw [gaussValueF_map]
+        exact gaussValue_le_one p F hρ1.le z
+      have h2gen : ∀ M : ℕ,
+          BddAbove (Set.range (gaussTermF p F ρ ((p : WittVector p F) ^ M *
+            WittVector.map ((powerBoundedSubring.toSubring F).subtype) z)))
+          ∧ gaussValueF p F ρ ((p : WittVector p F) ^ M *
+              WittVector.map ((powerBoundedSubring.toSubring F).subtype) z) ≤ ρ ^ M := by
+        intro M
+        induction M with
+        | zero =>
+          constructor
+          · simpa using hBz
+          · simpa using hzval
+        | succ m ihm =>
+          obtain ⟨ihB, ihv⟩ := ihm
+          have hsplit : (p : WittVector p F) ^ (m + 1) *
+              WittVector.map ((powerBoundedSubring.toSubring F).subtype) z
+              = (p : WittVector p F) * ((p : WittVector p F) ^ m *
+                WittVector.map ((powerBoundedSubring.toSubring F).subtype) z) := by
+            ring
+          constructor
+          · rw [hsplit]
+            exact bddAbove_gaussTermF_p_mul p F ihB
+          · rw [hsplit, gaussValueF_p_mul p F ihB, pow_succ, mul_comm (ρ ^ m) ρ]
+            exact mul_le_mul_of_nonneg_left ihv zero_le
+      exact (h2gen N).2
+    have h3 := congrArg (gaussValueF p F ρ) hdiffW
+    rw [h1] at h3
+    rw [← gaussValueF_alocToWittF p F ϖ hρ0 hρ1 (u - t)]
+    calc gaussValueF p F ρ (alocToWittF p F ϖ (u - t)) * cϖ ^ k
+        = cϖ ^ k * gaussValueF p F ρ (alocToWittF p F ϖ (u - t)) := mul_comm _ _
+      _ = gaussValueF p F ρ ((p : WittVector p F) ^ N *
+            WittVector.map ((powerBoundedSubring.toSubring F).subtype) z) := h3
+      _ ≤ ρ ^ N := h2
+  have hεc : ρ ^ N < ε * cϖ ^ k := hN
+  have hfinal : wAloc p F ϖ hρ0 hρ1 (u - t) * cϖ ^ k ≤ ε * cϖ ^ k :=
+    hval.trans hεc.le
+  exact le_of_mul_le_mul_right hfinal (pow_pos hcϖ0 k)
+
 end FarguesFontaine
 
 end
