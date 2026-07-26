@@ -469,25 +469,18 @@ theorem sheafificationW_of_bijective_on_cover {A B : X.PresheafOfModules}
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
-/-- **[PAIR-3 / CMP-LOC]** Being an isomorphism of `𝒪ₓ`-modules is Zariski-local: a
-morphism whose restriction to every member of an open cover is an isomorphism is an
-isomorphism. -/
-theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
+/-- **[CMP-LOC, section form]** A morphism of `𝒪ₓ`-modules that is *bijective on every open
+inside a member of a cover* is an isomorphism.
+
+This is the engine of `isIso_of_isIso_restrict`, factored out so that a **global** morphism
+assembled by gluing sections can be tested directly, without first manufacturing cover-local
+isomorphisms of restricted modules. -/
+theorem isIso_of_bijective_app_on_cover {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
     (U : ι → X.Opens) (hU : iSup U = ⊤)
-    (h : ∀ i, IsIso ((restrictFunctor (U i).ι).map g)) : IsIso g := by
-  -- the section maps inside cover members are bijective
-  have happ : ∀ (i : ι) (W : X.Opens), W ≤ U i → IsIso (g.app W) := by
-    intro i W hW
-    have h1 := Hom.isIso_iff_isIso_app.mp (h i) ((U i).ι ⁻¹ᵁ W)
-    have h2 : (U i).ι ''ᵁ ((U i).ι ⁻¹ᵁ W) = W := by
-      rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι,
-        inf_eq_right.mpr hW]
-    rw [← h2]
-    exact h1
-  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g.val := by
-    refine sheafificationW_of_bijective_on_cover g.val U hU (fun i W hW => ?_)
-    haveI := happ i W hW
-    exact (ConcreteCategory.isIso_iff_bijective (g.app W)).mp inferInstance
+    (hbij : ∀ (i : ι) (W : X.Opens), W ≤ U i → Function.Bijective (g.app W)) :
+    IsIso g := by
+  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g.val :=
+    sheafificationW_of_bijective_on_cover g.val U hU hbij
   rw [PresheafOfModules.sheafificationW_iff] at hw
   have hnat := (PresheafOfModules.sheafificationAdjunction
     (𝟙 X.ringCatSheaf.obj)).counit.naturality g
@@ -499,6 +492,22 @@ theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
   rw [hg]
   haveI : IsIso ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val) := hw
   infer_instance
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[PAIR-3 / CMP-LOC]** Being an isomorphism of `𝒪ₓ`-modules is Zariski-local: a
+morphism whose restriction to every member of an open cover is an isomorphism is an
+isomorphism. -/
+theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
+    (U : ι → X.Opens) (hU : iSup U = ⊤)
+    (h : ∀ i, IsIso ((restrictFunctor (U i).ι).map g)) : IsIso g := by
+  refine isIso_of_bijective_app_on_cover g U hU (fun i W hW => ?_)
+  have h1 := Hom.isIso_iff_isIso_app.mp (h i) ((U i).ι ⁻¹ᵁ W)
+  have h2 : (U i).ι ''ᵁ ((U i).ι ⁻¹ᵁ W) = W := by
+    rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι,
+      inf_eq_right.mpr hW]
+  haveI : IsIso (g.app W) := by rw [← h2]; exact h1
+  exact (ConcreteCategory.isIso_iff_bijective (g.app W)).mp inferInstance
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in

@@ -87,6 +87,7 @@ import ModularCurves.ForMathlib.QuotientTorsor
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.Moduli.Stack
 import ModularCurves.Picard.DivisorClass
+import ModularCurves.Picard.GlueTrivialization
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
