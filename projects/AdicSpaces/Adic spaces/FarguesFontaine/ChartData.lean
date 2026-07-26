@@ -510,6 +510,82 @@ def blocEquivAwayChartS (b : ℕ) (hb : 0 < b) :
   (IsLocalization.algEquiv (Submonoid.powers (chartS p F ϖ 1 b))
     (Localization.Away (chartS p F ϖ 1 b)) (Bloc p F ϖ)).toRingEquiv
 
+variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+
+/-- The first chart fraction `[ϖ]/p ∈ Bloc` (the image of `[ϖ]^{b+1}/s`). -/
+def chartFracPi : Bloc p F ϖ :=
+  algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ)
+    * ↑(isUnit_p_image p F ϖ).unit⁻¹
+
+/-- The second chart fraction `p^a/[ϖ]^b ∈ Bloc` (the image of `p^{a+1}/s`). -/
+def chartFracP (a b : ℕ) : Bloc p F ϖ :=
+  algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ a)
+    * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)) ^ b
+
+/-- `wI([ϖ]/p) ≤ 1` exactly when both radii are at least `|ϖ|` (the left-endpoint
+condition of the chart window `κ ≥ 1`). -/
+theorem wI_chartFracPi_le_one
+    (h1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (h2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (chartFracPi p F ϖ)) ≤ 1 := by
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK, chartFracPi]
+  have hval : ∀ (ρ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1),
+      wLoc p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ)
+        * ↑(isUnit_p_image p F ϖ).unit⁻¹)
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) * ρ⁻¹ := by
+    intro ρ hρ0 hρ1
+    rw [Valuation.map_mul, wLoc_algebraMap, wLoc_p_inv p F ϖ hρ0 hρ1, teichPi,
+      gaussValue_teichmuller p F hρ1.le]
+  rw [hval ρ₁ hρ₁0 hρ₁1, hval ρ₂ hρ₂0 hρ₂1]
+  refine max_le ?_ ?_
+  · calc perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) * ρ₁⁻¹
+        ≤ ρ₁ * ρ₁⁻¹ := mul_le_mul_of_nonneg_right h1 zero_le
+      _ = 1 := mul_inv_cancel₀ hρ₁0.ne'
+  · calc perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) * ρ₂⁻¹
+        ≤ ρ₂ * ρ₂⁻¹ := mul_le_mul_of_nonneg_right h2 zero_le
+      _ = 1 := mul_inv_cancel₀ hρ₂0.ne'
+
+/-- `wI(p^a/[ϖ]^b) ≤ 1` exactly when `ρ^a ≤ |ϖ|^b` at both radii (the
+right-endpoint condition of the chart window `κ ≤ a/b`). -/
+theorem wI_chartFracP_le_one (a b : ℕ)
+    (h1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (h2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (chartFracP p F ϖ a b)) ≤ 1 := by
+  have hϖne : ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 :=
+    fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+  have hϖ0 : 0 < perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) :=
+    pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr hϖne)
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK, chartFracP]
+  have hval : ∀ (ρ : NNReal) (hρ0 : 0 < ρ) (hρ1 : ρ < 1),
+      wLoc p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ a)
+        * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)) ^ b)
+      = ρ ^ a * ((perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ b := by
+    intro ρ hρ0 hρ1
+    rw [Valuation.map_mul, Valuation.map_pow, wLoc_algebraMap,
+      show ((p : Ainf p F) ^ a) = (p : Ainf p F) ^ a * 1 from (mul_one _).symm,
+      gaussValue_p_pow_mul p F hρ1.le a 1, gaussValue_one p F hρ1.le, mul_one,
+      wLoc_AlocToBloc p F ϖ hρ0 hρ1, wAloc_teichPiInvAloc p F ϖ hρ0 hρ1]
+  rw [hval ρ₁ hρ₁0 hρ₁1, hval ρ₂ hρ₂0 hρ₂1]
+  have hkey : ∀ ρa : NNReal, ρa ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b →
+      ρa * ((perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F))⁻¹) ^ b ≤ 1 := by
+    intro ρa h
+    rw [inv_pow]
+    calc ρa * (perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)⁻¹
+        ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b
+          * (perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)⁻¹ :=
+          mul_le_mul_of_nonneg_right h zero_le
+      _ = 1 := mul_inv_cancel₀ (pow_pos hϖ0 b).ne'
+  exact max_le (hkey _ h1) (hkey _ h2)
+
 end FarguesFontaine
 
 end
