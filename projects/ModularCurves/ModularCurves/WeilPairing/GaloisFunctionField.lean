@@ -225,4 +225,29 @@ theorem ord_P_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq L] [I
   unfold HasseWeil.Curves.SmoothPlaneCurve.ord_P
   rw [pointValuation_galoisFunctionFieldEquiv W σ (galoisSmoothPoint W σ P) P rfl rfl g]
 
+/-- `galoisSmoothPoint` is injective (its coordinates are `σ`-images). -/
+theorem galoisSmoothPoint_injective {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    Function.Injective (galoisSmoothPoint W σ) := by
+  intro P Q h
+  refine HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.ext ?_ ?_
+  · exact σ.injective (congrArg HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.x h)
+  · exact σ.injective (congrArg HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.y h)
+
+/-- **(M1b-3b-iv)** The affine divisor transports by relabelling the points along `σ`:
+`div(σ·g)` at `σ·P` is `div(g)` at `P`. -/
+theorem divisorOf_galoisFunctionFieldEquiv_apply {L : Type v} [Field L] [DecidableEq L]
+    [IsAlgClosed L] [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (g : (W.baseChange L).toAffine.FunctionField)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    (⟨(W.baseChange L).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).divisorOf
+          (galoisFunctionFieldEquiv W σ g) (galoisSmoothPoint W σ P) =
+      (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).divisorOf g P := by
+  show ((⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).ord_P (galoisSmoothPoint W σ P)
+        (galoisFunctionFieldEquiv W σ g)).untopD 0 = _
+  rw [ord_P_galoisFunctionFieldEquiv W σ P g]
+  rfl
+
 end ModularCurves
