@@ -652,6 +652,83 @@ theorem closure_chart_le_blocUnitBall (a b : ℕ)
     · rw [Set.mem_singleton_iff.mp hx]
       exact wI_chartFracP_le_one p F ϖ a b hr1 hr2
 
+/-- Under the localization identification, the fraction `[ϖ]^{b+1}/s` is `[ϖ]/p`. -/
+theorem blocEquiv_divByS_teichPi (b : ℕ) (hb : 0 < b) :
+    blocEquivAwayChartS p F ϖ b hb
+        (divByS (teichPi p F ϖ ^ (b + 1)) (chartS p F ϖ 1 b))
+      = chartFracPi p F ϖ := by
+  letI := isLocalization_chartS_Bloc p F ϖ b hb
+  rw [blocEquivAwayChartS, divByS]
+  rw [show (IsLocalization.algEquiv (Submonoid.powers (chartS p F ϖ 1 b))
+      (Localization.Away (chartS p F ϖ 1 b)) (Bloc p F ϖ)).toRingEquiv
+      (IsLocalization.mk' (Localization.Away (chartS p F ϖ 1 b))
+        (teichPi p F ϖ ^ (b + 1))
+        (⟨chartS p F ϖ 1 b, ⟨1, pow_one _⟩⟩ : Submonoid.powers (chartS p F ϖ 1 b)))
+      = IsLocalization.mk' (Bloc p F ϖ) (teichPi p F ϖ ^ (b + 1))
+        (⟨chartS p F ϖ 1 b, ⟨1, pow_one _⟩⟩ : Submonoid.powers (chartS p F ϖ 1 b))
+    from IsLocalization.algEquiv_mk' _ _]
+  rw [IsLocalization.mk'_eq_iff_eq_mul]
+  rw [chartFracPi, chartS, pow_one]
+  have hvp : algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F))
+      * ↑(isUnit_p_image p F ϖ).unit⁻¹ = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.mul_inv
+    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
+  calc algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ (b + 1))
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ b) := by
+        rw [← map_mul, ← pow_succ']
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ)
+        * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F))
+          * ↑(isUnit_p_image p F ϖ).unit⁻¹)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ b) := by
+        rw [hvp, mul_one]
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ)
+        * ↑(isUnit_p_image p F ϖ).unit⁻¹
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) * teichPi p F ϖ ^ b) := by
+        rw [map_mul]
+        ring
+
+/-- Under the localization identification, the fraction `p^{a+1}/s` is `p^a/[ϖ]^b`. -/
+theorem blocEquiv_divByS_p (a b : ℕ) (hb : 0 < b) :
+    blocEquivAwayChartS p F ϖ b hb
+        (divByS ((p : Ainf p F) ^ (a + 1)) (chartS p F ϖ 1 b))
+      = chartFracP p F ϖ a b := by
+  letI := isLocalization_chartS_Bloc p F ϖ b hb
+  rw [blocEquivAwayChartS, divByS]
+  rw [show (IsLocalization.algEquiv (Submonoid.powers (chartS p F ϖ 1 b))
+      (Localization.Away (chartS p F ϖ 1 b)) (Bloc p F ϖ)).toRingEquiv
+      (IsLocalization.mk' (Localization.Away (chartS p F ϖ 1 b))
+        ((p : Ainf p F) ^ (a + 1))
+        (⟨chartS p F ϖ 1 b, ⟨1, pow_one _⟩⟩ : Submonoid.powers (chartS p F ϖ 1 b)))
+      = IsLocalization.mk' (Bloc p F ϖ) ((p : Ainf p F) ^ (a + 1))
+        (⟨chartS p F ϖ 1 b, ⟨1, pow_one _⟩⟩ : Submonoid.powers (chartS p F ϖ 1 b))
+    from IsLocalization.algEquiv_mk' _ _]
+  rw [IsLocalization.mk'_eq_iff_eq_mul]
+  rw [chartFracP, chartS, pow_one]
+  have hvt : AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) = 1 := by
+    have h := AlocToBloc_teichPiInv_mul p F ϖ 1
+    rwa [pow_one, pow_one] at h
+  have hvtb : (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)) ^ b
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ b) = 1 := by
+    rw [map_pow, ← mul_pow, hvt, one_pow]
+  calc algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ (a + 1))
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ a)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) := by
+        rw [← map_mul, ← pow_succ]
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ a)
+        * ((AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)) ^ b
+          * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ ^ b))
+        * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) := by
+        rw [hvtb, mul_one]
+    _ = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F) ^ a)
+        * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ)) ^ b
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) * teichPi p F ϖ ^ b) := by
+        rw [map_mul]
+        ring
+
 end FarguesFontaine
 
 end
