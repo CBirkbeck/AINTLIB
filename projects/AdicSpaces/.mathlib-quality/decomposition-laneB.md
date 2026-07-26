@@ -220,3 +220,11 @@ CHECK whether Lane B can run entirely on the ρ'-uniform subring
 UNNECESSARY for T904–T912: Kedlaya §2–§3 for A^r at radius ρ could be replaced by
 working with the pair (ρ, ρ') from the start, matching the B^I-two-norm structure
 that T908+ needs anyway. EVALUATE FIRST next session — it could save weeks.
+
+### ρ'-dodge prerequisites (design check, same session)
+The two-radius carrier needs closure under · with value control, i.e. the F-port of
+SUBMULTIPLICATIVITY `gaussValueF_mul_le` (boundedness-threaded), which in turn needs
+the F-port of `exists_iter_split`. Both are mechanical replays of the Ainf-proofs
+(double-prefix + archimedean tail; the le_one-bounds become the boundedness
+hypotheses, tails via `mul_gaussValueF_le_of_tail`). Port these first when evaluating
+the dodge. Addition-closure at both radii is already free (`gaussValueF_add_le`).
