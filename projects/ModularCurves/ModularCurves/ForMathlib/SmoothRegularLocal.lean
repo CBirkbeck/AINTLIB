@@ -86,4 +86,113 @@ theorem one_le_height_of_isMaximal (k : Type u) [Field k] [IsAlgClosed k] {A : T
 
 end Height
 
+section RationalPoint
+
+/-- **(brick 5b)** Over an algebraically closed field, a maximal ideal of a finite-type
+algebra is the kernel of a `k`-point: `A ⧸ 𝔪 ≃ₐ[k] k` by Zariski's lemma
+(`finite_of_finite_type_of_isJacobsonRing`) plus algebraic closedness. -/
+noncomputable def residueAlgEquiv (k : Type u) [Field k] [IsAlgClosed k] {A : Type u}
+    [CommRing A] [Algebra k A] [Algebra.FiniteType k A] (𝔪 : Ideal A) [𝔪.IsMaximal] :
+    (A ⧸ 𝔪) ≃ₐ[k] k :=
+  letI : Field (A ⧸ 𝔪) := Ideal.Quotient.field 𝔪
+  haveI : Module.Finite k (A ⧸ 𝔪) := finite_of_finite_type_of_isJacobsonRing k (A ⧸ 𝔪)
+  haveI : Algebra.IsIntegral k (A ⧸ 𝔪) := Algebra.IsIntegral.of_finite k (A ⧸ 𝔪)
+  (AlgEquiv.ofBijective (Algebra.ofId k (A ⧸ 𝔪))
+    (IsAlgClosed.algebraMap_bijective_of_isIntegral (k := k) (K := A ⧸ 𝔪))).symm
+
+/-- **(brick 5b)** The `k`-point itself. -/
+noncomputable def pointAlgHom (k : Type u) [Field k] [IsAlgClosed k] {A : Type u}
+    [CommRing A] [Algebra k A] [Algebra.FiniteType k A] (𝔪 : Ideal A) [𝔪.IsMaximal] :
+    A →ₐ[k] k :=
+  (residueAlgEquiv k 𝔪).toAlgHom.comp (Ideal.Quotient.mkₐ k 𝔪)
+
+@[simp] theorem ker_pointAlgHom (k : Type u) [Field k] [IsAlgClosed k] {A : Type u}
+    [CommRing A] [Algebra k A] [Algebra.FiniteType k A] (𝔪 : Ideal A) [𝔪.IsMaximal] :
+    RingHom.ker (pointAlgHom k 𝔪).toRingHom = 𝔪 := by
+  ext a
+  simp only [RingHom.mem_ker, pointAlgHom, AlgHom.toRingHom_eq_coe, RingHom.coe_coe,
+    AlgHom.comp_apply, AlgEquiv.coe_algHom, Ideal.Quotient.mkₐ_eq_mk,
+    EmbeddingLike.map_eq_zero_iff, Ideal.Quotient.eq_zero_iff_mem]
+
+end RationalPoint
+
+section Regular
+
+/-- **(T-SMOOTH-REG brick 5 ★★)** The localization of a `k`-algebra standard smooth of
+relative dimension one at a maximal ideal is a **regular local ring** (`k` algebraically
+closed): its maximal ideal is principal (brick 4 + Nakayama) and its dimension is at least
+one (brick 5a). -/
+theorem isRegularLocalRing_localization_atPrime (k : Type u) [Field k] [IsAlgClosed k]
+    {A : Type u} [CommRing A] [Algebra k A]
+    [Algebra.IsStandardSmoothOfRelativeDimension 1 k A]
+    (𝔪 : Ideal A) [h𝔪 : 𝔪.IsMaximal] :
+    IsRegularLocalRing (Localization.AtPrime 𝔪) := by
+  classical
+  haveI : 𝔪.IsPrime := h𝔪.isPrime
+  haveI hss : Algebra.IsStandardSmooth k A :=
+    Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
+  haveI : Nontrivial A := ⟨⟨0, 1, fun h => h𝔪.ne_top (by
+    rw [Ideal.eq_top_iff_one, ← h]; exact Submodule.zero_mem _)⟩⟩
+  haveI : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing k A
+  -- the `k`-point at `𝔪`
+  letI : Algebra A k := (pointAlgHom k 𝔪).toRingHom.toAlgebra
+  haveI : IsScalarTower k A k :=
+    IsScalarTower.of_algebraMap_eq fun c => ((pointAlgHom k 𝔪).commutes c).symm
+  have hkerm : RingHom.ker (algebraMap A k) = 𝔪 := ker_pointAlgHom k 𝔪
+  -- brick 4: `𝔪 ≤ (x) + 𝔪²`
+  obtain ⟨x, hx, hle⟩ := exists_le_span_singleton_sup_sq k A
+    (le_of_eq (Algebra.IsStandardSmoothOfRelativeDimension.rank_kaehlerDifferential 1))
+  rw [hkerm] at hx hle
+  -- transport to the localization
+  haveI : IsNoetherianRing (Localization.AtPrime 𝔪) :=
+    IsLocalization.isNoetherianRing 𝔪.primeCompl (Localization.AtPrime 𝔪) inferInstance
+  set x' : Localization.AtPrime 𝔪 := algebraMap A (Localization.AtPrime 𝔪) x with hx'
+  have hmax : 𝔪.map (algebraMap A (Localization.AtPrime 𝔪)) =
+      maximalIdeal (Localization.AtPrime 𝔪) :=
+    IsLocalization.AtPrime.map_eq_maximalIdeal 𝔪 (Localization.AtPrime 𝔪)
+  have hmaple : maximalIdeal (Localization.AtPrime 𝔪) ≤
+      Ideal.span {x'} ⊔ (maximalIdeal (Localization.AtPrime 𝔪)) ^ 2 := by
+    rw [← hmax]
+    refine le_trans (Ideal.map_mono hle) ?_
+    rw [Ideal.map_sup, Ideal.map_span, Ideal.map_pow, hmax, Set.image_singleton, ← hx']
+  -- Nakayama
+  have hjac : maximalIdeal (Localization.AtPrime 𝔪) ≤
+      (⊥ : Ideal (Localization.AtPrime 𝔪)).jacobson :=
+    le_of_eq (IsLocalRing.jacobson_eq_maximalIdeal ⊥ bot_ne_top).symm
+  have hsmul : maximalIdeal (Localization.AtPrime 𝔪) ≤ Ideal.span {x'} ⊔
+      (maximalIdeal (Localization.AtPrime 𝔪)) • (maximalIdeal (Localization.AtPrime 𝔪)) := by
+    rwa [smul_eq_mul, ← sq]
+  have hprin : maximalIdeal (Localization.AtPrime 𝔪) ≤ Ideal.span {x'} :=
+    Submodule.le_of_le_smul_of_le_jacobson_bot (IsNoetherian.noetherian _) hjac hsmul
+  -- hence `spanFinrank ≤ 1`
+  have hxL : x' ∈ maximalIdeal (Localization.AtPrime 𝔪) := by
+    rw [← hmax]
+    exact Ideal.mem_map_of_mem _ hx
+  have heq : maximalIdeal (Localization.AtPrime 𝔪) =
+      Ideal.span ({x'} : Set (Localization.AtPrime 𝔪)) :=
+    le_antisymm hprin (Ideal.span_le.mpr (by simpa using hxL))
+  have hsf : (maximalIdeal (Localization.AtPrime 𝔪)).spanFinrank ≤ 1 := by
+    rw [heq]
+    refine le_trans (Submodule.spanFinrank_span_le_ncard_of_finite
+      (Set.finite_singleton x')) ?_
+    simp
+  -- dimension at least one
+  have hdim : (1 : WithBot ℕ∞) ≤ ringKrullDim (Localization.AtPrime 𝔪) := by
+    rw [IsLocalization.AtPrime.ringKrullDim_eq_height 𝔪 (Localization.AtPrime 𝔪)]
+    exact_mod_cast one_le_height_of_isMaximal k 𝔪
+  refine IsRegularLocalRing.of_spanFinrank_maximalIdeal_le
+    (Localization.AtPrime 𝔪) (le_trans ?_ hdim)
+  exact_mod_cast Nat.cast_le (α := ℕ∞).mpr hsf
+
+/-- **(T-SMOOTH-REG ★★★)** Hence the local ring at a maximal ideal is a **domain**
+(`ForMathlib/RegularLocalDomain`, Matsumura 14.3). -/
+theorem isDomain_localization_atPrime_of_isMaximal (k : Type u) [Field k] [IsAlgClosed k]
+    {A : Type u} [CommRing A] [Algebra k A]
+    [Algebra.IsStandardSmoothOfRelativeDimension 1 k A]
+    (𝔪 : Ideal A) [𝔪.IsMaximal] : IsDomain (Localization.AtPrime 𝔪) :=
+  letI := isRegularLocalRing_localization_atPrime k 𝔪
+  IsRegularLocalRing.isDomain _
+
+end Regular
+
 end ModularCurves
