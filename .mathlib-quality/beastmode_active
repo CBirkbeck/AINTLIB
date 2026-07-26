@@ -1,6 +1,7 @@
-FOCUS: DS4 M1b LEAF — bricks 1,2,3,4a,4b,4c ALL LANDED sorry-free (extensionality; Phi fixes x_gen,y_gen, constants, coefficients, W_KE; addX/addY transport; translateX/translateY transport).
-NEXT (brick 5, the conjugation itself): for S = some xk yk (non-2-torsion branch),
-  Phi o (translateAlgHom_of_nonTorsion W xk yk) = (translateAlgHom_of_nonTorsion W (sigma xk) (sigma yk)) o Phi
-by ringHom_ext_const_x_y_gen: on constants use galoisFunctionFieldEquiv_algebraMap + AlgHom.commutes; on x_gen use translateAlgHom_apply_x_gen (TranslationOrd:1852) then brick 4c; on y_gen use translateAlgHom_apply_y_gen (:2009) then brick 4c.
-  2-TORSION branch: translateAlgEquiv_of_2tor — find its action on x_gen/y_gen (search translateAlgEquiv_of_2tor_apply_x_gen) and repeat.
-  Then package as translateAlgEquivOfPoint conjugation (case split via translateAlgEquivOfPoint_some_nonTor / _some_2tor / _zero), feed to weilPairing_galois_of_conj, and finish: weilPairing_galois (unconditional), fieldWeilPairing_galois, M1c.
+FOCUS: DS4 M1b LEAF — brick 5 non-2-torsion branch is DONE and axiom-clean (galois_conj_translateAlgHom_nonTor). Bricks 1-4 all landed.
+REMAINING for the full conjugation:
+  (a) the 2-TORSION branch: same statement for translateAlgEquiv_of_2tor (find its action on x_gen/y_gen — search TranslationOrd for translateAlgEquiv_of_2tor / translateAlgHom_of_2tor apply lemmas; the same extensionality + brick-4 transports should work);
+  (b) package into the point-level conjugation for translateAlgEquivOfPoint (case split: _zero => refl; _some_nonTor => (a); _some_2tor => 2-torsion branch), with the sigma-image point given by galoisPointEquiv (its coordinates are sigma xk, sigma yk by definition);
+  (c) feed it to weilPairing_galois_of_conj to get the UNCONDITIONAL sigma-equivariance;
+  (d) package fieldWeilPairing_galois (bundled mu_N form) and then M1c: exists_pairingAlgebraHom_of_galoisEquivariant (WeilPairing/EtaleDescent.lean:440) plus the torsionAlgebraPointsEquiv equivariance.
+TECHNIQUE NOTES that made brick 5 work: use simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, <apply-lemmas>] and NEVER `show` on composites of these heavy ring homs; keep the curve opaque (map_galoisFunctionFieldEquiv_WKE + congrArg toAffine) instead of unfolding.
