@@ -498,4 +498,44 @@ theorem toProjective_equivMapDomain {L : Type v} [Field L] [Algebra k L] (σ : L
     · rintro ⟨P, hP⟩
       exact absurd hP (by simp)
 
+/-- **(M1b-3b, Lemma B)** The relabelling fixes the divisor supported at infinity. -/
+theorem equivMapDomain_single_infinity {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) (c : ℤ) :
+    Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        (Finsupp.single
+          (HasseWeil.Curves.ProjectiveSmoothPoint.infinity
+            (C := (⟨(W.baseChange L).toAffine⟩ :
+              HasseWeil.Curves.SmoothPlaneCurve L))) c) =
+      Finsupp.single HasseWeil.Curves.ProjectiveSmoothPoint.infinity c := by
+  classical
+  rw [Finsupp.equivMapDomain_eq_mapDomain, Finsupp.mapDomain_single]
+  rfl
+
+/-- **(M1b-3b ★)** The projective divisor transports by the `σ`-relabelling of points. -/
+theorem projectiveDivisorOf_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq L]
+    [IsAlgClosed L] [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (g : (W.baseChange L).toAffine.FunctionField) :
+    (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).projectiveDivisorOf
+        (galoisFunctionFieldEquiv W σ g) =
+      Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        ((⟨(W.baseChange L).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).projectiveDivisorOf g) := by
+  classical
+  show HasseWeil.Curves.Divisor.toProjective
+        ((⟨(W.baseChange L).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).divisorOf
+          (galoisFunctionFieldEquiv W σ g)) +
+      Finsupp.single HasseWeil.Curves.ProjectiveSmoothPoint.infinity
+        (((⟨(W.baseChange L).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty
+            (galoisFunctionFieldEquiv W σ g)).untopD 0) = _
+  rw [divisorOf_galoisFunctionFieldEquiv W σ g, toProjective_equivMapDomain,
+    ordAtInfty_galoisFunctionFieldEquiv W σ g, ← equivMapDomain_single_infinity W σ
+      (((⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty g).untopD 0)]
+  rw [Finsupp.equivMapDomain_eq_mapDomain, Finsupp.equivMapDomain_eq_mapDomain,
+    Finsupp.equivMapDomain_eq_mapDomain, ← Finsupp.mapDomain_add]
+  rfl
+
 end ModularCurves
