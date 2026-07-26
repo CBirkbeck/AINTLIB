@@ -195,4 +195,96 @@ theorem isDomain_localization_atPrime_of_isMaximal (k : Type u) [Field k] [IsAlg
 
 end Regular
 
+section LocallyIrreducible
+
+/-- **(T-SMOOTH-REG brick 6 ★)** In the prime spectrum of a `k`-algebra standard smooth of
+relative dimension one (`k` algebraically closed) **every point has an irreducible basic
+open neighbourhood**.
+
+Take a maximal ideal `𝔪 ⊇ 𝔭`. Since `A_𝔪` is a domain (brick 5) there is exactly one
+minimal prime below `𝔪`, namely `𝔮₁ = ker (A → A_𝔪)`; multiplying together, for each of
+the finitely many other minimal primes, an element of it outside `𝔪` produces `f ∉ 𝔪`
+lying in all of them. Then `D(f)` contains `𝔭`, and every prime in `D(f)` contains `𝔮₁`,
+so `D(f)` is a nonempty open subset of the irreducible closed set `V(𝔮₁)`. -/
+theorem exists_isIrreducible_basicOpen_nbhd (k : Type u) [Field k] [IsAlgClosed k]
+    {A : Type u} [CommRing A] [Algebra k A]
+    [Algebra.IsStandardSmoothOfRelativeDimension 1 k A] (p : PrimeSpectrum A) :
+    ∃ f : A, p ∈ PrimeSpectrum.basicOpen f ∧
+      IsIrreducible (PrimeSpectrum.basicOpen f : Set (PrimeSpectrum A)) := by
+  classical
+  haveI : Algebra.IsStandardSmooth k A :=
+    Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
+  haveI : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing k A
+  haveI hp : p.asIdeal.IsPrime := p.isPrime
+  obtain ⟨𝔪, h𝔪, hpm⟩ := p.asIdeal.exists_le_maximal hp.ne_top
+  haveI := h𝔪
+  haveI : 𝔪.IsPrime := h𝔪.isPrime
+  haveI : IsDomain (Localization.AtPrime 𝔪) :=
+    isDomain_localization_atPrime_of_isMaximal k 𝔪
+  -- the unique minimal prime below `𝔪`
+  set 𝔮₁ : Ideal A := RingHom.ker (algebraMap A (Localization.AtPrime 𝔪)) with h𝔮₁
+  haveI : 𝔮₁.IsPrime := RingHom.ker_isPrime _
+  have hker_le : ∀ 𝔭 : Ideal A, 𝔭.IsPrime → 𝔭 ≤ 𝔪 → 𝔮₁ ≤ 𝔭 := by
+    intro 𝔭 h𝔭 hle a ha
+    obtain ⟨t, ht⟩ := (IsLocalization.map_eq_zero_iff 𝔪.primeCompl
+      (Localization.AtPrime 𝔪) a).mp ha
+    rcases h𝔭.mem_or_mem (show (t : A) * a ∈ 𝔭 from ht ▸ Submodule.zero_mem _) with h | h
+    · exact absurd (hle h) t.2
+    · exact h
+  have huniq : ∀ 𝔮 ∈ minimalPrimes A, 𝔮 ≤ 𝔪 → 𝔮 = 𝔮₁ := by
+    intro 𝔮 h𝔮 hle
+    haveI : 𝔮.IsPrime := h𝔮.1.1
+    exact le_antisymm (h𝔮.2 ⟨inferInstance, bot_le⟩ (hker_le 𝔮 inferInstance hle))
+      (hker_le 𝔮 inferInstance hle)
+  -- the other minimal primes are finitely many and none is contained in `𝔪`
+  have hfin : (minimalPrimes A).Finite := by
+    simpa [minimalPrimes] using (⊥ : Ideal A).finite_minimalPrimes_of_isNoetherianRing
+  set S : Finset (Ideal A) := hfin.toFinset.erase 𝔮₁ with hS
+  have hchoice : ∀ 𝔮 : Ideal A, ∃ g : A, 𝔮 ∈ S → (g ∈ 𝔮 ∧ g ∉ 𝔪) := by
+    intro 𝔮
+    by_cases hmem : 𝔮 ∈ S
+    · have h𝔮min : 𝔮 ∈ minimalPrimes A := by
+        have := Finset.mem_of_mem_erase hmem
+        simpa [hfin.mem_toFinset] using this
+      have hne : 𝔮 ≠ 𝔮₁ := Finset.ne_of_mem_erase hmem
+      have hnle : ¬ 𝔮 ≤ 𝔪 := fun hle => hne (huniq 𝔮 h𝔮min hle)
+      obtain ⟨g, hg𝔮, hg𝔪⟩ := Set.not_subset.mp hnle
+      exact ⟨g, fun _ => ⟨hg𝔮, hg𝔪⟩⟩
+    · exact ⟨1, fun hc => absurd hc hmem⟩
+  choose g hg using hchoice
+  refine ⟨∏ 𝔮 ∈ S, g 𝔮, ?_, ?_⟩
+  · -- `p ∈ D(f)` because `f ∉ 𝔪 ⊇ p`
+    rw [PrimeSpectrum.mem_basicOpen]
+    intro hmem
+    obtain ⟨𝔮, h𝔮S, h𝔮⟩ := Ideal.IsPrime.prod_mem_iff.mp (hpm hmem)
+    exact (hg 𝔮 h𝔮S).2 h𝔮
+  · -- `D(f)` is a nonempty open subset of the irreducible closed set `V(𝔮₁)`
+    have hpf : p ∈ (PrimeSpectrum.basicOpen (∏ 𝔮 ∈ S, g 𝔮) : Set (PrimeSpectrum A)) := by
+      rw [SetLike.mem_coe, PrimeSpectrum.mem_basicOpen]
+      intro hmem
+      obtain ⟨𝔮, h𝔮S, h𝔮⟩ := Ideal.IsPrime.prod_mem_iff.mp (hpm hmem)
+      exact (hg 𝔮 h𝔮S).2 h𝔮
+    have hsub : (PrimeSpectrum.basicOpen (∏ 𝔮 ∈ S, g 𝔮) : Set (PrimeSpectrum A)) ⊆
+        closure ({⟨𝔮₁, inferInstance⟩} : Set (PrimeSpectrum A)) := by
+      intro q hq
+      rw [SetLike.mem_coe, PrimeSpectrum.mem_basicOpen] at hq
+      rw [PrimeSpectrum.closure_singleton]
+      haveI : q.asIdeal.IsPrime := q.isPrime
+      obtain ⟨𝔮, h𝔮min, h𝔮le⟩ :=
+        Ideal.exists_minimalPrimes_le (I := (⊥ : Ideal A)) (J := q.asIdeal) bot_le
+      have h𝔮min' : 𝔮 ∈ minimalPrimes A := h𝔮min
+      have h𝔮eq : 𝔮 = 𝔮₁ := by
+        by_contra hne
+        have h𝔮S : 𝔮 ∈ S := by
+          simp only [hS, Finset.mem_erase, hfin.mem_toFinset]
+          exact ⟨hne, h𝔮min'⟩
+        obtain ⟨c, hc⟩ := Finset.dvd_prod_of_mem g h𝔮S
+        exact hq (h𝔮le (hc ▸ Ideal.mul_mem_right c 𝔮 (hg 𝔮 h𝔮S).1))
+      exact h𝔮eq ▸ h𝔮le
+    exact ⟨⟨p, hpf⟩,
+      (isIrreducible_singleton (x := (⟨𝔮₁, inferInstance⟩ : PrimeSpectrum A))).closure.2.open_subset
+        (PrimeSpectrum.basicOpen _).2 hsub⟩
+
+end LocallyIrreducible
+
 end ModularCurves

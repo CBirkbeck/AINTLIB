@@ -78,3 +78,48 @@ theorem irreducibleSpace_of_connected_of_disjoint_irreducibleComponents
     (isClopen_iff.mp ⟨hclosed, hopen⟩).resolve_left hne.ne_empty
   have hirr : IsIrreducible (Set.univ : Set X) := huniv ▸ isIrreducible_irreducibleComponent
   exact { toPreirreducibleSpace := ⟨hirr.2⟩, toNonempty := ⟨x⟩ }
+
+/-- The union of an **open** irreducible set with any irreducible set meeting it is
+irreducible. (Openness is essential: two intersecting irreducible *closed* sets can have a
+reducible union.) -/
+theorem IsIrreducible.union_of_isOpen_of_inter_nonempty {U Z : Set X}
+    (hU : IsIrreducible U) (hUo : IsOpen U) (hZ : IsIrreducible Z)
+    (hne : (U ∩ Z).Nonempty) : IsIrreducible (U ∪ Z) := by
+  refine ⟨hU.1.mono Set.subset_union_left, fun a b ha hb hUa hUb => ?_⟩
+  -- `Z` meets `U`, so any open meeting `Z` meets `Z ∩ U`
+  have key : ∀ c : Set X, IsOpen c → ((U ∪ Z) ∩ c).Nonempty → (U ∩ c).Nonempty := by
+    intro c hc hcne
+    obtain ⟨w, hw, hwc⟩ := hcne
+    rcases hw with hwU | hwZ
+    · exact ⟨w, hwU, hwc⟩
+    · obtain ⟨z, hz, hzU, hzc⟩ := hZ.2 U c hUo hc
+        (by obtain ⟨v, hvU, hvZ⟩ := hne; exact ⟨v, hvZ, hvU⟩) ⟨w, hwZ, hwc⟩
+      exact ⟨z, hzU, hzc⟩
+  obtain ⟨z, hz, hzab⟩ := hU.2 a b ha hb (key a ha hUa) (key b hb hUb)
+  exact ⟨z, Or.inl hz, hzab⟩
+
+/-- **(T-G4a, the local-to-global step)** A nonempty connected space in which **every point
+has an irreducible open neighbourhood** is irreducible.
+
+The irreducible component through a point then *contains* every such neighbourhood (by
+maximality, using `IsIrreducible.union_of_isOpen_of_inter_nonempty`), so components are
+open; being also closed and nonempty, connectedness forces a single one. -/
+theorem irreducibleSpace_of_connected_of_locallyIrreducible [Nonempty X] [ConnectedSpace X]
+    (h : ∀ x : X, ∃ U : Set X, IsOpen U ∧ x ∈ U ∧ IsIrreducible U) : IrreducibleSpace X := by
+  obtain ⟨x⟩ := ‹Nonempty X›
+  have hopen : IsOpen (irreducibleComponent x) := by
+    rw [isOpen_iff_forall_mem_open]
+    intro y hy
+    obtain ⟨U, hUo, hyU, hUirr⟩ := h y
+    have hunion : IsIrreducible (U ∪ irreducibleComponent x) :=
+      hUirr.union_of_isOpen_of_inter_nonempty hUo isIrreducible_irreducibleComponent
+        ⟨y, hyU, hy⟩
+    have heq : U ∪ irreducibleComponent x = irreducibleComponent x :=
+      eq_irreducibleComponent hunion.2 Set.subset_union_right
+    exact ⟨U, heq ▸ Set.subset_union_left, hUo, hyU⟩
+  have hclopen : IsClopen (irreducibleComponent x) := ⟨isClosed_irreducibleComponent, hopen⟩
+  have huniv : irreducibleComponent x = Set.univ :=
+    hclopen.eq_univ ⟨x, mem_irreducibleComponent⟩
+  exact { isPreirreducible_univ := huniv ▸ isIrreducible_irreducibleComponent.2
+          toNonempty := ⟨x⟩ }
+
