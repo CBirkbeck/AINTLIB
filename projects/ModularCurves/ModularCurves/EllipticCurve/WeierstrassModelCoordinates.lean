@@ -18,6 +18,23 @@ open AlgebraicGeometry CategoryTheory
 
 universe u
 
+namespace WeierstrassCurve.Projective
+
+variable {R : Type u} [CommRing R]
+
+/-- A generalized Weierstrass relation in a Cartier frame gives homogeneous
+projective coordinates `[Xr:Y:r³]` on the corresponding cubic. -/
+lemma equation_X_mul_r_Y_r_pow_three
+    (W : WeierstrassCurve R) (X Y r : R)
+    (h : Y ^ 2 + W.a₁ * X * Y * r + W.a₃ * Y * r ^ 3 =
+      X ^ 3 + W.a₂ * X ^ 2 * r ^ 2 + W.a₄ * X * r ^ 4 + W.a₆ * r ^ 6) :
+    W.toProjective.Equation ![X * r, Y, r ^ 3] := by
+  rw [equation_iff]
+  simp only [fin3_def_ext]
+  linear_combination r ^ 3 * h
+
+end WeierstrassCurve.Projective
+
 namespace ModularCurves
 
 open HomogeneousIdeal
