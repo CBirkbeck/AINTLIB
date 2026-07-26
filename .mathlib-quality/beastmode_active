@@ -1,7 +1,8 @@
-FOCUS: DS4 M1b LEAF brick 4b — transport of translateX_xy/translateY_xy under Phi_sigma.
-LANDED (sorry-free, pushed): bricks 1,2,3 and 4a (galoisFunctionFieldEquiv_translateSlope).
-ATTEMPT NOTE (reverted; file green): `rw [translateX_xy_eq_addX]; unfold Affine.addX; simp only [...]; congr 1` hits a whnf TIMEOUT (200k) because W_KE unfolds into the base-changed record. Heartbeat bumps are FORBIDDEN.
-FIX TO TRY: prove a tiny standalone helper first, e.g.
-  private theorem map_addX (u v w : KE) : Phi (addX u v w) = addX (Phi u) (Phi v) (Phi w)
-  by `simp only [WeierstrassCurve.Affine.addX, map_sub, map_add, map_mul, map_pow, galoisFunctionFieldEquiv_a1, galoisFunctionFieldEquiv_a2]` (NO unfold of W_KE, NO congr), and similarly map_addY with a3/a4 as needed; then brick 4b is a two-line rw using 4a and these helpers.
-THEN: the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch separately), then weilPairing_galois unconditional, fieldWeilPairing_galois, M1c.
+FOCUS: DS4 M1b LEAF brick 4b — Phi_sigma vs the addX/addY formulas.
+LANDED sorry-free + pushed: bricks 1,2,3,4a (extensionality; Phi fixes x_gen,y_gen; Phi fixes base constants and a_i; slope transport).
+ATTEMPTS (both reverted, file green): (1) `unfold Affine.addX; congr` => whnf timeout; (2) `simp only [Affine.addX, ..., HasseWeil.W_KE, map_a1, map_a2, brick3]` => KERNEL deterministic timeout. CAUSE: unfolding HasseWeil.W_KE (= (W.baseChange L).map (algebraMap L KE)) inside the big expression explodes, because W.baseChange L is itself a record of algebraMap k L (W.a_i).
+FIX TO TRY NEXT (do NOT unfold W_KE inside the expression): first prove five tiny lemmas
+  galoisFunctionFieldEquiv_WKE_a1 : Phi ((W_KE (W.baseChange L)).a1) = (W_KE (W.baseChange L)).a1
+  (proof: `rw [HasseWeil.W_KE, WeierstrassCurve.map_a1]; exact galoisFunctionFieldEquiv_a1 W sigma`) and likewise a2,a3,a4,a6;
+then `simp only [WeierstrassCurve.Affine.addX, map_sub, map_add, map_mul, map_pow, galoisFunctionFieldEquiv_WKE_a1, galoisFunctionFieldEquiv_WKE_a2]` with NO W_KE in the simp set.
+THEN: addY likewise (a1,a3), translateX/translateY transport, the conjugation via ringHom_ext_const_x_y_gen (2-torsion branch separately), weilPairing_galois unconditional, fieldWeilPairing_galois, M1c.
