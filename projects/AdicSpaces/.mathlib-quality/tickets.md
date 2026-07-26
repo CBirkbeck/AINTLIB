@@ -57,11 +57,28 @@ radius is required** — Groebner.lean stands as proven.
   `A^{ρ₂} → hatK ρ₁` for `ρ₁ ≤ ρ₂` and hence the ring map `A^{ρ₂} → B^I`, (b) `λ_I([z̄ⁿ]/p)
   ≤ 1` ⇔ the left-endpoint condition `ρᵢ ≥ |z̄|ⁿ`, (c) evaluation of restricted series at a
   power-bounded element of the complete ring `B^I`.
+- **T910a** (spawned 2026-07-26) — **the universal property of restricted power series**:
+  for a complete nonarchimedean ring `B` with a power-multiplicative norm, a continuous
+  ring map `φ : A → B` and power-bounded `b₁,…,b_k ∈ B`, evaluation `A⟨T₁,…,T_k⟩ → B` is a
+  ring homomorphism. The repo's `RestrictedPowerSeries.lean` has **no** evaluation API —
+  this is new, reusable infrastructure (the hard part is multiplicativity: the Cauchy
+  product of two coefficientwise-null families). Concretely here: `wI (ArToBI a · bⁿ) ≤
+  v_{ρ₂}(a)` by `wI_ArToBI` + `wI_mul_le` + `wI_teichPowOverP_le_one`, so the partial sums
+  are Cauchy and `exists_BI_series_limit` (already proven) provides the value.
 - **T911** — surjectivity + strictness of that map (Kedlaya's explicit lift: for `x =
   pⁿ[x̄ₙ]` take `j` minimal with `c^{-j}|x̄ₙ| ≥ 1` and `z = pⁿ[x̄ₙ z̄^{-j}]T^j`, giving
   `|z|_1 ≤ λ_I(x)`), then the same with `k` extra radius-1 variables.
+- **T911b** (spawned 2026-07-26) — **the restricted-series functor preserves strict
+  surjections**: if `π : A ↠ B` is a surjective continuous ring map admitting norm-bounded
+  lifts, then `A⟨T₁,…,T_k⟩ → B⟨T₁,…,T_k⟩` is surjective (lift the coefficients with control,
+  using Kedlaya's estimate `|z|_ρ ≤ c^{t₀-t} λ_{I'}(x)` from T911).
 - **T912** — `IsStronglyNoetherian ↥(BISub …)`: quotient of the noetherian
-  `A^r{T, T₁,…,T_k}` (T911 + Theorem 3.2).
+  `A^r{T, T₁,…,T_k}` (T911 + T911b + Theorem 3.2).
+
+**T910 progress (2026-07-26)** — `Presentation.lean` (~470 lines): the `A^r`-algebra
+structure on `B^I` is **done** (`ArToBI`, injective, `wI_ArToBI`), and Kedlaya's Tate
+variable is **done** (`teichPowOverP`, `wLoc_teichPowOverP`, `wI_teichPowOverP`,
+`wI_teichPowOverP_le_one`). Remaining for T910: the evaluation map itself = T910a.
 
 **Cor 4.6 (`resIHom` injectivity, T909)** — source proof re-read: vanishing of `λ_{t₀}(x)`
 at one `t₀ ∈ I` forces `λ_t(x) = 0` for every `t` strictly between `t₀` and any other point

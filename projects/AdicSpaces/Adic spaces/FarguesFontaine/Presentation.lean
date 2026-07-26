@@ -33,6 +33,9 @@ and `z ↦ (resAr z, z)` is a ring map `A^{ρ₂} → B^{[ρ₁,ρ₂]}`.
 * `FarguesFontaine.wAloc_mono_radius` : monotonicity of the Gauss value in the radius.
 * `FarguesFontaine.tendsto_resAr` : the restriction is the limit of the approximants.
 * `FarguesFontaine.ArToBI_injective` : `A^{ρ₂}` embeds in `B^{[ρ₁,ρ₂]}`.
+* `FarguesFontaine.wI_ArToBI` : on `A^r` the interval norm is the `ρ₂`-value.
+* `FarguesFontaine.wI_teichPowOverP_le_one` : the Tate variable `[z̄ⁿ]/p` is
+  power-bounded exactly under Kedlaya's left-endpoint condition `|z̄|ⁿ ≤ ρ₁`.
 
 ## Sources
 
@@ -379,6 +382,93 @@ theorem ArToBI_injective {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 :
   have h := congrArg (fun w : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
     ((w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) hzz
   exact h
+
+set_option maxHeartbeats 1000000 in
+/-- **The restriction is contracting**: the smaller-radius value of an element of `A^r`
+is at most its value. -/
+theorem valued_resAr_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (h12 : ρ₁ ≤ ρ₂) {z : hatK p F hρ₂0 hρ₂1}
+    (hz : z ∈ ArSub p F ϖ hρ₂0 hρ₂1) :
+    Valued.v (resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ≤ Valued.v z := by
+  haveI hne := neBot_comap_of_mem_ArSub p F ϖ hz
+  have hkey : ∀ ε : NNReal, 0 < ε →
+      Valued.v (resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ≤ max (Valued.v z) ε := by
+    intro ε hε
+    have hlim := tendsto_resAr p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 hz
+    have hev : ∀ᶠ u in Filter.comap (AlocToHatK p F ϖ hρ₂0 hρ₂1) (nhds z),
+        AlocToHatK p F ϖ hρ₁0 hρ₁1 u
+          ∈ {w : hatK p F hρ₁0 hρ₁1 | Valued.v w ≤ max (Valued.v z) ε} := by
+      refine Filter.mem_of_superset
+        (Filter.preimage_mem_comap (valued_ball_mem_nhds p F z hε)) ?_
+      intro u hu
+      have hu' : Valued.v (AlocToHatK p F ϖ hρ₂0 hρ₂1 u - z) ≤ ε := hu
+      have h2 : Valued.v (AlocToHatK p F ϖ hρ₂0 hρ₂1 u) ≤ max (Valued.v z) ε := by
+        have hsplit : AlocToHatK p F ϖ hρ₂0 hρ₂1 u
+            = z + (AlocToHatK p F ϖ hρ₂0 hρ₂1 u - z) := by ring
+        rw [hsplit]
+        exact le_trans (Valuation.map_add _ _ _) (max_le_max (le_refl _) hu')
+      exact le_trans (valued_AlocToHatK_mono p F ϖ h12 u) h2
+    exact (isClosed_valued_ball p F (lt_of_lt_of_le hε (le_max_right _ _))).mem_of_tendsto
+      hlim hev
+  by_contra hcon
+  push Not at hcon
+  obtain ⟨ε, hε1, hε2⟩ := exists_between hcon
+  have := hkey ε (lt_of_le_of_lt zero_le hε1)
+  rw [max_eq_right hε1.le] at this
+  exact absurd this (not_le.mpr hε2)
+
+/-- **The interval norm of an element of `A^r`** is its `ρ₂`-value. -/
+theorem wI_ArToBI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} (h12 : ρ₁ ≤ ρ₂) (z : ↥(ArSub p F ϖ hρ₂0 hρ₂1)) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 ((ArToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) h12 z :
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+        (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = Valued.v (z : hatK p F hρ₂0 hρ₂1) := by
+  show max (Valued.v (resAr p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (z : hatK p F hρ₂0 hρ₂1)))
+      (Valued.v (z : hatK p F hρ₂0 hρ₂1)) = _
+  exact max_eq_right (valued_resAr_le p F ϖ h12 z.2)
+
+
+/-- **The image of Kedlaya's Tate variable**: the element `[z̄ⁿ]/p` of `Bloc`, which the
+case-3 presentation `A^r{T}/(pT - [z̄ⁿ]) ≅ B^I` sends `T` to. -/
+def teichPowOverP (zb : OF F) (n : ℕ) : Bloc p F ϖ :=
+  algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p zb ^ n)
+    * ↑(isUnit_p_image p F ϖ).unit⁻¹
+
+/-- The Gauss value of `[z̄ⁿ]/p` at radius `ρ` is `|z̄|ⁿ/ρ`. -/
+theorem wLoc_teichPowOverP {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (zb : OF F) (n : ℕ) :
+    wLoc p F ϖ hρ0 hρ1 (teichPowOverP p F ϖ zb n)
+      = (perfectoidValuation p F (zb : F)) ^ n / ρ := by
+  rw [teichPowOverP, Valuation.map_mul, wLoc_algebraMap, wLoc_p_inv,
+    ← map_pow (WittVector.teichmuller p), gaussValue_teichmuller p F hρ1.le]
+  rw [show ((zb ^ n : OF F) : F) = (zb : F) ^ n from by push_cast; rfl, map_pow]
+  exact (div_eq_mul_inv _ _).symm
+
+/-- The interval norm of `[z̄ⁿ]/p` is `|z̄|ⁿ/ρ₁` (the smaller radius dominates). -/
+theorem wI_teichPowOverP {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} (h12 : ρ₁ ≤ ρ₂) (zb : OF F) (n : ℕ) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (teichPowOverP p F ϖ zb n))
+      = (perfectoidValuation p F (zb : F)) ^ n / ρ₁ := by
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK, wLoc_teichPowOverP,
+    wLoc_teichPowOverP]
+  refine max_eq_left (div_le_div_of_nonneg_left zero_le hρ₁0 h12)
+
+/-- **Power-boundedness of the Tate variable** is exactly Kedlaya's left-endpoint
+condition `ρ₁ ≥ |z̄|ⁿ` (in his coordinates, `s ≥ -n⁻¹ log_c p`). -/
+theorem wI_teichPowOverP_le_one {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (h12 : ρ₁ ≤ ρ₂) {zb : OF F} {n : ℕ}
+    (hzb : (perfectoidValuation p F (zb : F)) ^ n ≤ ρ₁) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (teichPowOverP p F ϖ zb n)) ≤ 1 := by
+  rw [wI_teichPowOverP p F ϖ h12]
+  exact div_le_one_of_le₀ hzb zero_le
+
+/-- The Tate variable as an element of `B^I`. -/
+def teichPowOverPElt {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) (zb : OF F) (n : ℕ) : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  ⟨BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (teichPowOverP p F ϖ zb n),
+    BIProd_mem_BISub p F ϖ _⟩
 
 end FarguesFontaine
 
