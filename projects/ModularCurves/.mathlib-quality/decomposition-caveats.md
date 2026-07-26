@@ -504,3 +504,31 @@ Remaining to the field-level DS4 pairing:
    use uniqueness of the constant.
 3. M1c — `exists_pairingAlgebraHom_of_galoisEquivariant`, exposing the equivariance of
    `torsionAlgebraPointsEquiv` (currently `Nonempty`-valued) on the way.
+
+### DS4 M1b — the field-level Galois equivariance is down to ONE leaf (2026-07-26)
+
+`WeilPairing/GaloisFunctionField.lean` (sorry-free, axiom-clean, ~30 declarations) now
+proves, for an **arbitrary base field** and an **arbitrary** `σ : L ≃ₐ[k] L`:
+
+* the whole divisor transport (`projectiveDivisorOf_galois_weilFunction`:
+  `div(σ·g_T) = div(g_{σT})`), via `galoisSmoothPoint`/`galoisProjPointEquiv`,
+  `ord_P`/`ordAtInfty` transports, the κ-divisor transport, the fibre reindexing
+  (`galoisFiberEquiv`, `equivMapDomain_pullbackDiv`) and the sum-level
+  `equivMapDomain_pullbackDivisor`;
+* the σ-naturality constant `exists_const_galois_weilFunction` (`Φ_σ g_T = c·g_{σT}`,
+  `c ≠ 0`), using the new `projectiveDivisorOf_div` (HasseWeil ships only `mul`/`inv`);
+* the constants law `galoisFunctionFieldEquiv_algebraMap` (`Φ_σ(algebraMap a) = algebraMap (σ a)`);
+* the general-automorphism Galois core `weilPairing_galois_core_of_algEquiv` (the σ₀-analogue
+  of HasseWeil's `weilPairing_galois_core`, which is `q`-power-specific);
+* and the assembly **`weilPairing_galois_of_conj`** — `e(σS, σT) = σ(e(S,T))`, conditional
+  only on the **translation conjugation** `Φ_σ ∘ τ_S = τ_{σS} ∘ Φ_σ`.
+
+**The single remaining leaf** is that conjugation. Route: `algHom_ext_x_y_gen`
+(`Foundation/EC/TranslationOrd.lean` ~3261) reduces it to the generic coordinates, where
+`translateAlgEquivOfPoint_*_x_gen/_y_gen` (3613/3731/3773/3859) compute both sides and
+`Φ_σ` acts by `σ` on coefficients while fixing `x_gen`, `y_gen`.
+
+Elaboration note recorded for future work: at a base-changed curve the elaborator unfolds
+`⟨(W ⊗ L).toAffine⟩` to a record literal and instance search fails — pass
+`IsElliptic`/`IsIntegrallyClosed` **explicitly** (as `projectiveDivisorOf_div` and
+`exists_const_galois_weilFunction` now do).
