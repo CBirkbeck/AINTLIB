@@ -594,4 +594,20 @@ noncomputable def galoisPointEquiv {L : Type v} [Field L] [DecidableEq L] [Algeb
     cases P <;> rfl
   map_add' P Q := map_add _ P Q
 
+/-- **(M1b-3b-viii, step d)** The `σ`-action permutes the fibres of `[N]`: `σ` restricts to
+an equivalence `{P // N • P = Q} ≃ {P // N • P = σ·Q}` (it is additive, so it commutes with
+`N • ·`). -/
+noncomputable def galoisFiberEquiv {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+    [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) (N : ℤ)
+    (Q : (W.baseChange L).toAffine.Point) :
+    { P : (W.baseChange L).toAffine.Point // N • P = Q } ≃
+      { P : (W.baseChange L).toAffine.Point // N • P = galoisPointEquiv W σ Q } where
+  toFun P := ⟨galoisPointEquiv W σ P.1, by
+    rw [← map_zsmul (galoisPointEquiv W σ), P.2]⟩
+  invFun P := ⟨(galoisPointEquiv W σ).symm P.1, by
+    rw [← map_zsmul (galoisPointEquiv W σ).symm, P.2,
+      (galoisPointEquiv W σ).symm_apply_apply]⟩
+  left_inv P := Subtype.ext ((galoisPointEquiv W σ).symm_apply_apply P.1)
+  right_inv P := Subtype.ext ((galoisPointEquiv W σ).apply_symm_apply P.1)
+
 end ModularCurves
