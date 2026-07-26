@@ -25,6 +25,12 @@ norm, and its attainment machinery.
 * `FarguesFontaine.isRestricted_iff_valued` : a multivariate power series over `A^r`
   is restricted iff for every `ε > 0` only finitely many coefficients have value
   above `ε`.
+* `FarguesFontaine.leadIdxRPS`, `FarguesFontaine.leadCoeffRPS`, `FarguesFontaine.dIdx`,
+  `FarguesFontaine.groebnerSet` : Kedlaya's Gröbner data (Definitions 3.4–3.7).
+* `FarguesFontaine.approx_generation` : Lemma 3.8 (approximate ideal generation).
+* `FarguesFontaine.ideal_eq_span_groebner` : Lemma 3.9 (the generators generate).
+* `FarguesFontaine.isStronglyNoetherian_ArSub` : Theorem 3.2 — `A^r` is strongly
+  noetherian.
 
 ## Sources
 
@@ -2198,6 +2204,26 @@ theorem ideal_eq_span_groebner {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   · rw [Ideal.span_le]
     intro g hg
     exact hGH g (Finset.mem_coe.mp hg)
+
+set_option maxHeartbeats 1000000 in
+/-- **Kedlaya Theorem 3.2** for the campaign radius: the Tate algebra over `A^r`
+in any number of variables is noetherian. -/
+theorem isNoetherianRing_restrictedMvPowerSeries {k : ℕ} {ρ : NNReal}
+    {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
+    IsNoetherianRing ↥(restrictedMvPowerSeriesSubring k
+      ↥(ArSub p F ϖ hρ0 hρ1)) := by
+  rw [isNoetherianRing_iff_ideal_fg]
+  intro H
+  obtain ⟨G, ε, hε0, hε1, hGH, hG0, hGtail, hGdeg, hGdom⟩ :=
+    exists_groebner_family p F ϖ H
+  exact ⟨G, (ideal_eq_span_groebner p F ϖ hGH hG0 hGtail hGdeg hGdom
+    hε0 hε1).symm⟩
+
+/-- **`A^r` is strongly noetherian** (Kedlaya Theorem 3.2). -/
+instance isStronglyNoetherian_ArSub {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} :
+    IsStronglyNoetherian ↥(ArSub p F ϖ hρ0 hρ1) where
+  isNoetherianRing_restricted := fun k =>
+    isNoetherianRing_restrictedMvPowerSeries p F ϖ (k := k)
 
 end FarguesFontaine
 
