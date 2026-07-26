@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.FieldPairing
+import HasseWeil.HasseBound.WeilPairing.DivisorGalois
 
 /-!
 # The Galois action on the function field of a base-changed curve (DS4 M1b-3a)
@@ -93,5 +94,33 @@ noncomputable def galoisFunctionFieldEquiv {L : Type v} [Field L] [Algebra k L]
   (IsFractionRing.ringEquivOfRingEquiv (galoisCoordRingEquiv W σ)).trans
     (RingEquiv.cast (R := fun (V : WeierstrassCurve L) => V.toAffine.FunctionField)
       (map_algEquiv_baseChange_eq W σ))
+
+/-- **(M1b-3b-i)** The maximal ideal at a smooth point transports along the σ-induced
+coordinate-ring equivalence: `σ_*(𝔪_P) = 𝔪_Q` whenever `Q`'s coordinates are the
+`σ`-images of `P`'s. Port of HasseWeil's `map_maximalIdealAt_crFrobEquiv` (whose proof is
+already parametric in the base automorphism) to an arbitrary base field and an arbitrary
+`σ : L ≃ₐ[k] L`. -/
+theorem map_maximalIdealAt_galoisCoordRingEquiv {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint)
+    (Q : (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint)
+    (hQx : Q.x = σ P.x) (hQy : Q.y = σ P.y) :
+    Ideal.map (galoisCoordRingEquiv W σ).toRingHom
+        ((⟨(W.baseChange L).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).maximalIdealAt P) =
+      (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).maximalIdealAt Q := by
+  have hcr : (galoisCoordRingEquiv W σ).toRingHom =
+      WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine
+        (σ : L →+* L) := rfl
+  rw [hcr]
+  change Ideal.map _
+      (WeierstrassCurve.Affine.CoordinateRing.XYIdeal (W.baseChange L).toAffine
+        P.x (Polynomial.C P.y)) = _
+  rw [HasseWeil.WeilPairing.map_XYIdeal (W.baseChange L).toAffine _ P.x (Polynomial.C P.y)]
+  change _ = WeierstrassCurve.Affine.CoordinateRing.XYIdeal _ Q.x (Polynomial.C Q.y)
+  rw [hQx, hQy, Polynomial.map_C]
+  rfl
 
 end ModularCurves
