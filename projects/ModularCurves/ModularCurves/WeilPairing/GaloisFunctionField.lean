@@ -1060,4 +1060,22 @@ theorem galoisFunctionFieldEquiv_a₆ {L : Type v} [Field L] [Algebra k L] (σ :
       algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₆ :=
   galoisFunctionFieldEquiv_algebraMap_base W σ W.a₆
 
+section TranslationTransport
+
+variable {L : Type v} [Field L] [DecidableEq L] [Algebra k L]
+  [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L)
+
+/-- **(M1b-3b leaf, brick 4a)** `Φ_σ` transports the translation slope: the secant slope
+through `(x_gen, y_gen)` and `(xk, yk)` maps to the one through `(x_gen, y_gen)` and
+`(σ xk, σ yk)`. Uses the branch-free form `translateSlope_xy_eq` (the generic `x` is
+transcendental, so the secant branch always applies) and bricks 2–3. -/
+theorem galoisFunctionFieldEquiv_translateSlope (xk yk : L) :
+    galoisFunctionFieldEquiv W σ (HasseWeil.translateSlope_xy (W.baseChange L) xk yk) =
+      HasseWeil.translateSlope_xy (W.baseChange L) (σ xk) (σ yk) := by
+  rw [HasseWeil.translateSlope_xy_eq, HasseWeil.translateSlope_xy_eq, map_div₀, map_sub,
+    map_sub, galoisFunctionFieldEquiv_x_gen, galoisFunctionFieldEquiv_y_gen,
+    galoisFunctionFieldEquiv_algebraMap, galoisFunctionFieldEquiv_algebraMap]
+
+end TranslationTransport
+
 end ModularCurves
