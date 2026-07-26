@@ -642,3 +642,50 @@ remains chapter-scale.
 `set_option maxHeartbeats 1600000` (`E3DatumAssembly.lean:177`). Heartbeat bumps are
 forbidden by the owner, so 4b must be decomposed into small per-coordinate lemmas rather
 than attacked as one goal.
+
+---
+
+# BOARD AUDIT — 2026-07-26 (after M1c completed)
+
+## Two of `YRho.lean`'s four sorries are redundant duplicates, not open goals
+
+`ModularCurve/YRho.lean` has exactly four `sorry`s. Two of them are already proved
+**downstream**, and cannot be discharged in place only because the level-three route
+imports `YRho` (through `RhoSmooth`):
+
+| YRho sorry | proved as | where |
+|---|---|---|
+| `yRho_representable` (8730) | `yRho_representable'` / `yRho_representable_of_three_le` | `ModularCurve/RhoPoints.lean` |
+| `rhoLevel_relativelyRepresentable` (8682) | `rhoLevel_relativelyRepresentable'` | `ModularCurve/RhoSections.lean:7587` |
+
+Both duplicates are safe to delete on `main` (a cleaner's job — the statements are
+unchanged and the proved versions are strictly at least as strong; the
+`rhoLevel_relativelyRepresentable'` version does not even need `3 ≤ N`). Leaving them is
+actively misleading, since `yRho_representable` reads as the project's headline theorem
+being open when it is not.
+
+The other two are the genuine open goals:
+
+* `weilPairing_torsionMapOfEllHom` (2477) — the DS4 register's curve-base-change spec,
+  i.e. **M2**;
+* `yRho_geometricallyIrreducible` (8746) — needs the analytic connectedness input, the only
+  thing left of **G4** after this session's `irreducibleSpace_of_connectedSpace_of_smooth`.
+
+## The primed-variant pattern is not a general harvest
+
+A scripted audit over all 120 sorried declarations in the project looked for
+same-root proved variants (`name'`, `name''`, `name_of_*`) declared in other files. Only
+the two above matched. So the "sorry'd declaration superseded by a proved alternative"
+class is *not* a large hidden reserve here — worth knowing, since it was worth checking.
+
+## Remaining work on the caveat board, honestly
+
+| item | status |
+|---|---|
+| G1 (`p` from `det_cyclo`) | DONE |
+| G3 (Legendre registers) | DONE |
+| G4 algebraic half | DONE (this session) |
+| G4 analytic core | MAJOR-INFRA — `(Y⊗ℂ)^an ≅ ℍ/Γ̃` + GAGA; needs a scheme-analytification functor absent from mathlib and AINTLIB |
+| G2 / DS4 M1 (field level) | **DONE** (this session) — `exists_weilPairingHom_of_field`, over any perfect field |
+| G2 / DS4 M2 (general base) | chapter-scale. Confirmed this session that mathlib has **no** scheme-level étale fundamental group (`PreGaloisCategory` does not appear anywhere in `Mathlib/AlgebraicGeometry/`), so the "π₁(S)-set" route would itself have to be built first; the divisor-theoretic and Cartier-duality routes need relative Pic⁰ / relative Riemann–Roch |
+| H (chart-independence of M1c) | deferred; needs Weil-pairing invariance under a `VariableChange`. HasseWeil has the *scaling* law `weilPairing_scaling_of_dualComp` (`e(φS,φT) = e(S,T)^deg φ`) but only for **endomorphisms of one curve** with a supplied dual, so it does not apply between two different models. The honest route mirrors `GaloisFunctionField.lean` (~40 declarations) with a `VariableChange` in place of `σ`. Not blocking: `globalGaloisFibreChart` is deterministic in `E`, and the M1c statement is existential |
