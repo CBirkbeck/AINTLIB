@@ -1021,6 +1021,42 @@ theorem exists_locNhd_le_ball (a b : ℕ) (hb : 0 < b)
   rintro z ⟨y, hy, rfl⟩
   exact le_trans (wI_le_of_mem_locIdeal_pow p F ϖ a b hb hπ1 hπ2 hr1 hr2 n hy) hn
 
+/-- The chart topology, behind a non-reducible definition so statements never
+unfold the `RingSubgroupsBasis` construction (PERF). -/
+noncomputable def chartTopology (a b : ℕ) :
+    TopologicalSpace (Localization.Away (chartS p F ϖ 1 b)) :=
+  (chartData p F ϖ 1 b a b).topology
+
+/-- The chart-map is continuous at zero for the chart topology. -/
+theorem tendsto_chartToBIProd (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    @Filter.Tendsto _ _
+      (fun z => BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (blocEquivAwayChartS p F ϖ b hb z))
+      (@nhds _ (chartTopology p F ϖ a b) 0) (nhds 0) := by
+  intro U hU
+  rw [Filter.mem_map]
+  obtain ⟨ε, hε, hball⟩ := exists_wI_ball_subset p F hU
+  obtain ⟨n, hn⟩ := exists_locNhd_le_ball p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb hπ1 hπ2 hr1 hr2 hε
+  have hmem : ((locNhd (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b) n
+      : AddSubgroup (Localization.Away (chartS p F ϖ 1 b)))
+      : Set (Localization.Away (chartS p F ϖ 1 b)))
+      ∈ @nhds _ (chartTopology p F ϖ a b) 0 := by
+    show _ ∈ @nhds _ ((chartData p F ϖ 1 b a b).topology) 0
+    exact (locBasis (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b)
+      (chartData p F ϖ 1 b a b).hopen).hasBasis_nhds_zero.mem_of_mem
+        (i := n) trivial
+  refine Filter.mem_of_superset hmem ?_
+  intro z hz
+  refine hball ?_
+  exact hn z hz
+
 end FarguesFontaine
 
 end
