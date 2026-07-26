@@ -943,7 +943,33 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   summability from T903. EuclideanDomain: mathlib structure on the subtype.
 
 ### [T905] Gröbner data on Ar⟨X₁..Xₖ⟩
-- **Status**: open | **File**: FarguesFontaine/Groebner.lean | **Depends**: T903; repo A⟨X⟩
+- **Status**: in_progress (beastmode 2026-07-26) | **File**: FarguesFontaine/Groebner.lean | **Depends**: T903, T904 (both done); repo A⟨X⟩
+- **DESIGN (banked 2026-07-26 after full §3 re-read, ln 217-330)**: work over
+  `Ar := ↥(ArSub p F ϖ hρ0 hρ1)` with the REPO predicate
+  `restrictedMvPowerSeriesSubring k Ar` (RestrictedPowerSeries.lean; coefficients → 0
+  cofinitely in the SUBSPACE topology) — radius 1 = AD-5; target
+  `IsStronglyNoetherian Ar` (∀ k, IsNoetherianRing of that subring).
+  FOUNDATION (build first): `isRestricted_iff_valued`: topological cofinite-decay of
+  coefficients ⟺ NNReal-value decay (∀ε>0, {I : v f_I > ε} finite) — via the subtype
+  nhds-comap + Valued.mem_nhds γ-balls + the z₀ := toHatK(p^N) cofinality trick (both
+  directions; the eventually_valued_sub_le-pattern). Then: gaussNormRPS f := ⨆ I,
+  v(f I) (bddAbove from decay); attainment (finitely many above any ε);
+  leading index := degLex-max of the attainment set — mathlib `MonomialOrder.degLex`
+  (CHECK availability; else hand-roll graded-lex on Fin k →₀ ℕ: it's a linear order
+  refining ≤ with finite lower-≺-sets via bounded total degree);
+  d_I : (Fin k →₀ ℕ) → ℕ∞ := ⨅ over H-elements with leading index I of degAr of the
+  leading coefficient (∞ if none); monotone antitone d_{I₂} ≤ d_{I₁} for I₁ ≤ I₂
+  (multiply by the monomial T^{I₂−I₁} — monomial-mult shifts coefficients, norm
+  multiplicative-per-monomial); S := finitely many ≤-minimals of {d_I < ∞} per level d
+  (Dickson: mathlib `Finsupp` PWO — CHECK `Finsupp.isPWO`/`Set.IsPWO` machinery);
+  choose x_I. T906 = Lemma 3.8 (ε := max ratio over I ∈ S, J ≻ I — finite by the
+  finite-lower-≺-property; iteration with exact_division on leading coefficients; the
+  E_l ε-support bookkeeping + J₊ + infinitely-recurring-J + Remark-2.7 (degAr_eq_of_
+  valued_sub_lt on Ar-elements!) contradiction). T907 = Lemma 3.9 (geometric sum,
+  completeness of the restricted subring — repo API?) ⟹ IsNoetherianRing (ideal =
+  span of finite S: `Ideal.fg` for all H) ⟹ IsStronglyNoetherian Ar.
+  NOTE: Kedlaya's H-ideal machinery needs CHOICE of x_I per I ∈ S (Classical.choose
+  as in exact_division). All §2-inputs exist: degAr/degAr_mul/Remark 2.7/Prop 2.9.
 - **Statement**: for the repo's `RestrictedPowerSeries` over `Ar` (Gauss norm, radius 1
   per AD-5): leading index (graded-lex-maximal norm-attaining multi-index, Def 3.6
   ln 267–270 — attainment from coefficient decay), leading coefficient; `d_I`-function
