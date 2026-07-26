@@ -301,3 +301,133 @@ Also: `Y_ℂ → Y_ℚ̄` is surjective and continuous, so B-L2 is `Scheme.Hom.s
 bounded algebraic route exploiting most of what you already proved." Gap B: "explicitly
 avoid a GAGA project" — do the small one-way bridge first, leaving complex uniformization as
 the only genuinely large input.
+
+---
+
+# Second ChatGPT pass, told about the existing Picard/divisor layers — the ranking moves,
+# and **one of my claims above is FALSE**
+
+## CORRECTION 3 (mine) — "`sectionToPicRel` is an isomorphism" is not merely deferred, it is FALSE
+
+A.1's leaf **A-L6** above says the missing theorem is `autoduality : E ≅ Pic⁰_{E/S}` via
+`sectionToPicRel`. That statement, *with `picRel = Ker(0*)` as the codomain*, is false:
+
+> "Over a field `k`, `Pic(k) = 0`, so `Ker(0* : Pic(E) → Pic(k)) = Pic(E)`, which contains
+> every degree component. The map `Q ↦ 𝒪(Q − 0)` hits only the degree-zero component.
+> Consequently, with the current codomain, the statement `sectionToPicRel is an
+> isomorphism` is **false**. Abel's theorem would say that it is an isomorphism onto a
+> degree-zero subfunctor."
+
+`RelativePic.lean:24` is careful about this — it defers *both* "the degree-0 subfunctor" and
+"Abel's isomorphism". My A-L6 collapsed the two and named the false one. **A-L6 is
+withdrawn.**
+
+Good news: the construction does not need it. "Katz–Mazur's construction works on the
+kernel of pullback inside the full rigidified Picard group. Your second argument comes
+specifically from `κ(Q)`, so no degree-zero representability is needed."
+
+## The decisive input is (★′), not autoduality
+
+Write `κ_T(Q) = [𝒪(Q − 0)]` (= `sectionToPicRel`) and `m_N = [N]_{E_T}`. The reusable form is
+
+> **(★)** `m_N^* κ_T(Q) = κ_T([N]Q)`, i.e. in Lean
+> `Pic.map m_N (sectionToPicRel … Q) = sectionToPicRel … ([N]Q)`
+
+and for the **construction alone** the strictly weaker form suffices:
+
+> **(★′)** `Q ∈ E[N](T) ⟹ m_N^* κ_T(Q) = 1`.
+
+> "Neither follows merely from the existing `Pic`, `picRel`, or divisor APIs. It is the
+> specialized theorem-of-the-square / principal-polarization content hidden in the slogan
+> '`[N]` is self-dual'."
+
+**Relevant existing work found (verified present):** `projects/HasseWeil/HasseWeil/Pic0/`
+is an entire theorem-of-the-square / PicDual development — `PicDual.lean`,
+`PicDualAdditivityReduction.lean`, `PicDualClassMapMultiplicativity.lean`,
+`TheoremOfSquareDivisorForm.lean`, `PicDualPullbackTheoremOfSquare.lean` (whose header
+pins its own residual as the dual-additivity point identity). It is *field/Weierstrass-divisor*
+level, so it does not supply the relative sheafified `(★′)`, but it is the closest existing
+material and should be read before attacking it.
+
+## Revised ranking (cheapest first, for "construct the pairing when `N` is invertible")
+
+1. Level-3 atlas extension/descent — "still the shortest, lowest-risk route **if** the
+   finite-étale rigidity machinery is ready".
+2. **Hybrid: restricted Katz–Mazur construction + fibre rigidity — "now a very close
+   competitor, and probably the best reusable architecture".**
+3. Pure Katz–Mazur (all properties intrinsically, arbitrary base).
+4. Universal Weierstrass extension.
+5. Full Pic⁰ / Poincaré / autoduality.
+6. Étale fundamental group.
+
+> "Route (3) is now competitive and probably cheaper than route (2), but I would not yet
+> declare it cheaper than route (1). **If `(★′)` can be proved in a contained ticket, the
+> hybrid route likely becomes the best choice.**"
+
+## The hybrid architecture (recommended)
+
+```
+restricted self-adjointness (★′)
+  → normalized trivialization of [N]^* L_Q
+  → character E[N] → 𝔾_m
+  → e(P,Q)^N = 1
+  → E[N] ×_S E[N] → μ_N
+  → finite-étale fibre rigidity for the remaining identities
+```
+
+Construction package, with what we already have:
+
+1. **Object-level rigidified lift.** `picRel` is a subgroup of *isomorphism classes*; KM
+   needs an actual sheaf `L_Q` with an actual rigidification `ρ_Q : 0^*L_Q ≅ 𝒪_T`. The
+   natural lift of `picRelProj` is `L ↦ L ⊗ f^*(0^*L)⁻¹` with its canonical zero-section
+   rigidification — **construct this before passing to `Skeleton`**.
+2. **(★′)** — the one substantive new theorem.
+3. **Unique normalized trivialization** `α_Q : [N]^*L_Q ≅ 𝒪_{E_T}` agreeing with `ρ_Q` at
+   zero; any two differ by a global unit equal to 1 at zero. **We already have exactly this
+   uniqueness input**: `EllipticCurveGeom.universallyOConnected` (`EllipticCurve/Rigidity.lean:57`,
+   **PROVEN**, from `locallyWeierstrass_pushforward_O_eq_O`) gives KM's `H⁰(E_T, 𝒪^×) = {1}`.
+4. **The character.** For `P ∈ E[N](T)`, translation `t_P` preserves `[N]`; compare
+   `t_P^* α_Q` with `α_Q`; the ratio is a global unit on `E_T`, hence comes from a unique
+   unit of `T`. (*"This translation formulation is safer than saying merely 'evaluate at P'"*.)
+5. **Independence + base change.** Needs `sectionToPicRel` to be a *natural transformation*
+   — it is currently only a function with `sectionToPicRel_zero`. `sectionDivisor_baseChange`
+   is the geometric input; a `picClass`/ideal-module pullback compatibility theorem is still
+   required.
+6. **`μ_N`-valuedness.** Left bilinearity from the kernel translation action, then
+   `e(P,Q)^N = e([N]P, Q) = e(0,Q) = 1`. Use `muNPointsEquiv` + `_natural`/`_mul`/`_pow`.
+   **Right** bilinearity intrinsically needs the weaker Abel fragment
+   `κ(Q+Q') = κ(Q) ⊗ κ(Q')` — in the hybrid route, get it from fibre rigidity instead.
+
+**Lean optimisation offered:** work only over `T = E[N]` with the universal torsion section,
+then evaluate over `E[N] ×_S E[N]`. That produces the scheme morphism directly via
+`yonedaEquiv` and avoids building a fully natural pairing on every `T`. **Representability
+of `picRel` is not required.**
+
+## Two traps to respect
+
+* **Rigidification.** `Pic` goes through `Skeleton`, so an equality of classes gives only a
+  `Nonempty` isomorphism (`toSkeleton_eq_toSkeleton_iff`), never a canonical one; arbitrary
+  choices will not be functorial. Build the pairing on genuine rigidified sheaves, prove
+  invariance under rigidified isomorphism, *then* descend to classes.
+* **Order of operations in the hybrid.** Prove `μ_N`-valuedness **before** invoking fibre
+  rigidity: "generic-fibre equality for maps into `𝔾_m` does not control nilpotent
+  deviations; maps between finite étale schemes are rigid."
+
+## Scope limit to state plainly
+
+The hybrid proves the hard properties **only where `N` is invertible**. In characteristic
+dividing `N`, geometric points do not detect a finite flat group scheme and the field
+theorem does not apply; scheme-theoretic perfectness there genuinely needs Cartier–Nishi.
+Also, even with `N` invertible, "nondegenerate on geometric fibres" and "`E[N] ≅ E[N]^D`"
+are different Lean statements — the latter needs a usable Cartier-dual object. **This is a
+second, independent reason to add `[NIsInvertible S N]` to the register (A.0).**
+
+## Divisor/norm route: improved, still not cheapest
+
+`RelEffCartierDiv` "removes a major preliminary layer and makes the divisor route
+credible". But: **"incidence loci do not supply a moving lemma"** — they say where supports
+meet, not how to find a linearly equivalent divisor with disjoint support. Still missing:
+non-effective/principal relative divisors, relative rational functions with prescribed
+divisors, moving/existence after an fppf cover, sheafified finite-locally-free norms with
+base change, evaluation on finite flat divisors, and **family Weil reciprocity — "the
+dominant mathematical cost"**.
