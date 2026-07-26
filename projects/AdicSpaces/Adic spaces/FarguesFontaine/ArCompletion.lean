@@ -1728,6 +1728,60 @@ theorem exists_valued_eq_teichCoeffAr {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ <
     (tendsto_gaussTerm_teichCoeffAr p F ϖ hx) (by rw [← hv]; exact hvne)
   exact ⟨n₀, by rw [hv, hn₀], hmax⟩
 
+/-- **Coordinate recovery for `Φ`**: the limit coordinates of a `Φ`-series are the
+input coefficients (prefix approximants are eventually coordinate-constant). -/
+theorem teichCoeffAr_PhiHatK {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) {b : ℕ → F}
+    (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
+      Filter.atTop (nhds 0)) (n : ℕ) :
+    teichCoeffAr p F ϖ hρ0 hρ1 (PhiHatK p F ϖ hρ0 hρ1 b) n = b n := by
+  haveI hcompl : CompleteSpace F := IsPerfectoidRing.complete (p := p) (A := F)
+  haveI ht0 : T0Space F := IsPerfectoidRing.t0 (p := p) (A := F)
+  haveI huag : IsUniformAddGroup F := IsPerfectoidRing.uniformAddGroup (p := p) (A := F)
+  have hΦ := tendsto_PhiHatK p F ϖ hρ0 hρ1 hb
+  have htend : Filter.Tendsto (fun N => prefixAloc p F ϖ b N) Filter.atTop
+      (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1)
+        (nhds (PhiHatK p F ϖ hρ0 hρ1 b))) :=
+    Filter.tendsto_comap_iff.mpr hΦ
+  have hcoords := (tendsto_teichCoeffAr p F ϖ
+    (PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 hb) n).comp htend
+  have hev : ∀ᶠ N in Filter.atTop,
+      teichCoeffF p F (alocToWittF p F ϖ (prefixAloc p F ϖ b N)) n = b n :=
+    Filter.eventually_atTop.mpr ⟨n + 1, fun N hN =>
+      teichCoeffF_prefixAloc p F ϖ b (lt_of_lt_of_le (Nat.lt_succ_self n) hN)⟩
+  have hconst : Filter.Tendsto (fun _ : ℕ => b n) Filter.atTop
+      (nhds (teichCoeffAr p F ϖ hρ0 hρ1 (PhiHatK p F ϖ hρ0 hρ1 b) n)) :=
+    hcoords.congr' hev
+  exact tendsto_nhds_unique hconst tendsto_const_nhds
+
+/-- Limit coordinates of `0` vanish. -/
+theorem teichCoeffAr_zero {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (n : ℕ) :
+    teichCoeffAr p F ϖ hρ0 hρ1 (0 : hatK p F hρ0 hρ1) n = 0 := by
+  have hdec := tendsto_gaussTerm_teichCoeffAr p F ϖ
+    (zero_mem (ArSub p F ϖ hρ0 hρ1))
+  have hB : BddAbove (Set.range (fun m => ρ ^ m * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 (0 : hatK p F hρ0 hρ1) m))) := by
+    have hev := hdec.eventually_lt_const one_pos
+    obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp hev
+    refine ⟨max 1 ((Finset.range (K + 1)).sup (fun m => ρ ^ m * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 (0 : hatK p F hρ0 hρ1) m))), ?_⟩
+    rintro s ⟨m, rfl⟩
+    rcases lt_or_ge m (K + 1) with hm | hm
+    · exact le_max_of_le_right (Finset.le_sup
+        (f := fun m => ρ ^ m * perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 (0 : hatK p F hρ0 hρ1) m))
+        (Finset.mem_range.mpr hm))
+    · exact le_max_of_le_left (hK m (by omega)).le
+  have hform := valued_eq_iSup_teichCoeffAr p F ϖ (zero_mem (ArSub p F ϖ hρ0 hρ1))
+  rw [Valuation.map_zero] at hform
+  have h1 := le_ciSup hB n
+  rw [← hform] at h1
+  have hterm : ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 (0 : hatK p F hρ0 hρ1) n) = 0 :=
+    le_antisymm h1 zero_le
+  rcases mul_eq_zero.mp hterm with h | h
+  · exact absurd h (pow_pos hρ0 n).ne'
+  · exact (Valuation.zero_iff _).mp h
+
 end FarguesFontaine
 
 end
