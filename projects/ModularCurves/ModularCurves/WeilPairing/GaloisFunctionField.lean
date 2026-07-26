@@ -538,4 +538,20 @@ theorem projectiveDivisorOf_galoisFunctionFieldEquiv {L : Type v} [Field L] [Dec
     Finsupp.equivMapDomain_eq_mapDomain, ← Finsupp.mapDomain_add]
   rfl
 
+/-- **(M1b-3b-viii, step a)** The `σ`-action on smooth points agrees with mathlib's
+`Affine.Point.map σ` under `toProjectiveSmoothPoint`: relabelling a point's projective
+class is the projective class of the `σ`-image point. -/
+theorem galoisProjPointEquiv_toProjectiveSmoothPoint {L : Type v} [Field L] [DecidableEq L]
+    [Algebra k L] (σ : L ≃ₐ[k] L) (P : (W.baseChange L).toAffine.Point) :
+    galoisProjPointEquiv W σ
+        (WeierstrassCurve.Affine.Point.toProjectiveSmoothPoint P) =
+      WeierstrassCurve.Affine.Point.toProjectiveSmoothPoint
+        (WeierstrassCurve.Affine.Point.map (W' := W) (F := L) (K := L)
+          (σ.toAlgHom : L →ₐ[k] L) P) := by
+  cases P with
+  | zero => rfl
+  | some x y h =>
+    refine congrArg HasseWeil.Curves.ProjectiveSmoothPoint.affine ?_
+    exact HasseWeil.Curves.SmoothPlaneCurve.SmoothPoint.ext rfl rfl
+
 end ModularCurves
