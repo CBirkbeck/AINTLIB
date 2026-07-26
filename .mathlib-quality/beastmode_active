@@ -1,22 +1,25 @@
-FOCUS: [T-SMOOTH-REG] the last leaf of caveat G4 — `irreducibleSpace_of_connectedSpace_of_smooth`
-(ModularCurve/IrreducibilityScoping.lean:63, the ONLY sorry there).
-PLAN (validated): X smooth of rel dim 1 over kbar => every local ring is a DOMAIN =>
-irreducible components disjoint => connected+nonempty => irreducible.
-Local-ring domain via: (b) Omega_{A/k} free of rank 1 + the k-point derivation retraction
-=> m is PRINCIPAL (spanFinrank <= 1); (c) dim A_m >= 1 from the standard-smooth presentation
-A = MvPolynomial iota k / (f_j)_{j in sigma}, #iota = 1 + #sigma, via
-  height(q) = #iota  (maximal ideal of a polynomial ring over an ALG CLOSED field)
-  and brick 1 (dim R <= dim (R/span s) + #s);
-(d) IsRegularLocalRing.of_spanFinrank_le; (e) my IsRegularLocalRing.isDomain.
-DONE: brick 1 = ForMathlib/KrullDimQuotientSpan.lean
-  ringKrullDim_le_ringKrullDim_quotient_span_add_card (n-induction with the ring quantified
-  INSIDE; DoubleQuot.quotQuotEquivQuotSup for the double quotient).
-NEXT: brick 2 = height of a maximal ideal of MvPolynomial iota k (k alg closed) is #iota.
-  Route: Nullstellensatz (MvPolynomial.eq_vanishingIdeal_singleton_of_isMaximal) => q = ker(eval a);
-  chain span{X i - C(a i) : i in S} for S increasing; each prime since the quotient is a
-  polynomial ring on the complement (domain). Upper bound is free from
-  MvPolynomial.ringKrullDim_of_isNoetherianRing (dim = #iota).
-ALSO NOTE: mathlib now HAS MvPolynomial.ringKrullDim_of_isNoetherianRing.
-DS4 M1 status: weilPairing_galois + fieldWeilPairing_galois LANDED (axiom-clean);
-M1c (torsionAlgebraPointsEquiv named + Galois equivariance) is parked, with
-EllipticCurve/GlobalChartOverField.lean (global Weierstrass chart over a field) landed for it.
+FOCUS: [T-SMOOTH-REG] closing `irreducibleSpace_of_connectedSpace_of_smooth`
+(ModularCurve/IrreducibilityScoping.lean:63 — the only sorry in that file; caveat G4).
+LANDED SO FAR (all axiom-clean):
+  brick 1  ForMathlib/KrullDimQuotientSpan.lean  ringKrullDim_le_ringKrullDim_quotient_span_add_card
+  brick 3  same file: height_comap_le_height_add_card (quotient form, via the
+           IsLocalization (algebraMapSubmonoid ...) (S / I.map ...) instance)
+  brick 3 same file: height_comap_ringEquiv + height_comap_le_height_add_card_of_surjective
+  brick 2  ForMathlib/MvPolynomialMaximalHeight.lean card_le_height_of_isMaximal
+  brick 4  ForMathlib/SmoothCotangentPrincipal.lean exists_le_span_singleton_sup_sq
+           (KEY mathlib lemma: Algebra.FormallySmooth.kerCotangentToTensor_injective_iff
+            + Subsingleton (Algebra.H1Cotangent k k) => m/m^2 injects into k (x)_A Omega)
+  brick 5a ForMathlib/SmoothRegularLocal.lean one_le_height_of_isMaximal
+NEXT (brick 5b): the k-point at a maximal ideal.
+  A f.g. over k alg closed, m maximal => A/m = k:
+  finite_of_finite_type_of_isJacobsonRing k (A/m) (Zariski) +
+  IsAlgClosed.algebraMap_bijective_of_isIntegral => (A/m) ~alg[k] k;
+  produce instances [Algebra A k] [IsScalarTower k A k] with RingHom.ker (algebraMap A k) = m.
+THEN (brick 5c): brick 4 => m <= (x) + m^2; push to A_m (Ideal.map_sup / Ideal.map_pow /
+  IsLocalization.AtPrime.map_eq_maximalIdeal); Nakayama
+  (Submodule.le_of_le_smul_of_le_jacobson_bot + IsLocalRing.jacobson_eq_maximalIdeal)
+  => maximalIdeal = span {x} => spanFinrank <= 1; with brick 5a (dim >= 1) apply
+  IsRegularLocalRing.of_spanFinrank_le then ModularCurves.IsRegularLocalRing.isDomain.
+THEN (brick 6): scheme level — local rings of X are localizations at primes of the
+  standard-smooth Gamma(V); domain => unique minimal prime => irreducible components
+  disjoint => (ForMathlib/IrreducibleConnected.lean) connected+nonempty => irreducible.
