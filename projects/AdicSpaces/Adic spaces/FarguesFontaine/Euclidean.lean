@@ -264,6 +264,134 @@ theorem gaussValueF_teichmuller_sub_sub_le {ρ : NNReal} (hρ1 : ρ ≤ 1) (a b 
       _ = ρ * max (perfectoidValuation p F a) (perfectoidValuation p F b) := by
           rw [mul_comm, hcmax]
 
+/-- **Witt homogeneity (2.8.1), `n`-ary form**: the discrepancy between a finite sum
+of Teichmüller lifts and the Teichmüller lift of the sum is `ρ`-small relative to a
+common coefficient bound. -/
+theorem gaussValueF_teichmuller_sum_sub_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    {ι : Type*} (s : Finset ι) (f : ι → F) {B : NNReal}
+    (hf : ∀ i ∈ s, perfectoidValuation p F (f i) ≤ B) :
+    gaussValueF p F ρ ((∑ i ∈ s, WittVector.teichmuller p (f i))
+      - WittVector.teichmuller p (∑ i ∈ s, f i))
+      ≤ ρ * B := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    have hexpr : ((∑ i ∈ (∅ : Finset ι), WittVector.teichmuller p (f i))
+        - WittVector.teichmuller p (∑ i ∈ (∅ : Finset ι), f i)) = 0 := by
+      rw [Finset.sum_empty, Finset.sum_empty, WittVector.teichmuller_zero, sub_zero]
+    rw [hexpr, gaussValueF_zero]
+    exact zero_le
+  | insert a t ha ih =>
+    have hfa : perfectoidValuation p F (f a) ≤ B := hf a (Finset.mem_insert_self a t)
+    have hft : ∀ i ∈ t, perfectoidValuation p F (f i) ≤ B :=
+      fun i hi => hf i (Finset.mem_insert_of_mem hi)
+    have hS : perfectoidValuation p F (∑ i ∈ t, f i) ≤ B :=
+      Valuation.map_sum_le _ hft
+    rw [Finset.sum_insert ha, Finset.sum_insert ha]
+    have hsplit : (WittVector.teichmuller p (f a)
+          + ∑ i ∈ t, WittVector.teichmuller p (f i))
+        - WittVector.teichmuller p (f a + ∑ i ∈ t, f i)
+        = (WittVector.teichmuller p (f a)
+            + WittVector.teichmuller p (∑ i ∈ t, f i)
+            - WittVector.teichmuller p (f a + ∑ i ∈ t, f i))
+          + ((∑ i ∈ t, WittVector.teichmuller p (f i))
+            - WittVector.teichmuller p (∑ i ∈ t, f i)) := by
+      ring
+    rw [hsplit]
+    have hBsum : BddAbove (Set.range (gaussTermF p F ρ
+        (∑ i ∈ t, WittVector.teichmuller p (f i)))) :=
+      (gaussValueF_finset_sum_le p F hρ0 hρ1 B t
+        (fun i => WittVector.teichmuller p (f i))
+        (fun i hi => ⟨bddAbove_gaussTermF_teichmuller p F (f i), by
+          rw [gaussValueF_teichmuller]
+          exact hft i hi⟩)).1
+    have hB1 : BddAbove (Set.range (gaussTermF p F ρ
+        (WittVector.teichmuller p (f a)
+          + WittVector.teichmuller p (∑ i ∈ t, f i)
+          - WittVector.teichmuller p (f a + ∑ i ∈ t, f i)))) := by
+      have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1
+        (bddAbove_gaussTermF_add p F hρ0 hρ1
+          (bddAbove_gaussTermF_teichmuller p F (f a))
+          (bddAbove_gaussTermF_teichmuller p F (∑ i ∈ t, f i)))
+        (bddAbove_gaussTermF_neg p F hρ0 hρ1
+          (bddAbove_gaussTermF_teichmuller p F (f a + ∑ i ∈ t, f i)))
+      rwa [← sub_eq_add_neg] at h1
+    have hB2 : BddAbove (Set.range (gaussTermF p F ρ
+        ((∑ i ∈ t, WittVector.teichmuller p (f i))
+          - WittVector.teichmuller p (∑ i ∈ t, f i)))) := by
+      have h1 := bddAbove_gaussTermF_add p F hρ0 hρ1 hBsum
+        (bddAbove_gaussTermF_neg p F hρ0 hρ1
+          (bddAbove_gaussTermF_teichmuller p F (∑ i ∈ t, f i)))
+      rwa [← sub_eq_add_neg] at h1
+    refine le_trans (gaussValueF_add_le p F hρ0 hρ1 hB1 hB2) (max_le ?_ (ih hft))
+    refine le_trans (gaussValueF_teichmuller_add_sub_le p F hρ1.le (f a)
+      (∑ i ∈ t, f i)) ?_
+    exact mul_le_mul_of_nonneg_left (max_le hfa hS) zero_le
+
+variable (ϖ : PseudoUniformizer F)
+
+/-- **The degree** (Kedlaya Definition 2.4): the largest coordinate index realizing
+`λ_r(x) = max_n ρⁿ|xₙ|`. Junk value `0` for `x = 0` (Kedlaya's `deg 0 = -∞`) and for
+points outside `A^r`. -/
+def degAr {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x : hatK p F hρ0 hρ1) : ℕ :=
+  sSup {n | Valued.v x = ρ ^ n * perfectoidValuation p F
+    (teichCoeffAr p F ϖ hρ0 hρ1 x n)}
+
+/-- The attainment set of a nonzero element of `A^r` is bounded above. -/
+theorem bddAbove_attainment {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) :
+    BddAbove {n | Valued.v x = ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 x n)} := by
+  have hvpos : 0 < Valued.v x := pos_iff_ne_zero.mpr
+    ((Valuation.ne_zero_iff (Valued.v :
+      Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0)
+  obtain ⟨K, hK⟩ := Filter.eventually_atTop.mp
+    ((tendsto_gaussTerm_teichCoeffAr p F ϖ hx).eventually_lt_const hvpos)
+  refine ⟨K, fun n hn => ?_⟩
+  by_contra hcon
+  push Not at hcon
+  have h1 := hK n hcon.le
+  rw [← hn] at h1
+  exact absurd h1 (lt_irrefl _)
+
+/-- **Degree specification** (Kedlaya Definition 2.4): nonzero elements of `A^r`
+attain their value at the degree index, which dominates every attaining index. -/
+theorem degAr_spec {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) :
+    Valued.v x = ρ ^ (degAr p F ϖ hρ0 hρ1 x) * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 x (degAr p F ϖ hρ0 hρ1 x))
+      ∧ ∀ m, Valued.v x = ρ ^ m * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 x m) → m ≤ degAr p F ϖ hρ0 hρ1 x := by
+  have hne : {n | Valued.v x = ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 x n)}.Nonempty := by
+    obtain ⟨n₀, hn₀, -⟩ := exists_valued_eq_teichCoeffAr p F ϖ hx hx0
+    exact ⟨n₀, hn₀⟩
+  have hbdd := bddAbove_attainment p F ϖ hx hx0
+  constructor
+  · exact Nat.sSup_mem hne hbdd
+  · intro m hm
+    exact le_csSup hbdd hm
+
+/-- Terms above the degree are strictly below the value. -/
+theorem gaussTerm_lt_of_degAr_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0)
+    {n : ℕ} (hn : degAr p F ϖ hρ0 hρ1 x < n) :
+    ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+      < Valued.v x := by
+  have hle : ρ ^ n * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n)
+      ≤ Valued.v x := by
+    rw [valued_eq_iSup_teichCoeffAr p F ϖ hx]
+    have hB : BddAbove (Set.range (fun n => ρ ^ n * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 x n))) := by
+      obtain ⟨n₁, hn₁, hmax⟩ := exists_valued_eq_teichCoeffAr p F ϖ hx hx0
+      exact ⟨ρ ^ n₁ * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x n₁), by
+        rintro s ⟨k, rfl⟩
+        exact hmax k⟩
+    exact le_ciSup hB n
+  rcases lt_or_eq_of_le hle with hlt | heq
+  · exact hlt
+  · exact absurd ((degAr_spec p F ϖ hx hx0).2 n heq.symm) (Nat.not_le.mpr hn)
+
 end FarguesFontaine
 
 end

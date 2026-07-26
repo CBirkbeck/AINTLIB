@@ -1,1 +1,1 @@
-FOCUS: T903 value formula corollary — Valued.v x = sup_n rho^n |x_n| on ArSub (realization + valued_PhiHatK); check valued_PhiHatK statement first. Then T903 remaining: wAr layer + deg transfer; board update. 85 commits pushed.
+FOCUS: T904 (ii) n-ary (2.8.1) list form gaussValueF_teichmuller_list_sum_sub_le (induction on binary + F-ultrametric max); then Remark 2.7, degAr + spec, deg_mul. Euclidean.lean green at 87 commits pushed.
