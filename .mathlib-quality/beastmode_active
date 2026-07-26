@@ -1,8 +1,4 @@
-FOCUS: DS4 M1b — ONE leaf: the translation conjugation Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma at g_T.
-Everything else is DONE, sorry-free, axiom-clean (WeilPairing/GaloisFunctionField.lean -> weilPairing_galois_of_conj).
-IMPORTANT FINDING (checked): HasseWeil algHom_ext_x_y_gen (TranslationOrd:2252) is for F-ALGEBRA maps, but Phi_sigma is only a RING equiv (sigma-semilinear over L), so it does NOT apply directly.
-NEW FIRST BRICK: prove a ring-hom extensionality
-  ringHom_ext_const_x_y_gen : for psi1 psi2 : KE -> KE ring homs, if they agree on algebraMap L (constants), on x_gen and on y_gen, then psi1 = psi2.
-  Mirror the proof of algHom_ext_x_y_gen: IsLocalization.ringHom_ext (nonZeroDivisors CoordinateRing) then AdjoinRoot.ringHom_ext-style argument then Polynomial ext with the constants clause.
-THEN the conjugation itself: compute both sides on constants (galoisFunctionFieldEquiv_algebraMap + translate fixes constants via .commutes), on x_gen and y_gen (translateAlgEquivOfPoint_*_x_gen/_y_gen at 3613/3731/3773/3859, and Phi_sigma on generators = the generators with sigma applied to coefficients).
-THEN: fieldWeilPairing_galois (bundled form) and M1c (EtaleDescent:440 + torsionAlgebraPointsEquiv equivariance).
+FOCUS: DS4 M1b leaf (translation conjugation). Landed bricks: ringHom_ext_const_x_y_gen (semilinear extensionality), galoisFractionLift_x_gen, galoisFractionLift_y_gen (the raw lift fixes the generic coordinates, modulo the curve-equality cast).
+NEXT: cast them through ffGalCast to get galoisFunctionFieldEquiv_x_gen / _y_gen : Phi_sigma (x_gen) = x_gen and Phi_sigma (y_gen) = y_gen. Pattern: use the `key : forall V (h : V = W.baseChange L) ...; subst h; rfl` trick already used in galoisFunctionFieldEquiv_algebraMap, but with a HEq bridge for the generators (x_gen V vs x_gen (W.baseChange L)) — or prove a cast lemma `RingEquiv.cast h (x_gen V) = x_gen (W.baseChange L)` by subst.
+THEN the conjugation itself via ringHom_ext_const_x_y_gen: compare Phi o tau_S and tau_{sigma S} o Phi on constants (galoisFunctionFieldEquiv_algebraMap + AlgEquiv.commutes) and on x_gen,y_gen (translateAlgEquivOfPoint_*_x_gen/_y_gen give tau_S on the generators as rational functions in the coefficients; Phi applies sigma to those coefficients, which is exactly tau_{sigma S} on the generators).
+THEN weilPairing_galois (unconditional), fieldWeilPairing_galois, and M1c.
