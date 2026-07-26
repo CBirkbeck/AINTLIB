@@ -1,18 +1,14 @@
-FOCUS: Gap A. Pic-level bridge DONE + axiom-clean:
-  Modules.IsInvertible.unit_eq_one / unit_eq_unit_of_iso   (GlueTrivialization.lean)
-  RelEffCartierDiv.picClass_eq_of_nonempty_iso              (DivisorClass.lean)
-CHAIN NOW COMPLETE FROM MODULE-ISO TO kappa:
-  cover-local generating sections normalized on 0-section
-    -> nonempty_unitObj_iso_of_normalized_glue (RigidDescent)
-    -> Nonempty (idealModule D =~ idealModule D')
-    -> picClass_eq_of_nonempty_iso
-    -> equal picClass -> equal kappa.
-NEXT STEP: build the tensor-level version needed by kappa_add, i.e.
-  picClass D_Q * picClass D_Q' = picClass D_{Q+Q'} * picClass D_0  (mod ker picRelProj),
-which needs Skeleton.toSkeleton_tensorObj (already used in PicComparison
-.IsInvertible.isUnit_toSkeleton) to turn a product of classes into the class of a tensor.
-Then the ONLY remaining input is (LOCAL-SQUARE): the relative Miller/line function.
-NOTE: HasseWeil field proof (Foundation/Curves/Divisor/MillerAllChar.lean, 726 lines) is
-valuation-theoretic and does NOT transport to a base ring — the relative statement must be
-the IDEAL identity I(D_P).I(D_Q).I(D_{-(P+Q)}) = (line) and I(D_{P+Q}).I(D_{-(P+Q)}) = (vert)
-on a chart where the sections are in general position.
+FOCUS: Gap A. BOTH LEAVES NOW REDUCED to their descent-compatible form, and everything
+else in SelfAdjointN.lean is PROVED:
+  exists_pic_map_snd_kappa_add                    <-- LEAF (i), the only sorry left for kappa_add
+  exists_pic_map_snd_picMap_mulByHom_kappa        <-- LEAF (ii)
+Derived (no longer sorried): kappa_add, picMap_mulByHom_kappa_pow, picMap_mulByHom_kappa_eq_one.
+Mechanism: eq_of_mul_inv_eq_picMap_snd — Ker(0^*) cap Im(f^*) = 1 (GME p.109 splitting), so
+"the discrepancy comes from the base" upgrades to an equality. That is EXACTLY what
+nonempty_unitObj_iso_of_normalized_glue (Picard/RigidDescent.lean) produces.
+NEXT AND ONLY REMAINING MATH: (LOCAL-SQUARE). On a chart of the base with a Weierstrass
+model, exhibit the generating section l/v of the difference bundle, normalized on the zero
+section; feed to nonempty_unitObj_iso_of_normalized_glue; convert with
+picClass_mul_eq_of_nonempty_tensor_iso / picClass_eq_of_nonempty_iso.
+NOTE: mulByN E t N was introduced because Pic-valued products need
+(E.baseChange t).E and pullback E.pi t SYNTACTICALLY equal, not just defeq.

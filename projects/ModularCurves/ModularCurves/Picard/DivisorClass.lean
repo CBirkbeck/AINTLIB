@@ -71,6 +71,43 @@ theorem picClass_eq_of_nonempty_iso [IsSeparated π] {D D' : RelEffCartierDiv π
     (Modules.IsInvertible.unit_eq_unit_of_iso (D.isInvertible_idealModule h)
       (D'.isInvertible_idealModule h') e)
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **Multiplicativity.** A tensor isomorphism between ideal modules gives an equality of
+*products* of Picard classes. This is the shape the theorem of the square takes:
+`I(D_Q) ⊗ I(D_{Q'}) ≅ I(D_{Q+Q'}) ⊗ I(D_0)`. -/
+theorem picClass_mul_eq_of_nonempty_tensor_iso [IsSeparated π]
+    {D₁ D₂ D₃ D₄ : RelEffCartierDiv π}
+    (h₁ : IsOfficialCartier π D₁.ideal) (h₂ : IsOfficialCartier π D₂.ideal)
+    (h₃ : IsOfficialCartier π D₃.ideal) (h₄ : IsOfficialCartier π D₄.ideal)
+    (e : Nonempty (Modules.tensorObj (idealModule D₁.ideal) (idealModule D₂.ideal) ≅
+      Modules.tensorObj (idealModule D₃.ideal) (idealModule D₄.ideal))) :
+    D₁.picClass h₁ * D₂.picClass h₂ = D₃.picClass h₃ * D₄.picClass h₄ := by
+  letI := Modules.monoidalCategory C
+  letI := Modules.symmetricCategory C
+  have key : ∀ (Da Db : RelEffCartierDiv π) (ha : IsOfficialCartier π Da.ideal)
+      (hb : IsOfficialCartier π Db.ideal),
+      (((Da.isInvertible_idealModule ha).isUnit_toSkeleton.unit *
+          (Db.isInvertible_idealModule hb).isUnit_toSkeleton.unit :
+        (Skeleton C.Modules)ˣ) : Skeleton C.Modules)
+        = toSkeleton (Modules.tensorObj (idealModule Da.ideal) (idealModule Db.ideal)) := by
+    intro Da Db ha hb
+    rw [Units.val_mul, IsUnit.unit_spec, IsUnit.unit_spec, ← Skeleton.toSkeleton_tensorObj]
+    exact (toSkeleton_eq_toSkeleton_iff.mpr (Modules.nonempty_tensorObj_iso_tensor _ _)).symm
+  have hu : ((D₁.isInvertible_idealModule h₁).isUnit_toSkeleton.unit *
+        (D₂.isInvertible_idealModule h₂).isUnit_toSkeleton.unit)
+      = ((D₃.isInvertible_idealModule h₃).isUnit_toSkeleton.unit *
+        (D₄.isInvertible_idealModule h₄).isUnit_toSkeleton.unit) := by
+    refine Units.ext ?_
+    rw [key D₁ D₂ h₁ h₂, key D₃ D₄ h₃ h₄]
+    exact toSkeleton_eq_toSkeleton_iff.mpr e
+  calc D₁.picClass h₁ * D₂.picClass h₂
+      = ((D₁.isInvertible_idealModule h₁).isUnit_toSkeleton.unit *
+          (D₂.isInvertible_idealModule h₂).isUnit_toSkeleton.unit)⁻¹ := (mul_inv _ _).symm
+    _ = ((D₃.isInvertible_idealModule h₃).isUnit_toSkeleton.unit *
+          (D₄.isInvertible_idealModule h₄).isUnit_toSkeleton.unit)⁻¹ := by rw [hu]
+    _ = D₃.picClass h₃ * D₄.picClass h₄ := mul_inv _ _
+
 end RelEffCartierDiv
 
 section Assembly

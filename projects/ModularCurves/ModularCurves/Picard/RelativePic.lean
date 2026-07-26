@@ -85,6 +85,33 @@ noncomputable def picRelProj (t : T ⟶ S) :
       (Pic.map (baseChangeZero p z hz t)))⁻¹).codRestrict _
     (mul_inv_map_map_mem p z hz t)
 
+/-- Classes pulled back from the base die in the relative Picard group: `f_T^* Pic(T)` is
+exactly the kernel of the projection (GME p. 109's splitting). -/
+theorem picRelProj_map_snd (t : T ⟶ S) (M : Pic T) :
+    picRelProj p z hz t (Pic.map (Limits.pullback.snd p t) M) = 1 := by
+  refine Subtype.ext ?_
+  have h : Pic.map (baseChangeZero p z hz t) (Pic.map (Limits.pullback.snd p t) M) = M := by
+    calc Pic.map (baseChangeZero p z hz t) (Pic.map (Limits.pullback.snd p t) M)
+        = Pic.map (baseChangeZero p z hz t ≫ Limits.pullback.snd p t) M := by
+          rw [Pic.map_comp]; rfl
+      _ = M := by rw [baseChangeZero_snd, Pic.map_id]; rfl
+  show Pic.map (Limits.pullback.snd p t) M *
+      (Pic.map (Limits.pullback.snd p t)
+        (Pic.map (baseChangeZero p z hz t) (Pic.map (Limits.pullback.snd p t) M)))⁻¹ = 1
+  rw [h, mul_inv_cancel]
+
+/-- Two classes with the same image in the relative Picard group are exactly those differing
+by a class pulled back from the base. This is the form in which the theorem of the square is
+consumed: the difference bundle need only be shown to come from `T`. -/
+theorem picRelProj_eq_of_mul_inv_eq_map_snd (t : T ⟶ S)
+    {x y : Pic (Limits.pullback p t)} {M : Pic T}
+    (h : x * y⁻¹ = Pic.map (Limits.pullback.snd p t) M) :
+    picRelProj p z hz t x = picRelProj p z hz t y := by
+  have h1 : picRelProj p z hz t (x * y⁻¹) = 1 := by
+    rw [h]; exact picRelProj_map_snd p z hz t M
+  rw [map_mul, map_inv] at h1
+  exact mul_inv_eq_one.mp h1
+
 /-- **Comparison with the displayed definition** (GME p. 108, the definition preceding
 (2.16): "`Pic_{E/S}(T) = Pic(E ×_S T)/f_T^* Pic(T)`"): the zero-section splitting
 identifies the quotient with the kernel model. -/
