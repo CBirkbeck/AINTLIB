@@ -1,0 +1,7 @@
+FOCUS: RE-PLUMB yRho off the quarantined Legendre leg onto the AXIOM-CLEAN level-3 rigidifier (removes exists_scaleTorsorData from the cone; DS4 becomes the only register). Full scoping + Jacobian computation: projects/ModularCurves/.mathlib-quality/decomposition-caveats.md (section "DISCOVERY 2026-07-26").
+BRICK 1 (in progress): Algebra.IsStandardSmoothOfRelativeDimension 1 R (E3ModuliRing R) for 3 invertible.
+  1a. In E3Quotient: from the flex relation gamma*(3b^2+3bg+g^2)=0 derive s := beta+gamma divides gamma^2 (s*(3gamma-3s) = gamma^2).
+  1b. Hence IsUnit (algebraMap _ (E3ModuliRing R) s) via IsLocalization.Away.isUnit_of_dvd (s | e3Delta^2 since gamma | e3Delta), so pderiv 1 e3Rel = -3s^2 is a unit.
+  1c. IsLocalization.Away (e3Delta * pderiv) (E3ModuliRing) by IsLocalization.Away.mk; combine with IsLocalization.Away.mul + IsLocalization.algEquiv to identify E3ModuliRing with a further Away-localization of Localization.Away (pderiv), which is standard smooth of rel dim 1 by ForMathlib/StandardSmoothHypersurface.isStandardSmoothOfRelativeDimension_away_pderiv; finish with IsStandardSmoothOfRelativeDimension.trans (0+1) and .of_algEquiv.
+BRICK 2: mirror rhoLegendre_total_isStandardSmooth at level 3 (RhoSmooth.lean) using universalE3Obj + levelThreeData.
+BRICK 3: re-point exists_representsYRho / yRho_representable (RhoPoints.lean) at the level-3 cover (rL3 = naiveLevelThreeRepresentableBy, dL3 + surjectivity from exists_levelThreeTorsorData).
