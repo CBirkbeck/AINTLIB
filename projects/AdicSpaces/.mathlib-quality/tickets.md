@@ -704,9 +704,29 @@ File plan: `FarguesFontaine/RobbaLoc.lean` (T901), `FarguesFontaine/WittF.lean` 
   toHatK with valued_toHatK (Valued.v ∘ toHatK = gaussValue, via valuedCompletion_apply),
   Aloc (abbrev, finally defined here), AlocToHatK/BlocToHatK (IsLocalization.lift,
   unit-values via map_pow through the gaussVal bundle), ArSub/BrSub :=
-  range.topologicalClosure. REMAINING: extended coordinates on hatK-balls via T902(b3)
-  moduli + reconstruction/attainment + deg + deg_mul + summability (the realization
-  theorems per AD-3-revised); note Br-vs-Ar[1/p] identification deferred until needed | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
+  range.topologicalClosure. REMAINING (exact next steps, in order):
+  (1) `alocToWittF : Aloc →+* WittVector p F` := IsLocalization.lift of
+      `WittVector.map (powerBoundedSubring.toSubring F).subtype` ([ϖ]-image is a unit:
+      inverse `teichmuller p (ϖ⁻¹ : F)`, via map_teichmuller + teichmuller-mult +
+      mul_inv_cancel₀ + teichmuller_one); injectivity (denominators map to nonzerodivisors);
+  (2) coordinate transport: `teichCoeffF (WittVector.map ι a) n = ι (teichCoeff a n)`
+      (frobenius commutes with ring homs; symm-version by injectivity), hence
+      `teichCoeffAloc := teichCoeffF ∘ alocToWittF` extends teichCoeff with
+      [ϖ]-denominator scaling (scaling lemma teichCoeff_teichmuller_mul, F-version);
+  (3) per-coordinate ε-δ on Aloc-pairs with common denominator (clear [ϖ]^k, apply
+      exists_delta_teichCoeff_sub, pay c^{-k}; modulus uniform on fixed-denominator sets
+      — sufficient for Cauchy-sequence coordinates since a w-Cauchy sequence in Aloc can
+      be written with... CAUTION: re-derive; may need the denominator-bounded-on-Cauchy
+      argument or the direct W(F)-version of (b3), which is the same head-split recursion
+      run in W(F) using teichCoeffF and F-versions of head-split — F-head-split :=
+      exists_eq_sum_teichCoeffF_add at N=1 + tail-coords via the F-CORE-1 (mirror of
+      exists_head_split; port when needed);
+  (4) coordinates on ArSub := extend along density (DenseInducing/UniformContinuous.extend
+      or sequential: every x ∈ ArSub is a limit of Aloc-images; coords of the
+      approximants are Cauchy in F by (3); define teichCoeffAr x n := lim);
+  (5) reconstruction + attainment (wAr x = max ρⁿ|xₙ|, attained) on ArSub; then
+      deg := largest attaining index, deg_mul (T803-mirror), Rem-2.7, summability —
+      unlocking T904 (Euclidean). Br-vs-Ar[1/p] deferred until needed | **File**: FarguesFontaine/WittF.lean | **Depends**: T902
 - **REVISED per AD-3-revision**: `Aloc := Localization.Away (teichPi p F ϖ)`; wAloc :=
   extendToLocalization of gaussVal (mirror of T901 for the ϖ-only localization);
   `Ar ρ := UniformSpace.Completion (WithVal (wAloc ρ))` with mathlib `Valued`-instance
