@@ -31,6 +31,7 @@ import ModularCurves.EllipticCurve.SectionRigidity
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.MulByHomFlatFibre
+import ModularCurves.EllipticCurve.WeierstrassCover
 import ModularCurves.EllipticCurve.WeierstrassModel
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.Coaction
