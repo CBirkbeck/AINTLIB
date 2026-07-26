@@ -35,6 +35,30 @@ of `B^I`) is open; `pIdeal = (p)` is f.g.; `mem_pIdeal_pow_iff` shows `y ∈ (p)
 ρ₁ⁿ ∧ v(y₂) ≤ ρ₂ⁿ`, so `isAdic_pIdeal` identifies the subspace topology on `B^{I,+}` with
 the `p`-adic one; hence `BIPairOfDefinition`, `isHuberRing_BISub`, `isTateRing_BISub`.
 
+#### PERF-1 (2026-07-26) — **no heartbeat raises** (owner instruction)
+
+`set_option maxHeartbeats` / `synthInstance.maxHeartbeats` are not to be added; a timeout is
+fixed by breaking the proof up and passing implicit arguments explicitly. All 49 raises in
+`IntervalRing.lean` and `Presentation.lean` have been removed (see the two cleanup commits).
+The recurring causes, and their fixes, in this codebase:
+
+* generic `map_add`/`map_sum`/`map_mul` on a hom into a nested subring → state the identity
+  explicitly (`ArToBI_add`, `evalArHom_sum`, …) and prove it from the `RingHom` fields, or at
+  the ambient product level and transport with `Subtype.ext`;
+* `f ^ n` where the result type is a metavariable → ascribe it
+  (`(pIdeal … ^ n : Ideal ↥(BIPlusIn …))`);
+* `Subring.comap` in a definition → give the carrier explicitly (`BIPlusIn`), so membership
+  does not unfold through the comap;
+* anonymous constructors `⟨…, proof⟩` inside goals → name the bundled element (`sliceElt`);
+* a goal whose *context* is expensive (every tactic step ≈ 1s, e.g. `IsAdic` over a
+  subring-of-a-subring) → make the proof a one-step term over named lemmas.
+
+**Remaining**: `Groebner.lean` still has 6 raises, on the largest proofs of the campaign
+(`exists_groebner_family`, `groebner_reduce`, `approx_generation`, `exists_rps_series_limit`,
+`ideal_eq_span_groebner`, `isNoetherianRing_restrictedMvPowerSeries`). Removing them is a real
+decomposition pass — in that context even a 6-line wrapper is over budget, because destructuring
+the 9-component Gröbner existential costs seconds — and is tracked as its own task.
+
 #### AD-9 (2026-07-26) — **special intervals suffice; no general-radius Gröbner theory needed**
 
 Read from the arXiv source (`refs/paper.tex`, Kedlaya §4 = "Some additional rings"):

@@ -1,1 +1,1 @@
-FOCUS: removing heartbeat raises — Presentation.lean done (0 left); next IntervalRing.lean (12) then Groebner.lean (6)
+FOCUS: PERF-1 — Groebner.lean decomposition to drop its 6 remaining heartbeat raises; then back to T911 strictness
