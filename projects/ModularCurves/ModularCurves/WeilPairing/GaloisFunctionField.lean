@@ -1,0 +1,97 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import ModularCurves.WeilPairing.FieldPairing
+
+/-!
+# The Galois action on the function field of a base-changed curve (DS4 M1b-3a)
+
+DS4's field-level construction needs the Weil pairing to be `Gal(k̄/k)`-equivariant. The
+`HasseWeil` project proves the analogous statement for the **arithmetic Frobenius** over a
+*finite* field (`HasseBound/WeilPairing/FrobeniusFunctionFieldEquiv.lean`), and its proofs
+are parametric in the field automorphism — but that file's context fixes `[Fintype K]`, so
+the lemmas are unavailable over `ℚ`.
+
+This file redevelops the same construction for an **arbitrary base field `k`** and an
+arbitrary `σ : k̄ ≃ₐ[k] k̄`:
+
+* `coordRingMap_surjective_of_ringEquiv` / `..._bijective_of_ringEquiv` — `CoordinateRing.map`
+  along a ring equivalence of the base is bijective;
+* `map_algEquiv_baseChange_eq` — a `k`-algebra automorphism of `k̄` fixes `W ⊗ k̄`;
+* `galoisCoordRingEquiv` / `galoisFunctionFieldEquiv` — the induced automorphisms of the
+  coordinate ring and of the function field.
+
+These are the transport maps along which the Weil function (hence the pairing) will be
+compared in M1b-3b.
+-/
+
+universe u v
+
+open Polynomial WeierstrassCurve
+
+namespace ModularCurves
+
+variable {k : Type u} [Field k] (W : WeierstrassCurve k)
+
+/-- `CoordinateRing.map` along a ring **equivalence** of the base field is surjective. -/
+theorem coordRingMap_surjective_of_ringEquiv {L : Type v} [Field L] [Algebra k L]
+    (e : L ≃+* L) :
+    Function.Surjective
+      (WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine
+        (e : L →+* L)) := by
+  intro y
+  obtain ⟨q, rfl⟩ := AdjoinRoot.mk_surjective y
+  refine ⟨AdjoinRoot.mk _ (q.map (Polynomial.mapRingHom (e.symm : L →+* L))), ?_⟩
+  rw [WeierstrassCurve.Affine.CoordinateRing.map_mk]
+  congr 1
+  rw [Polynomial.map_map]
+  have hid : (Polynomial.mapRingHom (e : L →+* L)).comp
+      (Polynomial.mapRingHom (e.symm : L →+* L)) = RingHom.id L[X] := by
+    refine Polynomial.ringHom_ext ?_ ?_
+    · intro a
+      simp only [RingHom.comp_apply, Polynomial.coe_mapRingHom, Polynomial.map_C,
+        RingHom.id_apply, RingHom.coe_coe]
+      rw [RingEquiv.apply_symm_apply]
+    · simp only [RingHom.comp_apply, Polynomial.coe_mapRingHom, Polynomial.map_X,
+        RingHom.id_apply]
+  rw [hid, Polynomial.map_id]
+
+/-- `CoordinateRing.map` along a ring equivalence of the base field is bijective. -/
+theorem coordRingMap_bijective_of_ringEquiv {L : Type v} [Field L] [Algebra k L]
+    (e : L ≃+* L) :
+    Function.Bijective
+      (WeierstrassCurve.Affine.CoordinateRing.map (W.baseChange L).toAffine
+        (e : L →+* L)) :=
+  ⟨WeierstrassCurve.Affine.CoordinateRing.map_injective
+      (W' := (W.baseChange L).toAffine) (EquivLike.injective e),
+    coordRingMap_surjective_of_ringEquiv W e⟩
+
+/-- A `k`-algebra automorphism of an extension `L` fixes the base-changed curve `W ⊗ L`. -/
+theorem map_algEquiv_baseChange_eq {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    (W.baseChange L).map (σ : L →+* L) = W.baseChange L := by
+  rw [WeierstrassCurve.baseChange, WeierstrassCurve.map_map]
+  congr 1
+  ext x
+  show (σ : L →+* L).comp (algebraMap k L) x = algebraMap k L x
+  simpa using σ.commutes x
+
+/-- **(M1b-3a)** The coordinate-ring automorphism induced by `σ : L ≃ₐ[k] L`. -/
+noncomputable def galoisCoordRingEquiv {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    (W.baseChange L).toAffine.CoordinateRing ≃+*
+      ((W.baseChange L).map (σ : L →+* L)).toAffine.CoordinateRing :=
+  RingEquiv.ofBijective _
+    (coordRingMap_bijective_of_ringEquiv W (σ : L ≃+* L))
+
+/-- **(M1b-3a)** The function-field automorphism induced by `σ : L ≃ₐ[k] L`: lift
+`galoisCoordRingEquiv` to fraction fields and cast the codomain back along
+`map_algEquiv_baseChange_eq`. -/
+noncomputable def galoisFunctionFieldEquiv {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) :
+    (W.baseChange L).toAffine.FunctionField ≃+* (W.baseChange L).toAffine.FunctionField :=
+  (IsFractionRing.ringEquivOfRingEquiv (galoisCoordRingEquiv W σ)).trans
+    (RingEquiv.cast (R := fun (V : WeierstrassCurve L) => V.toAffine.FunctionField)
+      (map_algEquiv_baseChange_eq W σ))
+
+end ModularCurves
