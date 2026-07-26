@@ -1076,6 +1076,27 @@ theorem galoisFunctionFieldEquiv_translateSlope (xk yk : L) :
     map_sub, galoisFunctionFieldEquiv_x_gen, galoisFunctionFieldEquiv_y_gen,
     galoisFunctionFieldEquiv_algebraMap, galoisFunctionFieldEquiv_algebraMap]
 
+/-- `Φ_σ` fixes the `a₁`-coefficient of the generic base change `W_KE`. -/
+theorem galoisFunctionFieldEquiv_WKE_a₁ :
+    galoisFunctionFieldEquiv W σ ((HasseWeil.W_KE (W.baseChange L)).a₁) =
+      (HasseWeil.W_KE (W.baseChange L)).a₁ := by
+  rw [HasseWeil.W_KE, WeierstrassCurve.map_a₁]
+  exact galoisFunctionFieldEquiv_a₁ W σ
+
+/-- `Φ_σ` fixes the `a₂`-coefficient of `W_KE`. -/
+theorem galoisFunctionFieldEquiv_WKE_a₂ :
+    galoisFunctionFieldEquiv W σ ((HasseWeil.W_KE (W.baseChange L)).a₂) =
+      (HasseWeil.W_KE (W.baseChange L)).a₂ := by
+  rw [HasseWeil.W_KE, WeierstrassCurve.map_a₂]
+  exact galoisFunctionFieldEquiv_a₂ W σ
+
+/-- `Φ_σ` fixes the `a₃`-coefficient of `W_KE`. -/
+theorem galoisFunctionFieldEquiv_WKE_a₃ :
+    galoisFunctionFieldEquiv W σ ((HasseWeil.W_KE (W.baseChange L)).a₃) =
+      (HasseWeil.W_KE (W.baseChange L)).a₃ := by
+  rw [HasseWeil.W_KE, WeierstrassCurve.map_a₃]
+  exact galoisFunctionFieldEquiv_a₃ W σ
+
 end TranslationTransport
 
 end ModularCurves
