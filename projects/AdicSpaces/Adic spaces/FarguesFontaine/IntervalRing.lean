@@ -975,6 +975,35 @@ theorem resI_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ <
   rw [hcongr] at hb
   exact tendsto_nhds_unique hb ha
 
+set_option maxHeartbeats 1000000 in
+/-- **The restriction lands in the sub-interval ring**: for `z ∈ B^I` and two
+intermediate radii, the pair of restrictions lies in the corresponding interval ring
+`B^{I'}`. -/
+theorem resI_pair_mem {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} {θ η : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hη0 : 0 ≤ η) (hη1 : η ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ η * ρ₂ ^ (1 - η)) (hσ₂1 : ρ₁ ^ η * ρ₂ ^ (1 - η) < 1)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 z,
+        resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1 z)
+      ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 := by
+  haveI hne := neBot_comap_of_mem_BISub p F ϖ hz
+  have h1 := tendsto_resI p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 hz
+  have h2 := tendsto_resI p F ϖ hη0 hη1 hσ₂0 hσ₂1 hz
+  have hpair : Filter.Tendsto (fun x => (BlocToHatK p F ϖ hσ₁0 hσ₁1 x,
+        BlocToHatK p F ϖ hσ₂0 hσ₂1 x))
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds (resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1 z,
+        resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1 z)) :=
+    Filter.Tendsto.prodMk_nhds h1 h2
+  have hmem : ∀ᶠ x in Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z),
+      (BlocToHatK p F ϖ hσ₁0 hσ₁1 x, BlocToHatK p F ϖ hσ₂0 hσ₂1 x)
+        ∈ (Set.range (BIProd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)) :=
+    Filter.Eventually.of_forall fun x => ⟨x, rfl⟩
+  exact mem_closure_of_tendsto hpair hmem
+
 end FarguesFontaine
 
 end
