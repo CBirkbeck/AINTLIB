@@ -439,6 +439,104 @@ theorem exists_eps_terms_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     · refine le_trans (hK n hnK.le).le ?_
       exact mul_le_mul_of_nonneg_right (le_max_left ρ R) zero_le
 
+/-- Antidiagonal sups of products of two vanishing `NNReal` sequences vanish. -/
+theorem tendsto_antidiagonal_sup_zero {fa fb : ℕ → NNReal}
+    (ha : Filter.Tendsto fa Filter.atTop (nhds 0))
+    (hb : Filter.Tendsto fb Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun n => (Finset.range (n + 1)).sup
+      (fun i => fa i * fb (n - i))) Filter.atTop (nhds 0) := by
+  have hbdd : ∀ {f : ℕ → NNReal}, Filter.Tendsto f Filter.atTop (nhds 0)
+      → ∃ M : NNReal, 1 ≤ M ∧ ∀ n, f n ≤ M := by
+    intro f hf
+    obtain ⟨K₀, hK₀⟩ := Filter.eventually_atTop.mp (hf.eventually_lt_const one_pos)
+    refine ⟨max 1 ((Finset.range (K₀ + 1)).sup f), le_max_left _ _, fun n => ?_⟩
+    rcases lt_or_ge n (K₀ + 1) with hn | hn
+    · exact le_max_of_le_right (Finset.le_sup (Finset.mem_range.mpr hn))
+    · exact le_max_of_le_left (hK₀ n (by omega)).le
+  obtain ⟨Ma, hMa1, hMaB⟩ := hbdd ha
+  obtain ⟨Mb, hMb1, hMbB⟩ := hbdd hb
+  have hMa0 : 0 < Ma := lt_of_lt_of_le one_pos hMa1
+  have hMb0 : 0 < Mb := lt_of_lt_of_le one_pos hMb1
+  rw [tendsto_order]
+  constructor
+  · intro s hs
+    simp at hs
+  · intro s hs
+    obtain ⟨b', hb'0, hb's⟩ := exists_between hs
+    have hδa0 : 0 < b' * Mb⁻¹ := mul_pos hb'0 (inv_pos.mpr hMb0)
+    have hδb0 : 0 < b' * Ma⁻¹ := mul_pos hb'0 (inv_pos.mpr hMa0)
+    obtain ⟨Ka, hKa⟩ := Filter.eventually_atTop.mp (ha.eventually_lt_const hδa0)
+    obtain ⟨Kb, hKb⟩ := Filter.eventually_atTop.mp (hb.eventually_lt_const hδb0)
+    refine Filter.eventually_atTop.mpr ⟨Ka + Kb, fun n hn => ?_⟩
+    refine (Finset.sup_lt_iff (by rw [bot_eq_zero]; exact hs)).mpr fun i hi => ?_
+    have hcase : Ka ≤ i ∨ Kb ≤ n - i := by
+      by_contra hcon
+      push Not at hcon
+      have h1 : i < Ka := hcon.1
+      have h2 : n - i < Kb := hcon.2
+      have h3 : i ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)
+      omega
+    rcases hcase with hcase | hcase
+    · calc fa i * fb (n - i) ≤ fa i * Mb :=
+            mul_le_mul_of_nonneg_left (hMbB _) zero_le
+        _ < (b' * Mb⁻¹) * Mb :=
+            mul_lt_mul_of_pos_right (hKa i hcase) hMb0
+        _ = b' := by rw [mul_assoc, inv_mul_cancel₀ hMb0.ne', mul_one]
+        _ < s := hb's
+    · calc fa i * fb (n - i) ≤ Ma * fb (n - i) :=
+            mul_le_mul_of_nonneg_right (hMaB _) zero_le
+        _ < Ma * (b' * Ma⁻¹) :=
+            mul_lt_mul_of_pos_left (hKb _ hcase) hMa0
+        _ = b' := by rw [mul_comm b' _, ← mul_assoc, mul_inv_cancel₀ hMa0.ne',
+            one_mul]
+        _ < s := hb's
+
+/-- **The convolution of coordinate sequences** (the coefficients of a product of
+two series). -/
+def convF (a b : ℕ → F) (n : ℕ) : F :=
+  ∑ i ∈ Finset.range (n + 1), a i * b (n - i)
+
+/-- Decay is preserved under convolution (Cauchy-product vanishing). -/
+theorem tendsto_convF {ρ : NNReal} {a b : ℕ → F}
+    (ha : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (a n))
+      Filter.atTop (nhds 0))
+    (hb : Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (b n))
+      Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F (convF F a b n))
+      Filter.atTop (nhds 0) := by
+  have hsup := tendsto_antidiagonal_sup_zero
+    (fa := fun n => ρ ^ n * perfectoidValuation p F (a n))
+    (fb := fun n => ρ ^ n * perfectoidValuation p F (b n)) ha hb
+  refine tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hsup
+    (fun n => zero_le) fun n => ?_
+  have h1 : perfectoidValuation p F (convF F a b n)
+      ≤ (Finset.range (n + 1)).sup
+        (fun i => perfectoidValuation p F (a i * b (n - i))) := by
+    rw [convF]
+    exact Valuation.map_sum_le _ fun i hi => Finset.le_sup
+      (f := fun i => perfectoidValuation p F (a i * b (n - i))) hi
+  have hne : (Finset.range (n + 1)).Nonempty :=
+    Finset.nonempty_range_iff.mpr (Nat.succ_ne_zero n)
+  obtain ⟨i₀, hi₀mem, hi₀⟩ := Finset.exists_mem_eq_sup _ hne
+    (fun i => perfectoidValuation p F (a i * b (n - i)))
+  have hi₀n : i₀ ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hi₀mem)
+  calc ρ ^ n * perfectoidValuation p F (convF F a b n)
+      ≤ ρ ^ n * (Finset.range (n + 1)).sup
+        (fun i => perfectoidValuation p F (a i * b (n - i))) :=
+        mul_le_mul_of_nonneg_left h1 zero_le
+    _ = ρ ^ n * perfectoidValuation p F (a i₀ * b (n - i₀)) := by rw [hi₀]
+    _ = (ρ ^ i₀ * perfectoidValuation p F (a i₀))
+        * (ρ ^ (n - i₀) * perfectoidValuation p F (b (n - i₀))) := by
+        rw [Valuation.map_mul,
+          show ρ ^ n = ρ ^ i₀ * ρ ^ (n - i₀) from by
+            rw [← pow_add, Nat.add_sub_cancel' hi₀n]]
+        ring
+    _ ≤ (Finset.range (n + 1)).sup (fun i =>
+          (ρ ^ i * perfectoidValuation p F (a i))
+          * (ρ ^ (n - i) * perfectoidValuation p F (b (n - i)))) :=
+        Finset.le_sup (f := fun i => (ρ ^ i * perfectoidValuation p F (a i))
+          * (ρ ^ (n - i) * perfectoidValuation p F (b (n - i)))) hi₀mem
+
 end FarguesFontaine
 
 end
