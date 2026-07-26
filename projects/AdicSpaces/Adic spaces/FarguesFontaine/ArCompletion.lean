@@ -436,6 +436,23 @@ theorem exists_ball_subset_nhds {V : Set F} (hV : V ∈ nhds (0 : F)) :
   rw [hzeq]
   exact hFW (Set.mul_mem_mul u.2 hN)
 
+/-- The approximant filter of a point of `A^r` is nontrivial. -/
+theorem neBot_comap_of_mem_ArSub {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1) :
+    (Filter.comap (AlocToHatK p F ϖ hρ0 hρ1) (nhds x)).NeBot := by
+  rw [Filter.comap_neBot_iff]
+  intro t ht
+  have hx' : x ∈ closure (Set.range (AlocToHatK p F ϖ hρ0 hρ1)) := by
+    have hcarrier : (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1))
+        = closure ((AlocToHatK p F ϖ hρ0 hρ1).range : Set (hatK p F hρ0 hρ1)) := rfl
+    have hx2 : x ∈ (ArSub p F ϖ hρ0 hρ1 : Set (hatK p F hρ0 hρ1)) := hx
+    rw [hcarrier] at hx2
+    rwa [show ((AlocToHatK p F ϖ hρ0 hρ1).range : Set (hatK p F hρ0 hρ1))
+      = Set.range (AlocToHatK p F ϖ hρ0 hρ1) from rfl] at hx2
+  obtain ⟨y, hyt, hyr⟩ := mem_closure_iff_nhds.mp hx' t ht
+  obtain ⟨u, rfl⟩ := hyr
+  exact ⟨u, hyt⟩
+
 end FarguesFontaine
 
 end
