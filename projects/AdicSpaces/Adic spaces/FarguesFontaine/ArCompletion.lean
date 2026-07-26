@@ -182,38 +182,6 @@ theorem alocToWittF_algebraMap (x : Ainf p F) :
       = WittVector.map ((powerBoundedSubring.toSubring F).subtype) x :=
   IsLocalization.lift_eq _ x
 
-/-- One-step commutation of the inverse Frobenius with the inclusion `O_F → F`. -/
-theorem frobeniusEquivF_symm_subtype (z : OF F) :
-    (_root_.frobeniusEquiv F p).symm ((z : OF F) : F)
-      = (((_root_.frobeniusEquiv (OF F) p).symm z : OF F) : F) := by
-  refine ((_root_.frobeniusEquiv F p).symm_apply_eq).mpr ?_
-  rw [_root_.frobeniusEquiv_apply, frobenius_def]
-  have h2 : ((((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) : F)
-      = ((z : OF F) : F) := by
-    have h4 : (((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) = z := by
-      rw [← frobenius_def, ← _root_.frobeniusEquiv_apply, RingEquiv.apply_symm_apply]
-    rw [h4]
-  rw [show ((((_root_.frobeniusEquiv (OF F) p).symm z : OF F) : F)) ^ p
-    = ((((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) : F) from rfl, h2]
-
-/-- Iterated commutation of the inverse Frobenius with the inclusion `O_F → F`. -/
-theorem frobeniusEquivF_symm_pow_subtype (z : OF F) (k : ℕ) :
-    ((_root_.frobeniusEquiv F p).symm ^ k : RingAut F) ((z : OF F) : F)
-      = ((((_root_.frobeniusEquiv (OF F) p).symm ^ k : RingAut (OF F)) z : OF F) : F) := by
-  induction k generalizing z with
-  | zero => simp
-  | succ m ih =>
-    rw [pow_succ, pow_succ, RingAut.mul_apply, RingAut.mul_apply,
-      frobeniusEquivF_symm_subtype p F z, ih]
-
-/-- Coordinate transport along the inclusion: coordinates of `W(O_F)`-elements viewed
-in `W(F)` are the coercions of their `O_F`-coordinates. -/
-theorem teichCoeffF_map (a : Ainf p F) (n : ℕ) :
-    teichCoeffF p F (WittVector.map ((powerBoundedSubring.toSubring F).subtype) a) n
-      = ((teichCoeff p F a n : OF F) : F) := by
-  rw [teichCoeffF, teichCoeff, WittVector.map_coeff]
-  exact frobeniusEquivF_symm_pow_subtype p F (a.coeff n) n
-
 end FarguesFontaine
 
 end

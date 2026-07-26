@@ -333,6 +333,165 @@ theorem teichCoeffF_sum_range_add {N : ℕ} (b : ℕ → F) (z : WittVector p F)
   rw [teichCoeffF, hcoeff_eq j hj, hsumcoeff]
   exact frobeniusEquivF_symm_pow_pow_cancel p F (b j) j
 
+/-- One-step commutation of the inverse Frobenius with the inclusion `O_F → F`. -/
+theorem frobeniusEquivF_symm_subtype (z : OF F) :
+    (_root_.frobeniusEquiv F p).symm ((z : OF F) : F)
+      = (((_root_.frobeniusEquiv (OF F) p).symm z : OF F) : F) := by
+  refine ((_root_.frobeniusEquiv F p).symm_apply_eq).mpr ?_
+  rw [_root_.frobeniusEquiv_apply, frobenius_def]
+  have h2 : ((((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) : F)
+      = ((z : OF F) : F) := by
+    have h4 : (((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) = z := by
+      rw [← frobenius_def, ← _root_.frobeniusEquiv_apply, RingEquiv.apply_symm_apply]
+    rw [h4]
+  rw [show ((((_root_.frobeniusEquiv (OF F) p).symm z : OF F) : F)) ^ p
+    = ((((_root_.frobeniusEquiv (OF F) p).symm z) ^ p : OF F) : F) from rfl, h2]
+
+/-- Iterated commutation of the inverse Frobenius with the inclusion `O_F → F`. -/
+theorem frobeniusEquivF_symm_pow_subtype (z : OF F) (k : ℕ) :
+    ((_root_.frobeniusEquiv F p).symm ^ k : RingAut F) ((z : OF F) : F)
+      = ((((_root_.frobeniusEquiv (OF F) p).symm ^ k : RingAut (OF F)) z : OF F) : F) := by
+  induction k generalizing z with
+  | zero => simp
+  | succ m ih =>
+    rw [pow_succ, pow_succ, RingAut.mul_apply, RingAut.mul_apply,
+      frobeniusEquivF_symm_subtype p F z, ih]
+
+/-- Coordinate transport along the inclusion: coordinates of `W(O_F)`-elements viewed
+in `W(F)` are the coercions of their `O_F`-coordinates. -/
+theorem teichCoeffF_map (a : Ainf p F) (n : ℕ) :
+    teichCoeffF p F (WittVector.map ((powerBoundedSubring.toSubring F).subtype) a) n
+      = ((teichCoeff p F a n : OF F) : F) := by
+  rw [teichCoeffF, teichCoeff, WittVector.map_coeff]
+  exact frobeniusEquivF_symm_pow_subtype p F (a.coeff n) n
+
+
+/-! ### The Gauss value over `W(F)` (boundedness-threaded)
+
+Over `W(F)` coordinate valuations are unbounded in general, so the sup-based value
+carries explicit `BddAbove` hypotheses instead of the global `≤ 1` of `GaussNorm.lean`.
+These are the ports promised by T902(a)/T903(3). -/
+
+/-- The `n`-th Gauss term of `x : W(F)`. -/
+def gaussTermF (ρ : NNReal) (x : WittVector p F) (n : ℕ) : NNReal :=
+  ρ ^ n * perfectoidValuation p F (teichCoeffF p F x n)
+
+/-- The Gauss value of `x : W(F)` (junk `0` when the terms are unbounded — every lemma
+carries the boundedness hypothesis it needs). -/
+def gaussValueF (ρ : NNReal) (x : WittVector p F) : NNReal :=
+  ⨆ n, gaussTermF p F ρ x n
+
+theorem gaussTermF_le_gaussValueF {ρ : NNReal} {x : WittVector p F}
+    (hB : BddAbove (Set.range (gaussTermF p F ρ x))) (n : ℕ) :
+    gaussTermF p F ρ x n ≤ gaussValueF p F ρ x :=
+  le_ciSup hB n
+
+/-- Scaling (F-version): coordinates of `[w]·s` are `w`-multiples. -/
+theorem teichCoeffF_teichmuller_mul (w : F) (s : WittVector p F) (j : ℕ) :
+    teichCoeffF p F (WittVector.teichmuller p w * s) j = w * teichCoeffF p F s j := by
+  obtain ⟨z, hz⟩ := exists_eq_sum_teichCoeffF_add p F s (j + 1)
+  have hws : WittVector.teichmuller p w * s = (∑ i ∈ Finset.range (j + 1),
+      WittVector.teichmuller p (w * teichCoeffF p F s i) * (p : WittVector p F) ^ i) +
+      (p : WittVector p F) ^ (j + 1) * (WittVector.teichmuller p w * z) := by
+    conv_lhs => rw [hz]
+    rw [mul_add, Finset.mul_sum]
+    refine congrArg₂ (· + ·) (Finset.sum_congr rfl fun i _ => ?_) (by ring)
+    rw [map_mul]
+    ring
+  rw [hws, teichCoeffF_sum_range_add p F (N := j + 1) _ _ (Nat.lt_succ_self j)]
+
+/-- Head split (F-version). -/
+theorem exists_head_splitF (x : WittVector p F) :
+    ∃ x' : WittVector p F,
+      x = WittVector.teichmuller p (teichCoeffF p F x 0) + (p : WittVector p F) * x'
+      ∧ ∀ k, teichCoeffF p F x' k = teichCoeffF p F x (k + 1) := by
+  obtain ⟨z, hz⟩ := exists_eq_sum_teichCoeffF_add p F x 1
+  have h1 : x = WittVector.teichmuller p (teichCoeffF p F x 0) + (p : WittVector p F) * z := by
+    simpa using hz
+  refine ⟨z, h1, fun k => ?_⟩
+  obtain ⟨w, hw⟩ := exists_eq_sum_teichCoeffF_add p F z (k + 1)
+  have hmul : (p : WittVector p F) * z = (∑ i ∈ Finset.range (k + 1),
+      WittVector.teichmuller p (teichCoeffF p F z i) * (p : WittVector p F) ^ (i + 1)) +
+      (p : WittVector p F) ^ (k + 2) * w := by
+    conv_lhs => rw [hw]
+    rw [mul_add, Finset.mul_sum]
+    exact congrArg₂ (· + ·) (Finset.sum_congr rfl fun i _ => by ring) (by ring)
+  have hpeel : (∑ i ∈ Finset.range (k + 2),
+      WittVector.teichmuller p
+        (Nat.casesOn i (teichCoeffF p F x 0) fun i' => teichCoeffF p F z i') *
+        (p : WittVector p F) ^ i)
+      = (∑ i ∈ Finset.range (k + 1),
+          WittVector.teichmuller p (teichCoeffF p F z i) * (p : WittVector p F) ^ (i + 1)) +
+        WittVector.teichmuller p (teichCoeffF p F x 0) := by
+    rw [Finset.sum_range_succ']
+    exact congrArg₂ (· + ·) (Finset.sum_congr rfl fun i _ => rfl)
+      (by rw [pow_zero, mul_one]; rfl)
+  have hx2 : x = (∑ i ∈ Finset.range (k + 2),
+      WittVector.teichmuller p
+        (Nat.casesOn i (teichCoeffF p F x 0) fun i' => teichCoeffF p F z i') *
+        (p : WittVector p F) ^ i) + (p : WittVector p F) ^ (k + 2) * w := by
+    conv_lhs => rw [h1, hmul]
+    rw [hpeel]
+    abel
+  have hj := teichCoeffF_sum_range_add p F (N := k + 2)
+    (fun i => Nat.casesOn i (teichCoeffF p F x 0) fun i' => teichCoeffF p F z i') w
+    (j := k + 1) (by omega)
+  rw [← hx2] at hj
+  exact hj.symm
+
+/-- Pair bound (F-version, one-sided): the `u = b/a` trick, coordinates of `1 + [u]`
+transported from `W(O_F)`. -/
+private theorem valuation_teichCoeffF_teichmuller_add_le_left {a b : F}
+    (h : perfectoidValuation p F b ≤ perfectoidValuation p F a) (j : ℕ) :
+    perfectoidValuation p F (teichCoeffF p F
+      (WittVector.teichmuller p a + WittVector.teichmuller p b) j)
+      ≤ perfectoidValuation p F a := by
+  rcases eq_or_ne a 0 with rfl | ha
+  · have hb : b = 0 := by
+      have h0 : perfectoidValuation p F b = 0 := by
+        refine le_antisymm ?_ zero_le
+        simpa using h
+      exact (Valuation.zero_iff _).mp h0
+    subst hb
+    simp [teichCoeffF]
+  · have hva : perfectoidValuation p F a ≠ 0 := (Valuation.ne_zero_iff _).mpr ha
+    have hu1 : perfectoidValuation p F (b / a) ≤ 1 := by
+      have hmul : perfectoidValuation p F (b / a) * perfectoidValuation p F a
+          = perfectoidValuation p F b := by
+        rw [← Valuation.map_mul, div_mul_cancel₀ _ ha]
+      refine le_of_mul_le_mul_right ?_ (pos_iff_ne_zero.mpr hva)
+      rw [one_mul]
+      exact hmul.le.trans h
+    obtain ⟨u, hu⟩ := (perfectoidValuation_integers p F).exists_of_le_one hu1
+    have hab : a * ((u : OF F) : F) = b := by
+      have hcoe : ((u : OF F) : F) = b / a := hu
+      rw [hcoe, mul_comm, div_mul_cancel₀ _ ha]
+    have hsplit : WittVector.teichmuller p a + WittVector.teichmuller p b
+        = WittVector.teichmuller p a *
+          (1 + WittVector.teichmuller p ((u : OF F) : F)) := by
+      rw [mul_add, mul_one, ← map_mul, hab]
+    rw [hsplit, teichCoeffF_teichmuller_mul, Valuation.map_mul]
+    refine mul_le_of_le_one_right zero_le ?_
+    -- coordinates of 1 + [↑u] come from W(O_F)
+    have htrans : (1 + WittVector.teichmuller p ((u : OF F) : F))
+        = WittVector.map ((powerBoundedSubring.toSubring F).subtype)
+            (1 + WittVector.teichmuller p u) := by
+      rw [map_add, map_one, WittVector.map_teichmuller]
+      rfl
+    rw [htrans, teichCoeffF_map]
+    exact perfectoidValuation_le_one p F _
+
+/-- Pair bound (F-version): every coordinate of `[a] + [b]` has valuation at most
+`max |a| |b|`. -/
+theorem valuation_teichCoeffF_teichmuller_add_le (a b : F) (j : ℕ) :
+    perfectoidValuation p F (teichCoeffF p F
+      (WittVector.teichmuller p a + WittVector.teichmuller p b) j)
+      ≤ max (perfectoidValuation p F a) (perfectoidValuation p F b) := by
+  rcases le_total (perfectoidValuation p F b) (perfectoidValuation p F a) with h | h
+  · exact le_max_of_le_left (valuation_teichCoeffF_teichmuller_add_le_left p F h j)
+  · rw [add_comm]
+    exact le_max_of_le_right (valuation_teichCoeffF_teichmuller_add_le_left p F h j)
+
 end FarguesFontaine
 
 end
