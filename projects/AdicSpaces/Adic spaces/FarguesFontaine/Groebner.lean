@@ -569,6 +569,68 @@ theorem leadIdxRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     exact h3
   · exact hdomS _ hJlead
 
+/-- **The leading coefficient is invariant under monomial shifts**. -/
+theorem leadCoeffRPS_monomialShift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hf0 : f ≠ 0) (J : Fin k →₀ ℕ) :
+    leadCoeffRPS p F ϖ hρ0 hρ1
+        ((MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1))) * f)
+      = leadCoeffRPS p F ϖ hρ0 hρ1 f := by
+  rw [leadCoeffRPS, leadCoeffRPS, leadIdxRPS_monomialShift p F ϖ hf hf0 J,
+    coeff_monomialShift, if_pos le_self_add, add_tsub_cancel_left]
+
+/-- **The degree data** `d_I` of Kedlaya Definition 3.7: the degrees of leading
+coefficients of ideal elements with leading index `I`. -/
+def degSetIdx {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+    (I : Fin k →₀ ℕ) : Set ℕ :=
+  {d | ∃ x : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)),
+    x ∈ H ∧ (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0
+      ∧ leadIdxRPS p F ϖ hρ0 hρ1 (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        = I
+      ∧ degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) = d}
+
+/-- **Monotonicity of `d_I`** (Kedlaya Definition 3.7): a larger index realizes at
+least the same degrees — multiply by the intervening monomial. -/
+theorem degSetIdx_subset {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {I₁ I₂ : Fin k →₀ ℕ} (hI : I₁ ≤ I₂) :
+    degSetIdx p F ϖ hρ0 hρ1 H I₁ ⊆ degSetIdx p F ϖ hρ0 hρ1 H I₂ := by
+  rintro d ⟨x, hxH, hx0, hxlead, hxdeg⟩
+  set J : Fin k →₀ ℕ := I₂ - I₁ with hJ
+  set mono : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)) :=
+    ⟨MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1)),
+      isRestricted_monomial p F ϖ (1 : ↥(ArSub p F ϖ hρ0 hρ1)) (J := J)⟩ with hmono
+  have hxres : MvPowerSeries.IsRestricted
+      (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := x.2
+  have hcoe : ((mono * x : ↥(restrictedMvPowerSeriesSubring k
+        ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+      = (MvPowerSeries.monomial J (1 : ↥(ArSub p F ϖ hρ0 hρ1)))
+        * (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := rfl
+  refine ⟨mono * x, Ideal.mul_mem_left H mono hxH, ?_, ?_, ?_⟩
+  · rw [hcoe]
+    exact monomialShift_ne_zero p F ϖ hx0 J
+  · rw [hcoe, leadIdxRPS_monomialShift p F ϖ hxres hx0 J, hxlead, hJ,
+      tsub_add_cancel_of_le hI]
+  · rw [hcoe, leadCoeffRPS_monomialShift p F ϖ hxres hx0 J]
+    exact hxdeg
+
+/-- The `d_I`-value: the smallest degree of a leading coefficient at index `I`
+(`⊤` when no ideal element has that leading index). -/
+def dIdx {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+    (I : Fin k →₀ ℕ) : ℕ∞ :=
+  sInf ((fun d : ℕ => (d : ℕ∞)) '' degSetIdx p F ϖ hρ0 hρ1 H I)
+
+/-- **`d_I` is antitone** (Kedlaya Definition 3.7). -/
+theorem dIdx_antitone {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))}
+    {I₁ I₂ : Fin k →₀ ℕ} (hI : I₁ ≤ I₂) :
+    dIdx p F ϖ hρ0 hρ1 H I₂ ≤ dIdx p F ϖ hρ0 hρ1 H I₁ :=
+  sInf_le_sInf (Set.image_mono (degSetIdx_subset p F ϖ hI))
+
 end FarguesFontaine
 
 end
