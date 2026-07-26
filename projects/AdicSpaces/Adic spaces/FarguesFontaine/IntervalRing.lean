@@ -1275,6 +1275,94 @@ theorem valued_resI_le_wI {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 
   rw [max_eq_right hd1.le] at hle
   exact absurd (lt_of_le_of_lt hle hd2) (lt_irrefl _)
 
+/-- The image of `p` in the product, as an element. -/
+def pImage {ρ₁ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂)
+    (hρ₂1 : ρ₂ < 1) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) :=
+  BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+    (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F))
+
+/-- The two coordinates of `p` have the endpoint radii as values. -/
+theorem valued_pImage_fst {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    Valued.v (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 = ρ₁ := by
+  rw [pImage, BIProd_fst, valued_BlocToHatK, wLoc_algebraMap,
+    gaussValue_p p F hρ₁1.le]
+
+theorem valued_pImage_snd {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} :
+    Valued.v (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 = ρ₂ := by
+  rw [pImage, BIProd_snd, valued_BlocToHatK, wLoc_algebraMap,
+    gaussValue_p p F hρ₂1.le]
+
+/-- **Scaling up**: multiplying by `pⁿ` shrinks the norm by at least `(max ρ₁ ρ₂)ⁿ`. -/
+theorem wI_p_pow_mul_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (n : ℕ)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * z)
+      ≤ (max ρ₁ ρ₂) ^ n * wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z := by
+  refine le_trans (wI_mul_le p F _ _) ?_
+  refine mul_le_mul_of_nonneg_right ?_ zero_le
+  rw [wI_pow, pImage, wI_p_image]
+
+/-- **Scaling down**: an element of norm at most `(min ρ₁ ρ₂)ⁿ` is `pⁿ` times an
+element of the unit ball — the second half of the adic sandwich. -/
+theorem exists_eq_p_pow_mul {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1}
+    {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (n : ℕ)
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 z ≤ (min ρ₁ ρ₂) ^ n) :
+    ∃ w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1),
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ 1
+        ∧ z = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * w := by
+  obtain ⟨u, hu⟩ := isUnit_p_BIProd p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+  have hupow : IsUnit ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n) := by
+    rw [pImage, ← hu]
+    exact (u.isUnit).pow n
+  obtain ⟨v, hv⟩ := hupow
+  set V : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) := (v : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) with hVdef
+  set W : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) := ((v⁻¹ : ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))ˣ) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) with hWdef
+  have hVW : V * W = 1 := v.mul_inv
+  have hc1 : V.1 * W.1 = 1 := congrArg Prod.fst hVW
+  have hc2 : V.2 * W.2 = 1 := congrArg Prod.snd hVW
+  have hV1 : Valued.v V.1 = ρ₁ ^ n := by
+    have hproj : V.1 = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 ^ n := by
+      rw [hVdef]
+      exact congrArg Prod.fst hv
+    rw [hproj, Valuation.map_pow, valued_pImage_fst]
+  have hV2 : Valued.v V.2 = ρ₂ ^ n := by
+    have hproj : V.2 = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 ^ n := by
+      rw [hVdef]
+      exact congrArg Prod.snd hv
+    rw [hproj, Valuation.map_pow, valued_pImage_snd]
+  have hW1 : Valued.v W.1 = (ρ₁ ^ n)⁻¹ := by
+    have hmul := congrArg (fun t => Valued.v t) hc1
+    simp only [Valuation.map_mul, Valuation.map_one, hV1] at hmul
+    exact (inv_eq_of_mul_eq_one_right hmul).symm
+  have hW2 : Valued.v W.2 = (ρ₂ ^ n)⁻¹ := by
+    have hmul := congrArg (fun t => Valued.v t) hc2
+    simp only [Valuation.map_mul, Valuation.map_one, hV2] at hmul
+    exact (inv_eq_of_mul_eq_one_right hmul).symm
+  refine ⟨W * z, ?_, ?_⟩
+  · refine max_le ?_ ?_
+    · rw [show (W * z).1 = W.1 * z.1 from rfl, Valuation.map_mul, hW1]
+      have hz1 : Valued.v z.1 ≤ ρ₁ ^ n :=
+        le_trans (le_trans (le_max_left _ _) hz)
+          (pow_le_pow_left₀ zero_le (min_le_left _ _) n)
+      rw [inv_mul_le_iff₀ (pow_pos hρ₁0 n), mul_one]
+      exact hz1
+    · rw [show (W * z).2 = W.2 * z.2 from rfl, Valuation.map_mul, hW2]
+      have hz2 : Valued.v z.2 ≤ ρ₂ ^ n :=
+        le_trans (le_trans (le_max_right _ _) hz)
+          (pow_le_pow_left₀ zero_le (min_le_right _ _) n)
+      rw [inv_mul_le_iff₀ (pow_pos hρ₂0 n), mul_one]
+      exact hz2
+  · have h : (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * W = 1 := by
+      rw [← hv]
+      exact hVW
+    calc z = 1 * z := (one_mul z).symm
+      _ = ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * W) * z := by rw [h]
+      _ = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) ^ n * (W * z) := by rw [mul_assoc]
+
 end FarguesFontaine
 
 end
