@@ -1362,6 +1362,80 @@ theorem degAr_mul {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     (PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 hdc) hlt]
   exact hΦdeg
 
+/-- The division-step coordinate sequence decays: shifted coordinates of `y`
+divided by the leading coefficient of `x`. -/
+theorem tendsto_div_shift {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {y : hatK p F hρ0 hρ1} (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (m : ℕ) (c : F) :
+    Filter.Tendsto (fun n => ρ ^ n * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m) / c)) Filter.atTop (nhds 0) := by
+  have hdy := tendsto_gaussTerm_teichCoeffAr p F ϖ hy
+  have hshift : Filter.Tendsto (fun n => ρ ^ (n + m) * perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m))) Filter.atTop (nhds 0) :=
+    hdy.comp (Filter.tendsto_add_atTop_nat m)
+  have hscaled := hshift.mul_const ((ρ ^ m)⁻¹ * (perfectoidValuation p F c)⁻¹)
+  rw [zero_mul] at hscaled
+  refine hscaled.congr fun n => ?_
+  rw [map_div₀]
+  have hpow : ρ ^ (n + m) * (ρ ^ m)⁻¹ = ρ ^ n := by
+    rw [pow_add, mul_assoc, mul_inv_cancel₀ (pow_pos hρ0 m).ne', mul_one]
+  calc ρ ^ (n + m) * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m))
+        * ((ρ ^ m)⁻¹ * (perfectoidValuation p F c)⁻¹)
+      = (ρ ^ (n + m) * (ρ ^ m)⁻¹) * (perfectoidValuation p F
+          (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m)) * (perfectoidValuation p F c)⁻¹) := by
+        ring
+    _ = ρ ^ n * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m))
+          * (perfectoidValuation p F c)⁻¹) := by
+        rw [hpow]
+
+/-- **The division quotient** (Kedlaya's `z_l`): the `Φ`-series of the shifted
+coordinates of `y` divided by the leading coefficient of `x`. -/
+def divStep {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (x y : hatK p F hρ0 hρ1) :
+    hatK p F hρ0 hρ1 :=
+  PhiHatK p F ϖ hρ0 hρ1 (fun n => teichCoeffAr p F ϖ hρ0 hρ1 y
+    (n + degAr p F ϖ hρ0 hρ1 x) / teichCoeffAr p F ϖ hρ0 hρ1 x
+      (degAr p F ϖ hρ0 hρ1 x))
+
+theorem divStep_mem {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) :
+    divStep p F ϖ hρ0 hρ1 x y ∈ ArSub p F ϖ hρ0 hρ1 :=
+  PhiHatK_mem_ArSub p F ϖ hρ0 hρ1 (tendsto_div_shift p F ϖ hy _ _)
+
+/-- **Quotient value bound**: `v(z) ≤ v(y)/v(x)` (equality is not needed). -/
+theorem valued_divStep_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : hatK p F hρ0 hρ1} (hx : x ∈ ArSub p F ϖ hρ0 hρ1)
+    (hy : y ∈ ArSub p F ϖ hρ0 hρ1) (hx0 : x ≠ 0) :
+    Valued.v (divStep p F ϖ hρ0 hρ1 x y) * Valued.v x ≤ Valued.v y := by
+  set m := degAr p F ϖ hρ0 hρ1 x with hm
+  obtain ⟨hxattain, -⟩ := degAr_spec p F ϖ hx hx0
+  have hvx0 : Valued.v x ≠ 0 :=
+    (Valuation.ne_zero_iff (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal)).mpr hx0
+  have hxm0 : perfectoidValuation p F
+      (teichCoeffAr p F ϖ hρ0 hρ1 x m) ≠ 0 := by
+    intro h0
+    exact hvx0 (hxattain.trans (by rw [← hm, h0, mul_zero]))
+  rw [divStep, valued_PhiHatK p F ϖ hρ0 hρ1 (tendsto_div_shift p F ϖ hy _ _),
+    mul_comm, NNReal.mul_iSup]
+  refine ciSup_le fun n => ?_
+  rw [map_div₀, ← hm]
+  calc Valued.v x * (ρ ^ n * (perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m))
+        * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹))
+      = ρ ^ m * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+        * (ρ ^ n * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m))
+          * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹)) := by
+        rw [← hm] at hxattain
+        rw [hxattain]
+    _ = ρ ^ (n + m) * perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m))
+        * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m)
+          * (perfectoidValuation p F (teichCoeffAr p F ϖ hρ0 hρ1 x m))⁻¹) := by
+        rw [pow_add]
+        ring
+    _ = ρ ^ (n + m) * perfectoidValuation p F
+        (teichCoeffAr p F ϖ hρ0 hρ1 y (n + m)) := by
+        rw [mul_inv_cancel₀ hxm0, mul_one]
+    _ ≤ Valued.v y := gaussTerm_teichCoeffAr_le' p F ϖ hy (n + m)
+
 end FarguesFontaine
 
 end
