@@ -610,4 +610,53 @@ noncomputable def galoisFiberEquiv {L : Type v} [Field L] [DecidableEq L] [Algeb
   left_inv P := Subtype.ext ((galoisPointEquiv W σ).symm_apply_apply P.1)
   right_inv P := Subtype.ext ((galoisPointEquiv W σ).apply_symm_apply P.1)
 
+/-- **(M1b-3b-viii, step e)** The multiplicity-free pullback divisor transports:
+relabelling `f*((Q))` by `σ` gives `f*((σ·Q))`. -/
+theorem equivMapDomain_pullbackDiv {L : Type v} [Field L] [DecidableEq L] [IsAlgClosed L]
+    [Algebra k L] [(W.baseChange L).toAffine.IsElliptic] (σ : L ≃ₐ[k] L) (N : ℤ)
+    (hN : Finite (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom.ker)
+    (Q : (W.baseChange L).toAffine.Point) :
+    Finsupp.equivMapDomain (galoisProjPointEquiv W σ)
+        (HasseWeil.WeilPairing.pullbackDiv
+          (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN Q) =
+      HasseWeil.WeilPairing.pullbackDiv
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom hN
+        (galoisPointEquiv W σ Q) := by
+  classical
+  letI : Fintype { P : (W.baseChange L).toAffine.Point //
+      (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom P = Q } :=
+    @Fintype.ofFinite _ (HasseWeil.WeilPairing.fiber_finite _ hN Q)
+  letI : Fintype { P : (W.baseChange L).toAffine.Point //
+      (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom P =
+        galoisPointEquiv W σ Q } :=
+    @Fintype.ofFinite _ (HasseWeil.WeilPairing.fiber_finite _ hN (galoisPointEquiv W σ Q))
+  unfold HasseWeil.WeilPairing.pullbackDiv
+  rw [Finsupp.equivMapDomain_eq_mapDomain, Finsupp.mapDomain_finset_sum]
+  refine Finset.sum_nbij'
+    (i := fun P => (⟨galoisPointEquiv W σ P.1, by
+        have hP : N • P.1 = Q := P.2
+        show N • galoisPointEquiv W σ P.1 = galoisPointEquiv W σ Q
+        rw [← map_zsmul (galoisPointEquiv W σ), hP]⟩ :
+      { P : (W.baseChange L).toAffine.Point //
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom P =
+          galoisPointEquiv W σ Q }))
+    (j := fun P => (⟨(galoisPointEquiv W σ).symm P.1, by
+        have hP : N • P.1 = galoisPointEquiv W σ Q := P.2
+        show N • (galoisPointEquiv W σ).symm P.1 = Q
+        rw [← map_zsmul (galoisPointEquiv W σ).symm, hP,
+          (galoisPointEquiv W σ).symm_apply_apply]⟩ :
+      { P : (W.baseChange L).toAffine.Point //
+        (HasseWeil.mulByInt (W.baseChange L).toAffine N).toAddMonoidHom P = Q })) ?_ ?_ ?_ ?_ ?_
+  · intro P _
+    exact Finset.mem_univ _
+  · intro P _
+    exact Finset.mem_univ _
+  · intro P _
+    exact Subtype.ext ((galoisPointEquiv W σ).symm_apply_apply P.1)
+  · intro P _
+    exact Subtype.ext ((galoisPointEquiv W σ).apply_symm_apply P.1)
+  · intro P _
+    rw [Finsupp.mapDomain_single, galoisProjPointEquiv_toProjectiveSmoothPoint]
+    rfl
+
 end ModularCurves
