@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.WeilPairing.FieldPairing
 import HasseWeil.HasseBound.WeilPairing.DivisorGalois
+import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
 
 /-!
 # The Galois action on the function field of a base-changed curve (DS4 M1b-3a)
@@ -122,5 +123,68 @@ theorem map_maximalIdealAt_galoisCoordRingEquiv {L : Type v} [Field L] [Algebra 
   change _ = WeierstrassCurve.Affine.CoordinateRing.XYIdeal _ Q.x (Polynomial.C Q.y)
   rw [hQx, hQy, Polynomial.map_C]
   rfl
+
+/-- The smooth point of the σ-mapped curve with the same coordinates (nonsingularity
+transported across `map_algEquiv_baseChange_eq`). Port of HasseWeil's `pointOnMapped`. -/
+noncomputable def pointOnMappedGal {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint where
+  x := P.x
+  y := P.y
+  nonsingular := by
+    have hM : ((W.baseChange L).map (σ : L →+* L)).toAffine =
+        (W.baseChange L).toAffine := by rw [map_algEquiv_baseChange_eq W σ]
+    rw [hM]
+    exact P.nonsingular
+
+@[simp] theorem pointOnMappedGal_x {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    (pointOnMappedGal W σ P).x = P.x := rfl
+
+@[simp] theorem pointOnMappedGal_y {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L)
+    (P : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint) :
+    (pointOnMappedGal W σ P).y = P.y := rfl
+
+/-- **(M1b-3b-ii)** Affine order transport along `σ`: for smooth points `P`, `Q` with
+`P.x = σ Q.x`, `P.y = σ Q.y`, the point valuation of `σ·g` at `P` equals that of `g` at
+`Q`. Port of HasseWeil's `pointValuation_frobeniusFunctionFieldEquiv`. -/
+theorem pointValuation_galoisFunctionFieldEquiv {L : Type v} [Field L] [DecidableEq L]
+    [IsAlgClosed L] [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (P Q : (⟨(W.baseChange L).toAffine⟩ : HasseWeil.Curves.SmoothPlaneCurve L).SmoothPoint)
+    (hPx : P.x = σ Q.x) (hPy : P.y = σ Q.y)
+    (g : (W.baseChange L).toAffine.FunctionField) :
+    (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).pointValuation P
+        (galoisFunctionFieldEquiv W σ g) =
+      (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).pointValuation Q g := by
+  haveI hMell : ((W.baseChange L).map (σ : L →+* L)).toAffine.IsElliptic := by
+    rw [map_algEquiv_baseChange_eq W σ]; infer_instance
+  haveI hMic : IsIntegrallyClosed (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing := by
+    rw [map_algEquiv_baseChange_eq W σ]; infer_instance
+  haveI hMdd : IsDedekindDomain (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing :=
+    HasseWeil.Curves.SmoothPlaneCurve.isDedekindDomain_coordinateRing _
+  haveI hEdd : IsDedekindDomain (⟨(W.baseChange L).toAffine⟩ :
+      HasseWeil.Curves.SmoothPlaneCurve L).CoordinateRing :=
+    HasseWeil.Curves.SmoothPlaneCurve.isDedekindDomain_coordinateRing _
+  rw [galoisFunctionFieldEquiv, RingEquiv.trans_apply,
+    HasseWeil.WeilPairing.pointValuation_ringEquivCast _ _ (map_algEquiv_baseChange_eq W σ)
+      (pointOnMappedGal W σ P) P
+      (HasseWeil.WeilPairing.heq_smoothPoint _ _ (map_algEquiv_baseChange_eq W σ) _ _ rfl rfl)]
+  rw [HasseWeil.Curves.pointValuation_eq_heightOneValuation _ (pointOnMappedGal W σ P)
+      (IsFractionRing.ringEquivOfRingEquiv (galoisCoordRingEquiv W σ) g),
+    HasseWeil.Curves.pointValuation_eq_heightOneValuation _ Q g]
+  exact HasseWeil.WeilPairing.valuation_map_ringEquiv (galoisCoordRingEquiv W σ)
+    (HasseWeil.Curves.smoothPointToHeightOne (W.baseChange L).toAffine Q)
+    (HasseWeil.Curves.smoothPointToHeightOne
+      ((W.baseChange L).map (σ : L →+* L)).toAffine (pointOnMappedGal W σ P))
+    (by
+      rw [HasseWeil.Curves.smoothPointToHeightOne_asIdeal,
+        HasseWeil.Curves.smoothPointToHeightOne_asIdeal]
+      exact (map_maximalIdealAt_galoisCoordRingEquiv W σ Q (pointOnMappedGal W σ P)
+        (by rw [pointOnMappedGal_x, hPx]) (by rw [pointOnMappedGal_y, hPy])).symm) g
 
 end ModularCurves
