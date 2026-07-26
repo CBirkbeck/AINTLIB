@@ -1922,6 +1922,66 @@ theorem exists_rps_series_limit {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   rw [hcoe, hpartial n K]
   exact hS K n b hb0 hb
 
+/-- **Submultiplicativity of the Gauss norm**. -/
+theorem gaussNormRPS_mul_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {f g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    gaussNormRPS p F ϖ hρ0 hρ1 (f * g)
+      ≤ gaussNormRPS p F ϖ hρ0 hρ1 f * gaussNormRPS p F ϖ hρ0 hρ1 g := by
+  refine ciSup_le fun K => ?_
+  rw [MvPowerSeries.coeff_mul]
+  have hcoe : ((∑ q ∈ Finset.antidiagonal K,
+        MvPowerSeries.coeff q.1 f * MvPowerSeries.coeff q.2 g
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+      = ∑ q ∈ Finset.antidiagonal K,
+        ((MvPowerSeries.coeff q.1 f : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        * ((MvPowerSeries.coeff q.2 g : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1) := by
+    push_cast
+    rfl
+  rw [hcoe]
+  refine Valuation.map_sum_le (Valued.v : Valuation (hatK p F hρ0 hρ1) NNReal) ?_
+  intro q _
+  rw [Valuation.map_mul]
+  exact mul_le_mul (valued_coeff_le_gaussNormRPS p F ϖ hf q.1)
+    (valued_coeff_le_gaussNormRPS p F ϖ hg q.2) zero_le zero_le
+
+/-- The Gauss norm of a finite sum is bounded by the supremum of the norms. -/
+theorem gaussNormRPS_finset_sum_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {ι : Type*} (s : Finset ι)
+    (f : ι → ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+    (B : NNReal)
+    (hf : ∀ i ∈ s, gaussNormRPS p F ϖ hρ0 hρ1
+      ((f i : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+        : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≤ B) :
+    gaussNormRPS p F ϖ hρ0 hρ1
+      (((∑ i ∈ s, f i : ↥(restrictedMvPowerSeriesSubring k
+        ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k)
+        ↥(ArSub p F ϖ hρ0 hρ1))) ≤ B := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    have hzero : ((0 : ↥(restrictedMvPowerSeriesSubring k
+        ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k)
+        ↥(ArSub p F ϖ hρ0 hρ1)) = 0 := rfl
+    rw [Finset.sum_empty, hzero, gaussNormRPS_zero]
+    exact zero_le
+  | insert a t ha ih =>
+    rw [Finset.sum_insert ha]
+    have hcoe : (((f a + ∑ i ∈ t, f i : ↥(restrictedMvPowerSeriesSubring k
+          ↥(ArSub p F ϖ hρ0 hρ1)))) : MvPowerSeries (Fin k)
+          ↥(ArSub p F ϖ hρ0 hρ1))
+        = ((f a : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+            : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          + ((∑ i ∈ t, f i : ↥(restrictedMvPowerSeriesSubring k
+            ↥(ArSub p F ϖ hρ0 hρ1))) : MvPowerSeries (Fin k)
+            ↥(ArSub p F ϖ hρ0 hρ1)) := rfl
+    rw [hcoe]
+    refine le_trans (gaussNormRPS_add_le p F ϖ (f a).2
+      (∑ i ∈ t, f i).2) (max_le (hf a (Finset.mem_insert_self a t)) ?_)
+    exact ih fun i hi => hf i (Finset.mem_insert_of_mem hi)
+
 end FarguesFontaine
 
 end
