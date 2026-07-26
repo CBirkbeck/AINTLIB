@@ -5,6 +5,8 @@ Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.SheafyBI
 import «Adic spaces».FarguesFontaine.ChartData
+import «Adic spaces».RingEquivPresheafTransport
+import «Adic spaces».SheafyRingEquivTransport
 
 /-!
 # The chart comparison map into `B^I` (ID2d, Kedlaya §4 / Wedhorn §8.1)
@@ -32,6 +34,37 @@ set_option linter.overlappingInstances false
 noncomputable section
 
 namespace FarguesFontaine
+
+/-- **`IsTateRing` transports along a bicontinuous ring equivalence.** -/
+theorem isTateRing_congr {A B : Type*} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
+    (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm) [IsTateRing A] :
+    IsTateRing B where
+  exists_pairOfDefinition :=
+    ⟨(IsHuberRing.exists_pairOfDefinition (A := A)).some.mapRingEquiv e he he'⟩
+  exists_topologicallyNilpotent_unit := by
+    obtain ⟨u, hu⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := A)
+    refine ⟨Units.map e.toRingHom.toMonoidHom u, ?_⟩
+    have hfun : (fun n : ℕ =>
+        ((Units.map e.toRingHom.toMonoidHom u : Bˣ) : B) ^ n)
+        = fun n : ℕ => e ((u : A) ^ n) := by
+      funext n
+      rw [Units.coe_map, ← map_pow]
+      rfl
+    show Filter.Tendsto (fun n : ℕ =>
+      ((Units.map e.toRingHom.toMonoidHom u : Bˣ) : B) ^ n) Filter.atTop (nhds 0)
+    rw [hfun]
+    have hcomp := (he.tendsto 0).comp hu
+    rwa [map_zero] at hcomp
+
+/-- The presheaf value is complete for the right uniformity of its additive
+group (its canonical uniformity, rewritten). -/
+theorem completeSpace_right_presheafValue {A : Type*} [CommRing A]
+    [TopologicalSpace A] [IsTopologicalRing A] (D : RationalLocData A) :
+    @CompleteSpace (presheafValue D)
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D)) := by
+  rw [IsUniformAddGroup.rightUniformSpace_eq]
+  exact inferInstance
 
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
@@ -462,6 +495,99 @@ theorem presheafChartRingEquivBISub_symm_continuous (a b : ℕ) (ha : 0 < a)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm :=
   (chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
     (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm.continuous
+
+include hρ₁0 hρ₂0 in
+/-- **ID2e — the chart presheaf value is sheafy**: transporting
+`isSheafy_BISub` through the comparison isomorphism `𝒪_Y(U) ≅ B^I` at the
+exact chart interval. The plus subring is the transported `B^{I,+}`-candidate
+(the integral closure statement of §5 is not needed). -/
+theorem isSheafy_presheafChart (a b : ℕ) (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) :
+    letI : ValuationSpectrum.PlusSubring (presheafValue (chartData p F ϖ 1 b a b)) :=
+      ⟨(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).map
+        ((presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+          hexact1 hexact2).symm.toRingHom)⟩
+    letI : IsHuberRing (presheafValue (chartData p F ϖ 1 b a b)) :=
+      (isTateRing_congr (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
+        (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+        hexact1 hexact2).symm
+        (presheafChartRingEquivBISub_symm_continuous p F ϖ (hρ₁0 := hρ₁0)
+          (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+          hexact1 hexact2)
+        (presheafChartRingEquivBISub_continuous p F ϖ (hρ₁0 := hρ₁0)
+          (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+          hexact1 hexact2)).toIsHuberRing
+    letI : @CompleteSpace (presheafValue (chartData p F ϖ 1 b a b))
+        (IsTopologicalAddGroup.rightUniformSpace
+          (presheafValue (chartData p F ϖ 1 b a b))) :=
+      completeSpace_right_presheafValue (chartData p F ϖ 1 b a b)
+    letI : IsRingOfIntegralElements
+        (ValuationSpectrum.ringPlus (presheafValue (chartData p F ϖ 1 b a b))
+          : Subring (presheafValue (chartData p F ϖ 1 b a b))) :=
+      (isRingOfIntegralElements_BIPlusIn p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)).map
+        (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm
+        (presheafChartRingEquivBISub_symm_continuous p F ϖ (hρ₁0 := hρ₁0)
+          (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+          hexact1 hexact2)
+        (presheafChartRingEquivBISub_continuous p F ϖ (hρ₁0 := hρ₁0)
+          (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+          hexact1 hexact2)
+    ValuationSpectrum.IsSheafy (presheafValue (chartData p F ϖ 1 b a b)) := by
+  set e : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      ≃+* presheafValue (chartData p F ϖ 1 b a b) :=
+    (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm
+    with hedef
+  have he : Continuous e :=
+    presheafChartRingEquivBISub_symm_continuous p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
+  have he' : Continuous e.symm :=
+    presheafChartRingEquivBISub_continuous p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2
+  -- the A-side instance package
+  letI : ValuationSpectrum.PlusSubring ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    ⟨BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1⟩
+  letI : @CompleteSpace ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      (IsTopologicalAddGroup.rightUniformSpace
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+    completeSpace_right_BISub p F ϖ
+  letI : IsRingOfIntegralElements
+      (ValuationSpectrum.ringPlus ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+        : Subring ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+    isRingOfIntegralElements_BIPlusIn p F ϖ
+  -- sheafiness of `B^I` at `j = n = 1`
+  have h12 : ρ₁ ≤ ρ₂ := hexact1 ▸ vpi_le_rho2_of_exact p F ϖ (hρ₁1 := hρ₁1)
+    a b ha hb hab hexact1 hexact2
+  have hexact' : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (1 * 1) = ρ₁ := by
+    rw [one_mul, pow_one]
+    exact hexact1
+  have hbb : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowOverP p F ϖ ((PseudoUniformizer.toOF F ϖ) ^ 1) 1)) ≤ 1 := by
+    refine wI_teichPowOverP_le_one p F ϖ h12 ?_
+    rw [perfectoidValuation_pow_toOF p F ϖ]
+    exact le_of_eq hexact'
+  haveI : ValuationSpectrum.IsSheafy ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    isSheafy_BISub p F ϖ h12 1 1 (BIProd_mem_BISub p F ϖ _) hbb hexact'
+  haveI : IsTateRing (presheafValue (chartData p F ϖ 1 b a b)) :=
+    isTateRing_congr e he he'
+  letI : ValuationSpectrum.PlusSubring (presheafValue (chartData p F ϖ 1 b a b)) :=
+    ⟨(BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).map e.toRingHom⟩
+  letI : @CompleteSpace (presheafValue (chartData p F ϖ 1 b a b))
+      (IsTopologicalAddGroup.rightUniformSpace
+        (presheafValue (chartData p F ϖ 1 b a b))) :=
+    completeSpace_right_presheafValue (chartData p F ϖ 1 b a b)
+  letI : IsRingOfIntegralElements
+      (ValuationSpectrum.ringPlus (presheafValue (chartData p F ϖ 1 b a b))
+        : Subring (presheafValue (chartData p F ϖ 1 b a b))) :=
+    (isRingOfIntegralElements_BIPlusIn p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)).map e he he'
+  exact ValuationSpectrum.isSheafy_mapRingEquiv e he he' rfl
 
 end FarguesFontaine
 

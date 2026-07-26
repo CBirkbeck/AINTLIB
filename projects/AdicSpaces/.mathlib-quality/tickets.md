@@ -870,7 +870,7 @@ non-Tate bases are supported.
   condition ⟺ the `Y`-condition `v(p[ϖ]) ≠ 0`.
 
 ### [ID2] ★ The comparison theorem `presheafValue chartDataU ≅ B^{I_U}`
-- **Status**: open — DECOMPOSED 2026-07-26 into ID2a–ID2e |
+- **Status**: DONE 2026-07-27 (all of ID2a–ID2e; ChartData.lean + ChartComparison.lean) |
   **Parent**: PLAN-GATE-2 | **Type**: theorem block
 - **Interval match (worked out)**: κ = log v([ϖ])/log v(p) at the Gauss point w_ρ
   gives κ = log|ϖ|/log ρ, so U₀'s window κ ∈ [1, a/b] is the interval
@@ -938,16 +938,19 @@ non-Tate bases are supported.
   fractions `[ϖ]^{b+1}/s`, `p^{a+1}/s` by the window's endpoint arithmetic; the
   ideal generator has `wI < 1`) and conversely (`wI`-small elements of `Bloc` are
   in high `I_D`-powers — the division/prefix estimates from T911's machinery).
-- **ID2c** the map `presheafValue (chartData 1 b a b) →+* ↥(BISub |ϖ| |ϖ|^{b/a})`:
-  `UniformSpace.Completion.extension` of `BIProd ∘ ID2a` (uniformly continuous by
-  ID2b); ring-hom via the Completion.extension-hom API.
-- **ID2d** the map is a topological-ring isomorphism: dense range (density of
-  `Bloc` in `BISub` = its definition) + uniform embedding (ID2b) + both complete;
-  completion universal property.
-- **ID2e** transport: `IsSheafy (presheafValue (chartData 1 b a b))` from
-  `isSheafy_BISub_AD9` through ID2d via the repo's
-  RingEquivPresheafTransport/SheafyRingEquivTransport machinery; plus-ring = the
-  transported integral closure of `A⁺[T/s]` (consult §5's correction).
+- **ID2c** DONE 2026-07-27: chartUniformity/chartCompletionToBIProd/
+  presheafChartToBIProd (+_coe) in ChartData.lean; presheafChartToBI
+  (corestricted to B^I) in ChartComparison.lean.
+- **ID2d** DONE 2026-07-27 (ChartComparison.lean): presheafChartRingEquivBISub
+  `presheafValue (chartData 1 b a b) ≃+* ↥B^I` with both continuity directions,
+  via chartBIPkg (AbstractCompletion) + compareEquiv + dense-extension
+  agreement (presheafChartToBI_eq_compare). Hypotheses: 0 < a, 0 < b, b ≤ a,
+  hexact1 : |ϖ| = ρ₁, hexact2 : ρ₂^a = |ϖ|^b (exact chart interval).
+- **ID2e** DONE 2026-07-27 (ChartComparison.lean): isSheafy_presheafChart —
+  `IsSheafy (presheafValue (chartData 1 b a b))` with plus-ring the transported
+  `B^{I,+}`-candidate (BIPlusIn image; §5 integral-closure equality not needed),
+  via isSheafy_mapRingEquiv at e := (ID2d).symm; new generic infrastructure
+  isTateRing_congr + completeSpace_right_presheafValue.
 - **Sketch** (consult §5): (a) universal-property map into `B^I` (the fractions
   `[ϖ]/p`, `p^a/[ϖ]^b` are power-bounded in `B^{I_U}` — endpoint value
   computations); (b) both sides contain the dense `Bloc`; (c) the rational-
