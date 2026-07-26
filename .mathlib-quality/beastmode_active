@@ -1,7 +1,4 @@
-FOCUS: DS4 M1b — divisor transport COMPLETE (WeilPairing/GaloisFunctionField.lean, sorry-free: projectiveDivisorOf_galoisFunctionFieldEquiv).
-NEXT BRICK (3b-viii): div(Phi_sigma g_T) = div(g_{sigma T}).
-  KEY POINTER (found): mathlib has WeierstrassCurve.Affine.Point.map (Affine/Point.lean:785) as an ADDITIVE hom (W-base-changed points), so for sigma : L =a[k] L it is the sigma-action on points and commutes with [N] for free via map_zsmul. So:
-   (a) prove galoisSmoothPoint agrees with Point.map sigma on smooth points (coordinates are sigma x, sigma y on both sides);
-   (b) transport kappaDivisor / pullbackDiv along galoisProjPointEquiv using (a) + weilFunction_divisor (Pairing.lean:187: div(g_T) = pullbackDiv [N] T - pullbackDiv [N] 0);
-   (c) conclude div(Phi_sigma g_T) = div(g_{sigma T}).
-THEN (3b-ix) pairing equivariance via Constancy.pairing_const_of_transport + uniqueness of the constant; THEN M1c descent (EtaleDescent:440).
+FOCUS: DS4 M1b-3b-viii (div(Phi_sigma g_T) = div(g_{sigma T})).
+DONE steps a,b: galoisProjPointEquiv_toProjectiveSmoothPoint (relabelling = mathlib Affine.Point.map sigma) and equivMapDomain_kappaDivisor (kappa(P) relabels to kappa(sigma P)). Both sorry-free, pushed.
+NEXT step c: transport pullbackDivisor — HasseWeil weilFunction_divisor_eq_pullbackDivisor_kappaDivisor (HfactLemma:134) says div(g_T) = pullbackDivisor [N] (kappaDivisor T). Need: equivMapDomain (galoisProjPointEquiv) commutes with pullbackDivisor [N], i.e. relabelling a pullbackDiv of v is the pullbackDiv of the relabelled v — via pullbackDiv over the fibre [N]^{-1}(v) and the fact that sigma permutes that fibre (sigma is additive on points and commutes with [N]).
+THEN step d: combine to get div(Phi_sigma g_T) = div(g_{sigma T}); THEN the pairing equivariance; THEN M1c.
