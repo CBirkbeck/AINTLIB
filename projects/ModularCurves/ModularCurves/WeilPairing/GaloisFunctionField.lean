@@ -284,4 +284,31 @@ theorem norm_galoisCoordRingEquiv {L : Type v} [Field L] [Algebra k L] (σ : L �
     Polynomial.map_C, Polynomial.map_X, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
     WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
 
+/-- **(M1b-3b-v-a)** `ord_∞` of an integral element transports under
+`galoisCoordRingEquiv`. Port of HasseWeil's `ordAtInfty_algebraMap_crFrobEquiv`. -/
+theorem ordAtInfty_algebraMap_galoisCoordRingEquiv {L : Type v} [Field L] [DecidableEq L]
+    [Algebra k L] (σ : L ≃ₐ[k] L) [(W.baseChange L).toAffine.IsElliptic]
+    (u : (W.baseChange L).toAffine.CoordinateRing) :
+    (⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty
+        (algebraMap _ _ (galoisCoordRingEquiv W σ u)) =
+      (⟨(W.baseChange L).toAffine⟩ :
+        HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty (algebraMap _ _ u) := by
+  haveI hMell : ((W.baseChange L).map (σ : L →+* L)).toAffine.IsElliptic := by
+    rw [map_algEquiv_baseChange_eq W σ]; infer_instance
+  by_cases hu : u = 0
+  · subst hu
+    rw [map_zero, map_zero, map_zero,
+      HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero,
+      HasseWeil.Curves.SmoothPlaneCurve.ordAtInfty_zero]
+  · have hcu : galoisCoordRingEquiv W σ u ≠ 0 := fun h =>
+      hu ((EquivLike.injective (galoisCoordRingEquiv W σ)) (by rw [h, map_zero]))
+    rw [(⟨((W.baseChange L).map (σ : L →+* L)).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty_algebraMap_coordinateRing _ hcu,
+      (⟨(W.baseChange L).toAffine⟩ :
+          HasseWeil.Curves.SmoothPlaneCurve L).ordAtInfty_algebraMap_coordinateRing _ hu,
+      norm_galoisCoordRingEquiv,
+      Polynomial.natDegree_map_eq_of_injective
+        (RingHom.injective (σ : L →+* L))]
+
 end ModularCurves
