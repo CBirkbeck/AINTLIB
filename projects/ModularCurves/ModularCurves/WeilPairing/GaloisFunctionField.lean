@@ -1097,6 +1097,24 @@ theorem galoisFunctionFieldEquiv_WKE_a₃ :
   rw [HasseWeil.W_KE, WeierstrassCurve.map_a₃]
   exact galoisFunctionFieldEquiv_a₃ W σ
 
+/-- **(M1b-3b leaf, brick 4b-key)** The generic base change `W_KE` is fixed by `Φ_σ`:
+mapping its coefficients along `Φ_σ` returns the same curve. With mathlib's functoriality
+(`Affine.map_addX`, `map_addY`, `map_slope`) this is all that is needed to push `Φ_σ`
+through the addition formulas — and it avoids unfolding the (very large) curve record. -/
+theorem map_galoisFunctionFieldEquiv_WKE :
+    (HasseWeil.W_KE (W.baseChange L)).map
+        (galoisFunctionFieldEquiv W σ : (W.baseChange L).toAffine.FunctionField →+*
+          (W.baseChange L).toAffine.FunctionField) =
+      HasseWeil.W_KE (W.baseChange L) := by
+  refine WeierstrassCurve.ext ?_ ?_ ?_ ?_ ?_
+  · exact galoisFunctionFieldEquiv_WKE_a₁ W σ
+  · exact galoisFunctionFieldEquiv_WKE_a₂ W σ
+  · exact galoisFunctionFieldEquiv_WKE_a₃ W σ
+  · rw [WeierstrassCurve.map_a₄, HasseWeil.W_KE, WeierstrassCurve.map_a₄]
+    exact galoisFunctionFieldEquiv_a₄ W σ
+  · rw [WeierstrassCurve.map_a₆, HasseWeil.W_KE, WeierstrassCurve.map_a₆]
+    exact galoisFunctionFieldEquiv_a₆ W σ
+
 end TranslationTransport
 
 end ModularCurves
