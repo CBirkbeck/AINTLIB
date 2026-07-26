@@ -1,10 +1,11 @@
-FOCUS: [DS4 Gap A] two authorised tasks:
- (1) add [NIsInvertible S N] to the DS4 register (WeilPairing/Basic.lean) + fix fallout;
- (2) scope (star-prime): Q in E[N](T) => Pic.map [N] (sectionToPicRel .. Q) = 1.
-     READ HasseWeil/Pic0/ FIRST (TheoremOfSquareDivisorForm, PicDualPullbackTheoremOfSquare,
-     PicDualAdditivityReduction) — closest existing material, field-level.
-TRAPS (gpt-5.6-sol): Pic goes through Skeleton so class equality gives only Nonempty iso —
- build on RIGIDIFIED sheaves (L |-> L (x) f^*(0^*L)^-1) then descend. Prove mu_N-valuedness
- BEFORE fibre rigidity. universallyOConnected (Rigidity.lean:57, PROVEN) is the H^0(E_T,O^x)={1}
- uniqueness for the normalized trivialisation.
-DISCIPLINE: no maxHeartbeats; split proofs; explicit implicit args; hypotheses on underlying morphisms.
+FOCUS: Gap A / (star-prime). CORRECTION: the Picard layer is NOT axiom-clean.
+sectionToPicRel -> picClass -> RelEffCartierDiv.isOfficial -> officialAux_exists_finite_chart
+(LevelStructure/CartierDivisor.lean:2567) is SORRIED. So kappa inherits sorryAx regardless
+of leaves (i)/(ii). Gap A now has THREE open leaves, not two:
+  (U) officialAux_exists_finite_chart  -- UPSTREAM, gates picClass itself. WORKING THIS NOW.
+  (i) kappa_add                        -- Picard/SelfAdjointN.lean
+  (ii) picMap_mulByHom_kappa_pow       -- Picard/SelfAdjointN.lean
+(U) sketch: D -> S is finite (RelEffCartierDiv working defn, finite locally free).
+Pick affine U1 ni pi(c); pick affine std-smooth V0 ni c meeting D_{pi c} only at c;
+D \ V0 closed in D, finite => image closed in S, misses pi(c); shrink U0 to avoid it;
+then D cap pi^-1(U0) subset V0 so Gamma(C,V0)/I = Gamma(D cap pi^-1 U0) finite over Gamma(S,U0).
