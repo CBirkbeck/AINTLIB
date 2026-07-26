@@ -889,6 +889,151 @@ theorem gaussNormRPS_monomial {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   · have h1 := valued_coeff_le_gaussNormRPS p F ϖ hmono J
     rwa [MvPowerSeries.coeff_monomial, if_pos rfl] at h1
 
+/-- Coefficients of a monomial multiple, in range. -/
+theorem coeff_monomialMul_pos {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {D K : Fin k →₀ ℕ} (zz : ↥(ArSub p F ϖ hρ0 hρ1))
+    (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) (h : D ≤ K) :
+    MvPowerSeries.coeff K ((MvPowerSeries.monomial D zz) * x)
+      = zz * MvPowerSeries.coeff (K - D) x := by
+  rw [MvPowerSeries.coeff_monomial_mul, if_pos h]
+
+theorem coeff_monomialMul_neg {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {D K : Fin k →₀ ℕ} (zz : ↥(ArSub p F ϖ hρ0 hρ1))
+    (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) (h : ¬ D ≤ K) :
+    MvPowerSeries.coeff K ((MvPowerSeries.monomial D zz) * x) = 0 := by
+  rw [MvPowerSeries.coeff_monomial_mul, if_neg h]
+
+theorem isRestricted_monomialMul {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (D : Fin k →₀ ℕ) (zz : ↥(ArSub p F ϖ hρ0 hρ1))
+    {x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hx : MvPowerSeries.IsRestricted x) :
+    MvPowerSeries.IsRestricted ((MvPowerSeries.monomial D zz) * x) :=
+  Subring.mul_mem (restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1))
+    (isRestricted_monomial p F ϖ zz (J := D)) hx
+
+theorem coeff_sub_monomialMul_lead {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {x y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    {I J : Fin k →₀ ℕ} (hIJ : I ≤ J) (zz : ↥(ArSub p F ϖ hρ0 hρ1)) :
+    MvPowerSeries.coeff J (y - (MvPowerSeries.monomial (J - I) zz) * x)
+      = MvPowerSeries.coeff J y - zz * MvPowerSeries.coeff I x := by
+  rw [map_sub, coeff_monomialMul_pos p F ϖ zz x tsub_le_self,
+    tsub_tsub_cancel_of_le hIJ]
+
+theorem groebner_step {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNReal}
+    {x y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hx : MvPowerSeries.IsRestricted x) (hy : MvPowerSeries.IsRestricted y)
+    {I J : Fin k →₀ ℕ} {c : ↥(ArSub p F ϖ hρ0 hρ1)}
+    (hcx : MvPowerSeries.coeff I x = c)
+    (hc0 : ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) ≠ 0)
+    (hcnorm : Valued.v ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+      = gaussNormRPS p F ϖ hρ0 hρ1 x)
+    (hIJ : I ≤ J)
+    (htail : ∀ K : Fin k →₀ ℕ,
+      (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn I
+        < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+      Valued.v ((MvPowerSeries.coeff K x : ↥(ArSub p F ϖ hρ0 hρ1))
+          : hatK p F hρ0 hρ1)
+        ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 x) :
+    ∃ z : ↥(ArSub p F ϖ hρ0 hρ1),
+      Valued.v ((z : hatK p F hρ0 hρ1)) * gaussNormRPS p F ϖ hρ0 hρ1 x
+          ≤ gaussNormRPS p F ϖ hρ0 hρ1 y
+        ∧ (∀ K : Fin k →₀ ℕ,
+            (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn J
+              < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+            Valued.v ((MvPowerSeries.coeff K
+                ((MvPowerSeries.monomial (J - I) z) * x)
+                : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+              ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 y)
+        ∧ gaussNormRPS p F ϖ hρ0 hρ1
+            (y - (MvPowerSeries.monomial (J - I) z) * x)
+            ≤ gaussNormRPS p F ϖ hρ0 hρ1 y
+        ∧ (((MvPowerSeries.coeff J
+              (y - (MvPowerSeries.monomial (J - I) z) * x)
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) = 0
+          ∨ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
+                (y - (MvPowerSeries.monomial (J - I) z) * x)
+                : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+              < degAr p F ϖ hρ0 hρ1 ((c : ↥(ArSub p F ϖ hρ0 hρ1))
+                : hatK p F hρ0 hρ1)) := by
+  obtain ⟨z, hzmem, hzval, hzdeg⟩ := exact_division p F ϖ
+    (c : ↥(ArSub p F ϖ hρ0 hρ1)).2 hc0
+    (MvPowerSeries.coeff J y : ↥(ArSub p F ϖ hρ0 hρ1)).2
+  have hzc : Valued.v ((z : hatK p F hρ0 hρ1))
+      * Valued.v ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+      ≤ Valued.v ((MvPowerSeries.coeff J y : ↥(ArSub p F ϖ hρ0 hρ1))
+        : hatK p F hρ0 hρ1) := by
+    have heq : (z : hatK p F hρ0 hρ1)
+        * ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        = ((MvPowerSeries.coeff J y : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+          - (((MvPowerSeries.coeff J y : ↥(ArSub p F ϖ hρ0 hρ1))
+            : hatK p F hρ0 hρ1) - (z : hatK p F hρ0 hρ1)
+            * ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) := by
+      ring
+    rw [← Valuation.map_mul, heq]
+    exact le_trans (Valuation.map_sub _ _ _) (max_le le_rfl hzval)
+  have hzy : Valued.v ((z : hatK p F hρ0 hρ1)) * gaussNormRPS p F ϖ hρ0 hρ1 x
+      ≤ gaussNormRPS p F ϖ hρ0 hρ1 y := by
+    rw [← hcnorm]
+    exact le_trans hzc (valued_coeff_le_gaussNormRPS p F ϖ hy J)
+  refine ⟨⟨z, hzmem⟩, hzy, ?_, ?_, ?_⟩
+  · intro K hK
+    by_cases hDK : J - I ≤ K
+    · rw [coeff_monomialMul_pos p F ϖ _ x hDK, MulMemClass.coe_mul,
+        Valuation.map_mul]
+      have hshift : (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn I
+          < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn (K - (J - I)) := by
+        have h1 : I + (J - I) = J := add_tsub_cancel_of_le hIJ
+        have h2 : (K - (J - I)) + (J - I) = K := tsub_add_cancel_of_le hDK
+        have h3 : (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn (I + (J - I))
+            < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+              ((K - (J - I)) + (J - I)) := by
+          rw [h1, h2]
+          exact hK
+        rw [map_add, map_add] at h3
+        exact lt_of_add_lt_add_right h3
+      calc Valued.v ((z : hatK p F hρ0 hρ1))
+            * Valued.v ((MvPowerSeries.coeff (K - (J - I)) x
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+          ≤ Valued.v ((z : hatK p F hρ0 hρ1))
+            * (ε * gaussNormRPS p F ϖ hρ0 hρ1 x) :=
+            mul_le_mul_of_nonneg_left (htail (K - (J - I)) hshift) zero_le
+        _ = ε * (Valued.v ((z : hatK p F hρ0 hρ1))
+            * gaussNormRPS p F ϖ hρ0 hρ1 x) := by ring
+        _ ≤ ε * gaussNormRPS p F ϖ hρ0 hρ1 y :=
+            mul_le_mul_of_nonneg_left hzy zero_le
+    · rw [coeff_monomialMul_neg p F ϖ _ x hDK, ZeroMemClass.coe_zero,
+        Valuation.map_zero]
+      exact zero_le
+  · have haxnorm : gaussNormRPS p F ϖ hρ0 hρ1
+        ((MvPowerSeries.monomial (J - I) (⟨z, hzmem⟩ :
+          ↥(ArSub p F ϖ hρ0 hρ1))) * x) ≤ gaussNormRPS p F ϖ hρ0 hρ1 y := by
+      refine ciSup_le fun K => ?_
+      by_cases hDK : J - I ≤ K
+      · rw [coeff_monomialMul_pos p F ϖ _ x hDK, MulMemClass.coe_mul,
+          Valuation.map_mul]
+        refine le_trans (mul_le_mul_of_nonneg_left
+          (valued_coeff_le_gaussNormRPS p F ϖ hx (K - (J - I))) zero_le) hzy
+      · rw [coeff_monomialMul_neg p F ϖ _ x hDK, ZeroMemClass.coe_zero,
+          Valuation.map_zero]
+        exact zero_le
+    exact le_trans (gaussNormRPS_sub_le p F ϖ hy
+      (isRestricted_monomialMul p F ϖ (J - I) _ hx)) (max_le le_rfl haxnorm)
+  · have hcJ' : MvPowerSeries.coeff J (y - (MvPowerSeries.monomial (J - I)
+        (⟨z, hzmem⟩ : ↥(ArSub p F ϖ hρ0 hρ1))) * x)
+        = MvPowerSeries.coeff J y
+          - (⟨z, hzmem⟩ : ↥(ArSub p F ϖ hρ0 hρ1)) * c := by
+      rw [coeff_sub_monomialMul_lead p F ϖ hIJ, hcx]
+    have hcJ : ((MvPowerSeries.coeff J (y - (MvPowerSeries.monomial (J - I)
+        (⟨z, hzmem⟩ : ↥(ArSub p F ϖ hρ0 hρ1))) * x)
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        = ((MvPowerSeries.coeff J y : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+          - (z : hatK p F hρ0 hρ1)
+            * ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
+      exact congrArg (fun w : ↥(ArSub p F ϖ hρ0 hρ1) =>
+        (w : hatK p F hρ0 hρ1)) hcJ'
+    rw [hcJ]
+    exact hzdeg
+
 end FarguesFontaine
 
 end
