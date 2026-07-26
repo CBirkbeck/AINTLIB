@@ -1020,4 +1020,44 @@ theorem galoisFunctionFieldEquiv_y_gen {L : Type v} [Field L] [DecidableEq L] [A
   rw [galoisFunctionFieldEquiv, RingEquiv.trans_apply, galoisFractionLift_y_gen,
     cast_y_gen _ _ (map_algEquiv_baseChange_eq W σ)]
 
+/-- **(M1b-3b leaf, brick 3)** `Φ_σ` fixes every constant coming from the base field `k` —
+in particular the Weierstrass coefficients of `W ⊗ L`, since `σ` is a `k`-algebra map. -/
+theorem galoisFunctionFieldEquiv_algebraMap_base {L : Type v} [Field L] [Algebra k L]
+    (σ : L ≃ₐ[k] L) (a : k) :
+    galoisFunctionFieldEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.FunctionField (algebraMap k L a)) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (algebraMap k L a) := by
+  rw [galoisFunctionFieldEquiv_algebraMap W σ, σ.commutes]
+
+/-- The Weierstrass coefficients of `W ⊗ L` are base constants, hence `Φ_σ`-fixed. -/
+theorem galoisFunctionFieldEquiv_a₁ {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    galoisFunctionFieldEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₁) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₁ :=
+  galoisFunctionFieldEquiv_algebraMap_base W σ W.a₁
+
+theorem galoisFunctionFieldEquiv_a₂ {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    galoisFunctionFieldEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₂) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₂ :=
+  galoisFunctionFieldEquiv_algebraMap_base W σ W.a₂
+
+theorem galoisFunctionFieldEquiv_a₃ {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    galoisFunctionFieldEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₃) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₃ :=
+  galoisFunctionFieldEquiv_algebraMap_base W σ W.a₃
+
+theorem galoisFunctionFieldEquiv_a₄ {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    galoisFunctionFieldEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₄) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₄ :=
+  galoisFunctionFieldEquiv_algebraMap_base W σ W.a₄
+
+theorem galoisFunctionFieldEquiv_a₆ {L : Type v} [Field L] [Algebra k L] (σ : L ≃ₐ[k] L) :
+    galoisFunctionFieldEquiv W σ
+        (algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₆) =
+      algebraMap L (W.baseChange L).toAffine.FunctionField (W.baseChange L).a₆ :=
+  galoisFunctionFieldEquiv_algebraMap_base W σ W.a₆
+
 end ModularCurves
