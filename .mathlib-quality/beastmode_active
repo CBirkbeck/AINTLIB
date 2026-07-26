@@ -1,7 +1,8 @@
-FOCUS: DS4 M1b-3b-viii — div(Phi_sigma g_T) = div(g_{sigma T}).
-DONE steps a-e (sorry-free, pushed): galoisProjPointEquiv_toProjectiveSmoothPoint, equivMapDomain_kappaDivisor, galoisPointEquiv, galoisFiberEquiv, equivMapDomain_pullbackDiv.
-NEXT step f: equivMapDomain (galoisProjPointEquiv) (pullbackDivisor f h D) = pullbackDivisor f h (equivMapDomain (galoisProjPointEquiv) D).
-  pullbackDivisor f h D = D.sum (fun v n => n smul pullbackDiv f h v.toAffinePoint)  [DivisorPullback.lean:113]
-  Route: Finsupp.sum over the relabelled D reindexes by galoisProjPointEquiv (Finsupp.sum_equivMapDomain or sum_mapDomain_index), each term uses equivMapDomain_pullbackDiv (step e) plus the compatibility v.toAffinePoint under the relabelling (ProjectiveSmoothPoint.toAffinePoint vs galoisPointEquiv — a small case lemma like step (a), needed as step f-0).
-THEN step g: combine with weilFunction_divisor_eq_pullbackDivisor_kappaDivisor (HfactLemma:134) and equivMapDomain_kappaDivisor to conclude div(Phi_sigma g_T) = div(g_{sigma T}).
-THEN the pairing equivariance (Constancy.pairing_const_of_transport + uniqueness); THEN M1c (EtaleDescent:440).
+FOCUS: DS4 M1b-3b-ix — the PAIRING equivariance e(sigma S, sigma T) = sigma(e(S,T)).
+ALL geometric inputs are DONE and axiom-clean (WeilPairing/GaloisFunctionField.lean): projectiveDivisorOf_galois_weilFunction : div(sigma.g_T) = div(g_{sigma T}).
+ROUTE:
+ 1. From the divisor equality: div( (sigma.g_T) / g_{sigma T} ) = 0, so by HasseWeil Constancy.const_unit_of_projectiveDivisorOf_eq_zero there is c != 0 with sigma.g_T = c * g_{sigma T}. (Use projectiveDivisorOf_div = div f - div g if available, else divisorOf_div / map_div.)
+ 2. Phi_sigma intertwines translations: Phi_sigma o tau_S = tau_{sigma S} o Phi_sigma (translateAlgEquivOfPoint; needs a small lemma: the translation by S transported by sigma is the translation by sigma S — mirror of HasseWeil translate lemmas).
+ 3. Apply Phi_sigma to weilPairing_translate (tau_S g_T = e(S,T) g_T), substitute 1 and 2, cancel c, and use uniqueness of the constant (algebraMap injective) to get e(sigma S, sigma T) = sigma (e(S,T)).
+ 4. Package as fieldWeilPairing_galois : (fieldWeilPairing (sigma S) (sigma T)).1 = sigma ((fieldWeilPairing S T).1).
+THEN M1c: exists_pairingAlgebraHom_of_galoisEquivariant (EtaleDescent:440) + the torsionAlgebraPointsEquiv equivariance.
