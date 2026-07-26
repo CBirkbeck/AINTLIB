@@ -857,6 +857,107 @@ theorem gaussValue_le_of_mem_Iinf_pow {ρ : NNReal} (hρ1 : ρ < 1) (n : ℕ)
           omega
   exact hmono (Iinf_pow_le_span_chartMonomials p F ϖ n hw)
 
+/-- The transported image of an `A_inf`-element has interval norm bounded by the
+maximum of the two Gauss values. -/
+theorem wI_BIProd_algebraMap (x : Ainf p F) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (algebraMap (Ainf p F) (Bloc p F ϖ) x))
+      = max (gaussValue p F ρ₁ x) (gaussValue p F ρ₂ x) := by
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK, wLoc_algebraMap,
+    wLoc_algebraMap]
+
+/-- **The `J^n`-cofinality estimate**: elements of the `n`-th power of the ideal of
+definition of the chart localization transport into the `q^n`-ball of `B^I`, where
+`q = max(ρ₁, ρ₂, |ϖ|) < 1`. -/
+theorem wI_le_of_mem_locIdeal_pow (a b : ℕ) (hb : 0 < b)
+    (hπ1 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₁)
+    (hπ2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≤ ρ₂)
+    (hr1 : ρ₁ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (hr2 : ρ₂ ^ a ≤ perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b) (n : ℕ)
+    {y : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b))}
+    (hy : y ∈ locIdeal (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b) ^ n) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (blocEquivAwayChartS p F ϖ b hb (↑y : Localization.Away (chartS p F ϖ 1 b))))
+      ≤ (max (max ρ₁ ρ₂) (perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F))) ^ n := by
+  set q : NNReal := max (max ρ₁ ρ₂) (perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F)) with hqdef
+  set Bd : Ideal ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+      (chartS p F ϖ 1 b)) :=
+    { carrier := {z | wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (blocEquivAwayChartS p F ϖ b hb
+          (↑z : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n}
+      zero_mem' := by
+        show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (blocEquivAwayChartS p F ϖ b hb
+            ((0 : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+              (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
+        rw [ZeroMemClass.coe_zero, map_zero, map_zero, wI_zero p F]
+        exact zero_le
+      add_mem' := by
+        intro x z hx hz
+        show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (blocEquivAwayChartS p F ϖ b hb
+            ((x + z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+              (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
+        rw [AddMemClass.coe_add, map_add, map_add]
+        exact le_trans (wI_add_le p F _ _) (max_le hx hz)
+      smul_mem' := by
+        intro c z hz
+        show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (blocEquivAwayChartS p F ϖ b hb
+            ((c • z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+              (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
+        have hcoe : ((c • z : ↥(locSubring (podAinf p F ϖ) (chartT p F ϖ a b)
+            (chartS p F ϖ 1 b))) : Localization.Away (chartS p F ϖ 1 b))
+            = (↑c : Localization.Away (chartS p F ϖ 1 b)) * ↑z := rfl
+        rw [hcoe, map_mul, map_mul]
+        have hcball : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            (blocEquivAwayChartS p F ϖ b hb
+              (↑c : Localization.Away (chartS p F ϖ 1 b)))) ≤ 1 :=
+          map_locSubring_le_blocUnitBall p F ϖ a b hb hπ1 hπ2 hr1 hr2
+            ⟨c, c.2, rfl⟩
+        exact le_trans (wI_mul_le p F _ _)
+          (le_trans (mul_le_mul hcball hz zero_le zero_le)
+            (le_of_eq (one_mul _))) } with hBd
+  suffices hle : locIdeal (podAinf p F ϖ) (chartT p F ϖ a b)
+      (chartS p F ϖ 1 b) ^ n ≤ Bd from hle hy
+  rw [locIdeal, ← Ideal.map_pow, Ideal.map, Ideal.span_le]
+  rintro z ⟨w, hw, rfl⟩
+  rw [SetLike.mem_coe] at hw
+  show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+    (blocEquivAwayChartS p F ϖ b hb
+      (↑(algebraMapD (podAinf p F ϖ) (chartT p F ϖ a b) (chartS p F ϖ 1 b) w)
+        : Localization.Away (chartS p F ϖ 1 b)))) ≤ q ^ n
+  have hcoe : (↑(algebraMapD (podAinf p F ϖ) (chartT p F ϖ a b)
+      (chartS p F ϖ 1 b) w) : Localization.Away (chartS p F ϖ 1 b))
+      = algebraMap (Ainf p F) (Localization.Away (chartS p F ϖ 1 b)) ↑w := rfl
+  rw [hcoe, blocEquivAwayChartS_algebraMap p F ϖ b hb, wI_BIProd_algebraMap p F ϖ]
+  have hwmem : (↑w : Ainf p F) ∈ Iinf p F ϖ ^ n := by
+    have hset := idealToTop_pow_eq_preimage (Iinf p F ϖ) n
+    have hmem : w ∈ ((idealToTop (Iinf p F ϖ) ^ n :
+        Ideal ↥(⊤ : Subring (Ainf p F))) :
+        Set ↥(⊤ : Subring (Ainf p F))) := hw
+    rw [hset] at hmem
+    exact hmem
+  refine max_le ?_ ?_
+  · calc gaussValue p F ρ₁ ↑w
+        ≤ (max ρ₁ (perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F))) ^ n :=
+          gaussValue_le_of_mem_Iinf_pow p F ϖ hρ₁1 n hwmem
+      _ ≤ q ^ n := by
+          refine pow_le_pow_left₀ zero_le (max_le ?_ (le_max_right _ _)) n
+          exact le_trans (le_max_left _ _) (le_max_left _ _)
+  · calc gaussValue p F ρ₂ ↑w
+        ≤ (max ρ₂ (perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F))) ^ n :=
+          gaussValue_le_of_mem_Iinf_pow p F ϖ hρ₂1 n hwmem
+      _ ≤ q ^ n := by
+          refine pow_le_pow_left₀ zero_le (max_le ?_ (le_max_right _ _)) n
+          exact le_trans (le_max_right _ _) (le_max_left _ _)
+
 end FarguesFontaine
 
 end
