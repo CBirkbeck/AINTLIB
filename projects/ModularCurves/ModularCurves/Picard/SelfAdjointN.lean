@@ -46,8 +46,28 @@ built on genuine **rigidified** invertible sheaves — the lift `L ↦ L ⊗ f^*
 `picRelProj`, carrying its canonical zero-section rigidification — and only descended to
 Picard classes at the end. `(★′)` as stated here is the class-level shadow: it is what
 supplies *existence* of the trivialization, after which
-`EllipticCurveGeom.universallyOConnected` (`EllipticCurve/Rigidity.lean`, proved) makes the
-normalized choice unique.
+`ModularCurves.eq_one_of_pullback_eq_one` (`EllipticCurve/SectionRigidity.lean`, proved)
+makes the normalized choice unique.
+
+## Available machinery for the two leaves (both are now LOCAL ON THE BASE)
+
+The descent workhorse is proved and axiom-clean, so neither leaf needs a global argument:
+
+* `AlgebraicGeometry.Scheme.Modules.nonempty_unitObj_iso_of_glue`
+  (`Picard/GlueTrivialization.lean`) — an `𝒪`-module with cover-local generating sections
+  agreeing on overlaps is trivial. Sections glue by the sheaf axiom; the glued global
+  section is tested by `isIso_of_bijective_app_on_cover`.
+* `ModularCurves.nonempty_unitObj_iso_of_normalized_glue` (`Picard/RigidDescent.lean`) —
+  the elliptic-curve form: generating sections over the `f`-preimages of a cover **of the
+  base**, whose overlap comparison units are `1` along the zero section, give triviality.
+  Overlap agreement is *forced*, not checked: two generating sections differ by a unit, and
+  a unit that is `1` on the zero section is `1`.
+
+What remains for each leaf is therefore the **local** input: on a Weierstrass chart of the
+base, the explicit line-and-vertical function realizing
+`(Q) + (Q′) − (Q+Q′) − (0) = div(ℓ/v)` (Silverman III.3.5; the field-level template is
+`HasseWeil.Pic0.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv`, proved
+unconditionally in any characteristic), normalized along the zero section.
 -/
 
 universe u
