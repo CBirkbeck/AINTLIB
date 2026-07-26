@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.PoleSheafCartierTrivialization
 import ModularCurves.EllipticCurve.PoleSheafWeierstrassRelation
+import ModularCurves.EllipticCurve.WeierstrassModelCoordinates
 
 /-!
 # The Weierstrass equation in a Cartier chart
@@ -316,6 +317,59 @@ theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_Cart
   simp only [hxy', hxx', hxxx', hone] at hcoeff
   ring_nf at hcoeff ⊢
   exact hcoeff
+
+/-- The Cartier-frame pole relation gives homogeneous coordinates on the
+corresponding projective Weierstrass cubic. -/
+theorem sectionPoleSheafPower_six_local_homogeneous_weierstrass_equation_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hH1 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    (hH2 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 2).sheaf 1))
+    (hH3 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 3).sheaf 1))
+    (hH4 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 4).sheaf 1))
+    (hH5 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 5).sheaf 1))
+    (b1 : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π (sectionPoleSheafPower π z hz 1)))
+    (hb1 : b1 0 = sectionPoleSheafPowerOneSection π z hz)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 1 x = 1)
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1) :
+    ∃ a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)),
+      let hr : r ∈ z.ker.ideal U :=
+        hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+      let X := localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz 2) U
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd 2) x
+      let Y := localTrivializationCoefficient
+        (sectionPoleSheafPower π z hz 3) U
+        (sectionPoleSheafPowerTrivializationOfCartierGenerator
+          z hz U r hr hspan hnzd 3) y
+      let A : Γ(S, (⊤ : S.Opens)) →+* Γ(C, U.1) :=
+        (C.presheaf.map (homOfLE le_top).op).hom.comp π.appTop.hom
+      let W : WeierstrassCurve Γ(S, (⊤ : S.Opens)) := ⟨a₁, a₂, a₃, a₄, a₆⟩
+      (W.map A).toProjective.Equation ![X * r, Y, r ^ 3] := by
+  obtain ⟨a₁, a₂, a₃, a₄, a₆, hrel⟩ :=
+    sectionPoleSheafPower_six_local_homogeneous_weierstrass_relation_of_CartierGenerator
+      hsm z hz U hU r hspan hnzd hH1 hH2 hH3 hH4 hH5 b1 hb1 x hx y hy
+  refine ⟨a₁, a₂, a₃, a₄, a₆, ?_⟩
+  dsimp only
+  apply WeierstrassCurve.Projective.equation_X_mul_r_Y_r_pow_three
+  simpa only [WeierstrassCurve.map, RingHom.comp_apply] using hrel
 
 end
 
