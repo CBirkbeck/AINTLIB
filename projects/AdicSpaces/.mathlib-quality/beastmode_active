@@ -1,1 +1,1 @@
-FOCUS: T911 — Kedlaya lift/strictness of evalArHom (surjectivity), pending AD-10 decision on the k-variable route
+FOCUS: T911 k-variable hom — restrictedness of I |-> evalArHom (sliceSeries f I), then bundle the multivariate presentation map

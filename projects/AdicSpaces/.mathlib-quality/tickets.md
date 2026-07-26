@@ -97,6 +97,19 @@ topology (`gaussNormRPS` exists in Groebner.lean) plus the iso `A⟨T,T⃗⟩ �
 *general* (rather than `B^I`-specific) univariate evaluation theorem — i.e. the normed-ring
 framework AD-7 deliberately avoided. Decide before starting T911.
 
+**AD-10 decided (2026-07-26): route (a′), "slice and reuse."** Rather than redoing the
+analysis multivariately *or* building a normed-ring framework, fix a multi-index `I` in the
+`k` spectator variables and slice: `sliceSeries f I` is a one-variable series in `T`, and
+`sliceSeries (f·g) I = ∑_{I₁+I₂=I} sliceSeries f I₁ · sliceSeries g I₂` (**proven**, via
+`antidiagonal_cons`: the antidiagonal of `Finsupp.cons n I` is the product of the two
+antidiagonals). Since `evalArHom` is *already* a ring hom on one-variable series, the
+`k`-variable map is `I ↦ evalArHom (sliceSeries f I)` and its multiplicativity is the finite
+sum above — no new analysis. Landed: `cons_add`, `tail_add`, `antidiagonal_cons`,
+`coeffSeq_ext`, `sliceSeries`, `coeffSeq_sliceSeries`, `sliceSeries_add`, `sliceSeries_mul`.
+Remaining for the `k`-variable hom: restrictedness of `I ↦ evalArHom (sliceSeries f I)`
+(uniform decay: for each `ε`, all but finitely many `I` have *every* `T`-coefficient
+`≤ ε`), then bundle.
+
 **T910 progress (2026-07-26)** — `Presentation.lean` (~470 lines): the `A^r`-algebra
 structure on `B^I` is **done** (`ArToBI`, injective, `wI_ArToBI`), and Kedlaya's Tate
 variable is **done** (`teichPowOverP`, `wLoc_teichPowOverP`, `wI_teichPowOverP`,

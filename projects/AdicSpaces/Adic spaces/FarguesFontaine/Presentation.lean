@@ -42,6 +42,10 @@ and `z ↦ (resAr z, z)` is a ring map `A^{ρ₂} → B^{[ρ₁,ρ₂]}`.
   converge to the product of the limits — multiplicativity of evaluation.
 * `FarguesFontaine.evalArHom` : **evaluation as a ring homomorphism** `A^r⟨T⟩ →+* B^I`
   at any power-bounded element of `B^I` — Kedlaya's case-3 presentation map.
+* `FarguesFontaine.sliceSeries`, `FarguesFontaine.sliceSeries_mul` : slicing a
+  `(k+1)`-variable series into one-variable slices turns a product into the finite Cauchy
+  product of slices — the reduction of the `k`-variable evaluation to the one-variable one
+  (route (a) of AD-10).
 
 ## Sources
 
@@ -951,6 +955,112 @@ def evalArHom (h12 : ρ₁ ≤ ρ₂) {b : (hatK p F hρ₁0 hρ₁1) × (hatK p
     show (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) * b ^ l = 0
     rw [zero_mul])
   map_add' := fun f g => Subtype.ext (evalAr_add p F ϖ h12 hbmem hb f g)
+
+/-- `Finsupp.cons` is additive. -/
+theorem cons_add {k : ℕ} (a₁ a₂ : ℕ) (b₁ b₂ : Fin k →₀ ℕ) :
+    Finsupp.cons (a₁ + a₂) (b₁ + b₂)
+      = Finsupp.cons a₁ b₁ + Finsupp.cons a₂ b₂ := by
+  ext i
+  refine Fin.cases ?_ ?_ i
+  · simp only [Finsupp.cons_zero, Finsupp.add_apply, Finsupp.cons_zero]
+  · intro j
+    simp only [Finsupp.cons_succ, Finsupp.add_apply, Finsupp.cons_succ]
+
+/-- `Finsupp.tail` is additive. -/
+theorem tail_add {k : ℕ} (x y : Fin (k + 1) →₀ ℕ) :
+    Finsupp.tail (x + y) = Finsupp.tail x + Finsupp.tail y := by
+  ext i
+  simp only [Finsupp.tail_apply, Finsupp.add_apply, Finsupp.tail_apply]
+
+/-- **The antidiagonal of a `cons` splits**: pairs summing to `cons n I` are exactly the
+pairs obtained by consing a pair summing to `n` onto a pair summing to `I`. -/
+theorem antidiagonal_cons {k : ℕ} (n : ℕ) (I : Fin k →₀ ℕ) :
+    Finset.antidiagonal (Finsupp.cons n I)
+      = ((Finset.antidiagonal n) ×ˢ (Finset.antidiagonal I)).map
+        ⟨fun q => (Finsupp.cons q.1.1 q.2.1, Finsupp.cons q.1.2 q.2.2), by
+          rintro ⟨⟨a₁, a₂⟩, b₁, b₂⟩ ⟨⟨a₁', a₂'⟩, b₁', b₂'⟩ hq
+          obtain ⟨h1, h2⟩ := Prod.mk.injEq .. ▸ hq
+          obtain ⟨ha1, hb1⟩ := Finsupp.cons_injective2 h1
+          obtain ⟨ha2, hb2⟩ := Finsupp.cons_injective2 h2
+          simp only [Prod.mk.injEq]
+          exact ⟨⟨ha1, ha2⟩, hb1, hb2⟩⟩ := by
+  ext q
+  simp only [Finset.mem_antidiagonal, Finset.mem_map, Finset.mem_product,
+    Function.Embedding.coeFn_mk]
+  constructor
+  · intro hq
+    refine ⟨((q.1 0, q.2 0), (Finsupp.tail q.1, Finsupp.tail q.2)), ⟨?_, ?_⟩, ?_⟩
+    · show q.1 0 + q.2 0 = n
+      have := congrArg (fun m : Fin (k + 1) →₀ ℕ => m 0) hq
+      simpa only [Finsupp.add_apply, Finsupp.cons_zero] using this
+    · show Finsupp.tail q.1 + Finsupp.tail q.2 = I
+      rw [← tail_add, hq, Finsupp.tail_cons]
+    · refine Prod.ext ?_ ?_
+      · exact Finsupp.cons_tail q.1
+      · exact Finsupp.cons_tail q.2
+  · rintro ⟨⟨a, b⟩, ⟨ha, hb⟩, rfl⟩
+    show Finsupp.cons a.1 b.1 + Finsupp.cons a.2 b.2 = Finsupp.cons n I
+    rw [← cons_add, ha, hb]
+
+
+/-- A one-variable series is determined by its coefficient sequence. -/
+theorem coeffSeq_ext {A : Type*} [CommRing A] {f g : MvPowerSeries (Fin 1) A}
+    (h : ∀ n, coeffSeq f n = coeffSeq g n) : f = g := by
+  ext m
+  have hm : m = Finsupp.single (0 : Fin 1) (m 0) := by
+    refine Finsupp.ext fun i => ?_
+    rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
+  rw [hm]
+  exact h (m 0)
+
+/-- **The slice of a `(k+1)`-variable series**: the one-variable series in the first
+variable obtained by fixing the multi-index `I` in the remaining ones. -/
+def sliceSeries {k : ℕ} {A : Type*} [CommRing A] (f : MvPowerSeries (Fin (k + 1)) A)
+    (I : Fin k →₀ ℕ) : MvPowerSeries (Fin 1) A :=
+  fun m => MvPowerSeries.coeff (Finsupp.cons (m 0) I) f
+
+@[simp]
+theorem coeffSeq_sliceSeries {k : ℕ} {A : Type*} [CommRing A]
+    (f : MvPowerSeries (Fin (k + 1)) A) (I : Fin k →₀ ℕ) (n : ℕ) :
+    coeffSeq (sliceSeries f I) n = MvPowerSeries.coeff (Finsupp.cons n I) f := by
+  show MvPowerSeries.coeff (Finsupp.cons ((Finsupp.single (0 : Fin 1) n) 0) I) f
+      = MvPowerSeries.coeff (Finsupp.cons n I) f
+  rw [Finsupp.single_eq_same]
+
+theorem sliceSeries_add {k : ℕ} {A : Type*} [CommRing A]
+    (f g : MvPowerSeries (Fin (k + 1)) A) (I : Fin k →₀ ℕ) :
+    sliceSeries (f + g) I = sliceSeries f I + sliceSeries g I := by
+  refine coeffSeq_ext fun n => ?_
+  rw [coeffSeq_sliceSeries, coeffSeq_add, coeffSeq_sliceSeries, coeffSeq_sliceSeries,
+    map_add]
+
+set_option maxHeartbeats 1000000 in
+/-- **Slicing turns a product into the finite Cauchy product of slices** — the identity
+that reduces the `k`-variable evaluation to the one-variable one. -/
+theorem sliceSeries_mul {k : ℕ} {A : Type*} [CommRing A]
+    (f g : MvPowerSeries (Fin (k + 1)) A) (I : Fin k →₀ ℕ) :
+    sliceSeries (f * g) I
+      = ∑ q ∈ Finset.antidiagonal I, sliceSeries f q.1 * sliceSeries g q.2 := by
+  classical
+  refine coeffSeq_ext fun n => ?_
+  rw [coeffSeq_sliceSeries, MvPowerSeries.coeff_mul, antidiagonal_cons, Finset.sum_map,
+    Finset.sum_product_right]
+  have hcoeff : coeffSeq (∑ q ∈ Finset.antidiagonal I,
+        sliceSeries f q.1 * sliceSeries g q.2) n
+      = ∑ q ∈ Finset.antidiagonal I,
+        coeffSeq (sliceSeries f q.1 * sliceSeries g q.2) n := by
+    show MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n)
+        (∑ q ∈ Finset.antidiagonal I, sliceSeries f q.1 * sliceSeries g q.2)
+      = ∑ q ∈ Finset.antidiagonal I,
+        MvPowerSeries.coeff (Finsupp.single (0 : Fin 1) n)
+          (sliceSeries f q.1 * sliceSeries g q.2)
+    exact map_sum _ _ _
+  rw [hcoeff]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [coeffSeq_mul]
+  refine Finset.sum_congr rfl fun a _ => ?_
+  rw [coeffSeq_sliceSeries, coeffSeq_sliceSeries]
+  rfl
 
 end FarguesFontaine
 
