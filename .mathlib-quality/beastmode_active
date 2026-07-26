@@ -1,11 +1,13 @@
-FOCUS: Gap A / (star-prime). CORRECTION: the Picard layer is NOT axiom-clean.
-sectionToPicRel -> picClass -> RelEffCartierDiv.isOfficial -> officialAux_exists_finite_chart
-(LevelStructure/CartierDivisor.lean:2567) is SORRIED. So kappa inherits sorryAx regardless
-of leaves (i)/(ii). Gap A now has THREE open leaves, not two:
-  (U) officialAux_exists_finite_chart  -- UPSTREAM, gates picClass itself. WORKING THIS NOW.
-  (i) kappa_add                        -- Picard/SelfAdjointN.lean
-  (ii) picMap_mulByHom_kappa_pow       -- Picard/SelfAdjointN.lean
-(U) sketch: D -> S is finite (RelEffCartierDiv working defn, finite locally free).
-Pick affine U1 ni pi(c); pick affine std-smooth V0 ni c meeting D_{pi c} only at c;
-D \ V0 closed in D, finite => image closed in S, misses pi(c); shrink U0 to avoid it;
-then D cap pi^-1(U0) subset V0 so Gamma(C,V0)/I = Gamma(D cap pi^-1 U0) finite over Gamma(S,U0).
+FOCUS: Gap A. DONE: officialAux_exists_finite_chart PROVED (was a sorry) via fibrewise
+weakening + basic-open chart. NEXT: sliceAux_exists_noetherianStage (CartierDivisor.lean:1981)
+is the LAST sorry under isOfficial -> picClass -> sectionToPicRel -> kappa.
+Candidate elementary route avoiding noetherian approximation, for
+nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor (A flat fp /R, A/(f) flat /R, f fibrewise
+nzd => f nzd): let N = Ann_A(f).
+ (1) A, A/fA flat => fA flat (Tor_2(A/fA,-)=0 -> Tor_1(fA,-) -> Tor_1(A,-)=0).
+ (2) 0 -> N -> A ->f fA -> 0 with Tor_1(fA,-)=0 => N (x) M -> A (x) M injective for ALL M;
+     and Tor_2(fA,-)=0 => Tor_1(N,-)=0 => N is FLAT over R.
+ (3) M = K a field over R: image of N (x) K is killed by f (x) 1 => N (x) K = 0 by hypothesis.
+ (4) N flat + N (x) kappa(p) = 0 for all p  =>  N = 0.  <-- the only nontrivial step left.
+Check first whether mathlib already has (4) and how nonZeroDivisor_of_flat_of_fibrewise_nzd
+currently branches.
