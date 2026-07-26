@@ -57,6 +57,17 @@ noncomputable def fieldWeilPairing (P Q : W.toAffine.Point)
     (fieldWeilPairing W N hN P Q hP hQ : F) =
       weilPairing W (N : ℤ) (fieldWeil_intCast_ne_zero N hN) P Q hP hQ := rfl
 
+/-- The pairing depends only on the points (the torsion proofs are propositional). -/
+theorem fieldWeilPairing_congr {P P' Q Q' : W.toAffine.Point}
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (hP' : (N : ℤ) • P' = 0) (hQ' : (N : ℤ) • Q' = 0)
+    (h₁ : P = P') (h₂ : Q = Q') :
+    (fieldWeilPairing W N hN P Q hP hQ : F) =
+      (fieldWeilPairing W N hN P' Q' hP' hQ' : F) := by
+  subst h₁
+  subst h₂
+  rfl
+
 /-- **(M1a, the DS4 `T-C2` shape)** Bilinearity in the first slot. -/
 theorem fieldWeilPairing_mul_left (P P' Q : W.toAffine.Point)
     (hP : (N : ℤ) • P = 0) (hP' : (N : ℤ) • P' = 0) (hQ : (N : ℤ) • Q = 0)
