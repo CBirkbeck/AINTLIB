@@ -458,6 +458,152 @@ theorem RationalLocData.mapHuber_comp (e₁ : A ≃+* B) (he₁ : Continuous e�
     rfl
   · rfl
 
+section CompositeValue
+
+variable {C : Type*} [CommRing C] [TopologicalSpace C] [IsTopologicalRing C]
+  [DecidableEq C]
+  [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+  [PlusSubring B] [IsHuberRing B] [HasLocLiftPowerBounded B]
+  [PlusSubring C] [IsHuberRing C] [HasLocLiftPowerBounded C]
+
+private theorem presheafValue_eq_of_coeRingHom' {R : Type*} [CommRing R]
+    [TopologicalSpace R] [IsTopologicalRing R]
+    {E : RationalLocData R} {R' : Type*} [CommRing R'] [TopologicalSpace R']
+    {G H : presheafValue E → R'}
+    (hG : Continuous G) (hH : Continuous H) [T2Space R']
+    (h : ∀ l, G (E.coeRingHom l) = H (E.coeRingHom l)) (x : presheafValue E) :
+    G x = H x := by
+  have hdense : DenseRange (⇑(E.coeRingHom)) :=
+    @UniformSpace.Completion.denseRange_coe _ E.uniformSpace
+  exact congr_fun (hdense.equalizer hG hH (funext h)) x
+
+/-- **The value-level composite law** (elementwise; the containment is an
+argument): transporting along `e₁` then `e₂` is transporting along the
+composite, up to the restriction along the datum composite collapse. -/
+theorem presheafValueRingEquivHuber_comp_apply
+    (e₁ : A ≃+* B) (he₁ : Continuous e₁) (he₁' : Continuous e₁.symm)
+    (e₂ : B ≃+* C) (he₂ : Continuous e₂) (he₂' : Continuous e₂.symm)
+    (D : RationalLocData A)
+    (hle : rationalOpen ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').T
+        ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').s
+      ⊆ rationalOpen (D.mapHuber (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂')).T
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s)
+    (x : presheafValue D) :
+    presheafValueRingEquivHuber e₂ he₂ he₂' (D.mapHuber e₁ he₁ he₁')
+        (presheafValueRingEquivHuber e₁ he₁ he₁' D x)
+      = restrictionMap
+          (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+          ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle
+          (presheafValueRingEquivHuber (e₁.trans e₂) (he₂.comp he₁)
+            (he₁'.comp he₂') D x) := by
+  haveI : T2Space (presheafValue
+      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')) := inferInstance
+  refine presheafValue_eq_of_coeRingHom'
+    ((presheafValueRingEquivHuber_continuous e₂ he₂ he₂' _).comp
+      (presheafValueRingEquivHuber_continuous e₁ he₁ he₁' D))
+    ((restrictionMapHom_continuous _ _ hle).comp
+      (presheafValueRingEquivHuber_continuous (e₁.trans e₂) _ _ D))
+    (fun l => ?_) x
+  have hs₁ : (D.mapHuber e₁ he₁ he₁').s = e₁.toRingHom D.s := rfl
+  have hT₁ : ∀ t ∈ D.T, e₁.toRingHom t ∈ (D.mapHuber e₁ he₁ he₁').T :=
+    fun _ ht => Finset.mem_image_of_mem _ ht
+  have hs₂ : ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').s
+      = e₂.toRingHom (D.mapHuber e₁ he₁ he₁').s := rfl
+  have hT₂ : ∀ t ∈ (D.mapHuber e₁ he₁ he₁').T,
+      e₂.toRingHom t ∈ ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').T :=
+    fun _ ht => Finset.mem_image_of_mem _ ht
+  have hs₁₂ : (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s
+      = (e₁.trans e₂).toRingHom D.s := rfl
+  have hT₁₂ : ∀ t ∈ D.T, (e₁.trans e₂).toRingHom t
+      ∈ (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).T :=
+    fun _ ht => Finset.mem_image_of_mem _ ht
+  have hL1 : presheafValueRingEquivHuber e₁ he₁ he₁' D (D.coeRingHom l)
+      = (D.mapHuber e₁ he₁ he₁').coeRingHom
+          (locMapOfHom e₁.toRingHom D (D.mapHuber e₁ he₁ he₁') hs₁ l) :=
+    presheafValueMapOfHom_coe e₁.toRingHom he₁ D _ hs₁ hT₁ l
+  have hL2 : presheafValueRingEquivHuber e₂ he₂ he₂' (D.mapHuber e₁ he₁ he₁')
+      ((D.mapHuber e₁ he₁ he₁').coeRingHom
+        (locMapOfHom e₁.toRingHom D (D.mapHuber e₁ he₁ he₁') hs₁ l))
+      = ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').coeRingHom
+          (locMapOfHom e₂.toRingHom (D.mapHuber e₁ he₁ he₁')
+            ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hs₂
+            (locMapOfHom e₁.toRingHom D (D.mapHuber e₁ he₁ he₁') hs₁ l)) :=
+    presheafValueMapOfHom_coe e₂.toRingHom he₂ _ _ hs₂ hT₂ _
+  have hR1 : presheafValueRingEquivHuber (e₁.trans e₂) (he₂.comp he₁)
+      (he₁'.comp he₂') D (D.coeRingHom l)
+      = (D.mapHuber (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂')).coeRingHom
+          (locMapOfHom (e₁.trans e₂).toRingHom D
+            (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+            hs₁₂ l) :=
+    presheafValueMapOfHom_coe (e₁.trans e₂).toRingHom (he₂.comp he₁) D _
+      hs₁₂ hT₁₂ l
+  have hR2 : restrictionMapHom
+      (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle
+      ((D.mapHuber (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂')).coeRingHom
+        (locMapOfHom (e₁.trans e₂).toRingHom D
+          (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+          hs₁₂ l))
+      = restrictionMapAlg
+          (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+          ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle
+          (locMapOfHom (e₁.trans e₂).toRingHom D
+            (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+            hs₁₂ l) := by
+    letI : UniformSpace (Localization.Away
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s) :=
+      (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).uniformSpace
+    letI : IsTopologicalRing (Localization.Away
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s) :=
+      (D.mapHuber (e₁.trans e₂) (he₂.comp he₁)
+        (he₁'.comp he₂')).isTopologicalRing
+    letI : IsUniformAddGroup (Localization.Away
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s) :=
+      (D.mapHuber (e₁.trans e₂) (he₂.comp he₁)
+        (he₁'.comp he₂')).isUniformAddGroup
+    exact UniformSpace.Completion.extensionHom_coe
+      (restrictionMapAlg _ _ hle) (restrictionMapAlg_continuous _ _ hle) _
+  show presheafValueRingEquivHuber e₂ he₂ he₂' (D.mapHuber e₁ he₁ he₁')
+      (presheafValueRingEquivHuber e₁ he₁ he₁' D (D.coeRingHom l))
+    = restrictionMapHom
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+        ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle
+        (presheafValueRingEquivHuber (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂') D (D.coeRingHom l))
+  rw [hL1, hL2, hR1, hR2]
+  have halg : (((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂
+        he₂').coeRingHom).comp
+        ((locMapOfHom e₂.toRingHom (D.mapHuber e₁ he₁ he₁')
+          ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hs₂).comp
+          (locMapOfHom e₁.toRingHom D (D.mapHuber e₁ he₁ he₁') hs₁))
+      = (restrictionMapAlg
+          (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+          ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle).comp
+          (locMapOfHom (e₁.trans e₂).toRingHom D
+            (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+            hs₁₂) := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s)
+      (RingHom.ext fun a => ?_)
+    simp only [RingHom.comp_apply]
+    rw [locMapOfHom_algebraMap, locMapOfHom_algebraMap,
+      locMapOfHom_algebraMap]
+    rw [show restrictionMapAlg
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+        ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle
+        (algebraMap C (Localization.Away
+          (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s)
+          ((e₁.trans e₂).toRingHom a))
+      = ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').canonicalMap
+          ((e₁.trans e₂).toRingHom a) from by
+      rw [restrictionMapAlg, IsLocalization.Away.lift_eq]]
+    rfl
+  exact congr_fun (congrArg DFunLike.coe halg) l
+
+end CompositeValue
+
 end Composite
 
 section Refl
