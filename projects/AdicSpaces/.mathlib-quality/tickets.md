@@ -1129,12 +1129,21 @@ non-Tate bases are supported.
     trans-chain; step2-symm/step3 instances kernel-ground); (ii) ▸-transport
     of the letI-package (dependent instP/instI mismatch); (iii) elementwise
     BIPlusIn_map_twist via biSubringCongr (whnf through the closed
-    BIPlusIn/BISub instances). NEXT ATTEMPTS (fresh context): (a) add
-    `mem_BIPlusIn_iff : z ∈ BIPlusIn ↔ wI ↑z ≤ 1` as an rfl-lemma in
-    IntervalRing + retry (iii) rw-only with typed ascriptions; (b) profiler
-    to find the unfolding site; (c) fallback: presheaf values at the
-    ϖ_n-side BISub's (sheafiness free by TC2), twists only in the
-    restriction maps. Negative-side mirror DONE 2026-07-27
+    BIPlusIn/BISub instances). ATTEMPT (a) RESULT (2026-07-27): mem_BIPlusIn_iff
+    already existed in IntervalRing; with MINIMAL imports (ChartBIQ only, no
+    transport files) biSubringCongr_coe_val compiles clean — the t10 grind
+    was partly instance-pollution from the transport imports — but the
+    map-membership ext still whnf-grinds (Subring.map unfolds to .carrier
+    under the anonymous constructor). DECISION: route (c) — the presheaf
+    VALUES stay at the twisted-side BISub's (IsSheafy free from TC2 at ϖ_n;
+    isSheafy_presheafChart already gives the chart-presheafValue side), the
+    BIQ layer serves as the INDEXING/bookkeeping normalization
+    (chartRingEquivBIQ/Neg identify values where needed), and the twists
+    live in the restriction maps (biResQ pre/post-composed with
+    biSubringCongr of BISub_twist — RingHom-level composition, no
+    elementwise membership juggling). The plus-map correspondence
+    (BIPlusIn_map_twist) is NOT needed on this route; keep the (b)-profiler
+    idea only if a future consumer genuinely needs IsSheafy ↥BIQ verbatim. Negative-side mirror DONE 2026-07-27
     (chartRingEquivBIQNeg via the pPowM abbreviation — presheafValue of the
     (-m)-window chart ≃+* ↥(BIQ (p^m) (p^m/p)); the twist enters through
     BISub_twist.symm since the power relation points the other way). BOARD-HYGIENE LESSON: two
