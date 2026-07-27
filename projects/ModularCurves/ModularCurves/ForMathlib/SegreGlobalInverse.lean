@@ -506,4 +506,29 @@ lemma segreImagePairChartToProduct_compatible
     segreImagePairChartToProduct_compatible_awayι
       R m n i a j b
 
+/-- The global inverse to the glued Segre morphism, obtained by gluing the inverse
+affine-chart maps on the pair-indexed target cover. -/
+def segreImageProjToProduct
+    (R : Type u) [CommRing R] (m n : ℕ) :
+    segreImageProj R m n ⟶ segreProductProj R m n :=
+  (segreImagePairAffineOpenCover R m n).openCover.glueMorphisms
+    (fun q =>
+      segreImagePairChartToProduct
+        R m n q.1 q.2)
+    (fun q r =>
+      segreImagePairChartToProduct_compatible
+        R m n q.1 r.1 q.2 r.2)
+
+/-- The glued inverse restricts to the prescribed inverse morphism on every
+pair-indexed target chart. -/
+@[reassoc]
+lemma segreImagePairOpenCover_f_segreImageProjToProduct
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    (segreImagePairAffineOpenCover
+          R m n).openCover.f (i, j) ≫
+        segreImageProjToProduct R m n =
+      segreImagePairChartToProduct R m n i j := by
+  apply Scheme.Cover.ι_glueMorphisms
+
 end MvPolynomial
