@@ -1513,6 +1513,86 @@ theorem wLoc_mk'_monomial_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
   refine mul_le_mul_left ?_ _
   exact le_ciSup (bddAbove_range_gaussTerm p F hρ1.le w) i
 
+/-- Monomials over `B^I` are restricted. -/
+theorem isRestricted_monomial_BI {J : Fin k →₀ ℕ}
+    (a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    MvPowerSeries.IsRestricted
+      (MvPowerSeries.monomial J a
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  rw [MvPowerSeries.IsRestricted, Filter.tendsto_def]
+  intro U hU
+  rw [Filter.mem_cofinite]
+  refine (Set.finite_singleton J).subset ?_
+  intro s hs
+  simp only [Set.mem_compl_iff, Set.mem_preimage] at hs
+  by_contra hne
+  rw [Set.mem_singleton_iff] at hne
+  refine hs ?_
+  rw [MvPowerSeries.coeff_monomial, if_neg hne]
+  exact mem_of_mem_nhds hU
+
+section EvalBIMonomial
+
+variable {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+  {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
+/-- **The evaluation of a monomial**: `y·T^l ↦ φ(y)·b^l`. -/
+theorem evalBI_monomial {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1) (l : ℕ)
+    (y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hres : MvPowerSeries.IsRestricted
+      (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) l) y)) :
+    evalBI p F ϖ φ hφ hbmem hb ⟨_, hres⟩
+      = ((φ y : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l := by
+  classical
+  refine tendsto_nhds_unique (tendsto_evalBI p F ϖ φ hφ hbmem hb ⟨_, hres⟩) ?_
+  refine tendsto_const_nhds.congr' ?_
+  rw [Filter.EventuallyEq, Filter.eventually_atTop]
+  refine ⟨l + 1, fun n hn => ?_⟩
+  have hterm : ∀ m ∈ Finset.range n,
+      evalBITerm p F ϖ φ b
+          (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) l)
+            (y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) m
+        = if m = l then ((φ y : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l
+          else 0 := by
+    intro m _
+    rw [evalBITerm]
+    have hcoeff : coeffSeq (MvPowerSeries.monomial
+        (Finsupp.single (0 : Fin 1) l)
+        (y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) m
+        = if m = l then y else 0 := by
+      rw [coeffSeq, MvPowerSeries.coeff_monomial]
+      by_cases hm : m = l
+      · subst hm
+        rw [if_pos rfl, if_pos rfl]
+      · rw [if_neg hm, if_neg]
+        intro hcon
+        exact hm ((Finsupp.single_injective (0 : Fin 1)) hcon)
+    rw [hcoeff]
+    by_cases hm : m = l
+    · subst hm
+      rw [if_pos rfl, if_pos rfl]
+    · rw [if_neg hm, if_neg hm, φ.map_zero]
+      show (0 : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ m = 0
+      rw [zero_mul]
+  rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' (Finset.range n) l
+    (fun _ => ((φ y : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l),
+    if_pos (Finset.mem_range.mpr (by omega))]
+
+end EvalBIMonomial
+
 end FarguesFontaine
 
 end
