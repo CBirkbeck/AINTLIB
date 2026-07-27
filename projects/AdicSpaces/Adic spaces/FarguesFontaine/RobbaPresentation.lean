@@ -2551,6 +2551,97 @@ theorem NsndRPS_eq_iSup_coeffSeq
     hrange]
   rfl
 
+/-- **The presentation generator** `T − C g` as a restricted series. -/
+noncomputable def GeltElt (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    ↥(restrictedMvPowerSeriesSubring 1 ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+  ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 1)
+      (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    - MvPowerSeries.monomial 0 gB,
+    sub_mem (isRestricted_monomial_BI p F ϖ _)
+      (isRestricted_monomial_BI p F ϖ _)⟩
+
+/-- Coercion of an RPS-product over `B^I` (micro-lemma). -/
+theorem RPS_BI_coe_mul
+    (a b : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    ((a * b : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = (a : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        * (b : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := rfl
+
+/-- The generator's underlying series (micro-lemma). -/
+theorem GeltElt_coe (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    ((GeltElt p F ϖ gB : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 1)
+          (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        - MvPowerSeries.monomial 0 gB := rfl
+
+/-- The first-component coefficient recursion of generator multiplication. -/
+theorem coeffSeq_GeltElt_mul_fst (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) (n : ℕ) :
+    ((coeffSeq ((GeltElt p F ϖ gB * f
+        : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+      = (if 1 ≤ n then
+          ((coeffSeq (f : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (n - 1)
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+        else 0)
+        - ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+          * ((coeffSeq (f : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+              : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 := by
+  have hrec := coeffSeq_Gelt_mul gB
+    (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+  rw [RPS_BI_coe_mul p F ϖ, GeltElt_coe p F ϖ, hrec]
+  by_cases hn : 1 ≤ n
+  · rw [if_pos hn, if_pos hn]
+    rfl
+  · rw [if_neg hn, if_neg hn]
+    rfl
+
+/-- The second-component coefficient recursion of generator multiplication. -/
+theorem coeffSeq_GeltElt_mul_snd (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) (n : ℕ) :
+    ((coeffSeq ((GeltElt p F ϖ gB * f
+        : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+      = (if 1 ≤ n then
+          ((coeffSeq (f : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (n - 1)
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+        else 0)
+        - ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+          * ((coeffSeq (f : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+              : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 := by
+  have hrec := coeffSeq_Gelt_mul gB
+    (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+  rw [RPS_BI_coe_mul p F ϖ, GeltElt_coe p F ϖ, hrec]
+  by_cases hn : 1 ≤ n
+  · rw [if_pos hn, if_pos hn]
+    rfl
+  · rw [if_neg hn, if_neg hn]
+    rfl
+
 end FarguesFontaine
 
 end
