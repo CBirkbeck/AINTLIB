@@ -1344,6 +1344,80 @@ theorem numerator_formula_le {ρ₁ σ₁ V vc : NNReal}
         mul_le_mul_left (pow_mul_pow_le_of_le hρσ hki) _
     _ = σ₁ ^ i * (ρ₁ * V) ^ k := by rw [mul_pow]; ring
 
+/-- **The per-monomial lift package**: every monomial fraction with the
+cut-radius divisibility factors through a generator power, with the cofactor
+controlled at the outer radii by the original at the `σ`-radii. -/
+theorem exists_monomial_lift_package {ρ₁ σ₁ ρ₂ : NNReal}
+    (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hσ₁0 : 0 < σ₁) (hσ₁1 : σ₁ < 1)
+    (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1) (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    (i k : ℕ) (c : OF F)
+    (hdvd : i < k → perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F (zb : F) ^ ((k - i) / m)) :
+    ∃ (j : ℕ) (e : ℕ) (c' : OF F),
+      IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+        = teichPowGen p F ϖ zb m ^ j
+          * IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ e * WittVector.teichmuller p c')
+            (sPow p F ϖ k)
+      ∧ wLoc p F ϖ hρ₁0 hρ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ e * WittVector.teichmuller p c')
+          (sPow p F ϖ k))
+        ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹)
+          * (wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+            (sPow p F ϖ k)))
+      ∧ wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ e * WittVector.teichmuller p c')
+          (sPow p F ϖ k))
+        ≤ max (wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+            (sPow p F ϖ k)))
+          (wLoc p F ϖ hρ₂0 hρ₂1 (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+            (sPow p F ϖ k))) := by
+  have hK1 : (1 : NNReal) ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
+    calc (1 : NNReal) = ρ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
+        (mul_inv_cancel₀ (pow_pos hρ₁0 m).ne').symm
+      _ ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hρσ m) _
+  by_cases hik : i < k
+  · obtain ⟨c', hfact, hwin⟩ := exists_monomial_twist_div p F zb m hm i k c
+      (hdvd hik)
+    set j := (k - i) / m with hj
+    have he : i + m * j ≤ k := by
+      have h1 : j * m ≤ k - i := Nat.div_mul_le_self (k - i) m
+      have h2 : m * j ≤ k - i := by rwa [mul_comm]
+      omega
+    have hval : perfectoidValuation p F (c : F)
+        = σ₁ ^ (m * j) * perfectoidValuation p F (c' : F) := by
+      rw [perfectoidValuation_twist_factor p F zb c c' j hfact, hgen,
+        ← pow_mul]
+    have hcmp := twisted_formula_le (V := perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F))
+      (vc := perfectoidValuation p F (c : F))
+      (vc' := perfectoidValuation p F (c' : F))
+      hρ₁0 hσ₁0 hρ₂0 (vpi_pos p F ϖ) hρσ hσρ (m := m) (i := i) (k := k)
+      (j := j) hval he hwin
+    refine ⟨j, i + m * j, c',
+      mk'_monomial_twist_factor p F ϖ zb m i j k c c' hfact, ?_, ?_⟩
+    · rw [wLoc_mk'_monomial p F ϖ hρ₁0 hρ₁1,
+        wLoc_mk'_monomial p F ϖ hσ₁0 hσ₁1]
+      exact hcmp.2
+    · rw [wLoc_mk'_monomial p F ϖ hρ₂0 hρ₂1 (i + m * j) k c',
+        wLoc_mk'_monomial p F ϖ hσ₁0 hσ₁1 i k c]
+      exact le_trans hcmp.1 (le_max_left _ _)
+  · refine ⟨0, i, c, ?_, ?_, ?_⟩
+    · rw [pow_zero, one_mul]
+    · rw [wLoc_mk'_monomial p F ϖ hρ₁0 hρ₁1,
+        wLoc_mk'_monomial p F ϖ hσ₁0 hσ₁1]
+      refine le_trans (numerator_formula_le hρ₁0 hσ₁0 (vpi_pos p F ϖ)
+        hρσ (not_lt.mp hik)) ?_
+      exact le_mul_of_one_le_left zero_le hK1
+    · exact le_max_right _ _
+
 end FarguesFontaine
 
 end
