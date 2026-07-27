@@ -324,4 +324,57 @@ theorem section_ker_ideal_eq_top_of_le_sectionAway
   rw [hleft, hright] at hback
   exact hback
 
+/-- A finite global normalized comparison pulls the model zero ideal back to
+the marked-section ideal when its standard affine chart is exactly the
+section complement. -/
+theorem projModelMap_comap_zeroIdeal_eq_section_ker_of_normalized_restrict
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (a b r : Γ(C, U.1))
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hpreB : z ⁻¹ᵁ C.basicOpen (a * b) = ⊤)
+    (W : WeierstrassCurve R)
+    (f : R →+* Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+    (P : Fin 3 → Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+    (hP : (W.map f).toProjective.Equation P)
+    (hcop : IsCoprime (P 1) (P 2))
+    (hP0 : P 0 = U.1.topIso.inv.hom (a * r))
+    (hP1 : P 1 = U.1.topIso.inv.hom b)
+    (hP2 : P 2 = U.1.topIso.inv.hom (r ^ 3))
+    (F : C ⟶ projModel W) [IsFinite F]
+    (hFU : U.1.ι ≫ F =
+      projModelFromOfGlobalSectionsOfIsCoprime
+        W f P hP 1 2 hcop)
+    (hpre : F ⁻¹ᵁ (projModelZChart W).1 = sectionAway z hz) :
+    (projModelZero W).ker.comap F = z.ker := by
+  let B := C.affineBasicOpen (U := U) (a * b)
+  have hVaff : IsAffineOpen (sectionAway z hz) := by
+    rw [← hpre]
+    exact (projModelZChart W).2.preimage F
+  let V : C.affineOpens := ⟨sectionAway z hz, hVaff⟩
+  let A : Bool → C.affineOpens := fun q => cond q B V
+  have hcover : B.1 ⊔ V.1 = ⊤ := by
+    exact sup_sectionAway_eq_top_of_preimage_eq_top
+      z hz B.1 hpreB
+  apply Scheme.IdealSheafData.ext_of_iSup_eq_top A
+  · rw [iSup_bool_eq]
+    exact hcover
+  · intro q
+    cases q
+    · change ((projModelZero W).ker.comap F).ideal V =
+        z.ker.ideal V
+      have hVpre : V.1 ≤ F ⁻¹ᵁ (projModelZChart W).1 := by
+        exact le_of_eq hpre.symm
+      rw [projModelMap_comap_zeroIdeal_eq_top_of_le_preimage_zChart
+        W F V hVpre]
+      rw [section_ker_ideal_eq_top_of_le_sectionAway
+        z hz V le_rfl]
+    · change ((projModelZero W).ker.comap F).ideal B =
+        z.ker.ideal B
+      rw [projModelMap_comap_zeroIdeal_affineBasicOpen_mul_of_restrict
+        U a b r W f P hP hcop hP0 hP1 hP2 F hFU]
+      rw [← z.ker.map_ideal_basicOpen U (a * b), hspan,
+        Ideal.map_span, Set.image_singleton]
+      congr 2
+
 end ModularCurves
