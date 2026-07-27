@@ -3795,6 +3795,109 @@ theorem nonempty_case1_quotient_equiv
 
 end Case1Iso
 
+/-- A nonzero-valuation integral element divides a pseudo-uniformizer power. -/
+theorem dvd_pow_pseudoUniformizer (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) :
+    ∃ j : ℕ, zb ∣ PseudoUniformizer.toOF F ϖ ^ j := by
+  obtain ⟨j, hj⟩ := NNReal.exists_pow_lt_of_lt_one (pos_of_ne_zero hzb)
+    (perfectoidValuation_toOF_lt_one p F ϖ)
+  refine ⟨j, (perfectoidValuation_integers p F).dvd_of_le ?_⟩
+  have hcoe : ((PseudoUniformizer.toOF F ϖ ^ j : OF F) : F)
+      = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j := by
+    push_cast
+    rfl
+  calc perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ ^ j : OF F) : F)
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ j := by
+        rw [hcoe, map_pow]
+    _ ≤ perfectoidValuation p F (zb : F) := hj.le
+
+/-- **The generator's Teichmüller factor is a unit of `B_loc`**: its
+coordinate divides a pseudo-uniformizer power, whose Teichmüller image is
+inverted. -/
+theorem isUnit_teichmuller_image (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) :
+    IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ)
+      (WittVector.teichmuller p zb)) := by
+  obtain ⟨j, c, hc⟩ := dvd_pow_pseudoUniformizer p F ϖ zb hzb
+  refine isUnit_of_mul_isUnit_left
+    (y := algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c)) ?_
+  rw [← map_mul, ← map_mul]
+  have hteich : WittVector.teichmuller p (zb * c)
+      = teichPi p F ϖ ^ j := by
+    rw [← hc, teichPi, ← teichPi_pow]
+    rfl
+  rw [hteich, map_pow]
+  exact (isUnit_teichPi_image p F ϖ).pow j
+
+/-- **The case-1 generator is a unit of `B_loc`.** -/
+theorem isUnit_teichPowGen (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) (m₀ : ℕ) :
+    IsUnit (teichPowGen p F ϖ zb m₀) := by
+  rw [teichPowGen]
+  exact (isUnit_teichmuller_image p F ϖ zb hzb).mul
+    (((isUnit_p_image p F ϖ).unit⁻¹).isUnit.pow m₀)
+
+/-- **The generator's local valuation** at radius `ρ`. -/
+theorem wLoc_teichPowGen {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (zb : OF F) (m₀ : ℕ) :
+    wLoc p F ϖ hρ0 hρ1 (teichPowGen p F ϖ zb m₀)
+      = perfectoidValuation p F (zb : F) * (ρ ^ m₀)⁻¹ := by
+  rw [teichPowGen, map_mul, map_pow, wLoc_algebraMap,
+    gaussValue_teichmuller p F hρ1.le, wLoc_p_inv, inv_pow]
+
+/-- **The generator's valuation at the interval endpoints** (`B^I`-level). -/
+theorem valued_blocToBI_teichPowGen_fst
+    {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} (zb : OF F) (m₀ : ℕ) :
+    Valued.v (((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowGen p F ϖ zb m₀)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+      = perfectoidValuation p F (zb : F) * (ρ₁ ^ m₀)⁻¹ := by
+  rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+    = BlocToHatK p F ϖ hρ₁0 hρ₁1 (teichPowGen p F ϖ zb m₀) from rfl,
+    valued_BlocToHatK, wLoc_teichPowGen]
+
+/-- **The generator's valuation at the top endpoint** (`B^I`-level). -/
+theorem valued_blocToBI_teichPowGen_snd
+    {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} (zb : OF F) (m₀ : ℕ) :
+    Valued.v (((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowGen p F ϖ zb m₀)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+      = perfectoidValuation p F (zb : F) * (ρ₂ ^ m₀)⁻¹ := by
+  rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+    = BlocToHatK p F ϖ hρ₂0 hρ₂1 (teichPowGen p F ϖ zb m₀) from rfl,
+    valued_BlocToHatK, wLoc_teichPowGen]
+
+/-- The strict lower generator bound at the bottom radius. -/
+theorem one_lt_gen_val {ρ₁ σ₁ : NNReal} (hρ₁0 : 0 < ρ₁)
+    (hρσ : ρ₁ < σ₁) (m₀ : ℕ) (hm₀ : 0 < m₀) :
+    1 < σ₁ ^ m₀ * (ρ₁ ^ m₀)⁻¹ := by
+  have hpow : ρ₁ ^ m₀ < σ₁ ^ m₀ :=
+    pow_lt_pow_left₀ hρσ hρ₁0.le hm₀.ne'
+  have hpos : (0 : NNReal) < (ρ₁ ^ m₀)⁻¹ :=
+    inv_pos.mpr (pow_pos hρ₁0 m₀)
+  calc (1 : NNReal) = ρ₁ ^ m₀ * (ρ₁ ^ m₀)⁻¹ :=
+      (mul_inv_cancel₀ (pow_pos hρ₁0 m₀).ne').symm
+    _ < σ₁ ^ m₀ * (ρ₁ ^ m₀)⁻¹ := mul_lt_mul_of_pos_right hpow hpos
+
+/-- The generator bound at the top radius. -/
+theorem gen_val_le_one {σ₁ ρ₂ : NNReal} (hρ₂0 : 0 < ρ₂)
+    (hσρ : σ₁ ≤ ρ₂) (m₀ : ℕ) :
+    σ₁ ^ m₀ * (ρ₂ ^ m₀)⁻¹ ≤ 1 := by
+  have hpow : σ₁ ^ m₀ ≤ ρ₂ ^ m₀ := pow_le_pow_left' hσρ m₀
+  calc σ₁ ^ m₀ * (ρ₂ ^ m₀)⁻¹ ≤ ρ₂ ^ m₀ * (ρ₂ ^ m₀)⁻¹ :=
+      mul_le_mul_left hpow _
+    _ = 1 := mul_inv_cancel₀ (pow_pos hρ₂0 m₀).ne'
+
 end FarguesFontaine
 
 end
