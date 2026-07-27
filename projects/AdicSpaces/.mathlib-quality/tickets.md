@@ -1694,7 +1694,13 @@ non-Tate bases are supported.
     de-Tate the OpenValue/StalkValue sections (their content uses the
     basis + presheafValue-instances now available Huber-free); (YB3c)
     the shrink S4 replay at Y-points with PD-Tate := YB1. Each bounded;
-    they stack — keep each its own commit.
+    they stack — keep each its own commit. ★ YB3a DONE 2026-07-27
+    (RationalBasisHuber.lean): exists_isRational_spaOpen_subset_huber
+    — the general-Huber 7.35(2) with power-certificate validity
+    (toDatumOpen/isRational_of_pow_le/interDatumOpen + certified fold
+    + Tate-free generateFrom copy). NEXT YB3b: de-Tate OpenValue/
+    StalkValue (swap exists_isRational_spaOpen_subset → _huber; check
+    remaining Tate-uses in those sections), then YB3c the shrink.
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
