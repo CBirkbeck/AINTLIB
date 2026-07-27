@@ -5815,6 +5815,156 @@ theorem exists_balanced_pow_twist (zb : OF F) (m : ℕ)
       map_pow, map_pow]
     exact hdvd
 
+/-- The coefficient value forced by an exactly-normalized monomial fraction. -/
+theorem valuation_coeff_of_wLoc_eq_one {σ₁ : NNReal} (hσ₁0 : 0 < σ₁)
+    (hσ₁1 : σ₁ < 1) (i k : ℕ) (hik : i ≤ k) (c : OF F)
+    (hval : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k))
+      = 1) :
+    perfectoidValuation p F (c : F)
+      = σ₁ ^ (k - i) * (perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
+  set V : NNReal := perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hV
+  have hV0 : 0 < V := vpi_pos p F ϖ
+  have h1 : σ₁ ^ i * perfectoidValuation p F (c : F)
+      * (((σ₁ * V) ^ k)⁻¹) = 1 := by
+    rw [← wLoc_mk'_monomial p F ϖ hσ₁0 hσ₁1 i k c]
+    exact hval
+  have hpos : (0 : NNReal) < (σ₁ * V) ^ k := pow_pos (mul_pos hσ₁0 hV0) k
+  have h2 : σ₁ ^ i * perfectoidValuation p F (c : F) = (σ₁ * V) ^ k := by
+    have h3 := congrArg (· * ((σ₁ * V) ^ k)) h1
+    simpa [mul_assoc, inv_mul_cancel₀ hpos.ne'] using h3
+  have h4 : σ₁ ^ i * perfectoidValuation p F (c : F)
+      = σ₁ ^ i * (σ₁ ^ (k - i) * V ^ k) := by
+    rw [h2, mul_pow]
+    rw [show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) from by
+      rw [← pow_add]
+      congr 1
+      omega]
+    ring
+  exact mul_left_cancel₀ (pow_pos hσ₁0 i).ne' h4
+
+/-- **The exact-norm power lift** (T910-M M1c): a monomial fraction of
+`σ₁`-value exactly `1` has, at the `m`-th power, an evaluation preimage of
+`ρ`-Gauss norm exactly `1` — the balanced twist absorbs the radius change
+without any norm loss. -/
+theorem exists_evalBI_pow_norm_exact
+    {ρ₁ ρ₂ σ₁ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+    {hρ₂1 : ρ₂ < 1} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+    (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+        ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (hφb : ∀ x : Bloc p F ϖ,
+      ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+        : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
+    (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m))
+    (i k : ℕ) (hik : i ≤ k) (c : OF F)
+    (hval : wLoc p F ϖ hσ₁0 hσ₁1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k))
+      = 1) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (U : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        = 1
+      ∧ evalBI p F ϖ φ hφ hbmem hb U
+        = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            ((IsLocalization.mk' (Bloc p F ϖ)
+              ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+              (sPow p F ϖ k)) ^ m) := by
+  set V : NNReal := perfectoidValuation p F
+    ((PseudoUniformizer.toOF F ϖ : OF F) : F) with hV
+  have hV0 : 0 < V := vpi_pos p F ϖ
+  have hV1 : V < 1 := perfectoidValuation_toOF_lt_one p F ϖ
+  have hc := valuation_coeff_of_wLoc_eq_one p F ϖ hσ₁0 hσ₁1 i k hik c hval
+  -- the divisibility for the balanced twist
+  have hdvd : perfectoidValuation p F (c : F) ^ m
+      ≤ perfectoidValuation p F (zb : F) ^ (k - i) := by
+    rw [hc, hgen, mul_pow, ← pow_mul, ← pow_mul, ← pow_mul]
+    rw [show (k - i) * m = m * (k - i) from Nat.mul_comm _ _]
+    refine le_trans (mul_le_mul_of_nonneg_left
+      (pow_le_one₀ zero_le hV1.le) zero_le) ?_
+    rw [mul_one]
+  obtain ⟨c', hc', hfact⟩ := exists_balanced_pow_twist p F ϖ zb m i k hik c hdvd
+  -- the balanced coefficient's value
+  have hc'val : perfectoidValuation p F (c' : F) = V ^ (k * m) := by
+    have h1 : perfectoidValuation p F ((c : F)) ^ m
+        = perfectoidValuation p F (zb : F) ^ (k - i)
+          * perfectoidValuation p F (c' : F) := by
+      have h2 := congrArg (fun t : OF F =>
+        perfectoidValuation p F (t : F)) hc'
+      simpa [map_mul, map_pow] using h2
+    have h3 : σ₁ ^ (m * (k - i)) * V ^ (k * m)
+        = σ₁ ^ (m * (k - i)) * perfectoidValuation p F (c' : F) :=
+      calc σ₁ ^ (m * (k - i)) * V ^ (k * m)
+          = (σ₁ ^ (k - i) * V ^ k) ^ m := by
+            rw [mul_pow, ← pow_mul, ← pow_mul,
+              Nat.mul_comm (k - i) m, Nat.mul_comm k m]
+        _ = perfectoidValuation p F (c : F) ^ m := by rw [hc]
+        _ = perfectoidValuation p F (zb : F) ^ (k - i)
+            * perfectoidValuation p F (c' : F) := h1
+        _ = σ₁ ^ (m * (k - i)) * perfectoidValuation p F (c' : F) := by
+            rw [hgen, ← pow_mul]
+    exact (mul_left_cancel₀ (pow_pos hσ₁0 (m * (k - i))).ne' h3).symm
+  -- the lift
+  refine ⟨⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
+      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
+          (sPow p F ϖ (k * m)))),
+    isRestricted_monomial_BI p F ϖ _⟩, ?_, ?_⟩
+  · -- the exact norm
+    rw [show ((⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
+            (sPow p F ϖ (k * m)))),
+        isRestricted_monomial_BI p F ϖ _⟩ : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) (k - i))
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
+            (sPow p F ϖ (k * m)))) from rfl]
+    rw [wIRPS_monomial p F ϖ]
+    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
+          (sPow p F ϖ (k * m)))
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (k * m) * WittVector.teichmuller p c')
+          (sPow p F ϖ (k * m))) from rfl]
+    rw [wI_BIProd p F]
+    rw [valued_BlocToHatK, valued_BlocToHatK]
+    rw [wLoc_balanced p F ϖ hρ₁0 hρ₁1, wLoc_balanced p F ϖ hρ₂0 hρ₂1,
+      hc'val]
+    rw [mul_inv_cancel₀ (pow_pos hV0 (k * m)).ne', max_self]
+  · -- the evaluation identity
+    rw [evalBI_monomial p F ϖ φ hφ hbmem hb]
+    rw [hφb, hbg, ← map_pow (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1),
+      ← map_mul (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)]
+    congr 1
+    rw [mul_comm]
+    exact hfact.symm
+
 end FarguesFontaine
 
 end
