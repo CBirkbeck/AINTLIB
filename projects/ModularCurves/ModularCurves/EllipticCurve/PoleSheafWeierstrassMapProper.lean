@@ -29,6 +29,15 @@ theorem projModelMap_isProper_of_isAffine
     infer_instance
   exact IsProper.of_comp f (projModelπ W)
 
+/-- Restricting a proper morphism to the exact preimage of a target open remains proper. -/
+theorem resLE_isProper_of_preimage_eq
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsProper f]
+    (U : Y.Opens) (V : X.Opens) (h : f ⁻¹ᵁ U = V) :
+    IsProper (f.resLE U V (le_of_eq h.symm)) := by
+  subst V
+  rw [f.resLE_eq_morphismRestrict]
+  infer_instance
+
 end
 
 end ModularCurves
