@@ -217,7 +217,7 @@ variable [DecidableEq A]
 /-- **The intersection datum at power certificates** (the open-span form of
 `interDatum`): the combined tray absorbs the summed power. -/
 noncomputable def RationalLocData.interDatumOpen (D E : RationalLocData A)
-    (hP : E.P = D.P) (M₁ M₂ : ℕ)
+    (M₁ M₂ : ℕ)
     (hle₁ : (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ M₁
       ≤ Ideal.span (D.T : Set A))
     (hle₂ : (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ M₂
@@ -245,17 +245,17 @@ noncomputable def RationalLocData.interDatumOpen (D E : RationalLocData A)
 
 /-- The certificate of the intersection datum. -/
 theorem RationalLocData.interDatumOpen_pow_le (D E : RationalLocData A)
-    (hP : E.P = D.P) (M₁ M₂ : ℕ)
+    (M₁ M₂ : ℕ)
     (hle₁ : (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ M₁
       ≤ Ideal.span (D.T : Set A))
     (hle₂ : (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ M₂
       ≤ Ideal.span (E.T : Set A)) :
-    (Ideal.span (((D.interDatumOpen E hP M₁ M₂ hle₁ hle₂).P.A₀).subtype ''
-        (((D.interDatumOpen E hP M₁ M₂ hle₁ hle₂).P.I
-          : Ideal (D.interDatumOpen E hP M₁ M₂ hle₁ hle₂).P.A₀)
-          : Set (D.interDatumOpen E hP M₁ M₂ hle₁ hle₂).P.A₀))) ^ (M₁ + M₂)
+    (Ideal.span (((D.interDatumOpen E M₁ M₂ hle₁ hle₂).P.A₀).subtype ''
+        (((D.interDatumOpen E M₁ M₂ hle₁ hle₂).P.I
+          : Ideal (D.interDatumOpen E M₁ M₂ hle₁ hle₂).P.A₀)
+          : Set (D.interDatumOpen E M₁ M₂ hle₁ hle₂).P.A₀))) ^ (M₁ + M₂)
       ≤ Ideal.span
-        (((D.interDatumOpen E hP M₁ M₂ hle₁ hle₂).T : Finset A) : Set A) := by
+        (((D.interDatumOpen E M₁ M₂ hle₁ hle₂).T : Finset A) : Set A) := by
   show (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ (M₁ + M₂)
     ≤ Ideal.span ((D.interTray E : Finset A) : Set A)
   rw [pow_add]
@@ -275,13 +275,13 @@ theorem RationalLocData.interDatumOpen_pow_le (D E : RationalLocData A)
 /-- The intersection datum realises the intersection (open-span form;
 `rationalOpen` never mentions the pair). -/
 theorem RationalLocData.interDatumOpen_rationalOpen [PlusSubring A]
-    (D E : RationalLocData A) (hP : E.P = D.P) (M₁ M₂ : ℕ)
+    (D E : RationalLocData A) (M₁ M₂ : ℕ)
     (hle₁ : (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ M₁
       ≤ Ideal.span (D.T : Set A))
     (hle₂ : (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ M₂
       ≤ Ideal.span (E.T : Set A)) :
-    rationalOpen (D.interDatumOpen E hP M₁ M₂ hle₁ hle₂).T
-        (D.interDatumOpen E hP M₁ M₂ hle₁ hle₂).s
+    rationalOpen (D.interDatumOpen E M₁ M₂ hle₁ hle₂).T
+        (D.interDatumOpen E M₁ M₂ hle₁ hle₂).s
       = rationalOpen D.T D.s ∩ rationalOpen E.T E.s := by
   show rationalOpen (D.interTray E) (D.s * E.s) = _
   rw [RationalLocData.interTray_eq_mul,
@@ -332,20 +332,16 @@ theorem exists_spaOpen_eq_sInter_huber [PlusSubring A] [DecidableEq A]
     have hleD' : (Ideal.span (P.A₀.subtype '' (P.I : Set P.A₀))) ^ M'
         ≤ Ideal.span ((D'.T : Finset A) : Set A) := hM'
     refine ⟨(q.toDatumOpen P hIeq hIfg).interDatumOpen D'
-        (hD'P.trans (RCoord.toDatumOpen_P P hIeq hIfg q).symm)
         M M' hleq hleD',
       rfl, ⟨M + M',
         (q.toDatumOpen P hIeq hIfg).interDatumOpen_pow_le D'
-          (hD'P.trans (RCoord.toDatumOpen_P P hIeq hIfg q).symm)
           M M' hleq hleD'⟩, ?_⟩
     · show spaOpen _ = _
       unfold spaOpen
       rw [show ((q.toDatumOpen P hIeq hIfg).interDatumOpen D'
-            (hD'P.trans (RCoord.toDatumOpen_P P hIeq hIfg q).symm)
             M M' hleq hleD').T
           = (q.toDatumOpen P hIeq hIfg).interTray D' from rfl,
         show ((q.toDatumOpen P hIeq hIfg).interDatumOpen D'
-            (hD'P.trans (RCoord.toDatumOpen_P P hIeq hIfg q).symm)
             M M' hleq hleD').s
           = (q.toDatumOpen P hIeq hIfg).s * D'.s from rfl,
         RationalLocData.interTray_eq_mul,
