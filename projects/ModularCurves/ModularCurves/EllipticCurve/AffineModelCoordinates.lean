@@ -61,6 +61,45 @@ lemma affineModelEval_comp_algebraMap
   rw [AdjoinRoot.lift_of, Polynomial.coe_eval₂RingHom,
     Polynomial.eval₂_C]
 
+/-- Mapping a solution of an affine Weierstrass equation and composing the
+coefficient homomorphisms gives a solution of the composite base change. -/
+lemma affineEquation_map_comp
+    {B : Type u} [CommRing B]
+    (W : WeierstrassCurve R) (f : R →+* A) (g : A →+* B)
+    (x y : A) (hxy : (W.map f).toAffine.Equation x y) :
+    (W.map (g.comp f)).toAffine.Equation (g x) (g y) := by
+  simpa only [WeierstrassCurve.map_map] using hxy.map g
+
+/-- Affine-model evaluation is natural under postcomposition of the target
+ring homomorphism. -/
+lemma affineModelEval_comp
+    {B : Type u} [CommRing B]
+    (W : WeierstrassCurve R) (f : R →+* A) (g : A →+* B)
+    (x y : A) (hxy : (W.map f).toAffine.Equation x y) :
+    g.comp (affineModelEval W f x y hxy) =
+      affineModelEval W (g.comp f) (g x) (g y)
+        (affineEquation_map_comp W f g x y hxy) := by
+  apply AdjoinRoot.ringHom_ext
+  · apply Polynomial.ringHom_ext
+    · intro r
+      simp only [RingHom.comp_apply]
+      change g (((affineModelEval W f x y hxy).comp
+        (algebraMap R W.toAffine.CoordinateRing)) r) =
+          ((affineModelEval W (g.comp f) (g x) (g y)
+            (affineEquation_map_comp W f g x y hxy)).comp
+            (algebraMap R W.toAffine.CoordinateRing)) r
+      rw [affineModelEval_comp_algebraMap,
+        affineModelEval_comp_algebraMap]
+      rfl
+    · simp only [RingHom.comp_apply]
+      change g (affineModelEval W f x y hxy (coordX W)) =
+        affineModelEval W (g.comp f) (g x) (g y) _ (coordX W)
+      rw [affineModelEval_coordX, affineModelEval_coordX]
+  · simp only [RingHom.comp_apply]
+    change g (affineModelEval W f x y hxy (coordY W)) =
+      affineModelEval W (g.comp f) (g x) (g y) _ (coordY W)
+    rw [affineModelEval_coordY, affineModelEval_coordY]
+
 end
 
 end ModularCurves
