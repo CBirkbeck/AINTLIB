@@ -18,11 +18,38 @@ along the stability equality (closed, hence complete in the limit topology).
 The curve's structure presheaf takes these as its values (D-iv-2 tail).
 -/
 
-open TopologicalRing ValuationSpectrum WittVector NNReal TopologicalSpace Topology Filter CategoryTheory Opposite
+open TopologicalRing ValuationSpectrum WittVector NNReal TopologicalSpace Topology Filter CategoryTheory Opposite Pointwise
 
 set_option linter.overlappingInstances false
 
 noncomputable section
+
+namespace ValuationSpectrum
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+  [IsRingOfIntegralElements (A⁺ : Subring A)] [T2Space A]
+  [NonarchimedeanRing A]
+
+/-- **The value over an empty rational is trivial — general Huber form**
+(Wedhorn: `𝒪(∅) = 0`): a nonzero value would carry a `Spa`-point whose
+`comap` lies in the empty rational open. -/
+theorem presheafValue_subsingleton_of_rationalOpen_empty_huber
+    (E : RationalLocData A) (hempty : rationalOpen E.T E.s = ∅) :
+    Subsingleton (presheafValue E) := by
+  haveI : IsHuberRing (presheafValue E) := presheafValue_isHuberRing_huber E
+  letI P_B : PairOfDefinition (presheafValue E) := presheafValue_concretePair E
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete E
+  have h0 : IsUnit (0 : presheafValue E) := by
+    rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
+    intro w hw
+    exfalso
+    have hmem := comap_canonicalMap_mem_rationalOpen E
+      (canonicalMap_continuous E) hw
+    rw [hempty] at hmem
+    exact hmem
+  exact subsingleton_of_zero_eq_one (isUnit_zero_iff.mp h0)
+end ValuationSpectrum
 
 namespace FarguesFontaine
 
@@ -299,6 +326,42 @@ theorem curvePreimage_xImage (W : Opens ↥(yTop p F ϖ)) :
     obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy
     refine ⟨yFrobTop p F ϖ k y, hk, ?_⟩
     exact yTopToCurve_yFrobTop p F ϖ k y
+
+/-- **Wandering at the `𝒴`-carrier**: every point has an open neighbourhood
+whose nontrivial Frobenius translates are disjoint from it. -/
+theorem exists_disjoint_translates (y : ↥(yTop p F ϖ)) :
+    ∃ W : Opens ↥(yTop p F ϖ), y ∈ W ∧
+      ∀ k : ℤ, k ≠ 0 →
+        Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+            : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+          ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)) := by
+  obtain ⟨W₀, hyW₀, hWY, hWopen, hdis⟩ :=
+    exists_nhd_smul_disjoint y.2
+  refine ⟨⟨Subtype.val ⁻¹' (Subtype.val ⁻¹' W₀),
+    hWopen.preimage continuous_subtype_val⟩, hyW₀, ?_⟩
+  intro k hk
+  refine Set.disjoint_left.mpr ?_
+  rintro z hz1 hz2
+  -- hz1 : (yFrobTop k z).1.1 ∈ W₀; hz2 : z.1.1 ∈ W₀
+  have h1 : (Multiplicative.ofAdd (-k)) • (z.1.1 : Spv (Ainf p F)) ∈ W₀ := by
+    have := spaFrob_coe p F k z.1
+    show _ ∈ W₀
+    rw [← this]
+    exact hz1
+  have h2 : (Multiplicative.ofAdd k) •
+      ((Multiplicative.ofAdd (-k)) • (z.1.1 : Spv (Ainf p F)))
+      ∈ (Multiplicative.ofAdd k) • W₀ :=
+    Set.smul_mem_smul_set h1
+  rw [show (Multiplicative.ofAdd k) •
+      ((Multiplicative.ofAdd (-k)) • (z.1.1 : Spv (Ainf p F)))
+      = (z.1.1 : Spv (Ainf p F)) from by
+    rw [smul_smul]
+    rw [show (Multiplicative.ofAdd k * Multiplicative.ofAdd (-k))
+        = (1 : Multiplicative ℤ) from by
+      rw [← ofAdd_add]
+      simp]
+    rw [one_smul]] at h2
+  exact Set.disjoint_left.mp (hdis k hk) h2 hz2
 
 end FarguesFontaine
 
