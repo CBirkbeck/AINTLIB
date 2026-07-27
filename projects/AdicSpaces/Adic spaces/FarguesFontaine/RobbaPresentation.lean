@@ -3001,6 +3001,57 @@ theorem kerSol_decay_of_one_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     _ = δ / 2 := max_self _
     _ < δ := NNReal.half_lt_self hδ.ne'
 
+/-- **The kernel solution at the subring level.** -/
+noncomputable def kerSolElt (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB) (y : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (n : ℕ) : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  -(((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ^ (n + 1)
+    * ∑ i ∈ Finset.range (n + 1), y i * gB ^ i)
+
+/-- **Restrictedness of the kernel solution** from the interval-norm
+decay. -/
+theorem isRestricted_kerSol (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB) (y : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hd : Filter.Tendsto (fun n => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((kerSolElt p F ϖ gB hgu y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      Filter.atTop (nhds 0)) :
+    MvPowerSeries.IsRestricted
+      ((fun s => kerSolElt p F ϖ gB hgu y (s 0))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  set Ufun : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    (fun s => kerSolElt p F ϖ gB hgu y (s 0)) with hUdef
+  rw [isRestricted_iff_wI]
+  intro ε hε
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp (hd.eventually_lt_const hε)
+  have hsub : {s : Fin 1 →₀ ℕ | ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff s Ufun
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}
+      ⊆ (fun s : Fin 1 →₀ ℕ => s 0) ⁻¹' {n : ℕ | n < N} := by
+    intro s hs
+    rw [Set.mem_setOf_eq] at hs
+    show s 0 < N
+    by_contra hcon
+    push Not at hcon
+    have hcoeff : (MvPowerSeries.coeff s Ufun
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        = kerSolElt p F ϖ gB hgu y (s 0) := rfl
+    rw [hcoeff] at hs
+    exact absurd (hN (s 0) hcon) (not_lt.mpr hs.le)
+  refine Set.Finite.subset ?_ hsub
+  refine Set.Finite.preimage ?_ (Set.finite_Iio N)
+  intro a _ b _ hab
+  have ha : a = Finsupp.single (0 : Fin 1) (a 0) := by
+    refine Finsupp.ext fun i => ?_
+    rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
+  have hb : b = Finsupp.single (0 : Fin 1) (b 0) := by
+    refine Finsupp.ext fun i => ?_
+    rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
+  have hab' : a 0 = b 0 := hab
+  rw [ha, hb, hab']
+
 end FarguesFontaine
 
 end
