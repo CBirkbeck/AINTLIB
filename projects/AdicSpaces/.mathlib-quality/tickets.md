@@ -1301,6 +1301,11 @@ non-Tate bases are supported.
     product-of-limitRestrict — explicit-toFun — so map_mul-rewrites there
     are unnecessary);
     (S4) IsLocalRing (ringStalk v) with maximalIdeal = supp(stalkValue) —
+    (S4-easy) DONE 2026-07-27: StalkShrink named-claim +
+    isUnit_iff_not_vle_zero + mem_nonunits_iff_vle_zero +
+    isLocalRing_stalk_of_shrink + maximalIdeal_stalk_eq_supp (all
+    conditional on StalkShrink; axiom-clean). REMAINING = S4-core:
+    discharge StalkShrink via the Laurent route below.
     PLAN REFINED 2026-07-27 after reconnaissance: (S4-easy, do first)
     unit ⇒ nonzero stalk-value (v(x)v(x⁻¹) = v(1) ≠ 0), nonunits-⊆-supp
     contrapositive, supp is an ideal ⇒ once the hard half lands,
