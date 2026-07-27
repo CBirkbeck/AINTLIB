@@ -6,6 +6,7 @@ Authors: AINTLIB AI workers
 import «Adic spaces».FarguesFontaine.RobbaLoc
 import «Adic spaces».FarguesFontaine.IntervalRing
 import «Adic spaces».FarguesFontaine.SheafyBI
+import «Adic spaces».FarguesFontaine.UniformizerTwist
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 
 /-!
@@ -628,6 +629,45 @@ theorem vpiQ_one :
       = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) := by
   have h := vpiQ_natCast p F ϖ 1
   rwa [pow_one, Nat.cast_one] at h
+
+/-- The valuation of the Frobenius root as an rpow of the base:
+`|ϖ^{1/p^s}| = |ϖ|^{1/p^s}`. -/
+theorem perfectoidValuation_frobRoot_rpow (s : ℕ) :
+    perfectoidValuation p F
+        ((PseudoUniformizer.toOF F (PseudoUniformizer.frobRoot p F ϖ s) : OF F) : F)
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+          ^ (((p : ℝ) ^ s)⁻¹) := by
+  have h := perfectoidValuation_frobRoot_pow p F ϖ s
+  have hps : ((p : ℝ) ^ s) ≠ 0 := by
+    have := Nat.Prime.pos (Fact.out : Nat.Prime p)
+    positivity
+  rw [← h, ← NNReal.rpow_natCast _ (p ^ s), ← NNReal.rpow_mul]
+  rw [show ((p ^ s : ℕ) : ℝ) = (p : ℝ) ^ s from by push_cast; ring,
+    mul_inv_cancel₀ hps, NNReal.rpow_one]
+
+/-- **The twist bridge for rational radii (root side)**:
+`vpiQ-in-ϖ^{1/p^s}(q) = vpiQ-in-ϖ(q/p^s)`. -/
+theorem vpiQ_frobRoot (s : ℕ) (q : ℚ) :
+    vpiQ p F (PseudoUniformizer.frobRoot p F ϖ s) q
+      = vpiQ p F ϖ (q / (p ^ s : ℚ)) := by
+  have hps : ((p : ℝ) ^ s) ≠ 0 := by
+    have := Nat.Prime.pos (Fact.out : Nat.Prime p)
+    positivity
+  rw [vpiQ, vpiQ, perfectoidValuation_frobRoot_rpow p F ϖ s, ← NNReal.rpow_mul]
+  congr 1
+  push_cast
+  field_simp
+
+/-- **The twist bridge for rational radii (power side)**:
+`vpiQ-in-ϖ^m(q) = vpiQ-in-ϖ(q·m)`. -/
+theorem vpiQ_pPow (m : ℕ) (hm : 0 < m) (q : ℚ) :
+    vpiQ p F (PseudoUniformizer.pPow F ϖ m hm) q
+      = vpiQ p F ϖ (q * m) := by
+  rw [vpiQ, vpiQ, perfectoidValuation_pPow p F ϖ m hm,
+    ← NNReal.rpow_natCast _ m, ← NNReal.rpow_mul]
+  congr 1
+  push_cast
+  ring
 
 end FarguesFontaine
 
