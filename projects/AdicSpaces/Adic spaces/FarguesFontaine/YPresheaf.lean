@@ -743,6 +743,56 @@ theorem limitRestrictY_continuous {W' W : Set (Spv (Ainf p F))}
   refine continuous_pi fun i => ?_
   exact (continuous_apply _).comp continuous_subtype_val
 
+/-- The interval subring is a uniform additive group. -/
+instance (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) :
+    IsUniformAddGroup ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) :=
+  IsUniformInducing.isUniformAddGroup (BIQ p F ϖ q₁ q₂ h₁ h₂).subtype
+    isUniformEmbedding_subtype_val.isUniformInducing
+
+/-- The dyadic values are uniform additive groups (subspace uniformity). -/
+instance (i : DyadicIdx) : IsUniformAddGroup (dyadicVal p F ϖ i) :=
+  inferInstanceAs (IsUniformAddGroup
+    ↥(BIQ p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p)))
+
+/-- The limit sections are a uniform additive group (subspace uniformity). -/
+instance limitSectionsY.isUniformAddGroup (W : Set (Spv (Ainf p F))) :
+    IsUniformAddGroup ↥(limitSectionsY p F ϖ W) :=
+  IsUniformInducing.isUniformAddGroup (limitSectionsY p F ϖ W).subtype
+    isUniformEmbedding_subtype_val.isUniformInducing
+
+instance limitSectionsY.t0Space (W : Set (Spv (Ainf p F))) :
+    T0Space ↥(limitSectionsY p F ϖ W) :=
+  inferInstance
+
+/-- **The Y-structure presheaf**, bundled: on an open `U ⊆ 𝒴`, the complete
+topological ring of compatible dyadic families supported inside `U`. -/
+def yPresheaf : TopCat.Presheaf CompleteTopCommRingCat
+    (TopCat.of ↥(Y p F ϖ)) where
+  obj V := CompleteTopCommRingCat.of
+    ↥(limitSectionsY p F ϖ (Subtype.val '' (V.unop.1 : Set ↥(Y p F ϖ))))
+  map {V W} i := ⟨limitRestrictY p F ϖ
+      (Set.image_mono (leOfHom i.unop)),
+    limitRestrictY_continuous p F ϖ _⟩
+  map_id V := by
+    refine Subtype.ext (RingHom.ext fun x => Subtype.ext (funext fun i => ?_))
+    rfl
+  map_comp {U V W} i j := by
+    refine Subtype.ext (RingHom.ext fun x => Subtype.ext (funext fun i => ?_))
+    rfl
+
+@[simp] theorem yPresheaf_obj (V : (Opens ↥(TopCat.of ↥(Y p F ϖ)))ᵒᵖ) :
+    (yPresheaf p F ϖ).obj V = CompleteTopCommRingCat.of
+      ↥(limitSectionsY p F ϖ
+        (Subtype.val '' (V.unop.1 : Set ↥(Y p F ϖ)))) :=
+  rfl
+
+theorem yPresheaf_map {V W : (Opens ↥(TopCat.of ↥(Y p F ϖ)))ᵒᵖ} (i : V ⟶ W)
+    (x : ↥(limitSectionsY p F ϖ
+      (Subtype.val '' (V.unop.1 : Set ↥(Y p F ϖ))))) :
+    ((yPresheaf p F ϖ).map i).1 x
+      = limitRestrictY p F ϖ (Set.image_mono (leOfHom i.unop)) x :=
+  rfl
+
 end FarguesFontaine
 
 end
