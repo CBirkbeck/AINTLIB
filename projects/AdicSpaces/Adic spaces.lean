@@ -59,6 +59,7 @@ import «Adic spaces».FarguesFontaine.BigWindows
 import «Adic spaces».FarguesFontaine.ChartSpa
 import «Adic spaces».RationalBasisHuber
 import «Adic spaces».RelativeDescentHuber
+import «Adic spaces».RestrictedLimitSheaf
 import «Adic spaces».FarguesFontaine.YCharts
 import «Adic spaces».FarguesFontaine.YStalks
 import «Adic spaces».FlatnessResults
