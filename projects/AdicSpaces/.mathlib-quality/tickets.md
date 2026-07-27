@@ -1134,8 +1134,10 @@ non-Tate bases are supported.
     IntervalRing + retry (iii) rw-only with typed ascriptions; (b) profiler
     to find the unfolding site; (c) fallback: presheaf values at the
     ϖ_n-side BISub's (sheafiness free by TC2), twists only in the
-    restriction maps. Also open: the negative-side chartRingEquivBIQ mirror
-    (pPow — same compiling pattern as nonneg). BOARD-HYGIENE LESSON: two
+    restriction maps. Negative-side mirror DONE 2026-07-27
+    (chartRingEquivBIQNeg via the pPowM abbreviation — presheafValue of the
+    (-m)-window chart ≃+* ↥(BIQ (p^m) (p^m/p)); the twist enters through
+    BISub_twist.symm since the power relation points the other way). BOARD-HYGIENE LESSON: two
     silent no-op board edits this stretch (unasserted python replaces) —
     ALWAYS `assert old in src`. Original design: a ℚ-exponent wrapper layer —
     `BIQ (q₁ q₂ : ℚ)` := BISub at the radii `vπ^{qᵢ}` (NNReal-rpow of the

@@ -187,6 +187,115 @@ theorem chartEquivStep2_continuous (n : ℕ) :
   rw [chartEquivStep2]
   exact biCongr_continuous p F (PseudoUniformizer.frobRoot p F ϖ n) _ _
 
+theorem powQ_pos (m : ℕ) : (0 : ℚ) < (p ^ m : ℚ) := by
+  have hp : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  positivity
+
+theorem powQ_div_pos (m : ℕ) : (0 : ℚ) < (p ^ m : ℚ) / (p : ℚ) := by
+  have hp : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  positivity
+
+theorem vpiQ_pPow_one (m : ℕ) :
+    vpiQ p F (PseudoUniformizer.pPow F ϖ (p ^ m)
+        (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1
+      = vpiQ p F ϖ ((p ^ m : ℚ)) := by
+  rw [vpiQ_pPow p F ϖ (p ^ m) (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m) 1]
+  congr 1
+  push_cast
+  ring
+
+theorem vpiQ_pPow_invP (m : ℕ) :
+    vpiQ p F (PseudoUniformizer.pPow F ϖ (p ^ m)
+        (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) (1 / (p : ℚ))
+      = vpiQ p F ϖ ((p ^ m : ℚ) / (p : ℚ)) := by
+  rw [vpiQ_pPow p F ϖ (p ^ m)
+    (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m) (1 / (p : ℚ))]
+  congr 1
+  push_cast
+  ring
+
+/-- The `p^m`-th power uniformizer (abbreviation for the negative-side
+charts). -/
+noncomputable def pPowM (m : ℕ) : PseudoUniformizer F :=
+  PseudoUniformizer.pPow F ϖ (p ^ m)
+    (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)
+
+theorem teichPi_pPowM (m : ℕ) :
+    teichPi p F ϖ ^ p ^ m = teichPi p F (pPowM p F ϖ m) :=
+  (teichPi_pPow p F ϖ (p ^ m)
+    (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)).symm
+
+theorem vpiQ_pPowM_one (m : ℕ) :
+    vpiQ p F (pPowM p F ϖ m) 1 = vpiQ p F ϖ ((p ^ m : ℚ)) :=
+  vpiQ_pPow_one p F ϖ m
+
+theorem vpiQ_pPowM_invP (m : ℕ) :
+    vpiQ p F (pPowM p F ϖ m) (1 / (p : ℚ))
+      = vpiQ p F ϖ ((p ^ m : ℚ) / (p : ℚ)) :=
+  vpiQ_pPow_invP p F ϖ m
+
+/-- The ID2d comparison instantiated at the power uniformizer (negative side,
+step 1). -/
+noncomputable def chartEquivStep1Neg (m : ℕ) :
+    presheafValue (chartData p F (pPowM p F ϖ m) 1 1 p 1)
+      ≃+* ↥(BISub p F (pPowM p F ϖ m)
+          (vpi_pos p F (pPowM p F ϖ m))
+          (perfectoidValuation_toOF_lt_one p F (pPowM p F ϖ m))
+          (rhoRight_pos p F (pPowM p F ϖ m) p 1)
+          (rhoRight_lt_one p F (pPowM p F ϖ m) p 1
+            (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos)) :=
+  presheafChartRingEquivBISub p F (pPowM p F ϖ m)
+    (hρ₁0 := vpi_pos p F (pPowM p F ϖ m))
+    (hρ₁1 := perfectoidValuation_toOF_lt_one p F (pPowM p F ϖ m))
+    (hρ₂0 := rhoRight_pos p F (pPowM p F ϖ m) p 1)
+    (hρ₂1 := rhoRight_lt_one p F (pPowM p F ϖ m) p 1
+      (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos)
+    p 1 (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos
+    (Nat.Prime.one_le (Fact.out : Nat.Prime p)) rfl
+    (by rw [rhoRight_pow_exact p F (pPowM p F ϖ m) p 1
+          (Nat.Prime.pos (Fact.out : Nat.Prime p)), pow_one])
+
+/-- Radius rewriting (negative side, step 2). -/
+noncomputable def chartEquivStep2Neg (m : ℕ) :
+    ↥(BISub p F (pPowM p F ϖ m)
+        (vpi_pos p F (pPowM p F ϖ m))
+        (perfectoidValuation_toOF_lt_one p F (pPowM p F ϖ m))
+        (rhoRight_pos p F (pPowM p F ϖ m) p 1)
+        (rhoRight_lt_one p F (pPowM p F ϖ m) p 1
+          (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos))
+      ≃+* ↥(BISub p F (pPowM p F ϖ m)
+          (vpiQ_pos p F ϖ ((p ^ m : ℚ)))
+          (vpiQ_lt_one p F ϖ (powQ_pos p m))
+          (vpiQ_pos p F ϖ ((p ^ m : ℚ) / (p : ℚ)))
+          (vpiQ_lt_one p F ϖ (powQ_div_pos p m))) :=
+  biCongr p F (pPowM p F ϖ m)
+    (by rw [← vpiQ_pPowM_one p F ϖ m, vpiQ_one])
+    (by rw [← vpiQ_pPowM_invP p F ϖ m, rhoRight_eq_vpiQ]
+        norm_num)
+
+/-- Uniformizer-invariance transport (negative side, step 3). -/
+noncomputable def chartEquivStep3Neg (m : ℕ) :
+    ↥(BISub p F (pPowM p F ϖ m)
+        (vpiQ_pos p F ϖ ((p ^ m : ℚ)))
+        (vpiQ_lt_one p F ϖ (powQ_pos p m))
+        (vpiQ_pos p F ϖ ((p ^ m : ℚ) / (p : ℚ)))
+        (vpiQ_lt_one p F ϖ (powQ_div_pos p m)))
+      ≃+* ↥(BIQ p F ϖ ((p ^ m : ℚ)) ((p ^ m : ℚ) / (p : ℚ))
+          (powQ_pos p m) (powQ_div_pos p m)) :=
+  biSubringCongr p F
+    (BISub_twist p F (pPowM p F ϖ m)
+      (ϖ' := ϖ) (hk := pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)
+      (teichPi_pPowM p F ϖ m)).symm
+
+/-- **The chart ring of the `(-m)`-th Big window IS `BIQ (p^m) (p^{m-1})`**
+(negative side). -/
+noncomputable def chartRingEquivBIQNeg (m : ℕ) :
+    presheafValue (chartData p F (pPowM p F ϖ m) 1 1 p 1)
+      ≃+* ↥(BIQ p F ϖ ((p ^ m : ℚ)) ((p ^ m : ℚ) / (p : ℚ))
+          (powQ_pos p m) (powQ_div_pos p m)) :=
+  (chartEquivStep1Neg p F ϖ m).trans
+    ((chartEquivStep2Neg p F ϖ m).trans (chartEquivStep3Neg p F ϖ m))
+
 end FarguesFontaine
 
 end
