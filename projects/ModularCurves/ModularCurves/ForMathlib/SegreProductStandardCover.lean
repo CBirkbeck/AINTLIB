@@ -18,7 +18,7 @@ rings and hence, by the local Segre algebra equivalence, isomorphic to the corre
 standard chart of the Segre-image `Proj`.
 -/
 
-open CategoryTheory Limits AlgebraicGeometry
+open CategoryTheory Limits AlgebraicGeometry TopologicalSpace.Opens
 
 noncomputable section
 
@@ -28,24 +28,68 @@ namespace MvPolynomial
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-/-- The standard coordinate basic opens, presented by their homogeneous-localization spectra. -/
-def coordinateAffineOpenCover
-    (R : Type u) [CommRing R] (σ : Type) :
-    (Proj (homogeneousSubmodule σ R)).AffineOpenCover :=
-  Proj.affineOpenCoverOfIrrelevantLESpan
+/-- The open immersion of a standard coordinate chart into polynomial `Proj`. -/
+abbrev coordinateChartMap
+    (R : Type u) [CommRing R] (σ : Type) (i : σ) :
+    Spec (CommRingCat.of (ProjectiveCoordinateAway R i)) ⟶
+      Proj (homogeneousSubmodule σ R) :=
+  Proj.awayι
     (homogeneousSubmodule σ R)
-    (X : σ → MvPolynomial σ R)
-    (m := fun _ => 1)
-    (X_mem_homogeneousSubmodule_one R)
-    (fun _ => Nat.zero_lt_one)
-    irrelevant_toIdeal_le_span_range_X
+    (X i)
+    (X_mem_homogeneousSubmodule_one R i)
+    Nat.zero_lt_one
+
+/-- The standard coordinate basic opens, presented by their homogeneous-localization spectra. -/
+abbrev coordinateAffineOpenCover
+    (R : Type u) [CommRing R] (σ : Type) :
+    (Proj (homogeneousSubmodule σ R)).AffineOpenCover where
+  I₀ := σ
+  X i := .of (ProjectiveCoordinateAway R i)
+  f i := coordinateChartMap R σ i
+  idx x :=
+    (mem_iSup.mp
+      ((Proj.iSup_basicOpen_eq_top
+        (homogeneousSubmodule σ R)
+        (X : σ → MvPolynomial σ R)
+        irrelevant_toIdeal_le_span_range_X).ge
+          (Set.mem_univ x))).choose
+  covers x := by
+    change x ∈
+      (Proj.awayι
+        (homogeneousSubmodule σ R)
+        (X _)
+        (X_mem_homogeneousSubmodule_one R _)
+        Nat.zero_lt_one).opensRange
+    rw [Proj.opensRange_awayι]
+    exact
+      (mem_iSup.mp
+        ((Proj.iSup_basicOpen_eq_top
+          (homogeneousSubmodule σ R)
+          (X : σ → MvPolynomial σ R)
+          irrelevant_toIdeal_le_span_range_X).ge
+            (Set.mem_univ x))).choose_spec
+
+/-- The open cover underlying `coordinateAffineOpenCover`, with its index type definitionally
+equal to the coordinate type. -/
+@[simps! I₀ X f]
+def coordinateOpenCover
+    (R : Type u) [CommRing R] (σ : Type) :
+    (Proj (homogeneousSubmodule σ R)).OpenCover where
+  I₀ := σ
+  X i := Spec ((coordinateAffineOpenCover R σ).X i)
+  f i := coordinateChartMap R σ i
+  mem₀ := by
+    rw [Scheme.presieve₀_mem_precoverage_iff]
+    refine ⟨fun x ↦ ?_, fun i ↦ (coordinateAffineOpenCover R σ).map_prop i⟩
+    obtain ⟨y, hy⟩ := (coordinateAffineOpenCover R σ).covers x
+    exact ⟨(coordinateAffineOpenCover R σ).idx x, y, hy⟩
 
 @[simp]
 lemma coordinateAffineOpenCover_opensRange
     (R : Type u) [CommRing R] (σ : Type) (i : σ) :
     @Scheme.Hom.opensRange _ _
-        ((coordinateAffineOpenCover R σ).f i)
-        ((coordinateAffineOpenCover R σ).map_prop i) =
+        (coordinateChartMap R σ i)
+        ((coordinateOpenCover R σ).map_prop i) =
       coordinateOpen (R := R) i :=
   Proj.opensRange_awayι
     (homogeneousSubmodule σ R)
@@ -57,7 +101,7 @@ lemma coordinateAffineOpenCover_opensRange
 coefficient algebra. -/
 lemma coordinateAffineOpenCover_comp_homogeneousProjπ
     (R : Type u) [CommRing R] (σ : Type) (i : σ) :
-    (coordinateAffineOpenCover R σ).f i ≫
+    coordinateChartMap R σ i ≫
         homogeneousProjπ (R := R) (σ := σ) =
       Spec.map
         (CommRingCat.ofHom
@@ -83,21 +127,135 @@ abbrev segreProductProj
     (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
     (homogeneousProjπ (R := R) (σ := Fin (n + 1)))
 
-/-- The product of the standard coordinate covers on the two projective factors. -/
-abbrev segreProductStandardOpenCover
-    (R : Type u) [CommRing R] (m n : ℕ) :
-    (segreProductProj R m n).OpenCover :=
-  Scheme.Pullback.openCoverOfLeftRight
-    (coordinateAffineOpenCover R (Fin (m + 1))).openCover
-    (coordinateAffineOpenCover R (Fin (n + 1))).openCover
+/-- A standard affine chart in the product of two polynomial projective spaces. -/
+abbrev segreProductStandardChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) : Scheme.{u} :=
+  pullback
+    (coordinateChartMap R (Fin (m + 1)) i ≫
+      homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+    (coordinateChartMap R (Fin (n + 1)) j ≫
+      homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+
+/-- The first projection from a standard product chart. -/
+def segreProductStandardChartFst
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    segreProductStandardChart R m n i j ⟶
+      Spec (CommRingCat.of (ProjectiveCoordinateAway R i)) :=
+  pullback.fst
+    (coordinateChartMap R (Fin (m + 1)) i ≫
+      homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+    (coordinateChartMap R (Fin (n + 1)) j ≫
+      homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+
+/-- The second projection from a standard product chart. -/
+def segreProductStandardChartSnd
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    segreProductStandardChart R m n i j ⟶
+      Spec (CommRingCat.of (ProjectiveCoordinateAway R j)) :=
+  pullback.snd
+    (coordinateChartMap R (Fin (m + 1)) i ≫
+      homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+    (coordinateChartMap R (Fin (n + 1)) j ≫
+      homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+
+/-- The map from a standard product chart to the product of projective spaces. -/
+def segreProductStandardChartMap
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    segreProductStandardChart R m n i j ⟶ segreProductProj R m n :=
+  pullback.map
+    (coordinateChartMap R (Fin (m + 1)) i ≫
+      homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+    (coordinateChartMap R (Fin (n + 1)) j ≫
+      homogeneousProjπ (R := R) (σ := Fin (n + 1)))
     (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
     (homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+    (coordinateChartMap R (Fin (m + 1)) i)
+    (coordinateChartMap R (Fin (n + 1)) j)
+    (𝟙 (Spec (CommRingCat.of R)))
+    (Category.comp_id _)
+    (Category.comp_id _)
+
+/-- The product of the standard coordinate covers on the two projective factors. -/
+@[simps! I₀ X f]
+def segreProductStandardOpenCover
+    (R : Type u) [CommRing R] (m n : ℕ) :
+    (segreProductProj R m n).OpenCover where
+  I₀ := Fin (m + 1) × Fin (n + 1)
+  X ij := segreProductStandardChart R m n ij.1 ij.2
+  f ij := segreProductStandardChartMap R m n ij.1 ij.2
+  mem₀ := by
+    rw [Scheme.presieve₀_mem_precoverage_iff]
+    constructor
+    · intro x
+      obtain ⟨i, xi, hi⟩ :=
+        (coordinateOpenCover R (Fin (m + 1))).exists_eq
+          (pullback.fst
+            (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+            (homogeneousProjπ (R := R) (σ := Fin (n + 1))) x)
+      obtain ⟨j, yj, hj⟩ :=
+        (coordinateOpenCover R (Fin (n + 1))).exists_eq
+          (pullback.snd
+            (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+            (homogeneousProjπ (R := R) (σ := Fin (n + 1))) x)
+      refine ⟨(i, j), ?_⟩
+      change x ∈ Set.range
+        (pullback.map
+          (coordinateChartMap R (Fin (m + 1)) i ≫ homogeneousProjπ)
+          (coordinateChartMap R (Fin (n + 1)) j ≫ homogeneousProjπ)
+          (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+          (homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+          (coordinateChartMap R (Fin (m + 1)) i)
+          (coordinateChartMap R (Fin (n + 1)) j)
+          (𝟙 (Spec (CommRingCat.of R)))
+          (Category.comp_id _)
+          (Category.comp_id _))
+      rw [Scheme.Pullback.range_map
+        (coordinateChartMap R (Fin (m + 1)) i ≫ homogeneousProjπ)
+        (coordinateChartMap R (Fin (n + 1)) j ≫ homogeneousProjπ)
+        (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+        (homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+        (coordinateChartMap R (Fin (m + 1)) i)
+        (coordinateChartMap R (Fin (n + 1)) j)
+        (𝟙 (Spec (CommRingCat.of R)))
+        (Category.comp_id _)
+        (Category.comp_id _)]
+      exact ⟨⟨xi, hi⟩, ⟨yj, hj⟩⟩
+    · intro ij
+      letI : IsOpenImmersion (coordinateChartMap R (Fin (m + 1)) ij.1) :=
+        (coordinateOpenCover R (Fin (m + 1))).map_prop ij.1
+      letI : IsOpenImmersion (coordinateChartMap R (Fin (n + 1)) ij.2) :=
+        (coordinateOpenCover R (Fin (n + 1))).map_prop ij.2
+      change IsOpenImmersion
+        (pullback.map
+          (coordinateChartMap R (Fin (m + 1)) ij.1 ≫ homogeneousProjπ)
+          (coordinateChartMap R (Fin (n + 1)) ij.2 ≫ homogeneousProjπ)
+          (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+          (homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+          (coordinateChartMap R (Fin (m + 1)) ij.1)
+          (coordinateChartMap R (Fin (n + 1)) ij.2)
+          (𝟙 (Spec (CommRingCat.of R)))
+          (Category.comp_id _)
+          (Category.comp_id _))
+      exact Scheme.pullback_map_isOpenImmersion
+        (coordinateChartMap R (Fin (m + 1)) ij.1 ≫ homogeneousProjπ)
+        (coordinateChartMap R (Fin (n + 1)) ij.2 ≫ homogeneousProjπ)
+        (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+        (homogeneousProjπ (R := R) (σ := Fin (n + 1)))
+        (coordinateChartMap R (Fin (m + 1)) ij.1)
+        (coordinateChartMap R (Fin (n + 1)) ij.2)
+        (𝟙 (Spec (CommRingCat.of R)))
+        (Category.comp_id _)
+        (Category.comp_id _)
 
 /-- A standard product chart is the spectrum of the tensor product of its two factor rings. -/
 def segreProductStandardChartIsoSpec
     (R : Type u) [CommRing R] (m n : ℕ)
     (i : Fin (m + 1)) (j : Fin (n + 1)) :
-    (segreProductStandardOpenCover R m n).X (i, j) ≅
+    segreProductStandardChart R m n i j ≅
       Spec
         (CommRingCat.of
           (SegreProductChartRing R m n i j)) :=
@@ -109,11 +267,29 @@ def segreProductStandardChartIsoSpec
       (ProjectiveCoordinateAway R i)
       (ProjectiveCoordinateAway R j)
 
+/-- The inverse tensor-spectrum chart isomorphism followed by the first chart projection. -/
+def segreProductStandardChartIsoSpecInvFst
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    Spec (CommRingCat.of (SegreProductChartRing R m n i j)) ⟶
+      Spec (CommRingCat.of (ProjectiveCoordinateAway R i)) :=
+  (segreProductStandardChartIsoSpec R m n i j).inv ≫
+    segreProductStandardChartFst R m n i j
+
+/-- The inverse tensor-spectrum chart isomorphism followed by the second chart projection. -/
+def segreProductStandardChartIsoSpecInvSnd
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    Spec (CommRingCat.of (SegreProductChartRing R m n i j)) ⟶
+      Spec (CommRingCat.of (ProjectiveCoordinateAway R j)) :=
+  (segreProductStandardChartIsoSpec R m n i j).inv ≫
+    segreProductStandardChartSnd R m n i j
+
 /-- A standard product chart is canonically isomorphic to the corresponding Segre-image chart. -/
 def segreProductStandardChartIsoImageChart
     (R : Type u) [CommRing R] (m n : ℕ)
     (i : Fin (m + 1)) (j : Fin (n + 1)) :
-    (segreProductStandardOpenCover R m n).X (i, j) ≅
+    segreProductStandardChart R m n i j ≅
       (segreImageStandardChart R m n
         (segrePairIndex m n i j)).toScheme :=
   segreProductStandardChartIsoSpec R m n i j ≪≫
@@ -129,7 +305,7 @@ def segreProductStandardChartIsoImageChart
 def segreProductStandardChartToImageProj
     (R : Type u) [CommRing R] (m n : ℕ)
     (i : Fin (m + 1)) (j : Fin (n + 1)) :
-    (segreProductStandardOpenCover R m n).X (i, j) ⟶
+    segreProductStandardChart R m n i j ⟶
       segreImageProj R m n :=
   (segreProductStandardChartIsoImageChart R m n i j).hom ≫
     (segreImageStandardChart R m n (segrePairIndex m n i j)).ι
