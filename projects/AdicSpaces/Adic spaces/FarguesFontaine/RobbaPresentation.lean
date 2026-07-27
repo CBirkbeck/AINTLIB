@@ -1258,6 +1258,72 @@ theorem pow_mul_pow_le_of_le {a b : NNReal} (hab : a ≤ b) {k n : ℕ}
         mul_le_mul_right (pow_le_pow_left' hab _) _
     _ = b ^ n * a ^ k := by rw [h2]; ring
 
+omit [CharP F p] in
+/-- The value of a `zb^j`-factored coordinate. -/
+theorem perfectoidValuation_twist_factor (zb c c' : OF F) (j : ℕ)
+    (hfact : c = zb ^ j * c') :
+    perfectoidValuation p F (c : F)
+      = perfectoidValuation p F (zb : F) ^ j
+        * perfectoidValuation p F (c' : F) := by
+  rw [hfact]
+  rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+    push_cast; rfl]
+  rw [Valuation.map_mul, map_pow]
+
+/-- **The zone norm-comparison, formula level** (denominator zone): the
+twisted monomial's values at the outer radii are controlled by the original
+at the cut radius — exactly at the top, by the `m`-step constant at the
+bottom. -/
+theorem twisted_formula_le {ρ₁ σ₁ ρ₂ V vc vc' : NNReal}
+    (hρ₁0 : 0 < ρ₁) (hσ₁0 : 0 < σ₁) (hρ₂0 : 0 < ρ₂) (hV0 : 0 < V)
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂) {m i k j : ℕ}
+    (hval : vc = σ₁ ^ (m * j) * vc') (he : i + m * j ≤ k)
+    (hwin : k < i + m * j + m) :
+    ρ₂ ^ (i + m * j) * vc' * (((ρ₂ * V) ^ k)⁻¹)
+      ≤ σ₁ ^ i * vc * (((σ₁ * V) ^ k)⁻¹)
+    ∧ ρ₁ ^ (i + m * j) * vc' * (((ρ₁ * V) ^ k)⁻¹)
+      ≤ σ₁ ^ m * ((ρ₁ ^ m)⁻¹)
+        * (σ₁ ^ i * vc * (((σ₁ * V) ^ k)⁻¹)) := by
+  have hfold : σ₁ ^ i * vc = σ₁ ^ (i + m * j) * vc' := by
+    rw [hval, pow_add]
+    ring
+  have hρ₂V : (0 : NNReal) < (ρ₂ * V) ^ k :=
+    pow_pos (mul_pos hρ₂0 hV0) k
+  have hσ₁V : (0 : NNReal) < (σ₁ * V) ^ k :=
+    pow_pos (mul_pos hσ₁0 hV0) k
+  have hρ₁V : (0 : NNReal) < (ρ₁ * V) ^ k :=
+    pow_pos (mul_pos hρ₁0 hV0) k
+  constructor
+  · rw [hfold, mul_comm (ρ₂ ^ (i + m * j)) vc',
+      mul_comm (σ₁ ^ (i + m * j)) vc', mul_assoc, mul_assoc]
+    refine mul_le_mul_right ?_ vc'
+    rw [← div_eq_mul_inv, ← div_eq_mul_inv, div_le_div_iff₀ hρ₂V hσ₁V]
+    calc ρ₂ ^ (i + m * j) * (σ₁ * V) ^ k
+        = (σ₁ ^ k * ρ₂ ^ (i + m * j)) * V ^ k := by rw [mul_pow]; ring
+      _ ≤ (ρ₂ ^ k * σ₁ ^ (i + m * j)) * V ^ k :=
+          mul_le_mul_left (pow_mul_pow_le_of_le hσρ he) _
+      _ = σ₁ ^ (i + m * j) * (ρ₂ * V) ^ k := by rw [mul_pow]; ring
+  · rw [hfold, mul_comm (ρ₁ ^ (i + m * j)) vc', mul_assoc]
+    rw [show σ₁ ^ m * ((ρ₁ ^ m)⁻¹) * (σ₁ ^ (i + m * j) * vc'
+          * (((σ₁ * V) ^ k)⁻¹))
+        = vc' * (σ₁ ^ (i + m * j + m)
+          * ((ρ₁ ^ m * (σ₁ * V) ^ k)⁻¹)) from by
+      rw [pow_add (σ₁) (i + m * j) m, mul_inv]
+      ring]
+    refine mul_le_mul_right ?_ vc'
+    rw [← div_eq_mul_inv, ← div_eq_mul_inv,
+      div_le_div_iff₀ hρ₁V
+        (mul_pos (pow_pos hρ₁0 m) (pow_pos (mul_pos hσ₁0 hV0) k))]
+    calc ρ₁ ^ (i + m * j) * (ρ₁ ^ m * (σ₁ * V) ^ k)
+        = (ρ₁ ^ (i + m * j + m) * σ₁ ^ k) * V ^ k := by
+          rw [mul_pow, pow_add (ρ₁) (i + m * j) m]
+          ring
+      _ ≤ (σ₁ ^ (i + m * j + m) * ρ₁ ^ k) * V ^ k :=
+          mul_le_mul_left (pow_mul_pow_le_of_le hρσ hwin.le) _
+      _ = σ₁ ^ (i + m * j + m) * (ρ₁ * V) ^ k := by
+          rw [mul_pow]
+          ring
+
 end FarguesFontaine
 
 end
