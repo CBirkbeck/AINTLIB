@@ -601,4 +601,188 @@ lemma segreImagePairAwayι_segreImageProjToProduct
     segreImagePairOpenCover_f_segreImageProjToProduct
       R m n i j
 
+/-- The inverse-forward composite is the identity after restriction to each
+pair-indexed target chart. -/
+lemma segreImagePairAwayι_inverse_right
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n i j))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n i j))
+          Nat.zero_lt_one ≫
+        (segreImageProjToProduct R m n ≫
+          segreProductToImageProj R m n) =
+      Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n i j))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n i j))
+          Nat.zero_lt_one ≫
+        𝟙 (segreImageProj R m n) := by
+  calc
+    _ =
+        (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n i j))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n i j))
+            Nat.zero_lt_one ≫
+          segreImageProjToProduct R m n) ≫
+            segreProductToImageProj R m n :=
+      (Category.assoc _ _ _).symm
+    _ =
+        segreImagePairChartToProduct R m n i j ≫
+          segreProductToImageProj R m n :=
+      congrArg
+        (fun q => q ≫ segreProductToImageProj R m n)
+        (segreImagePairAwayι_segreImageProjToProduct
+          R m n i j)
+    _ =
+        Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n i j))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n i j))
+          Nat.zero_lt_one :=
+      segreImagePairChartToProduct_segreProductToImageProj_awayι
+        R m n i j
+    _ = _ := (Category.comp_id _).symm
+
+/-- The forward-inverse composite is the identity after restriction to each
+standard product chart. -/
+lemma segreProductStandardChart_inverse_left
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    segreProductStandardChartMap R m n i j ≫
+        (segreProductToImageProj R m n ≫
+          segreImageProjToProduct R m n) =
+      segreProductStandardChartMap R m n i j ≫
+        𝟙 (segreProductProj R m n) := by
+  have hforward :
+      segreProductStandardChartMap R m n i j ≫
+          segreProductToImageProj R m n =
+        segreProductStandardChartToImageProj R m n i j := by
+    change
+      (segreProductStandardOpenCover R m n).f (i, j) ≫
+          segreProductToImageProj R m n =
+        segreProductStandardChartToImageProj R m n i j
+    exact
+      segreProductStandardOpenCover_f_segreProductToImageProj
+        R m n i j
+  calc
+    _ =
+        (segreProductStandardChartMap R m n i j ≫
+          segreProductToImageProj R m n) ≫
+            segreImageProjToProduct R m n :=
+      (Category.assoc _ _ _).symm
+    _ =
+        segreProductStandardChartToImageProj R m n i j ≫
+          segreImageProjToProduct R m n :=
+      congrArg
+        (fun q => q ≫ segreImageProjToProduct R m n)
+        hforward
+    _ =
+        ((segreProductStandardChartIsoPairChart
+              R m n i j).hom ≫
+            Proj.awayι
+              (segreImageGrading R m n)
+              (segreImageCoordinate R m n
+                (segrePairIndex m n i j))
+              (segreImageCoordinate_mem_degreeOne R m n
+                (segrePairIndex m n i j))
+              Nat.zero_lt_one) ≫
+          segreImageProjToProduct R m n := by
+      rw [segreProductStandardChartIsoPairChart_hom_awayι]
+    _ =
+        (segreProductStandardChartIsoPairChart
+              R m n i j).hom ≫
+          (Proj.awayι
+              (segreImageGrading R m n)
+              (segreImageCoordinate R m n
+                (segrePairIndex m n i j))
+              (segreImageCoordinate_mem_degreeOne R m n
+                (segrePairIndex m n i j))
+              Nat.zero_lt_one ≫
+            segreImageProjToProduct R m n) :=
+      Category.assoc _ _ _
+    _ =
+        (segreProductStandardChartIsoPairChart
+              R m n i j).hom ≫
+          segreImagePairChartToProduct R m n i j :=
+      congrArg
+        (fun q =>
+          (segreProductStandardChartIsoPairChart
+            R m n i j).hom ≫ q)
+        (segreImagePairAwayι_segreImageProjToProduct
+          R m n i j)
+    _ =
+        (segreProductStandardChartIsoPairChart
+              R m n i j).hom ≫
+          ((segreProductStandardChartIsoPairChart
+              R m n i j).inv ≫
+            segreProductStandardChartMap R m n i j) :=
+      congrArg
+        (fun q =>
+          (segreProductStandardChartIsoPairChart
+            R m n i j).hom ≫ q)
+        (segreImagePairChartToProduct_eq R m n i j)
+    _ = segreProductStandardChartMap R m n i j :=
+      Iso.hom_inv_id_assoc
+        (segreProductStandardChartIsoPairChart
+          R m n i j)
+        (segreProductStandardChartMap R m n i j)
+    _ = _ := (Category.comp_id _).symm
+
+/-- The glued inverse is a right inverse to the global Segre morphism. -/
+lemma segreImageProjToProduct_segreProductToImageProj
+    (R : Type u) [CommRing R] (m n : ℕ) :
+    segreImageProjToProduct R m n ≫
+        segreProductToImageProj R m n =
+      𝟙 (segreImageProj R m n) := by
+  apply
+    (segreImagePairAffineOpenCover
+      R m n).openCover.hom_ext
+  intro q
+  exact
+    segreImagePairAwayι_inverse_right
+      R m n q.1 q.2
+
+/-- The global Segre morphism is a right inverse to the glued inverse. -/
+lemma segreProductToImageProj_segreImageProjToProduct
+    (R : Type u) [CommRing R] (m n : ℕ) :
+    segreProductToImageProj R m n ≫
+        segreImageProjToProduct R m n =
+      𝟙 (segreProductProj R m n) := by
+  apply
+    (segreProductStandardOpenCover
+      R m n).hom_ext
+  intro q
+  change
+    segreProductStandardChartMap R m n q.1 q.2 ≫
+        (segreProductToImageProj R m n ≫
+          segreImageProjToProduct R m n) =
+      segreProductStandardChartMap R m n q.1 q.2 ≫
+        𝟙 (segreProductProj R m n)
+  exact
+    segreProductStandardChart_inverse_left
+      R m n q.1 q.2
+
+/-- The global Segre morphism is an isomorphism, with inverse given by the
+glued inverse chart maps. -/
+instance isIso_segreProductToImageProj
+    (R : Type u) [CommRing R] (m n : ℕ) :
+    IsIso (segreProductToImageProj R m n) :=
+  IsIso.mk'
+    ⟨segreImageProjToProduct R m n,
+      segreImageProjToProduct_segreProductToImageProj
+        R m n,
+      segreProductToImageProj_segreImageProjToProduct
+        R m n⟩
+
 end MvPolynomial
