@@ -2060,7 +2060,37 @@ non-Tate bases are supported.
     (spread the section along the orbit through the yFrobVPreHom
     transports; freeness/wandering gives disjoint windows —
     injOn_toCurve_windowU/V); then local rings + valuations pull
-    back and (D-iv-4) the sheaf condition; (D-iv-5) xVObj. Non-critical parked:
+    back and (D-iv-4) the sheaf condition; (D-iv-5) xVObj.
+    ★ D-iv-3(i) DONE 2026-07-28: curveSpace : TopRingPresheafedSpace
+    (CurveTop + xStructurePresheaf); piYHom : yPresheafedSpace ⟶
+    curveSpace (base := the quotient projection, c := the subtype
+    inclusion of invariants — continuity is plain
+    continuous_subtype_val since frobFixed carries the induced
+    topology; naturality by the double-Subtype.ext-rfl). The stalk
+    comparison ringStalkMap piYHom y : xStalk(π y) ⟶ yStalk(y) is now
+    FREE from the generic machinery.
+    NEXT (D-iv-3(ii) — the DEEP core): the stalk map is bijective.
+    Surjectivity = the invariant-extension lemma: a germ at y is
+    represented on a small W ∋ y with W inside a window and the
+    translates (yFrobTop k)⁻¹ W pairwise disjoint
+    (exists_nhd_smul_disjoint, Curve.lean 90); spread the section by
+    the transports to the disjoint union ⋃ₖ translates = a SATURATED
+    open (the preimage of the open image π(W) — π open!); the spread
+    family glues by the 𝒴-sheaf condition (yVObj/isLimitSheafOn_Y at
+    the DISJOINT cover — compatibility trivial on empty overlaps
+    modulo the k-th self-overlaps where the transport-coherence
+    (the k+l composite law of limitFrobHom!) enters — NOTE: the
+    composite law limitFrobHom (k+l) = limitFrobHom k ∘ limitFrobHom l
+    modulo frobOpens-composite-casts is NOT YET PROVEN — it is the
+    one missing algebraic identity; prove it componentwise from
+    presheafValueRingEquivHuber-functoriality in e (mapHuber-comp:
+    mapHuber e₂ ∘ mapHuber e₁ vs mapHuber (e₂∘e₁) — datum-level via
+    RationalLocData.ext' + value-level via the dense-image
+    uniqueness). Injectivity = separation on the saturated cover.
+    This is a multi-step arc: (3ii-a) mapHuber-comp + pvHuber-comp
+    functoriality; (3ii-b) limitFrobHom-comp; (3ii-c) the disjoint
+    translate cover + invariant extension; (3ii-d) stalk bijectivity;
+    then local rings/valuations transport (3ii-e). Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
