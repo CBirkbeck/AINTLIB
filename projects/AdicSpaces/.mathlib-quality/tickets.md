@@ -2398,9 +2398,12 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   twisted_formula_le (the denominator-zone comparison, formula level —
   B_{ρ₂} ≤ A_{σ₁} exact and B_{ρ₁} ≤ σ₁^m(ρ₁^m)⁻¹·A_{σ₁} — via
   div_le_div_iff₀ POSITIVITY-form args + mul_le_mul_left for right-
-  constant factors). STILL NEEDED for (v): the numerator-zone twin
-  (A_{ρ₁} ≤ A_{σ₁} for k ≤ i — same engine, 10 lines) and then
-  (v) the head/tail first-approximation assembly
+  constant factors). (v)-PROGRESS 2026-07-27: numerator_formula_le (73612a071),
+  exists_monomial_lift_package (607abaed1 — the FULL per-monomial lift:
+  zone-dispatched factorization + both outer-radius bounds),
+  monomial_dvd_of_wLoc_le_one (the σ₁-Gauss bound ⇒ floor-div
+  divisibility; W = 1 normalized). REMAINING for (v): the head/tail
+  first-approximation assembly
   (exists_evalBI_approx_bloc: finite T-polynomial lift of the head via
   mk'_sPow_split + per-monomial dispatch, tail small; NOTE the plan is
   APPROXIMATE-lift (residual ≤ ε), not exact — the correction machinery
