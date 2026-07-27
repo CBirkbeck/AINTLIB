@@ -1275,11 +1275,10 @@ non-Tate bases are supported.
     (checked: no Spa-as-VObj constructor, no stalk-locality anywhere):
     **the Wedhorn 8.14 stalk package**, generic over a pair with
     [HasLocLiftPowerBounded] (+Tate where needed) — spawn as:
-    (S1) valueAt: the point-valuation on presheafValue D at v ∈ R(D) via
-    (spaPresheafValueEquivRationalOpen D).symm (exists, Huber-generic) +
-    its defining comap-property;
-    (S2) valueAt-compat: comap (restrictionMapHom D D' h) (valueAt D' v)
-    = valueAt D v (uniqueness of extensions via the equiv's injectivity);
+    (S1)+(S2) DONE 2026-07-27 (StructureSheafStalks.lean, generic Huber
+    pair): pointValue + mem_spa/isContinuous/comap_pointValue/
+    eq_pointValue_of_comap_eq + comap_restrictionMapHom_pointValue (germ
+    coherence). Axiom-clean.;
     (S3) the stalk valuation on (structurePresheaf A).ringStalk v via the
     mathlib germ API (germ_exist + germ-ext over the rational basis;
     well-defined by S2);
