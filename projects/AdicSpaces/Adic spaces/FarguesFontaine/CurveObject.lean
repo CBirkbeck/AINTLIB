@@ -1044,6 +1044,69 @@ theorem exists_invariant_extension (W : Opens ↥(yTop p F ϖ))
   obtain ⟨g, hg, hg0⟩ := exists_glue_extending p F ϖ W hdis s
   exact ⟨⟨g, glue_invariant p F ϖ W s g hg⟩, hg0⟩
 
+/-- **Germ naturality of the projection stalk map**: the stalk map of the
+curve projection carries the germ of an invariant section to the germ of its
+underlying section. -/
+theorem ringStalkMap_piYHom_germ (y : ↥(yTop p F ϖ))
+    (V : Opens (Curve p F ϖ)) (hy : yTopToCurve p F ϖ y ∈ V)
+    (t : ToType ((curveSpace p F ϖ).ringPresheaf.obj (op V))) :
+    (ValuationSpectrum.ringStalkMap (piYHom p F ϖ) y).hom
+        ((curveSpace p F ϖ).ringPresheaf.germ V (yTopToCurve p F ϖ y) hy t)
+      = (yPresheafedSpace p F ϖ).ringPresheaf.germ
+          ((Opens.map (yTopToCurveTop p F ϖ)).obj V) y hy
+          (piComponent p F ϖ V t) := by
+  have hunfold : ValuationSpectrum.ringStalkMap (piYHom p F ϖ) y
+      = (TopCat.Presheaf.stalkFunctor CommRingCat
+            (ConcreteCategory.hom (piYHom p F ϖ).base y)).map
+          (Functor.whiskerRight (piYHom p F ϖ).c
+            CompleteTopCommRingCat.forgetToCommRingCat)
+        ≫ TopCat.Presheaf.stalkPushforward CommRingCat
+            (piYHom p F ϖ).base
+            ((yPresheafedSpace p F ϖ).presheaf
+              ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y := rfl
+  have h1 := TopCat.Presheaf.stalkFunctor_map_germ_apply
+    (C := CommRingCat) V (ConcreteCategory.hom (piYHom p F ϖ).base y)
+    hy (Functor.whiskerRight (piYHom p F ϖ).c
+      CompleteTopCommRingCat.forgetToCommRingCat) t
+  have h2 := TopCat.Presheaf.stalkPushforward_germ_apply CommRingCat
+    (piYHom p F ϖ).base
+    ((yPresheafedSpace p F ϖ).presheaf
+      ⋙ CompleteTopCommRingCat.forgetToCommRingCat) V y hy
+    ((Functor.whiskerRight (piYHom p F ϖ).c
+      CompleteTopCommRingCat.forgetToCommRingCat).app (op V) t)
+  have hsplit : ∀ z : ToType (TopCat.Presheaf.stalk
+      ((curveSpace p F ϖ).presheaf
+        ⋙ CompleteTopCommRingCat.forgetToCommRingCat)
+      (ConcreteCategory.hom (piYHom p F ϖ).base y)),
+      (ConcreteCategory.hom
+        ((TopCat.Presheaf.stalkFunctor CommRingCat
+            (ConcreteCategory.hom (piYHom p F ϖ).base y)).map
+          (Functor.whiskerRight (piYHom p F ϖ).c
+            CompleteTopCommRingCat.forgetToCommRingCat)
+          ≫ TopCat.Presheaf.stalkPushforward CommRingCat
+              (piYHom p F ϖ).base
+              ((yPresheafedSpace p F ϖ).presheaf
+                ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y)) z
+      = (ConcreteCategory.hom (TopCat.Presheaf.stalkPushforward CommRingCat
+          (piYHom p F ϖ).base
+          ((yPresheafedSpace p F ϖ).presheaf
+            ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y))
+        ((ConcreteCategory.hom ((TopCat.Presheaf.stalkFunctor CommRingCat
+            (ConcreteCategory.hom (piYHom p F ϖ).base y)).map
+          (Functor.whiskerRight (piYHom p F ϖ).c
+            CompleteTopCommRingCat.forgetToCommRingCat))) z) :=
+    fun z => rfl
+  exact (congrArg (fun h => (ConcreteCategory.hom h)
+      ((ConcreteCategory.hom (TopCat.Presheaf.germ
+        ((curveSpace p F ϖ).presheaf
+          ⋙ CompleteTopCommRingCat.forgetToCommRingCat) V
+        (ConcreteCategory.hom (piYHom p F ϖ).base y) hy)) t))
+      hunfold).trans
+    ((hsplit _).trans ((congrArg (ConcreteCategory.hom
+      (TopCat.Presheaf.stalkPushforward CommRingCat (piYHom p F ϖ).base
+        ((yPresheafedSpace p F ϖ).presheaf
+          ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y)) h1).trans h2))
+
 end FarguesFontaine
 
 end
