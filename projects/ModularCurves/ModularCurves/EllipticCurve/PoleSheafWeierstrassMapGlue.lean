@@ -175,7 +175,7 @@ private theorem exists_global_of_exists_on_sup
   · rw [← Category.assoc, hVe, hfV]
   · rw [Category.assoc, hf, ← Category.assoc, heι, Category.id_comp]
 
-private lemma opens_ι_appTop {C : Scheme.{u}} (U : C.Opens) :
+lemma opens_ι_appTop {C : Scheme.{u}} (U : C.Opens) :
     U.ι.appTop =
       CommRingCat.ofHom
         (U.topIso.inv.hom.comp
