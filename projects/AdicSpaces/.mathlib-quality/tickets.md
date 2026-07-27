@@ -3066,6 +3066,31 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   witnesses `X^N − (image elt)`.
 - **Depends**: T910 cases 1-2 (done), T911 norm-exact lifts (done). Non-critical for
   the curve chain; genuine Def-4.2-fidelity math.
+- **M0 DONE 2026-07-31** (commit ebe1b51cb): map_BIPlusIn_le_BIPlusIn — the
+  containment half, one le_trans over wI_resIHom_le.
+- **DESIGN NOTES (2026-07-31 working session)**: reframe the Moreover-composite as
+  the RESTRICTION hom (eval on constants = φ = resIHom by the presentation design),
+  so no quotient plumbing is needed. The (⊇)-half sandwich: BIPlusIn-σ ⊆
+  integralClosure(image of the wIRPS≤1-ball) via per-element exact-power-lifts
+  (X^N − lift as the monic witness), and ⊆-back by the ball's integral-closedness
+  (isRingOfIntegralElements_BIPlusIn). The lift-evaluation identity is FREE at any
+  twist j: evalBI (monomial j (blocToBI-ρ (x·gen^{-j}))) = φ(x-image) by
+  evalBI_monomial + hφb (gen := teichPowGen, a UNIT, isUnit_teichPowGen); j tunes
+  ONLY the norm (wIRPS-monomial = the coefficient's wI-ρ; per-endpoint
+  multiplicativity + wLoc_teichPowGen). M1 (monomial case): Kedlaya's power trick —
+  λ_{t₀}(x)=1 at rational t₀ forces |x̄| ∈ p^ℚ; choose N clearing denominators so
+  the twisted coefficient has value exactly 1 at ρ. OPEN M2 DESIGN QUESTION (the
+  general-element reduction): the naive shift z ↦ z+1 (making |z|=1 from |z|<1)
+  loops with the monomial-split z = x·(1+w) (w small ⟹ back to the shift). Candidate
+  resolutions to try at formalization time: (a) leading-term split z = x + tail with
+  the exact lift of the MONOMIAL x and successive approximation on the tail INSIDE
+  the integral-closure subring (the closure C contains R₀-multiples; iterate
+  z − lift-image with strictly dropping norm and conclude by a completeness argument
+  for C ∩ ball — needs C-closedness or a convergent-integral-equations trick);
+  (b) prove instead the STRICT-BALL surjectivity refinement (Kedlaya's (4.9.1) with
+  constant 1 on the value-1 slice + ε-slack below) and deduce ball = closure of
+  image-ball ∪ integral part; (c) consult KL15 §5's integral-structure statements
+  for the intended argument. Record before attacking M2.
 
 ### [T909a] Three circles for the intermediate values of B^I
 - **Status**: done (2026-07-26) | **Parent**: T909 | **Type**: lemma
