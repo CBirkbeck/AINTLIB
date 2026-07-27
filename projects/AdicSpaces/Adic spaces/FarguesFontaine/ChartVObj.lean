@@ -17,9 +17,10 @@ instantiated at the chart pair through the ID2 comparison: Tate via
 `isTateRing_congr`, plus structure the transported `B^I`-unit ball,
 sheafiness `isSheafy_presheafChart`.
 
-The plus-reconciliation (canonical `completedPlusSubring` = transported
-`BIPlusIn`) is the recorded follow-up; until it lands the chart `VObj`
-carries the transported plus.
+The plus-reconciliation is **proven** here: `chartPlus_eq_canonical`
+(via `chartDensePlus_of_exact`, the dense-level integrality theorem) shows
+the transported `B^I`-unit ball equals the canonical `completedPlusSubring`
+at the `b = 1` window, so the chart `VObj`'s plus structure is canonical.
 -/
 
 open TopologicalRing ValuationSpectrum WittVector NNReal
@@ -1289,6 +1290,48 @@ theorem chartDensePlus_of_exact (a : ℕ) (ha : 0 < a)
     (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
     a 1 ha one_pos ha hexact1 hexact2).tendsto _).comp htend
   exact hclosed.mem_of_tendsto hlim (Filter.Eventually.of_forall hmem)
+
+
+/-! ### The plus reconciliation (the equality) -/
+
+/-- **The plus reconciliation** (Kedlaya Definition 4.5, `b = 1`): the
+transported `B^I`-unit ball **equals** the canonical completed plus subring of
+the chart value. The two inclusions are the power-boundedness transport and
+the dense-level integrality theorem. -/
+theorem chartPlus_map_eq_completedPlusSubring (a : ℕ) (ha : 0 < a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ 1) :
+    (BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).map
+        ((presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a 1 ha one_pos ha
+          hexact1 hexact2).symm.toRingHom)
+      = (chartData p F ϖ 1 1 a 1).completedPlusSubring :=
+  le_antisymm
+    (chartPlus_le_completedPlusSubring_of_dense p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a 1 ha one_pos ha
+      hexact1 hexact2
+      (chartDensePlus_of_exact p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a ha hexact1 hexact2))
+    (completedPlusSubring_le_chartPlus p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a 1 ha one_pos ha
+      hexact1 hexact2)
+
+/-- The chart `VObj`'s plus structure is the canonical one (`PlusSubring`
+form of the reconciliation). -/
+theorem chartPlus_eq_canonical (a : ℕ) (ha : 0 < a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ 1) :
+    (chartPlus p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) a 1 ha one_pos ha hexact1 hexact2).toSubring
+      = (chartData p F ϖ 1 1 a 1).completedPlusSubring :=
+  chartPlus_map_eq_completedPlusSubring p F ϖ (hρ₁0 := hρ₁0)
+    (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a ha hexact1 hexact2
 
 end FarguesFontaine
 
