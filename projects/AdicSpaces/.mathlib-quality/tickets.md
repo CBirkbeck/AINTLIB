@@ -2468,7 +2468,36 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   NfstRPS/NsndRPS_le_GeltElt_mul (set-free slim bodies — `set X :=
   big-lambda with h` ITSELF can blow the decl budget by occurrence-
   scanning) + **wIRPS_le_GeltElt_mul** — THE STRICTNESS (Kedlaya ln
-  527-533). ★ P4 COMPLETE 2026-07-27 (commits 70901e5d9..a05953d5f):
+  527-533). ★★ P5 CASE 1 COMPLETE 2026-07-27 (commits d5157f244..6107c42a1):
+  **robba_case1_presentation** — B^I⟨T⟩/(T − [z̄]/p^m₀) ≃+* B^{[σ₁,ρ₂]}
+  for a STRICT interior cut ρ₁ < σ₁ ≤ ρ₂ with |z̄| = σ₁^m₀, AXIOM-CLEAN
+  END-TO-END. Chain: P5a surjective_evalBIHom (p-power rescale into the
+  ball: exists_p_scaling via wI_pow/wI_p_image/NNReal.exists_pow_lt,
+  scale-back constant GeltEltM0(blocToBI(p-inv^k)), congrArg-composed
+  because rw [hU'eq] kabstract blows whnf); P5b
+  nonempty_case1_quotient_equiv (Ideal.quotEquivOfEq ∘
+  RingHom.quotientKerEquivOfSurjective); P5c instantiation φ :=
+  **resIHomTop** (NEW: top-anchored restriction — fst-slot resI at the
+  θ-interpolant, snd-slot LITERAL z.2 so resIHomTop_snd is rfl and the
+  shared-top kernel machinery needs NO radius transport) +
+  exists_interpolant (log-scale linear solve) + isUnit_teichPowGen
+  (Valuation.Integers.dvd_of_le: zb ∣ ϖ^j ⇒ Teichmüller image inverted)
+  + endpoint valuations wLoc_teichPowGen/valued_blocToBI_teichPowGen_*
+  + the two NNReal bounds; final assembly by term-style Exists.elim +
+  subst (NEW PERF LESSON: tactic-obtain/rcases motive-INFERENCE in
+  front of a fat quotient/RingEquiv goal blows isDefEq-200k; the
+  term-elim chain `(h).elim fun x hx => …` takes the motive from the
+  expected type directly and is cheap; subst itself is fine).
+  SCOPE NOTE: the degenerate cut ρ₁ = σ₁ (presentation of B^I itself)
+  is EXCLUDED — hg1 needs 1 < |g|_{ρ₁} strict; the fst-decay at
+  |g| = 1 would need the le_one-variant fed by fst-vanishing (same
+  route as snd) — only add if the sheafy-cover glue ever needs it.
+  REMAINING for T910: case 2 (the [z̄⁻¹]-generator cutting [ρ₁,σ] from
+  the TOP, mirrored: fst kept literal, snd restricted; kernel regimes
+  swapped hg1↔hg2) + the ρ ∈ p^ℚ plus-ring statement (Kedlaya's B-plus
+  version; ChartVObj plus-technique) — assess whether the sheafiness
+  consumer (T911+) actually needs case 2 or the plus-form before
+  building them. ★ P4 COMPLETE 2026-07-27 (commits 70901e5d9..a05953d5f):
   ker_evalBIHom_eq_span = le_antisymm(span_GeltElt_le_ker,
   ker_le_span_GeltElt). Full chain: kerSolElt_coe_fst/snd component
   bridges (AddMonoidHom.fst/snd map_sum + congrArg close) ->
