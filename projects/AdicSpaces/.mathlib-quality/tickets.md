@@ -1712,6 +1712,16 @@ non-Tate bases are supported.
     presheaf through the open-poset iso of the open subset Y); YB5 =
     done-by-YB3c modulo the packaging; YB6 the sheaf condition (per-
     window through the charts / keystone-over-B_n route (a)).
+    ★★ YB4+YB5 DONE 2026-07-27 (YStalks.lean): **yVPreObj** — 𝒴 as an
+    object of 𝒱^pre: PresheafedSpace.restrict of the ambient
+    structurePresheaf along the open inclusion (yPresheafedSpace),
+    restrictStalkIso-based ring-stalk equivalence (point spelled via
+    the inclusion for definitional stalk-type alignment), 8.14-fields
+    transported (instance-explicit maximalIdeal_comap_ringEquiv).
+    REMAINING for the Y-VObj: **YB6 only** — IsSheafOfTopologicalRings
+    of the restricted presheaf (per-window via the charts + the
+    keystone-over-B_n route (a), or a direct refinement argument);
+    then D-iii (φ-action as VObj-isos, X := Y/φ^ℤ).
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
