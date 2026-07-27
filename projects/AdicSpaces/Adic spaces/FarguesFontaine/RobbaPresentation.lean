@@ -1672,6 +1672,19 @@ theorem wIRPS_finset_sum_le {ι : Type*} (s : Finset ι)
       (∑ i ∈ t, f i).2) (max_le (hf a (Finset.mem_insert_self a t)) ?_)
     exact ih fun i hi => hf i (Finset.mem_insert_of_mem hi)
 
+section EvalBISum
+
+variable {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+  {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
 include hφ in
 /-- Evaluation commutes with finite sums. -/
 theorem evalBI_finset_sum {ι : Type*} (s : Finset ι)
@@ -1690,6 +1703,8 @@ theorem evalBI_finset_sum {ι : Type*} (s : Finset ι)
   | insert a t ha ih =>
     rw [Finset.sum_insert ha, Finset.sum_insert ha,
       evalBI_add p F ϖ φ hφ hbmem hb, ih]
+
+end EvalBISum
 
 end FarguesFontaine
 
