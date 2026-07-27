@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB AI workers
 -/
 import «Adic spaces».SpaRationalOpenComparison
+import «Adic spaces».RationalBasisHuber
 import «Adic spaces».PresheafFunctoriality
 import «Adic spaces».RationalBasis
 import «Adic spaces».StructurePresheafLimit
@@ -381,7 +382,7 @@ section OpenValue
 
 open TopologicalSpace
 
-variable [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+variable [IsRingOfIntegralElements (A⁺ : Subring A)]
   [HasLocLiftPowerBounded A]
 
 noncomputable local instance : DecidableEq A := Classical.decEq _
@@ -391,7 +392,7 @@ point (the rational basis, in `RationalIndex` form). -/
 theorem exists_rationalIndex_mem {V : Opens ↥(Spa A A⁺)} {v : ↥(Spa A A⁺)}
     (hv : v ∈ V) : ∃ i : RationalIndex V,
       (v : Spv A) ∈ (rationalOpen i.D.T i.D.s ∩ Spa A A⁺ : Set (Spv A)) := by
-  obtain ⟨D, hDrat, hvD, hDV⟩ := exists_isRational_spaOpen_subset V.2 hv
+  obtain ⟨D, hDrat, hvD, hDV⟩ := exists_isRational_spaOpen_subset_huber V.2 hv
   exact ⟨⟨D, hDrat, hDV⟩, hvD, v.2⟩
 
 /-- **The valuation of a point on the sections over any open neighbourhood**:
@@ -419,7 +420,7 @@ theorem comap_limitEvalHom_pointValue {V : Opens ↥(Spa A A⁺)}
   set j := (exists_rationalIndex_mem hv).choose with hjdef
   have hj := (exists_rationalIndex_mem hv).choose_spec
   -- refine at `v` inside the open intersection of the two rational opens
-  obtain ⟨E, hErat, hvE, hEsub⟩ := exists_isRational_spaOpen_subset
+  obtain ⟨E, hErat, hvE, hEsub⟩ := exists_isRational_spaOpen_subset_huber
     (IsOpen.inter (isOpen_spaOpen i.D) (isOpen_spaOpen j.D))
     (Set.mem_inter (mem_spaOpen.mpr hvi.1) (mem_spaOpen.mpr hj.1))
   have hEi : rationalOpen E.T E.s ⊆ rationalOpen i.D.T i.D.s :=
@@ -487,7 +488,7 @@ section StalkValue
 
 open TopologicalSpace CategoryTheory TopCat
 
-variable [IsTateRing A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+variable [IsRingOfIntegralElements (A⁺ : Subring A)]
   [HasLocLiftPowerBounded A]
 
 noncomputable local instance : DecidableEq A := Classical.decEq _
