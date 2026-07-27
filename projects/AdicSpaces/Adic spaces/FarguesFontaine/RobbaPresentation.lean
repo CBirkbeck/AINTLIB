@@ -2642,6 +2642,121 @@ theorem coeffSeq_GeltElt_mul_snd (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 
   · rw [if_neg hn, if_neg hn]
     rfl
 
+/-- The telescope dispatch: under the recursion the `X`-supremum is bounded
+by the `Y`-supremum, whatever the scale. -/
+theorem telescope_iSup_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (g : hatK p F hρ0 hρ1) (X Y : ℕ → hatK p F hρ0 hρ1)
+    (hrec : ∀ n, Y n = (if 1 ≤ n then X (n - 1) else 0) - g * X n)
+    (hbdd : BddAbove (Set.range (fun n => Valued.v (Y n))))
+    (hX0 : Filter.Tendsto (fun n => Valued.v (X n)) Filter.atTop (nhds 0)) :
+    (⨆ n, Valued.v (X n)) ≤ ⨆ n, Valued.v (Y n) := by
+  by_cases hg : Valued.v g ≤ 1
+  · exact ciSup_le fun m =>
+      telescope_down_bound p F g hg X Y hrec hbdd hX0 m
+  · refine ciSup_le fun m => le_trans
+      (telescope_up_bound p F g (not_le.mp hg) X Y hrec hbdd m) ?_
+    calc (Valued.v g)⁻¹ * (⨆ n, Valued.v (Y n))
+        ≤ 1 * (⨆ n, Valued.v (Y n)) := by
+          refine mul_le_mul_of_nonneg_right ?_ zero_le
+          exact (inv_le_one₀ (lt_trans one_pos (not_le.mp hg))).mpr
+            (not_le.mp hg).le
+      _ = ⨆ n, Valued.v (Y n) := one_mul _
+
+/-- The first-component norm does not drop under generator multiplication. -/
+theorem NfstRPS_le_GeltElt_mul (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    NfstRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ NfstRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((GeltElt p F ϖ gB * f
+            : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  have hbdd : BddAbove (Set.range (fun n => Valued.v
+      (((coeffSeq ((GeltElt p F ϖ gB * f
+          : ↥(restrictedMvPowerSeriesSubring 1
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))) := by
+    obtain ⟨B, hB⟩ := bddAbove_wIRPS p F ϖ (GeltElt p F ϖ gB * f).2
+    refine ⟨B, ?_⟩
+    rintro t ⟨n, rfl⟩
+    exact le_trans (le_max_left _ _)
+      (hB ⟨Finsupp.single (0 : Fin 1) n, rfl⟩)
+  have hX0 : Filter.Tendsto (fun n => Valued.v
+      (((coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+      Filter.atTop (nhds 0) :=
+    tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
+      (tendsto_wI_coeffSeq p F ϖ f.2) (fun _ => zero_le)
+      (fun n => le_max_left _ _)
+  rw [NfstRPS_eq_iSup_coeffSeq p F ϖ, NfstRPS_eq_iSup_coeffSeq p F ϖ]
+  exact telescope_iSup_le p F _ _ _
+    (fun n => coeffSeq_GeltElt_mul_fst p F ϖ gB f n) hbdd hX0
+
+/-- The second-component norm does not drop under generator multiplication. -/
+theorem NsndRPS_le_GeltElt_mul (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    NsndRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ NsndRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((GeltElt p F ϖ gB * f
+            : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  have hbdd : BddAbove (Set.range (fun n => Valued.v
+      (((coeffSeq ((GeltElt p F ϖ gB * f
+          : ↥(restrictedMvPowerSeriesSubring 1
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))) := by
+    obtain ⟨B, hB⟩ := bddAbove_wIRPS p F ϖ (GeltElt p F ϖ gB * f).2
+    refine ⟨B, ?_⟩
+    rintro t ⟨n, rfl⟩
+    exact le_trans (le_max_right _ _)
+      (hB ⟨Finsupp.single (0 : Fin 1) n, rfl⟩)
+  have hX0 : Filter.Tendsto (fun n => Valued.v
+      (((coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+      Filter.atTop (nhds 0) :=
+    tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
+      (tendsto_wI_coeffSeq p F ϖ f.2) (fun _ => zero_le)
+      (fun n => le_max_right _ _)
+  rw [NsndRPS_eq_iSup_coeffSeq p F ϖ, NsndRPS_eq_iSup_coeffSeq p F ϖ]
+  exact telescope_iSup_le p F _ _ _
+    (fun n => coeffSeq_GeltElt_mul_snd p F ϖ gB f n) hbdd hX0
+
+/-- **Strictness of generator multiplication** (Kedlaya ln 527–533):
+multiplying by `T − C g` does not decrease the interval Gauss norm — a
+strict injective endomorphism with closed image. -/
+theorem wIRPS_le_GeltElt_mul (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((GeltElt p F ϖ gB * f
+            : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  rw [wIRPS_eq_max_NfstRPS_NsndRPS p F ϖ f.2,
+    wIRPS_eq_max_NfstRPS_NsndRPS p F ϖ (GeltElt p F ϖ gB * f).2]
+  exact max_le_max (NfstRPS_le_GeltElt_mul p F ϖ gB f)
+    (NsndRPS_le_GeltElt_mul p F ϖ gB f)
+
 end FarguesFontaine
 
 end
