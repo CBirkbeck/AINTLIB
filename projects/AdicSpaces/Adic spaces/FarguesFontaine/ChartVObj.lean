@@ -6,6 +6,7 @@ Authors: AINTLIB AI workers
 import «Adic spaces».FarguesFontaine.ChartComparison
 import «Adic spaces».StructureSheafStalks
 import «Adic spaces».FarguesFontaine.IntervalSplitting
+import «Adic spaces».FarguesFontaine.YPresheaf
 
 /-!
 # The Fargues–Fontaine charts as objects of `𝒱` (D-ii-3 instantiation)
@@ -1040,6 +1041,254 @@ theorem monomial_symm_blocToBI_mem_completedPlusSubring (a : ℕ) (ha : 0 < a)
       refine symm_blocToBI_mem_completedPlusSubring_of_mem p F ϖ a 1 ha
         one_pos ha hexact1 hexact2 ?_
       exact mk_monomial_mem_of_large p F ϖ a k i (by omega) c
+
+
+/-! ### The head/tail split and the dense-level integrality theorem -/
+
+/-- The Gauss value of the denominator `(p[ϖ])^k`. -/
+theorem gaussValue_sPow {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (k : ℕ) :
+    gaussValue p F ρ ((sPow p F ϖ k : Ainf p F))
+      = (ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
+  rw [show ((sPow p F ϖ k : Submonoid.powers
+        ((p : Ainf p F) * teichPi p F ϖ)) : Ainf p F)
+      = ((p : Ainf p F) * teichPi p F ϖ) ^ k from rfl]
+  rw [show gaussValue p F ρ (((p : Ainf p F) * teichPi p F ϖ) ^ k)
+      = gaussVal p F hρ0 hρ1 (((p : Ainf p F) * teichPi p F ϖ) ^ k) from
+    (gaussVal_apply p F hρ0 hρ1 _).symm]
+  rw [Valuation.map_pow, gaussVal_apply, gaussValue_p_teichPi p F ϖ hρ1]
+
+/-- **Per-coefficient bound from the localized unit-ball condition**: if the
+fraction `x/(p[ϖ])^k` has `wLoc ≤ 1`, every Gauss term of `x` is bounded by
+the denominator's Gauss value. -/
+theorem gaussTerm_le_of_wLoc_mk'_le_one {ρ : NNReal} (hρ0 : 0 < ρ)
+    (hρ1 : ρ < 1) (x : Ainf p F) (k : ℕ)
+    (hw : wLoc p F ϖ hρ0 hρ1
+      (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)) ≤ 1) (i : ℕ) :
+    ρ ^ i * perfectoidValuation p F ((teichCoeff p F x i : F))
+      ≤ (ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
+  have hgv : gaussValue p F ρ x
+      ≤ (ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
+    rw [wLoc_mk' p F ϖ hρ0 hρ1, gaussValue_sPow p F ϖ hρ0 hρ1 k] at hw
+    have hB : ((ρ * perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k : NNReal) ≠ 0 :=
+      (pow_pos (mul_pos hρ0 (vpi_pos p F ϖ)) k).ne'
+    calc gaussValue p F ρ x
+        = gaussValue p F ρ x
+          * ((ρ * perfectoidValuation p F
+              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹
+          * (ρ * perfectoidValuation p F
+              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := by
+          rw [mul_assoc, inv_mul_cancel₀ hB, mul_one]
+      _ ≤ 1 * (ρ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k :=
+          mul_le_mul_left hw _
+      _ = (ρ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k := one_mul _
+  exact le_trans (le_ciSup (bddAbove_range_gaussTerm p F hρ1.le x) i) hgv
+
+/-- **The head/tail split of a localized element** along a Teichmüller
+truncation witness. -/
+theorem mk'_sPow_split (x : Ainf p F) (k N : ℕ) (w : Ainf p F)
+    (hw : x - ∑ i ∈ Finset.Iic N,
+        WittVector.teichmuller p (teichCoeff p F x i) * (p : Ainf p F) ^ i
+      = (p : Ainf p F) ^ (N + 1) * w) :
+    IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)
+      = (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k))
+        + IsLocalization.mk' (Bloc p F ϖ) ((p : Ainf p F) ^ (N + 1) * w)
+            (sPow p F ϖ k) := by
+  have hx : x = (∑ i ∈ Finset.Iic N,
+      (p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F x i))
+      + (p : Ainf p F) ^ (N + 1) * w := by
+    rw [show ∑ i ∈ Finset.Iic N,
+        (p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F x i)
+      = ∑ i ∈ Finset.Iic N,
+        WittVector.teichmuller p (teichCoeff p F x i) * (p : Ainf p F) ^ i
+      from Finset.sum_congr rfl fun i _ => mul_comm _ _]
+    rw [← hw]
+    ring
+  rw [IsLocalization.mk'_eq_mul_mk'_one,
+    show algebraMap (Ainf p F) (Bloc p F ϖ) x
+      = algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((∑ i ∈ Finset.Iic N, (p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          + (p : Ainf p F) ^ (N + 1) * w) from
+      congrArg _ hx,
+    map_add, map_sum, add_mul, Finset.sum_mul]
+  simp only [← IsLocalization.mk'_eq_mul_mk'_one]
+
+/-- **The tail bound**: the localized `p^{N+1}`-tail has `wLoc` at most
+`ρ^{N+1}` over the denominator's Gauss value. -/
+theorem wLoc_mk'_tail_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (k N : ℕ) (w : Ainf p F) :
+    wLoc p F ϖ hρ0 hρ1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (N + 1) * w) (sPow p F ϖ k))
+      ≤ ρ ^ (N + 1)
+        * (((ρ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹) := by
+  rw [wLoc_mk' p F ϖ hρ0 hρ1, gaussValue_sPow p F ϖ hρ0 hρ1 k]
+  refine mul_le_mul_left ?_ _
+  have hmul : gaussValue p F ρ ((p : Ainf p F) ^ (N + 1) * w)
+      = ρ ^ (N + 1) * gaussValue p F ρ w := by
+    rw [show gaussValue p F ρ ((p : Ainf p F) ^ (N + 1) * w)
+        = gaussVal p F hρ0 hρ1 ((p : Ainf p F) ^ (N + 1) * w) from
+      (gaussVal_apply p F hρ0 hρ1 _).symm]
+    rw [Valuation.map_mul, gaussVal_p_pow p F hρ0 hρ1 (N + 1),
+      gaussVal_apply]
+  rw [hmul]
+  calc ρ ^ (N + 1) * gaussValue p F ρ w
+      ≤ ρ ^ (N + 1) * 1 :=
+        mul_le_mul_right (gaussValue_le_one p F hρ1.le w) _
+    _ = ρ ^ (N + 1) := mul_one _
+
+/-- Difference of `hatK`-components across an additive split. -/
+theorem valued_BlocToHatK_sub_of_add {ρ : NNReal} (hρ0 : 0 < ρ)
+    (hρ1 : ρ < 1) (g t f : Bloc p F ϖ) (hf : f = g + t) :
+    Valued.v (BlocToHatK p F ϖ hρ0 hρ1 g - BlocToHatK p F ϖ hρ0 hρ1 f)
+      = wLoc p F ϖ hρ0 hρ1 t := by
+  rw [hf, map_add]
+  rw [show BlocToHatK p F ϖ hρ0 hρ1 g
+      - (BlocToHatK p F ϖ hρ0 hρ1 g + BlocToHatK p F ϖ hρ0 hρ1 t)
+    = -(BlocToHatK p F ϖ hρ0 hρ1 t) from by ring]
+  rw [Valuation.map_neg]
+  exact valued_BlocToHatK p F ϖ t
+
+include hρ₁1 hρ₂1 in
+/-- Geometric two-radius epsilon: `max (c₁ρ₁^N) (c₂ρ₂^N) → 0`. -/
+theorem tendsto_max_const_mul_pow (c₁ c₂ : NNReal) :
+    Filter.Tendsto (fun N : ℕ => max (c₁ * ρ₁ ^ N) (c₂ * ρ₂ ^ N))
+      Filter.atTop (nhds 0) := by
+  have h1 : Filter.Tendsto (fun N : ℕ => c₁ * ρ₁ ^ N)
+      Filter.atTop (nhds 0) := by
+    have := (tendsto_pow_atTop_nhds_zero_of_lt_one hρ₁1).const_mul c₁
+    simpa using this
+  have h2 : Filter.Tendsto (fun N : ℕ => c₂ * ρ₂ ^ N)
+      Filter.atTop (nhds 0) := by
+    have := (tendsto_pow_atTop_nhds_zero_of_lt_one hρ₂1).const_mul c₂
+    simpa using this
+  have := h1.max h2
+  simpa using this
+
+/-- **The dense-level integrality theorem** (`b = 1`, Kedlaya Def 4.5):
+`ChartDensePlus` holds at the exact window — every `Bloc` element bounded in
+both window Gauss norms transports into the canonical plus subring, by the
+Teichmüller head/tail split and the three-zone dispatch. -/
+theorem chartDensePlus_of_exact (a : ℕ) (ha : 0 < a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ 1) :
+    ChartDensePlus p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) a 1 ha one_pos ha hexact1 hexact2 := by
+  intro h hw1 hw2
+  obtain ⟨⟨x, s⟩, rfl⟩ := IsLocalization.mk'_surjective
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))
+    (S := Bloc p F ϖ) h
+  obtain ⟨k, hk⟩ := (Submonoid.mem_powers_iff _ _).mp s.2
+  have hs : s = sPow p F ϖ k := Subtype.ext hk.symm
+  subst hs
+  -- per-coefficient bounds at the two radii
+  have hb1 := gaussTerm_le_of_wLoc_mk'_le_one p F ϖ hρ₁0 hρ₁1 x k hw1
+  have hb2 := gaussTerm_le_of_wLoc_mk'_le_one p F ϖ hρ₂0 hρ₂1 x k hw2
+  -- Teichmüller truncation witnesses
+  choose w hwspec using fun N =>
+    WittVector.dvd_sub_sum_teichmuller_iterateFrobeniusEquiv_coeff x N
+  have hsplit : ∀ N, IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)
+      = (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k))
+        + IsLocalization.mk' (Bloc p F ϖ) ((p : Ainf p F) ^ (N + 1) * w N)
+            (sPow p F ϖ k) :=
+    fun N => mk'_sPow_split p F ϖ x k N (w N) (hwspec N)
+  -- the closed target
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+    isAffinoidRing_Ainf p F
+  have hclosed : IsClosed
+      ((chartData p F ϖ 1 1 a 1).completedPlusSubring
+        : Set (presheafValue (chartData p F ϖ 1 1 a 1))) := by
+    have hopen : IsOpen
+        ((chartData p F ϖ 1 1 a 1).completedPlusSubring
+          : Set (presheafValue (chartData p F ϖ 1 1 a 1))) :=
+      (RationalLocData.presheafValuePlus_isRingOfIntegralElements
+        (A := Ainf p F) (chartData p F ϖ 1 1 a 1)).isOpen
+    exact AddSubgroup.isClosed_of_isOpen
+      (chartData p F ϖ 1 1 a 1).completedPlusSubring.toAddSubgroup hopen
+  -- memberships of the heads
+  have hmem : ∀ N, (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a 1 ha one_pos ha
+      hexact1 hexact2).symm
+      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k)))
+      ∈ (chartData p F ϖ 1 1 a 1).completedPlusSubring := by
+    intro N
+    rw [map_sum (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      map_sum ((presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
+        (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a 1 ha one_pos ha
+        hexact1 hexact2).symm)]
+    exact sum_mem fun i _ =>
+      monomial_symm_blocToBI_mem_completedPlusSubring p F ϖ a ha
+        hexact1 hexact2 k i (teichCoeff p F x i) (hb1 i) (hb2 i)
+  -- the pair identity for the limit target
+  have hpair : ((BlocToHatK p F ϖ hρ₁0 hρ₁1
+        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)),
+      BlocToHatK p F ϖ hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)) :=
+    Prod.ext (BIProd_fst p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 _).symm
+      (BIProd_snd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 _).symm
+  -- convergence of the heads
+  have htend : Filter.Tendsto
+      (fun N => blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k)))
+      Filter.atTop
+      (nhds (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k)))) := by
+    refine tendsto_subtype_rng.mpr ?_
+    show Filter.Tendsto
+      (fun N => BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (∑ i ∈ Finset.Iic N, IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i
+            * WittVector.teichmuller p (teichCoeff p F x i))
+          (sPow p F ϖ k)))
+      Filter.atTop
+      (nhds (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (IsLocalization.mk' (Bloc p F ϖ) x (sPow p F ϖ k))))
+    rw [← hpair]
+    refine tendsto_BIProd_of_valued_le p F ϖ
+      (ε := fun N => max
+        ((ρ₁ * (((ρ₁ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹)) * ρ₁ ^ N)
+        ((ρ₂ * (((ρ₂ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹)) * ρ₂ ^ N))
+      ?_ ?_
+      (tendsto_max_const_mul_pow (hρ₁1 := hρ₁1) (hρ₂1 := hρ₂1) _ _)
+    · intro N
+      rw [valued_BlocToHatK_sub_of_add p F ϖ hρ₁0 hρ₁1 _ _ _ (hsplit N)]
+      refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₁0 hρ₁1 k N (w N))
+        (le_trans (le_of_eq (by ring)) (le_max_left _ _))
+    · intro N
+      rw [valued_BlocToHatK_sub_of_add p F ϖ hρ₂0 hρ₂1 _ _ _ (hsplit N)]
+      refine le_trans (wLoc_mk'_tail_le p F ϖ hρ₂0 hρ₂1 k N (w N))
+        (le_trans (le_of_eq (by ring)) (le_max_right _ _))
+  have hlim := ((presheafChartRingEquivBISub_symm_continuous p F ϖ
+    (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+    a 1 ha one_pos ha hexact1 hexact2).tendsto _).comp htend
+  exact hclosed.mem_of_tendsto hlim (Filter.Eventually.of_forall hmem)
 
 end FarguesFontaine
 
