@@ -67,6 +67,57 @@ theorem preimage_sectionAway_eq_of_pointedIso
     change e.hom.base (zX t) = e.hom.base x
     rw [show e.hom.base (zX t) = (zX ≫ e.hom) t from rfl, hez, ht]
 
+/-- Pulling back the complement of a section to a residue fibre gives the complement of the
+induced fibre point. -/
+theorem fiberι_preimage_sectionAway
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (s : S) :
+    (π.fiberι s) ⁻¹ᵁ sectionAway z hz =
+      @sectionAway (π.fiber s) (Spec (S.residueField s))
+        (π.fiberToSpecResidueField s) (isSeparated_fiberToSpecResidueField π s)
+        (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) := by
+  letI : IsSeparated (π.fiberToSpecResidueField s) :=
+    isSeparated_fiberToSpecResidueField π s
+  have hsec : sectionFiberPoint π z hz s ≫ π.fiberι s =
+      S.fromSpecResidueField s ≫ z := by
+    exact pullback.lift_fst _ _ _
+  ext x
+  change π.fiberι s x ∉ Set.range ⇑z ↔
+    x ∉ Set.range ⇑(sectionFiberPoint π z hz s)
+  constructor
+  · intro hx hxs
+    obtain ⟨t, rfl⟩ := hxs
+    apply hx
+    refine ⟨s, ?_⟩
+    symm
+    change (sectionFiberPoint π z hz s ≫ π.fiberι s) t = z s
+    rw [hsec]
+    simp
+  · intro hx hxs
+    obtain ⟨t, ht⟩ := hxs
+    apply hx
+    let p : Spec (S.residueField s) := IsLocalRing.closedPoint _
+    refine ⟨p, (π.fiberι s).isEmbedding.injective ?_⟩
+    have hxs_base : π (π.fiberι s x) = s := by
+      change (π.fiberι s ≫ π) x = s
+      rw [π.fiber_fac]
+      simp
+    have hts : s = t := by
+      calc
+        s = π (π.fiberι s x) := hxs_base.symm
+        _ = π (z t) := congrArg (fun q : E => π q) ht.symm
+        _ = t := by
+          change (z ≫ π) t = t
+          rw [hz]
+          rfl
+    subst t
+    calc
+      π.fiberι s (sectionFiberPoint π z hz s p) = z s := by
+        change (sectionFiberPoint π z hz s ≫ π.fiberι s) p = z s
+        rw [hsec]
+        simp
+      _ = π.fiberι s x := ht
+
 /-- In every residue fibre of a fibrewise-elliptic family, the complement of the marked
 point is affine. -/
 theorem FibrewiseElliptic.sectionAway_fiber_isAffineOpen
@@ -86,6 +137,44 @@ theorem FibrewiseElliptic.sectionAway_fiber_isAffineOpen
     (projModelZero W) (projModelZero_projModelπ W) e hez,
     sectionAway_projModelZero_eq_zChart]
   exact (projModelZChart W).2.preimage_of_isIso e.hom
+
+/-- Every residue fibre of the family obtained by removing the marked section is affine. -/
+theorem FibrewiseElliptic.sectionAway_comp_fiber_isAffine
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    {z : S ⟶ E} {hz : z ≫ π = 𝟙 S}
+    (h : FibrewiseElliptic π z hz) (s : S) :
+    IsAffine (((sectionAway z hz).ι ≫ π).fiber s) := by
+  letI : IsSeparated (π.fiberToSpecResidueField s) :=
+    isSeparated_fiberToSpecResidueField π s
+  let V := @sectionAway (π.fiber s) (Spec (S.residueField s))
+    (π.fiberToSpecResidueField s) (isSeparated_fiberToSpecResidueField π s)
+    (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _)
+  have hV : IsAffineOpen V := h.sectionAway_fiber_isAffineOpen s
+  let j : pullback (sectionAway z hz).ι (pullback.fst π (S.fromSpecResidueField s)) ⟶
+      pullback π (S.fromSpecResidueField s) :=
+    pullback.snd (sectionAway z hz).ι (pullback.fst π (S.fromSpecResidueField s))
+  have hj : j.opensRange = V := by
+    dsimp only [j, V]
+    rw [Scheme.Hom.opensRange_pullbackSnd, Scheme.Opens.opensRange_ι]
+    exact fiberι_preimage_sectionAway z hz s
+  have hj_set : Set.range ⇑j = Set.range ⇑V.ι := by
+    rw [← Scheme.Hom.coe_opensRange, hj, Scheme.Opens.range_ι]
+    rfl
+  have hVι : IsOpenImmersion V.ι :=
+    @Scheme.Opens.instIsOpenImmersionι _ V
+  have hjι : IsOpenImmersion j := by
+    dsimp only [j]
+    infer_instance
+  let e : pullback (sectionAway z hz).ι (pullback.fst π (S.fromSpecResidueField s)) ≅
+      V.toScheme := @IsOpenImmersion.isoOfRangeEq _ _ _ j V.ι hjι hVι hj_set
+  haveI : IsAffine V.toScheme := hV
+  haveI : IsAffine
+      (pullback (sectionAway z hz).ι (pullback.fst π (S.fromSpecResidueField s))) :=
+    @IsAffine.of_isIso _ _ e.hom (by infer_instance) inferInstance
+  change IsAffine (pullback ((sectionAway z hz).ι ≫ π) (S.fromSpecResidueField s))
+  let e' :=
+    pullbackRightPullbackFstIso π (S.fromSpecResidueField s) (sectionAway z hz).ι
+  exact @IsAffine.of_isIso _ _ e'.inv (by infer_instance) inferInstance
 
 end
 
