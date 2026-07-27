@@ -57,6 +57,7 @@ import «Adic spaces».FarguesFontaine.ChartVObj
 import «Adic spaces».FarguesFontaine.RobbaPresentation
 import «Adic spaces».FarguesFontaine.BigWindows
 import «Adic spaces».FarguesFontaine.ChartSpa
+import «Adic spaces».RationalBasisHuber
 import «Adic spaces».FarguesFontaine.YCharts
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
