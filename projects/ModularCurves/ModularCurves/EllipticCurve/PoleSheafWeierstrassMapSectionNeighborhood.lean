@@ -132,4 +132,46 @@ theorem projModelMap_sectionNeighborhood_isIso
   rw [← F.appLE_eq_app]
   exact hbij
 
+/-- The punctured and section-neighborhood comparisons glue to a global
+isomorphism with the projective Weierstrass model. -/
+theorem projModelMap_isIso_of_sectionNeighborhood
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    [IsAffine S] [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (W : WeierstrassCurve Γ(S, (⊤ : S.Opens)))
+    (F : C ⟶ projModel W) [IsFinite F]
+    (hpre : F ⁻¹ᵁ (projModelZChart W : (projModel W).Opens) =
+      sectionAway z hz)
+    [IsIso
+      (F.resLE (projModelZChart W : (projModel W).Opens)
+        (sectionAway z hz) (le_of_eq hpre.symm))]
+    (hpoint : z ≫ F = S.toSpecΓ ≫ projModelZero W)
+    (hideal : (projModelZero W).ker.comap F = z.ker) :
+    IsIso F := by
+  let A : Bool → (projModel W).Opens := fun q =>
+    cond q (projModelZChart W).1
+      (projModelSectionNeighborhood W).1
+  rw [← MorphismProperty.isomorphisms.iff]
+  apply IsZariskiLocalAtTarget.of_iSup_eq_top
+    (P := MorphismProperty.isomorphisms Scheme) A
+  · rw [iSup_bool_eq]
+    exact projModelZChart_sup_sectionNeighborhood_eq_top W
+  · intro q
+    cases q
+    · change MorphismProperty.isomorphisms Scheme
+        (F ∣_ (projModelSectionNeighborhood W).1)
+      rw [MorphismProperty.isomorphisms.iff]
+      rw [← F.resLE_eq_morphismRestrict]
+      exact projModelMap_sectionNeighborhood_isIso
+        z hz W F hpre hpoint hideal
+    · change MorphismProperty.isomorphisms Scheme
+        (F ∣_ (projModelZChart W).1)
+      rw [MorphismProperty.isomorphisms.iff]
+      rw [← F.resLE_eq_morphismRestrict]
+      rw [← MorphismProperty.isomorphisms.iff]
+      apply (F.resLE_congr le_rfl rfl hpre
+        (MorphismProperty.isomorphisms Scheme)).mpr
+      rw [MorphismProperty.isomorphisms.iff]
+      infer_instance
+
 end ModularCurves
