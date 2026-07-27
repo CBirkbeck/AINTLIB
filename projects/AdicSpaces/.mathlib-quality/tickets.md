@@ -1280,8 +1280,18 @@ non-Tate bases are supported.
     eq_pointValue_of_comap_eq + comap_restrictionMapHom_pointValue (germ
     coherence). Axiom-clean.;
     (S3) the stalk valuation on (structurePresheaf A).ringStalk v via the
-    mathlib germ API (germ_exist + germ-ext over the rational basis;
-    well-defined by S2);
+    mathlib germ API (exists_germ_eq + germ_eq CONVERSE both exist in
+    mathlib Stalks.lean; well-defined by S2); (S3a) DONE 2026-07-27
+    (StructureSheafStalks.lean §OpenValue): openValue (the point valuation
+    on limitSections V for ANY open V ∋ v, via choice of a rational index
+    from exists_isRational_spaOpen_subset) + choice-independence (common
+    rational refinement + S2 + the one-line eval-restriction law
+    restrictionMapHom_comp_limitEvalHom = the compatible-family identity) +
+    restriction coherence comap_limitRestrict_openValue +
+    openValue_vle_restrict. Remaining (S3b): the germ-relation ValuativeRel
+    on the ringStalk (8 axioms, each a finite-common-refinement argument
+    from the germ toolkit + openValue_vle_restrict) + stalkValue +
+    comap_germ_stalkValue;
     (S4) IsLocalRing (ringStalk v) with maximalIdeal = supp (Wedhorn 8.14:
     nonunits = {germ f | valueAt v f = 0}; a germ with nonzero value is
     invertible on a shrunk rational datum — needs
