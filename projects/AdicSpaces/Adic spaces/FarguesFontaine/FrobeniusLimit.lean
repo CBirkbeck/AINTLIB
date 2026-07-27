@@ -186,6 +186,146 @@ def ambientFrobHom (k : ℤ) :
   base := spaFrobTop p F k
   c := ambientFrobNat p F k
 
+/-- Two-sided `𝒴`-stability of the Frobenius. -/
+theorem spaFrob_mem_ySpaSet_iff (k : ℤ)
+    {v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))} :
+    spaFrob p F k v ∈ ySpaSet p F ϖ ↔ v ∈ ySpaSet p F ϖ := by
+  constructor
+  · intro h
+    have h2 := spaFrob_mem_ySpaSet p F ϖ (-k) h
+    rwa [spaFrob_spaFrob p F k v] at h2
+  · exact spaFrob_mem_ySpaSet p F ϖ k
+
+/-- The Frobenius on the `𝒴`-carrier. -/
+def yFrobTop (k : ℤ) : yTop p F ϖ ⟶ yTop p F ϖ :=
+  TopCat.ofHom ⟨fun y => ⟨spaFrob p F k y.1, spaFrob_mem_ySpaSet p F ϖ k y.2⟩,
+    Continuous.subtype_mk ((continuous_spaFrob p F k).comp
+      continuous_subtype_val) _⟩
+
+/-- **The Frobenius preimage commutes with the `𝒴`-image functor.** -/
+theorem yFunctor_frobOpens (k : ℤ) (V : Opens ↥(yTop p F ϖ)) :
+    frobOpens p F k ((yFunctor p F ϖ).obj V)
+      = (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ k)).obj V) := by
+  refine Opens.ext ?_
+  ext v
+  constructor
+  · rintro hv
+    obtain ⟨y, hyV, hyeq⟩ := hv
+    have hvY : v ∈ ySpaSet p F ϖ := by
+      rw [← spaFrob_mem_ySpaSet_iff p F ϖ k]
+      rw [← hyeq]
+      exact y.2
+    refine ⟨⟨v, hvY⟩, ?_, rfl⟩
+    show yFrobTop p F ϖ k ⟨v, hvY⟩ ∈ V
+    have heq : yFrobTop p F ϖ k ⟨v, hvY⟩ = y :=
+      Subtype.ext (show spaFrob p F k v = _ from hyeq.symm)
+    rwa [heq]
+  · rintro ⟨y, hyV, rfl⟩
+    exact ⟨yFrobTop p F ϖ k y, hyV, rfl⟩
+
+/-- Indices of the `𝒴`-image of a Frobenius preimage are indices of the
+Frobenius preimage of the `𝒴`-image (the opens are equal). -/
+def yFrobIndexBridge (k : ℤ) (V : Opens ↥(yTop p F ϖ))
+    (E : RationalIndex ((yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ k)).obj V))) :
+    RationalIndex (frobOpens p F k ((yFunctor p F ϖ).obj V)) :=
+  ⟨E.D, E.isRational, by
+    rw [yFunctor_frobOpens p F ϖ k V]
+    exact E.subset⟩
+
+/-- The `𝒴`-level Pi transport. -/
+def yLimitFrobPiHom (k : ℤ) (V : Opens ↥(yTop p F ϖ)) :
+    (∀ j : RationalIndex ((yFunctor p F ϖ).obj V), presheafValue j.D)
+      →+* (∀ E : RationalIndex ((yFunctor p F ϖ).obj
+            ((Opens.map (yFrobTop p F ϖ k)).obj V)), presheafValue E.D) :=
+  Pi.ringHom fun E =>
+    ((presheafValueRingEquivHuber (frobPow p F (-k))
+        (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
+        E.D).symm.toRingHom).comp
+      (Pi.evalRingHom _ (frobIndex p F k (yFrobIndexBridge p F ϖ k V E)))
+
+theorem yLimitFrobPiHom_apply (k : ℤ) (V : Opens ↥(yTop p F ϖ))
+    (x : ∀ j : RationalIndex ((yFunctor p F ϖ).obj V), presheafValue j.D)
+    (E : RationalIndex ((yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ k)).obj V))) :
+    yLimitFrobPiHom p F ϖ k V x E
+      = (presheafValueRingEquivHuber (frobPow p F (-k))
+          (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
+          E.D).symm
+        (x (frobIndex p F k (yFrobIndexBridge p F ϖ k V E))) := rfl
+
+/-- The `𝒴`-level transport of a compatible family is compatible. -/
+theorem yLimitFrobPiHom_mem (k : ℤ) (V : Opens ↥(yTop p F ϖ))
+    (x : ↥(limitSections ((yFunctor p F ϖ).obj V))) :
+    yLimitFrobPiHom p F ϖ k V
+        ((x : ∀ j : RationalIndex ((yFunctor p F ϖ).obj V),
+          presheafValue j.D))
+      ∈ limitSections ((yFunctor p F ϖ).obj
+          ((Opens.map (yFrobTop p F ϖ k)).obj V)) := by
+  intro E E' hE'E
+  rw [yLimitFrobPiHom_apply, yLimitFrobPiHom_apply]
+  have hsub' := rationalOpen_mapHuber_subset_of_subset
+    (frobPow p F (-k)) (continuous_frobPow p F (-k))
+    (continuous_frobPow_symm p F (-k))
+    (ringPlus_map_frobPow p F (-k)) E'.D E.D hE'E
+  have hx := x.2 (frobIndex p F k (yFrobIndexBridge p F ϖ k V E))
+    (frobIndex p F k (yFrobIndexBridge p F ϖ k V E')) hsub'
+  exact (presheafValueRingEquivHuber_symm_restriction
+    (frobPow p F (-k)) (continuous_frobPow p F (-k))
+    (continuous_frobPow_symm p F (-k)) E.D E'.D hE'E hsub'
+    ((x : ∀ j : RationalIndex ((yFunctor p F ϖ).obj V), presheafValue j.D)
+      (frobIndex p F k (yFrobIndexBridge p F ϖ k V E)))).symm.trans
+    (congrArg (⇑(presheafValueRingEquivHuber (frobPow p F (-k))
+      (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
+      E'.D).symm) hx)
+
+/-- **The `𝒴`-level Frobenius transport of limit sections.** -/
+def yLimitFrobHom (k : ℤ) (V : Opens ↥(yTop p F ϖ)) :
+    ↥(limitSections ((yFunctor p F ϖ).obj V))
+      →+* ↥(limitSections ((yFunctor p F ϖ).obj
+            ((Opens.map (yFrobTop p F ϖ k)).obj V))) :=
+  RingHom.codRestrict
+    ((yLimitFrobPiHom p F ϖ k V).comp
+      (limitSections ((yFunctor p F ϖ).obj V)).subtype)
+    (limitSections ((yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ k)).obj V)))
+    (fun x => yLimitFrobPiHom_mem p F ϖ k V x)
+
+theorem yLimitFrobHom_continuous (k : ℤ) (V : Opens ↥(yTop p F ϖ)) :
+    Continuous (yLimitFrobHom p F ϖ k V) := by
+  refine continuous_induced_rng.mpr ?_
+  have hfun : (Subtype.val ∘ ⇑(yLimitFrobHom p F ϖ k V))
+      = fun (x : ↥(limitSections ((yFunctor p F ϖ).obj V)))
+          (E : RationalIndex ((yFunctor p F ϖ).obj
+            ((Opens.map (yFrobTop p F ϖ k)).obj V))) =>
+        (presheafValueRingEquivHuber (frobPow p F (-k))
+          (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
+          E.D).symm
+        ((x : ∀ j : RationalIndex ((yFunctor p F ϖ).obj V),
+          presheafValue j.D)
+          (frobIndex p F k (yFrobIndexBridge p F ϖ k V E))) := rfl
+  rw [hfun]
+  exact continuous_pi fun E =>
+    (presheafValueRingEquivHuber_symm_continuous (frobPow p F (-k))
+      (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))
+      E.D).comp
+    ((continuous_apply _).comp continuous_subtype_val)
+
+/-- **The `𝒴`-Frobenius comparison**: the natural transformation of the
+restricted presheaf into its pushforward (naturality definitional). -/
+def yFrobNat (k : ℤ) :
+    (yPresheafedSpace p F ϖ).presheaf
+      ⟶ (Opens.map (yFrobTop p F ϖ k)).op ⋙ (yPresheafedSpace p F ϖ).presheaf where
+  app V := ⟨yLimitFrobHom p F ϖ k V.unop, yLimitFrobHom_continuous p F ϖ k V.unop⟩
+  naturality V V' i := Subtype.ext (RingHom.ext fun x => Subtype.ext
+    (funext fun E => rfl))
+
+/-- **The Frobenius endomorphism of the `𝒴`-presheafed space** (D-iii-3b). -/
+def yFrobHom (k : ℤ) :
+    yPresheafedSpace p F ϖ ⟶ yPresheafedSpace p F ϖ where
+  base := yFrobTop p F ϖ k
+  c := yFrobNat p F ϖ k
+
 end FarguesFontaine
 
 end
