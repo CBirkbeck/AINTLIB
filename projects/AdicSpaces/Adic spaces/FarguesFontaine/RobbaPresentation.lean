@@ -5,6 +5,7 @@ Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.Presentation
 import «Adic spaces».FarguesFontaine.SheafyBI
+import «Adic spaces».FarguesFontaine.ChartVObj
 
 /-!
 # Robba-localization presentations (T910, Kedlaya Lemma 4.9 cases 1–2)
@@ -1112,6 +1113,104 @@ theorem exists_twist_deep (zb c : OF F) (m : ℕ) (hm : 0 < m)
     rw [Nat.mul_succ] at hexp
     exact hexp
   omega
+
+/-- The Gauss value of the monomial `p^i·[c]`. -/
+theorem gaussValue_p_pow_mul_teichmuller {ρ : NNReal} (hρ1 : ρ ≤ 1)
+    (i : ℕ) (c : OF F) :
+    gaussValue p F ρ ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+      = ρ ^ i * perfectoidValuation p F (c : F) := by
+  induction i with
+  | zero =>
+    rw [pow_zero, one_mul, pow_zero, one_mul,
+      gaussValue_teichmuller p F hρ1]
+  | succ n ih =>
+    rw [show (p : Ainf p F) ^ (n + 1) * WittVector.teichmuller p c
+        = (p : Ainf p F) * ((p : Ainf p F) ^ n
+          * WittVector.teichmuller p c) from by ring,
+      gaussValue_p_mul p F hρ1, ih, pow_succ]
+    ring
+
+/-- The localized norm of the monomial fraction `p^i[c]/(p[ϖ])^k`. -/
+theorem wLoc_mk'_monomial {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (i k : ℕ) (c : OF F) :
+    wLoc p F ϖ hρ0 hρ1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k))
+      = ρ ^ i * perfectoidValuation p F (c : F)
+        * (((ρ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)⁻¹) := by
+  rw [wLoc_mk' p F ϖ hρ0 hρ1, gaussValue_sPow p F ϖ hρ0 hρ1 k,
+    gaussValue_p_pow_mul_teichmuller p F hρ1.le]
+
+/-- **The twisted factorization of a monomial fraction**: extracting `zb^j`
+from the Teichmüller coordinate is multiplication by the generator's `j`-th
+power. -/
+theorem mk'_monomial_twist_factor (zb : OF F) (m : ℕ) (i j k : ℕ)
+    (c c' : OF F) (hc : c = zb ^ j * c') :
+    IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+      = teichPowGen p F ϖ zb m ^ j
+        * IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (i + m * j) * WittVector.teichmuller p c')
+          (sPow p F ϖ k) := by
+  rw [show IsLocalization.mk' (Bloc p F ϖ)
+      ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+    = algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+      * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k) from
+    IsLocalization.mk'_eq_mul_mk'_one _ _]
+  rw [show IsLocalization.mk' (Bloc p F ϖ)
+      ((p : Ainf p F) ^ (i + m * j) * WittVector.teichmuller p c')
+      (sPow p F ϖ k)
+    = algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (i + m * j) * WittVector.teichmuller p c')
+      * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k) from
+    IsLocalization.mk'_eq_mul_mk'_one _ _]
+  calc algebraMap (Ainf p F) (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+        * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k)
+      = (teichPowGen p F ϖ zb m ^ j
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (i + m * j) * WittVector.teichmuller p c'))
+          * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k) := by
+        rw [teichPowGen_pow_mul_twist p F ϖ zb m i j c c' hc]
+    _ = teichPowGen p F ϖ zb m ^ j
+        * (algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (i + m * j) * WittVector.teichmuller p c')
+          * IsLocalization.mk' (Bloc p F ϖ) 1 (sPow p F ϖ k)) := by
+        ring
+
+/-- **The zone-dispatched twist data of a monomial coordinate**: in the
+numerator zone no twist; in the denominator zone the deficit-bounded maximal
+twist supplied by the `σ₁`-Gauss bound. -/
+theorem exists_monomial_twist_data (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (hzb0 : perfectoidValuation p F (zb : F) ≠ 0)
+    (hzb1 : perfectoidValuation p F (zb : F) < 1)
+    (i k : ℕ) (c : OF F) (hc0 : perfectoidValuation p F (c : F) ≠ 0)
+    (hcm : i < k → perfectoidValuation p F (c : F) ^ m
+      ≤ perfectoidValuation p F (zb : F) ^ (k - i)) :
+    ∃ (j : ℕ) (c' : OF F), c = zb ^ j * c'
+      ∧ perfectoidValuation p F (c' : F) ≠ 0
+      ∧ (i < k → (k < i + m * j + m
+          ∧ perfectoidValuation p F (zb : F)
+            < perfectoidValuation p F (c' : F)))
+      ∧ (k ≤ i → j = 0) := by
+  by_cases hik : i < k
+  · obtain ⟨j, c', hc', hdeep, hlt⟩ := exists_twist_deep p F zb c m hm
+      hzb0 hzb1 hc0 i k (hcm hik)
+    refine ⟨j, c', hc', ?_, fun _ => ⟨hdeep, hlt⟩, fun hk => absurd hik
+      (not_lt.mpr hk)⟩
+    intro h0
+    have hval : perfectoidValuation p F (c : F)
+        = perfectoidValuation p F (zb : F) ^ j
+          * perfectoidValuation p F (c' : F) := by
+      rw [hc']
+      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+        push_cast; rfl]
+      rw [Valuation.map_mul, map_pow]
+    rw [hval, h0, mul_zero] at hc0
+    exact hc0 rfl
+  · refine ⟨0, c, by rw [pow_zero, one_mul], hc0,
+      fun h => absurd h hik, fun _ => rfl⟩
 
 end FarguesFontaine
 
