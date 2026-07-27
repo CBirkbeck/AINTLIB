@@ -517,6 +517,104 @@ theorem translates_pairwise_disjoint
     exact hyj
   exact Set.disjoint_left.mp (hdis (j - i) (by omega)) h1 hyi
 
+/-- Each translate lies in the saturated preimage. -/
+theorem translate_le_curvePreimage_xImage (W : Opens ↥(yTop p F ϖ)) (k : ℤ) :
+    (Opens.map (yFrobTop p F ϖ k)).obj W
+      ≤ curvePreimage p F ϖ (xImage p F ϖ W) := by
+  rw [curvePreimage_xImage p F ϖ W]
+  exact le_iSup (fun k : ℤ => (Opens.map (yFrobTop p F ϖ k)).obj W) k
+
+/-- The translated-piece family of a section. -/
+noncomputable def translateFam (W : Opens ↥(yTop p F ϖ))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) (k : ℤ) :
+    ↥(limitSections ((yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ k)).obj W))) :=
+  limitRestrict (le_of_eq (yFunctor_frobOpens p F ϖ k W).symm)
+    (limitFrobHom p F k ((yFunctor p F ϖ).obj W) s)
+
+/-- The `yFunctor`-image inclusion of a translate into the saturation. -/
+theorem yFunctor_translate_le (W : Opens ↥(yTop p F ϖ)) (k : ℤ) :
+    (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ k)).obj W)
+      ≤ (yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W)) :=
+  leOfHom ((yFunctor p F ϖ).map
+    (homOfLE (translate_le_curvePreimage_xImage p F ϖ W k)))
+
+/-- **The glued invariant-candidate section over the saturation**
+(D-iv-3(ii-c β)): the translate family glues — compatibility is trivial on
+the diagonal and vacuous elsewhere (disjoint translates). -/
+theorem exists_translateFam_glue (W : Opens ↥(yTop p F ϖ))
+    (hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    ∃ g : ↥(limitSections ((yFunctor p F ϖ).obj
+        (curvePreimage p F ϖ (xImage p F ϖ W)))),
+      ∀ k : ℤ, limitRestrict (yFunctor_translate_le p F ϖ W k) g
+        = translateFam p F ϖ W s k := by
+  have hVS : (((yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W))
+      : Opens ↥(SpaTop (Ainf p F))) : Set ↥(SpaTop (Ainf p F)))
+      ⊆ Subtype.val ⁻¹' Y p F ϖ :=
+    yFunctor_trace p F ϖ _
+  have hcov : (((yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W))
+      : Opens ↥(SpaTop (Ainf p F))) : Set ↥(SpaTop (Ainf p F)))
+      ⊆ ⋃ k : ℤ, (((yFunctor p F ϖ).obj
+          ((Opens.map (yFrobTop p F ϖ k)).obj W)
+        : Opens ↥(SpaTop (Ainf p F))) : Set ↥(SpaTop (Ainf p F))) := by
+    rintro v ⟨y, hy, rfl⟩
+    have hy' := hy
+    rw [show curvePreimage p F ϖ (xImage p F ϖ W)
+        = ⨆ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W from
+      curvePreimage_xImage p F ϖ W] at hy'
+    rw [Opens.coe_iSup] at hy'
+    obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy'
+    exact Set.mem_iUnion.mpr ⟨k, ⟨y, hk, rfl⟩⟩
+  have hcompat : ∀ i j : ℤ,
+      limitRestrict (inf_le_left
+        (a := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W))
+        (b := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ j)).obj W)))
+        (translateFam p F ϖ W s i)
+      = limitRestrict (inf_le_right
+          (a := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W))
+          (b := (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ j)).obj W)))
+          (translateFam p F ϖ W s j) := by
+    intro i j
+    by_cases hij : i = j
+    · subst hij
+      rfl
+    · have hsub : Subsingleton ↥(limitSections
+          ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ i)).obj W)
+            ⊓ (yFunctor p F ϖ).obj
+              ((Opens.map (yFrobTop p F ϖ j)).obj W))) := by
+        refine ValuationSpectrum.limitSections_subsingleton_of_empty
+          (Set.eq_empty_of_forall_notMem fun v hv => ?_)
+        obtain ⟨hvi, hvj⟩ := hv
+        obtain ⟨y₁, hy₁, hy₁v⟩ := hvi
+        obtain ⟨y₂, hy₂, hy₂v⟩ := hvj
+        have hyy : y₁ = y₂ :=
+          Subtype.val_injective (hy₁v.trans hy₂v.symm)
+        subst hyy
+        exact Set.disjoint_left.mp
+          (translates_pairwise_disjoint p F ϖ hdis hij) hy₁ hy₂
+      exact hsub.elim _ _
+  have hcov' : (((yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W))
+      : Opens ↥(SpaTop (Ainf p F))) : Set ↥(SpaTop (Ainf p F)))
+      ⊆ ⋃ k : ULift ℤ, (((yFunctor p F ϖ).obj
+          ((Opens.map (yFrobTop p F ϖ k.down)).obj W)
+        : Opens ↥(SpaTop (Ainf p F))) : Set ↥(SpaTop (Ainf p F))) := by
+    intro v hv
+    obtain ⟨k, hk⟩ := Set.mem_iUnion.mp (hcov hv)
+    exact Set.mem_iUnion.mpr ⟨⟨k⟩, hk⟩
+  obtain ⟨g, hg⟩ := (isLimitSheafOn_Y p F ϖ).glue
+    (V := (yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W)))
+    hVS (ι := ULift ℤ)
+    (U := fun k : ULift ℤ => (yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ k.down)).obj W))
+    (fun k => yFunctor_translate_le p F ϖ W k.down) hcov'
+    (fun k => translateFam p F ϖ W s k.down)
+    (fun i j => hcompat i.down j.down)
+  exact ⟨g, fun k => hg ⟨k⟩⟩
+
 end FarguesFontaine
 
 end
