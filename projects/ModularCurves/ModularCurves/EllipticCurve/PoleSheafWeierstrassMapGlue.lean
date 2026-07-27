@@ -145,6 +145,36 @@ private theorem exists_glue_on_sup_over
   · rw [← Category.assoc, hfV, hV]
     rw [← Category.assoc, Scheme.homOfLE_ι]
 
+private theorem exists_global_of_exists_on_sup
+    {X Y Z : Scheme.{u}} (U V : X.Opens) (hUV : U ⊔ V = ⊤)
+    (fU : U.toScheme ⟶ Y) (fV : V.toScheme ⟶ Y)
+    (f : (U ⊔ V).toScheme ⟶ Y)
+    (hfU : X.homOfLE le_sup_left ≫ f = fU)
+    (hfV : X.homOfLE le_sup_right ≫ f = fV)
+    (p : Y ⟶ Z) (b : X ⟶ Z)
+    (hf : f ≫ p = (U ⊔ V).ι ≫ b) :
+    ∃ g : X ⟶ Y,
+      U.ι ≫ g = fU ∧ V.ι ≫ g = fV ∧ g ≫ p = b := by
+  let e : (U ⊔ V).toScheme ≅ X :=
+    (X.isoOfEq hUV).trans X.topIso
+  have hUe : U.ι ≫ e.inv = X.homOfLE le_sup_left := by
+    rw [← cancel_mono e.hom]
+    rw [Category.assoc, e.inv_hom_id, Category.comp_id]
+    simp only [e, Iso.trans_hom, Scheme.topIso_hom,
+      Scheme.isoOfEq_hom_ι, Scheme.homOfLE_ι]
+  have hVe : V.ι ≫ e.inv = X.homOfLE le_sup_right := by
+    rw [← cancel_mono e.hom]
+    rw [Category.assoc, e.inv_hom_id, Category.comp_id]
+    simp only [e, Iso.trans_hom, Scheme.topIso_hom,
+      Scheme.isoOfEq_hom_ι, Scheme.homOfLE_ι]
+  have heι : e.inv ≫ (U ⊔ V).ι = 𝟙 X := by
+    simp only [e, Iso.trans_inv, Category.assoc, Scheme.isoOfEq_inv_ι,
+      Scheme.toIso_inv_ι]
+  refine ⟨e.inv ≫ f, ?_, ?_, ?_⟩
+  · rw [← Category.assoc, hUe, hfU]
+  · rw [← Category.assoc, hVe, hfV]
+  · rw [Category.assoc, hf, ← Category.assoc, heι, Category.id_comp]
+
 private lemma opens_ι_appTop {C : Scheme.{u}} (U : C.Opens) :
     U.ι.appTop =
       CommRingCat.ofHom
@@ -387,6 +417,130 @@ theorem sectionPoleSheafPower_six_exists_projModelMap_on_cartier_away_union
       WC fU PU hPU 1 2 hcop)
     (projModelFromOfGlobalSections WC fV PV hPV 2 hZ)
     (projModelπ WC) (π ≫ S.toSpecΓ) hUV hUbase hVbase
+
+/-- If the Cartier and away charts cover the source, their glued pole map is
+an actual morphism from the whole curve to the projective Weierstrass model. -/
+theorem sectionPoleSheafPower_six_exists_projModelMap_of_cartier_away_cover
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (r : Γ(C, U.1)) (hr : r ∈ z.ker.ideal U)
+    (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (V : C.Opens) (hV : z ⁻¹ᵁ V = ⊥) (hUV : U.1 ⊔ V = ⊤)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (a₁ a₂ a₃ a₄ a₆ : Γ(S, (⊤ : S.Opens)))
+    (hrel :
+      sectionPoleSheafPower_baseSectionsMul z hz 3 3 (y ⊗ₜ y) +
+          a₁ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (sectionPoleSheafPower_baseSectionsMul z hz 2 3 (x ⊗ₜ y)) +
+          a₃ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3) y)) =
+        sectionPoleSheafPower_baseSectionsMul z hz 2 4
+            (x ⊗ₜ sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x)) +
+          a₂ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (sectionPoleSheafPower_baseSectionsMul z hz 2 2 (x ⊗ₜ x))) +
+          a₄ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2) x))) +
+          a₆ • Scheme.Modules.baseSectionsMap π
+            (sectionPoleSheafSuccHom π z hz 5)
+              (Scheme.Modules.baseSectionsMap π
+                (sectionPoleSheafSuccHom π z hz 4)
+                  (Scheme.Modules.baseSectionsMap π
+                    (sectionPoleSheafSuccHom π z hz 3)
+                      (Scheme.Modules.baseSectionsMap π
+                        (sectionPoleSheafSuccHom π z hz 2)
+                          (Scheme.Modules.baseSectionsMap π
+                            (sectionPoleSheafSuccHom π z hz 1)
+                              (sectionPoleSheafPowerOneSection π z hz)))))) :
+    let XU := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 2) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 2) x
+    let YU := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 3) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 3) y
+    let XV := overTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 2) V
+      (Scheme.Modules.overTrivializationOfRestrictIso
+        (sectionPoleSheafPower π z hz 2) V
+        (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+          z hz V hV 2)) x
+    let YV := overTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 3) V
+      (Scheme.Modules.overTrivializationOfRestrictIso
+        (sectionPoleSheafPower π z hz 3) V
+        (sectionPoleSheafPowerTrivializationOfSectionPreimageEqBot
+          z hz V hV 3)) y
+    let AU : Γ(S, (⊤ : S.Opens)) →+* Γ(C, U.1) :=
+      (C.presheaf.map (homOfLE le_top).op).hom.comp π.appTop.hom
+    let AV : Γ(S, (⊤ : S.Opens)) →+* Γ(C, V) :=
+      (C.presheaf.map (homOfLE le_top).op).hom.comp π.appTop.hom
+    let WC : WeierstrassCurve Γ(S, (⊤ : S.Opens)) :=
+      ⟨a₁, a₂, a₃, a₄, a₆⟩
+    let τU : Γ(C, U.1) →+*
+        Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+      U.1.topIso.inv.hom
+    let τV : Γ(C, V) →+*
+        Γ(V.toScheme, (⊤ : V.toScheme.Opens)) :=
+      V.topIso.inv.hom
+    let fU := τU.comp AU
+    let fV := τV.comp AV
+    let PU : Fin 3 → Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+      τU ∘ ![XU * r, YU, r ^ 3]
+    let PV : Fin 3 → Γ(V.toScheme, (⊤ : V.toScheme.Opens)) :=
+      τV ∘ ![XV, YV, 1]
+    let hPU : (WC.map fU).toProjective.Equation PU := by
+      have hPU₀ :=
+        sectionPoleSheafPower_six_local_homogeneous_weierstrass_equation_of_relation
+          z hz U r hr hspan hnzd x y a₁ a₂ a₃ a₄ a₆ hrel
+      simpa only [WC, fU, PU, WeierstrassCurve.map_map] using hPU₀.map τU
+    let hPV : (WC.map fV).toProjective.Equation PV := by
+      have hVeq :=
+        sectionPoleSheafPower_six_over_weierstrass_equation_of_preimage_eq_bot
+          z hz V hV x y a₁ a₂ a₃ a₄ a₆ hrel
+      have hPV₀ : (WC.map AV).toProjective.Equation ![XV, YV, 1] := by
+        rw [WeierstrassCurve.Projective.equation_some]
+        simpa only [XV, YV, AV, WC] using hVeq
+      simpa only [WC, fV, PV, WeierstrassCurve.map_map] using hPV₀.map τV
+    ∀ hcop : IsCoprime (PU 1) (PU 2),
+      ∃ f : C ⟶ projModel WC,
+        U.1.ι ≫ f =
+            projModelFromOfGlobalSectionsOfIsCoprime
+              WC fU PU hPU 1 2 hcop ∧
+          V.ι ≫ f =
+            projModelFromOfGlobalSections WC fV PV hPV 2
+              (by
+                simpa only [PV, Function.comp_apply,
+                  WeierstrassCurve.Projective.fin3_def_ext, map_one] using
+                  (isUnit_one :
+                    IsUnit (1 :
+                      Γ(V.toScheme, (⊤ : V.toScheme.Opens))))) ∧
+          f ≫ projModelπ WC = π ≫ S.toSpecΓ := by
+  dsimp only
+  intro hcop
+  obtain ⟨f, hfU, hfV, hf⟩ :=
+    sectionPoleSheafPower_six_exists_projModelMap_on_cartier_away_union
+      z hz U r hr hspan hnzd V hV x y a₁ a₂ a₃ a₄ a₆ hrel hcop
+  exact exists_global_of_exists_on_sup U.1 V hUV _ _ f hfU hfV
+    (projModelπ _) (π ≫ S.toSpecΓ) hf
 
 end
 
