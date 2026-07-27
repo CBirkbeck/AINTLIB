@@ -1660,7 +1660,22 @@ non-Tate bases are supported.
     comparison and only the SHEAF condition still routes through the
     charts; (c) dyadic/strip route (values only on strip-generated
     opens; stalks still need (a) or (b)). NEXT PROBE decides (b) vs
-    (a). Original: (E2) THE CROSS-CHART COMPARISON (hard core): for
+    (a). ★ ROUTE (b) SELECTED AND UNBLOCKED 2026-07-27: **YB1 DONE**
+    (YCharts.lean): isTateRing_presheafValue_of_rationalOpen_subset_Y
+    (per-datum concrete Tate over A_inf for Y-interior rationals — the
+    p[ϖ]-image unit via isUnit_iff_forall_not_vle_zero_of_completePair
+    + comap_canonicalMap_mem_rationalOpen (both Tate-free), nilpotent
+    via .map; supporting t2Space_Ainf + nilpotence-of-mem-Iinf). ALSO
+    FOUND: NonTateRationalOpenHomeomorph.lean already provides the
+    8.2(2)-homeo at a supplied completion-unit — the ambient chart-
+    homeo needs no base-Tate. YB-PLAN (ambient Y-object): YB2 the M8
+    HasLocLiftPowerBounded(A_inf)-instantiation audit; YB3 the
+    Y-relativized S4 (replay the Laurent shrink with PD-Tate := YB1);
+    YB4 the Y-VPreObj (carrier Y-subspace open in Spa, presheaf :=
+    ambient structurePresheaf through the open-poset iso); YB5 stalk
+    fields at Y-points; YB6 the sheaf condition (still routes through
+    charts / the keystone-over-B_n with the ⊤-image-span, or the
+    (a)-replay). Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
     (n+1)-index value — through the circle ring and the degenerate
