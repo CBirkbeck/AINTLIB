@@ -4923,6 +4923,389 @@ theorem exists_evalBI_approx_bloc₂
   
 end AssemblyBot
 
+section CorrectionBot
+
+variable {σ₂ : NNReal} {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+variable (hφ : ∀ z, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+    ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+variable (hφb : ∀ x : Bloc p F ϖ,
+  ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+    : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+    : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+  = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x)
+
+include hφb in
+/-- **The correction round** (case 2): a residual of size `W·2⁻ᵐ` is reduced
+to `W·2⁻⁽ᵐ⁺¹⁾` by a lift of `K`-controlled round norm. -/
+theorem exists_correction_step_BI₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀))
+    {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1) (n : ℕ)
+    (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+    (hrmem : r ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hrbnd : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r ≤ W * (2⁻¹ : NNReal) ^ n) :
+    ∃ f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) * (W * (2⁻¹ : NNReal) ^ n)
+      ∧ (r - evalBI p F ϖ φ hφ hbmem hb f)
+          ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      ∧ wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 (r - evalBI p F ϖ φ hφ hbmem hb f)
+        ≤ W * (2⁻¹ : NNReal) ^ (n + 1) := by
+  have hhalf0 : (0 : NNReal) < 2⁻¹ := by norm_num
+  have hhalf1 : ((2 : NNReal)⁻¹) ≤ 1 := by norm_num
+  have hε : (0 : NNReal) < W * (2⁻¹ : NNReal) ^ (n + 1) :=
+    mul_pos hW0 (pow_pos hhalf0 _)
+  -- the Bloc approximant
+  obtain ⟨x, hxapp⟩ := exists_BIProd_approx p F ϖ hrmem hε
+  have hxle : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ n := by
+    have hrw : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x
+        = r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x) := by ring
+    calc (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+          (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x))
+        = wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+          (r + -(r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x)) := by
+          rw [← hrw]
+      _ ≤ max (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r)
+          (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+            (-(r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x))) :=
+          wI_add_le p F _ _
+      _ = max (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r)
+          (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+            (r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x)) := by rw [wI_neg]
+      _ ≤ W * (2⁻¹ : NNReal) ^ n := by
+          refine max_le hrbnd (le_trans hxapp ?_)
+          exact mul_le_mul_of_nonneg_left
+            (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ n)) zero_le
+  -- destructure the approximant as a fraction
+  obtain ⟨⟨w, s⟩, rfl⟩ := IsLocalization.mk'_surjective
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))
+    (S := Bloc p F ϖ) x
+  obtain ⟨k, hk⟩ := (Submonoid.mem_powers_iff _ _).mp s.2
+  have hs : s = sPow p F ϖ k := Subtype.ext hk.symm
+  subst hs
+  -- the per-radius bounds of the approximant
+  have hxw := hxle
+  rw [wI_BIProd p F ϖ, valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
+    at hxw
+  have hw1 : wLoc p F ϖ hρ₁0 hρ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+      ≤ W * (2⁻¹ : NNReal) ^ n := le_trans (le_max_left _ _) hxw
+  have hw2 : wLoc p F ϖ hσ₂0 hσ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+      ≤ W * (2⁻¹ : NNReal) ^ n := le_trans (le_max_right _ _) hxw
+  -- the round-budget is ≤ 1
+  have hWn : W * (2⁻¹ : NNReal) ^ n ≤ 1 := by
+    calc W * (2⁻¹ : NNReal) ^ n
+        ≤ 1 * 1 := mul_le_mul hWle (pow_le_one₀ zero_le hhalf1)
+          zero_le zero_le
+      _ = 1 := one_mul 1
+  -- the first approximation of the approximant
+  obtain ⟨f, hfres, hfnorm⟩ := exists_evalBI_approx_bloc₂ p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg w k hw1 hw2 hε
+  refine ⟨f, hfnorm, ?_, ?_⟩
+  · exact sub_mem hrmem (evalBI_mem p F ϖ φ hφ hbmem hb f)
+  · have hsplit : r - evalBI p F ϖ φ hφ hbmem hb f
+        = (r - BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+            (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)))
+          + (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+              (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+            - evalBI p F ϖ φ hφ hbmem hb f) := by ring
+    rw [hsplit]
+    exact le_trans (wI_add_le p F _ _) (max_le hxapp hfres)
+
+include hφ in
+/-- Telescope base: the empty partial sum. -/
+theorem evalBI_partial_zero₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+    (u : ℕ → ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    z - evalBI p F ϖ φ hφ hbmem hb (∑ l ∈ Finset.range 0, u l) = z := by
+  rw [Finset.sum_range_zero, evalBI_zero p F ϖ φ hφ hbmem hb, sub_zero]
+
+include hφ in
+/-- Telescope step: peeling one correction. -/
+theorem evalBI_partial_succ₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+    (u : ℕ → ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) (m : ℕ) :
+    (z - evalBI p F ϖ φ hφ hbmem hb (∑ l ∈ Finset.range m, u l))
+        - evalBI p F ϖ φ hφ hbmem hb (u m)
+      = z - evalBI p F ϖ φ hφ hbmem hb
+          (∑ l ∈ Finset.range (m + 1), u l) := by
+  rw [Finset.sum_range_succ, evalBI_add p F ϖ φ hφ hbmem hb, sub_sub]
+
+include hφb in
+/-- **The correction sequence** (case 2): successive approximation with
+geometrically shrinking residuals and `K`-scaled round norms. -/
+theorem exists_correction_chain_BI₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀))
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1)
+    (hzW : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z ≤ W) :
+    ∃ (u : ℕ → ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      (r : ℕ → (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)),
+      r 0 = z
+      ∧ (∀ m, r (m + 1) = r m - evalBI p F ϖ φ hφ hbmem hb (u m))
+      ∧ (∀ l, wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((u l : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) * (W * (2⁻¹ : NNReal) ^ l))
+      ∧ ∀ m, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 (r m)
+            ≤ W * (2⁻¹ : NNReal) ^ m := by
+  have hK0 : (0 : NNReal) < ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) :=
+    mul_pos (pow_pos hρ₂0 m₀) (inv_pos.mpr (pow_pos hσ₂0 m₀))
+  set K : NNReal := ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) with hKdef
+  have hstep : ∀ (m : ℕ)
+      (r : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)),
+      r ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 →
+      wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 r ≤ W * (2⁻¹ : NNReal) ^ m →
+      ∃ f : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+        ((K)⁻¹)
+            * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+              ((f : ↥(restrictedMvPowerSeriesSubring 1
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+                : MvPowerSeries (Fin 1)
+                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          ≤ W * (2⁻¹ : NNReal) ^ m
+        ∧ (r - evalBI p F ϖ φ hφ hbmem hb f)
+            ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        ∧ wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+            (r - evalBI p F ϖ φ hφ hbmem hb f)
+          ≤ W * (2⁻¹ : NNReal) ^ (m + 1) := by
+    intro m r hrmem hrbnd
+    obtain ⟨f, hfnorm, hfmem, hfres⟩ := exists_correction_step_BI₂ p F ϖ
+      φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hW0 hWle m r hrmem hrbnd
+    refine ⟨f, ?_, hfmem, hfres⟩
+    calc ((K)⁻¹)
+          * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            ((f : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin 1)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ ((K)⁻¹)
+          * (K * (W * (2⁻¹ : NNReal) ^ m)) :=
+          mul_le_mul_right hfnorm _
+      _ = W * (2⁻¹ : NNReal) ^ m := by
+          rw [← mul_assoc, inv_mul_cancel₀ hK0.ne', one_mul]
+  obtain ⟨u, r, hr0, hrrec, hCbnd, hrmem, hrbnd⟩ :=
+    exists_chain (fun v => v ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+      (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+      (fun f : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) =>
+        ((K)⁻¹)
+          * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            ((f : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin 1)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      (fun v f => v - evalBI p F ϖ φ hφ hbmem hb f)
+      (fun m => W * (2⁻¹ : NNReal) ^ m) z hz
+      (by rw [pow_zero, mul_one]; exact hzW) hstep
+  refine ⟨u, r, hr0, hrrec, fun l => ?_, hrbnd⟩
+  have h := hCbnd l
+  calc wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((u l : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = (K)
+        * (((K)⁻¹)
+          * wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            ((u l : ↥(restrictedMvPowerSeriesSubring 1
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin 1)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) := by
+        rw [← mul_assoc, mul_inv_cancel₀ hK0.ne', one_mul]
+    _ ≤ (K) * (W * (2⁻¹ : NNReal) ^ l) :=
+        mul_le_mul_right h _
+
+include hφb in
+/-- **The correction sequence, telescoped** (case 2): partial-sum residuals
+shrink geometrically with `K`-scaled round norms. -/
+theorem exists_correction_sequence_BI₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀))
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1)
+    (hzW : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z ≤ W) :
+    ∃ u : ℕ → ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      (∀ l, wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((u l : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) * (W * (2⁻¹ : NNReal) ^ l))
+      ∧ ∀ m, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+          (z - evalBI p F ϖ φ hφ hbmem hb (∑ l ∈ Finset.range m, u l))
+            ≤ W * (2⁻¹ : NNReal) ^ m := by
+  obtain ⟨u, r, hr0, hrrec, hnorm, hres⟩ := exists_correction_chain_BI₂
+    p F ϖ φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz hW0 hWle hzW
+  refine ⟨u, hnorm, fun m => ?_⟩
+  have hpartial : ∀ m', r m'
+      = z - evalBI p F ϖ φ hφ hbmem hb (∑ l ∈ Finset.range m', u l) := by
+    intro m'
+    induction m' with
+    | zero =>
+      exact hr0.trans (evalBI_partial_zero₂ p F ϖ φ hφ hbmem hb z u).symm
+    | succ n ih =>
+      exact (hrrec n).trans
+        ((congrArg (· - evalBI p F ϖ φ hφ hbmem hb (u n)) ih).trans
+          (evalBI_partial_succ₂ p F ϖ φ hφ hbmem hb z u n))
+  rw [← hpartial m]
+  exact hres m
+
+include hφ in
+/-- **The correction limit** (case 2): a `K`-normed correction sequence with
+geometrically vanishing residuals sums to an exact preimage of `K`-controlled
+norm. -/
+theorem exists_evalBI_eq_of_correction_BI₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+    {K W : NNReal} (hK1 : 1 ≤ K) (hW : 0 < W)
+    (u : ℕ → ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hCbnd : ∀ l, wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((u l : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      ≤ K * (W * (2⁻¹ : NNReal) ^ l))
+    (hres : ∀ m, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (z - evalBI p F ϖ φ hφ hbmem hb (∑ l ∈ Finset.range m, u l))
+        ≤ W * (2⁻¹ : NNReal) ^ m) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      evalBI p F ϖ φ hφ hbmem hb U = z
+      ∧ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ K * W := by
+  have hhalf1 : ((2 : NNReal)⁻¹) ≤ 1 := by norm_num
+  have hhalf0 : (0 : NNReal) < 2⁻¹ := by norm_num
+  have hK0 : (0 : NNReal) < K := lt_of_lt_of_le one_pos hK1
+  have hC0 : Filter.Tendsto (fun l : ℕ => K * (W * (2⁻¹ : NNReal) ^ l))
+      Filter.atTop (nhds 0) := by
+    have h1 : Filter.Tendsto (fun l : ℕ => ((2 : NNReal)⁻¹) ^ l)
+        Filter.atTop (nhds 0) :=
+      tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)
+    have h2 := (h1.const_mul W).const_mul K
+    simpa [mul_assoc] using h2
+  obtain ⟨U, hU⟩ := exists_rps_series_limit_BI p F ϖ hCbnd hC0
+  have hUnorm : wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((U : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ K * W := by
+    have h0 := hU 0 (K * W) (mul_pos hK0 hW) (fun l _ => by
+      calc K * (W * (2⁻¹ : NNReal) ^ l)
+          ≤ K * (W * 1) := by
+            refine mul_le_mul_of_nonneg_left ?_ zero_le
+            exact mul_le_mul_of_nonneg_left
+              (pow_le_one₀ zero_le hhalf1) zero_le
+        _ = K * W := by rw [mul_one])
+    rwa [Finset.sum_range_zero, sub_zero] at h0
+  have hdiff : ∀ m : ℕ, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (z - evalBI p F ϖ φ hφ hbmem hb U)
+        ≤ K * (W * (2⁻¹ : NNReal) ^ m) := by
+    intro m
+    have hε : (0 : NNReal) < K * (W * (2⁻¹ : NNReal) ^ m) :=
+      mul_pos hK0 (mul_pos hW (pow_pos hhalf0 _))
+    have htail := hU m (K * (W * (2⁻¹ : NNReal) ^ m)) hε (fun l hl => by
+      refine mul_le_mul_of_nonneg_left ?_ zero_le
+      exact mul_le_mul_of_nonneg_left
+        (pow_le_pow_of_le_one zero_le hhalf1 hl) zero_le)
+    have hcancel : (∑ l ∈ Finset.range m, u l)
+        + (U - ∑ l ∈ Finset.range m, u l) = U := by abel
+    have h := wI_z_sub_evalBI_add_le p F ϖ φ hφ hbmem hb z
+      (∑ l ∈ Finset.range m, u l) (U - ∑ l ∈ Finset.range m, u l) hε
+      (le_trans (hres m) (le_mul_of_one_le_left zero_le hK1)) htail
+    exact le_trans (le_of_eq (congrArg
+      (fun t => wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (z - evalBI p F ϖ φ hφ hbmem hb t)) hcancel.symm)) h
+  have hle0 : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (z - evalBI p F ϖ φ hφ hbmem hb U) ≤ 0 :=
+    ge_of_tendsto hC0 (Filter.Eventually.of_forall hdiff)
+  have h0 : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (z - evalBI p F ϖ φ hφ hbmem hb U) = 0 := le_antisymm hle0 zero_le
+  exact ⟨U, (sub_eq_zero.mp ((wI_eq_zero_iff p F _).mp h0)).symm, hUnorm⟩
+
+include hφb in
+/-- **Strict surjectivity of the case-2 presentation on the unit ball**
+(Kedlaya Lemma 4.9, case 1, surjectivity with (4.9.1)-norm control): every
+`≤ 1`-normalized element of the cut interval ring is the value of a
+restricted series over `B^I` of norm at most `K = σ₂^m(ρ₁^m)⁻¹`. -/
+theorem exists_evalBI_eq_of_le_one₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀))
+    {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hzle : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z ≤ 1) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      evalBI p F ϖ φ hφ hbmem hb U = z
+      ∧ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) := by
+  have hK1 : (1 : NNReal) ≤ ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) :=
+    calc (1 : NNReal) = σ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) :=
+        (mul_inv_cancel₀ (pow_pos hσ₂0 m₀).ne').symm
+      _ ≤ ρ₂ ^ m₀ * ((σ₂ ^ m₀)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hσρ m₀) _
+  obtain ⟨u, hCbnd, hres⟩ := exists_correction_sequence_BI₂ p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz one_pos le_rfl hzle
+  obtain ⟨U, hUeq, hUnorm⟩ := exists_evalBI_eq_of_correction_BI₂ p F ϖ
+    φ hφ hbmem hb z hK1 one_pos u hCbnd hres
+  refine ⟨U, hUeq, ?_⟩
+  rwa [mul_one] at hUnorm
+
+end CorrectionBot
+
 end FarguesFontaine
 
 end
