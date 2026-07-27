@@ -164,6 +164,99 @@ theorem
   rw [hleft, hright] at hback
   exact hback
 
+/-- A global morphism whose affine-chart restriction is a normalized
+coprime-coordinate comparison pulls the model zero ideal back to the
+restricted Cartier generator on the corresponding basic open. -/
+theorem projModelMap_comap_zeroIdeal_affineBasicOpen_mul_of_restrict
+    {C : Scheme.{u}} (U : C.affineOpens)
+    (a b r : Γ(C, U.1))
+    (W : WeierstrassCurve R)
+    (f : R →+* Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+    (P : Fin 3 → Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)))
+    (hP : (W.map f).toProjective.Equation P)
+    (hcop : IsCoprime (P 1) (P 2))
+    (hP0 : P 0 = U.1.topIso.inv.hom (a * r))
+    (hP1 : P 1 = U.1.topIso.inv.hom b)
+    (hP2 : P 2 = U.1.topIso.inv.hom (r ^ 3))
+    (F : C ⟶ projModel W)
+    (hFU : U.1.ι ≫ F =
+      projModelFromOfGlobalSectionsOfIsCoprime
+        W f P hP 1 2 hcop) :
+    ((projModelZero W).ker.comap F).ideal
+        (C.affineBasicOpen (U := U) (a * b)) =
+      Ideal.span {
+        C.presheaf.map
+          (homOfLE (C.affineBasicOpen_le (a * b))).op r} := by
+  let B := C.affineBasicOpen (U := U) (a * b)
+  let hBU : B.1 ≤ U.1 := C.affineBasicOpen_le (a * b)
+  let g : B.1.toScheme ⟶ U.1.toScheme := C.homOfLE hBU
+  let res : Γ(C, U.1) →+* Γ(C, B.1) :=
+    (C.presheaf.map (homOfLE hBU).op).hom
+  have hab : IsUnit (res (a * b)) :=
+    AlgebraicGeometry.RingedSpace.isUnit_res_basicOpen
+      C.toRingedSpace (a * b)
+  have hab' : IsUnit (res a * res b) := by
+    simpa only [map_mul] using hab
+  have ha : IsUnit (res a) := (IsUnit.mul_iff.mp hab').1
+  have hb : IsUnit (res b) := (IsUnit.mul_iff.mp hab').2
+  have happ (q : Γ(C, U.1)) :
+      g.appTop.hom (U.1.topIso.inv.hom q) =
+        B.1.topIso.inv.hom (res q) := by
+    exact ConcreteCategory.congr_hom
+      (Scheme.Modules.topIso_inv_naturality hBU) q
+  have hga : IsUnit (g.appTop.hom (U.1.topIso.inv.hom a)) := by
+    rw [happ]
+    exact ha.map B.1.topIso.inv.hom
+  have hgb : IsUnit ((g.appTop.hom ∘ P) 1) := by
+    rw [Function.comp_apply, hP1, happ]
+    exact hb.map B.1.topIso.inv.hom
+  have htop :
+      ((projModelZero W).ker.comap
+        (g ≫ projModelFromOfGlobalSectionsOfIsCoprime
+          W f P hP 1 2 hcop)).ideal
+          ⟨⊤, isAffineOpen_top B.1.toScheme⟩ =
+        Ideal.span {g.appTop.hom (U.1.topIso.inv.hom r)} := by
+    apply
+      projModelFromOfGlobalSectionsOfIsCoprime_comp_comap_zeroIdeal_chartY
+        g W f P hP 1 2 hcop hgb
+        (g.appTop.hom (U.1.topIso.inv.hom r))
+        (g.appTop.hom (U.1.topIso.inv.hom a))
+    · simp only [Function.comp_apply, hP0, map_mul]
+    · simp only [Function.comp_apply, hP2, map_pow]
+    · exact hga
+  have hgf :
+      g ≫ projModelFromOfGlobalSectionsOfIsCoprime
+          W f P hP 1 2 hcop =
+        B.1.ι ≫ F := by
+    rw [← hFU]
+    rw [← Category.assoc, Scheme.homOfLE_ι]
+  let J : C.IdealSheafData := (projModelZero W).ker.comap F
+  have hmapped :
+      (J.ideal B).map B.1.topIso.inv.hom =
+        (Ideal.span {res r}).map B.1.topIso.inv.hom := by
+    rw [← J.ideal_comap_affineOpen_top B]
+    rw [Ideal.map_span, Set.image_singleton]
+    rw [← happ]
+    change (((projModelZero W).ker.comap F).comap B.1.ι).ideal
+        ⟨⊤, isAffineOpen_top B.1.toScheme⟩ =
+      Ideal.span {g.appTop.hom (U.1.topIso.inv.hom r)}
+    rw [← Scheme.IdealSheafData.comap_comp]
+    rw [← hgf]
+    exact htop
+  have hback := congrArg (Ideal.map B.1.topIso.hom.hom) hmapped
+  have hleft :
+      ((J.ideal B).map B.1.topIso.inv.hom).map
+          B.1.topIso.hom.hom = J.ideal B := by
+    exact Ideal.map_of_equiv
+      B.1.topIso.commRingCatIsoToRingEquiv.symm
+  have hright :
+      ((Ideal.span {res r}).map B.1.topIso.inv.hom).map
+          B.1.topIso.hom.hom = Ideal.span {res r} := by
+    exact Ideal.map_of_equiv
+      B.1.topIso.commRingCatIsoToRingEquiv.symm
+  rw [hleft, hright] at hback
+  exact hback
+
 /-- The ideal of a marked section is the unit ideal on every affine open
 contained in the complement of that section. -/
 theorem section_ker_ideal_eq_top_of_le_sectionAway
