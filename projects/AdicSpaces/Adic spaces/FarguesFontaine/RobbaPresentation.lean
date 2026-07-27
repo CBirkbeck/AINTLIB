@@ -1063,6 +1063,56 @@ theorem exists_twist (zb c : OF F)
       map_pow]
     exact hPj
 
+/-- **The twist reaches within one generator-step of the denominator**: under
+the `σ₁`-Gauss bound (in the `m`-th-power multiplicative form
+`|c|^m ≤ |zb|^{k−i}`), the maximal twist depth `j` satisfies
+`i + m·j + m > k` — the residual denominator-dominance is less than one
+generator-step. -/
+theorem exists_twist_deep (zb c : OF F) (m : ℕ) (hm : 0 < m)
+    (hzb0 : perfectoidValuation p F (zb : F) ≠ 0)
+    (hzb1 : perfectoidValuation p F (zb : F) < 1)
+    (hc0 : perfectoidValuation p F (c : F) ≠ 0) (i k : ℕ)
+    (hcm : perfectoidValuation p F (c : F) ^ m
+      ≤ perfectoidValuation p F (zb : F) ^ (k - i)) :
+    ∃ (j : ℕ) (c' : OF F), c = zb ^ j * c'
+      ∧ k < i + m * j + m
+      ∧ perfectoidValuation p F (zb : F)
+        < perfectoidValuation p F (c' : F) := by
+  obtain ⟨j, c', hc', hlt⟩ := exists_twist p F zb c hzb0 hzb1 hc0
+  refine ⟨j, c', hc', ?_, hlt⟩
+  -- maximality: |c| > |zb|^{j+1}
+  have hmax : perfectoidValuation p F (zb : F) ^ (j + 1)
+      < perfectoidValuation p F (c : F) := by
+    have hval : perfectoidValuation p F (c : F)
+        = perfectoidValuation p F (zb : F) ^ j
+          * perfectoidValuation p F (c' : F) := by
+      rw [hc']
+      rw [show ((zb ^ j * c' : OF F) : F) = ((zb : F)) ^ j * (c' : F) from by
+        push_cast; rfl]
+      rw [Valuation.map_mul, map_pow]
+    rw [hval, pow_succ]
+    exact mul_lt_mul_of_pos_left hlt
+      (pos_iff_ne_zero.mpr (pow_ne_zero _ hzb0))
+  -- power comparison: |zb|^{m(j+1)} < |c|^m ≤ |zb|^{k−i}
+  have hpow : perfectoidValuation p F (zb : F) ^ (m * (j + 1))
+      < perfectoidValuation p F (zb : F) ^ (k - i) := by
+    calc perfectoidValuation p F (zb : F) ^ (m * (j + 1))
+        = (perfectoidValuation p F (zb : F) ^ (j + 1)) ^ m := by
+          rw [← pow_mul, mul_comm]
+      _ < perfectoidValuation p F (c : F) ^ m := by
+          exact pow_lt_pow_left₀ hmax zero_le (Nat.pos_iff_ne_zero.mp hm)
+      _ ≤ perfectoidValuation p F (zb : F) ^ (k - i) := hcm
+  -- exponent reversal for a base < 1
+  have hexp : k - i < m * (j + 1) := by
+    by_contra hcon
+    push Not at hcon
+    exact absurd (pow_le_pow_of_le_one zero_le hzb1.le hcon)
+      (not_le.mpr hpow)
+  have hexp' : k - i < m * j + m := by
+    rw [Nat.mul_succ] at hexp
+    exact hexp
+  omega
+
 end FarguesFontaine
 
 end
