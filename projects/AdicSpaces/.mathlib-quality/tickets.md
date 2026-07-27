@@ -1740,7 +1740,23 @@ non-Tate bases are supported.
     per-window: ambient sections over window-interior opens vs the
     B_n-side structure presheaf through keystoneO-value-identification
     + isSheafy_presheafChart; then the Y-cover refinement. Substantial
-    assembly — next session's opening move; all substrates now exist.
+    assembly; all substrates now exist. ★ YB6c-1 DONE (windowKeystone
+    — keystoneO instantiated at the windows). ★ YB6c-2 DONE
+    (exists_pow_le_of_isRational — certificates at any valid datum's
+    own pair; the certificate supply is COMPLETE). REMAINING YB6c-3
+    (the last Y-VObj brick, precisely scoped): (i) the Y-LOCAL
+    IsLimitSheaf: valid Y-interior D + valid rational cover ⇒ the
+    equalizer at presheafValue-A_inf(D) — subordinate the cover to
+    window pieces (interDatumOpen at the new certificates; NO
+    compactness — the generic limit-glue handles arbitrary covers;
+    AVOID isCompact_spaOpen: Tate-gated AND its noHArch core is
+    sorry-tracked upstream), transport through windowKeystone (the
+    keystoneO squares) to the B_n-side IsLimitSheaf
+    (isSheafy_presheafChart chain); (ii) replay
+    StructurePresheafBundled's structurePresheaf_isSheafOfTopological-
+    Rings (~599) at the restricted-to-Y site with (i) in place of
+    IsLimitSheaf. Then yVObj := ⟨yVPreObj, that⟩ and D-iii (φ-action,
+    X := Y/φ^ℤ) follows.
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
