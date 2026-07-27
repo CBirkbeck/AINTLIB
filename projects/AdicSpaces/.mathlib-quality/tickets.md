@@ -1077,10 +1077,21 @@ non-Tate bases are supported.
     so BlocToHatK_twist (the change iso intertwines, by localization-lift
     uniqueness) gives BISub_twist: BISub-in-ϖ' = BISub-in-ϖ as SUBRING
     EQUALITY (not just iso) — the neighbouring charts' interval rings at a
-    common interval literally coincide; (D-i-t3) circle datum
-    over B_n (RationalLocData with image params, hopen from p-unit) +
-    keystone-over-B_n applications; (D-i-t4) the composed transition iso;
-    negative-side mirrors throughout;
+    common interval literally coincide; (D-i-t3) REVISED 2026-07-27 after the
+    signature audit: imgDatum/keystone need span(E.T) = ⊤ OVER THE BASE —
+    false for the circle datum over A_inf (chartT ⊆ Iinf); the circle datum
+    over B_n would need its own ID2-scale comparison. INSTEAD, exploit t2's
+    subring-EQUALITY: build the Y-structure directly on the κ-interval basis
+    with 𝒪(interval) := B^I (uniformizer-free by t2), i.e. the (D-ii)
+    'alternatively'-route. NEW t3: the interval-RESTRICTION maps
+    `BISub-[ρ₁,ρ₂] →+* BISub-[σ₁,σ₂]` for [σ₁,σ₂] ⊆ [ρ₁,ρ₂] — the identity
+    on the dense Bloc is wI-to-wJ continuous (interior interpolation, the
+    three-circles machinery of RestrictionInjective/wLoc_rpow_interpolate)
+    and extends by the ID2d AbstractCompletion pattern; functoriality
+    (comp/id) from dense-extension uniqueness. t4 (revised): assemble the
+    interval-presheaf on the basis of attainable intervals and glue to the
+    Y-object; the chart homeomorphisms (ChartSpa) provide the point-set
+    layer, isSheafy_presheafChart + ID2d the sheaf-condition per chart;
   (D-ii) VPreObj-level gluing machinery for a ℤ-chain of charts (new
     infrastructure — the repo has no presheafed-space gluing; alternatively
     build the Y-presheaf directly on the rational-basis of the union);
