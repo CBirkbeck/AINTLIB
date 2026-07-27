@@ -54,6 +54,7 @@ import «Adic spaces».FarguesFontaine.YPresheaf
 import «Adic spaces».FarguesFontaine.IntervalSplitting
 import «Adic spaces».StructureSheafStalks
 import «Adic spaces».FarguesFontaine.ChartVObj
+import «Adic spaces».FarguesFontaine.RobbaPresentation
 import «Adic spaces».FarguesFontaine.BigWindows
 import «Adic spaces».FarguesFontaine.ChartSpa
 import «Adic spaces».FlatnessResults

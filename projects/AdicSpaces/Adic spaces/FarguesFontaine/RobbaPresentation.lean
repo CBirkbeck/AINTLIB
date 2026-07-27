@@ -1,0 +1,468 @@
+/-
+Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: AINTLIB AI workers
+-/
+import «Adic spaces».FarguesFontaine.Presentation
+import «Adic spaces».FarguesFontaine.SheafyBI
+
+/-!
+# Robba-localization presentations (T910, Kedlaya Lemma 4.9 cases 1–2)
+
+The evaluation machinery for restricted series over `B^I` along a contracting
+coefficient homomorphism into a sub-interval ring:
+
+* `FarguesFontaine.wI_resIHom_le` : the interval restriction contracts `wI`;
+* `FarguesFontaine.isRestricted_iff_wI` / `tendsto_wI_coeffSeq` :
+  restrictedness over `B^I` in norm terms;
+* `FarguesFontaine.exists_evalBI_series` : convergence of the evaluation;
+* `FarguesFontaine.evalBIHom` : the presentation map `B^I⟨T⟩ →+* B^{I'}`,
+  generic in the contracting carrier `φ` (instantiated at `resIHom`).
+-/
+
+open TopologicalRing ValuationSpectrum WittVector NNReal
+
+set_option linter.overlappingInstances false
+
+noncomputable section
+
+namespace FarguesFontaine
+
+variable (p : ℕ) [Fact (Nat.Prime p)]
+variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
+variable (ϖ : PseudoUniformizer F)
+variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+  {hρ₂1 : ρ₂ < 1}
+
+/-- **The interval restriction contracts the interval norm** (both target
+radii are interpolants, each coordinate bounded by `valued_resI_le_wI`). -/
+theorem wI_resIHom_le {θ η : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hη0 : 0 ≤ η) (hη1 : η ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ η * ρ₂ ^ (1 - η)) (hσ₂1 : ρ₁ ^ η * ρ₂ ^ (1 - η) < 1)
+    (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+        ((resIHom p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1 z
+          : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+  refine max_le ?_ ?_
+  · exact valued_resI_le_wI p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 z.2
+  · exact valued_resI_le_wI p F ϖ hη0 hη1 hσ₂0 hσ₂1 z.2
+
+/-- Coercion of a `B^I`-sum to the product, as a plain equation (kept as a
+standalone micro-lemma so heavy contexts can rewrite with it instead of
+paying the definitional check). -/
+theorem BISub_coe_add {σ₁ σ₂ : NNReal} {h1 : 0 < σ₁} {h2 : σ₁ < 1}
+    {h3 : 0 < σ₂} {h4 : σ₂ < 1} (x y : ↥(BISub p F ϖ h1 h2 h3 h4)) :
+    ((x + y : ↥(BISub p F ϖ h1 h2 h3 h4))
+      : (hatK p F h1 h2) × (hatK p F h3 h4))
+      = ((x : ↥(BISub p F ϖ h1 h2 h3 h4))
+          : (hatK p F h1 h2) × (hatK p F h3 h4))
+        + ((y : ↥(BISub p F ϖ h1 h2 h3 h4))
+            : (hatK p F h1 h2) × (hatK p F h3 h4)) := rfl
+
+/-- **Restrictedness over `B^I` in interval-norm terms**: finitely many
+coefficients above every positive threshold. -/
+theorem isRestricted_iff_wI {k : ℕ}
+    (f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    MvPowerSeries.IsRestricted f
+      ↔ ∀ ε : NNReal, 0 < ε → {s : Fin k →₀ ℕ |
+          ε < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+            ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}.Finite := by
+  constructor
+  · intro hf ε hε
+    have hB : {a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) |
+        wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((a : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ ε}
+        ∈ nhds (0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+      wI_ball_mem_nhds_BISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hε
+    have hev := hf hB
+    rw [Filter.mem_map, Filter.mem_cofinite] at hev
+    refine hev.subset ?_
+    intro s hs
+    simp only [Set.mem_compl_iff, Set.mem_preimage, Set.mem_setOf_eq] at hs ⊢
+    exact not_le.mpr hs
+  · intro hf
+    rw [MvPowerSeries.IsRestricted, Filter.tendsto_def]
+    intro U hU
+    rw [nhds_subtype_eq_comap] at hU
+    obtain ⟨V, hV, hVU⟩ := Filter.mem_comap.mp hU
+    obtain ⟨ε, hε, hεV⟩ := exists_wI_ball_subset p F
+      (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hV
+    rw [Filter.mem_cofinite]
+    refine ((hf ε hε).subset ?_)
+    intro s hs
+    simp only [Set.mem_compl_iff, Set.mem_preimage, Set.mem_setOf_eq] at hs ⊢
+    by_contra hcon
+    push Not at hcon
+    exact hs (hVU (hεV hcon))
+
+/-- A restricted one-variable series over `B^I` has null coefficient norms. -/
+theorem tendsto_wI_coeffSeq
+    {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    Filter.Tendsto (fun n => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      Filter.atTop (nhds 0) := by
+  refine tendsto_order.mpr
+    ⟨fun c hc => absurd hc (not_lt.mpr zero_le), fun δ hδ => ?_⟩
+  have hfin := (isRestricted_iff_wI p F ϖ f).mp hf (δ / 2) (half_pos hδ)
+  have hpre : ((fun n : ℕ => (Finsupp.single (0 : Fin 1) n)) ⁻¹'
+      {s : Fin 1 →₀ ℕ | δ / 2 < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}).Finite :=
+    hfin.preimage ((Finsupp.single_injective (0 : Fin 1)).injOn)
+  obtain ⟨N, hN⟩ := hpre.bddAbove
+  rw [Filter.eventually_atTop]
+  refine ⟨N + 1, fun n hn => ?_⟩
+  have hnot : n ∉ ((fun n : ℕ => (Finsupp.single (0 : Fin 1) n)) ⁻¹'
+      {s : Fin 1 →₀ ℕ | δ / 2 < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}) := by
+    intro hmem
+    have := hN hmem
+    omega
+  exact lt_of_le_of_lt (not_lt.mp hnot) (NNReal.half_lt_self hδ.ne')
+
+/-- **Evaluation of a restricted series over `B^I` along a contracting
+coefficient homomorphism converges** — the abstract engine: `φ` carries the
+coefficients into the target interval ring without increasing the norm, the
+terms decay because the series is restricted. -/
+theorem exists_evalBI_series {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+    (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+        ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+      ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (a : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (ha : Filter.Tendsto (fun l => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((a l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      Filter.atTop (nhds 0))
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1) :
+    ∃ S : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1),
+      S ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1
+      ∧ Filter.Tendsto (fun n => ∑ l ∈ Finset.range n,
+          ((φ (a l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l)
+        Filter.atTop (nhds S) := by
+  refine exists_BI_series_limit p F ϖ (u := fun l =>
+    ((φ (a l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l)
+    (fun l => mul_mem (φ (a l)).2 (pow_mem hbmem l))
+    (C := fun l => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((a l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (fun l => ?_) ha
+  refine le_trans (wI_mul_le p F _ _) ?_
+  calc wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+        ((φ (a l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+        * wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 (b ^ l)
+      ≤ wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+          ((φ (a l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * 1 := by
+        refine mul_le_mul_of_nonneg_left ?_ zero_le
+        rw [wI_pow p F]
+        exact pow_le_one₀ zero_le hb
+    _ = wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+          ((φ (a l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) := mul_one _
+    _ ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((a l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := hφ (a l)
+
+section EvalBI
+
+variable {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+  {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+
+/-- The term of the `B^I`-evaluation series. -/
+def evalBITerm (b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+    (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (l : ℕ) :
+    (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1) :=
+  ((φ (coeffSeq f l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+    : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l
+
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
+include hφ in
+/-- The evaluation terms have null interval norm. -/
+theorem tendsto_wI_evalBITerm
+    {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    Filter.Tendsto (fun l => wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+        ((φ (coeffSeq f l) : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)))
+      Filter.atTop (nhds 0) :=
+  tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
+    (tendsto_wI_coeffSeq p F ϖ hf) (fun _ => zero_le)
+    (fun l => hφ (coeffSeq f l))
+
+include hφ in
+/-- **The value of a restricted series over `B^I` along a contracting
+coefficient homomorphism at a power-bounded element.** -/
+def evalBI {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1) :=
+  (exists_evalBI_series p F ϖ φ hφ
+    (coeffSeq (f : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (tendsto_wI_coeffSeq p F ϖ f.2) hbmem hb).choose
+
+theorem evalBI_mem {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    evalBI p F ϖ φ hφ hbmem hb f ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 :=
+  (exists_evalBI_series p F ϖ φ hφ
+    (coeffSeq (f : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (tendsto_wI_coeffSeq p F ϖ f.2) hbmem hb).choose_spec.1
+
+theorem tendsto_evalBI {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    Filter.Tendsto (fun n => ∑ l ∈ Finset.range n,
+        evalBITerm p F ϖ φ b
+          (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+      Filter.atTop (nhds (evalBI p F ϖ φ hφ hbmem hb f)) :=
+  (exists_evalBI_series p F ϖ φ hφ
+    (coeffSeq (f : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (tendsto_wI_coeffSeq p F ϖ f.2) hbmem hb).choose_spec.2
+
+/-- The carrier commutes with finite sums (by induction, avoiding class
+search on the nested subring types). -/
+theorem evalBI_carrier_sum {ι : Type*} (s : Finset ι)
+    (a : ι → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    φ (∑ i ∈ s, a i) = ∑ i ∈ s, φ (a i) := by
+  classical
+  induction s using Finset.induction with
+  | empty =>
+      rw [Finset.sum_empty, Finset.sum_empty]
+      exact φ.map_zero
+  | insert i s hi ih =>
+      rw [Finset.sum_insert hi, Finset.sum_insert hi, φ.map_add, ih]
+
+/-- The `l`-th term is additive in the series. -/
+theorem evalBITerm_add (b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+    (f g : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) (l : ℕ) :
+    evalBITerm p F ϖ φ b ((f + g : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+      = evalBITerm p F ϖ φ b (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+        + evalBITerm p F ϖ φ b (g : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l := by
+  have hc : φ (coeffSeq ((f + g : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+      = φ (coeffSeq (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+        + φ (coeffSeq (g : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l) := by
+    rw [show coeffSeq ((f + g : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+        = coeffSeq (f : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+          + coeffSeq (g : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l from
+      coeffSeq_add _ _ _, φ.map_add]
+  calc evalBITerm p F ϖ φ b
+        ((f + g : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+      = ((φ (coeffSeq (f : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+          + φ (coeffSeq (g : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+          : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l :=
+        congrArg (fun z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) =>
+          ((z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l) hc
+    _ = (((φ (coeffSeq (f : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+          : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+        + ((φ (coeffSeq (g : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+            : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))) * b ^ l :=
+        congrArg (· * b ^ l) (BISub_coe_add p F ϖ _ _)
+    _ = evalBITerm p F ϖ φ b (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+        + evalBITerm p F ϖ φ b (g : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l :=
+        add_mul _ _ _
+
+/-- Evaluation is additive. -/
+theorem evalBI_add {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (f g : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    evalBI p F ϖ φ hφ hbmem hb (f + g)
+      = evalBI p F ϖ φ hφ hbmem hb f + evalBI p F ϖ φ hφ hbmem hb g := by
+  refine tendsto_nhds_unique (tendsto_evalBI p F ϖ φ hφ hbmem hb (f + g)) ?_
+  refine ((tendsto_evalBI p F ϖ φ hφ hbmem hb f).add
+    (tendsto_evalBI p F ϖ φ hφ hbmem hb g)).congr fun n => ?_
+  rw [← Finset.sum_add_distrib]
+  exact Finset.sum_congr rfl fun l _ => (evalBITerm_add p F ϖ φ b f g l).symm
+
+/-- The `l`-th term of a product is the antidiagonal convolution. -/
+theorem evalBITerm_mul_sum (b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+    (f g : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) (l : ℕ) :
+    evalBITerm p F ϖ φ b ((f * g : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+      = (∑ q ∈ Finset.antidiagonal l,
+          ((φ (coeffSeq (f : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) q.1)
+            : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+          * ((φ (coeffSeq (g : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) q.2)
+            : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+            : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))) * b ^ l := by
+  rw [evalBITerm]
+  congr 1
+  have hc : coeffSeq ((f * g : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+      = ∑ q ∈ Finset.antidiagonal l,
+          coeffSeq (f : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) q.1
+          * coeffSeq (g : MvPowerSeries (Fin 1)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) q.2 :=
+    coeffSeq_mul _ _ _
+  rw [hc, evalBI_carrier_sum p F ϖ φ, AddSubmonoidClass.coe_finsetSum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [φ.map_mul]
+  rfl
+
+/-- **Evaluation is multiplicative** — the Cauchy-product estimate at the
+target radii. -/
+theorem evalBI_mul {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (f g : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    evalBI p F ϖ φ hφ hbmem hb (f * g)
+      = evalBI p F ϖ φ hφ hbmem hb f * evalBI p F ϖ φ hφ hbmem hb g := by
+  refine tendsto_nhds_unique (tendsto_evalBI p F ϖ φ hφ hbmem hb (f * g)) ?_
+  have hcp := tendsto_cauchy_product p F hb
+    (fun i => ((φ (coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) i)
+      : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)))
+    (fun j => ((φ (coeffSeq (g : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) j)
+      : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)))
+    (tendsto_wI_evalBITerm p F ϖ φ hφ f.2)
+    (tendsto_wI_evalBITerm p F ϖ φ hφ g.2)
+    (tendsto_evalBI p F ϖ φ hφ hbmem hb f)
+    (tendsto_evalBI p F ϖ φ hφ hbmem hb g)
+  refine hcp.congr fun n => ?_
+  exact Finset.sum_congr rfl fun l _ =>
+    (evalBITerm_mul_sum p F ϖ φ b f g l).symm
+
+/-- Evaluation sends `1` to `1`. -/
+theorem evalBI_one {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1) :
+    evalBI p F ϖ φ hφ hbmem hb 1 = 1 := by
+  refine tendsto_nhds_unique (tendsto_evalBI p F ϖ φ hφ hbmem hb 1) ?_
+  refine tendsto_const_nhds.congr' ?_
+  rw [Filter.EventuallyEq, Filter.eventually_atTop]
+  refine ⟨1, fun n hn => ?_⟩
+  have hterms : ∀ l ∈ Finset.range n,
+      evalBITerm p F ϖ φ b
+        (1 : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+        = if l = 0 then 1 else 0 := by
+    intro l _
+    rw [evalBITerm, coeffSeq_one]
+    by_cases hl : l = 0
+    · subst hl
+      rw [if_pos rfl, if_pos rfl, φ.map_one, pow_zero, mul_one]
+      rfl
+    · rw [if_neg hl, if_neg hl, φ.map_zero]
+      show (0 : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l = 0
+      rw [zero_mul]
+  show (1 : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+      = ∑ l ∈ Finset.range n,
+        evalBITerm p F ϖ φ b
+          (1 : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+  rw [Finset.sum_congr rfl hterms, Finset.sum_ite_eq' (Finset.range n) 0
+    (fun _ => (1 : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)))]
+  rw [if_pos (Finset.mem_range.mpr hn)]
+
+/-- Evaluation sends `0` to `0`. -/
+theorem evalBI_zero {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1) :
+    evalBI p F ϖ φ hφ hbmem hb 0 = 0 := by
+  refine tendsto_nhds_unique (tendsto_evalBI p F ϖ φ hφ hbmem hb 0) ?_
+  refine tendsto_const_nhds.congr fun n => ?_
+  refine (Finset.sum_eq_zero fun l _ => ?_).symm
+  rw [evalBITerm]
+  rw [show coeffSeq ((0 : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+      = 0 from coeffSeq_zero l, φ.map_zero]
+  show (0 : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l = 0
+  rw [zero_mul]
+
+include hφ in
+/-- **The Robba-localization evaluation, as a ring homomorphism**
+`B^I⟨T⟩ →+* B^{I'}` — Kedlaya's case-1/2 presentation map, generic in the
+contracting coefficient carrier. -/
+def evalBIHom {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1) :
+    ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) where
+  toFun f := ⟨evalBI p F ϖ φ hφ hbmem hb f, evalBI_mem p F ϖ φ hφ hbmem hb f⟩
+  map_one' := Subtype.ext (evalBI_one p F ϖ φ hφ hbmem hb)
+  map_mul' := fun f g => Subtype.ext (evalBI_mul p F ϖ φ hφ hbmem hb f g)
+  map_zero' := Subtype.ext (evalBI_zero p F ϖ φ hφ hbmem hb)
+  map_add' := fun f g => Subtype.ext (evalBI_add p F ϖ φ hφ hbmem hb f g)
+
+end EvalBI
+
+end FarguesFontaine
+
+end
