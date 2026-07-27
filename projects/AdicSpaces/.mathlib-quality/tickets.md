@@ -2424,8 +2424,20 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   Statement: abstract contracting φ with the Bloc-image law hφb, eval
   point b = BIProd-σ(teichPowGen zb m), w/k with both σ-wLoc ≤ 1, any
   ε > 0 → a T-polynomial f with residual ≤ ε and wIRPS f ≤ K :=
-  σ₁^m(ρ₁^m)⁻¹. NEXT (P3e): the correction sequence + limit +
-  surjectivity: mirror exists_correction_sequence (Presentation:2131,
+  σ₁^m(ρ₁^m)⁻¹. P3e PROGRESS 2026-07-27: W-generalized approx (f230e7a3d),
+  exists_correction_step_BI (61f6338ea), exists_correction_chain_BI +
+  telescope mini-lemmas (8c2804cea; PERF: the fat-φ-context accumulates
+  per-declaration cost — SPLIT chain-extraction and telescope into
+  separate declarations, one-step exact-terms per induction branch,
+  set-K compression; the raw-chain-form conclusion (∃ u r, hr0 ∧ hrrec
+  ∧ bounds) defers the telescope), exists_correction_sequence_BI
+  (telescoped wrapper, own budget). REMAINING (P3e-d): the limit
+  exists_evalBI_eq_of_correction_BI (mirror Presentation:2073-2128 with
+  exists_rps_series_limit_BI + wI_z_sub_evalBI_add_le, K-scaled W) +
+  the surjectivity capstone exists_evalBI_eq_of_mem (mirror :2215:
+  W := max(wI z, small)-normalization — W ≤ 1 requires the p-power
+  prescaling of z OR state for wI z ≤ 1 and lift the general case by
+  p-unit scaling — DESIGN at implementation). THE ORIGINAL P3e NOTE: mirror exists_correction_sequence (Presentation:2131,
   via the generic exists_chain + exists_BIProd_approx at the σ-radii —
   note the K-rescaling: approximate to ε/(2K)-style per round so the
   K-normed corrections telescope; W ≤ 1-normalization via p-power
