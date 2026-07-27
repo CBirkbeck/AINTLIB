@@ -331,6 +331,27 @@ noncomputable def windowResBIQ (n : ℕ) (r₁ r₂ : ℚ) (hr₁ : 0 < r₁)
       (invPow_succ_lt p n) hr₁m hr₂m).comp
     (chartRingEquivBIQ p F ϖ n).toRingHom
 
+/-- The negative-side window exponents decrease. -/
+theorem powQ_div_lt (m : ℕ) : (p ^ m : ℚ) / (p : ℚ) < (p ^ m : ℚ) := by
+  have hp : (1 : ℚ) < p := by
+    exact_mod_cast Nat.Prime.one_lt (Fact.out : Nat.Prime p)
+  have h0 : (0 : ℚ) < (p ^ m : ℚ) := by positivity
+  rw [div_lt_iff₀ (by linarith)]
+  nlinarith
+
+/-- **The restriction hom from the `(-m)`-th window chart to a rational
+sub-interval** (route (c), negative side). -/
+noncomputable def windowResBIQNeg (m : ℕ) (r₁ r₂ : ℚ) (hr₁ : 0 < r₁)
+    (hr₂ : 0 < r₂)
+    (hr₁m : (p ^ m : ℚ) / (p : ℚ) ≤ r₁ ∧ r₁ ≤ (p ^ m : ℚ))
+    (hr₂m : (p ^ m : ℚ) / (p : ℚ) ≤ r₂ ∧ r₂ ≤ (p ^ m : ℚ)) :
+    presheafValue (chartData p F (pPowM p F ϖ m) 1 1 p 1)
+      →+* ↥(BIQ p F ϖ r₁ r₂ hr₁ hr₂) :=
+  (biResQ' p F ϖ ((p ^ m : ℚ)) ((p ^ m : ℚ) / (p : ℚ)) r₁ r₂
+      (powQ_pos p m) (powQ_div_pos p m) hr₁ hr₂
+      (powQ_div_lt p m) hr₁m hr₂m).comp
+    (chartRingEquivBIQNeg p F ϖ m).toRingHom
+
 end FarguesFontaine
 
 end
