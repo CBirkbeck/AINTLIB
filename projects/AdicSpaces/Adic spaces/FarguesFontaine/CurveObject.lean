@@ -49,6 +49,27 @@ theorem presheafValue_subsingleton_of_rationalOpen_empty_huber
     rw [hempty] at hmem
     exact hmem
   exact subsingleton_of_zero_eq_one (isUnit_zero_iff.mp h0)
+/-- Every rational index of an open with empty trace has empty rational
+open (the rational open sits inside the trace). -/
+theorem rationalOpen_eq_empty_of_index {V : Opens ↥(Spa A A⁺)}
+    (hV : (V : Set ↥(Spa A A⁺)) = ∅) (i : RationalIndex V) :
+    rationalOpen i.D.T i.D.s = ∅ := by
+  refine Set.eq_empty_of_forall_notMem fun v hv => ?_
+  have hvs : (⟨v, rationalOpen_subset_spa hv⟩ : ↥(Spa A A⁺)) ∈ spaOpen i.D :=
+    hv
+  have := i.subset hvs
+  rw [hV] at this
+  exact this
+
+/-- **Sections over an empty-trace open are trivial.** -/
+theorem limitSections_subsingleton_of_empty {V : Opens ↥(Spa A A⁺)}
+    (hV : (V : Set ↥(Spa A A⁺)) = ∅) :
+    Subsingleton ↥(limitSections V) := by
+  refine ⟨fun x y => Subtype.ext (funext fun i => ?_)⟩
+  haveI := presheafValue_subsingleton_of_rationalOpen_empty_huber i.D
+    (rationalOpen_eq_empty_of_index hV i)
+  exact Subsingleton.elim _ _
+
 end ValuationSpectrum
 
 namespace FarguesFontaine
@@ -362,6 +383,25 @@ theorem exists_disjoint_translates (y : ↥(yTop p F ϖ)) :
       simp]
     rw [one_smul]] at h2
   exact Set.disjoint_left.mp (hdis k hk) h2 hz2
+
+theorem frobPow_zero : frobPow p F 0 = RingEquiv.refl (Ainf p F) := by
+  show ((frob p F ^ (0 : ℤ) : RingAut (Ainf p F)) : Ainf p F ≃+* Ainf p F) = _
+  rw [zpow_zero]
+  rfl
+
+theorem spaFrob_zero (v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    spaFrob p F 0 v = v := by
+  refine Subtype.ext ?_
+  show comap (frobPow p F 0).toRingHom v.1 = v.1
+  rw [frobPow_zero]
+  exact congr_fun (comap_id) v.1
+
+theorem frobOpens_zero (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    frobOpens p F 0 W = W := by
+  refine Opens.ext ?_
+  ext v
+  show spaFrob p F 0 v ∈ (W : Set _) ↔ v ∈ (W : Set _)
+  rw [spaFrob_zero]
 
 end FarguesFontaine
 
