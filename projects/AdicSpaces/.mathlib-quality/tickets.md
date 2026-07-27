@@ -2373,6 +2373,21 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   Bloc-approximant via mk'_sPow_split (ChartVObj), tail smallness,
   finite-head assembly. K = 1 likely achievable (both zones bound by
   the σ-norm directly); re-verify during implementation.
+  P3d PROGRESS: (ii) exists_twist_deep SHIPPED (6aa457abb); (iii)
+  SHIPPED (gaussValue_p_pow_mul_teichmuller + wLoc_mk'_monomial +
+  mk'_monomial_twist_factor + exists_monomial_twist_data; ChartVObj now
+  imported by RobbaPresentation for sPow/gaussValue_sPow; PERF: a bare
+  rw [mk'_eq_mul_mk'_one, mk'_eq_mul_mk'_one] REWRITES THE mk'(1,s)-TERM
+  the first rewrite created — use show-from-targeted rewrites per mk';
+  ← rw of the twist identity mis-associates — forward calc instead).
+  REMAINING for P3d: (iv) the single-monomial NNReal norm-comparison
+  lemma (wLoc-ρ-of-twisted ≤ K·max-of-two-σ-values via wLoc_mk'_monomial
+  formulas + the zone facts; K = (σ₁/ρ₁)^m-form in the denominator zone,
+  K = 1 numerator); (v) the head/tail first-approximation assembly
+  (exists_evalBI_approx_bloc: finite T-polynomial lift of the head via
+  mk'_sPow_split + per-monomial dispatch, tail small; NOTE the plan is
+  APPROXIMATE-lift (residual ≤ ε), not exact — the correction machinery
+  only needs first-approximations, avoiding the infinite T-regrouping).
   P3d(i) SHIPPED 2026-07-27 (commit 7111e8ef1): teichPowGen +
   algebraMap_p_pow_mul_vp_pow + teichPowGen_pow_mul_twist (the exact
   substitution identity) + exists_twist (maximal-twist normalization
