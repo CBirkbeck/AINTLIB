@@ -1,0 +1,149 @@
+/-
+Copyright (c) 2026 The AINTLIB contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: AINTLIB AI workers
+-/
+import «Adic spaces».FarguesFontaine.BigWindows
+import «Adic spaces».FarguesFontaine.ChartComparison
+import «Adic spaces».FarguesFontaine.UniformizerEquivariance
+
+/-!
+# The Big-window chart rings are the rational-exponent interval rings
+
+`FarguesFontaine.chartRingEquivBIQ` : the presheaf value of the `n`-th
+Big-window chart datum (at the twisted uniformizer `ϖ^{1/p^n}`) is canonically
+ring-isomorphic to `BIQ (1/p^n) (1/p^{n+1})` in the base uniformizer —
+composing the ID2d comparison (`presheafChartRingEquivBISub`), the radius
+rewriting to `vpiQ`-form (the twist bridges), and the on-the-nose
+uniformizer-invariance `BISub_twist`. This normalizes all chart rings onto
+the single `BIQ`-functor, the substrate of the Y-structure presheaf.
+-/
+
+open TopologicalRing ValuationSpectrum WittVector NNReal
+
+set_option linter.overlappingInstances false
+
+noncomputable section
+
+namespace FarguesFontaine
+
+variable (p : ℕ) [Fact (Nat.Prime p)]
+variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
+variable (ϖ : PseudoUniformizer F)
+
+/-- Positivity of the scaled exponents. -/
+theorem invPowQ_pos (s : ℕ) : (0 : ℚ) < 1 / (p ^ s : ℚ) := by
+  have hp : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  positivity
+
+/-- **The Big-window chart's interval ring is `BIQ` at the scaled exponents**
+(nonnegative side): the `[|ϖ_n|, |ϖ_n|^{1/p}]`-interval ring in the twisted
+uniformizer `ϖ_n = ϖ^{1/p^n}` IS `BIQ (1/p^n) (1/p^{n+1})` in the base
+uniformizer, on the nose after the `blocTwistEquiv`-identification of the
+underlying localizations — here stated at the level of the radii. -/
+theorem vpiQ_frobRoot_one (n : ℕ) :
+    vpiQ p F (PseudoUniformizer.frobRoot p F ϖ n) 1
+      = vpiQ p F ϖ (1 / (p ^ n : ℚ)) := by
+  rw [vpiQ_frobRoot p F ϖ n 1]
+
+theorem vpiQ_frobRoot_invP (n : ℕ) :
+    vpiQ p F (PseudoUniformizer.frobRoot p F ϖ n) (1 / (p : ℚ))
+      = vpiQ p F ϖ (1 / (p ^ (n + 1) : ℚ)) := by
+  rw [vpiQ_frobRoot p F ϖ n (1 / (p : ℚ))]
+  congr 1
+  have hp : ((p : ℚ)) ≠ 0 := by
+    exact_mod_cast (Nat.Prime.pos (Fact.out : Nat.Prime p)).ne'
+  field_simp
+  ring
+
+
+/-- `rhoRight` is a rational-exponent radius. -/
+theorem rhoRight_eq_vpiQ (ϖ'' : PseudoUniformizer F) (a b : ℕ) :
+    rhoRight p F ϖ'' a b = vpiQ p F ϖ'' ((b : ℚ) / (a : ℚ)) := by
+  rw [rhoRight, vpiQ]
+  congr 1
+  push_cast
+  rfl
+
+/-- Transport a subring equality of `B^I`'s to a ring equivalence. -/
+noncomputable def biSubringCongr {ρ₁ ρ₂ : NNReal}
+    {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {S T : Subring ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}
+    (h : S = T) : ↥S ≃+* ↥T := by
+  subst h
+  exact RingEquiv.refl _
+
+theorem biSubringCongr_continuous {ρ₁ ρ₂ : NNReal}
+    {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {S T : Subring ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}
+    (h : S = T) : Continuous (biSubringCongr p F h) := by
+  subst h
+  exact continuous_id
+
+/-- The ID2d comparison instantiated at the twisted uniformizer (step 1). -/
+noncomputable def chartEquivStep1 (n : ℕ) :
+    presheafValue (chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1)
+      ≃+* ↥(BISub p F (PseudoUniformizer.frobRoot p F ϖ n)
+          (vpi_pos p F (PseudoUniformizer.frobRoot p F ϖ n))
+          (perfectoidValuation_toOF_lt_one p F (PseudoUniformizer.frobRoot p F ϖ n))
+          (rhoRight_pos p F (PseudoUniformizer.frobRoot p F ϖ n) p 1)
+          (rhoRight_lt_one p F (PseudoUniformizer.frobRoot p F ϖ n) p 1
+            (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos)) :=
+  presheafChartRingEquivBISub p F (PseudoUniformizer.frobRoot p F ϖ n)
+    (hρ₁0 := vpi_pos p F (PseudoUniformizer.frobRoot p F ϖ n))
+    (hρ₁1 := perfectoidValuation_toOF_lt_one p F
+      (PseudoUniformizer.frobRoot p F ϖ n))
+    (hρ₂0 := rhoRight_pos p F (PseudoUniformizer.frobRoot p F ϖ n) p 1)
+    (hρ₂1 := rhoRight_lt_one p F (PseudoUniformizer.frobRoot p F ϖ n) p 1
+      (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos)
+    p 1 (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos
+    (Nat.Prime.one_le (Fact.out : Nat.Prime p)) rfl
+    (by rw [rhoRight_pow_exact p F (PseudoUniformizer.frobRoot p F ϖ n) p 1
+          (Nat.Prime.pos (Fact.out : Nat.Prime p)), pow_one])
+
+/-- Radius rewriting to `vpiQ`-form in the twisted uniformizer (step 2). -/
+noncomputable def chartEquivStep2 (n : ℕ) :
+    ↥(BISub p F (PseudoUniformizer.frobRoot p F ϖ n)
+        (vpi_pos p F (PseudoUniformizer.frobRoot p F ϖ n))
+        (perfectoidValuation_toOF_lt_one p F (PseudoUniformizer.frobRoot p F ϖ n))
+        (rhoRight_pos p F (PseudoUniformizer.frobRoot p F ϖ n) p 1)
+        (rhoRight_lt_one p F (PseudoUniformizer.frobRoot p F ϖ n) p 1
+          (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos))
+      ≃+* ↥(BISub p F (PseudoUniformizer.frobRoot p F ϖ n)
+          (vpiQ_pos p F ϖ (1 / (p ^ n : ℚ)))
+          (vpiQ_lt_one p F ϖ (invPowQ_pos p n))
+          (vpiQ_pos p F ϖ (1 / (p ^ (n + 1) : ℚ)))
+          (vpiQ_lt_one p F ϖ (invPowQ_pos p (n + 1)))) :=
+  biCongr p F (PseudoUniformizer.frobRoot p F ϖ n)
+    (by rw [← vpiQ_frobRoot_one p F ϖ n, vpiQ_one])
+    (by rw [← vpiQ_frobRoot_invP p F ϖ n, rhoRight_eq_vpiQ]
+        norm_num)
+
+/-- Uniformizer-invariance transport (step 3). -/
+noncomputable def chartEquivStep3 (n : ℕ) :
+    ↥(BISub p F (PseudoUniformizer.frobRoot p F ϖ n)
+        (vpiQ_pos p F ϖ (1 / (p ^ n : ℚ)))
+        (vpiQ_lt_one p F ϖ (invPowQ_pos p n))
+        (vpiQ_pos p F ϖ (1 / (p ^ (n + 1) : ℚ)))
+        (vpiQ_lt_one p F ϖ (invPowQ_pos p (n + 1))))
+      ≃+* ↥(BIQ p F ϖ (1 / (p ^ n : ℚ)) (1 / (p ^ (n + 1) : ℚ))
+          (invPowQ_pos p n) (invPowQ_pos p (n + 1))) :=
+  biSubringCongr p F
+    (BISub_twist p F ϖ
+      (hk := pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) n)
+      (teichPi_frobRoot_pow p F ϖ n))
+
+/-- **The chart ring of the `n`-th Big window IS `BIQ (1/p^n) (1/p^{n+1})`**:
+the ID2d comparison at the twisted uniformizer, the radius rewriting, and the
+uniformizer-invariance of `B^I`, composed. -/
+noncomputable def chartRingEquivBIQ (n : ℕ) :
+    presheafValue (chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1)
+      ≃+* ↥(BIQ p F ϖ (1 / (p ^ n : ℚ)) (1 / (p ^ (n + 1) : ℚ))
+          (invPowQ_pos p n) (invPowQ_pos p (n + 1))) :=
+  (chartEquivStep1 p F ϖ n).trans
+    ((chartEquivStep2 p F ϖ n).trans (chartEquivStep3 p F ϖ n))
+
+end FarguesFontaine
+
+end
