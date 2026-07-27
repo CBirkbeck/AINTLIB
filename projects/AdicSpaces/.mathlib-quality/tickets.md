@@ -1763,7 +1763,11 @@ non-Tate bases are supported.
     subset; hcover via the comap-correspondence — rationalOpen has
     Spa-membership BUILT IN, so B-side points pull back through
     comap_canonicalMap_mem_rationalOpen (Tate-free) and push forward
-    by pure comap_vle); (3c) the single-window transport of embedding+
+    by pure comap_vle); ★ 3b DONE
+    (RelativeDescentHuber: mem_imgDatumO_rationalOpen_iff +
+    imgDatumOTot/imgCoversO/imgCoveringO + rationality; PERF: dite-
+    guarded total function instead of dependent attach-image).
+    (3c) the single-window transport of embedding+
     gluing through keystoneO + keystone_restriction_squareO to the
     B_n IsSheafy (isSheafy_presheafChart); (3d) the straddling case
     (window-piece refinement + the adjacent-circle glue via
