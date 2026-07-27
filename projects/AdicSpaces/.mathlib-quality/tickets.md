@@ -1772,7 +1772,14 @@ non-Tate bases are supported.
     single-D₀ gluing transport end-to-end (imgFamily_restriction +
     the transported all-data compatibility + B-glue + keystone
     pullback + choice-coherent recovery); every hypothesis window-
-    dischargeable. REMAINING from 3c: the EMBEDDING-half transport
+    dischargeable. ★ EMBEDDING HALF DONE 2026-07-27
+    (isEmbedding_productRestrictionSub_of_imgCovering — the comparison
+    map + squares + IsInducing/Injective.of_comp cancellation). THE
+    FULL SINGLE-D₀ SHEAF TRANSPORT IS COMPLETE (both IsSheafy-fields).
+    REMAINING: (3c′) the window-instantiation wrapper (supply the B_n
+    instances via isSheafy_presheafChart + the YB6b certificate
+    supplier — near-trivial); (3d) the straddling case; (3e) the
+    Bundled-599 replay; yVObj. (superseded: the EMBEDDING-half transport
     (productRestrictionSub through the keystone equivalences — same
     square machinery, topological); then (3c′) the window-instantiation
     of both halves (IsSheafyOn-single-window). (3c-orig) the single-window transport of embedding+
