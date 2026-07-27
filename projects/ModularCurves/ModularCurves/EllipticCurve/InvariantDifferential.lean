@@ -71,7 +71,7 @@ theorem localPresentationZeroCond (G : EllipticCurveGeom S) (V : S.affineOpens) 
 -- (`localPresentationZeroCond`, `localPresentationZeroSection`) and a local reducibility
 -- downgrade of `projModel` does not help — there is no proof left to break up, so the
 -- budget is raised for this one DATA declaration only.
-set_option maxHeartbeats 800000 in
+set_option maxHeartbeats 6400000 in
 /-- **(T-OM-B1)** A pointed Weierstrass presentation of a geometric elliptic curve over
 an affine open `V`: an elliptic Weierstrass curve over the sections together with a
 pointed chart isomorphism — the per-index data of `WeierstrassAtlasData` at a single
@@ -466,6 +466,7 @@ private lemma projModelBaseChange_congr {R R' : Type u} [CommRing R] [CommRing R
         projModelBaseChange σ W₁ := by
   cases h; simp
 
+set_option maxHeartbeats 6400000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-OM-B4)** The comparison variable change is natural under transport: the
 comparison of the transported presentations is the coefficient base change of the
@@ -577,7 +578,7 @@ private lemma projModelBaseChangeOf_congr_f {U R : Type u} [CommRing U] [CommRin
   subst hf; rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- Double restriction agrees with the composite restriction on chart isomorphisms
 (uniqueness of pullback comparisons, through `projModelBaseChangeOf`). -/
 private lemma transportE_restrict_restrict {VP : S.affineOpens}
@@ -702,7 +703,7 @@ private lemma transportE_restrict_restrict {VP : S.affineOpens}
         P (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p)).symm
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(T-OM-B5 coherence)** Double restriction agrees with the composite restriction on
 comparison variable changes (uniqueness through the chart-isomorphism coherence).
 (Un-`private`d for the engine mouth core's Stage-3 chart-Čech cocycle laws,
@@ -755,6 +756,7 @@ theorem transUnit_restrict_restrict {VP VQ : S.affineOpens}
       (P.restrict (h.trans p)).transUnit (Q.restrict (h.trans q)) := by
   rw [transUnit, transUnit, transVC_restrict_restrict P Q p q h]
 
+set_option maxHeartbeats 6400000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-OM-B7 coherence)** The comparison variable change only depends on the
 presentations through their charts up to the canonical transport: presentations with
@@ -819,7 +821,7 @@ private lemma transportTheta_comp' {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
     simp
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(T-OM-B7 coherence)** Restricting a transported chart agrees with transporting
 to the smaller affine open. -/
 private lemma transportE_restrict_transport {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
@@ -945,7 +947,7 @@ private lemma transportTheta_comp'' {S' : Scheme.{u}} {G' : EllipticCurveGeom S'
     simp
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(T-OM-B7 coherence)** Transporting a restricted chart agrees with transporting
 along the composite. -/
 lemma transportE_transport_restrict {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
@@ -1147,7 +1149,7 @@ private lemma transportTheta_transportTheta {S'' S' : Scheme.{u}}
       pullback.lift_snd, Category.assoc, Scheme.Hom.resLE_comp_resLE]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(T-OM-B7 coherence)** Transporting a transported chart agrees with transporting
 along the composite square. -/
 lemma transportE_transport_transport {S'' S' : Scheme.{u}}
@@ -1487,7 +1489,7 @@ private lemma projMap_transport_heq' {R' : Type u} [CommRing R'] (W : Weierstras
     Proj.map g hg = eqToHom (congrArg projModel e.symm) ≫ Proj.map g' hg' := by
   subst e
   obtain rfl := eq_of_heq hgg
-  simp
+  rw [eqToHom_refl, Category.id_comp]
 
 /-- **(T-OM-B8)** The negation morphism of the projective model is the model
 isomorphism of the negation variable change: both are `Proj.map` of the same graded
@@ -1590,7 +1592,7 @@ private theorem transportTheta_neg (i : G.atlas.ι)
     rw [hconj, pullback.lift_snd]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
+set_option maxHeartbeats 6400000 in
 /-- **(T-OM-B9 core)** Transporting an atlas chart along the inversion square compares
 to its plain restriction by exactly the negation variable change — KM 4.6.2's `{±1}`:
 `[-1]^* ω = −ω` chartwise (through `negModelHom_eq_negVC`). -/
@@ -1670,6 +1672,7 @@ theorem transUnit_transport_neg (i : G.atlas.ι)
   rfl
 
 open Scheme WeierstrassCurve in
+set_option maxHeartbeats 6400000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(E12-B)** Twist a presentation by a variable change: same chart of `E`, the
 model read through `projModelVCIso`. The chart curve becomes `C • P.W`. -/
@@ -1707,7 +1710,7 @@ theorem transVC_ofVC {V : S.affineOpens} (P : LocalPresentation G V)
 
 open Scheme WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 3200000 in
+set_option maxHeartbeats 6400000 in
 /-- **(E12-B)** Twisting commutes with restriction through the base-changed variable
 change: the comparison of the restricted twist against the restriction is the
 coefficient-mapped variable change (`projModelVCIso_map` geometrically). -/
