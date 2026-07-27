@@ -5613,6 +5613,111 @@ theorem resIHomBot_blocToBI {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
     rw [resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 x,
       BIProd_snd p F ϖ hρ₁0 hρ₁1 hσ₁0 hσ₁1 x]
 
+/-- **The case-2 generator's valuation at the bottom endpoint.** -/
+theorem valued_blocToBI_teichPowGen₂_fst (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) (m₀ : ℕ) :
+    Valued.v (((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowGen₂ p F ϖ zb m₀)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+      = ρ₁ ^ m₀ * (perfectoidValuation p F (zb : F))⁻¹ := by
+  rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowGen₂ p F ϖ zb m₀)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+    = BlocToHatK p F ϖ hρ₁0 hρ₁1 (teichPowGen₂ p F ϖ zb m₀) from rfl,
+    valued_BlocToHatK, wLoc_teichPowGen₂ p F ϖ hρ₁0 hρ₁1 zb hzb]
+
+/-- **The case-2 generator's valuation at the top endpoint.** -/
+theorem valued_blocToBI_teichPowGen₂_snd (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) (m₀ : ℕ) :
+    Valued.v (((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (teichPowGen₂ p F ϖ zb m₀)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+      = ρ₂ ^ m₀ * (perfectoidValuation p F (zb : F))⁻¹ := by
+  rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowGen₂ p F ϖ zb m₀)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+    = BlocToHatK p F ϖ hρ₂0 hρ₂1 (teichPowGen₂ p F ϖ zb m₀) from rfl,
+    valued_BlocToHatK, wLoc_teichPowGen₂ p F ϖ hρ₂0 hρ₂1 zb hzb]
+
+/-- **The case-2 generator is a unit of `B_loc`.** -/
+theorem isUnit_teichPowGen₂ (zb : OF F)
+    (hzb : perfectoidValuation p F (zb : F) ≠ 0) (m₀ : ℕ) :
+    IsUnit (teichPowGen₂ p F ϖ zb m₀) := by
+  rw [teichPowGen₂]
+  refine IsUnit.mul ?_ ?_
+  · rw [map_pow]
+    exact (isUnit_p_image p F ϖ).pow m₀
+  · have hu := isUnit_teichmuller_image p F ϖ zb hzb
+    rw [← hu.unit_spec, Ring.inverse_unit]
+    exact hu.unit⁻¹.isUnit
+
+/-- **The case-2 Robba presentation, instantiated** (Kedlaya Lemma 4.9,
+case 2): for a strict interior cut `ρ₁ ≤ σ₂ < ρ₂` realized by an inverse
+Teichmüller generator (`|z̄| = σ₂^{m₀}`), the cut interval ring is the
+quotient of the restricted power series ring over `B^I` by the principal
+ideal on `T - p^{m₀}/[z̄]`. -/
+theorem robba_case2_presentation
+    {σ₂ : NNReal} (hσ₂0 : 0 < σ₂) (hσ₂1 : σ₂ < 1)
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ < ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀) :
+    Nonempty
+      ((↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ⧸ Ideal.span {GeltElt p F ϖ
+            (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+              (teichPowGen₂ p F ϖ zb m₀))})
+      ≃+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)) := by
+  refine (exists_interpolant hρ₁0 hρσ hσρ.le hρ₂1).elim
+    fun θ h => h.elim fun hθ0 h' => h'.elim fun hθ1 hθeq => ?_
+  subst hθeq
+  have hzb : perfectoidValuation p F (zb : F) ≠ 0 := by
+    rw [hgen]
+    exact (pow_pos hσ₂0 m₀).ne'
+  have hgu : IsUnit (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (teichPowGen₂ p F ϖ zb m₀)) :=
+    (isUnit_teichPowGen₂ p F ϖ zb hzb m₀).map
+      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  have hg1 : Valued.v
+      (((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (teichPowGen₂ p F ϖ zb m₀)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ 1 := by
+    rw [valued_blocToBI_teichPowGen₂_fst p F ϖ zb hzb, hgen]
+    exact gen_val_le_one hσ₂0 hρσ m₀
+  have hg2 : 1 < Valued.v
+      (((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (teichPowGen₂ p F ϖ zb m₀)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) := by
+    rw [valued_blocToBI_teichPowGen₂_snd p F ϖ zb hzb, hgen]
+    exact one_lt_gen_val hσ₂0 hσρ m₀ hm₀
+  have hbmem : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀) ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 :=
+    BIProd_mem_BISub p F ϖ _
+  have hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (teichPowGen₂ p F ϖ zb m₀)) ≤ 1 := by
+    refine max_le ?_ ?_
+    · rw [BIProd_fst, valued_BlocToHatK,
+        wLoc_teichPowGen₂ p F ϖ hρ₁0 hρ₁1 zb hzb, hgen]
+      exact gen_val_le_one hσ₂0 hρσ m₀
+    · rw [BIProd_snd, valued_BlocToHatK,
+        wLoc_teichPowGen₂ p F ϖ hσ₂0 hσ₂1 zb hzb, hgen]
+      exact le_of_eq (mul_inv_cancel₀ (pow_pos hσ₂0 m₀).ne')
+  exact nonempty_case2_quotient_equiv p F ϖ
+    (resIHomBot p F ϖ hθ0 hθ1 hσ₂0 hσ₂1)
+    (wI_resIHomBot_le p F ϖ hθ0 hθ1 hσ₂0 hσ₂1)
+    (resIHomBot_blocToBI p F ϖ hθ0 hθ1 hσ₂0 hσ₂1)
+    (resIHomBot_fst p F ϖ hθ0 hθ1 hσ₂0 hσ₂1)
+    hρσ hσρ.le zb m₀ hm₀ hgen hbmem hb rfl
+    (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (teichPowGen₂ p F ϖ zb m₀))
+    hgu (resIHomBot_blocToBI p F ϖ hθ0 hθ1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀))
+    hg1 hg2
+
 end FarguesFontaine
 
 end
