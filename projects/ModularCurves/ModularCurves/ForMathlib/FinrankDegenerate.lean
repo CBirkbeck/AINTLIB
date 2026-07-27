@@ -85,6 +85,8 @@ theorem Scheme.IdealSheafData.exists_mem_germ_ne_zero_of_le {C : Scheme.{u}}
     exact Ideal.mem_map_of_mem _ hf₀
   · simpa only [TopCat.Presheaf.germ_res_apply] using hgerm
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- Sections of an ideal sheaf die in the pushforward algebra of any morphism factoring
 through the subscheme: for `f = g ≫ J.subschemeι` and `a ∈ J.ideal U₀`, the image of `a` in
 the global sections of `pullback f u` (through the chart `u` and the pullback projection)
@@ -206,6 +208,9 @@ theorem Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem {X C : Schem
       J.appTop_pullback_snd_appLE_eq_zero f g hf u U₀ hle a haJ, zero_mul]
   · -- the nonvanishing, through the stalk at `w`
     intro h0
+    haveI : (((Spec (C.affineOpenCover.X (C.affineOpenCover.idx x))).isoSpec.hom
+        w).asIdeal).IsPrime :=
+      ((Spec (C.affineOpenCover.X (C.affineOpenCover.idx x))).isoSpec.hom w).isPrime
     obtain ⟨cc, hcc⟩ := (IsLocalization.map_eq_zero_iff
       (((Spec (C.affineOpenCover.X (C.affineOpenCover.idx x))).isoSpec.hom
         w).asIdeal.primeCompl)
@@ -213,19 +218,19 @@ theorem Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem {X C : Schem
     -- the definition's prime is `primeIdealOf` of `w` over the top of the chart
     have hq : ((Spec (C.affineOpenCover.X (C.affineOpenCover.idx x))).isoSpec.hom w)
         = ((isAffineOpen_top (Spec (C.affineOpenCover.X
-            (C.affineOpenCover.idx x)))).primeIdealOf ⟨w, trivial⟩) := by
+            (C.affineOpenCover.idx x)))).primeIdealOf ⟨w, TopologicalSpace.Opens.mem_top w⟩) := by
       rw [IsAffineOpen.primeIdealOf_eq_map_closedPoint]
       rfl
     -- the germ of the pulled element at `w` is nonzero (stalk map of an open immersion)
     have hgermA : (Spec (C.affineOpenCover.X
-        (C.affineOpenCover.idx x))).presheaf.germ ⊤ w trivial
+        (C.affineOpenCover.idx x))).presheaf.germ ⊤ w (TopologicalSpace.Opens.mem_top w)
         (u.appLE U₀.1 ⊤ hle a) ≠ 0 := by
       rw [show (u.appLE U₀.1 ⊤ hle a)
           = ((Spec (C.affineOpenCover.X (C.affineOpenCover.idx
               x))).presheaf.map (homOfLE hle).op) ((u.app U₀.1) a) from rfl]
       rw [TopCat.Presheaf.germ_res_apply]
       rw [show ((Spec (C.affineOpenCover.X (C.affineOpenCover.idx
-            x))).presheaf.germ (u ⁻¹ᵁ U₀.1) w ((homOfLE hle).le trivial))
+            x))).presheaf.germ (u ⁻¹ᵁ U₀.1) w ((homOfLE hle).le (TopologicalSpace.Opens.mem_top w)))
             ((u.app U₀.1) a)
           = (u.stalkMap w) (C.presheaf.germ U₀.1 (u.base w) hxU₀ a) from
         (Scheme.Hom.germ_stalkMap_apply u U₀.1 w hxU₀ a).symm]
@@ -237,9 +242,9 @@ theorem Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem {X C : Schem
           = (u.stalkMap w) (C.presheaf.germ U₀.1 (u.base w) hxU₀ a) from rfl, hzz, map_zero]))
     -- but the compl-element is a stalk unit, so the germ would vanish
     letI := (Spec (C.affineOpenCover.X (C.affineOpenCover.idx
-      x))).presheaf.algebra_section_stalk (U := ⊤) ⟨w, trivial⟩
+      x))).presheaf.algebra_section_stalk (U := ⊤) ⟨w, TopologicalSpace.Opens.mem_top w⟩
     haveI := (isAffineOpen_top (Spec (C.affineOpenCover.X
-      (C.affineOpenCover.idx x)))).isLocalization_stalk ⟨w, trivial⟩
+      (C.affineOpenCover.idx x)))).isLocalization_stalk ⟨w, TopologicalSpace.Opens.mem_top w⟩
     have hcu : IsUnit (algebraMap
         ↑Γ(Spec (C.affineOpenCover.X (C.affineOpenCover.idx x)), ⊤)
         ↑((Spec (C.affineOpenCover.X (C.affineOpenCover.idx x))).presheaf.stalk w)
@@ -247,7 +252,7 @@ theorem Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem {X C : Schem
       IsLocalization.map_units _
         (⟨cc.1, hq ▸ cc.2⟩ : ((isAffineOpen_top (Spec (C.affineOpenCover.X
           (C.affineOpenCover.idx x)))).primeIdealOf
-            ⟨w, trivial⟩).asIdeal.primeCompl)
+            ⟨w, TopologicalSpace.Opens.mem_top w⟩).asIdeal.primeCompl)
     refine hgermA ?_
     have hmap := congrArg (algebraMap
       ↑Γ(Spec (C.affineOpenCover.X (C.affineOpenCover.idx x)), ⊤)

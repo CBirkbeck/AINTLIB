@@ -990,6 +990,8 @@ theorem epi_pullback_snd_invariantsπ_of_free [Finite G]
       RingHom.flat_algebraMap_iff]
     infer_instance
   haveI : Surjective (invariantsπ G B R) := ⟨invariantsπ_surjective G B R⟩
+  haveI : MorphismProperty.IsStableUnderBaseChangeAlong (@Surjective) j :=
+    ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
   haveI : Surjective (pullback.snd (invariantsπ G B R) j) :=
     MorphismProperty.pullback_snd _ _ ‹Surjective (invariantsπ G B R)›
   exact Flat.epi_of_flat_of_surjective _
