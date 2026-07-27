@@ -2354,8 +2354,22 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   needs wI_evalBI_le — the eval-value bound, mirror wI_evalAr_le at
   Presentation ~1990-2040 — check its exact statement first); (P3d) the
   first-approximation lemma (the per-monomial Kedlaya lift on the
-  Bloc-dense layer); (P3e) exists_correction_sequence_BI +
-  exists_evalBI_eq_of_correction + surjectivity.
+  Bloc-dense layer). ⚠ DESIGN FACT (2026-07-27 re-read of ln 546-561):
+  case 1's lift is NOT norm-≤ like case 3's — Kedlaya (4.9.1) is
+  |z|_ρ ≤ c^{t₀−t}·λ_{I′}(x), a CONSTANT blow-up (the far endpoint vs
+  the cut endpoint). In our radius-1 conventions: monomial x = p^n[x̄],
+  j minimal with |x̄| ≥ c^j (c := |z̄^e|-content), lift y·T^j with
+  y := p^{n+mj}[x̄·z̄^{-ej}] (twist INSIDE the Teichmüller — field F),
+  eval(y·T^j) = p^n[x̄]-image exactly (Teichmüller multiplicativity);
+  norms: v_τ(y) = v_τ(x)·(τ^m c^{-e})^j — at τ = σ₁ (cut) it is ≤
+  v_{σ₁}(x) (ratio ≤ 1 there), at τ = ρ₂ bounded by CONST·v_{σ₁}(x)
+  via j-minimality (|x̄| < c^{j−1}). So the P3d statement is
+  wIRPS f ≤ K·wI-σ(x-image) with an explicit constant K = K(radii),
+  and P3e's correction-iteration approximates to ε/K per round
+  (statement shapes must carry K; exists_chain is generic enough).
+  The constant-K form still gives STRICT surjectivity (open mapping)
+  which is all Lemma 4.9 needs. (P3e) exists_correction_sequence_BI +
+  exists_evalBI_eq_of_correction + surjectivity, K-scaled.
   ALSO note wI_finite_of_isRestricted (Presentation:2265) already
   covers the BISub-restricted-finiteness (isRestricted_iff_wI overlaps
   it — dedupe when porting: keep both names, they differ in direction
