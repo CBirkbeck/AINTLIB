@@ -51,7 +51,7 @@ private lemma projModelEval_comp
     rw [projModelEval_mk, projModelEval_mk]
     simp only [MvPolynomial.eval₂_X, Function.comp_apply]
 
-private theorem projModelFromOfGlobalSectionsOfIsCoprime_naturality
+theorem projModelFromOfGlobalSectionsOfIsCoprime_naturality
     {R : Type u} [CommRing R] {X Y : Scheme.{u}}
     (g : Y ⟶ X) (W : WeierstrassCurve R)
     (f : R →+* Γ(X, (⊤ : X.Opens)))
