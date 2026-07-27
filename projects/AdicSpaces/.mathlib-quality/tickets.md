@@ -87,11 +87,32 @@ The recurring causes, and their fixes, in this codebase:
 * a goal whose *context* is expensive (every tactic step ≈ 1s, e.g. `IsAdic` over a
   subring-of-a-subring) → make the proof a one-step term over named lemmas.
 
-**Remaining**: `Groebner.lean` still has 6 raises, on the largest proofs of the campaign
-(`exists_groebner_family`, `groebner_reduce`, `approx_generation`, `exists_rps_series_limit`,
-`ideal_eq_span_groebner`, `isNoetherianRing_restrictedMvPowerSeries`). Removing them is a real
-decomposition pass — in that context even a 6-line wrapper is over budget, because destructuring
-the 9-component Gröbner existential costs seconds — and is tracked as its own task.
+**Remaining**: `Groebner.lean` is down to ONE raise (2026-07-31 beastmode pass,
+commits 230b6d928..): `ideal_eq_span_groebner` keeps its 8M. REMOVED (all at the
+default 200k now): `exists_groebner_family` (split `exists_groebner_generator` +
+choose-projections + the `himg` abstract-predicate image bridge),
+`groebner_reduce` (the hidden furnace was `set ... with` — it KABSTRACTS the whole
+fat goal and shows up as a 3-4s "rewriteSeq" per set; inline the abbreviations),
+`approx_generation` (`approxRedGoal` private abbrev to keep the wf-induction
+motive one application wide + the abstract-(B,c)-parameter `approx_generation_key`
++ calc-of-named-lemmas for the sum reshuffles), `exists_rps_series_limit` (the
+three-head-rewrite sum-collapse pattern from coeff_partial_sum_BI +
+`sub_add_cancel` instead of ring + congrArg-le for the final),
+`isNoetherianRing_restrictedMvPowerSeries` (choose-projections).
+THE TOOLKIT (binding for the last one and future PERF work): (1) `set x := e
+with h` is a hidden goal-kabstract — never use it under a big goal; (2)
+`.choose`/`.choose_spec`-projections beat `obtain` (no casesOn motive
+synthesis); (3) `congrArg`/`le_of_eq_of_le`/`Eq.trans_le`-chains beat `rw` at
+fat goals; (4) `Or.elim` beats `rcases` (a 17s rcases observed); (5) private
+`abbrev` goals keep induction motives cheap; (6) rfl-provable coercion
+equations (`coe_sub_monomialMul`-style) need NO rewrite at all — `exact`
+across the defeq. `ideal_eq_span_groebner` STATUS: the full conversion set
+(choice-projections, Y-as-let, term-chain inductions for hYnorm/htel/hYn/hUb/
+hsplit, a `span_key_estimate` split) verified at 4M in scratch but the 200k
+fit was not reached — the residual base cost is spread across the giant
+statement + step/choose/hlim blocks; the next attempt should introduce a
+bundled GroebnerPackage structure (one fat elaboration instead of ~40
+giant-type mentions). Non-blocking: the file builds green with the single 8M.
 
 #### AD-9 (2026-07-26) — **special intervals suffice; no general-radius Gröbner theory needed**
 
@@ -3023,6 +3044,28 @@ All in new `FarguesFontaine/RestrictionInjective.lean` (imports Presentation for
 `exists_BIProd_approx`). Source: Kedlaya Cor 4.6 proof (three circles with the weight
 on the vanishing point + endpoint continuity). Generality: interior-parameter
 sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval needed.
+
+### [T910-M] Lemma 4.9 'Moreover' clause: the plus-ring correspondence (spawned 2026-07-31)
+- **Status**: OPEN | **File**: FarguesFontaine/RobbaPresentation.lean | **Parent**: T910
+- **Statement (Kedlaya line 514-516)**: for the case-1/2 presentations at radii in the
+  |ϖ|-grid (our AD-9 σ's are exactly there), the integral closure of the image of
+  `BIPlusIn`-ρ under the presentation equivalence is `BIPlusIn`-σ (the target's unit
+  ball). Repo shape: for `e := (robba_case1_presentation …)-equiv` (or its underlying
+  hom composed with the quotient map), `(BIPlusIn ρ).map (composite) ⊆ BIPlusIn σ` and
+  `integralClosure ((BIPlusIn ρ).map composite) = BIPlusIn σ`.
+- **Sketch (source, eq:Robba-localization-lift tail)**: (⊆) the presentation maps are
+  wI-nonincreasing on the relevant balls (the eval-norm bounds already proven). (⊇,
+  the content) every Teichmüller monomial `x = ϖ^i[x̄]` with `λ_{I'}(x) = 1` has a
+  POWER `x^N` admitting a norm-EXACT lift `z` with `|z|_ρ = 1` (Kedlaya's power trick:
+  after raising to a power, `|x̄ z̄^{-j}| = 1`; the j=0 case is norm-exact already; the
+  norm-exact-lift infra from T911 (ff556c109, exists_evalBI_eq_of_le_one/₂) is the
+  engine). Then a general `z` in the target ball is integral: approximate by monomial
+  combinations, use the power-lift to write `z^N − (image elt)` with strictly smaller
+  norm, and close by completeness/successive approximation (the exists_correction
+  machinery pattern). Integral-closure bookkeeping via `mem_integralClosure`-monic
+  witnesses `X^N − (image elt)`.
+- **Depends**: T910 cases 1-2 (done), T911 norm-exact lifts (done). Non-critical for
+  the curve chain; genuine Def-4.2-fidelity math.
 
 ### [T909a] Three circles for the intermediate values of B^I
 - **Status**: done (2026-07-26) | **Parent**: T909 | **Type**: lemma
