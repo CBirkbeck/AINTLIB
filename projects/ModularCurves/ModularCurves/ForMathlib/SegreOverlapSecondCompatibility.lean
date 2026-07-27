@@ -16,7 +16,7 @@ The first and second standard charts map to a common double homogeneous localiza
 coordinate ratios satisfy the usual projective transition identities there.
 -/
 
-open CategoryTheory AlgebraicGeometry HomogeneousLocalization
+open CategoryTheory Limits AlgebraicGeometry HomogeneousLocalization
 
 noncomputable section
 
@@ -755,5 +755,283 @@ lemma segreProductChartToImageProj_overlap_compatible
         segreProductStandardChartToImageProj R m n a b := by
   rw [segreProductChartOverlapToChart_toImageProj,
     segreProductChartOverlapToSecondChart_toImageProj]
+
+/-- The first-chart presentation of the product overlap, projected to the first factor. -/
+lemma segreProductChartOverlapToChart_fst
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductChartOverlapToChart R m n i a j b ≫
+        (segreProductStandardOpenCover R m n).f (i, j) ≫
+        pullback.fst
+          (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+          (homogeneousProjπ (R := R) (σ := Fin (n + 1))) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductOverlapLeftRingHom R m n i a j b)) ≫
+        coordinateChartMap R (Fin (m + 1)) i := by
+  rw [segreProductStandardOpenCover_f]
+  rw [segreProductStandardChartMap_fst]
+  let localizationMap :=
+    segreProductChartLocalizationMap R m n i a j b
+  let chartInv :=
+    (segreProductStandardChartIsoSpec R m n i j).inv
+  let chartFst :=
+    segreProductStandardChartFst R m n i j
+  let coordinateMap :=
+    coordinateChartMap R (Fin (m + 1)) i
+  let factorMap :=
+    Spec.map
+      (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeLeftRingHom :
+          ProjectiveCoordinateAway R i →+*
+            SegreProductChartRing R m n i j))
+  have hchart :
+      (chartInv ≫ chartFst) ≫ coordinateMap =
+        factorMap ≫ coordinateMap := by
+    exact segreProductStandardChartIsoSpec_inv_fst R m n i j
+  change
+    (localizationMap ≫ chartInv) ≫
+        (chartFst ≫ coordinateMap) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductOverlapLeftRingHom R m n i a j b)) ≫
+        coordinateMap
+  calc
+    _ = localizationMap ≫
+          (chartInv ≫ (chartFst ≫ coordinateMap)) :=
+      Category.assoc localizationMap chartInv
+        (chartFst ≫ coordinateMap)
+    _ = localizationMap ≫
+          ((chartInv ≫ chartFst) ≫ coordinateMap) :=
+      congrArg (fun q => localizationMap ≫ q)
+        (Category.assoc chartInv chartFst coordinateMap).symm
+    _ = localizationMap ≫ (factorMap ≫ coordinateMap) :=
+      congrArg (fun q => localizationMap ≫ q) hchart
+    _ = (localizationMap ≫ factorMap) ≫ coordinateMap :=
+      (Category.assoc localizationMap factorMap coordinateMap).symm
+    _ = _ := by
+      unfold localizationMap factorMap
+        segreProductChartLocalizationMap
+      rw [← Spec.map_comp]
+      rfl
+
+/-- The first-chart presentation of the product overlap, projected to the second factor. -/
+lemma segreProductChartOverlapToChart_snd
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductChartOverlapToChart R m n i a j b ≫
+        (segreProductStandardOpenCover R m n).f (i, j) ≫
+        pullback.snd
+          (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+          (homogeneousProjπ (R := R) (σ := Fin (n + 1))) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductOverlapRightRingHom R m n i a j b)) ≫
+        coordinateChartMap R (Fin (n + 1)) j := by
+  rw [segreProductStandardOpenCover_f]
+  rw [segreProductStandardChartMap_snd]
+  let localizationMap :=
+    segreProductChartLocalizationMap R m n i a j b
+  let chartInv :=
+    (segreProductStandardChartIsoSpec R m n i j).inv
+  let chartSnd :=
+    segreProductStandardChartSnd R m n i j
+  let coordinateMap :=
+    coordinateChartMap R (Fin (n + 1)) j
+  let factorMap :=
+    Spec.map
+      (CommRingCat.ofHom
+        ((Algebra.TensorProduct.includeRight :
+          ProjectiveCoordinateAway R j →ₐ[R]
+            SegreProductChartRing R m n i j).toRingHom))
+  have hchart :
+      (chartInv ≫ chartSnd) ≫ coordinateMap =
+        factorMap ≫ coordinateMap := by
+    exact segreProductStandardChartIsoSpec_inv_snd R m n i j
+  change
+    (localizationMap ≫ chartInv) ≫
+        (chartSnd ≫ coordinateMap) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductOverlapRightRingHom R m n i a j b)) ≫
+        coordinateMap
+  calc
+    _ = localizationMap ≫
+          (chartInv ≫ (chartSnd ≫ coordinateMap)) :=
+      Category.assoc localizationMap chartInv
+        (chartSnd ≫ coordinateMap)
+    _ = localizationMap ≫
+          ((chartInv ≫ chartSnd) ≫ coordinateMap) :=
+      congrArg (fun q => localizationMap ≫ q)
+        (Category.assoc chartInv chartSnd coordinateMap).symm
+    _ = localizationMap ≫ (factorMap ≫ coordinateMap) :=
+      congrArg (fun q => localizationMap ≫ q) hchart
+    _ = (localizationMap ≫ factorMap) ≫ coordinateMap :=
+      (Category.assoc localizationMap factorMap coordinateMap).symm
+    _ = _ := by
+      unfold localizationMap factorMap
+        segreProductChartLocalizationMap
+      rw [← Spec.map_comp]
+      rfl
+
+/-- The second-chart presentation of the product overlap, projected to the first factor. -/
+lemma segreProductChartOverlapToSecondChart_fst
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductChartOverlapToSecondChart R m n i a j b ≫
+        (segreProductStandardOpenCover R m n).f (a, b) ≫
+        pullback.fst
+          (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+          (homogeneousProjπ (R := R) (σ := Fin (n + 1))) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondLeftRingHom R m n i a j b)) ≫
+        coordinateChartMap R (Fin (m + 1)) a := by
+  rw [segreProductStandardOpenCover_f]
+  rw [segreProductStandardChartMap_fst]
+  let transitionMap :=
+    segreProductOverlapToSecondChartSpec R m n i a j b
+  let chartInv :=
+    (segreProductStandardChartIsoSpec R m n a b).inv
+  let chartFst :=
+    segreProductStandardChartFst R m n a b
+  let coordinateMap :=
+    coordinateChartMap R (Fin (m + 1)) a
+  let factorMap :=
+    Spec.map
+      (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeLeftRingHom :
+          ProjectiveCoordinateAway R a →+*
+            SegreProductChartRing R m n a b))
+  have hchart :
+      (chartInv ≫ chartFst) ≫ coordinateMap =
+        factorMap ≫ coordinateMap := by
+    exact segreProductStandardChartIsoSpec_inv_fst R m n a b
+  have hcat :
+      CommRingCat.ofHom
+            (Algebra.TensorProduct.includeLeftRingHom :
+              ProjectiveCoordinateAway R a →+*
+                SegreProductChartRing R m n a b) ≫
+          CommRingCat.ofHom
+            (segreProductSecondChartAlgHom
+              R m n i a j b).toRingHom =
+        CommRingCat.ofHom
+          (segreProductSecondLeftRingHom
+            R m n i a j b) := by
+    ext x
+    exact
+      DFunLike.congr_fun
+        (segreProductSecondChartAlgHom_comp_left
+          R m n i a j b) x
+  have hfactor :
+      transitionMap ≫ factorMap =
+        Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondLeftRingHom
+              R m n i a j b)) := by
+    unfold transitionMap factorMap
+      segreProductOverlapToSecondChartSpec
+    rw [← Spec.map_comp, hcat]
+  change
+    (transitionMap ≫ chartInv) ≫
+        (chartFst ≫ coordinateMap) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondLeftRingHom R m n i a j b)) ≫
+        coordinateMap
+  calc
+    _ = transitionMap ≫
+          (chartInv ≫ (chartFst ≫ coordinateMap)) :=
+      Category.assoc transitionMap chartInv
+        (chartFst ≫ coordinateMap)
+    _ = transitionMap ≫
+          ((chartInv ≫ chartFst) ≫ coordinateMap) :=
+      congrArg (fun q => transitionMap ≫ q)
+        (Category.assoc chartInv chartFst coordinateMap).symm
+    _ = transitionMap ≫ (factorMap ≫ coordinateMap) :=
+      congrArg (fun q => transitionMap ≫ q) hchart
+    _ = (transitionMap ≫ factorMap) ≫ coordinateMap :=
+      (Category.assoc transitionMap factorMap coordinateMap).symm
+    _ = _ := congrArg (fun q => q ≫ coordinateMap) hfactor
+
+/-- The second-chart presentation of the product overlap, projected to the second factor. -/
+lemma segreProductChartOverlapToSecondChart_snd
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductChartOverlapToSecondChart R m n i a j b ≫
+        (segreProductStandardOpenCover R m n).f (a, b) ≫
+        pullback.snd
+          (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+          (homogeneousProjπ (R := R) (σ := Fin (n + 1))) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondRightRingHom R m n i a j b)) ≫
+        coordinateChartMap R (Fin (n + 1)) b := by
+  rw [segreProductStandardOpenCover_f]
+  rw [segreProductStandardChartMap_snd]
+  let transitionMap :=
+    segreProductOverlapToSecondChartSpec R m n i a j b
+  let chartInv :=
+    (segreProductStandardChartIsoSpec R m n a b).inv
+  let chartSnd :=
+    segreProductStandardChartSnd R m n a b
+  let coordinateMap :=
+    coordinateChartMap R (Fin (n + 1)) b
+  let factorMap :=
+    Spec.map
+      (CommRingCat.ofHom
+        ((Algebra.TensorProduct.includeRight :
+          ProjectiveCoordinateAway R b →ₐ[R]
+            SegreProductChartRing R m n a b).toRingHom))
+  have hchart :
+      (chartInv ≫ chartSnd) ≫ coordinateMap =
+        factorMap ≫ coordinateMap := by
+    exact segreProductStandardChartIsoSpec_inv_snd R m n a b
+  have hcat :
+      CommRingCat.ofHom
+            ((Algebra.TensorProduct.includeRight :
+              ProjectiveCoordinateAway R b →ₐ[R]
+                SegreProductChartRing R m n a b).toRingHom) ≫
+          CommRingCat.ofHom
+            (segreProductSecondChartAlgHom
+              R m n i a j b).toRingHom =
+        CommRingCat.ofHom
+          (segreProductSecondRightRingHom
+            R m n i a j b) := by
+    ext x
+    exact
+      DFunLike.congr_fun
+        (segreProductSecondChartAlgHom_comp_right
+          R m n i a j b) x
+  have hfactor :
+      transitionMap ≫ factorMap =
+        Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondRightRingHom
+              R m n i a j b)) := by
+    unfold transitionMap factorMap
+      segreProductOverlapToSecondChartSpec
+    rw [← Spec.map_comp, hcat]
+  change
+    (transitionMap ≫ chartInv) ≫
+        (chartSnd ≫ coordinateMap) =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondRightRingHom R m n i a j b)) ≫
+        coordinateMap
+  calc
+    _ = transitionMap ≫
+          (chartInv ≫ (chartSnd ≫ coordinateMap)) :=
+      Category.assoc transitionMap chartInv
+        (chartSnd ≫ coordinateMap)
+    _ = transitionMap ≫
+          ((chartInv ≫ chartSnd) ≫ coordinateMap) :=
+      congrArg (fun q => transitionMap ≫ q)
+        (Category.assoc chartInv chartSnd coordinateMap).symm
+    _ = transitionMap ≫ (factorMap ≫ coordinateMap) :=
+      congrArg (fun q => transitionMap ≫ q) hchart
+    _ = (transitionMap ≫ factorMap) ≫ coordinateMap :=
+      (Category.assoc transitionMap factorMap coordinateMap).symm
+    _ = _ := congrArg (fun q => q ≫ coordinateMap) hfactor
 
 end MvPolynomial

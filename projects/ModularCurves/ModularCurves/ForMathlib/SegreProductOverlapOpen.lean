@@ -74,7 +74,8 @@ private lemma opensRange_segreProductStandardChartMap
       (segreProductStandardChartMap_isOpenImmersion R m n i j) = _ at h
   exact h
 
-private lemma segreProductStandardChartMap_fst
+/-- The standard product-chart map followed by the first product projection. -/
+lemma segreProductStandardChartMap_fst
     (R : Type u) [CommRing R] (m n : ℕ)
     (i : Fin (m + 1)) (j : Fin (n + 1)) :
     segreProductStandardChartMap R m n i j ≫
@@ -87,7 +88,8 @@ private lemma segreProductStandardChartMap_fst
   change pullback.lift _ _ _ ≫ pullback.fst _ _ = _
   exact pullback.lift_fst _ _ _
 
-private lemma segreProductStandardChartMap_snd
+/-- The standard product-chart map followed by the second product projection. -/
+lemma segreProductStandardChartMap_snd
     (R : Type u) [CommRing R] (m n : ℕ)
     (i : Fin (m + 1)) (j : Fin (n + 1)) :
     segreProductStandardChartMap R m n i j ≫
