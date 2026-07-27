@@ -5,6 +5,7 @@ Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.BigWindows
 import «Adic spaces».FarguesFontaine.ChartSpa
+import «Adic spaces».FarguesFontaine.FrobeniusGauss
 
 /-!
 # The interval-trace basis of `Y` (D-ii-1)
@@ -142,6 +143,144 @@ theorem isOpen_intervalTrace_dyadic (s j₁ j₂ : ℕ)
         (chartS p F (PseudoUniformizer.frobRoot p F ϖ s) 1 j₂)} from by
     rw [← intervalTrace_dyadic_eq_rationalOpen p F ϖ s j₁ j₂ hj₁ hj₂]]
   exact isOpen_rationalOpen_trace (chartT_nonempty p F _ 1 (j₁ + j₂ - 1)) _
+
+/-- **A dyadic interval index**: exponents `(j₁/p^s, j₂/p^s)`, decreasing. -/
+structure DyadicIdx where
+  /-- The denominator exponent. -/
+  s : ℕ
+  /-- The larger numerator (the smaller radius' exponent). -/
+  j₁ : ℕ
+  /-- The smaller numerator. -/
+  j₂ : ℕ
+  /-- Positivity of the smaller numerator. -/
+  hj₂ : 0 < j₂
+  /-- The exponents decrease. -/
+  hlt : j₂ < j₁
+
+namespace DyadicIdx
+
+/-- The larger rational exponent. -/
+def q₁ (i : DyadicIdx) : ℚ := (i.j₁ : ℚ) / ((p : ℚ) ^ i.s)
+
+/-- The smaller rational exponent. -/
+def q₂ (i : DyadicIdx) : ℚ := (i.j₂ : ℚ) / ((p : ℚ) ^ i.s)
+
+theorem hj₁ (i : DyadicIdx) : 0 < i.j₁ := lt_trans i.hj₂ i.hlt
+
+theorem q₁_pos [Fact (Nat.Prime p)] (i : DyadicIdx) : 0 < i.q₁ p := by
+  have hp : (0 : ℚ) < p := by
+    exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
+  have hj : (0 : ℚ) < (i.j₁ : ℚ) := by exact_mod_cast i.hj₁
+  rw [q₁]
+  positivity
+
+theorem q₂_pos [Fact (Nat.Prime p)] (i : DyadicIdx) : 0 < i.q₂ p := by
+  have hp : (0 : ℚ) < p := by
+    exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
+  have hj : (0 : ℚ) < (i.j₂ : ℚ) := by exact_mod_cast i.hj₂
+  rw [q₂]
+  positivity
+
+theorem q₂_lt_q₁ [Fact (Nat.Prime p)] (i : DyadicIdx) : i.q₂ p < i.q₁ p := by
+  have hp : (0 : ℚ) < (p : ℚ) ^ i.s := by
+    have : (0 : ℚ) < p := by
+      exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
+    positivity
+  rw [q₁, q₂]
+  gcongr
+  exact_mod_cast i.hlt
+
+/-- The nesting relation: `i'`'s interval is contained in `i`'s. -/
+def Nested (i' i : DyadicIdx) : Prop :=
+  i.q₂ p ≤ i'.q₂ p ∧ i'.q₁ p ≤ i.q₁ p
+
+theorem Nested.mem₁ [Fact (Nat.Prime p)] {i' i : DyadicIdx}
+    (h : Nested p i' i) : i.q₂ p ≤ i'.q₁ p ∧ i'.q₁ p ≤ i.q₁ p :=
+  ⟨le_trans (le_trans h.1 (i'.q₂_lt_q₁ p).le) le_rfl, h.2⟩
+
+theorem Nested.mem₂ [Fact (Nat.Prime p)] {i' i : DyadicIdx}
+    (h : Nested p i' i) : i.q₂ p ≤ i'.q₂ p ∧ i'.q₂ p ≤ i.q₁ p :=
+  ⟨h.1, le_trans (i'.q₂_lt_q₁ p).le h.2⟩
+
+end DyadicIdx
+
+
+variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
+variable (ϖ : PseudoUniformizer F)
+
+/-- The interval ring at a dyadic index. -/
+noncomputable def dyadicVal (i : DyadicIdx) : Type _ :=
+  ↥(BIQ p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p))
+
+noncomputable instance (i : DyadicIdx) : CommRing (dyadicVal p F ϖ i) := by
+  rw [dyadicVal]
+  infer_instance
+
+/-- The restriction between nested dyadic indices. -/
+noncomputable def dyadicRes {i' i : DyadicIdx} (h : DyadicIdx.Nested p i' i) :
+    dyadicVal p F ϖ i →+* dyadicVal p F ϖ i' :=
+  biResQ' p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p)
+    (i.q₁_pos p) (i.q₂_pos p) (i'.q₁_pos p) (i'.q₂_pos p)
+    (i.q₂_lt_q₁ p) (h.mem₁ p) (h.mem₂ p)
+
+/-- The trace of a dyadic index on `Y`. -/
+def dyadicTrace (i : DyadicIdx) : Set (Spv (Ainf p F)) :=
+  intervalTrace p F ϖ (i.q₁ p) (i.q₂ p)
+
+/-- **The limit sections over the dyadic basis inside a set `W`**: compatible
+families of interval-ring elements, one per dyadic trace contained in `W`. -/
+noncomputable def limitSectionsY (W : Set (Spv (Ainf p F))) :
+    Subring (Π i : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆ W},
+      dyadicVal p F ϖ i.1) where
+  carrier := {f | ∀ (i' i : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆ W})
+    (h : DyadicIdx.Nested p i'.1 i.1), dyadicRes p F ϖ h (f i) = f i'}
+  zero_mem' := by
+    intro i' i h
+    show dyadicRes p F ϖ h 0 = 0
+    exact map_zero _
+  one_mem' := by
+    intro i' i h
+    show dyadicRes p F ϖ h 1 = 1
+    exact map_one _
+  add_mem' := by
+    intro f g hf hg i' i h
+    show dyadicRes p F ϖ h (f i + g i) = f i' + g i'
+    rw [map_add, hf i' i h, hg i' i h]
+  mul_mem' := by
+    intro f g hf hg i' i h
+    show dyadicRes p F ϖ h (f i * g i) = f i' * g i'
+    rw [map_mul, hf i' i h, hg i' i h]
+  neg_mem' := by
+    intro f hf i' i h
+    show dyadicRes p F ϖ h (-(f i)) = -(f i')
+    rw [map_neg, hf i' i h]
+
+
+/-- **The presheaf restriction**: sections over `W` restrict to sections over
+any `W' ⊆ W` by re-indexing. -/
+noncomputable def limitRestrictY {W' W : Set (Spv (Ainf p F))} (hW : W' ⊆ W) :
+    ↥(limitSectionsY p F ϖ W) →+* ↥(limitSectionsY p F ϖ W') where
+  toFun f := ⟨fun i => f.1 ⟨i.1, Set.Subset.trans i.2 hW⟩,
+    fun i' i h => f.2 ⟨i'.1, Set.Subset.trans i'.2 hW⟩
+      ⟨i.1, Set.Subset.trans i.2 hW⟩ h⟩
+  map_one' := rfl
+  map_mul' _ _ := rfl
+  map_zero' := rfl
+  map_add' _ _ := rfl
+
+/-- Restriction to the same set is the identity. -/
+theorem limitRestrictY_id {W : Set (Spv (Ainf p F))} :
+    limitRestrictY p F ϖ (le_refl W)
+      = RingHom.id ↥(limitSectionsY p F ϖ W) :=
+  rfl
+
+/-- Restrictions compose. -/
+theorem limitRestrictY_comp {W'' W' W : Set (Spv (Ainf p F))}
+    (h₁ : W'' ⊆ W') (h₂ : W' ⊆ W) :
+    (limitRestrictY p F ϖ h₁).comp (limitRestrictY p F ϖ h₂)
+      = limitRestrictY p F ϖ (Set.Subset.trans h₁ h₂) :=
+  rfl
 
 end FarguesFontaine
 

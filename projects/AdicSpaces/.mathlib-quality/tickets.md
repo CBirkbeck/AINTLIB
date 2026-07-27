@@ -1169,12 +1169,23 @@ non-Tate bases are supported.
     κ' ∈ [1/j₁, 1/j₂] chart of the p^s-th root uniformizer, via the
     (1,j₁,1,j₂)-datum and typed collapse-haves — and
     isOpen_intervalTrace_dyadic). The dyadic traces form an OPEN BASIS
-    substrate. NEXT: the limit-over-basis presheaf (limitSections-style over
-    dyadic basis-intervals inside an open of Y; adapt SheafyPair/
-    StructurePresheafBundled shapes) — note the dyadic datum is a
-    chartS-1-j₂-datum, so the ID2 machinery (sheafiness at nat-power
-    endpoints in ϖ_s) applies to REFINED dyadic charts too if needed for the
-    sheaf condition, not only the Big windows; (D-ii-2) the sheaf condition: per-window via
+    substrate. THE PRESHEAF CONSTRUCTION DONE 2026-07-27
+    (YPresheaf.lean): DyadicIdx (the index structure with q₁/q₂-exponents,
+    positivity, ordering, and the Nested relation with mem-lemmas),
+    dyadicVal/dyadicRes (values BIQ, restrictions biResQ'), dyadicTrace, the
+    limit subring **limitSectionsY W** (compatible families over dyadic
+    traces inside W), and **limitRestrictY** with id/comp laws BY RFL. The
+    Y-structure presheaf exists as a functor on the poset of subsets of Y.
+    NEXT (D-ii-2, the sheaf condition): (a) the values-on-basis comparison
+    𝒪(dyadic-trace) ≅ BIQ (the cofinality argument: the compatible-family
+    at a trace is determined by its value at the top index — needs the
+    directedness of the dyadic indices inside a trace and the injectivity of
+    the restrictions toward smaller intervals — resIHom_injective-style from
+    RestrictionInjective!); (b) separation + gluing over covers via the
+    per-chart sheafiness (isSheafy_presheafChart applies to ALL dyadic
+    charts, noted above); (c) the topology on limitSectionsY (product-
+    induced) and the embedding condition. The ID2-sheafiness note stands:
+    dyadic data are chartS-1-b-shaped. (D-ii-2) the sheaf condition: per-window via
     isSheafy_presheafChart + spaChartHomeoBigWindow + windowResBIQ,
     refinement via the rational basis; (D-ii-3) VPreObj packaging: stalks +
     valuations (stalk theory over the sheafy charts); (D-iii) φ-action:
