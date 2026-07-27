@@ -826,6 +826,75 @@ theorem limitFrobHom_add (k l : ℤ)
   refine congrArg _ ?_
   exact (h3.trans h4).symm
 
+/-- The carrier-level translate shift (subtraction-free form). -/
+theorem map_yFrobTop_shift (m : ℤ) (W : Opens ↥(yTop p F ϖ)) :
+    (Opens.map (yFrobTop p F ϖ 1)).obj
+        ((Opens.map (yFrobTop p F ϖ m)).obj W)
+      = (Opens.map (yFrobTop p F ϖ (1 + m))).obj W := by
+  refine Opens.ext ?_
+  ext y
+  show yFrobTop p F ϖ m (yFrobTop p F ϖ 1 y) ∈ (W : Set _)
+    ↔ yFrobTop p F ϖ (1 + m) y ∈ (W : Set _)
+  rw [← yFrobTop_add p F ϖ 1 m y]
+
+/-- **The piece shift** (subtraction-free): the Frobenius preimage of the
+`m`-th translate piece is the `(1+m)`-th. -/
+theorem piece_shift (m : ℤ) (W : Opens ↥(yTop p F ϖ)) :
+    frobOpens p F 1 ((yFunctor p F ϖ).obj
+        ((Opens.map (yFrobTop p F ϖ m)).obj W))
+      = (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ (1 + m))).obj W) := by
+  rw [yFunctor_frobOpens p F ϖ 1 ((Opens.map (yFrobTop p F ϖ m)).obj W)]
+  rw [map_yFrobTop_shift p F ϖ m W]
+
+/-- Inversion of the additivity identity: the double transport is the
+restriction of the sum transport. -/
+theorem limitFrobHom_double (k l : ℤ)
+    (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (s : ↥(limitSections W)) :
+    limitFrobHom p F k (frobOpens p F l W) (limitFrobHom p F l W s)
+      = limitRestrict (le_of_eq (frobOpens_add p F k l W).symm)
+          (limitFrobHom p F (k + l) W s) := by
+  rw [limitFrobHom_add p F k l W s]
+  have hcomp := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (frobOpens_add p F k l W).symm)
+    (le_of_eq (frobOpens_add p F k l W))))
+    (limitFrobHom p F k (frobOpens p F l W) (limitFrobHom p F l W s))
+  have hid := congr_fun (congrArg DFunLike.coe (limitRestrict_id
+    (frobOpens p F k (frobOpens p F l W))))
+    (limitFrobHom p F k (frobOpens p F l W) (limitFrobHom p F l W s))
+  exact (hcomp.trans hid).symm
+
+/-- **The translate-family recurrence** (subtraction-free): the generator
+transport carries the `m`-th piece to the `(1+m)`-th. -/
+theorem translateFam_succ (m : ℤ) (W : Opens ↥(yTop p F ϖ))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    limitRestrict (le_of_eq (piece_shift p F ϖ m W))
+        (translateFam p F ϖ W s (1 + m))
+      = limitFrobHom p F 1
+          ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ m)).obj W))
+          (translateFam p F ϖ W s m) := by
+  show limitRestrict (le_of_eq (piece_shift p F ϖ m W))
+      (limitRestrict (le_of_eq (yFunctor_frobOpens p F ϖ (1 + m) W).symm)
+        (limitFrobHom p F (1 + m) ((yFunctor p F ϖ).obj W) s))
+    = limitFrobHom p F 1
+        ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ m)).obj W))
+        (limitRestrict (le_of_eq (yFunctor_frobOpens p F ϖ m W).symm)
+          (limitFrobHom p F m ((yFunctor p F ϖ).obj W) s))
+  rw [limitFrobHom_limitRestrict p F 1
+    (le_of_eq (yFunctor_frobOpens p F ϖ m W).symm)
+    (limitFrobHom p F m ((yFunctor p F ϖ).obj W) s)]
+  rw [limitFrobHom_double p F 1 m ((yFunctor p F ϖ).obj W) s]
+  have h1 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (piece_shift p F ϖ m W))
+    (le_of_eq (yFunctor_frobOpens p F ϖ (1 + m) W).symm)))
+    (limitFrobHom p F (1 + m) ((yFunctor p F ϖ).obj W) s)
+  have h2 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (frobOpens_mono p F 1
+      (le_of_eq (yFunctor_frobOpens p F ϖ m W).symm))
+    (le_of_eq (frobOpens_add p F 1 m ((yFunctor p F ϖ).obj W)).symm)))
+    (limitFrobHom p F (1 + m) ((yFunctor p F ϖ).obj W) s)
+  exact h1.trans h2.symm
+
 end FarguesFontaine
 
 end
