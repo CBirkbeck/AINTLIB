@@ -2393,10 +2393,14 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   B_{ρ₂}/B_{σ₁} = (σ₁/ρ₂)^{k−e} ≤ 1. Numerator zone (i ≥ k): j = 0,
   profile increasing, K = 1 both radii. exists_twist/exists_twist_deep
   stay shipped (unused by the assembly; potentially useful elsewhere).
-  REMAINING for P3d: (iv) exists_monomial_twist_div (j := (k−i)/m,
-  divisibility from the direct hypothesis v(c) ≤ v(zb)^{(k−i)/m}) + the
-  single-monomial norm-comparison lemma (pure pow-arithmetic per the
-  ratios above); (v) the head/tail first-approximation assembly
+  (iv) DONE 2026-07-27: exists_monomial_twist_div (6b1b16d73),
+  pow_mul_pow_le_of_le (ec1b80dde), perfectoidValuation_twist_factor +
+  twisted_formula_le (the denominator-zone comparison, formula level —
+  B_{ρ₂} ≤ A_{σ₁} exact and B_{ρ₁} ≤ σ₁^m(ρ₁^m)⁻¹·A_{σ₁} — via
+  div_le_div_iff₀ POSITIVITY-form args + mul_le_mul_left for right-
+  constant factors). STILL NEEDED for (v): the numerator-zone twin
+  (A_{ρ₁} ≤ A_{σ₁} for k ≤ i — same engine, 10 lines) and then
+  (v) the head/tail first-approximation assembly
   (exists_evalBI_approx_bloc: finite T-polynomial lift of the head via
   mk'_sPow_split + per-monomial dispatch, tail small; NOTE the plan is
   APPROXIMATE-lift (residual ≤ ε), not exact — the correction machinery
