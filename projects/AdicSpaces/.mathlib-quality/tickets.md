@@ -1175,9 +1175,17 @@ non-Tate bases are supported.
     power modulus; biPhi : B^{[ρ₁,ρ₂]} →+* B^{[ρ₁^p,ρ₂^p]} + dense-layer
     identity biPhi_blocToBI). Direction note: on vpiQ-exponents biPhi is
     exponent-times-p (W_n-ring → W_{n-1}-ring, the function-side of κ↦pκ).
-    REMAINING D-iii: biPhi iso-property (inverse from frob.symm through the
-    same extension), φ-compatibility with biResQ' (dense equalizer), the
-    BIQ-reindexing wrapper, and X := Y/φ^ℤ via Curve.lean + descent. DEFERRED
+    biPhi ISO DONE 2026-07-27: frobBlocSymm (unit condition
+    via the Teichmüller-root x·x^{p-1} = x^p trick) with algebraMap-identity
+    and both Bloc round-trips; wLoc_frobBlocSymm (inverse radius-change,
+    free from the forward law + round-trip); uniformContinuous_frobSymmToBI
+    (root modulus, le_of_pow_le_pow); biPhiInv + dense-layer identity;
+    biPhi/biPhiInv continuity; the round-trips by dense equalizer; and
+    **biPhiEquiv : B^{[ρ₁,ρ₂]} ≃+* B^{[ρ₁^p,ρ₂^p]}** — the Frobenius
+    equivalence of interval rings, bicontinuous. REMAINING D-iii:
+    φ-compatibility with biResQ' (dense equalizer square), the
+    BIQ-reindexing wrapper (exponent-times-p), and X := Y/φ^ℤ via
+    Curve.lean + descent. DEFERRED
     (profiler task): composite chartRingEquivBIQ-continuity (step-3 kernel
     grind) and hence windowResBIQ-continuity — needed by D-ii-2's topology
     half; the unfolded four-step comp restatement is the likely fix. Negative-side mirror DONE 2026-07-27

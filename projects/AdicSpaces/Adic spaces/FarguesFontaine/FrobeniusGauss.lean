@@ -231,6 +231,282 @@ theorem biPhi_blocToBI (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
     (uniformContinuous_frobToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
       (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1).continuous z
 
+/-- The inverse Frobenius sends the inverted element to a unit of `Bloc`. -/
+theorem isUnit_frobSymm_p_teichPi_image (y : Submonoid.powers
+    ((p : Ainf p F) * teichPi p F ϖ)) :
+    IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ)
+      ((frob p F).symm (y : Ainf p F))) := by
+  obtain ⟨k, hk⟩ := y.2
+  rw [show (y : Ainf p F) = ((p : Ainf p F) * teichPi p F ϖ) ^ k from hk.symm,
+    map_pow, map_pow]
+  refine IsUnit.pow k ?_
+  rw [map_mul, map_natCast, map_mul]
+  refine (isUnit_p_image p F ϖ).mul ?_
+  -- the Teichmüller root is a unit since its p-th power is
+  refine isUnit_of_mul_isUnit_left
+    (y := algebraMap (Ainf p F) (Bloc p F ϖ)
+      ((frob p F).symm (teichPi p F ϖ)) ^ (p - 1)) ?_
+  rw [← pow_succ']
+  rw [show p - 1 + 1 = p from by
+    have := Nat.Prime.pos (Fact.out : Nat.Prime p)
+    omega]
+  have hpow : (frob p F).symm (teichPi p F ϖ) ^ p = teichPi p F ϖ := by
+    have h := congrArg (frob p F).symm (frob_teichPi p F ϖ)
+    rw [RingEquiv.symm_apply_apply] at h
+    rw [← map_pow, ← h]
+  rw [← map_pow, hpow]
+  exact isUnit_teichPi_image p F ϖ
+
+/-- **The inverse Frobenius on `Bloc`.** -/
+noncomputable def frobBlocSymm : Bloc p F ϖ →+* Bloc p F ϖ :=
+  IsLocalization.lift (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))
+    (g := (algebraMap (Ainf p F) (Bloc p F ϖ)).comp
+      ((frob p F).symm : Ainf p F ≃+* Ainf p F).toRingHom)
+    (fun y => isUnit_frobSymm_p_teichPi_image p F ϖ y)
+
+@[simp]
+theorem frobBlocSymm_algebraMap (x : Ainf p F) :
+    frobBlocSymm p F ϖ (algebraMap (Ainf p F) (Bloc p F ϖ) x)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((frob p F).symm x) :=
+  IsLocalization.lift_eq _ x
+
+/-- The Frobenius round-trip on `Bloc` (forward-after-inverse). -/
+theorem frobBloc_frobBlocSymm (z : Bloc p F ϖ) :
+    frobBloc p F ϖ (frobBlocSymm p F ϖ z) = z := by
+  have hext : (frobBloc p F ϖ).comp (frobBlocSymm p F ϖ)
+      = RingHom.id (Bloc p F ϖ) := by
+    refine IsLocalization.ringHom_ext
+      (Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) ?_
+    ext x
+    show frobBloc p F ϖ (frobBlocSymm p F ϖ
+      (algebraMap (Ainf p F) (Bloc p F ϖ) x))
+      = algebraMap (Ainf p F) (Bloc p F ϖ) x
+    rw [frobBlocSymm_algebraMap, frobBloc_algebraMap,
+      RingEquiv.apply_symm_apply]
+  exact congrFun (congrArg (fun f => f.toFun) hext) z
+
+/-- The Frobenius round-trip on `Bloc` (inverse-after-forward). -/
+theorem frobBlocSymm_frobBloc (z : Bloc p F ϖ) :
+    frobBlocSymm p F ϖ (frobBloc p F ϖ z) = z := by
+  have hext : (frobBlocSymm p F ϖ).comp (frobBloc p F ϖ)
+      = RingHom.id (Bloc p F ϖ) := by
+    refine IsLocalization.ringHom_ext
+      (Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) ?_
+    ext x
+    show frobBlocSymm p F ϖ (frobBloc p F ϖ
+      (algebraMap (Ainf p F) (Bloc p F ϖ) x))
+      = algebraMap (Ainf p F) (Bloc p F ϖ) x
+    rw [frobBloc_algebraMap, frobBlocSymm_algebraMap,
+      RingEquiv.symm_apply_apply]
+  exact congrFun (congrArg (fun f => f.toFun) hext) z
+
+/-- **The inverse radius-change law**: `w_ρ(φ⁻¹ z)^p = w_{ρ^p}(z)`. -/
+theorem wLoc_frobBlocSymm {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hρp0 : 0 < ρ ^ p) (hρp1 : ρ ^ p < 1) (z : Bloc p F ϖ) :
+    wLoc p F ϖ hρ0 hρ1 (frobBlocSymm p F ϖ z) ^ p
+      = wLoc p F ϖ hρp0 hρp1 z := by
+  have h := wLoc_frobBloc p F ϖ hρ0 hρ1 hρp0 hρp1 (frobBlocSymm p F ϖ z)
+  rw [frobBloc_frobBlocSymm] at h
+  exact h.symm
+
+
+
+/-- **The inverse Frobenius is uniformly continuous** from the
+`[ρ₁^p,ρ₂^p]`-uniformity to the `[ρ₁,ρ₂]`-diagonal (root modulus). -/
+theorem uniformContinuous_frobSymmToBI
+    (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
+    @UniformContinuous _ _ (blocWIUniformSpace p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) _
+      ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).comp (frobBlocSymm p F ϖ)) := by
+  have hppos : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  haveI : IsUniformAddGroup (Bloc p F ϖ) :=
+    isUniformAddGroup_blocWI p F ϖ
+  haveI : IsUniformAddGroup ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    isUniformAddGroup_BISub p F ϖ
+  refine uniformContinuous_of_tendsto_zero ?_
+  rw [tendsto_subtype_rng]
+  have hcoe : (fun z => (((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).comp
+      (frobBlocSymm p F ϖ) z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      = fun z => BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (frobBlocSymm p F ϖ z) := rfl
+  rw [hcoe]
+  intro U hU
+  rw [Filter.mem_map]
+  obtain ⟨ε, hε, hball⟩ := exists_wI_ball_subset p F
+    (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hU
+  have hδ : (0 : NNReal) < ε ^ p := pow_pos hε p
+  have hnhd : {w : (hatK p F hρ₁p0 hρ₁p1) × (hatK p F hρ₂p0 hρ₂p1) |
+      wI p F hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 w ≤ ε ^ p} ∈ nhds
+        (0 : (hatK p F hρ₁p0 hρ₁p1) × (hatK p F hρ₂p0 hρ₂p1)) := by
+    have h := wI_ball_mem_nhds p F
+      (0 : (hatK p F hρ₁p0 hρ₁p1) × (hatK p F hρ₂p0 hρ₂p1)) hδ
+    simpa using h
+  rw [show (nhds (0 : Bloc p F ϖ))
+      = Filter.comap (BIProd p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+        (nhds (BIProd p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 0)) from nhds_induced _ _]
+  rw [map_zero]
+  refine Filter.mem_of_superset (Filter.preimage_mem_comap hnhd) ?_
+  intro z hz
+  refine hball ?_
+  show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+    (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (frobBlocSymm p F ϖ z)) ≤ ε
+  have hzI : wI p F hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+      (BIProd p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 z) ≤ ε ^ p := hz
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK] at hzI ⊢
+  refine max_le ?_ ?_
+  · refine le_of_pow_le_pow_left₀ hppos.ne' zero_le ?_
+    rw [wLoc_frobBlocSymm p F ϖ hρ₁0 hρ₁1 hρ₁p0 hρ₁p1]
+    exact le_trans (le_max_left _ _) hzI
+  · refine le_of_pow_le_pow_left₀ hppos.ne' zero_le ?_
+    rw [wLoc_frobBlocSymm p F ϖ hρ₂0 hρ₂1 hρ₂p0 hρ₂p1]
+    exact le_trans (le_max_right _ _) hzI
+
+/-- **The inverse Frobenius on the interval rings.** -/
+noncomputable def biPhiInv (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
+    ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+      →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  haveI : CompleteSpace ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  IsDenseInducing.extendRingHom
+    (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁p0) (hρ₁1 := hρ₁p1)
+      (hρ₂0 := hρ₂p0) (hρ₂1 := hρ₂p1))
+    (denseRange_blocToBI p F ϖ)
+    (uniformContinuous_frobSymmToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+
+/-- `φ⁻¹` on the interval rings extends `frobBlocSymm` on the dense layer. -/
+theorem biPhiInv_blocToBI (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) (z : Bloc p F ϖ) :
+    biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+        (blocToBI p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 z)
+      = blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (frobBlocSymm p F ϖ z) := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  haveI : CompleteSpace ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  exact IsDenseInducing.extend_eq
+    ((isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁p0) (hρ₁1 := hρ₁p1)
+      (hρ₂0 := hρ₂p0) (hρ₂1 := hρ₂p1)).isDenseInducing
+      (denseRange_blocToBI p F ϖ))
+    (uniformContinuous_frobSymmToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1).continuous z
+
+
+/-- `φ` on the interval rings is continuous. -/
+theorem biPhi_continuous (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
+    Continuous (biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : CompleteSpace ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  exact (uniformContinuous_uniformly_extend
+    (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1))
+    (denseRange_blocToBI p F ϖ)
+    (uniformContinuous_frobToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)).continuous
+
+/-- `φ⁻¹` on the interval rings is continuous. -/
+theorem biPhiInv_continuous (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
+    Continuous (biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  haveI : CompleteSpace ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  exact (uniformContinuous_uniformly_extend
+    (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁p0) (hρ₁1 := hρ₁p1)
+      (hρ₂0 := hρ₂p0) (hρ₂1 := hρ₂p1))
+    (denseRange_blocToBI p F ϖ)
+    (uniformContinuous_frobSymmToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)).continuous
+
+/-- The `φ`-round-trip on the interval rings (forward-after-inverse). -/
+theorem biPhi_biPhiInv (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1)
+    (z : ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)) :
+    biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+        hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+        (biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 z) = z := by
+  have hfun : (⇑(biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+      ∘ ⇑(biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)) = id := by
+    refine (denseRange_blocToBI p F ϖ
+      (hρ₁0 := hρ₁p0) (hρ₁1 := hρ₁p1) (hρ₂0 := hρ₂p0) (hρ₂1 := hρ₂p1)).equalizer
+      (Continuous.comp
+        (biPhi_continuous p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+        (biPhiInv_continuous p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1))
+      continuous_id (funext fun w => ?_)
+    show biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+        (biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+          (blocToBI p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 w))
+      = blocToBI p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 w
+    rw [biPhiInv_blocToBI, biPhi_blocToBI, frobBloc_frobBlocSymm]
+  exact congrFun hfun z
+
+/-- The `φ`-round-trip on the interval rings (inverse-after-forward). -/
+theorem biPhiInv_biPhi (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1)
+    (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+        (biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 z) = z := by
+  have hfun : (⇑(biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+      ∘ ⇑(biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)) = id := by
+    refine (denseRange_blocToBI p F ϖ
+      (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)).equalizer
+      (Continuous.comp
+        (biPhiInv_continuous p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+        (biPhi_continuous p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1))
+      continuous_id (funext fun w => ?_)
+    show biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+        (biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+          (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 w))
+      = blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 w
+    rw [biPhi_blocToBI, biPhiInv_blocToBI, frobBlocSymm_frobBloc]
+  exact congrFun hfun z
+
+/-- **The Frobenius equivalence of interval rings**:
+`φ : B^{[ρ₁,ρ₂]} ≃+* B^{[ρ₁^p,ρ₂^p]}` (D-iii). -/
+noncomputable def biPhiEquiv (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      ≃+* ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) where
+  toFun := biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+    (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  invFun := biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+    (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  left_inv := biPhiInv_biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  right_inv := biPhi_biPhiInv p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+  map_mul' x y := map_mul (biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) x y
+  map_add' x y := map_add (biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) x y
+
 end FarguesFontaine
 
 end
