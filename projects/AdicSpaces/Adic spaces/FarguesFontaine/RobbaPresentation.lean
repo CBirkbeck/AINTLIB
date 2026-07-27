@@ -2320,6 +2320,28 @@ theorem wIRPS_eq_max_NfstRPS_NsndRPS
   · refine ciSup_le fun s => ?_
     exact le_trans (le_max_right _ _) (wI_coeff_le_wIRPS p F ϖ hf s)
 
+/-- **The generator-multiplication coefficient recursion**: multiplying by
+`T − C g` acts on coefficients as shift-minus-scale. -/
+theorem coeffSeq_Gelt_mul {A : Type*} [CommRing A] (gB : A)
+    (x : MvPowerSeries (Fin 1) A) (n : ℕ) :
+    coeffSeq ((MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 1) (1 : A)
+        - MvPowerSeries.monomial 0 gB) * x) n
+      = (if 1 ≤ n then coeffSeq x (n - 1) else 0) - gB * coeffSeq x n := by
+  rw [sub_mul, coeffSeq, map_sub]
+  congr 1
+  · rw [MvPowerSeries.coeff_monomial_mul]
+    by_cases hn : 1 ≤ n
+    · rw [if_pos (by
+        rw [Finsupp.single_le_iff, Finsupp.single_eq_same]
+        exact hn), if_pos hn, one_mul, coeffSeq, ← Finsupp.single_tsub]
+    · rw [if_neg (by
+        rw [Finsupp.single_le_iff, Finsupp.single_eq_same]
+        exact hn), if_neg hn]
+  · rw [MvPowerSeries.coeff_monomial_mul,
+      if_pos (zero_le : (0 : Fin 1 →₀ ℕ) ≤ Finsupp.single (0 : Fin 1) n),
+      tsub_zero,
+      coeffSeq]
+
 end FarguesFontaine
 
 end
