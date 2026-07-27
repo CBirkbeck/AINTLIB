@@ -420,6 +420,26 @@ theorem span_image_windowChart_eq_top (n : ℤ)
   exact Ideal.eq_top_of_isUnit_mem _ himg
     ((isUnit_canonicalMap_p_teichPi_window p F ϖ n).pow N)
 
+noncomputable local instance : DecidableEq (Ainf p F) := Classical.decEq _
+
+noncomputable local instance (n : ℤ) :
+    DecidableEq (presheafValue (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
+  Classical.decEq _
+
+/-- **The window keystone**: the value of the ambient structure presheaf on a
+valid rational inside a Big window is the value of the window chart's own
+structure presheaf on the image datum (`keystoneO` at the certificate). -/
+noncomputable def windowKeystone (n : ℤ) (E : RationalLocData (Ainf p F))
+    (hErat : E.IsRational)
+    (hEwin : rationalOpen E.T E.s
+      ⊆ rationalOpen (chartData p F (windowUnif p F ϖ n) 1 1 p 1).T
+          (chartData p F (windowUnif p F ϖ n) 1 1 p 1).s) :
+    presheafValue E ≃+* presheafValue
+      (imgDatumO (chartData p F (windowUnif p F ϖ n) 1 1 p 1) E
+        (span_image_windowChart_eq_top p F ϖ n E hErat)) :=
+  keystoneO (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+    (span_image_windowChart_eq_top p F ϖ n E hErat) hEwin
+
 end FarguesFontaine
 
 end
