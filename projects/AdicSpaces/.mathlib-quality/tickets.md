@@ -2123,7 +2123,23 @@ non-Tate bases are supported.
     (= ⨆ translates by the saturation identity) via
     isLimitSheafOn_Y.glue — compat VACUOUS on disjoint pieces; the
     glued section is generator-invariant by separation; (γ) stalk
-    surjectivity/injectivity of ringStalkMap piYHom from (β). Non-critical parked:
+    surjectivity/injectivity of ringStalkMap piYHom from (β).
+    ★ (3ii-c α + compat unblocking) DONE 2026-07-28 (commit 4258ce942,
+    axiom-clean): presheafValue_subsingleton_of_rationalOpen_empty_huber
+    (generic Huber via the Spa-point criterion at f := 0 — IsUnit 0 ⟺
+    no Spa-points since vle 0 0 always holds; a point would comap into
+    the empty rational; 0 = 1 by isUnit_zero_iff) — the disjoint-piece
+    gluing compat is now dischargeable by Subsingleton.elim;
+    exists_disjoint_translates (yTop-level wandering; needs open
+    Pointwise; ofAdd-cancel by ← ofAdd_add + simp).
+    NEXT (β, r75 plan): (1) limitSections-subsingleton over ⊥/disjoint
+    infs (componentwise from the empty-value subsingleton); (2)
+    mapHuber_one + presheafValueRingEquivHuber-at-one = id
+    (dense-image uniqueness); (3) spaFrob_zero/frobOpens_zero/
+    limitFrobHom_zero; (4) invariantExtension := isLimitSheafOn_Y.glue
+    at the translate cover (hle/hcov from curvePreimage_xImage +
+    image-preserves-sups; fam k := restrict∘limitFrobHom k; compat:
+    diagonal refl, off-diagonal Subsingleton.elim). Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
