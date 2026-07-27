@@ -895,6 +895,139 @@ theorem translateFam_succ (m : ℤ) (W : Opens ↥(yTop p F ϖ))
     (limitFrobHom p F (1 + m) ((yFunctor p F ϖ).obj W) s)
   exact h1.trans h2.symm
 
+/-- The `(1+m)`-th piece sits inside the Frobenius preimage of the
+saturation. -/
+theorem piece_le_frobOpens_sat (m : ℤ) (W : Opens ↥(yTop p F ϖ)) :
+    (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ (1 + m))).obj W)
+      ≤ frobOpens p F 1
+          ((yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W))) := by
+  rw [← piece_shift p F ϖ m W]
+  exact frobOpens_mono p F 1 (yFunctor_translate_le p F ϖ W m)
+
+/-- The shifted pieces cover the Frobenius preimage of the saturation
+(membership form). -/
+theorem pieces_cover_frobOpens_sat (W : Opens ↥(yTop p F ϖ))
+    (v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (hv : v ∈ frobOpens p F 1 ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))) :
+    ∃ m : ℤ, v ∈ (yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ (1 + m))).obj W) := by
+  rw [show frobOpens p F 1 ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))
+    = (yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W)) from
+    frobOpens_yFunctor_curvePreimage p F ϖ 1 (xImage p F ϖ W)] at hv
+  obtain ⟨y, hy, rfl⟩ := hv
+  rw [show curvePreimage p F ϖ (xImage p F ϖ W)
+      = ⨆ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W from
+    curvePreimage_xImage p F ϖ W] at hy
+  rw [Opens.coe_iSup] at hy
+  obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy
+  refine ⟨k - 1, ⟨y, ?_, rfl⟩⟩
+  show y ∈ ((Opens.map (yFrobTop p F ϖ (1 + (k - 1)))).obj W : Set _)
+  rw [show (1 : ℤ) + (k - 1) = k from by omega]
+  exact hk
+
+/-- **The per-piece invariance computation**: on each shifted piece, the
+transported glued section agrees with the stability restriction. -/
+theorem glue_piece_eq (W : Opens ↥(yTop p F ϖ))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W)))
+    (g : ↥(limitSections ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))))
+    (hg : ∀ k : ℤ, limitRestrict (yFunctor_translate_le p F ϖ W k) g
+      = translateFam p F ϖ W s k) (m : ℤ) :
+    limitRestrict (piece_le_frobOpens_sat p F ϖ m W)
+        (limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+          (curvePreimage p F ϖ (xImage p F ϖ W))) g)
+      = limitRestrict (piece_le_frobOpens_sat p F ϖ m W)
+          (limitRestrict (le_of_eq
+            (frobOpens_yFunctor_curvePreimage p F ϖ 1 (xImage p F ϖ W)))
+            g) := by
+  have hL1 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (piece_shift p F ϖ m W).symm)
+    (frobOpens_mono p F 1 (yFunctor_translate_le p F ϖ W m))))
+    (limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W))) g)
+  have hL2 := limitFrobHom_limitRestrict p F 1
+    (yFunctor_translate_le p F ϖ W m) g
+  have hL3 := congrArg (limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm))
+    (congrArg (limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ m)).obj W))) (hg m))
+  have hL4 := congrArg (limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm))
+    (translateFam_succ p F ϖ m W s).symm
+  have hL5 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (piece_shift p F ϖ m W).symm)
+    (le_of_eq (piece_shift p F ϖ m W))))
+    (translateFam p F ϖ W s (1 + m))
+  have hL6 := congr_fun (congrArg DFunLike.coe (limitRestrict_id
+    ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ (1 + m))).obj W))))
+    (translateFam p F ϖ W s (1 + m))
+  have hR1 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (piece_le_frobOpens_sat p F ϖ m W)
+    (le_of_eq (frobOpens_yFunctor_curvePreimage p F ϖ 1 (xImage p F ϖ W)))))
+    g
+  calc limitRestrict (piece_le_frobOpens_sat p F ϖ m W)
+        (limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+          (curvePreimage p F ϖ (xImage p F ϖ W))) g)
+      = limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm)
+          (limitRestrict (frobOpens_mono p F 1
+            (yFunctor_translate_le p F ϖ W m))
+            (limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+              (curvePreimage p F ϖ (xImage p F ϖ W))) g)) := hL1.symm
+    _ = limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm)
+          (limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+            ((Opens.map (yFrobTop p F ϖ m)).obj W))
+            (limitRestrict (yFunctor_translate_le p F ϖ W m) g)) :=
+        congrArg _ hL2.symm
+    _ = limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm)
+          (limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+            ((Opens.map (yFrobTop p F ϖ m)).obj W))
+            (translateFam p F ϖ W s m)) := hL3
+    _ = limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm)
+          (limitRestrict (le_of_eq (piece_shift p F ϖ m W))
+            (translateFam p F ϖ W s (1 + m))) := hL4
+    _ = translateFam p F ϖ W s (1 + m) := hL5.trans hL6
+    _ = limitRestrict (yFunctor_translate_le p F ϖ W (1 + m)) g :=
+        (hg (1 + m)).symm
+    _ = limitRestrict (piece_le_frobOpens_sat p F ϖ m W)
+          (limitRestrict (le_of_eq
+            (frobOpens_yFunctor_curvePreimage p F ϖ 1 (xImage p F ϖ W)))
+            g) := hR1.symm
+
+/-- **The glued section is `φ`-invariant** (D-iv-3(ii-c β), completed):
+sheaf separation over the shifted translate cover. -/
+theorem glue_invariant (W : Opens ↥(yTop p F ϖ))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W)))
+    (g : ↥(limitSections ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))))
+    (hg : ∀ k : ℤ, limitRestrict (yFunctor_translate_le p F ϖ W k) g
+      = translateFam p F ϖ W s k) :
+    limitFrobHom p F 1 ((yFunctor p F ϖ).obj
+        (curvePreimage p F ϖ (xImage p F ϖ W))) g
+      = limitRestrict (le_of_eq
+          (frobOpens_yFunctor_curvePreimage p F ϖ 1 (xImage p F ϖ W))) g := by
+  have hVS : ((frobOpens p F 1 ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))
+      : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      ⊆ Subtype.val ⁻¹' Y p F ϖ := by
+    rw [frobOpens_yFunctor_curvePreimage p F ϖ 1 (xImage p F ϖ W)]
+    exact yFunctor_trace p F ϖ _
+  have hcov : ((frobOpens p F 1 ((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))
+      : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      ⊆ ⋃ m : ULift ℤ, (SetLike.coe ((yFunctor p F ϖ).obj
+          ((Opens.map (yFrobTop p F ϖ (1 + m.down))).obj W))) := by
+    intro v hv
+    obtain ⟨m, hm⟩ := pieces_cover_frobOpens_sat p F ϖ W v hv
+    exact Set.mem_iUnion.mpr ⟨⟨m⟩, hm⟩
+  exact (isLimitSheafOn_Y p F ϖ).injective hVS
+    (ι := ULift ℤ)
+    (U := fun m : ULift ℤ => (yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ (1 + m.down))).obj W))
+    (fun m => piece_le_frobOpens_sat p F ϖ m.down W) hcov
+    (fun m => glue_piece_eq p F ϖ W s g hg m.down)
+
 end FarguesFontaine
 
 end
