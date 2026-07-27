@@ -3331,6 +3331,42 @@ theorem tendsto_snd_partial_sums_of_evalBI_eq_zero
 
 end KerTransport
 
+/-- First-component valuation decay of a restricted series' coefficients. -/
+theorem tendsto_v_fst_coeffSeq
+    {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    Filter.Tendsto (fun n => Valued.v
+        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+      Filter.atTop (nhds 0) :=
+  tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
+    (tendsto_wI_coeffSeq p F ϖ hf)
+    (fun n => (zero_le : (0 : NNReal) ≤ _))
+    (fun n => le_max_left _ _)
+
+/-- Second-component valuation decay of a restricted series' coefficients. -/
+theorem tendsto_v_snd_coeffSeq
+    {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    Filter.Tendsto (fun n => Valued.v
+        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+      Filter.atTop (nhds 0) :=
+  tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds
+    (tendsto_wI_coeffSeq p F ϖ hf)
+    (fun n => (zero_le : (0 : NNReal) ≤ _))
+    (fun n => le_max_right _ _)
+
+/-- Boundedness of the first-component valuations of a restricted series'
+coefficients. -/
+theorem bddAbove_v_fst_coeffSeq
+    {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    BddAbove (Set.range (fun n => Valued.v
+        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))) :=
+  (tendsto_v_fst_coeffSeq p F ϖ hf).bddAbove_range
+
 end FarguesFontaine
 
 end
