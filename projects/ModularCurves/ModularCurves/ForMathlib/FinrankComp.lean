@@ -212,7 +212,6 @@ theorem Scheme.Hom.finrank_comp [IsIntegral X] [IsIntegral Y] [IsIntegral Z]
         (Scheme.Hom.finrank_morphismRestrict (f ≫ g) U ⟨z, hzU⟩).symm
     _ = ((f ∣_ V) ≫ (g ∣_ U)).finrank ⟨z, hzU⟩ := by
         rw [morphismRestrict_comp]
-        rfl
     _ = (f ∣_ V).finrank ⟨genericPoint Y, hgen⟩ * (g ∣_ U).finrank ⟨z, hzU⟩ :=
         Scheme.Hom.finrank_comp_of_isAffine (f ∣_ V) (g ∣_ U) _ _
     _ = f.finrank (genericPoint Y) * g.finrank z := by

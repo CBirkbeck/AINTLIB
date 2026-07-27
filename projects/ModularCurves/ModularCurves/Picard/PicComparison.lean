@@ -102,7 +102,6 @@ theorem evalSection_add_right (M : _root_.SheafOfModules R) (U : C)
     (m m' : M.val.obj (op U)) :
     evalSection R M U φ (m + m') = evalSection R M U φ m + evalSection R M U φ m' := by
   simp only [evalSection_eq, map_add]
-  exact map_add _ _ _
 
 theorem evalSection_smul_right (M : _root_.SheafOfModules R) (U : C)
     (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
@@ -303,8 +302,9 @@ theorem whiskerRight_comp_eq_id_of_split {A B : D} (e : A ⊗ B ≅ 𝟙_ D)
         rw [← whiskerRight_tensor]
         have h2 : (ρ_ X).hom ≫ f ≫ (ρ_ Y).inv = f ▷ 𝟙_ D := by
           rw [rightUnitor_inv_naturality, Iso.hom_inv_id_assoc]
-        exact (congrArg (fun t => t ≫ Y ◁ e'.inv) h2).trans
-          (whisker_exchange f e'.inv).symm)
+        have hfin := (congrArg (fun t => t ≫ Y ◁ e'.inv) h2).trans
+          (whisker_exchange f e'.inv).symm
+        simpa only [Category.assoc] using hfin)
     exact (rightUnitorNatIso D).symm ≪≫ hcongr ≪≫ tensorRightTensor B A
   haveI : (tensorRight B).Faithful :=
     Functor.Faithful.of_comp (tensorRight B) (tensorRight A)
@@ -365,6 +365,13 @@ tensor: the sheafification of `evPre`, collapsed onto the unit by the counit. -/
 noncomputable def ev (M : X.Modules) : tensorObj M (dualObj M) ⟶ unitObj X :=
   (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map (evPre M) ≫
     (sheafifyValIso (unitObj X)).hom
+/-- The identity morphism on `X`'s structure sheaf viewed in `RingCat`, the sheafification
+parameter that `Modules.monoidalCategory` is built from.  Named once here: it otherwise appears
+verbatim six times inside `nonempty_tensorObj_iso_tensor`. -/
+private abbrev ringSheafId (X : Scheme.{u}) :=
+  𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
+    Sheaf _ RingCat.{u}).obj
+
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in

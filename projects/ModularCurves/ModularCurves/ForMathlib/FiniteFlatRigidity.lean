@@ -323,7 +323,6 @@ theorem eq_of_le_of_finrank_eq {C S : Scheme.{u}} (π : C ⟶ S)
               ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)).finrank u
             = ((Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) ∣_ U.1).finrank u := by
           conv_rhs => rw [morphismRestrict_comp]
-          rfl
         have h5 : ((Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) ∣_ U.1).finrank u
             = (Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)).finrank
                 (U.1.ι.base u) :=
