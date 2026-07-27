@@ -240,4 +240,98 @@ lemma segreStandardChartOverlapRingEquiv_firstRightRatio
     segreChartForwardAlgHom_right_ratio]
   rfl
 
+/-- The localized Segre equivalence sends a second-chart left ratio to the left factor. -/
+lemma segreStandardChartOverlapRingEquiv_secondLeftRatio
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a c : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreStandardChartOverlapRingEquiv R m n i a j b
+        (segreImageSecondChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n a c b b)) =
+      segreProductSecondLeftRingHom R m n i a j b
+        (projectiveCoordinateRatio R a c) := by
+  apply
+    (segreProductOverlapLeftRatio_isUnit R m n i a j b).mul_right_cancel
+  calc
+    _ =
+        segreStandardChartOverlapRingEquiv R m n i a j b
+            (segreImageSecondChartToOverlapAway R m n i a j b
+              (segreImageChartRatio R m n a c b b)) *
+          segreStandardChartOverlapRingEquiv R m n i a j b
+            (segreImageFirstChartToOverlapAway R m n i a j b
+              (segreImageChartRatio R m n i a j j)) := by
+      rw [
+        segreStandardChartOverlapRingEquiv_firstLeftRatio
+          R m n i a a j b]
+    _ =
+        segreStandardChartOverlapRingEquiv R m n i a j b
+          (segreImageSecondChartToOverlapAway R m n i a j b
+                (segreImageChartRatio R m n a c b b) *
+            segreImageFirstChartToOverlapAway R m n i a j b
+              (segreImageChartRatio R m n i a j j)) := by
+      rw [map_mul]
+    _ =
+        segreStandardChartOverlapRingEquiv R m n i a j b
+          (segreImageFirstChartToOverlapAway R m n i a j b
+            (segreImageChartRatio R m n i c j j)) := by
+      rw [segreImageChartOverlap_leftRatio_transition]
+    _ =
+        segreProductOverlapLeftRingHom R m n i a j b
+          (projectiveCoordinateRatio R i c) :=
+      segreStandardChartOverlapRingEquiv_firstLeftRatio
+        R m n i a c j b
+    _ =
+        segreProductSecondLeftRingHom R m n i a j b
+              (projectiveCoordinateRatio R a c) *
+            segreProductOverlapLeftRingHom R m n i a j b
+              (projectiveCoordinateRatio R i a) :=
+      (segreProductOverlap_leftRatio_transition
+        R m n i a c j b).symm
+
+/-- The localized Segre equivalence sends a second-chart right ratio to the right factor. -/
+lemma segreStandardChartOverlapRingEquiv_secondRightRatio
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b c : Fin (n + 1)) :
+    segreStandardChartOverlapRingEquiv R m n i a j b
+        (segreImageSecondChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n a a b c)) =
+      segreProductSecondRightRingHom R m n i a j b
+        (projectiveCoordinateRatio R b c) := by
+  apply
+    (segreProductOverlapRightRatio_isUnit R m n i a j b).mul_right_cancel
+  calc
+    _ =
+        segreStandardChartOverlapRingEquiv R m n i a j b
+            (segreImageSecondChartToOverlapAway R m n i a j b
+              (segreImageChartRatio R m n a a b c)) *
+          segreStandardChartOverlapRingEquiv R m n i a j b
+            (segreImageFirstChartToOverlapAway R m n i a j b
+              (segreImageChartRatio R m n i i j b)) := by
+      rw [
+        segreStandardChartOverlapRingEquiv_firstRightRatio
+          R m n i a j b b]
+    _ =
+        segreStandardChartOverlapRingEquiv R m n i a j b
+          (segreImageSecondChartToOverlapAway R m n i a j b
+                (segreImageChartRatio R m n a a b c) *
+            segreImageFirstChartToOverlapAway R m n i a j b
+              (segreImageChartRatio R m n i i j b)) := by
+      rw [map_mul]
+    _ =
+        segreStandardChartOverlapRingEquiv R m n i a j b
+          (segreImageFirstChartToOverlapAway R m n i a j b
+            (segreImageChartRatio R m n i i j c)) := by
+      rw [segreImageChartOverlap_rightRatio_transition]
+    _ =
+        segreProductOverlapRightRingHom R m n i a j b
+          (projectiveCoordinateRatio R j c) :=
+      segreStandardChartOverlapRingEquiv_firstRightRatio
+        R m n i a j b c
+    _ =
+        segreProductSecondRightRingHom R m n i a j b
+              (projectiveCoordinateRatio R b c) *
+            segreProductOverlapRightRingHom R m n i a j b
+              (projectiveCoordinateRatio R j b) :=
+      (segreProductOverlap_rightRatio_transition
+        R m n i a j b c).symm
+
 end MvPolynomial
