@@ -1104,4 +1104,57 @@ lemma segreProductChartOverlap_transition
           R m n i a j b).symm
       _ = _ := (Category.assoc _ _ _).symm
 
+/-- The localization presentation of an actual overlap carries its second projection to the
+explicit transition into the second product chart. -/
+lemma segreProductStandardOverlapIso_hom_toSecondChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductStandardOverlapIso R m n i a j b).hom ≫
+        segreProductChartOverlapToSecondChart R m n i a j b =
+      pullback.snd
+        (segreProductStandardChartMap R m n i j)
+        (segreProductStandardChartMap R m n a b) := by
+  letI : IsOpenImmersion
+      (segreProductStandardChartMap R m n a b) := by
+    rw [← segreProductStandardOpenCover_f R m n (a, b)]
+    exact (segreProductStandardOpenCover R m n).map_prop (a, b)
+  have htransition :
+      segreProductChartOverlapToChart R m n i a j b ≫
+          segreProductStandardChartMap R m n i j =
+        segreProductChartOverlapToSecondChart R m n i a j b ≫
+          segreProductStandardChartMap R m n a b := by
+    simpa only [segreProductStandardOpenCover_f] using
+      segreProductChartOverlap_transition R m n i a j b
+  rw [← cancel_mono
+    (segreProductStandardChartMap R m n a b)]
+  calc
+    _ =
+        (segreProductStandardOverlapIso R m n i a j b).hom ≫
+          (segreProductChartOverlapToSecondChart R m n i a j b ≫
+            segreProductStandardChartMap R m n a b) :=
+      Category.assoc _ _ _
+    _ =
+        (segreProductStandardOverlapIso R m n i a j b).hom ≫
+          (segreProductChartOverlapToChart R m n i a j b ≫
+            segreProductStandardChartMap R m n i j) :=
+      congrArg
+        (fun q =>
+          (segreProductStandardOverlapIso R m n i a j b).hom ≫ q)
+        htransition.symm
+    _ =
+        ((segreProductStandardOverlapIso R m n i a j b).hom ≫
+            segreProductChartOverlapToChart R m n i a j b) ≫
+          segreProductStandardChartMap R m n i j :=
+      (Category.assoc _ _ _).symm
+    _ =
+        pullback.fst
+            (segreProductStandardChartMap R m n i j)
+            (segreProductStandardChartMap R m n a b) ≫
+          segreProductStandardChartMap R m n i j :=
+      congrArg
+        (fun q => q ≫ segreProductStandardChartMap R m n i j)
+        (segreProductStandardOverlapIso_hom_toChart
+          R m n i a j b)
+    _ = _ := pullback.condition
+
 end MvPolynomial
