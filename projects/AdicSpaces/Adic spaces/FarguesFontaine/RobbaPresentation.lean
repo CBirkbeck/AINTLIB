@@ -3195,6 +3195,69 @@ theorem kerSolElt_coe_fst (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
         : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ^ (n + 1) * t))
     hsum
 
+/-- **The interval-norm decay of the kernel solution** from the two
+component regimes. -/
+theorem kerSolElt_wI_decay (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB)
+    (hg1 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+    (hg2 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ≤ 1)
+    (y : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hy1 : Filter.Tendsto (fun n => Valued.v
+      (((y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+      Filter.atTop (nhds 0))
+    (hyb : BddAbove (Set.range (fun n => Valued.v
+      (((y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))))
+    (hy2 : Filter.Tendsto (fun n => Valued.v
+      (((y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+      Filter.atTop (nhds 0))
+    (hvan : Filter.Tendsto (fun n => ∑ i ∈ Finset.range (n + 1),
+        ((y i : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ i)
+      Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun n => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((kerSolElt p F ϖ gB hgu y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      Filter.atTop (nhds 0) := by
+  have hinvS : gB * (((hgu.unit⁻¹
+      : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) = 1 := by
+    have h := hgu.unit.mul_inv
+    rwa [hgu.unit_spec] at h
+  have hinv1 : (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+      * ((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) = 1 :=
+    congrArg (fun t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
+      ((t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) hinvS
+  have hinv2 : (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+      * ((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) = 1 :=
+    congrArg (fun t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
+      ((t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) hinvS
+  have hd1 := kerSol_decay_of_one_lt p F _ _ hinv1 hg1 _
+    hy1 hyb
+  have hd2 := kerSol_decay_of_le_one p F _ _ hinv2 hg2 _
+    hy2 hvan
+  have hd1' := hd1.congr (fun n =>
+    (congrArg Valued.v (kerSolElt_coe_fst p F ϖ gB hgu y n)).symm)
+  have hd2' := hd2.congr (fun n =>
+    (congrArg Valued.v (kerSolElt_coe_snd p F ϖ gB hgu y n)).symm)
+  have hmax := hd1'.max hd2'
+  rw [max_self] at hmax
+  exact hmax
+
 end FarguesFontaine
 
 end
