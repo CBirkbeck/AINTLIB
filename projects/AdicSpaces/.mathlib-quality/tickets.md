@@ -2448,8 +2448,24 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   the UPWARD telescope x_n = −Σ_{i≤n} y_i·(g⁻¹)^{n+1−i} (g-inverse in
   the FIELD component) gives v_τ(x_n) ≤ N_τ(y)·v_τ(g)⁻¹ ≤ N_τ(y).
   Either way N_τ(y) ≥ N_τ(x); sup over the two radii: wIRPS(Gelt·x) ≥
-  wIRPS x — strictness + closed ideal. (P4-a1) still first: N_τ-defs +
-  wIRPS = max(N_fst, N_snd).
+  wIRPS x — strictness + closed ideal. (P4-a1) DONE (b0904b3e8:
+  NfstRPS/NsndRPS + wIRPS_eq_max); (P4-a2) DONE 2026-07-27:
+  coeffSeq_Gelt_mul (57325f8e8; the shift-minus-scale recursion via
+  MvPowerSeries.coeff_monomial_mul + Finsupp.single_tsub +
+  Finsupp.single_le_iff; PERF: open NNReal shadows the canonical
+  zero_le for Finsupp-≤ — ascribe (zero_le : (0 : Fin 1 →₀ ℕ) ≤ …)),
+  telescope_down_bound (4a9cb05ca; finite telescope + per-M ultrametric
+  + vanishing-tail contradiction; Tendsto.comp tendsto_add_atTop_nat
+  needs a .congr add_comm-flip), telescope_up_bound (induction-only
+  field-inverse route, no sums — v(X n) ≤ v(g)⁻¹·NY; inv_le_one₀-iff;
+  hcancel v(x) = v(g)⁻¹·v(g·x) pattern). NEXT (P4-a3): the strictness
+  assembly wIRPS(Gelt·x) ≥ wIRPS x: per component τ, the coefficient
+  sequences X := component-of-coeffSeq x, Y := component-of-coeffSeq
+  (Gelt·x) satisfy hrec (from coeffSeq_Gelt_mul projected to the
+  component), hbdd (restrictedness), hX0 (decay); dispatch v_τ(g-comp)
+  ≤ 1 → down / > 1 → up (up gives ≤ v(g)⁻¹NY ≤ NY); combine via
+  wIRPS_eq_max both sides. Then (P4-b) the kernel-inclusion per the
+  componentwise design above.
   (P4-b) KERNEL-INCLUSION: y ∈ ker(evalBIHom) ⇒ y = Gelt·x with
   x_n := −Σ_{i≤n} y_i·(blocToBI-ρ g)^{i−n−1}-POWERS — CAREFUL: g is
   NOT invertible in B^I-ρ globally (only its σ-image is unit-adjacent);
