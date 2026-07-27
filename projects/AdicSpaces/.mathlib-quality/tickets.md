@@ -1509,8 +1509,10 @@ non-Tate bases are supported.
     chartFracP^i · algebraMap [c^a·ϖ^{ib}] ∈ S ⇒ m integral over S with
     the monic X^a − m^a; (m4) head_K ∈ IntCl(S) (sum of m1-m3), tail_K
     wI-small ⇒ blocToBI-image of h ∈ topClosure(coe(IntCl(S-image)))
-    ⊆ canonical ✓ ChartDensePlus. Bricks: (r4a) the monomial-membership
-    lemmas m1-m3 at the fraction level; (r4b) the head/tail split of
+    ⊆ canonical ✓ ChartDensePlus. Bricks: (r4a) DONE 2026-07-27
+    (ChartVObj.lean: exists_eq_toOF_pow_mul + teich_div_p_pow_mem_
+    chartSubring (m1) + p_div_teich_pow_a_mem_chartSubring (m3);
+    m2 = A_inf-images are generators, no lemma needed; axiom-clean); (r4b) the head/tail split of
     x/(p[ϖ])^k with per-monomial 1-ball bounds (sup-def gives termwise
     bounds); (r4c) the limit assembly (mirror
     chartPlus_le_completedPlusSubring_of_dense's structure). (β) the ARCHITECTURE DECISION
