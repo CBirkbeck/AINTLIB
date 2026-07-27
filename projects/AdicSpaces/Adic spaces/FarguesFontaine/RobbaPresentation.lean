@@ -559,6 +559,300 @@ theorem exists_BI_coeff_column_limit
     (C := C) (fun l => ?_) hC0
   exact le_trans (wI_coeff_le_wIRPS p F ϖ (u l).2 K) (hC l)
 
+/-- **The residual-form series limit in `B^I`**: a `wI`-dominated series of
+interval-ring elements has a sum whose tails obey every eventual bound. -/
+theorem exists_wI_series_limit
+    {u : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)} {C : ℕ → NNReal}
+    (hC : ∀ l, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ C l)
+    (hC0 : Filter.Tendsto C Filter.atTop (nhds 0)) :
+    ∃ S : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ∀ (n : ℕ) (b : NNReal), 0 < b → (∀ l, n ≤ l → C l ≤ b) →
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (((S : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          - ∑ l ∈ Finset.range n,
+            ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ≤ b := by
+  obtain ⟨Sp, hSmem, htend⟩ := exists_BI_series_limit p F ϖ
+    (u := fun l => ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (fun l => (u l).2) (C := C) hC hC0
+  refine ⟨⟨Sp, hSmem⟩, fun n b hb0 hbnd => ?_⟩
+  have htail : Filter.Tendsto (fun m => (∑ l ∈ Finset.range m,
+      ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      - ∑ l ∈ Finset.range n,
+        ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      Filter.atTop (nhds (Sp - ∑ l ∈ Finset.range n,
+        ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))) :=
+    htend.sub_const _
+  refine (isClosed_wI_ball p F hb0).mem_of_tendsto htail ?_
+  filter_upwards [Filter.eventually_ge_atTop n] with m hm
+  have hIco : (∑ l ∈ Finset.range m,
+      ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      - ∑ l ∈ Finset.range n,
+        ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = ∑ l ∈ Finset.Ico n m,
+        ((u l : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) :=
+    (Finset.sum_Ico_eq_sub _ hm).symm
+  show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 _ ≤ b
+  rw [hIco]
+  refine wI_sum_le p F _ _ (fun l hl => ?_)
+  exact le_trans (hC l) (hbnd l (Finset.mem_Ico.mp hl).1)
+
+/-- Coercion of an RPS-difference over `B^I` (plain equation). -/
+theorem RPS_BI_coe_sub
+    (a b : ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    ((a - b : ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = (a : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        - (b : MvPowerSeries (Fin k)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := rfl
+
+/-- Coefficients of a difference over `B^I`, at the product level. -/
+theorem coeff_sub_eq_BI
+    (y w : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (K : Fin k →₀ ℕ) :
+    ((MvPowerSeries.coeff K (y - w)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = ((MvPowerSeries.coeff K y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        - ((MvPowerSeries.coeff K w : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) :=
+  congrArg (fun t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
+    (t : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (map_sub (MvPowerSeries.coeff K) y w)
+
+/-- Coefficients of a partial sum of restricted series, at the product level. -/
+theorem coeff_partial_sum_BI
+    (u : ℕ → ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (n : ℕ) (K : Fin k →₀ ℕ) :
+    ((MvPowerSeries.coeff K
+      ((∑ l ∈ Finset.range n, u l : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = ∑ l ∈ Finset.range n,
+        ((MvPowerSeries.coeff K
+          ((u l : ↥(restrictedMvPowerSeriesSubring k
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+  rw [show ((∑ l ∈ Finset.range n, u l : ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    = ∑ l ∈ Finset.range n,
+      ((u l : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) from
+    AddSubmonoidClass.coe_finsetSum _ _]
+  rw [map_sum]
+  rw [show ((∑ l ∈ Finset.range n, MvPowerSeries.coeff K
+      ((u l : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    = ∑ l ∈ Finset.range n,
+      ((MvPowerSeries.coeff K
+        ((u l : ↥(restrictedMvPowerSeriesSubring k
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) from
+    AddSubmonoidClass.coe_finsetSum _ _]
+
+/-- **Restrictedness of columnwise limits**: if each coefficient column of a
+`wIRPS`-vanishing series of restricted series converges with the tail
+estimates, the limit series is restricted. -/
+theorem isRestricted_column_limits
+    {u : ℕ → ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))} {C : ℕ → NNReal}
+    (hC0 : Filter.Tendsto C Filter.atTop (nhds 0))
+    (S : (Fin k →₀ ℕ) → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hS : ∀ K, ∀ (n : ℕ) (b : NNReal), 0 < b → (∀ l, n ≤ l → C l ≤ b) →
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (((S K : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          - ∑ l ∈ Finset.range n,
+            ((MvPowerSeries.coeff K
+              ((u l : ↥(restrictedMvPowerSeriesSubring k
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+                : MvPowerSeries (Fin k)
+                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ≤ b) :
+    MvPowerSeries.IsRestricted
+      (fun K => S K
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+  set Ufun : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+    (fun K => S K) with hUfun
+  rw [isRestricted_iff_wI]
+  intro t ht
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp (hC0.eventually_lt_const ht)
+  have hsub : {K : Fin k →₀ ℕ | t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff K Ufun
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}
+      ⊆ ⋃ l ∈ Finset.range N, {K : Fin k →₀ ℕ |
+        t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((MvPowerSeries.coeff K
+            ((u l : ↥(restrictedMvPowerSeriesSubring k
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin k)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))} := by
+    intro K hK
+    rw [Set.mem_setOf_eq] at hK
+    have hSK : ((MvPowerSeries.coeff K Ufun
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = ((S K : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := rfl
+    rw [hSK] at hK
+    have htail := hS K N t ht (fun l hl => (hN l hl).le)
+    have hbig : t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (∑ l ∈ Finset.range N,
+          ((MvPowerSeries.coeff K
+            ((u l : ↥(restrictedMvPowerSeriesSubring k
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin k)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := by
+      by_contra hcon
+      push Not at hcon
+      have hsplit : ((S K : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          = (((S K : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+            - ∑ l ∈ Finset.range N,
+              ((MvPowerSeries.coeff K
+                ((u l : ↥(restrictedMvPowerSeriesSubring k
+                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+                  : MvPowerSeries (Fin k)
+                    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+                : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+                : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+            + ∑ l ∈ Finset.range N,
+              ((MvPowerSeries.coeff K
+                ((u l : ↥(restrictedMvPowerSeriesSubring k
+                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+                  : MvPowerSeries (Fin k)
+                    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+                : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+                : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+        ring
+      rw [hsplit] at hK
+      exact absurd (le_trans (wI_add_le p F _ _) (max_le htail hcon))
+        (not_le.mpr hK)
+    have hex : ∃ l ∈ Finset.range N, t < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff K
+          ((u l : ↥(restrictedMvPowerSeriesSubring k
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin k)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+      by_contra hcon
+      push Not at hcon
+      exact absurd (wI_sum_le p F _ _ hcon) (not_le.mpr hbig)
+    obtain ⟨l, hlN, hl⟩ := hex
+    exact Set.mem_biUnion hlN hl
+  refine Set.Finite.subset (Set.Finite.biUnion (Finset.range N).finite_toSet
+    fun l _ => ?_) hsub
+  exact (isRestricted_iff_wI p F ϖ
+    ((u l : ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin k)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))).mp (u l).2 t ht
+
+/-- **Ultrametric series converge in the `B^I`-Tate algebra**: a
+`wIRPS`-vanishing series of restricted series over `B^I` has a restricted
+limit with the tail estimates (the analytic engine of the case-1/2
+Robba-localization surjectivity). -/
+theorem exists_rps_series_limit_BI
+    {u : ℕ → ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))} {C : ℕ → NNReal}
+    (hC : ∀ l, wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((u l : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ C l)
+    (hC0 : Filter.Tendsto C Filter.atTop (nhds 0)) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      ∀ (n : ℕ) (b : NNReal), 0 < b → (∀ l, n ≤ l → C l ≤ b) →
+      wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((U - ∑ l ∈ Finset.range n, u l
+          : ↥(restrictedMvPowerSeriesSubring k
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin k)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ b := by
+  have hcol : ∀ K : Fin k →₀ ℕ,
+      ∃ S : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ∀ (n : ℕ) (b : NNReal), 0 < b → (∀ l, n ≤ l → C l ≤ b) →
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (((S : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          - ∑ l ∈ Finset.range n,
+            ((MvPowerSeries.coeff K
+              ((u l : ↥(restrictedMvPowerSeriesSubring k
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+                : MvPowerSeries (Fin k)
+                  ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ≤ b := by
+    intro K
+    refine exists_wI_series_limit p F ϖ
+      (u := fun l => (MvPowerSeries.coeff K
+        ((u l : ↥(restrictedMvPowerSeriesSubring k
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))))
+      (C := C) (fun l => ?_) hC0
+    exact le_trans (wI_coeff_le_wIRPS p F ϖ (u l).2 K) (hC l)
+  choose S hS using hcol
+  have hres := isRestricted_column_limits p F ϖ (u := u) hC0 S hS
+  refine ⟨⟨(fun K => S K), hres⟩, fun n b hb0 hb => ?_⟩
+  refine ciSup_le fun K => ?_
+  have hcoe : ((MvPowerSeries.coeff K
+      (((⟨(fun K => S K), hres⟩ : ↥(restrictedMvPowerSeriesSubring k
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        - ∑ l ∈ Finset.range n, u l
+        : ↥(restrictedMvPowerSeriesSubring k
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = ((S K : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        - ∑ l ∈ Finset.range n,
+          ((MvPowerSeries.coeff K
+            ((u l : ↥(restrictedMvPowerSeriesSubring k
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin k)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+    rw [RPS_BI_coe_sub p F ϖ, coeff_sub_eq_BI p F ϖ]
+    rw [coeff_partial_sum_BI p F ϖ]
+    rfl
+  rw [hcoe]
+  exact hS K n b hb0 hb
+
 end FarguesFontaine
 
 end
