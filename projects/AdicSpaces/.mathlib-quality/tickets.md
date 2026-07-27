@@ -2458,8 +2458,17 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   + vanishing-tail contradiction; Tendsto.comp tendsto_add_atTop_nat
   needs a .congr add_comm-flip), telescope_up_bound (induction-only
   field-inverse route, no sums — v(X n) ≤ v(g)⁻¹·NY; inv_le_one₀-iff;
-  hcancel v(x) = v(g)⁻¹·v(g·x) pattern). NEXT (P4-a3): the strictness
-  assembly wIRPS(Gelt·x) ≥ wIRPS x: per component τ, the coefficient
+  hcancel v(x) = v(g)⁻¹·v(g·x) pattern). ★ P4-a3 COMPLETE 2026-07-27 (commits c5d5f9298/278d7bb00/strictness):
+  BISub_coe_sub/mul + RPS_BI_coe_mul + GeltElt(+_coe) +
+  NfstRPS/NsndRPS_eq_iSup_coeffSeq (range-equality-sSup route, NO
+  BddAbove juggling; Subsingleton.elim for Fin-1) +
+  coeffSeq_GeltElt_mul_fst/snd (PERF: per-branch plain-rfl after
+  if-resolution — coe-lemma rw's and show-reshapes both blow whnf) +
+  telescope_iSup_le (the dispatch corollary in the LEAN hatK-context) +
+  NfstRPS/NsndRPS_le_GeltElt_mul (set-free slim bodies — `set X :=
+  big-lambda with h` ITSELF can blow the decl budget by occurrence-
+  scanning) + **wIRPS_le_GeltElt_mul** — THE STRICTNESS (Kedlaya ln
+  527-533). NEXT (P4-b): the kernel-inclusion — original plan: per component τ, the coefficient
   sequences X := component-of-coeffSeq x, Y := component-of-coeffSeq
   (Gelt·x) satisfy hrec (from coeffSeq_Gelt_mul projected to the
   component), hbdd (restrictedness), hX0 (decay); dispatch v_τ(g-comp)
