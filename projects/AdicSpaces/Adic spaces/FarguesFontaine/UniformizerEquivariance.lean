@@ -416,7 +416,7 @@ theorem vpiQ_interpolate {q₁ q₂ r : ℚ} (hne : q₁ ≠ q₂) :
   ring
 
 
-variable {ρ₁ ρ₂ ρ₁' ρ₂' : NNReal}
+variable {ρ₁' ρ₂' : NNReal}
 
 /-- Transport of `B^I` along radius equalities (the proofs are definitionally
 irrelevant). -/
@@ -502,6 +502,105 @@ theorem biResQ_blocToBI (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 
   show (biCongr p F ϖ _ _) (biRes p F ϖ _ _ _ _ _ _ _ _
     (blocToBI p F ϖ _ _ _ _ z)) = _
   rw [biRes_blocToBI, biCongr_blocToBI]
+
+/-- The interval-restriction map is continuous. -/
+theorem biRes_continuous {θ₁ θ₂ : ℝ}
+    (hθ₁0 : 0 ≤ θ₁) (hθ₁1 : θ₁ ≤ 1) (hθ₂0 : 0 ≤ θ₂) (hθ₂1 : θ₂ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁)) (hσ₁1 : ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂)) (hσ₂1 : ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂) < 1) :
+    Continuous (biRes p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+      (hρ₂1 := hρ₂1) hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1) := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  exact (uniformContinuous_uniformly_extend
+    (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1))
+    (denseRange_blocToBI p F ϖ)
+    (uniformContinuous_blocToBI_interpolate p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+      hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1)).continuous
+
+/-- The radius-transport is continuous. -/
+theorem biCongr_continuous (h₁ : ρ₁ = ρ₁') (h₂ : ρ₂ = ρ₂')
+    {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {hρ₁0' : 0 < ρ₁'} {hρ₁1' : ρ₁' < 1} {hρ₂0' : 0 < ρ₂'} {hρ₂1' : ρ₂' < 1} :
+    Continuous (biCongr p F ϖ h₁ h₂ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) (hρ₁0' := hρ₁0') (hρ₁1' := hρ₁1')
+      (hρ₂0' := hρ₂0') (hρ₂1' := hρ₂1')) := by
+  subst h₁
+  subst h₂
+  exact continuous_id
+
+/-- The rational-exponent restriction map is continuous. -/
+theorem biResQ_continuous (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₁ < q₂)
+    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂) :
+    Continuous (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m) := by
+  rw [biResQ]
+  exact (biCongr_continuous p F ϖ (vpiQ_interpolate p F ϖ hlt.ne)
+      (vpiQ_interpolate p F ϖ hlt.ne)).comp
+    (biRes_continuous p F ϖ
+      (theta_mem_unit hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit hlt hr₁m.1 hr₁m.2).2
+      (theta_mem_unit hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit hlt hr₂m.1 hr₂m.2).2
+      _ _ _ _)
+
+/-- **Identity law**: restricting to the same interval is the identity. -/
+theorem biResQ_id (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) (hlt : q₁ < q₂) :
+    biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨le_refl q₁, hlt.le⟩
+        ⟨hlt.le, le_refl q₂⟩
+      = RingHom.id ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) := by
+  have hfun : ⇑(biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨le_refl q₁, hlt.le⟩
+      ⟨hlt.le, le_refl q₂⟩) = id := by
+    refine (denseRange_blocToBI p F ϖ
+      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
+      (biResQ_continuous p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt
+        ⟨le_refl q₁, hlt.le⟩ ⟨hlt.le, le_refl q₂⟩)
+      continuous_id (funext fun z => ?_)
+    show biResQ p F ϖ q₁ q₂ q₁ q₂ h₁ h₂ h₁ h₂ hlt ⟨le_refl q₁, hlt.le⟩
+        ⟨hlt.le, le_refl q₂⟩ (blocToBI p F ϖ _ _ _ _ z)
+      = blocToBI p F ϖ _ _ _ _ z
+    rw [biResQ_blocToBI]
+  exact RingHom.ext fun x => congrFun hfun x
+
+/-- **Composition law**: restrictions compose. -/
+theorem biResQ_comp (q₁ q₂ r₁ r₂ s₁ s₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hs₁ : 0 < s₁) (hs₂ : 0 < s₂)
+    (hlt : q₁ < q₂) (hlt' : r₁ < r₂)
+    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂)
+    (hs₁m : r₁ ≤ s₁ ∧ s₁ ≤ r₂) (hs₂m : r₁ ≤ s₂ ∧ s₂ ≤ r₂) :
+    (biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
+        (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
+      = biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+          ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
+          ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩ := by
+  have hfun : ⇑((biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m).comp
+      (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m))
+      = ⇑(biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+          ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
+          ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩) := by
+    refine (denseRange_blocToBI p F ϖ
+      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
+      ?_
+      (biResQ_continuous p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+        ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
+        ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩)
+      (funext fun z => ?_)
+    · exact (biResQ_continuous p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt'
+          hs₁m hs₂m).comp
+        (biResQ_continuous p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m)
+    · show biResQ p F ϖ r₁ r₂ s₁ s₂ hr₁ hr₂ hs₁ hs₂ hlt' hs₁m hs₂m
+          (biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
+            (blocToBI p F ϖ _ _ _ _ z))
+        = biResQ p F ϖ q₁ q₂ s₁ s₂ h₁ h₂ hs₁ hs₂ hlt
+            ⟨le_trans hr₁m.1 hs₁m.1, le_trans hs₁m.2 hr₂m.2⟩
+            ⟨le_trans hr₁m.1 hs₂m.1, le_trans hs₂m.2 hr₂m.2⟩
+            (blocToBI p F ϖ _ _ _ _ z)
+      rw [biResQ_blocToBI, biResQ_blocToBI, biResQ_blocToBI]
+  exact RingHom.ext fun x => congrFun hfun x
 
 end FarguesFontaine
 

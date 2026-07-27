@@ -1098,10 +1098,14 @@ non-Tate bases are supported.
     propositionally equal). SUBSTRATE BUILT 2026-07-27 (UniformizerEquivariance.lean: vpiQ + pos/lt_one
     + vpiQ_interpolate (affine-θ rpow identity), biCongr (subst-transport,
     proof-irrelevant), BIQ (q₁ q₂ : ℚ), theta_mem_unit, biResQ + its
-    dense-layer identity biResQ_blocToBI). REMAINING t4: functoriality
-    biResQ_id / biResQ_comp via dense-extension uniqueness (equalizer needs
-    biResQ-continuity — extendRingHom-continuity composed with biCongr), then
-    the presheaf assembly. Original design: a ℚ-exponent wrapper layer —
+    dense-layer identity biResQ_blocToBI). t4 FUNCTORIALITY DONE 2026-07-27
+    (biRes_continuous, biCongr_continuous, biResQ_continuous, biResQ_id,
+    biResQ_comp — all via the dense equalizer on blocToBI). The BIQ-substrate
+    is COMPLETE: a contravariant functor from the poset of rational-exponent
+    intervals to topological rings. REMAINING: the presheaf assembly on the
+    κ-interval basis and the Y-object gluing (next planning step: the
+    presheaf-of-BIQ over the basis, its sheaf condition from
+    isSheafy_presheafChart + the chart homeos, the VPreObj packaging). Original design: a ℚ-exponent wrapper layer —
     `BIQ (q₁ q₂ : ℚ)` := BISub at the radii `vπ^{qᵢ}` (NNReal-rpow of the
     rational exponents, 0 < q₁ ≤ q₂ say), with restriction maps
     `biResQ : BIQ q₁ q₂ →+* BIQ r₁ r₂` for [r₁,r₂]-exponent-intervals inside
