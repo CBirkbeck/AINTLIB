@@ -1337,9 +1337,30 @@ non-Tate bases are supported.
     **isUnit_of_forall_not_vle_zero_of_isOpen_topologicallyNilpotent**
     (AdicSpectrum:360, Wedhorn 7.52(2)) at PD' with
     IsTateRing.isOpen_topologicallyNilpotentElements (HuberRings:324) ⇒
-    IsUnit (restrictionMapHom D D' h b). NEXT BRICK: the plus-
-    functoriality lemma (read completedPlusSubring/presheafValuePlus defs
-    first).
+    IsUnit (restrictionMapHom D D' h b). PLUS-FUNCTORIALITY BRICK PLAN (2026-07-27, after finding
+    **mem_plus_of_forall_spa_vle_one_huber** — Wedhorn 7.52(1)/[Hu2] 3.3(i)
+    at general complete Huber, HuberLocLift:342): prove
+    aplus_le_comap_restrictionMapHom via the Spa-characterization at D':
+    reduce w''.vle (σx) 1 (∀ w'' ∈ Spa PD') to bounds of the continuous
+    w := comap σ w'' on (PD)⁺ = IntCl(topClosure(coe-IntCl(locPlus))):
+    (B1) the ≤1-locus of a continuous valuation is CLOSED (ultrametric
+    translate: a + {v < v a} ⊆ {v > 1}); (B2) integral-over-a-bounded-
+    subring ⇒ bounded (valuation integral bound, vle-form); (B3)
+    generators: A⁺-images via the σ∘ρ-law + w''-Spa-bound;
+    t/s-images via the multiplicative cancel w''(lift)·w''(ρ'(s)) =
+    w''(ρ'(t)) ≤ w''(ρ'(s)) ≠ 0 from base-membership R(D') ⊆ R(D);
+    (B4) assemble; (B5) comap_restrictionMapHom_mem_spa :=
+    comap_mem_spa + (B4). ⚡ MAJOR SIDE-DISCOVERY (architecture-relevant):
+    **hasLocLiftPowerBounded_huber_instance** (HuberLocLift:622, M8
+    2026-07-17) supplies HasLocLiftPowerBounded for EVERY complete Huber
+    pair with [IsRingOfIntegralElements A⁺] — NO Tate. The board's
+    'ambient route blocked: only Tate supplier' is STALE: if
+    (Ainf, ⊤-or-ringPlus) satisfies IsRingOfIntegralElements + T2 +
+    Nonarch + Complete, the WHOLE limitSections/structurePresheaf/stalk
+    machinery instantiates at the AMBIENT A_inf directly (𝒪_Y by
+    restriction; only the Y-local sheaf condition would still route
+    through the charts). RE-EVALUATE the D-ii architecture at the next
+    planning step before building cross-chart glue.
     PLAN REFINED 2026-07-27 after reconnaissance: (S4-easy, do first)
     unit ⇒ nonzero stalk-value (v(x)v(x⁻¹) = v(1) ≠ 0), nonunits-⊆-supp
     contrapositive, supp is an ideal ⇒ once the hard half lands,
