@@ -3517,6 +3517,100 @@ theorem evalBIHom_GeltElt
 
 end KerAssembly
 
+/-- Span membership from a generator factorization (slim context). -/
+theorem mem_span_GeltElt_of_factor (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (h : ∃ V : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      GeltElt p F ϖ gB * V = U) :
+    U ∈ Ideal.span {GeltElt p F ϖ gB} := by
+  obtain ⟨V, hV⟩ := h
+  exact hV ▸ Ideal.mul_mem_right V _
+    (Ideal.subset_span (Set.mem_singleton _))
+
+section KerAssembly
+
+variable {σ₁ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
+/-- The span of the generator sits inside the kernel (easy inclusion). -/
+theorem span_GeltElt_le_ker
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) = b) :
+    Ideal.span {GeltElt p F ϖ gB}
+      ≤ RingHom.ker (evalBIHom p F ϖ φ hφ hbmem hb) := by
+  refine Ideal.span_le.mpr ?_
+  refine Set.singleton_subset_iff.mpr ?_
+  exact RingHom.mem_ker.mpr (evalBIHom_GeltElt p F ϖ φ hφ hbmem hb gB hφgB)
+
+/-- The kernel sits inside the span of the generator (hard inclusion). -/
+theorem ker_le_span_GeltElt
+    (hφsnd : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (hb2 : b.2 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+    (hg1 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+    (hg2 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ≤ 1) :
+    RingHom.ker (evalBIHom p F ϖ φ hφ hbmem hb)
+      ≤ Ideal.span {GeltElt p F ϖ gB} := by
+  intro U hUker
+  have hU : evalBI p F ϖ φ hφ hbmem hb U = 0 := by
+    rw [← evalBIHom_coe p F ϖ φ hφ hbmem hb U, RingHom.mem_ker.mp hUker]
+    exact ZeroMemClass.coe_zero _
+  exact mem_span_GeltElt_of_factor p F ϖ gB U
+    (exists_factor_of_evalBI_eq_zero p F ϖ φ hφ hφsnd
+      hbmem hb gB hgu hb2 hg1 hg2 U hU)
+
+/-- **The kernel of the case-1 presentation is the principal ideal on the
+generator** (Kedlaya Lemma 4.9, case 1, the kernel computation). -/
+theorem ker_evalBIHom_eq_span
+    (hφsnd : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) = b)
+    (hg1 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+    (hg2 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ≤ 1) :
+    RingHom.ker (evalBIHom p F ϖ φ hφ hbmem hb)
+      = Ideal.span {GeltElt p F ϖ gB} := by
+  have hb2 : b.2 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 := by
+    rw [← hφgB, hφsnd]
+  exact le_antisymm
+    (ker_le_span_GeltElt p F ϖ φ hφ hφsnd hbmem hb gB hgu hb2 hg1 hg2)
+    (span_GeltElt_le_ker p F ϖ φ hφ hbmem hb gB hφgB)
+
+end KerAssembly
+
 end FarguesFontaine
 
 end
