@@ -29,6 +29,9 @@ criterion assembly itself is the separately-boarded Buchsbaum–Eisenbud flat-lo
 * `injective_of_denseRange_comap` (below): dominance ⟹ injective on (reduced) sections.
 -/
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 open AlgebraicGeometry CategoryTheory Limits
 
 universe u
