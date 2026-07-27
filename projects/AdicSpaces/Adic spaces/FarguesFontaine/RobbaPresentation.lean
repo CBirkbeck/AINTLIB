@@ -522,6 +522,43 @@ theorem wIRPS_zero :
       : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 from rfl]
   rw [wI_zero p F]
 
+/-- Coefficientwise limit input: each coefficient column of a
+`wIRPS`-controlled series of restricted series converges in `B^I`
+(the `exists_BI_series_limit`-engine, coefficientwise). -/
+theorem exists_BI_coeff_column_limit
+    {u : ℕ → ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))} {C : ℕ → NNReal}
+    (hC : ∀ l, wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((u l : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ C l)
+    (hC0 : Filter.Tendsto C Filter.atTop (nhds 0)) (K : Fin k →₀ ℕ) :
+    ∃ S : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1),
+      S ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ∧ Filter.Tendsto (fun n => ∑ l ∈ Finset.range n,
+          ((MvPowerSeries.coeff K
+            ((u l : ↥(restrictedMvPowerSeriesSubring k
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+              : MvPowerSeries (Fin k)
+                ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        Filter.atTop (nhds S) := by
+  refine exists_BI_series_limit p F ϖ
+    (u := fun l => ((MvPowerSeries.coeff K
+      ((u l : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+    (fun l => (MvPowerSeries.coeff K
+      ((u l : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))).2)
+    (C := C) (fun l => ?_) hC0
+  exact le_trans (wI_coeff_le_wIRPS p F ϖ (u l).2 K) (hC l)
+
 end FarguesFontaine
 
 end
