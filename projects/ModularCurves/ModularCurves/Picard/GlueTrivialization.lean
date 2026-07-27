@@ -28,6 +28,9 @@ normalized along the zero section and `ModularCurves.eq_one_of_pullback_eq_one` 
 which is `1` along the zero section is `1`.
 -/
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 open CategoryTheory Opposite TopologicalSpace

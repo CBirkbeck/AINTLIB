@@ -1477,6 +1477,7 @@ lemma towerBC {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
   exact (congrArg (fun m : Module W.toAffine.FunctionField W.toAffine.FunctionField
     => @Module.finrank _ _ _ _ m) hMod).symm
 
+set_option backward.isDefEq.respectTransparency true in
 /-- **(General transport square)** For `f : X ⟶ Y` and `U : Y.Opens`, the global sections of
 `pullback.snd f U.ι` and the sections `f.app U` agree through `topIso` and
 `pullbackRestrictIsoRestrict`. -/
@@ -1488,7 +1489,10 @@ private lemma topIso_hom_comp_app {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Opens)
       = (f ∣_ U).appTop := rfl
   rw [← Category.assoc, h1, morphismRestrict_appTop]
   simp only [Scheme.Opens.topIso_hom, Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map]
-  erw [Scheme.Hom.map_appLE, Scheme.Hom.appLE_map]
+  first
+    | rfl
+    | with_unfolding_all rfl
+    | erw [Scheme.Hom.map_appLE, Scheme.Hom.appLE_map]
 
 /-- **(L4-iii brick 6, steps A+B — the fraction-field tower assembly)** Given the field intertwining,
 the module rank `Module.finrank Γ(Z) Γ([N]⁻¹Z)` equals `(mulByInt N).degree`. Transport the appTop

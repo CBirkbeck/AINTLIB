@@ -632,6 +632,7 @@ private theorem localQuotientπ_mem_imageOpens_iff (hWV : W ≤ V) (hVa : IsAffi
   letI := σ.gammaMulSemiringAction hV
   have hπ : σ.localQuotientπ hV hVa w = invariantsπ G ↑Γ(X, V) ℤ (hVa.isoSpec.hom w) := by
     rw [localQuotientπ_def, Scheme.Hom.comp_apply]
+    rfl
   constructor
   · rintro ⟨t, ht, hteq⟩
     rw [hπ] at hteq

@@ -39,6 +39,9 @@ Consumer: `EllipticCurve/InvariantDifferential.lean` (T-OM-B*) instantiates all 
 at the Weierstrass-atlas transition cocycle of an elliptic curve to define `ω_{E/S}`.
 -/
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 open CategoryTheory TopologicalSpace
