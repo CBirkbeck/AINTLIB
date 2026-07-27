@@ -5718,6 +5718,20 @@ theorem robba_case2_presentation
       (teichPowGen₂ p F ϖ zb m₀))
     hg1 hg2
 
+/-! ### T910-M: the plus-ring correspondence (Kedlaya Lemma 4.9, 'Moreover') -/
+
+/-- **The restriction hom carries the unit ball into the unit ball**
+(T910-M, the containment half of Kedlaya Lemma 4.9's 'Moreover' clause). -/
+theorem map_BIPlusIn_le_BIPlusIn {θ η : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hη0 : 0 ≤ η) (hη1 : η ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ η * ρ₂ ^ (1 - η)) (hσ₂1 : ρ₁ ^ η * ρ₂ ^ (1 - η) < 1) :
+    (BIPlusIn p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).map
+        (resIHom p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+      ≤ BIPlusIn p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 := by
+  rintro _ ⟨z, hz, rfl⟩
+  exact le_trans (wI_resIHom_le p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1 z) hz
+
 end FarguesFontaine
 
 end
