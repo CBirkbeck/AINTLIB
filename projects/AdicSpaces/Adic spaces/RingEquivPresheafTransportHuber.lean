@@ -809,6 +809,14 @@ theorem presheafValueRingEquivHuber_congr_e_symm
     exact hcomp ▸ rfl
   rw [hid]
 
+/-- The datum transport is proof-irrelevant in the equivalence equality. -/
+theorem RationalLocData.mapHuber_congr_e {e e' : A ≃+* A}
+    (he : Continuous e) (he' : Continuous e.symm) (hf : Continuous e')
+    (hf' : Continuous e'.symm) (hE : e = e') (D : RationalLocData A) :
+    D.mapHuber e he he' = D.mapHuber e' hf hf' := by
+  subst hE
+  rfl
+
 end ReflValue
 
 /-- The datum collapse for any equivalence equal to the identity. -/
