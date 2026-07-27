@@ -2497,8 +2497,19 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   kerSol_decay_of_one_lt (expanding scale: split sum bound at N, the
   head constant dies under v(V)^{n+1} → 0, the tail rides (vVvg)^n = 1;
   PERF: mul_max_of_nonneg needs its nonneg-arg ASCRIBED — bare zero_le
-  is the argless NNReal variant). (b3) NEXT: assemble the kernel
-  theorem: for y ∈ ker(evalBI φ b) — (α) the componentwise vanishing
+  is the argless NNReal variant). (b3) PROGRESS 2026-07-27:
+  (β) DONE (faf01abfd: kerSolElt + isRestricted_kerSol — set-ascribed
+  MvPowerSeries + single-injective preimage-finiteness); (γ) DONE
+  (82f968572: kerSol_coeff_identity + GeltElt_mul_kerSol — PERF
+  BREAKTHROUGH: Nat-CASES makes both the ite-Decidable and the
+  (m+1)−1-subtraction reduce DEFINITIONALLY, so the per-coefficient
+  identity needs ZERO rewrites, just two exact's of the generic
+  recursion; coe-of-mk coefficient bridge = congrArg single_eq_same).
+  REMAINING: (α) the vanishing-transport (the decay-inputs hd1/hd2 for
+  isRestricted_kerSol derived from y ∈ ker: snd via resI_eq_snd-
+  transport of eval-vanishing + kerSol_decay_of_le_one; fst via
+  kerSol_decay_of_one_lt with 1 < v-ρ₁(gB) at instantiation) and
+  (δ) ker = span assembly. THE OLD PLAN TEXT: for y ∈ ker(evalBI φ b) — (α) the componentwise vanishing
   inputs: hvan-snd from resI_eq_snd + the φ-instantiation (the σ-pair's
   snd IS the ρ₂-component and eval y = 0 projects to the snd-series
   vanishing — NEEDS the eval-as-series-limit at the component:
