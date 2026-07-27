@@ -282,6 +282,24 @@ theorem limitRestrictY_comp {W'' W' W : Set (Spv (Ainf p F))}
       = limitRestrictY p F ϖ (Set.Subset.trans h₁ h₂) :=
   rfl
 
+/-- **Evaluation of limit sections at the top index** of a dyadic trace. -/
+noncomputable def limitEvalTop (i₀ : DyadicIdx) :
+    ↥(limitSectionsY p F ϖ (dyadicTrace p F ϖ i₀)) →+* dyadicVal p F ϖ i₀ where
+  toFun f := f.1 ⟨i₀, Set.Subset.refl _⟩
+  map_one' := rfl
+  map_mul' _ _ := rfl
+  map_zero' := rfl
+  map_add' _ _ := rfl
+
+/-- Evaluation is compatible with the family: the value at any nested index
+is the restriction of the top value. -/
+theorem limitEvalTop_spec (i₀ : DyadicIdx)
+    (f : ↥(limitSectionsY p F ϖ (dyadicTrace p F ϖ i₀)))
+    (i : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆ dyadicTrace p F ϖ i₀})
+    (h : DyadicIdx.Nested p i.1 i₀) :
+    f.1 i = dyadicRes p F ϖ h (limitEvalTop p F ϖ i₀ f) :=
+  (f.2 i ⟨i₀, Set.Subset.refl _⟩ h).symm
+
 end FarguesFontaine
 
 end

@@ -1177,11 +1177,17 @@ non-Tate bases are supported.
     traces inside W), and **limitRestrictY** with id/comp laws BY RFL. The
     Y-structure presheaf exists as a functor on the poset of subsets of Y.
     NEXT (D-ii-2, the sheaf condition): (a) the values-on-basis comparison
-    𝒪(dyadic-trace) ≅ BIQ (the cofinality argument: the compatible-family
-    at a trace is determined by its value at the top index — needs the
-    directedness of the dyadic indices inside a trace and the injectivity of
-    the restrictions toward smaller intervals — resIHom_injective-style from
-    RestrictionInjective!); (b) separation + gluing over covers via the
+    𝒪(dyadic-trace) ≅ BIQ: limitEvalTop + limitEvalTop_spec DONE 2026-07-27
+    (evaluation at the top index; the family is pinned on NESTED indices).
+    REMAINING for (a): the iso-property. KEY GEOMETRIC BRIDGE NEEDED:
+    `dyadicTrace i ⊆ dyadicTrace i₀ → Nested i i₀` (trace-inclusion implies
+    interval-inclusion) — via Gauss-point witnesses: for any rational κ₀ in
+    interval-i, the Gauss point at radius vπ^{1/κ₀} lies in trace-i (its
+    KGE/KLE-values are exact), hence in trace-i₀, forcing κ₀ into
+    interval-i₀ (GaussPoint.lean should supply the membership lemmas).
+    With the bridge: injectivity of limitEvalTop is limitEvalTop_spec;
+    surjectivity extends a top value by restrictions (well-defined since
+    every in-trace index is then nested; compatibility from biResQ'_comp).; (b) separation + gluing over covers via the
     per-chart sheafiness (isSheafy_presheafChart applies to ALL dyadic
     charts, noted above); (c) the topology on limitSectionsY (product-
     induced) and the embedding condition. The ID2-sheafiness note stands:
