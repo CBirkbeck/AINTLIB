@@ -100,6 +100,20 @@ lemma affineModelEval_comp
       affineModelEval W (g.comp f) (g x) (g y) _ (coordY W)
     rw [affineModelEval_coordY, affineModelEval_coordY]
 
+/-- Bijective postcomposition preserves bijectivity of affine-model
+evaluation. -/
+lemma affineModelEval_map_bijective
+    {B : Type u} [CommRing B]
+    (W : WeierstrassCurve R) (f : R →+* A) (g : A →+* B)
+    (x y : A) (hxy : (W.map f).toAffine.Equation x y)
+    (hg : Function.Bijective g)
+    (heval : Function.Bijective (affineModelEval W f x y hxy)) :
+    Function.Bijective
+      (affineModelEval W (g.comp f) (g x) (g y)
+        (affineEquation_map_comp W f g x y hxy)) := by
+  rw [← affineModelEval_comp W f g x y hxy]
+  exact hg.comp heval
+
 end
 
 end ModularCurves
