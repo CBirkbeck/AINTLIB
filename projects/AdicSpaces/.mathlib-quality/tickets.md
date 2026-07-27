@@ -1675,7 +1675,12 @@ non-Tate bases are supported.
     ambient structurePresheaf through the open-poset iso); YB5 stalk
     fields at Y-points; YB6 the sheaf condition (still routes through
     charts / the keystone-over-B_n with the ⊤-image-span, or the
-    (a)-replay). Original: (E2) THE CROSS-CHART COMPARISON: for
+    (a)-replay). ★ YB2 DONE 2026-07-27: completeSpace_right_Ainf +
+    **hasLocLiftPowerBounded_Ainf** — the ambient machinery
+    (structurePresheaf, limitSections, S1-S3 stalks) instantiates at
+    Spa(A_inf, A_inf). NEXT YB3: the Y-relativized S4 (Laurent shrink
+    replay with PD-Tate := YB1 at Y-interior rationals).
+    Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
     (n+1)-index value — through the circle ring and the degenerate
