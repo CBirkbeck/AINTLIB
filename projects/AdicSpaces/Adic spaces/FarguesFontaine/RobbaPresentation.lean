@@ -2342,6 +2342,80 @@ theorem coeffSeq_Gelt_mul {A : Type*} [CommRing A] (gB : A)
       tsub_zero,
       coeffSeq]
 
+/-- **The downward telescope bound** (Kedlaya's `t ≥ t₀` branch): under the
+shift-minus-scale recursion with a contracting scale, every `X`-value is
+bounded by the `Y`-supremum. -/
+theorem telescope_down_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (g : hatK p F hρ0 hρ1) (hg : Valued.v g ≤ 1)
+    (X Y : ℕ → hatK p F hρ0 hρ1)
+    (hrec : ∀ n, Y n = (if 1 ≤ n then X (n - 1) else 0) - g * X n)
+    (hbdd : BddAbove (Set.range (fun n => Valued.v (Y n))))
+    (hX0 : Filter.Tendsto (fun n => Valued.v (X n)) Filter.atTop (nhds 0))
+    (m : ℕ) :
+    Valued.v (X m) ≤ ⨆ n, Valued.v (Y n) := by
+  -- the finite telescope identity
+  have htel : ∀ M : ℕ, X m
+      = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
+        + g ^ M * X (m + M) := by
+    intro M
+    induction M with
+    | zero =>
+      rw [Finset.sum_range_zero, pow_zero, one_mul, Nat.add_zero, zero_add]
+    | succ M ih =>
+      have hstep : X (m + M) = Y (m + M + 1) + g * X (m + M + 1) := by
+        have h := hrec (m + M + 1)
+        rw [if_pos (Nat.succ_le_succ (Nat.zero_le _)),
+          Nat.add_sub_cancel] at h
+        rw [h]
+        ring
+      calc X m = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
+            + g ^ M * X (m + M) := ih
+        _ = (∑ j ∈ Finset.range M, g ^ j * Y (m + 1 + j))
+            + (g ^ M * Y (m + M + 1) + g ^ (M + 1) * X (m + M + 1)) := by
+            rw [hstep]
+            ring
+        _ = (∑ j ∈ Finset.range (M + 1), g ^ j * Y (m + 1 + j))
+            + g ^ (M + 1) * X (m + (M + 1)) := by
+            rw [Finset.sum_range_succ]
+            rw [show m + 1 + M = m + M + 1 from by omega,
+              show m + (M + 1) = m + M + 1 from by omega]
+            ring
+  -- per-M ultrametric bound
+  have hbound : ∀ M : ℕ, Valued.v (X m)
+      ≤ max (⨆ n, Valued.v (Y n)) (Valued.v (X (m + M))) := by
+    intro M
+    rw [htel M]
+    refine le_trans (Valuation.map_add _ _ _) (max_le_max ?_ ?_)
+    · refine Valuation.map_sum_le _ (fun j _ => ?_)
+      rw [Valuation.map_mul]
+      calc Valued.v (g ^ j) * Valued.v (Y (m + 1 + j))
+          ≤ 1 * Valued.v (Y (m + 1 + j)) := by
+            refine mul_le_mul_of_nonneg_right ?_ zero_le
+            rw [Valuation.map_pow]
+            exact pow_le_one₀ zero_le hg
+        _ = Valued.v (Y (m + 1 + j)) := one_mul _
+        _ ≤ ⨆ n, Valued.v (Y n) := le_ciSup hbdd (m + 1 + j)
+    · rw [Valuation.map_mul]
+      calc Valued.v (g ^ M) * Valued.v (X (m + M))
+          ≤ 1 * Valued.v (X (m + M)) := by
+            refine mul_le_mul_of_nonneg_right ?_ zero_le
+            rw [Valuation.map_pow]
+            exact pow_le_one₀ zero_le hg
+        _ = Valued.v (X (m + M)) := one_mul _
+  -- the tail vanishes
+  by_contra hcon
+  push Not at hcon
+  have hev : ∀ᶠ M in Filter.atTop,
+      Valued.v (X (m + M)) < Valued.v (X m) := by
+    have h1 := (hX0.comp (Filter.tendsto_add_atTop_nat m)).congr
+      (fun a => by
+        show Valued.v (X (a + m)) = Valued.v (X (m + a))
+        rw [Nat.add_comm])
+    exact h1.eventually_lt_const (lt_of_le_of_lt zero_le hcon)
+  obtain ⟨M, hM⟩ := hev.exists
+  exact absurd (hbound M)
+    (not_le.mpr (max_lt hcon (by exact hM)))
+
 end FarguesFontaine
 
 end
