@@ -905,6 +905,19 @@ theorem affineOpenAmbientSection_topSection {Y : Scheme.{u}}
   rw [← Y.presheaf.map_comp]
   simp
 
+/-- Transporting an ambient affine section to the top open is the inverse of
+the canonical restriction isomorphism. -/
+theorem affineOpenTopSection_eq_topIso_inv {Y : Scheme.{u}}
+    (U : Y.affineOpens) (r : Γ(Y, U.1)) :
+    affineOpenTopSection U r = U.1.topIso.inv.hom r := by
+  unfold affineOpenTopSection
+  rw [Scheme.Opens.ι_appIso]
+  change (Y.presheaf.map (eqToHom U.1.ι_image_top).op).hom r =
+    U.1.topIso.inv.hom r
+  apply ConcreteCategory.congr_hom
+  apply Y.presheaf.congr_map
+  exact Subsingleton.elim _ _
+
 private noncomputable def affineOpenSectionsIso
     {Y : Scheme.{u}} (U : Y.affineOpens) :
     Γ(Y, U.1) ≅ Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
@@ -926,6 +939,29 @@ theorem affineOpenTopSection_affinePullbackSection
     affineOpenTopSection U (affinePullbackSection f U V hUV r) =
       (f.resLE V.1 U.1 hUV).appTop.hom (affineOpenTopSection V r) := by
   simp [affinePullbackSection]
+
+/-- Pulling an affine section through the restricted morphism agrees with
+the ambient `appLE` comorphism. -/
+theorem affinePullbackSection_eq_appLE
+    {X Y : Scheme.{u}} (f : X ⟶ Y)
+    (U : X.affineOpens) (V : Y.affineOpens) (hUV : U.1 ≤ f ⁻¹ᵁ V.1)
+    (r : Γ(Y, V.1)) :
+    affinePullbackSection f U V hUV r =
+      (f.appLE V.1 U.1 hUV).hom r := by
+  apply Function.LeftInverse.injective
+    (fun s => affineOpenAmbientSection_topSection U s)
+  rw [affineOpenTopSection_affinePullbackSection]
+  have hres := Scheme.Hom.resLE_app_top
+    (f := f) (U := V.1) (V := U.1) hUV
+  have hresApply := ConcreteCategory.congr_hom hres
+    (affineOpenTopSection V r)
+  change (f.resLE V.1 U.1 hUV).appTop.hom
+      (affineOpenTopSection V r) =
+    U.1.topIso.inv.hom
+      ((f.appLE V.1 U.1 hUV).hom
+        (V.1.topIso.hom.hom (affineOpenTopSection V r))) at hresApply
+  rw [hresApply, affineOpenTopSection_eq_topIso_inv V,
+    Iso.inv_hom_id_apply, ← affineOpenTopSection_eq_topIso_inv U]
 
 /-- Pulling a nonzerodivisor through a flat morphism preserves the
 nonzerodivisor condition on affine charts. -/
