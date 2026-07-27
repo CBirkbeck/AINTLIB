@@ -97,6 +97,34 @@ lemma chartAwayHomOfTriple_z_bijective
   exact (Function.Bijective.of_comp_iff _
     (chartZRingEquiv W).symm.bijective).mp hcomp
 
+section ExplicitBaseMap
+
+variable {R S : Type u} [CommRing R] [CommRing S]
+
+/-- The chart-bijectivity result with an explicit coefficient homomorphism,
+using the algebra structure induced by that homomorphism. -/
+lemma chartAwayHomOfTriple_z_bijective_of_ringHom
+    (W : WeierstrassCurve R) (f : R →+* S) (x y : S)
+    (hxy : (W.map f).toAffine.Equation x y)
+    (hbij : Function.Bijective (affineModelEval W f x y hxy)) :
+    letI : Algebra R S := f.toAlgebra
+    let hxy' : (W.map (algebraMap R S)).toAffine.Equation x y := by
+      rw [RingHom.algebraMap_toAlgebra]
+      exact hxy
+    let P : Fin 3 → S := ![x, y, 1]
+    let hP : (W.map (algebraMap R S)).toProjective.Equation P := by
+      rw [WeierstrassCurve.Projective.equation_some]
+      exact hxy'
+    Function.Bijective
+      (chartAwayHomOfTriple W 2 P 1 (by simp [P]) hP).toRingHom := by
+  letI : Algebra R S := f.toAlgebra
+  dsimp only
+  apply chartAwayHomOfTriple_z_bijective W x y
+    (by simpa only [RingHom.algebraMap_toAlgebra] using hxy)
+  simpa only [RingHom.algebraMap_toAlgebra] using hbij
+
+end ExplicitBaseMap
+
 end
 
 end ModularCurves
