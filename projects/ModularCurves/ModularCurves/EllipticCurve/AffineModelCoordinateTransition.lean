@@ -65,6 +65,38 @@ lemma chartAwayHomOfTriple_z_comp_chartZRingEquiv_symm
       (hkl := by decide)]
     simp
 
+/-- If affine evaluation at `(x,y)` is bijective, then so is the corresponding
+projective `Z`-chart homomorphism. -/
+lemma chartAwayHomOfTriple_z_bijective
+    (W : WeierstrassCurve R) (x y : S)
+    (hxy : (W.map (algebraMap R S)).toAffine.Equation x y)
+    (hbij : Function.Bijective
+      (affineModelEval W (algebraMap R S) x y hxy)) :
+    let P : Fin 3 → S := ![x, y, 1]
+    let hP : (W.map (algebraMap R S)).toProjective.Equation P := by
+      rw [WeierstrassCurve.Projective.equation_some]
+      exact hxy
+    Function.Bijective
+      (chartAwayHomOfTriple W 2 P 1 (by simp [P]) hP).toRingHom := by
+  dsimp only
+  have heval :
+      ((chartAwayHomOfTriple W 2 ![x, y, 1] 1 (by simp) (by
+          rw [WeierstrassCurve.Projective.equation_some]
+          exact hxy)).toRingHom.comp
+        (chartZRingEquiv W).symm.toRingHom) =
+          affineModelEval W (algebraMap R S) x y hxy := by
+    simpa only using
+      chartAwayHomOfTriple_z_comp_chartZRingEquiv_symm W x y hxy
+  have hcomp : Function.Bijective
+      ((chartAwayHomOfTriple W 2 ![x, y, 1] 1 (by simp) (by
+          rw [WeierstrassCurve.Projective.equation_some]
+          exact hxy)).toRingHom.comp
+        (chartZRingEquiv W).symm.toRingHom) := by
+    rw [heval]
+    exact hbij
+  exact (Function.Bijective.of_comp_iff _
+    (chartZRingEquiv W).symm.bijective).mp hcomp
+
 end
 
 end ModularCurves
