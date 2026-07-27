@@ -29,6 +29,25 @@ noncomputable section
 
 namespace FarguesFontaine
 
+/-- The trace of a rational subset (with nonempty `T`) on `Spa (A, A⁺)` is
+open. -/
+theorem isOpen_rationalOpen_trace {A : Type*} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [ValuationSpectrum.PlusSubring A]
+    {T : Finset A} (hT : T.Nonempty) (s : A) :
+    IsOpen {x : ↥(Spa A (ringPlus A)) | (x : Spv A) ∈ rationalOpen T s} := by
+  have htrace : {x : ↥(Spa A (ringPlus A)) | (x : Spv A) ∈ rationalOpen T s}
+      = Subtype.val ⁻¹' (⋂ t ∈ (T : Set A), basicOpen t s) := by
+    ext x
+    simp only [Set.mem_setOf_eq, Set.mem_preimage,
+      rationalOpen_eq_spa_inter hT s, Set.mem_inter_iff]
+    exact ⟨fun h => h.2, fun h => ⟨x.2, h⟩⟩
+  rw [htrace]
+  refine IsOpen.preimage continuous_subtype_val ?_
+  refine Set.Finite.isOpen_biInter (Set.finite_coe_iff.mp (by
+    exact Set.Finite.to_subtype (T.finite_toSet))) ?_
+  intro t ht
+  exact TopologicalSpace.isOpen_generateFrom_of_mem ⟨t, s, rfl⟩
+
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
@@ -122,6 +141,59 @@ noncomputable def spaChartHomeoBigWindowNeg (m : ℕ) (hp : 1 < p) :
     (Homeomorph.setCongr (by
       rw [bigWindow_eq_rationalOpen_neg p F ϖ m hp]
       rfl))
+
+/-- `chartT` is nonempty. -/
+theorem chartT_nonempty (ϖ' : PseudoUniformizer F) (a b : ℕ) :
+    (chartT p F ϖ' a b).Nonempty := by
+  rw [chartT]
+  exact ⟨_, Finset.mem_insert_self _ _⟩
+
+/-- **The Big-window traces are open in `Spa (A_inf, A_inf)`.** -/
+theorem isOpen_bigWindow_trace (n : ℤ) (hp : 1 < p) :
+    IsOpen {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+      (x : Spv (Ainf p F)) ∈ bigWindow p F ϖ n} := by
+  rcases n with n | m
+  · rw [show (Int.ofNat n) = (n : ℤ) from rfl]
+    have h := bigWindow_eq_rationalOpen_ofNat p F ϖ n hp
+    rw [show {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+        (x : Spv (Ainf p F)) ∈ bigWindow p F ϖ (n : ℤ)}
+      = {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+        (x : Spv (Ainf p F)) ∈ rationalOpen
+          (chartT p F (PseudoUniformizer.frobRoot p F ϖ n) p 1)
+          (chartS p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1)} from by
+      rw [← h]]
+    exact isOpen_rationalOpen_trace (chartT_nonempty p F _ p 1) _
+  · rw [show (Int.negSucc m) = -((m + 1 : ℕ) : ℤ) from by
+      rw [Int.negSucc_eq]
+      push_cast
+      ring]
+    have h := bigWindow_eq_rationalOpen_neg p F ϖ (m + 1) hp
+    rw [show {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+        (x : Spv (Ainf p F)) ∈ bigWindow p F ϖ (-((m + 1 : ℕ) : ℤ))}
+      = {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+        (x : Spv (Ainf p F)) ∈ rationalOpen
+          (chartT p F (PseudoUniformizer.pPow F ϖ (p ^ (m + 1))
+            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) (m + 1))) p 1)
+          (chartS p F (PseudoUniformizer.pPow F ϖ (p ^ (m + 1))
+            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) (m + 1))) 1 1)} from by
+      rw [← h]]
+    exact isOpen_rationalOpen_trace (chartT_nonempty p F _ p 1) _
+
+/-- **The `Y`-trace is open in `Spa (A_inf, A_inf)`** (covered by the Big
+windows). -/
+theorem isOpen_Y_trace (hp : 1 < p) :
+    IsOpen {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+      (x : Spv (Ainf p F)) ∈ Y p F ϖ} := by
+  rw [show {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+      (x : Spv (Ainf p F)) ∈ Y p F ϖ}
+    = ⋃ n : ℤ, {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) |
+      (x : Spv (Ainf p F)) ∈ bigWindow p F ϖ n} from by
+    ext x
+    simp only [Set.mem_setOf_eq, Set.mem_iUnion]
+    rw [show (Y p F ϖ) = ⋃ n : ℤ, bigWindow p F ϖ n from
+      Y_eq_iUnion_bigWindow p F ϖ hp]
+    simp]
+  exact isOpen_iUnion fun n => isOpen_bigWindow_trace p F ϖ n hp
 
 end FarguesFontaine
 
