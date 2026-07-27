@@ -1614,6 +1614,37 @@ non-Tate bases are supported.
     top piece via biResQ'_split_existsUnique + biFstQ_biResQ'_left
     endpoint transport + biResQ'_comp; PERF: RingHom.congr_fun of a comp-
     law needs rw [RingHom.comp_apply] BEFORE the inner rw can match.
+    ★ ARCHITECTURE DECISION EXECUTED 2026-07-27 (beastmode, the
+    'decide when (b) lands' point): the Y-object route is (i) THE
+    ENLARGED CHART-RATIONAL BASIS, not (ii) VObj-glue — mathlib's
+    PresheafedSpace.GlueData is C-generic but needs [HasLimits C] and
+    CompleteTopCommRingCat has NO limits infrastructure (building it =
+    larger than the whole E-track); every (i)-ingredient exists in-repo
+    (limitSections-generic pattern, keystone-over-Tate-B_n, S1-S5 stalk
+    package per chart, spaChartHomeoBigWindow, BISub_twist equality,
+    the degenerate-interval circle comparison). The dyadic strip layer
+    (Y-a, landed: instances + yPresheaf bundle) remains as interval-
+    ring bookkeeping feeding the strip-level sheaf facts. E-TRACK PLAN
+    (spawned): (E1) ChartRatIdx — the index structure {(n : ℤ) ×
+    valid rational data D over B_n} with yTrace := the
+    spaChartHomeoBigWindow-image of R(D) ⊆ Y, nesting relation via
+    trace-inclusion; (E2) THE CROSS-CHART COMPARISON (hard core): for
+    an index of chart n whose trace sits inside the overlap circle
+    κ = p^{n+1}, the keystone-over-B_n identification with a chart-
+    (n+1)-index value — through the circle ring and the degenerate
+    interval B^{[τ,τ]} (BISub_twist + ID2d at both sides); gives the
+    inter-chart restriction maps; (E3) the limit presheaf over
+    ChartRatIdx-traces (mirror limitSectionsY topology block verbatim);
+    (E4) values-on-basis (limitEval at a top index = presheafValue of
+    the chart datum, the RationalIndex-cofinality) + stalks: chart-
+    rational traces ARE a neighbourhood basis of Y (chart homeos +
+    B_n-side rational basis), so stalk-at-v = chart-stalk =
+    StructureSheafStalks stalkValue at B_n — transport the S1-S5
+    fields; (E5) IsSheafOfTopologicalRings for the E3-presheaf (per-
+    chart IsLimitSheaf from isSheafy_presheafChart via
+    isSheafy_iff_isLimitSheaf + basis refinement; cross-chart overlap
+    sections agree by E2); (E6) yVObj := the VObj of Y. THEN D-iii
+    (φ-action, X := Y/φ^ℤ).
     NEXT (Y-OBJ pipeline): (Y-a) the Opens-functor packaging of
     limitSectionsY on the subspace Y (presheaf-on-Y in TopCat.Presheaf
     form or hand-rolled contravariant functor); (Y-b) sheaf condition for
