@@ -2294,9 +2294,28 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   identities into standalone lemmas and close them with TERM-MODE calc
   (congrArg of the subtype-level fact + a standalone BISub_coe_add
   micro-lemma + add_mul), no kabstract;
-  (P2) the specific b + its wI′ ≤ 1 (teichPowOverP norms exist from T911);
-  (P3) surjectivity with (4.9.1)-norm control: per-monomial lift
-  y = ϖ^n[x̄_n z̄^{-j}]·T^j (mirror exists_evalAr_eq_of_mem_BISub);
+  (P2) ANALYSIS DONE 2026-07-27 — b is FREE, reuse T911's family: in the
+  repo's untwisted conventions |p|_ρ = ρ VARIES with the radius while
+  |[z̄]|_ρ = |z̄| is CONSTANT (gaussVal_p_pow vs gaussVal_teichPi_pow) —
+  so Kedlaya's ρ-cut generator is realised as g := p^{-m}[z̄^e] ∈ B^I
+  (p is a unit of B^I), with v_ρ(g) = ρ^{-m}|z̄|^e ≤ 1 ⟺ ρ ≥ |z̄|^{e/m}:
+  a LEFT-endpoint cut, exactly T911's teichPowOverP p F ϖ (ϖ^j) n
+  (= p^{-1}[ϖ^{jn}]) shape with hexact : vπ^{jn} = σ₁ pinning the cut
+  radius; frobRoot-ϖ's give the full c^ℚ grid. b := BIProd-σ-image,
+  hbmem/hb discharged by the same AD-9 satisfiability lemmas
+  (isSheafy_BISub_AD9 side). The case-1 presentation map is therefore
+  evalBIHom (φ := resIHom …) at b := BIProd-σ (teichPowOverP (ϖ^j) n),
+  with σ₁ = vπ^{jn} (cut) and σ₂ = ρ₂ (θ := interpolation exponent of
+  vπ^{jn} in [ρ₁, ρ₂], η := 0);
+  (P3) surjectivity with (4.9.1)-norm control: per-monomial lift — for a
+  Bloc-monomial x with wLoc-σ-data, pick j minimal with |x̄|-vs-|z̄|^j
+  comparison, lift to y·T^j with y := the z̄^{-j}-twisted monomial IN THE
+  BIG ring B^I; then the density/completeness assembly (mirror
+  exists_evalAr_eq_of_mem_BISub 2215-2398, which reduces to Bloc via
+  exists_blocApprox + successive approximation — REREAD its skeleton
+  before writing; the coefficients here live in ↥BISub-ρ not ArSub so
+  the gaussNormRPS-analogue is the sup-wI-norm on restricted series —
+  DEFINE wIRPS first, mirroring gaussNormRPS);
   (P4) kernel = (T − b), closed, strict: multiplicativity bound wI(y) ≥
   |T−b|-factor + the x_n = −Σ y_i [z̄]^{i−n−1} coefficient-decay injectivity
   (Kedlaya ln 527–546; per-t case split t < t₀ geometric unit / t ≥ t₀
