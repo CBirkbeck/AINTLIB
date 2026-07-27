@@ -104,6 +104,33 @@ def trace (i : ChartRatIdx p F ϖ) : Set (Spv (Ainf p F)) :=
 
 end ChartRatIdx
 
+/-- **Chart-rational traces land inside `Y`.** -/
+theorem ChartRatIdx.trace_subset_Y (i : ChartRatIdx p F ϖ) :
+    ChartRatIdx.trace p F ϖ i ⊆ Y p F ϖ := by
+  have hcov := Y_eq_iUnion_bigWindow p F ϖ (one_lt_p p)
+  obtain ⟨n, DhD⟩ := i
+  match n with
+  | .ofNat k =>
+    rintro v ⟨w, ⟨u, -, rfl⟩, rfl⟩
+    have hw : ((spaChartHomeoBigWindow p F ϖ k (one_lt_p p) u
+        : ↥(bigWindow p F ϖ (k : ℤ)
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F))
+        ∈ bigWindow p F ϖ (k : ℤ)
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)) :=
+      (spaChartHomeoBigWindow p F ϖ k (one_lt_p p) u).2
+    rw [hcov]
+    exact Set.mem_iUnion.mpr ⟨(k : ℤ), hw.1⟩
+  | .negSucc m =>
+    rintro v ⟨w, ⟨u, -, rfl⟩, rfl⟩
+    have hw : ((spaChartHomeoBigWindowNeg p F ϖ (m + 1) (one_lt_p p) u
+        : ↥(bigWindow p F ϖ (-((m + 1 : ℕ) : ℤ))
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F))
+        ∈ bigWindow p F ϖ (-((m + 1 : ℕ) : ℤ))
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F)) :=
+      (spaChartHomeoBigWindowNeg p F ϖ (m + 1) (one_lt_p p) u).2
+    rw [hcov]
+    exact Set.mem_iUnion.mpr ⟨(-((m + 1 : ℕ) : ℤ)), hw.1⟩
+
 end FarguesFontaine
 
 end
