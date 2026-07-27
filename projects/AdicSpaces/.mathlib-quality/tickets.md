@@ -1321,11 +1321,25 @@ non-Tate bases are supported.
     membership of pointValue-v in the Laurent-minus rational (unfold the
     product-T conditions; vle 1 b' and vle b' b' + s-nonzero); (iii) the
     ELEMENTARY unit fact (b'-inverse = s₀·(s₀b')⁻¹, no Noetherian);
-    (iv) exists_downstairs_rationalDatum + the keystone/imgDatum
-    comparison to land on a base-rational D' with
-    IsUnit (restrictionMapHom D D' h b) — study imgDatum/keystone
-    statements (RelativePieceKeystone) for the exact unit-transport
-    path.
+    (iv) REROUTED 2026-07-27 (the keystone relativePiece_equiv is
+    [IsStronglyNoetherian]-gated — circular for the campaign; DO NOT use):
+    NOETHERIAN-FREE ROUTE: (1) w := pointValue ∈ basicOpen 1 c for
+    c := u^{-k}·b; (2) **exists_A_level_open_presentation** (SpaRational-
+    OpenHomeomorph:225, Tate+IRIE only!) at the singleton family (1, c) ⇒
+    a base-open W ∋ v capturing the basic-open for ALL Spa-PD-points over
+    W; (3) rational basis inside W ∩ R(D) ⇒ D'; (4) for every
+    w'' ∈ Spa(presheafValue D'): pull back along restrictionMapHom D D' to
+    a Spa-PD-point over R(D') ⊆ W (NEEDS THE MISSING BRICK: plus-
+    functoriality (PD)⁺ ≤ ((PD')⁺).comap (restrictionMapHom D D' h) — 
+    Wedhorn 8.2(3)-piece via integral-closure functoriality of the
+    completedPlusSubring; then AdicSpectrum.comap_mem_spa assembles) ⇒
+    capture ⇒ ¬vle (res b) 0 at every w''; (5)
+    **isUnit_of_forall_not_vle_zero_of_isOpen_topologicallyNilpotent**
+    (AdicSpectrum:360, Wedhorn 7.52(2)) at PD' with
+    IsTateRing.isOpen_topologicallyNilpotentElements (HuberRings:324) ⇒
+    IsUnit (restrictionMapHom D D' h b). NEXT BRICK: the plus-
+    functoriality lemma (read completedPlusSubring/presheafValuePlus defs
+    first).
     PLAN REFINED 2026-07-27 after reconnaissance: (S4-easy, do first)
     unit ⇒ nonzero stalk-value (v(x)v(x⁻¹) = v(1) ≠ 0), nonunits-⊆-supp
     contrapositive, supp is an ideal ⇒ once the hard half lands,
