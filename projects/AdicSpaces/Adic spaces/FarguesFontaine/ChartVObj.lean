@@ -486,6 +486,191 @@ theorem p_div_teich_pow_a_mem_chartSubring (a b d : ℕ) (hab : b ≤ a)
   · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
   · exact Set.mem_union_left _ ⟨_, rfl⟩
 
+
+/-! ### Monomial-fraction zone lemmas (ChartDensePlus r4b, b = 1) -/
+
+/-- The denominator element of the `k`-th monomial fraction. -/
+def sPow (k : ℕ) : Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ) :=
+  ⟨((p : Ainf p F) * teichPi p F ϖ) ^ k, k, rfl⟩
+
+/-- **(M3'') Large-exponent monomials are chart-subring elements directly**
+(`b = 1`): for `i ≥ ka + k`, the monomial fraction `p^i[c]/(p[ϖ])^k` is
+`chartFracP^k` times an `A_inf`-image. -/
+theorem mk_monomial_mem_of_large (a k i : ℕ) (hik : k * a + k ≤ i) (c : OF F) :
+    IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+      ∈ Subring.closure
+        (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+          ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a 1}) := by
+  have hsplit : i = k * a + (i - (k * a + k)) + k := by omega
+  have hIT : AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ k
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k = 1 := by
+    rw [← map_pow (AlocToBloc p F ϖ),
+      ← map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+    exact AlocToBloc_teichPiInv_mul p F ϖ k
+  have hfrac : chartFracP p F ϖ a 1
+      = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ a
+        * AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) := by
+    rw [chartFracP, map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)), pow_one]
+  have hkey : IsLocalization.mk' (Bloc p F ϖ)
+      ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+      = chartFracP p F ϖ a 1 ^ k
+        * algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ (i - (k * a + k)) * WittVector.teichmuller p c) := by
+    rw [IsLocalization.mk'_eq_iff_eq_mul]
+    calc (algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c))
+        = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k * a)
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F)) ^ (i - (k * a + k))
+          * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ k
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p c) := by
+          rw [map_mul (algebraMap (Ainf p F) (Bloc p F ϖ))]
+          rw [show ((p : Ainf p F) ^ i)
+              = (p : Ainf p F) ^ (k * a) * (p : Ainf p F) ^ (i - (k * a + k))
+                * (p : Ainf p F) ^ k from by
+            conv_lhs => rw [hsplit]
+            rw [pow_add, pow_add]]
+          rw [map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+      _ = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k * a)
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F)) ^ (i - (k * a + k))
+          * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ k
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p c)
+          * (AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) ^ k
+            * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k) := by
+          rw [hIT, mul_one]
+      _ = chartFracP p F ϖ a 1 ^ k
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (i - (k * a + k)) * WittVector.teichmuller p c)
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (((p : Ainf p F) * teichPi p F ϖ) ^ k) := by
+          simp only [hfrac, mul_pow,
+            map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+          generalize algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) = P
+          generalize AlocToBloc p F ϖ (teichPiInvAloc p F ϖ) = I
+          generalize algebraMap (Ainf p F) (Bloc p F ϖ)
+            (WittVector.teichmuller p c) = C
+          generalize algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) = T
+          ring
+  rw [hkey]
+  refine mul_mem (pow_mem (Subring.subset_closure ?_) k)
+    (Subring.subset_closure ?_)
+  · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
+  · exact Set.mem_union_left _ ⟨_, rfl⟩
+
+/-- **(M1'') Small-exponent monomials are chart-subring elements**: for
+`i ≤ k` with the left-endpoint bound `|c| ≤ |ϖ|^{2k−i}`, the monomial
+fraction `p^i[c]/(p[ϖ])^k` is an `m1`-form element. -/
+theorem mk_monomial_mem_of_le (a k i : ℕ) (hik : i ≤ k) (c : OF F)
+    (hc : perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        ^ (2 * k - i)) :
+    IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+      ∈ Subring.closure
+        (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+          ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a 1}) := by
+  have hπpos : (0 : NNReal) < perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) := vpi_pos p F ϖ
+  have hck : perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        ^ k := by
+    refine le_trans hc (pow_le_pow_of_le_one zero_le
+      (perfectoidValuation_toOF_lt_one p F ϖ).le (by omega))
+  obtain ⟨c', hc'eq⟩ := exists_eq_toOF_pow_mul p F ϖ k c hck
+  have hc' : perfectoidValuation p F (c' : F)
+      ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        ^ (k - i) := by
+    have hval : perfectoidValuation p F (c : F)
+        = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k
+          * perfectoidValuation p F (c' : F) := by
+      rw [hc'eq]
+      rw [show (((PseudoUniformizer.toOF F ϖ : OF F) ^ k * c' : OF F) : F)
+          = ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k * (c' : F) from by
+        push_cast; rfl]
+      rw [Valuation.map_mul, map_pow]
+    have h2 : perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+          ^ k * perfectoidValuation p F (c' : F)
+        ≤ perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+          ^ k * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (k - i) := by
+      rw [← hval, ← pow_add]
+      rw [show k + (k - i) = 2 * k - i from by omega]
+      exact hc
+    exact le_of_mul_le_mul_left h2 (pow_pos hπpos k)
+  have hcancel : ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i) = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.inv_mul
+    rw [(isUnit_p_image p F ϖ).unit_spec] at h
+    calc ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+        * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
+        = (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ))
+          * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F))) ^ (k - i) :=
+          (mul_pow _ _ _).symm
+      _ = 1 := by rw [h, one_pow]
+  have hkey : IsLocalization.mk' (Bloc p F ϖ)
+      ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+        * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i) := by
+    rw [IsLocalization.mk'_eq_iff_eq_mul]
+    have hsplitp : (k : ℕ) = i + (k - i) := by omega
+    calc (algebraMap (Ainf p F) (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c))
+        = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+          * (algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k
+            * algebraMap (Ainf p F) (Bloc p F ϖ)
+              (WittVector.teichmuller p c')) := by
+          rw [hc'eq, map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_mul (WittVector.teichmuller p),
+            map_pow (WittVector.teichmuller p),
+            map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_pow (algebraMap (Ainf p F) (Bloc p F ϖ))]
+          rfl
+      _ = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+          * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+          * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
+            * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+            * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k) := by
+          rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
+              (WittVector.teichmuller p c')
+              * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+              * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ (k - i)
+                * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+                * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k)
+            = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+              * (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+                * algebraMap (Ainf p F) (Bloc p F ϖ)
+                  ((p : Ainf p F)) ^ (k - i))
+              * (algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+                * algebraMap (Ainf p F) (Bloc p F ϖ) (teichPi p F ϖ) ^ k)
+            from by ring, hcancel, mul_one]
+          ring
+      _ = algebraMap (Ainf p F) (Bloc p F ϖ) (WittVector.teichmuller p c')
+          * ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ (k - i)
+          * algebraMap (Ainf p F) (Bloc p F ϖ)
+            (((p : Ainf p F) * teichPi p F ϖ) ^ k) := by
+          congr 1
+          rw [map_pow (algebraMap (Ainf p F) (Bloc p F ϖ)),
+            map_mul (algebraMap (Ainf p F) (Bloc p F ϖ)), mul_pow]
+          rw [show algebraMap (Ainf p F) (Bloc p F ϖ)
+              ((p : Ainf p F)) ^ (k - i)
+              * algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ i
+            = algebraMap (Ainf p F) (Bloc p F ϖ) ((p : Ainf p F)) ^ k from by
+            rw [← pow_add]
+            congr 1
+            omega]
+  rw [hkey]
+  exact teich_div_p_pow_mem_chartSubring p F ϖ a 1 (k - i) c' hc'
+
 end FarguesFontaine
 
 end
