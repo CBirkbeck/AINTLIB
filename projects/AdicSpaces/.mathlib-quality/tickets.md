@@ -1471,7 +1471,18 @@ non-Tate bases are supported.
     t/s (p^{a'}/s, [ϖ]^{b'}/s) and A_inf-elements — the T911 norm-exact
     lift machinery (Presentation.lean, 'norm-exact lift of p^{-i}') is the
     tool; then the element is a CONVERGENT SUM of generator-products ∈
-    the closed canonical subring. (β) the ARCHITECTURE DECISION
+    the closed canonical subring. r4-DESIGN 2026-07-27 (post-T911-study):
+    (1) [ϖ]/p = [ϖ]^{b+1}/chartS is a locPlus GENERATOR-QUOTIENT, so the
+    presentation base b = teichPowOverP = [ϖ^{jn}]/p is a generator-product
+    (jn ≥ 1); (2) Ar-ball monomials p^i[d]/[ϖ]^m with window-norms ≤ 1
+    have O_F-INTEGRAL a-th powers at the exact endpoint (hexact2) ⇒
+    degree-a integrality over locPlus; Aloc-elements sum via
+    exists_aloc_head_split + closedness; (3) z = evalAr f with
+    gaussNormRPS ≤ wI ≤ 1 (exists_evalAr_eq_of_mem_BISub, Kedlaya
+    strictness); partial sums are canonical-members (2)+(1);
+    tendsto_evalAr + canonical-closed ⇒ ChartDensePlus. Each step is a
+    compile-brick; then chartPlus = canonical and chartVObj upgrades to
+    the canonical pair. (β) the ARCHITECTURE DECISION
     (ambient-vs-glue, M8-note above) and the cross-chart assembly of the
     Y-VObj from the chartVObj chain + the D-ii-2 split fiber-product; then
     (D-iii) the φ-action as VObj-isos and X := Y/φ^ℤ.
