@@ -4039,6 +4039,56 @@ theorem resIHomTop_blocToBI {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
     rw [BIProd_snd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x,
       BIProd_snd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x]
 
+/-- **Every intermediate radius is a geometric interpolant** of the interval
+endpoints. -/
+theorem exists_interpolant {ρ₁ σ ρ₂ : NNReal} (hρ₁0 : 0 < ρ₁)
+    (hρσ : ρ₁ ≤ σ) (hσρ : σ ≤ ρ₂) (hρ₂1 : ρ₂ < 1) :
+    ∃ θ : ℝ, 0 ≤ θ ∧ θ ≤ 1 ∧ ρ₁ ^ θ * ρ₂ ^ (1 - θ) = σ := by
+  have hσ0 : 0 < σ := lt_of_lt_of_le hρ₁0 hρσ
+  have hρ₂0 : 0 < ρ₂ := lt_of_lt_of_le hσ0 hσρ
+  rcases eq_or_lt_of_le (le_trans hρσ hσρ) with heq | hlt
+  · -- ρ₁ = ρ₂ forces σ = ρ₁; θ = 1 works
+    have hσeq : σ = ρ₁ := le_antisymm (heq ▸ hσρ) hρσ
+    refine ⟨1, zero_le_one, le_rfl, ?_⟩
+    rw [sub_self, NNReal.rpow_one, NNReal.rpow_zero, mul_one, hσeq]
+  · -- strict case: solve on the log scale
+    have ha : (0 : ℝ) < (ρ₁ : ℝ) := hρ₁0
+    have hb : (0 : ℝ) < (ρ₂ : ℝ) := hρ₂0
+    have hs : (0 : ℝ) < (σ : ℝ) := hσ0
+    have hab : (ρ₁ : ℝ) < (ρ₂ : ℝ) := hlt
+    have hlog : Real.log (ρ₁ : ℝ) < Real.log (ρ₂ : ℝ) :=
+      Real.log_lt_log ha hab
+    have hden : Real.log (ρ₁ : ℝ) - Real.log (ρ₂ : ℝ) < 0 :=
+      sub_neg.mpr hlog
+    have hnum : Real.log (σ : ℝ) - Real.log (ρ₂ : ℝ) ≤ 0 :=
+      sub_nonpos.mpr (Real.log_le_log hσ0 hσρ)
+    have hnum' : Real.log (ρ₁ : ℝ) - Real.log (ρ₂ : ℝ)
+        ≤ Real.log (σ : ℝ) - Real.log (ρ₂ : ℝ) :=
+      sub_le_sub_right (Real.log_le_log hρ₁0 hρσ) _
+    refine ⟨(Real.log (σ : ℝ) - Real.log (ρ₂ : ℝ))
+      / (Real.log (ρ₁ : ℝ) - Real.log (ρ₂ : ℝ)),
+      by
+        rw [← neg_div_neg_eq]
+        exact div_nonneg (neg_nonneg.mpr hnum) (neg_nonneg.mpr hden.le),
+      ?_, ?_⟩
+    · rw [div_le_one_of_neg hden]
+      exact hnum'
+    · set θ := (Real.log (σ : ℝ) - Real.log (ρ₂ : ℝ))
+        / (Real.log (ρ₁ : ℝ) - Real.log (ρ₂ : ℝ)) with hθdef
+      have hd0 : Real.log (ρ₁ : ℝ) - Real.log (ρ₂ : ℝ) ≠ 0 := hden.ne
+      have hkey : Real.log (ρ₁ : ℝ) * θ + Real.log (ρ₂ : ℝ) * (1 - θ)
+          = Real.log (σ : ℝ) := by
+        calc Real.log (ρ₁ : ℝ) * θ + Real.log (ρ₂ : ℝ) * (1 - θ)
+            = θ * (Real.log (ρ₁ : ℝ) - Real.log (ρ₂ : ℝ))
+              + Real.log (ρ₂ : ℝ) := by ring
+          _ = (Real.log (σ : ℝ) - Real.log (ρ₂ : ℝ)) + Real.log (ρ₂ : ℝ) := by
+              rw [hθdef, div_mul_cancel₀ _ hd0]
+          _ = Real.log (σ : ℝ) := sub_add_cancel _ _
+      refine NNReal.coe_injective ?_
+      push_cast [NNReal.coe_rpow]
+      rw [Real.rpow_def_of_pos ha, Real.rpow_def_of_pos hb,
+        ← Real.exp_add, hkey, Real.exp_log hs]
+
 end FarguesFontaine
 
 end
