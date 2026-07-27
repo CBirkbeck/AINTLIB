@@ -1217,7 +1217,13 @@ non-Tate bases are supported.
     the val-projection (biGlue_coe-style) and kept out of rfl-args, else
     (kernel) deterministic timeout; also per-declaration kernel budgets ⇒
     hoist branch proofs into abstract-parameter lemmas (the aux-lemma +
-    named-def restructure pattern).
+    named-def restructure pattern). DYADIC LIFT DONE 2026-07-27
+    (YPresheaf.lean, now importing IntervalSplitting):
+    DyadicIdx.splitL/splitR (+_nested), biResQ'_split_existsUnique,
+    **exists_unique_dyadicRes_glue** — the two-piece sheaf axiom in
+    dyadicRes form (the splitL/splitR-radii are iota-defeq to the
+    Q-instantiation, so the Q-theorem applies verbatim; matching stated via
+    biSndQ/biFstQ at the split radius). Axiom-clean.
     Original sub-step text: (b1) endpoint projections biFst/biSnd : BISub → hatK ρᵢ
     (= RingHom.fst/snd ∘ subtype; continuous; dense-layer = BlocToHatK) and
     the three dense-equalizer laws: biFst∘biResQ'(left-shared) = biFst,
