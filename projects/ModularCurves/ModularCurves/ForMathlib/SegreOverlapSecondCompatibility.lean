@@ -334,4 +334,69 @@ lemma segreStandardChartOverlapRingEquiv_secondRightRatio
       (segreProductOverlap_rightRatio_transition
         R m n i a j b c).symm
 
+/-- The Segre-image away algebra map is the degree-zero localization inclusion. -/
+lemma segreImageAway_algebraMap_eq_fromZero
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (f : SegreCoordinateRing R m n) (r : R) :
+    algebraMap R
+        (Away (segreImageGrading R m n) f) r =
+      HomogeneousLocalization.fromZeroRingHom
+        (segreImageGrading R m n)
+        (Submonoid.powers f)
+        (algebraMap R (segreImageGrading R m n 0) r) := rfl
+
+/-- The first Segre-image chart map to the overlap preserves coefficients. -/
+lemma segreImageFirstChartToOverlapAway_algebraMap
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1))
+    (r : R) :
+    segreImageFirstChartToOverlapAway R m n i a j b
+        (algebraMap R (SegreImageChartRing R m n i j) r) =
+      algebraMap R
+        (SegreImageChartOverlapRing R m n i a j b) r := by
+  rw [segreImageAway_algebraMap_eq_fromZero
+    R m n
+    (segreImageCoordinate R m n (segrePairIndex m n i j))
+    r]
+  rw [segreImageAway_algebraMap_eq_fromZero
+    R m n
+    (segreImageCoordinate R m n (segrePairIndex m n i j) *
+      segreImageCoordinate R m n (segrePairIndex m n a b))
+    r]
+  exact
+    HomogeneousLocalization.awayMap_fromZeroRingHom
+      (segreImageGrading R m n)
+      (segreImageCoordinate_mem_degreeOne R m n
+        (segrePairIndex m n a b))
+      rfl
+      (algebraMap R (segreImageGrading R m n 0) r)
+
+/-- The second Segre-image chart map to the overlap preserves coefficients. -/
+lemma segreImageSecondChartToOverlapAway_algebraMap
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1))
+    (r : R) :
+    segreImageSecondChartToOverlapAway R m n i a j b
+        (algebraMap R (SegreImageChartRing R m n a b) r) =
+      algebraMap R
+        (SegreImageChartOverlapRing R m n i a j b) r := by
+  rw [segreImageAway_algebraMap_eq_fromZero
+    R m n
+    (segreImageCoordinate R m n (segrePairIndex m n a b))
+    r]
+  rw [segreImageAway_algebraMap_eq_fromZero
+    R m n
+    (segreImageCoordinate R m n (segrePairIndex m n i j) *
+      segreImageCoordinate R m n (segrePairIndex m n a b))
+    r]
+  exact
+    HomogeneousLocalization.awayMap_fromZeroRingHom
+      (segreImageGrading R m n)
+      (segreImageCoordinate_mem_degreeOne R m n
+        (segrePairIndex m n i j))
+      (mul_comm
+        (segreImageCoordinate R m n (segrePairIndex m n i j))
+        (segreImageCoordinate R m n (segrePairIndex m n a b)))
+      (algebraMap R (segreImageGrading R m n 0) r)
+
 end MvPolynomial
