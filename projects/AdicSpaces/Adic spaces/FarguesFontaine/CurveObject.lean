@@ -117,6 +117,83 @@ theorem isClosed_frobFixed (V : Opens (Curve p F ϖ)) :
   isClosed_eq (limitFrobHom_continuous p F 1 _)
     (limitRestrict_continuous _)
 
+/-- Monotonicity of the saturated ambient preimage. -/
+theorem yFunctor_curvePreimage_mono {V' V : Opens (Curve p F ϖ)}
+    (h : V' ≤ V) :
+    (yFunctor p F ϖ).obj (curvePreimage p F ϖ V')
+      ≤ (yFunctor p F ϖ).obj (curvePreimage p F ϖ V) :=
+  leOfHom ((yFunctor p F ϖ).map (homOfLE (fun _ hy => h hy)))
+
+/-- **Restriction preserves `φ`-invariance.** -/
+theorem frobFixed_restrict {V' V : Opens (Curve p F ϖ)} (h : V' ≤ V)
+    {s : ↥(limitSections
+      ((yFunctor p F ϖ).obj (curvePreimage p F ϖ V)))}
+    (hs : s ∈ frobFixed p F ϖ V) :
+    limitRestrict (yFunctor_curvePreimage_mono p F ϖ h) s
+      ∈ frobFixed p F ϖ V' := by
+  rw [mem_frobFixed]
+  rw [mem_frobFixed] at hs
+  have h1 := limitFrobHom_limitRestrict p F 1
+    (yFunctor_curvePreimage_mono p F ϖ h) s
+  rw [h1, hs]
+  have h2 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (frobOpens_mono p F 1 (yFunctor_curvePreimage_mono p F ϖ h))
+    (le_of_eq (frobOpens_yFunctor_curvePreimage p F ϖ 1 V)))) s
+  have h3 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (frobOpens_yFunctor_curvePreimage p F ϖ 1 V'))
+    (yFunctor_curvePreimage_mono p F ϖ h))) s
+  exact h2.trans h3.symm
+
+instance frobFixed.completeSpace (V : Opens (Curve p F ϖ)) :
+    CompleteSpace ↥(frobFixed p F ϖ V) :=
+  (isClosed_frobFixed p F ϖ V).completeSpace_coe
+
+instance frobFixed.isUniformAddGroup (V : Opens (Curve p F ϖ)) :
+    IsUniformAddGroup ↥(frobFixed p F ϖ V) :=
+  IsUniformInducing.isUniformAddGroup (frobFixed p F ϖ V).subtype
+    isUniformEmbedding_subtype_val.isUniformInducing
+
+/-- The curve as a topological-category object. -/
+def CurveTop : TopCat := TopCat.of (Curve p F ϖ)
+
+/-- The restriction of invariant sections, as a ring homomorphism. -/
+noncomputable def frobFixedRestrict {V' V : Opens (Curve p F ϖ)}
+    (h : V' ≤ V) :
+    ↥(frobFixed p F ϖ V) →+* ↥(frobFixed p F ϖ V') :=
+  RingHom.codRestrict
+    ((limitRestrict (yFunctor_curvePreimage_mono p F ϖ h)).comp
+      (frobFixed p F ϖ V).subtype)
+    (frobFixed p F ϖ V')
+    (fun s => frobFixed_restrict p F ϖ h s.2)
+
+theorem frobFixedRestrict_continuous {V' V : Opens (Curve p F ϖ)}
+    (h : V' ≤ V) : Continuous (frobFixedRestrict p F ϖ h) := by
+  refine continuous_induced_rng.mpr ?_
+  have hfun : (Subtype.val ∘ ⇑(frobFixedRestrict p F ϖ h))
+      = fun s : ↥(frobFixed p F ϖ V) =>
+        limitRestrict (yFunctor_curvePreimage_mono p F ϖ h) s.1 := rfl
+  rw [hfun]
+  exact (limitRestrict_continuous _).comp continuous_subtype_val
+
+/-- **The structure presheaf of the adic Fargues–Fontaine curve**
+(D-iv-2): values the `φ`-fixed sections over saturated preimages. -/
+noncomputable def xStructurePresheaf :
+    TopCat.Presheaf CompleteTopCommRingCat.{u_1} (CurveTop p F ϖ) where
+  obj V :=
+    letI := frobFixed.isUniformAddGroup p F ϖ V.unop
+    letI := frobFixed.completeSpace p F ϖ V.unop
+    CompleteTopCommRingCat.of ↥(frobFixed p F ϖ V.unop)
+  map {V W} i := ⟨frobFixedRestrict p F ϖ (leOfHom i.unop),
+    frobFixedRestrict_continuous p F ϖ (leOfHom i.unop)⟩
+  map_id V := by
+    refine Subtype.ext (RingHom.ext fun s => Subtype.ext (Subtype.ext
+      (funext fun i => ?_)))
+    rfl
+  map_comp {U V W} i j := by
+    refine Subtype.ext (RingHom.ext fun s => Subtype.ext (Subtype.ext
+      (funext fun i => ?_)))
+    rfl
+
 end FarguesFontaine
 
 end
