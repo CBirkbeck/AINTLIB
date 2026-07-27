@@ -49,6 +49,17 @@ the `p`-adic one; hence `BIPairOfDefinition`, `isHuberRing_BISub`, `isTateRing_B
 mathematics, the next task (T911 strictness) worked out, the binding working rules
 (PERF-1 in particular), the file map and the API inventory.
 
+#### PROCESS-INCIDENT 2 (2026-07-27, beastmode, self-logged): commit ca132f97c
+pushed RED (8 errors — the ported block used Opens/leOfHom under the
+scratch's extra `open TopologicalSpace CategoryTheory` absent in the
+target file; the `build | grep -c ; commit`-chain used `;` so the
+nonzero gate did not stop the commit). Fixed forward next commit
+(fully-qualified names). LESSONS RE-BOUND: (1) the gate must be a
+SEPARATE step and the commit must be manually issued only after
+reading the gate output — never `;`-chained; (2) when porting, diff
+the scratch's `open`-header against the target's — scratch-only opens
+are a red flag; prefer fully-qualified names in ported blocks.
+
 #### PROCESS-INCIDENT 2026-07-27 (beastmode, self-logged): commit 6d6958bb1
 pushed a BROKEN build (evalBI_finset_sum ported outside its variable
 section — 20 errors); fixed forward within minutes by the next commit
