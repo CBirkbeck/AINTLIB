@@ -2114,6 +2114,48 @@ theorem exists_correction_chain_BI
     _ ≤ (K) * (W * (2⁻¹ : NNReal) ^ l) :=
         mul_le_mul_right h _
 
+include hφb in
+/-- **The correction sequence, telescoped** (case 1): partial-sum residuals
+shrink geometrically with `K`-scaled round norms. -/
+theorem exists_correction_sequence_BI
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m₀)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀))
+    {z : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1)
+    (hzW : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 z ≤ W) :
+    ∃ u : ℕ → ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      (∀ l, wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((u l : ↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) * (W * (2⁻¹ : NNReal) ^ l))
+      ∧ ∀ m, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+          (z - evalBI p F ϖ φ hφ hbmem hb (∑ l ∈ Finset.range m, u l))
+            ≤ W * (2⁻¹ : NNReal) ^ m := by
+  obtain ⟨u, r, hr0, hrrec, hnorm, hres⟩ := exists_correction_chain_BI
+    p F ϖ φ hφ hφb hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz hW0 hWle hzW
+  refine ⟨u, hnorm, fun m => ?_⟩
+  have hpartial : ∀ m', r m'
+      = z - evalBI p F ϖ φ hφ hbmem hb (∑ l ∈ Finset.range m', u l) := by
+    intro m'
+    induction m' with
+    | zero =>
+      exact hr0.trans (evalBI_partial_zero p F ϖ φ hφ hbmem hb z u).symm
+    | succ n ih =>
+      exact (hrrec n).trans
+        ((congrArg (· - evalBI p F ϖ φ hφ hbmem hb (u n)) ih).trans
+          (evalBI_partial_succ p F ϖ φ hφ hbmem hb z u n))
+  rw [← hpartial m]
+  exact hres m
+
 end Correction
 
 end FarguesFontaine
