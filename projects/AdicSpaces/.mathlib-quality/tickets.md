@@ -1093,9 +1093,19 @@ non-Tate bases are supported.
     on the dense Bloc is wI-to-wJ continuous (interior interpolation, the
     three-circles machinery of RestrictionInjective/wLoc_rpow_interpolate)
     and extends by the ID2d AbstractCompletion pattern; functoriality
-    (comp/id) from dense-extension uniqueness. t4 (revised): assemble the
-    interval-presheaf on the basis of attainable intervals and glue to the
-    Y-object; the chart homeomorphisms (ChartSpa) provide the point-set
+    (comp/id) from dense-extension uniqueness. t4 (revised; DESIGN 2026-07-27): the biRes-composition laws
+    hit dependent-radius casts (the composite interpolated radii are only
+    propositionally equal). SUBSTRATE FIX: a ℚ-exponent wrapper layer —
+    `BIQ (q₁ q₂ : ℚ)` := BISub at the radii `vπ^{qᵢ}` (NNReal-rpow of the
+    rational exponents, 0 < q₁ ≤ q₂ say), with restriction maps
+    `biResQ : BIQ q₁ q₂ →+* BIQ r₁ r₂` for [r₁,r₂]-exponent-intervals inside
+    [q₁,q₂] (the interpolation θ's are affine ℚ-solutions
+    θ = (q₂ - r)/(q₂ - q₁), done ONCE in the wrapper); functoriality
+    (biResQ_id, biResQ_comp) via dense-extension uniqueness
+    (DenseRange.equalizer on blocToBI + biRes_blocToBI) — no casts, the
+    ℚ-exponents pin the types. Then the interval-presheaf on the basis
+    {κ-intervals with attainable dyadic endpoints} has values BIQ and the
+    Y-object glues over it; the chart homeomorphisms (ChartSpa) provide the point-set
     layer, isSheafy_presheafChart + ID2d the sheaf-condition per chart;
   (D-ii) VPreObj-level gluing machinery for a ℤ-chain of charts (new
     infrastructure — the repo has no presheafed-space gluing; alternatively
