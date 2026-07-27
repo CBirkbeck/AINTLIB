@@ -2492,12 +2492,26 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   is EXCLUDED — hg1 needs 1 < |g|_{ρ₁} strict; the fst-decay at
   |g| = 1 would need the le_one-variant fed by fst-vanishing (same
   route as snd) — only add if the sheafy-cover glue ever needs it.
-  REMAINING for T910: case 2 (the [z̄⁻¹]-generator cutting [ρ₁,σ] from
-  the TOP, mirrored: fst kept literal, snd restricted; kernel regimes
-  swapped hg1↔hg2) + the ρ ∈ p^ℚ plus-ring statement (Kedlaya's B-plus
-  version; ChartVObj plus-technique) — assess whether the sheafiness
-  consumer (T911+) actually needs case 2 or the plus-form before
-  building them. ★ P4 COMPLETE 2026-07-27 (commits 70901e5d9..a05953d5f):
+  REMAINING for T910 — CASE 2 (needed: Kedlaya's 4.10/4.11 subdivision
+  induction presents BOTH halves — top-half by case 1, bottom-half by
+  case 2). Paper: B^I{T/ρ⁻¹}/(T − [z̄⁻¹]) ≅ B^{I∩(0,log_c ρ]}; repo
+  normalization: generator g₂ := p^m·[z̄]⁻¹ (alg(p)^m · unit-inv of the
+  Teichmüller image — a UNIT of Bloc via isUnit_teichmuller_image),
+  |g₂|_ρ = ρ^m·σ₁^{-m}: ≤ 1 on [ρ₁,σ₁] (kept side), > 1 above. Target
+  B^{[ρ₁,σ₁]} = SHARED-BOTTOM. Mirror plan: M1 transport-mirror
+  tendsto_fst_partial_sums_of_evalBI_eq_zero (hφfst + hb1, fst-proj);
+  M2 decay-mirror kerSolElt_wI_decay₂ (le_one-regime on fst with
+  hvan-fst, one_lt-regime on snd with snd-BddAbove — decay lemmas are
+  radius-generic, roles swap); M3 kernel-mirror exists_factor₂ +
+  ker_eq_span₂ (span side identical); M4 THE DEEP MIRROR: case-2
+  surjectivity exists_evalBI_eq_of_le_one₂ — the zone theory
+  (twisted_formula/monomial-lift, Kedlaya ln 552-558) with the j-twist
+  on the opposite side; re-derive in repo norms, do NOT transliterate;
+  M5 resIHomBot (snd-slot resI, fst LITERAL — mirror of resIHomTop) +
+  isUnit for g₂ + endpoint valuations + robba_case2_presentation
+  (σ₁ < ρ₂ strict this time, ρ₁ ≤ σ₁). THEN: the plus-ring statement
+  (ρ ∈ p^ℚ integral-closure claim) + the A^r-level third iso — file as
+  follow-ups after case 2; assess T911-consumer need first. ★ P4 COMPLETE 2026-07-27 (commits 70901e5d9..a05953d5f):
   ker_evalBIHom_eq_span = le_antisymm(span_GeltElt_le_ker,
   ker_le_span_GeltElt). Full chain: kerSolElt_coe_fst/snd component
   bridges (AddMonoidHom.fst/snd map_sum + congrArg close) ->
