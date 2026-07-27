@@ -4149,6 +4149,312 @@ theorem robba_case1_presentation
       (teichPowGen p F ϖ zb m₀))
     hg1 hg2
 
+/-- Boundedness of the second-component valuations of a restricted series'
+coefficients. -/
+theorem bddAbove_v_snd_coeffSeq
+    {f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    BddAbove (Set.range (fun n => Valued.v
+        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))) :=
+  (tendsto_v_snd_coeffSeq p F ϖ hf).bddAbove_range
+
+/-- **The interval-norm decay of the kernel solution, mirrored regimes**
+(case 2): `le_one` at the bottom radius fed by first-component vanishing,
+`one_lt` at the top radius fed by boundedness. -/
+theorem kerSolElt_wI_decay₂ (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB)
+    (hg1 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ 1)
+    (hg2 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+    (y : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hy1 : Filter.Tendsto (fun n => Valued.v
+      (((y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+      Filter.atTop (nhds 0))
+    (hvan : Filter.Tendsto (fun n => ∑ i ∈ Finset.range (n + 1),
+        ((y i : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ i)
+      Filter.atTop (nhds 0))
+    (hy2 : Filter.Tendsto (fun n => Valued.v
+      (((y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+      Filter.atTop (nhds 0))
+    (hyb : BddAbove (Set.range (fun n => Valued.v
+      (((y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)))) :
+    Filter.Tendsto (fun n => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((kerSolElt p F ϖ gB hgu y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+      Filter.atTop (nhds 0) := by
+  have hinvS : gB * (((hgu.unit⁻¹
+      : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) = 1 := by
+    have h := hgu.unit.mul_inv
+    rwa [hgu.unit_spec] at h
+  have hinv1 : (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+      * ((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) = 1 :=
+    congrArg (fun t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
+      ((t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) hinvS
+  have hinv2 : (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+      * ((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) = 1 :=
+    congrArg (fun t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) =>
+      ((t : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) hinvS
+  have hd1 := kerSol_decay_of_le_one p F _ _ hinv1 hg1 _
+    hy1 hvan
+  have hd2 := kerSol_decay_of_one_lt p F _ _ hinv2 hg2 _
+    hy2 hyb
+  have hd1' := hd1.congr (fun n =>
+    (congrArg Valued.v (kerSolElt_coe_fst p F ϖ gB hgu y n)).symm)
+  have hd2' := hd2.congr (fun n =>
+    (congrArg Valued.v (kerSolElt_coe_snd p F ϖ gB hgu y n)).symm)
+  have hmax := hd1'.max hd2'
+  rw [max_self] at hmax
+  exact hmax
+
+section KerTransportBot
+
+variable {σ₂ : NNReal} {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+variable (hφ : ∀ z, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+    ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
+/-- **The kernel-to-vanishing transport, shared-bottom setting**: if a
+restricted series evaluates to zero, the first components of its partial
+sums — which the contraction `φ` leaves untouched — tend to zero at the
+bottom radius. -/
+theorem tendsto_fst_partial_sums_of_evalBI_eq_zero
+    (hφfst : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)).1
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hb1 : b.1 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    (U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hU : evalBI p F ϖ φ hφ hbmem hb U = 0) :
+    Filter.Tendsto (fun n => ∑ i ∈ Finset.range (n + 1),
+        ((coeffSeq (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) i
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ i)
+      Filter.atTop (nhds 0) := by
+  have h0 := tendsto_evalBI p F ϖ φ hφ hbmem hb U
+  rw [hU] at h0
+  have h2 : Filter.Tendsto (fun n => (∑ l ∈ Finset.range n,
+      evalBITerm p F ϖ φ b
+        (U : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l).1)
+      Filter.atTop (nhds (0 : hatK p F hρ₁0 hρ₁1)) := by
+    have hc := (continuous_fst.tendsto
+      (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))).comp h0
+    exact hc
+  have hterm : ∀ n, (∑ l ∈ Finset.range n,
+      evalBITerm p F ϖ φ b
+        (U : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l).1
+      = ∑ l ∈ Finset.range n,
+        ((coeffSeq (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ l := by
+    intro n
+    refine (map_sum (AddMonoidHom.fst (hatK p F hρ₁0 hρ₁1)
+      (hatK p F hσ₂0 hσ₂1)) _ (Finset.range n)).trans ?_
+    refine Finset.sum_congr rfl fun l _ => ?_
+    show (evalBITerm p F ϖ φ b
+      (U : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l).1 = _
+    rw [evalBITerm, Prod.fst_mul, Prod.pow_fst, hφfst, hb1]
+  have h3 := h2.congr hterm
+  exact h3.comp (Filter.tendsto_add_atTop_nat 1)
+
+/-- The evaluation hom's underlying value, shared-bottom (micro-lemma). -/
+theorem evalBIHom_coe₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    ((evalBIHom p F ϖ φ hφ hbmem hb f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+      = evalBI p F ϖ φ hφ hbmem hb f := rfl
+
+/-- **The case-2 kernel factorization from vanishing evaluation.** -/
+theorem exists_factor_of_evalBI_eq_zero₂
+    (hφfst : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)).1
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (hb1 : b.1 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    (hg1 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ 1)
+    (hg2 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+    (U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hU : evalBI p F ϖ φ hφ hbmem hb U = 0) :
+    ∃ V : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      GeltElt p F ϖ gB * V = U := by
+  have hvan := tendsto_fst_partial_sums_of_evalBI_eq_zero p F ϖ φ hφ
+    hφfst hbmem hb gB hb1 U hU
+  have hd := kerSolElt_wI_decay₂ p F ϖ gB hgu hg1 hg2
+    (fun n => coeffSeq (U : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n)
+    (tendsto_v_fst_coeffSeq p F ϖ U.2) hvan
+    (tendsto_v_snd_coeffSeq p F ϖ U.2)
+    (bddAbove_v_snd_coeffSeq p F ϖ U.2)
+  have hres := isRestricted_kerSol p F ϖ gB hgu
+    (fun n => coeffSeq (U : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n) hd
+  exact exists_factor_of_isRestricted_kerSol p F ϖ gB hgu U hres
+
+/-- The evaluation of the degree-one monomial element (shared-bottom). -/
+theorem evalBI_GeltEltM1₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1) :
+    evalBI p F ϖ φ hφ hbmem hb (GeltEltM1 p F ϖ) = b := by
+  refine (evalBI_monomial p F ϖ φ hφ hbmem hb 1
+    (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (isRestricted_monomial_BI p F ϖ _)).trans ?_
+  rw [map_one, OneMemClass.coe_one, one_mul, pow_one]
+
+/-- The evaluation of the constant monomial element (shared-bottom). -/
+theorem evalBI_GeltEltM0₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) = b) :
+    evalBI p F ϖ φ hφ hbmem hb (GeltEltM0 p F ϖ gB) = b := by
+  refine (evalBI_monomial p F ϖ φ hφ hbmem hb 0 gB
+    (isRestricted_monomial_BI p F ϖ _)).trans ?_
+  rw [hφgB, pow_zero, mul_one]
+
+/-- **The generator is killed by the evaluation** (shared-bottom). -/
+theorem evalBIHom_GeltElt₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) = b) :
+    evalBIHom p F ϖ φ hφ hbmem hb (GeltElt p F ϖ gB) = 0 := by
+  have h1 : evalBI p F ϖ φ hφ hbmem hb
+      (GeltElt p F ϖ gB + GeltEltM0 p F ϖ gB)
+      = evalBI p F ϖ φ hφ hbmem hb (GeltEltM1 p F ϖ) :=
+    congrArg (evalBI p F ϖ φ hφ hbmem hb) (GeltElt_add_M0 p F ϖ gB)
+  have h3 := (evalBI_add p F ϖ φ hφ hbmem hb
+    (GeltElt p F ϖ gB) (GeltEltM0 p F ϖ gB)).symm.trans h1
+  rw [evalBI_GeltEltM0₂ p F ϖ φ hφ hbmem hb gB hφgB,
+    evalBI_GeltEltM1₂ p F ϖ φ hφ hbmem hb] at h3
+  refine Subtype.ext ?_
+  rw [evalBIHom_coe₂ p F ϖ φ hφ hbmem hb, ZeroMemClass.coe_zero]
+  exact add_right_cancel (h3.trans (zero_add b).symm)
+
+/-- The span of the generator sits inside the kernel (shared-bottom). -/
+theorem span_GeltElt_le_ker₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) = b) :
+    Ideal.span {GeltElt p F ϖ gB}
+      ≤ RingHom.ker (evalBIHom p F ϖ φ hφ hbmem hb) := by
+  refine Ideal.span_le.mpr ?_
+  refine Set.singleton_subset_iff.mpr ?_
+  exact RingHom.mem_ker.mpr (evalBIHom_GeltElt₂ p F ϖ φ hφ hbmem hb gB hφgB)
+
+/-- The kernel sits inside the span of the generator (shared-bottom). -/
+theorem ker_le_span_GeltElt₂
+    (hφfst : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)).1
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (hb1 : b.1 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    (hg1 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ 1)
+    (hg2 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) :
+    RingHom.ker (evalBIHom p F ϖ φ hφ hbmem hb)
+      ≤ Ideal.span {GeltElt p F ϖ gB} := by
+  intro U hUker
+  have hU : evalBI p F ϖ φ hφ hbmem hb U = 0 := by
+    rw [← evalBIHom_coe₂ p F ϖ φ hφ hbmem hb U, RingHom.mem_ker.mp hUker]
+    exact ZeroMemClass.coe_zero _
+  exact mem_span_GeltElt_of_factor p F ϖ gB U
+    (exists_factor_of_evalBI_eq_zero₂ p F ϖ φ hφ hφfst
+      hbmem hb gB hgu hb1 hg1 hg2 U hU)
+
+/-- **The case-2 kernel is the principal ideal on the generator.** -/
+theorem ker_evalBIHom_eq_span₂
+    (hφfst : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)).1
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) = b)
+    (hg1 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ 1)
+    (hg2 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) :
+    RingHom.ker (evalBIHom p F ϖ φ hφ hbmem hb)
+      = Ideal.span {GeltElt p F ϖ gB} := by
+  have hb1 : b.1 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 := by
+    rw [← hφgB, hφfst]
+  exact le_antisymm
+    (ker_le_span_GeltElt₂ p F ϖ φ hφ hφfst hbmem hb gB hgu hb1 hg1 hg2)
+    (span_GeltElt_le_ker₂ p F ϖ φ hφ hbmem hb gB hφgB)
+
+end KerTransportBot
+
 end FarguesFontaine
 
 end
