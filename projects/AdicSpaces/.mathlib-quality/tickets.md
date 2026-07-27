@@ -1482,7 +1482,18 @@ non-Tate bases are supported.
     strictness); partial sums are canonical-members (2)+(1);
     tendsto_evalAr + canonical-closed ⇒ ChartDensePlus. Each step is a
     compile-brick; then chartPlus = canonical and chartVObj upgrades to
-    the canonical pair. (β) the ARCHITECTURE DECISION
+    the canonical pair. DECISIVE SIMPLIFICATION (2026-07-27, exponent
+    audit): the exponent bookkeeping is clean only for b = 1 — and the
+    ACTUAL Y-charts are (a,b) = (·,1)-data at the twisted uniformizers
+    (the dyadic/Big-window charts at frobRoot are chartS = p·[ϖ'],
+    T ∋ [ϖ']² — ρ₂^a = |ϖ'| forms), where ([ϖ']/p)^a = ([ϖ']²/chartS)^a
+    ∈ locPlus GIVES the monic witness directly. SPECIALIZE ChartDensePlus
+    (and if convenient the whole reconciliation) to b = 1: generators
+    [ϖ']²/s ⇒ [ϖ']/p; base-monomial b-presentation j·n with
+    hexact1-|ϖ'| = ρ₁ forces jn = 1 ⇒ the presentation base IS [ϖ']/p.
+    VERIFY at implementation: the chartVObj-instantiation exponents used
+    by the Y-cover (read ChartSpa/BigWindows instantiations) before
+    hard-coding b = 1. (β) the ARCHITECTURE DECISION
     (ambient-vs-glue, M8-note above) and the cross-chart assembly of the
     Y-VObj from the chartVObj chain + the D-ii-2 split fiber-product; then
     (D-iii) the φ-action as VObj-isos and X := Y/φ^ℤ.
