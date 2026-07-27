@@ -560,6 +560,30 @@ theorem presheafValueRingEquivHuber_refl_apply
     rfl
   exact congr_fun (congrArg DFunLike.coe halg) l
 
+/-- The `symm`-form of the identity collapse, equivalence given by an
+equation (subst-friendly; both containments are arguments). -/
+theorem presheafValueRingEquivHuber_symm_apply_of_eq_refl
+    {e : A ≃+* A} (he : Continuous e) (he' : Continuous e.symm)
+    (hE : e = RingEquiv.refl A) (D : RationalLocData A)
+    (hle' : rationalOpen D.T D.s
+      ⊆ rationalOpen (D.mapHuber e he he').T (D.mapHuber e he he').s)
+    (hle : rationalOpen (D.mapHuber e he he').T (D.mapHuber e he he').s
+      ⊆ rationalOpen D.T D.s)
+    (z : presheafValue (D.mapHuber e he he')) :
+    (presheafValueRingEquivHuber e he he' D).symm z
+      = restrictionMap (D.mapHuber e he he') D hle' z := by
+  subst hE
+  rw [(presheafValueRingEquivHuber (RingEquiv.refl A) he he' D).symm_apply_eq]
+  rw [presheafValueRingEquivHuber_refl_apply he he' D hle]
+  have hcomp := congr_fun (restrictionMap_comp
+    (D.mapHuber (RingEquiv.refl A) he he') D
+    (D.mapHuber (RingEquiv.refl A) he he') hle' hle) z
+  have hid := congr_fun (restrictionMap_id
+    (D.mapHuber (RingEquiv.refl A) he he')) z
+  refine ((?_ : _ = restrictionMap _ _ (hle.trans hle') z).trans ?_).symm
+  · exact hcomp
+  · exact hid
+
 end ReflValue
 
 end Refl
