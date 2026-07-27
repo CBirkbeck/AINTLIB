@@ -564,6 +564,72 @@ theorem comap_germ_stalkValue {v : ↥(Spa A A⁺)} (U : Opens ↥(Spa A A⁺))
   · intro h
     exact stalkVle_intro h
 
+/-! ### Locality of the stalk (S4: Wedhorn 8.14, reduced to the shrink claim) -/
+
+/-- A stalk unit has nonzero stalk value. -/
+theorem not_stalkValue_vle_zero_of_isUnit {v : ↥(Spa A A⁺)}
+    {x : ToType ((spaRingPresheaf A).stalk v)} (hx : IsUnit x) :
+    ¬ (stalkValue v).vle x 0 := by
+  intro h
+  obtain ⟨u, rfl⟩ := hx
+  have h1 := (stalkValue v).mul_vle_mul_left h ((u⁻¹ : _ˣ) : _)
+  rw [Units.mul_inv, zero_mul] at h1
+  exact (stalkValue v).not_vle_one_zero h1
+
+/-- The germ of a section that is a unit is a stalk unit. -/
+theorem isUnit_germ_of_isUnit {v : ↥(Spa A A⁺)} {U : Opens ↥(Spa A A⁺)}
+    (hvU : v ∈ U) {f : ↥(limitSections U)} (hf : IsUnit f) :
+    IsUnit ((spaRingPresheaf A).germ U v hvU f) :=
+  hf.map ((spaRingPresheaf A).germ U v hvU).hom
+
+/-- The stalk is nontrivial. -/
+theorem stalk_nontrivial (v : ↥(Spa A A⁺)) :
+    Nontrivial (ToType ((spaRingPresheaf A).stalk v)) := by
+  refine ⟨1, 0, fun h => ?_⟩
+  refine (stalkValue v).not_vle_one_zero ?_
+  rw [h]
+  rcases (stalkValue v).vle_total 0 0 with h0 | h0 <;> exact h0
+
+/-- **The shrink claim** (the hard half of Wedhorn 8.14, discharged in the
+S4-core step): every stalk element of nonzero value is a unit. -/
+def StalkShrink (v : ↥(Spa A A⁺)) : Prop :=
+  ∀ x : ToType ((spaRingPresheaf A).stalk v),
+    ¬ (stalkValue v).vle x 0 → IsUnit x
+
+/-- Under the shrink claim, units are exactly the elements of nonzero value. -/
+theorem isUnit_iff_not_vle_zero {v : ↥(Spa A A⁺)} (hs : StalkShrink v)
+    (x : ToType ((spaRingPresheaf A).stalk v)) :
+    IsUnit x ↔ ¬ (stalkValue v).vle x 0 :=
+  ⟨not_stalkValue_vle_zero_of_isUnit, hs x⟩
+
+/-- Under the shrink claim, the nonunits are the support of the stalk
+valuation. -/
+theorem mem_nonunits_iff_vle_zero {v : ↥(Spa A A⁺)} (hs : StalkShrink v)
+    (x : ToType ((spaRingPresheaf A).stalk v)) :
+    x ∈ nonunits (ToType ((spaRingPresheaf A).stalk v))
+      ↔ x ∈ (stalkValue v).supp := by
+  rw [mem_supp_iff, mem_nonunits_iff, isUnit_iff_not_vle_zero hs x, not_not]
+
+/-- **Wedhorn 8.14, packaged**: under the shrink claim the stalk is a local
+ring. -/
+theorem isLocalRing_stalk_of_shrink {v : ↥(Spa A A⁺)} (hs : StalkShrink v) :
+    IsLocalRing (ToType ((spaRingPresheaf A).stalk v)) := by
+  haveI := stalk_nontrivial v
+  refine IsLocalRing.of_nonunits_add ?_
+  intro a b ha hb
+  rw [mem_nonunits_iff_vle_zero hs] at ha hb ⊢
+  rw [mem_supp_iff] at ha hb ⊢
+  exact (stalkValue v).vle_add ha hb
+
+/-- Under the shrink claim, the maximal ideal is the support of the stalk
+valuation (the `val_supp` field of the `VPreObj` packaging). -/
+theorem maximalIdeal_stalk_eq_supp {v : ↥(Spa A A⁺)} (hs : StalkShrink v) :
+    @IsLocalRing.maximalIdeal _ _ (isLocalRing_stalk_of_shrink hs)
+      = (stalkValue v).supp := by
+  refine Ideal.ext fun x => ?_
+  rw [@IsLocalRing.mem_maximalIdeal _ _ (isLocalRing_stalk_of_shrink hs)]
+  exact mem_nonunits_iff_vle_zero hs x
+
 end StalkValue
 
 end ValuationSpectrum
