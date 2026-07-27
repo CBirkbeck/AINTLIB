@@ -236,6 +236,94 @@ theorem sectionPoleSheafPower_six_projModelMap_on_CartierChart_pointed
     1 2 1 hcop0 hone]
   exact projModelFromOfGlobalSections_zero_one_zero W
 
+/-- A global comparison morphism is pointed as soon as its restriction to the
+Cartier chart is the normalized local comparison morphism. -/
+theorem sectionPoleSheafPower_six_projModelMap_pointed_of_restrict
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 2))
+    (y : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz 3))
+    (hy : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd 2 y = 1)
+    (W : WeierstrassCurve Γ(S, (⊤ : S.Opens)))
+    (F : C ⟶ projModel W) :
+    let hr : r ∈ z.ker.ideal U :=
+      hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+    let X := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 2) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 2) x
+    let Y := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz 3) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd 3) y
+    let f : Γ(S, (⊤ : S.Opens)) →+*
+        Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+      U.1.topIso.inv.hom.comp
+        ((C.presheaf.map (homOfLE le_top).op).hom.comp
+          π.appTop.hom)
+    let P : Fin 3 → Γ(U.1.toScheme,
+        (⊤ : U.1.toScheme.Opens)) :=
+      U.1.topIso.inv.hom ∘ ![X * r, Y, r ^ 3]
+    ∀ (hP : (W.map f).toProjective.Equation P)
+      (hcop : IsCoprime (P 1) (P 2)),
+      U.1.ι ≫ F =
+          projModelFromOfGlobalSectionsOfIsCoprime
+            W f P hP 1 2 hcop →
+        z ≫ F = S.toSpecΓ ≫ projModelZero W := by
+  dsimp only
+  intro hP hcop hF
+  let hr : r ∈ z.ker.ideal U :=
+    hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+  let X := localTrivializationCoefficient
+    (sectionPoleSheafPower π z hz 2) U
+    (sectionPoleSheafPowerTrivializationOfCartierGenerator
+      z hz U r hr hspan hnzd 2) x
+  let Y := localTrivializationCoefficient
+    (sectionPoleSheafPower π z hz 3) U
+    (sectionPoleSheafPowerTrivializationOfCartierGenerator
+      z hz U r hr hspan hnzd 3) y
+  let f : Γ(S, (⊤ : S.Opens)) →+*
+      Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+    U.1.topIso.inv.hom.comp
+      ((C.presheaf.map (homOfLE le_top).op).hom.comp
+        π.appTop.hom)
+  let P : Fin 3 → Γ(U.1.toScheme,
+      (⊤ : U.1.toScheme.Opens)) :=
+    U.1.topIso.inv.hom ∘ ![X * r, Y, r ^ 3]
+  let zU : S ⟶ U.1.toScheme :=
+    S.topIso.inv ≫ z.resLE U.1 ⊤ (le_of_eq hU.symm)
+  change (W.map f).toProjective.Equation P at hP
+  change IsCoprime (P 1) (P 2) at hcop
+  change U.1.ι ≫ F =
+    projModelFromOfGlobalSectionsOfIsCoprime
+      W f P hP 1 2 hcop at hF
+  have hlocal :=
+    sectionPoleSheafPower_six_projModelMap_on_CartierChart_pointed
+      hsm z hz U hU r hspan hnzd x y hy W hP hcop
+  change zU ≫
+      projModelFromOfGlobalSectionsOfIsCoprime
+        W f P hP 1 2 hcop =
+    S.toSpecΓ ≫ projModelZero W at hlocal
+  have hzUι : zU ≫ U.1.ι = z := by
+    dsimp only [zU]
+    rw [Category.assoc, Scheme.Hom.resLE_comp_ι,
+      ← Scheme.topIso_hom, ← Category.assoc,
+      S.topIso.inv_hom_id, Category.id_comp]
+  calc
+    z ≫ F = (zU ≫ U.1.ι) ≫ F := by rw [hzUι]
+    _ = zU ≫ U.1.ι ≫ F := Category.assoc _ _ _
+    _ = zU ≫
+        projModelFromOfGlobalSectionsOfIsCoprime
+          W f P hP 1 2 hcop := by rw [hF]
+    _ = S.toSpecΓ ≫ projModelZero W := hlocal
+
 end
 
 end ModularCurves
