@@ -2159,6 +2159,41 @@ non-Tate bases are supported.
     invariant_sections_agree + the germ-level conclusion; then the
     stalk RingEquiv (ofBijective), local/val transport, D-iv-4 sheaf
     condition, xVObj (D-iv-5).
+    ★★★ D-iv COMPLETE 2026-07-30 (commits 91520683b..60a4d10e8, all
+    axiom-clean). (γ iii) INJECTIVITY: invariant_piece_transport/step
+    (the (1+m)-piece of an invariant section is the transport of its
+    m-piece); the INVERSION TOOLKIT (frobOpens_inv_collapse,
+    limitFrobHom_eq_zero_of — INDEX-GENERALIZED (c)(hc : c = 0) to
+    dodge the hetero-index rw, limitFrobHom_leftInv,
+    limitRestrict_eq_injective, limitFrobHom_injective);
+    invariant_piece_step'/back' (hk : 1 + m = k index-flexible forms —
+    Int.induction_on's pred-case is at -n-1 NOT -(n+1), pass
+    m := -(n:ℤ)-1); invariant_pieces_eq (full ℤ-determination);
+    invariant_sections_eq_of_zero_piece (separation at the translate
+    cover, ULift-indexed, V := explicit + inline yFunctor_trace — the
+    Opens-ascription across SpaTop/Spa spellings FAILS, state hcov at
+    single-coe + SetLike.coe); **ringStalkMap_piYHom_injective**
+    (germ-shrink via TopCat.Presheaf.germ_eq — NO rw at the
+    base-point-spelling germs, trans-chain through
+    ringStalkMap_piYHom_germ both sides; U ⊓ W₀ wandering shrink;
+    frobFixedRestrict collapse by germ_res_apply, curve-side map is
+    rfl = curveRingPresheaf_map_apply). (γ iv) PACKAGING: fiberPoint
+    (Classical section of the quotient), xStalkEquiv (stalkCongr along
+    Inseparable.of_eq + RingEquiv.ofBijective of the stalk map),
+    isLocalRing_xStalk, yStalkValue/yStalkValue_supp (STANDALONE —
+    yVPreObj.val-projections DON'T UNFOLD at coercion-elaboration
+    transparency; inline the comap-form), **xVPreObj**. (D-iv-4)
+    xPresheaf_isSheafOfTopologicalRings: homGlue at the saturated
+    preimages (curvePreimage_inf/iSup — preimage commutes with
+    inf/iSup; hoisted-have opens-eqs, NEVER curvePreimage-of-⊓ inside
+    rw patterns — the Opens-instance spelling of the binder's U kills
+    the reducible unifier), invariance of the glued section by
+    separation over the SAME saturated cover (stability
+    frobOpens 1 U'ᵢ = U'ᵢ makes the pieces themselves stable — no
+    shifts needed, unlike glue_invariant); uniqueness through
+    piComponent + huniq. (D-iv-5) **xVObj : VObj — THE ADIC
+    FARGUES–FONTAINE CURVE IS AN OBJECT OF WEDHORN'S CATEGORY 𝒱**
+    (CurveObject.lean; the definition-layer capstone of the D-track).
     ★ (3ii-c α + compat unblocking) DONE 2026-07-28 (commit 4258ce942,
     axiom-clean): presheafValue_subsingleton_of_rationalOpen_empty_huber
     (generic Huber via the Spa-point criterion at f := 0 — IsUnit 0 ⟺
