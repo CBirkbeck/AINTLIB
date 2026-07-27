@@ -615,6 +615,43 @@ theorem exists_translateFam_glue (W : Opens ↥(yTop p F ϖ))
     (fun i j => hcompat i.down j.down)
   exact ⟨g, fun k => hg ⟨k⟩⟩
 
+/-- The zero-translate inclusion into `W`. -/
+theorem yFunctor_translate_zero_le (W : Opens ↥(yTop p F ϖ)) :
+    (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ 0)).obj W)
+      ≤ (yFunctor p F ϖ).obj W :=
+  leOfHom ((yFunctor p F ϖ).map (homOfLE
+    (le_of_eq (map_yFrobTop_zero p F ϖ W))))
+
+/-- **The zero-piece of the translate family is the plain restriction.** -/
+theorem translateFam_zero (W : Opens ↥(yTop p F ϖ))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    translateFam p F ϖ W s 0
+      = limitRestrict (yFunctor_translate_zero_le p F ϖ W) s := by
+  show limitRestrict (le_of_eq (yFunctor_frobOpens p F ϖ 0 W).symm)
+      (limitFrobHom p F 0 ((yFunctor p F ϖ).obj W) s)
+    = limitRestrict (yFunctor_translate_zero_le p F ϖ W) s
+  rw [limitFrobHom_zero p F ((yFunctor p F ϖ).obj W) s]
+  exact congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (yFunctor_frobOpens p F ϖ 0 W).symm)
+    (le_of_eq (frobOpens_zero p F ((yFunctor p F ϖ).obj W))))) s
+
+/-- **The invariant-extension existence, extension form** (D-iv-3(ii-c β),
+first half): the glued candidate restricts on the zero translate to `s`. -/
+theorem exists_glue_extending (W : Opens ↥(yTop p F ϖ))
+    (hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    ∃ g : ↥(limitSections ((yFunctor p F ϖ).obj
+        (curvePreimage p F ϖ (xImage p F ϖ W)))),
+      (∀ k : ℤ, limitRestrict (yFunctor_translate_le p F ϖ W k) g
+        = translateFam p F ϖ W s k)
+      ∧ limitRestrict (yFunctor_translate_le p F ϖ W 0) g
+        = limitRestrict (yFunctor_translate_zero_le p F ϖ W) s := by
+  obtain ⟨g, hg⟩ := exists_translateFam_glue p F ϖ W hdis s
+  exact ⟨g, hg, (hg 0).trans (translateFam_zero p F ϖ W s)⟩
+
 end FarguesFontaine
 
 end
