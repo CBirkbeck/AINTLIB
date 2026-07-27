@@ -1351,13 +1351,16 @@ non-Tate bases are supported.
     w''(ρ'(t)) ≤ w''(ρ'(s)) ≠ 0 from base-membership R(D') ⊆ R(D);
     (B4) assemble; (B5) comap_restrictionMapHom_mem_spa :=
     comap_mem_spa + (B4). (B1)-(B5) ALL DONE 2026-07-27 (commit: plus
-    functoriality of restriction maps, axiom-clean). REMAINING for
-    RationalShrink: the assembly (cofinality k + basicOpen-membership of
-    pointValue at c := u^{-k}·b + exists_A_level_open_presentation at the
-    singleton family + rational basis in W ∩ R(D) + the capture-argument
-    at each w'' ∈ Spa(PD') via comap_restrictionMapHom_mem_spa + 7.52(2)
-    isUnit_of_forall_not_vle_zero_of_isOpen_topologicallyNilpotent with
-    IsTateRing.isOpen_topologicallyNilpotentElements at PD'). ⚡ MAJOR SIDE-DISCOVERY (architecture-relevant):
+    functoriality of restriction maps, axiom-clean). **S4 COMPLETE
+    2026-07-27**: rationalShrink_holds + stalkShrink_holds +
+    **isLocalRing_stalk** + **maximalIdeal_stalk** (Wedhorn 8.14
+    unconditional, axiom-clean). GOTCHA recorded: the AdicSpectrum 7.52(2)
+    lemma isUnit_of_forall_not_vle_zero_of_isOpen_topologicallyNilpotent
+    sits in an [IsLinearTopology A A]-section — FALSE for Tate rings; the
+    right criterion is the TATE-FREE
+    **isUnit_iff_forall_not_vle_zero_of_completePair** (pair-complete, used
+    via the isUnit_canonicalMap_s_huber pattern: presheafValue_isHuberRing_
+    huber + presheafValue_concretePair + presheafValue_isAdicComplete). ⚡ MAJOR SIDE-DISCOVERY (architecture-relevant):
     **hasLocLiftPowerBounded_huber_instance** (HuberLocLift:622, M8
     2026-07-17) supplies HasLocLiftPowerBounded for EVERY complete Huber
     pair with [IsRingOfIntegralElements A⁺] — NO Tate. The board's
