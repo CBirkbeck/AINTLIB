@@ -1439,7 +1439,14 @@ non-Tate bases are supported.
     (Aₛ)° + IntCl preserves power-bounded + closure) AND power-bounded =
     ball in BISub because wI is MULTIPLICATIVE ON POWERS
     (wI(xⁿ) = max(v₁,v₂)ⁿ = wI(x)ⁿ) — one small new lemma
-    isPowerBounded_iff_wI_le_one.
+    isPowerBounded_iff_wI_le_one — DONE 2026-07-27 (IntervalSplitting.lean:
+    wI_coe_pow + isPowerBounded_iff_wI_le_one, axiom-clean). Remaining for
+    (⊆): canonical ⊆ power-bounded — the faithful chain
+    (locPlusSubring_le_powerBounded + IntCl/coe/closure-stability; the
+    IRIE-field subset_powerBounded of presheafValuePlus_isRingOfIntegral-
+    Elements may give it in ONE step: (PD)⁺ ⊆ (PD)° then transport through
+    the comparison iso e (continuous ring equiv preserves power-bounded)
+    then the new iff).
     (⊇-hard, ball-into-canonical — Kedlaya Def 4.5): a ball element is a
     limit of Bloc-approximants which are AUTOMATICALLY in the ball for
     ε ≤ 1 (ultrametric: wI(h) ≤ max(wI z, ε) ≤ 1), so it reduces to the
