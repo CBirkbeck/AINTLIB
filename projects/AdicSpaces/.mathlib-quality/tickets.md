@@ -2019,7 +2019,23 @@ non-Tate bases are supported.
     form an equalizer that commutes with the sheaf equalizers).
     (D-iv-5) xVObj : VObj — THE ADIC FARGUES–FONTAINE CURVE AS A
     𝒱-OBJECT; plus CompactSpace (done in Curve.lean).
-    STATUS: D-iv-1 STARTING. Non-critical parked:
+    STATUS: D-iv-1 DONE + D-iv-2 CORE DONE 2026-07-28 (CurveObject.lean,
+    axiom-clean): yTopToY/yTopToCurve carrier bridges (double-subtype:
+    y.1.1/y.2 spellings), yTopToY_yFrobTop (= the ofAdd(-k)-action via
+    spaFrob_coe), yTopToCurve_yFrobTop (fiber preservation via
+    Quotient.sound), curvePreimage (saturated opens),
+    map_yFrobTop_curvePreimage + frobOpens_yFunctor_curvePreimage
+    (stability, carrier + ambient — the ambient one is a 2-line rw of
+    yFunctor_frobOpens), **frobFixed** := RingHom.eqLocus of the
+    transport against limitRestrict (le_of_eq stability) — CAST-FREE —
+    + mem-iff + isClosed (isClosed_eq of the two continuities).
+    NEXT (D-iv-2 tail): restriction maps preserve invariance
+    (limitFrobHom_limitRestrict + the le_of_eq-square) → the
+    X-presheaf functor xStructurePresheaf on Opens (Curve) with
+    CompleteTopCommRingCat-values (subring topology; completeness
+    from isClosed_frobFixed + completeSpace of limitSections —
+    check the limitSections-CompleteSpace instance's availability);
+    then D-iv-3 stalks. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
