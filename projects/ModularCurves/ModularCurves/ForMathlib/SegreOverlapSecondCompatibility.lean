@@ -1034,4 +1034,74 @@ lemma segreProductChartOverlapToSecondChart_snd
       (Category.assoc transitionMap factorMap coordinateMap).symm
     _ = _ := congrArg (fun q => q ≫ coordinateMap) hfactor
 
+/-- The two affine-chart presentations of an overlap induce the same map to the product. -/
+lemma segreProductChartOverlap_transition
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreProductChartOverlapToChart R m n i a j b ≫
+        (segreProductStandardOpenCover R m n).f (i, j) =
+      segreProductChartOverlapToSecondChart R m n i a j b ≫
+        (segreProductStandardOpenCover R m n).f (a, b) := by
+  apply pullback.hom_ext
+  · calc
+      _ =
+          segreProductChartOverlapToChart R m n i a j b ≫
+            ((segreProductStandardOpenCover R m n).f (i, j) ≫
+              pullback.fst
+                (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+                (homogeneousProjπ (R := R) (σ := Fin (n + 1)))) :=
+        Category.assoc _ _ _
+      _ =
+          Spec.map
+              (CommRingCat.ofHom
+                (segreProductOverlapLeftRingHom R m n i a j b)) ≫
+            coordinateChartMap R (Fin (m + 1)) i :=
+        segreProductChartOverlapToChart_fst R m n i a j b
+      _ =
+          Spec.map
+              (CommRingCat.ofHom
+                (segreProductSecondLeftRingHom R m n i a j b)) ≫
+            coordinateChartMap R (Fin (m + 1)) a :=
+        segreProductOverlapLeftChartTransition_toProj
+          R m n i a j b
+      _ =
+          segreProductChartOverlapToSecondChart R m n i a j b ≫
+            ((segreProductStandardOpenCover R m n).f (a, b) ≫
+              pullback.fst
+                (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+                (homogeneousProjπ (R := R) (σ := Fin (n + 1)))) :=
+        (segreProductChartOverlapToSecondChart_fst
+          R m n i a j b).symm
+      _ = _ := (Category.assoc _ _ _).symm
+  · calc
+      _ =
+          segreProductChartOverlapToChart R m n i a j b ≫
+            ((segreProductStandardOpenCover R m n).f (i, j) ≫
+              pullback.snd
+                (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+                (homogeneousProjπ (R := R) (σ := Fin (n + 1)))) :=
+        Category.assoc _ _ _
+      _ =
+          Spec.map
+              (CommRingCat.ofHom
+                (segreProductOverlapRightRingHom R m n i a j b)) ≫
+            coordinateChartMap R (Fin (n + 1)) j :=
+        segreProductChartOverlapToChart_snd R m n i a j b
+      _ =
+          Spec.map
+              (CommRingCat.ofHom
+                (segreProductSecondRightRingHom R m n i a j b)) ≫
+            coordinateChartMap R (Fin (n + 1)) b :=
+        segreProductOverlapRightChartTransition_toProj
+          R m n i a j b
+      _ =
+          segreProductChartOverlapToSecondChart R m n i a j b ≫
+            ((segreProductStandardOpenCover R m n).f (a, b) ≫
+              pullback.snd
+                (homogeneousProjπ (R := R) (σ := Fin (m + 1)))
+                (homogeneousProjπ (R := R) (σ := Fin (n + 1)))) :=
+        (segreProductChartOverlapToSecondChart_snd
+          R m n i a j b).symm
+      _ = _ := (Category.assoc _ _ _).symm
+
 end MvPolynomial
