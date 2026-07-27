@@ -2404,6 +2404,42 @@ non-Tate bases are supported.
   consumes), then AffinoidAdicPresentation.ofIsSheafy with
   isSheafy_of_stronglyNoetherian_828b; (A4) assembly over all x via
   fiberPoint + exists_disjoint_translates.
+  ★★★ X-ADIC-1 COMPLETE 2026-07-30 (commits fc773b0c6..76976c926, all
+  axiom-clean, FarguesFontaine/CurveAdicPresentation.lean):
+  **curveAdicSpacePresentation — THE ADIC FARGUES–FONTAINE CURVE IS
+  LOCALLY AFFINOID** (every point has an open neighbourhood ≃ₜ the adic
+  spectrum of a sheafy strongly noetherian complete Tate ring — a rational
+  localization of a window chart ring). The pieces: (A1)
+  yTopToCurve_injOn_of_disjoint_translates (orbit-collision forces k = 0)
+  + xImageEquiv/xImageHomeo (Equiv.toHomeomorphOfContinuousOpen; openness
+  of the image through isOpenQuotientMap); (A3-core)
+  isStronglyNoetherian_canonical_window (the isSheafy_canonical_window
+  hypothesis-supply mirrored at isStronglyNoetherian_BISub j=n=1 +
+  isStronglyNoetherian_congr along presheafChartRingEquivBISub — NOTE
+  StronglyNoetherianTransport is NOT in the CurveObject import chain, add
+  explicitly); (A3) windowSubAffinoid (letI-package:
+  presheafValue_isTateRing_concrete + presheafValue_isStronglyNoetherian_
+  faithful over the chart base + completeSpace_right_presheafValue +
+  828b + AffinoidAdicPresentation.ofIsSheafy — the generic
+  presheafValuePlusSubring/presheafValuePlus_isRingOfIntegralElements
+  instances TOWER over any base, so no plus-reconciliation was needed);
+  (A2) spaChartHomeoWindow (ℤ-unified by Int-rec: Int.neg-of-ofNat-succ
+  REDUCES to negSucc, so the negative-side chart at pPow p^{m+1} aligns
+  definitionally) + isOpen_yTop_windowTrace (Spa-condition free on yTop)
+  + exists_window_subdatum_nbhd (subbasis-basis at the chart point →
+  exists_spanning_presentation_of_mem_basicOpens over the Tate chart →
+  genPieceDatum with T := insert g (image f) — the spanning INCLUDES the
+  denominator, absorbed by rationalOpen_insert_self via vle_refl — →
+  NT-1' homeo + G₂-lift of the image + the explicit 4-level subtype
+  Equiv with point-generalized inverses (key : ∀ m, m = h_n r → …
+  applied at Subtype.ext rfl — NEVER try to spell the Prop-components));
+  (A4) the assembly. PERF/SPELLING LESSONS: yTop-point coercions to
+  ↥(Spa …) MUST go through ySpaPoint (the TopCat.of-carrier blocks the
+  ascription); set-equality memberships via Set.ext_iff.mp (spelling-
+  agnostic), NEVER rw at O.carrier-vs-↑O; isOpen_induced_iff's equation
+  is val⁻¹ t = s (preimage FIRST); Opens-witnesses in ∃-refines should be
+  INLINE literals, not `set`-variables (set-opacity blocks the
+  defeq-splitting of membership pairs).
 
 ---
 
