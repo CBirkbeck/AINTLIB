@@ -2315,7 +2315,26 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   exists_blocApprox + successive approximation — REREAD its skeleton
   before writing; the coefficients here live in ↥BISub-ρ not ArSub so
   the gaussNormRPS-analogue is the sup-wI-norm on restricted series —
-  DEFINE wIRPS first, mirroring gaussNormRPS);
+  DEFINE wIRPS first, mirroring gaussNormRPS — wIRPS layer SHIPPED
+  2026-07-27 as P3a (commit 5decd9108: wIRPS + bddAbove_wIRPS +
+  wI_coeff_le_wIRPS + wIRPS_zero). P3 SKELETON MAP (from the T911
+  engine, Presentation.lean): surjectivity = exists_correction_sequence
+  (successive approximation producing u : ℕ → series with geometric
+  wIRPS-decay and residual-shrink) + exists_evalAr_eq_of_correction
+  (the summed limit); the case-1 mirrors are evalBI-versions of both,
+  with the FIRST-approximation step (the actual Kedlaya per-monomial
+  content, eq:Robba-localization-lift): for z in the cut ring, approximate
+  by a Bloc-element (exists_blocApprox-analogue at the σ-radii — check
+  exists_blocApprox in IntervalSplitting), write it as mk'(x, s^k),
+  per-monomial ϖ-twisted lift y·T^j with j minimal s.t. |x̄|-vs-|z̄|^j,
+  head/tail-split as in ChartDensePlus's r5b machinery (mk'_sPow_split
+  is REUSABLE — the head monomials' lifts are FINITE sums). Also
+  needed for P4 later: multiplicativity bound wI(y) ≥ wI-of-(T−g)·x
+  (strictness) — locate wI_evalAr_le-analogues.
+  ALSO note wI_finite_of_isRestricted (Presentation:2265) already
+  covers the BISub-restricted-finiteness (isRestricted_iff_wI overlaps
+  it — dedupe when porting: keep both names, they differ in direction
+  packaging);
   (P4) kernel = (T − b), closed, strict: multiplicativity bound wI(y) ≥
   |T−b|-factor + the x_n = −Σ y_i [z̄]^{i−n−1} coefficient-decay injectivity
   (Kedlaya ln 527–546; per-t case split t < t₀ geometric unit / t ≥ t₀
