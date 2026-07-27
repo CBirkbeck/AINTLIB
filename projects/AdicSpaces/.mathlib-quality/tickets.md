@@ -1987,15 +1987,39 @@ non-Tate bases are supported.
     MORPHISM OF WEDHORN'S 𝒱^pre ON 𝒴** (toHom := yFrobHom k;
     isLocalHom + val_compat proven). φ^ℤ acts by k ↦ yFrobVPreHom k.
     REMAINING (D-iii tail): the k/-k composite-identity (the VPreHom
-    iso — VPreHom.ext reduces it to the PresheafedSpace-Hom roundtrip:
-    base = spaFrob_spaFrob-ext; c-components = the pv-equiv
-    left_inv/right_inv through the opens-roundtrip cast — sizeable
-    cast-algebra; NOTE the VObj-side needs only the yVObj-object
-    (done) and morphisms-as-VPreHom (done) — the ISO-form is optional
-    packaging for the φ-action-groupoid); X := Y/φ^ℤ (topological
-    layer complete in Curve.lean; the X-OBJECT needs quotient-descent
-    of the presheaf along the free wandering action — a genuinely new
-    development, board it when reached). Non-critical parked:
+    iso — OPTIONAL packaging, parked).
+    ★ D-iv PLAN (2026-07-28, the X-object as quotient descent —
+    the definition-layer capstone). ARCHITECTURE: 𝒪_X(V) := the
+    φ-INVARIANT sections of 𝒪_Y(π⁻¹V) — (π_* 𝒪_Y)^{φ^ℤ}; invariance
+    CAST-FREE via the stability equality: for an ambient W' :=
+    yFunctor(π⁻¹V) one has frobOpens 1 W' = W' (saturation), and s is
+    invariant iff limitFrobHom 1 W' s = limitRestrict (le_of_eq
+    hstab.symm) s — both sides in limitSections (frobOpens 1 W'), NO
+    casts. Generator-invariance suffices for the definition.
+    Sub-tickets:
+    (D-iv-1) saturation infra: curveOpens V ↦ the saturated Y-open
+    π⁻¹V (isOpenQuotientMap_toCurve gives openness); ySpa-level: the
+    ambient image W' and its Frobenius stability frobOpens k W' = W'
+    (from the π-saturation: w ∈ W' ⟺ spaFrob k w ∈ W' — orbit-wise);
+    the Galois correspondence opens(X) ≅ saturated-opens(Y).
+    (D-iv-2) frobFixedSubring W' hstab : Subring (limitSections W');
+    CLOSED (equalizer of the continuous limitFrobHom and the
+    continuous cast-restrict into the T2 target) hence complete;
+    restriction maps preserve invariance (limitFrobHom_limitRestrict
+    + le_of_eq-squares); the X-presheaf xStructurePresheaf :
+    Presheaf CompleteTopCommRingCat (CurveTop) with obj V :=
+    .of (frobFixed (π⁻¹V)); functoriality from limitRestrict.
+    (D-iv-3) stalks: at c = π(y) the invariants-stalk ≅ 𝒪_Y-stalk at
+    y through the window local sections (injOn_toCurve_windowU/V +
+    curve_eq_image_window_zero; each germ has a unique invariant
+    extension along the orbit — freeness+wandering). Local rings +
+    stalk valuations transport.
+    (D-iv-4) the sheaf condition for xStructurePresheaf from
+    isSheafyOn_Y/yVObj (saturated covers pull back; the invariants
+    form an equalizer that commutes with the sheaf equalizers).
+    (D-iv-5) xVObj : VObj — THE ADIC FARGUES–FONTAINE CURVE AS A
+    𝒱-OBJECT; plus CompactSpace (done in Curve.lean).
+    STATUS: D-iv-1 STARTING. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
