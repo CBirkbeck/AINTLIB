@@ -1959,7 +1959,23 @@ non-Tate bases are supported.
     REMAINING for val_compat: the RESTRICT-side conjugation
     (ringStalkMap (yFrobHom k) vs the ambient transport through
     yRingStalkEquiv/restrictStalkIso) + the final assembly; then
-    isLocalHom + the VObj-iso; then X. Non-critical parked:
+    isLocalHom + the VObj-iso; then X.
+    ★ D-iii-4c/4d DONE 2026-07-28 (commits f8da94013 + the val_compat
+    commit, axiom-clean): ringStalkMap_yFrob_germ (restricted germ
+    naturality; the hunfold-rfl + hsplit-∀-rfl + congrArg/trans
+    pattern — NEVER rw on ConcreteCategory-vs-Hom.hom-mixed goals);
+    yRingStalkIso_hom_germ (restrictStalkIso_hom_eq_germ_apply
+    restated at the 𝒴-spellings — spaRingPresheaf for ALL ambient
+    germs, defeq-bridged once at the exact-site);
+    limitFrobHom_bridge (the section bridge along yFunctor_frobOpens,
+    componentwise-rfl); **ringStalkMap_yFrob_conj** (the conjugation
+    square via stalk_hom_ext + the three germ lemmas);
+    **yFrob_val_compat** (val ∘ base = comap-of-stalk-map ∘ val:
+    comap-comp rfl-chains + the square + the ambient equivariance).
+    REMAINING: isLocalHom_stalkMap for yFrobHom (iso-route: the stalk
+    map is an iso since components are isos — or direct units-reflect
+    through the germ-naturality + the k/-k roundtrip); the VPreHom
+    bundle + the VObj-auto-iso; X := Y/φ^ℤ packaging. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
