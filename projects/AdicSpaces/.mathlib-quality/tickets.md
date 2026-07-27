@@ -28,7 +28,7 @@ quotes, discharge plans, and attack logs. Sources local under `refs/AdicSpaces/`
 | T907 | **Lemma 3.9** and **Theorem 3.2** — `A^r` is strongly noetherian | done |
 | T908 | `B^I` (Def 4.2): construction, norm, completeness, series, density, injectivity, **Lemma 4.4 (three circles)**, **Cor 4.5**, `B^{I,+}` | (a)+(b) done, (c) open |
 | T909 | restriction maps + **Cor 4.6 injectivity** (`resIHom_injective`, RestrictionInjective.lean) | **done** |
-| T910–T912 | Lemma 4.9 presentations; Theorem 4.10 | T911+T912 **done** (AD-9 case-3: surjective_evalArMvHom, isStronglyNoetherian_BISub); T910 cases 1–2 open (off critical path per AD-9) |
+| T910–T912 | Lemma 4.9 presentations; Theorem 4.10 | **ALL DONE 2026-07-27**: T911+T912 (AD-9 case-3: surjective_evalArMvHom, isStronglyNoetherian_BISub); T910 cases 1–2 (robba_case1_presentation, robba_case2_presentation — both axiom-clean; plus-ring 'Moreover' clause + A^r third iso deferred as non-critical follow-ups) |
 | TC1–TC2 | **`B^I` is sheafy** (SheafyBI.lean: affinoid instances + Wedhorn 8.28(b)); AD-9 data satisfiable (`isSheafy_BISub_AD9`) | **done** |
 
 **SESSION 2026-07-26 (second worker)**: commits da830e1a9 (T911 strictness), 8157ce661
