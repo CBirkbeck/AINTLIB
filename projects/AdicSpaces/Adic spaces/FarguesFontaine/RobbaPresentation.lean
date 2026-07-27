@@ -2789,6 +2789,40 @@ theorem resI_eq_fst {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1
   refine h2.congr fun x => ?_
   exact BIProd_fst p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
 
+/-- **The formal kernel recursion, generic form**: over any commutative ring
+with `g·V = 1`, the explicit solution satisfies the shift-minus-scale
+equations. -/
+theorem kerSol_rec_generic {A : Type*} [CommRing A] (g V : A)
+    (hinv : g * V = 1) (y : ℕ → A) (n : ℕ) :
+    (if 1 ≤ n then -(V ^ n * ∑ i ∈ Finset.range n, y i * g ^ i) else 0)
+      - g * -(V ^ (n + 1) * ∑ i ∈ Finset.range (n + 1), y i * g ^ i)
+      = y n := by
+  by_cases hn : 1 ≤ n
+  · rw [if_pos hn, Finset.sum_range_succ]
+    have h3 : (V * g) ^ n = 1 := by
+      rw [show V * g = 1 from by rw [mul_comm]; exact hinv, one_pow]
+    calc -(V ^ n * ∑ i ∈ Finset.range n, y i * g ^ i)
+          - g * -(V ^ (n + 1)
+            * ((∑ i ∈ Finset.range n, y i * g ^ i) + y n * g ^ n))
+        = (g * V) * (V ^ n
+            * ((∑ i ∈ Finset.range n, y i * g ^ i) + y n * g ^ n))
+          - V ^ n * ∑ i ∈ Finset.range n, y i * g ^ i := by
+          rw [show V ^ (n + 1) = V * V ^ n from by rw [pow_succ]; ring]
+          ring
+      _ = V ^ n * ((∑ i ∈ Finset.range n, y i * g ^ i) + y n * g ^ n)
+          - V ^ n * ∑ i ∈ Finset.range n, y i * g ^ i := by
+          rw [hinv, one_mul]
+      _ = (V * g) ^ n * y n := by
+          rw [mul_pow]
+          ring
+      _ = y n := by rw [h3, one_mul]
+  · rw [if_neg hn]
+    have hn0 : n = 0 := by omega
+    subst hn0
+    rw [Finset.sum_range_one, pow_zero, mul_one, pow_one]
+    calc 0 - g * -(V * y 0) = (g * V) * y 0 := by ring
+      _ = y 0 := by rw [hinv, one_mul]
+
 end FarguesFontaine
 
 end
