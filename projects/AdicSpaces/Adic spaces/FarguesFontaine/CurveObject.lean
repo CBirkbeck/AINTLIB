@@ -1191,6 +1191,86 @@ theorem ringStalkMap_piYHom_surjective (y : ↥(yTop p F ϖ)) :
     exact ((e1.trans e2).trans e3).trans h3
   exact hchain
 
+/-- The general piece inclusion into the Frobenius preimage of a saturated
+open. -/
+theorem piece_le_frobOpens_general (V : Opens (Curve p F ϖ)) (m : ℤ)
+    {W : Opens ↥(yTop p F ϖ)}
+    (hWle : ∀ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W
+      ≤ curvePreimage p F ϖ V) :
+    (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ (1 + m))).obj W)
+      ≤ frobOpens p F 1 ((yFunctor p F ϖ).obj (curvePreimage p F ϖ V)) := by
+  rw [← piece_shift p F ϖ m W]
+  exact frobOpens_mono p F 1
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m))))
+
+/-- **The invariant piece transport**: the `(1+m)`-piece restriction of an
+invariant section is the Frobenius transport of its `m`-piece restriction. -/
+theorem invariant_piece_transport (V : Opens (Curve p F ϖ))
+    (t : ↥(frobFixed p F ϖ V)) (m : ℤ) {W : Opens ↥(yTop p F ϖ)}
+    (hWle : ∀ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W
+      ≤ curvePreimage p F ϖ V) :
+    limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle (1 + m)))))
+        t.1
+      = limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm)
+          (limitFrobHom p F 1
+            ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ m)).obj W))
+            (limitRestrict
+              (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m)))) t.1)) := by
+  have hinv : limitFrobHom p F 1
+      ((yFunctor p F ϖ).obj (curvePreimage p F ϖ V)) t.1
+      = limitRestrict (le_of_eq
+          (frobOpens_yFunctor_curvePreimage p F ϖ 1 V)) t.1 := t.2
+  have hL1 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (piece_shift p F ϖ m W).symm)
+    (frobOpens_mono p F 1
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m)))))))
+    (limitFrobHom p F 1
+      ((yFunctor p F ϖ).obj (curvePreimage p F ϖ V)) t.1)
+  have hL2 := limitFrobHom_limitRestrict p F 1
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m)))) t.1
+  have hR1 := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (piece_le_frobOpens_general p F ϖ V m hWle)
+    (le_of_eq (frobOpens_yFunctor_curvePreimage p F ϖ 1 V)))) t.1
+  calc limitRestrict
+        (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle (1 + m))))) t.1
+      = limitRestrict (piece_le_frobOpens_general p F ϖ V m hWle)
+          (limitRestrict (le_of_eq
+            (frobOpens_yFunctor_curvePreimage p F ϖ 1 V)) t.1) := hR1.symm
+    _ = limitRestrict (piece_le_frobOpens_general p F ϖ V m hWle)
+          (limitFrobHom p F 1
+            ((yFunctor p F ϖ).obj (curvePreimage p F ϖ V)) t.1) :=
+        congrArg _ hinv.symm
+    _ = limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm)
+          (limitRestrict (frobOpens_mono p F 1
+            (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m)))))
+            (limitFrobHom p F 1
+              ((yFunctor p F ϖ).obj (curvePreimage p F ϖ V)) t.1)) :=
+        hL1.symm
+    _ = limitRestrict (le_of_eq (piece_shift p F ϖ m W).symm)
+          (limitFrobHom p F 1
+            ((yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ m)).obj W))
+            (limitRestrict
+              (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m)))) t.1)) :=
+        congrArg _ hL2.symm
+
+/-- **The piece step**: invariant sections agreeing on the `m`-th piece
+agree on the `(1+m)`-th. -/
+theorem invariant_piece_step (V : Opens (Curve p F ϖ))
+    (t t' : ↥(frobFixed p F ϖ V)) (m : ℤ)
+    {W : Opens ↥(yTop p F ϖ)}
+    (hWle : ∀ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W
+      ≤ curvePreimage p F ϖ V)
+    (hm : limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m))))
+        t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m))))
+        t'.1) :
+    limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle (1 + m)))))
+        t.1
+      = limitRestrict
+          (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle (1 + m))))) t'.1 := by
+  rw [invariant_piece_transport p F ϖ V t m hWle,
+    invariant_piece_transport p F ϖ V t' m hWle, hm]
+
 end FarguesFontaine
 
 end
