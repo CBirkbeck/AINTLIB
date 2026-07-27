@@ -109,6 +109,7 @@ import «Adic spaces».FJP.FiniteJetMain
 import «Adic spaces».FJP.FiniteJetSheafyEndpoints
 import «Adic spaces».SpaRationalOpenComparison
 import «Adic spaces».SpaRationalOpenHomeomorph
+import «Adic spaces».NonTateRationalOpenHomeomorph
 import «Adic spaces».SpaSpanPerturbation
 import «Adic spaces».Vendored.XiaMvPowerSeriesEquiv
 import «Adic spaces».Vendored.CoramMvRestricted
