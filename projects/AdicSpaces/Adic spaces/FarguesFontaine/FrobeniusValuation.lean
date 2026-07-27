@@ -413,7 +413,134 @@ theorem comap_ringStalkMap_ambientFrob_stalkValue (k : ℤ)
         (limitFrobHom p F k U g)
     exact stalkVle_congr p F (hgf.trans hMa.symm) (hgg.trans hMb.symm) hst
 
-end FarguesFontaine
+/-- **Germ naturality of the `𝒴`-Frobenius stalk transport** (the restricted
+analog of `ringStalkMap_ambientFrob_germ`). -/
+theorem ringStalkMap_yFrob_germ (k : ℤ) (x : yTop p F ϖ)
+    (V : Opens ↥(yTop p F ϖ)) (hx : yFrobTop p F ϖ k x ∈ V)
+    (s : ToType ((yPresheafedSpace p F ϖ).ringPresheaf.obj (op V))) :
+    (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom
+        ((yPresheafedSpace p F ϖ).ringPresheaf.germ V
+          (yFrobTop p F ϖ k x) hx s)
+      = (yPresheafedSpace p F ϖ).ringPresheaf.germ
+          ((Opens.map (yFrobTop p F ϖ k)).obj V) x hx
+          (yLimitFrobHom p F ϖ k V s) := by
+  have hunfold : ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x
+      = (TopCat.Presheaf.stalkFunctor CommRingCat
+            (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)).map
+          (Functor.whiskerRight (yFrobHom p F ϖ k).c
+            CompleteTopCommRingCat.forgetToCommRingCat)
+        ≫ TopCat.Presheaf.stalkPushforward CommRingCat
+            (yFrobHom p F ϖ k).base
+            ((yPresheafedSpace p F ϖ).presheaf
+              ⋙ CompleteTopCommRingCat.forgetToCommRingCat) x := rfl
+  have h1 := TopCat.Presheaf.stalkFunctor_map_germ_apply
+    (C := CommRingCat) V (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)
+    hx (Functor.whiskerRight (yFrobHom p F ϖ k).c
+      CompleteTopCommRingCat.forgetToCommRingCat) s
+  have h2 := TopCat.Presheaf.stalkPushforward_germ_apply CommRingCat
+    (yFrobHom p F ϖ k).base
+    ((yPresheafedSpace p F ϖ).presheaf
+      ⋙ CompleteTopCommRingCat.forgetToCommRingCat) V x hx
+    ((Functor.whiskerRight (yFrobHom p F ϖ k).c
+      CompleteTopCommRingCat.forgetToCommRingCat).app (op V) s)
+  have hsplit : ∀ y : ToType (TopCat.Presheaf.stalk
+      ((yPresheafedSpace p F ϖ).presheaf
+        ⋙ CompleteTopCommRingCat.forgetToCommRingCat)
+      (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)),
+      (ConcreteCategory.hom
+        ((TopCat.Presheaf.stalkFunctor CommRingCat
+            (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)).map
+          (Functor.whiskerRight (yFrobHom p F ϖ k).c
+            CompleteTopCommRingCat.forgetToCommRingCat)
+          ≫ TopCat.Presheaf.stalkPushforward CommRingCat
+              (yFrobHom p F ϖ k).base
+              ((yPresheafedSpace p F ϖ).presheaf
+                ⋙ CompleteTopCommRingCat.forgetToCommRingCat) x)) y
+      = (ConcreteCategory.hom (TopCat.Presheaf.stalkPushforward CommRingCat
+          (yFrobHom p F ϖ k).base
+          ((yPresheafedSpace p F ϖ).presheaf
+            ⋙ CompleteTopCommRingCat.forgetToCommRingCat) x))
+        ((ConcreteCategory.hom ((TopCat.Presheaf.stalkFunctor CommRingCat
+            (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)).map
+          (Functor.whiskerRight (yFrobHom p F ϖ k).c
+            CompleteTopCommRingCat.forgetToCommRingCat))) y) :=
+    fun y => rfl
+  exact (congrArg (fun h => (ConcreteCategory.hom h)
+      ((ConcreteCategory.hom (TopCat.Presheaf.germ
+        ((yPresheafedSpace p F ϖ).presheaf
+          ⋙ CompleteTopCommRingCat.forgetToCommRingCat) V
+        (ConcreteCategory.hom (yFrobHom p F ϖ k).base x) hx)) s))
+      hunfold).trans
+    ((hsplit _).trans ((congrArg (ConcreteCategory.hom
+      (TopCat.Presheaf.stalkPushforward CommRingCat (yFrobHom p F ϖ k).base
+        ((yPresheafedSpace p F ϖ).presheaf
+          ⋙ CompleteTopCommRingCat.forgetToCommRingCat) x)) h1).trans h2))
 
+/-- The transported section bridges along the `yFunctor`-Frobenius
+commutation (componentwise definitional). -/
+theorem limitFrobHom_bridge (k : ℤ) (V : Opens ↥(yTop p F ϖ))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj V))) :
+    limitRestrict (le_of_eq (yFunctor_frobOpens p F ϖ k V).symm)
+        (limitFrobHom p F k ((yFunctor p F ϖ).obj V) s)
+      = yLimitFrobHom p F ϖ k V s :=
+  Subtype.ext (funext fun _ => rfl)
+
+/-- The restriction stalk iso on germs, at the `𝒴`-spellings. -/
+theorem yRingStalkIso_hom_germ (x : yTop p F ϖ) (V : Opens ↥(yTop p F ϖ))
+    (hx : x ∈ V)
+    (s : ToType ((yPresheafedSpace p F ϖ).ringPresheaf.obj (op V))) :
+    (ConcreteCategory.hom (yRingStalkIso p F ϖ x).hom)
+        ((yPresheafedSpace p F ϖ).ringPresheaf.germ V x hx s)
+      = (spaRingPresheaf (Ainf p F)).germ
+          ((yFunctor p F ϖ).obj V) (ySpaPoint p F ϖ x) ⟨x, hx, rfl⟩ s :=
+  AlgebraicGeometry.PresheafedSpace.restrictStalkIso_hom_eq_germ_apply
+    (yAmbientRingSpace p F) (yIncl_isOpenEmbedding p F ϖ) V x hx s
+
+/-- **The conjugation square** (D-iii-4c): the `𝒴`-Frobenius stalk transport
+conjugates through the restriction stalk isomorphisms to the ambient one. -/
+theorem ringStalkMap_yFrob_conj (k : ℤ) (x : yTop p F ϖ) :
+    ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x
+        ≫ (yRingStalkIso p F ϖ x).hom
+      = (yRingStalkIso p F ϖ (yFrobTop p F ϖ k x)).hom
+          ≫ ValuationSpectrum.ringStalkMap (ambientFrobHom p F k)
+              (ySpaPoint p F ϖ x) := by
+  refine TopCat.Presheaf.stalk_hom_ext _ fun V hxV => ?_
+  refine CommRingCat.hom_ext (RingHom.ext fun s => ?_)
+  show (ConcreteCategory.hom (yRingStalkIso p F ϖ x).hom)
+      ((ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom
+        ((yPresheafedSpace p F ϖ).ringPresheaf.germ V
+          (yFrobTop p F ϖ k x) hxV s))
+    = (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k)
+        (ySpaPoint p F ϖ x)).hom
+        ((ConcreteCategory.hom
+          (yRingStalkIso p F ϖ (yFrobTop p F ϖ k x)).hom)
+          ((yPresheafedSpace p F ϖ).ringPresheaf.germ V
+            (yFrobTop p F ϖ k x) hxV s))
+  rw [ringStalkMap_yFrob_germ p F ϖ k x V hxV s]
+  rw [yRingStalkIso_hom_germ p F ϖ x ((Opens.map (yFrobTop p F ϖ k)).obj V)
+    hxV (yLimitFrobHom p F ϖ k V s)]
+  rw [yRingStalkIso_hom_germ p F ϖ (yFrobTop p F ϖ k x) V hxV s]
+  rw [show (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k)
+      (ySpaPoint p F ϖ x)).hom
+      ((spaRingPresheaf (Ainf p F)).germ
+        ((yFunctor p F ϖ).obj V)
+        (ySpaPoint p F ϖ (yFrobTop p F ϖ k x))
+        ⟨yFrobTop p F ϖ k x, hxV, rfl⟩ s)
+    = (spaRingPresheaf (Ainf p F)).germ
+        (frobOpens p F k ((yFunctor p F ϖ).obj V)) (ySpaPoint p F ϖ x)
+        ⟨yFrobTop p F ϖ k x, hxV, rfl⟩
+        (limitFrobHom p F k ((yFunctor p F ϖ).obj V) s) from
+    ringStalkMap_ambientFrob_germ p F k (ySpaPoint p F ϖ x)
+      ((yFunctor p F ϖ).obj V) ⟨yFrobTop p F ϖ k x, hxV, rfl⟩ s]
+  have hgerm := germ_limitRestrict
+    (le_of_eq (yFunctor_frobOpens p F ϖ k V).symm)
+    (show ySpaPoint p F ϖ x
+      ∈ (yFunctor p F ϖ).obj ((Opens.map (yFrobTop p F ϖ k)).obj V) from
+      ⟨x, show x ∈ (Opens.map (yFrobTop p F ϖ k)).obj V from hxV, rfl⟩)
+    (limitFrobHom p F k ((yFunctor p F ϖ).obj V) s)
+  rw [limitFrobHom_bridge p F ϖ k V s] at hgerm
+  exact hgerm
+
+end FarguesFontaine
 
 end
