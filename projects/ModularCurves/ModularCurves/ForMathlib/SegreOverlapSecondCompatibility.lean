@@ -74,4 +74,78 @@ def segreImageSecondChartToOverlapAway
       (segreImageCoordinate R m n (segrePairIndex m n i j))
       (segreImageCoordinate R m n (segrePairIndex m n a b)))
 
+/-- The left Segre-image coordinate ratio obeys the chart-transition formula. -/
+lemma segreImageChartOverlap_leftRatio_transition
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a c : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreImageSecondChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n a c b b) *
+        segreImageFirstChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n i a j j) =
+      segreImageFirstChartToOverlapAway R m n i a j b
+        (segreImageChartRatio R m n i c j j) := by
+  apply HomogeneousLocalization.val_injective
+  simp only [segreImageSecondChartToOverlapAway,
+    segreImageFirstChartToOverlapAway,
+    segreImageChartRatio,
+    HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.val_mul,
+    HomogeneousLocalization.Away.val_mk,
+    Localization.mk_mul]
+  rw [Localization.mk_eq_mk_iff, Localization.r_eq_r']
+  refine ⟨1, ?_⟩
+  simp only [Submonoid.coe_one, Submonoid.coe_mul, one_mul, pow_one]
+  rw [← segreImageCoordinate_cross_relation R m n i c j b]
+  have hanchor :=
+    segreImageCoordinate_cross_relation R m n i a j b
+  calc
+    _ =
+        segreImageCoordinate R m n (segrePairIndex m n i j) *
+          segreImageCoordinate R m n (segrePairIndex m n a b) *
+          (segreImageCoordinate R m n (segrePairIndex m n c j) *
+            (segreImageCoordinate R m n (segrePairIndex m n a j) *
+              segreImageCoordinate R m n (segrePairIndex m n i b)) *
+            segreImageCoordinate R m n (segrePairIndex m n a b)) := by
+      ring
+    _ = _ := by
+      rw [hanchor]
+      ring
+
+/-- The right Segre-image coordinate ratio obeys the chart-transition formula. -/
+lemma segreImageChartOverlap_rightRatio_transition
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b c : Fin (n + 1)) :
+    segreImageSecondChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n a a b c) *
+        segreImageFirstChartToOverlapAway R m n i a j b
+          (segreImageChartRatio R m n i i j b) =
+      segreImageFirstChartToOverlapAway R m n i a j b
+        (segreImageChartRatio R m n i i j c) := by
+  apply HomogeneousLocalization.val_injective
+  simp only [segreImageSecondChartToOverlapAway,
+    segreImageFirstChartToOverlapAway,
+    segreImageChartRatio,
+    HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.val_mul,
+    HomogeneousLocalization.Away.val_mk,
+    Localization.mk_mul]
+  rw [Localization.mk_eq_mk_iff, Localization.r_eq_r']
+  refine ⟨1, ?_⟩
+  simp only [Submonoid.coe_one, Submonoid.coe_mul, one_mul, pow_one]
+  rw [← segreImageCoordinate_cross_relation R m n i a j c]
+  have hanchor :=
+    segreImageCoordinate_cross_relation R m n i a j b
+  calc
+    _ =
+        segreImageCoordinate R m n (segrePairIndex m n i j) *
+          segreImageCoordinate R m n (segrePairIndex m n a b) *
+          (segreImageCoordinate R m n (segrePairIndex m n i c) *
+            (segreImageCoordinate R m n (segrePairIndex m n a j) *
+              segreImageCoordinate R m n (segrePairIndex m n i b)) *
+            segreImageCoordinate R m n (segrePairIndex m n a b)) := by
+      ring
+    _ = _ := by
+      rw [hanchor]
+      ring
+
 end MvPolynomial
