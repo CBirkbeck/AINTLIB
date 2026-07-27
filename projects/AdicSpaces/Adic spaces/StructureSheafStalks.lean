@@ -630,6 +630,62 @@ theorem maximalIdeal_stalk_eq_supp {v : ↥(Spa A A⁺)} (hs : StalkShrink v) :
   rw [@IsLocalRing.mem_maximalIdeal _ _ (isLocalRing_stalk_of_shrink hs)]
   exact mem_nonunits_iff_vle_zero hs x
 
+/-! ### Reduction of the shrink claim to the rational level -/
+
+variable (A) in
+/-- **The rational shrink claim** (the rational-level core of Wedhorn 8.14):
+an element of a completed rational localization with nonzero point value
+becomes a unit on a smaller valid rational neighbourhood of the point. -/
+def RationalShrink : Prop :=
+  ∀ (D : RationalLocData A) (_hD : D.IsRational) (v' : Spv A)
+    (hv : v' ∈ (rationalOpen D.T D.s ∩ Spa A A⁺ : Set (Spv A)))
+    (b : presheafValue D), ¬ (pointValue D hv).vle b 0 →
+    ∃ (D' : RationalLocData A) (_hD' : D'.IsRational)
+      (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s),
+      v' ∈ rationalOpen D'.T D'.s ∧ IsUnit (restrictionMapHom D D' h b)
+
+/-- **Reduction of the stalk shrink claim to the rational one**: representing
+a nonzero-value germ over a rational neighbourhood, shrinking by
+`RationalShrink`, and transporting the unit through the rational-open
+comparison `limitEval`. -/
+theorem stalkShrink_of_rationalShrink (hRS : RationalShrink A)
+    (v : ↥(Spa A A⁺)) : StalkShrink v := by
+  intro x hx
+  obtain ⟨U, hvU, f, rfl⟩ := (spaRingPresheaf A).exists_germ_eq x
+  -- the section has nonzero value
+  have hnz : ¬ (openValue U hvU).vle f 0 := by
+    intro hcon
+    refine hx ⟨U, hvU, f, 0, rfl, germ_zero U hvU, hcon⟩
+  -- compute at the defining rational index
+  set i := (exists_rationalIndex_mem hvU).choose with hidef
+  have hi := (exists_rationalIndex_mem hvU).choose_spec
+  have hnzD : ¬ (pointValue i.D hi).vle (limitEvalHom i f) 0 :=
+    fun hcon => hnz hcon
+  -- rational shrink
+  obtain ⟨D', hD', hsub, hvD', hunit⟩ := hRS i.D i.isRational
+    (v : Spv A) hi (limitEvalHom i f) hnzD
+  -- the smaller rational open, as an open of the subtype
+  have hW'U : spaOpens D' ≤ U :=
+    (spaOpen_subset_of_rationalOpen_subset hsub).trans i.subset
+  have hvW' : v ∈ spaOpens D' := mem_spaOpen.mpr hvD'
+  -- the restricted section is a unit via the rational-open comparison
+  have hcomp : limitEval hD' (limitRestrict hW'U f)
+      = restrictionMapHom i.D D' hsub (limitEvalHom i f) :=
+    (f.2 i ((RationalIndex.self D' hD').mono hW'U) hsub).symm
+  have hfunit : IsUnit (limitRestrict hW'U f) := by
+    have h1 : IsUnit (limitEval hD' (limitRestrict hW'U f)) := by
+      rw [hcomp]
+      exact hunit
+    have h2 := h1.map (limitEval hD').symm.toRingHom
+    rwa [show (limitEval hD').symm.toRingHom (limitEval hD'
+        (limitRestrict hW'U f)) = limitRestrict hW'U f from
+      (limitEval hD').symm_apply_apply _] at h2
+  have hgerm : (spaRingPresheaf A).germ (spaOpens D') v hvW'
+      (limitRestrict hW'U f) = (spaRingPresheaf A).germ U v hvU f :=
+    germ_limitRestrict hW'U hvW' f
+  rw [← hgerm]
+  exact isUnit_germ_of_isUnit hvW' hfunit
+
 end StalkValue
 
 end ValuationSpectrum
