@@ -1459,7 +1459,19 @@ non-Tate bases are supported.
     DENSE-LEVEL INTEGRALITY: a Bloc element with both window-Gauss norms
     ≤ 1 is integral over the A_inf[T/s]-localization subring (Teichmüller
     truncation; the T911 norm-exact-lift machinery is the tool);
-    then IntCl-closure-tower absorbs. This ⊇-half is the real new math. (β) the ARCHITECTURE DECISION
+    then IntCl-closure-tower absorbs. This ⊇-half is the real new math. ⊇-REDUCTION DONE
+    2026-07-27 (ChartVObj.lean): **ChartDensePlus** (the named dense claim)
+    + exists_ball_approx + chartPlus_le_completedPlusSubring_of_dense —
+    the reconciliation is now EXACTLY the equality
+    chartPlus = canonical ⟺ ChartDensePlus (⊆-half unconditional).
+    NEXT for ChartDensePlus (Kedlaya 4.5 dense integrality): h ∈ Bloc,
+    both window-norms ≤ 1: write h = x/(p[ϖ]^b-chart-s)^k (ID2a); the
+    norm-conditions bound the Teichmüller terms; each Laurent term
+    p^i[c]-over-s^k with its bound is a product of the chart generators
+    t/s (p^{a'}/s, [ϖ]^{b'}/s) and A_inf-elements — the T911 norm-exact
+    lift machinery (Presentation.lean, 'norm-exact lift of p^{-i}') is the
+    tool; then the element is a CONVERGENT SUM of generator-products ∈
+    the closed canonical subring. (β) the ARCHITECTURE DECISION
     (ambient-vs-glue, M8-note above) and the cross-chart assembly of the
     Y-VObj from the chartVObj chain + the D-ii-2 split fiber-product; then
     (D-iii) the φ-action as VObj-isos and X := Y/φ^ℤ.
