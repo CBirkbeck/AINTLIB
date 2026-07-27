@@ -8,7 +8,7 @@ This file identifies the complement of the zero section in a projective Weierstr
 with its standard affine `Z`-chart.
 -/
 
-open AlgebraicGeometry CategoryTheory TopologicalSpace
+open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 
 universe u
 
@@ -17,6 +17,15 @@ namespace ModularCurves
 noncomputable section
 
 variable {R : Type u} [CommRing R]
+
+/-- A residue-field fibre of a separated morphism is separated over the residue field. -/
+theorem isSeparated_fiberToSpecResidueField
+    {E S : Scheme.{u}} (π : E ⟶ S) [IsSeparated π] (s : S) :
+    IsSeparated (π.fiberToSpecResidueField s) := by
+  change IsSeparated (pullback.snd π (S.fromSpecResidueField s))
+  exact AlgebraicGeometry.IsSeparated.isStableUnderBaseChange.of_isPullback
+    (IsPullback.of_hasPullback π (S.fromSpecResidueField s))
+    (show IsSeparated π from inferInstance)
 
 /-- The complement of the zero section in a projective Weierstrass model is its affine
 `Z`-chart. -/
