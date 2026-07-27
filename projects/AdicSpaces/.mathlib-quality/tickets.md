@@ -2375,6 +2375,35 @@ non-Tate bases are supported.
   sheaf and stalk valuations) OR two-chart gluing along the Frobenius transitions
   (overlap pieces: κ = c identity; κ = 1 ↔φ↔ κ = p), cocycle condition, and the
   local-isomorphism property of q — only then is 𝒳 an adic space.
+- **STATUS UPDATE 2026-07-30 (beastmode)**: the FIRST branch is executed —
+  D-iv delivered 𝒪_X := (π_*𝒪_Y)^φ with stalks, valuations, and the sheaf
+  condition: **xVObj** (CurveObject.lean). The 𝒱-LEVEL "adic space"
+  predicate (Wedhorn 8.22: locally 𝒱-isomorphic to Spa-objects) awaits the
+  canonical Spa object of 𝒱 (the recorded open P5 leaf,
+  StructurePresheafBundled.lean:736 note) — NOT taken here. The available
+  honest form of the local-isomorphism property is the TOPOLOGICAL chart
+  layer (AdicSpacePresentation, same file):
+  ### [X-ADIC-1] The curve as an AdicSpacePresentation (spawned 2026-07-30)
+  Statement: an `AdicSpacePresentation` with carrier `Curve p F ϖ` — every
+  curve point has an open neighbourhood homeomorphic to the spectrum of an
+  affinoid adic presentation. Route: (A1) the wandering-image homeo
+  ↥W ≃ₜ ↥(xImage W) for W with pairwise-disjoint translates (yTopToCurve
+  restricted: injective by wandering — orbit-collision w' ∈ frob-translate
+  ∩ W₀ forces k = 0 — + continuous + isOpenMap ⟹ open embedding onto the
+  image); (A2) chart-side localization: y ∈ window n (Y_eq_iUnion_bigWindow),
+  transport the open W₀-constraint through spaChartHomeoBigWindow, pick a
+  rational-open nbhd inside Spa(B_n) (the SpaRationalOpenHomeomorph
+  rational-basis trick), NT-1'-homeo Spa(presheafValue D_{B_n}) ≃ₜ its
+  trace, Homeomorph.image-restriction back; (A3) the affinoid presentation
+  at the sub-rational value ring over B_n: IsTateRing
+  (presheafValue_isTateRing_concrete), **IsStronglyNoetherian via
+  presheafValue_isStronglyNoetherian_faithful over B_n** (B_n-instances by
+  the isSheafy_presheafChart letI-package + isStronglyNoetherian_BISub
+  transport), completeSpace_right_presheafValue, the canonical-plus
+  integral-elements supplier (the one spaChartHomeoBigWindow already
+  consumes), then AffinoidAdicPresentation.ofIsSheafy with
+  isSheafy_of_stronglyNoetherian_828b; (A4) assembly over all x via
+  fiberPoint + exists_disjoint_translates.
 
 ---
 
