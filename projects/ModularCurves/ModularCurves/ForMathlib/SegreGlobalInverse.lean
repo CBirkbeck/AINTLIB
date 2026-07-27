@@ -278,4 +278,106 @@ lemma segreImageOverlapToSecondProductChart
     segreProductOverlapIsoSegreImage_hom_toSecondChart_assoc]
   simp
 
+/-- The canonical affine-spectrum presentation of the overlap of two pair-indexed
+standard charts of the Segre image. -/
+def segreImagePairOverlapIso
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    pullback
+        (Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n i j))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n i j))
+          Nat.zero_lt_one)
+        (Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n a b))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n a b))
+          Nat.zero_lt_one) ≅
+      Spec
+        (CommRingCat.of
+          (SegreImageChartOverlapRing
+            R m n i a j b)) :=
+  Proj.pullbackAwayιIso
+    (segreImageGrading R m n)
+    (segreImageCoordinate_mem_degreeOne R m n
+      (segrePairIndex m n i j))
+    Nat.zero_lt_one
+    (segreImageCoordinate_mem_degreeOne R m n
+      (segrePairIndex m n a b))
+    Nat.zero_lt_one
+    rfl
+
+/-- The first pullback projection of a target-chart overlap is the canonical
+first-chart localization map. -/
+@[reassoc]
+lemma segreImagePairOverlapIso_inv_fst
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreImagePairOverlapIso R m n i a j b).inv ≫
+        pullback.fst
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n i j))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n i j))
+            Nat.zero_lt_one)
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n a b))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n a b))
+            Nat.zero_lt_one) =
+      segreImageOverlapToFirstChart R m n i a j b := by
+  exact
+    Proj.pullbackAwayιIso_inv_fst
+      (segreImageGrading R m n)
+      (segreImageCoordinate_mem_degreeOne R m n
+        (segrePairIndex m n i j))
+      Nat.zero_lt_one
+      (segreImageCoordinate_mem_degreeOne R m n
+        (segrePairIndex m n a b))
+      Nat.zero_lt_one
+      rfl
+
+/-- The second pullback projection of a target-chart overlap is the canonical
+second-chart localization map. -/
+@[reassoc]
+lemma segreImagePairOverlapIso_inv_snd
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreImagePairOverlapIso R m n i a j b).inv ≫
+        pullback.snd
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n i j))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n i j))
+            Nat.zero_lt_one)
+          (Proj.awayι
+            (segreImageGrading R m n)
+            (segreImageCoordinate R m n
+              (segrePairIndex m n a b))
+            (segreImageCoordinate_mem_degreeOne R m n
+              (segrePairIndex m n a b))
+            Nat.zero_lt_one) =
+      segreImageOverlapToSecondChart R m n i a j b := by
+  exact
+    Proj.pullbackAwayιIso_inv_snd
+      (segreImageGrading R m n)
+      (segreImageCoordinate_mem_degreeOne R m n
+        (segrePairIndex m n i j))
+      Nat.zero_lt_one
+      (segreImageCoordinate_mem_degreeOne R m n
+        (segrePairIndex m n a b))
+      Nat.zero_lt_one
+      rfl
+
 end MvPolynomial
