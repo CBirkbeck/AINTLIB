@@ -502,4 +502,112 @@ lemma segreStandardSecondChartOverlapAlgHom_comp_right
   rw [segreRightChartToImageAlgHom_ratio,
     segreStandardChartOverlapRingEquiv_secondRightRatio]
 
+/-- The second-chart overlap map composed with the Segre inverse is the product transition. -/
+lemma segreStandardSecondChartOverlapAlgHom_comp_inverse
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreStandardSecondChartOverlapAlgHom
+        R m n i a j b).comp
+        (segreChartInverseAlgHom R m n a b) =
+      segreProductSecondChartAlgHom R m n i a j b := by
+  apply Algebra.TensorProduct.ext
+  · ext x
+    change
+      segreStandardSecondChartOverlapAlgHom R m n i a j b
+          (segreChartInverseAlgHom R m n a b
+            ((Algebra.TensorProduct.includeLeft :
+              ProjectiveCoordinateAway R a →ₐ[R]
+                SegreProductChartRing R m n a b) x)) =
+        segreProductSecondChartAlgHom R m n i a j b
+          ((Algebra.TensorProduct.includeLeft :
+            ProjectiveCoordinateAway R a →ₐ[R]
+              SegreProductChartRing R m n a b) x)
+    rw [show
+      segreChartInverseAlgHom R m n a b
+          ((Algebra.TensorProduct.includeLeft :
+            ProjectiveCoordinateAway R a →ₐ[R]
+              SegreProductChartRing R m n a b) x) =
+        segreLeftChartToImageAlgHom R m n a b x by
+      simp [segreChartInverseAlgHom]]
+    rw [show
+      segreProductSecondChartAlgHom R m n i a j b
+          ((Algebra.TensorProduct.includeLeft :
+            ProjectiveCoordinateAway R a →ₐ[R]
+              SegreProductChartRing R m n a b) x) =
+        segreProductSecondLeftAlgHom R m n i a j b x by
+      exact
+        DFunLike.congr_fun
+          (segreProductSecondChartAlgHom_comp_left
+            R m n i a j b) x]
+    exact
+      DFunLike.congr_fun
+        (segreStandardSecondChartOverlapAlgHom_comp_left
+          R m n i a j b) x
+  · ext y
+    change
+      segreStandardSecondChartOverlapAlgHom R m n i a j b
+          (segreChartInverseAlgHom R m n a b
+            ((Algebra.TensorProduct.includeRight :
+              ProjectiveCoordinateAway R b →ₐ[R]
+                SegreProductChartRing R m n a b) y)) =
+        segreProductSecondChartAlgHom R m n i a j b
+          ((Algebra.TensorProduct.includeRight :
+            ProjectiveCoordinateAway R b →ₐ[R]
+              SegreProductChartRing R m n a b) y)
+    rw [show
+      segreChartInverseAlgHom R m n a b
+          ((Algebra.TensorProduct.includeRight :
+            ProjectiveCoordinateAway R b →ₐ[R]
+              SegreProductChartRing R m n a b) y) =
+        segreRightChartToImageAlgHom R m n a b y by
+      simp [segreChartInverseAlgHom]]
+    rw [show
+      segreProductSecondChartAlgHom R m n i a j b
+          ((Algebra.TensorProduct.includeRight :
+            ProjectiveCoordinateAway R b →ₐ[R]
+              SegreProductChartRing R m n a b) y) =
+        segreProductSecondRightAlgHom R m n i a j b y by
+      exact
+        DFunLike.congr_fun
+          (segreProductSecondChartAlgHom_comp_right
+            R m n i a j b) y]
+    exact
+      DFunLike.congr_fun
+        (segreStandardSecondChartOverlapAlgHom_comp_right
+          R m n i a j b) y
+
+/-- The second-image-chart overlap map is the standard forward map followed by transition. -/
+lemma segreStandardSecondChartOverlapAlgHom_eq
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreStandardSecondChartOverlapAlgHom R m n i a j b =
+      (segreProductSecondChartAlgHom R m n i a j b).comp
+        (segreChartForwardAlgHom R m n a b) := by
+  ext x
+  have hx :=
+    DFunLike.congr_fun
+      (segreChartInverseAlgHom_comp_forward R m n a b) x
+  have hx' :
+      segreChartInverseAlgHom R m n a b
+          (segreChartForwardAlgHom R m n a b x) =
+        x := by
+    simpa only [AlgHom.comp_apply, AlgHom.id_apply] using hx
+  calc
+    _ =
+        segreStandardSecondChartOverlapAlgHom R m n i a j b
+          (segreChartInverseAlgHom R m n a b
+            (segreChartForwardAlgHom R m n a b x)) := by
+      exact
+        congrArg
+          (segreStandardSecondChartOverlapAlgHom
+            R m n i a j b) hx'.symm
+    _ =
+        segreProductSecondChartAlgHom R m n i a j b
+          (segreChartForwardAlgHom R m n a b x) :=
+      DFunLike.congr_fun
+        (segreStandardSecondChartOverlapAlgHom_comp_inverse
+          R m n i a j b)
+        (segreChartForwardAlgHom R m n a b x)
+    _ = _ := rfl
+
 end MvPolynomial
