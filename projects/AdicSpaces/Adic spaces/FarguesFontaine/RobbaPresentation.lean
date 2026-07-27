@@ -5306,6 +5306,170 @@ theorem exists_evalBI_eq_of_le_one₂
 
 end CorrectionBot
 
+section SurjectivityBot
+
+variable {σ₂ : NNReal} {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+variable (hφ : ∀ z, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+    ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+variable (hφb : ∀ x : Bloc p F ϖ,
+  ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+    : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+    : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+  = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 x)
+
+/-- The evaluation of a constant coefficient element. -/
+theorem evalBI_GeltEltM0_eq₂
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (c : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    evalBI p F ϖ φ hφ hbmem hb (GeltEltM0 p F ϖ c)
+      = ((φ c : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) := by
+  refine (evalBI_monomial p F ϖ φ hφ hbmem hb 0 c
+    (isRestricted_monomial_BI p F ϖ _)).trans ?_
+  rw [pow_zero, mul_one]
+
+/-- The scaled element stays in the interval subring with unit norm. -/
+theorem exists_p_scaling₂
+    (z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) :
+    ∃ k : ℕ, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k * z) ≤ 1 := by
+  have hbound : ∀ k : ℕ, wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k * z)
+      ≤ (max ρ₁ σ₂) ^ k * wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z := by
+    intro k
+    refine le_trans (wI_mul_le p F _ _) ?_
+    rw [wI_pow, pImage, wI_p_image]
+  rcases eq_or_ne (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z) 0 with h0 | hne
+  · exact ⟨0, le_trans (hbound 0) (by rw [h0, mul_zero]; exact zero_le_one)⟩
+  · have hr1 : max ρ₁ σ₂ < 1 := max_lt hρ₁1 hσ₂1
+    have hipos : (0 : NNReal) < (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z)⁻¹ :=
+      inv_pos.mpr (pos_of_ne_zero hne)
+    obtain ⟨k, hk⟩ := NNReal.exists_pow_lt_of_lt_one hipos hr1
+    refine ⟨k, le_trans (hbound k) ?_⟩
+    refine le_of_lt ?_
+    calc (max ρ₁ σ₂) ^ k * wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z
+        < (wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z)⁻¹
+          * wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 z := by
+          exact mul_lt_mul_of_pos_right hk (pos_of_ne_zero hne)
+      _ = 1 := inv_mul_cancel₀ hne
+
+include hφb in
+/-- **Surjectivity of the case-2 evaluation** (Kedlaya Lemma 4.9, case 1):
+every element of the cut interval ring is a value, by `p`-power rescaling
+into the unit ball. -/
+theorem surjective_evalBIHom₂
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀)) :
+    Function.Surjective (evalBIHom p F ϖ φ hφ hbmem hb) := by
+  intro zsub
+  obtain ⟨k, hk⟩ := exists_p_scaling₂ p F ϖ
+    ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+  have hz'mem : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k
+      * ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))
+      ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 :=
+    mul_mem (pow_mem (BIProd_mem_BISub p F ϖ _) k) zsub.2
+  obtain ⟨U', hU'eq, -⟩ := exists_evalBI_eq_of_le_one₂ p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz'mem hk
+  refine ⟨GeltEltM0 p F ϖ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+    (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)) * U', ?_⟩
+  have hinv : (↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) = 1 := by
+    have h := (isUnit_p_image p F ϖ).unit.inv_mul
+    rwa [(isUnit_p_image p F ϖ).unit_spec] at h
+  have hvpalg : ((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k
+      * algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k = 1 := by
+    rw [← mul_pow, hinv, one_pow]
+  have h1 : pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k
+      = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) :=
+    (map_pow (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+      (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F)) k).symm
+  have h2 : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+      * BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k) = 1 :=
+    ((map_mul (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+        (algebraMap (Ainf p F) (Bloc p F ϖ) (p : Ainf p F) ^ k)).symm).trans
+      ((congrArg (BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1) hvpalg).trans
+        (map_one _))
+  have hfinal : BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+        (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k)
+      * (pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k
+        * ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)))
+      = ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) := by
+    rw [h1, ← mul_assoc, h2, one_mul]
+  refine Subtype.ext ?_
+  rw [evalBIHom_coe₂ p F ϖ φ hφ hbmem hb,
+    evalBI_mul p F ϖ φ hφ hbmem hb,
+    evalBI_GeltEltM0_eq₂ p F ϖ φ hφ hbmem hb]
+  exact (congrArg (fun t =>
+      ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k))
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) * t) hU'eq).trans
+    ((congrArg (fun s => s * (pImage p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1 ^ k
+        * ((zsub : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1))))
+      (hφb (((↑(isUnit_p_image p F ϖ).unit⁻¹ : Bloc p F ϖ)) ^ k))).trans
+      hfinal)
+include φ hφ hφb in
+/-- **The case-2 Robba presentation** (Kedlaya Lemma 4.9, case 1): the cut
+interval ring is the quotient of the restricted power series ring over
+`B^I` by the principal ideal on `T - g`. -/
+theorem nonempty_case2_quotient_equiv
+    (hφfst : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)).1
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+    (hρσ : ρ₁ ≤ σ₂) (hσρ : σ₂ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₂ ^ m₀)
+    {b : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hρ₁0 hρ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1
+      (teichPowGen₂ p F ϖ zb m₀))
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hσ₂0 hσ₂1)) = b)
+    (hg1 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ≤ 1)
+    (hg2 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) :
+    Nonempty
+      ((↥(restrictedMvPowerSeriesSubring 1
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ⧸ Ideal.span {GeltElt p F ϖ gB})
+      ≃+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hσ₂0 hσ₂1)) := by
+  have hker := ker_evalBIHom_eq_span₂ p F ϖ φ hφ hφfst hbmem hb
+    gB hgu hφgB hg1 hg2
+  have hsurj := surjective_evalBIHom₂ p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg
+  exact ⟨(Ideal.quotEquivOfEq hker.symm).trans
+    (RingHom.quotientKerEquivOfSurjective hsurj)⟩
+
+end SurjectivityBot
+
 end FarguesFontaine
 
 end
