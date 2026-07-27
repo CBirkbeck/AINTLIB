@@ -1465,6 +1465,54 @@ theorem monomial_dvd_of_wLoc_le_one {σ₁ : NNReal}
     _ = perfectoidValuation p F (zb : F) ^ ((k - i) / m) := by
         rw [hgen, ← pow_mul]
 
+/-- The interval restriction carries `Bloc`-images to `Bloc`-images. -/
+theorem resIHom_blocToBI {θ η : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 1)
+    (hη0 : 0 ≤ η) (hη1 : η ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ * ρ₂ ^ (1 - θ)) (hσ₁1 : ρ₁ ^ θ * ρ₂ ^ (1 - θ) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ η * ρ₂ ^ (1 - η)) (hσ₂1 : ρ₁ ^ η * ρ₂ ^ (1 - η) < 1)
+    (x : Bloc p F ϖ) :
+    ((resIHom p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+        : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+      = BIProd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 x := by
+  refine Prod.ext ?_ ?_
+  · show resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₁0 hσ₁1
+        ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = (BIProd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 x).1
+    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x from rfl]
+    rw [resI_BIProd p F ϖ hθ0 hθ1 hσ₁0 hσ₁1 x,
+      BIProd_fst p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 x]
+  · show resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hσ₂0 hσ₂1
+        ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = (BIProd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 x).2
+    rw [show ((blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x from rfl]
+    rw [resI_BIProd p F ϖ hη0 hη1 hσ₂0 hσ₂1 x,
+      BIProd_snd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 x]
+
+/-- Each monomial's localized norm is bounded by the element's. -/
+theorem wLoc_mk'_monomial_le {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (w : Ainf p F) (k i : ℕ) :
+    wLoc p F ϖ hρ0 hρ1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p (teichCoeff p F w i))
+        (sPow p F ϖ k))
+      ≤ wLoc p F ϖ hρ0 hρ1
+          (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) := by
+  rw [wLoc_mk'_monomial p F ϖ hρ0 hρ1, wLoc_mk' p F ϖ hρ0 hρ1,
+    gaussValue_sPow p F ϖ hρ0 hρ1 k]
+  refine mul_le_mul_left ?_ _
+  exact le_ciSup (bddAbove_range_gaussTerm p F hρ1.le w) i
+
 end FarguesFontaine
 
 end
