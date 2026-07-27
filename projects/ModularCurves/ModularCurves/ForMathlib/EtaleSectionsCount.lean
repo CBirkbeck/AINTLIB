@@ -151,6 +151,8 @@ theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
   haveI hE : Etale (Spec.map ψ) := by rw [hψ]; infer_instance
   haveI hF : IsFinite (Spec.map ψ) := by
     rw [hψ]
+    haveI : MorphismProperty.RespectsIso @IsFinite :=
+      MorphismProperty.IsStableUnderBaseChange.respectsIso
     exact (MorphismProperty.cancel_left_of_respectsIso @IsFinite X.isoSpec.inv f).mpr
       inferInstance
   have hRE : RingHom.Etale ψ.hom := HasRingHomProperty.Spec_iff.mp hE
@@ -195,6 +197,8 @@ theorem natCard_sections_le_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
   have hAlg : algebraMap k ↑Γ(X, ⊤) = ψ.hom := rfl
   haveI hF : IsFinite (Spec.map ψ) := by
     rw [hψ]
+    haveI : MorphismProperty.RespectsIso @IsFinite :=
+      MorphismProperty.IsStableUnderBaseChange.respectsIso
     exact (MorphismProperty.cancel_left_of_respectsIso @IsFinite X.isoSpec.inv f).mpr
       inferInstance
   have hRF : RingHom.Finite ψ.hom := (IsFinite.SpecMap_iff ψ).mp hF
@@ -264,6 +268,8 @@ lemma finite_sections {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCat.of k)) [IsFi
   have hAlg : algebraMap k ↑Γ(X, ⊤) = ψ.hom := rfl
   haveI hF : IsFinite (Spec.map ψ) := by
     rw [hψ]
+    haveI : MorphismProperty.RespectsIso @IsFinite :=
+      MorphismProperty.IsStableUnderBaseChange.respectsIso
     exact (MorphismProperty.cancel_left_of_respectsIso @IsFinite X.isoSpec.inv f).mpr
       inferInstance
   haveI : Module.Finite k ↑Γ(X, ⊤) := (IsFinite.SpecMap_iff ψ).mp hF
