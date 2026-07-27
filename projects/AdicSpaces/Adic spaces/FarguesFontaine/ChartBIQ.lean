@@ -31,6 +31,7 @@ variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 variable (ϖ : PseudoUniformizer F)
+variable {ρ₁ ρ₂ ρ₁' ρ₂' : NNReal}
 
 /-- Positivity of the scaled exponents. -/
 theorem invPowQ_pos (s : ℕ) : (0 : ℚ) < 1 / (p ^ s : ℚ) := by
@@ -143,6 +144,48 @@ noncomputable def chartRingEquivBIQ (n : ℕ) :
           (invPowQ_pos p n) (invPowQ_pos p (n + 1))) :=
   (chartEquivStep1 p F ϖ n).trans
     ((chartEquivStep2 p F ϖ n).trans (chartEquivStep3 p F ϖ n))
+
+theorem biCongr_symm_continuous (h₁ : ρ₁ = ρ₁') (h₂ : ρ₂ = ρ₂')
+    {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {hρ₁0' : 0 < ρ₁'} {hρ₁1' : ρ₁' < 1} {hρ₂0' : 0 < ρ₂'} {hρ₂1' : ρ₂' < 1} :
+    Continuous (biCongr p F ϖ h₁ h₂ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) (hρ₁0' := hρ₁0') (hρ₁1' := hρ₁1')
+      (hρ₂0' := hρ₂0') (hρ₂1' := hρ₂1')).symm := by
+  subst h₁
+  subst h₂
+  exact continuous_id
+
+theorem biSubringCongr_symm_continuous
+    {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {S T : Subring ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}
+    (h : S = T) : Continuous (biSubringCongr p F h).symm := by
+  subst h
+  exact continuous_id
+
+theorem chartEquivStep1_continuous (n : ℕ) :
+    Continuous (chartEquivStep1 p F ϖ n) := by
+  rw [chartEquivStep1]
+  exact presheafChartRingEquivBISub_continuous p F
+    (PseudoUniformizer.frobRoot p F ϖ n) p 1
+    (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos
+    (Nat.Prime.one_le (Fact.out : Nat.Prime p)) rfl
+    (by rw [rhoRight_pow_exact p F (PseudoUniformizer.frobRoot p F ϖ n) p 1
+          (Nat.Prime.pos (Fact.out : Nat.Prime p)), pow_one])
+
+theorem chartEquivStep1_symm_continuous (n : ℕ) :
+    Continuous (chartEquivStep1 p F ϖ n).symm := by
+  rw [chartEquivStep1]
+  exact presheafChartRingEquivBISub_symm_continuous p F
+    (PseudoUniformizer.frobRoot p F ϖ n) p 1
+    (Nat.Prime.pos (Fact.out : Nat.Prime p)) one_pos
+    (Nat.Prime.one_le (Fact.out : Nat.Prime p)) rfl
+    (by rw [rhoRight_pow_exact p F (PseudoUniformizer.frobRoot p F ϖ n) p 1
+          (Nat.Prime.pos (Fact.out : Nat.Prime p)), pow_one])
+
+theorem chartEquivStep2_continuous (n : ℕ) :
+    Continuous (chartEquivStep2 p F ϖ n) := by
+  rw [chartEquivStep2]
+  exact biCongr_continuous p F (PseudoUniformizer.frobRoot p F ϖ n) _ _
 
 end FarguesFontaine
 
