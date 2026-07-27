@@ -8,7 +8,7 @@ This file identifies the complement of the zero section in a projective Weierstr
 with its standard affine `Z`-chart.
 -/
 
-open AlgebraicGeometry TopologicalSpace
+open AlgebraicGeometry CategoryTheory TopologicalSpace
 
 universe u
 
@@ -32,6 +32,31 @@ theorem sectionAway_projModelZero_eq_zChart (W : WeierstrassCurve R) :
     exact hp (mem_range_zero_of_not_mem_zChart hpZ)
   · intro hpZ hp
     exact not_mem_zChart_of_mem_range_zero hp hpZ
+
+/-- A pointed isomorphism pulls the complement of the target section back to the complement
+of the source section. -/
+theorem preimage_sectionAway_eq_of_pointedIso
+    {X Y T : Scheme.{u}} {πX : X ⟶ T} {πY : Y ⟶ T}
+    [IsSeparated πX] [IsSeparated πY]
+    (zX : T ⟶ X) (hzX : zX ≫ πX = 𝟙 T)
+    (zY : T ⟶ Y) (hzY : zY ≫ πY = 𝟙 T)
+    (e : X ≅ Y) (hez : zX ≫ e.hom = zY) :
+    e.hom ⁻¹ᵁ sectionAway zY hzY = sectionAway zX hzX := by
+  ext x
+  change e.hom.base x ∉ Set.range ⇑zY ↔ x ∉ Set.range ⇑zX
+  constructor
+  · intro h hx
+    obtain ⟨t, rfl⟩ := hx
+    apply h
+    refine ⟨t, ?_⟩
+    symm
+    rw [show e.hom.base (zX t) = (zX ≫ e.hom) t from rfl, hez]
+  · intro h hx
+    obtain ⟨t, ht⟩ := hx
+    apply h
+    refine ⟨t, e.hom.homeomorph.injective ?_⟩
+    change e.hom.base (zX t) = e.hom.base x
+    rw [show e.hom.base (zX t) = (zX ≫ e.hom) t from rfl, hez, ht]
 
 end
 
