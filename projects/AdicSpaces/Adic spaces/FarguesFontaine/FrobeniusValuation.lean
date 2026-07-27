@@ -541,6 +541,47 @@ theorem ringStalkMap_yFrob_conj (k : ℤ) (x : yTop p F ϖ) :
   rw [limitFrobHom_bridge p F ϖ k V s] at hgerm
   exact hgerm
 
+private theorem comap_comp_apply' {R S T' : Type*} [CommRing R] [CommRing S]
+    [CommRing T'] (f : R →+* S) (g : S →+* T') (w : Spv T') :
+    comap (g.comp f) w = comap f (comap g w) := rfl
+
+/-- **The valuation compatibility of the `𝒴`-Frobenius** (VPreHom's
+`val_compat`-field): the stalk valuation at the image point is the pull-back
+of the stalk valuation along the Frobenius stalk transport. -/
+theorem yFrob_val_compat (k : ℤ) (x : yTop p F ϖ) :
+    (yVPreObj p F ϖ).val
+        (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)
+      = ((yVPreObj p F ϖ).val x).comap
+          (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom' := by
+  show comap (yRingStalkEquiv p F ϖ (yFrobTop p F ϖ k x)).toRingHom
+      (stalkValue (ySpaPoint p F ϖ (yFrobTop p F ϖ k x)))
+    = comap (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom'
+        (comap (yRingStalkEquiv p F ϖ x).toRingHom
+          (stalkValue (ySpaPoint p F ϖ x)))
+  have hsq := ringStalkMap_yFrob_conj p F ϖ k x
+  have hsq' : (yRingStalkEquiv p F ϖ x).toRingHom.comp
+      (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom'
+      = ((ValuationSpectrum.ringStalkMap (ambientFrobHom p F k)
+          (ySpaPoint p F ϖ x)).hom).comp
+        (yRingStalkEquiv p F ϖ (yFrobTop p F ϖ k x)).toRingHom :=
+    congrArg CommRingCat.Hom.hom hsq
+  have hamb := comap_ringStalkMap_ambientFrob_stalkValue p F k
+    (ySpaPoint p F ϖ x)
+  refine (congrArg (ValuationSpectrum.comap
+      (yRingStalkEquiv p F ϖ (yFrobTop p F ϖ k x)).toRingHom)
+      hamb.symm).trans ?_
+  refine ((comap_comp_apply' (yRingStalkEquiv p F ϖ
+      (yFrobTop p F ϖ k x)).toRingHom
+      (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k)
+        (ySpaPoint p F ϖ x)).hom
+      (stalkValue (ySpaPoint p F ϖ x))).symm).trans ?_
+  refine (congrArg (fun h => ValuationSpectrum.comap h
+      (stalkValue (ySpaPoint p F ϖ x))) hsq'.symm).trans ?_
+  exact comap_comp_apply'
+    (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom'
+    (yRingStalkEquiv p F ϖ x).toRingHom
+    (stalkValue (ySpaPoint p F ϖ x))
+
 end FarguesFontaine
 
 end
