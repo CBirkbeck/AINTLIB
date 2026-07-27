@@ -1157,4 +1157,50 @@ lemma segreProductStandardOverlapIso_hom_toSecondChart
           R m n i a j b)
     _ = _ := pullback.condition
 
+/-- The chartwise Segre morphisms agree on the actual overlaps of the standard product cover. -/
+lemma segreProductStandardChartToImageProj_compatible
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    pullback.fst
+          (segreProductStandardChartMap R m n i j)
+          (segreProductStandardChartMap R m n a b) ≫
+        segreProductStandardChartToImageProj R m n i j =
+      pullback.snd
+          (segreProductStandardChartMap R m n i j)
+          (segreProductStandardChartMap R m n a b) ≫
+        segreProductStandardChartToImageProj R m n a b := by
+  calc
+    _ =
+        ((segreProductStandardOverlapIso
+              R m n i a j b).hom ≫
+            segreProductChartOverlapToChart
+              R m n i a j b) ≫
+          segreProductStandardChartToImageProj R m n i j := by
+      rw [segreProductStandardOverlapIso_hom_toChart]
+    _ =
+        (segreProductStandardOverlapIso
+              R m n i a j b).hom ≫
+          (segreProductChartOverlapToChart
+              R m n i a j b ≫
+            segreProductStandardChartToImageProj
+              R m n i j) := by
+      rw [Category.assoc]
+    _ =
+        (segreProductStandardOverlapIso
+              R m n i a j b).hom ≫
+          (segreProductChartOverlapToSecondChart
+              R m n i a j b ≫
+            segreProductStandardChartToImageProj
+              R m n a b) := by
+      rw [segreProductChartToImageProj_overlap_compatible]
+    _ =
+        ((segreProductStandardOverlapIso
+              R m n i a j b).hom ≫
+            segreProductChartOverlapToSecondChart
+              R m n i a j b) ≫
+          segreProductStandardChartToImageProj R m n a b := by
+      rw [Category.assoc]
+    _ = _ := by
+      rw [segreProductStandardOverlapIso_hom_toSecondChart]
+
 end MvPolynomial
