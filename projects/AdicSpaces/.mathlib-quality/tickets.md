@@ -1197,7 +1197,12 @@ non-Tate bases are supported.
     BIQ[q₁,q₂] ≅ BIQ[q₁,r] ×_{hatK (vpiQ r)} BIQ[r,q₂] — with NO Spa
     transport (the isSheafy-transport route stays available but costs
     equalizer-shape alignment through the chart homeos). Sub-steps:
-    (b1) endpoint projections biFst/biSnd : BISub → hatK ρᵢ
+    (b1) DONE 2026-07-27 + (b2) DONE 2026-07-27 (commit: IntervalSplitting.lean
+    — biFstQ/biSndQ explicit-toFun projections, the three dense-equalizer
+    laws, biResQ'_split_injective; teichCoeff_init/tail,
+    pow_mul_gaussValue_init/tail_le in multiplied no-division form,
+    exists_wLoc_split; all axiom-clean). Remaining: (b3) assembly.
+    Original sub-step text: (b1) endpoint projections biFst/biSnd : BISub → hatK ρᵢ
     (= RingHom.fst/snd ∘ subtype; continuous; dense-layer = BlocToHatK) and
     the three dense-equalizer laws: biFst∘biResQ'(left-shared) = biFst,
     biSnd∘biResQ'(right-shared) = biSnd, biSnd∘resL = biFst∘resR (middle
