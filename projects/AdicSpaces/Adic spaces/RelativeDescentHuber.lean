@@ -778,6 +778,27 @@ theorem imgCoveringO_isRational (C : RationalCoveringData A)
 
 end ImgCovering
 
+
+section EqOpen
+
+variable [HasLocLiftPowerBounded A]
+
+/-- **Equal-open value coherence**: the cross restrictions between two data
+presenting the same rational open compose to the identity. -/
+theorem restrictionMap_cross_eq_id (D E : RationalLocData A)
+    (hDE : rationalOpen D.T D.s = rationalOpen E.T E.s) (x : presheafValue D) :
+    restrictionMap E D (le_of_eq hDE)
+      (restrictionMap D E (ge_of_eq hDE) x) = x := by
+  have hcomp := congr_fun
+    (restrictionMap_comp D E D (ge_of_eq hDE) (le_of_eq hDE)) x
+  simp only [Function.comp_apply] at hcomp
+  refine hcomp.trans ?_
+  have hid := congr_fun (restrictionMap_id D) x
+  exact (by simpa using hid :
+    restrictionMap D D ((le_of_eq hDE).trans (ge_of_eq hDE)) x = x)
+
+end EqOpen
+
 end ValuationSpectrum
 
 end
