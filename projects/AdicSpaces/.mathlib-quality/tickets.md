@@ -1105,7 +1105,20 @@ non-Tate bases are supported.
     intervals to topological rings. REMAINING: the presheaf assembly on the
     κ-interval basis and the Y-object gluing (next planning step: the
     presheaf-of-BIQ over the basis, its sheaf condition from
-    isSheafy_presheafChart + the chart homeos, the VPreObj packaging). Original design: a ℚ-exponent wrapper layer —
+    isSheafy_presheafChart + the chart homeos, the VPreObj packaging).
+    ORIENTATION NOTE (2026-07-27, read before assembling): vpiQ is ANTITONE,
+    so the radius-ordered interval [ρ₁ ≤ ρ₂] corresponds to a DECREASING
+    exponent pair q₁ > q₂ (κ-window [p^n, p^{n+1}] ↔ radii
+    [vπ^{1/p^n}, vπ^{1/p^{n+1}}] ↔ q-pair (1/p^n, 1/p^{n+1})). biResQ's
+    `hlt : q₁ < q₂` is only used for hlt.ne (interpolation) and the
+    theta_mem_unit sign-bookkeeping; for the presheaf either instantiate with
+    increasing q-pairs (radius-DEcreasing — fine, BISub takes any pair) or
+    add the mirrored theta_mem_unit variant for q₁ > q₂. Also vpiQ_natCast /
+    vpiQ_one bridge to the chart layer's nat-power radii; the bigWindow-n
+    chart ring is BIQ at the (1/p^{n+1}, 1/p^n)-pair up to the ID2d equiv at
+    ϖ_n (rhoRight-in-ϖ_n p 1 = vpiQ-in-ϖ (1/p^{n+1}) via
+    perfectoidValuation_frobRoot_pow — the rpow-arith bridge lemma to prove
+    when connecting). Original design: a ℚ-exponent wrapper layer —
     `BIQ (q₁ q₂ : ℚ)` := BISub at the radii `vπ^{qᵢ}` (NNReal-rpow of the
     rational exponents, 0 < q₁ ≤ q₂ say), with restriction maps
     `biResQ : BIQ q₁ q₂ →+* BIQ r₁ r₂` for [r₁,r₂]-exponent-intervals inside
