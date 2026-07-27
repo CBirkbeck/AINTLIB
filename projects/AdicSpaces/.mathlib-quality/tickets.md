@@ -3091,6 +3091,17 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   constant 1 on the value-1 slice + ε-slack below) and deduce ball = closure of
   image-ball ∪ integral part; (c) consult KL15 §5's integral-structure statements
   for the intended argument. Record before attacking M2.
+- **M1 COMPLETE 2026-07-31** (commits db4dfd7ac + 1640933a0, axiom-clean):
+  mk'_monomial_pow, **wLoc_balanced** (p-balanced monomial fractions — p-power
+  = denominator depth — have RADIUS-FREE values: the structural reason
+  Kedlaya's power trick needs no separate grid hypothesis in our untwisted
+  normalization), exists_balanced_pow_twist (N := m works universally: the
+  m-th power makes the floor-division exact), valuation_coeff_of_wLoc_eq_one,
+  **exists_evalBI_pow_norm_exact** (the exact-norm lift: value-1 monomial ⟹
+  the m-th power lifts through evalBI with wIRPS exactly 1 — the monic-witness
+  input X^m − U for the integral-closure sandwich). REMAINING: M2 (the
+  general-element power-lift reduction + the sandwich assembly; the open
+  design question stands as recorded above).
 
 ### [T909a] Three circles for the intermediate values of B^I
 - **Status**: done (2026-07-26) | **Parent**: T909 | **Type**: lemma
