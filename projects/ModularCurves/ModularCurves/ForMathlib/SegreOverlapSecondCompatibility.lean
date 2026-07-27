@@ -432,4 +432,74 @@ def segreStandardChartOverlapAlgEquiv
       segreStandardChartOverlapRingEquiv_algebraMap
         R m n i a j b }
 
+/-- The second Segre-image chart, mapped to the common product overlap. -/
+def segreStandardSecondChartOverlapAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    SegreImageChartRing R m n a b →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b where
+  __ :=
+    (segreStandardChartOverlapRingEquiv
+      R m n i a j b).toRingHom.comp
+      (segreImageSecondChartToOverlapAway
+        R m n i a j b)
+  commutes' r := by
+    change
+      segreStandardChartOverlapRingEquiv R m n i a j b
+          (segreImageSecondChartToOverlapAway R m n i a j b
+            (algebraMap R
+              (SegreImageChartRing R m n a b) r)) =
+        algebraMap R
+          (SegreProductChartOverlapRing R m n i a j b) r
+    rw [segreImageSecondChartToOverlapAway_algebraMap,
+      segreStandardChartOverlapRingEquiv_algebraMap]
+
+/-- The second Segre-image chart map restricts to the expected left factor map. -/
+lemma segreStandardSecondChartOverlapAlgHom_comp_left
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreStandardSecondChartOverlapAlgHom
+        R m n i a j b).comp
+        (segreLeftChartToImageAlgHom R m n a b) =
+      segreProductSecondLeftAlgHom R m n i a j b := by
+  apply
+    (AlgHom.cancel_right
+      (projectiveCoordinateDehomogenization_surjective R a)).mp
+  ext c
+  simp only [AlgHom.comp_apply,
+    projectiveCoordinateDehomogenization_X]
+  change
+    segreStandardChartOverlapRingEquiv R m n i a j b
+        (segreImageSecondChartToOverlapAway R m n i a j b
+          (segreLeftChartToImageAlgHom R m n a b
+            (projectiveCoordinateRatio R a c))) =
+      segreProductSecondLeftRingHom R m n i a j b
+        (projectiveCoordinateRatio R a c)
+  rw [segreLeftChartToImageAlgHom_ratio,
+    segreStandardChartOverlapRingEquiv_secondLeftRatio]
+
+/-- The second Segre-image chart map restricts to the expected right factor map. -/
+lemma segreStandardSecondChartOverlapAlgHom_comp_right
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreStandardSecondChartOverlapAlgHom
+        R m n i a j b).comp
+        (segreRightChartToImageAlgHom R m n a b) =
+      segreProductSecondRightAlgHom R m n i a j b := by
+  apply
+    (AlgHom.cancel_right
+      (projectiveCoordinateDehomogenization_surjective R b)).mp
+  ext c
+  simp only [AlgHom.comp_apply,
+    projectiveCoordinateDehomogenization_X]
+  change
+    segreStandardChartOverlapRingEquiv R m n i a j b
+        (segreImageSecondChartToOverlapAway R m n i a j b
+          (segreRightChartToImageAlgHom R m n a b
+            (projectiveCoordinateRatio R b c))) =
+      segreProductSecondRightRingHom R m n i a j b
+        (projectiveCoordinateRatio R b c)
+  rw [segreRightChartToImageAlgHom_ratio,
+    segreStandardChartOverlapRingEquiv_secondRightRatio]
+
 end MvPolynomial
