@@ -2339,11 +2339,23 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   mirrors the ArSub one: coefficientwise completeness of BISub +
   uniform-decay bookkeeping), and (ii) wI_z_sub_evalAr_add_le (evalBI-
   additivity residual estimate — cheap mirror via evalBI_add). Sequence
-  the P3 work as: (P3b) exists_rps_series_limit_BI, (P3c)
-  wI_z_sub_evalBI_add_le, (P3d) the first-approximation lemma (the
-  per-monomial Kedlaya lift on the Bloc-dense layer), (P3e)
-  exists_correction_sequence_BI + exists_evalBI_eq_of_correction +
-  surjectivity.
+  the P3 work as: (P3b) exists_rps_series_limit_BI — DONE 2026-07-27
+  (commit ab2e79302, RobbaPresentation.lean, axiom-clean, NO heartbeat
+  raises unlike the ArSub original's 2M: exists_wI_series_limit
+  (residual form via isClosed_wI_ball + wI_sum_le + eventually_ge_atTop
+  + Finset.sum_Ico_eq_sub), RPS_BI_coe_sub/coeff_sub_eq_BI micro-lemmas,
+  coeff_partial_sum_BI (PERF: the induction-rw route times out — use
+  AddSubmonoidClass.coe_finsetSum + map_sum + coe_finsetSum, three
+  lemma-head rewrites), isRestricted_column_limits (PERF: rw
+  [isRestricted_iff_wI] needs the series bound via `set Ufun :
+  MvPowerSeries … := (fun K => S K)` — the raw lambda does not match the
+  pattern at reducible transparency — plus an hSK rfl-bridge), and the
+  assembly); (P3c) wI_z_sub_evalBI_add_le (mirror Presentation:2041-2071:
+  needs wI_evalBI_le — the eval-value bound, mirror wI_evalAr_le at
+  Presentation ~1990-2040 — check its exact statement first); (P3d) the
+  first-approximation lemma (the per-monomial Kedlaya lift on the
+  Bloc-dense layer); (P3e) exists_correction_sequence_BI +
+  exists_evalBI_eq_of_correction + surjectivity.
   ALSO note wI_finite_of_isRestricted (Presentation:2265) already
   covers the BISub-restricted-finiteness (isRestricted_iff_wI overlaps
   it — dedupe when porting: keep both names, they differ in direction
