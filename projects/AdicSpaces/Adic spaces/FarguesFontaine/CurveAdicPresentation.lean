@@ -498,6 +498,40 @@ theorem exists_window_subdatum_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
       exact continuous_subtype_val.comp
         (continuous_subtype_val.comp continuous_subtype_val)
 
+
+/-- **THE ADIC FARGUES–FONTAINE CURVE IS LOCALLY AFFINOID** (X-ADIC-1, the
+capstone): the curve, as a topological space, is an `AdicSpacePresentation` —
+every point has an open neighbourhood homeomorphic to the adic spectrum of an
+affinoid adic presentation (a sheafy complete strongly noetherian Tate ring:
+a rational localization of a window chart ring). -/
+noncomputable def curveAdicSpacePresentation :
+    ValuationSpectrum.AdicSpacePresentation where
+  carrier := Curve p F ϖ
+  isLocallyAffinoid := by
+    intro x
+    have hp : 1 < p := one_lt_p p
+    -- the fiber point and a wandering neighbourhood
+    set y := fiberPoint p F ϖ x with hy
+    obtain ⟨W₀, hyW₀, hdis₀⟩ := exists_disjoint_translates p F ϖ y
+    -- the rational-subdatum neighbourhood inside it
+    obtain ⟨n, D', V, hyV, hVW₀, ⟨e⟩⟩ :=
+      exists_window_subdatum_nbhd p F ϖ hp y W₀ hyW₀
+    -- V inherits the disjoint-translate property
+    have hdisV : ∀ k : ℤ, k ≠ 0 →
+        Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj V
+            : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+          ((V : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)) := by
+      intro k hk
+      refine (hdis₀ k hk).mono ?_ ?_
+      · intro z hz
+        exact hVW₀ (hz : z ∈ (Opens.map (yFrobTop p F ϖ k)).obj V)
+      · exact fun z hz => hVW₀ hz
+    -- the open image neighbourhood on the curve
+    refine ⟨xImage p F ϖ V, ⟨y, hyV, yTopToCurve_fiberPoint p F ϖ x⟩,
+      windowSubAffinoid p F ϖ n D', ?_⟩
+    -- the homeomorphism chain
+    exact ⟨(xImageHomeo p F ϖ hdisV).symm.trans e.symm⟩
+
 end FarguesFontaine
 
 end
