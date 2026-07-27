@@ -6,7 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.EllipticCurve.GroupLaw
 
 /-!
-# The Weierstrass cover of the base (Gap A, (LOCAL-SQUARE) step 1)
+# The Weierstrass cover of the base
 
 `LocallyWeierstrass` is phrased pointwise: *every* point of the base has an affine
 neighbourhood carrying a Weierstrass model. The descent argument for the relative theorem of
@@ -14,8 +14,13 @@ the square needs it packaged as an **indexed cover** `U : ι → S.Opens` with `
 because that is the shape `ModularCurves.nonempty_unitObj_iso_of_normalized_glue` consumes.
 
 `LocallyWeierstrass.exists_cover` does the repackaging (indexing by the points of `S`, via
-choice). Downstream, the theorem-of-the-square identity is proved on each `U i` using the
-Weierstrass model there, and glued by rigidified descent.
+choice).
+
+Note: the original plan was to prove the theorem-of-the-square identity chart by chart on
+this cover and glue. That plan was dropped — over a nonreduced base a rigidified bundle can
+be fibrewise trivial and still nontrivial, so a chartwise argument does not assemble (see
+`Picard/SelfAdjointN.lean`). The cover remains useful wherever a Weierstrass model is needed
+locally on the base.
 -/
 
 universe u

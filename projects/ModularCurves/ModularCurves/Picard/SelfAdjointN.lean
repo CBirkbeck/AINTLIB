@@ -49,9 +49,9 @@ supplies *existence* of the trivialization, after which
 `ModularCurves.eq_one_of_pullback_eq_one` (`EllipticCurve/SectionRigidity.lean`, proved)
 makes the normalized choice unique.
 
-## Available machinery for the two leaves (both are now LOCAL ON THE BASE)
+## Available machinery, and the one remaining leaf
 
-The descent workhorse is proved and axiom-clean, so neither leaf needs a global argument:
+The descent workhorse is proved and axiom-clean:
 
 * `AlgebraicGeometry.Scheme.Modules.nonempty_unitObj_iso_of_glue`
   (`Picard/GlueTrivialization.lean`) — an `𝒪`-module with cover-local generating sections
@@ -61,13 +61,51 @@ The descent workhorse is proved and axiom-clean, so neither leaf needs a global 
   the elliptic-curve form: generating sections over the `f`-preimages of a cover **of the
   base**, whose overlap comparison units are `1` along the zero section, give triviality.
   Overlap agreement is *forced*, not checked: two generating sections differ by a unit, and
-  a unit that is `1` on the zero section is `1`.
+  a unit that is `1` on the zero section is `1`. That the cover may be taken **Zariski** is
+  not a restriction: a zero-normalized trivialization is unique, so an fppf-local one
+  descends.
 
-What remains for each leaf is therefore the **local** input: on a Weierstrass chart of the
-base, the explicit line-and-vertical function realizing
-`(Q) + (Q′) − (Q+Q′) − (0) = div(ℓ/v)` (Silverman III.3.5; the field-level template is
-`HasseWeil.Pic0.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv`, proved
-unconditionally in any characteristic), normalized along the zero section.
+### The route (revised 2026-07-27 after an external review)
+
+There is only ONE classical leaf, `exists_pic_map_snd_sectionCls_add`. Two routes were
+considered and rejected:
+
+* *Fibrewise seesaw over an arbitrary base is **false**.* Over `T = Spec k[ε]/(ε²)` and
+  `X = E₀ × T`, a nonzero class of `H¹(E₀, 𝒪)` gives transition functions `1 + ε a_{ij}`:
+  the bundle is trivial on the only fibre, is rigidified along zero (as `Pic T = 0`), and is
+  still nontrivial. It is the infinitesimal direction of `Pic⁰`. Seesaw needs the base
+  **reduced** (Stacks 0EX7). For the same reason "fibrewise degree `0` + rigidified along
+  `0` ⟹ Zariski-locally trivial on the base" is false — already over a field, by
+  `L = 𝒪(P − 0)` with `P ≠ 0`.
+* *The explicit line-and-vertical function on a Weierstrass chart* — the ideal identity
+  `I(D_P)·I(D_Q)·I(D_{−(P+Q)}) = (ℓ)` with `I(D_{P+Q})·I(D_{−(P+Q)}) = (v)` — is workable but
+  needs the degenerate loci (`P = Q`, `P = −Q`, either `= 0`) handled as closed subschemes
+  rather than finitely many bad points, and so needs the complete projective addition-law
+  charts. Ranked well below the route now taken.
+
+The route taken instead proves the leaf **on the universal pair of points**, where the base
+is reduced and the seesaw applies, and then base-changes down:
+
+1. `U = Spec (A_univ[Δ⁻¹])`, `C ⟶ U` the universal smooth Weierstrass cubic, `B = C ×_U C`
+   with its two universal sections `P, Q` (`EllipticCurve/AdditionBaseChange.lean`;
+   reducedness of the universal curve and of the fibre square is in
+   `EllipticCurve/GroupLawAxioms.lean`).
+2. On `C_B ⟶ B` form the rigidified discrepancy
+   `Δ^rig_{P,Q} = Δ_{P,Q} ⊗ f_B^*(0^* Δ_{P,Q})⁻¹`, where
+   `Δ_{P,Q} = 𝒪(D_{P+Q} + D_0 − D_P − D_{Q})`.
+3. Every residue-field fibre of `Δ^rig` is trivial, by the field theorem
+   `HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv` (Silverman III.3.5,
+   proved unconditionally in any characteristic).
+4. `B` is reduced — integral, in fact — so the reduced seesaw gives `Δ^rig ≅ f_B^* M`, and
+   pulling back along the zero section gives `M ≅ 𝒪_B`, i.e. `Δ^rig ≅ 𝒪`.
+5. Every Weierstrass curve over an arbitrary ring, with two sections, is a base change of
+   the universal pair — so the identity descends to arbitrary, **possibly nonreduced**,
+   bases. `RelEffCartierDiv.sectionDivisor_baseChange` (`EllipticCurve/PoleSheaf.lean`)
+   supplies part of that bridge.
+
+The expected bottleneck is not the seesaw but the comparison between HasseWeil's
+*projective-divisor* linear equivalence and the scheme-theoretic `picClass`, together with
+its base-change naturality.
 -/
 
 universe u
@@ -154,20 +192,22 @@ theorem kappa_mem_ker (Q : (E.baseChange t).Point (𝟙 T)) :
 `[𝒪(Q+Q′)] · [𝒪(0)]` and `[𝒪(Q)] · [𝒪(Q′)]` differ by a class pulled back from the base.
 
 This is the honest content of Silverman III.3.5 `(Q) + (Q′) ∼ (Q+Q′) + (0)` in the relative
-setting. The *exact* equality of classes is false — `𝒪(0)` restricted to the zero section is
-the conormal bundle — and "differs by `f^*`" is both true and all that is needed, because
-`Ker(0^*) ∩ Im(f^*) = 1`.
+setting. The *exact* equality of classes is false: `0^* 𝒪(D_0)` is the **normal** bundle
+`N_{0/E} ≅ ω_{E/T}⁻¹` (the *conormal* `I_0/I_0²` is `0^*` of `𝒪(−D_0)`), which is a
+generally nontrivial line bundle on the base. Concretely, for the constant family
+`E × E ⟶ E` with `Q(t) = t` and `Q′ = Q`, restricting the putative isomorphism along the
+constant zero section would force a degree-`2` bundle to agree with a degree-`4` one.
+"Differs by `f^*`" is both true and all that is needed, because `Ker(0^*) ∩ Im(f^*) = 1`.
 
-It is also exactly what `Picard/RigidDescent.lean` produces: locally on the base the
-difference bundle is trivialized by the line-over-vertical function `ℓ/v`, and normalizing
-those local trivializations along the zero section glues them
-(`nonempty_unitObj_iso_of_normalized_glue`).
+Equivalently: writing `Δ_{Q,Q′} = 𝒪(D_{Q+Q′} + D_0 − D_Q − D_{Q′})`, the statement is
+`Δ_{Q,Q′} ≅ f^*(0^* Δ_{Q,Q′})`.
 
-Field-level template, proved unconditionally in any characteristic:
-`HasseWeil.Pic0.TheoremOfSquareDivisorForm.kappaDivisor_add_linEquiv`. That proof is
-valuation-theoretic and does not transport to a base ring; the relative statement is the
-ideal identity `I(D_P)·I(D_Q)·I(D_{−(P+Q)}) = (ℓ)` together with
-`I(D_{P+Q})·I(D_{−(P+Q)}) = (v)` on a chart where the sections are in general position.
+Route: prove it on the universal pair of points, where the base is reduced and the seesaw
+theorem applies, with fibrewise triviality supplied by the field theorem
+`HasseWeil.Pic0.RouteCTheoremOfSquareDiv.kappaDivisor_add_linEquiv`; then base-change to
+arbitrary bases. See the module docstring for the full route and for why the two obvious
+alternatives (arbitrary-base fibrewise seesaw; the explicit Weierstrass line function) were
+rejected.
 
 The left-hand side is written pre-arranged as `κ`'s numerator over the product of `κ`'s
 numerators — in a commutative group it equals the readable
@@ -261,12 +301,24 @@ theorem picMap_mulByHom_kappa_mem_ker (N : ℕ) (Q : (E.baseChange t).Point (�
             zero_comp_mulByHom_baseChange E t N]
         exact kappa_mem_ker E hsm t Q
 
-/-- **(LEAF (ii) — relative theorem of the square for `[N]`, "comes from the base" form)**
-The discrepancy between `[N]^* κ(Q)` and `κ(Q)^N` is a class pulled back from the base.
+/-- **(NOT AN INDEPENDENT LEAF — formal consequence of leaf (i))** The discrepancy between
+`[N]^* κ(Q)` and `κ(Q)^N` is a class pulled back from the base.
 
-As for leaf (i), this is the shape `Picard/RigidDescent.lean` produces, and it is all that
-is needed: the exact isomorphism is false, since `[N]^*` of the conormal bundle at the zero
-section is not its `N`-th power. -/
+This is *not* a second classical theorem; it follows from `exists_pic_map_snd_sectionCls_add`
+proved in its **universal** form, by symmetry of the normalized Poincaré bundle. Writing
+`𝒜 = 𝒪(D_0) ⊗ f^*(0^* 𝒪(D_0))⁻¹` for the rigidification of `𝒪(D_0)`, put
+
+  `𝒫 = m^* 𝒜 ⊗ p₁^* 𝒜⁻¹ ⊗ p₂^* 𝒜⁻¹`  on `E_T ×_T E_T`.
+
+`𝒫` is trivial on both axes, and is **symmetric** — `τ^* 𝒫 ≅ 𝒫` for the transposition `τ`,
+simply because `m ∘ τ = m`. For a section `Q` one has `(id, −Q)^* 𝒫 ≅ κ(Q)`, since
+`t_{−Q}⁻¹(D_0) = D_Q` and the `p₂`-factor is exactly the zero-section normalization. Leaf (i),
+base-changed to `E_T ×_T E_T` with the two universal sections, says `𝒫` is additive in its
+second variable; symmetry upgrades that to additivity in the first; hence
+`([N] × id)^* [𝒫] = [𝒫]^N`, and restricting along `(id, −Q)` gives the statement.
+
+Kept as a named statement because that derivation needs `𝒫` and its symmetry built first;
+it is bookkeeping, not new mathematics. -/
 theorem exists_pic_map_snd_picMap_mulByHom_kappa (N : ℕ)
     (Q : (E.baseChange t).Point (𝟙 T)) :
     ∃ M : Scheme.Pic T,

@@ -22,9 +22,16 @@ Two generating sections differ by a unit; a unit which is `1` along the zero sec
 `z`). So normalizing each local section along the zero section makes the family
 automatically compatible, and `nonempty_unitObj_iso_of_glue` glues it.
 
-This is what turns the relative theorem of the square into a statement that may be checked
-**locally on the base**, where an explicit Weierstrass model and its line function are
-available.
+This is the mechanism by which a "the difference bundle comes from the base" statement is
+turned into an equality of Picard classes. Note that a **Zariski** cover suffices with no
+loss: a zero-normalized trivialization is unique (same lemma), so an fppf-local one
+descends.
+
+It is *not*, by itself, enough to prove the relative theorem of the square: triviality
+Zariski-locally on the base does not follow from fibrewise triviality over a nonreduced
+base (see the module docstring of `Picard/SelfAdjointN.lean` for the `k[ε]/(ε²)`
+counterexample). The theorem of the square is proved on the universal — hence reduced —
+pair of points, and this lemma is what converts its output into a class equality.
 -/
 
 universe u
