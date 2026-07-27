@@ -23,8 +23,10 @@ condition of the `Y`-presheaf on a split interval, Kedlaya-style):
   all radii `σ ≥ τ` (via `WittVector.init`/`tail` truncation of a numerator
   and per-term comparison of the Gauss sup-norms).
 
-These feed the gluing bijection
-`B^{[q₁,q₂]} ≅ B^{[q₁,r]} ×_{hatK τ} B^{[r,q₂]}`.
+* **The glued element** `biGlue` with `biResQ'_split_surjective`: together
+  with the separation above, the split fiber-product theorem
+  `B^{[q₁,q₂]} ≅ B^{[q₁,r]} ×_{hatK τ} B^{[r,q₂]}` — the sheaf axiom of the
+  interval presheaf on a two-piece closed cover.
 -/
 
 open TopologicalRing ValuationSpectrum WittVector NNReal
@@ -386,6 +388,459 @@ theorem biResQ'_split_injective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 
         (biSndQ_biResQ'_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) y,
       RingHom.comp_apply, RingHom.comp_apply, hR]
   exact Subtype.ext (Prod.ext hfst hsnd)
+
+/-- **The joint approximation step**: a matching pair of half-interval elements
+is jointly `ε`-approximated by a single `Bloc` element, via the Mittag-Leffler
+splitting of the discrepancy at the split radius. -/
+theorem exists_blocApprox_pair (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂)
+    {ε : NNReal} (hε : 0 < ε) :
+    ∃ h : Bloc p F ϖ,
+      wI p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r)
+        (vpiQ_lt_one p F ϖ hr)
+        ((g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+            × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+          - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) h) ≤ ε
+      ∧ wI p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂)
+          (vpiQ_lt_one p F ϖ h₂)
+          ((g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+              × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+            - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+                (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) h) ≤ ε := by
+  -- approximate each half from the closure description of `BISub`
+  have hg₁cl : (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+      × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+      ∈ closure ((BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+        (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)).range
+          : Set ((hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+            × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))) := g₁.2
+  have hg₂cl : (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+      × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+      ∈ closure ((BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+        (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)).range
+          : Set ((hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+            × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))) := g₂.2
+  obtain ⟨w₁, hw₁ball, z₁, hz₁⟩ := mem_closure_iff_nhds.mp hg₁cl _
+    (wI_ball_mem_nhds p F (hρ₁0 := vpiQ_pos p F ϖ q₁)
+      (hρ₁1 := vpiQ_lt_one p F ϖ h₁) (hρ₂0 := vpiQ_pos p F ϖ r)
+      (hρ₂1 := vpiQ_lt_one p F ϖ hr) _ hε)
+  obtain ⟨w₂, hw₂ball, z₂, hz₂⟩ := mem_closure_iff_nhds.mp hg₂cl _
+    (wI_ball_mem_nhds p F (hρ₁0 := vpiQ_pos p F ϖ r)
+      (hρ₁1 := vpiQ_lt_one p F ϖ hr) (hρ₂0 := vpiQ_pos p F ϖ q₂)
+      (hρ₂1 := vpiQ_lt_one p F ϖ h₂) _ hε)
+  rw [← hz₁] at hw₁ball
+  rw [← hz₂] at hw₂ball
+  have hb₁ : wI p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+      (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+      (BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+        (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁ - (g₁ : _ × _)) ≤ ε :=
+    hw₁ball
+  have hb₂ : wI p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+      (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+      (BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+        (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂ - (g₂ : _ × _)) ≤ ε :=
+    hw₂ball
+  -- the discrepancy is small at the split radius
+  have hmid₁ : Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
+      (vpiQ_lt_one p F ϖ hr) z₁ - biSndQ p F ϖ q₁ r h₁ hr g₁) ≤ ε := by
+    refine le_trans ?_ hb₁
+    rw [wI]
+    refine le_max_of_le_right (le_of_eq ?_)
+    rfl
+  have hmid₂ : Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
+      (vpiQ_lt_one p F ϖ hr) z₂ - biFstQ p F ϖ r q₂ hr h₂ g₂) ≤ ε := by
+    refine le_trans ?_ hb₂
+    rw [wI]
+    refine le_max_of_le_left (le_of_eq ?_)
+    rfl
+  have hdisc : wLoc p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+      (z₁ - z₂) ≤ ε := by
+    rw [← valued_BlocToHatK p F ϖ, map_sub]
+    calc Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁
+          - BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₂)
+        = Valued.v ((BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁
+            - biSndQ p F ϖ q₁ r h₁ hr g₁)
+          + (biFstQ p F ϖ r q₂ hr h₂ g₂
+            - BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₂)) := by
+          rw [hmatch]
+          ring_nf
+      _ ≤ max (Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
+            (vpiQ_lt_one p F ϖ hr) z₁ - biSndQ p F ϖ q₁ r h₁ hr g₁))
+          (Valued.v (biFstQ p F ϖ r q₂ hr h₂ g₂
+            - BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₂)) :=
+          Valuation.map_add _ _ _
+      _ ≤ ε := by
+          refine max_le hmid₁ ?_
+          rw [← Valuation.map_neg, neg_sub]
+          exact hmid₂
+  -- split the discrepancy
+  obtain ⟨dP, dM, hd, hP, hM⟩ := exists_wLoc_split p F ϖ
+    (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - z₂)
+  refine ⟨z₁ - dP, ?_, ?_⟩
+  · have hsplit : (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+          × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+        - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+            (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (z₁ - dP)
+        = ((g₁ : _ × _) - BIProd p F ϖ (vpiQ_pos p F ϖ q₁)
+            (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁)
+          + BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) dP := by
+      rw [map_sub]
+      ring
+    rw [hsplit]
+    refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
+    · rw [show (g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+            × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+          - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁
+          = -(BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+              (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) z₁ - (g₁ : _ × _)) from by
+        ring, wI_neg]
+      exact hb₁
+    · rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
+      refine max_le ?_ ?_
+      · exact le_trans (hP _ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+          (vpiQ_antitone p F ϖ hrq₁)) hdisc
+      · exact le_trans (hP _ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+          le_rfl) hdisc
+  · have hzM : z₁ - dP = z₂ + dM := by
+      have h' := hd
+      rw [sub_eq_iff_eq_add] at h'
+      rw [h']
+      ring
+    rw [hzM]
+    have hsplit : (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+          × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+        - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+            (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (z₂ + dM)
+        = ((g₂ : _ × _) - BIProd p F ϖ (vpiQ_pos p F ϖ r)
+            (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂)
+          + (- BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) dM) := by
+      rw [map_add]
+      ring
+    rw [hsplit]
+    refine le_trans (wI_add_le p F _ _) (max_le ?_ ?_)
+    · rw [show (g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+            × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+          - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂
+          = -(BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+              (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z₂ - (g₂ : _ × _)) from by
+        ring, wI_neg]
+      exact hb₂
+    · rw [wI_neg, wI_BIProd, valued_BlocToHatK, valued_BlocToHatK]
+      refine max_le ?_ ?_
+      · exact le_trans (hM _ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+          le_rfl) hdisc
+      · exact le_trans (hM _ (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+          (vpiQ_antitone p F ϖ hq₂r)) hdisc
+
+/-- Convergence in the completed field from termwise valuation bounds. -/
+theorem tendsto_hatK_of_valued_le {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    {u : ℕ → hatK p F hρ0 hρ1} {L : hatK p F hρ0 hρ1} {ε : ℕ → NNReal}
+    (hb : ∀ n, Valued.v (u n - L) ≤ ε n)
+    (hε : Filter.Tendsto ε Filter.atTop (nhds 0)) :
+    Filter.Tendsto u Filter.atTop (nhds L) := by
+  rw [Filter.tendsto_def]
+  intro U hU
+  obtain ⟨γ, hγ⟩ := (Valued.mem_nhds (R := hatK p F hρ0 hρ1)).mp hU
+  obtain ⟨δ, hδ0, hδγ⟩ := exists_nnreal_lt_gamma p F γ
+  have hev : ∀ᶠ n in Filter.atTop, ε n < δ :=
+    hε.eventually_lt_const hδ0
+  refine hev.mono fun n hn => ?_
+  exact hγ (hδγ _ ((hb n).trans hn.le))
+
+/-- Convergence of diagonal images from two termwise endpoint bounds. -/
+theorem tendsto_BIProd_of_valued_le {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁}
+    {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {h : ℕ → Bloc p F ϖ} {a : hatK p F hρ₁0 hρ₁1} {b : hatK p F hρ₂0 hρ₂1}
+    {ε : ℕ → NNReal}
+    (h1 : ∀ n, Valued.v (BlocToHatK p F ϖ hρ₁0 hρ₁1 (h n) - a) ≤ ε n)
+    (h2 : ∀ n, Valued.v (BlocToHatK p F ϖ hρ₂0 hρ₂1 (h n) - b) ≤ ε n)
+    (hε : Filter.Tendsto ε Filter.atTop (nhds 0)) :
+    Filter.Tendsto (fun n => BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (h n))
+      Filter.atTop (nhds (a, b)) := by
+  have hfst := tendsto_hatK_of_valued_le p F h1 hε
+  have hsnd := tendsto_hatK_of_valued_le p F h2 hε
+  exact hfst.prodMk_nhds hsnd
+
+/-- Recognition of a left-half restriction from a joint approximating
+sequence: if `f` has the correct outer component and the sequence converges to
+`f` jointly and to `g₁`'s middle component at the split radius, then the left
+restriction of `f` is `g₁`. -/
+theorem biResQ'_eq_left_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂))
+    (h : ℕ → Bloc p F ϖ)
+    (hfst : biFstQ p F ϖ q₁ q₂ h₁ h₂ f = biFstQ p F ϖ q₁ r h₁ hr g₁)
+    (htof : Filter.Tendsto (fun n => blocToBI p F ϖ (vpiQ_pos p F ϖ q₁)
+      (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (h n))
+      Filter.atTop (nhds f))
+    (hmid : Filter.Tendsto (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
+      (vpiQ_lt_one p F ϖ hr) (h n)) Filter.atTop
+      (nhds (biSndQ p F ϖ q₁ r h₁ hr g₁))) :
+    biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁ := by
+  have hA : Filter.Tendsto
+      (fun n => (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+        (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (h n)
+          : ↥(BIQ p F ϖ q₁ r h₁ hr)))
+      Filter.atTop
+      (nhds (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+        f)) := by
+    refine Filter.Tendsto.congr
+      (fun n => biResQ'_blocToBI p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
+        ⟨hlt.le, le_rfl⟩ hrm (h n)) ?_
+    exact ((biResQ'_continuous p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt
+      ⟨hlt.le, le_rfl⟩ hrm).tendsto _).comp htof
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · exact (RingHom.congr_fun
+      (biFstQ_biResQ'_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) f).trans hfst
+  · have hm1 : Filter.Tendsto
+        (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+          (h n)) Filter.atTop
+        (nhds (biSndQ p F ϖ q₁ r h₁ hr
+          (biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+            f))) := by
+      refine Filter.Tendsto.congr
+        (fun n => biSndQ_blocToBI p F ϖ q₁ r h₁ hr (h n))
+        (((biSndQ_continuous p F ϖ q₁ r h₁ hr).tendsto _).comp hA)
+    exact tendsto_nhds_unique hm1 hmid
+
+/-- Mirror of `biResQ'_eq_left_of_tendsto` for the right half. -/
+theorem biResQ'_eq_right_of_tendsto (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
+    (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂)) (f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂))
+    (h : ℕ → Bloc p F ϖ)
+    (hsnd : biSndQ p F ϖ q₁ q₂ h₁ h₂ f = biSndQ p F ϖ r q₂ hr h₂ g₂)
+    (htof : Filter.Tendsto (fun n => blocToBI p F ϖ (vpiQ_pos p F ϖ q₁)
+      (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (h n))
+      Filter.atTop (nhds f))
+    (hmid : Filter.Tendsto (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r)
+      (vpiQ_lt_one p F ϖ hr) (h n)) Filter.atTop
+      (nhds (biFstQ p F ϖ r q₂ hr h₂ g₂))) :
+    biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ := by
+  have hA : Filter.Tendsto
+      (fun n => (blocToBI p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+        (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) (h n)
+          : ↥(BIQ p F ϖ r q₂ hr h₂)))
+      Filter.atTop
+      (nhds (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+        f)) := by
+    refine Filter.Tendsto.congr
+      (fun n => biResQ'_blocToBI p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
+        ⟨le_rfl, hlt.le⟩ (h n)) ?_
+    exact ((biResQ'_continuous p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm
+      ⟨le_rfl, hlt.le⟩).tendsto _).comp htof
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · have hm1 : Filter.Tendsto
+        (fun n => BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+          (h n)) Filter.atTop
+        (nhds (biFstQ p F ϖ r q₂ hr h₂
+          (biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+            f))) := by
+      refine Filter.Tendsto.congr
+        (fun n => biFstQ_blocToBI p F ϖ r q₂ hr h₂ (h n))
+        (((biFstQ_continuous p F ϖ r q₂ hr h₂).tendsto _).comp hA)
+    exact tendsto_nhds_unique hm1 hmid
+  · exact (RingHom.congr_fun
+      (biSndQ_biResQ'_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm) f).trans hsnd
+
+/-- **The joint approximating sequence** of a matching pair, at accuracy
+`2⁻¹ ^ n`. -/
+noncomputable def glueSeq (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    ℕ → Bloc p F ϖ := fun n =>
+  (exists_blocApprox_pair p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch
+    (pow_pos (by norm_num : (0 : NNReal) < 2⁻¹) n)).choose
+
+theorem glueSeq_specL (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂)
+    (n : ℕ) :
+    wI p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ r)
+      (vpiQ_lt_one p F ϖ hr)
+      ((g₁ : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+          × (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)))
+        - BIProd p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+            (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+            (glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n))
+      ≤ 2⁻¹ ^ n :=
+  (exists_blocApprox_pair p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch
+    (pow_pos (by norm_num : (0 : NNReal) < 2⁻¹) n)).choose_spec.1
+
+theorem glueSeq_specR (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂)
+    (n : ℕ) :
+    wI p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr) (vpiQ_pos p F ϖ q₂)
+      (vpiQ_lt_one p F ϖ h₂)
+      ((g₂ : (hatK p F (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr))
+          × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+        - BIProd p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+            (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+            (glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n))
+      ≤ 2⁻¹ ^ n :=
+  (exists_blocApprox_pair p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch
+    (pow_pos (by norm_num : (0 : NNReal) < 2⁻¹) n)).choose_spec.2
+
+/-- The per-component form of the approximation bounds. -/
+theorem glueSeq_valued_le (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂)
+    (n : ℕ) :
+    Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+        (glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n)
+        - biFstQ p F ϖ q₁ r h₁ hr g₁) ≤ 2⁻¹ ^ n
+      ∧ Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+        (glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n)
+        - biSndQ p F ϖ q₁ r h₁ hr g₁) ≤ 2⁻¹ ^ n
+      ∧ Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ r) (vpiQ_lt_one p F ϖ hr)
+        (glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n)
+        - biFstQ p F ϖ r q₂ hr h₂ g₂) ≤ 2⁻¹ ^ n
+      ∧ Valued.v (BlocToHatK p F ϖ (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+        (glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n)
+        - biSndQ p F ϖ r q₂ hr h₂ g₂) ≤ 2⁻¹ ^ n := by
+  have hbL := glueSeq_specL p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n
+  have hbR := glueSeq_specR p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n
+  rw [wI] at hbL hbR
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [Valuation.map_sub_swap]
+    exact le_trans (le_max_left _ _) hbL
+  · rw [Valuation.map_sub_swap]
+    exact le_trans (le_max_right _ _) hbL
+  · rw [Valuation.map_sub_swap]
+    exact le_trans (le_max_left _ _) hbR
+  · rw [Valuation.map_sub_swap]
+    exact le_trans (le_max_right _ _) hbR
+
+/-- The accuracy sequence tends to zero. -/
+theorem glueSeq_eps_tendsto :
+    Filter.Tendsto (fun n : ℕ => (2⁻¹ : NNReal) ^ n) Filter.atTop (nhds 0) :=
+  tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num)
+
+/-- **The glued element** of a matching pair: the interval-ring element whose
+components are the two outer endpoint components. -/
+noncomputable def biGlue (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) :=
+  ⟨(biFstQ p F ϖ q₁ r h₁ hr g₁, biSndQ p F ϖ r q₂ hr h₂ g₂),
+    mem_closure_of_tendsto
+      (tendsto_BIProd_of_valued_le p F ϖ
+        (fun n => (glueSeq_valued_le p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂
+          hmatch n).1)
+        (fun n => (glueSeq_valued_le p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂
+          hmatch n).2.2.2)
+        (glueSeq_eps_tendsto))
+      (Filter.Eventually.of_forall fun n =>
+        ⟨glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n, rfl⟩)⟩
+
+/-- The glued element's underlying pair. -/
+theorem biGlue_coe (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch
+        : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+          × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)))
+      = (biFstQ p F ϖ q₁ r h₁ hr g₁, biSndQ p F ϖ r q₂ hr h₂ g₂) := rfl
+
+/-- The outer-left component of the glued element. -/
+theorem biGlue_fst (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    biFstQ p F ϖ q₁ q₂ h₁ h₂
+        (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch)
+      = biFstQ p F ϖ q₁ r h₁ hr g₁ := by
+  show (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch
+      : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+        × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂))).1 = _
+  rw [biGlue_coe]
+
+/-- The outer-right component of the glued element. -/
+theorem biGlue_snd (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    biSndQ p F ϖ q₁ q₂ h₁ h₂
+        (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch)
+      = biSndQ p F ϖ r q₂ hr h₂ g₂ := by
+  show (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch
+      : (hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+        × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂))).2 = _
+  rw [biGlue_coe]
+
+/-- The approximating sequence converges to the glued element. -/
+theorem tendsto_glueSeq_biGlue (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hq₂r : q₂ ≤ r) (hrq₁ : r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    Filter.Tendsto (fun n => blocToBI p F ϖ (vpiQ_pos p F ϖ q₁)
+      (vpiQ_lt_one p F ϖ h₁) (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+      (glueSeq p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch n))
+      Filter.atTop
+      (nhds (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂ hmatch)) :=
+  tendsto_subtype_rng.mpr (tendsto_BIProd_of_valued_le p F ϖ
+    (fun n => (glueSeq_valued_le p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂
+      hmatch n).1)
+    (fun n => (glueSeq_valued_le p F ϖ q₁ q₂ r h₁ h₂ hr hq₂r hrq₁ g₁ g₂
+      hmatch n).2.2.2)
+    (glueSeq_eps_tendsto))
+
+/-- **The left restriction of the glued element.** -/
+theorem biResQ'_biGlue_left (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm
+      (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch) = g₁ :=
+  biResQ'_eq_left_of_tendsto p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ _ _
+    (biGlue_fst p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
+    (tendsto_glueSeq_biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
+    (tendsto_hatK_of_valued_le p F
+      (fun n => (glueSeq_valued_le p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂
+        hmatch n).2.1)
+      (glueSeq_eps_tendsto))
+
+/-- **The right restriction of the glued element.** -/
+theorem biResQ'_biGlue_right (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩
+      (biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch) = g₂ :=
+  biResQ'_eq_right_of_tendsto p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₂ _ _
+    (biGlue_snd p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
+    (tendsto_glueSeq_biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch)
+    (tendsto_hatK_of_valued_le p F
+      (fun n => (glueSeq_valued_le p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂
+        hmatch n).2.2.1)
+      (glueSeq_eps_tendsto))
+
+/-- **Gluing surjectivity for a split interval**: every matching pair of
+half-interval elements is the pair of restrictions of an interval-ring
+element. -/
+theorem biResQ'_split_surjective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    ∃ f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂),
+      biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁
+      ∧ biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ :=
+  ⟨biGlue p F ϖ q₁ q₂ r h₁ h₂ hr hrm.1 hrm.2 g₁ g₂ hmatch,
+    biResQ'_biGlue_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch,
+    biResQ'_biGlue_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch⟩
 
 end FarguesFontaine
 
