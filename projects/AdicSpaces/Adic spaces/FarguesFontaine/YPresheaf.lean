@@ -300,6 +300,188 @@ theorem limitEvalTop_spec (i₀ : DyadicIdx)
     f.1 i = dyadicRes p F ϖ h (limitEvalTop p F ϖ i₀ f) :=
   (f.2 i ⟨i₀, Set.Subset.refl _⟩ h).symm
 
+omit [CharP F p] in
+/-- Nat powers of rational radii multiply the exponent. -/
+theorem vpiQ_pow (q : ℚ) (a : ℕ) :
+    vpiQ p F ϖ q ^ a = vpiQ p F ϖ (q * a) := by
+  rw [vpiQ, vpiQ, ← NNReal.rpow_natCast (_ ^ (q : ℝ)) a, ← NNReal.rpow_mul]
+  congr 1
+  push_cast
+  ring
+
+/-- The rational radii compare antitonically, as an iff. -/
+theorem vpiQ_le_vpiQ_iff {x y : ℚ} :
+    vpiQ p F ϖ x ≤ vpiQ p F ϖ y ↔ y ≤ x := by
+  have hb0 : (0 : ℝ) < (perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) : ℝ) := by
+    have h : (0 : NNReal) < perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F) := by
+      refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
+      exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+    exact_mod_cast h
+  have hb1 : (perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) : ℝ) < 1 := by
+    exact_mod_cast perfectoidValuation_toOF_lt_one p F ϖ
+  rw [vpiQ, vpiQ, ← NNReal.coe_le_coe, NNReal.coe_rpow, NNReal.coe_rpow,
+    Real.rpow_le_rpow_left_iff_of_base_lt_one hb0 hb1]
+  exact_mod_cast Iff.rfl
+
+
+/-- The Gauss valuation of `p`-powers. -/
+theorem gaussVal_p_pow {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (a : ℕ) :
+    gaussVal p F hρ0 hρ1 ((p : Ainf p F) ^ a) = ρ ^ a := by
+  rw [Valuation.map_pow, gaussVal_apply]
+  congr 1
+  have h := gaussValue_p_mul p F hρ1.le (1 : Ainf p F)
+  rw [mul_one, gaussValue_one p F hρ1.le, mul_one] at h
+  exact h
+
+/-- The Gauss valuation of Teichmüller powers. -/
+theorem gaussVal_teichPi_pow {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (b : ℕ) :
+    gaussVal p F hρ0 hρ1 (teichPi p F ϖ ^ b)
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b := by
+  rw [Valuation.map_pow, gaussVal_apply, teichPi,
+    gaussValue_teichmuller p F hρ1.le]
+
+/-- **Gauss points detect the interval**: the Gauss point at radius `vpiQ q`
+lies in the `(q₁, q₂)`-trace iff `q ∈ [q₂, q₁]`. -/
+theorem gaussPoint_mem_intervalTrace_iff {q q₁ q₂ : ℚ}
+    (hq : 0 < q) (hq₁ : 0 < q₁) (hq₂ : 0 < q₂) :
+    ofValuation (gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq))
+        ∈ intervalTrace p F ϖ q₁ q₂
+      ↔ q₂ ≤ q ∧ q ≤ q₁ := by
+  have hY := gaussPoint_mem_Y p F ϖ (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
+  have hnum₁ : 0 < q₁.num := Rat.num_pos.mpr hq₁
+  have hden₁ : (0 : ℚ) < (q₁.den : ℚ) := by exact_mod_cast q₁.den_pos
+  have hnum₂ : 0 < q₂.num := Rat.num_pos.mpr hq₂
+  have hden₂ : (0 : ℚ) < (q₂.den : ℚ) := by exact_mod_cast q₂.den_pos
+  have hcast₁ : ((q₁.num.toNat : ℕ) : ℚ) = (q₁.num : ℚ) := by
+    exact_mod_cast congrArg Int.cast (Int.toNat_of_nonneg hnum₁.le)
+  have hcast₂ : ((q₂.num.toNat : ℕ) : ℚ) = (q₂.num : ℚ) := by
+    exact_mod_cast congrArg Int.cast (Int.toNat_of_nonneg hnum₂.le)
+  have hab₁ : 1 / q₁ = ((q₁.den : ℕ) : ℚ) / ((q₁.num.toNat : ℕ) : ℚ) := by
+    rw [hcast₁]
+    conv_lhs => rw [← Rat.num_div_den q₁]
+    rw [one_div_div]
+  have hab₂ : 1 / q₂ = ((q₂.den : ℕ) : ℚ) / ((q₂.num.toNat : ℕ) : ℚ) := by
+    rw [hcast₂]
+    conv_lhs => rw [← Rat.num_div_den q₂]
+    rw [one_div_div]
+  have hq₁inv : (0 : ℚ) < 1 / q₁ := by positivity
+  have hq₂inv : (0 : ℚ) < 1 / q₂ := by positivity
+  have htoNat₁ : 0 < q₁.num.toNat := by omega
+  have htoNat₂ : 0 < q₂.num.toNat := by omega
+  have hcompute₁ : (ofValuation (gaussVal p F (vpiQ_pos p F ϖ q)
+        (vpiQ_lt_one p F ϖ hq))).vle
+        (teichPi p F ϖ ^ q₁.num.toNat) ((p : Ainf p F) ^ q₁.den)
+      ↔ q ≤ q₁ := by
+    show gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
+        (teichPi p F ϖ ^ q₁.num.toNat)
+      ≤ gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
+          ((p : Ainf p F) ^ q₁.den) ↔ _
+    rw [gaussVal_teichPi_pow, gaussVal_p_pow,
+      show perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+          ^ q₁.num.toNat = vpiQ p F ϖ ((q₁.num.toNat : ℕ) : ℚ) from
+        (vpiQ_natCast p F ϖ q₁.num.toNat).symm,
+      vpiQ_pow p F ϖ q q₁.den, vpiQ_le_vpiQ_iff p F ϖ, hcast₁]
+    rw [show (q * (q₁.den : ℚ) ≤ (q₁.num : ℚ)) ↔ q ≤ q₁ from by
+      rw [← le_div_iff₀ hden₁, Rat.num_div_den]]
+  have hcompute₂ : (ofValuation (gaussVal p F (vpiQ_pos p F ϖ q)
+        (vpiQ_lt_one p F ϖ hq))).vle
+        ((p : Ainf p F) ^ q₂.den) (teichPi p F ϖ ^ q₂.num.toNat)
+      ↔ q₂ ≤ q := by
+    show gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
+        ((p : Ainf p F) ^ q₂.den)
+      ≤ gaussVal p F (vpiQ_pos p F ϖ q) (vpiQ_lt_one p F ϖ hq)
+          (teichPi p F ϖ ^ q₂.num.toNat) ↔ _
+    rw [gaussVal_teichPi_pow, gaussVal_p_pow,
+      show perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+          ^ q₂.num.toNat = vpiQ p F ϖ ((q₂.num.toNat : ℕ) : ℚ) from
+        (vpiQ_natCast p F ϖ q₂.num.toNat).symm,
+      vpiQ_pow p F ϖ q q₂.den, vpiQ_le_vpiQ_iff p F ϖ, hcast₂]
+    rw [show ((q₂.num : ℚ) ≤ q * (q₂.den : ℚ)) ↔ q₂ ≤ q from by
+      rw [← div_le_iff₀ hden₂, Rat.num_div_den]]
+  constructor
+  · rintro ⟨-, hge, hle⟩
+    have h₁ := (KGE_iff hY hq₁inv htoNat₁ hab₁).mp hge
+    have h₂ := (KLE_iff hY hq₂inv htoNat₂ hab₂).mp hle
+    exact ⟨hcompute₂.mp h₂, hcompute₁.mp h₁⟩
+  · rintro ⟨h₂, h₁⟩
+    exact ⟨hY, (KGE_iff hY hq₁inv htoNat₁ hab₁).mpr (hcompute₁.mpr h₁),
+      (KLE_iff hY hq₂inv htoNat₂ hab₂).mpr (hcompute₂.mpr h₂)⟩
+
+/-- **Trace inclusion detects nesting**: if the dyadic trace of `i'` is contained
+in that of `i`, then `i'`'s interval is contained in `i`'s. The proof evaluates the
+inclusion at the two endpoint Gauss points of `i'`. -/
+theorem dyadicTrace_subset_nested {i' i : DyadicIdx}
+    (h : dyadicTrace p F ϖ i' ⊆ dyadicTrace p F ϖ i) :
+    DyadicIdx.Nested p i' i := by
+  have h₁ : ofValuation (gaussVal p F (vpiQ_pos p F ϖ (i'.q₁ p))
+      (vpiQ_lt_one p F ϖ (i'.q₁_pos p))) ∈ dyadicTrace p F ϖ i' :=
+    (gaussPoint_mem_intervalTrace_iff p F ϖ (i'.q₁_pos p) (i'.q₁_pos p)
+      (i'.q₂_pos p)).mpr ⟨(i'.q₂_lt_q₁ p).le, le_rfl⟩
+  have h₂ : ofValuation (gaussVal p F (vpiQ_pos p F ϖ (i'.q₂ p))
+      (vpiQ_lt_one p F ϖ (i'.q₂_pos p))) ∈ dyadicTrace p F ϖ i' :=
+    (gaussPoint_mem_intervalTrace_iff p F ϖ (i'.q₂_pos p) (i'.q₁_pos p)
+      (i'.q₂_pos p)).mpr ⟨le_rfl, (i'.q₂_lt_q₁ p).le⟩
+  have m₁ := (gaussPoint_mem_intervalTrace_iff p F ϖ (i'.q₁_pos p) (i.q₁_pos p)
+    (i.q₂_pos p)).mp (h h₁)
+  have m₂ := (gaussPoint_mem_intervalTrace_iff p F ϖ (i'.q₂_pos p) (i.q₁_pos p)
+    (i.q₂_pos p)).mp (h h₂)
+  exact ⟨m₂.1, m₁.2⟩
+
+/-- Nesting is transitive. -/
+theorem DyadicIdx.Nested.trans {i'' i' i : DyadicIdx}
+    (h₁ : DyadicIdx.Nested p i'' i') (h₂ : DyadicIdx.Nested p i' i) :
+    DyadicIdx.Nested p i'' i :=
+  ⟨le_trans h₂.1 h₁.1, le_trans h₁.2 h₂.2⟩
+
+/-- **Identity law for dyadic restriction**: restriction along a self-nesting is
+the identity. -/
+theorem dyadicRes_id (i : DyadicIdx) (h : DyadicIdx.Nested p i i) :
+    dyadicRes p F ϖ h = RingHom.id (dyadicVal p F ϖ i) :=
+  biResQ'_id p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p) (i.q₂_lt_q₁ p)
+
+/-- **Composition law for dyadic restriction.** -/
+theorem dyadicRes_comp {i'' i' i : DyadicIdx}
+    (h₁ : DyadicIdx.Nested p i'' i') (h₂ : DyadicIdx.Nested p i' i) :
+    (dyadicRes p F ϖ h₁).comp (dyadicRes p F ϖ h₂)
+      = dyadicRes p F ϖ (h₁.trans p h₂) :=
+  biResQ'_comp p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p) (i''.q₁ p) (i''.q₂ p)
+    (i.q₁_pos p) (i.q₂_pos p) (i'.q₁_pos p) (i'.q₂_pos p)
+    (i''.q₁_pos p) (i''.q₂_pos p) (i.q₂_lt_q₁ p) (i'.q₂_lt_q₁ p)
+    (h₂.mem₁ p) (h₂.mem₂ p) (h₁.mem₁ p) (h₁.mem₂ p)
+
+/-- **The values-on-basis comparison is bijective**: evaluation at the top index
+identifies the limit sections over a dyadic trace with the interval ring at its
+index. Injectivity is `limitEvalTop_spec` through the geometric bridge
+`dyadicTrace_subset_nested`; surjectivity restricts a top value along the
+bridge. -/
+theorem limitEvalTop_bijective (i₀ : DyadicIdx) :
+    Function.Bijective (limitEvalTop p F ϖ i₀) := by
+  constructor
+  · intro f g hfg
+    refine Subtype.ext (funext fun i => ?_)
+    have hn : DyadicIdx.Nested p i.1 i₀ := dyadicTrace_subset_nested p F ϖ i.2
+    rw [limitEvalTop_spec p F ϖ i₀ f i hn, limitEvalTop_spec p F ϖ i₀ g i hn,
+      hfg]
+  · intro x
+    have hmem : (fun i : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆
+          dyadicTrace p F ϖ i₀} =>
+          dyadicRes p F ϖ (dyadicTrace_subset_nested p F ϖ i.2) x)
+        ∈ limitSectionsY p F ϖ (dyadicTrace p F ϖ i₀) := by
+      intro i' i h
+      show dyadicRes p F ϖ h
+          (dyadicRes p F ϖ (dyadicTrace_subset_nested p F ϖ i.2) x)
+        = dyadicRes p F ϖ (dyadicTrace_subset_nested p F ϖ i'.2) x
+      rw [← RingHom.comp_apply,
+        dyadicRes_comp p F ϖ h (dyadicTrace_subset_nested p F ϖ i.2)]
+    refine ⟨⟨_, hmem⟩, ?_⟩
+    show dyadicRes p F ϖ (dyadicTrace_subset_nested p F ϖ (Set.Subset.refl _)) x
+      = x
+    rw [dyadicRes_id p F ϖ i₀]
+    rfl
+
 end FarguesFontaine
 
 end
