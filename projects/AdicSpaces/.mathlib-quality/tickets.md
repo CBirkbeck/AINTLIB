@@ -1701,6 +1701,17 @@ non-Tate bases are supported.
     + Tate-free generateFrom copy). NEXT YB3b: de-Tate OpenValue/
     StalkValue (swap exists_isRational_spaOpen_subset → _huber; check
     remaining Tate-uses in those sections), then YB3c the shrink.
+    ★ YB3b DONE (S3 sections de-Tated in place, library green).
+    ★ YB3c DONE 2026-07-27 (YStalks.lean): rationalShrink_Y (the 8.14
+    Laurent shrink at Y-interior rationals; YB1-Tate + primed open-
+    presentation + huber basis + complete-pair criterion) →
+    stalkShrink_Y → **isLocalRing_stalk_Y + maximalIdeal_stalk_Y** —
+    the ambient structurePresheaf(A_inf) has the full Wedhorn 8.14
+    stalk package at every Y-point, axiom-clean. REMAINING for the
+    Y-VObj (YB4-6): YB4 the Y-carrier VPreObj packaging (ambient
+    presheaf through the open-poset iso of the open subset Y); YB5 =
+    done-by-YB3c modulo the packaging; YB6 the sheaf condition (per-
+    window through the charts / keystone-over-B_n route (a)).
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
