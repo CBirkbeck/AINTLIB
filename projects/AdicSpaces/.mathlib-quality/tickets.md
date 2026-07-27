@@ -26,7 +26,7 @@ quotes, discharge plans, and attack logs. Sources local under `refs/AdicSpaces/`
 | T905 | Gröbner data: leading index/coefficient (Def 3.6), `dIdx` (Def 3.7), the finite Gröbner set (Dickson), the chosen generators | done |
 | T906 | **Lemma 3.8** (approximate ideal generation) with the Colex well-founded descent | done |
 | T907 | **Lemma 3.9** and **Theorem 3.2** — `A^r` is strongly noetherian | done |
-| T908 | `B^I` (Def 4.2): construction, norm, completeness, series, density, injectivity, **Lemma 4.4 (three circles)**, **Cor 4.5**, `B^{I,+}` | (a)+(b) done, (c) open |
+| T908 | `B^I` (Def 4.2): construction, norm, completeness, series, density, injectivity, **Lemma 4.4 (three circles)**, **Cor 4.5**, `B^{I,+}` | **done** ((a)+(b); (c) closed-as-scoped 2026-07-30: Bloc-layer ℤ-coordinates landed (IntervalCoordinates.lean), completion-level functionals struck per AD-8 resolution — obstructed + not source-backed) |
 | T909 | restriction maps + **Cor 4.6 injectivity** (`resIHom_injective`, RestrictionInjective.lean) | **done** |
 | T910–T912 | Lemma 4.9 presentations; Theorem 4.10 | **ALL DONE 2026-07-27**: T911+T912 (AD-9 case-3: surjective_evalArMvHom, isStronglyNoetherian_BISub); T910 cases 1–2 (robba_case1_presentation, robba_case2_presentation — both axiom-clean; plus-ring 'Moreover' clause + A^r third iso deferred as non-critical follow-ups) |
 | TC1–TC2 | **`B^I` is sheafy** (SheafyBI.lean: affinoid instances + Wedhorn 8.28(b)); AD-9 data satisfiable (`isSheafy_BISub_AD9`) | **done** |
@@ -2876,6 +2876,57 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   (c8) the series realization (Def 4.2 honest form): z = wI-limit of the
   two-sided partial sums Σ_{n=−K}^{N} pⁿ[zₙ] — additivity of the
   coordinates + Teichmüller-monomial evaluation + tail bound by (c7).
+- **AD-8 RESOLVED + T908(c) CLOSED AS-SCOPED (2026-07-30, beastmode).**
+  LANDED (IntervalCoordinates.lean, axiom-clean, commit 4648c3c7a): (c1)
+  blocCoeffF — the ℤ-indexed Teichmüller coordinates on the FULL dense
+  layer Bloc, with representation independence (repCoeff_eq_of_cross:
+  the W(F)-level combined shift-and-scale teichCoeffF_map_p_teichPi_pow_mul
+  + below-shift vanishing + mk'-cancellation over the domain Ainf), and
+  (c2) the per-term Gauss bound zpow_mul_valuation_blocCoeffF_le
+  (ρ^n·|coeff_n u| ≤ wLoc ρ u, ℤ-zpow form). These give Kedlaya's
+  line-144 expansions with the Gauss-norm formula (2.2.1/eq:Gauss norm
+  formula) on B_{L,E} = Bloc — the layer the paper actually computes on.
+  (c3)-(c8) NOT EXECUTED — OBSTRUCTION FINDING (concrete): the planned
+  T903-verbatim ε-δ transfer is impossible. The Ainf/Aloc-side Cauchy
+  core (exists_delta_teichCoeffF_sub, used by tendsto_teichCoeffAr)
+  terminates because support ≥ 0 bounds the carry-recursion depth by the
+  target index n. On Bloc the depth is the distance to the bottom of
+  support, UNBOUNDED over wI-balls; the twisted carry is genuinely
+  Hölder-p^{-depth} (tight already at depth 1: the S₁ Witt addition
+  polynomial gives v(teichCoeff([x]+[y]) 1 − teichCoeff [x] 1)
+  ≈ v(y)^{1/p}·v(x)^{(p-1)/p}), so a depth-K perturbation family
+  u' := u + p^{-K}[η], |η| = δ·ρ₁^K (wI-distance δ) moves the level-n
+  coordinate by ~ c^{-K}·(c^K·δ·ρ₁^K)^{p^{-K}} — NOT o(1) in δ uniformly
+  over K: coordinate functionals are NOT uniformly continuous on
+  wI-balls, and the comap-filter limit construction (c4) cannot
+  converge. Repair attempts explored and rejected: (i) common-
+  denominator reduction — the per-pair exponent K is unbounded over the
+  ball; (ii) deep/shallow splitting at threshold −L (exists_wLoc_split
+  + the (τ/σ)^L-gain via the (p[ϖ])^L-scaling trick) — the deep parts
+  are support-disjoint (Teichmüller expansions concatenate, no carries)
+  so coordinates at n ≥ −L see only the shallow parts, BUT the shallow
+  DIFFERENCE picks up the deep-part discrepancy (≤ B·(ρ₁/ρ₂)^L at ρ₂),
+  and damping it needs L → ∞ while the W(F)-δ at index n+L degrades
+  double-exponentially (ε^{p^{n+L}}) — the race fails structurally.
+  SOURCE AUDIT (refs/paper.tex): Kedlaya asserts unique ℤ-expansions
+  only for the ALGEBRAIC B_{L,E} (line 144, "uniquely ... zero for n
+  sufficiently small"); A^r-expansions come from the inclusion
+  A^r ↪ W(L)_E (support ≥ 0 — our teichCoeffAr, DONE in T903); B^r is
+  the LOCALIZATION A^r[1/p] (bounded per-element denominators — NOT our
+  closure BrSub, which contains wLoc-convergent deep series
+  Σ_{m≥1} p^{-m}[x̄_m], |x̄_m| ≤ ρ^m·2^{-m}, of unbounded-below support;
+  whether BrSub = ArSub[1/p] — the p^m[ϖ^{-m/2}] demon — stays open and
+  UNUSED). The paper NEVER forms ℤ-coordinates of general B^I-completion
+  elements: §2's y_l-recursions run in B^r via A^r ⊂ W(L); Lemma 4.4
+  reduces to single terms on the dense layer and closes by continuity of
+  the NORMS (not coordinates); §4's T-expansions are restricted-series
+  coordinates over B^I, not Teichmüller. Newton-polygon/leading-term
+  semicontinuity for extended Robba rings (KL15 §5-scale) would be the
+  machinery for a per-element expansion theory — outside this paper and
+  this campaign, and consumed by nothing downstream (T909–T912, TC1–TC2,
+  the curve chain are complete without it). VERDICT: T908(c) = (c1)+(c2)
+  as landed; the completion-level coordinate functionals are struck from
+  the deliverable as not-source-backed and obstructed as designed.
 
 ### [T909] Restriction maps BI → BI'
 - **Status**: done (2026-07-26, beastmode) — `resIHom : B^I →+* B^{I'}` bundled
