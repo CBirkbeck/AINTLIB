@@ -1525,6 +1525,18 @@ non-Tate bases are supported.
     ρ₂: ρ₂^{i−k}|ϖ|^{−k}, ρ₂ < 1) ⇒ head-in-IntCl(S) + tail → 0 ⇒
     closure ⇒ ChartDensePlus at b=1. Implement (M1'')-(M3'') as
     mk'-fraction lemmas, then the init/tail head-sum, then the limit.
+    (M1'') + (M3'') DONE 2026-07-27 (ChartVObj.lean: sPow +
+    mk_monomial_mem_of_le + mk_monomial_mem_of_large, axiom-clean; PERF:
+    omega CANNOT see k*a-vs-a*k as equal atoms — nonlinear — keep ONE
+    spelling; generalize the map-atoms before ring; the final membership
+    exacts must use the refine-bullet form). REMAINING: (M2'') the
+    middle-zone identity (mk'(p^i[c], s^k))^a = chartFracP^{i−k}·[c'']
+    (both sides = P^{ia}·T^{k(a+1)−i}·C''-normal form; mk'_pow +
+    hIT-insert at exponent i−k + T^{ka}-split), then the head-sum
+    (init-expansion of x as Σ p^i[teichCoeff] — needs the finite
+    Teichmüller-expansion lemma via coeff_add_of_disjoint-induction, CHECK
+    if already in GaussNorm/Presentation) + the tail-smallness + closure
+    assembly.
     Bricks: (r4a) DONE 2026-07-27
     (ChartVObj.lean: exists_eq_toOF_pow_mul + teich_div_p_pow_mem_
     chartSubring (m1) + p_div_teich_pow_a_mem_chartSubring (m3);
