@@ -2455,6 +2455,102 @@ theorem telescope_up_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
         _ = ⨆ n, Valued.v (Y n) := one_mul _
     · exact le_ciSup hbdd (n + 1)
 
+/-- Coercion of a `B^I`-difference (micro-lemma). -/
+theorem BISub_coe_sub {σ₁ σ₂ : NNReal} {h1 : 0 < σ₁} {h2 : σ₁ < 1}
+    {h3 : 0 < σ₂} {h4 : σ₂ < 1} (x y : ↥(BISub p F ϖ h1 h2 h3 h4)) :
+    ((x - y : ↥(BISub p F ϖ h1 h2 h3 h4))
+      : (hatK p F h1 h2) × (hatK p F h3 h4))
+      = ((x : ↥(BISub p F ϖ h1 h2 h3 h4))
+          : (hatK p F h1 h2) × (hatK p F h3 h4))
+        - ((y : ↥(BISub p F ϖ h1 h2 h3 h4))
+            : (hatK p F h1 h2) × (hatK p F h3 h4)) := rfl
+
+/-- Coercion of a `B^I`-product (micro-lemma). -/
+theorem BISub_coe_mul {σ₁ σ₂ : NNReal} {h1 : 0 < σ₁} {h2 : σ₁ < 1}
+    {h3 : 0 < σ₂} {h4 : σ₂ < 1} (x y : ↥(BISub p F ϖ h1 h2 h3 h4)) :
+    ((x * y : ↥(BISub p F ϖ h1 h2 h3 h4))
+      : (hatK p F h1 h2) × (hatK p F h3 h4))
+      = ((x : ↥(BISub p F ϖ h1 h2 h3 h4))
+          : (hatK p F h1 h2) × (hatK p F h3 h4))
+        * ((y : ↥(BISub p F ϖ h1 h2 h3 h4))
+            : (hatK p F h1 h2) × (hatK p F h3 h4)) := rfl
+
+/-- The first-component norm as a sequence supremum. -/
+theorem NfstRPS_eq_iSup_coeffSeq
+    (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    NfstRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
+      = ⨆ n : ℕ, Valued.v
+          (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) := by
+  have hrange : Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
+        (((MvPowerSeries.coeff s f
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+      = Set.range (fun n : ℕ => Valued.v
+        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)) := by
+    ext t
+    constructor
+    · rintro ⟨s, rfl⟩
+      refine ⟨s 0, ?_⟩
+      have hs : Finsupp.single (0 : Fin 1) (s 0) = s := by
+        refine Finsupp.ext fun i => ?_
+        rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
+      exact congrArg (fun s' : Fin 1 →₀ ℕ => Valued.v
+        (((MvPowerSeries.coeff s' f
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)) hs
+    · rintro ⟨n, rfl⟩
+      exact ⟨Finsupp.single (0 : Fin 1) n, rfl⟩
+  rw [NfstRPS, show (⨆ s : Fin 1 →₀ ℕ, Valued.v
+      (((MvPowerSeries.coeff s f
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+    = sSup (Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
+      (((MvPowerSeries.coeff s f
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))) from rfl,
+    hrange]
+  rfl
+
+/-- The second-component norm as a sequence supremum. -/
+theorem NsndRPS_eq_iSup_coeffSeq
+    (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    NsndRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
+      = ⨆ n : ℕ, Valued.v
+          (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) := by
+  have hrange : Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
+        (((MvPowerSeries.coeff s f
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+      = Set.range (fun n : ℕ => Valued.v
+        (((coeffSeq f n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) := by
+    ext t
+    constructor
+    · rintro ⟨s, rfl⟩
+      refine ⟨s 0, ?_⟩
+      have hs : Finsupp.single (0 : Fin 1) (s 0) = s := by
+        refine Finsupp.ext fun i => ?_
+        rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
+      exact congrArg (fun s' : Fin 1 →₀ ℕ => Valued.v
+        (((MvPowerSeries.coeff s' f
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) hs
+    · rintro ⟨n, rfl⟩
+      exact ⟨Finsupp.single (0 : Fin 1) n, rfl⟩
+  rw [NsndRPS, show (⨆ s : Fin 1 →₀ ℕ, Valued.v
+      (((MvPowerSeries.coeff s f
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))
+    = sSup (Set.range (fun s : Fin 1 →₀ ℕ => Valued.v
+      (((MvPowerSeries.coeff s f
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))) from rfl,
+    hrange]
+  rfl
+
 end FarguesFontaine
 
 end
