@@ -1905,7 +1905,41 @@ non-Tate bases are supported.
     NEXT (D-iii-4): the VPreHom fields for yFrobHom (isLocalHom on
     ring stalks + val-compat through yRingStalkIso) and the iso
     (k/-k roundtrips at PresheafedSpace-Hom level); then the VObj-iso
-    of yVObj and X := Y/φ^ℤ packaging. Non-critical parked:
+    of yVObj and X := Y/φ^ℤ packaging.
+    ★ D-iii-4a DONE 2026-07-28 (commit 8460f29a2, axiom-clean):
+    FarguesFontaine/FrobeniusValuation.lean —
+    comap_presheafValueRingEquivHuber_pointValue (+_symm variant): the
+    Huber value equivalence intertwines pointValue (proof =
+    eq_pointValue_of_comap_eq + the canonicalMap-naturality chain);
+    spaFrob_mem_frobIndex_datum; **comap_limitFrobHom_openValue** —
+    the Frobenius transport of limit sections intertwines the open
+    valuations (choice-independence at frobIndex-images + the
+    composite-eval collapse + the symm-pointValue equivariance).
+    ★★ MAJOR PERF LESSON (kernel `(kernel) deterministic timeout`,
+    cost ~2h of bisection): (i) NEVER inline a tactic proof in a
+    structure/subtype literal inside a `def` — every later
+    `.1`/`.2`/field-projection makes the kernel walk the literal
+    (spaFrob's Spa-membership, frobIndex's subset, mapHuber's hopen
+    all extracted to named lemmas); (ii) `lake env lean` PASSED a decl
+    that `lake build` kernel-rejects — the build is the ONLY gate for
+    kernel-budget issues (extends the known env-lean-false-errors
+    memory to false-SUCCESSES); (iii) componentwise-`rfl` composite
+    collapses (RingHom.ext fun x => rfl) blow the kernel when the
+    components' coercion-paths differ (RingEquiv-coe vs
+    .toRingHom-coe) — chain the PROVEN component-lemmas
+    (limitEvalHom_apply, limitFrobHom_component) with congrArg/trans
+    instead; (iv) comap-of-comp = nested-comaps IS generic-rfl-cheap
+    when stated as its own tiny lemma (comap_comp_apply) but
+    over-budget inlined at fat homs; (v) rw with an instance-path
+    mismatch (SubsemiringClass- vs CommRing-derived NonAssocSemiring
+    on limitSections) silently fails pattern-matching — use congrArg
+    with an explicit function.
+    NEXT (D-iii-4b): stalk-level val_compat — conjugate
+    ringStalkMap (yFrobHom k) through yRingStalkEquiv to the ambient
+    stalk transport; stalkValue-equivariance from
+    comap_limitFrobHom_openValue via comap_germ_stalkValue +
+    stalkVle intro/elim; then isLocalHom (via the iso-route) and the
+    VObj-iso; then X. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
