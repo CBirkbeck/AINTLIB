@@ -1070,9 +1070,25 @@ non-Tate bases are supported.
   Tate-gated is ONLY the HOMEOMORPH-upgrade (forward-openness,
   `spaPresheafValueEquivRationalOpen_isOpenMap`; continuity of the forward map
   is generic comap-continuity) and the RationalSubset-CORRESPONDENCE file.
-  [NT-1] (reduced): the open-map property over the A_inf base for the
-  BigWindow data — OR side-step: build the glued Y-object's topology through
-  the bijections by construction. Plus-ring note: the equiv lands on the
+  [NT-1] (reduced; EXECUTION PLAN 2026-07-27): the open-map chain
+  (SpaRationalOpenHomeomorph 225-421) uses [IsTateRing A] ONLY to supply
+  (i) the completion's topologically nilpotent unit (presheafValue_topNilUnit
+  maps A's unit; steps 1-2 of the proof are already parameter-level in
+  (u, hu)) and (ii) instance-resolution of
+  [IsRingOfIntegralElements ((presheafValue D)⁺-canonical)]. PLAN: new file
+  with primed variants exists_A_level_open_presentation' /
+  spaPresheafValueEquivRationalOpen_isOpenMap' /
+  spaPresheafValueHomeomorphRationalOpen' taking
+  (u : (presheafValue D)ˣ) (hu : IsTopologicallyNilpotent u)
+  [IsRingOfIntegralElements ((presheafValue D)⁺)] instead of [IsTateRing A];
+  proof = copy + audit each inferInstance site. Chart-side suppliers: the
+  unit from IsTateRing (presheafValue chart) (= isTateRing_congr of ID2e —
+  already constructed) via exists_topologicallyNilpotent_unit; the CANONICAL-
+  plus integral-elements instance is the plus-reconciliation task (canonical
+  ringPlus(presheafValue) vs ID2e's transported BIPlusIn) — now load-bearing:
+  find/derive `IsRingOfIntegralElements (ringPlus (presheafValue chart))`
+  (check what the PlusSubring (presheafValue D)-instance IS in Presheaf.lean
+  and whether its integral-elements proof is Tate-gated). Plus-ring note: the equiv lands on the
   CANONICAL `ringPlus (presheafValue …)`, not the transported BIPlusIn of
   ID2e — reconcile the two plus-structures when the VObj-level gluing needs
   it (they should agree by the §5-correction argument; ticket when reached).
