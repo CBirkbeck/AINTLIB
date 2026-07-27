@@ -1389,6 +1389,141 @@ theorem invariant_pieces_eq (V : Opens (Curve p F ϖ))
     exact invariant_piece_back' p F ϖ V t t' (-(n : ℤ) - 1) (-n) (by omega)
       hWle ih
 
+/-- The image bound: opens inside a saturated preimage have image inside
+the saturating open. -/
+theorem xImage_le (W : Opens ↥(yTop p F ϖ)) (V : Opens (Curve p F ϖ))
+    (h : W ≤ curvePreimage p F ϖ V) : xImage p F ϖ W ≤ V := by
+  rintro x ⟨w, hw, rfl⟩
+  exact h hw
+
+/-- **Separation of invariant sections** (D-iv-3(γ iii), the section-level
+statement): two `φ`-invariant sections over a saturation agreeing on the
+zero translate are equal. -/
+theorem invariant_sections_eq_of_zero_piece (W : Opens ↥(yTop p F ϖ))
+    (t t' : ↥(frobFixed p F ϖ (xImage p F ϖ W)))
+    (h0 : limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE
+        (translate_le_curvePreimage_xImage p F ϖ W 0)))) t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE
+        (translate_le_curvePreimage_xImage p F ϖ W 0)))) t'.1) :
+    t = t' := by
+  have hall := invariant_pieces_eq p F ϖ (xImage p F ϖ W) t t'
+    (fun k => translate_le_curvePreimage_xImage p F ϖ W k) h0
+  have hcov : (((yFunctor p F ϖ).obj
+      (curvePreimage p F ϖ (xImage p F ϖ W)))
+      : Set ↥(SpaTop (Ainf p F)))
+      ⊆ ⋃ m : ULift ℤ, (SetLike.coe ((yFunctor p F ϖ).obj
+          ((Opens.map (yFrobTop p F ϖ m.down)).obj W))) := by
+    intro v hv
+    obtain ⟨y, hy, rfl⟩ := hv
+    rw [show curvePreimage p F ϖ (xImage p F ϖ W)
+        = ⨆ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W from
+      curvePreimage_xImage p F ϖ W] at hy
+    rw [Opens.coe_iSup] at hy
+    obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy
+    exact Set.mem_iUnion.mpr ⟨⟨k⟩, ⟨y, hk, rfl⟩⟩
+  refine Subtype.ext ((isLimitSheafOn_Y p F ϖ).injective
+    (V := (yFunctor p F ϖ).obj (curvePreimage p F ϖ (xImage p F ϖ W)))
+    (yFunctor_trace p F ϖ _)
+    (ι := ULift ℤ)
+    (U := fun m : ULift ℤ => (yFunctor p F ϖ).obj
+      ((Opens.map (yFrobTop p F ϖ m.down)).obj W))
+    (fun m => leOfHom ((yFunctor p F ϖ).map (homOfLE
+      (translate_le_curvePreimage_xImage p F ϖ W m.down)))) hcov
+    (fun m => hall m.down))
+
+/-- The curve ring presheaf's action is the invariant restriction
+(pointwise). -/
+theorem curveRingPresheaf_map_apply {V' V : Opens (Curve p F ϖ)}
+    (h : V' ≤ V)
+    (t : ToType ((curveSpace p F ϖ).ringPresheaf.obj (op V))) :
+    (ConcreteCategory.hom
+        ((curveSpace p F ϖ).ringPresheaf.map (homOfLE h).op)) t
+      = frobFixedRestrict p F ϖ h t := rfl
+
+/-- **Injectivity of the projection stalk map** (D-iv-3(γ iii)): an
+invariant germ is determined by its underlying `𝒴`-germ. -/
+theorem ringStalkMap_piYHom_injective (y : ↥(yTop p F ϖ)) :
+    Function.Injective
+      (ValuationSpectrum.ringStalkMap (piYHom p F ϖ) y).hom := by
+  intro a b hab
+  obtain ⟨V₁, h₁, t₁, rfl⟩ :=
+    ((curveSpace p F ϖ).ringPresheaf).exists_germ_eq a
+  obtain ⟨V₂, h₂, t₂, rfl⟩ :=
+    ((curveSpace p F ϖ).ringPresheaf).exists_germ_eq b
+  have hyab : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+      ((Opens.map (yTopToCurveTop p F ϖ)).obj V₁) y h₁)
+      (piComponent p F ϖ V₁ t₁)
+      = ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+        ((Opens.map (yTopToCurveTop p F ϖ)).obj V₂) y h₂)
+        (piComponent p F ϖ V₂ t₂) :=
+    (ringStalkMap_piYHom_germ p F ϖ y V₁ h₁ t₁).symm.trans
+      (hab.trans (ringStalkMap_piYHom_germ p F ϖ y V₂ h₂ t₂))
+  obtain ⟨U, hyU, iU, iV, hres⟩ :=
+    TopCat.Presheaf.germ_eq ((yPresheafedSpace p F ϖ).ringPresheaf)
+      y h₁ h₂ _ _ hyab
+  obtain ⟨W₀, hyW₀, hdis₀⟩ := exists_disjoint_translates p F ϖ y
+  have hyW : y ∈ U ⊓ W₀ := ⟨hyU, hyW₀⟩
+  have hWU : U ⊓ W₀ ≤ U := inf_le_left
+  have hU₁ : U ≤ curvePreimage p F ϖ V₁ := leOfHom iU
+  have hU₂ : U ≤ curvePreimage p F ϖ V₂ := leOfHom iV
+  have hle₁ : xImage p F ϖ (U ⊓ W₀) ≤ V₁ :=
+    xImage_le p F ϖ (U ⊓ W₀) V₁ (le_trans hWU hU₁)
+  have hle₂ : xImage p F ϖ (U ⊓ W₀) ≤ V₂ :=
+    xImage_le p F ϖ (U ⊓ W₀) V₂ (le_trans hWU hU₂)
+  have hmem : yTopToCurve p F ϖ y ∈ xImage p F ϖ (U ⊓ W₀) := ⟨y, hyW, rfl⟩
+  -- the two invariant restrictions agree: separation over the translates
+  have hz : frobFixedRestrict p F ϖ hle₁ t₁
+      = frobFixedRestrict p F ϖ hle₂ t₂ := by
+    refine invariant_sections_eq_of_zero_piece p F ϖ (U ⊓ W₀) _ _ ?_
+    have hUres : limitRestrict
+        (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₁))) t₁.1
+        = limitRestrict
+          (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₂))) t₂.1 :=
+      (yRingPresheaf_map_apply p F ϖ hU₁
+          (piComponent p F ϖ V₁ t₁)).symm.trans
+        (hres.trans (yRingPresheaf_map_apply p F ϖ hU₂
+          (piComponent p F ϖ V₂ t₂)))
+    have hZU : (Opens.map (yFrobTop p F ϖ 0)).obj (U ⊓ W₀) ≤ U :=
+      le_trans (le_of_eq (map_yFrobTop_zero p F ϖ (U ⊓ W₀))) hWU
+    have hstep := congrArg (limitRestrict
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))) hUres
+    have hcol₁ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₁))))) t₁.1
+    have hcol₂ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE hZU)))
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE hU₂))))) t₂.1
+    have hexp₁ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE
+        (translate_le_curvePreimage_xImage p F ϖ (U ⊓ W₀) 0))))
+      (yFunctor_curvePreimage_mono p F ϖ hle₁))) t₁.1
+    have hexp₂ := congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+      (leOfHom ((yFunctor p F ϖ).map (homOfLE
+        (translate_le_curvePreimage_xImage p F ϖ (U ⊓ W₀) 0))))
+      (yFunctor_curvePreimage_mono p F ϖ hle₂))) t₂.1
+    exact hexp₁.trans ((hcol₁.symm.trans (hstep.trans hcol₂)).trans
+      hexp₂.symm)
+  -- both germs collapse to the common germ at the saturation image
+  have hg₁ : ((curveSpace p F ϖ).ringPresheaf.germ V₁
+      (yTopToCurve p F ϖ y) h₁) t₁
+      = ((curveSpace p F ϖ).ringPresheaf.germ
+        (xImage p F ϖ (U ⊓ W₀)) (yTopToCurve p F ϖ y) hmem)
+        (frobFixedRestrict p F ϖ hle₁ t₁) :=
+    (TopCat.Presheaf.germ_res_apply
+      ((curveSpace p F ϖ).ringPresheaf) (homOfLE hle₁)
+      (yTopToCurve p F ϖ y) hmem t₁).symm
+  have hg₂ : ((curveSpace p F ϖ).ringPresheaf.germ V₂
+      (yTopToCurve p F ϖ y) h₂) t₂
+      = ((curveSpace p F ϖ).ringPresheaf.germ
+        (xImage p F ϖ (U ⊓ W₀)) (yTopToCurve p F ϖ y) hmem)
+        (frobFixedRestrict p F ϖ hle₂ t₂) :=
+    (TopCat.Presheaf.germ_res_apply
+      ((curveSpace p F ϖ).ringPresheaf) (homOfLE hle₂)
+      (yTopToCurve p F ϖ y) hmem t₂).symm
+  exact hg₁.trans ((congrArg
+    (((curveSpace p F ϖ).ringPresheaf.germ (xImage p F ϖ (U ⊓ W₀))
+      (yTopToCurve p F ϖ y) hmem)) hz).trans hg₂.symm)
+
 end FarguesFontaine
 
 end
