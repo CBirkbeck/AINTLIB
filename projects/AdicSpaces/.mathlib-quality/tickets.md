@@ -1179,15 +1179,19 @@ non-Tate bases are supported.
     NEXT (D-ii-2, the sheaf condition): (a) the values-on-basis comparison
     𝒪(dyadic-trace) ≅ BIQ: limitEvalTop + limitEvalTop_spec DONE 2026-07-27
     (evaluation at the top index; the family is pinned on NESTED indices).
-    REMAINING for (a): the iso-property. KEY GEOMETRIC BRIDGE NEEDED:
-    `dyadicTrace i ⊆ dyadicTrace i₀ → Nested i i₀` (trace-inclusion implies
-    interval-inclusion) — via Gauss-point witnesses: for any rational κ₀ in
-    interval-i, the Gauss point at radius vπ^{1/κ₀} lies in trace-i (its
-    KGE/KLE-values are exact), hence in trace-i₀, forcing κ₀ into
-    interval-i₀ (GaussPoint.lean should supply the membership lemmas).
-    With the bridge: injectivity of limitEvalTop is limitEvalTop_spec;
-    surjectivity extends a top value by restrictions (well-defined since
-    every in-trace index is then nested; compatibility from biResQ'_comp).; (b) separation + gluing over covers via the
+    (a) COMPLETE 2026-07-27 (commit 31b48a9a2): the GEOMETRIC BRIDGE
+    dyadicTrace_subset_nested (trace-inclusion ⇒ interval-nesting) via the
+    two ENDPOINT Gauss points — gaussPoint_mem_intervalTrace_iff (the Gauss
+    point at radius vpiQ q is in the (q₁,q₂)-trace iff q₂ ≤ q ≤ q₁; proven
+    through KGE_iff/KLE_iff at the (den, num.toNat)-representation with
+    gaussVal_p_pow/gaussVal_teichPi_pow + vpiQ_pow/vpiQ_natCast/
+    vpiQ_le_vpiQ_iff); Nested.trans + dyadicRes_id/_comp (direct from the
+    biResQ' laws — the Prop-args make dyadicRes proof-irrelevant, so the
+    biResQ' statements apply verbatim); **limitEvalTop_bijective** — the
+    values-on-basis comparison 𝒪(dyadic-trace) ≅ BIQ: injectivity =
+    limitEvalTop_spec through the bridge, surjectivity = the
+    dyadicRes-family of a top value (compatibility = dyadicRes_comp,
+    top-evaluation = dyadicRes_id). All 10 new decls axiom-clean.; (b) separation + gluing over covers via the
     per-chart sheafiness (isSheafy_presheafChart applies to ALL dyadic
     charts, noted above); (c) the topology on limitSectionsY (product-
     induced) and the embedding condition. The ID2-sheafiness note stands:
