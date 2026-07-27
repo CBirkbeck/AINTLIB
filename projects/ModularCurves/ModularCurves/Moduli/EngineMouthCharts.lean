@@ -49,6 +49,9 @@ its elaboration profile — unchanged.
   the transition cocycle.
 -/
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 open AlgebraicGeometry CategoryTheory WeierstrassCurve SemilocalUnitSplit

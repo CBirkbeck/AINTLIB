@@ -16,6 +16,9 @@ The helper lemmas (`isIso_torsorCompare_spec` over an affine, `isPullback_torsor
 are general T-Q2 infrastructure.
 -/
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 open AlgebraicGeometry CategoryTheory Limits
 universe u
 

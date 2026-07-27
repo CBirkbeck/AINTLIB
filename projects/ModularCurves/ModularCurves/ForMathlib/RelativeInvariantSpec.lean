@@ -46,6 +46,9 @@ data: the three consumers in `Moduli/GammaHRepresentability.lean`
 general `Ell/R` bases (a constant curve over a plane with doubled origin).
 -/
 
+set_option backward.defeqAttrib.useBackward true
+set_option backward.isDefEq.respectTransparency false
+
 universe u
 
 open AlgebraicGeometry CategoryTheory Limits

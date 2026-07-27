@@ -15,7 +15,8 @@ descends uniquely to `Q'`.
 
 ## Main results
 
-* `epi_pullback_snd_quotientπ` — the restricted quotient cover is an epimorphism (fppf: flat from
+* `epi_pullback_snd_quotientπ_of_isOpenImmersion` — the restricted quotient cover is an
+  epimorphism (fppf: flat from
   `etale_quotientπ`, surjective by base change; `Flat.epi_of_flat_of_surjective`). Uniqueness.
 * `exists_quotientπ_lift_of_isOpenImmersion` — existence: glue the affine keystone
   `exists_invariantsπ_lift_of_isOpenImmersion` over the quotient-chart cover; overlap agreement by
@@ -33,7 +34,7 @@ variable {G : Type u} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
 
 set_option backward.isDefEq.respectTransparency.types false in
 /-- For a free action, the pullback of the quotient projection along an open immersion is epic. -/
-theorem epi_pullback_snd_quotientπ [Finite G]
+theorem epi_pullback_snd_quotientπ_of_isOpenImmersion [Finite G]
     [IsAffineHom (pullback.diagonal (terminal.from X))]
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
     (hVmem : ∀ x, x ∈ V x)
@@ -213,7 +214,7 @@ private theorem exists_quotientπ_lift_of_chartwise [Finite G]
         ((pullback.fst ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι)
             ((j ⁻¹ᵁ σ.quotientChart V hVs hVa y).ι) ≫
           (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι) ≫ j)) :=
-      σ.epi_pullback_snd_quotientπ V hVs hVa hVmem hfree _
+      σ.epi_pullback_snd_quotientπ_of_isOpenImmersion V hVs hVa hVmem hfree _
     exact overlap_eq (hPB x) (hPB y) (hq x) (hq y)
       (pullback.fst _ _) (pullback.snd _ _) pullback.condition
       (pullback.snd (σ.quotientπ V hVs hVa hVmem)
