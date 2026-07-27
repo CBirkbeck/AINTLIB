@@ -582,6 +582,45 @@ theorem yFrob_val_compat (k : ℤ) (x : yTop p F ϖ) :
     (yRingStalkEquiv p F ϖ x).toRingHom
     (stalkValue (ySpaPoint p F ϖ x))
 
+/-- **The `𝒴`-Frobenius stalk map is local** (units correspond through the
+valuation compatibility and the support-equals-maximal-ideal package). -/
+theorem yFrob_isLocalHom (k : ℤ) (x : yTop p F ϖ) :
+    IsLocalHom
+      (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom' := by
+  refine ⟨fun a ha => ?_⟩
+  have h1 : (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom' a
+      ∉ ((yVPreObj p F ϖ).val x).supp := by
+    rw [(yVPreObj p F ϖ).val_supp x]
+    exact fun hmem => (mem_nonunits_iff.mp
+      ((@IsLocalRing.mem_maximalIdeal _ _
+        ((yVPreObj p F ϖ).isLocalRing_stalk x) _).mp hmem)) ha
+  have hchain : ((yVPreObj p F ϖ).val
+      (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)).supp
+      = (((yVPreObj p F ϖ).val x).supp).comap
+          (ValuationSpectrum.ringStalkMap (yFrobHom p F ϖ k) x).hom' := by
+    rw [yFrob_val_compat p F ϖ k x]
+    exact supp_comap _ _
+  have h2 : a ∉ ((yVPreObj p F ϖ).val
+      (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)).supp :=
+    fun h => h1 (Ideal.mem_comap.mp (hchain ▸ h))
+  by_contra hnu
+  refine h2 ?_
+  rw [(yVPreObj p F ϖ).val_supp
+    (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)]
+  exact (@IsLocalRing.mem_maximalIdeal _ _
+    ((yVPreObj p F ϖ).isLocalRing_stalk
+      (ConcreteCategory.hom (yFrobHom p F ϖ k).base x)) _).mpr
+    (mem_nonunits_iff.mpr hnu)
+
+/-- **The Frobenius as a morphism of `𝒱^pre`** (D-iii): the `𝒴`-Frobenius
+presheafed-space endomorphism with local stalk maps and valuation
+compatibility. -/
+noncomputable def yFrobVPreHom (k : ℤ) :
+    ValuationSpectrum.VPreHom (yVPreObj p F ϖ) (yVPreObj p F ϖ) where
+  toHom := yFrobHom p F ϖ k
+  isLocalHom_stalkMap := fun x => yFrob_isLocalHom p F ϖ k x
+  val_compat := fun x => yFrob_val_compat p F ϖ k x
+
 end FarguesFontaine
 
 end
