@@ -44,6 +44,48 @@ theorem localTrivializationCoefficient_baseSections_smul
   exact localTrivializationCoefficient_smul M U e (π.appTop.hom a)
     ((Scheme.Modules.baseSectionsIsoRestrictScalarsTop π M).hom x)
 
+/-- The Cartier-chart coefficient of a normalized successor pole section
+restricts to `1` along the marked section. -/
+theorem sectionPoleSheafPower_succ_app_coefficient_eq_one
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1)) (n : ℕ)
+    (x : Scheme.Modules.baseSections π
+      (sectionPoleSheafPower π z hz (n + 1)))
+    (hx : sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+      hsm z hz U hU r hspan hnzd n x = 1) :
+    let hr : r ∈ z.ker.ideal U :=
+      hspan ▸ Ideal.subset_span (Set.mem_singleton r)
+    let X := localTrivializationCoefficient
+      (sectionPoleSheafPower π z hz (n + 1)) U
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r hr hspan hnzd (n + 1)) x
+    z.app U.1 X = 1 := by
+  dsimp only
+  have hr : r ∈ z.ker.ideal U := by
+    rw [hspan]
+    exact Ideal.subset_span (Set.mem_singleton r)
+  let X := localTrivializationCoefficient
+    (sectionPoleSheafPower π z hz (n + 1)) U
+    (sectionPoleSheafPowerTrivializationOfCartierGenerator
+      z hz U r hr hspan hnzd (n + 1)) x
+  have hcoordinate :=
+    sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator_hom_baseSectionsMap
+      hsm z hz U hU r hspan hnzd n x
+  have hcoordinate' :
+      sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
+          hsm z hz U hU r hspan hnzd n x =
+        S.presheaf.map (eqToHom hU.symm).op (z.app U.1 X) := by
+    rw [sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_apply]
+    simpa only [X, sectionPoleSheafPowerTrivializationOfCartierGenerator,
+      sectionPoleSheafTrivializationOfCartierGenerator] using hcoordinate
+  apply (ConcreteCategory.bijective_of_isIso
+    (S.presheaf.map (eqToHom hU.symm).op)).1
+  rw [← hcoordinate', hx, map_one]
+
 /-- The basic open of the Cartier-chart coefficient of a normalized successor
 pole section contains the entire marked section. -/
 theorem sectionPoleSheafPower_succ_preimage_basicOpen_coefficient_eq_top
@@ -65,30 +107,18 @@ theorem sectionPoleSheafPower_succ_preimage_basicOpen_coefficient_eq_top
         z hz U r hr hspan hnzd (n + 1)) x
     z ⁻¹ᵁ C.basicOpen X = ⊤ := by
   dsimp only
-  have hr : r ∈ z.ker.ideal U := by
-    rw [hspan]
-    exact Ideal.subset_span (Set.mem_singleton r)
   let X := localTrivializationCoefficient
     (sectionPoleSheafPower π z hz (n + 1)) U
-    (sectionPoleSheafPowerTrivializationOfCartierGenerator
-      z hz U r hr hspan hnzd (n + 1)) x
-  have hcoordinate :=
-    sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator_hom_baseSectionsMap
-      hsm z hz U hU r hspan hnzd n x
-  have hcoordinate' :
-      sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
-          hsm z hz U hU r hspan hnzd n x =
-        S.presheaf.map (eqToHom hU.symm).op (z.app U.1 X) := by
-    rw [sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_apply]
-    simpa only [X, sectionPoleSheafPowerTrivializationOfCartierGenerator,
-      sectionPoleSheafTrivializationOfCartierGenerator] using hcoordinate
-  have hrestrict :
-      S.presheaf.map (eqToHom hU.symm).op (z.app U.1 X) = 1 := by
-    rw [← hcoordinate']
-    exact hx
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r
+          (hspan ▸ Ideal.subset_span (Set.mem_singleton r))
+          hspan hnzd (n + 1)) x
+  have hrestrict : z.app U.1 X = 1 :=
+    sectionPoleSheafPower_succ_app_coefficient_eq_one
+      hsm z hz U hU r hspan hnzd n x hx
   rw [Scheme.preimage_basicOpen]
   rw [← Scheme.basicOpen_res_eq (X := S) (f := z.app U.1 X) (eqToHom hU.symm).op]
-  rw [hrestrict, Scheme.basicOpen_one]
+  rw [hrestrict, map_one, Scheme.basicOpen_one]
 
 /-- The Cartier-chart coefficient of a normalized successor pole section is
 coprime to the generator of the marked section. -/
@@ -113,31 +143,15 @@ theorem sectionPoleSheafPower_succ_isCoprime_coefficient_generator
   dsimp only
   letI : IsClosedImmersion z := isClosedImmersion_section z hz
   letI : QuasiCompact z := inferInstance
-  have hr : r ∈ z.ker.ideal U := by
-    rw [hspan]
-    exact Ideal.subset_span (Set.mem_singleton r)
   let X := localTrivializationCoefficient
     (sectionPoleSheafPower π z hz (n + 1)) U
-    (sectionPoleSheafPowerTrivializationOfCartierGenerator
-      z hz U r hr hspan hnzd (n + 1)) x
-  have hcoordinate :=
-    sectionPoleSheafSuccCoker_baseSectionsIsoOfCartierGenerator_hom_baseSectionsMap
-      hsm z hz U hU r hspan hnzd n x
-  have hcoordinate' :
-      sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator
-          hsm z hz U hU r hspan hnzd n x =
-        S.presheaf.map (eqToHom hU.symm).op (z.app U.1 X) := by
-    rw [sectionPoleSheafPower_succ_baseSectionsCoordinateOfCartierGenerator_apply]
-    simpa only [X, sectionPoleSheafPowerTrivializationOfCartierGenerator,
-      sectionPoleSheafTrivializationOfCartierGenerator] using hcoordinate
-  have hrestrict :
-      S.presheaf.map (eqToHom hU.symm).op (z.app U.1 X) = 1 := by
-    rw [← hcoordinate']
-    exact hx
-  have hX : z.app U.1 X = 1 := by
-    apply (ConcreteCategory.bijective_of_isIso
-      (S.presheaf.map (eqToHom hU.symm).op)).1
-    simpa using hrestrict
+      (sectionPoleSheafPowerTrivializationOfCartierGenerator
+        z hz U r
+          (hspan ▸ Ideal.subset_span (Set.mem_singleton r))
+          hspan hnzd (n + 1)) x
+  have hX : z.app U.1 X = 1 :=
+    sectionPoleSheafPower_succ_app_coefficient_eq_one
+      hsm z hz U hU r hspan hnzd n x hx
   have hker : X - 1 ∈ z.ker.ideal U := by
     rw [Scheme.Hom.ker_apply, RingHom.mem_ker, map_sub, hX, map_one, sub_self]
   obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp (hspan ▸ hker)
