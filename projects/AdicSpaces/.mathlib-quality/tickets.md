@@ -49,6 +49,15 @@ the `p`-adic one; hence `BIPairOfDefinition`, `isHuberRing_BISub`, `isTateRing_B
 mathematics, the next task (T911 strictness) worked out, the binding working rules
 (PERF-1 in particular), the file map and the API inventory.
 
+#### PROCESS-INCIDENT 2026-07-27 (beastmode, self-logged): commit 6d6958bb1
+pushed a BROKEN build (evalBI_finset_sum ported outside its variable
+section — 20 errors); fixed forward within minutes by the next commit
+(section-wrap). LESSON (binding): when porting a scratch block that
+depends on section variables (φ/hφ/σ-radii), port the WHOLE section
+including `variable`-lines, and ALWAYS run the `lake build` gate BEFORE
+`git commit`, not concurrently with it — the `build | grep -c` + `&&
+commit` one-liner commits even when the grep count is nonzero.
+
 #### PERF-1 (2026-07-26) — **no heartbeat raises** (owner instruction)
 
 `set_option maxHeartbeats` / `synthInstance.maxHeartbeats` are not to be added; a timeout is
