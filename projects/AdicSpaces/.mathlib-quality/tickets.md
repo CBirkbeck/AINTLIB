@@ -1164,11 +1164,17 @@ non-Tate bases are supported.
     (D-ii-1) the Y-presheaf on all opens: STARTED 2026-07-27
     (FarguesFontaine/YPresheaf.lean — intervalTrace (the κ ∈ [1/q₁,1/q₂]
     loci in KGE/KLE form, matching the BIQ q₁ q₂-indexing),
-    bigWindow_eq_intervalTrace, intervalTrace_mono). NEXT: openness of
-    attainable-endpoint traces (dyadic q = j/p^s via the twisted-uniformizer
-    rationalOpen identifications, generalizing the bigWindow ones), then the
-    limit-over-basis presheaf (limitSections-style over basis-intervals
-    inside an open; adapt SheafyPair/StructurePresheafBundled shapes); (D-ii-2) the sheaf condition: per-window via
+    bigWindow_eq_intervalTrace, intervalTrace_mono). DYADIC OPENNESS DONE 2026-07-27
+    (intervalTrace_dyadic_eq_rationalOpen — the (j₁/p^s, j₂/p^s)-trace is the
+    κ' ∈ [1/j₁, 1/j₂] chart of the p^s-th root uniformizer, via the
+    (1,j₁,1,j₂)-datum and typed collapse-haves — and
+    isOpen_intervalTrace_dyadic). The dyadic traces form an OPEN BASIS
+    substrate. NEXT: the limit-over-basis presheaf (limitSections-style over
+    dyadic basis-intervals inside an open of Y; adapt SheafyPair/
+    StructurePresheafBundled shapes) — note the dyadic datum is a
+    chartS-1-j₂-datum, so the ID2 machinery (sheafiness at nat-power
+    endpoints in ϖ_s) applies to REFINED dyadic charts too if needed for the
+    sheaf condition, not only the Big windows; (D-ii-2) the sheaf condition: per-window via
     isSheafy_presheafChart + spaChartHomeoBigWindow + windowResBIQ,
     refinement via the rational basis; (D-ii-3) VPreObj packaging: stalks +
     valuations (stalk theory over the sheafy charts); (D-iii) φ-action:
