@@ -1756,7 +1756,19 @@ non-Tate bases are supported.
     StructurePresheafBundled's structurePresheaf_isSheafOfTopological-
     Rings (~599) at the restricted-to-Y site with (i) in place of
     IsLimitSheaf. Then yVObj := ⟨yVPreObj, that⟩ and D-iii (φ-action,
-    X := Y/φ^ℤ) follows.
+    X := Y/φ^ℤ) follows. ★ YB6c-3a DONE (IsSheafyOn stated, YStalks).
+    NEXT bricks in order: (3b) imgCoveringO — the B_n-side covering
+    from a window-interior ambient covering (base/covers via imgDatumO
+    at the YB6b certificates; hsubset via imgDatumO_rationalOpen_
+    subset; hcover via the comap-correspondence — rationalOpen has
+    Spa-membership BUILT IN, so B-side points pull back through
+    comap_canonicalMap_mem_rationalOpen (Tate-free) and push forward
+    by pure comap_vle); (3c) the single-window transport of embedding+
+    gluing through keystoneO + keystone_restriction_squareO to the
+    B_n IsSheafy (isSheafy_presheafChart); (3d) the straddling case
+    (window-piece refinement + the adjacent-circle glue via
+    BISub_twist); (3e) the Bundled-599 replay at the restricted site;
+    yVObj.
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
