@@ -1722,6 +1722,16 @@ non-Tate bases are supported.
     of the restricted presheaf (per-window via the charts + the
     keystone-over-B_n route (a), or a direct refinement argument);
     then D-iii (φ-action as VObj-isos, X := Y/φ^ℤ).
+    ★ YB6a DONE 2026-07-27 (RelativeDescentHuber.lean): the FULL
+    keystone at open-span certificates — imgDatumO + keystoneO
+    (𝒪_A(E) ≃+* 𝒪_B(imgDatumO)) + continuity + squares, over any
+    Huber base (systematic O-transform of RelativeDescent, ~700
+    lines). NEXT YB6b: the certificate supplier
+    (span_image_eq_top over a Tate B for open-ambient-span E.T — the
+    p[ϖ]-unit argument) + the window-value identification (ambient
+    Y-interior datum ↦ B_n-side value through keystoneO at D₀ :=
+    windowChartData); then YB6c the Hom-cont sheaf assembly for
+    yPresheafedSpace.
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
