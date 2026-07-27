@@ -9,6 +9,7 @@ import ModularCurves.ForMathlib.SpecGroupAction
 import ModularCurves.ForMathlib.InvariantLocalization
 import ModularCurves.ForMathlib.InvariantTorsor
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 
 /-!
 # The affine quotient by a finite group action: universal property
