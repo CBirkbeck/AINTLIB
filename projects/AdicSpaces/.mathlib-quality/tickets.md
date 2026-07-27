@@ -1191,11 +1191,44 @@ non-Tate bases are supported.
     values-on-basis comparison 𝒪(dyadic-trace) ≅ BIQ: injectivity =
     limitEvalTop_spec through the bridge, surjectivity = the
     dyadicRes-family of a top value (compatibility = dyadicRes_comp,
-    top-evaluation = dyadicRes_id). All 10 new decls axiom-clean.; (b) separation + gluing over covers via the
-    per-chart sheafiness (isSheafy_presheafChart applies to ALL dyadic
-    charts, noted above); (c) the topology on limitSectionsY (product-
-    induced) and the embedding condition. The ID2-sheafiness note stands:
-    dyadic data are chartS-1-b-shaped. (D-ii-2) the sheaf condition: per-window via
+    top-evaluation = dyadicRes_id). All 10 new decls axiom-clean.; (b) REPLANNED 2026-07-27 (beastmode): prove the
+    sheaf condition DIRECTLY on the interval rings as the SPLIT FIBER-PRODUCT
+    THEOREM — for q₂ ≤ r ≤ q₁, restriction is a bijection
+    BIQ[q₁,q₂] ≅ BIQ[q₁,r] ×_{hatK (vpiQ r)} BIQ[r,q₂] — with NO Spa
+    transport (the isSheafy-transport route stays available but costs
+    equalizer-shape alignment through the chart homeos). Sub-steps:
+    (b1) endpoint projections biFst/biSnd : BISub → hatK ρᵢ
+    (= RingHom.fst/snd ∘ subtype; continuous; dense-layer = BlocToHatK) and
+    the three dense-equalizer laws: biFst∘biResQ'(left-shared) = biFst,
+    biSnd∘biResQ'(right-shared) = biSnd, biSnd∘resL = biFst∘resR (middle
+    match) ⇒ SEPARATION (the pair (resL, resR) is injective since an
+    element of BISub IS its endpoint pair). (b2) the SPLITTING LEMMA on
+    Bloc (the analytic core, Mittag-Leffler-style): every z = x/(p[ϖ])^k
+    splits z = zM + zP via mathlib's WittVector.init/tail (init_add_tail)
+    at threshold k: zM = init k x/(p[ϖ])^k (Laurent part, m−k < 0) has
+    wLoc_σ(zM) ≤ wLoc_τ(z) for all σ ≥ τ, zP = tail k x/(p[ϖ])^k (m−k ≥ 0)
+    has wLoc_σ(zP) ≤ wLoc_τ(z) for σ ≤ τ (per-term σ^{m−k} vs τ^{m−k}
+    monotonicity through the gaussValue sup-formula). (b3) assembly: the
+    matching subring M := {(g₁,g₂) | biSnd g₁ = biFst g₂} is closed in the
+    complete product ⇒ complete; Φ := (resL, resR) is uniform-inducing
+    (outer components recover the identity embedding by the b1-laws) with
+    complete source ⇒ closed range; the diagonal D = Φ(blocToBI z) is dense
+    in M by the b2-splitting (given (g₁,g₂) ∈ M ε-approximated by z₁, z₂:
+    d := z₁ − z₂ has w_τ(d) ≤ ε by the middle match; d = dM + dP; then
+    h := z₁ − dP = z₂ + dM is ε-close to BOTH) ⇒ M = range Φ ⇒ ∃!.
+    (c) the topology on limitSectionsY (product-induced) and the embedding
+    condition. The ID2-sheafiness note stands: dyadic data are
+    chartS-1-b-shaped. ARCHITECTURE NOTE (2026-07-27, binding for D-ii-3):
+    the dyadic STRIPS are NOT a neighbourhood basis of Y (a small rational
+    open around v — e.g. cut by p−[a]-type functions — contains no full
+    κ-annulus), so the strips-limit presheaf limitSectionsY computes 𝒪 only
+    on strip-generated opens and its naive stalks are TRIVIAL; D-ii-3 must
+    therefore package stalks/valuations FROM THE CHART SIDES (per the
+    original plan line 'stalks/valuations from the chart sides'), either by
+    (i) enlarging the limit basis to ALL chart rational opens (cross-chart
+    transition on sub-circle rationals = keystone OVER the Tate B_n — valid)
+    or (ii) VPreObj-gluing machinery for the ℤ-chain (cocycle-free since
+    only adjacent windows meet). Decide when (b) lands. (D-ii-2) the sheaf condition: per-window via
     isSheafy_presheafChart + spaChartHomeoBigWindow + windowResBIQ,
     refinement via the rational basis; (D-ii-3) VPreObj packaging: stalks +
     valuations (stalk theory over the sheafy charts); (D-iii) φ-action:
