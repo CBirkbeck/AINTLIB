@@ -97,4 +97,23 @@ theorem bijective_of_awayMap_bijective_of_mod_span
       (Submodule.Quotient.mk_eq_zero (LinearMap.range l)).mp hbzero
     exact ⟨a, ha⟩
 
+/-- A finite ring map satisfying the Cartier patch hypotheses is bijective if
+the principal ideal is the kernel of a quotient map whose composite with the
+finite map is surjective. -/
+theorem bijective_of_awayMap_bijective_of_ker_eq_span
+    {T : Type*} [CommRing T]
+    (f : R →+* S) (hf : f.Finite) (r : R)
+    (hr : r ∈ nonZeroDivisors R)
+    (hAway : Function.Bijective (Localization.awayMap f r))
+    (q : S →+* T) (hq : Function.Surjective (q.comp f))
+    (hker : RingHom.ker q = Ideal.span {f r}) :
+    Function.Bijective f := by
+  apply bijective_of_awayMap_bijective_of_mod_span
+    f hf r hr hAway
+  intro b
+  obtain ⟨a, ha⟩ := hq (q b)
+  refine ⟨a, ?_⟩
+  change q (f a) = q b at ha
+  rw [← hker, RingHom.mem_ker, map_sub, ha, sub_self]
+
 end RingHom.Finite
