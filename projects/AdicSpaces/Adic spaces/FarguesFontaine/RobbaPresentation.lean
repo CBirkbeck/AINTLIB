@@ -2908,6 +2908,99 @@ theorem kerSol_decay_of_le_one {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
     _ = δ / 2 := by rw [hVg, one_pow, one_mul]
     _ < δ := NNReal.half_lt_self hδ.ne'
 
+/-- **Kernel-solution decay, expanding scale** (the bottom-radius
+component): with `1 < v(g)` the inverse powers contract and the solution
+values decay — no vanishing hypothesis needed. -/
+theorem kerSol_decay_of_one_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (g V : hatK p F hρ0 hρ1) (hinv : g * V = 1)
+    (hg : 1 < Valued.v g) (y : ℕ → hatK p F hρ0 hρ1)
+    (hy0 : Filter.Tendsto (fun n => Valued.v (y n)) Filter.atTop (nhds 0))
+    (hybdd : BddAbove (Set.range (fun n => Valued.v (y n)))) :
+    Filter.Tendsto (fun n => Valued.v
+      (-(V ^ (n + 1) * ∑ i ∈ Finset.range (n + 1), y i * g ^ i)))
+      Filter.atTop (nhds 0) := by
+  have hg0 : (0 : NNReal) < Valued.v g := lt_trans one_pos hg
+  have hVg : Valued.v V * Valued.v g = 1 := by
+    rw [← Valuation.map_mul, mul_comm V g, hinv, Valuation.map_one]
+  have hV1 : Valued.v V < 1 := by
+    by_contra hcon
+    push Not at hcon
+    have h2 : (1 : NNReal) * 1 < Valued.v V * Valued.v g := by
+      calc (1 : NNReal) * 1 = 1 := one_mul 1
+        _ ≤ 1 * Valued.v V := by rw [one_mul]; exact hcon
+        _ < Valued.v g * Valued.v V := by
+            exact mul_lt_mul_of_pos_right hg
+              (lt_of_lt_of_le one_pos hcon)
+        _ = Valued.v V * Valued.v g := mul_comm _ _
+    rw [one_mul, hVg] at h2
+    exact absurd h2 (lt_irrefl _)
+  obtain ⟨B, hB⟩ := hybdd
+  refine tendsto_order.mpr
+    ⟨fun c hc => absurd hc (not_lt.mpr zero_le), fun δ hδ => ?_⟩
+  have hδ2 : (0 : NNReal) < δ / 2 := half_pos hδ
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp
+    ((hy0.eventually_lt_const hδ2).mono fun i h => h.le)
+  -- the head constant dies under the inverse powers
+  have hhead : Filter.Tendsto
+      (fun n : ℕ => B * Valued.v g ^ N * Valued.v V ^ (n + 1))
+      Filter.atTop (nhds 0) := by
+    have h1 : Filter.Tendsto (fun n : ℕ => Valued.v V ^ (n + 1))
+        Filter.atTop (nhds 0) := by
+      have h2 := tendsto_pow_atTop_nhds_zero_of_lt_one hV1
+      have h3 := h2.comp (Filter.tendsto_add_atTop_nat 1)
+      exact h3
+    have h4 := h1.const_mul (B * Valued.v g ^ N)
+    simpa using h4
+  obtain ⟨N₂, hN₂⟩ := Filter.eventually_atTop.mp
+    (hhead.eventually_lt_const hδ2)
+  rw [Filter.eventually_atTop]
+  refine ⟨max N N₂, fun n hn => ?_⟩
+  have hnN : N ≤ n := le_trans (le_max_left _ _) hn
+  have hnN₂ : N₂ ≤ n := le_trans (le_max_right _ _) hn
+  -- the split sum bound
+  have hS : Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i)
+      ≤ max (B * Valued.v g ^ N) ((δ / 2) * Valued.v g ^ n) := by
+    refine Valuation.map_sum_le _ (fun i hi => ?_)
+    have hin : i ≤ n := by
+      have := Finset.mem_range.mp hi
+      omega
+    rw [Valuation.map_mul, Valuation.map_pow]
+    by_cases hiN : i ≤ N
+    · refine le_trans ?_ (le_max_left _ _)
+      refine mul_le_mul (hB ⟨i, rfl⟩) ?_ zero_le zero_le
+      exact pow_le_pow_right₀ hg.le hiN
+    · refine le_trans ?_ (le_max_right _ _)
+      refine mul_le_mul ?_ ?_ zero_le zero_le
+      · exact hN i (by omega)
+      · exact pow_le_pow_right₀ hg.le hin
+  calc Valued.v (-(V ^ (n + 1) * ∑ i ∈ Finset.range (n + 1), y i * g ^ i))
+      = Valued.v V ^ (n + 1)
+        * Valued.v (∑ i ∈ Finset.range (n + 1), y i * g ^ i) := by
+        rw [Valuation.map_neg, Valuation.map_mul, Valuation.map_pow]
+    _ ≤ Valued.v V ^ (n + 1)
+        * max (B * Valued.v g ^ N) ((δ / 2) * Valued.v g ^ n) :=
+        mul_le_mul_of_nonneg_left hS zero_le
+    _ = max (B * Valued.v g ^ N * Valued.v V ^ (n + 1))
+        ((δ / 2) * (Valued.v g ^ n * Valued.v V ^ (n + 1))) := by
+        rw [mul_max_of_nonneg _ _ (zero_le
+          : (0:NNReal) ≤ Valued.v V ^ (n + 1))]
+        congr 1
+        · ring
+        · ring
+    _ ≤ max (δ / 2) (δ / 2) := by
+        refine max_le_max ?_ ?_
+        · exact (hN₂ n hnN₂).le
+        · calc (δ / 2) * (Valued.v g ^ n * Valued.v V ^ (n + 1))
+              = (δ / 2) * ((Valued.v V * Valued.v g) ^ n * Valued.v V) := by
+                rw [mul_pow]
+                ring
+            _ = (δ / 2) * Valued.v V := by rw [hVg, one_pow, one_mul]
+            _ ≤ (δ / 2) * 1 :=
+                mul_le_mul_of_nonneg_left hV1.le zero_le
+            _ = δ / 2 := mul_one _
+    _ = δ / 2 := max_self _
+    _ < δ := NNReal.half_lt_self hδ.ne'
+
 end FarguesFontaine
 
 end
