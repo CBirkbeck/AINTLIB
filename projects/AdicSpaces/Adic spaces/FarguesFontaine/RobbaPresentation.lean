@@ -2757,6 +2757,38 @@ theorem wIRPS_le_GeltElt_mul (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ�
   exact max_le_max (NfstRPS_le_GeltElt_mul p F ϖ gB f)
     (NsndRPS_le_GeltElt_mul p F ϖ gB f)
 
+/-- **The restriction at the top radius is the second component.** -/
+theorem resI_eq_snd {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₂0 hρ₂1 z = z.2 := by
+  haveI := neBot_comap_of_mem_BISub p F ϖ hz
+  refine Filter.Tendsto.limUnder_eq ?_
+  have h1 : Filter.Tendsto (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds z) := Filter.tendsto_comap
+  have h2 : Filter.Tendsto
+      (fun x => (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x).2)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds z.2) := (continuous_snd.tendsto z).comp h1
+  refine h2.congr fun x => ?_
+  exact BIProd_snd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+
+/-- **The restriction at the bottom radius is the first component.** -/
+theorem resI_eq_fst {z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :
+    resI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 hρ₁0 hρ₁1 z = z.1 := by
+  haveI := neBot_comap_of_mem_BISub p F ϖ hz
+  refine Filter.Tendsto.limUnder_eq ?_
+  have h1 : Filter.Tendsto (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds z) := Filter.tendsto_comap
+  have h2 : Filter.Tendsto
+      (fun x => (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x).1)
+      (Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) (nhds z))
+      (nhds z.1) := (continuous_fst.tendsto z).comp h1
+  refine h2.congr fun x => ?_
+  exact BIProd_fst p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x
+
 end FarguesFontaine
 
 end
