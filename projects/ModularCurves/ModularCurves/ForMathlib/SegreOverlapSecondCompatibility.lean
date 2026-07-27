@@ -1203,4 +1203,26 @@ lemma segreProductStandardChartToImageProj_compatible
     _ = _ := by
       rw [segreProductStandardOverlapIso_hom_toSecondChart]
 
+/-- The morphism from the product of projective spaces to the `Proj` of the Segre-image
+coordinate ring obtained by gluing the standard chart maps. -/
+def segreProductToImageProj
+    (R : Type u) [CommRing R] (m n : ℕ) :
+    segreProductProj R m n ⟶ segreImageProj R m n :=
+  (segreProductStandardOpenCover R m n).glueMorphisms
+    (fun q =>
+      segreProductStandardChartToImageProj
+        R m n q.1 q.2)
+    (fun q r =>
+      segreProductStandardChartToImageProj_compatible
+        R m n q.1 r.1 q.2 r.2)
+
+/-- The global Segre morphism restricts to the prescribed morphism on every standard chart. -/
+lemma segreProductStandardOpenCover_f_segreProductToImageProj
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i : Fin (m + 1)) (j : Fin (n + 1)) :
+    (segreProductStandardOpenCover R m n).f (i, j) ≫
+        segreProductToImageProj R m n =
+      segreProductStandardChartToImageProj R m n i j := by
+  apply Scheme.Cover.ι_glueMorphisms
+
 end MvPolynomial
