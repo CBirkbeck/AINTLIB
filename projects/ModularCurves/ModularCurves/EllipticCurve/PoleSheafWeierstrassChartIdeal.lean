@@ -86,6 +86,25 @@ private theorem ideal_comap_affineOpens_eq_map
   exact hresOuter.trans (hUcancelApply.trans
     (congrArg (f.appLE V.1 U.1 hUV).hom hVapply.symm))
 
+/-- Restricting an ideal sheaf to an affine open transports its ideal through
+the canonical equivalence on global sections. -/
+theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.ideal_comap_affineOpen_top
+    {X : Scheme.{u}}
+    (I : X.IdealSheafData) (U : X.affineOpens) :
+    (I.comap U.1.ι).ideal ⟨⊤, isAffineOpen_top _⟩ =
+      (I.ideal U).map U.1.topIso.inv.hom := by
+  let V : U.1.toScheme.affineOpens :=
+    ⟨⊤, isAffineOpen_top _⟩
+  have hVU : V.1 ≤ U.1.ι ⁻¹ᵁ U.1 := by
+    simpa only [V, Scheme.Opens.ι_preimage_self] using
+      (le_rfl : (⊤ : U.1.toScheme.Opens) ≤ ⊤)
+  rw [ideal_comap_affineOpens_eq_map I U.1.ι V U hVU]
+  have happ :
+      U.1.ι.appLE U.1 V.1 hVU = U.1.topIso.inv := by
+    change U.1.ι.appLE U.1 ⊤ _ = U.1.topIso.inv
+    exact ι_appLE_top U.1
+  rw [happ]
+
 /-- A unit-`Y` projective coordinate map pulls a standard `Y`-chart section back by
 `chartAwayHomOfTriple`. -/
 theorem projModelFromOfGlobalSections_appLE_chartYSection
