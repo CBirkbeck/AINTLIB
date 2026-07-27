@@ -1425,7 +1425,17 @@ non-Tate bases are supported.
     membership interface). With it, IsSheafy transports to the canonical
     pair and spaVObj_of_isSheafy applies verbatim at B_n. Alternatives if
     the equality resists: state spaVObj at the transported pair (letI) —
-    works but pollutes downstream plus-references.
+    works but pollutes downstream plus-references. ★ CHART VObj DONE
+    2026-07-27 (FarguesFontaine/ChartVObj.lean, transported-pair form):
+    chartPlus/chartTate (named instance-defs) + **chartVObj** =
+    spaVObj_of_isSheafy at the chart pair — compiled FIRST SHOT, all
+    axiom-clean. The FF Big-window charts are now objects of 𝒱 with the
+    complete Wedhorn 8.14/8.20 package. REMAINING for the Y-object:
+    (α) the plus-reconciliation (upgrade to the canonical pair, optional
+    if downstream works transported); (β) the ARCHITECTURE DECISION
+    (ambient-vs-glue, M8-note above) and the cross-chart assembly of the
+    Y-VObj from the chartVObj chain + the D-ii-2 split fiber-product; then
+    (D-iii) the φ-action as VObj-isos and X := Y/φ^ℤ.
     Then Y := glue the ℤ-chain of chart VObjs (cocycle-free, adjacent
     circles only; transitions from BISub_twist + the ID2 comparisons + the
     D-ii-2 split fiber-product) — architecture note above stands. Original:
