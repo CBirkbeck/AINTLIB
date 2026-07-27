@@ -1153,9 +1153,28 @@ non-Tate bases are supported.
     needs the composite chartRingEquivBIQ-continuity whose step-3 instance
     kernel-ground — profiler task; alternatively restate windowResBIQ as the
     unfolded four-step RingHom-comp so each factor's continuity applies
-    foldedly. NEXT: the negative-side windowResBIQNeg mirror; the pairwise
-    compatibility (two windows restricting to a common circle-subinterval
-    agree through the overlap identifications) — the sheaf-gluing datum. Negative-side mirror DONE 2026-07-27
+    foldedly. windowResBIQNeg DONE 2026-07-27. SUBSTRATE
+    ASSESSMENT (2026-07-27): NO pairwise-compatibility lemma is needed at
+    the value level — the presheaf-on-basis is manifestly well-defined:
+    values 𝒪(I) := BIQ-I, restrictions biResQ' (functorial: id/comp laws
+    proven), window-independent by construction; the windows enter only in
+    the SHEAF-condition proof (transporting sections through
+    windowResBIQ/Neg and the chart sheafiness). THE INTERVAL-PRESHEAF
+    SUBSTRATE IS COMPLETE. NEXT PHASE (spawn as D-ii-1..3, D-iii):
+    (D-ii-1) the Y-presheaf on all opens: extend from the κ-interval basis
+    (limitSections-style limit over basis-elements inside an open; adapt
+    SheafyPair/StructurePresheafBundled shapes from Spa(A) to the Y-subspace
+    with its bigWindow-trace basis — the traces and their openness are in
+    ChartSpa); (D-ii-2) the sheaf condition: per-window via
+    isSheafy_presheafChart + spaChartHomeoBigWindow + windowResBIQ,
+    refinement via the rational basis; (D-ii-3) VPreObj packaging: stalks +
+    valuations (stalk theory over the sheafy charts); (D-iii) φ-action as
+    shifts of the BIQ-indexing (κ ↦ pκ maps interval-exponents q ↦ q/p —
+    at the BIQ level a REINDEXING equiv, cleanly compatible with biResQ'),
+    then X := Y/φ^ℤ via Curve.lean's point-set layer + descent. DEFERRED
+    (profiler task): composite chartRingEquivBIQ-continuity (step-3 kernel
+    grind) and hence windowResBIQ-continuity — needed by D-ii-2's topology
+    half; the unfolded four-step comp restatement is the likely fix. Negative-side mirror DONE 2026-07-27
     (chartRingEquivBIQNeg via the pPowM abbreviation — presheafValue of the
     (-m)-window chart ≃+* ↥(BIQ (p^m) (p^m/p)); the twist enters through
     BISub_twist.symm since the power relation points the other way). BOARD-HYGIENE LESSON: two
