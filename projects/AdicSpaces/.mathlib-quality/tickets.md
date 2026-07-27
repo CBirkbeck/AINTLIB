@@ -1161,11 +1161,14 @@ non-Tate bases are supported.
     the SHEAF-condition proof (transporting sections through
     windowResBIQ/Neg and the chart sheafiness). THE INTERVAL-PRESHEAF
     SUBSTRATE IS COMPLETE. NEXT PHASE (spawn as D-ii-1..3, D-iii):
-    (D-ii-1) the Y-presheaf on all opens: extend from the κ-interval basis
-    (limitSections-style limit over basis-elements inside an open; adapt
-    SheafyPair/StructurePresheafBundled shapes from Spa(A) to the Y-subspace
-    with its bigWindow-trace basis — the traces and their openness are in
-    ChartSpa); (D-ii-2) the sheaf condition: per-window via
+    (D-ii-1) the Y-presheaf on all opens: STARTED 2026-07-27
+    (FarguesFontaine/YPresheaf.lean — intervalTrace (the κ ∈ [1/q₁,1/q₂]
+    loci in KGE/KLE form, matching the BIQ q₁ q₂-indexing),
+    bigWindow_eq_intervalTrace, intervalTrace_mono). NEXT: openness of
+    attainable-endpoint traces (dyadic q = j/p^s via the twisted-uniformizer
+    rationalOpen identifications, generalizing the bigWindow ones), then the
+    limit-over-basis presheaf (limitSections-style over basis-intervals
+    inside an open; adapt SheafyPair/StructurePresheafBundled shapes); (D-ii-2) the sheaf condition: per-window via
     isSheafy_presheafChart + spaChartHomeoBigWindow + windowResBIQ,
     refinement via the rational basis; (D-ii-3) VPreObj packaging: stalks +
     valuations (stalk theory over the sheafy charts); (D-iii) φ-action:
