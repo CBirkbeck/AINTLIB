@@ -189,4 +189,62 @@ def segreProductRightOverlapLift
     (projectiveCoordinateRatio R j b)
     (segreProductOverlapRightRatio_isUnit R m n i a j b)
 
+/-- The first-factor overlap lift extends its map from the first projective chart. -/
+lemma segreProductLeftOverlapLift_comp_first
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductLeftOverlapLift R m n i a j b).comp
+        (projectiveFirstChartToOverlapAway R i a) =
+      segreProductOverlapLeftRingHom R m n i a j b := by
+  letI := (projectiveFirstChartToOverlapAway R i a).toAlgebra
+  letI :
+      IsLocalization.Away
+        (projectiveCoordinateRatio R i a)
+        (ProjectiveCoordinateOverlapAway R i a) := by
+    rw [projectiveCoordinateRatio_eq_isLocalizationElem]
+    exact Away.isLocalization_mul
+      (X_mem_homogeneousSubmodule_one R i)
+      (X_mem_homogeneousSubmodule_one R a)
+      rfl Nat.one_ne_zero
+  change
+    (IsLocalization.Away.lift
+        (projectiveCoordinateRatio R i a)
+        (segreProductOverlapLeftRatio_isUnit R m n i a j b)).comp
+          (algebraMap
+            (ProjectiveCoordinateAway R i)
+            (ProjectiveCoordinateOverlapAway R i a)) =
+      segreProductOverlapLeftRingHom R m n i a j b
+  exact IsLocalization.Away.lift_comp
+    (projectiveCoordinateRatio R i a)
+    (segreProductOverlapLeftRatio_isUnit R m n i a j b)
+
+/-- The second-factor overlap lift extends its map from the first projective chart. -/
+lemma segreProductRightOverlapLift_comp_first
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductRightOverlapLift R m n i a j b).comp
+        (projectiveFirstChartToOverlapAway R j b) =
+      segreProductOverlapRightRingHom R m n i a j b := by
+  letI := (projectiveFirstChartToOverlapAway R j b).toAlgebra
+  letI :
+      IsLocalization.Away
+        (projectiveCoordinateRatio R j b)
+        (ProjectiveCoordinateOverlapAway R j b) := by
+    rw [projectiveCoordinateRatio_eq_isLocalizationElem]
+    exact Away.isLocalization_mul
+      (X_mem_homogeneousSubmodule_one R j)
+      (X_mem_homogeneousSubmodule_one R b)
+      rfl Nat.one_ne_zero
+  change
+    (IsLocalization.Away.lift
+        (projectiveCoordinateRatio R j b)
+        (segreProductOverlapRightRatio_isUnit R m n i a j b)).comp
+          (algebraMap
+            (ProjectiveCoordinateAway R j)
+            (ProjectiveCoordinateOverlapAway R j b)) =
+      segreProductOverlapRightRingHom R m n i a j b
+  exact IsLocalization.Away.lift_comp
+    (projectiveCoordinateRatio R j b)
+    (segreProductOverlapRightRatio_isUnit R m n i a j b)
+
 end MvPolynomial
