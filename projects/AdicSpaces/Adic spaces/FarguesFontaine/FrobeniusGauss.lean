@@ -5,6 +5,8 @@ Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.FrobeniusAction
 import «Adic spaces».FarguesFontaine.GaussNorm
+import «Adic spaces».FarguesFontaine.RobbaLoc
+import «Adic spaces».FarguesFontaine.UniformizerEquivariance
 
 /-!
 # Frobenius and the Gauss valuations (D-iii foundation)
@@ -28,6 +30,7 @@ namespace FarguesFontaine
 variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
+variable (ϖ : PseudoUniformizer F)
 
 /-- Frobenius acts coefficient-wise as the `p`-th power on Teichmüller
 coordinates. -/
@@ -64,6 +67,75 @@ theorem gaussValue_frob {ρ : NNReal} (hρ1 : ρ ≤ 1) (x : Ainf p F) :
   congr 1
   funext n
   exact gaussTerm_frob p F ρ x n
+
+/-- Frobenius sends the inverted element to a unit of `Bloc`. -/
+theorem isUnit_frob_p_teichPi_image (y : Submonoid.powers
+    ((p : Ainf p F) * teichPi p F ϖ)) :
+    IsUnit (algebraMap (Ainf p F) (Bloc p F ϖ) (frob p F (y : Ainf p F))) := by
+  obtain ⟨k, hk⟩ := y.2
+  rw [show (y : Ainf p F) = ((p : Ainf p F) * teichPi p F ϖ) ^ k from hk.symm,
+    map_pow, map_pow]
+  refine IsUnit.pow k ?_
+  rw [map_mul, frob_natCast, frob_teichPi, map_mul, map_pow]
+  exact (isUnit_p_image p F ϖ).mul ((isUnit_teichPi_image p F ϖ).pow p)
+
+/-- **Frobenius on `Bloc`**, by the universal property of the localization. -/
+noncomputable def frobBloc : Bloc p F ϖ →+* Bloc p F ϖ :=
+  IsLocalization.lift (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))
+    (g := (algebraMap (Ainf p F) (Bloc p F ϖ)).comp (frob p F).toRingHom)
+    (fun y => isUnit_frob_p_teichPi_image p F ϖ y)
+
+@[simp]
+theorem frobBloc_algebraMap (x : Ainf p F) :
+    frobBloc p F ϖ (algebraMap (Ainf p F) (Bloc p F ϖ) x)
+      = algebraMap (Ainf p F) (Bloc p F ϖ) (frob p F x) :=
+  IsLocalization.lift_eq _ x
+
+/-- **The radius-change law on `Bloc`**: `w_{ρ^p}(φ z) = w_ρ(z)^p`. -/
+theorem wLoc_frobBloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hρp0 : 0 < ρ ^ p) (hρp1 : ρ ^ p < 1) (z : Bloc p F ϖ) :
+    wLoc p F ϖ hρp0 hρp1 (frobBloc p F ϖ z) = wLoc p F ϖ hρ0 hρ1 z ^ p := by
+  obtain ⟨⟨a, y⟩, hz⟩ := IsLocalization.surj
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ)) z
+  obtain ⟨m, hm⟩ := y.2
+  have hz' : z * algebraMap (Ainf p F) (Bloc p F ϖ)
+      (((p : Ainf p F) * teichPi p F ϖ) ^ m) = algebraMap _ _ a := by
+    rw [show ((p : Ainf p F) * teichPi p F ϖ) ^ m = (y : Ainf p F) from hm]
+    exact hz
+  have himg : frobBloc p F ϖ z * algebraMap (Ainf p F) (Bloc p F ϖ)
+      (frob p F (((p : Ainf p F) * teichPi p F ϖ) ^ m))
+      = algebraMap _ _ (frob p F a) := by
+    have hmap := congrArg (frobBloc p F ϖ) hz'
+    rwa [map_mul, frobBloc_algebraMap, frobBloc_algebraMap] at hmap
+  have h1 := congrArg (wLoc p F ϖ hρp0 hρp1) himg
+  have h2 := congrArg (wLoc p F ϖ hρ0 hρ1) hz'
+  rw [Valuation.map_mul, wLoc_algebraMap, wLoc_algebraMap,
+    gaussValue_frob p F hρ1.le, gaussValue_frob p F hρ1.le] at h1
+  rw [Valuation.map_mul, wLoc_algebraMap, wLoc_algebraMap] at h2
+  have hval : gaussValue p F ρ (((p : Ainf p F) * teichPi p F ϖ) ^ m)
+      = (ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m :=
+    gaussValue_p_teichPi_pow p F ϖ hρ0 hρ1 m
+  have hπ0 : (0 : NNReal) < perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) := by
+    refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
+    exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+  have hne : ((ρ * perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m) ^ p ≠ 0 :=
+    pow_ne_zero p (pow_ne_zero m (mul_ne_zero hρ0.ne' hπ0.ne'))
+  rw [hval] at h1 h2
+  -- h1 : wLoc_{ρ^p}(φz) * ((ρ·vπ)^m)^p = gaussValue_ρ(a)^p  (after the pow-collapse)
+  -- h2 : wLoc_ρ(z) * (ρ·vπ)^m = gaussValue_ρ(a)
+  refine mul_right_cancel₀ hne ?_
+  calc wLoc p F ϖ hρp0 hρp1 (frobBloc p F ϖ z)
+        * ((ρ * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m) ^ p
+      = gaussValue p F ρ a ^ p := h1
+    _ = (wLoc p F ϖ hρ0 hρ1 z * (ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m) ^ p := by rw [h2]
+    _ = wLoc p F ϖ hρ0 hρ1 z ^ p * ((ρ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m) ^ p := by
+        rw [mul_pow]
 
 end FarguesFontaine
 
