@@ -652,6 +652,16 @@ theorem exists_glue_extending (W : Opens ↥(yTop p F ϖ))
   obtain ⟨g, hg⟩ := exists_translateFam_glue p F ϖ W hdis s
   exact ⟨g, hg, (hg 0).trans (translateFam_zero p F ϖ W s)⟩
 
+/-- Additivity of the Frobenius preimage of opens. -/
+theorem frobOpens_add (k l : ℤ)
+    (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    frobOpens p F (k + l) W = frobOpens p F k (frobOpens p F l W) := by
+  refine Opens.ext ?_
+  ext v
+  show spaFrob p F (k + l) v ∈ (W : Set _)
+    ↔ spaFrob p F l (spaFrob p F k v) ∈ (W : Set _)
+  rw [spaFrob_add p F k l v]
+
 end FarguesFontaine
 
 end

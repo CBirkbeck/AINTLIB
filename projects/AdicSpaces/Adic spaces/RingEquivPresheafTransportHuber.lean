@@ -602,6 +602,65 @@ theorem presheafValueRingEquivHuber_comp_apply
     rfl
   exact congr_fun (congrArg DFunLike.coe halg) l
 
+/-- **The value-level composite law, `symm` form.** -/
+theorem presheafValueRingEquivHuber_comp_symm_apply
+    (e₁ : A ≃+* B) (he₁ : Continuous e₁) (he₁' : Continuous e₁.symm)
+    (e₂ : B ≃+* C) (he₂ : Continuous e₂) (he₂' : Continuous e₂.symm)
+    (D : RationalLocData A)
+    (hle : rationalOpen ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').T
+        ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').s
+      ⊆ rationalOpen (D.mapHuber (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂')).T
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s)
+    (hle' : rationalOpen (D.mapHuber (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂')).T
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂')).s
+      ⊆ rationalOpen ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').T
+        ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂').s)
+    (z : presheafValue ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')) :
+    (presheafValueRingEquivHuber e₁ he₁ he₁' D).symm
+        ((presheafValueRingEquivHuber e₂ he₂ he₂'
+          (D.mapHuber e₁ he₁ he₁')).symm z)
+      = (presheafValueRingEquivHuber (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂') D).symm
+          (restrictionMap ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')
+            (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+            hle' z) := by
+  have hx := presheafValueRingEquivHuber_comp_apply e₁ he₁ he₁' e₂ he₂ he₂'
+    D hle
+    ((presheafValueRingEquivHuber (e₁.trans e₂) (he₂.comp he₁)
+      (he₁'.comp he₂') D).symm
+      (restrictionMap ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+        hle' z))
+  rw [RingEquiv.apply_symm_apply] at hx
+  have hzz : restrictionMap
+      (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle
+      (restrictionMap ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')
+        (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+        hle' z) = z := by
+    have hcomp := congr_fun (restrictionMap_comp
+      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')
+      (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂') hle' hle) z
+    have hid := congr_fun (restrictionMap_id
+      ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')) z
+    exact hcomp.trans hid
+  rw [hzz] at hx
+  have h1 : (presheafValueRingEquivHuber e₂ he₂ he₂'
+      (D.mapHuber e₁ he₁ he₁')).symm z
+      = presheafValueRingEquivHuber e₁ he₁ he₁' D
+          ((presheafValueRingEquivHuber (e₁.trans e₂) (he₂.comp he₁)
+            (he₁'.comp he₂') D).symm
+            (restrictionMap ((D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂')
+              (D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂'))
+              hle' z)) := by
+    conv_lhs => rw [← hx]
+    exact RingEquiv.symm_apply_apply _ _
+  exact (congrArg (⇑(presheafValueRingEquivHuber e₁ he₁ he₁' D).symm)
+    h1).trans (RingEquiv.symm_apply_apply _ _)
+
 end CompositeValue
 
 end Composite
