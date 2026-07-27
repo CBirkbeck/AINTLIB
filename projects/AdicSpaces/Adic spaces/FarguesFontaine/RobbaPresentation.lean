@@ -463,6 +463,65 @@ def evalBIHom {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
 
 end EvalBI
 
+
+/-! ### The interval Gauss norm on restricted series (T910 P3 substrate) -/
+
+variable {k : ℕ}
+
+/-- **The interval Gauss norm** on multivariate power series over `B^I`
+(radius-1 variables): the supremum of the coefficient interval norms. -/
+def wIRPS (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1)
+    (f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : NNReal :=
+  ⨆ s : Fin k →₀ ℕ, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+    ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+
+/-- Restricted series have bounded coefficient norms. -/
+theorem bddAbove_wIRPS
+    {f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    BddAbove (Set.range (fun s : Fin k →₀ ℕ =>
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))) := by
+  have hfin := (isRestricted_iff_wI p F ϖ f).mp hf 1 one_pos
+  refine ⟨max 1 ((hfin.toFinset).sup (fun s =>
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))), ?_⟩
+  rintro t ⟨s, rfl⟩
+  rcases le_or_gt (wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) 1 with h1 | h1
+  · exact le_max_of_le_left h1
+  · refine le_max_of_le_right (Finset.le_sup
+      (f := fun s => wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ?_)
+    rw [Set.Finite.mem_toFinset]
+    exact h1
+
+/-- Each coefficient norm is bounded by the interval Gauss norm. -/
+theorem wI_coeff_le_wIRPS
+    {f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) (s : Fin k →₀ ℕ) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      ≤ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f :=
+  le_ciSup (bddAbove_wIRPS p F ϖ hf) s
+
+/-- The interval Gauss norm of `0`. -/
+theorem wIRPS_zero :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (0 : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) = 0 := by
+  rw [wIRPS]
+  refine le_antisymm (ciSup_le fun s => ?_) zero_le
+  rw [map_zero]
+  rw [show (((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 from rfl]
+  rw [wI_zero p F]
+
 end FarguesFontaine
 
 end
