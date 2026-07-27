@@ -554,6 +554,41 @@ theorem isSheafy_canonical_window (n : ℤ) :
     (chartPlus_instance_eq_canonical p F (windowUnif p F ϖ n) p (by omega)
       rfl (window_hexact2 p F ϖ n)) _ _ hs
 
+/-- **YB6c-3c′, assembled — the single-window sheaf condition over the
+ambient `A_inf`**: every valid rational covering whose base lies inside a
+window chart's rational open satisfies both `IsSheafy`-fields, by the
+single-`D₀` transport at the window chart ring (which is sheafy at the
+canonical instances) with span certificates from the `p`-adic window unit. -/
+theorem isSheafyOn_window (n : ℤ) :
+    ValuationSpectrum.IsSheafyOn (A := Ainf p F)
+      (rationalOpen (chartData p F (windowUnif p F ϖ n) 1 1 p 1).T
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1).s) := by
+  classical
+  haveI : IsTateRing (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
+    isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+  haveI : IsHuberRing (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
+    IsTateRing.toIsHuberRing
+  letI : @CompleteSpace (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1))
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1))) :=
+    completeSpace_right_presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+  haveI : ValuationSpectrum.IsSheafy (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
+    isSheafy_canonical_window p F ϖ n
+  refine ⟨?_, ?_⟩
+  · intro C hC hCS
+    exact isEmbedding_productRestrictionSub_of_imgCovering
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+      (fun E hE => span_image_windowChart_eq_top p F ϖ n E hE) C hC hCS
+  · intro C hC hCS f hf
+    exact exists_glue_of_imgCovering
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+      (fun E hE => span_image_windowChart_eq_top p F ϖ n E hE) C hC hCS f hf
+
 end FarguesFontaine
 
 
