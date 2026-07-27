@@ -1593,6 +1593,85 @@ theorem evalBI_monomial {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ
 
 end EvalBIMonomial
 
+/-- The interval Gauss norm of a monomial. -/
+theorem wIRPS_monomial (J : Fin k →₀ ℕ)
+    (y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (MvPowerSeries.monomial J y
+          : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+  refine le_antisymm (ciSup_le fun s => ?_) ?_
+  · rw [MvPowerSeries.coeff_monomial]
+    by_cases hs : s = J
+    · rw [if_pos hs]
+    · rw [if_neg hs]
+      rw [show (((0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) = 0 from rfl,
+        wI_zero p F]
+      exact zero_le
+  · have h := le_ciSup (bddAbove_wIRPS p F ϖ
+      (isRestricted_monomial_BI p F ϖ (J := J) y)) J
+    rw [MvPowerSeries.coeff_monomial, if_pos rfl] at h
+    exact h
+
+/-- Ultrametric bound for sums of restricted series. -/
+theorem wIRPS_add_le
+    {f g : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) (hg : MvPowerSeries.IsRestricted g) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 (f + g)
+      ≤ max (wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f)
+          (wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 g) := by
+  refine ciSup_le fun s => ?_
+  rw [map_add, BISub_coe_add p F ϖ]
+  refine le_trans (wI_add_le p F _ _) (max_le_max ?_ ?_)
+  · exact wI_coeff_le_wIRPS p F ϖ hf s
+  · exact wI_coeff_le_wIRPS p F ϖ hg s
+
+/-- The interval Gauss norm of a finite sum of restricted series is bounded
+by any common bound. -/
+theorem wIRPS_finset_sum_le {ι : Type*} (s : Finset ι)
+    (f : ι → ↥(restrictedMvPowerSeriesSubring k
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (B : NNReal)
+    (hf : ∀ i ∈ s, wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((f i : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ B) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (((∑ i ∈ s, f i : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) ≤ B := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    have hzero : ((0 : ↥(restrictedMvPowerSeriesSubring k
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+        : MvPowerSeries (Fin k)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) = 0 := rfl
+    rw [Finset.sum_empty, hzero, wIRPS_zero]
+    exact zero_le
+  | insert a t ha ih =>
+    rw [Finset.sum_insert ha]
+    have hcoe : (((f a + ∑ i ∈ t, f i
+          : ↥(restrictedMvPowerSeriesSubring k
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))))
+          : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        = ((f a : ↥(restrictedMvPowerSeriesSubring k
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          + ((∑ i ∈ t, f i : ↥(restrictedMvPowerSeriesSubring k
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+            : MvPowerSeries (Fin k)
+              ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := rfl
+    rw [hcoe]
+    refine le_trans (wIRPS_add_le p F ϖ (f a).2
+      (∑ i ∈ t, f i).2) (max_le (hf a (Finset.mem_insert_self a t)) ?_)
+    exact ih fun i hi => hf i (Finset.mem_insert_of_mem hi)
+
 end FarguesFontaine
 
 end
