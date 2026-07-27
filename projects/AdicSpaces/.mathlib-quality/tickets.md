@@ -1767,7 +1767,15 @@ non-Tate bases are supported.
     (RelativeDescentHuber: mem_imgDatumO_rationalOpen_iff +
     imgDatumOTot/imgCoversO/imgCoveringO + rationality; PERF: dite-
     guarded total function instead of dependent attach-image).
-    (3c) the single-window transport of embedding+
+    ★ 3c GLUING DONE 2026-07-27
+    (RelativeDescentHuber): **exists_glue_of_imgCovering** — the
+    single-D₀ gluing transport end-to-end (imgFamily_restriction +
+    the transported all-data compatibility + B-glue + keystone
+    pullback + choice-coherent recovery); every hypothesis window-
+    dischargeable. REMAINING from 3c: the EMBEDDING-half transport
+    (productRestrictionSub through the keystone equivalences — same
+    square machinery, topological); then (3c′) the window-instantiation
+    of both halves (IsSheafyOn-single-window). (3c-orig) the single-window transport of embedding+
     gluing through keystoneO + keystone_restriction_squareO to the
     B_n IsSheafy (isSheafy_presheafChart); (3d) the straddling case
     (window-piece refinement + the adjacent-circle glue via
