@@ -31,6 +31,7 @@ variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 variable (ϖ : PseudoUniformizer F)
+variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
 
 /-- Frobenius acts coefficient-wise as the `p`-th power on Teichmüller
 coordinates. -/
@@ -136,6 +137,99 @@ theorem wLoc_frobBloc {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
     _ = wLoc p F ϖ hρ0 hρ1 z ^ p * ((ρ * perfectoidValuation p F
           ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ m) ^ p := by
         rw [mul_pow]
+
+/-- **The Frobenius is uniformly continuous** from the `[ρ₁,ρ₂]`-uniformity to
+the `[ρ₁^p,ρ₂^p]`-diagonal (power modulus). -/
+theorem uniformContinuous_frobToBI
+    (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
+    @UniformContinuous _ _ (blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) _
+      ((blocToBI p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1).comp (frobBloc p F ϖ)) := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : IsUniformAddGroup (Bloc p F ϖ) :=
+    isUniformAddGroup_blocWI p F ϖ
+  haveI : IsUniformAddGroup ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) :=
+    isUniformAddGroup_BISub p F ϖ
+  refine uniformContinuous_of_tendsto_zero ?_
+  rw [tendsto_subtype_rng]
+  have hcoe : (fun z => (((blocToBI p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1).comp
+      (frobBloc p F ϖ) z : ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1))
+        : (hatK p F hρ₁p0 hρ₁p1) × (hatK p F hρ₂p0 hρ₂p1)))
+      = fun z => BIProd p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 (frobBloc p F ϖ z) := rfl
+  rw [hcoe]
+  intro U hU
+  rw [Filter.mem_map]
+  obtain ⟨ε, hε, hball⟩ := exists_wI_ball_subset p F
+    (hρ₁0 := hρ₁p0) (hρ₁1 := hρ₁p1) (hρ₂0 := hρ₂p0) (hρ₂1 := hρ₂p1) hU
+  set δ : NNReal := ε ^ ((p : ℝ)⁻¹) with hδdef
+  have hδ : 0 < δ := NNReal.rpow_pos hε
+  have hδp : δ ^ p ≤ ε := by
+    rw [hδdef, ← NNReal.rpow_natCast (ε ^ ((p : ℝ)⁻¹)) p, ← NNReal.rpow_mul,
+      inv_mul_cancel₀ (by
+        have := Nat.Prime.pos (Fact.out : Nat.Prime p)
+        exact_mod_cast this.ne'), NNReal.rpow_one]
+  have hnhd : {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ δ} ∈ nhds
+        (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+    have h := wI_ball_mem_nhds p F
+      (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) hδ
+    simpa using h
+  rw [show (nhds (0 : Bloc p F ϖ))
+      = Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+        (nhds (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 0)) from nhds_induced _ _]
+  rw [map_zero]
+  refine Filter.mem_of_superset (Filter.preimage_mem_comap hnhd) ?_
+  intro z hz
+  refine hball ?_
+  show wI p F hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+    (BIProd p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 (frobBloc p F ϖ z)) ≤ ε
+  have hzI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ≤ δ := hz
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK] at hzI ⊢
+  rw [wLoc_frobBloc p F ϖ hρ₁0 hρ₁1 hρ₁p0 hρ₁p1,
+    wLoc_frobBloc p F ϖ hρ₂0 hρ₂1 hρ₂p0 hρ₂p1]
+  refine max_le ?_ ?_
+  · refine le_trans (pow_le_pow_left₀ zero_le
+      (le_trans (le_max_left _ _) hzI) p) hδp
+  · refine le_trans (pow_le_pow_left₀ zero_le
+      (le_trans (le_max_right _ _) hzI) p) hδp
+
+
+/-- **Frobenius on the interval rings**: `φ : B^{[ρ₁,ρ₂]} →+* B^{[ρ₁^p,ρ₂^p]}`,
+the dense extension of `frobBloc`. -/
+noncomputable def biPhi (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) :
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      →+* ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) :=
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : CompleteSpace ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  IsDenseInducing.extendRingHom
+    (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1))
+    (denseRange_blocToBI p F ϖ)
+    (uniformContinuous_frobToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1)
+
+/-- `φ` on the interval rings extends `frobBloc` on the dense layer. -/
+theorem biPhi_blocToBI (hρ₁p0 : 0 < ρ₁ ^ p) (hρ₁p1 : ρ₁ ^ p < 1)
+    (hρ₂p0 : 0 < ρ₂ ^ p) (hρ₂p1 : ρ₂ ^ p < 1) (z : Bloc p F ϖ) :
+    biPhi p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+        hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z)
+      = blocToBI p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1 (frobBloc p F ϖ z) := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : CompleteSpace ↥(BISub p F ϖ hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  exact IsDenseInducing.extend_eq
+    ((isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)).isDenseInducing
+      (denseRange_blocToBI p F ϖ))
+    (uniformContinuous_frobToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hρ₁p0 hρ₁p1 hρ₂p0 hρ₂p1).continuous z
 
 end FarguesFontaine
 
