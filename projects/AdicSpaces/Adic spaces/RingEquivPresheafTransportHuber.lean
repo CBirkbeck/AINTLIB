@@ -408,6 +408,58 @@ theorem presheafValueRingEquivHuber_symm_restriction
 
 end RestrictionHuberSymm
 
+section Composite
+
+variable {C : Type*} [CommRing C] [TopologicalSpace C] [IsTopologicalRing C]
+  [DecidableEq C]
+
+private theorem ideal_map_heq_of_targets_eq {R₀ : Type*} [CommRing R₀]
+    {C' : Type*} [CommRing C'] {S₁ S₂ : Subring C'} (h : S₁ = S₂)
+    (φ₁ : R₀ →+* ↥S₁) (φ₂ : R₀ →+* ↥S₂)
+    (hφ : ∀ x, ((φ₁ x : ↥S₁) : C') = ((φ₂ x : ↥S₂) : C')) (I : Ideal R₀) :
+    HEq (I.map φ₁) (I.map φ₂) := by
+  subst h
+  rw [show φ₁ = φ₂ from RingHom.ext fun x => Subtype.ext (hφ x)]
+
+/-- Composition law for the pair transport. -/
+theorem PairOfDefinition.mapRingEquiv_comp (e₁ : A ≃+* B) (he₁ : Continuous e₁)
+    (he₁' : Continuous e₁.symm) (e₂ : B ≃+* C) (he₂ : Continuous e₂)
+    (he₂' : Continuous e₂.symm) (P : PairOfDefinition A) :
+    PairOfDefinition.mapRingEquiv e₂ he₂ he₂'
+        (PairOfDefinition.mapRingEquiv e₁ he₁ he₁' P)
+      = PairOfDefinition.mapRingEquiv (e₁.trans e₂) (he₂.comp he₁)
+          (he₁'.comp he₂') P := by
+  refine PairOfDefinition.ext_of_fields ?_ ?_
+  · show (P.A₀.map e₁.toRingHom).map e₂.toRingHom
+      = P.A₀.map (e₁.trans e₂).toRingHom
+    rw [Subring.map_map]
+    rfl
+  · show HEq ((P.I.map (e₁.subringMap (s := P.A₀)).toRingHom).map
+        (e₂.subringMap (s := P.A₀.map e₁.toRingHom)).toRingHom)
+      (P.I.map ((e₁.trans e₂).subringMap (s := P.A₀)).toRingHom)
+    rw [Ideal.map_map]
+    exact ideal_map_heq_of_targets_eq
+      (by rw [Subring.map_map]; rfl)
+      ((e₂.subringMap (s := P.A₀.map e₁.toRingHom)).toRingHom.comp
+        (e₁.subringMap (s := P.A₀)).toRingHom)
+      ((e₁.trans e₂).subringMap (s := P.A₀)).toRingHom
+      (fun x => rfl) P.I
+
+/-- **Composition law for the Huber datum transport.** -/
+theorem RationalLocData.mapHuber_comp (e₁ : A ≃+* B) (he₁ : Continuous e₁)
+    (he₁' : Continuous e₁.symm) (e₂ : B ≃+* C) (he₂ : Continuous e₂)
+    (he₂' : Continuous e₂.symm) (D : RationalLocData A) :
+    (D.mapHuber e₁ he₁ he₁').mapHuber e₂ he₂ he₂'
+      = D.mapHuber (e₁.trans e₂) (he₂.comp he₁) (he₁'.comp he₂') := by
+  refine RationalLocData.ext' ?_ ?_ ?_
+  · exact PairOfDefinition.mapRingEquiv_comp e₁ he₁ he₁' e₂ he₂ he₂' D.P
+  · show (D.T.image e₁).image e₂ = D.T.image (e₁.trans e₂)
+    rw [Finset.image_image]
+    rfl
+  · rfl
+
+end Composite
+
 end ValuationSpectrum
 
 end
