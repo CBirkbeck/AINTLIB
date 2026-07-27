@@ -1625,7 +1625,17 @@ non-Tate bases are supported.
     the degenerate-interval circle comparison). The dyadic strip layer
     (Y-a, landed: instances + yPresheaf bundle) remains as interval-
     ring bookkeeping feeding the strip-level sheaf facts. E-TRACK PLAN
-    (spawned): (E1) ChartRatIdx — the index structure {(n : ℤ) ×
+    (spawned): (E1) DONE 2026-07-27 (YCharts.lean, commit ec5109b8e):
+    windowUnif/windowRing + full instance-alias package + ChartRatIdx
+    (Σ-encoded) + spaSet + trace (set-level sign dispatch). NEW PERF
+    LESSON (binding): a `structure` whose field type computes through
+    presheafValue sends the KERNEL through the completion machinery
+    and deterministically times out even when example-level uses pass
+    — encode as Σ+Subtype (elaborates as a plain def) with projection
+    defs. ALSO: backticks in `git commit -m` double-quoted messages
+    are command substitutions — the E1 commit message lost the word
+    `structure` that way; use single-quoted or heredoc messages.
+    Original: (E1) ChartRatIdx — the index structure {(n : ℤ) ×
     valid rational data D over B_n} with yTrace := the
     spaChartHomeoBigWindow-image of R(D) ⊆ Y, nesting relation via
     trace-inclusion; (E2) THE CROSS-CHART COMPARISON (hard core): for
