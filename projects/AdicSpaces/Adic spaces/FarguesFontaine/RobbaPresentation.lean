@@ -1241,6 +1241,23 @@ theorem exists_monomial_twist_div (zb : OF F) (m : ℕ) (hm : 0 < m)
       map_pow]
     exact hdvd
 
+/-- Cross-multiplied radial monotonicity: for `a ≤ b` and `k ≤ n`,
+`a^n b^k ≤ b^n a^k` — the engine of all zone norm-comparisons. -/
+theorem pow_mul_pow_le_of_le {a b : NNReal} (hab : a ≤ b) {k n : ℕ}
+    (hkn : k ≤ n) : a ^ n * b ^ k ≤ b ^ n * a ^ k := by
+  have h1 : a ^ n = a ^ k * a ^ (n - k) := by
+    rw [← pow_add]
+    congr 1
+    omega
+  have h2 : b ^ n = b ^ k * b ^ (n - k) := by
+    rw [← pow_add]
+    congr 1
+    omega
+  calc a ^ n * b ^ k = a ^ k * b ^ k * a ^ (n - k) := by rw [h1]; ring
+    _ ≤ a ^ k * b ^ k * b ^ (n - k) :=
+        mul_le_mul_right (pow_le_pow_left' hab _) _
+    _ = b ^ n * a ^ k := by rw [h2]; ring
+
 end FarguesFontaine
 
 end
