@@ -421,6 +421,25 @@ theorem exists_isRational_spaOpen_subset_huber [DecidableEq A]
   rw [hDP]
   exact hcert
 
+/-- **Every valid datum carries a power certificate at its own pair**: the
+open tray span contains an open image of a pair-ideal power, hence the
+ambient ideal power. -/
+theorem exists_pow_le_of_isRational (D : RationalLocData A)
+    (hD : D.IsRational) :
+    ∃ M : ℕ, (Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))) ^ M
+      ≤ Ideal.span (D.T : Set A) := by
+  have hbasis := D.P.hasBasis_nhds_zero
+  have hnhds : ((Ideal.span (D.T : Set A) : Ideal A) : Set A) ∈ nhds (0 : A) :=
+    hD.mem_nhds (Ideal.zero_mem _)
+  obtain ⟨M, -, hM⟩ := hbasis.mem_iff.mp hnhds
+  refine ⟨M, ?_⟩
+  rw [show Ideal.span (D.P.A₀.subtype '' (D.P.I : Set D.P.A₀))
+    = Ideal.map D.P.A₀.subtype D.P.I from rfl, ← Ideal.map_pow]
+  rw [Ideal.map]
+  refine Ideal.span_le.mpr ?_
+  intro x hx
+  exact hM hx
+
 end ValuationSpectrum
 
 end
