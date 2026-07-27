@@ -1731,7 +1731,16 @@ non-Tate bases are supported.
     p[ϖ]-unit argument) + the window-value identification (ambient
     Y-interior datum ↦ B_n-side value through keystoneO at D₀ :=
     windowChartData); then YB6c the Hom-cont sheaf assembly for
-    yPresheafedSpace.
+    yPresheafedSpace. ★ YB6b DONE 2026-07-27 (YStalks.lean):
+    bigWindow_eq_rationalOpen_windowUnif +
+    isUnit_canonicalMap_p_teichPi_window +
+    **span_image_windowChart_eq_top** — keystoneO applies at any
+    window chart against any valid ambient rational. YB6c REMAINING
+    (the last Y-VObj brick): the IsSheafOfTopologicalRings assembly —
+    per-window: ambient sections over window-interior opens vs the
+    B_n-side structure presheaf through keystoneO-value-identification
+    + isSheafy_presheafChart; then the Y-cover refinement. Substantial
+    assembly — next session's opening move; all substrates now exist.
     Original: (E2) THE CROSS-CHART COMPARISON: for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
