@@ -2331,6 +2331,19 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   is REUSABLE — the head monomials' lifts are FINITE sums). Also
   needed for P4 later: multiplicativity bound wI(y) ≥ wI-of-(T−g)·x
   (strictness) — locate wI_evalAr_le-analogues.
+  P3 DEPENDENCY DISCOVERED 2026-07-27: exists_evalAr_eq_of_correction
+  rests on (i) exists_rps_series_limit — completeness of the restricted-
+  series space (a Groebner.lean heavyweight, stated over ArSub) — the
+  case-1 mirror needs the ↥BISub-coefficient analogue (series of
+  restricted series with geometrically-decaying wIRPS converge; proof
+  mirrors the ArSub one: coefficientwise completeness of BISub +
+  uniform-decay bookkeeping), and (ii) wI_z_sub_evalAr_add_le (evalBI-
+  additivity residual estimate — cheap mirror via evalBI_add). Sequence
+  the P3 work as: (P3b) exists_rps_series_limit_BI, (P3c)
+  wI_z_sub_evalBI_add_le, (P3d) the first-approximation lemma (the
+  per-monomial Kedlaya lift on the Bloc-dense layer), (P3e)
+  exists_correction_sequence_BI + exists_evalBI_eq_of_correction +
+  surjectivity.
   ALSO note wI_finite_of_isRestricted (Presentation:2265) already
   covers the BISub-restricted-finiteness (isRestricted_iff_wI overlaps
   it — dedupe when porting: keep both names, they differ in direction
