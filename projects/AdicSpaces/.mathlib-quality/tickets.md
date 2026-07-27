@@ -2490,11 +2490,39 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   (kerSol_rec_generic — the formal recursion over an ABSTRACT CommRing;
   PERF: NEVER run `ring` over the ↥BISub subtype — its instance-whnf
   alone blows 200k; state ring-algebra generically and instantiate);
-  (b2) NEXT: the two decay lemmas for X n := −(V^{n+1}·Σ_{i≤n} y_i g^i)
-  at the components (fst: 1 < v₁(g)-head/tail-split; snd: the
-  eval-vanishing rewrite up = down-form + v₂ ≤ 1-decay per the RESOLVED
-  plan); (b3) restrictedness + ker = span (easy half: eval(GeltElt) =
-  b − φ(gB) = 0 via hφb + hbg). ORIGINAL NOTES: per component τ, the coefficient
+  (b2) DONE 2026-07-27 (b9b1f6ed5 + 286c35d30):
+  kerSol_decay_of_le_one (contracting scale: the vanishing turns S_n
+  into the tail via v(S n) ≤ max(v(S M), Ico-bound) with M → ∞ through
+  valued_ball_mem_nhds_zero; then (v(V)v(g))^{n+1} = 1 cancels) and
+  kerSol_decay_of_one_lt (expanding scale: split sum bound at N, the
+  head constant dies under v(V)^{n+1} → 0, the tail rides (vVvg)^n = 1;
+  PERF: mul_max_of_nonneg needs its nonneg-arg ASCRIBED — bare zero_le
+  is the argless NNReal variant). (b3) NEXT: assemble the kernel
+  theorem: for y ∈ ker(evalBI φ b) — (α) the componentwise vanishing
+  inputs: hvan-snd from resI_eq_snd + the φ-instantiation (the σ-pair's
+  snd IS the ρ₂-component and eval y = 0 projects to the snd-series
+  vanishing — NEEDS the eval-as-series-limit at the component:
+  tendsto_evalBI-snd-projection + the coefficient-identification
+  y_i-comp·(g-comp)^i = the evalBITerm-snd — work out: evalBITerm φ b
+  f l = φ(coeff-l)·b^l; its snd = φ(coeff)-snd·(b-snd)^l; with
+  φ(z)-snd-component and b-snd = (BIProd-σ g).snd = BlocToHatK-ρ₂ g —
+  vs the ρ-level series y_i-snd·(gB-snd)^i: gB-snd = BlocToHatK-ρ₂ g ✓
+  SAME and φ(z)-snd = resI-at-ρ₂(z-coe) = z-coe-snd [resI_eq_snd!] ✓ —
+  so the snd-projection of the eval-partial-sums IS the ρ-level partial
+  sums S_n-snd EXACTLY — the vanishing transports ✓ no extra hypothesis
+  needed at instantiation, but the ABSTRACT kernel theorem should take
+  hvan-snd as an input and the instantiation discharges it); (β) X n :=
+  kerSol-pair ∈ BISub-ρ: the pair (X-fst-formula, X-snd-formula) — WAIT
+  the kerSol-definition is ALREADY at the SUBRING level (X n :=
+  −(V^{n+1}·Σ y_i gB^i) with V := unit-inverse IN ↥BISub-ρ ✓ membership
+  free!) — the decays then give restrictedness via isRestricted_iff_wI
+  (wI = max of the two component-v's, both → 0 cofinitely... careful
+  isRestricted needs the cofinite-finiteness form — from the two
+  tendsto's: wI(X n) = max(v₁, v₂) → 0 ⇒ eventually ≤ ε ⇒ cofinite ✓
+  single-variable reindex); (γ) y = GeltElt·⟨X, restr⟩ by coefficient
+  ext (kerSol_rec_generic instantiated at A := ↥BISub-ρ, g := gB,
+  V := unit-inv, hinv from unit.mul_inv — NO ring-tactic needed, the
+  generic lemma applies); (δ) ker = span + the easy inclusion. ORIGINAL NOTES: per component τ, the coefficient
   sequences X := component-of-coeffSeq x, Y := component-of-coeffSeq
   (Gelt·x) satisfy hrec (from coeffSeq_Gelt_mul projected to the
   component), hbdd (restrictedness), hX0 (decay); dispatch v_τ(g-comp)
