@@ -101,4 +101,35 @@ theorem projModelMap_sectionNeighborhood_appLE_bijective
     φ hfinite (projModelSectionRoot W) hnzd hAway
     (z.app P.1).hom hsurj hker
 
+/-- The coordinate-ring Cartier patch upgrades to an isomorphism on the
+exact affine section neighborhood. -/
+theorem projModelMap_sectionNeighborhood_isIso
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    [IsAffine S] [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (W : WeierstrassCurve Γ(S, (⊤ : S.Opens)))
+    (F : C ⟶ projModel W) [IsFinite F]
+    (hpre : F ⁻¹ᵁ (projModelZChart W : (projModel W).Opens) =
+      sectionAway z hz)
+    [IsIso
+      (F.resLE (projModelZChart W : (projModel W).Opens)
+        (sectionAway z hz) (le_of_eq hpre.symm))]
+    (hpoint : z ≫ F = S.toSpecΓ ≫ projModelZero W)
+    (hideal : (projModelZero W).ker.comap F = z.ker) :
+    let N := projModelSectionNeighborhood W
+    let P : C.affineOpens := ⟨F ⁻¹ᵁ N.1, N.2.preimage F⟩
+    IsIso (F.resLE N.1 P.1 le_rfl) := by
+  dsimp only
+  let N := projModelSectionNeighborhood W
+  let P : C.affineOpens := ⟨F ⁻¹ᵁ N.1, N.2.preimage F⟩
+  have hbij :
+      Function.Bijective (F.appLE N.1 P.1 le_rfl).hom :=
+    projModelMap_sectionNeighborhood_appLE_bijective
+      z hz W F hpre hpoint hideal
+  rw [F.resLE_eq_morphismRestrict]
+  rw [isIso_morphismRestrict_iff_isIso_app F N.2]
+  rw [ConcreteCategory.isIso_iff_bijective]
+  rw [← F.appLE_eq_app]
+  exact hbij
+
 end ModularCurves
