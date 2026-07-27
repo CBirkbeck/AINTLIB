@@ -1046,8 +1046,19 @@ non-Tate bases are supported.
     bigWindow_inter_succ — the κ = p^{n+1} circle in KGE/KLE form — and its
     A_inf-level rational identifications bigWindow_inter_succ_eq_rationalOpen_
     ofNat (at frobRoot n, right-edge datum (p,1,p,1)) / _neg (at pPow p^m)).
-    REMAINING: the circle as a rational subset of EACH chart ring B_n + the
-    transition ring iso — BLOCKED on NT-1 (see below);
+    CIRCLE-IN-CHART DONE 2026-07-27 (ChartSpa.lean:
+    bigWindow_inter_succ_eq_rationalOpen_left — the same circle as the κ' = 1
+    left edge of chart n+1 — and the two preimage characterizations
+    spaChartHomeoBigWindow_preimage_circle (right edge, in chart n, params
+    image of (chartT (2p-1) 1, chartS p 1)) / _left (left edge, in chart n+1,
+    params image of (chartT 1 1, chartS 1 1)) via
+    comap_canonicalMap_mem_rationalOpen_iff; the homeo's forward coe is
+    definitionally comap — rfl). REMAINING for D-i: the transition ring iso
+    between the two circle-localizations
+    (presheafValue of the two image-data over B_n resp. B_{n+1}; route:
+    both are completed localizations of the SAME A_inf-circle datum —
+    compare through the A_inf-level circle datum's presheafValue or compose
+    imgDatum-style identifications; negative-side mirrors);
   (D-ii) VPreObj-level gluing machinery for a ℤ-chain of charts (new
     infrastructure — the repo has no presheafed-space gluing; alternatively
     build the Y-presheaf directly on the rational-basis of the union);

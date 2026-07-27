@@ -195,6 +195,125 @@ theorem isOpen_Y_trace (hp : 1 < p) :
     simp]
   exact isOpen_iUnion fun n => isOpen_bigWindow_trace p F ϖ n hp
 
+/-- **The right-edge circle inside the `n`-th chart spectrum**: under the chart
+homeomorphism, the trace of the overlap circle `bigWindow n ∩ bigWindow (n+1)`
+corresponds to the rational subset of `Spa (B_n)` with the image parameters of
+the circle datum. -/
+theorem spaChartHomeoBigWindow_preimage_circle (n : ℕ) (hp : 1 < p)
+    [DecidableEq (presheafValue (chartData p F
+      (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1))]
+    (w : ↥(Spa (presheafValue (chartData p F
+        (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1))
+      (ringPlus (presheafValue (chartData p F
+        (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1))))) :
+    ((spaChartHomeoBigWindow p F ϖ n hp w :
+        ↥(bigWindow p F ϖ (n : ℤ) ∩ Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F)) ∈ bigWindow p F ϖ (n : ℤ) ∩ bigWindow p F ϖ ((n : ℤ) + 1)
+      ↔ (w : Spv (presheafValue (chartData p F
+          (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1)))
+        ∈ rationalOpen
+          ((chartT p F (PseudoUniformizer.frobRoot p F ϖ n) (2 * p - 1) 1).image
+            (chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1).canonicalMap)
+          ((chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1).canonicalMap
+            (chartS p F (PseudoUniformizer.frobRoot p F ϖ n) p 1)) := by
+  rw [bigWindow_inter_succ_eq_rationalOpen_ofNat p F ϖ n hp]
+  have hcoe : ((spaChartHomeoBigWindow p F ϖ n hp w :
+      ↥(bigWindow p F ϖ (n : ℤ) ∩ Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F))
+      = comap (chartData p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1).canonicalMap
+        (w : Spv (presheafValue (chartData p F
+          (PseudoUniformizer.frobRoot p F ϖ n) 1 1 p 1))) := rfl
+  rw [hcoe]
+  exact comap_canonicalMap_mem_rationalOpen_iff w.2 _ _
+
+
+/-- **The overlap circle as the left edge of the `(n+1)`-st chart**: the same
+circle, with the `κ' = 1` datum `R({p², [ϖ'']²}/(p·[ϖ'']))` at
+`ϖ'' = ϖ^{1/p^{n+1}}`. -/
+theorem bigWindow_inter_succ_eq_rationalOpen_left (n : ℕ) (hp : 1 < p) :
+    bigWindow p F ϖ (n : ℤ) ∩ bigWindow p F ϖ ((n : ℤ) + 1)
+      = rationalOpen
+          (chartT p F (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1)
+          (chartS p F (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1) := by
+  have hppos : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  have hp0 : (0 : ℚ) < p := by exact_mod_cast hppos
+  have hpk : 0 < p ^ (n + 1) := pow_pos hppos (n + 1)
+  set ϖ' := PseudoUniformizer.frobRoot p F ϖ (n + 1) with hϖ'def
+  have hteich : teichPi p F ϖ' ^ p ^ (n + 1) = teichPi p F ϖ :=
+    teichPi_frobRoot_pow p F ϖ (n + 1)
+  have hYeq : Y p F ϖ' = Y p F ϖ :=
+    Y_eq_of_teichPi_pow p F ϖ hpk hteich
+  rw [bigWindow_inter_succ p F ϖ (n : ℤ) hp]
+  ext v
+  have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 1 1
+    one_pos one_pos one_pos one_pos v
+  rw [show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [hiff, hYeq]
+  have hq : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + 1) := zpow_pos hp0 _
+  have hab : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
+    push_cast
+    rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
+    push_cast
+    ring
+  constructor
+  · rintro ⟨hY, hge, hle⟩
+    have hgev := (KGE_iff hY hq one_pos hab).mp hge
+    have hlev := (KLE_iff hY hq one_pos hab).mp hle
+    rw [pow_one] at hgev hlev
+    refine ⟨hY, ?_, ?_⟩
+    · refine (vle_pow_iff hpk _ _).mp ?_
+      simp only [pow_one]
+      rw [hteich]
+      exact hgev
+    · refine (vle_pow_iff hpk _ _).mp ?_
+      simp only [pow_one]
+      rw [hteich]
+      exact hlev
+  · rintro ⟨hY, hge, hle⟩
+    simp only [pow_one] at hge hle
+    refine ⟨hY, ?_, ?_⟩
+    · refine (KGE_iff hY hq one_pos hab).mpr ?_
+      have h := (vle_pow_iff (v := v) hpk _ _).mpr hge
+      rw [hteich] at h
+      rw [pow_one]
+      exact h
+    · refine (KLE_iff hY hq one_pos hab).mpr ?_
+      have h := (vle_pow_iff (v := v) hpk _ _).mpr hle
+      rw [hteich] at h
+      rw [pow_one]
+      exact h
+
+/-- **The left-edge circle inside the `(n+1)`-st chart spectrum.** -/
+theorem spaChartHomeoBigWindow_preimage_circle_left (n : ℕ) (hp : 1 < p)
+    [DecidableEq (presheafValue (chartData p F
+      (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1))]
+    (w : ↥(Spa (presheafValue (chartData p F
+        (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1))
+      (ringPlus (presheafValue (chartData p F
+        (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1))))) :
+    ((spaChartHomeoBigWindow p F ϖ (n + 1) hp w :
+        ↥(bigWindow p F ϖ ((n + 1 : ℕ) : ℤ)
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F)) ∈ bigWindow p F ϖ (n : ℤ) ∩ bigWindow p F ϖ ((n : ℤ) + 1)
+      ↔ (w : Spv (presheafValue (chartData p F
+          (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1)))
+        ∈ rationalOpen
+          ((chartT p F (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1).image
+            (chartData p F (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1).canonicalMap)
+          ((chartData p F (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1).canonicalMap
+            (chartS p F (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1)) := by
+  rw [bigWindow_inter_succ_eq_rationalOpen_left p F ϖ n hp]
+  have hcoe : ((spaChartHomeoBigWindow p F ϖ (n + 1) hp w :
+      ↥(bigWindow p F ϖ ((n + 1 : ℕ) : ℤ)
+        ∩ Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F))
+      = comap (chartData p F
+          (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1).canonicalMap
+        (w : Spv (presheafValue (chartData p F
+          (PseudoUniformizer.frobRoot p F ϖ (n + 1)) 1 1 p 1))) := rfl
+  rw [hcoe]
+  exact comap_canonicalMap_mem_rationalOpen_iff w.2 _ _
+
 end FarguesFontaine
 
 end
