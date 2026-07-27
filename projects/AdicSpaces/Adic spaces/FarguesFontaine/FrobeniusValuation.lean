@@ -244,6 +244,175 @@ theorem comap_limitFrobHom_openValue (k : ℤ)
   exact comap_limitEvalHom_pointValue _ (frobIndex p F k E)
     (spaFrob_mem_frobIndex_datum p F k E hvE)
 
+/-- The Frobenius preimages of opens roundtrip. -/
+theorem frobOpens_frobOpens (k : ℤ)
+    (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    frobOpens p F k (frobOpens p F (-k) W) = W := by
+  refine Opens.ext ?_
+  ext v
+  show spaFrob p F (-k) (spaFrob p F k v) ∈ W ↔ v ∈ W
+  rw [spaFrob_spaFrob p F k v]
+
+/-- **Germ naturality of the ambient Frobenius stalk transport.** -/
+theorem ringStalkMap_ambientFrob_germ (k : ℤ)
+    (x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (U : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (hx : spaFrob p F k x ∈ U) (f : ↥(limitSections U)) :
+    (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom
+        ((yAmbientPresheafedSpace p F).ringPresheaf.germ U
+          (spaFrob p F k x) hx f)
+      = (yAmbientPresheafedSpace p F).ringPresheaf.germ
+          (frobOpens p F k U) x hx (limitFrobHom p F k U f) := by
+  have h1 := TopCat.Presheaf.stalkFunctor_map_germ_apply
+    (C := CommRingCat) U (ConcreteCategory.hom (ambientFrobHom p F k).base x)
+    hx (Functor.whiskerRight (ambientFrobHom p F k).c
+      CompleteTopCommRingCat.forgetToCommRingCat) f
+  have h2 := TopCat.Presheaf.stalkPushforward_germ_apply CommRingCat
+    (ambientFrobHom p F k).base
+    ((yAmbientPresheafedSpace p F).presheaf
+      ⋙ CompleteTopCommRingCat.forgetToCommRingCat) U x hx
+    ((Functor.whiskerRight (ambientFrobHom p F k).c
+      CompleteTopCommRingCat.forgetToCommRingCat).app (op U) f)
+  show (ConcreteCategory.hom (TopCat.Presheaf.stalkPushforward CommRingCat
+      (ambientFrobHom p F k).base
+      ((yAmbientPresheafedSpace p F).presheaf
+        ⋙ CompleteTopCommRingCat.forgetToCommRingCat) x))
+      ((ConcreteCategory.hom ((TopCat.Presheaf.stalkFunctor CommRingCat
+          (ConcreteCategory.hom (ambientFrobHom p F k).base x)).map
+        (Functor.whiskerRight (ambientFrobHom p F k).c
+          CompleteTopCommRingCat.forgetToCommRingCat)))
+        ((ConcreteCategory.hom
+          (TopCat.Presheaf.germ
+            ((yAmbientPresheafedSpace p F).presheaf
+              ⋙ CompleteTopCommRingCat.forgetToCommRingCat) U
+            (ConcreteCategory.hom (ambientFrobHom p F k).base x) hx)) f))
+      = _
+  rw [h1]
+  exact h2
+
+/-- The other-order roundtrip. -/
+theorem frobOpens_frobOpens' (k : ℤ)
+    (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    frobOpens p F (-k) (frobOpens p F k W) = W := by
+  have h := frobOpens_frobOpens p F (-k) W
+  rwa [neg_neg] at h
+
+/-- The open-valuation `vle` transports along the Frobenius (both sides as a
+propositional equality). -/
+theorem openValue_vle_frobTransport (k : ℤ)
+    (U' : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    {x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
+    (hx : x ∈ frobOpens p F k U') (s t : ↥(limitSections U')) :
+    ((openValue (frobOpens p F k U') hx).vle
+        (limitFrobHom p F k U' s) (limitFrobHom p F k U' t))
+      = ((openValue U' (show spaFrob p F k x ∈ U' from hx)).vle s t) := by
+  rw [← comap_limitFrobHom_openValue p F k U' hx]
+  exact (comap_vle (limitFrobHom p F k U') _ s t).symm
+
+/-- Transport of `stalkVle` along equalities of the arguments. -/
+theorem stalkVle_congr {v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
+    {a a' b b' : ToType ((spaRingPresheaf (Ainf p F)).stalk v)}
+    (ha : a = a') (hb : b = b') (h : stalkVle v a b) : stalkVle v a' b' := by
+  subst ha
+  subst hb
+  exact h
+
+/-- **The ambient stalk-value equivariance** (D-iii-4b, the ambient core of
+`val_compat`): pulling the stalk valuation back along the Frobenius stalk
+transport gives the stalk valuation at the image point. -/
+theorem comap_ringStalkMap_ambientFrob_stalkValue (k : ℤ)
+    (x : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    comap (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom
+        (stalkValue x)
+      = stalkValue (spaFrob p F k x) := by
+  refine ValuationSpectrum.ext (funext₂ fun a b => propext ⟨?_, ?_⟩)
+  · -- forward: comap-vle ⇒ stalkVle at the image point
+    intro hab
+    obtain ⟨U, hxU, f, g, hf, hg⟩ := exists_common_rep (spaFrob p F k x) a b
+    have hMa : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom a
+        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
+            (frobOpens p F k U) x hxU (limitFrobHom p F k U f) := by
+      rw [← hf]
+      exact ringStalkMap_ambientFrob_germ p F k x U hxU f
+    have hMb : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom b
+        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
+            (frobOpens p F k U) x hxU (limitFrobHom p F k U g) := by
+      rw [← hg]
+      exact ringStalkMap_ambientFrob_germ p F k x U hxU g
+    have hab' := stalkVle_congr p F hMa hMb hab
+    obtain ⟨W, hxW, hWU, hvle⟩ := stalkVle_elim hab' hxU rfl rfl
+    have hEq : frobOpens p F k (frobOpens p F (-k) W) = W :=
+      frobOpens_frobOpens p F k W
+    have hle1 : frobOpens p F k (frobOpens p F (-k) W) ≤ W := hEq.le
+    have hxW' : x ∈ frobOpens p F k (frobOpens p F (-k) W) := hEq.symm ▸ hxW
+    have hU'U : frobOpens p F (-k) W ≤ U := by
+      have h := frobOpens_mono p F (-k) hWU
+      rwa [frobOpens_frobOpens' p F k U] at h
+    have hvle2 := (openValue_vle_restrict hle1 hxW'
+      (limitRestrict hWU (limitFrobHom p F k U f))
+      (limitRestrict hWU (limitFrobHom p F k U g))).mp hvle
+    have hcolf : limitRestrict hle1
+        (limitRestrict hWU (limitFrobHom p F k U f))
+        = limitFrobHom p F k (frobOpens p F (-k) W)
+            (limitRestrict hU'U f) := by
+      have hcomp := congr_fun (congrArg DFunLike.coe
+        (limitRestrict_comp hle1 hWU)) (limitFrobHom p F k U f)
+      refine (hcomp.trans ?_)
+      exact (limitFrobHom_limitRestrict p F k hU'U f).symm
+    have hcolg : limitRestrict hle1
+        (limitRestrict hWU (limitFrobHom p F k U g))
+        = limitFrobHom p F k (frobOpens p F (-k) W)
+            (limitRestrict hU'U g) := by
+      have hcomp := congr_fun (congrArg DFunLike.coe
+        (limitRestrict_comp hle1 hWU)) (limitFrobHom p F k U g)
+      refine (hcomp.trans ?_)
+      exact (limitFrobHom_limitRestrict p F k hU'U g).symm
+    have hvle3 : (openValue (frobOpens p F k (frobOpens p F (-k) W))
+        hxW').vle
+        (limitFrobHom p F k (frobOpens p F (-k) W) (limitRestrict hU'U f))
+        (limitFrobHom p F k (frobOpens p F (-k) W)
+          (limitRestrict hU'U g)) := hcolf ▸ hcolg ▸ hvle2
+    have hcv := Eq.mp (openValue_vle_frobTransport p F k
+      (frobOpens p F (-k) W) hxW'
+      (limitRestrict hU'U f) (limitRestrict hU'U g)) hvle3
+    have hst := stalkVle_intro (v := spaFrob p F k x) hcv
+    exact stalkVle_congr p F
+      ((germ_limitRestrict hU'U _ f).trans hf)
+      ((germ_limitRestrict hU'U _ g).trans hg) hst
+  · -- backward
+    intro hab
+    obtain ⟨U, hxU, f, g, hf, hg⟩ := exists_common_rep (spaFrob p F k x) a b
+    obtain ⟨W', hxW', hW'U, hvle⟩ := stalkVle_elim hab hxU hf hg
+    have hxF : x ∈ frobOpens p F k W' := hxW'
+    have hcv := Eq.mpr (openValue_vle_frobTransport p F k W' hxF
+      (limitRestrict hW'U f) (limitRestrict hW'U g)) hvle
+    have hst := stalkVle_intro (v := x) hcv
+    have hMa : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom a
+        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
+            (frobOpens p F k U) x hxU (limitFrobHom p F k U f) := by
+      rw [← hf]
+      exact ringStalkMap_ambientFrob_germ p F k x U hxU f
+    have hMb : (ValuationSpectrum.ringStalkMap (ambientFrobHom p F k) x).hom b
+        = (yAmbientPresheafedSpace p F).ringPresheaf.germ
+            (frobOpens p F k U) x hxU (limitFrobHom p F k U g) := by
+      rw [← hg]
+      exact ringStalkMap_ambientFrob_germ p F k x U hxU g
+    have hgf : (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k W') x hxF
+        (limitFrobHom p F k W' (limitRestrict hW'U f))
+        = (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k U) x hxU
+            (limitFrobHom p F k U f) := by
+      rw [limitFrobHom_limitRestrict p F k hW'U f]
+      exact germ_limitRestrict (frobOpens_mono p F k hW'U) hxF
+        (limitFrobHom p F k U f)
+    have hgg : (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k W') x hxF
+        (limitFrobHom p F k W' (limitRestrict hW'U g))
+        = (spaRingPresheaf (Ainf p F)).germ (frobOpens p F k U) x hxU
+            (limitFrobHom p F k U g) := by
+      rw [limitFrobHom_limitRestrict p F k hW'U g]
+      exact germ_limitRestrict (frobOpens_mono p F k hW'U) hxF
+        (limitFrobHom p F k U g)
+    exact stalkVle_congr p F (hgf.trans hMa.symm) (hgg.trans hMb.symm) hst
+
 end FarguesFontaine
 
 
