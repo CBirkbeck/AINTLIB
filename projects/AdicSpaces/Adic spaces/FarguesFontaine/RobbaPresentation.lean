@@ -3131,6 +3131,70 @@ theorem GeltElt_mul_kerSol (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂
   rw [hcs (s 0 - 1), hcs (s 0)]
   exact kerSol_coeff_identity p F ϖ gB hgu f (s 0)
 
+/-- The kernel solution's second component. -/
+theorem kerSolElt_coe_snd (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB) (y : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (n : ℕ) :
+    ((kerSolElt p F ϖ gB hgu y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+      = -(((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 ^ (n + 1)
+        * ∑ i ∈ Finset.range (n + 1),
+            ((y i : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+            * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ i)) := by
+  have hsum : ((((∑ i ∈ Finset.range (n + 1), y i * gB ^ i)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+      = ∑ i ∈ Finset.range (n + 1),
+        ((y i : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ^ i := by
+    rw [AddSubmonoidClass.coe_finsetSum]
+    exact map_sum (AddMonoidHom.snd (hatK p F hρ₁0 hρ₁1)
+      (hatK p F hρ₂0 hρ₂1)) _ _
+  rw [kerSolElt]
+  exact congrArg (fun t =>
+    -((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2 ^ (n + 1) * t))
+    hsum
+
+/-- The kernel solution's first component. -/
+theorem kerSolElt_coe_fst (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB) (y : ℕ → ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (n : ℕ) :
+    ((kerSolElt p F ϖ gB hgu y n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+      = -(((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+          : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ^ (n + 1)
+        * ∑ i ∈ Finset.range (n + 1),
+            ((y i : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+            * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+              : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ i)) := by
+  have hsum : ((((∑ i ∈ Finset.range (n + 1), y i * gB ^ i)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+      = ∑ i ∈ Finset.range (n + 1),
+        ((y i : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1
+        * (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1) ^ i := by
+    rw [AddSubmonoidClass.coe_finsetSum]
+    exact map_sum (AddMonoidHom.fst (hatK p F hρ₁0 hρ₁1)
+      (hatK p F hρ₂0 hρ₂1)) _ _
+  rw [kerSolElt]
+  exact congrArg (fun t =>
+    -((((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1 ^ (n + 1) * t))
+    hsum
+
 end FarguesFontaine
 
 end
