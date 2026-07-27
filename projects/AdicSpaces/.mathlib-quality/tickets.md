@@ -1095,7 +1095,13 @@ non-Tate bases are supported.
     and extends by the ID2d AbstractCompletion pattern; functoriality
     (comp/id) from dense-extension uniqueness. t4 (revised; DESIGN 2026-07-27): the biRes-composition laws
     hit dependent-radius casts (the composite interpolated radii are only
-    propositionally equal). SUBSTRATE FIX: a ℚ-exponent wrapper layer —
+    propositionally equal). SUBSTRATE BUILT 2026-07-27 (UniformizerEquivariance.lean: vpiQ + pos/lt_one
+    + vpiQ_interpolate (affine-θ rpow identity), biCongr (subst-transport,
+    proof-irrelevant), BIQ (q₁ q₂ : ℚ), theta_mem_unit, biResQ + its
+    dense-layer identity biResQ_blocToBI). REMAINING t4: functoriality
+    biResQ_id / biResQ_comp via dense-extension uniqueness (equalizer needs
+    biResQ-continuity — extendRingHom-continuity composed with biCongr), then
+    the presheaf assembly. Original design: a ℚ-exponent wrapper layer —
     `BIQ (q₁ q₂ : ℚ)` := BISub at the radii `vπ^{qᵢ}` (NNReal-rpow of the
     rational exponents, 0 < q₁ ≤ q₂ say), with restriction maps
     `biResQ : BIQ q₁ q₂ →+* BIQ r₁ r₂` for [r₁,r₂]-exponent-intervals inside

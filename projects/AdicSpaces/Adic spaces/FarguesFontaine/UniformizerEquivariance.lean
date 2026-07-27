@@ -6,6 +6,7 @@ Authors: AINTLIB AI workers
 import «Adic spaces».FarguesFontaine.RobbaLoc
 import «Adic spaces».FarguesFontaine.IntervalRing
 import «Adic spaces».FarguesFontaine.SheafyBI
+import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 
 /-!
 # Uniformizer-equivariance of `Bloc` and its Gauss valuations (D-i-t1)
@@ -378,6 +379,129 @@ theorem biRes_blocToBI {θ₁ θ₂ : ℝ}
     (uniformContinuous_blocToBI_interpolate p F ϖ (hρ₁0 := hρ₁0)
       (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
       hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1).continuous z
+
+/-- The radius `|ϖ|^q` for a rational exponent `q`. -/
+noncomputable def vpiQ (q : ℚ) : NNReal :=
+  perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (q : ℝ)
+
+theorem vpiQ_pos (q : ℚ) : 0 < vpiQ p F ϖ q := by
+  rw [vpiQ]
+  refine NNReal.rpow_pos ?_
+  refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
+  exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+
+theorem vpiQ_lt_one {q : ℚ} (hq : 0 < q) : vpiQ p F ϖ q < 1 := by
+  rw [vpiQ]
+  refine NNReal.rpow_lt_one (perfectoidValuation_toOF_lt_one p F ϖ) ?_
+  exact_mod_cast hq
+
+/-- Interpolation of the rational radii: `vpiQ r = (vpiQ q₁)^θ·(vpiQ q₂)^{1-θ}`
+for the affine parameter `θ = (q₂ - r)/(q₂ - q₁)`. -/
+theorem vpiQ_interpolate {q₁ q₂ r : ℚ} (hne : q₁ ≠ q₂) :
+    vpiQ p F ϖ q₁ ^ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ)
+        * vpiQ p F ϖ q₂ ^ (1 - (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ))
+      = vpiQ p F ϖ r := by
+  have hπ0 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) ≠ 0 := by
+    refine (Valuation.ne_zero_iff _).mpr ?_
+    exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon)
+  rw [vpiQ, vpiQ, vpiQ, ← NNReal.rpow_mul, ← NNReal.rpow_mul,
+    ← NNReal.rpow_add hπ0]
+  congr 1
+  have hden : ((q₂ : ℝ) - (q₁ : ℝ)) ≠ 0 := by
+    refine sub_ne_zero.mpr ?_
+    exact_mod_cast hne.symm
+  push_cast
+  field_simp
+  ring
+
+
+variable {ρ₁ ρ₂ ρ₁' ρ₂' : NNReal}
+
+/-- Transport of `B^I` along radius equalities (the proofs are definitionally
+irrelevant). -/
+noncomputable def biCongr (h₁ : ρ₁ = ρ₁') (h₂ : ρ₂ = ρ₂')
+    {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {hρ₁0' : 0 < ρ₁'} {hρ₁1' : ρ₁' < 1} {hρ₂0' : 0 < ρ₂'} {hρ₂1' : ρ₂' < 1} :
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      ≃+* ↥(BISub p F ϖ hρ₁0' hρ₁1' hρ₂0' hρ₂1') := by
+  subst h₁
+  subst h₂
+  exact RingEquiv.refl _
+
+@[simp]
+theorem biCongr_blocToBI (h₁ : ρ₁ = ρ₁') (h₂ : ρ₂ = ρ₂')
+    {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
+    {hρ₁0' : 0 < ρ₁'} {hρ₁1' : ρ₁' < 1} {hρ₂0' : 0 < ρ₂'} {hρ₂1' : ρ₂' < 1}
+    (z : Bloc p F ϖ) :
+    biCongr p F ϖ h₁ h₂ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) (hρ₁0' := hρ₁0') (hρ₁1' := hρ₁1') (hρ₂0' := hρ₂0')
+        (hρ₂1' := hρ₂1')
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z)
+      = blocToBI p F ϖ hρ₁0' hρ₁1' hρ₂0' hρ₂1' z := by
+  subst h₁
+  subst h₂
+  rfl
+
+/-- **The rational-exponent interval ring** `B^{[|ϖ|^{q₂}... |ϖ|^{q₁}]}`
+(NOTE the radius at exponent `q` is `|ϖ|^q`, decreasing in `q`). -/
+noncomputable def BIQ (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂) :
+    Subring ((hatK p F (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁))
+      × (hatK p F (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂))) :=
+  BISub p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+    (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+
+/-- The affine interpolation parameter is in `[0, 1]` for exponents inside the
+interval. -/
+theorem theta_mem_unit {q₁ q₂ r : ℚ} (hlt : q₁ < q₂) (hr₁ : q₁ ≤ r)
+    (hr₂ : r ≤ q₂) :
+    (0 : ℝ) ≤ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ)
+      ∧ (((q₂ - r) / (q₂ - q₁) : ℚ) : ℝ) ≤ 1 := by
+  have h1 : (0 : ℚ) ≤ (q₂ - r) / (q₂ - q₁) := by
+    apply div_nonneg <;> linarith
+  have h2 : (q₂ - r) / (q₂ - q₁) ≤ 1 := by
+    rw [div_le_one (by linarith)]
+    linarith
+  exact ⟨by exact_mod_cast h1, by exact_mod_cast h2⟩
+
+/-- **The rational-exponent restriction map** `B^{[q₁,q₂]} →+* B^{[r₁,r₂]}` for
+`r₁, r₂ ∈ [q₁, q₂]` (D-i-t4 substrate). -/
+noncomputable def biResQ (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₁ < q₂)
+    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂) :
+    ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) →+* ↥(BIQ p F ϖ r₁ r₂ hr₁ hr₂) :=
+  (biCongr p F ϖ (vpiQ_interpolate p F ϖ hlt.ne)
+      (vpiQ_interpolate p F ϖ hlt.ne)
+      (hρ₁0' := vpiQ_pos p F ϖ r₁) (hρ₁1' := vpiQ_lt_one p F ϖ hr₁)
+      (hρ₂0' := vpiQ_pos p F ϖ r₂) (hρ₂1' := vpiQ_lt_one p F ϖ hr₂)).toRingHom.comp
+    (biRes p F ϖ
+      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)
+      (theta_mem_unit hlt hr₁m.1 hr₁m.2).1 (theta_mem_unit hlt hr₁m.1 hr₁m.2).2
+      (theta_mem_unit hlt hr₂m.1 hr₂m.2).1 (theta_mem_unit hlt hr₂m.1 hr₂m.2).2
+      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
+          exact vpiQ_pos p F ϖ r₁)
+      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
+          exact vpiQ_lt_one p F ϖ hr₁)
+      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
+          exact vpiQ_pos p F ϖ r₂)
+      (by rw [vpiQ_interpolate p F ϖ hlt.ne]
+          exact vpiQ_lt_one p F ϖ hr₂))
+
+
+/-- The rational-exponent restriction is the identity on the dense
+`Bloc`-layer. -/
+theorem biResQ_blocToBI (q₁ q₂ r₁ r₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr₁ : 0 < r₁) (hr₂ : 0 < r₂) (hlt : q₁ < q₂)
+    (hr₁m : q₁ ≤ r₁ ∧ r₁ ≤ q₂) (hr₂m : q₁ ≤ r₂ ∧ r₂ ≤ q₂) (z : Bloc p F ϖ) :
+    biResQ p F ϖ q₁ q₂ r₁ r₂ h₁ h₂ hr₁ hr₂ hlt hr₁m hr₂m
+        (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+          (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) z)
+      = blocToBI p F ϖ (vpiQ_pos p F ϖ r₁) (vpiQ_lt_one p F ϖ hr₁)
+          (vpiQ_pos p F ϖ r₂) (vpiQ_lt_one p F ϖ hr₂) z := by
+  show (biCongr p F ϖ _ _) (biRes p F ϖ _ _ _ _ _ _ _ _
+    (blocToBI p F ϖ _ _ _ _ z)) = _
+  rw [biRes_blocToBI, biCongr_blocToBI]
 
 end FarguesFontaine
 
