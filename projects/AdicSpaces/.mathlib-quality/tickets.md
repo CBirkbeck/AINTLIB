@@ -2431,13 +2431,21 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   separate declarations, one-step exact-terms per induction branch,
   set-K compression; the raw-chain-form conclusion (∃ u r, hr0 ∧ hrrec
   ∧ bounds) defers the telescope), exists_correction_sequence_BI
-  (telescoped wrapper, own budget). REMAINING (P3e-d): the limit
-  exists_evalBI_eq_of_correction_BI (mirror Presentation:2073-2128 with
-  exists_rps_series_limit_BI + wI_z_sub_evalBI_add_le, K-scaled W) +
-  the surjectivity capstone exists_evalBI_eq_of_mem (mirror :2215:
-  W := max(wI z, small)-normalization — W ≤ 1 requires the p-power
-  prescaling of z OR state for wI z ≤ 1 and lift the general case by
-  p-unit scaling — DESIGN at implementation). THE ORIGINAL P3e NOTE: mirror exists_correction_sequence (Presentation:2131,
+  (telescoped wrapper, own budget). ★★ P3e COMPLETE 2026-07-27 (commits through the capstone):
+  exists_evalBI_eq_of_correction_BI (4b19f75da; abstract-K limit; PERF:
+  congrArg-le_of_eq beats rwa-kabstract in the fat context) and
+  exists_evalBI_eq_of_le_one — CASE-1 STRICT SURJECTIVITY on the unit
+  ball with the (4.9.1)-K-constant. ⇒ T910 P3 (the surjectivity half)
+  IS COMPLETE. NEXT: (P4) the kernel: multiplication by (T − C g) is a
+  strict injective endomorphism (the Gauss-norm multiplicativity bound
+  wIRPS((T − C g)·f) ≥ wIRPS f-form, Kedlaya ln 527-533) + ker(evalBI)
+  = (T − C g)-ideal via the x_n = −Σ y_i [z̄]^{i−n−1}-coefficient
+  argument (ln 534-546: per-radius case split t < t₀ geometric-unit /
+  t ≥ t₀ the quotient-iso, then Cor Banach-to-Fréchet-analogue = our
+  coefficientwise-completeness); then (P5) the case-1 iso package
+  B^I⟨T⟩/(T − C g) ≅ B^{I′} + the ρ ∈ p^ℚ plus-ring statement (via the
+  ChartVObj plus-technique), and the [z̄⁻¹]-variant case 2 (mirrored
+  cut on the right — the geometry swaps ρ₂ and σ₁-roles). THE ORIGINAL P3e NOTE: mirror exists_correction_sequence (Presentation:2131,
   via the generic exists_chain + exists_BIProd_approx at the σ-radii —
   note the K-rescaling: approximate to ε/(2K)-style per round so the
   K-normed corrections telescope; W ≤ 1-normalization via p-power
