@@ -2280,9 +2280,20 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   of B^I). The cut endpoint: ρ₁′ pinned by an hexact-style hypothesis
   (|ϖ|-power = the radius where |p^{-m}[z̄^e]|_t = 1), I′ = [ρ₁′, ρ₂].
   Mirror of the T911 pipeline (Presentation.lean):
-  (P1) evalBIHom : BI⟨T⟩ →+* BISub′ at power-bounded b — series limit +
-  hom laws (mirror evalTerm/evalAr/evalArHom, with coefficient map
-  resIHom (T909) in place of ArToBI; contraction valued_resI_le_wI);
+  (P1) DONE 2026-07-27 (commit bf7b26fcf, RobbaPresentation.lean, all
+  axiom-clean): wI_resIHom_le + isRestricted_iff_wI + tendsto_wI_coeffSeq
+  + exists_evalBI_series + evalBITerm/evalBI/evalBIHom with full hom laws.
+  DESIGN: the carrier is an ABSTRACT contracting RingHom φ (hφ : wI-
+  contraction) — the resIHom interpolant-radii (ρ₁^θρ₂^{1−θ} rpow-
+  compounds) NEVER enter the eval signatures; instantiate φ := resIHom +
+  wI_resIHom_le only at the presentation site. PERF (new entries):
+  (i) section-variable hypotheses used only in BODIES need `include hφ
+  in` BEFORE the docstring (a docstring must immediately precede its
+  decl); (ii) rw-unfolding a def (rw [evalBITerm]) and even coe-add rfl
+  can blow the per-decl budget in fat contexts — hoist per-term
+  identities into standalone lemmas and close them with TERM-MODE calc
+  (congrArg of the subtype-level fact + a standalone BISub_coe_add
+  micro-lemma + add_mul), no kabstract;
   (P2) the specific b + its wI′ ≤ 1 (teichPowOverP norms exist from T911);
   (P3) surjectivity with (4.9.1)-norm control: per-monomial lift
   y = ϖ^n[x̄_n z̄^{-j}]·T^j (mirror exists_evalAr_eq_of_mem_BISub);
