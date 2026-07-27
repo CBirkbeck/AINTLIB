@@ -68,6 +68,7 @@ import «Adic spaces».FarguesFontaine.FrobeniusSpa
 import «Adic spaces».FarguesFontaine.FrobeniusLimit
 import «Adic spaces».FarguesFontaine.FrobeniusValuation
 import «Adic spaces».FarguesFontaine.CurveObject
+import «Adic spaces».FarguesFontaine.IntervalCoordinates
 import «Adic spaces».FlatnessResults
 import «Adic spaces».GeometricReduction
 import «Adic spaces».GeometricSeries
