@@ -1083,7 +1083,12 @@ non-Tate bases are supported.
     over B_n would need its own ID2-scale comparison. INSTEAD, exploit t2's
     subring-EQUALITY: build the Y-structure directly on the κ-interval basis
     with 𝒪(interval) := B^I (uniformizer-free by t2), i.e. the (D-ii)
-    'alternatively'-route. NEW t3: the interval-RESTRICTION maps
+    'alternatively'-route. NEW t3 DONE 2026-07-27 (UniformizerEquivariance.lean:
+    blocWIUniformSpace + blocToBI + isUniformInducing/denseRange/
+    isUniformAddGroup_blocWI + uniformContinuous_blocToBI_interpolate
+    (1-Lipschitz via wLoc_le_max_of_interpolate) + biRes (the restriction
+    hom via IsDenseInducing.extendRingHom) + biRes_blocToBI (dense-layer
+    identity)). Original plan: the interval-RESTRICTION maps
     `BISub-[ρ₁,ρ₂] →+* BISub-[σ₁,σ₂]` for [σ₁,σ₂] ⊆ [ρ₁,ρ₂] — the identity
     on the dense Bloc is wI-to-wJ continuous (interior interpolation, the
     three-circles machinery of RestrictionInjective/wLoc_rpow_interpolate)

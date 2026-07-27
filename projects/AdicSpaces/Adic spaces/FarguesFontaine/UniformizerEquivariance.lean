@@ -5,6 +5,7 @@ Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.RobbaLoc
 import «Adic spaces».FarguesFontaine.IntervalRing
+import «Adic spaces».FarguesFontaine.SheafyBI
 
 /-!
 # Uniformizer-equivariance of `Bloc` and its Gauss valuations (D-i-t1)
@@ -24,6 +25,7 @@ circle-localizations in the chart-transition data of the curve.
 open TopologicalRing ValuationSpectrum WittVector NNReal
 
 set_option linter.overlappingInstances false
+set_option warn.classDefReducibility false
 
 noncomputable section
 
@@ -229,6 +231,153 @@ theorem BISub_twist {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
         ← BlocToHatK_twist p F ϖ hk h hρ₂0 hρ₂1,
         RingEquiv.apply_symm_apply]
   rw [BISub, BISub, hrange]
+
+/-- The `wI`-uniformity on `Bloc`: the pullback of the product uniformity along
+the diagonal map. -/
+noncomputable def blocWIUniformSpace (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1)
+    (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1) : UniformSpace (Bloc p F ϖ) :=
+  UniformSpace.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) inferInstance
+
+/-- The corestricted diagonal `Bloc →+* ↥B^I`. -/
+noncomputable def blocToBI (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1)
+    (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1) :
+    Bloc p F ϖ →+* ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) :=
+  (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).codRestrict _
+    (fun z => (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range.le_topologicalClosure
+      ⟨z, rfl⟩)
+
+/-- The diagonal is uniformly inducing for the `wI`-uniformity. -/
+theorem isUniformInducing_blocToBI :
+    @IsUniformInducing _ _ (blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) _
+      (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) := by
+  letI : UniformSpace (Bloc p F ϖ) := blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  refine ⟨?_⟩
+  show Filter.comap _ (uniformity ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) = _
+  rw [uniformity_subtype, Filter.comap_comap]
+  rfl
+
+/-- The diagonal has dense range in `B^I`. -/
+theorem denseRange_blocToBI :
+    DenseRange (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) := by
+  rw [DenseRange, dense_iff_closure_eq,
+    Topology.IsEmbedding.subtypeVal.closure_eq_preimage_closure_image]
+  have himg : (Subtype.val '' Set.range (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      = Set.range (⇑(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+    ext w
+    constructor
+    · rintro ⟨-, ⟨z, rfl⟩, rfl⟩
+      exact ⟨z, rfl⟩
+    · rintro ⟨z, rfl⟩
+      exact ⟨blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z, ⟨z, rfl⟩, rfl⟩
+  rw [himg]
+  have hclos : closure (Set.range (⇑(BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      = (BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        : Set ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) := rfl
+  rw [hclos]
+  ext w
+  simp [w.2]
+
+
+/-- The `wI`-uniformity makes `Bloc` a uniform additive group. -/
+theorem isUniformAddGroup_blocWI :
+    @IsUniformAddGroup (Bloc p F ϖ)
+      (blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) _ :=
+  IsUniformAddGroup.comap
+    (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).toAddMonoidHom
+
+/-- **The interval-restriction is uniformly continuous on the dense layer**:
+for interpolated radii `σⱼ = ρ₁^{θⱼ}·ρ₂^{1-θⱼ}`, the `J`-diagonal is
+1-Lipschitz for the `I`-uniformity (three circles). -/
+theorem uniformContinuous_blocToBI_interpolate {θ₁ θ₂ : ℝ}
+    (hθ₁0 : 0 ≤ θ₁) (hθ₁1 : θ₁ ≤ 1) (hθ₂0 : 0 ≤ θ₂) (hθ₂1 : θ₂ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁)) (hσ₁1 : ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂)) (hσ₂1 : ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂) < 1) :
+    @UniformContinuous _ _ (blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) _
+      (blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : IsUniformAddGroup (Bloc p F ϖ) :=
+    isUniformAddGroup_blocWI p F ϖ
+  haveI : IsUniformAddGroup ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+    isUniformAddGroup_BISub p F ϖ
+  refine uniformContinuous_of_tendsto_zero ?_
+  rw [tendsto_subtype_rng]
+  have hcoe : (fun z => ((blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 z :
+      ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)))
+      = fun z => BIProd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 z := rfl
+  rw [hcoe]
+  intro U hU
+  rw [Filter.mem_map]
+  obtain ⟨ε, hε, hball⟩ := exists_wI_ball_subset p F
+    (hρ₁0 := hσ₁0) (hρ₁1 := hσ₁1) (hρ₂0 := hσ₂0) (hρ₂1 := hσ₂1) hU
+  have hnhd : {w : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1) |
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ ε} ∈ nhds
+        (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+    have h := wI_ball_mem_nhds p F
+      (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) hε
+    simpa using h
+  rw [show (nhds (0 : Bloc p F ϖ))
+      = Filter.comap (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+        (nhds (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 0)) from nhds_induced _ _]
+  rw [map_zero]
+  refine Filter.mem_of_superset (Filter.preimage_mem_comap hnhd) ?_
+  intro z hz
+  refine hball ?_
+  show wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+    (BIProd p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 z) ≤ ε
+  have hzI : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z) ≤ ε := hz
+  rw [wI_BIProd, valued_BlocToHatK, valued_BlocToHatK] at hzI ⊢
+  have h₁ := wLoc_le_max_of_interpolate p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ₁0 hθ₁1 hσ₁0 hσ₁1 z
+  have h₂ := wLoc_le_max_of_interpolate p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) hθ₂0 hθ₂1 hσ₂0 hσ₂1 z
+  exact max_le (le_trans h₁ hzI) (le_trans h₂ hzI)
+
+/-- **The interval-restriction map** `B^{[ρ₁,ρ₂]} →+* B^{[σ₁,σ₂]}` for
+interpolated sub-radii (D-i-t3): the dense extension of the identity on
+`Bloc`. -/
+noncomputable def biRes {θ₁ θ₂ : ℝ}
+    (hθ₁0 : 0 ≤ θ₁) (hθ₁1 : θ₁ ≤ 1) (hθ₂0 : 0 ≤ θ₂) (hθ₂1 : θ₂ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁)) (hσ₁1 : ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂)) (hσ₂1 : ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂) < 1) :
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+      →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  IsDenseInducing.extendRingHom
+    (isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1))
+    (denseRange_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1))
+    (uniformContinuous_blocToBI_interpolate p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+      hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+
+/-- The restriction map is the identity on the dense `Bloc`-layer. -/
+theorem biRes_blocToBI {θ₁ θ₂ : ℝ}
+    (hθ₁0 : 0 ≤ θ₁) (hθ₁1 : θ₁ ≤ 1) (hθ₂0 : 0 ≤ θ₂) (hθ₂1 : θ₂ ≤ 1)
+    (hσ₁0 : 0 < ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁)) (hσ₁1 : ρ₁ ^ θ₁ * ρ₂ ^ (1 - θ₁) < 1)
+    (hσ₂0 : 0 < ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂)) (hσ₂1 : ρ₁ ^ θ₂ * ρ₂ ^ (1 - θ₂) < 1)
+    (z : Bloc p F ϖ) :
+    biRes p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+        hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 z)
+      = blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 z := by
+  letI : UniformSpace (Bloc p F ϖ) :=
+    blocWIUniformSpace p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+  haveI : CompleteSpace ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) :=
+    (isComplete_BISub p F ϖ).completeSpace_coe
+  exact IsDenseInducing.extend_eq
+    ((isUniformInducing_blocToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)).isDenseInducing
+      (denseRange_blocToBI p F ϖ))
+    (uniformContinuous_blocToBI_interpolate p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
+      hθ₁0 hθ₁1 hθ₂0 hθ₂1 hσ₁0 hσ₁1 hσ₂0 hσ₂1).continuous z
 
 end FarguesFontaine
 
