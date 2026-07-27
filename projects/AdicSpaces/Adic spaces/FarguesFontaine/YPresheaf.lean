@@ -6,6 +6,7 @@ Authors: AINTLIB AI workers
 import «Adic spaces».FarguesFontaine.BigWindows
 import «Adic spaces».FarguesFontaine.ChartSpa
 import «Adic spaces».FarguesFontaine.FrobeniusGauss
+import «Adic spaces».FarguesFontaine.IntervalSplitting
 
 /-!
 # The interval-trace basis of `Y` (D-ii-1)
@@ -201,6 +202,40 @@ theorem Nested.mem₁ [Fact (Nat.Prime p)] {i' i : DyadicIdx}
 theorem Nested.mem₂ [Fact (Nat.Prime p)] {i' i : DyadicIdx}
     (h : Nested p i' i) : i.q₂ p ≤ i'.q₂ p ∧ i'.q₂ p ≤ i.q₁ p :=
   ⟨h.1, le_trans (i'.q₂_lt_q₁ p).le h.2⟩
+
+/-- The left piece of a middle split of a dyadic index. -/
+def splitL (i : DyadicIdx) (j : ℕ) (hj : i.j₂ < j) (hj' : j < i.j₁) :
+    DyadicIdx :=
+  ⟨i.s, i.j₁, j, lt_trans i.hj₂ hj, hj'⟩
+
+/-- The right piece of a middle split of a dyadic index. -/
+def splitR (i : DyadicIdx) (j : ℕ) (hj : i.j₂ < j) (hj' : j < i.j₁) :
+    DyadicIdx :=
+  ⟨i.s, j, i.j₂, i.hj₂, hj⟩
+
+theorem splitL_nested [Fact (Nat.Prime p)] (i : DyadicIdx) (j : ℕ)
+    (hj : i.j₂ < j) (hj' : j < i.j₁) :
+    Nested p (splitL i j hj hj') i := by
+  have hp : (0 : ℚ) < (p : ℚ) ^ i.s := by
+    have : (0 : ℚ) < p := by
+      exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
+    positivity
+  constructor
+  · show (i.j₂ : ℚ) / ((p : ℚ) ^ i.s) ≤ (j : ℚ) / ((p : ℚ) ^ i.s)
+    gcongr
+  · exact le_rfl
+
+theorem splitR_nested [Fact (Nat.Prime p)] (i : DyadicIdx) (j : ℕ)
+    (hj : i.j₂ < j) (hj' : j < i.j₁) :
+    Nested p (splitR i j hj hj') i := by
+  have hp : (0 : ℚ) < (p : ℚ) ^ i.s := by
+    have : (0 : ℚ) < p := by
+      exact_mod_cast Nat.Prime.pos (Fact.out : Nat.Prime p)
+    positivity
+  constructor
+  · exact le_rfl
+  · show (j : ℚ) / ((p : ℚ) ^ i.s) ≤ (i.j₁ : ℚ) / ((p : ℚ) ^ i.s)
+    gcongr
 
 end DyadicIdx
 
@@ -481,6 +516,53 @@ theorem limitEvalTop_bijective (i₀ : DyadicIdx) :
       = x
     rw [dyadicRes_id p F ϖ i₀]
     rfl
+
+/-- **Unique gluing over a split interval** (`∃!`-package of the split
+fiber-product theorem). -/
+theorem biResQ'_split_existsUnique (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    (hr : 0 < r) (hlt : q₂ < q₁) (hrm : q₂ ≤ r ∧ r ≤ q₁)
+    (g₁ : ↥(BIQ p F ϖ q₁ r h₁ hr)) (g₂ : ↥(BIQ p F ϖ r q₂ hr h₂))
+    (hmatch : biSndQ p F ϖ q₁ r h₁ hr g₁ = biFstQ p F ϖ r q₂ hr h₂ g₂) :
+    ∃! f : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂),
+      biResQ' p F ϖ q₁ q₂ q₁ r h₁ h₂ h₁ hr hlt ⟨hlt.le, le_rfl⟩ hrm f = g₁
+      ∧ biResQ' p F ϖ q₁ q₂ r q₂ h₁ h₂ hr h₂ hlt hrm ⟨le_rfl, hlt.le⟩ f = g₂ := by
+  obtain ⟨f, hfL, hfR⟩ := biResQ'_split_surjective p F ϖ q₁ q₂ r h₁ h₂ hr
+    hlt hrm g₁ g₂ hmatch
+  refine ⟨f, ⟨hfL, hfR⟩, fun f' hf' => ?_⟩
+  exact biResQ'_split_injective p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm
+    (hf'.1.trans hfL.symm) (hf'.2.trans hfR.symm)
+
+/-- **Unique gluing over a split dyadic index**: a matching pair of sections
+over the two pieces of a middle split is the pair of restrictions of a unique
+section over the whole index. This is the two-piece sheaf axiom of the dyadic
+interval presheaf. -/
+theorem exists_unique_dyadicRes_glue (i : DyadicIdx) (j : ℕ)
+    (hj : i.j₂ < j) (hj' : j < i.j₁)
+    (gL : dyadicVal p F ϖ (DyadicIdx.splitL i j hj hj'))
+    (gR : dyadicVal p F ϖ (DyadicIdx.splitR i j hj hj'))
+    (hmatch : biSndQ p F ϖ ((DyadicIdx.splitL i j hj hj').q₁ p)
+        ((DyadicIdx.splitL i j hj hj').q₂ p)
+        ((DyadicIdx.splitL i j hj hj').q₁_pos p)
+        ((DyadicIdx.splitL i j hj hj').q₂_pos p) gL
+      = biFstQ p F ϖ ((DyadicIdx.splitR i j hj hj').q₁ p)
+        ((DyadicIdx.splitR i j hj hj').q₂ p)
+        ((DyadicIdx.splitR i j hj hj').q₁_pos p)
+        ((DyadicIdx.splitR i j hj hj').q₂_pos p) gR) :
+    ∃! f : dyadicVal p F ϖ i,
+      dyadicRes p F ϖ (DyadicIdx.splitL_nested p i j hj hj') f = gL
+      ∧ dyadicRes p F ϖ (DyadicIdx.splitR_nested p i j hj hj') f = gR := by
+  have hrm : i.q₂ p ≤ (DyadicIdx.splitL i j hj hj').q₂ p
+      ∧ (DyadicIdx.splitL i j hj hj').q₂ p ≤ i.q₁ p :=
+    ⟨(DyadicIdx.splitL_nested p i j hj hj').1,
+      (DyadicIdx.splitR_nested p i j hj hj').2⟩
+  obtain ⟨f, hfL, hfR⟩ := biResQ'_split_surjective p F ϖ (i.q₁ p) (i.q₂ p)
+    ((DyadicIdx.splitL i j hj hj').q₂ p) (i.q₁_pos p) (i.q₂_pos p)
+    ((DyadicIdx.splitL i j hj hj').q₂_pos p) (i.q₂_lt_q₁ p) hrm gL gR hmatch
+  refine ⟨f, ⟨hfL, hfR⟩, fun f' hf' => ?_⟩
+  exact biResQ'_split_injective p F ϖ (i.q₁ p) (i.q₂ p)
+    ((DyadicIdx.splitL i j hj hj').q₂ p) (i.q₁_pos p) (i.q₂_pos p)
+    ((DyadicIdx.splitL i j hj hj').q₂_pos p) (i.q₂_lt_q₁ p) hrm
+    (hf'.1.trans hfL.symm) (hf'.2.trans hfR.symm)
 
 end FarguesFontaine
 
