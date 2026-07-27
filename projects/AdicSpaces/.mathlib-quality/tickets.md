@@ -2439,15 +2439,17 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   IS COMPLETE. NEXT: (P4) the kernel. DESIGN NOTES (2026-07-27, from the ln
   527-546 re-read in our conventions): the generator RPS-element is
   Gelt := (monomial (single 0 1) 1) − (monomial 0 (blocToBI-ρ g)) with
-  g := teichPowGen zb m₀ ∈ Bloc; (P4-a) STRICTNESS needs the PER-RADIUS
-  Gauss norm N_τ(f) := ⨆ n, v_τ(coeff n f) on RPS over B^I (τ ∈ {ρ₁,
-  ρ₂}; wIRPS = max of the two N_τ's — prove that as a lemma) and its
-  MULTIPLICATIVITY over each hatK-component (the classical Gauss lemma
-  over a complete valued FIELD, T-weight 1; check whether the repo's
-  T803/gaussValueF or Groebner degAr-machinery gives a reusable engine —
-  else prove the leading-index argument for hatK-coefficient series);
-  then N_τ(Gelt) = max(1, v_τ(g)) ≥ 1 gives N_τ(Gelt·x) ≥ N_τ(x) and
-  the sup: wIRPS(Gelt·x) ≥ wIRPS x — strict injectivity + closed ideal.
+  g := teichPowGen zb m₀ ∈ Bloc; (P4-a) STRICTNESS — TELESCOPE ROUTE (2026-07-27 refinement; NO
+  Gauss multiplicativity needed; repo has only gaussValueF_mul_le
+  submult): with y = (T − Cg)·x the coefficients obey y_n = x_{n−1} −
+  g·x_n. Per component (hatK-τ a FIELD): if v_τ(g) ≤ 1 (at/above the
+  cut) the DOWNWARD telescope x_m = Σ_{j>m} y_j·g^{j−m−1} (converges by
+  x-decay) gives v_τ(x_m) ≤ N_τ(y)·1 ⇒ N_τ(x) ≤ N_τ(y); if v_τ(g) > 1
+  the UPWARD telescope x_n = −Σ_{i≤n} y_i·(g⁻¹)^{n+1−i} (g-inverse in
+  the FIELD component) gives v_τ(x_n) ≤ N_τ(y)·v_τ(g)⁻¹ ≤ N_τ(y).
+  Either way N_τ(y) ≥ N_τ(x); sup over the two radii: wIRPS(Gelt·x) ≥
+  wIRPS x — strictness + closed ideal. (P4-a1) still first: N_τ-defs +
+  wIRPS = max(N_fst, N_snd).
   (P4-b) KERNEL-INCLUSION: y ∈ ker(evalBIHom) ⇒ y = Gelt·x with
   x_n := −Σ_{i≤n} y_i·(blocToBI-ρ g)^{i−n−1}-POWERS — CAREFUL: g is
   NOT invertible in B^I-ρ globally (only its σ-image is unit-adjacent);
@@ -2467,8 +2469,13 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   analogue = our isRestricted_iff_wI). Substantial; sequence as:
   (P4-a1) N_τ + wIRPS = max-lemma; (P4-a2) hatK-Gauss multiplicativity
   (or the ≥-bound directly via leading-index); (P4-a3) strictness;
-  (P4-b1) the componentwise inverse-formula x-construction; (P4-b2)
-  decay + reassembly; (P4-b3) ker = span. Then (P5) the case-1 iso package
+  (P4-b1) the componentwise inverse-formula x-construction — NOTE the
+  subtle heart: at the generic cut position v_{ρ₁}(g) > 1 > v_{ρ₂}(g)
+  the fst-component needs the UP-telescope and snd the DOWN-telescope;
+  the two must define the SAME x-pair, which is exactly where the
+  eval-vanishing hypothesis enters (Kedlaya ln 534-546); (P4-b2)
+  decay + reassembly (isRestricted from the two component-decays);
+  (P4-b3) ker = span. Then (P5) the case-1 iso package
   B^I⟨T⟩/(T − C g) ≅ B^{I′} + the ρ ∈ p^ℚ plus-ring statement (via the
   ChartVObj plus-technique), and the [z̄⁻¹]-variant case 2 (mirrored
   cut on the right — the geometry swaps ρ₂ and σ₁-roles). THE ORIGINAL P3e NOTE: mirror exists_correction_sequence (Presentation:2131,
