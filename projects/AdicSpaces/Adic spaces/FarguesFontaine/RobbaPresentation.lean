@@ -3367,6 +3367,156 @@ theorem bddAbove_v_fst_coeffSeq
           : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))) :=
   (tendsto_v_fst_coeffSeq p F ϖ hf).bddAbove_range
 
+/-- Existence packaging of the kernel factorization (slim context). -/
+theorem exists_factor_of_isRestricted_kerSol
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hres : MvPowerSeries.IsRestricted
+      ((fun s => kerSolElt p F ϖ gB hgu
+        (fun n => coeffSeq (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n) (s 0))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    ∃ V : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      GeltElt p F ϖ gB * V = f :=
+  ⟨⟨_, hres⟩, GeltElt_mul_kerSol p F ϖ gB hgu f hres⟩
+
+/-- The degree-one monomial element (slim context). -/
+noncomputable def GeltEltM1 : ↥(restrictedMvPowerSeriesSubring 1
+    ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+  ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 1)
+      (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+    isRestricted_monomial_BI p F ϖ _⟩
+
+/-- The constant monomial element on the generator (slim context). -/
+noncomputable def GeltEltM0 (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :=
+  ⟨MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 0) gB,
+    isRestricted_monomial_BI p F ϖ _⟩
+
+/-- The generator plus the constant term is the degree-one monomial
+(slim context; keeps subtype subtraction out of evaluation contexts). -/
+theorem GeltElt_add_M0 (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    GeltElt p F ϖ gB + GeltEltM0 p F ϖ gB = GeltEltM1 p F ϖ := by
+  refine Subtype.ext ?_
+  show (MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 1)
+      (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    - MvPowerSeries.monomial 0 gB)
+    + MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 0) gB
+    = MvPowerSeries.monomial (Finsupp.single (0 : Fin 1) 1)
+      (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+  rw [Finsupp.single_zero, sub_add_cancel]
+
+section KerAssembly
+
+variable {σ₁ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
+/-- The evaluation hom's underlying value (micro-lemma). -/
+theorem evalBIHom_coe
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    ((evalBIHom p F ϖ φ hφ hbmem hb f : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = evalBI p F ϖ φ hφ hbmem hb f := rfl
+
+/-- **The kernel factorization from vanishing evaluation** (Kedlaya Lemma
+4.9, case 1, injectivity direction): any restricted series killed by the
+evaluation is divisible by the generator `T - g`. -/
+theorem exists_factor_of_evalBI_eq_zero
+    (hφsnd : ∀ z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1),
+      ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)).2
+      = ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (hgu : IsUnit gB)
+    (hb2 : b.2 = ((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+    (hg1 : 1 < Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+    (hg2 : Valued.v (((gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2) ≤ 1)
+    (U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hU : evalBI p F ϖ φ hφ hbmem hb U = 0) :
+    ∃ V : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      GeltElt p F ϖ gB * V = U := by
+  have hvan := tendsto_snd_partial_sums_of_evalBI_eq_zero p F ϖ φ hφ
+    hφsnd hbmem hb gB hb2 U hU
+  have hd := kerSolElt_wI_decay p F ϖ gB hgu hg1 hg2
+    (fun n => coeffSeq (U : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n)
+    (tendsto_v_fst_coeffSeq p F ϖ U.2)
+    (bddAbove_v_fst_coeffSeq p F ϖ U.2)
+    (tendsto_v_snd_coeffSeq p F ϖ U.2) hvan
+  have hres := isRestricted_kerSol p F ϖ gB hgu
+    (fun n => coeffSeq (U : MvPowerSeries (Fin 1)
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n) hd
+  exact exists_factor_of_isRestricted_kerSol p F ϖ gB hgu U hres
+
+/-- The evaluation of the degree-one monomial element. -/
+theorem evalBI_GeltEltM1
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1) :
+    evalBI p F ϖ φ hφ hbmem hb (GeltEltM1 p F ϖ) = b := by
+  refine (evalBI_monomial p F ϖ φ hφ hbmem hb 1
+    (1 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (isRestricted_monomial_BI p F ϖ _)).trans ?_
+  rw [map_one, OneMemClass.coe_one, one_mul, pow_one]
+
+/-- The evaluation of the constant monomial element on the generator. -/
+theorem evalBI_GeltEltM0
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) = b) :
+    evalBI p F ϖ φ hφ hbmem hb (GeltEltM0 p F ϖ gB) = b := by
+  refine (evalBI_monomial p F ϖ φ hφ hbmem hb 0 gB
+    (isRestricted_monomial_BI p F ϖ _)).trans ?_
+  rw [hφgB, pow_zero, mul_one]
+
+/-- **The generator is killed by the evaluation.** -/
+theorem evalBIHom_GeltElt
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hφgB : ((φ gB : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)) = b) :
+    evalBIHom p F ϖ φ hφ hbmem hb (GeltElt p F ϖ gB) = 0 := by
+  have h1 : evalBI p F ϖ φ hφ hbmem hb
+      (GeltElt p F ϖ gB + GeltEltM0 p F ϖ gB)
+      = evalBI p F ϖ φ hφ hbmem hb (GeltEltM1 p F ϖ) :=
+    congrArg (evalBI p F ϖ φ hφ hbmem hb) (GeltElt_add_M0 p F ϖ gB)
+  have h3 := (evalBI_add p F ϖ φ hφ hbmem hb
+    (GeltElt p F ϖ gB) (GeltEltM0 p F ϖ gB)).symm.trans h1
+  rw [evalBI_GeltEltM0 p F ϖ φ hφ hbmem hb gB hφgB,
+    evalBI_GeltEltM1 p F ϖ φ hφ hbmem hb] at h3
+  refine Subtype.ext ?_
+  rw [evalBIHom_coe p F ϖ φ hφ hbmem hb, ZeroMemClass.coe_zero]
+  exact add_right_cancel (h3.trans (zero_add b).symm)
+
+end KerAssembly
+
 end FarguesFontaine
 
 end
