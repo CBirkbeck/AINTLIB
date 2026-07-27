@@ -1042,9 +1042,12 @@ non-Tate bases are supported.
   uniformizer) along the overlap circles `bigWindow n ∩ bigWindow (n+1) =
   {κ = p^{n+1}}` (a rational subset of BOTH neighbouring charts), rather than
   restricting a global A_inf-presheaf. Sub-plan:
-  (D-i) overlap data: the circle as a rational datum of both B_n-sides and the
-    transition ring iso (via imgDatum/spaPresheafValueRationalSubsetEquiv +
-    presheafValueRingEquivOfRingEquiv);
+  (D-i) overlap data: PARTIAL DONE 2026-07-27 (BigWindows.lean:
+    bigWindow_inter_succ — the κ = p^{n+1} circle in KGE/KLE form — and its
+    A_inf-level rational identifications bigWindow_inter_succ_eq_rationalOpen_
+    ofNat (at frobRoot n, right-edge datum (p,1,p,1)) / _neg (at pPow p^m)).
+    REMAINING: the circle as a rational subset of EACH chart ring B_n
+    (spaPresheafValueRationalSubsetEquiv-transport) + the transition ring iso;
   (D-ii) VPreObj-level gluing machinery for a ℤ-chain of charts (new
     infrastructure — the repo has no presheafed-space gluing; alternatively
     build the Y-presheaf directly on the rational-basis of the union);

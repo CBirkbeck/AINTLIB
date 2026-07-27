@@ -252,6 +252,137 @@ theorem bigWindow_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
       exact hge
     · exact (KLE_iff hY hq2 hpk hab2).mpr hle
 
+/-- **The overlap of consecutive Big windows is the `κ = p^{n+1}` circle.** -/
+theorem bigWindow_inter_succ (n : ℤ) (hp : 1 < p) :
+    bigWindow p F ϖ n ∩ bigWindow p F ϖ (n + 1)
+      = {v ∈ Y p F ϖ | KGE p F ϖ ((p : ℚ) ^ (n + 1)) v
+          ∧ KLE p F ϖ ((p : ℚ) ^ (n + 1)) v} := by
+  have hpQ : (1 : ℚ) < p := by exact_mod_cast hp
+  have hp0 : (0 : ℚ) < p := zero_lt_one.trans hpQ
+  ext v
+  constructor
+  · rintro ⟨⟨hY, -, hle⟩, ⟨-, hge, -⟩⟩
+    exact ⟨hY, hge, hle⟩
+  · rintro ⟨hY, hge, hle⟩
+    have hple : (p : ℚ) ^ n ≤ (p : ℚ) ^ (n + 1) :=
+      zpow_le_zpow_right₀ hpQ.le (by omega)
+    have hple2 : (p : ℚ) ^ (n + 1) ≤ (p : ℚ) ^ (n + 1 + 1) :=
+      zpow_le_zpow_right₀ hpQ.le (by omega)
+    exact ⟨⟨hY, KGE_mono p F ϖ hY (zpow_pos hp0 n) hple hge, hle⟩,
+      ⟨hY, hge, KLE_mono p F ϖ hY (zpow_pos hp0 (n + 1)) hple2 hle⟩⟩
+
+/-- **The overlap circle is a rational subset (nonnegative side)**: the
+`κ' = p` edge of the `n`-th chart, i.e. the datum
+`R({p^{2p}, [ϖ']²}/(p^p·[ϖ']))` at `ϖ' = ϖ^{1/p^n}`. -/
+theorem bigWindow_inter_succ_eq_rationalOpen_ofNat (n : ℕ) (hp : 1 < p) :
+    bigWindow p F ϖ (n : ℤ) ∩ bigWindow p F ϖ ((n : ℤ) + 1)
+      = rationalOpen
+          (chartT p F (PseudoUniformizer.frobRoot p F ϖ n) (2 * p - 1) 1)
+          (chartS p F (PseudoUniformizer.frobRoot p F ϖ n) p 1) := by
+  have hppos : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  have hp0 : (0 : ℚ) < p := by exact_mod_cast hppos
+  have hpk : 0 < p ^ n := pow_pos hppos n
+  set ϖ' := PseudoUniformizer.frobRoot p F ϖ n with hϖ'def
+  have hteich : teichPi p F ϖ' ^ p ^ n = teichPi p F ϖ :=
+    teichPi_frobRoot_pow p F ϖ n
+  have hYeq : Y p F ϖ' = Y p F ϖ :=
+    Y_eq_of_teichPi_pow p F ϖ hpk hteich
+  rw [bigWindow_inter_succ p F ϖ (n : ℤ) hp]
+  ext v
+  have hiff := mem_rationalOpen_chartData_iff p F ϖ' p 1 p 1
+    hppos one_pos hppos one_pos v
+  rw [show p + p - 1 = 2 * p - 1 from by omega, show 1 + 1 - 1 = 1 from by omega]
+    at hiff
+  rw [hiff, hYeq]
+  have hq : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + 1) := zpow_pos hp0 _
+  have hab : (p : ℚ) ^ ((n : ℤ) + 1) = ((p ^ (n + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
+    push_cast
+    rw [show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) from by push_cast; ring, zpow_natCast]
+    push_cast
+    ring
+  constructor
+  · rintro ⟨hY, hge, hle⟩
+    have hgev := (KGE_iff hY hq one_pos hab).mp hge
+    have hlev := (KLE_iff hY hq one_pos hab).mp hle
+    rw [pow_one] at hgev hlev
+    refine ⟨hY, ?_, ?_⟩
+    · refine (vle_pow_iff hpk _ _).mp ?_
+      simp only [pow_one]
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+        rw [pow_succ]
+        ring]
+      exact hgev
+    · refine (vle_pow_iff hpk _ _).mp ?_
+      simp only [pow_one]
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+        rw [pow_succ]
+        ring]
+      exact hlev
+  · rintro ⟨hY, hge, hle⟩
+    simp only [pow_one] at hge hle
+    refine ⟨hY, ?_, ?_⟩
+    · refine (KGE_iff hY hq one_pos hab).mpr ?_
+      have h := (vle_pow_iff (v := v) hpk _ _).mpr hge
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+        rw [pow_succ]
+        ring] at h
+      rw [pow_one]
+      exact h
+    · refine (KLE_iff hY hq one_pos hab).mpr ?_
+      have h := (vle_pow_iff (v := v) hpk _ _).mpr hle
+      rw [hteich, ← pow_mul, show p * p ^ n = p ^ (n + 1) from by
+        rw [pow_succ]
+        ring] at h
+      rw [pow_one]
+      exact h
+
+
+/-- **The overlap circle is a rational subset (negative side)**: the `κ' = p`
+edge at the `p^m`-th power uniformizer (circle `κ = p^{-m+1}`). -/
+theorem bigWindow_inter_succ_eq_rationalOpen_neg (m : ℕ) (hp : 1 < p) :
+    bigWindow p F ϖ (-(m : ℤ)) ∩ bigWindow p F ϖ (-(m : ℤ) + 1)
+      = rationalOpen
+          (chartT p F (PseudoUniformizer.pPow F ϖ (p ^ m)
+            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) (2 * p - 1) 1)
+          (chartS p F (PseudoUniformizer.pPow F ϖ (p ^ m)
+            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) p 1) := by
+  have hppos : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  have hp0 : (0 : ℚ) < p := by exact_mod_cast hppos
+  have hpk : 0 < p ^ m := pow_pos hppos m
+  set ϖ' := PseudoUniformizer.pPow F ϖ (p ^ m) (pow_pos hppos m) with hϖ'def
+  have hteich : teichPi p F ϖ' = teichPi p F ϖ ^ p ^ m :=
+    teichPi_pPow p F ϖ (p ^ m) (pow_pos hppos m)
+  have hYeq : Y p F ϖ' = Y p F ϖ :=
+    (Y_eq_of_teichPi_pow p F ϖ' hpk hteich.symm).symm
+  rw [bigWindow_inter_succ p F ϖ (-(m : ℤ)) hp]
+  ext v
+  have hiff := mem_rationalOpen_chartData_iff p F ϖ' p 1 p 1
+    hppos one_pos hppos one_pos v
+  rw [show p + p - 1 = 2 * p - 1 from by omega, show 1 + 1 - 1 = 1 from by omega]
+    at hiff
+  rw [hiff, hYeq]
+  have hq : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ) + 1) := zpow_pos hp0 _
+  have hab : (p : ℚ) ^ (-(m : ℤ) + 1) = ((p : ℕ) : ℚ) / ((p ^ m : ℕ) : ℚ) := by
+    rw [show -(m : ℤ) + 1 = 1 - (m : ℤ) from by ring, zpow_sub₀ hp0.ne',
+      zpow_one, zpow_natCast]
+    push_cast
+    ring
+  constructor
+  · rintro ⟨hY, hge, hle⟩
+    have hgev := (KGE_iff hY hq hpk hab).mp hge
+    have hlev := (KLE_iff hY hq hpk hab).mp hle
+    refine ⟨hY, ?_, ?_⟩
+    · simp only [pow_one]
+      rw [hteich]
+      exact hgev
+    · simp only [pow_one]
+      rw [hteich]
+      exact hlev
+  · rintro ⟨hY, hge, hle⟩
+    simp only [pow_one] at hge hle
+    rw [hteich] at hge hle
+    exact ⟨hY, (KGE_iff hY hq hpk hab).mpr hge, (KLE_iff hY hq hpk hab).mpr hle⟩
+
 end FarguesFontaine
 
 end
