@@ -664,6 +664,85 @@ theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
       rw [h2]
       exact hf' t (ht.trans (Nat.le_succ m))
 
+/-- The uniformity on a dyadic value (the interval-ring subspace
+uniformity). -/
+noncomputable instance (i : DyadicIdx) :
+    UniformSpace (dyadicVal p F ϖ i) :=
+  inferInstanceAs (UniformSpace
+    ↥(BIQ p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p)))
+
+/-- The dyadic values are topological rings. -/
+instance (i : DyadicIdx) : IsTopologicalRing (dyadicVal p F ϖ i) :=
+  inferInstanceAs (IsTopologicalRing
+    ↥(BIQ p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p)))
+
+/-- The dyadic values are separated. -/
+instance (i : DyadicIdx) : T2Space (dyadicVal p F ϖ i) :=
+  inferInstanceAs (T2Space
+    ↥(BIQ p F ϖ (i.q₁ p) (i.q₂ p) (i.q₁_pos p) (i.q₂_pos p)))
+
+/-- The dyadic values are complete (closed subrings of complete products). -/
+instance (i : DyadicIdx) : CompleteSpace (dyadicVal p F ϖ i) :=
+  (isClosed_BISub p F ϖ (hρ₁0 := vpiQ_pos p F ϖ (i.q₁ p))
+    (hρ₁1 := vpiQ_lt_one p F ϖ (i.q₁_pos p))
+    (hρ₂0 := vpiQ_pos p F ϖ (i.q₂ p))
+    (hρ₂1 := vpiQ_lt_one p F ϖ (i.q₂_pos p))).completeSpace_coe
+
+/-- The restriction between nested dyadic indices is continuous. -/
+theorem dyadicRes_continuous {i' i : DyadicIdx}
+    (h : DyadicIdx.Nested p i' i) :
+    Continuous (dyadicRes p F ϖ h) :=
+  biResQ'_continuous p F ϖ (i.q₁ p) (i.q₂ p) (i'.q₁ p) (i'.q₂ p)
+    (i.q₁_pos p) (i.q₂_pos p) (i'.q₁_pos p) (i'.q₂_pos p)
+    (i.q₂_lt_q₁ p) (h.mem₁ p) (h.mem₂ p)
+
+/-- **The compatibility locus is closed** in the product of the dyadic
+values. -/
+theorem isClosed_limitSectionsY (W : Set (Spv (Ainf p F))) :
+    IsClosed (limitSectionsY p F ϖ W
+      : Set (Π i : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆ W},
+        dyadicVal p F ϖ i.1)) := by
+  have hset : (limitSectionsY p F ϖ W
+      : Set (Π i : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆ W},
+        dyadicVal p F ϖ i.1))
+      = ⋂ (i' : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆ W})
+          (i : {i : DyadicIdx // dyadicTrace p F ϖ i ⊆ W})
+          (h : DyadicIdx.Nested p i'.1 i.1),
+          {f | dyadicRes p F ϖ h (f i) = f i'} := by
+    ext f
+    simp only [Set.mem_iInter, Set.mem_setOf_eq]
+    exact Iff.rfl
+  rw [hset]
+  refine isClosed_iInter fun i' => isClosed_iInter fun i =>
+    isClosed_iInter fun h => ?_
+  exact isClosed_eq
+    ((dyadicRes_continuous p F ϖ h).comp (continuous_apply i))
+    (continuous_apply i')
+
+/-- The limit sections over `W` are complete. -/
+instance (W : Set (Spv (Ainf p F))) :
+    CompleteSpace ↥(limitSectionsY p F ϖ W) :=
+  (isClosed_limitSectionsY p F ϖ W).completeSpace_coe
+
+/-- The limit sections over `W` are separated. -/
+instance (W : Set (Spv (Ainf p F))) :
+    T2Space ↥(limitSectionsY p F ϖ W) :=
+  inferInstance
+
+/-- The limit sections form a topological ring. -/
+instance (W : Set (Spv (Ainf p F))) :
+    IsTopologicalRing ↥(limitSectionsY p F ϖ W) :=
+  inferInstance
+
+/-- **The presheaf restriction is continuous** (a re-indexing of the
+product projections). -/
+theorem limitRestrictY_continuous {W' W : Set (Spv (Ainf p F))}
+    (hW : W' ⊆ W) :
+    Continuous (limitRestrictY p F ϖ hW) := by
+  refine Continuous.subtype_mk ?_ _
+  refine continuous_pi fun i => ?_
+  exact (continuous_apply _).comp continuous_subtype_val
+
 end FarguesFontaine
 
 end
