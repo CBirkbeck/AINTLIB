@@ -2124,6 +2124,23 @@ non-Tate bases are supported.
     isLimitSheafOn_Y.glue — compat VACUOUS on disjoint pieces; the
     glued section is generator-invariant by separation; (γ) stalk
     surjectivity/injectivity of ringStalkMap piYHom from (β).
+    ★★★ (3ii-c β) COMPLETE 2026-07-29 (commits through 5b4c39f5c, all
+    axiom-clean): the FULL INVARIANT-EXTENSION LEMMA. The engine:
+    limitFrobHom_add (additivity of the limit transport — componentwise
+    through presheafValueRingEquivHuber_comp_apply/_symm (dense-image
+    uniqueness) + congr_e + the composed-restriction/section-compat
+    collapse; TRANS-SPELLED continuity bridges (Continuous ⇑(e₁.trans
+    e₂)-typed haves) defuse the ∘-vs-trans coercion mismatches);
+    piece_shift/translateFam_succ (SUBTRACTION-FREE indexing at 1+m —
+    the k−1-form makes rw-motives type-incorrect); limitFrobHom_double
+    (inverted additivity); glue_piece_eq (the 7-step calc: comp-
+    collapse, naturality, hg m, succ.symm, roundtrip-id, hg (1+m),
+    comp-collapse — FIRST TRY); **glue_invariant** (sheaf separation
+    over the shifted translate cover, ULift-indexed, membership-form
+    covering to dodge the Opens-instance spellings; SetLike.coe for
+    the iUnion); **exists_invariant_extension** (bundled: a section
+    over a wandering-separated W extends to ↥(frobFixed (xImage W))
+    restricting back on the zero translate).
     ★ (3ii-c α + compat unblocking) DONE 2026-07-28 (commit 4258ce942,
     axiom-clean): presheafValue_subsingleton_of_rationalOpen_empty_huber
     (generic Huber via the Spa-point criterion at f := 0 — IsUnit 0 ⟺
