@@ -1939,7 +1939,27 @@ non-Tate bases are supported.
     stalk transport; stalkValue-equivariance from
     comap_limitFrobHom_openValue via comap_germ_stalkValue +
     stalkVle intro/elim; then isLocalHom (via the iso-route) and the
-    VObj-iso; then X. Non-critical parked:
+    VObj-iso; then X.
+    ★ D-iii-4b AMBIENT CORE DONE 2026-07-28 (commit c4d199fbd,
+    axiom-clean): ringStalkMap_ambientFrob_germ (germ naturality of
+    the categorical stalk transport — the stalkFunctor_map_germ_apply
+    + stalkPushforward_germ_apply chain; SPELLING DISCIPLINE: state
+    everything at ConcreteCategory.hom + the (presheaf ⋙ forget)
+    composite, NOT ringPresheaf/Hom.hom/spaRingPresheaf mixes — every
+    mixed spelling kills the rw-unifier); frobOpens roundtrips;
+    openValue_vle_frobTransport (the vle-transport core as a
+    PROP-EQUALITY — comap_vle is stated with = not ↔);
+    stalkVle_congr (subst-transport);
+    **comap_ringStalkMap_ambientFrob_stalkValue** — the ambient
+    stalk-valuation equivariance, both directions via
+    exists_common_rep + stalkVle_elim + the double-restrict collapse
+    (limitRestrict_comp + limitFrobHom naturality) + the transport
+    core + germ_limitRestrict collapses; NO rw-at-fat-hyps — all
+    Eq.mp/trans/congr chains.
+    REMAINING for val_compat: the RESTRICT-side conjugation
+    (ringStalkMap (yFrobHom k) vs the ambient transport through
+    yRingStalkEquiv/restrictStalkIso) + the final assembly; then
+    isLocalHom + the VObj-iso; then X. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
