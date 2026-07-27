@@ -284,6 +284,16 @@ private lemma exists_generatingSections_restrict_fromSpec
     exact hG.finite⟩
   exact ⟨G'', hG''⟩
 
+/-- Restriction of a finite-type quasicoherent module along an affine open's
+canonical spectrum presentation is finite type. -/
+theorem isFiniteType_restrict_fromSpec
+    (M : X.Modules) [M.IsQuasicoherent] [M.IsFiniteType]
+    (U : X.Opens) (hU : IsAffineOpen U) :
+    (M.restrict hU.fromSpec).IsFiniteType := by
+  obtain ⟨G, hG⟩ := exists_generatingSections_restrict_fromSpec M U hU
+  letI : G.IsFiniteType := hG
+  exact isFiniteType_of_generatingSections (M.restrict hU.fromSpec) G
+
 /-- The nonzero-stalk locus of a finite-type quasicoherent module is closed. -/
 lemma isClosed_stalkSupport
     (M : X.Modules) [M.IsFiniteType] [M.IsQuasicoherent] :
