@@ -67,6 +67,26 @@ theorem preimage_sectionAway_eq_of_pointedIso
     change e.hom.base (zX t) = e.hom.base x
     rw [show e.hom.base (zX t) = (zX ≫ e.hom) t from rfl, hez, ht]
 
+/-- In every residue fibre of a fibrewise-elliptic family, the complement of the marked
+point is affine. -/
+theorem FibrewiseElliptic.sectionAway_fiber_isAffineOpen
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    {z : S ⟶ E} {hz : z ≫ π = 𝟙 S}
+    (h : FibrewiseElliptic π z hz) (s : S) :
+    IsAffineOpen
+      (@sectionAway (π.fiber s) (Spec (S.residueField s))
+        (π.fiberToSpecResidueField s) (isSeparated_fiberToSpecResidueField π s)
+        (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _)) := by
+  letI : IsSeparated (π.fiberToSpecResidueField s) :=
+    isSeparated_fiberToSpecResidueField π s
+  obtain ⟨W, _, e, _, hez⟩ := h s
+  rw [← preimage_sectionAway_eq_of_pointedIso
+    (πX := π.fiberToSpecResidueField s) (πY := projModelπ W)
+    (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _)
+    (projModelZero W) (projModelZero_projModelπ W) e hez,
+    sectionAway_projModelZero_eq_zChart]
+  exact (projModelZChart W).2.preimage_of_isIso e.hom
+
 end
 
 end ModularCurves
