@@ -377,4 +377,43 @@ abbrev segreProductSecondRightRingHom
       SegreProductChartOverlapRing R m n i a j b :=
   (segreProductSecondRightAlgHom R m n i a j b).toRingHom
 
+/-- The transition homomorphism from the second product chart to the common overlap ring. -/
+def segreProductSecondChartAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    SegreProductChartRing R m n a b →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b :=
+  Algebra.TensorProduct.lift
+    (segreProductSecondLeftAlgHom R m n i a j b)
+    (segreProductSecondRightAlgHom R m n i a j b)
+    (fun _ _ => Commute.all _ _)
+
+/-- The second-chart transition restricts to its first factor map. -/
+lemma segreProductSecondChartAlgHom_comp_left
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductSecondChartAlgHom R m n i a j b).comp
+        (Algebra.TensorProduct.includeLeft :
+          ProjectiveCoordinateAway R a →ₐ[R]
+            SegreProductChartRing R m n a b) =
+      segreProductSecondLeftAlgHom R m n i a j b := by
+  exact Algebra.TensorProduct.lift_comp_includeLeft
+    (segreProductSecondLeftAlgHom R m n i a j b)
+    (segreProductSecondRightAlgHom R m n i a j b)
+    (fun _ _ => Commute.all _ _)
+
+/-- The second-chart transition restricts to its second factor map. -/
+lemma segreProductSecondChartAlgHom_comp_right
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductSecondChartAlgHom R m n i a j b).comp
+        (Algebra.TensorProduct.includeRight :
+          ProjectiveCoordinateAway R b →ₐ[R]
+            SegreProductChartRing R m n a b) =
+      segreProductSecondRightAlgHom R m n i a j b := by
+  exact Algebra.TensorProduct.lift_comp_includeRight
+    (segreProductSecondLeftAlgHom R m n i a j b)
+    (segreProductSecondRightAlgHom R m n i a j b)
+    (fun _ _ => Commute.all _ _)
+
 end MvPolynomial
