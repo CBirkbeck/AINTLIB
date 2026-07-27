@@ -799,6 +799,34 @@ theorem restrictionMap_cross_eq_id (D E : RationalLocData A)
 
 end EqOpen
 
+section GluingTransport
+
+variable [IsRingOfIntegralElements (A⁺ : Subring A)] [DecidableEq A]
+variable (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)]
+  [DecidableEq (RationalLocData (presheafValue D₀))]
+
+/-- **The transported family** over the image covering: choose a preimage
+piece and push its value through the keystone (cast along the membership
+equation). -/
+noncomputable def imgFamily (C : RationalCoveringData A)
+    (hcertB : Ideal.span ((C.base.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hCD₀ : rationalOpen C.base.T C.base.s
+      ⊆ rationalOpen D₀.T D₀.s)
+    (f : ∀ D : ↥C.covers, presheafValue D.1) :
+    ∀ D' : ↥(imgCoveringO D₀ C hcertB hcertP).covers,
+      presheafValue D'.1 := fun D' =>
+  let h := (mem_imgCoversO D₀ C hcertP).mp D'.2
+  (h.choose_spec.choose_spec.symm ▸
+    (keystoneO D₀ (hcertP h.choose h.choose_spec.choose)
+      ((C.hsubset h.choose h.choose_spec.choose).trans hCD₀)
+      (f ⟨h.choose, h.choose_spec.choose⟩)))
+
+end GluingTransport
+
 end ValuationSpectrum
 
 end
