@@ -1432,7 +1432,21 @@ non-Tate bases are supported.
     axiom-clean. The FF Big-window charts are now objects of 𝒱 with the
     complete Wedhorn 8.14/8.20 package. REMAINING for the Y-object:
     (α) the plus-reconciliation (upgrade to the canonical pair, optional
-    if downstream works transported); (β) the ARCHITECTURE DECISION
+    if downstream works transported) — PLAN REFINED 2026-07-27:
+    BIPlusIn is the FULL unit ball {wI ≤ 1} (not a closure).
+    (⊆-easy, canonical-into-ball): completedPlusSubring ⊆ power-bounded
+    (the existing faithful chain, Presheaf.lean ~490: locPlusSubring ⊆
+    (Aₛ)° + IntCl preserves power-bounded + closure) AND power-bounded =
+    ball in BISub because wI is MULTIPLICATIVE ON POWERS
+    (wI(xⁿ) = max(v₁,v₂)ⁿ = wI(x)ⁿ) — one small new lemma
+    isPowerBounded_iff_wI_le_one.
+    (⊇-hard, ball-into-canonical — Kedlaya Def 4.5): a ball element is a
+    limit of Bloc-approximants which are AUTOMATICALLY in the ball for
+    ε ≤ 1 (ultrametric: wI(h) ≤ max(wI z, ε) ≤ 1), so it reduces to the
+    DENSE-LEVEL INTEGRALITY: a Bloc element with both window-Gauss norms
+    ≤ 1 is integral over the A_inf[T/s]-localization subring (Teichmüller
+    truncation; the T911 norm-exact-lift machinery is the tool);
+    then IntCl-closure-tower absorbs. This ⊇-half is the real new math. (β) the ARCHITECTURE DECISION
     (ambient-vs-glue, M8-note above) and the cross-chart assembly of the
     Y-VObj from the chartVObj chain + the D-ii-2 split fiber-product; then
     (D-iii) the φ-action as VObj-isos and X := Y/φ^ℤ.
