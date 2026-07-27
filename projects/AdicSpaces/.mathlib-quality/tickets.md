@@ -2141,6 +2141,24 @@ non-Tate bases are supported.
     the iUnion); **exists_invariant_extension** (bundled: a section
     over a wandering-separated W extends to ↥(frobFixed (xImage W))
     restricting back on the zero translate).
+    ★★ (γ i/ii) DONE 2026-07-29 (commits a52bad1b9 + 1a49ef29b,
+    axiom-clean): ringStalkMap_piYHom_germ (the projection germ
+    naturality — the established hunfold/hsplit/trans pattern held
+    first-try); yRingPresheaf_map_apply + yGerm_limitRestrict (the
+    restricted-presheaf germ-restriction collapse via the generic
+    TopCat.Presheaf.germ_res_apply); **ringStalkMap_piYHom_surjective
+    — STALK SURJECTIVITY of the curve projection**: represent the
+    germ (TopCat.Presheaf.exists_germ_eq — GENERIC, works for any
+    presheaf), shrink into a wandering neighbourhood (Disjoint.mono
+    for the translate-disjointness of the inf), apply the invariant
+    extension, and chase both germs to the zero translate
+    (fully-parenthesized germ-applications — bare `.germ V y h t`
+    across linebreaks misparses in calc).
+    REMAINING (γ iii): injectivity — invariant_piece_determined
+    (ℤ-induction via translateFam_succ both directions) +
+    invariant_sections_agree + the germ-level conclusion; then the
+    stalk RingEquiv (ofBijective), local/val transport, D-iv-4 sheaf
+    condition, xVObj (D-iv-5).
     ★ (3ii-c α + compat unblocking) DONE 2026-07-28 (commit 4258ce942,
     axiom-clean): presheafValue_subsingleton_of_rationalOpen_empty_huber
     (generic Huber via the Spa-point criterion at f := 0 — IsUnit 0 ⟺
