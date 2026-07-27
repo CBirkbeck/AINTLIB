@@ -1440,7 +1440,13 @@ non-Tate bases are supported.
     ball in BISub because wI is MULTIPLICATIVE ON POWERS
     (wI(xⁿ) = max(v₁,v₂)ⁿ = wI(x)ⁿ) — one small new lemma
     isPowerBounded_iff_wI_le_one — DONE 2026-07-27 (IntervalSplitting.lean:
-    wI_coe_pow + isPowerBounded_iff_wI_le_one, axiom-clean). Remaining for
+    wI_coe_pow + isPowerBounded_iff_wI_le_one, axiom-clean). (⊆) FULLY DONE
+    2026-07-27 (ChartVObj.lean: presheafChartRingEquivBISub_isOpenMap +
+    **completedPlusSubring_le_chartPlus** — IRIE.subset_powerBounded over
+    the affinoid A_inf + open-map transport + the ball-iff; axiom-clean).
+    NOTE: Presheaf.lean's IsPowerBounded.map (line ~4175) is a SORRY and
+    FALSE-as-stated (needs open) — use isPowerBounded_map_of_isOpenMap
+    (Wedhorn828) instead, never the sorried one. Historical text: Remaining for
     (⊆): canonical ⊆ power-bounded — the faithful chain
     (locPlusSubring_le_powerBounded + IntCl/coe/closure-stability; the
     IRIE-field subset_powerBounded of presheafValuePlus_isRingOfIntegral-
