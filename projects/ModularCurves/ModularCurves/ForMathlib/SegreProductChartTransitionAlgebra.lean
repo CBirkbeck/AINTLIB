@@ -20,7 +20,7 @@ open scoped TensorProduct
 
 noncomputable section
 
-universe u
+universe u v
 
 namespace MvPolynomial
 
@@ -116,11 +116,11 @@ lemma segreProductOverlapRightRatio_isUnit
 
 /-- The double homogeneous localization attached to two standard projective charts. -/
 abbrev ProjectiveCoordinateOverlapAway
-    (R : Type u) [CommRing R] {σ : Type} (i a : σ) :=
+    (R : Type u) [CommRing R] {σ : Type v} (i a : σ) :=
   Away (homogeneousSubmodule σ R) (X i * X a)
 
 private lemma projectiveCoordinateRatio_eq_isLocalizationElem
-    (R : Type u) [CommRing R] {σ : Type} (i a : σ) :
+    (R : Type u) [CommRing R] {σ : Type v} (i a : σ) :
     projectiveCoordinateRatio R i a =
       Away.isLocalizationElem
         (X_mem_homogeneousSubmodule_one R i)
@@ -131,7 +131,7 @@ private lemma projectiveCoordinateRatio_eq_isLocalizationElem
 
 /-- The first projective chart maps canonically to the double homogeneous localization. -/
 def projectiveFirstChartToOverlapAway
-    (R : Type u) [CommRing R] {σ : Type} (i a : σ) :
+    (R : Type u) [CommRing R] {σ : Type v} (i a : σ) :
     ProjectiveCoordinateAway R i →+*
       ProjectiveCoordinateOverlapAway R i a :=
   awayMap
@@ -141,7 +141,7 @@ def projectiveFirstChartToOverlapAway
 
 /-- The second projective chart maps canonically to the double homogeneous localization. -/
 def projectiveSecondChartToOverlapAway
-    (R : Type u) [CommRing R] {σ : Type} (i a : σ) :
+    (R : Type u) [CommRing R] {σ : Type v} (i a : σ) :
     ProjectiveCoordinateAway R a →+*
       ProjectiveCoordinateOverlapAway R i a :=
   awayMap
