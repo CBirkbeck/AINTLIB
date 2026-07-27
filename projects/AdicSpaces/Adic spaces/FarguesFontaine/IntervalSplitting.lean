@@ -842,6 +842,188 @@ theorem biResQ'_split_surjective (q₁ q₂ r : ℚ) (h₁ : 0 < q₁) (h₂ : 0
     biResQ'_biGlue_left p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch,
     biResQ'_biGlue_right p F ϖ q₁ q₂ r h₁ h₂ hr hlt hrm g₁ g₂ hmatch⟩
 
+
+/-! ### Power-boundedness in the interval ring (the plus-reconciliation
+substrate): the unit ball `BIPlusIn` is exactly the power-bounded subring. -/
+
+variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂}
+  {hρ₂1 : ρ₂ < 1}
+
+/-- The interval norm is multiplicative on powers. -/
+theorem wI_coe_pow (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (n : ℕ) :
+    wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z ^ n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ^ n := by
+  rw [show ((z ^ n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+    = ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ^ n from
+    SubmonoidClass.coe_pow z n]
+  show max (Valued.v (((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).1 ^ n))
+      (Valued.v (((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).2 ^ n))
+    = _
+  rw [map_pow, map_pow]
+  rcases le_total (Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+      × (hatK p F hρ₂0 hρ₂1)).1))
+    (Valued.v ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) with h | h
+  · rw [show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        = Valued.v ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+      from max_eq_right h]
+    exact max_eq_right (pow_le_pow_left' h n)
+  · rw [show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+        = Valued.v ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+      from max_eq_left h]
+    exact max_eq_left (pow_le_pow_left' h n)
+
+/-- **Power-boundedness in the interval ring is the unit ball**: `wI` is
+multiplicative on powers, so an element is power-bounded iff `wI ≤ 1`
+(i.e. iff it lies in `BIPlusIn`). -/
+theorem isPowerBounded_iff_wI_le_one
+    (z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) :
+    TopologicalRing.IsPowerBounded z ↔
+      wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ≤ 1 := by
+  constructor
+  · intro hz
+    by_contra hgt
+    have h1 : 1 < wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 ((z : _ × _)) := lt_of_not_ge hgt
+    -- boundedness against the unit ball
+    have hUmem : Subtype.val ⁻¹' {w : (hatK p F hρ₁0 hρ₁1)
+        × (hatK p F hρ₂0 hρ₂1) | wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ 1}
+        ∈ nhds (0 : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) := by
+      refine continuous_subtype_val.continuousAt.preimage_mem_nhds ?_
+      simpa using wI_ball_mem_nhds p F
+        (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) one_pos
+    obtain ⟨V, hV, hSV⟩ := hz _ hUmem
+    rw [nhds_subtype_eq_comap] at hV
+    obtain ⟨t, ht, htV⟩ := Filter.mem_comap.mp hV
+    obtain ⟨ε, hε, hball⟩ := exists_wI_ball_subset p F ht
+    -- the small nonzero witness `pEltB ^ m`
+    have hmaxlt : max ρ₁ ρ₂ < 1 := max_lt hρ₁1 hρ₂1
+    obtain ⟨m, hm⟩ := NNReal.exists_pow_lt_of_lt_one hε hmaxlt
+    set y := pEltB p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m with hydef
+    have hyval : ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        = pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m := by
+      rw [hydef, SubmonoidClass.coe_pow]
+      rfl
+    have hymem : y ∈ V := by
+      refine htV ?_
+      show ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : _ × _) ∈ t
+      refine hball ?_
+      show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 ((y : _ × _)) ≤ ε
+      rw [hyval]
+      refine le_trans ?_ hm.le
+      show max (Valued.v ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m).1))
+        (Valued.v ((pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m).2)) ≤ (max ρ₁ ρ₂) ^ m
+      rw [show (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m).1
+          = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 ^ m from rfl,
+        show (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 ^ m).2
+          = (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 ^ m from rfl,
+        map_pow, map_pow, valued_pImage_fst p F ϖ, valued_pImage_snd p F ϖ]
+      exact max_le (pow_le_pow_left' (le_max_left _ _) m)
+        (pow_le_pow_left' (le_max_right _ _) m)
+    -- the blowing-up coordinate
+    rcases max_cases (Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+        × (hatK p F hρ₂0 hρ₂1)).1))
+      (Valued.v ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) with
+      ⟨hmax, -⟩ | ⟨hmax, -⟩
+    · -- first coordinate realizes the norm
+      have hwIeq : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+          = Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+            × (hatK p F hρ₂0 hρ₂1)).1) := hmax
+      have hv1 : 1 < Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+          × (hatK p F hρ₂0 hρ₂1)).1) := hwIeq ▸ h1
+      obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt ((ρ₁ ^ m)⁻¹) hv1
+      have hmem := hSV (Set.mul_mem_mul ⟨n, rfl⟩ hymem)
+      have hmem' : max
+          (Valued.v (((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+          (Valued.v (((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) ≤ 1 := hmem
+      have hle := le_trans (le_max_left _ _) hmem'
+      have hcoe : (((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).1
+          = ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).1 ^ n
+            * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).1 ^ m := by
+        rw [show ((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          = ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ^ n
+            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) from by
+          push_cast
+          rfl, hyval]
+        rfl
+      rw [hcoe, Valuation.map_mul, map_pow, map_pow,
+        valued_pImage_fst p F ϖ] at hle
+      have hgt' : 1 < Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+          × (hatK p F hρ₂0 hρ₂1)).1) ^ n * ρ₁ ^ m := by
+        rw [← inv_mul_cancel₀ (pow_ne_zero m hρ₁0.ne')]
+        exact mul_lt_mul_of_pos_right hn (by positivity)
+      exact absurd hle (not_le_of_gt hgt')
+    · -- second coordinate realizes the norm
+      have hwIeq : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+          = Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+            × (hatK p F hρ₂0 hρ₂1)).2) := hmax
+      have hv2 : 1 < Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+          × (hatK p F hρ₂0 hρ₂1)).2) := hwIeq ▸ h1
+      obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt ((ρ₂ ^ m)⁻¹) hv2
+      have hmem := hSV (Set.mul_mem_mul ⟨n, rfl⟩ hymem)
+      have hmem' : max
+          (Valued.v (((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))
+          (Valued.v (((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)) ≤ 1 := hmem
+      have hle := le_trans (le_max_right _ _) hmem'
+      have hcoe : (((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).2
+          = ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))).2 ^ n
+            * (pImage p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).2 ^ m := by
+        rw [show ((z ^ n * y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+          = ((z : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ^ n
+            * ((y : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) from by
+          push_cast
+          rfl, hyval]
+        rfl
+      rw [hcoe, Valuation.map_mul, map_pow, map_pow,
+        valued_pImage_snd p F ϖ] at hle
+      have hgt' : 1 < Valued.v ((z : (hatK p F hρ₁0 hρ₁1)
+          × (hatK p F hρ₂0 hρ₂1)).2) ^ n * ρ₂ ^ m := by
+        rw [← inv_mul_cancel₀ (pow_ne_zero m hρ₂0.ne')]
+        exact mul_lt_mul_of_pos_right hn (by positivity)
+      exact absurd hle (not_le_of_gt hgt')
+  · intro hle U hU
+    rw [nhds_subtype_eq_comap] at hU
+    obtain ⟨t, ht, htU⟩ := Filter.mem_comap.mp hU
+    obtain ⟨ε, hε, hball⟩ := exists_wI_ball_subset p F ht
+    refine ⟨Subtype.val ⁻¹' {w : (hatK p F hρ₁0 hρ₁1)
+        × (hatK p F hρ₂0 hρ₂1) | wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1 w ≤ ε}, ?_, ?_⟩
+    · refine continuous_subtype_val.continuousAt.preimage_mem_nhds ?_
+      simpa using wI_ball_mem_nhds p F
+        (0 : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) hε
+    · rintro x hx
+      obtain ⟨a, ⟨n, rfl⟩, v, hv, rfl⟩ := hx
+      refine htU ?_
+      show ((z ^ n * v : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : _ × _) ∈ t
+      refine hball ?_
+      show wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (((z ^ n * v : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : _ × _)) ≤ ε
+      refine le_trans (wI_mul_le p F
+        ((z ^ n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+        ((v : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+          : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))) ?_
+      have h1 : wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (((z ^ n : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : _ × _)) ≤ 1 := by
+        rw [wI_coe_pow p F ϖ z n]
+        exact pow_le_one₀ zero_le hle
+      exact le_trans (mul_le_mul' h1 hv) (le_of_eq (one_mul ε))
+
 end FarguesFontaine
 
 end
