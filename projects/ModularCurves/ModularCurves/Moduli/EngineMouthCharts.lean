@@ -10,6 +10,7 @@ import ModularCurves.ForMathlib.SemilocalVariableChangeSplit
 import ModularCurves.ForMathlib.SpecGroupAction
 import ModularCurves.ForMathlib.WeierstrassInvariantLocal
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The engine mouth core, Stage 3a–3b: the semilocal chart cover and its split transition
@@ -2463,7 +2464,7 @@ lemma gluePieceRange [IsAffine X] (a g : ↑Γ(X, ⊤))
     isOpenImmersion_projModelBaseChange W
   have hpb := isPullback_projModelBaseChange (R := Localization.Away a)
     (R' := ↑Γ(X, X.basicOpen (a * g))) W
-  have hsurj : Function.Surjective ⇑(hpb.isoPullback.hom) :=
+  have hsurj : Function.Surjective ⇑(hpb.isoPullback.hom.base) :=
     (Scheme.homeoOfIso hpb.isoPullback).surjective
   rw [Scheme.Opens.range_ι]
   show Set.range ⇑(projModelBaseChange (awayToSections a g) W) = _
@@ -2471,9 +2472,13 @@ lemma gluePieceRange [IsAffine X] (a g : ↑Γ(X, ⊤))
         = hpb.isoPullback.hom ≫ pullback.fst (projModelπ W)
             (Spec.map (CommRingCat.ofHom (awayToSections a g)))
       from hpb.isoPullback_hom_fst.symm]
-  rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp,
-    Set.range_eq_univ.mpr hsurj, Set.image_univ,
-    Scheme.Pullback.range_fst]
+  rw [Scheme.Hom.comp_base, TopCat.coe_comp, Set.range_comp]
+  simp only [hsurj.range_eq, Set.image_univ]
+  rw [show ((fun a_1 => (pullback.fst (projModelπ W)
+        (Spec.map (CommRingCat.ofHom (awayToSections a g)))) a_1) '' Set.univ)
+      = Set.range ⇑(pullback.fst (projModelπ W)
+        (Spec.map (CommRingCat.ofHom (awayToSections a g)))) from Set.image_univ]
+  rw [Scheme.Pullback.range_fst]
   rw [show Set.range ⇑(Spec.map (CommRingCat.ofHom (awayToSections a g)))
       = ↑(specBasicOpen (CommRingCat.of (Localization.Away a))
           (algebraMap ↑Γ(X, ⊤) (Localization.Away a) g)) from by
@@ -2782,6 +2787,7 @@ lemma chart_baseChange_fst {V : X.affineOpens} (Q : LocalPresentation C V)
   exact (cancel_epi (Q.restrict h).e.hom).mp goal2
 
 open Scheme LocalPresentation in
+set_option maxHeartbeats 12800000 in
 /-- **(reversed `chartPiece_index_congr`)** Two presentations of `C` over the same away-affine,
 both with chart curve `W₀.map (awayToSections a g)` and trivial comparison, give the same
 native-glue piece. -/
@@ -2803,7 +2809,7 @@ lemma gluePiece_chart_congr [IsAffine X] (a g : ↑Γ(X, ⊤))
           rw [hIso]
       _ = eqToHom (congrArg projModel hQW').symm ≫ Q'.e.inv := by
           rw [← Category.assoc, eqToHom_trans]
-  rw [reassoc_of% key]
+  conv_lhs => rw [← Category.assoc, key]
 
 /-- The composite localization map `A[1/a] → Γ(X, D((a·g₁)·(a·g₂)))` — restriction of
 `awayToSections a g₁` to the common away-affine. -/
@@ -2896,7 +2902,7 @@ theorem overlapRange [IsAffine X] (a g₁ g₂ : ↑Γ(X, ⊤))
     isOpenImmersion_projModelBaseChange W
   have hpb := isPullback_projModelBaseChange (R := Localization.Away a)
     (R' := ↑Γ(X, X.basicOpen ((a * g₁) * (a * g₂)))) W
-  have hsurj : Function.Surjective ⇑(hpb.isoPullback.hom) :=
+  have hsurj : Function.Surjective ⇑(hpb.isoPullback.hom.base) :=
     (Scheme.homeoOfIso hpb.isoPullback).surjective
   rw [Scheme.Opens.range_ι]
   show Set.range ⇑(projModelBaseChange (overlapMap a g₁ g₂) W) = _

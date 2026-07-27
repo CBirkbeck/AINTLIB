@@ -10,6 +10,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 import Mathlib.AlgebraicGeometry.PullbackCarrier
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 
 /-!
 # `IsStableUnderBaseChangeAlong` / `RespectsIso` for the standard morphism properties
@@ -96,5 +97,15 @@ instance respectsIso_etale : MorphismProperty.RespectsIso (@Etale) :=
 set_option backward.isDefEq.respectTransparency.types false in
 instance zariskiLocalAtTarget_flat : IsZariskiLocalAtTarget (@Flat) :=
   inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance respectsIso_formallyUnramified :
+    MorphismProperty.RespectsIso (@FormallyUnramified) :=
+  MorphismProperty.IsStableUnderBaseChange.respectsIso
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance stableAlong_formallyUnramified {X Y : Scheme.{u}} (f : X ⟶ Y) :
+    MorphismProperty.IsStableUnderBaseChangeAlong (@FormallyUnramified) f :=
+  ⟨fun pb hg => MorphismProperty.IsStableUnderBaseChange.of_isPullback pb hg⟩
 
 end ModularCurves.BumpCompat

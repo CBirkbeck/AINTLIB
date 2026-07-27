@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.MulByHomFlatFibre
 import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Unramified transport across pointed group-object isomorphisms
