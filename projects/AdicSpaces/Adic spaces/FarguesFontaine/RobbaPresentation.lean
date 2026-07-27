@@ -1418,6 +1418,53 @@ theorem exists_monomial_lift_package {ρ₁ σ₁ ρ₂ : NNReal}
       exact le_mul_of_one_le_left zero_le hK1
     · exact le_max_right _ _
 
+/-- **The cut-radius Gauss bound supplies the twist divisibility**: for a
+`σ₁`-bounded fraction, every denominator-zone Teichmüller coordinate is
+divisible to the floor-division depth. -/
+theorem monomial_dvd_of_wLoc_le_one {σ₁ : NNReal}
+    (hσ₁0 : 0 < σ₁) (hσ₁1 : σ₁ < 1)
+    (zb : OF F) (m : ℕ)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m)
+    (w : Ainf p F) (k : ℕ)
+    (hw : wLoc p F ϖ hσ₁0 hσ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)) ≤ 1)
+    (i : ℕ) (hik : i < k) :
+    perfectoidValuation p F ((teichCoeff p F w i : OF F) : F)
+      ≤ perfectoidValuation p F (zb : F) ^ ((k - i) / m) := by
+  have hterm := gaussTerm_le_of_wLoc_mk'_le_one p F ϖ hσ₁0 hσ₁1 w k hw i
+  -- σ₁^i·v(c) ≤ (σ₁·V)^k ⇒ v(c) ≤ σ₁^{k−i}·V^k
+  have hstep : perfectoidValuation p F ((teichCoeff p F w i : OF F) : F)
+      ≤ σ₁ ^ (k - i)
+        * perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k := by
+    have hsplit : (σ₁ * perfectoidValuation p F
+        ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k
+        = σ₁ ^ i * (σ₁ ^ (k - i)
+          * perfectoidValuation p F
+              ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k) := by
+      rw [mul_pow, show σ₁ ^ k = σ₁ ^ i * σ₁ ^ (k - i) from by
+        rw [← pow_add]
+        congr 1
+        omega]
+      ring
+    rw [hsplit] at hterm
+    exact le_of_mul_le_mul_left hterm (pow_pos hσ₁0 i)
+  refine le_trans hstep ?_
+  calc σ₁ ^ (k - i)
+      * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ k
+      ≤ σ₁ ^ (k - i) * 1 := by
+        refine mul_le_mul_of_nonneg_left ?_ zero_le
+        exact pow_le_one₀ zero_le (perfectoidValuation_toOF_lt_one p F ϖ).le
+    _ = σ₁ ^ (k - i) := mul_one _
+    _ ≤ σ₁ ^ (m * ((k - i) / m)) := by
+        refine pow_le_pow_of_le_one zero_le hσ₁1.le ?_
+        have h1 : ((k - i) / m) * m ≤ k - i := Nat.div_mul_le_self (k - i) m
+        have h2 : m * ((k - i) / m) ≤ k - i := by rwa [mul_comm]
+        exact h2
+    _ = perfectoidValuation p F (zb : F) ^ ((k - i) / m) := by
+        rw [hgen, ← pow_mul]
+
 end FarguesFontaine
 
 end
