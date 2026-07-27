@@ -5,7 +5,7 @@ Authors: Chris Birkbeck
 -/
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 import ModularCurves.EllipticCurve.PoleSheafPowerOneProjectiveCoordinates
-import ModularCurves.ForMathlib.PrescribedLocalizedBasis
+import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChangeLinearEquiv
 
 /-!
 # The normalized first pole basis after affine base change
@@ -179,35 +179,9 @@ theorem
   letI : Algebra B K := t.appTop.hom.toAlgebra
   letI : Algebra A K :=
     (Scheme.ΓSpecIso (.of A)).inv.hom.toAlgebra
-  have hcomp :
-      t.appTop ≫ (Scheme.ΓSpecIso (.of A)).hom =
-        CommRingCat.ofHom (algebraMap B A) := by
-    dsimp only [t]
-    rw [Scheme.Hom.comp_appTop, Category.assoc,
-      Scheme.ΓSpecIso_naturality]
-    have hΓ : (Scheme.ΓSpecIso (.of B)).hom = S.isoSpec.hom.appTop := by
-      exact (Scheme.toSpecΓ_appTop S).symm
-    rw [hΓ, ← Category.assoc,
-      ← Scheme.Hom.comp_appTop S.isoSpec.hom S.isoSpec.inv,
-      S.isoSpec.hom_inv_id]
-    simp
-  have happly (r : B) :
-      (Scheme.ΓSpecIso (.of A)).hom.hom (algebraMap B K r) =
-        algebraMap B A r := by
-    change ((t.appTop ≫ (Scheme.ΓSpecIso (.of A)).hom).hom) r =
-      (CommRingCat.ofHom (algebraMap B A)).hom r
-    rw [hcomp]
-  have hBAK (r : B) :
-      algebraMap B K r = algebraMap A K (algebraMap B A r) := by
-    apply (ConcreteCategory.bijective_of_isIso
-      (Scheme.ΓSpecIso (.of A)).hom).1
-    rw [happly]
-    change algebraMap B A r =
-      (Scheme.ΓSpecIso (.of A)).hom.hom
-        ((Scheme.ΓSpecIso (.of A)).inv.hom (algebraMap B A r))
-    simp
   letI : IsScalarTower B A K :=
-    IsScalarTower.of_algebraMap_eq hBAK
+    IsScalarTower.of_algebraMap_eq'
+      (Scheme.specMap_algebraMap_isoSpec_inv_appTop (S := S) A)
   let eBC : K ⊗[B] P ≃ₗ[K]
       Scheme.Modules.baseSections πT MT :=
     h.sectionPoleSheafPower_projectiveClosed_baseSectionsBaseChangeLinearEquiv
