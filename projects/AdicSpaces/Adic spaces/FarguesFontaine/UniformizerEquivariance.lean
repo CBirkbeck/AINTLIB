@@ -602,6 +602,33 @@ theorem biResQ_comp (q₁ q₂ r₁ r₂ s₁ s₂ : ℚ) (h₁ : 0 < q₁) (h�
       rw [biResQ_blocToBI, biResQ_blocToBI, biResQ_blocToBI]
   exact RingHom.ext fun x => congrFun hfun x
 
+/-- The rational radii are antitone in the exponent. -/
+theorem vpiQ_antitone {q q' : ℚ} (h : q ≤ q') :
+    vpiQ p F ϖ q' ≤ vpiQ p F ϖ q := by
+  rw [vpiQ, vpiQ]
+  exact NNReal.rpow_le_rpow_of_exponent_ge
+    (by
+      refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
+      exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ (Subtype.ext hcon))
+    (perfectoidValuation_toOF_lt_one p F ϖ).le
+    (by exact_mod_cast h)
+
+/-- The nat-power radii are the rational radii at nat exponents:
+`vpiQ n = |ϖ|^n`. -/
+theorem vpiQ_natCast (n : ℕ) :
+    vpiQ p F ϖ (n : ℚ)
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ n := by
+  rw [vpiQ]
+  rw [show (((n : ℚ) : ℝ)) = (n : ℝ) from by push_cast; rfl]
+  exact NNReal.rpow_natCast _ n
+
+/-- `vpiQ 1` is the base radius `|ϖ|`. -/
+theorem vpiQ_one :
+    vpiQ p F ϖ 1
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) := by
+  have h := vpiQ_natCast p F ϖ 1
+  rwa [pow_one, Nat.cast_one] at h
+
 end FarguesFontaine
 
 end
