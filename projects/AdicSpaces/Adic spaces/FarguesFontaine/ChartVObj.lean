@@ -778,6 +778,269 @@ theorem mk_monomial_pow_a_eq (a k d : ℕ) (hd : d ≤ k * a) (c : OF F)
         = ((p : Ainf p F) * teichPi p F ϖ) ^ (k * a) from rfl,
       ← pow_mul]
 
+
+/-! ### The transport to the canonical plus subring (ChartDensePlus bricks) -/
+
+/-- **The transport law**: the inverse comparison map carries the diagonal
+image of a `Bloc` element to the completion-coe of its localization avatar. -/
+theorem presheafChartRingEquivBISub_symm_blocToBI (a b : ℕ) (ha : 0 < a)
+    (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    (h : Bloc p F ϖ) :
+    (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 h)
+      = (chartData p F ϖ 1 b a b).coeRingHom
+          ((blocEquivAwayChartS p F ϖ b hb).symm h) := by
+  apply (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+    (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).injective
+  rw [RingEquiv.apply_symm_apply]
+  have hcmp : (chartCompletionUniformEquiv p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+      hexact1 hexact2)
+      ((chartData p F ϖ 1 b a b).coeRingHom
+        ((blocEquivAwayChartS p F ϖ b hb).symm h))
+      = chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) b hb ((blocEquivAwayChartS p F ϖ b hb).symm h) :=
+    @AbstractCompletion.compare_coe _ (chartUniformity p F ϖ a b)
+      (@UniformSpace.Completion.cPkg _ (chartUniformity p F ϖ a b))
+      (chartBIPkg p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2)
+      ((blocEquivAwayChartS p F ϖ b hb).symm h)
+  have hfwd : (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+      hexact1 hexact2)
+      ((chartData p F ϖ 1 b a b).coeRingHom
+        ((blocEquivAwayChartS p F ϖ b hb).symm h))
+      = chartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+          (hρ₂1 := hρ₂1) b hb ((blocEquivAwayChartS p F ϖ b hb).symm h) := by
+    rw [show (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0)
+        (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+        hexact1 hexact2)
+        ((chartData p F ϖ 1 b a b).coeRingHom
+          ((blocEquivAwayChartS p F ϖ b hb).symm h))
+      = presheafChartToBI p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+          (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b hb (le_of_eq hexact1)
+          (vpi_le_rho2_of_exact p F ϖ (hρ₁1 := hρ₁1) a b ha hb hab
+            hexact1 hexact2)
+          (rho1_pow_le_of_exact p F ϖ (hρ₁1 := hρ₁1) a b hab hexact1)
+          (le_of_eq hexact2)
+          ((chartData p F ϖ 1 b a b).coeRingHom
+            ((blocEquivAwayChartS p F ϖ b hb).symm h)) from rfl]
+    rw [congrFun (presheafChartToBI_eq_compare p F ϖ (hρ₁0 := hρ₁0)
+      (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab
+      hexact1 hexact2) _]
+    exact hcmp
+  rw [hfwd]
+  apply Subtype.ext
+  show (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1) h
+    = (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+        (blocEquivAwayChartS p F ϖ b hb
+          ((blocEquivAwayChartS p F ϖ b hb).symm h))
+  rw [RingEquiv.apply_symm_apply]
+
+/-- **The chart generators land in the localization plus-subring** under the
+chart identification: `S ⊆ (A⁺[T/s])`-image. -/
+theorem chartSubring_le_locPlusSubring_map (a b : ℕ) (hb : 0 < b) :
+    Subring.closure
+        (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+          ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b})
+      ≤ ((chartData p F ϖ 1 b a b).locPlusSubring).map
+          (blocEquivAwayChartS p F ϖ b hb).toRingHom := by
+  rw [Subring.closure_le]
+  rintro x (⟨y, rfl⟩ | hx)
+  · exact ⟨algebraMap (Ainf p F) (Localization.Away (chartS p F ϖ 1 b)) y,
+      RationalLocData.algebraMap_Aplus_mem_locPlusSubring _
+        (Subring.mem_top y),
+      blocEquivAwayChartS_algebraMap p F ϖ b hb y⟩
+  · rcases hx with rfl | hx
+    · exact ⟨divByS (teichPi p F ϖ ^ (b + 1)) (chartS p F ϖ 1 b),
+        RationalLocData.divByS_mem_locPlusSubring _
+          (by rw [show (chartData p F ϖ 1 b a b).T = chartT p F ϖ a b
+              from rfl, chartT]; simp),
+        blocEquiv_divByS_teichPi p F ϖ b hb⟩
+    · rw [Set.mem_singleton_iff.mp hx]
+      exact ⟨divByS ((p : Ainf p F) ^ (a + 1)) (chartS p F ϖ 1 b),
+        RationalLocData.divByS_mem_locPlusSubring _
+          (by rw [show (chartData p F ϖ 1 b a b).T = chartT p F ϖ a b
+              from rfl, chartT]; simp),
+        blocEquiv_divByS_p p F ϖ a b hb⟩
+
+/-- Chart-subring elements are carried into the completed plus-base. -/
+theorem coeRingHom_mem_completedPlusSubringBase_of_mem (a b : ℕ) (hb : 0 < b)
+    {h : Bloc p F ϖ}
+    (hS : h ∈ Subring.closure
+      (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+        ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b})) :
+    (chartData p F ϖ 1 b a b).coeRingHom
+        ((blocEquivAwayChartS p F ϖ b hb).symm h)
+      ∈ (chartData p F ϖ 1 b a b).completedPlusSubringBase := by
+  obtain ⟨w, hw, hweq⟩ := chartSubring_le_locPlusSubring_map p F ϖ a b hb hS
+  have hsymm : (blocEquivAwayChartS p F ϖ b hb).symm h = w := by
+    rw [← hweq]
+    exact RingEquiv.symm_apply_apply _ w
+  rw [hsymm]
+  have hint : ∀ u, u ∈ (chartData p F ϖ 1 b a b).locPlusSubring →
+      u ∈ (integralClosure ↥((chartData p F ϖ 1 b a b).locPlusSubring)
+        (Localization.Away (chartData p F ϖ 1 b a b).s)).toSubring :=
+    fun u hu => Subalgebra.mem_toSubring.mpr
+      (show IsIntegral
+          (↥((chartData p F ϖ 1 b a b).locPlusSubring)) u from
+        isIntegral_algebraMap
+          (x := (⟨u, hu⟩ : ↥((chartData p F ϖ 1 b a b).locPlusSubring))))
+  exact Subring.le_topologicalClosure _ ⟨w, hint w hw, rfl⟩
+
+/-- `S`-members transport into the canonical plus subring. -/
+theorem symm_blocToBI_mem_completedPlusSubring_of_mem (a b : ℕ) (ha : 0 < a)
+    (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    {h : Bloc p F ϖ}
+    (hS : h ∈ Subring.closure
+      (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+        ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b})) :
+    (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 h)
+      ∈ (chartData p F ϖ 1 b a b).completedPlusSubring := by
+  rw [presheafChartRingEquivBISub_symm_blocToBI p F ϖ a b ha hb hab
+    hexact1 hexact2 h]
+  exact RationalLocData.completedPlusSubringBase_le_completedPlusSubring _
+    (coeRingHom_mem_completedPlusSubringBase_of_mem p F ϖ a b hb hS)
+
+/-- Elements whose `n`-th power lies in `S` transport into the canonical plus
+subring (monic integrality `X^n − s₀` over the base). -/
+theorem symm_blocToBI_mem_completedPlusSubring_of_pow_mem (a b : ℕ)
+    (ha : 0 < a) (hb : 0 < b) (hab : b ≤ a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ b)
+    {n : ℕ} (hn : 0 < n) {h : Bloc p F ϖ}
+    (hS : h ^ n ∈ Subring.closure
+      (Set.range (algebraMap (Ainf p F) (Bloc p F ϖ))
+        ∪ {chartFracPi p F ϖ, chartFracP p F ϖ a b})) :
+    (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a b ha hb hab hexact1 hexact2).symm
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 h)
+      ∈ (chartData p F ϖ 1 b a b).completedPlusSubring := by
+  rw [presheafChartRingEquivBISub_symm_blocToBI p F ϖ a b ha hb hab
+    hexact1 hexact2 h]
+  have hbase0 : (chartData p F ϖ 1 b a b).coeRingHom
+      ((blocEquivAwayChartS p F ϖ b hb).symm (h ^ n))
+      ∈ (chartData p F ϖ 1 b a b).completedPlusSubringBase :=
+    coeRingHom_mem_completedPlusSubringBase_of_mem p F ϖ a b hb hS
+  have heq : (chartData p F ϖ 1 b a b).coeRingHom
+      ((blocEquivAwayChartS p F ϖ b hb).symm h) ^ n
+      = (chartData p F ϖ 1 b a b).coeRingHom
+        ((blocEquivAwayChartS p F ϖ b hb).symm (h ^ n)) :=
+    ((congrArg ((chartData p F ϖ 1 b a b).coeRingHom)
+        (map_pow (blocEquivAwayChartS p F ϖ b hb).symm h n)).trans
+      (map_pow ((chartData p F ϖ 1 b a b).coeRingHom) _ n)).symm
+  have hbase : (chartData p F ϖ 1 b a b).coeRingHom
+      ((blocEquivAwayChartS p F ϖ b hb).symm h) ^ n
+      ∈ (chartData p F ϖ 1 b a b).completedPlusSubringBase := by
+    rw [heq]
+    exact hbase0
+  refine Subalgebra.mem_toSubring.mpr (IsIntegral.of_pow hn ?_)
+  exact show IsIntegral
+      (↥((chartData p F ϖ 1 b a b).completedPlusSubringBase))
+      ((chartData p F ϖ 1 b a b).coeRingHom
+        ((blocEquivAwayChartS p F ϖ b hb).symm h) ^ n) from
+    isIntegral_algebraMap
+      (x := (⟨_, hbase⟩
+        : ↥((chartData p F ϖ 1 b a b).completedPlusSubringBase)))
+
+/-- **Zone dispatch** (`b = 1`): a monomial fraction `p^i[c]/(p[ϖ])^k` whose
+coefficient obeys both window Gauss-term bounds transports into the canonical
+plus subring — zone `i ≤ k` by `ϖ`-divisibility, zone `k < i ≤ k(a+1)` by
+`a`-th-power integrality, zone `k(a+1) ≤ i` directly. -/
+theorem monomial_symm_blocToBI_mem_completedPlusSubring (a : ℕ) (ha : 0 < a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ 1)
+    (k i : ℕ) (c : OF F)
+    (hc1 : ρ₁ ^ i * perfectoidValuation p F (c : F)
+      ≤ (ρ₁ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k)
+    (hc2 : ρ₂ ^ i * perfectoidValuation p F (c : F)
+      ≤ (ρ₂ * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) :
+    (presheafChartRingEquivBISub p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+        (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a 1 ha one_pos ha hexact1 hexact2).symm
+        (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+            (sPow p F ϖ k)))
+      ∈ (chartData p F ϖ 1 1 a 1).completedPlusSubring := by
+  have hπ0 : (0 : NNReal) < perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) := vpi_pos p F ϖ
+  by_cases hik : i ≤ k
+  · -- zone M1
+    refine symm_blocToBI_mem_completedPlusSubring_of_mem p F ϖ a 1 ha
+      one_pos ha hexact1 hexact2 ?_
+    refine mk_monomial_mem_of_le p F ϖ a k i hik c ?_
+    rw [← hexact1] at hc1
+    rw [show (perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+        * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k
+      = perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
+        * perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ (2 * k - i) from by
+      rw [← sq, ← pow_mul, ← pow_add]
+      congr 1
+      omega] at hc1
+    exact le_of_mul_le_mul_left hc1 (pow_pos hπ0 i)
+  · by_cases hika : i ≤ k * a + k
+    · -- zone M2: i = k + d with 0 < d ≤ ka
+      have hd : i - k ≤ k * a := by omega
+      have hca : perfectoidValuation p F (c : F) ^ a
+          ≤ perfectoidValuation p F
+              ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+            ^ (k * a - (i - k)) := by
+        have hstep := pow_le_pow_left' hc2 a
+        rw [show (ρ₂ ^ i * perfectoidValuation p F (c : F)) ^ a
+            = perfectoidValuation p F
+                ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
+              * perfectoidValuation p F (c : F) ^ a from by
+          rw [mul_pow, ← pow_mul, mul_comm i a, pow_mul, hexact2, pow_one]]
+          at hstep
+        rw [show ((ρ₂ * perfectoidValuation p F
+              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ k) ^ a
+            = perfectoidValuation p F
+                ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ i
+              * perfectoidValuation p F
+                ((PseudoUniformizer.toOF F ϖ : OF F) : F)
+                ^ (k * a - (i - k)) from by
+          rw [← pow_mul, mul_pow,
+            show ρ₂ ^ (k * a) = (ρ₂ ^ a) ^ k from by
+              rw [← pow_mul, mul_comm a k],
+            hexact2, pow_one, ← pow_add, ← pow_add]
+          congr 1
+          omega] at hstep
+        exact le_of_mul_le_mul_left hstep (pow_pos hπ0 i)
+      rw [show i = k + (i - k) from by omega]
+      obtain ⟨c'', hc''⟩ := mk_monomial_pow_a_eq p F ϖ a k (i - k) hd c hca
+      refine symm_blocToBI_mem_completedPlusSubring_of_pow_mem p F ϖ a 1 ha
+        one_pos ha hexact1 hexact2 ha ?_
+      rw [hc'']
+      refine mul_mem (pow_mem (Subring.subset_closure ?_) _)
+        (Subring.subset_closure ?_)
+      · exact Set.mem_union_right _ (Set.mem_insert_of_mem _ rfl)
+      · exact Set.mem_union_left _ ⟨_, rfl⟩
+    · -- zone M3
+      refine symm_blocToBI_mem_completedPlusSubring_of_mem p F ϖ a 1 ha
+        one_pos ha hexact1 hexact2 ?_
+      exact mk_monomial_mem_of_large p F ϖ a k i (by omega) c
+
 end FarguesFontaine
 
 end
