@@ -281,11 +281,15 @@ private theorem openPullbackRestrictMate_eq
     exact (openPullbackExplicitSquare_mate_eq f U).symm
   exact congrArg TwoSquare.natTrans h
 
-/-- The pullback--pushforward unit is invertible after restriction to an open
-subscheme on which the morphism itself is an isomorphism. -/
-theorem isIso_restrict_pullbackPushforward_unit_of_isIso_morphismRestrict
+/-- If the unit for a morphism restricted over an open is invertible, then the
+restriction of the original unit to that open is invertible. -/
+theorem isIso_restrict_pullbackPushforward_unit_of_restrict
     {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Opens)
-    [IsIso (f ∣_ U)] (M : Y.Modules) :
+    (M : Y.Modules)
+    [IsIso
+      ((pullbackPushforwardAdjunction
+        (f ∣_ U)).unit.app
+          ((restrictFunctor U.ι).obj M))] :
     IsIso ((restrictFunctor U.ι).map
       ((pullbackPushforwardAdjunction f).unit.app M)) := by
   let a := (restrictFunctor U.ι).map
@@ -323,6 +327,15 @@ theorem isIso_restrict_pullbackPushforward_unit_of_isIso_morphismRestrict
     rw [hunit]
     infer_instance
   exact IsIso.of_isIso_comp_right a b
+
+/-- The pullback--pushforward unit is invertible after restriction to an open
+subscheme on which the morphism itself is an isomorphism. -/
+theorem isIso_restrict_pullbackPushforward_unit_of_isIso_morphismRestrict
+    {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Opens)
+    [IsIso (f ∣_ U)] (M : Y.Modules) :
+    IsIso ((restrictFunctor U.ι).map
+      ((pullbackPushforwardAdjunction f).unit.app M)) :=
+  isIso_restrict_pullbackPushforward_unit_of_restrict f U M
 
 end
 
