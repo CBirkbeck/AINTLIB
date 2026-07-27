@@ -1018,7 +1018,45 @@ non-Tate bases are supported.
   transported — equality with B^{I,+} not required.
 
 ### [PLAN-GATE-3] Lane D: 𝒳 as a locally v-ringed quotient (NEW per sol Q6)
-- **Status**: blocked (planning gate) | **Depends**: PLAN-GATE-2
+- **Status**: OPEN — interface survey done 2026-07-27 (beastmode); execution
+  decision recorded below | **Depends**: PLAN-GATE-2 (now discharged)
+- **INTERFACE SURVEY (2026-07-27)**: the repo's object layer is
+  `VPreObj`/`VObj` (StructureSheaf.lean — valued presheafed spaces; VObj adds
+  `IsSheafOfTopologicalRings`); the pair-level presheaf is
+  `structurePresheaf : TopCat.Presheaf CompleteTopCommRingCat (SpaTop A)`
+  (StructurePresheafBundled.lean) with sheaf-condition `IsLimitSheaf`
+  (SheafyPair.lean) ⇔ `IsSheafy` (isSheafy_iff_isLimitSheaf, needs
+  HasLocLiftPowerBounded); the chart point-set identification is
+  `Spa (presheafValue D) (presheafValue D)⁺ ≃ₜ R(T/s) ∩ Spa(A,A⁺)`
+  (SpaRationalOpenHomeomorph.lean).
+- **OBSTRUCTION**: `structurePresheaf` at the AMBIENT pair (A_inf, ringPlus)
+  needs `[HasLocLiftPowerBounded (Ainf p F)]`, whose only sorry-free supplier
+  `hasLocLiftPowerBounded_faithful` requires `[IsTateRing]` — FALSE for A_inf.
+  So the ambient-restriction route (𝒪_Y := 𝒪_{Spa A_inf}|_Y) is blocked unless
+  HasLocLiftPowerBounded (Ainf) is proven directly (content: every VALID
+  rational datum of A_inf has s-unit + power-bounded fractions in its completed
+  localization — true for the bigWindow charts by ID2, open in general).
+- **DECISION (PLAN-GATE-3 route, 2026-07-27)**: build Y (and then X) by GLUING
+  the sheafy chart spaces `Spa(B_n, B_n⁺)` (B_n := presheafValue of the n-th
+  Big-window datum, sheafy by isSheafy_presheafChart at the twisted
+  uniformizer) along the overlap circles `bigWindow n ∩ bigWindow (n+1) =
+  {κ = p^{n+1}}` (a rational subset of BOTH neighbouring charts), rather than
+  restricting a global A_inf-presheaf. Sub-plan:
+  (D-i) overlap data: the circle as a rational datum of both B_n-sides and the
+    transition ring iso (via imgDatum/spaPresheafValueRationalSubsetEquiv +
+    presheafValueRingEquivOfRingEquiv);
+  (D-ii) VPreObj-level gluing machinery for a ℤ-chain of charts (new
+    infrastructure — the repo has no presheafed-space gluing; alternatively
+    build the Y-presheaf directly on the rational-basis of the union);
+  (D-iii) stalks/valuations (VPreObj fields) from the chart sides;
+  (D-iv) the φ-action as VObj-isos `Spa(B_n) ≅ Spa(B_{n+1})`-shifts
+    (FrobeniusAction + the twisted-uniformizer bookkeeping), then X := Y/φ^ℤ
+    via the free-wandering point-set layer (Curve.lean, done) + descent of the
+    glued sheaf.
+  ALTERNATIVE kept open: prove HasLocLiftPowerBounded (Ainf p F) directly
+  (every valid A_inf-datum is p[ϖ]-adically manageable; would unlock the
+  ambient route and Wedhorn Rem 8.27 verbatim). Decide at D-ii if gluing
+  infrastructure proves heavier than the direct class proof.
 - Content: 𝒴 pre-adic structure + chart identifications respecting restrictions
   (Wedhorn Rem 8.27); then EITHER 𝒪_X(W) := 𝒪_Y(q⁻¹W)^{φ^ℤ} descent (with plus
   sheaf and stalk valuations) OR two-chart gluing along the Frobenius transitions
