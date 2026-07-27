@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
+import ModularCurves.EllipticCurve.PoleSheafAwayChartFactor
 import ModularCurves.EllipticCurve.PoleSheafAwayModel
 import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapProper
 
@@ -11,6 +12,10 @@ complement and the standard affine Weierstrass chart is finite.
 
 open AlgebraicGeometry CategoryTheory
 open CategoryTheory.Limits
+open HomogeneousIdeal
+open WeierstrassCurve.Projective
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 universe u
 
@@ -60,6 +65,100 @@ theorem projModelMap_sectionAway_isFinite
       exact h.sectionAway_comp_fiber_isAffine s
   change IsFinite G
   exact IsFinite.of_isProper_of_locallyQuasiFinite G
+
+/-- An exact punctured comparison is an isomorphism once its affine chart
+homomorphism is an isomorphism. -/
+theorem projModelMap_sectionAway_isIso_of_restrict
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsAffine S] [IsProper π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz)
+    (W : WeierstrassCurve Γ(S, (⊤ : S.Opens)))
+    (F : C ⟶ projModel W)
+    (hF : F ≫ projModelπ W = π ≫ S.toSpecΓ)
+    (hpre : F ⁻¹ᵁ (projModelZChart W : (projModel W).Opens) =
+      sectionAway z hz)
+    (fV : Γ(S, (⊤ : S.Opens)) →+*
+      Γ((sectionAway z hz).toScheme,
+        (⊤ : (sectionAway z hz).toScheme.Opens)))
+    (PV : Fin 3 →
+      Γ((sectionAway z hz).toScheme,
+        (⊤ : (sectionAway z hz).toScheme.Opens)))
+    (hPV : (W.map fV).toProjective.Equation PV)
+    (hZ : IsUnit (PV 2))
+    (hFV : (sectionAway z hz).ι ≫ F =
+      projModelFromOfGlobalSections W fV PV hPV 2 hZ)
+    (hchart : IsIso (Spec.map (CommRingCat.ofHom
+      (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ)))) :
+    IsIso
+      (F.resLE (projModelZChart W : (projModel W).Opens)
+        (sectionAway z hz) (le_of_eq hpre.symm)) := by
+  let G :=
+    F.resLE (projModelZChart W : (projModel W).Opens)
+      (sectionAway z hz) (le_of_eq hpre.symm)
+  haveI hGfinite : IsFinite G :=
+    projModelMap_sectionAway_isFinite z hz h W F hF hpre
+  haveI hVaffine : IsAffine (sectionAway z hz).toScheme :=
+    @isAffine_of_isAffineHom _ _
+      G hGfinite.toIsAffineHom (projModelZChart W).2
+  haveI hToSpec : IsIso (sectionAway z hz).toScheme.toSpecΓ :=
+    IsAffine.affine
+  haveI hChartSpec : IsIso (Spec.map (CommRingCat.ofHom
+      (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ))) :=
+    hchart
+  let eZ :=
+    Proj.basicOpenIsoSpec (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI hEZ : IsIso eZ.inv := by
+    dsimp only [eZ]
+    infer_instance
+  have heZ :
+      eZ.inv ≫ (projModelZChart W).1.ι = chartι W 2 := by
+    rfl
+  have hLocalFactor :
+      projModelFromOfGlobalSections W fV PV hPV 2 hZ =
+        (sectionAway z hz).toScheme.toSpecΓ ≫
+          Spec.map (CommRingCat.ofHom
+            (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ)) ≫
+          chartι W 2 :=
+    projModelFromOfGlobalSections_eq_chart_of_ringHom
+      W fV PV hPV 2 hZ
+  have hG :
+      G =
+        (sectionAway z hz).toScheme.toSpecΓ ≫
+          Spec.map (CommRingCat.ofHom
+            (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ)) ≫
+          eZ.inv := by
+    rw [← cancel_mono (projModelZChart W).1.ι]
+    calc
+      G ≫ (projModelZChart W).1.ι =
+          (sectionAway z hz).ι ≫ F := by
+        dsimp only [G]
+        exact F.resLE_comp_ι (le_of_eq hpre.symm)
+      _ = projModelFromOfGlobalSections W fV PV hPV 2 hZ := hFV
+      _ = (sectionAway z hz).toScheme.toSpecΓ ≫
+          Spec.map (CommRingCat.ofHom
+            (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ)) ≫
+          chartι W 2 := hLocalFactor
+      _ = ((sectionAway z hz).toScheme.toSpecΓ ≫
+          Spec.map (CommRingCat.ofHom
+            (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ)) ≫
+          eZ.inv) ≫ (projModelZChart W).1.ι := by
+        simp only [Category.assoc, heZ]
+  haveI hChartFactor : IsIso
+      (Spec.map (CommRingCat.ofHom
+          (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ)) ≫
+        eZ.inv) := by
+    exact IsIso.comp_isIso' hChartSpec hEZ
+  haveI hFactor : IsIso
+      ((sectionAway z hz).toScheme.toSpecΓ ≫
+        Spec.map (CommRingCat.ofHom
+          (chartAwayHomOfTripleOfRingHom W fV PV hPV 2 hZ)) ≫
+        eZ.inv) := by
+    exact IsIso.comp_isIso' hToSpec hChartFactor
+  change IsIso G
+  rw [hG]
+  exact hFactor
 
 end
 
