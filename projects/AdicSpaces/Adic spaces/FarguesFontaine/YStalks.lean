@@ -755,6 +755,159 @@ theorem bigWindow_subset_runWindow (n : ℤ) (k : ℕ) {j : ℤ}
   · exact KLE_mono p F ϖ hY (zpow_pos hp0 (j + 1))
       (zpow_le_zpow_right₀ hpQ.le (by omega)) hle
 
+/-- **`p·[ϖ]` maps to a unit of every run chart ring** (as
+`isUnit_canonicalMap_p_teichPi_window`, with the run-window `⊆ Y` input). -/
+theorem isUnit_canonicalMap_p_teichPi_runChart (n : ℤ) (k : ℕ) :
+    IsUnit ((chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).canonicalMap
+      ((p : Ainf p F) * teichPi p F ϖ)) := by
+  haveI : IsRingOfIntegralElements
+      ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
+  haveI : IsHuberRing (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
+    presheafValue_isHuberRing_huber _
+  letI P_B : PairOfDefinition (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
+    presheafValue_concretePair _
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete _
+  rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
+  intro w hw hcon
+  have hmem := comap_canonicalMap_mem_rationalOpen
+    (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
+    (canonicalMap_continuous _) hw
+  have hY : comap (chartData p F (windowUnif p F ϖ n) 1 1
+      (p ^ (k + 1)) 1).canonicalMap w ∈ Y p F ϖ := by
+    refine runWindow_subset_Y p F ϖ n k ?_
+    rw [runWindow_eq_rationalOpen p F ϖ n k]
+    exact hmem
+  refine hY.2 ?_
+  exact (comap_vle _ w _ 0).mpr (by rwa [map_zero])
+
+/-- **The image-span certificate at the run charts**: as
+`span_image_windowChart_eq_top`. -/
+theorem span_image_runChart_eq_top (n : ℤ) (k : ℕ)
+    [DecidableEq (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1))]
+    (E : RationalLocData (Ainf p F)) (hErat : E.IsRational) :
+    Ideal.span ((E.T.image
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).canonicalMap
+      : Finset (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)))
+      : Set (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)))
+      = ⊤ := by
+  classical
+  obtain ⟨N, hN⟩ := (isAdic_iff.mp (isAdic_Iinf p F ϖ)).2
+    _ (hErat.mem_nhds (by
+      exact (Ideal.span ((E.T : Finset (Ainf p F)) : Set (Ainf p F))).zero_mem))
+  have hpow : ((p : Ainf p F) * teichPi p F ϖ) ^ N
+      ∈ Ideal.span ((E.T : Finset (Ainf p F)) : Set (Ainf p F)) := by
+    refine hN ?_
+    exact Ideal.pow_mem_pow
+      (Ideal.mul_mem_right _ _ (Ideal.subset_span (Set.mem_insert _ _))) N
+  obtain ⟨c, -, hc⟩ := Submodule.mem_span_finset.mp hpow
+  have himg : ((chartData p F (windowUnif p F ϖ n) 1 1
+        (p ^ (k + 1)) 1).canonicalMap
+        ((p : Ainf p F) * teichPi p F ϖ)) ^ N
+      ∈ Ideal.span ((E.T.image
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).canonicalMap
+      : Finset (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)))
+      : Set (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1))) := by
+    rw [← map_pow, ← hc]
+    rw [map_sum]
+    refine Ideal.sum_mem _ fun t ht => ?_
+    rw [smul_eq_mul, map_mul]
+    exact Ideal.mul_mem_left _ _
+      (Ideal.subset_span (Finset.mem_coe.mpr
+        (Finset.mem_image_of_mem _ ht)))
+  exact Ideal.eq_top_of_isUnit_mem _ himg
+    ((isUnit_canonicalMap_p_teichPi_runChart p F ϖ n k).pow N)
+
+/-- The run-chart exactness data, packaged. -/
+theorem run_hexact2 (n : ℤ) (k : ℕ) :
+    (rhoRight p F (windowUnif p F ϖ n) (p ^ (k + 1)) 1) ^ (p ^ (k + 1))
+      = perfectoidValuation p F
+          ((PseudoUniformizer.toOF F (windowUnif p F ϖ n) : OF F) : F) ^ 1 := by
+  exact rhoRight_pow_exact p F (windowUnif p F ϖ n) (p ^ (k + 1)) 1
+    (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) (k + 1))
+
+/-- **The run chart datum is Tate** (as `isTateRing_bigWindowChart`, at
+`(a, b) = (p^{k+1}, 1)`). -/
+theorem isTateRing_runChart (n : ℤ) (k : ℕ) :
+    IsTateRing (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) := by
+  have hp : 1 < p := one_lt_p p
+  have ha : 0 < p ^ (k + 1) := pow_pos (by omega) (k + 1)
+  exact isTateRing_presheafChart p F (windowUnif p F ϖ n)
+    (hρ₁0 := vpi_pos p F (windowUnif p F ϖ n))
+    (hρ₁1 := perfectoidValuation_toOF_lt_one p F (windowUnif p F ϖ n))
+    (hρ₂0 := rhoRight_pos p F (windowUnif p F ϖ n) (p ^ (k + 1)) 1)
+    (hρ₂1 := rhoRight_lt_one p F (windowUnif p F ϖ n) (p ^ (k + 1)) 1
+      (by omega) one_pos)
+    (p ^ (k + 1)) 1 (by omega) one_pos (by omega) rfl
+    (by rw [run_hexact2 p F ϖ n k, pow_one])
+
+/-- **The run chart ring is sheafy at the canonical instances** (as
+`isSheafy_canonical_window`, at `a = p^{k+1}`). -/
+theorem isSheafy_canonical_runChart (n : ℤ) (k : ℕ) :
+    letI : IsHuberRing (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
+      (isTateRing_runChart p F ϖ n k).toIsHuberRing
+    letI : @CompleteSpace (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1))
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue
+          (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1))) :=
+      completeSpace_right_presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
+    ValuationSpectrum.IsSheafy (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) := by
+  have hp : 1 < p := one_lt_p p
+  have ha : 0 < p ^ (k + 1) := pow_pos (by omega) (k + 1)
+  have hs := isSheafy_presheafChart p F (windowUnif p F ϖ n)
+    (hρ₁0 := vpi_pos p F (windowUnif p F ϖ n))
+    (hρ₁1 := perfectoidValuation_toOF_lt_one p F (windowUnif p F ϖ n))
+    (hρ₂0 := rhoRight_pos p F (windowUnif p F ϖ n) (p ^ (k + 1)) 1)
+    (hρ₂1 := rhoRight_lt_one p F (windowUnif p F ϖ n) (p ^ (k + 1)) 1
+      (by omega) one_pos)
+    (p ^ (k + 1)) 1 (by omega) one_pos (by omega) rfl
+    (run_hexact2 p F ϖ n k)
+  exact ValuationSpectrum.isSheafy_congr_plusSubring _ _
+    (chartPlus_instance_eq_canonical p F (windowUnif p F ϖ n) (p ^ (k + 1))
+      (by omega) rfl (run_hexact2 p F ϖ n k)) _ _ hs
+
+/-- **The run-window sheaf condition over the ambient `A_inf`** (as
+`isSheafyOn_window`, at the run chart). -/
+theorem isSheafyOn_runChart (n : ℤ) (k : ℕ) :
+    ValuationSpectrum.IsSheafyOn (A := Ainf p F)
+      (rationalOpen (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).T
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).s) := by
+  classical
+  haveI : IsTateRing (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
+    isTateRing_runChart p F ϖ n k
+  haveI : IsHuberRing (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
+    IsTateRing.toIsHuberRing
+  letI : @CompleteSpace (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1))
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1))) :=
+    completeSpace_right_presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
+  haveI : ValuationSpectrum.IsSheafy (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)) :=
+    isSheafy_canonical_runChart p F ϖ n k
+  refine ⟨?_, ?_⟩
+  · intro C hC hCS
+    exact isEmbedding_productRestrictionSub_of_imgCovering
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
+      (fun E hE => span_image_runChart_eq_top p F ϖ n k E hE) C hC hCS
+  · intro C hC hCS f hf
+    exact exists_glue_of_imgCovering
+      (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1)
+      (fun E hE => span_image_runChart_eq_top p F ϖ n k E hE) C hC hCS f hf
+
 end FarguesFontaine
 
 
