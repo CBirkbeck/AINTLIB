@@ -257,6 +257,24 @@ theorem projModelMap_comap_zeroIdeal_affineBasicOpen_mul_of_restrict
   rw [hleft, hright] at hback
   exact hback
 
+/-- The model zero ideal pulls back to the unit ideal on every affine source
+open mapping into the standard `Z`-chart. -/
+theorem projModelMap_comap_zeroIdeal_eq_top_of_le_preimage_zChart
+    {C : Scheme.{u}} (W : WeierstrassCurve R)
+    (F : C ⟶ projModel W) (V : C.affineOpens)
+    (hV : V.1 ≤ F ⁻¹ᵁ (projModelZChart W).1) :
+    ((projModelZero W).ker.comap F).ideal V = ⊤ := by
+  have hI :
+      (projModelZero W).ker.ideal (projModelZChart W) =
+        Ideal.span {1} :=
+    projModelZero_ker_ideal_chartZ W
+  rw [ideal_comap_affineOpens_span
+    (projModelZero W).ker F V (projModelZChart W) hV 1 hI]
+  rw [Ideal.span_singleton_eq_top]
+  simp only [affinePullbackSection, affineOpenTopSection,
+    affineOpenAmbientSection, map_one]
+  exact isUnit_one
+
 /-- The ideal of a marked section is the unit ideal on every affine open
 contained in the complement of that section. -/
 theorem section_ker_ideal_eq_top_of_le_sectionAway
