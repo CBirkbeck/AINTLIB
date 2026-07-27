@@ -589,6 +589,172 @@ theorem isSheafyOn_window (n : ℤ) :
       (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
       (fun E hE => span_image_windowChart_eq_top p F ϖ n E hE) C hC hCS f hf
 
+/-- **The run window** `{v : κ(v) ∈ [p^n, p^{n+k+1}]}` — the union of the
+`k + 1` adjacent Big windows starting at `n`. -/
+def runWindow (n : ℤ) (k : ℕ) : Set (Spv (Ainf p F)) :=
+  {v ∈ Y p F ϖ | KGE p F ϖ ((p : ℚ) ^ n) v
+    ∧ KLE p F ϖ ((p : ℚ) ^ (n + k + 1)) v}
+
+/-- **The run window is the rational open of the `(p^{k+1}, 1)`-chart in the
+window uniformizer** (nonnegative side): generalizes
+`bigWindow_eq_rationalOpen_ofNat` from `a = p` to `a = p^{k+1}`. -/
+theorem runWindow_eq_rationalOpen_ofNat (n : ℕ) (k : ℕ) (hp : 1 < p) :
+    runWindow p F ϖ (n : ℤ) k
+      = rationalOpen
+          (chartT p F (PseudoUniformizer.frobRoot p F ϖ n) (p ^ (k + 1)) 1)
+          (chartS p F (PseudoUniformizer.frobRoot p F ϖ n) 1 1) := by
+  have hppos : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  have hp0 : (0 : ℚ) < p := by exact_mod_cast hppos
+  have hpk : 0 < p ^ n := pow_pos hppos n
+  set ϖ' := PseudoUniformizer.frobRoot p F ϖ n with hϖ'def
+  have hteich : teichPi p F ϖ' ^ p ^ n = teichPi p F ϖ :=
+    teichPi_frobRoot_pow p F ϖ n
+  have hYeq : Y p F ϖ' = Y p F ϖ :=
+    Y_eq_of_teichPi_pow p F ϖ hpk hteich
+  ext v
+  have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 (p ^ (k + 1)) 1
+    one_pos one_pos (pow_pos hppos _) one_pos v
+  rw [show 1 + p ^ (k + 1) - 1 = p ^ (k + 1) from by omega,
+    show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [runWindow, Set.mem_setOf_eq, hiff, hYeq]
+  have hq1 : (0 : ℚ) < (p : ℚ) ^ (n : ℤ) := zpow_pos hp0 _
+  have hq2 : (0 : ℚ) < (p : ℚ) ^ ((n : ℤ) + k + 1) := zpow_pos hp0 _
+  have hab1 : (p : ℚ) ^ (n : ℤ) = ((p ^ n : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
+    push_cast
+    rw [zpow_natCast]
+    ring
+  have hab2 : (p : ℚ) ^ ((n : ℤ) + k + 1)
+      = ((p ^ (n + k + 1) : ℕ) : ℚ) / ((1 : ℕ) : ℚ) := by
+    push_cast
+    rw [show (n : ℤ) + k + 1 = ((n + k + 1 : ℕ) : ℤ) from by push_cast; ring,
+      zpow_natCast]
+    push_cast
+    ring
+  have hmul : p ^ (k + 1) * p ^ n = p ^ (n + k + 1) := by
+    rw [← pow_add]
+    ring_nf
+  constructor
+  · rintro ⟨hY, hge, hle⟩
+    have hgev := (KGE_iff hY hq1 one_pos hab1).mp hge
+    have hlev := (KLE_iff hY hq2 one_pos hab2).mp hle
+    rw [pow_one] at hgev hlev
+    refine ⟨hY, ?_, ?_⟩
+    · refine (vle_pow_iff hpk _ _).mp ?_
+      simp only [pow_one]
+      rw [hteich]
+      exact hgev
+    · refine (vle_pow_iff hpk _ _).mp ?_
+      simp only [pow_one]
+      rw [hteich, ← pow_mul, hmul]
+      exact hlev
+  · rintro ⟨hY, hge, hle⟩
+    simp only [pow_one] at hge hle
+    refine ⟨hY, ?_, ?_⟩
+    · refine (KGE_iff hY hq1 one_pos hab1).mpr ?_
+      have h := (vle_pow_iff (v := v) hpk _ _).mpr hge
+      rw [hteich] at h
+      rw [pow_one]
+      exact h
+    · refine (KLE_iff hY hq2 one_pos hab2).mpr ?_
+      have h := (vle_pow_iff (v := v) hpk _ _).mpr hle
+      rw [hteich, ← pow_mul, hmul] at h
+      rw [pow_one]
+      exact h
+
+/-- **The run window is a rational open (negative side)**: as
+`runWindow_eq_rationalOpen_ofNat`, at the `p^m`-th power uniformizer. -/
+theorem runWindow_eq_rationalOpen_neg (m k : ℕ) (hp : 1 < p) :
+    runWindow p F ϖ (-(m : ℤ)) k
+      = rationalOpen
+          (chartT p F (PseudoUniformizer.pPow F ϖ (p ^ m)
+            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) (p ^ (k + 1)) 1)
+          (chartS p F (PseudoUniformizer.pPow F ϖ (p ^ m)
+            (pow_pos (Nat.Prime.pos (Fact.out : Nat.Prime p)) m)) 1 1) := by
+  have hppos : 0 < p := Nat.Prime.pos (Fact.out : Nat.Prime p)
+  have hp0 : (0 : ℚ) < p := by exact_mod_cast hppos
+  have hpk : 0 < p ^ m := pow_pos hppos m
+  set ϖ' := PseudoUniformizer.pPow F ϖ (p ^ m) (pow_pos hppos m) with hϖ'def
+  have hteich : teichPi p F ϖ' = teichPi p F ϖ ^ p ^ m :=
+    teichPi_pPow p F ϖ (p ^ m) (pow_pos hppos m)
+  have hYeq : Y p F ϖ' = Y p F ϖ :=
+    (Y_eq_of_teichPi_pow p F ϖ' hpk hteich.symm).symm
+  ext v
+  have hiff := mem_rationalOpen_chartData_iff p F ϖ' 1 1 (p ^ (k + 1)) 1
+    one_pos one_pos (pow_pos hppos _) one_pos v
+  rw [show 1 + p ^ (k + 1) - 1 = p ^ (k + 1) from by omega,
+    show 1 + 1 - 1 = 1 from by omega] at hiff
+  rw [runWindow, Set.mem_setOf_eq, hiff, hYeq]
+  have hq1 : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ)) := zpow_pos hp0 _
+  have hq2 : (0 : ℚ) < (p : ℚ) ^ (-(m : ℤ) + k + 1) := zpow_pos hp0 _
+  have hab1 : (p : ℚ) ^ (-(m : ℤ)) = ((1 : ℕ) : ℚ) / ((p ^ m : ℕ) : ℚ) := by
+    rw [zpow_neg, zpow_natCast]
+    push_cast
+    rw [one_div]
+  have hab2 : (p : ℚ) ^ (-(m : ℤ) + k + 1)
+      = ((p ^ (k + 1) : ℕ) : ℚ) / ((p ^ m : ℕ) : ℚ) := by
+    rw [show -(m : ℤ) + k + 1 = ((k + 1 : ℕ) : ℤ) - ((m : ℕ) : ℤ) from by
+        push_cast
+        ring,
+      zpow_sub₀ hp0.ne', zpow_natCast, zpow_natCast]
+    push_cast
+    ring
+  constructor
+  · rintro ⟨hY, hge, hle⟩
+    have hgev := (KGE_iff hY hq1 hpk hab1).mp hge
+    have hlev := (KLE_iff hY hq2 hpk hab2).mp hle
+    rw [pow_one] at hgev
+    refine ⟨hY, ?_, ?_⟩
+    · simp only [pow_one]
+      rw [hteich]
+      exact hgev
+    · simp only [pow_one]
+      rw [hteich]
+      exact hlev
+  · rintro ⟨hY, hge, hle⟩
+    simp only [pow_one] at hge hle
+    rw [hteich] at hge hle
+    refine ⟨hY, ?_, ?_⟩
+    · refine (KGE_iff hY hq1 hpk hab1).mpr ?_
+      rw [pow_one]
+      exact hge
+    · exact (KLE_iff hY hq2 hpk hab2).mpr hle
+
+/-- **The run window is the rational open of the `(p^{k+1}, 1)`-window-chart
+datum**, uniformly in `n : ℤ`. -/
+theorem runWindow_eq_rationalOpen (n : ℤ) (k : ℕ) :
+    runWindow p F ϖ n k
+      = rationalOpen
+          (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).T
+          (chartData p F (windowUnif p F ϖ n) 1 1 (p ^ (k + 1)) 1).s := by
+  match n with
+  | .ofNat j =>
+    rw [show (Int.ofNat j) = ((j : ℕ) : ℤ) from rfl,
+      runWindow_eq_rationalOpen_ofNat p F ϖ j k (one_lt_p p)]
+    rfl
+  | .negSucc m =>
+    rw [show (Int.negSucc m) = (-(((m + 1 : ℕ)) : ℤ)) from rfl,
+      runWindow_eq_rationalOpen_neg p F ϖ (m + 1) k (one_lt_p p)]
+    rfl
+
+/-- Run windows lie inside `Y`. -/
+theorem runWindow_subset_Y (n : ℤ) (k : ℕ) :
+    runWindow p F ϖ n k ⊆ Y p F ϖ :=
+  fun _ hv => hv.1
+
+/-- **Each Big window of the run lies in the run window.** -/
+theorem bigWindow_subset_runWindow (n : ℤ) (k : ℕ) {j : ℤ}
+    (hj1 : n ≤ j) (hj2 : j ≤ n + k) :
+    bigWindow p F ϖ j ⊆ runWindow p F ϖ n k := by
+  have hpQ : (1 : ℚ) < p := by
+    exact_mod_cast Nat.Prime.one_lt (Fact.out : Nat.Prime p)
+  have hp0 : (0 : ℚ) < p := zero_lt_one.trans hpQ
+  rintro v ⟨hY, hge, hle⟩
+  refine ⟨hY, ?_, ?_⟩
+  · exact KGE_mono p F ϖ hY (zpow_pos hp0 n)
+      (zpow_le_zpow_right₀ hpQ.le hj1) hge
+  · exact KLE_mono p F ϖ hY (zpow_pos hp0 (j + 1))
+      (zpow_le_zpow_right₀ hpQ.le (by omega)) hle
+
 end FarguesFontaine
 
 
