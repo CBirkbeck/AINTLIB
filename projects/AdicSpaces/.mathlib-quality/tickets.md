@@ -1834,9 +1834,38 @@ non-Tate bases are supported.
     exists_runChart_superset (elim_finite_subcover over window traces,
     J' := insert 0 J for nonemptiness, min'/max' + toNat) ⇒
     **isSheafyOn_Y** — the FULL Y-interior sheaf condition over the
-    non-Tate ambient A_inf. THEN (3e) the Bundled-599 replay at the
-    restricted site; yVObj := ⟨yVPreObj, isSheafTopRings⟩; then D-iii
-    (φ-action), X := Y/φ^ℤ. (superseded: the EMBEDDING-half transport
+    non-Tate ambient A_inf.
+    ★★★ 3e COMPLETE 2026-07-28 (commits 56b12fe81 + 5788c6996, all
+    axiom-clean) — **yVObj: 𝒴 IS AN OBJECT OF WEDHORN'S 𝒱. THE
+    YB-TRACK HEADLINE IS CLOSED.** Pieces:
+    (3e-1/2, RestrictedLimitSheaf.lean — NEW GENERIC FILE, cleanup
+    note: could migrate next to SheafyPair): interValid (Tate-free
+    interRational via exists_pow_le_of_isRational_pair certificates at
+    D.P, choice-wrapped) + 4-lemma API; allData_huber (the R3 bridge
+    composite re-proven on interValid — ExactIntersectionCompatible
+    never needed); interCoveringPiecesV/interCoveringV;
+    IsSheafyOn.separationSub; exists_finite_rational_refinement_huber
+    (basis := exists_isRational_spaOpen_subset_huber, compactness a
+    HYPOTHESIS); the three S-relative engines (verbatim SheafyPair
+    copies, consumption sites patched to hOn.* + subset-derivations via
+    RationalLocData.rationalOpen_subset_of_trace); IsLimitSheafOn
+    structure (fields need explicit {V}{ι U} lambda-binders at
+    construction!) + of_isSheafyOn + homGlue.
+    (3e-3, FarguesFontaine/YSheaf.lean — NEW): isLimitSheafOn_Y;
+    yFunctor (open-image) + trace/cov/inf lemmas (image_inter needs
+    the ConcreteCategory.hom-spelled injectivity);
+    limitRestrict_cross_eq_of_opens_eq (subst-transport, kills the
+    reindex friction); yPresheaf_map_apply := structurePresheaf_map at
+    the composed spelling (EXPLICIT morphism arg — placeholder fails);
+    yPresheaf_isSheafOfTopologicalRings (homGlue at V' := image(iSup U),
+    hle := leOfHom∘map so the conclusion is definitional; compat via
+    pointwise trans-chains, NO rw-motives); **yVObj**.
+    REMAINING ON THE Y/X-TRACK: D-iii (φ-action as VObj-isos; the
+    biPhiQ interval layer is complete), X := Y/φ^ℤ (Curve.lean has the
+    topological quotient + CompactSpace already). Non-critical parked:
+    T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
+    (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
+    yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
     (productRestrictionSub through the keystone equivalences — same
     square machinery, topological); then (3c′) the window-instantiation
     of both halves (IsSheafyOn-single-window). (3c-orig) the single-window transport of embedding+
