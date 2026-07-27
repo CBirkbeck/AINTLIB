@@ -2269,6 +2269,57 @@ theorem exists_evalBI_eq_of_le_one
 
 end Correction
 
+
+/-! ### The per-radius component norms (T910 P4) -/
+
+/-- The first-component Gauss norm on restricted series over `B^I`. -/
+def NfstRPS (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1)
+    (f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : NNReal :=
+  ⨆ s : Fin k →₀ ℕ, Valued.v
+    (((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1)
+
+/-- The second-component Gauss norm on restricted series over `B^I`. -/
+def NsndRPS (hρ₁0 : 0 < ρ₁) (hρ₁1 : ρ₁ < 1) (hρ₂0 : 0 < ρ₂) (hρ₂1 : ρ₂ < 1)
+    (f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) : NNReal :=
+  ⨆ s : Fin k →₀ ℕ, Valued.v
+    (((MvPowerSeries.coeff s f : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2)
+
+/-- The interval Gauss norm is the maximum of the component norms. -/
+theorem wIRPS_eq_max_NfstRPS_NsndRPS
+    {f : MvPowerSeries (Fin k) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)}
+    (hf : MvPowerSeries.IsRestricted f) :
+    wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f
+      = max (NfstRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f)
+          (NsndRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 f) := by
+  refine le_antisymm (ciSup_le fun s => ?_) (max_le ?_ ?_)
+  · refine max_le ?_ ?_
+    · refine le_trans ?_ (le_max_left _ _)
+      have hb : BddAbove (Set.range (fun s : Fin k →₀ ℕ => Valued.v
+          (((MvPowerSeries.coeff s f
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).1))) := by
+        obtain ⟨B, hB⟩ := bddAbove_wIRPS p F ϖ hf
+        refine ⟨B, ?_⟩
+        rintro t ⟨s, rfl⟩
+        exact le_trans (le_max_left _ _) (hB ⟨s, rfl⟩)
+      exact le_ciSup hb s
+    · refine le_trans ?_ (le_max_right _ _)
+      have hb : BddAbove (Set.range (fun s : Fin k →₀ ℕ => Valued.v
+          (((MvPowerSeries.coeff s f
+            : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+            : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)).2))) := by
+        obtain ⟨B, hB⟩ := bddAbove_wIRPS p F ϖ hf
+        refine ⟨B, ?_⟩
+        rintro t ⟨s, rfl⟩
+        exact le_trans (le_max_right _ _) (hB ⟨s, rfl⟩)
+      exact le_ciSup hb s
+  · refine ciSup_le fun s => ?_
+    exact le_trans (le_max_left _ _) (wI_coeff_le_wIRPS p F ϖ hf s)
+  · refine ciSup_le fun s => ?_
+    exact le_trans (le_max_right _ _) (wI_coeff_le_wIRPS p F ϖ hf s)
+
 end FarguesFontaine
 
 end
