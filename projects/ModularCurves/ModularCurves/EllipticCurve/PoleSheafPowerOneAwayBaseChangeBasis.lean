@@ -24,6 +24,41 @@ namespace ModularCurves
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
+/-- For a proper smooth relative curve, a prescribed localized first-pole
+basis transports to the canonical principal affine base change as soon as
+canonical pushforward base change is an isomorphism. -/
+theorem
+    exists_sectionPoleSheafPowerOne_away_baseChange_basis_of_localized_basis_of_isProper
+    {C S : Scheme.{u}} [IsAffine S] {π : C ⟶ S} [IsProper π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (a : Γ(S, (⊤ : S.Opens)))
+    (bA : Module.Basis (Fin 1) (Localization.Away a)
+      (LocalizedModule.Away a
+        (Scheme.Modules.baseSections π
+          (sectionPoleSheafPower π z hz 1))))
+    (hbA : bA 0 = LocalizedModule.mkLinearMap (.powers a)
+      (Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz 1))
+      (sectionPoleSheafPowerOneSection π z hz)) :
+    let B := Γ(S, (⊤ : S.Opens))
+    let A := Localization.Away a
+    let T := Spec (.of A)
+    let t : T ⟶ S :=
+      Spec.map (CommRingCat.ofHom (algebraMap B A)) ≫ S.isoSpec.inv
+    let πT := pullback.snd π t
+    let zT := sectionBaseChange z hz t
+    let hzT := sectionBaseChange_snd z hz t
+    let MT := sectionPoleSheafPower πT zT hzT 1
+    IsIso ((sectionPoleSheafPowerPushforwardBaseChange
+      hsm z hz t 1).val.app (.op (⊤ : T.Opens))) →
+      ∃ b : Module.Basis (Fin 1) Γ(T, (⊤ : T.Opens))
+          (Scheme.Modules.baseSections πT MT),
+        b 0 = sectionPoleSheafPowerOneSection πT zT hzT :=
+  exists_sectionPoleSheafPowerOne_away_baseChange_basis_of_localized_basis
+    hsm z hz a bA hbA
+      (sectionPoleSheafPowerPushforward_isQuasicoherent hsm z hz 1)
+
 private theorem
     FibrewiseElliptic.sectionPoleSheafPowerOne_projectiveClosed_baseSectionsBaseChange_eq
     {R : Type u} {σ : Type} [CommRing R]
