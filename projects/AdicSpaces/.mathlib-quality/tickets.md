@@ -1053,12 +1053,27 @@ non-Tate bases are supported.
     image of (chartT (2p-1) 1, chartS p 1)) / _left (left edge, in chart n+1,
     params image of (chartT 1 1, chartS 1 1)) via
     comap_canonicalMap_mem_rationalOpen_iff; the homeo's forward coe is
-    definitionally comap — rfl). REMAINING for D-i: the transition ring iso
-    between the two circle-localizations
-    (presheafValue of the two image-data over B_n resp. B_{n+1}; route:
-    both are completed localizations of the SAME A_inf-circle datum —
-    compare through the A_inf-level circle datum's presheafValue or compose
-    imgDatum-style identifications; negative-side mirrors);
+    definitionally comap — rfl). REMAINING for D-i — TRANSITION ISO ROUTE
+    (settled 2026-07-27 after the keystone audit): RelativeDescent.keystone
+    (the 8.5-transitivity iso presheafValue E ≃+* presheafValue (imgDatum D₀ E))
+    needs [HasLocLiftPowerBounded A] — over A_inf that class includes NON-Tate
+    completions (the trivial datum gives presheafValue = A_inf itself), so
+    the faithful supplier cannot work; a general proof = Wedhorn 7.51/7.52
+    in Huber generality (a real deferred work-package, NOT taken). INSTEAD:
+    apply keystone OVER the chart rings B_n (Tate ✓ IsRingOfIntegralElements
+    via canonical plus ✓ HasLocLiftPowerBounded via faithful ✓) — the circle
+    ring over chart n is presheafValue of a B_n-datum; compare the two
+    neighbouring circle rings through their B^I-identifications and the
+    DEGENERATE interval ring B^{[τ,τ]} at the circle radius. New ingredient
+    (easy): B^I is UNIFORMIZER-EQUIVARIANT — Bloc-in-ϖ' = Bloc-in-ϖ
+    canonically ([ϖ] = [ϖ']^{p^s} makes the localizations agree:
+    1/[ϖ'] = [ϖ']^{p^s-1}/[ϖ]), and wLoc/gaussValue are ϖ-independent, so
+    BISub-in-ϖ' [ρ₁,ρ₂] = BISub-in-ϖ [ρ₁,ρ₂] under the canonical iso.
+    Sub-tickets: (D-i-t1) Bloc uniformizer-invariance ring iso +
+    wLoc-compatibility; (D-i-t2) BISub-equivariance; (D-i-t3) circle datum
+    over B_n (RationalLocData with image params, hopen from p-unit) +
+    keystone-over-B_n applications; (D-i-t4) the composed transition iso;
+    negative-side mirrors throughout;
   (D-ii) VPreObj-level gluing machinery for a ℤ-chain of charts (new
     infrastructure — the repo has no presheafed-space gluing; alternatively
     build the Y-presheaf directly on the rational-basis of the union);
