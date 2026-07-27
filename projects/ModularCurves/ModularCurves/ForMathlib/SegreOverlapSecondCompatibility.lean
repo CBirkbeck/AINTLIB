@@ -399,4 +399,37 @@ lemma segreImageSecondChartToOverlapAway_algebraMap
         (segreImageCoordinate R m n (segrePairIndex m n a b)))
       (algebraMap R (segreImageGrading R m n 0) r)
 
+/-- The localized Segre ring equivalence preserves coefficients. -/
+lemma segreStandardChartOverlapRingEquiv_algebraMap
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1))
+    (r : R) :
+    segreStandardChartOverlapRingEquiv R m n i a j b
+        (algebraMap R
+          (SegreImageChartOverlapRing R m n i a j b) r) =
+      algebraMap R
+        (SegreProductChartOverlapRing R m n i a j b) r := by
+  rw [← segreImageFirstChartToOverlapAway_algebraMap
+    R m n i a j b r]
+  unfold segreImageFirstChartToOverlapAway
+  rw [segreStandardChartOverlapRingEquiv_awayMap]
+  rw [(segreChartForwardAlgHom R m n i j).commutes]
+  exact
+    (IsScalarTower.algebraMap_apply
+      R
+      (SegreProductChartRing R m n i j)
+      (SegreProductChartOverlapRing R m n i a j b)
+      r).symm
+
+/-- The localized Segre chart equivalence as an equivalence of coefficient algebras. -/
+def segreStandardChartOverlapAlgEquiv
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    SegreImageChartOverlapRing R m n i a j b ≃ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b :=
+  { segreStandardChartOverlapRingEquiv R m n i a j b with
+    commutes' :=
+      segreStandardChartOverlapRingEquiv_algebraMap
+        R m n i a j b }
+
 end MvPolynomial
