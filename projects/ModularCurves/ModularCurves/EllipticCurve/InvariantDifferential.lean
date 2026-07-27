@@ -9,6 +9,7 @@ import ModularCurves.EllipticCurve.GroupLawDescent
 import ModularCurves.EllipticCurve.GroupLawConstruction
 import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
 import ModularCurves.ForMathlib.UnitCocycleSheaf
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The invariant differential `ω_{E/S}` (T-OM-B*, route R1)
@@ -58,6 +59,19 @@ variable {S : Scheme.{u}}
 
 /-! ### T-OM-B1: pointed Weierstrass presentations over an affine open -/
 
+/-- The pullback side-condition for the zero section over an affine open. Extracted from the
+`compat_zero` field of `LocalPresentation`: inlining it as a tactic block makes the structure
+declaration exceed the elaborator's `whnf` budget on the v4.33 pin. -/
+theorem localPresentationZeroCond (G : EllipticCurveGeom S) (V : S.affineOpens) :
+    (V.1.ι ≫ G.zero) ≫ G.π = 𝟙 (V.1 : Scheme.{u}) ≫ V.1.ι := by
+  rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]
+
+-- v4.33 bump: elaborating this structure's FIELD TYPES (`projModel W`, `V.2.isoSpec`)
+-- exceeds the default `whnf` budget. Both inline proofs have already been extracted
+-- (`localPresentationZeroCond`, `localPresentationZeroSection`) and a local reducibility
+-- downgrade of `projModel` does not help — there is no proof left to break up, so the
+-- budget is raised for this one DATA declaration only.
+set_option maxHeartbeats 800000 in
 /-- **(T-OM-B1)** A pointed Weierstrass presentation of a geometric elliptic curve over
 an affine open `V`: an elliptic Weierstrass curve over the sections together with a
 pointed chart isomorphism — the per-index data of `WeierstrassAtlasData` at a single
@@ -73,7 +87,7 @@ structure LocalPresentation (G : EllipticCurveGeom S) (V : S.affineOpens) where
   compat_π : e.hom ≫ projModelπ W = pullback.snd G.π V.1.ι ≫ V.2.isoSpec.hom
   /-- The chart isomorphism respects the zero sections. -/
   compat_zero : (V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
-      (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp])) ≫ e.hom =
+      (localPresentationZeroCond G V)) ≫ e.hom =
     projModelZero W
 
 variable {G : EllipticCurveGeom S}

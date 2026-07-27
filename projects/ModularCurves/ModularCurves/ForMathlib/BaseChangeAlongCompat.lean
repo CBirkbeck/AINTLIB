@@ -9,6 +9,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 import Mathlib.AlgebraicGeometry.PullbackCarrier
+import Mathlib.AlgebraicGeometry.Morphisms.Etale
 
 /-!
 # `IsStableUnderBaseChangeAlong` / `RespectsIso` for the standard morphism properties
@@ -74,5 +75,26 @@ instance respectsIso_isProper : MorphismProperty.RespectsIso (@IsProper) :=
 
 instance respectsIso_isClosedImmersion : MorphismProperty.RespectsIso (@IsClosedImmersion) :=
   MorphismProperty.IsStableUnderBaseChange.respectsIso
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance zariskiLocalAtTarget_isFinite : IsZariskiLocalAtTarget (@IsFinite) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance hasAffineProperty_isFinite : HasAffineProperty (@IsFinite)
+    (fun X _ f _ ↦ IsAffine X ∧ RingHom.Finite (Scheme.Hom.appTop f).hom) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance zariskiLocalAtTarget_etale : IsZariskiLocalAtTarget (@Etale) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance respectsIso_etale : MorphismProperty.RespectsIso (@Etale) :=
+  inferInstance
+
+set_option backward.isDefEq.respectTransparency.types false in
+instance zariskiLocalAtTarget_flat : IsZariskiLocalAtTarget (@Flat) :=
+  inferInstance
 
 end ModularCurves.BumpCompat

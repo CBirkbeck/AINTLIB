@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.MulByHomFibres
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # The model fibre-count (BB-QF, ALPHA leg)
@@ -632,8 +633,10 @@ theorem modelMulByHom_range_infinite {F : Type u} [Field F] [IsAlgClosed F]
   haveI hsing : Subsingleton (↥(Spec (CommRingCat.of F))) := by
     constructor
     intro a b
-    exact PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans
-      (Ideal.eq_bot_of_prime _).symm)
+    haveI := a.isPrime
+    haveI := b.isPrime
+    exact PrimeSpectrum.ext ((Ideal.eq_bot_of_prime a.asIdeal).trans
+      (Ideal.eq_bot_of_prime b.asIdeal).symm)
   -- per-level injections of `ℓⁿ`-torsion into the range
   have hinj : ∀ n : ℕ,
       ∃ f : ↥(HasseWeil.torsionSubgroup (W.baseChange F).toAffine ((ℓ ^ n : ℕ) : ℤ)) →

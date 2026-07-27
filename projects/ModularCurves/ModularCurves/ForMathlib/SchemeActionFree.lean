@@ -9,6 +9,7 @@ import ModularCurves.ForMathlib.EtaleCancellation
 import ModularCurves.ForMathlib.SchemeQuotient
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import ModularCurves.ForMathlib.BaseChangeAlongCompat
 
 /-!
 # Geometric freeness ⟹ algebraic freeness (the T-Q2 bridge)
