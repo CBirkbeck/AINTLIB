@@ -558,6 +558,129 @@ theorem biPhiQ_blocToBI (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
     (blocToBI p F ϖ _ _ _ _ z)) = _
   rw [biPhi_blocToBI, biCongr_blocToBI]
 
+/-- **Inverse Frobenius on the rational-exponent interval rings**
+(abstract-source form). -/
+noncomputable def biPhiInvQ (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂) :
+    ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1) →+* ↥(BIQ p F ϖ q₁ q₂ h₁ h₂) :=
+  (biPhiInv p F ϖ
+      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)
+      (hσ₁ ▸ pow_pos (vpiQ_pos p F ϖ q₁) p)
+      (hσ₁ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₁)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))
+      (hσ₂ ▸ pow_pos (vpiQ_pos p F ϖ q₂) p)
+      (hσ₂ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₂)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))).comp
+    (biCongr p F ϖ hσ₁.symm hσ₂.symm
+      (hρ₁0' := hσ₁ ▸ pow_pos (vpiQ_pos p F ϖ q₁) p)
+      (hρ₁1' := hσ₁ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₁)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))
+      (hρ₂0' := hσ₂ ▸ pow_pos (vpiQ_pos p F ϖ q₂) p)
+      (hρ₂1' := hσ₂ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₂)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))).toRingHom
+
+/-- The inverse extends `frobBlocSymm` on the dense layer. -/
+theorem biPhiInvQ_blocToBI (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂)
+    (z : Bloc p F ϖ) :
+    biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂
+        (blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 z)
+      = blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+          (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂)
+          (frobBlocSymm p F ϖ z) := by
+  show (biPhiInv p F ϖ _ _ _ _) ((biCongr p F ϖ hσ₁.symm hσ₂.symm)
+    (blocToBI p F ϖ _ _ _ _ z)) = _
+  rw [biCongr_blocToBI, biPhiInv_blocToBI]
+
+
+/-- `biPhiQ` is continuous. -/
+theorem biPhiQ_continuous (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂) :
+    Continuous (biPhiQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂) := by
+  rw [biPhiQ]
+  exact (biCongr_continuous p F ϖ hσ₁ hσ₂).comp
+    (biPhi_continuous p F ϖ
+      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)
+      (hσ₁ ▸ pow_pos (vpiQ_pos p F ϖ q₁) p)
+      (hσ₁ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₁)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))
+      (hσ₂ ▸ pow_pos (vpiQ_pos p F ϖ q₂) p)
+      (hσ₂ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₂)
+        (Nat.Prime.ne_zero (Fact.out : Nat.Prime p))))
+
+/-- `biPhiInvQ` is continuous. -/
+theorem biPhiInvQ_continuous (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂) :
+    Continuous (biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂) := by
+  rw [biPhiInvQ]
+  exact (biPhiInv_continuous p F ϖ
+    (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+    (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)
+    (hσ₁ ▸ pow_pos (vpiQ_pos p F ϖ q₁) p)
+    (hσ₁ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₁)
+      (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))
+    (hσ₂ ▸ pow_pos (vpiQ_pos p F ϖ q₂) p)
+    (hσ₂ ▸ pow_lt_one₀ zero_le (vpiQ_lt_one p F ϖ h₂)
+      (Nat.Prime.ne_zero (Fact.out : Nat.Prime p)))).comp
+    (biCongr_continuous p F ϖ hσ₁.symm hσ₂.symm)
+
+/-- The `Q`-level round-trip (inverse-after-forward). -/
+theorem biPhiInvQ_biPhiQ (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂)
+    (z : ↥(BIQ p F ϖ q₁ q₂ h₁ h₂)) :
+    biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂
+      (biPhiQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂ z) = z := by
+  have hfun : (⇑(biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂)
+      ∘ ⇑(biPhiQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂)) = id := by
+    refine (denseRange_blocToBI p F ϖ
+      (hρ₁0 := vpiQ_pos p F ϖ q₁) (hρ₁1 := vpiQ_lt_one p F ϖ h₁)
+      (hρ₂0 := vpiQ_pos p F ϖ q₂) (hρ₂1 := vpiQ_lt_one p F ϖ h₂)).equalizer
+      ((biPhiInvQ_continuous p F ϖ q₁ q₂ h₁ h₂ hσ₁ hσ₂).comp
+        (biPhiQ_continuous p F ϖ q₁ q₂ h₁ h₂ hσ₁ hσ₂))
+      continuous_id (funext fun w => ?_)
+    show biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂
+        (biPhiQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂
+          (blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+            (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) w))
+      = blocToBI p F ϖ (vpiQ_pos p F ϖ q₁) (vpiQ_lt_one p F ϖ h₁)
+          (vpiQ_pos p F ϖ q₂) (vpiQ_lt_one p F ϖ h₂) w
+    rw [biPhiQ_blocToBI, biPhiInvQ_blocToBI, frobBlocSymm_frobBloc]
+  exact congrFun hfun z
+
+/-- The `Q`-level round-trip (forward-after-inverse). -/
+theorem biPhiQ_biPhiInvQ (q₁ q₂ : ℚ) (h₁ : 0 < q₁) (h₂ : 0 < q₂)
+    {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+    {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+    (hσ₁ : vpiQ p F ϖ q₁ ^ p = σ₁) (hσ₂ : vpiQ p F ϖ q₂ ^ p = σ₂)
+    (z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)) :
+    biPhiQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂
+      (biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂ z) = z := by
+  have hfun : (⇑(biPhiQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂)
+      ∘ ⇑(biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂)) = id := by
+    refine (denseRange_blocToBI p F ϖ
+      (hρ₁0 := hσ₁0) (hρ₁1 := hσ₁1) (hρ₂0 := hσ₂0) (hρ₂1 := hσ₂1)).equalizer
+      ((biPhiQ_continuous p F ϖ q₁ q₂ h₁ h₂ hσ₁ hσ₂).comp
+        (biPhiInvQ_continuous p F ϖ q₁ q₂ h₁ h₂ hσ₁ hσ₂))
+      continuous_id (funext fun w => ?_)
+    show biPhiQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂
+        (biPhiInvQ p F ϖ q₁ q₂ h₁ h₂ (hσ₁0 := hσ₁0) (hσ₁1 := hσ₁1) (hσ₂0 := hσ₂0) (hσ₂1 := hσ₂1) hσ₁ hσ₂
+          (blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 w))
+      = blocToBI p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1 w
+    rw [biPhiInvQ_blocToBI, biPhiQ_blocToBI, frobBloc_frobBlocSymm]
+  exact congrFun hfun z
+
 end FarguesFontaine
 
 end

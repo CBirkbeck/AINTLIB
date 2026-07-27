@@ -1195,9 +1195,16 @@ non-Tate bases are supported.
     RingHom-comp + biCongr form with explicit-toFun-style shows is the
     compiling pattern; the ISO-form of biPhiQ is deferred (round-trips at
     the Q-level need the σ-abstract statement of biPhiInvQ — same recipe).
-    REMAINING D-iii: biPhiInvQ + Q-level round-trips (same recipe),
-    φ-biResQ' compatibility square at abstract radii, and X := Y/φ^ℤ via
-    Curve.lean + descent. DEFERRED
+    biPhiInvQ + Q-LEVEL ROUND-TRIPS DONE 2026-07-27
+    (biPhiInvQ with dense-layer identity, biPhiQ/biPhiInvQ continuity —
+    with FULLY EXPLICIT radius-proof args, the mvar-holes were the grind —
+    and both round-trips biPhiInvQ_biPhiQ / biPhiQ_biPhiInvQ by dense
+    equalizer). The φ-machinery on the interval-ring layer is COMPLETE:
+    Frobenius is a bicontinuous bijection BIQ q₁ q₂ ↔ B^{[σ]} at
+    σ = vpiQ(q)^p, with everything reaching the presheaf substrate.
+    REMAINING D-iii: the φ-biResQ'-compatibility square at abstract radii
+    (φ commutes with restrictions — the presheaf-equivariance datum), and
+    X := Y/φ^ℤ via Curve.lean + descent (needs the D-ii presheaf first). DEFERRED
     (profiler task): composite chartRingEquivBIQ-continuity (step-3 kernel
     grind) and hence windowResBIQ-continuity — needed by D-ii-2's topology
     half; the unfolded four-step comp restatement is the likely fix. Negative-side mirror DONE 2026-07-27
