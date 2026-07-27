@@ -32,6 +32,7 @@ variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 variable (ϖ : PseudoUniformizer F)
 variable {ρ₁ ρ₂ ρ₁' ρ₂' : NNReal}
+variable {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
 
 /-- Positivity of the scaled exponents. -/
 theorem invPowQ_pos (s : ℕ) : (0 : ℚ) < 1 / (p ^ s : ℚ) := by
@@ -295,6 +296,16 @@ noncomputable def chartRingEquivBIQNeg (m : ℕ) :
           (powQ_pos p m) (powQ_div_pos p m)) :=
   (chartEquivStep1Neg p F ϖ m).trans
     ((chartEquivStep2Neg p F ϖ m).trans (chartEquivStep3Neg p F ϖ m))
+
+/-- The subring-equality transport preserves the ambient value. -/
+theorem biSubringCongr_coe_val
+    {S T : Subring ((hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))}
+    (h : S = T) (z : ↥S) :
+    ((biSubringCongr p F h z : ↥T)
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1))
+      = ((z : ↥S) : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) := by
+  subst h
+  rfl
 
 end FarguesFontaine
 
