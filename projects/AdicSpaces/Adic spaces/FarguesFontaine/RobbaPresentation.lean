@@ -1212,6 +1212,35 @@ theorem exists_monomial_twist_data (zb : OF F) (m : ℕ) (hm : 0 < m)
   · refine ⟨0, c, by rw [pow_zero, one_mul], hc0,
       fun h => absurd h hik, fun _ => rfl⟩
 
+/-- **The floor-division twist**: under the direct divisibility bound the
+coordinate factors through `zb^{(k−i)/m}`, with the twisted exponent landing
+in the window `(k − m, k]` — no overshoot. -/
+theorem exists_monomial_twist_div (zb : OF F) (m : ℕ) (hm : 0 < m)
+    (i k : ℕ) (c : OF F)
+    (hdvd : perfectoidValuation p F (c : F)
+      ≤ perfectoidValuation p F (zb : F) ^ ((k - i) / m)) :
+    ∃ c' : OF F, c = zb ^ ((k - i) / m) * c'
+      ∧ k < i + m * ((k - i) / m) + m := by
+  have hdv := (perfectoidValuation_integers p F).dvd_of_le
+    (x := c) (y := zb ^ ((k - i) / m)) ?_
+  · obtain ⟨c', hc'⟩ := hdv
+    refine ⟨c', hc', ?_⟩
+    have hdm := Nat.div_add_mod (k - i) m
+    have hmod := Nat.mod_lt (k - i) hm
+    omega
+  · show perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
+      ≤ perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
+          (zb ^ ((k - i) / m)))
+    rw [show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) c)
+        = (c : F) from rfl,
+      show ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
+          (zb ^ ((k - i) / m)))
+        = ((zb : OF F) : F) ^ ((k - i) / m) from by push_cast; rfl,
+      map_pow]
+    exact hdvd
+
 end FarguesFontaine
 
 end
