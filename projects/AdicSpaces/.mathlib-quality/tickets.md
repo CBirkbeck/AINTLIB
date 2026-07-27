@@ -1816,8 +1816,27 @@ non-Tate bases are supported.
     (3d-5) **isSheafyOn_Y**: C valid, base ⊆ Y ⇒ base-trace compact
     ⊆ ⋃ (open window traces) ⇒ finite J ⇒ base ⊆ runChart (max J)
     (max J - min J) at Spv-level (rationalOpen carries Spa-membership)
-    ⇒ both fields from isSheafyOn_runChart. THEN (3e) the Bundled-599
-    replay; yVObj. (superseded: the EMBEDDING-half transport
+    ⇒ both fields from isSheafyOn_runChart.
+    ★★ 3d COMPLETE 2026-07-27 (commits c4bee684a + 0939fac00 +
+    7325dd490, all axiom-clean, every step FIRST-TRY): runWindow n k
+    (κ ∈ [p^n, p^{n+k+1}], NOTE runs extend UPWARD from n),
+    runWindow_eq_rationalOpen (ℤ-match; ofNat mirrors
+    bigWindow_eq_rationalOpen_ofNat with hmul : p^{k+1}·p^n = p^{n+k+1};
+    neg case at pPow (p^m) needs NO vle_pow_iff — hteich substitutes
+    directly; KLE_iff's hab at the UNREDUCED fraction p^{k+1}/p^m kills
+    the sign-split), bigWindow_subset_runWindow, runWindow_subset_Y;
+    isUnit_canonicalMap_p_teichPi_runChart + span_image_runChart_eq_top
+    + isTateRing_runChart + isSheafy_canonical_runChart +
+    isSheafyOn_runChart (verbatim window replays at a := p^(k+1));
+    ainf_pair_spec' (replicated private from Curve) +
+    isCompact_subtype_rationalOpen_ainf (7.35(2)₂ + radical from
+    IsRational-openness via the adic nhds basis);
+    exists_runChart_superset (elim_finite_subcover over window traces,
+    J' := insert 0 J for nonemptiness, min'/max' + toNat) ⇒
+    **isSheafyOn_Y** — the FULL Y-interior sheaf condition over the
+    non-Tate ambient A_inf. THEN (3e) the Bundled-599 replay at the
+    restricted site; yVObj := ⟨yVPreObj, isSheafTopRings⟩; then D-iii
+    (φ-action), X := Y/φ^ℤ. (superseded: the EMBEDDING-half transport
     (productRestrictionSub through the keystone equivalences — same
     square machinery, topological); then (3c′) the window-instantiation
     of both halves (IsSheafyOn-single-window). (3c-orig) the single-window transport of embedding+
