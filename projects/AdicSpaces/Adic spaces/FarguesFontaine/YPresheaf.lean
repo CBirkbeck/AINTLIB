@@ -771,7 +771,7 @@ def yPresheaf : TopCat.Presheaf CompleteTopCommRingCat
   obj V := CompleteTopCommRingCat.of
     ↥(limitSectionsY p F ϖ (Subtype.val '' (V.unop.1 : Set ↥(Y p F ϖ))))
   map {V W} i := ⟨limitRestrictY p F ϖ
-      (Set.image_mono (leOfHom i.unop)),
+      (Set.image_mono (CategoryTheory.leOfHom i.unop)),
     limitRestrictY_continuous p F ϖ _⟩
   map_id V := by
     refine Subtype.ext (RingHom.ext fun x => Subtype.ext (funext fun i => ?_))
@@ -780,17 +780,17 @@ def yPresheaf : TopCat.Presheaf CompleteTopCommRingCat
     refine Subtype.ext (RingHom.ext fun x => Subtype.ext (funext fun i => ?_))
     rfl
 
-@[simp] theorem yPresheaf_obj (V : (Opens ↥(TopCat.of ↥(Y p F ϖ)))ᵒᵖ) :
+@[simp] theorem yPresheaf_obj (V : (TopologicalSpace.Opens ↥(TopCat.of ↥(Y p F ϖ)))ᵒᵖ) :
     (yPresheaf p F ϖ).obj V = CompleteTopCommRingCat.of
       ↥(limitSectionsY p F ϖ
         (Subtype.val '' (V.unop.1 : Set ↥(Y p F ϖ)))) :=
   rfl
 
-theorem yPresheaf_map {V W : (Opens ↥(TopCat.of ↥(Y p F ϖ)))ᵒᵖ} (i : V ⟶ W)
+theorem yPresheaf_map {V W : (TopologicalSpace.Opens ↥(TopCat.of ↥(Y p F ϖ)))ᵒᵖ} (i : V ⟶ W)
     (x : ↥(limitSectionsY p F ϖ
       (Subtype.val '' (V.unop.1 : Set ↥(Y p F ϖ))))) :
     ((yPresheaf p F ϖ).map i).1 x
-      = limitRestrictY p F ϖ (Set.image_mono (leOfHom i.unop)) x :=
+      = limitRestrictY p F ϖ (Set.image_mono (CategoryTheory.leOfHom i.unop)) x :=
   rfl
 
 end FarguesFontaine
