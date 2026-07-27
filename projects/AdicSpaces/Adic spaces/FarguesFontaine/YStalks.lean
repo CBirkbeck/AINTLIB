@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FarguesFontaine.YCharts
 import «Adic spaces».StructureSheafStalks
+import «Adic spaces».RelativeDescentHuber
 
 /-!
 # Stalk locality of the ambient structure presheaf at points of `𝒴` (YB3c)
@@ -333,6 +334,91 @@ noncomputable def yVPreObj : VPreObj where
         (ySpaPoint_mem_Y p F ϖ x)).symm]
     exact (maximalIdeal_comap_ringEquiv (isLocalRing_yStalk p F ϖ x)
       hSloc (yRingStalkEquiv p F ϖ x)).symm
+
+/-- Each Big window is the rational open of its window chart datum. -/
+theorem bigWindow_eq_rationalOpen_windowUnif (n : ℤ) :
+    bigWindow p F ϖ n
+      = rationalOpen (chartData p F (windowUnif p F ϖ n) 1 1 p 1).T
+          (chartData p F (windowUnif p F ϖ n) 1 1 p 1).s := by
+  match n with
+  | .ofNat k =>
+    rw [show (Int.ofNat k) = ((k : ℕ) : ℤ) from rfl,
+      bigWindow_eq_rationalOpen_ofNat p F ϖ k (one_lt_p p)]
+    rfl
+  | .negSucc m =>
+    rw [show (Int.negSucc m) = (-(((m + 1 : ℕ)) : ℤ)) from rfl,
+      bigWindow_eq_rationalOpen_neg p F ϖ (m + 1) (one_lt_p p)]
+    rfl
+
+/-- **`p·[ϖ]` maps to a unit of every window chart ring** (the chart ring is
+Tate with the `chartS`-image as topologically nilpotent unit; `p[ϖ]` divides
+a `chartS`-power and conversely, so its image is a unit — routed through the
+Spa-point criterion like `YB1`). -/
+theorem isUnit_canonicalMap_p_teichPi_window (n : ℤ) :
+    IsUnit ((chartData p F (windowUnif p F ϖ n) 1 1 p 1).canonicalMap
+      ((p : Ainf p F) * teichPi p F ϖ)) := by
+  haveI : IsRingOfIntegralElements
+      ((Ainf p F)⁺ : Subring (Ainf p F)) := isAffinoidRing_Ainf p F
+  haveI : IsHuberRing (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
+    presheafValue_isHuberRing_huber _
+  letI P_B : PairOfDefinition (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
+    presheafValue_concretePair _
+  haveI : IsAdicComplete P_B.I P_B.A₀ := presheafValue_isAdicComplete _
+  rw [isUnit_iff_forall_not_vle_zero_of_completePair P_B]
+  intro w hw hcon
+  have hmem := comap_canonicalMap_mem_rationalOpen
+    (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+    (canonicalMap_continuous _) hw
+  have hY : comap (chartData p F (windowUnif p F ϖ n) 1 1 p 1).canonicalMap w
+      ∈ Y p F ϖ := by
+    have hbig : comap (chartData p F (windowUnif p F ϖ n) 1 1 p 1).canonicalMap
+        w ∈ bigWindow p F ϖ n := by
+      rw [bigWindow_eq_rationalOpen_windowUnif p F ϖ n]
+      exact hmem
+    have hcov := Y_eq_iUnion_bigWindow p F ϖ (one_lt_p p)
+    rw [hcov]
+    exact Set.mem_iUnion.mpr ⟨n, hbig⟩
+  refine hY.2 ?_
+  exact (comap_vle _ w _ 0).mpr (by rwa [map_zero])
+
+/-- **The image-span certificate at the window charts**: every valid
+`A_inf`-rational datum's tray hits `⊤` after mapping into a window chart
+ring (`(p[ϖ])^N` lies in the open tray span; its image is a unit). -/
+theorem span_image_windowChart_eq_top (n : ℤ)
+    [DecidableEq (presheafValue (chartData p F (windowUnif p F ϖ n) 1 1 p 1))]
+    (E : RationalLocData (Ainf p F)) (hErat : E.IsRational) :
+    Ideal.span ((E.T.image
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1).canonicalMap
+      : Finset (presheafValue (chartData p F (windowUnif p F ϖ n) 1 1 p 1)))
+      : Set (presheafValue (chartData p F (windowUnif p F ϖ n) 1 1 p 1)))
+      = ⊤ := by
+  classical
+  obtain ⟨N, hN⟩ := (isAdic_iff.mp (isAdic_Iinf p F ϖ)).2
+    _ (hErat.mem_nhds (by
+      exact (Ideal.span ((E.T : Finset (Ainf p F)) : Set (Ainf p F))).zero_mem))
+  have hpow : ((p : Ainf p F) * teichPi p F ϖ) ^ N
+      ∈ Ideal.span ((E.T : Finset (Ainf p F)) : Set (Ainf p F)) := by
+    refine hN ?_
+    exact Ideal.pow_mem_pow
+      (Ideal.mul_mem_right _ _ (Ideal.subset_span (Set.mem_insert _ _))) N
+  obtain ⟨c, -, hc⟩ := Submodule.mem_span_finset.mp hpow
+  have himg : ((chartData p F (windowUnif p F ϖ n) 1 1 p 1).canonicalMap
+        ((p : Ainf p F) * teichPi p F ϖ)) ^ N
+      ∈ Ideal.span ((E.T.image
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1).canonicalMap
+      : Finset (presheafValue (chartData p F (windowUnif p F ϖ n) 1 1 p 1)))
+      : Set (presheafValue (chartData p F (windowUnif p F ϖ n) 1 1 p 1))) := by
+    rw [← map_pow, ← hc]
+    rw [map_sum]
+    refine Ideal.sum_mem _ fun t ht => ?_
+    rw [smul_eq_mul, map_mul]
+    exact Ideal.mul_mem_left _ _
+      (Ideal.subset_span (Finset.mem_coe.mpr
+        (Finset.mem_image_of_mem _ ht)))
+  exact Ideal.eq_top_of_isUnit_mem _ himg
+    ((isUnit_canonicalMap_p_teichPi_window p F ϖ n).pow N)
 
 end FarguesFontaine
 
