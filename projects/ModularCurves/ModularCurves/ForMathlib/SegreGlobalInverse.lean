@@ -191,4 +191,91 @@ lemma segreImagePairChartToProduct_segreProductToImageProj
     segreImagePairChartToProduct_segreProductToImageProj_awayι
       R m n i j
 
+/-- On the double-chart model, the inverse Segre chart equivalence followed by the
+first product-chart presentation is the first target-chart restriction followed by
+its inverse chart map. -/
+@[reassoc]
+lemma segreImageOverlapToFirstProductChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductOverlapIsoSegreImage
+        R m n i a j b).inv ≫
+        segreProductChartOverlapToChart
+          R m n i a j b =
+      segreImageOverlapToFirstChart R m n i a j b ≫
+        (segreImagePairChartIsoSpec R m n i j).inv ≫
+        (segreProductStandardChartIsoImageChart
+          R m n i j).inv := by
+  rw [← cancel_mono
+    (segreProductStandardChartIsoImageChart
+      R m n i j).hom]
+  simp only [Category.assoc, Iso.inv_hom_id,
+    Category.comp_id]
+  dsimp only [segreProductChartOverlapToChart,
+    segreProductStandardChartIsoImageChart,
+    segreImagePairChartIsoSpec]
+  simp only [Iso.trans_hom, Category.assoc,
+    Iso.inv_hom_id_assoc]
+  change
+    (segreProductOverlapIsoSegreImage
+          R m n i a j b).inv ≫
+        segreProductChartLocalizationMap R m n i a j b ≫
+        Spec.map
+          (CommRingCat.ofHom
+            (segreChartForwardAlgHom
+              R m n i j).toRingHom) ≫
+        (segreImagePairChartIsoSpec
+          R m n i j).inv =
+      segreImageOverlapToFirstChart R m n i a j b ≫
+        (segreImagePairChartIsoSpec
+          R m n i j).inv
+  rw [←
+    segreProductOverlapIsoSegreImage_hom_toFirstChart_assoc]
+  simp
+
+/-- The analogous identification for the second product-chart presentation of the
+same double-chart model. -/
+@[reassoc]
+lemma segreImageOverlapToSecondProductChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductOverlapIsoSegreImage
+        R m n i a j b).inv ≫
+        segreProductChartOverlapToSecondChart
+          R m n i a j b =
+      segreImageOverlapToSecondChart R m n i a j b ≫
+        (segreImagePairChartIsoSpec R m n a b).inv ≫
+        (segreProductStandardChartIsoImageChart
+          R m n a b).inv := by
+  rw [← cancel_mono
+    (segreProductStandardChartIsoImageChart
+      R m n a b).hom]
+  simp only [Category.assoc, Iso.inv_hom_id,
+    Category.comp_id]
+  dsimp only [segreProductChartOverlapToSecondChart,
+    segreProductOverlapToSecondChartSpec,
+    segreProductStandardChartIsoImageChart,
+    segreImagePairChartIsoSpec]
+  simp only [Iso.trans_hom, Category.assoc,
+    Iso.inv_hom_id_assoc]
+  change
+    (segreProductOverlapIsoSegreImage
+          R m n i a j b).inv ≫
+        Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondChartAlgHom
+              R m n i a j b).toRingHom) ≫
+        Spec.map
+          (CommRingCat.ofHom
+            (segreChartForwardAlgHom
+              R m n a b).toRingHom) ≫
+        (segreImagePairChartIsoSpec
+          R m n a b).inv =
+      segreImageOverlapToSecondChart R m n i a j b ≫
+        (segreImagePairChartIsoSpec
+          R m n a b).inv
+  rw [←
+    segreProductOverlapIsoSegreImage_hom_toSecondChart_assoc]
+  simp
+
 end MvPolynomial
