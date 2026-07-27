@@ -1776,10 +1776,48 @@ non-Tate bases are supported.
     (isEmbedding_productRestrictionSub_of_imgCovering — the comparison
     map + squares + IsInducing/Injective.of_comp cancellation). THE
     FULL SINGLE-D₀ SHEAF TRANSPORT IS COMPLETE (both IsSheafy-fields).
-    REMAINING: (3c′) the window-instantiation wrapper (supply the B_n
-    instances via isSheafy_presheafChart + the YB6b certificate
-    supplier — near-trivial); (3d) the straddling case; (3e) the
-    Bundled-599 replay; yVObj. (superseded: the EMBEDDING-half transport
+    ★ 3c′ DONE 2026-07-27 (commits c73e37a1f + 49b6ee4f7, YStalks):
+    isSheafy_congr_plusSubring (PlusSubring is the only data-valued
+    instance in IsSheafy's signature — subst + proof-irrelevance),
+    chartPlus_instance_eq_canonical (congrArg PlusSubring.mk of the
+    r5c chartPlus_eq_canonical, general (a,1)), isSheafy_canonical_window
+    (isSheafy_presheafChart at (p,1)/windowUnif + the instance
+    transport), **isSheafyOn_window** (both single-D₀ transports at
+    D₀ := window datum, hcertAll := span_image_windowChart_eq_top).
+    ★ 3d REDESIGNED 2026-07-27 — **NO adjacent-circle glue needed**:
+    quasicompactness kills the straddle. Kit verified present:
+    isCompact_subtype_rationalOpen₂ (SpaQCviaSpvAI, two-generator
+    7.35(2)), Curve.ainf_pair_spec (private — REPLICATE ~10 lines:
+    pairOfDefinition_ofAdic at Iinf, g₁ = p, g₂ = [ϖ], A⁺ = ⊤),
+    rationalOpen_isOpen (RationalSubsets 154, unconditional),
+    mem_rationalOpen_chartData_iff (general (u,v,a,b)), KGE_iff/KLE_iff,
+    isSheafy_presheafChart + chartPlus_instance_eq_canonical at
+    general (a,1), rhoRight_pow_exact general. Steps:
+    (3d-1) runChart n k := chartData p F (windowUnif n) 1 1 (p^(k+1)) 1
+    — κ-interval [p^(n-k), p^(n+1)] (κ(v'^t) = p^(n+1)/t); covers
+    bigWindow j for n-k ≤ j ≤ n. runWindow_eq: rationalOpen (runChart
+    n k) = {v ∈ Y | KGE p^(n-k) ∧ KLE p^(n+1)} — generalize
+    bigWindow_eq_rationalOpen_ofNat/_neg's proof (ℤ-match on n +
+    sign-split of n-k for the hab ℕ-quotient shapes; the vle-exponent
+    bookkeeping through mem_rationalOpen_chartData_iff at a = p^(k+1)).
+    Then bigWindow_subset_runChart (KGE_mono/KLE_mono) and
+    runChart_rationalOpen_subset_Y (from the eq).
+    (3d-2) isUnit_canonicalMap_p_teichPi_runChart +
+    span_image_runChart_eq_top — verbatim replays of the window
+    versions (their proofs are chart-generic; only the ⊆-Y input
+    changes to runChart_rationalOpen_subset_Y).
+    (3d-3) isSheafy_canonical_runChart + isSheafyOn_runChart —
+    verbatim replays at a := p^(k+1) (hexact2 := rhoRight_pow_exact).
+    (3d-4) isCompact_subtype_rationalOpen_ainf (E) (hErat) — replicate
+    ainf_pair_spec + radical-from-openness (IsRational = IsOpen span T
+    → ∃ m, Iinf^m ≤ span T via adic nhds-basis as in
+    span_image_windowChart_eq_top's obtain; then Iinf ≤ radical by
+    pow_mem_pow).
+    (3d-5) **isSheafyOn_Y**: C valid, base ⊆ Y ⇒ base-trace compact
+    ⊆ ⋃ (open window traces) ⇒ finite J ⇒ base ⊆ runChart (max J)
+    (max J - min J) at Spv-level (rationalOpen carries Spa-membership)
+    ⇒ both fields from isSheafyOn_runChart. THEN (3e) the Bundled-599
+    replay; yVObj. (superseded: the EMBEDDING-half transport
     (productRestrictionSub through the keystone equivalences — same
     square machinery, topological); then (3c′) the window-instantiation
     of both halves (IsSheafyOn-single-window). (3c-orig) the single-window transport of embedding+
