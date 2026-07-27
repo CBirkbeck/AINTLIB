@@ -5732,6 +5732,89 @@ theorem map_BIPlusIn_le_BIPlusIn {θ η : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ ≤ 
   rintro _ ⟨z, hz, rfl⟩
   exact le_trans (wI_resIHom_le p F ϖ hθ0 hθ1 hη0 hη1 hσ₁0 hσ₁1 hσ₂0 hσ₂1 z) hz
 
+/-- Powers of monomial fractions are monomial fractions. -/
+theorem mk'_monomial_pow (i k m : ℕ) (c : OF F) :
+    (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ i * WittVector.teichmuller p c) (sPow p F ϖ k)) ^ m
+      = IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ (i * m) * WittVector.teichmuller p (c ^ m))
+        (sPow p F ϖ (k * m)) := by
+  have hnum : ((p : Ainf p F) ^ i * WittVector.teichmuller p c) ^ m
+      = (p : Ainf p F) ^ (i * m) * WittVector.teichmuller p (c ^ m) := by
+    rw [mul_pow, ← pow_mul, ← map_pow (WittVector.teichmuller p (R := OF F))]
+  have hden : (sPow p F ϖ k) ^ m = sPow p F ϖ (k * m) := by
+    refine Subtype.ext ?_
+    show (((p : Ainf p F) * teichPi p F ϖ) ^ k) ^ m
+      = ((p : Ainf p F) * teichPi p F ϖ) ^ (k * m)
+    rw [← pow_mul]
+  rw [← hnum, ← hden]
+  exact (IsLocalization.mk'_pow _ _ m).symm
+
+/-- **The radius-free value of `p`-balanced monomials**: when the `p`-power
+matches the denominator depth, the local valuation does not depend on the
+radius. -/
+theorem wLoc_balanced {ρ : NNReal} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (e : ℕ) (c : OF F) :
+    wLoc p F ϖ hρ0 hρ1 (IsLocalization.mk' (Bloc p F ϖ)
+        ((p : Ainf p F) ^ e * WittVector.teichmuller p c) (sPow p F ϖ e))
+      = perfectoidValuation p F (c : F)
+        * ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e)⁻¹ := by
+  rw [wLoc_mk'_monomial p F ϖ hρ0 hρ1]
+  rw [mul_pow, mul_inv]
+  calc ρ ^ e * perfectoidValuation p F (c : F)
+        * ((ρ ^ e)⁻¹ * ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e)⁻¹)
+      = (ρ ^ e * (ρ ^ e)⁻¹) * (perfectoidValuation p F (c : F)
+          * ((perfectoidValuation p F
+              ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e)⁻¹) := by ring
+    _ = perfectoidValuation p F (c : F)
+        * ((perfectoidValuation p F
+            ((PseudoUniformizer.toOF F ϖ : OF F) : F)) ^ e)⁻¹ := by
+        rw [mul_inv_cancel₀ (pow_pos hρ0 e).ne', one_mul]
+
+/-- **The balanced `m`-power twist** (T910-M M1a): the `m`-th power of a
+monomial fraction with divisibility-controlled coefficient factors through
+the generator with an exactly `p`-balanced remainder monomial. -/
+theorem exists_balanced_pow_twist (zb : OF F) (m : ℕ)
+    (i k : ℕ) (hik : i ≤ k) (c : OF F)
+    (hdvd : perfectoidValuation p F (c : F) ^ m
+      ≤ perfectoidValuation p F (zb : F) ^ (k - i)) :
+    ∃ c' : OF F, c ^ m = zb ^ (k - i) * c'
+      ∧ (IsLocalization.mk' (Bloc p F ϖ)
+          ((p : Ainf p F) ^ i * WittVector.teichmuller p c)
+          (sPow p F ϖ k)) ^ m
+        = teichPowGen p F ϖ zb m ^ (k - i)
+          * IsLocalization.mk' (Bloc p F ϖ)
+            ((p : Ainf p F) ^ (k * m)
+              * WittVector.teichmuller p c') (sPow p F ϖ (k * m)) := by
+  have hdv := (perfectoidValuation_integers p F).dvd_of_le
+    (x := c ^ m) (y := zb ^ (k - i)) ?_
+  · obtain ⟨c', hc'⟩ := hdv
+    refine ⟨c', hc', ?_⟩
+    rw [mk'_monomial_pow p F ϖ i k m c]
+    have hfact := mk'_monomial_twist_factor p F ϖ zb m (i * m) (k - i)
+      (k * m) (c ^ m) c' hc'
+    have hexp : i * m + m * (k - i) = k * m :=
+      calc i * m + m * (k - i) = m * i + m * (k - i) := by
+            rw [Nat.mul_comm i m]
+        _ = m * (i + (k - i)) := (Nat.mul_add m i (k - i)).symm
+        _ = m * k := by rw [Nat.add_sub_cancel' hik]
+        _ = k * m := Nat.mul_comm m k
+    rw [hexp] at hfact
+    exact hfact
+  · show perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (c ^ m))
+      ≤ perfectoidValuation p F
+        ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (zb ^ (k - i)))
+    rw [show ((algebraMap ↥(powerBoundedSubring.toSubring F) F) (c ^ m))
+        = ((c : OF F) : F) ^ m from by push_cast; rfl,
+      show ((algebraMap ↥(powerBoundedSubring.toSubring F) F)
+          (zb ^ (k - i)))
+        = ((zb : OF F) : F) ^ (k - i) from by push_cast; rfl,
+      map_pow, map_pow]
+    exact hdvd
+
 end FarguesFontaine
 
 end
