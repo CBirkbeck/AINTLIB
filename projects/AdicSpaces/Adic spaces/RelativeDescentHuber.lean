@@ -987,6 +987,224 @@ theorem imgFamily_agreement
 
 end ImgAgreement
 
+
+section GluingTransportMain
+
+variable [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [DecidableEq A]
+variable (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)]
+  [DecidableEq (RationalLocData (presheafValue D₀))]
+
+variable (C : RationalCoveringData A)
+
+/-- **Restriction of a transported family value** (cast-eliminated, member
+abstract so the substitution motive computes). -/
+theorem imgFamily_restriction
+    (hcertB : Ideal.span ((C.base.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hCD₀ : rationalOpen C.base.T C.base.s ⊆ rationalOpen D₀.T D₀.s)
+    (f : ∀ D : ↥C.covers, presheafValue D.1)
+    (D' : ↥(imgCoveringO D₀ C hcertB hcertP).covers)
+    (X : RationalLocData (presheafValue D₀))
+    (hX : rationalOpen X.T X.s ⊆ rationalOpen D'.1.T D'.1.s) :
+    restrictionMap D'.1 X hX (imgFamily D₀ C hcertB hcertP hCD₀ f D')
+      = restrictionMap
+          (imgDatumO D₀ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose
+            (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose))
+          X
+          (hX.trans (le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
+            ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose_spec)))
+          (keystoneHomO D₀
+            (hcertP _ ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose)
+            (f ⟨((mem_imgCoversO D₀ C hcertP).mp D'.2).choose,
+              ((mem_imgCoversO D₀ C hcertP).mp D'.2).choose_spec.choose⟩)) := by
+  set h := (mem_imgCoversO D₀ C hcertP).mp D'.2 with hh
+  have hval : imgFamily D₀ C hcertB hcertP hCD₀ f D'
+      = h.choose_spec.choose_spec.symm ▸
+        (keystoneO D₀ (hcertP h.choose h.choose_spec.choose)
+          ((C.hsubset h.choose h.choose_spec.choose).trans hCD₀)
+          (f ⟨h.choose, h.choose_spec.choose⟩)) := rfl
+  rw [hval, restrictionMap_cast _ _ h.choose_spec.choose_spec.symm _]
+  have hc := congr_fun (restrictionMap_comp
+    (imgDatumO D₀ h.choose (hcertP h.choose h.choose_spec.choose))
+    D'.1 X
+    (le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
+      h.choose_spec.choose_spec)) hX)
+    (keystoneHomO D₀ (hcertP h.choose h.choose_spec.choose)
+      (f ⟨h.choose, h.choose_spec.choose⟩))
+  simp only [Function.comp_apply] at hc
+  exact hc
+
+/-- **The single-`D₀` gluing transport** (the core of the Y-local sheaf
+condition): a compatible family over a valid rational covering inside
+`R(D₀)` glues, provided the completion at `D₀` is a sheafy Tate ring. -/
+theorem exists_glue_of_imgCovering
+    [IsTateRing (presheafValue D₀)]
+    [T2Space (presheafValue D₀)] [NonarchimedeanRing (presheafValue D₀)]
+    [letI : UniformSpace (presheafValue D₀) :=
+        IsTopologicalAddGroup.rightUniformSpace (presheafValue D₀);
+      CompleteSpace (presheafValue D₀)]
+    [IsRingOfIntegralElements ((presheafValue D₀)⁺)]
+    [IsSheafy (presheafValue D₀)]
+    (hcertAll : ∀ E : RationalLocData A, E.IsRational →
+      Ideal.span ((E.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (C : RationalCoveringData A) (hC : C.IsRational)
+    (hCD₀ : rationalOpen C.base.T C.base.s ⊆ rationalOpen D₀.T D₀.s)
+    (f : ∀ D : ↥C.covers, presheafValue D.1)
+    (hf : ∀ (D₁ D₂ : ↥C.covers)
+       (D₃ : RationalLocData A)
+       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+       restrictionMap D₁.1 D₃ h₃₁ (f D₁) =
+         restrictionMap D₂.1 D₃ h₃₂ (f D₂)) :
+    ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
+      restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D := by
+  classical
+  have hcertB := hcertAll _ hC.base
+  have hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤ :=
+    fun D hD => hcertAll D (hC.piece hD)
+  have hCBrat := imgCoveringO_isRational D₀ C hcertB hcertP
+  -- the transported family is all-data compatible
+  have hfB : (imgCoveringO D₀ C hcertB hcertP).AllDataCompatible
+      (imgFamily D₀ C hcertB hcertP hCD₀ f) := by
+    rw [RationalCoveringData.allDataCompatible_iff_exactIntersectionCompatible
+      hCBrat]
+    intro D₁' D₂'
+    -- unfold the two values through their choice witnesses
+    set h₁ := (mem_imgCoversO D₀ C hcertP).mp D₁'.2 with hh₁
+    set h₂ := (mem_imgCoversO D₀ C hcertP).mp D₂'.2 with hh₂
+    have hv₁ : imgFamily D₀ C hcertB hcertP hCD₀ f D₁'
+        = h₁.choose_spec.choose_spec.symm ▸
+          (keystoneO D₀ (hcertP h₁.choose h₁.choose_spec.choose)
+            ((C.hsubset h₁.choose h₁.choose_spec.choose).trans hCD₀)
+            (f ⟨h₁.choose, h₁.choose_spec.choose⟩)) := rfl
+    have hv₂ : imgFamily D₀ C hcertB hcertP hCD₀ f D₂'
+        = h₂.choose_spec.choose_spec.symm ▸
+          (keystoneO D₀ (hcertP h₂.choose h₂.choose_spec.choose)
+            ((C.hsubset h₂.choose h₂.choose_spec.choose).trans hCD₀)
+            (f ⟨h₂.choose, h₂.choose_spec.choose⟩)) := rfl
+    rw [hv₁, hv₂,
+      restrictionMap_cast _ _ h₁.choose_spec.choose_spec.symm _,
+      restrictionMap_cast _ _ h₂.choose_spec.choose_spec.symm _]
+    -- collapse the two-step restrictions and apply the agreement
+    have hI₁ : rationalOpen (D₁'.1.interRational D₂'.1
+        (hCBrat.piece D₁'.2) (hCBrat.piece D₂'.2)).T
+        (D₁'.1.interRational D₂'.1
+          (hCBrat.piece D₁'.2) (hCBrat.piece D₂'.2)).s
+        ⊆ rationalOpen
+          (imgDatumO D₀ h₁.choose (hcertP h₁.choose h₁.choose_spec.choose)).T
+          (imgDatumO D₀ h₁.choose (hcertP h₁.choose h₁.choose_spec.choose)).s := by
+      refine (RationalLocData.interRational_subset_left _ _ _ _).trans ?_
+      exact le_of_eq (congrArg (fun D => rationalOpen D.T D.s)
+        h₁.choose_spec.choose_spec)
+    have hI₂ : rationalOpen (D₁'.1.interRational D₂'.1
+        (hCBrat.piece D₁'.2) (hCBrat.piece D₂'.2)).T
+        (D₁'.1.interRational D₂'.1
+          (hCBrat.piece D₁'.2) (hCBrat.piece D₂'.2)).s
+        ⊆ rationalOpen
+          (imgDatumO D₀ h₂.choose (hcertP h₂.choose h₂.choose_spec.choose)).T
+          (imgDatumO D₀ h₂.choose (hcertP h₂.choose h₂.choose_spec.choose)).s := by
+      refine (RationalLocData.interRational_subset_right _ _ _ _).trans ?_
+      exact le_of_eq (congrArg (fun D => rationalOpen D.T D.s)
+        h₂.choose_spec.choose_spec)
+    have hc₁ := congr_fun (restrictionMap_comp
+      (imgDatumO D₀ h₁.choose (hcertP h₁.choose h₁.choose_spec.choose))
+      D₁'.1 (D₁'.1.interRational D₂'.1
+        (hCBrat.piece D₁'.2) (hCBrat.piece D₂'.2))
+      (le_of_eq (congrArg (fun D => rationalOpen D.T D.s)
+        h₁.choose_spec.choose_spec))
+      (RationalLocData.interRational_subset_left _ _ _ _))
+      (keystoneO D₀ (hcertP h₁.choose h₁.choose_spec.choose)
+        ((C.hsubset h₁.choose h₁.choose_spec.choose).trans hCD₀)
+        (f ⟨h₁.choose, h₁.choose_spec.choose⟩))
+    have hc₂ := congr_fun (restrictionMap_comp
+      (imgDatumO D₀ h₂.choose (hcertP h₂.choose h₂.choose_spec.choose))
+      D₂'.1 (D₁'.1.interRational D₂'.1
+        (hCBrat.piece D₁'.2) (hCBrat.piece D₂'.2))
+      (le_of_eq (congrArg (fun D => rationalOpen D.T D.s)
+        h₂.choose_spec.choose_spec))
+      (RationalLocData.interRational_subset_right _ _ _ _))
+      (keystoneO D₀ (hcertP h₂.choose h₂.choose_spec.choose)
+        ((C.hsubset h₂.choose h₂.choose_spec.choose).trans hCD₀)
+        (f ⟨h₂.choose, h₂.choose_spec.choose⟩))
+    simp only [Function.comp_apply] at hc₁ hc₂
+    rw [hc₁, hc₂]
+    exact imgFamily_agreement D₀ hcertAll C hC hCD₀ f hf
+      h₁.choose h₂.choose h₁.choose_spec.choose h₂.choose_spec.choose
+      _ hI₁ hI₂
+  -- glue on the B side
+  obtain ⟨xB, hxB⟩ := IsSheafy.gluing (A := presheafValue D₀)
+    (imgCoveringO D₀ C hcertB hcertP) hCBrat
+    (imgFamily D₀ C hcertB hcertP hCD₀ f) hfB
+  -- pull back along the base keystone
+  refine ⟨(keystoneO D₀ hcertB hCD₀).symm xB, ?_⟩
+  rintro ⟨D, hD⟩
+  -- the image member of this piece
+  have hDmem : imgDatumO D₀ D (hcertP D hD)
+      ∈ (imgCoveringO D₀ C hcertB hcertP).covers :=
+    (mem_imgCoversO D₀ C hcertP).mpr ⟨D, hD, rfl⟩
+  have hxD := hxB ⟨imgDatumO D₀ D (hcertP D hD), hDmem⟩
+  -- the keystone square at base → piece
+  have hsq := keystone_restriction_squareO D₀ hcertB (hcertP D hD)
+    (C.hsubset D hD) ((keystoneO D₀ hcertB hCD₀).symm xB)
+  have hbase : keystoneHomO D₀ hcertB ((keystoneO D₀ hcertB hCD₀).symm xB)
+      = xB := (keystoneO D₀ hcertB hCD₀).apply_symm_apply xB
+  rw [hbase] at hsq
+  -- identify the glued restriction with the family value
+  rw [show restrictionMap (imgDatumO D₀ C.base hcertB)
+      (imgDatumO D₀ D (hcertP D hD))
+      (imgDatumO_rationalOpen_subset D₀ hcertB (hcertP D hD)
+        (C.hsubset D hD)) xB
+    = imgFamily D₀ C hcertB hcertP hCD₀ f
+        ⟨imgDatumO D₀ D (hcertP D hD), hDmem⟩ from hxD] at hsq
+  -- apply the piece keystone's injectivity, then chain
+  refine (keystoneO D₀ (hcertP D hD)
+    ((C.hsubset D hD).trans hCD₀)).injective ?_
+  refine hsq.trans ?_
+  set hm := (mem_imgCoversO D₀ C hcertP).mp
+    (show imgDatumO D₀ D (hcertP D hD)
+      ∈ (imgCoveringO D₀ C hcertB hcertP).covers from hDmem) with hhm
+  have hXfst : rationalOpen (imgDatumO D₀ D (hcertP D hD)).T
+      (imgDatumO D₀ D (hcertP D hD)).s
+      ⊆ rationalOpen
+        (imgDatumO D₀ hm.choose (hcertP hm.choose hm.choose_spec.choose)).T
+        (imgDatumO D₀ hm.choose (hcertP hm.choose hm.choose_spec.choose)).s :=
+    le_of_eq (congrArg (fun E => rationalOpen E.T E.s)
+      hm.choose_spec.choose_spec)
+  have hagree := imgFamily_agreement D₀ hcertAll C hC hCD₀ f hf
+    hm.choose D hm.choose_spec.choose hD
+    (imgDatumO D₀ D (hcertP D hD)) hXfst (le_refl _)
+  have hres := imgFamily_restriction D₀ C hcertB hcertP hCD₀ f
+    ⟨imgDatumO D₀ D (hcertP D hD), hDmem⟩
+    (imgDatumO D₀ D (hcertP D hD)) (le_refl _)
+  have hid₁ := congr_fun (restrictionMap_id (imgDatumO D₀ D (hcertP D hD)))
+    (imgFamily D₀ C hcertB hcertP hCD₀ f
+      ⟨imgDatumO D₀ D (hcertP D hD), hDmem⟩)
+  have hid₂ := congr_fun (restrictionMap_id (imgDatumO D₀ D (hcertP D hD)))
+    (keystoneHomO D₀ (hcertP D hD) (f ⟨D, hD⟩))
+  calc imgFamily D₀ C hcertB hcertP hCD₀ f
+        ⟨imgDatumO D₀ D (hcertP D hD), hDmem⟩
+      = restrictionMap _ _ (le_refl _)
+          (imgFamily D₀ C hcertB hcertP hCD₀ f
+            ⟨imgDatumO D₀ D (hcertP D hD), hDmem⟩) := by
+        simpa using hid₁.symm
+    _ = restrictionMap _ _ _
+          (keystoneHomO D₀
+            (hcertP hm.choose hm.choose_spec.choose)
+            (f ⟨hm.choose, hm.choose_spec.choose⟩)) := hres
+    _ = restrictionMap _ _ (le_refl _)
+          (keystoneHomO D₀ (hcertP D hD) (f ⟨D, hD⟩)) := hagree
+    _ = keystoneHomO D₀ (hcertP D hD) (f ⟨D, hD⟩) := by
+        simpa using hid₂
+
+end GluingTransportMain
+
 end ValuationSpectrum
 
 end
