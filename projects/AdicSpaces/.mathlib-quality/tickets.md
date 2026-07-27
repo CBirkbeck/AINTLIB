@@ -2492,7 +2492,24 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   is EXCLUDED — hg1 needs 1 < |g|_{ρ₁} strict; the fst-decay at
   |g| = 1 would need the le_one-variant fed by fst-vanishing (same
   route as snd) — only add if the sheafy-cover glue ever needs it.
-  REMAINING for T910 — CASE 2 (needed: Kedlaya's 4.10/4.11 subdivision
+  ★★★ CASE 2 COMPLETE 2026-07-27 (commits cb1afa764..HEAD):
+  **robba_case2_presentation** — B^I⟨T⟩/(T − p^m₀/[z̄]) ≃+* B^{[ρ₁,σ₂]}
+  for ρ₁ ≤ σ₂ < ρ₂ with |z̄| = σ₂^m₀, AXIOM-CLEAN END-TO-END. Executed
+  M1–M5/Z1–Z9 mirror plan: shared-bottom kernel machinery (fst-
+  transport, swapped-regime decay, ker = span₂), mirrored zone theory
+  (teichPowGen₂ = p^m·Ring.inverse([z̄]); the twist MULTIPLIES the
+  coordinate so no divisibility input; K₂ = ρ₂^m(σ₂^m)⁻¹; same
+  pow_mul_pow_le_of_le core), approx₂ + correction₂ + capstone₂ by
+  SYSTEMATIC MIRROR-TRANSFORM of the case-1 text (target four-tuple,
+  generator, K-constant, hK-calcs, extraction sides — transform then
+  compile-fix residue; Z7+Z8 compiled on first/second try), resIHomBot
+  (fst literal; KERNEL-PERF: Prod.ext with bare rfl component forces
+  kernel defeq through subring-coe-mul and times out — use
+  congrArg-of-BISub_coe_mul/add), final assembly term-elim + subst.
+  T910 STATUS: both B-level cases DONE. REMAINING (follow-ups, assess
+  T911-consumer need first): the ρ ∈ p^ℚ plus-ring integral-closure
+  statement + the A^r-level third iso (A^r{T}/(pT−[z̄^n])). Historical:
+  the case-2 plan follows. (needed: Kedlaya's 4.10/4.11 subdivision
   induction presents BOTH halves — top-half by case 1, bottom-half by
   case 2). Paper: B^I{T/ρ⁻¹}/(T − [z̄⁻¹]) ≅ B^{I∩(0,log_c ρ]}; repo
   normalization: generator g₂ := p^m·[z̄]⁻¹ (alg(p)^m · unit-inv of the
