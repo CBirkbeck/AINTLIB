@@ -2090,7 +2090,22 @@ non-Tate bases are supported.
     This is a multi-step arc: (3ii-a) mapHuber-comp + pvHuber-comp
     functoriality; (3ii-b) limitFrobHom-comp; (3ii-c) the disjoint
     translate cover + invariant extension; (3ii-d) stalk bijectivity;
-    then local rings/valuations transport (3ii-e). Non-critical parked:
+    then local rings/valuations transport (3ii-e).
+    ★ (3ii-a) DATUM LEVEL DONE 2026-07-28: mapRingEquiv_comp (pair;
+    the ideal-HEq via ideal_map_heq_of_targets_eq — subst + RingHom
+    -ext with coercion-agreement fun _ => rfl) + mapHuber_comp
+    (RationalLocData.ext' + Finset.image_image), axiom-clean.
+    ★★ DESIGN SIMPLIFICATION (3ii-c): the pv-level composite law is
+    NOT needed! Spread the germ by ITERATING the GENERATOR transport
+    (Function.iterate of limitFrobHom 1) piece-by-piece; with W small
+    enough (exists_nhd_smul_disjoint) the distinct translates are
+    PAIRWISE DISJOINT, so the gluing-compatibility over the saturated
+    union is VACUOUS off the diagonal — the 𝒴-sheaf gluing
+    (isLimitSheafOn_Y.glue at the translate cover, all inside Y-trace)
+    produces the extension; its INVARIANCE follows from gluing
+    separation (the transport permutes the pieces by one shift).
+    The value-level composite (pvHuber-comp via dense-image
+    uniqueness + restrictionMap_cast) stays PARKED as nice-to-have. Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
