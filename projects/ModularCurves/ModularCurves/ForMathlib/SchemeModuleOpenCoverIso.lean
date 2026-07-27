@@ -81,4 +81,31 @@ theorem isIso_of_isIso_restrict_openCover
   simpa only [f, FM, FN, ObjectProperty.homMk, toPresheaf_map,
     mapPresheaf_app] using hfV
 
+/-- An isomorphism on the over-site of an open remains an isomorphism after
+scheme-module restriction to that open. -/
+theorem isIso_restrict_of_isIso_over
+    {M N : X.Modules} (f : M ⟶ N) (U : X.Opens)
+    [IsIso (f.over U)] :
+    IsIso ((restrictFunctor U.ι).map f) := by
+  let m := f.over U
+  let a := (overEquiv U).functor.map m
+  let eM := (overFunctorEquiv U).app M
+  let eN := (overFunctorEquiv U).app N
+  let d := (restrictFunctor U.ι).map f
+  have hnat : a ≫ eN.hom = eM.hom ≫ d :=
+    (overFunctorEquiv U).hom.naturality f
+  haveI ha : IsIso a := by
+    dsimp only [a]
+    infer_instance
+  haveI heM : IsIso eM.hom := by
+    dsimp only [eM]
+    infer_instance
+  haveI heN : IsIso eN.hom := by
+    dsimp only [eN]
+    infer_instance
+  haveI hcomp : IsIso (eM.hom ≫ d) := by
+    rw [← hnat]
+    exact IsIso.comp_isIso' ha heN
+  exact (isIso_comp_left_iff eM.hom d).mp hcomp
+
 end AlgebraicGeometry.Scheme.Modules
