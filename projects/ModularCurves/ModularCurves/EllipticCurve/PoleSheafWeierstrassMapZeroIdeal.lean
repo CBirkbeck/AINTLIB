@@ -377,4 +377,31 @@ theorem projModelMap_comap_zeroIdeal_eq_section_ker_of_normalized_restrict
         Ideal.map_span, Set.image_singleton]
       congr 2
 
+/-- Equality of the pulled model-zero ideal with a marked-section ideal
+identifies the kernel on the exact affine section neighborhood. -/
+theorem projModelMap_sectionNeighborhood_ker_eq_span
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (W : WeierstrassCurve R) (F : C ⟶ projModel W) [IsFinite F]
+    (hideal : (projModelZero W).ker.comap F = z.ker) :
+    let N := projModelSectionNeighborhood W
+    let P : C.affineOpens := ⟨F ⁻¹ᵁ N.1, N.2.preimage F⟩
+    RingHom.ker (z.app P.1).hom =
+      Ideal.span {
+        (F.appLE N.1 P.1 le_rfl).hom (projModelSectionRoot W)} := by
+  dsimp only
+  let N := projModelSectionNeighborhood W
+  let P : C.affineOpens := ⟨F ⁻¹ᵁ N.1, N.2.preimage F⟩
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  have hIP := congrArg
+    (fun I : C.IdealSheafData => I.ideal P) hideal
+  rw [ideal_comap_affineOpens_span
+      (projModelZero W).ker F P N le_rfl
+      (projModelSectionRoot W)
+      (projModelZero_ker_ideal_sectionNeighborhood W),
+    Scheme.Hom.ker_apply] at hIP
+  rw [affinePullbackSection_eq_appLE] at hIP
+  exact hIP.symm
+
 end ModularCurves
