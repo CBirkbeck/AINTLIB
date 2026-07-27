@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.EllipticCurve.PoleSheafWeierstrassChartIdeal
+import ModularCurves.EllipticCurve.PoleSheafAwaySections
 import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapGlue
 import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapOverlap
 
@@ -160,6 +161,55 @@ theorem
           B.1.topIso.hom.hom = Ideal.span {res r} := by
     exact Ideal.map_of_equiv
       B.1.topIso.commRingCatIsoToRingEquiv.symm
+  rw [hleft, hright] at hback
+  exact hback
+
+/-- The ideal of a marked section is the unit ideal on every affine open
+contained in the complement of that section. -/
+theorem section_ker_ideal_eq_top_of_le_sectionAway
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (V : C.affineOpens) (hV : V.1 ≤ sectionAway z hz) :
+    z.ker.ideal V = ⊤ := by
+  letI : IsClosedImmersion z := isClosedImmersion_section z hz
+  letI : QuasiCompact z := inferInstance
+  let I : V.1.toScheme.IdealSheafData := z.ker.comap V.1.ι
+  have hsupp : I.support = ⊥ := by
+    change (z.ker.comap V.1.ι).support = ⊥
+    rw [Scheme.IdealSheafData.support_comap]
+    ext x
+    change (x.1 : C) ∈ z.ker.support ↔ False
+    have hzmem := congrArg
+      (fun Z : Set C => (x.1 : C) ∈ Z) z.support_ker
+    have hclosure := congrArg
+      (fun Z : Set C => (x.1 : C) ∈ Z)
+      z.isClosedEmbedding.isClosed_range.closure_eq
+    constructor
+    · intro hx
+      have hxrange : (x.1 : C) ∈ Set.range z :=
+        hclosure.mp (hzmem.mp hx)
+      have hxV : (x.1 : C) ∈ sectionAway z hz := hV x.2
+      exact (hxV hxrange).elim
+    · intro hx
+      exact hx.elim
+  have hI : I = ⊤ := I.support_eq_bot_iff.mp hsupp
+  have hmapped :
+      (z.ker.ideal V).map V.1.topIso.inv.hom =
+        (⊤ : Ideal Γ(V.1.toScheme, (⊤ : V.1.toScheme.Opens))) := by
+    rw [← z.ker.ideal_comap_affineOpen_top V]
+    change I.ideal ⟨⊤, isAffineOpen_top _⟩ = ⊤
+    rw [hI]
+    rfl
+  have hback := congrArg (Ideal.map V.1.topIso.hom.hom) hmapped
+  have hleft :
+      ((z.ker.ideal V).map V.1.topIso.inv.hom).map
+          V.1.topIso.hom.hom = z.ker.ideal V := by
+    exact Ideal.map_of_equiv
+      V.1.topIso.commRingCatIsoToRingEquiv.symm
+  have hright :
+      (⊤ : Ideal Γ(V.1.toScheme, (⊤ : V.1.toScheme.Opens))).map
+          V.1.topIso.hom.hom = ⊤ := by
+    exact Ideal.map_top V.1.topIso.hom.hom
   rw [hleft, hright] at hback
   exact hback
 
