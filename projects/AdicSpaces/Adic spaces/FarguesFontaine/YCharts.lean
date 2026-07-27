@@ -6,6 +6,7 @@ import «Adic spaces».FarguesFontaine.ChartSpa
 import «Adic spaces».FarguesFontaine.ChartBIQ
 import «Adic spaces».NonTateRationalOpenHomeomorph
 import «Adic spaces».RelativeDescent
+import «Adic spaces».HuberLocLift
 
 /-!
 # The chart-rational index layer of `𝒴` (E-track, E1)
@@ -210,6 +211,29 @@ theorem isTateRing_presheafValue_of_rationalOpen_subset_Y
     { exists_pairOfDefinition := ⟨presheafValue_concretePair D⟩
       exists_topologicallyNilpotent_unit :=
         ⟨hx_unit.unit, by rwa [IsUnit.unit_spec]⟩ }
+
+include ϖ in
+/-- **`A_inf` is complete for the right uniformity** (from `(p,[ϖ])`-adic
+completeness through the mathlib bridge). -/
+theorem completeSpace_right_Ainf :
+    @CompleteSpace (Ainf p F)
+      (IsTopologicalAddGroup.rightUniformSpace (Ainf p F)) := by
+  letI : UniformSpace (Ainf p F) :=
+    IsTopologicalAddGroup.rightUniformSpace (Ainf p F)
+  haveI : IsUniformAddGroup (Ainf p F) := isUniformAddGroup_of_addCommGroup
+  exact ((isAdic_Iinf p F ϖ).isAdicComplete_iff.mp
+    (isAdicComplete_Iinf p F ϖ)).1
+
+include ϖ in
+/-- **The M8 instantiation**: the localization-lift power-boundedness
+package at the ambient `A_inf`. -/
+theorem hasLocLiftPowerBounded_Ainf :
+    HasLocLiftPowerBounded (Ainf p F) := by
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+    isAffinoidRing_Ainf p F
+  haveI : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
+  haveI := completeSpace_right_Ainf p F ϖ
+  exact hasLocLiftPowerBounded_huber
 
 end FarguesFontaine
 
