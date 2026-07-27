@@ -194,6 +194,38 @@ noncomputable def xStructurePresheaf :
       (funext fun i => ?_)))
     rfl
 
+/-- **The adic curve as a presheafed space of complete topological rings.** -/
+noncomputable def curveSpace : TopRingPresheafedSpace where
+  carrier := CurveTop p F ϖ
+  presheaf := xStructurePresheaf p F ϖ
+
+/-- The projection as a `TopCat`-morphism. -/
+def yTopToCurveTop : yTop p F ϖ ⟶ CurveTop p F ϖ :=
+  TopCat.ofHom ⟨yTopToCurve p F ϖ, continuous_yTopToCurve p F ϖ⟩
+
+/-- The saturated preimage is the `Opens.map`-preimage of the projection. -/
+theorem curvePreimage_eq_opensMap (V : Opens (Curve p F ϖ)) :
+    curvePreimage p F ϖ V = (Opens.map (yTopToCurveTop p F ϖ)).obj V :=
+  rfl
+
+/-- **The projection component**: invariant sections over the saturated
+preimage are in particular sections of the `𝒴`-presheaf over it. -/
+noncomputable def piComponent (V : Opens (Curve p F ϖ)) :
+    ↥(frobFixed p F ϖ V)
+      →+* ↥(limitSections ((yFunctor p F ϖ).obj (curvePreimage p F ϖ V))) :=
+  (frobFixed p F ϖ V).subtype
+
+/-- **The curve projection as a morphism of presheafed spaces** (D-iv-3(i)):
+base the quotient map, comparison the inclusion of invariants. -/
+noncomputable def piYHom : yPresheafedSpace p F ϖ ⟶ curveSpace p F ϖ where
+  base := yTopToCurveTop p F ϖ
+  c := {
+    app := fun V => ⟨piComponent p F ϖ V.unop, continuous_subtype_val⟩
+    naturality := fun V W i => by
+      refine Subtype.ext (RingHom.ext fun s => Subtype.ext
+        (funext fun j => ?_))
+      rfl }
+
 end FarguesFontaine
 
 end
