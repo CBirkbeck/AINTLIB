@@ -2231,6 +2231,42 @@ theorem exists_evalBI_eq_of_correction_BI
       (z - evalBI p F ϖ φ hφ hbmem hb U) = 0 := le_antisymm hle0 zero_le
   exact ⟨U, (sub_eq_zero.mp ((wI_eq_zero_iff p F _).mp h0)).symm, hUnorm⟩
 
+include hφb in
+/-- **Strict surjectivity of the case-1 presentation on the unit ball**
+(Kedlaya Lemma 4.9, case 1, surjectivity with (4.9.1)-norm control): every
+`≤ 1`-normalized element of the cut interval ring is the value of a
+restricted series over `B^I` of norm at most `K = σ₁^m(ρ₁^m)⁻¹`. -/
+theorem exists_evalBI_eq_of_le_one
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m₀)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀))
+    {z : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hz : z ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hzle : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 z ≤ 1) :
+    ∃ U : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      evalBI p F ϖ φ hφ hbmem hb U = z
+      ∧ wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+          (U : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) := by
+  have hK1 : (1 : NNReal) ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
+    calc (1 : NNReal) = ρ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
+        (mul_inv_cancel₀ (pow_pos hρ₁0 m₀).ne').symm
+      _ ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) :=
+        mul_le_mul_left (pow_le_pow_left' hρσ m₀) _
+  obtain ⟨u, hCbnd, hres⟩ := exists_correction_sequence_BI p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg hz one_pos le_rfl hzle
+  obtain ⟨U, hUeq, hUnorm⟩ := exists_evalBI_eq_of_correction_BI p F ϖ
+    φ hφ hbmem hb z hK1 one_pos u hCbnd hres
+  refine ⟨U, hUeq, ?_⟩
+  rwa [mul_one] at hUnorm
+
 end Correction
 
 end FarguesFontaine
