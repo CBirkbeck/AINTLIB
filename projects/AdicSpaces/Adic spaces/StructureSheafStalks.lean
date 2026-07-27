@@ -1082,6 +1082,37 @@ theorem maximalIdeal_stalk (v : ↥(Spa A A⁺)) :
       = (stalkValue v).supp :=
   maximalIdeal_stalk_eq_supp (stalkShrink_holds v)
 
+/-! ### S5: `Spa` as the first object of Wedhorn's category `𝒱` -/
+
+section SpaVObj
+
+variable (A)
+
+/-- **`Spa (A, A⁺)` as a presheafed space of complete topological rings.** -/
+noncomputable def spaPresheafedSpace : TopRingPresheafedSpace.{u} where
+  carrier := SpaTop A
+  presheaf := structurePresheaf A
+
+/-- **`Spa (A, A⁺)` as an object of `𝒱^pre`** (Wedhorn Definition 8.5): the
+structure presheaf with its local stalks (Wedhorn 8.14) and stalk valuations,
+the support being the maximal ideal. The first inhabitant of the category. -/
+noncomputable def spaVPreObj : VPreObj.{u} where
+  toPresheafedSpace := spaPresheafedSpace A
+  isLocalRing_stalk := fun x => isLocalRing_stalk (A := A) x
+  val := fun x => stalkValue (A := A) x
+  val_supp := fun x => (maximalIdeal_stalk (A := A) x).symm
+
+/-- **`Spa (A, A⁺)` of a sheafy pair as an object of `𝒱`** (Wedhorn Remark
+8.20): the structure presheaf is a sheaf of topological rings. -/
+noncomputable def spaVObj (h : IsLimitSheaf A) : VObj.{u} where
+  toVPreObj := spaVPreObj A
+  isSheafTopRings := structurePresheaf_isSheafOfTopologicalRings (A := A) h
+
+/-- The sheafy-pair form. -/
+noncomputable def spaVObj_of_isSheafy [IsSheafy A] : VObj.{u} :=
+  spaVObj A (isLimitSheaf_of_isSheafy (A := A))
+
+end SpaVObj
 end ShrinkHolds
 
 end ValuationSpectrum
