@@ -1271,6 +1271,124 @@ theorem invariant_piece_step (V : Opens (Curve p F ϖ))
   rw [invariant_piece_transport p F ϖ V t m hWle,
     invariant_piece_transport p F ϖ V t' m hWle, hm]
 
+/-! ### The transport inversion toolkit and full piece determination
+(D-iv-3 gamma-iii): the Frobenius transports are injective, so an invariant
+section is determined on every translate by its zero piece. -/
+
+theorem frobOpens_inv_collapse (a : ℤ)
+    (U : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    frobOpens p F (-a) (frobOpens p F a U) = U := by
+  rw [← frobOpens_add p F (-a) a U]
+  rw [show (-a) + a = 0 from by omega]
+  exact frobOpens_zero p F U
+
+/-- The zero-sum transport collapse (index-generalized). -/
+theorem limitFrobHom_eq_zero_of (c : ℤ) (hc : c = 0)
+    (U : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (s : ↥(limitSections U))
+    (hUc : frobOpens p F c U = U) :
+    limitFrobHom p F c U s = limitRestrict (le_of_eq hUc) s := by
+  subst hc
+  exact limitFrobHom_zero p F U s
+
+/-- The left inverse of the limit transport. -/
+theorem limitFrobHom_leftInv (a : ℤ)
+    (U : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+    (s : ↥(limitSections U)) :
+    limitFrobHom p F (-a) (frobOpens p F a U) (limitFrobHom p F a U s)
+      = limitRestrict (le_of_eq (frobOpens_inv_collapse p F a U)) s := by
+  rw [limitFrobHom_double p F (-a) a U s]
+  have hUc : frobOpens p F ((-a) + a) U = U := by
+    rw [show (-a) + a = 0 from by omega]
+    exact frobOpens_zero p F U
+  rw [limitFrobHom_eq_zero_of p F ((-a) + a) (by omega) U s hUc]
+  exact congr_fun (congrArg DFunLike.coe (limitRestrict_comp
+    (le_of_eq (frobOpens_add p F (-a) a U).symm)
+    (le_of_eq hUc))) s
+
+/-- Restrictions along an equality of opens are injective. -/
+theorem limitRestrict_eq_injective
+    {U U' : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))} (h : U = U') :
+    Function.Injective
+      (limitRestrict (A := Ainf p F) (le_of_eq h)) := by
+  intro X X' hXX
+  have h2 := congrArg (limitRestrict (le_of_eq h.symm)) hXX
+  have hcomp := fun z => congr_fun (congrArg DFunLike.coe
+    (limitRestrict_comp (le_of_eq h.symm) (le_of_eq h))) z
+  have hid := fun z => congr_fun (congrArg DFunLike.coe
+    (limitRestrict_id U')) z
+  calc X = limitRestrict (le_of_eq h.symm)
+        (limitRestrict (le_of_eq h) X) := ((hcomp X).trans (hid X)).symm
+    _ = limitRestrict (le_of_eq h.symm)
+        (limitRestrict (le_of_eq h) X') := h2
+    _ = X' := (hcomp X').trans (hid X')
+
+/-- **The limit transport is injective.** -/
+theorem limitFrobHom_injective (a : ℤ)
+    (U : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    Function.Injective (limitFrobHom p F a U) := by
+  intro X X' h
+  have h1 := congrArg (limitFrobHom p F (-a) (frobOpens p F a U)) h
+  rw [limitFrobHom_leftInv p F a U X, limitFrobHom_leftInv p F a U X'] at h1
+  exact limitRestrict_eq_injective p F (frobOpens_inv_collapse p F a U) h1
+
+/-- The piece step, index-flexible form. -/
+theorem invariant_piece_step' (V : Opens (Curve p F ϖ))
+    (t t' : ↥(frobFixed p F ϖ V)) (m k : ℤ) (hk : 1 + m = k)
+    {W : Opens ↥(yTop p F ϖ)}
+    (hWle : ∀ j : ℤ, (Opens.map (yFrobTop p F ϖ j)).obj W
+      ≤ curvePreimage p F ϖ V)
+    (hm : limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m))))
+        t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m))))
+        t'.1) :
+    limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle k)))) t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle k))))
+        t'.1 := by
+  subst hk
+  exact invariant_piece_step p F ϖ V t t' m hWle hm
+
+/-- The backward piece step, index-flexible form. -/
+theorem invariant_piece_back' (V : Opens (Curve p F ϖ))
+    (t t' : ↥(frobFixed p F ϖ V)) (m k : ℤ) (hk : 1 + m = k)
+    {W : Opens ↥(yTop p F ϖ)}
+    (hWle : ∀ j : ℤ, (Opens.map (yFrobTop p F ϖ j)).obj W
+      ≤ curvePreimage p F ϖ V)
+    (hkeq : limitRestrict
+        (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle k)))) t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle k))))
+        t'.1) :
+    limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m)))) t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle m))))
+        t'.1 := by
+  subst hk
+  have ht := invariant_piece_transport p F ϖ V t m hWle
+  have ht' := invariant_piece_transport p F ϖ V t' m hWle
+  rw [ht, ht'] at hkeq
+  have h2 := limitRestrict_eq_injective p F
+    (piece_shift p F ϖ m W).symm hkeq
+  exact limitFrobHom_injective p F 1 _ h2
+
+/-- **Invariant sections agreeing on the zero piece agree on every piece.** -/
+theorem invariant_pieces_eq (V : Opens (Curve p F ϖ))
+    (t t' : ↥(frobFixed p F ϖ V)) {W : Opens ↥(yTop p F ϖ)}
+    (hWle : ∀ j : ℤ, (Opens.map (yFrobTop p F ϖ j)).obj W
+      ≤ curvePreimage p F ϖ V)
+    (h0 : limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle 0))))
+        t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle 0))))
+        t'.1) (k : ℤ) :
+    limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle k)))) t.1
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE (hWle k))))
+        t'.1 := by
+  induction k using Int.induction_on with
+  | zero => exact h0
+  | succ n ih =>
+    exact invariant_piece_step' p F ϖ V t t' n (n + 1) (by omega) hWle ih
+  | pred n ih =>
+    exact invariant_piece_back' p F ϖ V t t' (-(n : ℤ) - 1) (-n) (by omega)
+      hWle ih
+
 end FarguesFontaine
 
 end
