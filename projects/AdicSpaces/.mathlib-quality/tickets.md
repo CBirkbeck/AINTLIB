@@ -1491,9 +1491,29 @@ non-Tate bases are supported.
     (and if convenient the whole reconciliation) to b = 1: generators
     [ϖ']²/s ⇒ [ϖ']/p; base-monomial b-presentation j·n with
     hexact1-|ϖ'| = ρ₁ forces jn = 1 ⇒ the presentation base IS [ϖ']/p.
-    VERIFY at implementation: the chartVObj-instantiation exponents used
-    by the Y-cover (read ChartSpa/BigWindows instantiations) before
-    hard-coding b = 1. (β) the ARCHITECTURE DECISION
+    VERIFIED 2026-07-27: the Y-cover uses chartData p F (frobRoot ϖ n)
+    1 1 p 1 — (a,b) = (p,1) ✓ b=1. FULL r4 PROOF-DESIGN (supersedes the
+    evalAr route; direct Teichmüller-monomial argument using EXISTING
+    ID2b machinery — mem_chartSubring_of_wI_le (≤|ϖ|^b-ball) +
+    exists_p_pow_mul_mem_chartSubring (scaled) + blocEquiv_divByS_teichPi
+    (the [ϖ]/p = divByS-bridge) all EXIST in ChartData.lean):
+    h ∈ Bloc 1-ball, h = x/(p[ϖ])^k with x ∈ A_inf so ALL Teichmüller
+    coords |c_i| ≤ 1 ⇒ the Laurent series Σ p^{i−k}[c_i/ϖ^k-shift]
+    CONVERGES in wI (tails ρ^{i−k} → 0 ✓ pow_mul_gaussValue_tail_le).
+    Split h = head_K + tail_K (b2-init/tail): (m1) each 1-ball monomial
+    with NEGATIVE p-exponent p^{-j}[c] has |c| ≤ ρ₁^j = |ϖ|^j [hexact1]
+    ⇒ c = ϖ^j·c' with c' ∈ O_F (F-valuation-ring) ⇒ = chartFracPi^j ·
+    algebraMap [c'] ∈ chartSubring; (m2) the i=0 term [c₀], |c₀| ≤ 1 ⇒
+    A_inf-image ∈ S; (m3) POSITIVE monomials m = p^i[c], |c| ≤ ρ₂^{-i}:
+    m^a = p^{ia}[c^a] with |c^a·ϖ^{ib}| ≤ 1 [hexact2] ⇒ m^a =
+    chartFracP^i · algebraMap [c^a·ϖ^{ib}] ∈ S ⇒ m integral over S with
+    the monic X^a − m^a; (m4) head_K ∈ IntCl(S) (sum of m1-m3), tail_K
+    wI-small ⇒ blocToBI-image of h ∈ topClosure(coe(IntCl(S-image)))
+    ⊆ canonical ✓ ChartDensePlus. Bricks: (r4a) the monomial-membership
+    lemmas m1-m3 at the fraction level; (r4b) the head/tail split of
+    x/(p[ϖ])^k with per-monomial 1-ball bounds (sup-def gives termwise
+    bounds); (r4c) the limit assembly (mirror
+    chartPlus_le_completedPlusSubring_of_dense's structure). (β) the ARCHITECTURE DECISION
     (ambient-vs-glue, M8-note above) and the cross-chart assembly of the
     Y-VObj from the chartVObj chain + the D-ii-2 split fiber-product; then
     (D-iii) the φ-action as VObj-isos and X := Y/φ^ℤ.
