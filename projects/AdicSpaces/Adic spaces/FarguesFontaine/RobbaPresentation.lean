@@ -853,6 +853,88 @@ theorem exists_rps_series_limit_BI
   rw [hcoe]
   exact hS K n b hb0 hb
 
+section EvalBIBounds
+
+variable {σ₁ σ₂ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+  {hσ₂0 : 0 < σ₂} {hσ₂1 : σ₂ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+
+/-- **The evaluation-value bound**: if every coefficient of `f` has interval
+norm at most `ε`, so does the value of the evaluation. -/
+theorem wI_evalBI_le {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    {ε : NNReal} (hε : 0 < ε)
+    (hf : ∀ l, wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)) ≤ ε) :
+    wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 (evalBI p F ϖ φ hφ hbmem hb f) ≤ ε := by
+  refine (isClosed_wI_ball p F hε).mem_of_tendsto
+    (tendsto_evalBI p F ϖ φ hφ hbmem hb f)
+    (Filter.Eventually.of_forall fun n => ?_)
+  refine wI_sum_le p F _ _ (fun l _ => ?_)
+  show wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+    (((φ (coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+      : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)) * b ^ l) ≤ ε
+  refine le_trans (wI_mul_le p F _ _) ?_
+  calc wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+        ((φ (coeffSeq (f : MvPowerSeries (Fin 1)
+            ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) l)
+          : ↥(BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1))
+          : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+        * wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 (b ^ l)
+      ≤ ε * 1 := by
+        refine mul_le_mul (le_trans (hφ _) (hf l)) ?_ zero_le zero_le
+        rw [wI_pow p F]
+        exact pow_le_one₀ zero_le hb
+    _ = ε := mul_one ε
+
+/-- **The residual estimate for a corrected approximation**: adding a
+correction of small norm does not worsen a small residual. -/
+theorem wI_z_sub_evalBI_add_le
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hσ₂0 hσ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1 b ≤ 1)
+    (z : (hatK p F hσ₁0 hσ₁1) × (hatK p F hσ₂0 hσ₂1))
+    (SS V : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    {ε : NNReal} (hε : 0 < ε)
+    (h1 : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+      (z - evalBI p F ϖ φ hφ hbmem hb SS) ≤ ε)
+    (h2 : wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      (V : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) ≤ ε) :
+    wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+      (z - evalBI p F ϖ φ hφ hbmem hb (SS + V)) ≤ ε := by
+  have hVle : wI p F hσ₁0 hσ₁1 hσ₂0 hσ₂1
+      (evalBI p F ϖ φ hφ hbmem hb V) ≤ ε := by
+    refine wI_evalBI_le p F ϖ φ hφ hbmem hb V hε (fun l => ?_)
+    exact le_trans (wI_coeff_le_wIRPS p F ϖ V.2 _) h2
+  have hsplit : z - evalBI p F ϖ φ hφ hbmem hb (SS + V)
+      = (z - evalBI p F ϖ φ hφ hbmem hb SS)
+        + (-(evalBI p F ϖ φ hφ hbmem hb V)) := by
+    rw [evalBI_add p F ϖ φ hφ hbmem hb]
+    ring
+  rw [hsplit]
+  refine le_trans (wI_add_le p F _ _) (max_le h1 ?_)
+  rw [wI_neg]
+  exact hVle
+
+end EvalBIBounds
+
 end FarguesFontaine
 
 end
