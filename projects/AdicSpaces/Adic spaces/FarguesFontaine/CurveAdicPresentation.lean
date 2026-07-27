@@ -2,6 +2,8 @@ import «Adic spaces».FarguesFontaine.CurveObject
 import «Adic spaces».StronglyNoetherianTransport
 import «Adic spaces».WedhornCechAcyclicity
 import «Adic spaces».StructurePresheafBundled
+import «Adic spaces».SpaParameterPerturbation
+import «Adic spaces».RelativePieceKeystone
 
 /-!
 # X-ADIC-1: the adic Fargues–Fontaine curve as an `AdicSpacePresentation`
@@ -235,6 +237,266 @@ theorem isOpen_yTop_windowTrace (n : ℤ) :
   refine Set.Finite.isOpen_biInter (Finset.finite_toSet T) ?_
   intro t _
   exact isOpen_basicOpen t s
+
+
+/-- Adding the denominator to the numerator set does not change a rational
+subset (`v(s) ≤ v(s)` always). -/
+theorem rationalOpen_insert_self {B : Type*} [CommRing B] [TopologicalSpace B]
+    [PlusSubring B] [DecidableEq B] (T : Finset B) (s : B) :
+    rationalOpen (insert s T) s = rationalOpen T s := by
+  ext v
+  constructor
+  · rintro ⟨hv, hT, hs⟩
+    exact ⟨hv, fun t ht => hT t (Finset.mem_insert_of_mem ht), hs⟩
+  · rintro ⟨hv, hT, hs⟩
+    refine ⟨hv, fun t ht => ?_, hs⟩
+    rcases Finset.mem_insert.mp ht with rfl | ht'
+    · exact ValuationSpectrum.vle_refl t
+    · exact hT t ht'
+
+/-- Membership in `Y` from membership in a Big window. -/
+theorem mem_Y_of_mem_bigWindow (hp : 1 < p) {v : Spv (Ainf p F)} (n : ℤ)
+    (hv : v ∈ bigWindow p F ϖ n) : v ∈ Y p F ϖ := by
+  rw [Y_eq_iUnion_bigWindow p F ϖ hp]
+  exact Set.mem_iUnion.mpr ⟨n, hv⟩
+
+/-- **The rational-neighbourhood selection** (X-ADIC-1 A2): every open
+neighbourhood of a point of the `𝒴`-carrier contains an open neighbourhood
+homeomorphic to the adic spectrum of a rational-subdatum value ring over a
+window chart. -/
+theorem exists_window_subdatum_nbhd (hp : 1 < p) (y : ↥(yTop p F ϖ))
+    (O : Opens ↥(yTop p F ϖ)) (hyO : y ∈ O) :
+    ∃ (n : ℤ) (D' : RationalLocData (windowChartRing p F ϖ n))
+      (V : Opens ↥(yTop p F ϖ)), y ∈ V ∧ V ≤ O ∧
+      Nonempty (↥(Spa (presheafValue D') (ringPlus (presheafValue D')))
+        ≃ₜ ↥((V : Set ↥(yTop p F ϖ)))) := by
+  classical
+  -- the window containing the point
+  have hyY : ((ySpaPoint p F ϖ y : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+      : Spv (Ainf p F)) ∈ Y p F ϖ := ySpaPoint_mem_Y p F ϖ y
+  rw [Y_eq_iUnion_bigWindow p F ϖ hp] at hyY
+  obtain ⟨n, hbw⟩ := Set.mem_iUnion.mp hyY
+  refine ⟨n, ?_⟩
+  set Bn := windowChartRing p F ϖ n with hBn
+  haveI : IsTateRing Bn := isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+    isAffinoidRing_Ainf p F
+  set h_n := spaChartHomeoWindow p F ϖ hp n with hhn
+  -- the M_n-point and the chart-side point
+  set m₀ : ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+    ⟨((ySpaPoint p F ϖ y : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)), hbw, (ySpaPoint p F ϖ y).2⟩ with hm₀
+  set w₀ := h_n.symm m₀ with hw₀
+  -- lift `O` to an Spv-open through the double subtype
+  obtain ⟨O₁, hO₁, hO₁eq⟩ := isOpen_induced_iff.mp O.2
+  obtain ⟨O₂, hO₂, hO₂eq⟩ := isOpen_induced_iff.mp hO₁
+  have hOmem : ∀ z : ↥(yTop p F ϖ), z ∈ O ↔
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ O₂ := by
+    intro z
+    constructor
+    · intro hz
+      have h1 : z ∈ Subtype.val ⁻¹' O₁ :=
+        (Set.ext_iff.mp hO₁eq z).mpr hz
+      have h2 : ySpaPoint p F ϖ z ∈ Subtype.val ⁻¹' O₂ :=
+        (Set.ext_iff.mp hO₂eq (ySpaPoint p F ϖ z)).mpr h1
+      exact h2
+    · intro hz
+      have h1 : ySpaPoint p F ϖ z ∈ O₁ :=
+        (Set.ext_iff.mp hO₂eq (ySpaPoint p F ϖ z)).mp hz
+      exact (Set.ext_iff.mp hO₁eq z).mp h1
+  -- the chart-side open around `w₀`
+  have hPMopen : IsOpen {m : ↥(bigWindow p F ϖ n
+      ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) | (m : Spv (Ainf p F)) ∈ O₂} :=
+    IsOpen.preimage continuous_subtype_val hO₂
+  have hPopen : IsOpen (h_n ⁻¹' {m | (m : Spv (Ainf p F)) ∈ O₂}) :=
+    IsOpen.preimage h_n.continuous hPMopen
+  have hw₀P : w₀ ∈ h_n ⁻¹' {m | (m : Spv (Ainf p F)) ∈ O₂} := by
+    show (h_n w₀ : Spv (Ainf p F)) ∈ O₂
+    rw [hw₀, h_n.apply_symm_apply]
+    exact (hOmem y).mp hyO
+  -- lift to an Spv(B_n)-open
+  obtain ⟨Q, hQ, hQeq⟩ := isOpen_induced_iff.mp hPopen
+  have hw₀Q : (w₀ : Spv Bn) ∈ Q :=
+    (Set.ext_iff.mp hQeq w₀).mpr hw₀P
+  -- the basic-open basis of Spv(B_n)
+  have hbasis := TopologicalSpace.isTopologicalBasis_of_subbasis
+    (t := (instTopologicalSpace : TopologicalSpace (Spv Bn)))
+    (s := {U : Set (Spv Bn) | ∃ f s, U = basicOpen f s}) rfl
+  obtain ⟨t, ht, hwt, htQ⟩ := hbasis.exists_subset_of_mem_open hw₀Q hQ
+  obtain ⟨fam₀, ⟨hfam₀_fin, hfam₀_sub⟩, rfl⟩ := ht
+  have hFG : ∀ e : Set (Spv Bn), ∃ q : Bn × Bn, e ∈ fam₀ →
+      e = basicOpen q.1 q.2 := by
+    intro e
+    by_cases he : e ∈ fam₀
+    · obtain ⟨f, s, hfs⟩ := hfam₀_sub he
+      exact ⟨(f, s), fun _ => hfs⟩
+    · exact ⟨(0, 0), fun h => absurd h he⟩
+  choose FG hFGspec using hFG
+  set fam : Finset (Set (Spv Bn)) := hfam₀_fin.toFinset with hfam
+  have hmem : ∀ e ∈ fam, (w₀ : Spv Bn) ∈ basicOpen (FG e).1 (FG e).2 := by
+    intro e he
+    have he₀ : e ∈ fam₀ := by
+      rwa [hfam, Set.Finite.mem_toFinset] at he
+    rw [← hFGspec e he₀]
+    exact hwt e he₀
+  -- the spanning presentation
+  obtain ⟨uB, huB⟩ := IsTateRing.exists_topologicallyNilpotent_unit (A := Bn)
+  obtain ⟨f, g, hspan, hwmem, hsub⟩ :=
+    exists_spanning_presentation_of_mem_basicOpens (B := Bn)
+      (ϖ := (uB : Bn)) uB.isUnit huB w₀.2
+      (fam := fam) (F := fun e => (FG e).1) (G := fun e => (FG e).2) hmem
+  -- the rational datum over the window chart
+  set T' : Finset Bn := insert g ((insert none (fam.image some)).image f)
+    with hT'
+  set D' : RationalLocData Bn := genPieceDatum
+    (presheafValue_concretePair (chartData p F (windowUnif p F ϖ n) 1 1 p 1))
+    T' g hspan with hD'
+  refine ⟨D', ?_⟩
+  -- the rational set agrees with the indexed one
+  have hReq : rationalOpen D'.T D'.s ∩ Spa Bn Bn⁺
+      = indexedRationalSet Bn (insert none (fam.image some)) f g := by
+    rw [indexedRationalSet_eq_rationalOpen]
+    rw [show D'.T = T' from rfl, show D'.s = g from rfl, hT',
+      rationalOpen_insert_self]
+  -- membership of the base point in the rational set
+  have hw₀R : (w₀ : Spv Bn) ∈ rationalOpen D'.T D'.s := by
+    have h1 : (w₀ : Spv Bn) ∈ rationalOpen D'.T D'.s ∩ Spa Bn Bn⁺ := by
+      rw [hReq]
+      exact hwmem
+    exact h1.1
+  -- the rational set is contained in the O₂-side
+  have hRsub : ∀ v : Spv Bn, v ∈ rationalOpen D'.T D'.s → v ∈ Q := by
+    intro v hv
+    have h1 : v ∈ indexedRationalSet Bn (insert none (fam.image some)) f g := by
+      rw [← hReq]
+      exact ⟨hv, rationalOpen_subset_spa hv⟩
+    have h2 := hsub h1
+    refine htQ ?_
+    intro e he₀
+    have he : e ∈ fam := by
+      rw [hfam, Set.Finite.mem_toFinset]
+      exact he₀
+    rw [hFGspec e he₀]
+    exact Set.mem_iInter₂.mp h2 e he
+  -- the window-side image of the rational trace
+  set RT : Set ↥(Spa Bn (ringPlus Bn)) :=
+    Subtype.val ⁻¹' rationalOpen D'.T D'.s with hRT
+  have hRTopen : IsOpen RT := (rationalOpens D'.T D'.s).2
+  set IM : Set ↥(bigWindow p F ϖ n
+      ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) := h_n '' RT with hIM
+  have hIMopen : IsOpen IM := h_n.isOpenMap RT hRTopen
+  obtain ⟨G₂, hG₂, hG₂eq⟩ := isOpen_induced_iff.mp hIMopen
+  -- the neighbourhood on the 𝒴-carrier
+  refine ⟨⟨{z : ↥(yTop p F ϖ) |
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ G₂}
+      ∩ {z : ↥(yTop p F ϖ) |
+        ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+          : Spv (Ainf p F)) ∈ bigWindow p F ϖ n},
+    IsOpen.inter
+      (IsOpen.preimage
+        (continuous_subtype_val.comp continuous_subtype_val) hG₂)
+      (isOpen_yTop_windowTrace p F ϖ n)⟩, ?_, ?_, ?_⟩
+  · -- y ∈ V
+    have hm₀IM : m₀ ∈ IM := by
+      have h1 : m₀ = h_n w₀ := (h_n.apply_symm_apply m₀).symm
+      rw [h1, hIM]
+      exact Set.mem_image_of_mem _ hw₀R
+    have hm₀G₂ : (m₀ : Spv (Ainf p F)) ∈ G₂ :=
+      (Set.ext_iff.mp hG₂eq m₀).mpr hm₀IM
+    exact ⟨hm₀G₂, hbw⟩
+  · -- V ≤ O
+    intro z hz
+    obtain ⟨hzG₂, hzbw⟩ := hz
+    set mz : ↥(bigWindow p F ϖ n
+        ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+      ⟨((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)), hzbw, (ySpaPoint p F ϖ z).2⟩ with hmz
+    have hmzIM : mz ∈ IM := (Set.ext_iff.mp hG₂eq mz).mp hzG₂
+    have hmzO₂ : (mz : Spv (Ainf p F)) ∈ O₂ := by
+      rw [hIM] at hmzIM
+      obtain ⟨r, hrRT, hrmz⟩ := hmzIM
+      have hrP : r ∈ h_n ⁻¹' {m | (m : Spv (Ainf p F)) ∈ O₂} :=
+        (Set.ext_iff.mp hQeq r).mp (hRsub _ hrRT)
+      have h2 : (h_n r : Spv (Ainf p F)) ∈ O₂ := hrP
+      rwa [hrmz] at h2
+    exact (hOmem z).mpr hmzO₂
+  · -- the homeomorphism
+    haveI : IsHuberRing Bn :=
+      (isTateRing_bigWindowChart p F (windowUnif p F ϖ n)).toIsHuberRing
+    haveI : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+    have hIM' : IM = ⇑h_n.symm ⁻¹' RT := by
+      rw [hIM]
+      exact h_n.toEquiv.image_eq_preimage_symm RT
+    set e₁ := spaPresheafValueHomeomorphRationalOpen' D'
+      (IsTateRing.exists_topologicallyNilpotent_unit
+        (A := presheafValue D')).choose
+      (IsTateRing.exists_topologicallyNilpotent_unit
+        (A := presheafValue D')).choose_spec with he₁
+    -- the second leg: the rational trace is carried onto `V`
+    refine ⟨e₁.trans (Homeomorph.mk (Equiv.mk
+      (fun r => ⟨⟨⟨((h_n ⟨(r : Spv Bn), r.2.2⟩
+          : ↥(bigWindow p F ϖ n
+            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+          (h_n ⟨(r : Spv Bn), r.2.2⟩).2.2⟩,
+          mem_Y_of_mem_bigWindow p F ϖ hp n
+            (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩,
+        (Set.ext_iff.mp hG₂eq (h_n ⟨(r : Spv Bn), r.2.2⟩)).mpr
+          (Set.mem_image_of_mem _ (show (⟨(r : Spv Bn), r.2.2⟩
+            : ↥(Spa Bn (ringPlus Bn))) ∈ RT from r.2.1)),
+        (h_n ⟨(r : Spv Bn), r.2.2⟩).2.1⟩)
+      (fun z => ⟨((h_n.symm ⟨((ySpaPoint p F ϖ z.1
+          : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+          z.2.2, (ySpaPoint p F ϖ z.1).2⟩
+          : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
+        (show h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩ ∈ RT from by
+          have h1 : (⟨((ySpaPoint p F ϖ z.1
+              : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+              z.2.2, (ySpaPoint p F ϖ z.1).2⟩
+              : ↥(bigWindow p F ϖ n
+                ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) ∈ IM :=
+            (Set.ext_iff.mp hG₂eq _).mp z.2.1
+          rw [hIM'] at h1
+          exact h1),
+        (h_n.symm ⟨_, z.2.2, (ySpaPoint p F ϖ z.1).2⟩).2⟩)
+      (fun r => ?_) (fun z => ?_)) ?_ ?_)⟩
+    · -- left inverse
+      refine Subtype.ext ?_
+      have key : ∀ (m : ↥(bigWindow p F ϖ n
+            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))),
+          m = h_n ⟨(r : Spv Bn), r.2.2⟩ →
+          ((h_n.symm m : ↥(Spa Bn (ringPlus Bn))) : Spv Bn) = (r : Spv Bn) := by
+        intro m hm
+        rw [hm, h_n.symm_apply_apply]
+      exact key _ (Subtype.ext rfl)
+    · -- right inverse
+      refine Subtype.ext (Subtype.ext (Subtype.ext ?_))
+      set mz : ↥(bigWindow p F ϖ n
+          ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) :=
+        ⟨((ySpaPoint p F ϖ z.1
+          : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F)),
+          z.2.2, (ySpaPoint p F ϖ z.1).2⟩ with hmzdef
+      have h1 : (⟨((h_n.symm mz : ↥(Spa Bn (ringPlus Bn))) : Spv Bn),
+          (h_n.symm mz).2⟩ : ↥(Spa Bn (ringPlus Bn))) = h_n.symm mz :=
+        Subtype.ext rfl
+      exact (congrArg (fun w : ↥(Spa Bn (ringPlus Bn)) =>
+          ((h_n w : ↥(bigWindow p F ϖ n
+            ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F))) h1).trans
+        (congrArg (fun m : ↥(bigWindow p F ϖ n
+            ∩ Spa (Ainf p F) (ringPlus (Ainf p F))) => (m : Spv (Ainf p F)))
+          (h_n.apply_symm_apply mz))
+    · -- continuity, forward
+      refine Continuous.subtype_mk (Continuous.subtype_mk
+        (Continuous.subtype_mk ?_ _) _) _
+      exact continuous_subtype_val.comp (h_n.continuous.comp
+        (Continuous.subtype_mk continuous_subtype_val _))
+    · -- continuity, backward
+      refine Continuous.subtype_mk ?_ _
+      refine continuous_subtype_val.comp (h_n.symm.continuous.comp ?_)
+      refine Continuous.subtype_mk ?_ _
+      exact continuous_subtype_val.comp
+        (continuous_subtype_val.comp continuous_subtype_val)
 
 end FarguesFontaine
 
