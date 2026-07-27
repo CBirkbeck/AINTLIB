@@ -564,6 +564,106 @@ theorem exists_unique_dyadicRes_glue (i : DyadicIdx) (j : ℕ)
     ((DyadicIdx.splitL i j hj hj').q₂_pos p) (i.q₂_lt_q₁ p) hrm
     (hf'.1.trans hfL.symm) (hf'.2.trans hfR.symm)
 
+/-- **Unique gluing over an `N`-piece chain of rational intervals**: matching
+sections over the consecutive pieces `[q t, q (t+1)]` of a strictly increasing
+exponent chain are the restrictions of a unique section over the whole
+interval `[q 0, q (m+1)]` — the finite-chain sheaf axiom of the interval
+presheaf, by induction on the two-piece split theorem. -/
+theorem biResQ'_chain_glue (q : ℕ → ℚ) (hq : ∀ t, 0 < q t)
+    (hlt : ∀ t, q t < q (t + 1))
+    (g : ∀ t, ↥(BIQ p F ϖ (q (t + 1)) (q t) (hq (t + 1)) (hq t)))
+    (hmatch : ∀ t, biSndQ p F ϖ (q (t + 2)) (q (t + 1)) (hq (t + 2))
+        (hq (t + 1)) (g (t + 1))
+      = biFstQ p F ϖ (q (t + 1)) (q t) (hq (t + 1)) (hq t) (g t)) :
+    ∀ m : ℕ, ∃! f : ↥(BIQ p F ϖ (q (m + 1)) (q 0) (hq (m + 1)) (hq 0)),
+      ∀ t, ∀ ht : t ≤ m,
+        biResQ' p F ϖ (q (m + 1)) (q 0) (q (t + 1)) (q t)
+          (hq (m + 1)) (hq 0) (hq (t + 1)) (hq t)
+          ((strictMono_nat_of_lt_succ hlt) (Nat.succ_pos m))
+          ⟨(strictMono_nat_of_lt_succ hlt).monotone (Nat.zero_le (t + 1)),
+            (strictMono_nat_of_lt_succ hlt).monotone (Nat.succ_le_succ ht)⟩
+          ⟨(strictMono_nat_of_lt_succ hlt).monotone (Nat.zero_le t),
+            (strictMono_nat_of_lt_succ hlt).monotone
+              (ht.trans (Nat.le_succ m))⟩
+          f = g t := by
+  intro m
+  induction m with
+  | zero =>
+    refine ⟨g 0, fun t ht => ?_, fun f' hf' => ?_⟩
+    · obtain rfl : t = 0 := Nat.le_zero.mp ht
+      rw [biResQ'_id p F ϖ (q 1) (q 0) (hq 1) (hq 0) (hlt 0)]
+      rfl
+    · have h0 := hf' 0 le_rfl
+      rw [biResQ'_id p F ϖ (q 1) (q 0) (hq 1) (hq 0) (hlt 0)] at h0
+      exact h0
+  | succ m ih =>
+    obtain ⟨fm, hfm, hfmu⟩ := ih
+    have hsm := strictMono_nat_of_lt_succ hlt
+    -- the top endpoint of the inductive glue is the top endpoint of `g m`
+    have hcomp := biFstQ_biResQ'_left p F ϖ (q (m + 1)) (q 0) (q m)
+      (hq (m + 1)) (hq 0) (hq m) (hsm (Nat.succ_pos m))
+      ⟨hsm.monotone (Nat.zero_le m), hsm.monotone (Nat.le_succ m)⟩
+    have hend : biFstQ p F ϖ (q (m + 1)) (q 0) (hq (m + 1)) (hq 0) fm
+        = biFstQ p F ϖ (q (m + 1)) (q m) (hq (m + 1)) (hq m) (g m) := by
+      have h1 := RingHom.congr_fun hcomp fm
+      rw [RingHom.comp_apply] at h1
+      rw [hfm m le_rfl] at h1
+      exact h1.symm
+    have hm2 : biSndQ p F ϖ (q (m + 2)) (q (m + 1)) (hq (m + 2))
+        (hq (m + 1)) (g (m + 1))
+        = biFstQ p F ϖ (q (m + 1)) (q 0) (hq (m + 1)) (hq 0) fm :=
+      (hmatch m).trans hend.symm
+    obtain ⟨f, ⟨hfL, hfR⟩, hfu⟩ := biResQ'_split_existsUnique p F ϖ
+      (q (m + 2)) (q 0) (q (m + 1)) (hq (m + 2)) (hq 0) (hq (m + 1))
+      (hsm (Nat.succ_pos (m + 1)))
+      ⟨hsm.monotone (Nat.zero_le (m + 1)),
+        hsm.monotone (Nat.le_succ (m + 1))⟩
+      (g (m + 1)) fm hm2
+    refine ⟨f, fun t ht => ?_, fun f' hf' => ?_⟩
+    · by_cases ht' : t = m + 1
+      · subst ht'
+        exact hfL
+      · have htm : t ≤ m := Nat.lt_succ_iff.mp (lt_of_le_of_ne ht ht')
+        have hcompres := biResQ'_comp p F ϖ (q (m + 2)) (q 0)
+          (q (m + 1)) (q 0) (q (t + 1)) (q t)
+          (hq (m + 2)) (hq 0) (hq (m + 1)) (hq 0) (hq (t + 1)) (hq t)
+          (hsm (Nat.succ_pos (m + 1))) (hsm (Nat.succ_pos m))
+          ⟨hsm.monotone (Nat.zero_le (m + 1)),
+            hsm.monotone (Nat.le_succ (m + 1))⟩
+          ⟨le_rfl, hsm.monotone (Nat.zero_le (m + 2))⟩
+          ⟨hsm.monotone (Nat.zero_le (t + 1)),
+            hsm.monotone (Nat.succ_le_succ htm)⟩
+          ⟨hsm.monotone (Nat.zero_le t),
+            hsm.monotone (htm.trans (Nat.le_succ m))⟩
+        have h2 := RingHom.congr_fun hcompres f
+        rw [RingHom.comp_apply] at h2
+        rw [hfR] at h2
+        rw [← h2]
+        exact hfm t htm
+    · refine hfu f' ⟨hf' (m + 1) le_rfl, ?_⟩
+      refine hfmu (biResQ' p F ϖ (q (m + 2)) (q 0) (q (m + 1)) (q 0)
+        (hq (m + 2)) (hq 0) (hq (m + 1)) (hq 0)
+        (hsm (Nat.succ_pos (m + 1)))
+        ⟨hsm.monotone (Nat.zero_le (m + 1)),
+          hsm.monotone (Nat.le_succ (m + 1))⟩
+        ⟨le_rfl, hsm.monotone (Nat.zero_le (m + 2))⟩ f')
+        (fun t ht => ?_)
+      have hcompres := biResQ'_comp p F ϖ (q (m + 2)) (q 0)
+        (q (m + 1)) (q 0) (q (t + 1)) (q t)
+        (hq (m + 2)) (hq 0) (hq (m + 1)) (hq 0) (hq (t + 1)) (hq t)
+        (hsm (Nat.succ_pos (m + 1))) (hsm (Nat.succ_pos m))
+        ⟨hsm.monotone (Nat.zero_le (m + 1)),
+          hsm.monotone (Nat.le_succ (m + 1))⟩
+        ⟨le_rfl, hsm.monotone (Nat.zero_le (m + 2))⟩
+        ⟨hsm.monotone (Nat.zero_le (t + 1)),
+          hsm.monotone (Nat.succ_le_succ ht)⟩
+        ⟨hsm.monotone (Nat.zero_le t),
+          hsm.monotone (ht.trans (Nat.le_succ m))⟩
+      have h2 := RingHom.congr_fun hcompres f'
+      rw [RingHom.comp_apply] at h2
+      rw [h2]
+      exact hf' t (ht.trans (Nat.le_succ m))
+
 end FarguesFontaine
 
 end
