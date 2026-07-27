@@ -164,9 +164,13 @@ theorem wLoc_blocTwistEquiv {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
     have hmap := congrArg (blocTwistEquiv p F ϖ hk h) hz'
     rwa [map_mul, blocTwistEquiv_algebraMap, blocTwistEquiv_algebraMap] at hmap
   have hval := gaussValue_p_teichPi_pow p F ϖ' hρ0 hρ1 m
+  have hπ0 : (0 : NNReal) < perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ' : OF F) : F) := by
+    refine pos_iff_ne_zero.mpr ((Valuation.ne_zero_iff _).mpr ?_)
+    exact fun hcon => PseudoUniformizer.toOF_ne_zero F ϖ' (Subtype.ext hcon)
   have hne : (ρ * perfectoidValuation p F
       ((PseudoUniformizer.toOF F ϖ' : OF F) : F)) ^ m ≠ 0 :=
-    pow_ne_zero m (mul_ne_zero hρ0.ne' (vpi_pos p F ϖ').ne')
+    pow_ne_zero m (mul_ne_zero hρ0.ne' hπ0.ne')
   have h1 := congrArg (wLoc p F ϖ hρ0 hρ1) himg
   have h2 := congrArg (wLoc p F ϖ' hρ0 hρ1) hz'
   rw [Valuation.map_mul, wLoc_algebraMap, wLoc_algebraMap, hval] at h1
