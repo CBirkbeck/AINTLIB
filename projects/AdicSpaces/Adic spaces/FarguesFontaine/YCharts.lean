@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FarguesFontaine.ChartSpa
 import «Adic spaces».FarguesFontaine.ChartBIQ
+import «Adic spaces».NonTateRationalOpenHomeomorph
+import «Adic spaces».RelativeDescent
 
 /-!
 # The chart-rational index layer of `𝒴` (E-track, E1)
@@ -130,6 +132,84 @@ theorem ChartRatIdx.trace_subset_Y (i : ChartRatIdx p F ϖ) :
       (spaChartHomeoBigWindowNeg p F ϖ (m + 1) (one_lt_p p) u).2
     rw [hcov]
     exact Set.mem_iUnion.mpr ⟨(-((m + 1 : ℕ) : ℤ)), hw.1⟩
+
+/-- Elements of the ideal of definition are topologically nilpotent. -/
+theorem isTopologicallyNilpotent_of_mem_Iinf {x : Ainf p F}
+    (hx : x ∈ Iinf p F ϖ) : IsTopologicallyNilpotent x :=
+  (isAdic_Iinf p F ϖ).hasBasis_nhds_zero.tendsto_right_iff.mpr fun n _ ↦
+    Filter.eventually_atTop.mpr ⟨n, fun m hm ↦
+      Ideal.pow_le_pow_right hm (Ideal.pow_mem_pow hx m)⟩
+
+/-- `p·[ϖ]` is topologically nilpotent in `A_inf`. -/
+theorem isTopologicallyNilpotent_p_teichPi :
+    IsTopologicallyNilpotent ((p : Ainf p F) * teichPi p F ϖ) := by
+  refine isTopologicallyNilpotent_of_mem_Iinf p F ϖ ?_
+  exact Ideal.mul_mem_right _ _
+    (Ideal.subset_span (Set.mem_insert _ _))
+
+include ϖ in
+/-- **`A_inf` is separated**: distinct points are separated by cosets of a
+common ideal power (cosets of a subgroup are equal or disjoint). -/
+theorem t2Space_Ainf : T2Space (Ainf p F) := by
+  refine ⟨fun x y hxy => ?_⟩
+  have hne : x - y ≠ 0 := sub_ne_zero.mpr hxy
+  have hnotall : ¬ ∀ n : ℕ, x - y ∈ (Iinf p F ϖ) ^ n := by
+    intro hall
+    refine hne ((isHausdorff_Iinf p F ϖ).haus (x - y) fun n => ?_)
+    rw [SModEq.zero]
+    simpa using hall n
+  push Not at hnotall
+  obtain ⟨n, hn⟩ := hnotall
+  have hopen : IsOpen ((Iinf p F ϖ ^ n : Ideal (Ainf p F))
+      : Set (Ainf p F)) :=
+    (isAdic_iff.mp (isAdic_Iinf p F ϖ)).1 n
+  refine ⟨(x + ·) '' (Iinf p F ϖ ^ n : Ideal (Ainf p F)),
+    (y + ·) '' (Iinf p F ϖ ^ n : Ideal (Ainf p F)),
+    (isOpenMap_add_left x) _ hopen, (isOpenMap_add_left y) _ hopen,
+    ⟨0, by simpa using (Ideal.zero_mem _)⟩,
+    ⟨0, by simpa using (Ideal.zero_mem _)⟩, ?_⟩
+  rw [Set.disjoint_left]
+  rintro z ⟨a, ha, rfl⟩ ⟨b, hb, hz⟩
+  refine hn ?_
+  have : x - y = b - a := by linear_combination -hz
+  rw [this]
+  exact sub_mem hb ha
+
+/-- **Per-datum concrete Tate structure over the non-Tate base** `A_inf`
+(the E2-route-(b) unblock): a valid rational datum whose rational open lies
+inside `𝒴` has a Tate completed localization — the image of `p·[ϖ]` is a
+topologically nilpotent unit (unit by the complete-pair Nullstellensatz
+criterion, since no `Spa`-point of the completion kills `p·[ϖ]`). -/
+theorem isTateRing_presheafValue_of_rationalOpen_subset_Y
+    (D : RationalLocData (Ainf p F))
+    (hsub : rationalOpen D.T D.s ⊆ Y p F ϖ) :
+    IsTateRing (presheafValue D) := by
+  haveI : IsRingOfIntegralElements ((Ainf p F)⁺ : Subring (Ainf p F)) :=
+    isAffinoidRing_Ainf p F
+  haveI : T2Space (Ainf p F) := t2Space_Ainf p F ϖ
+  have hx_nil : IsTopologicallyNilpotent
+      (D.canonicalMap ((p : Ainf p F) * teichPi p F ϖ)) :=
+    (isTopologicallyNilpotent_p_teichPi p F ϖ).map
+      (canonicalMap_continuous D)
+  have hx_unit : IsUnit
+      (D.canonicalMap ((p : Ainf p F) * teichPi p F ϖ)) := by
+    letI : IsHuberRing (presheafValue D) :=
+      presheafValue_isHuberRing_huber D
+    haveI : IsAdicComplete (presheafValue_concretePair D).I
+        (presheafValue_concretePair D).A₀ :=
+      presheafValue_isAdicComplete D
+    refine (isUnit_iff_forall_not_vle_zero_of_completePair
+      (presheafValue_concretePair D) _).mpr fun w hw => ?_
+    have hmem := comap_canonicalMap_mem_rationalOpen D
+      (canonicalMap_continuous D) hw
+    have hY := hsub hmem
+    intro hcon
+    exact hY.2 ((comap_vle D.canonicalMap w _ 0).mpr
+      (by rwa [map_zero]))
+  exact
+    { exists_pairOfDefinition := ⟨presheafValue_concretePair D⟩
+      exists_topologicallyNilpotent_unit :=
+        ⟨hx_unit.unit, by rwa [IsUnit.unit_spec]⟩ }
 
 end FarguesFontaine
 
