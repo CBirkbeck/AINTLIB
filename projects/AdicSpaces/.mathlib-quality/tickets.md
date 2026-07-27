@@ -2380,10 +2380,23 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   rw [mk'_eq_mul_mk'_one, mk'_eq_mul_mk'_one] REWRITES THE mk'(1,s)-TERM
   the first rewrite created — use show-from-targeted rewrites per mk';
   ← rw of the twist identity mis-associates — forward calc instead).
-  REMAINING for P3d: (iv) the single-monomial NNReal norm-comparison
-  lemma (wLoc-ρ-of-twisted ≤ K·max-of-two-σ-values via wLoc_mk'_monomial
-  formulas + the zone facts; K = (σ₁/ρ₁)^m-form in the denominator zone,
-  K = 1 numerator); (v) the head/tail first-approximation assembly
+  ⚠ (iv)-DESIGN CORRECTED AGAIN (2026-07-27): the MAXIMAL twist
+  (exists_twist/exists_twist_deep) OVERSHOOTS — for very divisible c the
+  twisted exponent e := i+mj can exceed k arbitrarily and B_{ρ₂}/A_{σ₁}
+  = (ρ₂/σ₁)^{e−k} is unbounded. THE RIGHT j IS THE FLOOR-DIV
+  j := (k−i)/m (Nat division), giving e ∈ (k−m, k] (deficit = (k−i) mod
+  m < m, NO overshoot). Divisibility for that j comes DIRECTLY from the
+  σ₁-Gauss bound: v(c) ≤ W·σ₁^{k−i}·vπ^k ≤ σ₁^{k−i} ≤ (σ₁^m)^{j} =
+  v(zb)^j (pow-antitone, m·j ≤ k−i), then dvd_of_le. KEY IDENTITY
+  c₀^j = σ₁^{mj} makes A_{σ₁} = σ₁^{e}·v(c')·((σ₁V)^k)⁻¹ = B_{σ₁}
+  EXACTLY; then B_{ρ₁}/B_{σ₁} = (σ₁/ρ₁)^{k−e} ≤ (σ₁/ρ₁)^m =: K and
+  B_{ρ₂}/B_{σ₁} = (σ₁/ρ₂)^{k−e} ≤ 1. Numerator zone (i ≥ k): j = 0,
+  profile increasing, K = 1 both radii. exists_twist/exists_twist_deep
+  stay shipped (unused by the assembly; potentially useful elsewhere).
+  REMAINING for P3d: (iv) exists_monomial_twist_div (j := (k−i)/m,
+  divisibility from the direct hypothesis v(c) ≤ v(zb)^{(k−i)/m}) + the
+  single-monomial norm-comparison lemma (pure pow-arithmetic per the
+  ratios above); (v) the head/tail first-approximation assembly
   (exists_evalBI_approx_bloc: finite T-polynomial lift of the head via
   mk'_sPow_split + per-monomial dispatch, tail small; NOTE the plan is
   APPROXIMATE-lift (residual ≤ ε), not exact — the correction machinery
