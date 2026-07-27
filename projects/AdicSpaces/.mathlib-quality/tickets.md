@@ -2842,6 +2842,40 @@ STEP (3) COMPLETE (2026-07-26, all axiom-clean in WittF.lean):
   (two-sided decay description).
 - **NOTE**: this is the hardest *infrastructure* ticket; sequence AFTER T907 unless
   parallel capacity exists.
+- **T908(c) EXECUTION PLAN (2026-07-30, beastmode; AD-8 = option (ii), the
+  board's stated preference — coordinates by limit construction, no
+  BrSub = A^r[1/p] claim)**. New file FarguesFontaine/IntervalCoordinates.lean.
+  Sub-steps:
+  (c1) blocCoeffF (u : Bloc) (n : ℤ) : F — the ℤ-indexed Teichmüller
+  coordinates on the dense layer, via a chosen mk'(a, sPow k)-representation
+  (IsLocalization.surj + powers-exponent choice); the WORKHORSE
+  representation-independence lemma blocCoeffF_mk' (any representation
+  computes it: (ϖ⁻¹)^k-scale of teichCoeffF (map a) (n+k)) from
+  W(F)-level combined shift+scale (teichCoeffF_p_mul iterated +
+  teichCoeffF_teichmuller_mul; (p[ϖ])^k·a ↦ p^k·[ϖ^k]·map a) + mk'-equality
+  cancellation over the domain Ainf (mathlib WittVector domain instance;
+  powers(p[ϖ]) ≤ nonZeroDivisors).
+  (c2) the per-term Gauss bound: ρ^n(zpow)·v(blocCoeffF u n) ≤ wLoc ρ u
+  (wLoc_mk' + gaussValue_p_teichPi + gaussTerm_le_gaussValue at n+k).
+  (c3) the pair ε-δ on Bloc (the deferred T902(b4)): common-denominator
+  reduction of u'−u to numerator form + exists_delta_teichCoeffF_sub at the
+  W(F) level (mirror the tendsto_teichCoeffAr Cauchy core's hkey step).
+  (c4) blocCoeffBr (x : hatK) (n : ℤ) := limUnder along the
+  BlocToHatK-approximant filter; neBot_comap_of_mem_BrSub +
+  eventually_pair_wLoc_le + exists_eventually_wLoc_le (verbatim mirrors of
+  the ArSub trio) + tendsto_blocCoeffBr on BrSub (mirror
+  tendsto_teichCoeffAr with the c3 input).
+  (c5) the value bound ρ^n·v(blocCoeffBr x n) ≤ Valued.v x on BrSub
+  (mirror gaussTerm_teichCoeffAr_le via eventually_wLoc_eq).
+  (c6) BI-level: teichCoeffBI z n := blocCoeffBr (z.1) n; the two-factor
+  agreement blocCoeffBr z.1 n = blocCoeffBr z.2 n for z ∈ BISub (both
+  filters share the Bloc-approximants of exists_BIProd_wI_le; limUnder
+  uniqueness).
+  (c7) per-term wI-bounds both endpoints + interior two-sided decay
+  (ρ ∈ (ρ₁,ρ₂): ρ^n·v(zₙ) ≤ (ρ/ρ₂)^n·wI → 0 as n → ∞, mirror n → −∞).
+  (c8) the series realization (Def 4.2 honest form): z = wI-limit of the
+  two-sided partial sums Σ_{n=−K}^{N} pⁿ[zₙ] — additivity of the
+  coordinates + Teichmüller-monomial evaluation + tail bound by (c7).
 
 ### [T909] Restriction maps BI → BI'
 - **Status**: done (2026-07-26, beastmode) — `resIHom : B^I →+* B^{I'}` bundled
