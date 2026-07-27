@@ -2468,7 +2468,35 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   NfstRPS/NsndRPS_le_GeltElt_mul (set-free slim bodies — `set X :=
   big-lambda with h` ITSELF can blow the decl budget by occurrence-
   scanning) + **wIRPS_le_GeltElt_mul** — THE STRICTNESS (Kedlaya ln
-  527-533). P4-b PLAN RESOLVED 2026-07-27 (supersedes the componentwise-split
+  527-533). ★ P4 COMPLETE 2026-07-27 (commits 70901e5d9..a05953d5f):
+  ker_evalBIHom_eq_span = le_antisymm(span_GeltElt_le_ker,
+  ker_le_span_GeltElt). Full chain: kerSolElt_coe_fst/snd component
+  bridges (AddMonoidHom.fst/snd map_sum + congrArg close) ->
+  kerSolElt_wI_decay (both component regimes, Tendsto.max + max_self) ->
+  tendsto_snd_partial_sums_of_evalBI_eq_zero (the ker->hvan transport:
+  phi fixes the shared top coordinate hphisnd, b agrees with gB there
+  hb2, snd-projection by continuity + map_sum-trans, range-reindex by
+  tendsto_add_atTop_nat) -> coefficient-decay glue trio
+  (tendsto_v_fst/snd_coeffSeq + bddAbove_v_fst_coeffSeq, squeeze
+  tendsto_of_tendsto_of_tendsto_of_le_of_le from wIRPS-decay) ->
+  exists_factor_of_evalBI_eq_zero -> slim mem_span_GeltElt_of_factor.
+  Easy inclusion: GeltElt_add_M0 (slim ADDITIVE split via GeltEltM1/M0
+  defs) -> evalBI_GeltEltM1/M0 -> evalBIHom_GeltElt (product-level
+  add_right_cancel route) -> Ideal.span_le + singleton_subset_iff.
+  NEW PERF LESSONS (binding): (i) bare RPS-subtype SUBTRACTION in the
+  fat phi-context deterministically blows whnf-200k even as a lone
+  have-term (probe7) — slim-hoist every sub; state fat-context facts
+  ADDITIVELY; (ii) Ideal.mem_span_singleton.mp and obtain-destructuring
+  of a fat existential both blow whnf — use Ideal.span_le +
+  Set.singleton_subset_iff + Ideal.mul_mem_right, and slim helpers that
+  take the compiled existential as a hypothesis (pure application is
+  cheap; re-elaboration/destructuring is not); (iii) rw with generic
+  map_sub/map_mul dies at 20k-typeclass in fat contexts — use
+  RingHom.map_* explicitly or .trans terms; (iv) statement-only probe
+  then have-by-have bisection localizes any such site in minutes;
+  (v) squeeze lemma is tendsto_of_tendsto_of_tendsto_of_le_of_le
+  (le_OF_le). Historical plan notes follow (P4-b PLAN RESOLVED
+  2026-07-27, supersedes the componentwise-split
   notes below): THE UNIT INSIGHT — at every instantiation the generator's
   Teichmüller content zb is a ϖ-power, so gB := blocToBI-ρ(teichPowGen
   zb m) is a UNIT of B^I-ρ ([ϖ]⁻¹ = vt ∈ Bloc, p⁻¹ = vp ∈ Bloc); with
