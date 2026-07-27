@@ -52,4 +52,53 @@ theorem projModelMap_sectionNeighborhood_section_comp_surjective
   rw [hpoint]
   exact hsurj
 
+/-- A finite pointed comparison that is an isomorphism away from the marked
+section is bijective on the affine section-neighborhood rings once it
+identifies the two marked-section ideals. -/
+theorem projModelMap_sectionNeighborhood_appLE_bijective
+    {C S : Scheme.{u}} {π : C ⟶ S}
+    [IsAffine S] [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (W : WeierstrassCurve Γ(S, (⊤ : S.Opens)))
+    (F : C ⟶ projModel W) [IsFinite F]
+    (hpre : F ⁻¹ᵁ (projModelZChart W : (projModel W).Opens) =
+      sectionAway z hz)
+    [IsIso
+      (F.resLE (projModelZChart W : (projModel W).Opens)
+        (sectionAway z hz) (le_of_eq hpre.symm))]
+    (hpoint : z ≫ F = S.toSpecΓ ≫ projModelZero W)
+    (hideal : (projModelZero W).ker.comap F = z.ker) :
+    let N := projModelSectionNeighborhood W
+    let P : C.affineOpens := ⟨F ⁻¹ᵁ N.1, N.2.preimage F⟩
+    Function.Bijective (F.appLE N.1 P.1 le_rfl).hom := by
+  dsimp only
+  let N := projModelSectionNeighborhood W
+  let P : C.affineOpens := ⟨F ⁻¹ᵁ N.1, N.2.preimage F⟩
+  let φ := (F.appLE N.1 P.1 le_rfl).hom
+  have hfinite : φ.Finite := by
+    dsimp only [φ]
+    rw [F.appLE_eq_app]
+    exact F.finite_app N.1 N.2
+  have hnzd :
+      projModelSectionRoot W ∈
+        nonZeroDivisors Γ(projModel W, N.1) :=
+    projModelSectionRoot_mem_nonZeroDivisors W
+  have hAway :
+      Function.Bijective
+        (Localization.awayMap φ (projModelSectionRoot W)) :=
+    projModelMap_sectionNeighborhood_awayMap_bijective
+      W F (sectionAway z hz) hpre
+  have hsurj :
+      Function.Surjective ((z.app P.1).hom.comp φ) :=
+    projModelMap_sectionNeighborhood_section_comp_surjective
+      z W F hpoint
+  have hker :
+      RingHom.ker (z.app P.1).hom =
+        Ideal.span {φ (projModelSectionRoot W)} :=
+    projModelMap_sectionNeighborhood_ker_eq_span
+      z hz W F hideal
+  exact RingHom.Finite.bijective_of_awayMap_bijective_of_ker_eq_span
+    φ hfinite (projModelSectionRoot W) hnzd hAway
+    (z.app P.1).hom hsurj hker
+
 end ModularCurves
