@@ -5,6 +5,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 import «Adic spaces».FarguesFontaine.YCharts
 import «Adic spaces».StructureSheafStalks
 import «Adic spaces».RelativeDescentHuber
+import «Adic spaces».FarguesFontaine.ChartVObj
 
 /-!
 # Stalk locality of the ambient structure presheaf at points of `𝒴` (YB3c)
@@ -469,6 +470,91 @@ structure IsSheafyOn (S : Set (Spv A)) [T2Space A] [NonarchimedeanRing A]
       restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D
 
 end ValuationSpectrum
+
+namespace ValuationSpectrum
+
+universe u
+
+/-- `IsSheafy` transports across an equality of `PlusSubring` instances
+(the only data-valued instance in its signature; all the others are
+`Prop`-classes and transport by proof irrelevance). -/
+theorem isSheafy_congr_plusSubring {A : Type u} [CommRing A] [TopologicalSpace A]
+    [IsTopologicalRing A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [hc : @CompleteSpace A (IsTopologicalAddGroup.rightUniformSpace A)]
+    (inst₁ inst₂ : PlusSubring A) (h : inst₁ = inst₂)
+    (hint₁ : IsRingOfIntegralElements
+      ((@ringPlus A _ inst₁) : Subring A))
+    (hint₂ : IsRingOfIntegralElements
+      ((@ringPlus A _ inst₂) : Subring A))
+    (hs : @IsSheafy A _ _ _ inst₁ _ _ _ hc hint₁) :
+    @IsSheafy A _ _ _ inst₂ _ _ _ hc hint₂ := by
+  subst h
+  exact hs
+
+end ValuationSpectrum
+
+namespace FarguesFontaine
+
+variable (p : ℕ) [Fact (Nat.Prime p)]
+variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
+  [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
+variable (ϖ : PseudoUniformizer F)
+
+/-- The window-chart exactness data, packaged. -/
+theorem window_hexact2 (n : ℤ) :
+    (rhoRight p F (windowUnif p F ϖ n) p 1) ^ p
+      = perfectoidValuation p F
+          ((PseudoUniformizer.toOF F (windowUnif p F ϖ n) : OF F) : F) ^ 1 := by
+  exact rhoRight_pow_exact p F (windowUnif p F ϖ n) p 1
+    (Nat.Prime.pos (Fact.out : Nat.Prime p))
+
+/-- The transported (`B^I`-ball) plus instance of a `(a, 1)`-chart equals the
+canonical `completedPlusSubring`-based instance — the instance-level form of
+the r5c plus reconciliation. -/
+theorem chartPlus_instance_eq_canonical {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁}
+    {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1} (a : ℕ) (ha : 0 < a)
+    (hexact1 : perfectoidValuation p F
+      ((PseudoUniformizer.toOF F ϖ : OF F) : F) = ρ₁)
+    (hexact2 : ρ₂ ^ a
+      = perfectoidValuation p F
+          ((PseudoUniformizer.toOF F ϖ : OF F) : F) ^ 1) :
+    chartPlus p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0)
+        (hρ₂1 := hρ₂1) a 1 ha one_pos ha hexact1 hexact2
+      = RationalLocData.presheafValuePlusSubring (chartData p F ϖ 1 1 a 1) :=
+  congrArg ValuationSpectrum.PlusSubring.mk
+    (chartPlus_eq_canonical p F ϖ (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1)
+      (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1) a ha hexact1 hexact2)
+
+/-- **YB6c-3c′ — the window chart ring is sheafy at the canonical
+instances**: `IsSheafy (presheafValue (chartData (windowUnif n) 1 1 p 1))`
+with the canonical (`completedPlusSubring`-based) plus subring, the chart's
+own Tate-Huber structure, and the canonical ring-of-integral-elements
+instance — the form consumed by the single-`D₀` transport theorems. -/
+theorem isSheafy_canonical_window (n : ℤ) :
+    letI : IsHuberRing (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) :=
+      (isTateRing_bigWindowChart p F (windowUnif p F ϖ n)).toIsHuberRing
+    letI : @CompleteSpace (presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1))
+        (IsTopologicalAddGroup.rightUniformSpace (presheafValue
+          (chartData p F (windowUnif p F ϖ n) 1 1 p 1))) :=
+      completeSpace_right_presheafValue
+        (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+    ValuationSpectrum.IsSheafy (presheafValue
+      (chartData p F (windowUnif p F ϖ n) 1 1 p 1)) := by
+  have hp : 1 < p := one_lt_p p
+  have hs := isSheafy_presheafChart p F (windowUnif p F ϖ n)
+    (hρ₁0 := vpi_pos p F (windowUnif p F ϖ n))
+    (hρ₁1 := perfectoidValuation_toOF_lt_one p F (windowUnif p F ϖ n))
+    (hρ₂0 := rhoRight_pos p F (windowUnif p F ϖ n) p 1)
+    (hρ₂1 := rhoRight_lt_one p F (windowUnif p F ϖ n) p 1 (by omega) one_pos)
+    p 1 (by omega) one_pos (by omega) rfl
+    (window_hexact2 p F ϖ n)
+  exact ValuationSpectrum.isSheafy_congr_plusSubring _ _
+    (chartPlus_instance_eq_canonical p F (windowUnif p F ϖ n) p (by omega)
+      rfl (window_hexact2 p F ϖ n)) _ _ hs
+
+end FarguesFontaine
 
 
 end
