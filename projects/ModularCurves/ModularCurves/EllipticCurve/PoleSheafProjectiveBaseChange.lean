@@ -356,24 +356,6 @@ namespace ModularCurves
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-private noncomputable def baseModulePresheafIdTopIso
-    {S : Scheme.{u}} (N : S.Modules) :
-    ModuleCat.of Γ(S, (⊤ : S.Opens)) Γ(N, (⊤ : S.Opens)) ≅
-      (Scheme.Modules.baseModulePresheaf (𝟙 S) N).obj
-        (.op (⊤ : S.Opens)) := by
-  refine ModuleCat.isoMk (Iso.refl _) ?_
-  intro r
-  ext (x : Γ(N, (⊤ : S.Opens)))
-  change
-    S.presheaf.map
-        ((initialOpOfTerminal isTerminalTop).to
-          (.op (⊤ : S.Opens)))
-        (Scheme.Hom.appTop (𝟙 S) r) • x = r • x
-  rw [Scheme.Hom.id_appTop]
-  rw [show (initialOpOfTerminal isTerminalTop).to
-    (.op (⊤ : S.Opens)) = 𝟙 _ from Subsingleton.elim _ _]
-  simp
-
 /-- Global sections of `O(n[0])` on a projectively presented fibrewise elliptic family commute
 with every affine base change. -/
 noncomputable def
@@ -1011,7 +993,7 @@ theorem
       f hsm z hz hn t
   let eTargetTopIso :=
     Scheme.Modules.baseSectionsPushforwardTopIso πT MT ≪≫
-      (baseModulePresheafIdTopIso
+      (Scheme.Modules.baseModulePresheafIdTopIso
         ((Scheme.Modules.pushforward πT).obj MT)).symm
   let eTargetTop :
       Scheme.Modules.baseSections πT MT ≃ₗ[A]
@@ -1041,7 +1023,7 @@ theorem
       eTarget ((1 : A) ⊗ₜ[B] s) =
         Scheme.Modules.pushforwardTopSection πT MT
           (eProjective ((1 : A) ⊗ₜ[B] s)) := by
-    change (baseModulePresheafIdTopIso
+    change (Scheme.Modules.baseModulePresheafIdTopIso
         ((Scheme.Modules.pushforward πT).obj MT)).inv
         ((Scheme.Modules.baseSectionsPushforwardTopIso πT MT).hom
           (eProjective ((1 : A) ⊗ₜ[B] s))) = _

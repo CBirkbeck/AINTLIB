@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+import Mathlib.LinearAlgebra.TensorProduct.Basis
 import Mathlib.RingTheory.Flat.LocallyFree
 import Mathlib.RingTheory.Localization.Free
 import Mathlib.RingTheory.LocalRing.Module
@@ -20,6 +21,70 @@ open TensorProduct
 noncomputable section
 
 universe u
+
+private theorem cancelBaseChange_one_one_tmul
+    {R A K V : Type*} [CommRing R] [CommRing A] [CommRing K]
+    [Algebra R A] [Algebra R K] [Algebra A K]
+    [IsScalarTower R A K] [AddCommGroup V] [Module R V]
+    (v : V) :
+    TensorProduct.AlgebraTensorModule.cancelBaseChange R A K K V
+        ((1 : K) ⊗ₜ[A] ((1 : A) ⊗ₜ[R] v)) =
+      (1 : K) ⊗ₜ[R] v := by
+  rw [TensorProduct.AlgebraTensorModule.cancelBaseChange_tmul, one_smul]
+
+/-- A prescribed singleton basis after localization remains a prescribed
+singleton basis after any compatible scalar extension and linear
+equivalence. -/
+theorem Module.exists_basis_singleton_of_localized_baseChange
+    {R K V W : Type*} [CommRing R] [CommRing K]
+    [AddCommGroup V] [Module R V] [AddCommGroup W] [Module K W]
+    (a : R) [Algebra R K] [Algebra (Localization.Away a) K]
+    [IsScalarTower R (Localization.Away a) K]
+    (v : V)
+    (bA : Module.Basis (Fin 1) (Localization.Away a)
+      (LocalizedModule.Away a V))
+    (hbA : bA 0 = LocalizedModule.mkLinearMap (.powers a) V v)
+    (eBC : K ⊗[R] V ≃ₗ[K] W) (w : W)
+    (hw : eBC ((1 : K) ⊗ₜ[R] v) = w) :
+    ∃ b : Module.Basis (Fin 1) K W, b 0 = w := by
+  let A := Localization.Away a
+  let eLoc : K ⊗[A] LocalizedModule.Away a V ≃ₗ[K]
+      K ⊗[A] (A ⊗[R] V) :=
+    (LocalizedModule.equivTensorProduct (.powers a) V).baseChange A K _ _
+  let eCancel : K ⊗[A] (A ⊗[R] V) ≃ₗ[K] K ⊗[R] V :=
+    TensorProduct.AlgebraTensorModule.cancelBaseChange R A K K V
+  let b : Module.Basis (Fin 1) K W :=
+    (((bA.baseChange K).map eLoc).map eCancel).map eBC
+  refine ⟨b, ?_⟩
+  have hequiv :
+      LocalizedModule.equivTensorProduct (.powers a) V
+          (LocalizedModule.mk v 1) =
+        (1 : A) ⊗ₜ[R] v := by
+    rw [LocalizedModule.equivTensorProduct_apply_mk,
+      Localization.mk_one_eq_algebraMap]
+    simp
+  have hbK :
+      (bA.baseChange K) 0 = (1 : K) ⊗ₜ[A] bA 0 :=
+    Module.Basis.baseChange_apply K bA 0
+  have hloc :
+      eLoc ((bA.baseChange K) 0) =
+        (1 : K) ⊗ₜ[A] ((1 : A) ⊗ₜ[R] v) := by
+    rw [hbK, hbA]
+    simp only [eLoc, LinearEquiv.baseChange_tmul,
+      LocalizedModule.mkLinearMap_apply]
+    rw [hequiv]
+  have hsource :
+      eCancel (eLoc ((bA.baseChange K) 0)) =
+        (1 : K) ⊗ₜ[R] v := by
+    rw [hloc]
+    exact cancelBaseChange_one_one_tmul v
+  have hb :
+      b 0 = eBC (eCancel (eLoc ((bA.baseChange K) 0))) := by
+    simp only [b, Module.Basis.map_apply]
+  calc
+    b 0 = eBC (eCancel (eLoc ((bA.baseChange K) 0))) := hb
+    _ = eBC ((1 : K) ⊗ₜ[R] v) := congrArg eBC hsource
+    _ = w := hw
 
 private theorem localized_toSpanSingleton_bijective_of_fiber_ne_zero
     {R M : Type u} [CommRing R] [AddCommGroup M] [Module R M]

@@ -21,6 +21,26 @@ universe u
 
 namespace AlgebraicGeometry.Scheme.Modules
 
+/-- Over the identity morphism, the base-module structure on top sections is
+the literal module structure on top sections. -/
+noncomputable def baseModulePresheafIdTopIso
+    {S : Scheme.{u}} (N : S.Modules) :
+    ModuleCat.of Γ(S, (⊤ : S.Opens)) Γ(N, (⊤ : S.Opens)) ≅
+      (baseModulePresheaf (𝟙 S) N).obj
+        (.op (⊤ : S.Opens)) := by
+  refine ModuleCat.isoMk (Iso.refl _) ?_
+  intro r
+  ext (x : Γ(N, (⊤ : S.Opens)))
+  change
+    S.presheaf.map
+        ((initialOpOfTerminal isTerminalTop).to
+          (.op (⊤ : S.Opens)))
+        (Scheme.Hom.appTop (𝟙 S) r) • x = r • x
+  rw [Scheme.Hom.id_appTop]
+  rw [show (initialOpOfTerminal isTerminalTop).to
+    (.op (⊤ : S.Opens)) = 𝟙 _ from Subsingleton.elim _ _]
+  simp
+
 /-- Sections of a module and sections of its pushforward agree as modules over the base. -/
 noncomputable def baseModulePresheafPushforwardAppIso
     {X Y S : Scheme.{u}} (f : X ⟶ Y) (π : Y ⟶ S) (M : X.Modules)
