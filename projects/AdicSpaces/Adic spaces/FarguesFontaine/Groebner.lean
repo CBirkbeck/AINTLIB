@@ -1062,7 +1062,36 @@ theorem exists_normalized_tail_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 
   · rw [div_mul_cancel₀ _ hne]
     exact htail K hK
 
-set_option maxHeartbeats 2000000 in
+/-- **One Gröbner generator at a fixed index** (the per-index content of the
+Gröbner package, standalone for the per-declaration budget). -/
+theorem exists_groebner_generator {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (H : Ideal ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+    (I : Fin k →₀ ℕ) (hI : dIdx p F ϖ hρ0 hρ1 H I ≠ ⊤) :
+    ∃ (x : ↥(restrictedMvPowerSeriesSubring k ↥(ArSub p F ϖ hρ0 hρ1)))
+      (e : NNReal),
+      x ∈ H ∧ ((x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) ≠ 0)
+        ∧ leadIdxRPS p F ϖ hρ0 hρ1
+            (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) = I
+        ∧ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+              (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+              : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)
+            = dIdx p F ϖ hρ0 hρ1 H I)
+        ∧ e < 1
+        ∧ (∀ K : Fin k →₀ ℕ,
+            (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn I
+              < (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn K →
+            Valued.v ((MvPowerSeries.coeff K
+                (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+                : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+              ≤ e * gaussNormRPS p F ϖ hρ0 hρ1
+                (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) := by
+  have h₁ := exists_leadIdx_degAr_eq p F ϖ hI
+  have h₂ := exists_normalized_tail_bound p F ϖ h₁.choose.2 h₁.choose_spec.2.1
+  exact ⟨h₁.choose, h₂.choose, h₁.choose_spec.1, h₁.choose_spec.2.1,
+    h₁.choose_spec.2.2.1, h₁.choose_spec.2.2.2, h₂.choose_spec.1,
+    fun K hK => h₂.choose_spec.2 K
+      (by rw [h₁.choose_spec.2.2.1]; exact hK)⟩
+
 open scoped Classical in
 /-- **The Gröbner data package** (Kedlaya Definition 3.7 + the `ε` of Lemma 3.8):
 a finite set of ideal generators, each with its leading data, and one `ε < 1`
@@ -1121,50 +1150,43 @@ theorem exists_groebner_family {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
                   (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
                   : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
                 ≤ e * gaussNormRPS p F ϖ hρ0 hρ1
-                  (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) := by
-    rintro ⟨I, hI⟩
-    obtain ⟨x, hxH, hx0, hlead, hdeg⟩ :=
-      exists_leadIdx_degAr_eq p F ϖ (hdIT I hI)
-    obtain ⟨e, helt, hetail⟩ := exists_normalized_tail_bound p F ϖ x.2 hx0
-    refine ⟨x, e, hxH, hx0, hlead, hdeg, helt, fun K hK => hetail K ?_⟩
-    rw [hlead]
-    exact hK
+                  (x : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) :=
+    fun I => exists_groebner_generator p F ϖ H I.1 (hdIT I.1 I.2)
   choose X E hXH hX0 hXlead hXdeg hElt hEtail using hex
-  refine ⟨T.attach.image X, max (T.attach.sup E) (1 / 2), ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  have himg : ∀ (P : ↥(restrictedMvPowerSeriesSubring k
+        ↥(ArSub p F ϖ hρ0 hρ1)) → Prop),
+      (∀ I : {I : Fin k →₀ ℕ // I ∈ T}, P (X I)) →
+      ∀ g ∈ T.attach.image X, P g := by
+    intro P hP g hg
+    obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
+    exact hP I
+  refine ⟨T.attach.image X, max (T.attach.sup E) (1 / 2), ?_, ?_,
+    himg _ (fun I => hXH I), himg _ (fun I => hX0 I),
+    himg _ (fun I K hK => le_trans (hEtail I K
+      ((congrArg (MonomialOrder.degLex : MonomialOrder (Fin k)).toSyn
+        (hXlead I)) ▸ hK))
+      (mul_le_mul_of_nonneg_right
+        (le_trans (Finset.le_sup (Finset.mem_attach T I)) (le_max_left _ _)) zero_le)),
+    himg _ (fun I => (hXdeg I).trans
+      (congrArg (dIdx p F ϖ hρ0 hρ1 H) (hXlead I).symm)), ?_⟩
   · refine lt_of_lt_of_le ?_ (le_max_right _ _)
     norm_num
   · refine max_lt ?_ (by norm_num)
     refine (Finset.sup_lt_iff (by rw [bot_eq_zero]; exact zero_lt_one)).mpr ?_
     intro I _
     exact hElt I
-  · intro g hg
-    obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
-    exact hXH I
-  · intro g hg
-    obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
-    exact hX0 I
-  · intro g hg K hK
-    obtain ⟨I, hI, rfl⟩ := Finset.mem_image.mp hg
-    refine le_trans (hEtail I K ?_) ?_
-    · rw [← hXlead I]
-      exact hK
-    · exact mul_le_mul_of_nonneg_right
-        (le_trans (Finset.le_sup hI) (le_max_left _ _)) zero_le
-  · intro g hg
-    obtain ⟨I, -, rfl⟩ := Finset.mem_image.mp hg
-    rw [hXlead I]
-    exact hXdeg I
   · intro J hJ
-    obtain ⟨I, hImem, hIJ, hdeq⟩ := exists_mem_groebnerSet_le p F ϖ hJ
-    have hIT : I ∈ T := by
+    have hex2 := exists_mem_groebnerSet_le p F ϖ hJ
+    have hIT : hex2.choose ∈ T := by
       rw [hT, Set.Finite.mem_toFinset]
-      exact hImem
-    refine ⟨X ⟨I, hIT⟩, Finset.mem_image.mpr ⟨⟨I, hIT⟩, Finset.mem_attach _ _, rfl⟩,
+      exact hex2.choose_spec.1
+    refine ⟨X ⟨hex2.choose, hIT⟩,
+      Finset.mem_image.mpr ⟨⟨hex2.choose, hIT⟩, Finset.mem_attach _ _, rfl⟩,
       ?_, ?_⟩
-    · rw [hXlead ⟨I, hIT⟩]
-      exact hIJ
-    · rw [hXlead ⟨I, hIT⟩]
-      exact hdeq
+    · exact le_of_eq_of_le (hXlead ⟨hex2.choose, hIT⟩)
+        hex2.choose_spec.2.1
+    · exact (congrArg (dIdx p F ϖ hρ0 hρ1 H)
+        (hXlead ⟨hex2.choose, hIT⟩)).trans hex2.choose_spec.2.2
 
 /-- **Dominated perturbations preserve value and degree** (Remark 2.7, packaged). -/
 theorem valued_degAr_eq_of_sub_lt {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
