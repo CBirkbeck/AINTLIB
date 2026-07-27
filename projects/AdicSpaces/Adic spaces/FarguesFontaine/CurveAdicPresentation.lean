@@ -1,5 +1,7 @@
 import «Adic spaces».FarguesFontaine.CurveObject
 import «Adic spaces».StronglyNoetherianTransport
+import «Adic spaces».WedhornCechAcyclicity
+import «Adic spaces».StructurePresheafBundled
 
 /-!
 # X-ADIC-1: the adic Fargues–Fontaine curve as an `AdicSpacePresentation`
@@ -145,6 +147,37 @@ theorem isStronglyNoetherian_canonical_window (n : ℤ) :
     (presheafChartRingEquivBISub_continuous p F (windowUnif p F ϖ n)
       (hρ₁0 := hρ₁0) (hρ₁1 := hρ₁1) (hρ₂0 := hρ₂0) (hρ₂1 := hρ₂1)
       p 1 (by omega) one_pos (by omega) rfl (window_hexact2 p F ϖ n))).mp hSN
+
+/-- The `n`-th window chart ring (abbreviation for the X-ADIC-1 assembly). -/
+noncomputable abbrev windowChartRing (n : ℤ) :=
+  presheafValue (chartData p F (windowUnif p F ϖ n) 1 1 p 1)
+
+noncomputable local instance (n : ℤ) : IsTateRing (windowChartRing p F ϖ n) :=
+  isTateRing_bigWindowChart p F (windowUnif p F ϖ n)
+
+noncomputable local instance (n : ℤ) :
+    IsStronglyNoetherian (windowChartRing p F ϖ n) :=
+  isStronglyNoetherian_canonical_window p F ϖ n
+
+noncomputable local instance (n : ℤ) :
+    IsNoetherianRing (windowChartRing p F ϖ n) :=
+  IsStronglyNoetherian.isNoetherianRing _
+
+/-- **The affinoid presentation of a rational subdomain of a window chart**
+(X-ADIC-1 A3): the value ring of any rational datum over a window chart ring
+is a sheafy complete Tate ring, hence an affinoid adic presentation. -/
+noncomputable def windowSubAffinoid (n : ℤ)
+    (D' : RationalLocData (windowChartRing p F ϖ n)) :
+    ValuationSpectrum.AffinoidAdicPresentation :=
+  letI : IsTateRing (presheafValue D') := presheafValue_isTateRing_concrete D'
+  letI : IsStronglyNoetherian (presheafValue D') :=
+    presheafValue_isStronglyNoetherian_faithful D'
+  letI : @CompleteSpace (presheafValue D')
+      (IsTopologicalAddGroup.rightUniformSpace (presheafValue D')) :=
+    completeSpace_right_presheafValue D'
+  letI : ValuationSpectrum.IsSheafy (presheafValue D') :=
+    ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
+  ValuationSpectrum.AffinoidAdicPresentation.ofIsSheafy (presheafValue D')
 
 end FarguesFontaine
 
