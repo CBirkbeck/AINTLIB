@@ -2485,10 +2485,16 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   down-form decays from hg2 : v_ρ₂(gB) ≤ 1 + y-decay; (b5)
   restrictedness from the two decays (isRestricted_iff_wI-side) and
   y = GeltElt·⟨x, _⟩ by coefficient-ext ⇒ ker ⊆ span. span ⊆ ker is
-  EASY: eval(GeltElt gB) = b − φ(gB) = 0 by hφb + hbg. Sequence: (b0)
-  the resI-same-radius-id lemma + the snd-eval-identity; (b1) the
-  x-definition + formal identity; (b2) the two decay lemmas; (b3) the
-  kernel theorem. ORIGINAL NOTES: per component τ, the coefficient
+  EASY: eval(GeltElt gB) = b − φ(gB) = 0 by hφb + hbg. Sequence: (b0) DONE (9ed3bb3c4 resI_eq_snd/fst via
+  limUnder-uniqueness on the comap filter, interpolant-free); (b1) DONE
+  (kerSol_rec_generic — the formal recursion over an ABSTRACT CommRing;
+  PERF: NEVER run `ring` over the ↥BISub subtype — its instance-whnf
+  alone blows 200k; state ring-algebra generically and instantiate);
+  (b2) NEXT: the two decay lemmas for X n := −(V^{n+1}·Σ_{i≤n} y_i g^i)
+  at the components (fst: 1 < v₁(g)-head/tail-split; snd: the
+  eval-vanishing rewrite up = down-form + v₂ ≤ 1-decay per the RESOLVED
+  plan); (b3) restrictedness + ker = span (easy half: eval(GeltElt) =
+  b − φ(gB) = 0 via hφb + hbg). ORIGINAL NOTES: per component τ, the coefficient
   sequences X := component-of-coeffSeq x, Y := component-of-coeffSeq
   (Gelt·x) satisfy hrec (from coeffSeq_Gelt_mul projected to the
   component), hbdd (restrictedness), hX0 (decay); dispatch v_τ(g-comp)
