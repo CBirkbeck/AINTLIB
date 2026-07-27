@@ -442,4 +442,33 @@ noncomputable def windowKeystone (n : ℤ) (E : RationalLocData (Ainf p F))
 
 end FarguesFontaine
 
+namespace ValuationSpectrum
+
+variable {A : Type*} [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+  [PlusSubring A] [IsHuberRing A]
+
+/-- **The subset-relative sheaf condition**: the two `IsSheafy`-fields, for
+rational coverings whose base lies inside `S`. -/
+structure IsSheafyOn (S : Set (Spv A)) [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A;
+      CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] : Prop where
+  embedding : ∀ (C : RationalCoveringData A), C.IsRational →
+    rationalOpen C.base.T C.base.s ⊆ S →
+    Topology.IsEmbedding (productRestrictionSub A C)
+  gluing : ∀ (C : RationalCoveringData A), C.IsRational →
+    rationalOpen C.base.T C.base.s ⊆ S →
+    ∀ (f : ∀ (D : ↥C.covers), presheafValue D.1),
+    (∀ (D₁ D₂ : ↥C.covers)
+       (D₃ : RationalLocData A)
+       (h₃₁ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₁.1.T D₁.1.s)
+       (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂.1.T D₂.1.s),
+       restrictionMap D₁.1 D₃ h₃₁ (f D₁) =
+         restrictionMap D₂.1 D₃ h₃₂ (f D₂)) →
+    ∃ x : presheafValue C.base, ∀ (D : ↥C.covers),
+      restrictionMap C.base D.1 (C.hsubset D.1 D.2) x = f D
+
+end ValuationSpectrum
+
+
 end
