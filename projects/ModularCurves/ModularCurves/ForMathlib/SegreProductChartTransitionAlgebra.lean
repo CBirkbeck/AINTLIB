@@ -247,4 +247,134 @@ lemma segreProductRightOverlapLift_comp_first
     (projectiveCoordinateRatio R j b)
     (segreProductOverlapRightRatio_isUnit R m n i a j b)
 
+private def projectiveFirstChartToOverlapAwayAlgHom
+    (R : Type u) [CommRing R] {σ : Type v} (i a : σ) :
+    ProjectiveCoordinateAway R i →ₐ[R]
+      ProjectiveCoordinateOverlapAway R i a where
+  __ := projectiveFirstChartToOverlapAway R i a
+  commutes' r := HomogeneousLocalization.awayMap_fromZeroRingHom
+    (homogeneousSubmodule σ R)
+    (X_mem_homogeneousSubmodule_one R a)
+    rfl
+    (algebraMap R (homogeneousSubmodule σ R 0) r)
+
+private def projectiveSecondChartToOverlapAwayAlgHom
+    (R : Type u) [CommRing R] {σ : Type v} (i a : σ) :
+    ProjectiveCoordinateAway R a →ₐ[R]
+      ProjectiveCoordinateOverlapAway R i a where
+  __ := projectiveSecondChartToOverlapAway R i a
+  commutes' r := HomogeneousLocalization.awayMap_fromZeroRingHom
+    (homogeneousSubmodule σ R)
+    (X_mem_homogeneousSubmodule_one R i)
+    (mul_comm (X i) (X a))
+    (algebraMap R (homogeneousSubmodule σ R 0) r)
+
+private def segreProductOverlapLeftAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateAway R i →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b where
+  __ := segreProductOverlapLeftRingHom R m n i a j b
+  commutes' r := by
+    simp [segreProductOverlapLeftRingHom]
+    change
+      algebraMap
+          (SegreProductChartRing R m n i j)
+          (SegreProductChartOverlapRing R m n i a j b)
+          (algebraMap R (SegreProductChartRing R m n i j) r) =
+        algebraMap R (SegreProductChartOverlapRing R m n i a j b) r
+    exact
+      (IsScalarTower.algebraMap_apply
+        R
+        (SegreProductChartRing R m n i j)
+        (SegreProductChartOverlapRing R m n i a j b)
+        r).symm
+
+private def segreProductOverlapRightAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateAway R j →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b where
+  __ := segreProductOverlapRightRingHom R m n i a j b
+  commutes' r := by
+    simp [segreProductOverlapRightRingHom]
+    change
+      algebraMap
+          (SegreProductChartRing R m n i j)
+          (SegreProductChartOverlapRing R m n i a j b)
+          (algebraMap R (SegreProductChartRing R m n i j) r) =
+        algebraMap R (SegreProductChartOverlapRing R m n i a j b) r
+    exact
+      (IsScalarTower.algebraMap_apply
+        R
+        (SegreProductChartRing R m n i j)
+        (SegreProductChartOverlapRing R m n i a j b)
+        r).symm
+
+private def segreProductLeftOverlapLiftAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateOverlapAway R i a →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b where
+  __ := segreProductLeftOverlapLift R m n i a j b
+  commutes' r := by
+    rw [← (projectiveFirstChartToOverlapAwayAlgHom R i a).commutes r]
+    change
+      ((segreProductLeftOverlapLift R m n i a j b).comp
+        (projectiveFirstChartToOverlapAway R i a))
+          (algebraMap R (ProjectiveCoordinateAway R i) r) =
+        algebraMap R (SegreProductChartOverlapRing R m n i a j b) r
+    rw [segreProductLeftOverlapLift_comp_first]
+    exact (segreProductOverlapLeftAlgHom R m n i a j b).commutes r
+
+private def segreProductRightOverlapLiftAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateOverlapAway R j b →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b where
+  __ := segreProductRightOverlapLift R m n i a j b
+  commutes' r := by
+    rw [← (projectiveFirstChartToOverlapAwayAlgHom R j b).commutes r]
+    change
+      ((segreProductRightOverlapLift R m n i a j b).comp
+        (projectiveFirstChartToOverlapAway R j b))
+          (algebraMap R (ProjectiveCoordinateAway R j) r) =
+        algebraMap R (SegreProductChartOverlapRing R m n i a j b) r
+    rw [segreProductRightOverlapLift_comp_first]
+    exact (segreProductOverlapRightAlgHom R m n i a j b).commutes r
+
+/-- The first factor of the second product chart, expressed in the common overlap ring. -/
+def segreProductSecondLeftAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateAway R a →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b :=
+  (segreProductLeftOverlapLiftAlgHom R m n i a j b).comp
+    (projectiveSecondChartToOverlapAwayAlgHom R i a)
+
+/-- The second factor of the second product chart, expressed in the common overlap ring. -/
+def segreProductSecondRightAlgHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateAway R b →ₐ[R]
+      SegreProductChartOverlapRing R m n i a j b :=
+  (segreProductRightOverlapLiftAlgHom R m n i a j b).comp
+    (projectiveSecondChartToOverlapAwayAlgHom R j b)
+
+/-- The ring homomorphism underlying the first factor of the second product chart. -/
+abbrev segreProductSecondLeftRingHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateAway R a →+*
+      SegreProductChartOverlapRing R m n i a j b :=
+  (segreProductSecondLeftAlgHom R m n i a j b).toRingHom
+
+/-- The ring homomorphism underlying the second factor of the second product chart. -/
+abbrev segreProductSecondRightRingHom
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    ProjectiveCoordinateAway R b →+*
+      SegreProductChartOverlapRing R m n i a j b :=
+  (segreProductSecondRightAlgHom R m n i a j b).toRingHom
+
 end MvPolynomial
