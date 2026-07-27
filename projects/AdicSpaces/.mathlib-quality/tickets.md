@@ -1288,10 +1288,18 @@ non-Tate bases are supported.
     rational refinement + S2 + the one-line eval-restriction law
     restrictionMapHom_comp_limitEvalHom = the compatible-family identity) +
     restriction coherence comap_limitRestrict_openValue +
-    openValue_vle_restrict. Remaining (S3b): the germ-relation ValuativeRel
-    on the ringStalk (8 axioms, each a finite-common-refinement argument
-    from the germ toolkit + openValue_vle_restrict) + stalkValue +
-    comap_germ_stalkValue;
+    openValue_vle_restrict. (S3b) DONE 2026-07-27 (§StalkValue):
+    spaRingPresheaf, germ_limitRestrict + germ-arith bridges, stalkVle +
+    exists_common_rep + stalkVle_elim, ALL 8 ValuativeRel axioms,
+    stalkValuativeRel, **stalkValue : Spv (ringStalk v)**,
+    comap_germ_stalkValue. Axiom-clean. PERF LESSON (binding): the germ
+    API lives at the (SpaTop A).str-Opens spelling while the pair-level
+    machinery is at instTopologicalSpaceSubtype — the two are defeq but
+    DEFEAT rw's keyed matching; NEVER rw with germ-form lemmas — use
+    term-mode Eq.trans/congrArg₂/▸-chains and let app-elaboration handle
+    the defeq (also limitRestrict-of-product is DEFEQ to
+    product-of-limitRestrict — explicit-toFun — so map_mul-rewrites there
+    are unnecessary);
     (S4) IsLocalRing (ringStalk v) with maximalIdeal = supp (Wedhorn 8.14:
     nonunits = {germ f | valueAt v f = 0}; a germ with nonzero value is
     invertible on a shrunk rational datum — needs
