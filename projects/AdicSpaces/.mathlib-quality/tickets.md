@@ -1409,6 +1409,23 @@ non-Tate bases are supported.
     IsLimitSheaf from isSheafy_presheafChart via isSheafy_iff_isLimitSheaf)
     — NEXT: instantiate spaVObj at the FF charts, then the Y-object
     (architecture decision: ambient-vs-glue, see the M8 note above).
+    CHART-INSTANTIATION AUDIT 2026-07-27: A_inf-side instances all present
+    (AinfHuber.lean: instTopologicalSpaceAinf/instNonarchimedeanRingAinf/
+    instIsHuberRingAinf/instPlusSubringAinf (⊤) + isAffinoidRing_Ainf —
+    CHECK whether an IsRingOfIntegralElements ((Ainf)⁺)-INSTANCE is
+    registered from it, plus T2/CompleteSpace instances for A_inf — grep
+    AinfHuber tail). Chart-side: [IsSheafy B_n] is supplied by
+    isSheafy_presheafChart ONLY AT THE TRANSPORTED PLUS (letI PlusSubring
+    := BIPlusIn mapped through presheafChartRingEquivBISub.symm) — NOT the
+    canonical presheafValuePlusSubring. THE LOAD-BEARING BRICK (already
+    flagged in NT-1): **the plus-reconciliation** — canonical
+    (presheafValue chartDatum)⁺ (= completedPlusSubring, the
+    IntCl-closure tower) EQUALS the transported BIPlusIn unit ball
+    (Kedlaya Def 4.5-side; mem_BIPlusIn_iff is the interval-side
+    membership interface). With it, IsSheafy transports to the canonical
+    pair and spaVObj_of_isSheafy applies verbatim at B_n. Alternatives if
+    the equality resists: state spaVObj at the transported pair (letI) —
+    works but pollutes downstream plus-references.
     Then Y := glue the ℤ-chain of chart VObjs (cocycle-free, adjacent
     circles only; transitions from BISub_twist + the ID2 comparisons + the
     D-ii-2 split fiber-product) — architecture note above stands. Original:
