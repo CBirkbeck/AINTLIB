@@ -334,6 +334,71 @@ theorem presheafValueRingEquivHuber_restriction
 
 end RestrictionHuber
 
+section Roundtrip
+
+/-- Extensionality for rational data from the three data fields (`hopen` is a
+proposition). -/
+theorem RationalLocData.ext' {D₁ D₂ : RationalLocData A}
+    (hP : D₁.P = D₂.P) (hT : D₁.T = D₂.T) (hs : D₁.s = D₂.s) : D₁ = D₂ := by
+  cases D₁
+  cases D₂
+  cases hP
+  cases hT
+  cases hs
+  rfl
+
+variable (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+
+/-- **The Huber datum roundtrip**: forward along `e`, back along `e.symm`. -/
+theorem RationalLocData.mapHuber_symm_map [DecidableEq A]
+    (D : RationalLocData A) :
+    (D.mapHuber e he he').mapHuber e.symm he' he = D := by
+  refine RationalLocData.ext' ?_ ?_ ?_
+  · exact PairOfDefinition.mapRingEquiv_symm_map e he he' D.P
+  · show (D.T.image e).image e.symm = D.T
+    rw [Finset.image_image]
+    exact (Finset.image_congr fun x _ => e.symm_apply_apply x).trans
+      Finset.image_id
+  · exact e.symm_apply_apply D.s
+
+/-- **The Huber datum roundtrip, other direction.** -/
+theorem RationalLocData.mapHuber_map_symm [DecidableEq A]
+    (D : RationalLocData B) :
+    (D.mapHuber e.symm he' he).mapHuber e he he' = D := by
+  refine RationalLocData.ext' ?_ ?_ ?_
+  · exact PairOfDefinition.mapRingEquiv_map_symm e he he' D.P
+  · show (D.T.image e.symm).image e = D.T
+    rw [Finset.image_image]
+    exact (Finset.image_congr fun x _ => e.apply_symm_apply x).trans
+      Finset.image_id
+  · exact e.apply_symm_apply D.s
+
+end Roundtrip
+
+section RestrictionHuberSymm
+
+variable [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+  [PlusSubring B] [IsHuberRing B] [HasLocLiftPowerBounded B]
+variable (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+
+/-- The inverse-direction restriction square of the Huber value equivalence. -/
+theorem presheafValueRingEquivHuber_symm_restriction
+    (D E : RationalLocData A)
+    (h : rationalOpen E.T E.s ⊆ rationalOpen D.T D.s)
+    (hBsub : rationalOpen (E.mapHuber e he he').T (E.mapHuber e he he').s ⊆
+      rationalOpen (D.mapHuber e he he').T (D.mapHuber e he he').s)
+    (y : presheafValue (D.mapHuber e he he')) :
+    (presheafValueRingEquivHuber e he he' E).symm
+        (restrictionMap (D.mapHuber e he he') (E.mapHuber e he he') hBsub y)
+      = restrictionMap D E h
+        ((presheafValueRingEquivHuber e he he' D).symm y) := by
+  have hsq := presheafValueRingEquivHuber_restriction e he he' D E h hBsub
+    ((presheafValueRingEquivHuber e he he' D).symm y)
+  rw [RingEquiv.apply_symm_apply] at hsq
+  exact (presheafValueRingEquivHuber e he he' E).symm_apply_eq.mpr hsq.symm
+
+end RestrictionHuberSymm
+
 end ValuationSpectrum
 
 end
