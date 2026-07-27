@@ -51,10 +51,22 @@ lemma segreImageIrrelevant_le
     (segreImageGradedHom R m n)
     (segreImageGradedHom_surjective R m n)
 
+/-- The `Proj` of the canonically graded Segre image algebra.
+
+The explicit instance arguments make this abbreviation stable across file boundaries. -/
+abbrev segreImageProj
+    (R : Type u) [CommRing R] (m n : ℕ) : Scheme :=
+  @Proj (SegreCoordinateRing R m n)
+    (Submodule R (SegreCoordinateRing R m n))
+    inferInstance inferInstance
+    (@Submodule.addSubgroupClass R (SegreCoordinateRing R m n) _ _ inferInstance)
+    (segreImageGrading R m n)
+    (segreImageGradingGradedRing R m n)
+
 /-- The canonical morphism from the Segre image `Proj` to polynomial projective space. -/
 def segreImageProjι
     (R : Type u) [CommRing R] (m n : ℕ) :
-    Proj (segreImageGrading R m n) ⟶
+    segreImageProj R m n ⟶
       Proj (homogeneousSubmodule (Fin (segreDimension m n + 1)) R) :=
   Proj.map (segreImageGradedHom R m n) (segreImageIrrelevant_le R m n)
 
