@@ -1638,7 +1638,29 @@ non-Tate bases are supported.
     Original: (E1) ChartRatIdx — the index structure {(n : ℤ) ×
     valid rational data D over B_n} with yTrace := the
     spaChartHomeoBigWindow-image of R(D) ⊆ Y, nesting relation via
-    trace-inclusion; (E2) THE CROSS-CHART COMPARISON (hard core): for
+    trace-inclusion; (E2) ANALYSIS 2026-07-27 (load-bearing, three
+    routes + blockers): the keystone (RelativeDescent) is parameterized
+    on hspanE : span E.T = ⊤ over the BASE — false over A_inf for
+    window-interior data (A_inf-units too small; T-augmentation changes
+    the open). NEW OBSERVATION: over the TATE-valued D₀ = window chart
+    the IMAGE span is ⊤ concretely — the chart ring inverts p and [ϖ'],
+    so the image of an Iinf^N-generating T hits the unit (p[ϖ'])^N.
+    The right generalization is hspanImg-primitive (span of the image
+    = ⊤; genPieceDatum accepts it directly), but the 500-line keystone
+    development carries hspanE through 232 threadings. ROUTES: (a) the
+    general-Huber keystone package (Wedhorn 8.4 at open-span; the
+    3-line imgDatumOpen variant + replay of the keystone body); (b)
+    AMBIENT REVIVAL: M8 gives structurePresheaf(A_inf) free; S1-S3
+    stalk machinery generic; S4's Laurent argument runs over PD :=
+    presheafValue-A_inf(D) and needs PD TATE — for window-interior
+    data PD inverts the p[ϖ]-image CONCRETELY (top-nilpotent unit)
+    even though A_inf is not Tate — probe
+    presheafValue_isTateRing_concrete's hypotheses; if per-datum
+    concrete-Tate lands, ambient stalks complete with NO cross-chart
+    comparison and only the SHEAF condition still routes through the
+    charts; (c) dyadic/strip route (values only on strip-generated
+    opens; stalks still need (a) or (b)). NEXT PROBE decides (b) vs
+    (a). Original: (E2) THE CROSS-CHART COMPARISON (hard core): for
     an index of chart n whose trace sits inside the overlap circle
     κ = p^{n+1}, the keystone-over-B_n identification with a chart-
     (n+1)-index value — through the circle ring and the degenerate
