@@ -2416,6 +2416,45 @@ theorem telescope_down_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
   exact absurd (hbound M)
     (not_le.mpr (max_lt hcon (by exact hM)))
 
+/-- **The upward telescope bound** (Kedlaya's `t < t₀` branch): under the
+shift-minus-scale recursion with an expanding scale, every `X`-value is
+bounded by `v(g)⁻¹` times the `Y`-supremum. -/
+theorem telescope_up_bound {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
+    (g : hatK p F hρ0 hρ1) (hg : 1 < Valued.v g)
+    (X Y : ℕ → hatK p F hρ0 hρ1)
+    (hrec : ∀ n, Y n = (if 1 ≤ n then X (n - 1) else 0) - g * X n)
+    (hbdd : BddAbove (Set.range (fun n => Valued.v (Y n)))) :
+    ∀ n, Valued.v (X n)
+      ≤ (Valued.v g)⁻¹ * (⨆ n, Valued.v (Y n)) := by
+  have hg0 : (0 : NNReal) < Valued.v g := lt_trans one_pos hg
+  have hcancel : ∀ x : hatK p F hρ0 hρ1, Valued.v x
+      = (Valued.v g)⁻¹ * Valued.v (g * x) := by
+    intro x
+    rw [Valuation.map_mul, ← mul_assoc, inv_mul_cancel₀ hg0.ne', one_mul]
+  intro n
+  induction n with
+  | zero =>
+    have h0 := hrec 0
+    rw [if_neg (by omega), zero_sub] at h0
+    rw [hcancel (X 0)]
+    refine mul_le_mul_of_nonneg_left ?_ zero_le
+    rw [show g * X 0 = -(Y 0) from by rw [h0]; ring, Valuation.map_neg]
+    exact le_ciSup hbdd 0
+  | succ n ih =>
+    have h1 := hrec (n + 1)
+    rw [if_pos (Nat.succ_le_succ (Nat.zero_le _)), Nat.add_sub_cancel] at h1
+    rw [hcancel (X (n + 1))]
+    refine mul_le_mul_of_nonneg_left ?_ zero_le
+    rw [show g * X (n + 1) = X n - Y (n + 1) from by rw [h1]; ring]
+    refine le_trans (Valuation.map_sub _ _ _) (max_le ?_ ?_)
+    · refine le_trans ih ?_
+      calc (Valued.v g)⁻¹ * (⨆ n, Valued.v (Y n))
+          ≤ 1 * (⨆ n, Valued.v (Y n)) := by
+            refine mul_le_mul_of_nonneg_right ?_ zero_le
+            exact (inv_le_one₀ (lt_trans one_pos hg)).mpr hg.le
+        _ = ⨆ n, Valued.v (Y n) := one_mul _
+    · exact le_ciSup hbdd (n + 1)
+
 end FarguesFontaine
 
 end
