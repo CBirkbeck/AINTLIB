@@ -2105,7 +2105,25 @@ non-Tate bases are supported.
     produces the extension; its INVARIANCE follows from gluing
     separation (the transport permutes the pieces by one shift).
     The value-level composite (pvHuber-comp via dense-image
-    uniqueness + restrictionMap_cast) stays PARKED as nice-to-have. Non-critical parked:
+    uniqueness + restrictionMap_cast) stays PARKED as nice-to-have.
+    ★ (3ii-c) SETUP DONE 2026-07-28 (CurveObject.lean, axiom-clean):
+    yTopToY_bijective + yTopToY_isInducing (the two subtype
+    presentations of 𝒴 — Spa-side double-subtype vs Spv-side —
+    topologically agree; the val-congrArg needs the EXPLICIT
+    ↥Y-lambda) → yTopToYHomeo; isOpenQuotientMap_yTopToCurve
+    (factors through the homeo); xImage (open images on the curve);
+    **curvePreimage_xImage : the saturation identity — preimage of
+    the image = ⨆ k, the k-th Frobenius translate** (orbit chase with
+    the sign -(toAdd g); Quotient.eq'' + MulAction.orbit both ways).
+    NEXT (3ii-c core): (α) the wandering separation at the yTop-level:
+    for y exists W ∋ y with translates pairwise disjoint (mirror
+    exists_nhd_smul_disjoint through yTopToYHomeo); (β) the invariant
+    extension: for s over such W, the family (iterated generator
+    transports on the translates) glues over curvePreimage (xImage W)
+    (= ⨆ translates by the saturation identity) via
+    isLimitSheafOn_Y.glue — compat VACUOUS on disjoint pieces; the
+    glued section is generator-invariant by separation; (γ) stalk
+    surjectivity/injectivity of ringStalkMap piYHom from (β). Non-critical parked:
     T908(c), T910 Moreover + A^r iso, T909 V₀ notes, PERF-1, E2/E3
     (dormant — the ChartRatIdx/E-track is SUPERSEDED by the ambient
     yVObj route for the sheaf condition; keep E1 as chart index infra). (superseded: the EMBEDDING-half transport
