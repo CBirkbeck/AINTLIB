@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.EllipticCurve.Comparison
+import ModularCurves.EllipticCurve.PoleSheafSuccessorHOne
 import ModularCurves.EllipticCurve.PoleSheafWeierstrassMapSectionNeighborhood
 
 /-!
@@ -103,5 +104,48 @@ theorem sectionPoleSheafPower_six_locallyWeierstrass_of_CartierGenerator
   letI : IsIso F := hIso
   exact locallyWeierstrass_of_projModelIso
     z hz h W F hF hpoint
+
+/-- A Cartier generator, the normalized first-pole basis, and vanishing of
+`H¹(O([0]))` suffice to produce a locally Weierstrass presentation. -/
+theorem sectionPoleSheafPower_locallyWeierstrass_of_CartierGenerator
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsAffine S] [IsProper π]
+    (hsm : SmoothOfRelativeDimension 1 π)
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (h : FibrewiseElliptic π z hz)
+    (U : C.affineOpens) (hU : z ⁻¹ᵁ U.1 = ⊤)
+    (r : Γ(C, U.1)) (hspan : z.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(C, U.1))
+    (hHOne : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 1).sheaf 1))
+    (bOne : Module.Basis (Fin 1) Γ(S, (⊤ : S.Opens))
+      (Scheme.Modules.baseSections π
+        (sectionPoleSheafPower π z hz 1)))
+    (hbOne : bOne 0 = sectionPoleSheafPowerOneSection π z hz) :
+    LocallyWeierstrass π z hz := by
+  have hH2 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 2).sheaf 1) :=
+    sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood
+      hsm z hz U hU hHOne (by omega)
+  have hH3 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 3).sheaf 1) :=
+    sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood
+      hsm z hz U hU hHOne (by omega)
+  have hH4 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 4).sheaf 1) :=
+    sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood
+      hsm z hz U hU hHOne (by omega)
+  have hH5 : Subsingleton (CategoryTheory.Sheaf.H
+      (sectionPoleSheafPower π z hz 5).sheaf 1) :=
+    sectionPoleSheafPower_subsingleton_H_one_of_one_of_affine_neighborhood
+      hsm z hz U hU hHOne (by omega)
+  obtain ⟨x, hx⟩ :=
+    exists_sectionPoleSheafPower_succ_baseSection_generator
+      hsm z hz U hU r hspan hnzd 1 hHOne
+  obtain ⟨y, hy⟩ :=
+    exists_sectionPoleSheafPower_succ_baseSection_generator
+      hsm z hz U hU r hspan hnzd 2 hH2
+  exact sectionPoleSheafPower_six_locallyWeierstrass_of_CartierGenerator
+    hsm z hz h U hU r hspan hnzd hHOne hH2 hH3 hH4 hH5
+      bOne hbOne x hx y hy
 
 end ModularCurves
