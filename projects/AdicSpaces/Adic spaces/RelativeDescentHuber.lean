@@ -827,6 +827,51 @@ noncomputable def imgFamily (C : RationalCoveringData A)
 
 end GluingTransport
 
+
+section ImgInter
+
+variable [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+  [DecidableEq A]
+variable (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)]
+
+/-- **The two presentations of the image intersection agree** as rational
+opens: the `B`-side intersection of the images equals the image of the
+certified `A`-side intersection. -/
+theorem imgDatumO_interDatumOpen_rationalOpen
+    {D₁ D₂ : RationalLocData A} {M₁ M₂ : ℕ}
+    (hle₁ : (Ideal.span (D₁.P.A₀.subtype '' (D₁.P.I : Set D₁.P.A₀))) ^ M₁
+      ≤ Ideal.span (D₁.T : Set A))
+    (hle₂ : (Ideal.span (D₁.P.A₀.subtype '' (D₁.P.I : Set D₁.P.A₀))) ^ M₂
+      ≤ Ideal.span (D₂.T : Set A))
+    (hcert₁ : Ideal.span ((D₁.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcert₂ : Ideal.span ((D₂.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertI : Ideal.span (((D₁.interDatumOpen D₂ M₁ M₂ hle₁ hle₂).T.image
+        D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤) :
+    rationalOpen (imgDatumO D₀ (D₁.interDatumOpen D₂ M₁ M₂ hle₁ hle₂) hcertI).T
+        (imgDatumO D₀ (D₁.interDatumOpen D₂ M₁ M₂ hle₁ hle₂) hcertI).s
+      = rationalOpen (imgDatumO D₀ D₁ hcert₁).T (imgDatumO D₀ D₁ hcert₁).s
+        ∩ rationalOpen (imgDatumO D₀ D₂ hcert₂).T
+            (imgDatumO D₀ D₂ hcert₂).s := by
+  ext w
+  constructor
+  · intro hw
+    have hwspa : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ := hw.1
+    have h1 := (mem_imgDatumO_rationalOpen_iff D₀ hcertI hwspa).mp hw
+    rw [RationalLocData.interDatumOpen_rationalOpen] at h1
+    exact ⟨(mem_imgDatumO_rationalOpen_iff D₀ hcert₁ hwspa).mpr h1.1,
+      (mem_imgDatumO_rationalOpen_iff D₀ hcert₂ hwspa).mpr h1.2⟩
+  · rintro ⟨hw₁, hw₂⟩
+    have hwspa : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ := hw₁.1
+    refine (mem_imgDatumO_rationalOpen_iff D₀ hcertI hwspa).mpr ?_
+    rw [RationalLocData.interDatumOpen_rationalOpen]
+    exact ⟨(mem_imgDatumO_rationalOpen_iff D₀ hcert₁ hwspa).mp hw₁,
+      (mem_imgDatumO_rationalOpen_iff D₀ hcert₂ hwspa).mp hw₂⟩
+
+end ImgInter
+
 end ValuationSpectrum
 
 end
