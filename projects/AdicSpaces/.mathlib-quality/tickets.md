@@ -2468,7 +2468,27 @@ sub-intervals (0 < θ, η < 1), which per AD-9 covers every strict sub-interval 
   NfstRPS/NsndRPS_le_GeltElt_mul (set-free slim bodies — `set X :=
   big-lambda with h` ITSELF can blow the decl budget by occurrence-
   scanning) + **wIRPS_le_GeltElt_mul** — THE STRICTNESS (Kedlaya ln
-  527-533). NEXT (P4-b): the kernel-inclusion — original plan: per component τ, the coefficient
+  527-533). P4-b PLAN RESOLVED 2026-07-27 (supersedes the componentwise-split
+  notes below): THE UNIT INSIGHT — at every instantiation the generator's
+  Teichmüller content zb is a ϖ-power, so gB := blocToBI-ρ(teichPowGen
+  zb m) is a UNIT of B^I-ρ ([ϖ]⁻¹ = vt ∈ Bloc, p⁻¹ = vp ∈ Bloc); with
+  hgu : IsUnit gB as a hypothesis Kedlaya's up-formula works verbatim at
+  the subring level: x_n := −(gB⁻¹)^{n+1}·Σ_{i≤n} y_i·gB^i (positive-
+  power spelling). Sub-steps: (b2) the formal identity (T − C gB)·x = y
+  coefficientwise (pure algebra from the x_n-definition); (b3) fst-decay
+  from hg1 : 1 < v_ρ₁(gB) (head/tail split of the up-formula: fixed-i
+  factors v₁(g)^{i−n−1} → 0, y-decay kills large i); (b4) snd-decay:
+  up = down + (g⁻¹)^{n+1}·(Σ_{ALL i} y_i-snd·(g-snd)^i) and THE FULL
+  SERIES VANISHES because it is the snd-component of eval(y) = 0 (the
+  σ-pair shares the top radius ρ₂, and φ-snd at η = 0 is the identity
+  component — needs a small resI-at-same-radius = id lemma); then the
+  down-form decays from hg2 : v_ρ₂(gB) ≤ 1 + y-decay; (b5)
+  restrictedness from the two decays (isRestricted_iff_wI-side) and
+  y = GeltElt·⟨x, _⟩ by coefficient-ext ⇒ ker ⊆ span. span ⊆ ker is
+  EASY: eval(GeltElt gB) = b − φ(gB) = 0 by hφb + hbg. Sequence: (b0)
+  the resI-same-radius-id lemma + the snd-eval-identity; (b1) the
+  x-definition + formal identity; (b2) the two decay lemmas; (b3) the
+  kernel theorem. ORIGINAL NOTES: per component τ, the coefficient
   sequences X := component-of-coeffSeq x, Y := component-of-coeffSeq
   (Gelt·x) satisfy hrec (from coeffSeq_Gelt_mul projected to the
   component), hbdd (restrictedness), hX0 (decay); dispatch v_τ(g-comp)
