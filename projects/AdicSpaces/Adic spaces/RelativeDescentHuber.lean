@@ -628,6 +628,156 @@ theorem keystone_restriction_squareO (x : presheafValue E) :
 end KeystoneSquares
 
 
+
+section ImgCovering
+
+variable [HasLocLiftPowerBounded A] [IsRingOfIntegralElements (A⁺ : Subring A)]
+
+variable (D₀ : RationalLocData A) [DecidableEq (presheafValue D₀)]
+
+/-- **Membership transfer into the image rational** (the two pure halves):
+a `Spa`-point of the completion lies in the image rational iff its
+`A`-shadow lies in the source rational. -/
+theorem mem_imgDatumO_rationalOpen_iff
+    {E : RationalLocData A}
+    (hspanE : Ideal.span ((E.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    {w : Spv (presheafValue D₀)}
+    (hw : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺) :
+    w ∈ rationalOpen (imgDatumO D₀ E hspanE).T (imgDatumO D₀ E hspanE).s
+      ↔ comap D₀.canonicalMap w ∈ rationalOpen E.T E.s := by
+  constructor
+  · rintro ⟨-, hT, hs⟩
+    refine ⟨comap_mem_spa (canonicalMap_continuous D₀)
+      D₀.canonicalMap_integral hw, ?_, ?_⟩
+    · intro t ht
+      rw [comap_vle]
+      exact hT (D₀.canonicalMap t) (by
+        rw [imgDatumO_T]
+        exact Finset.mem_image_of_mem _ ht)
+    · intro hcon
+      refine hs ?_
+      rw [show (imgDatumO D₀ E hspanE).s = D₀.canonicalMap E.s from rfl]
+      have := (comap_vle D₀.canonicalMap w E.s 0).mp hcon
+      rwa [map_zero] at this
+  · rintro ⟨-, hT, hs⟩
+    refine ⟨hw, ?_, ?_⟩
+    · intro t' ht'
+      rw [show (imgDatumO D₀ E hspanE).T = E.T.image D₀.canonicalMap
+        from rfl] at ht'
+      obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      rw [show (imgDatumO D₀ E hspanE).s = D₀.canonicalMap E.s from rfl]
+      exact (comap_vle D₀.canonicalMap w t E.s).mp (hT t ht)
+    · intro hcon
+      refine hs ?_
+      rw [show (imgDatumO D₀ E hspanE).s = D₀.canonicalMap E.s from rfl]
+        at hcon
+      rw [comap_vle]
+      rwa [show D₀.canonicalMap (0 : A) = 0 from map_zero _]
+
+variable [DecidableEq (RationalLocData (presheafValue D₀))]
+
+/-- The certificate-total image datum (`dite`-guarded, so `Finset.image`
+needs no dependent lambda). -/
+noncomputable def imgDatumOTot (E : RationalLocData A) :
+    RationalLocData (presheafValue D₀) :=
+  if h : Ideal.span ((E.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤
+  then imgDatumO D₀ E h
+  else globalLocData (presheafValue_concretePair D₀)
+
+theorem imgDatumOTot_of_cert {E : RationalLocData A}
+    (h : Ideal.span ((E.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤) :
+    imgDatumOTot D₀ E = imgDatumO D₀ E h :=
+  dif_pos h
+
+/-- The image pieces (a plain `Finset.image`). -/
+noncomputable def imgCoversO (C : RationalCoveringData A) :
+    Finset (RationalLocData (presheafValue D₀)) :=
+  C.covers.image (imgDatumOTot D₀)
+
+/-- Membership shape of the image pieces (certificate-resolved). -/
+theorem mem_imgCoversO (C : RationalCoveringData A)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    {D' : RationalLocData (presheafValue D₀)} :
+    D' ∈ imgCoversO D₀ C ↔
+      ∃ (D : RationalLocData A) (hD : D ∈ C.covers),
+        D' = imgDatumO D₀ D (hcertP D hD) := by
+  rw [imgCoversO, Finset.mem_image]
+  constructor
+  · rintro ⟨D, hD, rfl⟩
+    exact ⟨D, hD, (imgDatumOTot_of_cert D₀ (hcertP D hD)).symm ▸ rfl⟩
+  · rintro ⟨D, hD, rfl⟩
+    exact ⟨D, hD, imgDatumOTot_of_cert D₀ (hcertP D hD)⟩
+
+/-- The image pieces sit inside the image base (hoisted). -/
+theorem imgCoversO_subset (C : RationalCoveringData A)
+    (hcertB : Ideal.span ((C.base.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤) :
+    ∀ D' ∈ imgCoversO D₀ C,
+      rationalOpen D'.T D'.s
+        ⊆ rationalOpen (imgDatumO D₀ C.base hcertB).T
+            (imgDatumO D₀ C.base hcertB).s := by
+  intro D' hD'
+  obtain ⟨D, hD, rfl⟩ := (mem_imgCoversO D₀ C hcertP).mp hD'
+  intro w hw
+  have hwspa : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ := hw.1
+  have h1 := (mem_imgDatumO_rationalOpen_iff D₀ (hcertP D hD) hwspa).mp hw
+  have h2 := C.hsubset D hD h1
+  exact (mem_imgDatumO_rationalOpen_iff D₀ hcertB hwspa).mpr h2
+
+/-- The image pieces cover the image base (hoisted). -/
+theorem imgCoversO_cover (C : RationalCoveringData A)
+    (hcertB : Ideal.span ((C.base.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤) :
+    ∀ w ∈ rationalOpen (imgDatumO D₀ C.base hcertB).T
+        (imgDatumO D₀ C.base hcertB).s,
+      ∃ D' ∈ imgCoversO D₀ C, w ∈ rationalOpen D'.T D'.s := by
+  intro w hw
+  have hwspa : w ∈ Spa (presheafValue D₀) (presheafValue D₀)⁺ := hw.1
+  have h1 := (mem_imgDatumO_rationalOpen_iff D₀ hcertB hwspa).mp hw
+  obtain ⟨D, hD, hmem⟩ := C.hcover _ h1
+  refine ⟨imgDatumO D₀ D (hcertP D hD),
+    (mem_imgCoversO D₀ C hcertP).mpr ⟨D, hD, rfl⟩, ?_⟩
+  exact (mem_imgDatumO_rationalOpen_iff D₀ (hcertP D hD) hwspa).mpr hmem
+
+/-- **The image covering** over the completion. -/
+noncomputable def imgCoveringO (C : RationalCoveringData A)
+    (hcertB : Ideal.span ((C.base.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤) :
+    RationalCoveringData (presheafValue D₀) :=
+  ⟨imgDatumO D₀ C.base hcertB, imgCoversO D₀ C,
+    imgCoversO_subset D₀ C hcertB hcertP,
+    imgCoversO_cover D₀ C hcertB hcertP⟩
+
+/-- The image covering is rational. -/
+theorem imgCoveringO_isRational (C : RationalCoveringData A)
+    (hcertB : Ideal.span ((C.base.T.image D₀.canonicalMap
+      : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤)
+    (hcertP : ∀ D ∈ C.covers,
+      Ideal.span ((D.T.image D₀.canonicalMap
+        : Finset (presheafValue D₀)) : Set (presheafValue D₀)) = ⊤) :
+    (imgCoveringO D₀ C hcertB hcertP).IsRational := by
+  constructor
+  · exact imgDatumO_isRational D₀ C.base hcertB
+  · intro D' hD'
+    obtain ⟨D, hD, rfl⟩ := (mem_imgCoversO D₀ C hcertP).mp hD'
+    exact imgDatumO_isRational D₀ D (hcertP D hD)
+
+end ImgCovering
+
 end ValuationSpectrum
 
 end
