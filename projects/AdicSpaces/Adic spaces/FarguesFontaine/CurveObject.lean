@@ -1524,6 +1524,94 @@ theorem ringStalkMap_piYHom_injective (y : ↥(yTop p F ϖ)) :
     (((curveSpace p F ϖ).ringPresheaf.germ (xImage p F ϖ (U ⊓ W₀))
       (yTopToCurve p F ϖ y) hmem)) hz).trans hg₂.symm)
 
+/-! ### The curve as an object of Wedhorn's category (D-iv-γ packaging) -/
+
+/-- A chosen point of the `𝒴`-fiber over a curve point. -/
+noncomputable def fiberPoint (x : Curve p F ϖ) : ↥(yTop p F ϖ) :=
+  ((isOpenQuotientMap_yTopToCurve p F ϖ).surjective x).choose
+
+theorem yTopToCurve_fiberPoint (x : Curve p F ϖ) :
+    yTopToCurve p F ϖ (fiberPoint p F ϖ x) = x :=
+  ((isOpenQuotientMap_yTopToCurve p F ϖ).surjective x).choose_spec
+
+/-- **The bijectivity of the projection stalk map** (D-iv-3(γ),
+assembled). -/
+theorem ringStalkMap_piYHom_bijective (y : ↥(yTop p F ϖ)) :
+    Function.Bijective
+      (ValuationSpectrum.ringStalkMap (piYHom p F ϖ) y).hom :=
+  ⟨ringStalkMap_piYHom_injective p F ϖ y,
+    ringStalkMap_piYHom_surjective p F ϖ y⟩
+
+/-- **The stalk comparison of the curve** (D-iv-3(γ), the packaged form):
+the stalk of the curve's structure presheaf at a point is identified with
+the `𝒴`-stalk at a chosen fiber point, via point-transport followed by the
+bijective projection stalk map. -/
+noncomputable def xStalkEquiv (x : Curve p F ϖ) :
+    ToType ((curveSpace p F ϖ).ringStalk x)
+      ≃+* ToType ((yPresheafedSpace p F ϖ).ringStalk
+        (fiberPoint p F ϖ x)) :=
+  (((curveSpace p F ϖ).ringPresheaf.stalkCongr
+      (Inseparable.of_eq (yTopToCurve_fiberPoint p F ϖ x).symm)
+      ).commRingCatIsoToRingEquiv).trans
+    (RingEquiv.ofBijective
+      (ValuationSpectrum.ringStalkMap (piYHom p F ϖ)
+        (fiberPoint p F ϖ x)).hom
+      (ringStalkMap_piYHom_bijective p F ϖ (fiberPoint p F ϖ x)))
+
+/-- **The stalks of the curve are local rings** (transport along the stalk
+comparison). -/
+theorem isLocalRing_xStalk (x : Curve p F ϖ) :
+    IsLocalRing (ToType ((curveSpace p F ϖ).ringStalk x)) := by
+  haveI : IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk
+      (fiberPoint p F ϖ x))) :=
+    isLocalRing_yStalk p F ϖ (fiberPoint p F ϖ x)
+  exact (xStalkEquiv p F ϖ x).symm.isLocalRing
+
+/-- The `𝒴`-stalk valuation (the value of `yVPreObj.val`, standalone). -/
+noncomputable def yStalkValue (y : ↥(yTop p F ϖ)) :
+    Spv (ToType ((yPresheafedSpace p F ϖ).ringStalk y)) :=
+  comap ((yRingStalkEquiv p F ϖ y : _ →+* _))
+    (stalkValue (ySpaPoint p F ϖ y))
+
+/-- The support of the `𝒴`-stalk valuation is the maximal ideal
+(the `yVPreObj.val_supp` computation, standalone). -/
+theorem yStalkValue_supp (y : ↥(yTop p F ϖ)) :
+    (yStalkValue p F ϖ y).supp
+      = @IsLocalRing.maximalIdeal _ _ (isLocalRing_yStalk p F ϖ y) := by
+  haveI hSloc : IsLocalRing (ToType ((spaRingPresheaf (Ainf p F)).stalk
+      (ySpaPoint p F ϖ y))) :=
+    isLocalRing_stalk_Y p F ϖ (ySpaPoint p F ϖ y) (ySpaPoint_mem_Y p F ϖ y)
+  rw [show yStalkValue p F ϖ y
+      = comap ((yRingStalkEquiv p F ϖ y : _ →+* _))
+        (stalkValue (ySpaPoint p F ϖ y)) from rfl]
+  rw [supp_comap]
+  rw [show (stalkValue (ySpaPoint p F ϖ y)).supp
+      = @IsLocalRing.maximalIdeal _ _ hSloc from
+    (maximalIdeal_stalk_Y p F ϖ (ySpaPoint p F ϖ y)
+      (ySpaPoint_mem_Y p F ϖ y)).symm]
+  exact (maximalIdeal_comap_ringEquiv (isLocalRing_yStalk p F ϖ y)
+    hSloc (yRingStalkEquiv p F ϖ y)).symm
+
+/-- **The adic Fargues–Fontaine curve as an object of `𝒱^pre`**
+(D-iv, the pre-object): the `φ`-invariant structure presheaf on the
+quotient, with the stalk-local-ring and stalk-valuation package
+transported from `𝒴` along the bijective projection stalk maps. -/
+noncomputable def xVPreObj : VPreObj where
+  toPresheafedSpace := curveSpace p F ϖ
+  isLocalRing_stalk := fun x => isLocalRing_xStalk p F ϖ x
+  val := fun x => comap ((xStalkEquiv p F ϖ x : _ →+* _))
+    (yStalkValue p F ϖ (fiberPoint p F ϖ x))
+  val_supp := fun x => by
+    haveI hSloc : IsLocalRing (ToType ((yPresheafedSpace p F ϖ).ringStalk
+        (fiberPoint p F ϖ x))) :=
+      isLocalRing_yStalk p F ϖ (fiberPoint p F ϖ x)
+    rw [supp_comap]
+    rw [show (yStalkValue p F ϖ (fiberPoint p F ϖ x)).supp
+        = @IsLocalRing.maximalIdeal _ _ hSloc from
+      yStalkValue_supp p F ϖ (fiberPoint p F ϖ x)]
+    exact (maximalIdeal_comap_ringEquiv (isLocalRing_xStalk p F ϖ x)
+      hSloc (xStalkEquiv p F ϖ x)).symm
+
 end FarguesFontaine
 
 end
