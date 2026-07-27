@@ -1883,6 +1883,116 @@ theorem exists_evalBI_approx_bloc
 
 end Assembly
 
+
+/-! ### The correction round (T910 P3e) -/
+
+section Correction
+
+variable {σ₁ : NNReal} {hσ₁0 : 0 < σ₁} {hσ₁1 : σ₁ < 1}
+variable (φ : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)
+  →+* ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+variable (hφ : ∀ z, wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+    ((φ z : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+      : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  ≤ wI p F hρ₁0 hρ₁1 hρ₂0 hρ₂1
+      ((z : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        : (hatK p F hρ₁0 hρ₁1) × (hatK p F hρ₂0 hρ₂1)))
+variable (hφb : ∀ x : Bloc p F ϖ,
+  ((φ (blocToBI p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 x)
+    : ↥(BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1))
+    : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+  = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)
+
+include hφb in
+/-- **The correction round** (case 1): a residual of size `W·2⁻ᵐ` is reduced
+to `W·2⁻⁽ᵐ⁺¹⁾` by a lift of `K`-controlled round norm. -/
+theorem exists_correction_step_BI
+    (hρσ : ρ₁ ≤ σ₁) (hσρ : σ₁ ≤ ρ₂)
+    (zb : OF F) (m₀ : ℕ) (hm₀ : 0 < m₀)
+    (hgen : perfectoidValuation p F (zb : F) = σ₁ ^ m₀)
+    {b : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1)}
+    (hbmem : b ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hb : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 b ≤ 1)
+    (hbg : b = BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (teichPowGen p F ϖ zb m₀))
+    {W : NNReal} (hW0 : 0 < W) (hWle : W ≤ 1) (n : ℕ)
+    (r : (hatK p F hσ₁0 hσ₁1) × (hatK p F hρ₂0 hρ₂1))
+    (hrmem : r ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1)
+    (hrbnd : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 r ≤ W * (2⁻¹ : NNReal) ^ n) :
+    ∃ f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)),
+      wIRPS p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1
+        (f : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+        ≤ σ₁ ^ m₀ * ((ρ₁ ^ m₀)⁻¹) * (W * (2⁻¹ : NNReal) ^ n)
+      ∧ (r - evalBI p F ϖ φ hφ hbmem hb f)
+          ∈ BISub p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      ∧ wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 (r - evalBI p F ϖ φ hφ hbmem hb f)
+        ≤ W * (2⁻¹ : NNReal) ^ (n + 1) := by
+  have hhalf0 : (0 : NNReal) < 2⁻¹ := by norm_num
+  have hhalf1 : ((2 : NNReal)⁻¹) ≤ 1 := by norm_num
+  have hε : (0 : NNReal) < W * (2⁻¹ : NNReal) ^ (n + 1) :=
+    mul_pos hW0 (pow_pos hhalf0 _)
+  -- the Bloc approximant
+  obtain ⟨x, hxapp⟩ := exists_BIProd_approx p F ϖ hrmem hε
+  have hxle : wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+      (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x) ≤ W * (2⁻¹ : NNReal) ^ n := by
+    have hrw : BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x
+        = r + -(r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x) := by ring
+    calc (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+          (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x))
+        = wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+          (r + -(r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)) := by
+          rw [← hrw]
+      _ ≤ max (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 r)
+          (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            (-(r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x))) :=
+          wI_add_le p F _ _
+      _ = max (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1 r)
+          (wI p F hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            (r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1 x)) := by rw [wI_neg]
+      _ ≤ W * (2⁻¹ : NNReal) ^ n := by
+          refine max_le hrbnd (le_trans hxapp ?_)
+          exact mul_le_mul_of_nonneg_left
+            (pow_le_pow_of_le_one zero_le hhalf1 (Nat.le_succ n)) zero_le
+  -- destructure the approximant as a fraction
+  obtain ⟨⟨w, s⟩, rfl⟩ := IsLocalization.mk'_surjective
+    (M := Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ))
+    (S := Bloc p F ϖ) x
+  obtain ⟨k, hk⟩ := (Submonoid.mem_powers_iff _ _).mp s.2
+  have hs : s = sPow p F ϖ k := Subtype.ext hk.symm
+  subst hs
+  -- the per-radius bounds of the approximant
+  have hxw := hxle
+  rw [wI_BIProd p F ϖ, valued_BlocToHatK p F ϖ, valued_BlocToHatK p F ϖ]
+    at hxw
+  have hw1 : wLoc p F ϖ hσ₁0 hσ₁1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+      ≤ W * (2⁻¹ : NNReal) ^ n := le_trans (le_max_left _ _) hxw
+  have hw2 : wLoc p F ϖ hρ₂0 hρ₂1
+      (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+      ≤ W * (2⁻¹ : NNReal) ^ n := le_trans (le_max_right _ _) hxw
+  -- the round-budget is ≤ 1
+  have hWn : W * (2⁻¹ : NNReal) ^ n ≤ 1 := by
+    calc W * (2⁻¹ : NNReal) ^ n
+        ≤ 1 * 1 := mul_le_mul hWle (pow_le_one₀ zero_le hhalf1)
+          zero_le zero_le
+      _ = 1 := one_mul 1
+  -- the first approximation of the approximant
+  obtain ⟨f, hfres, hfnorm⟩ := exists_evalBI_approx_bloc p F ϖ φ hφ hφb
+    hρσ hσρ zb m₀ hm₀ hgen hbmem hb hbg w k hWn hw1 hw2 hε
+  refine ⟨f, hfnorm, ?_, ?_⟩
+  · exact sub_mem hrmem (evalBI_mem p F ϖ φ hφ hbmem hb f)
+  · have hsplit : r - evalBI p F ϖ φ hφ hbmem hb f
+        = (r - BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+            (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k)))
+          + (BIProd p F ϖ hσ₁0 hσ₁1 hρ₂0 hρ₂1
+              (IsLocalization.mk' (Bloc p F ϖ) w (sPow p F ϖ k))
+            - evalBI p F ϖ φ hφ hbmem hb f) := by ring
+    rw [hsplit]
+    exact le_trans (wI_add_le p F _ _) (max_le hxapp hfres)
+
+end Correction
+
 end FarguesFontaine
 
 end
