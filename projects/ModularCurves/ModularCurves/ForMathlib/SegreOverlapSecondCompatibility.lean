@@ -610,4 +610,98 @@ lemma segreStandardSecondChartOverlapAlgHom_eq
         (segreChartForwardAlgHom R m n a b x)
     _ = _ := rfl
 
+/-- The double Segre-image chart maps to its second standard chart. -/
+def segreImageOverlapToSecondChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    Spec
+        (CommRingCat.of
+          (SegreImageChartOverlapRing R m n i a j b)) ⟶
+      Spec
+        (CommRingCat.of
+          (SegreImageChartRing R m n a b)) :=
+  Spec.map
+    (CommRingCat.ofHom
+      (segreImageSecondChartToOverlapAway R m n i a j b))
+
+/-- The product-overlap isomorphism intertwines the second standard charts. -/
+@[reassoc]
+lemma segreProductOverlapIsoSegreImage_hom_toSecondChart
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    (segreProductOverlapIsoSegreImage R m n i a j b).hom ≫
+        segreImageOverlapToSecondChart R m n i a j b =
+      Spec.map
+          (CommRingCat.ofHom
+            (segreProductSecondChartAlgHom
+              R m n i a j b).toRingHom) ≫
+        Spec.map
+          (CommRingCat.ofHom
+            (segreChartForwardAlgHom
+              R m n a b).toRingHom) := by
+  simp only [segreProductOverlapIsoSegreImage,
+    segreImageOverlapToSecondChart,
+    Scheme.Spec_map, Functor.mapIso_hom, Iso.op_hom,
+    Quiver.Hom.unop_op, ← Spec.map_comp]
+  congr 1
+  ext x
+  exact
+    DFunLike.congr_fun
+      (segreStandardSecondChartOverlapAlgHom_eq
+        R m n i a j b) x
+
+/-- The double Segre-image chart factors through its second standard chart into `Proj`. -/
+lemma segreImageOverlapToSecondChart_toProj
+    (R : Type u) [CommRing R] (m n : ℕ)
+    (i a : Fin (m + 1)) (j b : Fin (n + 1)) :
+    segreImageOverlapToSecondChart R m n i a j b ≫
+        Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n a b))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n a b))
+          Nat.zero_lt_one =
+      segreImageOverlapToProj R m n i a j b := by
+  change
+    Spec.map
+          (CommRingCat.ofHom
+            (awayMap
+              (segreImageGrading R m n)
+              (segreImageCoordinate_mem_degreeOne R m n
+                (segrePairIndex m n i j))
+              (mul_comm
+                (segreImageCoordinate R m n
+                  (segrePairIndex m n i j))
+                (segreImageCoordinate R m n
+                  (segrePairIndex m n a b))))) ≫
+        Proj.awayι
+          (segreImageGrading R m n)
+          (segreImageCoordinate R m n
+            (segrePairIndex m n a b))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n a b))
+          Nat.zero_lt_one =
+      Proj.awayι
+        (segreImageGrading R m n)
+        (segreImageCoordinate R m n
+            (segrePairIndex m n i j) *
+          segreImageCoordinate R m n
+            (segrePairIndex m n a b))
+        (SetLike.mul_mem_graded
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n i j))
+          (segreImageCoordinate_mem_degreeOne R m n
+            (segrePairIndex m n a b)))
+        (by omega)
+  rw [Proj.awayι, Proj.awayι, Iso.eq_inv_comp,
+    Proj.basicOpenIsoSpec_hom,
+    Proj.basicOpenToSpec_SpecMap_awayMap_assoc,
+    ← Proj.basicOpenIsoSpec_hom _ _ _ _,
+    Iso.hom_inv_id_assoc, Scheme.homOfLE_ι]
+  · exact
+      segreImageCoordinate_mem_degreeOne R m n
+        (segrePairIndex m n a b)
+  · exact Nat.zero_lt_one
+
 end MvPolynomial
