@@ -3052,6 +3052,85 @@ theorem isRestricted_kerSol (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ�
   have hab' : a 0 = b 0 := hab
   rw [ha, hb, hab']
 
+/-- The per-coefficient kernel identity (hoisted for budget). -/
+theorem kerSol_coeff_identity (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) (n : ℕ) :
+    (if 1 ≤ n then kerSolElt p F ϖ gB hgu
+        (fun m => coeffSeq (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) m) (n - 1) else 0)
+      - gB * kerSolElt p F ϖ gB hgu
+        (fun m => coeffSeq (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) m) n
+      = coeffSeq (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n := by
+  have hinv : gB * (((hgu.unit⁻¹
+      : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) = 1 := by
+    have h := hgu.unit.mul_inv
+    rwa [hgu.unit_spec] at h
+  cases n with
+  | zero =>
+    exact kerSol_rec_generic gB
+      (((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) hinv
+      (fun m => coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) m) 0
+  | succ m =>
+    exact kerSol_rec_generic gB
+      (((hgu.unit⁻¹ : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+        : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) hinv
+      (fun m' => coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) m') (m + 1)
+
+/-- **The kernel factorization**: the generator times the kernel solution
+recovers the original series. -/
+theorem GeltElt_mul_kerSol (gB : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))
+    (hgu : IsUnit gB)
+    (f : ↥(restrictedMvPowerSeriesSubring 1
+      ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+    (hres : MvPowerSeries.IsRestricted
+      ((fun s => kerSolElt p F ϖ gB hgu
+        (fun n => coeffSeq (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n) (s 0))
+        : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) :
+    GeltElt p F ϖ gB * ⟨_, hres⟩ = f := by
+  have hinv : gB * (((hgu.unit⁻¹
+      : (↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))ˣ)
+      : ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1))) = 1 := by
+    have h := hgu.unit.mul_inv
+    rwa [hgu.unit_spec] at h
+  apply Subtype.ext
+  refine MvPowerSeries.ext fun s => ?_
+  have hs : s = Finsupp.single (0 : Fin 1) (s 0) := by
+    refine Finsupp.ext fun i => ?_
+    rw [Subsingleton.elim i (0 : Fin 1), Finsupp.single_eq_same]
+  rw [hs]
+  show coeffSeq ((GeltElt p F ϖ gB * (⟨_, hres⟩
+      : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (s 0)
+    = coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) (s 0)
+  rw [RPS_BI_coe_mul p F ϖ, GeltElt_coe p F ϖ, coeffSeq_Gelt_mul]
+  have hcs : ∀ m : ℕ, coeffSeq (((⟨_, hres⟩
+      : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : ↥(restrictedMvPowerSeriesSubring 1
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)))
+      : MvPowerSeries (Fin 1) ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) m
+      = kerSolElt p F ϖ gB hgu
+        (fun n => coeffSeq (f : MvPowerSeries (Fin 1)
+          ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n) m := fun m =>
+    congrArg (kerSolElt p F ϖ gB hgu
+      (fun n => coeffSeq (f : MvPowerSeries (Fin 1)
+        ↥(BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1)) n)) Finsupp.single_eq_same
+  rw [hcs (s 0 - 1), hcs (s 0)]
+  exact kerSol_coeff_identity p F ϖ gB hgu f (s 0)
+
 end FarguesFontaine
 
 end
