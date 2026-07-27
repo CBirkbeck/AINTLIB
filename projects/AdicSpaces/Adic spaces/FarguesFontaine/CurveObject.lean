@@ -1107,6 +1107,90 @@ theorem ringStalkMap_piYHom_germ (y : ↥(yTop p F ϖ))
         ((yPresheafedSpace p F ϖ).presheaf
           ⋙ CompleteTopCommRingCat.forgetToCommRingCat) y)) h1).trans h2))
 
+/-- The restricted ring presheaf's action is the `yFunctor`-level
+restriction (pointwise). -/
+theorem yRingPresheaf_map_apply {V' V : Opens ↥(yTop p F ϖ)} (h : V' ≤ V)
+    (f : ToType ((yPresheafedSpace p F ϖ).ringPresheaf.obj (op V))) :
+    (ConcreteCategory.hom
+        ((yPresheafedSpace p F ϖ).ringPresheaf.map (homOfLE h).op)) f
+      = limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE h))) f :=
+  structurePresheaf_map (((yFunctor p F ϖ).map (homOfLE h)).op) f
+
+/-- Germ-restriction collapse for the restricted presheaf (the
+`limitRestrict` form). -/
+theorem yGerm_limitRestrict {V' V : Opens ↥(yTop p F ϖ)} (h : V' ≤ V)
+    {y : ↥(yTop p F ϖ)} (hy : y ∈ V')
+    (f : ToType ((yPresheafedSpace p F ϖ).ringPresheaf.obj (op V))) :
+    (yPresheafedSpace p F ϖ).ringPresheaf.germ V' y hy
+        (limitRestrict (leOfHom ((yFunctor p F ϖ).map (homOfLE h))) f)
+      = (yPresheafedSpace p F ϖ).ringPresheaf.germ V y (h hy) f := by
+  rw [← yRingPresheaf_map_apply p F ϖ h f]
+  exact TopCat.Presheaf.germ_res_apply
+    ((yPresheafedSpace p F ϖ).ringPresheaf) (homOfLE h) y hy f
+
+/-- **Surjectivity of the projection stalk map** (D-iv-3(γ ii)): every germ
+of the `𝒴`-presheaf lifts to an invariant germ of the curve presheaf. -/
+theorem ringStalkMap_piYHom_surjective (y : ↥(yTop p F ϖ)) :
+    Function.Surjective
+      (ValuationSpectrum.ringStalkMap (piYHom p F ϖ) y).hom := by
+  intro a
+  obtain ⟨U, hyU, f, rfl⟩ :=
+    ((yPresheafedSpace p F ϖ).ringPresheaf).exists_germ_eq a
+  obtain ⟨W₀, hyW₀, hdis₀⟩ := exists_disjoint_translates p F ϖ y
+  set W : Opens ↥(yTop p F ϖ) := U ⊓ W₀ with hWdef
+  have hyW : y ∈ W := ⟨hyU, hyW₀⟩
+  have hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)) := by
+    intro k hk
+    refine (hdis₀ k hk).mono ?_ ?_
+    · intro z hz
+      exact (hz : z ∈ (Opens.map (yFrobTop p F ϖ k)).obj (U ⊓ W₀)).2
+    · exact fun z hz => (hz : z ∈ (U ⊓ W₀ : Opens _)).2
+  set fW := limitRestrict
+    (leOfHom ((yFunctor p F ϖ).map (homOfLE
+      (inf_le_left : W ≤ U)))) f with hfWdef
+  obtain ⟨t, ht0⟩ := exists_invariant_extension p F ϖ W hdis fW
+  have hmem : yTopToCurve p F ϖ y ∈ xImage p F ϖ W := ⟨y, hyW, rfl⟩
+  refine ⟨(curveSpace p F ϖ).ringPresheaf.germ (xImage p F ϖ W)
+    (yTopToCurve p F ϖ y) hmem t, ?_⟩
+  rw [ringStalkMap_piYHom_germ p F ϖ y (xImage p F ϖ W) hmem t]
+  -- the zero-translate membership of y
+  have hy0 : y ∈ (Opens.map (yFrobTop p F ϖ 0)).obj W := by
+    show yFrobTop p F ϖ 0 y ∈ (W : Set _)
+    rw [yFrobTop_zero p F ϖ y]
+    exact hyW
+  -- chase both germs down to the zero translate
+  have h1 := yGerm_limitRestrict p F ϖ
+    (translate_le_curvePreimage_xImage p F ϖ W 0) hy0 t.1
+  have h2 := yGerm_limitRestrict p F ϖ
+    (le_of_eq (map_yFrobTop_zero p F ϖ W)) hy0 fW
+  have h3 := yGerm_limitRestrict p F ϖ (inf_le_left : W ≤ U) hyW f
+  have hchain : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+      ((Opens.map (yTopToCurveTop p F ϖ)).obj (xImage p F ϖ W)) y hmem)
+      (piComponent p F ϖ (xImage p F ϖ W) t)
+      = ((yPresheafedSpace p F ϖ).ringPresheaf.germ U y hyU) f := by
+    have e1 : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+        ((Opens.map (yTopToCurveTop p F ϖ)).obj (xImage p F ϖ W)) y hmem)
+        (piComponent p F ϖ (xImage p F ϖ W) t)
+        = ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+            ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
+          (limitRestrict (yFunctor_translate_le p F ϖ W 0) t.1) := h1.symm
+    have e2 : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+        ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
+        (limitRestrict (yFunctor_translate_le p F ϖ W 0) t.1)
+        = ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+            ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
+          (limitRestrict (yFunctor_translate_zero_le p F ϖ W) fW) :=
+      congrArg _ ht0
+    have e3 : ((yPresheafedSpace p F ϖ).ringPresheaf.germ
+        ((Opens.map (yFrobTop p F ϖ 0)).obj W) y hy0)
+        (limitRestrict (yFunctor_translate_zero_le p F ϖ W) fW)
+        = ((yPresheafedSpace p F ϖ).ringPresheaf.germ W y hyW) fW := h2
+    exact ((e1.trans e2).trans e3).trans h3
+  exact hchain
+
 end FarguesFontaine
 
 end
