@@ -1072,7 +1072,12 @@ non-Tate bases are supported.
     Sub-tickets: (D-i-t1) DONE 2026-07-27
     (FarguesFontaine/UniformizerEquivariance.lean: isLocalization_twist_Bloc,
     blocTwistEquiv + _algebraMap, gaussValue_p_teichPi_pow,
-    wLoc_blocTwistEquiv); (D-i-t2) BISub-equivariance; (D-i-t3) circle datum
+    wLoc_blocTwistEquiv); (D-i-t2) DONE 2026-07-27 — STRONGER than planned:
+    hatK is uniformizer-FREE by construction (wK lives on FractionRing A_inf),
+    so BlocToHatK_twist (the change iso intertwines, by localization-lift
+    uniqueness) gives BISub_twist: BISub-in-ϖ' = BISub-in-ϖ as SUBRING
+    EQUALITY (not just iso) — the neighbouring charts' interval rings at a
+    common interval literally coincide; (D-i-t3) circle datum
     over B_n (RationalLocData with image params, hopen from p-unit) +
     keystone-over-B_n applications; (D-i-t4) the composed transition iso;
     negative-side mirrors throughout;

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: AINTLIB AI workers
 -/
 import «Adic spaces».FarguesFontaine.RobbaLoc
+import «Adic spaces».FarguesFontaine.IntervalRing
 
 /-!
 # Uniformizer-equivariance of `Bloc` and its Gauss valuations (D-i-t1)
@@ -32,6 +33,7 @@ variable (p : ℕ) [Fact (Nat.Prime p)]
 variable (F : Type*) [Field F] [TopologicalSpace F] [IsTopologicalRing F]
   [UniformSpace F] [NonarchimedeanRing F] [IsPerfectoidField p F] [CharP F p]
 variable (ϖ : PseudoUniformizer F)
+variable {ρ₁ ρ₂ : NNReal} {hρ₁0 : 0 < ρ₁} {hρ₁1 : ρ₁ < 1} {hρ₂0 : 0 < ρ₂} {hρ₂1 : ρ₂ < 1}
 
 /-- **`Bloc` is uniformizer-invariant**: if `[ϖ']^k = [ϖ]` then `Bloc-in-ϖ` is
 also the localization away from `p·[ϖ']`. -/
@@ -176,6 +178,57 @@ theorem wLoc_blocTwistEquiv {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
   rw [Valuation.map_mul, wLoc_algebraMap, wLoc_algebraMap, hval] at h1
   rw [Valuation.map_mul, wLoc_algebraMap, wLoc_algebraMap, hval] at h2
   exact mul_right_cancel₀ hne (h1.trans h2.symm)
+
+/-- **`BlocToHatK` is uniformizer-equivariant**: the change isomorphism
+intertwines the maps to the (uniformizer-free) completed field. -/
+theorem BlocToHatK_twist {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
+    (h : teichPi p F ϖ' ^ k = teichPi p F ϖ) {ρ : NNReal} (hρ0 : 0 < ρ)
+    (hρ1 : ρ < 1) (z : Bloc p F ϖ') :
+    BlocToHatK p F ϖ hρ0 hρ1 (blocTwistEquiv p F ϖ hk h z)
+      = BlocToHatK p F ϖ' hρ0 hρ1 z := by
+  letI := isLocalization_twist_Bloc p F ϖ hk h
+  have hext : (BlocToHatK p F ϖ hρ0 hρ1).comp
+      ((blocTwistEquiv p F ϖ hk h).toRingHom)
+      = BlocToHatK p F ϖ' hρ0 hρ1 := by
+    refine IsLocalization.ringHom_ext
+      (Submonoid.powers ((p : Ainf p F) * teichPi p F ϖ')) ?_
+    ext y
+    show BlocToHatK p F ϖ hρ0 hρ1 (blocTwistEquiv p F ϖ hk h
+      (algebraMap (Ainf p F) (Bloc p F ϖ') y)) = BlocToHatK p F ϖ' hρ0 hρ1
+        (algebraMap (Ainf p F) (Bloc p F ϖ') y)
+    rw [blocTwistEquiv_algebraMap]
+    rw [show BlocToHatK p F ϖ hρ0 hρ1 (algebraMap (Ainf p F) (Bloc p F ϖ) y)
+        = toHatK p F hρ0 hρ1 y from IsLocalization.lift_eq _ y,
+      show BlocToHatK p F ϖ' hρ0 hρ1 (algebraMap (Ainf p F) (Bloc p F ϖ') y)
+        = toHatK p F hρ0 hρ1 y from IsLocalization.lift_eq _ y]
+  exact congrFun (congrArg (fun f => f.toFun) hext) z
+
+/-- **`B^I` is uniformizer-invariant on the nose**: the interval subrings for
+`[ϖ']^k = [ϖ]` coincide as subrings of the (uniformizer-free) product of
+completed fields. -/
+theorem BISub_twist {ϖ' : PseudoUniformizer F} {k : ℕ} (hk : 0 < k)
+    (h : teichPi p F ϖ' ^ k = teichPi p F ϖ) :
+    BISub p F ϖ' hρ₁0 hρ₁1 hρ₂0 hρ₂1 = BISub p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1 := by
+  have hrange : (BIProd p F ϖ' hρ₁0 hρ₁1 hρ₂0 hρ₂1).range
+      = (BIProd p F ϖ hρ₁0 hρ₁1 hρ₂0 hρ₂1).range := by
+    ext w
+    constructor
+    · rintro ⟨z, rfl⟩
+      refine ⟨blocTwistEquiv p F ϖ hk h z, ?_⟩
+      show (BlocToHatK p F ϖ hρ₁0 hρ₁1 (blocTwistEquiv p F ϖ hk h z),
+          BlocToHatK p F ϖ hρ₂0 hρ₂1 (blocTwistEquiv p F ϖ hk h z))
+        = (BlocToHatK p F ϖ' hρ₁0 hρ₁1 z, BlocToHatK p F ϖ' hρ₂0 hρ₂1 z)
+      rw [BlocToHatK_twist p F ϖ hk h hρ₁0 hρ₁1 z,
+        BlocToHatK_twist p F ϖ hk h hρ₂0 hρ₂1 z]
+    · rintro ⟨z, rfl⟩
+      refine ⟨(blocTwistEquiv p F ϖ hk h).symm z, ?_⟩
+      show (BlocToHatK p F ϖ' hρ₁0 hρ₁1 ((blocTwistEquiv p F ϖ hk h).symm z),
+          BlocToHatK p F ϖ' hρ₂0 hρ₂1 ((blocTwistEquiv p F ϖ hk h).symm z))
+        = (BlocToHatK p F ϖ hρ₁0 hρ₁1 z, BlocToHatK p F ϖ hρ₂0 hρ₂1 z)
+      rw [← BlocToHatK_twist p F ϖ hk h hρ₁0 hρ₁1,
+        ← BlocToHatK_twist p F ϖ hk h hρ₂0 hρ₂1,
+        RingEquiv.apply_symm_apply]
+  rw [BISub, BISub, hrange]
 
 end FarguesFontaine
 
