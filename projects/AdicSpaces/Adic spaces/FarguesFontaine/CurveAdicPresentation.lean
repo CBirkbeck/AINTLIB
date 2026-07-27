@@ -179,6 +179,63 @@ noncomputable def windowSubAffinoid (n : ℤ)
     ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
   ValuationSpectrum.AffinoidAdicPresentation.ofIsSheafy (presheafValue D')
 
+noncomputable local instance : DecidableEq (Ainf p F) := Classical.decEq _
+
+/-- **The `ℤ`-unified window chart homeomorphism**: for every `n : ℤ`, the
+adic spectrum of the `n`-th window chart ring is the `n`-th Big-window trace
+(the `ℕ`- and negative-side chart homeomorphisms, aligned with the
+`windowUnif`-uniformizer). -/
+noncomputable def spaChartHomeoWindow (hp : 1 < p) : ∀ n : ℤ,
+    ↥(Spa (windowChartRing p F ϖ n) (ringPlus (windowChartRing p F ϖ n)))
+      ≃ₜ ↥(bigWindow p F ϖ n ∩ Spa (Ainf p F) (ringPlus (Ainf p F)))
+  | .ofNat k => spaChartHomeoBigWindow p F ϖ k hp
+  | .negSucc m => spaChartHomeoBigWindowNeg p F ϖ (m + 1) hp
+
+/-- The Big-window trace is open in the `𝒴`-carrier (the `Spa`-side
+membership is automatic on `yTop`, so the trace is a finite intersection of
+basic-open traces). -/
+theorem isOpen_yTop_windowTrace (n : ℤ) :
+    IsOpen {z : ↥(yTop p F ϖ) |
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ bigWindow p F ϖ n} := by
+  rw [show bigWindow p F ϖ n
+      = rationalOpen (chartData p F (windowUnif p F ϖ n) 1 1 p 1).T
+          (chartData p F (windowUnif p F ϖ n) 1 1 p 1).s from
+    bigWindow_eq_rationalOpen_windowUnif p F ϖ n]
+  set T := (chartData p F (windowUnif p F ϖ n) 1 1 p 1).T with hT
+  set s := (chartData p F (windowUnif p F ϖ n) 1 1 p 1).s with hs
+  have hTne : T.Nonempty := by
+    rw [hT]
+    exact ⟨(p : Ainf p F) ^ (p + 1),
+      Finset.mem_insert_self _ {teichPi p F (windowUnif p F ϖ n) ^ (1 + 1)}⟩
+  have hset : {z : ↥(yTop p F ϖ) |
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F)) ∈ rationalOpen T s}
+      = {z : ↥(yTop p F ϖ) |
+          ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+            : Spv (Ainf p F)) ∈ ⋂ t ∈ (T : Set (Ainf p F)), basicOpen t s} := by
+    ext z
+    constructor
+    · rintro ⟨-, hT', hs'⟩
+      exact Set.mem_iInter₂.mpr fun t ht => ⟨hT' t ht, hs'⟩
+    · intro hz
+      have hzSpa : ((ySpaPoint p F ϖ z
+          : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) : Spv (Ainf p F))
+          ∈ Spa (Ainf p F) (ringPlus (Ainf p F)) :=
+        (ySpaPoint p F ϖ z).2
+      obtain ⟨t₀, ht₀⟩ := hTne
+      have h₀ := Set.mem_iInter₂.mp hz
+      exact ⟨hzSpa, fun t ht => (h₀ t ht).1, (h₀ t₀ ht₀).2⟩
+  rw [hset]
+  have hcont : Continuous (fun z : ↥(yTop p F ϖ) =>
+      ((ySpaPoint p F ϖ z : ↥(Spa (Ainf p F) (ringPlus (Ainf p F))))
+        : Spv (Ainf p F))) :=
+    continuous_subtype_val.comp continuous_subtype_val
+  refine IsOpen.preimage hcont ?_
+  refine Set.Finite.isOpen_biInter (Finset.finite_toSet T) ?_
+  intro t _
+  exact isOpen_basicOpen t s
+
 end FarguesFontaine
 
 end
