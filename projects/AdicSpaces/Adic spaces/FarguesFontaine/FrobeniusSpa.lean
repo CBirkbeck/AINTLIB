@@ -86,15 +86,22 @@ theorem comap_frobPow_eq_smul (k : ℤ) (v : Spv (Ainf p F)) :
     = Multiplicative.ofAdd k from by
       rw [← ofAdd_neg, neg_neg]]
 
+/-- The comap of a Frobenius power preserves `Spa` (extracted so the
+`spaFrob` literal stays small). -/
+theorem spaFrob_mem_spa (k : ℤ)
+    (v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
+    comap (frobPow p F k).toRingHom v.1
+      ∈ Spa (Ainf p F) (ringPlus (Ainf p F)) := by
+  refine comap_mem_spa_map (frobPow p F k) (ringPlus (Ainf p F))
+    (continuous_frobPow p F k) ?_
+  rw [← ringPlus_map_frobPow p F k]
+  exact v.2
+
 /-- **The Frobenius action on the adic spectrum** (the `k`-th power), via
 `comap`; lands in `Spa` since `⊤` is stable. -/
 def spaFrob (k : ℤ) (v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
     ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) :=
-  ⟨comap (frobPow p F k).toRingHom v.1, by
-    refine comap_mem_spa_map (frobPow p F k) (ringPlus (Ainf p F))
-      (continuous_frobPow p F k) ?_
-    rw [← ringPlus_map_frobPow p F k]
-    exact v.2⟩
+  ⟨comap (frobPow p F k).toRingHom v.1, spaFrob_mem_spa p F k v⟩
 
 theorem spaFrob_coe (k : ℤ) (v : ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
     (spaFrob p F k v : Spv (Ainf p F))

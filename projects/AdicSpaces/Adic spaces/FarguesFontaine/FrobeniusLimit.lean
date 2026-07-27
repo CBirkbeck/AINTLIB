@@ -35,14 +35,14 @@ def frobOpens (k : ℤ) (W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) :
     Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F))) :=
   ⟨spaFrob p F k ⁻¹' (W : Set _), W.2.preimage (continuous_spaFrob p F k)⟩
 
-/-- The transported rational index: a rational index of the Frobenius
-preimage pulls back to a rational index of the original open. -/
-def frobIndex (k : ℤ) {W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
-    (E : RationalIndex (frobOpens p F k W)) : RationalIndex W where
-  D := E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
-    (continuous_frobPow_symm p F (-k))
-  isRational := RationalLocData.mapHuber_isRational _ _ _ E.D E.isRational
-  subset := by
+/-- The subset witness of the transported rational index, extracted so the
+`frobIndex` literal stays small (kernel projection-reduction budget). -/
+theorem frobIndex_subset (k : ℤ)
+    {W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
+    (E : RationalIndex (frobOpens p F k W)) :
+    spaOpen (E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+        (continuous_frobPow_symm p F (-k)))
+      ⊆ (W : Set ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))) := by
     have h1 : spaFrob p F (-k) ⁻¹' spaOpen E.D
         = spaOpen (E.D.mapHuber (frobPow p F (-k))
             (continuous_frobPow p F (-k)) (continuous_frobPow_symm p F (-k))) :=
@@ -56,6 +56,15 @@ def frobIndex (k : ℤ) {W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
       rwa [neg_neg] at h
     rw [← hroundtrip]
     exact hsub
+
+/-- The transported rational index: a rational index of the Frobenius
+preimage pulls back to a rational index of the original open. -/
+def frobIndex (k : ℤ) {W : Opens ↥(Spa (Ainf p F) (ringPlus (Ainf p F)))}
+    (E : RationalIndex (frobOpens p F k W)) : RationalIndex W where
+  D := E.D.mapHuber (frobPow p F (-k)) (continuous_frobPow p F (-k))
+    (continuous_frobPow_symm p F (-k))
+  isRational := RationalLocData.mapHuber_isRational _ _ _ E.D E.isRational
+  subset := frobIndex_subset p F k E
 
 /-- The Pi-level Frobenius transport (all ring-hom laws free). -/
 def limitFrobPiHom (k : ℤ)

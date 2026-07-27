@@ -67,15 +67,14 @@ theorem locMapAway_mem_locSubring (φ : A →+* B)
   | neg y _ hy => rw [map_neg]; exact neg_mem hy
   | zero => rw [map_zero]; exact zero_mem _
 
-/-- **Transport of a rational datum along a bicontinuous ring equivalence,
-general Huber form** (no spanning condition; `hopen` transported through the
-datum-free localization pushforward). -/
-def RationalLocData.mapHuber (e : A ≃+* B) (he : Continuous e)
-    (he' : Continuous e.symm) (D : RationalLocData A) : RationalLocData B where
-  P := D.P.mapRingEquiv e he he'
-  T := D.T.image e
-  s := e D.s
-  hopen := by
+/-- The transported openness witness, extracted so the `mapHuber` structure
+literal stays small (kernel projection-reduction budget). -/
+theorem RationalLocData.mapHuber_hopen (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) (D : RationalLocData A) :
+    ∃ N : ℕ, ∀ b : (D.P.mapRingEquiv e he he').A₀,
+      b ∈ (D.P.mapRingEquiv e he he').I ^ N →
+      divByS (↑b : B) (e D.s)
+        ∈ locSubring (D.P.mapRingEquiv e he he') (D.T.image e) (e D.s) := by
     obtain ⟨N, hN⟩ := D.hopen
     refine ⟨N, fun b hb => ?_⟩
     have hb' : b ∈ Ideal.map (e.subringMap (s := D.P.A₀)).toRingHom
@@ -94,6 +93,16 @@ def RationalLocData.mapHuber (e : A ≃+* B) (he : Continuous e)
     rw [locMapAway_divByS] at hmem
     rw [show ((b : ↥(D.P.mapRingEquiv e he he').A₀) : B) = e (a : A) from hval]
     exact hmem
+
+/-- **Transport of a rational datum along a bicontinuous ring equivalence,
+general Huber form** (no spanning condition; `hopen` transported through the
+datum-free localization pushforward). -/
+def RationalLocData.mapHuber (e : A ≃+* B) (he : Continuous e)
+    (he' : Continuous e.symm) (D : RationalLocData A) : RationalLocData B where
+  P := D.P.mapRingEquiv e he he'
+  T := D.T.image e
+  s := e D.s
+  hopen := D.mapHuber_hopen e he he'
 
 @[simp] theorem RationalLocData.mapHuber_P (e : A ≃+* B) (he : Continuous e)
     (he' : Continuous e.symm) (D : RationalLocData A) :
