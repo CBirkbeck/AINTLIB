@@ -1028,6 +1028,22 @@ theorem glue_invariant (W : Opens ↥(yTop p F ϖ))
     (fun m => piece_le_frobOpens_sat p F ϖ m.down W) hcov
     (fun m => glue_piece_eq p F ϖ W s g hg m.down)
 
+/-- **The invariant extension** (D-iv-3(ii-c β), the bundled form): every
+section over a wandering-separated open extends to a `φ`-invariant section
+of the curve presheaf over the saturation, restricting back to it on the
+zero translate. -/
+theorem exists_invariant_extension (W : Opens ↥(yTop p F ϖ))
+    (hdis : ∀ k : ℤ, k ≠ 0 →
+      Disjoint (((Opens.map (yFrobTop p F ϖ k)).obj W
+          : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ))
+        ((W : Opens ↥(yTop p F ϖ)) : Set ↥(yTop p F ϖ)))
+    (s : ↥(limitSections ((yFunctor p F ϖ).obj W))) :
+    ∃ g : ↥(frobFixed p F ϖ (xImage p F ϖ W)),
+      limitRestrict (yFunctor_translate_le p F ϖ W 0) g.1
+        = limitRestrict (yFunctor_translate_zero_le p F ϖ W) s := by
+  obtain ⟨g, hg, hg0⟩ := exists_glue_extending p F ϖ W hdis s
+  exact ⟨⟨g, glue_invariant p F ϖ W s g hg⟩, hg0⟩
+
 end FarguesFontaine
 
 end
