@@ -226,6 +226,80 @@ noncomputable def piYHom : yPresheafedSpace p F ϖ ⟶ curveSpace p F ϖ where
         (funext fun j => ?_))
       rfl }
 
+/-- `yTopToY` is a bijection. -/
+theorem yTopToY_bijective : Function.Bijective (yTopToY p F ϖ) := by
+  constructor
+  · intro y₁ y₂ h
+    have h1 : y₁.1.1 = y₂.1.1 :=
+      congrArg (fun z : ↥(Y p F ϖ) => (z : Spv (Ainf p F))) h
+    exact Subtype.ext (Subtype.ext h1)
+  · intro z
+    have hz : z.1 ∈ Spa (Ainf p F) (ringPlus (Ainf p F)) := z.2.1
+    exact ⟨⟨⟨z.1, hz⟩, z.2⟩, rfl⟩
+
+/-- `yTopToY` is inducing (both sides carry the `Spv`-subspace topology). -/
+theorem yTopToY_isInducing : Topology.IsInducing (yTopToY p F ϖ) := by
+  constructor
+  refine le_antisymm ?_ ?_
+  · exact (continuous_yTopToY p F ϖ).le_induced
+  · intro U hU
+    obtain ⟨V, hV, rfl⟩ := hU
+    obtain ⟨S, hS, rfl⟩ := hV
+    refine ⟨Subtype.val ⁻¹' S, ⟨S, hS, rfl⟩, ?_⟩
+    rfl
+
+/-- `yTopToY` as a homeomorphism (the two subtype presentations of `𝒴`
+agree topologically). -/
+noncomputable def yTopToYHomeo : ↥(yTop p F ϖ) ≃ₜ ↥(Y p F ϖ) :=
+  (Equiv.ofBijective _ (yTopToY_bijective p F ϖ)).toHomeomorphOfIsInducing
+    (yTopToY_isInducing p F ϖ)
+
+/-- The projection from the `𝒴`-carrier is an open quotient map. -/
+theorem isOpenQuotientMap_yTopToCurve :
+    IsOpenQuotientMap (yTopToCurve p F ϖ) := by
+  have hcomp : yTopToCurve p F ϖ
+      = (toCurve p F ϖ) ∘ (yTopToYHomeo p F ϖ) := rfl
+  rw [hcomp]
+  exact (isOpenQuotientMap_toCurve p F ϖ).comp
+    (yTopToYHomeo p F ϖ).isOpenQuotientMap
+
+/-- The open image of a `𝒴`-carrier open on the curve. -/
+def xImage (W : Opens ↥(yTop p F ϖ)) : Opens (Curve p F ϖ) :=
+  ⟨yTopToCurve p F ϖ '' (W : Set ↥(yTop p F ϖ)),
+    (isOpenQuotientMap_yTopToCurve p F ϖ).isOpenMap _ W.2⟩
+
+/-- **Saturation identity**: the preimage of the image is the union of the
+Frobenius translates. -/
+theorem curvePreimage_xImage (W : Opens ↥(yTop p F ϖ)) :
+    curvePreimage p F ϖ (xImage p F ϖ W)
+      = ⨆ k : ℤ, (Opens.map (yFrobTop p F ϖ k)).obj W := by
+  refine Opens.ext ?_
+  ext y
+  constructor
+  · rintro ⟨w, hwW, hw⟩
+    -- yTopToCurve w = yTopToCurve y: same orbit
+    have hrel : yTopToY p F ϖ w ∈ MulAction.orbit (Multiplicative ℤ)
+        (yTopToY p F ϖ y) :=
+      MulAction.orbitRel_apply.mp (Quotient.eq''.mp hw)
+    obtain ⟨g, hg⟩ := MulAction.mem_orbit_iff.mp hrel
+    -- w = the (toAdd g)-translate of y; then yFrobTop-translate membership
+    rw [Opens.coe_iSup]
+    refine Set.mem_iUnion.mpr ⟨-(Multiplicative.toAdd g), ?_⟩
+    show yFrobTop p F ϖ (-(Multiplicative.toAdd g)) y ∈ W
+    have hkey : yTopToY p F ϖ
+        (yFrobTop p F ϖ (-(Multiplicative.toAdd g)) y)
+        = yTopToY p F ϖ w := by
+      rw [yTopToY_yFrobTop p F ϖ (-(Multiplicative.toAdd g)) y, neg_neg,
+        ofAdd_toAdd]
+      exact hg
+    have := (yTopToY_bijective p F ϖ).1 hkey
+    rwa [this]
+  · intro hy
+    rw [Opens.coe_iSup] at hy
+    obtain ⟨k, hk⟩ := Set.mem_iUnion.mp hy
+    refine ⟨yFrobTop p F ϖ k y, hk, ?_⟩
+    exact yTopToCurve_yFrobTop p F ϖ k y
+
 end FarguesFontaine
 
 end
