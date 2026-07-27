@@ -1249,7 +1249,6 @@ theorem coe_sub_monomialMul {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1}
       = (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
         - m * (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := rfl
 
-set_option maxHeartbeats 2000000 in
 /-- **One Gröbner reduction** (Kedlaya Lemma 3.8, inner move at the ideal level):
 a nonzero ideal element can be moved by a generator multiple so that the norm does
 not grow, coefficients above the leading index move by at most `ε·|y|`, and the
@@ -1327,88 +1326,95 @@ theorem groebner_reduce {ρ : NNReal} {hρ0 : 0 < ρ} {hρ1 : ρ < 1} {ε : NNRe
               (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
               : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)) := by
   classical
-  set J := leadIdxRPS p F ϖ hρ0 hρ1
-    (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) with hJdef
-  -- `d_J` is finite because `y` realizes it
   have hyres : MvPowerSeries.IsRestricted
       (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := y.2
-  have hdJ : dIdx p F ϖ hρ0 hρ1 H J
+  have hdJ : dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
       ≤ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
           (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
           : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ∞)) :=
     dIdx_le_of_mem p F ϖ hyH hy0 rfl
-  have hdJtop : dIdx p F ϖ hρ0 hρ1 H J ≠ ⊤ :=
+  have hdJtop : dIdx p F ϖ hρ0 hρ1 H (leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) ≠ ⊤ :=
     ne_top_of_le_ne_top (WithTop.natCast_ne_top _) hdJ
-  obtain ⟨g, hgG, hIJ, hdeq⟩ := hGdom J hdJtop
-  set I := leadIdxRPS p F ϖ hρ0 hρ1
-    (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) with hIdef
-  set c := leadCoeffRPS p F ϖ hρ0 hρ1
-    (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) with hcdef
+  have hgd := hGdom (leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) hdJtop
   have hgres : MvPowerSeries.IsRestricted
-      (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) := g.2
-  have hg0 := hG0 g hgG
-  have hcnorm : Valued.v ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+      (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
+    hgd.choose.2
+  have hg0 := hG0 hgd.choose hgd.choose_spec.1
+  have hcnorm : Valued.v ((leadCoeffRPS p F ϖ hρ0 hρ1
+        (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
       = gaussNormRPS p F ϖ hρ0 hρ1
-        (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
+        (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)) :=
     valued_leadCoeffRPS p F ϖ hgres hg0
-  have hc0 : ((c : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) ≠ 0 := by
+  have hc0 : ((leadCoeffRPS p F ϖ hρ0 hρ1
+        (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+        : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) ≠ 0 := by
     refine (Valuation.ne_zero_iff (Valued.v :
       Valuation (hatK p F hρ0 hρ1) NNReal)).mp ?_
     rw [hcnorm]
     exact gaussNormRPS_ne_zero p F ϖ hgres hg0
-  obtain ⟨z, hznorm, hzabove, hzsub, hzdeg⟩ :=
-    groebner_step p F ϖ hgres hyres (I := I) (J := J) (c := c) rfl hc0 hcnorm hIJ
-      (hGtail g hgG)
-  have hcoe := coe_sub_monomialMul p F ϖ y g (MvPowerSeries.monomial (J - I) z)
-    (isRestricted_monomial p F ϖ z)
-  refine ⟨g, ⟨MvPowerSeries.monomial (J - I) z,
-      isRestricted_monomial p F ϖ z⟩, J, hgG, ?_, rfl, ?_, ?_, ?_⟩
-  · rw [gaussNormRPS_monomial]
-    exact hznorm
-  · rw [hcoe]
-    exact hzsub
+  have hstep := groebner_step p F ϖ hgres hyres rfl hc0 hcnorm
+    hgd.choose_spec.2.1 (hGtail hgd.choose hgd.choose_spec.1)
+  refine ⟨hgd.choose, ⟨MvPowerSeries.monomial ((leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) - (leadIdxRPS p F ϖ hρ0 hρ1
+              (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))) hstep.choose,
+      isRestricted_monomial p F ϖ hstep.choose⟩, (leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))),
+    hgd.choose_spec.1, ?_, rfl, ?_, ?_, ?_⟩
+  · exact le_of_eq_of_le
+      (congrArg (fun t : NNReal => t * gaussNormRPS p F ϖ hρ0 hρ1
+        (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+        (gaussNormRPS_monomial p F ϖ _ hstep.choose))
+      hstep.choose_spec.1
+  · exact hstep.choose_spec.2.2.1
   · intro K hK
-    rw [hcoe]
     have hdiff : ((MvPowerSeries.coeff K
           ((y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-            - (MvPowerSeries.monomial (J - I) z)
-              * (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+            - (MvPowerSeries.monomial ((leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) - (leadIdxRPS p F ϖ hρ0 hρ1
+              (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))) hstep.choose)
+              * (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
           : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
         - ((MvPowerSeries.coeff K
           (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
           : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
-        = -((MvPowerSeries.coeff K ((MvPowerSeries.monomial (J - I) z)
-              * (g : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
-            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
-      rw [coeff_sub_eq p F ϖ]
-      ring
-    rw [hdiff, Valuation.map_neg]
-    exact hzabove K hK
-  · rw [hcoe]
-    have hlc : leadCoeffRPS p F ϖ hρ0 hρ1
-        (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-        = MvPowerSeries.coeff J (y : MvPowerSeries (Fin k)
-          ↥(ArSub p F ϖ hρ0 hρ1)) := by
-      rw [hJdef, leadCoeffRPS]
-    have hdegle : degAr p F ϖ hρ0 hρ1 ((c : ↥(ArSub p F ϖ hρ0 hρ1))
-          : hatK p F hρ0 hρ1)
-        ≤ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
+        = -((MvPowerSeries.coeff K
+            ((MvPowerSeries.monomial ((leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))) - (leadIdxRPS p F ϖ hρ0 hρ1
+              (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))) hstep.choose)
+              * (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) :=
+      (congrArg (fun t : hatK p F hρ0 hρ1 => t
+          - ((MvPowerSeries.coeff K
+            (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1))
+        (coeff_sub_eq p F ϖ _ _ K)).trans
+        (sub_sub_cancel_left _ _)
+    exact le_of_eq_of_le
+      ((congrArg Valued.v hdiff).trans (Valuation.map_neg _ _))
+      (hstep.choose_spec.2.1 K hK)
+  · have hchain : ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ) : ℕ∞)
+        ≤ ((degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ) : ℕ∞) :=
+      ((hGdeg hgd.choose hgd.choose_spec.1).trans
+        hgd.choose_spec.2.2).trans_le hdJ
+    have hdegle : degAr p F ϖ hρ0 hρ1 ((leadCoeffRPS p F ϖ hρ0 hρ1
+          (hgd.choose : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
+          : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1)
+        ≤ degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff (leadIdxRPS p F ϖ hρ0 hρ1
+      (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1)))
           (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
           : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) := by
-      have h1 := hGdeg g hgG
-      rw [← hIdef, ← hcdef] at h1
-      rw [hlc] at hdJ
-      have h2 : ((degAr p F ϖ hρ0 hρ1 ((c : ↥(ArSub p F ϖ hρ0 hρ1))
-            : hatK p F hρ0 hρ1) : ℕ) : ℕ∞)
-          ≤ ((degAr p F ϖ hρ0 hρ1 ((MvPowerSeries.coeff J
-            (y : MvPowerSeries (Fin k) ↥(ArSub p F ϖ hρ0 hρ1))
-            : ↥(ArSub p F ϖ hρ0 hρ1)) : hatK p F hρ0 hρ1) : ℕ) : ℕ∞) := by
-        rw [h1, hdeq]
-        exact hdJ
-      exact_mod_cast h2
-    rcases hzdeg with h | h
-    · exact Or.inl h
-    · exact Or.inr (lt_of_lt_of_le h hdegle)
+      exact_mod_cast hchain
+    exact hstep.choose_spec.2.2.2.elim Or.inl
+      (fun h => Or.inr (lt_of_lt_of_le h hdegle))
+
 
 /-- The rank of a coefficient relative to a threshold `c`: the shifted degree if the
 coefficient is `c`-large, and `0` otherwise (Kedlaya's `ε`-support with its degree
